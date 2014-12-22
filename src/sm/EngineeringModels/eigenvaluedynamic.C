@@ -128,17 +128,15 @@ TimeStep *EigenValueDynamic :: giveNextStep()
     int istep = giveNumberOfFirstStep();
     StateCounterType counter = 1;
 
-    delete previousStep;
-    if ( currentStep != NULL ) {
-        istep =  currentStep->giveNumber() + 1;
+    if ( currentStep ) {
+        istep = currentStep->giveNumber() + 1;
         counter = currentStep->giveSolutionStateCounter() + 1;
     }
 
-    previousStep = currentStep;
-    currentStep = new TimeStep(istep, this, 1, ( double ) istep, 0., counter);
-    // time and dt variables are set eq to 0 for statics - has no meaning
+    previousStep = std :: move(currentStep);
+    currentStep.reset( new TimeStep(istep, this, 1, ( double ) istep, 0., counter) );
 
-    return currentStep;
+    return currentStep.get();
 }
 
 

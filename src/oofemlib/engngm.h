@@ -222,11 +222,11 @@ protected:
     /// List of problem metasteps.
     std :: vector< MetaStep > metaStepList;
     /// Solution step when IC (initial conditions) apply.
-    TimeStep *stepWhenIcApply;
+    std :: unique_ptr< TimeStep > stepWhenIcApply;
     /// Current time step.
-    TimeStep *currentStep;
+    std :: unique_ptr< TimeStep > currentStep;
     /// Previous time step.
-    TimeStep *previousStep;
+    std :: unique_ptr< TimeStep > previousStep;
     /// Receivers id.
     int number;
 
@@ -669,7 +669,7 @@ public:
         if ( master ) {
             return master->giveCurrentStep();
         } else {
-            return currentStep;
+            return currentStep.get();
         }
     }
     /// Returns previous time step.
@@ -677,7 +677,7 @@ public:
         if ( master ) {
             return master->givePreviousStep();
         } else {
-            return previousStep;
+            return previousStep.get();
         }
     }
     /// Returns next time step (next to current step) of receiver.
@@ -687,7 +687,7 @@ public:
         if ( master ) {
             return master->giveCurrentStep();
         } else {
-            return stepWhenIcApply;
+            return stepWhenIcApply.get();
         }
     }
     /// Returns number of first time step used by receiver.

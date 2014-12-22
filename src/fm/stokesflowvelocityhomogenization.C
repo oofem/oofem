@@ -109,7 +109,7 @@ StokesFlowVelocityHomogenization :: solveYourselfAt(TimeStep *tStep)
     currentStep->setNumber( tStep->giveNumber() );
     currentStep->setTime( tStep->giveTargetTime() );
     currentStep->setTimeIncrement( tStep->giveTimeIncrement() );
-    StokesFlow :: solveYourselfAt(currentStep);
+    StokesFlow :: solveYourselfAt(currentStep.get());
 }
 
 

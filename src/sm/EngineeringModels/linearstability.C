@@ -141,20 +141,15 @@ TimeStep *LinearStability :: giveNextStep()
     int istep = giveNumberOfFirstStep();
     StateCounterType counter = 1;
 
-    if ( previousStep != NULL ) {
-        delete previousStep;
-    }
-
-    if ( currentStep != NULL ) {
+    if ( currentStep ) {
         istep =  currentStep->giveNumber() + 1;
         counter = currentStep->giveSolutionStateCounter() + 1;
     }
 
-    previousStep = currentStep;
-    currentStep = new TimeStep(istep, this, 1, 0., 0., counter);
-    // time and dt variables are set eq to 0 for staics - has no meaning
+    previousStep = std :: move(currentStep);
+    currentStep.reset( new TimeStep(istep, this, 1, 0., 0., counter) );
 
-    return currentStep;
+    return currentStep.get();
 }
 
 void LinearStability :: solveYourself()

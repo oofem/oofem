@@ -159,20 +159,16 @@ TimeStep *NlDEIDynamic :: giveNextStep()
     double totalTime = 0;
     StateCounterType counter = 1;
 
-    if ( previousStep != NULL ) {
-        delete previousStep;
-    }
-
-    if ( currentStep != NULL ) {
+    if ( currentStep ) {
         totalTime = currentStep->giveTargetTime() + deltaT;
         istep     = currentStep->giveNumber() + 1;
         counter   = currentStep->giveSolutionStateCounter() + 1;
     }
 
-    previousStep = currentStep;
-    currentStep  = new TimeStep(istep, this, 1, totalTime, deltaT, counter);
+    previousStep = std :: move(currentStep);
+    currentStep.reset( new TimeStep(istep, this, 1, totalTime, deltaT, counter) );
 
-    return currentStep;
+    return currentStep.get();
 }
 
 

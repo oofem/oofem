@@ -187,52 +187,41 @@ CBS :: giveTractionPressure(Dof *dof)
 TimeStep *
 CBS :: giveSolutionStepWhenIcApply()
 {
-    if ( stepWhenIcApply == NULL ) {
-        stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0,
-                                       0.0, deltaT, 0);
+    if ( !stepWhenIcApply ) {
+        stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0,
+                                       0.0, deltaT, 0) );
     }
 
-    return stepWhenIcApply;
+    return stepWhenIcApply.get();
 }
 
 TimeStep *
 CBS :: giveNextStep()
 {
-    int istep = this->giveNumberOfFirstStep();
-    double totalTime = 0;
     double dt = deltaT;
-    StateCounterType counter = 1;
-    delete previousStep;
-    if ( currentStep == NULL ) {
+    if ( !currentStep ) {
         // first step -> generate initial step
-        currentStep = new TimeStep( *giveSolutionStepWhenIcApply() );
-    } else {
-        istep = currentStep->giveNumber() + 1;
-        counter = currentStep->giveSolutionStateCounter() + 1;
+        currentStep.reset( new TimeStep( *giveSolutionStepWhenIcApply() ) );
     }
 
-    previousStep = currentStep;
+    previousStep = std :: move(currentStep);
 
     Domain *domain = this->giveDomain(1);
     // check for critical time step
     for ( auto &elem : domain->giveElements() ) {
-        dt = min( dt, static_cast< CBSElement * >( elem.get() )->computeCriticalTimeStep(previousStep) );
+        dt = min( dt, static_cast< CBSElement * >( elem.get() )->computeCriticalTimeStep(previousStep.get()) );
     }
 
     dt *= 0.6;
     dt = max(dt, minDeltaT);
     dt /= this->giveVariableScale(VST_Time);
 
-    if ( currentStep != NULL ) {
-        totalTime = currentStep->giveTargetTime() + dt;
-    }
+    currentStep.reset( new TimeStep(*previousStep, dt) );
 
-    currentStep = new TimeStep(istep, this, 1, totalTime, dt, counter);
-    // time and dt variables are set eq to 0 for staics - has no meaning
+    OOFEM_LOG_INFO( "SolutionStep %d : t = %e, dt = %e\n", currentStep->giveNumber(),
+                    currentStep->giveTargetTime() * this->giveVariableScale(VST_Time), dt * this->giveVariableScale(VST_Time) );
 
-    OOFEM_LOG_INFO( "SolutionStep %d : t = %e, dt = %e\n", istep, totalTime * this->giveVariableScale(VST_Time), dt * this->giveVariableScale(VST_Time) );
-
-    return currentStep;
+    return currentStep.get();
 }
 
 void
@@ -262,7 +251,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
 
         lhs->buildInternalStructure(this, 1, pnum);
 
-        this->assemble( *lhs, stepWhenIcApply, PressureLhs,
+        this->assemble( *lhs, stepWhenIcApply.get(), PressureLhs,
                        pnum, this->giveDomain(1) );
         lhs->times(deltaT * theta1 * theta2);
 
@@ -273,7 +262,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
             }
 
             mss->buildInternalStructure(this, 1, vnum);
-            this->assemble( *mss, stepWhenIcApply, MassMatrix,
+            this->assemble( *mss, stepWhenIcApply.get(), MassMatrix,
                            vnum, this->giveDomain(1) );
         } else {
             mm.resize(momneq);
@@ -294,13 +283,13 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     //<RESTRICTED_SECTION>
     else if ( materialInterface ) {
         lhs->zero();
-        this->assemble( *lhs, stepWhenIcApply, PressureLhs,
+        this->assemble( *lhs, stepWhenIcApply.get(), PressureLhs,
                        pnum, this->giveDomain(1) );
         lhs->times(deltaT * theta1 * theta2);
 
         if ( consistentMassFlag ) {
             mss->zero();
-            this->assemble( *mss, stepWhenIcApply, MassMatrix,
+            this->assemble( *mss, stepWhenIcApply.get(), MassMatrix,
                            vnum, this->giveDomain(1) );
         } else {
             mm.zero();

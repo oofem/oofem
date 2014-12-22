@@ -213,24 +213,14 @@ void StructuralMaterialEvaluator :: doStepOutput(TimeStep *tStep)
 
 TimeStep *StructuralMaterialEvaluator :: giveNextStep()
 {
-    if ( previousStep ) {
-        delete previousStep;
-    }
-
-    if ( currentStep == NULL ) {
-        int istep = this->giveNumberOfFirstStep();
+    if ( !currentStep ) {
         // first step -> generate initial step
-        previousStep = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -this->deltaT, this->deltaT, 0);
-        currentStep = new TimeStep(istep, this, 1, 0.0, this->deltaT, 1);
-    } else {
-        int istep =  currentStep->giveNumber() + 1;
-        StateCounterType counter = currentStep->giveSolutionStateCounter() + 1;
-        previousStep = currentStep;
-        double dt = currentStep->giveTimeIncrement();
-        double totalTime = currentStep->giveTargetTime() + dt;
-        currentStep = new TimeStep(istep, this, 1, totalTime, dt, counter);
+        //currentStep.reset( new TimeStep(*giveSolutionStepWhenIcApply()) );
+        currentStep.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 1, 0., this->deltaT, 0) );
     }
+    previousStep = std :: move(currentStep);
+    currentStep.reset( new TimeStep(*previousStep, this->deltaT) );
 
-    return currentStep;
+    return currentStep.get();
 }
 } // end namespace oofem

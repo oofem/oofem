@@ -157,22 +157,16 @@ double FreeWarping :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, 
 TimeStep *FreeWarping :: giveNextStep()
 {
     int istep = this->giveNumberOfFirstStep();
-    //int mstep = 1;
     StateCounterType counter = 1;
 
-    if ( previousStep != NULL ) {
-        delete previousStep;
-    }
-
-    if ( currentStep != NULL ) {
-        istep =  currentStep->giveNumber() + 1;
+    if ( currentStep ) {
+        istep = currentStep->giveNumber() + 1;
         counter = currentStep->giveSolutionStateCounter() + 1;
     }
 
-    previousStep = currentStep;
-    currentStep = new TimeStep(istep, this, 1, ( double ) istep, 0., counter);
-    // time and dt variables are set eq to 0 for staics - has no meaning
-    return currentStep;
+    previousStep = std :: move(currentStep);
+    currentStep.reset( new TimeStep(istep, this, 1, ( double ) istep, 0., counter) );
+    return currentStep.get();
 }
 
 

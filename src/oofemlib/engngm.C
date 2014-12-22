@@ -94,9 +94,6 @@ namespace oofem {
 EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPrescribedNeqs()
 {
     number = i;
-    currentStep = NULL;
-    previousStep = NULL;
-    stepWhenIcApply = NULL;
     defaultErrEstimator = NULL;
     numberOfSteps = 0;
     numberOfEquations = 0;
@@ -148,15 +145,6 @@ EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPresc
 
 EngngModel :: ~EngngModel()
 {
-    if ( previousStep == currentStep ) {
-        delete this->currentStep;
-    } else {
-        delete currentStep;
-        delete previousStep;
-    }
-
-    delete stepWhenIcApply;
-
     delete exportModuleManager;
 
     delete initModuleManager;
@@ -1344,8 +1332,8 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
     }
 
     // restore solution step
-    if ( currentStep == NULL ) {
-        currentStep = new TimeStep(istep, this, 0, 0., 0., 0);
+    if ( !currentStep ) {
+        currentStep.reset( new TimeStep(istep, this, 0, 0., 0., 0) );
     }
 
     if ( ( iores = currentStep->restoreContext(*stream, mode) ) != CIO_OK ) {
@@ -1361,12 +1349,8 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
         }
     }
 
-    if ( previousStep ) {
-        delete previousStep;
-    }
-
-    previousStep = new TimeStep(istep - 1, this, pmstep, currentStep->giveTargetTime ( ) - currentStep->giveTimeIncrement(),
-                                currentStep->giveTimeIncrement(), currentStep->giveSolutionStateCounter() - 1);
+    previousStep.reset( new TimeStep(istep - 1, this, pmstep, currentStep->giveTargetTime ( ) - currentStep->giveTimeIncrement(),
+                                currentStep->giveTimeIncrement(), currentStep->giveSolutionStateCounter() - 1) );
 
     // restore numberOfEquations and domainNeqs array
     if ( !stream->read(numberOfEquations) ) {

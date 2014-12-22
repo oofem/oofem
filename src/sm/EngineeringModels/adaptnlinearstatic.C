@@ -243,9 +243,9 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
         OOFEM_ERROR("source problem must also be AdaptiveNonlinearStatic.");
     }
 
-    this->currentStep = new TimeStep( * ( sourceProblem->giveCurrentStep() ) );
+    this->currentStep.reset( new TimeStep( * ( sourceProblem->giveCurrentStep() ) ) );
     if ( sourceProblem->givePreviousStep() ) {
-        this->previousStep = new TimeStep( * ( sourceProblem->givePreviousStep() ) );
+        this->previousStep.reset( new TimeStep( * ( sourceProblem->givePreviousStep() ) ) );
     }
 
     // map primary unknowns
@@ -279,12 +279,12 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
 
     // computes the stresses and calls updateYourself to mapped state
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
-        result &= this->giveDomain(1)->giveElement(ielem)->adaptiveUpdate(currentStep);
+        result &= this->giveDomain(1)->giveElement(ielem)->adaptiveUpdate(currentStep.get());
     }
 
     // finish mapping process
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
-        result &= this->giveDomain(1)->giveElement(ielem)->adaptiveFinish(currentStep);
+        result &= this->giveDomain(1)->giveElement(ielem)->adaptiveFinish(currentStep.get());
     }
 
 

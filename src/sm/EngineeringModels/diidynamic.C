@@ -176,8 +176,7 @@ TimeStep *DIIDynamic :: giveNextStep()
     StateCounterType counter = 1;
     TimeDiscretizationType td = initialTimeDiscretization;
 
-    delete previousStep;
-    if ( currentStep != NULL ) {
+    if ( currentStep ) {
         totalTime = currentStep->giveTargetTime() + deltaT;
         istep     = currentStep->giveNumber() + 1;
         counter   = currentStep->giveSolutionStateCounter() + 1;
@@ -188,11 +187,11 @@ TimeStep *DIIDynamic :: giveNextStep()
         }
     }
 
-    previousStep = currentStep;
+    previousStep = std :: move(currentStep);
 
-    currentStep  = new TimeStep(istep, this, 1, totalTime, deltaT, counter, td);
+    currentStep.reset( new TimeStep(istep, this, 1, totalTime, deltaT, counter, td) );
 
-    return currentStep;
+    return currentStep.get();
 }
 
 void DIIDynamic :: solveYourself()

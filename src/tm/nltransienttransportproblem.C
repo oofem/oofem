@@ -86,7 +86,7 @@ NLTransientTransportProblem :: giveNextStep()
     NonStationaryTransportProblem :: giveNextStep();
     intrinsicTime = previousStep->giveTargetTime() + this->alpha*(currentStep->giveTargetTime()-previousStep->giveTargetTime());
     currentStep->setIntrinsicTime(intrinsicTime);
-    return currentStep;
+    return currentStep.get();
 }
 
 
@@ -122,10 +122,10 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
 
     //create previous solution from IC or from previous tStep
     if ( tStep->isTheFirstStep() ) {
-        if ( stepWhenIcApply == NULL ) {
-            stepWhenIcApply = new TimeStep( *tStep->givePreviousStep() );
+        if ( !stepWhenIcApply ) {
+            stepWhenIcApply.reset( new TimeStep( *tStep->givePreviousStep() ) );
         }
-        this->applyIC(stepWhenIcApply); //insert solution to hash=1(previous), if changes in equation numbering
+        this->applyIC(stepWhenIcApply.get()); //insert solution to hash=1(previous), if changes in equation numbering
     }
 
     double dTTau = tStep->giveTimeIncrement();

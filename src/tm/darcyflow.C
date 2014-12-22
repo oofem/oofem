@@ -225,21 +225,15 @@ NumericalMethod *DarcyFlow :: giveNumericalMethod(MetaStep *mStep)
 
 TimeStep *DarcyFlow :: giveNextStep()
 {
-    int istep = this->giveNumberOfFirstStep();
-
-    StateCounterType counter = 1;
-    delete previousStep;
-
-    if ( currentStep != NULL ) {
-        istep =  currentStep->giveNumber() + 1;
-        counter = currentStep->giveSolutionStateCounter() + 1;
+    if ( !currentStep ) {
+        // first step -> generate initial step
+        //currentStep.reset( new TimeStep(*giveSolutionStepWhenIcApply()) );
+        currentStep.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 1, 0., 1.0, 0) );
     }
+    previousStep = std :: move(currentStep);
+    currentStep.reset( new TimeStep(*previousStep, 1.0) );
 
-    previousStep = currentStep;
-    currentStep = new TimeStep(istep, this, 1, ( double ) istep, 0., counter);
-    // time and dt variables are set eq to 0 for statics - has no meaning
-    ///@todo They have important meaning in *quasi* static solutions, this must be fixed.
-    return currentStep;
+    return currentStep.get();
 }
 
 }

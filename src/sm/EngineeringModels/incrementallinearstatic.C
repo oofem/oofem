@@ -134,27 +134,14 @@ double IncrementalLinearStatic :: giveDiscreteTime(int iStep)
 
 TimeStep *IncrementalLinearStatic :: giveNextStep()
 {
-    int istep = this->giveNumberOfFirstStep();
-    int mStepNum = 1;
-    double dt = this->giveDiscreteTime(istep);
-    StateCounterType counter = 1;
-
-    if ( currentStep != NULL ) {
-        istep =  currentStep->giveNumber() + 1;
-        dt = this->giveDiscreteTime(istep) - this->giveDiscreteTime(istep - 1);
-        counter = currentStep->giveSolutionStateCounter() + 1;
+    if ( !currentStep ) {
+        currentStep.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, 0.,  this->giveDiscreteTime(1), 0) );
     }
 
-    if ( previousStep != NULL ) {
-        delete previousStep;
-    }
-
-    previousStep = currentStep;
-    if ( previousStep == NULL ) {
-        previousStep = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -dt, dt, 0);
-    }
-    currentStep = new TimeStep(istep, this, mStepNum, this->giveDiscreteTime ( istep ), dt, counter);
-    return currentStep;
+    previousStep = std :: move(currentStep);
+    double dt = this->giveDiscreteTime(previousStep->giveNumber()+1) - previousStep->giveTargetTime();
+    currentStep.reset( new TimeStep(*previousStep, dt) );
+    return currentStep.get();
 }
 
 void IncrementalLinearStatic :: solveYourself()

@@ -229,8 +229,7 @@ TimeStep *NonLinearDynamic :: giveNextStep()
         deltaTtmp = 0.;
     }
 
-    delete previousStep;
-    if ( currentStep != NULL ) {
+    if ( currentStep ) {
         totalTime = currentStep->giveTargetTime() + deltaTtmp;
         istep = currentStep->giveNumber() + 1;
         counter = currentStep->giveSolutionStateCounter() + 1;
@@ -245,10 +244,10 @@ TimeStep *NonLinearDynamic :: giveNextStep()
         }
     }
 
-    previousStep = currentStep;
-    currentStep = new TimeStep(istep, this, mStepNum, totalTime, deltaTtmp, counter, td);
+    previousStep = std :: move(currentStep);
+    currentStep.reset( new TimeStep(istep, this, mStepNum, totalTime, deltaTtmp, counter, td) );
 
-    return currentStep;
+    return currentStep.get();
 }
 
 

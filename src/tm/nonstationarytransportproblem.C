@@ -165,12 +165,12 @@ double NonStationaryTransportProblem :: giveUnknownComponent(ValueModeType mode,
 TimeStep *
 NonStationaryTransportProblem :: giveSolutionStepWhenIcApply()
 {
-    if ( stepWhenIcApply == NULL ) {
-        stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, this->initT - giveDeltaT ( giveNumberOfFirstStep() ), giveDeltaT ( giveNumberOfFirstStep() ), 0);
-        //stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -deltaT, deltaT, 0);
+    if ( !stepWhenIcApply ) {
+        stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, this->initT - giveDeltaT ( giveNumberOfFirstStep() ), giveDeltaT ( giveNumberOfFirstStep() ), 0) );
+        //stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -deltaT, deltaT, 0) );
     }
 
-    return stepWhenIcApply;
+    return stepWhenIcApply.get();
 }
 
 
@@ -222,25 +222,23 @@ NonStationaryTransportProblem :: giveNextStep()
     double totalTime = this->initT;
     double intrinsicTime;
     StateCounterType counter = 1;
-    delete previousStep;
 
-    if ( currentStep != NULL ) {
+    if ( currentStep ) {
         istep =  currentStep->giveNumber() + 1;
         totalTime = currentStep->giveTargetTime() + giveDeltaT(istep);
         counter = currentStep->giveSolutionStateCounter() + 1;
     } else {
         // first step -> generate initial step
-        currentStep = new TimeStep( *giveSolutionStepWhenIcApply() );
+        currentStep.reset( new TimeStep( *giveSolutionStepWhenIcApply() ) );
     }
 
-    previousStep = currentStep;
-    currentStep = new TimeStep(istep, this, 1, totalTime, this->giveDeltaT ( istep ), counter);
+    previousStep = std :: move(currentStep);
+    currentStep.reset( new TimeStep(istep, this, 1, totalTime, this->giveDeltaT ( istep ), counter) );
     //set intrinsic time to time of integration
     intrinsicTime = currentStep->giveTargetTime();
 //     intrinsicTime = previousStep->giveTargetTime() + this->alpha *this->giveDeltaT(istep);
     currentStep->setIntrinsicTime(intrinsicTime);
-    // time and dt variables are set eq to 0 for statics - has no meaning
-    return currentStep;
+    return currentStep.get();
 }
 
 
@@ -265,21 +263,21 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
         bcRhs.resize(neq); //rhs vector from solution step i-1
         bcRhs.zero();
 
-        this->applyIC(stepWhenIcApply);
+        this->applyIC(stepWhenIcApply.get());
 
         //project initial conditions to have temporary temperature in integration points
 
         //edge or surface load on elements
-        this->assembleVectorFromElements( bcRhs, stepWhenIcApply, ElementBCTransportVector,
+        this->assembleVectorFromElements( bcRhs, stepWhenIcApply.get(), ElementBCTransportVector,
                                          VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //add prescribed value, such as temperature, on nodes
-        this->assembleDirichletBcRhsVector( bcRhs, stepWhenIcApply, VM_Total,
+        this->assembleDirichletBcRhsVector( bcRhs, stepWhenIcApply.get(), VM_Total,
                                            NSTP_MidpointLhs, EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //add internal source vector on elements
-        this->assembleVectorFromElements( bcRhs, stepWhenIcApply, ElementInternalSourceVector,
+        this->assembleVectorFromElements( bcRhs, stepWhenIcApply.get(), ElementInternalSourceVector,
                                          VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //add nodal load
-        this->assembleVectorFromDofManagers( bcRhs, stepWhenIcApply, ExternalForcesVector,
+        this->assembleVectorFromDofManagers( bcRhs, stepWhenIcApply.get(), ExternalForcesVector,
                                             VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
     }
 
@@ -301,11 +299,11 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 #endif
 
         //Left hand side matrix due to convection
-        this->assemble( *conductivityMatrix, stepWhenIcApply, LHSBCMatrix,
+        this->assemble( *conductivityMatrix, stepWhenIcApply.get(), LHSBCMatrix,
                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
         conductivityMatrix->times(alpha);
         //Add contribution of alpha*K+C/dt
-        this->assemble( *conductivityMatrix, stepWhenIcApply, NSTP_MidpointLhs,
+        this->assemble( *conductivityMatrix, stepWhenIcApply.get(), NSTP_MidpointLhs,
                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
     }
 

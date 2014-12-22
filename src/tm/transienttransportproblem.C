@@ -104,36 +104,25 @@ double TransientTransportProblem :: giveUnknownComponent(ValueModeType mode, Tim
 
 TimeStep *TransientTransportProblem :: giveNextStep()
 {
-    int istep = this->giveNumberOfFirstStep();
-    //int mstep = 1;
-    StateCounterType counter = 1;
-    double tt = 0.;
-
-    delete previousStep;
-
-    if ( currentStep != NULL ) {
-        istep = currentStep->giveNumber() + 1;
-        counter = currentStep->giveSolutionStateCounter() + 1;
-        tt = currentStep->giveTargetTime();
-        previousStep = currentStep;
-    } else {
-        previousStep = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, 0., this->deltaT, 0);
+    if ( !currentStep ) {
+        // first step -> generate initial step
+        currentStep.reset( new TimeStep( *giveSolutionStepWhenIcApply() ) );
     }
-
-    currentStep = new TimeStep(istep, this, 1, tt + this->deltaT, this->deltaT, counter);
-    // time and dt variables are set eq to 0 for statics - has no meaning
-    return currentStep;
+    
+    previousStep = std :: move(currentStep);
+    currentStep.reset( new TimeStep(*previousStep, this->deltaT) );
+    return currentStep.get();
 }
 
 
 TimeStep *TransientTransportProblem :: giveSolutionStepWhenIcApply()
 {
-    if ( stepWhenIcApply == NULL ) {
+    if ( !stepWhenIcApply ) {
         ///@todo Should we have this->initT ?
-        stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, 0., deltaT, 0);
+        stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, 0., deltaT, 0) );
     }
 
-    return stepWhenIcApply;
+    return stepWhenIcApply.get();
 }
 
 
