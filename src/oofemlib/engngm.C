@@ -705,6 +705,11 @@ void EngngModel :: printYourself()
     printf("number of eq's : %d\n", numberOfEquations);
 }
 
+void EngngModel :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
+{
+    iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
+}
+
 void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep,
                             CharType type, const UnknownNumberingScheme &s, Domain *domain)
 //

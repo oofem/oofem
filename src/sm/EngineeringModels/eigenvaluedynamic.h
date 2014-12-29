@@ -102,16 +102,6 @@ public:
 
     virtual double giveEigenValue(int eigNum) { return eigVal.at(eigNum); }
 
-    /**
-     * DOF printing routine. Called by DofManagers to print Dof specific part.
-     * Dof class provides component printing routines, but emodel is responsible
-     * for what will be printed at DOF level.
-     * @param stream Output stream.
-     * @param iDof Dof to be processed.
-     * @param tStep Solution step.
-     */
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
-
     // identification
     virtual const char *giveClassName() const { return "EigenValueDynamic"; }
 };

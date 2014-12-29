@@ -73,7 +73,7 @@ protected:
     /// Numerical method used to solve the problem
     std :: unique_ptr< SparseNonLinearSystemNM > nMethod;
 
-    bool alpha;
+    double alpha;
     double deltaT;
     bool keepTangent;
 
@@ -89,6 +89,7 @@ public:
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
+    virtual int requiresUnknownsDictionaryUpdate();
     virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep);
     virtual void updateDomainLinks();
 
@@ -101,8 +102,6 @@ public:
     virtual int forceEquationNumbering();
 
     virtual int checkConsistency();
-
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
 
     // identification
     virtual const char *giveInputRecordName() const { return _IFT_TransientTransportProblem_Name; }

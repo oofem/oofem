@@ -223,9 +223,7 @@ StationaryTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmp
             // Optimization for linear problems, we can keep the old matrix (which could save its factorization)
             this->conductivityMatrix->zero();
             ///@todo We should use some problem-neutral names instead of "ConductivityMatrix" (and something nicer for LHSBCMatrix)
-            this->assemble( *conductivityMatrix, tStep, ConductivityMatrix,
-                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            this->assemble( *conductivityMatrix, tStep, LHSBCMatrix,
+            this->assemble( *conductivityMatrix, tStep, TangentStiffnessMatrix,
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
         return;
@@ -340,13 +338,6 @@ StationaryTransportProblem :: updateDomainLinks()
 {
     EngngModel :: updateDomainLinks();
     this->giveNumericalMethod( this->giveCurrentMetaStep() )->setDomain( this->giveDomain(1) );
-}
-
-
-void
-StationaryTransportProblem :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
-{
-    iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
 }
 
 

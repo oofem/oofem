@@ -301,12 +301,6 @@ void IncrementalLinearStatic :: updateDofUnknownsDictionary(DofManager *inode, T
 }
 
 
-void IncrementalLinearStatic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
-{
-    iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
-}
-
-
 void IncrementalLinearStatic :: terminate(TimeStep *tStep)
 {
     StructuralEngngModel :: terminate(tStep);

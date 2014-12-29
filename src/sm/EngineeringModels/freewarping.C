@@ -362,14 +362,6 @@ FreeWarping :: updateDomainLinks()
 }
 
 
-
-void
-FreeWarping :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
-{
-    iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
-}
-
-
 int
 FreeWarping :: estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType)
 {

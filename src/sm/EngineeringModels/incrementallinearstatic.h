@@ -109,8 +109,6 @@ public:
 
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
 
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
-
     virtual void terminate(TimeStep *tStep);
 
     virtual fMode giveFormulation() { return TL; }

@@ -95,7 +95,6 @@ public:
     virtual TimeStep *giveNextStep();
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
 
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
     virtual fMode giveFormulation() { return TL; }
 
     void setSolution(TimeStep *tStep, const FloatArray &vectorToStore);

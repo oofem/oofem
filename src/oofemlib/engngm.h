@@ -1031,7 +1031,7 @@ public:
      * @param iDof dof to be processed
      * @param tStep solution step
      */
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep) = 0;
+    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
 
 
     // identification

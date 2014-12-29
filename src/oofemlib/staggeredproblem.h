@@ -137,7 +137,6 @@ public:
 
     void printYourself();
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep) { }
     virtual TimeStep *giveNextStep();
     virtual TimeStep *giveSolutionStepWhenIcApply();
 

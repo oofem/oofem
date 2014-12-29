@@ -108,7 +108,6 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual int checkConsistency();
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
     virtual void doStepOutput(TimeStep *tStep);
     void updateInternalState(TimeStep *tStep);
     virtual void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d);

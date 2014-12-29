@@ -91,8 +91,6 @@ public:
 
     virtual int checkConsistency();
 
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
-
     // identification
     virtual const char *giveInputRecordName() const { return _IFT_StationaryTransportProblem_Name; }
     virtual const char *giveClassName() const { return "StationaryTransportProblem"; }

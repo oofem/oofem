@@ -624,12 +624,6 @@ NonStationaryTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer
 
 
 void
-NonStationaryTransportProblem :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
-{
-    iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
-}
-
-void
 NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
 {
     Domain *domain = this->giveDomain(1);

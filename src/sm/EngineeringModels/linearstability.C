@@ -489,10 +489,4 @@ contextIOResultType LinearStability :: restoreContext(DataStream *stream, Contex
     return CIO_OK;
 }
 
-
-void
-LinearStability :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
-{
-    iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
-}
 } // end namespace oofem

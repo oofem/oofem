@@ -158,12 +158,6 @@ void DarcyFlow :: DumpMatricesToFile(FloatMatrix *LHS, FloatArray *RHS, FloatArr
     fclose(SolutionFile);
 }
 
-
-void DarcyFlow :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
-{
-    iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
-}
-
 void DarcyFlow :: updateYourself(TimeStep *tStep)
 {
     EngngModel :: updateYourself(tStep);

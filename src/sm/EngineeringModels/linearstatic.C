@@ -351,14 +351,6 @@ LinearStatic :: updateDomainLinks()
 }
 
 
-
-void
-LinearStatic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
-{
-    iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
-}
-
-
 int
 LinearStatic :: estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType)
 {

@@ -403,12 +403,6 @@ StaticStructural :: forceEquationNumbering()
 }
 
 
-void
-StaticStructural :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
-{
-    iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
-}
-
 void StaticStructural :: setSolution(TimeStep *tStep, const FloatArray &vectorToStore)
 {
     this->field->update(VM_Total, tStep, vectorToStore, EModelDefaultEquationNumbering());

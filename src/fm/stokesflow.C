@@ -242,11 +242,6 @@ int StokesFlow :: checkConsistency()
     return EngngModel :: checkConsistency();
 }
 
-void StokesFlow :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
-{
-    iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
-}
-
 void StokesFlow :: updateInternalState(TimeStep *tStep)
 {
     for ( auto &domain: domainList ) {
