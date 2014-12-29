@@ -482,7 +482,7 @@ QDKTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coord
 
     //check that the z is within the element
     StructuralCrossSection *cs = this->giveStructuralCrossSection();
-    double elthick = cs->give(CS_Thickness, & answer, NULL, this);
+    double elthick = cs->give(CS_Thickness, & answer, this);
 
     if ( elthick / 2.0 + midplZ - fabs( coords.at(3) ) < -POINT_TOL ) {
         answer.zero();
