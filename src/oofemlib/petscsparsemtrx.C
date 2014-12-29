@@ -89,9 +89,7 @@ void
 PetscSparseMtrx :: times(const FloatArray &x, FloatArray &answer) const
 {
     if ( emodel->isParallel() ) {
-        if ( x.giveSize() != answer.giveSize() ) {
-            OOFEM_ERROR("Size mismatch");
-        }
+        answer.resize(x.giveSize());
 
         Vec globX;
         Vec globY;
@@ -265,6 +263,30 @@ void
 PetscSparseMtrx :: times(double x)
 {
     MatScale(this->mtrx, x);
+}
+
+
+void
+PetscSparseMtrx :: add(double x, SparseMtrx &m)
+{
+    PetscSparseMtrx *M = dynamic_cast< PetscSparseMtrx * >( &m );
+    MatAXPY(this->giveMtrx(), x, M->giveMtrx(), SAME_NONZERO_PATTERN);
+}
+
+
+void
+PetscSparseMtrx :: addDiagonal(double x, FloatArray &m)
+{
+    OOFEM_WARNING("Calling function that has not been tested (remove this message when it is verified)");
+    Vec globM;
+    if ( emodel->isParallel() ) {
+        this->createVecGlobal(& globM);
+        this->scatterL2G(m, globM);
+    } else {
+        VecCreateSeqWithArray(PETSC_COMM_SELF, 1, m.giveSize(), m.givePointer(), & globM);
+    }
+    MatDiagonalSet(this->mtrx, globM, ADD_VALUES);
+    VecDestroy(& globM);
 }
 
 ///@todo I haven't looked at the parallel code yet (lack of time right now, and i want to see it work first). / Mikael

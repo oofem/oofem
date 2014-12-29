@@ -134,30 +134,46 @@ public:
      * @param x Array to be multiplied with receiver.
      * @param answer y.
      */
-    virtual void times(const FloatArray &x, FloatArray &answer) const { OOFEM_ERROR("Not implemented"); };
+    virtual void times(const FloatArray &x, FloatArray &answer) const { OOFEM_ERROR("Not implemented"); }
     /**
      * Evaluates @f$ y = A^{\mathrm{T}} \cdot x @f$
      * @param x Array to be multiplied with transpose of the receiver.
      * @param answer y.
      */
-    virtual void timesT(const FloatArray &x, FloatArray &answer) const { OOFEM_ERROR("Not implemented"); };
+    virtual void timesT(const FloatArray &x, FloatArray &answer) const { OOFEM_ERROR("Not implemented"); }
     /**
      * Evaluates @f$ C = A^{\mathrm{T}} \cdot B @f$
      * @param B Array to be multiplied with receiver.
      * @param answer C.
      */
-    virtual void times(const FloatMatrix &B, FloatMatrix &answer) const { OOFEM_ERROR("Not implemented"); };
+    virtual void times(const FloatMatrix &B, FloatMatrix &answer) const { OOFEM_ERROR("Not implemented"); }
     /**
      * Evaluates @f$ C = A^{\mathrm{T}} \cdot B @f$
      * @param B Matrix to be multiplied with receiver.
      * @param answer C.
      */
-    virtual void timesT(const FloatMatrix &B, FloatMatrix &answer) const { OOFEM_ERROR("Not implemented"); };
+    virtual void timesT(const FloatMatrix &B, FloatMatrix &answer) const { OOFEM_ERROR("Not implemented"); }
     /**
      * Multiplies receiver by scalar value.
      * @param x Value to multiply receiver.
      */
-    virtual void times(double x) { OOFEM_ERROR("Not implemented"); };
+    virtual void times(double x) { OOFEM_ERROR("Not implemented"); }
+    /**
+     * Adds x * m.
+     * @param x Value to multiply m by.
+     * @param m Matrix to add (should of the same matrix type).
+     */
+    virtual void add(double x, SparseMtrx &m) { OOFEM_ERROR("Not implemented"); }
+    /**
+     * Adds x * m (treats m as a diagonal matrix, stored as an array)
+     * @param x Value to multiply m by.
+     * @param m Matrix to add.
+     */
+    virtual void addDiagonal(double x, FloatArray &m) {
+        for ( int i = 1; i <= m.giveSize(); ++i ) {
+            this->at(i, i) += x * m.at(i);
+        }
+    }
 
     /**
      * Builds internal structure of receiver. This method determines the internal profile
@@ -237,7 +253,7 @@ public:
     }
 
     virtual SparseMtrx *giveSubMatrix(const IntArray &rows, const IntArray &cols) 
-        { OOFEM_ERROR("Not implemented"); return NULL; };
+    { OOFEM_ERROR("Not implemented"); return NULL; }
     
     /// Returns coefficient at position (i,j).
     virtual double &at(int i, int j) = 0;

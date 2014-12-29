@@ -94,6 +94,7 @@ public:
     virtual void times(const FloatArray &x, FloatArray &answer) const;
     virtual void timesT(const FloatArray &x, FloatArray &answer) const { this->times(x, answer); }
     virtual void times(double x);
+    virtual void add(double x, SparseMtrx &m);
     virtual int buildInternalStructure(EngngModel *, int, const UnknownNumberingScheme &);
 
     //virtual Skyline *giveSubMatrix(Skyline &mat, IntArray &rows, IntArray &cols);

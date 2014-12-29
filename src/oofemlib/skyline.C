@@ -632,6 +632,17 @@ void Skyline :: times(double x)
 }
 
 
+void Skyline :: add(double x, SparseMtrx &m)
+{
+    Skyline *M = dynamic_cast< Skyline* >( &m );
+
+    for ( int j = 0; j < nwk; j++ ) {
+        mtrx [ j ] += x * M->mtrx [ j ];
+    }
+
+    this->version++;
+}
+
 void Skyline :: printYourself() const
 {
     // Prints the receiver on screen.
