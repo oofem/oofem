@@ -85,6 +85,8 @@ void IntMatBilinearCZStatus :: updateYourself(TimeStep *tStep)
     jump = mJumpNew;
 
     mPlastMultIncOld = mPlastMultIncNew;
+
+    StructuralInterfaceMaterialStatus ::updateYourself(tStep);
 }
 
 
@@ -153,6 +155,11 @@ void IntMatBilinearCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *
         answer.resize(3);
         answer.zero();
         status->mTractionNew = answer;
+
+        status->letTempJumpBe(jump);
+        status->letTempFirstPKTractionBe(answer);
+        status->letTempTractionBe(answer);
+
         return;
     }
 
@@ -165,6 +172,11 @@ void IntMatBilinearCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *
         answer.beScaled( ( 1.0 - status->mDamageNew ), answer );
 
         status->mTractionNew = answer;
+
+        status->letTempJumpBe(jump);
+        status->letTempFirstPKTractionBe(answer);
+        status->letTempTractionBe(answer);
+
         return;
     } else {
         // Iterate to find plastic strain increment.
@@ -218,7 +230,8 @@ void IntMatBilinearCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *
                 // Jim
                 status->letTempJumpBe(jump);
                 status->letTempFirstPKTractionBe(answer);
-                
+                status->letTempTractionBe(answer);
+
                 return;
             }
 
