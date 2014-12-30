@@ -117,6 +117,8 @@ TransportElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, 
         this->computeInternalForcesVectorAt(answer, tStep, mode);
     } else if ( mtrx == ExternalForcesVector ) {
         this->computeExternalForcesVectorAt(answer, tStep, mode);
+    } else if ( mtrx == InertiaForcesVector ) {
+        this->computeInertiaForcesVectorAt(answer, tStep, mode);
     } else if ( mtrx == ElementBCTransportVector ) { ///@todo Remove this, only external and internal.
         this->computeBCVectorAt(answer, tStep, mode);
     } else if ( mtrx == ElementInternalSourceVector ) { ///@todo Remove this, only external and internal.
@@ -480,12 +482,10 @@ TransportElement :: computeConstitutiveMatrixAt(FloatMatrix &answer,
 void
 TransportElement :: computeInternalForcesVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
 {
-    IntArray dofids;
     FloatArray tmp;
     FloatArray unknowns;
     FloatMatrix s;
-    this->giveElementDofIDMask(dofids);
-    this->computeVectorOf(dofids, mode, tStep, unknowns);
+    this->computeVectorOf(mode, tStep, unknowns);
     ///@todo Integrate and compute as a nonlinear problem instead of doing this tangent.
     this->computeConductivityMatrix(s, Conductivity, tStep);
     answer.beProductOf(s, unknowns);
@@ -493,13 +493,25 @@ TransportElement :: computeInternalForcesVectorAt(FloatArray &answer, TimeStep *
     this->computeInternalSourceRhsVectorAt(tmp, tStep, mode);
     answer.subtract(tmp);
 
-    ///@todo Convective b.c.s
+    // Neumann b.c.s
     FloatMatrix bc_tangent;
     this->computeBCMtrxAt(bc_tangent, tStep, VM_Total);
     if ( bc_tangent.isNotEmpty() ) {
         tmp.beProductOf(bc_tangent, unknowns);
         answer.add(tmp);
     }
+}
+
+
+void
+TransportElement :: computeInertiaForcesVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
+{
+    FloatMatrix cap;
+    FloatArray vel;
+    this->computeVectorOf(VM_Velocity, tStep, vel);
+    this->computeCapacityMatrix(cap, tStep);
+    answer.beProductOf(cap, vel);
+    answer.negated();
 }
 
 

@@ -67,6 +67,7 @@ public:
 
     virtual void computeInternalForcesVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     virtual void computeExternalForcesVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
+    virtual void computeInertiaForcesVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
 
     virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
     virtual void computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);

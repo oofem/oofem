@@ -85,7 +85,8 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(NSTP_MidpointLhs, 156) /* NonStationaryTransportProblem - LHS for midpoint discretization alg. */ \
     ENUM_ITEM_WITH_VALUE(NSTP_MidpointRhs, 157) /* NonStationaryTransportProblem - RHS for midpoint discretization alg. */ \
     ENUM_ITEM_WITH_VALUE(IntSourceLHSMatrix, 158) /* LHS due to material internal source (Transport problems) */ \
-    ENUM_ITEM_WITH_VALUE(PrescribedRhsVector, 159)
+    ENUM_ITEM_WITH_VALUE(PrescribedRhsVector, 159)                                        \
+    ENUM_ITEM_WITH_VALUE(InertiaForcesVector, 160)
 
 enum CharType {
     CharType_DEF

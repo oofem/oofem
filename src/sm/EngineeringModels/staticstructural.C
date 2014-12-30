@@ -180,34 +180,7 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
     int di = 1;
 
     this->field->advanceSolution(tStep);
-#if 1
-    {
-        // Copy over the old dictionary values to the new step as the initial guess:
-        /*
-        Domain *d = this->giveDomain(1);
-        TimeStep *prev = tStep->givePreviousStep();
-        for ( auto &dman : d->giveDofManagers() ) {
-            static_cast< DofDistributedPrimaryField* >(field)->setInitialGuess(*dman, tStep, prev);
-        }
-
-        for ( auto &elem : d->giveElements() ) {
-            int ndman = elem->giveNumberOfInternalDofManagers();
-            for ( int i = 1; i <= ndman; i++ ) {
-                static_cast< DofDistributedPrimaryField* >(field)->setInitialGuess(*elem->giveInternalDofManager(i), tStep, prev);
-            }
-        }
-
-        for ( auto &bc : d->giveBcs() ) {
-            int ndman = bc->giveNumberOfInternalDofManagers();
-            for ( int i = 1; i <= ndman; i++ ) {
-                static_cast< DofDistributedPrimaryField* >(field)->setInitialGuess(*bc->giveInternalDofManager(i), tStep, prev);
-            }
-        }
-        */
-        // Apply dirichlet b.c.s
-        field->applyBoundaryCondition(tStep);
-    }
-#endif
+    this->field->applyBoundaryCondition(tStep); ///@todo Temporary hack, advanceSolution should apply the boundary conditions directly.
 
     neq = this->giveNumberOfDomainEquations( di, EModelDefaultEquationNumbering() );
     this->field->initialize(VM_Total, tStep, this->solution, EModelDefaultEquationNumbering() ); 
@@ -300,7 +273,7 @@ void StaticStructural :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
         // Updates the solution in case it has changed 
         ///@todo NRSolver should report when the solution changes instead of doing it this way.
         this->field->update(VM_Total, tStep, this->solution, EModelDefaultEquationNumbering());
-        this->field->applyBoundaryCondition(tStep);
+        this->field->applyBoundaryCondition(tStep);///@todo Temporary hack to override the incorrect vavues that is set by "update" above. Remove this when that is fixed.
 
         this->internalForces.zero();
         this->assembleVector(this->internalForces, tStep, InternalForcesVector, VM_Total,
