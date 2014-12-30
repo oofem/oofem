@@ -1125,7 +1125,6 @@ SUPG :: updateDofUnknownsDictionary_predictor(TimeStep *tStep)
                 } else {
                     val = dof->giveBcValue(VM_Total, tStep);
                     dof->updateUnknownsDictionary(tStep, VM_Total, val); // velocity
-                    //val = iDof -> giveBcValue (VM_Velocity,tStep) ; //velocity of velocity is acceleration
                     dof->updateUnknownsDictionary(tStep, VM_Acceleration, 0.0); // acceleration
                 }
             }

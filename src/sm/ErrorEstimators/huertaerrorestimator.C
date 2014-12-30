@@ -2982,8 +2982,6 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
                 coarseSol = sol;
             }
 
-            //    coarseSol = nodeDof -> giveBcValue(VM_Total, refinedTStep);
-
             coarseSolution.at(pos) = coarseSol;
             elementError.at(pos) = sol - coarseSol;
             patchError.at(pos) = primaryUnknownError.at( ( globalNodeIdArray.at(inode) - 1 ) * dofs + idof ) - coarseSol;
@@ -3732,8 +3730,6 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
                 // coarse solution is identical with fine solution at BC
                 coarseSolution.at(pos) = fineSolution.at(pos);
             }
-
-            //    coarseSolution.at(pos) = nodeDof -> giveBcValue(VM_Total, refinedTStep);
         }
     }
 

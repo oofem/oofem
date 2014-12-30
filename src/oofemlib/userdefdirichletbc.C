@@ -164,14 +164,6 @@ UserDefDirichletBC :: giveInputRecord(DynamicInputRecord &input)
 
 
 void
-UserDefDirichletBC :: setPrescribedValue(double s)
-{
-    values.zero();
-    values.add(s);
-}
-
-
-void
 UserDefDirichletBC :: scale(double s)
 {
     values.times(s);

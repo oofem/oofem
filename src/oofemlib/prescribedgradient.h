@@ -131,9 +131,6 @@ public:
      */
     virtual void setPrescribedGradientVoigt(const FloatArray &t);
 
-    /// @warning Not used. Do not call.
-    virtual void setPrescribedValue(double) { OOFEM_ERROR("Scalar value not used for prescribed tensors."); }
-
     /**
      * Set the center coordinate for the prescribed values to be set for.
      * @param x Center coordinate.

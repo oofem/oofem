@@ -115,7 +115,7 @@ public:
      * @param s prescribed value
      * @todo This function isn't as meaningful anymore. Possibly keep it if we change it to a vector. No inheriting b.c.s can overload this in a meaningful way.
      */
-    virtual void setPrescribedValue(double s);
+    void setPrescribedValue(double s);
 
     // Overloaded methods:
     virtual bcType giveType() const { return DirichletBT; }

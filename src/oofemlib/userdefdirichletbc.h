@@ -96,8 +96,6 @@ public:
 
     virtual double give(Dof *dof, ValueModeType mode, double time);
 
-    virtual void setPrescribedValue(double s);
-
     // Overloaded methods:
     virtual bcType giveType() const { return DirichletBT; }
     virtual IRResultType initializeFrom(InputRecord *ir);
