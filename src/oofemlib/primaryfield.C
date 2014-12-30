@@ -297,7 +297,7 @@ PrimaryField :: applyBoundaryCondition(BoundaryCondition &bc, TimeStep *tStep)
             Dof *dof = dman->giveDofWithID(dofid);
             int peq = - dof->giveEqn(); // Note, only consider prescribed equations here
             if ( peq > 0 ) {
-                f->at(peq) = bc.give(dof, VM_Total, tStep);
+                f->at(peq) = bc.give(dof, VM_Total, tStep->giveTargetTime());
             }
         }
     }

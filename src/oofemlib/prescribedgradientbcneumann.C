@@ -16,6 +16,7 @@
 #include "sparsemtrx.h"
 #include "xfem/xfemelementinterface.h"
 #include "xfem/integrationrules/discsegintegrationrule.h"
+#include "timestep.h"
 #include "function.h"
 
 #include <cmath>
@@ -55,10 +56,7 @@ PrescribedGradientBCNeumann :: PrescribedGradientBCNeumann(int n, Domain *d) :
 
 PrescribedGradientBCNeumann :: ~PrescribedGradientBCNeumann()
 {
-    if ( mpSigmaHom != NULL ) {
-        delete mpSigmaHom;
-        mpSigmaHom = NULL;
-    }
+    delete mpSigmaHom;
 }
 
 DofManager *PrescribedGradientBCNeumann :: giveInternalDofManager(int i)
@@ -87,9 +85,8 @@ void PrescribedGradientBCNeumann :: assembleVector(FloatArray &answer, TimeStep 
         FloatArray gradVoigt;
         giveGradientVoigt(gradVoigt);
 
-        double loadLevel = this->giveTimeFunction()->evaluate(tStep, mode);
+        double loadLevel = this->giveTimeFunction()->evaluateAtTime(tStep->giveTargetTime());
         stressLoad.beScaled(-rve_size*loadLevel, gradVoigt);
-
 
         answer.assemble(stressLoad, sigma_loc);
     } else if ( type == InternalForcesVector ) {

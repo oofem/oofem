@@ -56,7 +56,7 @@
 namespace oofem {
 REGISTER_BoundaryCondition(PrescribedGradient);
 
-double PrescribedGradient :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
+double PrescribedGradient :: give(Dof *dof, ValueModeType mode, double time)
 {
     DofIDItem id = dof->giveDofID();
     FloatArray *coords = dof->giveDofManager()->giveCoordinates();
@@ -65,13 +65,23 @@ double PrescribedGradient :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
         OOFEM_ERROR("Size of coordinate system different from center coordinate in b.c.");
     }
 
+    double factor = 0;
+    if ( mode == VM_Total ) {
+        factor = this->giveTimeFunction()->evaluateAtTime(time);
+    } else if ( mode == VM_Velocity ) {
+        factor = this->giveTimeFunction()->evaluateVelocityAtTime(time);
+    } else if ( mode == VM_Acceleration ) {
+        factor = this->giveTimeFunction()->evaluateAccelerationAtTime(time);
+    } else {
+        OOFEM_ERROR("Should not be called for value mode type then total, velocity, or acceleration.");
+    }
     // Reminder: u_i = d_ij . (x_j - xb_j) = d_ij . dx_j
     FloatArray dx;
     dx.beDifferenceOf(* coords, this->centerCoord);
 
     FloatArray u;
     u.beProductOf(gradient, dx);
-    u.times( this->giveTimeFunction()->evaluate(tStep, mode) );
+    u.times( factor );
 
     switch ( id ) {
     case D_u:

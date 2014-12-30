@@ -246,14 +246,15 @@ void GnuplotExportModule::outputReactionForces(TimeStep *tStep)
             DofManager *dMan = domain->giveDofManager( dofManMap.at(i) );
             Dof *dof = dMan->giveDofWithID( dofidMap.at(i) );
 
-            if( dof->giveBcId() == bcInd+1) {
+            if ( dof->giveBcId() == bcInd+1 ) {
                 fR.at( dofidMap.at(i) ) += reactions.at( eqnMap.at(i) );
 
                 // Slightly dirty
                 BoundaryCondition *bc = dynamic_cast<BoundaryCondition*> (domain->giveBc(bcInd+1));
-                if(bc != NULL) {
-                    disp.at(bcInd+1) = bc->give(dof, VM_Total, tStep);
+                if ( bc != NULL ) {
+                    disp.at(bcInd+1) = bc->give(dof, VM_Total, tStep->giveTargetTime());
                 }
+                ///@todo This function should be using the primaryfield instead of asking BCs directly. / Mikael
             }
         }
 
@@ -726,7 +727,7 @@ void GnuplotExportModule::outputGradient(PrescribedGradientBC &iBC, TimeStep *tS
     // Homogenized strain
     FloatArray grad;
     iBC.giveGradientVoigt(grad);
-    double timeFactor = iBC.giveTimeFunction()->evaluate(tStep, VM_Total);
+    double timeFactor = iBC.giveTimeFunction()->evaluateAtTime(tStep->giveTargetTime());
     printf("timeFactor: %e\n", timeFactor );
     grad.times(timeFactor);
     printf("Mean grad computed in Gnuplot export module: "); grad.printYourself();

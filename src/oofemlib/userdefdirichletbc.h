@@ -94,7 +94,7 @@ public:
     /// Destructor
     virtual ~UserDefDirichletBC();
 
-    virtual double give(Dof *dof, ValueModeType mode, TimeStep *tStep);
+    virtual double give(Dof *dof, ValueModeType mode, double time);
 
     virtual void setPrescribedValue(double s);
 

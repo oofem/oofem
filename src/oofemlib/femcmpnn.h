@@ -127,7 +127,7 @@ public:
      * @param ir Input record to initialize from.
      * @return IRResultType
      */
-    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_NOTFOUND; };
+    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
     /**
      * Setups the input record string of receiver.
      * @param input Dynamic input record to be filled by receiver.

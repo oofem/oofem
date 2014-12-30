@@ -46,6 +46,7 @@
 #include "spatiallocalizer.h"
 #include "geometry.h"
 #include "dynamicinputrecord.h"
+#include "timestep.h"
 #include "function.h"
 
 #include "xfem/XFEMDebugTools.h"
@@ -71,27 +72,17 @@ PrescribedGradientBCWeak :: PrescribedGradientBCWeak(int n, Domain *d) :
     computeDomainBoundingBox(* d, mLC, mUC);
 }
 
-PrescribedGradientBCWeak :: ~PrescribedGradientBCWeak() {
+PrescribedGradientBCWeak :: ~PrescribedGradientBCWeak()
+{
     for ( size_t i = 0; i < mpTractionMasterNodes.size(); i++ ) {
-        if ( mpTractionMasterNodes [ i ] != NULL ) {
-            delete mpTractionMasterNodes [ i ];
-            mpTractionMasterNodes [ i ] = NULL;
-        }
+        delete mpTractionMasterNodes [ i ];
     }
-    mpTractionMasterNodes.clear();
 
     for ( size_t i = 0; i < mpTractionElements.size(); i++ ) {
-        if ( mpTractionElements [ i ] != NULL ) {
-            delete mpTractionElements [ i ];
-            mpTractionElements [ i ] = NULL;
-        }
+        delete mpTractionElements [ i ];
     }
-    mpTractionElements.clear();
 
-    if ( mpDisplacementLock != NULL ) {
-        delete mpDisplacementLock;
-        mpDisplacementLock = NULL;
-    }
+    delete mpDisplacementLock;
 }
 
 int PrescribedGradientBCWeak :: giveNumberOfInternalDofManagers()
@@ -239,7 +230,7 @@ void PrescribedGradientBCWeak :: assembleVector(FloatArray &answer, TimeStep *tS
 
             fExt.negated();
 
-            double loadLevel = this->giveTimeFunction()->evaluate(tStep, mode);
+            double loadLevel = this->giveTimeFunction()->evaluateAtTime(tStep->giveTargetTime());
             fExt.times(loadLevel);
 
             // Assemble
@@ -383,7 +374,7 @@ void PrescribedGradientBCWeak :: assemble(SparseMtrx &answer, TimeStep *tStep,
             KZero.zero();
             answer.assemble(lockRows, lockCols, KZero);
         }
-    } else   {
+    } else {
         printf("Skipping assembly in PrescribedGradientBCWeak::assemble().\n");
     }
 }

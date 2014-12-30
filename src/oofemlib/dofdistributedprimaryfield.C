@@ -57,7 +57,22 @@ DofDistributedPrimaryField :: ~DofDistributedPrimaryField()
 double
 DofDistributedPrimaryField :: giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *tStep)
 {
+#if 0
+    double val1 = dof->giveUnknownsDictionaryValue(tStep, VM_Total);
+    double val0 = dof->giveUnknownsDictionaryValue(tStep->givePreviousStep(), VM_Total);
+    if ( mode == VM_Total ) {
+        return this->alpha * val1 + (1.-this->alpha) * val0;
+    } else if ( mode == VM_Velocity ) {
+        return (val1 - val0) / tStep->giveTimeIncrement();
+    } else if ( mode == VM_Incremental ) {
+        return val1 - val0;
+    } else {
+        OOFEM_ERROR("Unknown value mode requested");
+        return 0;
+    }
+#else
     return dof->giveUnknownsDictionaryValue(tStep, mode);
+#endif
 }
 
 FloatArray *
@@ -247,8 +262,7 @@ DofDistributedPrimaryField :: applyBoundaryCondition(TimeStep *tStep)
         for ( auto &dof : *dman ) {
             if ( dof->hasBc(tStep) && dof->isPrimaryDof() ) {
                 int bcid = dof->giveBcId();
-                //double val = static_cast< BoundaryCondition* >(d->giveBc(bcid))->give(dof, VM_Total, tStep);
-                double val = static_cast< BoundaryCondition* >(d->giveBc(bcid))->give(dof, tStep->giveTargetTime());
+                double val = static_cast< BoundaryCondition* >(d->giveBc(bcid))->give(dof, VM_Total, tStep->giveTargetTime());
                 dof->updateUnknownsDictionary(tStep, VM_Total, val);
             }
         }
@@ -279,7 +293,7 @@ DofDistributedPrimaryField :: applyBoundaryCondition(BoundaryCondition &bc, Time
             }
             Dof *dof = dman->giveDofWithID(dofid);
             if ( dof->isPrimaryDof() ) {
-                dof->updateUnknownsDictionary( tStep, VM_Total, bc.give(dof, tStep->giveTargetTime()) );
+                dof->updateUnknownsDictionary( tStep, VM_Total, bc.give(dof, VM_Total, tStep->giveTargetTime()) );
             }
         }
     }
@@ -322,7 +336,7 @@ DofDistributedPrimaryField :: advanceSolution(TimeStep *tStep)
     }
 
     // Apply dirichlet b.c.s
-    this->applyBoundaryCondition(tStep);
+    //this->applyBoundaryCondition(tStep);
 #endif
 }
 

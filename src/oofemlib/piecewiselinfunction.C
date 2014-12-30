@@ -123,8 +123,6 @@ PiecewiseLinFunction :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    Function :: initializeFrom(ir);
-
     // Optional means, read data from external file (useful for very large sets of data)
     if ( ir->hasField(_IFT_PiecewiseLinFunction_dataFile) ) {
         std :: list< double >t, ft;
@@ -159,19 +157,18 @@ PiecewiseLinFunction :: initializeFrom(InputRecord *ir)
         }
     } else {
         int numberOfPoints;
-        IR_GIVE_FIELD(ir, numberOfPoints, _IFT_PiecewiseLinFunction_npoints);
+        IR_GIVE_OPTIONAL_FIELD(ir, numberOfPoints, "npoints");
         IR_GIVE_FIELD(ir, dates, _IFT_PiecewiseLinFunction_t);
         IR_GIVE_FIELD(ir, values, _IFT_PiecewiseLinFunction_ft);
     }
 
-    return IRRT_OK;
+    return Function :: initializeFrom(ir);
 }
 
 
 void PiecewiseLinFunction :: giveInputRecord(DynamicInputRecord &input)
 {
     Function :: giveInputRecord(input);
-    input.setField(this->dates.giveSize(), _IFT_PiecewiseLinFunction_npoints);
     input.setField(this->dates, _IFT_PiecewiseLinFunction_t);
     input.setField(this->values, _IFT_PiecewiseLinFunction_ft);
 }

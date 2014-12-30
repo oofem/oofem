@@ -56,7 +56,7 @@ public:
     /// Destructor.
     virtual ~TractionPressureBC() { }
 
-    virtual double give(Dof *dof, ValueModeType mode, TimeStep *tStep);
+    virtual double give(Dof *dof, ValueModeType mode, double time);
 
     virtual void scale(double s) { }
     virtual const char *giveClassName() const { return "TractionPressureBC"; }
