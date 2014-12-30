@@ -48,6 +48,7 @@ REGISTER_Material(IntMatIsoDamage);
 IntMatIsoDamage :: IntMatIsoDamage(int n, Domain *d) : StructuralInterfaceMaterial(n, d)
 {
     maxOmega = 0.999999;
+    semiExplicit = false;
 }
 
 
@@ -85,6 +86,12 @@ IntMatIsoDamage :: giveEngTraction_3d(FloatArray &answer, GaussPoint *gp,
     }
 
     double strength = 1.0 - min(omega, maxOmega);
+
+    if(semiExplicit) {
+        double oldOmega = status->giveDamage();
+        strength = 1.0 - min(oldOmega, maxOmega);
+    }
+
     answer = {ks * jump.at(1) * strength, ks * jump.at(2) * strength, kn * jump.at(3)};
     // damage in tension only
     if ( jump.at(3) >= 0 ) {

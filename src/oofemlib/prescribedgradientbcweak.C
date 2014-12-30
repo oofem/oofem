@@ -774,8 +774,13 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
 
                     int numClosePoints = 0;
                     const double meshTol2 = meshTol * meshTol;
-                    for ( auto bndPos : bndNodeCoords [ sideInd ] ) {
+                    for ( auto &bndPos : bndNodeCoords [ sideInd ] ) {
                         if ( bndPos.first.distance_square(intersecPoints [ i ]) < meshTol2 ) {
+
+                            if(numClosePoints < mNumTractionNodesAtIntersections) {
+                                bndPos.second = true;
+                            }
+
                             numClosePoints++;
                         }
                     }
@@ -797,8 +802,13 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
 
                         int numClosePoints = 0;
                         const double meshTol2 = meshTol * meshTol;
-                        for ( auto bndPos : bndNodeCoords [ sideInd ] ) {
+                        for ( auto &bndPos : bndNodeCoords [ sideInd ] ) {
                             if ( bndPos.first.distance_square(xPlus) < meshTol2 ) {
+
+                                if(numClosePoints < mNumTractionNodesAtIntersections) {
+                                    bndPos.second = true;
+                                }
+
                                 numClosePoints++;
                             }
                         }
@@ -815,6 +825,128 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
                 }
             }
         }
+
+
+
+
+    }
+
+
+
+    SpatialLocalizer *localizer = domain->giveSpatialLocalizer();
+
+    // Also add traction nodes where cohesive zone elements intersect the boundary
+    for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
+        Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
+        int boundary = boundaries.at(pos * 2);
+
+        e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+
+        // Add the start and end nodes of the segment
+        DofManager *startNode   = e->giveDofManager(bNodes [ 0 ]);
+        const FloatArray &xS    = * ( startNode->giveCoordinates() );
+
+        DofManager *endNode     = e->giveDofManager(bNodes [ 1 ]);
+        const FloatArray &xE    = * ( endNode->giveCoordinates() );
+
+        double radius = xS.distance(xE)*1.0e-2;
+
+        std :: set< int >elListS;
+        localizer->giveAllElementsWithNodesWithinBox(elListS, xS, radius);
+
+        std :: vector< FloatArray >intersecPoints;
+
+
+        // Also add traction nodes where cohesive zone elements intersect the boundary
+        for(int elInd : elListS) {
+
+            Element *el = domain->giveElement(elInd);
+
+            if( strcmp(el->giveClassName(),"IntElLine1" ) == 0 )
+            {
+                intersecPoints.push_back(xS);
+                break;
+            }
+
+        }
+
+
+        std :: set< int >elListE;
+        localizer->giveAllElementsWithNodesWithinBox(elListE, xE, radius);
+
+
+
+        for(int elInd : elListE) {
+
+            Element *el = domain->giveElement(elInd);
+
+            if( strcmp(el->giveClassName(),"IntElLine1" ) == 0 )
+            {
+                intersecPoints.push_back(xE);
+                break;
+            }
+
+        }
+
+
+
+        for ( size_t i = 0; i < intersecPoints.size(); i++ ) {
+            if ( boundaryPointIsOnActiveBoundary(intersecPoints [ i ]) ) {
+                int sideInd = giveSideIndex(intersecPoints [ i ]);
+
+                int numClosePoints = 0;
+                const double meshTol2 = meshTol * meshTol;
+                for ( auto &bndPos : bndNodeCoords [ sideInd ] ) {
+                    if ( bndPos.first.distance_square(intersecPoints [ i ]) < meshTol2 ) {
+
+                        if(numClosePoints < mNumTractionNodesAtIntersections) {
+                            bndPos.second = true;
+                        }
+
+                        numClosePoints++;
+                    }
+                }
+
+                if ( numClosePoints < mNumTractionNodesAtIntersections ) {
+                    for ( int j = 0; j < mNumTractionNodesAtIntersections - numClosePoints; j++ ) {
+                        std :: pair< FloatArray, bool >nodeCoord = {
+                            intersecPoints [ i ], true
+                        };
+
+                        bndNodeCoords [ sideInd ].push_back(nodeCoord);
+                    }
+                }
+            } else   {
+                if ( mMeshIsPeriodic ) {
+                    FloatArray xPlus;
+                    giveMirroredPointOnGammaPlus(xPlus, intersecPoints [ i ]);
+
+                    int sideInd = giveSideIndex(xPlus);
+
+                    int numClosePoints = 0;
+                    const double meshTol2 = meshTol * meshTol;
+                    for ( auto &bndPos : bndNodeCoords [ sideInd ] ) {
+                        if ( bndPos.first.distance_square(xPlus) < meshTol2 ) {
+
+                            if(numClosePoints < mNumTractionNodesAtIntersections) {
+                                bndPos.second = true;
+                            }
+                            numClosePoints++;
+                        }
+                    }
+
+                    if ( numClosePoints < mNumTractionNodesAtIntersections ) {
+                        for ( int j = 0; j < mNumTractionNodesAtIntersections - numClosePoints; j++ ) {
+                            std :: pair< FloatArray, bool >nodeCoord = {
+                                xPlus, true
+                            };
+                            bndNodeCoords [ sideInd ].push_back(nodeCoord);
+                        }
+                    }
+                }
+            }
+        }
+
     }
 
     // Sort boundary nodes
