@@ -267,7 +267,8 @@ PrimaryField :: applyBoundaryCondition(TimeStep *tStep)
         for ( auto &dof : *dman ) {
             int peq = - dof->giveEqn();
             if ( peq > 0 ) {
-                f->at(peq) = dof->giveBcValue(VM_Total, tStep);
+                int bcid = dof->giveBcId();
+                f->at(peq) = static_cast< BoundaryCondition* >(d->giveBc(bcid))->give(dof, VM_Total, tStep->giveTargetTime());
             }
         }
     }

@@ -511,7 +511,6 @@ TransportElement :: computeInertiaForcesVectorAt(FloatArray &answer, TimeStep *t
     this->computeVectorOf(VM_Velocity, tStep, vel);
     this->computeCapacityMatrix(cap, tStep);
     answer.beProductOf(cap, vel);
-    answer.negated();
 }
 
 

@@ -148,7 +148,7 @@ void TransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
             this->assemble( *effectiveMatrix, tStep, TangentStiffnessMatrix,
                            EModelDefaultEquationNumbering(), d );
             effectiveMatrix->times(alpha);
-            effectiveMatrix->add(-1./tStep->giveTimeIncrement(), *capacityMatrix);
+            effectiveMatrix->add(1./tStep->giveTimeIncrement(), *capacityMatrix);
         }
     }
 
@@ -194,11 +194,11 @@ void TransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
 void
 TransientTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
 {
-    // F(T) - C*dT/dt = Q
+    // F(T) + C*dT/dt = Q
     // Linearized:
-    // F(T^(k)) + K*a*dT_1 = Q + C * dT/dt^(k) + C/dt * dT_1
+    // F(T^(k)) + K*a*dT_1 = Q - C * dT/dt^(k) - C/dt * dT_1
     // Rearranged
-    // (a*K - C/dt) * dT_1 = Q - (F(T^(k)) - C * dT/dt^(k))
+    // (a*K + C/dt) * dT_1 = Q - (F(T^(k)) + C * dT/dt^(k))
     // K_eff        * dT_1 = Q - F_eff
     // Update:
     // T_1 += dT_1
@@ -210,7 +210,7 @@ TransientTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn
     this->field->applyBoundaryCondition(tStep);
 
     if ( cmpn == InternalRhs ) {
-        // F_eff = F(T^(k)) - C * dT/dt^(k)
+        // F_eff = F(T^(k)) + C * dT/dt^(k)
         this->internalForces.zero();
         this->assembleVector(this->internalForces, tStep, InternalForcesVector, VM_Total,
                              EModelDefaultEquationNumbering(), this->giveDomain(1), & this->eNorm);
@@ -222,13 +222,13 @@ TransientTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn
         this->eNorm.add(tmp); ///@todo Fix this, assembleVector shouldn't zero eNorm inside the functions. / Mikael
 
     } else if ( cmpn == NonLinearLhs ) {
-        // K_eff = (a*K - C/dt)
+        // K_eff = (a*K + C/dt)
         if ( !this->keepTangent ) {
             this->effectiveMatrix->zero();
             this->assemble( *effectiveMatrix, tStep, TangentStiffnessMatrix,
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
             effectiveMatrix->times(alpha);
-            effectiveMatrix->add(-1./tStep->giveTimeIncrement(), *capacityMatrix);
+            effectiveMatrix->add(1./tStep->giveTimeIncrement(), *capacityMatrix);
         }
     } else {
         OOFEM_ERROR("Unknown component");
