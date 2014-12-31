@@ -490,6 +490,15 @@ TransportElement :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
     FloatArray unknowns;
     this->computeVectorOf(VM_Total, tStep, unknowns);
 
+#if 1
+    FloatMatrix s;
+    ///@todo Integrate and compute as a nonlinear problem instead of doing this tangent.
+    this->computeConductivityMatrix(s, Conductivity, tStep);
+    answer.beProductOf(s, unknowns);
+    this->computeVectorOf(VM_Total, tStep, unknowns);
+    this->computeInternalSourceRhsVectorAt(tmp, tStep, VM_Total);
+    answer.subtract(tmp);
+#else
     //TransportCrossSection *cs = static_cast< SimpleTransportCrossSection * >( this->giveCrossSection() );
     //TransportMaterial *mat = static_cast< SimpleTransportCrossSection * >( cs )->giveMaterial();
     TransportMaterial *mat = static_cast< TransportMaterial* >( this->giveMaterial() );
@@ -519,6 +528,7 @@ TransportElement :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
             answer.plusProduct(N, val, dV);
         }
     }
+#endif
 
     ///@todo With sets, we can make this much nicer than to add it here, though it works for now. / Mikael
     // Neumann b.c.s
