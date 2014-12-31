@@ -96,13 +96,11 @@ IRResultType AbaqusUserElement :: initializeFrom(InputRecord *ir)
      * strncpy(this->giveClassName, uelname.c_str(), 80);*/
 
 #ifdef _WIN32
-    ///@todo Check all the windows support.
     this->uelobj = ( void * ) LoadLibrary( filename.c_str() );
     if ( !this->uelobj ) {
         OOFEM_ERROR( "couldn't load \"%s\",\ndlerror: %s", filename.c_str() );
     }
 
-    //     * ( void ** )( & this->umat ) = GetProcAddress( ( HMODULE ) this->umatobj, "umat_" );
     * ( FARPROC * ) ( & this->uel ) = GetProcAddress( ( HMODULE ) this->uelobj, "uel_" );  //works for MinGW 32bit
     if ( !this->uel ) {
         // char *dlresult = GetLastError();
@@ -137,14 +135,14 @@ void AbaqusUserElement :: postInitialize()
     this->rhs.resize(this->ndofel, this->nrhs);
     this->amatrx.resize(this->ndofel, this->ndofel);
     this->svars.resize(this->numSvars);
-    this->lFlags.resize(20); ///@todo Why 20 ?
-    this->predef.resize( this->npredef * this->numberOfDofMans * 2 ); ///@todo Why * 2. Is it because mrcd == 2? Then use the mrcd variable for generality
-    this->energy.resize(8); ///@todo Why 8 ?
+    this->lFlags.resize(5);
+    this->predef.resize( this->npredef * this->numberOfDofMans * 2 );
+    this->energy.resize(8);
     this->U.resize(this->ndofel);
     this->V.resize(this->ndofel);
     this->A.resize(this->ndofel);
     this->DU.resize(this->ndofel, this->nrhs);
-    
+
     if ( !this->coords.isNotEmpty() ) {
         this->coords.resize(this->numberOfDofMans, this->mcrd);
         for ( int j = 1; j <= numberOfDofMans; j++ ) {
@@ -216,7 +214,6 @@ void AbaqusUserElement :: giveInternalForcesVector(FloatArray &answer, TimeStep 
     this->giveDomain()->giveClassName();
     DU.zero();
     DU.setColumn(tempIntVect, 1);
-    ///@todo Why not this? Why nrhs=2 ? / Mikael
     //this->computeVectorOf(VM_Total, tStep, DU);
     this->giveInternalForcesVector(answer, tStep, U, DU, useUpdatedGpRecord);
 }

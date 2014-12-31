@@ -98,7 +98,7 @@ private:
     int jtype;
 
     /// Element rhs
-    int nrhs = 1;
+    int nrhs = 2;
     FloatMatrix rhs, tempRHS;
 
     /// Element amatrx
@@ -224,9 +224,6 @@ protected:
         OOFEM_ERROR("function not defined for abaqusUserElement and should never be called.");
         return 0;
     }
-
-private:
-    void initUandDU(int mode, TimeStep *tStep);
 };
 
 }// namespace oofem
