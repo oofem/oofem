@@ -113,6 +113,7 @@ double EigenValueDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *t
 
     switch ( mode ) {
     case VM_Total:  // EigenVector
+    case VM_Incremental:
         return eigVec.at( eq, ( int ) tStep->giveTargetTime() );
 
     default:
