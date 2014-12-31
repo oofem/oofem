@@ -45,6 +45,8 @@
 #include "verbose.h"
 #include "mathfem.h"
 #include "crosssection.h"
+#include "transportcrosssection.h"
+#include "simpletransportcrosssection.h"
 #include "feinterpol.h"
 #include "feinterpol2d.h"
 #include "feinterpol3d.h"
@@ -114,11 +116,13 @@ TransportElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, 
 //
 {
     if ( mtrx == InternalForcesVector ) {
-        this->computeInternalForcesVectorAt(answer, tStep, mode);
+        this->computeInternalForcesVector(answer, tStep);
     } else if ( mtrx == ExternalForcesVector ) {
-        this->computeExternalForcesVectorAt(answer, tStep, mode);
+        this->computeExternalForcesVector(answer, tStep, mode);
     } else if ( mtrx == InertiaForcesVector ) {
-        this->computeInertiaForcesVectorAt(answer, tStep, mode);
+        this->computeInertiaForcesVector(answer, tStep);
+    } else if ( mtrx == LumpedMassMatrix ) {
+        this->computeLumpedCapacityVector(answer, tStep);
     } else if ( mtrx == ElementBCTransportVector ) { ///@todo Remove this, only external and internal.
         this->computeBCVectorAt(answer, tStep, mode);
     } else if ( mtrx == ElementInternalSourceVector ) { ///@todo Remove this, only external and internal.
@@ -183,14 +187,14 @@ TransportElement :: computeConductivityMatrix(FloatMatrix &answer, MatResponseMo
     answer.resize( this->computeNumberOfDofs(), this->computeNumberOfDofs() );
     answer.zero();
     if ( emode == HeatTransferEM || emode == Mass1TransferEM ) {
-        this->computeConductivitySubMatrix(answer, 2, 0, Conductivity_hh, tStep);
+        this->computeConductivitySubMatrix(answer, 0, Conductivity_hh, tStep);
     } else if ( emode == HeatMass1TransferEM ) {
         FloatMatrix subAnswer;
         MatResponseMode rmode [ 2 ] [ 2 ] = { { Conductivity_hh, Conductivity_hw }, { Conductivity_wh, Conductivity_ww } };
 
         for ( int i = 1; i <= 2; i++ ) {
             for ( int j = 1; j <= 2; j++ ) {
-                this->computeConductivitySubMatrix(subAnswer, 2, 0, rmode [ i - 1 ] [ j - 1 ], tStep);
+                this->computeConductivitySubMatrix(subAnswer, 0, rmode [ i - 1 ] [ j - 1 ], tStep);
                 this->assembleLocalContribution(answer, subAnswer, 2, i, j);
             }
         }
@@ -230,10 +234,10 @@ TransportElement :: computeNmatrixAt(FloatMatrix &answer, const FloatArray &lcoo
 
 
 void
-TransportElement :: computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *gp)
+TransportElement :: computeGradientMatrixAt(FloatMatrix &answer, const FloatArray &lcoords)
 {
     FloatMatrix dnx;
-    this->giveInterpolation()->evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->giveInterpolation()->evaldNdx( dnx, lcoords, FEIElementGeometryWrapper(this) );
     ///@todo We should change the transposition in evaldNdx;
     answer.beTranspositionOf(dnx);
 }
@@ -326,7 +330,7 @@ TransportElement :: computeCapacitySubMatrix(FloatMatrix &answer, MatResponseMod
 }
 
 void
-TransportElement :: computeConductivitySubMatrix(FloatMatrix &answer, int nsd, int iri, MatResponseMode rmode, TimeStep *tStep)
+TransportElement :: computeConductivitySubMatrix(FloatMatrix &answer, int iri, MatResponseMode rmode, TimeStep *tStep)
 {
     double dV;
     FloatMatrix b, d, db;
@@ -335,7 +339,7 @@ TransportElement :: computeConductivitySubMatrix(FloatMatrix &answer, int nsd, i
     answer.zero();
     for ( GaussPoint *gp: *integrationRulesArray [ iri ] ) {
         this->computeConstitutiveMatrixAt(d, rmode, gp, tStep);
-        this->computeGradientMatrixAt(b, gp);
+        this->computeGradientMatrixAt(b, *gp->giveNaturalCoordinates());
         dV = this->computeVolumeAround(gp);
 
         db.beProductOf(d, b);
@@ -480,19 +484,43 @@ TransportElement :: computeConstitutiveMatrixAt(FloatMatrix &answer,
 }
 
 void
-TransportElement :: computeInternalForcesVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
+TransportElement :: computeInternalForcesVector(FloatArray &answer, TimeStep *tStep)
 {
     FloatArray tmp;
     FloatArray unknowns;
-    FloatMatrix s;
-    this->computeVectorOf(mode, tStep, unknowns);
-    ///@todo Integrate and compute as a nonlinear problem instead of doing this tangent.
-    this->computeConductivityMatrix(s, Conductivity, tStep);
-    answer.beProductOf(s, unknowns);
+    this->computeVectorOf(VM_Total, tStep, unknowns);
 
-    this->computeInternalSourceRhsVectorAt(tmp, tStep, mode);
-    answer.subtract(tmp);
+    //TransportCrossSection *cs = static_cast< SimpleTransportCrossSection * >( this->giveCrossSection() );
+    //TransportMaterial *mat = static_cast< SimpleTransportCrossSection * >( cs )->giveMaterial();
+    TransportMaterial *mat = static_cast< TransportMaterial* >( this->giveMaterial() );
+    FloatArray flux, grad, field;
+    FloatMatrix B, N;
 
+    answer.clear();
+    for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
+        FloatArray &lcoords = * gp->giveNaturalCoordinates();
+
+        this->computeNmatrixAt(N, lcoords);
+        this->computeGradientMatrixAt(B, lcoords);
+        field.beProductOf(N, unknowns);
+        grad.beProductOf(B, unknowns);
+
+        mat->giveFluxVector(flux, gp, grad, field, tStep);
+
+        double dV = this->computeVolumeAround(gp);
+        answer.plusProduct(B, flux, -dV);
+
+        ///@todo Can/should this part not be built into the flux itself? Probably not? / Mikael
+        if ( mat->hasInternalSource() ) {
+            // add internal source produced by material (if any)
+            FloatArray val;
+            double dV = this->computeVolumeAround(gp);
+            mat->computeInternalSourceVector(val, gp, tStep, VM_Total);
+            answer.plusProduct(N, val, dV);
+        }
+    }
+
+    ///@todo With sets, we can make this much nicer than to add it here, though it works for now. / Mikael
     // Neumann b.c.s
     FloatMatrix bc_tangent;
     this->computeBCMtrxAt(bc_tangent, tStep, VM_Total);
@@ -504,13 +532,29 @@ TransportElement :: computeInternalForcesVectorAt(FloatArray &answer, TimeStep *
 
 
 void
-TransportElement :: computeInertiaForcesVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
+TransportElement :: computeInertiaForcesVector(FloatArray &answer, TimeStep *tStep)
 {
     FloatMatrix cap;
     FloatArray vel;
     this->computeVectorOf(VM_Velocity, tStep, vel);
     this->computeCapacityMatrix(cap, tStep);
     answer.beProductOf(cap, vel);
+}
+
+
+void
+TransportElement :: computeLumpedCapacityVector(FloatArray &answer, TimeStep *tStep)
+{
+    FloatMatrix cap;
+    this->computeCapacityMatrix(cap, tStep);
+
+    int size = cap.giveNumberOfRows();
+    answer.resize(size);
+    for ( int i = 1; i <= size; i++ ) {
+        for ( int j = 1; j <= size; j++ ) {
+            answer.at(i) += cap.at(i, j);
+        }
+    }
 }
 
 
@@ -686,7 +730,7 @@ TransportElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLo
 
 
 void
-TransportElement :: computeExternalForcesVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
+TransportElement :: computeExternalForcesVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
 {
     this->computeBCVectorAt(answer, tStep, mode);
 }
@@ -763,6 +807,7 @@ TransportElement :: computeBCSubVectorAt(FloatArray &answer, TimeStep *tStep, Va
     }
 }
 
+
 void
 TransportElement :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iEdge,
                                              TimeStep *tStep, ValueModeType mode, int indx)
@@ -814,6 +859,7 @@ TransportElement :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int
     }
 }
 
+
 void
 TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
                                                 int iSurf, TimeStep *tStep, ValueModeType mode, int indx)
@@ -864,8 +910,6 @@ TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
         OOFEM_ERROR("unsupported bc type encountered");
     }
 }
-
-
 
 
 void
@@ -982,7 +1026,7 @@ TransportElement :: computeFlow(FloatArray &answer, GaussPoint *gp, TimeStep *tS
 
     this->giveElementDofIDMask(dofid);
     this->computeVectorOf(dofid, VM_Total, tStep, r);
-    this->computeGradientMatrixAt(b, gp);
+    this->computeGradientMatrixAt(b, *gp->giveNaturalCoordinates());
 
     if ( emode == HeatTransferEM ||  emode == Mass1TransferEM ) {
         this->computeConstitutiveMatrixAt(d, Conductivity_hh, gp, tStep);
