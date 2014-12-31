@@ -327,7 +327,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     if ( consistentMassFlag ) {
         rhs.times(deltaT);
         // Depends on prescribed v
-        this->assembleVectorFromElements( rhs, tStep, PrescribedVelocityRhsVector, VM_Incremental,
+        this->assembleVectorFromElements( rhs, tStep, PrescribedVelocityRhsVector, VM_Total,
                                          vnum, this->giveDomain(1) );
         nMethod->solve(*mss, rhs, deltaAuxVelocity);
     } else {
