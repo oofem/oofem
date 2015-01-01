@@ -169,6 +169,7 @@ protected:
      * @param indx Unknown index.
      */
     void computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, ValueModeType mode, int indx);
+    void computeBodyBCSubVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode, int indx);
     /**
      * Computes the part of RHS due to applied BCs on particular edge.
      * The part corresponds to unknown identified by indx param.
