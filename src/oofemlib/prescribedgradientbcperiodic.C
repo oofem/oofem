@@ -56,14 +56,13 @@
 namespace oofem {
 REGISTER_BoundaryCondition(PrescribedGradientBCPeriodic);
 
-PrescribedGradientBCPeriodic :: PrescribedGradientBCPeriodic(int n, Domain *d) : PrescribedGradientBC(n, d)
+PrescribedGradientBCPeriodic :: PrescribedGradientBCPeriodic(int n, Domain *d) : PrescribedGradientBC(n, d),
+    strain( new Node(1, d) )
 {
     // The unknown volumetric strain
     int nsd = d->giveNumberOfSpatialDimensions();
     int components = nsd * nsd;
     // The prescribed strains.
-    strain.reset(new Node(1, d));
-    strain_id.clear();
     for ( int i = 0; i < components; i++ ) {
         int dofid = d->giveNextFreeDofID();
         strain_id.followedBy(dofid);
@@ -216,21 +215,41 @@ void PrescribedGradientBCPeriodic :: computeFields(FloatArray &sigma, TimeStep *
 
 void PrescribedGradientBCPeriodic :: computeTangents(FloatMatrix &E, TimeStep *tStep)
 {
-    ///@todo Implement tangent computations
     EModelDefaultEquationNumbering fnum;
     EModelDefaultPrescribedEquationNumbering pnum;
     EngngModel *rve = this->giveDomain()->giveEngngModel();
     ///@todo Get this from engineering model
-    SparseLinearSystemNM *solver = classFactory.createSparseLinSolver( ST_Petsc, this->domain, this->domain->giveEngngModel() ); // = rve->giveLinearSolver();
+    std :: unique_ptr< SparseLinearSystemNM > solver( classFactory.createSparseLinSolver( ST_Petsc, this->domain, this->domain->giveEngngModel() ) ); // = rve->giveLinearSolver();
     SparseMtrxType stype = solver->giveRecommendedMatrix(true);
     std :: unique_ptr< SparseMtrx > Kff( classFactory.createSparseMtrx( stype ) );
+    std :: unique_ptr< SparseMtrx > Kfp( classFactory.createSparseMtrx( stype ) );
+    std :: unique_ptr< SparseMtrx > Kpp( classFactory.createSparseMtrx(stype) );
 
     Kff->buildInternalStructure(rve, 1, fnum);
+    Kfp->buildInternalStructure(rve, 1, fnum);
     rve->assemble(*Kff, tStep, StiffnessMatrix, fnum, this->domain);
+    rve->assemble(*Kfp, tStep, StiffnessMatrix, fnum, pnum, this->domain);
+    rve->assemble(*Kpp, tStep, StiffnessMatrix, fnum, pnum, this->domain);
 
-    OOFEM_ERROR("Not implemented yet");
+    int neq = Kfp->giveNumberOfRows();
+    int nsd = this->domain->giveNumberOfSpatialDimensions();
+    int ncomp = nsd * nsd;
 
-    delete solver; ///@todo Remove this when solver is taken from engngmodel
+    FloatMatrix grad_pert(ncomp, ncomp), rhs, sol(neq, ncomp);
+    grad_pert.resize(ncomp, ncomp); // In fact, npeq should most likely equal ndev
+    grad_pert.beUnitMatrix();
+
+    // Compute the solution to each of the pertubation of eps
+    Kfp->times(grad_pert, rhs);
+    solver->solve(*Kff, rhs, sol);
+
+    // Compute the solution to each of the pertubation of eps
+    Kfp->timesT(sol, E); // Assuming symmetry
+    // This is probably always zero, but for generality
+    FloatMatrix tmpMat;
+    Kpp->times(grad_pert, tmpMat);
+    E.subtract(tmpMat);
+    E.times(1.0 / this->domainSize());
 }
 
 

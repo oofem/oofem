@@ -106,7 +106,7 @@ public:
     virtual SparseMtrxType giveType() const { return SMT_SymCompCol; }
     virtual bool isAsymmetric() const { return false; }
 
-    virtual const char *giveClassName() const { return "DSSMatrix";;}
+    virtual const char *giveClassName() const { return "DSSMatrix"; }
 };
 
 class DSSMatrixLDL : public DSSMatrix
