@@ -265,11 +265,11 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
     }
     
     if ( _succ ) {
-        _dss->SetMatrixPattern(_sm, bsize);
+        _dss->SetMatrixPattern(_sm.get(), bsize);
         _dss->LoadMCN(ndofmans+ndofmansbc, bsize, mcn);
     } else {
         OOFEM_LOG_INFO("DSSMatrix: using assumed block structure");
-        _dss->SetMatrixPattern(_sm, bsize);
+        _dss->SetMatrixPattern(_sm.get(), bsize);
     }
 
     _dss->PreFactorize();
