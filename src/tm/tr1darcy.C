@@ -244,10 +244,10 @@ void Tr1Darcy :: giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, Ti
     /*
      * Compute characteristic matrix for this element. The only option is the stiffness matrix...
      */
-    if ( mtrx == StiffnessMatrix ) {
+    if ( mtrx == StiffnessMatrix || mtrx == ConductivityMatrix || mtrx == TangentStiffnessMatrix ) {
         this->computeStiffnessMatrix(answer, tStep);
     } else {
-        OOFEM_ERROR("Unknown Type of characteristic mtrx.");
+        OOFEM_ERROR("Unknown Type of characteristic mtrx %d", mtrx);
     }
 }
 

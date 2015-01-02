@@ -52,6 +52,7 @@ class SparseNonLinearSystemNM;
 
 /**
  * This class represents stationary transport problem.
+ * @author Mikael Öhman (among others)
  */
 class StationaryTransportProblem : public EngngModel
 {
