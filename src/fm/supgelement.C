@@ -94,7 +94,7 @@ SUPGElement :: giveCharacteristicMatrix(FloatMatrix &answer,
 //
 {
 
-    if ( type == StiffnessMatrix ) {
+    if ( type == StiffnessMatrix || type == TangentStiffnessMatrix ) {
             // stokes flow only
         double dscale = this->giveDomain()->giveEngngModel()->giveVariableScale(VST_Density);
         double uscale = this->giveDomain()->giveEngngModel()->giveVariableScale(VST_Velocity);
