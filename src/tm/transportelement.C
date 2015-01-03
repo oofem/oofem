@@ -349,25 +349,8 @@ TransportElement :: computeInternalSourceRhsSubVectorAt(FloatArray &answer, Time
     // //  different coordinate system in each node)
     TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
 
-    FloatArray val, globalIPcoords, n;
+    FloatArray val, n;
     answer.clear();
-
-    int nLoads = this->giveBodyLoadArray()->giveSize();
-    for ( int i = 1; i <= nLoads; i++ ) {
-        int k = bodyLoadArray.at(i);
-        Load *load = domain->giveLoad(k);
-        bcGeomType ltype = load->giveBCGeoType();
-        if ( ltype == BodyLoadBGT ) {
-            for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
-                this->computeNAt( n, * gp->giveNaturalCoordinates() );
-                double dV = this->computeVolumeAround(gp);
-                this->computeGlobalCoordinates( globalIPcoords, * gp->giveNaturalCoordinates() );
-                load->computeValueAt(val, tStep, globalIPcoords, mode);
-
-                answer.add(val.at(indx) * dV, n);
-            }
-        }
-    }
 
     // add internal source produced by material (if any)
     if ( mat->hasInternalSource() ) {
