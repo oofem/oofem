@@ -93,6 +93,7 @@ DofDistributedPrimaryField :: initialize(ValueModeType mode, TimeStep *tStep, Fl
 
     for ( auto &node : d->giveDofManagers() ) {
         for ( Dof *dof: *node ) {
+            if ( !dof->isPrimaryDof() ) continue;
             int eqNum = dof->giveEquationNumber(s);
             if ( eqNum ) {
                 answer.at(eqNum) = dof->giveUnknownsDictionaryValue(tStep, mode);
@@ -104,6 +105,7 @@ DofDistributedPrimaryField :: initialize(ValueModeType mode, TimeStep *tStep, Fl
         int ndman = elem->giveNumberOfInternalDofManagers();
         for ( int i = 1; i <= ndman; i++ ) {
             for ( auto &dof : *elem->giveInternalDofManager(i) ) {
+                if ( !dof->isPrimaryDof() ) continue;
                 int eqNum = dof->giveEquationNumber(s);
                 if ( eqNum > 0 ) {
                     answer.at(eqNum) = dof->giveUnknownsDictionaryValue(tStep, mode);
@@ -116,6 +118,7 @@ DofDistributedPrimaryField :: initialize(ValueModeType mode, TimeStep *tStep, Fl
         int ndman = bc->giveNumberOfInternalDofManagers();
         for ( int i = 1; i <= ndman; i++ ) {
             for ( auto &dof : *bc->giveInternalDofManager(i) ) {
+                if ( !dof->isPrimaryDof() ) continue;
                 int eqNum = dof->giveEquationNumber(s);
                 if ( eqNum > 0 ) {
                     answer.at(eqNum) = dof->giveUnknownsDictionaryValue(tStep, mode);
@@ -133,6 +136,7 @@ DofDistributedPrimaryField :: update(ValueModeType mode, TimeStep *tStep, const 
 
     for ( auto &node : d->giveDofManagers() ) {
         for ( Dof *dof: *node ) {
+            if ( !dof->isPrimaryDof() ) continue;
             int eqNum = dof->giveEquationNumber(s);
             if ( eqNum > 0 ) {
                 dof->updateUnknownsDictionary(tStep, mode, vectorToStore.at(eqNum));
@@ -150,6 +154,7 @@ DofDistributedPrimaryField :: update(ValueModeType mode, TimeStep *tStep, const 
         int ndman = elem->giveNumberOfInternalDofManagers();
         for ( int i = 1; i <= ndman; i++ ) {
             for ( auto &dof : *elem->giveInternalDofManager(i) ) {
+                if ( !dof->isPrimaryDof() ) continue;
                 int eqNum = dof->giveEquationNumber(s);
                 if ( eqNum > 0 ) {
                     dof->updateUnknownsDictionary(tStep, mode, vectorToStore.at(eqNum));
@@ -162,6 +167,7 @@ DofDistributedPrimaryField :: update(ValueModeType mode, TimeStep *tStep, const 
         int ndman = bc->giveNumberOfInternalDofManagers();
         for ( int i = 1; i <= ndman; i++ ) {
             for ( auto &dof : *bc->giveInternalDofManager(i) ) {
+                if ( !dof->isPrimaryDof() ) continue;
                 int eqNum = dof->giveEquationNumber(s);
                 if ( eqNum > 0 ) {
                     dof->updateUnknownsDictionary(tStep, mode, vectorToStore.at(eqNum));
