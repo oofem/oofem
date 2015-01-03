@@ -43,6 +43,7 @@
 #include <string>
 #include <list>
 #include <vector>
+#include <memory>
 
 ///@todo These are general enough to be able to use outside this class.
 ///@name Input fields for Circle
@@ -141,7 +142,7 @@ protected:
     /// Number of points to use for resampling
     int m;
     /// The grid of points, the actual topological information
-    ParticleGrid< ParticlePoint > *grid;
+    std :: unique_ptr< ParticleGrid< ParticlePoint > > grid;
 
     /// Corner nodes
     std :: list< ParticlePoint >corners;
@@ -179,7 +180,7 @@ protected:
      * Works recursively on refined grids.
      * @param g Grid to clear.
      */
-    void removePoints(ParticleGrid< ParticlePoint > *g) const;
+    void removePoints(ParticleGrid< ParticlePoint > &g) const;
 
     /**
      * Finds the displacement for the underlying FE-mesh.
@@ -208,7 +209,7 @@ protected:
     /**
      * Shortest distance from least square fit based on 2nd order polynomial.
      */
-    void calculateShortestDistance(const ParticlePoint *p, std :: list< ParticlePoint * > &points, ParticleGrid< ParticlePoint > *grid) const;
+    void calculateShortestDistance(const ParticlePoint *p, std :: list< ParticlePoint * > &points, ParticleGrid< ParticlePoint > &grid) const;
 
     /**
      * Helper for calculateShortestDistance
@@ -224,7 +225,7 @@ protected:
      * @param p1 Second corner of the edge.
      * @param grid Grid to add points to.
      */
-    void addLineSegment(int id, const FloatArray &p0, const FloatArray &p1, ParticleGrid< ParticlePoint > *grid) const;
+    void addLineSegment(int id, const FloatArray &p0, const FloatArray &p1, ParticleGrid< ParticlePoint > &grid) const;
     /**
      * Used for initialization, calculating the distance from primitives.
      * Adds a circle segment from p0 to p1, with center at c.
@@ -235,14 +236,14 @@ protected:
      * @param v1 Upper angle [-pi,pi].
      * @param grid Grid to add points to.
      */
-    void addCircleSegment(int id, const FloatArray &c, double r, double v0, double v1, ParticleGrid< ParticlePoint > *grid) const;
+    void addCircleSegment(int id, const FloatArray &c, double r, double v0, double v1, ParticleGrid< ParticlePoint > &grid) const;
     /**
      * Adds a corner node.
      * @param id ID for corner.
      * @param c Coordinate of corner.
      * @param grid Grid to add corner to.
      */
-    void addCorner(int id, const FloatArray &c, ParticleGrid< ParticlePoint > *grid);
+    void addCorner(int id, const FloatArray &c, ParticleGrid< ParticlePoint > &grid);
 
     /**
      * Generates the PSLG for meshing with Triangle.

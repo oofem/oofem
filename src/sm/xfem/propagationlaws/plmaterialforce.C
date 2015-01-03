@@ -27,20 +27,14 @@ namespace oofem {
 REGISTER_PropagationLaw(PLMaterialForce)
 
 PLMaterialForce::PLMaterialForce():
-mRadius(0.0),
-mIncrementLength(0.0),
-mCrackPropThreshold(0.0)
-{
-    mpMaterialForceEvaluator = new MaterialForceEvaluator();
-}
+    mRadius(0.0),
+    mIncrementLength(0.0),
+    mCrackPropThreshold(0.0),
+    mpMaterialForceEvaluator( new MaterialForceEvaluator() )
+{}
 
 PLMaterialForce::~PLMaterialForce()
-{
-    if(mpMaterialForceEvaluator != NULL) {
-        delete mpMaterialForceEvaluator;
-        mpMaterialForceEvaluator = NULL;
-    }
-}
+{}
 
 IRResultType PLMaterialForce :: initializeFrom(InputRecord *ir)
 {

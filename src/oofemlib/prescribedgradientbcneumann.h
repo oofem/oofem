@@ -37,6 +37,8 @@
 
 #include "prescribedgradientbc.h"
 
+#include <memory>
+
 #define _IFT_PrescribedGradientBCNeumann_Name   "prescribedgradientbcneumann"
 
 namespace oofem {
@@ -49,7 +51,7 @@ class Element;
  * @author Erik Svenning
  * @date Mar 5, 2014
  */
-class PrescribedGradientBCNeumann : public PrescribedGradientBC
+class OOFEM_EXPORT PrescribedGradientBCNeumann : public PrescribedGradientBC
 {
 public:
     PrescribedGradientBCNeumann(int n, Domain *d);
@@ -86,7 +88,7 @@ public:
     void giveStressLocationArray(IntArray &oCols, const UnknownNumberingScheme &r_s);
 protected:
     /// DOF-manager containing the unknown homogenized stress.
-    Node *mpSigmaHom;
+    std :: unique_ptr< Node > mpSigmaHom;
     IntArray mSigmaIds;
 
     /// Help function that integrates the tangent contribution from a single element boundary.

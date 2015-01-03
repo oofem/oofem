@@ -68,24 +68,19 @@ namespace oofem {
 REGISTER_ExportModule(GnuplotExportModule)
 
 GnuplotExportModule::GnuplotExportModule(int n, EngngModel *e):
-ExportModule(n, e),
-mExportReactionForces(false),
-mExportBoundaryConditions(false),
-mExportBoundaryConditionsExtra(false),
-mExportMesh(false),
-mExportXFEM(false),
-mExportCrackLength(false),
-mMonitorNodeIndex(-1)
-{
-    mpMatForceEvaluator = new  MaterialForceEvaluator();
-}
+    ExportModule(n, e),
+    mExportReactionForces(false),
+    mExportBoundaryConditions(false),
+    mExportBoundaryConditionsExtra(false),
+    mExportMesh(false),
+    mExportXFEM(false),
+    mExportCrackLength(false),
+    mMonitorNodeIndex(-1),
+    mpMatForceEvaluator( new  MaterialForceEvaluator() )
+{}
 
-GnuplotExportModule::~GnuplotExportModule() {
-    if(mpMatForceEvaluator != NULL) {
-        delete mpMatForceEvaluator;
-        mpMatForceEvaluator = NULL;
-    }
-}
+GnuplotExportModule::~GnuplotExportModule()
+{}
 
 IRResultType GnuplotExportModule::initializeFrom(InputRecord *ir)
 {

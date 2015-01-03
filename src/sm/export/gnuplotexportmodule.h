@@ -39,6 +39,7 @@
 #include "floatarray.h"
 
 #include <unordered_map>
+#include <memory>
 
 ///@name Input fields for GnuplotExportModule
 //@{
@@ -148,7 +149,7 @@ protected:
     /**
      * Evaluator for material forces.
      */
-    MaterialForceEvaluator *mpMatForceEvaluator;
+    std :: unique_ptr< MaterialForceEvaluator > mpMatForceEvaluator;
     FloatArray mMatForceRadii;
 
     /**

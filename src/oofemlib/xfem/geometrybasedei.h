@@ -91,10 +91,10 @@ public:
 
     virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius);
 
-    BasicGeometry *giveGeometry() { return mpBasicGeometry; }
+    BasicGeometry *giveGeometry() { return mpBasicGeometry.get(); }
 
 protected:
-    BasicGeometry *mpBasicGeometry;
+    std :: unique_ptr< BasicGeometry > mpBasicGeometry;
 };
 } /* namespace oofem */
 

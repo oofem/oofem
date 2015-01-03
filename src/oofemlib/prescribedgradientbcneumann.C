@@ -25,7 +25,8 @@ namespace oofem {
 REGISTER_BoundaryCondition(PrescribedGradientBCNeumann);
 
 PrescribedGradientBCNeumann :: PrescribedGradientBCNeumann(int n, Domain *d) :
-    PrescribedGradientBC(n, d)
+    PrescribedGradientBC(n, d),
+    mpSigmaHom( new Node(0, d) )
 {
     int nsd = d->giveNumberOfSpatialDimensions();
     int numComponents = 0;
@@ -44,24 +45,21 @@ PrescribedGradientBCNeumann :: PrescribedGradientBCNeumann(int n, Domain *d) :
         break;
     }
 
-    mSigmaIds.clear();
-    mpSigmaHom = new Node(0, d); // Node number lacks meaning here.
     for ( int i = 0; i < numComponents; i++ ) {
         // Just putting in X_i id-items since they don't matter.
         int dofId = d->giveNextFreeDofID();
         mSigmaIds.followedBy(dofId);
-        mpSigmaHom->appendDof( new MasterDof( mpSigmaHom, ( DofIDItem ) ( dofId ) ) );
+        mpSigmaHom->appendDof( new MasterDof( mpSigmaHom.get(), ( DofIDItem ) ( dofId ) ) );
     }
 }
 
 PrescribedGradientBCNeumann :: ~PrescribedGradientBCNeumann()
 {
-    delete mpSigmaHom;
 }
 
 DofManager *PrescribedGradientBCNeumann :: giveInternalDofManager(int i)
 {
-    return mpSigmaHom;
+    return mpSigmaHom.get();
 }
 
 void PrescribedGradientBCNeumann :: scale(double s)

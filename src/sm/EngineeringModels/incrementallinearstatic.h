@@ -39,6 +39,8 @@
 #include "sparselinsystemnm.h"
 #include "sparsemtrxtype.h"
 
+#include <memory>
+
 ///@name Input fields for IncrementalLinearStatic
 //@{
 #define _IFT_IncrementalLinearStatic_Name "incrlinearstatic"
@@ -64,7 +66,7 @@ namespace oofem {
 class IncrementalLinearStatic : public StructuralEngngModel
 {
 protected:
-    SparseMtrx *stiffnessMatrix;
+    std :: unique_ptr< SparseMtrx > stiffnessMatrix;
     FloatArray loadVector;
     FloatArray internalLoadVector;
     FloatArray incrementOfDisplacementVector;
@@ -73,7 +75,7 @@ protected:
     double deltaT;
     double endOfTimeOfInterest;
     /// Numerical method used to solve the problem
-    SparseLinearSystemNM *nMethod;
+    std :: unique_ptr< SparseLinearSystemNM > nMethod;
 
     LinSystSolverType solverType;
     SparseMtrxType sparseMtrxType;

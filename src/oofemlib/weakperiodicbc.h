@@ -37,6 +37,7 @@
 
 #include <vector>
 #include <iostream>
+#include <memory>
 
 #include "activebc.h"
 #include "inputrecord.h"
@@ -119,7 +120,7 @@ private:
 
     double computeBaseFunctionValue2D(int baseID, FloatArray coordinate);
 
-    Node *gammaDman;
+    std :: unique_ptr< Node > gammaDman;
     IntArray gamma_ids;
 
     double factorial(int n);

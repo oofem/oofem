@@ -51,38 +51,26 @@ REGISTER_EngngModel(IncrementalLinearStatic);
 IncrementalLinearStatic :: IncrementalLinearStatic(int i, EngngModel *_master) : StructuralEngngModel(i, _master),
     loadVector(), internalLoadVector(), incrementOfDisplacementVector(), discreteTimes()
 {
-    stiffnessMatrix = NULL;
     ndomains = 1;
     endOfTimeOfInterest = 0;
-    nMethod = NULL;
 }
 
 
 IncrementalLinearStatic :: ~IncrementalLinearStatic()
-{
-    if ( stiffnessMatrix ) {
-        delete stiffnessMatrix;
-    }
-
-    if ( nMethod ) {
-        delete nMethod;
-    }
-}
+{}
 
 
 NumericalMethod *IncrementalLinearStatic :: giveNumericalMethod(MetaStep *mStep)
 
 {
-    if ( nMethod ) {
-        return nMethod;
+    if ( !nMethod ) {
+        nMethod.reset( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
+        if ( !nMethod ) {
+            OOFEM_ERROR("linear solver creation failed");
+        }
     }
 
-    nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
-    if ( nMethod == NULL ) {
-        OOFEM_ERROR("linear solver creation failed");
-    }
-
-    return nMethod;
+    return nMethod.get();
 }
 
 
@@ -227,12 +215,8 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Assembling stiffness matrix\n");
 #endif
-    if ( stiffnessMatrix ) {
-        delete stiffnessMatrix;
-    }
-
-    stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
-    if ( stiffnessMatrix == NULL ) {
+    stiffnessMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+    if ( !stiffnessMatrix ) {
         OOFEM_ERROR("sparse matrix creation failed");
     }
 

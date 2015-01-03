@@ -49,18 +49,12 @@ REGISTER_XfemManager(XfemStructureManager)
 
 XfemStructureManager :: XfemStructureManager(Domain *domain) :
     XfemManager(domain),
-    mSplitCracks(false)
-{
-    mpMatForceEvaluator = new  MaterialForceEvaluator();
-}
+    mSplitCracks(false),
+    mpMatForceEvaluator( new MaterialForceEvaluator() )
+{}
 
 XfemStructureManager :: ~XfemStructureManager()
-{
-    if(mpMatForceEvaluator != NULL) {
-        delete mpMatForceEvaluator;
-        mpMatForceEvaluator = NULL;
-    }
-}
+{}
 
 IRResultType XfemStructureManager :: initializeFrom(InputRecord *ir)
 {

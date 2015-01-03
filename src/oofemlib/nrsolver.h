@@ -45,6 +45,8 @@
 #include "floatarray.h"
 #include "linesearch.h"
 
+#include <memory>
+
 ///@name Input fields for NRSolver
 //@{
 #define _IFT_NRSolver_Name "nrsolver"
@@ -99,7 +101,7 @@ protected:
     int MANRMSteps;
 
     /// linear system solver
-    SparseLinearSystemNM *linSolver;
+    std :: unique_ptr< SparseLinearSystemNM > linSolver;
     /// linear system solver ID
     LinSystSolverType solverType;
     /// sparse matrix version, used to control constrains application to stiffness
@@ -129,7 +131,7 @@ protected:
     /// Flag indicating whether to use line-search
     bool lsFlag;
     /// Line search solver
-    LineSearchNM *linesearchSolver;
+    std :: unique_ptr< LineSearchNM > linesearchSolver;
     /// Flag indicating if the stiffness should be evaluated before the residual in the first iteration.
     bool mCalcStiffBeforeRes;
     /// Flag indicating whether to use constrained Newton

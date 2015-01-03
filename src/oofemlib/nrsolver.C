@@ -80,8 +80,6 @@ NRSolver :: NRSolver(Domain *d, EngngModel *m) :
     prescribedDofsFlag = false;
     prescribedEqsInitFlag = false;
     prescribedDisplacementTF = 0;
-    linSolver = NULL;
-    linesearchSolver = NULL;
     lsFlag = 0; // no line-search
     
     constrainedNRFlag = false; 
@@ -96,8 +94,6 @@ NRSolver :: NRSolver(Domain *d, EngngModel *m) :
 
 NRSolver :: ~NRSolver()
 {
-    delete linSolver;
-    delete linesearchSolver;
 }
 
 
@@ -358,29 +354,29 @@ NRSolver :: giveLinearSolver()
 {
     if ( linSolver ) {
         if ( linSolver->giveLinSystSolverType() == solverType ) {
-            return linSolver;
+            return linSolver.get();
         } else {
-            delete linSolver;
+            linSolver.reset(NULL);
         }
     }
 
-    linSolver = classFactory.createSparseLinSolver(solverType, domain, engngModel);
-    if ( linSolver == NULL ) {
+    linSolver.reset( classFactory.createSparseLinSolver(solverType, domain, engngModel) );
+    if ( !linSolver ) {
         OOFEM_ERROR("linear solver creation failed for type %d", solverType);
     }
 
-    return linSolver;
+    return linSolver.get();
 }
 
 
 LineSearchNM *
 NRSolver :: giveLineSearchSolver()
 {
-    if ( linesearchSolver == NULL ) {
-        linesearchSolver = new LineSearchNM(domain, engngModel);
+    if ( !linesearchSolver ) {
+        linesearchSolver.reset( new LineSearchNM(domain, engngModel) );
     }
 
-    return linesearchSolver;
+    return linesearchSolver.get();
 }
 
 void
