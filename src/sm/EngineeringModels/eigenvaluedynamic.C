@@ -163,7 +163,7 @@ void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep)
         massMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
         massMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
 
-        this->assemble( *stiffnessMatrix, tStep, StiffnessMatrix,
+        this->assemble( *stiffnessMatrix, tStep, TangentStiffnessMatrix,
                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
         this->assemble( *massMatrix, tStep, MassMatrix,
                        EModelDefaultEquationNumbering(), this->giveDomain(1) );

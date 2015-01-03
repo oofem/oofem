@@ -166,7 +166,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
             element->giveLocationArray(loc, dn);
             element->giveCharacteristicMatrix(charMtrx,  LumpedMassMatrix, tStep);
             // charMtrx.beLumpedOf(fullCharMtrx);
-            element->giveCharacteristicMatrix(charMtrx2, StiffnessMatrix, tStep);
+            element->giveCharacteristicMatrix(charMtrx2, TangentStiffnessMatrix, tStep);
 
             //
             // assemble it manually
@@ -284,7 +284,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
     for ( i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
         element->giveLocationArray(loc, dn);
-        element->giveCharacteristicMatrix(charMtrx, StiffnessMatrix, tStep);
+        element->giveCharacteristicMatrix(charMtrx, TangentStiffnessMatrix, tStep);
         n = loc.giveSize();
         for ( j = 1; j <= n; j++ ) {
             jj = loc.at(j);

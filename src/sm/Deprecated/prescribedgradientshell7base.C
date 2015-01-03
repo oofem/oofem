@@ -259,10 +259,10 @@ void PrescribedGenStrainShell7 :: computeTangent(FloatMatrix &tangent, EquationI
     Kfp->buildInternalStructure(rve, 1, eid, fnum, pnum);
     Kpf->buildInternalStructure(rve, 1, eid, pnum, fnum);
     Kpp->buildInternalStructure(rve, 1, eid, pnum);
-    rve->assemble(*Kff, tStep, eid, StiffnessMatrix, fnum, this->domain);
-    rve->assemble(*Kfp, tStep, eid, StiffnessMatrix, fnum, pnum, this->domain);
-    rve->assemble(*Kpf, tStep, eid, StiffnessMatrix, pnum, fnum, this->domain);
-    rve->assemble(*Kpp, tStep, eid, StiffnessMatrix, pnum, this->domain);
+    rve->assemble(*Kff, tStep, eid, TangentStiffnessMatrix, fnum, this->domain);
+    rve->assemble(*Kfp, tStep, eid, TangentStiffnessMatrix, fnum, pnum, this->domain);
+    rve->assemble(*Kpf, tStep, eid, TangentStiffnessMatrix, pnum, fnum, this->domain);
+    rve->assemble(*Kpp, tStep, eid, TangentStiffnessMatrix, pnum, this->domain);
 
     FloatMatrix C, X, Kpfa, KfpC, a;
 

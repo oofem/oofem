@@ -133,7 +133,7 @@ void Tr1BubbleStokes :: giveCharacteristicVector(FloatArray &answer, CharType mt
 void Tr1BubbleStokes :: giveCharacteristicMatrix(FloatMatrix &answer,
                                                  CharType mtrx, TimeStep *tStep)
 {
-    if ( mtrx == StiffnessMatrix || mtrx == TangentStiffnessMatrix ) {
+    if ( mtrx == TangentStiffnessMatrix ) {
         this->computeStiffnessMatrix(answer, TangentStiffness, tStep);
     } else {
         OOFEM_ERROR("Unknown Type of characteristic mtrx.");

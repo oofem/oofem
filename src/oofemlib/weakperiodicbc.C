@@ -425,7 +425,7 @@ void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Elem
 
 void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx &answer, TimeStep *tStep, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
-    if ( type != TangentStiffnessMatrix && type != StiffnessMatrix ) {
+    if ( type != TangentStiffnessMatrix ) {
         return;
     }
 

@@ -227,9 +227,9 @@ void PrescribedGradientBCPeriodic :: computeTangents(FloatMatrix &E, TimeStep *t
 
     Kff->buildInternalStructure(rve, 1, fnum);
     Kfp->buildInternalStructure(rve, 1, fnum);
-    rve->assemble(*Kff, tStep, StiffnessMatrix, fnum, this->domain);
-    rve->assemble(*Kfp, tStep, StiffnessMatrix, fnum, pnum, this->domain);
-    rve->assemble(*Kpp, tStep, StiffnessMatrix, fnum, pnum, this->domain);
+    rve->assemble(*Kff, tStep,TangentStiffnessMatrix, fnum, this->domain);
+    rve->assemble(*Kfp, tStep,TangentStiffnessMatrix, fnum, pnum, this->domain);
+    rve->assemble(*Kpp, tStep,TangentStiffnessMatrix, fnum, pnum, this->domain);
 
     int neq = Kfp->giveNumberOfRows();
     int nsd = this->domain->giveNumberOfSpatialDimensions();

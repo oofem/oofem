@@ -83,7 +83,7 @@ void Tr1Darcy :: computeGaussPoints()
     }
 }
 
-void Tr1Darcy :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
+void Tr1Darcy :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, TimeStep *tStep)
 {
     /*
      * Return Ke = integrate(B^T K B)
@@ -100,7 +100,7 @@ void Tr1Darcy :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
         ///@todo Should we make it return the transpose instead?
         double detJ = this->interpolation_lin.evaldNdx( BT, lcoords, FEIElementGeometryWrapper(this) );
 
-        mat->giveCharacteristicMatrix(K, TangentStiffness, gp, tStep);
+        mat->giveCharacteristicMatrix(K, mode, gp, tStep);
 
         B.beTranspositionOf(BT);
         KB.beProductOf(K, B);
@@ -244,8 +244,8 @@ void Tr1Darcy :: giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, Ti
     /*
      * Compute characteristic matrix for this element. The only option is the stiffness matrix...
      */
-    if ( mtrx == StiffnessMatrix || mtrx == ConductivityMatrix || mtrx == TangentStiffnessMatrix ) {
-        this->computeStiffnessMatrix(answer, tStep);
+    if ( mtrx == ConductivityMatrix || mtrx == TangentStiffnessMatrix ) {
+        this->computeStiffnessMatrix(answer, TangentStiffness, tStep);
     } else {
         OOFEM_ERROR("Unknown Type of characteristic mtrx %d", mtrx);
     }

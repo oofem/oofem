@@ -84,7 +84,7 @@ SUPGElement2 :: giveCharacteristicMatrix(FloatMatrix &answer,
 //
 {
 #if 0
-    if ( mtrx == StiffnessMatrix ) {
+    if ( mtrx == TangentStiffnessMatrix ) {
         // support for stokes solver
         IntArray vloc, ploc;
         FloatMatrix h;

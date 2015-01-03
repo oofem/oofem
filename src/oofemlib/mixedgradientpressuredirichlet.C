@@ -280,7 +280,7 @@ void MixedGradientPressureDirichlet :: computeTangents(FloatMatrix &Ed, FloatArr
         // Sets up RHS for all sensitivity problems;
         std :: unique_ptr< SparseMtrx > Kfp( classFactory.createSparseMtrx(stype) );
         Kfp->buildInternalStructure(rve, 1, fnum, pnum);
-        rve->assemble(*Kfp, tStep, StiffnessMatrix, fnum, pnum, this->domain);
+        rve->assemble(*Kfp, tStep,TangentStiffnessMatrix, fnum, pnum, this->domain);
 
         // Setup up indices and locations
         int neq = Kfp->giveNumberOfRows();
@@ -315,7 +315,7 @@ void MixedGradientPressureDirichlet :: computeTangents(FloatMatrix &Ed, FloatArr
             OOFEM_ERROR("MixedGradientPressureDirichlet :: computeTangents - Couldn't create sparse matrix of type %d\n", stype);
         }
         Kff->buildInternalStructure(rve, 1, fnum);
-        rve->assemble(*Kff, tStep, StiffnessMatrix, fnum, this->domain);
+        rve->assemble(*Kff, tStep,TangentStiffnessMatrix, fnum, this->domain);
         solver->solve(*Kff, rhs_p, s_p);
         solver->solve(*Kff, rhs_d, s_d);
     }
@@ -333,8 +333,8 @@ void MixedGradientPressureDirichlet :: computeTangents(FloatMatrix &Ed, FloatArr
         std :: unique_ptr< SparseMtrx > Kpp( classFactory.createSparseMtrx(stype) );
         Kpf->buildInternalStructure(rve, 1, pnum, fnum);
         Kpp->buildInternalStructure(rve, 1, pnum);
-        rve->assemble(*Kpf, tStep, StiffnessMatrix, pnum, fnum, this->domain);
-        rve->assemble(*Kpp, tStep, StiffnessMatrix, pnum, this->domain);
+        rve->assemble(*Kpf, tStep,TangentStiffnessMatrix, pnum, fnum, this->domain);
+        rve->assemble(*Kpp, tStep,TangentStiffnessMatrix, pnum, this->domain);
 
         FloatMatrix tmpMat;
         Kpp->times(ddev_pert, tmpMat);

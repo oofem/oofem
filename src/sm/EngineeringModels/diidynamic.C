@@ -316,7 +316,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
                                   + a5 * previousAccelerationVector.at(i)
                                   + a6 * previousIncrementOfDisplacement.at(i) );
         }
-        this->timesMtrx(help, rhs2, StiffnessMatrix, domain, tStep);
+        this->timesMtrx(help, rhs2, TangentStiffnessMatrix, domain, tStep);
         help.zero();
         for ( int i = 1; i <= neq; i++ ) {
             rhs.at(i) += rhs2.at(i);
@@ -393,7 +393,7 @@ DIIDynamic :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
         FloatMatrix charMtrx;
 
         element = domain->giveElement(num);
-        element->giveCharacteristicMatrix(answer, StiffnessMatrix, tStep);
+        element->giveCharacteristicMatrix(answer, TangentStiffnessMatrix, tStep);
         answer.times(1 + this->delta * a1);
 
         element->giveCharacteristicMatrix(charMtrx, MassMatrix, tStep);

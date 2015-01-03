@@ -181,7 +181,7 @@ void DarcyFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d
     case NonLinearLhs:
 
         this->stiffnessMatrix->zero();
-        this->assemble( *this->stiffnessMatrix, tStep, StiffnessMatrix,
+        this->assemble( *this->stiffnessMatrix, tStep, TangentStiffnessMatrix,
                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
         break;
 
