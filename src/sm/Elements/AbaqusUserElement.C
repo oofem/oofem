@@ -76,6 +76,8 @@ IRResultType AbaqusUserElement :: initializeFrom(InputRecord *ir)
 
     StructuralElement :: initializeFrom(ir);
 
+    this->numberOfDofMans = dofManArray.giveSize();
+
     // necessary to prevent an array dimension error in Init
     IR_GIVE_FIELD(ir, nCoords, _IFT_AbaqusUserElement_numcoords);
 
@@ -128,7 +130,6 @@ void AbaqusUserElement :: postInitialize()
 {
     NLStructuralElement :: postInitialize();
 
-    this->numberOfDofMans = this->dofManArray.giveSize();
     this->ndofel = this->numberOfDofMans * this->nCoords;
     this->mlvarx = this->ndofel;
     this->nrhs = 2;
