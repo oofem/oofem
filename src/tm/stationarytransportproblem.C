@@ -161,10 +161,8 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
         conductivityMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
         if ( this->keepTangent ) {
             this->conductivityMatrix->zero();
-            this->assemble( *conductivityMatrix, tStep, ConductivityMatrix,
-                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            this->assemble( *conductivityMatrix, tStep, LHSBCMatrix,
-                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assemble( *conductivityMatrix, tStep, TangentStiffnessMatrix,
+                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
     }
 
@@ -222,7 +220,6 @@ StationaryTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmp
         if ( !this->keepTangent ) {
             // Optimization for linear problems, we can keep the old matrix (which could save its factorization)
             this->conductivityMatrix->zero();
-            ///@todo We should use some problem-neutral names instead of "ConductivityMatrix" (and something nicer for LHSBCMatrix)
             this->assemble( *conductivityMatrix, tStep, TangentStiffnessMatrix,
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }

@@ -298,11 +298,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
         OOFEM_LOG_INFO("Assembling conductivity and capacity matrices\n");
 #endif
 
-        //Left hand side matrix due to convection
-        this->assemble( *conductivityMatrix, stepWhenIcApply.get(), LHSBCMatrix,
-                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
-        conductivityMatrix->times(alpha);
-        //Add contribution of alpha*K+C/dt
+        //Add contribution of alpha*K+C/dt (where K has contributions from conductivity and neumann b.c.s)
         this->assemble( *conductivityMatrix, stepWhenIcApply.get(), NSTP_MidpointLhs,
                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
     }
@@ -551,7 +547,7 @@ NonStationaryTransportProblem :: giveElementCharacteristicMatrix(FloatMatrix &an
         FloatMatrix charMtrx1, charMtrx2;
 
         element = domain->giveElement(num);
-        element->giveCharacteristicMatrix(answer, ConductivityMatrix, tStep);
+        element->giveCharacteristicMatrix(answer, TangentStiffnessMatrix, tStep);
         element->giveCharacteristicMatrix(charMtrx2, CapacityMatrix, tStep);
 
         if ( lumpedCapacityStab ) {
@@ -588,7 +584,7 @@ NonStationaryTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer
                                                               const UnknownNumberingScheme &s, TimeStep *tStep)
 {
     IntArray loc;
-    FloatMatrix charMtrx, bcMtrx;
+    FloatMatrix charMtrx;
     FloatArray unknownVec, contrib, intSource;
     Element *element;
 
@@ -607,12 +603,6 @@ NonStationaryTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer
         element->giveLocationArray(loc, s);
         //(alpha-1)*K+C/dt
         this->giveElementCharacteristicMatrix(charMtrx, i, NSTP_MidpointRhs, tStep, domain);
-        //contribution from previous boundary convection
-        element->giveCharacteristicMatrix(bcMtrx, LHSBCMatrix, tStep);
-        bcMtrx.times(this->alpha - 1.0);
-        if ( bcMtrx.isNotEmpty() ) {
-            charMtrx.add(bcMtrx);
-        }
 
         if ( charMtrx.isNotEmpty() ) {
             element->computeVectorOf(VM_Total, tStep, unknownVec);
@@ -702,14 +692,13 @@ NonStationaryTransportProblem :: assembleDirichletBcRhsVector(FloatArray &answer
                                                               const UnknownNumberingScheme &ns, Domain *d)
 {
     IntArray loc, dofids;
-    Element *element;
     FloatArray rp, charVec;
-    FloatMatrix s, bcMtrx;
+    FloatMatrix s;
 
     int nelem = d->giveNumberOfElements();
 
     for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-        element = d->giveElement(ielem);
+        Element *element = d->giveElement(ielem);
 
         element->giveElementDofIDMask(dofids);
         element->computeVectorOfPrescribed(dofids, mode, tStep, rp);
@@ -717,8 +706,6 @@ NonStationaryTransportProblem :: assembleDirichletBcRhsVector(FloatArray &answer
             continue;
         } else {
             this->giveElementCharacteristicMatrix(s, ielem, lhsType, tStep, d);
-            element->giveCharacteristicMatrix(bcMtrx, LHSBCMatrix, tStep);
-            s.add(bcMtrx);
             charVec.beProductOf(s, rp);
             charVec.negated();
 

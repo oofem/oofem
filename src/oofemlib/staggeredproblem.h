@@ -77,8 +77,6 @@ class Function;
  * the slaves are treated in so-called maintained mode. In this mode, the attributes and
  * meta step attributes are taken from the master. The local attributes, even if specified,
  * are ignored.
- *
- * @todo Move to oofemlib
  */
 class OOFEM_EXPORT StaggeredProblem : public EngngModel
 {
@@ -170,9 +168,6 @@ public:
     virtual void drawYourself(oofegGraphicContext &gc);
     virtual void drawElements(oofegGraphicContext &gc);
     virtual void drawNodes(oofegGraphicContext &gc);
-    /**
-     * Shows the sparse structure of required matrix, type == 1 stiffness.
-     */
     virtual void showSparseMtrxStructure(int type, oofegGraphicContext &gc, TimeStep *tStep) { }
 #endif
 
