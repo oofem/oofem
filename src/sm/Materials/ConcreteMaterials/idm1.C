@@ -1203,7 +1203,7 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
         }
 
         // compute and store the crack angle (just for postprocessing)
-        double ca = 3.1415926 / 2.;
+        double ca = M_PI / 2.;
         if ( crackPlaneNormal.at(1) != 0.0 ) {
             ca = atan( crackPlaneNormal.at(2) / crackPlaneNormal.at(1) );
         }

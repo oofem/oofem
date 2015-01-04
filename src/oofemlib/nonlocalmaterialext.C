@@ -407,7 +407,7 @@ NonlocalMaterialExtensionInterface :: computeWeightFunction(const FloatArray &sr
 double
 NonlocalMaterialExtensionInterface :: giveIntegralOfWeightFunction(const int spatial_dimension)
 {
-    const double pi = 3.1415926;
+    const double pi = M_PI;
     switch ( weightFun ) {
     case WFT_Bell:
         switch ( spatial_dimension ) {

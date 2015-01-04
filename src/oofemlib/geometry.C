@@ -659,8 +659,7 @@ void Circle :: computeNormalSignDist(double &oDist, const FloatArray &iPoint) co
 
 void Circle :: giveGlobalCoordinates(FloatArray &oGlobalCoord, const double &iArcPos) const
 {
-    const double pi = 3.14159265359;
-    double angle = 2.0*pi*iArcPos;
+    double angle = 2.0*M_PI*iArcPos;
 
     oGlobalCoord.resize(2);
     oGlobalCoord = { mVertices[0][0] + radius*cos(angle), mVertices[0][1] + radius*sin(angle) };

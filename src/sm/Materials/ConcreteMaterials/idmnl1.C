@@ -255,7 +255,7 @@ IDNLMaterial :: computeDistanceModifier(double damage)
 
     case 4: return 1. / pow(Rf / cl, damage);
 
-    case 5: return ( 2. * cl ) / ( cl + Rf + ( cl - Rf ) * cos(3.1415926 * damage) );
+    case 5: return ( 2. * cl ) / ( cl + Rf + ( cl - Rf ) * cos(M_PI * damage) );
 
     default: return 1.;
     }

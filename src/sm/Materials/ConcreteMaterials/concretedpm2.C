@@ -1711,7 +1711,7 @@ ConcreteDPM2 :: computeTempKappa(const double kappaInitial,
     equivalentDeltaPlasticStrain = sqrt( 1. / 9. * pow( ( sigTrial - sig ) / ( kM ), 2. ) +
                                          pow(rhoTrial / ( 2. * gM ), 2.) );
 
-    double thetaVertex = 3.141592653589793 / 3.;
+    double thetaVertex = M_PI / 3.;
     double ductilityMeasure = computeDuctilityMeasure(sig, rho, thetaVertex);
 
     return kappaInitial + equivalentDeltaPlasticStrain / ductilityMeasure;
@@ -2994,7 +2994,7 @@ ConcreteDPM2 :: computeTrialCoordinates(const StressVector &stress, double &sigN
         if ( sigNew >= 0 ) {
             thetaNew = 0.;
         } else {
-            thetaNew = 3.141592654 / 6;
+            thetaNew = M_PI / 6;
         }
     } else {
         StressVector deviatoricStress(matMode);

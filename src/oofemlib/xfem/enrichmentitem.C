@@ -388,7 +388,7 @@ void EnrichmentItem :: calcPolarCoord(double &oR, double &oTheta, const FloatArr
         q.times(1.0 / oR);
     }
 
-    const double pi = 3.14159265359;
+    const double pi = M_PI;
 
     //    if( q.dotProduct(iT) > 0.0 ) {
     //        oTheta = asin( q.dotProduct(iN) );
