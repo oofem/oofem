@@ -52,7 +52,7 @@ namespace oofem {
  * Under development.
  *
  * @author Erik Svenning
- * @date Mar 5, 2014
+ * @author Mikael Öhman
  */
 
 class OOFEM_EXPORT PrescribedGradientBC : public ActiveBoundaryCondition
@@ -76,6 +76,26 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual void scale(double s) { mGradient.times(s); }
+
+    /**
+     * Computes the homogenized, macroscopic, field (stress).
+     * @param sigma Output quantity (typically stress).
+     * @param tStep Active time step.
+     */
+    virtual void computeField(FloatArray &sigma, TimeStep *tStep) = 0;
+
+    /**
+     * Computes the macroscopic tangent for homogenization problems through sensitivity analysis.
+     * @param tangent Output tangent.
+     * @param tStep Active time step.
+     */
+    virtual void computeTangent(FloatMatrix &tangent, TimeStep *tStep) = 0;
+
+    /**
+     * Sets the new (symmetric) gradient.
+     * @param t New gradient in Voigt notation.
+     */
+    void setPrescribedGradientVoigt(const FloatArray &t);
 
     void giveGradientVoigt(FloatArray &oGradient) const;
 };

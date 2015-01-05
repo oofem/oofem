@@ -77,13 +77,8 @@ public:
     virtual const char *giveClassName() const { return "PrescribedGradientBCNeumann"; }
     virtual const char *giveInputRecordName() const { return _IFT_PrescribedGradientBCNeumann_Name; }
 
-    /**
-     * Computes the homogenized, macroscopic, field (stress).
-     * @param sigma Output quantity (typically stress).
-     * @param tStep Active time step.
-     */
-    void computeField(FloatArray &sigma, TimeStep *tStep);
-
+    virtual void computeField(FloatArray &sigma, TimeStep *tStep);
+    virtual void computeTangent(FloatMatrix &tangent, TimeStep *tStep);
 
     void giveStressLocationArray(IntArray &oCols, const UnknownNumberingScheme &r_s);
 protected:

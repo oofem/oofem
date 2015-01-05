@@ -216,6 +216,13 @@ void PrescribedGradientBCNeumann :: computeField(FloatArray &sigma, TimeStep *tS
     mpSigmaHom->giveUnknownVector(sigma, mSigmaIds, VM_Total, tStep);
 }
 
+
+void PrescribedGradientBCNeumann :: computeTangent(FloatMatrix &tangent, TimeStep *tStep)
+{
+    OOFEM_ERROR("Not implemented yet");
+}
+
+
 void PrescribedGradientBCNeumann :: giveStressLocationArray(IntArray &oCols, const UnknownNumberingScheme &r_s)
 {
     mpSigmaHom->giveCompleteLocationArray(oCols, r_s);

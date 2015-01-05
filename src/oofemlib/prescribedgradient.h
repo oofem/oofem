@@ -107,14 +107,14 @@ public:
      * @param sigma Output quantity (typically stress).
      * @param tStep Active time step.
      */
-    void computeField(FloatArray &sigma, TimeStep *tStep);
+    virtual void computeField(FloatArray &sigma, TimeStep *tStep);
 
     /**
      * Computes the macroscopic tangent for homogenization problems through sensitivity analysis.
      * @param tangent Output tangent.
      * @param tStep Active time step.
      */
-    void computeTangent(FloatMatrix &tangent, TimeStep *tStep);
+    virtual void computeTangent(FloatMatrix &tangent, TimeStep *tStep);
 
     virtual void scale(double s) { gradient.times(s); }
 

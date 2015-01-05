@@ -586,6 +586,11 @@ void PrescribedGradientBCWeak :: computeField(FloatArray &sigma, TimeStep *tStep
 #endif
 }
 
+void PrescribedGradientBCWeak :: computeTangent(FloatMatrix &tangent, TimeStep *tStep)
+{
+    OOFEM_ERROR("Not implemented yet");
+}
+
 void PrescribedGradientBCWeak :: giveTractionElNormal(size_t iElInd, FloatArray &oNormal, FloatArray &oTangent) const
 {
     const FloatArray &xS = mpTractionElements [ iElInd ]->mStartCoord;
