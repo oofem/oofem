@@ -862,7 +862,7 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
 
             Element *el = domain->giveElement(elInd);
 
-            if( strcmp(el->giveClassName(),"IntElLine1" ) == 0 )
+            if( strcmp(el->giveClassName(),"IntElLine1" ) == 0 || strcmp(el->giveClassName(),"IntElLine2" ) == 0 )
             {
                 intersecPoints.push_back(xS);
                 break;
@@ -880,7 +880,7 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
 
             Element *el = domain->giveElement(elInd);
 
-            if( strcmp(el->giveClassName(),"IntElLine1" ) == 0 )
+            if( strcmp(el->giveClassName(),"IntElLine1" ) == 0 || strcmp(el->giveClassName(),"IntElLine2" ) == 0 )
             {
                 intersecPoints.push_back(xE);
                 break;
