@@ -73,7 +73,7 @@ NM_Status PetscSolver :: solve(SparseMtrx &A, FloatArray &b, FloatArray &x)
     VecDuplicate(globRhsVec, & globSolVec);
 
     //VecView(globRhsVec,PETSC_VIEWER_STDOUT_WORLD);
-    NM_Status s = this->petsc_solve(Lhs, globRhsVec, globSolVec);
+    NM_Status s = this->petsc_solve(*Lhs, globRhsVec, globSolVec);
     //VecView(globSolVec,PETSC_VIEWER_STDOUT_WORLD);
 
     Lhs->scatterG2L(globSolVec, x);
@@ -111,7 +111,7 @@ PetscSolver :: petsc_solve(PetscSparseMtrx &Lhs, Vec b, Vec x)
      * Set operators. Here the matrix that defines the linear system
      * also serves as the preconditioning matrix.
      */
-    if ( Lhs->newValues ) { // Optimization for successive solves
+    if ( Lhs.newValues ) { // Optimization for successive solves
         ///@todo I'm not 100% on the choice MatStructure. SAME_NONZERO_PATTERN should be safe.
         if ( this->engngModel->requiresUnknownsDictionaryUpdate() ) {
 #if  PETSC_VERSION_MAJOR >= 3 && PETSC_VERSION_MINOR >= 5
