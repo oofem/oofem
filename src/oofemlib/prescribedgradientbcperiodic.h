@@ -86,8 +86,8 @@ public:
     virtual Dof *giveMasterDof(ActiveDof *dof, int mdof);
 
     virtual void computeDofTransformation(ActiveDof *dof, FloatArray &masterContribs);
-    virtual void computeFields(FloatArray &sigma, TimeStep *tStep);
-    virtual void computeTangents(FloatMatrix &E, TimeStep *tStep);
+    virtual void computeField(FloatArray &sigma, TimeStep *tStep);
+    virtual void computeTangent(FloatMatrix &E, TimeStep *tStep);
     double giveUnknown(double val, ValueModeType mode, TimeStep *tStep, ActiveDof *dof);
     virtual double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep, ActiveDof *dof);
     virtual double giveUnknown(ValueModeType mode, TimeStep *tStep, ActiveDof *dof);

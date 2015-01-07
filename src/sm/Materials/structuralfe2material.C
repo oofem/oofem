@@ -42,7 +42,7 @@
 #include "classfactory.h"
 #include "util.h"
 #include "contextioerr.h"
-#include "prescribedgradient.h"
+#include "prescribedgradientbc.h"
 
 #include <sstream>
 
@@ -149,9 +149,9 @@ StructuralFE2MaterialStatus :: createRVE(int n, GaussPoint *gp, const std :: str
 
     this->rve->letOutputBaseFileNameBe( name.str() );
 
-    this->bc = dynamic_cast< PrescribedGradient * >( this->rve->giveDomain(1)->giveBc(1) );
+    this->bc = dynamic_cast< PrescribedGradientBC * >( this->rve->giveDomain(1)->giveBc(1) );
     if ( !this->bc ) {
-        OOFEM_ERROR("RVE doesn't have necessary boundary condition; should have a type of PrescribedGradient as first b.c.");
+        OOFEM_ERROR("RVE doesn't have necessary boundary condition; should have a type of PrescribedGradientBC as first b.c.");
     }
 
     return true;

@@ -34,7 +34,7 @@
 
 #include "xfem/listbasedei.h"
 #include "xfemmanager.h"
-
+#include "domain.h"
 #include "classfactory.h"
 
 #include <string>
@@ -44,13 +44,10 @@ namespace oofem {
 
 ListBasedEI :: ListBasedEI(int n, XfemManager *xm, Domain *aDomain) :
     EnrichmentItem(n, xm, aDomain)
-{
-    // TODO Auto-generated constructor stub
-}
+{}
 
-ListBasedEI :: ~ListBasedEI() {
-    // TODO Auto-generated destructor stub
-}
+ListBasedEI :: ~ListBasedEI()
+{}
 
 void ListBasedEI :: updateGeometry()
 {
@@ -74,8 +71,8 @@ void ListBasedEI :: updateNodeEnrMarker(XfemManager &ixFemMan)
 
     //printf("\n The following nodes are enriched ");
     // Loop over nodes in the DofManList and mark nodes as enriched.
-    for ( int i = 0; i < int ( dofManList.size() ); i++ ) {
-        mNodeEnrMarkerMap [ dofManList [ i ] ] = NodeEnr_BULK;
+    for ( auto &dman : dofManList ) {
+        mNodeEnrMarkerMap [ dman ] = NodeEnr_BULK;
         //  printf(" %i", dofList [ i ]);
     }
 

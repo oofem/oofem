@@ -42,6 +42,7 @@
 #include <vector>
 #include <petscksp.h>
 #include <petscvec.h>
+#include <petscmat.h>
 
 namespace oofem {
 REGISTER_SparseMtrx(PetscSparseMtrx, SMT_PetscMtrx);
@@ -270,7 +271,7 @@ void
 PetscSparseMtrx :: add(double x, SparseMtrx &m)
 {
     PetscSparseMtrx *M = dynamic_cast< PetscSparseMtrx * >( &m );
-    MatAXPY(this->giveMtrx(), x, M->giveMtrx(), SAME_NONZERO_PATTERN);
+    MatAXPY(*this->giveMtrx(), x, *M->giveMtrx(), SAME_NONZERO_PATTERN);
 }
 
 

@@ -195,7 +195,7 @@ Dof *PrescribedGradientBCPeriodic :: giveMasterDof(ActiveDof *dof, int mdof)
 }
 
 
-void PrescribedGradientBCPeriodic :: computeFields(FloatArray &sigma, TimeStep *tStep)
+void PrescribedGradientBCPeriodic :: computeField(FloatArray &sigma, TimeStep *tStep)
 {
     EngngModel *emodel = this->giveDomain()->giveEngngModel();
     FloatArray tmp;
@@ -213,7 +213,7 @@ void PrescribedGradientBCPeriodic :: computeFields(FloatArray &sigma, TimeStep *
 }
 
 
-void PrescribedGradientBCPeriodic :: computeTangents(FloatMatrix &E, TimeStep *tStep)
+void PrescribedGradientBCPeriodic :: computeTangent(FloatMatrix &E, TimeStep *tStep)
 {
     EModelDefaultEquationNumbering fnum;
     EModelDefaultPrescribedEquationNumbering pnum;
