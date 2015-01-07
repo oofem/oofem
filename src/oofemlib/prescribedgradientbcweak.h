@@ -35,7 +35,8 @@
 #ifndef PRESCRIBEDGRADIENTBCWEAK_H_
 #define PRESCRIBEDGRADIENTBCWEAK_H_
 
-#include "prescribedgradientbc.h"
+#include "prescribedgradienthomogenization.h"
+#include "activebc.h"
 #include "geometry.h"
 
 #include <unordered_map>
@@ -79,7 +80,7 @@ public:
  * @author Erik Svenning
  * @date April 17, 2014
  */
-class PrescribedGradientBCWeak : public PrescribedGradientBC
+class PrescribedGradientBCWeak : public ActiveBoundaryCondition, public PrescribedGradientHomogenization
 {
 public:
     PrescribedGradientBCWeak(int n, Domain *d);
@@ -224,8 +225,6 @@ protected:
 
     void giveTractionUnknows(FloatArray &oTracUnknowns, ValueModeType mode, TimeStep *tStep, int iTracElInd);
     void giveDisplacementUnknows(FloatArray &oDispUnknowns, ValueModeType mode, TimeStep *tStep, int iTracElInd);
-
-    double domainSize();
 
     bool pointIsOnGammaPlus(const FloatArray &iPos) const;
     void giveMirroredPointOnGammaMinus(FloatArray &oPosMinus, const FloatArray &iPosPlus) const;

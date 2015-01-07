@@ -35,7 +35,8 @@
 #ifndef PRESCRIBEDGRADIENTBCNEUMANN_H_
 #define PRESCRIBEDGRADIENTBCNEUMANN_H_
 
-#include "prescribedgradientbc.h"
+#include "prescribedgradienthomogenization.h"
+#include "activebc.h"
 
 #include <memory>
 
@@ -51,7 +52,7 @@ class Element;
  * @author Erik Svenning
  * @date Mar 5, 2014
  */
-class OOFEM_EXPORT PrescribedGradientBCNeumann : public PrescribedGradientBC
+class OOFEM_EXPORT PrescribedGradientBCNeumann : public ActiveBoundaryCondition, public PrescribedGradientHomogenization
 {
 public:
     PrescribedGradientBCNeumann(int n, Domain *d);
@@ -59,6 +60,9 @@ public:
 
     virtual int giveNumberOfInternalDofManagers() { return 1; }
     virtual DofManager *giveInternalDofManager(int i);
+
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual bcType giveType() const { return UnknownBT; }
 
@@ -81,6 +85,7 @@ public:
     virtual void computeTangent(FloatMatrix &tangent, TimeStep *tStep);
 
     void giveStressLocationArray(IntArray &oCols, const UnknownNumberingScheme &r_s);
+
 protected:
     /// DOF-manager containing the unknown homogenized stress.
     std :: unique_ptr< Node > mpSigmaHom;

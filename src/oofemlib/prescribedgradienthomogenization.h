@@ -32,87 +32,99 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef prescribedgradient_h
-#define prescribedgradient_h
+#ifndef prescribedgradienthomogenization_h
+#define prescribedgradienthomogenization_h
 
-#include "prescribedgradienthomogenization.h"
-#include "boundarycondition.h"
-#include "dof.h"
-#include "bctype.h"
-#include "valuemodetype.h"
+#include "inputrecord.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 
-///@name Input fields for PrescribedTensor
+///@name Input fields for PrescribedGradientHomogenization
 //@{
-#define _IFT_PrescribedGradient_Name "prescribedgradient"
+#define _IFT_PrescribedGradientHomogenization_Name "prescribedgradient"
+#define _IFT_PrescribedGradientHomogenization_centercoords "ccoord"
+#define _IFT_PrescribedGradientHomogenization_gradient "gradient"
 //@}
 
 namespace oofem {
+class TimeStep;
+class DynamicInputRecord;
+class Domain;
+
 /**
- * Prescribes @f$ v_i = d_{ij}(x_j-\bar{x}_j) @f$ or @f$ s = d_{1j}(x_j - \bar{x}_j) @f$
- * where @f$ v_i @f$ are primary unknowns for the subscale.
- * This is typical boundary condition in multiscale analysis where @f$ d = \partial_x s@f$
- * would a macroscopic gradient at the integration point, i.e. this is a boundary condition for prolongation.
- * It is also convenient to use when one wants to test a arbitrary specimen for shear.
+ * Class for homogenization of applied gradients.
+ * This is typically applied to a boundary condition in multiscale analysis where @f$ d = \partial_x s@f$
+ * 
  * @author Mikael Öhman
- * @author Erik Svenning
  */
-class OOFEM_EXPORT PrescribedGradient : public BoundaryCondition, public PrescribedGradientHomogenization
+class OOFEM_EXPORT PrescribedGradientHomogenization
 {
+protected:
+    /// Prescribed gradient @f$ d_{ij} @f$
+    FloatMatrix mGradient;
+
+    /// Center coordinate @f$ \bar{x}_i @f$
+    FloatArray mCenterCoord;
+
+    virtual double domainSize(Domain *d, int set);
+
 public:
-    /**
-     * Creates boundary condition with given number, belonging to given domain.
-     * @param n Boundary condition number.
-     * @param d Domain to which new object will belongs.
-     */
-    PrescribedGradient(int n, Domain *d) : BoundaryCondition(n, d) { }
-
-    /// Destructor
-    virtual ~PrescribedGradient() { }
-
-    virtual double give(Dof *dof, ValueModeType mode, double time);
-
-    virtual bcType giveType() const { return DirichletBT; }
+    PrescribedGradientHomogenization() { }
+    virtual ~PrescribedGradientHomogenization() { }
 
     /**
      * Initializes receiver according to object description stored in input record.
      * The input record contains two fields;
      * - gradient \#rows \#columns { d_11 d_12 ... ; d_21 ... } (required)
      * - cCoords \#columns x_1 x_2 ... (optional, default 0)
-     * The prescribed tensor's columns must be equal to the size of the center coordinates.
+     * The prescribed gradients columns must be equal to the size of the center coordinates.
      * The size of the center coordinates must be equal to the size of the coordinates in the applied nodes.
      */
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     /**
-     * Constructs a coefficient matrix for all prescribed unknowns.
-     * Helper routine for computational homogenization.
-     * @todo Perhaps this routine should only give results for the dof it prescribes?
-     * @param C Coefficient matrix to fill.
-     */
-    void updateCoefficientMatrix(FloatMatrix &C);
-
-    /**
      * Computes the homogenized, macroscopic, field (stress).
      * @param sigma Output quantity (typically stress).
      * @param tStep Active time step.
      */
-    virtual void computeField(FloatArray &sigma, TimeStep *tStep);
+    virtual void computeField(FloatArray &sigma, TimeStep *tStep) = 0;
 
     /**
      * Computes the macroscopic tangent for homogenization problems through sensitivity analysis.
      * @param tangent Output tangent.
      * @param tStep Active time step.
      */
-    virtual void computeTangent(FloatMatrix &tangent, TimeStep *tStep);
+    virtual void computeTangent(FloatMatrix &tangent, TimeStep *tStep) = 0;
 
-    virtual void scale(double s) { mGradient.times(s); }
+    /**
+     * Set prescribed gradient.
+     * @param t New prescribed gradient.
+     */
+    void setPrescribedGradient(const FloatMatrix &t) { mGradient = t; }
 
-    virtual const char *giveClassName() const { return "PrescribedGradient"; }
-    virtual const char *giveInputRecordName() const { return _IFT_PrescribedGradient_Name; }
+    /**
+     * Sets the prescribed gradient from the matrix from given voigt notation.
+     * Assumes use of double values for off-diagonal, usually the way for strain in Voigt form.
+     * @param t Vector in voigt format.
+     */
+    void setPrescribedGradientVoigt(const FloatArray &t);
+    /**
+     * Gives back the applied gradient in Voigt form.
+     * @param oGradient The applied gradient, in Voigt form.
+     */
+    void giveGradientVoigt(FloatArray &oGradient) const;
+
+    /**
+     * Set the center coordinate for the prescribed values to be set for.
+     * @param x Center coordinate.
+     */
+    void setCenterCoordinate(FloatArray &x) { mCenterCoord = x; }
+    /// Returns the center coordinate
+    FloatArray &giveCenterCoordinate() { return mCenterCoord; }
+
+    virtual const char *giveClassName() const = 0;
 };
 } // end namespace oofem
 
-#endif // prescribedgradient_h
+#endif // prescribedgradienthomogenization_h

@@ -48,7 +48,7 @@
 
 namespace oofem {
 class EngngModel;
-class PrescribedGradientBC;
+class PrescribedGradientHomogenization;
 
 class StructuralFE2MaterialStatus : public StructuralMaterialStatus
 {
@@ -56,7 +56,7 @@ protected:
     /// The RVE
     std :: unique_ptr< EngngModel > rve;
     /// Boundary condition in RVE that performs the computational homogenization.
-    PrescribedGradientBC *bc;
+    PrescribedGradientHomogenization *bc;
 
     FloatMatrix tangent;
     bool oldTangent;
@@ -66,7 +66,7 @@ public:
     virtual ~StructuralFE2MaterialStatus() {}
 
     EngngModel *giveRVE() { return this->rve.get(); }
-    PrescribedGradientBC *giveBC() { return this->bc; }
+    PrescribedGradientHomogenization *giveBC() { return this->bc; }
 
     void markOldTangent();
     void computeTangent(TimeStep *tStep);

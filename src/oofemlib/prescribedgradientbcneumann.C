@@ -25,7 +25,8 @@ namespace oofem {
 REGISTER_BoundaryCondition(PrescribedGradientBCNeumann);
 
 PrescribedGradientBCNeumann :: PrescribedGradientBCNeumann(int n, Domain *d) :
-    PrescribedGradientBC(n, d),
+    ActiveBoundaryCondition(n, d),
+    PrescribedGradientHomogenization(),
     mpSigmaHom( new Node(0, d) )
 {
     int nsd = d->giveNumberOfSpatialDimensions();
@@ -57,13 +58,30 @@ PrescribedGradientBCNeumann :: ~PrescribedGradientBCNeumann()
 {
 }
 
+
+IRResultType PrescribedGradientBCNeumann :: initializeFrom(InputRecord *ir)
+{
+    ActiveBoundaryCondition :: initializeFrom(ir);
+    return PrescribedGradientHomogenization :: initializeFrom(ir);
+}
+
+
+void PrescribedGradientBCNeumann :: giveInputRecord(DynamicInputRecord &input)
+{
+    ActiveBoundaryCondition :: giveInputRecord(input);
+    PrescribedGradientHomogenization :: giveInputRecord(input);
+}
+
+
 DofManager *PrescribedGradientBCNeumann :: giveInternalDofManager(int i)
 {
     return mpSigmaHom.get();
 }
 
 void PrescribedGradientBCNeumann :: scale(double s)
-{}
+{
+    this->mGradient.times(s);
+}
 
 void PrescribedGradientBCNeumann :: assembleVector(FloatArray &answer, TimeStep *tStep,
                                                    CharType type, ValueModeType mode,
@@ -78,7 +96,7 @@ void PrescribedGradientBCNeumann :: assembleVector(FloatArray &answer, TimeStep 
 
     if ( type == ExternalForcesVector ) {
         // The external forces have two contributions. On the additional equations for sigma, the load is simply the prescribed gradient.
-        double rve_size = this->domainSize();
+        double rve_size = this->domainSize(this->giveDomain(), this->giveSetNumber());
         FloatArray stressLoad;
         FloatArray gradVoigt;
         giveGradientVoigt(gradVoigt);

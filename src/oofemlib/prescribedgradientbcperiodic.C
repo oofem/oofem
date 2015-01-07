@@ -223,13 +223,14 @@ void PrescribedGradientBCPeriodic :: computeTangent(FloatMatrix &E, TimeStep *tS
     SparseMtrxType stype = solver->giveRecommendedMatrix(true);
     std :: unique_ptr< SparseMtrx > Kff( classFactory.createSparseMtrx( stype ) );
     std :: unique_ptr< SparseMtrx > Kfp( classFactory.createSparseMtrx( stype ) );
-    std :: unique_ptr< SparseMtrx > Kpp( classFactory.createSparseMtrx(stype) );
+    std :: unique_ptr< SparseMtrx > Kpp( classFactory.createSparseMtrx( stype ) );
 
-    Kff->buildInternalStructure(rve, 1, fnum);
-    Kfp->buildInternalStructure(rve, 1, fnum);
-    rve->assemble(*Kff, tStep,TangentStiffnessMatrix, fnum, this->domain);
-    rve->assemble(*Kfp, tStep,TangentStiffnessMatrix, fnum, pnum, this->domain);
-    rve->assemble(*Kpp, tStep,TangentStiffnessMatrix, fnum, pnum, this->domain);
+    Kff->buildInternalStructure(rve, this->domain->giveNumber(), fnum);
+    Kfp->buildInternalStructure(rve, this->domain->giveNumber(), fnum, pnum);
+    Kpp->buildInternalStructure(rve, this->domain->giveNumber(), pnum);
+    rve->assemble(*Kff, tStep, TangentStiffnessMatrix, fnum, this->domain);
+    rve->assemble(*Kfp, tStep, TangentStiffnessMatrix, fnum, pnum, this->domain);
+    rve->assemble(*Kpp, tStep, TangentStiffnessMatrix, pnum, this->domain);
 
     int neq = Kfp->giveNumberOfRows();
     int nsd = this->domain->giveNumberOfSpatialDimensions();

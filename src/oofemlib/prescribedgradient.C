@@ -61,7 +61,7 @@ double PrescribedGradient :: give(Dof *dof, ValueModeType mode, double time)
     DofIDItem id = dof->giveDofID();
     FloatArray *coords = dof->giveDofManager()->giveCoordinates();
 
-    if ( coords->giveSize() != this->centerCoord.giveSize() ) {
+    if ( coords->giveSize() != this->mCenterCoord.giveSize() ) {
         OOFEM_ERROR("Size of coordinate system different from center coordinate in b.c.");
     }
 
@@ -77,12 +77,13 @@ double PrescribedGradient :: give(Dof *dof, ValueModeType mode, double time)
     }
     // Reminder: u_i = d_ij . (x_j - xb_j) = d_ij . dx_j
     FloatArray dx;
-    dx.beDifferenceOf(* coords, this->centerCoord);
+    dx.beDifferenceOf(* coords, this->mCenterCoord);
 
     FloatArray u;
-    u.beProductOf(gradient, dx);
+    u.beProductOf(mGradient, dx);
     u.times( factor );
 
+    ///@todo Use the user-specified dofs here instead:
     switch ( id ) {
     case D_u:
     case V_u:
@@ -103,27 +104,6 @@ double PrescribedGradient :: give(Dof *dof, ValueModeType mode, double time)
     }
 }
 
-void PrescribedGradient :: setPrescribedGradientVoigt(const FloatArray &t)
-{
-    int n = t.giveSize();
-    if ( n == 3 ) { // Then 2D
-        this->gradient.resize(2, 2);
-        this->gradient.at(1, 1) = t.at(1);
-        this->gradient.at(2, 2) = t.at(2);
-        this->gradient.at(1, 2) = this->gradient.at(2, 1) = t.at(3);
-    } else if ( n == 6 ) { // Then 3D
-        this->gradient.resize(3, 3);
-        this->gradient.at(1, 1) = t.at(1);
-        this->gradient.at(2, 2) = t.at(2);
-        this->gradient.at(3, 3) = t.at(3);
-        // In voigt form, assuming the use of gamma_12 instead of eps_12
-        this->gradient.at(1, 2) = this->gradient.at(2, 1) = t.at(6) * 0.5;
-        this->gradient.at(1, 3) = this->gradient.at(3, 1) = t.at(5) * 0.5;
-        this->gradient.at(2, 3) = this->gradient.at(3, 2) = t.at(4) * 0.5;
-    } else {
-        OOFEM_ERROR("Tensor is in strange voigt format. Should be 3 or 6. Use setPrescribedTensor directly if needed.");
-    }
-}
 
 void PrescribedGradient :: updateCoefficientMatrix(FloatMatrix &C)
 // This is written in a very general way, supporting both fm and sm problems.
@@ -171,7 +151,6 @@ void PrescribedGradient :: updateCoefficientMatrix(FloatMatrix &C)
                 C.at(k2, 3) = coords->at(1) - xbar;
             }
         } else { // nsd == 3
-            OOFEM_ERROR("3D Not tested yet!");
             Dof *d3 = n->giveDofWithID( this->dofs(2) );
             int k3 = d3->__givePrescribedEquationNumber();
 
@@ -195,24 +174,6 @@ void PrescribedGradient :: updateCoefficientMatrix(FloatMatrix &C)
 }
 
 
-double PrescribedGradient :: domainSize()
-{
-    int nsd = this->domain->giveNumberOfSpatialDimensions();
-    double domain_size = 0.0;
-    // This requires the boundary to be consistent and ordered correctly.
-    Set *set = this->giveDomain()->giveSet(this->set);
-    const IntArray &boundaries = set->giveBoundaryList();
-
-    for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
-        Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
-        int boundary = boundaries.at(pos * 2);
-        FEInterpolation *fei = e->giveInterpolation();
-        domain_size += fei->evalNXIntegral( boundary, FEIElementGeometryWrapper(e) );
-    }
-    return fabs(domain_size / nsd);
-}
-
-
 void PrescribedGradient :: computeField(FloatArray &sigma, TimeStep *tStep)
 {
     EngngModel *emodel = this->domain->giveEngngModel();
@@ -231,7 +192,7 @@ void PrescribedGradient :: computeField(FloatArray &sigma, TimeStep *tStep)
     FloatMatrix C;
     this->updateCoefficientMatrix(C);
     sigma.beTProductOf(C, R_c);
-    sigma.times( 1. / this->domainSize() );
+    sigma.times( 1. / this->domainSize(this->giveDomain(), this->giveSetNumber()) );
 }
 
 
@@ -279,30 +240,20 @@ void PrescribedGradient :: computeTangent(FloatMatrix &tangent, TimeStep *tStep)
     Kpf->times(a, Kpfa);
     X.subtract(Kpfa);
     tangent.beTProductOf(C, X);
-    tangent.times( 1. / this->domainSize() );
+    tangent.times( 1. / this->domainSize(this->giveDomain(), this->giveSetNumber()) );
 }
 
 
 IRResultType PrescribedGradient :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
     GeneralBoundaryCondition :: initializeFrom(ir);
-
-    IR_GIVE_FIELD(ir, this->gradient, _IFT_PrescribedGradient_gradient);
-
-    this->centerCoord.resize( this->gradient.giveNumberOfColumns() );
-    this->centerCoord.zero();
-    IR_GIVE_OPTIONAL_FIELD(ir, this->centerCoord, _IFT_PrescribedGradient_centercoords)
-
-    return IRRT_OK;
+    return PrescribedGradientHomogenization :: initializeFrom(ir);
 }
 
 
 void PrescribedGradient :: giveInputRecord(DynamicInputRecord &input)
 {
-    BoundaryCondition :: giveInputRecord(input);
-    input.setField(this->gradient, _IFT_PrescribedGradient_gradient);
-    input.setField(this->centerCoord, _IFT_PrescribedGradient_centercoords);
+    GeneralBoundaryCondition :: giveInputRecord(input);
+    return PrescribedGradientHomogenization :: giveInputRecord(input);
 }
 } // end namespace oofem

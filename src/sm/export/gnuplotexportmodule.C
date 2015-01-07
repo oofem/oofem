@@ -430,7 +430,7 @@ void GnuplotExportModule::outputXFEMGeometry(const std::vector< std::vector<Floa
     WritePointsToGnuplot(nameCracks, iEnrItemPoints);
 }
 
-void GnuplotExportModule::outputBoundaryCondition(PrescribedGradient &iBC, TimeStep *tStep)
+void GnuplotExportModule :: outputBoundaryCondition(PrescribedGradient &iBC, TimeStep *tStep)
 {
     FloatArray stress;
     iBC.computeField(stress, tStep);
@@ -458,6 +458,9 @@ void GnuplotExportModule::outputBoundaryCondition(PrescribedGradient &iBC, TimeS
 
     XFEMDebugTools::WriteArrayToGnuplot(nameMeanStress, componentArray, stressArray);
 
+    FloatArray grad;
+    iBC.giveGradientVoigt(grad);
+    outputGradient(iBC.giveNumber(), *iBC.giveDomain(), grad, tStep);
 }
 
 void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCNeumann &iBC, TimeStep *tStep)
@@ -489,8 +492,10 @@ void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCNeumann &i
     XFEMDebugTools::WriteArrayToGnuplot(nameMeanStress, componentArray, stressArray);
 
     // Homogenized strain
-    outputGradient(iBC, ts);
-
+    
+    FloatArray grad;
+    iBC.giveGradientVoigt(grad);
+    outputGradient(iBC.giveNumber(), *iBC.giveDomain(), grad, tStep);
 }
 
 void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCWeak &iBC, TimeStep *tStep)
@@ -523,7 +528,10 @@ void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCWeak &iBC,
 
 
     // Homogenized strain
-    outputGradient(iBC, ts);
+    FloatArray grad;
+    iBC.giveGradientVoigt(grad);
+    outputGradient(iBC.giveNumber(), *iBC.giveDomain(), grad, tStep);
+
 #if 0
     FloatArray grad;
     iBC.giveGradientVoigt(grad);
@@ -715,14 +723,10 @@ void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCWeak &iBC,
     }
 }
 
-void GnuplotExportModule::outputGradient(PrescribedGradientBC &iBC, TimeStep *tStep)
+void GnuplotExportModule::outputGradient(int bc, Domain &d, FloatArray &grad, TimeStep *tStep)
 {
-    int bcIndex = iBC.giveNumber();
-
     // Homogenized strain
-    FloatArray grad;
-    iBC.giveGradientVoigt(grad);
-    double timeFactor = iBC.giveTimeFunction()->evaluateAtTime(tStep->giveTargetTime());
+    double timeFactor = d.giveBc(bc)->giveTimeFunction()->evaluateAtTime(tStep->giveTargetTime());
     printf("timeFactor: %e\n", timeFactor );
     grad.times(timeFactor);
     printf("Mean grad computed in Gnuplot export module: "); grad.printYourself();
@@ -731,7 +735,7 @@ void GnuplotExportModule::outputGradient(PrescribedGradientBC &iBC, TimeStep *tS
 
 
     std :: stringstream strMeanGrad;
-    strMeanGrad << "PrescribedGradientGnuplotMeanGrad" << bcIndex << "Time" << time << ".dat";
+    strMeanGrad << "PrescribedGradientGnuplotMeanGrad" << bc << "Time" << time << ".dat";
     std :: string nameMeanGrad = strMeanGrad.str();
     std::vector<double> componentArrayGrad, gradArray;
 

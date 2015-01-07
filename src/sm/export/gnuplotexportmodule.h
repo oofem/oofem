@@ -113,7 +113,7 @@ public:
     /**
      * Help functions
      */
-    void outputGradient(PrescribedGradientBC &iBC, TimeStep *tStep);
+    void outputGradient(int bc, Domain &d, FloatArray &grad, TimeStep *tStep);
 
     /**
      * Mesh output

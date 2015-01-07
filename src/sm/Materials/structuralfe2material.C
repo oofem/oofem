@@ -42,7 +42,8 @@
 #include "classfactory.h"
 #include "util.h"
 #include "contextioerr.h"
-#include "prescribedgradientbc.h"
+#include "generalboundarycondition.h"
+#include "prescribedgradienthomogenization.h"
 
 #include <sstream>
 
@@ -87,6 +88,7 @@ void
 StructuralFE2Material :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
                                  const FloatArray &totalStrain, TimeStep *tStep)
 {
+    FloatArray ans9;
     StructuralFE2MaterialStatus *ms = static_cast< StructuralFE2MaterialStatus * >( this->giveStatus(gp) );
 
     ms->setTimeStep(tStep);
@@ -95,7 +97,12 @@ StructuralFE2Material :: giveRealStressVector_3d(FloatArray &answer, GaussPoint 
     // Solve subscale problem
     ms->giveRVE()->solveYourselfAt(tStep);
     // Post-process the stress
-    ms->giveBC()->computeField(answer, tStep);
+    ms->giveBC()->computeField(ans9, tStep);
+    ans9.printYourself();
+    answer = ans9;
+    //answer = {ans9[0], ans9[1], ans9[2], 0.5*(ans9[3]+ans9[6]), 0.5*(ans9[4]+ans9[7]), 0.5*(ans9[5]+ans9[8])};
+    totalStrain.printYourself("total strain input");
+    ans9.printYourself("total stress output");
     // Update the material status variables
     ms->letStressVectorBe(answer);
     ms->letStrainVectorBe(totalStrain);
@@ -106,10 +113,45 @@ StructuralFE2Material :: giveRealStressVector_3d(FloatArray &answer, GaussPoint 
 void
 StructuralFE2Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
- 
     StructuralFE2MaterialStatus *ms = static_cast< StructuralFE2MaterialStatus * >( this->giveStatus(gp) );
     ms->computeTangent(tStep);
-    answer = ms->giveTangent();
+    const FloatMatrix &ans9 = ms->giveTangent();
+
+    answer.resize(6, 6);
+    for ( int i = 0; i < 6; ++i ) {
+        for ( int j = 0; j < 6; ++j ) {
+            answer(i, j) = ans9(i, j);
+        }
+    }
+#if 1
+    // Numerical ATS for debugging
+    FloatMatrix numericalATS(6, 6);
+    FloatArray dsig;
+    FloatArray tempStrain(6);
+
+    tempStrain.zero();
+    FloatArray sig, strain, sigPert;
+    giveRealStressVector_3d(sig, gp, tempStrain, tStep);
+    double h = 0.001; // Linear problem, size of this doesn't matter.
+    for ( int k = 1; k <= 6; ++k ) {
+        strain = tempStrain;
+        strain.at(k) += h;
+        giveRealStressVector_3d(sigPert, gp, strain, tStep);
+        dsig.beDifferenceOf(sigPert, sig);
+        numericalATS.setColumn(dsig, k);
+    }
+    numericalATS.times(1. / h);
+
+    printf("Analytical deviatoric tangent = ");
+    answer.printYourself();
+    printf("Numerical deviatoric tangent = ");
+    numericalATS.printYourself();
+    numericalATS.subtract(answer);
+    double norm = numericalATS.computeFrobeniusNorm();
+    if ( norm > answer.computeFrobeniusNorm() * 1e-3 && norm > 0.0 ) {
+        OOFEM_ERROR("Error in deviatoric tangent");
+    }
+#endif
 }
 
 
@@ -149,9 +191,9 @@ StructuralFE2MaterialStatus :: createRVE(int n, GaussPoint *gp, const std :: str
 
     this->rve->letOutputBaseFileNameBe( name.str() );
 
-    this->bc = dynamic_cast< PrescribedGradientBC * >( this->rve->giveDomain(1)->giveBc(1) );
+    this->bc = dynamic_cast< PrescribedGradientHomogenization * >( this->rve->giveDomain(1)->giveBc(1) );
     if ( !this->bc ) {
-        OOFEM_ERROR("RVE doesn't have necessary boundary condition; should have a type of PrescribedGradientBC as first b.c.");
+        OOFEM_ERROR("RVE doesn't have necessary boundary condition; should have a type of PrescribedGradientHomogenization as first b.c.");
     }
 
     return true;
