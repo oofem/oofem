@@ -78,6 +78,9 @@ public:
     /// Destructor.
     virtual ~ContactDefinition();
 
+    ContactDefinition(const ContactDefinition& src) = delete;
+    ContactDefinition &operator = (const ContactDefinition &src) = delete;
+
     virtual void createContactDofs();
 
     virtual IRResultType initializeFrom(InputRecord *ir){ return IRRT_OK; };
