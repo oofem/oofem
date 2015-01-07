@@ -63,6 +63,9 @@ public:
     DynamicDataReader();
     virtual ~DynamicDataReader();
 
+    DynamicDataReader(const DynamicDataReader& src) = delete;
+    DynamicDataReader &operator = (const DynamicDataReader &src) = delete;
+
     /**
      * Main purpose of this class it the possibility to add new input records in code.
      * The input records can be any implementation, but the intended use would be together with the DynamicInputRecord class.
