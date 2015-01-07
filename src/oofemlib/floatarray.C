@@ -82,7 +82,7 @@ double &
 FloatArray :: operator() (int i)
 {
     if ( i >= this->giveSize() ) {
-        OOFEM_ERROR("array error on index : %d <= 0", i);
+        OOFEM_ERROR("array error on index : %d >= %d", i, this->giveSize());
     }
     return values [ i ];
 }
@@ -91,7 +91,7 @@ const double &
 FloatArray :: operator() (int i) const
 {
     if ( i >= this->giveSize() ) {
-        OOFEM_ERROR("array error on index : %d <= 0", i);
+        OOFEM_ERROR("array error on index : %d >= %d", i, this->giveSize());
     }
     return values [ i ];
 }
@@ -99,7 +99,7 @@ double &
 FloatArray :: operator[] (int i)
 {
     if ( i >= this->giveSize() ) {
-        OOFEM_ERROR("array error on index : %d <= 0", i);
+        OOFEM_ERROR("array error on index : %d >= %d", i, this->giveSize());
     }
     return values [ i ];
 }
@@ -108,7 +108,7 @@ const double &
 FloatArray :: operator[] (int i) const
 {
     if ( i >= this->giveSize() ) {
-        OOFEM_ERROR("array error on index : %d <= 0", i);
+        OOFEM_ERROR("array error on index : %d >= %d", i, this->giveSize());
     }
     return values [ i ];
 }
