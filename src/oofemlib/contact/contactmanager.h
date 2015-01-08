@@ -77,7 +77,9 @@ public:
     /// Destructor.
     virtual ~ContactManager();
 
-    
+    ContactManager(const ContactManager& src) = delete;
+    ContactManager &operator = (const ContactManager &src) = delete;
+
     void createContactDofs();
     
     /// Initializes receiver according to object description stored in input record.
