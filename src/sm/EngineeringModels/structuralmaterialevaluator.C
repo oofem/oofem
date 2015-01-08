@@ -68,6 +68,11 @@ IRResultType StructuralMaterialEvaluator :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, this->cmpntFunctions, _IFT_StructuralMaterialEvaluator_componentFunctions);
     IR_GIVE_FIELD(ir, this->sControl, _IFT_StructuralMaterialEvaluator_stressControl);
 
+    if ( this->sControl.giveSize() > 0 ) {
+        tolerance = 1.0;
+        IR_GIVE_FIELD(ir, this->tolerance, _IFT_StructuralMaterialEvaluator_tolerance);
+    }
+
     IR_GIVE_FIELD(ir, this->vars, _IFT_StructuralMaterialEvaluator_outputVariables);
 
     // Compute the strain control (everything not controlled by stress)
@@ -93,7 +98,7 @@ void StructuralMaterialEvaluator :: solveYourself()
         std :: unique_ptr< GaussPoint > gp(new GaussPoint(nullptr, i, nullptr, 1, mode));
         gps.emplace_back( std :: move(gp) );
         // Initialize the strain vector;
-        StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( d->giveMaterial(i)->giveStatus( &*gps[i-1] ) );
+        StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( d->giveMaterial(i)->giveStatus( gps[i-1].get() ) );
         status->letStrainVectorBe(initialStrain);
     }
 
@@ -106,7 +111,6 @@ void StructuralMaterialEvaluator :: solveYourself()
 
     // Note, strain == strain-rate (kept as strain for brevity)
     int maxiter = 100; // User input?
-    double tolerance = 1.e-6; // Needs to be normalized somehow, or user input
     FloatArray stressC, deltaStrain, strain, stress, res;
     stressC.resize( sControl.giveSize() );
     res.resize( sControl.giveSize() );
@@ -115,7 +119,7 @@ void StructuralMaterialEvaluator :: solveYourself()
     for ( int istep = 1; istep <= this->numberOfSteps; ++istep ) {
         this->timer.startTimer(EngngModelTimer :: EMTT_SolutionStepTimer);
         for ( int imat = 1; imat <= d->giveNumberOfMaterialModels(); ++imat ) {
-            GaussPoint *gp = &*gps[imat-1];
+            GaussPoint *gp = gps[imat-1].get();
             StructuralMaterial *mat = static_cast< StructuralMaterial * >( d->giveMaterial(imat) );
             StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) );
 
@@ -138,7 +142,7 @@ void StructuralMaterialEvaluator :: solveYourself()
                 }
 
                 OOFEM_LOG_RELEVANT( "Time step: %d, Material %d, Iteration: %d,  Residual = %e\n", istep, imat, iter, res.computeNorm() );
-                if ( res.computeNorm() <= tolerance ) { ///@todo More flexible control of convergence needed. Something relative?
+                if ( res.computeNorm() <= tolerance ) {
                     break;
                 }
 
@@ -200,10 +204,9 @@ void StructuralMaterialEvaluator :: doStepOutput(TimeStep *tStep)
 
     outfile << tStep->giveIntrinsicTime();
     for ( int i = 1; i <= d->giveNumberOfMaterialModels(); i++ ) {
-        GaussPoint *gp = &*gps[i-1];
         Material *mat = d->giveMaterial(i);
         for ( int var : this->vars ) {
-            mat->giveIPValue(outputValue, gp, ( InternalStateType ) var, tStep);
+            mat->giveIPValue(outputValue, gps[i-1].get(), ( InternalStateType ) var, tStep);
             outfile << " " << outputValue;
         }
     }

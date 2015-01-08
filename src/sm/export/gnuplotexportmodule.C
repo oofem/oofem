@@ -51,7 +51,6 @@
 #include "../sm/Materials/InterfaceMaterials/structuralinterfacematerialstatus.h"
 #include "xfem/XFEMDebugTools.h"
 #include "prescribedgradient.h"
-#include "prescribedgradientbc.h"
 #include "prescribedgradientbcneumann.h"
 #include "prescribedgradientbcweak.h"
 #include "gausspoint.h"

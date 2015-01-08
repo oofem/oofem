@@ -47,6 +47,7 @@
 #define _IFT_StructuralMaterialEvaluator_componentFunctions "componentfunctions" ///< Integer list of time functions for each component
 #define _IFT_StructuralMaterialEvaluator_stressControl "stresscontrol" ///< Integer list of the stress components which are controlled
 #define _IFT_StructuralMaterialEvaluator_outputVariables "vars" ///< Variables (from integration point) to be written.
+#define _IFT_StructuralMaterialEvaluator_tolerance "tolerance" ///< Tolerance for stress control
 //@}
 
 namespace oofem {
@@ -71,6 +72,8 @@ protected:
     std::vector< std :: unique_ptr< GaussPoint > >gps;
 
     std :: ofstream outfile;
+
+    double tolerance;
 
 public:
     StructuralMaterialEvaluator(int i, EngngModel * _master = NULL);

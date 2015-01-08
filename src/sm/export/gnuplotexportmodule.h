@@ -81,7 +81,8 @@ class MaterialForceEvaluator;
  *
  * Created on: Jan 29, 2014
  */
-class OOFEM_EXPORT GnuplotExportModule : public ExportModule {
+class OOFEM_EXPORT GnuplotExportModule : public ExportModule
+{
 public:
     GnuplotExportModule(int n, EngngModel *e);
     virtual ~GnuplotExportModule();
@@ -91,7 +92,7 @@ public:
     virtual void initialize();
     virtual void terminate();
 
-    virtual const char *giveClassName() const { return "GnuplotExportModule"; };
+    virtual const char *giveClassName() const { return "GnuplotExportModule"; }
     virtual const char *giveInputRecordName() const { return _IFT_GnuplotExportModule_Name; }
 
     /**

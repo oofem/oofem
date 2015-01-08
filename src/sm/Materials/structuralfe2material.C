@@ -98,14 +98,10 @@ StructuralFE2Material :: giveRealStressVector_3d(FloatArray &answer, GaussPoint 
     ms->giveRVE()->solveYourselfAt(tStep);
     // Post-process the stress
     ms->giveBC()->computeField(ans9, tStep);
-    ans9.printYourself();
-    answer = ans9;
-    //answer = {ans9[0], ans9[1], ans9[2], 0.5*(ans9[3]+ans9[6]), 0.5*(ans9[4]+ans9[7]), 0.5*(ans9[5]+ans9[8])};
-    totalStrain.printYourself("total strain input");
-    ans9.printYourself("total stress output");
+    answer = {ans9[0], ans9[1], ans9[2], 0.5*(ans9[3]+ans9[6]), 0.5*(ans9[4]+ans9[7]), 0.5*(ans9[5]+ans9[8])};
     // Update the material status variables
-    ms->letStressVectorBe(answer);
-    ms->letStrainVectorBe(totalStrain);
+    ms->letTempStressVectorBe(answer);
+    ms->letTempStrainVectorBe(totalStrain);
     ms->markOldTangent(); // Mark this so that tangent is reevaluated if they are needed.
 }
 
@@ -117,13 +113,31 @@ StructuralFE2Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatR
     ms->computeTangent(tStep);
     const FloatMatrix &ans9 = ms->giveTangent();
 
+    // Compute the (minor) symmetrized tangent:
     answer.resize(6, 6);
     for ( int i = 0; i < 6; ++i ) {
         for ( int j = 0; j < 6; ++j ) {
             answer(i, j) = ans9(i, j);
         }
     }
-#if 1
+    for ( int i = 0; i < 6; ++i ) {
+        for ( int j = 6; j < 9; ++j ) {
+            answer(i, j-3) += ans9(i, j);
+            answer(j-3, i) += ans9(j, i);
+        }
+    }
+    for ( int i = 6; i < 9; ++i ) {
+        for ( int j = 6; j < 9; ++j ) {
+             answer(j-3, i-3) += ans9(j, i);
+         }
+    }
+    for ( int i = 0; i < 6; ++i ) {
+        for ( int j = 3; j < 6; ++j ) {
+             answer(j, i) *= 0.5;
+             answer(i, j) *= 0.5;
+        }
+    }
+#if 0
     // Numerical ATS for debugging
     FloatMatrix numericalATS(6, 6);
     FloatArray dsig;

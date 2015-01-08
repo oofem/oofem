@@ -243,7 +243,6 @@ set (core_bc
     boundarycondition.C
     prescribedgradienthomogenization.C
     prescribedgradient.C
-    prescribedgradientbc.C
     prescribedgradientbcneumann.C
     prescribedgradientbcweak.C
     prescribedgradientbcweakperiodic.C

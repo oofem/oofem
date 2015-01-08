@@ -84,24 +84,8 @@ double PrescribedGradient :: give(Dof *dof, ValueModeType mode, double time)
     u.times( factor );
 
     ///@todo Use the user-specified dofs here instead:
-    switch ( id ) {
-    case D_u:
-    case V_u:
-    case P_f:
-    case T_f:
-        return u.at(1);
-
-    case D_v:
-    case V_v:
-        return u.at(2);
-
-    case D_w:
-    case V_w:
-        return u.at(3);
-
-    default:
-        return 0.0;
-    }
+    int pos = this->dofs.findFirstIndexOf(id);
+    return u.at(pos);
 }
 
 
@@ -112,20 +96,16 @@ void PrescribedGradient :: updateCoefficientMatrix(FloatMatrix &C)
 // C = [x 0 0 y]
 //     [0 y x 0]
 //     [ ... ] in 2D, voigt form [d_11, d_22, d_12 d_21]
-// C = [x 0 0 y z 0]
-//     [0 y 0 x 0 z]
-//     [0 0 z 0 x y]
-//     [ ......... ] in 3D, voigt form [d_11, d_22, d_33, d_23, d_13, d_12]
+// C = [x 0 0 0 z y 0 0 0]
+//     [0 y 0 z 0 0 0 0 x]
+//     [0 0 z 0 0 0 y x 0]
+//     [ ............... ] in 3D, voigt form [d_11, d_22, d_33, d_23, d_13, d_12, d_32, d_31, d_21]
 {
     Domain *domain = this->giveDomain();
 
     int nsd = domain->giveNumberOfSpatialDimensions();
     int npeq = domain->giveEngngModel()->giveNumberOfDomainEquations( domain->giveNumber(), EModelDefaultPrescribedEquationNumbering() );
-    if ( nsd == 2 ) {
-        C.resize(npeq, 4);
-    } else {
-        C.resize(npeq, nsd * ( nsd + 1 ) / 2);
-    }
+    C.resize(npeq, nsd * nsd);
     C.zero();
 
     FloatArray &cCoords = this->giveCenterCoordinate();
@@ -156,18 +136,18 @@ void PrescribedGradient :: updateCoefficientMatrix(FloatMatrix &C)
 
             if ( k1 ) {
                 C.at(k1, 1) = coords->at(1) - xbar;
-                C.at(k1, 4) = coords->at(2) - ybar;
+                C.at(k1, 6) = coords->at(2) - ybar;
                 C.at(k1, 5) = coords->at(3) - zbar;
             }
             if ( k2 ) {
                 C.at(k2, 2) = coords->at(2) - ybar;
-                C.at(k2, 4) = coords->at(1) - xbar;
-                C.at(k2, 6) = coords->at(3) - zbar;
+                C.at(k2, 9) = coords->at(1) - xbar;
+                C.at(k2, 4) = coords->at(3) - zbar;
             }
             if ( k3 ) {
                 C.at(k3, 3) = coords->at(3) - zbar;
-                C.at(k3, 5) = coords->at(1) - xbar;
-                C.at(k3, 6) = coords->at(2) - ybar;
+                C.at(k3, 8) = coords->at(1) - xbar;
+                C.at(k3, 7) = coords->at(2) - ybar;
             }
         }
     }

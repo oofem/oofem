@@ -36,7 +36,8 @@
 #ifndef prescribedgradientperiodic_h_
 #define prescribedgradientperiodic_h_
 
-#include "prescribedgradientbc.h"
+#include "prescribedgradienthomogenization.h"
+#include "activebc.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 
@@ -56,7 +57,7 @@ class Node;
  *
  * @author Mikael Öhman
  */
-class OOFEM_EXPORT PrescribedGradientBCPeriodic : public PrescribedGradientBC
+class OOFEM_EXPORT PrescribedGradientBCPeriodic : public ActiveBoundaryCondition, public PrescribedGradientHomogenization
 {
 protected:
     std :: unique_ptr< Node > strain;
@@ -67,9 +68,10 @@ protected:
     
     int masterSet;
 
+    /**
+     * This is the central support function, which finds the corresponding slave nodes for each master node.
+     */
     void findSlaveToMasterMap();
-
-    virtual double domainSize();
 
 public:
     PrescribedGradientBCPeriodic(int n, Domain *d);
