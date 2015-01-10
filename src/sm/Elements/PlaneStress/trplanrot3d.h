@@ -72,13 +72,11 @@ protected:
      * Transformation Matrix form GtoL(3,3) is stored
      * at the element level for computation efficiency
      */
-    FloatMatrix *GtoLRotationMatrix;
+    FloatMatrix GtoLRotationMatrix;
 
 public:
     TrPlaneStrRot3d(int n, Domain * d);
-    virtual ~TrPlaneStrRot3d() {
-        delete GtoLRotationMatrix;
-    }
+    virtual ~TrPlaneStrRot3d() { }
 
 protected:
     void giveLocalCoordinates(FloatArray &answer, FloatArray &global);

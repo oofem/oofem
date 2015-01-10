@@ -37,6 +37,8 @@
 
 #include "xfem/xfemmanager.h"
 
+#include <memory>
+
 ///@name Input fields for XfemManager
 //@{
 #define _IFT_XfemStructureManager_Name "xfemstructuremanager"
@@ -47,7 +49,7 @@ namespace oofem {
 
 class MaterialForceEvaluator;
 
-/*
+/**
  * XfemStructureManager: XFEM manager with extra functionality
  * specific for the sm module.
  *
@@ -85,7 +87,7 @@ protected:
     /**
      * Evaluator for material forces.
      */
-    MaterialForceEvaluator *mpMatForceEvaluator;
+    std :: unique_ptr< MaterialForceEvaluator > mpMatForceEvaluator;
 };
 } /* namespace oofem */
 

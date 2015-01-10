@@ -156,6 +156,7 @@ public:
      * @return New weight based on stress-based averaging.
      */
     double computeStressBasedWeight(double &nx, double &ny, double &ratio, GaussPoint *gp, GaussPoint *jGp, double weight);
+    double computeStressBasedWeightForPeriodicCell(double &nx, double &ny, double &ratio, GaussPoint *gp, GaussPoint *jGp);
 
     void computeLocalEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
     { IsotropicDamageMaterial1 :: computeEquivalentStrain(kappa, strain, gp, tStep); }

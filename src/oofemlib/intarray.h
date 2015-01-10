@@ -241,18 +241,16 @@ public:
      * The size of receiver is changed accordingly.
      * @param value value to insert.
      * @param allocChunk If reallocation needed, an additional space for allocChunk values will be allocated.
-     * @return Index of inserted (or existing) value.
      */
-    int insertSorted(int value, int allocChunk = 0);
+    void insertSorted(int value, int allocChunk = 0);
     /**
      * Inserts given value into a receiver, which is assumed to be sorted.
      * The value is inserted only if it does not exist.
      * The size of receiver is changed accordingly.
      * @param value Value to insert.
      * @param allocChunk If reallocation needed, an additional space for allocChunk values will be allocated.
-     * @return Index of inserted (or existing) value.
      */
-    int insertSortedOnce(int value, int allocChunk = 0);
+	void insertSortedOnce(int value, int allocChunk = 0);
     /**
      * Erase the element of given value.
      * If the value is found receiver will shrink accordingly,

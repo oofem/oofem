@@ -48,7 +48,7 @@ class Domain;
  * @author Erik Svenning
  * @date Sep 9, 2014
  */
-class GeometryBasedEI : public EnrichmentItem
+class OOFEM_EXPORT GeometryBasedEI : public EnrichmentItem
 {
 public:
     GeometryBasedEI(int n, XfemManager *xm, Domain *aDomain);
@@ -91,10 +91,10 @@ public:
 
     virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius);
 
-    BasicGeometry *giveGeometry() { return mpBasicGeometry; }
+    BasicGeometry *giveGeometry() { return mpBasicGeometry.get(); }
 
 protected:
-    BasicGeometry *mpBasicGeometry;
+    std :: unique_ptr< BasicGeometry > mpBasicGeometry;
 };
 } /* namespace oofem */
 

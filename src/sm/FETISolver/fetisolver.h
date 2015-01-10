@@ -110,7 +110,7 @@ public:
      * @param x Solution array
      * @return NM_Status value
      */
-    virtual NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
+    virtual NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x);
 
     int estimateMaxPackSize(IntArray &, DataStream &, int &);
     /// Sets up the communication maps

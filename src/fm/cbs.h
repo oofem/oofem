@@ -120,12 +120,12 @@ class CBS : public FluidModel
 {
 protected:
     /// Numerical method used to solve the problem.
-    SparseLinearSystemNM *nMethod;
+    std :: unique_ptr< SparseLinearSystemNM > nMethod;
 
     LinSystSolverType solverType;
     SparseMtrxType sparseMtrxType;
 
-    SparseMtrx *lhs;
+    std :: unique_ptr< SparseMtrx > lhs;
     /// Pressure field.
     PrimaryField PressureField;
     /// Velocity field.
@@ -137,7 +137,7 @@ protected:
     /// Lumped mass matrix.
     FloatArray mm;
     /// Sparse consistent mass.
-    SparseMtrx *mss;
+    std :: unique_ptr< SparseMtrx > mss;
 
     /// Time step and its minimal value.
     double deltaT, minDeltaT;
@@ -165,7 +165,7 @@ protected:
 
     //<RESTRICTED_SECTION>
     // material interface representation for multicomponent flows
-    MaterialInterface *materialInterface;
+    std :: unique_ptr< MaterialInterface > materialInterface;
     //</RESTRICTED_SECTION>
 public:
     CBS(int i, EngngModel * _master = NULL);

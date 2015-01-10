@@ -155,10 +155,6 @@ void MacroLSpace :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode 
 //assign values to DOF on the boundary according to definition on macrolspace and actual displacement stage
 void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
 {
-    //Domain *microDomain = problemMicro->giveDomain(1);
-    //EngngModel *microEngngModel = microDomain->giveEngngModel();
-    //Domain *domain = this->giveDomain();
-    DofManager *DofMan;
     GeneralBoundaryCondition *GeneralBoundaryCond;
     Function *timeFunct;
     DynamicInputRecord ir_func, ir_bc;
@@ -196,8 +192,7 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
     microDomain->resizeBoundaryConditions( 3 * microBoundaryNodes.giveSize() ); //from domain.C
 
     counter = 1;
-    for ( int i = 1; i <= microDomain->giveNumberOfDofManagers(); i++ ) { //go through all nodes on microDomain
-        DofMan = microDomain->giveDofManager(i);
+    for ( auto &DofMan : microDomain->giveDofManagers() ) { //go through all nodes on microDomain
         if ( microBoundaryNodes.contains( DofMan->giveGlobalNumber() ) ) { //if the node number is on boundary
             this->evalInterpolation( n, microMaterial->microMasterCoords, * DofMan->giveCoordinates() );
             //n.printYourself();

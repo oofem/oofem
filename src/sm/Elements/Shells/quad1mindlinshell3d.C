@@ -423,7 +423,7 @@ Quad1MindlinShell3D :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tS
         mass += this->computeVolumeAround(gp) * this->giveStructuralCrossSection()->give('d', gp);
     }
 
-    answer.resize(12, 12);
+    answer.resize(24, 24);
     answer.zero();
     for ( int i = 0; i < 4; i++ ) {
         answer(i * 6 + 0, i * 6 + 0) = mass * 0.25;

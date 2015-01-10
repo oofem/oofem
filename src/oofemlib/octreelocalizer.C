@@ -212,7 +212,7 @@ void OctantRec :: printYourself()
 {
     if ( this->isTerminalOctant() ) {
         std :: cout << " center = {" << this->origin.at(1) << "," << this->origin.at(2) << "," << this->origin.at(3)
-                    << "} size = " << ( this->halfWidth * 2. ) << " nodes = " << this->nodeList.size() << " elem_ips = " << this->elementIPList.size();
+                    << "} size = " << ( this->halfWidth * 2. ) << " nodes = " << this->nodeList.size() << " elem_ips = " << this->elementIPList.size() << "\n";
     } else {
         if ( this->depth == 0 ) {
             printf("*ROOTCELL*");
@@ -247,9 +247,7 @@ OctreeSpatialLocalizer :: OctreeSpatialLocalizer(Domain* d) : SpatialLocalizer(d
 
 OctreeSpatialLocalizer :: ~OctreeSpatialLocalizer()
 {
-    if ( rootCell ) {
-        delete rootCell;
-    }
+    delete rootCell;
 }
 
 
@@ -542,8 +540,8 @@ OctreeSpatialLocalizer :: insertNodeIntoOctree(OctantRec *rootCell, int nodeNum,
         currCell->divideLocally(1, this->octreeMask);
         // propagate all nodes already assigned to currCell to children
         for ( int inod: cellNodeList ) {
-            DofManager *dman = domain->giveDofManager(inod);
-            FloatArray *nodeCoords = static_cast< Node * >(dman)->giveCoordinates();
+            Node *node = domain->giveNode(inod);
+            FloatArray *nodeCoords = node->giveCoordinates();
             this->insertNodeIntoOctree(currCell, inod, * nodeCoords);
         }
 
@@ -564,9 +562,10 @@ OctreeSpatialLocalizer :: insertNodeIntoOctree(OctantRec *rootCell, int nodeNum,
         if ( result != OctantRec :: CS_ChildFound ) {
             OOFEM_ERROR("internal error - octree inconsistency");
         }
+        this->insertNodeIntoOctree(currCell, nodeNum, coords);
+    } else {
+        currCell->addNode(nodeNum);
     }
-
-    currCell->addNode(nodeNum);
 }
 
 
@@ -1487,17 +1486,15 @@ OctreeSpatialLocalizer :: giveAllNodesWithinBox(nodeContainerType &nodeSet, cons
 
 
 Node *
-OctreeSpatialLocalizer :: giveNodeClosestToPoint(const FloatArray &gcoords)
+OctreeSpatialLocalizer :: giveNodeClosestToPoint(const FloatArray &gcoords, double maxDist)
 {
     Node *answer = NULL;
     std :: list< OctantRec * >cellList;
     OctantRec *currCell;
     double radius, prevRadius;
-    FloatArray c = this->rootCell->giveOrigin();
 
     // Maximum distance given coordinate and furthest terminal cell ( center_distance + width/2*sqrt(3) )
-    double minDist = c.distance(gcoords) + this->rootCell->giveWidth() * 0.87;
-
+    double minDist = maxDist;
 
     // found terminal octant containing point
     currCell = this->findTerminalContaining(rootCell, gcoords);
@@ -1505,15 +1502,15 @@ OctreeSpatialLocalizer :: giveNodeClosestToPoint(const FloatArray &gcoords)
     // Look in center, then expand.
     this->giveNodeClosestToPointWithinOctant(currCell, gcoords, minDist, answer);
     prevRadius = 0.;
-    radius = currCell->giveWidth();
-    while ( radius < minDist ) {
+    radius = min(currCell->giveWidth(), minDist);
+    do {
         this->giveListOfTerminalCellsInBoundingBox(cellList, gcoords, radius, prevRadius, this->rootCell);
         for ( OctantRec *cell: cellList ) {
             this->giveNodeClosestToPointWithinOctant(cell, gcoords, minDist, answer);
         }
         prevRadius = radius;
         radius *= 2.; // Keep expanding the scope until the radius is larger than the entire root cell, then give up (because we have checked every possible cell)
-    }
+    } while ( prevRadius < minDist );
     return answer;
 }
 
@@ -1522,17 +1519,18 @@ void
 OctreeSpatialLocalizer :: giveNodeClosestToPointWithinOctant(OctantRec *currCell, const FloatArray &gcoords,
                                                                 double &minDist, Node * &answer)
 {
-    for ( auto &dman : this->giveDomain()->giveDofManagers() ) {
-        if ( dman->giveParallelMode() == DofManager_remote ) {
-            continue;
-        }
+    double minDist2 = minDist*minDist;
+    for ( auto &inod : currCell->giveNodeList() ) {
+        Node *node = domain->giveNode(inod);
 
-        double currDist = gcoords.distance(*dman->giveCoordinates());
-        if ( currDist < minDist ) {
-            answer = dynamic_cast< Node* >( dman.get() );
-            minDist = currDist;
+        double currDist2 = gcoords.distance_square(*node->giveCoordinates());
+
+        if ( currDist2 < minDist2 ) {
+            answer = node;
+            minDist2 = currDist2;
         }
     }
+    minDist = sqrt(minDist2);
 }
 
 
@@ -1603,9 +1601,9 @@ OctreeSpatialLocalizer :: giveListOfTerminalCellsInBoundingBox(std :: list< Octa
     BBStatus = currentCell->testBoundingBox(coords, radius);
     if ( BBStatus != OctantRec :: BBS_OutsideCell ) {
         if ( currentCell->isTerminalOctant() ) {
-            if ( currentCell->testBoundingBox(coords, innerRadius) == OctantRec :: BBS_OutsideCell ) {
+            //if ( currentCell->testBoundingBox(coords, innerRadius) == OctantRec :: BBS_OutsideCell ) {
                 cellList.push_back(currentCell);
-            }
+            //}
         } else {
             for ( int i = 0; i <= octreeMask.at(1); i++ ) {
                 for ( int j = 0; j <= octreeMask.at(2); j++ ) {

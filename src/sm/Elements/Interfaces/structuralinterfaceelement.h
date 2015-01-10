@@ -79,10 +79,11 @@ class StructuralInterfaceElement : public Element
 {
 protected:
     /// Initial displacement vector, describes the initial nodal displacements when element has been casted.
-    FloatArray *initialDisplacements;
+    FloatArray initialDisplacements;
     FEInterpolation *interpolation;
     /// Flag indicating if geometrical nonlinearities apply.
     int nlGeometry;
+
 public:
     /**
      * Constructor. Creates structural element with given number, belonging to given domain.

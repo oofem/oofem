@@ -102,7 +102,7 @@ protected:
      * Note: Try to avoid using the dictionary because of a very slow access. Use rather separate variables to
      * store material parameters.
      */
-    Dictionary *propertyDictionary;
+    Dictionary propertyDictionary;
 
     /**
      * Casting time. For solution time less than casting time the material

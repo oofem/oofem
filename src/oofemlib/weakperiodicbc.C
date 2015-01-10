@@ -55,17 +55,15 @@
 namespace oofem {
 REGISTER_BoundaryCondition(WeakPeriodicBoundaryCondition);
 
-WeakPeriodicBoundaryCondition :: WeakPeriodicBoundaryCondition(int n, Domain *d) : ActiveBoundaryCondition(n, d)
+WeakPeriodicBoundaryCondition :: WeakPeriodicBoundaryCondition(int n, Domain *d) : ActiveBoundaryCondition(n, d),
+    gammaDman( new Node(0, this->domain) )
 {
     useBasisType = monomial;
     doUpdateSminmax = true;
-    gammaDman = NULL;
 }
 
 WeakPeriodicBoundaryCondition :: ~WeakPeriodicBoundaryCondition()
-{
-    delete gammaDman;
-}
+{}
 
 IRResultType
 WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
@@ -125,12 +123,11 @@ WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
 
     // Create dofs for coefficients
     bcID = this->giveNumber();
-    gammaDman = new Node(0, this->domain);
     gamma_ids.clear();
     for ( int i = 0; i < ndof; i++ ) {
         int dofid = this->domain->giveNextFreeDofID();
         gamma_ids.followedBy(dofid);
-        gammaDman->appendDof( new MasterDof( gammaDman, ( DofIDItem )dofid ) );
+        gammaDman->appendDof( new MasterDof( gammaDman.get(), ( DofIDItem )dofid ) );
     }
 
     //computeOrthogonalBasis();
@@ -426,9 +423,9 @@ void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Elem
     }
 }
 
-void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tStep, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
+void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx &answer, TimeStep *tStep, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
-    if ( type != TangentStiffnessMatrix && type != StiffnessMatrix ) {
+    if ( type != TangentStiffnessMatrix ) {
         return;
     }
 
@@ -487,8 +484,8 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tSt
 
             BT.beTranspositionOf(B);
 
-            answer->assemble(r_sideLoc, c_loc, B);
-            answer->assemble(r_loc, c_sideLoc, BT);
+            answer.assemble(r_sideLoc, c_loc, B);
+            answer.assemble(r_loc, c_sideLoc, BT);
         }
     }
 
@@ -635,7 +632,7 @@ int WeakPeriodicBoundaryCondition :: giveNumberOfInternalDofManagers()
 DofManager *WeakPeriodicBoundaryCondition :: giveInternalDofManager(int i)
 {
     if ( i == 1 ) {
-        return gammaDman;
+        return gammaDman.get();
     } else {
         return NULL;
     }

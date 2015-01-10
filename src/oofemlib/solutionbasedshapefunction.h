@@ -40,7 +40,6 @@
 #include "floatarray.h"
 
 #define _IFT_SolutionbasedShapeFunction_Name "solutionbasedshapefunction"
-#define _IFT_SolutionbasedShapeFunction_Set "set"
 #define _IFT_SolutionbasedShapeFunction_ShapeFunctionFile "shapefunctionfile"
 #define _IFT_SolutionbasedShapeFunction_Externalset "externalset"
 #define _IFT_SolutionbasedShapeFunction_UseCorrectionFactors "usecorrectionfactors"
@@ -72,7 +71,6 @@ class OOFEM_EXPORT SolutionbasedShapeFunction : public ActiveBoundaryCondition
 private:
     Node *myNode;
     IntArray myDofIDs;
-    int set;
     int externalSet;
     int order;
     double TOL;

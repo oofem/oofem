@@ -255,7 +255,7 @@ IDNLMaterial :: computeDistanceModifier(double damage)
 
     case 4: return 1. / pow(Rf / cl, damage);
 
-    case 5: return ( 2. * cl ) / ( cl + Rf + ( cl - Rf ) * cos(3.1415926 * damage) );
+    case 5: return ( 2. * cl ) / ( cl + Rf + ( cl - Rf ) * cos(M_PI * damage) );
 
     default: return 1.;
     }
@@ -355,6 +355,11 @@ IDNLMaterial :: computeAngleAndSigmaRatio(double &nx, double &ny, double &ratio,
 double
 IDNLMaterial :: computeStressBasedWeight(double &nx, double &ny, double &ratio, GaussPoint *gp, GaussPoint *jGp, double weight)
 {
+    // Take into account periodicity, if required
+  if ( this->px > 0. ){
+    return computeStressBasedWeightForPeriodicCell(nx, ny, ratio, gp, jGp);
+  }
+
     //Check if source and receiver point coincide
     if ( gp == jGp ) {
         return weight;
@@ -376,6 +381,39 @@ IDNLMaterial :: computeStressBasedWeight(double &nx, double &ny, double &ratio, 
     //Get new weight
     double updatedWeight = this->computeWeightFunction(modDistance);
     updatedWeight *= jGp->giveElement()->computeVolumeAround(jGp); //weight * (Volume where the weight is applied)
+    return updatedWeight;
+}
+
+  // This method is a slight modification of IDNLMaterial :: computeStressBasedWeight but is implemented separately,
+  // to keep the basic method as simple (and efficient) as possible
+double
+IDNLMaterial :: computeStressBasedWeightForPeriodicCell(double &nx, double &ny, double &ratio, GaussPoint *gp, GaussPoint *jGp)
+{     
+    double updatedWeight = 0.;
+    FloatArray gpCoords, distance;
+    gp->giveElement()->computeGlobalCoordinates( gpCoords, * ( gp->giveNaturalCoordinates() ) );
+    int ix, nper = 1; // could be increased in the future, if needed
+
+    for (ix=-nper; ix<=nper; ix++) { // loop over periodic images shifted in x-direction
+      jGp->giveElement()->computeGlobalCoordinates( distance, * ( jGp->giveNaturalCoordinates() ) );
+      distance.at(1) += ix*px; // shift the x-coordinate
+      distance.subtract(gpCoords); // Vector connecting the two Gauss points
+
+      //Compute modified distance
+      double x1 = nx * distance.at(1) + ny *distance.at(2);
+      double x2 = -ny *distance.at(1) + nx *distance.at(2);
+      // Compute axis of ellipse and scale/stretch weak axis so that ellipse is converted to circle
+      double gamma = this->beta + ( 1. - beta ) * ratio * ratio;
+      x2 /= gamma;
+      double modDistance = sqrt(x1 * x1 + x2 * x2);
+
+      //Get new weight
+      double updatedWeightContribution = this->computeWeightFunction(modDistance);
+      if ( updatedWeightContribution > 0. ){
+	updatedWeightContribution *= jGp->giveElement()->computeVolumeAround(jGp); //weight * (Volume where the weight is applied)
+	updatedWeight += updatedWeightContribution;
+      }
+    }
     return updatedWeight;
 }
 

@@ -37,6 +37,7 @@
 
 #include <set>
 #include <vector>
+#include <memory>
 
 #include "sparselinsystemnm.h"
 #include "sparsenonlinsystemnm.h"
@@ -183,7 +184,7 @@ protected:
     FloatArray calm_HPCDmanWeightSrcArray;
 
     /// Linear system solver.
-    SparseLinearSystemNM *linSolver;
+    std :: unique_ptr< SparseLinearSystemNM > linSolver;
     /// linear system solver ID.
     LinSystSolverType solverType;
 
@@ -213,8 +214,8 @@ public:
     virtual ~CylindricalALM();
 
     // Overloaded methods:
-    virtual NM_Status solve(SparseMtrx *K, FloatArray *R, FloatArray *R0,
-                            FloatArray *X, FloatArray *dX, FloatArray *F,
+    virtual NM_Status solve(SparseMtrx &K, FloatArray &R, FloatArray *R0,
+                            FloatArray &X, FloatArray &dX, FloatArray &F,
                             const FloatArray &internalForcesEBENorm, double &ReachedLambda, referenceLoadInputModeType rlm,
                             int &nite, TimeStep *);
     virtual double giveCurrentStepLength() { return deltaL; }

@@ -51,7 +51,7 @@ class Domain;
  * @author Erik Svenning
  * @date Sep 9, 2014
  */
-class HybridEI : public GeometryBasedEI
+class OOFEM_EXPORT HybridEI : public GeometryBasedEI
 {
 public:
     HybridEI(int n, XfemManager *xm, Domain *aDomain);

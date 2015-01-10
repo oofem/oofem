@@ -132,7 +132,7 @@ static int globalNelems;
 
 
 int
-HuertaErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
+HuertaErrorEstimator :: estimateError(EE_ErrorMode err_mode, TimeStep *tStep)
 {
     Domain *d = this->domain;
     EngngModel *model = d->giveEngngModel();
@@ -552,11 +552,11 @@ HuertaErrorEstimator :: giveValue(EE_ValueType type, TimeStep *tStep)
 RemeshingCriteria *
 HuertaErrorEstimator :: giveRemeshingCrit()
 {
-    if ( this->rc ) {
-        return this->rc;
+    if ( !this->rc ) {
+        this->rc.reset( new HuertaRemeshingCriteria(1, this) );
     }
 
-    return ( this->rc = new HuertaRemeshingCriteria(1, this) );
+    return this->rc.get();
 }
 
 
@@ -1150,7 +1150,6 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
         IntArray sideBcDofId, dofIdArray, *loadArray;
         FloatMatrix *lcs;
         bool hasBc;
-        Dof *nodeDof;
 
         dofIdArray = element->giveDomain()->giveDefaultNodeDofIDArry();
 
@@ -1262,7 +1261,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
                                     for ( idof = 1; idof <= dofs; idof++ ) {
                                         bcDofId = 0;
                                         if ( bcId <= sideNumBc ) {
-                                            nodeDof = node->giveDofWithID( sideBcDofId.at(bcId) );
+                                            auto nodeDof = node->giveDofWithID( sideBcDofId.at(bcId) );
                                             if ( nodeDof->giveDofID() == dofIdArray.at(idof) ) {
                                                 bcDofId = nodeDof->giveBcId();
                                                 bcId++;
@@ -1364,19 +1363,16 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
             int idof;
             double u, du = 1.0 / ( level + 1 );
             double xc, yc, zc, xm, ym, zm;
-            MaterialMode mode;
-            GaussPoint *gp;
             FloatArray globCoord(3), * locCoord;
             FloatMatrix Nmatrix;
             FloatArray uCoarse, uFine;
 
-            mode = element->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0)->giveMaterialMode();
+            MaterialMode mmode = element->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0)->giveMaterialMode();
 
             // create a fictitious integration point
             locCoord = new FloatArray;
             IntegrationRule ir(1, element);
-            //gp = new GaussPoint(element, 1, locCoord, 1.0, mode);
-            gp = new GaussPoint( &ir, 1, locCoord, 1.0, mode);
+            auto *gp = new GaussPoint(&ir, 1, locCoord, 1.0, mmode);
 
             for ( inode = startNode; inode <= endNode; inode++ ) {
                 xc = corner [ inode - 1 ]->at(1);
@@ -1444,7 +1440,6 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
                 }
             }
 
-            delete gp;
         } else {
             int idof;
 
@@ -1587,7 +1582,6 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
         std::vector< IntArray >sideBcDofIdList;
         IntArray sideNumBc(2), dofIdArray, * loadArray;
         bool hasBc;
-        Dof *nodeDof;
         FloatMatrix *lcs;
 
         dofIdArray = element->giveDomain()->giveDefaultNodeDofIDArry();
@@ -1742,7 +1736,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                                         for ( idof = 1; idof <= dofs; idof++ ) {
                                             bcDofId = 0;
                                             if ( bcId <= sideNumBc.at(index) ) {
-                                                nodeDof = node->giveDofWithID( sideBcDofId.at(bcId) );
+                                                auto nodeDof = node->giveDofWithID( sideBcDofId.at(bcId) );
                                                 if ( nodeDof->giveDofID() == dofIdArray.at(idof) ) {
                                                     bcDofId = nodeDof->giveBcId();
                                                     bcId++;
@@ -1868,18 +1862,17 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
             int s1, s2, idof;
             double u, v, du = 1.0 / ( level + 1 ), dv = 1.0 / ( level + 1 );
             double xc, yc, zc, xs1, ys1, zs1, xs2, ys2, zs2, xm, ym, zm;
-            MaterialMode mode;
             GaussPoint *gp;
             FloatArray globCoord(3), * locCoord;
             FloatMatrix Nmatrix;
             FloatArray uCoarse, uFine;
 
-            mode = element->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0)->giveMaterialMode();
+			MaterialMode mmode = element->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0)->giveMaterialMode();
 
             // create a fictitious integration point
             locCoord = new FloatArray;
             IntegrationRule ir(0, element);
-            gp = new GaussPoint( &ir, 1, locCoord, 1.0, mode);
+            gp = new GaussPoint( &ir, 1, locCoord, 1.0, mmode);
 
             for ( inode = startNode; inode <= endNode; inode++ ) {
                 s1 = inode;
@@ -2169,7 +2162,6 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
         std::vector < IntArray >sideBcDofIdList, faceBcDofIdList;
         IntArray sideNumBc(3), faceNumBc(3), dofIdArray, * loadArray;
         bool hasBc;
-        Dof *nodeDof;
         FloatMatrix *lcs;
 
         dofIdArray = element->giveDomain()->giveDefaultNodeDofIDArry();
@@ -2361,7 +2353,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                                                 for ( idof = 1; idof <= dofs; idof++ ) {
                                                     bcDofId = 0;
                                                     if ( bcId <= sideNumBc.at(index) ) {
-                                                        nodeDof = node->giveDofWithID( sideBcDofId.at(bcId) );
+                                                        Dof *nodeDof = node->giveDofWithID( sideBcDofId.at(bcId) );
                                                         if ( nodeDof->giveDofID() == dofIdArray.at(idof) ) {
                                                             bcDofId = nodeDof->giveBcId();
                                                             bcId++;
@@ -2396,7 +2388,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                                                 for ( idof = 1; idof <= dofs; idof++ ) {
                                                     bcDofId = 0;
                                                     if ( bcId <= faceNumBc.at(index) ) {
-                                                        nodeDof = node->giveDofWithID( faceBcDofId.at(bcId) );
+                                                        Dof *nodeDof = node->giveDofWithID( faceBcDofId.at(bcId) );
                                                         if ( nodeDof->giveDofID() == dofIdArray.at(idof) ) {
                                                             bcDofId = nodeDof->giveBcId();
                                                             bcId++;
@@ -2404,7 +2396,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                                                     }
 
                                                     bcs.at(idof) = bcDofId;
-                                                }
+                                                }	
                                                 ir->setField(bcs, "bc");
                                             }
                                         }
@@ -2544,19 +2536,16 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
             double xc, yc, zc, xm, ym, zm;
             double xs1, ys1, zs1, xs2, ys2, zs2, xs3, ys3, zs3;
             double xf1, yf1, zf1, xf2, yf2, zf2, xf3, yf3, zf3;
-            MaterialMode mode;
-            GaussPoint *gp;
             FloatArray globCoord(3), * locCoord;
             FloatMatrix Nmatrix;
             FloatArray uCoarse, uFine;
 
-            mode = element->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0)->giveMaterialMode();
+			MaterialMode mmode = element->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0)->giveMaterialMode();
 
             // create a fictitious integration point
             locCoord = new FloatArray;
             IntegrationRule irule(0, element);
-            gp = new GaussPoint( &irule, 1, locCoord, 1.0, mode);
-
+			auto gp = new GaussPoint(&irule, 1, locCoord, 1.0, mmode);
             for ( inode = startNode; inode <= endNode; inode++ ) {
                 s1 = hexaSideNode [ inode - 1 ] [ 0 ];
                 s2 = hexaSideNode [ inode - 1 ] [ 1 ];
@@ -2688,7 +2677,6 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                 }
             }
 
-            delete gp;
         } else {
             int idof;
 
@@ -2964,8 +2952,6 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
     et_solve = timer.getUtime();
 #endif
 
-    //fprintf(stdout, "\n");
-
 #ifdef TIME_INFO
     timer.startTimer();
 #endif
@@ -2995,8 +2981,6 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
                 // coarse solution is identical with fine solution at BC
                 coarseSol = sol;
             }
-
-            //    coarseSol = nodeDof -> giveBcValue(VM_Total, refinedTStep);
 
             coarseSolution.at(pos) = coarseSol;
             elementError.at(pos) = sol - coarseSol;
@@ -3546,7 +3530,7 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
     EngngModel *refinedProblem;
     int localNodeId, localElemId, localBcId, localf;
     int mats, csects, loads, funcs, nlbarriers;
-    int inode, idof, dofs, pos, elemId, ielem, elems, size;
+    int inode, idof, dofs, elemId, ielem, elems, size;
     IntArray dofIdArray;
     FloatArray nodeSolution, uCoarse, errorVector, coarseVector, fineVector;
     FloatArray fineSolution, coarseSolution, errorSolution;
@@ -3733,7 +3717,7 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
     mapper.mapAndUpdate(uCoarse, VM_Total, domain, refinedDomain, tStep);
 
     // get exact and coarse solution (including BC !!!)
-    pos = 1;
+    int pos = 1;
     for ( inode = 1; inode <= localNodeId; inode++ ) {
         node = refinedDomain->giveNode(inode);
         node->giveUnknownVector(nodeSolution, dofIdArray, VM_Total, refinedTStep);
@@ -3746,8 +3730,6 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
                 // coarse solution is identical with fine solution at BC
                 coarseSolution.at(pos) = fineSolution.at(pos);
             }
-
-            //    coarseSolution.at(pos) = nodeDof -> giveBcValue(VM_Total, refinedTStep);
         }
     }
 

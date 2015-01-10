@@ -41,53 +41,24 @@ REGISTER_SparseLinSolver(LDLTFactorization, ST_Direct)
 LDLTFactorization :: LDLTFactorization(Domain *d, EngngModel *m) :
     SparseLinearSystemNM(d, m)
 {
-    //
-    // constructor
-    //
 }
 
 LDLTFactorization :: ~LDLTFactorization()
 {
-    //
-    // destructor
-    //
 }
 
 NM_Status
-LDLTFactorization :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
+LDLTFactorization :: solve(SparseMtrx &A, FloatArray &b, FloatArray &x)
 {
-    int size;
-
-    // first check whether Lhs is defined
-    if ( !A ) {
-        OOFEM_ERROR("unknown Lhs");
-    }
-
-    // and whether Rhs
-    if ( !b ) {
-        OOFEM_ERROR("unknown Rhs");
-    }
-
-    // and whether previous Solution exist
-    if ( !x ) {
-        OOFEM_ERROR("unknown solution array");
-    }
-
-    if ( ( size = x->giveSize() ) != b->giveSize() ) {
-        OOFEM_ERROR("size mismatch");
-    }
-
     // check whether Lhs supports factorization
-    if ( !A->canBeFactorized() ) {
+    if ( !A.canBeFactorized() ) {
         OOFEM_ERROR("Lhs not support factorization");
     }
 
-    for ( int i = 1; i <= size; i++ ) {
-        x->at(i) = b->at(i);
-    }
+    x = b;
 
     // solving
-    A->factorized()->backSubstitutionWith(* x);
+    A.factorized()->backSubstitutionWith(x);
 
     return NM_Success;
 }

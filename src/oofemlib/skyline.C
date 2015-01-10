@@ -632,6 +632,17 @@ void Skyline :: times(double x)
 }
 
 
+void Skyline :: add(double x, SparseMtrx &m)
+{
+    Skyline *M = dynamic_cast< Skyline* >( &m );
+
+    for ( int j = 0; j < nwk; j++ ) {
+        mtrx [ j ] += x * M->mtrx [ j ];
+    }
+
+    this->version++;
+}
+
 void Skyline :: printYourself() const
 {
     // Prints the receiver on screen.
@@ -705,9 +716,9 @@ Skyline :: Skyline(int neq, int nwk1, double *mtrx1, const IntArray &adr1) : Spa
 }
 
 
-//Skyline *Skyline :: giveSubMatrix(Skyline *mat, IntArray &rows, IntArray &cols)
-//Skyline *Skyline :: beSubMatrixOf(const Skyline *mat, IntArray &rows, IntArray &cols)
-//SparseMtrx *Skyline :: beSubMatrixOf(const SparseMtrx *mat, IntArray &rows, IntArray &cols)
+//Skyline *Skyline :: giveSubMatrix(Skyline &mat, IntArray &rows, IntArray &cols)
+//Skyline *Skyline :: beSubMatrixOf(const Skyline &mat, IntArray &rows, IntArray &cols)
+//SparseMtrx *Skyline :: beSubMatrixOf(const SparseMtrx &mat, IntArray &rows, IntArray &cols)
 SparseMtrx *Skyline :: giveSubMatrix(const IntArray &rows, const IntArray &cols) 
 {
 

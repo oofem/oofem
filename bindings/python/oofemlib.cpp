@@ -84,14 +84,14 @@ namespace bp = boost::python;
 #include "gausspoint.h"
 #include "internalstatetype.h"
 #include "matresponsemode.h"
-#include "sm/Materials/structuralmaterial.h"
+#include "Materials/structuralmaterial.h"
 #include "matstatus.h"
-#include "sm/Materials/structuralms.h"
+#include "Materials/structuralms.h"
 #include "exportmodulemanager.h"
 #include "outputmanager.h"
 #include "classfactory.h"
 
-#include "sm/Materials/structmatsettable.h"
+#include "Materials/structmatsettable.h"
 
 namespace oofem {
 
@@ -111,7 +111,7 @@ struct PyFloatArray : FloatArray, wrapper<FloatArray>
     PyFloatArray(FloatArray &src): FloatArray(src) {}
 
     void printYourseelf() const {
-        if (override f = this->get_override("printYourself")) {f();} 
+        if (override f = this->get_override("printYourself")) {f();}
         this->get_override("printYourself")();
     }
 };
@@ -993,7 +993,7 @@ public:
   PyFieldManager (): FieldManager() {}
   void myRegisterField(Field* a, FieldType key) {
     FieldManager_registerField (this, a, key);
-  }  
+  }
 
   Field* myGiveField(FieldType key) {
     return FieldManager_getField(this, key);

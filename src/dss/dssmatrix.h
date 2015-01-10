@@ -38,6 +38,8 @@
 #include "sparsemtrx.h"
 #include "intarray.h"
 
+#include <memory>
+
 /* DSS module lives in global namespace, not in oofem namespace */
 class DSSolver;
 struct SparseMatrixF;
@@ -56,9 +58,9 @@ public:
 
 protected:
     /// Pointer to SparseMatrixF class rep
-    SparseMatrixF *_sm;
+    std :: unique_ptr< SparseMatrixF > _sm;
     /// pointer to DSSolver class (representation of Direct Sparse Solver in DSS lib)
-    DSSolver *_dss;
+    std :: unique_ptr< DSSolver > _dss;
     /// Flag indicating whether factorized.
     bool isFactorized;
     /// type of storage & factorization
@@ -97,14 +99,14 @@ public:
     virtual int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat);
     virtual bool canBeFactorized() const { return true; }
     virtual SparseMtrx *factorized();
-    virtual void solve(FloatArray *b, FloatArray *x);
+    virtual void solve(FloatArray &b, FloatArray &x);
     virtual void zero();
     virtual double &at(int i, int j);
     virtual double at(int i, int j) const;
     virtual SparseMtrxType giveType() const { return SMT_SymCompCol; }
     virtual bool isAsymmetric() const { return false; }
 
-    virtual const char *giveClassName() const { return "DSSMatrix";;}
+    virtual const char *giveClassName() const { return "DSSMatrix"; }
 };
 
 class DSSMatrixLDL : public DSSMatrix

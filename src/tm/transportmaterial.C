@@ -44,9 +44,9 @@ TransportMaterialStatus :: setTempGradient(FloatArray grad)
 }
 
 void
-TransportMaterialStatus :: setTempField(FloatArray field)
+TransportMaterialStatus :: setTempField(FloatArray newField)
 {
-    this->temp_field = std :: move(field);
+    this->temp_field = std :: move(newField);
 }
 
 void

@@ -910,6 +910,7 @@ AnisotropicDamageMaterial :: obtainAlpha2(FloatMatrix tempDamageTensor, double d
     FloatMatrix deltaD, positiveStrainTensorSquared, resultingDamageTensor, eVecs;
     FloatArray eVals;
     int cont;
+	maxDamage = 0.0;
     cont = 1;
     alpha_a = 0;
     alpha_b = 1;
@@ -1121,7 +1122,7 @@ AnisotropicDamageMaterial :: computeCorrectionFactor(FloatMatrix tempDamageTenso
     int tempFlag = status->giveFlag();
     double tempStoredFactor = status->giveStoredFactor();
     double Dc = 1.00, trD = 0;
-    double factor;
+    double factor = 0.0;
     trD = tempDamageTensor.at(1, 1) + tempDamageTensor.at(2, 2) + tempDamageTensor.at(3, 3);
     // If flag = 0, the trace of the damage tensor has never been greater than Dc under compression before
     if ( tempFlag == 0 ) {
@@ -1198,7 +1199,6 @@ AnisotropicDamageMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 void AnisotropicDamageMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode,
                                                            GaussPoint *gp, TimeStep *atTime)
 {
-    FloatArray totalStrain;
     AnisotropicDamageMaterialStatus *status = static_cast< AnisotropicDamageMaterialStatus * >( this->giveStatus(gp) );
     if ( mode == ElasticStiffness ) {
         this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
@@ -1458,8 +1458,8 @@ AnisotropicDamageMaterial :: computeDamageTensor(FloatMatrix &answer, GaussPoint
     AnisotropicDamageMaterialStatus *status = static_cast< AnisotropicDamageMaterialStatus * >( this->giveStatus(gp) );
     double Dc = 1.00;
     double Kappa;
-    FloatMatrix de, strainTensor, damageTensor, tempDamageTensor, eVecs;
-    FloatArray strainVector, eVals;
+    FloatMatrix de, damageTensor, tempDamageTensor;
+    FloatArray strainVector;
     //this->computeEquivalentStrain(equivStrain, reducedTotalStrainVector, gp, atTime);
     FloatMatrix Dn = status->giveDamage();
     Kappa = this->computeKappa(Dn);
@@ -1982,15 +1982,10 @@ AnisotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussP
         answer.at(6) = status->giveDamage().at(1, 2);
         return 1;
     } else if ( type == IST_PrincipalDamageTensor ) {
-        FloatArray eVals;
+        //int checker12=this->checkSymmetry(status->giveDamage());
+        FloatMatrix dam = status->giveDamage();
         FloatMatrix eVecs;
-        answer.resize(3);
-        answer.zero();
-        //        int checker12=this->checkSymmetry(status->giveDamage());
-        status->giveDamage().jaco_(eVals, eVecs, 20);
-        answer.at(1) = eVals.at(1);
-        answer.at(2) = eVals.at(2);
-        answer.at(3) = eVals.at(3);
+        dam.jaco_(answer, eVecs, 20);
         return 1;
     } else if ( type == IST_DamageTensorTemp ) {
         answer.resize(6);
@@ -2003,15 +1998,10 @@ AnisotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussP
         answer.at(6) = status->giveTempDamage().at(1, 2);
         return 1;
     } else if ( type == IST_PrincipalDamageTempTensor ) {
-        FloatArray eVals;
+        //int checker13=this->checkSymmetry(status->giveTempDamage());
+        FloatMatrix dam = status->giveTempDamage();
         FloatMatrix eVecs;
-        answer.resize(3);
-        answer.zero();
-        //        int checker13=this->checkSymmetry(status->giveTempDamage());
-        status->giveTempDamage().jaco_(eVals, eVecs, 20);
-        answer.at(1) = eVals.at(1);
-        answer.at(2) = eVals.at(2);
-        answer.at(3) = eVals.at(3);
+        dam.jaco_(answer, eVecs, 20);
         return 1;
     } else if ( type == IST_MaxEquivalentStrainLevel ) {
         answer.resize(1);
@@ -2132,20 +2122,17 @@ AnisotropicDamageMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     MaterialMode mode = gp->giveMaterialMode();
     if ( mode == _PlaneStress ) { // special treatment of the out-of-plane strain
         FloatArray helpVec;
-        int n;
         MaterialStatus :: printOutputAt(file, tStep);
         fprintf(file, "  strains ");
         StructuralMaterial :: giveFullSymVectorForm(helpVec, strainVector, mode);
         helpVec.at(3) = this->strainZ;
-        n = helpVec.giveSize();
-        for ( int i = 1; i <= n; i++ ) {
-            fprintf( file, " % .4e", helpVec.at(i) );
+        for ( auto &v : helpVec ) {
+            fprintf( file, " % .4e", v );
         }
         fprintf(file, "\n              stresses");
         StructuralMaterial :: giveFullSymVectorForm(helpVec, stressVector, mode);
-        n = helpVec.giveSize();
-        for ( int i = 1; i <= n; i++ ) {
-            fprintf( file, " % .4e", helpVec.at(i) );
+        for ( auto &v : helpVec ) {
+            fprintf( file, " % .4e", v );
         }
         fprintf(file, "\n");
     } else {

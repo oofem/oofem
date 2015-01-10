@@ -92,7 +92,7 @@ void Crack :: computeCrackIntersectionPoints(Crack &iCrack, std :: vector< Float
     const double tol = 1.0e-12;
 
     // Enrichment domain of the current crack
-    PolygonLine *polygonLine1 = dynamic_cast< PolygonLine * >( mpBasicGeometry );
+    PolygonLine *polygonLine1 = dynamic_cast< PolygonLine * >( mpBasicGeometry.get() );
 
     // Enrichment domain of the crack given as input
     PolygonLine *polygonLine2 = dynamic_cast< PolygonLine * >( iCrack.giveGeometry() );
@@ -119,7 +119,7 @@ void Crack :: computeArcPoints(const std :: vector< FloatArray > &iIntersectionP
     const double tol = 1.0e-12;
 
     // Enrichment domain of the current crack
-    PolygonLine *polygonLine1 = dynamic_cast< PolygonLine * >( mpBasicGeometry );
+    PolygonLine *polygonLine1 = dynamic_cast< PolygonLine * >( mpBasicGeometry.get() );
 
     if ( polygonLine1 != NULL ) {
         for ( FloatArray pos:iIntersectionPoints ) {
@@ -138,7 +138,7 @@ void Crack :: computeArcPoints(const std :: vector< FloatArray > &iIntersectionP
 
 double Crack :: computeLength()
 {
-    PolygonLine *polygonLine = dynamic_cast< PolygonLine * >( mpBasicGeometry );
+    PolygonLine *polygonLine = dynamic_cast< PolygonLine * >( mpBasicGeometry.get() );
 
     if ( polygonLine != NULL ) {
         return polygonLine->computeLength();

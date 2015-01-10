@@ -44,6 +44,7 @@
 #include "intarray.h"
 #include "generalboundarycondition.h"
 
+#include <memory>
 #include <ctime>
 #include <set>
 
@@ -179,7 +180,7 @@ SloanGraph :: findPeripheralNodes()
     //if (startNode && endNode) return;
 
     int InitialRoot;
-    SloanLevelStructure *Spine;
+    std :: unique_ptr< SloanLevelStructure > Spine;
 
     // clock_t time_0 = ::clock();
     if ( SpineQuality == Best ) {
@@ -192,7 +193,7 @@ SloanGraph :: findPeripheralNodes()
     }
 
     // initial spine
-    Spine = new SloanLevelStructure(this, InitialRoot);
+    Spine.reset( new SloanLevelStructure(this, InitialRoot) );
     this->startNode = InitialRoot;
 
     int CurrentDiameter = Spine->giveDepth();
@@ -203,22 +204,20 @@ SloanGraph :: findPeripheralNodes()
     while ( newStartNode ) {
         newStartNode = 0;
 
-        this->extractCandidates(candidates, Spine);
+        this->extractCandidates(candidates, *Spine);
         int MinimumWidth = domain->giveNumberOfDofManagers();
 
         for ( int Root: candidates ) {
-            SloanLevelStructure *TrialSpine = new SloanLevelStructure(this, Root);
+            std :: unique_ptr< SloanLevelStructure > TrialSpine( new SloanLevelStructure(this, Root) );
             // abort level struc assembly if TrialWidth>MinimumWidth.
             if ( TrialSpine->formYourself(MinimumWidth) == 0 ) {
-                delete TrialSpine;
                 continue;
             }
 
             TrialDepth = TrialSpine->giveDepth();
             TrialWidth = TrialSpine->giveWidth();
             if ( TrialWidth < MinimumWidth && TrialDepth > CurrentDiameter ) {
-                delete Spine;
-                Spine = TrialSpine;
+                Spine = std :: move( TrialSpine );
                 this->startNode = Root;
                 CurrentDiameter = Spine->giveDepth();
                 newStartNode = 1;
@@ -229,12 +228,8 @@ SloanGraph :: findPeripheralNodes()
                 MinimumWidth = TrialWidth;
                 this->endNode = Root;
             }
-
-            delete TrialSpine;
         } // end loop over candidates
     }
-
-    delete Spine;
 
     //clock_t time_1 = ::clock();
 
@@ -243,14 +238,10 @@ SloanGraph :: findPeripheralNodes()
 
 
 void
-SloanGraph :: extractCandidates(std :: list< int > &candidates, SloanLevelStructure *Spine)
+SloanGraph :: extractCandidates(std :: list< int > &candidates, SloanLevelStructure &Spine)
 {
-    if ( !Spine ) {
-        OOFEM_ERROR("Invalid spine");
-    }
-
-    int NumberOfLevels = Spine->giveDepth();
-    IntArray LastLevel = Spine->giveLevel(NumberOfLevels);
+    int NumberOfLevels = Spine.giveDepth();
+    IntArray LastLevel = Spine.giveLevel(NumberOfLevels);
     sort( LastLevel, SloanNodalDegreeOrderingCrit(this) );
 
     candidates.clear();
@@ -268,10 +259,8 @@ SloanGraph :: extractCandidates(std :: list< int > &candidates, SloanLevelStruct
 int
 SloanGraph :: computeTrueDiameter()
 {
-    SloanLevelStructure *LSC = new SloanLevelStructure( this, findBestRoot() );
-    int Diameter = LSC->giveDepth();
-    delete LSC;
-    return Diameter;
+    SloanLevelStructure LSC( this, findBestRoot() );
+    return LSC.giveDepth();
 }
 
 int

@@ -225,14 +225,14 @@ contextIOResultType XfemManager :: saveContext(DataStream &stream, ContextMode m
     }
 
     for ( int i = 1; i <= this->numberOfEnrichmentItems; i++ ) {
-        EnrichmentItem *obj = this->giveEnrichmentItem(i);
+        EnrichmentItem *object = this->giveEnrichmentItem(i);
         if ( ( mode & CM_Definition ) ) {
-            if ( !stream.write( obj->giveInputRecordName() ) ) {
+            if ( !stream.write( object->giveInputRecordName() ) ) {
                 THROW_CIOERR(CIO_IOERR);
             }
         }
 
-        if ( ( iores = obj->saveContext(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = object->saveContext(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }

@@ -104,7 +104,7 @@ public:
      * @param r_s Row numbering scheme.
      * @param c_s Column numbering scheme.
      */
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep,
+    virtual void assemble(SparseMtrx &answer, TimeStep *tStep,
                           CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) { }
 
     /**

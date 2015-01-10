@@ -159,20 +159,16 @@ TimeStep *NlDEIDynamic :: giveNextStep()
     double totalTime = 0;
     StateCounterType counter = 1;
 
-    if ( previousStep != NULL ) {
-        delete previousStep;
-    }
-
-    if ( currentStep != NULL ) {
+    if ( currentStep ) {
         totalTime = currentStep->giveTargetTime() + deltaT;
         istep     = currentStep->giveNumber() + 1;
         counter   = currentStep->giveSolutionStateCounter() + 1;
     }
 
-    previousStep = currentStep;
-    currentStep  = new TimeStep(istep, this, 1, totalTime, deltaT, counter);
+    previousStep = std :: move(currentStep);
+    currentStep.reset( new TimeStep(istep, this, 1, totalTime, deltaT, counter) );
 
-    return currentStep;
+    return currentStep.get();
 }
 
 
@@ -458,7 +454,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_RELEVANT( "\n\nSolving [Step number %8d, Time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
 #endif
 
-    //     NM_Status s = nMethod->solve(massMatrix, & loadVector, & displacementVector);
+    //     NM_Status s = nMethod->solve(*massMatrix, loadVector, displacementVector);
     //    if ( !(s & NM_Success) ) {
     //        OOFEM_ERROR("No success in solving system. Ma=f");
     //    }
@@ -540,7 +536,7 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
         element->giveCharacteristicMatrix(charMtrx, LumpedMassMatrix, tStep);
 
 #ifdef LOCAL_ZERO_MASS_REPLACEMENT
-        element->giveCharacteristicMatrix(charMtrx2, StiffnessMatrix, tStep);
+        element->giveCharacteristicMatrix(charMtrx2, TangentStiffnessMatrix, tStep);
 #endif
 
 #ifdef DEBUG
@@ -595,7 +591,7 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
     for ( i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
         element->giveLocationArray(loc, en);
-        element->giveCharacteristicMatrix(charMtrx, StiffnessMatrix, tStep);
+        element->giveCharacteristicMatrix(charMtrx, TangentStiffnessMatrix, tStep);
         n = loc.giveSize();
         for ( j = 1; j <= n; j++ ) {
             jj = loc.at(j);

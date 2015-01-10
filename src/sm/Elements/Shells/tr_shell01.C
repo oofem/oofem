@@ -53,12 +53,9 @@ REGISTER_Element(TR_SHELL01);
 IntArray TR_SHELL01 :: loc_plate = {3, 4, 5, 9, 10, 11, 15, 16, 17};
 IntArray TR_SHELL01 :: loc_membrane = {1, 2, 6, 7, 8, 12, 13, 14, 18};
 
-TR_SHELL01 :: TR_SHELL01(int n, Domain *aDomain) : StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), ZZErrorEstimatorInterface(this), SpatialLocalizerInterface(this)
+TR_SHELL01 :: TR_SHELL01(int n, Domain *aDomain) : StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), ZZErrorEstimatorInterface(this), SpatialLocalizerInterface(this),
+    plate(new CCTPlate3d(-1, aDomain)), membrane(new TrPlaneStrRot3d(-1, aDomain))
 {
-    plate    = new CCTPlate3d(-1, aDomain);
-    membrane = new TrPlaneStrRot3d(-1, aDomain);
-    compositeIR = NULL;
-
     numberOfDofMans = 3;
 }
 
@@ -352,13 +349,11 @@ TR_SHELL01 :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 IntegrationRule *
 TR_SHELL01 :: ZZErrorEstimatorI_giveIntegrationRule()
 {
-    if ( this->compositeIR ) {
-        return this->compositeIR;
-    } else {
-        this->compositeIR = new GaussIntegrationRule(1, this, 1, 12);
+    if ( !this->compositeIR ) {
+        this->compositeIR.reset( new GaussIntegrationRule(1, this, 1, 12) );
         this->compositeIR->SetUpPointsOnTriangle(plate->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints(), _3dShell);
-        return this->compositeIR;
     }
+    return this->compositeIR.get();
 }
 
 void

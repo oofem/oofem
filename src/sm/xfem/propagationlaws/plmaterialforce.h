@@ -37,13 +37,12 @@
 
 #include "xfem/propagationlaw.h"
 
+#include <memory>
+
 #define _IFT_PLMaterialForce_Name "propagationlawmaterialforce"
-// Radius of region for domain integral
-#define _IFT_PLMaterialForce_Radius "radius"
-// Increment length per time step
-#define _IFT_PLMaterialForce_IncLength "incrementlength"
-// Threshold for crack propagation
-#define _IFT_PLMaterialForce_CrackPropThreshold "gc"
+#define _IFT_PLMaterialForce_Radius "radius" ///< Radius of region for domain integral
+#define _IFT_PLMaterialForce_IncLength "incrementlength" ///< Increment length per time step
+#define _IFT_PLMaterialForce_CrackPropThreshold "gc" ///<  Threshold for crack propagation
 
 namespace oofem {
 
@@ -78,7 +77,7 @@ public:
 protected:
     double mRadius, mIncrementLength, mCrackPropThreshold;
 
-    MaterialForceEvaluator *mpMaterialForceEvaluator;
+    std :: unique_ptr< MaterialForceEvaluator > mpMaterialForceEvaluator;
 };
 
 } /* namespace oofem */

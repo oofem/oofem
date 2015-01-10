@@ -262,7 +262,7 @@ StructuralEngngModel :: showSparseMtrxStructure(int type, oofegGraphicContext &g
     }
 
     for ( auto &elem : domain->giveElements() ) {
-        elem->showSparseMtrxStructure(StiffnessMatrix, gc, tStep);
+        elem->showSparseMtrxStructure(TangentStiffnessMatrix, gc, tStep);
     }
 }
 #endif

@@ -241,8 +241,8 @@ endif ()
 set (core_bc
     generalboundarycondition.C
     boundarycondition.C
+    prescribedgradienthomogenization.C
     prescribedgradient.C
-    prescribedgradientbc.C
     prescribedgradientbcneumann.C
     prescribedgradientbcweak.C
     prescribedgradientbcweakperiodic.C

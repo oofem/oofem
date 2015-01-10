@@ -176,8 +176,7 @@ TimeStep *DIIDynamic :: giveNextStep()
     StateCounterType counter = 1;
     TimeDiscretizationType td = initialTimeDiscretization;
 
-    delete previousStep;
-    if ( currentStep != NULL ) {
+    if ( currentStep ) {
         totalTime = currentStep->giveTargetTime() + deltaT;
         istep     = currentStep->giveNumber() + 1;
         counter   = currentStep->giveSolutionStateCounter() + 1;
@@ -188,11 +187,11 @@ TimeStep *DIIDynamic :: giveNextStep()
         }
     }
 
-    previousStep = currentStep;
+    previousStep = std :: move(currentStep);
 
-    currentStep  = new TimeStep(istep, this, 1, totalTime, deltaT, counter, td);
+    currentStep.reset( new TimeStep(istep, this, 1, totalTime, deltaT, counter, td) );
 
-    return currentStep;
+    return currentStep.get();
 }
 
 void DIIDynamic :: solveYourself()
@@ -225,13 +224,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
         previousIncrementOfDisplacement.resize(neq);
         previousIncrementOfDisplacement.zero();
 
-        int j, jj;
-        int nman  = domain->giveNumberOfDofManagers();
-        DofManager *node;
-
-        for ( j = 1; j <= nman; j++ ) {
-            node = domain->giveDofManager(j);
-
+        for ( auto &node : domain->giveDofManagers()) {
             for ( Dof *iDof: *node ) {
                 //
                 // Ask for initial values obtained from boundary conditions and initial conditions.
@@ -240,7 +233,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
                     continue;
                 }
 
-                jj = iDof->__giveEquationNumber();
+                int jj = iDof->__giveEquationNumber();
                 if ( jj ) {
                     displacementVector.at(jj) = iDof->giveUnknown(VM_Total, stepWhenIcApply);
                     velocityVector.at(jj)     = iDof->giveUnknown(VM_Velocity, stepWhenIcApply);
@@ -263,7 +256,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
 
         stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
 
-        this->assemble(stiffnessMatrix, tStep, EffectiveStiffnessMatrix,
+        this->assemble(*stiffnessMatrix, tStep, EffectiveStiffnessMatrix,
                        EModelDefaultEquationNumbering(), domain);
 
         help.resize(neq);
@@ -289,7 +282,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
         OOFEM_LOG_DEBUG("Assembling stiffness matrix\n");
 #endif
         stiffnessMatrix->zero();
-        this->assemble(stiffnessMatrix, tStep, EffectiveStiffnessMatrix,
+        this->assemble(*stiffnessMatrix, tStep, EffectiveStiffnessMatrix,
                        EModelDefaultEquationNumbering(), domain);
     }
 
@@ -323,7 +316,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
                                   + a5 * previousAccelerationVector.at(i)
                                   + a6 * previousIncrementOfDisplacement.at(i) );
         }
-        this->timesMtrx(help, rhs2, StiffnessMatrix, domain, tStep);
+        this->timesMtrx(help, rhs2, TangentStiffnessMatrix, domain, tStep);
         help.zero();
         for ( int i = 1; i <= neq; i++ ) {
             rhs.at(i) += rhs2.at(i);
@@ -348,7 +341,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_RELEVANT( "\n\nSolving [step number %8d, time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
 #endif
 
-    nMethod->solve(stiffnessMatrix, & rhs, & displacementVector);
+    nMethod->solve(*stiffnessMatrix, rhs, displacementVector);
 
     if ( tStep->giveTimeDiscretization() == TD_Wilson ) {
         OOFEM_LOG_INFO("TD_Wilson: Updating acceleration, velocity and displacement.\n");
@@ -400,7 +393,7 @@ DIIDynamic :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
         FloatMatrix charMtrx;
 
         element = domain->giveElement(num);
-        element->giveCharacteristicMatrix(answer, StiffnessMatrix, tStep);
+        element->giveCharacteristicMatrix(answer, TangentStiffnessMatrix, tStep);
         answer.times(1 + this->delta * a1);
 
         element->giveCharacteristicMatrix(charMtrx, MassMatrix, tStep);

@@ -367,9 +367,9 @@ TrPlaneStrRot :: GivePitch()
         int k = j + 1 - j / 2 * 3;
         if ( x(k) == x(j) ) {
             if ( y(k) > y(j) ) {
-                angles.at(i + 1) = 3.14159265358979 / 2.;
+                angles.at(i + 1) = M_PI / 2.;
             } else {
-                angles.at(i + 1) = 3.14159265358979 * 3. / 2.;
+                angles.at(i + 1) = M_PI * 3. / 2.;
             }
         }
 
@@ -377,15 +377,15 @@ TrPlaneStrRot :: GivePitch()
             if ( y(k) >= y(j) ) {
                 angles.at(i + 1) = atan( ( y(k) - y(j) ) / ( x(k) - x(j) ) );
             } else {
-                angles.at(i + 1) = 2. * 3.14159265358979 - atan( ( y(j) - y(k) ) / ( x(k) - x(j) ) );
+                angles.at(i + 1) = 2. * M_PI - atan( ( y(j) - y(k) ) / ( x(k) - x(j) ) );
             }
         }
 
         if ( x(k) < x(j) ) {
             if ( y(k) >= y(j) ) {
-                angles.at(i + 1) = 3.14159265358979 - atan( ( y(k) - y(j) ) / ( x(j) - x(k) ) );
+                angles.at(i + 1) = M_PI - atan( ( y(k) - y(j) ) / ( x(j) - x(k) ) );
             } else {
-                angles.at(i + 1) = 3.14159265358979 + atan( ( y(j) - y(k) ) / ( x(j) - x(k) ) );
+                angles.at(i + 1) = M_PI + atan( ( y(j) - y(k) ) / ( x(j) - x(k) ) );
             }
         }
     }

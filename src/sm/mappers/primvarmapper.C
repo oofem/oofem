@@ -84,14 +84,14 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
 
     FloatArray res(numDofsNew);
 
-    SparseMtrx *K;
-    SparseLinearSystemNM *solver;
+    std :: unique_ptr< SparseMtrx > K;
+    std :: unique_ptr< SparseLinearSystemNM > solver;
 
-    solver = classFactory.createSparseLinSolver(ST_Petsc, & iOldDom, engngMod);
+    solver.reset( classFactory.createSparseLinSolver(ST_Petsc, & iOldDom, engngMod) );
     if (!solver) {
-        solver = classFactory.createSparseLinSolver(ST_Direct, & iOldDom, engngMod);
+        solver.reset( classFactory.createSparseLinSolver(ST_Direct, & iOldDom, engngMod) );
     }
-    K = classFactory.createSparseMtrx(solver->giveRecommendedMatrix(true));
+    K.reset( classFactory.createSparseMtrx(solver->giveRecommendedMatrix(true)) );
 
     K->buildInternalStructure( engngMod, iNewDom.giveNumber(), num );
 
@@ -241,7 +241,7 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
                     FloatArray oldDisp;
                     oldDisp.beProductOf(NOld, nodeDispOld);
 
-                    FloatArray temp, du;
+                    FloatArray temp, duu;
 
 #ifdef DEBUG
                     if(!oldDisp.isFinite()) {
@@ -253,8 +253,8 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
                     }
 #endif
 
-                    du.beDifferenceOf(oldDisp, newDisp);
-                    temp.beTProductOf(NNew, du);
+                    duu.beDifferenceOf(oldDisp, newDisp);
+                    temp.beTProductOf(NNew, duu);
                     double dV = elNew->computeVolumeAround(gp);
                     elRes.add(dV, temp);
                 }
@@ -328,7 +328,7 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
 //        K->writeToFile("Kmapping.txt");
 
         // Solve
-        solver->solve(K, & res, & du);
+        solver->solve(*K, res, du);
 
 #ifdef DEBUG
         if(!du.isFinite()) {
@@ -338,8 +338,5 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
 
         oU.add(du);
     }
-
-    delete solver;
-    delete K;
 }
 } /* namespace oofem */

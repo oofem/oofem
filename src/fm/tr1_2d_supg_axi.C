@@ -604,17 +604,16 @@ TR1_2D_SUPG_AXI :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
     answer.zero();
 
     int nLoads;
-    Load *load;
     bcGeomType ltype;
     FloatArray un, gVector;
-    FloatArray n;
+    FloatArray nV;
     double dV, coeff, u, v, rho;
 
     // add body load (gravity) termms
     this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
     nLoads = this->giveBodyLoadArray()->giveSize();
     for ( int i = 1; i <= nLoads; i++ ) {
-        load = domain->giveLoad( bodyLoadArray.at(i) );
+        Load *load = domain->giveLoad( bodyLoadArray.at(i) );
         ltype = load->giveBCGeoType();
         if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ForceLoadBVT ) ) {
             load->computeComponentArrayAt(gVector, tStep, VM_Total);
@@ -622,17 +621,17 @@ TR1_2D_SUPG_AXI :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
                 for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
                     dV = this->computeVolumeAround(gp);
                     rho = this->giveMaterial()->give('d', gp);
-                    this->computeNVector(n, gp);
+                    this->computeNVector(nV, gp);
                     coeff = rho * dV;
-                    u = n.at(1) * un.at(1) + n.at(2) * un.at(3) + n.at(3) * un.at(5);
-                    v = n.at(1) * un.at(2) + n.at(2) * un.at(4) + n.at(3) * un.at(6);
+                    u = nV.at(1) * un.at(1) + nV.at(2) * un.at(3) + nV.at(3) * un.at(5);
+                    v = nV.at(1) * un.at(2) + nV.at(2) * un.at(4) + nV.at(3) * un.at(6);
 
-                    answer.at(1) += coeff * ( gVector.at(1) * ( n.at(1) + t_supg * ( b [ 0 ] * u + c [ 0 ] * v ) ) );
-                    answer.at(2) += coeff * ( gVector.at(2) * ( n.at(1) + t_supg * ( b [ 0 ] * u + c [ 0 ] * v ) ) );
-                    answer.at(3) += coeff * ( gVector.at(1) * ( n.at(2) + t_supg * ( b [ 1 ] * u + c [ 1 ] * v ) ) );
-                    answer.at(4) += coeff * ( gVector.at(2) * ( n.at(2) + t_supg * ( b [ 1 ] * u + c [ 1 ] * v ) ) );
-                    answer.at(5) += coeff * ( gVector.at(1) * ( n.at(3) + t_supg * ( b [ 2 ] * u + c [ 2 ] * v ) ) );
-                    answer.at(6) += coeff * ( gVector.at(2) * ( n.at(3) + t_supg * ( b [ 2 ] * u + c [ 2 ] * v ) ) );
+                    answer.at(1) += coeff * ( gVector.at(1) * ( nV.at(1) + t_supg * ( b [ 0 ] * u + c [ 0 ] * v ) ) );
+                    answer.at(2) += coeff * ( gVector.at(2) * ( nV.at(1) + t_supg * ( b [ 0 ] * u + c [ 0 ] * v ) ) );
+                    answer.at(3) += coeff * ( gVector.at(1) * ( nV.at(2) + t_supg * ( b [ 1 ] * u + c [ 1 ] * v ) ) );
+                    answer.at(4) += coeff * ( gVector.at(2) * ( nV.at(2) + t_supg * ( b [ 1 ] * u + c [ 1 ] * v ) ) );
+                    answer.at(5) += coeff * ( gVector.at(1) * ( nV.at(3) + t_supg * ( b [ 2 ] * u + c [ 2 ] * v ) ) );
+                    answer.at(6) += coeff * ( gVector.at(2) * ( nV.at(3) + t_supg * ( b [ 2 ] * u + c [ 2 ] * v ) ) );
                 }
             }
         }
@@ -649,8 +648,7 @@ TR1_2D_SUPG_AXI :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
         sid = boundarySides.at(j);
         if ( ( code & FMElement_PrescribedTractionBC ) ) {
             FloatArray t, coords(1);
-            int nLoads, n, id;
-            BoundaryLoad *load;
+            int n, id;
             // integrate tractions
             n1 = sid;
             n2 = ( n1 == 3 ? 1 : n1 + 1 );
@@ -665,15 +663,15 @@ TR1_2D_SUPG_AXI :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
             // then zero traction is assumed !!!
 
             // loop over boundary load array
-            nLoads = this->giveBoundaryLoadArray()->giveSize() / 2;
-            for ( int i = 1; i <= nLoads; i++ ) {
+            int numLoads = this->giveBoundaryLoadArray()->giveSize() / 2;
+            for ( int i = 1; i <= numLoads; i++ ) {
                 n = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
                 id = boundaryLoadArray.at(i * 2);
                 if ( id != sid ) {
                     continue;
                 }
 
-                load = dynamic_cast< BoundaryLoad * >( domain->giveLoad(n) );
+                auto load = dynamic_cast< BoundaryLoad * >( domain->giveLoad(n) );
                 if ( load ) {
                     load->computeValueAt(t, tStep, coords, VM_Total);
 

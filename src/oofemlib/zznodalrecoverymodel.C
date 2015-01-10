@@ -140,8 +140,8 @@ ZZNodalRecoveryModel :: recoverValues(Set elementSet, InternalStateType type, Ti
         for ( int elementNode = 1; elementNode <= elemNodes; elementNode++ ) {
             int node = element->giveDofManager(elementNode)->giveNumber();
             lhs.at( regionNodalNumbers.at(node) ) += nn.at(eq);
-            for ( int i = 1; i <= regionValSize; i++ ) {
-                rhs.at(regionNodalNumbers.at(node), i) += nsig.at(eq, i);
+            for ( int j = 1; j <= regionValSize; j++ ) {
+                rhs.at(regionNodalNumbers.at(node), j) += nsig.at(eq, j);
             }
 
             eq++;
@@ -181,7 +181,7 @@ ZZNodalRecoveryModel :: recoverValues(Set elementSet, InternalStateType type, Ti
         std :: ostringstream msg;
         int i = 0;
         for ( int dman: unresolvedDofMans ) {
-            msg << dman << ' ';
+            msg << this->domain->giveDofManager(dman)->giveLabel() << ' ';
             if ( ++i > 20 ) {
                 break;
             }
@@ -189,7 +189,7 @@ ZZNodalRecoveryModel :: recoverValues(Set elementSet, InternalStateType type, Ti
         if ( i > 20 ) {
             msg << "...";
         }
-        OOFEM_WARNING("some values of some dofmanagers undetermined\n[%s]", msg.str().c_str() );
+        OOFEM_WARNING("some values of some dofmanagers undetermined (in global numbers) \n[%s]", msg.str().c_str() );
     }
 
 

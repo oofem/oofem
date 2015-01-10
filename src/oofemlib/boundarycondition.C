@@ -45,10 +45,27 @@ namespace oofem {
 REGISTER_BoundaryCondition(BoundaryCondition);
 
 double BoundaryCondition :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
-// Returns the value at tStep of the prescribed value of the kinematic
-// unknown 'u'. Returns 0 if 'u' has no prescribed value.
 {
-    double factor = this->giveTimeFunction()->evaluate(tStep, mode);
+    if ( mode == VM_Incremental ) {
+        return this->give(dof, VM_Total, tStep->giveTargetTime()) - this->give(dof, VM_Total, tStep->giveTargetTime() - tStep->giveTimeIncrement());
+    } else {
+        return this->give(dof, mode, tStep->giveIntrinsicTime());
+    }
+}
+
+
+double BoundaryCondition :: give(Dof *dof, ValueModeType mode, double time)
+{
+    double factor = 0;
+    if ( mode == VM_Total ) {
+        factor = this->giveTimeFunction()->evaluateAtTime(time);
+    } else if ( mode == VM_Velocity ) {
+        factor = this->giveTimeFunction()->evaluateVelocityAtTime(time);
+    } else if ( mode == VM_Acceleration ) {
+        factor = this->giveTimeFunction()->evaluateAccelerationAtTime(time);
+    } else {
+        OOFEM_ERROR("Should not be called for value mode type then total, velocity, or acceleration.");
+    }
     int index = this->dofs.findFirstIndexOf( dof->giveDofID() );
     if ( !index ) {
         index = 1;
@@ -60,8 +77,6 @@ double BoundaryCondition :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
 
 IRResultType
 BoundaryCondition :: initializeFrom(InputRecord *ir)
-// Sets up the dictionary where the receiver stores the conditions it
-// imposes.
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 

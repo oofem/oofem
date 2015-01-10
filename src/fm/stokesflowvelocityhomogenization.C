@@ -74,9 +74,9 @@ StokesFlowVelocityHomogenization :: giveAreaOfRVE()
     min = * this->giveDomain(1)->giveDofManager(1)->giveCoordinates();
     max = * this->giveDomain(1)->giveDofManager(1)->giveCoordinates();
 
-    for ( int i = 1; i <= this->giveDomain(1)->giveNumberOfDofManagers(); i++ ) {
-        min.beMinOf( min, * this->giveDomain(1)->giveDofManager(i)->giveCoordinates() );
-        max.beMaxOf( max, * this->giveDomain(1)->giveDofManager(i)->giveCoordinates() );
+    for ( auto &node : this->giveDomain(1)->giveDofManagers() ) {
+        min.beMinOf( min, * node->giveCoordinates() );
+        max.beMaxOf( max, * node->giveCoordinates() );
     }
 
     areaOfRVE = ( max.at(1) - min.at(1) ) * ( max.at(2) - min.at(2) );
@@ -106,11 +106,10 @@ void
 StokesFlowVelocityHomogenization :: solveYourselfAt(TimeStep *tStep)
 {
     handlePrescribedValues();
-    this->giveCurrentStep();
     currentStep->setNumber( tStep->giveNumber() );
     currentStep->setTime( tStep->giveTargetTime() );
     currentStep->setTimeIncrement( tStep->giveTimeIncrement() );
-    StokesFlow :: solveYourselfAt(currentStep);
+    StokesFlow :: solveYourselfAt(currentStep.get());
 }
 
 
@@ -226,13 +225,11 @@ StokesFlowVelocityHomogenization :: rveGiveCharacteristicData(int DataType, void
 void
 StokesFlowVelocityHomogenization :: computeTangent(FloatMatrix &answer, TimeStep *tStep)
 {
-    int ndof;
-
     IntArray loc, col;
     FloatArray averagev;
 
     Domain *domain = this->giveDomain(1);
-    ndof = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
+    int ndof = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
 
     // Build F matrix
     FloatMatrix F, Fe;
@@ -253,16 +250,14 @@ StokesFlowVelocityHomogenization :: computeTangent(FloatMatrix &answer, TimeStep
     FloatMatrix H;
 
     //    SparseLinearSystemNM *linMethod = classFactory.createSparseLinSolver(ST_Petsc, this->giveDomain(1), this);
-    SparseLinearSystemNM *linMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
+    std :: unique_ptr< SparseLinearSystemNM > linMethod( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
 
     H.resize( F.giveNumberOfRows(), F.giveNumberOfColumns() );
     H.zero();
 
-    linMethod->solve(stiffnessMatrix, F, H);
+    linMethod->solve(*stiffnessMatrix, F, H);
 
     answer.beTProductOf(H, F);
     answer.times( 1. / this->giveAreaOfRVE() );
-
-    delete linMethod;
 }
 }

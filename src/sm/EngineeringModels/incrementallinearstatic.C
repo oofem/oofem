@@ -51,38 +51,26 @@ REGISTER_EngngModel(IncrementalLinearStatic);
 IncrementalLinearStatic :: IncrementalLinearStatic(int i, EngngModel *_master) : StructuralEngngModel(i, _master),
     loadVector(), internalLoadVector(), incrementOfDisplacementVector(), discreteTimes()
 {
-    stiffnessMatrix = NULL;
     ndomains = 1;
     endOfTimeOfInterest = 0;
-    nMethod = NULL;
 }
 
 
 IncrementalLinearStatic :: ~IncrementalLinearStatic()
-{
-    if ( stiffnessMatrix ) {
-        delete stiffnessMatrix;
-    }
-
-    if ( nMethod ) {
-        delete nMethod;
-    }
-}
+{}
 
 
 NumericalMethod *IncrementalLinearStatic :: giveNumericalMethod(MetaStep *mStep)
 
 {
-    if ( nMethod ) {
-        return nMethod;
+    if ( !nMethod ) {
+        nMethod.reset( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
+        if ( !nMethod ) {
+            OOFEM_ERROR("linear solver creation failed");
+        }
     }
 
-    nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
-    if ( nMethod == NULL ) {
-        OOFEM_ERROR("linear solver creation failed");
-    }
-
-    return nMethod;
+    return nMethod.get();
 }
 
 
@@ -134,27 +122,14 @@ double IncrementalLinearStatic :: giveDiscreteTime(int iStep)
 
 TimeStep *IncrementalLinearStatic :: giveNextStep()
 {
-    int istep = this->giveNumberOfFirstStep();
-    int mStepNum = 1;
-    double dt = this->giveDiscreteTime(istep);
-    StateCounterType counter = 1;
-
-    if ( currentStep != NULL ) {
-        istep =  currentStep->giveNumber() + 1;
-        dt = this->giveDiscreteTime(istep) - this->giveDiscreteTime(istep - 1);
-        counter = currentStep->giveSolutionStateCounter() + 1;
+    if ( !currentStep ) {
+        currentStep.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, 0.,  this->giveDiscreteTime(1), 0) );
     }
 
-    if ( previousStep != NULL ) {
-        delete previousStep;
-    }
-
-    previousStep = currentStep;
-    if ( previousStep == NULL ) {
-        previousStep = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -dt, dt, 0);
-    }
-    currentStep = new TimeStep(istep, this, mStepNum, this->giveDiscreteTime ( istep ), dt, counter);
-    return currentStep;
+    previousStep = std :: move(currentStep);
+    double dt = this->giveDiscreteTime(previousStep->giveNumber()+1) - previousStep->giveTargetTime();
+    currentStep.reset( new TimeStep(*previousStep, dt) );
+    return currentStep.get();
 }
 
 void IncrementalLinearStatic :: solveYourself()
@@ -165,25 +140,22 @@ void IncrementalLinearStatic :: solveYourself()
 
 void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
 {
+    Domain *d = this->giveDomain(1);
     // Creates system of governing eq's and solves them at given time step
 
     // Initiates the total displacement to zero.
     if ( tStep->isTheFirstStep() ) {
-        Domain *d = this->giveDomain(1);
-        for ( int i = 1; i <= d->giveNumberOfDofManagers(); i++ ) {
-            DofManager *dofman = d->giveDofManager(i);
+        for ( auto &dofman : d->giveDofManagers() ) {
             for ( Dof *dof: *dofman ) {
                 dof->updateUnknownsDictionary(tStep->givePreviousStep(), VM_Total, 0.);
                 dof->updateUnknownsDictionary(tStep, VM_Total, 0.);
             }
         }
 
-        int nbc = d->giveNumberOfBoundaryConditions();
-        for ( int ibc = 1; ibc <= nbc; ++ibc ) {
-            GeneralBoundaryCondition *bc = d->giveBc(ibc);
+        for ( auto &bc : d->giveBcs() ) {
             ActiveBoundaryCondition *abc;
 
-            if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >(bc) ) ) {
+            if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >(bc.get()) ) ) {
                 int ndman = abc->giveNumberOfInternalDofManagers();
                 for ( int i = 1; i <= ndman; i++ ) {
                     DofManager *dofman = abc->giveInternalDofManager(i);
@@ -197,9 +169,7 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
     }
 
     // Apply dirichlet b.c's on total values
-    Domain *d = this->giveDomain(1);
-    for ( int i = 1; i <= d->giveNumberOfDofManagers(); i++ ) {
-        DofManager *dofman = d->giveDofManager(i);
+    for ( auto &dofman : d->giveDofManagers() ) {
         for ( Dof *dof: *dofman ) {
             double tot = dof->giveUnknown( VM_Total, tStep->givePreviousStep() );
             if ( dof->hasBc(tStep) ) {
@@ -245,25 +215,21 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Assembling stiffness matrix\n");
 #endif
-    if ( stiffnessMatrix ) {
-        delete stiffnessMatrix;
-    }
-
-    stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
-    if ( stiffnessMatrix == NULL ) {
+    stiffnessMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+    if ( !stiffnessMatrix ) {
         OOFEM_ERROR("sparse matrix creation failed");
     }
 
     stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
     stiffnessMatrix->zero();
-    this->assemble( stiffnessMatrix, tStep, StiffnessMatrix,
+    this->assemble( *stiffnessMatrix, tStep, TangentStiffnessMatrix,
                    EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Solving ...\n");
 #endif
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
-    NM_Status s = nMethod->solve(stiffnessMatrix, & loadVector, & incrementOfDisplacementVector);
+    NM_Status s = nMethod->solve(*stiffnessMatrix, loadVector, incrementOfDisplacementVector);
     if ( !( s & NM_Success ) ) {
         OOFEM_ERROR("No success in solving system.");
     }
@@ -316,12 +282,6 @@ void IncrementalLinearStatic :: updateDofUnknownsDictionary(DofManager *inode, T
         dof->updateUnknownsDictionary(tStep->givePreviousStep(), VM_Total, val);
         dof->updateUnknownsDictionary(tStep, VM_Total, val);
     }
-}
-
-
-void IncrementalLinearStatic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
-{
-    iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
 }
 
 

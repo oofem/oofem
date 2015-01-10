@@ -94,9 +94,7 @@ public:
     /// Destructor
     virtual ~UserDefDirichletBC();
 
-    virtual double give(Dof *dof, ValueModeType mode, TimeStep *tStep);
-
-    virtual void setPrescribedValue(double s);
+    virtual double give(Dof *dof, ValueModeType mode, double time);
 
     // Overloaded methods:
     virtual bcType giveType() const { return DirichletBT; }

@@ -85,7 +85,7 @@ namespace oofem {
 class NonLinearDynamic : public StructuralEngngModel
 {
 protected:
-    SparseMtrx *effectiveStiffnessMatrix, *massMatrix;
+    std :: unique_ptr< SparseMtrx > effectiveStiffnessMatrix, massMatrix;
 
     LinSystSolverType solverType;
     SparseMtrxType sparseMtrxType;
@@ -107,7 +107,7 @@ protected:
     int commInitFlag;
     int nonlocalStiffnessFlag;
     /// Numerical method used to solve the problem.
-    SparseNonLinearSystemNM *nMethod;
+    std :: unique_ptr< SparseNonLinearSystemNM > nMethod;
     /// Intrinsic time increment.
     double deltaT;
 
@@ -159,7 +159,7 @@ public:
 #endif
 
 protected:
-    void assemble(SparseMtrx *answer, TimeStep *tStep, CharType type,
+    void assemble(SparseMtrx &answer, TimeStep *tStep, CharType type,
                   const UnknownNumberingScheme &, Domain *domain);
 
     void proceedStep(int di, TimeStep *tStep);

@@ -70,7 +70,7 @@ IsotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, E, _IFT_IsotropicLinearElasticMaterial_e);
     IR_GIVE_FIELD(ir, nu, _IFT_IsotropicLinearElasticMaterial_n);
     IR_GIVE_FIELD(ir, value, _IFT_IsotropicLinearElasticMaterial_talpha);
-    propertyDictionary->add(tAlpha, value);
+    propertyDictionary.add(tAlpha, value);
     // compute  value of shear modulus
     G = E / ( 2.0 * ( 1. + nu ) );
 
@@ -86,7 +86,7 @@ IsotropicLinearElasticMaterial :: giveInputRecord(DynamicInputRecord &input)
 
     input.setField(this->E, _IFT_IsotropicLinearElasticMaterial_e);
     input.setField(this->nu, _IFT_IsotropicLinearElasticMaterial_n);
-    input.setField(this->propertyDictionary->at(tAlpha), _IFT_IsotropicLinearElasticMaterial_talpha);
+    input.setField(this->propertyDictionary.at(tAlpha), _IFT_IsotropicLinearElasticMaterial_talpha);
 }
 
 
@@ -232,17 +232,12 @@ IsotropicLinearElasticMaterial :: giveThermalDilatationVector(FloatArray &answer
 // gp (element) local axes
 //
 {
+    double alpha = this->give(tAlpha, gp);
     answer.resize(6);
     answer.zero();
-    answer.at(1) = this->give(tAlpha, gp);
-    answer.at(2) = this->give(tAlpha, gp);
-    answer.at(3) = this->give(tAlpha, gp);
+    answer.at(1) = alpha;
+    answer.at(2) = alpha;
+    answer.at(3) = alpha;
 }
 
-
-MaterialStatus *
-IsotropicLinearElasticMaterial :: CreateStatus(GaussPoint *gp) const
-{
-    return new StructuralMaterialStatus(1, this->giveDomain(), gp);
-}
 } // end namespace oofem

@@ -66,10 +66,16 @@ public:
 
     virtual double giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *tStep);
 
-    virtual void update(ValueModeType mode, TimeStep *tStep, FloatArray &vectorToStore);
+    virtual void update(ValueModeType mode, TimeStep *tStep, const FloatArray &vectorToStore, const UnknownNumberingScheme &s);
+
+    virtual void applyDefaultInitialCondition();
+    void applyInitialCondition(InitialCondition &ic);
+    virtual void applyBoundaryCondition(TimeStep *tStep);
+    virtual void applyBoundaryCondition(BoundaryCondition &bc, TimeStep *tStep);
 
     virtual FloatArray *giveSolutionVector(TimeStep *tStep);
 
+    void setInitialGuess(DofManager &dman, TimeStep *tStep, TimeStep *prev);
     virtual void advanceSolution(TimeStep *tStep);
 
     virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);

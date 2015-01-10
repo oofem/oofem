@@ -125,20 +125,16 @@ double StationaryTransportProblem :: giveUnknownComponent(ValueModeType mode, Ti
 TimeStep *StationaryTransportProblem :: giveNextStep()
 {
     int istep = this->giveNumberOfFirstStep();
-    //int mstep = 1;
     StateCounterType counter = 1;
 
-    delete previousStep;
-
-    if ( currentStep != NULL ) {
+    if ( currentStep ) {
         istep = currentStep->giveNumber() + 1;
         counter = currentStep->giveSolutionStateCounter() + 1;
     }
 
-    previousStep = currentStep;
-    currentStep = new TimeStep(istep, this, 1, ( double ) istep, 0., counter);
-    // time and dt variables are set eq to 0 for statics - has no meaning
-    return currentStep;
+    previousStep = std :: move(currentStep);
+    currentStep.reset( new TimeStep(istep, this, 1, ( double ) istep, 0., counter) );
+    return currentStep.get();
 }
 
 
@@ -165,10 +161,8 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
         conductivityMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
         if ( this->keepTangent ) {
             this->conductivityMatrix->zero();
-            this->assemble( conductivityMatrix, tStep, ConductivityMatrix,
-                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            this->assemble( conductivityMatrix, tStep, LHSBCMatrix,
-                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assemble( *conductivityMatrix, tStep, TangentStiffnessMatrix,
+                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
     }
 
@@ -191,19 +185,19 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     FloatArray incrementOfSolution;
     double loadLevel;
     int currentIterations;
-    this->nMethod->solve(this->conductivityMatrix,
-                         & externalForces,
+    this->nMethod->solve(*this->conductivityMatrix,
+                         externalForces,
                          NULL,
-                         UnknownsField->giveSolutionVector(tStep),
-                         & incrementOfSolution,
-                         & this->internalForces,
+                         *UnknownsField->giveSolutionVector(tStep),
+                         incrementOfSolution,
+                         this->internalForces,
                          this->eNorm,
                          loadLevel, // Only relevant for incrementalBCLoadVector
                          SparseNonLinearSystemNM :: rlm_total,
                          currentIterations,
                          tStep);
 
-    //nMethod->solve( conductivityMatrix, & rhsVector, UnknownsField->giveSolutionVector(tStep) );
+    //nMethod->solve( *conductivityMatrix, rhsVector, *UnknownsField->giveSolutionVector(tStep) );
 }
 
 void
@@ -226,10 +220,7 @@ StationaryTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmp
         if ( !this->keepTangent ) {
             // Optimization for linear problems, we can keep the old matrix (which could save its factorization)
             this->conductivityMatrix->zero();
-            ///@todo We should use some problem-neutral names instead of "ConductivityMatrix" (and something nicer for LHSBCMatrix)
-            this->assemble( conductivityMatrix, tStep, ConductivityMatrix,
-                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            this->assemble( conductivityMatrix, tStep, LHSBCMatrix,
+            this->assemble( *conductivityMatrix, tStep, TangentStiffnessMatrix,
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
         return;
@@ -344,13 +335,6 @@ StationaryTransportProblem :: updateDomainLinks()
 {
     EngngModel :: updateDomainLinks();
     this->giveNumericalMethod( this->giveCurrentMetaStep() )->setDomain( this->giveDomain(1) );
-}
-
-
-void
-StationaryTransportProblem :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
-{
-    iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
 }
 
 

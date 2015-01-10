@@ -243,9 +243,9 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
         OOFEM_ERROR("source problem must also be AdaptiveNonlinearStatic.");
     }
 
-    this->currentStep = new TimeStep( * ( sourceProblem->giveCurrentStep() ) );
+    this->currentStep.reset( new TimeStep( * ( sourceProblem->giveCurrentStep() ) ) );
     if ( sourceProblem->givePreviousStep() ) {
-        this->previousStep = new TimeStep( * ( sourceProblem->givePreviousStep() ) );
+        this->previousStep.reset( new TimeStep( * ( sourceProblem->givePreviousStep() ) ) );
     }
 
     // map primary unknowns
@@ -279,12 +279,12 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
 
     // computes the stresses and calls updateYourself to mapped state
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
-        result &= this->giveDomain(1)->giveElement(ielem)->adaptiveUpdate(currentStep);
+        result &= this->giveDomain(1)->giveElement(ielem)->adaptiveUpdate(currentStep.get());
     }
 
     // finish mapping process
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
-        result &= this->giveDomain(1)->giveElement(ielem)->adaptiveFinish(currentStep);
+        result &= this->giveDomain(1)->giveElement(ielem)->adaptiveFinish(currentStep.get());
     }
 
 
@@ -343,8 +343,8 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
 
 
         if ( initFlag ) {
-            stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
-            if ( stiffnessMatrix == NULL ) {
+            stiffnessMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+            if ( !stiffnessMatrix ) {
                 OOFEM_ERROR("sparse matrix creation failed");
             }
 
@@ -356,7 +356,7 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
 
             stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
             stiffnessMatrix->zero(); // zero stiffness matrix
-            this->assemble( stiffnessMatrix, this->giveCurrentStep(), SecantStiffnessMatrix,
+            this->assemble( *stiffnessMatrix, this->giveCurrentStep(), SecantStiffnessMatrix,
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
             initFlag = 0;
         }
@@ -383,12 +383,12 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
         //nMethod -> solveYourselfAt(this->giveCurrentStep()) ;
         nMethod->setStepLength(deltaL / 5.0);
         if ( initialLoadVector.isNotEmpty() ) {
-            numMetStatus = nMethod->solve( stiffnessMatrix, & incrementalLoadVector, & initialLoadVector,
-                                          & totalDisplacement, & incrementOfDisplacement, & internalForces,
+            numMetStatus = nMethod->solve( *stiffnessMatrix, incrementalLoadVector, & initialLoadVector,
+                                          totalDisplacement, incrementOfDisplacement, internalForces,
                                           internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         } else {
-            numMetStatus = nMethod->solve( stiffnessMatrix, & incrementalLoadVector, NULL,
-                                          & totalDisplacement, & incrementOfDisplacement, & internalForces,
+            numMetStatus = nMethod->solve( *stiffnessMatrix, incrementalLoadVector, NULL,
+                                          totalDisplacement, incrementOfDisplacement, internalForces,
                                           internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         }
 
@@ -660,8 +660,8 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
 
         if ( initFlag ) {
             if ( !stiffnessMatrix ) {
-                stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
-                if ( stiffnessMatrix == NULL ) {
+                stiffnessMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+                if ( !stiffnessMatrix ) {
                     OOFEM_ERROR("sparse matrix creation failed");
                 }
             }
@@ -674,7 +674,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
 
             stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
             stiffnessMatrix->zero(); // zero stiffness matrix
-            this->assemble( stiffnessMatrix, this->giveCurrentStep(), SecantStiffnessMatrix,
+            this->assemble( *stiffnessMatrix, this->giveCurrentStep(), SecantStiffnessMatrix,
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
             initFlag = 0;
         }
@@ -699,12 +699,12 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
         //nMethod -> solveYourselfAt(this->giveCurrentStep()) ;
         nMethod->setStepLength(deltaL / 5.0);
         if ( initialLoadVector.isNotEmpty() ) {
-            numMetStatus = nMethod->solve( stiffnessMatrix, & incrementalLoadVector, & initialLoadVector,
-                                          & totalDisplacement, & incrementOfDisplacement, & internalForces,
+            numMetStatus = nMethod->solve( *stiffnessMatrix, incrementalLoadVector, & initialLoadVector,
+                                          totalDisplacement, incrementOfDisplacement, internalForces,
                                           internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         } else {
-            numMetStatus = nMethod->solve( stiffnessMatrix, & incrementalLoadVector, NULL,
-                                          & totalDisplacement, & incrementOfDisplacement, & internalForces,
+            numMetStatus = nMethod->solve( *stiffnessMatrix, incrementalLoadVector, NULL,
+                                          totalDisplacement, incrementOfDisplacement, internalForces,
                                           internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         }
 

@@ -159,7 +159,7 @@ Lattice2d_mt :: computeNmatrixAt(FloatMatrix &answer, const FloatArray &coords)
 
 
 void
-Lattice2d_mt :: computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *gp)
+Lattice2d_mt :: computeGradientMatrixAt(FloatMatrix &answer, const FloatArray &lcoords)
 {
     double l = this->giveLength();
 

@@ -154,14 +154,14 @@ private:
      * Domain connectivity table. Table is build upon request.
      * Provides connectivity information of current domain.
      */
-    ConnectivityTable *connectivityTable;
+    std :: unique_ptr< ConnectivityTable > connectivityTable;
     /**
      * Spatial Localizer. It is build upon request.
      * Provides the spatial localization services.
      */
-    SpatialLocalizer *spatialLocalizer;
+    std :: unique_ptr< SpatialLocalizer > spatialLocalizer;
     /// Output manager, allowing to filter the produced output.
-    OutputManager *outputManager;
+    std :: unique_ptr< OutputManager > outputManager;
     /// Domain number.
     int number;
     /// Domain serial (version) number. Used for domain version identification during Adaptive computations.
@@ -170,7 +170,7 @@ private:
     int nsd;
     bool axisymm;
     /// nodal recovery object associated to receiver.
-    NodalRecoveryModel *smoother;
+    std :: unique_ptr< NodalRecoveryModel > smoother; ///@todo I don't see why this has to be stored, and there is only one? /Mikael
 
     std :: string mDomainType;
     /**
@@ -185,13 +185,13 @@ private:
      */
     StateCounterType nonlocalUpdateStateCounter;
     /// XFEM Manager
-    XfemManager *xfemManager;
+    std :: unique_ptr< XfemManager > xfemManager;
 
     /// Fracture Manager
-    FractureManager *fracManager;
+    std :: unique_ptr< FractureManager > fracManager;
 
     /// Contact Manager
-    ContactManager *contactManager;
+    std :: unique_ptr< ContactManager > contactManager;
     
     
     /**
@@ -213,7 +213,7 @@ private:
     std::unordered_map< int, IntArray> mMapMaterialNum2El;
 
     /// Topology description
-    TopologyDescription *topology;
+    std :: unique_ptr< TopologyDescription > topology;
 
     /// Keeps track of next free dof ID (for special Lagrange multipliers, XFEM and such)
     int freeDofID;
@@ -223,7 +223,7 @@ private:
      * Transaction manager. The purpose of this class is to
      * make the domain modification (in terms of adding and deleting components) versatile.
      */
-    DomainTransactionManager *transactionManager;
+    std :: unique_ptr< DomainTransactionManager > transactionManager;
     /// Global dof manager map (index is global of man number).
     std :: map< int, DofManager * >dmanMap;
     /// dmanMap init flag.
@@ -491,7 +491,7 @@ public:
     void setSet(int i, Set *obj);
 
     /// Temporary function, sets xfemManager.
-    void setXfemManager(XfemManager *ipXfemManager) { xfemManager = ipXfemManager; }
+    void setXfemManager(XfemManager *ipXfemManager);
 
     XfemManager *giveXfemManager();
     bool hasXfemManager();
@@ -605,7 +605,7 @@ public:
     /**
      * Returns domain output manager.
      */
-    OutputManager *giveOutputManager() { return outputManager; }
+    OutputManager *giveOutputManager();
     /**
      * Returns Error Estimator associated to receiver.
      * Calls corresponding EngngModel Service.
@@ -619,13 +619,13 @@ public:
     /**
      * Returns receiver's associated topology description.
      */
-    TopologyDescription *giveTopology() { return topology; }
+    TopologyDescription *giveTopology();
     /**
      * Sets the given smoother as an actual smoother for receiver.
      * @param smoother New smoother for receiver.
      * @param destroyOld Determines if any preexisting smoother should be deleted.
      */
-    void setSmoother(NodalRecoveryModel *smoother, bool destroyOld = true);
+    void setSmoother(NodalRecoveryModel *newSmoother, bool destroyOld = true);
 
 #ifdef __PARALLEL_MODE
     /**@name Domain transaction support methods.

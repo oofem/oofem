@@ -272,13 +272,6 @@ PatchIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, Mat
                 newGPCoord.push_back(global);
             }
         }
-
-
-        //for ( int k = 0; k < mTriangles [ triToKeep [ i ] ].giveNrVertices(); k++ ) {
-        //    delete gCoords [ k ];
-        //}
-
-        //delete [] gCoords;
     }
 
     XfemManager *xMan = elem->giveDomain()->giveXfemManager();
@@ -364,22 +357,11 @@ PatchIntegrationRule :: restoreContext(DataStream &stream, ContextMode mode, voi
         THROW_CIOERR(iores);
     }
 
-    /*
-     *  // restore patch data
-     *  if ( this->patch ) {
-     *      delete this->patch;
-     *  }
-     */
     int _ptype;
     if ( !stream.read(_ptype) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    /*
-     *  // create new patch
-     *  this->patch = classFactory.createPatch( ( Patch :: PatchType ) _ptype, this->giveElement() );
-     *  this->patch->restoreContext(stream, mode, obj);
-     */
     return CIO_OK;
 }
 } // end namespace oofem

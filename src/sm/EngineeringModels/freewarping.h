@@ -90,8 +90,6 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
-
     // identification
     virtual const char *giveInputRecordName() const { return _IFT_FreeWarping_Name; }
     virtual const char *giveClassName() const { return "FreeWarping"; }

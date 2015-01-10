@@ -63,8 +63,8 @@ DynamicRelaxationSolver :: initializeFrom(InputRecord *ir)
 
 
 NM_Status
-DynamicRelaxationSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
-                  FloatArray *X, FloatArray *dX, FloatArray *F,
+DynamicRelaxationSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
+                  FloatArray &X, FloatArray &dX, FloatArray &F,
                   const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                   int &nite, TimeStep *tStep)
 
@@ -73,7 +73,7 @@ DynamicRelaxationSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
     FloatArray rhs, ddX, RT, X_0, X_n, X_n1, M;
 
     double RRT;
-    int neq = X->giveSize();
+    int neq = X.giveSize();
     NM_Status status = NM_None;
     bool converged, errorOutOfRangeFlag;
     ParallelContext *parallel_context = engngModel->giveParallelContext( this->domain->giveNumber() );
@@ -90,7 +90,7 @@ DynamicRelaxationSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
 
     // compute total load R = R+R0
     l = 1.0;
-    RT = * R;
+    RT = R;
     if ( R0 ) {
         RT.add(* R0);
     }
@@ -101,7 +101,7 @@ DynamicRelaxationSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
     ddX.resize(neq);
     ddX.zero();
 
-    X_0 = *X;
+    X_0 = X;
     X_n = X_0;
     X_n1 = X_0;
 
@@ -122,13 +122,13 @@ DynamicRelaxationSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
     do {
         // Compute the residual
         engngModel->updateComponent(tStep, InternalRhs, domain);
-        rhs.beDifferenceOf(RT, * F);
+        rhs.beDifferenceOf(RT, F);
 
-        converged = this->checkConvergence(RT, * F, rhs, ddX, * X, RRT, internalForcesEBENorm, nite, errorOutOfRangeFlag);
+        converged = this->checkConvergence(RT, F, rhs, ddX, X, RRT, internalForcesEBENorm, nite, errorOutOfRangeFlag);
         if ( errorOutOfRangeFlag ) {
             status = NM_NoSuccess;
-            dX->zero();
-            X->zero();
+            dX.zero();
+            X.zero();
             OOFEM_WARNING("Divergence reached after %d iterations", nite);
             break;
         } else if ( converged && ( nite >= minIterations ) ) {
@@ -147,12 +147,12 @@ DynamicRelaxationSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
         printf("dt = %e\n", dt);
         for ( int j = 0; j < neq; ++j ) {
             //M * x'' + C*x' * dt = rhs * dt*dt
-            (*X)[j] = rhs[j] * dt * dt / M[j] - ( -2*X_n1[j] + X_n[j] ) - alpha * (X_n1[j] - X_n[j]) * dt;
+            X[j] = rhs[j] * dt * dt / M[j] - ( -2*X_n1[j] + X_n[j] ) - alpha * (X_n1[j] - X_n[j]) * dt;
         }
         X_n = X_n1;
-        X_n1 = (*X);
+        X_n1 = X;
 
-        dX->beDifferenceOf(*X, X_0);
+        dX.beDifferenceOf(X, X_0);
         tStep->incrementStateCounter(); // update solution state counter
         tStep->incrementSubStepNumber();
         nite++; // iteration increment
