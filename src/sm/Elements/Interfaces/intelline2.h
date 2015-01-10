@@ -38,6 +38,7 @@
 #include "../sm/Elements/Interfaces/intelline1.h"
 
 #define _IFT_IntElLine2_Name "intelline2"
+#define _IFT_IntElLine2_LinearTraction "linear"
 
 namespace oofem {
 class FEI2dLineQuad;
@@ -52,6 +53,7 @@ class IntElLine2 : public IntElLine1
 {
 protected:
     static FEI2dLineQuad interp;
+    static FEI2dLineLin interpLin;
 
 public:
     IntElLine2(int n, Domain * d);
@@ -75,6 +77,10 @@ protected:
     virtual void computeGaussPoints();
 
     Element_Geometry_Type giveGeometryType() const { return EGT_quad_21_interface; };
+
+    /// If linear interpolation should be used.
+	bool linear;
+
 };
 } // end namespace oofem
 #endif
