@@ -214,6 +214,7 @@ set (sm_interface_materials
     Materials/InterfaceMaterials/structuralinterfacematerial.C
     Materials/InterfaceMaterials/bondceb.C
     Materials/InterfaceMaterials/cohint.C
+    Materials/InterfaceMaterials/intmatelastic.C
     Materials/InterfaceMaterials/intmatbilinczfagerstrom.C
     Materials/InterfaceMaterials/intmatbilinczjansson.C
     Materials/InterfaceMaterials/intmatbilinearcz.C
