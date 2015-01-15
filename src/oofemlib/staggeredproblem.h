@@ -37,6 +37,7 @@
 
 #include "engngm.h"
 #include "inputrecord.h"
+#include "floatarray.h"
 
 ///@name Input fields for StaggeredProblem
 //@{

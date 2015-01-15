@@ -59,6 +59,7 @@
 #include "material.h"
 #include "classfactory.h"
 #include "crosssection.h"
+#include "dof.h"
 
 #include <vector>
 

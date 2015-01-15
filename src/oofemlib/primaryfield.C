@@ -41,6 +41,7 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "engngm.h"
+#include "unknownnumberingscheme.h"
 #include "initialcondition.h"
 #include "boundarycondition.h"
 

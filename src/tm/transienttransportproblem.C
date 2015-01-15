@@ -40,6 +40,7 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "nrsolver.h"
+#include "unknownnumberingscheme.h"
 
 namespace oofem {
 REGISTER_EngngModel(TransientTransportProblem);

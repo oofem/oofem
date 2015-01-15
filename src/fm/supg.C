@@ -52,6 +52,7 @@
 #include "function.h"
 #include "contextioerr.h"
 #include "timer.h"
+#include "unknownnumberingscheme.h"
 
 namespace oofem {
 /* define if implicit interface update required */

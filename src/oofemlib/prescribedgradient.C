@@ -47,7 +47,7 @@
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
 #include "feinterpol.h"
-
+#include "unknownnumberingscheme.h"
 #include "sparsemtrx.h"
 #include "sparselinsystemnm.h"
 

@@ -54,6 +54,7 @@
 #include "set.h"
 #include "dynamicinputrecord.h"
 #include "feinterpol.h"
+#include "unknownnumberingscheme.h"
 
 namespace oofem {
 REGISTER_BoundaryCondition(MixedGradientPressureNeumann);

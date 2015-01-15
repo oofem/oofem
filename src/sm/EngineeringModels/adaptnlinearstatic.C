@@ -52,6 +52,7 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "oofem_terminate.h"
+#include "unknownnumberingscheme.h"
 
 #ifdef __PARALLEL_MODE
  #include "parallelcontext.h"

@@ -36,6 +36,7 @@
 #define unknownnumberingscheme_h
 
 #include "dof.h"
+#include "intarray.h"
 
 namespace oofem {
 /**
@@ -100,6 +101,32 @@ public:
 
     virtual int giveDofEquationNumber(Dof *dof) const {
         return dof->__givePrescribedEquationNumber();
+    }
+};
+
+
+/**
+ * Specialized numbering scheme for assembling only specified DofIDs.
+ * This can be useful for computing the reaction forces for a subset of dofids.
+ */
+class DofIDEquationNumbering : public UnknownNumberingScheme
+{
+protected:
+    IntArray dofids;
+    bool prescribed;
+
+public:
+    DofIDEquationNumbering(bool prescribed, IntArray dofids) : 
+        UnknownNumberingScheme(), dofids(std :: move(dofids)), prescribed(prescribed) { }
+
+    virtual bool isDefault() const { return !prescribed; }
+    virtual int giveDofEquationNumber(Dof *dof) const {
+        DofIDItem id = dof->giveDofID();
+        if ( dofids.contains(id) ) {
+            return prescribed ? dof->__givePrescribedEquationNumber() : dof->__giveEquationNumber();
+        }
+
+        return 0;
     }
 };
 } // end namespace oofem

@@ -14,6 +14,7 @@
 #include "linsystsolvertype.h"
 #include "sparselinsystemnm.h"
 #include "sparsenonlinsystemnm.h"
+#include "primaryfield.h"
 
 #define _IFT_DarcyFlow_Name "darcyflow"
 

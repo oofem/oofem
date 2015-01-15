@@ -42,6 +42,7 @@
 #include "timestep.h"
 #include "outputmanager.h"
 #include "activebc.h"
+#include "unknownnumberingscheme.h"
 
 namespace oofem {
 StructuralEngngModel :: StructuralEngngModel(int i, EngngModel *_master) : EngngModel(i, _master),
