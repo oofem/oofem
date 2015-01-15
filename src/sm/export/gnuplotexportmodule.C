@@ -297,7 +297,7 @@ void GnuplotExportModule::outputXFEM(Crack &iCrack, TimeStep *tStep)
 {
     const std::vector<GaussPoint*> &czGaussPoints = iCrack.giveCohesiveZoneGaussPoints();
 
-    std::vector<double> arcLengthPositions, normalJumps, tangJumps;
+    std::vector<double> arcLengthPositions, normalJumps, tangJumps, normalTractions;
 
     const BasicGeometry *bg = iCrack.giveGeometry();
 
@@ -307,7 +307,7 @@ void GnuplotExportModule::outputXFEM(Crack &iCrack, TimeStep *tStep)
         if(matStat != NULL) {
 
             // Compute arc length position of the Gauss point
-            const FloatArray &coord = *(gp->giveNaturalCoordinates());
+            const FloatArray &coord = (gp->giveGlobalCoordinates());
             double tangDist = 0.0, arcPos = 0.0;
             bg->computeTangentialSignDist(tangDist, coord, arcPos);
             arcLengthPositions.push_back(arcPos);
@@ -321,6 +321,10 @@ void GnuplotExportModule::outputXFEM(Crack &iCrack, TimeStep *tStep)
 
 
             tangJumps.push_back( jumpLoc.at(2) );
+
+
+            const FloatArray &trac = matStat->giveFirstPKTraction();
+            normalTractions.push_back(trac.at(3));
         }
     }
 
@@ -347,6 +351,11 @@ void GnuplotExportModule::outputXFEM(Crack &iCrack, TimeStep *tStep)
         strTangJump << "TangJumpGnuplotEI" << eiIndex << "Time" << time << ".dat";
         std :: string nameTangJump = strTangJump.str();
         XFEMDebugTools::WriteArrayToGnuplot(nameTangJump, arcLengthPositions, tangJumps);
+
+        std :: stringstream strNormalTrac;
+        strNormalTrac << "NormalTracGnuplotEI" << eiIndex << "Time" << time << ".dat";
+        std :: string nameNormalTrac = strNormalTrac.str();
+        XFEMDebugTools::WriteArrayToGnuplot(nameNormalTrac, arcLengthPositions, normalTractions);
 
 
         std::vector<FloatArray> matForcesStart, matForcesEnd;

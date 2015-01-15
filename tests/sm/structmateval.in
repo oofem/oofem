@@ -1,6 +1,6 @@
 structmateval.out
 Test of the structural material evaluator.
-StructuralMaterialEvaluator nsteps 1 componentfunctions 6 1 1 1 1 1 1 stresscontrol 6 1 2 3 4 5 6 vars 2 1 4
+StructuralMaterialEvaluator nsteps 1 componentfunctions 6 1 1 1 1 1 1 stresscontrol 6 1 2 3 4 5 6 vars 2 1 4 tolerance 1.0e-6
 #errorcheck
 domain 3d
 OutputManager

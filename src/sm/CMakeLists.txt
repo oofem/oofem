@@ -62,6 +62,7 @@ set (sm_element
     Elements/PlaneStress/planstrss.C
     Elements/PlaneStress/planstrssxfem.C
     Elements/PlaneStress/trplanstrssxfem.C
+    Elements/PlaneStress/qtrplanstrssxfem.C
     Elements/PlaneStress/qtrplstrgrad.C
     Elements/PlaneStress/trplanrot3d.C
     Elements/PlaneStress/qplanestressgrad.C
