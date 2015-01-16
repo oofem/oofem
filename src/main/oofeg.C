@@ -953,13 +953,13 @@ void OOFEGSimpleCmd(char *buf)
         stepinfo [ 0 ] = istep;
         stepinfo [ 1 ] = iversion;
         try {
-            problem->restoreContext(NULL, CM_State, ( void * ) stepinfo);
+            problem->restoreContext(NULL, CM_State | CM_Definition, ( void * ) stepinfo);
         } catch(ContextIOERR & m) {
             m.print();
             stepinfo [ 0 ] = pstep;
             stepinfo [ 1 ] = iversion;
             try {
-                problem->restoreContext(NULL, CM_State, ( void * ) stepinfo);
+                problem->restoreContext(NULL, CM_State | CM_Definition, ( void * ) stepinfo);
             } catch(ContextIOERR & m2) {
                 m2.print();
                 exit(1);
@@ -977,7 +977,7 @@ void OOFEGSimpleCmd(char *buf)
         stepinfo [ 0 ] = istep;
         stepinfo [ 1 ] = iversion;
         try {
-            problem->restoreContext(NULL, CM_State, ( void * ) stepinfo);
+            problem->restoreContext(NULL, CM_State | CM_Definition, ( void * ) stepinfo);
         } catch(ContextIOERR & m) {
             m.print();
             exit(1);
@@ -1216,13 +1216,13 @@ void previousStep(Widget wid, XtPointer cl, XtPointer cd)
             stepInfo [ 0 ] = istep;
             stepInfo [ 1 ] = 0;
             try {
-                problem->restoreContext(NULL, CM_State, ( void * ) stepInfo);
+                problem->restoreContext(NULL, CM_State | CM_Definition, ( void * ) stepInfo);
             } catch(ContextIOERR & m) {
                 m.print();
                 stepInfo [ 0 ] = prevStep;
                 stepInfo [ 1 ] = 0;
                 try {
-                    problem->restoreContext(NULL, CM_State, ( void * ) stepInfo);
+                    problem->restoreContext(NULL, CM_State | CM_Definition, ( void * ) stepInfo);
                 } catch(ContextIOERR & m2) {
                     m2.print();
                     exit(1);
@@ -1239,7 +1239,7 @@ void previousStep(Widget wid, XtPointer cl, XtPointer cd)
         stepInfo [ 0 ] = istep;
         stepInfo [ 1 ] = 0;
         try {
-            problem->restoreContext(NULL, CM_State, ( void * ) stepInfo);
+            problem->restoreContext(NULL, CM_State | CM_Definition, ( void * ) stepInfo);
         } catch(ContextIOERR & m) {
             m.print();
             exit(1);
@@ -2195,7 +2195,7 @@ pass_setanimate_command(Widget w, XtPointer ptr, XtPointer call_data)
         stepinfo [ 0 ] = istep;
         stepinfo [ 1 ] = iversion;
         try {
-            problem->restoreContext(NULL, CM_State, ( void * ) stepinfo);
+            problem->restoreContext(NULL, CM_State | CM_Definition, ( void * ) stepinfo);
         } catch(ContextIOERR & m) {
             m.print();
             return;
