@@ -38,6 +38,7 @@
 #include "deadweight.h"
 #include "tr21stokes.h"
 #include "dofmanager.h"
+#include "unknownnumberingscheme.h"
 
 namespace oofem {
 REGISTER_EngngModel(StokesFlowVelocityHomogenization);

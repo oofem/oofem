@@ -35,6 +35,7 @@
 #include "hexa21stokes.h"
 #include "fmelement.h"
 #include "node.h"
+#include "dof.h"
 #include "domain.h"
 #include "gaussintegrationrule.h"
 #include "gausspoint.h"

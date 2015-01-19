@@ -37,6 +37,7 @@
 
 #include "engngm.h"
 #include "statecountertype.h"
+#include "floatarray.h"
 
 namespace oofem {
 class StructuralElement;

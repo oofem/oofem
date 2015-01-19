@@ -41,6 +41,7 @@
 #include "nonlocalmaterialext.h"
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
+#include "unknownnumberingscheme.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"

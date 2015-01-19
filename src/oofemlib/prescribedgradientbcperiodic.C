@@ -52,6 +52,7 @@
 #include "domain.h"
 #include "spatiallocalizer.h"
 #include "feinterpol.h"
+#include "unknownnumberingscheme.h"
 
 namespace oofem {
 REGISTER_BoundaryCondition(PrescribedGradientBCPeriodic);
@@ -173,16 +174,17 @@ Dof *PrescribedGradientBCPeriodic :: giveMasterDof(ActiveDof *dof, int mdof)
 
 void PrescribedGradientBCPeriodic :: computeField(FloatArray &sigma, TimeStep *tStep)
 {
+    DofIDEquationNumbering pnum(true, strain_id);
     EngngModel *emodel = this->giveDomain()->giveEngngModel();
     FloatArray tmp, sig_tmp;
-    int npeq = emodel->giveNumberOfDomainEquations( this->giveDomain()->giveNumber(), EModelDefaultPrescribedEquationNumbering() );
+    int npeq = strain_id.giveSize();
     // sigma = residual (since we use the slave dofs) = f_ext - f_int
     sig_tmp.resize(npeq);
     sig_tmp.zero();
-    emodel->assembleVector(sig_tmp, tStep, InternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
+    emodel->assembleVector(sig_tmp, tStep, InternalForcesVector, VM_Total, pnum, this->domain);
     tmp.resize(npeq);
     tmp.zero();
-    emodel->assembleVector(tmp, tStep, ExternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
+    emodel->assembleVector(tmp, tStep, ExternalForcesVector, VM_Total, pnum, this->domain);
     sig_tmp.subtract(tmp);
     // Divide by the RVE-volume
     sig_tmp.times(1.0 / ( this->domainSize(this->giveDomain(), this->set) + this->domainSize(this->giveDomain(), this->masterSet) ));
@@ -203,7 +205,7 @@ void PrescribedGradientBCPeriodic :: computeField(FloatArray &sigma, TimeStep *t
 void PrescribedGradientBCPeriodic :: computeTangent(FloatMatrix &E, TimeStep *tStep)
 {
     EModelDefaultEquationNumbering fnum;
-    EModelDefaultPrescribedEquationNumbering pnum;
+    DofIDEquationNumbering pnum(true, strain_id);
     EngngModel *rve = this->giveDomain()->giveEngngModel();
     ///@todo Get this from engineering model
     std :: unique_ptr< SparseLinearSystemNM > solver( classFactory.createSparseLinSolver( ST_Petsc, this->domain, this->domain->giveEngngModel() ) ); // = rve->giveLinearSolver();

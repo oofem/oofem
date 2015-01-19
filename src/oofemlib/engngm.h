@@ -52,7 +52,6 @@
 #include "contextoutputmode.h"
 #include "contextfilemode.h"
 #include "contextioresulttype.h"
-#include "unknownnumberingscheme.h"
 #include "metastep.h"
 #include "parallelcontext.h"
 
@@ -105,6 +104,7 @@ class ProblemCommunicator;
 class ProcessCommunicatorBuff;
 class CommunicatorBuff;
 class ProcessCommunicator;
+class UnknownNumberingScheme;
 
 
 /**

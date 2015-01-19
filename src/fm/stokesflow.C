@@ -45,6 +45,7 @@
 #include "parallelcontext.h"
 #include "exportmodulemanager.h"
 #include "dofdistributedprimaryfield.h"
+#include "unknownnumberingscheme.h"
 
 namespace oofem {
 REGISTER_EngngModel(StokesFlow);

@@ -41,11 +41,11 @@
 #include "intarray.h"
 #include "error.h"
 #include "sparsemtrxtype.h"
-#include "unknownnumberingscheme.h"
 
 namespace oofem {
 class EngngModel;
 class TimeStep;
+class UnknownNumberingScheme;
 
 /**
  * Base class for all matrices stored in sparse format. Basically sparse matrix

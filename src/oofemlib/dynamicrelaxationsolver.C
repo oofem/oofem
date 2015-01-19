@@ -41,6 +41,7 @@
 #include "dofmanager.h"
 #include "element.h"
 #include "generalboundarycondition.h"
+#include "unknownnumberingscheme.h"
 
 namespace oofem {
 

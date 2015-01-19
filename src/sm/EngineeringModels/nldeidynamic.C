@@ -44,6 +44,7 @@
 #include "contextioerr.h"
 #include "sparsemtrx.h"
 #include "classfactory.h"
+#include "unknownnumberingscheme.h"
 
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"

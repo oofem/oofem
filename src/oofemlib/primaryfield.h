@@ -38,7 +38,6 @@
 #include "field.h"
 #include "interface.h"
 #include "floatarray.h"
-#include "unknownnumberingscheme.h"
 #include "valuemodetype.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
@@ -51,6 +50,7 @@ class PrimaryField;
 class Dof;
 class BoundaryCondition;
 class InitialCondition;
+class UnknownNumberingScheme;
 
 /**
  * Element interface class. Declares the functionality required to support PrimaryField element interpolation.

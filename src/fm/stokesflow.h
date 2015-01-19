@@ -40,6 +40,8 @@
 #include "topologydescription.h"
 #include "linsystsolvertype.h"
 #include "floatmatrix.h"
+#include "primaryfield.h"
+#include "floatarray.h"
 
 ///@name Input fields for Stokes' Flow
 //@{

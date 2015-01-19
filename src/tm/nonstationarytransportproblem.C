@@ -47,6 +47,7 @@
 #include "contextioerr.h"
 #include "function.h"
 #include "sparsenonlinsystemnm.h"
+#include "unknownnumberingscheme.h"
 
 #ifdef __CEMHYD_MODULE
  #include "cemhyd/cemhydmat.h"

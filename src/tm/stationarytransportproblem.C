@@ -36,6 +36,7 @@
 #include "nummet.h"
 #include "timestep.h"
 #include "element.h"
+#include "dof.h"
 #include "maskedprimaryfield.h"
 #include "verbose.h"
 #include "transportelement.h"
@@ -43,6 +44,7 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "nrsolver.h"
+#include "unknownnumberingscheme.h"
 
 namespace oofem {
 REGISTER_EngngModel(StationaryTransportProblem);

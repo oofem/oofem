@@ -67,6 +67,7 @@
 #include "classfactory.h"
 #include "xfem/xfemmanager.h"
 #include "parallelcontext.h"
+#include "unknownnumberingscheme.h"
 #include "contact/contactmanager.h"
 
 #ifdef __PARALLEL_MODE

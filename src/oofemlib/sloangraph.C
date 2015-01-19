@@ -72,21 +72,23 @@ void SloanGraph :: initialize()
 
     this->nodes.reserve(nnodes);
     this->dmans.reserve(nnodes);
+    std :: map< DofManager*, int > dman2map;
 
     // Add dof managers.
     int count = 0;
     for ( auto &dman : domain->giveDofManagers() ) {
         nodes.emplace_back(this, ++count);
         dmans.push_back(dman.get());
+        dman2map.insert({dman.get(), count});
     }
     // Add element internal dof managers
     for ( auto &elem : domain->giveElements() ) {
         this->nodes.reserve( nodes.size() + elem->giveNumberOfInternalDofManagers() );
         this->dmans.reserve( dmans.size() + elem->giveNumberOfInternalDofManagers() );
         for ( int j = 1; j <= elem->giveNumberOfInternalDofManagers(); ++j ) {
-            ///@todo This must be broken! The index "i" will overlap with node numbers. Rethink the approach! / Mikael
             nodes.emplace_back(this, ++count);
             dmans.push_back( elem->giveInternalDofManager(j) );
+            dman2map.insert({elem->giveInternalDofManager(j), count});
         }
     }
     // Add boundary condition internal dof managers
@@ -94,9 +96,9 @@ void SloanGraph :: initialize()
         this->nodes.reserve( nodes.size() + bc->giveNumberOfInternalDofManagers() );
         this->dmans.reserve( dmans.size() + bc->giveNumberOfInternalDofManagers() );
         for ( int j = 1; j <= bc->giveNumberOfInternalDofManagers(); ++j ) {
-            ///@todo This must be broken! The index "i" will overlap with node numbers. Rethink the approach! / Mikael
             nodes.emplace_back(this, ++count);
             dmans.push_back( bc->giveInternalDofManager(j) );
+            dman2map.insert({bc->giveInternalDofManager(j), count});
         }
     }
 
@@ -107,10 +109,10 @@ void SloanGraph :: initialize()
         int ndofmans = ielemnodes + ielemintdmans;
         connections.resize(ndofmans);
         for ( int j = 1; j <= ielemnodes; j++ ) {
-            connections.at(j) = elem->giveDofManager(j)->giveNumber();
+            connections.at(j) = dman2map[ elem->giveDofManager(j) ];
         }
         for ( int j = 1; j <= ielemintdmans; j++ ) {
-            connections.at(ielemnodes + j) = nnodes + elem->giveInternalDofManager(j)->giveNumber();
+            connections.at(ielemnodes + j) = dman2map[ elem->giveInternalDofManager(j) ];
         }
         for ( int j = 1; j <= ndofmans; j++ ) {
             for ( int k = j + 1; k <= ndofmans; k++ ) {
@@ -122,8 +124,8 @@ void SloanGraph :: initialize()
     }
     ///@todo Add connections from dof managers to boundary condition internal dof managers.
 
-
     IntArray dofMasters;
+    count = 0;
     for ( auto &dman : dmans ) {
         ++count;
         if ( dman->hasAnySlaveDofs() ) {

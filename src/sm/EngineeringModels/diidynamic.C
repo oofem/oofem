@@ -42,6 +42,7 @@
 #include "contextioerr.h"
 #include "datastream.h"
 #include "verbose.h"
+#include "unknownnumberingscheme.h"
 #include "classfactory.h"
 
 namespace oofem {

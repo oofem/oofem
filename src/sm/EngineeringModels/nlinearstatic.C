@@ -51,6 +51,8 @@
 #include "errorestimator.h"
 #include "mathfem.h"
 #include "dofmanager.h"
+#include "dof.h"
+#include "unknownnumberingscheme.h"
 
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"

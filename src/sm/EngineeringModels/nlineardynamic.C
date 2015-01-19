@@ -42,6 +42,7 @@ using namespace std;
 #include "timestep.h"
 #include "metastep.h"
 #include "element.h"
+#include "dof.h"
 #include "error.h"
 #include "verbose.h"
 #include "sparsenonlinsystemnm.h"
@@ -53,6 +54,7 @@ using namespace std;
 #include "contextioerr.h"
 #include "sparsemtrx.h"
 #include "errorestimator.h"
+#include "unknownnumberingscheme.h"
 
 #ifdef __PARALLEL_MODE
  #include "loadbalancer.h"

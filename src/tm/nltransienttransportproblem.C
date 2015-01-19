@@ -41,6 +41,7 @@
 #include "transportelement.h"
 #include "classfactory.h"
 #include "mathfem.h"
+#include "unknownnumberingscheme.h"
 
 namespace oofem {
 REGISTER_EngngModel(NLTransientTransportProblem);

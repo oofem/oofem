@@ -44,6 +44,7 @@
 #include "contextioerr.h"
 #include "dofmanager.h"
 #include "activebc.h"
+#include "unknownnumberingscheme.h"
 
 namespace oofem {
 REGISTER_EngngModel(IncrementalLinearStatic);
