@@ -68,6 +68,7 @@ set (sm_element
     Elements/PlaneStress/qplanestressgrad.C
     Elements/PlaneStress/trplanestressrotallman.C
     Elements/PlaneStress/basicelement.C
+    Elements/AbaqusUserElement.C
     Elements/htselement.C
     Elements/latticestructuralelement.C
     Elements/graddpelement.C 
@@ -123,6 +124,7 @@ set (sm_emodel
     EngineeringModels/nldeidynamic.C
     EngineeringModels/incrementallinearstatic.C
     EngineeringModels/freewarping.C 
+    EngineeringModels/structuralmaterialevaluator.C
     )
 
 set (sm_loads
@@ -167,6 +169,7 @@ set (sm_material
     Materials/RheoChainMaterials/maxwellChM.C 
     Materials/RheoChainMaterials/kelvinChM.C
     Materials/RheoChainMaterials/kelvinChSolM.C
+    Materials/structuralfe2material.C
     Materials/b3mat.C
     Materials/rcsd.C 
     Materials/rcsde.C 
@@ -211,6 +214,7 @@ set (sm_interface_materials
     Materials/InterfaceMaterials/structuralinterfacematerial.C
     Materials/InterfaceMaterials/bondceb.C
     Materials/InterfaceMaterials/cohint.C
+    Materials/InterfaceMaterials/intmatelastic.C
     Materials/InterfaceMaterials/intmatbilinczfagerstrom.C
     Materials/InterfaceMaterials/intmatbilinczjansson.C
     Materials/InterfaceMaterials/intmatbilinearcz.C

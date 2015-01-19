@@ -78,6 +78,20 @@ TimeStep :: TimeStep(const TimeStep &src)
     subStepNumber = src.subStepNumber;
 }
 
+TimeStep :: TimeStep(const TimeStep &previous, double dt)
+{
+    eModel = previous.eModel;
+    targetTime = previous.targetTime + dt;
+    intrinsicTime = previous.intrinsicTime + dt;
+    deltaT = dt;
+    solutionStateCounter = previous.solutionStateCounter + 1;
+    number = previous.number + 1;
+    version = 0;
+    mStepNumber = previous.mStepNumber ? previous.mStepNumber : 1;
+    subStepNumber = 0;
+}
+
+
 TimeStep &
 TimeStep :: operator = ( const TimeStep & src )
 {

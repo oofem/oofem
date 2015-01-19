@@ -139,7 +139,7 @@ class OOFEM_EXPORT Element : public FEMComponent
 {
 protected:
     /// Number of dofmanagers
-    int numberOfDofMans;
+    int numberOfDofMans; ///@todo We should remove this parameter. It's redundant (and therefore possibly wrong) since the dofManArray stores it's length internally. 
     /// Array containing dofmanager numbers.
     IntArray dofManArray;
     /// Number of associated material.

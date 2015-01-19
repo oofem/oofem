@@ -86,7 +86,7 @@ NLTransientTransportProblem :: giveNextStep()
     NonStationaryTransportProblem :: giveNextStep();
     intrinsicTime = previousStep->giveTargetTime() + this->alpha*(currentStep->giveTargetTime()-previousStep->giveTargetTime());
     currentStep->setIntrinsicTime(intrinsicTime);
-    return currentStep;
+    return currentStep.get();
 }
 
 
@@ -122,10 +122,10 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
 
     //create previous solution from IC or from previous tStep
     if ( tStep->isTheFirstStep() ) {
-        if ( stepWhenIcApply == NULL ) {
-            stepWhenIcApply = new TimeStep( *tStep->givePreviousStep() );
+        if ( !stepWhenIcApply ) {
+            stepWhenIcApply.reset( new TimeStep( *tStep->givePreviousStep() ) );
         }
-        this->applyIC(stepWhenIcApply); //insert solution to hash=1(previous), if changes in equation numbering
+        this->applyIC(stepWhenIcApply.get()); //insert solution to hash=1(previous), if changes in equation numbering
     }
 
     double dTTau = tStep->giveTimeIncrement();
@@ -170,13 +170,11 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
         if ( ( nite == 1 ) || ( NR_Mode == nrsolverFullNRM ) || ( ( NR_Mode == nrsolverAccelNRM ) && ( nite % MANRMSteps == 0 ) ) ) {
             conductivityMatrix->zero();
             //Assembling left hand side - start with conductivity matrix
-            this->assemble( conductivityMatrix, & TauStep, LHSBCMatrix,
-                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            this->assemble( conductivityMatrix, & TauStep, IntSourceLHSMatrix,
+            this->assemble( *conductivityMatrix, & TauStep, IntSourceLHSMatrix,
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
             conductivityMatrix->times(alpha);
             //Add capacity matrix
-            this->assemble( conductivityMatrix, & TauStep, NSTP_MidpointLhs,
+            this->assemble( *conductivityMatrix, & TauStep, NSTP_MidpointLhs,
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
 
@@ -205,7 +203,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
         // compute norm of residuals from balance equations
         solutionErr = rhs.computeNorm();
 
-        linSolver->solve(conductivityMatrix, & rhs, & solutionVectorIncrement);
+        linSolver->solve(*conductivityMatrix, rhs, solutionVectorIncrement);
         solutionVector->add(solutionVectorIncrement);
         this->updateInternalState(& TauStep); //insert to hash=0(current), if changes in equation numbering
         // compute error in the solutionvector increment
@@ -355,11 +353,9 @@ void
 NLTransientTransportProblem :: copyUnknownsInDictionary(ValueModeType mode, TimeStep *fromTime, TimeStep *toTime)
 {
     Domain *domain = this->giveDomain(1);
-    int nnodes = domain->giveNumberOfDofManagers();
 
-    for ( int j = 1; j <= nnodes; j++ ) {
-        DofManager *inode = domain->giveDofManager(j);
-        for ( Dof *dof: *inode ) {
+    for ( auto &node : domain->giveDofManagers() ) {
+        for ( Dof *dof: *node ) {
             double val = dof->giveUnknown(mode, fromTime);
             dof->updateUnknownsDictionary(toTime, mode, val);
         }
@@ -393,7 +389,7 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer,
     //
     double t = tStep->giveTargetTime();
     IntArray loc;
-    FloatMatrix charMtrxCond, charMtrxCap, bcMtrx;
+    FloatMatrix charMtrxCond, charMtrxCap;
     FloatArray r, drdt, contrib, help;
     Element *element;
     TimeStep *previousStep = this->givePreviousStep(); //r_t
@@ -417,8 +413,7 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer,
 
         element->giveLocationArray(loc, ns);
 
-        element->giveCharacteristicMatrix(charMtrxCond, ConductivityMatrix, tStep);
-        element->giveCharacteristicMatrix(bcMtrx, LHSBCMatrix, tStep);
+        element->giveCharacteristicMatrix(charMtrxCond, TangentStiffnessMatrix, tStep);
         element->giveCharacteristicMatrix(charMtrxCap, CapacityMatrix, tStep);
 
 
@@ -460,9 +455,6 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer,
         }
 
         help.beProductOf(charMtrxCap, drdt);
-        if ( bcMtrx.isNotEmpty() ) {
-            charMtrxCond.add(bcMtrx);
-        }
 
         contrib.beProductOf(charMtrxCond, r);
         contrib.add(help);

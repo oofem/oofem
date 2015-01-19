@@ -86,7 +86,6 @@ public:
     virtual const char *giveClassName() const { return "AnisotropicLinearElasticMaterial"; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     void giveInputRecord(DynamicInputRecord &input);
-    virtual double give(int aProperty, GaussPoint *gp);
 
     // important functions
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,

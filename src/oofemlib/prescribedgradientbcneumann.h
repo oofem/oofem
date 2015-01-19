@@ -35,7 +35,10 @@
 #ifndef PRESCRIBEDGRADIENTBCNEUMANN_H_
 #define PRESCRIBEDGRADIENTBCNEUMANN_H_
 
-#include "prescribedgradientbc.h"
+#include "prescribedgradienthomogenization.h"
+#include "activebc.h"
+
+#include <memory>
 
 #define _IFT_PrescribedGradientBCNeumann_Name   "prescribedgradientbcneumann"
 
@@ -49,7 +52,7 @@ class Element;
  * @author Erik Svenning
  * @date Mar 5, 2014
  */
-class PrescribedGradientBCNeumann : public PrescribedGradientBC
+class OOFEM_EXPORT PrescribedGradientBCNeumann : public ActiveBoundaryCondition, public PrescribedGradientHomogenization
 {
 public:
     PrescribedGradientBCNeumann(int n, Domain *d);
@@ -57,6 +60,9 @@ public:
 
     virtual int giveNumberOfInternalDofManagers() { return 1; }
     virtual DofManager *giveInternalDofManager(int i);
+
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual bcType giveType() const { return UnknownBT; }
 
@@ -66,7 +72,7 @@ public:
                                 CharType type, ValueModeType mode,
                                 const UnknownNumberingScheme &s, FloatArray *eNorm = NULL);
 
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep,
+    virtual void assemble(SparseMtrx &answer, TimeStep *tStep,
                           CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
     virtual void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,
@@ -75,18 +81,14 @@ public:
     virtual const char *giveClassName() const { return "PrescribedGradientBCNeumann"; }
     virtual const char *giveInputRecordName() const { return _IFT_PrescribedGradientBCNeumann_Name; }
 
-    /**
-     * Computes the homogenized, macroscopic, field (stress).
-     * @param sigma Output quantity (typically stress).
-     * @param tStep Active time step.
-     */
-    void computeField(FloatArray &sigma, TimeStep *tStep);
-
+    virtual void computeField(FloatArray &sigma, TimeStep *tStep);
+    virtual void computeTangent(FloatMatrix &tangent, TimeStep *tStep);
 
     void giveStressLocationArray(IntArray &oCols, const UnknownNumberingScheme &r_s);
+
 protected:
     /// DOF-manager containing the unknown homogenized stress.
-    Node *mpSigmaHom;
+    std :: unique_ptr< Node > mpSigmaHom;
     IntArray mSigmaIds;
 
     /// Help function that integrates the tangent contribution from a single element boundary.

@@ -204,11 +204,11 @@ ZZErrorEstimator :: giveValue(EE_ValueType type, TimeStep *tStep)
 RemeshingCriteria *
 ZZErrorEstimator :: giveRemeshingCrit()
 {
-    if ( this->rc ) {
-        return this->rc;
+    if ( !this->rc ) {
+        this->rc.reset( new ZZRemeshingCriteria(1, this) );
     }
 
-    return ( this->rc = new ZZRemeshingCriteria(1, this) );
+    return this->rc.get();
 }
 
 

@@ -94,11 +94,10 @@ SUPGElement :: giveCharacteristicMatrix(FloatMatrix &answer,
 //
 {
 
-    if ( type == StiffnessMatrix ) {
+    if ( type == TangentStiffnessMatrix ) {
             // stokes flow only
         double dscale = this->giveDomain()->giveEngngModel()->giveVariableScale(VST_Density);
         double uscale = this->giveDomain()->giveEngngModel()->giveVariableScale(VST_Velocity);
-
 
         IntArray vloc, ploc;
         FloatMatrix h;

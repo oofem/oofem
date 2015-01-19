@@ -44,26 +44,18 @@
 #include "topologydescription.h"
 #include "parallelcontext.h"
 #include "exportmodulemanager.h"
-#include "primaryfield.h"
+#include "dofdistributedprimaryfield.h"
 
 namespace oofem {
 REGISTER_EngngModel(StokesFlow);
 
 StokesFlow :: StokesFlow(int i, EngngModel *_master) : FluidModel(i, _master)
 {
-    this->nMethod = NULL;
     this->ndomains = 1;
-    this->stiffnessMatrix = NULL;
-    this->meshqualityee = NULL;
-    this->velocityPressureField = NULL;
 }
 
 StokesFlow :: ~StokesFlow()
 {
-    delete this->velocityPressureField;
-    delete this->nMethod;
-    delete this->stiffnessMatrix;
-    delete this->meshqualityee;
 }
 
 IRResultType StokesFlow :: initializeFrom(InputRecord *ir)
@@ -82,12 +74,9 @@ IRResultType StokesFlow :: initializeFrom(InputRecord *ir)
     this->deltaT = 1.0;
     IR_GIVE_OPTIONAL_FIELD(ir, deltaT, _IFT_StokesFlow_deltat);
 
-    delete this->velocityPressureField;
-    this->velocityPressureField = new PrimaryField(this, 1, FT_VelocityPressure, 1);
-    delete this->stiffnessMatrix;
-    this->stiffnessMatrix = NULL;
-    delete this->meshqualityee;
-    this->meshqualityee = NULL;
+    this->velocityPressureField.reset( new DofDistributedPrimaryField(this, 1, FT_VelocityPressure, 1) );
+    this->stiffnessMatrix.reset( NULL );
+    this->meshqualityee.reset( NULL );
 
     this->ts = TS_OK;
 
@@ -100,11 +89,12 @@ IRResultType StokesFlow :: initializeFrom(InputRecord *ir)
 void StokesFlow :: solveYourselfAt(TimeStep *tStep)
 {
     Domain *d = this->giveDomain(1);
-    FloatArray *solutionVector = NULL;
+    FloatArray externalForces;
+    FloatArray incrementOfSolution;
 
     if ( d->giveNumberOfElements() == 0 && d->giveTopology() ) {
         d->giveTopology()->replaceFEMesh();
-        this->meshqualityee = new MeshQualityErrorEstimator( 1, d );
+        this->meshqualityee.reset( new MeshQualityErrorEstimator( 1, d ) );
     }
 
     if ( d->giveTopology() && this->meshqualityee ) {
@@ -128,13 +118,11 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     velocityPressureField->advanceSolution(tStep);
 
     // Point pointer SolutionVector to current solution in velocityPressureField
-    solutionVector = velocityPressureField->giveSolutionVector(tStep);
-    solutionVector->resize(neq);
-    solutionVector->zero();
+    velocityPressureField->initialize(VM_Total, tStep, solutionVector, EModelDefaultEquationNumbering() );
 
     // Create "stiffness matrix"
     if ( !this->stiffnessMatrix ) {
-        this->stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
+        this->stiffnessMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
         if ( !this->stiffnessMatrix ) {
             OOFEM_ERROR("Couldn't create requested sparse matrix of type %d", sparseMtrxType);
         }
@@ -142,15 +130,15 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
         this->stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
     }
 
-    this->incrementOfSolution.resize(neq);
+    incrementOfSolution.resize(neq);
     this->internalForces.resize(neq);
 
     // Build initial/external load (LoadVector)
-    this->externalForces.resize(neq);
-    this->externalForces.zero();
-    this->assembleVector( this->externalForces, tStep, ExternalForcesVector, VM_Total,
+    externalForces.resize(neq);
+    externalForces.zero();
+    this->assembleVector( externalForces, tStep, ExternalForcesVector, VM_Total,
                          EModelDefaultEquationNumbering(), d );
-    this->updateSharedDofManagers(this->externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
+    this->updateSharedDofManagers(externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
 
     if ( this->giveProblemScale() == macroScale ) {
         OOFEM_LOG_INFO("StokesFlow :: solveYourselfAt - Solving step %d, metastep %d, (neq = %d)\n", tStep->giveNumber(), tStep->giveMetaStepNumber(), neq);
@@ -162,12 +150,12 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     double loadLevel;
     int currentIterations;
     this->updateComponent( tStep, InternalRhs, d );
-    NM_Status status = this->nMethod->solve(this->stiffnessMatrix,
-                                            & ( this->externalForces ),
+    NM_Status status = this->nMethod->solve(*this->stiffnessMatrix,
+                                            externalForces,
                                             NULL,
                                             solutionVector,
-                                            & ( this->incrementOfSolution ),
-                                            & ( this->internalForces ),
+                                            incrementOfSolution,
+                                            this->internalForces,
                                             this->eNorm,
                                             loadLevel, // Only relevant for incrementalBCLoadVector?
                                             SparseNonLinearSystemNM :: rlm_total,
@@ -178,23 +166,19 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     this->updateComponent( tStep, NonLinearLhs, d );
     this->internalForces.negated();
     this->internalForces.add(externalForces);
-    NM_Status status = this->nMethod->giveLinearSolver()->solve(this->stiffnessMatrix, & ( this->internalForces ), solutionVector);
+    NM_Status status = this->nMethod->giveLinearSolver()->solve(this->stiffnessMatrix.get(), & ( this->internalForces ), & solutionVector);
     this->updateComponent( tStep, NonLinearLhs, d );
 #endif
 
     if ( !( status & NM_Success ) ) {
         OOFEM_ERROR("No success in solving problem at time step", tStep->giveNumber());
     }
-
-
-    // update element stabilization
-    for ( auto &elem : d->giveElements() ) {
-        static_cast< FMElement * >( elem.get() )->updateStabilizationCoeffs(tStep);
-    }
 }
 
 void StokesFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
 {
+    velocityPressureField->update(VM_Total, tStep, solutionVector, EModelDefaultEquationNumbering());
+
     // update element stabilization
     for ( auto &elem : d->giveElements() ) {
         static_cast< FMElement * >( elem.get() )->updateStabilizationCoeffs(tStep);
@@ -208,7 +192,7 @@ void StokesFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
         return;
     } else if ( cmpn == NonLinearLhs ) {
         this->stiffnessMatrix->zero();
-        this->assemble(this->stiffnessMatrix, tStep, StiffnessMatrix,
+        this->assemble(*stiffnessMatrix, tStep, TangentStiffnessMatrix,
                        EModelDefaultEquationNumbering(), d);
         return;
     } else {
@@ -226,11 +210,7 @@ int StokesFlow :: forceEquationNumbering(int id)
 {
     int neq = FluidModel :: forceEquationNumbering(id);
     this->equationNumberingCompleted = false;
-    if ( this->stiffnessMatrix ) {
-        delete this->stiffnessMatrix;
-        this->stiffnessMatrix = NULL;
-    }
-
+    this->stiffnessMatrix.reset( NULL );
     return neq;
 }
 
@@ -262,11 +242,6 @@ int StokesFlow :: checkConsistency()
     return EngngModel :: checkConsistency();
 }
 
-void StokesFlow :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
-{
-    iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
-}
-
 void StokesFlow :: updateInternalState(TimeStep *tStep)
 {
     for ( auto &domain: domainList ) {
@@ -293,32 +268,22 @@ void StokesFlow :: doStepOutput(TimeStep *tStep)
 
 NumericalMethod *StokesFlow :: giveNumericalMethod(MetaStep *mStep)
 {
-    if ( this->nMethod ) {
-        return this->nMethod;
+    if ( !this->nMethod ) {
+        this->nMethod.reset( new NRSolver(this->giveDomain(1), this) );
     }
-
-    this->nMethod = new NRSolver(this->giveDomain(1), this);
-    return this->nMethod;
+    return this->nMethod.get();
 }
 
 TimeStep *StokesFlow :: giveNextStep()
 {
-    delete previousStep;
-
-    if ( currentStep == NULL ) {
-        int istep = this->giveNumberOfFirstStep();
+    if ( !currentStep ) {
         // first step -> generate initial step
-        previousStep = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -this->deltaT, this->deltaT, 0);
-        currentStep = new TimeStep(istep, this, 1, 0.0, this->deltaT, 1);
-    } else {
-        int istep = currentStep->giveNumber() + 1;
-        StateCounterType counter = currentStep->giveSolutionStateCounter() + 1;
-        previousStep = currentStep;
-        double dt = currentStep->giveTimeIncrement();
-        double totalTime = currentStep->giveTargetTime() + dt;
-        currentStep = new TimeStep(istep, this, 1, totalTime, dt, counter);
+        //currentStep.reset( new TimeStep(*giveSolutionStepWhenIcApply()) );
+        currentStep.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 1, 0., this->deltaT, 0) );
     }
+    previousStep = std :: move(currentStep);
+    currentStep.reset( new TimeStep(*previousStep, this->deltaT) );
 
-    return currentStep;
+    return currentStep.get();
 }
 } // end namespace oofem

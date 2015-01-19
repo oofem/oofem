@@ -16,6 +16,7 @@
 #include "sparsemtrx.h"
 #include "xfem/xfemelementinterface.h"
 #include "xfem/integrationrules/discsegintegrationrule.h"
+#include "timestep.h"
 #include "function.h"
 
 #include <cmath>
@@ -24,7 +25,9 @@ namespace oofem {
 REGISTER_BoundaryCondition(PrescribedGradientBCNeumann);
 
 PrescribedGradientBCNeumann :: PrescribedGradientBCNeumann(int n, Domain *d) :
-    PrescribedGradientBC(n, d)
+    ActiveBoundaryCondition(n, d),
+    PrescribedGradientHomogenization(),
+    mpSigmaHom( new Node(0, d) )
 {
     int nsd = d->giveNumberOfSpatialDimensions();
     int numComponents = 0;
@@ -43,31 +46,42 @@ PrescribedGradientBCNeumann :: PrescribedGradientBCNeumann(int n, Domain *d) :
         break;
     }
 
-    mSigmaIds.clear();
-    mpSigmaHom = new Node(0, d); // Node number lacks meaning here.
     for ( int i = 0; i < numComponents; i++ ) {
         // Just putting in X_i id-items since they don't matter.
         int dofId = d->giveNextFreeDofID();
         mSigmaIds.followedBy(dofId);
-        mpSigmaHom->appendDof( new MasterDof( mpSigmaHom, ( DofIDItem ) ( dofId ) ) );
+        mpSigmaHom->appendDof( new MasterDof( mpSigmaHom.get(), ( DofIDItem ) ( dofId ) ) );
     }
 }
 
 PrescribedGradientBCNeumann :: ~PrescribedGradientBCNeumann()
 {
-    if ( mpSigmaHom != NULL ) {
-        delete mpSigmaHom;
-        mpSigmaHom = NULL;
-    }
 }
+
+
+IRResultType PrescribedGradientBCNeumann :: initializeFrom(InputRecord *ir)
+{
+    ActiveBoundaryCondition :: initializeFrom(ir);
+    return PrescribedGradientHomogenization :: initializeFrom(ir);
+}
+
+
+void PrescribedGradientBCNeumann :: giveInputRecord(DynamicInputRecord &input)
+{
+    ActiveBoundaryCondition :: giveInputRecord(input);
+    PrescribedGradientHomogenization :: giveInputRecord(input);
+}
+
 
 DofManager *PrescribedGradientBCNeumann :: giveInternalDofManager(int i)
 {
-    return mpSigmaHom;
+    return mpSigmaHom.get();
 }
 
 void PrescribedGradientBCNeumann :: scale(double s)
-{}
+{
+    this->mGradient.times(s);
+}
 
 void PrescribedGradientBCNeumann :: assembleVector(FloatArray &answer, TimeStep *tStep,
                                                    CharType type, ValueModeType mode,
@@ -82,14 +96,13 @@ void PrescribedGradientBCNeumann :: assembleVector(FloatArray &answer, TimeStep 
 
     if ( type == ExternalForcesVector ) {
         // The external forces have two contributions. On the additional equations for sigma, the load is simply the prescribed gradient.
-        double rve_size = this->domainSize();
+        double rve_size = this->domainSize(this->giveDomain(), this->giveSetNumber());
         FloatArray stressLoad;
         FloatArray gradVoigt;
         giveGradientVoigt(gradVoigt);
 
-        double loadLevel = this->giveTimeFunction()->evaluate(tStep, mode);
+        double loadLevel = this->giveTimeFunction()->evaluateAtTime(tStep->giveTargetTime());
         stressLoad.beScaled(-rve_size*loadLevel, gradVoigt);
-
 
         answer.assemble(stressLoad, sigma_loc);
     } else if ( type == InternalForcesVector ) {
@@ -135,10 +148,10 @@ void PrescribedGradientBCNeumann :: assembleVector(FloatArray &answer, TimeStep 
     }
 }
 
-void PrescribedGradientBCNeumann :: assemble(SparseMtrx *answer, TimeStep *tStep,
+void PrescribedGradientBCNeumann :: assemble(SparseMtrx &answer, TimeStep *tStep,
                                              CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
-    if ( type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == StiffnessMatrix || type == ElasticStiffnessMatrix ) {
+    if ( type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == ElasticStiffnessMatrix ) {
         FloatMatrix Ke, KeT;
         IntArray loc_r, loc_c, sigma_loc_r, sigma_loc_c;
         Set *set = this->giveDomain()->giveSet(this->set);
@@ -164,8 +177,8 @@ void PrescribedGradientBCNeumann :: assemble(SparseMtrx *answer, TimeStep *tStep
             Ke.negated();
             KeT.beTranspositionOf(Ke);
 
-            answer->assemble(sigma_loc_r, loc_c, Ke); // Contribution to delta_s_i equations
-            answer->assemble(loc_r, sigma_loc_c, KeT); // Contributions to delta_v equations
+            answer.assemble(sigma_loc_r, loc_c, Ke); // Contribution to delta_s_i equations
+            answer.assemble(loc_r, sigma_loc_c, KeT); // Contributions to delta_v equations
         }
     } else   {
         printf("Skipping assembly in PrescribedGradientBCNeumann::assemble().\n");
@@ -220,6 +233,13 @@ void PrescribedGradientBCNeumann :: computeField(FloatArray &sigma, TimeStep *tS
 {
     mpSigmaHom->giveUnknownVector(sigma, mSigmaIds, VM_Total, tStep);
 }
+
+
+void PrescribedGradientBCNeumann :: computeTangent(FloatMatrix &tangent, TimeStep *tStep)
+{
+    OOFEM_ERROR("Not implemented yet");
+}
+
 
 void PrescribedGradientBCNeumann :: giveStressLocationArray(IntArray &oCols, const UnknownNumberingScheme &r_s)
 {

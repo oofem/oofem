@@ -475,7 +475,7 @@ ConcreteDPM2Status :: computeWork(GaussPoint *gp, double gf)
 
     //Ask for stress tensor at step
     StressVector stress(tempStressVector, matMode);
-    double n = stress.giveSize();
+    int n = stress.giveSize();
     //Calculate increase/decrease in total work
     double dSW = ( tempStressVector.dotProduct(deltaTotalStrain, n) + stressVector.dotProduct(deltaTotalStrain, n) ) / 2.;
 
@@ -545,11 +545,11 @@ ConcreteDPM2 :: initializeFrom(InputRecord *ir)
     // elastic parameters
     IR_GIVE_FIELD(ir, eM, _IFT_IsotropicLinearElasticMaterial_e)
     IR_GIVE_FIELD(ir, nu, _IFT_IsotropicLinearElasticMaterial_n);
-    propertyDictionary->add('E', eM);
-    propertyDictionary->add('n', nu);
+    propertyDictionary.add('E', eM);
+    propertyDictionary.add('n', nu);
 
     IR_GIVE_FIELD(ir, value, _IFT_IsotropicLinearElasticMaterial_talpha);
-    propertyDictionary->add(tAlpha, value);
+    propertyDictionary.add(tAlpha, value);
 
     gM = eM / ( 2. * ( 1. + nu ) );
     kM = eM / ( 3. * ( 1. - 2. * nu ) );
@@ -1711,7 +1711,7 @@ ConcreteDPM2 :: computeTempKappa(const double kappaInitial,
     equivalentDeltaPlasticStrain = sqrt( 1. / 9. * pow( ( sigTrial - sig ) / ( kM ), 2. ) +
                                          pow(rhoTrial / ( 2. * gM ), 2.) );
 
-    double thetaVertex = 3.141592653589793 / 3.;
+    double thetaVertex = M_PI / 3.;
     double ductilityMeasure = computeDuctilityMeasure(sig, rho, thetaVertex);
 
     return kappaInitial + equivalentDeltaPlasticStrain / ductilityMeasure;
@@ -2994,7 +2994,7 @@ ConcreteDPM2 :: computeTrialCoordinates(const StressVector &stress, double &sigN
         if ( sigNew >= 0 ) {
             thetaNew = 0.;
         } else {
-            thetaNew = 3.141592654 / 6;
+            thetaNew = M_PI / 6;
         }
     } else {
         StressVector deviatoricStress(matMode);

@@ -41,7 +41,6 @@
 ///@name Input fields for PiecewiseLinFunction
 //@{
 #define _IFT_PiecewiseLinFunction_Name "piecewiselinfunction"
-#define _IFT_PiecewiseLinFunction_npoints "npoints"
 #define _IFT_PiecewiseLinFunction_t "t"
 #define _IFT_PiecewiseLinFunction_ft "f(t)"
 #define _IFT_PiecewiseLinFunction_dataFile "datafile"

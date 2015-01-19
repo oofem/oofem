@@ -63,37 +63,27 @@ REGISTER_EngngModel(SUPG);
 SUPG :: SUPG(int i, EngngModel * _master) : FluidModel(i, _master), accelerationVector()
 {
     initFlag = 1;
-    lhs = NULL;
     ndomains = 1;
-    nMethod = NULL;
-    VelocityPressureField = NULL;
     consistentMassFlag = 0;
     equationScalingFlag = false;
     lscale = uscale = dscale = 1.0;
-    materialInterface = NULL;
 }
 
 
 SUPG :: ~SUPG()
 {
-    delete VelocityPressureField;
-    delete materialInterface;
-    delete nMethod;
-    delete lhs;
 }
 
 
 NumericalMethod *SUPG :: giveNumericalMethod(MetaStep *mStep)
 {
-    if ( this->nMethod ) {
-        return this->nMethod;
+    if ( !this->nMethod ) {
+        this->nMethod.reset( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) ); 
+        if ( !this->nMethod ) { 
+            OOFEM_ERROR("linear solver creation failed"); 
+        }
     }
-
-    this->nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this); 
-    if ( this->nMethod == NULL ) { 
-        OOFEM_ERROR("linear solver creation failed"); 
-    }
-    return this->nMethod;
+    return this->nMethod.get();
 }
 
 IRResultType
@@ -145,29 +135,29 @@ SUPG :: initializeFrom(InputRecord *ir)
     }
 
     if ( requiresUnknownsDictionaryUpdate() ) {
-        VelocityPressureField = new DofDistributedPrimaryField(this, 1, FT_VelocityPressure, 1);
+        VelocityPressureField.reset( new DofDistributedPrimaryField(this, 1, FT_VelocityPressure, 1) );
     } else {
-        VelocityPressureField = new PrimaryField(this, 1, FT_VelocityPressure, 1);
+        VelocityPressureField.reset( new PrimaryField(this, 1, FT_VelocityPressure, 1) );
     }
 
     val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_SUPG_miflag);
     if ( val == 1 ) {
-        this->materialInterface = new LEPlic( 1, this->giveDomain(1) );
+        this->materialInterface.reset( new LEPlic( 1, this->giveDomain(1) ) );
         this->materialInterface->initializeFrom(ir);
         // export velocity field
         FieldManager *fm = this->giveContext()->giveFieldManager();
         IntArray mask;
         mask = {V_u, V_v, V_w};
 
-        std :: shared_ptr< Field > _velocityField( new MaskedPrimaryField ( FT_Velocity, this->VelocityPressureField, mask ) );
+        std :: shared_ptr< Field > _velocityField( new MaskedPrimaryField ( FT_Velocity, this->VelocityPressureField.get(), mask ) );
         fm->registerField(_velocityField, FT_Velocity);
 
         //fsflag = 0;
         //IR_GIVE_OPTIONAL_FIELD (ir, fsflag, _IFT_SUPG_fsflag, "fsflag");
     } else if ( val == 2 ) {
         // positive coefficient scheme level set alg
-        this->materialInterface = new LevelSetPCS( 1, this->giveDomain(1) );
+        this->materialInterface.reset( new LevelSetPCS( 1, this->giveDomain(1) ) );
         this->materialInterface->initializeFrom(ir);
     }
 
@@ -229,13 +219,13 @@ SUPG :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
         return;
     } else if ( cmpn == NonLinearLhs ) {
         this->lhs->zero();
-        if ( 1 ) { //if ((nite > 5)) // && (rnorm < 1.e4))
-            this->assemble( lhs, tStep, TangentStiffnessMatrix,
-                            EModelDefaultEquationNumbering(), d );
-        } else {
-            this->assemble( lhs, tStep, SecantStiffnessMatrix,
-                            EModelDefaultEquationNumbering(), d );
-        }
+        //if ( 1 ) { //if ((nite > 5)) // && (rnorm < 1.e4))
+        this->assemble( *lhs, tStep, TangentStiffnessMatrix,
+                        EModelDefaultEquationNumbering(), d );
+       // } else {
+       //     this->assemble( lhs, tStep, SecantStiffnessMatrix,
+       //                     EModelDefaultEquationNumbering(), d );
+       // }
         return;
     } else {
         OOFEM_ERROR("Unknown component");
@@ -257,62 +247,51 @@ SUPG :: giveReynoldsNumber()
 TimeStep *
 SUPG :: giveSolutionStepWhenIcApply()
 {
-    if ( stepWhenIcApply == NULL ) {
+    if ( !stepWhenIcApply ) {
         double dt = deltaT / this->giveVariableScale(VST_Time);
 
-        stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0,
-                                       0.0, dt, 0);
+        stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0,
+                                       0.0, dt, 0) );
     }
 
-    return stepWhenIcApply;
+    return stepWhenIcApply.get();
 }
 
 TimeStep *
 SUPG :: giveNextStep()
 {
-    int istep = this->giveNumberOfFirstStep();
-    double totalTime = 0;
     double dt = deltaT;
-    StateCounterType counter = 1;
-    delete previousStep;
 
     Domain *domain = this->giveDomain(1);
 
-    if ( currentStep == NULL ) {
+    if ( !currentStep ) {
         // first step -> generate initial step
-        currentStep = new TimeStep( *giveSolutionStepWhenIcApply() );
-    } else {
-        istep =  currentStep->giveNumber() + 1;
-        counter = currentStep->giveSolutionStateCounter() + 1;
+        currentStep.reset( new TimeStep( *giveSolutionStepWhenIcApply() ) );
     }
 
-    previousStep = currentStep;
+    previousStep = std :: move(currentStep);
 
     if ( deltaTF ) {
-        dt *= domain->giveFunction(deltaTF)->evaluateAtTime(istep);
+        dt *= domain->giveFunction(deltaTF)->evaluateAtTime(previousStep->giveNumber() + 1);
     }
 
     // check for critical time step
     for ( auto &elem : domain->giveElements() ) {
-        dt = min( dt, static_cast< SUPGElement * >( elem.get() )->computeCriticalTimeStep(previousStep) );
+        dt = min( dt, static_cast< SUPGElement * >( elem.get() )->computeCriticalTimeStep(previousStep.get()) );
     }
 
     if ( materialInterface ) {
-        dt = min( dt, materialInterface->computeCriticalTimeStep(previousStep) );
+        dt = min( dt, materialInterface->computeCriticalTimeStep(previousStep.get()) );
     }
 
     // dt *= 0.6;
     dt /= this->giveVariableScale(VST_Time);
 
-    if ( currentStep != NULL ) {
-        totalTime = currentStep->giveTargetTime() + dt;
-    }
+    currentStep.reset( new TimeStep(*previousStep, dt) );
 
-    currentStep = new TimeStep(istep, this, 1, totalTime, dt, counter);
-
-    OOFEM_LOG_INFO( "SolutionStep %d : t = %e, dt = %e\n", istep, totalTime * this->giveVariableScale(VST_Time), dt * this->giveVariableScale(VST_Time) );
-    // time and dt variables are set eq to 0 for staics - has no meaning
-    return currentStep;
+    OOFEM_LOG_INFO( "SolutionStep %d : t = %e, dt = %e\n", currentStep->giveNumber(), 
+                    currentStep->giveTargetTime() * this->giveVariableScale(VST_Time), dt * this->giveVariableScale(VST_Time) );
+    return currentStep.get();
 }
 
 
@@ -350,8 +329,8 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
 
         incrementalSolutionVector.resize(neq);
 
-        lhs = classFactory.createSparseMtrx(sparseMtrxType);
-        if ( lhs == NULL ) {
+        lhs.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+        if ( !lhs ) {
             OOFEM_ERROR("sparse matrix creation failed");
         }
 
@@ -370,9 +349,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
 
 
     if ( !requiresUnknownsDictionaryUpdate() ) {
-        for ( int i = 1; i <= neq; i++ ) {
-            solutionVector->at(i) = prevSolutionVector->at(i);
-        }
+        *solutionVector = *prevSolutionVector;
     }
 
     //previousAccelerationVector=accelerationVector;
@@ -430,12 +407,12 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     double loadLevel;
     int currentIterations;
     this->updateComponent( tStep, InternalRhs, this->giveDomain(1) );
-    NM_Status status = this->nMethod->solve(this->lhs,
-                                            & externalForces,
+    NM_Status status = this->nMethod->solve(*this->lhs,
+                                            externalForces,
                                             NULL,
                                             solutionVector,
-                                            & ( this->incrementalSolutionVector ),
-                                            & ( this->internalForces ),
+                                            this->incrementalSolutionVector,
+                                            this->internalForces,
                                             this->eNorm,
                                             loadLevel, // Only relevant for incrementalBCLoadVector?
                                             SparseNonLinearSystemNM :: rlm_total,
@@ -476,22 +453,22 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
             // momentum balance part
             lhs->zero();
             if ( 1 ) { //if ((nite > 5)) // && (rnorm < 1.e4))
-                this->assemble( lhs, tStep, TangentStiffnessMatrix,
+                this->assemble( *lhs, tStep, TangentStiffnessMatrix,
                                EModelDefaultEquationNumbering(), this->giveDomain(1) );
             } else {
-                this->assemble( lhs, tStep, SecantStiffnessMatrix,
+                this->assemble( *lhs, tStep, SecantStiffnessMatrix,
                                EModelDefaultEquationNumbering(), this->giveDomain(1) );
             }
         }
         //if (this->fsflag) this->imposeAmbientPressureInOuterNodes(lhs,&rhs,tStep);
 
 #if 1
-        nMethod->solve(lhs, & rhs, & incrementalSolutionVector);
+        nMethod->solve(*lhs, rhs, incrementalSolutionVector);
 #else
 
         SparseMtrx *__lhs = lhs->GiveCopy();
 
-        nMethod->solve(lhs, & rhs, & incrementalSolutionVector);
+        nMethod->solve(*lhs, rhs, incrementalSolutionVector);
 
         // check solver
         FloatArray __rhs(neq);
@@ -1148,7 +1125,6 @@ SUPG :: updateDofUnknownsDictionary_predictor(TimeStep *tStep)
                 } else {
                     val = dof->giveBcValue(VM_Total, tStep);
                     dof->updateUnknownsDictionary(tStep, VM_Total, val); // velocity
-                    //val = iDof -> giveBcValue (VM_Velocity,tStep) ; //velocity of velocity is acceleration
                     dof->updateUnknownsDictionary(tStep, VM_Acceleration, 0.0); // acceleration
                 }
             }

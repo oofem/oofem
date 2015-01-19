@@ -118,9 +118,9 @@ Tr2Shell7XFEM :: computeGaussPoints()
         for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { 
             int numberOfInterfaces = this->layeredCS->giveNumberOfLayers()-1;
             czIntegrationRulesArray.resize( numberOfInterfaces );
-            for ( int i = 0; i < numberOfInterfaces; i++ ) {
-                czIntegrationRulesArray [ i ].reset( new GaussIntegrationRule(1, this) );
-                czIntegrationRulesArray [ i ]->SetUpPointsOnTriangle(nPointsTri, _3dInterface);
+            for ( int j = 0; j < numberOfInterfaces; j++ ) {
+                czIntegrationRulesArray [ j ].reset( new GaussIntegrationRule(1, this) );
+                czIntegrationRulesArray [ j ]->SetUpPointsOnTriangle(nPointsTri, _3dInterface);
             }
         
         }
@@ -203,9 +203,9 @@ bool Tr2Shell7XFEM :: updateIntegrationRuleMultiCrack()
         //Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); 
         int numberOfInterfaces = this->layeredCS->giveNumberOfLayers()-1;
         czIntegrationRulesArray.resize(numberOfInterfaces);
-        for ( int i = 0; i < numberOfInterfaces; i++ ) {
-            czIntegrationRulesArray [ i ].reset( new GaussIntegrationRule(1, this) );
-            czIntegrationRulesArray [ i ]->SetUpPointsOnTriangle(nPointsTri, _3dInterface);
+        for ( int j = 0; j < numberOfInterfaces; j++ ) {
+            czIntegrationRulesArray [ j ].reset( new GaussIntegrationRule(1, this) );
+            czIntegrationRulesArray [ j ]->SetUpPointsOnTriangle(nPointsTri, _3dInterface);
         }
     }
 

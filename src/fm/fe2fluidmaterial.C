@@ -80,19 +80,17 @@ void FE2FluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, Gauss
 
 void FE2FluidMaterial :: computeDeviatoricStressVector(FloatArray &stress_dev, double &r_vol, GaussPoint *gp, const FloatArray &eps, double pressure, TimeStep *tStep)
 {
-    FloatMatrix d, tangent;
     FE2FluidMaterialStatus *ms = static_cast< FE2FluidMaterialStatus * >( this->giveStatus(gp) );
 
     ms->setTimeStep(tStep);
 
     MixedGradientPressureBC *bc = ms->giveBC();
-    StokesFlow *rve = ms->giveRVE();
 
     // Set input
     bc->setPrescribedDeviatoricGradientFromVoigt(eps);
     bc->setPrescribedPressure(pressure);
     // Solve subscale problem
-    rve->solveYourselfAt(tStep);
+    ms->giveRVE()->solveYourselfAt(tStep);
 
     bc->computeFields(stress_dev, r_vol, tStep);
     ms->letDeviatoricStressVectorBe(stress_dev);
@@ -329,7 +327,6 @@ FE2FluidMaterialStatus :: FE2FluidMaterialStatus(int n, Domain *d, GaussPoint *g
 
 FE2FluidMaterialStatus :: ~FE2FluidMaterialStatus()
 {
-    delete this->rve;
 }
 
 // Uses an input file for now, should eventually create the RVE itself.
@@ -344,10 +341,7 @@ bool FE2FluidMaterialStatus :: createRVE(int n, GaussPoint *gp, const std :: str
     em->giveNextStep(); // Makes sure there is a timestep (which we will modify before solving a step)
     em->init();
 
-    this->rve = dynamic_cast< StokesFlow * >(em);
-    if ( !this->rve ) {
-        return false;
-    }
+    this->rve.reset( em );
 
     std :: ostringstream name;
     name << this->rve->giveOutputBaseFileName() << "-gp" << n;
@@ -393,7 +387,7 @@ contextIOResultType FE2FluidMaterialStatus :: saveContext(DataStream &stream, Co
         THROW_CIOERR(iores);
     }
 
-    return CIO_OK;
+    return this->rve->saveContext(&stream, mode, obj);
 }
 
 contextIOResultType FE2FluidMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
@@ -402,8 +396,9 @@ contextIOResultType FE2FluidMaterialStatus :: restoreContext(DataStream &stream,
     if ( ( iores = FluidDynamicMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
+    this->markOldTangents();
 
-    return CIO_OK;
+    return this->rve->restoreContext(&stream, mode, obj);
 }
 
 void FE2FluidMaterialStatus :: markOldTangents() { this->oldTangents = true; }

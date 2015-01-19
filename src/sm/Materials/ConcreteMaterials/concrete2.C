@@ -151,8 +151,8 @@ Concrete2 :: give(int aProperty, GaussPoint *gp)
         return this->IFAD;
 
     default:
-        if ( propertyDictionary->includes(aProperty) ) {
-            value = propertyDictionary->at(aProperty);
+        if ( propertyDictionary.includes(aProperty) ) {
+            value = propertyDictionary.at(aProperty);
             return value;
         } else {
             return this->linearElasticMaterial->give(aProperty, gp);

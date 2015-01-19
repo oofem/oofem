@@ -49,21 +49,15 @@
 
 
 namespace oofem {
-StructuralInterfaceElement :: StructuralInterfaceElement(int n, Domain *aDomain) : Element(n, aDomain)
+StructuralInterfaceElement :: StructuralInterfaceElement(int n, Domain *aDomain) : Element(n, aDomain),
+    interpolation(NULL),
+    nlGeometry(0)
 {
-    // Constructor. Creates an element with number n, belonging to aDomain.
-    initialDisplacements = NULL;
-    nlGeometry = 0;
 }
 
 
 StructuralInterfaceElement :: ~StructuralInterfaceElement()
-// Destructor.
-{
-    if ( initialDisplacements ) {
-        delete initialDisplacements;
-    }
-}
+{ }
 
 
 
@@ -76,7 +70,7 @@ StructuralInterfaceElement :: computeStiffnessMatrix(FloatMatrix &answer, MatRes
     answer.clear();
 
     FloatMatrix rotationMatGtoL;
-    for ( IntegrationPoint *ip: *this->giveDefaultIntegrationRulePtr() ) {
+    for ( auto &ip: *this->giveDefaultIntegrationRulePtr() ) {
 
         if ( this->nlGeometry == 0 ) {
             this->giveStiffnessMatrix_Eng(D, rMode, ip, tStep);
@@ -124,15 +118,12 @@ StructuralInterfaceElement :: computeSpatialJump(FloatArray &answer, Integration
     this->computeVectorOf(VM_Total, tStep, u);
 
     // subtract initial displacements, if defined
-    if ( initialDisplacements ) {
-        u.subtract(* initialDisplacements);
+    if ( initialDisplacements.giveSize() ) {
+        u.subtract(initialDisplacements);
     }
 
     answer.beProductOf(N, u);
 }
-
-
-
 
 
 void
@@ -150,14 +141,14 @@ StructuralInterfaceElement :: giveInternalForcesVector(FloatArray &answer,
 
     this->computeVectorOf(VM_Total, tStep, u);
     // subtract initial displacements, if defined
-    if ( initialDisplacements ) {
-        u.subtract(* initialDisplacements);
+    if ( initialDisplacements.giveSize() ) {
+        u.subtract(initialDisplacements);
     }
 
     // zero answer will resize accordingly when adding first contribution
     answer.clear();
 
-    for ( IntegrationPoint *ip: *this->giveDefaultIntegrationRulePtr() ) {
+    for ( auto &ip: *this->giveDefaultIntegrationRulePtr() ) {
         this->computeNmatrixAt(ip, N);
         //if ( useUpdatedGpRecord == 1 ) {
         //    StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( ip->giveMaterialStatus() );
@@ -176,6 +167,7 @@ StructuralInterfaceElement :: giveInternalForcesVector(FloatArray &answer,
     }
 
 }
+
 
 void
 StructuralInterfaceElement :: computeTraction(FloatArray &traction, IntegrationPoint *ip, FloatArray &jump, TimeStep *tStep)
@@ -198,15 +190,12 @@ StructuralInterfaceElement :: computeTraction(FloatArray &traction, IntegrationP
 }
 
 
-
 void
 StructuralInterfaceElement :: giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep)
 {
     // returns characteristics matrix of receiver according to mtrx
 
-    if ( mtrx == StiffnessMatrix ) {
-        this->computeStiffnessMatrix(answer, TangentStiffness, tStep);
-    } else if ( mtrx == TangentStiffnessMatrix ) {
+    if ( mtrx == TangentStiffnessMatrix ) {
         this->computeStiffnessMatrix(answer, TangentStiffness, tStep);
     } else if ( mtrx == SecantStiffnessMatrix ) {
         this->computeStiffnessMatrix(answer, SecantStiffness, tStep);
@@ -243,11 +232,7 @@ StructuralInterfaceElement :: updateYourself(TimeStep *tStep)
 
     // record initial displacement if element not active
     if ( activityTimeFunction && !isActivated(tStep) ) {
-        if ( !initialDisplacements ) {
-            initialDisplacements = new FloatArray();
-        }
-
-        this->computeVectorOf(VM_Total, tStep, * initialDisplacements);
+        this->computeVectorOf(VM_Total, tStep, initialDisplacements);
     }
 }
 
@@ -256,9 +241,7 @@ void
 StructuralInterfaceElement :: updateInternalState(TimeStep *tStep)
 {
     // Updates the receiver at end of step.
-
     FloatArray tractionG, jumpL;
-    FloatMatrix rotationMatGtoL;
 
     // force updating strains & stresses
     for ( auto &iRule: integrationRulesArray ) {
@@ -288,9 +271,6 @@ StructuralInterfaceElement :: giveIPValue(FloatArray &answer, IntegrationPoint *
 }
 
 
-
-
-
 IRResultType
 StructuralInterfaceElement :: initializeFrom(InputRecord *ir)
 {
@@ -306,8 +286,7 @@ void StructuralInterfaceElement :: giveInputRecord(DynamicInputRecord &input)
 StructuralInterfaceCrossSection *StructuralInterfaceElement :: giveInterfaceCrossSection()
 {
     return static_cast< StructuralInterfaceCrossSection * >( this->giveCrossSection() );
-};
-
+}
 
 
 void
@@ -331,7 +310,4 @@ StructuralInterfaceElement :: giveStiffnessMatrix_Eng(FloatMatrix &answer, MatRe
     ///@todo dT1dj = d(F*T2)/dj = dF/dj*T2 + F*dT2/dj - should we assume dFdj = 0? Otherwise it will be very complex!
 }
 } // end namespace oofem
-
-
-
 

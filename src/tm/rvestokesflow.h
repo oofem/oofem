@@ -52,7 +52,7 @@ class RVEStokesFlowMaterialStatus : public TransportMaterialStatus
 {
 protected:
     FloatMatrix temp_TangentMatrix, tangentMatrix;
-    FloatArray *solutionVector;
+    FloatArray solutionVector;
     EngngModel *rve;
 
 public:

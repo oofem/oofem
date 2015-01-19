@@ -1046,7 +1046,6 @@ void  defAutoScale(Widget wid, XtPointer cl, XtPointer cd)
     };
     double coord, maxdef = 0.0;
     Domain *domain;
-    DofManager *dman;
 
     TimeStep *tStep = gc [ OOFEG_DEFORMED_GEOMETRY_LAYER ].getActiveProblem()->giveCurrentStep();
     if ( tStep == NULL ) {
@@ -1063,20 +1062,20 @@ void  defAutoScale(Widget wid, XtPointer cl, XtPointer cd)
             }
         }
 
-        for ( i = 1; i <= nnodes; i++ ) {
-            dman = domain->giveDofManager(i);
-            if ( dynamic_cast< Node * >(dman) ) {
+        for ( auto &dman : domain->giveDofManagers() ) {
+            Node *node = dynamic_cast< Node * >(dman.get());
+            if ( node ) {
                 if ( init ) {
                     for ( j = 1; j <= 3; j++ ) {
-                        maxcoords [ j - 1 ] = mincoords [ j - 1 ] = domain->giveNode(i)->giveCoordinate(j);
+                        maxcoords [ j - 1 ] = mincoords [ j - 1 ] = node->giveCoordinate(j);
                     }
 
                     init = 0;
                 }
 
                 for ( j = 1; j <= 3; j++ ) {
-                    coord = domain->giveNode(i)->giveCoordinate(j);
-                    maxdef = max( maxdef, fabs(domain->giveNode(i)->giveUpdatedCoordinate(j, tStep, 1.0) - coord) );
+                    coord = node->giveCoordinate(j);
+                    maxdef = max( maxdef, fabs(node->giveUpdatedCoordinate(j, tStep, 1.0) - coord) );
                     maxcoords [ j - 1 ] = max(maxcoords [ j - 1 ], coord);
                     mincoords [ j - 1 ] = min(mincoords [ j - 1 ], coord);
                 }

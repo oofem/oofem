@@ -41,6 +41,7 @@
 #include "material.h"
 #include "internalstatetype.h"
 #include "internalstatevaluetype.h"
+#include "dictionary.h"
 #include "crosssectextension.h"
 
 ///@name Input fields for CrossSection
@@ -104,7 +105,7 @@ protected:
      * More preferably, (due to slow access into dictionary values) one should use
      * corresponding variables declared inside class
      */
-    Dictionary *propertyDictionary;
+    Dictionary propertyDictionary;
 
     int setNumber;        // el set number the cross section is applied to
 

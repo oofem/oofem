@@ -331,20 +331,20 @@ SkylineUnsym :: buildInternalStructure(EngngModel *eModel, int di, const Unknown
         ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
         if ( bc != NULL ) {
             bc->giveLocationArrays(r_locs, c_locs, UnknownCharType, s, s);
-            for ( std :: size_t k = 0; k < r_locs.size(); k++ ) {
-                IntArray &krloc = r_locs [ k ];
-                IntArray &kcloc = c_locs [ k ];
+            for ( std :: size_t j = 0; j < r_locs.size(); j++ ) {
+                IntArray &krloc = r_locs [ j ];
+                IntArray &kcloc = c_locs [ j ];
                 first = neq;
-                for ( int j = 1; j <= kcloc.giveSize(); j++ ) {
-                    int jj = kcloc.at(j);
-                    if ( jj ) {
-                        first = min(first, jj);
+                for ( int k = 1; k <= kcloc.giveSize(); k++ ) {
+                    int kk = kcloc.at(k);
+                    if ( kk ) {
+                        first = min(first, kk);
                     }
                 }
-                for ( int i = 1; i <= krloc.giveSize(); i++ ) {
-                    int ii = krloc.at(i);
-                    if ( ii && ( first < firstIndex.at(ii) ) ) {
-                        firstIndex.at(ii) = first;
+                for ( int k = 1; k <= krloc.giveSize(); k++ ) {
+                    int kk = krloc.at(k);
+                    if ( kk && ( first < firstIndex.at(kk) ) ) {
+                        firstIndex.at(kk) = first;
                     }
                 }
             }

@@ -119,7 +119,7 @@ CBSElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueM
     } else if ( mtrx == CorrectionRhs ) {
         this->computeCorrectionRhs(answer, tStep);
     } else if ( mtrx == PrescribedVelocityRhsVector ) {
-        this->computePrescribedTermsI(answer, mode, tStep);
+        this->computePrescribedTermsI(answer, tStep);
     }
     //else if (mtrx == PrescribedDensityRhsVector)
     //  this->computePrescribedTermsII (answer, mode, tStep);
@@ -143,12 +143,12 @@ CBSElement :: giveCharacteristicValue(CharType mtrx, TimeStep *tStep)
 
 
 void
-CBSElement :: computePrescribedTermsI(FloatArray &answer, ValueModeType mode, TimeStep *tStep)
+CBSElement :: computePrescribedTermsI(FloatArray &answer, TimeStep *tStep)
 {
     FloatMatrix mass;
     FloatArray usp;
     this->computeConsistentMassMtrx(mass, tStep);
-    this->computeVectorOfVelocities(mode, tStep, usp);
+    this->computeVectorOfVelocities(VM_Incremental, tStep, usp);
     answer.beProductOf(mass, usp);
     answer.negated();
 }

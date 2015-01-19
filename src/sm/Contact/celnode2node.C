@@ -54,17 +54,17 @@ int
 Node2NodeContact :: instanciateYourself(DataReader *dr)
 {
     // compute normal as direction vector from master node to slave node
-    FloatArray xs, xm, normal;
+    FloatArray xs, xm, _normal;
     xs = *this->slaveNode->giveCoordinates();
     xm = *this->masterNode->giveCoordinates();
     
-    normal = xs-xm;
-    double norm = normal.computeNorm();
+	_normal = xs-xm;
+    double norm = _normal.computeNorm();
     if ( norm < 1.0e-8 ) {
         OOFEM_ERROR("Couldn't compute normal between master node (num %d) and slave node (num %d), nodes are too close to each other.", 
           masterNode->giveGlobalNumber(), slaveNode->giveGlobalNumber() )
     } else {
-        this->normal = normal*(1.0/norm);
+        normal = _normal*(1.0/norm);
     }
     return 1;
 }

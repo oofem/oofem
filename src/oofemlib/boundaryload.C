@@ -53,8 +53,8 @@ void
 BoundaryLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode)
 {
     // Evaluates the value at specific integration point
-    int i, j, nSize;
-    double value, factor;
+    int nSize;
+    double factor;
     FloatArray N;
 
     if ( ( mode != VM_Total ) && ( mode != VM_Incremental ) ) {
@@ -70,8 +70,9 @@ BoundaryLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatA
         OOFEM_ERROR("componentArray size mismatch");
     }
 
-    for ( i = 1; i <= nDofs; i++ ) {
-        for ( value = 0., j = 1; j <= nSize; j++ ) {
+    for ( int i = 1; i <= nDofs; i++ ) {
+        double value = 0.;
+        for ( int j = 1; j <= nSize; j++ ) {
             value += N.at(j) * this->componentArray.at(i + ( j - 1 ) * nDofs);
         }
 

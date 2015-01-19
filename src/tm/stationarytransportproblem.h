@@ -52,6 +52,7 @@ class SparseNonLinearSystemNM;
 
 /**
  * This class represents stationary transport problem.
+ * @author Mikael Öhman (among others)
  */
 class StationaryTransportProblem : public EngngModel
 {
@@ -90,8 +91,6 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual int checkConsistency();
-
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
 
     // identification
     virtual const char *giveInputRecordName() const { return _IFT_StationaryTransportProblem_Name; }

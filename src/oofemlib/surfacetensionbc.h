@@ -71,7 +71,7 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep,
+    virtual void assemble(SparseMtrx &answer, TimeStep *tStep,
                           CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
     virtual void assembleVector(FloatArray &answer, TimeStep *tStep,

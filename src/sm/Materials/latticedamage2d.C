@@ -76,7 +76,7 @@ LatticeDamage2d :: initializeFrom(InputRecord *ir)
 
     double value = 0.;
     IR_GIVE_FIELD(ir, value, _IFT_IsotropicLinearElasticMaterial_talpha);
-    propertyDictionary->add(tAlpha, value);
+    propertyDictionary.add(tAlpha, value);
 
     IR_GIVE_FIELD(ir, eNormal, _IFT_LatticeDamage2d_eNormal);
 
@@ -126,7 +126,7 @@ LatticeDamage2d :: initializeFrom(InputRecord *ir)
     this->biotCoefficient = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, this->biotCoefficient, _IFT_LatticeDamage2d_bio);
 
-    this->biotType = 0.;
+    this->biotType = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->biotType, _IFT_LatticeDamage2d_btype);
 
     return IRRT_OK;

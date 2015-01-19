@@ -130,8 +130,6 @@ public:
     virtual void giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
                                                  CharType type, TimeStep *tStep, Domain *domain);
 
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
-
     /**
      * Returns time function for time step increment.
      * Used time function should provide step lengths as function of step number.

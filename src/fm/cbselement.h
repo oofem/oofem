@@ -77,7 +77,7 @@ public:
     /** Calculates diagonal mass matrix. */
     virtual void computeDiagonalMassMtrx(FloatArray &answer, TimeStep *tStep) = 0;
     /** Calculates rhs due to prescribed (*) velocities for (*) velocities. */
-    virtual void computePrescribedTermsI(FloatArray &answer, ValueModeType mode, TimeStep *tStep);
+    virtual void computePrescribedTermsI(FloatArray &answer, TimeStep *tStep);
     /* Calculates rhs due to prescribed density/pressure. */
     //virtual void computePrescribedTermsII(FloatArray& answer, ValueModeType, TimeStep*);
     /** Calculates convection component for (*) velocities. */

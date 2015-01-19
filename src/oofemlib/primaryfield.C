@@ -80,8 +80,9 @@ PrimaryField :: storeDofManager(TimeStep *tStep, DofManager &dman)
 }
 
 void
-PrimaryField :: storeInDofDictionaries(TimeStep *tStep, Domain *d)
+PrimaryField :: storeInDofDictionaries(TimeStep *tStep)
 {
+    Domain *d = emodel->giveDomain(domainIndx);
     for ( auto &dman : d->giveDofManagers() ) {
         this->storeDofManager(tStep, *dman);
     }
@@ -111,10 +112,10 @@ PrimaryField :: readDofManager(TimeStep *tStep, DofManager &dman)
         for ( int hist = 0; hist < this->nHistVectors; ++hist ) {
             if ( eq > 0 ) {
                 FloatArray *vec = this->giveSolutionVector( resolveIndx(tStep, 0));
-                dof->giveUnknownsDictionaryValue(step, VM_Total, vec->at(eq));
+                vec->at(eq) = dof->giveUnknownsDictionaryValue(step, VM_Total);
             } else if ( eq < 0 ) {
                 FloatArray *vec = this->givePrescribedVector( resolveIndx(tStep, 0) );
-                dof->giveUnknownsDictionaryValue(step, VM_Total, vec->at(-eq));
+                vec->at(-eq) = dof->giveUnknownsDictionaryValue(step, VM_Total);
             }
             step = tStep->givePreviousStep();
         }
@@ -123,8 +124,11 @@ PrimaryField :: readDofManager(TimeStep *tStep, DofManager &dman)
 
 
 void
-PrimaryField :: readFromDofDictionaries(TimeStep *tStep, Domain *d)
+PrimaryField :: readFromDofDictionaries(TimeStep *tStep)
 {
+    Domain *d = emodel->giveDomain(domainIndx);
+    //int neq = this->emodel->giveNumberOfDomainEquations(domainIndx, EModelDefaultEquationNumbering());
+    //int peq = this->emodel->giveNumberOfDomainEquations(domainIndx, EModelDefaultPrescribedEquationNumbering());
     for ( auto &dman : d->giveDofManagers() ) {
         this->readDofManager(tStep, *dman);
     }
@@ -160,10 +164,10 @@ PrimaryField :: initialize(ValueModeType mode, TimeStep *tStep, FloatArray &answ
 }
 
 void
-PrimaryField :: applyDefaultInitialCondition(int domain)
+PrimaryField :: applyDefaultInitialCondition()
 {
-    int neq = emodel->giveNumberOfDomainEquations( domain, EModelDefaultEquationNumbering() );
-    int npeq = emodel->giveNumberOfDomainEquations( domain, EModelDefaultPrescribedEquationNumbering() );
+    int neq = emodel->giveNumberOfDomainEquations( domainIndx, EModelDefaultEquationNumbering() );
+    int npeq = emodel->giveNumberOfDomainEquations( domainIndx, EModelDefaultPrescribedEquationNumbering() );
     for ( auto &s : solutionVectors ) {
         s.resize(neq);
         s.zero();
@@ -172,12 +176,49 @@ PrimaryField :: applyDefaultInitialCondition(int domain)
         s.resize(npeq);
         s.zero();
     }
+
+    TimeStep *tStep = emodel->giveSolutionStepWhenIcApply();
+    Domain *d = emodel->giveDomain(domainIndx);
+    int indxm0;
+    if ( tStep == NULL ) {
+        indxm0 = 1;
+    } else {
+        indxm0 = this->resolveIndx(tStep, 0);
+    }
+    FloatArray *f0 = this->giveSolutionVector(indxm0);
+    FloatArray *p0 = this->givePrescribedVector(indxm0);
+    for ( auto &dman : d->giveDofManagers() ) {
+        for ( auto &dof : *dman ) {
+            int icid = dof->giveIcId();
+            if ( icid > 0 && dof->isPrimaryDof() ) {
+                InitialCondition *ic = d->giveIc(icid);
+                if ( ic->hasConditionOn(VM_Total) ) {
+                    double val = ic->give(VM_Total);
+                    int eq = dof->giveEqn();
+                    dof->updateUnknownsDictionary(tStep, VM_Total, val);
+                    if ( eq > 0 ) {
+                        f0->at(eq) = val;
+                    } else if ( eq < 0 ) {
+                        p0->at(-eq) = val;
+                    }
+                }
+            }
+        }
+    }
+    // Apply ICs that use sets.
+    for ( auto &ic : emodel->giveDomain(domainIndx)->giveIcs() ) {
+        this->applyInitialCondition(*ic);
+    }
 }
 
 
 void
 PrimaryField :: applyInitialCondition(InitialCondition &ic)
 {
+    if ( ic.giveSetNumber() == 0 ) {
+        return;
+    }
+
     IntArray loc_s, loc_ps;
     Domain *d = ic.giveDomain();
     Set *set = d->giveSet(ic.giveSetNumber());
@@ -218,16 +259,24 @@ PrimaryField :: applyInitialCondition(InitialCondition &ic)
 
 
 void
-PrimaryField :: applyBoundaryCondition(TimeStep *tStep, int di)
+PrimaryField :: applyBoundaryCondition(TimeStep *tStep)
 {
-    Domain *d = emodel->giveDomain(di);
+    Domain *d = emodel->giveDomain(domainIndx);
     FloatArray *f = this->givePrescribedVector(resolveIndx(tStep, 0));
     for ( auto &dman : d->giveDofManagers() ) {
         for ( auto &dof : *dman ) {
             int peq = - dof->giveEqn();
             if ( peq > 0 ) {
-                f->at(peq) = dof->giveBcValue(VM_Total, tStep);
+                int bcid = dof->giveBcId();
+                f->at(peq) = static_cast< BoundaryCondition* >(d->giveBc(bcid))->give(dof, VM_Total, tStep->giveTargetTime());
             }
+        }
+    }
+
+    for ( auto &bc : d->giveBcs() ) {
+        BoundaryCondition *dbc = dynamic_cast< BoundaryCondition* >(bc.get());
+        if ( dbc ) {
+            this->applyBoundaryCondition(*dbc, tStep);
         }
     }
 }
@@ -249,7 +298,7 @@ PrimaryField :: applyBoundaryCondition(BoundaryCondition &bc, TimeStep *tStep)
             Dof *dof = dman->giveDofWithID(dofid);
             int peq = - dof->giveEqn(); // Note, only consider prescribed equations here
             if ( peq > 0 ) {
-                f->at(peq) = bc.give(dof, VM_Total, tStep);
+                f->at(peq) = bc.give(dof, VM_Total, tStep->giveTargetTime());
             }
         }
     }
@@ -257,7 +306,7 @@ PrimaryField :: applyBoundaryCondition(BoundaryCondition &bc, TimeStep *tStep)
 
 
 void
-PrimaryField :: update(ValueModeType mode, TimeStep *tStep, FloatArray &vectorToStore)
+PrimaryField :: update(ValueModeType mode, TimeStep *tStep, const FloatArray &vectorToStore, const UnknownNumberingScheme &s)
 {
     if ( mode == VM_Total ) {
         * this->giveSolutionVector(tStep) = vectorToStore;
@@ -279,7 +328,7 @@ PrimaryField :: giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *tStep)
         if ( eq > 0 )
             return this->giveSolutionVector(indxm0)->at(eq);
         else
-            return this->givePrescribedVector(indxm0)->at(eq);
+            return this->givePrescribedVector(indxm0)->at(-eq);
     } else if ( mode == VM_Incremental ) {
         int indxm0 = this->resolveIndx(tStep, 0);
         int indxm1 = this->resolveIndx(tStep, -1);
@@ -288,7 +337,7 @@ PrimaryField :: giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *tStep)
         if ( eq > 0 )
             return ( this->giveSolutionVector(indxm0)->at(eq) - this->giveSolutionVector(indxm1)->at(eq) );
         else
-            return ( this->givePrescribedVector(indxm0)->at(eq) - this->givePrescribedVector(indxm1)->at(eq) );
+            return ( this->givePrescribedVector(indxm0)->at(-eq) - this->givePrescribedVector(indxm1)->at(-eq) );
     } else {
         OOFEM_ERROR("unsupported mode");
     }

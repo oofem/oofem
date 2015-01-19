@@ -111,14 +111,11 @@ public:
     /// Sets the temp scalar measure of the largest strain level to given value.
     void setTempKappa(double newKappa) { tempKappa = newKappa; }
     /// Returns the last equilibrated second order damage tensor.
-    //void giveDamage(FloatMatrix &answer){answer = damage;}
-    FloatMatrix giveDamage() { return damage; }
+    const FloatMatrix &giveDamage() { return damage; }
     /// Returns the temp. second order damage tensor.
-    //void giveTempDamage(FloatMatrix &answer){answer = tempDamage;}
-    FloatMatrix giveTempDamage() { return tempDamage; }
-    // Assigns temp. damage tensor to given tensor d
-    //void setTempDamage(FloatMatrix &d){tempDamage = d;}
-    void setTempDamage(FloatMatrix d) { tempDamage = d; }
+    const FloatMatrix &giveTempDamage() { return tempDamage; }
+    /// Assigns temp. damage tensor to given tensor d
+    void setTempDamage(const FloatMatrix &d) { tempDamage = d; }
     /// Returns the last equilibrated scalar measure of the out-of-plane strain to given value (for 2dPlaneStress mode).
     double giveStrainZ() { return strainZ; }
     /// Returns the temp scalar measure of the out-of-plane strain to given value (for 2dPlaneStress mode).
@@ -161,7 +158,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "AnisotropicDamageMaterialModelStatus"; }
-    //    virtual classType giveClassID() const { return AnisotropicDamageMaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
@@ -216,7 +212,6 @@ public:
 
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "AnisotropicDamageMaterial"; }
-    //    virtual classType giveClassID() const { return AnisotropicDamageMaterialClass; }
     virtual const char *giveInputRecordName() const { return _IFT_AnisotropicDamageMaterial_Name; }
 
     /// Returns reference to undamaged (bulk) material
@@ -233,11 +228,11 @@ public:
     void computeInplaneStress(FloatArray &inplaneStress, const FloatArray &inplaneStrain, double epsZ, const FloatMatrix &dam);
 
 
-    // Obtains the proportion of the damage tensor that is needed to get the first eigenvalue equal to the damage threshold
+    /// Obtains the proportion of the damage tensor that is needed to get the first eigenvalue equal to the damage threshold
     double obtainAlpha1(FloatMatrix tempDamageTensor, double deltaLambda, FloatMatrix positiveStrainTensor, double damageThreshold);
-    // Obtains the proportion of the damage tensor that is needed to get the second eigenvalue equal to the damage threshold
+    /// Obtains the proportion of the damage tensor that is needed to get the second eigenvalue equal to the damage threshold
     double obtainAlpha2(FloatMatrix tempDamageTensor, double deltaLambda, FloatMatrix positiveStrainTensor, FloatMatrix ProjMatrix, double damageThreshold);
-    // Obtains the proportion of the damage tensor that is needed to get the third eigenvalue equal to the damage threshold
+    /// Obtains the proportion of the damage tensor that is needed to get the third eigenvalue equal to the damage threshold
     double obtainAlpha3(FloatMatrix tempDamageTensor, double deltaLambda, FloatMatrix positiveStrainTensor, FloatArray vec3, double damageThreshold);
 
     double checkSymmetry(FloatMatrix matrix);

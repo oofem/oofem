@@ -57,40 +57,32 @@ REGISTER_EngngModel(LinearStatic);
 
 LinearStatic :: LinearStatic(int i, EngngModel *_master) : StructuralEngngModel(i, _master), loadVector(), displacementVector()
 {
-    stiffnessMatrix = NULL;
     ndomains = 1;
-    nMethod = NULL;
     initFlag = 1;
     solverType = ST_Direct;
 }
 
 
-LinearStatic :: ~LinearStatic()
-{
-    delete stiffnessMatrix;
-    delete nMethod;
-}
+LinearStatic :: ~LinearStatic() { }
 
 
 NumericalMethod *LinearStatic :: giveNumericalMethod(MetaStep *mStep)
 {
-    if ( nMethod ) {
-        return nMethod;
-    }
-
-    if ( isParallel() ) {
-        if ( ( solverType == ST_Petsc ) || ( solverType == ST_Feti ) ) {
-            nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
+    if ( !nMethod ) {
+        if ( isParallel() ) {
+            if ( ( solverType == ST_Petsc ) || ( solverType == ST_Feti ) ) {
+                nMethod.reset( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
+            }
+        } else {
+            nMethod.reset( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
         }
-    } else {
-        nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
+        if ( !nMethod ) {
+            OOFEM_ERROR("linear solver creation failed");
+        }
     }
 
-    if ( nMethod == NULL ) {
-        OOFEM_ERROR("linear solver creation failed");
-    }
 
-    return nMethod;
+    return nMethod.get();
 }
 
 IRResultType
@@ -157,22 +149,16 @@ double LinearStatic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep,
 TimeStep *LinearStatic :: giveNextStep()
 {
     int istep = this->giveNumberOfFirstStep();
-    //int mstep = 1;
     StateCounterType counter = 1;
 
-    if ( previousStep != NULL ) {
-        delete previousStep;
-    }
-
-    if ( currentStep != NULL ) {
-        istep =  currentStep->giveNumber() + 1;
+    if ( currentStep ) {
+        istep = currentStep->giveNumber() + 1;
         counter = currentStep->giveSolutionStateCounter() + 1;
     }
 
-    previousStep = currentStep;
-    currentStep = new TimeStep(istep, this, 1, ( double ) istep, 0., counter);
-    // time and dt variables are set eq to 0 for staics - has no meaning
-    return currentStep;
+    previousStep = std :: move(currentStep);
+    currentStep.reset( new TimeStep(istep, this, 1, ( double ) istep, 0., counter) );
+    return currentStep.get();
 }
 
 
@@ -208,14 +194,14 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
         //
         // first step  assemble stiffness Matrix
         //
-        stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
-        if ( stiffnessMatrix == NULL ) {
+        stiffnessMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+        if ( !stiffnessMatrix ) {
             OOFEM_ERROR("sparse matrix creation failed");
         }
 
         stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
 
-        this->assemble( stiffnessMatrix, tStep, StiffnessMatrix,
+        this->assemble( *stiffnessMatrix, tStep, TangentStiffnessMatrix,
                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
         initFlag = 0;
@@ -262,7 +248,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
 #ifdef VERBOSE
     OOFEM_LOG_INFO("\n\nSolving ...\n\n");
 #endif
-    NM_Status s = nMethod->solve(stiffnessMatrix, & loadVector, & displacementVector);
+    NM_Status s = nMethod->solve(*stiffnessMatrix, loadVector, displacementVector);
     if ( !( s & NM_Success ) ) {
         OOFEM_ERROR("No success in solving system.");
     }
@@ -362,14 +348,6 @@ LinearStatic :: updateDomainLinks()
 {
     EngngModel :: updateDomainLinks();
     this->giveNumericalMethod( this->giveCurrentMetaStep() )->setDomain( this->giveDomain(1) );
-}
-
-
-
-void
-LinearStatic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
-{
-    iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
 }
 
 

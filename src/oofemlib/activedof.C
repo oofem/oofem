@@ -191,17 +191,11 @@ void ActiveDof :: computeDofTransformation(FloatArray &primaryMasterContribs)
 
 double ActiveDof :: giveUnknown(ValueModeType mode, TimeStep *tStep)
 {
-    if ( this->hasBc(tStep) ) {
-        return this->giveBcValue(mode, tStep);
-    }
     return this->giveActiveBoundaryCondition()->giveUnknown(mode, tStep, this);
 }
 
 double ActiveDof :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep)
 {
-    if ( this->hasBc(tStep) ) {
-        return this->giveBcValue(mode, tStep);
-    }
     return this->giveActiveBoundaryCondition()->giveUnknown(field, mode, tStep, this);
 }
 

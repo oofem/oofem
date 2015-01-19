@@ -65,7 +65,7 @@ public:
     virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
     virtual void giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode, TimeStep *tStep);
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep);
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, TimeStep *tStep);
 
     virtual void computeGaussPoints();
     virtual int computeNumberOfDofs();

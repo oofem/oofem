@@ -976,7 +976,7 @@ LayeredCrossSection :: printYourself()
 // Prints the receiver on screen.
 {
     printf("Cross Section with properties: \n");
-    propertyDictionary->printYourself();
+    propertyDictionary.printYourself();
     printf("Layer Materials: \n");
     layerMaterials.printYourself();
     printf("Thickness of each layer: \n");

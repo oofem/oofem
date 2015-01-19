@@ -400,8 +400,8 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
             //this->exportCompositeElement(this->defaultVTKPiece, el, tStep);
             this->exportCompositeElement(this->defaultVTKPieces, el, tStep);
 
-            for ( int i = 0; i < (int)this->defaultVTKPieces.size(); i++ ) {
-                this->writeVTKPiece(this->defaultVTKPieces[i], tStep);
+            for ( int j = 0; j < (int)this->defaultVTKPieces.size(); j++ ) {
+                this->writeVTKPiece(this->defaultVTKPieces[j], tStep);
             }
 #else
                 // No support for binary export yet
@@ -828,7 +828,7 @@ VTKXMLExportModule :: giveDataHeaders(std :: string &pointHeader, std :: string 
         if ( type == DisplacementVector || type == EigenVector || type == VelocityVector || type == DirectorField ) {
             vectors += __UnknownTypeToString(type);
             vectors.append(" ");
-        } else if ( type == FluxVector || type == PressureVector || type == Temperature ) {
+        } else if ( type == FluxVector || type == PressureVector || type == Temperature || type == Humidity) {
             scalars += __UnknownTypeToString(type);
             scalars.append(" ");
         } else {
@@ -862,7 +862,7 @@ VTKXMLExportModule :: giveDataHeaders(std :: string &pointHeader, std :: string 
         if ( type == DisplacementVector || type == VelocityVector || type == DirectorField ) {
             vectors += std :: string("Load") + __UnknownTypeToString(type);
             vectors.append(" ");
-        } else if ( type == FluxVector || type == PressureVector || type == Temperature ) {
+        } else if ( type == FluxVector || type == PressureVector || type == Temperature || type == Humidity ) {
             scalars += std :: string("Load") + __UnknownTypeToString(type);
             scalars.append(" ");
         } else {
@@ -1415,7 +1415,7 @@ VTKXMLExportModule :: getNodalVariableFromPrimaryField(FloatArray &answer, DofMa
         }
 
         answer.resize(3);
-    } else if ( type == FluxVector ) {
+    } else if ( type == FluxVector || type == Humidity) {
         dofIDMask.followedBy(C_1);
         iState = IST_MassConcentration_1;
         answer.resize(1);

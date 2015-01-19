@@ -121,7 +121,7 @@ public:
 protected:
     virtual void computeGaussPoints();
 
-    virtual void  computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *);
+    virtual void  computeGradientMatrixAt(FloatMatrix &answer, const FloatArray &lcoords);
     virtual void  computeNmatrixAt(FloatMatrix &n, const FloatArray &);
 
     virtual double givePressure();

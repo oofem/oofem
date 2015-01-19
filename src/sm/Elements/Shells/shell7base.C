@@ -602,10 +602,10 @@ Shell7Base :: computePressureTangentMatrix(FloatMatrix &answer, Load *load, cons
     // Computes tangent matrix associated with the linearization of pressure loading. Assumes constant pressure.
     ConstantPressureLoad* pLoad = dynamic_cast< ConstantPressureLoad * >( load );
     
-    //IntegrationRule *iRule = giveInterpolation()->giveBoundaryIntegrationRule(load->giveApproxOrder(), iSurf);
+    //std :: unique_ptr< IntegrationRule >iRule( giveInterpolation()->giveBoundaryIntegrationRule(load->giveApproxOrder(), iSurf) );
     int nPointsTri = 6; //todo generalize
-    IntegrationRule *iRule = new GaussIntegrationRule(1, this);
-    iRule->SetUpPointsOnWedge(nPointsTri, 1, _3dMat); //@todo replce with triangle which has a xi3-coord
+    GaussIntegrationRule iRule(1, this);
+    iRule.SetUpPointsOnWedge(nPointsTri, 1, _3dMat); ///@todo replce with triangle which has a xi3-coord
     
     FloatMatrix N, B, LB, NLB, L(7, 18), gcov, W1, W2;
     FloatArray lcoords(3), solVec, pressure;
@@ -618,7 +618,7 @@ Shell7Base :: computePressureTangentMatrix(FloatMatrix &answer, Load *load, cons
     int ndof = Shell7Base :: giveNumberOfDofs();
     answer.resize(ndof, ndof);
     answer.zero();
-    for ( auto *ip: *iRule ) { // rule #2 for surface integration
+    for ( auto *ip: iRule ) { // rule #2 for surface integration
         lcoords.at(1) = ip->giveNaturalCoordinate(1);
         lcoords.at(2) = ip->giveNaturalCoordinate(2);
         lcoords.at(3) = xi;     // local coord where load is applied
@@ -651,8 +651,6 @@ Shell7Base :: computePressureTangentMatrix(FloatMatrix &answer, Load *load, cons
         double dA = this->computeAreaAround(ip, xi);
         answer.add(dA, NLB);
     }
-    
-    delete iRule;
 }
 
 
@@ -887,8 +885,8 @@ Shell7Base :: computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     // Analytically integrated over the thickness. Constant density assumed.
     int nPointsTri = 6; //todo generalize
-    IntegrationRule *iRule = new GaussIntegrationRule(1, this);
-    iRule->SetUpPointsOnWedge(nPointsTri, 1, _3dMat); //@todo replce with triangle which has a xi3-coord
+    GaussIntegrationRule iRule(1, this);
+    iRule.SetUpPointsOnWedge(nPointsTri, 1, _3dMat); ///@todo replce with triangle which has a xi3-coord
     
     
     //------------------------------
@@ -899,7 +897,7 @@ Shell7Base :: computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     ///@todo: Should be changed to integration over the layers and use the corresponding material
     Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(1) );     // for now, while I don't have an analytical exp.
 
-    for ( auto &gp: *iRule ) {
+    for ( auto &gp: iRule ) {
         const FloatArray &lCoords = *gp->giveNaturalCoordinates();
         this->computeNmatrixAt(lCoords, N);
         FloatArray unknowns, m(3);
@@ -945,8 +943,6 @@ Shell7Base :: computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     const IntArray &ordering = this->giveOrderingDofTypes();    
     answer.assemble(temp, ordering);
     answer.symmetrized();
-
-    delete iRule;
 }
 
 
@@ -980,7 +976,7 @@ Shell7Base :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
     // Num refers in this case to  numerical integration in both in-plane and through the thickness.
     // For analytically integrated throught the thickness, see computeMassMatrix
 
-    FloatMatrix mass, temp;
+    FloatMatrix mass;
     FloatArray solVec;
     this->giveUpdatedSolutionVector(solVec, tStep);
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();     // conversion of data
@@ -1033,16 +1029,16 @@ Shell7Base :: computeConvectiveMassForce(FloatArray &answer, TimeStep *tStep)
     ///@todo: very old version should be checked
     // Analytically integrated over the thickness. Constant density assumed.
     int nPointsTri = 6; //todo generalize
-    IntegrationRule *iRule = new GaussIntegrationRule(1, this);
-    iRule->SetUpPointsOnWedge(nPointsTri, 1, _3dMat); //@todo replce with triangle which has a xi3-coord
+    GaussIntegrationRule iRule(1, this);
+    iRule.SetUpPointsOnWedge(nPointsTri, 1, _3dMat); //@todo replce with triangle which has a xi3-coord
         
     FloatMatrix N;
-    FloatArray lCoords, a, da, m, dm, aVec, daVec, fm(7);
+    FloatArray a, da, m, dm, aVec, daVec, fm(7);
     double gam, dgam, dA;
 
     answer.resize(42);
     answer.zero();
-    for ( auto &gp: *iRule ) { // rule 2 for mid-plane integration only
+    for ( auto &gp: iRule ) { // rule 2 for mid-plane integration only
         const FloatArray &lCoords = *gp->giveNaturalCoordinates();
         this->computeNmatrixAt(lCoords, N);
         this->giveUpdatedSolutionVector(aVec, tStep);
@@ -1090,8 +1086,6 @@ Shell7Base :: computeConvectiveMassForce(FloatArray &answer, TimeStep *tStep)
         dA = this->computeAreaAround(gp, xi);
         answer.plusProduct(N, fm, dA);
     }
-    
-    delete iRule;
 }
 
 

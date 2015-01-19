@@ -41,6 +41,8 @@
 #include "primaryfield.h"
 #include "materialinterface.h"
 
+#include <memory>
+
 ///@name Input fields for SUPG
 //@{
 #define _IFT_SUPG_Name "supg"
@@ -72,13 +74,13 @@ class SUPG : public FluidModel
 {
 protected:
     /// Numerical method used to solve the problem
-    SparseLinearSystemNM *nMethod;
+    std :: unique_ptr< SparseLinearSystemNM >nMethod;
 
     LinSystSolverType solverType;
     SparseMtrxType sparseMtrxType;
 
-    SparseMtrx *lhs;
-    PrimaryField *VelocityPressureField;
+    std :: unique_ptr< SparseMtrx > lhs;
+    std :: unique_ptr< PrimaryField > VelocityPressureField;
     //PrimaryField VelocityField;
     FloatArray accelerationVector; //, previousAccelerationVector;
     FloatArray incrementalSolutionVector;
@@ -111,7 +113,7 @@ protected:
     double Re;
 
     // material interface representation for multicomponent flows
-    MaterialInterface *materialInterface;
+    std :: unique_ptr< MaterialInterface > materialInterface;
     // map of active dofmans for problems with free surface and only one fluid considered
     // IntArray __DofManActivityMask;
     // free surface flag -> we solve free surface problem by single reference fluid
@@ -158,7 +160,7 @@ public:
     virtual void updateDofUnknownsDictionary(DofManager *dman, TimeStep *tStep);
     virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep);
 
-    virtual MaterialInterface *giveMaterialInterface(int n) { return materialInterface; }
+    virtual MaterialInterface *giveMaterialInterface(int n) { return materialInterface.get(); }
 
 
 protected:

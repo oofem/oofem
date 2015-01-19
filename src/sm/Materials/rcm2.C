@@ -853,8 +853,8 @@ RCM2Material :: give(int aProperty, GaussPoint *gp)
         aProperty = 'G';
     }
 
-    if ( propertyDictionary->includes(aProperty) ) {
-        value = propertyDictionary->at(aProperty);
+    if ( propertyDictionary.includes(aProperty) ) {
+        value = propertyDictionary.at(aProperty);
     } else {
         if ( linearElasticMaterial ) {
             value = this->linearElasticMaterial->give(aProperty, gp);

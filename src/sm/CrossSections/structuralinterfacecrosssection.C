@@ -83,7 +83,7 @@ StructuralInterfaceCrossSection :: initializeFrom(InputRecord *ir)
     double thickness = 0.0;
     if ( ir->hasField(_IFT_StructuralInterfaceCrossSection_thickness) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, thickness, _IFT_StructuralInterfaceCrossSection_thickness);
-        propertyDictionary->add(CS_Thickness, thickness);
+        propertyDictionary.add(CS_Thickness, thickness);
     }
 
     return IRRT_OK;

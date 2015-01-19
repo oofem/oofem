@@ -393,7 +393,7 @@ BinghamFluidMaterial2 :: checkConsistency()
     if ( domain->giveEngngModel()->giveEquationScalingFlag() ) {
         double scale;
         scale = domain->giveEngngModel()->giveVariableScale(VST_Density);
-        propertyDictionary->at('d') /= scale;
+        propertyDictionary.at('d') /= scale;
 
         scale = domain->giveEngngModel()->giveVariableScale(VST_Viscosity);
         this->mu_0 /= scale;
@@ -534,7 +534,7 @@ BinghamFluidMaterial2 :: computeDeviatoricStress(FloatArray &answer, const Float
             deps.at(6) * _nu
         };
     } else {
-        OOFEM_ERROR("unsuported material mode");
+        OOFEM_ERROR("unsupported material mode");
     }
 }
 

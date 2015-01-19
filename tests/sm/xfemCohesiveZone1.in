@@ -20,7 +20,7 @@ intmatbilinearcz 2 kn 1.0e6 g1c 1.0e1 g2c 1.5e0 mu 0.0 gamma 0.5 sigf 1.e2
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
 BoundaryCondition 2 loadTimeFunction 1 prescribedvalue 0.8e-1
 #
-PiecewiseLinFunction 1 npoints 2 t 2 0.0 5.0 f(t) 2 0.0 1.0
+PiecewiseLinFunction 1 npoints 2 t 2 1.0 6.0 f(t) 2 0.0 1.0
 XfemManager 1 numberofenrichmentitems 1 debugvtk 0
 crack 1 
 #DiscontinuousFunction 1

@@ -1,0 +1,10 @@
+structmateval.out
+Test of the structural material evaluator.
+StructuralMaterialEvaluator nsteps 1 componentfunctions 6 1 1 1 1 1 1 stresscontrol 6 1 2 3 4 5 6 vars 2 1 4 tolerance 1.0e-6
+#errorcheck
+domain 3d
+OutputManager
+ndofman 0 nelem 0 ncrosssect 0 nmat 1 nbc 0 nic 0 nltf 1
+TutorialMaterial 1 d 1.0 tAlpha 0.0 E 200e9 n 0.3 sigy 200e6 H 20e9
+#IsoE            1 d 1.0 tAlpha 0.0 E 200e9 n 0.3
+ConstantFunction 1 f(t) 250.0e6

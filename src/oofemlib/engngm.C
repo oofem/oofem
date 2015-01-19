@@ -94,9 +94,6 @@ namespace oofem {
 EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPrescribedNeqs()
 {
     number = i;
-    currentStep = NULL;
-    previousStep = NULL;
-    stepWhenIcApply = NULL;
     defaultErrEstimator = NULL;
     numberOfSteps = 0;
     numberOfEquations = 0;
@@ -148,15 +145,6 @@ EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPresc
 
 EngngModel :: ~EngngModel()
 {
-    if ( previousStep == currentStep ) {
-        delete this->currentStep;
-    } else {
-        delete currentStep;
-        delete previousStep;
-    }
-
-    delete stepWhenIcApply;
-
     delete exportModuleManager;
 
     delete initModuleManager;
@@ -186,10 +174,10 @@ EngngModel :: ~EngngModel()
 }
 
 
-void EngngModel :: setParallelMode(bool parallelFlag)
+void EngngModel :: setParallelMode(bool newParallelFlag)
 {
-    this->parallelFlag = parallelFlag;
-    if ( this->parallelFlag ) {
+    parallelFlag = newParallelFlag;
+    if ( parallelFlag ) {
         initParallel();
     }
 }
@@ -717,7 +705,12 @@ void EngngModel :: printYourself()
     printf("number of eq's : %d\n", numberOfEquations);
 }
 
-void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep,
+void EngngModel :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
+{
+    iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
+}
+
+void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep,
                             CharType type, const UnknownNumberingScheme &s, Domain *domain)
 //
 // assembles matrix
@@ -725,10 +718,6 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep,
 {
     IntArray loc;
     FloatMatrix mat, R;
-
-    if ( answer == NULL ) {
-        OOFEM_ERROR("NULL pointer encountered.");
-    }
 
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
     int nelem = domain->giveNumberOfElements();
@@ -759,7 +748,7 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep,
 #ifdef _OPENMP
  #pragma omp critical
 #endif
-            if ( answer->assemble(loc, mat) == 0 ) {
+            if ( answer.assemble(loc, mat) == 0 ) {
                 OOFEM_ERROR("sparse matrix assemble error");
             }
         }
@@ -779,21 +768,18 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep,
     
     this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
 
-    answer->assembleBegin();
-    answer->assembleEnd();
+    answer.assembleBegin();
+    answer.assembleEnd();
 }
 
 
-void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep,
+void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep,
                             CharType type, const UnknownNumberingScheme &rs, const UnknownNumberingScheme &cs,
                             Domain *domain)
 // Same as assemble, but with different numbering for rows and columns
 {
     IntArray r_loc, c_loc, dofids(0);
     FloatMatrix mat, R;
-    if ( answer == NULL ) {
-        OOFEM_ERROR("NULL pointer encountered.");
-    }
 
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
     int nelem = domain->giveNumberOfElements();
@@ -823,7 +809,7 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep,
 #ifdef _OPENMP
  #pragma omp critical
 #endif
-            if ( answer->assemble(r_loc, c_loc, mat) == 0 ) {
+            if ( answer.assemble(r_loc, c_loc, mat) == 0 ) {
                 OOFEM_ERROR("sparse matrix assemble error");
             }
         }
@@ -839,8 +825,8 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep,
 
     this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
 
-    answer->assembleBegin();
-    answer->assembleEnd();
+    answer.assembleBegin();
+    answer.assembleEnd();
 }
 
 
@@ -1351,8 +1337,8 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
     }
 
     // restore solution step
-    if ( currentStep == NULL ) {
-        currentStep = new TimeStep(istep, this, 0, 0., 0., 0);
+    if ( !currentStep ) {
+        currentStep.reset( new TimeStep(istep, this, 0, 0., 0., 0) );
     }
 
     if ( ( iores = currentStep->restoreContext(*stream, mode) ) != CIO_OK ) {
@@ -1368,12 +1354,8 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
         }
     }
 
-    if ( previousStep ) {
-        delete previousStep;
-    }
-
-    previousStep = new TimeStep(istep - 1, this, pmstep, currentStep->giveTargetTime ( ) - currentStep->giveTimeIncrement(),
-                                currentStep->giveTimeIncrement(), currentStep->giveSolutionStateCounter() - 1);
+    previousStep.reset( new TimeStep(istep - 1, this, pmstep, currentStep->giveTargetTime ( ) - currentStep->giveTimeIncrement(),
+                                currentStep->giveTimeIncrement(), currentStep->giveSolutionStateCounter() - 1) );
 
     // restore numberOfEquations and domainNeqs array
     if ( !stream->read(numberOfEquations) ) {

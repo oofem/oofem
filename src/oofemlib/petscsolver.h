@@ -58,7 +58,7 @@ public:
 
     virtual ~PetscSolver();
 
-    virtual NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
+    virtual NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x);
 
     /**
      * Solves the given linear system.
@@ -67,7 +67,7 @@ public:
      * @param x Solution array(PETSC Vec(tor)).
      * @return NM_Status value.
      */
-    NM_Status petsc_solve(PetscSparseMtrx *A, Vec b, Vec x);
+    NM_Status petsc_solve(PetscSparseMtrx &A, Vec b, Vec x);
 
     virtual const char *giveClassName() const { return "PetscSolver"; }
     virtual LinSystSolverType giveLinSystSolverType() const { return ST_Petsc; }

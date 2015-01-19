@@ -138,7 +138,7 @@ NewtonianFluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, Gaus
             eps.at(6) * viscosity
         };
     }  else {
-        OOFEM_ERROR("unsuported material mode");
+        OOFEM_ERROR("unsupported material mode");
     }
 
 
@@ -198,7 +198,7 @@ NewtonianFluidMaterial :: checkConsistency()
     if ( domain->giveEngngModel()->giveEquationScalingFlag() ) {
         double scale;
         scale = domain->giveEngngModel()->giveVariableScale(VST_Density);
-        propertyDictionary->at('d') /= scale;
+        propertyDictionary.at('d') /= scale;
 
         scale = domain->giveEngngModel()->giveVariableScale(VST_Viscosity);
         this->viscosity /= scale;

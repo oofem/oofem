@@ -75,15 +75,11 @@ namespace oofem
 {
 REGISTER_TopologyDescription(ParticleTopologyDescription);
 
-ParticleTopologyDescription :: ParticleTopologyDescription(Domain *d) : TopologyDescription(d), resampled(false), maxdisp2(0), grid(NULL)
+ParticleTopologyDescription :: ParticleTopologyDescription(Domain *d) : TopologyDescription(d), resampled(false), maxdisp2(0)
 {}
 
 ParticleTopologyDescription :: ~ParticleTopologyDescription()
 {
-    if ( this->grid ) {
-        delete this->grid;
-    }
-
     if ( this->corners.size() ) {
         this->corners.clear();
     }
@@ -134,7 +130,7 @@ bool ParticleTopologyDescription :: instanciateYourself(DataReader *dr)
 
     this->tubeWidth = ( bb1(0) - bb0(0) ) / res * tubewidth;
 
-    this->grid = new ParticleGrid< ParticlePoint >(resolution, bb0, bb1);
+    this->grid.reset( new ParticleGrid< ParticlePoint >(resolution, bb0, bb1) );
 
     for ( int i = 1; i <= nsegments; i++ ) {
         ir = dr->giveInputRecord(DataReader :: IR_geometryRec, i);
@@ -143,7 +139,7 @@ bool ParticleTopologyDescription :: instanciateYourself(DataReader *dr)
         if ( name.compare("line") == 0 ) {
             IR_GIVE_FIELD(ir, x0, _IFT_Line_start);
             IR_GIVE_FIELD(ir, x1, _IFT_Line_end);
-            this->addLineSegment(id, x0, x1, this->grid);
+            this->addLineSegment(id, x0, x1, *this->grid);
         } else if ( name.compare("circle") == 0 ) {
             IR_GIVE_FIELD(ir, center, _IFT_Circle_center);
             IR_GIVE_FIELD(ir, radius, _IFT_Circle_radius);
@@ -153,10 +149,10 @@ bool ParticleTopologyDescription :: instanciateYourself(DataReader *dr)
             IR_GIVE_OPTIONAL_FIELD(ir, alpha1, _IFT_Circle_end);
             alpha0 *= M_PI / 180;
             alpha1 *= M_PI / 180;
-            this->addCircleSegment(id, center, radius, alpha0, alpha1, this->grid);
+            this->addCircleSegment(id, center, radius, alpha0, alpha1, *this->grid);
         } else if ( name.compare("cornerpoint") == 0 ) {
             IR_GIVE_FIELD(ir, center, _IFT_Point_coords);
-            this->addCorner(id, center, this->grid);
+            this->addCorner(id, center, *this->grid);
         } else {
             OOFEM_ERROR( "Unknown geometry type '%s'", name.c_str() );
         }
@@ -173,7 +169,7 @@ bool ParticleTopologyDescription :: instanciateYourself(DataReader *dr)
     return true;
 }
 
-void ParticleTopologyDescription :: addLineSegment(int id, const FloatArray &p0, const FloatArray &p1, ParticleGrid< ParticlePoint > *g) const
+void ParticleTopologyDescription :: addLineSegment(int id, const FloatArray &p0, const FloatArray &p1, ParticleGrid< ParticlePoint > &g) const
 {
     ParticlePoint *point;
     double tubeWidth2 = this->tubeWidth * this->tubeWidth;
@@ -221,7 +217,7 @@ void ParticleTopologyDescription :: addLineSegment(int id, const FloatArray &p0,
 }
 
 void ParticleTopologyDescription :: addCircleSegment(int id, const FloatArray &c, double r, double v0, double v1,
-                                                     ParticleGrid< ParticlePoint > *g) const
+                                                     ParticleGrid< ParticlePoint > &g) const
 {
     ParticlePoint *point;
     FloatArray new_foot(2), new_normal(2), grid_p;
@@ -258,7 +254,7 @@ void ParticleTopologyDescription :: addCircleSegment(int id, const FloatArray &c
     }
 }
 
-void ParticleTopologyDescription :: addCorner(int id, const FloatArray &c, ParticleGrid< ParticlePoint > *grid)
+void ParticleTopologyDescription :: addCorner(int id, const FloatArray &c, ParticleGrid< ParticlePoint > &grid)
 {
     /// @todo Remove this structure.
     ParticlePoint corner;
@@ -405,23 +401,23 @@ TopologyState ParticleTopologyDescription :: checkOverlap()
         }
     }
 
-    this->removePoints(this->grid);
+    this->removePoints(*this->grid);
     return ts;
 }
 
-void ParticleTopologyDescription :: removePoints(ParticleGrid< ParticlePoint > *g) const
+void ParticleTopologyDescription :: removePoints(ParticleGrid< ParticlePoint > &g) const
 {
     ParticlePoint *p;
     FloatArray grid_coord;
     ParticleGrid< ParticlePoint > *sg;
 
-    for ( int ind = 0; ind < g->getTotal(); ind++ ) {
-        if ( g->getPoint(p, ind) ) {
+    for ( int ind = 0; ind < g.getTotal(); ind++ ) {
+        if ( g.getPoint(p, ind) ) {
             if ( p->removal ) {
-                g->clearPosition(ind);
+                g.clearPosition(ind);
             }
         } else if ( this->grid->getSubGrid(sg, ind) ) {
-            this->removePoints(sg);
+            this->removePoints(*sg);
             // If all subpoint were removed, then remove the whole grid.
             if ( sg->isEmpty() ) {
                 sg->clearPosition(ind);
@@ -430,7 +426,7 @@ void ParticleTopologyDescription :: removePoints(ParticleGrid< ParticlePoint > *
     }
 }
 
-void ParticleTopologyDescription :: calculateShortestDistance(const ParticlePoint *p0, std :: list< ParticlePoint * > &neighbors, ParticleGrid< ParticlePoint > *g) const
+void ParticleTopologyDescription :: calculateShortestDistance(const ParticlePoint *p0, std :: list< ParticlePoint * > &neighbors, ParticleGrid< ParticlePoint > &g) const
 // This routine is the most complicated one, and it's no unique in it's possible design.
 // Current implementation does
 // 1. Curve fit a second order polynomial
@@ -476,7 +472,7 @@ void ParticleTopologyDescription :: calculateShortestDistance(const ParticlePoin
     IntArray ind0, ind1;
     double radius = this->tubeWidth + max(txi_max, -txi_min);
     this->getBoundingBox(x0, x1, p0->foot, radius);
-    g->getBoundingBox(x0, x1, ind0, ind1);
+    g.getBoundingBox(x0, x1, ind0, ind1);
     double tubeWidth2 = this->tubeWidth * this->tubeWidth;
     FloatArray new_foot, new_normal;
 
@@ -488,7 +484,7 @@ void ParticleTopologyDescription :: calculateShortestDistance(const ParticlePoin
     /// @todo Adaptivity
     for ( pos(0) = ind0(0); pos(0) < ind1(0); pos(0)++ ) {
         for ( pos(1) = ind0(1); pos(1) < ind1(1); pos(1)++ ) {
-            g->getGridCoord(grid_point, pos);
+            g.getGridCoord(grid_point, pos);
             if ( grid_point.distance_square(p0->foot) > radius * radius ) {  // Quick optimization (might give false negatives, but that is acceptable.)
                 continue;
             }
@@ -498,15 +494,15 @@ void ParticleTopologyDescription :: calculateShortestDistance(const ParticlePoin
                                                         grid_point, new_foot, new_normal);
 
             if ( distance2 < tubeWidth2 ) { // Otherwise we ignore it
-                if ( g->getPoint(point, pos) ) {
+                if ( g.getPoint(point, pos) ) {
                     if ( point->distance2 < distance2 ) {
                         continue;
                     }
-                } else if ( g->getSubGrid(subgrid, pos) ) {
+                } else if ( g.getSubGrid(subgrid, pos) ) {
                     OOFEM_ERROR("Not implemented");
                 }
                 point = new ParticlePoint(new_foot, p0->id, new_normal, distance2);
-                g->setPoint(point, pos);
+                g.setPoint(point, pos);
             }
         }
     }
@@ -603,7 +599,7 @@ void ParticleTopologyDescription :: resample()
     ParticlePoint *origin;
     FloatArray grid0;
     FloatArray new_foot, new_normal;
-    ParticleGrid< ParticlePoint > *new_grid = new ParticleGrid< ParticlePoint >(this->grid);
+    std :: unique_ptr< ParticleGrid< ParticlePoint > > new_grid( new ParticleGrid< ParticlePoint >(this->grid.get()) );
 
     double maxdisp = sqrt(this->maxdisp2);
     int total_points = 0;
@@ -611,12 +607,11 @@ void ParticleTopologyDescription :: resample()
         total_points++;
         if ( ( origin = it.getPoint() ) != NULL ) {
             this->collectNeighbors(neighbours, origin, maxdisp);
-            this->calculateShortestDistance(origin, neighbours, new_grid);
+            this->calculateShortestDistance(origin, neighbours, *new_grid);
         }
     }
 
-    delete this->grid;
-    this->grid = new_grid;
+    this->grid = std :: move( new_grid );
     this->resampled = true;
 }
 
@@ -917,8 +912,6 @@ void ParticleTopologyDescription :: generatePSLG(Triangle_PSLG &pslg)
     ParticlePoint *origin;
     std :: list< node >nodes;
     std :: list< ParticlePoint * >points;
-    std :: list< ParticlePoint * > :: iterator pit;
-    ParticleGrid< ParticlePoint > :: iterator it;
     FloatArray x0, x1, grid_coord;
 
     // Nodal merge limit (for very close points, 1/10 of the grid step).
@@ -958,7 +951,7 @@ void ParticleTopologyDescription :: generatePSLG(Triangle_PSLG &pslg)
 
         this->getBoundingBox(x0, x1, cit->foot, 2 * this->tubeWidth);
         this->grid->getPointsWithin(points, x0, x1);
-        for ( pit = points.begin(); pit != points.end(); pit++ ) {
+        for ( auto pit = points.begin(); pit != points.end(); pit++ ) {
             if ( ( cit->foot.distance_square( ( * pit )->foot ) <= merge2 ) && ( * pit )->node == 0 ) {
                 ( * pit )->node = cit->node;
                 ( * pit )->foot = cit->foot;
@@ -981,7 +974,7 @@ void ParticleTopologyDescription :: generatePSLG(Triangle_PSLG &pslg)
 
             this->getBoundingBox(x0, x1, origin->foot, 2 * this->tubeWidth);
             this->grid->getPointsWithin(points, x0, x1);
-            for ( pit = points.begin(); pit != points.end(); pit++ ) {
+            for ( auto pit = points.begin(); pit != points.end(); pit++ ) {
                 if ( ( * pit )->node == 0 ) {
                     /*
                      * temp.beDifferenceOf((*pit)->foot, origin->foot);
@@ -1031,7 +1024,7 @@ void ParticleTopologyDescription :: generatePSLG(Triangle_PSLG &pslg)
                 points.push_front(& * cit);
             }
 
-            for ( pit = points.begin(); pit != points.end(); ++pit ) {
+            for ( auto pit = points.begin(); pit != points.end(); ++pit ) {
                 ParticlePoint *p = * pit;
 
                 if ( p->id != origin->id || origin->node == p->node ) {

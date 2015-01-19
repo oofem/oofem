@@ -71,16 +71,11 @@ NonLinearDynamic :: NonLinearDynamic(int i, EngngModel *_master) : StructuralEng
     ndomains                = 1;
     internalVarUpdateStamp  = 0;
     initFlag = commInitFlag = 1;
-
-    effectiveStiffnessMatrix = NULL;
-    massMatrix               = NULL;
-    nMethod                  = NULL;
 }
 
 
 NonLinearDynamic :: ~NonLinearDynamic()
 {
-    delete nMethod;
 }
 
 
@@ -91,12 +86,12 @@ NumericalMethod *NonLinearDynamic :: giveNumericalMethod(MetaStep *mStep)
     }
 
     if ( this->nMethod ) {
-        nMethod->reinitialize();
-        return nMethod;
+        this->nMethod->reinitialize();
+    } else {
+        this->nMethod.reset( new NRSolver(this->giveDomain(1), this) );
     }
 
-    this->nMethod = new NRSolver(this->giveDomain(1), this);
-    return this->nMethod;
+    return this->nMethod.get();
 }
 
 
@@ -234,8 +229,7 @@ TimeStep *NonLinearDynamic :: giveNextStep()
         deltaTtmp = 0.;
     }
 
-    delete previousStep;
-    if ( currentStep != NULL ) {
+    if ( currentStep ) {
         totalTime = currentStep->giveTargetTime() + deltaTtmp;
         istep = currentStep->giveNumber() + 1;
         counter = currentStep->giveSolutionStateCounter() + 1;
@@ -250,10 +244,10 @@ TimeStep *NonLinearDynamic :: giveNextStep()
         }
     }
 
-    previousStep = currentStep;
-    currentStep = new TimeStep(istep, this, mStepNum, totalTime, deltaTtmp, counter, td);
+    previousStep = std :: move(currentStep);
+    currentStep.reset( new TimeStep(istep, this, mStepNum, totalTime, deltaTtmp, counter, td) );
 
-    return currentStep;
+    return currentStep.get();
 }
 
 
@@ -345,12 +339,8 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         TimeStep *stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0,
                                                  -deltaT, deltaT, 0);
 
-        int nman = this->giveDomain(di)->giveNumberOfDofManagers();
-
         // Considering initial conditions.
-        for ( int j = 1; j <= nman; j++ ) {
-            DofManager *node = this->giveDomain(di)->giveDofManager(j);
-
+        for ( auto &node : this->giveDomain(di)->giveDofManagers() ) {
             for ( Dof *dof: *node ) {
                 // Ask for initial values obtained from
                 // bc (boundary conditions) and ic (initial conditions).
@@ -374,11 +364,11 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         // First assemble problem at current time step.
         // Option to take into account initial conditions.
         if ( !effectiveStiffnessMatrix ) {
-            effectiveStiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
-            massMatrix = classFactory.createSparseMtrx(sparseMtrxType);
+            effectiveStiffnessMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+            massMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
         }
 
-        if ( effectiveStiffnessMatrix == NULL || massMatrix == NULL ) {
+        if ( !effectiveStiffnessMatrix || !massMatrix ) {
             OOFEM_ERROR("sparse matrix creation failed");
         }
 
@@ -392,7 +382,7 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         massMatrix->buildInternalStructure( this, di, EModelDefaultEquationNumbering() );
 
         // Assemble mass matrix
-        this->assemble( massMatrix, tStep, MassMatrix,
+        this->assemble( *massMatrix, tStep, MassMatrix,
                        EModelDefaultEquationNumbering(), this->giveDomain(di) );
 
         // Initialize vectors
@@ -467,8 +457,8 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         incrementOfDisplacement.zero();
     }
 
-    NM_Status numMetStatus = nMethod->solve(effectiveStiffnessMatrix, & rhs, NULL,
-                                            & totalDisplacement, & incrementOfDisplacement, & forcesVector,
+    NM_Status numMetStatus = nMethod->solve(*effectiveStiffnessMatrix, rhs, NULL,
+                                            totalDisplacement, incrementOfDisplacement, forcesVector,
                                             internalForcesEBENorm, loadLevel, SparseNonLinearSystemNM :: rlm_total, currentIterations, tStep);
     if ( !( numMetStatus & NM_Success ) ) {
         OOFEM_ERROR("NRSolver failed to solve problem");
@@ -600,7 +590,7 @@ void NonLinearDynamic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
             timer.startTimer();
 #endif
             effectiveStiffnessMatrix->zero();
-            this->assemble(effectiveStiffnessMatrix, tStep, EffectiveStiffnessMatrix,
+            this->assemble(*effectiveStiffnessMatrix, tStep, EffectiveStiffnessMatrix,
                            EModelDefaultEquationNumbering(), d);
 #if 0
             this->assemble(effectiveStiffnessMatrix, tStep, TangentStiffnessMatrix,
@@ -792,7 +782,7 @@ NonLinearDynamic :: updateDomainLinks()
 
 
 void
-NonLinearDynamic :: assemble(SparseMtrx *answer, TimeStep *tStep, CharType type,
+NonLinearDynamic :: assemble(SparseMtrx &answer, TimeStep *tStep, CharType type,
                              const UnknownNumberingScheme &s, Domain *domain)
 {
 #ifdef TIME_REPORT
@@ -805,11 +795,11 @@ NonLinearDynamic :: assemble(SparseMtrx *answer, TimeStep *tStep, CharType type,
     if ( ( nonlocalStiffnessFlag ) && ( type == TangentStiffnessMatrix ) ) {
         // Add nonlocal contribution.
         for ( auto &elem : domain->giveElements() ) {
-            static_cast< NLStructuralElement * >( elem.get() )->addNonlocalStiffnessContributions(* answer, s, tStep);
+            static_cast< NLStructuralElement * >( elem.get() )->addNonlocalStiffnessContributions(answer, s, tStep);
         }
 
         // Print storage statistics.
-        answer->printStatistics();
+        answer.printStatistics();
     }
 
 #ifdef TIME_REPORT
@@ -996,7 +986,7 @@ NonLinearDynamic :: unpackMigratingData(TimeStep *tStep)
             if ( _dof->isPrimaryDof() ) {
                 if ( ( _eq = _dof->__giveEquationNumber() ) ) {
                     // pack values in solution vectors
-                    _dof->giveUnknownsDictionaryValue( tStep, VM_Total, totalDisplacement.at(_eq) );
+                    totalDisplacement.at(_eq) = _dof->giveUnknownsDictionaryValue( tStep, VM_Total );
  #if 0
                     // debug print
                     if ( _dm->giveParallelMode() == DofManager_shared ) {

@@ -36,7 +36,6 @@
 #define enrichmentitem_h
 
 #include "femcmpnn.h"
-#include "domain.h"
 #include "floatmatrix.h"
 #include "dofiditem.h"
 #include "tipinfo.h"
@@ -62,10 +61,6 @@
 
 //@}
 
-#define _IFT_Crack_Name "crack"
-
-
-
 namespace oofem {
 class BasicGeometry;
 class EnrichmentFunction;
@@ -82,6 +77,9 @@ class DynamicDataReader;
 class Triangle;
 class GnuplotExportModule;
 class GaussPoint;
+class Element;
+class CrossSection;
+class Node;
 
 
 enum NodeEnrichmentType : int {

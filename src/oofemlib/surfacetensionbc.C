@@ -92,7 +92,7 @@ void SurfaceTensionBoundaryCondition :: giveLocationArrays(std :: vector< IntArr
     }
 }
 
-void SurfaceTensionBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tStep,
+void SurfaceTensionBoundaryCondition :: assemble(SparseMtrx &answer, TimeStep *tStep,
                                                  CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
     if ( !this->useTangent || type != TangentStiffnessMatrix ) {
@@ -116,7 +116,7 @@ void SurfaceTensionBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *t
         e->giveBoundaryLocationArray(r_loc, bNodes, this->dofs, r_s);
         e->giveBoundaryLocationArray(c_loc, bNodes, this->dofs, c_s);
         this->computeTangentFromElement(Ke, e, boundary, tStep);
-        answer->assemble(r_loc, c_loc, Ke);
+        answer.assemble(r_loc, c_loc, Ke);
     }
 }
 

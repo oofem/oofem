@@ -283,7 +283,7 @@ double HydratingConcreteMat :: GivePower(TimeStep *tStep, GaussPoint *gp, ValueM
     }
     
     //return computed power (homexportmodule)
-    if (evalTime == ms->lastEvalTime){
+    if ( evalTime == ms->lastEvalTime ) {
         return ms->power;
     }
 

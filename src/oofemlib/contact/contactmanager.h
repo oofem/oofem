@@ -37,10 +37,12 @@
 
 #include "chartype.h"
 #include "valuemodetype.h"
-
 #include "oofemcfg.h"
 #include "datareader.h"
 #include "inputrecord.h"
+
+#include <vector>
+#include <memory>
 
 ///@name Input fields for _IFT_ContactManager
 //@{
@@ -66,7 +68,7 @@ protected:
     Domain *domain;
 
 private:
-    std :: vector< ContactDefinition *> contactDefinitionList;
+    std :: vector< std :: unique_ptr< ContactDefinition > > contactDefinitionList;
 
 public:
 
@@ -75,7 +77,9 @@ public:
     /// Destructor.
     virtual ~ContactManager();
 
-    
+    ContactManager(const ContactManager& src) = delete;
+    ContactManager &operator = (const ContactManager &src) = delete;
+
     void createContactDofs();
     
     /// Initializes receiver according to object description stored in input record.
@@ -86,7 +90,7 @@ public:
 
     Domain *giveDomain() { return this->domain; }
     int numberOfContactDefinitions;
-    ContactDefinition *giveContactDefinition(const int num) { return this->contactDefinitionList[num-1]; };
+    ContactDefinition *giveContactDefinition(const int num) { return this->contactDefinitionList[num-1].get(); };
     int giveNumberOfContactDefinitions() const { return (int)contactDefinitionList.size(); }
 
     
@@ -94,7 +98,7 @@ public:
                                     const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
     
 
-    void assembleTangentFromContacts(SparseMtrx *answer, TimeStep *tStep,
+    void assembleTangentFromContacts(SparseMtrx &answer, TimeStep *tStep,
                           CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
 };

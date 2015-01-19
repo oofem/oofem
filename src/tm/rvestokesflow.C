@@ -62,14 +62,11 @@ RVEStokesFlowMaterialStatus :: RVEStokesFlowMaterialStatus(int n, Domain *d, Gau
     temp_TangentMatrix.resize(2, 2);
     temp_TangentMatrix.zero();
 
-    solutionVector = new FloatArray;
-
     this->rve = rve;
 }
 
 RVEStokesFlowMaterialStatus :: ~RVEStokesFlowMaterialStatus()
 {
-    delete solutionVector;
 }
 
 void

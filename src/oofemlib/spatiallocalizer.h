@@ -215,7 +215,7 @@ public:
      * @param coords Global coordinate.
      * @return Closest node, or NULL or none exists.
      */
-    virtual Node *giveNodeClosestToPoint(const FloatArray &coords) = 0;
+    virtual Node *giveNodeClosestToPoint(const FloatArray &coords, double maxDist) = 0;
 
     /**
      * Initialize receiver data structure if not done previously

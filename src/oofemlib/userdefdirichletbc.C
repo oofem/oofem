@@ -59,9 +59,18 @@ UserDefDirichletBC :: ~UserDefDirichletBC()
 
 
 double
-UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
+UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, double time)
 {
-    double factor = this->giveTimeFunction()->evaluate(tStep, mode);
+    double factor = 0.;
+    if ( mode == VM_Total ) {
+        factor = this->giveTimeFunction()->evaluateAtTime(time);
+    } else if ( mode == VM_Velocity ) {
+        factor = this->giveTimeFunction()->evaluateVelocityAtTime(time);
+    } else if ( mode == VM_Acceleration ) {
+        factor = this->giveTimeFunction()->evaluateAccelerationAtTime(time);
+    } else {
+        OOFEM_ERROR("Should not be called for value mode type then total, velocity, or acceleration.");
+    }
     DofManager *dMan = dof->giveDofManager();
 
 
@@ -91,7 +100,7 @@ UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
     PyTuple_SetItem(pArgs, 1, PyLong_FromLong( dof->giveDofID() ));
 
     // Time
-    PyTuple_SetItem(pArgs, 2, PyFloat_FromDouble( tStep->giveTargetTime() ));
+    PyTuple_SetItem(pArgs, 2, PyFloat_FromDouble( time ));
 
     // Value returned from the Python function
     PyObject *pRetVal = NULL;
@@ -151,14 +160,6 @@ UserDefDirichletBC :: giveInputRecord(DynamicInputRecord &input)
 {
     GeneralBoundaryCondition :: giveInputRecord(input);
     input.setField(this->mFileName, _IFT_UserDefDirichletBC_filename);
-}
-
-
-void
-UserDefDirichletBC :: setPrescribedValue(double s)
-{
-    values.zero();
-    values.add(s);
 }
 
 

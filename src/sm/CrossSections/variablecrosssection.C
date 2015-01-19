@@ -160,8 +160,8 @@ VariableCrossSection :: give(CrossSectionProperty aProperty, const FloatArray *c
     double value = 0.0;
     const ScalarFunction *expr;
 
-    if ( propertyDictionary->includes(aProperty) ) {
-        value = propertyDictionary->at(aProperty);
+    if ( propertyDictionary.includes(aProperty) ) {
+        value = propertyDictionary.at(aProperty);
     } else {
         this->giveExpression(& expr, aProperty);
 

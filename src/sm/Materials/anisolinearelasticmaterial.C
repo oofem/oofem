@@ -93,24 +93,12 @@ AnisotropicLinearElasticMaterial :: giveInputRecord(DynamicInputRecord &input)
     input.setField(alpha, _IFT_AnisotropicLinearElasticMaterial_talpha);
 }
 
-double
-AnisotropicLinearElasticMaterial :: give(int aProperty, GaussPoint *gp)
-//
-// Returns the value of the property aProperty (e.g. the Young's modulus 'E') of the receiver.
-//
-{
-    return this->Material :: give(aProperty, gp);
-}
-
 
 void
 AnisotropicLinearElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                                   MatResponseMode mode,
                                                                   GaussPoint *gp,
                                                                   TimeStep *tStep)
-//
-// forceElasticResponse ignored - always elastic
-//
 {
     answer = stiffmat;
 }
@@ -119,11 +107,8 @@ AnisotropicLinearElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &a
 void
 AnisotropicLinearElasticMaterial :: giveThermalDilatationVector(FloatArray &answer,
                                                                 GaussPoint *gp, TimeStep *tStep)
-//
-// returns a FloatArray(3) of coefficients of thermal dilatation
-//
 {
-    answer = alpha;
+    answer = {alpha[0], alpha[1], alpha[2], 0., 0., 0.};
 }
 
 

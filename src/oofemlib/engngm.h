@@ -222,11 +222,11 @@ protected:
     /// List of problem metasteps.
     std :: vector< MetaStep > metaStepList;
     /// Solution step when IC (initial conditions) apply.
-    TimeStep *stepWhenIcApply;
+    std :: unique_ptr< TimeStep > stepWhenIcApply;
     /// Current time step.
-    TimeStep *currentStep;
+    std :: unique_ptr< TimeStep > currentStep;
     /// Previous time step.
-    TimeStep *previousStep;
+    std :: unique_ptr< TimeStep > previousStep;
     /// Receivers id.
     int number;
 
@@ -393,7 +393,7 @@ public:
      * Sets the problem to run in parallel (or not).
      * @param parallelFlag Determines parallel mode.
      */
-    void setParallelMode(bool parallelFlag);
+    void setParallelMode(bool newParallelFlag);
     /// Returns domain mode.
     problemMode giveProblemMode() { return pMode; }
     /**
@@ -669,7 +669,7 @@ public:
         if ( master ) {
             return master->giveCurrentStep();
         } else {
-            return currentStep;
+            return currentStep.get();
         }
     }
     /// Returns previous time step.
@@ -677,7 +677,7 @@ public:
         if ( master ) {
             return master->givePreviousStep();
         } else {
-            return previousStep;
+            return previousStep.get();
         }
     }
     /// Returns next time step (next to current step) of receiver.
@@ -687,7 +687,7 @@ public:
         if ( master ) {
             return master->giveCurrentStep();
         } else {
-            return stepWhenIcApply;
+            return stepWhenIcApply.get();
         }
     }
     /// Returns number of first time step used by receiver.
@@ -888,7 +888,7 @@ public:
      * @param type Characteristic components of type type are requested from elements and assembled.
      * @param domain Source domain.
      */
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep,
+    virtual void assemble(SparseMtrx &answer, TimeStep *tStep,
                           CharType type, const UnknownNumberingScheme &s, Domain *domain);
     /**
      * Assembles characteristic matrix of required type into given sparse matrix.
@@ -899,7 +899,7 @@ public:
      * @param type Characteristic components of type type are requested from elements and assembled.
      * @param domain Source domain.
      */
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep,
+    virtual void assemble(SparseMtrx &answer, TimeStep *tStep,
                           CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain);
     /**
      * Assembles characteristic vector of required type from dofManagers, element, and active boundary conditions, into given vector.
@@ -1031,7 +1031,7 @@ public:
      * @param iDof dof to be processed
      * @param tStep solution step
      */
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep) = 0;
+    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
 
 
     // identification

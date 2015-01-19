@@ -99,7 +99,7 @@ protected:
     /// Initial condition number associated to dof.
     int ic;
     /// Unknowns dictionary to support changes of static system.
-    Dictionary *unknowns;
+    Dictionary unknowns;
 
 public:
     /**
@@ -143,16 +143,15 @@ public:
 
     virtual void updateUnknownsDictionary(TimeStep *tStep, ValueModeType mode, double dofValue);
 
-    virtual void giveUnknownsDictionaryValue(TimeStep *tStep, ValueModeType mode, double &dofValue);
+    virtual double giveUnknownsDictionaryValue(TimeStep *tStep, ValueModeType mode);
 
     virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 
     virtual void setBcId(int bcId) { this->bc = bcId; }
     virtual void setIcId(int icId) { this->ic = icId; }
-    virtual void setEquationNumber(int equationNumber) { this->equationNumber = equationNumber; }
-    virtual void setUnknowns(Dictionary *unknowns) { this->unknowns = unknowns; }
-    virtual Dictionary *giveUnknowns() { return this->unknowns; }
+    virtual void setEquationNumber(int newEquationNumber) { this->equationNumber = newEquationNumber; }
+    virtual Dictionary *giveUnknowns() { return &this->unknowns; }
     virtual int giveEqn() { return equationNumber; }
 
 protected:
