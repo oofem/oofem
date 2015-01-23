@@ -41,6 +41,7 @@
 #include "fieldmanager.h"
 #include "metastep.h"
 #include "timer.h"
+#include "assemblercallback.h"
 #include "chartype.h"
 #include "unknowntype.h"
 #include "varscaletype.h"
@@ -481,11 +482,6 @@ public:
     virtual int giveNumberOfDomainEquations(int di, const UnknownNumberingScheme &num);
 
     // management components
-    /**
-     * Provides backward mapping between numerical component and characteristic
-     * component on EngngModel level.
-     */
-    virtual CharType giveTypeOfComponent(NumericalCmpn) { return UnknownCharType; }
     /**
      * Returns requested unknown. Unknown at give time step is characterized by its type and mode
      * and by its equation number. This function is used by Dofs, when they are requested for
