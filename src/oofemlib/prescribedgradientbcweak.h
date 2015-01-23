@@ -86,6 +86,8 @@ public:
     PrescribedGradientBCWeak(int n, Domain *d);
     virtual ~PrescribedGradientBCWeak();
 
+    void clear();
+
     virtual int giveNumberOfInternalDofManagers();
     virtual DofManager *giveInternalDofManager(int i);
 
@@ -213,7 +215,13 @@ protected:
 
     std :: unordered_map< int, std :: vector< int > >mTracElDispNodes;
 
+public:
+    void recomputeTractionMesh();
+
+protected:
     void createTractionMesh(bool iEnforceCornerPeriodicity, int iNumSides);
+    bool damageExceedsTolerance(Element *el);
+
     void buildMaps(const std :: vector< std :: pair< FloatArray, bool > > &iBndNodeCoordsFull);
 
     void integrateTangent(FloatMatrix &oTangent, size_t iTracElInd);

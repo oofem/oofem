@@ -48,6 +48,7 @@
 #include "dynamicinputrecord.h"
 #include "timestep.h"
 #include "function.h"
+#include "engngm.h"
 
 #include "xfem/XFEMDebugTools.h"
 
@@ -76,16 +77,40 @@ PrescribedGradientBCWeak :: PrescribedGradientBCWeak(int n, Domain *d) :
 
 PrescribedGradientBCWeak :: ~PrescribedGradientBCWeak()
 {
+    clear();
+}
+
+void PrescribedGradientBCWeak :: clear()
+{
+    mpTractionNodes.clear();
+
     for ( size_t i = 0; i < mpTractionMasterNodes.size(); i++ ) {
-        delete mpTractionMasterNodes [ i ];
+        if ( mpTractionMasterNodes [ i ] != NULL ) {
+            delete mpTractionMasterNodes [ i ];
+            mpTractionMasterNodes [ i ] = NULL;
+        }
     }
+    mpTractionMasterNodes.clear();
 
     for ( size_t i = 0; i < mpTractionElements.size(); i++ ) {
-        delete mpTractionElements [ i ];
+        if ( mpTractionElements [ i ] != NULL ) {
+            delete mpTractionElements [ i ];
+            mpTractionElements [ i ] = NULL;
+        }
+    }
+    mpTractionElements.clear();
+
+    if ( mpDisplacementLock != NULL ) {
+        delete mpDisplacementLock;
+        mpDisplacementLock = NULL;
     }
 
-    delete mpDisplacementLock;
+    mMapTractionElDispElGamma.clear();
+    mTractionElInteriorCoordinates.clear();
+    mTracElDispNodes.clear();
 }
+
+//#define DAMAGE_TEST
 
 int PrescribedGradientBCWeak :: giveNumberOfInternalDofManagers()
 {
@@ -642,6 +667,13 @@ void PrescribedGradientBCWeak :: giveTraction(size_t iElInd, FloatArray &oStartT
     }
 }
 
+void PrescribedGradientBCWeak :: recomputeTractionMesh()
+{
+    printf("Recomputing traction mesh.\n");
+    clear();
+    postInitialize();
+}
+
 void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodicity, int iNumSides)
 {
     const double nodeDistTol = 1.0e-15;
@@ -794,32 +826,36 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
                     }
                 } else   {
                     if ( mMeshIsPeriodic ) {
-                        FloatArray xPlus;
-                        giveMirroredPointOnGammaPlus(xPlus, intersecPoints [ i ]);
 
-                        int sideInd = giveSideIndex(xPlus);
+                        if ( pointIsMapapble(intersecPoints [ i ]) ) {
+                            FloatArray xPlus;
+                            giveMirroredPointOnGammaPlus(xPlus, intersecPoints [ i ]);
 
-                        int numClosePoints = 0;
-                        const double meshTol2 = meshTol * meshTol;
-                        for ( auto &bndPos : bndNodeCoords [ sideInd ] ) {
-                            if ( bndPos.first.distance_square(xPlus) < meshTol2 ) {
+                            int sideInd = giveSideIndex(xPlus);
 
-                                if(numClosePoints < mNumTractionNodesAtIntersections) {
-                                    bndPos.second = true;
+                            int numClosePoints = 0;
+                            const double meshTol2 = meshTol * meshTol;
+                            for ( auto &bndPos : bndNodeCoords [ sideInd ] ) {
+                                if ( bndPos.first.distance_square(xPlus) < meshTol2 ) {
+
+                                    if(numClosePoints < mNumTractionNodesAtIntersections) {
+                                        bndPos.second = true;
+                                    }
+
+                                    numClosePoints++;
                                 }
+                            }
 
-                                numClosePoints++;
+                            if ( numClosePoints < mNumTractionNodesAtIntersections ) {
+                                for ( int j = 0; j < mNumTractionNodesAtIntersections - numClosePoints; j++ ) {
+                                    std :: pair< FloatArray, bool >nodeCoord = {
+                                        xPlus, true
+                                    };
+                                    bndNodeCoords [ sideInd ].push_back(nodeCoord);
+                                }
                             }
                         }
 
-                        if ( numClosePoints < mNumTractionNodesAtIntersections ) {
-                            for ( int j = 0; j < mNumTractionNodesAtIntersections - numClosePoints; j++ ) {
-                                std :: pair< FloatArray, bool >nodeCoord = {
-                                    xPlus, true
-                                };
-                                bndNodeCoords [ sideInd ].push_back(nodeCoord);
-                            }
-                        }
                     }
                 }
             }
@@ -863,8 +899,19 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
 
             if( strcmp(el->giveClassName(),"IntElLine1" ) == 0 || strcmp(el->giveClassName(),"IntElLine2" ) == 0 )
             {
+#ifdef DAMAGE_TEST
+                if(damageExceedsTolerance(el)) {
+//                    OOFEM_ERROR("Damage exceeds tolerance.")
+//                    printf("Damage exceeds tolerance. Adding traction node.\n");
+                    intersecPoints.push_back(xS);
+                    break;
+                }
+
+#else
                 intersecPoints.push_back(xS);
                 break;
+
+#endif
             }
 
         }
@@ -881,8 +928,20 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
 
             if( strcmp(el->giveClassName(),"IntElLine1" ) == 0 || strcmp(el->giveClassName(),"IntElLine2" ) == 0 )
             {
+
+#ifdef DAMAGE_TEST
+                if(damageExceedsTolerance(el)) {
+//                    OOFEM_ERROR("Damage exceeds tolerance.")
+//                    printf("Damage exceeds tolerance. Adding traction node.\n");
+                    intersecPoints.push_back(xE);
+                    break;
+                }
+#else
                 intersecPoints.push_back(xE);
                 break;
+#endif
+
+
             }
 
         }
@@ -917,31 +976,36 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
                 }
             } else   {
                 if ( mMeshIsPeriodic ) {
-                    FloatArray xPlus;
-                    giveMirroredPointOnGammaPlus(xPlus, intersecPoints [ i ]);
 
-                    int sideInd = giveSideIndex(xPlus);
+                    if ( pointIsMapapble(intersecPoints [ i ]) ) {
 
-                    int numClosePoints = 0;
-                    const double meshTol2 = meshTol * meshTol;
-                    for ( auto &bndPos : bndNodeCoords [ sideInd ] ) {
-                        if ( bndPos.first.distance_square(xPlus) < meshTol2 ) {
+                        FloatArray xPlus;
+                        giveMirroredPointOnGammaPlus(xPlus, intersecPoints [ i ]);
 
-                            if(numClosePoints < mNumTractionNodesAtIntersections) {
-                                bndPos.second = true;
+                        int sideInd = giveSideIndex(xPlus);
+
+                        int numClosePoints = 0;
+                        const double meshTol2 = meshTol * meshTol;
+                        for ( auto &bndPos : bndNodeCoords [ sideInd ] ) {
+                            if ( bndPos.first.distance_square(xPlus) < meshTol2 ) {
+
+                                if(numClosePoints < mNumTractionNodesAtIntersections) {
+                                    bndPos.second = true;
+                                }
+                                numClosePoints++;
                             }
-                            numClosePoints++;
+                        }
+
+                        if ( numClosePoints < mNumTractionNodesAtIntersections ) {
+                            for ( int j = 0; j < mNumTractionNodesAtIntersections - numClosePoints; j++ ) {
+                                std :: pair< FloatArray, bool >nodeCoord = {
+                                    xPlus, true
+                                };
+                                bndNodeCoords [ sideInd ].push_back(nodeCoord);
+                            }
                         }
                     }
 
-                    if ( numClosePoints < mNumTractionNodesAtIntersections ) {
-                        for ( int j = 0; j < mNumTractionNodesAtIntersections - numClosePoints; j++ ) {
-                            std :: pair< FloatArray, bool >nodeCoord = {
-                                xPlus, true
-                            };
-                            bndNodeCoords [ sideInd ].push_back(nodeCoord);
-                        }
-                    }
                 }
             }
         }
@@ -1156,6 +1220,23 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
             mpDisplacementLock->appendDof( new MasterDof(mpDisplacementLock, ( DofIDItem ) dofid) );
         }
     }
+}
+
+bool PrescribedGradientBCWeak :: damageExceedsTolerance(Element *el)
+{
+    TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
+
+    double maxDamage = 0.0, damageTol = 0.01;
+    for ( auto &gp: *el->giveDefaultIntegrationRulePtr() ) {
+        FloatArray damage;
+        el->giveIPValue(damage, gp, IST_DamageScalar, tStep);
+//                    printf("damage: "); damage.printYourself();
+        maxDamage = std::max(maxDamage, damage(0));
+    }
+
+//    printf("maxDamage: %e\n", maxDamage);
+
+    return maxDamage >= damageTol;
 }
 
 void PrescribedGradientBCWeak :: buildMaps(const std :: vector< std :: pair< FloatArray, bool > > &iBndNodeCoordsFull)

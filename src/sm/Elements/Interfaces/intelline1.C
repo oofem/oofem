@@ -166,8 +166,8 @@ IntElLine1 :: computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 
     answer.resize(2, 2);
     answer.at(1, 1) =  G.at(1);
-    answer.at(2, 1) =  G.at(2);
-    answer.at(1, 2) = -G.at(2);
+    answer.at(2, 1) = -G.at(2);
+    answer.at(1, 2) =  G.at(2);
     answer.at(2, 2) =  G.at(1);
 
 }
