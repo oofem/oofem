@@ -34,6 +34,7 @@
 
 #include "fluidmodel.h"
 #include "element.h"
+#include "dof.h"
 #include "generalboundarycondition.h"
 #include "dofmanager.h"
 

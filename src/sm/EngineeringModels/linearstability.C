@@ -46,6 +46,8 @@
 #include "datastream.h"
 #include "exportmodulemanager.h"
 #include "dofmanager.h"
+#include "dof.h"
+#include "unknownnumberingscheme.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"

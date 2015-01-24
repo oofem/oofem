@@ -34,6 +34,7 @@
 
 #include "../sm/Elements/lumpedmasselement.h"
 #include "dofmanager.h"
+#include "dof.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"

@@ -40,6 +40,7 @@
 #include "valuemodetype.h"
 #include "integrationdomain.h"
 #include "dofmantransftype.h"
+#include "floatarray.h"
 
 #include <memory>
 

@@ -69,8 +69,8 @@ AnisotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
     if ( alpha.giveSize() == 0 ) {
         alpha.resize(3);
         alpha.zero();
-    } else if ( alpha.giveSize() != 3 )     {
-        OOFEM_ERROR( "Incorrect size of talpha - should be 0 or 3, is %d\n", alpha.giveSize() );
+    } else if ( alpha.giveSize() != 6 )     {
+        OOFEM_ERROR( "Incorrect size of talpha - should be 0 or 6, is %d\n", alpha.giveSize() );
     }
 
     return IRRT_OK;
@@ -108,7 +108,7 @@ void
 AnisotropicLinearElasticMaterial :: giveThermalDilatationVector(FloatArray &answer,
                                                                 GaussPoint *gp, TimeStep *tStep)
 {
-    answer = {alpha[0], alpha[1], alpha[2], 0., 0., 0.};
+    answer = alpha;
 }
 
 

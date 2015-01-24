@@ -38,12 +38,14 @@
 #include "nummet.h"
 #include "timestep.h"
 #include "element.h"
+#include "dof.h"
 #include "sparsemtrx.h"
 #include "verbose.h"
 #include "classfactory.h"
 #include "datastream.h"
 #include "contextioerr.h"
 #include "classfactory.h"
+#include "unknownnumberingscheme.h"
 
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"

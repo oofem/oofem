@@ -83,6 +83,59 @@ void MatrixAssembler :: locationFromElementNodes(IntArray& loc, Element& element
 }
 
 
+#if 1
+// For backwards compatibility:
+
+OldVectorAssembler :: OldVectorAssembler(CharType t): type(t) {}
+
+void OldVectorAssembler :: vectorFromElement(FloatArray& vec, Element& element, TimeStep* tStep, ValueModeType mode) const
+{
+    element.giveCharacteristicVector(vec, this->type, mode, tStep);
+}
+
+void OldVectorAssembler :: vectorFromLoad(FloatArray& vec, Element& element, BodyLoad* load, TimeStep* tStep, ValueModeType mode) const
+{
+    element.computeLoadVector(vec, load, this->type, mode, tStep);
+}
+
+void OldVectorAssembler :: vectorFromBoundaryLoad(FloatArray& vec, Element& element, BoundaryLoad* load, int boundary, TimeStep* tStep, ValueModeType mode) const
+{
+    element.computeBoundaryLoadVector(vec, load, boundary, this->type, mode, tStep);
+}
+
+void OldVectorAssembler :: vectorFromEdgeLoad(FloatArray& vec, Element& element, BoundaryLoad* load, int edge, TimeStep* tStep, ValueModeType mode) const
+{
+    element.computeBoundaryEdgeLoadVector(vec, load, edge, this->type, mode, tStep);
+}
+
+void OldVectorAssembler :: vectorFromNodeLoad(FloatArray& vec, DofManager& dman, NodalLoad* load, TimeStep* tStep, ValueModeType mode) const
+{
+    dman.computeLoadVector(vec, load, this->type, tStep, mode);
+}
+
+
+void OldMatrixAssembler :: matrixFromElement(FloatMatrix& mat, Element& element, TimeStep* tStep) const
+{
+    element.giveCharacteristicMatrix(mat, this->type, tStep);
+}
+
+void OldMatrixAssembler :: matrixFromLoad(FloatMatrix& mat, Element& element, BodyLoad* load, TimeStep* tStep) const
+{
+    mat.clear();
+}
+
+void OldMatrixAssembler :: matrixFromBoundaryLoad(FloatMatrix& mat, Element& element, BoundaryLoad* load, int boundary, TimeStep* tStep) const
+{
+    mat.clear();
+}
+
+void OldMatrixAssembler :: matrixFromEdgeLoad(FloatMatrix& mat, Element& element, BoundaryLoad* load, int edge, TimeStep* tStep) const
+{
+    mat.clear();
+}
+#endif
+
+
 
 void InternalForceAssembler :: vectorFromElement(FloatArray& vec, Element& element, TimeStep* tStep, ValueModeType mode) const
 {

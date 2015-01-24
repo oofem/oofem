@@ -50,6 +50,7 @@
 #include "sparselinsystemnm.h"
 #include "dynamicinputrecord.h"
 #include "domain.h"
+#include "unknownnumberingscheme.h"
 
 namespace oofem {
 REGISTER_BoundaryCondition(MixedGradientPressureDirichlet);

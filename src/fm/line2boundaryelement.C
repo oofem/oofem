@@ -34,6 +34,7 @@
 
 #include "line2boundaryelement.h"
 #include "node.h"
+#include "dof.h"
 #include "fei2dlinequad.h"
 #include "gaussintegrationrule.h"
 #include "crosssection.h"

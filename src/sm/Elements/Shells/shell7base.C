@@ -45,6 +45,7 @@
 #include "constantsurfaceload.h"
 #include "vtkxmlexportmodule.h"
 #include "fracturemanager.h"
+#include "dof.h"
 #include <fstream>
 
 namespace oofem {

@@ -41,6 +41,7 @@
 #include "floatarray.h"
 #include "linesearch.h"
 #include "nrsolver.h"
+#include "unknownnumberingscheme.h"
 
 #include <set>
 #include <vector>

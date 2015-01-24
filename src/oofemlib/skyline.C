@@ -46,6 +46,7 @@
 #include "contact/contactmanager.h"
 #include "contact/contactdefinition.h"
 #include "contact/contactelement.h"
+#include "unknownnumberingscheme.h"
 
 
 #include <climits>

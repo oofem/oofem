@@ -15,6 +15,7 @@
 #include "sparsemtrx.h"
 #include "nrsolver.h"
 #include "primaryfield.h"
+#include "unknownnumberingscheme.h"
 
 #include <iostream>
 #include <fstream>

@@ -41,6 +41,7 @@
 #include "node.h"
 #include "dof.h"
 #include "connectivitytable.h"
+#include "unknownnumberingscheme.h"
 
 namespace oofem {
 EIPrimaryUnknownMapper :: EIPrimaryUnknownMapper() : PrimaryUnknownMapper()

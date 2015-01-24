@@ -43,6 +43,7 @@
 #include "element.h"
 #include "timestep.h"
 #include "classfactory.h"
+#include "dof.h"
 #ifdef __SM_MODULE
  #include "../sm/EngineeringModels/structengngmodel.h"
 #endif

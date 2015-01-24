@@ -66,6 +66,7 @@
 #include "boundarycondition.h"
 #include "feinterpol.h"
 #include "gausspoint.h"
+#include "unknownnumberingscheme.h"
 
 #include <vector>
 #include <string>

@@ -49,8 +49,8 @@
 #include "elementextension.h"
 #include "entityrenumberingscheme.h"
 #include "unknowntype.h"
-#include "unknownnumberingscheme.h"
 #include "integrationrule.h"
+#include "dofiditem.h"
 
 #include <cstdio>
 #include <vector>
@@ -83,6 +83,8 @@ class ElementSide;
 class FEInterpolation;
 class Load;
 class BoundaryLoad;
+class PrimaryField;
+class UnknownNumberingScheme;
 
 /**
  * In parallel mode, this type indicates the mode of element.

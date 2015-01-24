@@ -43,6 +43,7 @@
 #include "load.h"
 #include "element.h"
 #include "dofmanager.h"
+#include "dof.h"
 
 #ifdef __FM_MODULE
 #include "fluiddynamicmaterial.h"

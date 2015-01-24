@@ -48,6 +48,7 @@
 #include "vtkxmlexportmodule.h"
 #include "gausspoint.h"
 #include "matstatmapperint.h"
+#include "unknownnumberingscheme.h"
 
 namespace oofem {
 REGISTER_EngngModel(XFEMStatic);

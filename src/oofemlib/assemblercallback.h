@@ -37,6 +37,7 @@
 
 #include "valuemodetype.h" ///@todo We shouldn't have this for assembling vectors or matrices(!) / Mikael
 #include "matresponsemode.h"
+#include "chartype.h"
 
 namespace oofem {
 class IntArray;
@@ -87,6 +88,20 @@ public:
 };
 
 
+class OldVectorAssembler
+{
+private:
+    CharType type;
+
+public:
+    OldVectorAssembler(CharType t);
+    virtual void vectorFromElement(FloatArray& vec, Element& element, TimeStep* tStep, ValueModeType mode) const;
+    virtual void vectorFromLoad(FloatArray& vec, Element& element, BodyLoad* load, TimeStep* tStep, ValueModeType mode) const;
+    virtual void vectorFromBoundaryLoad(FloatArray& vec, Element& element, BoundaryLoad* load, int boundary, TimeStep* tStep, ValueModeType mode) const;
+    virtual void vectorFromEdgeLoad(FloatArray& vec, Element& element, BoundaryLoad* load, int edge, TimeStep* tStep, ValueModeType mode) const;
+    virtual void vectorFromNodeLoad(FloatArray& vec, DofManager& dman, NodalLoad* load, TimeStep* tStep, ValueModeType mode) const;
+};
+
 /**
  * Implementation for assembling internal forces vectors in standard monolithic, nonlinear FE-problems
  * @author Mikael Öhman
@@ -130,6 +145,20 @@ public:
     virtual void matrixFromLoad(FloatMatrix &mat, Element &element, BodyLoad *load, TimeStep *tStep) const;
     virtual void matrixFromBoundaryLoad(FloatMatrix &mat, Element &element, BoundaryLoad *load, int boundary, TimeStep *tStep) const;
     virtual void matrixFromEdgeLoad(FloatMatrix &mat, Element &element, BoundaryLoad *load, int edge, TimeStep *tStep) const;
+};
+
+
+class OldMatrixAssembler
+{
+private:
+    CharType type;
+
+public:
+    OldMatrixAssembler(CharType t);
+    virtual void matrixFromElement(FloatMatrix &vec, Element &element, TimeStep *tStep) const;
+    virtual void matrixFromLoad(FloatMatrix &vec, Element &element, BodyLoad *load, TimeStep *tStep) const;
+    virtual void matrixFromBoundaryLoad(FloatMatrix &vec, Element &element, BoundaryLoad *load, int boundary, TimeStep *tStep) const;
+    virtual void matrixFromEdgeLoad(FloatMatrix &vec, Element &element, BoundaryLoad *load, int edge, TimeStep *tStep) const;
 };
 
 #if 0
