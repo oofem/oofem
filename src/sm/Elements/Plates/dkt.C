@@ -389,9 +389,13 @@ DKTPlate :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double detJ, weight;
+    std :: vector< FloatArray > lc = {FloatArray(3), FloatArray(3), FloatArray(3)};
+    this->giveNodeCoordinates(lc[0].at(1), lc[1].at(1), lc[2].at(1), 
+                              lc[0].at(2), lc[1].at(2), lc[2].at(2), 
+                              lc[0].at(3), lc[1].at(3), lc[2].at(3));
 
     weight = gp->giveWeight();
-    detJ = fabs( this->interp_lin.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    detJ = fabs( this->interp_lin.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc) ) );
     return detJ * weight; ///@todo What about thickness?
 }
 

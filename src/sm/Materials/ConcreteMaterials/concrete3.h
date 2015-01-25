@@ -71,7 +71,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int hasNonLinearBehaviour() { return 1; }
     virtual const char *giveClassName() const { return "Concrete3"; }
-    virtual const char *giveInputRecordName() const { return _IFT_Concrete3_exp_soft; }
+    virtual const char *giveInputRecordName() const { return _IFT_Concrete3_Name; }
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 

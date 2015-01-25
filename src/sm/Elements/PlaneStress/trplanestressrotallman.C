@@ -142,17 +142,17 @@ TrPlanestressRotAllman :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
     answer.at(1, 1) = dnx.at(1, 1) + 0.5 * dnx.at(4, 1) + 0.5 * dnx.at(6, 1);
     answer.at(1, 4) = dnx.at(2, 1) + 0.5 * dnx.at(4, 1) + 0.5 * dnx.at(5, 1);
     answer.at(1, 7) = dnx.at(3, 1) + 0.5 * dnx.at(5, 1) + 0.5 * dnx.at(6, 1);
-    answer.at(1, 3) = dnx.at(6, 1) * ( lxy [ 0 ].at(2) - lxy [ 2 ].at(2) ) / 8.0 - dnx.at(4, 1) * ( lxy [ 1 ].at(2) - lxy [ 0 ].at(2) ) / 8.0;
-    answer.at(1, 6) = dnx.at(4, 1) * ( lxy [ 1 ].at(2) - lxy [ 0 ].at(2) ) / 8.0 - dnx.at(5, 1) * ( lxy [ 2 ].at(2) - lxy [ 1 ].at(2) ) / 8.0;
-    answer.at(1, 9) = dnx.at(5, 1) * ( lxy [ 2 ].at(2) - lxy [ 1 ].at(2) ) / 8.0 - dnx.at(6, 1) * ( lxy [ 0 ].at(2) - lxy [ 2 ].at(2) ) / 8.0;
+    answer.at(1, 3) =+dnx.at(6, 1) * ( lxy [ 0 ].at(2) - lxy [ 2 ].at(2) ) / 8.0 - dnx.at(4, 1) * ( lxy [ 1 ].at(2) - lxy [ 0 ].at(2) ) / 8.0;
+    answer.at(1, 6) =+dnx.at(4, 1) * ( lxy [ 1 ].at(2) - lxy [ 0 ].at(2) ) / 8.0 - dnx.at(5, 1) * ( lxy [ 2 ].at(2) - lxy [ 1 ].at(2) ) / 8.0;
+    answer.at(1, 9) =+dnx.at(5, 1) * ( lxy [ 2 ].at(2) - lxy [ 1 ].at(2) ) / 8.0 - dnx.at(6, 1) * ( lxy [ 0 ].at(2) - lxy [ 2 ].at(2) ) / 8.0;
 
     // epsilon_y
     answer.at(2, 2) = dnx.at(1, 2) + 0.5 * dnx.at(4, 2) + 0.5 * dnx.at(6, 2);
     answer.at(2, 5) = dnx.at(2, 2) + 0.5 * dnx.at(4, 2) + 0.5 * dnx.at(5, 2);
     answer.at(2, 8) = dnx.at(3, 2) + 0.5 * dnx.at(5, 2) + 0.5 * dnx.at(6, 2);
-    answer.at(2, 3) = -dnx.at(6, 2) * ( lxy [ 0 ].at(1) - lxy [ 2 ].at(1) ) / 8.0 + dnx.at(4, 2) * ( lxy [ 1 ].at(1) - lxy [ 0 ].at(1) ) / 8.0;
-    answer.at(2, 6) = -dnx.at(4, 2) * ( lxy [ 1 ].at(1) - lxy [ 0 ].at(1) ) / 8.0 + dnx.at(5, 2) * ( lxy [ 2 ].at(1) - lxy [ 1 ].at(1) ) / 8.0;
-    answer.at(2, 9) = -dnx.at(5, 2) * ( lxy [ 2 ].at(1) - lxy [ 1 ].at(1) ) / 8.0 + dnx.at(6, 2) * ( lxy [ 0 ].at(1) - lxy [ 2 ].at(1) ) / 8.0;
+    answer.at(2, 3) =-dnx.at(6, 2) * ( lxy [ 0 ].at(1) - lxy [ 2 ].at(1) ) / 8.0 + dnx.at(4, 2) * ( lxy [ 1 ].at(1) - lxy [ 0 ].at(1) ) / 8.0;
+    answer.at(2, 6) =-dnx.at(4, 2) * ( lxy [ 1 ].at(1) - lxy [ 0 ].at(1) ) / 8.0 + dnx.at(5, 2) * ( lxy [ 2 ].at(1) - lxy [ 1 ].at(1) ) / 8.0;
+    answer.at(2, 9) =-dnx.at(5, 2) * ( lxy [ 2 ].at(1) - lxy [ 1 ].at(1) ) / 8.0 + dnx.at(6, 2) * ( lxy [ 0 ].at(1) - lxy [ 2 ].at(1) ) / 8.0;
 
     // gamma_xy (shear)
     answer.at(3, 1) = dnx.at(1, 2) + 0.5 * dnx.at(4, 2) + 0.5 * dnx.at(6, 2);

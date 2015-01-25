@@ -36,8 +36,10 @@ set (sm_element
     Elements/Plates/dkt.C 
     Elements/Plates/qdkt.C
     Elements/Plates/quad1mindlin.C
+    Elements/Plates/dkt3d.C
     Elements/Shells/rershell.C 
     Elements/Shells/tr_shell01.C 
+    Elements/Shells/tr_shell02.C 
     Elements/Shells/cct3d.C
     Elements/Shells/quad1mindlinshell3d.C
     Elements/Shells/shell7base.C
@@ -68,6 +70,7 @@ set (sm_element
     Elements/PlaneStress/qplanestressgrad.C
     Elements/PlaneStress/trplanestressrotallman.C
     Elements/PlaneStress/basicelement.C
+    Elements/PlaneStress/trplanestressrotallman3d.C
     Elements/AbaqusUserElement.C
     Elements/htselement.C
     Elements/latticestructuralelement.C
