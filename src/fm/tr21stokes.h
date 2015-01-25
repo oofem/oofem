@@ -76,7 +76,6 @@ public:
     virtual ~Tr21Stokes();
 
     // ** To be removed
-    void giveGradP(FloatArray &answer, TimeStep *tStep);
     void giveIntegratedVelocity(FloatArray &answer, TimeStep *tStep);
     void giveElementFMatrix(FloatMatrix &answer);
     // **

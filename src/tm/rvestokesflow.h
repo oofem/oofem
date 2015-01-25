@@ -35,12 +35,14 @@
 #ifndef rvestokesflow_h
 #define rvestokesflow_h
 
-#include "rvematerial.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "transportmaterial.h"
 
 #define _IFT_RVEStokesFlow_Name "rvestokesflow"
+#define _IFT_RVEStokesFlow_fileName "file"
+#define _IFT_RVEStokesFlow_bctype "bctype"
+#define _IFT_RVEStokesFlow_supressoutput "supressoutput"
 
 namespace oofem {
 /**
@@ -90,10 +92,22 @@ public:
  *
  * @author Carl Sandström
  */
-class RVEStokesFlow : public RVEMaterial, public TransportMaterial
+class RVEStokesFlow : public TransportMaterial
 {
 private:
+    std :: unique_ptr< EngngModel > rve;
+
+    std :: string rveFilename;
+    std :: string rveLogFilename;
+
+    /// Type of boundary condition.
+    int BCType;
+    
+    int SupressRVEoutput;
+
     void exportFilter(EngngModel *E, GaussPoint *gp, TimeStep *tStep);
+    void suppressStdout();
+    void enableStdout();
 
 public:
     RVEStokesFlow(int n, Domain * d);

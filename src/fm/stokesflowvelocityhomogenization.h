@@ -83,7 +83,7 @@ public:
 
 private:
     /** Computes the mean velocity and pressure gradient */
-    void getMeans(FloatArray &gradP, FloatArray &v, TimeStep *tStep);
+    void getMeans(FloatArray &v, TimeStep *tStep);
 };
 }
 #endif // stokesflowvelocityhomogenization_h

@@ -119,13 +119,12 @@ StokesFlowVelocityHomogenization :: rveSetBoundaryConditions(int BCType, FloatAr
 { }
 
 void
-StokesFlowVelocityHomogenization :: getMeans(FloatArray &gradP, FloatArray &v, TimeStep *tStep)
+StokesFlowVelocityHomogenization :: getMeans(FloatArray &v, TimeStep *tStep)
 {
-    FloatArray gradPTemp, v_hatTemp;
+    FloatArray v_hatTemp;
     double Area = 0, AreaFull = 0; //(xmax-xmin)*(ymax-ymin);
     double xmax = 0, xmin = 0, ymax = 0, ymin = 0;
 
-    gradP.clear();
     v.clear();
 
     for ( auto &elem : this->giveDomain(1)->giveElements() ) {
@@ -150,10 +149,8 @@ StokesFlowVelocityHomogenization :: getMeans(FloatArray &gradP, FloatArray &v, T
                 }
             }
 
-            T->giveGradP(gradPTemp, tStep);
             T->giveIntegratedVelocity(v_hatTemp, tStep);
 
-            gradP.add(gradPTemp);
             v.add(v_hatTemp);
 
             Area = Area + T->computeArea();
@@ -161,7 +158,6 @@ StokesFlowVelocityHomogenization :: getMeans(FloatArray &gradP, FloatArray &v, T
     }
 
     AreaFull = ( xmax - xmin ) * ( ymax - ymin );
-    gradP.times(1. / Area);
     v.times(1. / AreaFull);
 }
 
@@ -177,9 +173,8 @@ StokesFlowVelocityHomogenization :: rveGiveCharacteristicData(int DataType, void
 
     switch ( DataType ) {
     case 1: {
-        FloatArray *gradP;
-        FloatArray thisGradP, v_hat;
-        gradP = ( FloatArray * ) input;
+        FloatArray *gradP = ( FloatArray * ) input;
+        FloatArray v_hat;
 
         for ( auto &elem : this->giveDomain(1)->giveElements() ) {
             if ( Tr21Stokes * T = dynamic_cast< Tr21Stokes * >( elem.get() ) ) {
@@ -199,7 +194,7 @@ StokesFlowVelocityHomogenization :: rveGiveCharacteristicData(int DataType, void
 
         solveYourselfAt(tStep);
 
-        getMeans(thisGradP, v_hat, tStep);
+        getMeans(v_hat, tStep);
 
         ( ( FloatArray * ) answer )->resize(2);
         ( ( FloatArray * ) answer )->at(1) = v_hat.at(1);
@@ -227,7 +222,6 @@ void
 StokesFlowVelocityHomogenization :: computeTangent(FloatMatrix &answer, TimeStep *tStep)
 {
     IntArray loc, col;
-    FloatArray averagev;
 
     Domain *domain = this->giveDomain(1);
     int ndof = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
@@ -237,7 +231,7 @@ StokesFlowVelocityHomogenization :: computeTangent(FloatMatrix &answer, TimeStep
 
     F.resize(ndof, 2);
     F.zero();
-    col = {1,2};
+    col.enumerate(2);
 
     for ( auto &elem : domain->giveElements() ) {
         if ( Tr21Stokes * T = dynamic_cast< Tr21Stokes * >( elem.get() ) ) {
@@ -250,7 +244,6 @@ StokesFlowVelocityHomogenization :: computeTangent(FloatMatrix &answer, TimeStep
 
     FloatMatrix H;
 
-    //    SparseLinearSystemNM *linMethod = classFactory.createSparseLinSolver(ST_Petsc, this->giveDomain(1), this);
     std :: unique_ptr< SparseLinearSystemNM > linMethod( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
 
     H.resize( F.giveNumberOfRows(), F.giveNumberOfColumns() );

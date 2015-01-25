@@ -34,6 +34,7 @@
 
 #include "rvestokesflow.h"
 #include "util.h"
+#include "oofemtxtdatareader.h"
 #include "rveengngmodel.h"
 #include "engngm.h"
 #include "nummet.h"
@@ -140,13 +141,35 @@ RVEStokesFlowMaterialStatus :: restoreContext(DataStream &stream, ContextMode mo
     return CIO_OK;
 }
 
-RVEStokesFlow :: RVEStokesFlow(int n, Domain *d) : RVEMaterial(n, d), TransportMaterial(n, d)
+RVEStokesFlow :: RVEStokesFlow(int n, Domain *d) : TransportMaterial(n, d)
 { }
 
 IRResultType RVEStokesFlow :: initializeFrom(InputRecord *ir)
 {
+    IRResultType result;
+
     // this->TransportMaterial :: initializeFrom(ir);
-    this->RVEMaterial :: initializeFrom(ir);
+
+    IR_GIVE_FIELD(ir, this->rveFilename, _IFT_RVEStokesFlow_fileName);
+
+    OOFEM_LOG_INFO( "************************** Instanciating microproblem from file %s\n", rveFilename.c_str() );
+    OOFEMTXTDataReader drMicro( rveFilename.c_str() );
+
+    this->rve.reset( InstanciateProblem(& drMicro, _processor, 0) );
+    drMicro.finish();
+
+    this->rve->setProblemScale(microScale);
+    this->rve->setProblemScale(microScale);
+    this->rve->checkProblemConsistency();
+    this->rve->initMetaStepAttributes( this->rve->giveMetaStep(1) );
+    this->rve->giveNextStep();
+    this->rve->init();
+
+    OOFEM_LOG_INFO("************************** Microproblem at %p instanciated \n", rve.get());
+
+    SupressRVEoutput = 0;
+
+    IR_GIVE_OPTIONAL_FIELD(ir, SupressRVEoutput, _IFT_RVEStokesFlow_supressoutput);
 
     return IRRT_OK;
 }
@@ -157,21 +180,20 @@ RVEStokesFlow :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateTy
     RVEStokesFlowMaterialStatus *thisMaterialStatus;
     thisMaterialStatus = static_cast< RVEStokesFlowMaterialStatus * >( this->giveStatus(gp) );
     FloatMatrix temp;
-    answer.resize(3);
-    answer.zero();
+    answer.clear();
 
     switch ( type ) {
     case IST_Velocity:
         answer.copySubVector(thisMaterialStatus->giveFlux(), 1);
-        break;
+        return 1;
     case IST_PressureGradient:
         answer.copySubVector(thisMaterialStatus->giveGradient(), 1);
-        break;
+        return 1;
     case IST_TangentNorm:
         temp = thisMaterialStatus->giveTangentMatrix();
         answer.resize(1);
         answer.at(1) = temp.computeFrobeniusNorm();
-        break;
+        return 1;
     case IST_Tangent:
         temp = thisMaterialStatus->giveTangentMatrix();
         answer.resize(4);
@@ -179,12 +201,12 @@ RVEStokesFlow :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateTy
         answer.at(2) = temp.at(1, 2);
         answer.at(3) = temp.at(2, 1);
         answer.at(4) = temp.at(2, 2);
-        break;
+        return 1;
     default:
         return TransportMaterial :: giveIPValue(answer, gp, type, tStep);
     }
 
-    return 1;
+    return 0;
 }
 
 void
@@ -192,10 +214,11 @@ RVEStokesFlow :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatA
 {
     this->suppressStdout();
 
-    OOFEM_LOG_DEBUG("\n****** Enter giveFluxVector ********************** Element number %u, Gauss point %u, rve @ %p \n", gp->giveElement()->giveGlobalNumber(), gp->giveNumber(), this->rve);
+    OOFEM_LOG_DEBUG("\n****** Enter giveFluxVector ********************** Element number %u, Gauss point %u, rve @ %p \n", 
+                    gp->giveElement()->giveGlobalNumber(), gp->giveNumber(), this->rve.get());
 
     RVEStokesFlowMaterialStatus *status = static_cast< RVEStokesFlowMaterialStatus * >( this->giveStatus(gp) );
-    FloatArray temp = status->giveTempGradient();
+    const FloatArray &temp = status->giveTempGradient();
 
     if ( temp.giveSize() >= 3 && temp.at(1) == grad.at(1) && temp.at(2) == grad.at(2) ) {
         OOFEM_LOG_DEBUG("This pressure gradient has already been evaluated\n");
@@ -204,7 +227,7 @@ RVEStokesFlow :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatA
         FloatArray X;
         rveEngngModel *rveE;
 
-        rveE = dynamic_cast< rveEngngModel * >(this->rve);
+        rveE = dynamic_cast< rveEngngModel * >(this->rve.get());
 
         X = grad;
 
@@ -258,7 +281,7 @@ RVEStokesFlow :: giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode, 
 {
     this->suppressStdout();
 
-    OOFEM_LOG_DEBUG("\n****** Enter giveDeviatoricStiffnessMatrix ********************** rve @ %p \n", this->rve);
+    OOFEM_LOG_DEBUG("\n****** Enter giveDeviatoricStiffnessMatrix ********************** rve @ %p \n", this->rve.get());
 
     RVEStokesFlowMaterialStatus *status = static_cast< RVEStokesFlowMaterialStatus * >( this->giveStatus(gp) );
 
@@ -273,6 +296,28 @@ RVEStokesFlow :: giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode, 
 MaterialStatus *
 RVEStokesFlow :: CreateStatus(GaussPoint *gp) const
 {
-    return new RVEStokesFlowMaterialStatus(1, this->giveDomain(), gp, this->rve);
+    return new RVEStokesFlowMaterialStatus(1, this->giveDomain(), gp, this->rve.get());
 }
+
+void
+RVEStokesFlow :: suppressStdout()
+{
+    //    if (SupressRVEoutput) {
+    //        fgetpos(stdout, &stdoutPos);
+    //        stdoutFID=dup(fileno(stdout));
+    //        freopen(this->rveLogFilename.c_str(), "a", stdout);
+    //    }
+}
+
+void RVEStokesFlow :: enableStdout()
+{
+    //    if (SupressRVEoutput) {
+    //        fflush(stdout);
+    //        dup2(stdoutFID, fileno(stdout));
+    //        close (stdoutFID);
+    //        clearerr(stdout);
+    //        fsetpos(stdout, &stdoutPos);        /* for C9X */
+    //    }
+}
+
 }

@@ -425,51 +425,6 @@ void Tr21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer
     }
 }
 
-void Tr21Stokes :: giveGradP(FloatArray &answer, TimeStep *tStep)
-{
-    /*
-     * Integrate gradient of P over element
-     */
-
-    answer.resize(2);
-    answer.zero();
-
-#if 0
-    GaussIntegrationRule iRuleEdge(1, this, 1, 1);
-    GaussPoint *gpEdge;
-    FloatArray Normal, N, *lcoords, p, temp;
-    FloatMatrix int_Np_edge;
-
-    iRuleEdge.setUpPointsOnLine(this->numberOfGaussPoints, _Unknown);
-
-    this->computeVectorOfPressures(VM_Total, tStep, p);
-
-    answer.clear();
-
-    for ( int i = 1; i <= integrationEdges->giveSize(); i++ ) {
-        int iEdge = integrationEdges->at(i);
-        givePressureGradientBoundaryIntegral(int_Np_edge, iEdge);
-
-        temp.resize(2);
-        temp.zero();
-        if ( iEdge == 1 ) {
-            temp.at(1) = int_Np_edge.at(1, 1) * p.at(1) + int_Np_edge.at(1, 2) * p.at(2);
-            temp.at(2) = int_Np_edge.at(2, 1) * p.at(1) + int_Np_edge.at(2, 2) * p.at(2);
-        } else if ( iEdge == 2 ) {
-            temp.at(1) = int_Np_edge.at(1, 1) * p.at(2) + int_Np_edge.at(1, 2) * p.at(3);
-            temp.at(2) = int_Np_edge.at(2, 1) * p.at(2) + int_Np_edge.at(2, 2) * p.at(3);
-        } else if ( iEdge == 3 ) {
-            temp.at(1) = int_Np_edge.at(1, 1) * p.at(3) + int_Np_edge.at(1, 2) * p.at(1);
-            temp.at(2) = int_Np_edge.at(2, 1) * p.at(3) + int_Np_edge.at(2, 2) * p.at(1);
-        } else {
-            printf("iEdge != {1,2,3}\n");
-        }
-
-        answer.add(temp);
-    }
-
-#endif
-}
 
 void Tr21Stokes :: giveIntegratedVelocity(FloatArray &answer, TimeStep *tStep)
 {
@@ -479,19 +434,8 @@ void Tr21Stokes :: giveIntegratedVelocity(FloatArray &answer, TimeStep *tStep)
 
     FloatArray v, N, tmp;
     FloatMatrix Nmatrix;
-    int k = 0;
 
-    v.resize(12);
-    v.zero();
-
-    for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
-        for ( Dof *d: *this->giveDofManager(i) ) {
-            if ( ( d->giveDofID() == V_u ) || ( d->giveDofID() == V_v ) ) {
-                k = k + 1;
-                v.at(k) = d->giveUnknown(VM_Total, tStep);
-            }
-        }
-    }
+    this->computeVectorOf({V_u, V_v}, VM_Total, tStep, v);
 
     answer.clear();
 
@@ -512,27 +456,19 @@ void Tr21Stokes :: giveIntegratedVelocity(FloatArray &answer, TimeStep *tStep)
 
 void Tr21Stokes :: giveElementFMatrix(FloatMatrix &answer)
 {
-    double detJ;
     FloatArray N, N2;
-
-    N2.clear();
 
     for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
         FloatArray &lcoords = * gp->giveNaturalCoordinates();
 
         this->interpolation_quad.evalN( N, lcoords, FEIElementGeometryWrapper(this) );
-        detJ = this->interpolation_quad.giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(this) );
+        double detJ = this->interpolation_quad.giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(this) );
         N.times(gp->giveWeight() * detJ);
-        //N.printYourself();
         N2.add(N);
     }
 
-    answer.resize(12, 2);
-    answer.zero();
-
-    for ( int i = 1; i <= 6; i++ ) {
-        answer.at(i * 2 - 1, 1) = N2.at(i);
-        answer.at(i * 2, 2) = N2.at(i);
-    }
+    FloatMatrix ansT;
+    ansT.beNMatrixOf(N2, 2);
+    answer.beTranspositionOf(ansT);
 }
 } // end namespace oofem
