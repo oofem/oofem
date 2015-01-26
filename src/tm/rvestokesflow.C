@@ -35,7 +35,7 @@
 #include "rvestokesflow.h"
 #include "util.h"
 #include "oofemtxtdatareader.h"
-#include "rveengngmodel.h"
+#include "stokesflowvelocityhomogenization.h"
 #include "engngm.h"
 #include "nummet.h"
 #include "contextioerr.h"
@@ -43,6 +43,7 @@
 #include "mathfem.h"
 #include "classfactory.h"
 #include "engngm.h"
+#include "deadweight.h"
 
 #include <cstdio>
 #include <cstring>
@@ -51,52 +52,52 @@
 namespace oofem {
 REGISTER_Material(RVEStokesFlow);
 
-RVEStokesFlowMaterialStatus :: RVEStokesFlowMaterialStatus(int n, Domain *d, GaussPoint *g, EngngModel *rve) :
-    TransportMaterialStatus(n, d, g)
+int RVEStokesFlow :: n = 1;
+
+RVEStokesFlowMaterialStatus :: RVEStokesFlowMaterialStatus(int n, Domain *d, GaussPoint *g, const std :: string &inputfile) :
+    TransportMaterialStatus(n, d, g), oldTangent(true)
 {
-    temp_gradient.resize(2);
-    temp_gradient.zero();
+    
+    OOFEM_LOG_INFO( "************************** Instanciating microproblem from file %s\n", inputfile.c_str() );
+    OOFEMTXTDataReader dr( inputfile.c_str() );
 
-    temp_flux.resize(2);
-    temp_flux.zero();
+    EngngModel *e = InstanciateProblem(& dr, _processor, 0);
+    dr.finish();
+ 
+    if ( dynamic_cast< StokesFlowVelocityHomogenization* >(e) ) {
+        this->rve.reset( dynamic_cast< StokesFlowVelocityHomogenization* >(e) );
+    } else {
+        delete e;
+        OOFEM_ERROR("Unexpected RVE engineering model");
+    }
 
-    temp_TangentMatrix.resize(2, 2);
-    temp_TangentMatrix.zero();
+    std :: ostringstream name;
+    name << this->rve->giveOutputBaseFileName() << "-gp" << n;
+    if ( this->domain->giveEngngModel()->isParallel() && this->domain->giveEngngModel()->giveNumberOfProcesses() > 1 ) {
+        name << "." << this->domain->giveEngngModel()->giveRank();
+    }
+    this->rve->letOutputBaseFileNameBe( name.str() );
 
-    this->rve = rve;
+    this->rve->setProblemScale(microScale);
+    this->rve->checkProblemConsistency();
+    this->rve->initMetaStepAttributes( this->rve->giveMetaStep(1) );
+    this->rve->giveNextStep();
+    this->rve->init();
+
+    OOFEM_LOG_INFO("************************** Microproblem at %p instanciated \n", rve.get());
 }
 
 RVEStokesFlowMaterialStatus :: ~RVEStokesFlowMaterialStatus()
 {
 }
 
-void
-RVEStokesFlowMaterialStatus :: exportFilter(GaussPoint *gp, TimeStep *tStep)
+
+void RVEStokesFlowMaterialStatus :: setTimeStep(TimeStep *tStep)
 {
-    // Fix name for RVE output file and print output
-
-    std :: string filename, basefilename;
-    std :: ostringstream filenameStringStream;
-
-
-    filenameStringStream << this->giveDomain()->giveEngngModel()->giveOutputBaseFileName().c_str() << ".rve/Rve_" << gp->giveElement()->giveGlobalNumber() << "_" << gp->giveNumber();
-
-    filename = filenameStringStream.str();
-
-    // Update fields on subscale
-    FloatArray grapP = this->giveTempGradient(), seepageVelocity;
-
-    rveEngngModel *rveE;
-    rveE = dynamic_cast< rveEngngModel * >(this->rve);
-
-    rveE->rveSetBoundaryConditions(10, grapP);
-    rveE->rveGiveCharacteristicData(1, & grapP, & seepageVelocity, tStep);
-
-    basefilename = this->rve->giveOutputBaseFileName();
-
-    this->rve->letOutputBaseFileNameBe(filename);
-    this->rve->doStepOutput(tStep);
-    this->rve->letOutputBaseFileNameBe(basefilename);
+    TimeStep *rveTStep = this->rve->giveCurrentStep();
+    rveTStep->setNumber( tStep->giveNumber() );
+    rveTStep->setTime( tStep->giveTargetTime() );
+    rveTStep->setTimeIncrement( tStep->giveTimeIncrement() );
 }
 
 void
@@ -111,8 +112,8 @@ RVEStokesFlowMaterialStatus :: updateYourself(TimeStep *tStep)
     TransportMaterialStatus :: updateYourself(tStep);
     tangentMatrix = temp_TangentMatrix;
 
-    //Mtrl->suppressStdout();
-    //Mtrl->enableStdout();
+    this->rve->updateYourself(tStep);
+    this->rve->terminate(tStep);
 }
 
 
@@ -152,27 +153,13 @@ IRResultType RVEStokesFlow :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, this->rveFilename, _IFT_RVEStokesFlow_fileName);
 
-    OOFEM_LOG_INFO( "************************** Instanciating microproblem from file %s\n", rveFilename.c_str() );
-    OOFEMTXTDataReader drMicro( rveFilename.c_str() );
-
-    this->rve.reset( InstanciateProblem(& drMicro, _processor, 0) );
-    drMicro.finish();
-
-    this->rve->setProblemScale(microScale);
-    this->rve->setProblemScale(microScale);
-    this->rve->checkProblemConsistency();
-    this->rve->initMetaStepAttributes( this->rve->giveMetaStep(1) );
-    this->rve->giveNextStep();
-    this->rve->init();
-
-    OOFEM_LOG_INFO("************************** Microproblem at %p instanciated \n", rve.get());
-
     SupressRVEoutput = 0;
 
     IR_GIVE_OPTIONAL_FIELD(ir, SupressRVEoutput, _IFT_RVEStokesFlow_supressoutput);
 
     return IRRT_OK;
 }
+
 
 int
 RVEStokesFlow :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
@@ -212,81 +199,65 @@ RVEStokesFlow :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateTy
 void
 RVEStokesFlow :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep)
 {
+
     this->suppressStdout();
 
-    OOFEM_LOG_DEBUG("\n****** Enter giveFluxVector ********************** Element number %u, Gauss point %u, rve @ %p \n", 
-                    gp->giveElement()->giveGlobalNumber(), gp->giveNumber(), this->rve.get());
+    OOFEM_LOG_DEBUG("\n****** Enter giveFluxVector ********************** Element number %u, Gauss point %u\n", 
+                    gp->giveElement()->giveGlobalNumber(), gp->giveNumber());
 
     RVEStokesFlowMaterialStatus *status = static_cast< RVEStokesFlowMaterialStatus * >( this->giveStatus(gp) );
-    const FloatArray &temp = status->giveTempGradient();
+    StokesFlowVelocityHomogenization *rveE = status->giveRVE();
 
-    if ( temp.giveSize() >= 3 && temp.at(1) == grad.at(1) && temp.at(2) == grad.at(2) ) {
-        OOFEM_LOG_DEBUG("This pressure gradient has already been evaluated\n");
-        answer = status->giveTempFlux();
-    } else {
-        FloatArray X;
-        rveEngngModel *rveE;
+    OOFEM_LOG_DEBUG( "Solve RVE problem for macroscale pressure gradient gradP=[%f, %f, %f]\n ",
+                     grad.at(1), grad.at(2), grad.giveSize() == 3 ? grad.at(3) : 0. );
 
-        rveE = dynamic_cast< rveEngngModel * >(this->rve.get());
+    // Compute seepage velocity
+    FloatArray components = grad;
+    components.negated();
 
-        X = grad;
-
-        OOFEM_LOG_DEBUG( "Solve RVE problem with boundary conditions (type=%u) for macroscale pressure gradient gradP=[%f, %f]\n ", BCType, grad.at(1), grad.at(2) );
-
-        // Compute seepage velocity
-        rveE->rveSetBoundaryConditions(BCType, grad);
-        rveE->rveGiveCharacteristicData(1, & X, & answer, tStep);
-
-        OOFEM_LOG_DEBUG( "Pressure gradient gradP=[%f %f] yields velocity vector [%f %f]\n", X.at(1), X.at(2), answer.at(1), answer.at(2) );
-
-
-        status->setTempGradient(X);
-        status->setTempFlux(answer);
-
-        // Compute tangent
-        FloatMatrix K;
-        rveE->rveGiveCharacteristicData(2, & X, & K, tStep);
-        status->letTempTangentMatrixBe(K);
+    ///@todo This should either be a specialized boundary condition so that this routine can be replaced by something else
+    for ( auto &bc : rveE->giveDomain(1)->giveBcs() ) {
+        DeadWeight *load = dynamic_cast< DeadWeight* >( bc.get() );
+        if ( load ) {
+            load->setDeadWeighComponents(components);
+            break;
+        }
     }
+
+    status->setTimeStep(tStep);
+    rveE->solveYourselfAt(rveE->giveCurrentStep());
+    rveE->getMeans(answer, tStep);
+
+    OOFEM_LOG_DEBUG( "Pressure gradient gradP=[%f %f] yields velocity vector [%f %f]\n", grad.at(1), grad.at(2), answer.at(1), answer.at(2) );
+
+
+    status->setTempGradient(grad);
+    status->setTempFlux(answer);
+    status->oldTangent = true;
 
     OOFEM_LOG_DEBUG("****** Exit giveFluxVector **************************************** \n");
 
     this->enableStdout();
 }
 
-void
-RVEStokesFlow :: exportFilter(EngngModel *E, GaussPoint *gp, TimeStep *tStep)
-{
-    // Fix name for RVE output file and print output
-
-    std :: string filename, basefilename;
-    std :: ostringstream tempstring;
-
-    basefilename = this->giveDomain()->giveEngngModel()->giveOutputBaseFileName();
-    tempstring << basefilename << ".rve/Rve_" << gp->giveElement()->giveGlobalNumber() << "_" << gp->giveNumber();
-    filename = tempstring.str();
-
-    basefilename = E->giveOutputBaseFileName();
-    E->letOutputBaseFileNameBe(filename);
-
-    this->suppressStdout();
-    E->doStepOutput(tStep);
-    this->enableStdout();
-
-    E->letOutputBaseFileNameBe(basefilename);
-}
 
 void
 RVEStokesFlow :: giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep)
 {
     this->suppressStdout();
 
-    OOFEM_LOG_DEBUG("\n****** Enter giveDeviatoricStiffnessMatrix ********************** rve @ %p \n", this->rve.get());
+    OOFEM_LOG_DEBUG("\n****** Enter giveDeviatoricStiffnessMatrix **********************\n");
 
     RVEStokesFlowMaterialStatus *status = static_cast< RVEStokesFlowMaterialStatus * >( this->giveStatus(gp) );
 
-    answer = status->giveTempTangentMatrix();
-    status->letTempTangentMatrixBe(answer);
+    if ( status->oldTangent ) {
+        // Compute tangent
+        status->giveRVE()->computeTangent(answer, tStep);
+        status->letTempTangentMatrixBe(answer);
+        status->oldTangent = false;
+    } else {
+        answer = status->giveTempTangentMatrix();
+    }
 
     OOFEM_LOG_DEBUG("****** Exit giveDeviatoricStiffnessMatrix **************************************** \n");
 
@@ -296,7 +267,7 @@ RVEStokesFlow :: giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode, 
 MaterialStatus *
 RVEStokesFlow :: CreateStatus(GaussPoint *gp) const
 {
-    return new RVEStokesFlowMaterialStatus(1, this->giveDomain(), gp, this->rve.get());
+    return new RVEStokesFlowMaterialStatus(n++, this->giveDomain(), gp, this->rveFilename);
 }
 
 void

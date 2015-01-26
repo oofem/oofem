@@ -412,41 +412,4 @@ void Tet21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answe
     }
 }
 
-void Tet21Stokes :: giveIntegratedVelocity(FloatArray &answer, TimeStep *tStep)
-{
-    /*
-     * Integrate velocity over element
-     */
-
-    FloatMatrix Nmatrix;
-    FloatArray v, N, tmp;
-    int k = 0;
-
-    v.resize(30);
-    v.zero();
-
-    for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
-        for ( Dof *d: *this->giveDofManager(i) ) {
-            if ( ( d->giveDofID() == V_u ) || ( d->giveDofID() == V_v ) || ( d->giveDofID() == V_w ) ) {
-                k = k + 1;
-                v.at(k) = d->giveUnknown(VM_Total, tStep);
-            }
-        }
-    }
-
-    answer.clear();
-
-    for ( GaussPoint *gp: *this->integrationRulesArray [ 0 ] ) {
-        const FloatArray &lcoords = * gp->giveNaturalCoordinates();
-
-        this->interpolation_quad.evalN( N, lcoords, FEIElementGeometryWrapper(this) );
-        double detJ = this->interpolation_quad.giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(this) );
-        double dA = detJ * gp->giveWeight();
-
-        Nmatrix.beNMatrixOf(N, 3);
-
-        tmp.beProductOf(Nmatrix, v);
-        answer.add(dA, tmp);
-    }
-}
 } // end namespace oofem

@@ -75,11 +75,6 @@ public:
     Tr21Stokes(int n, Domain * d);
     virtual ~Tr21Stokes();
 
-    // ** To be removed
-    void giveIntegratedVelocity(FloatArray &answer, TimeStep *tStep);
-    void giveElementFMatrix(FloatMatrix &answer);
-    // **
-
     virtual double computeVolumeAround(GaussPoint *gp);
 
     virtual void computeGaussPoints();

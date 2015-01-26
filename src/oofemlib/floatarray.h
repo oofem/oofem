@@ -442,6 +442,11 @@ public:
      * @return Sum of receiver.
      */
     double sum() const;
+    /**
+     * Computes the product of receiver values.
+     * @return Product of receiver.
+     */
+    double product() const;
 
     /**
      * Returns the receiver a rotated according the change-of-base matrix r.

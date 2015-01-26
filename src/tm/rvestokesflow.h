@@ -38,6 +38,9 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "transportmaterial.h"
+#include "stokesflowvelocityhomogenization.h"
+
+#include <memory>
 
 #define _IFT_RVEStokesFlow_Name "rvestokesflow"
 #define _IFT_RVEStokesFlow_fileName "file"
@@ -49,18 +52,20 @@ namespace oofem {
  * Material status class for the RVEStokesFlow class.
  *
  * @author Carl Sandström
+ * @author Mikael Öhman
  */
 class RVEStokesFlowMaterialStatus : public TransportMaterialStatus
 {
 protected:
     FloatMatrix temp_TangentMatrix, tangentMatrix;
-    FloatArray solutionVector;
-    EngngModel *rve;
+    std :: unique_ptr< StokesFlowVelocityHomogenization > rve;
 
 public:
-    RVEStokesFlowMaterialStatus(int n, Domain * d, GaussPoint * g, EngngModel * rve);
+    RVEStokesFlowMaterialStatus(int n, Domain * d, GaussPoint * g, const std :: string &inputfile);
 
     virtual ~RVEStokesFlowMaterialStatus();
+
+    void setTimeStep(TimeStep *tStep);
 
     virtual void initTempStatus();
 
@@ -71,13 +76,11 @@ public:
 
     const FloatMatrix &giveTangentMatrix() { return tangentMatrix; }
     const FloatMatrix &giveTempTangentMatrix() { return temp_TangentMatrix; }
-    void letTempTangentMatrixBe(FloatMatrix K) { temp_TangentMatrix = std :: move(K); }
+    void letTempTangentMatrixBe(const FloatMatrix &K) { temp_TangentMatrix = K; }
 
-    /**
-     * Export this RVE. The files produced is named ./[.in-file].rve/Rve_[ID]_[GP number] where is is the global element number any GP number is
-     * the number of the Gausspoint where the RVE is evaluated
-     */
-    void exportFilter(GaussPoint *gp, TimeStep *tStep);
+    StokesFlowVelocityHomogenization *giveRVE() { return rve.get(); }
+
+    bool oldTangent;
 
     virtual const char *giveClassName() const { return "RVEStokesFlowMaterialStatus"; }
 };
@@ -91,21 +94,17 @@ public:
  * velocity).
  *
  * @author Carl Sandström
+ * @author Mikael Öhman
  */
 class RVEStokesFlow : public TransportMaterial
 {
 private:
-    std :: unique_ptr< EngngModel > rve;
-
+    static int n;
     std :: string rveFilename;
     std :: string rveLogFilename;
 
-    /// Type of boundary condition.
-    int BCType;
-    
     int SupressRVEoutput;
 
-    void exportFilter(EngngModel *E, GaussPoint *gp, TimeStep *tStep);
     void suppressStdout();
     void enableStdout();
 

@@ -111,8 +111,6 @@ public:
 
     // Nodal averaging interface:
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
-
-    void giveIntegratedVelocity(FloatArray &answer, TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // tet21stokes_h
