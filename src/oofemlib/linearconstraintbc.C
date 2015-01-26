@@ -149,9 +149,6 @@ void LinearConstraintBC :: assembleVector(FloatArray &answer, TimeStep *tStep,
     if ( !this->rhsType.contains( ( int ) type ) ) {
         return;
     }
-    if ( !this->isImposed(tStep) ) {
-        return;
-    }
 
     if ( type == InternalForcesVector ) {
         // compute true residual
@@ -173,7 +170,7 @@ void LinearConstraintBC :: assembleVector(FloatArray &answer, TimeStep *tStep,
                 answer.at( s.giveDofEquationNumber( mdof ) ) += idof->giveUnknown(mode, tStep) * this->weights.at(_i) * factor;
             }
         }
-    } else {
+    } else if ( type == ExternalForcesVector ) {
         // use rhs value
 
         if ( rhsTf ) {

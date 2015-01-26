@@ -122,8 +122,6 @@ void DarcyFlow :: solveYourselfAt(TimeStep *tStep)
     lhs->toFloatMatrix(LHS_backup);
     DumpMatricesToFile(& LHS_backup, & rhs, NULL);
 #endif
-
-    this->updateYourself(tStep);
 }
 
 
