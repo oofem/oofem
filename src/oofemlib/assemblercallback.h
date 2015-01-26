@@ -50,6 +50,8 @@ class NodalLoad;
 class BodyLoad;
 class BoundaryLoad;
 class UnknownNumberingScheme;
+class SparseMtrx;
+class ActiveBoundaryCondition;
 
 /**
  * Callback class for assembling specific types of vectors.
@@ -78,17 +80,18 @@ public:
 class MatrixAssembler
 {
 public:
-    virtual void matrixFromElement(FloatMatrix &vec, Element &element, TimeStep *tStep) const;
-    virtual void matrixFromLoad(FloatMatrix &vec, Element &element, BodyLoad *load, TimeStep *tStep) const;
-    virtual void matrixFromBoundaryLoad(FloatMatrix &vec, Element &element, BoundaryLoad *load, int boundary, TimeStep *tStep) const;
-    virtual void matrixFromEdgeLoad(FloatMatrix &vec, Element &element, BoundaryLoad *load, int edge, TimeStep *tStep) const;
+    virtual void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const;
+    virtual void matrixFromLoad(FloatMatrix &mat, Element &element, BodyLoad *load, TimeStep *tStep) const;
+    virtual void matrixFromBoundaryLoad(FloatMatrix &mat, Element &element, BoundaryLoad *load, int boundary, TimeStep *tStep) const;
+    virtual void matrixFromEdgeLoad(FloatMatrix &mat, Element &element, BoundaryLoad *load, int edge, TimeStep *tStep) const;
+    virtual void assembleFromActiveBC(SparseMtrx &k, ActiveBoundaryCondition &bc, TimeStep* tStep, const UnknownNumberingScheme &s_r, const UnknownNumberingScheme &s_c) const;
 
     virtual void locationFromElement(IntArray &loc, Element &element, const UnknownNumberingScheme &s, IntArray *dofIds = nullptr) const;
     virtual void locationFromElementNodes(IntArray &loc, Element &element, const IntArray &bNodes, const UnknownNumberingScheme &s, IntArray *dofIds = nullptr) const;
 };
 
 
-class OldVectorAssembler
+class OldVectorAssembler : public VectorAssembler
 {
 private:
     CharType type;
@@ -106,7 +109,7 @@ public:
  * Implementation for assembling internal forces vectors in standard monolithic, nonlinear FE-problems
  * @author Mikael Öhman
  */
-class InternalForceAssembler: public VectorAssembler
+class InternalForceAssembler : public VectorAssembler
 {
 public:
     virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
@@ -119,7 +122,7 @@ public:
  * Implementation for assembling external forces vectors in standard monolithic FE-problems
  * @author Mikael Öhman
  */
-class ExternalForceAssembler: public VectorAssembler
+class ExternalForceAssembler : public VectorAssembler
 {
 public:
     virtual void vectorFromLoad(FloatArray &vec, Element &element, BodyLoad *load, TimeStep *tStep, ValueModeType mode) const;
@@ -132,33 +135,35 @@ public:
  * Implementation for assembling tangent matrices in standard monolithic FE-problems
  * @author Mikael Öhman
  */
-class TangentAssembler
+class TangentAssembler : public MatrixAssembler
 {
 protected:
     ///@todo This is more general than just material responses; we should make a "TangentType"
     MatResponseMode rmode;
     
 public:
-    TangentAssembler(MatResponseMode m): rmode(m) {}
+    TangentAssembler(MatResponseMode m): MatrixAssembler(), rmode(m) {}
 
     virtual void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const;
     virtual void matrixFromLoad(FloatMatrix &mat, Element &element, BodyLoad *load, TimeStep *tStep) const;
     virtual void matrixFromBoundaryLoad(FloatMatrix &mat, Element &element, BoundaryLoad *load, int boundary, TimeStep *tStep) const;
     virtual void matrixFromEdgeLoad(FloatMatrix &mat, Element &element, BoundaryLoad *load, int edge, TimeStep *tStep) const;
+    virtual void assembleFromActiveBC(SparseMtrx &k, ActiveBoundaryCondition &bc, TimeStep* tStep, const UnknownNumberingScheme &s_r, const UnknownNumberingScheme &s_c) const;
 };
 
 
-class OldMatrixAssembler
+class OldMatrixAssembler : public MatrixAssembler
 {
 private:
     CharType type;
 
 public:
-    OldMatrixAssembler(CharType t);
-    virtual void matrixFromElement(FloatMatrix &vec, Element &element, TimeStep *tStep) const;
-    virtual void matrixFromLoad(FloatMatrix &vec, Element &element, BodyLoad *load, TimeStep *tStep) const;
-    virtual void matrixFromBoundaryLoad(FloatMatrix &vec, Element &element, BoundaryLoad *load, int boundary, TimeStep *tStep) const;
-    virtual void matrixFromEdgeLoad(FloatMatrix &vec, Element &element, BoundaryLoad *load, int edge, TimeStep *tStep) const;
+    OldMatrixAssembler(CharType t) : MatrixAssembler(), type(t) {}
+    virtual void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const;
+    virtual void matrixFromLoad(FloatMatrix &mat, Element &element, BodyLoad *load, TimeStep *tStep) const;
+    virtual void matrixFromBoundaryLoad(FloatMatrix &mat, Element &element, BoundaryLoad *load, int boundary, TimeStep *tStep) const;
+    virtual void matrixFromEdgeLoad(FloatMatrix &mat, Element &element, BoundaryLoad *load, int edge, TimeStep *tStep) const;
+    virtual void assembleFromActiveBC(SparseMtrx &k, ActiveBoundaryCondition &bc, TimeStep* tStep, const UnknownNumberingScheme &s_r, const UnknownNumberingScheme &s_c) const;
 };
 
 #if 0
@@ -166,7 +171,7 @@ public:
  * Implementation for assembling the consistent mass matrix
  * @author Mikael Öhman
  */
-class MassMatrixAssembler
+class MassMatrixAssembler : public MatrixAssembler
 {
 public:
     virtual void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const;

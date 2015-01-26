@@ -37,6 +37,7 @@
 #include "floatmatrix.h"
 #include "element.h"
 #include "dofmanager.h"
+#include "activebc.h"
 
 #include "nodalload.h" // Needed for nodalload -> load conversion. We shouldn't need this.
 #include "bodyload.h" // Needed for bodyload -> load conversion. We shouldn't need this.
@@ -64,13 +65,15 @@ void VectorAssembler :: locationFromElementNodes(IntArray& loc, Element& element
     element.giveBoundaryLocationArray(loc, bNodes, s, dofIds);
 }
 
-void MatrixAssembler :: matrixFromElement(FloatMatrix& vec, Element& element, TimeStep* tStep) const { vec.clear(); }
+void MatrixAssembler :: matrixFromElement(FloatMatrix& mat, Element& element, TimeStep* tStep) const { mat.clear(); }
 
-void MatrixAssembler :: matrixFromLoad(FloatMatrix& vec, Element& element, BodyLoad* load, TimeStep* tStep) const { vec.clear(); }
+void MatrixAssembler :: matrixFromLoad(FloatMatrix& mat, Element& element, BodyLoad* load, TimeStep* tStep) const { mat.clear(); }
 
-void MatrixAssembler :: matrixFromBoundaryLoad(FloatMatrix& vec, Element& element, BoundaryLoad* load, int boundary, TimeStep* tStep) const { vec.clear(); }
+void MatrixAssembler :: matrixFromBoundaryLoad(FloatMatrix& mat, Element& element, BoundaryLoad* load, int boundary, TimeStep* tStep) const { mat.clear(); }
 
-void MatrixAssembler :: matrixFromEdgeLoad(FloatMatrix& vec, Element& element, BoundaryLoad* load, int edge, TimeStep* tStep) const { vec.clear(); }
+void MatrixAssembler :: matrixFromEdgeLoad(FloatMatrix& mat, Element& element, BoundaryLoad* load, int edge, TimeStep* tStep) const { mat.clear(); }
+
+void MatrixAssembler :: assembleFromActiveBC(SparseMtrx &k, ActiveBoundaryCondition &bc, TimeStep* tStep, const UnknownNumberingScheme &s_r, const UnknownNumberingScheme &s_c) const {}
 
 void MatrixAssembler :: locationFromElement(IntArray& loc, Element& element, const UnknownNumberingScheme& s, IntArray* dofIds) const
 {
@@ -133,6 +136,12 @@ void OldMatrixAssembler :: matrixFromEdgeLoad(FloatMatrix& mat, Element& element
 {
     mat.clear();
 }
+
+void OldMatrixAssembler :: assembleFromActiveBC(SparseMtrx &k, ActiveBoundaryCondition &bc, TimeStep* tStep, const UnknownNumberingScheme &s_r, const UnknownNumberingScheme &s_c) const
+{
+    bc.assemble(k, tStep, type, s_r, s_c);
+}
+
 #endif
 
 
@@ -217,6 +226,13 @@ void TangentAssembler :: matrixFromEdgeLoad(FloatMatrix& mat, Element& element, 
     mat.clear();
     //element.computeTangentFromEdgeLoad(mat, load, edge, this->rmode, tStep);
 }
+
+void TangentAssembler :: assembleFromActiveBC(SparseMtrx &k, ActiveBoundaryCondition &bc, TimeStep* tStep, const UnknownNumberingScheme &s_r, const UnknownNumberingScheme &s_c) const
+{
+    bc.assemble(k, tStep, TangentStiffnessMatrix, s_r, s_c);
+}
+
+
 
 #if 0
 void MassMatrixAssembler :: matrixFromElement(FloatMatrix& mat, Element& element, TimeStep* tStep) const
