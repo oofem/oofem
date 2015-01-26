@@ -66,7 +66,8 @@ public:
 
     void computeTangent(FloatMatrix &answer, TimeStep *tStep);
     /** Computes the mean velocity and pressure gradient */
-    void getMeans(FloatArray &v, TimeStep *tStep);
+    void computeSeepage(FloatArray &v, TimeStep *tStep);
+    void applyPressureGradient(const FloatArray &grad);
 
 private:
     void integrateNMatrix(FloatMatrix &N, Element &elem, TimeStep *tStep);

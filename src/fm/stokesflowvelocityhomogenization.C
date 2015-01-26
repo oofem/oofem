@@ -31,16 +31,14 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "stokesflow.h"
 #include "stokesflowvelocityhomogenization.h"
-#include "primaryfield.h"
 #include "classfactory.h"
-#include "deadweight.h"
-#include "tr21stokes.h"
 #include "dofmanager.h"
 #include "gausspoint.h"
 #include "feinterpol.h"
 #include "unknownnumberingscheme.h"
+#include "sparsemtrx.h"
+#include "deadweight.h"
 
 namespace oofem {
 REGISTER_EngngModel(StokesFlowVelocityHomogenization);
@@ -72,7 +70,7 @@ StokesFlowVelocityHomogenization :: giveAreaOfRVE()
 
 
 void
-StokesFlowVelocityHomogenization :: getMeans(FloatArray &v, TimeStep *tStep)
+StokesFlowVelocityHomogenization :: computeSeepage(FloatArray &v, TimeStep *tStep)
 {
     FloatMatrix N;
     FloatArray v_hatTemp, unknowns;
@@ -100,7 +98,10 @@ StokesFlowVelocityHomogenization :: computeTangent(FloatMatrix &answer, TimeStep
     int ndof = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
 
     // Build F matrix
-    IntArray dofs = {V_u, V_v}; ///@todo Should not be hardcoded to just V_u and V_v
+    IntArray dofs(nsd);
+    for ( int i = 0; i < nsd; ++i ) {
+        dofs[i] = V_u + i; ///@todo This is a hack. We should have these as user input instead.
+    }
     FloatMatrix F(ndof, nsd), Fe, N;
     col.enumerate(nsd);
 
@@ -115,12 +116,18 @@ StokesFlowVelocityHomogenization :: computeTangent(FloatMatrix &answer, TimeStep
 
     FloatMatrix H;
 
-    std :: unique_ptr< SparseLinearSystemNM > linMethod( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
+    std :: unique_ptr< SparseLinearSystemNM > solver( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
 
     H.resize( F.giveNumberOfRows(), F.giveNumberOfColumns() );
     H.zero();
 
-    linMethod->solve(*stiffnessMatrix, F, H);
+    // For correct homogenization, the tangent at the converged values should be used
+    // (the one from the Newton iterations from solveYourselfAt is not updated to contain the latest values).
+    SparseMtrxType stype = solver->giveRecommendedMatrix(true);
+    std :: unique_ptr< SparseMtrx > Kff( classFactory.createSparseMtrx( stype ) );
+    Kff->buildInternalStructure(this, domain->giveNumber(), EModelDefaultEquationNumbering() );
+    this->assemble(*Kff, tStep, TangentStiffnessMatrix, EModelDefaultEquationNumbering(), domain);
+    solver->solve(*Kff, F, H);
 
     answer.beTProductOf(H, F);
     answer.times( 1. / this->giveAreaOfRVE() );
@@ -142,6 +149,23 @@ StokesFlowVelocityHomogenization :: integrateNMatrix(FloatMatrix &N, Element &el
     }
 
     N.beNMatrixOf(n2, this->giveDomain(1)->giveNumberOfSpatialDimensions());
+}
+
+
+void
+StokesFlowVelocityHomogenization :: applyPressureGradient(const FloatArray &grad)
+{
+    FloatArray components = grad;
+    components.negated();
+
+    ///@todo This should either be a specialized boundary condition so that this routine can be replaced by something else
+    for ( auto &bc : this->giveDomain(1)->giveBcs() ) {
+        DeadWeight *load = dynamic_cast< DeadWeight* >( bc.get() );
+        if ( load ) {
+            load->setDeadWeighComponents(components);
+            break;
+        }
+    }
 }
 
 }

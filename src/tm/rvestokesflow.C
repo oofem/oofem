@@ -37,13 +37,10 @@
 #include "oofemtxtdatareader.h"
 #include "stokesflowvelocityhomogenization.h"
 #include "engngm.h"
-#include "nummet.h"
 #include "contextioerr.h"
 #include "gausspoint.h"
 #include "mathfem.h"
 #include "classfactory.h"
-#include "engngm.h"
-#include "deadweight.h"
 
 #include <cstdio>
 #include <cstring>
@@ -212,21 +209,10 @@ RVEStokesFlow :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatA
                      grad.at(1), grad.at(2), grad.giveSize() == 3 ? grad.at(3) : 0. );
 
     // Compute seepage velocity
-    FloatArray components = grad;
-    components.negated();
-
-    ///@todo This should either be a specialized boundary condition so that this routine can be replaced by something else
-    for ( auto &bc : rveE->giveDomain(1)->giveBcs() ) {
-        DeadWeight *load = dynamic_cast< DeadWeight* >( bc.get() );
-        if ( load ) {
-            load->setDeadWeighComponents(components);
-            break;
-        }
-    }
-
+    rveE->applyPressureGradient(grad);
     status->setTimeStep(tStep);
     rveE->solveYourselfAt(rveE->giveCurrentStep());
-    rveE->getMeans(answer, tStep);
+    rveE->computeSeepage(answer, tStep);
 
     OOFEM_LOG_DEBUG( "Pressure gradient gradP=[%f %f] yields velocity vector [%f %f]\n", grad.at(1), grad.at(2), answer.at(1), answer.at(2) );
 
