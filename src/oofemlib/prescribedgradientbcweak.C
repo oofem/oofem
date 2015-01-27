@@ -219,7 +219,7 @@ void PrescribedGradientBCWeak :: assembleVector(FloatArray &answer, TimeStep *tS
             IntegrationRule *ir = createNewIntegrationRule(i);
 
             for ( GaussPoint *gp: *ir ) {
-                const FloatArray &locCoordsOnLine = * gp->giveNaturalCoordinates();
+                const FloatArray &locCoordsOnLine = gp->giveNaturalCoordinates();
 
                 // Compute N^trac
                 FloatArray N, Ntrac;
@@ -541,7 +541,7 @@ void PrescribedGradientBCWeak :: computeField(FloatArray &sigma, TimeStep *tStep
         IntegrationRule *ir = createNewIntegrationRule(i);
 
         for ( GaussPoint *gp: *ir ) {
-            const FloatArray &locCoordsOnLine = * gp->giveNaturalCoordinates();
+            const FloatArray &locCoordsOnLine = gp->giveNaturalCoordinates();
 
             // Compute N^trac
             FloatArray N, Ntrac;
@@ -1465,7 +1465,7 @@ void PrescribedGradientBCWeak :: assembleTangentGPContribution(FloatMatrix &oTan
 
     const TractionElement &tEl = * ( mpTractionElements [ iTracElInd ] );
     double detJ = 0.5 * tEl.mStartCoord.distance(tEl.mEndCoord);
-    const FloatArray &locCoordsOnLine = * iGP.giveNaturalCoordinates();
+    const FloatArray &locCoordsOnLine = iGP.giveNaturalCoordinates();
 
     //////////////////////////////////
     // Compute traction N-matrix

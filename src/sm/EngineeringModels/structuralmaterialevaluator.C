@@ -95,7 +95,7 @@ void StructuralMaterialEvaluator :: solveYourself()
     gps.clear();
     gps.reserve(d->giveNumberOfMaterialModels());
     for ( int i = 1; i <= d->giveNumberOfMaterialModels(); i++ ) {
-        std :: unique_ptr< GaussPoint > gp(new GaussPoint(nullptr, i, nullptr, 1, mode));
+        std :: unique_ptr< GaussPoint > gp(new GaussPoint(nullptr, i, FloatArray(0), 1, mode));
         gps.emplace_back( std :: move(gp) );
         // Initialize the strain vector;
         StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( d->giveMaterial(i)->giveStatus( gps[i-1].get() ) );

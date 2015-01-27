@@ -123,14 +123,13 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
             FloatArray global;
             GaussPoint * &gp = this->gaussPoints [ pointsPassed ];
 
-            FloatArray *coord = new FloatArray(2);
-            coord->at(1) = coords_xi1.at(j + 1);
-            coord->at(2) = coords_xi2.at(j + 1);
-            gp = new GaussPoint(this, pointsPassed + 1, coord, weights.at(j + 1), mode);
+            gp = new GaussPoint(this, pointsPassed + 1,
+                                {coords_xi1.at(j + 1), coords_xi2.at(j + 1)},
+                                weights.at(j + 1), mode);
 
 
 
-            mTriInterp.local2global( global, * gp->giveNaturalCoordinates(),
+            mTriInterp.local2global( global, gp->giveNaturalCoordinates(),
                                      FEIVertexListGeometryWrapper(coords) );
 
             newGPCoord.push_back(global);
@@ -237,23 +236,21 @@ PatchIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, Mat
         for ( int k = 1; k <= nPointsTri; k++ ) {
             for ( int m = 1; m <= nPointsDepth; m++ ) {
                 // local coords in the parent triangle
-                FloatArray *lCoords = new FloatArray(3);
-                lCoords->at(1) = coords_xi1.at(k);
-                lCoords->at(2) = coords_xi2.at(k);
-                lCoords->at(3) = coords_xi3.at(m);
 
                 double refElArea = 0.5;
                 double oldWeight = weightsTri.at(k) * weightsDepth.at(m);
                 double newWeight = 2.0 * refElArea * oldWeight * triangle.getArea() / parentArea;
 
-                GaussPoint *gp = new GaussPoint(this, count + 1, lCoords, newWeight, mode);
+                GaussPoint *gp = new GaussPoint(this, count + 1, 
+                                                {coords_xi1.at(k), coords_xi2.at(k), coords_xi3.at(m)},
+                                                newWeight, mode);
                 this->gaussPoints [ count ] = gp;
                 count++;
 
 
                 // Compute global gp coordinate in the element from local gp coord in the sub triangle
                 FloatArray global;
-                mTriInterp.local2global( global, * gp->giveNaturalCoordinates(),
+                mTriInterp.local2global( global, gp->giveNaturalCoordinates(),
                                          FEIVertexListGeometryWrapper(gCoords) );
 
 

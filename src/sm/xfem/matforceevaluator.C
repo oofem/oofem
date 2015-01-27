@@ -120,7 +120,7 @@ void MaterialForceEvaluator::computeMaterialForce(FloatArray &oMatForce, Domain 
             FloatMatrix dNdx;
             FEInterpolation *interp = el->giveInterpolation();
             const FEIElementGeometryWrapper geomWrapper(el);
-            interp->evaldNdx(dNdx, * gp->giveNaturalCoordinates(), geomWrapper);
+            interp->evaldNdx(dNdx, gp->giveNaturalCoordinates(), geomWrapper);
 
             FloatArray weightInElNodes;
 

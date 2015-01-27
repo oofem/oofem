@@ -735,7 +735,7 @@ Beam3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tSte
 {
     FloatArray lc(1);
     StructuralElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
-    answer.times( this->giveCrossSection()->give(CS_Area, & lc, this) );
+    answer.times( this->giveCrossSection()->give(CS_Area, lc, this) );
 }
 
 

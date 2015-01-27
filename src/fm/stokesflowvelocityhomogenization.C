@@ -140,7 +140,7 @@ StokesFlowVelocityHomogenization :: integrateNMatrix(FloatMatrix &N, Element &el
     FloatArray n, n2;
 
     for ( GaussPoint *gp: *elem.giveDefaultIntegrationRulePtr() ) {
-        FloatArray &lcoords = * gp->giveNaturalCoordinates();
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
         ///@todo Ask the element for the N-matrix instead
         elem.giveInterpolation()->evalN( n, lcoords, FEIElementGeometryWrapper(&elem) );

@@ -395,7 +395,7 @@ DKTPlate :: computeVolumeAround(GaussPoint *gp)
                               lc[0].at(3), lc[1].at(3), lc[2].at(3));
 
     weight = gp->giveWeight();
-    detJ = fabs( this->interp_lin.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc) ) );
+    detJ = fabs( this->interp_lin.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc) ) );
     return detJ * weight; ///@todo What about thickness?
 }
 
@@ -471,7 +471,7 @@ DKTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
 
     //check that the z is within the element
     StructuralCrossSection *cs = this->giveStructuralCrossSection();
-    double elthick = cs->give(CS_Thickness, & answer, this);
+    double elthick = cs->give(CS_Thickness, answer, this);
 
     if ( elthick / 2.0 + midplZ - fabs( coords.at(3) ) < -POINT_TOL ) {
         answer.zero();
@@ -626,7 +626,7 @@ DKTPlate :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
     FloatArray n;
 
-    this->interp_lin.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.edgeEvalN( n, iedge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 6);
     answer.at(1, 1) = n.at(1);
@@ -673,7 +673,7 @@ DKTPlate :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 DKTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     return detJ *gp->giveWeight();
 }
 
@@ -681,7 +681,7 @@ DKTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 DKTPlate :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interp_lin.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.edgeLocal2global( answer, iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -725,7 +725,7 @@ DKTPlate :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gauss
 void
 DKTPlate :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
-    this->computeNmatrixAt(* sgp->giveNaturalCoordinates(), answer);
+    this->computeNmatrixAt(sgp->giveNaturalCoordinates(), answer);
 }
 
 void
@@ -761,7 +761,7 @@ DKTPlate :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 void
 DKTPlate :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
 {
-    this->computeGlobalCoordinates( answer, * gp->giveNaturalCoordinates() );
+    this->computeGlobalCoordinates( answer, gp->giveNaturalCoordinates() );
 }
 
 
@@ -824,7 +824,7 @@ DKTPlate :: computeShearForces(FloatArray &answer, GaussPoint *gp, TimeStep *tSt
     answer.resize(5);
 
     this->computeVertexBendingMoments(m, tStep);
-    this->interp_lin.evaldNdx( dndx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.evaldNdx( dndx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     for ( int i = 1; i <= this->numberOfDofMans; i++ ) {
         answer.at(4) += m.at(1, i) * dndx.at(i, 1) + m.at(3, i) * dndx.at(i, 2); //dMxdx + dMxydy
         answer.at(5) += m.at(2, i) * dndx.at(i, 2) + m.at(3, i) * dndx.at(i, 1); //dMydy + dMxydx

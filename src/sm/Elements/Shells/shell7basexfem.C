@@ -437,7 +437,7 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
         Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) );
 
         for ( GaussPoint *gp: *integrationRulesArray [ layer - 1 ] ) {
-            lCoords = * gp->giveNaturalCoordinates();
+            lCoords = gp->giveNaturalCoordinates();
 
             this->computeEnrichedBmatrixAt(lCoords, B, NULL);
             this->computeEnrichedBmatrixAt(lCoords, BEnr, ei);
@@ -469,7 +469,7 @@ Shell7BaseXFEM :: computeSectionalForcesAt(FloatArray &sectionalForces, Integrat
     FloatArray PVector;
     this->computeStressMatrix(P, genEps, ip, mat, tStep);
 
-    FloatArray lCoords = *ip->giveNaturalCoordinates();
+    const FloatArray &lCoords = ip->giveNaturalCoordinates();
     this->evalInitialContravarBaseVectorsAt(lCoords, Gcon);
     PG.beProductOf(P,Gcon);
     PG1.beColumnOf(PG, 1);
@@ -831,7 +831,7 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
         StructuralMaterial *layerMaterial = static_cast< StructuralMaterial* >( domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) ) );
 
         for ( GaussPoint *gp: *integrationRulesArray [ layer - 1 ] ) {
-            const FloatArray &lCoords = * gp->giveNaturalCoordinates();
+            const FloatArray &lCoords = gp->giveNaturalCoordinates();
             Shell7Base :: computeBmatrixAt(lCoords,B);
             double dV = this->computeVolumeAroundLayer(gp, layer);
             
@@ -987,7 +987,7 @@ Shell7BaseXFEM :: discComputeStiffness(FloatMatrix &LCC, FloatMatrix &LDD, Float
     FloatMatrix temp, B;
     FloatMatrix lambdaC [ 3 ], lambdaD [ 3 ];
 
-    FloatArray lCoords = * ip->giveNaturalCoordinates();
+    const FloatArray &lCoords = ip->giveNaturalCoordinates();
     FloatArray solVecC, genEpsC;
     Shell7Base :: computeBmatrixAt(lCoords,B);
     
@@ -1045,7 +1045,7 @@ Shell7BaseXFEM :: OLDcomputeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
         StructuralMaterial *layerMaterial = static_cast< StructuralMaterial* >( domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) ) );
         
         for ( GaussPoint *gp: *integrationRulesArray [ layer - 1 ] ) {
-            const FloatArray &lCoords = * gp->giveNaturalCoordinates();
+            const FloatArray &lCoords = gp->giveNaturalCoordinates();
             this->computeEnrichedBmatrixAt(lCoords, Bc, NULL);
             
             Shell7Base :: computeLinearizedStiffness(gp, layerMaterial, tStep, A);
@@ -1178,7 +1178,7 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &KdIJ, IntegrationPoi
     FloatMatrix temp, B1, B2;
     FloatMatrix lambda1 [ 3 ], lambda2 [ 3 ];
 
-    FloatArray lCoords = * ip->giveNaturalCoordinates();
+    const FloatArray &lCoords = ip->giveNaturalCoordinates();
     this->computeEnrichedBmatrixAt(lCoords, B1, ei1);
     this->computeEnrichedBmatrixAt(lCoords, B2, ei2);
 
@@ -1296,11 +1296,11 @@ Shell7BaseXFEM :: computePressureTangentMatrixDis(FloatMatrix &KCC, FloatMatrix 
     ConstantPressureLoad* pLoad = dynamic_cast< ConstantPressureLoad * >( load );
     
     FloatMatrix N, B, L(7, 18), gcov, W1, W2;
-    FloatArray lCoords(3), solVec, pressure;
+    FloatArray lCoords, solVec, pressure;
     FloatArray g1, g2, genEps;
     FloatMatrix lambdaGC [ 3 ], lambdaNC, lambdaGD [ 3 ], lambdaND;
     double xi = pLoad->giveLoadOffset();
-    lCoords = *ip->giveNaturalCoordinates();
+    lCoords = ip->giveNaturalCoordinates();
     lCoords.at(3) = xi;     // local coord where load is applied
     double zeta = this->giveGlobalZcoord( lCoords );
     this->giveUpdatedSolutionVector(solVec, tStep);
@@ -1315,7 +1315,7 @@ Shell7BaseXFEM :: computePressureTangentMatrixDis(FloatMatrix &KCC, FloatMatrix 
         
     //(xc+xd)*(g1xg2)=xc*g1xg2 + xd*g1xg2 -> xc*(W2*Dg1 - W1*Dg2) + xd*(W2*Dg1 - W1*Dg2)
     // Traction tangent, L =  lambdaN * ( W2*lambdaG_1 - W1*lambdaG_2  ) 
-    load->computeValueAt(pressure, tStep, * ( ip->giveNaturalCoordinates() ), VM_Total);        // pressure component
+    load->computeValueAt(pressure, tStep, ip->giveNaturalCoordinates(), VM_Total);        // pressure component
     this->evalCovarBaseVectorsAt(lCoords, gcov, genEps, tStep);
     g1.beColumnOf(gcov,1);
     g2.beColumnOf(gcov,2);
@@ -1398,7 +1398,7 @@ Shell7BaseXFEM :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
             FloatArray xbar, m;
             double gam = 0.;
             //this->computeSolutionFields(xbar, m, gam, solVec, N11, N22, N33);
-            FloatArray localCoords = * gp->giveNaturalCoordinates();
+            FloatArray localCoords = gp->giveNaturalCoordinates();
             this->giveUnknownsAt(localCoords, solVec, xbar, m, gam, tStep);
             //this->computeNmatrixAt(gp, N);
             //unknowns.beProductOf(N,a); // [xbar, m, gam]^T
@@ -1550,7 +1550,7 @@ Shell7BaseXFEM :: computeEnrTractionForce(FloatArray &answer, const int iEdge, B
     Nf.zero();
     for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
         gp = iRule.getIntegrationPoint(i);
-        FloatArray lCoords = *gp->giveNaturalCoordinates();
+        const FloatArray &lCoords = gp->giveNaturalCoordinates();
 
         edgeLoad->computeValueAt(components, tStep, lCoords, mode);
         this->edgeComputeEnrichedNmatrixAt(lCoords, N, ei, iEdge);
@@ -1610,7 +1610,7 @@ Shell7BaseXFEM :: computeEnrTractionForce(FloatArray &answer, const int iEdge, B
     Nf.resize( Shell7Base :: giveNumberOfDofs()  );
     Nf.zero();
     for ( GaussPoint *gp : iRule ) {
-        FloatArray lCoordsEdge = *gp->giveNaturalCoordinates();
+        const FloatArray &lCoordsEdge = gp->giveNaturalCoordinates();
         
         this->fei->edgeLocal2global( gCoords, iEdge, lCoordsEdge, FEIElementGeometryWrapper(this) );
         this->fei->global2local( lCoords, gCoords, FEIElementGeometryWrapper(this) );
@@ -2909,15 +2909,14 @@ Shell7BaseXFEM :: recoverValuesFromCZIP(std::vector<FloatArray> &recoveredValues
 
     // Find closest ip to the nodes
     IntArray closestIPArray(numNodes);
-    FloatArray nodeCoords, ipCoords, ipValues;
+    FloatArray nodeCoords, ipValues;
 
     for ( int i = 1; i <= numNodes; i++ ) {
         nodeCoords.beColumnOf(localNodeCoords, i);
         double distOld = 3.0; // should not be larger
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             IntegrationPoint *ip = iRule->getIntegrationPoint(j);
-            ipCoords = *ip->giveNaturalCoordinates();
-            double dist = nodeCoords.distance(ipCoords);
+            double dist = nodeCoords.distance(ip->giveNaturalCoordinates());
             if ( dist < distOld ) {
                 closestIPArray.at(i) = j;
                 distOld = dist;

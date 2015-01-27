@@ -123,37 +123,37 @@ L4Axisymm :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
 
     FloatArray N, NRed, redCoord;
     if ( numberOfFiAndShGaussPoints == 1 ) { // Reduced integration
-       redCoord  = {0.0, 0.0}; // eval in centroid
+        redCoord  = {0.0, 0.0}; // eval in centroid
     } else {
-      redCoord = *gp->giveNaturalCoordinates();
+        redCoord = gp->giveNaturalCoordinates();
     }
 
 
     FEInterpolation *interp = this->giveInterpolation();
         
 
-    interp->evalN( N, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    interp->evalN( N, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     interp->evalN( NRed, redCoord, FEIElementGeometryWrapper(this) );
     
     // Evaluate radius at center
     double r = 0.0;
     for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
-      double x = this->giveNode(i)->giveCoordinate(1);
-      r += x * NRed.at(i);
+        double x = this->giveNode(i)->giveCoordinate(1);
+        r += x * NRed.at(i);
     } 
     
     FloatMatrix dNdx, dNdxRed;
-    interp->evaldNdx( dNdx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    interp->evaldNdx( dNdx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     interp->evaldNdx( dNdxRed, redCoord, FEIElementGeometryWrapper(this) );
     answer.resize(6, dNdx.giveNumberOfRows() * 2);
     answer.zero();
 
     for ( int i = 1; i <= dNdx.giveNumberOfRows(); i++ ) {
-      answer.at(1, i * 2 - 1) = dNdx.at(i, 1);
-      answer.at(2, i * 2 - 0) = dNdx.at(i, 2);
-      answer.at(3, i * 2 - 1) = NRed.at(i) / r;
-      answer.at(6, 2 * i - 1) = dNdxRed.at(i, 2);
-      answer.at(6, 2 * i - 0) = dNdxRed.at(i, 1);
+        answer.at(1, i * 2 - 1) = dNdx.at(i, 1);
+        answer.at(2, i * 2 - 0) = dNdx.at(i, 2);
+        answer.at(3, i * 2 - 1) = NRed.at(i) / r;
+        answer.at(6, 2 * i - 1) = dNdxRed.at(i, 2);
+        answer.at(6, 2 * i - 0) = dNdxRed.at(i, 1);
     }
 }
 

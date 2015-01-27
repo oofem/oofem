@@ -96,7 +96,7 @@ void Tr1Darcy :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mod
     answer.clear();
 
     for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
-        const FloatArray &lcoords = * gp->giveNaturalCoordinates();
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
         ///@todo Should we make it return the transpose instead?
         double detJ = this->interpolation_lin.evaldNdx( BT, lcoords, FEIElementGeometryWrapper(this) );
 
@@ -132,11 +132,11 @@ void Tr1Darcy :: computeInternalForcesVector(FloatArray &answer, TimeStep *tStep
     answer.zero();
 
     for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
-        FloatArray *lcoords = gp->giveNaturalCoordinates();
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
-        double detJ = this->interpolation_lin.giveTransformationJacobian( * lcoords, FEIElementGeometryWrapper(this) );
-        this->interpolation_lin.evaldNdx( BT, * lcoords, FEIElementGeometryWrapper(this) );
-        this->interpolation_lin.evalN( n, * lcoords, FEIElementGeometryWrapper(this) );
+        double detJ = this->interpolation_lin.giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(this) );
+        this->interpolation_lin.evaldNdx( BT, lcoords, FEIElementGeometryWrapper(this) );
+        this->interpolation_lin.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
         B.beTranspositionOf(BT);
         P.at(1) = n.dotProduct(a); // Evaluates the field at this point.
 
@@ -206,15 +206,15 @@ void Tr1Darcy :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iE
         iRule.SetUpPointsOnLine(numberOfEdgeIPs, _Unknown);
 
         for ( GaussPoint *gp: iRule ) {
-            FloatArray *lcoords = gp->giveNaturalCoordinates();
-            this->interpolation_lin.edgeEvalN( N, iEdge, * lcoords, FEIElementGeometryWrapper(this) );
+            const FloatArray &lcoords = gp->giveNaturalCoordinates();
+            this->interpolation_lin.edgeEvalN( N, iEdge, lcoords, FEIElementGeometryWrapper(this) );
             double dV = this->computeEdgeVolumeAround(gp, iEdge);
 
             if ( boundaryLoad->giveFormulationType() == Load :: FT_Entity ) {                // Edge load in xi-eta system
-                boundaryLoad->computeValueAt(loadValue, tStep, * lcoords, mode);
+                boundaryLoad->computeValueAt(loadValue, tStep, lcoords, mode);
             } else {  // Edge load in x-y system
                 FloatArray gcoords;
-                this->interpolation_lin.edgeLocal2global( gcoords, iEdge, * lcoords, FEIElementGeometryWrapper(this) );
+                this->interpolation_lin.edgeLocal2global( gcoords, iEdge, lcoords, FEIElementGeometryWrapper(this) );
                 boundaryLoad->computeValueAt(loadValue, tStep, gcoords, mode);
             }
 
@@ -228,14 +228,14 @@ void Tr1Darcy :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iE
 
 double Tr1Darcy :: giveThicknessAt(const FloatArray &gcoords)
 {
-    return this->giveCrossSection()->give(CS_Thickness, & gcoords, this, false);
+    return this->giveCrossSection()->give(CS_Thickness, gcoords, this, false);
 }
 
 
 double Tr1Darcy :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double thickness = 1;
-    double detJ = fabs( this->interpolation_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveSubPatchCoordinates(), FEIElementGeometryWrapper(this) ) );
+    double detJ = fabs( this->interpolation_lin.edgeGiveTransformationJacobian( iEdge, gp->giveSubPatchCoordinates(), FEIElementGeometryWrapper(this) ) );
     return detJ *thickness *gp->giveWeight();
 }
 

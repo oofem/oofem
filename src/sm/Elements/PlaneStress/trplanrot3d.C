@@ -83,7 +83,7 @@ TrPlaneStrRot3d :: computeVolumeAround(GaussPoint *gp)
     std :: vector< FloatArray > lc = {{x[0], y[0]}, {x[1], y[1]}, {x[2], y[2]}};
 
     weight = gp->giveWeight();
-    detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc) ) );
+    detJ = fabs( this->interp.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc) ) );
     return detJ * weight * this->giveStructuralCrossSection()->give(CS_Thickness, gp);
 }
 
@@ -375,7 +375,7 @@ void
 TrPlaneStrRot3d :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
     FloatMatrix ne;
-    this->computeNmatrixAt(* sgp->giveNaturalCoordinates(), ne);
+    this->computeNmatrixAt(sgp->giveNaturalCoordinates(), ne);
 
     answer.resize(6, 18);
     answer.zero();
@@ -434,7 +434,7 @@ TrPlaneStrRot3d :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 void
 TrPlaneStrRot3d :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
 {
-    this->computeGlobalCoordinates( answer, * gp->giveNaturalCoordinates() );
+    this->computeGlobalCoordinates( answer, gp->giveNaturalCoordinates() );
 }
 
 

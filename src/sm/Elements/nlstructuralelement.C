@@ -70,7 +70,7 @@ NLStructuralElement :: computeCurrentVolume(TimeStep *tStep)
         double J=Fm.giveDeterminant();
 
         FEInterpolation *interpolation = this->giveInterpolation();
-        double detJ = fabs( ( interpolation->giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) ) );
+        double detJ = fabs( ( interpolation->giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) ) );
 
         vol=vol + gp->giveWeight()*detJ*J;
     }

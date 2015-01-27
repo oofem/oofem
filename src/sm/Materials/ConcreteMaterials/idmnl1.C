@@ -133,7 +133,7 @@ IDNLMaterial :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
 
     Element *elem = gp->giveElement();
     FloatArray coords;
-    elem->computeGlobalCoordinates( coords, * ( gp->giveNaturalCoordinates() ) );
+    elem->computeGlobalCoordinates( coords, gp->giveNaturalCoordinates() );
     double xtarget = coords.at(1);
 
     double w, wsum = 0., x, xprev, damage, damageprev = 0.;
@@ -144,7 +144,7 @@ IDNLMaterial :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
     xprev = xtarget;
     for ( pos = postarget; pos != list->end(); ++pos ) {
         nearElem = ( pos->nearGp )->giveElement();
-        nearElem->computeGlobalCoordinates( coords, * ( ( pos->nearGp )->giveNaturalCoordinates() ) );
+        nearElem->computeGlobalCoordinates( coords, pos->nearGp->giveNaturalCoordinates() );
         x = coords.at(1);
         nonlocStatus = static_cast< IDNLMaterialStatus * >( this->giveStatus(pos->nearGp) );
         damage = nonlocStatus->giveTempDamage();
@@ -167,7 +167,7 @@ IDNLMaterial :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
     distance = 0.;
     for ( pos = postarget; pos != list->begin(); --pos ) {
         nearElem = ( pos->nearGp )->giveElement();
-        nearElem->computeGlobalCoordinates( coords, * ( ( pos->nearGp )->giveNaturalCoordinates() ) );
+        nearElem->computeGlobalCoordinates( coords, pos->nearGp->giveNaturalCoordinates() );
         x = coords.at(1);
         nonlocStatus = static_cast< IDNLMaterialStatus * >( this->giveStatus(pos->nearGp) );
         damage = nonlocStatus->giveTempDamage();
@@ -190,7 +190,7 @@ IDNLMaterial :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
     pos = list->begin();
     if ( pos != postarget ) {
         nearElem = ( pos->nearGp )->giveElement();
-        nearElem->computeGlobalCoordinates( coords, * ( ( pos->nearGp )->giveNaturalCoordinates() ) );
+        nearElem->computeGlobalCoordinates( coords, pos->nearGp->giveNaturalCoordinates() );
         x = coords.at(1);
         nonlocStatus = static_cast< IDNLMaterialStatus * >( this->giveStatus(pos->nearGp) );
         damage = nonlocStatus->giveTempDamage();
@@ -366,8 +366,8 @@ IDNLMaterial :: computeStressBasedWeight(double &nx, double &ny, double &ratio, 
     }
     //Compute distance between source and receiver point
     FloatArray gpCoords, distance;
-    gp->giveElement()->computeGlobalCoordinates( gpCoords, * ( gp->giveNaturalCoordinates() ) );
-    jGp->giveElement()->computeGlobalCoordinates( distance, * ( jGp->giveNaturalCoordinates() ) );
+    gp->giveElement()->computeGlobalCoordinates( gpCoords, gp->giveNaturalCoordinates() );
+    jGp->giveElement()->computeGlobalCoordinates( distance, jGp->giveNaturalCoordinates() );
     distance.subtract(gpCoords); // Vector connecting the two Gauss points
 
     //Compute modified distance
@@ -391,11 +391,11 @@ IDNLMaterial :: computeStressBasedWeightForPeriodicCell(double &nx, double &ny, 
 {     
     double updatedWeight = 0.;
     FloatArray gpCoords, distance;
-    gp->giveElement()->computeGlobalCoordinates( gpCoords, * ( gp->giveNaturalCoordinates() ) );
+    gp->giveElement()->computeGlobalCoordinates( gpCoords, gp->giveNaturalCoordinates() );
     int ix, nper = 1; // could be increased in the future, if needed
 
     for (ix=-nper; ix<=nper; ix++) { // loop over periodic images shifted in x-direction
-      jGp->giveElement()->computeGlobalCoordinates( distance, * ( jGp->giveNaturalCoordinates() ) );
+      jGp->giveElement()->computeGlobalCoordinates( distance, jGp->giveNaturalCoordinates() );
       distance.at(1) += ix*px; // shift the x-coordinate
       distance.subtract(gpCoords); // Vector connecting the two Gauss points
 

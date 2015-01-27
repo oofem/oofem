@@ -436,7 +436,7 @@ RerShell :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
 
     //check that the z is within the element
     StructuralCrossSection *cs = this->giveStructuralCrossSection();
-    GaussPoint _gp(NULL, 1, new FloatArray ( answer ), 1.0, _2dPlate);
+    GaussPoint _gp(NULL, 1, answer, 1.0, _2dPlate);
 
     double elthick;
 

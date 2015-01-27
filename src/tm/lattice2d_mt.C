@@ -183,7 +183,7 @@ Lattice2d_mt :: updateInternalState(TimeStep *tStep)
     // force updating ip values
     for ( auto &iRule: integrationRulesArray ) {
         for ( GaussPoint *gp: *iRule ) {
-            this->computeNmatrixAt( n, * gp->giveNaturalCoordinates() );
+            this->computeNmatrixAt( n, gp->giveNaturalCoordinates() );
             this->computeVectorOf({P_f}, VM_Total, tStep, r);
             f.beProductOf(n, r);
             mat->updateInternalState(f, gp, tStep);

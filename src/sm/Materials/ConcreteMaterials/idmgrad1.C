@@ -271,7 +271,7 @@ IDGMaterial :: giveInternalLength(FloatMatrix &answer, MatResponseMode rMode, Ga
     } else if ( averType == 1 ) {
         answer.resize(1, 1);
         FloatArray gpCoords;
-        if ( gp->giveElement()->computeGlobalCoordinates( gpCoords, * ( gp->giveNaturalCoordinates() ) ) == 0 ) {
+        if ( gp->giveElement()->computeGlobalCoordinates( gpCoords, gp->giveNaturalCoordinates() ) == 0 ) {
             OOFEM_ERROR("computeGlobalCoordinates of GP failed");
         }
 

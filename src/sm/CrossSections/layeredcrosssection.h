@@ -154,7 +154,7 @@ public:
     virtual FloatArray *imposeStrainConstrainsOnGradient(GaussPoint *gp, FloatArray *);
 
     virtual double give(CrossSectionProperty a, GaussPoint *gp);
-    virtual double give(CrossSectionProperty a, const FloatArray *coords, Element *elem, bool local);
+    virtual double give(CrossSectionProperty a, const FloatArray &coords, Element *elem, bool local);
     int giveNumberOfLayers();
 
     /// Returns the total thickness of all layers.

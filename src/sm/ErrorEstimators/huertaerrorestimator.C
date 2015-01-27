@@ -1364,16 +1364,15 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
             int idof;
             double u, du = 1.0 / ( level + 1 );
             double xc, yc, zc, xm, ym, zm;
-            FloatArray globCoord(3), * locCoord;
+            FloatArray globCoord(3);
             FloatMatrix Nmatrix;
             FloatArray uCoarse, uFine;
 
             MaterialMode mmode = element->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0)->giveMaterialMode();
 
             // create a fictitious integration point
-            locCoord = new FloatArray;
             IntegrationRule ir(1, element);
-            auto *gp = new GaussPoint(&ir, 1, locCoord, 1.0, mmode);
+            auto *gp = new GaussPoint(&ir, 1, {}, 1.0, mmode);
 
             for ( inode = startNode; inode <= endNode; inode++ ) {
                 xc = corner [ inode - 1 ]->at(1);
@@ -1422,7 +1421,10 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
                             globCoord.at(3) = zc * ( 1.0 - u ) + zm * u;
 
                             // this effectively rewrites the local coordinates of the fictitious integration point
-                            element->computeLocalCoordinates(* locCoord, globCoord);
+                            FloatArray lcoord;
+                            element->computeLocalCoordinates(lcoord, globCoord);
+                            gp->setNaturalCoordinates(lcoord);
+                            
                             // get N matrix at the fictitious integration point
                             this->HuertaErrorEstimatorI_computeNmatrixAt(gp, Nmatrix);
                             // get displacement at the fictitious integration point
@@ -1864,16 +1866,15 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
             double u, v, du = 1.0 / ( level + 1 ), dv = 1.0 / ( level + 1 );
             double xc, yc, zc, xs1, ys1, zs1, xs2, ys2, zs2, xm, ym, zm;
             GaussPoint *gp;
-            FloatArray globCoord(3), * locCoord;
+            FloatArray globCoord(3);
             FloatMatrix Nmatrix;
             FloatArray uCoarse, uFine;
 
-			MaterialMode mmode = element->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0)->giveMaterialMode();
+            MaterialMode mmode = element->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0)->giveMaterialMode();
 
             // create a fictitious integration point
-            locCoord = new FloatArray;
             IntegrationRule ir(0, element);
-            gp = new GaussPoint( &ir, 1, locCoord, 1.0, mmode);
+            gp = new GaussPoint( &ir, 1, {}, 1.0, mmode);
 
             for ( inode = startNode; inode <= endNode; inode++ ) {
                 s1 = inode;
@@ -1954,7 +1955,9 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                                 globCoord.at(3) = ( zc * ( 1.0 - u ) + zs1 * u ) * ( 1.0 - v ) + ( zs2 * ( 1.0 - u ) + zm * u ) * v;
 
                                 // this effectively rewrites the local coordinates of the fictitious integration point
-                                element->computeLocalCoordinates(* locCoord, globCoord);
+                                FloatArray lcoord;
+                                element->computeLocalCoordinates(lcoord, globCoord);
+                                gp->setNaturalCoordinates(lcoord);
                                 // get N matrix at the fictitious integration point
                                 this->HuertaErrorEstimatorI_computeNmatrixAt(gp, Nmatrix);
                                 // get displacement at the fictitious integration point
@@ -2537,16 +2540,15 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
             double xc, yc, zc, xm, ym, zm;
             double xs1, ys1, zs1, xs2, ys2, zs2, xs3, ys3, zs3;
             double xf1, yf1, zf1, xf2, yf2, zf2, xf3, yf3, zf3;
-            FloatArray globCoord(3), * locCoord;
+            FloatArray globCoord(3);
             FloatMatrix Nmatrix;
             FloatArray uCoarse, uFine;
 
-			MaterialMode mmode = element->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0)->giveMaterialMode();
+            MaterialMode mmode = element->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0)->giveMaterialMode();
 
             // create a fictitious integration point
-            locCoord = new FloatArray;
             IntegrationRule irule(0, element);
-			auto gp = new GaussPoint(&irule, 1, locCoord, 1.0, mmode);
+            auto gp = new GaussPoint(&irule, 1, {}, 1.0, mmode);
             for ( inode = startNode; inode <= endNode; inode++ ) {
                 s1 = hexaSideNode [ inode - 1 ] [ 0 ];
                 s2 = hexaSideNode [ inode - 1 ] [ 1 ];
@@ -2657,7 +2659,9 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                                                       + ( ( zs3 * ( 1.0 - u ) + zf2 * u ) * ( 1.0 - v ) + ( zf3 * ( 1.0 - u ) + zm * u ) * v ) * w;
 
                                     // this effectively rewrites the local coordinates of the fictitious integration point
-                                    element->computeLocalCoordinates(* locCoord, globCoord);
+                                    FloatArray lcoord;
+                                    element->computeLocalCoordinates(lcoord, globCoord);
+                                    gp->setNaturalCoordinates(lcoord);
                                     // get N matrix at the fictitious integration point
                                     this->HuertaErrorEstimatorI_computeNmatrixAt(gp, Nmatrix);
                                     // get displacement at the fictitious integration point

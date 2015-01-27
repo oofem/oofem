@@ -106,7 +106,7 @@ Quad1_ht :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, thickness, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(),
+    determinant = fabs( this->interpolation.giveTransformationJacobian( gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) ) );
     weight      = gp->giveWeight();
     thickness   = this->giveCrossSection()->give(CS_Thickness, gp); // 't'
@@ -119,20 +119,20 @@ Quad1_ht :: computeVolumeAround(GaussPoint *gp)
 double
 Quad1_ht :: giveThicknessAt(const FloatArray &gcoords)
 {
-    return this->giveCrossSection()->give(CS_Thickness, & gcoords, this, false);
+    return this->giveCrossSection()->give(CS_Thickness, gcoords, this, false);
 }
 
 
 double
 Quad1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(),
+    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) );
     FloatArray gc;
-    this->interpolation.edgeLocal2global( gc, iEdge, * gp->giveNaturalCoordinates(),
+    this->interpolation.edgeLocal2global( gc, iEdge, gp->giveNaturalCoordinates(),
                                          FEIElementGeometryWrapper(this) );
     // temporary gauss point on element (not edge) to evaluate thickness
-    GaussPoint _gp( NULL, 1, new FloatArray ( gc ), 1.0, gp->giveMaterialMode() );
+    GaussPoint _gp( NULL, 1, gc, 1.0, gp->giveMaterialMode() );
     double thick = this->giveCrossSection()->give(CS_Thickness, & _gp); // 't'
     return result *thick *gp->giveWeight();
 }

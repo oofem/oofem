@@ -160,7 +160,7 @@ MisesMatNl :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
 
     Element *elem = gp->giveElement();
     FloatArray coords;
-    elem->computeGlobalCoordinates( coords, * ( gp->giveNaturalCoordinates() ) );
+    elem->computeGlobalCoordinates( coords, gp->giveNaturalCoordinates() );
     double xtarget = coords.at(1);
 
     double w, wsum = 0., x, xprev, damage, damageprev = 0.0;
@@ -171,7 +171,7 @@ MisesMatNl :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
     xprev = xtarget;
     for ( pos = postarget; pos != list->end(); ++pos ) {
         nearElem = ( pos->nearGp )->giveElement();
-        nearElem->computeGlobalCoordinates( coords, * ( ( pos->nearGp )->giveNaturalCoordinates() ) );
+        nearElem->computeGlobalCoordinates( coords, pos->nearGp->giveNaturalCoordinates() );
         x = coords.at(1);
         nonlocStatus = static_cast< MisesMatNlStatus * >( this->giveStatus(pos->nearGp) );
         damage = nonlocStatus->giveTempDamage();
@@ -190,7 +190,7 @@ MisesMatNl :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
     distance = 0.;
     for ( pos = postarget; pos != list->begin(); --pos ) {
         nearElem = ( pos->nearGp )->giveElement();
-        nearElem->computeGlobalCoordinates( coords, * ( ( pos->nearGp )->giveNaturalCoordinates() ) );
+        nearElem->computeGlobalCoordinates( coords, pos->nearGp->giveNaturalCoordinates() );
         x = coords.at(1);
         nonlocStatus = static_cast< MisesMatNlStatus * >( this->giveStatus(pos->nearGp) );
         damage = nonlocStatus->giveTempDamage();
@@ -209,7 +209,7 @@ MisesMatNl :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
     pos = list->begin();
     if ( pos != postarget ) {
         nearElem = ( pos->nearGp )->giveElement();
-        nearElem->computeGlobalCoordinates( coords, * ( ( pos->nearGp )->giveNaturalCoordinates() ) );
+        nearElem->computeGlobalCoordinates( coords, pos->nearGp->giveNaturalCoordinates() );
         x = coords.at(1);
         nonlocStatus = static_cast< MisesMatNlStatus * >( this->giveStatus(pos->nearGp) );
         damage = nonlocStatus->giveTempDamage();

@@ -140,7 +140,7 @@ public:
      * @param gp Integration point
      * @return Property value.
      */
-    virtual double give(CrossSectionProperty a, const FloatArray *coords, Element *elem, bool local = true);
+    virtual double give(CrossSectionProperty a, const FloatArray &coords, Element *elem, bool local = true);
 
     /**
      * Returns the value of cross section property.

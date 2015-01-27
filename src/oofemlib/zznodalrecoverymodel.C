@@ -217,7 +217,7 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNValProduct(FloatMatri
             continue;
         }
 
-        interpol->evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(element) );
+        interpol->evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(element) );
         answer.plusDyadUnsym(n, stressVector, dV);
 
         //  help.beTProductOf(n,stressVector);
@@ -250,7 +250,7 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &a
 
     for ( GaussPoint *gp: *iRule ) {
         double dV = element->computeVolumeAround(gp);
-        interpol->evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(element) );
+        interpol->evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(element) );
         fullAnswer.plusDyadSymmUpper(n, dV);
         pok += ( n.at(1) * dV ); ///@todo What is this? Completely unused.
         volume += dV;

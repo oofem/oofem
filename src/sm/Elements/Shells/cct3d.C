@@ -126,7 +126,7 @@ CCTPlate3d :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coor
     answer.resize(2);
     answer.at(1) = inputCoords_ElCS.at(1);
     answer.at(2) = inputCoords_ElCS.at(2);
-    GaussPoint _gp(NULL, 1, new FloatArray ( answer ), 2.0, _2dPlate);
+    GaussPoint _gp(NULL, 1, answer, 2.0, _2dPlate);
     // now check if the third local coordinate is within the thickness of element
     bool outofplane = ( fabs( inputCoords_ElCS.at(3) ) <= this->giveCrossSection()->give(CS_Thickness, & _gp) / 2. );
 
@@ -401,7 +401,7 @@ CCTPlate3d :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint
 {
     int i, j;
     FloatMatrix ne;
-    this->computeNmatrixAt(* sgp->giveNaturalCoordinates(), ne);
+    this->computeNmatrixAt(sgp->giveNaturalCoordinates(), ne);
 
     answer.resize(6, 18);
     answer.zero();
@@ -460,7 +460,7 @@ CCTPlate3d :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 void
 CCTPlate3d :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
 {
-    this->computeGlobalCoordinates( answer, * gp->giveNaturalCoordinates() );
+    this->computeGlobalCoordinates( answer, gp->giveNaturalCoordinates() );
 }
 
 

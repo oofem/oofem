@@ -181,15 +181,15 @@ SolutionbasedShapeFunction :: computeCorrectionFactors(modeStruct &myMode, IntAr
         std :: unique_ptr< IntegrationRule >iRule(geoInterpolation->giveBoundaryIntegrationRule(order, Boundary));
 
         for ( GaussPoint *gp: *iRule ) {
-            FloatArray *lcoords = gp->giveNaturalCoordinates();
+            const FloatArray &lcoords = gp->giveNaturalCoordinates();
             FloatArray gcoords, normal, N;
             FloatArray Phi;
 
-            double detJ = fabs( geoInterpolation->boundaryGiveTransformationJacobian( Boundary, * lcoords, FEIElementGeometryWrapper(thisElement) ) ) * gp->giveWeight();
+            double detJ = fabs( geoInterpolation->boundaryGiveTransformationJacobian( Boundary, lcoords, FEIElementGeometryWrapper(thisElement) ) ) * gp->giveWeight();
 
-            geoInterpolation->boundaryEvalNormal( normal, Boundary, * lcoords, FEIElementGeometryWrapper(thisElement) );
-            geoInterpolation->boundaryEvalN( N, Boundary, * lcoords, FEIElementGeometryWrapper(thisElement) );
-            geoInterpolation->boundaryLocal2Global( gcoords, Boundary, * lcoords, FEIElementGeometryWrapper(thisElement) );
+            geoInterpolation->boundaryEvalNormal( normal, Boundary, lcoords, FEIElementGeometryWrapper(thisElement) );
+            geoInterpolation->boundaryEvalN( N, Boundary, lcoords, FEIElementGeometryWrapper(thisElement) );
+            geoInterpolation->boundaryLocal2Global( gcoords, Boundary, lcoords, FEIElementGeometryWrapper(thisElement) );
 
             FloatArray pPhi, mPhi, zPhi;
             pPhi.resize( Dofs->giveSize() );

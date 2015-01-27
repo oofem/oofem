@@ -72,7 +72,7 @@ QuadAxisym1_ht :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(),
+    determinant = fabs( this->interpolation.giveTransformationJacobian( gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) ) );
 
     weight = gp->giveWeight();
@@ -92,10 +92,10 @@ QuadAxisym1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double radius;
     FloatArray gcoords;
-    this->interpolation.edgeLocal2global( gcoords, iEdge, * gp->giveSubPatchCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeLocal2global( gcoords, iEdge, gp->giveSubPatchCoordinates(), FEIElementGeometryWrapper(this) );
     radius = gcoords.at(1);
 
-    double detJ = fabs( this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(),
+    double detJ = fabs( this->interpolation.edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(),
                                                                            FEIElementGeometryWrapper(this) ) );
     return detJ *gp->giveWeight() * radius;
 }
@@ -104,7 +104,7 @@ double
 QuadAxisym1_ht :: computeRadiusAt(GaussPoint *gp)
 {
     FloatArray gcoords;
-    this->interpolation.local2global( gcoords, * gp->giveSubPatchCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.local2global( gcoords, gp->giveSubPatchCoordinates(), FEIElementGeometryWrapper(this) );
     return gcoords.at(1);
 }
 } // end namespace oofem

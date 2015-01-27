@@ -192,11 +192,11 @@ double WeakPeriodicBoundaryCondition :: computeProjectionCoefficient(int vIndex,
 
         for ( GaussPoint *gp: *iRule ) {
 
-            FloatArray *lcoords = gp->giveNaturalCoordinates();
+            const FloatArray &lcoords = gp->giveNaturalCoordinates();
             FloatArray gcoords;
 
-            geoInterpolation->boundaryLocal2Global( gcoords, side [ thisSide ].at(ielement), * lcoords, FEIElementGeometryWrapper(thisElement) );
-            double detJ = fabs( geoInterpolation->boundaryGiveTransformationJacobian( side [ thisSide ].at(ielement), * lcoords, FEIElementGeometryWrapper(thisElement) ) );
+            geoInterpolation->boundaryLocal2Global( gcoords, side [ thisSide ].at(ielement), lcoords, FEIElementGeometryWrapper(thisElement) );
+            double detJ = fabs( geoInterpolation->boundaryGiveTransformationJacobian( side [ thisSide ].at(ielement), lcoords, FEIElementGeometryWrapper(thisElement) ) );
 
             int a, b;
             getExponents(vIndex, a, b);
@@ -391,16 +391,16 @@ void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Elem
     std :: unique_ptr< IntegrationRule >iRule(geoInterpolation->giveBoundaryIntegrationRule(orderOfPolygon, boundary));
 
     for ( GaussPoint *gp: *iRule ) {
-        FloatArray *lcoords = gp->giveNaturalCoordinates();
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
         FloatArray N;
 
         // Find the value of parameter s which is the vert/horiz distance to 0
-        geoInterpolation->boundaryLocal2Global( gcoords, boundary, * lcoords, FEIElementGeometryWrapper(e) );
+        geoInterpolation->boundaryLocal2Global( gcoords, boundary, lcoords, FEIElementGeometryWrapper(e) );
         // Compute base function values
-        interpolation->boundaryEvalN( N, boundary, * lcoords, FEIElementGeometryWrapper(e) );
+        interpolation->boundaryEvalN( N, boundary, lcoords, FEIElementGeometryWrapper(e) );
         // Compute Jacobian
-        double detJ = fabs( geoInterpolation->boundaryGiveTransformationJacobian( boundary, * lcoords, FEIElementGeometryWrapper(e) ) );
+        double detJ = fabs( geoInterpolation->boundaryGiveTransformationJacobian( boundary, lcoords, FEIElementGeometryWrapper(e) ) );
         double s = gcoords.at( surfaceIndexes.at(1) );
 
         for ( int j = 0; j < B.giveNumberOfColumns(); j++ ) {

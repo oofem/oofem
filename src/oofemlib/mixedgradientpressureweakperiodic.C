@@ -267,7 +267,7 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionVelocityTangent(Float
 
     answer.clear();
     for ( GaussPoint *gp: *ir ) {
-        FloatArray &lcoords = * gp->giveNaturalCoordinates();
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
         FEIElementGeometryWrapper cellgeo(el);
 
         double detJ = interp->boundaryEvalNormal(normal, boundary, lcoords, cellgeo);
@@ -296,7 +296,7 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionXTangent(FloatMatrix 
 
     FloatArray tmpAnswer;
     for ( GaussPoint *gp: *ir ) {
-        FloatArray &lcoords = * gp->giveNaturalCoordinates();
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
         FEIElementGeometryWrapper cellgeo(el);
 
         double detJ = interp->boundaryEvalNormal(normal, boundary, lcoords, cellgeo);
@@ -325,7 +325,7 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionDev(FloatArray &answe
     answer.clear();
 
     for ( GaussPoint *gp: *ir ) {
-        FloatArray &lcoords = * gp->giveNaturalCoordinates();
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
         FEIElementGeometryWrapper cellgeo(el);
 
         double detJ = interp->boundaryEvalNormal(normal, boundary, lcoords, cellgeo);
@@ -503,7 +503,7 @@ void MixedGradientPressureWeakPeriodic :: computeStress(FloatArray &sigmaDev, Fl
         std :: unique_ptr< IntegrationRule >ir( interp->giveBoundaryIntegrationRule(maxorder, boundary) );
 
         for ( GaussPoint *gp: *ir ) {
-            FloatArray &lcoords = * gp->giveNaturalCoordinates();
+            const FloatArray &lcoords = gp->giveNaturalCoordinates();
             FEIElementGeometryWrapper cellgeo(el);
 
             double detJ = interp->boundaryEvalNormal(normal, boundary, lcoords, cellgeo);

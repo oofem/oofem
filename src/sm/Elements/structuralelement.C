@@ -125,7 +125,7 @@ void StructuralElement :: computeBoundaryLoadVector(FloatArray &answer, Boundary
     std :: unique_ptr< IntegrationRule >iRule( fei->giveBoundaryIntegrationRule(load->giveApproxOrder(), boundary) );
 
     for ( GaussPoint *gp: *iRule ) {
-        FloatArray &lcoords = * gp->giveNaturalCoordinates();
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
         if ( load->giveFormulationType() == Load :: FT_Entity ) {
             load->computeValueAt(force, tStep, lcoords, mode);
@@ -191,7 +191,7 @@ StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, 
 
     if ( force.giveSize() ) {
         for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
-            this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), n);
+            this->computeNmatrixAt(gp->giveSubPatchCoordinates(), n);
             dV  = this->computeVolumeAround(gp);
             dens = this->giveCrossSection()->give('d', gp);
             ntf.beTProductOf(n, force);
@@ -265,7 +265,7 @@ StructuralElement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
             dV  = this->computeEdgeVolumeAround(gp, iEdge);
 
             if ( edgeLoad->giveFormulationType() == Load :: FT_Entity ) {
-                edgeLoad->computeValueAt(force, tStep, * ( gp->giveNaturalCoordinates() ), mode);
+                edgeLoad->computeValueAt(force, tStep, gp->giveNaturalCoordinates(), mode);
             } else {
                 this->computeEdgeIpGlobalCoords(globalIPcoords, gp, iEdge);
                 edgeLoad->computeValueAt(force, tStep, globalIPcoords, mode);
@@ -342,7 +342,7 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
             dV  = this->computeSurfaceVolumeAround(gp, iSurf);
 
             if ( surfLoad->giveFormulationType() == Load :: FT_Entity ) {
-                surfLoad->computeValueAt(force, tStep, * ( gp->giveNaturalCoordinates() ), mode);
+                surfLoad->computeValueAt(force, tStep, gp->giveNaturalCoordinates(), mode);
             } else {
                 this->computeSurfIpGlobalCoords(globalIPcoords, gp, iSurf);
                 surfLoad->computeValueAt(force, tStep, globalIPcoords, mode);
@@ -418,7 +418,7 @@ StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *
     mass = 0.;
 
     for ( GaussPoint *gp: iRule ) {
-        this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), n);
+        this->computeNmatrixAt(gp->giveSubPatchCoordinates(), n);
         density = this->giveCrossSection()->give('d', gp);
 
         if ( ipDensity != NULL ) {
@@ -607,7 +607,7 @@ StructuralElement :: computeResultingIPTemperatureAt(FloatArray &answer, TimeSte
     Load *load;
     FloatArray gCoords, temperature;
 
-    if ( this->computeGlobalCoordinates( gCoords, * ( gp->giveNaturalCoordinates() ) ) == 0 ) {
+    if ( this->computeGlobalCoordinates( gCoords, gp->giveNaturalCoordinates() ) == 0 ) {
         OOFEM_ERROR("computeGlobalCoordinates failed");
     }
 
@@ -631,7 +631,7 @@ StructuralElement :: computeResultingIPEigenstrainAt(FloatArray &answer, TimeSte
     Load *load;
     FloatArray gCoords, eigenstrain;
 
-    if ( this->computeGlobalCoordinates( gCoords, * ( gp->giveNaturalCoordinates() ) ) == 0 ) {
+    if ( this->computeGlobalCoordinates( gCoords, gp->giveNaturalCoordinates() ) == 0 ) {
         OOFEM_ERROR("computeGlobalCoordinates failed");
     }
 
@@ -1210,7 +1210,7 @@ StructuralElement :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSta
         FloatArray u;
         FloatMatrix N;
         this->computeVectorOf(VM_Total, tStep, u);
-        this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), N);
+        this->computeNmatrixAt(gp->giveSubPatchCoordinates(), N);
         answer.beProductOf(N, u);
         return 1;
     }

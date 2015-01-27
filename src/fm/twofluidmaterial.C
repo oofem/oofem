@@ -178,8 +178,8 @@ TwoFluidMaterial :: giveTempVOF(GaussPoint *gp)
 
 TwoFluidMaterialStatus :: TwoFluidMaterialStatus(int n, Domain *d, GaussPoint *gp, const IntArray &slaveMaterial) :
     FluidDynamicMaterialStatus(n, d, gp),
-    slaveGp0( new GaussPoint(NULL, 0, NULL, 0., gp->giveMaterialMode()) ),
-    slaveGp1( new GaussPoint(NULL, 0, NULL, 0., gp->giveMaterialMode()) )
+    slaveGp0( new GaussPoint(NULL, 0, FloatArray(), 0., gp->giveMaterialMode()) ),
+    slaveGp1( new GaussPoint(NULL, 0, FloatArray(), 0., gp->giveMaterialMode()) )
 {
     this->slaveGp0->setMaterialStatus( domain->giveMaterial( slaveMaterial(0) )->CreateStatus(this->slaveGp0.get()), this->giveNumber() );
     this->slaveGp1->setMaterialStatus( domain->giveMaterial( slaveMaterial(1) )->CreateStatus(this->slaveGp0.get()), this->giveNumber() );

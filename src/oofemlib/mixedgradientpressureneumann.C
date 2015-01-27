@@ -295,7 +295,7 @@ void MixedGradientPressureNeumann :: integrateVolTangent(FloatArray &answer, Ele
 
     answer.clear();
     for ( GaussPoint *gp: *ir ) {
-        FloatArray &lcoords = * gp->giveNaturalCoordinates();
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
         FEIElementGeometryWrapper cellgeo(e);
 
         // Evaluate the normal;
@@ -330,7 +330,7 @@ void MixedGradientPressureNeumann :: integrateDevTangent(FloatMatrix &answer, El
 
     answer.clear();
     for ( GaussPoint *gp: *ir ) {
-        FloatArray &lcoords = * gp->giveNaturalCoordinates();
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
         FEIElementGeometryWrapper cellgeo(e);
 
         // Evaluate the normal;

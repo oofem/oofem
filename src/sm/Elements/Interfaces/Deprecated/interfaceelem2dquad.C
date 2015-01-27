@@ -316,7 +316,7 @@ void InterfaceElem2dQuad :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 
         indx = gc.giveIntVarIndx();
 
-        result += this->computeGlobalCoordinates( gcoord, * ( gp->giveNaturalCoordinates() ) );
+        result += this->computeGlobalCoordinates( gcoord, gp->giveNaturalCoordinates() );
 
         p [ 0 ].x = ( FPNum ) gcoord.at(1);
         p [ 0 ].y = ( FPNum ) gcoord.at(2);

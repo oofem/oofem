@@ -1942,7 +1942,7 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
     int nc = 0;
-    FloatArray *lc, gc, value;
+    FloatArray gc, value;
     FILE *stream;
     InternalStateType isttype;
     InternalStateValueType vtype;
@@ -1974,8 +1974,7 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
             int ielem = elements.at(i);
 
             for ( GaussPoint *gp: *d->giveElement(ielem)->giveDefaultIntegrationRulePtr() ) {
-                lc = gp->giveNaturalCoordinates();
-                d->giveElement(ielem)->computeGlobalCoordinates(gc, * lc);
+                d->giveElement(ielem)->computeGlobalCoordinates(gc, gp->giveNaturalCoordinates());
                 for ( double c: gc ) {
                     fprintf( stream, "%e ", c );
                 }

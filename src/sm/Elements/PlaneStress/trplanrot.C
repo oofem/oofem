@@ -98,8 +98,8 @@ TrPlaneStrRot :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, i
     }
     
     // Derivatives of the shape functions (for this special interpolation)
-    FloatArray nx = this->GiveDerivativeUX(*gp->giveNaturalCoordinates());
-    FloatArray ny = this->GiveDerivativeVY(*gp->giveNaturalCoordinates());
+    FloatArray nx = this->GiveDerivativeUX(gp->giveNaturalCoordinates());
+    FloatArray ny = this->GiveDerivativeVY(gp->giveNaturalCoordinates());
 
     FloatArray center = {0.0, 0.0};
     FloatArray nxRed = this->GiveDerivativeVX( center );
@@ -171,8 +171,8 @@ TrPlaneStrRot :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, i
     answer.resize(size, 9);
 
     if ( ( li <= 2 ) ) {
-        FloatArray nx = this->GiveDerivativeUX(*gp->giveNaturalCoordinates());
-        FloatArray ny = this->GiveDerivativeVY(*gp->giveNaturalCoordinates());
+        FloatArray nx = this->GiveDerivativeUX(gp->giveNaturalCoordinates());
+        FloatArray ny = this->GiveDerivativeVY(gp->giveNaturalCoordinates());
 
         if ( ( li <= 1 ) && ( ui >= 1 ) ) {
             for ( int i = 1; i <= 3; i++ ) {
@@ -395,7 +395,7 @@ TrPlaneStrRot :: GivePitch()
 
 
 FloatArray
-TrPlaneStrRot :: GiveDerivativeUX(FloatArray &lCoords)
+TrPlaneStrRot :: GiveDerivativeUX(const FloatArray &lCoords)
 {
     // get node coordinates
     FloatArray x(3), y(3);
@@ -436,7 +436,7 @@ TrPlaneStrRot :: GiveDerivativeUX(FloatArray &lCoords)
 
 
 FloatArray
-TrPlaneStrRot :: GiveDerivativeVX(FloatArray &lCoords)
+TrPlaneStrRot :: GiveDerivativeVX(const FloatArray &lCoords)
 {
     // get node coordinates
     FloatArray x(3), y(3);
@@ -477,7 +477,7 @@ TrPlaneStrRot :: GiveDerivativeVX(FloatArray &lCoords)
 
 
 FloatArray
-TrPlaneStrRot :: GiveDerivativeUY(FloatArray &lCoords)
+TrPlaneStrRot :: GiveDerivativeUY(const FloatArray &lCoords)
 {
     // get node coordinates
     FloatArray x(3), y(3);
@@ -518,7 +518,7 @@ TrPlaneStrRot :: GiveDerivativeUY(FloatArray &lCoords)
 
 
 FloatArray
-TrPlaneStrRot :: GiveDerivativeVY(FloatArray &lCoords)
+TrPlaneStrRot :: GiveDerivativeVY(const FloatArray &lCoords)
 {
     // get node coordinates
     FloatArray x(3), y(3);

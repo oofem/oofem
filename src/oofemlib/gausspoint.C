@@ -36,57 +36,42 @@
 #include "matstatus.h"
 #include "material.h"
 
+#include <memory>
+
 namespace oofem {
 //GaussPoint :: GaussPoint(IntegrationRule *ir, int n, FloatArray *a, double w, MaterialMode mode) : statusDict()
-GaussPoint :: GaussPoint(IntegrationRule *ir, int n, FloatArray *iNaturalCoord, double w, MaterialMode mode)
-// Constructor. Creates a Gauss point belonging to element e, with number
-// n, with coordinates a, with weight w.
+GaussPoint :: GaussPoint(IntegrationRule *ir, int n, FloatArray iNaturalCoord, double w, MaterialMode mode) :
+    number(n),
+    irule(ir),
+    naturalCoordinates(std :: move(iNaturalCoord)),
+    weight(w),
+    materialMode(mode)
 {
-    irule        = ir;
-    number       = n;
-    naturalCoordinates  = iNaturalCoord;
-    weight       = w;
-    materialMode = mode;
-
     subPatchCoordinates = NULL;
     globalCoordinates = NULL;
     materialStatus = NULL;
 }
 
-GaussPoint :: GaussPoint(IntegrationRule * ir, int n, double w, MaterialMode mode)
+GaussPoint :: GaussPoint(IntegrationRule * ir, int n, double w, MaterialMode mode) :
+    number(n),
+    irule(ir),
+    weight(w),
+    materialMode(mode)
 {
-    irule        = ir;
-    number       = n;
-    naturalCoordinates  = NULL;
-    weight       = w;
-    materialMode = mode;
-
     subPatchCoordinates = NULL;
     globalCoordinates = NULL;
     materialStatus = NULL;
 }
 
 GaussPoint :: ~GaussPoint()
-// Destructor.
 {
-    delete naturalCoordinates;
-
     for ( GaussPoint *gp: gaussPoints ) {
         delete gp;
     }
 
-    if ( subPatchCoordinates ) {
-        delete subPatchCoordinates;
-    }
-
-    if(globalCoordinates != NULL) {
-        delete globalCoordinates;
-    }
-
-    if ( materialStatus != NULL ) {
-        delete materialStatus;
-        materialStatus = NULL;
-    }
+    delete subPatchCoordinates;
+    delete globalCoordinates;
+    delete materialStatus;
 }
 
 

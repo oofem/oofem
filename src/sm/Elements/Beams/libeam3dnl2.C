@@ -601,7 +601,7 @@ LIBeam3dNL2 :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *
      * without regarding particular side
      */
 
-    this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
+    this->computeNmatrixAt(gp->giveSubPatchCoordinates(), answer);
 }
 
 
@@ -638,7 +638,7 @@ LIBeam3dNL2 :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 LIBeam3dNL2 :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    computeGlobalCoordinates( answer, * ( gp->giveNaturalCoordinates() ) );
+    computeGlobalCoordinates( answer, gp->giveNaturalCoordinates() );
 }
 
 
@@ -755,7 +755,7 @@ LIBeam3dNL2 :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep 
 {
     FloatArray lc(1);
     NLStructuralElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
-    answer.times( this->giveCrossSection()->give(CS_Area, & lc, this) );
+    answer.times( this->giveCrossSection()->give(CS_Area, lc, this) );
 }
 
 

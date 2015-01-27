@@ -302,7 +302,7 @@ TrPlaneStress2d :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedEleme
 
 void TrPlaneStress2d :: HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
-    computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
+    computeNmatrixAt(gp->giveSubPatchCoordinates(), answer);
 }
 
 #ifdef __OOFEG

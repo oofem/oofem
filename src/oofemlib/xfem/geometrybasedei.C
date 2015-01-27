@@ -546,10 +546,9 @@ void GeometryBasedEI :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJu
     Element *el = localizer->giveElementContainingPoint( iGP.giveGlobalCoordinates() );
     if ( el != NULL ) {
         FloatArray N;
-        FloatArray locCoord = * ( iGP.giveNaturalCoordinates() );
-        //        el->computeLocalCoordinates(locCoord, iGlobalCoord);
         FEInterpolation *interp = el->giveInterpolation();
-        interp->evalN( N, locCoord, FEIElementGeometryWrapper(el) );
+        interp->evalN( N, iGP.giveNaturalCoordinates(), FEIElementGeometryWrapper(el) );
+        //el->computeLocalCoordinates(locCoord, iGlobalCoord);
 
         evalLevelSetNormal( normalSignDist, iGP.giveGlobalCoordinates(), N, el->giveDofManArray() );
     }

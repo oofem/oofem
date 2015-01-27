@@ -57,9 +57,7 @@ LobattoIntegrationRule :: SetUpPointsOnLine(int nPoints, MaterialMode mode)
     this->gaussPoints.resize( nPoints );
 
     for ( int i = 1; i <= nPoints; i++ ) {
-        FloatArray *coord = new FloatArray(1);
-        coord->at(1) = coords_xi.at(i);
-        this->gaussPoints [ i - 1 ] = new GaussPoint(this, i, coord, weights.at ( i ), mode);
+        this->gaussPoints [ i - 1 ] = new GaussPoint(this, i, {coords_xi.at(i)}, weights.at ( i ), mode);
     }
 
     this->intdomain = _Line;
@@ -81,10 +79,8 @@ LobattoIntegrationRule :: SetUpPointsOnSquare(int nPoints, MaterialMode mode)
     for ( int i = 1; i <= nPoints_xi1; i++ ) {
         for ( int j = 1; j <= nPoints_xi2; j++ ) {
             count++;
-            FloatArray *coord = new FloatArray(2);
-            coord->at(1) = coords_xi1.at(i);
-            coord->at(2) = coords_xi2.at(j);
-            this->gaussPoints [ count - 1 ] = new GaussPoint(this, count, coord, weights1.at ( i ) *weights2.at ( j ), mode);
+            this->gaussPoints [ count - 1 ] = new GaussPoint(this, count, {coords_xi1.at(i), coords_xi2.at(j)}, 
+                                                             weights1.at ( i ) *weights2.at ( j ), mode);
         }
     }
 
@@ -110,11 +106,8 @@ LobattoIntegrationRule :: SetUpPointsOnCube(int nPoints, MaterialMode mode)
         for ( int j = 1; j <= nPoints_xi2; j++ ) {
             for ( int k = 1; k <= nPoints_xi3; k++ ) {
                 count++;
-                FloatArray *coord = new FloatArray(3);
-                coord->at(1) = coords_xi1.at(i);
-                coord->at(2) = coords_xi2.at(j);
-                coord->at(3) = coords_xi3.at(k);
-                this->gaussPoints [ count - 1 ] = new GaussPoint(this, count, coord, weights1.at ( i ) *weights2.at ( j ) *weights3.at ( k ), mode);
+                this->gaussPoints [ count - 1 ] = new GaussPoint(this, count, {coords_xi1.at(i), coords_xi2.at(j), coords_xi3.at(k)},
+                                                                 weights1.at ( i ) *weights2.at ( j ) *weights3.at ( k ), mode);
             }
         }
     }

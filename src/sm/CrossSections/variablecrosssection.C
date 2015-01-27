@@ -155,7 +155,7 @@ VariableCrossSection :: give(CrossSectionProperty aProperty, GaussPoint *gpx)
 
 
 double
-VariableCrossSection :: give(CrossSectionProperty aProperty, const FloatArray *coords, Element *elem, bool local)
+VariableCrossSection :: give(CrossSectionProperty aProperty, const FloatArray &coords, Element *elem, bool local)
 {
     double value = 0.0;
     const ScalarFunction *expr;
@@ -168,21 +168,21 @@ VariableCrossSection :: give(CrossSectionProperty aProperty, const FloatArray *c
         FloatArray c;
         if ( this->localFormulationFlag ) {
             if ( local ) {
-                c = * coords;
+                c = coords;
             } else {
                 // convert given coords into local cs
-                if ( !elem->computeLocalCoordinates(c, * coords) ) {
+                if ( !elem->computeLocalCoordinates(c, coords) ) {
                     OOFEM_ERROR("computeLocalCoordinates failed (element %d)", elem->giveNumber() );
                 }
             }
         } else { // global coordinates needed
             if ( local ) {
                 // convert given coords into global cs
-                if ( !elem->computeGlobalCoordinates(c, * coords) ) {
+                if ( !elem->computeGlobalCoordinates(c, coords) ) {
                     OOFEM_ERROR("computeGlobalCoordinates failed (element %d)", elem->giveNumber() );
                 }
             } else {
-                c = * coords;
+                c = coords;
             }
         }
         // evaluate the expression

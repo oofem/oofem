@@ -1814,7 +1814,7 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSt
         if ( ( tf = fm->giveField(FT_Temperature) ) ) {
             // temperature field registered
             FloatArray gcoords, et2;
-            static_cast< StructuralElement * >( gp->giveElement() )->computeGlobalCoordinates( gcoords, * gp->giveNaturalCoordinates() );
+            static_cast< StructuralElement * >( gp->giveElement() )->computeGlobalCoordinates( gcoords, gp->giveNaturalCoordinates() );
             if ( ( err = tf->evaluateAt(answer, gcoords, VM_Total, tStep) ) ) {
                 OOFEM_ERROR("tf->evaluateAt failed, element %d, error code %d", gp->giveElement()->giveNumber(), err);
             }
@@ -1827,7 +1827,7 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSt
     } else if ( type == IST_CylindricalStressTensor || type == IST_CylindricalStrainTensor ) {
         FloatArray gc, val = status->giveStressVector();
         FloatMatrix base(3, 3);
-        static_cast< StructuralElement * >( gp->giveElement() )->computeGlobalCoordinates( gc, * gp->giveNaturalCoordinates() );
+        static_cast< StructuralElement * >( gp->giveElement() )->computeGlobalCoordinates( gc, gp->giveNaturalCoordinates() );
         double l = sqrt( gc.at(1) * gc.at(1) + gc.at(2) * gc.at(2) );
         if ( l > 1.e-4 ) {
             base.at(1, 1) = gc.at(1) / l;
@@ -1908,7 +1908,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
         // temperature field registered
         FloatArray gcoords, et2;
         int err;
-        elem->computeGlobalCoordinates( gcoords, * gp->giveNaturalCoordinates() );
+        elem->computeGlobalCoordinates( gcoords, gp->giveNaturalCoordinates() );
         if ( ( err = tf->evaluateAt(et2, gcoords, mode, tStep) ) ) {
             OOFEM_ERROR("tf->evaluateAt failed, element %d, error code %d", elem->giveNumber(), err);
         }

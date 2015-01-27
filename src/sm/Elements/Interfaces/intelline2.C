@@ -74,7 +74,7 @@ IntElLine2 :: computeNmatrixAt(GaussPoint *ip, FloatMatrix &answer)
     answer.zero();
 
     if(linear) {
-		interpLin.evalN( N, * ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+		interpLin.evalN( N, ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
 		answer.at(1, 1) = answer.at(2, 2) = -N.at(1);
 		answer.at(1, 3) = answer.at(2, 4) = -N.at(2);
@@ -85,7 +85,7 @@ IntElLine2 :: computeNmatrixAt(GaussPoint *ip, FloatMatrix &answer)
 //		answer.at(1, 11) = answer.at(2, 12) = N.at(3);
     }
     else {
-		interp.evalN( N, * ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+		interp.evalN( N, ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
 		answer.at(1, 1) = answer.at(2, 2) = -N.at(1);
 		answer.at(1, 3) = answer.at(2, 4) = -N.at(2);
@@ -224,7 +224,7 @@ void IntElLine2 :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 
         indx = gc.giveIntVarIndx();
 
-        result += this->computeGlobalCoordinates( gcoord, * ( gp->giveNaturalCoordinates() ) );
+        result += this->computeGlobalCoordinates( gcoord, gp->giveNaturalCoordinates() );
 
         p [ 0 ].x = ( FPNum ) gcoord.at(1);
         p [ 0 ].y = ( FPNum ) gcoord.at(2);

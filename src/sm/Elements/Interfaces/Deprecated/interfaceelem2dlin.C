@@ -71,7 +71,7 @@ InterfaceElem2dLin :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int 
 //
 {
     FloatArray n;
-    this->interp.evalN (n, *gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));
+    this->interp.evalN (n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(2, 8);
     answer.zero();
@@ -104,12 +104,12 @@ InterfaceElem2dLin :: computeVolumeAround(GaussPoint *gp)
     double r = 1.0;
     if (this->axisymmode) {
         FloatArray n(2);
-        this->interp.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+        this->interp.evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
         r = n.at(1)*this->giveNode(1)->giveCoordinate(1) + n.at(2)*this->giveNode(2)->giveCoordinate(1);
     }
 
 
-    double result = this->interp.giveTransformationJacobian(* gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));
+    double result = this->interp.giveTransformationJacobian(gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));
     return result * gp->giveWeight() * r;
 }
 
@@ -244,7 +244,7 @@ void InterfaceElem2dLin :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 
         indx = gc.giveIntVarIndx();
 
-        result += this->computeGlobalCoordinates( gcoord, * ( gp->giveNaturalCoordinates() ) );
+        result += this->computeGlobalCoordinates( gcoord, gp->giveNaturalCoordinates() );
 
         p [ 0 ].x = ( FPNum ) gcoord.at(1);
         p [ 0 ].y = ( FPNum ) gcoord.at(2);

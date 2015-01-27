@@ -141,7 +141,7 @@ CrossSection :: give(CrossSectionProperty aProperty, GaussPoint *gp)
 }
 
 double
-CrossSection :: give(CrossSectionProperty aProperty, const FloatArray *coords, Element *elem, bool local)
+CrossSection :: give(CrossSectionProperty aProperty, const FloatArray &coords, Element *elem, bool local)
 // Returns the value of the property aProperty of the receiver.
 {
     if ( propertyDictionary.includes(aProperty) ) {

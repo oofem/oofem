@@ -119,7 +119,7 @@ Quad1MindlinShell3D :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad
     if ( gravity.giveSize() ) {
         for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
 
-            this->interp.evalN( n, * gp->giveNaturalCoordinates(), FEIVoidCellGeometry() );
+            this->interp.evalN( n, gp->giveNaturalCoordinates(), FEIVoidCellGeometry() );
             dV = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness, gp);
             density = this->giveStructuralCrossSection()->give('d', gp);
 
@@ -166,8 +166,8 @@ Quad1MindlinShell3D :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load
 
         for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
             double dV = this->computeVolumeAround(gp);
-            this->interp.evalN( n, * gp->giveNaturalCoordinates(), FEIVoidCellGeometry() );
-            this->interp.local2global( gcoords, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+            this->interp.evalN( n, gp->giveNaturalCoordinates(), FEIVoidCellGeometry() );
+            this->interp.local2global( gcoords, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
             surfLoad->computeValueAt(pressure, tStep, gcoords, mode);
 
             answer.at(3) += n.at(1) * pressure.at(1) * dV;
@@ -190,7 +190,7 @@ Quad1MindlinShell3D :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int
 {
     FloatArray n, ns;
     FloatMatrix dn, dns;
-    const FloatArray &localCoords = * gp->giveNaturalCoordinates();
+    const FloatArray &localCoords = gp->giveNaturalCoordinates();
 
     this->interp.evaldNdx( dn, localCoords, FEIVertexListGeometryWrapper(lnodes) );
     this->interp.evalN( n, localCoords,  FEIVoidCellGeometry() );
@@ -304,7 +304,7 @@ Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
 
         // Drilling stiffness is here for improved numerical properties
         if ( drillCoeff > 0. ) {
-            this->interp.evalN( n, * gp->giveNaturalCoordinates(), FEIVoidCellGeometry() );
+            this->interp.evalN( n, gp->giveNaturalCoordinates(), FEIVoidCellGeometry() );
             for ( int j = 0; j < 4; j++ ) {
                 n(j) -= 0.25;
             }
@@ -347,7 +347,7 @@ Quad1MindlinShell3D :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMo
 
         // Drilling stiffness is here for improved numerical properties
         if ( drillCoeff > 0. ) {
-            this->interp.evalN( n, * gp->giveNaturalCoordinates(), FEIVoidCellGeometry() );
+            this->interp.evalN( n, gp->giveNaturalCoordinates(), FEIVoidCellGeometry() );
             for ( int j = 0; j < 4; j++ ) {
                 n(j) -= 0.25;
             }
@@ -408,7 +408,7 @@ Quad1MindlinShell3D :: computeVolumeAround(GaussPoint *gp)
     double detJ, weight;
 
     weight = gp->giveWeight();
-    detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lnodes) ) );
+    detJ = fabs( this->interp.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lnodes) ) );
     return detJ * weight;
 }
 
@@ -497,7 +497,7 @@ Quad1MindlinShell3D :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, Gaus
     IntArray edgeNodes;
     FloatArray n;
 
-    this->interp.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIVoidCellGeometry() );
+    this->interp.edgeEvalN( n, iedge, gp->giveNaturalCoordinates(), FEIVoidCellGeometry() );
     this->interp.computeLocalEdgeMapping(edgeNodes, iedge);
 
     answer.beNMatrixOf(n, 6);
@@ -524,7 +524,7 @@ Quad1MindlinShell3D :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 Quad1MindlinShell3D :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double detJ = this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lnodes) );
+    double detJ = this->interp.edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lnodes) );
     return detJ *gp->giveWeight();
 }
 
@@ -533,7 +533,7 @@ void
 Quad1MindlinShell3D :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
     FloatArray local;
-    this->interp.edgeLocal2global( local, iEdge, * gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lnodes)  );
+    this->interp.edgeLocal2global( local, iEdge, gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lnodes)  );
     local.resize(3);
     local.at(3) = 0.;
     answer.beProductOf(this->lcsMatrix, local);

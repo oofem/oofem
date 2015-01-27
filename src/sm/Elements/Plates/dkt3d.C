@@ -306,7 +306,7 @@ DKTPlate3d :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint
 {
     int i, j;
     FloatMatrix ne;
-    this->computeNmatrixAt(* sgp->giveNaturalCoordinates(), ne);
+    this->computeNmatrixAt(sgp->giveNaturalCoordinates(), ne);
 
     answer.resize(6, 18);
     answer.zero();
@@ -365,7 +365,7 @@ DKTPlate3d :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 void
 DKTPlate3d :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
 {
-    this->computeGlobalCoordinates( answer, * gp->giveNaturalCoordinates() );
+    this->computeGlobalCoordinates( answer, gp->giveNaturalCoordinates() );
 }
 
 
@@ -429,7 +429,7 @@ DKTPlate3d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *g
 {
     FloatArray n;
 
-    this->interp_lin.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.edgeEvalN( n, iedge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(6, 12);
     answer.at(3, 3) = n.at(1);
@@ -477,7 +477,7 @@ DKTPlate3d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 DKTPlate3d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     return detJ *gp->giveWeight();
 }
 
@@ -485,7 +485,7 @@ DKTPlate3d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 DKTPlate3d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interp_lin.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.edgeLocal2global( answer, iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -547,7 +547,7 @@ DKTPlate3d :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coor
     answer.resize(2);
     answer.at(1) = inputCoords_ElCS.at(1);
     answer.at(2) = inputCoords_ElCS.at(2);
-    GaussPoint _gp(NULL, 1, new FloatArray ( answer ), 2.0, _2dPlate);
+    GaussPoint _gp(NULL, 1, answer, 2.0, _2dPlate);
     // now check if the third local coordinate is within the thickness of element
     bool outofplane = ( fabs( inputCoords_ElCS.at(3) ) <= this->giveCrossSection()->give(CS_Thickness, & _gp) / 2. );
 

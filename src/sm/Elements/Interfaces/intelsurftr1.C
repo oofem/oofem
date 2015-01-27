@@ -67,7 +67,7 @@ IntElSurfTr1 :: computeNmatrixAt(GaussPoint *ip, FloatMatrix &answer)
     // Returns the modified N-matrix which multiplied with u give the spatial jump.
 
     FloatArray N;
-    this->interpolation.evalN( N, * ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evalN( N, ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 18);
     answer.zero();
@@ -100,7 +100,7 @@ void
 IntElSurfTr1 :: computeCovarBaseVectorsAt(IntegrationPoint *ip, FloatArray &G1, FloatArray &G2)
 {
     FloatMatrix dNdxi;
-    this->interpolation.evaldNdxi( dNdxi, * ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdxi( dNdxi, ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     G1.resize(3);
     G2.resize(3);
     G1.zero();

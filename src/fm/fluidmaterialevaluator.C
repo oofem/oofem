@@ -105,7 +105,7 @@ void FluidMaterialEvaluator :: solveYourself()
     gps.clear();
     gps.reserve(d->giveNumberOfMaterialModels());
     for ( int i = 1; i <= d->giveNumberOfMaterialModels(); i++ ) {
-        std :: unique_ptr< GaussPoint > gp(new GaussPoint(nullptr, i, nullptr, 1, mode));
+        std :: unique_ptr< GaussPoint > gp(new GaussPoint(nullptr, i, FloatArray(), 1, mode));
         gps.emplace_back( std :: move(gp));
         // Initialize the strain vector;
         FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( d->giveMaterial(i) );

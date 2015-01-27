@@ -111,7 +111,7 @@ GPExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
                 // export Gauss point coordinates
                 if ( ncoords ) { // no coordinates exported if ncoords==0
-                    elem->computeGlobalCoordinates( gcoords, * ( gp->giveNaturalCoordinates() ) );
+                    elem->computeGlobalCoordinates( gcoords, gp->giveNaturalCoordinates() );
                     int nc = gcoords.giveSize();
                     if ( ncoords >= 0 ) {
                         fprintf(stream, "%d ", ncoords);

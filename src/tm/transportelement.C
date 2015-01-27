@@ -308,7 +308,7 @@ TransportElement :: computeCapacitySubMatrix(FloatMatrix &answer, MatResponseMod
 
     answer.clear();
     for ( GaussPoint *gp: *integrationRulesArray [ iri ] ) {
-        this->computeNAt( n, * gp->giveNaturalCoordinates() );
+        this->computeNAt( n, gp->giveNaturalCoordinates() );
         // ask for capacity coefficient. In basic units [J/K/m3]
         double c = mat->giveCharacteristicValue(rmode, gp, tStep);
         double dV = this->computeVolumeAround(gp);
@@ -328,7 +328,7 @@ TransportElement :: computeConductivitySubMatrix(FloatMatrix &answer, int iri, M
     answer.zero();
     for ( GaussPoint *gp: *integrationRulesArray [ iri ] ) {
         this->computeConstitutiveMatrixAt(d, rmode, gp, tStep);
-        this->computeGradientMatrixAt(b, *gp->giveNaturalCoordinates());
+        this->computeGradientMatrixAt(b, gp->giveNaturalCoordinates());
         dV = this->computeVolumeAround(gp);
 
         db.beProductOf(d, b);
@@ -355,7 +355,7 @@ TransportElement :: computeInternalSourceRhsSubVectorAt(FloatArray &answer, Time
     // add internal source produced by material (if any)
     if ( mat->hasInternalSource() ) {
         for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
-            this->computeNAt( n, * gp->giveNaturalCoordinates() );
+            this->computeNAt( n, gp->giveNaturalCoordinates() );
             double dV = this->computeVolumeAround(gp);
             mat->computeInternalSourceVector(val, gp, tStep, mode);
 
@@ -432,7 +432,7 @@ TransportElement :: computeIntSourceLHSSubMatrix(FloatMatrix &answer, MatRespons
 
     answer.clear();
     for ( GaussPoint *gp: *integrationRulesArray [ iri ] ) {
-        this->computeNAt( n, * gp->giveNaturalCoordinates() );
+        this->computeNAt( n, gp->giveNaturalCoordinates() );
         // ask for coefficient from material
         double c = mat->giveCharacteristicValue(rmode, gp, tStep);
         double dV = this->computeVolumeAround(gp);
@@ -466,7 +466,7 @@ TransportElement :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
 
     answer.clear();
     for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
-        FloatArray &lcoords = * gp->giveNaturalCoordinates();
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
         this->computeNmatrixAt(N, lcoords);
         this->computeGradientMatrixAt(B, lcoords);
@@ -556,7 +556,7 @@ TransportElement :: computeLoadVector(FloatArray &answer, Load *load, CharType t
     }
 
     for ( GaussPoint *gp: *iRule ) {
-        FloatArray &lcoords = * gp->giveNaturalCoordinates();
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
         interp->evalN( n, lcoords, FEIElementGeometryWrapper(this) );
         N.beNMatrixOf(n, unknownsPerNode);
@@ -617,7 +617,7 @@ TransportElement :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *
     }
 
     for ( GaussPoint *gp: *iRule ) {
-        FloatArray &lcoords = * gp->giveNaturalCoordinates();
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
         interp->boundaryEvalN( n, boundary, lcoords, FEIElementGeometryWrapper(this) );
         N.beNMatrixOf(n, unknownsPerNode);
@@ -676,7 +676,7 @@ TransportElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLo
     }
 
     for ( GaussPoint *gp: *iRule ) {
-        FloatArray &lcoords = * gp->giveNaturalCoordinates();
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
         interp->boundaryEdgeEvalN( n, boundary, lcoords, FEIElementGeometryWrapper(this) );
         N.beNMatrixOf(n, unknownsPerNode);
@@ -807,8 +807,8 @@ TransportElement :: computeBodyBCSubVectorAt(FloatArray &answer, Load *load,
     std :: unique_ptr< IntegrationRule > iRule( this->giveInterpolation()->giveIntegrationRule(load->giveApproxOrder()) );
     for ( GaussPoint *gp : *iRule ) {
         double dV = this->computeVolumeAround(gp);
-        this->computeNAt( n, * gp->giveNaturalCoordinates() );
-        this->computeGlobalCoordinates( globalIPcoords, * gp->giveNaturalCoordinates() );
+        this->computeNAt( n, gp->giveNaturalCoordinates() );
+        this->computeGlobalCoordinates( globalIPcoords, gp->giveNaturalCoordinates() );
         load->computeValueAt(val, tStep, globalIPcoords, mode);
         answer.add(val.at(indx) * dV, n);
     }
@@ -840,15 +840,15 @@ TransportElement :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int
         }
 
         for ( GaussPoint *gp: iRule ) {
-            FloatArray *lcoords = gp->giveNaturalCoordinates();
-            this->computeEgdeNAt(n, iEdge, * lcoords);
+            const FloatArray &lcoords = gp->giveNaturalCoordinates();
+            this->computeEgdeNAt(n, iEdge, lcoords);
             dV = this->computeEdgeVolumeAround(gp, iEdge);
 
             if ( edgeLoad->giveFormulationType() == Load :: FT_Entity ) {
-                edgeLoad->computeValueAt(val, tStep, * lcoords, mode);
+                edgeLoad->computeValueAt(val, tStep, lcoords, mode);
             } else {
                 FloatArray globalIPcoords;
-                this->computeEdgeIpGlobalCoords(globalIPcoords, * lcoords, iEdge);
+                this->computeEdgeIpGlobalCoords(globalIPcoords, lcoords, iEdge);
                 edgeLoad->computeValueAt(val, tStep, globalIPcoords, mode);
             }
 
@@ -890,13 +890,13 @@ TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
 
         std :: unique_ptr< IntegrationRule > iRule( this->GetSurfaceIntegrationRule(approxOrder) );
         for ( GaussPoint *gp: *iRule ) {
-            this->computeSurfaceNAt( n, iSurf, * gp->giveNaturalCoordinates() );
+            this->computeSurfaceNAt( n, iSurf, gp->giveNaturalCoordinates() );
             double dV = this->computeSurfaceVolumeAround(gp, iSurf);
 
             if ( surfLoad->giveFormulationType() == Load :: FT_Entity ) {
-                surfLoad->computeValueAt(val, tStep, * gp->giveNaturalCoordinates(), mode);
+                surfLoad->computeValueAt(val, tStep, gp->giveNaturalCoordinates(), mode);
             } else {
-                this->computeSurfIpGlobalCoords(globalIPcoords, * gp->giveNaturalCoordinates(), iSurf);
+                this->computeSurfIpGlobalCoords(globalIPcoords, gp->giveNaturalCoordinates(), iSurf);
                 surfLoad->computeValueAt(val, tStep, globalIPcoords, mode);
             }
 
@@ -943,7 +943,7 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
                 FloatMatrix subAnswer;
 
                 for ( GaussPoint *gp: iRule ) {
-                    this->computeEgdeNAt( n, id, * gp->giveNaturalCoordinates() );
+                    this->computeEgdeNAt( n, id, gp->giveNaturalCoordinates() );
                     double dV = this->computeEdgeVolumeAround(gp, id);
                     subAnswer.plusDyadSymmUpper( n, dV * edgeLoad->giveProperty('a', tStep) );
                 }
@@ -966,7 +966,7 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
                 std :: unique_ptr< IntegrationRule > iRule( this->GetSurfaceIntegrationRule(approxOrder) );
 
                 for ( GaussPoint *gp: *iRule ) {
-                    this->computeSurfaceNAt( n, id, * gp->giveNaturalCoordinates() );
+                    this->computeSurfaceNAt( n, id, gp->giveNaturalCoordinates() );
                     double dV = this->computeSurfaceVolumeAround(gp, id);
                     subAnswer.plusDyadSymmUpper( n, dV * surfLoad->giveProperty('a', tStep) );
                 }
@@ -1025,7 +1025,7 @@ TransportElement :: computeFlow(FloatArray &answer, GaussPoint *gp, TimeStep *tS
 
     this->giveElementDofIDMask(dofid);
     this->computeVectorOf(dofid, VM_Total, tStep, r);
-    this->computeGradientMatrixAt(b, *gp->giveNaturalCoordinates());
+    this->computeGradientMatrixAt(b, gp->giveNaturalCoordinates());
 
     if ( emode == HeatTransferEM ||  emode == Mass1TransferEM ) {
         this->computeConstitutiveMatrixAt(d, Conductivity_hh, gp, tStep);
@@ -1085,13 +1085,13 @@ TransportElement :: updateInternalState(TimeStep *tStep)
         for ( GaussPoint *gp: *iRule ) {
 
             ///@todo Why is the state vector the unknown solution at the gauss point? / Mikael
-            this->computeNmatrixAt( n, * gp->giveNaturalCoordinates() );
+            this->computeNmatrixAt( n, gp->giveNaturalCoordinates() );
             stateVector.beProductOf(n, r);
             mat->updateInternalState(stateVector, gp, tStep);
 
             ///@todo We need to sort out multiple materials for coupled (heat+mass) problems
 #if 0
-            this->computeGradientMatrixAt( B, * gp->giveNaturalCoordinates() );
+            this->computeGradientMatrixAt( B, gp->giveNaturalCoordinates() );
             gradient.beProductOf(B, r);
             mat->giveFluxVector(flux, gp, gradient, tStep);
 #endif

@@ -72,7 +72,7 @@ IntElLine1 :: computeNmatrixAt(GaussPoint *ip, FloatMatrix &answer)
 
     FloatArray N;
     FEInterpolation *interp = this->giveInterpolation();
-    interp->evalN( N, * ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    interp->evalN( N, ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(2, 8);
     answer.zero();
@@ -101,7 +101,7 @@ IntElLine1 :: computeCovarBaseVectorAt(IntegrationPoint *ip, FloatArray &G)
 {
     FloatMatrix dNdxi;
     FEInterpolation *interp = this->giveInterpolation();
-    interp->evaldNdxi( dNdxi, * ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    interp->evaldNdxi( dNdxi, ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     G.resize(2);
     G.zero();
     int numNodes = this->giveNumberOfNodes();
@@ -124,7 +124,7 @@ IntElLine1 :: computeAreaAround(IntegrationPoint *ip)
     if ( this->axisymmode ) {
         int numNodes = this->giveNumberOfNodes();
         FloatArray N;
-        this->interp.evalN( N, * ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+        this->interp.evalN( N, ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
         // interpolate radius
         double r = 0.0;
         for ( int i = 1; i <= N.giveSize(); i++ ) {
@@ -267,7 +267,7 @@ void IntElLine1 :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 
         indx = gc.giveIntVarIndx();
 
-        result += this->computeGlobalCoordinates( gcoord, * ( gp->giveNaturalCoordinates() ) );
+        result += this->computeGlobalCoordinates( gcoord, gp->giveNaturalCoordinates() );
 
         p [ 0 ].x = ( FPNum ) gcoord.at(1);
         p [ 0 ].y = ( FPNum ) gcoord.at(2);

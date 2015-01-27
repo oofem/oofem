@@ -134,12 +134,12 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
 
                     // New N-matrix
                     FloatMatrix NNew;
-                    elNew->computeNmatrixAt(* ( gp->giveNaturalCoordinates() ), NNew);
+                    elNew->computeNmatrixAt(gp->giveNaturalCoordinates(), NNew);
 
 
                     //////////////
                     // Global coordinates of GP
-                    const FloatArray &localCoord = * ( gp->giveNaturalCoordinates() );
+                    const FloatArray &localCoord = gp->giveNaturalCoordinates();
                     FloatArray globalCoord;
                     elNew->computeGlobalCoordinates(globalCoord, localCoord);
                     //////////////

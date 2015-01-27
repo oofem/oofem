@@ -98,8 +98,8 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
     FloatArray N;
     FEInterpolation *interp = iEl.giveInterpolation();
     const FEIElementGeometryWrapper geomWrapper(& iEl);
-    interp->evaldNdx(dNdx, * iGP.giveNaturalCoordinates(), geomWrapper);
-    interp->evalN(N, * iGP.giveNaturalCoordinates(), geomWrapper);
+    interp->evaldNdx(dNdx, iGP.giveNaturalCoordinates(), geomWrapper);
+    interp->evalN(N, iGP.giveNaturalCoordinates(), geomWrapper);
 
     const IntArray &elNodes = iEl.giveDofManArray();
 
@@ -174,10 +174,10 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
 
                     // Enrichment function derivative in Gauss point
                     std :: vector< FloatArray >efgpD;
-                    ei->evaluateEnrFuncDerivAt(efgpD, globalCoord, * iGP.giveNaturalCoordinates(), globalNodeInd, * element, N, dNdx, elNodes);
+                    ei->evaluateEnrFuncDerivAt(efgpD, globalCoord, iGP.giveNaturalCoordinates(), globalNodeInd, * element, N, dNdx, elNodes);
                     // Enrichment function in Gauss Point
                     std :: vector< double >efGP;
-                    ei->evaluateEnrFuncAt(efGP, globalCoord, * iGP.giveNaturalCoordinates(), globalNodeInd, * element, N, elNodes);
+                    ei->evaluateEnrFuncAt(efGP, globalCoord, iGP.giveNaturalCoordinates(), globalNodeInd, * element, N, elNodes);
 
 
                     const FloatArray &nodePos = node->giveNodeCoordinates();

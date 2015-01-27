@@ -108,7 +108,7 @@ MMAShapeFunctProjection :: mapVariable(FloatArray &answer, GaussPoint *gp, Inter
             container.emplace_back(*nvec);
         }
 
-        this->interpolateIntVarAt(answer, elem, * gp->giveNaturalCoordinates(),
+        this->interpolateIntVarAt(answer, elem, gp->giveNaturalCoordinates(),
                                   container, type, tStep);
     } else {
         OOFEM_ERROR("var not initialized");
@@ -159,7 +159,7 @@ MMAShapeFunctProjection :: mapStatus(MaterialStatus &oStatus) const
 
 
 void
-MMAShapeFunctProjection :: interpolateIntVarAt(FloatArray &answer, Element *elem, FloatArray &lcoords,
+MMAShapeFunctProjection :: interpolateIntVarAt(FloatArray &answer, Element *elem, const FloatArray &lcoords,
                                                std :: vector< FloatArray > &list, InternalStateType type, TimeStep *tStep) const
 {
     FloatArray n;

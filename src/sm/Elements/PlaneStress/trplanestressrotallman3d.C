@@ -92,7 +92,7 @@ TrPlanestressRotAllman3d :: computeVolumeAround(GaussPoint *gp)
     this->computeLocalNodalCoordinates(lc);
 
     weight = gp->giveWeight();
-    detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc) ) );
+    detJ = fabs( this->interp.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc) ) );
     return detJ * weight * this->giveStructuralCrossSection()->give(CS_Thickness, gp);
 }
 

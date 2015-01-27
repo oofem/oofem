@@ -230,7 +230,7 @@ TrPlaneStrain :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement
 
 void TrPlaneStrain :: HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
-    computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
+    computeNmatrixAt(gp->giveSubPatchCoordinates(), answer);
 }
 
 
