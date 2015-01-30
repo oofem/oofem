@@ -61,6 +61,69 @@ namespace oofem {
 REGISTER_EngngModel(SUPG);
 
 
+SUPGTangentAssembler :: SUPGTangentAssembler(MatResponseMode m, double l, double d, double u, double a) : 
+    MatrixAssembler(), rmode(m), lscale(l), dscale(d), uscale(u), alpha(a)
+{}
+
+
+void SUPGTangentAssembler :: matrixFromElement(FloatMatrix &answer, Element &el, TimeStep *tStep) const
+{
+    SUPGElement *element = static_cast< SUPGElement * >( &el );
+    IntArray vloc, ploc;
+    FloatMatrix h;
+    int size = element->computeNumberOfDofs();
+    element->giveLocalVelocityDofMap(vloc);
+    element->giveLocalPressureDofMap(ploc);
+    answer.resize(size, size);
+    answer.zero();
+
+    element->computeAccelerationTerm_MB(h, tStep);
+    answer.assemble(h, vloc);
+    element->computeAdvectionDerivativeTerm_MB(h, tStep);
+    h.times( alpha * tStep->giveTimeIncrement() );
+    answer.assemble(h, vloc);
+    element->computeDiffusionDerivativeTerm_MB(h, rmode, tStep);
+
+    h.times( alpha * tStep->giveTimeIncrement() );
+    answer.assemble(h, vloc);
+    element->computePressureTerm_MB(h, tStep);
+    answer.assemble(h, vloc, ploc);
+    element->computeLSICStabilizationTerm_MB(h, tStep);
+    h.times( alpha * tStep->giveTimeIncrement() * lscale / ( dscale * uscale * uscale ) );
+    answer.assemble(h, vloc);
+    element->computeBCLhsTerm_MB(h, tStep);
+    if ( h.isNotEmpty() ) {
+        h.times( alpha * tStep->giveTimeIncrement() );
+        answer.assemble(h, vloc);
+    }
+
+    element->computeBCLhsPressureTerm_MB(h, tStep);
+    if ( h.isNotEmpty() ) {
+        answer.assemble(h, vloc, ploc);
+    }
+
+    // conservation eq part
+    element->computeLinearAdvectionTerm_MC(h, tStep);
+    h.times( alpha * tStep->giveTimeIncrement() * 1.0 / ( dscale * uscale ) );
+    answer.assemble(h, ploc, vloc);
+    element->computeAdvectionDerivativeTerm_MC(h, tStep);
+    h.times( alpha * tStep->giveTimeIncrement() );
+    answer.assemble(h, ploc, vloc);
+    element->computeAccelerationTerm_MC(h, tStep);
+    answer.assemble(h, ploc, vloc);
+    element->computeBCLhsPressureTerm_MC(h, tStep);
+    if ( h.isNotEmpty() ) {
+        answer.assemble(h, ploc, vloc);
+    }
+
+    element->computeDiffusionDerivativeTerm_MC(h, tStep);
+    h.times( alpha * tStep->giveTimeIncrement() );
+    answer.assemble(h, ploc, vloc);
+    element->computePressureTerm_MC(h, tStep);
+    answer.assemble(h, ploc);
+}
+
+
 SUPG :: SUPG(int i, EngngModel * _master) : FluidModel(i, _master), accelerationVector()
 {
     initFlag = 1;

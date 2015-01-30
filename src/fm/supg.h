@@ -40,6 +40,7 @@
 #include "sparselinsystemnm.h"
 #include "primaryfield.h"
 #include "materialinterface.h"
+#include "assemblercallback.h"
 
 #include <memory>
 
@@ -65,6 +66,22 @@
 namespace oofem {
 class SparseMtrx;
 class SparseNonLinearSystemNM;
+
+/**
+ * Callback class for assembling SUPG tangent matrices
+ * @author Mikael Öhman
+ */
+class SUPGTangentAssembler : public MatrixAssembler
+{
+protected:
+    MatResponseMode rmode;
+    double lscale, dscale, uscale;
+    double alpha;
+
+public:
+    SUPGTangentAssembler(MatResponseMode m, double l, double d, double u, double a);
+    virtual void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const;
+};
 
 /**
  * This class represents transient incompressible flow problem. Solution is based on
