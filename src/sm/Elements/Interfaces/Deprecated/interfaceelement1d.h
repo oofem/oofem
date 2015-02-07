@@ -43,6 +43,7 @@
 #define _IFT_InterfaceElem1d_Name "interface1d"
 #define _IFT_InterfaceElem1d_refnode "refnode"
 #define _IFT_InterfaceElem1d_normal "normal"
+#define _IFT_InterfaceElem1d_dofIDs "dofids"
 //@}
 
 namespace oofem {
@@ -56,6 +57,7 @@ protected:
     enum cmode { ie1d_1d, ie1d_2d, ie1d_3d } mode;
     int referenceNode;
     FloatArray normal;
+    IntArray dofids;
 
 public:
     InterfaceElem1d(int n, Domain * d);

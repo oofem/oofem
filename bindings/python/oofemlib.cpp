@@ -600,9 +600,6 @@ void pyclass_Domain()
 
         .def("giveNumberOfSpatialDimensions", &Domain::giveNumberOfSpatialDimensions)
         .add_property("numberOfSpatialDimensions", &Domain::giveNumberOfSpatialDimensions)
-        .def("giveDomainType", &Domain::giveDomainType)
-        .def("setDomainType", &Domain::setDomainType)
-        .add_property("domainType", &Domain::giveDomainType, &Domain::setDomainType)
 
         .def("checkConsistency", &Domain::checkConsistency)
         .def("giveArea", &Domain::giveArea)
