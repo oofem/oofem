@@ -161,18 +161,19 @@ set (sm_material
     Materials/ConcreteMaterials/idmgrad1.C
     Materials/ConcreteMaterials/mazarsmodel.C 
     Materials/ConcreteMaterials/mazarsmodelnl.C
-    Materials/ConcreteMaterials/b3solidmat.C
     Materials/ConcreteMaterials/mplasticmaterial2.C
     Materials/ConcreteMaterials/compodamagemat.C
-    Materials/RheoChainMaterials/cebfip78.C
-    Materials/RheoChainMaterials/doublepowerlaw.C
-    Materials/RheoChainMaterials/mps.C
     Materials/RheoChainMaterials/rheoChM.C 
     Materials/RheoChainMaterials/maxwellChM.C 
     Materials/RheoChainMaterials/kelvinChM.C
     Materials/RheoChainMaterials/kelvinChSolM.C
+    Materials/RheoChainMaterials/cebfip78.C
+    Materials/RheoChainMaterials/doublepowerlaw.C
+    Materials/RheoChainMaterials/b3mat.C
+    Materials/RheoChainMaterials/b3solidmat.C
+    Materials/RheoChainMaterials/mps.C
+    Materials/RheoChainMaterials/mpsdammat.C
     Materials/structuralfe2material.C
-    Materials/b3mat.C
     Materials/rcsd.C 
     Materials/rcsde.C 
     Materials/rcsdnl.C

@@ -35,13 +35,12 @@
 #ifndef b3mat_h
 #define b3mat_h
 
-#include "Materials/RheoChainMaterials/maxwellChM.h"
+#include "maxwellChM.h"
 
 ///@name Input fields for B3Material
 //@{
 #define _IFT_B3Material_Name "b3mat"
 #define _IFT_B3Material_mode "mode"
-#define _IFT_B3Material_emodulimode "emodulimode"
 #define _IFT_B3Material_shmode "shmode"
 #define _IFT_B3Material_fc "fc"
 #define _IFT_B3Material_cc "cc"
@@ -68,13 +67,6 @@
 #define _IFT_B3Material_q5 "q5"
 #define _IFT_B3Material_kt "kt"
 #define _IFT_B3Material_EpsSinf "epssinf"
-#define _IFT_B3Material_microprestress "microprestress"
-#define _IFT_B3Material_c0 "c0"
-#define _IFT_B3Material_c1 "c1"
-#define _IFT_B3Material_ksh "ksh"
-#define _IFT_B3Material_ts0 "ts0"
-#define _IFT_B3Material_finalhumidity "finalhumidity"
-#define _IFT_B3Material_initialhumidity "initialhumidity"
 //@}
 
 namespace oofem {
@@ -125,7 +117,7 @@ protected:
     /// Free shrinkage at material point, requires staggered analysis.
     virtual void computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
     void predictParametersFrom(double, double, double, double, double, double, double);
-    virtual double computeCreepFunction(double tStep, double ofAge);
+    virtual double computeCreepFunction(double t, double t_prime);
 
     /**
      * Function calculates relative humidity from water content (inverse relation form sorption isotherm).

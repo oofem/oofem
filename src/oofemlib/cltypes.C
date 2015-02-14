@@ -95,6 +95,11 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_DeviatoricStrain:
     case IST_DeviatoricStress:
     case IST_CauchyStressTensor:
+    case IST_AutogenousShrinkageTensor:
+    case IST_DryingShrinkageTensor:
+    case IST_TotalShrinkageTensor:
+    case IST_ThermalStrainTensor:
+    case IST_CreepStrainTensor:
         return ISVT_TENSOR_S3;
 
     case IST_BeamForceMomentumTensor:
@@ -175,6 +180,8 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_XFEMLevelSetPhi:
     case IST_Maturity:
     case IST_CrossSectionNumber:
+    case IST_CrackWidth:
+    case IST_TensileStrength:
         return ISVT_SCALAR;
 
     default:

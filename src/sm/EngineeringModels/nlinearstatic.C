@@ -194,6 +194,11 @@ NonLinearStatic :: initializeFrom(InputRecord *ir)
     nonlocalStiffnessFlag = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, nonlocalStiffnessFlag, _IFT_NonLinearStatic_nonlocstiff);
 
+    updateElasticStiffnessFlag = false;
+    if ( ir->hasField(_IFT_NonLinearStatic_updateElasticStiffnessFlag) ) {
+      updateElasticStiffnessFlag = true;
+    }
+    
 #ifdef __PARALLEL_MODE
     if ( isParallel() ) {
         //commBuff = new CommunicatorBuff (this->giveNumberOfProcesses(), CBT_dynamic);
@@ -261,6 +266,17 @@ double NonLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeStep *tSt
     return 0.0;
 }
 
+TimeStep *NonLinearStatic :: giveSolutionStepWhenIcApply()
+{
+    if ( stepWhenIcApply == NULL ) {
+        int inin = giveNumberOfTimeStepWhenIcApply();
+	//        int nFirst = giveNumberOfFirstStep();
+        stepWhenIcApply = new TimeStep(inin, this, 0, -deltaT, deltaT, 0);
+    }
+
+    return stepWhenIcApply;
+}
+
 
 TimeStep *NonLinearStatic :: giveNextStep()
 {
@@ -291,6 +307,11 @@ TimeStep *NonLinearStatic :: giveNextStep()
                 OOFEM_ERROR("no next step available, mStepNum=%d > nMetaSteps=%d", mStepNum, nMetaSteps);
             }
         }
+    } else {
+        TimeStep *newStep;
+        // first step -> generate initial step
+        newStep = giveSolutionStepWhenIcApply();
+        currentStep = new TimeStep(*newStep);
     }
 
     previousStep = currentStep;
@@ -541,7 +562,7 @@ NonLinearStatic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
                            EModelDefaultEquationNumbering(), d);
             initFlag = 0;
         } else if ( ( stiffMode == nls_elasticStiffness ) && ( initFlag ||
-                                                              ( this->giveMetaStep( tStep->giveMetaStepNumber() )->giveFirstStepNumber() == tStep->giveNumber() ) ) ) {
+                                                              ( this->giveMetaStep( tStep->giveMetaStepNumber() )->giveFirstStepNumber() == tStep->giveNumber() ) || (updateElasticStiffnessFlag) ) ) {
 #ifdef VERBOSE
             OOFEM_LOG_DEBUG("Assembling elastic stiffness matrix\n");
 #endif

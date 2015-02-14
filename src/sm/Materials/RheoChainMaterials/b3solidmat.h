@@ -35,9 +35,20 @@
 #ifndef b3solidmat_h
 #define b3solidmat_h
 
-#include "Materials/RheoChainMaterials/kelvinChM.h"
+#include "kelvinChM.h"
 
+///@name Input fields for B3Material
+//@{
 #define _IFT_B3SolidMaterial_Name "b3solidmat"
+#define _IFT_B3SolidMaterial_emodulimode "emodulimode"
+#define _IFT_B3SolidMaterial_microprestress "microprestress"
+#define _IFT_B3SolidMaterial_c0 "c0"
+#define _IFT_B3SolidMaterial_c1 "c1"
+#define _IFT_B3SolidMaterial_ksh "ksh"
+#define _IFT_B3SolidMaterial_finalhumidity "finalhumidity"
+#define _IFT_B3SolidMaterial_initialhumidity "initialhumidity"
+#define _IFT_B3SolidMaterial_lambda0 "lambda0"
+//@}
 
 namespace oofem {
 /**
@@ -77,7 +88,11 @@ class B3SolidMaterial : public KelvinChainMaterial
 protected:
     double t0;
     double w, E28, q1, q2, q3, q4, q5; // predicted data
-    enum b3ShModeType { B3_NoShrinkage, B3_AverageShrinkage, B3_PointShrinkage, B3_PointShrinkageMPS } shMode;
+
+    /// constant equal to one day in time units of analysis (eg. 86400 if the analysis runs in seconds)
+    double lambda0;
+
+    enum b3ShModeType { B3_NoShrinkage, B3_AverageShrinkage, B3_PointShrinkage } shMode;
     /// Additional parameters for average cross section shrinkage
     double EpsSinf, kt, ks, vs, hum;
     /// Additional parameters for free shrinkage at material point
@@ -130,13 +145,12 @@ protected:
     void computeTotalAverageShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     /// Evaluation of the shrinkageStrainVector. Shrinkage is fully dependent on humidity rate in given GP
-    void computePointShrinkageStrainVectorMPS(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    void computePointShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
-    void computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
     void predictParametersFrom(double, double, double, double, double, double, double);
 
     /// Evaluation of the compliance function of the non-aging solidifying constituent.
-    double computeNonAgingCreepFunction(double loadDuration);
+    virtual double computeCreepFunction(double t, double t_prime);
 
     /// Evaluation of the relative volume of the solidified material.
     double computeSolidifiedVolume(TimeStep *tStep);
@@ -144,12 +158,13 @@ protected:
     /// Evaluation of the flow term viscosity.
     double computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep);
 
-    virtual double computeCreepFunction(double tStep, double ofAge);
-
     double inverse_sorption_isotherm(double w);
 
     /// Evaluation of characteristic moduli of the non-aging Kelvin chain.
     virtual void computeCharCoefficients(FloatArray &answer, double tStep);
+
+    /// Update of partial moduli of individual chain units
+    virtual void updateEparModuli(double tStep);
 
     virtual void computeCharTimes();
 

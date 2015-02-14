@@ -152,6 +152,9 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
         OOFEM_ERROR("stepMultiplier must be > 0")
     }
 
+    //    timeLag = 0.;
+    //    IR_GIVE_OPTIONAL_FIELD(ir, timeLag, _IFT_StaggeredProblem_timeLag);
+
     inputStreamNames.resize(2);
     IR_GIVE_FIELD(ir, inputStreamNames [ 0 ], _IFT_StaggeredProblem_prob1);
     IR_GIVE_FIELD(ir, inputStreamNames [ 1 ], _IFT_StaggeredProblem_prob2);

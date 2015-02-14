@@ -1,0 +1,274 @@
+/*
+ *
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
+ *
+ *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2012   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include "crackexportmodule.h"
+#include "gausspoint.h"
+#include "material.h"
+#include "element.h"
+#include "integrationrule.h"
+#include "timestep.h"
+#include "engngm.h"
+#include "classfactory.h"
+#include "isodamagemodel.h"
+#include "crosssection.h"
+
+#include <fstream>
+#include <sstream>
+
+namespace oofem {
+
+REGISTER_ExportModule( CrackExportModule )
+
+
+
+
+  CrackExportModule :: CrackExportModule(int n, EngngModel *e) : ExportModule(n, e)
+  {
+  }
+
+
+  CrackExportModule :: ~CrackExportModule()
+  {
+  }
+
+
+  IRResultType
+  CrackExportModule :: initializeFrom(InputRecord *ir)
+  {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result;              // Required by IR_GIVE_FIELD macro
+
+
+    IR_GIVE_FIELD(ir, crossSections, _IFT_CrackExportModule_cs);
+    this->threshold = 0.;
+    IR_GIVE_OPTIONAL_FIELD(ir, threshold, _IFT_CrackExportModule_threshold);
+
+    ExportModule :: initializeFrom(ir);
+
+    return IRRT_OK;
+  }
+  
+
+  void
+  CrackExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
+  {
+    if ( !testTimeStepOutput(tStep) ) {
+      return;
+    }
+
+    double crackLength_projection;
+    double crackLength_sqrt;
+    double crackWidth;
+    double crackAngle;
+    double elementLength;
+   
+    double damage;
+    FloatArray crackVector;
+    FloatMatrix princDir;
+    FloatMatrix rotMatrix;
+    FloatArray strainVector, princStrain;
+
+    FloatArray output;
+    
+    double weight, totWeight;
+
+    //    InternalStateType vartype;
+
+    Domain *d  = emodel->giveDomain(1);
+    int nelem = d->giveNumberOfElements();
+
+    IntegrationRule *iRule;
+
+    IsotropicDamageMaterial *mat;
+    IsotropicDamageMaterialStatus *matStatus;
+
+    //double index = tStep->giveNumber();
+
+    std::vector< FloatArray > pointsVector;
+
+   
+    // loop over elements
+    for ( int ielem = 1; ielem <= nelem; ielem++ ) {
+      
+      Element *elem = d->giveElement(ielem);
+      
+      int csNumber = elem->giveCrossSection()->giveNumber();
+      if (this->crossSections.containsSorted( csNumber ) ){
+      //if (true) {
+
+	totWeight = 0.;
+	
+	crackWidth = 0.;
+	crackLength_projection = 0.;
+	crackLength_sqrt = 0.;
+	crackAngle = 0.;
+	
+	
+	for ( int i = 0; i < elem->giveNumberOfIntegrationRules(); i++ ) {
+	  iRule = elem->giveIntegrationRule(i);
+
+	  output.resize(5);
+
+
+            for ( GaussPoint *gp: *iRule ) {
+	      
+
+	      mat = (IsotropicDamageMaterial*) gp->giveMaterial();
+	      matStatus =  static_cast< IsotropicDamageMaterialStatus * >( mat->giveStatus(gp) );
+
+	      damage = matStatus->giveDamage();
+	      //elem->giveIPValue(strainVector, gp, IST_StrainTensor, tStep);
+	      
+	      if(damage > 0.) {
+
+		weight = elem->computeVolumeAround(gp);
+		totWeight += weight;
+
+		matStatus->giveCrackVector(crackVector);
+		crackVector.times(1./damage);
+	      
+		princDir.resize(2,2);
+
+		princDir.at(1,1) = crackVector.at(2);
+		princDir.at(2,1) = -crackVector.at(1);
+		
+		princDir.at(1,2) = crackVector.at(1);
+		princDir.at(2,2) = crackVector.at(2);
+
+		elementLength = matStatus->giveLe();
+
+		strainVector = matStatus->giveStrainVector();
+		// modify shear strain in order to allow transformation with the stress transformation matrix
+		strainVector.at(3) /= 2.;
+
+		mat->givePlaneStressVectorTranformationMtrx(rotMatrix, princDir, false);
+		princStrain.beProductOf(rotMatrix, strainVector);
+
+      
+		crackWidth += elementLength * princStrain.at(1) * damage * weight;
+		crackLength_projection += elem->giveCharacteristicSize(gp, crackVector, ECSM_Projection) * weight;
+		crackLength_sqrt += elem->giveCharacteristicSize(gp, crackVector, ECSM_SquareRootOfArea) * weight;
+		
+		if(crackVector.at(1) != 0.) {
+		 double contrib = atan( crackVector.at(2) / crackVector.at(1) ) * 180./3.1415926;
+		 if (contrib < 0.) {
+		   contrib += 180.;
+		 } else if (contrib > 180.) {
+		   contrib -= 180.;
+		  }
+		 crackAngle += contrib  * weight;
+		} else {
+		  crackAngle += 90. * weight;
+		}
+		  
+
+		/*		double length1 = elem->giveCharacteristicSize(gp, crackVector, ECSM_SquareRootOfArea);
+		double length2 = elem->giveCharacteristicSize(gp, crackVector, ECSM_ProjectionCentered);
+		double length3 = elem->giveCharacteristicSize(gp, crackVector, ECSM_Oliver1);
+		double length4 = elem->giveCharacteristicSize(gp, crackVector, ECSM_Oliver1modified);
+		double length5 = elem->giveCharacteristicSize(gp, crackVector, ECSM_Projection);
+		*/
+
+	      } else {
+		crackWidth += 0.;
+		crackLength_projection += 0.;
+		crackLength_sqrt += 0.;
+		crackAngle += 0.;
+	      }
+	    }
+	    
+	    if (totWeight > 0.) {
+	      
+	      crackWidth /= totWeight;
+	      crackLength_projection /= totWeight;
+	      crackLength_sqrt /= totWeight;
+	      crackAngle /= totWeight;
+	      
+	    }
+	    
+	    if (crackWidth >= threshold) {
+
+	      output.at(1) = ielem;
+	      output.at(2) = crackWidth;
+	      output.at(3) = crackAngle;
+	      output.at(4) = crackLength_projection;
+	      output.at(5) = crackLength_sqrt;
+	    
+	      pointsVector.push_back(output);
+	    }
+	    
+	}
+      }
+
+    }    
+    // vyblejt do outputu
+    std :: stringstream strCracks;
+    strCracks  << ".dat";
+    std :: string nameCracks = this->giveOutputBaseFileName(tStep) + strCracks.str();
+    writeToOutputFile(nameCracks, pointsVector);
+
+  }
+
+
+  void CrackExportModule :: writeToOutputFile(const std :: string &iName, const std :: vector< FloatArray > &iPoints)
+  {
+    std :: ofstream file;
+    file.open( iName.data() );
+    
+    // Set some output options
+    file << std :: scientific;
+    
+    file << "#elem\twidth\tangle\tlength_project\tlength_sqrt\n";
+
+    for(auto posVec: iPoints) {
+      for(int i = 0; i < posVec.giveSize(); i++) {
+	file << posVec[i] << "\t";
+      }
+      file << "\n";
+    }
+
+    file.close();
+  }
+  
+
+  void
+  CrackExportModule :: initialize()
+  {}
+
+
+  void
+  CrackExportModule :: terminate()
+  {}
+  
+}

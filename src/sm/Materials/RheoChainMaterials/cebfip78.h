@@ -72,7 +72,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
 protected:
-    virtual double computeCreepFunction(double tStep, double ofAge);
+    virtual double computeCreepFunction(double t, double t_prime);
 };
 } // end namespace oofem
 #endif // cebfip78_h

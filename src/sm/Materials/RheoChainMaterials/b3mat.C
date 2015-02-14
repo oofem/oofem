@@ -206,10 +206,11 @@ B3Material :: predictParametersFrom(double fc, double c, double wc, double ac,
 
 
 double
-B3Material :: computeCreepFunction(double tStep, double ofAge)
+B3Material :: computeCreepFunction(double t, double t_prime)
 {
-    // computes the value of creep function at time ofAge
-    // when load is acting from tStep
+    // computes the value of creep function at time t
+    // when load is acting from time t_prime
+    // t-t_prime = duration of loading
 
     double Qf, Z, r, Q, C0, TauSh, St1, St2, H1, H2, Cd;
     double n, m;
@@ -219,26 +220,26 @@ B3Material :: computeCreepFunction(double tStep, double ofAge)
 
     // basic creep
 
-    Qf = 1. / ( 0.086 * pow(ofAge, 2. / 9.) + 1.21 * pow(ofAge, 4. / 9.) );
-    Z  = pow(ofAge, -m) * log( 1. + pow(tStep - ofAge, n) );
-    r  = 1.7 * pow(ofAge, 0.12) + 8.0;
+    Qf = 1. / ( 0.086 * pow(t_prime, 2. / 9.) + 1.21 * pow(t_prime, 4. / 9.) );
+    Z  = pow(t_prime, -m) * log( 1. + pow(t - t_prime, n) );
+    r  = 1.7 * pow(t_prime, 0.12) + 8.0;
     Q  = Qf * pow( ( 1. + pow( ( Qf / Z ), r ) ), -1. / r );
 
-    C0 = q2 * Q + q3 *log( 1. + pow ( tStep - ofAge, n ) ) + q4 *log(tStep / ofAge);
+    C0 = q2 * Q + q3 *log( 1. + pow ( t - t_prime, n ) ) + q4 *log(t / t_prime);
 
 
     if ( this->shMode == B3_AverageShrinkage ) {
         // Aditional creep due to drying
 
         TauSh = kt * pow(ks * 2.0 * vs, 2.);
-        if ( ( tStep - t0 ) >= 0 ) {
-            St1  = tanh( pow( ( tStep - t0 ) / TauSh, 1. / 2. ) );
+        if ( ( t - t0 ) >= 0 ) {
+            St1  = tanh( pow( ( t - t0 ) / TauSh, 1. / 2. ) );
         } else {
             St1 = 0.0;
         }
 
-        if ( ( ofAge - t0 ) >= 0 ) {
-            St2  = tanh( pow( ( ofAge - t0 ) / TauSh, 1. / 2. ) );
+        if ( ( t_prime - t0 ) >= 0 ) {
+            St2  = tanh( pow( ( t_prime - t0 ) / TauSh, 1. / 2. ) );
         } else {
             St2 = 0.0;
         }
@@ -395,8 +396,10 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, T
         OOFEM_ERROR("external fields not found");
     }
 
-    if ( status->giveStressVector().giveSize() ) {
-        stressVector      = status->giveStressVector();
+    //    if ( status->giveStressVector().giveSize() ) {
+    //        stressVector      = status->giveStressVector();
+    if ( status->giveViscoelasticStressVector().giveSize() ) {
+        stressVector      = status->giveViscoelasticStressVector();
     } else {
         stressVector.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
         stressVector.zero();
