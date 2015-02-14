@@ -1816,7 +1816,6 @@ VTKXMLExportModule :: writeVTKCollection()
     if ( tstep_substeps_out_flag ) {
         fname = this->emodel->giveOutputBaseFileName() + ".m" + std::to_string(this->number) + ".substep.pvd";
     } else {
-        //snprintf( fname, "%s.m%d.pvd", this->emodel->giveOutputBaseFileName(), this->number );
         fname = this->emodel->giveOutputBaseFileName() + ".m" + std::to_string(this->number) + ".pvd";
     }
 
