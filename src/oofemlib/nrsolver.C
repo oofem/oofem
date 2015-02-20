@@ -190,7 +190,7 @@ NRSolver :: initializeFrom(InputRecord *ir)
 
 
 NM_Status
-NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
+NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0, FloatArray *iR,
                   FloatArray *X, FloatArray *dX, FloatArray *F,
                   const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                   int &nite, TimeStep *tStep)
@@ -253,9 +253,16 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
 
     nite = 0;
     do {
-        // Compute the residual
-        engngModel->updateComponent(tStep, InternalRhs, domain);
+      // Compute the residual
+      engngModel->updateComponent(tStep, InternalRhs, domain);
+      if (nite || iR == NULL) {
         rhs.beDifferenceOf(RT, * F);
+      } else {
+        rhs = * R;
+        if (iR) {
+          rhs.add(*iR); // add initial guess
+        }
+      }
         if ( this->prescribedDofsFlag ) {
             this->applyConstraintsToLoadIncrement(nite, k, rhs, rlm, tStep);
         }

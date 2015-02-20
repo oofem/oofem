@@ -467,7 +467,7 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         incrementOfDisplacement.zero();
     }
 
-    NM_Status numMetStatus = nMethod->solve(effectiveStiffnessMatrix, & rhs, NULL,
+    NM_Status numMetStatus = nMethod->solve(effectiveStiffnessMatrix, & rhs, NULL, NULL,
                                             & totalDisplacement, & incrementOfDisplacement, & forcesVector,
                                             internalForcesEBENorm, loadLevel, SparseNonLinearSystemNM :: rlm_total, currentIterations, tStep);
     if ( !( numMetStatus & NM_Success ) ) {
