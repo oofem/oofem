@@ -68,7 +68,7 @@ protected:
     static IntArray edge_ordering [ 3 ];
 
     /// The extra dofs from the bubble
-    ElementDofManager *bubble;
+    std :: unique_ptr< ElementDofManager > bubble;
     // Coordinates associated with the bubble dofs.
     //FloatArray bubbleCoord; // Assumed fixed at 0 for now (i.e. only linear geometry)
 

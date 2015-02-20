@@ -44,7 +44,11 @@ Structural2DElement :: Structural2DElement(int n, Domain *aDomain) :
     // Constructor. Creates an element with number n, belonging to aDomain.
 {
     //nlGeometry = 0; // Geometrical nonlinearities disabled as default
+  cellGeometryWrapper = NULL;
+}
 
+Structural2DElement :: ~Structural2DElement() {
+  if (cellGeometryWrapper) delete cellGeometryWrapper;
 }
 
 void
@@ -62,6 +66,15 @@ Structural2DElement :: giveNumberOfNodes() const
     return this->giveInterpolation()->giveNumberOfNodes();
 }
 
+
+FEICellGeometry*
+Structural2DElement::giveCellGeometryWrapper() {
+  if (cellGeometryWrapper) {
+    return cellGeometryWrapper;
+  } else {
+    return (cellGeometryWrapper=new FEIElementGeometryWrapper(this));
+  }
+}
  
 
 int 
@@ -99,7 +112,7 @@ Structural2DElement :: computeVolumeAround(GaussPoint *gp)
 
     double weight = gp->giveWeight();
     FloatArray *lCoords = gp->giveNaturalCoordinates(); // local/natural coords of the gp (parent domain)
-    double detJ = fabs( this->giveInterpolation()->giveTransformationJacobian( *lCoords, FEIElementGeometryWrapper(this) ) );
+    double detJ = fabs( this->giveInterpolation()->giveTransformationJacobian( *lCoords, *this->giveCellGeometryWrapper() ) );
     double thickness = this->giveCrossSection()->give(CS_Thickness, gp); // the cross section keeps track of the thickness
     
     return detJ * thickness * weight; // dV
@@ -139,7 +152,7 @@ Structural2DElement :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, Gaus
     // Evaluate the shape functions at the position of the gp. 
     FloatArray N;
     static_cast< FEInterpolation2d* > ( this->giveInterpolation() )->
-        edgeEvalN( N, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );  
+        edgeEvalN( N, iedge, * gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );  
     answer.beNMatrixOf(N, 2);
 }
 
@@ -167,7 +180,7 @@ void
 Structural2DElement :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
     static_cast< FEInterpolation2d* > ( this->giveInterpolation() )->
-        edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+        edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
 }
 
 
@@ -180,7 +193,7 @@ Structural2DElement :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
      * The returned value is used for integration of a line integral (external forces).
      */
     double detJ = static_cast< FEInterpolation2d* > ( this->giveInterpolation() )->
-        edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+        edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
     return detJ * gp->giveWeight();
 }
 
@@ -199,7 +212,7 @@ Structural2DElement :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int i
     FloatArray normal(2);
 
     static_cast< FEInterpolation2d* > ( this->giveInterpolation() )->
-        edgeEvalNormal( normal, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+        edgeEvalNormal( normal, iEdge, * gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
 
     answer.resize(2, 2);
     answer.zero();        
@@ -245,7 +258,7 @@ PlaneStressElement :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int 
 
     FEInterpolation *interp = this->giveInterpolation();
     FloatMatrix dNdx; 
-    interp->evaldNdx( dNdx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    interp->evaldNdx( dNdx, * gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
     
     answer.resize(3, dNdx.giveNumberOfRows() * 2);
     answer.zero();
@@ -268,7 +281,7 @@ PlaneStressElement :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     /// @todo not checked if correct
   
     FloatMatrix dNdx;
-    this->giveInterpolation()->evaldNdx( dNdx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->giveInterpolation()->evaldNdx( dNdx, * gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
 
     answer.resize(4, dNdx.giveNumberOfRows() * 2);
     answer.zero();
@@ -313,7 +326,7 @@ PlaneStrainElement :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int 
 {
     FEInterpolation *interp = this->giveInterpolation();
     FloatMatrix dNdx; 
-    interp->evaldNdx( dNdx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    interp->evaldNdx( dNdx, * gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
     
     
     answer.resize(4, dNdx.giveNumberOfRows() * 2);
@@ -337,7 +350,7 @@ PlaneStrainElement :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     // @todo not checked if correct
   
     FloatMatrix dNdx;
-    this->giveInterpolation()->evaldNdx( dNdx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->giveInterpolation()->evaldNdx( dNdx, * gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
 
     answer.resize(4, dNdx.giveNumberOfRows() * 2);
     answer.zero();
@@ -389,7 +402,7 @@ AxisymElement :: computeVolumeAround(GaussPoint *gp)
     
     FloatArray N;
     static_cast< FEInterpolation2d* > ( this->giveInterpolation() )->
-        evalN( N, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );  
+        evalN( N, * gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );  
         
     double r = 0.0;
     for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
@@ -398,7 +411,7 @@ AxisymElement :: computeVolumeAround(GaussPoint *gp)
     }
 
     double determinant = fabs(  static_cast< FEInterpolation2d* > ( this->giveInterpolation() )->
-        giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+        giveTransformationJacobian( * gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() ) );
 
     double weight = gp->giveWeight();
     return determinant * weight * r;
@@ -418,7 +431,7 @@ AxisymElement :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, i
     FEInterpolation *interp = this->giveInterpolation();
      
     FloatArray N;
-    interp->evalN( N, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    interp->evalN( N, * gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
     double r = 0.0;
     for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
         double x = this->giveNode(i)->giveCoordinate(1);
@@ -426,7 +439,7 @@ AxisymElement :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, i
     } 
     
     FloatMatrix dNdx;
-    interp->evaldNdx( dNdx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    interp->evaldNdx( dNdx, * gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
     answer.resize(6, dNdx.giveNumberOfRows() * 2);
     answer.zero();
 
@@ -452,7 +465,7 @@ AxisymElement :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     FloatMatrix dnx;
 
     static_cast< FEInterpolation2d* > ( this->giveInterpolation() )->
-        evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+        evaldNdx( dnx, * gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
     int nRows = dnx.giveNumberOfRows();
     answer.resize(9, nRows*2);
     answer.zero();
@@ -486,7 +499,7 @@ AxisymElement :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
     FloatArray c(2);
     this->computeEdgeIpGlobalCoords(c, gp, iEdge);
     double result = static_cast< FEInterpolation2d* > ( this->giveInterpolation() )-> 
-        edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+        edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
 
 
     return c.at(1) * result * gp->giveWeight();

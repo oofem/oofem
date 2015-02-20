@@ -163,11 +163,9 @@ VTKExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     fprintf(stream, "\nCELLS %d %d\n", elemToProcess, celllistsize);
 
     IntArray regionNodalNumbers(nnodes);
-    int offset = 0;
 
     // assemble global->local map
-    this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 0);
-    offset += regionDofMans;
+    this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, 0, d, ireg, 0);
     for ( auto &elem : d->giveElements() ) {
         if ( elem->giveParallelMode() != Element_local ) {
             continue;
@@ -483,8 +481,8 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
                         vec.add(gp->giveWeight(), temp);
                     }
                     vec.times(1 / gptot);
-                    for ( int i = 1; i <= vec.giveSize(); ++i ) {
-                        fprintf( stream, "%e ", vec.at(i) );
+                    for ( int j = 1; j <= vec.giveSize(); ++j ) {
+                        fprintf( stream, "%e ", vec.at(j) );
                     }
                     fprintf(stream, "\n");
                 }

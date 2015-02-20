@@ -41,6 +41,8 @@
 #include "eleminterpmapperinterface.h"
 #include "elementinternaldofman.h"
 
+#include <memory>
+
 #define _IFT_Tet1BubbleStokes_Name "tet1bubblestokes"
 
 namespace oofem {
@@ -70,7 +72,7 @@ protected:
     static IntArray surf_ordering [ 4 ];
 
     /// The extra dofs from the bubble
-    ElementDofManager *bubble;
+    std :: unique_ptr< ElementDofManager > bubble;
     // Coordinates associated with the bubble dofs.
     //FloatArray bubbleCoord; // Assumed fixed at 0 for now (i.e. only linear geometry)
 
@@ -99,7 +101,7 @@ public:
     virtual int computeNumberOfDofs();
 
     virtual int giveNumberOfInternalDofManagers() const { return 1; }
-    virtual DofManager *giveInternalDofManager(int i) const { return bubble; }
+    virtual DofManager *giveInternalDofManager(int i) const { return bubble.get(); }
     virtual void giveInternalDofManDofIDMask(int i, IntArray &answer) const;
 
     virtual FEInterpolation *giveInterpolation() const;

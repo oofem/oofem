@@ -380,11 +380,11 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
     for ( auto &elem : domain->giveElements() ) {
 #ifdef __FM_MODULE
 
-        if ( Tr21Stokes *T = dynamic_cast< Tr21Stokes * >( elem.get() ) ) {
-            T->giveIntegratedVelocity(v_hatTemp, tStep);
+        if ( Tr21Stokes *Tr = dynamic_cast< Tr21Stokes * >( elem.get() ) ) {
+            Tr->giveIntegratedVelocity(v_hatTemp, tStep);
             v_hat.add(v_hatTemp);
-        } else if ( Tet21Stokes *T = dynamic_cast< Tet21Stokes * >( elem.get() ) ) {
-            T->giveIntegratedVelocity(v_hatTemp, tStep);
+        } else if ( Tet21Stokes *Tet = dynamic_cast< Tet21Stokes * >( elem.get() ) ) {
+            Tet->giveIntegratedVelocity(v_hatTemp, tStep);
             v_hat.add(v_hatTemp);
         }
 

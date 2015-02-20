@@ -108,6 +108,7 @@ public:
      * @return Prescribed value of unknown or zero if not prescribed.
      */
     virtual double give(Dof *dof, ValueModeType mode, TimeStep *tStep);
+    virtual double give(Dof *dof, double time);
 
     /**
      * Set prescribed value at the input record string of receiver

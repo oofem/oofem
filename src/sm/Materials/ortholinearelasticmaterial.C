@@ -447,13 +447,4 @@ OrthotropicLinearElasticMaterial :: giveThermalDilatationVector(FloatArray &answ
     answer.beProductOf(transf, help);
 }
 
-
-MaterialStatus *
-OrthotropicLinearElasticMaterial :: CreateStatus(GaussPoint *gp) const
-/*
- * creates new  material status  corresponding to this class
- */
-{
-    return new StructuralMaterialStatus(1, this->giveDomain(), gp);
-}
 } // end namespace oofem

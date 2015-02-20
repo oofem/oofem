@@ -262,11 +262,11 @@ Tet1_3D_SUPG :: updateStabilizationCoeffs(TimeStep *tStep)
     dt = tStep->giveTimeIncrement() * tscale;
 
     std :: unique_ptr< IntegrationRule > &iRule = this->integrationRulesArray [ 1 ];
-    GaussPoint *gp = iRule->getIntegrationPoint(0);
-    nu = static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->giveEffectiveViscosity( gp, tStep->givePreviousStep() );
+    GaussPoint *gp_first = iRule->getIntegrationPoint(0);
+    nu = static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->giveEffectiveViscosity(gp_first, tStep->givePreviousStep() );
     nu *= domain->giveEngngModel()->giveVariableScale(VST_Viscosity);
 
-    for ( GaussPoint *gp: *iRule ) {
+    for ( auto *gp: *iRule ) {
         this->computeDivUMatrix(du, gp);
         divu.beProductOf(du, u);
         sum += divu.at(1);

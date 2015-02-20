@@ -225,13 +225,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
         previousIncrementOfDisplacement.resize(neq);
         previousIncrementOfDisplacement.zero();
 
-        int j, jj;
-        int nman  = domain->giveNumberOfDofManagers();
-        DofManager *node;
-
-        for ( j = 1; j <= nman; j++ ) {
-            node = domain->giveDofManager(j);
-
+        for ( auto &node : domain->giveDofManagers()) {
             for ( Dof *iDof: *node ) {
                 //
                 // Ask for initial values obtained from boundary conditions and initial conditions.
@@ -240,7 +234,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
                     continue;
                 }
 
-                jj = iDof->__giveEquationNumber();
+                int jj = iDof->__giveEquationNumber();
                 if ( jj ) {
                     displacementVector.at(jj) = iDof->giveUnknown(VM_Total, stepWhenIcApply);
                     velocityVector.at(jj)     = iDof->giveUnknown(VM_Velocity, stepWhenIcApply);

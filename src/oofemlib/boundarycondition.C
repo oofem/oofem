@@ -58,6 +58,20 @@ double BoundaryCondition :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
 }
 
 
+double BoundaryCondition :: give(Dof *dof, double time)
+// Returns the value at tStep of the prescribed value of the kinematic
+// unknown 'u'. Returns 0 if 'u' has no prescribed value.
+{
+    double factor = this->giveTimeFunction()->evaluateAtTime(time);
+    int index = this->dofs.findFirstIndexOf( dof->giveDofID() );
+    if ( !index ) {
+        index = 1;
+    }
+    double prescribedValue = this->values.at(index);
+    return prescribedValue * factor;
+}
+
+
 IRResultType
 BoundaryCondition :: initializeFrom(InputRecord *ir)
 // Sets up the dictionary where the receiver stores the conditions it

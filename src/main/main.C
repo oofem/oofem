@@ -273,7 +273,7 @@ int main(int argc, char *argv[])
         problem->initStepIncrements();
     } else if ( adaptiveRestartFlag ) {
         problem->initializeAdaptive(adaptiveRestartFlag);
-        problem->saveContext(NULL, CM_State);
+        problem->saveContext(NULL, CM_State | CM_Definition);
         // exit (1);
     }
 

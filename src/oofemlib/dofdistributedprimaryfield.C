@@ -39,6 +39,11 @@
 #include "timestep.h"
 #include "floatarray.h"
 #include "engngm.h"
+#include "set.h"
+#include "boundarycondition.h"
+#include "initialcondition.h"
+#include "element.h"
+
 
 namespace oofem {
 DofDistributedPrimaryField :: DofDistributedPrimaryField(EngngModel *a, int idomain,
@@ -52,34 +57,54 @@ DofDistributedPrimaryField :: ~DofDistributedPrimaryField()
 double
 DofDistributedPrimaryField :: giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *tStep)
 {
-    return dof->giveUnknown(mode, tStep);
+    return dof->giveUnknownsDictionaryValue(tStep, mode);
 }
 
 FloatArray *
 DofDistributedPrimaryField :: giveSolutionVector(TimeStep *tStep)
 {
+    //OOFEM_ERROR("This function should not be called. initialize and update should be used instead");
     return PrimaryField :: giveSolutionVector(tStep);
 }
 
 void
 DofDistributedPrimaryField :: initialize(ValueModeType mode, TimeStep *tStep, FloatArray &answer, const UnknownNumberingScheme &s)
 {
-    Domain *domain = emodel->giveDomain(domainIndx);
-    int neq =  emodel->giveNumberOfDomainEquations(domainIndx, s);
-    int nnodes = domain->giveNumberOfDofManagers();
+    Domain *d = emodel->giveDomain(domainIndx);
+    int neq = emodel->giveNumberOfDomainEquations(domainIndx, s);
 
     answer.resize(neq);
     answer.zero();
 
-    for ( int j = 1; j <= nnodes; j++ ) {
-        DofManager *inode = domain->giveDofManager(j);
-        for ( Dof *iDof: *inode ) {
-            int eqNum = iDof->__giveEquationNumber();
-            double val;
+    for ( auto &node : d->giveDofManagers() ) {
+        for ( Dof *dof: *node ) {
+            int eqNum = dof->giveEquationNumber(s);
             if ( eqNum ) {
-                iDof->giveUnknownsDictionaryValue(tStep, mode, val);
-                answer.at(eqNum) = val;
-                //answer.at(eqNum) = iDof->giveUnknown( mode, tStep);
+                answer.at(eqNum) = dof->giveUnknownsDictionaryValue(tStep, mode);
+            }
+        }
+    }
+
+    for ( auto &elem : d->giveElements() ) {
+        int ndman = elem->giveNumberOfInternalDofManagers();
+        for ( int i = 1; i <= ndman; i++ ) {
+            for ( auto &dof : *elem->giveInternalDofManager(i) ) {
+                int eqNum = dof->giveEquationNumber(s);
+                if ( eqNum > 0 ) {
+                    answer.at(eqNum) = dof->giveUnknownsDictionaryValue(tStep, mode);
+                }
+            }
+        }
+    }
+
+    for ( auto &bc : d->giveBcs() ) {
+        int ndman = bc->giveNumberOfInternalDofManagers();
+        for ( int i = 1; i <= ndman; i++ ) {
+            for ( auto &dof : *bc->giveInternalDofManager(i) ) {
+                int eqNum = dof->giveEquationNumber(s);
+                if ( eqNum > 0 ) {
+                    answer.at(eqNum) = dof->giveUnknownsDictionaryValue(tStep, mode);
+                }
             }
         }
     }
@@ -87,42 +112,218 @@ DofDistributedPrimaryField :: initialize(ValueModeType mode, TimeStep *tStep, Fl
 
 // project solutionVector to DoF unknowns dictionary
 void
-DofDistributedPrimaryField :: update(ValueModeType mode, TimeStep *tStep, FloatArray &vectorToStore)
+DofDistributedPrimaryField :: update(ValueModeType mode, TimeStep *tStep, const FloatArray &vectorToStore, const UnknownNumberingScheme &s)
 {
-    Domain *domain = emodel->giveDomain(domainIndx);
-    int nnodes = domain->giveNumberOfDofManagers();
+    Domain *d = emodel->giveDomain(domainIndx);
 
-    for ( int j = 1; j <= nnodes; j++ ) {
-        DofManager *inode = domain->giveDofManager(j);
-        for ( Dof *iDof: *inode ) {
-            int eqNum = iDof->__giveEquationNumber();
-            double val;
+    for ( auto &node : d->giveDofManagers() ) {
+        for ( Dof *dof: *node ) {
+            int eqNum = dof->giveEquationNumber(s);
+            if ( eqNum > 0 ) {
+                dof->updateUnknownsDictionary(tStep, mode, vectorToStore.at(eqNum));
+            }
+            ///@todo This should not be here / Mikael
             if ( mode == VM_Total ) {
-                if ( iDof->hasBc(tStep) ) { // boundary condition
-                    val = iDof->giveBcValue(VM_Total, tStep);
-                } else {
-                    //vect = this->UnknownsField->giveSolutionVector(tStep);
-                    val = vectorToStore.at(eqNum);
-                }
-            } else { //all other modes, e.g. VM_RhsTotal
-                if ( !eqNum ) {
-                    val = 0.; //assume that 0's are present in the beginning of node initiation
-                } else {
-                    val = vectorToStore.at(eqNum);
+                if ( dof->hasBc(tStep) ) {
+                    dof->updateUnknownsDictionary(tStep, mode, dof->giveBcValue(VM_Total, tStep));
                 }
             }
+        }
+    }
+    
+    for ( auto &elem : d->giveElements() ) {
+        int ndman = elem->giveNumberOfInternalDofManagers();
+        for ( int i = 1; i <= ndman; i++ ) {
+            for ( auto &dof : *elem->giveInternalDofManager(i) ) {
+                int eqNum = dof->giveEquationNumber(s);
+                if ( eqNum > 0 ) {
+                    dof->updateUnknownsDictionary(tStep, mode, vectorToStore.at(eqNum));
+                }
+            }
+        }
+    }
 
-            iDof->updateUnknownsDictionary(tStep, mode, val);
+    for ( auto &bc : d->giveBcs() ) {
+        int ndman = bc->giveNumberOfInternalDofManagers();
+        for ( int i = 1; i <= ndman; i++ ) {
+            for ( auto &dof : *bc->giveInternalDofManager(i) ) {
+                int eqNum = dof->giveEquationNumber(s);
+                if ( eqNum > 0 ) {
+                    dof->updateUnknownsDictionary(tStep, mode, vectorToStore.at(eqNum));
+                }
+            }
         }
     }
 }
 
 
+void
+DofDistributedPrimaryField :: applyDefaultInitialCondition()
+{
+    Domain *d = emodel->giveDomain(domainIndx);
+    TimeStep *tStep = emodel->giveSolutionStepWhenIcApply();
+    // Copy over the old dictionary values to the new step as the initial guess:
+    for ( auto &dman : d->giveDofManagers() ) {
+        for ( auto &dof : *dman ) {
+            dof->updateUnknownsDictionary(tStep, VM_Total, 0.);
+            int icid = dof->giveIcId();
+            if ( icid > 0 && dof->isPrimaryDof() ) {
+                InitialCondition *ic = d->giveIc(icid);
+                if ( ic->hasConditionOn(VM_Total) ) {
+                    double val = ic->give(VM_Total);
+                    dof->updateUnknownsDictionary(tStep, VM_Total, val);
+                }
+            }
+        }
+    }
+
+    for ( auto &elem : d->giveElements() ) {
+        int ndman = elem->giveNumberOfInternalDofManagers();
+        for ( int i = 1; i <= ndman; i++ ) {
+            for ( auto &dof : *elem->giveInternalDofManager(i) ) {
+                dof->updateUnknownsDictionary(tStep, VM_Total, 0.);
+            }
+        }
+    }
+
+    for ( auto &bc : d->giveBcs() ) {
+        int ndman = bc->giveNumberOfInternalDofManagers();
+        for ( int i = 1; i <= ndman; i++ ) {
+            for ( auto &dof : *bc->giveInternalDofManager(i) ) {
+                dof->updateUnknownsDictionary(tStep, VM_Total, 0.);
+            }
+        }
+    }
+
+    // Apply ICs that use sets.
+    for ( auto &ic : d->giveIcs() ) {
+        this->applyInitialCondition(*ic);
+    }
+}
+
+void
+DofDistributedPrimaryField :: applyInitialCondition(InitialCondition &ic)
+{
+    if ( ic.giveSetNumber() == 0 ) {
+        return;
+    }
+
+    IntArray loc_s, loc_ps;
+    Domain *d = ic.giveDomain();
+    Set *set = d->giveSet(ic.giveSetNumber());
+    TimeStep *tStep = emodel->giveSolutionStepWhenIcApply();
+    //TimeStep *prev = tStep->givePreviousStep();
+
+    // We have to set initial value, and velocity, for this particular primary field.
+    for ( int inode : set->giveNodeList() ) {
+        DofManager *dman = d->giveDofManager(inode);
+        double tot0 = 0;
+        if ( ic.hasConditionOn(VM_Total) ) {
+            tot0 = ic.give(VM_Total);
+        }
+#if 0
+        Not relevant for this time discretization
+        double tot1 = 0.
+        if ( ic.hasConditionOn(VM_Incremental) ) {
+            tot1 = tot0 - ic.give(VM_Incremental);
+        } else if ( ic.hasConditionOn(VM_Velocity) ) {
+            tot1 = tot0 - ic.give(VM_Velocity) * tStep->giveTimeIncrement();
+        } else {
+            tot1 = tot0;
+        }
+#endif
+        for ( auto &dof : *dman ) {
+            //dof->updateUnknownsDictionary(tStep, VM_Total, tot1);
+            dof->updateUnknownsDictionary(tStep, VM_Total, tot0);
+        }
+    }
+}
+
+void
+DofDistributedPrimaryField :: applyBoundaryCondition(TimeStep *tStep)
+{
+    Domain *d = emodel->giveDomain(domainIndx);
+    for ( auto &dman : d->giveDofManagers() ) {
+        for ( auto &dof : *dman ) {
+            if ( dof->hasBc(tStep) && dof->isPrimaryDof() ) {
+                int bcid = dof->giveBcId();
+                //double val = static_cast< BoundaryCondition* >(d->giveBc(bcid))->give(dof, VM_Total, tStep);
+                double val = static_cast< BoundaryCondition* >(d->giveBc(bcid))->give(dof, tStep->giveTargetTime());
+                dof->updateUnknownsDictionary(tStep, VM_Total, val);
+            }
+        }
+    }
+
+    for ( auto &bc : d->giveBcs() ) {
+        BoundaryCondition *dbc = dynamic_cast< BoundaryCondition* >(bc.get());
+        if ( dbc && dbc->isImposed(tStep) ) {
+            this->applyBoundaryCondition(*dbc, tStep);
+        }
+    }
+}
+
+void
+DofDistributedPrimaryField :: applyBoundaryCondition(BoundaryCondition &bc, TimeStep *tStep)
+{
+    if ( bc.giveSetNumber() == 0 ) {
+        return;
+    }
+
+    Domain *d = bc.giveDomain();
+    Set *set = d->giveSet(bc.giveSetNumber());
+    for ( int inode : set->giveNodeList() ) {
+        DofManager *dman = d->giveDofManager(inode);
+        for ( auto &dofid : bc.giveDofIDs() ) {
+            if ( !dman->hasDofID((DofIDItem)dofid) ) { ///@todo It's unfortunate that we have to search for the dofid twice.
+                continue;
+            }
+            Dof *dof = dman->giveDofWithID(dofid);
+            if ( dof->isPrimaryDof() ) {
+                dof->updateUnknownsDictionary( tStep, VM_Total, bc.give(dof, tStep->giveTargetTime()) );
+            }
+        }
+    }
+}
+
+
+void
+DofDistributedPrimaryField :: setInitialGuess(DofManager &dman, TimeStep *tStep, TimeStep *prev)
+{
+    for ( auto &dof : dman ) {
+        double val = dof->giveUnknownsDictionaryValue( prev, VM_Total );
+        dof->updateUnknownsDictionary( tStep, VM_Total, val );
+    }
+}
 
 void
 DofDistributedPrimaryField :: advanceSolution(TimeStep *tStep)
 {
     PrimaryField :: advanceSolution(tStep);
+#if 0
+    // Copy over the old dictionary values to the new step as the initial guess:
+    Domain *d = emodel->giveDomain(1);
+    TimeStep *prev = tStep->givePreviousStep();
+    for ( auto &dman : d->giveDofManagers() ) {
+        this->setInitialGuess(*dman, tStep, prev);
+    }
+
+    for ( auto &elem : d->giveElements() ) {
+        int ndman = elem->giveNumberOfInternalDofManagers();
+        for ( int i = 1; i <= ndman; i++ ) {
+            this->setInitialGuess(*elem->giveInternalDofManager(i), tStep, prev);
+        }
+    }
+
+    for ( auto &bc : d->giveBcs() ) {
+        int ndman = bc->giveNumberOfInternalDofManagers();
+        for ( int i = 1; i <= ndman; i++ ) {
+            this->setInitialGuess(*bc->giveInternalDofManager(i), tStep, prev);
+        }
+    }
+
+    // Apply dirichlet b.c.s
+    this->applyBoundaryCondition(tStep);
+#endif
 }
 
 

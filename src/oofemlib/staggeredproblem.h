@@ -45,6 +45,7 @@
 #define _IFT_StaggeredProblem_dtf "dtf"
 #define _IFT_StaggeredProblem_timeDefinedByProb "timedefinedbyprob"
 #define _IFT_StaggeredProblem_stepmultiplier "stepmultiplier"
+//#define _IFT_StaggeredProblem_timeLag "timelag"
 #define _IFT_StaggeredProblem_prescribedtimes "prescribedtimes"
 #define _IFT_StaggeredProblem_prob1 "prob1"
 #define _IFT_StaggeredProblem_prob2 "prob2"
@@ -94,6 +95,13 @@ protected:
      * two consecutive time steps. Efficient for creep and relaxation analyses.
      */
     double stepMultiplier;
+
+    /**
+     * Time lag specifying how much is the second sub-problem delayed after the first one
+     * during this period the second subproblem isn't solved at all.
+     * Efficient tool for coupling structural problem with hydration.
+     */
+    //    double timeLag;
 
     /// Specified times where the problem is solved
     FloatArray discreteTimes;

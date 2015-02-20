@@ -36,8 +36,10 @@ set (sm_element
     Elements/Plates/dkt.C 
     Elements/Plates/qdkt.C
     Elements/Plates/quad1mindlin.C
+    Elements/Plates/dkt3d.C
     Elements/Shells/rershell.C 
     Elements/Shells/tr_shell01.C 
+    Elements/Shells/tr_shell02.C 
     Elements/Shells/cct3d.C
     Elements/Shells/quad1mindlinshell3d.C
     Elements/Shells/shell7base.C
@@ -67,6 +69,8 @@ set (sm_element
     Elements/PlaneStress/qplanestressgrad.C
     Elements/PlaneStress/trplanestressrotallman.C
     Elements/PlaneStress/basicelement.C
+    Elements/PlaneStress/trplanestressrotallman3d.C
+    Elements/PlaneStress/linquad3d_planestress.C
     Elements/htselement.C
     Elements/latticestructuralelement.C
     Elements/graddpelement.C 
@@ -122,6 +126,7 @@ set (sm_emodel
     EngineeringModels/nldeidynamic.C
     EngineeringModels/incrementallinearstatic.C
     EngineeringModels/freewarping.C 
+    EngineeringModels/structuralmaterialevaluator.C
     )
 
 set (sm_loads
@@ -156,17 +161,19 @@ set (sm_material
     Materials/ConcreteMaterials/idmgrad1.C
     Materials/ConcreteMaterials/mazarsmodel.C 
     Materials/ConcreteMaterials/mazarsmodelnl.C
-    Materials/ConcreteMaterials/b3solidmat.C
     Materials/ConcreteMaterials/mplasticmaterial2.C
     Materials/ConcreteMaterials/compodamagemat.C
-    Materials/RheoChainMaterials/cebfip78.C
-    Materials/RheoChainMaterials/doublepowerlaw.C
-    Materials/RheoChainMaterials/mps.C
     Materials/RheoChainMaterials/rheoChM.C 
     Materials/RheoChainMaterials/maxwellChM.C 
     Materials/RheoChainMaterials/kelvinChM.C
     Materials/RheoChainMaterials/kelvinChSolM.C
-    Materials/b3mat.C
+    Materials/RheoChainMaterials/cebfip78.C
+    Materials/RheoChainMaterials/doublepowerlaw.C
+    Materials/RheoChainMaterials/b3mat.C
+    Materials/RheoChainMaterials/b3solidmat.C
+    Materials/RheoChainMaterials/mps.C
+    Materials/RheoChainMaterials/mpsdammat.C
+    Materials/structuralfe2material.C
     Materials/rcsd.C 
     Materials/rcsde.C 
     Materials/rcsdnl.C
@@ -257,7 +264,7 @@ set (sm_xfem
     xfem/enrichmentitems/delamination.C
     xfem/enrichmentitems/shellcrack.C
     xfem/propagationlaws/plhoopstresscirc.C
-    #xfem/propagationlaws/plmaterialforce.C
+    xfem/propagationlaws/plmaterialforce.C
     xfem/xfemstructuremanager.C
     xfem/matforceevaluator.C
     EngineeringModels/xfemsolverinterface.C

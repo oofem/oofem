@@ -511,7 +511,7 @@ public:
      * Sets receiver global number.
      * @param number New global number for receiver.
      */
-    void setGlobalNumber(int number) { globalNumber = number; }
+    void setGlobalNumber(int newNumber) { globalNumber = newNumber; }
 
     /**
      * Return dofManagerParallelMode of receiver.

@@ -305,7 +305,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
         // scalar damage mode
         double E, e0, ef2;
         // double ep, ef, E, dCoeff;
-        FloatArray reducedSpaceStressVector;
+        //FloatArray reducedSpaceStressVector;
         double damage;
 
         E = linearElasticMaterial->give(Ex, gp);

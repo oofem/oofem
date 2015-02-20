@@ -62,39 +62,25 @@ CBS :: CBS(int i, EngngModel* _master) : FluidModel ( i, _master ),
     vnum ( false ), vnumPrescribed ( true ), pnum ( false ), pnumPrescribed ( true )
 {
     initFlag = 1;
-    lhs = NULL;
     ndomains = 1;
-    nMethod = NULL;
     consistentMassFlag = 0;
     equationScalingFlag = false;
     lscale = uscale = dscale = 1.0;
-    //<RESTRICTED_SECTION>
-    materialInterface = NULL;
-    //</RESTRICTED_SECTION>
 }
 
 CBS :: ~CBS()
 {
-    //<RESTRICTED_SECTION>
-    delete materialInterface;
-
-    //</RESTRICTED_SECTION>
-    delete this->nMethod;
-    delete this->lhs;
 }
 
 NumericalMethod *CBS :: giveNumericalMethod(MetaStep *mStep)
 {
-    if ( nMethod ) {
-        return nMethod;
+    if ( !nMethod ) {
+        nMethod.reset( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
+        if ( !nMethod ) {
+            OOFEM_ERROR("linear solver creation failed");
+        }
     }
-
-    nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
-    if ( nMethod == NULL ) {
-        OOFEM_ERROR("linear solver creation failed");
-    }
-
-    return nMethod;
+    return nMethod.get();
 }
 
 IRResultType
@@ -102,7 +88,6 @@ CBS :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    EngngModel :: initializeFrom(ir);
     int val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_lstype);
     solverType = ( LinSystSolverType ) val;
@@ -139,7 +124,7 @@ CBS :: initializeFrom(InputRecord *ir)
     val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_CBS_miflag);
     if ( val ) {
-        this->materialInterface = new LEPlic( 1, this->giveDomain(1) );
+        this->materialInterface.reset( new LEPlic( 1, this->giveDomain(1) ) );
         // export velocity field
         FieldManager *fm = this->giveContext()->giveFieldManager();
         IntArray mask = {V_u, V_v, V_w};
@@ -148,10 +133,9 @@ CBS :: initializeFrom(InputRecord *ir)
         std :: shared_ptr< Field > _velocityField( new MaskedPrimaryField ( FT_Velocity, &this->VelocityField, mask ) );
         fm->registerField(_velocityField, FT_Velocity);
     }
-
     //</RESTRICTED_SECTION>
 
-    return IRRT_OK;
+    return EngngModel :: initializeFrom(ir);
 }
 
 
@@ -204,10 +188,6 @@ TimeStep *
 CBS :: giveSolutionStepWhenIcApply()
 {
     if ( stepWhenIcApply == NULL ) {
-        /*
-         * stepWhenIcApply = new TimeStep (giveNumberOfTimeStepWhenIcApply(),this,0,
-         * -deltaT,deltaT,0);
-         */
         stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0,
                                        0.0, deltaT, 0);
     }
@@ -223,7 +203,6 @@ CBS :: giveNextStep()
     double dt = deltaT;
     StateCounterType counter = 1;
     delete previousStep;
-
     if ( currentStep == NULL ) {
         // first step -> generate initial step
         currentStep = new TimeStep( *giveSolutionStepWhenIcApply() );
@@ -276,25 +255,25 @@ CBS :: solveYourselfAt(TimeStep *tStep)
                                          pnumPrescribed, this->giveDomain(1) );
 
 
-        lhs = classFactory.createSparseMtrx(sparseMtrxType);
-        if ( lhs == NULL ) {
+        lhs.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+        if ( !lhs ) {
             OOFEM_ERROR("sparse matrix creation failed");
         }
 
         lhs->buildInternalStructure(this, 1, pnum);
 
-        this->assemble( lhs, stepWhenIcApply, PressureLhs,
+        this->assemble( lhs.get(), stepWhenIcApply, PressureLhs,
                        pnum, this->giveDomain(1) );
         lhs->times(deltaT * theta1 * theta2);
 
         if ( consistentMassFlag ) {
-            mss = classFactory.createSparseMtrx(sparseMtrxType);
-            if ( mss == NULL ) {
+            mss.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+            if ( !mss ) {
                 OOFEM_ERROR("sparse matrix creation failed");
             }
 
             mss->buildInternalStructure(this, 1, vnum);
-            this->assemble( mss, stepWhenIcApply, MassMatrix,
+            this->assemble( mss.get(), stepWhenIcApply, MassMatrix,
                            vnum, this->giveDomain(1) );
         } else {
             mm.resize(momneq);
@@ -315,13 +294,13 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     //<RESTRICTED_SECTION>
     else if ( materialInterface ) {
         lhs->zero();
-        this->assemble( lhs, stepWhenIcApply, PressureLhs,
+        this->assemble( lhs.get(), stepWhenIcApply, PressureLhs,
                        pnum, this->giveDomain(1) );
         lhs->times(deltaT * theta1 * theta2);
 
         if ( consistentMassFlag ) {
             mss->zero();
-            this->assemble( mss, stepWhenIcApply, MassMatrix,
+            this->assemble( mss.get(), stepWhenIcApply, MassMatrix,
                            vnum, this->giveDomain(1) );
         } else {
             mm.zero();
@@ -361,7 +340,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
         // Depends on prescribed v
         this->assembleVectorFromElements( rhs, tStep, PrescribedVelocityRhsVector, VM_Incremental,
                                          vnum, this->giveDomain(1) );
-        nMethod->solve(mss, & rhs, & deltaAuxVelocity);
+        nMethod->solve(mss.get(), & rhs, & deltaAuxVelocity);
     } else {
         for ( int i = 1; i <= momneq; i++ ) {
             deltaAuxVelocity.at(i) = deltaT * rhs.at(i) / mm.at(i);
@@ -391,7 +370,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     this->assembleVectorFromElements( rhs, tStep, DensityRhsPressureTerms, VM_Total,
                                      pnum, this->giveDomain(1) );
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
-    nMethod->solve(lhs, & rhs, pressureVector);
+    nMethod->solve(lhs.get(), & rhs, pressureVector);
     pressureVector->times(this->theta2);
     pressureVector->add(* prevPressureVector);
 
@@ -404,7 +383,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     if ( consistentMassFlag ) {
         rhs.times(deltaT);
         //this->assembleVectorFromElements(rhs, tStep, PrescribedRhsVector, VM_Incremental, vnum, this->giveDomain(1));
-        nMethod->solve(mss, & rhs, velocityVector);
+        nMethod->solve(mss.get(), & rhs, velocityVector);
         velocityVector->add(deltaAuxVelocity);
         velocityVector->add(* prevVelocityVector);
     } else {
@@ -588,7 +567,8 @@ CBS :: checkConsistency()
             } else if ( bc->giveBCValType() == ForceLoadBVT ) {
                 bc->scale( 1. / this->giveVariableScale(VST_Force) );
             } else {
-                OOFEM_ERROR("unknown bc/ic type");
+                OOFEM_WARNING("unknown bc/ic type");
+                return 0;
             }
         }
 
@@ -598,7 +578,8 @@ CBS :: checkConsistency()
             } else if ( ic->giveICValType() == PressureBVT ) {
                 ic->scale( VM_Total, 1. / this->giveVariableScale(VST_Pressure) );
             } else {
-                OOFEM_ERROR("unknown bc/ic type");
+                OOFEM_WARNING("unknown bc/ic type");
+                return 0;
             }
         }
     }

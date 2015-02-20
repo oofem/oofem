@@ -186,10 +186,10 @@ EngngModel :: ~EngngModel()
 }
 
 
-void EngngModel :: setParallelMode(bool parallelFlag)
+void EngngModel :: setParallelMode(bool newParallelFlag)
 {
-    this->parallelFlag = parallelFlag;
-    if ( this->parallelFlag ) {
+    parallelFlag = newParallelFlag;
+    if ( parallelFlag ) {
         initParallel();
     }
 }

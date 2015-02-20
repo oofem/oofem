@@ -45,7 +45,7 @@
 #define _IFT_M1Material_Name "microplane_m1"
 #define _IFT_M1Material_e "e"
 #define _IFT_M1Material_s0 "s0"
-#define _IFT_M1Material_e "e"
+#define _IFT_M1Material_hn "hn"
 #define _IFT_M1Material_talpha "talpha"
 #define _IFT_M1Material_nmp "nmp"
 //@}
@@ -57,7 +57,7 @@ namespace oofem {
 class M1MaterialStatus : public StructuralMaterialStatus
 {
 protected:
-    FloatArray sigN, tempSigN;
+    FloatArray sigN, tempSigN, sigNyield;
 
 public:
     M1MaterialStatus(int n, Domain *d, GaussPoint *g);
@@ -66,9 +66,12 @@ public:
     // definition
     virtual const char *giveClassName() const { return "M1MaterialStatus"; }
     void letTempNormalMplaneStressesBe(FloatArray sigmaN) { tempSigN =  std :: move(sigmaN); }
+    void letNormalMplaneYieldStressesBe(FloatArray sigmaNyield) { sigNyield =  std :: move(sigmaNyield); }
     const FloatArray &giveNormalMplaneStresses() { return sigN; }
     const FloatArray &giveTempNormalMplaneStresses() { return tempSigN; }
+    const FloatArray &giveNormalMplaneYieldStresses() { return sigNyield; }
     virtual void initTempStatus();
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
     virtual void updateYourself(TimeStep *tStep);
 
     virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
@@ -85,8 +88,9 @@ protected:
 
     double E; // Young's modulus
     double nu; // Poisson ratio
-    double EN; // normal microplane modulus
-    double s0; // microplane yield stress
+    double EN; // normal microplane elastic modulus
+    double HN; // normal microplane hardening/softening modulus
+    double s0; // normal microplane initial yield stress
     int nmp; // number of microplanes
     FloatMatrix n; // microplane normals
     FloatMatrix N; // N = n x n in Voigt notation

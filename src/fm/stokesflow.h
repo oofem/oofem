@@ -64,25 +64,24 @@ protected:
     /// Time increment read from input record.
     double deltaT;
     /// Primary unknowns.
-    PrimaryField *velocityPressureField;
+    std :: unique_ptr< PrimaryField > velocityPressureField;
     /// Sparse matrix type.
     SparseMtrxType sparseMtrxType;
     /// Numerical method.
-    SparseNonLinearSystemNM *nMethod;
+    std :: unique_ptr< SparseNonLinearSystemNM > nMethod;
     /// Linear solver type.
     LinSystSolverType solverType;
     /// Element norm for nonlinear analysis (squared)
     FloatArray eNorm;
 
     /// Used for determining if a new mesh must be created.
-    MeshQualityErrorEstimator *meshqualityee;
+    std :: unique_ptr< MeshQualityErrorEstimator > meshqualityee;
     /// Maximum deformation allowed
     double maxdef;
 
-    SparseMtrx *stiffnessMatrix;
+    std :: unique_ptr< SparseMtrx > stiffnessMatrix;
+    FloatArray solutionVector;
     FloatArray internalForces;
-    FloatArray externalForces;
-    FloatArray incrementOfSolution;
 
     /// Topology state, most notably used for determining if there is a need to remesh.
     TopologyState ts;

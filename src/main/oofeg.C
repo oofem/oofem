@@ -538,13 +538,13 @@ void ESICustomize(Widget parent_pane)
                              commandWidgetClass, color_scale_palette, toggleTransparentContours, ( XtPointer ) NULL);
 
             oofeg_add_dialog(NULL, "Set Contour Width", "Set contour width", "0", color_scale_palette,
-                             apply_change, "CONTOUR_WIDTH", ESIDialogValueNumber, NULL);
+                             apply_change, "contour_width", ESIDialogValueNumber, NULL);
 
 
             oofeg_add_dialog(NULL, "Set number of contours",
                              "Set number of contours (requires Hidden or Shaded mode)", "12",
                              color_scale_palette,
-                             apply_change, "NUMBER_OF_CONTOURS", ESIDialogValueNumber, NULL);
+                             apply_change, "number_of_contours", ESIDialogValueNumber, NULL);
 
 
 
@@ -611,7 +611,7 @@ void ESICustomize(Widget parent_pane)
         /* CUSTOM / ACTIVE_PROBLEM */
         if ( problem->giveNumberOfSlaveProblems() ) {
             oofeg_add_dialog(NULL, "Active problem", "Problem (1 <= problem  < MAX_PROB)", "1", parent_pane,
-                             apply_change, "ACTIVE_PROB", ESIDialogValueNumber, NULL);
+                             apply_change, "active_prob", ESIDialogValueNumber, NULL);
         }
 
 
@@ -629,11 +629,11 @@ void ESICustomize(Widget parent_pane)
                              commandWidgetClass, layers_update_palette, apply_layer_update, ( XtPointer ) layers_update_palette);
         }
         oofeg_add_dialog(NULL, "SeekStep", "Step (0 <= isptep < MAX_STEPS)", "0", activeStep_palette,
-                         apply_change, "ACTIVE_STEP", ESIDialogValueNumber, NULL);
+                         apply_change, "active_step", ESIDialogValueNumber, NULL);
         oofeg_add_button("NEXT_STEP", "NextStep", commandWidgetClass, activeStep_palette, nextStep, NULL);
         oofeg_add_button("NEXT_STEP", "PrevStep", commandWidgetClass, activeStep_palette, previousStep, NULL);
         oofeg_add_dialog(NULL, "Seek EigMode", "Set Active Eigen value & vector (0 <= index < nroot)", "0", activeStep_palette,
-                         apply_change, "ACTIVE_EIGEN_VALUE", ESIDialogValueNumber, NULL);
+                         apply_change, "active_eigen_value", ESIDialogValueNumber, NULL);
 
         oofeg_add_palette("< Animate/Loop steps >", activeStep_palette, & animate_setup_palette);
         {
@@ -700,7 +700,7 @@ void ESICustomize(Widget parent_pane)
         oofeg_add_button("DEF_PLOT", "DefGeom Plot", commandWidgetClass, deformations_menu, defPlot, NULL);
         oofeg_add_button("EIGVEC_PLOT", "EigVec Plot", commandWidgetClass, deformations_menu, eigVecPlot, NULL);
         oofeg_add_dialog(NULL, "Set DefScale", "Input Deformation Scale (0 <= scale < MAX_Scale)", "0.0", deformations_menu,
-                         apply_change, "SET_DEF_SCALE", ESIDialogValueNumber, NULL);
+                         apply_change, "set_def_scale", ESIDialogValueNumber, NULL);
         oofeg_add_button("AutoSetDefScale", "Auto DefScale", commandWidgetClass, deformations_menu, defAutoScale, NULL);
         oofeg_add_button("SPARSE_PLOT", "StiffSparse Plot", commandWidgetClass, plot_palette,
                          showSparseMtrxStructure, NULL);
@@ -851,7 +851,7 @@ void ESICustomize(Widget parent_pane)
                                  varPlot, ( XtPointer ) ( oofeg_draw_modes + 16 ) );
 
                 oofeg_add_dialog(NULL, "Set ZProfScale", "Input z-Profile Scale (0 <= scale < MAX_Scale)", "0.0", scalarplot_palette,
-                                 apply_change, "SET_ZPROF_SCALE", ESIDialogValueNumber, NULL);
+                                 apply_change, "set_zprof_scale", ESIDialogValueNumber, NULL);
             }
 
             oofeg_add_palette("< Vector plot >", varplot_palette, & vectorplot_palette);
@@ -953,13 +953,13 @@ void OOFEGSimpleCmd(char *buf)
         stepinfo [ 0 ] = istep;
         stepinfo [ 1 ] = iversion;
         try {
-            problem->restoreContext(NULL, CM_State, ( void * ) stepinfo);
+            problem->restoreContext(NULL, CM_State | CM_Definition, ( void * ) stepinfo);
         } catch(ContextIOERR & m) {
             m.print();
             stepinfo [ 0 ] = pstep;
             stepinfo [ 1 ] = iversion;
             try {
-                problem->restoreContext(NULL, CM_State, ( void * ) stepinfo);
+                problem->restoreContext(NULL, CM_State | CM_Definition, ( void * ) stepinfo);
             } catch(ContextIOERR & m2) {
                 m2.print();
                 exit(1);
@@ -977,7 +977,7 @@ void OOFEGSimpleCmd(char *buf)
         stepinfo [ 0 ] = istep;
         stepinfo [ 1 ] = iversion;
         try {
-            problem->restoreContext(NULL, CM_State, ( void * ) stepinfo);
+            problem->restoreContext(NULL, CM_State | CM_Definition, ( void * ) stepinfo);
         } catch(ContextIOERR & m) {
             m.print();
             exit(1);
@@ -1038,7 +1038,7 @@ void defPlot(Widget wid, XtPointer cl, XtPointer cd)
 
 void  defAutoScale(Widget wid, XtPointer cl, XtPointer cd)
 {
-    int init = 1, id, i, j, nnodes;
+    int init = 1, id, j;
     double mincoords [ 3 ] = {
         0., 0., 0.
     }, maxcoords [ 3 ] = {
@@ -1046,7 +1046,6 @@ void  defAutoScale(Widget wid, XtPointer cl, XtPointer cd)
     };
     double coord, maxdef = 0.0;
     Domain *domain;
-    DofManager *dman;
 
     TimeStep *tStep = gc [ OOFEG_DEFORMED_GEOMETRY_LAYER ].getActiveProblem()->giveCurrentStep();
     if ( tStep == NULL ) {
@@ -1056,27 +1055,27 @@ void  defAutoScale(Widget wid, XtPointer cl, XtPointer cd)
 
     for ( id = 1; id <= gc [ OOFEG_DEFORMED_GEOMETRY_LAYER ].getActiveProblem()->giveNumberOfDomains(); id++ ) {
         domain = gc [ OOFEG_DEFORMED_GEOMETRY_LAYER ].getActiveProblem()->giveDomain(id);
-        nnodes = domain->giveNumberOfDofManagers();
+        //nnodes = domain->giveNumberOfDofManagers();
         if ( id == 1 ) {
             for ( j = 1; j <= 3; j++ ) {
                 maxcoords [ j - 1 ] = mincoords [ j - 1 ] = domain->giveNode(1)->giveCoordinate(j);
             }
         }
 
-        for ( i = 1; i <= nnodes; i++ ) {
-            dman = domain->giveDofManager(i);
-            if ( dynamic_cast< Node * >(dman) ) {
+        for ( auto &dman : domain->giveDofManagers() ) {
+            Node *node = dynamic_cast< Node * >(dman.get());
+            if ( node ) {
                 if ( init ) {
                     for ( j = 1; j <= 3; j++ ) {
-                        maxcoords [ j - 1 ] = mincoords [ j - 1 ] = domain->giveNode(i)->giveCoordinate(j);
+                        maxcoords [ j - 1 ] = mincoords [ j - 1 ] = node->giveCoordinate(j);
                     }
 
                     init = 0;
                 }
 
                 for ( j = 1; j <= 3; j++ ) {
-                    coord = domain->giveNode(i)->giveCoordinate(j);
-                    maxdef = max( maxdef, fabs(domain->giveNode(i)->giveUpdatedCoordinate(j, tStep, 1.0) - coord) );
+                    coord = node->giveCoordinate(j);
+                    maxdef = max( maxdef, fabs(node->giveUpdatedCoordinate(j, tStep, 1.0) - coord) );
                     maxcoords [ j - 1 ] = max(maxcoords [ j - 1 ], coord);
                     mincoords [ j - 1 ] = min(mincoords [ j - 1 ], coord);
                 }
@@ -1217,13 +1216,13 @@ void previousStep(Widget wid, XtPointer cl, XtPointer cd)
             stepInfo [ 0 ] = istep;
             stepInfo [ 1 ] = 0;
             try {
-                problem->restoreContext(NULL, CM_State, ( void * ) stepInfo);
+                problem->restoreContext(NULL, CM_State | CM_Definition, ( void * ) stepInfo);
             } catch(ContextIOERR & m) {
                 m.print();
                 stepInfo [ 0 ] = prevStep;
                 stepInfo [ 1 ] = 0;
                 try {
-                    problem->restoreContext(NULL, CM_State, ( void * ) stepInfo);
+                    problem->restoreContext(NULL, CM_State | CM_Definition, ( void * ) stepInfo);
                 } catch(ContextIOERR & m2) {
                     m2.print();
                     exit(1);
@@ -1240,7 +1239,7 @@ void previousStep(Widget wid, XtPointer cl, XtPointer cd)
         stepInfo [ 0 ] = istep;
         stepInfo [ 1 ] = 0;
         try {
-            problem->restoreContext(NULL, CM_State, ( void * ) stepInfo);
+            problem->restoreContext(NULL, CM_State | CM_Definition, ( void * ) stepInfo);
         } catch(ContextIOERR & m) {
             m.print();
             exit(1);
@@ -2196,7 +2195,7 @@ pass_setanimate_command(Widget w, XtPointer ptr, XtPointer call_data)
         stepinfo [ 0 ] = istep;
         stepinfo [ 1 ] = iversion;
         try {
-            problem->restoreContext(NULL, CM_State, ( void * ) stepinfo);
+            problem->restoreContext(NULL, CM_State | CM_Definition, ( void * ) stepinfo);
         } catch(ContextIOERR & m) {
             m.print();
             return;

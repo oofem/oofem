@@ -204,7 +204,6 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0, FloatArray *iR,
     FloatArray rhs, ddX, RT;
     double RRT;
     int neq = X->giveSize();
-    NM_Status status;
     bool converged, errorOutOfRangeFlag;
     ParallelContext *parallel_context = engngModel->giveParallelContext( this->domain->giveNumber() );
 
@@ -221,7 +220,7 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0, FloatArray *iR,
 
     l = 1.0;
 
-    status = NM_None;
+    NM_Status status = NM_None;
     this->giveLinearSolver();
 
     // compute total load R = R+R0
@@ -301,9 +300,9 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0, FloatArray *iR,
         //
         if ( this->lsFlag && ( nite > 0 ) ) { // Why not nite == 0 ?
             // line search
-            LineSearchNM :: LS_status status;
+            LineSearchNM :: LS_status LSstatus;
             double eta;
-            this->giveLineSearchSolver()->solve(X, & ddX, F, R, R0, prescribedEqs, 1.0, eta, status, tStep);
+            this->giveLineSearchSolver()->solve(X, & ddX, F, R, R0, prescribedEqs, 1.0, eta, LSstatus, tStep);
         } else if ( this->constrainedNRFlag && ( nite > this->constrainedNRminiter ) ) {
             ///@todo This doesn't check units, it is nonsense and must be corrected / Mikael
             if ( this->forceErrVec.computeSquaredNorm() > this->forceErrVecOld.computeSquaredNorm() ) {

@@ -165,25 +165,22 @@ void IncrementalLinearStatic :: solveYourself()
 
 void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
 {
+    Domain *d = this->giveDomain(1);
     // Creates system of governing eq's and solves them at given time step
 
     // Initiates the total displacement to zero.
     if ( tStep->isTheFirstStep() ) {
-        Domain *d = this->giveDomain(1);
-        for ( int i = 1; i <= d->giveNumberOfDofManagers(); i++ ) {
-            DofManager *dofman = d->giveDofManager(i);
+        for ( auto &dofman : d->giveDofManagers() ) {
             for ( Dof *dof: *dofman ) {
                 dof->updateUnknownsDictionary(tStep->givePreviousStep(), VM_Total, 0.);
                 dof->updateUnknownsDictionary(tStep, VM_Total, 0.);
             }
         }
 
-        int nbc = d->giveNumberOfBoundaryConditions();
-        for ( int ibc = 1; ibc <= nbc; ++ibc ) {
-            GeneralBoundaryCondition *bc = d->giveBc(ibc);
+        for ( auto &bc : d->giveBcs() ) {
             ActiveBoundaryCondition *abc;
 
-            if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >(bc) ) ) {
+            if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >(bc.get()) ) ) {
                 int ndman = abc->giveNumberOfInternalDofManagers();
                 for ( int i = 1; i <= ndman; i++ ) {
                     DofManager *dofman = abc->giveInternalDofManager(i);
@@ -197,9 +194,7 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
     }
 
     // Apply dirichlet b.c's on total values
-    Domain *d = this->giveDomain(1);
-    for ( int i = 1; i <= d->giveNumberOfDofManagers(); i++ ) {
-        DofManager *dofman = d->giveDofManager(i);
+    for ( auto &dofman : d->giveDofManagers() ) {
         for ( Dof *dof: *dofman ) {
             double tot = dof->giveUnknown( VM_Total, tStep->givePreviousStep() );
             if ( dof->hasBc(tStep) ) {

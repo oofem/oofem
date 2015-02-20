@@ -140,8 +140,8 @@ ZZNodalRecoveryModel :: recoverValues(Set elementSet, InternalStateType type, Ti
         for ( int elementNode = 1; elementNode <= elemNodes; elementNode++ ) {
             int node = element->giveDofManager(elementNode)->giveNumber();
             lhs.at( regionNodalNumbers.at(node) ) += nn.at(eq);
-            for ( int i = 1; i <= regionValSize; i++ ) {
-                rhs.at(regionNodalNumbers.at(node), i) += nsig.at(eq, i);
+            for ( int j = 1; j <= regionValSize; j++ ) {
+                rhs.at(regionNodalNumbers.at(node), j) += nsig.at(eq, j);
             }
 
             eq++;

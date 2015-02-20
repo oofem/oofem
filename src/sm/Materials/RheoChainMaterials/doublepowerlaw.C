@@ -57,18 +57,20 @@ DoublePowerLawMaterial :: initializeFrom(InputRecord *ir)
 
 
 double
-DoublePowerLawMaterial :: computeCreepFunction(double tStep, double ofAge)
+DoublePowerLawMaterial :: computeCreepFunction(double t, double t_prime)
 {
-    // computes the value of creep function at time ofAge
-    // when load is acting from tStep
+
+    // computes the value of creep function at time t
+    // when load is acting from time t_prime
+    // t-t_prime = duration of loading
 
     double e0;
     double h1, h2, h3;
 
     e0 = 1.50 * E28;
 
-    h1 = pow(tStep - ofAge, n);
-    h2 = pow(ofAge, -m) + alpha;
+    h1 = pow(t - t_prime, n);
+    h2 = pow(t_prime, -m) + alpha;
     h3 = fi1 / e0;
 
     return 1. / e0 + h1 * h2 * h3;

@@ -400,8 +400,8 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
             //this->exportCompositeElement(this->defaultVTKPiece, el, tStep);
             this->exportCompositeElement(this->defaultVTKPieces, el, tStep);
 
-            for ( int i = 0; i < (int)this->defaultVTKPieces.size(); i++ ) {
-                this->writeVTKPiece(this->defaultVTKPieces[i], tStep);
+            for ( int j = 0; j < (int)this->defaultVTKPieces.size(); j++ ) {
+                this->writeVTKPiece(this->defaultVTKPieces[j], tStep);
             }
 #else
                 // No support for binary export yet
@@ -1814,9 +1814,9 @@ VTKXMLExportModule :: writeVTKCollection()
     std :: string fname;
 
     if ( tstep_substeps_out_flag ) {
-        fname = this->emodel->giveOutputBaseFileName() + ".substep.pvd";
+        fname = this->emodel->giveOutputBaseFileName() + ".m" + std::to_string(this->number) + ".substep.pvd";
     } else {
-        fname = this->emodel->giveOutputBaseFileName() + ".pvd";
+        fname = this->emodel->giveOutputBaseFileName() + ".m" + std::to_string(this->number) + ".pvd";
     }
 
     std :: ofstream outfile( fname.c_str() );
@@ -1845,9 +1845,9 @@ VTKXMLExportModule :: writeGPVTKCollection()
     std :: string fname;
 
     if ( tstep_substeps_out_flag ) {
-        fname = this->emodel->giveOutputBaseFileName() + ".substep.gp.pvd";
+        fname = this->emodel->giveOutputBaseFileName() + ".m" + std::to_string(this->number) + ".substep.gp.pvd";
     } else {
-        fname = this->emodel->giveOutputBaseFileName() + ".gp.pvd";
+        fname = this->emodel->giveOutputBaseFileName() + ".m" + std::to_string(this->number) + ".gp.pvd";
     }
 
     std :: ofstream outfile( fname.c_str() );

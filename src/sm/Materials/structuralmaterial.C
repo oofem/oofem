@@ -1868,9 +1868,13 @@ void
 StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
                                                            GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
 {
-    FloatArray et, e0, eigenstrain;
-    FloatMatrix GCS;
+    FloatArray et, eigenstrain;
     MaterialMode matmode = gp->giveMaterialMode();
+    if ( gp->giveIntegrationRule() == NULL ) {
+        ///@todo Hack for loose gausspoints. We shouldn't ask for "gp->giveElement()". FIXME
+        answer.clear();
+        return;
+    }
     Element *elem = gp->giveElement();
     StructuralElement *selem = dynamic_cast< StructuralElement * >( gp->giveElement() );
 
@@ -1920,7 +1924,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
 
 
     if ( et.giveSize() ) { //found temperature boundary conditions or prescribed field
-        FloatArray fullAnswer;
+        FloatArray fullAnswer, e0;
 
         this->giveThermalDilatationVector(e0, gp, tStep);
 

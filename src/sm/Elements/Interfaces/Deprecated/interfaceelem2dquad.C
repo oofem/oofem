@@ -128,7 +128,6 @@ InterfaceElem2dQuad :: computeVolumeAround(GaussPoint *gp)
 
     double r = 1.0;
     if (this->axisymmode) {
-      double ksi = gp->giveNaturalCoordinate(1);
       double n3  = 1. - ksi * ksi;
       double n1  = ( 1. - ksi ) * 0.5 - 0.5 * n3;
       double n2  = ( 1. + ksi ) * 0.5 - 0.5 * n3;

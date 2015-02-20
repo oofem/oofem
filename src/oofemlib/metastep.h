@@ -100,7 +100,7 @@ public:
     /// Sets the receiver bounds according to given solution step number, returns end index.
     int setStepBounds(int startStepNumber);
     /// Sets the number of steps within the metastep.
-    void setNumberOfSteps(int numberOfSteps);
+    void setNumberOfSteps(int newNumberOfSteps);
     /// Tests if step number is maintained by receiver.
     int isStepValid(int solStepNumber);
     /// Returns the step relative number  to receiver.

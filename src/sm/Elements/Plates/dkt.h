@@ -89,7 +89,7 @@ public:
     virtual int testElementExtension(ElementExtension ext) { return ( ( ( ext == Element_EdgeLoadSupport ) || ( ext == Element_SurfaceLoadSupport ) ) ? 1 : 0 ); }
 
 protected:
-    virtual void computeGaussPoints();
+
     virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
     virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
@@ -131,6 +131,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_DKTPlate_Name; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
+    virtual void computeGaussPoints();
     virtual int computeNumberOfDofs() { return 9; }
     virtual void giveDofManDofIDMask(int inode, IntArray &) const;
 

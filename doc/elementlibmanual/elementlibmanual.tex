@@ -369,6 +369,8 @@ Structure should be defined in x,y plane.
 The nodes should be numbered anti-clockwise (positive rotation around
 z-axis).  The element features are summarized in Table~\ref{planestress2dsummary}.
 
+The generalization of this element, that can be positioned arbitrarily in space is \param{linquad3dplanestress} element. This element requires 3 displacement degrees of freedon in each node and assumes, that the element geometry is flat, i.e. all nodes are in the same plane. The element features are summarized in Table~\ref{linquad3dplanestresssummary}.
+
 \begin{figure}[htb]
  \centering
  \begin{makeimage}
@@ -388,6 +390,18 @@ z-axis).  The element features are summarized in Table~\ref{planestress2dsummary
 \elementDescription{Loads}{Body loads are supported. Boundary loads are supported and computed using numerical integration. The side numbering is following. Each i-th element side begins in i-th element node and ends on next element node (i+1-th node or 1-st node, in the case of side number 4). The local positive edge x-axis coincides with side direction, the positive local edge y-axis is rotated 90 degrees anti-clockwise (see fig. (\ref{Planestress2dfig})).}
 \elementDescription{Nlgeo}{0, 1.}
 \elementDescription{Status}{Reliable}
+\end{elementsummary}
+
+\begin{elementsummary}{linquad3dplanestress}{3D quadrilateral element for plane stress analysis}{\optField{NIP}{in}}{linquad3dplanestress element summary}{linquad3dplanestresssummary}
+\elementParam{\param{NIP}: allows to set the number of integration points}
+\elementDescription{Unknowns}{Three dofs (u-displacement, v-displacement, w-displacement) are required in each node.}
+\elementDescription{Approximation}{Linear approximation of displacements and geometry.}
+\elementDescription{Integration}{Integration of membrane strain terms using Gauss integration formula in 1, 4 (default), 9 or 16 integration points. The default number of integration points used can be overloaded using \param{NIP} parameter. Reduced integration for shear terms is employed. Shear terms are always integrated using the 1-point integration rule.}
+\elementDescription{Features}{Nonlocal constitutive support, Geometric nonlinearity support.}
+\elementDescription{CS properties}{cross section thickness is required.}
+\elementDescription{Loads}{Body loads are supported. Boundary loads are supported and computed using numerical integration. The side numbering is following. Each i-th element side begins in i-th element node and ends on next element node (i+1-th node or 1-st node, in the case of side number 4). The local positive edge x-axis coincides with side direction, the positive local edge y-axis is rotated 90 degrees anti-clockwise (see fig. (\ref{Planestress2dfig})).}
+\elementDescription{Nlgeo}{0, 1.}
+\elementDescription{Status}{Basic functionality tested, element loads need further testing.}
 \end{elementsummary}
 
 \subsubsection{QPlaneStress2d}
@@ -488,6 +502,10 @@ default) or in 7 points (using \param{NIP} parameter).}
 Implementation of triangular three-node  plane-stress 
 finite element with independent rotation field.
 Each node has 3 degrees of freedom. The element features are summarized in Table~\ref{trplanestrrotsummary}.
+
+The generalization of this element, that can be positioned arbitrarily in space is \param{trplanestrrot3d} element. This element requires 6 degrees of freedon in each node.
+The element features are summarized in Table~\ref{trplanestrrot3dsummary}.
+
 The implementation is based on the following paper: Ibrahimbegovic, A., Taylor, R.L., Wilson, E. L.: A robust membrane qudritelar element with rotational degrees of freedom, Int. J. Num. Meth. Engng., 30, 445-457, 1990.
 The rotation field is defined as $\omega = \del{1}{2}(\der{v}{x}-\der{u}{y}) = \nabla_u\mbf{u}$. The following form of potential energy functial is assumed:
 \begin{equation*}
@@ -508,10 +526,27 @@ where $\mbf{\tau}$ is pseudo-stress (component of anti-symmetric stress tensor) 
 \elementDescription{Status}{-}
 \end{elementsummary}
 
+\begin{elementsummary}{trplanestrrot3d}{3D linear triangular plane stress element with rotational DOFs}{\optField{NIP}{in} \optField{NIPRot}{in}}{trplanestrrot3d element summary}{trplanestrrot3dsummary}
+\elementParam{\param{NIP}: allows to set the number of integration points for integration of membrane terms.}
+\elementParam{\param{NIPRot}: allows to set the number of integration points for integration of terms associated to rotational field.}
+\elementDescription{Unknowns}{Six dofs (u-displacement, v-displacement, w-displacement, x-rotation, y-rotation, z-rotation) are required in each node.}
+\elementDescription{Approximation}{Linear approximation of displacements and geometry.}
+\elementDescription{Integration}{Integration of membrane strain terms using gauss integration formula in 4 points (default) or using 1 or 7 points (using \param{NIP} parameter). Integration of strains associated with rotational field integration using 1 point is default (4 and 7 points rules can be specified using \param{NIPRot} parameter).}
+\elementDescription{Features}{-}
+\elementDescription{CS properties}{Cross section thickness is required.}
+\elementDescription{Loads}{-}
+\elementDescription{Nlgeo}{0.}
+\elementDescription{Status}{-}
+\end{elementsummary}
+
 \subsubsection{TrPlaneStressRotAllman}
 Implementation of triangular three-node  plane-stress 
 with nodal rotations.
 Each node has 3 degrees of freedom. The element features are summarized in Table~\ref{TrPlaneStressRotAllmansummary}.
+
+The generalization of this element, that can be positioned arbitrarily in space is \param{trplanestressrotallman3d} element. This element requires 6 degrees of freedon in each node. The element features are summarized in Table~\ref{trplanestressrotallman3dsummary}.
+
+
 The implementation is based on the following paper: Allman, D.J.: A compatible triangular element including vertex rotations for plane elasticity analysis, Computers \& Structures, vol. 19, no. 1-2, pp. 1-8, 1984.
 The element is based on plane stress element with quadratic interpolation. The displacements in midside nodes are expressed using vertex displacements and vertex rotations (for edge normal displacement component); the tangential component is interpolated from vertex values. For particular element side starting at i-th vertex and ending in j-th vertex the normal and tangential displacements at edge midpoint can be expressed as
 \begin{eqnarray*}
@@ -537,6 +572,18 @@ v\vert_{l/2} &=& \del{u_{ni}+u_{nj}}{2}+\del{l}{8}(\omega_i-\omega_j)\del{\Delta
 \elementDescription{Status}{-}
 \end{elementsummary}
 
+\begin{elementsummary}{trplanestressrotallman3d}{2D linear triangular plane stress element with rotational DOFs}{}{trplanestressrotallman3d element summary}{trplanestressrotallman3dsummary}
+\elementDescription{Unknowns}{Six dofs (D\_u, D\_v, D\_w, R\_x, R\_y, R\_z) are required in each node.}
+\elementDescription{Approximation}{Linear approximation of geometry, quadratic interpolation of displacements.}
+\elementDescription{Integration}{Integration of membrane strain terms using gauss integration formula in 4 points.}
+\elementDescription{Zero energy mode}{The zero energy mode (equal rotations) is handled by adding additional energy term preventing spurious modes.}
+
+\elementDescription{Features}{-}
+\elementDescription{CS properties}{Cross section thickness is required.}
+\elementDescription{Loads}{-}
+\elementDescription{Nlgeo}{0.}
+\elementDescription{Status}{-}
+\end{elementsummary}
 
 
 %-----------------------------------------------------------------------------------------------
@@ -785,6 +832,33 @@ Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sig
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{Reliable}
 \end{elementsummary}
+
+
+\subsubsection {tr\_shell02 element}
+Combination of thin-plate DKT plate element with plane stress element (TrPlanestressRotAllman). This element comes with complete set of 6 DOFs per node. 
+The element features are summarized in Table~\ref{trshell02summary}.
+
+\begin{elementsummary}{tr\_shell02}{Triangular shell element combining DKT plate element with triangular plane stress element with rotational DOFs}{-}{tr\_shell02 element summary}{trshell02summary}
+%\elementParam{\param{NIP}: allows to set the number of integration points for integration of membrane terms.}
+\elementDescription{Unknowns}{Six dofs (u,v,w-displacements and u,v,w rotations) are in general required in each node.}
+\elementDescription{Approximation}{See description of cct and trplanstrrot elements}
+\elementDescription{Integration}{4 integration points necessary, use "NIP 4" in element record.}
+%\elementDescription{Features}{Layered cross section support.}
+\elementDescription{CS properties}{Cross section thickness is required.}
+\elementDescription{Loads}{Body loads are supported. Boundary loads are supported (only surface loads).}
+\elementDescription{Output}{On output, the shell force ($s_f$), shell strain ($s_s$), shell momentum ($s_m$), and shell curvature ($s_c$) tensors in \textbf{global coordinate system} are printed as vector form with 6 components, with the following meaning:
+\begin{eqnarray*}
+s_f&=&\{n_x, n_y, n_z, v_{yz}, v_{xz}, v_{xy}\},\\
+s_s&=&\{\varepsilon_x, \varepsilon_y, \varepsilon_z, \gamma_{yz}, \gamma_{xz}, \gamma_{xz}\},\\
+s_m&=&\{m_x, m_y, m_z, m_{yz}, m_{xz}, m_{xz}\},\\
+s_c&=&\{\kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xz}\}
+\end{eqnarray*}
+where $\varepsilon_x, \varepsilon_y, \varepsilon_z$ are membrane normal deformations, $\gamma_{zy}, \gamma_{zx}, \gamma_{xy}$ are (out of plane and in plane) shear componets, $\kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xz}$ are curvatures, $n_x, n_y, n_z, v_{yz}, v_{xz}, v_{xy}$ are integral forces (normal and shear forces), and $m_x, m_y, m_z, m_{yz}, m_{xz}, m_{xz}$ are bending moments. 
+Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
+\elementDescription{Nlgeo}{0.}
+\elementDescription{Status}{-}
+\end{elementsummary}
+
 
 
 \subsubsection{Quad1Mindlin Element} \label{quad1mindlin}

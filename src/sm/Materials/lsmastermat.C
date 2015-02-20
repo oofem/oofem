@@ -379,8 +379,6 @@ LargeStrainMasterMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, 
     FloatMatrix stiffness;
     MaterialMode mMode = gp->giveMaterialMode();
     if ( mMode == _3dMat ) {
-        Material *mat;
-        StructuralMaterial *sMat;
         mat = domain->giveMaterial(slaveMat);
         sMat = dynamic_cast< StructuralMaterial * >(mat);
         if ( sMat == NULL ) {

@@ -256,13 +256,20 @@ LinearElasticMaterial :: giveEshelbyStressVector_PlaneStrain(FloatArray &answer,
 }
 
 double
-LinearElasticMaterial ::giveEnergyDensity(GaussPoint *gp, TimeStep *tStep)
+LinearElasticMaterial :: giveEnergyDensity(GaussPoint *gp, TimeStep *tStep)
 {
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
     const FloatArray &strain = status->giveTempStrainVector();
     const FloatArray &stress = status->giveTempStressVector();
 
     return 0.5*stress.dotProduct(strain);
+}
+
+
+MaterialStatus *
+LinearElasticMaterial :: CreateStatus(GaussPoint *gp) const
+{
+    return new StructuralMaterialStatus(1, this->giveDomain(), gp);
 }
 
 } // end namespace oofem

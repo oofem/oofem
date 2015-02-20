@@ -2127,9 +2127,9 @@ Shell7BaseXFEM :: vtkEvalUpdatedGlobalCoordinateAt(const FloatArray &localCoords
     this->giveUpdatedSolutionVector(solVec, tStep);
     FloatArray xc, mc; double gamc=0;
     Shell7Base :: giveUnknownsAt(localCoords, solVec, xc, mc, gamc, tStep);
-    double fac = ( zeta + 0.5 * gamc * zeta * zeta );
+    double fac_cont = ( zeta + 0.5 * gamc * zeta * zeta );
     globalCoords = xc;
-    globalCoords.add(fac,mc);
+    globalCoords.add(fac_cont,mc);
 
 #if 1
     // Discontinuous part
@@ -2143,9 +2143,9 @@ Shell7BaseXFEM :: vtkEvalUpdatedGlobalCoordinateAt(const FloatArray &localCoords
             ei->giveEIDofIdArray(eiDofIdArray);
             this->computeDiscSolutionVector(eiDofIdArray, tStep, solVecD);
             this->giveDisUnknownsAt(localCoords, ei, solVecD, xd, md, gamd, tStep);
-            double fac = ( zeta + 0.5 * gamd * zeta * zeta );
+            double fac_disc = ( zeta + 0.5 * gamd * zeta * zeta );
             xtemp = xd;
-            xtemp.add(fac,md);
+            xtemp.add(fac_disc,md);
             globalCoords.add(xtemp);
         }
         
@@ -2266,7 +2266,7 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
     for ( int fieldNum = 1; fieldNum <= primaryVarsToExport.giveSize(); fieldNum++ ) {
         UnknownType type = ( UnknownType ) primaryVarsToExport.at(fieldNum);
         nodeNum = 1;
-        int currentCell = 1;
+        currentCell = 1;
         for ( int layer = 1; layer <= numLayers; layer++ ) {
 
             numSubCells = (int)this->numSubDivisionsArray[layer - 1];
@@ -2332,7 +2332,7 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
     for ( int i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
         InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);
         InternalStateValueType valueType = giveInternalStateValueType(type);
-        int currentCell = 1;
+        currentCell = 1;
         for ( int layer = 1; layer <= numLayers; layer++ ) {
             numSubCells = (int)this->numSubDivisionsArray[layer - 1];
             for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
@@ -2369,7 +2369,7 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
         
         for ( int enrItIndex = 1; enrItIndex <= nEnrIt; enrItIndex++ ) {
             EnrichmentItem *ei = xFemMan->giveEnrichmentItem(enrItIndex);
-            int nodeNum = 1;
+            nodeNum = 1;
             for ( int layer = 1; layer <= numLayers; layer++ ) {
                 FloatMatrix localNodeCoords;
 
@@ -2742,7 +2742,7 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
     for ( int fieldNum = 1; fieldNum <= primaryVarsToExport.giveSize(); fieldNum++ ) {
         UnknownType type = ( UnknownType ) primaryVarsToExport.at(fieldNum);
         nodeNum = 1;
-        int currentCell = 1;
+        currentCell = 1;
         for ( int layer = 1; layer <= numInterfaces; layer++ ) {
             
             for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
@@ -2804,7 +2804,7 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
     for ( int i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
         InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);
         InternalStateValueType valueType = giveInternalStateValueType(type);
-        int currentCell = 1;
+        currentCell = 1;
         for ( int layer = 1; layer <= numInterfaces; layer++ ) {
             for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
                 if ( type == IST_CrossSectionNumber ) {

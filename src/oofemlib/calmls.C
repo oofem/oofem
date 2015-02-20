@@ -909,18 +909,18 @@ void CylindricalALM :: convertHPCMap()
     int size;
     EModelDefaultEquationNumbering dn;
 
-    int jglobnum, count = 0, ndofman = domain->giveNumberOfDofManagers();
+    int count = 0;
     size = calm_HPCDmanDofSrcArray.giveSize() / 2;
     indirectMap.resize(size);
     weights.resize(size);
-    for ( int j = 1; j <= ndofman; j++ ) {
-        jglobnum = domain->giveNode(j)->giveLabel();
+    for ( auto &dman : domain->giveDofManagers() ) {
+        int jglobnum = dman->giveLabel();
         for ( int i = 1; i <= size; i++ ) {
             int inode = calm_HPCDmanDofSrcArray.at(2 * i - 1);
             int idofid = calm_HPCDmanDofSrcArray.at(2 * i);
             if ( inode == jglobnum ) {
-                if ( parallel_context->isLocal( domain->giveNode(j) ) ) {
-                    indirectMap.at(++count) = domain->giveNode(j)->giveDofWithID(idofid)->giveEquationNumber(dn);
+                if ( parallel_context->isLocal( dman.get() ) ) {
+                    indirectMap.at(++count) = dman->giveDofWithID(idofid)->giveEquationNumber(dn);
                     if ( calm_Control == calml_hpc ) {
                         weights.at(count) = calm_HPCDmanWeightSrcArray.at(i);
                     }

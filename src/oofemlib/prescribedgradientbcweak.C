@@ -980,8 +980,10 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
     }
 #if 0
     printf("bndNodeCoords: \n");
-    for ( auto x :  bndNodeCoords ) {
-        x.first.printYourself();
+    for(auto coordArray : bndNodeCoords) {
+        for ( auto x :  coordArray ) {
+            x.first.printYourself();
+        }
     }
 #endif
 
@@ -1281,6 +1283,15 @@ void PrescribedGradientBCWeak :: assembleTangentGPContribution(FloatMatrix &oTan
         //printf("Computing enriched N-matrix.\n");
         xfemElInt_minus->XfemElementInterface_createEnrNmatrixAt(NdispMat_minus, dispElLocCoord_minus, * dispEl_minus, false);
     } else   {
+        if(!domain->hasXfemManager()) {
+            printf("!domain->hasXfemManager()\n");
+        }
+
+        if(xfemElInt_minus == NULL) {
+            printf("xfemElInt_minus == NULL\n");
+            printf("dispEl_minus->giveClassName(): %s\n", dispEl_minus->giveClassName() );
+        }
+
         OOFEM_ERROR("Unable to compute N-matrix.")
     }
 
@@ -1304,6 +1315,9 @@ void PrescribedGradientBCWeak :: assembleTangentGPContribution(FloatMatrix &oTan
         oTangent.assemble(contrib, rows, cols);
     }
     else {
+        contrib.resize(rows.giveSize(), cols.giveSize());
+        contrib.zero();
+        oTangent.assemble(contrib, rows, cols);
         printf("Warning in PrescribedGradientBCWeak :: assembleTangentGPContribution: rows.giveSize(): %d cols.giveSize(): %d\n", rows.giveSize(), cols.giveSize() );
     }
 }

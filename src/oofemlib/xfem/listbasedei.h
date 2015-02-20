@@ -49,7 +49,7 @@ class Domain;
  * @author Erik Svenning
  * @date Sep 9, 2014
  */
-class ListBasedEI : public EnrichmentItem
+class OOFEM_EXPORT ListBasedEI : public EnrichmentItem
 {
 public:
     ListBasedEI(int n, XfemManager *xm, Domain *aDomain);

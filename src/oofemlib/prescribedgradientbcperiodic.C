@@ -142,11 +142,12 @@ void PrescribedGradientBCPeriodic :: findSlaveToMasterMap()
         Node *masterNode = NULL;
         Node *node = this->domain->giveNode(inode);
         const FloatArray &masterCoord = *node->giveCoordinates();
+        //printf("node %d\n", node->giveLabel()); masterCoord.printYourself();
         // The difficult part, what offset to subtract to find the master side;
         for ( FloatArray &testJump : jumps ) {
             coord.beDifferenceOf(masterCoord, testJump);
-            masterNode = sl->giveNodeClosestToPoint(coord);
-            if ( masterNode->giveCoordinates()->distance(coord) <= fabs(jump.at(1))*1e-6) {
+            masterNode = sl->giveNodeClosestToPoint(coord, fabs(jump.at(1))*1e-5);
+            if ( masterNode != NULL ) {
                 //printf("Found master (%d) to node %d (distance = %e)\n",  masterNode->giveNumber(), node->giveNumber(),
                 //       masterNode->giveCoordinates()->distance(coord));
                 break;

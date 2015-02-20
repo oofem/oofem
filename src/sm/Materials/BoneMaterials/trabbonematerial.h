@@ -88,9 +88,9 @@ public:
     double giveSlope();
     double giveSigC();
     double giveMatConstC();
-    FloatArray givePlasStrainVector();
-    FloatArray giveTempPlasStrainVector();
-    FloatArray giveTempIncPlasStrainVector();
+    const FloatArray &givePlasStrainVector();
+    const FloatArray &giveTempPlasStrainVector();
+    const FloatArray &giveTempIncPlasStrainVector();
 
     void setTempAlpha(double al) { tempAlpha = al; }
     void setTempDam(double da) { tempDam = da; }

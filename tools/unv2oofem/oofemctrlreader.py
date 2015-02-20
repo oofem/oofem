@@ -242,9 +242,9 @@ class CTRLParser:
         self.nic=int(dataline[7])
         self.nltf=int(dataline[9])
         
-        if len(dataline)>=11:
-            if dataline[10].lower()=="nxfemman":
-                self.nxfemman=int(dataline[11])
+        xmanInd = dataline.index("nxfemman")
+        if xmanInd != -1:
+            self.nxfemman = int(dataline[xmanInd+1])
 
         #read crossSect, material, bc, ic, and lft records into footer
         count = 0

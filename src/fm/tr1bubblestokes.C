@@ -67,14 +67,13 @@ Tr1BubbleStokes :: Tr1BubbleStokes(int n, Domain *aDomain) : FMElement(n, aDomai
     this->numberOfDofMans = 3;
     this->numberOfGaussPoints = 7;
 
-    this->bubble = new ElementDofManager(1, aDomain, this);
-    this->bubble->appendDof( new MasterDof(this->bubble, V_u) );
-    this->bubble->appendDof( new MasterDof(this->bubble, V_v) );
+    this->bubble.reset( new ElementDofManager(1, aDomain, this) );
+    this->bubble->appendDof( new MasterDof(this->bubble.get(), V_u) );
+    this->bubble->appendDof( new MasterDof(this->bubble.get(), V_v) );
 }
 
 Tr1BubbleStokes :: ~Tr1BubbleStokes()
 {
-    delete this->bubble;
 }
 
 void Tr1BubbleStokes :: computeGaussPoints()
@@ -109,7 +108,7 @@ int Tr1BubbleStokes :: giveNumberOfInternalDofManagers() const
 
 DofManager *Tr1BubbleStokes :: giveInternalDofManager(int i) const
 {
-    return this->bubble;
+    return this->bubble.get();
 }
 
 double Tr1BubbleStokes :: computeVolumeAround(GaussPoint *gp)
