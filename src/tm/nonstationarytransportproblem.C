@@ -544,36 +544,24 @@ NonStationaryTransportProblem :: giveElementCharacteristicMatrix(FloatMatrix &an
     // element class level
 
     if ( ( type == NSTP_MidpointLhs ) || ( type == NSTP_MidpointRhs ) ) {
-        Element *element;
+        Element *element = domain->giveElement(num);
         FloatMatrix charMtrx1, charMtrx2;
 
-        element = domain->giveElement(num);
         element->giveCharacteristicMatrix(answer, TangentStiffnessMatrix, tStep);
-        element->giveCharacteristicMatrix(charMtrx2, CapacityMatrix, tStep);
 
         if ( lumpedCapacityStab ) {
-            int size = charMtrx2.giveNumberOfRows();
-            for ( int i = 1; i <= size; i++ ) {
-                double s = 0.0;
-                for ( int j = 1; j <= size; j++ ) {
-                    s += charMtrx2.at(i, j);
-                    charMtrx2.at(i, j) = 0.0;
-                }
-
-                charMtrx2.at(i, i) = s;
-            }
+            element->giveCharacteristicMatrix(charMtrx2, LumpedMassMatrix, tStep);
+        } else {
+            element->giveCharacteristicMatrix(charMtrx2, MassMatrix, tStep);
         }
 
         if ( type == NSTP_MidpointLhs ) {
             answer.times(this->alpha);
-            charMtrx2.times( 1. / tStep->giveTimeIncrement() );
         } else {
             answer.times(this->alpha - 1.0);
-            charMtrx2.times( 1. / tStep->giveTimeIncrement() );
         }
 
-        answer.add(charMtrx2);
-        return;
+        answer.add(1. / tStep->giveTimeIncrement(), charMtrx2);
     } else {
         EngngModel :: giveElementCharacteristicMatrix(answer, num, type, tStep, domain);
     }

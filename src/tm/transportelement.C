@@ -94,8 +94,18 @@ TransportElement :: giveCharacteristicMatrix(FloatMatrix &answer,
         answer.add(tmp);
     } else if ( mtrx == ConductivityMatrix ) {
         this->computeConductivityMatrix(answer, Conductivity, tStep);
-    } else if ( mtrx == CapacityMatrix ) {
+    } else if ( mtrx == CapacityMatrix || mtrx == MassMatrix ) {
         this->computeCapacityMatrix(answer, tStep);
+    } else if ( mtrx == LumpedMassMatrix ) {
+        this->computeCapacityMatrix(answer, tStep);
+        for ( int i = 1; i <= answer.giveNumberOfRows(); i++ ) {
+            double s = 0.0;
+            for ( int j = 1; j <= answer.giveNumberOfColumns(); j++ ) {
+                s += answer.at(i, j);
+                answer.at(i, j) = 0.0;
+            }
+            answer.at(i, i) = s;
+        }
     } else if ( mtrx == LHSBCMatrix ) {
         this->computeBCMtrxAt(answer, tStep, VM_Total);
     } else if ( mtrx == IntSourceLHSMatrix ) {
