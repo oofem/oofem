@@ -492,49 +492,49 @@ DKTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
         help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         this->computeShearForces(help, gp, tStep); // postprocess shear forces
         if ( type == IST_ShellForceTensor ) {
-            answer.at(1) = 0.0; // nx
-            answer.at(2) = 0.0; // vxy
-            answer.at(3) = help.at(4); // vxz
-            answer.at(4) = 0.0; // vyx
-            answer.at(5) = 0.0; // ny
-            answer.at(6) = help.at(5); // vyz
-            answer.at(7) = help.at(4); // vzx
-            answer.at(8) = help.at(5); // vzy
-            answer.at(9) = 0.0; // nz
+            answer.at(1) = 0.0; // n_x
+            answer.at(2) = 0.0; // v_xy
+            answer.at(3) = help.at(4); // v_xz
+            answer.at(4) = 0.0; // v_yx
+            answer.at(5) = 0.0; // n_y
+            answer.at(6) = help.at(5); // v_yz
+            answer.at(7) = help.at(4); // v_zx
+            answer.at(8) = help.at(5); // v_zy
+            answer.at(9) = 0.0; // n_z
         } else {
-            answer.at(1) = help.at(1); // mx
-            answer.at(2) = help.at(3); // mxy
-            answer.at(3) = 0.0;      // mxz
-            answer.at(4) = help.at(3); // mxy
-            answer.at(5) = help.at(2); // my
-            answer.at(6) = 0.0;      // myz
-            answer.at(7) = 0.0;      // mzx
-            answer.at(8) = 0.0;      // mzy
-            answer.at(9) = 0.0;      // mz
+            answer.at(1) = help.at(1); // m_x
+            answer.at(2) = help.at(3); // m_xy
+            answer.at(3) = 0.0;      // m_xz
+            answer.at(4) = help.at(3); // m_xy
+            answer.at(5) = help.at(2); // m_y
+            answer.at(6) = 0.0;      // m_yz
+            answer.at(7) = 0.0;      // m_zx
+            answer.at(8) = 0.0;      // m_zy
+            answer.at(9) = 0.0;      // m_z
         }
         return 1;
     } else if ( ( type == IST_ShellStrainTensor )  || ( type == IST_ShellCurvatureTensor ) ) {
         help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
-        if ( type == IST_ShellForceTensor ) {
-            answer.at(1) = 0.0; // nx
-            answer.at(2) = 0.0; // vxy
-            answer.at(3) = help.at(4); // vxz
-            answer.at(4) = 0.0; // vyx
-            answer.at(5) = 0.0; // ny
-            answer.at(6) = help.at(5); // vyz
-            answer.at(7) = help.at(4); // vzx
-            answer.at(8) = help.at(5); // nzy
-            answer.at(9) = 0.0; // nz
+        if ( type == IST_ShellStrainTensor ) {
+            answer.at(1) = 0.0; // n_x
+            answer.at(2) = 0.0; // v_xy
+            answer.at(3) = help.at(4); // v_xz
+            answer.at(4) = 0.0; // v_yx
+            answer.at(5) = 0.0; // n_y
+            answer.at(6) = help.at(5); // v_yz
+            answer.at(7) = help.at(4); // v_zx
+            answer.at(8) = help.at(5); // v_zy
+            answer.at(9) = 0.0; // n_z
         } else {
-            answer.at(1) = help.at(1); // mx
-            answer.at(2) = help.at(3); // mxy
-            answer.at(3) = 0.0;      // mxz
-            answer.at(4) = help.at(3); // mxy
-            answer.at(5) = help.at(2); // my
-            answer.at(6) = 0.0;      // myz
-            answer.at(7) = 0.0;      // mzx
-            answer.at(8) = 0.0;      // mzy
-            answer.at(9) = 0.0;      // mz
+            answer.at(1) = help.at(1); // k_x
+            answer.at(2) = help.at(3); // k_xy
+            answer.at(3) = 0.0;      // k_xz
+            answer.at(4) = help.at(3); // k_xy
+            answer.at(5) = help.at(2); // k_y
+            answer.at(6) = 0.0;      // k_yz
+            answer.at(7) = 0.0;      // k_zx
+            answer.at(8) = 0.0;      // k_zy
+            answer.at(9) = 0.0;      // k_z
         }
         return 1;
     } else {
