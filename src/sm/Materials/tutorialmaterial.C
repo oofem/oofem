@@ -36,12 +36,13 @@
 #include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
+#include "dynamicinputrecord.h"
 #include "classfactory.h"
 
 namespace oofem {
 REGISTER_Material(TutorialMaterial);
 
-TutorialMaterial :: TutorialMaterial(int n, Domain *d) : IsotropicLinearElasticMaterial(n, d)
+TutorialMaterial :: TutorialMaterial(int n, Domain *d) :StructuralMaterial(n, d),  D(n, d)
 {}
 
 TutorialMaterial :: ~TutorialMaterial()
@@ -52,13 +53,25 @@ TutorialMaterial :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
 
-    IsotropicLinearElasticMaterial :: initializeFrom(ir);
+    StructuralMaterial :: initializeFrom(ir);
+    D.initializeFrom(ir);
     
     IR_GIVE_FIELD(ir, this->sig0, _IFT_TutorialMaterial_yieldstress);
 
     IR_GIVE_FIELD(ir, this->H, _IFT_TutorialMaterial_hardeningmoduli);
 
     return IRRT_OK;
+}
+
+
+void
+TutorialMaterial :: giveInputRecord(DynamicInputRecord &ir)
+{
+    StructuralMaterial :: giveInputRecord(ir);
+    D.giveInputRecord(ir);
+    
+    ir.setField(this->sig0, _IFT_TutorialMaterial_yieldstress);
+    ir.setField(this->H, _IFT_TutorialMaterial_hardeningmoduli);
 }
 
 
@@ -80,7 +93,7 @@ TutorialMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
     
     // Compute trial stress = sig_tr = sig_old + E*delta_eps
     FloatMatrix elasticStiffness;
-    IsotropicLinearElasticMaterial :: give3dMaterialStiffnessMatrix(elasticStiffness, TangentStiffness, gp, tStep);
+    D.give3dMaterialStiffnessMatrix(elasticStiffness, TangentStiffness, gp, tStep);
     FloatArray trialStress, deltaStress;
     deltaStress.beProductOf(elasticStiffness, deltaStrain);   // linear increment
     trialStress = status->giveStressVector(); // last equilibriated stress
@@ -99,6 +112,7 @@ TutorialMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
     if ( phiTrial < 0.0 ) { // elastic
         answer = trialStress;
     } else { // plastic loading
+        double G = D.giveShearModulus();
         double mu = phiTrial / ( 3.0 * G + H ); // plastic multiplier
         answer = devTrialStress * ( 1.0 - 3.0*G*mu/effectiveTrialStress); // radial return
         answer.add(sphTrialStress);
@@ -164,11 +178,12 @@ TutorialMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRespon
     double phiTrial = effectiveTrialStress - ( this->sig0 + kappa );
     
     FloatMatrix elasticStiffness;
-    IsotropicLinearElasticMaterial :: give3dMaterialStiffnessMatrix(elasticStiffness, TangentStiffness, gp, tStep);
+    D.give3dMaterialStiffnessMatrix(elasticStiffness, TangentStiffness, gp, tStep);
     
     if ( phiTrial < 0.0 ) { // elastic
         answer = elasticStiffness;
     } else { // plastic loading
+        double G = D.giveShearModulus();
         // E_t = elasticStiffness - correction
         // correction =  2.0 * G * ( 2.0 * G / h *( sig0 + kappa ) / sigtre *openProd(nu,nu) + mu*3*G/sigtre *Idev);
         double h = 3.0 * G + H;

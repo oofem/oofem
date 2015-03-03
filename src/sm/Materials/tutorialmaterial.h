@@ -35,8 +35,9 @@
 #ifndef tutorialmaterial_h
 #define tutorialmaterial_h
 
-#include "Materials/isolinearelasticmaterial.h"
+#include "Materials/structuralmaterial.h"
 #include "Materials/structuralms.h"
+#include "Materials/isolinearelasticmaterial.h"
 
 ///@name Input fields for TutorialMaterial
 //@{
@@ -53,7 +54,7 @@ class Domain;
  * Both kinematic and isotropic hardening is supported.
  * @author Jim Brozoulis
  */
-class TutorialMaterial : public IsotropicLinearElasticMaterial
+class TutorialMaterial : public StructuralMaterial
 {
 protected:
     /// Hardening modulus.
@@ -61,12 +62,15 @@ protected:
 
     /// Initial (uniaxial) yield stress.
     double sig0;
+    
+    IsotropicLinearElasticMaterial D;
 
 public:
     TutorialMaterial(int n, Domain * d);
     virtual ~TutorialMaterial();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &ir);
     virtual const char *giveInputRecordName() const { return _IFT_TutorialMaterial_Name; }
     virtual const char *giveClassName() const { return "TutorialMaterial"; }
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return true; }
