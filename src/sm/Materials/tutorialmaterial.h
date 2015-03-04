@@ -80,12 +80,13 @@ public:
     virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
     
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    
+
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+
 protected:
     static void giveDeviatoricProjectionMatrix(FloatMatrix &answer);
     
     static double computeJ2InvariantOf(const FloatArray &sigV);
-    //double evaluateYieldFunction();
 
     static void computeSphDevPartOf(const FloatArray &sigV, FloatArray &sigSph, FloatArray &sigDev); 
 };

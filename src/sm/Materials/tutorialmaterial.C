@@ -202,6 +202,19 @@ TutorialMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRespon
 }
 
 
+int
+TutorialMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
+{
+    TutorialMaterialStatus *status = static_cast< TutorialMaterialStatus * >( this->giveStatus(gp) );
+    if ( type == IST_PlasticStrainTensor ) {
+        answer = status->givePlasticStrain();
+        return 1;
+    } else {
+        return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
+    }
+}
+
+
 //=============================================================================
 
 

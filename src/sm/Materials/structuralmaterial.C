@@ -50,18 +50,17 @@
 namespace oofem {
 StructuralMaterial :: StructuralMaterial(int n, Domain * d) : Material(n, d) 
 { 
-  
-      // Voigt index map
-      vIindex.resize(3);
-      vIindex[0] = { 1, 6, 5 };
-      vIindex[1] = { 9, 2, 4 };
-      vIindex[2] = { 8, 7, 3 };  
+    // Voigt index map
+    vIindex.resize(3);
+    vIindex[0] = { 1, 6, 5 };
+    vIindex[1] = { 9, 2, 4 };
+    vIindex[2] = { 8, 7, 3 };  
       
-      // Symmetric Voigt index map
-      svIndex.resize(3);
-      svIndex[0] = { 1, 6, 5 };
-      svIndex[1] = { 6, 2, 4 };
-      svIndex[2] = { 5, 4, 3 };       
+    // Symmetric Voigt index map
+    svIndex.resize(3);
+    svIndex[0] = { 1, 6, 5 };
+    svIndex[1] = { 6, 2, 4 };
+    svIndex[2] = { 5, 4, 3 };       
     
 }  
 int
