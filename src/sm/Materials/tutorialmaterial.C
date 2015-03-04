@@ -178,7 +178,7 @@ TutorialMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRespon
     double phiTrial = effectiveTrialStress - ( this->sig0 + kappa );
     
     FloatMatrix elasticStiffness;
-    D.give3dMaterialStiffnessMatrix(elasticStiffness, TangentStiffness, gp, tStep);
+    D.give3dMaterialStiffnessMatrix(elasticStiffness, mode, gp, tStep);
     
     if ( phiTrial < 0.0 ) { // elastic
         answer = elasticStiffness;
@@ -206,25 +206,23 @@ TutorialMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRespon
 
 
 TutorialMaterialStatus :: TutorialMaterialStatus(int n, Domain * d, GaussPoint * g) :
-StructuralMaterialStatus(n, d, g)
-{
-    this->tempPlasticStrain.clear();
-    this->plasticStrain.clear();
-    this->tempKappa = 0.0;
-    this->kappa= 0.0;
-    tempDevTrialStress.resize(6);
-    tempDevTrialStress.zero();
-}
+    StructuralMaterialStatus(n, d, g),
+    tempPlasticStrain(6), plasticStrain(6),
+    tempDevTrialStress(6),
+    tempKappa(0.), kappa(0.)
+{ }
 
 void
 TutorialMaterialStatus :: initTempStatus()
 {
-    StructuralMaterialStatus :: initTempStatus();
+    //StructuralMaterialStatus :: initTempStatus();
 
-    if ( plasticStrain.giveSize() == 0 ) {
-        plasticStrain.resize(6);
-        plasticStrain.zero();
-    }
+    // reset temp vars.
+    tempStressVector = stressVector;
+    tempStrainVector = strainVector;
+    tempPVector      = PVector;
+    tempFVector      = FVector;
+
 
     tempPlasticStrain = plasticStrain;
     tempKappa = kappa;
