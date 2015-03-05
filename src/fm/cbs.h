@@ -61,6 +61,18 @@
 //@}
 
 namespace oofem {
+
+/**
+ * Callback class for assembling CBS pressure matrices
+ * @author Mikael Öhman
+ */
+class PressureLhsAssembler : public MatrixAssembler
+{
+public:
+    virtual void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const;
+};
+
+
 /**
  * Specialized numbering scheme for CBS algorithm, since it needs velocities separately.
  */

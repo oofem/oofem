@@ -541,7 +541,6 @@ void MixedGradientPressureNeumann :: computeFields(FloatArray &sigmaDev, double 
 
 void MixedGradientPressureNeumann :: computeTangents(FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, TimeStep *tStep)
 {
-    //double size = this->domainSize();
     // Fetch some information from the engineering model
     EngngModel *rve = this->giveDomain()->giveEngngModel();
     ///@todo Get this from engineering model
@@ -560,7 +559,7 @@ void MixedGradientPressureNeumann :: computeTangents(FloatMatrix &Ed, FloatArray
         OOFEM_ERROR("Couldn't create sparse matrix of type %d\n", stype);
     }
     Kff->buildInternalStructure(rve, this->domain->giveNumber(), fnum);
-    rve->assemble(*Kff, tStep,TangentStiffnessMatrix, fnum, fnum, this->domain);
+    rve->assemble(*Kff, tStep, TangentAssembler(TangentStiffness), fnum, fnum, this->domain);
 
     // Setup up indices and locations
     int neq = Kff->giveNumberOfRows();

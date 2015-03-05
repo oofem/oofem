@@ -384,7 +384,7 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         massMatrix->buildInternalStructure( this, di, EModelDefaultEquationNumbering() );
 
         // Assemble mass matrix
-        this->assemble( *massMatrix, tStep, MassMatrix,
+        this->assemble( *massMatrix, tStep, MassMatrixAssembler(),
                        EModelDefaultEquationNumbering(), this->giveDomain(di) );
 
         // Initialize vectors
@@ -527,34 +527,6 @@ NonLinearDynamic :: determineConstants(TimeStep *tStep)
 }
 
 
-void
-NonLinearDynamic :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
-                                                    CharType type, TimeStep *tStep, Domain *domain)
-{
-    // We don't directly call element ->GiveCharacteristicMatrix() function, because some
-    // engngm classes may require special modification of base types supported on
-    // element class level.
-
-    if ( type == EffectiveStiffnessMatrix ) {
-        Element *element;
-        FloatMatrix charMtrx;
-
-        element = domain->giveElement(num);
-        element->giveCharacteristicMatrix(answer, TangentStiffnessMatrix, tStep);
-        answer.times(1 + this->delta * a1);
-
-        element->giveCharacteristicMatrix(charMtrx, MassMatrix, tStep);
-        charMtrx.times(this->a0 + this->eta * this->a1);
-
-        answer.add(charMtrx);
-
-        return;
-    } else {
-        StructuralEngngModel :: giveElementCharacteristicMatrix(answer, num, type, tStep, domain);
-    }
-}
-
-
 void NonLinearDynamic :: updateYourself(TimeStep *tStep)
 {
     totIterations = 0;
@@ -591,10 +563,11 @@ void NonLinearDynamic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
 #ifdef TIME_REPORT
             timer.startTimer();
 #endif
+#if 1
             effectiveStiffnessMatrix->zero();
-            this->assemble(*effectiveStiffnessMatrix, tStep, EffectiveStiffnessMatrix,
+            this->assemble(*effectiveStiffnessMatrix, tStep, EffectiveTangentAssembler(false, 1 + this->delta * a1,  this->a0 + this->eta * this->a1),
                            EModelDefaultEquationNumbering(), d);
-#if 0
+#else
             this->assemble(effectiveStiffnessMatrix, tStep, TangentStiffnessMatrix,
                            EModelDefaultEquationNumbering(), d);
             effectiveStiffnessMatrix->times(1. + this->delta * a1);
@@ -784,7 +757,7 @@ NonLinearDynamic :: updateDomainLinks()
 
 
 void
-NonLinearDynamic :: assemble(SparseMtrx &answer, TimeStep *tStep, CharType type,
+NonLinearDynamic :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAssembler &ma,
                              const UnknownNumberingScheme &s, Domain *domain)
 {
 #ifdef TIME_REPORT
@@ -792,9 +765,9 @@ NonLinearDynamic :: assemble(SparseMtrx &answer, TimeStep *tStep, CharType type,
     timer.startTimer();
 #endif
 
-    EngngModel :: assemble(answer, tStep, type, s, domain);
+    EngngModel :: assemble(answer, tStep, ma, s, domain);
 
-    if ( ( nonlocalStiffnessFlag ) && ( type == TangentStiffnessMatrix ) ) {
+    if ( ( nonlocalStiffnessFlag ) && dynamic_cast< const TangentAssembler* >(&ma) ) {
         // Add nonlocal contribution.
         for ( auto &elem : domain->giveElements() ) {
             static_cast< NLStructuralElement * >( elem.get() )->addNonlocalStiffnessContributions(answer, s, tStep);

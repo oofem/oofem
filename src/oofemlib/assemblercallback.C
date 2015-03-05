@@ -116,32 +116,6 @@ void OldVectorAssembler :: vectorFromNodeLoad(FloatArray& vec, DofManager& dman,
     dman.computeLoadVector(vec, load, this->type, tStep, mode);
 }
 
-
-void OldMatrixAssembler :: matrixFromElement(FloatMatrix& mat, Element& element, TimeStep* tStep) const
-{
-    element.giveCharacteristicMatrix(mat, this->type, tStep);
-}
-
-void OldMatrixAssembler :: matrixFromLoad(FloatMatrix& mat, Element& element, BodyLoad* load, TimeStep* tStep) const
-{
-    mat.clear();
-}
-
-void OldMatrixAssembler :: matrixFromBoundaryLoad(FloatMatrix& mat, Element& element, BoundaryLoad* load, int boundary, TimeStep* tStep) const
-{
-    mat.clear();
-}
-
-void OldMatrixAssembler :: matrixFromEdgeLoad(FloatMatrix& mat, Element& element, BoundaryLoad* load, int edge, TimeStep* tStep) const
-{
-    mat.clear();
-}
-
-void OldMatrixAssembler :: assembleFromActiveBC(SparseMtrx &k, ActiveBoundaryCondition &bc, TimeStep* tStep, const UnknownNumberingScheme &s_r, const UnknownNumberingScheme &s_c) const
-{
-    bc.assemble(k, tStep, type, s_r, s_c);
-}
-
 #endif
 
 
@@ -234,12 +208,25 @@ void TangentAssembler :: assembleFromActiveBC(SparseMtrx &k, ActiveBoundaryCondi
 
 
 
-#if 0
 void MassMatrixAssembler :: matrixFromElement(FloatMatrix& mat, Element& element, TimeStep* tStep) const
 {
     element.giveCharacteristicMatrix(mat, MassMatrix, tStep);
     //element.computeMassMatrix(mat, tStep);
 }
-#endif
+
+
+
+EffectiveTangentAssembler :: EffectiveTangentAssembler(bool lumped, double k, double m) :
+    MatrixAssembler(), lumped(lumped), k(k), m(m)
+{}
+
+void EffectiveTangentAssembler :: matrixFromElement(FloatMatrix &answer, Element &el, TimeStep *tStep) const
+{
+    FloatMatrix massMatrix;
+    el.giveCharacteristicMatrix(answer, TangentStiffnessMatrix, tStep);
+    answer.times(this->k);
+    el.giveCharacteristicMatrix(massMatrix, this->lumped ? LumpedMassMatrix : MassMatrix, tStep);
+    answer.add(this->m, massMatrix);
+}
 
 }

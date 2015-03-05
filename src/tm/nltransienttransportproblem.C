@@ -171,11 +171,11 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
         if ( ( nite == 1 ) || ( NR_Mode == nrsolverFullNRM ) || ( ( NR_Mode == nrsolverAccelNRM ) && ( nite % MANRMSteps == 0 ) ) ) {
             conductivityMatrix->zero();
             //Assembling left hand side - start with conductivity matrix
-            this->assemble( *conductivityMatrix, & TauStep, IntSourceLHSMatrix,
+            this->assemble( *conductivityMatrix, & TauStep, IntSourceLHSAssembler(),
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
             conductivityMatrix->times(alpha);
             //Add capacity matrix
-            this->assemble( *conductivityMatrix, & TauStep, NSTP_MidpointLhs,
+            this->assemble( *conductivityMatrix, & TauStep, MidpointLhsAssembler(lumpedCapacityStab, alpha),
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
 

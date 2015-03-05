@@ -152,11 +152,11 @@ void TransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
         } else {
             capacityMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
             capacityMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
-            this->assemble( *capacityMatrix, tStep, CapacityMatrix, EModelDefaultEquationNumbering(), d );
+            this->assemble( *capacityMatrix, tStep, MassMatrixAssembler(), EModelDefaultEquationNumbering(), d );
         }
         
         if ( this->keepTangent ) {
-            this->assemble( *effectiveMatrix, tStep, TangentStiffnessMatrix,
+            this->assemble( *effectiveMatrix, tStep, TangentAssembler(TangentStiffness),
                            EModelDefaultEquationNumbering(), d );
             effectiveMatrix->times(alpha);
             if ( lumped ) {
@@ -242,7 +242,7 @@ TransientTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn
         // K_eff = (a*K + C/dt)
         if ( !this->keepTangent ) {
             this->effectiveMatrix->zero();
-            this->assemble( *effectiveMatrix, tStep, TangentStiffnessMatrix,
+            this->assemble( *effectiveMatrix, tStep, TangentAssembler(TangentStiffness),
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
             effectiveMatrix->times(alpha);
             if ( lumped ) {

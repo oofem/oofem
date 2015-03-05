@@ -284,10 +284,10 @@ SUPG :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
     } else if ( cmpn == NonLinearLhs ) {
         this->lhs->zero();
         //if ( 1 ) { //if ((nite > 5)) // && (rnorm < 1.e4))
-        this->assemble( *lhs, tStep, TangentStiffnessMatrix,
+        this->assemble( *lhs, tStep, SUPGTangentAssembler(TangentStiffness, lscale, dscale, uscale, alpha),
                         EModelDefaultEquationNumbering(), d );
        // } else {
-       //     this->assemble( lhs, tStep, SecantStiffnessMatrix,
+       //     this->assemble( lhs, tStep, SUPGTangentAssembler(SecantStiffness),
        //                     EModelDefaultEquationNumbering(), d );
        // }
         return;
@@ -517,10 +517,10 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
             // momentum balance part
             lhs->zero();
             if ( 1 ) { //if ((nite > 5)) // && (rnorm < 1.e4))
-                this->assemble( *lhs, tStep, TangentStiffnessMatrix,
+                this->assemble( *lhs, tStep, SUPGTangentAssembler(TangentStiffness, lscale, dscale, uscale, alpha),
                                EModelDefaultEquationNumbering(), this->giveDomain(1) );
             } else {
-                this->assemble( *lhs, tStep, SecantStiffnessMatrix,
+                this->assemble( *lhs, tStep, SUPGTangentAssembler(SecantStiffness, lscale, dscale, uscale, alpha),
                                EModelDefaultEquationNumbering(), this->giveDomain(1) );
             }
         }
@@ -986,78 +986,6 @@ SUPG :: updateElementsForNewInterfacePosition(TimeStep *tStep)
     for ( auto &elem : domain->giveElements() ) {
         SUPGElement *ePtr = static_cast< SUPGElement * >( elem.get() );
         ePtr->updateElementForNewInterfacePosition(tStep);
-    }
-}
-
-
-void
-SUPG :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num, CharType type, TimeStep *tStep, Domain *domain)
-{
-    ///@todo Either we do this logic here, or we move it to the element and lets the element ask for "alpha" and the scaling variables.
-    if ( type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == ElasticStiffnessMatrix ) {
-        SUPGElement *element = static_cast< SUPGElement * >( domain->giveElement(num) );
-        IntArray vloc, ploc;
-        FloatMatrix h;
-        int size = element->computeNumberOfDofs();
-        element->giveLocalVelocityDofMap(vloc);
-        element->giveLocalPressureDofMap(ploc);
-        answer.resize(size, size);
-        answer.zero();
-
-        element->computeAccelerationTerm_MB(h, tStep);
-        answer.assemble(h, vloc);
-        element->computeAdvectionDerivativeTerm_MB(h, tStep);
-        h.times( alpha * tStep->giveTimeIncrement() );
-        answer.assemble(h, vloc);
-        if ( type == TangentStiffnessMatrix ) {
-            element->computeDiffusionDerivativeTerm_MB(h, TangentStiffness, tStep);
-        } else if ( type == ElasticStiffnessMatrix ) {
-            element->computeDiffusionDerivativeTerm_MB(h, ElasticStiffness, tStep);
-        } else if ( type == SecantStiffnessMatrix ) {
-            element->computeDiffusionDerivativeTerm_MB(h, SecantStiffness, tStep);
-        } else {
-            OOFEM_ERROR("CharType not supported");
-        }
-
-        h.times( alpha * tStep->giveTimeIncrement() );
-        answer.assemble(h, vloc);
-        element->computePressureTerm_MB(h, tStep);
-        answer.assemble(h, vloc, ploc);
-        element->computeLSICStabilizationTerm_MB(h, tStep);
-        h.times( alpha * tStep->giveTimeIncrement() * lscale / ( dscale * uscale * uscale ) );
-        answer.assemble(h, vloc);
-        element->computeBCLhsTerm_MB(h, tStep);
-        if ( h.isNotEmpty() ) {
-            h.times( alpha * tStep->giveTimeIncrement() );
-            answer.assemble(h, vloc);
-        }
-
-        element->computeBCLhsPressureTerm_MB(h, tStep);
-        if ( h.isNotEmpty() ) {
-            answer.assemble(h, vloc, ploc);
-        }
-
-        // conservation eq part
-        element->computeLinearAdvectionTerm_MC(h, tStep);
-        h.times( alpha * tStep->giveTimeIncrement() * 1.0 / ( dscale * uscale ) );
-        answer.assemble(h, ploc, vloc);
-        element->computeAdvectionDerivativeTerm_MC(h, tStep);
-        h.times( alpha * tStep->giveTimeIncrement() );
-        answer.assemble(h, ploc, vloc);
-        element->computeAccelerationTerm_MC(h, tStep);
-        answer.assemble(h, ploc, vloc);
-        element->computeBCLhsPressureTerm_MC(h, tStep);
-        if ( h.isNotEmpty() ) {
-            answer.assemble(h, ploc, vloc);
-        }
-
-        element->computeDiffusionDerivativeTerm_MC(h, tStep);
-        h.times( alpha * tStep->giveTimeIncrement() );
-        answer.assemble(h, ploc, vloc);
-        element->computePressureTerm_MC(h, tStep);
-        answer.assemble(h, ploc);
-    } else {
-        EngngModel :: giveElementCharacteristicMatrix(answer, num, type, tStep, domain);
     }
 }
 

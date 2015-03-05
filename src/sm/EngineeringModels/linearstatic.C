@@ -203,7 +203,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
 
         stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
 
-        this->assemble( *stiffnessMatrix, tStep, TangentStiffnessMatrix,
+        this->assemble( *stiffnessMatrix, tStep, TangentAssembler(TangentStiffness),
                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
         initFlag = 0;

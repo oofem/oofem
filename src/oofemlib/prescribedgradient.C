@@ -50,6 +50,7 @@
 #include "unknownnumberingscheme.h"
 #include "sparsemtrx.h"
 #include "sparselinsystemnm.h"
+#include "assemblercallback.h"
 
 #include <cmath>
 
@@ -206,10 +207,10 @@ void PrescribedGradient :: computeTangent(FloatMatrix &tangent, TimeStep *tStep)
     Kfp->buildInternalStructure(rve, 1, fnum, pnum);
     Kpf->buildInternalStructure(rve, 1, pnum, fnum);
     Kpp->buildInternalStructure(rve, 1, pnum);
-    rve->assemble(*Kff, tStep,TangentStiffnessMatrix, fnum, this->domain);
-    rve->assemble(*Kfp, tStep,TangentStiffnessMatrix, fnum, pnum, this->domain);
-    rve->assemble(*Kpf, tStep,TangentStiffnessMatrix, pnum, fnum, this->domain);
-    rve->assemble(*Kpp, tStep,TangentStiffnessMatrix, pnum, this->domain);
+    rve->assemble(*Kff, tStep, TangentAssembler(TangentStiffness), fnum, this->domain);
+    rve->assemble(*Kfp, tStep, TangentAssembler(TangentStiffness), fnum, pnum, this->domain);
+    rve->assemble(*Kpf, tStep, TangentAssembler(TangentStiffness), pnum, fnum, this->domain);
+    rve->assemble(*Kpp, tStep, TangentAssembler(TangentStiffness), pnum, this->domain);
 
     FloatMatrix C, X, Kpfa, KfpC, a;
 

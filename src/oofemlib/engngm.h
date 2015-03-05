@@ -840,18 +840,6 @@ public:
     virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) { return 0; }
 
     /**
-     * Returns characteristic matrix of element. The Element::giveCharacteristicMatrix function
-     * should not be called directly, because EngngModel may require some special modification
-     * of characteristic matrices supported on element level. But default implementation does
-     * the direct call to element level.
-     * @param answer Characteristic matrix.
-     * @param num Element number.
-     * @param type Type of matrix requested.
-     * @param tStep Time step when response is computed.
-     * @param domain Source domain.
-     */
-    virtual void giveElementCharacteristicMatrix(FloatMatrix &answer, int num, CharType type, TimeStep *tStep, Domain *domain);
-    /**
      * Returns characteristic vector of element. The Element::giveCharacteristicVector function
      * should not be called directly, because EngngModel may require some special modification
      * of characteristic vectors supported on element level. But default implementation does
@@ -885,7 +873,7 @@ public:
      * @param domain Source domain.
      */
     virtual void assemble(SparseMtrx &answer, TimeStep *tStep,
-                          CharType type, const UnknownNumberingScheme &s, Domain *domain);
+                          const MatrixAssembler &ma, const UnknownNumberingScheme &s, Domain *domain);
     /**
      * Assembles characteristic matrix of required type into given sparse matrix.
      * @param answer assembled matrix
@@ -896,7 +884,7 @@ public:
      * @param domain Source domain.
      */
     virtual void assemble(SparseMtrx &answer, TimeStep *tStep,
-                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain);
+                          const MatrixAssembler &ma, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain);
     /**
      * Assembles characteristic vector of required type from dofManagers, element, and active boundary conditions, into given vector.
      * This routine is simple a convenient call to all three subroutines, since this is most likely what any engineering model will want to do.

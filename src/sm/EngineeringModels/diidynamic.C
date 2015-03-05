@@ -257,7 +257,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
 
         stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
 
-        this->assemble(*stiffnessMatrix, tStep, EffectiveStiffnessMatrix,
+        this->assemble(*stiffnessMatrix, tStep, EffectiveTangentAssembler(false, 1 + this->delta * a1,  this->a0 + this->eta * this->a1),
                        EModelDefaultEquationNumbering(), domain);
 
         help.resize(neq);
@@ -283,7 +283,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
         OOFEM_LOG_DEBUG("Assembling stiffness matrix\n");
 #endif
         stiffnessMatrix->zero();
-        this->assemble(*stiffnessMatrix, tStep, EffectiveStiffnessMatrix,
+        this->assemble(*stiffnessMatrix, tStep, EffectiveTangentAssembler(false, 1 + this->delta * a1,  this->a0 + this->eta * this->a1),
                        EModelDefaultEquationNumbering(), domain);
     }
 
@@ -377,34 +377,6 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
             + a6 *previousAccelerationVector.at(i)
             + a7 *accelerationVector.at(i);
         }
-    }
-}
-
-
-void
-DIIDynamic :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
-                                              CharType type, TimeStep *tStep, Domain *domain)
-{
-    // We don't directly call element ->GiveCharacteristicMatrix() function, because some
-    // engngm classes may require special modification of base types supported on
-    // element class level.
-
-    if ( type == EffectiveStiffnessMatrix ) {
-        Element *element;
-        FloatMatrix charMtrx;
-
-        element = domain->giveElement(num);
-        element->giveCharacteristicMatrix(answer, TangentStiffnessMatrix, tStep);
-        answer.times(1 + this->delta * a1);
-
-        element->giveCharacteristicMatrix(charMtrx, MassMatrix, tStep);
-        charMtrx.times(this->a0 + this->eta * this->a1);
-
-        answer.add(charMtrx);
-
-        return;
-    } else {
-        StructuralEngngModel :: giveElementCharacteristicMatrix(answer, num, type, tStep, domain);
     }
 }
 

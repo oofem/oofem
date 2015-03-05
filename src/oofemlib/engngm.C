@@ -711,8 +711,8 @@ void EngngModel :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
     iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
 }
 
-void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep,
-                            CharType type, const UnknownNumberingScheme &s, Domain *domain)
+void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAssembler &ma,
+                            const UnknownNumberingScheme &s, Domain *domain)
 //
 // assembles matrix
 //
@@ -730,18 +730,15 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep,
         // skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. They introduction is necessary to
         // allow local averaging on domains without fine grain communication between domains).
-        if ( element->giveParallelMode() == Element_remote ) {
+        if ( element->giveParallelMode() == Element_remote || !element->isActivated(tStep) ) {
             continue;
         }
 
-        if ( !element->isActivated(tStep) ) {
-            continue;
-        }
-
-        this->giveElementCharacteristicMatrix(mat, ielem, type, tStep, domain);
+        ma.matrixFromElement(mat, *element, tStep);
 
         if ( mat.isNotEmpty() ) {
-            element->giveLocationArray(loc, s);
+            ma.locationFromElement(loc, *element, s);
+            ///@todo This rotation matrix is not flexible enough.. it can only work with full size matrices and doesn't allow for flexibility in the matrixassembler.
             if ( element->giveRotationMatrix(R) ) {
                 mat.rotatedWith(R);
             }
@@ -759,12 +756,13 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep,
     for ( int i = 1; i <= nbc; ++i ) {
         ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
         if ( bc != NULL ) {
-            bc->assemble(answer, tStep, type, s, s);
+            ma.assembleFromActiveBC(answer, *bc, tStep, s, s);
         }
     }
     
     if ( domain->hasContactManager() ) {
-        domain->giveContactManager()->assembleTangentFromContacts(answer, tStep, type, s, s);
+        OOFEM_ERROR("Contant problems temporarily deactivated");
+        //domain->giveContactManager()->assembleTangentFromContacts(answer, tStep, type, s, s);
     }
     
     this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
@@ -774,8 +772,8 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep,
 }
 
 
-void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep,
-                            CharType type, const UnknownNumberingScheme &rs, const UnknownNumberingScheme &cs,
+void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAssembler &ma,
+                            const UnknownNumberingScheme &rs, const UnknownNumberingScheme &cs,
                             Domain *domain)
 // Same as assemble, but with different numbering for rows and columns
 {
@@ -790,19 +788,16 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep,
     for ( int ielem = 1; ielem <= nelem; ielem++ ) {
         Element *element = domain->giveElement(ielem);
 
-        if ( element->giveParallelMode() == Element_remote ) {
+        if ( element->giveParallelMode() == Element_remote || !element->isActivated(tStep) ) {
             continue;
         }
 
-        if ( !element->isActivated(tStep) ) {
-            continue;
-        }
-
-        this->giveElementCharacteristicMatrix(mat, ielem, type, tStep, domain);
+        ma.matrixFromElement(mat, *element, tStep);
         if ( mat.isNotEmpty() ) {
-            element->giveLocationArray(r_loc, rs);
-            element->giveLocationArray(c_loc, cs);
+            ma.locationFromElement(r_loc, *element, rs);
+            ma.locationFromElement(c_loc, *element, cs);
             // Rotate it
+            ///@todo This rotation matrix is not flexible enough.. it can only work with full size matrices and doesn't allow for flexibility in the matrixassembler.
             if ( element->giveRotationMatrix(R) ) {
                 mat.rotatedWith(R);
             }
@@ -820,8 +815,13 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep,
     for ( int i = 1; i <= nbc; ++i ) {
         ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
         if ( bc != NULL ) {
-            bc->assemble(answer, tStep, type, rs, cs);
+            ma.assembleFromActiveBC(answer, *bc, tStep, rs, cs);
         }
+    }
+
+    if ( domain->hasContactManager() ) {
+        OOFEM_ERROR("Contant problems temporarily deactivated");
+        //domain->giveContactManager()->assembleTangentFromContacts(answer, tStep, type, rs, cs);
     }
 
     this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
@@ -1150,13 +1150,6 @@ EngngModel :: assembleVectorFromContacts(FloatArray &answer, TimeStep *tStep, Ch
     if( domain->hasContactManager()) {
         domain->giveContactManager()->assembleVectorFromContacts(answer, tStep, type, mode, s, domain, eNorms);
     } 
-}
-
-
-void
-EngngModel :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num, CharType type, TimeStep *tStep, Domain *domain)
-{
-    domain->giveElement(num)->giveCharacteristicMatrix(answer, type, tStep);
 }
 
 

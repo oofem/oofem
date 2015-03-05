@@ -223,7 +223,7 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
 
     stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
     stiffnessMatrix->zero();
-    this->assemble( *stiffnessMatrix, tStep, TangentStiffnessMatrix,
+    this->assemble( *stiffnessMatrix, tStep, TangentAssembler(TangentStiffness),
                    EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
 #ifdef VERBOSE

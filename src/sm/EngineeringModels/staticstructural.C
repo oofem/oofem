@@ -283,7 +283,7 @@ void StaticStructural :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
         internalVarUpdateStamp = tStep->giveSolutionStateCounter(); // Hack for linearstatic
     } else if ( cmpn == NonLinearLhs ) {
         this->stiffnessMatrix->zero();
-        this->assemble(*this->stiffnessMatrix, tStep, TangentStiffnessMatrix, EModelDefaultEquationNumbering(), d);
+        this->assemble(*this->stiffnessMatrix, tStep, TangentAssembler(TangentStiffness), EModelDefaultEquationNumbering(), d);
     } else {
         OOFEM_ERROR("Unknown component");
     }

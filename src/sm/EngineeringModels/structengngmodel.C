@@ -45,6 +45,14 @@
 #include "unknownnumberingscheme.h"
 
 namespace oofem {
+
+void InitialStressMatrixAssembler :: matrixFromElement(FloatMatrix &answer, Element &el, TimeStep *tStep) const
+{
+    static_cast< StructuralElement * >( &el )->computeInitialStressMatrix(answer, tStep);
+}
+
+
+
 StructuralEngngModel :: StructuralEngngModel(int i, EngngModel *_master) : EngngModel(i, _master),
     internalVarUpdateStamp(0), internalForcesEBENorm()
 { }

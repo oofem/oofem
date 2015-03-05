@@ -43,6 +43,17 @@ namespace oofem {
 class StructuralElement;
 
 /**
+ * Callback class for assembling initial stress matrices
+ * @author Mikael Öhman
+ */
+class InitialStressMatrixAssembler : public MatrixAssembler
+{
+public:
+    virtual void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const;
+};
+
+
+/**
  * This class implements extension of EngngModel for structural models.
  * Its purpose is to declare and implement general methods for computing reaction forces.
  */

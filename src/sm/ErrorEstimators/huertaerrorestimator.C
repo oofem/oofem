@@ -3063,7 +3063,7 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
         eNorm = uNorm = 0.0;
         for ( ielem = 1; ielem <= localElemId; ielem++ ) {
             element = refinedDomain->giveElement(ielem);
-            refinedProblem->giveElementCharacteristicMatrix(mat, ielem, STIFFNESS_TYPE, refinedTStep, refinedDomain);
+            element->giveCharacteristicMatrix(mat, STIFFNESS_TYPE, refinedTStep);
 
             this->extractVectorFrom(element, elementError, elementVector, dofs, refinedTStep);
             this->extractVectorFrom(element, patchError, patchVector, dofs, refinedTStep);
@@ -3822,7 +3822,7 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
             }
 
             element = refinedDomain->giveElement(ielem);
-            refinedProblem->giveElementCharacteristicMatrix(mat, ielem, STIFFNESS_TYPE, refinedTStep, refinedDomain);
+            element->giveCharacteristicMatrix(mat, STIFFNESS_TYPE, refinedTStep);
 
             this->extractVectorFrom(element, errorSolution, errorVector, dofs, refinedTStep);
             tmpVector.beProductOf(mat, errorVector);

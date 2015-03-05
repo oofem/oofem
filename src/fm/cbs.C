@@ -56,6 +56,13 @@
 namespace oofem {
 REGISTER_EngngModel(CBS);
 
+void PressureLhsAssembler :: matrixFromElement(FloatMatrix &answer, Element &el, TimeStep *tStep) const
+{
+    static_cast< CBSElement * >( &el )->computePressureLhs(answer, tStep);
+}
+
+
+
 CBS :: CBS(int i, EngngModel* _master) : FluidModel ( i, _master ),
     PressureField ( this, 1, FT_Pressure, 1 ),
     VelocityField ( this, 1, FT_Velocity, 1 ),
@@ -251,7 +258,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
 
         lhs->buildInternalStructure(this, 1, pnum);
 
-        this->assemble( *lhs, stepWhenIcApply.get(), PressureLhs,
+        this->assemble( *lhs, stepWhenIcApply.get(), PressureLhsAssembler(),
                        pnum, this->giveDomain(1) );
         lhs->times(deltaT * theta1 * theta2);
 
@@ -262,7 +269,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
             }
 
             mss->buildInternalStructure(this, 1, vnum);
-            this->assemble( *mss, stepWhenIcApply.get(), MassMatrix,
+            this->assemble( *mss, stepWhenIcApply.get(), MassMatrixAssembler(),
                            vnum, this->giveDomain(1) );
         } else {
             mm.resize(momneq);
@@ -283,13 +290,13 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     //<RESTRICTED_SECTION>
     else if ( materialInterface ) {
         lhs->zero();
-        this->assemble( *lhs, stepWhenIcApply.get(), PressureLhs,
+        this->assemble( *lhs, stepWhenIcApply.get(), PressureLhsAssembler(),
                        pnum, this->giveDomain(1) );
         lhs->times(deltaT * theta1 * theta2);
 
         if ( consistentMassFlag ) {
             mss->zero();
-            this->assemble( *mss, stepWhenIcApply.get(), MassMatrix,
+            this->assemble( *mss, stepWhenIcApply.get(), MassMatrixAssembler(),
                            vnum, this->giveDomain(1) );
         } else {
             mm.zero();

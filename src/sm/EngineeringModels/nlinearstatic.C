@@ -528,14 +528,14 @@ NonLinearStatic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
 #ifdef VERBOSE
             OOFEM_LOG_DEBUG("Assembling tangent stiffness matrix\n");
 #endif
-            this->assemble(*stiffnessMatrix, tStep, TangentStiffnessMatrix,
+            this->assemble(*stiffnessMatrix, tStep, TangentAssembler(TangentStiffness),
                            EModelDefaultEquationNumbering(), d);
         } else if ( ( stiffMode == nls_secantStiffness ) || ( stiffMode == nls_secantInitialStiffness && initFlag ) ) {
 #ifdef VERBOSE
             OOFEM_LOG_DEBUG("Assembling secant stiffness matrix\n");
 #endif
             stiffnessMatrix->zero(); // zero stiffness matrix
-            this->assemble(*stiffnessMatrix, tStep, SecantStiffnessMatrix,
+            this->assemble(*stiffnessMatrix, tStep, TangentAssembler(SecantStiffness),
                            EModelDefaultEquationNumbering(), d);
             initFlag = 0;
         } else if ( ( stiffMode == nls_elasticStiffness ) && ( initFlag ||
@@ -544,7 +544,7 @@ NonLinearStatic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
             OOFEM_LOG_DEBUG("Assembling elastic stiffness matrix\n");
 #endif
             stiffnessMatrix->zero(); // zero stiffness matrix
-            this->assemble(*stiffnessMatrix, tStep, ElasticStiffnessMatrix,
+            this->assemble(*stiffnessMatrix, tStep, TangentAssembler(ElasticStiffness),
                            EModelDefaultEquationNumbering(), d);
             initFlag = 0;
         } else {
@@ -740,7 +740,7 @@ NonLinearStatic :: updateDomainLinks()
 
 
 void
-NonLinearStatic :: assemble(SparseMtrx &answer, TimeStep *tStep, CharType type,
+NonLinearStatic :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAssembler &ma,
                             const UnknownNumberingScheme &s, Domain *domain)
 {
 #ifdef TIME_REPORT
@@ -748,9 +748,9 @@ NonLinearStatic :: assemble(SparseMtrx &answer, TimeStep *tStep, CharType type,
     timer.startTimer();
 #endif
 
-    LinearStatic :: assemble(answer, tStep, type, s, domain);
+    LinearStatic :: assemble(answer, tStep, ma, s, domain);
 
-    if ( ( nonlocalStiffnessFlag ) && ( type == TangentStiffnessMatrix ) ) {
+    if ( ( nonlocalStiffnessFlag ) && dynamic_cast< const TangentAssembler* >(&ma) ) {
         // add nonlocal contribution
         for ( auto &elem : domain->giveElements() ) {
             static_cast< StructuralElement * >( elem.get() )->addNonlocalStiffnessContributions(answer, s, tStep);

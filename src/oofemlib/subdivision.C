@@ -230,7 +230,8 @@ Subdivision :: RS_Triangle :: numberSharedEdges(int iNode, IntArray &connNodes)
         _edge = new Subdivision :: RS_SharedEdge(this->mesh);
         _edge->setEdgeNodes(iNode, jNode);
 
-        this->mesh->addEdge(++eNum, _edge);
+        this->mesh->addEdge(_edge);
+        eNum++;
 
         // get the tentative partitions
         // they must be confirmed via mutual communication
@@ -286,7 +287,8 @@ Subdivision :: RS_Tetra :: numberSharedEdges(int iNode, IntArray &connNodes)
         _edge = new Subdivision :: RS_SharedEdge(this->mesh);
         _edge->setEdgeNodes(iNode, jNode);
 
-        this->mesh->addEdge(++eNum, _edge);
+        this->mesh->addEdge(_edge);
+        ++eNum;
 
         // get the tentative partitions
         // they must be confirmed via mutual communication
@@ -685,7 +687,7 @@ Subdivision :: RS_Triangle :: bisect(std :: queue< int > &subdivqueue, std :: li
         // create new irregular
         iNum = mesh->giveNumberOfNodes() + 1;
         irregular = new Subdivision :: RS_IrregularNode(iNum, mesh, 0, coords, density, boundary);
-        mesh->addNode(iNum, irregular);
+        mesh->addNode(irregular);
         // add irregular to receiver
         this->irregular_nodes.at(leIndex) = iNum;
 
@@ -949,7 +951,7 @@ Subdivision :: RS_Tetra :: bisect(std :: queue< int > &subdivqueue, std :: list<
             // create new irregular
             iNum = mesh->giveNumberOfNodes() + 1;
             irregular = new Subdivision :: RS_IrregularNode(iNum, mesh, 0, coords, density, false);
-            mesh->addNode(iNum, irregular);
+            mesh->addNode(irregular);
             // add irregular to receiver
             this->irregular_nodes.at(eIndex) = iNum;
 
@@ -1360,7 +1362,7 @@ Subdivision :: RS_Triangle :: generate(std :: list< int > &sharedEdgesQueue)
             _nodes.at(3) = irregular_nodes.at(iedge);
             childNum = mesh->giveNumberOfElements() + 1;
             child = new Subdivision :: RS_Triangle(childNum, mesh, this->number, _nodes); // number, parent, coords
-            mesh->addElement(childNum, child);
+            mesh->addElement(child);
             children.at(1) = childNum;
             // set neigbour info
             child->setNeighbor( 1, -this->giveNeighbor(kedge) );
@@ -1380,7 +1382,7 @@ Subdivision :: RS_Triangle :: generate(std :: list< int > &sharedEdgesQueue)
             _nodes.at(3) = irregular_nodes.at(jedge);
             childNum = mesh->giveNumberOfElements() + 1;
             child = new Subdivision :: RS_Triangle(childNum, mesh, this->number, _nodes); // number, parent, coords
-            mesh->addElement(childNum, child);
+            mesh->addElement(child);
             children.at(2) = childNum;
             // set neigbour info
             child->setNeighbor(1, childNum - 1);
@@ -1400,7 +1402,7 @@ Subdivision :: RS_Triangle :: generate(std :: list< int > &sharedEdgesQueue)
             _nodes.at(3) = irregular_nodes.at(kedge);
             childNum = mesh->giveNumberOfElements() + 1;
             child = new Subdivision :: RS_Triangle(childNum, mesh, this->number, _nodes); // number, parent, coords
-            mesh->addElement(childNum, child);
+            mesh->addElement(child);
             children.at(3) = childNum;
             // set neigbour info
             child->setNeighbor( 1, -this->giveNeighbor(iedge) );
@@ -1426,7 +1428,7 @@ Subdivision :: RS_Triangle :: generate(std :: list< int > &sharedEdgesQueue)
             _nodes.at(3) = irregular_nodes.at(iedge);
             childNum = mesh->giveNumberOfElements() + 1;
             child = new Subdivision :: RS_Triangle(childNum, mesh, this->number, _nodes); // number, parent, coords
-            mesh->addElement(childNum, child);
+            mesh->addElement(child);
             children.at(4) = childNum;
             // set neigbour info
             child->setNeighbor( 1, -this->giveNeighbor(jedge) );
@@ -1490,7 +1492,7 @@ Subdivision :: RS_Triangle :: generate(std :: list< int > &sharedEdgesQueue)
             _nodes.at(3) = irregular_nodes.at(iedge);
             childNum = mesh->giveNumberOfElements() + 1;
             child = new Subdivision :: RS_Triangle(childNum, mesh, this->number, _nodes); // number, parent, coords
-            mesh->addElement(childNum, child);
+            mesh->addElement(child);
             children.at(1) = childNum;
             // set neigbour info
             child->setNeighbor( 1, -this->giveNeighbor(kedge) );
@@ -1516,7 +1518,7 @@ Subdivision :: RS_Triangle :: generate(std :: list< int > &sharedEdgesQueue)
             _nodes.at(3) = irregular_nodes.at(jedge);
             childNum = mesh->giveNumberOfElements() + 1;
             child = new Subdivision :: RS_Triangle(childNum, mesh, this->number, _nodes); // number, parent, coords
-            mesh->addElement(childNum, child);
+            mesh->addElement(child);
             children.at(2) = childNum;
             // set neigbour info
             child->setNeighbor(1, childNum - 1);
@@ -1536,7 +1538,7 @@ Subdivision :: RS_Triangle :: generate(std :: list< int > &sharedEdgesQueue)
             _nodes.at(3) = irregular_nodes.at(iedge);
             childNum = mesh->giveNumberOfElements() + 1;
             child = new Subdivision :: RS_Triangle(childNum, mesh, this->number, _nodes); // number, parent, coords
-            mesh->addElement(childNum, child);
+            mesh->addElement(child);
             children.at(3) = childNum;
             // set neigbour info
             child->setNeighbor( 1, -this->giveNeighbor(jedge) );
@@ -1593,7 +1595,7 @@ Subdivision :: RS_Triangle :: generate(std :: list< int > &sharedEdgesQueue)
             _nodes.at(3) = irregular_nodes.at(iedge);
             childNum = mesh->giveNumberOfElements() + 1;
             child = new Subdivision :: RS_Triangle(childNum, mesh, this->number, _nodes); // number, parent, coords
-            mesh->addElement(childNum, child);
+            mesh->addElement(child);
             children.at(1) = childNum;
             // set neigbour info
             child->setNeighbor( 1, -this->giveNeighbor(kedge) );
@@ -1613,7 +1615,7 @@ Subdivision :: RS_Triangle :: generate(std :: list< int > &sharedEdgesQueue)
             _nodes.at(3) = irregular_nodes.at(kedge);
             childNum = mesh->giveNumberOfElements() + 1;
             child = new Subdivision :: RS_Triangle(childNum, mesh, this->number, _nodes); // number, parent, coords
-            mesh->addElement(childNum, child);
+            mesh->addElement(child);
             children.at(2) = childNum;
             // set neigbour info
             child->setNeighbor( 1, -this->giveNeighbor(iedge) );
@@ -1639,7 +1641,7 @@ Subdivision :: RS_Triangle :: generate(std :: list< int > &sharedEdgesQueue)
             _nodes.at(3) = nodes.at(knode);
             childNum = mesh->giveNumberOfElements() + 1;
             child = new Subdivision :: RS_Triangle(childNum, mesh, this->number, _nodes); // number, parent, coords
-            mesh->addElement(childNum, child);
+            mesh->addElement(child);
             children.at(3) = childNum;
             // set neigbour info
             child->setNeighbor(1, childNum - 2);
@@ -1696,7 +1698,7 @@ Subdivision :: RS_Triangle :: generate(std :: list< int > &sharedEdgesQueue)
             _nodes.at(3) = irregular_nodes.at(iedge);
             childNum = mesh->giveNumberOfElements() + 1;
             child = new Subdivision :: RS_Triangle(childNum, mesh, this->number, _nodes); // number, parent, coords
-            mesh->addElement(childNum, child);
+            mesh->addElement(child);
             children.at(1) = childNum;
             // set neigbour info
             child->setNeighbor( 1, -this->giveNeighbor(kedge) );
@@ -1722,7 +1724,7 @@ Subdivision :: RS_Triangle :: generate(std :: list< int > &sharedEdgesQueue)
             _nodes.at(3) = nodes.at(knode);
             childNum = mesh->giveNumberOfElements() + 1;
             child = new Subdivision :: RS_Triangle(childNum, mesh, this->number, _nodes); // number, parent, coords
-            mesh->addElement(childNum, child);
+            mesh->addElement(child);
             children.at(2) = childNum;
             // set neigbour info
             child->setNeighbor(1, childNum - 1);
@@ -1979,7 +1981,8 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
                         _edge = new Subdivision :: RS_SharedEdge(this->mesh);
                         _edge->setEdgeNodes( irregular_nodes.at(iedge), nodes.at(inode) );
 
-                        this->mesh->addEdge(++eNum, _edge);
+                        this->mesh->addEdge(_edge);
+                        eNum++;
 
                         // get the tentative partitions
                         // they must be confirmed via mutual communication
@@ -1998,7 +2001,8 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
                         _edge = new Subdivision :: RS_SharedEdge(this->mesh);
                         _edge->setEdgeNodes( irregular_nodes.at(iedge), nodes.at(nnode) );
 
-                        this->mesh->addEdge(++eNum, _edge);
+                        this->mesh->addEdge(_edge);
+                        eNum++;
 
                         // get the tentative partitions
                         // they must be confirmed via mutual communication
@@ -2021,7 +2025,7 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
             _nodes.at(4) = nodes.at(nnode);
             childNum = mesh->giveNumberOfElements() + 1;
             child = new Subdivision :: RS_Tetra(childNum, mesh, this->number, _nodes);            // number, parent, coords
-            mesh->addElement(childNum, child);
+            mesh->addElement(child);
             children.at(1) = childNum;
 
             // set neigbour info
@@ -2102,7 +2106,7 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
             _nodes.at(4) = nodes.at(nnode);
             childNum = mesh->giveNumberOfElements() + 1;
             child = new Subdivision :: RS_Tetra(childNum, mesh, this->number, _nodes);            // number, parent, coords
-            mesh->addElement(childNum, child);
+            mesh->addElement(child);
             children.at(2) = childNum;
 
             // set neigbour info
@@ -2356,7 +2360,8 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
                         _edge = new Subdivision :: RS_SharedEdge(this->mesh);
                         _edge->setEdgeNodes( irregular_nodes.at(iiedge), nodes.at(jnode) );
 
-                        this->mesh->addEdge(++eNum, _edge);
+                        this->mesh->addEdge(_edge);
+                        eNum++;
 
                         // get the tentative partitions
                         // they must be confirmed via mutual communication
@@ -2375,7 +2380,8 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
                         _edge = new Subdivision :: RS_SharedEdge(this->mesh);
                         _edge->setEdgeNodes( irregular_nodes.at(iiedge), nodes.at(knode) );
 
-                        this->mesh->addEdge(++eNum, _edge);
+                        this->mesh->addEdge(_edge);
+                        eNum++;
 
                         // get the tentative partitions
                         // they must be confirmed via mutual communication
@@ -2398,7 +2404,7 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
             _nodes.at(4) = irregular_nodes.at(iiedge);
             childNum = mesh->giveNumberOfElements() + 1;
             child = new Subdivision :: RS_Tetra(childNum, mesh, this->number, _nodes);            // number, parent, coords
-            mesh->addElement(childNum, child);
+            mesh->addElement(child);
             children.at(1) = childNum;
             // set neigbour info
             if ( irregulars1 ) {
@@ -2477,7 +2483,7 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
             _nodes.at(4) = nodes.at(nnode);
             childNum = mesh->giveNumberOfElements() + 1;
             child = new Subdivision :: RS_Tetra(childNum, mesh, this->number, _nodes);            // number, parent, coords
-            mesh->addElement(childNum, child);
+            mesh->addElement(child);
             children.at(2) = childNum;
 
             // set neigbour info
@@ -3413,7 +3419,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
         _node->setParallelMode( domain->giveNode(i)->giveParallelMode() );
         _node->setPartitions( * domain->giveNode(i)->givePartitionList() );
 #endif
-        this->mesh->addNode(i, _node);
+        this->mesh->addNode(_node);
     }
 
     // import elements
@@ -3427,7 +3433,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
             }
 
             _element = new Subdivision :: RS_Triangle(i, mesh, i, enodes);
-            this->mesh->addElement(i, _element);
+            this->mesh->addElement(_element);
         } else if ( domain->giveElement(i)->giveGeometryType() == EGT_tetra_1 ) {
             enodes.resize(4);
             for ( int j = 1; j <= 4; j++ ) {
@@ -3435,7 +3441,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
             }
 
             _element = new Subdivision :: RS_Tetra(i, mesh, i, enodes);
-            this->mesh->addElement(i, _element);
+            this->mesh->addElement(_element);
         } else {
             OOFEM_ERROR("Unsupported element geometry (element %d)", i);
             _element = NULL;
@@ -4793,7 +4799,7 @@ Subdivision :: unpackSharedIrregulars(Subdivision *s, ProcessCommunicator &pc)
                 irregular = new Subdivision :: RS_IrregularNode(iNum, mesh, 0, coords, density, true);
                 irregular->setParallelMode(DofManager_shared);
                 irregular->setEdgeNodes(iNode, jNode);
-                mesh->addNode(iNum, irregular);
+                mesh->addNode(irregular);
 
  #ifdef __OOFEG
   #ifdef DRAW_IRREGULAR_NODES

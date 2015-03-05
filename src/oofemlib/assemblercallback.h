@@ -152,21 +152,6 @@ public:
 };
 
 
-class OldMatrixAssembler : public MatrixAssembler
-{
-private:
-    CharType type;
-
-public:
-    OldMatrixAssembler(CharType t) : MatrixAssembler(), type(t) {}
-    virtual void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const;
-    virtual void matrixFromLoad(FloatMatrix &mat, Element &element, BodyLoad *load, TimeStep *tStep) const;
-    virtual void matrixFromBoundaryLoad(FloatMatrix &mat, Element &element, BoundaryLoad *load, int boundary, TimeStep *tStep) const;
-    virtual void matrixFromEdgeLoad(FloatMatrix &mat, Element &element, BoundaryLoad *load, int edge, TimeStep *tStep) const;
-    virtual void assembleFromActiveBC(SparseMtrx &k, ActiveBoundaryCondition &bc, TimeStep* tStep, const UnknownNumberingScheme &s_r, const UnknownNumberingScheme &s_c) const;
-};
-
-#if 0
 /**
  * Implementation for assembling the consistent mass matrix
  * @author Mikael Öhman
@@ -176,7 +161,22 @@ class MassMatrixAssembler : public MatrixAssembler
 public:
     virtual void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const;
 };
-#endif
+
+
+/**
+ * Callback class for assembling effective tangents composed of stiffness and mass matrix.
+ * @author Mikael Öhman
+ */
+class EffectiveTangentAssembler : public MatrixAssembler
+{
+protected:
+    double lumped;
+    double k, m;
+
+public:
+    EffectiveTangentAssembler(bool lumped, double k, double m);
+    virtual void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const;
+};
 
 }
 #endif // assemblercallback_h

@@ -126,7 +126,7 @@ StokesFlowVelocityHomogenization :: computeTangent(FloatMatrix &answer, TimeStep
     SparseMtrxType stype = solver->giveRecommendedMatrix(true);
     std :: unique_ptr< SparseMtrx > Kff( classFactory.createSparseMtrx( stype ) );
     Kff->buildInternalStructure(this, domain->giveNumber(), EModelDefaultEquationNumbering() );
-    this->assemble(*Kff, tStep, TangentStiffnessMatrix, EModelDefaultEquationNumbering(), domain);
+    this->assemble(*Kff, tStep, TangentAssembler(TangentStiffness), EModelDefaultEquationNumbering(), domain);
     solver->solve(*Kff, F, H);
 
     answer.beTProductOf(H, F);

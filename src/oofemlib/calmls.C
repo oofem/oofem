@@ -78,7 +78,6 @@ CylindricalALM :: CylindricalALM(Domain *d, EngngModel *m) :
 
     // Variables for Hyper Plane Control
     calm_Control = calm_hpc_off; // HPControl is not default
-    linSolver = NULL;
     // linesearch default off
     lsFlag = 0;
 

@@ -264,7 +264,7 @@ void PrescribedGradientBCNeumann :: computeTangent(FloatMatrix &tangent, TimeSte
         OOFEM_ERROR("Couldn't create sparse matrix of type %d\n", stype);
     }
     Kff->buildInternalStructure(rve, this->domain->giveNumber(), fnum);
-    rve->assemble(*Kff, tStep, TangentStiffnessMatrix, fnum, fnum, this->domain);
+    rve->assemble(*Kff, tStep, TangentAssembler(TangentStiffness), fnum, fnum, this->domain);
 
     // Setup up indices and locations
     int neq = Kff->giveNumberOfRows();

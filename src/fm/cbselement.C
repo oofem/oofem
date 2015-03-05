@@ -85,9 +85,7 @@ CBSElement :: giveCharacteristicMatrix(FloatMatrix &answer,
 // returns characteristics matrix of receiver according to mtrx
 //
 {
-    if ( mtrx == PressureLhs ) {
-        this->computePressureLhs(answer, tStep);
-    } else if ( mtrx == MassMatrix ) {
+    if ( mtrx == MassMatrix ) {
         this->computeConsistentMassMtrx(answer, tStep);
     } else {
         OOFEM_ERROR("Unknown Type of characteristic mtrx.");
