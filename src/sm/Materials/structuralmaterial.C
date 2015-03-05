@@ -134,8 +134,8 @@ StructuralMaterial :: giveRealStressVector_StressControl(FloatArray &answer, Gau
     // Iterate to find full vE.
     // Compute the negated the array of control since we need stressControl as well;
 
-    stressControl.resize( 9 - strainControl.giveSize() );
-    for ( int i = 1, j = 1; i <= 9; i++ ) {
+    stressControl.resize( 6 - strainControl.giveSize() );
+    for ( int i = 1, j = 1; i <= 6; i++ ) {
         if ( !strainControl.contains(i) ) {
             stressControl.at(j++) = i;
         }
@@ -148,18 +148,26 @@ StructuralMaterial :: giveRealStressVector_StressControl(FloatArray &answer, Gau
     }
 
     // Iterate to find full vE.
-    for ( int k = 0; k < 100; k++ ) { // Allow for a generous 100 iterations.
+    for ( int k = 0; k < 10; k++ ) { // Allow for a generous 100 iterations.
         this->giveRealStressVector_3d(vS, gp, vE, tStep);
-        vS.printYourself();
+        // For debugging the iterations:
+        //vE.printYourself("vE");
+        //vS.printYourself("vS");
         reducedvS.beSubArrayOf(vS, stressControl);
-        if ( reducedvS.computeNorm() < 1e-6 ) { ///@todo We need a tolerance here!
-            StructuralMaterial :: giveReducedVectorForm(answer, vS, _1dMat);
+        // Pick out the (response) stresses for the controlled strains
+        answer.beSubArrayOf(vS, strainControl);
+        if ( reducedvS.computeNorm() <= 1e0 && k >= 1 ) { // Absolute tolerance right now (with at least one iteration)
+            ///@todo We need a relative tolerance here!
+            /// A relative tolerance like this could work, but if a really small increment is performed it won't work
+            /// (it will be limited by machine precision)
+        //if ( reducedvS.computeNorm() <= 1e-6 * answer.computeNorm() ) {
             return;
         }
 
         this->give3dMaterialStiffnessMatrix(tangent, TangentStiffness, gp, tStep);
         reducedTangent.beSubMatrixOf(tangent, stressControl, stressControl);
         reducedTangent.solveForRhs(reducedvS, increment_vE);
+        increment_vE.negated();
         vE.assemble(increment_vE, stressControl);
     }
 

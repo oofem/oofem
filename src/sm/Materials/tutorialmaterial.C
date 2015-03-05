@@ -223,7 +223,12 @@ TutorialMaterialStatus :: TutorialMaterialStatus(int n, Domain * d, GaussPoint *
     tempPlasticStrain(6), plasticStrain(6),
     tempDevTrialStress(6),
     tempKappa(0.), kappa(0.)
-{ }
+{
+    strainVector.resize(6);
+    stressVector.resize(6);
+    tempStressVector = stressVector;
+    tempStrainVector = strainVector;
+}
 
 void
 TutorialMaterialStatus :: initTempStatus()
