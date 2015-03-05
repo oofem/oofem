@@ -70,6 +70,7 @@ class PressureLhsAssembler : public MatrixAssembler
 {
 public:
     virtual void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const;
+    virtual void locationFromElement(IntArray &loc, Element &element, const UnknownNumberingScheme &s, IntArray *dofIds = nullptr) const;
 };
 
 

@@ -61,6 +61,11 @@ void PressureLhsAssembler :: matrixFromElement(FloatMatrix &answer, Element &el,
     static_cast< CBSElement * >( &el )->computePressureLhs(answer, tStep);
 }
 
+void PressureLhsAssembler :: locationFromElement(IntArray& loc, Element& element, const UnknownNumberingScheme& s, IntArray* dofIds) const
+{
+    element.giveLocationArray(loc, {P_f}, s, dofIds);
+}
+
 
 
 CBS :: CBS(int i, EngngModel* _master) : FluidModel ( i, _master ),

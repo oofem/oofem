@@ -595,16 +595,15 @@ TR1_2D_CBS :: computePressureLhs(FloatMatrix &answer, TimeStep *tStep)
 {
     // calculates the pressure LHS
 
-    answer.resize(9, 9);
-    answer.zero();
+    answer.resize(3, 3);
 
-    answer.at(3, 3) = area * ( b [ 0 ] * b [ 0 ] + c [ 0 ] * c [ 0 ] );
-    answer.at(6, 6) = area * ( b [ 1 ] * b [ 1 ] + c [ 1 ] * c [ 1 ] );
-    answer.at(9, 9) = area * ( b [ 2 ] * b [ 2 ] + c [ 2 ] * c [ 2 ] );
+    answer.at(1, 1) = area * ( b [ 0 ] * b [ 0 ] + c [ 0 ] * c [ 0 ] );
+    answer.at(2, 2) = area * ( b [ 1 ] * b [ 1 ] + c [ 1 ] * c [ 1 ] );
+    answer.at(3, 3) = area * ( b [ 2 ] * b [ 2 ] + c [ 2 ] * c [ 2 ] );
 
-    answer.at(3, 6) = answer.at(6, 3) = area * ( b [ 0 ] * b [ 1 ] + c [ 0 ] * c [ 1 ] );
-    answer.at(3, 9) = answer.at(9, 3) = area * ( b [ 0 ] * b [ 2 ] + c [ 0 ] * c [ 2 ] );
-    answer.at(6, 9) = answer.at(9, 6) = area * ( b [ 1 ] * b [ 2 ] + c [ 1 ] * c [ 2 ] );
+    answer.at(1, 2) = answer.at(2, 1) = area * ( b [ 0 ] * b [ 1 ] + c [ 0 ] * c [ 1 ] );
+    answer.at(1, 3) = answer.at(3, 1) = area * ( b [ 0 ] * b [ 2 ] + c [ 0 ] * c [ 2 ] );
+    answer.at(2, 3) = answer.at(3, 2) = area * ( b [ 1 ] * b [ 2 ] + c [ 1 ] * c [ 2 ] );
 }
 
 
