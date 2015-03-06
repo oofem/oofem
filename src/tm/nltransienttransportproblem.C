@@ -216,7 +216,9 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
         tStep->incrementStateCounter();
 
         OOFEM_LOG_INFO("%-15e %-10d %-15e %-15e\n", tStep->giveTargetTime(), nite, solutionErr, incrementErr);
-
+	
+	    currentIterations = nite;
+	
         if ( nite >= nsmax ) {
             OOFEM_ERROR("convergence not reached after %d iterations", nsmax);
         }

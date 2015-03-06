@@ -61,6 +61,7 @@ StaggeredProblem :: StaggeredProblem(int i, EngngModel *_master) : EngngModel(i,
     dtFunction = 0;
     stepMultiplier = 1.;
     timeDefinedByProb = 0;
+    adaptiveStepLength = false;
 }
 
 StaggeredProblem :: ~StaggeredProblem()
@@ -139,6 +140,20 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, timeDefinedByProb, _IFT_StaggeredProblem_timeDefinedByProb);
     }
 
+    if ( ir->hasField(_IFT_StaggeredProblem_adaptiveStepLength) ) {
+      adaptiveStepLength = true;
+      this->minStepLength = 0.;
+      IR_GIVE_OPTIONAL_FIELD(ir, minStepLength, _IFT_StaggeredProblem_minsteplength);
+      this->maxStepLength = 1.e32;
+      IR_GIVE_OPTIONAL_FIELD(ir, maxStepLength, _IFT_StaggeredProblem_maxsteplength);
+      this->reqIterations = 1;
+      IR_GIVE_OPTIONAL_FIELD(ir, reqIterations, _IFT_StaggeredProblem_reqiterations);
+      this->endOfTimeOfInterest = 1.e32;
+      IR_GIVE_OPTIONAL_FIELD(ir, endOfTimeOfInterest, _IFT_StaggeredProblem_endoftimeofinterest);
+      this->adaptiveStepSince = 0.;
+      IR_GIVE_OPTIONAL_FIELD(ir, adaptiveStepSince, _IFT_StaggeredProblem_adaptivestepsince);
+    }
+    
     if ( dtFunction < 1 ) {
         ndomains = 0;
         domainNeqs.clear();
@@ -224,6 +239,47 @@ StaggeredProblem :: giveDeltaT(int n)
         return this->giveDiscreteTime(n) - this->giveDiscreteTime(n - 1);
     }
 
+    if ( adaptiveStepLength ) {
+      EngngModel *sp;
+      int nite = 1;
+      double adjustedDeltaT = deltaT;
+
+      if ( currentStep != NULL ) {
+	if ( currentStep->giveNumber() != 0 ) {
+
+	  // return prescribed deltaT for times until time = adaptiveStepSince
+	  // can be used for consecutive force loading applied in a specified number of steps
+	  if ( !(currentStep->giveTargetTime() > this->adaptiveStepSince ) ) {
+	    return adjustedDeltaT;
+	  }
+
+	  for (int i = 1; i <= this->giveNumberOfSlaveProblems(); i++ ) {
+	    sp = this->giveSlaveProblem(i);
+	    nite = max(sp->giveCurrentNumberOfIterations(), nite);
+	  }
+	  
+	  if ( nite > reqIterations ) {
+	    adjustedDeltaT =  this->prevStepLength * reqIterations / nite;
+	  } else {
+	    adjustedDeltaT  =  this->prevStepLength * sqrt( sqrt( ( double ) reqIterations / ( double ) nite ) );
+	  }
+	  
+	  if ( adjustedDeltaT > maxStepLength ) {
+	    adjustedDeltaT = maxStepLength;
+	  }
+	  
+	  if ( adjustedDeltaT < minStepLength ) {
+	    adjustedDeltaT = minStepLength;
+	  }
+	}
+      }
+      
+      this->currentStepLength = adjustedDeltaT;
+      
+      return adjustedDeltaT;
+      
+    }
+    
     return deltaT;
 }
 
@@ -278,7 +334,19 @@ StaggeredProblem :: giveNextStep()
     }
 
     previousStep = currentStep;
-    currentStep = new TimeStep(istep, this, 1, totalTime, this->giveDeltaT ( istep ), counter);
+
+    if ( (totalTime >= this->endOfTimeOfInterest) && this->adaptiveStepLength ) {
+      totalTime = this->endOfTimeOfInterest;
+      OOFEM_LOG_INFO("\n==================================================================\n");
+      OOFEM_LOG_INFO("\nAdjusting time step length to: %lf \n\n", totalTime-previousStep->giveTargetTime());
+      currentStep = new TimeStep(istep, this, 1, totalTime, totalTime-previousStep->giveTargetTime() , counter);
+    } else {
+      if (this->adaptiveStepLength) {
+      OOFEM_LOG_INFO("\n==================================================================\n");
+      OOFEM_LOG_INFO("\nAdjusting time step length to: %lf \n\n",  this->giveDeltaT ( istep ));
+      }
+      currentStep = new TimeStep(istep, this, 1, totalTime, this->giveDeltaT ( istep ), counter);
+    }
 
     // time and dt variables are set eq to 0 for statics - has no meaning
     return currentStep;
@@ -338,6 +406,10 @@ StaggeredProblem :: solveYourself()
             }
 
 #endif
+	    
+	        if ( (sp->giveCurrentStep()->giveTargetTime() >= this->endOfTimeOfInterest) && this->adaptiveStepLength ) {
+	            break;
+	        }
         }
     }
 }
@@ -372,6 +444,10 @@ StaggeredProblem :: forceEquationNumbering()
 void
 StaggeredProblem :: updateYourself(TimeStep *tStep)
 {
+    if (adaptiveStepLength) {
+        this->prevStepLength = this->currentStepLength;
+    }
+
     for ( auto &emodel: emodelList ) {
         emodel->updateYourself(tStep);
     }

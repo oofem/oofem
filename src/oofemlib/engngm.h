@@ -520,6 +520,11 @@ public:
      * @return Nonzero if successful.
      */
     int exchangeRemoteElementData(int ExchangeTag);
+    /**
+     * Returns number of iterations that was required to reach equilibrium - used for adaptive step length in 
+     * staggered problem
+     */
+    virtual int giveCurrentNumberOfIterations() {return 1;}
 
 #ifdef __PARALLEL_MODE
     /// Returns the communication object of reciever.

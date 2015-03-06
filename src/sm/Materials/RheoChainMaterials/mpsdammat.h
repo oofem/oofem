@@ -62,44 +62,43 @@
 //@}
 
 namespace oofem {
-
 #define MPSDAMMAT_ITERATION_LIMIT 1.e-9
 
 /**
-  */
+ */
 class MPSDamMaterialStatus : public MPSMaterialStatus
 {
 protected:
-  /// Equilibrated stress vector in reduced form
-  FloatArray effectiveStressVector;
-  /// Temporary stress vector in reduced form (increments are used mainly in nonlinear analysis)
-  FloatArray tempEffectiveStressVector;
-  /// Scalar measure of the largest strain level ever reached in material.
-  double kappa;
-  /// Non-equilibrated scalar measure of the largest strain level.
-  double tempKappa;
-  /// Damage level of material.
-  double damage;
-  /// Non-equilibrated damage level of material.
-  double tempDamage;
+    /// Equilibrated stress vector in reduced form
+    FloatArray effectiveStressVector;
+    /// Temporary stress vector in reduced form (increments are used mainly in nonlinear analysis)
+    FloatArray tempEffectiveStressVector;
+    /// Scalar measure of the largest strain level ever reached in material.
+    double kappa;
+    /// Non-equilibrated scalar measure of the largest strain level.
+    double tempKappa;
+    /// Damage level of material.
+    double damage;
+    /// Non-equilibrated damage level of material.
+    double tempDamage;
 
-  /// Characteristic length
-  double charLength;
-  /// Crack orientation normalized to damage magnitude. This is useful for plotting cracks as a vector field (paraview etc.).
-  FloatArray crackVector;
+    /// Characteristic length
+    double charLength;
+    /// Crack orientation normalized to damage magnitude. This is useful for plotting cracks as a vector field (paraview etc.).
+    FloatArray crackVector;
 
-  /// hydration-degree dependent equivalent strain at stress peak 
-  double var_e0;
-  /// hydration-degree dependent fracture energy
-  double var_gf;
+    /// hydration-degree dependent equivalent strain at stress peak
+    double var_e0;
+    /// hydration-degree dependent fracture energy
+    double var_gf;
 
 #ifdef supplementary_info
-  double crackWidth;
-  double residTensileStrength;
+    double crackWidth;
+    double residTensileStrength;
 #endif
 
 public:
-    MPSDamMaterialStatus(int n, Domain * d, GaussPoint * g, int nunits);
+    MPSDamMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits);
     virtual ~MPSDamMaterialStatus() { }
 
     virtual const FloatArray &giveViscoelasticStressVector() const { return effectiveStressVector; }
@@ -152,7 +151,7 @@ public:
     // definition
     virtual const char *giveClassName() const { return "MPSDamMaterialStatus"; }
 
- protected:
+protected:
     /**
      * Abstract service allowing to perform some initialization, when damage first appear.
      * @param kappa Scalar measure of strain level.
@@ -160,7 +159,6 @@ public:
      * @param gp Integration point.
      */
     virtual void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp) { }
-
 };
 
 
@@ -190,7 +188,7 @@ protected:
     /// dummy Young's modulus
     double E;
 
-   /// Maximum limit on omega. The purpose is elimination of a too compliant material which may cause convergence problems. Set to something like 0.99 if needed.
+    /// Maximum limit on omega. The purpose is elimination of a too compliant material which may cause convergence problems. Set to something like 0.99 if needed.
     double maxOmega;
 
     /// Equivalent strain at stress peak (or a similar parameter).
@@ -211,14 +209,14 @@ protected:
 
 
 
-   /// Parameter specifying the type of softening (damage law).
+    /// Parameter specifying the type of softening (damage law).
     SofteningType softType;
 
     /// Method used for evaluation of characteristic element size
     ElementCharSizeMethod ecsMethod;
 
 public:
-    MPSDamMaterial(int n, Domain * d);
+    MPSDamMaterial(int n, Domain *d);
     virtual ~MPSDamMaterial() { }
 
     virtual int hasNonLinearBehaviour() { return 1; }
@@ -281,23 +279,23 @@ public:
                                                TimeStep *tStep);
 
     virtual void givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                               MatResponseMode mode,
-                                               GaussPoint *gp,
-                                               TimeStep *tStep);
+                                          MatResponseMode mode,
+                                          GaussPoint *gp,
+                                          TimeStep *tStep);
 
     virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                               MatResponseMode mode,
-                                               GaussPoint *gp,
-                                               TimeStep *tStep);
+                                          MatResponseMode mode,
+                                          GaussPoint *gp,
+                                          TimeStep *tStep);
 
     virtual void give1dStressStiffMtrx(FloatMatrix &answer,
-                                               MatResponseMode mode,
-                                               GaussPoint *gp,
-                                               TimeStep *tStep);
+                                       MatResponseMode mode,
+                                       GaussPoint *gp,
+                                       TimeStep *tStep);
 
 
 protected:
-  
+
     //virtual double giveEModulus(GaussPoint *gp, TimeStep *tStep);
 };
 } // end namespace oofem

@@ -50,6 +50,12 @@
 #define _IFT_StaggeredProblem_prob1 "prob1"
 #define _IFT_StaggeredProblem_prob2 "prob2"
 #define _IFT_StaggeredProblem_coupling "coupling"
+#define _IFT_StaggeredProblem_adaptiveStepLength "adaptivesteplength"
+#define _IFT_StaggeredProblem_minsteplength "minsteplength"
+#define _IFT_StaggeredProblem_maxsteplength "maxsteplength"
+#define _IFT_StaggeredProblem_reqiterations "reqiterations"
+#define _IFT_StaggeredProblem_endoftimeofinterest "endoftimeofinterest"
+#define _IFT_StaggeredProblem_adaptivestepsince "adaptivestepsince"
 //@}
 
 namespace oofem {
@@ -111,6 +117,24 @@ protected:
 
     /// List of slave models to which this model is coupled
     IntArray coupledModels;
+    bool adaptiveStepLength;
+    /// adaptive time step length - minimum
+    double minStepLength;
+    /// adaptive time step length - maximum
+    double maxStepLength;
+    /// adaptive time step length - required (=optimum) number of iterations 
+    double reqIterations;
+    /// adaptive time step length applies after prescribed time
+    double adaptiveStepSince;
+    /**
+     * alternative overriding the number of steps "nsteps" - necessary for time-driven analyses when
+     * the appropriate number of steps is apriori unknow. If used, set "nsteps" to a high number e.g. 100000000
+     */
+    double endOfTimeOfInterest;
+
+    double prevStepLength;
+    double currentStepLength;
+    
 
 public:
     /**
