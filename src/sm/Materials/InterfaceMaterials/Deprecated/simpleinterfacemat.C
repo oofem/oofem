@@ -99,7 +99,7 @@ SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *
     FloatArray shearStrain(2), shearStress; //, strainVector;
     StructuralElement *el = static_cast< StructuralElement * >( gp->giveElement() );
     //el->computeStrainVector(strainVector, gp, tStep);
-
+    bool shearYieldingFlag = false;
     FloatArray tempShearStressShift = status->giveTempShearStressShift();
     const double normalStrain = strainVector.at(1);
     double normalStress, maxShearStress, dp;
@@ -139,14 +139,15 @@ SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *
         answer.resize(3);
         shearStrain.at(1) = strainVector.at(2);
         shearStrain.at(2) = strainVector.at(3);
-        shearStress.beScaled(this->kn, shearStrain);
+        shearStress.beScaled(this->ks, shearStrain);
         shearStress.subtract(tempShearStressShift);
         dp = shearStress.dotProduct(shearStress, 2);
         if ( dp > maxShearStress * maxShearStress ) {
+	    shearYieldingFlag = true;
             shearStress.times( maxShearStress / sqrt(dp) );
         }
 
-        tempShearStressShift.beScaled(this->kn, shearStrain);
+        tempShearStressShift.beScaled(this->ks, shearStrain);
         tempShearStressShift.subtract(shearStress);
         answer.at(2) = shearStress.at(1);
         answer.at(3) = shearStress.at(2);
@@ -160,6 +161,7 @@ SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *
     answer.at(1) = max(answer.at(1), -lim);  //threshold on minimum
     //answer.at(1) = normalStress > lim ? lim : normalStress < -lim ? -lim : normalStress;
     // update gp
+    status->setShearYieldingFlag(shearYieldingFlag);
     status->setTempShearStressShift(tempShearStressShift);
     status->letTempStrainVectorBe(strainVector);
     status->letTempStressVectorBe(answer);
@@ -175,7 +177,7 @@ SimpleInterfaceMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
 //
 {
     MaterialMode mMode = gp->giveElement()->giveMaterialMode();
-
+    SimpleInterfaceMaterialStatus *status = static_cast< SimpleInterfaceMaterialStatus * >( this->giveStatus(gp) );
     FloatArray strainVector;
     StructuralElement *el = static_cast< StructuralElement * >( gp->giveElement() );
     double normalStrain;
@@ -224,9 +226,14 @@ SimpleInterfaceMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
         answer.resize(3, 3);
         if ( rMode == SecantStiffness || rMode == TangentStiffness ) {
             if ( normalStrain + normalClearance <= 0. ) {
-                answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = this->kn; //in compression and after the clearance gap closed
+	      answer.at(1, 1) = kn;
+	      if(status->giveShearYieldingFlag() == true)
+		answer.at(2, 2) = answer.at(3, 3) = 0;
+	      else
+		answer.at(2, 2) = answer.at(3, 3) = ks;//this->kn; //in compression and after the clearance gap closed
             } else {
-                answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = this->kn * this->stiffCoeff;
+                answer.at(1, 1) = this->kn * this->stiffCoeff;
+		answer.at(2, 2) = answer.at(3, 3) = 0;
             }
         } else {
             if ( rMode == ElasticStiffness ) {
@@ -275,6 +282,8 @@ SimpleInterfaceMaterial :: initializeFrom(InputRecord *ir)
     stiffCoeff = 0.;
     normalClearance = 0.;
     IR_GIVE_FIELD(ir, kn, _IFT_SimpleInterfaceMaterial_kn);
+    ks = kn;
+    IR_GIVE_OPTIONAL_FIELD(ir, ks, _IFT_SimpleInterfaceMaterial_ks);
     IR_GIVE_OPTIONAL_FIELD(ir, frictCoeff, _IFT_SimpleInterfaceMaterial_frictCoeff);
     IR_GIVE_OPTIONAL_FIELD(ir, stiffCoeff, _IFT_SimpleInterfaceMaterial_stiffCoeff);
     IR_GIVE_OPTIONAL_FIELD(ir, normalClearance, _IFT_SimpleInterfaceMaterial_normalClearance);
@@ -300,6 +309,7 @@ SimpleInterfaceMaterialStatus :: SimpleInterfaceMaterialStatus(int n, Domain *d,
     tempShearStressShift.resize(2);
     shearStressShift.zero();
     tempShearStressShift.zero();
+    shearYieldingFlag = false;
 }
 
 
