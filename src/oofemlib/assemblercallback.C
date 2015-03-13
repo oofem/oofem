@@ -119,6 +119,35 @@ void OldVectorAssembler :: vectorFromNodeLoad(FloatArray& vec, DofManager& dman,
 #endif
 
 
+void MatrixProductAssembler :: vectorFromElement(FloatArray& vec, Element& element, TimeStep* tStep, ValueModeType mode) const
+{
+    FloatMatrix mat;
+    this->mAssem.matrixFromElement(mat, element, tStep);
+    vec.beProductOf(mat, this->vec);
+}
+
+void MatrixProductAssembler :: vectorFromLoad(FloatArray& vec, Element& element, BodyLoad* load, TimeStep* tStep, ValueModeType mode) const
+{
+    FloatMatrix mat;
+    this->mAssem.matrixFromLoad(mat, element, load, tStep);
+    vec.beProductOf(mat, this->vec);
+}
+
+void MatrixProductAssembler :: vectorFromBoundaryLoad(FloatArray& vec, Element& element, BoundaryLoad* load, int boundary, TimeStep* tStep, ValueModeType mode) const
+{
+    FloatMatrix mat;
+    this->mAssem.matrixFromBoundaryLoad(mat, element, load, boundary, tStep);
+    vec.beProductOf(mat, this->vec);
+}
+
+void MatrixProductAssembler :: vectorFromEdgeLoad(FloatArray& vec, Element& element, BoundaryLoad* load, int edge, TimeStep* tStep, ValueModeType mode) const
+{
+    FloatMatrix mat;
+    this->mAssem.matrixFromBoundaryLoad(mat, element, load, edge, tStep);
+    vec.beProductOf(mat, this->vec);
+}
+
+
 
 void InternalForceAssembler :: vectorFromElement(FloatArray& vec, Element& element, TimeStep* tStep, ValueModeType mode) const
 {

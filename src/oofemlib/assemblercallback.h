@@ -132,6 +132,27 @@ public:
 };
 
 /**
+ * Implementation for assembling forces computed by multiplication with a matrix.
+ * This is useful for computing; f = K * u for extrapolated forces, without constructing the K-matrix.
+ * @author Mikael Öhman
+ */
+class MatrixProductAssembler : public VectorAssembler
+{
+protected:
+    MatrixAssembler mAssem;
+    const FloatArray &vec;
+
+public:
+    MatrixProductAssembler(MatrixAssembler m, const FloatArray &vec): VectorAssembler(), mAssem(m), vec(vec) {}
+
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+    virtual void vectorFromLoad(FloatArray &vec, Element &element, BodyLoad *load, TimeStep *tStep, ValueModeType mode) const;
+    virtual void vectorFromBoundaryLoad(FloatArray &vec, Element &element, BoundaryLoad *load, int boundary, TimeStep *tStep, ValueModeType mode) const;
+    virtual void vectorFromEdgeLoad(FloatArray &vec, Element &element, BoundaryLoad *load, int edge, TimeStep *tStep, ValueModeType mode) const;
+};
+
+
+/**
  * Implementation for assembling tangent matrices in standard monolithic FE-problems
  * @author Mikael Öhman
  */
