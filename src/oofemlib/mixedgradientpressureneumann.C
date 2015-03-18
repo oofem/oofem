@@ -278,7 +278,6 @@ void MixedGradientPressureNeumann :: integrateVolTangent(FloatArray &answer, Ele
 {
     FloatArray normal, n;
     FloatMatrix nMatrix;
-    IntArray boundaryNodes;
 
     FEInterpolation *interp = e->giveInterpolation(); // Geometry interpolation
     // Some assumptions here, either velocity or displacement unknowns. Perhaps its better to just as for a certain equation id?

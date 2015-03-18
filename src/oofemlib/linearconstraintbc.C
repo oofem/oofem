@@ -109,7 +109,7 @@ void LinearConstraintBC :: assemble(SparseMtrx &answer, TimeStep *tStep,
     int size = this->weights.giveSize();
     IntArray lambdaeq(1);
     FloatMatrix contrib(size, 1), contribt;
-    IntArray locr(size), locc(size);
+    IntArray locr(size);
 
     if ( !this->lhsType.contains( ( int ) type ) ) {
         return;

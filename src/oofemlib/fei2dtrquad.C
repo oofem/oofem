@@ -155,7 +155,7 @@ int
 FEI2dTrQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo)
 {
     FloatArray res, delta, guess, lcoords_guess;
-    FloatMatrix jac, jacT;
+    FloatMatrix jac;
     double convergence_limit, error = 0.0;
 
     // find a suitable convergence limit

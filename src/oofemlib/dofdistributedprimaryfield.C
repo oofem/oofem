@@ -229,7 +229,6 @@ DofDistributedPrimaryField :: applyInitialCondition(InitialCondition &ic)
         return;
     }
 
-    IntArray loc_s, loc_ps;
     Domain *d = ic.giveDomain();
     Set *set = d->giveSet(ic.giveSetNumber());
     TimeStep *tStep = emodel->giveSolutionStepWhenIcApply();
@@ -319,7 +318,7 @@ void
 DofDistributedPrimaryField :: advanceSolution(TimeStep *tStep)
 {
     PrimaryField :: advanceSolution(tStep);
-#if 0
+#if 1
     // Copy over the old dictionary values to the new step as the initial guess:
     Domain *d = emodel->giveDomain(1);
     TimeStep *prev = tStep->givePreviousStep();

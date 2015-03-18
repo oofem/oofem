@@ -33,7 +33,6 @@
  */
 
 #include "field.h"
-#include "error.h"
 
 #include <cstdarg>
 

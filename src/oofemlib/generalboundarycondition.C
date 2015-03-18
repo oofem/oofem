@@ -33,10 +33,8 @@
  */
 
 #include "generalboundarycondition.h"
-#include "valuemodetype.h"
 #include "bcvaltype.h"
 #include "function.h"
-#include "reinforcement.h"
 #include "timestep.h"
 #include "datastream.h"
 #include "contextioerr.h"

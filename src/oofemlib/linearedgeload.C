@@ -47,9 +47,6 @@ LinearEdgeLoad :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     BoundaryLoad :: initializeFrom(ir);
-    if ( componentArray.giveSize() != nDofs * 2 ) {
-        OOFEM_ERROR("componentArray size mismatch");
-    }
 
     int fType = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, fType, _IFT_LinearEdgeLoad_formulation);

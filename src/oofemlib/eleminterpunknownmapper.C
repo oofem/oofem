@@ -56,7 +56,7 @@ EIPrimaryUnknownMapper :: mapAndUpdate(FloatArray &answer, ValueModeType mode,
     int inode, nd_nnodes = newd->giveNumberOfDofManagers();
     int nsize = newd->giveEngngModel()->giveNumberOfDomainEquations( newd->giveNumber(), EModelDefaultEquationNumbering() );
     FloatArray unknownValues;
-    IntArray dofidMask, locationArray;
+    IntArray dofidMask;
     IntArray reglist;
 #ifdef OOFEM_MAPPING_CHECK_REGIONS
     ConnectivityTable *conTable = newd->giveConnectivityTable();
@@ -123,7 +123,6 @@ EIPrimaryUnknownMapper :: evaluateAt(FloatArray &answer, IntArray &dofMask, Valu
         oelem = NULL;
         for ( int i = 1; i < regList.giveSize(); ++i ) {
             Element *tmpelem = sl->giveElementClosestToPoint( lcoords, closest, coords, regList.at(i) );
-            distance = closest.distance_square(coords);
             if ( tmpelem != NULL ) {
                 distance = closest.distance_square(coords);
                 if ( distance < mindist || i == 1 ) {

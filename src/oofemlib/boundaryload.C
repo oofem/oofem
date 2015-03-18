@@ -53,7 +53,7 @@ void
 BoundaryLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode)
 {
     // Evaluates the value at specific integration point
-    int nSize;
+    int nSize, nDofs;
     double factor;
     FloatArray N;
 
@@ -61,14 +61,12 @@ BoundaryLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatA
         OOFEM_ERROR("unknown mode");
     }
 
-    answer.resize(this->nDofs);
-
     this->computeNArray(N, coords);
     nSize = N.giveSize();
 
-    if ( ( this->componentArray.giveSize() / nSize ) != nDofs ) {
-        OOFEM_ERROR("componentArray size mismatch");
-    }
+    nDofs = this->componentArray.giveSize() / nSize;
+
+    answer.resize(nDofs);
 
     for ( int i = 1; i <= nDofs; i++ ) {
         double value = 0.;
@@ -80,15 +78,7 @@ BoundaryLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatA
     }
 
     // time distribution
-
-    /*
-     * factor = this -> giveTimeFunction() -> at(tStep->giveTime()) ;
-     * if ((mode==VM_Incremental) && (!tStep->isTheFirstStep()))
-     * //factor -= this->giveTimeFunction()->at(tStep->givePreviousStep()->giveTime()) ;
-     * factor -= this->giveTimeFunction()->at(tStep->giveTime()-tStep->giveTimeIncrement());
-     */
     factor = this->giveTimeFunction()->evaluate(tStep, mode);
-
     answer.times(factor);
 }
 
@@ -100,7 +90,8 @@ BoundaryLoad :: initializeFrom(InputRecord *ir)
 
     result = Load :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, nDofs, _IFT_BoundaryLoad_ndofs);
+    int dummy;
+    IR_GIVE_OPTIONAL_FIELD(ir, dummy, "ndofs");
 
     int value = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_BoundaryLoad_loadtype);
@@ -121,7 +112,6 @@ void
 BoundaryLoad :: giveInputRecord(DynamicInputRecord &input)
 {
     Load :: giveInputRecord(input);
-    input.setField(this->nDofs, _IFT_BoundaryLoad_ndofs);
     input.setField(this->lType, _IFT_BoundaryLoad_loadtype);
     input.setField(this->coordSystemType, _IFT_BoundaryLoad_cstype);
     input.setField(this->propertyDictionary, _IFT_BoundaryLoad_properties);

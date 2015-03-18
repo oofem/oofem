@@ -39,7 +39,6 @@
  */
 
 #include "femcmpnn.h"
-#include "error.h"
 #include "datastream.h"
 #include "contextioerr.h"
 #include "dynamicinputrecord.h"

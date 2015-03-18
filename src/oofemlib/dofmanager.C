@@ -34,9 +34,7 @@
 
 #include "dofmanager.h"
 #include "masterdof.h"
-#include "slavedof.h"
 #include "simpleslavedof.h"
-#include "activedof.h"
 #include "timestep.h"
 #include "load.h"
 #include "floatarray.h"
@@ -403,9 +401,9 @@ DofManager :: initializeFrom(InputRecord *ir)
     // masters have to be in same partition as slaves. They can be again Remote copies.
 
 
-    bool hasIc = !( ic.giveSize() == 0 );
-    bool hasBc = !( mBC.giveSize() == 0 );
-    bool hasTypeinfo = !( dofTypeMask.giveSize() == 0 );
+    bool hasIc = ic.giveSize() != 0;
+    bool hasBc = mBC.giveSize() != 0;
+    bool hasTypeinfo = dofTypeMask.giveSize() != 0;
 
     ///@todo This should eventually be removed, still here to preserve backwards compatibility:
     if ( ( hasIc || hasBc || hasTypeinfo ) && !this->dofidmask ) {
@@ -698,8 +696,6 @@ contextIOResultType DofManager :: restoreContext(DataStream &stream, ContextMode
 
 void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDArry, ValueModeType mode, TimeStep *tStep, bool padding)
 {
-    IntArray dofArray;
-
     answer.resize( dofIDArry.giveSize() );
     if ( dofIDArry.giveSize() == 0 ) return;
 
@@ -729,8 +725,6 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
 void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDArry,
                                      PrimaryField &field, ValueModeType mode, TimeStep *tStep, bool padding)
 {
-    IntArray dofArray;
-
     answer.resize( dofIDArry.giveSize() );
 
     int k = 0;

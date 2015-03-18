@@ -443,9 +443,6 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
     //
     BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >(load);
     if ( edgeLoad ) {
-        if ( edgeLoad->giveNumberOfDofs() != 3 ) {
-            OOFEM_ERROR("load number of dofs mismatch");
-        }
 
         answer.resize(6);
         answer.zero();

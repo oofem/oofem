@@ -689,7 +689,7 @@ EngngModel :: printOutputAt(FILE *File, TimeStep *tStep)
     }
 
     fprintf(File, "\n==============================================================");
-    fprintf(File, "\nOutput for time % .8e ", tStep->giveTargetTime() * this->giveVariableScale(VST_Time) );
+    fprintf(File, "\nOutput for time %.8e ", tStep->giveTargetTime() * this->giveVariableScale(VST_Time) );
     fprintf(File, "\n==============================================================\n");
     for ( auto &domain: domainList ) {
         fprintf( File, "Output for domain %3d\n", domain->giveNumber() );
@@ -932,7 +932,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
             abc->assembleVector(answer, tStep, type, mode, s, eNorms);
         } else if ( bc->giveSetNumber() && ( load = dynamic_cast< Load * >(bc) ) && bc->isImposed(tStep) ) {
             // Now we assemble the corresponding load type fo the respective components in the set:
-            IntArray dofids, loc, dofIDarry, bNodes;
+            IntArray dofids, loc, bNodes;
             FloatArray charVec;
             FloatMatrix R;
             BodyLoad *bodyLoad;

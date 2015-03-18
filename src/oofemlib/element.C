@@ -212,7 +212,7 @@ int
 Element :: computeNumberOfPrimaryMasterDofs()
 {
     int answer = 0;
-    IntArray nodeDofIDMask, dofMask;
+    IntArray nodeDofIDMask;
 
     for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
         this->giveDofManDofIDMask(i, nodeDofIDMask);

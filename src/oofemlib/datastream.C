@@ -33,7 +33,7 @@
  */
 
 #include "datastream.h"
-#include "error.h"
+
 #include <vector>
 
 namespace oofem

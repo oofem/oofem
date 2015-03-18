@@ -42,15 +42,11 @@ REGISTER_Function(ConstantFunction);
 IRResultType
 ConstantFunction :: initializeFrom(InputRecord *ir)
 {
-    //
-    // instanciates receiver according to input record
-    //
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    Function :: initializeFrom(ir);
     IR_GIVE_FIELD(ir, value, _IFT_ConstantFunction_f);
 
-    return IRRT_OK;
+    return Function :: initializeFrom(ir);
 }
 
 

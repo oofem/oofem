@@ -71,18 +71,8 @@ FEI2dQuadBiQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FE
 void
 FEI2dQuadBiQuad :: giveDerivatives(FloatMatrix &dN, const FloatArray &lc)
 {
-    IntArray snodes;
-
     double u = lc.at(1);
     double v = lc.at(2);
-
-    /*
-     *  double a[] = {0.5*(u-1.0)*u, 0.5*(u+1.0)*u, 1.0-u*u};
-     *  double b[] = {0.5*(v-1.0)*v, 0.5*(v+1.0)*v, 1.0-v*v};
-     *
-     *  double da[] = {u - 0.5, u + 0.5, -2.0 * u};
-     *  double db[] = {v - 0.5, v + 0.5, -2.0 * v};
-     */
 
     double a[] = {
         0.5 * ( u - 1.0 ) * u, 1.0 - u * u, 0.5 * ( u + 1.0 ) * u

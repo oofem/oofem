@@ -76,8 +76,8 @@ int
 MMAClosestIPTransfer :: mapStatus(MaterialStatus &oStatus) const
 {
     if ( mpMaterialStatus != NULL ) {
-        MaterialStatusMapperInterface &interface = dynamic_cast< MaterialStatusMapperInterface & >(oStatus);
-        interface.copyStateVariables(* mpMaterialStatus);
+        MaterialStatusMapperInterface *interface = static_cast< MaterialStatusMapperInterface * >(&oStatus);
+        interface->copyStateVariables(* mpMaterialStatus);
 
         return 1;
     } else {

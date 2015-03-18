@@ -371,7 +371,7 @@ MatlabExportModule :: doOutputData(TimeStep *tStep, FILE *FID)
 void
 MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
 {
-    FloatArray v_hat, GradPTemp, v_hatTemp;
+    FloatArray v_hat;
 
     Domain *domain  = emodel->giveDomain(1);
 
@@ -428,8 +428,6 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
                 fprintf(FID, "\tspecials.weakperiodic{%u}.descType=%u;\n", wpbccount, wpbc->giveBasisType() );
                 fprintf(FID, "\tspecials.weakperiodic{%u}.coefficients=[", wpbccount);
                 for ( Dof *dof: *wpbc->giveInternalDofManager(j) ) {
-                    FloatArray unknowns;
-                    IntArray DofMask;
                     double X = dof->giveUnknown(VM_Total, tStep);
                     fprintf(FID, "%e\t", X);
                 }
@@ -442,8 +440,6 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
         if (sbsf) {
             fprintf(FID, "\tspecials.solutionbasedsf{%u}.values=[", sbsfcount);
             for ( Dof *dof: *sbsf->giveInternalDofManager(1) ) {                  // Only one internal dof manager
-                FloatArray unknowns;
-                IntArray DofMask;
                 double X = dof->giveUnknown(VM_Total, tStep);
                 fprintf(FID, "%e\t", X);
             }
@@ -747,7 +743,7 @@ MatlabExportModule :: doOutputHomogenizeDofIDs(TimeStep *tStep,    FILE *FID)
     }
 
 
-    for ( std :: size_t i = 0; i<HomQuantities.size(); i ++) {
+    for ( std :: size_t i = 0; i < HomQuantities.size(); i ++) {
         FloatArray *thisIS;
         thisIS = HomQuantities.at(i);
         thisIS->times(1.0/Vol);

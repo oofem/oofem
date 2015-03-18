@@ -228,7 +228,6 @@ FEI3dTrLin :: surfaceLocal2global(FloatArray &answer, int isurf,
                                    const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     //Note: This gives the coordinate in the reference system
-    IntArray nodes;
     FloatArray N;
     this->surfaceEvalN(N, isurf, lcoords, cellgeo);
 

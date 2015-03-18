@@ -44,39 +44,22 @@ REGISTER_BoundaryCondition(ConstantEdgeLoad);
 IRResultType
 ConstantEdgeLoad :: initializeFrom(InputRecord *ir)
 {
-    BoundaryLoad :: initializeFrom(ir);
-    if ( componentArray.giveSize() != nDofs ) {
-        OOFEM_ERROR("componentArray size mismatch");
-    }
-
-    return IRRT_OK;
+    return BoundaryLoad :: initializeFrom(ir);
 }
 
 void
 ConstantEdgeLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode)
 {
-    // we overload general implementation on the boundary load level due
-    // to implementation efficiency
-
-    double factor;
-
     if ( ( mode != VM_Total ) && ( mode != VM_Incremental ) ) {
         OOFEM_ERROR("mode not supported");
     }
 
-    // ask time distribution
-    /*
-     * factor = this -> giveTimeFunction() -> at(tStep->giveTime()) ;
-     * if ((mode==VM_Incremental) && (!tStep->isTheFirstStep()))
-     * //factor -= this->giveTimeFunction()->at(tStep->givePreviousStep()->giveTime()) ;
-     * factor -= this->giveTimeFunction()->at(tStep->giveTime()-tStep->giveTimeIncrement()) ;
-     */
-    factor = this->giveTimeFunction()->evaluate(tStep, mode);
-    answer = componentArray;
-    answer.times(factor);
-
     if ( !isImposed(tStep) ) {
         answer.zero();
+    } else {
+        double factor = this->giveTimeFunction()->evaluate(tStep, mode);
+        answer.beScaled(factor, componentArray);
+        answer.times(factor);
     }
 }
 } // end namespace oofem
