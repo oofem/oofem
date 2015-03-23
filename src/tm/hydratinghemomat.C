@@ -67,7 +67,8 @@ HydratingHeMoMaterial :: initializeFrom(InputRecord *ir)
     /* if (ir->hasField("tout")) {
      * teplotaOut = 1;
      * printf("HydratingHeMoMat %d: additional teplota.out output selected.\n", giveNumber());
-     * } else */teplotaOut = 0;
+     * } else */
+    teplotaOut = 0;
 
     if ( hydration ) {
         // mixture type: 1 - mtLafarge, 2 - mtHuber, 3 - mtC60

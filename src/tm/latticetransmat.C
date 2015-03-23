@@ -36,7 +36,7 @@
 #include "domain.h"
 #include "gausspoint.h"
 #include "latticetransportelement.h"
-#include "math.h"
+#include "mathfem.h"
 #include "staggeredproblem.h"
 #include "classfactory.h"
 #ifdef __SM_MODULE
@@ -50,8 +50,6 @@ IRResultType
 LatticeTransportMaterial :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    this->Material :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, this->viscosity, _IFT_LatticeTransportMaterial_vis);
 
@@ -103,8 +101,7 @@ LatticeTransportMaterial :: initializeFrom(InputRecord *ir)
     crackLimit = -1.;
     IR_GIVE_OPTIONAL_FIELD(ir, this->crackLimit, _IFT_LatticeTransportMaterial_clim);
 
-
-    return IRRT_OK;
+    return Material :: initializeFrom(ir);
 }
 
 
@@ -159,7 +156,7 @@ LatticeTransportMaterial :: computeConductivity(double suction,
 
     this->density = this->give('d', gp);
 
-    double relativePermeability=0.;
+    double relativePermeability = 0.;
     double conductivity = 0.;
 
     double saturation, partOne, partTwo, numerator, denominator;
@@ -289,8 +286,8 @@ LatticeTransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tStep)
 
     fprintf(File, "  state");
 
-    for ( int i = 1; i <= field.giveSize(); i++ ) {
-        fprintf( File, " % .4e", field.at(i) );
+    for ( auto &val : field ) {
+        fprintf( File, " %.4e", val );
     }
 
     fprintf(File, "  mass %.8e", mass);

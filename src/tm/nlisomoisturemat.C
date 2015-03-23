@@ -60,7 +60,7 @@ NlIsoMoistureMaterial :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, iso_h, _IFT_NlIsoMoistureMaterial_iso_h);
         IR_GIVE_FIELD(ir, iso_wh, _IFT_NlIsoMoistureMaterial_iso_wh);
 
-        if ( !( iso_h.giveSize() == iso_wh.giveSize() ) ) {
+        if ( iso_h.giveSize() != iso_wh.giveSize() ) {
             OOFEM_ERROR("the size of 'iso_h' and 'iso_w(h)' must be the same");
         }
 
@@ -100,7 +100,7 @@ NlIsoMoistureMaterial :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, perm_h, _IFT_NlIsoMoistureMaterial_perm_h);
         IR_GIVE_FIELD(ir, perm_ch, _IFT_NlIsoMoistureMaterial_perm_ch);
 
-        if ( !( perm_h.giveSize() == perm_ch.giveSize() ) ) {
+        if ( perm_h.giveSize() != perm_ch.giveSize() ) {
             OOFEM_ERROR("the size of 'perm_h' and 'perm_c(h)' must be the same");
         }
 

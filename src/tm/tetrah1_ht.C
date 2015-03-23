@@ -92,17 +92,7 @@ IRResultType
 Tetrah1_ht :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 1;
-    IRResultType result = this->TransportElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    if ( !( ( numberOfGaussPoints == 1 ) ||
-           ( numberOfGaussPoints == 4 ) ) ) {
-        numberOfGaussPoints = 1;
-    }
-
-    return IRRT_OK;
+    return TransportElement :: initializeFrom(ir);
 }
 
 

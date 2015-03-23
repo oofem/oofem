@@ -35,8 +35,6 @@
 
 #include "tr1darcy.h"
 #include "fei2dtrlin.h"
-#include "node.h"
-#include "domain.h"
 #include "gaussintegrationrule.h"
 #include "gausspoint.h"
 #include "bcgeomtype.h"
@@ -46,7 +44,6 @@
 #include "boundaryload.h"
 #include "mathfem.h"
 #include "crosssection.h"
-#include "matresponsemode.h"
 #include "classfactory.h"
 
 namespace oofem {

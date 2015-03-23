@@ -40,9 +40,7 @@ namespace oofem {
 IRResultType
 IsotropicMoistureTransferMaterial :: initializeFrom(InputRecord *ir)
 {
-    this->Material :: initializeFrom(ir);
-
-    return IRRT_OK;
+    return Material :: initializeFrom(ir);
 }
 
 void

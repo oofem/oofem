@@ -46,9 +46,7 @@ LatticeTransportElement :: ~LatticeTransportElement()
 IRResultType
 LatticeTransportElement :: initializeFrom(InputRecord *ir)
 {
-    TransportElement :: initializeFrom(ir);
-
-    return IRRT_OK;
+    return TransportElement :: initializeFrom(ir);
 }
 
 

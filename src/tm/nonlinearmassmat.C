@@ -33,7 +33,6 @@
  */
 
 #include "nonlinearmassmat.h"
-#include "domain.h"
 #include "floatmatrix.h"
 #include "gausspoint.h"
 #include "mathfem.h"
@@ -47,12 +46,10 @@ NonlinearMassTransferMaterial :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-    this->Material :: initializeFrom(ir);
-
     IR_GIVE_FIELD(ir, C, _IFT_NonlinearMassTransferMaterial_c);
     IR_GIVE_FIELD(ir, alpha, _IFT_NonlinearMassTransferMaterial_alpha);
 
-    return IRRT_OK;
+    return Material :: initializeFrom(ir);
 }
 
 void

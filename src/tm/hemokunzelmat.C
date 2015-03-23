@@ -146,7 +146,7 @@ HeMoKunzelMaterial :: give(int aProperty, GaussPoint *gp)
 // 'E') of the receiver.
 //
 {
-    return this->Material :: give(aProperty, gp);
+    return Material :: give(aProperty, gp);
 }
 
 

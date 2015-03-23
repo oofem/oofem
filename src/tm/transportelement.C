@@ -492,7 +492,6 @@ TransportElement :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
         if ( mat->hasInternalSource() ) {
             // add internal source produced by material (if any)
             FloatArray val;
-            double dV = this->computeVolumeAround(gp);
             mat->computeInternalSourceVector(val, gp, tStep, VM_Total);
             answer.plusProduct(N, val, dV);
         }
@@ -948,7 +947,7 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
                 int numberOfEdgeIPs = ( int ) ceil( ( approxOrder + 1. ) / 2. );
                 GaussIntegrationRule iRule(1, this, 1, 1);
                 iRule.SetUpPointsOnLine(numberOfEdgeIPs, _Unknown);
-                FloatArray val, n;
+                FloatArray n;
                 IntArray mask;
                 FloatMatrix subAnswer;
 
@@ -962,7 +961,7 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
                 this->giveEdgeDofMapping(mask, id);
                 answer.assemble(subAnswer, mask);
             } else if ( ltype == SurfaceLoadBGT ) {
-                FloatArray val, n;
+                FloatArray n;
                 IntArray mask;
                 FloatMatrix subAnswer;
 
@@ -1083,8 +1082,11 @@ TransportElement :: updateInternalState(TimeStep *tStep)
 // Updates the receiver at the end of a solution step
 {
     FloatArray stateVector, r;
+#if 0
     FloatArray gradient, flux;
-    FloatMatrix n, B;
+    FloatMatrix B;
+#endif
+    FloatMatrix n;
     IntArray dofid;
     TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
 
@@ -1115,7 +1117,7 @@ TransportElement :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, Pr
                                                           TimeStep *tStep)
 {
     int indx;
-    FloatArray elemvector, f, lc;
+    FloatArray elemvector, lc;
     FloatMatrix n;
     IntArray elemdofs;
     // determine element dof ids
