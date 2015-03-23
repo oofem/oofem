@@ -233,7 +233,7 @@ public:
      * Print receiver on stdout with custom name.
      * @param name Display name of reciever.
      */    
-    virtual void printYourself(const std::string name) const;
+    virtual void printYourself(const std::string &name) const;
     /**
      * Print receiver on stdout with high accuracy.
      */

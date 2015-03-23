@@ -694,9 +694,10 @@ VTKXMLExportModule :: writeVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep)
     // Write output: node coords
     int numNodes = vtkPiece.giveNumberOfNodes();
     int numEl = vtkPiece.giveNumberOfCells();
-    FloatArray vtkCoords(3), coords;
+    FloatArray coords;
 
 #ifdef __VTK_MODULE
+    FloatArray vtkCoords(3);
     for ( int inode = 1; inode <= numNodes; inode++ ) {
         coords = vtkPiece.giveNodeCoords(inode);
         vtkCoords.zero();
@@ -1084,12 +1085,7 @@ VTKXMLExportModule :: writeIntVars(VTKPiece &vtkPiece)
     int n = internalVarsToExport.giveSize();
     for ( int i = 1; i <= n; i++ ) {
         InternalStateType type = ( InternalStateType ) internalVarsToExport.at(i);
-        InternalStateValueType valType = giveInternalStateValueType(type);
-        int ncomponents = giveInternalStateTypeSize(valType);
-
-        //if ( type == IST_AbaqusStateVector ) {
-        //    ncomponents = 23;
-        //}
+        int ncomponents;
 
         const char *name = __InternalStateTypeToString(type);
         int numNodes = vtkPiece.giveNumberOfNodes();
@@ -1663,7 +1659,6 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
     FloatMatrix rotMat(3, 3);
     int col = 0;
     FloatArray valueArray, temp;
-    IntArray redIndx;
 
     InternalStateValueType valType = giveInternalStateValueType(type);
     int ncomponents = giveInternalStateTypeSize(valType);

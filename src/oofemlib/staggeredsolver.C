@@ -119,7 +119,7 @@ StaggeredSolver :: instanciateYourself()
 void
 StaggeredSolver :: giveTotalLocationArray(IntArray &condensedLocationArray, const UnknownNumberingScheme &s, Domain *d)
 {
-    IntArray masterDofIDs, nodalArray, ids, locationArray;
+    IntArray nodalArray, ids, locationArray;
     locationArray.clear();
     
     for ( auto &dman : d->giveDofManagers() ) {

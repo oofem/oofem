@@ -201,7 +201,7 @@ void PrescribedGradientBCNeumann :: assemble(SparseMtrx &answer, TimeStep *tStep
 void PrescribedGradientBCNeumann :: giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,
                                                        const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
-    IntArray bNodes, dofids;
+    IntArray dofids;
     IntArray loc_r, loc_c, sigma_loc_r, sigma_loc_c;
     int nsd = this->domain->giveNumberOfSpatialDimensions();
     DofIDItem id0 = this->domain->giveDofManager(1)->hasDofID(V_u) ? V_u : D_u; // Just check the first node if it has V_u or D_u.

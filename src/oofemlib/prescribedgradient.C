@@ -51,8 +51,7 @@
 #include "sparsemtrx.h"
 #include "sparselinsystemnm.h"
 #include "assemblercallback.h"
-
-#include <cmath>
+#include "mathfem.h"
 
 namespace oofem {
 REGISTER_BoundaryCondition(PrescribedGradient);

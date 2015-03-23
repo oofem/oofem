@@ -752,7 +752,7 @@ void FloatArray :: printYourself() const
 }
 
 
-void FloatArray :: printYourself(const std::string name) const
+void FloatArray :: printYourself(const std::string &name) const
 // Prints the receiver on screen.
 {
     printf("%s (%d): \n", name.c_str(), this->giveSize());

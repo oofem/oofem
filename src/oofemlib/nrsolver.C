@@ -174,15 +174,10 @@ NRSolver :: initializeFrom(InputRecord *ir)
         mCalcStiffBeforeRes = false;
     }
 
-    SparseNonLinearSystemNM :: initializeFrom(ir);
  
     IR_GIVE_OPTIONAL_FIELD(ir, this->constrainedNRminiter, _IFT_NRSolver_constrainedNRminiter);
 
-    #define _IFT_NRSolver_constrainedNRalpha "constrainednralpha"
-#define _IFT_NRSolver_constrainedNRminiter "constrainednrminiter"
-
-
-    return IRRT_OK;
+    return SparseNonLinearSystemNM :: initializeFrom(ir);
 }
 
 

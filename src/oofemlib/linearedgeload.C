@@ -46,8 +46,6 @@ LinearEdgeLoad :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    BoundaryLoad :: initializeFrom(ir);
-
     int fType = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, fType, _IFT_LinearEdgeLoad_formulation);
     if ( fType == 1 ) {
@@ -56,13 +54,14 @@ LinearEdgeLoad :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, startCoords, _IFT_LinearEdgeLoad_startcoord);
         IR_GIVE_FIELD(ir, endCoords, _IFT_LinearEdgeLoad_endcoord);
         if ( startCoords.isEmpty() || endCoords.isEmpty() ) {
-            OOFEM_ERROR("coordinates not specified");
+            OOFEM_WARNING("coordinates not specified");
+            return IRRT_NOTFOUND;
         }
     } else {
         this->formulation = FT_Entity;
     }
 
-    return IRRT_OK;
+    return BoundaryLoad :: initializeFrom(ir);
 }
 
 

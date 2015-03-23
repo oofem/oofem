@@ -83,7 +83,7 @@ OutputExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     FILE *file = this->giveOutputStream();
 
     fprintf(file, "\n==============================================================");
-    fprintf(file, "\nOutput for time % .8e ", tStep->giveTargetTime() * emodel->giveVariableScale(VST_Time) );
+    fprintf(file, "\nOutput for time %.8e ", tStep->giveTargetTime() * emodel->giveVariableScale(VST_Time) );
     fprintf(file, "\n==============================================================\n");
 
     for ( int idomain = 1; idomain <= emodel->giveNumberOfDomains(); idomain++ ) {

@@ -434,7 +434,6 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx &answer, TimeStep *tSt
     gammaDman->giveLocationArray(gamma_ids, c_loc, c_s);
 
     FloatMatrix B, BT;
-    FloatArray gcoords, normal;
     int normalSign, dofCountOnBoundary;
 
     updateSminmax();
@@ -561,7 +560,6 @@ void WeakPeriodicBoundaryCondition :: assembleVector(FloatArray &answer, TimeSte
 
     FloatMatrix B;
 
-    FloatArray gcoords, normal;
     int normalSign, dofCountOnBoundary;
 
     updateSminmax();
@@ -574,7 +572,7 @@ void WeakPeriodicBoundaryCondition :: assembleVector(FloatArray &answer, TimeSte
             Element *thisElement = this->domain->giveElement( element [ thisSide ].at(ielement) );
 
             // Find dofs for this element which should be periodic
-            IntArray bNodes, nodeDofIDMask, periodicDofIDMask, nodalArray;
+            IntArray bNodes, periodicDofIDMask, nodalArray;
             periodicDofIDMask.resize(1);
             periodicDofIDMask.at(1) = dofid;
 

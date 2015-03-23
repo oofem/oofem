@@ -82,8 +82,6 @@ SolutionbasedShapeFunction :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;
 
-    ActiveBoundaryCondition :: initializeFrom(ir);
-
     // Load problem file
     this->filename = "";
     IR_GIVE_OPTIONAL_FIELD(ir, this->filename, _IFT_SolutionbasedShapeFunction_ShapeFunctionFile);
@@ -101,17 +99,18 @@ SolutionbasedShapeFunction :: initializeFrom(InputRecord *ir)
 
 
     // Set up master dofs
+    ///@todo This should be in the constructor:
     myNode = new Node( 1, this->giveDomain() );
 
-    for (int i=1; i<=this->giveDomain()->giveNumberOfSpatialDimensions(); i++) {
-        int DofID=this->domain->giveNextFreeDofID();
+    for (int i = 1; i <= this->giveDomain()->giveNumberOfSpatialDimensions(); i++) {
+        int DofID = this->domain->giveNextFreeDofID();
         MasterDof *newDof = new MasterDof( myNode, (DofIDItem) DofID );
         myNode->appendDof( newDof );
     }
 
     init();
 
-    return IRRT_OK;
+    return ActiveBoundaryCondition :: initializeFrom(ir);
 }
 
 DofManager *
@@ -516,7 +515,7 @@ SolutionbasedShapeFunction :: computeBaseFunctionValueAt(FloatArray &answer, Flo
         }
         ;
     } else {
-        std :: vector< FloatArray * >checkcoords;
+        std :: vector< FloatArray >checkcoords;
         std :: vector< int >permuteIndex;
         int n = 0;
 
@@ -546,20 +545,19 @@ SolutionbasedShapeFunction :: computeBaseFunctionValueAt(FloatArray &answer, Flo
         int _s = 0x01 << n;
         for ( int i = 0; i < _s; i++ ) {
             int mask = i, counter = 1;
-            FloatArray *newCoord = new(FloatArray) ( coords.giveSize() );
-            * newCoord = coords;
+            FloatArray newCoord = coords;
 
             for ( int j = 1; j <= n; j++ ) {
                 double d = 0.0; //TOL;
                 if ( ( mask & 1 ) == 0 ) { // Max
-                    newCoord->at( permuteIndex.at(counter - 1) ) = minCoord.at( permuteIndex.at(counter - 1) ) + d;
+                    newCoord.at( permuteIndex.at(counter - 1) ) = minCoord.at( permuteIndex.at(counter - 1) ) + d;
                 } else { // Min
-                    newCoord->at( permuteIndex.at(counter - 1) ) = maxCoord.at( permuteIndex.at(counter - 1) ) - d;
+                    newCoord.at( permuteIndex.at(counter - 1) ) = maxCoord.at( permuteIndex.at(counter - 1) ) - d;
                 }
                 counter++;
                 mask = mask >> 1;
             }
-            checkcoords.push_back(newCoord);
+            checkcoords.emplace_back(newCoord);
         }
 
         // The followind define allows for use of weakly periodic bc to be copied. This does not comply with the theory but is used to check the validity of the code.
@@ -573,7 +571,7 @@ SolutionbasedShapeFunction :: computeBaseFunctionValueAt(FloatArray &answer, Flo
 #endif
         FloatArray values;
         for ( size_t i = 0; i < checkcoords.size(); i++ ) {
-            giveValueAtPoint(values, * checkcoords.at(i), dofIDs, myEngngModel);
+            giveValueAtPoint(values, checkcoords[i], dofIDs, myEngngModel);
             //printf("Values at (%f, %f, %f) are [%f, %f, %f]\n", checkcoords.at(i)->at(1), checkcoords.at(i)->at(2), checkcoords.at(i)->at(3), values.at(1), values.at(2), values.at(3));
 #if USEWPBC == 1
             for ( int j = 1; j <= values.giveSize(); j++ ) {
@@ -581,10 +579,9 @@ SolutionbasedShapeFunction :: computeBaseFunctionValueAt(FloatArray &answer, Flo
             }
 #else
             for ( int j = 1; j <= values.giveSize(); j++ ) {
-                answer.at(j) = answer.at(j) + values.at(j) / ( ( double ) pow(2.0, n) );
+                answer.at(j) += values.at(j) / ( ( double ) pow(2.0, n) );
             }
 #endif
-            delete( checkcoords.at(i) );
         }
     }
 }

@@ -504,7 +504,7 @@ void PrescribedGradientBCWeak :: giveTractionLocationArrays(int iTracElInd, IntA
 {
     rows.clear();
 
-    IntArray tracElRows, trac_loc_c, trac_loc_r;
+    IntArray tracElRows, trac_loc_r;
 
     const TractionElement &tEl = * ( mpTractionElements [ iTracElInd ] );
     for ( int tracNodeInd : tEl.mTractionNodeInd ) {

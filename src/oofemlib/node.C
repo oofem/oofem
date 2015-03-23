@@ -101,7 +101,11 @@ IRResultType Node :: initializeFrom(InputRecord *ir)
     // VERBOSE_PRINT1("Instanciating node ",number)
 #  endif
 
-    DofManager :: initializeFrom(ir);
+    result = DofManager :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+
     IR_GIVE_FIELD(ir, coordinates, _IFT_Node_coords);
 
     //

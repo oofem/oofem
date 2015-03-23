@@ -57,8 +57,7 @@ DynamicRelaxationSolver :: DynamicRelaxationSolver(Domain *d, EngngModel *m) : N
 IRResultType
 DynamicRelaxationSolver :: initializeFrom(InputRecord *ir)
 {
-    NRSolver :: initializeFrom(ir);
-    return IRRT_OK;
+    return NRSolver :: initializeFrom(ir);
 }
 
 

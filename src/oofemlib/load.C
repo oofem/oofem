@@ -80,7 +80,7 @@ Load :: initializeFrom(InputRecord *ir)
 #  ifdef VERBOSE
     // VERBOSE_PRINT1 ("Instanciating load ",number)
 #  endif
-    GeneralBoundaryCondition :: initializeFrom(ir);
+
     IR_GIVE_FIELD(ir, componentArray, _IFT_Load_components);
 
     int size = componentArray.giveSize();
@@ -88,7 +88,8 @@ Load :: initializeFrom(InputRecord *ir)
     dofExcludeMask.zero();
     IR_GIVE_OPTIONAL_FIELD(ir, dofExcludeMask, _IFT_Load_dofexcludemask);
     if ( dofExcludeMask.giveSize() != size ) {
-        OOFEM_ERROR("dofExcludeMask and componentArray size mismatch");
+        OOFEM_WARNING("dofExcludeMask and componentArray size mismatch");
+        return IRRT_BAD_FORMAT;
     } else {
         for ( int i = 1; i <= size; i++ ) {
             if ( dofExcludeMask.at(i) ) {
@@ -97,7 +98,7 @@ Load :: initializeFrom(InputRecord *ir)
         }
     }
 
-    return IRRT_OK;
+    return GeneralBoundaryCondition :: initializeFrom(ir);
 }
 
 

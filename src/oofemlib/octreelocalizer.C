@@ -749,10 +749,8 @@ OctreeSpatialLocalizer :: giveElementClosestToPoint(FloatArray &lcoords, FloatAr
     Element *answer = NULL;
     std :: list< OctantRec * >cellList;
     OctantRec *currCell;
-    FloatArray currLcoords;
-    FloatArray currClosest;
     double radius, prevRadius;
-    FloatArray c  = this->rootCell->giveOrigin();
+    FloatArray c = this->rootCell->giveOrigin();
 
     this->initElementDataStructure(region);
 
