@@ -86,7 +86,7 @@ RheoChainMaterial :: giveRealStressVector(FloatArray &answer,
 // strain increment at time tStep.
 //
 {
-    FloatArray stressIncrement, stressVector, strainIncrement, reducedStrain, eigenStrain;
+    FloatArray stressIncrement, stressVector, strainIncrement, reducedStrain;
     FloatMatrix Binv;
     double Emodulus;
     RheoChainMaterialStatus *status = static_cast< RheoChainMaterialStatus * >( this->giveStatus(gp) );

@@ -113,8 +113,6 @@ public:
 protected:
 
     virtual double giveArea();
-    virtual FloatArray *GivebCoeff();
-    virtual FloatArray *GivecCoeff();
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }
 };
 } // end namespace oofem

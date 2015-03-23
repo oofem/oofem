@@ -97,7 +97,7 @@ IRResultType
 TrPlaneStrain :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 1;
-    IRResultType result = this->StructuralElement :: initializeFrom(ir);
+    IRResultType result = StructuralElement :: initializeFrom(ir);
     if ( result != IRRT_OK ) {
         return result;
     }

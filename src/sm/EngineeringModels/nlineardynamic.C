@@ -626,7 +626,7 @@ NonLinearDynamic :: printOutputAt(FILE *File, TimeStep *tStep)
         return; // Do not print even Solution step header
     }
 
-    fprintf( File, "\n\nOutput for time % .3e, solution step number %d\n", tStep->giveTargetTime(), tStep->giveNumber() );
+    fprintf( File, "\n\nOutput for time %.3e, solution step number %d\n", tStep->giveTargetTime(), tStep->giveNumber() );
     fprintf(File, "Equilibrium reached in %d iterations\n\n", currentIterations);
 
 
@@ -835,7 +835,7 @@ NonLinearDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type
         // assemble it manually
         //
 #ifdef DEBUG
-        if ( ( n = loc.giveSize() ) != charMtrx.giveNumberOfRows() ) {
+        if ( loc.giveSize() != charMtrx.giveNumberOfRows() ) {
             OOFEM_ERROR("dimension mismatch");
         }
 

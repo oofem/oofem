@@ -139,7 +139,6 @@ MisesMat :: giveFirstPKStressVector_3d(FloatArray &answer,
 
     double kappa, dKappa, yieldValue, mi;
     FloatMatrix F, oldF, invOldF;
-    FloatArray totalStrain;
     FloatArray s(6);
     F.beMatrixForm(totalDefGradOOFEM); //(method assumes full 3D)
 
@@ -265,8 +264,7 @@ void
 MisesMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain)
 {
     double kappa, yieldValue, dKappa;
-    FloatArray reducedStress;
-    FloatArray strain, plStrain;
+    FloatArray plStrain;
     MaterialMode mode = gp->giveMaterialMode();
     MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
     StressVector fullStress(mode);
@@ -570,10 +568,9 @@ MisesMat :: give3dLSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode
     FloatArray delta(6);
     delta.at(1) = delta.at(2) = delta.at(3) = 1;
 
-    FloatMatrix F, F_Tr;
+    FloatMatrix F;
     F.beMatrixForm( status->giveTempFVector() );
-    double J;
-    J = F.giveDeterminant();
+    double J = F.giveDeterminant();
 
     StressVector trialStressDev(status->giveTrialStressDev(), _3dMat);
     double trialStressVol = status->giveTrialStressVol();
@@ -586,7 +583,6 @@ MisesMat :: give3dLSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode
     }
 
 
-    FloatMatrix Cdev(6, 6);
     FloatMatrix C(6, 6);
     FloatMatrix help(6, 6);
     help.beDyadicProductOf(delta, delta);
@@ -603,18 +599,16 @@ MisesMat :: give3dLSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode
     help.add(n2);
     help.times(-2. / 3. * trialS);
     C1.add(help);
-    Cdev = C1;
     C.times(K * J * J);
 
     help = I;
     help.times( -K * ( J * J - 1 ) );
     C.add(help);
-    FloatMatrix Cvol = C;
     C.add(C1);
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     FloatMatrix invF(3, 3);
-    FloatMatrix T(6, 6), tT(6, 6);
+    FloatMatrix T(6, 6);
 
     invF.beInverseOf(F);
     //////////////////////////////////////////////////
@@ -814,35 +808,35 @@ MisesMatStatus :: printOutputAt(FILE *file, TimeStep *tStep)
      *  n = plasticStrain.giveSize();
      *  fprintf(file, " plastic_strains ");
      *  for ( i = 1; i <= n; i++ ) {
-     *      fprintf( file, " % .4e", plasticStrain.at(i) );
+     *      fprintf( file, " %.4e", plasticStrain.at(i) );
      *  }
      */
     // print the cumulative plastic strain
     fprintf(file, ", kappa ");
-    fprintf(file, " % .4e", kappa);
+    fprintf(file, " %.4e", kappa);
 
     fprintf(file, "}\n");
     /*
      * //print Left Cauchy - Green deformation tensor
      * fprintf(file," left Cauchy Green");
-     * fprintf( file, " % .4e",tempLeftCauchyGreen.at(1,1) );
-     * fprintf( file, " % .4e",tempLeftCauchyGreen.at(2,2) );
-     * fprintf( file, " % .4e",tempLeftCauchyGreen.at(3,3) );
-     * fprintf( file, " % .4e",tempLeftCauchyGreen.at(2,3) );
-     * fprintf( file, " % .4e",tempLeftCauchyGreen.at(1,3) );
-     * fprintf( file, " % .4e",tempLeftCauchyGreen.at(1,2) );
+     * fprintf( file, " %.4e",tempLeftCauchyGreen.at(1,1) );
+     * fprintf( file, " %.4e",tempLeftCauchyGreen.at(2,2) );
+     * fprintf( file, " %.4e",tempLeftCauchyGreen.at(3,3) );
+     * fprintf( file, " %.4e",tempLeftCauchyGreen.at(2,3) );
+     * fprintf( file, " %.4e",tempLeftCauchyGreen.at(1,3) );
+     * fprintf( file, " %.4e",tempLeftCauchyGreen.at(1,2) );
      *
      * //print deformation gradient
      * fprintf(file," Deformation Gradient");
-     * fprintf( file, " % .4e",tempDefGrad.at(1,1) );
-     * fprintf( file, " % .4e",tempDefGrad.at(1,2) );
-     * fprintf( file, " % .4e",tempDefGrad.at(1,3) );
-     * fprintf( file, " % .4e",tempDefGrad.at(2,1) );
-     * fprintf( file, " % .4e",tempDefGrad.at(2,2) );
-     * fprintf( file, " % .4e",tempDefGrad.at(2,3) );
-     * fprintf( file, " % .4e",tempDefGrad.at(3,1) );
-     * fprintf( file, " % .4e",tempDefGrad.at(3,2) );
-     * fprintf( file, " % .4e",tempDefGrad.at(3,3) );
+     * fprintf( file, " %.4e",tempDefGrad.at(1,1) );
+     * fprintf( file, " %.4e",tempDefGrad.at(1,2) );
+     * fprintf( file, " %.4e",tempDefGrad.at(1,3) );
+     * fprintf( file, " %.4e",tempDefGrad.at(2,1) );
+     * fprintf( file, " %.4e",tempDefGrad.at(2,2) );
+     * fprintf( file, " %.4e",tempDefGrad.at(2,3) );
+     * fprintf( file, " %.4e",tempDefGrad.at(3,1) );
+     * fprintf( file, " %.4e",tempDefGrad.at(3,2) );
+     * fprintf( file, " %.4e",tempDefGrad.at(3,3) );
      */
 
     fprintf(file, "}\n");

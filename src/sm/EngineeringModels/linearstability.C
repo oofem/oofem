@@ -285,7 +285,7 @@ LinearStability :: terminateLinStatic(TimeStep *tStep)
     FILE *File = this->giveOutputStream();
     tStep->setTime(0.);
 
-    fprintf(File, "\nOutput for time % .3e \n\n", tStep->giveTargetTime() );
+    fprintf(File, "\nOutput for time %.3e \n\n", tStep->giveTargetTime() );
     fprintf(File, "Linear static:\n\n");
 
     if ( requiresUnknownsDictionaryUpdate() ) {
@@ -353,7 +353,7 @@ void LinearStability :: terminate(TimeStep *tStep)
     int nnodes = domain->giveNumberOfDofManagers();
 
     for ( int i = 1; i <= numberOfRequiredEigenValues; i++ ) {
-        fprintf(outputStream, "\nOutput for eigen value no.  % .3e \n", ( double ) i);
+        fprintf(outputStream, "\nOutput for eigen value no.  %.3e \n", ( double ) i);
         fprintf( outputStream,
                 "Printing eigen vector no. %d, corresponding eigen value is %15.8e\n\n",
                 i, eigVal.at(i) );

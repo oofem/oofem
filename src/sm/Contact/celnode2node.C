@@ -268,7 +268,7 @@ Node2NodeContactL :: computeContactForces(FloatArray &answer, TimeStep *tStep, C
 {
   
     //Loop through all the master objects and let them do their thing
-    FloatArray gap, C, Fc;
+    FloatArray gap, C;
     this->computeGap(gap, tStep);
     
     GaussPoint *gp = this->integrationRule->getIntegrationPoint(0);

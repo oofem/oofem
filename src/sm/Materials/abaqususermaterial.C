@@ -420,7 +420,7 @@ void AbaqusUserMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussP
 
     // compute Green-Lagrange strain
     FloatArray strain;
-    FloatArray vE, vS;
+    FloatArray vS;
     FloatMatrix F, E;
     F.beMatrixForm(vF);
     E.beTProductOf(F, F);

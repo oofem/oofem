@@ -62,7 +62,7 @@ TrabBoneNLEmbed :: ~TrabBoneNLEmbed()
 void
 TrabBoneNLEmbed :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep)
 {
-    FloatArray SDstrainVector, fullSDStrainVector;
+    FloatArray SDstrainVector;
     double cumPlastStrain;
     TrabBoneNLEmbedStatus *nlstatus = static_cast< TrabBoneNLEmbedStatus * >( this->giveStatus(gp) );
 
@@ -128,7 +128,7 @@ TrabBoneNLEmbed :: computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep
         nonlocalCumPlastStrain += nonlocalContribution;
     }
 
-    nonlocalCumPlastStrain /= status->giveIntegrationScale();
+    nonlocalCumPlastStrain /= status->giveIntegrationScale(); ///@todo This is never used.
 
     //  double localCumPlastStrain = status->giveLocalCumPlastStrainForAverage();
     //  alpha = mParam*nonlocalCumPlastStrain +(1-mParam)*localCumPlastStrain ;
@@ -202,17 +202,16 @@ TrabBoneNLEmbedStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status {");
     fprintf(file, " plastrains ");
-    int n = plasDef.giveSize();
-    for ( int i = 1; i <= n; i++ ) {
-        fprintf( file, " % .4e", plasDef.at(i) );
+    for ( auto &val : plasDef ) {
+        fprintf( file, " %.4e", val );
     }
 
     fprintf(file, " ,");
-    fprintf(file, " alpha % .4e ,", alpha);
-    fprintf(file, " dam  % .4e ,", dam);
-    fprintf(file, " esed  % .4e ,", this->tempTSED);
+    fprintf(file, " alpha %.4e ,", alpha);
+    fprintf(file, " dam  %.4e ,", dam);
+    fprintf(file, " esed  %.4e ,", this->tempTSED);
     fprintf(file, " psed  0. ,");
-    fprintf(file, " tsed  % .4e ,", this->tempTSED);
+    fprintf(file, " tsed  %.4e ,", this->tempTSED);
     fprintf(file, "}\n");
 }
 

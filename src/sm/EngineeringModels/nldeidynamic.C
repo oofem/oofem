@@ -541,7 +541,7 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
 #endif
 
 #ifdef DEBUG
-        if ( ( n = loc.giveSize() ) != charMtrx.giveNumberOfRows() ) {
+        if ( loc.giveSize() != charMtrx.giveNumberOfRows() ) {
             OOFEM_ERROR("dimension mismatch");
         }
 #endif
@@ -816,7 +816,7 @@ NlDEIDynamic :: printOutputAt(FILE *File, TimeStep *tStep)
         return;                                                                      // do not print even Solution step header
     }
 
-    fprintf( File, "\n\nOutput for time % .3e, solution step number %d\n", tStep->giveTargetTime(), tStep->giveNumber() );
+    fprintf( File, "\n\nOutput for time %.3e, solution step number %d\n", tStep->giveTargetTime(), tStep->giveNumber() );
     if ( drFlag ) {
         fprintf(File, "Reached load level : %e\n\n", this->pt);
     }

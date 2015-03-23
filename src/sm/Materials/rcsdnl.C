@@ -458,8 +458,8 @@ RCSDNLMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     fprintf(file, "nonlocstatus { ");
     fprintf(file, "  nonloc strains ");
     StructuralMaterial :: giveFullSymVectorForm( helpVec, nonlocalStrainVector, gp->giveMaterialMode() );
-    for ( int i = 1; i <= helpVec.giveSize(); i++ ) {
-        fprintf( file, " % .4e", helpVec.at(i) );
+    for ( auto &val : helpVec ) {
+        fprintf( file, " %.4e", val );
     }
 
     fprintf(file, "}\n");

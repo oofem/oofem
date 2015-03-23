@@ -61,7 +61,6 @@ RankineMatNl :: giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint 
     //mj this->initGpForNewStep(gp);
     
     double tempDam;
-    FloatArray tempEffStress;
     //mj performPlasticityReturn(gp, totalStrain, mode);
     // nonlocal method "computeDamage" performs the plastic return
     // for all Gauss points when it is called for the first time

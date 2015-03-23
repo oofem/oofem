@@ -320,7 +320,7 @@ StructuralMaterial :: giveFirstPKStressVector_1d(FloatArray &answer, GaussPoint 
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
     IntArray P_control; // Determines which components are controlled by P resp.
-    FloatArray old_vF, vF, increment_vF, vP, vP_control;
+    FloatArray vF, increment_vF, vP, vP_control;
     FloatMatrix tangent, tangent_Pcontrol;
     // Compute the negated the array of control since we need P_control as well;
     P_control.resize(8);

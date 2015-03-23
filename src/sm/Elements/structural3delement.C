@@ -128,7 +128,7 @@ IRResultType
 Structural3DElement :: initializeFrom(InputRecord *ir)
 {
     // Initialise the element from the input record   
-    return this->NLStructuralElement :: initializeFrom(ir); 
+    return NLStructuralElement :: initializeFrom(ir);
 }
 
 

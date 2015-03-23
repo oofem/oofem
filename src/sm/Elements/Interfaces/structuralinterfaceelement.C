@@ -136,8 +136,8 @@ StructuralInterfaceElement :: giveInternalForcesVector(FloatArray &answer,
     // this must be done after you want internal forces after element->updateYourself()
     // has been called for the same time step.
 
-    FloatMatrix N, rotationMatGtoL;
-    FloatArray u, traction, tractionTemp, jump;
+    FloatMatrix N;
+    FloatArray u, traction, jump;
 
     this->computeVectorOf(VM_Total, tStep, u);
     // subtract initial displacements, if defined

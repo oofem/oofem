@@ -111,12 +111,11 @@ DustMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     const StrainVector &plasticStrain = this->givePlasticStrain();
 
     fprintf(file, ", plasticStrains ");
-    int n = plasticStrain.giveSize();
-    for ( int i = 1; i <= n; i++ ) {
-        fprintf( file, " % .4e", plasticStrain.at(i) );
+    for ( auto &val : plasticStrain ) {
+        fprintf( file, " %.4e", val );
     }
 
-    fprintf(file, ", q  % .4e", q);
+    fprintf(file, ", q  %.4e", q);
 
     fprintf(file, "}\n");
 }

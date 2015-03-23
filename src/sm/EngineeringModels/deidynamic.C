@@ -142,7 +142,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
     IntArray loc;
     Element *element;
     int neq;
-    int i, k, n, j, jj, kk, init = 0;
+    int n, init = 0;
     double coeff, maxDt, maxOmi, maxOm = 0., maxOmEl, c1, c2, c3;
     FloatMatrix charMtrx, charMtrx2;
     FloatArray previousDisplacementVector;
@@ -162,7 +162,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
         massMatrix.resize(neq);
         massMatrix.zero();
         EModelDefaultEquationNumbering dn;
-        for ( i = 1; i <= nelem; i++ ) {
+        for ( int i = 1; i <= nelem; i++ ) {
             element = domain->giveElement(i);
             element->giveLocationArray(loc, dn);
             element->giveCharacteristicMatrix(charMtrx,  LumpedMassMatrix, tStep);
@@ -173,7 +173,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
             // assemble it manually
             //
 #ifdef DEBUG
-            if ( ( n = loc.giveSize() ) != charMtrx.giveNumberOfRows() ) {
+            if ( loc.giveSize() != charMtrx.giveNumberOfRows() ) {
                 OOFEM_ERROR("dimension mismatch");
             }
 
@@ -182,7 +182,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
             n = loc.giveSize();
 
             maxOmEl = 0.;
-            for ( j = 1; j <= n; j++ ) {
+            for ( int j = 1; j <= n; j++ ) {
                 if ( charMtrx.at(j, j) > ZERO_MASS ) {
                     maxOmi =  charMtrx2.at(j, j) / charMtrx.at(j, j);
                     if ( init ) {
@@ -193,15 +193,15 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
 
             maxOm = ( maxOm > maxOmEl ) ? ( maxOm ) : ( maxOmEl );
 
-            for ( j = 1; j <= n; j++ ) {
-                jj = loc.at(j);
+            for ( int j = 1; j <= n; j++ ) {
+                int jj = loc.at(j);
                 if ( ( jj ) && ( charMtrx.at(j, j) <= ZERO_MASS ) ) {
                     charMtrx.at(j, j) = charMtrx2.at(j, j) / maxOmEl;
                 }
             }
 
-            for ( j = 1; j <= n; j++ ) {
-                jj = loc.at(j);
+            for ( int j = 1; j <= n; j++ ) {
+                int jj = loc.at(j);
                 if ( jj ) {
                     massMatrix.at(jj) += charMtrx.at(j, j);
                 }
@@ -282,16 +282,16 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
     // assembling additional parts of right hand side
     //
     EModelDefaultEquationNumbering dn;
-    for ( i = 1; i <= nelem; i++ ) {
+    for ( int i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
         element->giveLocationArray(loc, dn);
         element->giveCharacteristicMatrix(charMtrx, TangentStiffnessMatrix, tStep);
         n = loc.giveSize();
-        for ( j = 1; j <= n; j++ ) {
-            jj = loc.at(j);
+        for ( int j = 1; j <= n; j++ ) {
+            int jj = loc.at(j);
             if ( jj ) {
-                for ( k = 1; k <= n; k++ ) {
-                    kk = loc.at(k);
+                for ( int k = 1; k <= n; k++ ) {
+                    int kk = loc.at(k);
                     if ( kk ) {
                         loadVector.at(jj) -= charMtrx.at(j, k) * displacementVector.at(kk);
                     }
@@ -309,8 +309,8 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
 
 
 
-    for ( j = 1; j <= neq; j++ ) {
-        coeff =  massMatrix.at(j);
+    for ( int j = 1; j <= neq; j++ ) {
+        coeff = massMatrix.at(j);
         loadVector.at(j) += coeff * c3 * displacementVector.at(j) -
         coeff * ( c1 - dumpingCoef * c2 ) *
         previousDisplacementVector.at(j);
@@ -331,7 +331,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
 #endif
     double prevD;
 
-    for ( i = 1; i <= neq; i++ ) {
+    for ( int i = 1; i <= neq; i++ ) {
         prevD = previousDisplacementVector.at(i);
         nextDisplacementVector.at(i) = loadVector.at(i) /
         ( massMatrix.at(i) * ( c1 + dumpingCoef * c2 ) );

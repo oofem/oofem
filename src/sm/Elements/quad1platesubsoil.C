@@ -97,8 +97,8 @@ Quad1PlateSubSoil :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int l
 // Returns the [3x4] strain-displacement matrix {B} of the receiver,
 // evaluated at gp.
 {
-    FloatArray n, ns;
-    FloatMatrix dn, dns;
+    FloatArray n;
+    FloatMatrix dn;
 
     this->interp_lin.evaldNdx( dn, gp->giveNaturalCoordinates(),  FEIElementGeometryWrapper(this) );
     this->interp_lin.evalN( n, gp->giveNaturalCoordinates(),  FEIElementGeometryWrapper(this) );
@@ -133,7 +133,7 @@ IRResultType
 Quad1PlateSubSoil :: initializeFrom(InputRecord *ir)
 {
     this->numberOfGaussPoints = 4;
-    return this->StructuralElement :: initializeFrom(ir);
+    return StructuralElement :: initializeFrom(ir);
 }
 
 

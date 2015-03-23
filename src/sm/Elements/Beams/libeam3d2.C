@@ -176,7 +176,7 @@ LIBeam3d2 :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, 
 // Returns the stiffness matrix of the receiver, expressed in the global
 // axes.
 {
-    this->StructuralElement :: computeStiffnessMatrix(answer, rMode, tStep);
+    StructuralElement :: computeStiffnessMatrix(answer, rMode, tStep);
 }
 
 

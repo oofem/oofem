@@ -58,8 +58,8 @@ IRResultType Crack :: initializeFrom(InputRecord *ir)
 void Crack :: AppendCohesiveZoneGaussPoint(GaussPoint *ipGP)
 {
     StructuralInterfaceMaterialStatus *matStat = dynamic_cast< StructuralInterfaceMaterialStatus * >( ipGP->giveMaterialStatus() );
-    matStat->printYourself();
-    if ( matStat != NULL ) {
+
+    if ( matStat ) {
         // Compute arc length position of the Gauss point
         const FloatArray &coord =  ipGP->giveGlobalCoordinates();
         double tangDist = 0.0, arcPos = 0.0;

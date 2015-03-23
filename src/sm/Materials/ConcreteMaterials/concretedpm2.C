@@ -212,15 +212,13 @@ ConcreteDPM2Status :: printOutputAt(FILE *file, TimeStep *tStep)
     inelasticStrainVector.times(le);
 
     fprintf(file, " plastic ");
-    int n = plasticStrainVector.giveSize();
-    for ( int i = 1; i <= n; i++ ) {
-        fprintf( file, " % .10e", plasticStrainVector.at(i) );
+    for ( auto &val : plasticStrainVector ) {
+        fprintf( file, " %.10e", val );
     }
 
     fprintf(file, " inelastic ");
-    n = inelasticStrainVector.giveSize();
-    for ( int i = 1; i <= n; i++ ) {
-        fprintf( file, " % .10e", inelasticStrainVector.at(i) );
+    for ( auto &val : inelasticStrainVector ) {
+        fprintf( file, " %.10e", val );
     }
 
     fprintf(file, " equivStrain %.10e,", equivStrain);
@@ -470,9 +468,6 @@ ConcreteDPM2Status :: computeWork(GaussPoint *gp, double gf)
     StrainVector deltaTotalStrain(tempTotalstrain);
     deltaTotalStrain.subtract(totalstrain);
 
-    //Ask for the stored plastic strain tensor
-    StrainVector tempPlasticStrains = tempPlasticStrain;
-
     //Ask for stress tensor at step
     StressVector stress(tempStressVector, matMode);
     int n = stress.giveSize();
@@ -662,10 +657,7 @@ ConcreteDPM2 :: giveRealStressVector_1d(FloatArray &answer,
     this->initTempStatus(gp);
     status->letTempStrainVectorBe(strainVector);
 
-    FloatArray testStrain;
     StrainVector strain(strainVector, matMode);
-    //Calculate the strain increment!
-    StrainVector deltaStrain(matMode);
 
     //Calculate strain rate
     //Time step
@@ -755,14 +747,9 @@ ConcreteDPM2 :: giveRealStressVector(FloatArray &answer,
 
     status->letTempStrainVectorBe(strainVector);
 
-
-    FloatArray testStrain;
-
     //  ConcreteDPM2Status *status = giveStatus (gp) ;
 
     StrainVector strain(strainVector, matMode);
-    //Calculate the strain increment!
-    StrainVector deltaStrain(matMode);
 
     //Calculate strain rate
     //Time step
@@ -1079,7 +1066,6 @@ ConcreteDPM2 :: computeRateFactor(const double alpha,
     ConcreteDPM2Status *status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
 
     //Access old and new strain
-    StrainVector oldStrain(status->giveStrainVector(), matMode);
     StrainVector strain(status->giveTempStrainVector(), matMode);
 
     //Determine the principal values of the strain
@@ -1595,8 +1581,6 @@ ConcreteDPM2 :: performVertexReturn(StressVector &effectiveStress,
     //    ConcreteDPM2Status *status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
     StressVector deviatoricStressTrial(matMode);
     double sigTrial;
-    StressVector stressTemp(matMode);
-    StressVector deviatoricStress(matMode);
     double yieldValue = 0.;
     double yieldValueMid = 0.;
     double sig2 = 0.;
@@ -1607,8 +1591,6 @@ ConcreteDPM2 :: performVertexReturn(StressVector &effectiveStress,
 
     effectiveStress.computeDeviatoricVolumetricSplit(deviatoricStressTrial, sigTrial);
     const double rhoTrial = deviatoricStressTrial.computeSecondCoordinate();
-
-    StrainVector deltaPlasticStrain(matMode);
 
     //    double tempKappaP = status->giveTempKappaP();
     const double kappaInitial = tempKappaP;
@@ -1706,7 +1688,6 @@ ConcreteDPM2 :: computeTempKappa(const double kappaInitial,
 {
     //This function is called, if stress state is in vertex case
     double equivalentDeltaPlasticStrain;
-    FloatArray deltaPlasticStrainPrincipal(3);
     rho = 0.;
     equivalentDeltaPlasticStrain = sqrt( 1. / 9. * pow( ( sigTrial - sig ) / ( kM ), 2. ) +
                                          pow(rhoTrial / ( 2. * gM ), 2.) );
@@ -1778,28 +1759,22 @@ ConcreteDPM2 :: performRegularReturn(StressVector &effectiveStress,
     ConcreteDPM2Status *status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
 
     MaterialMode matMode = gp->giveMaterialMode();
-    StressVector trialStress(matMode), tempStress(matMode), deviatoricTrialStress(matMode);
+    StressVector trialStress(matMode), deviatoricTrialStress(matMode);
 
     double yieldValue;
 
     FloatArray residuals(4), residualsNorm(4), dGDInv(2);
     FloatMatrix jacobian(4, 4), inverseOfJacobian(4, 4);
-    FloatArray rVector(3), helpVector(3), helpVector2(3);
     double dKappaDDeltaLambda;
-    FloatMatrix aMatrix(3, 3), aMatrixInv(3, 3);
     FloatArray deltaIncrement(3);
     FloatArray deltaIncrementTemp(3);
-    StrainVector tempPlasticStrain(matMode);
 
     double deltaLambda = 0.;
     double normOfResiduals = 0.;
     int iterationCount = 0;
 
-    FloatArray jacobianTimesAnswerIncrement;
     FloatArray unknownsTrial;
     FloatArray residualsTrial;
-    FloatArray deltaUnknowns;
-    FloatArray jacobianTimesDeltaUnknowns;
     FloatArray unknowns(4);
 
     if ( matMode == _1dMat ) { //Resize Matrices and Arrays for 1D
@@ -1838,8 +1813,6 @@ ConcreteDPM2 :: performRegularReturn(StressVector &effectiveStress,
     sig = trialSig;
     rho = trialRho;
 
-    // Write the old plastic strain to the temp ones
-    tempPlasticStrain = status->giveTempPlasticStrain();
 
     // Do the same for kappa
     double kappaP = status->giveTempKappaP();
@@ -2269,7 +2242,6 @@ ConcreteDPM2 :: computeDKappaDDeltaLambda(const double sig,
     if ( matMode != _1dMat ) {
         FloatArray dGDInv(2);
         computeDGDInv(dGDInv, sig, rho, tempKappa);
-        FloatArray dGDStressPrincipal(3);
 
         equivalentDGDStress = sqrt( 1. / 3. * pow(dGDInv(0), 2.) +
                                     pow(dGDInv(1), 2.) );
@@ -2325,9 +2297,7 @@ ConcreteDPM2 :: computeDDKappaDDeltaLambdaDInv(FloatArray &answer,
     double equivalentDGDStress;
     FloatArray dGDInv(2);
     FloatMatrix dDGDDInv(2, 2);
-    FloatArray dGDStressPrincipal(3);
     FloatArray dEquivalentDGDStressDInv(2);
-    FloatArray helpA(3);
 
     //Compute first and second derivative of plastic potential
     computeDGDInv(dGDInv, sig, rho, tempKappa);
@@ -2372,8 +2342,6 @@ ConcreteDPM2 :: computeDDKappaDDeltaLambdaDKappa(const double sig,
     if ( matMode != _1dMat ) {
         FloatArray dGDInv(2);
         FloatArray dDGDInvDKappa(2);
-        FloatArray dGDStressPrincipal(3);
-        FloatArray helpA(3);
 
         //Compute first and second derivative of plastic potential
         computeDGDInv(dGDInv, sig, rho, tempKappa);
@@ -2390,6 +2358,7 @@ ConcreteDPM2 :: computeDDKappaDDeltaLambdaDKappa(const double sig,
         // compute the derivative of
         double dDuctilityMeasureDKappa = 0.;
 
+        ///@todo Is this right? This is *NEVER* used.
         dDKappaDDeltaLambdaDKappa =
             ( dEquivalentDGDStressDKappa * ductilityMeasure -
               equivalentDGDStress * dDuctilityMeasureDKappa ) / pow(ductilityMeasure, 2.);
@@ -2684,9 +2653,7 @@ ConcreteDPM2 :: computeAlpha(StressVector &effectiveStressTension,
                              StressVector &effectiveStress)
 {
     FloatMatrix stressPrincipalDir(3, 3);
-    FloatArray help;
     StressVector principalStress(_3dMat);
-    StressVector effectiveStressTest(_3dMat);
     effectiveStress.computePrincipalValDir(principalStress, stressPrincipalDir);
 
     //Split the principal values in a tension and a compression part

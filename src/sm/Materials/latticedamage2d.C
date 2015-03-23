@@ -270,10 +270,9 @@ LatticeDamage2d :: computeStressIndependentStrainVector(FloatArray &answer,
         exit(1);
     }
 
-    double deltaTemperature = 0.;
     if ( mode == VM_Total ) {
         // compute temperature difference
-        deltaTemperature = et.at(1) - this->referenceTemperature;
+        double deltaTemperature = et.at(1) - this->referenceTemperature;
         answer.at(1) = this->give(tAlpha, gp) * deltaTemperature;
     } else {
         answer.at(1) = this->give(tAlpha, gp) * et.at(1);
@@ -326,15 +325,13 @@ LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
     const double e0 = this->give(e0_ID, gp) * this->e0Mean;
     status->setE0(e0);
 
-    FloatArray strainVector, reducedStrain;
+    FloatArray reducedStrain;
 
     double f, equivStrain, tempKappa, omega = 0.;
 
     //this->initGpForNewStep(gp);
     this->initTempStatus(gp);
     reducedStrain = totalStrain;
-
-    FloatArray testStrainOld( status->giveStrainVector() );
 
     // subtract stress independent part
     this->giveStressDependentPartOfStrainVector(reducedStrain, gp, totalStrain, tStep, VM_Total);
@@ -396,8 +393,7 @@ LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
     
     //Compute dissipation
     double tempDissipation = status->giveDissipation();
-    double tempDeltaDissipation = 0.;
-    tempDeltaDissipation = computeDeltaDissipation(omega, reducedStrain, gp, tStep);
+    double tempDeltaDissipation = computeDeltaDissipation(omega, reducedStrain, gp, tStep);
 
     tempDissipation += tempDeltaDissipation;
 
@@ -482,7 +478,6 @@ LatticeDamage2d :: computeDeltaDissipation(double omega,
     FloatArray crackOpeningOld(3);
     crackOpeningOld.times(omegaOld);
     crackOpeningOld.times(length);
-    FloatArray stressOld( status->giveStressVector() );
     FloatArray intermediateStrain(3);
 
     double tempDeltaDissipation = 0.;
@@ -743,12 +738,11 @@ LatticeDamage2dStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");
     fprintf(file, "reduced strains ");
-    int rSize = reducedStrain.giveSize();
-    for ( int k = 1; k <= rSize; k++ ) {
-        fprintf( file, "% .4e ", reducedStrain.at(k) );
+    for ( auto &val : reducedStrain ) {
+        fprintf( file, "%.4e ", val );
     }
 
-    fprintf(file, "kappa %f, equivStrain %f, damage %f, dissipation %f, deltaDissipation %f, e0 %f, crack_flag %d, crackWidth % .8e, biotCoeff %f", this->kappa, this->equivStrain, this->damage, this->dissipation, this->deltaDissipation, this->e0, this->crack_flag, this->crackWidth, this->biot);
+    fprintf(file, "kappa %f, equivStrain %f, damage %f, dissipation %f, deltaDissipation %f, e0 %f, crack_flag %d, crackWidth %.8e, biotCoeff %f", this->kappa, this->equivStrain, this->damage, this->dissipation, this->deltaDissipation, this->e0, this->crack_flag, this->crackWidth, this->biot);
     fprintf(file, "}\n");
 }
 
@@ -877,7 +871,8 @@ LatticeDamage2dStatus :: setTempCrackWidth(double val)
 
 
 void
-LatticeDamage2dStatus :: setVariableInStatus(double variable) {
+LatticeDamage2dStatus :: setVariableInStatus(double variable)
+{
     e0 = variable;
 }
 

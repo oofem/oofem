@@ -442,7 +442,7 @@ MazarsMaterial :: initDamaged(double kappa, FloatArray &totalStrainVector, Gauss
 {
     int indmin = 1, indmax = 1;
     double le;
-    FloatArray principalStrains, crackPlaneNormal(3), fullstrain;
+    FloatArray principalStrains, crackPlaneNormal(3);
     FloatMatrix principalDir(3, 3);
     MazarsMaterialStatus *status = static_cast< MazarsMaterialStatus * >( this->giveStatus(gp) );
 

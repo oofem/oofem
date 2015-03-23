@@ -257,7 +257,7 @@ Concrete3 :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
     //
     //Ee = this->give(pscm_Ee);
     Gf = this->give(pscm_Gf, gp);
-    Ft = this->give(pscm_Ft, gp);
+    Ft = this->give(pscm_Ft, gp); ///@todo This isn't used. Is it right?! / Micke
     Le = status->giveCharLength(i);
 
     Ft = this->computeStrength(gp, Le);

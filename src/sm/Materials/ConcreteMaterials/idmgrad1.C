@@ -382,7 +382,7 @@ IDGMaterial :: giveRealStressVectorGrad(FloatArray &answer1, double &answer2, Ga
 {
     IDGMaterialStatus *status = static_cast< IDGMaterialStatus * >( this->giveStatus(gp) );
     LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
-    FloatArray strainVector, reducedTotalStrainVector, totalStrainVector, strain;
+    FloatArray reducedTotalStrainVector, strain;
 
     FloatMatrix de;
     double f, equivStrain, tempKappa = 0.0, omega = 0.0;

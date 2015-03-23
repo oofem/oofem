@@ -246,10 +246,9 @@ MicroplaneMaterial :: computeShearMStrainComponent(Microplane *mplane,
                                                    const FloatArray &macroStrain)
 {
     int mnumber = mplane->giveNumber();
-    int i;
     double em = 0.0;
 
-    for ( i = 0; i < 6; i++ ) {
+    for ( int i = 0; i < 6; i++ ) {
         em += M [ mnumber - 1 ] [ i ] * macroStrain.at(i + 1);
     }
 
@@ -277,9 +276,8 @@ MicroplaneMaterial :: computeStrainVectorComponents(FloatArray &answer, Micropla
 {
     int mnumber = mplane->giveNumber();
     double en = 0., ev = 0., em = 0., el = 0.;
-    int i;
 
-    for ( i = 0; i < 6; i++ ) {
+    for ( int i = 0; i < 6; i++ ) {
         en += N [ mnumber - 1 ] [ i ] * macroStrain.at(i + 1);
         em += M [ mnumber - 1 ] [ i ] * macroStrain.at(i + 1);
         el += L [ mnumber - 1 ] [ i ] * macroStrain.at(i + 1);

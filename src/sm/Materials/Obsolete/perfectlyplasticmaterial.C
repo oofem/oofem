@@ -293,8 +293,6 @@ PerfectlyPlasticMaterial :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &an
     }
 }
 
-#define YIELD_BOUNDARY -0.0001
-
 void
 PerfectlyPlasticMaterial :: giveMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode,
                                                         GaussPoint *gp,
@@ -475,7 +473,6 @@ PerfectlyPlasticMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
 // this implementation should be faster.
 {
     FloatMatrix fullAnswer;
-    IntArray mask;
     if ( mode == ElasticStiffness ) {
         this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
     } else {

@@ -64,16 +64,19 @@ BsplinePlaneStressElement :: BsplinePlaneStressElement(int n, Domain *aDomain) :
 
 IRResultType BsplinePlaneStressElement :: initializeFrom(InputRecord *ir)
 {
-    BSplineInterpolation *interpol = static_cast< BSplineInterpolation * >( this->giveInterpolation() );
-    IGAElement :: initializeFrom(ir);
     //PlaneStressStructuralElementEvaluator::initializeFrom(ir);
+    return IGAElement :: initializeFrom(ir);
+}
 
-    // HUHU checkConsistency()
+
+int BsplinePlaneStressElement :: checkConsistency()
+{
+    BSplineInterpolation *interpol = static_cast< BSplineInterpolation * >( this->giveInterpolation() );
     if ( giveNumberOfDofManagers() != interpol->giveNumberOfControlPoints(1) * interpol->giveNumberOfControlPoints(2) ) {
-        OOFEM_ERROR("number of control points mismatch");
+        OOFEM_WARNING("number of control points mismatch");
+        return 0;
     }
-
-    return IRRT_OK;
+    return 1;
 }
 
 
@@ -83,16 +86,19 @@ NURBSPlaneStressElement :: NURBSPlaneStressElement(int n, Domain *aDomain) : IGA
 
 IRResultType NURBSPlaneStressElement :: initializeFrom(InputRecord *ir)
 {
-    NURBSInterpolation *interpol = static_cast< NURBSInterpolation * >( this->giveInterpolation() );
-    IGAElement :: initializeFrom(ir);
     //PlaneStressStructuralElementEvaluator::initializeFrom(ir);
+    return IGAElement :: initializeFrom(ir);
+}
 
-    // HUHU
+
+int NURBSPlaneStressElement :: checkConsistency()
+{
+    NURBSInterpolation *interpol = static_cast< NURBSInterpolation * >( this->giveInterpolation() );
     if ( giveNumberOfDofManagers() != interpol->giveNumberOfControlPoints(1) * interpol->giveNumberOfControlPoints(2) ) {
-        OOFEM_ERROR("number of control points mismatch");
+        OOFEM_WARNING("number of control points mismatch");
+        return 0;
     }
-
-    return IRRT_OK;
+    return 1;
 }
 
 
@@ -106,16 +112,19 @@ NURBSSpace3dElement :: NURBSSpace3dElement(int n, Domain *aDomain) : IGAElement(
 
 IRResultType NURBSSpace3dElement :: initializeFrom(InputRecord *ir)
 {
-    NURBSInterpolation *interpol = static_cast< NURBSInterpolation * >( this->giveInterpolation() );
-    IGAElement :: initializeFrom(ir);
     //PlaneStressStructuralElementEvaluator::initializeFrom(ir);
+    return IGAElement :: initializeFrom(ir);
+}
 
-    // HUHU
+
+int NURBSSpace3dElement :: checkConsistency()
+{
+    NURBSInterpolation *interpol = static_cast< NURBSInterpolation * >( this->giveInterpolation() );
     if ( giveNumberOfDofManagers() != interpol->giveNumberOfControlPoints(1) * interpol->giveNumberOfControlPoints(2) * interpol->giveNumberOfControlPoints(3) ) {
-        OOFEM_ERROR("number of control points mismatch");
+        OOFEM_WARNING("number of control points mismatch");
+        return 0;
     }
-
-    return IRRT_OK;
+    return 1;
 }
 
 // HUHU should be implemented by IGA element (it is the same for Bspline NURBS and TSpline)

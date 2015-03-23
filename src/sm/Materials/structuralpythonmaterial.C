@@ -84,7 +84,7 @@ IRResultType StructuralPythonMaterial :: initializeFrom(InputRecord *ir)
             OOFEM_ERROR("No functions for either small or large deformations supplied. Are you sure the functions are named correctly?");
         }
     } else   {
-        OOFEM_ERROR("mpModule == NULL for module name %s", this->moduleName.c_str())
+        OOFEM_ERROR("mpModule == NULL for module name %s", this->moduleName.c_str());
     }
     pert = 1e-12;
 

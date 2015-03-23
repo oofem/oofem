@@ -174,7 +174,6 @@ TrabBoneGrad3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponse
             if ( tempDam > status->giveDam() ) {
                 double nlKappa =  status->giveNonlocalCumulatedStrain();
                 kappa = mParam * nlKappa + ( 1. - mParam ) * tempKappa;
-                FloatArray tempEffStress =  status->giveTempEffectiveStress();
                 double gPrime = TrabBone3D :: computeDamageParamPrime(kappa);
                 // Construction of the tangent stiffness third term
                 thirdTerm.beDyadicProductOf(tempEffectiveStress, prodTensor);

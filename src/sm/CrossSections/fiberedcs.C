@@ -122,7 +122,7 @@ void
 FiberedCrossSection :: giveGeneralizedStress_Beam3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
     double fiberThick, fiberWidth, fiberZCoord, fiberYCoord;
-    FloatArray fiberStrain, fullStressVect, reducedFiberStress;
+    FloatArray fiberStrain, reducedFiberStress;
     StructuralElement *element = static_cast< StructuralElement * >( gp->giveElement() );
     FiberedCrossSectionInterface *interface;
 
@@ -595,7 +595,6 @@ FiberedCrossSection :: give(CrossSectionProperty aProperty, GaussPoint *gp)
         return this->width;
     } else if ( aProperty == CS_Area ) { // not given in input
         return this->giveArea();
-    } else if ( aProperty == CS_Area ) { // not given in input
     }
 
     return CrossSection :: give(aProperty, gp);

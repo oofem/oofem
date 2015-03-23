@@ -732,7 +732,7 @@ LIBeam3dNL :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
     IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
     GaussPoint *gp = iRule->getIntegrationPoint(0);
 
-    FloatArray ui(3), xd(3), curv(3), ac(3), PrevEpsilon;
+    FloatArray ui(3), ac(3), PrevEpsilon;
     FloatMatrix sc(3, 3), tmid(3, 3);
 
     // update curvature at midpoint

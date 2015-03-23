@@ -280,7 +280,7 @@ B3SolidMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
     v = computeSolidifiedVolume(tStep);
     eta = this->computeFlowTermViscosity(gp, tStep);     //evaluated in the middle of the time-step
 
-    ///@warning THREAD UNSAFE!
+    ///@todo THREAD UNSAFE!
     this->updateEparModuli(relMatAge + ( tStep->giveTargetTime() - 0.5 * tStep->giveTimeIncrement() ) / timeFactor);
 
     if ( this->EmoduliMode == 0 ) { //retardation spectrum used
@@ -526,7 +526,7 @@ B3SolidMaterial :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, 
 
     double TauSh, St, kh, help, E607, Et0Tau, EpsShInf, EpsSh;
     double time = relMatAge + tStep->giveTargetTime() / timeFactor;
-    int size = 6;
+    int size;
     FloatArray fullAnswer;
     MaterialMode mode = gp->giveMaterialMode();
 
@@ -689,7 +689,7 @@ B3SolidMaterial :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *
     double time = relMatAge + tStep->giveTargetTime() / timeFactor;
     int i, err, tflag = 0, wflag = 0;
     KelvinChainMaterialStatus *status = static_cast< KelvinChainMaterialStatus * >( this->giveStatus(gp) );
-    int size = 6;
+    int size;
     FloatArray fullAnswer;
     MaterialMode mmode = gp->giveMaterialMode();
 

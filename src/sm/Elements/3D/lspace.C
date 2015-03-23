@@ -93,7 +93,7 @@ IRResultType
 LSpace :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 8;
-    return this->Structural3DElement :: initializeFrom(ir);
+    return Structural3DElement :: initializeFrom(ir);
 }
 
 

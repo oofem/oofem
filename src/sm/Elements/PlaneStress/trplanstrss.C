@@ -102,56 +102,6 @@ TrPlaneStress2d :: giveArea()
 }
 
 
-FloatArray *TrPlaneStress2d :: GivebCoeff()
-//
-// Returns coefficients of partial derivatives of shape functions
-// with respect to x
-//
-{
-    double y1, y2, y3, area;
-    FloatArray *b;
-
-    b = new FloatArray(3);
-
-    y1 = this->giveNode(1)->giveCoordinate(2);
-    y2 = this->giveNode(2)->giveCoordinate(2);
-    y3 = this->giveNode(3)->giveCoordinate(2);
-
-    area = this->giveArea();
-
-    b->at(1) = ( y2 - y3 ) / 2.0 / area;
-    b->at(2) = ( y3 - y1 ) / 2.0 / area;
-    b->at(3) = ( y1 - y2 ) / 2.0 / area;
-
-    return b;
-}
-
-
-FloatArray *TrPlaneStress2d :: GivecCoeff()
-//
-// Returns coefficients of partial derivatives of shape functions
-// with respect to y
-//
-{
-    double x1, x2, x3, area;
-    FloatArray *c;
-
-    c = new FloatArray(3);
-
-    x1 = this->giveNode(1)->giveCoordinate(1);
-    x2 = this->giveNode(2)->giveCoordinate(1);
-    x3 = this->giveNode(3)->giveCoordinate(1);
-
-    area = this->giveArea();
-
-    c->at(1) = ( x3 - x2 ) / 2.0 / area;
-    c->at(2) = ( x1 - x3 ) / 2.0 / area;
-    c->at(3) = ( x2 - x1 ) / 2.0 / area;
-
-    return c;
-}
-
-
 double
 TrPlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrackPlane, ElementCharSizeMethod method)
 //

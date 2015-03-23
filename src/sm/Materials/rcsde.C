@@ -42,7 +42,6 @@
 #include "contextioerr.h"
 #include "classfactory.h"
 
-#include <cstring>
 
 namespace oofem {
 REGISTER_Material(RCSDEMaterial);
@@ -206,7 +205,6 @@ RCSDEMaterial :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
 
         if ( ( rMode == TangentStiffness ) || ( rMode == SecantStiffness ) ) {
             FloatMatrix reducedAnswer;
-            IntArray mask;
             double dCoeff;
 
             reducedAnswer = * status->giveDs0Matrix();

@@ -116,16 +116,15 @@ DruckerPragerPlasticitySMStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     giveFullPlasticStrainVector(plasticStrainVector);
 
     fprintf(file, "plasticStrains ");
-    int n = plasticStrainVector.giveSize();
-    for ( int i = 1; i <= n; i++ ) {
-        fprintf( file, " % .4e", plasticStrainVector.at(i) );
+    for ( auto &val : plasticStrainVector ) {
+        fprintf( file, " %.4e", val );
     }
 
     fprintf(file, "}\n");
 
     fprintf(file, "\t\thardening_parameter ");
     // print hardening parameter
-    fprintf(file, " % .4e\n", kappa);
+    fprintf(file, " %.4e\n", kappa);
 }
 
 contextIOResultType

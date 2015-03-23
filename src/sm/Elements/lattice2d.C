@@ -187,7 +187,7 @@ Lattice2d :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
 // Computes numerically the stiffness matrix of the receiver.
 {
     double dV;
-    FloatMatrix d, bi, bj, dbj, dij;
+    FloatMatrix d, bj, dbj;
     answer.resize(6, 6);
     answer.zero();
     this->computeBmatrixAt(integrationRulesArray [ 0 ]->getIntegrationPoint(0), bj);

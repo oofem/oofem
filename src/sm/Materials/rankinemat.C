@@ -168,8 +168,6 @@ RankineMat :: CreateStatus(GaussPoint *gp) const
 void
 RankineMat :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep)
 {
-    FloatArray strainVector;
-    FloatMatrix d;
     RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
 
     // initialization
@@ -737,14 +735,13 @@ RankineMatStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 #ifdef keep_track_of_dissipated_energy
     fprintf(file, ", dissW %g, freeE %g, stressW %g ", this->dissWork, ( this->stressWork ) - ( this->dissWork ), this->stressWork);
 #endif
-    /*
-     * // print the plastic strain
-     *  n = plasticStrain.giveSize();
-     *  fprintf(file, " plastic_strains ");
-     *  for ( i = 1; i <= n; i++ ) {
-     *      fprintf( file, " % .4e", plasticStrain.at(i) );
-     *  }
-     */
+#if 0
+    // print the plastic strain
+    fprintf(file, " plastic_strains ");
+    for ( auto &val : plasticStrain ) {
+        fprintf( file, " %.4e", val );
+    }
+#endif
     // print the cumulative plastic strain
     fprintf(file, "}\n");
 }

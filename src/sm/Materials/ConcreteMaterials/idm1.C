@@ -574,7 +574,7 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
         double posNorm = 0.0;
         double nu = lmat->give(NYxz, gp);
         FloatArray principalStrains;
-        FloatMatrix N, m;
+        FloatMatrix N;
 
         if ( gp->giveMaterialMode() == _1dMat ) {
             dim = 1;
@@ -660,7 +660,7 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
         int index = 0, dim = 0;
         double sum = 0.;
         FloatArray stress, principalStress, eta;
-        FloatMatrix de, N, m, Eta;
+        FloatMatrix de, N, Eta;
 
         lmat->giveStiffnessMatrix(de, SecantStiffness, gp, tStep);
         stress.beProductOf(de, strain);
@@ -1293,7 +1293,7 @@ int
 IsotropicDamageMaterial1 :: MMI_map(GaussPoint *gp, Domain *oldd, TimeStep *tStep)
 {
     int result;
-    FloatArray intVal, strainIncr(3);
+    FloatArray intVal;
     IntArray toMap(3);
     IsotropicDamageMaterial1Status *status = static_cast< IsotropicDamageMaterial1Status * >( this->giveStatus(gp) );
 
@@ -1348,12 +1348,12 @@ int
 IsotropicDamageMaterial1 :: MMI_update(GaussPoint *gp,  TimeStep *tStep, FloatArray *estrain)
 {
     int result = 1;
-    FloatArray intVal, strain;
-    IsotropicDamageMaterial1Status *status = static_cast< IsotropicDamageMaterial1Status * >( this->giveStatus(gp) );
+    FloatArray intVal;
 
     // now update all internal vars accordingly
-    strain = status->giveStrainVector();
 #ifdef IDM_USE_MAPPEDSTRAIN
+    IsotropicDamageMaterial1Status *status = static_cast< IsotropicDamageMaterial1Status * >( this->giveStatus(gp) );
+    FloatArray strain = status->giveStrainVector();
     this->giveRealStressVector(intVal, gp, strain, tStep);
 #else
     this->giveRealStressVector(intVal, gp, * estrain, tStep);

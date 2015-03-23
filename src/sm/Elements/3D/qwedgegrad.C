@@ -72,7 +72,7 @@ IRResultType
 QWedgeGrad :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 9;
-    return this->Structural3DElement :: initializeFrom(ir);
+    return Structural3DElement :: initializeFrom(ir);
 }
 
 

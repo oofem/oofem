@@ -416,7 +416,7 @@ void
 Beam2d :: giveEndForcesVector(FloatArray &answer, TimeStep *tStep)
 {
     // stress equivalent vector in nodes (vector of internal forces)
-    FloatArray u, load;
+    FloatArray load;
 
     this->giveInternalForcesVector(answer, tStep, false);
 
@@ -432,7 +432,6 @@ void
 Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, TimeStep *tStep, ValueModeType mode)
 {
     FloatArray coords, components, help;
-    FloatMatrix T;
     double l = this->computeLength();
     double kappa = this->giveKappaCoeff(tStep);
     double fx, fz, fm, dfx, dfz, dfm;
@@ -576,11 +575,7 @@ Beam2d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type
 void
 Beam2d :: printOutputAt(FILE *File, TimeStep *tStep)
 {
-    // Performs end-of-step operations.
-
-    int n;
     FloatArray rl, Fl;
-    FloatMatrix T;
 
     fprintf(File, "beam element %d :\n", number);
 
@@ -591,15 +586,13 @@ Beam2d :: printOutputAt(FILE *File, TimeStep *tStep)
     this->giveEndForcesVector(Fl, tStep);
 
     fprintf(File, "  local displacements ");
-    n = rl.giveSize();
-    for ( int i = 1; i <= n; i++ ) {
-        fprintf( File, " % .4e", rl.at(i) );
+    for ( auto &val : rl ) {
+        fprintf( File, " %.4e", val );
     }
 
     fprintf(File, "\n  local end forces    ");
-    n = Fl.giveSize();
-    for ( int i = 1; i <= n; i++ ) {
-        fprintf( File, " % .4e", Fl.at(i) );
+    for ( auto &val : Fl ) {
+        fprintf( File, " %.4e", val );
     }
 
     fprintf(File, "\n");

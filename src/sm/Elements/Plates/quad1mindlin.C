@@ -185,7 +185,7 @@ Quad1Mindlin :: initializeFrom(InputRecord *ir)
 {
     this->numberOfGaussPoints = 4;
     this->reducedIntegrationFlag = ir->hasField(_IFT_Quad1Mindlin_ReducedIntegration);
-    return this->NLStructuralElement :: initializeFrom(ir);
+    return NLStructuralElement :: initializeFrom(ir);
 }
 
 
@@ -279,7 +279,7 @@ Quad1Mindlin :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateTyp
         return 1;
     } else if ( ( type == IST_ShellStrainTensor )  || ( type == IST_ShellCurvatureTensor ) ) {
         help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
-        if ( type == IST_ShellForceTensor ) {
+        if ( type == IST_ShellStrainTensor ) {
             answer.at(1) = 0.0; // nx
             answer.at(2) = 0.0; // vxy
             answer.at(3) = help.at(4); // vxz

@@ -84,7 +84,7 @@ TrabBoneNL :: ~TrabBoneNL()
 void
 TrabBoneNL :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep)
 {
-    FloatArray SDstrainVector, fullSDStrainVector;
+    FloatArray SDstrainVector;
     double cumPlastStrain;
     TrabBoneNLStatus *nlstatus = static_cast< TrabBoneNLStatus * >( this->giveStatus(gp) );
 
@@ -297,14 +297,13 @@ TrabBoneNLStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status {");
     fprintf(file, " plastrains ");
-    int n = epsp.giveSize();
-    for ( int i = 1; i <= n; i++ ) {
-        fprintf( file, " % .4e", epsp.at(i) );
+    for ( auto &val : epsp) {
+        fprintf( file, " %.4e", val );
     }
 
     fprintf(file, ",");
-    fprintf(file, " alpha % .4e,", alpha);
-    fprintf(file, " dam  % .4e", dam);
+    fprintf(file, " alpha %.4e,", alpha);
+    fprintf(file, " dam  %.4e", dam);
     fprintf(file, "}\n");
 }
 

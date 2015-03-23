@@ -78,12 +78,7 @@ QTruss1dGrad :: giveDofManDofIDMask(int inode, IntArray &answer) const
 IRResultType
 QTruss1dGrad :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result = this->StructuralElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    return IRRT_OK;
+    return StructuralElement :: initializeFrom(ir);
 }
 
 

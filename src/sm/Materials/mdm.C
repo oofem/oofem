@@ -1179,7 +1179,7 @@ int
 MDM :: MMI_map(GaussPoint *gp, Domain *oldd, TimeStep *tStep)
 {
     int result = 0;
-    FloatArray intVal, strainIncr(3);
+    FloatArray intVal;
     IntArray toMap(1);
     MDMStatus *status = static_cast< MDMStatus * >( this->giveStatus(gp) );
 
@@ -1468,23 +1468,19 @@ MDMStatus :: initTempStatus()
 void
 MDMStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-    int i, j, n;
-
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");
 
-    n = Psi.giveSize();
     fprintf(file, " compliance on microplanes: ");
-    for ( i = 1; i <= n; i++ ) {
-        fprintf( file, " % .4e", Psi.at(i) );
+    for ( auto &val : Psi ) {
+        fprintf( file, " %.4e", val );
     }
 
-    n = damageTensorEigenVectors.giveNumberOfRows();
     fprintf(file, ", complianceTensorEigenVectors ");
-    for ( i = 1; i <= n; i++ ) {
+    for ( int i = 1; i <= damageTensorEigenVectors.giveNumberOfRows(); i++ ) {
         fprintf(file, "{");
-        for ( j = 1; j <= n; j++ ) {
-            fprintf( file, " % .4e", damageTensorEigenVectors.at(j, i) );
+        for ( int j = 1; j <= damageTensorEigenVectors.giveNumberOfColumns(); j++ ) {
+            fprintf( file, " %.4e", damageTensorEigenVectors.at(j, i) );
         }
 
         fprintf(file, "}");
@@ -1493,8 +1489,8 @@ MDMStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     fprintf(file, "}");
 
     fprintf(file, ", complianceTensorEigenValues ");
-    for ( i = 1; i <= n; i++ ) {
-        fprintf( file, " % .4e", damageTensorEigenValues.at(i) );
+    for ( auto &val : damageTensorEigenValues ) {
+        fprintf( file, " %.4e", val );
     }
 
     fprintf(file, "}\n");

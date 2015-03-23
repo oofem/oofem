@@ -527,7 +527,6 @@ Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
 {
     FloatArray coords, components, endComponents;
     FloatMatrix T;
-    FloatArray floc(12);
     double l = this->computeLength();
     double kappay = this->giveKappayCoeff(tStep);
     double kappaz = this->giveKappazCoeff(tStep);
@@ -680,11 +679,7 @@ Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
 void
 Beam3d :: printOutputAt(FILE *File, TimeStep *tStep)
 {
-    // Performs end-of-step operations.
-
-    int n;
     FloatArray rl, Fl;
-    FloatMatrix T;
 
     fprintf(File, "beam element %d :\n", number);
 
@@ -694,15 +689,13 @@ Beam3d :: printOutputAt(FILE *File, TimeStep *tStep)
     this->giveEndForcesVector(Fl, tStep);
 
     fprintf(File, "  local displacements ");
-    n = rl.giveSize();
-    for ( int i = 1; i <= n; i++ ) {
-        fprintf( File, " % .4e", rl.at(i) );
+    for ( auto &val : rl ) {
+        fprintf( File, " %.4e", val );
     }
 
     fprintf(File, "\n  local end forces    ");
-    n = Fl.giveSize();
-    for ( int i = 1; i <= n; i++ ) {
-        fprintf( File, " % .4e", Fl.at(i) );
+    for ( auto &val : Fl ) {
+        fprintf( File, " %.4e", val );
     }
 
     fprintf(File, "\n");
@@ -829,7 +822,7 @@ Beam3d :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     // computes initial stress matrix of receiver (or geometric stiffness matrix)
 
-    FloatMatrix stiff, T;
+    FloatMatrix stiff;
     FloatArray endForces;
 
     double l = this->computeLength();

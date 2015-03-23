@@ -109,7 +109,6 @@ IntElPoint :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     setCoordMode();
     
 
-    FloatArray N;
     switch ( mode ) {
     case ie1d_1d:
         answer.resize(1, 2);

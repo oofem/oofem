@@ -46,27 +46,11 @@ namespace oofem {
 REGISTER_Material(IntMatBilinearCZ);
 
 IntMatBilinearCZStatus :: IntMatBilinearCZStatus(int n, Domain *d, GaussPoint *g) : StructuralInterfaceMaterialStatus(n, d, g),
-    mDamageNew(0.0),
-    mDamageOld(0.0)
+    mDamageNew(0.), mDamageOld(0.),
+    mTractionOld(3), mTractionNew(3),
+    mJumpOld(3), mJumpNew(3),
+    mPlastMultIncNew(0.), mPlastMultIncOld(0.)
 {
-    mTractionOld.resize(3);
-    mTractionOld.zero();
-
-    mTractionNew.resize(3);
-    mTractionNew.zero();
-
-    mJumpOld.resize(3);
-    mJumpOld.zero();
-
-    mJumpNew.resize(3);
-    mJumpNew.zero();
-
-    mDamageOld = 0.0;
-    mDamageNew = 0.0;
-
-    mPlastMultIncNew = 0.0;
-    mPlastMultIncOld = 0.0;
-
 }
 
 

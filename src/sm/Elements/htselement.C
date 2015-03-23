@@ -74,8 +74,11 @@ HTSelement :: giveDofManDofIDMask(int inode, IntArray &answer) const
 IRResultType
 HTSelement :: initializeFrom(InputRecord *ir)
 {
-    //IRResultType result;                 // Required by IR_GIVE_FIELD macro
-    this->StructuralElement :: initializeFrom(ir);
+    IRResultType result;                 // Required by IR_GIVE_FIELD macro
+    result = StructuralElement :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
     numberOfGaussPoints = 8;
     //IR_GIVE_FIELD(ir, numberOfEdges, _IFT_HTSelement_numberOfEdges, "numberOfEdges");
     //numberOfEdges = 3;
@@ -372,7 +375,7 @@ HTSelement :: computeAMatrixAt(FloatMatrix &answer, FloatMatrix N, GaussPoint *g
 {
     //answer.resize() ??? otazka zda bude nutne ji preskejlovat, asi alo jo vzhledem k tomu jaky element vracim (ctverec, trojuhelnik)
     answer.zero(); //radsi ano
-    FloatMatrix Sv, Uv, NSvUg, Ugamma, NSv, NSvT;
+    FloatMatrix Sv, Ugamma, NSv, NSvT;
 
     this->computeUgammaMatrixAt(Ugamma, gp);
     this->computeSvMatrixAt(Sv, gp, sideNumber);

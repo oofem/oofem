@@ -293,7 +293,7 @@ B3Material :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, Gauss
      */
     double TauSh, St, kh, help, E607, Et0Tau, EpsShInf, EpsSh;
     double time = relMatAge + tStep->giveTargetTime() / timeFactor;
-    int size = 6;
+    int size;
     FloatArray fullAnswer;
     MaterialMode mode = gp->giveMaterialMode();
 
@@ -345,7 +345,7 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, T
     double time = relMatAge + tStep->giveTargetTime() / timeFactor;
     int err, tflag = 0, wflag = 0;
     MaxwellChainMaterialStatus *status = static_cast< MaxwellChainMaterialStatus * >( this->giveStatus(gp) );
-    int size = 6;
+    int size;
     FloatArray fullAnswer;
     MaterialMode mmode = gp->giveMaterialMode();
 

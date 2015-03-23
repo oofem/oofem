@@ -72,7 +72,6 @@ AbaqusUserElement :: ~AbaqusUserElement()
 IRResultType AbaqusUserElement :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                                        // Required by IR_GIVE_FIELD macro
-    std :: string uelname;
 
     StructuralElement :: initializeFrom(ir);
 
@@ -93,9 +92,10 @@ IRResultType AbaqusUserElement :: initializeFrom(InputRecord *ir)
     }
     IR_GIVE_FIELD(ir, this->filename, _IFT_AbaqusUserElement_userElement);
 
-    /*uelname = "uel";
-     * IR_GIVE_OPTIONAL_FIELD(ir, uelname, _IFT_AbaqusUserElement_name);
-     * strncpy(this->giveClassName, uelname.c_str(), 80);*/
+#if 0
+    uelname = "uel";
+    IR_GIVE_OPTIONAL_FIELD(ir, uelname, _IFT_AbaqusUserElement_name);
+#endif
 
 #ifdef _WIN32
     this->uelobj = ( void * ) LoadLibrary( filename.c_str() );

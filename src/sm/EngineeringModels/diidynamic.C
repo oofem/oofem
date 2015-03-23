@@ -434,7 +434,7 @@ DIIDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type, Doma
         element->giveCharacteristicMatrix(charMtrx, type, tStep);
 
 #ifdef DEBUG
-        if ( ( n = loc.giveSize() ) != charMtrx.giveNumberOfRows() ) {
+        if ( loc.giveSize() != charMtrx.giveNumberOfRows() ) {
             OOFEM_ERROR("dimension mismatch");
         }
 

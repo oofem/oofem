@@ -278,9 +278,9 @@ Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
 {
     // We need to overload this for practical reasons (this 3d shell has all 9 dofs, but the shell part only cares for the first 8)
     // This elements adds an additional stiffness for the so called drilling dofs, meaning we need to work with all 9 components.
-    FloatMatrix b, d;
+    FloatMatrix b;
     FloatArray n, strain, stress;
-    FloatArray shellUnknowns, drillUnknowns, unknowns;
+    FloatArray shellUnknowns, drillUnknowns;
     bool drillCoeffFlag = false;
 
     // Split this for practical reasons into normal shell dofs and drilling dofs
@@ -372,7 +372,7 @@ IRResultType
 Quad1MindlinShell3D :: initializeFrom(InputRecord *ir)
 {
     this->reducedIntegrationFlag = ir->hasField(_IFT_Quad1MindlinShell3D_ReducedIntegration);
-    return this->NLStructuralElement :: initializeFrom(ir);
+    return NLStructuralElement :: initializeFrom(ir);
 }
 
 

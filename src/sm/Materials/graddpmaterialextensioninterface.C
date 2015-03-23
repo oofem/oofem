@@ -33,7 +33,6 @@
  */
 
 
-
 #include "domain.h"
 #include "nonlocalbarrier.h"
 #include "graddpmaterialextensioninterface.h"

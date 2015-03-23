@@ -282,7 +282,7 @@ LayeredCrossSection :: giveGeneralizedStress_Plate(FloatArray &answer, GaussPoin
             rotStrain.at(4) = c * strain.at(4) - s *strain.at(3);
             rotStrain.at(5) = ( c * c - s * s ) * strain.at(5) + c * s * ( strain.at(1) - strain.at(2) );
 
-            static_cast< StructuralMaterial * >(layerMat)->giveRealStressVector_PlateLayer(rotStress, gp, rotStrain, tStep);
+            layerMat->giveRealStressVector_PlateLayer(rotStress, gp, rotStrain, tStep);
 
             answer = {
                 c *c * rotStress.at(1) + 2 * c * s * rotStress.at(5) + s * s * rotStress.at(2),
@@ -360,7 +360,7 @@ LayeredCrossSection :: giveGeneralizedStress_Shell(FloatArray &answer, GaussPoin
                 ( c * c - s * s ) * strain.at(5) + c * s * ( strain.at(1) - strain.at(2) ),
             };
 
-            static_cast< StructuralMaterial * >(layerMat)->giveRealStressVector_PlateLayer(rotStress, gp, rotStrain, tStep);
+            layerMat->giveRealStressVector_PlateLayer(rotStress, gp, rotStrain, tStep);
 
             answer = {
                 c *c * rotStress.at(1) + 2 * c * s * rotStress.at(5) + s * s * rotStress.at(2),

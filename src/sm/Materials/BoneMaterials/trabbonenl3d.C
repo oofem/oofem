@@ -66,7 +66,7 @@ TrabBoneNL3D :: ~TrabBoneNL3D()
 void
 TrabBoneNL3D :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep)
 {
-    FloatArray SDstrainVector, fullSDStrainVector;
+    FloatArray SDstrainVector;
     double cumPlastStrain;
     TrabBoneNL3DStatus *nlStatus = static_cast< TrabBoneNL3DStatus * >( this->giveStatus(gp) );
 
@@ -430,17 +430,16 @@ TrabBoneNL3DStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status {");
     fprintf(file, " plastrains ");
-    int n = plasDef.giveSize();
-    for ( int i = 1; i <= n; i++ ) {
-        fprintf( file, " % .4e", plasDef.at(i) );
+    for ( auto &val : plasDef ) {
+        fprintf( file, " %.4e", val );
     }
 
     fprintf(file, " ,");
-    fprintf(file, " kappa % .4e ,", kappa);
-    fprintf(file, " dam  % .4e ,", tempDam);
-    fprintf(file, " esed  % .4e ,", this->tempTSED - this->tempPSED);
-    fprintf(file, " psed  % .4e ,", this->tempPSED);
-    fprintf(file, " tsed  % .4e", this->tempTSED);
+    fprintf(file, " kappa %.4e ,", kappa);
+    fprintf(file, " dam  %.4e ,", tempDam);
+    fprintf(file, " esed  %.4e ,", this->tempTSED - this->tempPSED);
+    fprintf(file, " psed  %.4e ,", this->tempPSED);
+    fprintf(file, " tsed  %.4e", this->tempTSED);
     fprintf(file, "}\n");
 }
 

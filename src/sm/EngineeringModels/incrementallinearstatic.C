@@ -256,7 +256,7 @@ double IncrementalLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeS
 
 int IncrementalLinearStatic :: giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep)
 {
-    return ( int ) tStep->giveNumber() % 2;
+    return tStep->giveNumber() % 2;
 }
 
 

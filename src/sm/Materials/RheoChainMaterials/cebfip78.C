@@ -35,7 +35,6 @@
 #include "cebfip78.h"
 #include "mathfem.h"
 #include "gausspoint.h"
-#include "crosssection.h"
 #include "classfactory.h"
 
 namespace oofem {

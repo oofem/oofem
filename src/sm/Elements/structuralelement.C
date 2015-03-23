@@ -54,7 +54,7 @@
 #include "nonlocmatstiffinterface.h"
 #include "mathfem.h"
 #include "materialmapperinterface.h"
-#include <math.h>
+
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
  #include "connectivitytable.h"
@@ -543,7 +543,6 @@ StructuralElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
     double mass = 0.;
 
     IntArray nodeDofIDMask, dimFlag(3);
-    IntArray nodalArray;
     int indx = 0, ldofs, dim;
     double summ;
 
@@ -886,7 +885,7 @@ StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &a
 // has been called for the same time step.
 //
 {
-    FloatMatrix b, R;
+    FloatMatrix b;
     FloatArray temp, u, stress, strain;
     IntArray irlocnum;
 

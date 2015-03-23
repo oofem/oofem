@@ -99,12 +99,10 @@ void XfemStructureManager :: updateYourself(TimeStep *tStep)
 
 void XfemStructureManager :: splitCracks()
 {
-    std :: vector< size_t >eiToRemove;
-
     // Loop over cracks
     for ( int i = 1; i <= giveNumberOfEnrichmentItems(); i++ ) {
         Crack *crack_i = dynamic_cast< Crack * >( this->giveEnrichmentItem(i) );
-        if ( crack_i != NULL ) {
+        if ( crack_i ) {
             // Check if crack i intersects with any of the cracks [1,i-1]:
             for ( int j = 1; j < i; j++ ) {
                 // TODO: To improve performance, we may wish to use
@@ -112,7 +110,7 @@ void XfemStructureManager :: splitCracks()
                 bool splittedCrack = false;
 
                 Crack *crack_j = dynamic_cast< Crack * >( this->giveEnrichmentItem(j) );
-                if ( crack_j != NULL ) {
+                if ( crack_j ) {
                     // If so, find the arc length positions of the intersections on crack i ...
 
                     std :: vector< FloatArray >intersectionPoints;

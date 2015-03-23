@@ -140,7 +140,7 @@ IRResultType
 PlaneStress2d :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 4;
-    IRResultType result = this->NLStructuralElement :: initializeFrom(ir);
+    IRResultType result = NLStructuralElement :: initializeFrom(ir);
     if ( result != IRRT_OK ) {
         return result;
     }

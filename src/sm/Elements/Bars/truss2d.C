@@ -283,16 +283,16 @@ IRResultType
 Truss2d :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                            // Required by IR_GIVE_FIELD macro
-    this->NLStructuralElement :: initializeFrom(ir);
 
     cs_mode = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, cs_mode, _IFT_Truss2d_cs);
 
     if ( cs_mode != 0 && cs_mode != 1 && cs_mode != 2 ) {
-        OOFEM_ERROR("Unsupported value of cs_mode");
+        OOFEM_WARNING("Unsupported value of cs_mode");
+        return IRRT_BAD_FORMAT;
     }
 
-    return IRRT_OK;
+    return NLStructuralElement :: initializeFrom(ir);
 }
 
 

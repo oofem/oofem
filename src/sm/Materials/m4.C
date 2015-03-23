@@ -132,8 +132,8 @@ M4Material :: giveRealMicroplaneStressVector(FloatArray &answer,
                                              TimeStep *tStep)
 {
     M4MaterialStatus *status = static_cast< M4MaterialStatus * >( this->giveMicroplaneStatus(mplane) );
-    FloatArray previousStress, previousStrain;
-    FloatArray stressIncrement, strainIncrement;
+    FloatArray previousStress;
+    FloatArray strainIncrement;
     double EpsN, DEpsN, DEpsL, DEpsM;
     double EpsV, DEpsV;
     double SEV, SVdash, EpsD, DEpsD, SED, SEM, SEL, SD;
@@ -147,7 +147,6 @@ M4Material :: giveRealMicroplaneStressVector(FloatArray &answer,
 
     // ask status for tempVH parameter
     previousStress = status->giveStressVector();
-    previousStrain = status->giveStrainVector();
     strainIncrement.beDifferenceOf( strain, status->giveStrainVector() );
     if ( !previousStress.isNotEmpty() ) {
         previousStress.resize(4);
