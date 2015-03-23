@@ -251,7 +251,6 @@ TR21_2D_SUPG :: computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp)
 void
 TR21_2D_SUPG :: computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep)
 {
-    FloatArray n, u, un;
     FloatMatrix D, d2n;
 
     answer.resize(2, 12);

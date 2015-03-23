@@ -261,13 +261,10 @@ void Tet1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryL
     }
 
     if ( load->giveType() == TransmissionBC ) { // Neumann boundary conditions (traction)
-        BoundaryLoad *boundaryLoad = static_cast< BoundaryLoad * >(load);
-
-        int numberOfIPs = ( int ) ceil( ( boundaryLoad->giveApproxOrder() + 2. ) / 2. );
+        int numberOfIPs = ( int ) ceil( ( load->giveApproxOrder() + 2. ) / 2. );
 
         GaussIntegrationRule iRule(1, this, 1, 1);
         FloatArray N, t, f(9);
-        IntArray edge_mapping;
 
         f.zero();
         iRule.SetUpPointsOnTriangle(numberOfIPs, _Unknown);
@@ -279,12 +276,12 @@ void Tet1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryL
             double detJ = fabs( this->interp.surfaceGiveTransformationJacobian( iSurf, lcoords, FEIElementGeometryWrapper(this) ) );
             double dA = gp->giveWeight() * detJ;
 
-            if ( boundaryLoad->giveFormulationType() == Load :: FT_Entity ) { // Edge load in xi-eta system
-                boundaryLoad->computeValueAt(t, tStep, lcoords, VM_Total);
+            if ( load->giveFormulationType() == Load :: FT_Entity ) { // Edge load in xi-eta system
+                load->computeValueAt(t, tStep, lcoords, VM_Total);
             } else { // Edge load in x-y system
                 FloatArray gcoords;
                 this->interp.boundaryLocal2Global( gcoords, iSurf, lcoords, FEIElementGeometryWrapper(this) );
-                boundaryLoad->computeValueAt(t, tStep, gcoords, VM_Total);
+                load->computeValueAt(t, tStep, gcoords, VM_Total);
             }
 
             // Reshape the vector

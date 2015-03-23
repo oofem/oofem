@@ -444,7 +444,7 @@ TR1_2D_SUPG2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep)
 {
     answer.resize(6);
     answer.zero();
-    FloatArray u, un, eps(3), stress;
+    FloatArray u, eps(3), stress;
     double dV, Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
     //double dudx,dudy,dvdx,dvdy;
 
@@ -509,7 +509,7 @@ TR1_2D_SUPG2 :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRespon
     //double dudx, dudy, dvdx, dvdy;
     answer.resize(6, 6);
     answer.zero();
-    FloatMatrix _db, _d, _b(3, 6), _bs(3, 6);
+    FloatMatrix _db, _d, _b(3, 6);
     //FloatArray un;
     double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
 
@@ -1599,7 +1599,7 @@ TR1_2D_SUPG2 :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, Primar
 {
     int indx, es;
     double sum;
-    FloatArray elemvector, f, lc;
+    FloatArray elemvector, lc;
     //FloatMatrix n;
     IntArray elemdofs;
     // determine element dof ids

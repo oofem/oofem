@@ -187,7 +187,7 @@ SUPGElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Value
         answer.assemble(h, ploc);
 
         FloatMatrix m1;
-        FloatArray v, p;
+        FloatArray v;
         // add lsic stabilization term
         //this->giveCharacteristicMatrix(m1, LSICStabilizationTerm_MB, tStep);
         //m1.times( lscale / ( dscale * uscale * uscale ) );

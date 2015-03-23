@@ -33,7 +33,6 @@
  */
 
 #include "tr21stokes.h"
-#include "fmelement.h"
 #include "node.h"
 #include "dof.h"
 #include "domain.h"
@@ -243,13 +242,11 @@ void Tr21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *l
     }
 
     if ( load->giveType() == TransmissionBC ) { // Neumann boundary conditions (traction)
-        BoundaryLoad *boundaryLoad = static_cast< BoundaryLoad * >(load);
 
-        int numberOfEdgeIPs = ( int ) ceil( ( boundaryLoad->giveApproxOrder() + 1. ) / 2. ) * 2;
+        int numberOfEdgeIPs = ( int ) ceil( ( load->giveApproxOrder() + 1. ) / 2. ) * 2;
 
         GaussIntegrationRule iRule(1, this, 1, 1);
         FloatArray N, t, f(6);
-        IntArray edge_mapping;
 
         f.zero();
         iRule.SetUpPointsOnLine(numberOfEdgeIPs, _Unknown);
@@ -261,12 +258,12 @@ void Tr21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *l
             double detJ = fabs( this->interpolation_quad.boundaryGiveTransformationJacobian( boundary, lcoords, FEIElementGeometryWrapper(this) ) );
             double dS = gp->giveWeight() * detJ;
 
-            if ( boundaryLoad->giveFormulationType() == Load :: FT_Entity ) { // Edge load in xi-eta system
-                boundaryLoad->computeValueAt(t, tStep, lcoords, VM_Total);
+            if ( load->giveFormulationType() == Load :: FT_Entity ) { // Edge load in xi-eta system
+                load->computeValueAt(t, tStep, lcoords, VM_Total);
             } else { // Edge load in x-y system
                 FloatArray gcoords;
                 this->interpolation_quad.boundaryLocal2Global( gcoords, boundary, lcoords, FEIElementGeometryWrapper(this) );
-                boundaryLoad->computeValueAt(t, tStep, gcoords, VM_Total);
+                load->computeValueAt(t, tStep, gcoords, VM_Total);
             }
 
             // Reshape the vector
