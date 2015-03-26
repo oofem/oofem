@@ -59,7 +59,6 @@ ConstantEdgeLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, const Fl
     } else {
         double factor = this->giveTimeFunction()->evaluate(tStep, mode);
         answer.beScaled(factor, componentArray);
-        answer.times(factor);
     }
 }
 } // end namespace oofem
