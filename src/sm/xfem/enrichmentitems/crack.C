@@ -50,9 +50,7 @@ Crack :: Crack(int n, XfemManager *xm, Domain *aDomain) : HybridEI(n, xm, aDomai
 
 IRResultType Crack :: initializeFrom(InputRecord *ir)
 {
-    EnrichmentItem :: initializeFrom(ir);
-
-    return IRRT_OK;
+    return EnrichmentItem :: initializeFrom(ir);
 }
 
 void Crack :: AppendCohesiveZoneGaussPoint(GaussPoint *ipGP)

@@ -73,7 +73,10 @@ IRResultType AbaqusUserElement :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                                        // Required by IR_GIVE_FIELD macro
 
-    StructuralElement :: initializeFrom(ir);
+    result = StructuralElement :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     this->numberOfDofMans = dofManArray.giveSize();
 

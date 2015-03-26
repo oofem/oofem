@@ -91,8 +91,6 @@ MatlabExportModule :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                    // Required by IR_GIVE_FIELD macro
 
-    ExportModule :: initializeFrom(ir);
-
     exportMesh = ir->hasField(_IFT_MatlabExportModule_mesh);
     exportData = ir->hasField(_IFT_MatlabExportModule_data);
     exportArea = ir->hasField(_IFT_MatlabExportModule_area);
@@ -117,7 +115,7 @@ MatlabExportModule :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, IPFieldsElSet, _IFT_MatlabExportModule_IPFieldsElSet);
     }
 
-    return IRRT_OK;
+    return ExportModule :: initializeFrom(ir);
 }
 
 

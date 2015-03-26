@@ -778,7 +778,10 @@ LayeredCrossSection :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    CrossSection :: initializeFrom(ir);
+    result = CrossSection :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     IR_GIVE_FIELD(ir, numberOfLayers, _IFT_LayeredCrossSection_nlayers);
     IR_GIVE_FIELD(ir, layerMaterials, _IFT_LayeredCrossSection_layermaterials);

@@ -357,8 +357,6 @@ IRResultType
 Lattice2d :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
-    // first call parent
-    LatticeStructuralElement :: initializeFrom(ir);
 
     IR_GIVE_OPTIONAL_FIELD(ir, thickness, _IFT_Lattice2d_thick);
 
@@ -375,7 +373,8 @@ Lattice2d :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, couplingNumbers.at(1), _IFT_Lattice2d_couplingnumber);
     }
 
-    return IRRT_OK;
+    // first call parent
+    return LatticeStructuralElement :: initializeFrom(ir);
 }
 
 

@@ -475,7 +475,9 @@ RheoChainMaterial :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    StructuralMaterial :: initializeFrom(ir);
+    result = StructuralMaterial :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
+
     IR_GIVE_FIELD(ir, nu, _IFT_RheoChainMaterial_n);
     IR_GIVE_FIELD(ir, relMatAge, _IFT_RheoChainMaterial_relmatage);
     this->begOfTimeOfInterest = -1.0;

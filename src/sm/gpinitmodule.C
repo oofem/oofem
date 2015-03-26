@@ -59,8 +59,7 @@ GPInitModule :: ~GPInitModule()
 IRResultType
 GPInitModule :: initializeFrom(InputRecord *ir)
 {
-    InitModule :: initializeFrom(ir);
-    return IRRT_OK;
+    return InitModule :: initializeFrom(ir);
 }
 
 

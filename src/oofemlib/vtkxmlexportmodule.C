@@ -100,8 +100,6 @@ VTKXMLExportModule :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     int val;
 
-    ExportModule :: initializeFrom(ir);
-
     IR_GIVE_OPTIONAL_FIELD(ir, cellVarsToExport, _IFT_VTKXMLExportModule_cellvars); // Macro - see internalstatetype.h
     IR_GIVE_OPTIONAL_FIELD(ir, internalVarsToExport, _IFT_VTKXMLExportModule_vars); // Macro - see internalstatetype.h
     IR_GIVE_OPTIONAL_FIELD(ir, primaryVarsToExport, _IFT_VTKXMLExportModule_primvars); // Macro - see unknowntype.h
@@ -116,7 +114,8 @@ VTKXMLExportModule :: initializeFrom(InputRecord *ir)
     
     regionSets.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, regionSets, _IFT_VTKXMLExportModule_regionsets); // Macro
-    return IRRT_OK;
+
+    return ExportModule :: initializeFrom(ir);
 }
 
 

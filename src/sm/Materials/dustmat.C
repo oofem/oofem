@@ -170,10 +170,12 @@ DustMaterial :: initializeFrom(InputRecord *ir)
     // Required by IR_GIVE_FIELD macro
     IRResultType result;
     // call the corresponding service of structural material
-    StructuralMaterial :: initializeFrom(ir);
+    result = StructuralMaterial :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     // call the corresponding service for the linear elastic material
-    this->LEMaterial->initializeFrom(ir);
+    result = this->LEMaterial->initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     // instanciate the variables defined in DustMaterial
     ft = 3e6;
@@ -204,31 +206,38 @@ DustMaterial :: initializeFrom(InputRecord *ir)
 
     // check parameters admissibility
     if ( ft < 0 ) {
-        OOFEM_ERROR("parameter 'ft' must be positive")
+        OOFEM_WARNING("parameter 'ft' must be positive");
+        return IRRT_BAD_FORMAT;
     }
 
     if ( x0 < 0 ) {
-        OOFEM_ERROR("parameter 'x0' must be positive")
+        OOFEM_WARNING("parameter 'x0' must be positive");
+        return IRRT_BAD_FORMAT;
     }
 
     if ( rEll < 0 ) {
-        OOFEM_ERROR("parameter 'rEll' must be positive")
+        OOFEM_WARNING("parameter 'rEll' must be positive");
+        return IRRT_BAD_FORMAT;
     }
 
     if ( theta < 0 ) {
-        OOFEM_ERROR("parameter 'theta' must be positive")
+        OOFEM_WARNING("parameter 'theta' must be positive");
+        return IRRT_BAD_FORMAT;
     }
 
     if ( beta < 0 ) {
-        OOFEM_ERROR("parameter 'beta' must be positive")
+        OOFEM_WARNING("parameter 'beta' must be positive");
+        return IRRT_BAD_FORMAT;
     }
 
     if ( lambda < 0 ) {
-        OOFEM_ERROR("parameter 'lambda' must be positive")
+        OOFEM_WARNING("parameter 'lambda' must be positive");
+        return IRRT_BAD_FORMAT;
     }
 
     if ( alpha < lambda ) {
-        OOFEM_ERROR("parameter 'alpha' must be greater than parameter 'lambda'")
+        OOFEM_WARNING("parameter 'alpha' must be greater than parameter 'lambda'");
+        return IRRT_BAD_FORMAT;
     }
 
     x0 = -x0; // compressive strength is negative, although on input it is a positive number

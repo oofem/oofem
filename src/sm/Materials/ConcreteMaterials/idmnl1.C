@@ -513,8 +513,14 @@ IDNLMaterial :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    IsotropicDamageMaterial1 :: initializeFrom(ir);
-    StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
+    result = IsotropicDamageMaterial1 :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+    result = StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     averType = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, averType, _IFT_IDNLMaterial_averagingtype);

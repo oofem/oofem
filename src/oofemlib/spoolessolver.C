@@ -113,15 +113,6 @@ SpoolesSolver :: initializeFrom(InputRecord *ir)
         msgFileCloseFlag = 0;
     }
 
-    /*
-     * IR_GIVE_OPTIONAL_FIELD (ir, tol, "lstol");
-     * IR_GIVE_OPTIONAL_FIELD (ir, maxite, "lsiter");
-     * val = 0;
-     * IR_GIVE_OPTIONAL_FIELD (ir, val, "lsprecond");
-     * precondType= (IMLPrecondType) val;
-     *
-     * this->precondAttributes = ir;
-     */
     return IRRT_OK;
 }
 

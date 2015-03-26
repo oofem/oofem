@@ -238,7 +238,8 @@ M4Material :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    MicroplaneMaterial_Bazant :: initializeFrom(ir);
+    result = MicroplaneMaterial_Bazant :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     c1 = 6.20e-1;
     c2 = 2.76;

@@ -121,7 +121,8 @@ B3SolidMaterial :: initializeFrom(InputRecord *ir)
     } else if ( this->shMode == B3_PointShrinkageMPS ) {   // #3 in enumerator
         // microprestress-sol-theory: read data for shrinkage evaluation
         if ( this->MicroPrestress == 0 ) {
-            OOFEM_ERROR("to use B3_PointShrinkageMPS - MicroPrestress must be = 1");       //or else no external fiels would be found
+            OOFEM_WARNING("to use B3_PointShrinkageMPS - MicroPrestress must be = 1");       //or else no external fiels would be found
+            return IRRT_BAD_FORMAT;
         }
 
         kSh = -1;
@@ -133,7 +134,8 @@ B3SolidMaterial :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, finalHum, _IFT_B3Material_finalhumidity);
         // either kSh or initHum and finalHum must be given in input record
         if ( !( ( this->kSh != -1 ) || ( ( initHum != -1 ) && ( finalHum != -1 ) ) ) ) {
-            OOFEM_ERROR("either kSh or initHum and finalHum must be given in input record");
+            OOFEM_WARNING("either kSh or initHum and finalHum must be given in input record");
+            return IRRT_BAD_FORMAT;
         }
 
         /*
@@ -180,9 +182,7 @@ B3SolidMaterial :: initializeFrom(InputRecord *ir)
         this->predictParametersFrom(fc, c, wc, ac, t0, alpha1, alpha2);
     }
 
-    KelvinChainMaterial :: initializeFrom(ir);
-
-    return IRRT_OK;
+    return KelvinChainMaterial :: initializeFrom(ir);
 }
 
 void

@@ -71,8 +71,6 @@ LargeStrainMasterMaterial :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                 // required by IR_GIVE_FIELD macro
 
-
-
     IR_GIVE_OPTIONAL_FIELD(ir, slaveMat, _IFT_LargeStrainMasterMaterial_slaveMat); // number of slave material
     IR_GIVE_OPTIONAL_FIELD(ir, m, _IFT_LargeStrainMasterMaterial_m); // type of Set-Hill strain tensor
 
@@ -83,9 +81,7 @@ LargeStrainMasterMaterial :: initializeFrom(InputRecord *ir)
 MaterialStatus *
 LargeStrainMasterMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    LargeStrainMasterMaterialStatus *status;
-    status = new LargeStrainMasterMaterialStatus(1, this->giveDomain(), gp, slaveMat);
-    return status;
+    return new LargeStrainMasterMaterialStatus(1, this->giveDomain(), gp, slaveMat);
 }
 
 

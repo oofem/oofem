@@ -130,7 +130,6 @@ SymmetryBarrier :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, origin, _IFT_SymmetryBarrier_origin);
     IR_GIVE_FIELD(ir, normals, _IFT_SymmetryBarrier_normals);
 
-
     lcs.resize(3, 3);
     int size = normals.giveSize();
     if ( !( ( size == 0 ) || ( size == 6 ) ) ) {
@@ -166,7 +165,8 @@ SymmetryBarrier :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, mask, _IFT_SymmetryBarrier_activemask);
     if ( mask.giveSize() != 3 ) {
-        OOFEM_ERROR("activemask size should be 3");
+        OOFEM_WARNING("activemask size should be 3");
+        return IRRT_BAD_FORMAT;
     }
 
     return IRRT_OK;

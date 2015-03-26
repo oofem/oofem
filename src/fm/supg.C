@@ -155,7 +155,10 @@ SUPG :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    FluidModel :: initializeFrom(ir);
+    result = FluidModel :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     IR_GIVE_FIELD(ir, rtolv, _IFT_SUPG_rtolv);
     atolv = 1.e-15;

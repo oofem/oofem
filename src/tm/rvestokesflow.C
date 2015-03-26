@@ -146,8 +146,6 @@ IRResultType RVEStokesFlow :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;
 
-    // this->TransportMaterial :: initializeFrom(ir);
-
     IR_GIVE_FIELD(ir, this->rveFilename, _IFT_RVEStokesFlow_fileName);
 
     SupressRVEoutput = 0;

@@ -71,8 +71,11 @@ LatticeDamage2d :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                             // Required by IR_GIVE_FIELD macro
 
-    StructuralMaterial :: initializeFrom(ir);
-    RandomMaterialExtensionInterface :: initializeFrom(ir);
+    result = StructuralMaterial :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
+    
+    result = RandomMaterialExtensionInterface :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     double value = 0.;
     IR_GIVE_FIELD(ir, value, _IFT_IsotropicLinearElasticMaterial_talpha);
@@ -120,7 +123,8 @@ LatticeDamage2d :: initializeFrom(InputRecord *ir)
         e0OneMean = 0.3 * e0Mean;
         IR_GIVE_OPTIONAL_FIELD(ir, e0OneMean, _IFT_LatticeDamage2d_e0OneMean);
     } else {
-        OOFEM_ERROR("Unknown softening type");
+        OOFEM_WARNING("Unknown softening type");
+        return IRRT_BAD_FORMAT;
     }
 
     this->biotCoefficient = 0.;

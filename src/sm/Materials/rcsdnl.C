@@ -354,10 +354,13 @@ RCSDNLMaterial :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     //RCSDEMaterial::instanciateFrom (ir);
-    this->giveLinearElasticMaterial()->initializeFrom(ir);
-    IR_GIVE_FIELD(ir, Ft, _IFT_RCSDNLMaterial_ft);
-    StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
+    result = this->giveLinearElasticMaterial()->initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;    
 
+    result = StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
+
+    IR_GIVE_FIELD(ir, Ft, _IFT_RCSDNLMaterial_ft);
     IR_GIVE_FIELD(ir, SDTransitionCoeff, _IFT_RCSDNLMaterial_sdtransitioncoeff);
     IR_GIVE_FIELD(ir, SDTransitionCoeff2, _IFT_RCSDNLMaterial_sdtransitioncoeff2);
     if ( SDTransitionCoeff2 > 1.0 ) {
@@ -380,7 +383,8 @@ RCSDNLMaterial :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, this->Gf, _IFT_RCSDNLMaterial_gf);
         this->ef = this->Gf / this->Ft;
     } else {
-        OOFEM_ERROR("cannot determine Gf and ef from input data");
+        OOFEM_WARNING("cannot determine Gf and ef from input data");
+        return IRRT_BAD_FORMAT;
     }
 
     return IRRT_OK;

@@ -152,9 +152,6 @@ SpringElement :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    // first call parent
-    StructuralElement :: initializeFrom(ir);
-
     int _mode;
     IR_GIVE_FIELD(ir, _mode, _IFT_SpringElement_mode);
     IR_GIVE_FIELD(ir, springConstant, _IFT_SpringElement_springConstant);
@@ -164,7 +161,7 @@ SpringElement :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, this->dir, _IFT_SpringElement_orientation);
         this->dir.normalize();
     }
-    return IRRT_OK;
+    return StructuralElement :: initializeFrom(ir);
 }
 
 void SpringElement :: printOutputAt(FILE *File, TimeStep *tStep)

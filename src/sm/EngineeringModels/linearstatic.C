@@ -92,7 +92,11 @@ LinearStatic :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    StructuralEngngModel :: initializeFrom(ir);
+    result = StructuralEngngModel :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+
     int val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_lstype);
     solverType = ( LinSystSolverType ) val;

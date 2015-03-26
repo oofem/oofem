@@ -69,13 +69,16 @@ IDGMaterial :: ~IDGMaterial()
 IRResultType
 IDGMaterial :: initializeFrom(InputRecord *ir)
 {
-    IsotropicDamageMaterial1 :: initializeFrom(ir);
-    GradDpMaterialExtensionInterface :: initializeFrom(ir);
-
-
-    this->mapper.initializeFrom(ir);
-
-    return IRRT_OK;
+    IRResultType result;
+    result = IsotropicDamageMaterial1 :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+    result = GradDpMaterialExtensionInterface :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+    return this->mapper.initializeFrom(ir);
 }
 
 /////////////////////////////////////////////////////////////////////////////

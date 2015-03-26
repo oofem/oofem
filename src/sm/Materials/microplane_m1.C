@@ -149,9 +149,10 @@ M1Material :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode rMod
 IRResultType
 M1Material :: initializeFrom(InputRecord *ir)
 {
-    StructuralMaterial :: initializeFrom(ir);
-
     IRResultType result;                // Required by IR_GIVE_FIELD macro
+
+    result = StructuralMaterial :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     IR_GIVE_FIELD(ir, E, _IFT_M1Material_e);
     EN = 1.5 * E;

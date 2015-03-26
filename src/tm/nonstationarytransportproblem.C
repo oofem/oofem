@@ -120,7 +120,8 @@ NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-    EngngModel :: initializeFrom(ir);
+    result = EngngModel :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     if ( ir->hasField(_IFT_NonStationaryTransportProblem_initt) ) {
         IR_GIVE_FIELD(ir, initT, _IFT_NonStationaryTransportProblem_initt);
@@ -133,7 +134,8 @@ NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
     } else if ( ir->hasField(_IFT_NonStationaryTransportProblem_prescribedtimes) ) {
         IR_GIVE_FIELD(ir, discreteTimes, _IFT_NonStationaryTransportProblem_prescribedtimes);
     } else {
-        OOFEM_ERROR("Time step not defined");
+        OOFEM_WARNING("Time step not defined");
+        return IRRT_BAD_FORMAT;
     }
 
     IR_GIVE_FIELD(ir, alpha, _IFT_NonStationaryTransportProblem_alpha);

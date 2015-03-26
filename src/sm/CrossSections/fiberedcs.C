@@ -434,16 +434,18 @@ FiberedCrossSection :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, thick, _IFT_FiberedCrossSection_thick);
     IR_GIVE_FIELD(ir, width, _IFT_FiberedCrossSection_width);
 
-    if ( ( numberOfFibers != fiberMaterials.giveSize() ) ||
-        ( numberOfFibers != fiberThicks.giveSize() )     ||
-        ( numberOfFibers != fiberWidths.giveSize() )     ||
-        ( numberOfFibers != fiberYcoords.giveSize() )    ||
-        ( numberOfFibers != fiberZcoords.giveSize() ) ) {
-        OOFEM_ERROR("Array size mismatch ");
+    if ( numberOfFibers != fiberMaterials.giveSize() ||
+         numberOfFibers != fiberThicks.giveSize()    ||
+         numberOfFibers != fiberWidths.giveSize()    ||
+         numberOfFibers != fiberYcoords.giveSize()   ||
+         numberOfFibers != fiberZcoords.giveSize() ) {
+        OOFEM_WARNING("Array size mismatch ");
+        return IRRT_BAD_FORMAT;
     }
 
     if ( numberOfFibers <= 0 ) {
-        OOFEM_ERROR("numberOfFibers <= 0 is not allowed");
+        OOFEM_WARNING("numberOfFibers <= 0 is not allowed");
+        return IRRT_BAD_FORMAT;
     }
 
     return IRRT_OK;

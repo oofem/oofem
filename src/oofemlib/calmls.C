@@ -679,16 +679,12 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
     double oldPsi =  Psi; // default from constructor
     double initialStepLength, forcedInitialStepLength;
     int hpcMode;
-    IRResultType val;
 
     IR_GIVE_OPTIONAL_FIELD(ir, Psi, _IFT_CylindricalALM_psi);
     if ( Psi < 0. ) {
         Psi = oldPsi;
     }
 
-    // double oldTangenStiffnessTreshold = TangenStiffnessTreshold;
-    // TangenStiffnessTreshold = readDouble (initString,"tstiffnesstreshold");
-    // if (TangenStiffnessTreshold < 0.01) TangenStiffnessTreshold  = oldTangenStiffnessTreshold;
     nsmax = 30;
     IR_GIVE_OPTIONAL_FIELD(ir, nsmax, _IFT_CylindricalALM_maxiter);
     if ( nsmax < 30 ) {
@@ -729,8 +725,8 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
         numberOfRequiredIterations = 1000;
     }
 
-    val = IR_GIVE_OPTIONAL_FIELD(ir, minIterations, _IFT_CylindricalALM_miniterations);
-    if ( val == IRRT_OK ) {
+    IR_GIVE_OPTIONAL_FIELD(ir, minIterations, _IFT_CylindricalALM_miniterations);
+    if ( result == IRRT_OK ) {
         if ( minIterations > 3 && minIterations < 1000 ) {
             numberOfRequiredIterations = minIterations;
         }
@@ -880,7 +876,6 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
     }
 
     this->giveLinearSolver()->initializeFrom(ir);
-    //refLoadInputMode = (calm_referenceLoadInputModeType) readInteger  (initString, "refloadmode");
 
     SparseNonLinearSystemNM :: initializeFrom(ir);
 

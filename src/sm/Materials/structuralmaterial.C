@@ -2067,15 +2067,10 @@ StructuralMaterial :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-#  ifdef VERBOSE
-    // VERBOSE_PRINT1 ("Instanciating material ",this->giveNumber())
-#  endif
-    this->Material :: initializeFrom(ir);
-
     referenceTemperature = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, referenceTemperature, _IFT_StructuralMaterial_referencetemperature);
 
-    return IRRT_OK;
+    return Material :: initializeFrom(ir);
 }
 
 

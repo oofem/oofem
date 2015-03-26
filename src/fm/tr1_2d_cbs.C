@@ -103,11 +103,7 @@ TR1_2D_CBS :: initializeFrom(InputRecord *ir)
 {
     //<RESTRICTED_SECTION>
     IRResultType result;                // Required by IR_GIVE_FIELD macro
-    //</RESTRICTED_SECTION>
 
-    CBSElement :: initializeFrom(ir);
-
-    //<RESTRICTED_SECTION>
     this->vof = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, vof, _IFT_Tr1CBS_pvof);
     if ( vof > 0.0 ) {
@@ -121,7 +117,7 @@ TR1_2D_CBS :: initializeFrom(InputRecord *ir)
 
     //</RESTRICTED_SECTION>
 
-    return IRRT_OK;
+    return CBSElement :: initializeFrom(ir);
 }
 
 

@@ -815,9 +815,7 @@ RCM2Material :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, Gf, _IFT_RCM2Material_gf);
     IR_GIVE_FIELD(ir, Ft, _IFT_RCM2Material_ft);
 
-    this->giveLinearElasticMaterial()->initializeFrom(ir);
-
-    return IRRT_OK;
+    return this->giveLinearElasticMaterial()->initializeFrom(ir);
 }
 
 double

@@ -61,7 +61,9 @@ NLTransientTransportProblem :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-    NonStationaryTransportProblem :: initializeFrom(ir);
+    result = NonStationaryTransportProblem :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
+
     int val = 30;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_NLTransientTransportProblem_nsmax);
     nsmax = val;

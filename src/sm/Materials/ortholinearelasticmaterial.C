@@ -58,7 +58,8 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
     FloatArray triplets;
 
 
-    LinearElasticMaterial :: initializeFrom(ir);
+    result = LinearElasticMaterial :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     IR_GIVE_FIELD(ir, value, _IFT_OrthotropicLinearElasticMaterial_ex);
     propertyDictionary.add(Ex, value);

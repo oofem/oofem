@@ -69,7 +69,6 @@ POIExportModule :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     int val;
 
-    ExportModule :: initializeFrom(ir);
     IR_GIVE_OPTIONAL_FIELD(ir, internalVarsToExport, _IFT_POIExportModule_vars);
     IR_GIVE_OPTIONAL_FIELD(ir, primaryVarsToExport, _IFT_POIExportModule_primvars);
 
@@ -81,7 +80,7 @@ POIExportModule :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, poiFileName, _IFT_POIExportModule_poifilename);
     this->readPOIFile(poiFileName); // parse poi file
 
-    return IRRT_OK;
+    return ExportModule :: initializeFrom(ir);
 }
 
 void

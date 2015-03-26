@@ -313,7 +313,8 @@ MicroplaneMaterial :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    StructuralMaterial :: initializeFrom(ir);
+    result = StructuralMaterial :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     // elastic constants
     IR_GIVE_FIELD(ir, E, _IFT_MicroplaneMaterial_e);

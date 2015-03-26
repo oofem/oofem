@@ -53,14 +53,14 @@ TutorialMaterial :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
 
-    StructuralMaterial :: initializeFrom(ir);
-    D.initializeFrom(ir);
+    result = D.initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
     
     IR_GIVE_FIELD(ir, this->sig0, _IFT_TutorialMaterial_yieldstress);
 
     IR_GIVE_FIELD(ir, this->H, _IFT_TutorialMaterial_hardeningmoduli);
 
-    return IRRT_OK;
+    return StructuralMaterial :: initializeFrom(ir);
 }
 
 

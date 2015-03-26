@@ -252,8 +252,7 @@ MaxwellChainMaterial :: CreateStatus(GaussPoint *gp) const
 IRResultType
 MaxwellChainMaterial :: initializeFrom(InputRecord *ir)
 {
-    RheoChainMaterial :: initializeFrom(ir);
-    return IRRT_OK;
+    return RheoChainMaterial :: initializeFrom(ir);
 }
 
 /****************************************************************************************/

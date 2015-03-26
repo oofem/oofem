@@ -391,7 +391,10 @@ TrPlanestressRotAllman :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 IRResultType
 TrPlanestressRotAllman :: initializeFrom(InputRecord *ir)
 {
-    TrPlaneStress2d :: initializeFrom(ir);
+    IRResultType result = TrPlaneStress2d :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
     numberOfGaussPoints = 4;
     return IRRT_OK;
 }

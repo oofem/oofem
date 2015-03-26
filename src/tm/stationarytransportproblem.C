@@ -79,7 +79,8 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    EngngModel :: initializeFrom(ir);
+    result = EngngModel :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     int val = SMT_Skyline;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);

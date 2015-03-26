@@ -268,7 +268,9 @@ KelvinChainMaterial :: CreateStatus(GaussPoint *gp) const
 IRResultType
 KelvinChainMaterial :: initializeFrom(InputRecord *ir)
 {
-    RheoChainMaterial :: initializeFrom(ir);
+    IRResultType result = RheoChainMaterial :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
+
     this->giveDiscreteTimes(); // Makes sure the new discrete times are evaluated.
     return IRRT_OK;
 }

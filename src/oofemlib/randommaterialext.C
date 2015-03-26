@@ -70,7 +70,8 @@ RandomMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, randomVariableGenerators, _IFT_RandomMaterialExt_randGen);
 
     if ( randVariables.giveSize() != randomVariableGenerators.giveSize() ) {
-        OOFEM_ERROR("Incompatible size of randvars and randdist attrs");
+        OOFEM_WARNING("Incompatible size of randvars and randdist attrs");
+        return IRRT_BAD_FORMAT;
     }
 
     return IRRT_OK;

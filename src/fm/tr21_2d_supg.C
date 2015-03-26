@@ -105,17 +105,6 @@ TR21_2D_SUPG :: giveDofManDofIDMask(int inode, IntArray &answer) const
     }
 }
 
-IRResultType
-TR21_2D_SUPG :: initializeFrom(InputRecord *ir)
-{
-    SUPGElement2 :: initializeFrom(ir);
-    pressureDofManArray.resize(3);
-    pressureDofManArray.at(1) = dofManArray.at(1);
-    pressureDofManArray.at(2) = dofManArray.at(2);
-    pressureDofManArray.at(3) = dofManArray.at(3);
-    return IRRT_OK;
-}
-
 void
 TR21_2D_SUPG :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
@@ -1407,22 +1396,6 @@ TR21_2D_SUPG :: computeVolumeAround(GaussPoint *gp)
     return volume;
 }
 
-
-//double
-//TR21_2D_SUPG :: computeVolumeAroundPressure(FEInterpolation2d& interpol, GaussPoint *gp)
-// Returns the portion of the receiver which is attached to gp.
-//{
-//  double determinant, weight, volume;
-
-//  determinant = fabs( interpol.giveTransformationJacobian(domain, pressureDofManArray,
-//     gp->giveNaturalCoordinates(), 0.0) );
-
-
-//  weight      = gp->giveWeight();
-//  volume      = determinant * weight;
-
-//  return volume;
-//}
 
 Interface *
 TR21_2D_SUPG :: giveInterface(InterfaceType interface)

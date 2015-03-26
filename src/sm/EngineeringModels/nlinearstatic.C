@@ -192,7 +192,11 @@ NonLinearStatic :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    LinearStatic :: initializeFrom(ir);
+    result = LinearStatic :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+
     nonlocalStiffnessFlag = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, nonlocalStiffnessFlag, _IFT_NonLinearStatic_nonlocstiff);
 

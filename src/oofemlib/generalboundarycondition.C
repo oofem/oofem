@@ -69,7 +69,8 @@ GeneralBoundaryCondition :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, timeFunction, _IFT_GeneralBoundaryCondition_timeFunct);
     if ( timeFunction <= 0 ) {
-        OOFEM_ERROR("bad TimeFunction id");
+        OOFEM_WARNING("bad TimeFunction id");
+        return IRRT_BAD_FORMAT;
     }
 
     int val = 0;

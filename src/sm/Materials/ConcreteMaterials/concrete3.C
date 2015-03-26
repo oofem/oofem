@@ -441,11 +441,7 @@ Concrete3 :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    //double value ;
-    int exmode;
-
-    RCM2Material :: initializeFrom(ir);
-    exmode = 0;
+    int exmode = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, exmode, _IFT_Concrete3_exp_soft);
     if ( exmode ) {
         softeningMode = exponentialSoftening;
@@ -453,13 +449,6 @@ Concrete3 :: initializeFrom(InputRecord *ir)
         softeningMode = linearSoftening;
     }
 
-    /*
-     * value = readDouble (initString,"shearretfactor");
-     * shearRetFactor = value;
-     * if (shearRetFactor < 0.001) shearRetFactor = 0.001;
-     * if (shearRetFactor > 0.50) shearRetFactor = 0.50;
-     */
-
-    return IRRT_OK;
+    return RCM2Material :: initializeFrom(ir);
 }
 } // end namespace oofem

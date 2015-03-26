@@ -438,9 +438,6 @@ Beam3d :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                    // Required by IR_GIVE_FIELD macro
 
-    // first call parent
-    StructuralElement :: initializeFrom(ir);
-
     if ( ir->hasField(_IFT_Beam3d_refnode) ) {
         IR_GIVE_FIELD(ir, referenceNode, _IFT_Beam3d_refnode);
         if ( referenceNode == 0 ) {
@@ -457,7 +454,8 @@ Beam3d :: initializeFrom(InputRecord *ir)
         IntArray val;
         IR_GIVE_FIELD(ir, val, _IFT_Beam3d_dofstocondense);
         if ( val.giveSize() >= 12 ) {
-            OOFEM_ERROR("wrong input data for condensed dofs");
+            OOFEM_WARNING("wrong input data for condensed dofs");
+            return IRRT_BAD_FORMAT;
         }
 
         dofsToCondense = new IntArray(val);
@@ -465,7 +463,7 @@ Beam3d :: initializeFrom(InputRecord *ir)
         dofsToCondense = NULL;
     }
 
-    return IRRT_OK;
+    return StructuralElement :: initializeFrom(ir);
 }
 
 

@@ -219,10 +219,12 @@ DruckerPragerPlasticitySM :: initializeFrom(InputRecord *ir)
     // Required by IR_GIVE_FIELD macro
     IRResultType result;
     // call the corresponding service of structural material
-    StructuralMaterial :: initializeFrom(ir);
+    result = StructuralMaterial :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     // call the corresponding service for the linear elastic material
-    LEMaterial->initializeFrom(ir);
+    result = LEMaterial->initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     // initialize elastic constants
     //eM = LEMaterial->give(Ex,gp);
@@ -248,8 +250,8 @@ DruckerPragerPlasticitySM :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, limitYieldStress, _IFT_DruckerPragerPlasticitySM_lys);
         break;
     default:
-        OOFEM_ERROR("Choose hardeningType 1 (linear hardening/softening), 2 (exponential hardening/softening) in input file!");
-        break;
+        OOFEM_WARNING("Choose hardeningType 1 (linear hardening/softening), 2 (exponential hardening/softening) in input file!");
+        return IRRT_BAD_FORMAT;
     }
 
     yieldTol = 1.e-14;

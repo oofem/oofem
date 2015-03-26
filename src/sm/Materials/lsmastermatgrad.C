@@ -292,18 +292,13 @@ LargeStrainMasterMaterialGrad :: giveFirstPKStressVectorGrad(FloatArray &answer1
 }
 
 
-
-
-
-
-
-
 IRResultType
 LargeStrainMasterMaterialGrad :: initializeFrom(InputRecord *ir)
 {
-    LargeStrainMasterMaterial :: initializeFrom(ir);
-    return IRRT_OK;
+    return LargeStrainMasterMaterial :: initializeFrom(ir);
 }
+
+
 
 //=============================================================================
 

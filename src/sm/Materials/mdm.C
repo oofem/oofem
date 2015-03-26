@@ -805,7 +805,8 @@ MDM :: initializeFrom(InputRecord *ir)
             IR_GIVE_FIELD(ir, this->Gf, _IFT_MDM_gf);
             IR_GIVE_FIELD(ir, this->Ft, _IFT_MDM_ft);
         } else {
-            OOFEM_ERROR("unknown set of parameters");
+            OOFEM_WARNING("unknown set of parameters");
+            return IRRT_BAD_FORMAT;
         }
     } else { // local case
         if ( ( ir->hasField(_IFT_MDM_efp) ) && ( ir->hasField(_IFT_MDM_ep) ) ) {
@@ -816,7 +817,8 @@ MDM :: initializeFrom(InputRecord *ir)
             IR_GIVE_FIELD(ir, this->Gf, _IFT_MDM_gf);
             IR_GIVE_FIELD(ir, this->mdm_Ep, _IFT_MDM_ep);
         } else {
-            OOFEM_ERROR("unknown set of parameters");
+            OOFEM_WARNING("unknown set of parameters");
+            return IRRT_BAD_FORMAT;
         }
     }
 
@@ -844,21 +846,29 @@ MDM :: initializeFrom(InputRecord *ir)
     OOFEM_LOG_INFO("MDM: using optional mapper %d\n", mapperType);
 #endif
 
-    MicroplaneMaterial :: initializeFrom(ir);
+    result = MicroplaneMaterial :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
+    
     if ( this->nonlocal ) {
-        StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
+        result = StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
+        if ( result != IRRT_OK ) return result;
     }
 
     linearElasticMaterial = new IsotropicLinearElasticMaterial( 1, MicroplaneMaterial :: giveDomain() );
-    linearElasticMaterial->initializeFrom(ir);
+    result = linearElasticMaterial->initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
 #ifdef MDM_MAPPING_DEBUG
-    mapperSFT.initializeFrom(ir);
-    mapperLST.initializeFrom(ir);
+    result = mapperSFT.initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
+    result = mapperLST.initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 #else
-    mapper.initializeFrom(ir);
+    result = mapper.initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 #endif
-    mapper2.initializeFrom(ir);
+    result = mapper2.initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     return IRRT_OK;
 }

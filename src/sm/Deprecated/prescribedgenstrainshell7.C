@@ -291,8 +291,6 @@ IRResultType PrescribedGenStrainShell7 :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-    GeneralBoundaryCondition :: initializeFrom(ir);
-
     IR_GIVE_FIELD(ir, this->initialGenEps, _IFT_PrescribedGenStrainShell7_initialgeneralizedstrain);
     IR_GIVE_FIELD(ir, this->genEps, _IFT_PrescribedGenStrainShell7_generalizedstrain);
 
@@ -300,7 +298,7 @@ IRResultType PrescribedGenStrainShell7 :: initializeFrom(InputRecord *ir)
     this->centerCoord.zero();
     IR_GIVE_OPTIONAL_FIELD(ir, this->centerCoord, _IFT_PrescribedGenStrainShell7_centercoords)
 
-    return IRRT_OK;
+    return GeneralBoundaryCondition :: initializeFrom(ir);
 }
 
 

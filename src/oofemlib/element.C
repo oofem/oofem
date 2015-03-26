@@ -458,7 +458,6 @@ Material *Element :: giveMaterial()
 {
 #ifdef DEBUG
     if ( !material ) {
-        // material = this -> readInteger("mat") ;
         OOFEM_ERROR("material not defined");
     }
 #endif

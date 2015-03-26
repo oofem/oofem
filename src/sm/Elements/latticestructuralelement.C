@@ -44,9 +44,6 @@ LatticeStructuralElement :: ~LatticeStructuralElement()
 IRResultType
 LatticeStructuralElement :: initializeFrom(InputRecord *ir)
 {
-    // first call parent
-    StructuralElement :: initializeFrom(ir);
-
-    return IRRT_OK;
+    return StructuralElement :: initializeFrom(ir);
 }
 } // end namespace oofem

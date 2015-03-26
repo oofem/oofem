@@ -225,8 +225,10 @@ void Delamination :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const 
 
 IRResultType Delamination :: initializeFrom(InputRecord *ir)
 {
-    EnrichmentItem :: initializeFrom(ir);
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
+
+    result = EnrichmentItem :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     // Compute the delamination xi-coord
     IR_GIVE_FIELD(ir, this->interfaceNum, _IFT_Delamination_interfacenum); // interface number from the bottom
@@ -234,16 +236,19 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
 
     LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( this->giveDomain()->giveCrossSection(this->crossSectionNum) );
     if ( layeredCS == NULL ) {
-        OOFEM_ERROR("Delamination EI requires a valid layered cross section number input: see record '%s'.", _IFT_Delamination_csnum);
+        OOFEM_WARNING("Delamination EI requires a valid layered cross section number input: see record '%s'.", _IFT_Delamination_csnum);
+        return IRRT_BAD_FORMAT;
     } else if ( this->interfaceNum.giveSize() < 1 || this->interfaceNum.giveSize() > 2 ) {
-        OOFEM_ERROR("Size of record 'interfacenum' must be 1 or 2");
+        OOFEM_WARNING("Size of record 'interfacenum' must be 1 or 2");
+        return IRRT_BAD_FORMAT;
     }
 
     // check that interface numbers are valid
     interfaceNum.printYourself("interface num");
     for ( int i = 1; i <= this->interfaceNum.giveSize(); i++ ) {
         if ( this->interfaceNum.at(i) < 1 || this->interfaceNum.at(i) >= layeredCS->giveNumberOfLayers() ) {
-            OOFEM_ERROR( "Cross section does not contain the interface number (%d) specified in the record '%s' since number of layers is %d.", this->interfaceNum.at(i), _IFT_Delamination_interfacenum, layeredCS->giveNumberOfLayers() );
+            OOFEM_WARNING( "Cross section does not contain the interface number (%d) specified in the record '%s' since number of layers is %d.", this->interfaceNum.at(i), _IFT_Delamination_interfacenum, layeredCS->giveNumberOfLayers() );
+            return IRRT_BAD_FORMAT;
         }
     }
 
@@ -257,7 +262,8 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
 
     if ( this->interfaceNum.giveSize() == 2 ) {
         if ( this->interfaceNum.at(1) >= this->interfaceNum.at(2) ) {
-            OOFEM_ERROR("second intercfacenum must be greater than the first one");
+            OOFEM_WARNING("second intercfacenum must be greater than the first one");
+            return IRRT_BAD_FORMAT;
         }
         for ( int i = 1; i <= this->interfaceNum.at(2); i++ ) {
             this->xiTop += layeredCS->giveLayerThickness(i) / totalThickness * 2.0;

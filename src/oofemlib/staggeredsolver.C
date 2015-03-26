@@ -61,7 +61,10 @@ StaggeredSolver :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    NRSolver ::initializeFrom(ir);
+    result = NRSolver ::initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     IR_GIVE_FIELD(ir, this->totalIdList, _IFT_StaggeredSolver_DofIdList);
     IR_GIVE_FIELD(ir, this->idPos, _IFT_StaggeredSolver_DofIdListPositions);

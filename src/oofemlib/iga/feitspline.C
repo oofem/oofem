@@ -92,7 +92,8 @@ IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
         localIndexKnotVector_tmp.clear();
         IR_GIVE_FIELD(ir, localIndexKnotVector_tmp, IFT_localIndexKnotVector [ n ]);
         if ( localIndexKnotVector_tmp.giveSize() != totalNumberOfControlPoints * ( degree [ n ] + 2 ) ) {
-            OOFEM_ERROR("invalid size of knot vector %s", IFT_localIndexKnotVector [ n ]);
+            OOFEM_WARNING("invalid size of knot vector %s", IFT_localIndexKnotVector [ n ]);
+            return IRRT_BAD_FORMAT;
         }
 
         pos = 0;
@@ -108,8 +109,9 @@ IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
             indexKnotVal = indexKnotVec [ 0 ];
             for ( int j = 1; j < degree [ n ] + 2; j++ ) {
                 if ( indexKnotVal > indexKnotVec [ j ] ) {
-                    OOFEM_ERROR("local index knot vector %s of control point %d is not monotonic",
+                    OOFEM_WARNING("local index knot vector %s of control point %d is not monotonic",
                                  IFT_localIndexKnotVector [ n ], i + 1);
+                    return IRRT_BAD_FORMAT;
                 }
 
                 /* this is only for the case when TSpline = NURBS
@@ -122,14 +124,16 @@ IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
 
             // check for nondegeneracy of local index knot vector
             if ( indexKnotVal == indexKnotVec [ 0 ] ) {
-                OOFEM_ERROR("local index knot vector %s of control point %d is degenerated",
+                OOFEM_WARNING("local index knot vector %s of control point %d is degenerated",
                              IFT_localIndexKnotVector [ n ], i + 1);
+                return IRRT_BAD_FORMAT;
             }
 
             // check for range of local index knot vector
             if ( indexKnotVec [ 0 ] <= 0 || indexKnotVal > knotValues [ n ].giveSize() ) {
-                OOFEM_ERROR("local index knot vector %s of control point %d out of range",
+                OOFEM_WARNING("local index knot vector %s of control point %d out of range",
                              IFT_localIndexKnotVector [ n ], i + 1);
+                return IRRT_BAD_FORMAT;
             }
         }
     }

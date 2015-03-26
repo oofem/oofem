@@ -102,7 +102,11 @@ StaticStructural :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    StructuralEngngModel :: initializeFrom(ir);
+    result = StructuralEngngModel :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+
     int val = SMT_Skyline;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
     sparseMtrxType = ( SparseMtrxType ) val;

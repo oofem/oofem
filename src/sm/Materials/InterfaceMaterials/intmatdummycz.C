@@ -75,9 +75,7 @@ void IntMatDummyCZ :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatRespons
 
 IRResultType IntMatDummyCZ :: initializeFrom(InputRecord *ir)
 {
-    StructuralInterfaceMaterial :: initializeFrom(ir);
-
-    return IRRT_OK;
+    return StructuralInterfaceMaterial :: initializeFrom(ir);
 }
 
 void IntMatDummyCZ :: giveInputRecord(DynamicInputRecord &input)

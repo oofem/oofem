@@ -354,9 +354,15 @@ ConcreteDPM :: initializeFrom(InputRecord *ir)
     IRResultType result;
 
     // call the corresponding service for the linear elastic material
-    StructuralMaterial :: initializeFrom(ir);
+    result = StructuralMaterial :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
-    linearElasticMaterial->initializeFrom(ir);
+    result = linearElasticMaterial->initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     double value;
     // elastic parameters

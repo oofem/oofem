@@ -386,7 +386,8 @@ Beam2d :: initializeFrom(InputRecord *ir)
         IntArray val;
         IR_GIVE_FIELD(ir, val, _IFT_Beam2d_dofstocondense);
         if ( val.giveSize() >= 6 ) {
-            OOFEM_ERROR("wrong input data for condensed dofs");
+            OOFEM_WARNING("wrong input data for condensed dofs");
+            return IRRT_BAD_FORMAT;
         }
 
         dofsToCondense = new IntArray(val);

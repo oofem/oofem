@@ -103,8 +103,7 @@ IntMatElastic :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, k, _IFT_IntMatElastic_kn);
 
-    StructuralInterfaceMaterial :: initializeFrom(ir);
-    return IRRT_OK;
+    return StructuralInterfaceMaterial :: initializeFrom(ir);
 }
 
 void IntMatElastic :: giveInputRecord(DynamicInputRecord &input)
