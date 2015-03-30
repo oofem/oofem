@@ -37,7 +37,7 @@
 
 #include "../sm/Elements/PlaneStress/trplanstrss.h"
 
-///@name Input fields for TrPlaneStrRot
+///@name Input fields for TrPlaneStrRotAllman
 //@{
 #define _IFT_TrPlanestressRotAllman_Name "trplanestressrotallman"
 //@}
@@ -63,8 +63,6 @@ public:
     TrPlanestressRotAllman(int, Domain *);
     virtual ~TrPlanestressRotAllman() { }
 
-
-    
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
     virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);

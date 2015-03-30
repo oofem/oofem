@@ -82,6 +82,8 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _PlaneStressRot; }
 
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+
     virtual int computeNumberOfDofs() { return 9; }
     virtual void giveDofManDofIDMask(int inode, IntArray &) const;
 

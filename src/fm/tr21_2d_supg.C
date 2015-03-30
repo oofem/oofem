@@ -135,13 +135,8 @@ TR21_2D_SUPG :: computeNuMatrix(FloatMatrix &answer, GaussPoint *gp)
     FloatArray n;
 
     this->velocityInterpolation.evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-    answer.resize(2, 12);
-    answer.zero();
-
-    for ( int i = 1; i <= 6; i++ ) {
-        answer.at(1, 2 * i - 1)  = n.at(i);
-        answer.at(2, 2 * i - 0)  = n.at(i);
-    }
+    
+    answer.beNMatrixOf(n, 2);
 }
 
 void
@@ -166,7 +161,7 @@ TR21_2D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, Time
 void
 TR21_2D_SUPG :: computeBMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
-    FloatMatrix dn(6, 2);
+    FloatMatrix dn;
     this->velocityInterpolation.evaldNdx( dn, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 12);
@@ -229,7 +224,7 @@ TR21_2D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep
 void
 TR21_2D_SUPG :: computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
-    FloatMatrix dn(3, 2);
+    FloatMatrix dn;
     pressureInterpolation.evaldNdx( dn, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.beTranspositionOf(dn);
@@ -399,7 +394,7 @@ double
 TR21_2D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep)
 {
     double answer = 0.0, vol = 0.0;
-    FloatMatrix n(2, 12), dn(6, 2);
+    FloatMatrix n, dn;
     FloatArray fi(6), u, un, gfi;
 
     this->computeVectorOfVelocities(VM_Total, tStep, un);
@@ -1242,7 +1237,6 @@ TR21_2D_SUPG :: computeQuadraticFunct(FloatArray &answer, int iedge)
     A.at(3, 3) = 1.0;
 
     FloatArray b(3);
-    int i, j, k;
 
     detA = A.giveDeterminant();
 
@@ -1250,9 +1244,9 @@ TR21_2D_SUPG :: computeQuadraticFunct(FloatArray &answer, int iedge)
     b.at(2) = y2;
     b.at(3) = y3;
 
-    for ( k = 1; k <= 3; k++ ) {
-        for ( i = 1; i <= 3; i++ ) {
-            for ( j = 1; j <= 3; j++ ) {
+    for ( int k = 1; k <= 3; k++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
+            for ( int j = 1; j <= 3; j++ ) {
                 A1.at(i, j) = A.at(i, j);
             }
 
