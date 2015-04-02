@@ -1738,7 +1738,7 @@ void EngngModel :: drawNodes(oofegGraphicContext &gc)
 {
     Domain *d = this->giveDomain( gc.getActiveDomain() );
     TimeStep *tStep = this->giveCurrentStep();
-    for ( auto &dman : d->giveElements() ) {
+    for ( auto &dman : d->giveDofManagers() ) {
         dman->drawYourself(gc, tStep);
     }
 }
