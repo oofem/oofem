@@ -39,6 +39,7 @@
 #include "domain.h"
 #include "element.h"
 #include "dofmanager.h"
+#include "dof.h"
 #include "sparsemtrxtype.h"
 #include "classfactory.h"
 #include "activebc.h"
