@@ -40,6 +40,7 @@
 #include "dofmanager.h"
 #include "engngm.h"
 #include "domain.h"
+#include "unknownnumberingscheme.h"
 #include "classfactory.h"
 
 namespace oofem {
