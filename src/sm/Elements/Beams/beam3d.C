@@ -369,32 +369,23 @@ Beam3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 // stored rowwise (mainly used by some materials with ortho and anisotrophy)
 //
 {
-    FloatArray lx(3), ly(3), lz(3), help(3);
+    FloatArray lx, ly, lz, help(3);
     Node *nodeA, *nodeB;
     nodeA = this->giveNode(1);
     nodeB = this->giveNode(2);
 
-    answer.resize(3, 3);
-    answer.zero();
+    lx.beDifferenceOf(*nodeB->giveCoordinates(), *nodeA->giveCoordinates());
+    lx.normalize();
+
     if ( !this->usingAngle ) {
         Node *refNode = this->giveDomain()->giveNode(this->referenceNode);
-
-        lx.beDifferenceOf(*nodeB->giveCoordinates(), *nodeA->giveCoordinates());
-        lx.normalize();
         help.beDifferenceOf(*refNode->giveCoordinates(), *nodeA->giveCoordinates());
 
         lz.beVectorProductOf(lx, help);
         lz.normalize();
-        ly.beVectorProductOf(lz, lx);
-        ly.normalize();
     } else {
-        lx.beDifferenceOf(*nodeB->giveCoordinates(), *nodeA->giveCoordinates());
-        lx.normalize();
-
         FloatMatrix rot(3, 3);
-        double upComp, theta;
-        bool isVert;
-        theta = referenceAngle * asin(1.0) / 90.0;
+        double theta = referenceAngle * M_PI / 180.0;
 
         rot.at(1, 1) = cos(theta) + pow(lx.at(1), 2) * ( 1 - cos(theta) );
         rot.at(1, 2) = lx.at(1) * lx.at(2) * ( 1 - cos(theta) ) - lx.at(3) * sin(theta);
@@ -409,20 +400,21 @@ Beam3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
         rot.at(3, 3) = cos(theta) + pow(lx.at(3), 2) * ( 1 - cos(theta) );
 
         help.at(3) = 1.0;         // up-vector
-        upComp = lx.dotProduct(help);
-        isVert = acos(upComp) < 0.001;
         // here is ly is used as a temp var
-        if ( isVert ) {
-            ly.at(2) = 1.0;
+        if ( acos(lx.dotProduct(help)) < 0.001 ) { // Check if it is vertical
+            ly = {0., 1., 0.};
         } else {
             ly.beVectorProductOf(lx, help);
         }
         lz.beProductOf(rot, ly);
-        ly.beVectorProductOf(lz, lx);
         lz.normalize();
-        ly.normalize();
     }
 
+    ly.beVectorProductOf(lz, lx);
+    ly.normalize();
+
+    answer.resize(3, 3);
+    answer.zero();
     for ( int i = 1; i <= 3; i++ ) {
         answer.at(1, i) = lx.at(i);
         answer.at(2, i) = ly.at(i);
