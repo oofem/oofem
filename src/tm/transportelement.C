@@ -106,10 +106,6 @@ TransportElement :: giveCharacteristicMatrix(FloatMatrix &answer,
             }
             answer.at(i, i) = s;
         }
-    } else if ( mtrx == LHSBCMatrix ) {
-        this->computeBCMtrxAt(answer, tStep, VM_Total);
-    } else if ( mtrx == IntSourceLHSMatrix ) {
-        this->computeIntSourceLHSMatrix(answer, tStep);
     } else {
         OOFEM_ERROR("Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx));
     }
@@ -131,10 +127,6 @@ TransportElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, 
         this->computeInertiaForcesVector(answer, tStep);
     } else if ( mtrx == LumpedMassMatrix ) {
         this->computeLumpedCapacityVector(answer, tStep);
-    } else if ( mtrx == ElementBCTransportVector ) { ///@todo Remove this, only external and internal.
-        this->computeBCVectorAt(answer, tStep, mode);
-    } else if ( mtrx == ElementInternalSourceVector ) { ///@todo Remove this, only external and internal.
-        this->computeInternalSourceRhsVectorAt(answer, tStep, mode);
     } else {
         OOFEM_ERROR( "Unknown Type of characteristic mtrx (%s)",
                 __CharTypeToString(mtrx) );

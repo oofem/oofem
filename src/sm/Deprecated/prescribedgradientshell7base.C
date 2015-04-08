@@ -215,9 +215,9 @@ void PrescribedGenStrainShell7 :: computeField(FloatArray &sigma, EquationID eid
 
     R_c.zero();
     R_ext.zero();
-    emodel->assembleVector( R_c, tStep, eid, InternalForcesVector, VM_Total,
+    emodel->assembleVector( R_c, tStep, eid, InternalForceAssembler(), VM_Total,
                             EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
-    emodel->assembleVector( R_ext, tStep, eid, ExternalForcesVector, VM_Total,
+    emodel->assembleVector( R_ext, tStep, eid, ExternalForceAssembler(), VM_Total,
                             EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
     R_c.subtract(R_ext);
 

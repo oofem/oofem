@@ -228,7 +228,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
     //
     loadVector.resize( this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ) );
     loadVector.zero();
-    this->assembleVector( loadVector, tStep, ExternalForcesVector, VM_Total,
+    this->assembleVector( loadVector, tStep, ExternalForceAssembler(), VM_Total,
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
@@ -236,7 +236,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
     //
     FloatArray internalForces( this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ) );
     internalForces.zero();
-    this->assembleVector( internalForces, tStep, InternalForcesVector, VM_Total,
+    this->assembleVector( internalForces, tStep, InternalForceAssembler(), VM_Total,
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     loadVector.subtract(internalForces);

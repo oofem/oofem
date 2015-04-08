@@ -55,6 +55,7 @@ using namespace std;
 #include "sparsemtrx.h"
 #include "errorestimator.h"
 #include "unknownnumberingscheme.h"
+#include "assemblercallback.h"
 
 #ifdef __PARALLEL_MODE
  #include "loadbalancer.h"
@@ -421,12 +422,17 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
     FloatArray loadVector;
     loadVector.resize( this->giveNumberOfDomainEquations( di, EModelDefaultEquationNumbering() ) );
     loadVector.zero();
-    this->assembleVector( loadVector, tStep, ExternalForcesVector,
+    this->assembleVector( loadVector, tStep, ExternalForceAssembler(),
                          VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(di) );
     this->updateSharedDofManagers(loadVector, EModelDefaultEquationNumbering(), LoadExchangeTag);
 
     // Assembling the effective load vector
     for ( int i = 1; i <= neq; i++ ) {
+        //help.beScaled(a2, previousVelocityVector);
+        //help.add(a3, previousAccelerationVector);
+        //help.add(a4 * eta, previousVelocityVector);
+        //help.add(a5 * eta, previousAccelerationVector);
+        //help.add(a6 * eta, previousIncrementOfDisplacement);
         help.at(i) = a2 * previousVelocityVector.at(i) + a3 *previousAccelerationVector.at(i)
         + eta * ( a4 * previousVelocityVector.at(i)
                  + a5 * previousAccelerationVector.at(i)
@@ -436,6 +442,9 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
     massMatrix->times(help, rhs);
 
     if ( delta != 0 ) {
+        //help.beScaled(a4 * delta, previousVelocityVector);
+        //help.add(a5 * delta, previousAccelerationVector);
+        //help.add(a6 * delta, previousIncrementOfDisplacement);
         for ( int i = 1; i <= neq; i++ ) {
             help.at(i) = delta * ( a4 * previousVelocityVector.at(i)
                                   + a5 * previousAccelerationVector.at(i)
@@ -445,6 +454,9 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
 
         help.zero();
         rhs.add(rhs2);
+
+        //this->assembleVector(rhs, tStep, MatrixProductAssembler(TangentAssembler(), help), VM_Total, 
+        //                    EModelDefaultEquationNumbering(), this->giveDomain(1));
     }
 
     rhs.add(loadVector);
@@ -607,6 +619,8 @@ void NonLinearDynamic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
                 if ( delta != 0 ) {
                     help.beScaled(delta * a1, incrementOfDisplacement);
                     this->timesMtrx(help, rhs2, TangentStiffnessMatrix, this->giveDomain(1), tStep);
+                    //this->assembleVector(rhs2, tStep, MatrixProductAssembler(TangentAssembler(), help), VM_Total, 
+                    //                    EModelDefaultEquationNumbering(), this->giveDomain(1));
 
                     forcesVector.add(rhs2);
                 }

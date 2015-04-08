@@ -375,11 +375,11 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
 
     v_hat.clear();
 
+        ///@todo Sort out this hack in a nicer (modular) way / Mikael
+#if 0
     for ( auto &elem : domain->giveElements() ) {
 #ifdef __FM_MODULE
 
-        ///@todo Sort out this hack in a nicer (modular) way / Mikael
-#if 0
         if ( Tr21Stokes *Tr = dynamic_cast< Tr21Stokes * >( elem.get() ) ) {
             Tr->giveIntegratedVelocity(v_hatTemp, tStep);
             v_hat.add(v_hatTemp);
@@ -387,10 +387,10 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
             Tet->giveIntegratedVelocity(v_hatTemp, tStep);
             v_hat.add(v_hatTemp);
         }
-#endif
 
 #endif
     }
+#endif
 
     // Compute intrinsic area/volume
     double intrinsicSize = 1.0;

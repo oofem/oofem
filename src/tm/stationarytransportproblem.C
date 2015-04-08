@@ -176,7 +176,7 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 #endif
     FloatArray externalForces(neq);
     externalForces.zero();
-    this->assembleVector( externalForces, tStep, ExternalForcesVector, VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVector( externalForces, tStep, ExternalForceAssembler(), VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
     this->updateSharedDofManagers(externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
 
     // set-up numerical method
@@ -215,7 +215,7 @@ StationaryTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmp
 {
     if ( cmpn == InternalRhs ) {
         this->internalForces.zero();
-        this->assembleVector(this->internalForces, tStep, InternalForcesVector, VM_Total,
+        this->assembleVector(this->internalForces, tStep, InternalForceAssembler(), VM_Total,
                              EModelDefaultEquationNumbering(), this->giveDomain(1), & this->eNorm);
         this->updateSharedDofManagers(this->internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
         return;

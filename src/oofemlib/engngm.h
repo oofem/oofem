@@ -840,20 +840,6 @@ public:
     virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) { return 0; }
 
     /**
-     * Returns characteristic vector of element. The Element::giveCharacteristicVector function
-     * should not be called directly, because EngngModel may require some special modification
-     * of characteristic vectors supported on element level. But default implementation does
-     * the direct call to element level.
-     * @param answer Characteristic vector.
-     * @param num Element number.
-     * @param type Type of vector requested.
-     * @param mode Mode of unknown (total, incremental, rate of change).
-     * @param tStep Time step when response is computed.
-     * @param domain Source domain.
-     */
-    virtual void giveElementCharacteristicVector(FloatArray &answer, int num, CharType type, ValueModeType mode, TimeStep *tStep, Domain *domain);
-
-    /**
      * Returns the parallel context corresponding to given domain (n) and unknown type
      * Default implementation returns i-th context from parallelContextList.
      */
@@ -893,40 +879,39 @@ public:
      * @param answer Assembled vector.
      * @param mode Mode of unknown (total, incremental, rate of change).
      * @param tStep Time step, when answer is assembled.
-     * @param type Characteristic components of type type are requested.
+     * @param va Determines what vector is assembled.
      * @param s Determines the equation numbering scheme.
      * @param domain Domain to assemble from.
      * @param eNorms If non-NULL, squared norms of each internal force will be added to this, split up into dof IDs.
      * @return Sum of element/node norm (squared) of assembled vector.
      */
-    void assembleVector(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
+    void assembleVector(FloatArray &answer, TimeStep *tStep, const VectorAssembler &va, ValueModeType mode,
                         const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
     /**
      * Assembles characteristic vector of required type from dofManagers into given vector.
      * @param answer Assembled vector.
      * @param mode Mode of unknown (total, incremental, rate of change).
      * @param tStep Time step, when answer is assembled.
-     * @param type Characteristic components of type type are requested.
+     * @param va Determines what vector is assembled.
      * @param s Determines the equation numbering scheme.
      * @param domain Domain to assemble from.
      * @param eNorms Norms for each dofid (optional).
      * @return Sum of element norm (squared) of assembled vector.
      */
-    void assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
+    void assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, const VectorAssembler &va, ValueModeType mode,
                                        const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
     /**
      * Assembles characteristic vector of required type from elements into given vector.
      * @param answer Assembled vector.
      * @param tStep Time step, when answer is assembled.
      * @param mode Mode of unknown (total, incremental, rate of change).
-     * @param type Characteristic components of type type are requested
-     * from elements and assembled using prescribed eqn numbers.
+     * @param va Determines what vector is assembled.
      * @param s Determines the equation numbering scheme.
      * @param domain Domain to assemble from.
      * @param eNorms Norms for each dofid (optional).
      * @return Sum of element norm (squared) of assembled vector.
      */
-    void assembleVectorFromElements(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
+    void assembleVectorFromElements(FloatArray &answer, TimeStep *tStep, const VectorAssembler &va, ValueModeType mode,
                                     const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
 
     /**
@@ -934,13 +919,12 @@ public:
      * @param answer Assembled vector.
      * @param tStep Time step, when answer is assembled.
      * @param mode Mode of unknown (total, incremental, rate of change).
-     * @param type Characteristic components of type type are requested
-     * from elements and assembled using prescribed eqn numbers.
+     * @param va Determines what vector is assembled.
      * @param s Determines the equation numbering scheme.
      * @param domain Domain to assemble from.
      * @param eNorms Norms for each dofid (optional).
      */
-    void assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
+    void assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, const VectorAssembler &va, ValueModeType mode,
                               const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
 
     /**

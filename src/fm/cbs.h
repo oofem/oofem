@@ -62,10 +62,49 @@
 
 namespace oofem {
 
-/**
- * Callback class for assembling CBS pressure matrices
- * @author Mikael Öhman
- */
+/// Implementation for assembling external forces vectors in standard monolithic FE-problems
+class NumberOfNodalPrescribedTractionPressureAssembler : public VectorAssembler
+{
+public:
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+};
+
+/// Implementation for assembling external forces vectors in standard monolithic FE-problems
+class IntermediateConvectionDiffusionAssembler : public VectorAssembler
+{
+public:
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+};
+
+/// Implementation for assembling external forces vectors in standard monolithic FE-problems
+class PrescribedVelocityRhsAssembler : public VectorAssembler
+{
+public:
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+};
+
+/// Implementation for assembling external forces vectors in standard monolithic FE-problems
+class DensityPrescribedTractionPressureAssembler : public VectorAssembler
+{
+public:
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+};
+
+/// Implementation for assembling external forces vectors in standard monolithic FE-problems
+class DensityRhsAssembler : public VectorAssembler
+{
+public:
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+};
+
+/// Implementation for assembling external forces vectors in standard monolithic FE-problems
+class CorrectionRhsAssembler : public VectorAssembler
+{
+public:
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+};
+
+/// Callback class for assembling CBS pressure matrices
 class PressureLhsAssembler : public MatrixAssembler
 {
 public:

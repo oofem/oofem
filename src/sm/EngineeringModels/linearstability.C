@@ -210,11 +210,11 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
     loadVector.zero();
 
     // Internal forces first, negated;
-    this->assembleVector( loadVector, tStep, InternalForcesVector, VM_Total,
+    this->assembleVector( loadVector, tStep, InternalForceAssembler(), VM_Total,
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
     loadVector.negated();
 
-    this->assembleVector( loadVector, tStep, ExternalForcesVector, VM_Total,
+    this->assembleVector( loadVector, tStep, ExternalForceAssembler(), VM_Total,
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
     this->updateSharedDofManagers(loadVector, EModelDefaultEquationNumbering(), ReactionExchangeTag);
 

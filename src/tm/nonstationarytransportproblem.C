@@ -56,6 +56,15 @@
 namespace oofem {
 REGISTER_EngngModel(NonStationaryTransportProblem);
 
+void TransportExternalForceAssembler :: vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const
+{
+    TransportElement *telem = static_cast< TransportElement* >(&element);
+    telem->computeBCVectorAt(vec, tStep, mode);
+    FloatArray tmp;
+    telem->computeInternalSourceRhsVectorAt(tmp, tStep, mode);
+    vec.add(tmp);    
+}
+
 
 MidpointLhsAssembler :: MidpointLhsAssembler(bool lumped, double alpha) : 
     MatrixAssembler(), lumped(lumped), alpha(alpha)
@@ -294,16 +303,14 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
         //project initial conditions to have temporary temperature in integration points
 
         //edge or surface load on elements
-        this->assembleVectorFromElements( bcRhs, stepWhenIcApply.get(), ElementBCTransportVector,
+        //add internal source vector on elements
+        this->assembleVectorFromElements( bcRhs, stepWhenIcApply.get(), TransportExternalForceAssembler(),
                                          VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //add prescribed value, such as temperature, on nodes
         this->assembleDirichletBcRhsVector( bcRhs, stepWhenIcApply.get(), VM_Total,
                                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
-        //add internal source vector on elements
-        this->assembleVectorFromElements( bcRhs, stepWhenIcApply.get(), ElementInternalSourceVector,
-                                         VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //add nodal load
-        this->assembleVectorFromDofManagers( bcRhs, stepWhenIcApply.get(), ExternalForcesVector,
+        this->assembleVectorFromDofManagers( bcRhs, stepWhenIcApply.get(), ExternalForceAssembler(),
                                             VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
     }
 
@@ -349,15 +356,13 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     rhs.times(1. - alpha);
     bcRhs.zero();
     //boundary conditions evaluated at targetTime
-    this->assembleVectorFromElements( bcRhs, tStep, ElementBCTransportVector,
+    this->assembleVectorFromElements( bcRhs, tStep, TransportExternalForceAssembler(),
                                      VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
     this->assembleDirichletBcRhsVector( bcRhs, tStep, VM_Total,
                                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    this->assembleVectorFromElements( bcRhs, tStep, ElementInternalSourceVector,
-                                     VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     // assembling load from nodes
-    this->assembleVectorFromDofManagers( bcRhs, tStep, InternalForcesVector, VM_Total,
+    this->assembleVectorFromDofManagers( bcRhs, tStep, InternalForceAssembler(), VM_Total,
                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
     for ( int i = 1; i <= neq; i++ ) {
         rhs.at(i) += bcRhs.at(i) * alpha;

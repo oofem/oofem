@@ -162,9 +162,9 @@ void PrescribedGradient :: computeField(FloatArray &sigma, TimeStep *tStep)
 
     R_c.zero();
     R_ext.zero();
-    emodel->assembleVector( R_c, tStep, InternalForcesVector, VM_Total,
+    emodel->assembleVector( R_c, tStep, InternalForceAssembler(), VM_Total,
                             EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
-    emodel->assembleVector( R_ext, tStep, ExternalForcesVector, VM_Total,
+    emodel->assembleVector( R_ext, tStep, ExternalForceAssembler(), VM_Total,
                             EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
     R_c.subtract(R_ext);
 

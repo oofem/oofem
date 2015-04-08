@@ -87,7 +87,7 @@ void DarcyFlow :: solveYourselfAt(TimeStep *tStep)
     // Build initial/external load (LoadVector)
     this->externalForces.resize(neq);
     this->externalForces.zero();
-    this->assembleVectorFromElements( this->externalForces, tStep, ExternalForcesVector, VM_Total,
+    this->assembleVectorFromElements( this->externalForces, tStep, ExternalForceAssembler(), VM_Total,
                                      EModelDefaultEquationNumbering(), this->giveDomain(1) );
     this->updateSharedDofManagers(this->externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
 
@@ -172,7 +172,7 @@ void DarcyFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d
     switch ( cmpn ) {
     case InternalRhs:
         this->internalForces.zero();
-        this->assembleVector(this->internalForces, tStep,  InternalForcesVector, VM_Total,
+        this->assembleVector(this->internalForces, tStep, InternalForceAssembler(), VM_Total,
                              EModelDefaultEquationNumbering(), d, & this->ebeNorm);
         this->updateSharedDofManagers(this->externalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
         break;

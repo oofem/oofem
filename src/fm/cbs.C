@@ -56,9 +56,48 @@
 namespace oofem {
 REGISTER_EngngModel(CBS);
 
-void PressureLhsAssembler :: matrixFromElement(FloatMatrix &answer, Element &el, TimeStep *tStep) const
+
+void NumberOfNodalPrescribedTractionPressureAssembler :: vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const
 {
-    static_cast< CBSElement * >( &el )->computePressureLhs(answer, tStep);
+    static_cast< CBSElement & >( element ).computeNumberOfNodalPrescribedTractionPressureContributions(vec, tStep);
+}
+
+void IntermediateConvectionDiffusionAssembler :: vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const
+{
+    FloatArray vec_p;
+    static_cast< CBSElement & >( element ).computeConvectionTermsI(vec, tStep);
+    static_cast< CBSElement & >( element ).computeDiffusionTermsI(vec_p, tStep);
+    vec.add(vec_p);
+}
+
+void PrescribedVelocityRhsAssembler :: vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const
+{
+    static_cast< CBSElement & >( element ).computePrescribedTermsI(vec, tStep);
+    
+}
+
+void DensityPrescribedTractionPressureAssembler :: vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const
+{
+    static_cast< CBSElement & >( element ).computePrescribedTractionPressure(vec, tStep);
+}
+
+void DensityRhsAssembler :: vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const
+{
+    FloatArray vec_p;
+    static_cast< CBSElement & >( element ).computeDensityRhsVelocityTerms(vec, tStep);
+    static_cast< CBSElement & >( element ).computeDensityRhsPressureTerms(vec_p, tStep);
+    vec.add(vec_p);
+}
+
+void CorrectionRhsAssembler :: vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const
+{
+    static_cast< CBSElement & >( element ).computeCorrectionRhs(vec, tStep);
+    
+}
+
+void PressureLhsAssembler :: matrixFromElement(FloatMatrix &answer, Element &element, TimeStep *tStep) const
+{
+    static_cast< CBSElement & >( element ).computePressureLhs(answer, tStep);
 }
 
 void PressureLhsAssembler :: locationFromElement(IntArray& loc, Element& element, const UnknownNumberingScheme& s, IntArray* dofIds) const
@@ -221,7 +260,7 @@ CBS :: giveNextStep()
     Domain *domain = this->giveDomain(1);
     // check for critical time step
     for ( auto &elem : domain->giveElements() ) {
-        dt = min( dt, static_cast< CBSElement * >( elem.get() )->computeCriticalTimeStep(previousStep.get()) );
+        dt = min( dt, static_cast< CBSElement & >( *elem ).computeCriticalTimeStep(previousStep.get()) );
     }
 
     dt *= 0.6;
@@ -252,7 +291,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
         nodalPrescribedTractionPressureConnectivity.resize(presneq_prescribed);
         nodalPrescribedTractionPressureConnectivity.zero();
         this->assembleVectorFromElements( nodalPrescribedTractionPressureConnectivity, tStep,
-                                         NumberOfNodalPrescribedTractionPressureContributions, VM_Total,
+                                         NumberOfNodalPrescribedTractionPressureAssembler(), VM_Total,
                                          pnumPrescribed, this->giveDomain(1) );
 
 
@@ -279,7 +318,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
         } else {
             mm.resize(momneq);
             mm.zero();
-            this->assembleVectorFromElements( mm, tStep, LumpedMassMatrix, VM_Total,
+            this->assembleVectorFromElements( mm, tStep, LumpedMassVectorAssembler(), VM_Total,
                                              vnum, this->giveDomain(1) );
         }
 
@@ -305,7 +344,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
                            vnum, this->giveDomain(1) );
         } else {
             mm.zero();
-            this->assembleVectorFromElements( mm, tStep, LumpedMassMatrix, VM_Total,
+            this->assembleVectorFromElements( mm, tStep, LumpedMassVectorAssembler(), VM_Total,
                                              vnum, this->giveDomain(1) );
         }
     }
@@ -330,17 +369,13 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     /* STEP 1 - calculates auxiliary velocities*/
     rhs.zero();
     // Depends on old v:
-    this->assembleVectorFromElements( rhs, tStep, IntermediateConvectionTerm, VM_Total,
-                                     vnum, this->giveDomain(1) );
-    this->assembleVectorFromElements( rhs, tStep, IntermediateDiffusionTerm, VM_Total,
-                                     vnum, this->giveDomain(1) );
-    //this->assembleVectorFromElements(mm, tStep, LumpedMassMatrix, VM_Total, this->giveDomain(1));
+    this->assembleVectorFromElements( rhs, tStep, IntermediateConvectionDiffusionAssembler(), VM_Total, vnum, this->giveDomain(1) );
+    //this->assembleVectorFromElements(mm, tStep, LumpedMassVectorAssembler(), VM_Total, this->giveDomain(1));
 
     if ( consistentMassFlag ) {
         rhs.times(deltaT);
         // Depends on prescribed v
-        this->assembleVectorFromElements( rhs, tStep, PrescribedVelocityRhsVector, VM_Total,
-                                         vnum, this->giveDomain(1) );
+        this->assembleVectorFromElements( rhs, tStep, PrescribedVelocityRhsAssembler(), VM_Total, vnum, this->giveDomain(1) );
         nMethod->solve(*mss, rhs, deltaAuxVelocity);
     } else {
         for ( int i = 1; i <= momneq; i++ ) {
@@ -352,7 +387,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     this->prescribedTractionPressure.resize(presneq_prescribed);
     this->prescribedTractionPressure.zero();
     this->assembleVectorFromElements( prescribedTractionPressure, tStep,
-                                     DensityPrescribedTractionPressure, VM_Total,
+                                     DensityPrescribedTractionPressureAssembler(), VM_Total,
                                      pnumPrescribed, this->giveDomain(1) );
     for ( int i = 1; i <= presneq_prescribed; i++ ) {
         prescribedTractionPressure.at(i) /= nodalPrescribedTractionPressureConnectivity.at(i);
@@ -362,13 +397,10 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     * velocityVector = * prevVelocityVector;
     velocityVector->add(this->theta1, deltaAuxVelocity);
 
-    // Depends on old V + deltaAuxV * theta1:
+    // Depends on old V + deltaAuxV * theta1 and p:
     rhs.resize(presneq);
     rhs.zero();
-    this->assembleVectorFromElements( rhs, tStep, DensityRhsVelocityTerms, VM_Total,
-                                     pnum, this->giveDomain(1) );
-    // Depends on p:
-    this->assembleVectorFromElements( rhs, tStep, DensityRhsPressureTerms, VM_Total,
+    this->assembleVectorFromElements( rhs, tStep, DensityRhsAssembler(), VM_Total,
                                      pnum, this->giveDomain(1) );
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
     nMethod->solve(*lhs, rhs, *pressureVector);
@@ -379,11 +411,11 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     rhs.resize(momneq);
     rhs.zero();
     // Depends on p:
-    this->assembleVectorFromElements( rhs, tStep, CorrectionRhs, VM_Total,
+    this->assembleVectorFromElements( rhs, tStep, CorrectionRhsAssembler(), VM_Total,
                                      vnum, this->giveDomain(1) );
     if ( consistentMassFlag ) {
         rhs.times(deltaT);
-        //this->assembleVectorFromElements(rhs, tStep, PrescribedRhsVector, VM_Incremental, vnum, this->giveDomain(1));
+        //this->assembleVectorFromElements(rhs, tStep, PrescribedRhsAssembler(), VM_Incremental, vnum, this->giveDomain(1));
         nMethod->solve(*mss, rhs, *velocityVector);
         velocityVector->add(deltaAuxVelocity);
         velocityVector->add(* prevVelocityVector);

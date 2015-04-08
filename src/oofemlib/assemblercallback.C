@@ -55,6 +55,8 @@ void VectorAssembler :: vectorFromEdgeLoad(FloatArray& vec, Element& element, Bo
 
 void VectorAssembler :: vectorFromNodeLoad(FloatArray& vec, DofManager& dman, NodalLoad* load, TimeStep* tStep, ValueModeType mode) const { vec.clear(); }
 
+void VectorAssembler :: assembleFromActiveBC(FloatArray &answer, ActiveBoundaryCondition &bc, TimeStep* tStep, ValueModeType mode, const UnknownNumberingScheme &s, FloatArray *eNorms) const { }
+
 void VectorAssembler :: locationFromElement(IntArray& loc, Element& element, const UnknownNumberingScheme& s, IntArray* dofIds) const
 {
     element.giveLocationArray(loc, s, dofIds);
@@ -86,39 +88,6 @@ void MatrixAssembler :: locationFromElementNodes(IntArray& loc, Element& element
 }
 
 
-#if 1
-// For backwards compatibility:
-
-OldVectorAssembler :: OldVectorAssembler(CharType t): type(t) {}
-
-void OldVectorAssembler :: vectorFromElement(FloatArray& vec, Element& element, TimeStep* tStep, ValueModeType mode) const
-{
-    element.giveCharacteristicVector(vec, this->type, mode, tStep);
-}
-
-void OldVectorAssembler :: vectorFromLoad(FloatArray& vec, Element& element, BodyLoad* load, TimeStep* tStep, ValueModeType mode) const
-{
-    element.computeLoadVector(vec, load, this->type, mode, tStep);
-}
-
-void OldVectorAssembler :: vectorFromBoundaryLoad(FloatArray& vec, Element& element, BoundaryLoad* load, int boundary, TimeStep* tStep, ValueModeType mode) const
-{
-    element.computeBoundaryLoadVector(vec, load, boundary, this->type, mode, tStep);
-}
-
-void OldVectorAssembler :: vectorFromEdgeLoad(FloatArray& vec, Element& element, BoundaryLoad* load, int edge, TimeStep* tStep, ValueModeType mode) const
-{
-    element.computeBoundaryEdgeLoadVector(vec, load, edge, this->type, mode, tStep);
-}
-
-void OldVectorAssembler :: vectorFromNodeLoad(FloatArray& vec, DofManager& dman, NodalLoad* load, TimeStep* tStep, ValueModeType mode) const
-{
-    dman.computeLoadVector(vec, load, this->type, tStep, mode);
-}
-
-#endif
-
-
 void MatrixProductAssembler :: vectorFromElement(FloatArray& vec, Element& element, TimeStep* tStep, ValueModeType mode) const
 {
     FloatMatrix mat;
@@ -148,7 +117,6 @@ void MatrixProductAssembler :: vectorFromEdgeLoad(FloatArray& vec, Element& elem
 }
 
 
-
 void InternalForceAssembler :: vectorFromElement(FloatArray& vec, Element& element, TimeStep* tStep, ValueModeType mode) const
 {
     element.giveCharacteristicVector(vec, InternalForcesVector, mode, tStep);
@@ -173,7 +141,18 @@ void InternalForceAssembler :: vectorFromEdgeLoad(FloatArray& vec, Element& elem
     //element.computeInternalForcesFromEdgeLoad(vec, load, edge, tStep);
 }
 
+void InternalForceAssembler :: assembleFromActiveBC(FloatArray &answer, ActiveBoundaryCondition &bc, TimeStep* tStep, ValueModeType mode, const UnknownNumberingScheme &s, FloatArray *eNorms) const
+{
+    bc.assembleVector(answer, tStep, InternalForcesVector, mode, s, eNorms);
+    //bc.assembleInternalForces(answer, tStep, s, eNorms);
+}
 
+
+void ExternalForceAssembler :: vectorFromElement(FloatArray& vec, Element& element, TimeStep* tStep, ValueModeType mode) const
+{
+    ///@todo To be removed when sets are used for loads.
+    element.giveCharacteristicVector(vec, ExternalForcesVector, mode, tStep);
+}
 
 void ExternalForceAssembler :: vectorFromLoad(FloatArray& vec, Element& element, BodyLoad* load, TimeStep* tStep, ValueModeType mode) const
 {
@@ -196,8 +175,28 @@ void ExternalForceAssembler :: vectorFromEdgeLoad(FloatArray& vec, Element& elem
 void ExternalForceAssembler :: vectorFromNodeLoad(FloatArray& vec, DofManager& dman, NodalLoad* load, TimeStep* tStep, ValueModeType mode) const
 {
     dman.computeLoadVector(vec, load, ExternalForcesVector, tStep, mode);
+    //dman.computeExternalForcesFromLoad(vec, load, tStep);
 }
 
+void ExternalForceAssembler :: assembleFromActiveBC(FloatArray &answer, ActiveBoundaryCondition &bc, TimeStep* tStep, ValueModeType mode, const UnknownNumberingScheme &s, FloatArray *eNorms) const
+{
+    bc.assembleVector(answer, tStep, ExternalForcesVector, mode, s, eNorms);
+    //bc.assembleExternalForces(answer, tStep, s, eNorms);
+}
+
+
+void LumpedMassVectorAssembler :: vectorFromElement(FloatArray& vec, Element& element, TimeStep* tStep, ValueModeType mode) const
+{
+    element.giveCharacteristicVector(vec, LumpedMassMatrix, mode, tStep);
+    //element.computeLumpedMassMatrix(vec, tStep);
+}
+
+
+void InertiaForceAssembler :: vectorFromElement(FloatArray& vec, Element& element, TimeStep* tStep, ValueModeType mode) const
+{
+    element.giveCharacteristicVector(vec, InertiaForcesVector, mode, tStep);
+    //element.computeInertiaForces(vec, tStep);
+}
 
 
 void TangentAssembler :: matrixFromElement(FloatMatrix& mat, Element& element, TimeStep* tStep) const

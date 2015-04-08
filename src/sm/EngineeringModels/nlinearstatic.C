@@ -826,16 +826,16 @@ NonLinearStatic :: assembleIncrementalReferenceLoadVectors(FloatArray &_incremen
 
     if ( _refMode == SparseNonLinearSystemNM :: rlm_incremental ) {
         ///@todo This was almost definitely wrong before. It never seems to be used. Is this code even relevant?
-        this->assembleVector(_incrementalLoadVector, tStep, ExternalForcesVector,
+        this->assembleVector(_incrementalLoadVector, tStep, ExternalForceAssembler(),
                              VM_Incremental, EModelDefaultEquationNumbering(), sourceDomain);
 
-        this->assembleVector(_incrementalLoadVectorOfPrescribed, tStep, ExternalForcesVector,
+        this->assembleVector(_incrementalLoadVectorOfPrescribed, tStep, ExternalForceAssembler(),
                              VM_Incremental, EModelDefaultPrescribedEquationNumbering(), sourceDomain);
     } else {
-        this->assembleVector(_incrementalLoadVector, tStep, ExternalForcesVector,
+        this->assembleVector(_incrementalLoadVector, tStep, ExternalForceAssembler(),
                              VM_Total, EModelDefaultEquationNumbering(), sourceDomain);
 
-        this->assembleVector(_incrementalLoadVectorOfPrescribed, tStep, ExternalForcesVector,
+        this->assembleVector(_incrementalLoadVectorOfPrescribed, tStep, ExternalForceAssembler(),
                              VM_Total, EModelDefaultPrescribedEquationNumbering(), sourceDomain);
     }
 

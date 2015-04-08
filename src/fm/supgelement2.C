@@ -190,19 +190,6 @@ SUPGElement2 :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Valu
 }
 
 
-double
-SUPGElement2 :: giveCharacteristicValue(CharType mtrx, TimeStep *tStep)
-{
-    if ( mtrx == CriticalTimeStep ) {
-        return this->computeCriticalTimeStep(tStep);
-    } else {
-        OOFEM_ERROR("Unknown Type of characteristic mtrx.");
-    }
-
-    return 0.0;
-}
-
-
 int
 SUPGElement2 :: checkConsistency()
 //

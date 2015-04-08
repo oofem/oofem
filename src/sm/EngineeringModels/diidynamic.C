@@ -313,6 +313,9 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
     }
 
     this->timesMtrx(help, rhs, MassMatrix, domain, tStep);
+    //this->assembleVector(help, tStep, MatrixProductAssembler(MassMatrix(), rhs), VM_Total, 
+    //                    EModelDefaultEquationNumbering(), this->giveDomain(1));
+
     help.zero();
 
     if ( delta != 0 ) {
@@ -323,6 +326,9 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
                                   + a6 * previousIncrementOfDisplacement.at(i) );
         }
         this->timesMtrx(help, rhs2, TangentStiffnessMatrix, domain, tStep);
+        //this->assembleVector(help, tStep, MatrixProductAssembler(TangentAssembler(), rhs2), VM_Total, 
+        //                    EModelDefaultEquationNumbering(), this->giveDomain(1));
+
         help.zero();
         for ( int i = 1; i <= neq; i++ ) {
             rhs.at(i) += rhs2.at(i);
@@ -467,7 +473,7 @@ DIIDynamic :: assembleLoadVector(FloatArray &_loadVector, Domain *domain, ValueM
     _loadVector.resize( this->giveNumberOfDomainEquations( domain->giveNumber(), EModelDefaultEquationNumbering() ) );
     _loadVector.zero();
 
-    this->assembleVector(_loadVector, tStep, ExternalForcesVector, mode,
+    this->assembleVector(_loadVector, tStep, ExternalForceAssembler(), mode,
                          EModelDefaultEquationNumbering(), domain);
     this->updateSharedDofManagers(_loadVector, EModelDefaultEquationNumbering(), LoadExchangeTag);
 }

@@ -41,6 +41,7 @@
 #include "transportelement.h"
 #include "classfactory.h"
 #include "mathfem.h"
+#include "assemblercallback.h"
 #include "unknownnumberingscheme.h"
 
 namespace oofem {
@@ -184,13 +185,11 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
         rhs.resize(neq);
         rhs.zero();
         //edge or surface load on element
-        this->assembleVectorFromElements( rhs, & TauStep, ElementBCTransportVector, VM_Total,
-                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //add internal source vector on elements
-        this->assembleVectorFromElements( rhs, & TauStep, ElementInternalSourceVector, VM_Total,
+        this->assembleVectorFromElements( rhs, & TauStep, TransportExternalForceAssembler(), VM_Total,
                                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //add nodal load
-        this->assembleVectorFromDofManagers( rhs, & TauStep, ExternalForcesVector, VM_Total,
+        this->assembleVectorFromDofManagers( rhs, & TauStep, ExternalForceAssembler(), VM_Total,
                                             EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
         // subtract the rhs part depending on previous solution

@@ -271,7 +271,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
     //
     loadVector.resize( this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ) );
     loadVector.zero();
-    this->assembleVector(loadVector, tStep, ExternalForcesVector,
+    this->assembleVector(loadVector, tStep, ExternalForceAssembler(),
                          VM_Total, EModelDefaultEquationNumbering(), domain);
     this->updateSharedDofManagers(loadVector, EModelDefaultEquationNumbering(), LoadExchangeTag);
 

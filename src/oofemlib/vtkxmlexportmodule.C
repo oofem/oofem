@@ -1546,8 +1546,8 @@ VTKXMLExportModule :: exportExternalForces(VTKPiece &vtkPiece, IntArray &mapG2L,
     int neq = emodel->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
     int npeq = emodel->giveNumberOfDomainEquations( 1, EModelDefaultPrescribedEquationNumbering() );
     FloatArray extForces(neq), extForcesP(npeq);
-    emodel->assembleVector(extForces, tStep, ExternalForcesVector, VM_Total, EModelDefaultEquationNumbering(), d);
-    emodel->assembleVector(extForcesP, tStep, ExternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), d);
+    emodel->assembleVector(extForces, tStep, ExternalForceAssembler(), VM_Total, EModelDefaultEquationNumbering(), d);
+    emodel->assembleVector(extForcesP, tStep, ExternalForceAssembler(), VM_Total, EModelDefaultPrescribedEquationNumbering(), d);
 
     vtkPiece.setNumberOfLoadsToExport(externalForcesToExport.giveSize(), mapL2G.giveSize());
     for ( int i = 1; i <= externalForcesToExport.giveSize(); i++ ) {

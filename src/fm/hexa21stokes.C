@@ -47,6 +47,7 @@
 #include "fei3dhexalin.h"
 #include "fei3dhexatriquad.h"
 #include "fluidcrosssection.h"
+#include "assemblercallback.h"
 #include "classfactory.h"
 
 namespace oofem {

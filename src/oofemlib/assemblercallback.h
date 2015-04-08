@@ -66,6 +66,7 @@ public:
     virtual void vectorFromBoundaryLoad(FloatArray &vec, Element &element, BoundaryLoad *load, int boundary, TimeStep *tStep, ValueModeType mode) const;
     virtual void vectorFromEdgeLoad(FloatArray &vec, Element &element, BoundaryLoad *load, int edge, TimeStep *tStep, ValueModeType mode) const;
     virtual void vectorFromNodeLoad(FloatArray &vec, DofManager &dman, NodalLoad *load, TimeStep *tStep, ValueModeType mode) const;
+    virtual void assembleFromActiveBC(FloatArray &answer, ActiveBoundaryCondition &bc, TimeStep* tStep, ValueModeType mode, const UnknownNumberingScheme &s, FloatArray *eNorms) const;
 
     /// Default implementation takes all the DOF IDs
     virtual void locationFromElement(IntArray &loc, Element &element, const UnknownNumberingScheme &s, IntArray *dofIds = nullptr) const;
@@ -91,20 +92,6 @@ public:
 };
 
 
-class OldVectorAssembler : public VectorAssembler
-{
-private:
-    CharType type;
-
-public:
-    OldVectorAssembler(CharType t);
-    virtual void vectorFromElement(FloatArray& vec, Element& element, TimeStep* tStep, ValueModeType mode) const;
-    virtual void vectorFromLoad(FloatArray& vec, Element& element, BodyLoad* load, TimeStep* tStep, ValueModeType mode) const;
-    virtual void vectorFromBoundaryLoad(FloatArray& vec, Element& element, BoundaryLoad* load, int boundary, TimeStep* tStep, ValueModeType mode) const;
-    virtual void vectorFromEdgeLoad(FloatArray& vec, Element& element, BoundaryLoad* load, int edge, TimeStep* tStep, ValueModeType mode) const;
-    virtual void vectorFromNodeLoad(FloatArray& vec, DofManager& dman, NodalLoad* load, TimeStep* tStep, ValueModeType mode) const;
-};
-
 /**
  * Implementation for assembling internal forces vectors in standard monolithic, nonlinear FE-problems
  * @author Mikael Öhman
@@ -116,6 +103,7 @@ public:
     virtual void vectorFromLoad(FloatArray &vec, Element &element, BodyLoad *load, TimeStep *tStep, ValueModeType mode) const;
     virtual void vectorFromBoundaryLoad(FloatArray &vec, Element &element, BoundaryLoad *load, int boundary, TimeStep *tStep, ValueModeType mode) const;
     virtual void vectorFromEdgeLoad(FloatArray &vec, Element &element, BoundaryLoad *load, int edge, TimeStep *tStep, ValueModeType mode) const;
+    virtual void assembleFromActiveBC(FloatArray &answer, ActiveBoundaryCondition &bc, TimeStep* tStep, ValueModeType mode, const UnknownNumberingScheme &s, FloatArray *eNorms) const;
 };
 
 /**
@@ -125,11 +113,34 @@ public:
 class ExternalForceAssembler : public VectorAssembler
 {
 public:
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const; ///@todo Temporary: Remove when switch to sets is complete
     virtual void vectorFromLoad(FloatArray &vec, Element &element, BodyLoad *load, TimeStep *tStep, ValueModeType mode) const;
     virtual void vectorFromBoundaryLoad(FloatArray &vec, Element &element, BoundaryLoad *load, int boundary, TimeStep *tStep, ValueModeType mode) const;
     virtual void vectorFromEdgeLoad(FloatArray &vec, Element &element, BoundaryLoad *load, int edge, TimeStep *tStep, ValueModeType mode) const;
     virtual void vectorFromNodeLoad(FloatArray &vec, DofManager &dman, NodalLoad *load, TimeStep *tStep, ValueModeType mode) const;
+    virtual void assembleFromActiveBC(FloatArray &answer, ActiveBoundaryCondition &bc, TimeStep* tStep, ValueModeType mode, const UnknownNumberingScheme &s, FloatArray *eNorms) const;
 };
+
+/**
+ * Implementation for assembling lumped mass matrix (diagonal components) in vector form.
+ * @author Mikael Öhman
+ */
+class LumpedMassVectorAssembler : public VectorAssembler
+{
+public:
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+};
+
+/**
+ * Implementation for assembling the intertia forces vector (i.e. C * dT/dt or M * a)
+ * @author Mikael Öhman
+ */
+class InertiaForceAssembler : public VectorAssembler
+{
+public:
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+};
+
 
 /**
  * Implementation for assembling forces computed by multiplication with a matrix.
@@ -163,7 +174,7 @@ protected:
     MatResponseMode rmode;
     
 public:
-    TangentAssembler(MatResponseMode m): MatrixAssembler(), rmode(m) {}
+    TangentAssembler(MatResponseMode m = TangentStiffness): MatrixAssembler(), rmode(m) {}
 
     virtual void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const;
     virtual void matrixFromLoad(FloatMatrix &mat, Element &element, BodyLoad *load, TimeStep *tStep) const;

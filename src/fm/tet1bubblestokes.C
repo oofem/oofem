@@ -45,6 +45,7 @@
 #include "fei3dtetlin.h"
 #include "masterdof.h"
 #include "fluidcrosssection.h"
+#include "assemblercallback.h"
 #include "classfactory.h"
 
 namespace oofem {

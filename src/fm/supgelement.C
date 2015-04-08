@@ -329,20 +329,6 @@ SUPGElement :: computeBCLhsPressureTerm_MC(FloatMatrix &answer, TimeStep *tStep)
 }
 
 
-double
-SUPGElement :: giveCharacteristicValue(CharType mtrx, TimeStep *tStep)
-{
-    if ( mtrx == CriticalTimeStep ) {
-        return this->computeCriticalTimeStep(tStep);
-    } else {
-        OOFEM_ERROR("Unknown Type of characteristic mtrx.");
-    }
-
-    return 0.0;
-}
-
-
-
 int
 SUPGElement :: checkConsistency()
 //

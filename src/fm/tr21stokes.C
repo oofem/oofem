@@ -46,6 +46,7 @@
 #include "fei2dtrlin.h"
 #include "fei2dtrquad.h"
 #include "fluidcrosssection.h"
+#include "assemblercallback.h"
 #include "classfactory.h"
 #include "engngm.h"
 

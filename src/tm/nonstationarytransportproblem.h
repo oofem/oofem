@@ -57,6 +57,20 @@
 
 namespace oofem {
 
+
+/**
+ * Callback class for assembling element external forces:
+ * - edge or surface load on elements
+ * - add internal source vector on elements
+ * @author Mikael Öhman
+ */
+class TransportExternalForceAssembler : public VectorAssembler
+{
+public:
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+};
+
+    
 /**
  * Callback class for assembling mid point effective tangents
  * @author Mikael Öhman

@@ -69,6 +69,20 @@ class SparseMtrx;
 class SparseNonLinearSystemNM;
 
 /**
+ * Callback class for assembling SUPG internal forces
+ * @author Mikael Öhman
+ */
+class SUPGInternalForceAssembler : public VectorAssembler
+{
+protected:
+    double lscale, dscale, uscale;
+
+public:
+    SUPGInternalForceAssembler(double l, double d, double u);
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+};
+
+/**
  * Callback class for assembling SUPG tangent matrices
  * @author Mikael Öhman
  */
@@ -147,7 +161,6 @@ public:
     virtual double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
     virtual void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d);
     virtual double giveReynoldsNumber();
-    virtual void giveElementCharacteristicVector(FloatArray &answer, int num, CharType type, ValueModeType mode, TimeStep *tStep, Domain *domain);
 
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);

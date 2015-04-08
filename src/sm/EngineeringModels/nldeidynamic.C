@@ -496,7 +496,7 @@ NlDEIDynamic :: computeLoadVector(FloatArray &answer, ValueModeType mode, TimeSt
     //
     // Assemble the nodal part of load vector.
     //
-    this->assembleVector( answer, tStep, ExternalForcesVector, mode,
+    this->assembleVector( answer, tStep, ExternalForceAssembler(), mode,
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //

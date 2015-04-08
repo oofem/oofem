@@ -226,7 +226,7 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
 
     // Build initial/external load
     externalForces.zero();
-    this->assembleVector( externalForces, tStep, ExternalForcesVector, VM_Total,
+    this->assembleVector( externalForces, tStep, ExternalForceAssembler(), VM_Total,
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
     this->updateSharedDofManagers(externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
 
@@ -280,7 +280,7 @@ void StaticStructural :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
         this->field->applyBoundaryCondition(tStep);///@todo Temporary hack to override the incorrect vavues that is set by "update" above. Remove this when that is fixed.
 
         this->internalForces.zero();
-        this->assembleVector(this->internalForces, tStep, InternalForcesVector, VM_Total,
+        this->assembleVector(this->internalForces, tStep, InternalForceAssembler(), VM_Total,
                              EModelDefaultEquationNumbering(), d, & this->eNorm);
         this->updateSharedDofManagers(this->internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
 

@@ -137,7 +137,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     // Build initial/external load (LoadVector)
     externalForces.resize(neq);
     externalForces.zero();
-    this->assembleVector( externalForces, tStep, ExternalForcesVector, VM_Total,
+    this->assembleVector( externalForces, tStep, ExternalForceAssembler(), VM_Total,
                          EModelDefaultEquationNumbering(), d );
     this->updateSharedDofManagers(externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
 
@@ -187,7 +187,7 @@ void StokesFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
 
     if ( cmpn == InternalRhs ) {
         this->internalForces.zero();
-        this->assembleVector(this->internalForces, tStep, InternalForcesVector, VM_Total,
+        this->assembleVector(this->internalForces, tStep, InternalForceAssembler(), VM_Total,
                              EModelDefaultEquationNumbering(), d, & this->eNorm);
         this->updateSharedDofManagers(this->internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
         return;

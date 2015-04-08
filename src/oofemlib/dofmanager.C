@@ -93,26 +93,6 @@ void DofManager :: setLoadArray(IntArray &la)
 }
 
 
-void DofManager :: computeLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
-// Computes the vector of the nodal loads of the receiver.
-{
-    answer.clear();
-
-    if ( this->giveLoadArray()->isEmpty() ) {
-        return;
-    } else {
-        FloatArray contribution;
-        int nLoads = loadArray.giveSize();     // the node may be subjected
-        for ( int i = 1; i <= nLoads; i++ ) {   // to more than one load
-            int n = loadArray.at(i);
-            Load *loadN = domain->giveLoad(n);
-            computeLoadVector(contribution, loadN, ExternalForcesVector, tStep, mode);
-            answer.add(contribution);
-        }
-    }
-}
-
-
 void DofManager :: computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeStep *tStep, ValueModeType mode)
 {
     if ( load->giveBCGeoType() != NodalLoadBGT ) {

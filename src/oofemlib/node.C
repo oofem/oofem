@@ -811,6 +811,13 @@ Node :: drawYourself(oofegGraphicContext &gc, TimeStep *tStep)
             FloatArray load;
             FloatMatrix t;
             IntArray dofIDArry(0);
+            
+            load.clear();
+            for ( int iload : *node->giveLoadArray() ) {   // to more than one load
+                Load *loadN = domain->giveLoad(iload);
+                self->computeLoadVector(load, loadN, ExternalForcesVector, tStep, VM_Total);
+                charVec.add(load);
+            }
             computeLoadVectorAt(load, tStep, VM_Total);
             if ( computeL2GTransformation(t, dofIDArry) ) {
                 load.rotatedWith(t, 'n');

@@ -201,12 +201,12 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
     // Assembling the element part of load vector
     internalLoadVector.resize(neq);
     internalLoadVector.zero();
-    this->assembleVector( internalLoadVector, tStep, InternalForcesVector,
+    this->assembleVector( internalLoadVector, tStep, InternalForceAssembler(),
                          VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     loadVector.resize(neq);
     loadVector.zero();
-    this->assembleVector( loadVector, tStep, ExternalForcesVector,
+    this->assembleVector( loadVector, tStep, ExternalForceAssembler(),
                          VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     loadVector.subtract(internalLoadVector);

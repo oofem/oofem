@@ -240,10 +240,10 @@ void MixedGradientPressureDirichlet :: computeFields(FloatArray &sigmaDev, doubl
     // sigma = residual (since we use the slave dofs) = f_ext - f_int
     sigmaDev.resize(npeq);
     sigmaDev.zero();
-    emodel->assembleVector(sigmaDev, tStep, InternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
+    emodel->assembleVector(sigmaDev, tStep, InternalForceAssembler(), VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
     tmp.resize(npeq);
     tmp.zero();
-    emodel->assembleVector(tmp, tStep, ExternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
+    emodel->assembleVector(tmp, tStep, ExternalForceAssembler(), VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
     sigmaDev.subtract(tmp);
     // Divide by the RVE-volume
     sigmaDev.times( 1.0 / this->domainSize() );

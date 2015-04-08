@@ -107,7 +107,7 @@ DynamicRelaxationSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
     // Compute the mass "matrix" (lumped, only storing the diagonal)
     M.resize(neq);
     M.zero();
-    engngModel->assembleVector(M, tStep, LumpedMassMatrix, VM_Total, EModelDefaultEquationNumbering(), domain);
+    engngModel->assembleVector(M, tStep, LumpedMassVectorAssembler(), VM_Total, EModelDefaultEquationNumbering(), domain);
 
     double Le = -1.0;
     for ( auto &elem : domain->giveElements() ) {

@@ -42,6 +42,13 @@
 namespace oofem {
 class StructuralElement;
 
+/// Assembles the internal forces, without updating the strain.
+///@todo The need for this is just due to some other design choices. 
+class LastEquilibratedInternalForceAssembler : public InternalForceAssembler
+{
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+};
+
 /**
  * Callback class for assembling initial stress matrices
  * @author Mikael Öhman
