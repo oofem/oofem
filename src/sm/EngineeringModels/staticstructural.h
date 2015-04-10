@@ -44,6 +44,8 @@
 #define _IFT_StaticStructural_Name "staticstructural"
 #define _IFT_StaticStructural_deltat "deltat"
 #define _IFT_StaticStructural_solvertype "solvertype"
+#define _IFT_StaticStructural_linearguess "linearguess"
+
 namespace oofem {
 class SparseMtrx;
 
@@ -68,6 +70,7 @@ protected:
     
     double deltaT;
     
+    bool linearguess;
 public:
     StaticStructural(int i, EngngModel * _master = NULL);
     virtual ~StaticStructural();

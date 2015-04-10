@@ -116,6 +116,9 @@ StaticStructural :: initializeFrom(InputRecord *ir)
 
     this->solverType = 0; // Default NR
     IR_GIVE_OPTIONAL_FIELD(ir, solverType, _IFT_StaticStructural_solvertype);
+
+    this->linearguess = false;
+    IR_GIVE_OPTIONAL_FIELD(ir, linearguess, _IFT_StaticStructural_linearguess);
     
     
 #ifdef __PARALLEL_MODE
@@ -197,19 +200,21 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
     // Fetch vector to fill in from primary field.
     this->solution = field->giveSolutionVector(tStep);
 
-
     if(!tStep->isTheFirstStep()) {
         // Old solution as starting guess
         FloatArray *oldSol = field->giveSolutionVector(tStep->givePreviousStep());
         *solution = *oldSol;
+    } else {
+        FloatArray *nullSolution = field->giveSolutionVector(tStep->givePreviousStep());
+        nullSolution->resize(neq);
+        nullSolution->zero();
     }
 
-    if(solution->giveSize() != neq) {
+    if(this->solution->giveSize() != neq) {
         printf("Resizing.\n");
         this->solution->resize(neq);
         this->solution->zero();
     }
-
 
     // Create "stiffness matrix"
     if ( !this->stiffnessMatrix ) {
@@ -224,6 +229,23 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
 
     FloatArray incrementOfSolution(neq);
 
+    if (linearguess) {
+        // Make initial guess (elastic)
+#ifdef VERBOSE
+        OOFEM_LOG_RELEVANT("Computing initial guess\n");
+#endif
+        FloatArray extrapolatedForces;
+        this->assembleExtrapolatedForces( extrapolatedForces, tStep, TangentStiffnessMatrix, this->giveDomain(di) );
+        extrapolatedForces.negated();
+
+        this->updateComponent( tStep, NonLinearLhs, this->giveDomain(di) );
+        SparseLinearSystemNM *linSolver = nMethod->giveLinearSolver();
+        OOFEM_LOG_RELEVANT("solving for increment\n");
+        linSolver->solve(stiffnessMatrix, & extrapolatedForces, & incrementOfSolution);
+        OOFEM_LOG_RELEVANT("initial guess found\n");
+        //solution->zero();
+        this->solution->add(incrementOfSolution);
+    }
 
     // Build initial/external load
     FloatArray externalForces(neq);
