@@ -148,7 +148,6 @@ int main(int argc, char *argv[])
     myInput->setField(1, _IFT_GeneralBoundaryCondition_timeFunct);
     myInput->setField(FloatArray{0.0, 10.0, 0.0}, _IFT_Load_components);
     myInput->setField(3, _IFT_BoundaryLoad_loadtype);
-    myInput->setField(3, _IFT_BoundaryLoad_ndofs);
     myData.insertInputRecord(DataReader::IR_bcRec, myInput);
 
     myInput = new DynamicInputRecord(_IFT_NodalLoad_Name, 4);
