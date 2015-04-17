@@ -177,7 +177,7 @@ set (sm_material
     Materials/rcsd.C 
     Materials/rcsde.C 
     Materials/rcsdnl.C
-    Materials/RheoChainMaterials/mooneyrivlin.C # TODO This isn't a rheochain material at al
+    Materials/mooneyrivlin.C
     Materials/m4.C
     Materials/microplane_m1.C
     Materials/druckerPragerPlasticitySM.C

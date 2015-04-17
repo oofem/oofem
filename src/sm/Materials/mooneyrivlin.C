@@ -125,7 +125,7 @@ MooneyRivlinMaterial :: giveFirstPKStressVector_PlaneStrain(FloatArray &answer, 
 
     FloatMatrix P;
     //first part of stress tensor : C1 * \frac{\partial \bar{I}_1}{\partial F_ij}
-    P.add( 2 * C1 */ pow(J, 2 / 3.), F );
+    P.add( 2 * C1 / pow(J, 2 / 3.), F );
     P.add(-2. / 3. * C1 * barI1, invFt);
     // second part of stress tensor : C2 * \frac{\partial \bar{I}_2}{\partial F_ij}
     P.add( 2. * C2 * barI1 / pow(J, 2. / 3.), F );
