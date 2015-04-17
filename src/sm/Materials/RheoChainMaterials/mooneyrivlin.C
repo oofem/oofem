@@ -44,20 +44,20 @@ MooneyRivlinMaterial :: MooneyRivlinMaterial(int n, Domain *d) : StructuralMater
 { }
 
 
-
-
 void
 MooneyRivlinMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &vF, TimeStep *tStep)
 // returns 9 components of the first piola kirchhoff stress corresponding to the given deformation gradinet
 
 {
     double J, I1, I2, barI1, barI2;
-    FloatMatrix F, C, Cpow2, invFt, FC;
+    FloatMatrix F, C, Cpow2, invFt, FC, invF;
 
-    MooneyRivlinMaterialStatus *status = static_cast< MooneyRivlinMaterialStatus * >( this->giveStatus(gp) );
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
     //store deformation gradient into matrix
     F.beMatrixForm(vF);
+    invF.beInverseOf(F);
+    invFt.beTranspositionOf(invF);
     // compute jacobian
     J = F.giveDeterminant();
     // compute right Cauchy-Green tensor
@@ -73,28 +73,17 @@ MooneyRivlinMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussPoin
     barI2 = I2 * pow(J, -4. / 3.);
 
 
-    FloatMatrix P, junk;
+    FloatMatrix P;
     //first part of stress tensor : C1 * \frac{\partial \bar{I}_1}{\partial F_ij}
-    P = F;
-    P.times( 2 / pow(J, 2 / 3.) );
-    junk = invFt;
-    junk.times(-2. / 3. * barI1);
-    P.add(junk);
-    P.times(C1);
+    P.add(2 * C1 / pow(J, 2 / 3.), F);
+    P.add(-2. / 3. * C1 * barI1, invFt);
     // second part of stress tensor : C2 * \frac{\partial \bar{I}_2}{\partial F_ij}
-    junk = F;
-    junk.times( 2. * C2 * barI1 / pow(J, 2. / 3.) );
-    P.add(junk);
-    junk = invFt;
-    junk.times(-4. / 3. * C2 * barI2);
-    P.add(junk);
-    junk = FC;
-    junk.times( 2. / pow(J, 4. / 3.) );
-    P.add(junk);
+    P.add( 2. * C2 * barI1 / pow(J, 2. / 3.), F );
+    P.add(-4. / 3. * C2 * barI2, invFt);
+    P.add(-2. * C2 / pow(J, 4. / 3.), FC );
     // third part of stress tensor : K * \frac{\partial ln J }{F_ij}
-    junk = invFt;
-    junk.times(K);
-    P.add(junk);
+    P.add(K, invFt);
+
     answer.beVectorForm(P);
 
     // update gp
@@ -107,11 +96,11 @@ MooneyRivlinMaterial :: giveFirstPKStressVector_PlaneStrain(FloatArray &answer, 
 // returns 4 components of the First PK Stress corresponding to the given deformation gradient
 
 {
-    double J, lnJ, I1, I2, barI1, barI2;
+    double J, I1, I2, barI1, barI2;
     FloatArray vF, vP;
     FloatMatrix F, C, CC, invFt, FC, invF;
 
-    MooneyRivlinMaterialStatus *status = static_cast< MooneyRivlinMaterialStatus * >( this->giveStatus(gp) );
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
     vF = {
         reducedvF.at(1), reducedvF.at(2), reducedvF.at(3), 0, 0, reducedvF.at(4), 0, 0, reducedvF.at(5)
     };
@@ -121,7 +110,6 @@ MooneyRivlinMaterial :: giveFirstPKStressVector_PlaneStrain(FloatArray &answer, 
     invFt.beTranspositionOf(invF);
     // compute jacobian and its log
     J = F.giveDeterminant();
-    lnJ = log(J);
     // compute right Cauchy-Green tensor
     C.beTProductOf(F, F);
     // compute C*C
@@ -135,31 +123,20 @@ MooneyRivlinMaterial :: giveFirstPKStressVector_PlaneStrain(FloatArray &answer, 
     barI2 = I2 * pow(J, -4. / 3.);
 
 
-    FloatMatrix P, junk;
+    FloatMatrix P;
     //first part of stress tensor : C1 * \frac{\partial \bar{I}_1}{\partial F_ij}
-    P = F;
-    P.times( 2 / pow(J, 2 / 3.) );
-    junk = invFt;
-    junk.times(-2. / 3. * barI1);
-    P.add(junk);
-    P.times(C1);
+    P.add( 2 * C1 */ pow(J, 2 / 3.), F );
+    P.add(-2. / 3. * C1 * barI1, invFt);
     // second part of stress tensor : C2 * \frac{\partial \bar{I}_2}{\partial F_ij}
-    junk = F;
-    junk.times( 2. * C2 * barI1 / pow(J, 2. / 3.) );
-    P.add(junk);
-    junk = invFt;
-    junk.times(-4. / 3. * C2 * barI2);
-    P.add(junk);
-    junk = FC;
-    junk.times( -2. * C2 / pow(J, 4. / 3.) );
-    P.add(junk);
+    P.add( 2. * C2 * barI1 / pow(J, 2. / 3.), F );
+    P.add(-4. / 3. * C2 * barI2, invFt);
+    P.add(-2. * C2 / pow(J, 4. / 3.), FC);
     // third part of stress tensor : K * \frac{\partial ln J }{F_ij}
-    junk = invFt;
-    junk.times(K * lnJ);
-    P.add(junk);
+    P.add(K, invFt);
     vP.beVectorForm(P);
     StructuralMaterial :: giveReducedVectorForm(answer, vP, _PlaneStrain);
     answer.beVectorForm(P);
+
     // update gp
     status->letTempFVectorBe(reducedvF);
     status->letTempPVectorBe(answer);
@@ -172,7 +149,7 @@ MooneyRivlinMaterial :: give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer,
                                                            GaussPoint *gp, TimeStep *tStep)
 // returns the 9x9 tangent stiffness matrix - dP/dF
 {
-    MooneyRivlinMaterialStatus *status = static_cast< MooneyRivlinMaterialStatus * >( this->giveStatus(gp) );
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
     double I1, I2, J, lnJ;
     FloatMatrix C, CC, invF, FC, B;
@@ -550,7 +527,7 @@ MooneyRivlinMaterial :: givePlaneStrainStiffMtrx_dPdF(FloatMatrix &answer,
                                                       MatResponseMode mode,
                                                       GaussPoint *gp, TimeStep *tStep)
 {
-    MooneyRivlinMaterialStatus *status = static_cast< MooneyRivlinMaterialStatus * >( this->giveStatus(gp) );
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
     double I1, I2, J, lnJ;
     FloatMatrix C, CC, invF, FC, B;
@@ -679,10 +656,7 @@ MooneyRivlinMaterial :: givePlaneStrainStiffMtrx_dPdF(FloatMatrix &answer,
 MaterialStatus *
 MooneyRivlinMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    StructuralMaterialStatus *status;
-
-    status = new StructuralMaterialStatus(1, this->giveDomain(), gp);
-    return status;
+    return new StructuralMaterialStatus(1, this->giveDomain(), gp);
 }
 
 
@@ -695,8 +669,6 @@ MooneyRivlinMaterial :: initializeFrom(InputRecord *ir)
     result = StructuralMaterial :: initializeFrom(ir);
     if ( result != IRRT_OK ) return result;
 
-    // Read material properties here
-
     IR_GIVE_FIELD(ir, K, _IFT_MooneyRivlinMaterial_k);
     IR_GIVE_FIELD(ir, C1, _IFT_MooneyRivlinMaterial_c1);
     IR_GIVE_FIELD(ir, C2, _IFT_MooneyRivlinMaterial_c2);
@@ -704,39 +676,4 @@ MooneyRivlinMaterial :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-
-MooneyRivlinMaterialStatus :: MooneyRivlinMaterialStatus(int n, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g)
-{
-    // init state variables
-}
-
-
-MooneyRivlinMaterialStatus :: ~MooneyRivlinMaterialStatus()
-{ }
-
-
-void
-MooneyRivlinMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
-{
-    // print state to output stream
-
-    StructuralMaterialStatus :: printOutputAt(file, tStep);
-    fprintf(file, "status { ");
-    fprintf(file, "}\n");
-}
-
-// initialize temporary state variables according to equilibrated state vars
-void
-MooneyRivlinMaterialStatus :: initTempStatus()
-{
-    StructuralMaterialStatus :: initTempStatus();
-}
-
-
-// Called when equilibrium reached, set equilibrated vars according to temporary (working) ones.
-void
-MooneyRivlinMaterialStatus :: updateYourself(TimeStep *tStep)
-{
-    StructuralMaterialStatus :: updateYourself(tStep);
-}
 } // end namespace oofem
