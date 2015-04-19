@@ -159,7 +159,6 @@ int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
 
 
 
-
     for ( auto &val : columns ) {
         this->nz_ += val.size();
     }
@@ -198,21 +197,19 @@ void SymCompCol :: times(const FloatArray &x, FloatArray &answer) const
     int M = dim_ [ 0 ];
     int N = dim_ [ 1 ];
 
-    //      Check for compatible dimensions:
+#if DEBUG
     if ( x.giveSize() != N ) {
         OOFEM_ERROR("incompatible dimensions");
     }
+#endif
 
     answer.resize(M);
     answer.zero();
 
-    int j, t;
-    double rhs, sum;
-
-    for ( j = 0; j < N; j++ ) {
-        rhs = x(j);
-        sum = 0.0;
-        for ( t = colptr_(j) + 1; t < colptr_(j + 1); t++ ) {
+    for ( int j = 0; j < N; j++ ) {
+        double rhs = x(j);
+        double sum = 0.0;
+        for ( int t = colptr_(j) + 1; t < colptr_(j + 1); t++ ) {
             answer( rowind_(t) ) += val_(t) * rhs; // column loop
             sum += val_(t) * x( rowind_(t) ); // row loop
         }
@@ -224,9 +221,7 @@ void SymCompCol :: times(const FloatArray &x, FloatArray &answer) const
 
 void SymCompCol :: times(double x)
 {
-    for ( int t = 0; t < nz_; t++ ) {
-        val_(t) *= x;
-    }
+    val_.times(x);
 
     // increment version
     this->version++;
@@ -236,31 +231,36 @@ void SymCompCol :: times(double x)
 
 int SymCompCol :: assemble(const IntArray &loc, const FloatMatrix &mat)
 {
-    int i, j, ii, jj, dim;
-    //   RowColumn* rowColumnJJ ; // 13 November 1996 - not needed anymore
+    int dim = mat.giveNumberOfRows();
 
 #  ifdef DEBUG
-    dim = mat.giveNumberOfRows();
     if ( dim != loc.giveSize() ) {
         OOFEM_ERROR("dimension of 'k' and 'loc' mismatch");
     }
-
-    //this -> checkSizeTowards(loc) ;
 #  endif
 
-    // added to make it work for nonlocal model !!!!!!!!!!!!!!!!!!!!!!!!!!
-    // checkSizeTowards(loc) ;
-
-
-    dim = mat.giveNumberOfRows();
-
-    for ( j = 1; j <= dim; j++ ) {
-        jj = loc.at(j);
+    for ( int j = 0; j < dim; j++ ) {
+        int jj = loc[j];
         if ( jj ) {
-            for ( i = 1; i <= dim; i++ ) {
-                ii = loc.at(i);
-                if ( ii && ( ii >= jj ) ) { // assemble only lower triangular part
-                    this->at(ii, jj) += mat.at(i, j);
+            int cstart = colptr_[jj - 1];
+            int t = cstart;
+            int last_ii = this->nRows + 1; // Ensures that t is set correctly the first time.
+            for ( int i = 0; i < dim; i++ ) {
+                int ii = loc[i];
+                if ( ii >= jj ) { // assemble only lower triangular part
+                    // Some heuristics that speed up most cases ( benifits are large for incremental sub-blocks, e.g. locs = [123, 124, 125, 245, 246, 247] ):
+                    if ( ii < last_ii )
+                        t = cstart;
+                    else if ( ii > last_ii )
+                        t++;
+                    for ( ; rowind_[t] < ii - 1; t++ ) {
+#  ifdef DEBUG
+                        if ( t >= colptr_[jj] )
+                            OOFEM_ERROR("Couldn't find row %d in the sparse structure", ii);
+#  endif
+                    }
+                    val_[t] += mat(i, j);
+                    last_ii = ii;
                 }
             }
         }
@@ -274,19 +274,33 @@ int SymCompCol :: assemble(const IntArray &loc, const FloatMatrix &mat)
 
 int SymCompCol :: assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat)
 {
-    int i, j, ii, jj, dim1, dim2;
-
-    // this->checkSizeTowards(rloc, cloc);
+    int dim1, dim2;
 
     dim1 = mat.giveNumberOfRows();
     dim2 = mat.giveNumberOfColumns();
-    for ( i = 1; i <= dim1; i++ ) {
-        ii = rloc.at(i);
-        if ( ii ) {
-            for ( j = 1; j <= dim2; j++ ) {
-                jj = cloc.at(j);
-                if ( jj && ( ii >= jj ) ) {
-                    this->at(ii, jj) += mat.at(i, j);
+
+    for ( int j = 0; j < dim2; j++ ) {
+        int jj = cloc[j];
+        if ( jj ) {
+            int cstart = colptr_[jj - 1];
+            int t = cstart;
+            int last_ii = this->nRows + 1; // Ensures that t is set correctly the first time.
+            for ( int i = 0; i < dim1; i++ ) {
+                int ii = rloc[i];
+                if ( ii >= jj ) { // assemble only lower triangular part
+                    // Some heuristics that speed up most cases ( benifits are large for incremental sub-blocks, e.g. locs = [123, 124, 125, 245, 246, 247] ):
+                    if ( ii < last_ii )
+                        t = cstart;
+                    else if ( ii > last_ii )
+                        t++;
+                    for ( ; rowind_[t] < ii - 1; t++ ) {
+#  ifdef DEBUG
+                        if ( t >= colptr_[jj] )
+                            OOFEM_ERROR("Couldn't find row %d in the sparse structure", ii);
+#  endif
+                    }
+                    val_[t] += mat(i, j);
+                    last_ii = ii;
                 }
             }
         }
@@ -300,9 +314,7 @@ int SymCompCol :: assemble(const IntArray &rloc, const IntArray &cloc, const Flo
 
 void SymCompCol :: zero()
 {
-    for ( int t = 0; t < nz_; t++ ) {
-        val_(t) = 0.0;
-    }
+    val_.zero();
 
     // increment version
     this->version++;
