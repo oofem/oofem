@@ -117,8 +117,12 @@ ZZNodalRecoveryModel :: recoverValues(Set elementSet, InternalStateType type, Ti
 
 
         // ask element contributions
+        if (!interface->ZZNodalRecoveryMI_computeNValProduct(nsig, type, tStep)) {
+          // skip element contribution if value type recognized by element
+          continue;
+        }
         interface->ZZNodalRecoveryMI_computeNNMatrix(nn, type);
-        interface->ZZNodalRecoveryMI_computeNValProduct(nsig, type, tStep);
+
         // assemble contributions
         elemNodes = element->giveNumberOfDofManagers();
 
@@ -199,7 +203,7 @@ ZZNodalRecoveryModel :: recoverValues(Set elementSet, InternalStateType type, Ti
 }
 
 
-void
+bool
 ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNValProduct(FloatMatrix &answer, InternalStateType type,
                                                                       TimeStep *tStep)
 {  // evaluates N^T sigma over element volume
@@ -208,13 +212,15 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNValProduct(FloatMatri
     FloatArray stressVector, n;
     FEInterpolation *interpol = element->giveInterpolation();
     IntegrationRule *iRule = element->giveDefaultIntegrationRulePtr();
+    bool success = true;
 
     answer.clear();
     for ( GaussPoint *gp: *iRule ) {
         double dV = element->computeVolumeAround(gp);
         //this-> computeStressVector(stressVector, gp, tStep);
         if ( !element->giveIPValue(stressVector, gp, type, tStep) ) {
-            continue;
+          success = false;
+          continue;
         }
 
         interpol->evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(element) );
@@ -223,6 +229,7 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNValProduct(FloatMatri
         //  help.beTProductOf(n,stressVector);
         //  answer.add(help.times(dV));
     }
+    return success;
 }
 
 void
