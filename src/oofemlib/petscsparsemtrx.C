@@ -36,6 +36,7 @@
 #include "engngm.h"
 #include "activebc.h"
 #include "element.h"
+#include "dofmanager.h"
 #include "sparsemtrxtype.h"
 #include "classfactory.h"
 
@@ -591,10 +592,10 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, const Unkn
                 nnz += row_upper.giveSize();
             }
 
-            int ret = strcmp(type, MATSEQAIJ);
-            if ( ret != 0 ) {
+            if ( strcmp(type, MATSEQAIJ) != 0 ) {
                 // Compute optimal block size (test various sizes and compute the "wasted" zeros).
-                for ( int bsize = 3; bsize > 1; --bsize ) {
+                int maxblock = domain->giveNumberOfDofManagers() > 0 ? domain->giveDofManager(1)->giveNumberOfDofs() : 0;
+                for ( int bsize = maxblock; bsize > 1; --bsize ) {
                     int nblocks = ceil(rows_upper.size() / (double)bsize);
                     blocks.clear();
                     blocks.resize(nblocks);
