@@ -144,7 +144,7 @@ StokesFlowVelocityHomogenization :: integrateNMatrix(FloatMatrix &N, Element &el
 
         ///@todo Ask the element for the N-matrix instead
         elem.giveInterpolation()->evalN( n, lcoords, FEIElementGeometryWrapper(&elem) );
-        double detJ = elem.giveInterpolation()->giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(&elem) );
+        double detJ = fabs( elem.giveInterpolation()->giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(&elem) ) );
         n2.add(gp->giveWeight() * detJ, n);
     }
 
