@@ -45,6 +45,7 @@
 #define _IFT_AbaqusUserMaterial_Name "abaqususermaterial"
 #define _IFT_AbaqusUserMaterial_numState "numstate"
 #define _IFT_AbaqusUserMaterial_properties "properties"
+#define _IFT_AbaqusUserMaterial_initialStress "initialstress"
 #define _IFT_AbaqusUserMaterial_userMaterial "umat"
 #define _IFT_AbaqusUserMaterial_name "name"
 #define _IFT_AbaqusUserMaterial_numericalTangent "numericaltangent"
@@ -98,7 +99,8 @@ private:
     int numState;
     /// Material properties.
     FloatArray properties;
-
+    /// Initial stress.
+    FloatArray initialStress;
     /**
      * Flag to determine how the stress and Jacobian are interpreted.
      * 0 implies that the P and dPdF are returned from the umat routine.
@@ -196,6 +198,10 @@ public:
         tempTangent = std :: move(t);
         hasTangentFlag = true;
     }
+
+ 
+
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     virtual const char *giveClassName() const { return "AbaqusUserMaterialStatus"; }
 };
