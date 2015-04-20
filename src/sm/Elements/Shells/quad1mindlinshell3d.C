@@ -233,6 +233,108 @@ Quad1MindlinShell3D :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int
         answer(3 + 4, 2 + 0 + i * 5) = dns(i, 1);// gamma_yz = -fi_x+dw/dy
         answer(3 + 4, 2 + 1 + i * 5) = -ns(i);
     }
+
+
+#if 0
+    // Experimental MITC4 support.
+    double x1, x2, x3, x4;
+    double y1, y2, y3, y4;
+    double Ax, Bx, Cx, Ay, By, Cy;
+
+    x1 = lnodes[0][0];
+    x2 = lnodes[1][0];
+    x3 = lnodes[2][0];
+    x4 = lnodes[3][0];
+
+    y1 = lnodes[0][1];
+    y2 = lnodes[1][1];
+    y3 = lnodes[2][1];
+    y4 = lnodes[3][1];
+
+    Ax = x1 - x2 - x3 + x4;
+    Bx = x1 - x2 + x3 - x4;
+    Cx = x1 + x2 - x3 - x4;
+
+    Ay = y1 - y2 - y3 + y4;
+    By = y1 - y2 + y3 - y4;
+    Cy = y1 + y2 - y3 - y4;
+
+    rz = sqrt( sqr(Cx + r*Bx) + sqr(Cy + r*By)) / ( 16 * detJ );
+    sz = sqrt( sqr(Ax + s*Bx) + sqr(Ay + s*By)) / ( 16 * detJ );
+
+    // TODO: Missing alpha and beta.
+    FloatMatrix jac;
+    this->interp.giveJacobianMatrixAt(jac, localCoords, FEIVertexListGeometryWrapper(lnodes) );
+    // TODO: Not sure if this is the jacobian matrix. I'm just guessing the components here! MOST LIKELY WRONG!
+    s_b = jac(0,0); //sin(beta);
+    s_a = jac(0,1); //sin(alpha);
+    c_b = jac(1,0); //cos(beta);
+    c_a = jac(1,1); //cos(alpha);
+
+    // gamma_xz = "fi_y+dw/dx" in standard formulation
+    answer(6, 2 +  0) = rz * s_b * ( (1+s)) - sz * s_a ( (1+r));
+    answer(6, 2 +  1) = rz * s_b * (-(1+s)) - sz * s_a ( (1-r));
+    answer(6, 2 +  2) = rz * s_b * (-(1-s)) - sz * s_a (-(1-r));
+    answer(6, 2 +  3) = rz * s_b * ( (1-s)) - sz * s_a (-(1+r));
+    answer(6, 2 +  4) = rz * s_b * (y2-y1) * 0.5 * (1+s) - sz * s_a * (y4-y1) * 0.5 * (1+r); // tx1
+    answer(6, 2 +  5) = rz * s_b * (x1-x2) * 0.5 * (1+s) - sz * s_a * (x1-x4) * 0.5 * (1+r); // ty1
+
+    answer(6, 2 +  6) = rz * s_b * (y2-y1) * 0.5 * (1+s) - sz * s_a * (y3-x2) * 0.5 * (1+r); // tx2
+    answer(6, 2 +  7) = rz * s_b * (x1-x2) * 0.5 * (1+s) - sz * s_a * (x2-x3) * 0.5 * (1+r); // ty2
+
+    answer(6, 2 +  8) = rz * s_b * (y3-y4) * 0.5 * (1-s) - sz * s_a * (y3-y2) * 0.5 * (1-r); // tx3
+    answer(6, 2 +  9) = rz * s_b * (x4-x3) * 0.5 * (1-s) - sz * s_a * (x2-x3) * 0.5 * (1-r); // ty3
+
+    answer(6, 2 + 10) = rz * s_b * (y3-y4) * 0.5 * (1-s) - sz * s_a * (y4-y1) * 0.5 * (1-r); // tx4
+    answer(6, 2 + 11) = rz * s_b * (x4-x3) * 0.5 * (1-s) - sz * s_a * (x1-x4) * 0.5 * (1-r); // ty4
+
+    // gamma_yz = -fi_x+dw/dy
+    answer(7, 2 +  0) = - rz * c_b * ( (1+s)) + sz * c_a ( (1+r));
+    answer(7, 2 +  1) = - rz * c_b * (-(1+s)) + sz * c_a ( (1-r));
+    answer(7, 2 +  2) = - rz * c_b * (-(1-s)) + sz * c_a (-(1-r));
+    answer(7, 2 +  3) = - rz * c_b * ( (1-s)) + sz * c_a (-(1+r));
+    answer(7, 2 +  4) = - rz * c_b * (y2-y1) * 0.5 * (1+s) + sz * c_a * (y4-y1) * 0.5 * (1+r); // tx1
+    answer(7, 2 +  5) = - rz * c_b * (x1-x2) * 0.5 * (1+s) + sz * c_a * (x1-x4) * 0.5 * (1+r); // ty1
+
+    answer(7, 2 +  6) = - rz * c_b * (y2-y1) * 0.5 * (1+s) + sz * c_a * (y3-x2) * 0.5 * (1+r); // tx2
+    answer(7, 2 +  7) = - rz * c_b * (x1-x2) * 0.5 * (1+s) + sz * c_a * (x2-x3) * 0.5 * (1+r); // ty2
+
+    answer(7, 2 +  8) = - rz * c_b * (y3-y4) * 0.5 * (1-s) + sz * c_a * (y3-y2) * 0.5 * (1-r); // tx3
+    answer(7, 2 +  9) = - rz * c_b * (x4-x3) * 0.5 * (1-s) + sz * c_a * (x2-x3) * 0.5 * (1-r); // ty3
+
+    answer(7, 2 + 10) = - rz * c_b * (y3-y4) * 0.5 * (1-s) + sz * c_a * (y4-y1) * 0.5 * (1-r); // tx4
+    answer(7, 2 + 11) = - rz * c_b * (x4-x3) * 0.5 * (1-s) + sz * c_a * (x1-x4) * 0.5 * (1-r); // ty4
+
+#elif 0
+    FloatArray ns_A, ns_B, ns_C, ns_D;
+    FloatMatrix dns_A, dns_B, dns_C, dns_D;
+
+    this->interp.evaldNdx( dns_B, {-1., 0.}, FEIVertexListGeometryWrapper(lnodes) );
+    this->interp.evaldNdx( dns_D, { 1., 0.}, FEIVertexListGeometryWrapper(lnodes) );
+    this->interp.evaldNdx( dns_C, { 0.,-1.}, FEIVertexListGeometryWrapper(lnodes) );
+    this->interp.evaldNdx( dns_A, { 0., 1.}, FEIVertexListGeometryWrapper(lnodes) );
+
+
+    this->interp.evalN( ns_B, {-1., 0.},  FEIVoidCellGeometry() );
+    this->interp.evalN( ns_D, { 1., 0.},  FEIVoidCellGeometry() );
+    this->interp.evalN( ns_C, { 0.,-1.},  FEIVoidCellGeometry() );
+    this->interp.evalN( ns_A, { 0., 1.},  FEIVoidCellGeometry() );
+
+    double r1 = localCoords[0];
+    double r2 = localCoords[1];
+
+    // Note: This is just 5 dofs (sixth column is all zero, torsional stiffness handled separately.)
+    for ( int i = 0; i < 4; ++i ) {
+        // gamma_xz = fi_y+dw/dx
+        answer(3 + 3, 2 + 0 + i * 5) = 0.5 * ( (1 - r1) * dns_B(i, 0) + (1 + r1) * dns_D(i, 0) );
+        answer(3 + 3, 2 + 2 + i * 5) = 0.5 * ( (1 - r1) * ns_B(i)     + (1 + r1) * ns_D(i) );
+
+        // gamma_yz = -fi_x+dw/dy
+        answer(3 + 4, 2 + 0 + i * 5) = 0.5 * ( (1 - r2) * dns_A(i, 1) + (1 + r2) * dns_C(i, 1) );
+        answer(3 + 4, 2 + 1 + i * 5) = 0.5 * (-(1 - r2) * ns_A(i)     - (1 + r2) * ns_C(i) );
+
+    }
+#endif
 }
 
 
