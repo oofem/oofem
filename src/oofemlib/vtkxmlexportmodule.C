@@ -1655,33 +1655,33 @@ VTKXMLExportModule :: exportCellVars(VTKPiece &vtkPiece, int numCells, TimeStep 
 void
 VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, InternalStateType type, TimeStep *tStep)
 {
-    FloatMatrix rotMat(3, 3);
+    FloatMatrix rotMat;
     int col = 0;
-    FloatArray valueArray, temp;
+    FloatArray temp;
 
     InternalStateValueType valType = giveInternalStateValueType(type);
     int ncomponents = giveInternalStateTypeSize(valType);
 
-    valueArray.resize(ncomponents);
+    answer.resize(ncomponents);
 
     switch ( type ) {
         // Special scalars
     case IST_MaterialNumber:
         // commented by bp: do what user wants
         //OOFEM_WARNING1("Material numbers are deprecated, outputing cross section number instead...");
-        valueArray.at(1) = ( double ) el->giveMaterial()->giveNumber();
+        answer.at(1) = ( double ) el->giveMaterial()->giveNumber();
         break;
     case IST_CrossSectionNumber:
-        valueArray.at(1) = ( double ) el->giveCrossSection()->giveNumber();
+        answer.at(1) = ( double ) el->giveCrossSection()->giveNumber();
         break;
     case IST_ElementNumber:
-        valueArray.at(1) = ( double ) el->giveNumber();
+        answer.at(1) = ( double ) el->giveNumber();
         break;
     case IST_Pressure: ///@todo This case seems redundant, remove? /JB, /// Why this special treatment for pressure? / Mikael
         if ( el->giveNumberOfInternalDofManagers() == 1 ) {
             //IntArray pmask(1); pmask.at(1) = P_f;
             //el->giveInternalDofManager(1)->giveUnknownVector (answer, pmask, VM_Total, tStep);
-            //valueArray.at(1) = answer.at(1);
+            //answer.at(1) = answer.at(1);
         }
 
         break;
@@ -1704,10 +1704,11 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
         }
 
         if ( !el->giveLocalCoordinateSystem(rotMat) ) {
-            rotMat.zero(); ///@todo shouldn't it be an identity matrix? /JB
+            rotMat.resize(3,3);
+            rotMat.beUnitMatrix();
         }
 
-        valueArray.beColumnOf(rotMat, col);
+        answer.beColumnOf(rotMat, col);
         break;
 
         // Export cell data as average from ip's as default
@@ -1715,29 +1716,26 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
 
         // compute cell average from ip values
         IntegrationRule * iRule = el->giveDefaultIntegrationRulePtr();
-        computeIPAverage(temp, iRule, el, type, tStep); // if element has more than one iRule?? /JB
+        computeIPAverage(answer, iRule, el, type, tStep); // if element has more than one iRule?? /JB
 
         // Reshape the Voigt vectors to include all components (duplicated if necessary, VTK insists on 9 components for tensors.)
 #if 1
-        // Is this part necessary now when giveIPValue returns full form? Only need to symmetrize in case of 6 components /JB
-        if ( ncomponents == 9 && temp.giveSize() != 9 ) { // If it has 9 components, then it is assumed to be proper already.
-            this->makeFullTensorForm(valueArray, temp);
-        } else if ( valType == ISVT_VECTOR && temp.giveSize() < 3 ) {
-            valueArray = {temp.giveSize() > 1 ? temp.at(1) : 0.0,
-                          temp.giveSize() > 2 ? temp.at(2) : 0.0,
-                          0.0};
+        /// @todo Is this part necessary now when giveIPValue returns full form? Only need to symmetrize in case of 6 components /JB
+        /// @todo Some material models aren't exporting values correctly (yet) / Mikael
+        if ( ncomponents == 9 && answer.giveSize() != 9 ) { // If it has 9 components, then it is assumed to be proper already.
+            FloatArray temp = answer;
+            this->makeFullTensorForm(answer, temp);
+        } else if ( valType == ISVT_VECTOR && answer.giveSize() < 3 ) {
+            answer = {answer.giveSize() > 1 ? answer.at(1) : 0.0,
+                      answer.giveSize() > 2 ? answer.at(2) : 0.0,
+                      0.0};
         } else if ( ncomponents != temp.giveSize() ) { // Trying to gracefully handle bad cases, just output zeros.
-            valueArray.resize(9);
-            valueArray.zero();
-        } else {
-            valueArray = temp;
+            answer.resize(9);
+            answer.zero();
         }
 
 #endif
     }
-
-
-    answer = valueArray;
 }
 
 
