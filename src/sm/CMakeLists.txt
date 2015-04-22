@@ -108,6 +108,7 @@ set (sm_crosssection
     CrossSections/fiberedcs.C
     CrossSections/structuralinterfacecrosssection.C
     CrossSections/variablecrosssection.C
+    CrossSections/warpingcrosssection.C
     )
 
 set (sm_emodel

@@ -299,7 +299,7 @@ protected:
     //  Exports cell variables (typically internal variables).
     //
 
-    void exportCellVars(VTKPiece &piece, int numCells, int region, TimeStep *tStep);
+    void exportCellVars(VTKPiece &piece, int numCells, TimeStep *tStep);
 
     //
     //  Exports a single cell variable (typically an internal variable).
@@ -321,8 +321,7 @@ protected:
      * The i-th value contains the corresponding global node number.
      */
     int initRegionNodeNumbering(IntArray &mapG2L, IntArray &mapL2G,
-                                int &regionDofMans, 
-                                int &totalcells,
+                                int &regionDofMans, int &totalcells,
                                 Domain *domain, TimeStep *tStep, int reg);
     /// Returns number of regions (aka regionSets)
     int giveNumberOfRegions();

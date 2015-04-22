@@ -32,20 +32,26 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/EngineeringModels/freewarping.h"
-#include "../sm/Elements/structuralelement.h"
-#include "../sm/Elements/structuralelementevaluator.h"
+#include "freewarping.h"
+#include "crosssection.h"
+#include "Elements/trwarp.h"
 #include "nummet.h"
 #include "timestep.h"
 #include "element.h"
 #include "sparsemtrx.h"
 #include "verbose.h"
+#include "Elements/structuralelement.h"
+#include "Elements/structuralelementevaluator.h"
 #include "classfactory.h"
 #include "datastream.h"
 #include "contextioerr.h"
 #include "classfactory.h"
 
+//#define THROW_CIOERR(e) throw ContextIOERR(e, __FILE__, __LINE__); // km???
+
 #ifdef __PARALLEL_MODE
+ #include "fetisolver.h"
+ #include "sparsemtrx.h"
  #include "problemcomm.h"
  #include "communicator.h"
 #endif
@@ -62,13 +68,24 @@ FreeWarping :: FreeWarping(int i, EngngModel *_master) : StructuralEngngModel(i,
     nMethod = NULL;
     initFlag = 1;
     solverType = ST_Direct;
+
+#ifdef __PARALLEL_MODE
+    commMode = ProblemCommMode__NODE_CUT;
+    nonlocalExt = 0;
+    communicator = nonlocCommunicator = NULL;
+    commBuff = NULL;
+#endif
 }
 
 
 FreeWarping :: ~FreeWarping()
 {
-    delete stiffnessMatrix;
-    delete nMethod;
+    if ( stiffnessMatrix ) {
+        delete stiffnessMatrix;
+    }
+    if ( nMethod ) {
+        delete nMethod;
+    }
 }
 
 
@@ -107,17 +124,92 @@ FreeWarping :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
     sparseMtrxType = ( SparseMtrxType ) val;
 
+
+
+
 #ifdef __PARALLEL_MODE
     if ( isParallel() ) {
         commBuff = new CommunicatorBuff( this->giveNumberOfProcesses() );
-        communicator = new NodeCommunicator(this, commBuff, this->giveRank(),
-                                            this->giveNumberOfProcesses());
+        communicator = new ProblemCommunicator(this, commBuff, this->giveRank(),
+                                               this->giveNumberOfProcesses(),
+                                               this->commMode);
     }
 
 #endif
 
 
     return IRRT_OK;
+}
+
+
+void
+FreeWarping :: computeCenterOfGravity()
+{
+    int noCS = this->giveDomain(1)->giveNumberOfCrossSectionModels(); //number of warping Crosssections
+    CG.resize(noCS, 2);
+    //	cg.resize(2);
+    FloatArray Sx, Sy, moments, domainArea;
+    Sx.resize(noCS);
+    Sy.resize(noCS);
+    domainArea.resize(noCS);
+    moments.resize(2);
+
+    for ( int i = 1; i <= this->giveDomain(1)->giveNumberOfElements(); ++i ) {
+        int j = this->giveDomain(1)->giveElement(i)->giveCrossSection()->giveNumber();
+        Tr_Warp *trwarp = dynamic_cast< Tr_Warp * >( this->giveDomain(1)->giveElement(i) );
+        if ( trwarp ) {
+            trwarp->computeFirstMomentOfArea(moments);
+            Sx.at(j) += moments.at(1);
+            Sy.at(j) += moments.at(2);
+
+            domainArea.at(j) += fabs( this->giveDomain(1)->giveElement(i)->computeArea() );
+        } else                   {
+            OOFEM_ERROR("Error during dynamic_cast");
+        }
+    }
+    for ( int j = 1; j <= noCS; ++j ) {
+        double A = domainArea.at(j);
+        if ( A != 0 ) {
+            CG.at(j, 1) = Sx.at(j) / A;
+            CG.at(j, 2) = Sy.at(j) / A;
+        } else   {
+            OOFEM_ERROR("Zero crosssection area");
+        }
+    }
+    fprintf(outputStream, "\n Center of gravity:");
+    for ( int j = 1; j <= noCS; ++j ) {
+        fprintf( outputStream, "\n  CrossSection %d  x = %f     y = %f", j, CG.at(j, 1), CG.at(j, 2) );
+    }
+}
+
+void
+FreeWarping :: computeResultAtCenterOfGravity(TimeStep *tStep)
+{
+    int noCS = this->giveDomain(1)->giveNumberOfCrossSectionModels(); //number of warping Crosssections
+    SolutionAtCG.resize(noCS);
+    Element *closestElement;
+    FloatArray lcoords,  closest, lcg;
+    SpatialLocalizer *sp = this->giveDomain(1)->giveSpatialLocalizer();
+    sp->init();
+    lcoords.resize(2);
+    closest.resize(2);
+    lcg.resize(2);
+
+    for ( int j = 1; j <= noCS; ++j ) {
+        lcg.at(1) = CG.at(j, 1);
+        lcg.at(2) = CG.at(j, 2);
+        closestElement = sp->giveElementClosestToPoint(lcoords, closest, lcg, 0);
+
+        StructuralElement *sE = dynamic_cast< StructuralElement * >(closestElement);
+        FloatArray u, r, b;
+        FloatMatrix N;
+        sE->computeNmatrixAt(lcoords, N);
+        sE->computeVectorOf(VM_Total, tStep, u);
+        u.resizeWithValues(3);
+        r.beProductOf(N, u);
+
+        SolutionAtCG.at(j) = r.at(1);
+    }
 }
 
 
@@ -178,15 +270,24 @@ TimeStep *FreeWarping :: giveNextStep()
 
 void FreeWarping :: solveYourself()
 {
+    this->computeCenterOfGravity();
+
+#ifdef __PARALLEL_MODE
     if ( this->isParallel() ) {
  #ifdef __VERBOSE_PARALLEL
         // force equation numbering before setting up comm maps
-        int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
+        int neq = this->giveNumberOfDomainEquations(EID_MomentumBalance);
         OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), neq);
  #endif
 
-        this->initializeCommMaps();
+        // set up communication patterns
+        // needed only for correct shared rection computation
+        communicator->setUpCommunicationMaps(this, true);
+        if ( nonlocalExt ) {
+            nonlocCommunicator->setUpCommunicationMaps(this, true);
+        }
     }
+#endif
 
     StructuralEngngModel :: solveYourself();
 }
@@ -216,7 +317,11 @@ void FreeWarping :: solveYourselfAt(TimeStep *tStep)
         stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
 
         this->assemble( stiffnessMatrix, tStep, StiffnessMatrix,
-                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        //
+        // original stiffnes Matrix is singular (no Dirichlet b.c's exist for free warping problem)
+        // thus one diagonal element is made stiffer (for each warping crosssection)
+        this->updateStiffnessMatrix(stiffnessMatrix);
 
         initFlag = 0;
     }
@@ -237,22 +342,24 @@ void FreeWarping :: solveYourselfAt(TimeStep *tStep)
     loadVector.resize( this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ) );
     loadVector.zero();
     this->assembleVector( loadVector, tStep, ExternalForcesVector, VM_Total,
-                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
     // internal forces (from Dirichlet b.c's, or thermal expansion, etc.)
     //
     // no such forces exist for the free warping problem
     /*
-    FloatArray internalForces( this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ) );
-    internalForces.zero();
-    this->assembleVector( internalForces, tStep, InternalForcesVector, VM_Total,
-                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
+     * FloatArray internalForces( this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ) );
+     * internalForces.zero();
+     * this->assembleVector( internalForces, tStep, EID_MomentumBalance, InternalForcesVector, VM_Total,
+     *                   EModelDefaultEquationNumbering(), this->giveDomain(1) );
+     *
+     * loadVector.subtract(internalForces);
+     */
 
-    loadVector.subtract(internalForces);
-    */
-
+#ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(loadVector, EModelDefaultEquationNumbering(), ReactionExchangeTag);
+#endif
 
     //
     // set-up numerical model
@@ -270,93 +377,27 @@ void FreeWarping :: solveYourselfAt(TimeStep *tStep)
         OOFEM_ERROR("No success in solving system.");
     }
 
-    tStep->incrementStateCounter();            // update solution state counter
-}
+    //
+    // update computed "displacementVector" with the respect to the center of gravity
+    //
+    this->computeResultAtCenterOfGravity(tStep);
+    //
+    // results are shifted to be zero at the center of gravity (for each warping crosssection)
+    //
+    this->updateComputedResults(displacementVector, tStep);
 
 
-contextIOResultType FreeWarping :: saveContext(DataStream *stream, ContextMode mode, void *obj)
-//
-// saves state variable - displacement vector
-//
-{
-    contextIOResultType iores;
-    int closeFlag = 0;
-    FILE *file = NULL;
-
-    if ( stream == NULL ) {
-        if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
-                                    this->giveCurrentStep()->giveVersion(), contextMode_write) ) {
-            THROW_CIOERR(CIO_IOERR); // override
-        }
-
-        stream = new FileDataStream(file);
-        closeFlag = 1;
-    }
-
-    if ( ( iores = StructuralEngngModel :: saveContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    if ( ( iores = displacementVector.storeYourself(*stream) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    if ( closeFlag ) {
-        fclose(file);
-        delete stream;
-        stream = NULL;
-    }
-
-    return CIO_OK;
-}
-
-
-contextIOResultType FreeWarping :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
-//
-// restore state variable - displacement vector
-//
-{
-    contextIOResultType iores;
-    int closeFlag = 0;
-    int istep, iversion;
-    FILE *file = NULL;
-
-    this->resolveCorrespondingStepNumber(istep, iversion, obj);
-
-    if ( stream == NULL ) {
-        if ( !this->giveContextFile(& file, istep, iversion, contextMode_read) ) {
-            THROW_CIOERR(CIO_IOERR); // override
-        }
-
-        stream = new FileDataStream(file);
-        closeFlag = 1;
-    }
-
-    if ( ( iores = StructuralEngngModel :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    if ( ( iores = displacementVector.restoreYourself(*stream) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-
-    if ( closeFlag ) {
-        fclose(file);
-        delete stream;
-        stream = NULL;
-    }
-
-    return CIO_OK;
+    // update solution state counter
+    tStep->incrementStateCounter();
 }
 
 
 void
 FreeWarping :: terminate(TimeStep *tStep)
 {
-    StructuralEngngModel :: terminate(tStep);
-    //this->printReactionForces(tStep, 1); // here we should rather compute the torsional stiffness
     fflush( this->giveOutputStream() );
+    this->printReactionForces(tStep, 1); // computed reaction forces have the mening of torsional stiffness
+    StructuralEngngModel :: terminate(tStep);
 }
 
 
@@ -376,15 +417,28 @@ FreeWarping :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 }
 
 
+#ifdef __PARALLEL_MODE
 int
-FreeWarping :: estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType)
+FreeWarping :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType)
 {
-    int count = 0, pcount = 0;
+    int mapSize = commMap.giveSize();
+    int ndofs, count = 0, pcount = 0;
+    IntArray locationArray;
     Domain *domain = this->giveDomain(1);
+    DofManager *dman;
+    Dof *jdof;
 
-    if ( packUnpackType == 0 ) { ///@todo Fix this old ProblemCommMode__NODE_CUT value
-        for ( int map: commMap ) {
-            for ( Dof *jdof: *domain->giveDofManager( map ) ) {
+    if ( packUnpackType == ProblemCommMode__ELEMENT_CUT ) {
+        for ( int i = 1; i <= mapSize; i++ ) {
+            count += domain->giveDofManager( commMap.at(i) )->giveNumberOfDofs();
+        }
+
+        return ( buff.givePackSize(MPI_DOUBLE, 1) * count );
+    } else if ( packUnpackType == ProblemCommMode__NODE_CUT ) {
+        for ( int i = 1; i <= mapSize; i++ ) {
+            ndofs = ( dman = domain->giveDofManager( commMap.at(i) ) )->giveNumberOfDofs();
+            for ( int j = 1; j <= ndofs; j++ ) {
+                jdof = dman->giveDof(j);
                 if ( jdof->isPrimaryDof() && ( jdof->__giveEquationNumber() ) ) {
                     count++;
                 } else {
@@ -397,15 +451,76 @@ FreeWarping :: estimateMaxPackSize(IntArray &commMap, DataStream &buff, int pack
         // only pcount is relevant here, since only prescribed components are exchanged !!!!
         // --------------------------------------------------------------------------------
 
-        return ( buff.givePackSizeOfDouble(1) * pcount );
-    } else if ( packUnpackType == 1 ) {
-        for ( int map: commMap ) {
-            count += domain->giveElement( map )->estimatePackSize(buff);
+        return ( buff.givePackSize(MPI_DOUBLE, 1) * pcount );
+    } else if ( packUnpackType == ProblemCommMode__REMOTE_ELEMENT_MODE ) {
+        for ( int i = 1; i <= mapSize; i++ ) {
+            count += domain->giveElement( commMap.at(i) )->estimatePackSize(buff);
         }
 
         return count;
     }
 
     return 0;
+}
+#endif
+
+
+void
+FreeWarping :: updateStiffnessMatrix(SparseMtrx *answer)
+{
+    // increase diagonal stiffness (coresponding to the 1st node of 1st element ) for each crosssection
+    for ( int j = 1; j <= this->giveDomain(1)->giveNumberOfCrossSectionModels(); j++ ) {
+        for ( int i = 1; i <= this->giveDomain(1)->giveNumberOfElements(); i++ ) {
+            int CSnumber = this->giveDomain(1)->giveElement(i)->giveCrossSection()->giveNumber();
+            if ( CSnumber == j ) {
+                IntArray locationArray;
+                EModelDefaultEquationNumbering s;
+                this->giveDomain(1)->giveElement(i)->giveLocationArray(locationArray, s);
+                if ( locationArray.at(1) != 0 ) {
+                    int cn = locationArray.at(1);
+                    if ( answer->at(cn, cn) != 0 ) {
+                        answer->at(cn, cn) = 2 * answer->at(cn, cn);
+                    } else {
+                        answer->at(cn, cn) = 1000;
+                    }
+                }
+                break;
+            }
+        }
+    }
+}
+
+
+
+
+void
+FreeWarping :: updateComputedResults(FloatArray &answer, TimeStep *tStep)
+{
+    // value of result in the center of gravity is interpolated
+    // and substracted from the original solution vector
+    // (individualy for each crosssection)
+
+
+    // set up vector of crosssections numbers
+    // through all nodes
+    int length = answer.giveSize();
+    IntArray CSindicator(length);
+    EModelDefaultEquationNumbering s;
+    for ( int i = 1; i <= this->giveDomain(1)->giveNumberOfElements(); i++ ) {
+        int CSnumber = this->giveDomain(1)->giveElement(i)->giveCrossSection()->giveNumber();
+        IntArray locationArray;
+        this->giveDomain(1)->giveElement(i)->giveLocationArray(locationArray, s);
+        for ( int j = 1; j <= 3; j++ ) {
+            int locationNumber = locationArray.at(j);
+            if ( locationNumber != 0 ) {
+                CSindicator.at(locationNumber) =  CSnumber;
+            }
+        }
+    }
+
+    // substracr answer for corresponding warping crosssection
+    for ( int i = 1; i <= length; i++ ) {
+        answer.at(i) -= SolutionAtCG.at( CSindicator.at(i) );
+    }
 }
 } // end namespace oofem

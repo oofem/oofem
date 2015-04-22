@@ -32,37 +32,35 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef unknowntype_h
-#define unknowntype_h
-//#include "internalstatetype.h"
-#include "enumitem.h"
+#include "warpingcrosssection.h"
+#include "gausspoint.h"
+//#include "structuralmaterial.h"
+#include "floatarray.h"
+#include "classfactory.h"
+#include "dynamicinputrecord.h"
+//#include "structuralms.h"
+//#include "structuralelement.h"
 
 namespace oofem {
-#define UnknownType_DEF \
-    ENUM_ITEM_WITH_VALUE(DisplacementVector, 1) \
-    ENUM_ITEM_WITH_VALUE(GeneralizedDisplacementVector, 2) \
-    ENUM_ITEM_WITH_VALUE(FluxVector, 3)                    \
-    ENUM_ITEM_WITH_VALUE(VelocityVector, 4)                \
-    ENUM_ITEM_WITH_VALUE(PressureVector, 5)                \
-    ENUM_ITEM_WITH_VALUE(Temperature, 6)                   \
-    ENUM_ITEM_WITH_VALUE(Humidity, 7)                      \
-    ENUM_ITEM_WITH_VALUE(EigenVector, 8)                   \
-    ENUM_ITEM_WITH_VALUE(DirectorField, 15) /* Vector field */ \
-    ENUM_ITEM_WITH_VALUE(DeplanationFunction, 16)
-/**
- * Type representing particular unknown (its physical meaning).
- */
-enum UnknownType {
-    UnknownType_DEF
-};
-
-#undef ENUM_ITEM
-#undef ENUM_ITEM_WITH_VALUE
-#undef enumitem_h
+REGISTER_CrossSection(WarpingCrossSection);
 
 
+IRResultType
+WarpingCrossSection :: initializeFrom(InputRecord *ir)
+//
+// instanciates receiver from input record
+//
+{
+    IRResultType result;                // Required by IR_GIVE_FIELD macro
+
+    this->CrossSection :: initializeFrom(ir);
+
+    int value;
+    IR_GIVE_FIELD(ir, value, _IFT_WarpingCrossSection_WarpingNodeNumber);
+    this->WarpingNodeNumber = value;
+    //propertyDictionary->add(CS_Thickness, thick);
 
 
-const char *__UnknownTypeToString(UnknownType _value);
+    return IRRT_OK;
+}
 } // end namespace oofem
-#endif // unknowntype_h

@@ -987,6 +987,24 @@ to selected error estimator. For description, follow to section
 \end{itemize}
 %
 
+\subsection{Free warping analysis}
+\label{FreeWarping}
+\begin{record}
+\recentry{\entKeywordInst{FreeWarping}}{\field{nsteps}{in}}
+\end{record}
+
+Free warping analysis computes the deplanation function of cross section with arbitrary shape. It is done by solving the Laplace's equation with automatically generated boundary conditions corresponding to the free warping problem.
+
+This type of analysis supports only \param{TrWarp} elements and \param{WarpingCS} cross sections. One external node must be defined for each warping cross section. The coordinates of this node can be arbitrary but this node must be defined with parametr  \param{DofIDMask 1 24} and one boundary condition which represents relative twist acting on corresponding warping cross section. No additional loads make sence in free warping analysis.
+
+Parameter \param{nsteps} indicates the number of loading cases.
+Series of loading cases is maintained as sequence of time-steps.
+For each load case an auxiliary time-step is generated with time
+equal to load case number.
+Load vectors for each load case are formed as load vectors at
+this auxiliary time.
+
+
 \subsection{Stationary transport problem}
 \label{StationaryTransport}
 
@@ -2297,6 +2315,14 @@ The model requires to specify a material model corresponding to particular fiber
 %%Represents cross section abstraction for heat transfer problems.
 %%The input parameters are: thick - determined using \param{thick} parameter
 %%and width - determined using \param{width} parameter of cross section.
+
+\item
+Warping cross section \\
+\begin{record}[0.9\textwidth]
+\recentry{\entKeywordInst{WarpingCS}}{\field{WarpingNode}{in}}
+\end{record}
+Represents the cross section for Free warping analysis, see section \ref{FreeWarping}. The \param{WarpingNode} parametr defines the number of external node with prescribed boundary condition which corresponds to the relative twist of warping cross section.
+
 \end{itemize}
 
 \subsection{Material type  records}

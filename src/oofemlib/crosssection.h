@@ -117,7 +117,8 @@ public:
     CrossSection(int n, Domain * d);
     /// Destructor.
     virtual ~CrossSection();
-
+    /// Returns crosssection number   
+    int giveNumber() const { return number; }
     int giveSetNumber() const { return this->setNumber; };
 
     /**

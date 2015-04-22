@@ -81,7 +81,13 @@ void Dof :: printSingleOutputAt(FILE *File, TimeStep *tStep, char ch, ValueModeT
     fprintf(File, "  dof %d   %c % .8e\n", dofID, ch, x);
 }
 
-
+void Dof :: printSingleOutputWithAdditionAt(FILE *File, TimeStep *tStep, char ch, ValueModeType mode, double addend)
+// Prints in the data file the unknown 'u' (for example, the displacement
+// 'd') of the receiver, at tStep.
+{
+    double x = addend + this->giveUnknown(mode, tStep);
+    fprintf(File, "  dof %d   %c % .8e\n", dofID, ch, x);
+}
 
 void Dof :: printMultipleOutputAt(FILE *File, TimeStep *tStep, char *ch,
                                   ValueModeType *mode, int nite)

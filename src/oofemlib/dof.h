@@ -326,7 +326,7 @@ public:
      * Called from corresponding e-model.
      */
     virtual void printMultipleOutputAt(FILE *File, TimeStep *tStep, char *ch, ValueModeType *mode, int nite);
-
+    void printSingleOutputWithAdditionAt(FILE *File, TimeStep *tStep, char ch, ValueModeType mode, double addend);
     /// Prints the receiver state on stdout.
     virtual void printYourself();
     /**

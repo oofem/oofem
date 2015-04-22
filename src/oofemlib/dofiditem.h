@@ -66,6 +66,8 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(D_u_edge_lin, 20) /* Linear part of boundary u-displacement used by Trefftz element*/ \
     ENUM_ITEM_WITH_VALUE(D_v_edge_const, 21) /* Constant part of boundary v-displacement used by Trefftz element*/ \
     ENUM_ITEM_WITH_VALUE(D_v_edge_lin, 22) /* Linear part of boundary v-displacement used by Trefftz element*/ \
+    ENUM_ITEM_WITH_VALUE(Warp_PsiTheta, 23) /* Relative twist times deplanation function, used by Trwarp element*/ \
+    ENUM_ITEM_WITH_VALUE(Warp_Theta, 24) /* Relative twist, used by Trwarp element*/ \
 
 /**
  * Type representing particular dof type. Values of this type describe the physical meaning of
@@ -75,7 +77,7 @@ namespace oofem {
  */
 enum DofIDItem {
     DofIDItem_DEF
-    MaxDofID
+    MaxDofID = 500
 };
 
 #undef ENUM_ITEM

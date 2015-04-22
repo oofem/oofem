@@ -214,7 +214,7 @@ InternalStateValueType giveInternalStateValueType(UnknownType type)
 {
     if ( ( type == DisplacementVector ) || ( type == EigenVector ) || ( type == VelocityVector ) || ( type == DirectorField ) ) {
         return ISVT_VECTOR;
-    } else if ( ( type == FluxVector ) || ( type == PressureVector ) || ( type == Temperature ) || (type == Humidity) ) {
+    } else if ( ( type == FluxVector ) || ( type == PressureVector ) || ( type == Temperature ) || (type == Humidity) || (type == DeplanationFunction) ) {
         return ISVT_SCALAR;
     } else {
         OOFEM_ERROR( "unsupported UnknownType %s", __UnknownTypeToString(type) );

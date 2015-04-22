@@ -1300,6 +1300,25 @@ approximation of displacement field. Can be used to glue together two elements w
 \elementDescription{Note}{Element requires material model with \_3dInterface support.}
 \end{elementsummary}
 
+%-----------------------------------------------------------------------------------------------
+\clearpage
+\subsection{Free warping analysis elements}
+\subsubsection{TrWarp}
+Implements 2D linear triangular three-node finite element for \param{FreeWarping} analysis. Each node has 1 degree of freedom.
+The node numbering is anti-clockwise. The element features are summarized in Table~\ref{TrWarpsummary}.
+
+
+\begin{elementsummary}{TrWarp}{2D linear triangular warping element}{-}{TrWarp element summary}{TrWarpsummary}
+\elementDescription{Unknowns}{One dof (the value of deplanation function) is required in each node.}
+\elementDescription{Approximation}{Linear approximation of displacements and geometry.}
+\elementDescription{Integration}{Integration using one point gauss integration formula.}
+\elementDescription{Features}{This type of element is supported in \param{FreeWarping} analysis only.}
+\elementDescription{CS properties}{Only \param{warpingCS} is supported.}
+\elementDescription{Loads}{Edge loads corresponding to free warping problem are generated automatically. Additional edge loads are not supported.}
+\elementDescription{Nlgeo}{0.}
+\elementDescription{Status}{-}
+\elementDescription{Note}{Test case: sm/freewarpingtest2.in}
+\end{elementsummary}
 
 %-----------------------------------------------------------------------------------------------
 \clearpage

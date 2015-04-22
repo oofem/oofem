@@ -32,37 +32,52 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef unknowntype_h
-#define unknowntype_h
-//#include "internalstatetype.h"
-#include "enumitem.h"
+#ifndef warpingcrosssection_h
+#define warpingcrosssection_h
+
+#include "simplecrosssection.h"
+// #include "structuralmaterial.h"
+// #include "floatarray.h"
+//  #include "floatmatrix.h"
+
+///@name Input fields for SimpleCrossSection
+//@{
+#define _IFT_WarpingCrossSection_Name "warpingcs"
+#define _IFT_WarpingCrossSection_WarpingNodeNumber "warpingnode"
+//@}
 
 namespace oofem {
-#define UnknownType_DEF \
-    ENUM_ITEM_WITH_VALUE(DisplacementVector, 1) \
-    ENUM_ITEM_WITH_VALUE(GeneralizedDisplacementVector, 2) \
-    ENUM_ITEM_WITH_VALUE(FluxVector, 3)                    \
-    ENUM_ITEM_WITH_VALUE(VelocityVector, 4)                \
-    ENUM_ITEM_WITH_VALUE(PressureVector, 5)                \
-    ENUM_ITEM_WITH_VALUE(Temperature, 6)                   \
-    ENUM_ITEM_WITH_VALUE(Humidity, 7)                      \
-    ENUM_ITEM_WITH_VALUE(EigenVector, 8)                   \
-    ENUM_ITEM_WITH_VALUE(DirectorField, 15) /* Vector field */ \
-    ENUM_ITEM_WITH_VALUE(DeplanationFunction, 16)
 /**
- * Type representing particular unknown (its physical meaning).
+ * description of warping cross section...
  */
-enum UnknownType {
-    UnknownType_DEF
+//class OOFEM_EXPORT WarpingCrossSection : public StructuralCrossSection {
+class OOFEM_EXPORT WarpingCrossSection : public SimpleCrossSection
+{
+public:
+
+    WarpingCrossSection(int n, Domain *d) : SimpleCrossSection(n, d) {
+        WarpingNodeNumber = 0;
+    }
+
+    virtual IRResultType initializeFrom(InputRecord *ir);
+
+
+    // identification and auxiliary functions
+
+    virtual const char *giveClassName() const {
+        return "WarpingCrossSection";
+    }
+
+    virtual const char *giveInputRecordName() const {
+        return _IFT_WarpingCrossSection_Name;
+    }
+
+    int giveWarpingNodeNumber() const {
+        return this->WarpingNodeNumber;
+    };
+
+protected:
+    int WarpingNodeNumber;     // number of the 4rd node
 };
-
-#undef ENUM_ITEM
-#undef ENUM_ITEM_WITH_VALUE
-#undef enumitem_h
-
-
-
-
-const char *__UnknownTypeToString(UnknownType _value);
 } // end namespace oofem
-#endif // unknowntype_h
+#endif // warpingcrosssection_h

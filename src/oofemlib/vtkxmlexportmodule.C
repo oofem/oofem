@@ -674,7 +674,7 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
         this->exportIntVars(vtkPiece, mapG2L, mapL2G, region, tStep);
         this->exportExternalForces(vtkPiece, mapG2L, mapL2G, region, tStep);
 
-        this->exportCellVars(vtkPiece, numRegionEl, region, tStep);
+        this->exportCellVars(vtkPiece, numRegionEl, tStep);
     } // end of default piece for simple geometry elements
 }
 
@@ -828,7 +828,7 @@ VTKXMLExportModule :: giveDataHeaders(std :: string &pointHeader, std :: string 
         if ( type == DisplacementVector || type == EigenVector || type == VelocityVector || type == DirectorField ) {
             vectors += __UnknownTypeToString(type);
             vectors.append(" ");
-        } else if ( type == FluxVector || type == PressureVector || type == Temperature || type == Humidity) {
+        } else if ( type == FluxVector || type == PressureVector || type == Temperature || type == Humidity || type == DeplanationFunction ) {
             scalars += __UnknownTypeToString(type);
             scalars.append(" ");
         } else {
@@ -1260,8 +1260,7 @@ VTKXMLExportModule :: writeVTKCellData(FloatArray &valueArray)
 int
 VTKXMLExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNumbers,
                                               IntArray &regionL2GNodalNumbers,
-                                              int &regionDofMans, 
-                                              int &regionSingleCells,
+                                              int &regionDofMans, int &regionSingleCells,
                                               Domain *domain, TimeStep *tStep, int reg)
 {
     // regionG2LNodalNumbers is array with mapping from global numbering to local region numbering.
@@ -1419,6 +1418,10 @@ VTKXMLExportModule :: getNodalVariableFromPrimaryField(FloatArray &answer, DofMa
     } else if ( type == FluxVector || type == Humidity) {
         dofIDMask.followedBy(C_1);
         iState = IST_MassConcentration_1;
+        answer.resize(1);
+    } else if (type == DeplanationFunction) {
+        dofIDMask.followedBy(Warp_PsiTheta);
+        iState = IST_Temperature;
         answer.resize(1);
     } else if ( type == Temperature ) {
         dofIDMask.followedBy(T_f);
@@ -1634,23 +1637,23 @@ VTKXMLExportModule :: writeExternalForces(VTKPiece &vtkPiece)
 //----------------------------------------------------
 
 void
-VTKXMLExportModule :: exportCellVars(VTKPiece &vtkPiece, int numCells, int region, TimeStep *tStep)
+VTKXMLExportModule :: exportCellVars(VTKPiece &vtkPiece, int numCells, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
     FloatArray valueArray;
 
     vtkPiece.setNumberOfCellVarsToExport(cellVarsToExport.giveSize(), numCells);
-    const IntArray &elements = this->giveRegionSet(region)->giveElementList();
     for ( int field = 1; field <= cellVarsToExport.giveSize(); field++ ) {
         InternalStateType type = ( InternalStateType ) cellVarsToExport.at(field);
-        for ( int i = 1; i <= elements.giveSize(); i++ ) {
-          Element *el = d->giveElement(elements.at(i));
-          if ( el->giveParallelMode() != Element_local ) {
-            continue;
-          }
 
-          this->getCellVariableFromIS(valueArray, el, type, tStep);
-          vtkPiece.setCellVar(field, i, valueArray);
+        for ( int ielem = 1; ielem <= numCells; ielem++ ) {
+            Element *el = d->giveElement(ielem); ///@todo should be a pointer to an element in the region /JB
+            if ( el->giveParallelMode() != Element_local ) {
+                continue;
+            }
+
+            this->getCellVariableFromIS(valueArray, el, type, tStep);
+            vtkPiece.setCellVar(field, ielem, valueArray);
         }
     }
 }
@@ -1690,13 +1693,6 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
         }
 
         break;
-    case IST_AbaqusStateVector:
-      {
-         // compute cell average from ip values
-        IntegrationRule * iRule = el->giveDefaultIntegrationRulePtr();
-        computeIPAverage(valueArray, iRule, el, type, tStep); // if element has more than one iRule?? /JB
-      }
-      break;
 
         // Special vectors
     case IST_MaterialOrientation_x:
