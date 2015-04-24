@@ -1655,10 +1655,6 @@ VTKXMLExportModule :: exportCellVars(VTKPiece &vtkPiece, int numCells, TimeStep 
 void
 VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, InternalStateType type, TimeStep *tStep)
 {
-    FloatMatrix rotMat;
-    int col = 0;
-    FloatArray temp;
-
     InternalStateValueType valType = giveInternalStateValueType(type);
     int ncomponents = giveInternalStateTypeSize(valType);
 
@@ -1690,26 +1686,25 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
     case IST_MaterialOrientation_x:
     case IST_MaterialOrientation_y:
     case IST_MaterialOrientation_z:
+        {
+            FloatMatrix rotMat;
+            int col = 0;
+            if ( type == IST_MaterialOrientation_x ) {
+                col = 1;
+            } else if ( type == IST_MaterialOrientation_y ) {
+                col = 2;
+            } else if ( type == IST_MaterialOrientation_z ) {
+                col = 3;
+            }
 
-        if ( type == IST_MaterialOrientation_x ) {
-            col = 1;
+            if ( !el->giveLocalCoordinateSystem(rotMat) ) {
+                rotMat.resize(3,3);
+                rotMat.beUnitMatrix();
+            }
+
+            answer.beColumnOf(rotMat, col);
+            break;
         }
-
-        if ( type == IST_MaterialOrientation_y ) {
-            col = 2;
-        }
-
-        if ( type == IST_MaterialOrientation_z ) {
-            col = 3;
-        }
-
-        if ( !el->giveLocalCoordinateSystem(rotMat) ) {
-            rotMat.resize(3,3);
-            rotMat.beUnitMatrix();
-        }
-
-        answer.beColumnOf(rotMat, col);
-        break;
 
         // Export cell data as average from ip's as default
     default:
@@ -1717,7 +1712,6 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
         // compute cell average from ip values
         IntegrationRule * iRule = el->giveDefaultIntegrationRulePtr();
         computeIPAverage(answer, iRule, el, type, tStep); // if element has more than one iRule?? /JB
-
         // Reshape the Voigt vectors to include all components (duplicated if necessary, VTK insists on 9 components for tensors.)
 #if 1
         /// @todo Is this part necessary now when giveIPValue returns full form? Only need to symmetrize in case of 6 components /JB
@@ -1729,8 +1723,8 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
             answer = {answer.giveSize() > 1 ? answer.at(1) : 0.0,
                       answer.giveSize() > 2 ? answer.at(2) : 0.0,
                       0.0};
-        } else if ( ncomponents != temp.giveSize() ) { // Trying to gracefully handle bad cases, just output zeros.
-            answer.resize(9);
+        } else if ( ncomponents != answer.giveSize() ) { // Trying to gracefully handle bad cases, just output zeros.
+            answer.resize(ncomponents);
             answer.zero();
         }
 
