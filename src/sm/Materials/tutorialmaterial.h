@@ -51,7 +51,6 @@ class Domain;
 
 /**
  * This class implements a isotropic plastic linear material (J2 plasticity condition is used).
- * Both kinematic and isotropic hardening is supported.
  * @author Jim Brozoulis
  */
 class TutorialMaterial : public StructuralMaterial
