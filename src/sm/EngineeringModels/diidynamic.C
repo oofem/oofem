@@ -187,7 +187,7 @@ TimeStep *DIIDynamic :: giveNextStep()
         istep     = currentStep->giveNumber() + 1;
         counter   = currentStep->giveSolutionStateCounter() + 1;
         td        = currentStep->giveTimeDiscretization();
-        if ( ( currentStep->giveNumber() == giveNumberOfFirstStep() ) &&
+        if ( currentStep->isTheFirstStep() &&
             ( initialTimeDiscretization == TD_ThreePointBackward ) ) {
             td = TD_ThreePointBackward;
         }
@@ -213,7 +213,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
     Domain *domain = this->giveDomain(1);
     int neq =  this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
 
-    if ( tStep->giveNumber() == giveNumberOfFirstStep() ) {
+    if ( tStep->isTheFirstStep() ) {
         TimeStep *stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0,
                                                  -deltaT, deltaT, 0);
         //
@@ -481,7 +481,7 @@ DIIDynamic :: assembleLoadVector(FloatArray &_loadVector, Domain *domain, ValueM
 void
 DIIDynamic :: determineConstants(TimeStep *tStep)
 {
-    if ( ( currentStep->giveNumber() == giveNumberOfFirstStep() ) &&
+    if ( currentStep->isTheFirstStep() &&
         ( initialTimeDiscretization == TD_ThreePointBackward ) ) {
         currentStep->setTimeDiscretization(TD_TwoPointBackward);
     }

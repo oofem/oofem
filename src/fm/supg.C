@@ -453,7 +453,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     FloatArray externalForces(neq);
     this->internalForces.resize(neq);
 
-    if ( tStep->giveNumber() == giveNumberOfFirstStep() ) {
+    if ( tStep->isTheFirstStep() ) {
         TimeStep *stepWhenIcApply = tStep->givePreviousStep();
         if ( materialInterface ) {
             materialInterface->initialize();

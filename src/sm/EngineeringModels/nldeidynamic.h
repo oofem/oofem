@@ -158,7 +158,6 @@ public:
     virtual fMode giveFormulation() { return TL; }
 
     virtual int giveNumberOfFirstStep() { return 0; }
-    virtual int giveNumberOfTimeStepWhenIcApply() { return 0; }
 
 protected:
     /**

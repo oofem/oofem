@@ -321,7 +321,7 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
     // Time-stepping constants
     this->determineConstants(tStep);
 
-    if ( ( tStep->giveNumber() == giveNumberOfFirstStep() ) && initFlag ) {
+    if ( tStep->isTheFirstStep() && initFlag ) {
         // Initialization
         incrementOfDisplacement.resize(neq);
         incrementOfDisplacement.zero();
@@ -505,7 +505,7 @@ NonLinearDynamic :: determineConstants(TimeStep *tStep)
         OOFEM_LOG_DEBUG("Solving using Backward Euler method\n");
     } else if ( timeDiscretization == TD_ThreePointBackward ) {
         OOFEM_LOG_DEBUG("Solving using Three-point Backward Euler method\n");
-        if ( tStep->giveNumber() == giveNumberOfFirstStep() ) {
+        if ( tStep->isTheFirstStep() ) {
             timeDiscretization = TD_TwoPointBackward;
         }
     } else {

@@ -709,13 +709,7 @@ public:
     /// Returns end of time interest (time corresponding to end of time integration).
     virtual double giveEndOfTimeOfInterest() { return 0.; }
     /// Returns the time step number, when initial conditions should apply.
-    virtual int giveNumberOfTimeStepWhenIcApply() {
-        if ( master ) {
-            return master->giveNumberOfTimeStepWhenIcApply();
-        } else {
-            return 0;
-        }
-    }
+    int giveNumberOfTimeStepWhenIcApply() { return 0; }
     /// Returns reference to receiver's numerical method.
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep) { return NULL; }
     /// Returns receiver's export module manager.

@@ -205,8 +205,8 @@ EngngModel :: Instanciate_init()
 int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const char *dataOutputFileName, const char *desc)
 // simple input - only number of steps variable is read
 {
-    OOFEMTXTDataReader *txtReader = dynamic_cast<OOFEMTXTDataReader*> (dr);
-    if(txtReader != NULL) {
+    OOFEMTXTDataReader *txtReader = dynamic_cast< OOFEMTXTDataReader* > (dr);
+    if ( txtReader != NULL ) {
         referenceFileName = std :: string(txtReader->giveDataSourceName());
     }
 
@@ -387,8 +387,7 @@ EngngModel :: instanciateDefaultMetaStep(InputRecord *ir)
     metaStepList.emplace_back(1, this, numberOfSteps, *ir);
 
     // set meta step bounds
-    int istep = this->giveNumberOfFirstStep() - 1;
-    metaStepList[0].setStepBounds(istep + 1);
+    metaStepList[0].setStepBounds(this->giveNumberOfFirstStep());
 
     OOFEM_LOG_RELEVANT("Total number of solution steps     %d\n",  numberOfSteps);
     return 1;

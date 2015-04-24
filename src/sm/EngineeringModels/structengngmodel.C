@@ -51,7 +51,6 @@ void LastEquilibratedInternalForceAssembler :: vectorFromElement(FloatArray& vec
 {
     //static_cast< StructuralElement & >( element ).giveInternalForcesVector(vec, tStep, 1);
     element.giveCharacteristicVector(vec, LastEquilibratedInternalForcesVector, mode, tStep);
-    vec.printYourself();
 }
 
 void InitialStressMatrixAssembler :: matrixFromElement(FloatMatrix &answer, Element &element, TimeStep *tStep) const

@@ -273,7 +273,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
     }
 
 
-    if ( tStep->giveNumber() == giveNumberOfFirstStep() ) {
+    if ( tStep->isTheFirstStep() ) {
         //
         // Special init step - Compute displacements at tstep 0.
         //

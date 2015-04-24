@@ -351,7 +351,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
 
     //</RESTRICTED_SECTION>
 
-    if ( tStep->giveNumber() == giveNumberOfFirstStep() ) {
+    if ( tStep->isTheFirstStep() ) {
         TimeStep *stepWhenIcApply = tStep->givePreviousStep();
         this->applyIC(stepWhenIcApply);
     }

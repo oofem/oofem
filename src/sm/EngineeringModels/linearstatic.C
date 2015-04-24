@@ -154,16 +154,14 @@ double LinearStatic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep,
 
 TimeStep *LinearStatic :: giveNextStep()
 {
-    int istep = this->giveNumberOfFirstStep();
-    StateCounterType counter = 1;
-
-    if ( currentStep ) {
-        istep = currentStep->giveNumber() + 1;
-        counter = currentStep->giveSolutionStateCounter() + 1;
+    if ( !currentStep ) {
+        // first step -> generate initial step
+        //currentStep.reset( new TimeStep(*giveSolutionStepWhenIcApply()) );
+        currentStep.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 1, 0., 1., 0) );
     }
-
     previousStep = std :: move(currentStep);
-    currentStep.reset( new TimeStep(istep, this, 1, ( double ) istep, 0., counter) );
+    currentStep.reset( new TimeStep(*previousStep, 1.) );
+
     return currentStep.get();
 }
 
