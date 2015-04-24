@@ -384,7 +384,7 @@ Tr_Warp :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &answer, InternalStateTy
     answer.at(4) = 1.0;
 }
 
-void
+bool
 Tr_Warp :: ZZNodalRecoveryMI_computeNValProduct(FloatMatrix &answer, InternalStateType type,
                                                 TimeStep *tStep)
 {  // evaluates N^T sigma over element volume
@@ -414,6 +414,7 @@ Tr_Warp :: ZZNodalRecoveryMI_computeNValProduct(FloatMatrix &answer, InternalSta
     for ( int i = 1; i <= answer.giveNumberOfColumns(); i++ ) {
         answer.at(4, i) = 0.0;
     }
+    return true;
 }
 
 void

@@ -142,7 +142,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
     int nelem = domain->giveNumberOfElements();
     IntArray loc;
     Element *element;
-    DofManager *node;
+    //DofManager *node;
     int neq;
     int i, k, n, j, jj, kk, init = 0;
     double coeff, maxDt, maxOmi, maxOm = 0., maxOmEl, c1, c2, c3;

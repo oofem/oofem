@@ -90,7 +90,7 @@ public:
 
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
     void ZZNodalRecoveryMI_computeNNMatrix(FloatArray &answer, InternalStateType type);
-    void ZZNodalRecoveryMI_computeNValProduct(FloatMatrix &answer, InternalStateType type,
+    bool ZZNodalRecoveryMI_computeNValProduct(FloatMatrix &answer, InternalStateType type,
                                               TimeStep *tStep);
     virtual Element *SpatialLocalizerI_giveElement() { return this; }
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
