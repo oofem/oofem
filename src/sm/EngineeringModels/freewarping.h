@@ -120,7 +120,7 @@ public:
 
 
 #ifdef __PARALLEL_MODE
-    int estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType);
+    int estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType);
 #endif
 };
 } // end namespace oofem

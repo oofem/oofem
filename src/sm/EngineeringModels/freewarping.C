@@ -419,7 +419,7 @@ FreeWarping :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 
 #ifdef __PARALLEL_MODE
 int
-FreeWarping :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType)
+FreeWarping :: estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType)
 {
     int mapSize = commMap.giveSize();
     int ndofs, count = 0, pcount = 0;
