@@ -66,7 +66,7 @@ extern "C" {
 
 namespace oofem {
 
-bool FloatArray ::isFinite() const
+bool FloatArray :: isFinite() const
 {
     for(double val : values) {
         if(!std::isfinite(val)) {

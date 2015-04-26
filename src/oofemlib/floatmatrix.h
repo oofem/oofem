@@ -143,7 +143,7 @@ public:
         return * this;
     }
     /// Destructor.
-    ~FloatMatrix() {};
+    ~FloatMatrix() {}
 
     /**
      * Checks size of receiver towards requested bounds.

@@ -156,12 +156,9 @@ void CompCol :: times(const FloatArray &x, FloatArray &answer) const
     answer.resize(M);
     answer.zero();
 
-    int j, t;
-    double rhs;
-
-    for ( j = 0; j < N; j++ ) {
-        rhs = x(j);
-        for ( t = colptr_(j); t < colptr_(j + 1); t++ ) {
+    for ( int j = 0; j < N; j++ ) {
+        double rhs = x(j);
+        for ( int t = colptr_(j); t < colptr_(j + 1); t++ ) {
             answer( rowind_(t) ) += val_(t) * rhs;
         }
     }
@@ -169,9 +166,7 @@ void CompCol :: times(const FloatArray &x, FloatArray &answer) const
 
 void CompCol :: times(double x)
 {
-    for ( int t = 0; t < nz_; t++ ) {
-        val_(t) *= x;
-    }
+    val_.times(x);
 
     // increment version
     this->version++;
@@ -261,30 +256,36 @@ int CompCol :: buildInternalStructure(EngngModel *eModel, int di, const UnknownN
 
 int CompCol :: assemble(const IntArray &loc, const FloatMatrix &mat)
 {
-    int dim;
+    int dim = mat.giveNumberOfRows();
 
 #  ifdef DEBUG
-    dim = mat.giveNumberOfRows();
     if ( dim != loc.giveSize() ) {
         OOFEM_ERROR("dimension of 'k' and 'loc' mismatch");
     }
-
-    //this -> checkSizeTowards(loc) ;
 #  endif
 
-    // added to make it work for nonlocal model !!!!!!!!!!!!!!!!!!!!!!!!!!
-    // checkSizeTowards(loc) ;
-
-
-    dim = mat.giveNumberOfRows();
-
-    for ( int j = 1; j <= dim; j++ ) {
-        int jj = loc.at(j);
+    for ( int j = 0; j < dim; j++ ) {
+        int jj = loc[j];
         if ( jj ) {
-            for ( int i = 1; i <= dim; i++ ) {
-                int ii = loc.at(i);
+            int cstart = colptr_[jj - 1];
+            int t = cstart;
+            int last_ii = this->nRows + 1; // Ensures that t is set correctly the first time.
+            for ( int i = 0; i < dim; i++ ) {
+                int ii = loc[i];
                 if ( ii ) {
-                    this->at(ii, jj) += mat.at(i, j);
+                    // Some heuristics that speed up most cases ( benifits are large for incremental sub-blocks, e.g. locs = [123, 124, 125, 245, 246, 247] ):
+                    if ( ii < last_ii )
+                        t = cstart;
+                    else if ( ii > last_ii )
+                        t++;
+                    for ( ; rowind_[t] < ii - 1; t++ ) {
+#  ifdef DEBUG
+                        if ( t >= colptr_[jj] )
+                            OOFEM_ERROR("Couldn't find row %d in the sparse structure", ii);
+#  endif
+                    }
+                    val_[t] += mat(i, j);
+                    last_ii = ii;
                 }
             }
         }
@@ -300,17 +301,31 @@ int CompCol :: assemble(const IntArray &rloc, const IntArray &cloc, const FloatM
 {
     int dim1, dim2;
 
-    // this->checkSizeTowards(rloc, cloc);
-
     dim1 = mat.giveNumberOfRows();
     dim2 = mat.giveNumberOfColumns();
-    for ( int i = 1; i <= dim1; i++ ) {
-        int ii = rloc.at(i);
-        if ( ii ) {
-            for ( int j = 1; j <= dim2; j++ ) {
-                int jj = cloc.at(j);
-                if ( jj ) {
-                    this->at(ii, jj) += mat.at(i, j);
+
+    for ( int j = 0; j < dim2; j++ ) {
+        int jj = cloc[j];
+        if ( jj ) {
+            int cstart = colptr_[jj - 1];
+            int t = cstart;
+            int last_ii = this->nRows + 1; // Ensures that t is set correctly the first time.
+            for ( int i = 0; i < dim1; i++ ) {
+                int ii = rloc[i];
+                if ( ii ) {
+                    // Some heuristics that speed up most cases ( benifits are large for incremental sub-blocks, e.g. locs = [123, 124, 125, 245, 246, 247] ):
+                    if ( ii < last_ii )
+                        t = cstart;
+                    else if ( ii > last_ii )
+                        t++;
+                    for ( ; rowind_[t] < ii - 1; t++ ) {
+#  ifdef DEBUG
+                        if ( t >= colptr_[jj] )
+                            OOFEM_ERROR("Couldn't find row %d in the sparse structure", ii);
+#  endif
+                    }
+                    val_[t] += mat(i, j);
+                    last_ii = ii;
                 }
             }
         }
@@ -324,9 +339,7 @@ int CompCol :: assemble(const IntArray &rloc, const IntArray &cloc, const FloatM
 
 void CompCol :: zero()
 {
-    for ( int t = 0; t < nz_; t++ ) {
-        val_(t) = 0.0;
-    }
+    val_.zero();
 
     // increment version
     this->version++;

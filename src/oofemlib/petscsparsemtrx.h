@@ -50,6 +50,7 @@ protected:
     MatType mType;
     int leqs;
     int geqs;
+    int blocksize;
     int di;
     EngngModel *emodel;
 
