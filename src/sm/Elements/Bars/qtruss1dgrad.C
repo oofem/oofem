@@ -34,6 +34,7 @@
 
 #include "../sm/Elements/Bars/qtruss1dgrad.h"
 #include "fei1dlin.h"
+#include "fei1dquad.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
@@ -128,4 +129,17 @@ QTruss1dGrad :: computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
     this->interpolation_lin.evaldNdx( dnx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beTranspositionOf(dnx);
 }
+
+void QTruss1dGrad :: computeUnknownVectorAtLocal(ValueModeType mode, TimeStep* tStep, const FloatArray& lcoords, FloatArray& answer)
+{
+    FloatArray n, unknown;
+    this->interpolation_lin.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
+    this->computeVectorOf({D_u}, mode, tStep, unknown);
+    answer.at(1) = n.dotProduct(unknown);
+
+    this->interpolation.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
+    this->computeVectorOf({G_0}, mode, tStep, unknown);
+    answer.at(2) = n.dotProduct(unknown);
+}
+
 }

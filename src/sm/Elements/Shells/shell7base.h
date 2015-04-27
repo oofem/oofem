@@ -37,7 +37,6 @@
 
 #include "CrossSections/layeredcrosssection.h"
 #include "Elements/nlstructuralelement.h"
-#include "eleminterpmapperinterface.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "vtkxmlexportmodule.h"
 #include "zznodalrecoverymodel.h"

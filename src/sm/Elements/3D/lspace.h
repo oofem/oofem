@@ -41,7 +41,6 @@
 #include "sprnodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "spatiallocalizer.h"
-#include "eleminterpmapperinterface.h"
 
 #define _IFT_LSpace_Name "lspace"
 
@@ -61,7 +60,6 @@ class FEI3dHexaLin;
 class LSpace  : public Structural3DElement, public ZZNodalRecoveryModelInterface,
 public SPRNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface,
 public SpatialLocalizerInterface,
-public EIPrimaryUnknownMapperInterface,
 public HuertaErrorEstimatorInterface
 {
 protected:
@@ -83,10 +81,6 @@ public:
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                             InternalStateType type, TimeStep *tStep);
-
-    virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType u,
-                                                                 TimeStep *tStep, const FloatArray &lcoords,
-                                                                 FloatArray &answer);
 
     virtual void HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refinedElement, int level, int nodeId,
                                                                   IntArray &localNodeIdArray, IntArray &globalNodeIdArray,

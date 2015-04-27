@@ -33,7 +33,6 @@
  */
 
 #include "eleminterpunknownmapper.h"
-#include "eleminterpmapperinterface.h"
 #include "element.h"
 #include "domain.h"
 #include "engngm.h"
@@ -111,7 +110,6 @@ EIPrimaryUnknownMapper :: evaluateAt(FloatArray &answer, IntArray &dofMask, Valu
                                      Domain *oldd, FloatArray &coords, IntArray &regList, TimeStep *tStep)
 {
     Element *oelem;
-    EIPrimaryUnknownMapperInterface *interface;
     SpatialLocalizer *sl = oldd->giveSpatialLocalizer();
 
     FloatArray lcoords, closest;
@@ -140,13 +138,8 @@ EIPrimaryUnknownMapper :: evaluateAt(FloatArray &answer, IntArray &dofMask, Valu
         return false;
     }
 
-    interface = static_cast< EIPrimaryUnknownMapperInterface * >( oelem->giveInterface(EIPrimaryUnknownMapperInterfaceType) );
-    if ( interface ) {
-        oelem->giveElementDofIDMask(dofMask);
-        interface->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(mode, tStep, lcoords, answer);
-    } else {
-        OOFEM_ERROR("Element does not support EIPrimaryUnknownMapperInterface");
-    }
+    oelem->giveElementDofIDMask(dofMask);
+    oelem->computeUnknownVectorAtLocal(mode, tStep, lcoords, answer);
 
     return true;
 }

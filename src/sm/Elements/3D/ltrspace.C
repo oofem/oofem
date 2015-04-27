@@ -61,7 +61,7 @@ FEI3dTetLin LTRSpace :: interpolation;
 LTRSpace :: LTRSpace(int n, Domain *aDomain) :
     Structural3DElement(n, aDomain), ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface(),
     SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(this),
-    EIPrimaryUnknownMapperInterface(), ZZErrorEstimatorInterface(this),
+    ZZErrorEstimatorInterface(this),
     HuertaErrorEstimatorInterface()
 
 {
@@ -81,8 +81,6 @@ LTRSpace :: giveInterface(InterfaceType interface)
         return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
         return static_cast< SpatialLocalizerInterface * >(this);
-    } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
         return static_cast< ZZErrorEstimatorInterface * >(this);
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
@@ -493,19 +491,6 @@ LTRSpace :: drawSpecial(oofegGraphicContext &gc, TimeStep *tStep)
 }
 
 #endif
-
-
-void
-LTRSpace :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-                                                             TimeStep *tStep, const FloatArray &lcoords,
-                                                             FloatArray &answer)
-{
-    FloatArray u;
-    FloatMatrix n;
-    this->computeNmatrixAt(lcoords, n);
-    this->computeVectorOf(mode, tStep, u);
-    answer.beProductOf(n, u);
-}
 
 
 IntegrationRule *

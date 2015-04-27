@@ -42,7 +42,6 @@
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "spatiallocalizer.h"
-#include "eleminterpmapperinterface.h"
 #include "mmashapefunctprojection.h"
 
 #define _IFT_Truss1d_Name "truss1d"
@@ -56,7 +55,6 @@ class FEI1dLin;
  */
 class Truss1d : public StructuralElement,
 public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, public SpatialLocalizerInterface,
-public EIPrimaryUnknownMapperInterface,
 public ZZErrorEstimatorInterface,
 public HuertaErrorEstimatorInterface
 {
@@ -101,11 +99,6 @@ public:
     // NodalAveragingRecoveryMInterface
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                             InternalStateType type, TimeStep *tStep);
-
-    // EIPrimaryUnknownMInterface
-    virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-                                                                       TimeStep *tStep, const FloatArray &lcoords,
-                                                                       FloatArray &answer);
 
     // HuertaErrorEstimatorInterface
     virtual void HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refinedElement, int level, int nodeId,

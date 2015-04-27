@@ -25,7 +25,6 @@
 #include "inputrecord.h"
 #include "engngm.h"
 #include "spatiallocalizer.h"
-#include "eleminterpmapperinterface.h"
 #include "dynamicinputrecord.h"
 #include "bodyload.h"
 #include "boundarycondition.h"
@@ -599,12 +598,10 @@ SolutionbasedShapeFunction :: giveValueAtPoint(FloatArray &answer, const FloatAr
         coords.pY();
     }
 
-    EIPrimaryUnknownMapperInterface *em = dynamic_cast< EIPrimaryUnknownMapperInterface * >( elementAtCoords->giveInterface(EIPrimaryUnknownMapperInterfaceType) );
-
     IntArray eldofids;
 
     elementAtCoords->giveElementDofIDMask(eldofids);
-    em->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(VM_Total, thisTimestep, lcoords, values);
+    elementAtCoords->computeUnknownVectorAtLocal(VM_Total, thisTimestep, lcoords, values);
 
     for ( int i = 1; i <= dofIDs.giveSize(); i++ ) {
         for ( int j = 1; j <= eldofids.giveSize(); j++ ) {

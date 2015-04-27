@@ -101,10 +101,7 @@ public:
     virtual MaterialMode giveMaterialMode();
     virtual void giveInputRecord(DynamicInputRecord &input);
 
-    // For mapping of primary unknowns
-    virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-                                                                       TimeStep *tStep, const FloatArray &lcoords,
-                                                                       FloatArray &answer);
+    virtual void computeUnknownVectorAtLocal(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer);
     virtual void giveElementDofIDMask(IntArray &answer) const;
 
     /// VTK Interface

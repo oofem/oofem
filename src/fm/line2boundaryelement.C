@@ -70,16 +70,12 @@ Interface *Line2BoundaryElement :: giveInterface(InterfaceType it)
     case SpatialLocalizerInterfaceType:
         return static_cast< SpatialLocalizerInterface * >(this);
 
-    case EIPrimaryUnknownMapperInterfaceType:
-        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
-
     default:
         return FMElement :: giveInterface(it);
     }
 }
 
-void Line2BoundaryElement :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-                                                                                   TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
+void Line2BoundaryElement :: computeUnknownVectorAtLocal(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {
     FloatArray n;
     this->fei.evalN( answer, lcoords, FEIElementGeometryWrapper(this) );

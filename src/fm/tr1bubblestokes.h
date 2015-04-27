@@ -38,7 +38,6 @@
 #include "fmelement.h"
 #include "zznodalrecoverymodel.h"
 #include "spatiallocalizer.h"
-#include "eleminterpmapperinterface.h"
 #include "matresponsemode.h"
 
 #define _IFT_Tr1BubbleStokes_Name "tr1bubblestokes"
@@ -57,8 +56,7 @@ class ElementDofManager;
  */
 class Tr1BubbleStokes : public FMElement,
 public ZZNodalRecoveryModelInterface,
-public SpatialLocalizerInterface,
-public EIPrimaryUnknownMapperInterface
+public SpatialLocalizerInterface
 {
 protected:
     /// Interpolation for pressure
@@ -110,9 +108,7 @@ public:
 
     virtual Interface *giveInterface(InterfaceType it);
 
-    // Element interpolation interface:
-    virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType u,
-                                                                       TimeStep *tStep, const FloatArray &coords, FloatArray &answer);
+    virtual void computeUnknownVectorAtLocal(ValueModeType u, TimeStep *tStep, const FloatArray &coords, FloatArray &answer);
 };
 } // end namespace oofem
 #endif // tr1bubblestokes_h

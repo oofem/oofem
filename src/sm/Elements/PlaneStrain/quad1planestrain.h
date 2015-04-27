@@ -41,7 +41,6 @@
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "spatiallocalizer.h"
-#include "eleminterpmapperinterface.h"
 
 #define _IFT_Quad1PlaneStrain_Name "quad1planestrain"
 
@@ -58,7 +57,6 @@ class FEI2dQuadLin;
  */
 class Quad1PlaneStrain : public PlaneStrainElement, public ZZNodalRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
     public SpatialLocalizerInterface,
-    public EIPrimaryUnknownMapperInterface,
     public HuertaErrorEstimatorInterface
 {
 protected:
@@ -75,10 +73,6 @@ public:
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
     virtual int SPRNodalRecoveryMI_giveNumberOfIP();
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
-
-    virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-                                                                       TimeStep *tStep, const FloatArray &lcoords,
-                                                                       FloatArray &answer);
 
     // HuertaErrorEstimatorInterface
     virtual void HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refinedElement, int level, int nodeId,

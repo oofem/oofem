@@ -1017,6 +1017,17 @@ TransportElement :: assembleLocalContribution(FloatArray &answer, FloatArray &sr
     }
 }
 
+
+void
+TransportElement :: computeUnknownVectorAtLocal(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
+{
+    FloatArray u;
+    FloatMatrix n;
+    this->computeNmatrixAt(n, lcoords);
+    this->computeVectorOf(mode, tStep, u);
+    answer.beProductOf(n, u);
+}
+
 void
 TransportElement :: computeFlow(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {

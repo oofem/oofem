@@ -370,16 +370,12 @@ Interface *Tr21Stokes :: giveInterface(InterfaceType it)
     case SpatialLocalizerInterfaceType:
         return static_cast< SpatialLocalizerInterface * >(this);
 
-    case EIPrimaryUnknownMapperInterfaceType:
-        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
-
     default:
         return FMElement :: giveInterface(it);
     }
 }
 
-void Tr21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-                                                                         TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
+void Tr21Stokes :: computeUnknownVectorAtLocal(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {
     FloatArray n, n_lin;
     this->interpolation_quad.evalN( n, lcoords, FEIElementGeometryWrapper(this) );

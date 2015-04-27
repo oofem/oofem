@@ -33,7 +33,6 @@
  */
 
 #include "particletopologydescription.h"
-#include "eleminterpmapperinterface.h"
 #include "timestep.h"
 #include "dofiditem.h"
 #include "spatiallocalizer.h"
@@ -736,21 +735,16 @@ bool ParticleTopologyDescription :: findDisplacement(FloatArray &displacement, i
         return false;
     }
 
-    // Let element evaluate the unknowns
-    EIPrimaryUnknownMapperInterface *em = dynamic_cast< EIPrimaryUnknownMapperInterface * >( e->giveInterface(EIPrimaryUnknownMapperInterfaceType) );
-    if ( !em ) {
-        OOFEM_ERROR("Element missing necessary interface EIPrimaryUnknownMapperInterface");
-    }
 
     if ( this->useDisplacements ) {
-        em->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(VM_Incremental, tStep, lcoords, displacement);    // Displacement
+        e->computeUnknownVectorAtLocal(VM_Incremental, tStep, lcoords, displacement);    // Displacement
     } else {
         FloatArray fields;
         IntArray dofIds;
         displacement.resize( this->d->giveNumberOfSpatialDimensions() );
         displacement.zero();
         double dt = tStep->giveTimeIncrement();
-        em->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(VM_Total, tStep, lcoords, fields);    // Velocities + pressures most likely.
+        e->computeUnknownVectorAtLocal(VM_Total, tStep, lcoords, fields);    // Velocities + pressures most likely.
         e->giveElementDofIDMask(dofIds);
         for ( int i = 0; i < dofIds.giveSize(); i++ ) {
             if ( dofIds(i) == V_u ) {

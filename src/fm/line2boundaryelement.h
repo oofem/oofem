@@ -37,7 +37,7 @@
 
 #include "fmelement.h"
 #include "spatiallocalizer.h"
-#include "eleminterpmapperinterface.h"
+#include "floatarray.h"
 
 #define _IFT_Line2BoundaryElement_Name "line2boundary"
 
@@ -51,8 +51,7 @@ class FEI2dLineQuad;
  */
 class Line2BoundaryElement :
 public FMElement,
-public SpatialLocalizerInterface,
-public EIPrimaryUnknownMapperInterface
+public SpatialLocalizerInterface
 {
 protected:
     static FEI2dLineQuad fei;
@@ -81,8 +80,7 @@ public:
     // Interfaces
     virtual Interface *giveInterface(InterfaceType it);
 
-    virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-                                                                       TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer);
+    virtual void computeUnknownVectorAtLocal(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer);
 };
 }
 

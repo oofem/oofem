@@ -58,7 +58,7 @@ FEI2dTrLin TrPlaneStress2d :: interp(1, 2);
 TrPlaneStress2d :: TrPlaneStress2d(int n, Domain *aDomain) :
     PlaneStressElement(n, aDomain), ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface(),
     SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(this),
-    EIPrimaryUnknownMapperInterface(), ZZErrorEstimatorInterface(this),
+    ZZErrorEstimatorInterface(this),
     HuertaErrorEstimatorInterface()
 {
     numberOfDofMans  = 3;
@@ -79,8 +79,6 @@ TrPlaneStress2d :: giveInterface(InterfaceType interface)
         return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
         return static_cast< SpatialLocalizerInterface * >(this);
-    } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
         return static_cast< ZZErrorEstimatorInterface * >(this);
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
@@ -534,19 +532,6 @@ SPRPatchType
 TrPlaneStress2d :: SPRNodalRecoveryMI_givePatchType()
 {
     return SPRPatchType_2dxy;
-}
-
-
-void
-TrPlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-                                                                    TimeStep *tStep, const FloatArray &lcoords,
-                                                                    FloatArray &answer)
-{
-    FloatMatrix n;
-    FloatArray u;
-    this->computeNmatrixAt(lcoords, n);
-    this->computeVectorOf(mode, tStep, u);
-    answer.beProductOf(n, u);
 }
 
 } // end namespace oofem

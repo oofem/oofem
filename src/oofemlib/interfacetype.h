@@ -56,7 +56,6 @@ enum InterfaceType {
 
     SpatialLocalizerInterfaceType,
 
-    EIPrimaryUnknownMapperInterfaceType,
     EIPrimaryFieldInterfaceType,
 
     NonlocalMaterialStatusExtensionInterfaceType,

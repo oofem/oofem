@@ -295,9 +295,7 @@ void TrPlaneStress2dXFEM :: giveInputRecord(DynamicInputRecord &input)
 
 
 void
-TrPlaneStress2dXFEM :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-                                                                        TimeStep *tStep, const FloatArray &lcoords,
-                                                                        FloatArray &answer)
+TrPlaneStress2dXFEM :: computeUnknownVectorAtLocal(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {
     // TODO: Validate implementation.
 

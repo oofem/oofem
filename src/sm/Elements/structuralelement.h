@@ -199,6 +199,8 @@ public:
         OOFEM_ERROR("not implemented");
     }
 
+    virtual void computeUnknownVectorAtLocal(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer);
+
     /**
      * Computes force dependent part of load vector. It is load vector induced by applied force loading.
      * Element body load and element boundary load (edge and surface load) is included.

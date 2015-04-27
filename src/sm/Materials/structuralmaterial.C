@@ -45,7 +45,6 @@
 #include "engngm.h"
 #include "fieldmanager.h"
 #include "dynamicinputrecord.h"
-#include "eleminterpmapperinterface.h"
 
 namespace oofem {
 StructuralMaterial :: StructuralMaterial(int n, Domain * d) : Material(n, d) 

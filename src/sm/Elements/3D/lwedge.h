@@ -40,7 +40,6 @@
 #include "ErrorEstimators/huertaerrorestimator.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
-#include "eleminterpmapperinterface.h"
 #include "sprnodalrecoverymodel.h"
 #include "spatiallocalizer.h"
 

@@ -647,6 +647,15 @@ StructuralElement :: computeResultingIPEigenstrainAt(FloatArray &answer, TimeSte
 }
 
 
+void
+StructuralElement :: computeUnknownVectorAtLocal(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
+{
+    FloatArray u;
+    FloatMatrix n;
+    this->computeNmatrixAt(lcoords, n);
+    this->computeVectorOf(mode, tStep, u);
+    answer.beProductOf(n, u);
+}
 
 void
 StructuralElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,

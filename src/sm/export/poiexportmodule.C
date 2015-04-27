@@ -41,7 +41,6 @@
 #include "mmaleastsquareprojection.h"
 #include "mmashapefunctprojection.h"
 #include "spatiallocalizer.h"
-#include "eleminterpmapperinterface.h"
 #include "internalstatevaluetype.h"
 #include "element.h"
 #include "classfactory.h"
@@ -174,7 +173,7 @@ POIExportModule :: exportIntVars(FILE *stream, TimeStep *tStep)
 void
 POIExportModule :: exportIntVarAs(InternalStateType valID, FILE *stream, TimeStep *tStep)
 {
-    int i, region;
+    int region;
     IntArray toMap(1);
     Domain *d = emodel->giveDomain(1);
     FloatArray poiCoords(3);
@@ -195,8 +194,8 @@ POIExportModule :: exportIntVarAs(InternalStateType valID, FILE *stream, TimeSte
             val.clear();
         }
         fprintf(stream, "%10d ", poi.id);
-        for ( i = 1; i <= val.giveSize(); i++ ) {
-            fprintf( stream, " %15e", val.at(i) );
+        for ( auto &x : val ) {
+            fprintf( stream, " %15e", x );
         }
 
         fprintf(stream, "\n");
@@ -229,20 +228,16 @@ POIExportModule :: exportPrimaryVars(FILE *stream, TimeStep *tStep)
     // should be performed over regions
 
     int n = primaryVarsToExport.giveSize();
-    int nnodes;
     Domain *d = emodel->giveDomain(1);
-    UnknownType type;
 
     if ( n == 0 ) {
         return;
     }
 
-    nnodes = d->giveNumberOfDofManagers();
-
-    fprintf(stream, "\n\nPOINT_DATA %d\n", nnodes);
+    fprintf(stream, "\n\nPOINT_DATA %d\n", d->giveNumberOfDofManagers());
 
     for ( int i = 1; i <= n; i++ ) {
-        type = ( UnknownType ) primaryVarsToExport.at(i);
+        UnknownType type = ( UnknownType ) primaryVarsToExport.at(i);
         this->exportPrimVarAs(type, stream, tStep);
     }
 }
@@ -283,21 +278,11 @@ POIExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
         Element *source = sl->giveElementClosestToPoint(lcoords, closest, coords);
         if ( source ) {
             // ask interface
-            EIPrimaryUnknownMapperInterface *interface =
-                static_cast< EIPrimaryUnknownMapperInterface * >( source->giveInterface(EIPrimaryUnknownMapperInterfaceType) );
-            if ( interface ) {
-                interface->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(VM_Total, tStep, lcoords, pv);
-            } else {
-                pv.clear();
-                OOFEM_WARNING("element %d with no EIPrimaryUnknownMapperInterface support",
-                               source->giveNumber() );
-            }
+            source->computeUnknownVectorAtLocal(VM_Total, tStep, lcoords, pv);
 
             fprintf(stream, "%10d ", poi.id);
-            if ( pv.giveSize() ) {
-                for ( int j = 1; j <= pv.giveSize(); j++ ) {
-                    fprintf( stream, " %15e ", pv.at(j) );
-                }
+            for ( auto &p : pv ) {
+                fprintf( stream, " %15e ", p );
             }
 
             fprintf(stream, "\n");
