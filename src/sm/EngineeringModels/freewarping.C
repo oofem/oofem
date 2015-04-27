@@ -50,10 +50,9 @@
 //#define THROW_CIOERR(e) throw ContextIOERR(e, __FILE__, __LINE__); // km???
 
 #ifdef __PARALLEL_MODE
- #include "fetisolver.h"
- #include "sparsemtrx.h"
  #include "problemcomm.h"
  #include "communicator.h"
+ #include "loadbalancer.h"
 #endif
 
 #include <typeinfo>
