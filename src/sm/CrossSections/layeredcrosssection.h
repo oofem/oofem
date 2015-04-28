@@ -237,13 +237,13 @@ public:
 
 
     virtual void giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep)
-    { OOFEM_ERROR("not implemented"); };
+    { OOFEM_ERROR("not implemented"); }
     virtual void giveCauchyStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep)
-    { OOFEM_ERROR("not implemented"); };
+    { OOFEM_ERROR("not implemented"); }
     virtual void giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-    { OOFEM_ERROR("not implemented"); };
+    { OOFEM_ERROR("not implemented"); }
     virtual void giveStiffnessMatrix_dCde(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-    { OOFEM_ERROR("not implemented"); };
+    { OOFEM_ERROR("not implemented"); }
 
 
 protected:

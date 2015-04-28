@@ -166,8 +166,8 @@ public:
     const double &operator() (int i) const;
     const double &operator[] (int i) const;
 #else
-    inline const double &operator() (int i) const { return values [ i ]; };
-    inline const double &operator[] (int i) const { return values [ i ]; };
+    inline const double &operator() (int i) const { return values [ i ]; }
+    inline const double &operator[] (int i) const { return values [ i ]; }
 #endif
     /** Checks size of receiver towards requested bounds.
      * Current implementation will call exit(1), if dimension

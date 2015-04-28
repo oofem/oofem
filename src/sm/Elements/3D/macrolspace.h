@@ -69,7 +69,7 @@ public:
 
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
 
-    virtual void computeUnknownVectorAtLocal(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
+    virtual void computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
     { OOFEM_ERROR("Macro space element doesn't support computing local unknown vector (yet)\n"); }
 
     /// Related to setting the boundary conditions of micro problem.

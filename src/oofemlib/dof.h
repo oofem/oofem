@@ -387,13 +387,13 @@ public:
      * Sets a specific equation number to receiver.
      * @param equationNumber New equation number.
      */
-    virtual void setEquationNumber(int equationNumber) { };
+    virtual void setEquationNumber(int equationNumber) { }
 
     /**
      * Sets the dictionary of unknowns for receiver.
      * @param unknowns New dictionary of unknowns.
      */
-    virtual void setUnknowns(Dictionary *unknowns) { };
+    virtual void setUnknowns(Dictionary *unknowns) { }
     /**
      * Receives the dictionary of unknowns in receiver.
      * @return Dictionary of unknowns for DOF.

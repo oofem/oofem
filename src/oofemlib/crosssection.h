@@ -119,7 +119,7 @@ public:
     /// Destructor.
     virtual ~CrossSection();
 
-    int giveSetNumber() const { return this->setNumber; };
+    int giveSetNumber() const { return this->setNumber; }
 
     /**
      * Returns the value of cross section property at given point.
@@ -148,7 +148,7 @@ public:
      * @param gp Integration point.
      * @return Property value.
      */
-    virtual double give(int aProperty, GaussPoint *gp) { return 0.0; };
+    virtual double give(int aProperty, GaussPoint *gp) { return 0.0; }
 
     /**
      * Check for symmetry of stiffness matrix.
@@ -157,7 +157,7 @@ public:
      * @param rMode Response mode of material.
      * @return True if stiffness matrix of receiver is symmetric.
      */
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; };
+    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
     virtual void printYourself();
 
     /**

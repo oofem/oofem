@@ -58,7 +58,7 @@ public:
     void mapVariables(TimeStep *tStep, StaticStructural &ioEngngModel);
 #endif
 
-    void xfemUpdatePrimaryField(StructuralEngngModel &ioEngngModel, TimeStep *tStep, const FloatArray &iNewSol) { };
+    void xfemUpdatePrimaryField(StructuralEngngModel &ioEngngModel, TimeStep *tStep, const FloatArray &iNewSol) { }
     void xfemUpdatePrimaryField(StaticStructural &ioEngngModel, TimeStep *tStep, const FloatArray &iNewSol);
 
 protected:

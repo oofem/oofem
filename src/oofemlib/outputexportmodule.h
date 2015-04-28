@@ -98,7 +98,7 @@ public:
     virtual void doOutput(TimeStep *tStep, bool forcedOutput = false);
     virtual void terminate();
 
-    virtual const char *giveClassName() const { return "OutputExportModule"; };
+    virtual const char *giveClassName() const { return "OutputExportModule"; }
     virtual const char *giveInputRecordName() const { return _IFT_OutputExportModule_Name; }
 };
 } // end namespace oofem

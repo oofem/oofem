@@ -278,7 +278,7 @@ POIExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
         Element *source = sl->giveElementClosestToPoint(lcoords, closest, coords);
         if ( source ) {
             // ask interface
-            source->computeUnknownVectorAtLocal(VM_Total, tStep, lcoords, pv);
+            source->computeField(VM_Total, tStep, lcoords, pv);
 
             fprintf(stream, "%10d ", poi.id);
             for ( auto &p : pv ) {

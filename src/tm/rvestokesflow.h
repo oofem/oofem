@@ -111,13 +111,13 @@ private:
 public:
     RVEStokesFlow(int n, Domain * d);
 
-    virtual ~RVEStokesFlow() { };
+    virtual ~RVEStokesFlow() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep);
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep);
-    virtual double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) { return 0.0; };
+    virtual double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) { return 0.0; }
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 

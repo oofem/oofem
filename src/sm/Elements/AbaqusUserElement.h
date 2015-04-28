@@ -172,7 +172,7 @@ public:
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, FloatArray &U, FloatMatrix &DU, int useUpdatedGpRecord);
     virtual int computeNumberOfDofs() { return this->ndofel; }
     virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
-    virtual void computeUnknownVectorAtLocal(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
+    virtual void computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
     { OOFEM_ERROR("Abaqus user element cannot support computing local unknown vector\n"); }
     virtual void updateYourself(TimeStep *tStep);
     virtual void updateInternalState(TimeStep *tStep);

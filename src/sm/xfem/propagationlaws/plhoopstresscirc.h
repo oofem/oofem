@@ -80,8 +80,8 @@ class DynamicInputRecord;
 class OOFEM_EXPORT PLHoopStressCirc : public PropagationLaw
 {
 public:
-    PLHoopStressCirc() : mRadius(0.0), mAngleInc(0.0), mIncrementLength(0.0), mHoopStressThreshold(0.0), mUseRadialBasisFunc(false) { };
-    virtual ~PLHoopStressCirc() { };
+    PLHoopStressCirc() : mRadius(0.0), mAngleInc(0.0), mIncrementLength(0.0), mHoopStressThreshold(0.0), mUseRadialBasisFunc(false) { }
+    virtual ~PLHoopStressCirc() { }
 
     virtual const char *giveClassName() const { return "PLHoopStressCirc"; }
     virtual const char *giveInputRecordName() const { return _IFT_PLHoopStressCirc_Name; }

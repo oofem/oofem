@@ -63,7 +63,7 @@ public:
     
     // Edge
     virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge);
-    virtual int giveNumberOfEdges() const { return 4; };
+    virtual int giveNumberOfEdges() const { return 4; }
     virtual void edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double edgeEvalNormal(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void edgeEvaldNds(FloatArray &answer, int iedge,

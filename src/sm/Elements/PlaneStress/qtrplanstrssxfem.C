@@ -231,7 +231,7 @@ void QTrPlaneStress2dXFEM :: giveInputRecord(DynamicInputRecord &input)
 }
 
 void
-QTrPlaneStress2dXFEM :: computeUnknownVectorAtLocal(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
+QTrPlaneStress2dXFEM :: computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {
     // TODO: Validate implementation.
 

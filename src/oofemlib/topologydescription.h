@@ -87,7 +87,7 @@ public:
      * @param tStep Active time step.
      */
     virtual void doOutput(TimeStep *tStep)
-    { OOFEM_ERROR( "Not implemented" ); };
+    { OOFEM_ERROR( "Not implemented" ); }
 
     /**
      * Generates the FE components from the bare mesh.

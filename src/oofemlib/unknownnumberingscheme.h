@@ -47,13 +47,13 @@ namespace oofem {
 class OOFEM_EXPORT UnknownNumberingScheme
 {
 public:
-    UnknownNumberingScheme(void) { };
+    UnknownNumberingScheme(void) { }
     virtual ~UnknownNumberingScheme() { }
 
     /**
      * Initializes the receiver, if necessary.
      */
-    virtual void init() { };
+    virtual void init() { }
     /**
      * Returns true, if receiver is the default engngModel equation numbering scheme;
      * This is useful for some components (typically elements), that cache their code numbers

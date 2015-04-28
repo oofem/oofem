@@ -139,7 +139,7 @@ EIPrimaryUnknownMapper :: evaluateAt(FloatArray &answer, IntArray &dofMask, Valu
     }
 
     oelem->giveElementDofIDMask(dofMask);
-    oelem->computeUnknownVectorAtLocal(mode, tStep, lcoords, answer);
+    oelem->computeField(mode, tStep, lcoords, answer);
 
     return true;
 }

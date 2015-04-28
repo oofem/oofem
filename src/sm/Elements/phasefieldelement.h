@@ -68,11 +68,11 @@ public:
 
     ///@todo move these to a cross section model later
     double internalLength;
-    double giveInternalLength( ) { return internalLength; };
+    double giveInternalLength( ) { return internalLength; }
     double criticalEnergy;
-    double giveCriticalEnergy() { return criticalEnergy; };
+    double giveCriticalEnergy() { return criticalEnergy; }
     double relaxationTime;
-    double giveRelaxationTime( ) { return relaxationTime; };
+    double giveRelaxationTime( ) { return relaxationTime; }
 
 protected:
 

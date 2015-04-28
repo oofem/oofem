@@ -452,7 +452,7 @@ public:
      * @param lcoords Local coordinates to evaluate at
      * @param answer Results
      */
-    virtual void computeUnknownVectorAtLocal(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
+    virtual void computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
     { OOFEM_ERROR("Missing support for computing unknown vector at local element coordinates\n"); }
     /**
      * Returns volume related to given integration point. Used typically in subroutines,

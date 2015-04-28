@@ -737,14 +737,14 @@ bool ParticleTopologyDescription :: findDisplacement(FloatArray &displacement, i
 
 
     if ( this->useDisplacements ) {
-        e->computeUnknownVectorAtLocal(VM_Incremental, tStep, lcoords, displacement);    // Displacement
+        e->computeField(VM_Incremental, tStep, lcoords, displacement);    // Displacement
     } else {
         FloatArray fields;
         IntArray dofIds;
         displacement.resize( this->d->giveNumberOfSpatialDimensions() );
         displacement.zero();
         double dt = tStep->giveTimeIncrement();
-        e->computeUnknownVectorAtLocal(VM_Total, tStep, lcoords, fields);    // Velocities + pressures most likely.
+        e->computeField(VM_Total, tStep, lcoords, fields);    // Velocities + pressures most likely.
         e->giveElementDofIDMask(dofIds);
         for ( int i = 0; i < dofIds.giveSize(); i++ ) {
             if ( dofIds(i) == V_u ) {

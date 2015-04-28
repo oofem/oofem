@@ -202,7 +202,7 @@ public:
     /**
      * Returns reference to associated material status (NULL if not defined).
      */
-    IntegrationPointStatus *giveMaterialStatus() { return this->materialStatus; };
+    IntegrationPointStatus *giveMaterialStatus() { return this->materialStatus; }
 
     /**
      * Sets Material status managed by receiver.

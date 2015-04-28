@@ -138,7 +138,7 @@ public:
 
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "StructuralInterfaceCrossSection"; }
-    virtual const char *giveInputRecordName() const { return _IFT_StructuralInterfaceCrossSection_Name; };
+    virtual const char *giveInputRecordName() const { return _IFT_StructuralInterfaceCrossSection_Name; }
 
     CrossSectExtension crossSectionType;
 private:

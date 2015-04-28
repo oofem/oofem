@@ -601,7 +601,7 @@ SolutionbasedShapeFunction :: giveValueAtPoint(FloatArray &answer, const FloatAr
     IntArray eldofids;
 
     elementAtCoords->giveElementDofIDMask(eldofids);
-    elementAtCoords->computeUnknownVectorAtLocal(VM_Total, thisTimestep, lcoords, values);
+    elementAtCoords->computeField(VM_Total, thisTimestep, lcoords, values);
 
     for ( int i = 1; i <= dofIDs.giveSize(); i++ ) {
         for ( int j = 1; j <= eldofids.giveSize(); j++ ) {

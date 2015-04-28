@@ -199,7 +199,7 @@ public:
         OOFEM_ERROR("not implemented");
     }
 
-    virtual void computeUnknownVectorAtLocal(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer);
+    virtual void computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer);
 
     /**
      * Computes force dependent part of load vector. It is load vector induced by applied force loading.

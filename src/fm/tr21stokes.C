@@ -375,7 +375,7 @@ Interface *Tr21Stokes :: giveInterface(InterfaceType it)
     }
 }
 
-void Tr21Stokes :: computeUnknownVectorAtLocal(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
+void Tr21Stokes :: computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {
     FloatArray n, n_lin, pressures, velocities;
     this->interpolation_quad.evalN( n, lcoords, FEIElementGeometryWrapper(this) );

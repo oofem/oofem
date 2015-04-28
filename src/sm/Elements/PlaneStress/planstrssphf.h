@@ -54,7 +54,7 @@ public:
     PlaneStressPhF2d(int n, Domain *d);
     virtual ~PlaneStressPhF2d() { }
 
-    NLStructuralElement *giveElement() { return this; }; 
+    NLStructuralElement *giveElement() { return this; } 
     virtual int computeNumberOfDofs() { return 12; }
     virtual void giveDofManDofIDMask( int inode, EquationID EqID, IntArray &answer ) const;
     virtual void giveDofManDofIDMask_u( IntArray &answer );

@@ -127,8 +127,8 @@ public:
     // identification and auxiliary functions
     std::vector< std::vector<int> > vIindex;
     std::vector< std::vector<int> > svIndex;
-    int giveSymVI(int ind1, int ind2) {  return svIndex[ind1-1][ind2-1]; };
-    int giveVI(int ind1, int ind2) {  return this->vIindex[ind1-1][ind2-1]; };    
+    int giveSymVI(int ind1, int ind2) { return svIndex[ind1-1][ind2-1]; }
+    int giveVI(int ind1, int ind2) { return this->vIindex[ind1-1][ind2-1]; }    
       
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "StructuralMaterial"; }

@@ -50,7 +50,7 @@ class FloatArray;
 class InputRecord;
 class DynamicInputRecord;
 
-/*
+/**
  * EnrFrontDoNothing
  * @author Erik Svenning
  * @date Feb 14, 2014
@@ -58,8 +58,8 @@ class DynamicInputRecord;
 class OOFEM_EXPORT EnrFrontDoNothing : public EnrichmentFront
 {
 public:
-    EnrFrontDoNothing() { };
-    virtual ~EnrFrontDoNothing() { };
+    EnrFrontDoNothing() { }
+    virtual ~EnrFrontDoNothing() { }
 
     virtual void MarkNodesAsFront(std :: unordered_map< int, NodeEnrichmentType > &ioNodeEnrMarkerMap, XfemManager &ixFemMan, const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const TipInfo &iTipInfo) { mTipInfo = iTipInfo; }
 
@@ -68,9 +68,9 @@ public:
     virtual int  giveMaxNumEnrichments() const { return 0; }
 
     // Evaluate the enrichment function and its derivative in front nodes.
-    virtual void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const EfInput &iEfInput) const { };
-    virtual void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const EfInput &iEfInput, const FloatArray &iGradLevelSet) const { };
-    virtual void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, GaussPoint &iGP, int iNodeInd, bool iGPLivesOnCurrentCrack, const double &iNormalSignDist) const { };
+    virtual void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const EfInput &iEfInput) const { }
+    virtual void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const EfInput &iEfInput, const FloatArray &iGradLevelSet) const { }
+    virtual void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, GaussPoint &iGP, int iNodeInd, bool iGPLivesOnCurrentCrack, const double &iNormalSignDist) const { }
 
     virtual const char *giveClassName() const { return "EnrFrontDoNothing"; }
     virtual const char *giveInputRecordName() const { return _IFT_EnrFrontDoNothing_Name; }

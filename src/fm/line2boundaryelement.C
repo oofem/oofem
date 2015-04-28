@@ -75,7 +75,7 @@ Interface *Line2BoundaryElement :: giveInterface(InterfaceType it)
     }
 }
 
-void Line2BoundaryElement :: computeUnknownVectorAtLocal(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
+void Line2BoundaryElement :: computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {
     FloatArray n, unknowns;
     this->fei.evalN( answer, lcoords, FEIElementGeometryWrapper(this) );

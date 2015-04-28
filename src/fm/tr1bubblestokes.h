@@ -108,7 +108,7 @@ public:
 
     virtual Interface *giveInterface(InterfaceType it);
 
-    virtual void computeUnknownVectorAtLocal(ValueModeType u, TimeStep *tStep, const FloatArray &coords, FloatArray &answer);
+    virtual void computeField(ValueModeType u, TimeStep *tStep, const FloatArray &coords, FloatArray &answer);
 };
 } // end namespace oofem
 #endif // tr1bubblestokes_h

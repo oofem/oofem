@@ -71,7 +71,7 @@ public:
     virtual double giveThicknessAt(const FloatArray &gcoords);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui);
     virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
-    //virtual void updateInternalState(TimeStep *tStep) { };
+    //virtual void updateInternalState(TimeStep *tStep) { }
 
     virtual Interface *giveInterface(InterfaceType t);
 

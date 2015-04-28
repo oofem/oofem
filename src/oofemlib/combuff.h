@@ -349,7 +349,7 @@ public:
 
     int testCompletion(int &source, int &tag) { return MPIBuffer :: testCompletion(source, tag); }
 
-    virtual int waitCompletion() { return MPIBuffer :: waitCompletion(); };
+    virtual int waitCompletion() { return MPIBuffer :: waitCompletion(); }
 
     virtual int bcast(int root) { return MPIBuffer :: bcast(this->communicator, root); }
 };

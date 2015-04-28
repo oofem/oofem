@@ -143,15 +143,15 @@ public:
 
 
     // Should update receiver geometry to the state reached at given time step.
-    virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep) { };
+    virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep) { }
     virtual void updateGeometry() = 0;
     virtual void propagateFronts(bool &oFrontsHavePropagated) = 0;
 
     virtual bool hasPropagatingFronts() const;
 
 
-    int giveStartOfDofIdPool() const { return this->startOfDofIdPool; };
-    int giveEndOfDofIdPool() const { return this->endOfDofIdPool; };
+    int giveStartOfDofIdPool() const { return this->startOfDofIdPool; }
+    int giveEndOfDofIdPool() const { return this->endOfDofIdPool; }
     virtual int giveDofPoolSize() const;
     /**
      * Compute Id's of enriched dofs for a given DofManager.
@@ -210,8 +210,8 @@ public:
     static double calcXiZeroLevel(const double &iQ1, const double &iQ2);
     static void calcPolarCoord(double &oR, double &oTheta, const FloatArray &iOrigin, const FloatArray &iPos, const FloatArray &iN, const FloatArray &iT, const EfInput &iEfInput, bool iFlipTangent);
 
-    PropagationLaw *givePropagationLaw() { return this->mpPropagationLaw; };
-    bool hasPropagationLaw() { return this->mPropLawIndex != 0; };
+    PropagationLaw *givePropagationLaw() { return this->mpPropagationLaw; }
+    bool hasPropagationLaw() { return this->mPropLawIndex != 0; }
 
 
     virtual void callGnuplotExportModule(GnuplotExportModule &iExpMod, TimeStep *tStep);

@@ -146,7 +146,7 @@ public:
         nodes = edges = quads = hexas = 0;
     };
 
-    ~RefinedMesh() { };
+    ~RefinedMesh() { }
 
     int refineMeshGlobally(Domain *d, int level, std :: vector< RefinedElement > &refinedElementList);
 };

@@ -104,7 +104,7 @@ public:
 #endif
 
 protected:
-    virtual int giveNumberOfIPForMassMtrxIntegration() { return 8; };
+    virtual int giveNumberOfIPForMassMtrxIntegration() { return 8; }
 
     /**
      * @name Surface load support

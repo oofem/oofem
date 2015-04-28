@@ -89,7 +89,7 @@ public:
     /// Constructor
     CohesiveInterfaceMaterial(int n, Domain * d);
     /// Destructor
-    virtual ~CohesiveInterfaceMaterial() { };
+    virtual ~CohesiveInterfaceMaterial() { }
 
     virtual int hasNonLinearBehaviour() { return 0; }
     virtual int hasMaterialModeCapability(MaterialMode mode) { return ( mode == _3dInterface ); }

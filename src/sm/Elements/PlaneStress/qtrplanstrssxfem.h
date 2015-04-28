@@ -60,8 +60,8 @@ protected:
     virtual void postInitialize();
 
 public:
-	QTrPlaneStress2dXFEM(int n, Domain * d) : QTrPlaneStress2d(n, d), XfemStructuralElementInterface(this), VTKXMLExportModuleElementInterface() { numberOfDofMans = 6; };
-	virtual ~QTrPlaneStress2dXFEM();
+    QTrPlaneStress2dXFEM(int n, Domain * d) : QTrPlaneStress2d(n, d), XfemStructuralElementInterface(this), VTKXMLExportModuleElementInterface() { numberOfDofMans = 6; }
+    virtual ~QTrPlaneStress2dXFEM();
 
     virtual const char *giveInputRecordName() const { return _IFT_QTrPlaneStress2dXFEM_Name; }
     virtual const char *giveClassName() const { return "QTrPlaneStress2dXFEM"; }
@@ -90,7 +90,7 @@ public:
     virtual MaterialMode giveMaterialMode();
     virtual void giveInputRecord(DynamicInputRecord &input);
 
-    virtual void computeUnknownVectorAtLocal(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer);
+    virtual void computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer);
 
 protected:
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 6; } // TODO: Check

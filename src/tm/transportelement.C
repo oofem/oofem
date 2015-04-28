@@ -1019,7 +1019,7 @@ TransportElement :: assembleLocalContribution(FloatArray &answer, FloatArray &sr
 
 
 void
-TransportElement :: computeUnknownVectorAtLocal(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
+TransportElement :: computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {
     FloatArray u;
     FloatMatrix n;

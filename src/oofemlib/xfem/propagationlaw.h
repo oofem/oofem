@@ -81,8 +81,8 @@ public:
 class OOFEM_EXPORT PLDoNothing : public PropagationLaw
 {
 public:
-    PLDoNothing() { };
-    virtual ~PLDoNothing() { };
+    PLDoNothing() { }
+    virtual ~PLDoNothing() { }
 
     virtual const char *giveClassName() const { return "PLDoNothing"; }
     virtual const char *giveInputRecordName() const { return _IFT_PLDoNothing_Name; }
@@ -91,7 +91,7 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual bool hasPropagation() const { return false; }
-    virtual bool propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp) { return false; };
+    virtual bool propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp) { return false; }
 };
 
 /**
@@ -101,8 +101,8 @@ public:
 class OOFEM_EXPORT PLCrackPrescribedDir : public PropagationLaw
 {
 public:
-    PLCrackPrescribedDir() : mAngle(0.0), mIncrementLength(0.0) { };
-    virtual ~PLCrackPrescribedDir() { };
+    PLCrackPrescribedDir() : mAngle(0.0), mIncrementLength(0.0) { }
+    virtual ~PLCrackPrescribedDir() { }
 
     virtual const char *giveClassName() const { return "PLCrackPrescribedDir"; }
     virtual const char *giveInputRecordName() const { return _IFT_PLCrackPrescribedDir_Name; }

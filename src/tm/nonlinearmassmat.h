@@ -66,8 +66,8 @@ protected:
 
 public:
 
-    NonlinearMassTransferMaterial(int n, Domain * d) : TransportMaterial(n, d) { };
-    virtual ~NonlinearMassTransferMaterial() { };
+    NonlinearMassTransferMaterial(int n, Domain * d) : TransportMaterial(n, d) { }
+    virtual ~NonlinearMassTransferMaterial() { }
 
     virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
                                            MatResponseMode mode,
@@ -83,7 +83,7 @@ public:
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
     virtual const char *giveInputRecordName() const { return _IFT_NonlinearMassTransferMaterial_Name; }
-    virtual const char *giveClassName() const { return "NonlinearMassTransferMaterial"; };
+    virtual const char *giveClassName() const { return "NonlinearMassTransferMaterial"; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 };

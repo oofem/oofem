@@ -50,7 +50,7 @@ namespace oofem {
 /**
  * This class implements Compressible Mooney - Rivlin material.
  *
- * @author: Martin Horák, nitramkaroh@seznam.cz
+ * @author Martin Horák, nitramkaroh@seznam.cz
  * 
  * References: R.W. Ogden: Non-Linear Elastic Deformations,
  * de Souza Neto, Peric, Owen: Computational Methods for Plasticity: Theory and Applications

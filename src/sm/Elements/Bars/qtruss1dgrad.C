@@ -130,7 +130,7 @@ QTruss1dGrad :: computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
     answer.beTranspositionOf(dnx);
 }
 
-void QTruss1dGrad :: computeUnknownVectorAtLocal(ValueModeType mode, TimeStep* tStep, const FloatArray& lcoords, FloatArray& answer)
+void QTruss1dGrad :: computeField(ValueModeType mode, TimeStep* tStep, const FloatArray& lcoords, FloatArray& answer)
 {
     FloatArray n, unknown;
     this->interpolation_lin.evalN( n, lcoords, FEIElementGeometryWrapper(this) );

@@ -80,7 +80,7 @@ public:
     // Interfaces
     virtual Interface *giveInterface(InterfaceType it);
 
-    virtual void computeUnknownVectorAtLocal(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer);
+    virtual void computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer);
 };
 }
 

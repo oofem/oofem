@@ -75,9 +75,9 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void appendInputRecords(DynamicDataReader &oDR);
 
-    double giveDelamXiCoord() const { return xiBottom; };     // coord where the delamination is defined
-    double giveBoundingDelamXiCoord() const { return xiTop; };// coord where the delamination enrichment should stop, default is the shell surface
-    int giveDelamInterfaceNum() const { return interfaceNum.at(1); };
+    double giveDelamXiCoord() const { return xiBottom; }     // coord where the delamination is defined
+    double giveBoundingDelamXiCoord() const { return xiTop; } // coord where the delamination enrichment should stop, default is the shell surface
+    int giveDelamInterfaceNum() const { return interfaceNum.at(1); }
     virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep);
 
     virtual void evaluateEnrFuncInNode(std :: vector< double > &oEnrFunc, const Node &iNode) const { OOFEM_ERROR("Not implemented.") }

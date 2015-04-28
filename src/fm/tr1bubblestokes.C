@@ -391,7 +391,7 @@ Interface *Tr1BubbleStokes :: giveInterface(InterfaceType it)
     }
 }
 
-void Tr1BubbleStokes :: computeUnknownVectorAtLocal(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
+void Tr1BubbleStokes :: computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {
     FloatArray n, n_lin, pressures, velocities;
     this->interp.evalN( n, lcoords, FEIElementGeometryWrapper(this) );

@@ -67,14 +67,14 @@ public:
      */
     Preconditioner() { }
     /// Destructor
-    virtual ~Preconditioner(void) { };
+    virtual ~Preconditioner(void) { }
 
     /**
      * Initializes the receiver (constructs the preconditioning matrix M) of given matrix.
      * Virtual service, to be implemented by derived classes. Should be called after initializeFrom service.
      * @param a Sparse matrix to be preconditioned.
      */
-    virtual void init(const SparseMtrx &a) { };
+    virtual void init(const SparseMtrx &a) { }
 
     /**
      * Solves the linear system.

@@ -382,12 +382,12 @@ PrimaryField :: __evaluateAt(FloatArray &answer, FloatArray &coords,
     }
 
     if ( dofId ) {
-        bgelem->computeUnknownVectorAtLocal(mode, tStep, lcoords, answer);
+        bgelem->computeField(mode, tStep, lcoords, answer);
     } else {
         FloatArray field;
         IntArray elemDofId;
         bgelem->giveElementDofIDMask(elemDofId);
-        bgelem->computeUnknownVectorAtLocal(mode, tStep, lcoords, field);
+        bgelem->computeField(mode, tStep, lcoords, field);
         answer.resize( dofId->giveSize() );
         answer.zero();
         for ( int i = 1; i <= dofId->giveSize(); ++i ) {
