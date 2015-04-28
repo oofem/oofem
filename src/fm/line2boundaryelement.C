@@ -77,17 +77,18 @@ Interface *Line2BoundaryElement :: giveInterface(InterfaceType it)
 
 void Line2BoundaryElement :: computeUnknownVectorAtLocal(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {
-    FloatArray n;
+    FloatArray n, unknowns;
     this->fei.evalN( answer, lcoords, FEIElementGeometryWrapper(this) );
 
     IntArray dofIDs;
     this->giveElementDofIDMask(dofIDs);
+    this->computeVectorOf(dofIDs, mode, tStep, unknowns);
 
     answer.resize( dofIDs.giveSize() );
     answer.zero();
-    for ( int i = 1; i <= n.giveSize(); ++i ) {
-        for ( int j = 1; j <= dofIDs.giveSize(); ++j ) {
-            answer.at(j) += n.at(i) * this->giveNode(i)->giveDofWithID( dofIDs.at(j) )->giveUnknown(mode, tStep);
+    for ( int i = 0; i < n.giveSize(); ++i ) {
+        for ( int j = 0; j < dofIDs.giveSize(); ++j ) {
+            answer(j) += n(i) * unknowns(i*dofIDs.giveSize() + j);
         }
     }
 }

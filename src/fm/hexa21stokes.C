@@ -368,19 +368,22 @@ Interface *Hexa21Stokes :: giveInterface(InterfaceType it)
 
 void Hexa21Stokes :: computeUnknownVectorAtLocal(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {
-    FloatArray n, n_lin;
+    FloatArray n, n_lin, pressures, velocities;
     this->interpolation_quad.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
     this->interpolation_lin.evalN( n_lin, lcoords, FEIElementGeometryWrapper(this) );
+    this->computeVectorOf({P_f}, mode, tStep, pressures);
+    this->computeVectorOf({V_u, V_v, V_w}, mode, tStep, velocities);
+
     answer.resize(4);
     answer.zero();
     for ( int i = 1; i <= n.giveSize(); i++ ) {
-        answer(0) += n.at(i) * this->giveNode(i)->giveDofWithID(V_u)->giveUnknown(mode, tStep);
-        answer(1) += n.at(i) * this->giveNode(i)->giveDofWithID(V_v)->giveUnknown(mode, tStep);
-        answer(2) += n.at(i) * this->giveNode(i)->giveDofWithID(V_w)->giveUnknown(mode, tStep);
+        answer(0) += n.at(i) * velocities.at(i*3-2);
+        answer(1) += n.at(i) * velocities.at(i*3-1);
+        answer(2) += n.at(i) * velocities.at(i*3);
     }
 
     for ( int i = 1; i <= n_lin.giveSize(); i++ ) {
-        answer(3) += n_lin.at(i) * this->giveNode(i)->giveDofWithID(P_f)->giveUnknown(mode, tStep);
+        answer(3) += n_lin.at(i) * pressures.at(i);
     }
 }
 
