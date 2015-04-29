@@ -121,7 +121,7 @@ M4Material :: giveStiffnessMatrix(FloatMatrix &answer,
     answer.at(4, 4) = answer.at(5, 5) = answer.at(6, 6) = E / ( 2. + 2. * nu );
     answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = E * ( 1. - nu ) / ( ( 1. + nu ) * ( 1. - 2. * nu ) );
     answer.at(1, 2) = answer.at(2, 1) = answer.at(1, 3) = answer.at(3, 1) =
-        answer.at(2, 3) = answer.at(3, 2) = E * nu / ( ( 1. + nu ) * ( 1. - 2. * nu ) );
+                                                              answer.at(2, 3) = answer.at(3, 2) = E * nu / ( ( 1. + nu ) * ( 1. - 2. * nu ) );
 }
 
 
@@ -132,8 +132,8 @@ M4Material :: giveRealMicroplaneStressVector(FloatArray &answer,
                                              TimeStep *tStep)
 {
     M4MaterialStatus *status = static_cast< M4MaterialStatus * >( this->giveMicroplaneStatus(mplane) );
-    FloatArray previousStress, previousStrain;
-    FloatArray stressIncrement, strainIncrement;
+    FloatArray previousStress;
+    FloatArray strainIncrement;
     double EpsN, DEpsN, DEpsL, DEpsM;
     double EpsV, DEpsV;
     double SEV, SVdash, EpsD, DEpsD, SED, SEM, SEL, SD;
@@ -147,7 +147,6 @@ M4Material :: giveRealMicroplaneStressVector(FloatArray &answer,
 
     // ask status for tempVH parameter
     previousStress = status->giveStressVector();
-    previousStrain = status->giveStrainVector();
     strainIncrement.beDifferenceOf( strain, status->giveStrainVector() );
     if ( !previousStress.isNotEmpty() ) {
         previousStress.resize(4);
@@ -194,7 +193,7 @@ M4Material :: giveRealMicroplaneStressVector(FloatArray &answer,
 
     SED = previousStress.at(2) - previousStress.at(1) + CD * DEpsD;
     SD = min( max( SED, this->FDminus(EpsD, k1, c7, c8, c9, E) ),
-             this->FDplus(EpsD, k1, c5, c6, c7, c20, E) );
+              this->FDplus(EpsD, k1, c5, c6, c7, c20, E) );
 
     SNdash = SVdash + SD;
     answer.at(2) = min( SNdash, this->FN(EpsN, previousStress.at(1), k1, c1, c2, c3, c4, E, EV) );
@@ -239,8 +238,8 @@ M4Material :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    // je-li funkce prepsana, je treba zavolat predchazejici
-    MicroplaneMaterial_Bazant :: initializeFrom(ir);
+    result = MicroplaneMaterial_Bazant :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     c1 = 6.20e-1;
     c2 = 2.76;
@@ -270,8 +269,6 @@ M4Material :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, k2, _IFT_M4Material_k2);
     IR_GIVE_FIELD(ir, k3, _IFT_M4Material_k3);
     IR_GIVE_FIELD(ir, k4, _IFT_M4Material_k4);
-    IR_GIVE_FIELD(ir, E, _IFT_M4Material_e);
-    IR_GIVE_FIELD(ir, nu, _IFT_M4Material_n);
     IR_GIVE_FIELD(ir, talpha, _IFT_M4Material_talpha);
     mu = 1.0;
     EV = E / ( 1 - 2 * nu );

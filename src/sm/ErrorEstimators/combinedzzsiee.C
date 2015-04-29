@@ -83,11 +83,11 @@ CombinedZZSIErrorEstimator :: giveValue(EE_ValueType type, TimeStep *tStep)
 RemeshingCriteria *
 CombinedZZSIErrorEstimator :: giveRemeshingCrit()
 {
-    if ( this->rc ) {
-        return this->rc;
+    if ( !this->rc ) {
+        this->rc.reset( new CombinedZZSIRemeshingCriteria(1, this) );
     }
 
-    return ( this->rc = new CombinedZZSIRemeshingCriteria(1, this) );
+    return this->rc.get();
 }
 
 IRResultType
@@ -163,9 +163,11 @@ CombinedZZSIRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
 IRResultType
 CombinedZZSIRemeshingCriteria :: initializeFrom(InputRecord *ir)
 {
-    zzrc.initializeFrom(ir);
-    dirc.initializeFrom(ir);
-    return IRRT_OK;
+    IRResultType result = zzrc.initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+    return dirc.initializeFrom(ir);
 }
 
 

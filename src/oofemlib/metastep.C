@@ -66,9 +66,7 @@ MetaStep :: initializeFrom(InputRecord *ir)
 
     delete attributes;
     this->attributes = ir->GiveCopy();
-    /*
-     * this->readQuotedString (initString, "attributes", this->attributes, MetaStepAttrRecLenght);
-     */
+
     return IRRT_OK;
 }
 
@@ -81,9 +79,9 @@ MetaStep :: setStepBounds(int startStepNumber)
 }
 
 void
-MetaStep :: setNumberOfSteps(int numberOfSteps)
+MetaStep :: setNumberOfSteps(int newNumberOfSteps)
 {
-    this->numberOfSteps = numberOfSteps;
+    this->numberOfSteps = newNumberOfSteps;
 }
 
 int

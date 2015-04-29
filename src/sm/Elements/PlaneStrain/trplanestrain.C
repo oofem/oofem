@@ -57,8 +57,8 @@ FEI2dTrLin TrPlaneStrain :: interp(1, 2);
 TrPlaneStrain :: TrPlaneStrain(int n, Domain *aDomain) :
     PlaneStrainElement(n, aDomain), ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface(),
     SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(this),
-    EIPrimaryUnknownMapperInterface(), ZZErrorEstimatorInterface(this),
-    MMAShapeFunctProjectionInterface(), HuertaErrorEstimatorInterface()
+    ZZErrorEstimatorInterface(this),
+    HuertaErrorEstimatorInterface()
     // Constructor.
 {
     numberOfDofMans  = 3;
@@ -81,12 +81,8 @@ TrPlaneStrain :: giveInterface(InterfaceType interface)
         return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
         return static_cast< SpatialLocalizerInterface * >(this);
-    } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
         return static_cast< ZZErrorEstimatorInterface * >(this);
-    } else if ( interface == MMAShapeFunctProjectionInterfaceType ) {
-        return static_cast< MMAShapeFunctProjectionInterface * >(this);
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
         return static_cast< HuertaErrorEstimatorInterface * >(this);
     }
@@ -99,7 +95,7 @@ IRResultType
 TrPlaneStrain :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 1;
-    IRResultType result = this->StructuralElement :: initializeFrom(ir);
+    IRResultType result = StructuralElement :: initializeFrom(ir);
     if ( result != IRRT_OK ) {
         return result;
     }
@@ -162,47 +158,6 @@ TrPlaneStrain :: SPRNodalRecoveryMI_givePatchType()
 
 
 void
-TrPlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-                                                                  TimeStep *tStep, const FloatArray &lcoords,
-                                                                  FloatArray &answer)
-{
-    FloatArray u, nv;
-    FloatMatrix n;
-
-    this->interp.evalN( nv, lcoords, FEIElementGeometryWrapper(this) );
-
-    n.beNMatrixOf(nv, 2);
-
-    this->computeVectorOf(mode, tStep, u);
-
-    answer.beProductOf(n, u);
-}
-
-
-void
-TrPlaneStrain :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &coords,
-                                                                      coordType ct, nodalValContainerType &list,
-                                                                      InternalStateType type, TimeStep *tStep)
-{
-    FloatArray n, lcoords;
-
-    if ( ct == MMAShapeFunctProjectionInterface :: coordType_local ) {
-        lcoords = coords;
-    } else {
-        computeLocalCoordinates(lcoords, coords);
-    }
-
-    this->interp.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
-
-    ///@todo Introduce support function for this type of construction..
-    answer.resize(0);
-    answer.add(n.at(1), list[0]);
-    answer.add(n.at(2), list[1]);
-    answer.add(n.at(3), list[2]);
-}
-
-
-void
 TrPlaneStrain :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refinedElement, int level, int nodeId,
                                                                   IntArray &localNodeIdArray, IntArray &globalNodeIdArray,
                                                                   HuertaErrorEstimatorInterface :: SetupMode sMode, TimeStep *tStep,
@@ -260,7 +215,7 @@ TrPlaneStrain :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement
 
 void TrPlaneStrain :: HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
-    computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
+    computeNmatrixAt(gp->giveSubPatchCoordinates(), answer);
 }
 
 

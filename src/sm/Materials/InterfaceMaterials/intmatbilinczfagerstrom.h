@@ -84,13 +84,13 @@ protected:
     FloatMatrix Iep;
     FloatArray alphav;
 
-	// indicator for davae development of preceding time step
-	bool tempDamageDev;
-	bool oldDamageDev;
+    // indicator for davae development of preceding time step
+    bool tempDamageDev;
+    bool oldDamageDev;
 
-	// tangent stiffness from previous time step
-	FloatMatrix temp_dTdJ;
-	FloatMatrix old_dTdJ;
+    // tangent stiffness from previous time step
+    FloatMatrix temp_dTdJ;
+    FloatMatrix old_dTdJ;
 
 
 
@@ -110,7 +110,7 @@ public:
 
     double giveDamage() { return damage; }
     double giveTempDamage() { return tempDamage; }
-	bool giveOldDamageDev() {return oldDamageDev;}
+    bool giveOldDamageDev() { return oldDamageDev; }
 
     const FloatArray &giveOldMaterialJump() { return oldMaterialJump; }
     const FloatArray &giveTempMaterialJump() { return tempMaterialJump; }

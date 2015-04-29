@@ -139,31 +139,16 @@ GradDpElement :: computeStressVectorAndLocalCumulatedStrain(FloatArray &answer, 
     if ( nlGeo == 0 ) {
         FloatArray Epsilon;
         this->computeLocalStrainVector(Epsilon, gp, tStep);
-        if ( cs->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
-            dpmat->giveRealStressVectorGrad(answer, localCumulatedStrain, gp, Epsilon, nlCumulatedStrain, tStep);
-            return;
-        } else {
-            OOFEM_ERROR("unsupported mode");
-        }
+        dpmat->giveRealStressVectorGrad(answer, localCumulatedStrain, gp, Epsilon, nlCumulatedStrain, tStep);
     } else if ( nlGeo == 1 ) {
         if ( elem->giveDomain()->giveEngngModel()->giveFormulation() == TL ) {
             FloatArray vF;
             this->computeDeformationGradientVector(vF, gp, tStep);
-            if ( cs->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
-                dpmat->giveFirstPKStressVectorGrad(answer, localCumulatedStrain, gp, vF, nlCumulatedStrain, tStep);
-                return;
-            } else {
-                OOFEM_ERROR("unsupported mode");
-            }
+            dpmat->giveFirstPKStressVectorGrad(answer, localCumulatedStrain, gp, vF, nlCumulatedStrain, tStep);
         } else {
             FloatArray vF;
             this->computeDeformationGradientVector(vF, gp, tStep);
-            if ( cs->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
-                dpmat->giveCauchyStressVectorGrad(answer, localCumulatedStrain, gp, vF, nlCumulatedStrain, tStep);
-                return;
-            } else {
-                OOFEM_ERROR("unsupported mode");
-            }
+            dpmat->giveCauchyStressVectorGrad(answer, localCumulatedStrain, gp, vF, nlCumulatedStrain, tStep);
         }
     }
 }
@@ -233,7 +218,6 @@ GradDpElement :: computeNonlocalGradient(FloatArray &answer, GaussPoint *gp, Tim
 {
     FloatMatrix Bk;
     FloatArray u;
-    FloatArray aux;
 
     this->computeBkappaMatrixAt(gp, Bk);
     this->computeNonlocalDegreesOfFreedom(u, tStep);

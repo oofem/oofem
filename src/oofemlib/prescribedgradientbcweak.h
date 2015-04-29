@@ -35,7 +35,8 @@
 #ifndef PRESCRIBEDGRADIENTBCWEAK_H_
 #define PRESCRIBEDGRADIENTBCWEAK_H_
 
-#include "prescribedgradientbc.h"
+#include "prescribedgradienthomogenization.h"
+#include "activebc.h"
 #include "geometry.h"
 
 #include <unordered_map>
@@ -46,6 +47,7 @@
 #define _IFT_PrescribedGradientBCWeak_NumTractionNodeSpacing   "tractionnodespacing"
 #define _IFT_PrescribedGradientBCWeak_DuplicateCornerNodes   "duplicatecornernodes"
 #define _IFT_PrescribedGradientBCWeak_TangDistPadding   "tangdistpadding"
+#define _IFT_PrescribedGradientBCWeak_TracDofScaling   "tracdofscaling"
 
 namespace oofem {
 class IntegrationRule;
@@ -58,13 +60,13 @@ public:
     TractionElement() {}
     virtual ~TractionElement() {}
 
-    void computeN_Constant(FloatArray &oN, const double &iXi) const { oN = FloatArray{1.0}; }
-    void computeN_Linear(FloatArray &oN, const double &iXi) const { oN = {0.5*(1.0-iXi), 0.5*(1.0+iXi)}; }
+    void computeN_Constant(FloatArray &oN, const double &iXi) const { oN = FloatArray { 1.0 }; }
+    void computeN_Linear(FloatArray &oN, const double &iXi) const { oN = { 0.5 * ( 1.0 - iXi ), 0.5 * ( 1.0 + iXi ) }; }
 
-    std::vector<int> mTractionNodeInd;
+    std :: vector< int >mTractionNodeInd;
 
     // Interior segments used for Gaussian quadrature
-    std::vector<Line> mInteriorSegments;
+    std :: vector< Line >mInteriorSegments;
 
     FloatArray mStartCoord;
     FloatArray mEndCoord;
@@ -78,62 +80,52 @@ public:
  * @author Erik Svenning
  * @date April 17, 2014
  */
-class PrescribedGradientBCWeak : public PrescribedGradientBC
+class PrescribedGradientBCWeak : public ActiveBoundaryCondition, public PrescribedGradientHomogenization
 {
 public:
-    PrescribedGradientBCWeak(int n, Domain * d);
+    PrescribedGradientBCWeak(int n, Domain *d);
     virtual ~PrescribedGradientBCWeak();
+
+    void clear();
 
     virtual int giveNumberOfInternalDofManagers();
     virtual DofManager *giveInternalDofManager(int i);
 
     virtual bcType giveType() const { return UnknownBT; }
 
-    /**
-     * Initializes receiver according to object description stored in input record.
-     * The input record contains two fields;
-     * - devGradient \#columns { d_11 d_22 ... d_21 ... } (required)
-     * - pressure p (required)
-     * The gradient should be in Voigt notation (only the deviatoric part will be used)
-     */
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual void postInitialize();
 
+    virtual void computeField(FloatArray &sigma, TimeStep *tStep);
+    virtual void computeTangent(FloatMatrix &E, TimeStep *tStep);
+
     virtual void assembleVector(FloatArray &answer, TimeStep *tStep,
                                 CharType type, ValueModeType mode,
                                 const UnknownNumberingScheme &s, FloatArray *eNorm = NULL);
 
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep,
+    virtual void assemble(SparseMtrx &answer, TimeStep *tStep,
                           CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
     virtual void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,
-                               		const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
+                                    const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
     virtual void giveTractionLocationArray(IntArray &rows,
-                                    const UnknownNumberingScheme &s);
+                                           const UnknownNumberingScheme &s);
 
     virtual void giveTractionLocationArrays(int iTracElInd, IntArray &rows, CharType type,
-                                    const UnknownNumberingScheme &s);
+                                            const UnknownNumberingScheme &s);
 
     virtual void giveDisplacementLocationArrays(int iTracElInd, IntArray &rows, CharType type,
-                                    const UnknownNumberingScheme &s);
+                                                const UnknownNumberingScheme &s);
 
     virtual const char *giveClassName() const { return "PrescribedGradientBCWeak"; }
     virtual const char *giveInputRecordName() const { return _IFT_PrescribedGradientBCWeak_Name; }
 
-    /**
-     * Computes the homogenized, macroscopic, field (stress).
-     * @param sigma Output quantity (typically stress).
-     * @param eid Equation ID to which sigma belongs.
-     * @param tStep Active time step.
-     */
-    void computeField(FloatArray &sigma, TimeStep *tStep);
-
-    /// Routines for postprocessing
-    size_t giveNumberOfTractionElements() const {return mpTractionElements.size();}
-    void giveTractionElCoord(size_t iElInd, FloatArray &oStartCoord, FloatArray &oEndCoord) const {oStartCoord = mpTractionElements[iElInd]->mStartCoord; oEndCoord = mpTractionElements[iElInd]->mEndCoord;}
+    // Routines for postprocessing
+    size_t giveNumberOfTractionElements() const { return mpTractionElements.size(); }
+    void giveTractionElCoord(size_t iElInd, FloatArray &oStartCoord, FloatArray &oEndCoord) const { oStartCoord = mpTractionElements [ iElInd ]->mStartCoord; oEndCoord = mpTractionElements [ iElInd ]->mEndCoord; }
     void giveTractionElNormal(size_t iElInd, FloatArray &oNormal, FloatArray &oTangent) const;
     void giveTractionElArcPos(size_t iElInd, double &oXiStart, double &oXiEnd) const;
     void giveBoundaries(IntArray &oBoundaries);
@@ -185,6 +177,8 @@ protected:
      */
     double mTangDistPadding;
 
+    double mTracDofScaling;
+
     /// Lower corner of domain (assuming a rectangular RVE)
     FloatArray mLC;
 
@@ -193,39 +187,46 @@ protected:
 
 
     /// DOF-managers for the independent traction discretization
-    std::vector<Node*> mpTractionNodes;
-    std::vector<Node*> mpTractionMasterNodes;
+    std :: vector< Node * >mpTractionNodes;
+    std :: vector< Node * >mpTractionMasterNodes;
 
-    /// Lock displacements in one node i periodic
+    /// Lock displacements in one node if periodic
     Node *mpDisplacementLock;
+    int mLockNodeInd;
     double mDispLockScaling;
 
     /// Elements for the independent traction discretization
-    std::vector<TractionElement*> mpTractionElements;
+    std :: vector< TractionElement * >mpTractionElements;
 
 
     /**
      * Map from a traction element to displacement elements it
      * interacts with everywhere on gamma.
      */
-    std :: unordered_map< int, std :: vector< int > > mMapTractionElDispElGamma;
+    std :: unordered_map< int, std :: vector< int > >mMapTractionElDispElGamma;
 
     /**
      * Map from a traction element to displacement node and
      * crack intersection coordinates inside the element.
      * This map is used when creating the integration rule.
      */
-    std :: unordered_map<int, std::vector<FloatArray> > mTractionElInteriorCoordinates;
+    std :: unordered_map< int, std :: vector< FloatArray > >mTractionElInteriorCoordinates;
 
 
-    std :: unordered_map<int, std::vector<int> > mTracElDispNodes;
+    std :: unordered_map< int, std :: vector< int > >mTracElDispNodes;
 
+public:
+    void recomputeTractionMesh();
+
+protected:
     void createTractionMesh(bool iEnforceCornerPeriodicity, int iNumSides);
-    void buildMaps(const std::vector< std::pair<FloatArray, bool> > &iBndNodeCoordsFull);
+    bool damageExceedsTolerance(Element *el);
+
+    void buildMaps(const std :: vector< std :: pair< FloatArray, bool > > &iBndNodeCoordsFull);
 
     void integrateTangent(FloatMatrix &oTangent, size_t iTracElInd);
 
-    void assembleTangentGPContribution(FloatMatrix &oTangent, size_t iTracElInd, GaussPoint &iGP, const FloatArray &iBndCoord, std :: unordered_map<int, IntArray > &iGlobalNodeIndToPosInLocalLocArray, const double &iScaleFactor);
+    void assembleTangentGPContribution(FloatMatrix &oTangent, size_t iTracElInd, GaussPoint &iGP, const FloatArray &iBndCoord, std :: unordered_map< int, IntArray > &iGlobalNodeIndToPosInLocalLocArray, const double &iScaleFactor);
 
     IntegrationRule *createNewIntegrationRule(int iTracElInd);
 
@@ -233,8 +234,6 @@ protected:
 
     void giveTractionUnknows(FloatArray &oTracUnknowns, ValueModeType mode, TimeStep *tStep, int iTracElInd);
     void giveDisplacementUnknows(FloatArray &oDispUnknowns, ValueModeType mode, TimeStep *tStep, int iTracElInd);
-
-    double domainSize();
 
     bool pointIsOnGammaPlus(const FloatArray &iPos) const;
     void giveMirroredPointOnGammaMinus(FloatArray &oPosMinus, const FloatArray &iPosPlus) const;
@@ -246,65 +245,65 @@ protected:
     virtual bool boundaryPointIsOnActiveBoundary(const FloatArray &iPos) const = 0;
 
     int giveSideIndex(const FloatArray &iPos) const;
-    bool closePointExists(const std::vector< std::pair<FloatArray, bool> > &iCoordArray, const FloatArray &iPos, const double &iMeshTol2) const;
+    bool closePointExists(const std :: vector< std :: pair< FloatArray, bool > > &iCoordArray, const FloatArray &iPos, const double &iMeshTol2) const;
 };
 
-class ArcPosSortFunction {
+class ArcPosSortFunction
+{
 public:
-    ArcPosSortFunction(const FloatArray &iStartPos):mStartPos(iStartPos) {}
+    ArcPosSortFunction(const FloatArray &iStartPos) : mStartPos(iStartPos) {}
     ~ArcPosSortFunction() {}
 
     bool operator()(const FloatArray &iVec1, const FloatArray &iVec2) const
     {
-                return mStartPos.distance_square(iVec1) < mStartPos.distance_square(iVec2);
+        return mStartPos.distance_square(iVec1) < mStartPos.distance_square(iVec2);
     }
 
 private:
     const FloatArray mStartPos;
 };
 
-template <class T>
-class ArcPosSortFunction3 {
+template< class T >
+class ArcPosSortFunction3
+{
 public:
-    ArcPosSortFunction3(const FloatArray &iLC, const FloatArray &iUC, const double &iTol, int iSideInd):
-    mLC(iLC),
-    mUC(iUC),
-    mTol(iTol),
-    mSideInd(iSideInd)
-    {
-
-    }
+    ArcPosSortFunction3(const FloatArray &iLC, const FloatArray &iUC, const double &iTol, int iSideInd) :
+        mLC(iLC),
+        mUC(iUC),
+        mTol(iTol),
+        mSideInd(iSideInd)
+    {}
 
     ~ArcPosSortFunction3() {}
 
-    bool operator()(const std::pair<FloatArray, T> &iVec1, const std::pair<FloatArray,int> &iVec2) const
+    bool operator()(const std :: pair< FloatArray, T > &iVec1, const std :: pair< FloatArray, int > &iVec2) const
     {
-                return calcArcPos(iVec1.first) < calcArcPos(iVec2.first);
+        return calcArcPos(iVec1.first) < calcArcPos(iVec2.first);
     }
 
     double calcArcPos(const FloatArray &iPos) const
     {
-        double Lx = mUC[0] - mLC[0];
-        double Ly = mUC[1] - mLC[1];
+        double Lx = mUC [ 0 ] - mLC [ 0 ];
+        double Ly = mUC [ 1 ] - mLC [ 1 ];
 
-        if(mSideInd == 0){
-            const FloatArray &x = {mUC[0], mLC[1]};
+        if ( mSideInd == 0 ) {
+            const FloatArray &x = { mUC [ 0 ], mLC [ 1 ] };
             double dist = Lx + iPos.distance(x);
             return dist;
         }
 
-        if(mSideInd == 1){
+        if ( mSideInd == 1 ) {
             double dist = Lx + Ly + iPos.distance(mUC);
             return dist;
         }
 
-        if(mSideInd == 2){
-            const FloatArray &x = {mLC[0], mUC[1]};
+        if ( mSideInd == 2 ) {
+            const FloatArray &x = { mLC [ 0 ], mUC [ 1 ] };
             double dist = Lx + Ly + Lx + iPos.distance(x);
             return dist;
         }
 
-        if(mSideInd == 3){
+        if ( mSideInd == 3 ) {
             double dist = iPos.distance(mLC);
             return dist;
         }
@@ -321,7 +320,6 @@ private:
     // 0->x=L, 1->y=L, 2->x=0, 3->y=0
     const int mSideInd;
 };
-
 } /* namespace oofem */
 
 #endif /* PRESCRIBEDGRADIENTBCWEAK_H_ */

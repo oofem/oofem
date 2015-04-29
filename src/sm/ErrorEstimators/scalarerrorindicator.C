@@ -107,10 +107,10 @@ ScalarErrorIndicator :: initializeFrom(InputRecord *ir)
 RemeshingCriteria *
 ScalarErrorIndicator :: giveRemeshingCrit()
 {
-    if ( this->rc ) {
-        return this->rc;
+    if ( !this->rc ) {
+        this->rc.reset( new DirectErrorIndicatorRC(1, this) );
     }
 
-    return ( this->rc = new DirectErrorIndicatorRC(1, this) );
+    return this->rc.get();
 }
 } // end namespace oofem

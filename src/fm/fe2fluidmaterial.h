@@ -40,6 +40,8 @@
 #include "mixedgradientpressurebc.h"
 #include "floatmatrix.h"
 
+#include <memory>
+
 ///@name Input fields for FE^2 fluid material
 //@{
 #define _IFT_FE2FluidMaterial_Name "fe2fluidmaterial"
@@ -47,7 +49,7 @@
 //@}
 
 namespace oofem {
-class StokesFlow;
+class EngngModel;
 
 /**
  * Class representing material status for the subscale fluid, i.e an Representative Volume Element (RVE).
@@ -57,7 +59,7 @@ class FE2FluidMaterialStatus : public FluidDynamicMaterialStatus
 {
 protected:
     /// The subscale flow
-    StokesFlow *rve;
+    std :: unique_ptr< EngngModel > rve;
     /// Boundary condition in RVE that performs the computational homogenization.
     MixedGradientPressureBC *bc;
 
@@ -83,7 +85,7 @@ public:
     /// Destructor
     virtual ~FE2FluidMaterialStatus();
 
-    StokesFlow *giveRVE() { return this->rve; }
+    EngngModel *giveRVE() { return this->rve.get(); }
     MixedGradientPressureBC *giveBC() { return this->bc; }
 
     void markOldTangents();
@@ -92,15 +94,15 @@ public:
     double giveVOFFraction() { return this->voffraction; }
 
     /// Creates/Initiates the RVE problem.
-    virtual bool createRVE(int n, GaussPoint *gp, const std :: string &inputfile);
+    bool createRVE(int n, GaussPoint *gp, const std :: string &inputfile);
 
     /// Copies time step data to RVE.
-    virtual void setTimeStep(TimeStep *tStep);
+    void setTimeStep(TimeStep *tStep);
 
     FloatMatrix &giveDeviatoricTangent() { return Ed; }
-    FloatArray &giveDeviatoricPressureTangent() { return Ep; };
-    FloatArray &giveVolumetricDeviatoricTangent() { return Cd; };
-    double &giveVolumetricPressureTangent() { return Cp; };
+    FloatArray &giveDeviatoricPressureTangent() { return Ep; }
+    FloatArray &giveVolumetricDeviatoricTangent() { return Cd; }
+    double &giveVolumetricPressureTangent() { return Cp; }
 
     double givePressure() { return this->pressure; }
     void letPressureBe(double val) { this->pressure = val; }

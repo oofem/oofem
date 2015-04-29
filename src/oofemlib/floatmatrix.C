@@ -164,11 +164,11 @@ FloatMatrix &FloatMatrix :: operator = ( std :: initializer_list< std :: initial
 
 FloatMatrix &FloatMatrix :: operator = ( std :: initializer_list< FloatArray >mat )
 {
-    RESIZE( ( int ) mat.begin()->giveSize(), ( int ) mat.size() );
+    RESIZE( mat.begin()->giveSize(), ( int ) mat.size() );
     auto p = this->values.begin();
     for ( auto col : mat ) {
 #if DEBUG
-        if ( this->nRows != ( int ) col.giveSize() ) {
+        if ( this->nRows != col.giveSize() ) {
                 OOFEM_ERROR("Initializer list has inconsistent column sizes.");
         }
 #endif
@@ -188,7 +188,6 @@ void FloatMatrix :: checkBounds(int i, int j) const
     if ( i <= 0 ) {
         OOFEM_ERROR("matrix error on rows : %d < 0", i);
     }
-
     if ( j <= 0 ) {
         OOFEM_ERROR("matrix error on columns : %d < 0", j);
     }
@@ -198,6 +197,7 @@ void FloatMatrix :: checkBounds(int i, int j) const
     }
 
     if ( j > nColumns ) {
+		printf("APA \n");
         OOFEM_ERROR("matrix error on columns : %d > %d", j, nColumns);
     }
 }
@@ -1423,30 +1423,29 @@ double FloatMatrix :: giveDeterminant() const
     return 0.;
 }
 
+
+void FloatMatrix :: beDiagonal(const FloatArray &diag)
+{
+    int n = diag.giveSize();
+    this->resize(n, n);
+    for ( int i = 0; i < n; ++i ) {
+        (*this)(i, i) = diag[i];
+    }
+}
+
+
 double FloatMatrix :: giveTrace() const
-// Returns the trace (sum of diagonal terms) of the receiver.
 {
 #  ifdef DEBUG
     if ( !this->isSquare() ) {
         OOFEM_ERROR("cannot compute the trace of a non-square %d by %d matrix", nRows, nColumns);
     }
 #  endif
-
-    if ( nRows == 1 ) {
-        return values [ 0 ];
-    } else if ( nRows == 2 ) {
-        return ( values [ 0 ] + values [ 3 ] );
-    } else if ( nRows == 3 ) {
-        return ( values [ 0 ] + values [ 4 ] + values [ 8 ] );
-    } else {
-        double answer = 0.;
-        for ( int k = 0; k < nRows; k++ ) {
-            answer += values [ k * ( nRows + 1 ) ];
-        }
-        return answer;
+    double answer = 0.;
+    for ( int k = 0; k < nRows; k++ ) {
+        answer += values [ k * ( nRows + 1 ) ];
     }
-
-    return 0.;
+    return answer;
 }
 
 
@@ -1643,11 +1642,11 @@ void FloatMatrix :: beMatrixForm(const FloatArray &aArray)
 void FloatMatrix :: changeComponentOrder()
 {
     // Changes index order between abaqus <-> OOFEM
-    //#  ifdef DEBUG
-    //	if ( nRows != 6 || nColumns != 6 ) {
-    //		OOFEM_ERROR("matrix dimension is not 6x6");
-    //	}
-    //#  endif
+//#  ifdef DEBUG
+//    if ( nRows != 6 || nColumns != 6 ) {
+//        OOFEM_ERROR("matrix dimension is not 6x6");
+//    }
+//#  endif
 
     if ( nRows == 6 && nColumns == 6 ) {
         // This could probably be done more beautifully + efficiently.
@@ -1668,7 +1667,7 @@ void FloatMatrix :: changeComponentOrder()
         std :: swap( this->at(4, 5), this->at(6, 5) );
     } else if ( nRows == 9 && nColumns == 9 ) {
         // OOFEM:           11, 22, 33, 23, 13, 12, 32, 31, 21
-        // UMAT:			11, 22, 33, 12, 13, 23, 32, 21, 31
+        // UMAT:            11, 22, 33, 12, 13, 23, 32, 21, 31
         const int abq2oo [ 9 ] = {
             1,  2,  3,  6,  5,  4,  7,  9,  8
         };

@@ -66,12 +66,11 @@ IRResultType MacroLSpace :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;              // Required by IR_GIVE_FIELD macro
 
-    this->LSpace :: initializeFrom(ir);
-
     IR_GIVE_FIELD(ir, this->microMasterNodes, _IFT_MacroLspace_microMasterNodes);
 
     if ( this->microMasterNodes.giveSize() != 8 ) {
-        OOFEM_ERROR("Need 8 master nodes from the microproblem defined on macroLspace element");
+        OOFEM_WARNING("Need 8 master nodes from the microproblem defined on macroLspace element");
+        return IRRT_BAD_FORMAT;
     }
 
     IR_GIVE_FIELD(ir, this->microBoundaryNodes, _IFT_MacroLspace_microBoundaryNodes);
@@ -92,7 +91,7 @@ IRResultType MacroLSpace :: initializeFrom(InputRecord *ir)
         }
     }
 #endif
-    return IRRT_OK;
+    return LSpace :: initializeFrom(ir);;
 }
 
 
@@ -155,10 +154,6 @@ void MacroLSpace :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode 
 //assign values to DOF on the boundary according to definition on macrolspace and actual displacement stage
 void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
 {
-    //Domain *microDomain = problemMicro->giveDomain(1);
-    //EngngModel *microEngngModel = microDomain->giveEngngModel();
-    //Domain *domain = this->giveDomain();
-    DofManager *DofMan;
     GeneralBoundaryCondition *GeneralBoundaryCond;
     Function *timeFunct;
     DynamicInputRecord ir_func, ir_bc;
@@ -196,8 +191,7 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
     microDomain->resizeBoundaryConditions( 3 * microBoundaryNodes.giveSize() ); //from domain.C
 
     counter = 1;
-    for ( int i = 1; i <= microDomain->giveNumberOfDofManagers(); i++ ) { //go through all nodes on microDomain
-        DofMan = microDomain->giveDofManager(i);
+    for ( auto &DofMan : microDomain->giveDofManagers() ) { //go through all nodes on microDomain
         if ( microBoundaryNodes.contains( DofMan->giveGlobalNumber() ) ) { //if the node number is on boundary
             this->evalInterpolation( n, microMaterial->microMasterCoords, * DofMan->giveCoordinates() );
             //n.printYourself();

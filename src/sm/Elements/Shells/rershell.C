@@ -60,8 +60,6 @@ REGISTER_Element(RerShell);
 RerShell :: RerShell(int n, Domain *aDomain) :
     CCTPlate3d(n, aDomain)
 {
-    numberOfDofMans  = 3;
-    GtoLRotationMatrix = NULL;
     Rx = 1.e+40;
     Ry = 1.e+40;
     Rxy = 1.e+40;
@@ -278,7 +276,7 @@ IRResultType
 RerShell :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 1;
-    IRResultType result = this->StructuralElement :: initializeFrom(ir);
+    IRResultType result = StructuralElement :: initializeFrom(ir);
     if ( result != IRRT_OK ) {
         return result;
     }
@@ -386,7 +384,7 @@ RerShell :: giveLocalCoordinateSystem(FloatMatrix &answer)
 //
 {
     this->computeGtoLRotationMatrix();
-    answer = * GtoLRotationMatrix;
+    answer = GtoLRotationMatrix;
     return 1;
 }
 
@@ -438,7 +436,7 @@ RerShell :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
 
     //check that the z is within the element
     StructuralCrossSection *cs = this->giveStructuralCrossSection();
-    GaussPoint _gp(NULL, 1, new FloatArray ( answer ), 1.0, _2dPlate);
+    GaussPoint _gp(NULL, 1, answer, 1.0, _2dPlate);
 
     double elthick;
 
@@ -478,10 +476,7 @@ RerShell :: computeGtoLRotationMatrix(FloatMatrix &answer)
 {
     double val;
 
-    // test if pereviously computed
-    if ( GtoLRotationMatrix == NULL ) {
-        this->computeGtoLRotationMatrix();
-    }
+    this->computeGtoLRotationMatrix();
 
 
     answer.resize(18, 18);
@@ -489,7 +484,7 @@ RerShell :: computeGtoLRotationMatrix(FloatMatrix &answer)
 
     for ( int i = 1; i <= 3; i++ ) {
         for ( int j = 1; j <= 3; j++ ) {
-            val = GtoLRotationMatrix->at(i, j);
+            val = GtoLRotationMatrix.at(i, j);
             answer.at(i, j)     = val;
             answer.at(i + 3, j + 3) = val;
             answer.at(i + 6, j + 6) = val;
@@ -521,7 +516,7 @@ RerShell :: giveLocalCoordinates(FloatArray &answer, const FloatArray &global)
     // is defined
 
     this->computeGtoLRotationMatrix();
-    answer.beProductOf(* GtoLRotationMatrix, global);
+    answer.beProductOf(GtoLRotationMatrix, global);
 }
 
 
@@ -581,7 +576,7 @@ RerShell :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gauss
     if ( ( type == GlobalForceTensor ) || ( type == GlobalMomentumTensor ) ||
         ( type == GlobalStrainTensor ) || ( type == GlobalCurvatureTensor ) ) {
         this->computeGtoLRotationMatrix();
-        answer.rotatedWith(* GtoLRotationMatrix);
+        answer.rotatedWith(GtoLRotationMatrix);
     }
 }
 
@@ -626,14 +621,14 @@ RerShell :: printOutputAt(FILE *file, TimeStep *tStep)
         fprintf(file, "  strains    ");
         // eps_x, eps_y, eps_z, eps_yz, eps_xz, eps_xy (global)
         fprintf( file,
-                " % .4e % .4e % .4e % .4e % .4e % .4e ",
+                " %.4e %.4e %.4e %.4e %.4e %.4e ",
                 v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
 
         this->giveIPValue(v, gp, IST_ShellCurvatureTensor, tStep);
         fprintf(file, "\n              curvatures ");
         // k_x, k_y, k_z, k_yz, k_xz, k_xy (global)
         fprintf( file,
-                " % .4e % .4e % .4e % .4e % .4e % .4e ",
+                " %.4e %.4e %.4e %.4e %.4e %.4e ",
                 v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
 
         // Forces - Moments
@@ -641,14 +636,14 @@ RerShell :: printOutputAt(FILE *file, TimeStep *tStep)
         fprintf(file, "\n              stresses   ");
         // n_x, n_y, n_z, v_yz, v_xz, v_xy (global)
         fprintf( file,
-                " % .4e % .4e % .4e % .4e % .4e % .4e ",
+                " %.4e %.4e %.4e %.4e %.4e %.4e ",
                 v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
 
         this->giveIPValue(v, gp, IST_ShellMomentumTensor, tStep);
         fprintf(file, "\n              moments    ");
         // m_x, m_y, m_z, m_yz, m_xz, m_xy (global)
         fprintf( file,
-                " % .4e % .4e % .4e % .4e % .4e % .4e ",
+                " %.4e %.4e %.4e %.4e %.4e %.4e ",
                 v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
 
         fprintf(file, "\n");

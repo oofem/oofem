@@ -63,8 +63,6 @@ class TimeStep;
 class OOFEM_EXPORT PointLoad : public BodyLoad
 {
 protected:
-    /// Number of "DOFs" which represent load geometry.
-    int nDofs;
     /// Load type (its physical meaning).
     bcType lType;
     /// Load coordinate system.
@@ -79,7 +77,6 @@ public:
      * @param d Domain to which new object will belongs.
      */
     PointLoad(int n, Domain * d) : BodyLoad(n, d) {
-        nDofs = 0;
         coordSystemType = CST_Global;
     }
 
@@ -88,10 +85,6 @@ public:
      * Gives coordinates of the receiver
      */
     const FloatArray & giveCoordinates() const { return coords; }
-    /**
-     * Return receiver's number of "DOFs". Should correspond to number of DOFs on loaded entity.
-     */
-    int giveNumberOfDofs() { return nDofs; }
 
     virtual CoordSystType giveCoordSystMode() { return coordSystemType; }
     //virtual FormulationType giveFormulationType () { return FT_Entity; }

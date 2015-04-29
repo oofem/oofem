@@ -189,7 +189,7 @@ MaxwellChainMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 
 
 void
-MaxwellChainMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tNow)
+MaxwellChainMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tStep)
 {
     /*
      * Updates hidden variables used to effectively trace the load history
@@ -203,12 +203,12 @@ MaxwellChainMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tNow)
     MaxwellChainMaterialStatus *status =
         static_cast< MaxwellChainMaterialStatus * >( this->giveStatus(gp) );
 
-    this->giveUnitStiffnessMatrix(Binv, gp, tNow);
+    this->giveUnitStiffnessMatrix(Binv, gp, tStep);
     help = status->giveTempStrainVector();
     help.subtract( status->giveStrainVector() );
 
     // Subtract the stress-independent part of strain
-    this->computeTrueStressIndependentStrainVector(deltaEps0, gp, tNow, VM_Incremental);
+    this->computeTrueStressIndependentStrainVector(deltaEps0, gp, tStep, VM_Incremental);
     if ( deltaEps0.giveSize() ) {
         help.subtract(deltaEps0);
     }
@@ -216,10 +216,10 @@ MaxwellChainMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tNow)
     help1.beProductOf(Binv, help);
 
     ///@warning THREAD UNSAFE!
-    this->updateEparModuli(relMatAge + ( tNow->giveTargetTime() - 0.5 * tNow->giveTimeIncrement() ) / timeFactor);
+    this->updateEparModuli(relMatAge + ( tStep->giveTargetTime() - 0.5 * tStep->giveTimeIncrement() ) / timeFactor);
 
     for ( int mu = 1; mu <= nUnits; mu++ ) {
-        deltaYmu = tNow->giveTimeIncrement() / timeFactor / this->giveCharTime(mu);
+        deltaYmu = tStep->giveTimeIncrement() / timeFactor / this->giveCharTime(mu);
         deltaYmu = pow( deltaYmu, this->giveCharTimeExponent(mu) );
 
         lambdaMu = ( 1.0 - exp(-deltaYmu) ) / deltaYmu;
@@ -252,8 +252,7 @@ MaxwellChainMaterial :: CreateStatus(GaussPoint *gp) const
 IRResultType
 MaxwellChainMaterial :: initializeFrom(InputRecord *ir)
 {
-    RheoChainMaterial :: initializeFrom(ir);
-    return IRRT_OK;
+    return RheoChainMaterial :: initializeFrom(ir);
 }
 
 /****************************************************************************************/

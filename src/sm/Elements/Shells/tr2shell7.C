@@ -57,7 +57,7 @@ IntArray Tr2Shell7 :: orderingNodes = {1, 2, 3, 19, 20, 21, 37, 4, 5, 6, 22, 23,
                        10, 11, 12, 28, 29, 30, 40, 13, 14, 15, 31, 32, 33, 41, 16, 17, 18,
                        34, 35, 36, 42};
 IntArray Tr2Shell7 :: orderingEdgeNodes = {1, 2, 3, 10, 11, 12, 19, 4, 5, 6, 13, 14, 15, 20, 7, 8, 9, 16, 17, 18, 21};
-		       
+
 
 Tr2Shell7 :: Tr2Shell7(int n, Domain *aDomain) : Shell7Base(n, aDomain)
 {
@@ -161,7 +161,7 @@ Tr2Shell7 :: computeVolumeAroundLayer(GaussPoint *gp, int layer)
     double detJ;
     FloatMatrix Gcov;
     FloatArray lcoords;
-    lcoords = * gp->giveNaturalCoordinates();
+    lcoords = gp->giveNaturalCoordinates();
     this->evalInitialCovarBaseVectorsAt(lcoords, Gcov);
     detJ = Gcov.giveDeterminant() * 0.5 * this->layeredCS->giveLayerThickness(layer);
     return detJ *gp->giveWeight();

@@ -57,9 +57,9 @@ class OOFEM_EXPORT SparseGeneralEigenValueSystemNM : public NumericalMethod
 {
 public:
     /// Constructor.
-    SparseGeneralEigenValueSystemNM(Domain * d, EngngModel * m) : NumericalMethod(d, m) { };
+    SparseGeneralEigenValueSystemNM(Domain * d, EngngModel * m) : NumericalMethod(d, m) { }
     /// Destructor.
-    virtual ~SparseGeneralEigenValueSystemNM() { };
+    virtual ~SparseGeneralEigenValueSystemNM() { }
 
     virtual const char *giveClassName() const = 0;
     std :: string errorInfo(const char *func) { return std :: string(this->giveClassName()) + func; }
@@ -74,7 +74,7 @@ public:
      * @param nroot number of required eigenvalues.
      * @return NM_Status value.
      */
-    virtual NM_Status solve(SparseMtrx *A, SparseMtrx *B, FloatArray *x, FloatMatrix *v, double rtol, int nroot) = 0;
+    virtual NM_Status solve(SparseMtrx &A, SparseMtrx &B, FloatArray &x, FloatMatrix &v, double rtol, int nroot) = 0;
 };
 } // end namespace oofem
 #endif // sparsegeneigenvalsystemnm_h

@@ -33,6 +33,7 @@
  */
 
 #include "latticetransportelement.h"
+#include "transportmaterial.h"
 
 namespace oofem {
 LatticeTransportElement :: LatticeTransportElement(int n, Domain *aDomain, ElementMode em) : TransportElement(n, aDomain, em)
@@ -45,8 +46,9 @@ LatticeTransportElement :: ~LatticeTransportElement()
 IRResultType
 LatticeTransportElement :: initializeFrom(InputRecord *ir)
 {
-    TransportElement :: initializeFrom(ir);
-
-    return IRRT_OK;
+    return TransportElement :: initializeFrom(ir);
 }
+
+
+
 } // end namespace oofem

@@ -35,8 +35,9 @@
 #ifndef tutorialmaterial_h
 #define tutorialmaterial_h
 
-#include "Materials/isolinearelasticmaterial.h"
+#include "Materials/structuralmaterial.h"
 #include "Materials/structuralms.h"
+#include "Materials/isolinearelasticmaterial.h"
 
 ///@name Input fields for TutorialMaterial
 //@{
@@ -50,52 +51,50 @@ class Domain;
 
 /**
  * This class implements a isotropic plastic linear material (J2 plasticity condition is used).
- * in a finite element problem.
- * Both kinematic and isotropic hardening is supported.
+ * @author Jim Brozoulis
  */
-class TutorialMaterial : public IsotropicLinearElasticMaterial
+class TutorialMaterial : public StructuralMaterial
 {
 protected:
-
     /// Hardening modulus.
     double H;
 
     /// Initial (uniaxial) yield stress.
     double sig0;
     
-    
+    IsotropicLinearElasticMaterial D;
+
 public:
     TutorialMaterial(int n, Domain * d);
     virtual ~TutorialMaterial();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &ir);
     virtual const char *giveInputRecordName() const { return _IFT_TutorialMaterial_Name; }
     virtual const char *giveClassName() const { return "TutorialMaterial"; }
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return true; }
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
-    const void giveDeviatoricProjectionMatrix(FloatMatrix &answer);
     // stress computation methods
     virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
     
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    
+
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+
 protected:
+    static void giveDeviatoricProjectionMatrix(FloatMatrix &answer);
     
     static double computeJ2InvariantOf(const FloatArray &sigV);
-    //double evaluateYieldFunction();
 
     static void computeSphDevPartOf(const FloatArray &sigV, FloatArray &sigSph, FloatArray &sigDev); 
 };
 
 
 
-
-
 class TutorialMaterialStatus : public StructuralMaterialStatus
 {
 protected:
-
     /// Temporary plastic strain (the given iteration)
     FloatArray tempPlasticStrain;
     
@@ -109,17 +108,17 @@ protected:
 
 public:
     TutorialMaterialStatus(int n, Domain * d, GaussPoint * g);
-    virtual ~TutorialMaterialStatus(){};
+    virtual ~TutorialMaterialStatus() {}
 
     const FloatArray &givePlasticStrain() { return plasticStrain; }
 
-    void letTempPlasticStrainBe(FloatArray values) { tempPlasticStrain = std :: move(values); }
+    void letTempPlasticStrainBe(const FloatArray &values) { tempPlasticStrain = values; }
 
-    const double &giveKappa() { return this->kappa; }
+    double giveKappa() { return this->kappa; }
 
     void letTempKappaBe(double value) { tempKappa = value; }
     
-    void letTempDevTrialStressBe(FloatArray values) { tempDevTrialStress = std :: move(values); }
+    void letTempDevTrialStressBe(const FloatArray &values) { tempDevTrialStress = values; }
     const FloatArray &giveTempDevTrialStress() { return tempDevTrialStress; }
     
     virtual const char *giveClassName() const { return "TutorialMaterialStatus"; }
@@ -128,20 +127,12 @@ public:
 
     virtual void updateYourself(TimeStep *tStep);
 
-    
-    
     // semi optional methods
     //virtual void printOutputAt(FILE *file, TimeStep *tStep);
-
     
     //virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
     //virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-
 };
 
-
-
-
-
 } // end namespace oofem
-#endif // j2mat_h
+#endif // tutorialmaterial_h

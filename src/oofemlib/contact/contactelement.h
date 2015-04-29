@@ -95,12 +95,12 @@ public:
     virtual void setupIntegrationPoints(){};
     
     
-    ContactElement *giveSlave(const int num) { return slaveObjectList[num-1]; }; 
-    int giveNumberOfSlaves() { return slaveObjectList.size(); };
-    virtual int instanciateYourself(DataReader *dr){ return 1; };
+    ContactElement *giveSlave(const int num) { return slaveObjectList[num-1]; }
+    int giveNumberOfSlaves() { return slaveObjectList.size(); }
+    virtual int instanciateYourself(DataReader *dr){ return 1; }
     //virtual const char *giveClassName() const { return "ContactDefinition"; }
-    bool isInContact() { return inContact; };
-    virtual void giveDofManagersToAppendTo(IntArray &answer) { answer = {}; }; 
+    bool isInContact() { return inContact; }
+    virtual void giveDofManagersToAppendTo(IntArray &answer) { answer.clear(); }
     
     
     virtual void computeContactForces(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
@@ -111,8 +111,8 @@ public:
     
     virtual void giveLocationArray(IntArray &answer, const UnknownNumberingScheme &s) = 0;
     // set the dof id array if the contact element has its own dofs (Lagrange multipliers)
-    virtual void setDofIdArray(IntArray &array){ this->dofIdArray = array; };
-    virtual IntArray &giveDofIdArray(){ return this->dofIdArray; };
+    virtual void setDofIdArray(IntArray &array){ this->dofIdArray = array; }
+    virtual IntArray &giveDofIdArray(){ return this->dofIdArray; }
 };
 
 
@@ -143,7 +143,7 @@ public:
     virtual void computeGap(FloatArray &answer, TimeStep *tStep);
     virtual void computeContactTractionAt(GaussPoint *gp, FloatArray &t, FloatArray &gap, TimeStep *tStep);
     virtual void computeCmatrixAt(GaussPoint *gp, FloatArray &answer, TimeStep *TimeStep);
-    FloatArray &giveNormal() { return this->normal; };
+    FloatArray &giveNormal() { return this->normal; }
     
     
     // Necessary methods - pure virtual in base class

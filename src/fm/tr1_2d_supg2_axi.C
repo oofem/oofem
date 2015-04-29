@@ -84,8 +84,6 @@ TR1_2D_SUPG2_AXI :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;               // Required by IR_GIVE_FIELD macro
 
-    SUPGElement :: initializeFrom(ir);
-
     this->vof = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, vof, _IFT_Tr1SUPG_pvof);
     if ( vof > 0.0 ) {
@@ -102,8 +100,11 @@ TR1_2D_SUPG2_AXI :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, mat [ 1 ], _IFT_Tr1SUPG2_mat1);
     this->material = this->mat [ 0 ];
 
+    result = SUPGElement :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
     this->initGeometry();
-    //this -> updateIntegrationRules();
     return IRRT_OK;
 }
 
@@ -701,10 +702,9 @@ TR1_2D_SUPG2_AXI :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
     answer.zero();
 
     int nLoads;
-    Load *load;
     bcGeomType ltype;
     double rho;
-    FloatArray un, n, gVector;
+    FloatArray un, nV, gVector;
     double u, v, dV, coeff;
 
     // add body load (gravity) termms
@@ -712,7 +712,7 @@ TR1_2D_SUPG2_AXI :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
 
     nLoads = this->giveBodyLoadArray()->giveSize();
     for ( int i = 1; i <= nLoads; i++ ) {
-        load  = domain->giveLoad( bodyLoadArray.at(i) );
+        auto load  = domain->giveLoad( bodyLoadArray.at(i) );
         ltype = load->giveBCGeoType();
         if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ForceLoadBVT ) ) {
             load->computeComponentArrayAt(gVector, tStep, VM_Total);
@@ -721,17 +721,17 @@ TR1_2D_SUPG2_AXI :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
                     for ( GaussPoint *gp: *integrationRulesArray [ ifluid ] ) {
                         rho = this->_giveMaterial(ifluid)->give('d', gp);
                         dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
-                        computeNVector(n, gp);
+                        computeNVector(nV, gp);
                         coeff = rho * dV;
-                        u = n.at(1) * un.at(1) + n.at(2) * un.at(3) + n.at(3) * un.at(5);
-                        v = n.at(1) * un.at(2) + n.at(2) * un.at(4) + n.at(3) * un.at(6);
+                        u = nV.at(1) * un.at(1) + nV.at(2) * un.at(3) + nV.at(3) * un.at(5);
+                        v = nV.at(1) * un.at(2) + nV.at(2) * un.at(4) + nV.at(3) * un.at(6);
 
-                        answer.at(1) += coeff * ( gVector.at(1) * ( n.at(1) + t_supg * ( b [ 0 ] * u + c [ 0 ] * v ) ) );
-                        answer.at(2) += coeff * ( gVector.at(2) * ( n.at(1) + t_supg * ( b [ 0 ] * u + c [ 0 ] * v ) ) );
-                        answer.at(3) += coeff * ( gVector.at(1) * ( n.at(2) + t_supg * ( b [ 1 ] * u + c [ 1 ] * v ) ) );
-                        answer.at(4) += coeff * ( gVector.at(2) * ( n.at(2) + t_supg * ( b [ 1 ] * u + c [ 1 ] * v ) ) );
-                        answer.at(5) += coeff * ( gVector.at(1) * ( n.at(3) + t_supg * ( b [ 2 ] * u + c [ 2 ] * v ) ) );
-                        answer.at(6) += coeff * ( gVector.at(2) * ( n.at(3) + t_supg * ( b [ 2 ] * u + c [ 2 ] * v ) ) );
+                        answer.at(1) += coeff * ( gVector.at(1) * ( nV.at(1) + t_supg * ( b [ 0 ] * u + c [ 0 ] * v ) ) );
+                        answer.at(2) += coeff * ( gVector.at(2) * ( nV.at(1) + t_supg * ( b [ 0 ] * u + c [ 0 ] * v ) ) );
+                        answer.at(3) += coeff * ( gVector.at(1) * ( nV.at(2) + t_supg * ( b [ 1 ] * u + c [ 1 ] * v ) ) );
+                        answer.at(4) += coeff * ( gVector.at(2) * ( nV.at(2) + t_supg * ( b [ 1 ] * u + c [ 1 ] * v ) ) );
+                        answer.at(5) += coeff * ( gVector.at(1) * ( nV.at(3) + t_supg * ( b [ 2 ] * u + c [ 2 ] * v ) ) );
+                        answer.at(6) += coeff * ( gVector.at(2) * ( nV.at(3) + t_supg * ( b [ 2 ] * u + c [ 2 ] * v ) ) );
                     }
                 }
             }
@@ -747,8 +747,7 @@ TR1_2D_SUPG2_AXI :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
         sid = boundarySides.at(j);
         if ( ( code & FMElement_PrescribedTractionBC ) ) {
             FloatArray t, coords(1);
-            int nLoads, n, id;
-            BoundaryLoad *load;
+            int n, id;
             // integrate tractions
             n1 = sid;
             n2 = ( n1 == 3 ? 1 : n1 + 1 );
@@ -763,17 +762,17 @@ TR1_2D_SUPG2_AXI :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
             // then zero traction is assumed !!!
 
             // loop over boundary load array
-            nLoads = this->giveBoundaryLoadArray()->giveSize() / 2;
-            for ( int i = 1; i <= nLoads; i++ ) {
+            int numLoads = this->giveBoundaryLoadArray()->giveSize() / 2;
+            for ( int i = 1; i <= numLoads; i++ ) {
                 n = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
                 id = boundaryLoadArray.at(i * 2);
                 if ( id != sid ) {
                     continue;
                 }
 
-                load = dynamic_cast< BoundaryLoad * >( domain->giveLoad(n) );
-                if ( load ) {
-                    load->computeValueAt(t, tStep, coords, VM_Total);
+                auto bLoad = dynamic_cast< BoundaryLoad * >( domain->giveLoad(n) );
+                if ( bLoad ) {
+					bLoad->computeValueAt(t, tStep, coords, VM_Total);
 
                     // here it is assumed constant traction, one point integration only
                     // n1 (u,v)
@@ -1568,10 +1567,10 @@ TR1_2D_SUPG2_AXI :: updateIntegrationRules()
 
         // remap ip coords into area coords of receiver
         for ( GaussPoint *gp: *integrationRulesArray [ i ] ) {
-            approx->local2global( gc, * gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(vcoords [ i ]) );
+            approx->local2global( gc, gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(vcoords [ i ]) );
             triaApprox.global2local( lc, gc, FEIElementGeometryWrapper(this) );
             // modify original ip coords to target ones
-            gp->setSubPatchCoordinates( * gp->giveNaturalCoordinates() );
+            gp->setSubPatchCoordinates( gp->giveNaturalCoordinates() );
             gp->setNaturalCoordinates(lc);
             //gp->setWeight (gp->giveWeight()*a/area);
         }
@@ -1632,10 +1631,10 @@ TR1_2D_SUPG2_AXI :: computeVolumeAroundID(GaussPoint *gp, integrationDomain id, 
 
     if ( id == _Triangle ) {
         FEI2dTrLin __interpolation(1, 2);
-        return _r *weight *fabs( __interpolation.giveTransformationJacobian ( *gp->giveSubPatchCoordinates(), FEIVertexListGeometryWrapper(idpoly) ) );
+        return _r *weight *fabs( __interpolation.giveTransformationJacobian ( gp->giveSubPatchCoordinates(), FEIVertexListGeometryWrapper(idpoly) ) );
     } else {
         FEI2dQuadLin __interpolation(1, 2);
-        double det = fabs( __interpolation.giveTransformationJacobian( * gp->giveSubPatchCoordinates(), FEIVertexListGeometryWrapper(idpoly) ) );
+        double det = fabs( __interpolation.giveTransformationJacobian( gp->giveSubPatchCoordinates(), FEIVertexListGeometryWrapper(idpoly) ) );
         return _r * det * weight;
     }
 }
@@ -1694,7 +1693,7 @@ void TR1_2D_SUPG2_AXI :: computeBMtrx(FloatMatrix &_b, GaussPoint *gp)
 void
 TR1_2D_SUPG2_AXI :: computeNVector(FloatArray &n, GaussPoint *gp)
 {
-    this->interp.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 void

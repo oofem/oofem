@@ -1,12 +1,11 @@
 set (sm_element
-    ElementEvaluators/structuralelementevaluator.C
-    ElementEvaluators/space3delementevaluator.C
-    ElementEvaluators/planestresselementevaluator.C
+    Elements/structuralelementevaluator.C
     Elements/igaelements.C
     Elements/structuralelement.C
     Elements/nlstructuralelement.C
     Elements/structural2delement.C
     Elements/structural3delement.C
+    Elements/3D/space3delementevaluator.C
     Elements/3D/lspace.C 
     Elements/3D/lspacebb.C
     Elements/3D/qspace.C 
@@ -37,8 +36,10 @@ set (sm_element
     Elements/Plates/dkt.C 
     Elements/Plates/qdkt.C
     Elements/Plates/quad1mindlin.C
+    Elements/Plates/dkt3d.C
     Elements/Shells/rershell.C 
     Elements/Shells/tr_shell01.C 
+    Elements/Shells/tr_shell02.C 
     Elements/Shells/cct3d.C
     Elements/Shells/quad1mindlinshell3d.C
     Elements/Shells/shell7base.C
@@ -54,6 +55,7 @@ set (sm_element
     Elements/PlaneStrain/qtrplanestrain.C 
     Elements/PlaneStrain/qtrplanestraingrad.C
     Elements/PlaneStrain/trplanestrain.C 
+    Elements/PlaneStress/planestresselementevaluator.C
     Elements/PlaneStress/trplanrot.C
     Elements/PlaneStress/trplanstrss.C 
     Elements/PlaneStress/qplanstrss.C 
@@ -62,11 +64,14 @@ set (sm_element
     Elements/PlaneStress/planstrss.C
     Elements/PlaneStress/planstrssxfem.C
     Elements/PlaneStress/trplanstrssxfem.C
+    Elements/PlaneStress/qtrplanstrssxfem.C
     Elements/PlaneStress/qtrplstrgrad.C
     Elements/PlaneStress/trplanrot3d.C
     Elements/PlaneStress/qplanestressgrad.C
     Elements/PlaneStress/trplanestressrotallman.C
     Elements/PlaneStress/basicelement.C
+    Elements/PlaneStress/trplanestressrotallman3d.C
+    Elements/AbaqusUserElement.C
     Elements/htselement.C
     Elements/latticestructuralelement.C
     Elements/graddpelement.C 
@@ -122,6 +127,7 @@ set (sm_emodel
     EngineeringModels/nldeidynamic.C
     EngineeringModels/incrementallinearstatic.C
     EngineeringModels/freewarping.C 
+    EngineeringModels/structuralmaterialevaluator.C
     )
 
 set (sm_loads
@@ -138,6 +144,7 @@ set (sm_material
     Materials/structuralmaterial.C
     Materials/linearelasticmaterial.C
     Materials/isolinearelasticmaterial.C
+    Materials/anisolinearelasticmaterial.C
     Materials/ortholinearelasticmaterial.C
     Materials/BoneMaterials/trabbonematerial.C 
     Materials/BoneMaterials/trabbonenl3d.C 
@@ -165,12 +172,14 @@ set (sm_material
     Materials/RheoChainMaterials/maxwellChM.C 
     Materials/RheoChainMaterials/kelvinChM.C
     Materials/RheoChainMaterials/kelvinChSolM.C
+    Materials/structuralfe2material.C
     Materials/b3mat.C
     Materials/rcsd.C 
     Materials/rcsde.C 
     Materials/rcsdnl.C
-    Materials/RheoChainMaterials/mooneyrivlin.C # TODO This isn't a rheochain material at al
+    Materials/mooneyrivlin.C
     Materials/m4.C
+    Materials/microplane_m1.C
     Materials/druckerPragerPlasticitySM.C
     Materials/druckerpragercutmat.C
     Materials/masonry02.C
@@ -208,6 +217,7 @@ set (sm_interface_materials
     Materials/InterfaceMaterials/structuralinterfacematerial.C
     Materials/InterfaceMaterials/bondceb.C
     Materials/InterfaceMaterials/cohint.C
+    Materials/InterfaceMaterials/intmatelastic.C
     Materials/InterfaceMaterials/intmatbilinczfagerstrom.C
     Materials/InterfaceMaterials/intmatbilinczjansson.C
     Materials/InterfaceMaterials/intmatbilinearcz.C
@@ -255,7 +265,9 @@ set (sm_xfem
     xfem/enrichmentitems/delamination.C
     xfem/enrichmentitems/shellcrack.C
     xfem/propagationlaws/plhoopstresscirc.C
+    xfem/propagationlaws/plmaterialforce.C
     xfem/xfemstructuremanager.C
+    xfem/matforceevaluator.C
     EngineeringModels/xfemsolverinterface.C
     )
 

@@ -42,7 +42,6 @@ void
 FEI2dQuadBiQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double u, v;
-    answer.resize(9);
 
     u = lcoords.at(1);
     v = lcoords.at(2);
@@ -54,6 +53,7 @@ FEI2dQuadBiQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FE
         0.5 * ( v - 1.0 ) * v, 1.0 - v * v, 0.5 * ( v + 1.0 ) * v
     };
 
+    answer.resize(9);
     answer.at(1) = a [ 0 ] * b [ 0 ];
     answer.at(5) = a [ 1 ] * b [ 0 ];
     answer.at(2) = a [ 2 ] * b [ 0 ];
@@ -62,27 +62,14 @@ FEI2dQuadBiQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FE
     answer.at(9) = a [ 1 ] * b [ 1 ];
     answer.at(6) = a [ 2 ] * b [ 1 ];
 
-    answer.at(4) = a [ 0 ] * b [ 2 ];
-    answer.at(7) = a [ 1 ] * b [ 2 ];
-    answer.at(3) = a [ 2 ] * b [ 2 ];
 }
 
 
 void
 FEI2dQuadBiQuad :: giveDerivatives(FloatMatrix &dN, const FloatArray &lc)
 {
-    IntArray snodes;
-
     double u = lc.at(1);
     double v = lc.at(2);
-
-    /*
-     *  double a[] = {0.5*(u-1.0)*u, 0.5*(u+1.0)*u, 1.0-u*u};
-     *  double b[] = {0.5*(v-1.0)*v, 0.5*(v+1.0)*v, 1.0-v*v};
-     *
-     *  double da[] = {u - 0.5, u + 0.5, -2.0 * u};
-     *  double db[] = {v - 0.5, v + 0.5, -2.0 * v};
-     */
 
     double a[] = {
         0.5 * ( u - 1.0 ) * u, 1.0 - u * u, 0.5 * ( u + 1.0 ) * u

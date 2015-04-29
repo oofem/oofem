@@ -103,11 +103,7 @@ TR1_2D_CBS :: initializeFrom(InputRecord *ir)
 {
     //<RESTRICTED_SECTION>
     IRResultType result;                // Required by IR_GIVE_FIELD macro
-    //</RESTRICTED_SECTION>
 
-    CBSElement :: initializeFrom(ir);
-
-    //<RESTRICTED_SECTION>
     this->vof = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, vof, _IFT_Tr1CBS_pvof);
     if ( vof > 0.0 ) {
@@ -121,7 +117,7 @@ TR1_2D_CBS :: initializeFrom(InputRecord *ir)
 
     //</RESTRICTED_SECTION>
 
-    return IRRT_OK;
+    return CBSElement :: initializeFrom(ir);
 }
 
 
@@ -277,13 +273,11 @@ void
 TR1_2D_CBS :: computeDiffusionTermsI(FloatArray &answer, TimeStep *tStep)
 {
     FloatArray stress;
-    int nLoads;
     FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
     double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
     double coeff, rho = mat->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     bcGeomType ltype;
-    Load *load;
     FloatArray gVector;
     double ar3 = area / 3.0;
 
@@ -301,9 +295,9 @@ TR1_2D_CBS :: computeDiffusionTermsI(FloatArray &answer, TimeStep *tStep)
     // add boundary termms
     coeff = ar3 * rho;
     // body load (gravity effects)
-    nLoads = this->giveBodyLoadArray()->giveSize();
+    int nLoads = this->giveBodyLoadArray()->giveSize();
     for ( int i = 1; i <= nLoads; i++ ) {
-        load = domain->giveLoad( bodyLoadArray.at(i) );
+        auto load = domain->giveLoad( bodyLoadArray.at(i) );
         ltype = load->giveBCGeoType();
         if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ForceLoadBVT ) ) {
             load->computeComponentArrayAt(gVector, tStep, VM_Total);
@@ -330,7 +324,7 @@ TR1_2D_CBS :: computeDiffusionTermsI(FloatArray &answer, TimeStep *tStep)
 
             //_error("computeDiffusionTermsI: traction bc not supported");
             FloatArray t, coords(1);
-            int nLoads, n;
+
             BoundaryLoad *load;
             // integrate tractions
             n1 = boundarySides.at(j);
@@ -343,9 +337,9 @@ TR1_2D_CBS :: computeDiffusionTermsI(FloatArray &answer, TimeStep *tStep)
             ny = -tx / l;
 
             // loop over boundary load array
-            nLoads = this->giveBoundaryLoadArray()->giveSize() / 2;
-            for ( int i = 1; i <= nLoads; i++ ) {
-                n = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
+            int numLoads = this->giveBoundaryLoadArray()->giveSize() / 2;
+            for ( int i = 1; i <= numLoads; i++ ) {
+                int n = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
                 load = dynamic_cast< BoundaryLoad * >( domain->giveLoad(n) );
                 if ( load ) {
                     load->computeValueAt(t, tStep, coords, VM_Total);
@@ -597,16 +591,15 @@ TR1_2D_CBS :: computePressureLhs(FloatMatrix &answer, TimeStep *tStep)
 {
     // calculates the pressure LHS
 
-    answer.resize(9, 9);
-    answer.zero();
+    answer.resize(3, 3);
 
-    answer.at(3, 3) = area * ( b [ 0 ] * b [ 0 ] + c [ 0 ] * c [ 0 ] );
-    answer.at(6, 6) = area * ( b [ 1 ] * b [ 1 ] + c [ 1 ] * c [ 1 ] );
-    answer.at(9, 9) = area * ( b [ 2 ] * b [ 2 ] + c [ 2 ] * c [ 2 ] );
+    answer.at(1, 1) = area * ( b [ 0 ] * b [ 0 ] + c [ 0 ] * c [ 0 ] );
+    answer.at(2, 2) = area * ( b [ 1 ] * b [ 1 ] + c [ 1 ] * c [ 1 ] );
+    answer.at(3, 3) = area * ( b [ 2 ] * b [ 2 ] + c [ 2 ] * c [ 2 ] );
 
-    answer.at(3, 6) = answer.at(6, 3) = area * ( b [ 0 ] * b [ 1 ] + c [ 0 ] * c [ 1 ] );
-    answer.at(3, 9) = answer.at(9, 3) = area * ( b [ 0 ] * b [ 2 ] + c [ 0 ] * c [ 2 ] );
-    answer.at(6, 9) = answer.at(9, 6) = area * ( b [ 1 ] * b [ 2 ] + c [ 1 ] * c [ 2 ] );
+    answer.at(1, 2) = answer.at(2, 1) = area * ( b [ 0 ] * b [ 1 ] + c [ 0 ] * c [ 1 ] );
+    answer.at(1, 3) = answer.at(3, 1) = area * ( b [ 0 ] * b [ 2 ] + c [ 0 ] * c [ 2 ] );
+    answer.at(2, 3) = answer.at(3, 2) = area * ( b [ 1 ] * b [ 2 ] + c [ 1 ] * c [ 2 ] );
 }
 
 

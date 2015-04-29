@@ -60,14 +60,15 @@ FEI3dTetQuad :: giveVolume(const FEICellGeometry &cellgeo) const
     x4 = cellgeo.giveVertexCoordinates(4)->at(1);
     y4 = cellgeo.giveVertexCoordinates(4)->at(2);
     z4 = cellgeo.giveVertexCoordinates(4)->at(3);
-    //	x5=cellgeo.giveVertexCoordinates(5)->at(1);		y5=cellgeo.giveVertexCoordinates(5)->at(2);		z5=cellgeo.giveVertexCoordinates(5)->at(3);
-    //	x6=cellgeo.giveVertexCoordinates(6)->at(1);		y6=cellgeo.giveVertexCoordinates(6)->at(2);		z6=cellgeo.giveVertexCoordinates(6)->at(3);
-    //	x7=cellgeo.giveVertexCoordinates(7)->at(1);		y7=cellgeo.giveVertexCoordinates(7)->at(2);		z7=cellgeo.giveVertexCoordinates(7)->at(3);
-    //	x8=cellgeo.giveVertexCoordinates(8)->at(1);		y8=cellgeo.giveVertexCoordinates(8)->at(2);		z8=cellgeo.giveVertexCoordinates(8)->at(3);
-    //	x9=cellgeo.giveVertexCoordinates(9)->at(1);		y9=cellgeo.giveVertexCoordinates(9)->at(2);		z9=cellgeo.giveVertexCoordinates(9)->at(3);
-    //	x10=cellgeo.giveVertexCoordinates(10)->at(1);	y10=cellgeo.giveVertexCoordinates(10)->at(2);	z10=cellgeo.giveVertexCoordinates(10)->at(3);
-    /*
-     *      double area = x1*y3*z2 - x1*y2*z3 + x2*y1*z3 - x2*y3*z1 - x3*y1*z2 + x3*y2*z1 + x1*y2*z4 - x1*y4*z2 - x2*y1*z4 + x2*y4*z1 + x4*y1*z2 - x4*y2*z1 - x1*y3*z4 + x1*y4*z3
+#if 0
+    x5=cellgeo.giveVertexCoordinates(5)->at(1);     y5=cellgeo.giveVertexCoordinates(5)->at(2);     z5=cellgeo.giveVertexCoordinates(5)->at(3);
+    x6=cellgeo.giveVertexCoordinates(6)->at(1);     y6=cellgeo.giveVertexCoordinates(6)->at(2);     z6=cellgeo.giveVertexCoordinates(6)->at(3);
+    x7=cellgeo.giveVertexCoordinates(7)->at(1);     y7=cellgeo.giveVertexCoordinates(7)->at(2);     z7=cellgeo.giveVertexCoordinates(7)->at(3);
+    x8=cellgeo.giveVertexCoordinates(8)->at(1);     y8=cellgeo.giveVertexCoordinates(8)->at(2);     z8=cellgeo.giveVertexCoordinates(8)->at(3);
+    x9=cellgeo.giveVertexCoordinates(9)->at(1);     y9=cellgeo.giveVertexCoordinates(9)->at(2);     z9=cellgeo.giveVertexCoordinates(9)->at(3);
+    x10=cellgeo.giveVertexCoordinates(10)->at(1);   y10=cellgeo.giveVertexCoordinates(10)->at(2);   z10=cellgeo.giveVertexCoordinates(10)->at(3);
+
+    double area = x1*y3*z2 - x1*y2*z3 + x2*y1*z3 - x2*y3*z1 - x3*y1*z2 + x3*y2*z1 + x1*y2*z4 - x1*y4*z2 - x2*y1*z4 + x2*y4*z1 + x4*y1*z2 - x4*y2*z1 - x1*y3*z4 + x1*y4*z3
      + x3*y1*z4 - x3*y4*z1 - x4*y1*z3 + x4*y3*z1 - 2*x1*y2*z6 + 2*x1*y3*z5 - 2*x1*y5*z3 + 2*x1*y6*z2 + 2*x2*y1*z6 + x2*y3*z4 - x2*y4*z3 - 2*x2*y6*z1 - 2*x3*y1*z5 - x3*y2*z4
      + x3*y4*z2 + 2*x3*y5*z1 + x4*y2*z3 - x4*y3*z2 + 2*x5*y1*z3 - 2*x5*y3*z1 - 2*x6*y1*z2 + 2*x6*y2*z1 - 2*x1*y2*z7 + 2*x1*y3*z6 - 2*x1*y4*z5 + 2*x1*y5*z4 - 2*x1*y6*z3 + 2*x1*y7*z2
      + 2*x2*y1*z7 - 2*x2*y3*z5 + 2*x2*y5*z3 - 2*x2*y7*z1 - 2*x3*y1*z6 + 2*x3*y2*z5 - 2*x3*y5*z2 + 2*x3*y6*z1 + 2*x4*y1*z5 - 2*x4*y5*z1 - 2*x5*y1*z4 - 2*x5*y2*z3 + 2*x5*y3*z2
@@ -108,14 +109,13 @@ FEI3dTetQuad :: giveVolume(const FEICellGeometry &cellgeo) const
      + - 4*x4*y10*z9 + 16*x6*y7*z10 - 16*x6*y10*z7 - 16*x7*y6*z10 + 16*x7*y10*z6 - 4*x9*y4*z10 + 4*x9*y10*z4 + 4*x10*y4*z9 + 16*x10*y6*z7 - 16*x10*y7*z6 - 4*x10*y9*z4 - 16*x6*y9*z10
      + 16*x6*y10*z9 + 16*x7*y8*z10 - 16*x7*y10*z8 - 16*x8*y7*z10 + 16*x8*y10*z7 + 16*x9*y6*z10 - 16*x9*y10*z6 - 16*x10*y6*z9 + 16*x10*y7*z8 - 16*x10*y8*z7 + 16*x10*y9*z6 + 16*x8*y9*z10
      + - 16*x8*y10*z9 - 16*x9*y8*z10 + 16*x9*y10*z8 + 16*x10*y8*z9 - 16*x10*y9*z8;
-     */
-    //
-    //	printf("Q Area=%f\n", area);
 
+     //printf("Q Area=%f\n", area);
+#endif
     double area = x1 * y3 * z2 - x1 * y2 * z3 + x2 * y1 * z3 - x2 * y3 * z1 - x3 * y1 * z2 + x3 * y2 * z1 + x1 * y2 * z4 - x1 * y4 * z2 - x2 * y1 * z4 + x2 * y4 * z1 + x4 * y1 * z2 - x4 * y2 * z1 -
                   x1 * y3 * z4 + x1 * y4 * z3 + x3 * y1 * z4 - x3 * y4 * z1 - x4 * y1 * z3 + x4 * y3 * z1 + x2 * y3 * z4 - x2 * y4 * z3 - x3 * y2 * z4 + x3 * y4 * z2 + x4 * y2 * z3 - x4 * y3 * z2;
 
-    //	printf("L Area=%f\n", area);
+    //printf("L Area=%f\n", area);
 
     area = area / 6.0;
     return area;
@@ -302,7 +302,7 @@ FEI3dTetQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEIC
 void
 FEI3dTetQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    FloatMatrix inv, dNduvw, coords;
+    FloatMatrix dNduvw, coords;
     this->evaldNdxi(dNduvw, lcoords, cellgeo);
     coords.resize( 3, dNduvw.giveNumberOfRows() );
     for ( int i = 1; i <= dNduvw.giveNumberOfRows(); i++ ) {

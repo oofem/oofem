@@ -54,6 +54,12 @@
 #define _IFT_XfemManager_Name "xfemmanager"
 #define _IFT_XfemManager_numberOfEnrichmentItems "numberofenrichmentitems"
 #define _IFT_XfemManager_numberOfGpPerTri "numberofgppertri"
+
+/// How many times a subtriangle should be refined
+#define _IFT_XfemManager_numberOfTriRefs "numberoftrirefs"
+
+#define _IFT_XfemManager_enrDofScaleFac "enrdofscalefac"
+
 #define _IFT_XfemManager_debugVTK "debugvtk"
 #define _IFT_XfemManager_VTKExport "vtkexport"
 #define _IFT_XfemManager_VTKExportFields "exportfields"
@@ -103,7 +109,7 @@ class OOFEM_EXPORT XfemManager
 protected:
     Domain *domain;
     /// Enrichment item list.
-    std :: vector< std :: unique_ptr< EnrichmentItem > > enrichmentItemList;
+    std :: vector< std :: unique_ptr< EnrichmentItem > >enrichmentItemList;
 
     int numberOfEnrichmentItems;
 
@@ -112,6 +118,17 @@ protected:
      * subdividing cut elements.
      */
     int mNumGpPerTri;
+
+    /**
+     * The number of times a subtriangle should be refined.
+     */
+    int mNumTriRef;
+
+    /* Scale factor for the enrichment dofs. Implies that the corresponding
+       dofs must be scaled with 1/factor in the input file
+     */
+    double mEnrDofScaleFac;
+
     bool doVTKExport;
 
     /// If extra debug vtk files should be written.
@@ -144,14 +161,16 @@ public:
     virtual ~XfemManager();
     XfemManager(const XfemManager &) = delete;
 
-    XfemManager & operator=(const XfemManager &) = delete;
+    XfemManager &operator=(const XfemManager &) = delete;
 
     int giveNumGpPerTri() const { return mNumGpPerTri; } /// Number of Gauss points per sub-triangle in cut elements.
+    int giveNumTriRefs() const { return mNumTriRef;}
+    double giveEnrDofScaleFactor() const {return mEnrDofScaleFac;}
 
     bool isElementEnriched(const Element *elem);
 
-    inline EnrichmentItem *giveEnrichmentItem(int n) { return enrichmentItemList[n-1].get(); }
-    int giveNumberOfEnrichmentItems() const { return (int)enrichmentItemList.size(); }
+    inline EnrichmentItem *giveEnrichmentItem(int n) { return enrichmentItemList [ n - 1 ].get(); }
+    int giveNumberOfEnrichmentItems() const { return ( int ) enrichmentItemList.size(); }
 
     void createEnrichedDofs();
 
@@ -189,9 +208,9 @@ public:
     /**
      * Update enrichment items (level sets).
      */
-    void updateYourself();
+    virtual void updateYourself(TimeStep *tStep);
 
-    void propagateFronts();
+    void propagateFronts(bool &oAnyFronHasPropagated);
     bool hasPropagatingFronts();
 
     bool giveVtkDebug() const { return mDebugVTK; }

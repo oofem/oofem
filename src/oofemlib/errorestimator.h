@@ -47,6 +47,8 @@
 #include "internalstatetype.h"
 #include "remeshingcrit.h"
 
+#include <memory>
+
 ///@name Input fields for ErrorEstimator
 //@{
 #define _IFT_ErrorEstimator_regionskipmap "regionskipmap"
@@ -79,7 +81,7 @@ class OOFEM_EXPORT ErrorEstimator : public FEMComponent
 {
 protected:
     ErrorEstimatorType eeType;
-    RemeshingCriteria *rc;
+    std :: unique_ptr< RemeshingCriteria > rc;
     /**
      * Map indicating regions to skip (region - cross section model).
      * Do not access this variable directly, since this variable is read from input and could have size different

@@ -62,15 +62,16 @@ public:
 
     void AppendCohesiveZoneGaussPoint(GaussPoint *ipGP);
 
-    virtual void callGnuplotExportModule(GnuplotExportModule &iExpMod);
+    virtual void callGnuplotExportModule(GnuplotExportModule &iExpMod, TimeStep *tStep);
 
     const std :: vector< GaussPoint * > &giveCohesiveZoneGaussPoints() const { return mCohesiveZoneGaussPoints; }
     const std :: vector< double > &giveCohesiveZoneArcPositions() const { return mCohesiveZoneArcPositions; }
 
-    void computeCrackIntersectionPoints(Crack &iCrack, std::vector<FloatArray> &oIntersectionPoints, std::vector<double> &oArcPositions);
-    void computeArcPoints(const std::vector<FloatArray> &iIntersectionPoints, std::vector<double> &oArcPositions);
+    void computeCrackIntersectionPoints(Crack &iCrack, std :: vector< FloatArray > &oIntersectionPoints, std :: vector< double > &oArcPositions);
+    void computeArcPoints(const std :: vector< FloatArray > &iIntersectionPoints, std :: vector< double > &oArcPositions);
+    double computeLength();
     virtual int giveDofPoolSize() const;
-    
+
 protected:
     /**
      * Array of pointers to the Gauss points related to the

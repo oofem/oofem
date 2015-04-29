@@ -275,14 +275,4 @@ StructuralCrossSection :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-///@todo make static? /JB - No. Remove it. / Mikael
-int
-StructuralCrossSection :: hasMaterialModeCapability(MaterialMode mode)
-//
-// returns whether receiver supports given mode
-//
-{
-    return mode == _3dMat || mode == _PlaneStress || mode == _PlaneStrain  || mode == _1dMat ||
-           mode == _PlateLayer || mode == _2dBeamLayer || mode == _Fiber;
-}
 } // end namespace oofem

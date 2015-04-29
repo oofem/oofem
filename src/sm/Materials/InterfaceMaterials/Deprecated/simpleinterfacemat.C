@@ -34,7 +34,6 @@
 
 #include "simpleinterfacemat.h"
 #include "../sm/Elements/structuralelement.h"
-//#include "interfaceelement1d.h"
 #include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
@@ -333,19 +332,17 @@ SimpleInterfaceMaterialStatus :: updateYourself(TimeStep *tStep)
 }
 
 
-FloatArray
+const FloatArray &
 SimpleInterfaceMaterialStatus :: giveShearStressShift()
 {
-    FloatArray answer = shearStressShift;
-    return answer;
+    return shearStressShift;
 }
 
 
-FloatArray
+const FloatArray &
 SimpleInterfaceMaterialStatus :: giveTempShearStressShift()
 {
-    FloatArray answer = tempShearStressShift;
-    return answer;
+    return tempShearStressShift;
 }
 
 

@@ -35,7 +35,6 @@
 #include "cebfip78.h"
 #include "mathfem.h"
 #include "gausspoint.h"
-#include "crosssection.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -46,8 +45,6 @@ CebFip78Material :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    MaxwellChainMaterial :: initializeFrom(ir);
-
     IR_GIVE_FIELD(ir, E28, _IFT_CebFip78Material_e28);
     IR_GIVE_FIELD(ir, fibf, _IFT_CebFip78Material_fibf);
     IR_GIVE_FIELD(ir, kap_a_per_area, _IFT_CebFip78Material_kap_a_per_area);
@@ -55,8 +52,7 @@ CebFip78Material :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, kap_tt, _IFT_CebFip78Material_kap_tt);
     IR_GIVE_FIELD(ir, u, _IFT_CebFip78Material_u);
 
-    // t0   = readDouble (initString,"curringendtime");
-    return IRRT_OK;
+    return MaxwellChainMaterial :: initializeFrom(ir);
 }
 
 

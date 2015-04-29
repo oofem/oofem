@@ -58,9 +58,8 @@ PointLoad :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    result = Load :: initializeFrom(ir);
-
-    IR_GIVE_FIELD(ir, nDofs, _IFT_PointLoad_ndofs);
+    int dummy;
+    IR_GIVE_FIELD(ir, dummy, "ndofs");
     IR_GIVE_FIELD(ir, coords, _IFT_PointLoad_coords);
 
     int value = 0;
@@ -71,7 +70,7 @@ PointLoad :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_PointLoad_cstype);
     coordSystemType = ( CoordSystType ) value;
 
-    return result;
+    return Load :: initializeFrom(ir);
 }
 
 
@@ -79,7 +78,6 @@ void
 PointLoad :: giveInputRecord(DynamicInputRecord &input)
 {
     Load :: giveInputRecord(input);
-    input.setField(this->nDofs, _IFT_PointLoad_ndofs);
     input.setField(this->lType, _IFT_PointLoad_loadtype);
     input.setField(this->coordSystemType, _IFT_PointLoad_cstype);
     input.setField(this->coords, _IFT_PointLoad_coords);

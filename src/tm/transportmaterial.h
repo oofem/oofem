@@ -87,7 +87,7 @@ public:
     /// Set gradient.
     void setTempGradient(FloatArray grad);
     /// Set field.
-    void setTempField(FloatArray field);
+    void setTempField(FloatArray newField);
     /// Set flux.
     void setTempFlux(FloatArray w);
 

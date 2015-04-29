@@ -92,17 +92,7 @@ IRResultType
 Tetrah1_ht :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 1;
-    IRResultType result = this->TransportElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    if ( !( ( numberOfGaussPoints == 1 ) ||
-           ( numberOfGaussPoints == 4 ) ) ) {
-        numberOfGaussPoints = 1;
-    }
-
-    return IRRT_OK;
+    return TransportElement :: initializeFrom(ir);
 }
 
 
@@ -111,7 +101,7 @@ Tetrah1_ht :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(),
+    determinant = fabs( this->interpolation.giveTransformationJacobian( gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) ) );
 
     weight = gp->giveWeight();
@@ -123,7 +113,7 @@ Tetrah1_ht :: computeVolumeAround(GaussPoint *gp)
 double
 Tetrah1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(),
+    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) );
     return result *gp->giveWeight();
 }
@@ -143,7 +133,7 @@ double
 Tetrah1_ht :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
     double detJ, weight;
-    detJ = fabs( interpolation.surfaceGiveTransformationJacobian( iSurf, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    detJ = fabs( interpolation.surfaceGiveTransformationJacobian( iSurf, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
 
     weight = gp->giveWeight();
     return detJ * weight;

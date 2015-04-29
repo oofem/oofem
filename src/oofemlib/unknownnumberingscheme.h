@@ -36,6 +36,7 @@
 #define unknownnumberingscheme_h
 
 #include "dof.h"
+#include "intarray.h"
 
 namespace oofem {
 /**
@@ -46,13 +47,13 @@ namespace oofem {
 class OOFEM_EXPORT UnknownNumberingScheme
 {
 public:
-    UnknownNumberingScheme(void) { };
+    UnknownNumberingScheme(void) { }
     virtual ~UnknownNumberingScheme() { }
 
     /**
      * Initializes the receiver, if necessary.
      */
-    virtual void init() { };
+    virtual void init() { }
     /**
      * Returns true, if receiver is the default engngModel equation numbering scheme;
      * This is useful for some components (typically elements), that cache their code numbers
@@ -100,6 +101,32 @@ public:
 
     virtual int giveDofEquationNumber(Dof *dof) const {
         return dof->__givePrescribedEquationNumber();
+    }
+};
+
+
+/**
+ * Specialized numbering scheme for assembling only specified DofIDs.
+ * This can be useful for computing the reaction forces for a subset of dofids.
+ */
+class DofIDEquationNumbering : public UnknownNumberingScheme
+{
+protected:
+    IntArray dofids;
+    bool prescribed;
+
+public:
+    DofIDEquationNumbering(bool prescribed, IntArray dofids) : 
+        UnknownNumberingScheme(), dofids(std :: move(dofids)), prescribed(prescribed) { }
+
+    virtual bool isDefault() const { return !prescribed; }
+    virtual int giveDofEquationNumber(Dof *dof) const {
+        DofIDItem id = dof->giveDofID();
+        if ( dofids.contains(id) ) {
+            return prescribed ? dof->__givePrescribedEquationNumber() : dof->__giveEquationNumber();
+        }
+
+        return 0;
     }
 };
 } // end namespace oofem

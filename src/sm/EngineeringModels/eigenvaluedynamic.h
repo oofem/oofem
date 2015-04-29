@@ -65,8 +65,8 @@ namespace oofem {
 class EigenValueDynamic : public EngngModel
 {
 private:
-    SparseMtrx *stiffnessMatrix;
-    SparseMtrx *massMatrix;
+    std :: unique_ptr< SparseMtrx > stiffnessMatrix;
+    std :: unique_ptr< SparseMtrx > massMatrix;
     SparseMtrxType sparseMtrxType;
     FloatMatrix eigVec;
     FloatArray eigVal;
@@ -76,25 +76,16 @@ private:
     /// Relative tolerance.
     double rtolv;
     /// Numerical method used to solve the problem.
-    SparseGeneralEigenValueSystemNM *nMethod;
+    std :: unique_ptr< SparseGeneralEigenValueSystemNM > nMethod;
     GenEigvalSolverType solverType;
 
 public:
     EigenValueDynamic(int i, EngngModel * _master = NULL) : EngngModel(i, _master)
     {
-        stiffnessMatrix = NULL;
-        massMatrix = NULL;
         numberOfSteps = 1;
         ndomains = 1;
-        nMethod = NULL;
     }
-    virtual ~EigenValueDynamic() {
-        delete stiffnessMatrix;
-        delete massMatrix;
-        if ( nMethod ) {
-            delete nMethod;
-        }
-    }
+    virtual ~EigenValueDynamic() { }
 
     virtual void solveYourselfAt(TimeStep *tStep);
     virtual void terminate(TimeStep *tStep);
@@ -110,16 +101,6 @@ public:
     virtual int resolveCorrespondingEigenStepNumber(void *obj);
 
     virtual double giveEigenValue(int eigNum) { return eigVal.at(eigNum); }
-
-    /**
-     * DOF printing routine. Called by DofManagers to print Dof specific part.
-     * Dof class provides component printing routines, but emodel is responsible
-     * for what will be printed at DOF level.
-     * @param stream Output stream.
-     * @param iDof Dof to be processed.
-     * @param tStep Solution step.
-     */
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
 
     // identification
     virtual const char *giveClassName() const { return "EigenValueDynamic"; }

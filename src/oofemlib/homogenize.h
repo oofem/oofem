@@ -55,7 +55,7 @@ public:
     Homogenize();
 
     /// Destructor
-    ~Homogenize(void) { };
+    ~Homogenize(void) { }
 
     /**  Parallel scheme of Voigt for any number of isotropic phases
      * @param PhaseMatrix matrix containing in each row the volume fraction, the Young modulus and the Poisson ratio for each phase

@@ -50,22 +50,24 @@
 #include "sparselinsystemnm.h"
 #include "dynamicinputrecord.h"
 #include "domain.h"
+#include "unknownnumberingscheme.h"
+#include "assemblercallback.h"
 
 namespace oofem {
 REGISTER_BoundaryCondition(MixedGradientPressureDirichlet);
 
-MixedGradientPressureDirichlet :: MixedGradientPressureDirichlet(int n, Domain *d) : MixedGradientPressureBC(n, d)
+MixedGradientPressureDirichlet :: MixedGradientPressureDirichlet(int n, Domain *d) : MixedGradientPressureBC(n, d),
+    voldman( new Node(1, d) ),
+    devdman( new Node(2, d) )
 {
     ///@todo Creating these statically in the constructor is a bad idea.. it should be part of Domain::createDofs()
     // The unknown volumetric strain
     vol_id = d->giveNextFreeDofID();
-    voldman = new Node(1, d);
-    voldman->appendDof( new MasterDof( voldman, (DofIDItem)vol_id ) );
+    voldman->appendDof( new MasterDof( voldman.get(), (DofIDItem)vol_id ) );
 
     int nsd = d->giveNumberOfSpatialDimensions();
     int components = ( nsd + 1 ) * nsd / 2;
     // The prescribed strains.
-    devdman = new Node(2, d);
     dev_id.clear();
     for ( int i = 0; i < components; i++ ) {
         int dofid = d->giveNextFreeDofID();
@@ -73,15 +75,13 @@ MixedGradientPressureDirichlet :: MixedGradientPressureDirichlet(int n, Domain *
         // Just putting in X_i id-items since they don't matter.
         // These don't actually need to be active, they are masterdofs with prescribed values, its
         // easier to just have them here rather than trying to make another Dirichlet boundary condition.
-        devdman->appendDof( new ActiveDof( devdman, (DofIDItem)dofid, this->giveNumber() ) );
+        devdman->appendDof( new ActiveDof( devdman.get(), (DofIDItem)dofid, this->giveNumber() ) );
     }
 }
 
 
 MixedGradientPressureDirichlet :: ~MixedGradientPressureDirichlet()
 {
-    delete voldman;
-    delete devdman;
 }
 
 
@@ -100,9 +100,9 @@ int MixedGradientPressureDirichlet :: giveNumberOfInternalDofManagers()
 DofManager *MixedGradientPressureDirichlet :: giveInternalDofManager(int i)
 {
     if ( i == 1 ) {
-        return this->voldman;
+        return this->voldman.get();
     } else {
-        return this->devdman;
+        return this->devdman.get();
     }
 }
 
@@ -240,10 +240,10 @@ void MixedGradientPressureDirichlet :: computeFields(FloatArray &sigmaDev, doubl
     // sigma = residual (since we use the slave dofs) = f_ext - f_int
     sigmaDev.resize(npeq);
     sigmaDev.zero();
-    emodel->assembleVector(sigmaDev, tStep, InternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
+    emodel->assembleVector(sigmaDev, tStep, InternalForceAssembler(), VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
     tmp.resize(npeq);
     tmp.zero();
-    emodel->assembleVector(tmp, tStep, ExternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
+    emodel->assembleVector(tmp, tStep, ExternalForceAssembler(), VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
     sigmaDev.subtract(tmp);
     // Divide by the RVE-volume
     sigmaDev.times( 1.0 / this->domainSize() );
@@ -261,8 +261,9 @@ void MixedGradientPressureDirichlet :: computeTangents(FloatMatrix &Ed, FloatArr
     // Fetch some information from the engineering model
     EngngModel *rve = this->giveDomain()->giveEngngModel();
     ///@todo Get this from engineering model
-    SparseLinearSystemNM *solver = classFactory.createSparseLinSolver( ST_Petsc, this->domain, this->domain->giveEngngModel() ); // = rve->giveLinearSolver();
-    SparseMtrxType stype = SMT_PetscMtrx; // = rve->giveSparseMatrixType();
+    std :: unique_ptr< SparseLinearSystemNM > solver(
+        classFactory.createSparseLinSolver( ST_Petsc, this->domain, this->domain->giveEngngModel() ) ); // = rve->giveLinearSolver();
+    SparseMtrxType stype = solver->giveRecommendedMatrix(true);
     EModelDefaultEquationNumbering fnum;
     EModelDefaultPrescribedEquationNumbering pnum;
 
@@ -279,9 +280,9 @@ void MixedGradientPressureDirichlet :: computeTangents(FloatMatrix &Ed, FloatArr
 
     {
         // Sets up RHS for all sensitivity problems;
-        SparseMtrx *Kfp = classFactory.createSparseMtrx(stype);
+        std :: unique_ptr< SparseMtrx > Kfp( classFactory.createSparseMtrx(stype) );
         Kfp->buildInternalStructure(rve, 1, fnum, pnum);
-        rve->assemble(Kfp, tStep, StiffnessMatrix, fnum, pnum, this->domain);
+        rve->assemble(*Kfp, tStep, TangentAssembler(TangentStiffness), fnum, pnum, this->domain);
 
         // Setup up indices and locations
         int neq = Kfp->giveNumberOfRows();
@@ -307,20 +308,18 @@ void MixedGradientPressureDirichlet :: computeTangents(FloatMatrix &Ed, FloatArr
         rhs_p.zero();
         rhs_p.at(dvol_eq) = -1.0 * rve_size; // dp = 1.0 (unit size)
         s_p.resize(neq);
-        delete Kfp;
     }
 
     {
         // Solve all sensitivities
-        SparseMtrx *Kff = classFactory.createSparseMtrx(stype);
-        Kff->buildInternalStructure(rve, 1, fnum);
+        std :: unique_ptr< SparseMtrx > Kff( classFactory.createSparseMtrx(stype) );
         if ( !Kff ) {
             OOFEM_ERROR("MixedGradientPressureDirichlet :: computeTangents - Couldn't create sparse matrix of type %d\n", stype);
         }
-        rve->assemble(Kff, tStep, StiffnessMatrix, fnum, this->domain);
-        solver->solve(Kff, & rhs_p, & s_p);
-        solver->solve(Kff, rhs_d, s_d);
-        delete Kff;
+        Kff->buildInternalStructure(rve, 1, fnum);
+        rve->assemble(*Kff, tStep, TangentAssembler(TangentStiffness), fnum, this->domain);
+        solver->solve(*Kff, rhs_p, s_p);
+        solver->solve(*Kff, rhs_d, s_d);
     }
 
     // Sensitivities for d_vol is solved for directly;
@@ -332,12 +331,12 @@ void MixedGradientPressureDirichlet :: computeTangents(FloatMatrix &Ed, FloatArr
 
     {
         // Sensitivities for d_dev is obtained as reactions forces;
-        SparseMtrx *Kpf = classFactory.createSparseMtrx(stype);
-        SparseMtrx *Kpp = classFactory.createSparseMtrx(stype);
+        std :: unique_ptr< SparseMtrx > Kpf( classFactory.createSparseMtrx(stype) );
+        std :: unique_ptr< SparseMtrx > Kpp( classFactory.createSparseMtrx(stype) );
         Kpf->buildInternalStructure(rve, 1, pnum, fnum);
         Kpp->buildInternalStructure(rve, 1, pnum);
-        rve->assemble(Kpf, tStep, StiffnessMatrix, pnum, fnum, this->domain);
-        rve->assemble(Kpp, tStep, StiffnessMatrix, pnum, this->domain);
+        rve->assemble(*Kpf, tStep, TangentAssembler(TangentStiffness), pnum, fnum, this->domain);
+        rve->assemble(*Kpp, tStep, TangentAssembler(TangentStiffness), pnum, this->domain);
 
         FloatMatrix tmpMat;
         Kpp->times(ddev_pert, tmpMat);
@@ -346,8 +345,6 @@ void MixedGradientPressureDirichlet :: computeTangents(FloatMatrix &Ed, FloatArr
         Ed.times(1.0 / rve_size);
         Kpf->times(s_p, Ep);
         Ep.times(1.0 / rve_size);
-        delete Kpp;
-        delete Kpf;
     }
 
     // Not sure if i actually need to do this part, but the obtained tangents are to dsigma/dp, not dsigma_dev/dp, so they need to be corrected;
@@ -372,7 +369,6 @@ void MixedGradientPressureDirichlet :: computeTangents(FloatMatrix &Ed, FloatArr
         }
     }
 #endif
-    delete solver; ///@todo Remove this when solver is taken from engngmodel
 }
 
 
@@ -443,7 +439,7 @@ bool MixedGradientPressureDirichlet :: hasBc(ActiveDof *dof, TimeStep *tStep)
 
 bool MixedGradientPressureDirichlet :: isDevDof(ActiveDof *dof)
 {
-    return devdman == dof->giveDofManager();
+    return devdman.get() == dof->giveDofManager();
 }
 
 
@@ -451,13 +447,11 @@ IRResultType MixedGradientPressureDirichlet :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;
 
-    MixedGradientPressureBC :: initializeFrom(ir);
-
     this->centerCoord.resize( domain->giveNumberOfSpatialDimensions() );
     this->centerCoord.zero();
     IR_GIVE_OPTIONAL_FIELD(ir, this->centerCoord, _IFT_MixedGradientPressure_centerCoords)
 
-    return IRRT_OK;
+    return MixedGradientPressureBC :: initializeFrom(ir);
 }
 
 

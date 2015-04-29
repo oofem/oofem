@@ -38,6 +38,7 @@
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
+ #include "gausspoint.h"
 #endif
 
 namespace oofem {
@@ -251,7 +252,7 @@ void QPlaneStrain :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
         pp [ 8 ].y = 0.25 * ( pp [ 0 ].y + pp [ 1 ].y + pp [ 2 ].y + pp [ 3 ].y );
         pp [ 8 ].z = 0.;
 
-        for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
+        for ( auto &gp: *this->giveDefaultIntegrationRulePtr() ) {
             gpCoords = gp->giveNaturalCoordinates();
             if ( ( gpCoords->at(1) > 0. ) && ( gpCoords->at(2) > 0. ) ) {
                 ind.at(1) = 0;

@@ -31,240 +31,141 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "stokesflow.h"
 #include "stokesflowvelocityhomogenization.h"
-#include "primaryfield.h"
 #include "classfactory.h"
-#include "deadweight.h"
-#include "tr21stokes.h"
 #include "dofmanager.h"
+#include "gausspoint.h"
+#include "feinterpol.h"
+#include "unknownnumberingscheme.h"
+#include "sparsemtrx.h"
+#include "deadweight.h"
 
 namespace oofem {
 REGISTER_EngngModel(StokesFlowVelocityHomogenization);
 
 StokesFlowVelocityHomogenization :: StokesFlowVelocityHomogenization(int i, EngngModel *_master) : StokesFlow(i, _master)
 {
-    areaOfDomain = -1.;
-    areaOfRVE = -1.;
 }
 
 StokesFlowVelocityHomogenization :: ~StokesFlowVelocityHomogenization()
 { }
 
-double
-StokesFlowVelocityHomogenization :: giveAreaOfDomain()
-{
-    if ( areaOfDomain > 0. ) {
-        return areaOfDomain;
-    }
-
-    areaOfDomain = this->giveDomain(1)->giveArea();
-    return areaOfDomain;
-}
 
 double
 StokesFlowVelocityHomogenization :: giveAreaOfRVE()
 {
-    if ( areaOfRVE > 0. ) {
-        return areaOfRVE;
-    }
-
     FloatArray min, max;
 
     min = * this->giveDomain(1)->giveDofManager(1)->giveCoordinates();
     max = * this->giveDomain(1)->giveDofManager(1)->giveCoordinates();
 
-    for ( int i = 1; i <= this->giveDomain(1)->giveNumberOfDofManagers(); i++ ) {
-        min.beMinOf( min, * this->giveDomain(1)->giveDofManager(i)->giveCoordinates() );
-        max.beMaxOf( max, * this->giveDomain(1)->giveDofManager(i)->giveCoordinates() );
+    for ( auto &node : this->giveDomain(1)->giveDofManagers() ) {
+        min.beMinOf( min, * node->giveCoordinates() );
+        max.beMaxOf( max, * node->giveCoordinates() );
     }
 
-    areaOfRVE = ( max.at(1) - min.at(1) ) * ( max.at(2) - min.at(2) );
-    return areaOfRVE;
-}
-
-void
-StokesFlowVelocityHomogenization :: handlePrescribedValues()
-{
-    this->giveDomain(1)->giveArea();
-    this->giveAreaOfDomain();
-
-    for ( int i = 1; i <= this->giveDomain(1)->giveNumberOfElements(); i++ ) {
-#if 0
-        if ( CarlTr * ThisElement = dynamic_cast< CarlTr * >( this->giveDomain(1)->giveElement(i) ) ) {
-            ThisElement = ( CarlTr * ) this->giveDomain(1)->giveElement(i);
-            ThisElement->numberOfElementsOnDomain = this->giveDomain(1)->giveNumberOfElements();
-            ThisElement->totalAreaOfDomain = this->giveAreaOfDomain();
-            ThisElement->specialUnknowns = & ( this->SpecialUnknowns );
-            DofMan = ( Node * ) ThisElement->giveDofManager(7);
-            this->prescribedType = ThisElement->prescribedType;
-        }
-
-#endif
-    }
-}
-
-void
-StokesFlowVelocityHomogenization :: solveYourselfAt(TimeStep *tStep)
-{
-    handlePrescribedValues();
-    this->giveCurrentStep();
-    currentStep->setNumber( tStep->giveNumber() );
-    currentStep->setTime( tStep->giveTargetTime() );
-    currentStep->setTimeIncrement( tStep->giveTimeIncrement() );
-    StokesFlow :: solveYourselfAt(currentStep);
+    max.subtract(min);
+    return max.product();
 }
 
 
 void
-StokesFlowVelocityHomogenization :: rveSetBoundaryConditions(int BCType, FloatArray eps)
-{ }
-
-void
-StokesFlowVelocityHomogenization :: getMeans(FloatArray &gradP, FloatArray &v, TimeStep *tStep)
+StokesFlowVelocityHomogenization :: computeSeepage(FloatArray &v, TimeStep *tStep)
 {
-    FloatArray gradPTemp, v_hatTemp;
-    double Area = 0, AreaFull = 0; //(xmax-xmin)*(ymax-ymin);
-    double xmax = 0, xmin = 0, ymax = 0, ymin = 0;
+    FloatMatrix N;
+    FloatArray v_hatTemp, unknowns;
 
-    gradP.clear();
     v.clear();
 
-    for ( int i = 1; i <= this->giveDomain(1)->giveNumberOfElements(); i++ ) {
-        if ( Tr21Stokes * T = dynamic_cast< Tr21Stokes * >( this->giveDomain(1)->giveElement(i) ) ) {
-            // The following only works for a rectangle
-
-            for ( int j = 1; j <= T->giveNumberOfDofManagers(); j++ ) {
-                if ( T->giveDofManager(j)->giveCoordinate(1) > xmax ) {
-                    xmax = T->giveDofManager(j)->giveCoordinate(1);
-                }
-
-                if ( T->giveDofManager(j)->giveCoordinate(1) < xmin ) {
-                    xmin = T->giveDofManager(j)->giveCoordinate(1);
-                }
-
-                if ( T->giveDofManager(j)->giveCoordinate(2) > ymax ) {
-                    ymax = T->giveDofManager(j)->giveCoordinate(2);
-                }
-
-                if ( T->giveDofManager(j)->giveCoordinate(2) < ymin ) {
-                    ymin = T->giveDofManager(j)->giveCoordinate(2);
-                }
-            }
-
-            T->giveGradP(gradPTemp, tStep);
-            T->giveIntegratedVelocity(v_hatTemp, tStep);
-
-            gradP.add(gradPTemp);
-            v.add(v_hatTemp);
-
-            Area = Area + T->computeArea();
-        }
+    for ( auto &elem : this->giveDomain(1)->giveElements() ) {
+        this->integrateNMatrix(N, *elem, tStep);
+        elem->computeVectorOf({V_u, V_v, V_w}, VM_Total, tStep, unknowns);
+        v_hatTemp.beProductOf(N, unknowns);
+        v.add(v_hatTemp);
     }
 
-    AreaFull = ( xmax - xmin ) * ( ymax - ymin );
-    gradP.times(1. / Area);
-    v.times(1. / AreaFull);
+    v.times( 1. / this->giveAreaOfRVE() );
 }
 
 
-void
-StokesFlowVelocityHomogenization :: rveGiveCharacteristicData(int DataType, void *input, void *answer, TimeStep *tStep)
-{
-    /*
-     * Datatype:
-     *  1 : Get velocity. *answer is a pointer to a FloatArray.
-     *  2 : Get tangent matrix. Linearization using the last tangent matrix using 1) but with other gradP
-     */
-
-    switch ( DataType ) {
-    case 1: {
-        FloatArray *gradP;
-        FloatArray thisGradP, v_hat;
-        gradP = ( FloatArray * ) input;
-
-        for ( int i = 1; i < this->giveDomain(1)->giveNumberOfElements(); i++ ) {
-            if ( Tr21Stokes * T = dynamic_cast< Tr21Stokes * >( this->giveDomain(1)->giveElement(i) ) ) {
-                IntArray *bodyLoad = T->giveBodyLoadArray();
-                DeadWeight *load;
-                load = dynamic_cast< DeadWeight * >( this->giveDomain(1)->giveLoad( bodyLoad->at(1) ) );
-
-                FloatArray Components;
-                Components.resize(2);
-                Components.at(1) = gradP->at(1) * -1;
-                Components.at(2) = gradP->at(2) * -1;
-                load->setDeadWeighComponents(Components);
-
-                break;
-            }
-        }
-
-        solveYourselfAt(tStep);
-
-        getMeans(thisGradP, v_hat, tStep);
-
-        ( ( FloatArray * ) answer )->resize(2);
-        ( ( FloatArray * ) answer )->at(1) = v_hat.at(1);
-        ( ( FloatArray * ) answer )->at(2) = v_hat.at(2);
-
-        break;
-    }
-    case 2: {
-        FloatMatrix K;
-
-        this->computeTangent(K, tStep);
-
-        ( ( FloatMatrix * ) answer )->resize(2, 2);
-
-        ( ( FloatMatrix * ) answer )->at(1, 1) = K.at(1, 1);
-        ( ( FloatMatrix * ) answer )->at(1, 2) = K.at(1, 2);
-        ( ( FloatMatrix * ) answer )->at(2, 1) = K.at(2, 1);
-        ( ( FloatMatrix * ) answer )->at(2, 2) = K.at(2, 2);
-
-        return;
-    }
-    }
-}
 void
 StokesFlowVelocityHomogenization :: computeTangent(FloatMatrix &answer, TimeStep *tStep)
 {
-    int ndof;
-
     IntArray loc, col;
-    FloatArray averagev;
 
     Domain *domain = this->giveDomain(1);
-    ndof = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
+    int nsd = domain->giveNumberOfSpatialDimensions();
+    int ndof = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
 
     // Build F matrix
-    FloatMatrix F, Fe;
+    IntArray dofs(nsd);
+    for ( int i = 0; i < nsd; ++i ) {
+        dofs[i] = V_u + i; ///@todo This is a hack. We should have these as user input instead.
+    }
+    FloatMatrix F(ndof, nsd), Fe, N;
+    col.enumerate(nsd);
 
-    F.resize(ndof, 2);
-    F.zero();
-    col = {1,2};
+    for ( auto &elem : domain->giveElements() ) {
 
-    for ( int i = 1; i <= domain->giveNumberOfElements(); i++ ) {
-        if ( Tr21Stokes * T = dynamic_cast< Tr21Stokes * >( this->giveDomain(1)->giveElement(i) ) ) {
-            T->giveElementFMatrix(Fe);
-            T->giveLocationArray( loc, {V_u, V_v}, EModelDefaultEquationNumbering() );
-
-            F.assemble(Fe, loc, col);
-        }
+        this->integrateNMatrix(N, *elem, tStep);
+        
+        elem->giveLocationArray( loc, dofs, EModelDefaultEquationNumbering() );
+        Fe.beTranspositionOf(N);
+        F.assemble(Fe, loc, col);
     }
 
     FloatMatrix H;
 
-    //    SparseLinearSystemNM *linMethod = classFactory.createSparseLinSolver(ST_Petsc, this->giveDomain(1), this);
-    SparseLinearSystemNM *linMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
+    std :: unique_ptr< SparseLinearSystemNM > solver( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
 
     H.resize( F.giveNumberOfRows(), F.giveNumberOfColumns() );
     H.zero();
 
-    linMethod->solve(stiffnessMatrix, F, H);
+    // For correct homogenization, the tangent at the converged values should be used
+    // (the one from the Newton iterations from solveYourselfAt is not updated to contain the latest values).
+    SparseMtrxType stype = solver->giveRecommendedMatrix(true);
+    std :: unique_ptr< SparseMtrx > Kff( classFactory.createSparseMtrx( stype ) );
+    Kff->buildInternalStructure(this, domain->giveNumber(), EModelDefaultEquationNumbering() );
+    this->assemble(*Kff, tStep, TangentAssembler(TangentStiffness), EModelDefaultEquationNumbering(), domain);
+    solver->solve(*Kff, F, H);
 
     answer.beTProductOf(H, F);
     answer.times( 1. / this->giveAreaOfRVE() );
-
-    delete linMethod;
 }
+
+
+void
+StokesFlowVelocityHomogenization :: integrateNMatrix(FloatMatrix &N, Element &elem, TimeStep *tStep)
+{
+    FloatArray n, n2;
+
+    for ( GaussPoint *gp: *elem.giveDefaultIntegrationRulePtr() ) {
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
+
+        ///@todo Ask the element for the N-matrix instead
+        elem.giveInterpolation()->evalN( n, lcoords, FEIElementGeometryWrapper(&elem) );
+        double detJ = fabs( elem.giveInterpolation()->giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(&elem) ) );
+        n2.add(gp->giveWeight() * detJ, n);
+    }
+
+    N.beNMatrixOf(n2, this->giveDomain(1)->giveNumberOfSpatialDimensions());
+}
+
+
+void
+StokesFlowVelocityHomogenization :: applyPressureGradient(const FloatArray &grad)
+{
+    FloatArray components = grad;
+    components.negated();
+
+    ///@todo This should either be a specialized boundary condition so that this routine can be replaced by something else
+    for ( auto &bc : this->giveDomain(1)->giveBcs() ) {
+        DeadWeight *load = dynamic_cast< DeadWeight* >( bc.get() );
+        if ( load ) {
+            load->setDeadWeighComponents(components);
+            break;
+        }
+    }
+}
+
 }

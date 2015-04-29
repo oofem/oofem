@@ -47,7 +47,7 @@
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
  #include "oofegutils.h"
- #include "rcm2.h"
+ #include "Materials/rcm2.h"
 #endif
 
 namespace oofem {
@@ -56,8 +56,7 @@ REGISTER_Element(QTrPlaneStress2d);
 FEI2dTrQuad QTrPlaneStress2d :: interpolation(1, 2);
 
 QTrPlaneStress2d :: QTrPlaneStress2d(int n, Domain *aDomain) :
-    PlaneStressElement(n, aDomain), SpatialLocalizerInterface(this),
-    EIPrimaryUnknownMapperInterface()
+    PlaneStressElement(n, aDomain), SpatialLocalizerInterface(this)
 {
     numberOfDofMans  = 6;
     numberOfGaussPoints = 4;
@@ -82,8 +81,6 @@ QTrPlaneStress2d :: giveInterface(InterfaceType interface)
         return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
         return static_cast< SpatialLocalizerInterface * >(this);
-    } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     }
 
     return NULL;
@@ -94,12 +91,7 @@ IRResultType
 QTrPlaneStress2d :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 4;
-    IRResultType result = this->StructuralElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    return IRRT_OK;
+    return StructuralElement :: initializeFrom(ir);
 }
 
 
@@ -404,23 +396,5 @@ QTrPlaneStress2d :: SPRNodalRecoveryMI_givePatchType()
 {
     return SPRPatchType_2dquadratic;
 }
-
-
-void
-QTrPlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-                                                                     TimeStep *tStep, const FloatArray &lcoords,
-                                                                     FloatArray &answer)
-{
-    FloatArray u, ni;
-    FloatMatrix n;
-
-    this->interpolation.evalN( ni, lcoords, FEIElementGeometryWrapper(this) );
-
-    n.beNMatrixOf(ni, 2);
-
-    this->computeVectorOf({D_u, D_v}, mode, tStep, u);
-    answer.beProductOf(n, u);
-}
-
 
 } // end namespace oofem

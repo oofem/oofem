@@ -48,7 +48,7 @@
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
  #include "oofegutils.h"
- #include "rcm2.h"
+ #include "Materials/rcm2.h"
 
  #include <Etetrawd.h>
 #endif
@@ -61,8 +61,8 @@ FEI3dTetLin LTRSpace :: interpolation;
 LTRSpace :: LTRSpace(int n, Domain *aDomain) :
     Structural3DElement(n, aDomain), ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface(),
     SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(this),
-    EIPrimaryUnknownMapperInterface(), ZZErrorEstimatorInterface(this),
-    MMAShapeFunctProjectionInterface(), HuertaErrorEstimatorInterface()
+    ZZErrorEstimatorInterface(this),
+    HuertaErrorEstimatorInterface()
 
 {
     numberOfDofMans  = 4;
@@ -81,12 +81,8 @@ LTRSpace :: giveInterface(InterfaceType interface)
         return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
         return static_cast< SpatialLocalizerInterface * >(this);
-    } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
         return static_cast< ZZErrorEstimatorInterface * >(this);
-    } else if ( interface == MMAShapeFunctProjectionInterfaceType ) {
-        return static_cast< MMAShapeFunctProjectionInterface * >(this);
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
         return static_cast< HuertaErrorEstimatorInterface * >(this);
     }
@@ -257,7 +253,7 @@ LTRSpace :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *ref
 
 void LTRSpace :: HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
-    computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
+    computeNmatrixAt(gp->giveSubPatchCoordinates(), answer);
 }
 
 #ifdef __OOFEG
@@ -411,8 +407,7 @@ LTRSpace :: drawSpecial(oofegGraphicContext &gc, TimeStep *tStep)
 
         //   for (GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
         {
-            IntegrationRule *iRule = integrationRulesArray [ 0 ];
-            GaussPoint *gp = iRule->getIntegrationPoint(0);
+            GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
             if ( this->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
                 return;
             }
@@ -496,48 +491,6 @@ LTRSpace :: drawSpecial(oofegGraphicContext &gc, TimeStep *tStep)
 }
 
 #endif
-
-
-void
-LTRSpace :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-                                                             TimeStep *tStep, const FloatArray &lcoords,
-                                                             FloatArray &answer)
-{
-    FloatArray u;
-    FloatMatrix n;
-    n.beNMatrixOf(lcoords, 3);
-
-    this->computeVectorOf(mode, tStep, u);
-    answer.beProductOf(n, u);
-}
-
-
-void
-LTRSpace :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &coords,
-                                                                 coordType ct, nodalValContainerType &list,
-                                                                 InternalStateType type, TimeStep *tStep)
-{
-    double l1, l2, l3, l4;
-    FloatArray lcoords;
-    if ( ct == MMAShapeFunctProjectionInterface :: coordType_local ) {
-        lcoords = coords;
-    } else {
-        computeLocalCoordinates(lcoords, coords);
-    }
-
-    l1 = lcoords.at(1);
-    l2 = lcoords.at(2);
-    l3 = lcoords.at(3);
-    l4 = 1.0 - l1 - l2 - l3;
-    answer.resize(0);
-    answer.add(l1, list[0]);
-    answer.add(l2, list[1]);
-    answer.add(l3, list[2]);
-    answer.add(l4, list[3]);
-}
-
-
-
 
 
 IntegrationRule *

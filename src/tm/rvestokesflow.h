@@ -35,30 +35,37 @@
 #ifndef rvestokesflow_h
 #define rvestokesflow_h
 
-#include "rvematerial.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "transportmaterial.h"
+#include "stokesflowvelocityhomogenization.h"
+
+#include <memory>
 
 #define _IFT_RVEStokesFlow_Name "rvestokesflow"
+#define _IFT_RVEStokesFlow_fileName "file"
+#define _IFT_RVEStokesFlow_bctype "bctype"
+#define _IFT_RVEStokesFlow_supressoutput "supressoutput"
 
 namespace oofem {
 /**
  * Material status class for the RVEStokesFlow class.
  *
  * @author Carl Sandström
+ * @author Mikael Öhman
  */
 class RVEStokesFlowMaterialStatus : public TransportMaterialStatus
 {
 protected:
     FloatMatrix temp_TangentMatrix, tangentMatrix;
-    FloatArray *solutionVector;
-    EngngModel *rve;
+    std :: unique_ptr< StokesFlowVelocityHomogenization > rve;
 
 public:
-    RVEStokesFlowMaterialStatus(int n, Domain * d, GaussPoint * g, EngngModel * rve);
+    RVEStokesFlowMaterialStatus(int n, Domain * d, GaussPoint * g, const std :: string &inputfile);
 
     virtual ~RVEStokesFlowMaterialStatus();
+
+    void setTimeStep(TimeStep *tStep);
 
     virtual void initTempStatus();
 
@@ -69,13 +76,11 @@ public:
 
     const FloatMatrix &giveTangentMatrix() { return tangentMatrix; }
     const FloatMatrix &giveTempTangentMatrix() { return temp_TangentMatrix; }
-    void letTempTangentMatrixBe(FloatMatrix K) { temp_TangentMatrix = std :: move(K); }
+    void letTempTangentMatrixBe(const FloatMatrix &K) { temp_TangentMatrix = K; }
 
-    /**
-     * Export this RVE. The files produced is named ./[.in-file].rve/Rve_[ID]_[GP number] where is is the global element number any GP number is
-     * the number of the Gausspoint where the RVE is evaluated
-     */
-    void exportFilter(GaussPoint *gp, TimeStep *tStep);
+    StokesFlowVelocityHomogenization *giveRVE() { return rve.get(); }
+
+    bool oldTangent;
 
     virtual const char *giveClassName() const { return "RVEStokesFlowMaterialStatus"; }
 };
@@ -89,22 +94,30 @@ public:
  * velocity).
  *
  * @author Carl Sandström
+ * @author Mikael Öhman
  */
-class RVEStokesFlow : public RVEMaterial, public TransportMaterial
+class RVEStokesFlow : public TransportMaterial
 {
 private:
-    void exportFilter(EngngModel *E, GaussPoint *gp, TimeStep *tStep);
+    static int n;
+    std :: string rveFilename;
+    std :: string rveLogFilename;
+
+    int SupressRVEoutput;
+
+    void suppressStdout();
+    void enableStdout();
 
 public:
     RVEStokesFlow(int n, Domain * d);
 
-    virtual ~RVEStokesFlow() { };
+    virtual ~RVEStokesFlow() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep);
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep);
-    virtual double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) { return 0.0; };
+    virtual double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) { return 0.0; }
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 

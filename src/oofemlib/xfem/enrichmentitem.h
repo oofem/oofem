@@ -36,7 +36,6 @@
 #define enrichmentitem_h
 
 #include "femcmpnn.h"
-#include "domain.h"
 #include "floatmatrix.h"
 #include "dofiditem.h"
 #include "tipinfo.h"
@@ -62,10 +61,6 @@
 
 //@}
 
-#define _IFT_Crack_Name "crack"
-
-
-
 namespace oofem {
 class BasicGeometry;
 class EnrichmentFunction;
@@ -82,6 +77,9 @@ class DynamicDataReader;
 class Triangle;
 class GnuplotExportModule;
 class GaussPoint;
+class Element;
+class CrossSection;
+class Node;
 
 
 enum NodeEnrichmentType : int {
@@ -145,15 +143,15 @@ public:
 
 
     // Should update receiver geometry to the state reached at given time step.
-    virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep) { };
+    virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep) { }
     virtual void updateGeometry() = 0;
-    virtual void propagateFronts() = 0;
+    virtual void propagateFronts(bool &oFrontsHavePropagated) = 0;
 
     virtual bool hasPropagatingFronts() const;
 
 
-    int giveStartOfDofIdPool() const { return this->startOfDofIdPool; };
-    int giveEndOfDofIdPool() const { return this->endOfDofIdPool; };
+    int giveStartOfDofIdPool() const { return this->startOfDofIdPool; }
+    int giveEndOfDofIdPool() const { return this->endOfDofIdPool; }
     virtual int giveDofPoolSize() const;
     /**
      * Compute Id's of enriched dofs for a given DofManager.
@@ -212,21 +210,21 @@ public:
     static double calcXiZeroLevel(const double &iQ1, const double &iQ2);
     static void calcPolarCoord(double &oR, double &oTheta, const FloatArray &iOrigin, const FloatArray &iPos, const FloatArray &iN, const FloatArray &iT, const EfInput &iEfInput, bool iFlipTangent);
 
-    PropagationLaw *givePropagationLaw() { return this->mpPropagationLaw; };
-    bool hasPropagationLaw() { return this->mPropLawIndex != 0; };
+    PropagationLaw *givePropagationLaw() { return this->mpPropagationLaw; }
+    bool hasPropagationLaw() { return this->mPropLawIndex != 0; }
 
 
-    virtual void callGnuplotExportModule(GnuplotExportModule &iExpMod);
+    virtual void callGnuplotExportModule(GnuplotExportModule &iExpMod, TimeStep *tStep);
 
 
     const std :: unordered_map< int, NodeEnrichmentType > &giveEnrNodeMap() const { return mNodeEnrMarkerMap; }
 
     virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius) = 0;
 
-    EnrichmentFront *giveEnrichmentFrontStart() {return mpEnrichmentFrontStart;}
+    EnrichmentFront *giveEnrichmentFrontStart() { return mpEnrichmentFrontStart; }
     void setEnrichmentFrontStart(EnrichmentFront *ipEnrichmentFrontStart);
 
-    EnrichmentFront *giveEnrichmentFrontEnd() {return mpEnrichmentFrontEnd;}
+    EnrichmentFront *giveEnrichmentFrontEnd() { return mpEnrichmentFrontEnd; }
     void setEnrichmentFrontEnd(EnrichmentFront *ipEnrichmentFrontEnd);
 
     bool tipIsTouchingEI(const TipInfo &iTipInfo);
@@ -263,7 +261,7 @@ protected:
 
 
     // Level set for signed distance to the interface.
-    //	The sign is determined by the interface normal direction.
+    // The sign is determined by the interface normal direction.
     // This level set function is relevant for both open and closed interfaces.
     std :: unordered_map< int, double >mLevelSetNormalDirMap;
 
@@ -287,7 +285,6 @@ inline bool EnrichmentItem :: isDofManEnriched(const DofManager &iDMan) const
     auto res = mNodeEnrMarkerMap.find( iDMan.giveGlobalNumber() );
     return !( res == mNodeEnrMarkerMap.end() );
 }
-
 } // end namespace oofem
 
 

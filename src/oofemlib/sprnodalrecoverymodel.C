@@ -332,10 +332,9 @@ void
 SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDetermine,
                                    IntArray &pap, int papNumber, Set &elementSet)
 {
-    int nelem, ndofman, ielem, count, patchElements, i, j, includes, npap, ipap;
+    int nelem, ndofman, count, patchElements, j, includes, npap, ipap;
     const IntArray *papDofManConnectivity = domain->giveConnectivityTable()->giveDofManConnectivityArray(papNumber);
     std :: list< int >dofManToDetermineList;
-    std :: list< int > :: iterator dofManToDetermineListIter;
     SPRNodalRecoveryModelInterface *interface;
     IntArray toDetermine, toDetermine2, elemPap, papInv;
     Element *element;
@@ -347,7 +346,7 @@ SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDeter
     //
     nelem = papDofManConnectivity->giveSize();
     count = 0;
-    for ( ielem = 1; ielem <= nelem; ielem++ ) {
+    for ( int ielem = 1; ielem <= nelem; ielem++ ) {
         if ( domain->giveElement( papDofManConnectivity->at(ielem) )->giveParallelMode() != Element_local ) {
             continue;
         }
@@ -360,7 +359,7 @@ SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDeter
     patchElems.resize(count);
     patchElements = 0;
     for ( int i = 1; i <= nelem; i++ ) {
-        ielem = regionelements.at(i);
+        int ielem = regionelements.at(i);
 
         if ( domain->giveElement( papDofManConnectivity->at(ielem) )->giveParallelMode() != Element_local ) {
             continue;
@@ -382,7 +381,7 @@ SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDeter
     // determine dofManagers which values will be determined by this patch
     // first add those required by elements participating in patch
     dofManToDetermine.clear();
-    for ( ielem = 1; ielem <= patchElements; ielem++ ) {
+    for (int ielem = 1; ielem <= patchElements; ielem++ ) {
         element = domain->giveElement( patchElems.at(ielem) );
 
         if ( element->giveParallelMode() != Element_local ) {
@@ -392,7 +391,7 @@ SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDeter
         if ( ( interface = static_cast< SPRNodalRecoveryModelInterface * >( element->giveInterface(SPRNodalRecoveryModelInterfaceType) ) ) ) {
             // add element reported dofMans for pap dofMan
             interface->SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(toDetermine, papNumber);
-            for ( i = 1; i <= toDetermine.giveSize(); i++ ) {
+            for ( int i = 1; i <= toDetermine.giveSize(); i++ ) {
                 includes = 0;
                 // test if INCLUDED
                 for ( int dman: dofManToDetermineList ) {
@@ -467,7 +466,6 @@ SPRNodalRecoveryModel :: computePatch(FloatMatrix &a, IntArray &patchElems, int 
     int nelem, neq;
     FloatArray ipVal, coords, P;
     FloatMatrix A, rhs;
-    SPRNodalRecoveryModelInterface *interface;
 
     neq = this->giveNumberOfUnknownPolynomialCoefficients(regType);
     rhs.resize(neq, regionValSize);
@@ -479,7 +477,7 @@ SPRNodalRecoveryModel :: computePatch(FloatMatrix &a, IntArray &patchElems, int 
     nelem = patchElems.giveSize();
     for ( int ielem = 1; ielem <= nelem; ielem++ ) {
         Element *element = domain->giveElement( patchElems.at(ielem) );
-        if ( ( interface = static_cast< SPRNodalRecoveryModelInterface * >( element->giveInterface(SPRNodalRecoveryModelInterfaceType) ) ) ) {
+        if ( element->giveInterface(SPRNodalRecoveryModelInterfaceType) ) {
             IntegrationRule *iRule = element->giveDefaultIntegrationRulePtr();
             for ( GaussPoint *gp: *iRule ) {
                 int hasVal = element->giveIPValue(ipVal, gp, type, tStep);
@@ -492,7 +490,7 @@ SPRNodalRecoveryModel :: computePatch(FloatMatrix &a, IntArray &patchElems, int 
                     rhs.zero();
                 }
 
-                element->computeGlobalCoordinates( coords, * gp->giveSubPatchCoordinates() );
+                element->computeGlobalCoordinates( coords, gp->giveSubPatchCoordinates() );
                 // compute ip contribution
                 this->computePolynomialTerms(P, coords, regType);
                 for ( int j = 1; j <= neq; j++ ) {
@@ -587,7 +585,6 @@ SPRNodalRecoveryModel :: giveNumberOfUnknownPolynomialCoefficients(SPRPatchType 
     } else {
         return 0;
     }
-    return 0;
 }
 
 

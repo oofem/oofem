@@ -202,7 +202,7 @@ FEI3dHexaLin :: global2local(FloatArray &answer, const FloatArray &coords, const
 
         // update guess
         answer.subtract(delta);
-    } while ( 1 );
+    } while ( true );
 
     // test if inside
     bool inside = true;

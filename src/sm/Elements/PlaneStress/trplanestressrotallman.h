@@ -37,7 +37,7 @@
 
 #include "../sm/Elements/PlaneStress/trplanstrss.h"
 
-///@name Input fields for TrPlaneStrRot
+///@name Input fields for TrPlaneStrRotAllman
 //@{
 #define _IFT_TrPlanestressRotAllman_Name "trplanestressrotallman"
 //@}
@@ -64,12 +64,11 @@ public:
     virtual ~TrPlanestressRotAllman() { }
 
 protected:
-    virtual void computeGaussPoints();
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
     virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
 
     virtual double giveArea();
-    void computeLocalNodalCoordinates(std::vector< FloatArray > &lxy);
+    virtual void computeLocalNodalCoordinates(std::vector< FloatArray > &lxy);
     /**
      * Computes the stiffness matrix stabilization of zero energy mode (equal rotations)
      *
@@ -87,7 +86,7 @@ public:
     virtual integrationDomain giveIntegrationDomain() const { return _Triangle; }
     /** Computes the stiffness matrix of receiver. Overloaded to add stabilization of zero-energy mode (equal rotations) */
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
-
+    virtual void computeGaussPoints();
     virtual int computeNumberOfDofs() { return 9; }
     virtual void giveDofManDofIDMask(int inode, IntArray &) const;
 

@@ -71,8 +71,6 @@ LargeStrainMasterMaterial :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                 // required by IR_GIVE_FIELD macro
 
-
-
     IR_GIVE_OPTIONAL_FIELD(ir, slaveMat, _IFT_LargeStrainMasterMaterial_slaveMat); // number of slave material
     IR_GIVE_OPTIONAL_FIELD(ir, m, _IFT_LargeStrainMasterMaterial_m); // type of Set-Hill strain tensor
 
@@ -83,9 +81,7 @@ LargeStrainMasterMaterial :: initializeFrom(InputRecord *ir)
 MaterialStatus *
 LargeStrainMasterMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    LargeStrainMasterMaterialStatus *status;
-    status = new LargeStrainMasterMaterialStatus(1, this->giveDomain(), gp, slaveMat);
-    return status;
+    return new LargeStrainMasterMaterialStatus(1, this->giveDomain(), gp, slaveMat);
 }
 
 
@@ -104,7 +100,7 @@ LargeStrainMasterMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, Gaus
 
         double lambda1, lambda2, lambda3, E1, E2, E3;
         FloatArray eVals, SethHillStrainVector, stressVector, stressM;
-        FloatMatrix F, Ft, C, eVecs, SethHillStrain, stress(3, 3);
+        FloatMatrix F, Ft, C, eVecs, SethHillStrain;
         FloatMatrix L1, L2, T, tT;
         //store of deformation gradient into 3x3 matrix
         F.beMatrixForm(vF);
@@ -379,8 +375,6 @@ LargeStrainMasterMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, 
     FloatMatrix stiffness;
     MaterialMode mMode = gp->giveMaterialMode();
     if ( mMode == _3dMat ) {
-        Material *mat;
-        StructuralMaterial *sMat;
         mat = domain->giveMaterial(slaveMat);
         sMat = dynamic_cast< StructuralMaterial * >(mat);
         if ( sMat == NULL ) {

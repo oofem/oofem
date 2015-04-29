@@ -35,6 +35,7 @@
 #ifndef prescribedgradient_h
 #define prescribedgradient_h
 
+#include "prescribedgradienthomogenization.h"
 #include "boundarycondition.h"
 #include "dof.h"
 #include "bctype.h"
@@ -45,8 +46,6 @@
 ///@name Input fields for PrescribedTensor
 //@{
 #define _IFT_PrescribedGradient_Name "prescribedgradient"
-#define _IFT_PrescribedGradient_centercoords "ccoord"
-#define _IFT_PrescribedGradient_gradient "gradient"
 //@}
 
 namespace oofem {
@@ -59,27 +58,20 @@ namespace oofem {
  * @author Mikael Öhman
  * @author Erik Svenning
  */
-class OOFEM_EXPORT PrescribedGradient : public BoundaryCondition
+class OOFEM_EXPORT PrescribedGradient : public BoundaryCondition, public PrescribedGradientHomogenization
 {
-protected:
-    /// Prescribed gradient @f$ d_{ij} @f$
-    FloatMatrix gradient;
-
-    /// Center coordinate @f$ \bar{x}_i @f$
-    FloatArray centerCoord;
-
 public:
     /**
      * Creates boundary condition with given number, belonging to given domain.
      * @param n Boundary condition number.
      * @param d Domain to which new object will belongs.
      */
-    PrescribedGradient(int n, Domain * d) : BoundaryCondition(n, d) { }
+    PrescribedGradient(int n, Domain *d) : BoundaryCondition(n, d) { }
 
     /// Destructor
     virtual ~PrescribedGradient() { }
 
-    virtual double give(Dof *dof, ValueModeType mode, TimeStep *tStep);
+    virtual double give(Dof *dof, ValueModeType mode, double time);
 
     virtual bcType giveType() const { return DirichletBT; }
 
@@ -107,46 +99,19 @@ public:
      * @param sigma Output quantity (typically stress).
      * @param tStep Active time step.
      */
-    void computeField(FloatArray &sigma, TimeStep *tStep);
+    virtual void computeField(FloatArray &sigma, TimeStep *tStep);
 
     /**
      * Computes the macroscopic tangent for homogenization problems through sensitivity analysis.
      * @param tangent Output tangent.
      * @param tStep Active time step.
      */
-    void computeTangent(FloatMatrix &tangent, TimeStep *tStep);
+    virtual void computeTangent(FloatMatrix &tangent, TimeStep *tStep);
 
-    virtual void scale(double s) { gradient.times(s); }
-
-    /**
-     * Set prescribed tensor.
-     * @param t New prescribed value.
-     */
-    virtual void setPrescribedGradient(const FloatMatrix &t) { gradient = t; }
-
-    /**
-     * Sets the prescribed tensor from the matrix from given voigt notation.
-     * Assumes use of double values for off-diagonal, usually the way for strain in Voigt form.
-     * @param t Vector in voigt format.
-     */
-    virtual void setPrescribedGradientVoigt(const FloatArray &t);
-
-    /// @warning Not used. Do not call.
-    virtual void setPrescribedValue(double) { OOFEM_ERROR("Scalar value not used for prescribed tensors."); }
-
-    /**
-     * Set the center coordinate for the prescribed values to be set for.
-     * @param x Center coordinate.
-     */
-    virtual void setCenterCoordinate(FloatArray x) { centerCoord = std::move(x); }
-    /// Returns the center coordinate
-    virtual FloatArray &giveCenterCoordinate() { return centerCoord; }
+    virtual void scale(double s) { mGradient.times(s); }
 
     virtual const char *giveClassName() const { return "PrescribedGradient"; }
     virtual const char *giveInputRecordName() const { return _IFT_PrescribedGradient_Name; }
-
-protected:
-    double domainSize();
 };
 } // end namespace oofem
 

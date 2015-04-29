@@ -99,7 +99,7 @@ PrescribedMean :: assemble(SparseMtrx *answer, TimeStep *tStep, CharType type,
                                                   (interpolator->giveIntegrationRule(3));
 
         for ( GaussPoint * gp: * iRule ) {
-            FloatArray *lcoords = gp->giveNaturalCoordinates();
+            FloatArray lcoords = gp->giveNaturalCoordinates();
             FloatArray N; //, a;
             FloatMatrix temp, tempT;
             double detJ = 0.0;
@@ -108,14 +108,14 @@ PrescribedMean :: assemble(SparseMtrx *answer, TimeStep *tStep, CharType type,
             if (elementEdges) {
                 // Compute boundary integral
                 interpolator->boundaryGiveNodes( boundaryNodes, sides.at(i) );
-                interpolator->boundaryEvalN(N, sides.at(i), *lcoords, FEIElementGeometryWrapper(thisElement));
-                detJ = fabs ( interpolator->boundaryGiveTransformationJacobian(sides.at(i), *lcoords, FEIElementGeometryWrapper(thisElement)) );
+                interpolator->boundaryEvalN(N, sides.at(i), lcoords, FEIElementGeometryWrapper(thisElement));
+                detJ = fabs ( interpolator->boundaryGiveTransformationJacobian(sides.at(i), lcoords, FEIElementGeometryWrapper(thisElement)) );
                 // Retrieve locations for dofs on boundary
                 thisElement->giveBoundaryLocationArray(r_Sideloc, boundaryNodes, dofids, r_s);
                 thisElement->giveBoundaryLocationArray(c_Sideloc, boundaryNodes, dofids, c_s);
             } else {
-                interpolator->evalN(N, *lcoords, FEIElementGeometryWrapper(thisElement));
-                detJ = fabs ( interpolator->giveTransformationJacobian(*lcoords, FEIElementGeometryWrapper(thisElement) ) );
+                interpolator->evalN(N, lcoords, FEIElementGeometryWrapper(thisElement));
+                detJ = fabs ( interpolator->giveTransformationJacobian(lcoords, FEIElementGeometryWrapper(thisElement) ) );
                 IntArray DofIDStemp, rloc, cloc;
 
                 thisElement->giveLocationArray(rloc, r_s, &DofIDStemp);
@@ -180,7 +180,7 @@ PrescribedMean :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
                                                   (interpolator->giveIntegrationRule(3));
 
         for ( GaussPoint * gp: * iRule ) {
-            FloatArray *lcoords = gp->giveNaturalCoordinates();
+            FloatArray lcoords = gp->giveNaturalCoordinates();
             FloatArray a, N, pressureEqns, lambdaEqns;
             IntArray boundaryNodes, dofids={(DofIDItem) this->dofid}, locationArray;
             double detJ=0.0;
@@ -189,15 +189,15 @@ PrescribedMean :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
                 // Compute integral
                 interpolator->boundaryGiveNodes( boundaryNodes, sides.at(i) );
                 thisElement->computeBoundaryVectorOf(boundaryNodes, dofids, VM_Total, tStep, a);
-                interpolator->boundaryEvalN(N, sides.at(i), *lcoords, FEIElementGeometryWrapper(thisElement));
-                detJ = fabs ( interpolator->boundaryGiveTransformationJacobian(sides.at(i), *lcoords, FEIElementGeometryWrapper(thisElement)) );
+                interpolator->boundaryEvalN(N, sides.at(i), lcoords, FEIElementGeometryWrapper(thisElement));
+                detJ = fabs ( interpolator->boundaryGiveTransformationJacobian(sides.at(i), lcoords, FEIElementGeometryWrapper(thisElement)) );
 
                 // Retrieve locations for dofs with dofids
                 thisElement->giveBoundaryLocationArray(locationArray, boundaryNodes, dofids, s);
             } else {
                 thisElement->computeVectorOf(dofids, VM_Total, tStep, a);
-                interpolator->evalN(N, *lcoords, FEIElementGeometryWrapper(thisElement));
-                detJ = fabs ( interpolator->giveTransformationJacobian(*lcoords, FEIElementGeometryWrapper(thisElement)));
+                interpolator->evalN(N, lcoords, FEIElementGeometryWrapper(thisElement));
+                detJ = fabs ( interpolator->giveTransformationJacobian(lcoords, FEIElementGeometryWrapper(thisElement)));
 
                 IntArray DofIDStemp, loc;
 
@@ -291,13 +291,13 @@ PrescribedMean :: computeDomainSize()
         }
 
         for ( GaussPoint * gp: * iRule ) {
-            FloatArray *lcoords = gp->giveNaturalCoordinates();
+            FloatArray lcoords = gp->giveNaturalCoordinates();
 
             double detJ;
             if (elementEdges) {
-                detJ = fabs ( interpolator->boundaryGiveTransformationJacobian(sides.at(i), *lcoords, FEIElementGeometryWrapper(thisElement)) );
+                detJ = fabs ( interpolator->boundaryGiveTransformationJacobian(sides.at(i), lcoords, FEIElementGeometryWrapper(thisElement)) );
             } else {
-                detJ = fabs ( interpolator->giveTransformationJacobian(*lcoords, FEIElementGeometryWrapper(thisElement)) );
+                detJ = fabs ( interpolator->giveTransformationJacobian(lcoords, FEIElementGeometryWrapper(thisElement)) );
             }
             domainSize = domainSize + detJ*gp->giveWeight();
         }

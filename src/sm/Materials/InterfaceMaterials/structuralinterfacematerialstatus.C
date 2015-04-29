@@ -41,50 +41,33 @@
 #include "gausspoint.h"
 namespace oofem {
 StructuralInterfaceMaterialStatus :: StructuralInterfaceMaterialStatus(int n, Domain *d, GaussPoint *g) :
-    MaterialStatus(n, d, g), jump(), traction(), tempTraction(), tempJump(), firstPKTraction(), tempFirstPKTraction(), F(), tempF()
+    MaterialStatus(n, d, g), jump(3), traction(3), tempTraction(3), tempJump(3), firstPKTraction(3), tempFirstPKTraction(3), F(3, 3), tempF(3, 3),
+    mNewlyInserted(true)
 {
-    int size = this->giveDomain()->giveNumberOfSpatialDimensions();
-    size = 3;
-    this->jump.resize(size);
-    this->traction.resize(size);
-    this->firstPKTraction.resize(size);
-    this->F.resize(size, size);
     this->F.beUnitMatrix();
-
-    // reset temp vars.
-    this->tempJump            = this->jump;
-    this->tempTraction        = this->traction;
-    this->tempFirstPKTraction = this->firstPKTraction;
-    this->tempF               = this->F;
+    this->tempF.beUnitMatrix();
 }
 
 
 StructuralInterfaceMaterialStatus :: ~StructuralInterfaceMaterialStatus() { }
 
 
-void StructuralInterfaceMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
-// Prints the strains and stresses on the data file.
+void StructuralInterfaceMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-    //FloatArray helpVec;
-    //int n;
+#if 0
+    MaterialStatus :: printOutputAt(file, tStep);
 
-    //MaterialStatus :: printOutputAt(File, tNow);
+    fprintf(file, "  jump ");
+    for ( auto &val : this->jump ) {
+        fprintf(file, " %.4e", val );
+    }
 
-    //fprintf(File, "  strains ");
-    //StructuralMaterial :: giveFullSymVectorForm(helpVec, strainVector, gp->giveMaterialMode());
-    //n = helpVec.giveSize();
-    //for ( int i = 1; i <= n; i++ ) {
-    //    fprintf( File, " % .4e", helpVec.at(i) );
-    //}
-
-    //fprintf(File, "\n              stresses");
-    //StructuralMaterial :: giveFullSymVectorForm(helpVec, stressVector, gp->giveMaterialMode());
-
-    //n = helpVec.giveSize();
-    //for ( int i = 1; i <= n; i++ ) {
-    //    fprintf( File, " % .4e", helpVec.at(i) );
-    //}
-    //fprintf(File, "\n");
+    fprintf(File, "\n              traction ");
+    for ( auto &val : this->traction ) {
+        fprintf( File, " %.4e", val );
+    }
+    fprintf(file, "\n");
+#endif
 }
 
 
@@ -131,55 +114,44 @@ void StructuralInterfaceMaterialStatus :: initTempStatus()
 
 contextIOResultType
 StructuralInterfaceMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// saves full ms context (saves state variables, that completely describe
-// current state)
 {
-    //contextIOResultType iores;
-    //if ( stream == NULL ) {
-    //    OOFEM_ERROR("can't write into NULL stream");
-    //}
+#if 0
+    contextIOResultType iores;
 
-    //if ( ( iores = MaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-    //    THROW_CIOERR(iores);
-    //}
+    if ( ( iores = MaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
 
-    //if ( ( iores = strainVector.storeYourself(stream) ) != CIO_OK ) {
-    //    THROW_CIOERR(iores);
-    //}
+    if ( ( iores = strainVector.storeYourself(stream) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
 
-    //if ( ( iores = stressVector.storeYourself(stream) ) != CIO_OK ) {
-    //    THROW_CIOERR(iores);
-    //}
-
+    if ( ( iores = stressVector.storeYourself(stream) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+#endif
     return CIO_OK;
 }
 
 
 contextIOResultType
 StructuralInterfaceMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// restores full material context (saves state variables, that completely describe
-// current state)
-//
 {
-    //contextIOResultType iores;
-    //if ( stream == NULL ) {
-    //    OOFEM_ERROR("can't write into NULL stream");
-    //}
+#if 0
+    contextIOResultType iores;
 
-    //if ( ( iores = MaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-    //    THROW_CIOERR(iores);
-    //}
+    if ( ( iores = MaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
 
-    //if ( ( iores = strainVector.restoreYourself(stream) ) != CIO_OK ) {
-    //    THROW_CIOERR(iores);
-    //}
+    if ( ( iores = strainVector.restoreYourself(stream) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
 
-    //if ( ( iores = stressVector.restoreYourself(stream) ) != CIO_OK ) {
-    //    THROW_CIOERR(iores);
-    //}
-
+    if ( ( iores = stressVector.restoreYourself(stream) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+#endif
     return CIO_OK;
 }
 
@@ -188,15 +160,15 @@ void StructuralInterfaceMaterialStatus :: copyStateVariables(const MaterialStatu
     MaterialStatus &tmpStat = const_cast< MaterialStatus & >(iStatus);
     const StructuralInterfaceMaterialStatus &structStatus = dynamic_cast< StructuralInterfaceMaterialStatus & >(tmpStat);
 
-    jump                            = structStatus.giveJump();
-    traction                        = structStatus.giveTraction();
+    jump                    = structStatus.giveJump();
+    traction                = structStatus.giveTraction();
     tempTraction            = structStatus.giveTempTraction();
-    tempJump                        = structStatus.giveTempJump();
+    tempJump                = structStatus.giveTempJump();
     firstPKTraction         = structStatus.giveFirstPKTraction();
     tempFirstPKTraction     = structStatus.giveTempFirstPKTraction();
-    F                                       = structStatus.giveF();
-    tempF                           = structStatus.giveTempF();
-    mNormalDir                      = structStatus.giveNormal();
+    F                       = structStatus.giveF();
+    tempF                   = structStatus.giveTempF();
+    mNormalDir              = structStatus.giveNormal();
 }
 
 

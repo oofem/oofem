@@ -34,7 +34,6 @@
 
 #include "compodamagemat.h"
 #include "../sm/Elements/structuralelement.h"
-#include "material.h"
 #include "gausspoint.h"
 #include "../sm/Materials/structuralmaterial.h"
 #include "../sm/Materials/structuralms.h"
@@ -48,13 +47,11 @@ REGISTER_Material(CompoDamageMat);
 
 CompoDamageMat :: CompoDamageMat(int n, Domain *d) : StructuralMaterial(n, d)
 {
-    // Constructor
 }
 
 
 CompoDamageMat :: ~CompoDamageMat()
 {
-    // destructor
 }
 
 
@@ -63,28 +60,27 @@ IRResultType CompoDamageMat :: initializeFrom(InputRecord *ir)
     double value;
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    this->Material :: initializeFrom(ir);
     //define transversely othotropic material stiffness parameters
     IR_GIVE_FIELD(ir, value, _IFT_CompoDamageMat_exx);
-    propertyDictionary->add(Ex, value);
+    propertyDictionary.add(Ex, value);
     IR_GIVE_FIELD(ir, value, _IFT_CompoDamageMat_eyyezz);
-    propertyDictionary->add(Ey, value);
-    propertyDictionary->add(Ez, value);
+    propertyDictionary.add(Ey, value);
+    propertyDictionary.add(Ez, value);
     IR_GIVE_FIELD(ir, value, _IFT_CompoDamageMat_nuxynuxz);
-    propertyDictionary->add(NYxy, value);
-    propertyDictionary->add(NYxz, value);
+    propertyDictionary.add(NYxy, value);
+    propertyDictionary.add(NYxz, value);
     IR_GIVE_FIELD(ir, value, _IFT_CompoDamageMat_nuyz);
-    propertyDictionary->add(NYyz, value);
-    propertyDictionary->add(NYzy, value);
+    propertyDictionary.add(NYyz, value);
+    propertyDictionary.add(NYzy, value);
     IR_GIVE_FIELD(ir, value, _IFT_CompoDamageMat_Gxy);
-    propertyDictionary->add(Gxy, value);
-    propertyDictionary->add(Gxz, value);
+    propertyDictionary.add(Gxy, value);
+    propertyDictionary.add(Gxz, value);
 
     //calulate remaining components
-    propertyDictionary->add( Gyz, this->give(Ey, NULL) / ( 1. + this->give(NYxy, NULL) ) );
-    propertyDictionary->add( NYyx, this->give(Ey, NULL) * this->give(NYxy, NULL) / this->give(Ex, NULL) );
+    propertyDictionary.add( Gyz, this->give(Ey, NULL) / ( 1. + this->give(NYxy, NULL) ) );
+    propertyDictionary.add( NYyx, this->give(Ey, NULL) * this->give(NYxy, NULL) / this->give(Ex, NULL) );
     //propertyDictionary -> add(Gzy,this->give(Gyz,NULL));
-    propertyDictionary->add( NYzx, this->give(NYyx, NULL) );
+    propertyDictionary.add( NYzx, this->give(NYyx, NULL) );
 
     IR_GIVE_FIELD(ir, this->inputTension, _IFT_CompoDamageMat_tension_f0_gf);
 
@@ -115,9 +111,7 @@ IRResultType CompoDamageMat :: initializeFrom(InputRecord *ir)
     this->afterIter = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->allowSnapBack, _IFT_CompoDamageMat_allowSnapBack);
 
-    //
-    //OOFEM_LOG_INFO("READ \n");
-    return IRRT_OK;
+    return Material :: initializeFrom(ir);
 }
 
 void CompoDamageMat :: giveInputRecord(DynamicInputRecord &input)

@@ -108,8 +108,8 @@ public:
         this->failCrit = failCrit;
     }
 
-    FailureCriteriaStatus() { };
-    ~FailureCriteriaStatus() { }; // must destroy object correctly
+    FailureCriteriaStatus() { }
+    ~FailureCriteriaStatus() { } // must destroy object correctly
     Element *el;
 
     std :: vector< std :: vector< FloatArray > >quantities;
@@ -117,14 +117,14 @@ public:
     std :: vector< bool >failedFlags;
 
 
-    //FailureCriteriaType giveType() { return this->giveFailureCriteria().giveType(); };
-    FailureCriteria *giveFailureCriteria() { return this->failCrit; };
+    //FailureCriteriaType giveType() { return this->giveFailureCriteria().giveType(); }
+    FailureCriteria *giveFailureCriteria() { return this->failCrit; }
 
 
     bool hasFailed(int i) { return failedFlags.at(i - 1); }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int instanciateYourself(DataReader *dr) { return 1; };
+    virtual int instanciateYourself(DataReader *dr) { return 1; }
     virtual const char *giveClassName() const { return "FailureCriteriaStatus"; }
 };
 
@@ -145,13 +145,13 @@ public:
         this->number = number;
         this->fMan = fMan;
     };
-    ~FailureCriteria() { }; // must destroy object correctly
+    ~FailureCriteria() { } // must destroy object correctly
 
     std :: vector< FailureCriteriaStatus * >list;
 
     FailureCriteriaType giveType() { return this->type; }
     FractureManager *giveFractureManager() { return this->fMan; }
-    void setType(FailureCriteriaType type) { this->type = type; };
+    void setType(FailureCriteriaType type) { this->type = type; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     int instanciateYourself(DataReader *dr);
@@ -160,7 +160,7 @@ public:
 
     virtual FailureCriteriaStatus *CreateStatus(Element *el, FailureCriteria *failCrit) const = 0;
     virtual bool computeFailureCriteriaQuantities(FailureCriteriaStatus *fcStatus, TimeStep *tStep);
-    virtual bool evaluateFCQuantities(Element *el, TimeStep *tStep) { return false; }; // defaults to no implementation
+    virtual bool evaluateFCQuantities(Element *el, TimeStep *tStep) { return false; } // defaults to no implementation
     virtual bool evaluateFailureCriteria(FailureCriteriaStatus *fcStatus) = 0;
 };
 
@@ -192,7 +192,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual FailureCriteriaStatus *CreateStatus(Element *el, FailureCriteria *failCrit) const
-    { return new DamagedNeighborLayeredStatus(el, failCrit); };
+    { return new DamagedNeighborLayeredStatus(el, failCrit); }
 };
 
 
@@ -202,7 +202,7 @@ class FailureModuleElementInterface : public Interface
 public:
     FailureModuleElementInterface() : Interface() { }
     virtual const char *giveClassName() const { return "FailureModuleElementInterface"; }
-    virtual void computeFailureCriteriaQuantities(FailureCriteriaStatus *fc, TimeStep *tStep) { };
+    virtual void computeFailureCriteriaQuantities(FailureCriteriaStatus *fc, TimeStep *tStep) { }
 };
 
 
@@ -224,8 +224,8 @@ public:
     /// Destructor.
     ~FractureManager();
 
-    void setUpdateFlag(bool flag) { this->updateFlag = flag; };
-    bool giveUpdateFlag() { return this->updateFlag; };
+    void setUpdateFlag(bool flag) { this->updateFlag = flag; }
+    bool giveUpdateFlag() { return this->updateFlag; }
 
     void evaluateFailureCriterias(TimeStep *tStep); //Loop through all elements and evaluate criteria (if supported)
 

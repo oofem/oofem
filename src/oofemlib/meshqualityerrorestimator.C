@@ -90,9 +90,8 @@ double MeshQualityErrorEstimator :: computeJacobianError(FEInterpolation &fei, I
     double min_rcond = 1.0, rcond;
     FloatMatrix jac;
 
-    FEIElementGeometryWrapper egw(elem);
     for ( GaussPoint *gp: ir ) {
-        fei.giveJacobianMatrixAt( jac, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(elem) );
+        fei.giveJacobianMatrixAt( jac, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(elem) );
         rcond = jac.computeReciprocalCondition() * sgn( jac.giveDeterminant() ); // Signed rcond. as inverted mappings are particularly bad.
         if ( rcond < min_rcond ) {
             min_rcond = rcond;
@@ -104,8 +103,8 @@ double MeshQualityErrorEstimator :: computeJacobianError(FEInterpolation &fei, I
 double MeshQualityErrorEstimator :: giveValue(EE_ValueType type, TimeStep *tStep)
 {
     double error = 0.0, temp;
-    for ( int i = 1; i <= this->domain->giveNumberOfElements(); ++i ) {
-        temp = this->giveElementError(unknownET, this->domain->giveElement(i), tStep);
+    for ( auto &elem : this->domain->giveElements() ) {
+        temp = this->giveElementError(unknownET, elem.get(), tStep);
         if ( temp > error ) {
             error = temp;
         }

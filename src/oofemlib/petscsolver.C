@@ -51,34 +51,15 @@ PetscSolver :: PetscSolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(d, m
 
 PetscSolver :: ~PetscSolver() { }
 
-NM_Status PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
+NM_Status PetscSolver :: solve(SparseMtrx &A, FloatArray &b, FloatArray &x)
 {
-    int neqs;
+    int neqs = b.giveSize();
+    x.resize(neqs);
 
-    // first check whether Lhs is defined
-    if ( !A ) {
-        OOFEM_ERROR("unknown Lhs");
-    }
-
-    // and whether Rhs
-    if ( !b ) {
-        OOFEM_ERROR("unknown Rhs");
-    }
-
-    // and whether previous Solution exist
-    if ( !x ) {
-        OOFEM_ERROR("unknown solution array");
-    }
-
-    if ( x->giveSize() != ( neqs = b->giveSize() ) ) {
-        OOFEM_ERROR("size mismatch");
-    }
-
-    if ( A->giveType() != SMT_PetscMtrx ) {
+    PetscSparseMtrx *Lhs = dynamic_cast< PetscSparseMtrx * >(&A);
+    if ( !Lhs ) {
         OOFEM_ERROR("PetscSparseMtrx Expected");
     }
-
-    PetscSparseMtrx *Lhs = static_cast< PetscSparseMtrx * >(A);
 
     Vec globRhsVec;
     Vec globSolVec;
@@ -87,15 +68,15 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
      * scatter and gather rhs to global representation (automatically detects sequential/parallel modes)
      */
     Lhs->createVecGlobal(& globRhsVec);
-    Lhs->scatterL2G(* b, globRhsVec);
+    Lhs->scatterL2G(b, globRhsVec);
 
     VecDuplicate(globRhsVec, & globSolVec);
 
     //VecView(globRhsVec,PETSC_VIEWER_STDOUT_WORLD);
-    NM_Status s = this->petsc_solve(Lhs, globRhsVec, globSolVec);
+    NM_Status s = this->petsc_solve(*Lhs, globRhsVec, globSolVec);
     //VecView(globSolVec,PETSC_VIEWER_STDOUT_WORLD);
 
-    Lhs->scatterG2L(globSolVec, * x);
+    Lhs->scatterG2L(globSolVec, x);
 
     VecDestroy(& globSolVec);
     VecDestroy(& globRhsVec);
@@ -104,14 +85,11 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
 }
 
 NM_Status
-PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
+PetscSolver :: petsc_solve(PetscSparseMtrx &Lhs, Vec b, Vec x)
 {
     int nite;
     PetscErrorCode err;
     KSPConvergedReason reason;
-    if ( Lhs->giveType() != SMT_PetscMtrx ) {
-        OOFEM_ERROR("PetscSparseMtrx Expected");
-    }
 
     Timer timer;
     timer.startTimer();
@@ -119,39 +97,39 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
     /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      *  Create the linear solver and set various options
      *  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-    if ( !Lhs->kspInit ) {
+    if ( !Lhs.kspInit ) {
 #ifdef __PARALLEL_MODE
         MPI_Comm comm = engngModel->giveParallelComm();
 #else
         MPI_Comm comm = PETSC_COMM_SELF;
 #endif
-        KSPCreate(comm, & Lhs->ksp);
-        Lhs->kspInit = true;
+        KSPCreate(comm, & Lhs.ksp);
+        Lhs.kspInit = true;
     }
 
     /*
      * Set operators. Here the matrix that defines the linear system
      * also serves as the preconditioning matrix.
      */
-    if ( Lhs->newValues ) { // Optimization for successive solves
+    if ( Lhs.newValues ) { // Optimization for successive solves
         ///@todo I'm not 100% on the choice MatStructure. SAME_NONZERO_PATTERN should be safe.
         if ( this->engngModel->requiresUnknownsDictionaryUpdate() ) {
 #if  PETSC_VERSION_MAJOR >= 3 && PETSC_VERSION_MINOR >= 5
             // The syntax for this function changed in PETSc version 3.5.1 /ES
-            KSPSetOperators(Lhs->ksp, * Lhs->giveMtrx(), * Lhs->giveMtrx());
+            KSPSetOperators(Lhs.ksp, * Lhs.giveMtrx(), * Lhs.giveMtrx());
 #else
-            KSPSetOperators(Lhs->ksp, * Lhs->giveMtrx(), * Lhs->giveMtrx(), DIFFERENT_NONZERO_PATTERN);
+            KSPSetOperators(Lhs.ksp, * Lhs.giveMtrx(), * Lhs.giveMtrx(), DIFFERENT_NONZERO_PATTERN);
 #endif
         } else {
             //KSPSetOperators(Lhs->ksp, * Lhs->giveMtrx(), * Lhs->giveMtrx(), SAME_PRECONDITIONER);
 #if  PETSC_VERSION_MAJOR >= 3 && PETSC_VERSION_MINOR >= 5
             // The syntax for this function changed in PETSc version 3.5.1 /ES
-            KSPSetOperators(Lhs->ksp, * Lhs->giveMtrx(), * Lhs->giveMtrx());
+            KSPSetOperators(Lhs.ksp, * Lhs.giveMtrx(), * Lhs.giveMtrx());
 #else
-            KSPSetOperators(Lhs->ksp, * Lhs->giveMtrx(), * Lhs->giveMtrx(), SAME_NONZERO_PATTERN);
+            KSPSetOperators(Lhs.ksp, * Lhs.giveMtrx(), * Lhs.giveMtrx(), SAME_NONZERO_PATTERN);
 #endif
         }
-        Lhs->newValues = false;
+        Lhs.newValues = false;
 
         /*
          * Set linear solver defaults for this problem (optional).
@@ -160,7 +138,7 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
          * KSPSetFromOptions().  All of these defaults can be
          * overridden at runtime, as indicated below.
          */
-        KSPSetTolerances(Lhs->ksp, PETSC_DEFAULT, PETSC_DEFAULT, PETSC_DEFAULT, PETSC_DEFAULT);
+        KSPSetTolerances(Lhs.ksp, PETSC_DEFAULT, PETSC_DEFAULT, PETSC_DEFAULT, PETSC_DEFAULT);
 
         /*
          * Set runtime options, e.g.,
@@ -169,19 +147,19 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
          * KSPSetFromOptions() is called _after_ any other customization
          * routines.
          */
-        KSPSetFromOptions(Lhs->ksp);
+        KSPSetFromOptions(Lhs.ksp);
     }
 
     /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      *  Solve the linear system
      *  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
     //MatView(*Lhs->giveMtrx(),PETSC_VIEWER_STDOUT_SELF);
-    err = KSPSolve(Lhs->ksp, b, x);
+    err = KSPSolve(Lhs.ksp, b, x);
     if ( err != 0 ) {
         OOFEM_ERROR("Error when solving: %d\n", err);
     }
-    KSPGetConvergedReason(Lhs->ksp, & reason);
-    KSPGetIterationNumber(Lhs->ksp, & nite);
+    KSPGetConvergedReason(Lhs.ksp, & reason);
+    KSPGetIterationNumber(Lhs.ksp, & nite);
 
     if ( reason >= 0 ) {
         //OOFEM_LOG_INFO("PetscSolver:  Converged. KSPConvergedReason: %d, number of iterations: %d\n", reason, nite);
@@ -190,7 +168,7 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
     }
 
     timer.stopTimer();
-    OOFEM_LOG_INFO( "PetscSolver:  User time consumed by solution: %.2fs\n", timer.getUtime() );
+    OOFEM_LOG_INFO( "PetscSolver:  User time consumed by solution: %.2fs, KSPConvergedReason: %d, number of iterations: %d\n", timer.getUtime(), reason, nite );
 
     if ( reason < 0 ) {
         return NM_NoSuccess;
@@ -202,16 +180,12 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
 
 #if 0
 ///@todo Parallel mode of this.
-NM_Status PetscSolver :: solve(SparseMtrx *A, FloatMatrix &B, FloatMatrix &X)
+NM_Status PetscSolver :: solve(SparseMtrx &A, FloatMatrix &B, FloatMatrix &X)
 {
-    if ( !A ) {
-        OOFEM_ERROR("Unknown Lhs");
-    }
-    if ( A->giveType() != SMT_PetscMtrx ) {
+    PetscSparseMtrx *Lhs = dynamic_cast< PetscSparseMtrx * >(&A);
+    if ( !Lhs ) {
         OOFEM_ERROR("PetscSparseMtrx Expected");
     }
-
-    PetscSparseMtrx *Lhs = static_cast< PetscSparseMtrx * >(A);
 
     Vec globRhsVec;
     Vec globSolVec;
@@ -226,7 +200,7 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatMatrix &B, FloatMatrix &X)
     for ( int i = 0; i < cols; ++i ) {
         VecCreateSeqWithArray(PETSC_COMM_SELF, rows, B.givePointer() + rows * i, & globRhsVec);
         VecDuplicate(globRhsVec, & globSolVec);
-        s = this->petsc_solve(Lhs, globRhsVec, globSolVec, newLhs);
+        s = this->petsc_solve(*Lhs, globRhsVec, globSolVec, newLhs);
         if ( !( s & NM_Success ) ) {
             OOFEM_WARNING("No success at solving column %d", i + 1);
             return s;

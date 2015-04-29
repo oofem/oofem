@@ -84,9 +84,7 @@ IRResultType
 Tr_Warp :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 1;
-    this->StructuralElement :: initializeFrom(ir);
-
-    return IRRT_OK;
+    return StructuralElement :: initializeFrom(ir);
 }
 
 
@@ -97,7 +95,7 @@ Tr_Warp :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
 // luated at gp.
 {
     FloatMatrix dN;
-    this->interp.evaldNdx( dN, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evaldNdx( dN, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(2, 3);
 
@@ -116,7 +114,7 @@ Tr_Warp :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, volume;
-    determinant = fabs( this->interp.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    determinant = fabs( this->interp.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     weight = gp->giveWeight();
     volume = determinant * weight;
 
@@ -196,8 +194,7 @@ Tr_Warp :: giveThicknessAt(const FloatArray &gcoords)
 double
 Tr_Warp :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double determinant = fabs( this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
-    FloatArray gc;
+    double determinant = fabs( this->interp.edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     return determinant * gp->giveWeight();
 }
 
@@ -213,8 +210,8 @@ Tr_Warp :: giveInterface(InterfaceType interface)
 {
     if ( interface == SpatialLocalizerInterfaceType ) {
         return static_cast< SpatialLocalizerInterface * >(this);
-	//    } else if ( interface == EIPrimaryFieldInterfaceType ) {
-	//        return static_cast< EIPrimaryFieldInterface * >(this);
+    //} else if ( interface == EIPrimaryFieldInterfaceType ) {
+        //return static_cast< EIPrimaryFieldInterface * >(this);
     } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
         return static_cast< ZZNodalRecoveryModelInterface * >(this);
     }

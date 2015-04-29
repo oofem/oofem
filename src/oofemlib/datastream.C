@@ -33,26 +33,25 @@
  */
 
 #include "datastream.h"
-#include "error.h"
+
+#include <vector>
 
 namespace oofem
 {
 int DataStream :: read(std :: string &data)
 {
     int n;
-    char *str;
+    std :: vector< char >str;
     if ( !this->read(& n, 1) ) {
         data = "";
         return 0;
     }
-    str = new char [ n + 1 ];
-    if ( !this->read(str, n) ) {
+    str.resize(n);
+    if ( !this->read(str.data(), n) ) {
         data = "";
         return 0;
     }
-    str [ n ] = '\0';
-    data = str;
-    delete [] str;
+    data = std::string(str.data(), str.size());
     return 1;
 }
 

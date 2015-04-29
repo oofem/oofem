@@ -128,7 +128,6 @@ InterfaceElem2dQuad :: computeVolumeAround(GaussPoint *gp)
 
     double r = 1.0;
     if (this->axisymmode) {
-      double ksi = gp->giveNaturalCoordinate(1);
       double n3  = 1. - ksi * ksi;
       double n1  = ( 1. - ksi ) * 0.5 - 0.5 * n3;
       double n2  = ( 1. + ksi ) * 0.5 - 0.5 * n3;
@@ -317,7 +316,7 @@ void InterfaceElem2dQuad :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 
         indx = gc.giveIntVarIndx();
 
-        result += this->computeGlobalCoordinates( gcoord, * ( gp->giveNaturalCoordinates() ) );
+        result += this->computeGlobalCoordinates( gcoord, gp->giveNaturalCoordinates() );
 
         p [ 0 ].x = ( FPNum ) gcoord.at(1);
         p [ 0 ].y = ( FPNum ) gcoord.at(2);

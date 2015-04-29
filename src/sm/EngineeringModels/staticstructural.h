@@ -44,8 +44,8 @@
 #define _IFT_StaticStructural_Name "staticstructural"
 #define _IFT_StaticStructural_deltat "deltat"
 #define _IFT_StaticStructural_solvertype "solvertype"
-#define _IFT_StaticStructural_linearguess "linearguess"
 
+#define _IFT_StaticStructural_recomputeaftercrackpropagation "recomputeaftercrackprop"
 namespace oofem {
 class SparseMtrx;
 
@@ -56,21 +56,24 @@ class SparseMtrx;
 class StaticStructural : public StructuralEngngModel, public XfemSolverInterface
 {
 protected:
+    FloatArray solution;
     FloatArray internalForces;
-    FloatArray *solution;
     FloatArray eNorm;
-    SparseMtrx *stiffnessMatrix;
+    std :: unique_ptr< SparseMtrx >stiffnessMatrix;
 
-    PrimaryField *field;
+    std :: unique_ptr< PrimaryField >field;
 
     SparseMtrxType sparseMtrxType;
 
-    SparseNonLinearSystemNM *nMethod;
+    std :: unique_ptr< SparseNonLinearSystemNM >nMethod;
     int solverType;
     
     double deltaT;
-    
-    bool linearguess;
+
+    InitialGuess initialGuessType;
+
+    bool mRecomputeStepAfterPropagation;
+
 public:
     StaticStructural(int i, EngngModel * _master = NULL);
     virtual ~StaticStructural();
@@ -92,10 +95,11 @@ public:
     virtual TimeStep *giveNextStep();
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
 
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
     virtual fMode giveFormulation() { return TL; }
 
-    virtual void updatePrimaryField(ValueModeType mode, TimeStep *tStep, const FloatArray &vectorToStore);
+    void setSolution(TimeStep *tStep, const FloatArray &vectorToStore);
+
+    virtual bool requiresEquationRenumbering(TimeStep *tStep);
 
     // identification
     virtual const char *giveInputRecordName() const { return _IFT_StaticStructural_Name; }

@@ -68,7 +68,6 @@ BinghamFluidMaterial2 :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    this->FluidDynamicMaterial :: initializeFrom(ir);
     // we use rather object's member data than to store data into slow
     // key-val dictionary with lot of memory allocations
     IR_GIVE_FIELD(ir, mu_0, _IFT_BinghamFluidMaterial2_mu0);
@@ -79,7 +78,7 @@ BinghamFluidMaterial2 :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, stressGrowthRate, _IFT_BinghamFluidMaterial2_stressGrowthRate);
     tau_c = tau_0 * mu_inf / ( mu_inf - mu_0 );
     //tau_c = tau_0;
-    return IRRT_OK;
+    return FluidDynamicMaterial :: initializeFrom(ir);
 }
 
 
@@ -218,16 +217,16 @@ BinghamFluidMaterial2 :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatR
         double dgde1, dgde2, dgde3;
         double dmudg, mu;
 
-        if ( 0 ) {
-            double _nu = computeActualViscosity(tau_0, gamma);
+#if 0
+        double _nu = computeActualViscosity(tau_0, gamma);
 
-            answer.at(1, 1) = answer.at(2, 2) = 2.0 * _nu;
-            answer.at(3, 3) = _nu;
+        answer.at(1, 1) = answer.at(2, 2) = 2.0 * _nu;
+        answer.at(3, 3) = _nu;
 
-            //answer.at(1,1) = answer.at(2,2) = answer.at(3,3) = 2.0*_nu;
-            //answer.at(4,4) = _nu;
-            return;
-        }
+        //answer.at(1,1) = answer.at(2,2) = answer.at(3,3) = 2.0*_nu;
+        //answer.at(4,4) = _nu;
+        return;
+#endif
 
         if ( ( mode == ElasticStiffness ) || ( mode == SecantStiffness ) ) {
             double _nu = computeActualViscosity(tau_0, gamma);
@@ -393,7 +392,7 @@ BinghamFluidMaterial2 :: checkConsistency()
     if ( domain->giveEngngModel()->giveEquationScalingFlag() ) {
         double scale;
         scale = domain->giveEngngModel()->giveVariableScale(VST_Density);
-        propertyDictionary->at('d') /= scale;
+        propertyDictionary.at('d') /= scale;
 
         scale = domain->giveEngngModel()->giveVariableScale(VST_Viscosity);
         this->mu_0 /= scale;
@@ -534,7 +533,7 @@ BinghamFluidMaterial2 :: computeDeviatoricStress(FloatArray &answer, const Float
             deps.at(6) * _nu
         };
     } else {
-        OOFEM_ERROR("unsuported material mode");
+        OOFEM_ERROR("unsupported material mode");
     }
 }
 
@@ -566,17 +565,17 @@ BinghamFluidMaterial2Status :: BinghamFluidMaterial2Status(int n, Domain *d, Gau
 }
 
 void
-BinghamFluidMaterial2Status :: printOutputAt(FILE *File, TimeStep *tNow)
+BinghamFluidMaterial2Status :: printOutputAt(FILE *File, TimeStep *tStep)
 // Prints the strains and stresses on the data file.
 {
     fprintf(File, " strains ");
     for ( double e: deviatoricStrainRateVector ) {
-        fprintf( File, " % .4e", e );
+        fprintf( File, " %.4e", e );
     }
 
     fprintf(File, "\n deviatoric stresses");
     for ( double e: deviatoricStressVector ) {
-        fprintf( File, " % .4e", e );
+        fprintf( File, " %.4e", e );
     }
 
     fprintf(File, "\n          status { gamma %e, tau %e }", devStrainMagnitude, devStressMagnitude);

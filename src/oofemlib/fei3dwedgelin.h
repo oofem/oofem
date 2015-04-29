@@ -62,6 +62,7 @@ public:
     virtual int global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual double giveCharacteristicLength(const FEICellGeometry &cellgeo) const;
 
     // Edge
     virtual void edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
@@ -86,8 +87,7 @@ public:
     virtual IntegrationRule *giveIntegrationRule(int order);
     virtual IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary);
     virtual IntegrationRule *giveSurfaceIntegrationRule(int order, int isurf)
-        { return giveBoundaryIntegrationRule(order, isurf); };
-    
+        { return giveBoundaryIntegrationRule(order, isurf); }    
 
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);

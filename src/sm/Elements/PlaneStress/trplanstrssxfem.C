@@ -30,7 +30,6 @@
  #include "oofeggraphiccontext.h"
  #include "oofegutils.h"
  #include "xfem/patchintegrationrule.h"
- #include "rcm2.h"
 #endif
 
 
@@ -127,20 +126,21 @@ TrPlaneStress2dXFEM :: giveDofManDofIDMask(int inode, IntArray &answer) const
     TrPlaneStress2d :: giveDofManDofIDMask(inode, answer);
 
     // Discontinuous part
-	if( this->giveDomain()->hasXfemManager() ) {
-		DofManager *dMan = giveDofManager(inode);
-		XfemManager *xMan = giveDomain()->giveXfemManager();
+    if( this->giveDomain()->hasXfemManager() ) {
+        DofManager *dMan = giveDofManager(inode);
+        XfemManager *xMan = giveDomain()->giveXfemManager();
 
-        const std::vector<int> &nodeEiIndices = xMan->giveNodeEnrichmentItemIndices( dMan->giveGlobalNumber() );
+        int placeInArray = domain->giveDofManPlaceInArray(dMan->giveGlobalNumber());
+        const std::vector<int> &nodeEiIndices = xMan->giveNodeEnrichmentItemIndices( placeInArray );
         for ( size_t i = 0; i < nodeEiIndices.size(); i++ ) {
             EnrichmentItem *ei = xMan->giveEnrichmentItem(nodeEiIndices[i]);
-			if ( ei->isDofManEnriched(* dMan) ) {
-				IntArray eiDofIdArray;
-				ei->computeEnrichedDofManDofIdArray(eiDofIdArray, *dMan);
-				answer.followedBy(eiDofIdArray);
-			}
-		}
-	}
+            if ( ei->isDofManEnriched(* dMan) ) {
+                IntArray eiDofIdArray;
+                ei->computeEnrichedDofManDofIdArray(eiDofIdArray, *dMan);
+                answer.followedBy(eiDofIdArray);
+            }
+        }
+    }
 }
 
 void
@@ -169,6 +169,11 @@ void TrPlaneStress2dXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatRespo
 //          printf("Found zero on diagonal.\n");
         }
     }
+}
+
+void TrPlaneStress2dXFEM :: computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+{
+    XfemStructuralElementInterface::XfemElementInterface_computeDeformationGradientVector(answer, gp, tStep);
 }
 
 void
@@ -240,7 +245,7 @@ void TrPlaneStress2dXFEM :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
             indx = gc.giveIntVarIndx();
 
             for ( auto &ir: integrationRulesArray ) {
-                PatchIntegrationRule *iRule = dynamic_cast< PatchIntegrationRule * >(ir);
+                PatchIntegrationRule *iRule = dynamic_cast< PatchIntegrationRule * >(ir.get());
 
  #if 0
                 val = iRule->giveMaterial();
@@ -290,9 +295,7 @@ void TrPlaneStress2dXFEM :: giveInputRecord(DynamicInputRecord &input)
 
 
 void
-TrPlaneStress2dXFEM :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-                                                                        TimeStep *tStep, const FloatArray &lcoords,
-                                                                        FloatArray &answer)
+TrPlaneStress2dXFEM :: computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {
     // TODO: Validate implementation.
 

@@ -410,7 +410,6 @@ PhaseFieldElement :: computeStiffnessMatrix_dd(FloatMatrix &answer, MatResponseM
 IRResultType
 PhaseFieldElement :: initializeFrom(InputRecord *ir)
 {
-    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     //IRResultType result;                // Required by IR_GIVE_FIELD macro
     //nlGeo = 0;
 

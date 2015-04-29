@@ -41,6 +41,7 @@
 #include "unknowntype.h"
 
 #include <list>
+#include <memory>
 
 ///@name Input fields for Point-of-Interest export module
 //@{
@@ -79,7 +80,7 @@ protected:
     /// Smoother type.
     enum POIEM_MapperType { POI_CPT, POI_SFT, POI_LST } mtype;
     /// Mapper.
-    MaterialMappingAlgorithm *mapper;
+    std :: unique_ptr< MaterialMappingAlgorithm > mapper;
     //
 
 public:

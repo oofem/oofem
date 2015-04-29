@@ -1,5 +1,4 @@
 #include "prescribedgradientweakquadtetnodalforce.h"
 
-PrescribedGradientWeakQuadTetNodalForce::PrescribedGradientWeakQuadTetNodalForce()
-{
-}
+PrescribedGradientWeakQuadTetNodalForce :: PrescribedGradientWeakQuadTetNodalForce()
+{}

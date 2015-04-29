@@ -76,9 +76,10 @@ namespace oofem {
 class IntMatBilinearCZFagerstromRate : public IntMatBilinearCZFagerstrom
 {
 protected:
-    /// Additional Material parameters
-    double c_star;   // rate dependence coefficient	
-    double m;   // rate dependence exponent
+    /// Rate dependence coefficient
+    double c_star;
+    /// Rate dependence exponent
+    double m;
     virtual int checkConsistency();
 
     
@@ -88,7 +89,7 @@ public:
     /// Destructor
     virtual ~IntMatBilinearCZFagerstromRate();
 
-	virtual void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
+    virtual void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
                                          const FloatMatrix &F, TimeStep *tStep);
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);

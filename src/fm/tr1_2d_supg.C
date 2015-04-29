@@ -98,8 +98,6 @@ TR1_2D_SUPG :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;               // Required by IR_GIVE_FIELD macro
 
-    SUPGElement :: initializeFrom(ir);
-
     this->vof = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, vof, _IFT_Tr1SUPG_pvof);
     if ( vof > 0.0 ) {
@@ -111,6 +109,10 @@ TR1_2D_SUPG :: initializeFrom(InputRecord *ir)
         this->temp_vof = this->vof;
     }
 
+    result = SUPGElement :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
     this->initGeometry();
     return IRRT_OK;
 }
@@ -878,9 +880,7 @@ TR1_2D_SUPG :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
     answer.resize(6);
     answer.zero();
 
-    int nLoads;
     double usum [ 2 ];
-    Load *load;
     bcGeomType ltype;
     double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     FloatArray un, gVector;
@@ -892,9 +892,9 @@ TR1_2D_SUPG :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
     usum [ 0 ] = un.at(1) + un.at(3) + un.at(5);
     usum [ 1 ] = un.at(2) + un.at(4) + un.at(6);
     double coeff = rho * area / 3.0;
-    nLoads = this->giveBodyLoadArray()->giveSize();
+    int nLoads = this->giveBodyLoadArray()->giveSize();
     for ( int i = 1; i <= nLoads; i++ ) {
-        load  = domain->giveLoad( bodyLoadArray.at(i) );
+        Load *load  = domain->giveLoad( bodyLoadArray.at(i) );
         ltype = load->giveBCGeoType();
         if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ForceLoadBVT ) ) {
             load->computeComponentArrayAt(gVector, tStep, VM_Total);
@@ -909,11 +909,11 @@ TR1_2D_SUPG :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
         }
 
         if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ReinforceBVT ) ) {
-            Reinforcement *load  = dynamic_cast< Reinforcement * >( domain->giveLoad( bodyLoadArray.at(i) ) );
-            double phi = load->givePorosity();
-            double alpha = load->giveshapefactor();
-            double kx = load->givePermeability()->at(1);
-            double ky = load->givePermeability()->at(2);
+            Reinforcement *rload  = dynamic_cast< Reinforcement * >( domain->giveLoad( bodyLoadArray.at(i) ) );
+            double phi = rload->givePorosity();
+            double alpha = rload->giveshapefactor();
+            double kx = rload->givePermeability()->at(1);
+            double ky = rload->givePermeability()->at(2);
             double tau_0 = this->giveMaterial()->give( YieldStress, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
             //double mu_0 = this->giveMaterial()->give( Viscosity, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
             gVector.resize(2);
@@ -934,21 +934,18 @@ TR1_2D_SUPG :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
     double tx, ty, l;
     //IntArray nodecounter (3);
 
-    if ( 1 ) {
+    if ( true ) {
         FloatArray t, coords(1);
-        int nLoads, n, id;
-        BoundaryLoad *load;
-        bcType loadtype;
         // integrate tractions
 
         // if no traction bc applied but side marked as with traction load
         // then zero traction is assumed !!!
 
         // loop over boundary load array
-        nLoads = this->giveBoundaryLoadArray()->giveSize() / 2;
-        for ( int i = 1; i <= nLoads; i++ ) {
-            n = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
-            id = boundaryLoadArray.at(i * 2);
+        int numLoads = this->giveBoundaryLoadArray()->giveSize() / 2;
+        for ( int i = 1; i <= numLoads; i++ ) {
+            int n = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
+            int id = boundaryLoadArray.at(i * 2);
 
             n1 = id;
             n2 = ( n1 == 3 ? 1 : n1 + 1 );
@@ -957,8 +954,8 @@ TR1_2D_SUPG :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
             ty = giveNode(n2)->giveCoordinate(2) - giveNode(n1)->giveCoordinate(2);
             l = sqrt(tx * tx + ty * ty);
 
-            load = dynamic_cast< BoundaryLoad * >( domain->giveLoad(n) );
-            loadtype = load->giveType();
+            auto load = dynamic_cast< BoundaryLoad * >( domain->giveLoad(n) );
+            auto loadtype = load->giveType();
             if ( loadtype == TransmissionBC ) {
                 load->computeValueAt(t, tStep, coords, VM_Total);
 
@@ -982,7 +979,6 @@ TR1_2D_SUPG :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *tStep)
 {
     int nLoads;
     double coeff;
-    Load *load;
     bcGeomType ltype;
     FloatArray gVector;
 
@@ -991,7 +987,7 @@ TR1_2D_SUPG :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *tStep)
     coeff = t_pspg * area;
     nLoads    = this->giveBodyLoadArray()->giveSize();
     for ( int i = 1; i <= nLoads; i++ ) {
-        load  = domain->giveLoad( bodyLoadArray.at(i) );
+        Load *load  = domain->giveLoad( bodyLoadArray.at(i) );
         ltype = load->giveBCGeoType();
         if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ForceLoadBVT ) ) {
             load->computeComponentArrayAt(gVector, tStep, VM_Total);
@@ -1003,11 +999,11 @@ TR1_2D_SUPG :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *tStep)
         }
 
         if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ReinforceBVT ) ) {
-            Reinforcement *load  = dynamic_cast< Reinforcement * >( domain->giveLoad( bodyLoadArray.at(i) ) );
-            double phi = load->givePorosity();
-            double alpha = load->giveshapefactor();
-            double kx = load->givePermeability()->at(1);
-            double ky = load->givePermeability()->at(2);
+            Reinforcement *rload  = dynamic_cast< Reinforcement * >( domain->giveLoad( bodyLoadArray.at(i) ) );
+            double phi = rload->givePorosity();
+            double alpha = rload->giveshapefactor();
+            double kx = rload->givePermeability()->at(1);
+            double ky = rload->givePermeability()->at(2);
             double tau_0 = this->giveMaterial()->give( YieldStress, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
             double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
             //double mu_0 = this->giveMaterial()->give( Viscosity, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );

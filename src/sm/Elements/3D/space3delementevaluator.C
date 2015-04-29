@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/ElementEvaluators/space3delementevaluator.h"
+#include "../sm/Elements/3D/space3delementevaluator.h"
 #include "../sm/CrossSections/structuralcrosssection.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
@@ -54,7 +54,7 @@ void Space3dStructuralElementEvaluator :: computeNMatrixAt(FloatMatrix &answer, 
     Element *element = this->giveElement();
     FEInterpolation *interp = element->giveInterpolation();
 
-    interp->evalN( N, * gp->giveNaturalCoordinates(), FEIIGAElementGeometryWrapper( element, gp->giveIntegrationRule()->giveKnotSpan() ) );
+    interp->evalN( N, gp->giveNaturalCoordinates(), FEIIGAElementGeometryWrapper( element, gp->giveIntegrationRule()->giveKnotSpan() ) );
 
     answer.beNMatrixOf(N, 3);
 }
@@ -65,7 +65,7 @@ void Space3dStructuralElementEvaluator :: computeBMatrixAt(FloatMatrix &answer, 
     Element *element = this->giveElement();
     FEInterpolation *interp = element->giveInterpolation();
     // this uses FEInterpolation::nodes2coords - quite inefficient in this case (large num of dofmans)
-    interp->evaldNdx( d, * gp->giveNaturalCoordinates(), FEIIGAElementGeometryWrapper( element, gp->giveIntegrationRule()->giveKnotSpan() ) );
+    interp->evaldNdx( d, gp->giveNaturalCoordinates(), FEIIGAElementGeometryWrapper( element, gp->giveIntegrationRule()->giveKnotSpan() ) );
 
 
     answer.resize(6, d.giveNumberOfRows() * 3);
@@ -90,7 +90,7 @@ void Space3dStructuralElementEvaluator :: computeBMatrixAt(FloatMatrix &answer, 
 double Space3dStructuralElementEvaluator :: computeVolumeAround(GaussPoint *gp)
 {
     double determinant = fabs( this->giveElement()->giveInterpolation()
-                              ->giveTransformationJacobian( * gp->giveNaturalCoordinates(),
+                              ->giveTransformationJacobian( gp->giveNaturalCoordinates(),
                                                            FEIIGAElementGeometryWrapper( this->giveElement(),
                                                                                         gp->giveIntegrationRule()->giveKnotSpan() ) ) );
     return determinant *gp->giveWeight();

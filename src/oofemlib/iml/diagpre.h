@@ -50,7 +50,7 @@ public:
     /// Constructor. The user should call initializeFrom and init services in this given order to ensure consistency.
     DiagPreconditioner() : Preconditioner() { }
     /// Destructor
-    virtual ~DiagPreconditioner(void) { };
+    virtual ~DiagPreconditioner(void) { }
 
     virtual void init(const SparseMtrx &a);
 

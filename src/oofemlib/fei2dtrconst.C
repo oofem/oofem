@@ -41,8 +41,7 @@ namespace oofem {
 void
 FEI2dTrConst :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    answer.resize(1);
-    answer.at(1) = 1.;
+    answer = FloatArray{1.};
 }
 
 double
@@ -58,12 +57,12 @@ void
 FEI2dTrConst :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double l1, l2, l3;
-    answer.resize(2);
 
     l1 = lcoords.at(1);
     l2 = lcoords.at(2);
     l3 = 1.0 - l1 - l2;
 
+    answer.resize(2);
     answer.at(1) = ( l1 * cellgeo.giveVertexCoordinates(1)->at(xind) +
                     l2 * cellgeo.giveVertexCoordinates(2)->at(xind) +
                     l3 * cellgeo.giveVertexCoordinates(3)->at(xind) );
@@ -78,7 +77,6 @@ int
 FEI2dTrConst :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo)
 {
     double detJ, x1, x2, x3, y1, y2, y3;
-    answer.resize(3);
 
     x1 = cellgeo.giveVertexCoordinates(1)->at(xind);
     x2 = cellgeo.giveVertexCoordinates(2)->at(xind);
@@ -90,6 +88,7 @@ FEI2dTrConst :: global2local(FloatArray &answer, const FloatArray &coords, const
 
     detJ = ( x2 * y3 + x1 * y2 + y1 * x3 - x2 * y1 - x3 * y2 - x1 * y3 );
 
+    answer.resize(3);
     answer.at(1) = ( ( x2 * y3 - x3 * y2 ) + ( y2 - y3 ) * coords.at(xind) + ( x3 - x2 ) * coords.at(yind) ) / detJ;
     answer.at(2) = ( ( x3 * y1 - x1 * y3 ) + ( y3 - y1 ) * coords.at(xind) + ( x1 - x3 ) * coords.at(yind) ) / detJ;
     //answer.at(3) = ( ( x1 * y2 - x2 * y1 ) + ( y1 - y2 ) * coords.at(xind) + ( x2 - x1 ) * coords.at(yind) ) / detJ;
@@ -146,8 +145,7 @@ void
 FEI2dTrConst :: edgeEvaldNds(FloatArray &answer, int iedge,
                              const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    answer.resize(2);
-    answer.zero();
+    answer = { 0., 0. };
 }
 
 void
@@ -155,9 +153,7 @@ FEI2dTrConst :: edgeLocal2global(FloatArray &answer, int iedge,
                                  const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     IntArray edgeNodes;
-    FloatArray n(2);
-    n.at(1) = ( 1 - lcoords(0) ) * 0.5;
-    n.at(2) = ( 1 + lcoords(0) ) * 0.5;
+    FloatArray n = { ( 1 - lcoords(0) ) * 0.5, ( 1 + lcoords(0) ) * 0.5 };
     this->computeLocalEdgeMapping(edgeNodes, iedge);
 
     answer.resize(2);

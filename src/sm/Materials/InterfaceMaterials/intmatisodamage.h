@@ -126,6 +126,8 @@ protected:
     /// Maximum limit on omega. The purpose is elimination of a too compliant material which may cause convergency problems. Set to something like 0.99 if needed.
     double maxOmega;
 
+    bool semiExplicit; // If semi-explicit time integration should be used
+
 public:
     /// Constructor
     IntMatIsoDamage(int n, Domain *d);
@@ -139,13 +141,7 @@ public:
                                       const FloatArray &jump, TimeStep *tStep);
 
     virtual void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
-                                        const FloatMatrix &F, TimeStep *tStep)
-    {
-        giveEngTraction_3d(answer, gp, jump, tStep);
-        IntMatIsoDamageStatus *status = static_cast< IntMatIsoDamageStatus * >( this->giveStatus(gp) );
-        status->letTempFirstPKTractionBe(answer);
-
-    }
+                                        const FloatMatrix &F, TimeStep *tStep);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     

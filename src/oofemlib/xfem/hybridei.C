@@ -35,37 +35,33 @@
 #include "xfem/hybridei.h"
 #include "xfemmanager.h"
 #include "node.h"
-
+#include "domain.h"
 #include "classfactory.h"
 
 #include <string>
 
 
 namespace oofem {
-
 REGISTER_EnrichmentItem(HybridEI)
 
-HybridEI::HybridEI(int n, XfemManager *xm, Domain *aDomain):
-GeometryBasedEI(n, xm, aDomain)
-{
+HybridEI :: HybridEI(int n, XfemManager *xm, Domain *aDomain) :
+    GeometryBasedEI(n, xm, aDomain)
+{}
 
-}
+HybridEI :: ~HybridEI()
+{}
 
-HybridEI::~HybridEI() {
-    // TODO Auto-generated destructor stub
-}
-
-void HybridEI::evalLevelSetNormal(double &oLevelSet, const FloatArray &iGlobalCoord, const FloatArray &iN, const IntArray &iNodeInd) const
+void HybridEI :: evalLevelSetNormal(double &oLevelSet, const FloatArray &iGlobalCoord, const FloatArray &iN, const IntArray &iNodeInd) const
 {
     interpLevelSet(oLevelSet, iN, iNodeInd);
 }
 
-void HybridEI::evalLevelSetTangential(double &oLevelSet, const FloatArray &iGlobalCoord, const FloatArray &iN, const IntArray &iNodeInd) const
+void HybridEI :: evalLevelSetTangential(double &oLevelSet, const FloatArray &iGlobalCoord, const FloatArray &iN, const IntArray &iNodeInd) const
 {
     interpLevelSetTangential(oLevelSet, iN, iNodeInd);
 }
 
-void HybridEI::evalGradLevelSetNormal(FloatArray &oGradLevelSet, const FloatArray &iGlobalCoord, const FloatMatrix &idNdX, const IntArray &iNodeInd) const
+void HybridEI :: evalGradLevelSetNormal(FloatArray &oGradLevelSet, const FloatArray &iGlobalCoord, const FloatMatrix &idNdX, const IntArray &iNodeInd) const
 {
     interpGradLevelSet(oGradLevelSet, idNdX, iNodeInd);
 }
@@ -114,5 +110,4 @@ void HybridEI :: interpGradLevelSet(FloatArray &oGradLevelSet, const FloatMatrix
         }
     }
 }
-
 } /* namespace oofem */

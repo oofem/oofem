@@ -59,25 +59,23 @@ IntMatDummyCZ::~IntMatDummyCZ()
 void IntMatDummyCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
                                                 const FloatMatrix &F, TimeStep *tStep)
 {
-	StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus(gp) );
+    StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus(gp) );
 
-	status->letTempJumpBe(jump);
+    status->letTempJumpBe(jump);
 
-	answer.resize(3);
-	answer.zero();
+    answer.resize(3);
+    answer.zero();
 }
 
 void IntMatDummyCZ :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-	answer.resize(3,3);
-	answer.zero();
+    answer.resize(3,3);
+    answer.zero();
 }
 
 IRResultType IntMatDummyCZ :: initializeFrom(InputRecord *ir)
 {
-    StructuralInterfaceMaterial :: initializeFrom(ir);
-
-    return IRRT_OK;
+    return StructuralInterfaceMaterial :: initializeFrom(ir);
 }
 
 void IntMatDummyCZ :: giveInputRecord(DynamicInputRecord &input)
@@ -87,7 +85,7 @@ void IntMatDummyCZ :: giveInputRecord(DynamicInputRecord &input)
 
 void IntMatDummyCZ :: printYourself()
 {
-	printf("I am a IntMatDummyCZ.\n");
+    printf("I am a IntMatDummyCZ.\n");
 }
 
 } /* namespace oofem */

@@ -61,6 +61,58 @@
 //@}
 
 namespace oofem {
+
+/// Implementation for assembling external forces vectors in standard monolithic FE-problems
+class NumberOfNodalPrescribedTractionPressureAssembler : public VectorAssembler
+{
+public:
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+};
+
+/// Implementation for assembling external forces vectors in standard monolithic FE-problems
+class IntermediateConvectionDiffusionAssembler : public VectorAssembler
+{
+public:
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+};
+
+/// Implementation for assembling external forces vectors in standard monolithic FE-problems
+class PrescribedVelocityRhsAssembler : public VectorAssembler
+{
+public:
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+};
+
+/// Implementation for assembling external forces vectors in standard monolithic FE-problems
+class DensityPrescribedTractionPressureAssembler : public VectorAssembler
+{
+public:
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+};
+
+/// Implementation for assembling external forces vectors in standard monolithic FE-problems
+class DensityRhsAssembler : public VectorAssembler
+{
+public:
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+};
+
+/// Implementation for assembling external forces vectors in standard monolithic FE-problems
+class CorrectionRhsAssembler : public VectorAssembler
+{
+public:
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+};
+
+/// Callback class for assembling CBS pressure matrices
+class PressureLhsAssembler : public MatrixAssembler
+{
+public:
+    virtual void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const;
+    virtual void locationFromElement(IntArray &loc, Element &element, const UnknownNumberingScheme &s, IntArray *dofIds = nullptr) const;
+};
+
+
 /**
  * Specialized numbering scheme for CBS algorithm, since it needs velocities separately.
  */
@@ -120,12 +172,12 @@ class CBS : public FluidModel
 {
 protected:
     /// Numerical method used to solve the problem.
-    SparseLinearSystemNM *nMethod;
+    std :: unique_ptr< SparseLinearSystemNM > nMethod;
 
     LinSystSolverType solverType;
     SparseMtrxType sparseMtrxType;
 
-    SparseMtrx *lhs;
+    std :: unique_ptr< SparseMtrx > lhs;
     /// Pressure field.
     PrimaryField PressureField;
     /// Velocity field.
@@ -137,7 +189,7 @@ protected:
     /// Lumped mass matrix.
     FloatArray mm;
     /// Sparse consistent mass.
-    SparseMtrx *mss;
+    std :: unique_ptr< SparseMtrx > mss;
 
     /// Time step and its minimal value.
     double deltaT, minDeltaT;
@@ -165,7 +217,7 @@ protected:
 
     //<RESTRICTED_SECTION>
     // material interface representation for multicomponent flows
-    MaterialInterface *materialInterface;
+    std :: unique_ptr< MaterialInterface > materialInterface;
     //</RESTRICTED_SECTION>
 public:
     CBS(int i, EngngModel * _master = NULL);

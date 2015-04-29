@@ -106,6 +106,10 @@ OOFEMTXTDataReader :: giveInputRecord(InputRecordType typeId, int recordId)
 void
 OOFEMTXTDataReader :: finish()
 {
+    if ( this->it != this->recordList.end() ) {
+        OOFEM_WARNING("There are unread lines in the input file\n"
+            "The most common cause is missing cause are missing entries in the domain record, e.g. 'nset'");
+    }
     this->recordList.clear();
 }
 
@@ -127,7 +131,7 @@ OOFEMTXTDataReader :: giveLineFromInput(std :: ifstream &stream, int &lineNum, s
         }
 
         if ( !flag ) {
-            c = tolower(c); // convert line to lowercase
+            c = (char)tolower(c); // convert line to lowercase
         }
     }
     return true;

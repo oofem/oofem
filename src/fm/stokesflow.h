@@ -40,6 +40,8 @@
 #include "topologydescription.h"
 #include "linsystsolvertype.h"
 #include "floatmatrix.h"
+#include "primaryfield.h"
+#include "floatarray.h"
 
 ///@name Input fields for Stokes' Flow
 //@{
@@ -64,25 +66,24 @@ protected:
     /// Time increment read from input record.
     double deltaT;
     /// Primary unknowns.
-    PrimaryField *velocityPressureField;
+    std :: unique_ptr< PrimaryField > velocityPressureField;
     /// Sparse matrix type.
     SparseMtrxType sparseMtrxType;
     /// Numerical method.
-    SparseNonLinearSystemNM *nMethod;
+    std :: unique_ptr< SparseNonLinearSystemNM > nMethod;
     /// Linear solver type.
     LinSystSolverType solverType;
     /// Element norm for nonlinear analysis (squared)
     FloatArray eNorm;
 
     /// Used for determining if a new mesh must be created.
-    MeshQualityErrorEstimator *meshqualityee;
+    std :: unique_ptr< MeshQualityErrorEstimator > meshqualityee;
     /// Maximum deformation allowed
     double maxdef;
 
-    SparseMtrx *stiffnessMatrix;
+    std :: unique_ptr< SparseMtrx > stiffnessMatrix;
+    FloatArray solutionVector;
     FloatArray internalForces;
-    FloatArray externalForces;
-    FloatArray incrementOfSolution;
 
     /// Topology state, most notably used for determining if there is a need to remesh.
     TopologyState ts;
@@ -109,7 +110,6 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual int checkConsistency();
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
     virtual void doStepOutput(TimeStep *tStep);
     void updateInternalState(TimeStep *tStep);
     virtual void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d);

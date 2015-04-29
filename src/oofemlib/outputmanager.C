@@ -108,7 +108,6 @@ OutputManager :: doDofManOutput(FILE *file, TimeStep *tStep)
 void
 OutputManager :: doElementOutput(FILE *file, TimeStep *tStep)
 {
-    int nelem = domain->giveNumberOfElements();
     if ( !testTimeStepOutput(tStep) ) {
         return;
     }
@@ -116,15 +115,16 @@ OutputManager :: doElementOutput(FILE *file, TimeStep *tStep)
     fprintf(file, "\n\nElement output:\n---------------\n");
 
     if ( element_all_out_flag   && element_except.empty() ) {
-        for ( int i = 1; i <= nelem; i++ ) {
+        for ( auto &elem : domain->giveElements() ) {
             // test for remote element in parallel mode
-            if ( domain->giveElement(i)->giveParallelMode() == Element_remote ) {
+            if ( elem->giveParallelMode() == Element_remote ) {
                 continue;
             }
 
-            domain->giveElement(i)->printOutputAt(file, tStep);
+            elem->printOutputAt(file, tStep);
         }
     } else {
+        int nelem = domain->giveNumberOfElements();
         for ( int i = 1; i <= nelem; i++ ) {
             if ( _testElementOutput(i) ) {
                 domain->giveElement(i)->printOutputAt(file, tStep);

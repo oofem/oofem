@@ -32,61 +32,37 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef rvematerial_h
-#define rvematerial_h
+#ifndef planestresselementevaluator_h
+#define planestresselementevaluator_h
 
-#include <cstdio>
-#include <cstdlib>
-
-#include "material.h"
-#include "floatarray.h"
-#include "floatmatrix.h"
-#include "engngm.h"
-
-///@name Input fields for RVEMaterial
-//@{
-#define _IFT_RVEMaterial_bctype "bctype"
-#define _IFT_RVEMaterial_supressoutput "supressoutput"
-#define _IFT_RVEMaterial_fileName "file"
-//@}
+#include "../sm/Elements/structuralelementevaluator.h"
 
 namespace oofem {
 /**
- * @author Carl Sandström
+ * General purpose Plane stress structural element evaluator.
  */
-class OOFEM_EXPORT RVEMaterial //: virtual public Material
+class PlaneStressStructuralElementEvaluator : public StructuralElementEvaluator
 {
-private:
-    //int stdoutFID;
-    //fpos_t stdoutPos;
+public:
+    PlaneStressStructuralElementEvaluator() : StructuralElementEvaluator() { }
 
 protected:
-    /// Name of .in file containing the RVE
-    std :: string rveFilename;
-    std :: string rveLogFilename;
-    /// Type of boundary condition.
-    int BCType;
-
-public:
-    EngngModel *rve;
-
-    // Constructor
-    RVEMaterial(int n, Domain * d) { }; // : Material(n, d) { };
-
-    // Destructor
-    ~RVEMaterial() {
-        delete rve;
-    };
-
-    int SupressRVEoutput;
-
-    IRResultType initializeFrom(InputRecord *ir);
-
-    void suppressStdout();
-    void enableStdout();
-
-    const char *giveClassName() const { return "RVEMaterial"; };
-};
-}
-
-#endif // rvematerial_h
+    /**
+     * Assemble interpolation matrix at given IP.
+     * In case of IGAElements, N is assumed to contain only nonzero interpolation functions.
+     */
+    virtual void computeNMatrixAt(FloatMatrix &answer, GaussPoint *gp);
+    /**
+     * Assembles the strain-displacement matrix of the receiver at given integration point.
+     * In case of IGAElements, B is assumed to contain only contribution from nonzero interpolation functions.
+     */
+    virtual void computeBMatrixAt(FloatMatrix &answer, GaussPoint *gp);
+    virtual double computeVolumeAround(GaussPoint *gp);
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    void giveDofManDofIDMask(int inode, IntArray &answer) const {
+        answer = {D_u, D_v};
+    }
+}; // end of PlaneStressStructuralElementEvaluator definition
+} // end namespace oofem
+#endif //planestresselementevaluator_h

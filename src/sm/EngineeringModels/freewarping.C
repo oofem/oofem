@@ -34,13 +34,14 @@
 
 #include "../sm/EngineeringModels/freewarping.h"
 #include "../sm/Elements/structuralelement.h"
-#include "../sm/ElementEvaluators/structuralelementevaluator.h"
+#include "../sm/Elements/structuralelementevaluator.h"
 #include "nummet.h"
 #include "timestep.h"
 #include "element.h"
+#include "dof.h"
 #include "sparsemtrx.h"
 #include "verbose.h"
-#include "classfactory.h"
+#include "unknownnumberingscheme.h"
 #include "datastream.h"
 #include "contextioerr.h"
 #include "classfactory.h"
@@ -98,7 +99,11 @@ FreeWarping :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    StructuralEngngModel :: initializeFrom(ir);
+    result = StructuralEngngModel :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+
     int val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_lstype);
     solverType = ( LinSystSolverType ) val;
@@ -157,22 +162,16 @@ double FreeWarping :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, 
 TimeStep *FreeWarping :: giveNextStep()
 {
     int istep = this->giveNumberOfFirstStep();
-    //int mstep = 1;
     StateCounterType counter = 1;
 
-    if ( previousStep != NULL ) {
-        delete previousStep;
-    }
-
-    if ( currentStep != NULL ) {
-        istep =  currentStep->giveNumber() + 1;
+    if ( currentStep ) {
+        istep = currentStep->giveNumber() + 1;
         counter = currentStep->giveSolutionStateCounter() + 1;
     }
 
-    previousStep = currentStep;
-    currentStep = new TimeStep(istep, this, 1, ( double ) istep, 0., counter);
-    // time and dt variables are set eq to 0 for staics - has no meaning
-    return currentStep;
+    previousStep = std :: move(currentStep);
+    currentStep.reset( new TimeStep(istep, this, 1, ( double ) istep, 0., counter) );
+    return currentStep.get();
 }
 
 
@@ -215,7 +214,7 @@ void FreeWarping :: solveYourselfAt(TimeStep *tStep)
 
         stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
 
-        this->assemble( stiffnessMatrix, tStep, StiffnessMatrix,
+        this->assemble( *stiffnessMatrix, tStep, TangentAssembler(TangentStiffness),
                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
         initFlag = 0;
@@ -236,7 +235,7 @@ void FreeWarping :: solveYourselfAt(TimeStep *tStep)
     //
     loadVector.resize( this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ) );
     loadVector.zero();
-    this->assembleVector( loadVector, tStep, ExternalForcesVector, VM_Total,
+    this->assembleVector( loadVector, tStep, ExternalForceAssembler(), VM_Total,
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
@@ -246,7 +245,7 @@ void FreeWarping :: solveYourselfAt(TimeStep *tStep)
     /*
     FloatArray internalForces( this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ) );
     internalForces.zero();
-    this->assembleVector( internalForces, tStep, InternalForcesVector, VM_Total,
+    this->assembleVector( internalForces, tStep, InternalForceAssembler(), VM_Total,
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     loadVector.subtract(internalForces);
@@ -265,7 +264,7 @@ void FreeWarping :: solveYourselfAt(TimeStep *tStep)
 #ifdef VERBOSE
     OOFEM_LOG_INFO("\n\nSolving ...\n\n");
 #endif
-    NM_Status s = nMethod->solve(stiffnessMatrix, & loadVector, & displacementVector);
+    NM_Status s = nMethod->solve(*stiffnessMatrix, loadVector, displacementVector);
     if ( !( s & NM_Success ) ) {
         OOFEM_ERROR("No success in solving system.");
     }
@@ -365,14 +364,6 @@ FreeWarping :: updateDomainLinks()
 {
     EngngModel :: updateDomainLinks();
     this->giveNumericalMethod( this->giveCurrentMetaStep() )->setDomain( this->giveDomain(1) );
-}
-
-
-
-void
-FreeWarping :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
-{
-    iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
 }
 
 

@@ -84,7 +84,8 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, degree_tmp, _IFT_BSplineInterpolation_degree);
     if ( degree_tmp.giveSize() != nsd ) {
-        OOFEM_ERROR("degree size mismatch");
+        OOFEM_WARNING("degree size mismatch");
+        return IRRT_BAD_FORMAT;
     }
 
     for ( int i = 0; i < nsd; i++ ) {
@@ -95,14 +96,16 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, knotValues [ n ], IFT_knotVector [ n ]);
         size = knotValues [ n ].giveSize();
         if ( size < 2 ) {
-            OOFEM_ERROR("invalid size of knot vector %s", IFT_knotVector [ n ]);
+            OOFEM_WARNING("invalid size of knot vector %s", IFT_knotVector [ n ]);
+            return IRRT_BAD_FORMAT;
         }
 
         // check for monotonicity of knot vector without multiplicity
         knotVal = knotValues [ n ].at(1);
         for ( int i = 1; i < size; i++ ) {
             if ( knotValues [ n ].at(i + 1) <= knotVal ) {
-                OOFEM_ERROR("knot vector %s is not monotonic", IFT_knotVector [ n ]);
+                OOFEM_WARNING("knot vector %s is not monotonic", IFT_knotVector [ n ]);
+                return IRRT_BAD_FORMAT;
             }
 
             knotVal = knotValues [ n ].at(i + 1);
@@ -124,14 +127,16 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
             }
         } else {
             if ( knotMultiplicity [ n ].giveSize() != size ) {
-                OOFEM_ERROR("knot multiplicity %s size mismatch", IFT_knotMultiplicity [ n ]);
+                OOFEM_WARNING("knot multiplicity %s size mismatch", IFT_knotMultiplicity [ n ]);
+                return IRRT_BAD_FORMAT;
             }
 
             // check for multiplicity range (skip the first and last one)
             for ( int i = 1; i < size - 1; i++ ) {
                 if ( knotMultiplicity [ n ].at(i + 1) < 1 || knotMultiplicity [ n ].at(i + 1) > degree [ n ] ) {
-                    OOFEM_ERROR("knot multiplicity %s out of range - value %d",
+                    OOFEM_WARNING("knot multiplicity %s out of range - value %d",
                                  IFT_knotMultiplicity [ n ], knotMultiplicity [ n ].at(i + 1) );
+                    return IRRT_BAD_FORMAT;
                 }
             }
 

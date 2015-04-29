@@ -127,8 +127,8 @@ public:
     // identification and auxiliary functions
     std::vector< std::vector<int> > vIindex;
     std::vector< std::vector<int> > svIndex;
-    int giveSymVI(int ind1, int ind2) {  return svIndex[ind1-1][ind2-1]; };
-    int giveVI(int ind1, int ind2) {  return this->vIindex[ind1-1][ind2-1]; };    
+    int giveSymVI(int ind1, int ind2) { return svIndex[ind1-1][ind2-1]; }
+    int giveVI(int ind1, int ind2) { return this->vIindex[ind1-1][ind2-1]; }    
       
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "StructuralMaterial"; }
@@ -242,6 +242,11 @@ public:
     virtual void giveCauchyStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep)
     { OOFEM_ERROR("not implemented "); }
     //@}
+
+    /**
+     * Prototype for computation of Eshelby stress. No default implementation is provided.
+     */
+    virtual void giveEshelbyStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
 
     void give_dPdF_from(const FloatMatrix &dSdE, FloatMatrix &answer, GaussPoint *gp);
     void convert_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix &dSdE, FloatArray &S, FloatArray &F, MaterialMode matMode);
@@ -544,8 +549,8 @@ public:
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     virtual void give2dPlateSubSoilStiffMtrx(FloatMatrix &answer,
-					     MatResponseMode mmode, GaussPoint *gp,
-					     TimeStep *tStep);
+                                             MatResponseMode mmode, GaussPoint *gp,
+                                             TimeStep *tStep);
     /**
      * Transforms 3d strain vector into another coordinate system.
      * @param answer Transformed strain vector

@@ -38,8 +38,10 @@
 #include "fmelement.h"
 #include "zznodalrecoverymodel.h"
 #include "spatiallocalizer.h"
-#include "eleminterpmapperinterface.h"
 #include "elementinternaldofman.h"
+#include "matresponsemode.h"
+
+#include <memory>
 
 #define _IFT_Tet1BubbleStokes_Name "tet1bubblestokes"
 
@@ -56,8 +58,7 @@ class FEI3dTetLin;
  */
 class Tet1BubbleStokes : public FMElement,
 public ZZNodalRecoveryModelInterface,
-public SpatialLocalizerInterface,
-public EIPrimaryUnknownMapperInterface
+public SpatialLocalizerInterface
 {
 protected:
     /// Interpolation for pressure
@@ -70,7 +71,7 @@ protected:
     static IntArray surf_ordering [ 4 ];
 
     /// The extra dofs from the bubble
-    ElementDofManager *bubble;
+    std :: unique_ptr< ElementDofManager > bubble;
     // Coordinates associated with the bubble dofs.
     //FloatArray bubbleCoord; // Assumed fixed at 0 for now (i.e. only linear geometry)
 
@@ -86,7 +87,7 @@ public:
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
 
     void computeInternalForcesVector(FloatArray &answer, TimeStep *tStep);
-    void computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep);
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, TimeStep *tStep);
 
     void computeExternalForcesVector(FloatArray &answer, TimeStep *tStep);
     virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
@@ -99,7 +100,7 @@ public:
     virtual int computeNumberOfDofs();
 
     virtual int giveNumberOfInternalDofManagers() const { return 1; }
-    virtual DofManager *giveInternalDofManager(int i) const { return bubble; }
+    virtual DofManager *giveInternalDofManager(int i) const { return bubble.get(); }
     virtual void giveInternalDofManDofIDMask(int i, IntArray &answer) const;
 
     virtual FEInterpolation *giveInterpolation() const;
@@ -111,9 +112,7 @@ public:
 
     virtual Interface *giveInterface(InterfaceType it);
 
-    // Element interpolation interface:
-    virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType u,
-                                                                       TimeStep *tStep, const FloatArray &coords, FloatArray &answer);
+    virtual void computeField(ValueModeType u, TimeStep *tStep, const FloatArray &coords, FloatArray &answer);
 };
 } // end namespace oofem
 #endif // tet1bubblestokes_h

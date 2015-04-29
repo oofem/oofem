@@ -179,10 +179,9 @@ Steel1 :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     double value;
 
-    PerfectlyPlasticMaterial :: initializeFrom(ir);
     IR_GIVE_FIELD(ir, value, _IFT_Steel1_ry);
-    propertyDictionary->add( 'k', value / sqrt(3.) );
+    propertyDictionary.add( 'k', value / sqrt(3.) );
 
-    return IRRT_OK;
+    return PerfectlyPlasticMaterial :: initializeFrom(ir);
 }
 } // end namespace oofem

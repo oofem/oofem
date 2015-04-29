@@ -80,7 +80,7 @@ MazarsNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, Ga
      * computation. It is therefore necessary only to store local strain in corresponding status.
      * This service is declared at StructuralNonlocalMaterial level.
      */
-    FloatArray SDstrainVector, fullSDStrainVector;
+    FloatArray SDstrainVector;
     double equivStrain;
     MazarsNLMaterialStatus *nlstatus = static_cast< MazarsNLMaterialStatus * >( this->giveStatus(gp) );
 
@@ -128,8 +128,10 @@ MazarsNLMaterial :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    MazarsMaterial :: initializeFrom(ir);
-    StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
+    result = MazarsMaterial :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
+    result = StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     IR_GIVE_FIELD(ir, R, _IFT_MazarsNLMaterial_r);
     if ( R < 0.0 ) {

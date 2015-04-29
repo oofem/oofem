@@ -37,6 +37,7 @@
 
 #include "engngm.h"
 #include "inputrecord.h"
+#include "floatarray.h"
 
 ///@name Input fields for StaggeredProblem
 //@{
@@ -77,8 +78,6 @@ class Function;
  * the slaves are treated in so-called maintained mode. In this mode, the attributes and
  * meta step attributes are taken from the master. The local attributes, even if specified,
  * are ignored.
- *
- * @todo Move to oofemlib
  */
 class OOFEM_EXPORT StaggeredProblem : public EngngModel
 {
@@ -137,7 +136,6 @@ public:
 
     void printYourself();
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep) { }
     virtual TimeStep *giveNextStep();
     virtual TimeStep *giveSolutionStepWhenIcApply();
 
@@ -171,9 +169,6 @@ public:
     virtual void drawYourself(oofegGraphicContext &gc);
     virtual void drawElements(oofegGraphicContext &gc);
     virtual void drawNodes(oofegGraphicContext &gc);
-    /**
-     * Shows the sparse structure of required matrix, type == 1 stiffness.
-     */
     virtual void showSparseMtrxStructure(int type, oofegGraphicContext &gc, TimeStep *tStep) { }
 #endif
 
@@ -181,21 +176,6 @@ public:
 
     virtual EngngModel *giveSlaveProblem(int i);
     virtual int giveNumberOfSlaveProblems() { return (int)inputStreamNames.size(); }
-
-    virtual int giveNumberOfFirstStep() {
-        if ( master ) {
-            return master->giveNumberOfFirstStep();
-        } else {
-            return 1;
-        }
-    }
-    virtual int giveNumberOfTimeStepWhenIcApply() {
-        if ( master ) {
-            return master->giveNumberOfTimeStepWhenIcApply();
-        } else {
-            return 0;
-        }
-    }
     virtual int instanciateDefaultMetaStep(InputRecord *ir);
 
 protected:

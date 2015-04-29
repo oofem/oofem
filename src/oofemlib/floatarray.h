@@ -166,8 +166,8 @@ public:
     const double &operator() (int i) const;
     const double &operator[] (int i) const;
 #else
-    inline const double &operator() (int i) const { return values [ i ]; };
-    inline const double &operator[] (int i) const { return values [ i ]; };
+    inline const double &operator() (int i) const { return values [ i ]; }
+    inline const double &operator[] (int i) const { return values [ i ]; }
 #endif
     /** Checks size of receiver towards requested bounds.
      * Current implementation will call exit(1), if dimension
@@ -233,7 +233,7 @@ public:
      * Print receiver on stdout with custom name.
      * @param name Display name of reciever.
      */    
-    virtual void printYourself(const std::string name) const;
+    virtual void printYourself(const std::string &name) const;
     /**
      * Print receiver on stdout with high accuracy.
      */
@@ -442,6 +442,11 @@ public:
      * @return Sum of receiver.
      */
     double sum() const;
+    /**
+     * Computes the product of receiver values.
+     * @return Product of receiver.
+     */
+    double product() const;
 
     /**
      * Returns the receiver a rotated according the change-of-base matrix r.

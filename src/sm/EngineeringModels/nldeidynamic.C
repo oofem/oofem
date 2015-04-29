@@ -44,6 +44,7 @@
 #include "contextioerr.h"
 #include "sparsemtrx.h"
 #include "classfactory.h"
+#include "unknownnumberingscheme.h"
 
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"
@@ -57,7 +58,8 @@ REGISTER_EngngModel(NlDEIDynamic);
 
 NlDEIDynamic :: NlDEIDynamic(int i, EngngModel *_master) : StructuralEngngModel(i, _master), massMatrix(), loadVector(),
     previousIncrementOfDisplacementVector(), displacementVector(),
-    velocityVector(), accelerationVector(), internalForces()
+    velocityVector(), accelerationVector(), internalForces(),
+    nMethod(NULL)
 {
     ndomains = 1;
     initFlag = 1;
@@ -87,7 +89,10 @@ NlDEIDynamic :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-    StructuralEngngModel :: initializeFrom(ir);
+    result = StructuralEngngModel :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     IR_GIVE_FIELD(ir, dumpingCoef, _IFT_NlDEIDynamic_dumpcoef); // C = dumpingCoef * M
     IR_GIVE_FIELD(ir, deltaT, _IFT_NlDEIDynamic_deltat);
@@ -158,20 +163,16 @@ TimeStep *NlDEIDynamic :: giveNextStep()
     double totalTime = 0;
     StateCounterType counter = 1;
 
-    if ( previousStep != NULL ) {
-        delete previousStep;
-    }
-
-    if ( currentStep != NULL ) {
+    if ( currentStep ) {
         totalTime = currentStep->giveTargetTime() + deltaT;
         istep     = currentStep->giveNumber() + 1;
         counter   = currentStep->giveSolutionStateCounter() + 1;
     }
 
-    previousStep = currentStep;
-    currentStep  = new TimeStep(istep, this, 1, totalTime, deltaT, counter);
+    previousStep = std :: move(currentStep);
+    currentStep.reset( new TimeStep(istep, this, 1, totalTime, deltaT, counter) );
 
-    return currentStep;
+    return currentStep.get();
 }
 
 
@@ -272,7 +273,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
     }
 
 
-    if ( tStep->giveNumber() == giveNumberOfFirstStep() ) {
+    if ( tStep->isTheFirstStep() ) {
         //
         // Special init step - Compute displacements at tstep 0.
         //
@@ -457,7 +458,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_RELEVANT( "\n\nSolving [Step number %8d, Time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
 #endif
 
-    //     NM_Status s = nMethod->solve(massMatrix, & loadVector, & displacementVector);
+    //     NM_Status s = nMethod->solve(*massMatrix, loadVector, displacementVector);
     //    if ( !(s & NM_Success) ) {
     //        OOFEM_ERROR("No success in solving system. Ma=f");
     //    }
@@ -495,7 +496,7 @@ NlDEIDynamic :: computeLoadVector(FloatArray &answer, ValueModeType mode, TimeSt
     //
     // Assemble the nodal part of load vector.
     //
-    this->assembleVector( answer, tStep, ExternalForcesVector, mode,
+    this->assembleVector( answer, tStep, ExternalForceAssembler(), mode,
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
@@ -539,11 +540,11 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
         element->giveCharacteristicMatrix(charMtrx, LumpedMassMatrix, tStep);
 
 #ifdef LOCAL_ZERO_MASS_REPLACEMENT
-        element->giveCharacteristicMatrix(charMtrx2, StiffnessMatrix, tStep);
+        element->giveCharacteristicMatrix(charMtrx2, TangentStiffnessMatrix, tStep);
 #endif
 
 #ifdef DEBUG
-        if ( ( n = loc.giveSize() ) != charMtrx.giveNumberOfRows() ) {
+        if ( loc.giveSize() != charMtrx.giveNumberOfRows() ) {
             OOFEM_ERROR("dimension mismatch");
         }
 #endif
@@ -594,7 +595,7 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
     for ( i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
         element->giveLocationArray(loc, en);
-        element->giveCharacteristicMatrix(charMtrx, StiffnessMatrix, tStep);
+        element->giveCharacteristicMatrix(charMtrx, TangentStiffnessMatrix, tStep);
         n = loc.giveSize();
         for ( j = 1; j <= n; j++ ) {
             jj = loc.at(j);
@@ -818,7 +819,7 @@ NlDEIDynamic :: printOutputAt(FILE *File, TimeStep *tStep)
         return;                                                                      // do not print even Solution step header
     }
 
-    fprintf( File, "\n\nOutput for time % .3e, solution step number %d\n", tStep->giveTargetTime(), tStep->giveNumber() );
+    fprintf( File, "\n\nOutput for time %.3e, solution step number %d\n", tStep->giveTargetTime(), tStep->giveNumber() );
     if ( drFlag ) {
         fprintf(File, "Reached load level : %e\n\n", this->pt);
     }

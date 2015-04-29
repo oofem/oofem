@@ -36,6 +36,7 @@
 #include "classfactory.h"
 #include "fracturemanager.h"
 #include "element.h"
+#include "dof.h"
 #include "../sm/CrossSections/layeredcrosssection.h"
 #include "dynamicinputrecord.h"
 #include "dynamicdatareader.h"
@@ -54,9 +55,9 @@ REGISTER_EnrichmentItem(Delamination)
 Delamination :: Delamination(int n, XfemManager *xm, Domain *aDomain) : ListBasedEI(n, xm, aDomain)
 {
     mpEnrichesDofsWithIdArray = {
-            D_u, D_v, D_w, W_u, W_v, W_w
+        D_u, D_v, D_w, W_u, W_v, W_w
     };
-    this->interfaceNum = {};
+    this->interfaceNum.clear();
     this->crossSectionNum = -1;
     this->matNum = 0;
     this->xiBottom = -1.0;
@@ -153,8 +154,8 @@ int Delamination :: instanciateYourself(DataReader *dr)
 
 
     XfemManager *xMan = this->giveDomain()->giveXfemManager();
-//    mpEnrichmentDomain->CallNodeEnrMarkerUpdate(* this, * xMan);
-    this->updateNodeEnrMarker(*xMan);
+    //    mpEnrichmentDomain->CallNodeEnrMarkerUpdate(* this, * xMan);
+    this->updateNodeEnrMarker(* xMan);
 
 
     writeVtkDebug();
@@ -200,13 +201,12 @@ Delamination :: updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep)
         }
 
         std :: sort( dofManList.begin(), this->dofManList.end() );
-
     }
 }
 
 void Delamination :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iGlobalCoord, const FloatArray &iLocalCoord, int iNodeInd, const Element &iEl) const
 {
-    if(iLocalCoord.giveSize() != 3) {
+    if ( iLocalCoord.giveSize() != 3 ) {
         OOFEM_ERROR("iLocalCoord.giveSize() != 3")
     }
 
@@ -225,8 +225,10 @@ void Delamination :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const 
 
 IRResultType Delamination :: initializeFrom(InputRecord *ir)
 {
-    EnrichmentItem :: initializeFrom(ir);
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
+
+    result = EnrichmentItem :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     // Compute the delamination xi-coord
     IR_GIVE_FIELD(ir, this->interfaceNum, _IFT_Delamination_interfacenum); // interface number from the bottom
@@ -234,30 +236,34 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
 
     LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( this->giveDomain()->giveCrossSection(this->crossSectionNum) );
     if ( layeredCS == NULL ) {
-        OOFEM_ERROR("Delamination EI requires a valid layered cross section number input: see record '%s'.", _IFT_Delamination_csnum);
+        OOFEM_WARNING("Delamination EI requires a valid layered cross section number input: see record '%s'.", _IFT_Delamination_csnum);
+        return IRRT_BAD_FORMAT;
     } else if ( this->interfaceNum.giveSize() < 1 || this->interfaceNum.giveSize() > 2 ) {
-        OOFEM_ERROR("Size of record 'interfacenum' must be 1 or 2");
+        OOFEM_WARNING("Size of record 'interfacenum' must be 1 or 2");
+        return IRRT_BAD_FORMAT;
     }
-    
+
     // check that interface numbers are valid
     interfaceNum.printYourself("interface num");
     for ( int i = 1; i <= this->interfaceNum.giveSize(); i++ ) {
         if ( this->interfaceNum.at(i) < 1 || this->interfaceNum.at(i) >= layeredCS->giveNumberOfLayers() ) {
-            OOFEM_ERROR("Cross section does not contain the interface number (%d) specified in the record '%s' since number of layers is %d.", this->interfaceNum.at(i), _IFT_Delamination_interfacenum, layeredCS->giveNumberOfLayers());
+            OOFEM_WARNING( "Cross section does not contain the interface number (%d) specified in the record '%s' since number of layers is %d.", this->interfaceNum.at(i), _IFT_Delamination_interfacenum, layeredCS->giveNumberOfLayers() );
+            return IRRT_BAD_FORMAT;
         }
     }
-    
+
     // compute xi-coord of the delamination
     this->delamXiCoord = -1.0;
-    double totalThickness = layeredCS->give(CS_Thickness, NULL, NULL, false); // no position available
+    double totalThickness = layeredCS->give(CS_Thickness, FloatArray(), NULL, false); // no position available
     for ( int i = 1; i <= this->interfaceNum.at(1); i++ ) {
         this->delamXiCoord += layeredCS->giveLayerThickness(i) / totalThickness * 2.0;
         this->xiBottom += layeredCS->giveLayerThickness(i) / totalThickness * 2.0;
     }
-    
+
     if ( this->interfaceNum.giveSize() == 2 ) {
-        if (this->interfaceNum.at(1) >= this->interfaceNum.at(2)) {
-            OOFEM_ERROR("second intercfacenum must be greater than the first one");
+        if ( this->interfaceNum.at(1) >= this->interfaceNum.at(2) ) {
+            OOFEM_WARNING("second intercfacenum must be greater than the first one");
+            return IRRT_BAD_FORMAT;
         }
         for ( int i = 1; i <= this->interfaceNum.at(2); i++ ) {
             this->xiTop += layeredCS->giveLayerThickness(i) / totalThickness * 2.0;
@@ -265,7 +271,7 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
     } else {
         this->xiTop = 1.0; // default is the top surface
     }
-    
+
 
     IR_GIVE_OPTIONAL_FIELD(ir, this->matNum, _IFT_Delamination_CohesiveZoneMaterial);
     if ( this->matNum > 0 ) {
@@ -335,16 +341,15 @@ Delamination :: appendInputRecords(DynamicDataReader &oDR)
     }
 }
 
-void Delamination::evalLevelSetNormal(double &oLevelSet, const FloatArray &iGlobalCoord, const FloatArray &iN, const IntArray &iNodeInd) const
+void Delamination :: evalLevelSetNormal(double &oLevelSet, const FloatArray &iGlobalCoord, const FloatArray &iN, const IntArray &iNodeInd) const
 {
     // TODO: For consistency, this should be evaluated based on giveDelamXiCoord() /ES
-//    interpLevelSet(oLevelSet, iN, iNodeInd);
+    //    interpLevelSet(oLevelSet, iN, iNodeInd);
 }
 
-void Delamination::evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet) const
+void Delamination :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet) const
 {
     oEnrFunc.resize(1, 0.0);
     mpEnrichmentFunc->evaluateEnrFuncAt(oEnrFunc [ 0 ], iPos, iLevelSet);
 }
-
 } // end namespace oofem

@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/ElementEvaluators/planestresselementevaluator.h"
+#include "../sm/Elements/PlaneStress/planestresselementevaluator.h"
 #include "../sm/CrossSections/structuralcrosssection.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
@@ -51,7 +51,7 @@ void PlaneStressStructuralElementEvaluator :: computeNMatrixAt(FloatMatrix &answ
 {
     FloatArray N;
     FEInterpolation *interp = gp->giveElement()->giveInterpolation();
-    interp->evalN( N, * gp->giveNaturalCoordinates(), FEIIGAElementGeometryWrapper( gp->giveElement(), gp->giveIntegrationRule()->giveKnotSpan() ) );
+    interp->evalN( N, gp->giveNaturalCoordinates(), FEIIGAElementGeometryWrapper( gp->giveElement(), gp->giveIntegrationRule()->giveKnotSpan() ) );
     answer.beNMatrixOf(N, 2);
 }
 
@@ -61,7 +61,7 @@ void PlaneStressStructuralElementEvaluator :: computeBMatrixAt(FloatMatrix &answ
 
     FEInterpolation *interp = gp->giveElement()->giveInterpolation();
     // this uses FEInterpolation::nodes2coords - quite inefficient in this case (large num of dofmans)
-    interp->evaldNdx( d, * gp->giveNaturalCoordinates(),
+    interp->evaldNdx( d, gp->giveNaturalCoordinates(),
                      FEIIGAElementGeometryWrapper( gp->giveElement(), gp->giveIntegrationRule()->giveKnotSpan() ) );
 
     answer.resize(3, d.giveNumberOfRows() * 2);
@@ -81,7 +81,7 @@ double PlaneStressStructuralElementEvaluator :: computeVolumeAround(GaussPoint *
 {
     double determinant, weight, thickness, volume;
     determinant = fabs( this->giveElement()->giveInterpolation()
-                       ->giveTransformationJacobian( * gp->giveNaturalCoordinates(),
+                       ->giveTransformationJacobian( gp->giveNaturalCoordinates(),
                                                     FEIIGAElementGeometryWrapper( this->giveElement(),
                                                                                  gp->giveIntegrationRule()->giveKnotSpan() ) ) );
     weight      = gp->giveWeight();

@@ -45,9 +45,7 @@
 #include "floatarray.h"
 #include "linesearch.h"
 
-#ifdef __PETSC_MODULE
- #include <petscksp.h>
-#endif
+#include <memory>
 
 ///@name Input fields for NRSolver
 //@{
@@ -103,7 +101,7 @@ protected:
     int MANRMSteps;
 
     /// linear system solver
-    SparseLinearSystemNM *linSolver;
+    std :: unique_ptr< SparseLinearSystemNM > linSolver;
     /// linear system solver ID
     LinSystSolverType solverType;
     /// sparse matrix version, used to control constrains application to stiffness
@@ -133,7 +131,7 @@ protected:
     /// Flag indicating whether to use line-search
     bool lsFlag;
     /// Line search solver
-    LineSearchNM *linesearchSolver;
+    std :: unique_ptr< LineSearchNM > linesearchSolver;
     /// Flag indicating if the stiffness should be evaluated before the residual in the first iteration.
     bool mCalcStiffBeforeRes;
     /// Flag indicating whether to use constrained Newton
@@ -148,13 +146,16 @@ protected:
     /// Relative iterative displacement change tolerance for each group
     FloatArray rtold;
 
+    ///@todo This doesn't check units, it is nonsense and must be corrected / Mikael
+    FloatArray forceErrVec;
+    FloatArray forceErrVecOld;
 public:
     NRSolver(Domain * d, EngngModel * m);
     virtual ~NRSolver();
 
     // Overloaded methods:
-    virtual NM_Status solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
-                            FloatArray *X, FloatArray *dX, FloatArray *F,
+    virtual NM_Status solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
+                            FloatArray &X, FloatArray &dX, FloatArray &F,
                             const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                             int &nite, TimeStep *);
     virtual void printState(FILE *outputStream);
@@ -186,8 +187,8 @@ protected:
 
     /// Initiates prescribed equations
     void initPrescribedEqs();
-    void applyConstraintsToStiffness(SparseMtrx *k);
-    void applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, FloatArray &R,
+    void applyConstraintsToStiffness(SparseMtrx &k);
+    void applyConstraintsToLoadIncrement(int nite, const SparseMtrx &k, FloatArray &R,
                                          referenceLoadInputModeType rlm, TimeStep *tStep);
 
     /**
@@ -195,15 +196,7 @@ protected:
      * @return True if solution has converged, otherwise false.
      */
     bool checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs, FloatArray &ddX, FloatArray &X,
-                          double RRT, const FloatArray &internalForcesEBENorm, int nite, bool &errorOutOfRange, TimeStep *tNow);
-
-    bool checkConvergenceDofIdArray(FloatArray &RT, FloatArray &F, FloatArray &rhs, FloatArray &ddX, FloatArray &X,
-                          double RRT, const FloatArray &internalForcesEBENorm, int nite, bool &errorOutOfRange, TimeStep *tNow, IntArray &dofIdArray);
-
-    ///NEW JB
-    FloatArray forceErrVec;
-    FloatArray forceErrVecOld;
-
+                          double RRT, const FloatArray &internalForcesEBENorm, int nite, bool &errorOutOfRange);
 };
 } // end namespace oofem
 #endif // nrsolver_h

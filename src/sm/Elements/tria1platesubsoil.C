@@ -97,11 +97,11 @@ Tria1PlateSubSoil :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int l
 // Returns the [3x3] strain-displacement matrix {B} of the receiver,
 // evaluated at gp.
 {
-    FloatArray n, ns;
-    FloatMatrix dn, dns;
+    FloatArray n;
+    FloatMatrix dn;
 
-    this->interp_lin.evaldNdx( dn, * gp->giveNaturalCoordinates(),  FEIElementGeometryWrapper(this) );
-    this->interp_lin.evalN( n, * gp->giveNaturalCoordinates(),  FEIElementGeometryWrapper(this) );
+    this->interp_lin.evaldNdx( dn, gp->giveNaturalCoordinates(),  FEIElementGeometryWrapper(this) );
+    this->interp_lin.evalN( n, gp->giveNaturalCoordinates(),  FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 3);
     answer.zero();
@@ -133,7 +133,7 @@ IRResultType
 Tria1PlateSubSoil :: initializeFrom(InputRecord *ir)
 {
     this->numberOfGaussPoints = 1;
-    return this->StructuralElement :: initializeFrom(ir);
+    return StructuralElement :: initializeFrom(ir);
 }
 
 
@@ -173,7 +173,7 @@ Tria1PlateSubSoil :: computeVolumeAround(GaussPoint *gp)
     double detJ, weight;
 
     weight = gp->giveWeight();
-    detJ = fabs( this->interp_lin.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    detJ = fabs( this->interp_lin.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     return detJ * weight;
 }
 
@@ -236,7 +236,7 @@ Tria1PlateSubSoil :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &a
 void
 Tria1PlateSubSoil :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
-  this->computeNmatrixAt(* sgp->giveNaturalCoordinates(), answer);
+  this->computeNmatrixAt(sgp->giveNaturalCoordinates(), answer);
 }
 
 void
@@ -245,9 +245,9 @@ Tria1PlateSubSoil :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
     answer.resize(3);
     answer.zero();
     if ( iSurf == 1 ) {
-      for (int i = 1; i<=3; i++) {
-	answer.at(i) = i;
-      }
+        for (int i = 1; i<=3; i++) {
+            answer.at(i) = i;
+        }
     } else {
         OOFEM_ERROR("wrong surface number");
     }
@@ -272,7 +272,7 @@ Tria1PlateSubSoil :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 void
 Tria1PlateSubSoil :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
 {
-    this->computeGlobalCoordinates( answer, * gp->giveNaturalCoordinates() );
+    this->computeGlobalCoordinates( answer, gp->giveNaturalCoordinates() );
 }
 
 

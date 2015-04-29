@@ -7,6 +7,7 @@
  *            ##   ##  ##   ##  ##      ##      ##     ##
  *            #####    #####   ##      ######  ##     ##
  *
+ *
  *             OOFEM : Object Oriented Finite Element Code
  *
  *               Copyright (C) 1993 - 2013   Borek Patzak
@@ -31,6 +32,41 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "rveengngmodel.h"
+/*
+ * matforceevaluator.h
+ *
+ *  Created on: Nov 12, 2014
+ *      Author: svennine
+ */
 
-namespace oofem { }
+#ifndef MATFORCEEVALUATOR_H_
+#define MATFORCEEVALUATOR_H_
+
+namespace oofem {
+
+class TipInfo;
+class Domain;
+class FloatArray;
+class TimeStep;
+
+/**
+ * Evaluates material forces.
+ *
+ * Under development. Currently, only elastic material and traction free cracks are considered.
+ *
+ * @author Erik Svenning
+ * @date Nov 12, 2014
+ */
+class MaterialForceEvaluator {
+public:
+    MaterialForceEvaluator();
+    virtual ~MaterialForceEvaluator();
+
+    void computeMaterialForce(FloatArray &oMatForce, Domain &iDomain, const TipInfo &iTipInfo, TimeStep *tStep, const double &iRadius);
+
+    double computeWeightFunctionInPoint(const FloatArray &iCoord, const FloatArray &iTipCoord, const double &iRadius) const;
+};
+
+} /* namespace oofem */
+
+#endif /* MATFORCEEVALUATOR_H_ */

@@ -98,7 +98,6 @@ BondCEBMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     if ( mMode == _3dInterface ) {
       ntc = 3;
     }
-    int i;
     BondCEBMaterialStatus *status = static_cast< BondCEBMaterialStatus * >( this->giveStatus(gp) );
 
     //this->initGpForNewStep(gp);
@@ -110,11 +109,11 @@ BondCEBMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 
     // trial values of shear tractions evaluated elastically
     double s = 0., dKappa = 0.;
-    for (i=2; i<=ntc; i++) {
-      double depsi = totalStrain.at(i) - status->giveStrainVector().at(i);
-      answer.at(i) = status->giveStressVector().at(i) + ks * depsi;
-      s += answer.at(i)*answer.at(i);
-      dKappa += depsi*depsi;
+    for ( int i = 2; i <= ntc; i++ ) {
+        double depsi = totalStrain.at(i) - status->giveStrainVector().at(i);
+        answer.at(i) = status->giveStressVector().at(i) + ks * depsi;
+        s += answer.at(i)*answer.at(i);
+        dKappa += depsi*depsi;
      }
 
     // norm of trial shear traction
@@ -130,10 +129,10 @@ BondCEBMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     double smax = evaluateBondStress(tempKappa);
 
     // reduce shear tractions, if needed
-    if (s>smax){
-      for (i=2; i<=ntc; i++) {
-	answer.at(i) *= (smax/s);
-      }
+    if ( s > smax ) {
+        for ( int i = 2; i <= ntc; i++ ) {
+            answer.at(i) *= (smax/s);
+        }
     }
  
     // update gp
@@ -168,23 +167,23 @@ BondCEBMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
     switch ( mMode ) {
     case _2dInterface:
         answer.resize(2, 2);
-	answer.zero();
+        answer.zero();
         answer.at(1, 1) = kn;
-	if ( rMode == ElasticStiffness ) {
-	  answer.at(2, 2) = ks;
-	} else {
-	  answer.at(2, 2) = ks;
-	}
+        if ( rMode == ElasticStiffness ) {
+            answer.at(2, 2) = ks;
+        } else {
+            answer.at(2, 2) = ks;
+        }
         break;
     case _3dInterface:
         answer.resize(3, 3);
-	answer.zero();
-	answer.at(1, 1) = kn;
-	if ( rMode == ElasticStiffness ) {
-	  answer.at(2, 2) = answer.at(3, 3) = ks;
-	} else {
-	  answer.at(2, 2) = answer.at(3, 3) = ks;
-	}
+        answer.zero();
+        answer.at(1, 1) = kn;
+        if ( rMode == ElasticStiffness ) {
+            answer.at(2, 2) = answer.at(3, 3) = ks;
+        } else {
+            answer.at(2, 2) = answer.at(3, 3) = ks;
+        }
         break;
     default:
         StructuralMaterial :: giveStiffnessMatrix(answer, rMode, gp, tStep);

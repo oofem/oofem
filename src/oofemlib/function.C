@@ -34,12 +34,10 @@
 
 #include "function.h"
 #include "timestep.h"
-#include "dynamicinputrecord.h"
 
 namespace oofem {
 Function :: Function(int n, Domain *d) :
-    FEMComponent(n, d),
-    initialValue(0.)
+    FEMComponent(n, d)
 { }
 
 double
@@ -52,42 +50,12 @@ Function :: evaluate(TimeStep *tStep, ValueModeType mode)
     } else if ( mode == VM_Acceleration ) {
         return this->evaluateAccelerationAtTime( tStep->giveIntrinsicTime() );
     } else if ( mode == VM_Incremental ) {
-        //return this->evaluateAtTime( tStep->giveTime() ) - this->evaluateAtTime( tStep->giveTime() - tStep->giveTimeIncrement() );
-
-        if ( tStep->isTheFirstStep() ) {
-            return this->evaluateAtTime(tStep->giveIntrinsicTime() - this->initialValue);
-        } else {
-            return this->evaluateAtTime( tStep->giveIntrinsicTime() ) - this->evaluateAtTime( tStep->giveIntrinsicTime() - tStep->giveTimeIncrement() );
-        }
+        return this->evaluateAtTime( tStep->giveTargetTime() ) - this->evaluateAtTime( tStep->giveTargetTime() - tStep->giveTimeIncrement() );
     } else {
         OOFEM_ERROR("unsupported mode(%d)", mode);
     }
 
     return 0.;
-}
-
-
-IRResultType
-Function :: initializeFrom(InputRecord *ir)
-{
-    //
-    // instanciates receiver according to input record
-    //
-    IRResultType result;              // Required by IR_GIVE_FIELD macro
-
-
-    this->initialValue = 0.;
-    IR_GIVE_OPTIONAL_FIELD(ir, this->initialValue, _IFT_Function_initialvalue);
-
-    return IRRT_OK;
-}
-
-
-void
-Function :: giveInputRecord(DynamicInputRecord &input)
-{
-    FEMComponent :: giveInputRecord(input);
-    input.setField(this->initialValue, _IFT_Function_initialvalue);
 }
 
 
@@ -107,11 +75,9 @@ void
 Function :: evaluate(FloatArray &answer, const std :: map< std :: string, FunctionArgument > &valDict)
 {
     auto it = valDict.find("t");
-#ifdef DEBUG
     if ( it == valDict.end() ) {
         OOFEM_ERROR("Missing necessary argument \"t\"");
     }
-#endif
     answer = FloatArray{this->evaluateAtTime(it->second.val0)};
 }
 
@@ -120,12 +86,10 @@ Function :: evaluate(const std :: map< std :: string, FunctionArgument > &valDic
 {
     FloatArray ans;
     this->evaluate(ans, valDict);
-#ifdef DEBUG
     if ( ans.giveSize() != 1 ) {
         OOFEM_ERROR("Function does not return scalar value");
     }
-#endif
-    return ans(0);
+    return ans[0];
 }
 
 } // end namespace oofem

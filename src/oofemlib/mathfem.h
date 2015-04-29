@@ -109,6 +109,8 @@ inline bool isnan(double x) { return std :: isnan(x); }
 inline double cbrt(double x) { return sgn(x) * pow(fabs(x), 1.0 / 3.0); }
 #endif
 
+inline double sqr(double x) { return x * x; }
+
 /// Returns the positive part of given float
 inline double macbra(double x) { return ( x >= 0 ? x : 0 ); }
 /// Returns the negative part of given float

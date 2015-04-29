@@ -86,19 +86,6 @@ public:
  */
 class OOFEM_EXPORT Function : public FEMComponent
 {
-protected:
-    /**
-     * By default, the increment of receiver is computed as a difference between values evaluated at given solution step and in previous step.
-     * However, if the solution step is the first step, the difference is typically set to the total value of receiver at the first step.
-     * This is quite natural, as a loading with constant time function is expected to be applied at first step.
-     * In certain cases, this default behavior has to be changed. The initial value (set by default to zero)
-     * allows to set initial value of receiver. This initial value is used only when the increment of receiver is evaluated at first step,
-     * when result is defined as value of receiver at given step minus the initial value.
-     * This allows to correctly handle temperature loading, that is specified with respect to some reference temperature.
-     * In this case, the initial value should be set to the reference temperature, allowing to obtain correct temperate increment in first step.
-     */
-    double initialValue;
-
 public:
     /**
      * Constructor. Creates load time function with given number, belonging to given domain.
@@ -149,10 +136,6 @@ public:
      * @return @f$ f''(t) @f$.
      */
     virtual double evaluateAccelerationAtTime(double t) = 0;
-
-    // Overloaded methods:
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
 };
 } // end namespace oofem
 #endif // function_h

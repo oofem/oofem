@@ -116,16 +116,15 @@ DruckerPragerPlasticitySMStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     giveFullPlasticStrainVector(plasticStrainVector);
 
     fprintf(file, "plasticStrains ");
-    int n = plasticStrainVector.giveSize();
-    for ( int i = 1; i <= n; i++ ) {
-        fprintf( file, " % .4e", plasticStrainVector.at(i) );
+    for ( auto &val : plasticStrainVector ) {
+        fprintf( file, " %.4e", val );
     }
 
     fprintf(file, "}\n");
 
     fprintf(file, "\t\thardening_parameter ");
     // print hardening parameter
-    fprintf(file, " % .4e\n", kappa);
+    fprintf(file, " %.4e\n", kappa);
 }
 
 contextIOResultType
@@ -220,10 +219,12 @@ DruckerPragerPlasticitySM :: initializeFrom(InputRecord *ir)
     // Required by IR_GIVE_FIELD macro
     IRResultType result;
     // call the corresponding service of structural material
-    StructuralMaterial :: initializeFrom(ir);
+    result = StructuralMaterial :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     // call the corresponding service for the linear elastic material
-    LEMaterial->initializeFrom(ir);
+    result = LEMaterial->initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     // initialize elastic constants
     //eM = LEMaterial->give(Ex,gp);
@@ -249,8 +250,8 @@ DruckerPragerPlasticitySM :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, limitYieldStress, _IFT_DruckerPragerPlasticitySM_lys);
         break;
     default:
-        OOFEM_ERROR("Choose hardeningType 1 (linear hardening/softening), 2 (exponential hardening/softening) in input file!");
-        break;
+        OOFEM_WARNING("Choose hardeningType 1 (linear hardening/softening), 2 (exponential hardening/softening) in input file!");
+        return IRRT_BAD_FORMAT;
     }
 
     yieldTol = 1.e-14;

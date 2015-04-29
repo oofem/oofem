@@ -118,8 +118,8 @@ public:
      * @param tStep Time step to solve for.
      * @return NM_Status value.
      */
-    virtual NM_Status solve(SparseMtrx *K, FloatArray *R, FloatArray *R0,
-                            FloatArray *X, FloatArray *dX, FloatArray *F,
+    virtual NM_Status solve(SparseMtrx &K, FloatArray &R, FloatArray *R0,
+                            FloatArray &X, FloatArray &dX, FloatArray &F,
                             const FloatArray &internalForcesEBENorm, double &s, referenceLoadInputModeType rlm,
                             int &nite, TimeStep *tStep) = 0;
 
@@ -154,7 +154,7 @@ public:
 
     virtual const char *giveClassName() const { return "SparseNonLinearSystemNM"; }
     /// Error printing helper.
-    std :: string errorInfo(const char *func) const { return std :: string(giveClassName()) + func; }
+    std :: string errorInfo(const char *func) const { return std :: string(giveClassName()) + "::" + func; }
 };
 } // end namespace oofem
 #endif // sparsenonlinsystemnm_h

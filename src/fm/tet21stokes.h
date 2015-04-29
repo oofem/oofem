@@ -39,6 +39,7 @@
 #include "nodalaveragingrecoverymodel.h"
 #include "spatiallocalizer.h"
 #include "eleminterpmapperinterface.h"
+#include "matresponsemode.h"
 
 #define _IFT_Tet21Stokes_Name "tet21stokes"
 
@@ -67,8 +68,6 @@ protected:
     static IntArray conservation_ordering;
     /// Ordering of dofs on surfaces. Used to assemble edge loads (only momentum balance)
     static IntArray surf_ordering [ 4 ];
-    /// Index of velocities on side (basically 1..21 excluding the pressures at index 4, 8 and 12)
-    static IntArray velocitydofsonside;
 
 public:
     Tet21Stokes(int n, Domain * d);
@@ -79,7 +78,7 @@ public:
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
 
     void computeInternalForcesVector(FloatArray &answer, TimeStep *tStep);
-    void computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep);
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, TimeStep *tStep);
 
     void computeExternalForcesVector(FloatArray &answer, TimeStep *tStep);
     virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
@@ -112,8 +111,6 @@ public:
 
     // Nodal averaging interface:
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
-
-    void giveIntegratedVelocity(FloatArray &answer, TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // tet21stokes_h

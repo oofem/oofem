@@ -50,21 +50,20 @@ REGISTER_Material( StructuralMaterialSettable );
 StructuralMaterialSettable :: StructuralMaterialSettable(int n, Domain *d) :
     StructuralMaterial(n, d)
 {
-	isoLE = new IsotropicLinearElasticMaterial(n,d);
+    isoLE = new IsotropicLinearElasticMaterial(n,d);
 }
 
 StructuralMaterialSettable :: ~StructuralMaterialSettable()
 {
-	delete isoLE;
+    delete isoLE;
 }
 
 IRResultType
 StructuralMaterialSettable :: initializeFrom(InputRecord *ir)
 {
-    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     //IRResultType result;                // Required by IR_GIVE_FIELD macro
     StructuralMaterial :: initializeFrom(ir);
-	 return isoLE->initializeFrom(ir);
+    return isoLE->initializeFrom(ir);
 }
 
 void

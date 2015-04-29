@@ -52,40 +52,40 @@ LineSearchNM :: LineSearchNM(Domain *d, EngngModel *m) :
 }
 
 NM_Status
-LineSearchNM :: solve(FloatArray *r, FloatArray *dr, FloatArray *F, FloatArray *R, FloatArray *R0,
-                      IntArray &eqnmask, double lambda, double &etaValue, LS_status &status, TimeStep *tNow)
+LineSearchNM :: solve(FloatArray &r, FloatArray &dr, FloatArray &F, FloatArray &R, FloatArray *R0,
+                      IntArray &eqnmask, double lambda, double &etaValue, LS_status &status, TimeStep *tStep)
 {
-    int ico, ii, ils, neq = r->giveSize();
+    int ico, ii, ils, neq = r.giveSize();
     double s0, si;
 
     FloatArray g(neq), rb(neq);
     // Compute inner product at start and stop if positive
-    g = * R;
+    g = R;
     g.times(lambda);
     if ( R0 ) {
         g.add(* R0);
     }
 
-    g.subtract(* F);
+    g.subtract(F);
 
     for ( ii = 1; ii <= eqnmask.giveSize(); ii++ ) {
         g.at( eqnmask.at(ii) ) = 0.0;
     }
 
-    s0 = ( -1.0 ) * g.dotProduct(* dr);
+    s0 = ( -1.0 ) * g.dotProduct(dr);
     if ( s0 >= 0.0 ) {
         //printf ("\nLineSearchNM::solve starting inner product uphill, val=%e",s0);
         OOFEM_LOG_DEBUG("LS: product uphill, eta=%e\n", 1.0);
-        r->add(* dr);
-        tNow->incrementStateCounter();        // update solution state counter
-        engngModel->updateComponent(tNow, InternalRhs, domain);
+        r.add(dr);
+        tStep->incrementStateCounter();        // update solution state counter
+        engngModel->updateComponent(tStep, InternalRhs, domain);
         etaValue = 1.0;
         status = ls_ok;
         return NM_Success;
     }
 
     // keep original total displacement r
-    rb = * r;
+    rb = r;
 
     eta.resize(this->max_iter + 1);
     prod.resize(this->max_iter + 1);
@@ -100,32 +100,32 @@ LineSearchNM :: solve(FloatArray *r, FloatArray *dr, FloatArray *F, FloatArray *
     for ( ils = 2; ils <= this->max_iter; ils++ ) {
         // update displacements
         for ( ii = 1; ii <= neq; ii++ ) {
-            r->at(ii) = rb.at(ii) + this->eta.at(ils) * dr->at(ii);
+            r.at(ii) = rb.at(ii) + this->eta.at(ils) * dr.at(ii);
         }
 
-        tNow->incrementStateCounter();        // update solution state counter
+        tStep->incrementStateCounter();        // update solution state counter
         // update internal forces according to new state
-        engngModel->updateComponent(tNow, InternalRhs, domain);
+        engngModel->updateComponent(tStep, InternalRhs, domain);
         // compute out-of balance forces g in new state
-        g = * R;
+        g = R;
         g.times(lambda);
         if ( R0 ) {
             g.add(* R0);
         }
 
-        g.subtract(* F);
+        g.subtract(F);
 
         for ( ii = 1; ii <= eqnmask.giveSize(); ii++ ) {
             g.at( eqnmask.at(ii) ) = 0.0;
         }
 
         // compute current inner-product ratio
-        si = ( -1.0 ) * g.dotProduct(* dr) / s0;
+        si = ( -1.0 ) * g.dotProduct(dr) / s0;
         prod.at(ils) = si;
 
         // check if line-search tolerance is satisfied
         if ( fabs(si) < ls_tolerance ) {
-            dr->times( this->eta.at(ils) );
+            dr.times( this->eta.at(ils) );
             //printf ("\nLineSearchNM::solve tolerance satisfied for eta=%e, ils=%d", eta.at(ils),ils);
             OOFEM_LOG_DEBUG( "LS: ils=%d, eta=%e\n", ils, eta.at(ils) );
 
@@ -147,11 +147,11 @@ LineSearchNM :: solve(FloatArray *r, FloatArray *dr, FloatArray *F, FloatArray *
     OOFEM_LOG_DEBUG( "LS: ils=%d, ico=%d, eta=%e\n", ils, ico, eta.at(ils) );
     /* update F before */
     for ( ii = 1; ii <= neq; ii++ ) {
-        r->at(ii) = rb.at(ii) + dr->at(ii);
+        r.at(ii) = rb.at(ii) + dr.at(ii);
     }
 
-    tNow->incrementStateCounter();           // update solution state counter
-    engngModel->updateComponent(tNow, InternalRhs, domain);
+    tStep->incrementStateCounter();           // update solution state counter
+    engngModel->updateComponent(tStep, InternalRhs, domain);
     etaValue = 1.0;
     status = ls_failed;
     return NM_NoSuccess;

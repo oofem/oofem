@@ -71,16 +71,8 @@ QWedgeGrad :: QWedgeGrad(int n, Domain *aDomain) :  QWedge(n, aDomain), GradDpEl
 IRResultType
 QWedgeGrad :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result = this->NLStructuralElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    if ( ( numberOfGaussPoints != 2 ) && ( numberOfGaussPoints != 9 ) ) {
-        numberOfGaussPoints = 9;
-    }
-
-    return IRRT_OK;
+    numberOfGaussPoints = 9;
+    return Structural3DElement :: initializeFrom(ir);
 }
 
 
@@ -112,7 +104,7 @@ void
 QWedgeGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatArray n;
-    this->interpolation_lin.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation_lin.evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beNMatrixOf(n, 1);
 }
 
@@ -120,7 +112,7 @@ void
 QWedgeGrad :: computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
-    this->interpolation_lin.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation_lin.evaldNdx( dnx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beTranspositionOf(dnx);
 }
 

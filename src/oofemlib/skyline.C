@@ -46,6 +46,7 @@
 #include "contact/contactmanager.h"
 #include "contact/contactdefinition.h"
 #include "contact/contactelement.h"
+#include "unknownnumberingscheme.h"
 
 
 #include <climits>
@@ -366,7 +367,7 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, const UnknownN
     // maximal column height for assembled characteristics matrix
     //
 
-    int js, maxle;
+    int maxle;
     int ac1;
     int neq;
     if ( s.isDefault() ) {
@@ -391,22 +392,17 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, const UnknownN
         mht.at(j) = j; // initialize column height, maximum is line number (since it only stores upper triangular)
     }
 
-    int nelem = domain->giveNumberOfElements();
-
     // loop over elements code numbers
-    for ( int i = 1; i <= nelem; i++ ) {
-        domain->giveElement(i)->giveLocationArray(loc, s);
-        js = loc.giveSize();
+    for ( auto &elem : domain->giveElements() ) {
+        elem->giveLocationArray(loc, s);
         maxle = INT_MAX;
-        for ( int j = 1; j <= js; j++ ) {
-            int ieq = loc.at(j);
+        for ( int ieq : loc ) {
             if ( ieq != 0 ) {
                 maxle = min(maxle, ieq);
             }
         }
 
-        for ( int j = 1; j <= js; j++ ) {
-            int ieq = loc.at(j);
+        for ( int ieq : loc ) {
             if ( ieq != 0 ) {
                 mht.at(ieq) = min( maxle, mht.at(ieq) );
             }
@@ -414,26 +410,24 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, const UnknownN
     }
 
     // loop over active boundary conditions (e.g. relative kinematic constraints)
-    int ii, jj, nbc = domain->giveNumberOfBoundaryConditions();
     std :: vector< IntArray >r_locs;
     std :: vector< IntArray >c_locs;
 
-    for ( int i = 1; i <= nbc; ++i ) {
-        ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
+    for ( auto &gbc : domain->giveBcs() ) {
+        ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( gbc.get() );
         if ( bc != NULL ) {
             bc->giveLocationArrays(r_locs, c_locs, UnknownCharType, s, s);
             for ( std :: size_t k = 0; k < r_locs.size(); k++ ) {
                 IntArray &krloc = r_locs [ k ];
                 IntArray &kcloc = c_locs [ k ];
                 maxle = INT_MAX;
-                for ( int i = 1; i <= krloc.giveSize(); i++ ) {
-                    if ( ( ii = krloc.at(i) ) ) {
+                for ( int ii : krloc ) {
+                    if ( ii > 0 ) {
                         maxle = min(maxle, ii);
                     }
                 }
-                for ( int j = 1; j <= kcloc.giveSize(); j++ ) {
-                    jj = kcloc.at(j);
-                    if ( jj ) {
+                for ( int jj : kcloc ) {
+                    if ( jj > 0 ) {
                         mht.at(jj) = min( maxle, mht.at(jj) );
                     }
                 }
@@ -451,17 +445,14 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, const UnknownN
                 ContactElement *cEl = cDef->giveContactElement(k);
                 cEl->giveLocationArray(loc, s);
             
-                js = loc.giveSize();
                 maxle = INT_MAX;
-                for ( int j = 1; j <= js; j++ ) {
-                    int ieq = loc.at(j);
+                for ( int ieq : loc ) {
                     if ( ieq != 0 ) {
                         maxle = min(maxle, ieq);
                     }
                 }
 
-                for ( int j = 1; j <= js; j++ ) {
-                    int ieq = loc.at(j);
+                for ( int ieq : loc ) {
                     if ( ieq != 0 ) {
                         mht.at(ieq) = min( maxle, mht.at(ieq) );
                     }
@@ -642,6 +633,17 @@ void Skyline :: times(double x)
 }
 
 
+void Skyline :: add(double x, SparseMtrx &m)
+{
+    Skyline *M = dynamic_cast< Skyline* >( &m );
+
+    for ( int j = 0; j < nwk; j++ ) {
+        mtrx [ j ] += x * M->mtrx [ j ];
+    }
+
+    this->version++;
+}
+
 void Skyline :: printYourself() const
 {
     // Prints the receiver on screen.
@@ -715,9 +717,9 @@ Skyline :: Skyline(int neq, int nwk1, double *mtrx1, const IntArray &adr1) : Spa
 }
 
 
-//Skyline *Skyline :: giveSubMatrix(Skyline *mat, IntArray &rows, IntArray &cols)
-//Skyline *Skyline :: beSubMatrixOf(const Skyline *mat, IntArray &rows, IntArray &cols)
-//SparseMtrx *Skyline :: beSubMatrixOf(const SparseMtrx *mat, IntArray &rows, IntArray &cols)
+//Skyline *Skyline :: giveSubMatrix(Skyline &mat, IntArray &rows, IntArray &cols)
+//Skyline *Skyline :: beSubMatrixOf(const Skyline &mat, IntArray &rows, IntArray &cols)
+//SparseMtrx *Skyline :: beSubMatrixOf(const SparseMtrx &mat, IntArray &rows, IntArray &cols)
 SparseMtrx *Skyline :: giveSubMatrix(const IntArray &rows, const IntArray &cols) 
 {
 

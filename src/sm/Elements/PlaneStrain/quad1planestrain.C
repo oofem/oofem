@@ -47,7 +47,7 @@
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
  #include "oofegutils.h"
- #include "rcm2.h"
+ #include "Materials/rcm2.h"
 #endif
 
 namespace oofem {
@@ -58,7 +58,6 @@ FEI2dQuadLin Quad1PlaneStrain :: interp(1, 2);
 Quad1PlaneStrain :: Quad1PlaneStrain(int n, Domain *aDomain) :
     PlaneStrainElement(n, aDomain), ZZNodalRecoveryModelInterface(this), SPRNodalRecoveryModelInterface(),
     SpatialLocalizerInterface(this),
-    EIPrimaryUnknownMapperInterface(),
     HuertaErrorEstimatorInterface()
 {
     numberOfDofMans  = 4;
@@ -83,7 +82,7 @@ Quad1PlaneStrain :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li
 {
     FloatMatrix dN;
 
-    this->interp.evaldNdx( dN, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evaldNdx( dN, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     // Reshape
     answer.resize(4, 8);
@@ -135,7 +134,7 @@ Quad1PlaneStrain :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // evaluated at gp.
 {
     FloatMatrix dnx;
-    this->interp.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evaldNdx( dnx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(5, 8);
     answer.zero();
@@ -153,7 +152,7 @@ IRResultType
 Quad1PlaneStrain :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 4;
-    IRResultType result = this->NLStructuralElement :: initializeFrom(ir);
+    IRResultType result = NLStructuralElement :: initializeFrom(ir);
     if ( result != IRRT_OK ) {
         return result;
     }
@@ -179,8 +178,6 @@ Quad1PlaneStrain :: giveInterface(InterfaceType interface)
         return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
         return static_cast< SpatialLocalizerInterface * >(this);
-    } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
         return static_cast< HuertaErrorEstimatorInterface * >(this);
     }
@@ -247,7 +244,7 @@ Quad1PlaneStrain :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElem
 
 void Quad1PlaneStrain :: HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
-    computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
+    computeNmatrixAt(gp->giveSubPatchCoordinates(), answer);
 }
 
 
@@ -569,7 +566,7 @@ Quad1PlaneStrain :: drawSpecial(oofegGraphicContext &gc, TimeStep *tStep)
                                                      n3 * this->giveNode(3)->giveUpdatedCoordinate(2, tStep, defScale) +
                                                      n4 * this->giveNode(4)->giveUpdatedCoordinate(2, tStep, defScale) );
                         } else {
-                            computeGlobalCoordinates( gpglobalcoords, * ( gp->giveNaturalCoordinates() ) );
+                            computeGlobalCoordinates( gpglobalcoords, gp->giveNaturalCoordinates() );
                         }
 
                         xc = gpglobalcoords.at(1);
@@ -643,23 +640,6 @@ SPRPatchType
 Quad1PlaneStrain :: SPRNodalRecoveryMI_givePatchType()
 {
     return SPRPatchType_2dxy;
-}
-
-
-void
-Quad1PlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-                                                                     TimeStep *tStep, const FloatArray &lcoords,
-                                                                     FloatArray &answer)
-{
-    FloatArray u, nv;
-    FloatMatrix n;
-
-    this->interp.evalN( nv, lcoords, FEIElementGeometryWrapper(this) );
-
-    n.beNMatrixOf(nv, 2);
-
-    this->computeVectorOf({D_u, D_v}, mode, tStep, u);
-    answer.beProductOf(n, u);
 }
 
 } // end namespace oofem

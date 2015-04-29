@@ -47,6 +47,7 @@
 #include "contextioerr.h"
 #include "exportmodulemanager.h"
 #include "parallelcontext.h"
+#include "unknownnumberingscheme.h"
 
 namespace oofem {
 #define CALM_RESET_STEP_REDUCE 0.25
@@ -77,7 +78,6 @@ CylindricalALM :: CylindricalALM(Domain *d, EngngModel *m) :
 
     // Variables for Hyper Plane Control
     calm_Control = calm_hpc_off; // HPControl is not default
-    linSolver = NULL;
     // linesearch default off
     lsFlag = 0;
 
@@ -102,15 +102,14 @@ CylindricalALM :: CylindricalALM(Domain *d, EngngModel *m) :
 
 CylindricalALM :: ~CylindricalALM()
 {
-    delete linSolver;
 }
 
 
 NM_Status
-CylindricalALM :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
-                        FloatArray *X, FloatArray *dX, FloatArray *F,
+CylindricalALM :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
+                        FloatArray &X, FloatArray &dX, FloatArray &F,
                         const FloatArray &internalForcesEBENorm, double &ReachedLambda, referenceLoadInputModeType rlm,
-                        int &nite, TimeStep *tNow)
+                        int &nite, TimeStep *tStep)
 {
     FloatArray rhs, deltaXt, deltaX_, dXm1, XInitial;
     FloatArray ddX; // total increment of displacements in iteration
@@ -118,7 +117,7 @@ CylindricalALM :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
     double XX, RR, RR0, XR, p = 0.0;
     double deltaLambda, Lambda, eta, DeltaLambdam1, DeltaLambda = 0.0;
     double drProduct = 0.0;
-    int neq = R->giveSize();
+    int neq = R.giveSize();
     int irest = 0;
     int HPsize, i, ind;
     double _RR, _XX;
@@ -152,7 +151,7 @@ CylindricalALM :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
         calm_NR_ModeTick--;
     }
 
-    XInitial = * X;
+    XInitial = X;
     ddX.resize(neq);
     ddX.zero();
     deltaXt.resize(neq);
@@ -182,17 +181,17 @@ CylindricalALM :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
     //
     // A.2.   We assume positive-definite (0)Kt (tangent stiffness mtrx).
     //
-    RR = parallel_context->localNorm(* R);
+    RR = parallel_context->localNorm(R);
     RR *= RR;
 
 restart:
     //
     // A.1. calculation of (0)VarRt
     //
-    dX->zero();
-    //engngModel->updateComponent(tNow, InternalRhs, domain); // By not updating this, one obtains the old equilibrated tangent.
-    engngModel->updateComponent(tNow, NonLinearLhs, domain);
-    linSolver->solve(k, R, & deltaXt);
+    dX.zero();
+    //engngModel->updateComponent(tStep, InternalRhs, domain); // By not updating this, one obtains the old equilibrated tangent.
+    engngModel->updateComponent(tStep, NonLinearLhs, domain);
+    linSolver->solve(k, R, deltaXt);
 
     // If desired by the user, the solution is (slightly) perturbed, so that various symmetries can be broken.
     // This is useful e.g. to trigger localization in a homogeneous material under uniform stress without
@@ -213,7 +212,7 @@ restart:
         for ( i = 1; i <= HPsize; i++ ) {
             if ( ( ind = calm_HPCIndirectDofMask.at(i) ) != 0 ) {
                 _XX += deltaXt.at(ind) * deltaXt.at(ind);
-                _RR += R->at(ind) * R->at(ind);
+                _RR += R.at(ind) * R.at(ind);
             }
         }
 
@@ -237,7 +236,7 @@ restart:
         p = parallel_context->accumulate(p);
     }
 
-    XR = parallel_context->localDotProduct(deltaXt, * R);
+    XR = parallel_context->localDotProduct(deltaXt, R);
     /* XR is unscaled Bergan's param of current stiffness XR = deltaXt^T k deltaXt
      * this is used to test whether k has negative or positive slope */
 
@@ -248,25 +247,25 @@ restart:
     // A.3.
     //
 
-    rhs = * R;
+    rhs = R;
     rhs.times(DeltaLambda);
     if ( R0 ) {
         rhs.add(* R0);
     }
-    linSolver->solve(k, & rhs, dX);
-    X->add(* dX);
+    linSolver->solve(k, rhs, dX);
+    X.add(dX);
 
     nite = 0;
 
     // update solution state counter
-    tNow->incrementStateCounter();
-    engngModel->updateComponent(tNow, InternalRhs, domain);
+    tStep->incrementStateCounter();
+    engngModel->updateComponent(tStep, InternalRhs, domain);
 
     do {
         nite++;
-        tNow->incrementSubStepNumber();
+        tStep->incrementSubStepNumber();
 
-        dXm1 = * dX;
+        dXm1 = dX;
         DeltaLambdam1 = DeltaLambda;
 
         //
@@ -282,30 +281,30 @@ restart:
             // internal state of elements is updated by previous calling
             // InternalRhs
             //
-            engngModel->updateComponent(tNow, NonLinearLhs, domain);
+            engngModel->updateComponent(tStep, NonLinearLhs, domain);
             //
             // compute deltaXt for i-th iteration
             //
-            linSolver->solve(k, R, & deltaXt);
+            linSolver->solve(k, R, deltaXt);
         }
 
         // B.2.
         //
 
-        rhs =  * R;
+        rhs =  R;
         rhs.times(Lambda);
         if ( R0 ) {
             rhs.add(* R0);
         }
 
-        rhs.subtract(* F);
+        rhs.subtract(F);
         deltaX_.resize(neq);
-        linSolver->solve(k, & rhs, & deltaX_);
+        linSolver->solve(k, rhs, deltaX_);
         eta = 1.0;
         //
         // B.3.
         //
-        if ( this->computeDeltaLambda(deltaLambda, * dX, deltaXt, deltaX_, * R, RR, eta, deltaL, DeltaLambda, neq) ) {
+        if ( this->computeDeltaLambda(deltaLambda, dX, deltaXt, deltaX_, R, RR, eta, deltaL, DeltaLambda, neq) ) {
             irest++;
             if ( irest <= maxRestarts ) {
                 // convergence problems
@@ -318,11 +317,11 @@ restart:
                 }
 
                 // restore previous total displacement vector
-                * X = XInitial;
+                X = XInitial;
                 // reset all changes fro previous equilibrium state
-                dX->zero();
+                dX.zero();
                 // restore initial stiffness
-                engngModel->updateComponent(tNow, NonLinearLhs, domain);
+                engngModel->updateComponent(tStep, NonLinearLhs, domain);
 
                 OOFEM_LOG_INFO("CALMLS:       Iteration Reset ...\n");
 
@@ -345,11 +344,11 @@ restart:
             //
             //  LINE SEARCH
             //
-            this->do_lineSearch(* X, XInitial, deltaX_, deltaXt,
-                                dXm1, * dX, ddX,
-                                * R, R0, * F,
+            this->do_lineSearch(X, XInitial, deltaX_, deltaXt,
+                                dXm1, dX, ddX,
+                                R, R0, F,
                                 DeltaLambda, DeltaLambdam1, deltaLambda, Lambda, ReachedLambda,
-                                RR, drProduct, tNow);
+                                RR, drProduct, tStep);
         } else { // no line search
             //
             // update solution vectors
@@ -357,23 +356,23 @@ restart:
             ddX.clear();
             ddX.add(eta * deltaLambda, deltaXt);
             ddX.add(eta, deltaX_);
-            * dX = dXm1;
-            dX->add(ddX);
-            * X = XInitial;
-            X->add(* dX);
+            dX = dXm1;
+            dX.add(ddX);
+            X = XInitial;
+            X.add(dX);
 
             drProduct = parallel_context->localNorm(ddX);
             drProduct *= drProduct;
 
-            tNow->incrementStateCounter();     // update solution state counter
+            tStep->incrementStateCounter();     // update solution state counter
             //
             // B.6.
             //
             DeltaLambda = DeltaLambdam1 + deltaLambda;
             Lambda = ReachedLambda + DeltaLambda;
 
-            tNow->incrementStateCounter();     // update solution state counter
-            engngModel->updateComponent(tNow, InternalRhs, domain);
+            tStep->incrementStateCounter();     // update solution state counter
+            engngModel->updateComponent(tStep, InternalRhs, domain);
         }
 
         //
@@ -382,7 +381,7 @@ restart:
         // convergence check
         //
 
-        converged = this->checkConvergence(* R, R0, * F, * X, ddX, Lambda, RR0, RR, drProduct,
+        converged = this->checkConvergence(R, R0, F, X, ddX, Lambda, RR0, RR, drProduct,
                                            internalForcesEBENorm, nite, errorOutOfRangeFlag);
         if ( ( nite >= nsmax ) || errorOutOfRangeFlag ) {
             irest++;
@@ -397,12 +396,12 @@ restart:
                 }
 
                 // restore previous total displacement vector
-                * X = XInitial;
+                X = XInitial;
                 // reset all changes from previous equilibrium state
                 engngModel->initStepIncrements();
-                dX->zero();
+                dX.zero();
                 // restore initial stiffness
-                engngModel->updateComponent(tNow, NonLinearLhs, domain);
+                engngModel->updateComponent(tStep, NonLinearLhs, domain);
 
                 OOFEM_LOG_INFO("CALMLS:       Iteration Reset ...\n");
 
@@ -419,7 +418,7 @@ restart:
         }
 
         // output of per iteration data
-        engngModel->giveExportModuleManager()->doOutput(tNow, true);
+        engngModel->giveExportModuleManager()->doOutput(tStep, true);
     } while ( !converged || ( nite < minIterations ) );
 
     //
@@ -436,7 +435,7 @@ restart:
     double DR = parallel_context->localNorm(* dX);
     bk = DeltaLambda * RDR / ( DR * DR );
 
-    if ( tNow->giveNumber() == 1 ) {
+    if ( tStep->giveNumber() == 1 ) {
         // compute Bergan_k0
         Bergan_k0 = bk;
     } else {
@@ -513,15 +512,13 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
         dg_totalLoadLevel.zero();
         dg_totalDisp.zero();
         // loop over dof managers
-        int ndofman = domain->giveNumberOfDofManagers();
-        for ( int _idofman = 1; _idofman <= ndofman; _idofman++ ) {
-            DofManager *_idofmanptr = domain->giveDofManager(_idofman);
-            if ( !_idofmanptr->isLocal() ) {
+        for ( auto &dman : domain->giveDofManagers() ) {
+            if ( !dman->isLocal() ) {
                 continue;
             }
 
             // loop over individual dofs
-            for ( Dof *_idofptr: *_idofmanptr ) {
+            for ( Dof *_idofptr: *dman ) {
                 // loop over dof groups
                 for ( int _dg = 1; _dg <= _ng; _dg++ ) {
                     // test if dof ID is in active set
@@ -546,17 +543,15 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
         } // end loop over dof managers
 
         // loop over elements and their DOFs
-        int nelem = domain->giveNumberOfElements();
-        for ( int _ielem = 1; _ielem <= nelem; _ielem++ ) {
-            Element *_ielemptr = domain->giveElement(_ielem);
-            if ( _ielemptr->giveParallelMode() != Element_local ) {
+        for ( auto &elem : domain->giveElements() ) {
+            if ( elem->giveParallelMode() != Element_local ) {
                 continue;
             }
 
             // loop over element internal Dofs
-            for ( int _idofman = 1; _idofman <= _ielemptr->giveNumberOfInternalDofManagers(); _idofman++ ) {
+            for ( int _idofman = 1; _idofman <= elem->giveNumberOfInternalDofManagers(); _idofman++ ) {
                 // loop over individual dofs
-                for ( Dof *_idofptr: *_ielemptr->giveInternalDofManager(_idofman) ) {
+                for ( Dof *_idofptr: *elem->giveInternalDofManager(_idofman) ) {
                     // loop over dof groups
                     for ( int _dg = 1; _dg <= _ng; _dg++ ) {
                         // test if dof ID is in active set
@@ -684,16 +679,12 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
     double oldPsi =  Psi; // default from constructor
     double initialStepLength, forcedInitialStepLength;
     int hpcMode;
-    IRResultType val;
 
     IR_GIVE_OPTIONAL_FIELD(ir, Psi, _IFT_CylindricalALM_psi);
     if ( Psi < 0. ) {
         Psi = oldPsi;
     }
 
-    // double oldTangenStiffnessTreshold = TangenStiffnessTreshold;
-    // TangenStiffnessTreshold = readDouble (initString,"tstiffnesstreshold");
-    // if (TangenStiffnessTreshold < 0.01) TangenStiffnessTreshold  = oldTangenStiffnessTreshold;
     nsmax = 30;
     IR_GIVE_OPTIONAL_FIELD(ir, nsmax, _IFT_CylindricalALM_maxiter);
     if ( nsmax < 30 ) {
@@ -734,8 +725,8 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
         numberOfRequiredIterations = 1000;
     }
 
-    val = IR_GIVE_OPTIONAL_FIELD(ir, minIterations, _IFT_CylindricalALM_miniterations);
-    if ( val == IRRT_OK ) {
+    IR_GIVE_OPTIONAL_FIELD(ir, minIterations, _IFT_CylindricalALM_miniterations);
+    if ( result == IRRT_OK ) {
         if ( minIterations > 3 && minIterations < 1000 ) {
             numberOfRequiredIterations = minIterations;
         }
@@ -885,7 +876,6 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
     }
 
     this->giveLinearSolver()->initializeFrom(ir);
-    //refLoadInputMode = (calm_referenceLoadInputModeType) readInteger  (initString, "refloadmode");
 
     SparseNonLinearSystemNM :: initializeFrom(ir);
 
@@ -913,18 +903,18 @@ void CylindricalALM :: convertHPCMap()
     int size;
     EModelDefaultEquationNumbering dn;
 
-    int jglobnum, count = 0, ndofman = domain->giveNumberOfDofManagers();
+    int count = 0;
     size = calm_HPCDmanDofSrcArray.giveSize() / 2;
     indirectMap.resize(size);
     weights.resize(size);
-    for ( int j = 1; j <= ndofman; j++ ) {
-        jglobnum = domain->giveNode(j)->giveLabel();
+    for ( auto &dman : domain->giveDofManagers() ) {
+        int jglobnum = dman->giveLabel();
         for ( int i = 1; i <= size; i++ ) {
             int inode = calm_HPCDmanDofSrcArray.at(2 * i - 1);
             int idofid = calm_HPCDmanDofSrcArray.at(2 * i);
             if ( inode == jglobnum ) {
-                if ( parallel_context->isLocal( domain->giveNode(j) ) ) {
-                    indirectMap.at(++count) = domain->giveNode(j)->giveDofWithID(idofid)->giveEquationNumber(dn);
+                if ( parallel_context->isLocal( dman.get() ) ) {
+                    indirectMap.at(++count) = dman->giveDofWithID(idofid)->giveEquationNumber(dn);
                     if ( calm_Control == calml_hpc ) {
                         weights.at(count) = calm_HPCDmanWeightSrcArray.at(i);
                     }
@@ -980,18 +970,16 @@ CylindricalALM :: giveLinearSolver()
 {
     if ( linSolver ) {
         if ( linSolver->giveLinSystSolverType() == solverType ) {
-            return linSolver;
-        } else {
-            delete linSolver;
+            return linSolver.get();
         }
     }
 
-    linSolver = classFactory.createSparseLinSolver(solverType, domain, engngModel);
-    if ( linSolver == NULL ) {
+    linSolver.reset( classFactory.createSparseLinSolver(solverType, domain, engngModel) );
+    if ( !linSolver ) {
         OOFEM_ERROR("linear solver creation failed");
     }
 
-    return linSolver;
+    return linSolver.get();
 }
 
 
@@ -1217,7 +1205,7 @@ CylindricalALM :: do_lineSearch(FloatArray &r, const FloatArray &rInitial, const
                                 const FloatArray &dXm1, FloatArray &dX, FloatArray &ddX,
                                 const FloatArray &R, const FloatArray *R0, const FloatArray &F,
                                 double &DeltaLambda, double &DeltaLambdam1, double &deltaLambda,
-                                double &Lambda, double &ReachedLambda, double RR, double &drProduct, TimeStep *tNow)
+                                double &Lambda, double &ReachedLambda, double RR, double &drProduct, TimeStep *tStep)
 {
     //
     //  LINE SEARCH
@@ -1276,9 +1264,9 @@ CylindricalALM :: do_lineSearch(FloatArray &r, const FloatArray &rInitial, const
         drProduct = parallel_context->localNorm(ddX);
         drProduct *= drProduct;
 
-        tNow->incrementStateCounter(); // update solution state counter
+        tStep->incrementStateCounter(); // update solution state counter
         // update internal forces according to new state
-        engngModel->updateComponent(tNow, InternalRhs, domain);
+        engngModel->updateComponent(tStep, InternalRhs, domain);
 
         e1 = parallel_context->localDotProduct(deltaX_, F);
         e2 = parallel_context->localDotProduct(deltaXt, F);
@@ -1356,8 +1344,8 @@ CylindricalALM :: do_lineSearch(FloatArray &r, const FloatArray &rInitial, const
         drProduct = parallel_context->localNorm(ddX);
         drProduct *= drProduct;
 
-        tNow->incrementStateCounter(); // update solution state counter
-        engngModel->updateComponent(tNow, InternalRhs, domain);
+        tStep->incrementStateCounter(); // update solution state counter
+        engngModel->updateComponent(tStep, InternalRhs, domain);
         DeltaLambda = DeltaLambdam1 + deltaLambda;
         Lambda = ReachedLambda + DeltaLambda;
 

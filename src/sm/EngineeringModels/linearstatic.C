@@ -34,16 +34,18 @@
 
 #include "../sm/EngineeringModels/linearstatic.h"
 #include "../sm/Elements/structuralelement.h"
-#include "../sm/ElementEvaluators/structuralelementevaluator.h"
+#include "../sm/Elements/structuralelementevaluator.h"
 #include "nummet.h"
 #include "timestep.h"
 #include "element.h"
+#include "dof.h"
 #include "sparsemtrx.h"
 #include "verbose.h"
 #include "classfactory.h"
 #include "datastream.h"
 #include "contextioerr.h"
 #include "classfactory.h"
+#include "unknownnumberingscheme.h"
 
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"
@@ -57,40 +59,32 @@ REGISTER_EngngModel(LinearStatic);
 
 LinearStatic :: LinearStatic(int i, EngngModel *_master) : StructuralEngngModel(i, _master), loadVector(), displacementVector()
 {
-    stiffnessMatrix = NULL;
     ndomains = 1;
-    nMethod = NULL;
     initFlag = 1;
     solverType = ST_Direct;
 }
 
 
-LinearStatic :: ~LinearStatic()
-{
-    delete stiffnessMatrix;
-    delete nMethod;
-}
+LinearStatic :: ~LinearStatic() { }
 
 
 NumericalMethod *LinearStatic :: giveNumericalMethod(MetaStep *mStep)
 {
-    if ( nMethod ) {
-        return nMethod;
-    }
-
-    if ( isParallel() ) {
-        if ( ( solverType == ST_Petsc ) || ( solverType == ST_Feti ) ) {
-            nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
+    if ( !nMethod ) {
+        if ( isParallel() ) {
+            if ( ( solverType == ST_Petsc ) || ( solverType == ST_Feti ) ) {
+                nMethod.reset( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
+            }
+        } else {
+            nMethod.reset( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
         }
-    } else {
-        nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
+        if ( !nMethod ) {
+            OOFEM_ERROR("linear solver creation failed");
+        }
     }
 
-    if ( nMethod == NULL ) {
-        OOFEM_ERROR("linear solver creation failed");
-    }
 
-    return nMethod;
+    return nMethod.get();
 }
 
 IRResultType
@@ -98,7 +92,11 @@ LinearStatic :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    StructuralEngngModel :: initializeFrom(ir);
+    result = StructuralEngngModel :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+
     int val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_lstype);
     solverType = ( LinSystSolverType ) val;
@@ -156,23 +154,15 @@ double LinearStatic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep,
 
 TimeStep *LinearStatic :: giveNextStep()
 {
-    int istep = this->giveNumberOfFirstStep();
-    //int mstep = 1;
-    StateCounterType counter = 1;
-
-    if ( previousStep != NULL ) {
-        delete previousStep;
+    if ( !currentStep ) {
+        // first step -> generate initial step
+        //currentStep.reset( new TimeStep(*giveSolutionStepWhenIcApply()) );
+        currentStep.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 1, 0., 1., 0) );
     }
+    previousStep = std :: move(currentStep);
+    currentStep.reset( new TimeStep(*previousStep, 1.) );
 
-    if ( currentStep != NULL ) {
-        istep =  currentStep->giveNumber() + 1;
-        counter = currentStep->giveSolutionStateCounter() + 1;
-    }
-
-    previousStep = currentStep;
-    currentStep = new TimeStep(istep, this, 1, ( double ) istep, 0., counter);
-    // time and dt variables are set eq to 0 for staics - has no meaning
-    return currentStep;
+    return currentStep.get();
 }
 
 
@@ -208,14 +198,14 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
         //
         // first step  assemble stiffness Matrix
         //
-        stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
-        if ( stiffnessMatrix == NULL ) {
+        stiffnessMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+        if ( !stiffnessMatrix ) {
             OOFEM_ERROR("sparse matrix creation failed");
         }
 
         stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
 
-        this->assemble( stiffnessMatrix, tStep, StiffnessMatrix,
+        this->assemble( *stiffnessMatrix, tStep, TangentAssembler(TangentStiffness),
                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
         initFlag = 0;
@@ -236,7 +226,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
     //
     loadVector.resize( this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ) );
     loadVector.zero();
-    this->assembleVector( loadVector, tStep, ExternalForcesVector, VM_Total,
+    this->assembleVector( loadVector, tStep, ExternalForceAssembler(), VM_Total,
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
@@ -244,7 +234,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
     //
     FloatArray internalForces( this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ) );
     internalForces.zero();
-    this->assembleVector( internalForces, tStep, InternalForcesVector, VM_Total,
+    this->assembleVector( internalForces, tStep, InternalForceAssembler(), VM_Total,
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     loadVector.subtract(internalForces);
@@ -262,7 +252,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
 #ifdef VERBOSE
     OOFEM_LOG_INFO("\n\nSolving ...\n\n");
 #endif
-    NM_Status s = nMethod->solve(stiffnessMatrix, & loadVector, & displacementVector);
+    NM_Status s = nMethod->solve(*stiffnessMatrix, loadVector, displacementVector);
     if ( !( s & NM_Success ) ) {
         OOFEM_ERROR("No success in solving system.");
     }
@@ -362,14 +352,6 @@ LinearStatic :: updateDomainLinks()
 {
     EngngModel :: updateDomainLinks();
     this->giveNumericalMethod( this->giveCurrentMetaStep() )->setDomain( this->giveDomain(1) );
-}
-
-
-
-void
-LinearStatic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
-{
-    iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
 }
 
 

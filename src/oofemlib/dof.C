@@ -78,7 +78,7 @@ void Dof :: printSingleOutputAt(FILE *File, TimeStep *tStep, char ch, ValueModeT
 // 'd') of the receiver, at tStep.
 {
     double x = scale * this->giveUnknown(mode, tStep);
-    fprintf(File, "  dof %d   %c % .8e\n", dofID, ch, x);
+    fprintf(File, "  dof %d   %c %.8e\n", dofID, ch, x);
 }
 
 
@@ -91,7 +91,7 @@ void Dof :: printMultipleOutputAt(FILE *File, TimeStep *tStep, char *ch,
     fprintf(File, "  dof %d", dofID);
     for ( int i = 1; i <= nite; i++ ) {
         double x = this->giveUnknown(mode [ i - 1 ], tStep);
-        fprintf(File, "   %c % .8e", ch [ i - 1 ], x);
+        fprintf(File, "   %c %.8e", ch [ i - 1 ], x);
     }
 
     fprintf(File, "\n");

@@ -43,6 +43,7 @@
 #define _IFT_Beam3d_Name "beam3d"
 #define _IFT_Beam3d_dofstocondense "dofstocondense"
 #define _IFT_Beam3d_refnode "refnode"
+#define _IFT_Beam3d_refangle "refangle"
 //@}
 
 namespace oofem {
@@ -55,16 +56,20 @@ namespace oofem {
  *
  * This class is not derived from liBeam3d or truss element, because it does not support
  * any material nonlinearities (if should, stiffness must be integrated)
+ * 
+ * @author Giovanni (among others)
  */
 class Beam3d : public StructuralElement, public FiberedCrossSectionInterface
 {
 protected:
     double kappay, kappaz, length;
     int referenceNode;
+    double referenceAngle = 0;
+    bool usingAngle = false;
     IntArray *dofsToCondense;
 
 public:
-    Beam3d(int n, Domain * d);
+    Beam3d(int n, Domain *d);
     virtual ~Beam3d();
 
     virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL);
@@ -110,7 +115,7 @@ public:
 
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
+    virtual void drawDeformedGeometry(oofegGraphicContext & gc, TimeStep * tStep, UnknownType);
 #endif
 
 protected:

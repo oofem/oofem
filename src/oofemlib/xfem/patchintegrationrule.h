@@ -46,8 +46,8 @@ class Triangle;
  * PatchIntegrationRule provides integration over a triangle patch.
  * Input to the constructor is:
  *  -int n:         number of quadrature points per triangle.
- *  -Element *e:	parent element pointer
- *  -iTriangles:	array of triangles describing the subdivision of the element.
+ *  -Element *e:    parent element pointer
+ *  -iTriangles:    array of triangles describing the subdivision of the element.
  *
  * @author Erik Svenning (Major modifications)
  *

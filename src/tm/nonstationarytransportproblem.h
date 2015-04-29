@@ -56,6 +56,48 @@
 //@}
 
 namespace oofem {
+
+
+/**
+ * Callback class for assembling element external forces:
+ * - edge or surface load on elements
+ * - add internal source vector on elements
+ * @author Mikael Öhman
+ */
+class TransportExternalForceAssembler : public VectorAssembler
+{
+public:
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+};
+
+    
+/**
+ * Callback class for assembling mid point effective tangents
+ * @author Mikael Öhman
+ */
+class MidpointLhsAssembler : public MatrixAssembler
+{
+protected:
+    double lumped;
+    double alpha;
+
+public:
+    MidpointLhsAssembler(bool lumped, double alpha);
+    virtual void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const;
+};
+
+
+/**
+ * Callback class for assembling CBS pressure matrices
+ * @author Mikael Öhman
+ */
+class IntSourceLHSAssembler : public MatrixAssembler
+{
+public:
+    virtual void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const;
+};
+
+
 /**
  * This class represents linear nonstationary transport problem.
  */
@@ -127,11 +169,6 @@ public:
 
     virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep);
 
-    virtual void giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
-                                                 CharType type, TimeStep *tStep, Domain *domain);
-
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
-
     /**
      * Returns time function for time step increment.
      * Used time function should provide step lengths as function of step number.
@@ -168,13 +205,11 @@ protected:
      * @param answer Global vector where the contribution will be added.
      * @param tStep Solution step.
      * @param mode Mode of result.
-     * @param lhsType Type of element matrix to be multiplied by vector of prescribed.
-     * The giveElementCharacteristicMatrix service is used to get/compute element matrix.
      * @param s A map of non-default equation numbering if required.
      * @param d Domain.
      */
     virtual void assembleDirichletBcRhsVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode,
-                                              CharType lhsType, const UnknownNumberingScheme &s, Domain *d);
+                                              const UnknownNumberingScheme &s, Domain *d);
 
     /**
      * Updates IP values on elements.

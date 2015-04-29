@@ -32,54 +32,54 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#ifndef PLMATERIALFORCE_H_
+#define PLMATERIALFORCE_H_
 
-#ifndef PRESCRIBEDGRADIENTBC_H_
-#define PRESCRIBEDGRADIENTBC_H_
+#include "xfem/propagationlaw.h"
 
-#include "activebc.h"
-#include "valuemodetype.h"
-#include "floatmatrix.h"
-#include "floatarray.h"
+#include <memory>
 
-#define _IFT_PrescribedGradientBC_centercoords "ccoord"
-#define _IFT_PrescribedGradientBC_gradient "gradient"
+#define _IFT_PLMaterialForce_Name "propagationlawmaterialforce"
+#define _IFT_PLMaterialForce_Radius "radius" ///< Radius of region for domain integral
+#define _IFT_PLMaterialForce_IncLength "incrementlength" ///< Increment length per time step
+#define _IFT_PLMaterialForce_CrackPropThreshold "gc" ///<  Threshold for crack propagation
 
 namespace oofem {
+
+class Domain;
+class EnrichmentDomain;
+class DynamicInputRecord;
+class MaterialForceEvaluator;
+
+
 /**
- * Base class for boundary conditions that prescribe a displacement gradient
- * (in a strong or weak sense) on the boundary of a RVE.
- *
- * Under development.
+ * Propagation law that propagates the crack in
+ * the direction of the material force.
  *
  * @author Erik Svenning
- * @date Mar 5, 2014
+ * @date Nov 14, 2014
  */
-
-class OOFEM_EXPORT PrescribedGradientBC : public ActiveBoundaryCondition
+class OOFEM_EXPORT PLMaterialForce : public PropagationLaw
 {
-protected:
-    /// Prescribed gradient @f$ d_{ij} @f$
-    FloatMatrix mGradient;
-
-    /// Center coordinate @f$ \bar{x}_i @f$
-    FloatArray mCenterCoord;
-
-    double domainSize();
-
 public:
-    PrescribedGradientBC(int n, Domain * d);
-    virtual ~PrescribedGradientBC();
+    PLMaterialForce();
+    virtual ~PLMaterialForce();
 
-    virtual bcType giveType() const { return UnknownBT; }
+    virtual const char *giveClassName() const { return "PLMaterialForce"; }
+    virtual const char *giveInputRecordName() const { return _IFT_PLMaterialForce_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
-    virtual void scale(double s) { mGradient.times(s); }
+    virtual bool hasPropagation() const { return mIncrementLength > 0.; } ///@todo Could this be done smarter? / Mikael
+    virtual bool propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp);
 
-    void giveGradientVoigt(FloatArray &oGradient) const;
+protected:
+    double mRadius, mIncrementLength, mCrackPropThreshold;
+
+    std :: unique_ptr< MaterialForceEvaluator > mpMaterialForceEvaluator;
 };
 
 } /* namespace oofem */
 
-#endif /* PRESCRIBEDGRADIENTBC_H_ */
+#endif /* PLMATERIALFORCE_H_ */

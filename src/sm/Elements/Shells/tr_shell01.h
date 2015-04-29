@@ -42,6 +42,8 @@
 #include "../sm/Elements/PlaneStress/trplanrot3d.h"
 #include "spatiallocalizer.h"
 
+#include <memory>
+
 #define _IFT_TR_SHELL01_Name "tr_shell01"
 
 namespace oofem {
@@ -56,27 +58,24 @@ class TR_SHELL01 : public StructuralElement, public ZZNodalRecoveryModelInterfac
 {
 protected:
     /// Pointer to plate element.
-    CCTPlate3d *plate;
+    std :: unique_ptr< CCTPlate3d > plate;
     /// Pointer to membrane (plane stress) element.
-    TrPlaneStrRot3d *membrane;
+    std :: unique_ptr< TrPlaneStrRot3d > membrane;
     /**
      * Element integraton rule (plate and membrane parts have their own integration rules)
      * this one used to integrate element error and perhaps can be (re)used for other putrposes.
      * Created on demand.
      */
-    IntegrationRule *compositeIR;
+    std :: unique_ptr< IntegrationRule > compositeIR;
+
+    static IntArray loc_plate;
+    static IntArray loc_membrane;
 
 public:
     /// Constructor
     TR_SHELL01(int n, Domain * d);
     /// Destructor
-    virtual ~TR_SHELL01() {
-        delete plate;
-        delete membrane;
-        if ( this->compositeIR ) {
-            delete this->compositeIR;
-        }
-    }
+    virtual ~TR_SHELL01() {}
 
     virtual FEInterpolation *giveInterpolation() const { return plate->giveInterpolation(); }
 

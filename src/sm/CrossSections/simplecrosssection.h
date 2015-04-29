@@ -147,12 +147,12 @@ public:
 
     virtual double give(int aProperty, GaussPoint *gp);
     virtual double give(CrossSectionProperty a, GaussPoint *gp) { return CrossSection :: give(a, gp); }
-    virtual double give(CrossSectionProperty a, const FloatArray *coords, Element *elem, bool local) { return CrossSection :: give(a, coords, elem, local); }
+    virtual double give(CrossSectionProperty a, const FloatArray &coords, Element *elem, bool local) { return CrossSection :: give(a, coords, elem, local); }
     virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep);
     virtual Material *giveMaterial(IntegrationPoint *ip);
 
-    int giveMaterialNumber() const { return this->materialNumber; };
-    void setMaterialNumber(int matNum) { this->materialNumber = matNum; };
+    int giveMaterialNumber() const { return this->materialNumber; }
+    void setMaterialNumber(int matNum) { this->materialNumber = matNum; }
     virtual int checkConsistency();
     virtual Interface *giveMaterialInterface(InterfaceType t, IntegrationPoint *ip);
 
@@ -161,6 +161,7 @@ public:
 
     virtual void giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep);
     virtual void giveCauchyStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep);
+    virtual void giveEshelbyStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedvF, TimeStep *tStep);
     virtual void giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void giveStiffnessMatrix_dCde(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 

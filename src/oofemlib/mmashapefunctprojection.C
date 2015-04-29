@@ -39,6 +39,7 @@
 #include "domain.h"
 #include "spatiallocalizer.h"
 #include "timestep.h"
+#include "feinterpol.h"
 #include "nodalaveragingrecoverymodel.h"
 
 #include <cstdlib>
@@ -96,14 +97,8 @@ MMAShapeFunctProjection :: mapVariable(FloatArray &answer, GaussPoint *gp, Inter
 {
     Element *elem = gp->giveElement();
     int nnodes = elem->giveNumberOfDofManagers();
-    MMAShapeFunctProjectionInterface :: nodalValContainerType container;
-    MMAShapeFunctProjectionInterface *interface;
+    std::vector< FloatArray > container;
     const FloatArray *nvec;
-
-    if ( ( interface = static_cast< MMAShapeFunctProjectionInterface * >
-                       ( elem->giveInterface(MMAShapeFunctProjectionInterfaceType) ) ) == NULL ) {
-        abort();
-    }
 
     int indx = this->intVarTypes.findFirstIndexOf( ( int ) type );
     if ( indx ) {
@@ -113,9 +108,8 @@ MMAShapeFunctProjection :: mapVariable(FloatArray &answer, GaussPoint *gp, Inter
             container.emplace_back(*nvec);
         }
 
-        interface->MMAShapeFunctProjectionInterface_interpolateIntVarAt(answer, ( * gp->giveNaturalCoordinates() ),
-                                                                        MMAShapeFunctProjectionInterface :: coordType_local,
-                                                                        container, type, tStep);
+        this->interpolateIntVarAt(answer, elem, gp->giveNaturalCoordinates(),
+                                  container, type, tStep);
     } else {
         OOFEM_ERROR("var not initialized");
     }
@@ -128,20 +122,15 @@ int
 MMAShapeFunctProjection :: __mapVariable(FloatArray &answer, FloatArray &coords,
                                          InternalStateType type, TimeStep *tStep)
 {
-    Element *elem = domain->giveSpatialLocalizer()->giveElementContainingPoint(coords);
+    FloatArray lcoords, closest;
+    Element *elem = domain->giveSpatialLocalizer()->giveElementClosestToPoint(coords, closest, lcoords);
     if ( !elem ) {
         OOFEM_ERROR("no suitable source found");
     }
 
     int nnodes = elem->giveNumberOfDofManagers();
-    MMAShapeFunctProjectionInterface :: nodalValContainerType container;
-    MMAShapeFunctProjectionInterface *interface;
+    std::vector< FloatArray > container;
     const FloatArray *nvec;
-
-    if ( ( interface = static_cast< MMAShapeFunctProjectionInterface * >
-                       ( elem->giveInterface(MMAShapeFunctProjectionInterfaceType) ) )  == NULL ) {
-        abort();
-    }
 
     int indx = this->intVarTypes.findFirstIndexOf( ( int ) type );
     if ( indx ) {
@@ -151,15 +140,14 @@ MMAShapeFunctProjection :: __mapVariable(FloatArray &answer, FloatArray &coords,
             container.emplace_back(*nvec);
         }
 
-        interface->MMAShapeFunctProjectionInterface_interpolateIntVarAt(answer, coords,
-                                                                        MMAShapeFunctProjectionInterface :: coordType_global,
-                                                                        container, type, tStep);
+        this->interpolateIntVarAt(answer, elem, lcoords, container, type, tStep);
     } else {
         OOFEM_ERROR("var not initialized");
     }
 
     return 1;
 }
+
 
 int
 MMAShapeFunctProjection :: mapStatus(MaterialStatus &oStatus) const
@@ -168,4 +156,20 @@ MMAShapeFunctProjection :: mapStatus(MaterialStatus &oStatus) const
 
     return 0;
 }
+
+
+void
+MMAShapeFunctProjection :: interpolateIntVarAt(FloatArray &answer, Element *elem, const FloatArray &lcoords,
+                                               std :: vector< FloatArray > &list, InternalStateType type, TimeStep *tStep) const
+{
+    FloatArray n;
+
+    elem->giveInterpolation()->evalN( n, lcoords, FEIElementGeometryWrapper(elem) );
+
+    answer.resize(0);
+    for ( int i = 0; i < n.giveSize(); ++i ) {
+        answer.add(n[i], list[i]);
+    }
+}
+
 } // end namespace oofem

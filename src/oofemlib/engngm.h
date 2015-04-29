@@ -41,6 +41,7 @@
 #include "fieldmanager.h"
 #include "metastep.h"
 #include "timer.h"
+#include "assemblercallback.h"
 #include "chartype.h"
 #include "unknowntype.h"
 #include "varscaletype.h"
@@ -52,7 +53,6 @@
 #include "contextoutputmode.h"
 #include "contextfilemode.h"
 #include "contextioresulttype.h"
-#include "unknownnumberingscheme.h"
 #include "metastep.h"
 #include "parallelcontext.h"
 
@@ -105,6 +105,7 @@ class ProblemCommunicator;
 class ProcessCommunicatorBuff;
 class CommunicatorBuff;
 class ProcessCommunicator;
+class UnknownNumberingScheme;
 
 
 /**
@@ -222,11 +223,11 @@ protected:
     /// List of problem metasteps.
     std :: vector< MetaStep > metaStepList;
     /// Solution step when IC (initial conditions) apply.
-    TimeStep *stepWhenIcApply;
+    std :: unique_ptr< TimeStep > stepWhenIcApply;
     /// Current time step.
-    TimeStep *currentStep;
+    std :: unique_ptr< TimeStep > currentStep;
     /// Previous time step.
-    TimeStep *previousStep;
+    std :: unique_ptr< TimeStep > previousStep;
     /// Receivers id.
     int number;
 
@@ -359,7 +360,7 @@ public:
      * @see giveOutputBaseFileName
      * @param src New output file name.
      */
-    void letOutputBaseFileNameBe(const std :: string &src) { dataOutputFileName = src; }
+    void letOutputBaseFileNameBe(const std :: string &src);
     /**
      * Returns domain context output mode.
      */
@@ -393,7 +394,7 @@ public:
      * Sets the problem to run in parallel (or not).
      * @param parallelFlag Determines parallel mode.
      */
-    void setParallelMode(bool parallelFlag);
+    void setParallelMode(bool newParallelFlag);
     /// Returns domain mode.
     problemMode giveProblemMode() { return pMode; }
     /**
@@ -408,6 +409,14 @@ public:
     /// Sets the renumber flag to false.
     virtual void resetRenumberFlag() { this->renumberFlag = false; }
 
+    /**
+     * Returns the user time of the current simulation step in seconds.
+     */
+    double giveSolutionStepTime();
+    /**
+     * Returns the real and user time for the analysis.
+     */
+    void giveAnalysisTime(int &rhrs, int &rmin, int &rsec, int &uhrs, int &umin, int &usec);
     /**
      * Performs analysis termination after finishing analysis.
      */
@@ -473,11 +482,6 @@ public:
     virtual int giveNumberOfDomainEquations(int di, const UnknownNumberingScheme &num);
 
     // management components
-    /**
-     * Provides backward mapping between numerical component and characteristic
-     * component on EngngModel level.
-     */
-    virtual CharType giveTypeOfComponent(NumericalCmpn) { return UnknownCharType; }
     /**
      * Returns requested unknown. Unknown at give time step is characterized by its type and mode
      * and by its equation number. This function is used by Dofs, when they are requested for
@@ -578,9 +582,8 @@ public:
      * initialization of parallel context, etc)
      * before Initialization form DataReader. Called at the beginning of instanciateYourself.
      * @param dataOutputFileName Name of default output stream
-     * @param ndomains number of receiver domains
      */
-    void Instanciate_init(int ndomains);
+    void Instanciate_init();
     /**
      * Initializes receiver according to object description in input reader.
      * InitString can be imagined as data record in component database
@@ -662,7 +665,7 @@ public:
         if ( master ) {
             return master->giveCurrentStep();
         } else {
-            return currentStep;
+            return currentStep.get();
         }
     }
     /// Returns previous time step.
@@ -670,7 +673,7 @@ public:
         if ( master ) {
             return master->givePreviousStep();
         } else {
-            return previousStep;
+            return previousStep.get();
         }
     }
     /// Returns next time step (next to current step) of receiver.
@@ -680,7 +683,7 @@ public:
         if ( master ) {
             return master->giveCurrentStep();
         } else {
-            return stepWhenIcApply;
+            return stepWhenIcApply.get();
         }
     }
     /// Returns number of first time step used by receiver.
@@ -706,13 +709,7 @@ public:
     /// Returns end of time interest (time corresponding to end of time integration).
     virtual double giveEndOfTimeOfInterest() { return 0.; }
     /// Returns the time step number, when initial conditions should apply.
-    virtual int giveNumberOfTimeStepWhenIcApply() {
-        if ( master ) {
-            return master->giveNumberOfTimeStepWhenIcApply();
-        } else {
-            return 0;
-        }
-    }
+    int giveNumberOfTimeStepWhenIcApply() { return 0; }
     /// Returns reference to receiver's numerical method.
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep) { return NULL; }
     /// Returns receiver's export module manager.
@@ -837,32 +834,6 @@ public:
     virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) { return 0; }
 
     /**
-     * Returns characteristic matrix of element. The Element::giveCharacteristicMatrix function
-     * should not be called directly, because EngngModel may require some special modification
-     * of characteristic matrices supported on element level. But default implementation does
-     * the direct call to element level.
-     * @param answer Characteristic matrix.
-     * @param num Element number.
-     * @param type Type of matrix requested.
-     * @param tStep Time step when response is computed.
-     * @param domain Source domain.
-     */
-    virtual void giveElementCharacteristicMatrix(FloatMatrix &answer, int num, CharType type, TimeStep *tStep, Domain *domain);
-    /**
-     * Returns characteristic vector of element. The Element::giveCharacteristicVector function
-     * should not be called directly, because EngngModel may require some special modification
-     * of characteristic vectors supported on element level. But default implementation does
-     * the direct call to element level.
-     * @param answer Characteristic vector.
-     * @param num Element number.
-     * @param type Type of vector requested.
-     * @param mode Mode of unknown (total, incremental, rate of change).
-     * @param tStep Time step when response is computed.
-     * @param domain Source domain.
-     */
-    virtual void giveElementCharacteristicVector(FloatArray &answer, int num, CharType type, ValueModeType mode, TimeStep *tStep, Domain *domain);
-
-    /**
      * Returns the parallel context corresponding to given domain (n) and unknown type
      * Default implementation returns i-th context from parallelContextList.
      */
@@ -881,8 +852,8 @@ public:
      * @param type Characteristic components of type type are requested from elements and assembled.
      * @param domain Source domain.
      */
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep,
-                          CharType type, const UnknownNumberingScheme &s, Domain *domain);
+    virtual void assemble(SparseMtrx &answer, TimeStep *tStep,
+                          const MatrixAssembler &ma, const UnknownNumberingScheme &s, Domain *domain);
     /**
      * Assembles characteristic matrix of required type into given sparse matrix.
      * @param answer assembled matrix
@@ -892,8 +863,8 @@ public:
      * @param type Characteristic components of type type are requested from elements and assembled.
      * @param domain Source domain.
      */
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep,
-                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain);
+    virtual void assemble(SparseMtrx &answer, TimeStep *tStep,
+                          const MatrixAssembler &ma, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain);
     /**
      * Assembles characteristic vector of required type from dofManagers, element, and active boundary conditions, into given vector.
      * This routine is simple a convenient call to all three subroutines, since this is most likely what any engineering model will want to do.
@@ -902,40 +873,39 @@ public:
      * @param answer Assembled vector.
      * @param mode Mode of unknown (total, incremental, rate of change).
      * @param tStep Time step, when answer is assembled.
-     * @param type Characteristic components of type type are requested.
+     * @param va Determines what vector is assembled.
      * @param s Determines the equation numbering scheme.
      * @param domain Domain to assemble from.
      * @param eNorms If non-NULL, squared norms of each internal force will be added to this, split up into dof IDs.
      * @return Sum of element/node norm (squared) of assembled vector.
      */
-    void assembleVector(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
+    void assembleVector(FloatArray &answer, TimeStep *tStep, const VectorAssembler &va, ValueModeType mode,
                         const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
     /**
      * Assembles characteristic vector of required type from dofManagers into given vector.
      * @param answer Assembled vector.
      * @param mode Mode of unknown (total, incremental, rate of change).
      * @param tStep Time step, when answer is assembled.
-     * @param type Characteristic components of type type are requested.
+     * @param va Determines what vector is assembled.
      * @param s Determines the equation numbering scheme.
      * @param domain Domain to assemble from.
      * @param eNorms Norms for each dofid (optional).
      * @return Sum of element norm (squared) of assembled vector.
      */
-    void assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
+    void assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, const VectorAssembler &va, ValueModeType mode,
                                        const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
     /**
      * Assembles characteristic vector of required type from elements into given vector.
      * @param answer Assembled vector.
      * @param tStep Time step, when answer is assembled.
      * @param mode Mode of unknown (total, incremental, rate of change).
-     * @param type Characteristic components of type type are requested
-     * from elements and assembled using prescribed eqn numbers.
+     * @param va Determines what vector is assembled.
      * @param s Determines the equation numbering scheme.
      * @param domain Domain to assemble from.
      * @param eNorms Norms for each dofid (optional).
      * @return Sum of element norm (squared) of assembled vector.
      */
-    void assembleVectorFromElements(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
+    void assembleVectorFromElements(FloatArray &answer, TimeStep *tStep, const VectorAssembler &va, ValueModeType mode,
                                     const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
 
     /**
@@ -943,13 +913,12 @@ public:
      * @param answer Assembled vector.
      * @param tStep Time step, when answer is assembled.
      * @param mode Mode of unknown (total, incremental, rate of change).
-     * @param type Characteristic components of type type are requested
-     * from elements and assembled using prescribed eqn numbers.
+     * @param va Determines what vector is assembled.
      * @param s Determines the equation numbering scheme.
      * @param domain Domain to assemble from.
      * @param eNorms Norms for each dofid (optional).
      */
-    void assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
+    void assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, const VectorAssembler &va, ValueModeType mode,
                               const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
 
     /**
@@ -1024,7 +993,7 @@ public:
      * @param iDof dof to be processed
      * @param tStep solution step
      */
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep) = 0;
+    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
 
 
     // identification

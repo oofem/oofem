@@ -34,9 +34,7 @@
 
 #include "dofmanager.h"
 #include "masterdof.h"
-#include "slavedof.h"
 #include "simpleslavedof.h"
-#include "activedof.h"
 #include "timestep.h"
 #include "load.h"
 #include "floatarray.h"
@@ -95,30 +93,14 @@ void DofManager :: setLoadArray(IntArray &la)
 }
 
 
-void DofManager :: computeLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
-// Computes the vector of the nodal loads of the receiver.
-{
-    answer.clear();
-
-    if ( this->giveLoadArray()->isEmpty() ) {
-        return;
-    } else {
-        FloatArray contribution;
-        int nLoads = loadArray.giveSize();     // the node may be subjected
-        for ( int i = 1; i <= nLoads; i++ ) {   // to more than one load
-            int n = loadArray.at(i);
-            Load *loadN = domain->giveLoad(n);
-            computeLoadVector(contribution, loadN, ExternalForcesVector, tStep, mode);
-            answer.add(contribution);
-        }
-    }
-}
-
-
 void DofManager :: computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeStep *tStep, ValueModeType mode)
 {
     if ( load->giveBCGeoType() != NodalLoadBGT ) {
         OOFEM_ERROR("incompatible load type applied");
+    }
+    if ( type != ExternalForcesVector ) {
+        answer.clear();
+        return;
     }
     load->computeComponentArrayAt(answer, tStep, mode);
 }
@@ -399,9 +381,9 @@ DofManager :: initializeFrom(InputRecord *ir)
     // masters have to be in same partition as slaves. They can be again Remote copies.
 
 
-    bool hasIc = !( ic.giveSize() == 0 );
-    bool hasBc = !( mBC.giveSize() == 0 );
-    bool hasTypeinfo = !( dofTypeMask.giveSize() == 0 );
+    bool hasIc = ic.giveSize() != 0;
+    bool hasBc = mBC.giveSize() != 0;
+    bool hasTypeinfo = dofTypeMask.giveSize() != 0;
 
     ///@todo This should eventually be removed, still here to preserve backwards compatibility:
     if ( ( hasIc || hasBc || hasTypeinfo ) && !this->dofidmask ) {
@@ -694,8 +676,6 @@ contextIOResultType DofManager :: restoreContext(DataStream &stream, ContextMode
 
 void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDArry, ValueModeType mode, TimeStep *tStep, bool padding)
 {
-    IntArray dofArray;
-
     answer.resize( dofIDArry.giveSize() );
     if ( dofIDArry.giveSize() == 0 ) return;
 
@@ -705,7 +685,7 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
         if ( pos == this->end() ) {
             if ( padding ) {
                 answer.at(++k) = 0.;
-		continue;
+                continue;
             } else {
                 continue;
             }
@@ -725,8 +705,6 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
 void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDArry,
                                      PrimaryField &field, ValueModeType mode, TimeStep *tStep, bool padding)
 {
-    IntArray dofArray;
-
     answer.resize( dofIDArry.giveSize() );
 
     int k = 0;
@@ -735,7 +713,7 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
         if ( pos == this->end() ) {
             if ( padding ) {
                 answer.at(++k) = 0.;
-		continue;
+                continue;
             } else {
                 continue;
             }

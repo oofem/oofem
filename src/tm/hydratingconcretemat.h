@@ -75,8 +75,7 @@ public:
     HydratingConcreteMat(int n, Domain * d);
     virtual ~HydratingConcreteMat();
 
-    /// Return true if hydration heat source is present.
-    virtual int hasInternalSource() { return 1; };
+    virtual int hasInternalSource() { return 1; }
     virtual void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
     virtual double giveCharacteristicValue(MatResponseMode mode,

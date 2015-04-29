@@ -42,13 +42,13 @@
 #include "classfactory.h"
 #include "gaussintegrationrule.h"
 #include "gausspoint.h"
+#include "fei2dtrlin.h"
 
 namespace oofem {
 REGISTER_Element(TrPlaneStrRot3d);
 
 TrPlaneStrRot3d :: TrPlaneStrRot3d(int n, Domain *aDomain) : TrPlaneStrRot(n, aDomain)
 {
-    GtoLRotationMatrix = NULL;
 }
 
 
@@ -65,11 +65,26 @@ TrPlaneStrRot3d :: giveLocalCoordinates(FloatArray &answer, FloatArray &global)
     }
 
     // first ensure that receiver's GtoLRotationMatrix[3,3] is defined
-    if ( GtoLRotationMatrix == NULL ) {
+    if ( !GtoLRotationMatrix.isNotEmpty() ) {
         this->computeGtoLRotationMatrix();
     }
 
-    answer.beProductOf(* GtoLRotationMatrix, global);
+    answer.beProductOf(GtoLRotationMatrix, global);
+}
+
+
+double
+TrPlaneStrRot3d :: computeVolumeAround(GaussPoint *gp)
+{
+    double detJ, weight;
+
+    FloatArray x, y;
+    this->giveNodeCoordinates(x, y);
+    std :: vector< FloatArray > lc = {{x[0], y[0]}, {x[1], y[1]}, {x[2], y[2]}};
+
+    weight = gp->giveWeight();
+    detJ = fabs( this->interp.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc) ) );
+    return detJ * weight * this->giveStructuralCrossSection()->give(CS_Thickness, gp);
 }
 
 
@@ -82,10 +97,12 @@ TrPlaneStrRot3d :: giveNodeCoordinates(FloatArray &x, FloatArray &y)
     this->giveLocalCoordinates( nc2, * ( this->giveNode(2)->giveCoordinates() ) );
     this->giveLocalCoordinates( nc3, * ( this->giveNode(3)->giveCoordinates() ) );
 
+    x.resize(3);
     x.at(1) = nc1.at(1);
     x.at(2) = nc2.at(1);
     x.at(3) = nc3.at(1);
 
+    y.resize(3);
     y.at(1) = nc1.at(2);
     y.at(2) = nc2.at(2);
     y.at(3) = nc3.at(2);
@@ -117,8 +134,8 @@ TrPlaneStrRot3d :: computeGtoLRotationMatrix()
 // e3'    : e1' x help
 // e2'    : e3' x e1'
 {
-    if ( GtoLRotationMatrix == NULL ) {
-        FloatArray e1(3), e2(3), e3(3), help(3);
+    if ( !GtoLRotationMatrix.isNotEmpty() ) {
+        FloatArray e1, e2, e3, help;
 
         // compute e1' = [N2-N1]  and  help = [N3-N1]
         e1.beDifferenceOf( * this->giveNode(2)->giveCoordinates(),  * this->giveNode(1)->giveCoordinates() );
@@ -136,16 +153,16 @@ TrPlaneStrRot3d :: computeGtoLRotationMatrix()
         e2.beVectorProductOf(e3, e1);
 
         //
-        GtoLRotationMatrix = new FloatMatrix(3, 3);
+        GtoLRotationMatrix.resize(3, 3);
 
         for ( int i = 1; i <= 3; i++ ) {
-            GtoLRotationMatrix->at(1, i) = e1.at(i);
-            GtoLRotationMatrix->at(2, i) = e2.at(i);
-            GtoLRotationMatrix->at(3, i) = e3.at(i);
+            GtoLRotationMatrix.at(1, i) = e1.at(i);
+            GtoLRotationMatrix.at(2, i) = e2.at(i);
+            GtoLRotationMatrix.at(3, i) = e3.at(i);
         }
     }
 
-    return GtoLRotationMatrix;
+    return &GtoLRotationMatrix;
 }
 
 
@@ -156,7 +173,7 @@ TrPlaneStrRot3d :: computeGtoLRotationMatrix(FloatMatrix &answer)
 // for one node (r written transposed): {u,v,r3} = T * {u,v,w,r1,r2,r3}
 {
     // test if pereviously computed
-    if ( GtoLRotationMatrix == NULL ) {
+    if ( !GtoLRotationMatrix.isNotEmpty() ) {
         this->computeGtoLRotationMatrix();
     }
 
@@ -164,9 +181,9 @@ TrPlaneStrRot3d :: computeGtoLRotationMatrix(FloatMatrix &answer)
     answer.zero();
 
     for ( int i = 1; i <= 3; i++ ) {
-        answer.at(1, i) = answer.at(1 + 3, i  + 6) = answer.at(1 + 6, i  + 12) = GtoLRotationMatrix->at(1, i);
-        answer.at(2, i) = answer.at(2 + 3, i  + 6) = answer.at(2 + 6, i  + 12) = GtoLRotationMatrix->at(2, i);
-        answer.at(3, i + 3) = answer.at(3 + 3, i + 3 + 6) = answer.at(3 + 6, i + 3 + 12) = GtoLRotationMatrix->at(3, i);
+        answer.at(1, i) = answer.at(1 + 3, i  + 6) = answer.at(1 + 6, i  + 12) = GtoLRotationMatrix.at(1, i);
+        answer.at(2, i) = answer.at(2 + 3, i  + 6) = answer.at(2 + 6, i  + 12) = GtoLRotationMatrix.at(2, i);
+        answer.at(3, i + 3) = answer.at(3 + 3, i + 3 + 6) = answer.at(3 + 6, i + 3 + 12) = GtoLRotationMatrix.at(3, i);
     }
 
     return 1;
@@ -218,7 +235,7 @@ TrPlaneStrRot3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type
     if ( ( type == GlobalForceTensor  ) || ( type == GlobalMomentumTensor  ) ||
         ( type == GlobalStrainTensor ) || ( type == GlobalCurvatureTensor ) ) {
         this->computeGtoLRotationMatrix();
-        answer.rotatedWith(* GtoLRotationMatrix);
+        answer.rotatedWith(GtoLRotationMatrix);
     }
 }
 
@@ -284,7 +301,7 @@ TrPlaneStrRot3d :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
 // f(local) = T * f(global)
 {
     // test if previously computed
-    if ( GtoLRotationMatrix == NULL ) {
+    if ( !GtoLRotationMatrix.isNotEmpty() ) {
         this->computeGtoLRotationMatrix();
     }
 
@@ -292,9 +309,9 @@ TrPlaneStrRot3d :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
     answer.zero();
 
     for ( int i = 1; i <= 3; i++ ) {
-        answer.at(1, i) = answer.at(4, i + 3) = GtoLRotationMatrix->at(1, i);
-        answer.at(2, i) = answer.at(5, i + 3) = GtoLRotationMatrix->at(2, i);
-        answer.at(3, i) = answer.at(6, i + 3) = GtoLRotationMatrix->at(3, i);
+        answer.at(1, i) = answer.at(4, i + 3) = GtoLRotationMatrix.at(1, i);
+        answer.at(2, i) = answer.at(5, i + 3) = GtoLRotationMatrix.at(2, i);
+        answer.at(3, i) = answer.at(6, i + 3) = GtoLRotationMatrix.at(3, i);
     }
 
     return 1;
@@ -358,7 +375,7 @@ void
 TrPlaneStrRot3d :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
     FloatMatrix ne;
-    this->computeNmatrixAt(* sgp->giveNaturalCoordinates(), ne);
+    this->computeNmatrixAt(sgp->giveNaturalCoordinates(), ne);
 
     answer.resize(6, 18);
     answer.zero();
@@ -417,7 +434,7 @@ TrPlaneStrRot3d :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 void
 TrPlaneStrRot3d :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
 {
-    this->computeGlobalCoordinates( answer, * gp->giveNaturalCoordinates() );
+    this->computeGlobalCoordinates( answer, gp->giveNaturalCoordinates() );
 }
 
 
@@ -445,14 +462,14 @@ TrPlaneStrRot3d :: printOutputAt(FILE *file, TimeStep *tStep)
             fprintf(file, "  strains    ");
             // eps_x, eps_y, eps_z, eps_yz, eps_xz, eps_xy (global)
             fprintf( file,
-                    " % .4e % .4e % .4e % .4e % .4e % .4e ",
+                    " %.4e %.4e %.4e %.4e %.4e %.4e ",
                     v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
 
             this->giveIPValue(v, gp, IST_ShellCurvatureTensor, tStep);
             fprintf(file, "\n              curvatures ");
             // k_x, k_y, k_z, k_yz, k_xz, k_xy (global)
             fprintf( file,
-                    " % .4e % .4e % .4e % .4e % .4e % .4e ",
+                    " %.4e %.4e %.4e %.4e %.4e %.4e ",
                     v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
 
             // Forces - Moments
@@ -460,14 +477,14 @@ TrPlaneStrRot3d :: printOutputAt(FILE *file, TimeStep *tStep)
             fprintf(file, "\n              stresses   ");
             // n_x, n_y, n_z, v_yz, v_xz, v_xy (global)
             fprintf( file,
-                    " % .4e % .4e % .4e % .4e % .4e % .4e ",
+                    " %.4e %.4e %.4e %.4e %.4e %.4e ",
                     v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
 
             this->giveIPValue(v, gp, IST_ShellMomentumTensor, tStep);
             fprintf(file, "\n              moments    ");
             // m_x, m_y, m_z, m_yz, m_xz, m_xy (global)
             fprintf( file,
-                    " % .4e % .4e % .4e % .4e % .4e % .4e ",
+                    " %.4e %.4e %.4e %.4e %.4e %.4e ",
                     v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
 
             fprintf(file, "\n");

@@ -37,7 +37,6 @@
 #include "classfactory.h"
 #include "xfem/xfemmanager.h"
 #include "domain.h"
-#include "connectivitytable.h"
 #include "spatiallocalizer.h"
 #include "element.h"
 #include "gausspoint.h"
@@ -72,9 +71,13 @@ int EnrFrontLinearBranchFuncOneEl :: giveNumEnrichments(const DofManager &iDMan)
 
 void EnrFrontLinearBranchFuncOneEl :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const EfInput &iEfInput) const
 {
-    FloatArray xTip = { mTipInfo.mGlobalCoord.at(1), mTipInfo.mGlobalCoord.at(2) };
+    FloatArray xTip = {
+        mTipInfo.mGlobalCoord.at(1), mTipInfo.mGlobalCoord.at(2)
+    };
 
-    FloatArray pos = { iEfInput.mPos.at(1), iEfInput.mPos.at(2) };
+    FloatArray pos = {
+        iEfInput.mPos.at(1), iEfInput.mPos.at(2)
+    };
 
     // Crack tangent and normal
     FloatArray t, n;
@@ -87,8 +90,8 @@ void EnrFrontLinearBranchFuncOneEl :: evaluateEnrFuncAt(std :: vector< double > 
     mpBranchFunc->evaluateEnrFuncAt(oEnrFunc, r, theta);
 
 #ifdef DEBUG
-    for(double val:oEnrFunc) {
-        if(!std::isfinite(val)) {
+    for ( double val:oEnrFunc ) {
+        if ( !std :: isfinite(val) ) {
             printf("r: %e theta: %e\n", r, theta);
             OOFEM_ERROR("!std::isfinite(val)")
         }
@@ -130,15 +133,15 @@ void EnrFrontLinearBranchFuncOneEl :: evaluateEnrFuncDerivAt(std :: vector< Floa
 
 void EnrFrontLinearBranchFuncOneEl :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, GaussPoint &iGP, int iNodeInd, bool iGPLivesOnCurrentCrack, const double &iNormalSignDist) const
 {
-	const FloatArray &xTip = mTipInfo.mGlobalCoord;
-	const FloatArray &gpCoord = iGP.giveGlobalCoordinates();
+    const FloatArray &xTip = mTipInfo.mGlobalCoord;
+    const FloatArray &gpCoord = iGP.giveGlobalCoordinates();
 
-	double radius = gpCoord.distance(xTip);
+    double radius = gpCoord.distance(xTip);
 
-	std :: vector< double > jumps;
-	mpBranchFunc->giveJump(jumps, radius);
+    std :: vector< double >jumps;
+    mpBranchFunc->giveJump(jumps, radius);
 
-	oEnrFuncJumps.insert( oEnrFuncJumps.end(), jumps.begin(), jumps.end() );
+    oEnrFuncJumps.insert( oEnrFuncJumps.end(), jumps.begin(), jumps.end() );
 }
 
 IRResultType EnrFrontLinearBranchFuncOneEl :: initializeFrom(InputRecord *ir)

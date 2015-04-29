@@ -293,8 +293,6 @@ PerfectlyPlasticMaterial :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &an
     }
 }
 
-#define YIELD_BOUNDARY -0.0001
-
 void
 PerfectlyPlasticMaterial :: giveMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode,
                                                         GaussPoint *gp,
@@ -475,7 +473,6 @@ PerfectlyPlasticMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
 // this implementation should be faster.
 {
     FloatMatrix fullAnswer;
-    IntArray mask;
     if ( mode == ElasticStiffness ) {
         this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
     } else {
@@ -638,10 +635,9 @@ PerfectlyPlasticMaterial :: GiveStressCorrectionBackToYieldSurface(GaussPoint *g
 IRResultType
 PerfectlyPlasticMaterial :: initializeFrom(InputRecord *ir)
 {
-    Material :: initializeFrom(ir);
-    this->giveLinearElasticMaterial()->initializeFrom(ir);
-
-    return IRRT_OK;
+    IRResultType result = Material :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
+    return this->giveLinearElasticMaterial()->initializeFrom(ir);
 }
 
 
@@ -652,8 +648,8 @@ PerfectlyPlasticMaterial :: give(int aProperty, GaussPoint *gp)
 {
     double value = 0.0;
 
-    if ( propertyDictionary->includes(aProperty) ) {
-        value = propertyDictionary->at(aProperty);
+    if ( propertyDictionary.includes(aProperty) ) {
+        value = propertyDictionary.at(aProperty);
     } else {
         if ( linearElasticMaterial ) {
             value = this->linearElasticMaterial->give(aProperty, gp);
@@ -799,9 +795,9 @@ PerfectlyPlasticMaterialStatus :: initTempStatus()
 
 
 void
-PerfectlyPlasticMaterialStatus :: updateYourself(TimeStep *tNow)
+PerfectlyPlasticMaterialStatus :: updateYourself(TimeStep *tStep)
 {
-    StructuralMaterialStatus :: updateYourself(tNow);
+    StructuralMaterialStatus :: updateYourself(tStep);
 
     plasticStrainVector.add(plasticStrainIncrementVector);
     plasticStrainIncrementVector.zero();

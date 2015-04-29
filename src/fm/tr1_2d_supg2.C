@@ -72,24 +72,17 @@ TR1_2D_SUPG2 :: TR1_2D_SUPG2(int n, Domain *aDomain) :
     TR1_2D_SUPG(n, aDomain)
 {
     numberOfDofMans  = 3;
-    defaultIRule = NULL;
 }
 
 TR1_2D_SUPG2 :: ~TR1_2D_SUPG2()
 {
-    for ( int i = 0; i < 2; i++ ) {
-        myPoly [ i ].clear();
-    }
-    if ( defaultIRule ) {
-        delete defaultIRule;
-    }
 }
 
 
 void
 TR1_2D_SUPG2 :: computeNVector(FloatArray &answer, GaussPoint *gp)
 {
-    this->interp.evalN( answer, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evalN( answer, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -110,7 +103,11 @@ TR1_2D_SUPG2 :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;               // Required by IR_GIVE_FIELD macro
 
-    SUPGElement :: initializeFrom(ir);
+    result = SUPGElement :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+
 
     this->vof = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, vof, _IFT_Tr1SUPG_pvof);
@@ -166,7 +163,7 @@ TR1_2D_SUPG2 :: computeGaussPoints()
         integrationRulesArray [ 1 ].reset( new GaussIntegrationRule(2, this, 1, 3, true) );
     }
     if ( !defaultIRule ) {
-        defaultIRule = new GaussIntegrationRule(1, this, 1, 3, true);
+        defaultIRule.reset( new GaussIntegrationRule(1, this, 1, 3, true) );
         this->giveCrossSection()->setupIntegrationPoints(* defaultIRule, 1, this);
     }
 }
@@ -451,7 +448,7 @@ TR1_2D_SUPG2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep)
 {
     answer.resize(6);
     answer.zero();
-    FloatArray u, un, eps(3), stress;
+    FloatArray u, eps(3), stress;
     double dV, Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
     //double dudx,dudy,dvdx,dvdy;
 
@@ -516,7 +513,7 @@ TR1_2D_SUPG2 :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRespon
     //double dudx, dudy, dvdx, dvdy;
     answer.resize(6, 6);
     answer.zero();
-    FloatMatrix _db, _d, _b(3, 6), _bs(3, 6);
+    FloatMatrix _db, _d, _b(3, 6);
     //FloatArray un;
     double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
 
@@ -1606,7 +1603,7 @@ TR1_2D_SUPG2 :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, Primar
 {
     int indx, es;
     double sum;
-    FloatArray elemvector, f, lc;
+    FloatArray elemvector, lc;
     //FloatMatrix n;
     IntArray elemdofs;
     // determine element dof ids
@@ -1727,10 +1724,10 @@ TR1_2D_SUPG2 :: updateIntegrationRules()
 
         // remap ip coords into area coords of receiver
         for ( GaussPoint *gp: *integrationRulesArray [ i ] ) {
-            approx->local2global( gc, * gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(vcoords [ i ]) );
+            approx->local2global( gc, gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(vcoords [ i ]) );
             triaApprox.global2local( lc, gc, FEIElementGeometryWrapper(this) );
             // modify original ip coords to target ones
-            gp->setSubPatchCoordinates( * gp->giveNaturalCoordinates() );
+            gp->setSubPatchCoordinates( gp->giveNaturalCoordinates() );
             gp->setNaturalCoordinates(lc);
             //gp->setWeight (gp->giveWeight()*a/area);
         }
@@ -1769,10 +1766,10 @@ TR1_2D_SUPG2 :: computeVolumeAroundID(GaussPoint *gp, integrationDomain id, cons
 
     if ( id == _Triangle ) {
         FEI2dTrLin __interpolation(1, 2);
-        return weight *fabs( __interpolation.giveTransformationJacobian ( *gp->giveSubPatchCoordinates(), FEIVertexListGeometryWrapper(idpoly) ) );
+        return weight *fabs( __interpolation.giveTransformationJacobian ( gp->giveSubPatchCoordinates(), FEIVertexListGeometryWrapper(idpoly) ) );
     } else {
         FEI2dQuadLin __interpolation(1, 2);
-        double det = fabs( __interpolation.giveTransformationJacobian( * gp->giveSubPatchCoordinates(), FEIVertexListGeometryWrapper(idpoly) ) );
+        double det = fabs( __interpolation.giveTransformationJacobian( gp->giveSubPatchCoordinates(), FEIVertexListGeometryWrapper(idpoly) ) );
         return det * weight;
     }
 }

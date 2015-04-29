@@ -69,7 +69,7 @@ public:
      */
     ConnectivityTable(Domain * d) : domain(d), nodalConnectivity(), nodalConnectivityFlag(0) { }
     /// Destructor
-    ~ConnectivityTable();
+    ~ConnectivityTable() { }
     /// reset receiver to an initial state (will force table update, when needed next time)
     void reset();
 

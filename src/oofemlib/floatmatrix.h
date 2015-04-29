@@ -143,7 +143,7 @@ public:
         return * this;
     }
     /// Destructor.
-    ~FloatMatrix() {};
+    ~FloatMatrix() {}
 
     /**
      * Checks size of receiver towards requested bounds.
@@ -262,9 +262,13 @@ public:
      */
     //bool computeEigenValuesSymmetric(FloatArray &lambda, FloatMatrix &v, int neigs = 0) const;
     /**
-     * Returns the determinant of the receiver. The receiver should be a square matrix.
-     * Current implementation works for (3,3) and smaller matrices.
+     * Modifies receiver to be a diagonal matrix with the components specified in diag.
      * @return Determinant of receiver.
+     */
+    void beDiagonal(const FloatArray &diag);
+    /**
+     * Returns the trace of the receiver. The receiver should be a square matrix.
+     * @return Trace of receiver.
      */
     double giveTrace() const;
     /**

@@ -155,7 +155,7 @@ LIBeam2d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     double density = this->giveStructuralCrossSection()->give('d', gp);
-    double halfMass   = density * this->giveCrossSection()->give(CS_Area, gp) * this->computeLength() / 2.;
+    double halfMass = density * this->giveCrossSection()->give(CS_Area, gp) * this->computeLength() / 2.;
     answer.resize(6, 6);
     answer.zero();
     answer.at(1, 1) = halfMass;
@@ -193,7 +193,7 @@ LIBeam2d :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, T
 // Returns the stiffness matrix of the receiver, expressed in the global
 // axes.
 {
-    this->StructuralElement :: computeStiffnessMatrix(answer, rMode, tStep);
+    StructuralElement :: computeStiffnessMatrix(answer, rMode, tStep);
 }
 
 
@@ -340,7 +340,7 @@ LIBeam2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
      * without regarding particular side
      */
 
-    this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
+    this->computeNmatrixAt(gp->giveSubPatchCoordinates(), answer);
 }
 
 
@@ -381,7 +381,7 @@ LIBeam2d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 LIBeam2d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    computeGlobalCoordinates( answer, * ( gp->giveNaturalCoordinates() ) );
+    computeGlobalCoordinates( answer, gp->giveNaturalCoordinates() );
 }
 
 
@@ -390,7 +390,7 @@ LIBeam2d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tS
 {
     FloatArray lc(1);
     StructuralElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
-    answer.times( this->giveCrossSection()->give(CS_Area, & lc, NULL, this) );
+    answer.times( this->giveCrossSection()->give(CS_Area, lc, this) );
 }
 
 

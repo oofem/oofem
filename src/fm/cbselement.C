@@ -85,9 +85,7 @@ CBSElement :: giveCharacteristicMatrix(FloatMatrix &answer,
 // returns characteristics matrix of receiver according to mtrx
 //
 {
-    if ( mtrx == PressureLhs ) {
-        this->computePressureLhs(answer, tStep);
-    } else if ( mtrx == MassMatrix ) {
+    if ( mtrx == MassMatrix ) {
         this->computeConsistentMassMtrx(answer, tStep);
     } else {
         OOFEM_ERROR("Unknown Type of characteristic mtrx.");
@@ -104,22 +102,6 @@ CBSElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueM
 {
     if ( mtrx == LumpedMassMatrix ) {
         this->computeDiagonalMassMtrx(answer, tStep);
-    } else if ( mtrx == IntermediateConvectionTerm ) {
-        this->computeConvectionTermsI(answer, tStep);
-    } else if ( mtrx == IntermediateDiffusionTerm ) {
-        this->computeDiffusionTermsI(answer, tStep);
-    } else if ( mtrx == DensityRhsVelocityTerms ) {
-        this->computeDensityRhsVelocityTerms(answer, tStep);
-    } else if ( mtrx == DensityRhsPressureTerms ) {
-        this->computeDensityRhsPressureTerms(answer, tStep);
-    } else if ( mtrx == DensityPrescribedTractionPressure ) {
-        this->computePrescribedTractionPressure(answer, tStep);
-    } else if ( mtrx == NumberOfNodalPrescribedTractionPressureContributions ) {
-        this->computeNumberOfNodalPrescribedTractionPressureContributions(answer, tStep);
-    } else if ( mtrx == CorrectionRhs ) {
-        this->computeCorrectionRhs(answer, tStep);
-    } else if ( mtrx == PrescribedVelocityRhsVector ) {
-        this->computePrescribedTermsI(answer, mode, tStep);
     }
     //else if (mtrx == PrescribedDensityRhsVector)
     //  this->computePrescribedTermsII (answer, mode, tStep);
@@ -129,26 +111,13 @@ CBSElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueM
 }
 
 
-double
-CBSElement :: giveCharacteristicValue(CharType mtrx, TimeStep *tStep)
-{
-    if ( mtrx == CriticalTimeStep ) {
-        return this->computeCriticalTimeStep(tStep);
-    } else {
-        OOFEM_ERROR("Unknown Type of characteristic mtrx.");
-    }
-
-    return 0.0;
-}
-
-
 void
-CBSElement :: computePrescribedTermsI(FloatArray &answer, ValueModeType mode, TimeStep *tStep)
+CBSElement :: computePrescribedTermsI(FloatArray &answer, TimeStep *tStep)
 {
     FloatMatrix mass;
     FloatArray usp;
     this->computeConsistentMassMtrx(mass, tStep);
-    this->computeVectorOfVelocities(mode, tStep, usp);
+    this->computeVectorOfVelocities(VM_Incremental, tStep, usp);
     answer.beProductOf(mass, usp);
     answer.negated();
 }

@@ -64,14 +64,13 @@ SUPGElement :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-    FMElement :: initializeFrom(ir);
 
     IR_GIVE_OPTIONAL_FIELD(ir, boundarySides, _IFT_SUPGElement_bsides);
     if ( !boundarySides.isEmpty() ) {
         IR_GIVE_FIELD(ir, boundaryCodes, _IFT_SUPGElement_bcodes);
     }
 
-    return IRRT_OK;
+    return FMElement :: initializeFrom(ir);
 }
 
 
@@ -94,52 +93,51 @@ SUPGElement :: giveCharacteristicMatrix(FloatMatrix &answer,
 //
 {
 
-    if ( type == StiffnessMatrix ) {
-      // stokes flow only
-      double dscale = this->giveDomain()->giveEngngModel()->giveVariableScale(VST_Density);
-      double uscale = this->giveDomain()->giveEngngModel()->giveVariableScale(VST_Velocity);
+    if ( type == TangentStiffnessMatrix ) {
+            // stokes flow only
+        double dscale = this->giveDomain()->giveEngngModel()->giveVariableScale(VST_Density);
+        double uscale = this->giveDomain()->giveEngngModel()->giveVariableScale(VST_Velocity);
 
+        IntArray vloc, ploc;
+        FloatMatrix h;
+        int size = this->computeNumberOfDofs();
+        this->giveLocalVelocityDofMap(vloc);
+        this->giveLocalPressureDofMap(ploc);
+        answer.resize(size, size);
+        answer.zero();
 
-      IntArray vloc, ploc;
-      FloatMatrix h;
-      int size = this->computeNumberOfDofs();
-      this->giveLocalVelocityDofMap(vloc);
-      this->giveLocalPressureDofMap(ploc);
-      answer.resize(size, size);
-      answer.zero();
+        //this->computeAccelerationTerm_MB(h, tStep);
+        //answer.assemble(h, vloc);
+        this->computeDiffusionDerivativeTerm_MB(h, TangentStiffness, tStep);
+        answer.assemble(h, vloc);
+        this->computePressureTerm_MB(h, tStep);
+        answer.assemble(h, vloc, ploc);
+        //this->computeLSICStabilizationTerm_MB(h, tStep);
+        //h.times( alpha * tStep->giveTimeIncrement() * lscale / ( dscale * uscale * uscale ) );
+        //answer.assemble(h, vloc);
+        this->computeBCLhsTerm_MB(h, tStep);
+        if ( h.isNotEmpty() ) {
+            answer.assemble(h, vloc);
+        }
 
-      //this->computeAccelerationTerm_MB(h, tStep);
-      //answer.assemble(h, vloc);
-      this->computeDiffusionDerivativeTerm_MB(h, TangentStiffness, tStep);
-      answer.assemble(h, vloc);
-      this->computePressureTerm_MB(h, tStep);
-      answer.assemble(h, vloc, ploc);
-      //this->computeLSICStabilizationTerm_MB(h, tStep);
-      //h.times( alpha * tStep->giveTimeIncrement() * lscale / ( dscale * uscale * uscale ) );
-      //answer.assemble(h, vloc);
-      this->computeBCLhsTerm_MB(h, tStep);
-      if ( h.isNotEmpty() ) {
-	answer.assemble(h, vloc);
-      }
-
-      this->computeBCLhsPressureTerm_MB(h, tStep);
-      if ( h.isNotEmpty() ) {
-	answer.assemble(h, vloc, ploc);
-      }
+        this->computeBCLhsPressureTerm_MB(h, tStep);
+        if ( h.isNotEmpty() ) {
+            answer.assemble(h, vloc, ploc);
+        }
 
         // conservation eq part
-      this->computeLinearAdvectionTerm_MC(h, tStep);
-      h.times( 1.0 / ( dscale * uscale ) );
-      answer.assemble(h, ploc, vloc);
-      this->computeBCLhsPressureTerm_MC(h, tStep);
-      if ( h.isNotEmpty() ) {
-	answer.assemble(h, ploc, vloc);
-      }
+        this->computeLinearAdvectionTerm_MC(h, tStep);
+        h.times( 1.0 / ( dscale * uscale ) );
+        answer.assemble(h, ploc, vloc);
+        this->computeBCLhsPressureTerm_MC(h, tStep);
+        if ( h.isNotEmpty() ) {
+            answer.assemble(h, ploc, vloc);
+        }
 
-      this->computeDiffusionDerivativeTerm_MC(h, tStep);
-      answer.assemble(h, ploc, vloc);
-      this->computePressureTerm_MC(h, tStep);
-      answer.assemble(h, ploc);
+        this->computeDiffusionDerivativeTerm_MC(h, tStep);
+        answer.assemble(h, ploc, vloc);
+        this->computePressureTerm_MC(h, tStep);
+        answer.assemble(h, ploc);
     } else {
       OOFEM_ERROR("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
     }
@@ -188,7 +186,7 @@ SUPGElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Value
         answer.assemble(h, ploc);
 
         FloatMatrix m1;
-        FloatArray v, p;
+        FloatArray v;
         // add lsic stabilization term
         //this->giveCharacteristicMatrix(m1, LSICStabilizationTerm_MB, tStep);
         //m1.times( lscale / ( dscale * uscale * uscale ) );
@@ -329,20 +327,6 @@ SUPGElement :: computeBCLhsPressureTerm_MC(FloatMatrix &answer, TimeStep *tStep)
         }
     }
 }
-
-
-double
-SUPGElement :: giveCharacteristicValue(CharType mtrx, TimeStep *tStep)
-{
-    if ( mtrx == CriticalTimeStep ) {
-        return this->computeCriticalTimeStep(tStep);
-    } else {
-        OOFEM_ERROR("Unknown Type of characteristic mtrx.");
-    }
-
-    return 0.0;
-}
-
 
 
 int

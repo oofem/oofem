@@ -46,18 +46,6 @@
 #define _IFT_PLCrackPrescribedDir_IncLength "incrementlength" // Increment per time step
 
 
-#define _IFT_PLHoopStressCirc_Name "propagationlawhoopstresscirc"
-// Radius of circle used for stress sampling points
-#define _IFT_PLHoopStressCirc_Radius "radius"
-// Angle between sampling points on the circle
-#define _IFT_PLHoopStressCirc_AngleInc "angleinc"
-// Increment length per time step
-#define _IFT_PLHoopStressCirc_IncLength "incrementlength"
-// Threshold for crack propagation
-#define _IFT_PLHoopStressCirc_HoopStressThreshold "hoopstressthreshold"
-// If radial basis functions should be used for stress interpolation
-#define _IFT_PLHoopStressCirc_RadialBasisFunc "useradialbasisfunc"
-
 namespace oofem {
 class Domain;
 class EnrichmentDomain;
@@ -93,8 +81,8 @@ public:
 class OOFEM_EXPORT PLDoNothing : public PropagationLaw
 {
 public:
-    PLDoNothing() { };
-    virtual ~PLDoNothing() { };
+    PLDoNothing() { }
+    virtual ~PLDoNothing() { }
 
     virtual const char *giveClassName() const { return "PLDoNothing"; }
     virtual const char *giveInputRecordName() const { return _IFT_PLDoNothing_Name; }
@@ -103,7 +91,7 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual bool hasPropagation() const { return false; }
-    virtual bool propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp) {return false;};
+    virtual bool propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp) { return false; }
 };
 
 /**
@@ -113,8 +101,8 @@ public:
 class OOFEM_EXPORT PLCrackPrescribedDir : public PropagationLaw
 {
 public:
-    PLCrackPrescribedDir() : mAngle(0.0), mIncrementLength(0.0) { };
-    virtual ~PLCrackPrescribedDir() { };
+    PLCrackPrescribedDir() : mAngle(0.0), mIncrementLength(0.0) { }
+    virtual ~PLCrackPrescribedDir() { }
 
     virtual const char *giveClassName() const { return "PLCrackPrescribedDir"; }
     virtual const char *giveInputRecordName() const { return _IFT_PLCrackPrescribedDir_Name; }
@@ -128,7 +116,6 @@ public:
 protected:
     double mAngle, mIncrementLength;
 };
-
 } // end namespace oofem
 
 #endif /* PROPAGATIONLAW_H_ */

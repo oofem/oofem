@@ -147,7 +147,7 @@ LinearElasticMaterial :: giveRealStressVector_Warping(FloatArray &answer, GaussP
     //       G is the shear modulus of elasticity and theta is the relative twist (dPhi_z/dz), set here to a unit value 
     FloatArray gcoords;
     Element* elem = gp->giveElement();
-    elem->computeGlobalCoordinates( gcoords, * ( gp->giveNaturalCoordinates() ) );
+    elem->computeGlobalCoordinates( gcoords, gp->giveNaturalCoordinates() );
     answer.resize(2);
     answer.at(1) = reducedStrain.at(2) + gcoords.at(1);
     answer.at(2) = reducedStrain.at(1) - gcoords.at(2);
@@ -213,4 +213,63 @@ LinearElasticMaterial :: giveRealStressVector_Fiber(FloatArray &answer, GaussPoi
     status->letTempStrainVectorBe(reducedStrain);
     status->letTempStressVectorBe(answer);
 }
+
+void
+LinearElasticMaterial :: giveEshelbyStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep)
+{
+    FloatArray fullFv;
+    StructuralMaterial :: giveFullVectorFormF(fullFv, reducedF, _PlaneStrain);
+
+    FloatMatrix H;
+    H.beMatrixForm(fullFv);
+
+    H(0,0) -= 1.0;
+    H(1,1) -= 1.0;
+    H(2,2) -= 1.0;
+
+
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+    const FloatArray &stressV = status->giveTempStressVector();
+
+    FloatArray fullStressV;
+    StructuralMaterial::giveFullSymVectorForm(fullStressV, stressV, _PlaneStrain);
+
+    FloatMatrix stress;
+    stress.beMatrixFormOfStress(fullStressV);
+
+
+    double energyDens = giveEnergyDensity(gp, tStep);
+
+
+    FloatMatrix eshelbyStress(3,3);
+    eshelbyStress.beTProductOf(H, stress);
+    eshelbyStress.negated();
+
+    eshelbyStress(0,0) += energyDens;
+    eshelbyStress(1,1) += energyDens;
+    eshelbyStress(2,2) += energyDens;
+
+
+    FloatArray eshelbyStressV;
+    eshelbyStressV.beVectorForm(eshelbyStress);
+    StructuralMaterial :: giveReducedVectorForm( answer, eshelbyStressV, _PlaneStrain );
+}
+
+double
+LinearElasticMaterial :: giveEnergyDensity(GaussPoint *gp, TimeStep *tStep)
+{
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+    const FloatArray &strain = status->giveTempStrainVector();
+    const FloatArray &stress = status->giveTempStressVector();
+
+    return 0.5*stress.dotProduct(strain);
+}
+
+
+MaterialStatus *
+LinearElasticMaterial :: CreateStatus(GaussPoint *gp) const
+{
+    return new StructuralMaterialStatus(1, this->giveDomain(), gp);
+}
+
 } // end namespace oofem

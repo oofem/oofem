@@ -157,15 +157,10 @@ HyperElasticMaterial :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-
-    StructuralMaterial :: initializeFrom(ir);
-
-    // Read material properties here
-
     IR_GIVE_FIELD(ir, K, _IFT_HyperElasticMaterial_k);
     IR_GIVE_FIELD(ir, G, _IFT_HyperElasticMaterial_g);
 
-    return IRRT_OK;
+    return StructuralMaterial :: initializeFrom(ir);
 }
 
 

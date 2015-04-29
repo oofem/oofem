@@ -51,9 +51,6 @@ IRResultType
 NeumannMomentLoad :: initializeFrom(InputRecord *ir)
 {
     BoundaryLoad :: initializeFrom(ir);
-    if ( componentArray.giveSize() != nDofs ) {
-        OOFEM_ERROR("componentArray size mismatch");
-    }
 
     IRResultType result;
 
@@ -61,8 +58,6 @@ NeumannMomentLoad :: initializeFrom(InputRecord *ir)
     p = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, p, _IFT_NeumannMomentLoad_Constant);
     IR_GIVE_FIELD(ir, cset, _IFT_NeumannMomentLoad_CenterSet);
-
-    //g.printYourself();
 
     xbar.resize(0);
 
@@ -73,14 +68,10 @@ void
 NeumannMomentLoad :: computeXbar()
 {
 
-    //if (!xbar.isEmpty()) return;
-
     xbar.resize(this->giveDomain()->giveNumberOfSpatialDimensions());
     xbar.zero();
 
     celements = this->giveDomain()->giveSet(cset)->giveElementList();
-    //this->giveDomain()->giveSet(cset)->giveBoundaryList()
-    //celements.printYourself();
 
     double V=0.0;
 
@@ -93,10 +84,10 @@ NeumannMomentLoad :: computeXbar()
 
         for ( GaussPoint * gp: * iRule ) {
             FloatArray coord;
-            FloatArray *lcoords = gp->giveNaturalCoordinates();
-            double detJ = i->giveTransformationJacobian(*lcoords, FEIElementGeometryWrapper(thisElement));
+            FloatArray lcoords = gp->giveNaturalCoordinates();
+            double detJ = i->giveTransformationJacobian(lcoords, FEIElementGeometryWrapper(thisElement));
 
-            i->local2global(coord, *lcoords, FEIElementGeometryWrapper(thisElement));
+            i->local2global(coord, lcoords, FEIElementGeometryWrapper(thisElement));
             coord.times(gp->giveWeight()*fabs(detJ));
 
             V=V+gp->giveWeight()*fabs(detJ);
@@ -128,14 +119,6 @@ NeumannMomentLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, const F
 
     OOFEM_ERROR("Should not happen!");
 
-    // ask time distribution
-
-    /*
-     * factor = this -> giveTimeFunction() -> at(tStep->giveTime()) ;
-     * if ((mode==VM_Incremental) && (!tStep->isTheFirstStep()))
-     * //factor -= this->giveTimeFunction()->at(tStep->givePreviousStep()->giveTime()) ;
-     * factor -= this->giveTimeFunction()->at(tStep->giveTime()-tStep->giveTimeIncrement()) ;
-     */
     factor = this->giveTimeFunction()->evaluate(tStep, mode);
     answer = componentArray;
     answer.times(factor);

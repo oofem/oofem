@@ -280,110 +280,16 @@ void DynCompCol :: times(double x)
 
 int DynCompCol :: buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &s)
 {
-    /*
-     * int neq = eModel -> giveNumberOfDomainEquations (di);
-     *
-     **#ifndef DynCompCol_USE_STL_SETS
-     * IntArray  loc;
-     * Domain* domain = eModel->giveDomain(di);
-     * int nelem = domain -> giveNumberOfElements() ;
-     * int i,ii,j,jj,n, indx;
-     * Element* elem;
-     * IntArray colItems(neq);
-     * // allocation map
-     * char* map = new char[neq*neq];
-     * if (map == NULL) {
-     * printf ("CompCol::buildInternalStructure - map creation failed");
-     * exit (1);
-     * }
-     *
-     * for (i=0; i<neq*neq; i++)
-     * map[i]=0;
-     *
-     *
-     * for (n=1 ; n<=nelem ; n++) {
-     * elem = domain -> giveElement(n);
-     * elem -> giveLocationArray (loc) ;
-     *
-     * for (i=1 ; i <= loc.giveSize() ; i++) {
-     * if ((ii = loc.at(i))) {
-     *  for (j=1; j <= loc.giveSize() ; j++) {
-     *   if ((jj=loc.at(j)))
-     *    if (map[(ii-1)*neq+jj-1] == 0) {
-     *     map[(ii-1)*neq+jj-1] = 1;
-     *     colItems.at(ii) ++;
-     *    }
-     *  }
-     * }
-     * }
-     * }
-     *
-     * if (rowind_) {
-     * for (i=0; i< nColumns; i++) delete this->rowind_[i];
-     * delete this->rowind_;
-     * }
-     * rowind_ = (IntArray**) new (IntArray*)[neq];
-     * for (j=0; j<neq; j++) rowind_[j] = new IntArray(colItems(j));
-     *
-     * indx = 1;
-     * for (j=0; j<neq; j++) { // column loop
-     * indx = 1;
-     * for (i=0; i<neq; i++) { // row loop
-     * if (map[i*neq+j]) {
-     *  rowind_[j]->at(indx) = i;
-     *  indx++;
-     * }
-     * }
-     * }
-     *
-     * // delete map
-     * delete (map);
-     *
-     * // allocate value array
-     * if (columns_) {
-     * for (i=0; i< nColumns; i++) delete this->columns_[i];
-     * delete this->columns_;
-     * }
-     * columns_= (FloatArray**) new (FloatArray*)[neq];
-     * int nz_ = 0;
-     * for (j=0; j<neq; j++) {
-     * columns_[j] = new FloatArray (colItems(j));
-     * nz_ += colItems(j);
-     * }
-     *
-     * printf ("\nDynCompCol info: neq is %d, nelem is %d\n",neq,nz_);
-     **#else
-     * int i,j;
-     * if (columns) {
-     * for (i=0; i< nColumns; i++) delete this->columns[i];
-     * delete this->columns;
-     * }
-     * columns= new std::map<int, double>*[neq];
-     * for (j=0; j<neq; j++) {
-     * columns[j] = new std::map<int, double>;
-     * }
-     *
-     **#endif
-     *
-     * nColumns = nRows = neq;
-     * // increment version
-     * this->version++;
-     *
-     * return true;
-     */
     int neq = eModel->giveNumberOfDomainEquations(di, s);
 
 #ifndef DynCompCol_USE_STL_SETS
     IntArray loc;
     Domain *domain = eModel->giveDomain(di);
-    int nelem = domain->giveNumberOfElements();
-    int i, ii, j, jj, n;
-    Element *elem;
 
     nColumns = nRows = neq;
 
     if ( rowind_ ) {
-        for ( i = 0; i < nColumns; i++ ) {
+        for ( int i = 0; i < nColumns; i++ ) {
             delete this->rowind_ [ i ];
         }
 
@@ -391,13 +297,13 @@ int DynCompCol :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
     }
 
     rowind_ = ( IntArray ** ) new IntArray * [ neq ];
-    for ( j = 0; j < neq; j++ ) {
+    for ( int j = 0; j < neq; j++ ) {
         rowind_ [ j ] = new IntArray();
     }
 
     // allocate value array
     if ( columns_ ) {
-        for ( i = 0; i < nColumns; i++ ) {
+        for ( int i = 0; i < nColumns; i++ ) {
             delete this->columns_ [ i ];
         }
 
@@ -405,18 +311,17 @@ int DynCompCol :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
     }
 
     columns_ = ( FloatArray ** ) new FloatArray * [ neq ];
-    for ( j = 0; j < neq; j++ ) {
+    for ( int j = 0; j < neq; j++ ) {
         columns_ [ j ] = new FloatArray();
     }
 
-    for ( n = 1; n <= nelem; n++ ) {
-        elem = domain->giveElement(n);
+    for ( auto &elem : domain->giveElements() ) {
         elem->giveLocationArray(loc, s);
 
-        for ( i = 1; i <= loc.giveSize(); i++ ) {
-            if ( ( ii = loc.at(i) ) ) {
-                for ( j = 1; j <= loc.giveSize(); j++ ) {
-                    if ( ( jj = loc.at(j) ) ) {
+        for ( int ii : loc ) {
+            if ( ii > 0 ) {
+                for ( int jj : loc ) {
+                    if ( jj > 0 ) {
                         this->insertRowInColumn(ii - 1, jj - 1);
                     }
                 }
@@ -425,21 +330,20 @@ int DynCompCol :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
     }
 
     // loop over active boundary conditions
-    int nbc = domain->giveNumberOfBoundaryConditions();
     std :: vector< IntArray >r_locs;
     std :: vector< IntArray >c_locs;
 
-    for ( int i = 1; i <= nbc; ++i ) {
-        ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
+    for ( auto &gbc : domain->giveBcs() ) {
+        ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( gbc.get() );
         if ( bc != NULL ) {
             bc->giveLocationArrays(r_locs, c_locs, UnknownCharType, s, s);
             for ( std :: size_t k = 0; k < r_locs.size(); k++ ) {
                 IntArray &krloc = r_locs [ k ];
                 IntArray &kcloc = c_locs [ k ];
-                for ( int i = 1; i <= krloc.giveSize(); i++ ) {
-                    if ( ( ii = krloc.at(i) ) ) {
-                        for ( int j = 1; j <= kcloc.giveSize(); j++ ) {
-                            if ( ( jj = kcloc.at(j) ) ) {
+                for ( int ii : krloc ) {
+                    if ( ii > 0 ) {
+                        for ( int jj : kcloc ) {
+                            if ( jj > 0 ) {
                                 this->insertRowInColumn(jj - 1, ii - 1);
                             }
                         }
@@ -450,7 +354,7 @@ int DynCompCol :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
     }
 
     int nz_ = 0;
-    for ( j = 0; j < neq; j++ ) {
+    for ( int j = 0; j < neq; j++ ) {
         nz_ += this->rowind_ [ j ]->giveSize();
     }
 

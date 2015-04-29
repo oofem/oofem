@@ -42,7 +42,6 @@
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "spatiallocalizer.h"
-#include "eleminterpmapperinterface.h"
 #include "mmashapefunctprojection.h"
 
 #define _IFT_Truss1d_Name "truss1d"
@@ -56,8 +55,7 @@ class FEI1dLin;
  */
 class Truss1d : public StructuralElement,
 public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, public SpatialLocalizerInterface,
-public EIPrimaryUnknownMapperInterface,
-public ZZErrorEstimatorInterface, public MMAShapeFunctProjectionInterface,
+public ZZErrorEstimatorInterface,
 public HuertaErrorEstimatorInterface
 {
 protected:
@@ -102,11 +100,6 @@ public:
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                             InternalStateType type, TimeStep *tStep);
 
-    // EIPrimaryUnknownMInterface
-    virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-                                                                       TimeStep *tStep, const FloatArray &lcoords,
-                                                                       FloatArray &answer);
-
     // HuertaErrorEstimatorInterface
     virtual void HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refinedElement, int level, int nodeId,
                                                                   IntArray &localNodeIdArray, IntArray &globalNodeIdArray,
@@ -115,10 +108,6 @@ public:
                                                                   IntArray &controlNode, IntArray &controlDof,
                                                                   HuertaErrorEstimator :: AnalysisMode aMode);
     virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-
-    virtual void MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &coords,
-                                                                      coordType ct, nodalValContainerType &list,
-                                                                      InternalStateType type, TimeStep *tStep);
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);

@@ -36,6 +36,7 @@
 #include "engngm.h"
 #include "intarray.h"
 #include "dofmanager.h"
+#include "unknownnumberingscheme.h"
 #include "domain.h"
 
 #ifdef __USE_MPI

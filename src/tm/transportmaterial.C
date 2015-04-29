@@ -44,9 +44,9 @@ TransportMaterialStatus :: setTempGradient(FloatArray grad)
 }
 
 void
-TransportMaterialStatus :: setTempField(FloatArray field)
+TransportMaterialStatus :: setTempField(FloatArray newField)
 {
-    this->temp_field = std :: move(field);
+    this->temp_field = std :: move(newField);
 }
 
 void
@@ -69,25 +69,25 @@ TransportMaterialStatus :: TransportMaterialStatus(int n, Domain *d, GaussPoint 
     MaterialStatus(n, d, g), temp_field(), temp_gradient(), temp_flux(), field(), gradient(), flux(), maturity(0.)
 { }
 
-void TransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
+void TransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tStep)
 // Print the state variable and the flow vector on the data file.
 {
     FloatArray flowVec;
     TransportElement *transpElem = static_cast< TransportElement * >( gp->giveElement() );
 
-    MaterialStatus :: printOutputAt(File, tNow);
+    MaterialStatus :: printOutputAt(File, tStep);
 
     fprintf(File, "  state");
 
-    for ( int i = 1; i <= field.giveSize(); i++ ) {
-        fprintf( File, " % .4e", field.at(i) );
+    for ( auto &val : field ) {
+        fprintf( File, " %.4e", val );
     }
 
-    transpElem->computeFlow(flowVec, gp, tNow);
+    transpElem->computeFlow(flowVec, gp, tStep);
 
     fprintf(File, "   flow");
-    for ( int i = 1; i <= flowVec.giveSize(); i++ ) {
-        fprintf( File, " % .4e", flowVec.at(i) );
+    for ( auto &flow : flowVec ) {
+        fprintf( File, " %.4e", flow );
     }
 
     fprintf(File, "\n");

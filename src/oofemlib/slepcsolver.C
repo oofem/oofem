@@ -60,7 +60,7 @@ SLEPcSolver :: ~SLEPcSolver()
 }
 
 NM_Status
-SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatrix *_r, double rtol, int nroot)
+SLEPcSolver :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, FloatMatrix &_r, double rtol, int nroot)
 {
     FILE *outStream;
     PetscErrorCode ierr;
@@ -70,9 +70,6 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
     outStream = domain->giveEngngModel()->giveOutputStream();
 
     // first check whether Lhs is defined
-    if ( ( !a ) || ( !b ) ) {
-        OOFEM_ERROR("matrices are not defined");
-    }
 
     if ( a->giveNumberOfRows() != a->giveNumberOfColumns() ||
         b->giveNumberOfRows() != b->giveNumberOfRows() ||
@@ -80,31 +77,17 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
         OOFEM_ERROR("matrices size mismatch");
     }
 
-    if ( a->giveType() != SMT_PetscMtrx || b->giveType() != SMT_PetscMtrx ) {
+    A = dynamic_cast< PetscSparseMtrx * >(&a);
+    B = dynamic_cast< PetscSparseMtrx * >(&b);
+
+    if ( !A || !B ) {
         OOFEM_ERROR("PetscSparseMtrx Expected");
     }
 
-    A = static_cast< PetscSparseMtrx * >(a);
-    B = static_cast< PetscSparseMtrx * >(b);
     size = engngModel->giveParallelContext( A->giveDomainIndex() )->giveNumberOfNaturalEqs(); // A->giveLeqs();
 
-    // check array for storing eigenvalues
-    if ( _eigv == NULL ) {
-        OOFEM_ERROR("unknown eigenvalue array");
-    }
-
-    if ( _eigv->giveSize() != nroot ) {
-        OOFEM_ERROR("eigv size mismatch");
-    }
-
-    // check matrix for storing resulted eigen vectors at the end
-    if ( _r == NULL ) {
-        OOFEM_ERROR("unknown eigen vectors mtrx");
-    }
-
-    if ( ( _r->giveNumberOfRows() != size ) || ( _r->giveNumberOfColumns() != nroot ) ) {
-        OOFEM_ERROR("_r size mismatch");
-    }
+    _r.resize(size, nroot);
+    _eigv.resize(nroot);
 
 
     /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

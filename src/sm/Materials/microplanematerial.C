@@ -63,7 +63,7 @@ MicroplaneMaterial :: giveMicroplane(int i, GaussPoint *masterGp)
         MaterialMode slaveMode, masterMode = masterGp->giveMaterialMode();
         slaveMode = this->giveCorrespondingSlaveMaterialMode(masterMode);
 
-        masterGp->gaussPoints.resize( this->numberOfMicroplanes );
+        masterGp->gaussPoints.resize(this->numberOfMicroplanes);
         for ( int j = 0; j < numberOfMicroplanes; j++ ) {
             masterGp->gaussPoints [ j ] = new Microplane(masterGp->giveIntegrationRule(), j + 1, slaveMode);
         }
@@ -246,10 +246,9 @@ MicroplaneMaterial :: computeShearMStrainComponent(Microplane *mplane,
                                                    const FloatArray &macroStrain)
 {
     int mnumber = mplane->giveNumber();
-    int i;
     double em = 0.0;
 
-    for ( i = 0; i < 6; i++ ) {
+    for ( int i = 0; i < 6; i++ ) {
         em += M [ mnumber - 1 ] [ i ] * macroStrain.at(i + 1);
     }
 
@@ -277,9 +276,8 @@ MicroplaneMaterial :: computeStrainVectorComponents(FloatArray &answer, Micropla
 {
     int mnumber = mplane->giveNumber();
     double en = 0., ev = 0., em = 0., el = 0.;
-    int i;
 
-    for ( i = 0; i < 6; i++ ) {
+    for ( int i = 0; i < 6; i++ ) {
         en += N [ mnumber - 1 ] [ i ] * macroStrain.at(i + 1);
         em += M [ mnumber - 1 ] [ i ] * macroStrain.at(i + 1);
         el += L [ mnumber - 1 ] [ i ] * macroStrain.at(i + 1);
@@ -295,13 +293,33 @@ MicroplaneMaterial :: computeStrainVectorComponents(FloatArray &answer, Micropla
     answer.at(4) = em;
 }
 
+void
+MicroplaneMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+                                                    MatResponseMode mode,
+                                                    GaussPoint *gp,
+                                                    TimeStep *tStep)
+{
+    answer.resize(6, 6);
+    answer.zero();
+    // elastic stiffness matrix
+    answer.at(4, 4) = answer.at(5, 5) = answer.at(6, 6) = E / ( 2. + 2. * nu );
+    answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = E * ( 1. - nu ) / ( ( 1. + nu ) * ( 1. - 2. * nu ) );
+    answer.at(1, 2) = answer.at(2, 1) = answer.at(1, 3) = answer.at(3, 1) =
+                                                              answer.at(2, 3) = answer.at(3, 2) = E * nu / ( ( 1. + nu ) * ( 1. - 2. * nu ) );
+}
+
 IRResultType
 MicroplaneMaterial :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    StructuralMaterial :: initializeFrom(ir);
+    result = StructuralMaterial :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
+    // elastic constants
+    IR_GIVE_FIELD(ir, E, _IFT_MicroplaneMaterial_e);
+    IR_GIVE_FIELD(ir, nu, _IFT_MicroplaneMaterial_n);
+    // number of microplanes
     IR_GIVE_FIELD(ir, numberOfMicroplanes, _IFT_MicroplaneMaterial_nmp);
     this->initializeData(numberOfMicroplanes);
     return IRRT_OK;

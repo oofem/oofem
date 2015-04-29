@@ -59,6 +59,7 @@
 #include "material.h"
 #include "classfactory.h"
 #include "crosssection.h"
+#include "dof.h"
 
 #include <vector>
 
@@ -85,7 +86,6 @@ VTKExportModule :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     int val;
 
-    ExportModule :: initializeFrom(ir);
     IR_GIVE_OPTIONAL_FIELD(ir, cellVarsToExport, _IFT_VTKExportModule_cellvars);
     IR_GIVE_OPTIONAL_FIELD(ir, internalVarsToExport, _IFT_VTKExportModule_vars);
     IR_GIVE_OPTIONAL_FIELD(ir, primaryVarsToExport, _IFT_VTKExportModule_primvars);
@@ -94,7 +94,7 @@ VTKExportModule :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_VTKExportModule_stype);
     stype = ( NodalRecoveryModel :: NodalRecoveryModelType ) val;
 
-    return IRRT_OK;
+    return ExportModule :: initializeFrom(ir);
 }
 
 
@@ -143,42 +143,38 @@ VTKExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         fprintf(stream, "\n");
     }
 
-    int ielem, nelem = d->giveNumberOfElements(), elemToProcess = 0;
+    int elemToProcess = 0;
     int ncells, celllistsize = 0;
-    for ( ielem = 1; ielem <= nelem; ielem++ ) {
-        if ( d->giveElement(ielem)->giveParallelMode() != Element_local ) {
+    for ( auto &elem : d->giveElements() ) {
+        if ( elem->giveParallelMode() != Element_local ) {
             continue;
         }
 
         elemToProcess++;
         // element composed from same-type cells asumed
-        ncells = this->giveNumberOfElementCells( d->giveElement(ielem) );
-        celllistsize += ncells + ncells *this->giveNumberOfNodesPerCell( this->giveCellType ( d->giveElement ( ielem ) ) );
+        ncells = this->giveNumberOfElementCells( elem.get() );
+        celllistsize += ncells + ncells *this->giveNumberOfNodesPerCell( this->giveCellType ( elem.get() ) );
     }
 
     int nelemNodes;
-    Element *elem;
     int vtkCellType;
     IntArray cellNodes;
     // output cells
     fprintf(stream, "\nCELLS %d %d\n", elemToProcess, celllistsize);
 
     IntArray regionNodalNumbers(nnodes);
-    int offset = 0;
 
     // assemble global->local map
-    this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 0);
-    offset += regionDofMans;
-    for ( ielem = 1; ielem <= nelem; ielem++ ) {
-        elem = d->giveElement(ielem);
+    this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, 0, d, ireg, 0);
+    for ( auto &elem : d->giveElements() ) {
         if ( elem->giveParallelMode() != Element_local ) {
             continue;
         }
 
-        vtkCellType = this->giveCellType(elem);
+        vtkCellType = this->giveCellType(elem.get());
 
         nelemNodes = this->giveNumberOfNodesPerCell(vtkCellType); //elem->giveNumberOfNodes(); // It HAS to be the same size as giveNumberOfNodesPerCell, otherwise the file will be incorrect.
-        this->giveElementCell(cellNodes, elem, 0);
+        this->giveElementCell(cellNodes, elem.get(), 0);
         fprintf(stream, "%d ", nelemNodes);
         for ( i = 1; i <= nelemNodes; i++ ) {
             fprintf(stream, "%d ", regionNodalNumbers.at( cellNodes.at(i) ) - 1);
@@ -189,13 +185,12 @@ VTKExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
     // output cell types
     fprintf(stream, "\nCELL_TYPES %d\n", elemToProcess);
-    for ( ielem = 1; ielem <= nelem; ielem++ ) {
-        elem = d->giveElement(ielem);
+    for ( auto &elem : d->giveElements() ) {
         if ( elem->giveParallelMode() != Element_local ) {
             continue;
         }
 
-        vtkCellType = this->giveCellType(elem);
+        vtkCellType = this->giveCellType(elem.get());
         fprintf(stream, "%d\n", vtkCellType);
     }
 
@@ -408,11 +403,9 @@ VTKExportModule :: exportIntVars(FILE *stream, TimeStep *tStep)
 void
 VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tStep)
 {
-    int ielem, pos;
+    int pos;
     InternalStateType type;
-    Element *elem;
     Domain *d  = emodel->giveDomain(1);
-    int nelem = d->giveNumberOfElements();
     FloatMatrix mtrx(3, 3);
     FloatArray temp, vec;
     double gptot;
@@ -424,8 +417,7 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
         case IST_MaterialNumber:
         case IST_ElementNumber:
             fprintf( stream, "SCALARS %s int\nLOOKUP_TABLE default\n", __InternalStateTypeToString(type) );
-            for ( ielem = 1; ielem <= nelem; ielem++ ) {
-                elem = d->giveElement(ielem);
+            for ( auto &elem : d->giveElements() ) {
                 if ( elem->giveParallelMode() != Element_local ) {
                     continue;
                 }
@@ -454,8 +446,8 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
             }
 
             fprintf( stream, "VECTORS %s double\n", __InternalStateTypeToString(type) );
-            for ( ielem = 1; ielem <= nelem; ielem++ ) {
-                if ( !d->giveElement(ielem)->giveLocalCoordinateSystem(mtrx) ) {
+            for ( auto &elem : d->giveElements() ) {
+                if ( !elem->giveLocalCoordinateSystem(mtrx) ) {
                     mtrx.resize(3, 3);
                     mtrx.zero();
                 }
@@ -476,8 +468,7 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
                 } else {
                     fprintf( stream, "VECTORS %s double\nLOOKUP_TABLE default\n", __InternalStateTypeToString(type) );
                 }
-                for ( ielem = 1; ielem <= nelem; ielem++ ) {
-                    elem = d->giveElement(ielem);
+                for ( auto &elem : d->giveElements() ) {
                     if ( elem->giveParallelMode() != Element_local ) {
                         continue;
                     }
@@ -490,8 +481,8 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
                         vec.add(gp->giveWeight(), temp);
                     }
                     vec.times(1 / gptot);
-                    for ( int i = 1; i <= vec.giveSize(); ++i ) {
-                        fprintf( stream, "%e ", vec.at(i) );
+                    for ( int j = 1; j <= vec.giveSize(); ++j ) {
+                        fprintf( stream, "%e ", vec.at(j) );
                     }
                     fprintf(stream, "\n");
                 }
@@ -528,7 +519,7 @@ VTKExportModule :: giveTotalRBRNumberOfNodes(Domain *d)
 // vtk from smoothing the nodal values at region boundaries.
 //
 {
-    int rbrnodes = 0, nnodes = d->giveNumberOfDofManagers(), nelems = d->giveNumberOfElements();
+    int rbrnodes = 0, nnodes = d->giveNumberOfDofManagers();
     std :: vector< char > map(nnodes);
     //char map[nnodes];
     int elemnodes;
@@ -537,8 +528,7 @@ VTKExportModule :: giveTotalRBRNumberOfNodes(Domain *d)
         map [ j ] = 0;
     }
 
-    for ( int j = 1; j <= nelems; j++ ) {
-        Element *elem  = d->giveElement(j);
+    for ( auto &elem : d->giveElements() ) {
         if ( elem->giveParallelMode() != Element_local ) {
             continue;
         }
@@ -568,19 +558,15 @@ VTKExportModule :: initRegionNodeNumbering(IntArray &regionNodalNumbers, int &re
     // The i-th value contains the corresponding global node number.
 
 
-    int ielem, nelem = domain->giveNumberOfElements();
     int nnodes = domain->giveNumberOfDofManagers();
     int elemNodes;
-    int elementNode, node;
     int currOffset = offset + 1;
-    Element *element;
 
     regionNodalNumbers.resize(nnodes);
     regionNodalNumbers.zero();
     regionDofMans = 0;
 
-    for ( ielem = 1; ielem <= nelem; ielem++ ) {
-        element = domain->giveElement(ielem);
+    for ( auto &element : domain->giveElements() ) {
 
         if ( element->giveParallelMode() != Element_local ) {
             continue;
@@ -590,8 +576,8 @@ VTKExportModule :: initRegionNodeNumbering(IntArray &regionNodalNumbers, int &re
         //  elemSides = element->giveNumberOfSides();
 
         // determine local region node numbering
-        for ( elementNode = 1; elementNode <= elemNodes; elementNode++ ) {
-            node = element->giveNode(elementNode)->giveNumber();
+        for ( int elementNode = 1; elementNode <= elemNodes; elementNode++ ) {
+            int node = element->giveNode(elementNode)->giveNumber();
             if ( regionNodalNumbers.at(node) == 0 ) { // assign new number
                 /* mark for assignement. This is done later, as it allows to preserve
                  * natural node numbering.
@@ -604,8 +590,7 @@ VTKExportModule :: initRegionNodeNumbering(IntArray &regionNodalNumbers, int &re
 
     if ( mode == 1 ) {
         IntArray answer(nnodes);
-        int i;
-        for ( i = 1; i <= nnodes; i++ ) {
+        for ( int i = 1; i <= nnodes; i++ ) {
             if ( regionNodalNumbers.at(i) ) {
                 regionNodalNumbers.at(i) = currOffset++;
                 answer.at( regionNodalNumbers.at(i) ) = i;
@@ -614,8 +599,7 @@ VTKExportModule :: initRegionNodeNumbering(IntArray &regionNodalNumbers, int &re
 
         regionNodalNumbers = answer;
     } else {
-        int i;
-        for ( i = 1; i <= nnodes; i++ ) {
+        for ( int i = 1; i <= nnodes; i++ ) {
             if ( regionNodalNumbers.at(i) ) {
                 regionNodalNumbers.at(i) = currOffset++;
             }
@@ -768,7 +752,6 @@ VTKExportModule :: giveSmoother()
 
     if ( this->smoother == NULL ) {
         this->smoother = classFactory.createNodalRecoveryModel(this->stype, d);
-        IntArray vrmap;
     }
 
     return this->smoother;
@@ -779,22 +762,8 @@ VTKExportModule :: giveSmoother()
 void
 VTKExportModule :: exportPrimaryVars(FILE *stream, TimeStep *tStep)
 {
-    // should be performed over regions
-
-    int i, n = primaryVarsToExport.giveSize();
-    //int nnodes;
-    //Domain *d = emodel->giveDomain(1);
-    UnknownType type;
-
-    if ( n == 0 ) {
-        return;
-    }
-
-    //nnodes = d->giveNumberOfDofManagers();
-    //fprintf(stream,"\n\nPOINT_DATA %d\n", nnodes);
-
-    for ( i = 1; i <= n; i++ ) {
-        type = ( UnknownType ) primaryVarsToExport.at(i);
+    for ( auto &primvar : primaryVarsToExport ) {
+        UnknownType type = ( UnknownType ) primvar;
         this->exportPrimVarAs(type, stream, tStep);
     }
 }
@@ -805,17 +774,16 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
 {
     Domain *d = emodel->giveDomain(1);
     int ireg;
-    int nnodes = d->giveNumberOfDofManagers(), inode;
+    int nnodes = d->giveNumberOfDofManagers();
     int j, jsize;
     FloatArray iVal, iValLCS;
-    FloatMatrix t(3, 3);
     IntArray dofIDMask;
     InternalStateValueType type = ISVT_UNDEFINED;
     int nScalarComp = 1;
 
     if ( ( valID == DisplacementVector ) || ( valID == EigenVector ) || ( valID == VelocityVector ) ) {
         type = ISVT_VECTOR;
-    } else if ( ( valID == FluxVector ) || ( valID == PressureVector ) || ( valID == Temperature ) ) {
+    } else if ( ( valID == FluxVector ) || ( valID == PressureVector ) || ( valID == Temperature ) || ( valID == Humidity )) {
         type = ISVT_SCALAR;
         //nScalarComp = d->giveNumberOfDefaultNodeDofs();
     } else {
@@ -848,7 +816,7 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
     // Used for special nodes/elements with mixed number of dofs.
     this->giveSmoother();
 
-    for ( inode = 1; inode <= regionDofMans; inode++ ) {
+    for ( int inode = 1; inode <= regionDofMans; inode++ ) {
         DofManager *dman = d->giveNode( regionNodalNumbers.at(inode) );
 
         if ( ( valID == DisplacementVector ) || ( valID == EigenVector ) || ( valID == VelocityVector ) ) {
@@ -865,7 +833,7 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
                     iVal.at(3) = dof->giveUnknown(VM_Total, tStep);
                 }
             }
-        } else if ( valID == FluxVector ) {
+        } else if ( (valID == FluxVector) || (valID == Humidity) ) {
             iVal.resize(1);
 
             for ( Dof *dof: *dman ) {

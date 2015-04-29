@@ -38,7 +38,6 @@
 #include "field.h"
 #include "interface.h"
 #include "floatarray.h"
-#include "unknownnumberingscheme.h"
 #include "valuemodetype.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
@@ -49,6 +48,9 @@
 namespace oofem {
 class PrimaryField;
 class Dof;
+class BoundaryCondition;
+class InitialCondition;
+class UnknownNumberingScheme;
 
 /**
  * Element interface class. Declares the functionality required to support PrimaryField element interpolation.
@@ -83,8 +85,7 @@ public:
 
 
 /**
- * Abstract class representing field of primary variables (those, which are unknown and are typically
- * associated to nodes).
+ * Abstract class representing field of primary variables (those, which are unknown and are typically associated to nodes).
  * In the current design the primary field is understood as simple database, that allows to keep track
  * of the history of a solution vector representing primary field. The history is kept as sequence of
  * solution vectors. The history depth kept can be selected. PrimaryField class basically provides access to
@@ -97,6 +98,8 @@ public:
  * updated by EngngModel, it may contain a mix of different fields (this is especially true for
  * strongly coupled problems). Then masked primary field can be used to select only certain DOFs
  * (based on DofID) from its master PrimaryField.
+ * 
+ * @note This primary field will always assume default numbering schemes.
  */
 class OOFEM_EXPORT PrimaryField : public Field
 {
@@ -131,6 +134,34 @@ public:
      * @param answer Resulting vector.
      */
     virtual void initialize(ValueModeType mode, TimeStep *tStep, FloatArray &answer, const UnknownNumberingScheme &s);
+
+    // These functions are hardcoded to assume the default numbering scheme (as is the rest of primaryfield)
+    void storeDofManager(TimeStep *tStep, DofManager &dman);
+    void storeInDofDictionaries(TimeStep *tStep);
+    void readDofManager(TimeStep *tStep, DofManager &dman);
+    void readFromDofDictionaries(TimeStep *tStep);
+
+    /**
+     * Applies the default initial values values for all DOFs (0) in given domain.
+     * @param domain Domain number
+     */
+    virtual void applyDefaultInitialCondition();
+    /**
+     * Applies initial condition to all DOFs.
+     * @param ic Initial condition for DOFs
+     */
+    void applyInitialCondition(InitialCondition &ic);
+    /**
+     * Applies all boundary conditions to all prescribed DOFs.
+     * @param tStep Current time step.
+     */
+    virtual void applyBoundaryCondition(TimeStep *tStep);
+    /**
+     * Applies the boundary condition to all prescribed DOFs in given domain.
+     * @param bc Boundary condition.
+     * @param domain tStep Time step for when bc applies.
+     */
+    void applyBoundaryCondition(BoundaryCondition &bc, TimeStep *tStep);
 
     /**
      * @param dof Pointer to DOF.
@@ -195,7 +226,7 @@ public:
      * @param mode Mode of the unknown (increment, total value etc.)
      * @param tStep Time step unknowns belong to.
      */
-    virtual void update(ValueModeType mode, TimeStep *tStep, FloatArray &vectorToStore);
+    virtual void update(ValueModeType mode, TimeStep *tStep, const FloatArray &vectorToStore, const UnknownNumberingScheme &s);
 
     /**
      * Brings up a new solution vector for given time step.

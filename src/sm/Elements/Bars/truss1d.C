@@ -59,8 +59,8 @@ Truss1d :: Truss1d(int n, Domain *aDomain) :
     StructuralElement(n, aDomain),
     ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface(),
     SpatialLocalizerInterface(this),
-    EIPrimaryUnknownMapperInterface(), ZZErrorEstimatorInterface(this),
-    MMAShapeFunctProjectionInterface(), HuertaErrorEstimatorInterface()
+    ZZErrorEstimatorInterface(this),
+    HuertaErrorEstimatorInterface()
 {
     numberOfDofMans = 2;
 }
@@ -102,7 +102,7 @@ Truss1d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 //
 {
     FloatMatrix dN;
-    this->interp.evaldNdx( dN, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evaldNdx( dN, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beTranspositionOf(dN); ///@todo It would be more suitable to follow the column-major version as done in FEI-classes
 }
 
@@ -138,7 +138,7 @@ Truss1d :: computeVolumeAround(GaussPoint *gp)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
-    double detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    double detJ = fabs( this->interp.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     return detJ *gp->giveWeight() * this->giveCrossSection()->give(CS_Area, gp);
 }
 
@@ -201,7 +201,7 @@ Truss1d :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refi
 
 void Truss1d :: HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
-    computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
+    computeNmatrixAt(gp->giveSubPatchCoordinates(), answer);
 }
 
 
@@ -363,8 +363,6 @@ void Truss1d :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
     }
 }
 
-
-
 #endif
 
 
@@ -377,12 +375,8 @@ Truss1d :: giveInterface(InterfaceType interface)
         return static_cast< NodalAveragingRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
         return static_cast< SpatialLocalizerInterface * >(this);
-    } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
         return static_cast< ZZErrorEstimatorInterface * >(this);
-    } else if ( interface == MMAShapeFunctProjectionInterfaceType ) {
-        return static_cast< MMAShapeFunctProjectionInterface * >(this);
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
         return static_cast< HuertaErrorEstimatorInterface * >(this);
     }
@@ -399,36 +393,4 @@ Truss1d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int no
     this->giveIPValue(answer, gp, type, tStep);
 }
 
-
-void
-Truss1d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-                                                            TimeStep *tStep, const FloatArray &lcoords,
-                                                            FloatArray &answer)
-{
-    FloatArray n, u;
-
-    this->interp.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
-    this->computeVectorOf(IntArray{D_u}, mode, tStep, u);
-    answer = FloatArray{n.dotProduct(u)};
-}
-
-
-void
-Truss1d :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &coords,
-                                                                coordType ct, nodalValContainerType &list,
-                                                                InternalStateType type, TimeStep *tStep)
-{
-    FloatArray lcoords, n;
-    if ( ct == MMAShapeFunctProjectionInterface :: coordType_local ) {
-        lcoords = coords;
-    } else {
-        computeLocalCoordinates(lcoords, coords);
-    }
-
-    this->interp.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
-
-    answer.resize(0);
-    answer.add(n.at(1), list[0]);
-    answer.add(n.at(2), list[1]);
-}
 } // end namespace oofem

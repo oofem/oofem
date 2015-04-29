@@ -64,7 +64,7 @@ IntArray Tr2Shell7XFEM :: orderingNodes = {1, 2, 3, 19, 20, 21, 37, 4, 5, 6, 22,
                        10, 11, 12, 28, 29, 30, 40, 13, 14, 15, 31, 32, 33, 41, 16, 17, 18,
                        34, 35, 36, 42};
 IntArray Tr2Shell7XFEM :: orderingEdgeNodes = {1, 2, 3, 10, 11, 12, 19, 4, 5, 6, 13, 14, 15, 20, 7, 8, 9, 16, 17, 18, 21};
-		   
+
 
 Tr2Shell7XFEM :: Tr2Shell7XFEM(int n, Domain *aDomain) : Shell7BaseXFEM(n, aDomain)
 {
@@ -118,9 +118,9 @@ Tr2Shell7XFEM :: computeGaussPoints()
         for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { 
             int numberOfInterfaces = this->layeredCS->giveNumberOfLayers()-1;
             czIntegrationRulesArray.resize( numberOfInterfaces );
-            for ( int i = 0; i < numberOfInterfaces; i++ ) {
-                czIntegrationRulesArray [ i ].reset( new GaussIntegrationRule(1, this) );
-                czIntegrationRulesArray [ i ]->SetUpPointsOnTriangle(nPointsTri, _3dInterface);
+            for ( int j = 0; j < numberOfInterfaces; j++ ) {
+                czIntegrationRulesArray [ j ].reset( new GaussIntegrationRule(1, this) );
+                czIntegrationRulesArray [ j ]->SetUpPointsOnTriangle(nPointsTri, _3dInterface);
             }
         
         }
@@ -203,9 +203,9 @@ bool Tr2Shell7XFEM :: updateIntegrationRuleMultiCrack()
         //Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); 
         int numberOfInterfaces = this->layeredCS->giveNumberOfLayers()-1;
         czIntegrationRulesArray.resize(numberOfInterfaces);
-        for ( int i = 0; i < numberOfInterfaces; i++ ) {
-            czIntegrationRulesArray [ i ].reset( new GaussIntegrationRule(1, this) );
-            czIntegrationRulesArray [ i ]->SetUpPointsOnTriangle(nPointsTri, _3dInterface);
+        for ( int j = 0; j < numberOfInterfaces; j++ ) {
+            czIntegrationRulesArray [ j ].reset( new GaussIntegrationRule(1, this) );
+            czIntegrationRulesArray [ j ]->SetUpPointsOnTriangle(nPointsTri, _3dInterface);
         }
     }
 
@@ -280,7 +280,7 @@ Tr2Shell7XFEM :: computeVolumeAroundLayer(GaussPoint *gp, int layer)
     double detJ;
     FloatMatrix Gcov;
     FloatArray lcoords;
-    lcoords = * gp->giveNaturalCoordinates();
+    lcoords = gp->giveNaturalCoordinates();
     this->evalInitialCovarBaseVectorsAt(lcoords, Gcov);
     detJ = Gcov.giveDeterminant() * 0.5 * this->layeredCS->giveLayerThickness(layer);
     return detJ *gp->giveWeight();

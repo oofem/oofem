@@ -51,15 +51,16 @@ class DynamicInputRecord;
 class GaussPoint;
 enum NodeEnrichmentType : int;
 
-struct EfInput {
+struct EfInput
+{
     EfInput() {}
-    EfInput(const FloatArray &iPos, const double &iLevelSet, int iNodeInd, const FloatArray &iClosestPointOnCrack, const double &iArcPos, const FloatArray &iLocalTangDir):
-    mPos(iPos),
-    mLevelSet(iLevelSet),
-    mNodeInd(iNodeInd),
-    mClosestPointOnCrack(iClosestPointOnCrack),
-    mArcPos(iArcPos),
-    mLocalTangDir(iLocalTangDir)
+    EfInput(const FloatArray &iPos, const double &iLevelSet, int iNodeInd, const FloatArray &iClosestPointOnCrack, const double &iArcPos, const FloatArray &iLocalTangDir) :
+        mPos(iPos),
+        mLevelSet(iLevelSet),
+        mNodeInd(iNodeInd),
+        mClosestPointOnCrack(iClosestPointOnCrack),
+        mArcPos(iArcPos),
+        mLocalTangDir(iLocalTangDir)
     {}
 
     ~EfInput() {}
@@ -73,7 +74,7 @@ struct EfInput {
 };
 
 
-/*
+/**
  * Class EnrichmentFront: describes the edge or tip of an XFEM enrichment.
  * The purpose is to add a different treatment of the front than the "interior"
  * enrichments. We may, e.g.
@@ -86,14 +87,13 @@ struct EfInput {
  * @author Erik Svenning
  * @date Feb 14, 2014
  */
-
 class OOFEM_EXPORT EnrichmentFront
 {
 public:
-    EnrichmentFront() { };
-    virtual ~EnrichmentFront() { };
+    EnrichmentFront() { }
+    virtual ~EnrichmentFront() { }
 
-    /*
+    /**
      *  MarkNodesAsFront:
      *  Intput:
      *  -ioNodeEnrMarker:   A vector with the same size as the number of nodes in the mesh
@@ -101,7 +101,7 @@ public:
      *                      marked with 1, other entries are zero.
      *
      *  Output:
-     *  -ioNodeEnrMarker:	Modifies the vector by marking tip nodes as 2, meaning that they
+     *  -ioNodeEnrMarker:   Modifies the vector by marking tip nodes as 2, meaning that they
      *                      should get special treatment. May also modify the set of nodes
      *                      enriched by the interior enrichment.
      */
@@ -117,7 +117,7 @@ public:
     virtual void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const EfInput &iEfInput, const FloatArray &iGradLevelSet) const = 0;
     virtual void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, GaussPoint &iGP, int iNodeInd, bool iGPLivesOnCurrentCrack, const double &iNormalSignDist) const = 0;
 
-    std :: string errorInfo(const char *func) const { return std :: string(giveClassName()) + func; }
+    std :: string errorInfo(const char *func) const { return std :: string( giveClassName() ) + func; }
 
     virtual const char *giveClassName() const = 0;
     virtual const char *giveInputRecordName() const = 0;
@@ -127,9 +127,9 @@ public:
 
     virtual double giveSupportRadius() const = 0;
 
-    virtual bool propagationIsAllowed() const {return true;}
+    virtual bool propagationIsAllowed() const { return true; }
 
-    const TipInfo &giveTipInfo() const {return mTipInfo;}
+    const TipInfo &giveTipInfo() const { return mTipInfo; }
 
     void computeCrackTangent(FloatArray &oTangent, FloatArray &oNormal, bool &oFlipTangent, const EfInput &iEfInput) const;
 
@@ -141,7 +141,6 @@ protected:
      * This help function accomplishes that.
      */
     void MarkTipElementNodesAsFront(std :: unordered_map< int, NodeEnrichmentType > &ioNodeEnrMarkerMap, XfemManager &ixFemMan,  const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const TipInfo &iTipInfo);
-
 };
 } // end namespace oofem
 

@@ -66,14 +66,13 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         return;
     }
 
+    bool volExported = false;
     fprintf(this->stream, "%.3e  ", tStep->giveTargetTime());
     for ( int ist: ists ) {
         FloatArray ipState, avgState;
         double VolTot = 0.;
         Domain *d = emodel->giveDomain(1);
-        int nelem = d->giveNumberOfElements();
-        for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-            Element *elem = d->giveElement(ielem);
+        for ( auto &elem : d->giveElements() ) {
             if ( this->matnum.giveSize() == 0 || this->matnum.contains( elem->giveMaterial()->giveNumber() ) ) { ///@todo We shouldn't rely on element->giveMaterial, won't work for layered cross-sections
                 for ( GaussPoint *gp: *elem->giveDefaultIntegrationRulePtr() ) {
                     double dV = elem->computeVolumeAround(gp);
@@ -84,6 +83,10 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
             }
         }
 
+        if ( !volExported ) {
+            fprintf(this->stream, "%.3e    ", VolTot);
+            volExported = true;
+        }
         avgState.times( 1. / VolTot * this->scale );
         fprintf(this->stream, "%d ", avgState.giveSize());
         for ( auto s: avgState ) {
@@ -103,10 +106,9 @@ HOMExportModule :: initialize()
         OOFEM_ERROR( "failed to open file %s", fileName.c_str() );
     }
 
-    fprintf(this->stream, "#Time      ");
+    fprintf(this->stream, "#Time      Volume       ");
     for ( int var: this->ists ) {
-        fprintf(this->stream, __InternalStateTypeToString( ( InternalStateType ) var) );
-        fprintf(this->stream, "    ");
+        fprintf(this->stream, "%s    ", __InternalStateTypeToString( ( InternalStateType ) var) );
     }
     fprintf(this->stream, "\n" );
     fflush(this->stream);

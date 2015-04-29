@@ -117,7 +117,7 @@ TrabBoneEmbed :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
                                          TimeStep *tStep)
 {
     double tempDam, tempTSED;
-    FloatArray newTotalDef, plasDef;
+    FloatArray plasDef;
     FloatArray totalStress;
     FloatMatrix compliance, elasticity;
 

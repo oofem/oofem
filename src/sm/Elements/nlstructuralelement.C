@@ -70,7 +70,7 @@ NLStructuralElement :: computeCurrentVolume(TimeStep *tStep)
         double J=Fm.giveDeterminant();
 
         FEInterpolation *interpolation = this->giveInterpolation();
-        double detJ = fabs( ( interpolation->giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) ) );
+        double detJ = fabs( ( interpolation->giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) ) );
 
         vol=vol + gp->giveWeight()*detJ*J;
     }
@@ -88,7 +88,7 @@ NLStructuralElement :: computeDeformationGradientVector(FloatArray &answer, Gaus
 
     // Obtain the current displacement vector of the element and subtract initial displacements (if present)
     FloatArray u;
-    this->computeVectorOf({1, 2, 3}, VM_Total, tStep, u); // solution vector
+    this->computeVectorOf({D_u, D_v, D_w}, VM_Total, tStep, u); // solution vector
     if ( initialDisplacements ) {
         u.subtract(* initialDisplacements);
     }
@@ -504,7 +504,7 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
 void
 NLStructuralElement :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
-    FloatArray stress, stressFull(6);
+    FloatArray stress;
     FloatMatrix B, stress_ident, stress_identFull;
     IntArray indx;
 
@@ -556,12 +556,11 @@ IRResultType
 NLStructuralElement :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
-    this->StructuralElement :: initializeFrom(ir);
 
     nlGeometry = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, nlGeometry, _IFT_NLStructuralElement_nlgeoflag);
 
-    return IRRT_OK;
+    return StructuralElement :: initializeFrom(ir);
 }
 
 void NLStructuralElement :: giveInputRecord(DynamicInputRecord &input)

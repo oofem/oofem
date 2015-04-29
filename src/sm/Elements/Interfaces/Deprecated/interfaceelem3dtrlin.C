@@ -71,7 +71,7 @@ InterfaceElement3dTrLin :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
 //
 {
     FloatArray n;
-    this->interpolation.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 18);
     answer.zero();
@@ -141,7 +141,7 @@ InterfaceElement3dTrLin :: computeVolumeAround(GaussPoint *gp)
         lncp[ i - 1 ].beProductOf(lcs, *this->giveNode(i)->giveCoordinates());
     }
 
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lncp) ) );
+    determinant = fabs( this->interpolation.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lncp) ) );
     weight      = gp->giveWeight();
     thickness   = this->giveCrossSection()->give(CS_Thickness, gp);
     volume      = determinant * weight * thickness;

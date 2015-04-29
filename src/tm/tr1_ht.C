@@ -34,7 +34,6 @@
 
 #include "tr1_ht.h"
 #include "fei2dtrlin.h"
-#include "node.h"
 #include "crosssection.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
@@ -87,16 +86,8 @@ Tr1_ht :: computeGaussPoints()
 IRResultType
 Tr1_ht :: initializeFrom(InputRecord *ir)
 {
-    //const char *__keyword, *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    //IRResultType result;                               // Required by IR_GIVE_FIELD macro
-
     numberOfGaussPoints = 1;
-    this->TransportElement :: initializeFrom(ir);
-
-    //IR_GIVE_OPTIONAL_FIELD (ir, numberOfGaussPoints, _IFT_Element_nip);
-    //if ( numberOfGaussPoints != 1) numberOfGaussPoints = 1;
-
-    return IRRT_OK;
+    return TransportElement :: initializeFrom(ir);
 }
 
 
@@ -105,7 +96,7 @@ Tr1_ht :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, volume;
-    determinant = fabs( this->interp.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    determinant = fabs( this->interp.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     weight = gp->giveWeight();
     volume = determinant * weight * this->giveCrossSection()->give(CS_Thickness, gp);
 
@@ -116,16 +107,16 @@ Tr1_ht :: computeVolumeAround(GaussPoint *gp)
 double
 Tr1_ht :: giveThicknessAt(const FloatArray &gcoords)
 {
-    return this->giveCrossSection()->give(CS_Thickness, & gcoords, this, false);
+    return this->giveCrossSection()->give(CS_Thickness, gcoords, this, false);
 }
 
 
 double
 Tr1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double determinant = fabs( this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    double determinant = fabs( this->interp.edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     FloatArray gc;
-    double thick = this->giveCrossSection()->give(CS_Thickness, gp->giveNaturalCoordinates(), NULL, this); // 't'
+    double thick = this->giveCrossSection()->give(CS_Thickness, gp->giveNaturalCoordinates(), NULL); // 't'
     return determinant *thick *gp->giveWeight();
 }
 

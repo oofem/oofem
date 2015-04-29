@@ -58,7 +58,7 @@ public:
     TransportCrossSection(int n, Domain * d) : CrossSection(n, d) { }
 
     /// Destructor.
-    virtual ~TransportCrossSection() { };
+    virtual ~TransportCrossSection() { }
 
     /// @todo Temporary function that hands out the material. Must be removed for future layered support, but input files will still look the same.
     TransportMaterial *giveMaterial();

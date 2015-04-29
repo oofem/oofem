@@ -93,9 +93,12 @@ public:
     OutputExportModule(int n, EngngModel * e);
     virtual ~OutputExportModule() {}
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void doOutput(TimeStep *tStep, bool forcedOutput = false);
+    FILE *giveOutputStream();
 
-    virtual const char *giveClassName() const { return "OutputExportModule"; };
+    virtual void doOutput(TimeStep *tStep, bool forcedOutput = false);
+    virtual void terminate();
+
+    virtual const char *giveClassName() const { return "OutputExportModule"; }
     virtual const char *giveInputRecordName() const { return _IFT_OutputExportModule_Name; }
 };
 } // end namespace oofem

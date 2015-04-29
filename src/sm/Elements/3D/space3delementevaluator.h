@@ -32,37 +32,38 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef planestresselementevaluator_h
-#define planestresselementevaluator_h
+#ifndef space3delementevaluator_h
+#define space3delementevaluator_h
 
-#include "../sm/ElementEvaluators/structuralelementevaluator.h"
+#include "../sm/Elements/structuralelementevaluator.h"
 
 namespace oofem {
 /**
- * General purpose Plane stress structural element evaluator.
+ * General purpose 3d structural element evaluator.
  */
-class PlaneStressStructuralElementEvaluator : public StructuralElementEvaluator
+class Space3dStructuralElementEvaluator : public StructuralElementEvaluator
 {
 public:
-    PlaneStressStructuralElementEvaluator() : StructuralElementEvaluator() { }
+    Space3dStructuralElementEvaluator() : StructuralElementEvaluator() { }
+    virtual ~Space3dStructuralElementEvaluator() { }
 
 protected:
     /**
-     * Assemble interpolation matrix at given IP.
-     * In case of IGAElements, N is assumed to contain only nonzero interpolation functions.
+     * Assemble interpolation matrix at given IP
+     * In case of IGAElements, N is assumed to contain only nonzero interpolation functions
      */
     virtual void computeNMatrixAt(FloatMatrix &answer, GaussPoint *gp);
     /**
-     * Assembles the strain-displacement matrix of the receiver at given integration point.
-     * In case of IGAElements, B is assumed to contain only contribution from nonzero interpolation functions.
+     * Assembles the strain-displacement matrix of the receiver at given integration point
+     * In case of IGAElements, B is assumed to contain only contribution from nonzero interpolation functions
      */
     virtual void computeBMatrixAt(FloatMatrix &answer, GaussPoint *gp);
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     void giveDofManDofIDMask(int inode, IntArray &answer) const {
-        answer = {D_u, D_v};
+        answer = {D_u, D_v, D_w};
     }
-}; // end of PlaneStressStructuralElementEvaluator definition
+};
 } // end namespace oofem
-#endif //planestresselementevaluator_h
+#endif //space3delementevaluator_h

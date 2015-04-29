@@ -54,24 +54,23 @@
 #include "set.h"
 #include "dynamicinputrecord.h"
 #include "feinterpol.h"
+#include "unknownnumberingscheme.h"
 
 namespace oofem {
 REGISTER_BoundaryCondition(MixedGradientPressureWeakPeriodic);
 
-MixedGradientPressureWeakPeriodic :: MixedGradientPressureWeakPeriodic(int n, Domain *d) : MixedGradientPressureBC(n, d)
+MixedGradientPressureWeakPeriodic :: MixedGradientPressureWeakPeriodic(int n, Domain *d) : MixedGradientPressureBC(n, d),
+    voldman( new Node(-1, d) ),
+    tractionsdman( new Node(-1, d) )
 {
-    this->voldman = new Node(0, d); // Node number lacks meaning here.
     int dofid = this->domain->giveNextFreeDofID();
     v_id.followedBy(dofid);
-    this->voldman->appendDof( new MasterDof( voldman, ( DofIDItem ) dofid ) );
-    this->tractionsdman = new Node(0, this->domain); // Node number lacks meaning here.
+    this->voldman->appendDof( new MasterDof( voldman.get(), ( DofIDItem ) dofid ) );
 }
 
 
 MixedGradientPressureWeakPeriodic :: ~MixedGradientPressureWeakPeriodic()
 {
-    delete voldman;
-    delete tractionsdman;
 }
 
 
@@ -84,9 +83,9 @@ int MixedGradientPressureWeakPeriodic :: giveNumberOfInternalDofManagers()
 DofManager *MixedGradientPressureWeakPeriodic :: giveInternalDofManager(int i)
 {
     if ( i == 1 ) {
-        return this->tractionsdman;
+        return this->tractionsdman.get();
     } else {
-        return this->voldman;
+        return this->voldman.get();
     }
 }
 
@@ -95,7 +94,6 @@ IRResultType MixedGradientPressureWeakPeriodic :: initializeFrom(InputRecord *ir
 {
     IRResultType result;
 
-    MixedGradientPressureBC :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, this->order, _IFT_MixedGradientPressureWeakPeriodic_order);
     if ( this->order < 0 ) {
@@ -111,10 +109,10 @@ IRResultType MixedGradientPressureWeakPeriodic :: initializeFrom(InputRecord *ir
         t_id.followedBy(dofid);
         // Simply use t_i = S_i . n, where S_1 = [1,0,0;0,0,0;0,0,0], S_2 = [0,1,0;0,0,0;0,0,0], etc.
         // then the linear terms, [x,0,0], [0,x,0] ... and so on
-        this->tractionsdman->appendDof( new MasterDof( tractionsdman, ( DofIDItem ) dofid ) );
+        this->tractionsdman->appendDof( new MasterDof( tractionsdman.get(), ( DofIDItem ) dofid ) );
     }
 
-    return IRRT_OK;
+    return MixedGradientPressureBC :: initializeFrom(ir);
 }
 
 
@@ -268,7 +266,7 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionVelocityTangent(Float
 
     answer.clear();
     for ( GaussPoint *gp: *ir ) {
-        FloatArray &lcoords = * gp->giveNaturalCoordinates();
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
         FEIElementGeometryWrapper cellgeo(el);
 
         double detJ = interp->boundaryEvalNormal(normal, boundary, lcoords, cellgeo);
@@ -297,7 +295,7 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionXTangent(FloatMatrix 
 
     FloatArray tmpAnswer;
     for ( GaussPoint *gp: *ir ) {
-        FloatArray &lcoords = * gp->giveNaturalCoordinates();
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
         FEIElementGeometryWrapper cellgeo(el);
 
         double detJ = interp->boundaryEvalNormal(normal, boundary, lcoords, cellgeo);
@@ -326,7 +324,7 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionDev(FloatArray &answe
     answer.clear();
 
     for ( GaussPoint *gp: *ir ) {
-        FloatArray &lcoords = * gp->giveNaturalCoordinates();
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
         FEIElementGeometryWrapper cellgeo(el);
 
         double detJ = interp->boundaryEvalNormal(normal, boundary, lcoords, cellgeo);
@@ -424,10 +422,10 @@ void MixedGradientPressureWeakPeriodic :: assembleVector(FloatArray &answer, Tim
 }
 
 
-void MixedGradientPressureWeakPeriodic :: assemble(SparseMtrx *answer, TimeStep *tStep,
+void MixedGradientPressureWeakPeriodic :: assemble(SparseMtrx &answer, TimeStep *tStep,
                                                    CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
-    if ( type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == StiffnessMatrix || type == ElasticStiffnessMatrix ) {
+    if ( type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == ElasticStiffnessMatrix ) {
         FloatMatrix Ke_v, Ke_vT, Ke_e, Ke_eT;
         IntArray v_loc_r, v_loc_c, t_loc_r, t_loc_c, e_loc_r, e_loc_c;
         IntArray bNodes;
@@ -457,11 +455,11 @@ void MixedGradientPressureWeakPeriodic :: assemble(SparseMtrx *answer, TimeStep 
             Ke_vT.beTranspositionOf(Ke_v);
             Ke_eT.beTranspositionOf(Ke_e);
 
-            answer->assemble(t_loc_r, v_loc_c, Ke_v);
-            answer->assemble(v_loc_r, t_loc_c, Ke_vT);
+            answer.assemble(t_loc_r, v_loc_c, Ke_v);
+            answer.assemble(v_loc_r, t_loc_c, Ke_vT);
 
-            answer->assemble(t_loc_r, e_loc_c, Ke_e);
-            answer->assemble(e_loc_r, t_loc_c, Ke_eT);
+            answer.assemble(t_loc_r, e_loc_c, Ke_e);
+            answer.assemble(e_loc_r, t_loc_c, Ke_eT);
         }
     }
 }
@@ -504,7 +502,7 @@ void MixedGradientPressureWeakPeriodic :: computeStress(FloatArray &sigmaDev, Fl
         std :: unique_ptr< IntegrationRule >ir( interp->giveBoundaryIntegrationRule(maxorder, boundary) );
 
         for ( GaussPoint *gp: *ir ) {
-            FloatArray &lcoords = * gp->giveNaturalCoordinates();
+            const FloatArray &lcoords = gp->giveNaturalCoordinates();
             FEIElementGeometryWrapper cellgeo(el);
 
             double detJ = interp->boundaryEvalNormal(normal, boundary, lcoords, cellgeo);
@@ -548,21 +546,21 @@ void MixedGradientPressureWeakPeriodic :: computeTangents(FloatMatrix &Ed, Float
     // Fetch some information from the engineering model
     EngngModel *rve = this->giveDomain()->giveEngngModel();
     ///@todo Get this from engineering model
-    SparseLinearSystemNM *solver = classFactory.createSparseLinSolver( ST_Petsc, this->domain, this->domain->giveEngngModel() ); // = rve->giveLinearSolver();
-    SparseMtrx *Kff;
-    SparseMtrxType stype = SMT_PetscMtrx; // = rve->giveSparseMatrixType();
+    std :: unique_ptr< SparseLinearSystemNM > solver( 
+        classFactory.createSparseLinSolver( ST_Petsc, this->domain, this->domain->giveEngngModel() ) ); // = rve->giveLinearSolver();
+    SparseMtrxType stype = solver->giveRecommendedMatrix(true);
     EModelDefaultEquationNumbering fnum;
     Set *set = this->giveDomain()->giveSet(this->set);
     const IntArray &boundaries = set->giveBoundaryList();
     double rve_size = this->domainSize();
 
     // Set up and assemble tangent FE-matrix which will make up the sensitivity analysis for the macroscopic material tangent.
-    Kff = classFactory.createSparseMtrx(stype);
+    std :: unique_ptr< SparseMtrx > Kff( classFactory.createSparseMtrx(stype) );
     if ( !Kff ) {
         OOFEM_ERROR("Couldn't create sparse matrix of type %d\n", stype);
     }
     Kff->buildInternalStructure(rve, this->domain->giveNumber(), fnum);
-    rve->assemble(Kff, tStep, StiffnessMatrix, fnum, fnum, this->domain);
+    rve->assemble(*Kff, tStep, TangentAssembler(TangentStiffness), fnum, fnum, this->domain);
 
     // Setup up indices and locations
     int neq = Kff->giveNumberOfRows();
@@ -607,8 +605,8 @@ void MixedGradientPressureWeakPeriodic :: computeTangents(FloatMatrix &Ed, Float
     p_pert.at( e_loc.at(1) ) = - 1.0 * rve_size;
 
     // Solve all sensitivities
-    solver->solve(Kff, ddev_pert, s_d);
-    solver->solve(Kff, & p_pert, & s_p);
+    solver->solve(*Kff, ddev_pert, s_d);
+    solver->solve(*Kff, p_pert, s_p);
 
     // Extract the tractions from the sensitivity solutions s_d and s_p:
     FloatArray tractions_p( t_loc.giveSize() );
@@ -646,9 +644,6 @@ void MixedGradientPressureWeakPeriodic :: computeTangents(FloatMatrix &Ed, Float
         this->computeStress(sigmaDev, tractions, rve_size);
         Ed.setColumn(sigmaDev, dpos);
     }
-
-    delete Kff;
-    delete solver;
 }
 
 void MixedGradientPressureWeakPeriodic :: giveInputRecord(DynamicInputRecord &input)

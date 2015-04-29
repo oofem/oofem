@@ -43,7 +43,7 @@
  #include "oofeggraphiccontext.h"
  #include "connectivitytable.h"
  #include "oofegutils.h"
- #include "rcm2.h"
+ #include "Materials/rcm2.h"
 #endif
 
 
@@ -53,9 +53,7 @@ REGISTER_Element(QTrPlaneStrain);
 FEI2dTrQuad QTrPlaneStrain :: interpolation(1, 2);
 
 QTrPlaneStrain :: QTrPlaneStrain(int n, Domain *aDomain) :
-    PlaneStrainElement(n, aDomain), SpatialLocalizerInterface(this), ZZNodalRecoveryModelInterface(this),
-    EIPrimaryUnknownMapperInterface()
-    // Constructor.
+    PlaneStrainElement(n, aDomain), SpatialLocalizerInterface(this), ZZNodalRecoveryModelInterface(this)
 {
     numberOfDofMans = 6;
     numberOfGaussPoints = 4;
@@ -72,8 +70,6 @@ QTrPlaneStrain :: giveInterface(InterfaceType interface)
         return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
         return static_cast< SpatialLocalizerInterface * >(this);
-    } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     }
 
     return NULL;
@@ -307,22 +303,5 @@ QTrPlaneStrain :: SPRNodalRecoveryMI_givePatchType()
 {
     return SPRPatchType_2dquadratic;
 }
-
-void
-QTrPlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-                                                                   TimeStep *tStep, const FloatArray &lcoords,
-                                                                   FloatArray &answer)
-{
-    FloatArray u, ni;
-    FloatMatrix n;
-
-    this->interpolation.evalN( ni, lcoords, FEIElementGeometryWrapper(this) );
-
-    n.beNMatrixOf(ni, 2);
-
-    this->computeVectorOf({D_u, D_v}, mode, tStep, u);
-    answer.beProductOf(n, u);
-}
-
 
 } // end namespace oofem

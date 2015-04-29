@@ -50,11 +50,9 @@ SimpleTransportCrossSection :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    TransportCrossSection :: initializeFrom(ir);
-
     IR_GIVE_FIELD(ir, this->matNumber, _IFT_SimpleTransportCrossSection_material);
 
-    return IRRT_OK;
+    return TransportCrossSection :: initializeFrom(ir);
 }
 
 

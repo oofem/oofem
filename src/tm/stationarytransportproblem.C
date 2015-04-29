@@ -36,6 +36,7 @@
 #include "nummet.h"
 #include "timestep.h"
 #include "element.h"
+#include "dof.h"
 #include "maskedprimaryfield.h"
 #include "verbose.h"
 #include "transportelement.h"
@@ -43,6 +44,7 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "nrsolver.h"
+#include "unknownnumberingscheme.h"
 
 namespace oofem {
 REGISTER_EngngModel(StationaryTransportProblem);
@@ -77,7 +79,8 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    EngngModel :: initializeFrom(ir);
+    result = EngngModel :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     int val = SMT_Skyline;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
@@ -125,20 +128,16 @@ double StationaryTransportProblem :: giveUnknownComponent(ValueModeType mode, Ti
 TimeStep *StationaryTransportProblem :: giveNextStep()
 {
     int istep = this->giveNumberOfFirstStep();
-    //int mstep = 1;
     StateCounterType counter = 1;
 
-    delete previousStep;
-
-    if ( currentStep != NULL ) {
+    if ( currentStep ) {
         istep = currentStep->giveNumber() + 1;
         counter = currentStep->giveSolutionStateCounter() + 1;
     }
 
-    previousStep = currentStep;
-    currentStep = new TimeStep(istep, this, 1, ( double ) istep, 0., counter);
-    // time and dt variables are set eq to 0 for statics - has no meaning
-    return currentStep;
+    previousStep = std :: move(currentStep);
+    currentStep.reset( new TimeStep(istep, this, 1, ( double ) istep, 0., counter) );
+    return currentStep.get();
 }
 
 
@@ -165,10 +164,8 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
         conductivityMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
         if ( this->keepTangent ) {
             this->conductivityMatrix->zero();
-            this->assemble( conductivityMatrix, tStep, ConductivityMatrix,
-                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            this->assemble( conductivityMatrix, tStep, LHSBCMatrix,
-                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assemble( *conductivityMatrix, tStep, TangentAssembler(TangentStiffness),
+                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
     }
 
@@ -179,7 +176,7 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 #endif
     FloatArray externalForces(neq);
     externalForces.zero();
-    this->assembleVector( externalForces, tStep, ExternalForcesVector, VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVector( externalForces, tStep, ExternalForceAssembler(), VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
     this->updateSharedDofManagers(externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
 
     // set-up numerical method
@@ -191,19 +188,19 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     FloatArray incrementOfSolution;
     double loadLevel;
     int currentIterations;
-    this->nMethod->solve(this->conductivityMatrix,
-                         & externalForces,
+    this->nMethod->solve(*this->conductivityMatrix,
+                         externalForces,
                          NULL,
-                         UnknownsField->giveSolutionVector(tStep),
-                         & incrementOfSolution,
-                         & this->internalForces,
+                         *UnknownsField->giveSolutionVector(tStep),
+                         incrementOfSolution,
+                         this->internalForces,
                          this->eNorm,
                          loadLevel, // Only relevant for incrementalBCLoadVector
                          SparseNonLinearSystemNM :: rlm_total,
                          currentIterations,
                          tStep);
 
-    //nMethod->solve( conductivityMatrix, & rhsVector, UnknownsField->giveSolutionVector(tStep) );
+    //nMethod->solve( *conductivityMatrix, rhsVector, *UnknownsField->giveSolutionVector(tStep) );
 }
 
 void
@@ -218,7 +215,7 @@ StationaryTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmp
 {
     if ( cmpn == InternalRhs ) {
         this->internalForces.zero();
-        this->assembleVector(this->internalForces, tStep, InternalForcesVector, VM_Total,
+        this->assembleVector(this->internalForces, tStep, InternalForceAssembler(), VM_Total,
                              EModelDefaultEquationNumbering(), this->giveDomain(1), & this->eNorm);
         this->updateSharedDofManagers(this->internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
         return;
@@ -226,10 +223,7 @@ StationaryTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmp
         if ( !this->keepTangent ) {
             // Optimization for linear problems, we can keep the old matrix (which could save its factorization)
             this->conductivityMatrix->zero();
-            ///@todo We should use some problem-neutral names instead of "ConductivityMatrix" (and something nicer for LHSBCMatrix)
-            this->assemble( conductivityMatrix, tStep, ConductivityMatrix,
-                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            this->assemble( conductivityMatrix, tStep, LHSBCMatrix,
+            this->assemble( *conductivityMatrix, tStep, TangentAssembler(TangentStiffness),
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
         return;
@@ -328,11 +322,9 @@ StationaryTransportProblem :: checkConsistency()
     Domain *domain = this->giveDomain(1);
 
     // check for proper element type
-    int nelem = domain->giveNumberOfElements();
-    for ( int i = 1; i <= nelem; i++ ) {
-        Element *ePtr = domain->giveElement(i);
-        if ( !dynamic_cast< TransportElement * >(ePtr) ) {
-            OOFEM_WARNING("Element %d has no TransportElement base", i);
+    for ( auto &elem : domain->giveElements() ) {
+        if ( !dynamic_cast< TransportElement * >( elem.get() ) ) {
+            OOFEM_WARNING("Element %d has no TransportElement base", elem->giveLabel());
             return 0;
         }
     }
@@ -350,20 +342,12 @@ StationaryTransportProblem :: updateDomainLinks()
 
 
 void
-StationaryTransportProblem :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
-{
-    iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
-}
-
-
-void
 StationaryTransportProblem :: updateInternalState(TimeStep *tStep)
 {
     ///@todo Remove this, unnecessary with solving as a nonlinear problem (left for now, since nonstationary problems might still need it)
     for ( auto &domain: domainList ) {
-        int nelem = domain->giveNumberOfElements();
-        for ( int j = 1; j <= nelem; j++ ) {
-            domain->giveElement(j)->updateInternalState(tStep);
+        for ( auto &elem : domain->giveElements() ) {
+            elem->updateInternalState(tStep);
         }
     }
 }

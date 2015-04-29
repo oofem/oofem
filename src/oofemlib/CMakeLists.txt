@@ -5,12 +5,12 @@ set (core_unsorted
     cltypes.C timer.C dictionary.C
     connectivitytable.C error.C mathfem.C logger.C util.C
     initmodulemanager.C initmodule.C initialcondition.C
+    assemblercallback.C
     homogenize.C
     nonlocalbarrier.C
     geotoolbox.C geometry.C
     datastream.C
     set.C
-    rvematerial.C
     weakperiodicbc.C
     solutionbasedshapefunction.C
     fracturemanager.C
@@ -76,6 +76,7 @@ set (core_nm
     sparselinsystemnm.C
     sparsenonlinsystemnm.C
     nrsolver.C
+    dynamicrelaxationsolver.C
     linesearch.C
     calmls.C
     staggeredsolver.C
@@ -215,6 +216,7 @@ set (core_xfem
     xfem/enrichmentfronts/enrichmentfrontreducefront.C
     xfem/enrichmentfronts/enrichmentfrontlinbranchfuncradius.C
     xfem/enrichmentfronts/enrichmentfrontlinbranchfunconeel.C
+    xfem/enrichmentfronts/enrichmentfrontcohesivebranchfunconeel.C
     xfem/enrichmentfronts/enrichmentfrontintersection.C
     xfem/integrationrules/discsegintegrationrule.C
     xfem/xfemtolerances.C
@@ -240,12 +242,13 @@ endif ()
 set (core_bc
     generalboundarycondition.C
     boundarycondition.C
+    prescribedgradienthomogenization.C
     prescribedgradient.C
-    prescribedgradientbc.C
     prescribedgradientbcneumann.C
     prescribedgradientbcweak.C
     prescribedgradientbcweakperiodic.C
     prescribedgradientbcweakdirichlet.C
+    prescribedgradientbcperiodic.C
     mixedgradientpressurebc.C
     mixedgradientpressuredirichlet.C
     mixedgradientpressureneumann.C

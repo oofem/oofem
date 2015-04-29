@@ -102,7 +102,7 @@ StressStrainBaseVector :: convertFromFullForm(const FloatArray &vector, Material
             this->at(i) = vector.at(i);
         }
     } else {
-        StructuralMaterial :: giveVoigtSymVectorMask(indx, ( MaterialMode ) mode);
+        StructuralMaterial :: giveVoigtSymVectorMask(indx, mode);
         this->resize( StructuralMaterial :: giveSizeOfVoigtSymVector(mode) );
         this->zero();
 

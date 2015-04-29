@@ -25,7 +25,6 @@
 #include "inputrecord.h"
 #include "engngm.h"
 #include "spatiallocalizer.h"
-#include "eleminterpmapperinterface.h"
 #include "dynamicinputrecord.h"
 #include "bodyload.h"
 #include "boundarycondition.h"
@@ -82,8 +81,6 @@ SolutionbasedShapeFunction :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;
 
-    ActiveBoundaryCondition :: initializeFrom(ir);
-
     // Load problem file
     this->filename = "";
     IR_GIVE_OPTIONAL_FIELD(ir, this->filename, _IFT_SolutionbasedShapeFunction_ShapeFunctionFile);
@@ -101,17 +98,18 @@ SolutionbasedShapeFunction :: initializeFrom(InputRecord *ir)
 
 
     // Set up master dofs
+    ///@todo This should be in the constructor:
     myNode = new Node( 1, this->giveDomain() );
 
-    for (int i=1; i<=this->giveDomain()->giveNumberOfSpatialDimensions(); i++) {
-        int DofID=this->domain->giveNextFreeDofID();
+    for (int i = 1; i <= this->giveDomain()->giveNumberOfSpatialDimensions(); i++) {
+        int DofID = this->domain->giveNextFreeDofID();
         MasterDof *newDof = new MasterDof( myNode, (DofIDItem) DofID );
         myNode->appendDof( newDof );
     }
 
     init();
 
-    return IRRT_OK;
+    return ActiveBoundaryCondition :: initializeFrom(ir);
 }
 
 DofManager *
@@ -134,16 +132,15 @@ SolutionbasedShapeFunction :: isCoeff(ActiveDof *dof)
 void
 SolutionbasedShapeFunction :: init()
 {
-    Node *n;
-    n = this->giveDomain()->giveNode(1);
+    Node *n1 = this->giveDomain()->giveNode(1);
 
-    maxCoord = * n->giveCoordinates();
-    minCoord = * n->giveCoordinates();
+    maxCoord = * n1->giveCoordinates();
+    minCoord = * n1->giveCoordinates();
 
-    for ( int i = 1; i <= this->giveDomain()->giveNumberOfDofManagers(); i++ ) {
+    for ( auto &n :this->giveDomain()->giveDofManagers() ) {
         for ( int j = 1; j <= maxCoord.giveSize(); j++ ) {
-            maxCoord.at(j) = max( this->giveDomain()->giveDofManager(i)->giveCoordinate(j), maxCoord.at(j) );
-            minCoord.at(j) = min( this->giveDomain()->giveDofManager(i)->giveCoordinate(j), minCoord.at(j) );
+            maxCoord.at(j) = max( n->giveCoordinate(j), maxCoord.at(j) );
+            minCoord.at(j) = min( n->giveCoordinate(j), minCoord.at(j) );
         }
     }
 }
@@ -157,8 +154,8 @@ SolutionbasedShapeFunction :: computeCorrectionFactors(modeStruct &myMode, IntAr
 
     double A0p = 0.0, App = 0.0, A0m = 0.0, Amm = 0.0, Bp = 0.0, Bm = 0.0, c0 = 0.0, cp = 0.0, cm = 0.0;
 
-    EngngModel *m = myMode.myEngngModel;
-    Set *mySet = m->giveDomain(1)->giveSet(externalSet);
+    EngngModel *model = myMode.myEngngModel;
+    Set *mySet = model->giveDomain(1)->giveSet(externalSet);
 
     IntArray BoundaryList = mySet->giveBoundaryList();
 
@@ -166,7 +163,7 @@ SolutionbasedShapeFunction :: computeCorrectionFactors(modeStruct &myMode, IntAr
         int ElementID = BoundaryList(2 * i);
         int Boundary = BoundaryList(2 * i + 1);
 
-        Element *thisElement = m->giveDomain(1)->giveElement(ElementID);
+        Element *thisElement = model->giveDomain(1)->giveElement(ElementID);
         FEInterpolation *geoInterpolation = thisElement->giveInterpolation();
         IntArray bnodes, zNodes, pNodes, mNodes;
         FloatMatrix nodeValues;
@@ -182,15 +179,15 @@ SolutionbasedShapeFunction :: computeCorrectionFactors(modeStruct &myMode, IntAr
         std :: unique_ptr< IntegrationRule >iRule(geoInterpolation->giveBoundaryIntegrationRule(order, Boundary));
 
         for ( GaussPoint *gp: *iRule ) {
-            FloatArray *lcoords = gp->giveNaturalCoordinates();
+            const FloatArray &lcoords = gp->giveNaturalCoordinates();
             FloatArray gcoords, normal, N;
             FloatArray Phi;
 
-            double detJ = fabs( geoInterpolation->boundaryGiveTransformationJacobian( Boundary, * lcoords, FEIElementGeometryWrapper(thisElement) ) ) * gp->giveWeight();
+            double detJ = fabs( geoInterpolation->boundaryGiveTransformationJacobian( Boundary, lcoords, FEIElementGeometryWrapper(thisElement) ) ) * gp->giveWeight();
 
-            geoInterpolation->boundaryEvalNormal( normal, Boundary, * lcoords, FEIElementGeometryWrapper(thisElement) );
-            geoInterpolation->boundaryEvalN( N, Boundary, * lcoords, FEIElementGeometryWrapper(thisElement) );
-            geoInterpolation->boundaryLocal2Global( gcoords, Boundary, * lcoords, FEIElementGeometryWrapper(thisElement) );
+            geoInterpolation->boundaryEvalNormal( normal, Boundary, lcoords, FEIElementGeometryWrapper(thisElement) );
+            geoInterpolation->boundaryEvalN( N, Boundary, lcoords, FEIElementGeometryWrapper(thisElement) );
+            geoInterpolation->boundaryLocal2Global( gcoords, Boundary, lcoords, FEIElementGeometryWrapper(thisElement) );
 
             FloatArray pPhi, mPhi, zPhi;
             pPhi.resize( Dofs->giveSize() );
@@ -387,15 +384,14 @@ SolutionbasedShapeFunction :: loadProblem()
         this->setLoads(myEngngModel, i + 1);
 
         // Check
-        for ( int j = 1; j <= myEngngModel->giveDomain(1)->giveNumberOfElements(); j++ ) {
-            Element *e = myEngngModel->giveDomain(1)->giveElement(j);
+        for ( auto &elem : myEngngModel->giveDomain(1)->giveElements() ) {
             FloatArray centerCoord;
             int vlockCount = 0;
             centerCoord.resize(3);
             centerCoord.zero();
 
-            for ( int k = 1; k <= e->giveNumberOfDofManagers(); k++ ) {
-                DofManager *dman = e->giveDofManager(k);
+            for ( int k = 1; k <= elem->giveNumberOfDofManagers(); k++ ) {
+                DofManager *dman = elem->giveDofManager(k);
                 centerCoord.add( * dman->giveCoordinates() );
                 for ( Dof *dof: *dman ) {
                     if ( dof->giveBcId() != 0 ) {
@@ -404,7 +400,7 @@ SolutionbasedShapeFunction :: loadProblem()
                 }
             }
             if ( vlockCount == 30 ) {
-                OOFEM_WARNING("Element over-constrained (%u)! Center coordinate: %f, %f, %f\n", e->giveNumber(), centerCoord.at(1) / 10, centerCoord.at(2) / 10, centerCoord.at(3) / 10);
+                OOFEM_WARNING("Element over-constrained (%u)! Center coordinate: %f, %f, %f\n", elem->giveNumber(), centerCoord.at(1) / 10, centerCoord.at(2) / 10, centerCoord.at(3) / 10);
             }
         }
 
@@ -498,9 +494,9 @@ SolutionbasedShapeFunction :: setLoads(EngngModel *myEngngModel, int d)
     myBodyLoad->initializeFrom(& ir);
     myEngngModel->giveDomain(1)->setBoundaryCondition(bcID, myBodyLoad);
 
-    for ( int i = 1; i <= myEngngModel->giveDomain(1)->giveNumberOfElements(); i++ ) {
+    for ( auto &elem : myEngngModel->giveDomain(1)->giveElements() ) {
         IntArray *blArray;
-        blArray = myEngngModel->giveDomain(1)->giveElement(i)->giveBodyLoadArray();
+        blArray = elem->giveBodyLoadArray();
         blArray->resizeWithValues(blArray->giveSize() + 1);
         blArray->at( blArray->giveSize() ) = bcID;
     }
@@ -518,7 +514,7 @@ SolutionbasedShapeFunction :: computeBaseFunctionValueAt(FloatArray &answer, Flo
         }
         ;
     } else {
-        std :: vector< FloatArray * >checkcoords;
+        std :: vector< FloatArray >checkcoords;
         std :: vector< int >permuteIndex;
         int n = 0;
 
@@ -548,20 +544,19 @@ SolutionbasedShapeFunction :: computeBaseFunctionValueAt(FloatArray &answer, Flo
         int _s = 0x01 << n;
         for ( int i = 0; i < _s; i++ ) {
             int mask = i, counter = 1;
-            FloatArray *newCoord = new(FloatArray) ( coords.giveSize() );
-            * newCoord = coords;
+            FloatArray newCoord = coords;
 
             for ( int j = 1; j <= n; j++ ) {
                 double d = 0.0; //TOL;
                 if ( ( mask & 1 ) == 0 ) { // Max
-                    newCoord->at( permuteIndex.at(counter - 1) ) = minCoord.at( permuteIndex.at(counter - 1) ) + d;
+                    newCoord.at( permuteIndex.at(counter - 1) ) = minCoord.at( permuteIndex.at(counter - 1) ) + d;
                 } else { // Min
-                    newCoord->at( permuteIndex.at(counter - 1) ) = maxCoord.at( permuteIndex.at(counter - 1) ) - d;
+                    newCoord.at( permuteIndex.at(counter - 1) ) = maxCoord.at( permuteIndex.at(counter - 1) ) - d;
                 }
                 counter++;
                 mask = mask >> 1;
             }
-            checkcoords.push_back(newCoord);
+            checkcoords.emplace_back(newCoord);
         }
 
         // The followind define allows for use of weakly periodic bc to be copied. This does not comply with the theory but is used to check the validity of the code.
@@ -575,7 +570,7 @@ SolutionbasedShapeFunction :: computeBaseFunctionValueAt(FloatArray &answer, Flo
 #endif
         FloatArray values;
         for ( size_t i = 0; i < checkcoords.size(); i++ ) {
-            giveValueAtPoint(values, * checkcoords.at(i), dofIDs, myEngngModel);
+            giveValueAtPoint(values, checkcoords[i], dofIDs, myEngngModel);
             //printf("Values at (%f, %f, %f) are [%f, %f, %f]\n", checkcoords.at(i)->at(1), checkcoords.at(i)->at(2), checkcoords.at(i)->at(3), values.at(1), values.at(2), values.at(3));
 #if USEWPBC == 1
             for ( int j = 1; j <= values.giveSize(); j++ ) {
@@ -583,10 +578,9 @@ SolutionbasedShapeFunction :: computeBaseFunctionValueAt(FloatArray &answer, Flo
             }
 #else
             for ( int j = 1; j <= values.giveSize(); j++ ) {
-                answer.at(j) = answer.at(j) + values.at(j) / ( ( double ) pow(2.0, n) );
+                answer.at(j) += values.at(j) / ( ( double ) pow(2.0, n) );
             }
 #endif
-            delete( checkcoords.at(i) );
         }
     }
 }
@@ -604,12 +598,10 @@ SolutionbasedShapeFunction :: giveValueAtPoint(FloatArray &answer, const FloatAr
         coords.pY();
     }
 
-    EIPrimaryUnknownMapperInterface *em = dynamic_cast< EIPrimaryUnknownMapperInterface * >( elementAtCoords->giveInterface(EIPrimaryUnknownMapperInterfaceType) );
-
     IntArray eldofids;
 
     elementAtCoords->giveElementDofIDMask(eldofids);
-    em->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(VM_Total, thisTimestep, lcoords, values);
+    elementAtCoords->computeField(VM_Total, thisTimestep, lcoords, values);
 
     for ( int i = 1; i <= dofIDs.giveSize(); i++ ) {
         for ( int j = 1; j <= eldofids.giveSize(); j++ ) {

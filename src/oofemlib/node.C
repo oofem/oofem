@@ -101,7 +101,11 @@ IRResultType Node :: initializeFrom(InputRecord *ir)
     // VERBOSE_PRINT1("Instanciating node ",number)
 #  endif
 
-    DofManager :: initializeFrom(ir);
+    result = DofManager :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+
     IR_GIVE_FIELD(ir, coordinates, _IFT_Node_coords);
 
     //
@@ -203,15 +207,12 @@ void
 Node :: printYourself()
 // Prints the receiver on screen.
 {
-    double x, y;
-
-    x = this->giveCoordinate(1);
-    y = this->giveCoordinate(2);
-    printf("Node %d    coord : x %f  y %f\n", number, x, y);
+    printf("Node %d    coord : x %f  y %fz< %f\n", number, this->giveCoordinate(1), this->giveCoordinate(2), this->giveCoordinate(3));
     for ( Dof *dof: *this ) {
         dof->printYourself();
     }
 
+    printf("load array : ");
     loadArray.printYourself();
     printf("\n");
 }
@@ -450,8 +451,8 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                 case D_u:
                 case D_v:
                 case D_w:
-                    for ( Dof *dof: *this ) {
-                        DofIDItem id2 = dof->giveDofID();
+                    for ( Dof *dof2: *this ) {
+                        DofIDItem id2 = dof2->giveDofID();
                         j++;
                         if ( ( id2 == D_u ) || ( id2 == D_v ) || ( id2 == D_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( D_u ) + 1,
@@ -464,8 +465,8 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                 case V_u:
                 case V_v:
                 case V_w:
-                    for ( Dof *dof: *this ) {
-                        DofIDItem id2 = dof->giveDofID();
+                    for ( Dof *dof2: *this ) {
+                        DofIDItem id2 = dof2->giveDofID();
                         j++;
                         if ( ( id2 == V_u ) || ( id2 == V_v ) || ( id2 == V_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( V_u ) + 1,
@@ -478,8 +479,8 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                 case R_u:
                 case R_v:
                 case R_w:
-                    for ( Dof *dof: *this ) {
-                        DofIDItem id2 = dof->giveDofID();
+                    for ( Dof *dof2: *this ) {
+                        DofIDItem id2 = dof2->giveDofID();
                         j++;
                         if ( ( id2 == R_u ) || ( id2 == R_v ) || ( id2 == R_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( R_u ) + 1,
@@ -810,6 +811,13 @@ Node :: drawYourself(oofegGraphicContext &gc, TimeStep *tStep)
             FloatArray load;
             FloatMatrix t;
             IntArray dofIDArry(0);
+            
+            load.clear();
+            for ( int iload : *node->giveLoadArray() ) {   // to more than one load
+                Load *loadN = domain->giveLoad(iload);
+                self->computeLoadVector(load, loadN, ExternalForcesVector, tStep, VM_Total);
+                charVec.add(load);
+            }
             computeLoadVectorAt(load, tStep, VM_Total);
             if ( computeL2GTransformation(t, dofIDArry) ) {
                 load.rotatedWith(t, 'n');

@@ -34,7 +34,7 @@
 
 #include "../sm/EngineeringModels/structengngmodel.h"
 #include "../sm/Elements/structuralelement.h"
-#include "../sm/ElementEvaluators/structuralelementevaluator.h"
+#include "../sm/Elements/structuralelementevaluator.h"
 #include "../sm/Elements/Interfaces/structuralinterfaceelement.h"
 #include "dofmanager.h"
 #include "dof.h"
@@ -42,8 +42,24 @@
 #include "timestep.h"
 #include "outputmanager.h"
 #include "activebc.h"
+#include "assemblercallback.h"
+#include "unknownnumberingscheme.h"
 
 namespace oofem {
+
+void LastEquilibratedInternalForceAssembler :: vectorFromElement(FloatArray& vec, Element& element, TimeStep* tStep, ValueModeType mode) const
+{
+    //static_cast< StructuralElement & >( element ).giveInternalForcesVector(vec, tStep, 1);
+    element.giveCharacteristicVector(vec, LastEquilibratedInternalForcesVector, mode, tStep);
+}
+
+void InitialStressMatrixAssembler :: matrixFromElement(FloatMatrix &answer, Element &element, TimeStep *tStep) const
+{
+    static_cast< StructuralElement & >( element ).computeInitialStressMatrix(answer, tStep);
+}
+
+
+
 StructuralEngngModel :: StructuralEngngModel(int i, EngngModel *_master) : EngngModel(i, _master),
     internalVarUpdateStamp(0), internalForcesEBENorm()
 { }
@@ -59,7 +75,6 @@ StructuralEngngModel :: printReactionForces(TimeStep *tStep, int di)
 // computes and prints reaction forces in all supported or restrained dofs
 //
 {
-    IntArray ielemDofMask;
     FloatArray reactions;
     IntArray dofManMap, dofidMap, eqnMap;
 
@@ -89,7 +104,7 @@ StructuralEngngModel :: printReactionForces(TimeStep *tStep, int di)
     //
     for ( int i = 1; i <= dofManMap.giveSize(); i++ ) {
         if ( domain->giveOutputManager()->testDofManOutput(dofManMap.at(i), tStep) ) {
-            fprintf( outputStream, "\tNode %8d iDof %2d reaction % .4e    [bc-id: %d]\n",
+            fprintf( outputStream, "\tNode %8d iDof %2d reaction %.4e    [bc-id: %d]\n",
                     domain->giveDofManager( dofManMap.at(i) )->giveLabel(),
                     dofidMap.at(i), reactions.at( eqnMap.at(i) ),
                     domain->giveDofManager( dofManMap.at(i) )->giveDofWithID( dofidMap.at(i) )->giveBcId() );
@@ -107,11 +122,11 @@ StructuralEngngModel :: computeReaction(FloatArray &answer, TimeStep *tStep, int
     answer.zero();
 
     // Add internal forces
-    this->assembleVector( answer, tStep, LastEquilibratedInternalForcesVector, VM_Total,
+    this->assembleVector( answer, tStep, LastEquilibratedInternalForceAssembler(), VM_Total,
                          EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di) );
     // Subtract external loading
     ///@todo All engineering models should be using this (for consistency)
-    //this->assembleVector( answer, tStep, ExternalForcesVector, VM_Total,
+    //this->assembleVector( answer, tStep, ExternalForceAssembler(), VM_Total,
     //                    EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di) );
     ///@todo This method is overloaded in some functions, it needs to be generalized.
     this->computeExternalLoadReactionContribution(contribution, tStep, di);
@@ -125,7 +140,7 @@ StructuralEngngModel :: computeExternalLoadReactionContribution(FloatArray &reac
 {
     reactions.resize( this->giveNumberOfDomainEquations( di, EModelDefaultPrescribedEquationNumbering() ) );
     reactions.zero();
-    this->assembleVector( reactions, tStep, ExternalForcesVector, VM_Total,
+    this->assembleVector( reactions, tStep, ExternalForceAssembler(), VM_Total,
                          EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di) );
 }
 
@@ -140,7 +155,7 @@ StructuralEngngModel :: giveInternalForces(FloatArray &answer, bool normFlag, in
 
     answer.resize( this->giveNumberOfDomainEquations( di, EModelDefaultEquationNumbering() ) );
     answer.zero();
-    this->assembleVector(answer, tStep, InternalForcesVector, VM_Total,
+    this->assembleVector(answer, tStep, InternalForceAssembler(), VM_Total,
                          EModelDefaultEquationNumbering(), domain, normFlag ? & this->internalForcesEBENorm : NULL);
 
     // Redistributes answer so that every process have the full values on all shared equations
@@ -163,17 +178,14 @@ int
 StructuralEngngModel :: checkConsistency()
 {
     Domain *domain = this->giveDomain(1);
-    int nelem = domain->giveNumberOfElements();
     // check for proper element type
-
-    for ( int i = 1; i <= nelem; i++ ) {
-        Element *ePtr = domain->giveElement(i);
-        StructuralElement *sePtr = dynamic_cast< StructuralElement * >(ePtr);
-        StructuralInterfaceElement *siePtr = dynamic_cast< StructuralInterfaceElement * >(ePtr);
-        StructuralElementEvaluator *see = dynamic_cast< StructuralElementEvaluator * >(ePtr);
+    for ( auto &elem : domain->giveElements() ) {
+        StructuralElement *sePtr = dynamic_cast< StructuralElement * >( elem.get() );
+        StructuralInterfaceElement *siePtr = dynamic_cast< StructuralInterfaceElement * >( elem.get() );
+        StructuralElementEvaluator *see = dynamic_cast< StructuralElementEvaluator * >( elem.get() );
 
         if ( sePtr == NULL && see == NULL && siePtr == NULL ) {
-            OOFEM_WARNING("element %d has no Structural support", i);
+            OOFEM_WARNING("Element %d has no structural support", elem->giveLabel());
             return 0;
         }
     }
@@ -188,19 +200,16 @@ void
 StructuralEngngModel :: updateInternalState(TimeStep *tStep)
 {
     for ( auto &domain: domainList ) {
-        int nnodes = domain->giveNumberOfDofManagers();
         if ( requiresUnknownsDictionaryUpdate() ) {
-            for ( int j = 1; j <= nnodes; j++ ) {
-                this->updateDofUnknownsDictionary(domain->giveDofManager(j), tStep);
+            for ( auto &dman : domain->giveDofManagers() ) {
+                this->updateDofUnknownsDictionary(dman.get(), tStep);
             }
         }
 
-        int nbc = domain->giveNumberOfBoundaryConditions();
-        for ( int i = 1; i <= nbc; ++i ) {
-            GeneralBoundaryCondition *bc = domain->giveBc(i);
+        for ( auto &bc : domain->giveBcs() ) {
             ActiveBoundaryCondition *abc;
 
-            if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >(bc) ) ) {
+            if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >(bc.get()) ) ) {
                 int ndman = abc->giveNumberOfInternalDofManagers();
                 for ( int j = 1; j <= ndman; j++ ) {
                     this->updateDofUnknownsDictionary(abc->giveInternalDofManager(j), tStep);
@@ -209,9 +218,8 @@ StructuralEngngModel :: updateInternalState(TimeStep *tStep)
         }
 
         if ( internalVarUpdateStamp != tStep->giveSolutionStateCounter() ) {
-            int nelem = domain->giveNumberOfElements();
-            for ( int j = 1; j <= nelem; j++ ) {
-                domain->giveElement(j)->updateInternalState(tStep);
+            for ( auto &elem : domain->giveElements() ) {
+                elem->updateInternalState(tStep);
             }
 
             internalVarUpdateStamp = tStep->giveSolutionStateCounter();
@@ -269,9 +277,8 @@ StructuralEngngModel :: showSparseMtrxStructure(int type, oofegGraphicContext &g
         return;
     }
 
-    int nelems = domain->giveNumberOfElements();
-    for ( int i = 1; i <= nelems; i++ ) {
-        domain->giveElement(i)->showSparseMtrxStructure(StiffnessMatrix, gc, tStep);
+    for ( auto &elem : domain->giveElements() ) {
+        elem->showSparseMtrxStructure(TangentStiffnessMatrix, gc, tStep);
     }
 }
 #endif

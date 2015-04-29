@@ -65,12 +65,7 @@ IRResultType
 Q27Space :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 27;
-    IRResultType result = this->StructuralElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    return IRRT_OK;
+    return Structural3DElement :: initializeFrom(ir);
 }
 
 

@@ -316,8 +316,8 @@ QDKTPlate :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rM
 
 void
 QDKTPlate :: giveNodeCoordinates(double &x1, double &x2, double &x3, double &x4,
-				 double &y1, double &y2, double &y3, double &y4,
-				 double &z1, double &z2, double &z3, double &z4)
+                                 double &y1, double &y2, double &y3, double &y4,
+                                 double &z1, double &z2, double &z3, double &z4)
 {
   FloatArray *nc1, *nc2, *nc3, *nc4;
     nc1 = this->giveNode(1)->giveCoordinates();
@@ -346,7 +346,7 @@ QDKTPlate :: giveNodeCoordinates(double &x1, double &x2, double &x3, double &x4,
 IRResultType
 QDKTPlate :: initializeFrom(InputRecord *ir)
 {
-    return this->NLStructuralElement :: initializeFrom(ir);
+    return NLStructuralElement :: initializeFrom(ir);
 }
 
 
@@ -388,7 +388,7 @@ QDKTPlate :: computeVolumeAround(GaussPoint *gp)
     double detJ, weight;
 
     weight = gp->giveWeight();
-    detJ = fabs( this->interp_lin.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    detJ = fabs( this->interp_lin.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     return detJ * weight; ///@todo What about thickness?
 }
 
@@ -438,7 +438,7 @@ QDKTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep
 
     if ( force.giveSize() ) {
         for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
-            this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), n);
+            this->computeNmatrixAt(gp->giveSubPatchCoordinates(), n);
             dV  = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness, gp);
             dens = this->giveCrossSection()->give('d', gp);
             ntf.beTProductOf(n, force);
@@ -482,7 +482,7 @@ QDKTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coord
 
     //check that the z is within the element
     StructuralCrossSection *cs = this->giveStructuralCrossSection();
-    double elthick = cs->give(CS_Thickness, & answer, NULL, this);
+    double elthick = cs->give(CS_Thickness, answer, this);
 
     if ( elthick / 2.0 + midplZ - fabs( coords.at(3) ) < -POINT_TOL ) {
         answer.zero();
@@ -573,9 +573,9 @@ QDKTPlate :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, i
 {
     answer.resize(1);
     if ( ( pap == this->giveNode(1)->giveNumber() ) ||
-	 ( pap == this->giveNode(2)->giveNumber() ) ||
-	 ( pap == this->giveNode(3)->giveNumber() ) ||
-	 ( pap == this->giveNode(4)->giveNumber() ) ) {
+        ( pap == this->giveNode(2)->giveNumber() ) ||
+        ( pap == this->giveNode(3)->giveNumber() ) ||
+        ( pap == this->giveNode(4)->giveNumber() ) ) {
       answer.at(1) = pap;
     } else {
         OOFEM_ERROR("node unknown");
@@ -595,7 +595,7 @@ QDKTPlate :: SPRNodalRecoveryMI_givePatchType()
 //
 void
 QDKTPlate :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
-					GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep)
+                                        GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep)
 // returns full 3d strain vector of given layer (whose z-coordinate from center-line is
 // stored in slaveGp) for given tStep
 {
@@ -621,7 +621,7 @@ QDKTPlate :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp
 {
     FloatArray n;
 
-    this->interp_lin.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.edgeEvalN( n, iedge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 6);
     answer.at(1, 1) = n.at(1);
@@ -649,7 +649,7 @@ QDKTPlate :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 QDKTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     return detJ *gp->giveWeight();
 }
 
@@ -657,7 +657,7 @@ QDKTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 QDKTPlate :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interp_lin.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.edgeLocal2global( answer, iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -700,7 +700,7 @@ QDKTPlate :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gaus
 void
 QDKTPlate :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
-  this->computeNmatrixAt(* sgp->giveNaturalCoordinates(), answer);
+    this->computeNmatrixAt(sgp->giveNaturalCoordinates(), answer);
 }
 
 void
@@ -709,9 +709,9 @@ QDKTPlate :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
     answer.resize(12);
     answer.zero();
     if ( iSurf == 1 ) {
-      for (int i = 1; i<=12; i++) {
-	answer.at(i) = i;
-      }
+        for (int i = 1; i<=12; i++) {
+            answer.at(i) = i;
+        }
     } else {
         OOFEM_ERROR("wrong surface number");
     }
@@ -736,7 +736,7 @@ QDKTPlate :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 void
 QDKTPlate :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
 {
-    this->computeGlobalCoordinates( answer, * gp->giveNaturalCoordinates() );
+    this->computeGlobalCoordinates( answer, gp->giveNaturalCoordinates() );
 }
 
 

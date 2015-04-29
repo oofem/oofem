@@ -38,12 +38,14 @@
 #include "timestep.h"
 #include "engngm.h"
 #include "node.h"
+#include "dof.h"
 #include "materialinterface.h"
 #include "mathfem.h"
 #include "cltypes.h"
 #include "material.h"
 #include "classfactory.h"
 #include "crosssection.h"
+#include "unknownnumberingscheme.h"
 
 #include "xfem/xfemmanager.h"
 #include "xfem/enrichmentitem.h"
@@ -98,8 +100,6 @@ VTKXMLExportModule :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     int val;
 
-    ExportModule :: initializeFrom(ir);
-
     IR_GIVE_OPTIONAL_FIELD(ir, cellVarsToExport, _IFT_VTKXMLExportModule_cellvars); // Macro - see internalstatetype.h
     IR_GIVE_OPTIONAL_FIELD(ir, internalVarsToExport, _IFT_VTKXMLExportModule_vars); // Macro - see internalstatetype.h
     IR_GIVE_OPTIONAL_FIELD(ir, primaryVarsToExport, _IFT_VTKXMLExportModule_primvars); // Macro - see unknowntype.h
@@ -109,10 +109,13 @@ VTKXMLExportModule :: initializeFrom(InputRecord *ir)
     val = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_VTKXMLExportModule_stype); // Macro
     stype = ( NodalRecoveryModel :: NodalRecoveryModelType ) val;
-
+    timeScale = 1.;
+    IR_GIVE_OPTIONAL_FIELD(ir, timeScale, _IFT_VTKXMLExportModule_timescale); // Macro
+    
     regionSets.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, regionSets, _IFT_VTKXMLExportModule_regionsets); // Macro
-    return IRRT_OK;
+
+    return ExportModule :: initializeFrom(ir);
 }
 
 
@@ -140,7 +143,7 @@ VTKXMLExportModule :: terminate()
 
 
 void
-VTKXMLExportModule :: makeFullForm(FloatArray &answer, const FloatArray &reducedForm)
+VTKXMLExportModule :: makeFullTensorForm(FloatArray &answer, const FloatArray &reducedForm)
 {
     answer.resize(9);
     answer.zero();
@@ -155,6 +158,17 @@ VTKXMLExportModule :: makeFullForm(FloatArray &answer, const FloatArray &reduced
     answer.at(8) = answer.at(6);
 }
 
+void
+VTKXMLExportModule :: makeFullVectorForm(FloatArray &answer, const FloatArray &input)
+{
+    answer.resize(3);
+    answer.zero();
+    
+    int isize = min(input.giveSize(), 3); // so it will simply truncate larger arrays
+    for ( int i = 1; i <= isize; i++ ) {
+        answer.at(i) = input.at(i);
+    }
+}
 
 std :: string
 VTKXMLExportModule :: giveOutputFileName(TimeStep *tStep)
@@ -347,7 +361,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
     // Write output: VTK header
 #ifndef __VTK_MODULE
-    fprintf(this->fileStream, "<!-- TimeStep %e Computed %d-%02d-%02d at %02d:%02d:%02d -->\n", tStep->giveIntrinsicTime(), current->tm_year + 1900, current->tm_mon + 1, current->tm_mday, current->tm_hour,  current->tm_min,  current->tm_sec);
+    fprintf(this->fileStream, "<!-- TimeStep %e Computed %d-%02d-%02d at %02d:%02d:%02d -->\n", tStep->giveIntrinsicTime()*timeScale, current->tm_year + 1900, current->tm_mon + 1, current->tm_mday, current->tm_hour,  current->tm_min,  current->tm_sec);
     fprintf(this->fileStream, "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">\n");
     fprintf(this->fileStream, "<UnstructuredGrid>\n");
 #endif
@@ -387,8 +401,8 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
             //this->exportCompositeElement(this->defaultVTKPiece, el, tStep);
             this->exportCompositeElement(this->defaultVTKPieces, el, tStep);
 
-            for ( int i = 0; i < (int)this->defaultVTKPieces.size(); i++ ) {
-                this->writeVTKPiece(this->defaultVTKPieces[i], tStep);
+            for ( int j = 0; j < (int)this->defaultVTKPieces.size(); j++ ) {
+                this->writeVTKPiece(this->defaultVTKPieces[j], tStep);
             }
 #else
                 // No support for binary export yet
@@ -430,34 +444,47 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     fclose(this->fileStream);
 #endif
 
-    // export raw ip values (if required)
+    // export raw ip values (if required), works only on one domain
     if ( !this->ipInternalVarsToExport.isEmpty() ) {
         this->exportIntVarsInGpAs(ipInternalVarsToExport, tStep);
+        if(!emodel->isParallel() && tStep->giveNumber() >= 1 ) { // For non-parallel enabled OOFEM, then we only check for multiple steps.
+            std :: ostringstream pvdEntry;
+            std :: stringstream subStep;
+            if (tstep_substeps_out_flag)
+                subStep << "." << tStep->giveSubStepNumber();
+            pvdEntry << "<DataSet timestep=\"" << tStep->giveIntrinsicTime()<< subStep.str() << "\" group=\"\" part=\"\" file=\"" << this->giveOutputBaseFileName(tStep) + ".gp.vtu" << "\"/>";
+            this->gpPvdBuffer.push_back( pvdEntry.str() );
+            this->writeGPVTKCollection();
+        }
     }
 
-    // Write the *.pvd-file. Currently only conatains time step information. It's named "timestep" but is actually the total time.
+    // Write the *.pvd-file. Currently only contains time step information. It's named "timestep" but is actually the total time.
     // First we check to see that there are more than 1 time steps, otherwise it is redundant;
     if ( emodel->isParallel() && emodel->giveRank() == 0 ) {
         ///@todo Should use probably use PVTU-files instead. It is starting to get messy.
         // For this to work, all processes must have an identical output file name.
         for ( int i = 0; i < this->emodel->giveNumberOfProcesses(); ++i ) {
             std :: ostringstream pvdEntry;
+            std :: stringstream subStep;
             char fext [ 100 ];
             if ( this->emodel->giveNumberOfProcesses() > 1 ) {
                 sprintf( fext, "_%03d.m%d.%d", i, this->number, tStep->giveNumber() );
             } else {
                 sprintf( fext, "m%d.%d", this->number, tStep->giveNumber() );
             }
-
-            pvdEntry << "<DataSet timestep=\"" << tStep->giveIntrinsicTime() << "\" group=\"\" part=\"" << i << "\" file=\""
-                     << this->emodel->giveOutputBaseFileName() << fext << ".vtu\"/>";
+            if (tstep_substeps_out_flag)
+                subStep << "." << tStep->giveSubStepNumber();
+            pvdEntry << "<DataSet timestep=\"" << tStep->giveIntrinsicTime() << subStep.str() << "\" group=\"\" part=\"" << i << "\" file=\"" << this->emodel->giveOutputBaseFileName() << fext << ".vtu\"/>";
             this->pvdBuffer.push_back( pvdEntry.str() );
         }
 
         this->writeVTKCollection();
     } else if ( !emodel->isParallel() && tStep->giveNumber() >= 1 ) { // For non-parallel, then we only check for multiple steps.
         std :: ostringstream pvdEntry;
-        pvdEntry << "<DataSet timestep=\"" << tStep->giveIntrinsicTime() << "\" group=\"\" part=\"\" file=\"" << fname << "\"/>";
+        std :: stringstream subStep;
+        if (tstep_substeps_out_flag)
+            subStep << "." << tStep->giveSubStepNumber();
+        pvdEntry << "<DataSet timestep=\"" << tStep->giveIntrinsicTime() << subStep.str() << "\" group=\"\" part=\"\" file=\"" << fname << "\"/>";
         this->pvdBuffer.push_back( pvdEntry.str() );
         this->writeVTKCollection();
     }
@@ -666,9 +693,10 @@ VTKXMLExportModule :: writeVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep)
     // Write output: node coords
     int numNodes = vtkPiece.giveNumberOfNodes();
     int numEl = vtkPiece.giveNumberOfCells();
-    FloatArray vtkCoords(3), coords;
+    FloatArray coords;
 
 #ifdef __VTK_MODULE
+    FloatArray vtkCoords(3);
     for ( int inode = 1; inode <= numNodes; inode++ ) {
         coords = vtkPiece.giveNodeCoords(inode);
         vtkCoords.zero();
@@ -802,7 +830,7 @@ VTKXMLExportModule :: giveDataHeaders(std :: string &pointHeader, std :: string 
         if ( type == DisplacementVector || type == EigenVector || type == VelocityVector || type == DirectorField ) {
             vectors += __UnknownTypeToString(type);
             vectors.append(" ");
-        } else if ( type == FluxVector || type == PressureVector || type == Temperature ) {
+        } else if ( type == FluxVector || type == PressureVector || type == Temperature || type == Humidity) {
             scalars += __UnknownTypeToString(type);
             scalars.append(" ");
         } else {
@@ -836,7 +864,7 @@ VTKXMLExportModule :: giveDataHeaders(std :: string &pointHeader, std :: string 
         if ( type == DisplacementVector || type == VelocityVector || type == DirectorField ) {
             vectors += std :: string("Load") + __UnknownTypeToString(type);
             vectors.append(" ");
-        } else if ( type == FluxVector || type == PressureVector || type == Temperature ) {
+        } else if ( type == FluxVector || type == PressureVector || type == Temperature || type == Humidity ) {
             scalars += std :: string("Load") + __UnknownTypeToString(type);
             scalars.append(" ");
         } else {
@@ -981,12 +1009,9 @@ VTKXMLExportModule :: getNodalVariableFromIS(FloatArray &answer, Node *node, Tim
     if ( valType == ISVT_SCALAR ) {
         answer.at(1) = valSize ? val->at(1) : 0.0;
     } else if ( valType == ISVT_VECTOR ) {
-        int isize = min(valSize, 3); // so it will simply truncate larger arrays
-        for ( int i = 1; i <= isize; i++ ) {
-            answer.at(i) = val->at(i);
-        }
+        makeFullVectorForm(answer, *val);
     } else if ( valType == ISVT_TENSOR_S3 || valType == ISVT_TENSOR_S3E ) {
-        this->makeFullForm(answer, * val);
+        this->makeFullTensorForm(answer, * val);
     } else if ( valType == ISVT_TENSOR_G ) { // export general tensor values as scalars
         int isize = min(val->giveSize(), 9);
         for ( int i = 1; i <= isize; i++ ) {
@@ -1039,12 +1064,9 @@ VTKXMLExportModule :: getNodalVariableFromXFEMST(FloatArray &answer, Node *node,
     if ( valType == ISVT_SCALAR ) {
         answer.at(1) = valSize ? val->at(1) : 0.0;
     } else if ( valType == ISVT_VECTOR ) {
-        int isize = min(valSize, 3); // so it will simply truncate larger arrays
-        for ( int i = 1; i <= isize; i++ ) {
-            answer.at(i) = val->at(i);
-        }
+        makeFullVectorForm(answer, *val);
     } else if ( valType == ISVT_TENSOR_S3 || valType == ISVT_TENSOR_S3E ) {
-        this->makeFullForm(answer, * val);
+        this->makeFullTensorForm(answer, * val);
     } else if ( valType == ISVT_TENSOR_G ) { // export general tensor values as scalars
         int isize = min(val->giveSize(), 9);
         for ( int i = 1; i <= isize; i++ ) {
@@ -1062,12 +1084,7 @@ VTKXMLExportModule :: writeIntVars(VTKPiece &vtkPiece)
     int n = internalVarsToExport.giveSize();
     for ( int i = 1; i <= n; i++ ) {
         InternalStateType type = ( InternalStateType ) internalVarsToExport.at(i);
-        InternalStateValueType valType = giveInternalStateValueType(type);
-        int ncomponents = giveInternalStateTypeSize(valType);
-
-        //if ( type == IST_AbaqusStateVector ) {
-        //    ncomponents = 23;
-        //}
+        int ncomponents;
 
         const char *name = __InternalStateTypeToString(type);
         int numNodes = vtkPiece.giveNumberOfNodes();
@@ -1395,7 +1412,7 @@ VTKXMLExportModule :: getNodalVariableFromPrimaryField(FloatArray &answer, DofMa
         }
 
         answer.resize(3);
-    } else if ( type == FluxVector ) {
+    } else if ( type == FluxVector || type == Humidity) {
         dofIDMask.followedBy(C_1);
         iState = IST_MassConcentration_1;
         answer.resize(1);
@@ -1529,8 +1546,8 @@ VTKXMLExportModule :: exportExternalForces(VTKPiece &vtkPiece, IntArray &mapG2L,
     int neq = emodel->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
     int npeq = emodel->giveNumberOfDomainEquations( 1, EModelDefaultPrescribedEquationNumbering() );
     FloatArray extForces(neq), extForcesP(npeq);
-    emodel->assembleVector(extForces, tStep, ExternalForcesVector, VM_Total, EModelDefaultEquationNumbering(), d);
-    emodel->assembleVector(extForcesP, tStep, ExternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), d);
+    emodel->assembleVector(extForces, tStep, ExternalForceAssembler(), VM_Total, EModelDefaultEquationNumbering(), d);
+    emodel->assembleVector(extForcesP, tStep, ExternalForceAssembler(), VM_Total, EModelDefaultPrescribedEquationNumbering(), d);
 
     vtkPiece.setNumberOfLoadsToExport(externalForcesToExport.giveSize(), mapL2G.giveSize());
     for ( int i = 1; i <= externalForcesToExport.giveSize(); i++ ) {
@@ -1638,34 +1655,29 @@ VTKXMLExportModule :: exportCellVars(VTKPiece &vtkPiece, const IntArray &elems, 
 void
 VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, InternalStateType type, TimeStep *tStep)
 {
-    FloatMatrix rotMat(3, 3);
-    int col = 0;
-    FloatArray valueArray, temp;
-    IntArray redIndx;
-
     InternalStateValueType valType = giveInternalStateValueType(type);
     int ncomponents = giveInternalStateTypeSize(valType);
 
-    valueArray.resize(ncomponents);
+    answer.resize(ncomponents);
 
     switch ( type ) {
         // Special scalars
     case IST_MaterialNumber:
         // commented by bp: do what user wants
         //OOFEM_WARNING1("Material numbers are deprecated, outputing cross section number instead...");
-        valueArray.at(1) = ( double ) el->giveMaterial()->giveNumber();
-	break;
+        answer.at(1) = ( double ) el->giveMaterial()->giveNumber();
+        break;
     case IST_CrossSectionNumber:
-        valueArray.at(1) = ( double ) el->giveCrossSection()->giveNumber();
+        answer.at(1) = ( double ) el->giveCrossSection()->giveNumber();
         break;
     case IST_ElementNumber:
-        valueArray.at(1) = ( double ) el->giveNumber();
+        answer.at(1) = ( double ) el->giveNumber();
         break;
     case IST_Pressure: ///@todo This case seems redundant, remove? /JB, /// Why this special treatment for pressure? / Mikael
         if ( el->giveNumberOfInternalDofManagers() == 1 ) {
             //IntArray pmask(1); pmask.at(1) = P_f;
             //el->giveInternalDofManager(1)->giveUnknownVector (answer, pmask, VM_Total, tStep);
-            //valueArray.at(1) = answer.at(1);
+            //answer.at(1) = answer.at(1);
         }
 
         break;
@@ -1674,54 +1686,50 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
     case IST_MaterialOrientation_x:
     case IST_MaterialOrientation_y:
     case IST_MaterialOrientation_z:
+        {
+            FloatMatrix rotMat;
+            int col = 0;
+            if ( type == IST_MaterialOrientation_x ) {
+                col = 1;
+            } else if ( type == IST_MaterialOrientation_y ) {
+                col = 2;
+            } else if ( type == IST_MaterialOrientation_z ) {
+                col = 3;
+            }
 
-        if ( type == IST_MaterialOrientation_x ) {
-            col = 1;
+            if ( !el->giveLocalCoordinateSystem(rotMat) ) {
+                rotMat.resize(3,3);
+                rotMat.beUnitMatrix();
+            }
+
+            answer.beColumnOf(rotMat, col);
+            break;
         }
-
-        if ( type == IST_MaterialOrientation_y ) {
-            col = 2;
-        }
-
-        if ( type == IST_MaterialOrientation_z ) {
-            col = 3;
-        }
-
-        if ( !el->giveLocalCoordinateSystem(rotMat) ) {
-            rotMat.zero(); ///@todo shouldn't it be an identity matrix? /JB
-        }
-
-        valueArray.beColumnOf(rotMat, col);
-        break;
 
         // Export cell data as average from ip's as default
     default:
 
         // compute cell average from ip values
         IntegrationRule * iRule = el->giveDefaultIntegrationRulePtr();
-        computeIPAverage(temp, iRule, el, type, tStep); // if element has more than one iRule?? /JB
-
+        computeIPAverage(answer, iRule, el, type, tStep); // if element has more than one iRule?? /JB
         // Reshape the Voigt vectors to include all components (duplicated if necessary, VTK insists on 9 components for tensors.)
 #if 1
-        // Is this part necessary now when giveIPValue returns full form? Only need to symmetrize in case of 6 components /JB
-        if ( ncomponents == 9 && temp.giveSize() != 9 ) { // If it has 9 components, then it is assumed to be proper already.
-            this->makeFullForm(valueArray, temp);
-        } else if ( valType == ISVT_VECTOR && temp.giveSize() < 3 ) {
-            valueArray = {temp.giveSize() > 1 ? temp.at(1) : 0.0,
-                          temp.giveSize() > 2 ? temp.at(2) : 0.0,
-                          0.0};
-        } else if ( ncomponents != temp.giveSize() ) { // Trying to gracefully handle bad cases, just output zeros.
-            valueArray.resize(9);
-            valueArray.zero();
-        } else {
-            valueArray = temp;
+        /// @todo Is this part necessary now when giveIPValue returns full form? Only need to symmetrize in case of 6 components /JB
+        /// @todo Some material models aren't exporting values correctly (yet) / Mikael
+        if ( ncomponents == 9 && answer.giveSize() != 9 ) { // If it has 9 components, then it is assumed to be proper already.
+            FloatArray temp = answer;
+            this->makeFullTensorForm(answer, temp);
+        } else if ( valType == ISVT_VECTOR && answer.giveSize() < 3 ) {
+            answer = {answer.giveSize() > 1 ? answer.at(1) : 0.0,
+                      answer.giveSize() > 2 ? answer.at(2) : 0.0,
+                      0.0};
+        } else if ( ncomponents != answer.giveSize() ) { // Trying to gracefully handle bad cases, just output zeros.
+            answer.resize(ncomponents);
+            answer.zero();
         }
 
 #endif
     }
-
-
-    answer = valueArray;
 }
 
 
@@ -1794,7 +1802,7 @@ VTKXMLExportModule :: writeVTKCollection()
     std :: string fname;
 
     if ( tstep_substeps_out_flag ) {
-        fname = this->emodel->giveOutputBaseFileName() + ".gp.pvd";
+        fname = this->emodel->giveOutputBaseFileName() + ".substep.pvd";
     } else {
         fname = this->emodel->giveOutputBaseFileName() + ".pvd";
     }
@@ -1814,7 +1822,36 @@ VTKXMLExportModule :: writeVTKCollection()
     outfile.close();
 }
 
+void
+VTKXMLExportModule :: writeGPVTKCollection()
+{
+    struct tm *current;
+    time_t now;
+    time(& now);
+    current = localtime(& now);
+    char buff [ 1024 ];
+    std :: string fname;
 
+    if ( tstep_substeps_out_flag ) {
+        fname = this->emodel->giveOutputBaseFileName() + ".substep.gp.pvd";
+    } else {
+        fname = this->emodel->giveOutputBaseFileName() + ".gp.pvd";
+    }
+
+    std :: ofstream outfile( fname.c_str() );
+
+    sprintf(buff, "<!-- Computation started %d-%02d-%02d at %02d:%02d:%02d -->\n", current->tm_year + 1900, current->tm_mon + 1, current->tm_mday, current->tm_hour,  current->tm_min,  current->tm_sec);
+    //     outfile << buff;
+
+    outfile << "<?xml version=\"1.0\"?>\n<VTKFile type=\"Collection\" version=\"0.1\">\n<Collection>\n";
+    for ( auto pvd: this->gpPvdBuffer ) {
+        outfile << pvd << "\n";
+    }
+
+    outfile << "</Collection>\n</VTKFile>";
+
+    outfile.close();
+}
 
 
 
@@ -1891,7 +1928,7 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
     int nc = 0;
-    FloatArray *lc, gc, value;
+    FloatArray gc, value;
     FILE *stream;
     InternalStateType isttype;
     InternalStateValueType vtype;
@@ -1923,8 +1960,7 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
             int ielem = elements.at(i);
 
             for ( GaussPoint *gp: *d->giveElement(ielem)->giveDefaultIntegrationRulePtr() ) {
-                lc = gp->giveNaturalCoordinates();
-                d->giveElement(ielem)->computeGlobalCoordinates(gc, * lc);
+                d->giveElement(ielem)->computeGlobalCoordinates(gc, gp->giveNaturalCoordinates());
                 for ( double c: gc ) {
                     fprintf( stream, "%e ", c );
                 }
@@ -2009,9 +2045,12 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
                 for ( GaussPoint *gp: *d->giveElement(ielem)->giveDefaultIntegrationRulePtr() ) {
                     d->giveElement(ielem)->giveIPValue(value, gp, isttype, tStep);
 
-                    if ( ( vtype == ISVT_TENSOR_S3 ) || ( vtype == ISVT_TENSOR_S3E ) ) {
+                    if ( vtype == ISVT_VECTOR ) {
                         FloatArray help = value;
-                        this->makeFullForm(value, help);
+                        makeFullVectorForm(value, help);
+                    } else if ( ( vtype == ISVT_TENSOR_S3 ) || ( vtype == ISVT_TENSOR_S3E ) ) {
+                        FloatArray help = value;
+                        this->makeFullTensorForm(value, help);
                     }
 
                     for ( double v: value ) {

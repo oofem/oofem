@@ -144,6 +144,7 @@ protected:
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
     virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
     virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
+    void computeVectorOfUnknowns(ValueModeType mode, TimeStep* tStep, FloatArray &shellUnknowns, FloatArray &drillUnknowns);
     //virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, GaussPoint *gp) { answer.clear(); }
     //virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const { answer.clear(); }
     //virtual IntegrationRule *GetSurfaceIntegrationRule(int i) { return NULL; }

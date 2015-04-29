@@ -82,7 +82,7 @@ Q4Axisymm :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     numberOfGaussPoints = 4;
-    result = this->StructuralElement :: initializeFrom(ir);
+    result = StructuralElement :: initializeFrom(ir);
     if ( result != IRRT_OK ) {
         return result;
     }
@@ -107,7 +107,7 @@ Q4Axisymm :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
         FEInterpolation *interp = this->giveInterpolation();
         
         FloatArray N, NRed, redCoord = {0.0, 0.0}; // eval in centroid
-        interp->evalN( N, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+        interp->evalN( N, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
         interp->evalN( NRed, redCoord, FEIElementGeometryWrapper(this) );
         
         // Evaluate radius at center
@@ -118,7 +118,7 @@ Q4Axisymm :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
         } 
         
         FloatMatrix dNdx, dNdxRed;
-        interp->evaldNdx( dNdx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+        interp->evaldNdx( dNdx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
         interp->evaldNdx( dNdxRed, redCoord, FEIElementGeometryWrapper(this) );
         answer.resize(6, dNdx.giveNumberOfRows() * 2);
         answer.zero();

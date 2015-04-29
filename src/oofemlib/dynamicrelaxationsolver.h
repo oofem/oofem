@@ -32,38 +32,48 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef space3delementevaluator_h
-#define space3delementevaluator_h
+#ifndef dynamicrelaxationsolver_h
+#define dynamicrelaxationsolver_h
 
-#include "../sm/ElementEvaluators/structuralelementevaluator.h"
+#include "sparselinsystemnm.h"
+#include "sparsenonlinsystemnm.h"
+#include "sparsemtrx.h"
+#include "floatarray.h"
+#include "linesearch.h"
+#include "nrsolver.h"
+
+#include <vector>
+
+
+///@name Input fields for DynamicRelaxationSolver
+//@{
+#define _IFT_DynamicRelaxationSolver_Name "drsolver"
+//@}
 
 namespace oofem {
+class Domain;
+class EngngModel;
+
+
 /**
- * General purpose 3d structural element evaluator.
+ * Solves static equilibrium by means of explicit dynamic iterations.
+ * @author Mikael Öhman
  */
-class Space3dStructuralElementEvaluator : public StructuralElementEvaluator
+class OOFEM_EXPORT DynamicRelaxationSolver : public NRSolver
 {
 public:
-    Space3dStructuralElementEvaluator() : StructuralElementEvaluator() { }
-    virtual ~Space3dStructuralElementEvaluator() { }
+    DynamicRelaxationSolver(Domain * d, EngngModel * m);
+    virtual ~DynamicRelaxationSolver() {}
 
-protected:
-    /**
-     * Assemble interpolation matrix at given IP
-     * In case of IGAElements, N is assumed to contain only nonzero interpolation functions
-     */
-    virtual void computeNMatrixAt(FloatMatrix &answer, GaussPoint *gp);
-    /**
-     * Assembles the strain-displacement matrix of the receiver at given integration point
-     * In case of IGAElements, B is assumed to contain only contribution from nonzero interpolation functions
-     */
-    virtual void computeBMatrixAt(FloatMatrix &answer, GaussPoint *gp);
-    virtual double computeVolumeAround(GaussPoint *gp);
-    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
-    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    void giveDofManDofIDMask(int inode, IntArray &answer) const {
-        answer = {D_u, D_v, D_w};
-    }
+    virtual NM_Status solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
+                            FloatArray &X, FloatArray &dX, FloatArray &F,
+                            const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
+                            int &nite, TimeStep *);
+
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    
+    virtual const char *giveClassName() const { return "DynamicRelaxationSolver"; }
+    virtual const char *giveInputRecordName() const { return _IFT_DynamicRelaxationSolver_Name; }
 };
 } // end namespace oofem
-#endif //space3delementevaluator_h
+#endif // dynamicrelaxationsolver_h

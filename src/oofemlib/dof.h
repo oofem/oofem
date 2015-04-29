@@ -368,9 +368,9 @@ public:
      * Access dictionary value, if not present zero is returned.
      * @param tStep Time step.
      * @param mode Mode of value.
-     * @param dofValue Value of the dof.
+     * @return The requested value.
      */
-    virtual void giveUnknownsDictionaryValue(TimeStep *tStep, ValueModeType mode, double &dofValue) { }
+    virtual double giveUnknownsDictionaryValue(TimeStep *tStep, ValueModeType mode) { return 0; }
 
     /// Returns string for prepending output (used by error reporting macros).
     std :: string errorInfo(const char *func) const;
@@ -387,13 +387,13 @@ public:
      * Sets a specific equation number to receiver.
      * @param equationNumber New equation number.
      */
-    virtual void setEquationNumber(int equationNumber) { };
+    virtual void setEquationNumber(int equationNumber) { }
 
     /**
      * Sets the dictionary of unknowns for receiver.
      * @param unknowns New dictionary of unknowns.
      */
-    virtual void setUnknowns(Dictionary *unknowns) { };
+    virtual void setUnknowns(Dictionary *unknowns) { }
     /**
      * Receives the dictionary of unknowns in receiver.
      * @return Dictionary of unknowns for DOF.

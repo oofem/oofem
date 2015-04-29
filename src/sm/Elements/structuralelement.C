@@ -54,7 +54,7 @@
 #include "nonlocmatstiffinterface.h"
 #include "mathfem.h"
 #include "materialmapperinterface.h"
-#include <math.h>
+
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
  #include "connectivitytable.h"
@@ -64,18 +64,12 @@
 namespace oofem {
 StructuralElement :: StructuralElement(int n, Domain *aDomain) :
     Element(n, aDomain)
-    // Constructor. Creates an element with number n, belonging to aDomain.
 {
-    initialDisplacements = NULL;
 }
 
 
 StructuralElement :: ~StructuralElement()
-// Destructor.
 {
-    if ( initialDisplacements ) {
-        delete initialDisplacements;
-    }
 }
 
 
@@ -128,10 +122,10 @@ void StructuralElement :: computeBoundaryLoadVector(FloatArray &answer, Boundary
     FloatArray force, globalIPcoords;
     int nsd = fei->giveNsd();
 
-    IntegrationRule *iRule = fei->giveBoundaryIntegrationRule(load->giveApproxOrder(), boundary);
+    std :: unique_ptr< IntegrationRule >iRule( fei->giveBoundaryIntegrationRule(load->giveApproxOrder(), boundary) );
 
     for ( GaussPoint *gp: *iRule ) {
-        FloatArray &lcoords = * gp->giveNaturalCoordinates();
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
         if ( load->giveFormulationType() == Load :: FT_Entity ) {
             load->computeValueAt(force, tStep, lcoords, mode);
@@ -166,8 +160,6 @@ void StructuralElement :: computeBoundaryLoadVector(FloatArray &answer, Boundary
         double dV = thickness * gp->giveWeight() * fei->boundaryGiveTransformationJacobian( boundary, lcoords, FEIElementGeometryWrapper(this) );
         answer.plusProduct(n, force, dV);
     }
-
-    delete iRule;
 }
 
 
@@ -199,7 +191,7 @@ StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, 
 
     if ( force.giveSize() ) {
         for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
-            this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), n);
+            this->computeNmatrixAt(gp->giveSubPatchCoordinates(), n);
             dV  = this->computeVolumeAround(gp);
             dens = this->giveCrossSection()->give('d', gp);
             ntf.beTProductOf(n, force);
@@ -273,7 +265,7 @@ StructuralElement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
             dV  = this->computeEdgeVolumeAround(gp, iEdge);
 
             if ( edgeLoad->giveFormulationType() == Load :: FT_Entity ) {
-                edgeLoad->computeValueAt(force, tStep, * ( gp->giveNaturalCoordinates() ), mode);
+                edgeLoad->computeValueAt(force, tStep, gp->giveNaturalCoordinates(), mode);
             } else {
                 this->computeEdgeIpGlobalCoords(globalIPcoords, gp, iEdge);
                 edgeLoad->computeValueAt(force, tStep, globalIPcoords, mode);
@@ -337,20 +329,20 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
 
     BoundaryLoad *surfLoad = dynamic_cast< BoundaryLoad * >(load);
     if ( surfLoad ) {
-        IntegrationRule *iRule;
+        std :: unique_ptr< IntegrationRule > iRule;
         FloatArray reducedAnswer, force, ntf;
         IntArray mask;
         FloatMatrix n;
         FloatArray globalIPcoords;
 
         int approxOrder = surfLoad->giveApproxOrder() + this->giveInterpolation()->giveInterpolationOrder();
-        iRule = this->GetSurfaceIntegrationRule(approxOrder);
+        iRule.reset( this->GetSurfaceIntegrationRule(approxOrder) );
         for ( GaussPoint *gp: *iRule ) {
             this->computeSurfaceNMatrixAt(n, iSurf, gp);
             dV  = this->computeSurfaceVolumeAround(gp, iSurf);
 
             if ( surfLoad->giveFormulationType() == Load :: FT_Entity ) {
-                surfLoad->computeValueAt(force, tStep, * ( gp->giveNaturalCoordinates() ), mode);
+                surfLoad->computeValueAt(force, tStep, gp->giveNaturalCoordinates(), mode);
             } else {
                 this->computeSurfIpGlobalCoords(globalIPcoords, gp, iSurf);
                 surfLoad->computeValueAt(force, tStep, globalIPcoords, mode);
@@ -373,7 +365,6 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
             reducedAnswer.add(dV, ntf);
         }
 
-        delete iRule;
         this->giveSurfaceDofMapping(mask, iSurf);
         answer.resize( this->computeNumberOfDofs() );
         answer.zero();
@@ -391,45 +382,7 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
 int 
 StructuralElement :: giveNumberOfIPForMassMtrxIntegration()
 {
-  
-    //test different elements:
-  IntegrationRule *iRule = this->giveIntegrationRule(0);
-  
-    
-    printf(" num ip Triangle1: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Triangle, 2*1));
-    
-    printf(" num ip Triangle2: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Triangle, 2*2));
-    
-    printf(" num ip Square1: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Square, 2*1));
-    
-    printf(" num ip Square2: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Square, 2*2)); 
-    
-    printf(" num ip Square3: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Square, 2*3));
-    
-    printf(" num ip_Cube1: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Cube, 2*1)); 
-    
-    printf(" num ip_Cube2: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Cube, 2*2)); 
-    
-    printf(" num ip_Cube3: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Cube, 2*3)); 
-
-    printf(" num ip_Tetrahedra1: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Tetrahedra, 2*1)); 
-    
-    printf(" num ip_Tetrahedra2: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Tetrahedra, 2*2)); 
-    
-    printf(" num ip_Tetrahedra3: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Tetrahedra, 2*3)); 
-        
-    printf(" num ip_Wedge1: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Wedge, 2*1)); 
-    
-    printf(" num ip_Wedge2: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Wedge, 2*2)); 
-    //_Line,
-    
-  
-  
-  
-  
-  
-  
-  
+    IntegrationRule *iRule = this->giveIntegrationRule(0);
     // returns necessary number of ip to integrate the mass matrix 
     // \int_V N^T*N dV => (order of the approximation)*2 (constant density assumed)
     ///TODO this is without the jacobian and density
@@ -465,7 +418,7 @@ StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *
     mass = 0.;
 
     for ( GaussPoint *gp: iRule ) {
-        this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), n);
+        this->computeNmatrixAt(gp->giveSubPatchCoordinates(), n);
         density = this->giveCrossSection()->give('d', gp);
 
         if ( ipDensity != NULL ) {
@@ -590,8 +543,7 @@ StructuralElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
     double mass = 0.;
 
     IntArray nodeDofIDMask, dimFlag(3);
-    IntArray nodalArray;
-    int indx = 0, k, ldofs, dim;
+    int indx = 0, ldofs, dim;
     double summ;
 
     if ( !this->isActivated(tStep) ) {
@@ -610,7 +562,7 @@ StructuralElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
         for ( int j = 1; j <= nodeDofIDMask.giveSize(); j++ ) {
             indx++;
             // zero all off-diagonal terms
-            for ( k = 1; k <= ldofs; k++ ) {
+            for (int k = 1; k <= ldofs; k++ ) {
                 if ( k != indx ) {
                     answer.at(indx, k) = 0.;
                     answer.at(k, indx) = 0.;
@@ -654,7 +606,7 @@ StructuralElement :: computeResultingIPTemperatureAt(FloatArray &answer, TimeSte
     Load *load;
     FloatArray gCoords, temperature;
 
-    if ( this->computeGlobalCoordinates( gCoords, * ( gp->giveNaturalCoordinates() ) ) == 0 ) {
+    if ( this->computeGlobalCoordinates( gCoords, gp->giveNaturalCoordinates() ) == 0 ) {
         OOFEM_ERROR("computeGlobalCoordinates failed");
     }
 
@@ -678,7 +630,7 @@ StructuralElement :: computeResultingIPEigenstrainAt(FloatArray &answer, TimeSte
     Load *load;
     FloatArray gCoords, eigenstrain;
 
-    if ( this->computeGlobalCoordinates( gCoords, * ( gp->giveNaturalCoordinates() ) ) == 0 ) {
+    if ( this->computeGlobalCoordinates( gCoords, gp->giveNaturalCoordinates() ) == 0 ) {
         OOFEM_ERROR("computeGlobalCoordinates failed");
     }
 
@@ -695,6 +647,15 @@ StructuralElement :: computeResultingIPEigenstrainAt(FloatArray &answer, TimeSte
 }
 
 
+void
+StructuralElement :: computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
+{
+    FloatArray u;
+    FloatMatrix n;
+    this->computeNmatrixAt(lcoords, n);
+    this->computeVectorOf(mode, tStep, u);
+    answer.beProductOf(n, u);
+}
 
 void
 StructuralElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
@@ -933,7 +894,7 @@ StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &a
 // has been called for the same time step.
 //
 {
-    FloatMatrix b, R;
+    FloatMatrix b;
     FloatArray temp, u, stress, strain;
     IntArray irlocnum;
 
@@ -1008,9 +969,7 @@ StructuralElement :: giveCharacteristicMatrix(FloatMatrix &answer,
 // returns characteristics matrix of receiver according to mtrx
 //
 {
-    if ( mtrx == StiffnessMatrix ) {
-        this->computeStiffnessMatrix(answer, TangentStiffness, tStep);
-    } else if ( mtrx == TangentStiffnessMatrix ) {
+    if ( mtrx == TangentStiffnessMatrix ) {
         this->computeStiffnessMatrix(answer, TangentStiffness, tStep);
     } else if ( mtrx == SecantStiffnessMatrix ) {
         this->computeStiffnessMatrix(answer, SecantStiffness, tStep);
@@ -1045,6 +1004,13 @@ StructuralElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx,
          * and this will cause to integrate internal forces using existing (nontemp, equlibrated) stresses in
          * statuses. Mainly used to compute reaction forces */
         this->giveInternalForcesVector(answer, tStep, 1);
+    } else if ( mtrx == LumpedMassMatrix ) {
+        FloatMatrix M;
+        this->computeLumpedMassMatrix(M, tStep);
+        answer.resize(M.giveNumberOfColumns());
+        for ( int i = 0; i < M.giveNumberOfColumns(); ++i ) {
+            answer[i] = M(i,i);
+        }
     } else {
         OOFEM_ERROR("Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx) );
     }
@@ -1058,7 +1024,7 @@ StructuralElement :: updateYourself(TimeStep *tStep)
     // record initial displacement if element not active
     if ( activityTimeFunction && !isActivated(tStep) ) {
         if ( !initialDisplacements ) {
-            initialDisplacements = new FloatArray();
+            initialDisplacements.reset( new FloatArray() );
         }
 
         this->computeVectorOf(VM_Total, tStep, * initialDisplacements);
@@ -1138,10 +1104,10 @@ StructuralElement :: checkConsistency()
 void
 StructuralElement :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 {
-    const int numNodes = this->giveNumberOfDofManagers();
+    int numNodes = this->giveNumberOfDofManagers();
     FloatArray N(numNodes);
 
-    const int dim = this->giveSpatialDimension();
+    int dim = this->giveSpatialDimension();
 
     answer.resize(dim, dim * numNodes);
     answer.zero();
@@ -1163,7 +1129,7 @@ StructuralElement :: condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray 
     int nkon = what->giveSize();
     int size = stiff->giveNumberOfRows();
     double coeff, dii, lii = 0;
-    FloatArray *gaussCoeff = NULL;
+    FloatArray gaussCoeff;
     // stored gauss coefficient
     // for mass condensation
 
@@ -1186,7 +1152,7 @@ StructuralElement :: condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray 
 
     // create gauss coeff array if mass condensation requested
     if ( mass ) {
-        gaussCoeff = new FloatArray(size);
+        gaussCoeff.resize(size);
     }
 
     for ( i = 1; i <= nkon; i++ ) {
@@ -1214,7 +1180,7 @@ StructuralElement :: condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray 
             }
 
             if ( mass ) {
-                gaussCoeff->at(j) = coeff;
+                gaussCoeff.at(j) = coeff;
             }
         }
 
@@ -1229,9 +1195,9 @@ StructuralElement :: condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray 
             for ( j = 1; j <= size; j++ ) {
                 for ( k = 1; k <= size; k++ ) {
                     if ( ( ii != j ) && ( ii != k ) ) {
-                        mass->at(j, k) += mass->at(j, ii) * gaussCoeff->at(k) +
-                        mass->at(ii, k) * gaussCoeff->at(j) +
-                        mass->at(ii, ii) * gaussCoeff->at(j) * gaussCoeff->at(k);
+                        mass->at(j, k) += mass->at(j, ii) * gaussCoeff.at(k) +
+                        mass->at(ii, k) * gaussCoeff.at(j) +
+                        mass->at(ii, ii) * gaussCoeff.at(j) * gaussCoeff.at(k);
                     }
                 }
             }
@@ -1241,10 +1207,6 @@ StructuralElement :: condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray 
                 mass->at(k, ii) = 0.;
             }
         }
-    }
-
-    if ( mass ) {
-        delete gaussCoeff;
     }
 }
 
@@ -1256,7 +1218,7 @@ StructuralElement :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSta
         FloatArray u;
         FloatMatrix N;
         this->computeVectorOf(VM_Total, tStep, u);
-        this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), N);
+        this->computeNmatrixAt(gp->giveSubPatchCoordinates(), N);
         answer.beProductOf(N, u);
         return 1;
     }
@@ -1398,8 +1360,8 @@ StructuralElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateTy
 void
 StructuralElement :: showSparseMtrxStructure(CharType mtrx, oofegGraphicContext &gc, TimeStep *tStep)
 {
-    if ( ( mtrx == StiffnessMatrix ) || ( mtrx == TangentStiffnessMatrix ) ||
-        ( mtrx == SecantStiffnessMatrix ) || ( mtrx == ElasticStiffnessMatrix ) ) {
+    if ( mtrx == TangentStiffnessMatrix ||
+        mtrx == SecantStiffnessMatrix || mtrx == ElasticStiffnessMatrix ) {
         int i, j, n;
         IntArray loc;
         this->giveLocationArray( loc, EModelDefaultEquationNumbering() );
@@ -1483,7 +1445,7 @@ void
 StructuralElement :: showExtendedSparseMtrxStructure(CharType mtrx, oofegGraphicContext &gc, TimeStep *tStep)
 {
     NonlocalMaterialStiffnessInterface *interface;
-    if ( ( ( mtrx == StiffnessMatrix ) || ( mtrx == TangentStiffnessMatrix ) ) ) {
+    if ( mtrx == TangentStiffnessMatrix ) {
         //interface = static_cast< NonlocalMaterialStiffnessInterface * >
         //            ( this->giveMaterial()->giveInterface(NonlocalMaterialStiffnessInterfaceType) );
         //if ( interface == NULL ) {

@@ -59,7 +59,8 @@ IRResultType StructuralPythonMaterial :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;
 
-    StructuralMaterial :: initializeFrom(ir);
+    result = StructuralMaterial :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     IR_GIVE_FIELD(ir, this->moduleName, _IFT_StructuralPythonMaterial_moduleName);
 
@@ -81,10 +82,12 @@ IRResultType StructuralPythonMaterial :: initializeFrom(InputRecord *ir)
             OOFEM_WARNING("Using numerical tangent for large deformations");
         }
         if ( smallDef == NULL && largeDef == NULL ) {
-            OOFEM_ERROR("No functions for either small or large deformations supplied. Are you sure the functions are named correctly?");
+            OOFEM_WARNING("No functions for either small or large deformations supplied. Are you sure the functions are named correctly?");
+            return IRRT_BAD_FORMAT;
         }
-    } else   {
-        OOFEM_ERROR("mpModule == NULL for module name %s", this->moduleName.c_str())
+    } else {
+        OOFEM_WARNING("mpModule == NULL for module name %s", this->moduleName.c_str());
+        return IRRT_BAD_FORMAT;
     }
     pert = 1e-12;
 

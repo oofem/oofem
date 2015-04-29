@@ -36,14 +36,15 @@
 #define domain_h
 
 #include "oofemcfg.h"
-#include "alist.h"
 #include "domaintype.h"
 #include "statecountertype.h"
 #include "intarray.h"
+#include "error.h"
 #ifdef __PARALLEL_MODE
  #include "entityrenumberingscheme.h"
 #endif
 
+#include <memory>
 #include <unordered_map>
 #include <map>
 #include <string>
@@ -114,23 +115,23 @@ class OOFEM_EXPORT Domain
 {
 private:
     /// Element list.
-    AList< Element > *elementList;
+    std :: vector< std :: unique_ptr< Element > > elementList;
     /// Dof manager list.
-    AList< DofManager > *dofManagerList;
+    std :: vector< std :: unique_ptr< DofManager > > dofManagerList;
     /// Material list.
-    AList< Material > *materialList;
+    std :: vector< std :: unique_ptr< Material > > materialList;
     /// Cross section list.
-    AList< CrossSection > *crossSectionList;
+    std :: vector< std :: unique_ptr< CrossSection > > crossSectionList;
     /// Boundary condition list.
-    AList< GeneralBoundaryCondition > *bcList;
+    std :: vector< std :: unique_ptr< GeneralBoundaryCondition > > bcList;
     /// Initial condition list.
-    AList< InitialCondition > *icList;
+    std :: vector< std :: unique_ptr< InitialCondition > > icList;
     /// Load time function list.
-    AList< Function > *functionList;
+    std :: vector< std :: unique_ptr< Function > > functionList;
     /// Set list.
-    AList< Set > *setList;
+    std :: vector< std :: unique_ptr< Set > > setList;
     /// Nonlocal barrier list.
-    AList< NonlocalBarrier > *nonlocalBarierList;
+    std :: vector< std :: unique_ptr< NonlocalBarrier > > nonlocalBarrierList;
 
     /// Default dofs for a node (depends on the domain type).
     IntArray defaultNodeDofIDArry;
@@ -153,14 +154,14 @@ private:
      * Domain connectivity table. Table is build upon request.
      * Provides connectivity information of current domain.
      */
-    ConnectivityTable *connectivityTable;
+    std :: unique_ptr< ConnectivityTable > connectivityTable;
     /**
      * Spatial Localizer. It is build upon request.
      * Provides the spatial localization services.
      */
-    SpatialLocalizer *spatialLocalizer;
+    std :: unique_ptr< SpatialLocalizer > spatialLocalizer;
     /// Output manager, allowing to filter the produced output.
-    OutputManager *outputManager;
+    std :: unique_ptr< OutputManager > outputManager;
     /// Domain number.
     int number;
     /// Domain serial (version) number. Used for domain version identification during Adaptive computations.
@@ -169,7 +170,7 @@ private:
     int nsd;
     bool axisymm;
     /// nodal recovery object associated to receiver.
-    NodalRecoveryModel *smoother;
+    std :: unique_ptr< NodalRecoveryModel > smoother; ///@todo I don't see why this has to be stored, and there is only one? /Mikael
 
     std :: string mDomainType;
     /**
@@ -184,13 +185,13 @@ private:
      */
     StateCounterType nonlocalUpdateStateCounter;
     /// XFEM Manager
-    XfemManager *xfemManager;
+    std :: unique_ptr< XfemManager > xfemManager;
 
     /// Fracture Manager
-    FractureManager *fracManager;
+    std :: unique_ptr< FractureManager > fracManager;
 
     /// Contact Manager
-    ContactManager *contactManager;
+    std :: unique_ptr< ContactManager > contactManager;
     
     
     /**
@@ -200,13 +201,19 @@ private:
     std::unordered_map< int, int > mElementPlaceInArray;
 
     /**
+     * Map from a dofmans's global number to its place
+     * in the dofman array.
+     */
+    std::unordered_map< int, int > mDofManPlaceInArray;
+
+    /**
      * Map from material number to elements that have the
      * given material number. Added by ES 140718.
      */
     std::unordered_map< int, IntArray> mMapMaterialNum2El;
 
     /// Topology description
-    TopologyDescription *topology;
+    std :: unique_ptr< TopologyDescription > topology;
 
     /// Keeps track of next free dof ID (for special Lagrange multipliers, XFEM and such)
     int freeDofID;
@@ -216,7 +223,7 @@ private:
      * Transaction manager. The purpose of this class is to
      * make the domain modification (in terms of adding and deleting components) versatile.
      */
-    DomainTransactionManager *transactionManager;
+    std :: unique_ptr< DomainTransactionManager > transactionManager;
     /// Global dof manager map (index is global of man number).
     std :: map< int, DofManager * >dmanMap;
     /// dmanMap init flag.
@@ -230,7 +237,7 @@ private:
     /**@name Load Balancing data structures */
     //@{
     /// List of received elements.
-    std :: list< Element * >recvElemList;
+    std :: list< Element * >recvElemList; ///@todo This seems like dead, old unused code. Remove it? / Mikael
     //@}
 #endif
 
@@ -243,6 +250,9 @@ public:
      * @see giveSerialNumber
      */
     Domain(int n, int serNum, EngngModel * e);
+
+    Domain(const Domain& src) = delete;
+    Domain &operator = (const Domain &src) = delete;
 
     /// Create a copy of the domain using the dynamic data reader.
     Domain *Clone();
@@ -264,6 +274,7 @@ public:
      * @param n Pointer to n-th element is returned.
      */
     Element *giveElement(int n);
+    std :: vector< std :: unique_ptr< Element > > &giveElements() { return this->elementList; }
     /**
      * Service for accessing particular domain fe element.
      * Generates error if no such element is defined.
@@ -276,6 +287,12 @@ public:
      * calling giveElement. Returns -1 if not found.
      */
     int giveElementPlaceInArray(int iGlobalElNum) const;
+    /**
+     * Returns the array index of the dofman with global
+     * number iGlobalDofManNum, so that it can be fetched by
+     * calling giveDofManager. Returns -1 if not found.
+     */
+    int giveDofManPlaceInArray(int iGlobalDofManNum) const;
     /**
      * Returns array with indices of elements that have a
      * given material number.
@@ -297,12 +314,14 @@ public:
      * @param n Pointer to n-th bc is returned.
      */
     GeneralBoundaryCondition *giveBc(int n);
+    std :: vector< std :: unique_ptr< GeneralBoundaryCondition > > &giveBcs() { return this->bcList; }
     /**
      * Service for accessing particular domain ic.
      * Generates error if no such ic is defined.
      * @param n Pointer to n-th ic is returned.
      */
     InitialCondition *giveIc(int n);
+    std :: vector< std :: unique_ptr< InitialCondition > > &giveIcs() { return this->icList; }
 
     /**
      * Service for accessing particular domain load time function.
@@ -310,18 +329,21 @@ public:
      * @param n Pointer to n-th load time function is returned.
      */
     Function *giveFunction(int n);
+    std :: vector< std :: unique_ptr< Function > > &giveFunctions() { return this->functionList; }
     /**
      * Service for accessing particular domain material model.
      * Generates error if no such material model is defined.
      * @param n Pointer to n-th material model is returned.
      */
     Material *giveMaterial(int n);
+    std :: vector< std :: unique_ptr< Material > > &giveMaterials() { return this->materialList; }
     /**
      * Service for accessing particular domain cross section model.
      * Generates error if no such cross section  model is defined.
      * @param n Pointer to n-th cross section is returned.
      */
     CrossSection *giveCrossSection(int n);
+    std :: vector< std :: unique_ptr< CrossSection > > &giveCrossSections() { return this->crossSectionList; }
     /**
      * Service for accessing particular domain nonlocal barrier representation.
      * Generates error if no such barrier  model is defined.
@@ -334,7 +356,7 @@ public:
      * @param n Pointer to n-th object is returned.
      */
     Set *giveSet(int n);
-
+    std :: vector< std :: unique_ptr< Set > > &giveSets() { return this->setList; }
     /**
      * Service for accessing particular domain node.
      * Generates error if no such node is defined.
@@ -344,16 +366,16 @@ public:
     inline Node *giveNode(int n)
     {
     #ifdef DEBUG
-        if ( !dofManagerList->includes(n) ) {
+        if ( n < 1 || n > (int)dofManagerList.size() ) {
             OOFEM_ERROR("undefined dofManager (%d)", n);
         }
 
-        Node *node = reinterpret_cast< Node * >( dofManagerList->at(n) );
+        Node *node = reinterpret_cast< Node * >( dofManagerList[n-1].get() );
 
         return node;
 
     #else
-        return reinterpret_cast< Node * >( dofManagerList->at(n) );
+        return reinterpret_cast< Node * >( dofManagerList[n-1].get() );
     #endif
     }
     /**
@@ -370,6 +392,7 @@ public:
      * @param n Pointer to n-th dof manager is returned.
      */
     DofManager *giveDofManager(int n);
+    std :: vector< std :: unique_ptr< DofManager > > &giveDofManagers() { return this->dofManagerList; }
     /**
      * Service for accessing particular domain dof manager.
      * Generates error if no such element is defined.
@@ -400,28 +423,26 @@ public:
      * Intenal DOF managers are not affected, as those are created by the corresponding element/bc.
      */
     void createDofs();
-    //int giveNumberOfNodes () {return nodeList->giveSize();}
-    //int giveNumberOfSides () {return elementSideList->giveSize();}
     /// Returns number of dof managers in domain.
-    int giveNumberOfDofManagers() const { return dofManagerList->giveSize(); }
+    int giveNumberOfDofManagers() const { return (int)dofManagerList.size(); }
     /// Returns number of elements in domain.
-    int giveNumberOfElements() const { return elementList->giveSize(); }
+    int giveNumberOfElements() const { return (int)elementList.size(); }
     /// Returns number of material models in domain.
-    int giveNumberOfMaterialModels() const { return materialList->giveSize(); }
+    int giveNumberOfMaterialModels() const { return (int)materialList.size(); }
     /// Returns number of cross section models in domain.
-    int giveNumberOfCrossSectionModels() const { return crossSectionList->giveSize(); }
+    int giveNumberOfCrossSectionModels() const { return (int)crossSectionList.size(); }
     /// Returns number of boundary conditions in domain.
-    int giveNumberOfBoundaryConditions() const { return bcList->giveSize(); }
+    int giveNumberOfBoundaryConditions() const { return (int)bcList.size(); }
     /// Returns number of initial conditions in domain.
-    int giveNumberOfInitialConditions() const { return icList->giveSize(); }
+    int giveNumberOfInitialConditions() const { return (int)icList.size(); }
     /// Returns number of load time functions in domain.
-    int giveNumberOfFunctions() const { return functionList->giveSize(); }
+    int giveNumberOfFunctions() const { return (int)functionList.size(); }
     /// Returns number of regions. Currently regions corresponds to cross section models.
     int giveNumberOfRegions() const { return this->giveNumberOfCrossSectionModels(); }
     /// Returns number of nonlocal integration barriers
-    int giveNumberOfNonlocalBarriers() const { return nonlocalBarierList->giveSize(); }
+    int giveNumberOfNonlocalBarriers() const { return (int)nonlocalBarrierList.size(); }
     /// Returns number of sets
-    int giveNumberOfSets() const { return setList->giveSize(); }
+    int giveNumberOfSets() const { return (int)setList.size(); }
 
     /// Returns number of spatial dimensions.
     int giveNumberOfSpatialDimensions();
@@ -470,7 +491,7 @@ public:
     void setSet(int i, Set *obj);
 
     /// Temporary function, sets xfemManager.
-    void setXfemManager(XfemManager *ipXfemManager) { xfemManager = ipXfemManager; }
+    void setXfemManager(XfemManager *ipXfemManager);
 
     XfemManager *giveXfemManager();
     bool hasXfemManager();
@@ -481,7 +502,6 @@ public:
     FractureManager *giveFractureManager();
     bool hasFractureManager();
 
-    /// List of Xfemmanagers.
     /**
      * Sets receiver's associated topology description.
      * @param topo New topology description for receiver.
@@ -585,7 +605,7 @@ public:
     /**
      * Returns domain output manager.
      */
-    OutputManager *giveOutputManager() { return outputManager; }
+    OutputManager *giveOutputManager();
     /**
      * Returns Error Estimator associated to receiver.
      * Calls corresponding EngngModel Service.
@@ -599,13 +619,13 @@ public:
     /**
      * Returns receiver's associated topology description.
      */
-    TopologyDescription *giveTopology() { return topology; }
+    TopologyDescription *giveTopology();
     /**
      * Sets the given smoother as an actual smoother for receiver.
      * @param smoother New smoother for receiver.
      * @param destroyOld Determines if any preexisting smoother should be deleted.
      */
-    void setSmoother(NodalRecoveryModel *smoother, bool destroyOld = true);
+    void setSmoother(NodalRecoveryModel *newSmoother, bool destroyOld = true);
 
 #ifdef __PARALLEL_MODE
     /**@name Domain transaction support methods.
@@ -677,6 +697,12 @@ private:
      * its place the element array.
      */
     void BuildElementPlaceInArrayMap();
+
+    /**
+     * Construct map from a dofman's global number to
+     * its place the dofman array.
+     */
+    void BuildDofManPlaceInArrayMap();
 
     /**
      * Construct map from a material number to

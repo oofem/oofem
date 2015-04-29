@@ -241,17 +241,6 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
     EngngModel *microEngngModel = microDomain->giveEngngModel();
     DofManager *DofMan;
     Dof *dof;
-    CharType type = UnknownCharType;
-
-    if ( rMode == TangentStiffness ) {
-        type = TangentStiffnessMatrix;
-    } else if ( rMode == SecantStiffness ) {
-        type = SecantStiffnessMatrix;
-    } else if ( rMode == ElasticStiffness ) {
-        type = ElasticStiffnessMatrix;
-    } else {
-        OOFEM_ERROR("Material response mode %s is undefined", __MatResponseModeToString(rMode) );
-    }
 
     FloatMatrix Kbb; //contains reduced problem with boundary nodes and without interior nodes
     FloatMatrix *Kbi = NULL; //can be zero size if no internal DOFs
@@ -283,7 +272,7 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
         Kii = classFactory.createSparseMtrx(sparseMtrxType);
         Kii->buildInternalStructure(microEngngModel, 1, * this);
         Kii->zero();
-        microEngngModel->assemble(Kii, tStep, type, * this, microDomain);
+        microEngngModel->assemble(*Kii, tStep, TangentAssembler(rMode), * this, microDomain);
     }
 
 
@@ -296,7 +285,7 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
     stiffnessMatrixMicro->zero();
     stiffnessMatrixMicro->buildInternalStructure(microEngngModel, 1, * this);
     stiffnessMatrixMicro->zero();
-    microEngngModel->assemble(stiffnessMatrixMicro, tStep, type, * this, microDomain);
+    microEngngModel->assemble(*stiffnessMatrixMicro, tStep, TangentAssembler(rMode), * this, microDomain);
 
 
     for ( int i = 1; i <= totalBoundaryDofs; i++ ) {

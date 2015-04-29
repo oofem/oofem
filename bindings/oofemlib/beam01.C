@@ -8,13 +8,13 @@
 // Optional (only need the input fields defines)
 #include "../sm/EngineeringModels/linearstatic.h"
 #include "../sm/CrossSections/simplecrosssection.h"
-#include "isolinearelasticmaterial.h"
-#include "truss2d.h"
+#include "../sm/Materials/isolinearelasticmaterial.h"
+#include "../sm/Elements/Bars/truss2d.h"
 #include "generalboundarycondition.h"
-#include "beam2d.h"
+#include "../sm/Elements/Beams/beam2d.h"
 #include "constantedgeload.h"
 #include "nodalload.h"
-#include "structtemperatureload.h"
+#include "../sm/Loads/structtemperatureload.h"
 #include "peakfunction.h"
 #include "node.h"
 #include "outputmanager.h"
@@ -148,7 +148,6 @@ int main(int argc, char *argv[])
     myInput->setField(1, _IFT_GeneralBoundaryCondition_timeFunct);
     myInput->setField(FloatArray{0.0, 10.0, 0.0}, _IFT_Load_components);
     myInput->setField(3, _IFT_BoundaryLoad_loadtype);
-    myInput->setField(3, _IFT_BoundaryLoad_ndofs);
     myData.insertInputRecord(DataReader::IR_bcRec, myInput);
 
     myInput = new DynamicInputRecord(_IFT_NodalLoad_Name, 4);

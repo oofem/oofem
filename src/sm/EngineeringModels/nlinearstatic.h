@@ -175,7 +175,7 @@ public:
 #endif
 
 protected:
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, CharType type,
+    virtual void assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAssembler &ma,
                           const UnknownNumberingScheme &, Domain *domain);
     void proceedStep(int di, TimeStep *tStep);
     virtual void updateLoadVectors(TimeStep *tStep);

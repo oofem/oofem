@@ -42,7 +42,6 @@
 #include "xfem/hybridei.h"
 
 namespace oofem {
-
 /**
  * EnrichmentItem describing an inclusion
  * @author Erik Svenning (among others)
@@ -69,7 +68,6 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     CrossSection *giveCrossSection() { return mpCrossSection; }
 };
-
 } /* namespace oofem */
 
 #endif /* INCLUSIONEI_H_ */

@@ -40,7 +40,6 @@
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
-#include "eleminterpmapperinterface.h"
 
 #define _IFT_QTrPlaneStrain_Name "qtrplanestrain"
 
@@ -52,8 +51,7 @@ class FEI2dTrQuad;
  * stress elasticity finite element. Each node has 2 degrees of freedom.
  */
 class QTrPlaneStrain : public PlaneStrainElement, public SpatialLocalizerInterface,
-public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface,
-public EIPrimaryUnknownMapperInterface
+public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface
 {
 protected:
     static FEI2dTrQuad interpolation;
@@ -81,10 +79,6 @@ public:
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
     virtual int SPRNodalRecoveryMI_giveNumberOfIP();
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
-
-    virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-                                                                       TimeStep *tStep, const FloatArray &lcoords,
-                                                                       FloatArray &answer);
 
 protected:
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }

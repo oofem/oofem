@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/ElementEvaluators/structuralelementevaluator.h"
+#include "../sm/Elements/structuralelementevaluator.h"
 #include "../sm/Elements/structuralelement.h"
 #include "../sm/CrossSections/structuralcrosssection.h"
 #include "../sm/Materials/structuralmaterial.h"
@@ -131,7 +131,7 @@ void StructuralElementEvaluator :: giveCharacteristicMatrix(FloatMatrix &answer,
 // returns characteristics matrix of receiver according to mtrx
 //
 {
-    if ( mtrx == StiffnessMatrix ) {
+    if ( mtrx == TangentStiffnessMatrix ) {
         this->computeStiffnessMatrix(answer, TangentStiffness, tStep);
     } else if ( mtrx == MassMatrix ) {
         double mass;

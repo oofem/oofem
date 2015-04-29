@@ -74,12 +74,8 @@ QTrPlaneStrainGrad :: giveDofManDofIDMask(int inode, IntArray &answer) const
 IRResultType
 QTrPlaneStrainGrad :: initializeFrom(InputRecord *ir)
 {
-    //IRResultType result;                 // Required by IR_GIVE_FIELD macro
-    this->StructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 4;
-    //IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, _IFT_Element_nip);
-
-    return IRRT_OK;
+    return StructuralElement :: initializeFrom(ir);
 }
 
 void
@@ -96,7 +92,7 @@ void
 QTrPlaneStrainGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatArray n;
-    this->interpolation_lin.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation_lin.evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beNMatrixOf(n, 1);
 }
 
@@ -104,7 +100,7 @@ void
 QTrPlaneStrainGrad :: computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
-    this->interpolation_lin.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation_lin.evaldNdx( dnx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beTranspositionOf(dnx);
 }
 }

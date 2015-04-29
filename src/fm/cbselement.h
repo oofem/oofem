@@ -70,14 +70,13 @@ public:
 
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
-    virtual double giveCharacteristicValue(CharType type, TimeStep *tStep);
 
     /** Calculates consistent mass matrix. */
     virtual void computeConsistentMassMtrx(FloatMatrix &answer, TimeStep *tStep) = 0;
     /** Calculates diagonal mass matrix. */
     virtual void computeDiagonalMassMtrx(FloatArray &answer, TimeStep *tStep) = 0;
     /** Calculates rhs due to prescribed (*) velocities for (*) velocities. */
-    virtual void computePrescribedTermsI(FloatArray &answer, ValueModeType mode, TimeStep *tStep);
+    virtual void computePrescribedTermsI(FloatArray &answer, TimeStep *tStep);
     /* Calculates rhs due to prescribed density/pressure. */
     //virtual void computePrescribedTermsII(FloatArray& answer, ValueModeType, TimeStep*);
     /** Calculates convection component for (*) velocities. */

@@ -15,6 +15,7 @@
 #include "sparsemtrx.h"
 #include "nrsolver.h"
 #include "primaryfield.h"
+#include "unknownnumberingscheme.h"
 
 #include <iostream>
 #include <fstream>
@@ -25,25 +26,20 @@ REGISTER_EngngModel(DarcyFlow);
 
 DarcyFlow :: DarcyFlow(int i, EngngModel *_master) : EngngModel(i, _master)
 {
-    this->PressureField = NULL;
-    this->nMethod = NULL;
     this->ndomains = 1;
     this->hasAdvanced = false;
-    this->stiffnessMatrix = NULL;
 }
 
 DarcyFlow :: ~DarcyFlow()
 {
-    delete PressureField;
-    delete nMethod;
-    delete stiffnessMatrix;
 }
 
 IRResultType DarcyFlow :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-    EngngModel :: initializeFrom(ir);
+    result = EngngModel :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     int val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_lstype);
@@ -54,7 +50,7 @@ IRResultType DarcyFlow :: initializeFrom(InputRecord *ir)
     sparseMtrxType = ( SparseMtrxType ) val;
 
     // Create solution space for pressure field
-    PressureField = new PrimaryField(this, 1, FT_Pressure, 1);
+    PressureField.reset( new PrimaryField(this, 1, FT_Pressure, 1) );
     return IRRT_OK;
 }
 
@@ -83,7 +79,7 @@ void DarcyFlow :: solveYourselfAt(TimeStep *tStep)
 
     // Create "stiffness matrix"
     if ( !this->stiffnessMatrix ) {
-        this->stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
+        this->stiffnessMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
         this->stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
     }
 
@@ -91,7 +87,7 @@ void DarcyFlow :: solveYourselfAt(TimeStep *tStep)
     // Build initial/external load (LoadVector)
     this->externalForces.resize(neq);
     this->externalForces.zero();
-    this->assembleVectorFromElements( this->externalForces, tStep, ExternalForcesVector, VM_Total,
+    this->assembleVectorFromElements( this->externalForces, tStep, ExternalForceAssembler(), VM_Total,
                                      EModelDefaultEquationNumbering(), this->giveDomain(1) );
     this->updateSharedDofManagers(this->externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
 
@@ -104,13 +100,12 @@ void DarcyFlow :: solveYourselfAt(TimeStep *tStep)
     this->updateComponent( tStep, InternalRhs, this->giveDomain(1) );
     this->updateComponent( tStep, NonLinearLhs, this->giveDomain(1) );
 
-    FloatArray incrementalLoadVector(0); // Should be allowed to be null
-    NM_Status status = this->nMethod->solve(this->stiffnessMatrix,
-                                            & ( this->externalForces ),
+    NM_Status status = this->nMethod->solve(*this->stiffnessMatrix,
+                                            this->externalForces,
                                             NULL,
-                                            solutionVector,
-                                            & ( this->incrementOfSolution ),
-                                            & ( this->internalForces ),
+                                            * solutionVector,
+                                            this->incrementOfSolution,
+                                            this->internalForces,
                                             this->ebeNorm,
                                             loadLevel, // Only relevant for incrementalBCLoadVector?
                                             SparseNonLinearSystemNM :: rlm_total, // Why this naming scheme? Should be RLM_Total, and ReferenceLoadInputModeType
@@ -127,8 +122,6 @@ void DarcyFlow :: solveYourselfAt(TimeStep *tStep)
     lhs->toFloatMatrix(LHS_backup);
     DumpMatricesToFile(& LHS_backup, & rhs, NULL);
 #endif
-
-    this->updateYourself(tStep);
 }
 
 
@@ -164,12 +157,6 @@ void DarcyFlow :: DumpMatricesToFile(FloatMatrix *LHS, FloatArray *RHS, FloatArr
     fclose(SolutionFile);
 }
 
-
-void DarcyFlow :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
-{
-    iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
-}
-
 void DarcyFlow :: updateYourself(TimeStep *tStep)
 {
     EngngModel :: updateYourself(tStep);
@@ -185,7 +172,7 @@ void DarcyFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d
     switch ( cmpn ) {
     case InternalRhs:
         this->internalForces.zero();
-        this->assembleVector(this->internalForces, tStep,  InternalForcesVector, VM_Total,
+        this->assembleVector(this->internalForces, tStep, InternalForceAssembler(), VM_Total,
                              EModelDefaultEquationNumbering(), d, & this->ebeNorm);
         this->updateSharedDofManagers(this->externalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
         break;
@@ -193,7 +180,7 @@ void DarcyFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d
     case NonLinearLhs:
 
         this->stiffnessMatrix->zero();
-        this->assemble( this->stiffnessMatrix, tStep, StiffnessMatrix,
+        this->assemble( *this->stiffnessMatrix, tStep, TangentAssembler(TangentStiffness),
                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
         break;
 
@@ -207,10 +194,7 @@ int DarcyFlow :: forceEquationNumbering(int id)  // Is this really needed???!?
     int neq = EngngModel :: forceEquationNumbering(id);
 
     this->equationNumberingCompleted = false;
-    if ( this->stiffnessMatrix ) {
-        delete this->stiffnessMatrix;
-        this->stiffnessMatrix = NULL;
-    }
+    this->stiffnessMatrix.reset(NULL);
 
     return neq;
 }
@@ -222,34 +206,27 @@ NumericalMethod *DarcyFlow :: giveNumericalMethod(MetaStep *mStep)
      * If no solver has bee initialized, create one, otherwise, return the existing solver.
      */
 
-    if ( this->nMethod ) {
-        return this->nMethod;
+    if ( !this->nMethod ) {
+        this->nMethod.reset( new NRSolver(this->giveDomain(1), this) );
+        if ( !nMethod ) {
+            OOFEM_ERROR("numerical method creation failed");
+        }
     }
 
-    this->nMethod = new NRSolver(this->giveDomain(1), this);
-    if ( !nMethod ) {
-        OOFEM_ERROR("numerical method creation failed");
-    }
-    return this->nMethod;
+    return this->nMethod.get();
 }
 
 TimeStep *DarcyFlow :: giveNextStep()
 {
-    int istep = this->giveNumberOfFirstStep();
-
-    StateCounterType counter = 1;
-    delete previousStep;
-
-    if ( currentStep != NULL ) {
-        istep =  currentStep->giveNumber() + 1;
-        counter = currentStep->giveSolutionStateCounter() + 1;
+    if ( !currentStep ) {
+        // first step -> generate initial step
+        //currentStep.reset( new TimeStep(*giveSolutionStepWhenIcApply()) );
+        currentStep.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 1, 0., 1.0, 0) );
     }
+    previousStep = std :: move(currentStep);
+    currentStep.reset( new TimeStep(*previousStep, 1.0) );
 
-    previousStep = currentStep;
-    currentStep = new TimeStep(istep, this, 1, ( double ) istep, 0., counter);
-    // time and dt variables are set eq to 0 for statics - has no meaning
-    ///@todo They have important meaning in *quasi* static solutions, this must be fixed.
-    return currentStep;
+    return currentStep.get();
 }
 
 }

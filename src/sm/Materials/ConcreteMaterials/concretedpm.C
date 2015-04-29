@@ -145,23 +145,21 @@ ConcreteDPMStatus :: printOutputAt(FILE *file, TimeStep *tStep)
         break;
     }
 
-    /*
-     * // print plastic strain vector
-     * StrainVector plasticStrainVector( gp->giveMaterialMode() ) ;
-     * giveFullPlasticStrainVector(plasticStrainVector) ;
-     *
-     * fprintf (file,"plastic strains ") ;
-     * int n = plasticStrainVector.giveSize() ;
-     * for (int i=1 ; i<=n ; i++)
-     * fprintf (file," % .4e", plasticStrainVector.at(i)) ;
-     */
+#if 0
+     // print plastic strain vector
+     StrainVector plasticStrainVector( gp->giveMaterialMode() ) ;
+     giveFullPlasticStrainVector(plasticStrainVector) ;
+     fprintf(file,"plastic strains ") ;
+     for ( auto &val : plasticStrainVector )
+        fprintf(file," %.4e", val);
+#endif
 
     // print hardening/softening parameters and damage
 
-    //fprintf (file," kappaP % .4e", kappaP ) ;
-    //fprintf (file,", kappaD % .4e", kappaD ) ;
-    fprintf(file, ", kappa % .4e % .4e", kappaP, kappaD);
-    fprintf(file, ", damage % .4e", damage);
+    //fprintf (file," kappaP %.4e", kappaP ) ;
+    //fprintf (file,", kappaD %.4e", kappaD ) ;
+    fprintf(file, ", kappa %.4e %.4e", kappaP, kappaD);
+    fprintf(file, ", damage %.4e", damage);
 
     // end of record
     fprintf(file, "}\n");
@@ -356,19 +354,25 @@ ConcreteDPM :: initializeFrom(InputRecord *ir)
     IRResultType result;
 
     // call the corresponding service for the linear elastic material
-    StructuralMaterial :: initializeFrom(ir);
+    result = StructuralMaterial :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
-    linearElasticMaterial->initializeFrom(ir);
+    result = linearElasticMaterial->initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     double value;
     // elastic parameters
     IR_GIVE_FIELD(ir, eM, _IFT_IsotropicLinearElasticMaterial_e);
     IR_GIVE_FIELD(ir, nu, _IFT_IsotropicLinearElasticMaterial_n);
-    propertyDictionary->add('E', eM);
-    propertyDictionary->add('n', nu);
+    propertyDictionary.add('E', eM);
+    propertyDictionary.add('n', nu);
 
     IR_GIVE_FIELD(ir, value, _IFT_IsotropicLinearElasticMaterial_talpha);
-    propertyDictionary->add(tAlpha, value);
+    propertyDictionary.add(tAlpha, value);
 
     gM = eM / ( 2. * ( 1. + nu ) );
     kM = eM / ( 3. * ( 1. - 2. * nu ) );
@@ -376,8 +380,8 @@ ConcreteDPM :: initializeFrom(InputRecord *ir)
     // instanciate the variables of the plasticity model
     IR_GIVE_FIELD(ir, fc, _IFT_ConcreteDPM_fc);
     IR_GIVE_FIELD(ir, ft, _IFT_ConcreteDPM_ft);
-    propertyDictionary->add(ft_strength, ft);
-    propertyDictionary->add(fc_strength, fc);
+    propertyDictionary.add(ft_strength, ft);
+    propertyDictionary.add(fc_strength, fc);
 
     // damage parameters - only exponential softening
     // [in ef variable the wf (crack opening) is stored]
@@ -884,7 +888,6 @@ ConcreteDPM :: performRegularReturn(StressVector &effectiveStress,
     double tempKappaPTest = 0.;
     int iterationCount = 0;
     int negativeRhoFlag = 0;
-    StrainVector elasticStrain(matMode);
     FloatArray dGDInv(2);
     FloatArray dFDInv(2);
     FloatArray residual(3);
@@ -897,9 +900,6 @@ ConcreteDPM :: performRegularReturn(StressVector &effectiveStress,
     FloatMatrix aMatrix;
     FloatArray helpVectorA(3);
     FloatArray helpVectorB(3);
-    StressVector helpIncrement(matMode);
-    StrainVector plasticStrainIncrement(matMode);
-    StrainVector dGDStressDeviatoric(matMode);
     StressVector deviatoricStress(matMode);
 
     //compute the principal directions of the stress
@@ -910,8 +910,6 @@ ConcreteDPM :: performRegularReturn(StressVector &effectiveStress,
     //compute invariants from stress state
     effectiveStress.computeDeviatoricVolumetricSplit(deviatoricStress, sig);
     rho = deviatoricStress.computeSecondCoordinate();
-
-    const StressVector initialStress = effectiveStress;
 
     const double volumetricPlasticStrain =
         3. * status->giveVolumetricPlasticStrain();
@@ -1078,10 +1076,8 @@ ConcreteDPM :: performVertexReturn(StressVector &effectiveStress,
     MaterialMode matMode = gp->giveMaterialMode();
     StressVector deviatoricStressTrial(matMode);
     double sigTrial;
-    StressVector stressTemp(matMode);
-    StressVector deviatoricStress(matMode);
-    double yieldValue = 0.;
-    double yieldValueMid = 0.;
+    double yieldValue;
+    double yieldValueMid;
     double sig2 = 0.;
     double dSig;
     double sigMid;
@@ -1090,8 +1086,6 @@ ConcreteDPM :: performVertexReturn(StressVector &effectiveStress,
 
     effectiveStress.computeDeviatoricVolumetricSplit(deviatoricStressTrial, sigTrial);
     const double rhoTrial = deviatoricStressTrial.computeSecondCoordinate();
-
-    StrainVector deltaPlasticStrain(matMode);
 
     tempKappaP = status->giveTempKappaP();
     const double kappaInitial = tempKappaP;
@@ -1178,7 +1172,6 @@ ConcreteDPM :: computeTempKappa(const double kappaInitial,
 {
     //This function is called, if stress state is in vertex case
     double equivalentDeltaPlasticStrain;
-    FloatArray deltaPlasticStrainPrincipal(3);
     rho = 0.;
     equivalentDeltaPlasticStrain = sqrt( 1. / 9. * pow( ( sigTrial - sig ) / ( kM ), 2. ) +
                                         pow(rhoTrial / ( 2. * gM ), 2.) );
@@ -1302,7 +1295,6 @@ ConcreteDPM :: computeDKappaDDeltaLambda(const double sig,
     double equivalentDGDStress;
     FloatArray dGDInv(2);
     computeDGDInv(dGDInv, sig, rho, tempKappa);
-    FloatArray dGDStressPrincipal(3);
 
     equivalentDGDStress = sqrt( 1. / 3. * pow(dGDInv(0), 2.) +
                                pow(dGDInv(1), 2.) );
@@ -1323,9 +1315,7 @@ ConcreteDPM :: computeDDKappaDDeltaLambdaDInv(FloatArray &answer,
     double equivalentDGDStress;
     FloatArray dGDInv(2);
     FloatMatrix dDGDDInv(2, 2);
-    FloatArray dGDStressPrincipal(3);
     FloatArray dEquivalentDGDStressDInv(2);
-    FloatArray helpA(3);
 
     //Compute first and second derivative of plastic potential
     computeDGDInv(dGDInv, sig, rho, tempKappa);
@@ -1364,8 +1354,6 @@ ConcreteDPM :: computeDDKappaDDeltaLambdaDKappa(const double sig,
     double equivalentDGDStress;
     FloatArray dGDInv(2);
     FloatArray dDGDInvDKappa(2);
-    FloatArray dGDStressPrincipal(3);
-    FloatArray helpA(3);
     double dEquivalentDGDStressDKappa;
 
     //Compute first and second derivative of plastic potential
@@ -1664,12 +1652,11 @@ ConcreteDPM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                              TimeStep *tStep)
 {
     if ( gp->giveMaterialMode() == _3dMat || gp->giveMaterialMode() ==  _PlaneStrain ) {
-        double omega = 0.;
         ConcreteDPMStatus *status = giveStatus(gp);
         if ( mode == ElasticStiffness ) {
             this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
         } else if ( mode == SecantStiffness || mode == TangentStiffness ) {
-            omega = status->giveTempDamage();
+            double omega = status->giveTempDamage();
             if ( omega > 0.9999 ) {
                 omega = 0.9999;
             }

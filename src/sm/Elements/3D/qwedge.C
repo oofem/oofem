@@ -68,7 +68,7 @@ QWedge :: initializeFrom(InputRecord *ir)
 
     this->matRotation = ir->hasField(_IFT_QWedge_materialCoordinateSystem);
 
-    return this->NLStructuralElement :: initializeFrom(ir);
+    return Structural3DElement :: initializeFrom(ir);
 }
 
 FEInterpolation *
@@ -103,7 +103,7 @@ QWedge :: computeStressVector(FloatArray &answer, const FloatArray &e, GaussPoin
         FloatArray x, y, z;
         FloatArray rotStrain, s;
 
-        this->giveMaterialOrientationAt( x, y, z, * gp->giveNaturalCoordinates() );
+        this->giveMaterialOrientationAt( x, y, z, gp->giveNaturalCoordinates() );
         // Transform from global c.s. to material c.s.
         rotStrain = {
             e(0) * x(0) * x(0) + e(5) * x(0) * x(1) + e(1) * x(1) * x(1) + e(4) * x(0) * x(2) + e(3) * x(1) * x(2) + e(2) * x(2) * x(2),
@@ -137,7 +137,7 @@ QWedge :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode
         FloatArray x, y, z;
         FloatMatrix Q;
 
-        this->giveMaterialOrientationAt( x, y, z, * gp->giveNaturalCoordinates() );
+        this->giveMaterialOrientationAt( x, y, z, gp->giveNaturalCoordinates() );
 
         Q = {
             { x(0) * x(0), x(1) * x(1), x(2) * x(2), x(1) * x(2), x(0) * x(2), x(0) * x(1) },
@@ -204,14 +204,6 @@ QWedge :: SPRNodalRecoveryMI_giveNumberOfIP()
     return integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints();
 }
 
-
-void
-QWedge :: SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp)
-{
-    if ( this->computeGlobalCoordinates( coords, * gp->giveNaturalCoordinates() ) == 0 ) {
-        OOFEM_ERROR("computeGlobalCoordinates failed");
-    }
-}
 
 SPRPatchType
 QWedge :: SPRNodalRecoveryMI_givePatchType()

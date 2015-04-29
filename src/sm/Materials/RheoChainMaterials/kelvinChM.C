@@ -195,7 +195,7 @@ KelvinChainMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, 
 }
 
 void
-KelvinChainMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tNow)
+KelvinChainMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tStep)
 {
     /*
      * Updates hidden variables used to effectively trace the load history
@@ -216,14 +216,14 @@ KelvinChainMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tNow)
     delta_sigma.subtract( status->giveStrainVector() ); // strain increment in current time-step
 
     // Subtract the stress-independent part of strain
-    this->computeStressIndependentStrainVector(deltaEps0, gp, tNow, VM_Incremental);
+    this->computeStressIndependentStrainVector(deltaEps0, gp, tStep, VM_Incremental);
     if ( deltaEps0.giveSize() ) {
         delta_sigma.subtract(deltaEps0); // should be equal to zero if there is no stress change during the time-step
     }
 
-    delta_sigma.times( this->giveEModulus(gp, tNow) ); // = delta_sigma
+    delta_sigma.times( this->giveEModulus(gp, tStep) ); // = delta_sigma
 
-    deltaT = tNow->giveTimeIncrement() / timeFactor;
+    deltaT = tStep->giveTimeIncrement() / timeFactor;
 
     for ( int mu = 1; mu <= nUnits; mu++ ) {
         help = delta_sigma;
@@ -268,7 +268,9 @@ KelvinChainMaterial :: CreateStatus(GaussPoint *gp) const
 IRResultType
 KelvinChainMaterial :: initializeFrom(InputRecord *ir)
 {
-    RheoChainMaterial :: initializeFrom(ir);
+    IRResultType result = RheoChainMaterial :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
+
     this->giveDiscreteTimes(); // Makes sure the new discrete times are evaluated.
     return IRRT_OK;
 }

@@ -39,8 +39,8 @@
 #include "iga/feibspline.h"
 #include "iga/feinurbs.h"
 #include "iga/feitspline.h"
-#include "../sm/ElementEvaluators/planestresselementevaluator.h"
-#include "../sm/ElementEvaluators/space3delementevaluator.h"
+#include "../sm/Elements/PlaneStress/planestresselementevaluator.h"
+#include "../sm/Elements/3D/space3delementevaluator.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "matresponsemode.h"
@@ -61,6 +61,7 @@ public:
     BsplinePlaneStressElement(int n, Domain * aDomain);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual int checkConsistency();
 
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) {
         PlaneStressStructuralElementEvaluator :: giveCharacteristicMatrix(answer, mtrx, tStep);
@@ -102,6 +103,7 @@ public:
     NURBSPlaneStressElement(int n, Domain * aDomain);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual int checkConsistency();
 
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) {
         PlaneStressStructuralElementEvaluator :: giveCharacteristicMatrix(answer, mtrx, tStep);
@@ -187,6 +189,7 @@ public:
     NURBSSpace3dElement(int n, Domain * aDomain);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual int checkConsistency();
 
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) {
         Space3dStructuralElementEvaluator :: giveCharacteristicMatrix(answer, mtrx, tStep);

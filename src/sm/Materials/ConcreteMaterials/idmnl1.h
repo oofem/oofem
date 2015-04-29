@@ -69,7 +69,7 @@ protected:
 
 public:
     /// Constructor.
-    IDNLMaterialStatus(int n, Domain * d, GaussPoint * g);
+    IDNLMaterialStatus(int n, Domain *d, GaussPoint *g);
     /// Destructor.
     virtual ~IDNLMaterialStatus();
 
@@ -109,7 +109,7 @@ public:
  * Model based on nonlocal averaging of equivalent strain.
  */
 class IDNLMaterial : public IsotropicDamageMaterial1, public StructuralNonlocalMaterialExtensionInterface,
-public NonlocalMaterialStiffnessInterface
+    public NonlocalMaterialStiffnessInterface
 {
 protected:
     /// Final value of interaction radius, for a model with evolving characteristic length.
@@ -121,7 +121,7 @@ protected:
 
 public:
     /// Constructor
-    IDNLMaterial(int n, Domain * d);
+    IDNLMaterial(int n, Domain *d);
     /// Destructor
     virtual ~IDNLMaterial();
 
@@ -138,22 +138,25 @@ public:
     /**
      * Function used in the Stress based nonlocal variation.In this function the ratio of the first two
      * eigenvalues is and the angle of the first eigenvector with respect to the horizontal axis is calculated
-     * @param[out] angle Value of the angle  of the first eigenvector with respect to the x-axis (radians)
+     * @param[out] nx x-component of the first eigenvector of effective stress.
+     * @param[out] ny y-component of the first eigenvector of effective stress.
      * @param[out] ratio Value of the ratio of the second over the first eigenvalue of the stress tensor (sigma2/sigma1)
      * @param gp Gauss Point whose nonlocal interactions domain is modified
-     * @param flag showing whether stress based averaging is activated (flag=1).For zero strain states the stress-based averaging is deactivated (flag=0)
+     * @param flag showing whether stress based averaging is activated (flag=true).For zero strain states the stress-based averaging is deactivated (flag=false)
      */
-    void computeAngleAndSigmaRatio(double &angle, double &ratio, GaussPoint *gp, double &flag);
+    void computeAngleAndSigmaRatio(double &nx, double &ny, double &ratio, GaussPoint *gp, bool &flag);
     /**
      * Function used to compute the new weight based on stress-based averaging.
-     * @param angle Value of the angle  of the first eigenvector with respect to the x-axis (radians).
+     * @param nx x-component of the first eigenvector of effective stress.
+     * @param ny y-component of the first eigenvector of effective stress.
      * @param ratio Value of the ratio of the second over the first eigenvalue of the stress tensor (sigma2/sigma1).
      * @param gp Gauss Point whose nonlocal interactions domain is modified.
      * @param jGp Gauss Point which contributes to the nonlocal interactions domain of gp.
      * @param weight Original weight.
      * @return New weight based on stress-based averaging.
      */
-    double computeStressBasedWeight(double &angle, double &ratio, GaussPoint *gp, GaussPoint *jGp, double weight);
+    double computeStressBasedWeight(double &nx, double &ny, double &ratio, GaussPoint *gp, GaussPoint *jGp, double weight);
+    double computeStressBasedWeightForPeriodicCell(double &nx, double &ny, double &ratio, GaussPoint *gp, GaussPoint *jGp);
 
     void computeLocalEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
     { IsotropicDamageMaterial1 :: computeEquivalentStrain(kappa, strain, gp, tStep); }

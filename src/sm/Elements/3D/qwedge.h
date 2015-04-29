@@ -39,7 +39,6 @@
 #include "ErrorEstimators/huertaerrorestimator.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
-#include "eleminterpmapperinterface.h"
 #include "sprnodalrecoverymodel.h"
 
 #define _IFT_QWedge_Name "qwedge"
@@ -89,7 +88,6 @@ public:
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
     virtual int SPRNodalRecoveryMI_giveNumberOfIP();
-    virtual void SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp);
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);

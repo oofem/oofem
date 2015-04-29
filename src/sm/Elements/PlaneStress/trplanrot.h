@@ -82,16 +82,18 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _PlaneStressRot; }
 
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+
     virtual int computeNumberOfDofs() { return 9; }
     virtual void giveDofManDofIDMask(int inode, IntArray &) const;
 
     virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane);
 
     FloatArray GivePitch();
-    FloatArray GiveDerivativeUX(FloatArray &lCoords);
-    FloatArray GiveDerivativeVX(FloatArray &lCoords);
-    FloatArray GiveDerivativeUY(FloatArray &lCoords);
-    FloatArray GiveDerivativeVY(FloatArray &lCoords);
+    FloatArray GiveDerivativeUX(const FloatArray &lCoords);
+    FloatArray GiveDerivativeVX(const FloatArray &lCoords);
+    FloatArray GiveDerivativeUY(const FloatArray &lCoords);
+    FloatArray GiveDerivativeVY(const FloatArray &lCoords);
     //virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     virtual int testElementExtension(ElementExtension ext) { return 0; }

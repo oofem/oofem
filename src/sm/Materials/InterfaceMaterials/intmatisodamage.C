@@ -46,18 +46,13 @@ namespace oofem {
 REGISTER_Material(IntMatIsoDamage);
 
 IntMatIsoDamage :: IntMatIsoDamage(int n, Domain *d) : StructuralInterfaceMaterial(n, d)
-    //
-    // constructor
-    //
 {
     maxOmega = 0.999999;
+    semiExplicit = false;
 }
 
 
 IntMatIsoDamage :: ~IntMatIsoDamage()
-//
-// destructor
-//
 { }
 
 
@@ -65,8 +60,6 @@ void
 IntMatIsoDamage :: giveEngTraction_3d(FloatArray &answer, GaussPoint *gp,
                                                    const FloatArray &jump,
                                                    TimeStep *tStep)
-//
-// returns 3d traction vector 
 {
     IntMatIsoDamageStatus *status = static_cast< IntMatIsoDamageStatus * >( this->giveStatus(gp) );
     
@@ -91,14 +84,19 @@ IntMatIsoDamage :: giveEngTraction_3d(FloatArray &answer, GaussPoint *gp,
         // evaluate damage parameter
         this->computeDamageParam(omega, tempKappa);
     }
-    FloatMatrix D;
-    this->give3dStiffnessMatrix_Eng(D, ElasticStiffness, gp, tStep);
-    // damage in tension only
-    if ( equivJump >= 0.0 ) {
-        D.times(1.0 - omega);
+
+    double strength = 1.0 - min(omega, maxOmega);
+
+    if(semiExplicit) {
+        double oldOmega = status->giveDamage();
+        strength = 1.0 - min(oldOmega, maxOmega);
     }
 
-    answer.beProductOf(D, jump);
+    answer = {ks * jump.at(1) * strength, ks * jump.at(2) * strength, kn * jump.at(3)};
+    // damage in tension only
+    if ( jump.at(3) >= 0 ) {
+        answer.at(3) *= strength;
+    }
 
     // update gp
     status->letTempJumpBe(jump);
@@ -109,14 +107,21 @@ IntMatIsoDamage :: giveEngTraction_3d(FloatArray &answer, GaussPoint *gp,
 }
 
 
+void
+IntMatIsoDamage :: giveFirstPKTraction_3d(FloatArray& answer, GaussPoint* gp, const FloatArray& jump, const FloatMatrix& F, TimeStep* tStep)
+{
+    IntMatIsoDamageStatus *status = static_cast< IntMatIsoDamageStatus * > ( this->giveStatus ( gp ) );
+    this->giveEngTraction_3d(answer, gp, jump, tStep);
+    status->letTempFirstPKTractionBe(answer);
+
+}
+
 
 void
 IntMatIsoDamage :: give2dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode,
                                                                      GaussPoint *gp, TimeStep *tStep)
 {
-    double om, un;
     IntMatIsoDamageStatus *status = static_cast< IntMatIsoDamageStatus * >( this->giveStatus(gp) );
-
 
     if ( ( rMode == ElasticStiffness ) || ( rMode == SecantStiffness ) || ( rMode == TangentStiffness ) ) {
         // assemble eleastic stiffness
@@ -129,40 +134,34 @@ IntMatIsoDamage :: give2dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMod
             return;
         }
 
+        const FloatArray &jump3d = status->giveTempJump();
+        FloatArray jump2d = {jump3d.at(1), jump3d.at(3)};
+        double om = min(status->giveTempDamage(), maxOmega);
+        double un = jump2d.at(2);
+
         if ( rMode == SecantStiffness ) {
-            // Secant stiffness
-            om = status->giveTempDamage();
-            un = status->giveTempJump().at(2);
-            om = min(om, maxOmega);
+            answer.at(1, 1) *= 1.0 - om;
             // damage in tension only
             if ( un >= 0 ) {
-                answer.times(1.0 - om);
+                answer.at(2, 2) *= 1.0 - om;
             }
 
             return;
-        } else {
-            // Tangent Stiffness
-            FloatArray se(2), jump3d, jump2d(2);
-
-            jump3d = status->giveTempJump();
-            jump2d.at(1) = jump3d.at(1);
-            jump2d.at(2) = jump3d.at(3);
-            se.beProductOf(answer, jump2d);
-
-            om = status->giveTempDamage();
-            un = jump2d.at(2);
-            om = min(om, maxOmega);
+        } else { // Tangent Stiffness
+            answer.at(1, 1) *= 1.0 - om;
             // damage in tension only
             if ( un >= 0 ) {
-                answer.times(1.0 - om); ///@todo this is only the secant stiffness - tangent stiffness is broken!
+                answer.at(2, 2) *= 1.0 - om; ///@todo this is only the secant stiffness - tangent stiffness is broken!
 
+#if 0
+                se.beProductOf(answer, jump2d);
                 double omega, omega_plus;
                 computeDamageParam(omega, un);
                 computeDamageParam(omega_plus, un + 1.0e-8 );
-                //double dom = (omega_plus - omega)/ 1.0e-8;
+                double dom = (omega_plus - omega)/ 1.0e-8;
                 
                 // d( (1-omega)*D*j ) / dj = (1-omega)D - D*j openprod domega/dj
-            /*    double fac = ft*(e0 - un)/gf;
+                double fac = ft*(e0 - un)/gf;
                 dom = e0*exp(fac) /(un*un + 1.0e-9) + e0*ft*exp(fac) / (gf*un + 1.0e-9);
                 
                 
@@ -170,8 +169,8 @@ IntMatIsoDamage :: give2dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMod
                 if ( ( om > 0. ) && ( status->giveTempKappa() > status->giveKappa() ) ) {
                     answer.at(1, 2) -= se.at(1) * dom;
                     answer.at(2, 2) -= se.at(2) * dom;
-                }*/
-                return;
+                }
+#endif
             }
         }
     }  else {
@@ -182,11 +181,9 @@ IntMatIsoDamage :: give2dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMod
 
 void
 IntMatIsoDamage :: give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode,
-                                                                     GaussPoint *gp, TimeStep *tStep)
+                                             GaussPoint *gp, TimeStep *tStep)
 {
-    double om, un;
     IntMatIsoDamageStatus *status = static_cast< IntMatIsoDamageStatus * >( this->giveStatus(gp) );
-
 
     if ( ( rMode == ElasticStiffness ) || ( rMode == SecantStiffness ) || ( rMode == TangentStiffness ) ) {
         // assemble eleastic stiffness
@@ -200,34 +197,29 @@ IntMatIsoDamage :: give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMod
             return;
         }
 
+        const FloatArray &jump3d = status->giveTempJump();
+        double om = min(status->giveTempDamage(), maxOmega);
+        double un = jump3d.at(3);
+
         if ( rMode == SecantStiffness ) {
             // Secant stiffness
-            om = status->giveTempDamage();
-            //un = status->giveTempStrainVector().at(1);
-            un = status->giveTempJump().at(3);
-            om = min(om, maxOmega);
+            answer.at(1, 1) *= 1.0 - om;
+            answer.at(2, 2) *= 1.0 - om;
             // damage in tension only
             if ( un >= 0 ) {
-                answer.times(1.0 - om);
+                answer.at(3, 3) *= 1.0 - om;
             }
 
             return;
         } else {
             // Tangent Stiffness
-            FloatArray se, jump;
-            //e = status->giveTempStrainVector();
-            jump = status->giveTempJump();
-            se.beProductOf(answer, jump);
-
-            om = status->giveTempDamage();
-            //un = status->giveTempStrainVector().at(1);
-            un = jump.at(3);
-            om = min(om, maxOmega);
+            answer.at(1, 1) *= 1.0 - om;
+            answer.at(2, 2) *= 1.0 - om;
             // damage in tension only
             if ( un >= 0 ) {
-                answer.times(1.0 - om);
-                return;
+                answer.at(3, 3) *= 1.0 - om;
             }
+            return;
         }
     }  else {
         OOFEM_ERROR("Unknown MatResponseMode");
@@ -307,17 +299,7 @@ IntMatIsoDamage :: giveInputRecord(DynamicInputRecord &input)
 void
 IntMatIsoDamage :: computeEquivalentJump(double &kappa, const FloatArray &jump)
 {
-    // Damage only driven by the normal jump
-
-    if ( jump.giveSize() == 3 ) {
-        kappa = macbra( jump.at(3) );
-    } else if ( jump.giveSize() == 2 ) {
-        kappa = macbra( jump.at(2) );
-    } else if( jump.giveSize() == 1 ) {
-        kappa = macbra( jump.at(1) );
-    } else {
-        OOFEM_ERROR("Jump vector is not of dimension 1,2 or 3");
-    }
+    kappa = jump.at(3);
 }
 
 void
@@ -415,4 +397,5 @@ IntMatIsoDamageStatus :: restoreContext(DataStream &stream, ContextMode mode, vo
 
     return CIO_OK;
 }
+
 } // end namespace oofem
