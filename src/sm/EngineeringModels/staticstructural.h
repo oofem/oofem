@@ -101,6 +101,10 @@ public:
 
     virtual bool requiresEquationRenumbering(TimeStep *tStep);
 
+    virtual int requiresUnknownsDictionaryUpdate() { return true; }
+    virtual void updateDofUnknownsDictionary(DofManager *, TimeStep *);
+    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep);
+
     // identification
     virtual const char *giveInputRecordName() const { return _IFT_StaticStructural_Name; }
     virtual const char *giveClassName() const { return "StaticStructural"; }

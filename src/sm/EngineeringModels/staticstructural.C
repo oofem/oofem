@@ -187,7 +187,12 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
     this->field->applyBoundaryCondition(tStep); ///@todo Temporary hack, advanceSolution should apply the boundary conditions directly.
 
     neq = this->giveNumberOfDomainEquations( di, EModelDefaultEquationNumbering() );
-    this->field->initialize(VM_Total, tStep, this->solution, EModelDefaultEquationNumbering() ); 
+    if (tStep->giveNumber()==1) {
+        this->field->initialize(VM_Total, tStep, this->solution, EModelDefaultEquationNumbering() );
+    } else {
+        this->field->initialize(VM_Total, tStep->givePreviousStep(), this->solution, EModelDefaultEquationNumbering() );
+        this->field->update(VM_Total, tStep, this->solution, EModelDefaultEquationNumbering() );
+    }
 
     FloatArray incrementOfSolution(neq), externalForces(neq);
 
@@ -440,6 +445,25 @@ StaticStructural :: estimateMaxPackSize(IntArray &commMap, DataStream &buff, int
     }
 
     return 0;
+}
+
+void
+StaticStructural :: updateDofUnknownsDictionary(DofManager *dman, TimeStep *tStep)
+{
+
+    for (Dof *dof : *dman ) {
+        double val;
+        val = dof->giveUnknown(VM_Total, tStep);
+
+        dof->updateUnknownsDictionary(tStep, VM_Total, val);
+    }
+
+}
+
+int
+StaticStructural :: giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep)
+{
+    return tStep->giveNumber();
 }
 
 } // end namespace oofem
