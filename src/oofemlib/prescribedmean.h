@@ -72,18 +72,19 @@ private:
     bool elementEdges;
 
     IntArray elements;
-
     IntArray sides;
-
     IntArray lambdaIDs;
 
 public:
-    PrescribedMean (int n, Domain * d) : ActiveBoundaryCondition(n, d) {};
+    PrescribedMean (int n, Domain * d) : ActiveBoundaryCondition(n, d), lambdaDman( new Node(0, this->domain) ) {}
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, CharType type,
+    virtual void assemble(SparseMtrx &answer, TimeStep *tStep, CharType type,
                           const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
+
+//    virtual void assemble(SparseMtrx &answer, TimeStep *tStep, CharType type,
+//                          const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) { }
 
     virtual void assembleVector(FloatArray &answer, TimeStep *tStep,
                                 CharType type, ValueModeType mode,

@@ -63,11 +63,10 @@ PrescribedMean :: initializeFrom(InputRecord *ir)
     elementEdges = false;
     IR_GIVE_OPTIONAL_FIELD(ir, elementEdges, _IFT_PrescribedMean_Edge);
 
-    int dofid = this->domain->giveNextFreeDofID();
+    int newdofid = this->domain->giveNextFreeDofID();
     lambdaIDs.clear();
-    lambdaIDs.followedBy(dofid);
-    lambdaDman = new Node(0, this->domain);
-    lambdaDman->appendDof( new MasterDof( lambdaDman, ( DofIDItem )dofid ));
+    lambdaIDs.followedBy(newdofid);
+    lambdaDman->appendDof( new MasterDof( lambdaDman, ( DofIDItem )newdofid ));
 
     domainSize=-1.;
 
@@ -76,7 +75,7 @@ PrescribedMean :: initializeFrom(InputRecord *ir)
 }
 
 void
-PrescribedMean :: assemble(SparseMtrx *answer, TimeStep *tStep, CharType type,
+PrescribedMean :: assemble(SparseMtrx &answer, TimeStep *tStep, CharType type,
                            const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
 
@@ -135,8 +134,8 @@ PrescribedMean :: assemble(SparseMtrx *answer, TimeStep *tStep, CharType type,
             temp = N*detJ*gp->giveWeight()*(1.0/domainSize);
             tempT.beTranspositionOf(temp);
 
-            answer->assemble(r_Sideloc, c_loc, temp);
-            answer->assemble(r_loc, c_Sideloc, tempT);
+            answer.assemble(r_Sideloc, c_loc, temp);
+            answer.assemble(r_loc, c_Sideloc, tempT);
         }
 
         delete iRule;
