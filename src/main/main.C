@@ -299,6 +299,8 @@ int main(int argc, char *argv[])
 #endif
     oofem_logger.printStatistics();
 
+    problem.reset();
+
     oofem_finalize_modules();
 
     return 0;
