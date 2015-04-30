@@ -67,13 +67,6 @@ FreeWarping :: FreeWarping(int i, EngngModel *_master) : StructuralEngngModel(i,
     nMethod = NULL;
     initFlag = 1;
     solverType = ST_Direct;
-
-#ifdef __PARALLEL_MODE
-    commMode = ProblemCommMode__NODE_CUT;
-    nonlocalExt = 0;
-    communicator = nonlocCommunicator = NULL;
-    commBuff = NULL;
-#endif
 }
 
 
@@ -271,22 +264,14 @@ void FreeWarping :: solveYourself()
 {
     this->computeCenterOfGravity();
 
-#ifdef __PARALLEL_MODE
     if ( this->isParallel() ) {
  #ifdef __VERBOSE_PARALLEL
         // force equation numbering before setting up comm maps
-        int neq = this->giveNumberOfDomainEquations(EID_MomentumBalance);
+      int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
         OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), neq);
  #endif
-
-        // set up communication patterns
-        // needed only for correct shared rection computation
-        communicator->setUpCommunicationMaps(this, true);
-        if ( nonlocalExt ) {
-            nonlocCommunicator->setUpCommunicationMaps(this, true);
-        }
+	this->initializeCommMaps();
     }
-#endif
 
     StructuralEngngModel :: solveYourself();
 }
