@@ -97,6 +97,12 @@ NumericalMethod *StaticStructural :: giveNumericalMethod(MetaStep *mStep)
     return nMethod.get();
 }
 
+int
+StaticStructural :: giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep)
+{
+    return tStep->giveNumber() % 2;
+}
+
 IRResultType
 StaticStructural :: initializeFrom(InputRecord *ir)
 {
@@ -187,7 +193,6 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
     this->field->applyBoundaryCondition(tStep); ///@todo Temporary hack, advanceSolution should apply the boundary conditions directly.
 
     neq = this->giveNumberOfDomainEquations( di, EModelDefaultEquationNumbering() );
-    this->field->initialize(VM_Total, tStep, this->solution, EModelDefaultEquationNumbering() ); 
 
     FloatArray incrementOfSolution(neq), externalForces(neq);
 
@@ -205,12 +210,23 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
     this->initMetaStepAttributes( this->giveCurrentMetaStep() );
 
+    // Construct the initial guess, starting with the old solution:
+    this->field->initialize(VM_Total, tStep->givePreviousStep(), this->solution, EModelDefaultEquationNumbering() ); 
+    this->field->update(VM_Total, tStep, this->solution, EModelDefaultEquationNumbering());
+    this->field->applyBoundaryCondition(tStep); ///@todo Temporary hack to override the incorrect values that is set by "update" above. Remove this when that is fixed.
+
     if ( this->initialGuessType == IG_Tangent ) {
         OOFEM_LOG_RELEVANT("Computing initial guess\n");
-        FloatArray extrapolatedForces;
+        FloatArray extrapolatedForces(neq);
         this->assembleExtrapolatedForces( extrapolatedForces, tStep, TangentStiffnessMatrix, this->giveDomain(di) );
         extrapolatedForces.negated();
-
+        this->assembleVector(extrapolatedForces, tStep, LinearizedDilationForceAssembler(), VM_Incremental, EModelDefaultEquationNumbering(), this->giveDomain(di) );
+/*
+        extrapolatedForces.printYourself("extrapolatedForces");
+        this->internalForces.zero();
+        this->assembleVectorFromElements(this->internalForces, tStep, InternalForceAssembler(), VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(di));
+        this->internalForces.printYourself("internal forces");
+*/
         OOFEM_LOG_RELEVANT("Computing old tangent\n");
         this->updateComponent( tStep, NonLinearLhs, this->giveDomain(di) );
         SparseLinearSystemNM *linSolver = nMethod->giveLinearSolver();
@@ -218,12 +234,14 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
         linSolver->solve(*stiffnessMatrix, extrapolatedForces, incrementOfSolution);
         OOFEM_LOG_RELEVANT("Initial guess found\n");
         this->solution.add(incrementOfSolution);
+        
+        this->field->update(VM_Total, tStep, this->solution, EModelDefaultEquationNumbering());
+        this->field->applyBoundaryCondition(tStep); ///@todo Temporary hack to override the incorrect values that is set by "update" above. Remove this when that is fixed.
     } else if ( this->initialGuessType != IG_None ) {
         OOFEM_ERROR("Initial guess type: %d not supported", initialGuessType);
     } else {
         incrementOfSolution.zero();
     }
-
     // Build initial/external load
     externalForces.zero();
     this->assembleVector( externalForces, tStep, ExternalForceAssembler(), VM_Total,
@@ -267,6 +285,16 @@ void StaticStructural :: terminate(TimeStep *tStep)
 
 double StaticStructural :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 {
+    double val1 = dof->giveUnknownsDictionaryValue(tStep, VM_Total);
+    double val0 = dof->giveUnknownsDictionaryValue(tStep->givePreviousStep(), VM_Total);
+    if ( mode == VM_Total ) {
+        return val1;
+    } else if ( mode == VM_Incremental ) {
+        return val1 - val0;
+    } else {
+        OOFEM_ERROR("Unknown value mode requested");
+        return 0;
+    }
     return this->field->giveUnknownValue(dof, mode, tStep);
 }
 
