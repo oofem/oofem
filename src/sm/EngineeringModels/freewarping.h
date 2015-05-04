@@ -118,10 +118,7 @@ public:
     void updateComputedResults(FloatArray &answer, TimeStep *tStep);
     void updateStiffnessMatrix(SparseMtrx *answer);
 
-
-#ifdef __PARALLEL_MODE
     int estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType);
-#endif
 };
 } // end namespace oofem
 #endif // freewarping_h

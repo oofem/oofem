@@ -52,7 +52,6 @@
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"
  #include "communicator.h"
- #include "loadbalancer.h"
 #endif
 
 #include <typeinfo>
@@ -72,12 +71,8 @@ FreeWarping :: FreeWarping(int i, EngngModel *_master) : StructuralEngngModel(i,
 
 FreeWarping :: ~FreeWarping()
 {
-    if ( stiffnessMatrix ) {
-        delete stiffnessMatrix;
-    }
-    if ( nMethod ) {
-        delete nMethod;
-    }
+    delete stiffnessMatrix;
+    delete nMethod;
 }
 
 
@@ -122,9 +117,8 @@ FreeWarping :: initializeFrom(InputRecord *ir)
 #ifdef __PARALLEL_MODE
     if ( isParallel() ) {
         commBuff = new CommunicatorBuff( this->giveNumberOfProcesses() );
-        communicator = new ProblemCommunicator(this, commBuff, this->giveRank(),
-                                               this->giveNumberOfProcesses(),
-                                               this->commMode);
+        communicator = new NodeCommunicator(this, commBuff, this->giveRank(),
+                                            this->giveNumberOfProcesses());
     }
 
 #endif
@@ -341,9 +335,7 @@ void FreeWarping :: solveYourselfAt(TimeStep *tStep)
      * loadVector.subtract(internalForces);
      */
 
-#ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(loadVector, EModelDefaultEquationNumbering(), ReactionExchangeTag);
-#endif
 
     //
     // set-up numerical model
@@ -401,28 +393,15 @@ FreeWarping :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 }
 
 
-#ifdef __PARALLEL_MODE
 int
 FreeWarping :: estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType)
 {
-    int mapSize = commMap.giveSize();
-    int ndofs, count = 0, pcount = 0;
-    IntArray locationArray;
+    int count = 0, pcount = 0;
     Domain *domain = this->giveDomain(1);
-    DofManager *dman;
-    Dof *jdof;
 
-    if ( packUnpackType == ProblemCommMode__ELEMENT_CUT ) {
-        for ( int i = 1; i <= mapSize; i++ ) {
-            count += domain->giveDofManager( commMap.at(i) )->giveNumberOfDofs();
-        }
-
-        return ( buff.givePackSize(MPI_DOUBLE, 1) * count );
-    } else if ( packUnpackType == ProblemCommMode__NODE_CUT ) {
-        for ( int i = 1; i <= mapSize; i++ ) {
-            ndofs = ( dman = domain->giveDofManager( commMap.at(i) ) )->giveNumberOfDofs();
-            for ( int j = 1; j <= ndofs; j++ ) {
-                jdof = dman->giveDof(j);
+    if ( packUnpackType == 0 ) { ///@todo Fix this old ProblemCommMode__NODE_CUT value
+        for ( int map: commMap ) {
+            for ( Dof *jdof: *domain->giveDofManager( map ) ) {
                 if ( jdof->isPrimaryDof() && ( jdof->__giveEquationNumber() ) ) {
                     count++;
                 } else {
@@ -435,10 +414,10 @@ FreeWarping :: estimateMaxPackSize(IntArray &commMap, DataStream &buff, int pack
         // only pcount is relevant here, since only prescribed components are exchanged !!!!
         // --------------------------------------------------------------------------------
 
-        return ( buff.givePackSize(MPI_DOUBLE, 1) * pcount );
-    } else if ( packUnpackType == ProblemCommMode__REMOTE_ELEMENT_MODE ) {
-        for ( int i = 1; i <= mapSize; i++ ) {
-            count += domain->giveElement( commMap.at(i) )->estimatePackSize(buff);
+        return ( buff.givePackSizeOfDouble(1) * pcount );
+    } else if ( packUnpackType == 1 ) {
+        for ( int map: commMap ) {
+            count += domain->giveElement( map )->estimatePackSize(buff);
         }
 
         return count;
@@ -446,7 +425,6 @@ FreeWarping :: estimateMaxPackSize(IntArray &commMap, DataStream &buff, int pack
 
     return 0;
 }
-#endif
 
 
 void
