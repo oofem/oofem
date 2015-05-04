@@ -299,7 +299,7 @@ public:
 
     virtual int testCrossSectionExtension(CrossSectExtension ext) { return ( ( ext == CS_StructuralCapability ) ? 1 : 0 ); }
 
-
+    virtual Material *giveMaterial(IntegrationPoint *ip) { OOFEM_ERROR("Missing implementation"); return NULL; }
 
     IRResultType  initializeFrom(InputRecord *ir);
 

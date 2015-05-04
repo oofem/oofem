@@ -50,6 +50,16 @@ class LastEquilibratedInternalForceAssembler : public InternalForceAssembler
 };
 
 /**
+ * Callback class for assembling linearized thermal "loads", useful for computing initial guesses.
+ * @author Mikael Öhman
+ */
+class LinearizedDilationForceAssembler : public VectorAssembler
+{
+public:
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+};
+
+/**
  * Callback class for assembling initial stress matrices
  * @author Mikael Öhman
  */

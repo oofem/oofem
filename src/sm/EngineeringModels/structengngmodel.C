@@ -45,12 +45,39 @@
 #include "assemblercallback.h"
 #include "unknownnumberingscheme.h"
 
+#include "../sm/Materials/structuralmaterial.h"
+#include "../sm/CrossSections/structuralcrosssection.h"
+
 namespace oofem {
 
 void LastEquilibratedInternalForceAssembler :: vectorFromElement(FloatArray& vec, Element& element, TimeStep* tStep, ValueModeType mode) const
 {
     //static_cast< StructuralElement & >( element ).giveInternalForcesVector(vec, tStep, 1);
     element.giveCharacteristicVector(vec, LastEquilibratedInternalForcesVector, mode, tStep);
+}
+
+void LinearizedDilationForceAssembler :: vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const
+{
+    StructuralElement &selem = static_cast< StructuralElement & >( element );
+
+    vec.clear();
+    for ( auto &gp : *selem.giveDefaultIntegrationRulePtr() ) {
+        FloatMatrix B;
+        FloatArray epsilonTemperature;
+        
+        double dV = selem.computeVolumeAround(gp);
+        selem.computeBmatrixAt(gp, B);
+
+        static_cast< StructuralMaterial *>( selem.giveStructuralCrossSection()->giveMaterial(gp) )->computeStressIndependentStrainVector(epsilonTemperature, gp, tStep, VM_Incremental);
+
+        if ( epsilonTemperature.giveSize() > 0 ) {
+            FloatArray s;
+            FloatMatrix D;
+            selem.computeConstitutiveMatrixAt(D, ElasticStiffness, gp, tStep);
+            s.beProductOf(D, epsilonTemperature);
+            vec.plusProduct(B, s, dV);
+        }
+    }
 }
 
 void InitialStressMatrixAssembler :: matrixFromElement(FloatMatrix &answer, Element &element, TimeStep *tStep) const

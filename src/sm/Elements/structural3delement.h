@@ -101,7 +101,7 @@ protected:
       virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int);
       virtual int computeLoadLSToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *gp);
     
-    private:
+private:
     double dnx(int i, int arg2);
 };
 
