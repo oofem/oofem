@@ -1099,16 +1099,18 @@ EngngModel :: assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, Ch
     // Simply assembles contributions from each element in domain
     IntArray loc;
     FloatArray charVec, delta_u;
-    FloatMatrix charMatrix;
-    int nelems;
+    FloatMatrix charMatrix, R;
+    int nelems = domain->giveNumberOfElements();
     EModelDefaultEquationNumbering dn;
 
     answer.resize( this->giveNumberOfDomainEquations( domain->giveNumber(), EModelDefaultEquationNumbering() ) );
     answer.zero();
 
-    nelems = domain->giveNumberOfElements();
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
 
+#ifdef _OPENMP
+ #pragma omp parallel for shared(answer) private(R, charMatrix, charVec, loc, delta_u)
+#endif
     for ( int i = 1; i <= nelems; i++ ) {
         Element *element = domain->giveElement(i);
 
@@ -1131,10 +1133,17 @@ EngngModel :: assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, Ch
         element->giveCharacteristicMatrix(charMatrix, type, tStep);
         element->computeVectorOf(VM_Incremental, tStep, delta_u);
         charVec.beProductOf(charMatrix, delta_u);
+        if ( element->giveRotationMatrix(R) ) {
+            charVec.rotatedWith(R, 't');
+        }
 
         ///@todo Deal with element deactivation and reactivation properly.
-
-        answer.assemble(charVec, loc);
+#ifdef _OPENMP
+ #pragma omp critical
+#endif
+        {
+            answer.assemble(charVec, loc);
+        }
     }
 
     this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
