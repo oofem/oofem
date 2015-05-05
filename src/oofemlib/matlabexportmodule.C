@@ -305,7 +305,6 @@ MatlabExportModule :: doOutputMesh(TimeStep *tStep, FILE *FID)
     fprintf(FID, "\tmesh.p=[");
     for ( auto &dman : domain->giveDofManagers() ) {
         for ( int j = 1; j <= domain->giveNumberOfSpatialDimensions(); j++) {
-            //double x = dman->giveCoordinate(1), y = dman->giveCoordinate(2);
             double c = dman->giveCoordinate(j);
             fprintf(FID, "%f, ", c);
         }
@@ -375,10 +374,10 @@ MatlabExportModule :: doOutputData(TimeStep *tStep, FILE *FID)
 void
 MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
 {
-    FloatArray v_hat, GradPTemp, v_hatTemp;
+//    FloatArray v_hat, GradPTemp, v_hatTemp;
 
     Domain *domain  = emodel->giveDomain(1);
-
+/*
     v_hat.clear();
 
         ///@todo Sort out this hack in a nicer (modular) way / Mikael
@@ -422,6 +421,8 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
         fprintf(FID, "]; %% No velocities\n");
     }
 
+    */
+
     // Output weak periodic boundary conditions
     unsigned int wpbccount = 1, sbsfcount = 1, mcount = 1;
 
@@ -460,7 +461,6 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
             fprintf(FID, "];\n");
             mcount++;
         }
-
     }
 }
 
@@ -560,10 +560,6 @@ MatlabExportModule :: doOutputReactionForces(TimeStep *tStep,    FILE *FID)
 void
 MatlabExportModule :: doOutputIntegrationPointFields(TimeStep *tStep,    FILE *FID)
 {
-
-    //if ( !testTimeStepOutput(tStep) ) {
-    //    return;
-    //}
 
     int domainIndex = 1;
     Domain *domain  = emodel->giveDomain( domainIndex );
@@ -668,7 +664,6 @@ MatlabExportModule :: giveOutputStream(TimeStep *tStep)
 
     char fext[100];
     sprintf( fext, "_m%d_%d", this->number, tStep->giveNumber() );
-    //fileName += fext;
 
     if ( this->testSubStepOutput() ) {
         // include tStep version in output file name
@@ -712,8 +707,6 @@ MatlabExportModule :: giveOutputStream(TimeStep *tStep)
     }
 
     fileName += ".m";
-
-    // printf("Filename: %s\n", functionname.c_str());
 
     if ( ( answer = fopen(fileName.c_str(), "w") ) == NULL ) {
         OOFEM_ERROR("failed to open file %s", fileName.c_str() );
@@ -776,7 +769,6 @@ MatlabExportModule :: doOutputHomogenizeDofIDs(TimeStep *tStep,    FILE *FID)
             }
         }
         fprintf(FID, "];\n");
-        // HomQuantities.at(i)->printYourself();
         delete HomQuantities.at(i);
     }
 
