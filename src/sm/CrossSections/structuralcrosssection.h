@@ -294,16 +294,11 @@ public:
      */
     virtual FloatArray *imposeStrainConstrainsOnGradient(GaussPoint *gp, FloatArray *gradientStressVector3d);
 
-    // identification and auxiliary functions
-    virtual const char *giveClassName() const { return "StructuralCrossSection"; }
-
     virtual int testCrossSectionExtension(CrossSectExtension ext) { return ( ( ext == CS_StructuralCapability ) ? 1 : 0 ); }
 
     virtual Material *giveMaterial(IntegrationPoint *ip) { OOFEM_ERROR("Missing implementation"); return NULL; }
 
-    IRResultType  initializeFrom(InputRecord *ir);
-
-    virtual void createMaterialStatus(GaussPoint &iGP) = 0; // ES
+    virtual void createMaterialStatus(GaussPoint &iGP) = 0;
 
     virtual int checkConsistency() = 0;
     virtual Interface *giveMaterialInterface(InterfaceType t, IntegrationPoint *ip) { return NULL; }

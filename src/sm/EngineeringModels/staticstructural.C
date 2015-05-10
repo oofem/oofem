@@ -123,7 +123,7 @@ StaticStructural :: initializeFrom(InputRecord *ir)
     this->solverType = 0; // Default NR
     IR_GIVE_OPTIONAL_FIELD(ir, solverType, _IFT_StaticStructural_solvertype);
 
-    int _val = IG_None;
+    int _val = IG_Tangent;
     IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_EngngModel_initialGuess);
     this->initialGuessType = ( InitialGuess ) _val;
     
@@ -220,13 +220,15 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
         FloatArray extrapolatedForces(neq);
         this->assembleExtrapolatedForces( extrapolatedForces, tStep, TangentStiffnessMatrix, this->giveDomain(di) );
         extrapolatedForces.negated();
-        this->assembleVector(extrapolatedForces, tStep, LinearizedDilationForceAssembler(), VM_Incremental, EModelDefaultEquationNumbering(), this->giveDomain(di) );
-/*
+        ///@todo Need to find a general way to support this before enabling it by default.
+        //this->assembleVector(extrapolatedForces, tStep, LinearizedDilationForceAssembler(), VM_Incremental, EModelDefaultEquationNumbering(), this->giveDomain(di) );
+#if 0
+        // Some debug stuff:
         extrapolatedForces.printYourself("extrapolatedForces");
         this->internalForces.zero();
         this->assembleVectorFromElements(this->internalForces, tStep, InternalForceAssembler(), VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(di));
         this->internalForces.printYourself("internal forces");
-*/
+#endif
         OOFEM_LOG_RELEVANT("Computing old tangent\n");
         this->updateComponent( tStep, NonLinearLhs, this->giveDomain(di) );
         SparseLinearSystemNM *linSolver = nMethod->giveLinearSolver();
