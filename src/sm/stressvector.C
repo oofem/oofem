@@ -395,7 +395,6 @@ StressVector :: computeSecondCoordinate() const
     // This function computes the second Haigh-Westergaard coordinate
     // from the deviatoric stress state
     //
-    ;
     return sqrt( 2. * computeSecondInvariant() );
 }
 

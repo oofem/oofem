@@ -1401,6 +1401,85 @@ StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &di
 
 
 double
+StructuralMaterial :: computeDeviatoricVolumetricSplit(FloatArray &dev, const FloatArray &s)
+{
+    double vol = s[0] + s[1] + s[2];
+    double mean = vol / 3.0;
+    dev = s;
+    dev.at(1) -= vol;
+    dev.at(2) -= vol;
+    dev.at(3) -= vol;
+    return mean;
+}
+
+
+double
+StructuralMaterial :: computeFirstInvariant(const FloatArray &s)
+{
+    if ( s.giveSize() == 1 ) {
+        return s [ 0 ];
+    } else {
+        return s [ 0 ] + s [ 1 ] + s [ 2 ];
+    }
+}
+
+double
+StructuralMaterial :: computeSecondStressInvariant(const FloatArray &s)
+{
+    return .5 * ( s [ 0 ] * s [ 0 ] + s [ 1 ] * s [ 1 ] + s [ 2 ] * s [ 2 ] ) +
+            s [ 3 ] * s [ 3 ] + s [ 4 ] * s [ 4 ] + s [ 5 ] * s [ 5 ];
+}
+
+double
+StructuralMaterial :: computeThirdStressInvariant(const FloatArray &s)
+{
+    return ( 1. / 3. ) * ( s [ 0 ] * s [ 0 ] * s [ 0 ] + 3. * s [ 0 ] * s [ 5 ] * s [ 5 ] +
+                            3. * s [ 0 ] * s [ 4 ] * s [ 4 ] + 6. * s [ 3 ] * s [ 5 ] * s [ 4 ] +
+                            3. * s [ 1 ] * s [ 5 ] * s [ 5 ] + 3 * s [ 2 ] * s [ 4 ] * s [ 4 ] +
+                            s [ 1 ] * s [ 1 ] * s [ 1 ] + 3. * s [ 1 ] * s [ 3 ] * s [ 3 ] +
+                            3. * s [ 2 ] * s [ 3 ] * s [ 3 ] + s [ 2 ] * s [ 2 ] * s [ 2 ] );
+}
+
+
+double
+StructuralMaterial :: computeFirstCoordinate(const FloatArray &s)
+{
+    // This function computes the first Haigh-Westergaard coordinate
+    return computeFirstInvariant(s) / sqrt(3.);
+}
+
+double
+StructuralMaterial :: computeSecondCoordinate(const FloatArray &s)
+{
+    // This function computes the second Haigh-Westergaard coordinate
+    // from the deviatoric stress state
+    return sqrt( 2. * computeSecondStressInvariant(s) );
+}
+
+double
+StructuralMaterial :: computeThirdCoordinate(const FloatArray &s)
+{
+    // This function computes the third Haigh-Westergaard coordinate
+    // from the deviatoric stress state
+    double c1 = 0.0;
+    if ( computeSecondStressInvariant(s) == 0. ) {
+        c1 = 0.0;
+    } else {
+        c1 = ( 3. * sqrt(3.) / 2. ) * computeThirdStressInvariant(s) / ( pow( computeSecondStressInvariant(s), ( 3. / 2. ) ) );
+    }
+
+    if ( c1 > 1.0 ) {
+        c1 = 1.0;
+    }
+
+    if ( c1 < -1.0 ) {
+        c1 = -1.0;
+    }
+
+    return 1. / 3. * acos(c1);
+}
+
+double
 StructuralMaterial :: computeVonMisesStress(const FloatArray *currentStress)
 {
     double J2;

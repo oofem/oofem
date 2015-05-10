@@ -304,6 +304,22 @@ public:
                                        stressStrainPrincMode mode);
 
     /**
+     * Computes split of receiver into deviatoric and volumetric part.
+     * @param dev Deviatoric part.
+     * @param s Input vector
+     * @return Volumetric part (diagonal components divided by 3).
+     */
+    static double computeDeviatoricVolumetricSplit(FloatArray &dev, const FloatArray &s);
+
+    static double computeFirstInvariant(const FloatArray &s);
+    static double computeSecondStressInvariant(const FloatArray &s);
+    static double computeThirdStressInvariant(const FloatArray &s);
+
+    static double computeFirstCoordinate(const FloatArray &s);
+    static double computeSecondCoordinate(const FloatArray &s);
+    static double computeThirdCoordinate(const FloatArray &s);
+
+    /**
      * Computes full 3d material stiffness matrix at given integration point, time, respecting load history
      * in integration point.
      * @param answer Computed results.
