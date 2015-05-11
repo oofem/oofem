@@ -713,30 +713,18 @@ public:
     virtual ~ConcreteDPM2();
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual int hasMaterialModeCapability(MaterialMode mMode);
-
     virtual const char *giveClassName() const { return "ConcreteDPM2"; }
     virtual const char *giveInputRecordName() const { return _IFT_ConcreteDPM2_Name; }
 
     LinearElasticMaterial *giveLinearElasticMaterial()
     { return linearElasticMaterial; }
 
-    int computeInverseOfJacobian(FloatMatrix &answer, const FloatMatrix &src);
     virtual void  giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep);
 
-    /**
-     * Computes real macro stress in corresponding macro integration point for
-     * given macroscopic strain vector.
-     */
-    virtual void giveRealStressVector(FloatArray &answer,
+    virtual void giveRealStressVector_3d(FloatArray &answer,
                                       GaussPoint *gp,
                                       const FloatArray &strainVector,
                                       TimeStep *tStep);
-
-    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    virtual void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
 
     /**
      * Perform stress return of the plasticity model and compute history variables.
@@ -755,8 +743,8 @@ public:
      */
 
     bool checkForVertexCase(double &answer,
-                            const double sig,
-                            const double tempKappa);
+                            double sig,
+                            double tempKappa);
 
     /**
      * Perform regular stress return for the plasticity model, i.e. if the trial stress state does not lie in the vertex region.
@@ -775,9 +763,9 @@ public:
      */
 
     void compute1dJacobian(FloatMatrix &answer,
-                           const double totalsigma,
-                           const double tempKappa,
-                           const double deltaLambda,
+                           double totalsigma,
+                           double tempKappa,
+                           double deltaLambda,
                            GaussPoint *gp);
     /**
      * Compute jacobian for 2D(plane strain) and 3d cases
@@ -788,10 +776,10 @@ public:
      * @param gp Gauss point
      */
     void computeJacobian(FloatMatrix &answer,
-                         const double sig,
-                         const double rho,
-                         const double tempKappa,
-                         const double deltaLambda,
+                         double sig,
+                         double rho,
+                         double tempKappa,
+                         double deltaLambda,
                          GaussPoint *gp);
 
     /**
@@ -815,31 +803,31 @@ public:
      * @param tempKappa Hardening variable.
      * @returns Yield value.
      */
-    double computeYieldValue(const double sig,
-                             const double rho,
-                             const double theta,
-                             const double tempKappa) const;
+    double computeYieldValue(double sig,
+                             double rho,
+                             double theta,
+                             double tempKappa) const;
 
     /**
      * Compute the value of the hardening function based on the hardening variable.
      * @param tempKappa Hardening variable.
      * @returns Value of the hardening function.
      */
-    double computeHardeningOne(const double tempKappa) const;
+    double computeHardeningOne(double tempKappa) const;
 
     /** Compute the derivative of the hardening function based on the
      *  hardening parameter.
      *  @param tempKappa Hardening variable.
      *  @return Derivative of the hardening function.
      */
-    double computeHardeningOnePrime(const double tempKappa) const;
+    double computeHardeningOnePrime(double tempKappa) const;
 
     /**
      * Compute the value of the hardening function based on the hardening variable.
      * @param tempKappa Hardening variable.
      * @return Value of the hardening function.
      */
-    double computeHardeningTwo(const double tempKappa) const;
+    double computeHardeningTwo(double tempKappa) const;
 
     /**
      * Compute the derivative of the hardening function based on the
@@ -847,7 +835,7 @@ public:
      * @param tempKappa Hardening variable.
      * @return Derivative of the hardening function.
      */
-    double computeHardeningTwoPrime(const double tempKappa) const;
+    double computeHardeningTwoPrime(double tempKappa) const;
 
     /** Compute the derivative of the yield surface with respect to the hardening
      *  variable based on the stress state and the hardening variable
@@ -856,9 +844,9 @@ public:
      *  @param tempKappa Hardening variable.
      *  @return Derivative of the yield surface.
      */
-    double computeDFDKappa(const double sig,
-                           const double rho,
-                           const double tempKappa);
+    double computeDFDKappa(double sig,
+                           double rho,
+                           double tempKappa);
 
 
     /**
@@ -868,9 +856,9 @@ public:
      * @param tempKappa Hardening variable.
      * @return Derivative of kappa with respect to delta lambda.
      */
-    double computeDKappaDDeltaLambda(const double sig,
-                                     const double rho,
-                                     const double tempKappa);
+    double computeDKappaDDeltaLambda(double sig,
+                                     double rho,
+                                     double tempKappa);
 
 
 
@@ -882,9 +870,9 @@ public:
      * @param theta Lode angle of stress state.
      * @return Ductility measure.
      */
-    virtual double computeDuctilityMeasure(const double sig,
-                                           const double rho,
-                                           const double theta);
+    virtual double computeDuctilityMeasure(double sig,
+                                           double rho,
+                                           double theta);
 
 
 
@@ -896,18 +884,17 @@ public:
      * @param tempKappa plastic strain
      */
     void computeDDuctilityMeasureDInv(FloatArray &answer,
-                                      const double sig,
-                                      const double rho,
-                                      const double tempKappa);
+                                      double sig,
+                                      double rho,
+                                      double tempKappa);
     /**
      * Compute derivative the ductility measure with respect to  the stress state.
      * @param answer array of the derivative of the ductility measure with respect to stress
      * @param sig stress.
      * @param tempKappa plastic strain
      */
-    void computeDDuctilityMeasureDInv1d(double &answer,
-                                        const double sigma,
-                                        const double tempKappa); //Dimitris change 1d implementation
+    double computeDDuctilityMeasureDInv1d(double sigma,
+                                        double tempKappa); //Dimitris change 1d implementation
 
     /**
      * Compute derivative the palstic potential function with respect to  the stress state.
@@ -917,32 +904,31 @@ public:
      * @param tempKappa plastic strain
      */
     void computeDGDInv(FloatArray &answer,
-                       const double sig,
-                       const double rho,
-                       const double tempKappa);
+                       double sig,
+                       double rho,
+                       double tempKappa);
     /**
      * Compute derivative the palstic potential function with respect to  the stress state.
      * @param answer array of the derivative of the plastic potential with respect to stress
      * @param sig stress.
      * @param tempKappa plastic strain
      */
-    void  computeDGDInv1d(double &answer,
-                          const double sig,
-                          const double tempKappa);
+    double computeDGDInv1d(double sig,
+                          double tempKappa);
 
     /**
      * This function computes the ratio of the volumetric and deviatoric component
      * of the flow direction. It is used within the vertex return to check,
      * if the vertex return is admissible.
      */
-    double computeRatioPotential(const double sig,
-                                 const double tempKappa);
+    double computeRatioPotential(double sig,
+                                 double tempKappa);
 
     /**
      * This function computes the rate factor which is used to take into account the strain rate dependence of the material.
      */
-    double computeRateFactor(const double alpha,
-                             const double timeFactor,
+    double computeRateFactor(double alpha,
+                             double timeFactor,
                              GaussPoint *gp,
                              TimeStep *deltaTime);
 
@@ -951,47 +937,45 @@ public:
      * invariants sig and rho are computed.
      */
     void computeDDGDDInv(FloatMatrix &answer,
-                         const double sig,
-                         const double rho,
-                         const double tempKappa);
+                         double sig,
+                         double rho,
+                         double tempKappa);
     /**
      * Here, the second derivative of the plastic potential with respect to the
      * invariants sig and rho are computed.
      */
-    void computeDDGDDInv1d(double &answer,
-                           const double sigma,
-                           const double tempKappa);
+    double computeDDGDDInv1d(double sigma,
+                           double tempKappa);
     /**
      * Here, the mixed derivative of the plastic potential with respect
      * to the invariants and the hardening parameter are determined.
      */
     void computeDDGDInvDKappa(FloatArray &answer,
-                              const double sig,
-                              const double rho,
-                              const double tempKappa);
+                              double sig,
+                              double rho,
+                              double tempKappa);
 
-    void computeDDGDInvDKappa1d(double &answer,
-                                const double sigma,
-                                const double tempKappa);
+    double computeDDGDInvDKappa1d(double sigma,
+                                double tempKappa);
     /**
      * Computes the mixed derivative of the hardening parameter kappa with
      * respect to the plastic multiplier delta Lambda and the invariants sig
      * and rho.
      */
     void computeDDKappaDDeltaLambdaDInv(FloatArray &answer,
-                                        const double sig,
-                                        const double rho,
-                                        const double tempKappa);
+                                        double sig,
+                                        double rho,
+                                        double tempKappa);
 
-    void computeDDKappaDDeltaLambdaDInv1d(double &answer,
-                                          const double sigma,
-                                          const double tempKappa);
+    double computeDDKappaDDeltaLambdaDInv1d(double sigma,
+                                          double tempKappa);
     /**
      * Computes the derivative of the evolution law of the hardening parameter kappa with respect to the hardening variable kappa.
      */
-    double computeDDKappaDDeltaLambdaDKappa(const double sig,
-                                            const double rho,
-                                            const double tempKappa);
+    double computeDDKappaDDeltaLambdaDKappa(double sig,
+                                            double rho,
+                                            double tempKappa);
+    double computeDDKappaDDeltaLambdaDKappa1d(double sig, double tempKappa);
 
 
 
@@ -1000,25 +984,24 @@ public:
      * invariants sig and rho.
      */
     void computeDFDInv(FloatArray &answer,
-                       const double sig,
-                       const double rho,
-                       const double tempKappa) const;
-    void computeDFDInv1d(double &answer,
-                         const double sigma,
-                         const double tempKappa) const;
+                       double sig,
+                       double rho,
+                       double tempKappa) const;
+    double computeDFDInv1d(double sigma,
+                         double tempKappa) const;
     /**
      * Compute tempKappa.
      */
-    double computeTempKappa(const double kappaInitial,
-                            const double sigTrial,
-                            const double rhoTrial,
-                            const double sig);
+    double computeTempKappa(double kappaInitial,
+                            double sigTrial,
+                            double rhoTrial,
+                            double sig);
 
 
     /**
      * Compute damage parameters
      */
-    void  computeDamage(FloatArray &answer, const StrainVector &strain, const double timeFactor, GaussPoint *gp, TimeStep *tStep, const double alpha);
+    void  computeDamage(FloatArray &answer, const StrainVector &strain, double timeFactor, GaussPoint *gp, TimeStep *tStep, double alpha);
 
 
     /**
@@ -1038,7 +1021,7 @@ public:
     /// Compute equivalent strain value.
     double computeDeltaPlasticStrainNormTension(double tempKappaD, double kappaD, GaussPoint *gp);
 
-    double computeDeltaPlasticStrainNormCompression(const double tempAlpha, double tempKappaD, double kappaD, GaussPoint *gp);
+    double computeDeltaPlasticStrainNormCompression(double tempAlpha, double tempKappaD, double kappaD, GaussPoint *gp);
 
     virtual double computeEquivalentStrain(double sig, double rho, double theta);
 
@@ -1078,14 +1061,14 @@ public:
                                  const StressVector &stress) const;
 
     /// Compute the derivative of R with respect to costheta.
-    double computeDRDCosTheta(const double theta, const double ecc) const;
+    double computeDRDCosTheta(double theta, double ecc) const;
 
     virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
-    void computeSecantStiffness(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    void compute3dSecantStiffness(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
 
 
