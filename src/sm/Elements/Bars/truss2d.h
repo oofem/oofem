@@ -80,6 +80,9 @@ public:
     virtual int computeNumberOfDofs() { return 4; }
     virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
 
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+
     // characteristic length (for crack band approach)
     virtual double giveCharacteristicLength(const FloatArray &)
     { return this->computeLength(); }

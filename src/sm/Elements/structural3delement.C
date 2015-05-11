@@ -115,20 +115,17 @@ Structural3DElement :: computeStressVector(FloatArray &answer, const FloatArray 
     this->giveStructuralCrossSection()->giveRealStress_3d(answer, gp, strain, tStep);
 }
 
+void
+Structural3DElement :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveStiffnessMatrix_3d(answer, rMode, gp, tStep);
+}
+
 
 void
 Structural3DElement :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v, D_w};
-}
-
-
-
-IRResultType
-Structural3DElement :: initializeFrom(InputRecord *ir)
-{
-    // Initialise the element from the input record   
-    return NLStructuralElement :: initializeFrom(ir);
 }
 
 
@@ -182,8 +179,6 @@ Structural3DElement :: giveCharacteristicLength(const FloatArray &normalToCrackP
 
 
 // Surface support
-
-
 void
 Structural3DElement :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
