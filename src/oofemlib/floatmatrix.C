@@ -164,11 +164,11 @@ FloatMatrix &FloatMatrix :: operator = ( std :: initializer_list< std :: initial
 
 FloatMatrix &FloatMatrix :: operator = ( std :: initializer_list< FloatArray >mat )
 {
-    RESIZE( ( int ) mat.begin()->giveSize(), ( int ) mat.size() );
+    RESIZE( mat.begin()->giveSize(), ( int ) mat.size() );
     auto p = this->values.begin();
     for ( auto col : mat ) {
 #if DEBUG
-        if ( this->nRows != ( int ) col.giveSize() ) {
+        if ( this->nRows != col.giveSize() ) {
                 OOFEM_ERROR("Initializer list has inconsistent column sizes.");
         }
 #endif
@@ -1105,7 +1105,7 @@ void FloatMatrix :: subtract(const FloatMatrix &aMatrix)
 }
 
 
-void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer, bool transpose)
+bool FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer, bool transpose)
 // solves equation b = this * x
 {
 #  ifdef DEBUG
@@ -1128,7 +1128,7 @@ void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer, bool tr
         dgetrs_(transpose ? "Transpose" : "No transpose", & this->nRows, & nrhs, this->givePointer(), & this->nRows, ipiv.givePointer(), answer.givePointer(), & this->nRows, & info);
     }
     if ( info != 0 ) {
-        OOFEM_ERROR("error %d", info);
+        return false;
     }
 #else
     int pivRow;
@@ -1157,7 +1157,7 @@ void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer, bool tr
         }
 
         if ( piv < 1.e-20 ) {
-            OOFEM_ERROR("cannot solve, seems to be singular at row %d", pivRow);
+            return false;
         }
 
         // exchange rows
@@ -1192,6 +1192,8 @@ void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer, bool tr
         answer.at(i) = ( answer.at(i) - help ) / mtrx->at(i, i);
     }
 #endif
+
+    return true;
 }
 
 

@@ -466,7 +466,6 @@ Shell7BaseXFEM :: computeSectionalForcesAt(FloatArray &sectionalForces, Integrat
     // f = \Lambda_i * P * G^I
     FloatArray PG1(3), PG2(3), PG3(3);
     FloatMatrix lambda[3], Gcon, P, PG;
-    FloatArray PVector;
     this->computeStressMatrix(P, genEps, ip, mat, tStep);
 
     const FloatArray &lCoords = ip->giveNaturalCoordinates();
@@ -811,7 +810,7 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
     
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();
     FloatMatrix tempRed, tempRedT;
-    FloatMatrix KCC, KDC, KDD, Bc;
+    FloatMatrix KCC, KDC, KDD;
     FloatMatrix LCC, LDD, LDC;
     FloatMatrix B, BenrM, BenrK;
     
@@ -984,7 +983,7 @@ Shell7BaseXFEM :: discComputeStiffness(FloatMatrix &LCC, FloatMatrix &LDD, Float
     // L_CC = lambdaC_i^T * A_ij * lambdaC_j  
     // L_DD = lambdaD_i^T * A_ij * lambdaD_j
     // L_CD = lambdaC_i^T * A_ij * lambdaD_j
-    FloatMatrix temp, B;
+    FloatMatrix B;
     FloatMatrix lambdaC [ 3 ], lambdaD [ 3 ];
 
     const FloatArray &lCoords = ip->giveNaturalCoordinates();
@@ -1295,7 +1294,7 @@ Shell7BaseXFEM :: computePressureTangentMatrixDis(FloatMatrix &KCC, FloatMatrix 
     // Computes tangent matrix associated with the linearization of pressure loading. Assumes constant pressure.
     ConstantPressureLoad* pLoad = dynamic_cast< ConstantPressureLoad * >( load );
     
-    FloatMatrix N, B, L(7, 18), gcov, W1, W2;
+    FloatMatrix N, B, gcov, W1, W2;
     FloatArray lCoords, solVec, pressure;
     FloatArray g1, g2, genEps;
     FloatMatrix lambdaGC [ 3 ], lambdaNC, lambdaGD [ 3 ], lambdaND;
@@ -2133,8 +2132,8 @@ Shell7BaseXFEM :: vtkEvalUpdatedGlobalCoordinateAt(const FloatArray &localCoords
 
 #if 1
     // Discontinuous part
-    std :: vector< double > ef;
-    FloatArray solVecD, xd, md, xtemp(3), N; double gamd=0;
+    FloatArray solVecD, xd, md, xtemp(3);
+    double gamd = 0;
     for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) {
         EnrichmentItem *ei = this->xMan->giveEnrichmentItem(i);
 
@@ -2155,7 +2154,7 @@ Shell7BaseXFEM :: vtkEvalUpdatedGlobalCoordinateAt(const FloatArray &localCoords
 
 
 void
-Shell7BaseXFEM :: giveDisUnknownsAt(const FloatArray &lcoords, EnrichmentItem *ei, FloatArray &solVec, FloatArray &x, FloatArray &m, double gam, TimeStep *tStep)
+Shell7BaseXFEM :: giveDisUnknownsAt(const FloatArray &lcoords, EnrichmentItem *ei, FloatArray &solVec, FloatArray &x, FloatArray &m, double &gam, TimeStep *tStep)
 {
     // returns the unknowns evaluated at a point (xi1, xi2, xi3)
     FloatArray vec;
@@ -2165,7 +2164,6 @@ Shell7BaseXFEM :: giveDisUnknownsAt(const FloatArray &lcoords, EnrichmentItem *e
     x = {vec.at(1), vec.at(2), vec.at(3)};
     m = {vec.at(4), vec.at(5), vec.at(6)};
     gam = vec.at(7);
-
 }
 
 
@@ -2459,7 +2457,7 @@ Shell7BaseXFEM :: giveFictiousCZNodeCoordsForExport(std::vector<FloatArray> &nod
 
     nodes.resize(localNodeCoords.giveNumberOfColumns());
     for ( int i = 1; i <= localNodeCoords.giveNumberOfColumns(); i++ ){
-        FloatArray coords, localCoords(3);
+        FloatArray localCoords(3);
         localCoords.beColumnOf(localNodeCoords,i);
 
         this->vtkEvalInitialGlobalCZCoordinateAt(localCoords, layer, nodes[i-1]);

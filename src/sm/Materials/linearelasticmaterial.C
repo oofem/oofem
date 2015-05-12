@@ -38,31 +38,6 @@
 #include "../sm/Materials/structuralms.h"
 
 namespace oofem {
-void
-LinearElasticMaterial :: giveRealStressVector(FloatArray &answer,
-                                              GaussPoint *gp,
-                                              const FloatArray &reducedStrain,
-                                              TimeStep *tStep)
-{
-    FloatArray strainVector;
-    FloatMatrix d;
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-
-    // subtract stress independent part
-    // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
-    // therefore it is necessary to subtract always the total eigen strain value
-    this->giveStressDependentPartOfStrainVector(strainVector, gp,
-                                                reducedStrain,
-                                                tStep, VM_Total);
-
-    this->giveStiffnessMatrix(d, TangentStiffness, gp, tStep);
-    answer.beProductOf(d, strainVector);
-
-    // update gp
-    status->letTempStrainVectorBe(reducedStrain);
-    status->letTempStressVectorBe(answer);
-}
-
 
 void
 LinearElasticMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)

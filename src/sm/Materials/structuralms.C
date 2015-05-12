@@ -80,14 +80,14 @@ void StructuralMaterialStatus :: printOutputAt(FILE *File, TimeStep *tStep)
     fprintf(File, "  strains ");
     StructuralMaterial :: giveFullSymVectorForm( helpVec, strainVector, gp->giveMaterialMode() );
     for ( auto &var : helpVec ) {
-        fprintf( File, " % .4e", var );
+        fprintf( File, " %.4e", var );
     }
 
     fprintf(File, "\n              stresses");
     StructuralMaterial :: giveFullSymVectorForm( helpVec, stressVector, gp->giveMaterialMode() );
 
     for ( auto &var : helpVec ) {
-        fprintf( File, " % .4e", var );
+        fprintf( File, " %.4e", var );
     }
     fprintf(File, "\n");
 }

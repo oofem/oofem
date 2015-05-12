@@ -104,13 +104,8 @@ MPlasticMaterial :: giveRealStressVector(FloatArray &answer,
 {
     FloatArray strainSpaceHardeningVariables;
     FloatArray fullStressVector;
-    FloatArray strainIncrement, elasticStrainVectorR;
     FloatArray strainVectorR, plasticStrainVectorR;
-    FloatArray helpVec, helpVec2;
-    int i;
-    FloatMatrix elasticModuli, hardeningModuli, consistentModuli;
-    FloatMatrix elasticModuliInverse, hardeningModuliInverse;
-    FloatMatrix helpMtrx, helpMtrx2;
+    FloatArray helpVec;
     IntArray activeConditionMap(this->nsurf);
     FloatArray gamma;
 
@@ -154,7 +149,7 @@ MPlasticMaterial :: giveRealStressVector(FloatArray &answer,
     // update state flag
     int newState, state = status->giveStateFlag();
     bool yieldFlag = false;
-    for ( i = 1; i <= nsurf; i++ ) {
+    for ( int i = 1; i <= nsurf; i++ ) {
         if ( gamma.at(i) > 0. ) {
             yieldFlag = true;
         }
@@ -187,14 +182,14 @@ MPlasticMaterial :: closestPointReturn(FloatArray &answer,
                                        TimeStep *tStep)
 {
     FloatArray fullStressVector;
-    FloatArray strainIncrement, elasticStrainVectorR;
-    FloatArray fullStressSpaceHardeningVars, residualVectorR, gradientVectorR;
+    FloatArray elasticStrainVectorR;
+    FloatArray fullStressSpaceHardeningVars, residualVectorR;
 
     FloatArray helpVector, helpVector2;
     FloatArray dgamma, tempGamma;
     FloatMatrix elasticModuli, hardeningModuli, consistentModuli;
     FloatMatrix elasticModuliInverse, hardeningModuliInverse;
-    FloatMatrix helpMtrx, helpMtrx2;
+    FloatMatrix helpMtrx;
     FloatMatrix gmat;
     std :: vector< FloatArray > yieldGradVec(this->nsurf), loadGradVec(this->nsurf), * yieldGradVecPtr, * loadGradVecPtr;
     FloatArray rhs;
@@ -430,9 +425,8 @@ MPlasticMaterial :: cuttingPlaneReturn(FloatArray &answer,
 {
     FloatArray elasticStrainVectorR;
     FloatArray fullStressVector, fullStressSpaceHardeningVars;
-    FloatArray fSigmaGradientVectorR, gGradientVectorR, helpVector, trialStressIncrement, rhs;
-    FloatArray di, dj;
-    FloatMatrix elasticModuli, hardeningModuli, dmat, helpMtrx, gmatInv, gradMat;
+    FloatArray helpVector, trialStressIncrement, rhs;
+    FloatMatrix elasticModuli, hardeningModuli, dmat, gmatInv;
     std :: vector< FloatArray > yieldGradVec(this->nsurf), loadGradVec(this->nsurf), * yieldGradVecPtr, * loadGradVecPtr;
     FloatArray dgamma(this->nsurf);
     double yieldValue;
@@ -850,15 +844,14 @@ MPlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     //
 
     FloatMatrix consistentModuli, elasticModuli, hardeningModuli;
-    FloatMatrix consistentModuliInverse, elasticModuliInverse, hardeningModuliInverse;
-    FloatMatrix consistentSubModuli, gradientMatrix, gmatInv, gmat, gradMat, helpMtrx, helpMtrx2, nmat, sbm1, answerR;
-    FloatArray gradientVector, stressVector, fullStressVector;
+    FloatMatrix elasticModuliInverse, hardeningModuliInverse;
+    FloatMatrix gmatInv, gmat, gradMat, helpMtrx, helpMtrx2, nmat, sbm1;
+    FloatArray stressVector, fullStressVector;
     FloatArray stressSpaceHardeningVars;
-    FloatArray strainSpaceHardeningVariables, helpVector;
+    FloatArray strainSpaceHardeningVariables;
     std :: vector< FloatArray > yieldGradVec(this->nsurf), loadGradVec(this->nsurf), * yieldGradVecPtr, * loadGradVecPtr;
-    FloatArray helpVec;
 
-    IntArray activeConditionMap, mask;
+    IntArray activeConditionMap;
     FloatArray gamma;
     int size, sizeR, i, j, iindx, actSurf = 0;
 
@@ -997,21 +990,18 @@ MPlasticMaterial :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
     //
 
     FloatMatrix dmat, elasticModuli, hardeningModuli;
-    FloatMatrix gradientMatrix, gmatInv, gmat, gradMat, helpMtrx, helpMtrx2;
-    FloatArray gradientVector, stressVector, fullStressVector;
+    FloatMatrix gmatInv, gmat, gradMat, helpMtrx, helpMtrx2;
+    FloatArray stressVector, fullStressVector;
     FloatArray stressSpaceHardeningVars;
-    FloatArray strainSpaceHardeningVariables, helpVector;
+    FloatArray strainSpaceHardeningVariables;
     std :: vector< FloatArray > yieldGradVec(this->nsurf), loadGradVec(this->nsurf);
-    FloatArray helpVec;
 
-    IntArray activeConditionMap, mask;
-    FloatArray gamma;
+    IntArray activeConditionMap;
     int size, sizeR, i, j, iindx, actSurf = 0;
 
     MPlasticMaterialStatus *status = static_cast< MPlasticMaterialStatus * >( this->giveStatus(gp) );
 
     // ask for plastic consistency parameter
-    gamma = status->giveTempGamma();
     activeConditionMap = status->giveTempActiveConditionMap();
     //
     // check for elastic cases
@@ -1387,8 +1377,6 @@ MPlasticMaterialStatus :: ~MPlasticMaterialStatus()
 void
 MPlasticMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-    int n;
-
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");
     if ( ( state_flag == MPlasticMaterialStatus :: PM_Yielding ) || ( state_flag == MPlasticMaterialStatus :: PM_Unloading ) ) {
@@ -1398,17 +1386,15 @@ MPlasticMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
             fprintf(file, " Unloading, ");
         }
 
-        n = plasticStrainVector.giveSize();
         fprintf(file, " plastic strains ");
-        for ( int i = 1; i <= n; i++ ) {
-            fprintf( file, " % .4e", plasticStrainVector.at(i) );
+        for ( auto &val : plasticStrainVector ) {
+            fprintf( file, " %.4e", val );
         }
 
         if ( strainSpaceHardeningVarsVector.giveSize() ) {
-            n = strainSpaceHardeningVarsVector.giveSize();
             fprintf(file, ", strain space hardening vars ");
-            for ( int i = 1; i <= n; i++ ) {
-                fprintf( file, " % .4e", strainSpaceHardeningVarsVector.at(i) );
+            for ( auto &val : strainSpaceHardeningVarsVector ) {
+                fprintf( file, " %.4e", val );
             }
         }
     }

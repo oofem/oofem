@@ -82,7 +82,7 @@ Q4Axisymm :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     numberOfGaussPoints = 4;
-    result = this->StructuralElement :: initializeFrom(ir);
+    result = StructuralElement :: initializeFrom(ir);
     if ( result != IRRT_OK ) {
         return result;
     }

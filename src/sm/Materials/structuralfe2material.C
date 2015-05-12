@@ -141,25 +141,25 @@ StructuralFE2Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatR
     // Numerical ATS for debugging
     FloatMatrix numericalATS(6, 6);
     FloatArray dsig;
-    FloatArray tempStrain(6);
+    // Note! We need a copy of the temp strain, since the pertubations might change it.
+    FloatArray tempStrain = ms->giveTempStrainVector();
 
-    tempStrain.zero();
     FloatArray sig, strain, sigPert;
     giveRealStressVector_3d(sig, gp, tempStrain, tStep);
-    double h = 0.001; // Linear problem, size of this doesn't matter.
+    double hh = 1e-6;
     for ( int k = 1; k <= 6; ++k ) {
         strain = tempStrain;
-        strain.at(k) += h;
+        strain.at(k) += hh;
         giveRealStressVector_3d(sigPert, gp, strain, tStep);
         dsig.beDifferenceOf(sigPert, sig);
         numericalATS.setColumn(dsig, k);
     }
-    numericalATS.times(1. / h);
+    numericalATS.times(1. / hh);
+    giveRealStressVector_3d(sig, gp, tempStrain, tStep); // Reset
 
-    printf("Analytical deviatoric tangent = ");
-    answer.printYourself();
-    printf("Numerical deviatoric tangent = ");
-    numericalATS.printYourself();
+    //answer.printYourself("Analytical deviatoric tangent");
+    //numericalATS.printYourself("Numerical deviatoric tangent");
+
     numericalATS.subtract(answer);
     double norm = numericalATS.computeFrobeniusNorm();
     if ( norm > answer.computeFrobeniusNorm() * 1e-3 && norm > 0.0 ) {

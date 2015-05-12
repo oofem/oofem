@@ -194,7 +194,6 @@ void GnuplotExportModule::outputReactionForces(TimeStep *tStep)
         OOFEM_ERROR("failed to cast to StructuralEngngModel.");
     }
 
-    IntArray ielemDofMask;
     FloatArray reactions;
     IntArray dofManMap, dofidMap, eqnMap;
 

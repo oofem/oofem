@@ -218,7 +218,6 @@ GradDpElement :: computeNonlocalGradient(FloatArray &answer, GaussPoint *gp, Tim
 {
     FloatMatrix Bk;
     FloatArray u;
-    FloatArray aux;
 
     this->computeBkappaMatrixAt(gp, Bk);
     this->computeNonlocalDegreesOfFreedom(u, tStep);

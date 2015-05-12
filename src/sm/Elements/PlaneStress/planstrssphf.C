@@ -44,19 +44,19 @@ PlaneStress2d(n, aDomain ) { }
 void
 PlaneStressPhF2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    answer.setValues( 3, D_u, D_v, T_f ); ///@todo add damage dofID later
+    answer = {D_u, D_v, T_f}; ///@todo add damage dofID later
 }
 
 void
-PlaneStressPhF2d::giveDofManDofIDMask_u( IntArray &answer )
+PlaneStressPhF2d :: giveDofManDofIDMask_u( IntArray &answer )
 {
-    answer.setValues( 2, D_u, D_v );
+    answer = {D_u, D_v};
 }
 
 void
-PlaneStressPhF2d::giveDofManDofIDMask_d( IntArray &answer )
+PlaneStressPhF2d :: giveDofManDofIDMask_d( IntArray &answer )
 {
-    answer.setValues( 1, T_f );
+    answer = {T_f};
 }
 
 

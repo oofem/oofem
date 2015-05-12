@@ -111,9 +111,6 @@ protected:
     /// Intrinsic time increment.
     double deltaT;
 
-    virtual void giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
-                                                 CharType type, TimeStep *tStep, Domain *domain);
-
 public:
     NonLinearDynamic(int i, EngngModel * _master = NULL);
     virtual ~NonLinearDynamic();
@@ -159,7 +156,7 @@ public:
 #endif
 
 protected:
-    void assemble(SparseMtrx &answer, TimeStep *tStep, CharType type,
+    void assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAssembler &ma,
                   const UnknownNumberingScheme &, Domain *domain);
 
     void proceedStep(int di, TimeStep *tStep);

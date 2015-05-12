@@ -33,7 +33,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if 1
 #include "../sm/Elements/phasefieldelement.h"
 #include "../sm/CrossSections/structuralcrosssection.h"
 #include "../sm/Materials/structuralms.h"
@@ -47,10 +46,9 @@
 #include <cstdio>
 
 
-
 namespace oofem {
 
-PhaseFieldElement::PhaseFieldElement( int i, Domain *aDomain ) 
+PhaseFieldElement :: PhaseFieldElement( int i, Domain *aDomain ) 
 {  
     ///@todo will be set by the cross section later
     internalLength = 6.0;
@@ -172,15 +170,13 @@ PhaseFieldElement :: computeBStress_u(FloatArray &answer, GaussPoint *gp, TimeSt
 {
     // computes G(d)*sig(u)
     NLStructuralElement *el = this->giveElement( );
-    StructuralCrossSection *cs = dynamic_cast< StructuralCrossSection *> ( el->giveCrossSection() );
-    FloatArray reducedStrain, a_u;
+    FloatArray strain, a_u;
     FloatMatrix B_u;
 
     el->computeBmatrixAt(gp, B_u);
-
     this->computeDisplacementUnknowns(a_u, VM_Total, tStep);
-    reducedStrain.beProductOf(B_u, a_u);
-    cs->giveRealStresses(answer, gp, reducedStrain, tStep);
+    strain.beProductOf(B_u, a_u);
+    el->computeStressVector(answer, strain, gp, tStep);
     answer.times( this->computeG(gp, VM_Total, tStep) );
 
 }
@@ -410,7 +406,6 @@ PhaseFieldElement :: computeStiffnessMatrix_dd(FloatMatrix &answer, MatResponseM
 IRResultType
 PhaseFieldElement :: initializeFrom(InputRecord *ir)
 {
-    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     //IRResultType result;                // Required by IR_GIVE_FIELD macro
     //nlGeo = 0;
 
@@ -545,5 +540,3 @@ PhaseFieldElement :: initializeFrom(InputRecord *ir)
 
 
 } // end namespace oofem
-
-#endif

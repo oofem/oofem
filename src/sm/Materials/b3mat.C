@@ -47,6 +47,9 @@ B3Material :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
+    result = MaxwellChainMaterial :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
+
     //
     // NOTE
     //
@@ -55,7 +58,6 @@ B3Material :: initializeFrom(InputRecord *ir)
     //
     //
     double fc = 0.0, c = 0.0, wc = 0.0, ac = 0.0, alpha1 = 0.0, alpha2 = 0.0;
-    MaxwellChainMaterial :: initializeFrom(ir);
 
     int mode = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, mode, _IFT_B3Material_mode);
@@ -293,7 +295,7 @@ B3Material :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, Gauss
      */
     double TauSh, St, kh, help, E607, Et0Tau, EpsShInf, EpsSh;
     double time = relMatAge + tStep->giveTargetTime() / timeFactor;
-    int size = 6;
+    int size;
     FloatArray fullAnswer;
     MaterialMode mode = gp->giveMaterialMode();
 
@@ -345,7 +347,7 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, T
     double time = relMatAge + tStep->giveTargetTime() / timeFactor;
     int err, tflag = 0, wflag = 0;
     MaxwellChainMaterialStatus *status = static_cast< MaxwellChainMaterialStatus * >( this->giveStatus(gp) );
-    int size = 6;
+    int size;
     FloatArray fullAnswer;
     MaterialMode mmode = gp->giveMaterialMode();
 

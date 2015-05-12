@@ -40,8 +40,6 @@
 #include "materialinterface.h"
 #include "dynamicinputrecord.h"
 #include "classfactory.h"
-#include "matconst.h"
-//#include "leplic.h"
 
 namespace oofem {
 REGISTER_Material(TwoFluidMaterial);
@@ -61,7 +59,8 @@ TwoFluidMaterial :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, this->slaveMaterial, _IFT_TwoFluidMaterial_mat);
     if ( this->slaveMaterial.giveSize() != 2 ) {
-        OOFEM_ERROR("mat array should have two values");
+        OOFEM_WARNING("mat array should have two values");
+        return IRRT_BAD_FORMAT;
     }
 
     return IRRT_OK;

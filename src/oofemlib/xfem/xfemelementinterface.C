@@ -45,12 +45,11 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "dynamicinputrecord.h"
-
+#include "mathfem.h"
 
 #include "XFEMDebugTools.h"
 #include <string>
 #include <sstream>
-#include <math.h>
 
 namespace oofem {
 XfemElementInterface :: XfemElementInterface(Element *e) :

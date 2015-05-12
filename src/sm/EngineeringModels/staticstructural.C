@@ -97,12 +97,22 @@ NumericalMethod *StaticStructural :: giveNumericalMethod(MetaStep *mStep)
     return nMethod.get();
 }
 
+int
+StaticStructural :: giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep)
+{
+    return tStep->giveNumber() % 2;
+}
+
 IRResultType
 StaticStructural :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    StructuralEngngModel :: initializeFrom(ir);
+    result = StructuralEngngModel :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+
     int val = SMT_Skyline;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
     sparseMtrxType = ( SparseMtrxType ) val;
@@ -113,7 +123,7 @@ StaticStructural :: initializeFrom(InputRecord *ir)
     this->solverType = 0; // Default NR
     IR_GIVE_OPTIONAL_FIELD(ir, solverType, _IFT_StaticStructural_solvertype);
 
-    int _val = IG_None;
+    int _val = IG_Tangent;
     IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_EngngModel_initialGuess);
     this->initialGuessType = ( InitialGuess ) _val;
     
@@ -183,7 +193,6 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
     this->field->applyBoundaryCondition(tStep); ///@todo Temporary hack, advanceSolution should apply the boundary conditions directly.
 
     neq = this->giveNumberOfDomainEquations( di, EModelDefaultEquationNumbering() );
-    this->field->initialize(VM_Total, tStep, this->solution, EModelDefaultEquationNumbering() ); 
 
     FloatArray incrementOfSolution(neq), externalForces(neq);
 
@@ -201,12 +210,25 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
     this->initMetaStepAttributes( this->giveCurrentMetaStep() );
 
+    // Construct the initial guess, starting with the old solution:
+    this->field->initialize(VM_Total, tStep->givePreviousStep(), this->solution, EModelDefaultEquationNumbering() ); 
+    this->field->update(VM_Total, tStep, this->solution, EModelDefaultEquationNumbering());
+    this->field->applyBoundaryCondition(tStep); ///@todo Temporary hack to override the incorrect values that is set by "update" above. Remove this when that is fixed.
+
     if ( this->initialGuessType == IG_Tangent ) {
         OOFEM_LOG_RELEVANT("Computing initial guess\n");
-        FloatArray extrapolatedForces;
+        FloatArray extrapolatedForces(neq);
         this->assembleExtrapolatedForces( extrapolatedForces, tStep, TangentStiffnessMatrix, this->giveDomain(di) );
         extrapolatedForces.negated();
-
+        ///@todo Need to find a general way to support this before enabling it by default.
+        //this->assembleVector(extrapolatedForces, tStep, LinearizedDilationForceAssembler(), VM_Incremental, EModelDefaultEquationNumbering(), this->giveDomain(di) );
+#if 0
+        // Some debug stuff:
+        extrapolatedForces.printYourself("extrapolatedForces");
+        this->internalForces.zero();
+        this->assembleVectorFromElements(this->internalForces, tStep, InternalForceAssembler(), VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(di));
+        this->internalForces.printYourself("internal forces");
+#endif
         OOFEM_LOG_RELEVANT("Computing old tangent\n");
         this->updateComponent( tStep, NonLinearLhs, this->giveDomain(di) );
         SparseLinearSystemNM *linSolver = nMethod->giveLinearSolver();
@@ -214,15 +236,17 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
         linSolver->solve(*stiffnessMatrix, extrapolatedForces, incrementOfSolution);
         OOFEM_LOG_RELEVANT("Initial guess found\n");
         this->solution.add(incrementOfSolution);
+        
+        this->field->update(VM_Total, tStep, this->solution, EModelDefaultEquationNumbering());
+        this->field->applyBoundaryCondition(tStep); ///@todo Temporary hack to override the incorrect values that is set by "update" above. Remove this when that is fixed.
     } else if ( this->initialGuessType != IG_None ) {
         OOFEM_ERROR("Initial guess type: %d not supported", initialGuessType);
     } else {
         incrementOfSolution.zero();
     }
-
     // Build initial/external load
     externalForces.zero();
-    this->assembleVector( externalForces, tStep, ExternalForcesVector, VM_Total,
+    this->assembleVector( externalForces, tStep, ExternalForceAssembler(), VM_Total,
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
     this->updateSharedDofManagers(externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
 
@@ -263,6 +287,16 @@ void StaticStructural :: terminate(TimeStep *tStep)
 
 double StaticStructural :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 {
+    double val1 = dof->giveUnknownsDictionaryValue(tStep, VM_Total);
+    double val0 = dof->giveUnknownsDictionaryValue(tStep->givePreviousStep(), VM_Total);
+    if ( mode == VM_Total ) {
+        return val1;
+    } else if ( mode == VM_Incremental ) {
+        return val1 - val0;
+    } else {
+        OOFEM_ERROR("Unknown value mode requested");
+        return 0;
+    }
     return this->field->giveUnknownValue(dof, mode, tStep);
 }
 
@@ -276,14 +310,14 @@ void StaticStructural :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
         this->field->applyBoundaryCondition(tStep);///@todo Temporary hack to override the incorrect vavues that is set by "update" above. Remove this when that is fixed.
 
         this->internalForces.zero();
-        this->assembleVector(this->internalForces, tStep, InternalForcesVector, VM_Total,
+        this->assembleVector(this->internalForces, tStep, InternalForceAssembler(), VM_Total,
                              EModelDefaultEquationNumbering(), d, & this->eNorm);
         this->updateSharedDofManagers(this->internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
 
         internalVarUpdateStamp = tStep->giveSolutionStateCounter(); // Hack for linearstatic
     } else if ( cmpn == NonLinearLhs ) {
         this->stiffnessMatrix->zero();
-        this->assemble(*this->stiffnessMatrix, tStep, TangentStiffnessMatrix, EModelDefaultEquationNumbering(), d);
+        this->assemble(*this->stiffnessMatrix, tStep, TangentAssembler(TangentStiffness), EModelDefaultEquationNumbering(), d);
     } else {
         OOFEM_ERROR("Unknown component");
     }

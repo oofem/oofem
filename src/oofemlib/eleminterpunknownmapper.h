@@ -46,7 +46,6 @@ class TimeStep;
  * The class implementing the primary unknown mapper using element interpolation functions.
  * The basic task is to map the primary unknowns from one (old) mesh to the new one.
  * This task requires the special element algorithms, these are to be included using interface concept.
- * Requires the element support via EIPrimaryUnknownMapperInterface.
  */
 class OOFEM_EXPORT EIPrimaryUnknownMapper : public PrimaryUnknownMapper
 {

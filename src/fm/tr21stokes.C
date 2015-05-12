@@ -33,7 +33,6 @@
  */
 
 #include "tr21stokes.h"
-#include "fmelement.h"
 #include "node.h"
 #include "dof.h"
 #include "domain.h"
@@ -47,6 +46,7 @@
 #include "fei2dtrlin.h"
 #include "fei2dtrquad.h"
 #include "fluidcrosssection.h"
+#include "assemblercallback.h"
 #include "classfactory.h"
 #include "engngm.h"
 
@@ -243,13 +243,11 @@ void Tr21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *l
     }
 
     if ( load->giveType() == TransmissionBC ) { // Neumann boundary conditions (traction)
-        BoundaryLoad *boundaryLoad = static_cast< BoundaryLoad * >(load);
 
-        int numberOfEdgeIPs = ( int ) ceil( ( boundaryLoad->giveApproxOrder() + 1. ) / 2. ) * 2;
+        int numberOfEdgeIPs = ( int ) ceil( ( load->giveApproxOrder() + 1. ) / 2. ) * 2;
 
         GaussIntegrationRule iRule(1, this, 1, 1);
         FloatArray N, t, f(6);
-        IntArray edge_mapping;
 
         f.zero();
         iRule.SetUpPointsOnLine(numberOfEdgeIPs, _Unknown);
@@ -261,12 +259,12 @@ void Tr21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *l
             double detJ = fabs( this->interpolation_quad.boundaryGiveTransformationJacobian( boundary, lcoords, FEIElementGeometryWrapper(this) ) );
             double dS = gp->giveWeight() * detJ;
 
-            if ( boundaryLoad->giveFormulationType() == Load :: FT_Entity ) { // Edge load in xi-eta system
-                boundaryLoad->computeValueAt(t, tStep, lcoords, VM_Total);
+            if ( load->giveFormulationType() == Load :: FT_Entity ) { // Edge load in xi-eta system
+                load->computeValueAt(t, tStep, lcoords, VM_Total);
             } else { // Edge load in x-y system
                 FloatArray gcoords;
                 this->interpolation_quad.boundaryLocal2Global( gcoords, boundary, lcoords, FEIElementGeometryWrapper(this) );
-                boundaryLoad->computeValueAt(t, tStep, gcoords, VM_Total);
+                load->computeValueAt(t, tStep, gcoords, VM_Total);
             }
 
             // Reshape the vector
@@ -372,29 +370,28 @@ Interface *Tr21Stokes :: giveInterface(InterfaceType it)
     case SpatialLocalizerInterfaceType:
         return static_cast< SpatialLocalizerInterface * >(this);
 
-    case EIPrimaryUnknownMapperInterfaceType:
-        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
-
     default:
         return FMElement :: giveInterface(it);
     }
 }
 
-void Tr21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-                                                                         TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
+void Tr21Stokes :: computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {
-    FloatArray n, n_lin;
+    FloatArray n, n_lin, pressures, velocities;
     this->interpolation_quad.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
     this->interpolation_lin.evalN( n_lin, lcoords, FEIElementGeometryWrapper(this) );
-    answer.resize(3);
+    this->computeVectorOf({P_f}, mode, tStep, pressures);
+    this->computeVectorOf({V_u, V_v, V_w}, mode, tStep, velocities);
+
+    answer.resize(4);
     answer.zero();
     for ( int i = 1; i <= n.giveSize(); i++ ) {
-        answer(0) += n.at(i) * this->giveNode(i)->giveDofWithID(V_u)->giveUnknown(mode, tStep);
-        answer(1) += n.at(i) * this->giveNode(i)->giveDofWithID(V_v)->giveUnknown(mode, tStep);
+        answer(0) += n.at(i) * velocities.at(i*2-1);
+        answer(1) += n.at(i) * velocities.at(i*2);
     }
 
     for ( int i = 1; i <= n_lin.giveSize(); i++ ) {
-        answer(2) += n_lin.at(i) * this->giveNode(i)->giveDofWithID(P_f)->giveUnknown(mode, tStep);
+        answer(2) += n_lin.at(i) * pressures.at(i);
     }
 }
 

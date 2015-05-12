@@ -77,7 +77,8 @@ IRResultType AbaqusUserMaterial :: initializeFrom(InputRecord *ir)
     IRResultType result;
     std :: string umatname;
 
-    StructuralMaterial :: initializeFrom(ir);
+    result = StructuralMaterial :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     IR_GIVE_FIELD(ir, this->numState, _IFT_AbaqusUserMaterial_numState);
     IR_GIVE_FIELD(ir, this->properties, _IFT_AbaqusUserMaterial_properties);
@@ -420,7 +421,7 @@ void AbaqusUserMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussP
 
     // compute Green-Lagrange strain
     FloatArray strain;
-    FloatArray vE, vS;
+    FloatArray vS;
     FloatMatrix F, E;
     F.beMatrixForm(vF);
     E.beTProductOf(F, F);

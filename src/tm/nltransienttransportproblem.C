@@ -41,6 +41,7 @@
 #include "transportelement.h"
 #include "classfactory.h"
 #include "mathfem.h"
+#include "assemblercallback.h"
 #include "unknownnumberingscheme.h"
 
 namespace oofem {
@@ -61,7 +62,9 @@ NLTransientTransportProblem :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-    NonStationaryTransportProblem :: initializeFrom(ir);
+    result = NonStationaryTransportProblem :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
+
     int val = 30;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_NLTransientTransportProblem_nsmax);
     nsmax = val;
@@ -171,24 +174,22 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
         if ( ( nite == 1 ) || ( NR_Mode == nrsolverFullNRM ) || ( ( NR_Mode == nrsolverAccelNRM ) && ( nite % MANRMSteps == 0 ) ) ) {
             conductivityMatrix->zero();
             //Assembling left hand side - start with conductivity matrix
-            this->assemble( *conductivityMatrix, & TauStep, IntSourceLHSMatrix,
+            this->assemble( *conductivityMatrix, & TauStep, IntSourceLHSAssembler(),
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
             conductivityMatrix->times(alpha);
             //Add capacity matrix
-            this->assemble( *conductivityMatrix, & TauStep, NSTP_MidpointLhs,
+            this->assemble( *conductivityMatrix, & TauStep, MidpointLhsAssembler(lumpedCapacityStab, alpha),
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
 
         rhs.resize(neq);
         rhs.zero();
         //edge or surface load on element
-        this->assembleVectorFromElements( rhs, & TauStep, ElementBCTransportVector, VM_Total,
-                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //add internal source vector on elements
-        this->assembleVectorFromElements( rhs, & TauStep, ElementInternalSourceVector, VM_Total,
+        this->assembleVectorFromElements( rhs, & TauStep, TransportExternalForceAssembler(), VM_Total,
                                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //add nodal load
-        this->assembleVectorFromDofManagers( rhs, & TauStep, ExternalForcesVector, VM_Total,
+        this->assembleVectorFromDofManagers( rhs, & TauStep, ExternalForceAssembler(), VM_Total,
                                             EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
         // subtract the rhs part depending on previous solution

@@ -41,7 +41,6 @@
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "spatiallocalizer.h"
-#include "eleminterpmapperinterface.h"
 
 #define _IFT_PlaneStress2d_Name "planestress2d"
 
@@ -56,7 +55,6 @@ class FEI2dQuadLin;
  */
 class PlaneStress2d : public PlaneStressElement, public ZZNodalRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
 public SpatialLocalizerInterface,
-public EIPrimaryUnknownMapperInterface,
 public HuertaErrorEstimatorInterface
 {
 protected:
@@ -84,10 +82,6 @@ public:
                                                                   IntArray &controlNode, IntArray &controlDof,
                                                                   HuertaErrorEstimator :: AnalysisMode aMode);
     virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-
-    virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-                                                                       TimeStep *tStep, const FloatArray &lcoords,
-                                                                       FloatArray &answer);
 
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);

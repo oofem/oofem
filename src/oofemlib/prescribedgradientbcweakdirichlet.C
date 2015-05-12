@@ -25,10 +25,9 @@ PrescribedGradientBCWeakDirichlet :: ~PrescribedGradientBCWeakDirichlet()
 
 IRResultType PrescribedGradientBCWeakDirichlet :: initializeFrom(InputRecord *ir)
 {
-    PrescribedGradientBCWeak :: initializeFrom(ir);
     mMeshIsPeriodic = false;
 
-    return IRRT_OK;
+    return PrescribedGradientBCWeak :: initializeFrom(ir);
 }
 
 void PrescribedGradientBCWeakDirichlet :: postInitialize()

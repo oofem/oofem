@@ -95,7 +95,7 @@ IsoInterfaceDamageMaterial :: giveRealStressVector(FloatArray &answer, GaussPoin
 //
 {
     IsoInterfaceDamageMaterialStatus *status = static_cast< IsoInterfaceDamageMaterialStatus * >( this->giveStatus(gp) );
-    FloatArray strainVector, reducedTotalStrainVector;
+    FloatArray reducedTotalStrainVector;
     FloatMatrix de;
     double equivStrain, tempKappa = 0.0, omega = 0.0;
 

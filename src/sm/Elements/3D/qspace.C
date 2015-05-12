@@ -63,7 +63,7 @@ QSpace :: initializeFrom(InputRecord *ir)
 
     this->matRotation = ir->hasField(_IFT_QSpace_materialCoordinateSystem);
 
-    return this->Structural3DElement :: initializeFrom(ir);
+    return Structural3DElement :: initializeFrom(ir);
 }
 
 

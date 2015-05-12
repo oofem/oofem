@@ -92,12 +92,7 @@ IRResultType
 Quad1_ht :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 4;
-    IRResultType result = this->TransportElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    return IRRT_OK;
+    return TransportElement :: initializeFrom(ir);
 }
 
 

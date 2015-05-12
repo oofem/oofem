@@ -155,7 +155,7 @@ LIBeam2d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     double density = this->giveStructuralCrossSection()->give('d', gp);
-    double halfMass   = density * this->giveCrossSection()->give(CS_Area, gp) * this->computeLength() / 2.;
+    double halfMass = density * this->giveCrossSection()->give(CS_Area, gp) * this->computeLength() / 2.;
     answer.resize(6, 6);
     answer.zero();
     answer.at(1, 1) = halfMass;
@@ -193,7 +193,7 @@ LIBeam2d :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, T
 // Returns the stiffness matrix of the receiver, expressed in the global
 // axes.
 {
-    this->StructuralElement :: computeStiffnessMatrix(answer, rMode, tStep);
+    StructuralElement :: computeStiffnessMatrix(answer, rMode, tStep);
 }
 
 

@@ -46,14 +46,14 @@ FEI2dTrQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICel
     double l2 = lcoords.at(2);
     double l3 = 1. - l1 - l2;
 
-    answer.resize(6);
-
-    answer.at(1) = ( 2. * l1 - 1. ) * l1;
-    answer.at(2) = ( 2. * l2 - 1. ) * l2;
-    answer.at(3) = ( 2. * l3 - 1. ) * l3;
-    answer.at(4) = 4. * l1 * l2;
-    answer.at(5) = 4. * l2 * l3;
-    answer.at(6) = 4. * l3 * l1;
+    answer = {
+        ( 2. * l1 - 1. ) * l1,
+        ( 2. * l2 - 1. ) * l2,
+        ( 2. * l3 - 1. ) * l3,
+        4. * l1 * l2,
+        4. * l2 * l3,
+        4. * l3 * l1
+    };
 }
 
 double
@@ -131,11 +131,10 @@ void
 FEI2dTrQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     FloatArray n;
-    answer.resize(2);
-    answer.zero();
-
     this->evalN(n, lcoords, cellgeo);
 
+    answer.resize(2);
+    answer.zero();
     for ( int i = 1; i <= 6; i++ ) {
         answer.at(1) += n.at(i) * cellgeo.giveVertexCoordinates(i)->at(xind);
         answer.at(2) += n.at(i) * cellgeo.giveVertexCoordinates(i)->at(yind);
@@ -155,7 +154,7 @@ int
 FEI2dTrQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo)
 {
     FloatArray res, delta, guess, lcoords_guess;
-    FloatMatrix jac, jacT;
+    FloatMatrix jac;
     double convergence_limit, error = 0.0;
 
     // find a suitable convergence limit
@@ -190,10 +189,7 @@ FEI2dTrQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const
         return false;
     }
 
-    answer.resize(3);
-    answer(0) = lcoords_guess(0);
-    answer(1) = lcoords_guess(1);
-    answer(2) = 1.0 - lcoords_guess(0) - lcoords_guess(1);
+    answer = { lcoords_guess(0), lcoords_guess(1), 1.0 - lcoords_guess(0) - lcoords_guess(1) };
 
     bool inside = true;
     for ( int i = 0; i < 3; i++ ) {
@@ -223,12 +219,9 @@ void
 FEI2dTrQuad :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double n3, ksi = lcoords.at(1);
-    answer.resize(3);
-
     n3 = 1. - ksi * ksi;
-    answer.at(1) = ( 1. - ksi - n3 ) * 0.5;
-    answer.at(2) = ( 1. + ksi - n3 ) * 0.5;
-    answer.at(3) = n3;
+
+    answer = { ( 1. - ksi - n3 ) * 0.5, ( 1. + ksi - n3 ) * 0.5, n3 };
 }
 
 void
@@ -262,10 +255,11 @@ FEI2dTrQuad :: edgeEvaldNds(FloatArray &answer, int iedge,
 #endif
     double xi = lcoords.at(1);
     double J = edgeGiveTransformationJacobian(iedge, lcoords, cellgeo);
-    answer.resize(3);
-    answer(0) = ( xi - 0.5 ) / J;
-    answer(1) = ( xi + 0.5 ) / J;
-    answer(2) = -2 * xi / J;
+    answer = {
+        ( xi - 0.5 ) / J,
+        ( xi + 0.5 ) / J,
+        -2 * xi / J
+    };
 }
 
 double FEI2dTrQuad :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
@@ -411,8 +405,8 @@ FEI2dTrQuad :: giveArea(const FEICellGeometry &cellgeo) const
     x6 = p->at(1);
     y6 = p->at(2);
 
-    return ( 4 * ( -( x4 * y1 ) + x6 * y1 + x4 * y2 - x5 * y2 + x5 * y3 - x6 * y3 ) + x2 * ( y1 - y3 - 4 * y4 + 4 * y5 ) +
-            x1 * ( -y2 + y3 + 4 * y4 - 4 * y6 ) + x3 * ( -y1 + y2 - 4 * y5 + 4 * y6 ) ) / 6;
+    return fabs( ( 4 * ( -( x4 * y1 ) + x6 * y1 + x4 * y2 - x5 * y2 + x5 * y3 - x6 * y3 ) + x2 * ( y1 - y3 - 4 * y4 + 4 * y5 ) +
+            x1 * ( -y2 + y3 + 4 * y4 - 4 * y6 ) + x3 * ( -y1 + y2 - 4 * y5 + 4 * y6 ) ) / 6 );
 }
 
 double

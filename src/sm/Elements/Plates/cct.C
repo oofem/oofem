@@ -313,7 +313,7 @@ IRResultType
 CCTPlate :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 1;
-    return this->NLStructuralElement :: initializeFrom(ir);
+    return NLStructuralElement :: initializeFrom(ir);
 }
 
 

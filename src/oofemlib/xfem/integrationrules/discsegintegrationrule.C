@@ -60,8 +60,6 @@ int DiscontinuousSegmentIntegrationRule :: SetUpPointsOnLine(int iNumPointsPerSe
 
     double totalLength = mXS.distance(mXE);
 
-    FEI1dLin linInterp(1);
-
     std :: vector< FloatArray >newGPCoord;
 
     // Loop over line segments

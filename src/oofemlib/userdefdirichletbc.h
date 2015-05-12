@@ -68,7 +68,7 @@ typedef _object PyObject;
  * Status: experimental.
  *
  * @date Aug 7, 2013
- * @author: Erik Svenning
+ * @author Erik Svenning
  */
 namespace oofem {
 

@@ -135,8 +135,14 @@ DofManager *PrescribedGradientBCWeak :: giveInternalDofManager(int i)
 IRResultType PrescribedGradientBCWeak :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;
-    ActiveBoundaryCondition :: initializeFrom(ir);
-    PrescribedGradientHomogenization :: initializeFrom(ir);
+    result = ActiveBoundaryCondition :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+    result = PrescribedGradientHomogenization :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     IR_GIVE_FIELD(ir, mTractionInterpOrder, _IFT_PrescribedGradientBCWeak_TractionInterpOrder);
     printf("mTractionInterpOrder: %d\n", mTractionInterpOrder);
@@ -504,7 +510,7 @@ void PrescribedGradientBCWeak :: giveTractionLocationArrays(int iTracElInd, IntA
 {
     rows.clear();
 
-    IntArray tracElRows, trac_loc_c, trac_loc_r;
+    IntArray tracElRows, trac_loc_r;
 
     const TractionElement &tEl = * ( mpTractionElements [ iTracElInd ] );
     for ( int tracNodeInd : tEl.mTractionNodeInd ) {

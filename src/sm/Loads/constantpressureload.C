@@ -48,14 +48,9 @@ ConstantPressureLoad :: ConstantPressureLoad(int i, Domain *d) : BoundaryLoad(i,
 IRResultType
 ConstantPressureLoad :: initializeFrom(InputRecord *ir)
 {
-    BoundaryLoad :: initializeFrom(ir);
-    if ( componentArray.giveSize() != nDofs ) {
-        OOFEM_ERROR("componentArray size mismatch");
-    }
-
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     IR_GIVE_OPTIONAL_FIELD(ir, this->loadOffset, _IFT_ConstantPressureLoad_LoadOffset);
-    return IRRT_OK;
+    return BoundaryLoad :: initializeFrom(ir);
 }
 
 void
@@ -64,21 +59,12 @@ ConstantPressureLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, cons
     // we overload general implementation on the boundary load level due
     // to implementation efficiency
 
-    double factor;
-
     if ( ( mode != VM_Total ) && ( mode != VM_Incremental ) ) {
         OOFEM_ERROR("mode not supported");
     }
 
     // ask time distribution
-
-    /*
-     * factor = this -> giveTimeFunction() -> at(tStep->giveTime()) ;
-     * if ((mode==VM_Incremental) && (!tStep->isTheFirstStep()))
-     * //factor -= this->giveTimeFunction()->at(tStep->givePreviousStep()->giveTime()) ;
-     * factor -= this->giveTimeFunction()->at(tStep->giveTime()-tStep->giveTimeIncrement()) ;
-     */
-    factor = this->giveTimeFunction()->evaluate(tStep, mode);
+    double factor = this->giveTimeFunction()->evaluate(tStep, mode);
     answer = componentArray;
     answer.times(factor);
 }

@@ -69,13 +69,16 @@ IDGMaterial :: ~IDGMaterial()
 IRResultType
 IDGMaterial :: initializeFrom(InputRecord *ir)
 {
-    IsotropicDamageMaterial1 :: initializeFrom(ir);
-    GradDpMaterialExtensionInterface :: initializeFrom(ir);
-
-
-    this->mapper.initializeFrom(ir);
-
-    return IRRT_OK;
+    IRResultType result;
+    result = IsotropicDamageMaterial1 :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+    result = GradDpMaterialExtensionInterface :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+    return this->mapper.initializeFrom(ir);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -382,7 +385,7 @@ IDGMaterial :: giveRealStressVectorGrad(FloatArray &answer1, double &answer2, Ga
 {
     IDGMaterialStatus *status = static_cast< IDGMaterialStatus * >( this->giveStatus(gp) );
     LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
-    FloatArray strainVector, reducedTotalStrainVector, totalStrainVector, strain;
+    FloatArray reducedTotalStrainVector, strain;
 
     FloatMatrix de;
     double f, equivStrain, tempKappa = 0.0, omega = 0.0;

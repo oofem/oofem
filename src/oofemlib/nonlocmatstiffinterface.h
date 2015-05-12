@@ -70,7 +70,7 @@ public:
     /**
      * Plots the sparse structure of stiffness contribution.
      */
-    virtual void NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(GaussPoint *gp, oofegGraphicContext &gc, TimeStep *) { };
+    virtual void NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(GaussPoint *gp, oofegGraphicContext &gc, TimeStep *) { }
 #endif
 };
 } // end namespace oofem

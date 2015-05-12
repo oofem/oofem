@@ -33,7 +33,6 @@
  */
 
 #include "newtonianfluid.h"
-#include "fluiddynamicmaterial.h"
 #include "domain.h"
 #include "floatmatrix.h"
 #include "gausspoint.h"
@@ -49,13 +48,9 @@ NewtonianFluidMaterial :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    this->FluidDynamicMaterial :: initializeFrom(ir);
-    // we use rather object's member data than to store data into slow
-    // key-val dictionary with lot of memory allocations
-
     IR_GIVE_FIELD(ir, viscosity, _IFT_NewtonianFluidMaterial_mu);
 
-    return IRRT_OK;
+    return FluidDynamicMaterial :: initializeFrom(ir);
 }
 
 

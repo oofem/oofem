@@ -43,7 +43,6 @@
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "spatiallocalizer.h"
-#include "eleminterpmapperinterface.h"
 #include "mmashapefunctprojection.h"
 
 #define _IFT_TrPlaneStress2d_Name "trplanestress2d"
@@ -61,7 +60,6 @@ class FEI2dTrLin;
 class TrPlaneStress2d : public PlaneStressElement, public ZZNodalRecoveryModelInterface,
 public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
 public SpatialLocalizerInterface,
-public EIPrimaryUnknownMapperInterface,
 public ZZErrorEstimatorInterface,
 public HuertaErrorEstimatorInterface
 {
@@ -97,10 +95,6 @@ public:
     virtual int SPRNodalRecoveryMI_giveNumberOfIP();
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
 
-    virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-                                                                       TimeStep *tStep, const FloatArray &lcoords,
-                                                                       FloatArray &answer);
-
     // HuertaErrorEstimatorInterface
     virtual void HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refinedElement, int level, int nodeId,
                                                                   IntArray &localNodeIdArray, IntArray &globalNodeIdArray,
@@ -113,8 +107,6 @@ public:
 protected:
 
     virtual double giveArea();
-    virtual FloatArray *GivebCoeff();
-    virtual FloatArray *GivecCoeff();
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }
 };
 } // end namespace oofem

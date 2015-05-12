@@ -126,13 +126,14 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-
     if ( ir->hasField(_IFT_StaggeredProblem_deltat) ) {
-        EngngModel :: initializeFrom(ir);
+        result = EngngModel :: initializeFrom(ir);
+        if ( result != IRRT_OK ) return result;
         IR_GIVE_FIELD(ir, deltaT, _IFT_StaggeredProblem_deltat);
         dtFunction = 0;
     } else if ( ir->hasField(_IFT_StaggeredProblem_prescribedtimes) ) {
-        EngngModel :: initializeFrom(ir);
+        result = EngngModel :: initializeFrom(ir);
+        if ( result != IRRT_OK ) return result;
         IR_GIVE_FIELD(ir, discreteTimes, _IFT_StaggeredProblem_prescribedtimes);
         dtFunction = 0;
     } else {
@@ -149,7 +150,8 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, dtFunction, _IFT_StaggeredProblem_dtf);
     IR_GIVE_OPTIONAL_FIELD(ir, stepMultiplier, _IFT_StaggeredProblem_stepmultiplier);
     if ( stepMultiplier < 0 ) {
-        OOFEM_ERROR("stepMultiplier must be > 0")
+        OOFEM_WARNING("stepMultiplier must be > 0");
+        return IRRT_BAD_FORMAT;
     }
 
     inputStreamNames.resize(2);

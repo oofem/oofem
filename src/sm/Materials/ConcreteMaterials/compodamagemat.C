@@ -34,7 +34,6 @@
 
 #include "compodamagemat.h"
 #include "../sm/Elements/structuralelement.h"
-#include "material.h"
 #include "gausspoint.h"
 #include "../sm/Materials/structuralmaterial.h"
 #include "../sm/Materials/structuralms.h"
@@ -61,7 +60,6 @@ IRResultType CompoDamageMat :: initializeFrom(InputRecord *ir)
     double value;
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    this->Material :: initializeFrom(ir);
     //define transversely othotropic material stiffness parameters
     IR_GIVE_FIELD(ir, value, _IFT_CompoDamageMat_exx);
     propertyDictionary.add(Ex, value);
@@ -113,9 +111,7 @@ IRResultType CompoDamageMat :: initializeFrom(InputRecord *ir)
     this->afterIter = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->allowSnapBack, _IFT_CompoDamageMat_allowSnapBack);
 
-    //
-    //OOFEM_LOG_INFO("READ \n");
-    return IRRT_OK;
+    return Material :: initializeFrom(ir);
 }
 
 void CompoDamageMat :: giveInputRecord(DynamicInputRecord &input)

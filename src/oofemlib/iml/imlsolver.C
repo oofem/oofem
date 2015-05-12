@@ -101,16 +101,12 @@ IMLSolver :: initializeFrom(InputRecord *ir)
     } else if ( precondType == IML_ICPrec ) {
         M = new CompCol_ICPreconditioner();
     } else {
-        OOFEM_ERROR("unknown preconditioner type");
+        OOFEM_WARNING("unknown preconditioner type");
+        return IRRT_BAD_FORMAT;
     }
 
     // initialize precond attributes
-    M->initializeFrom(ir);
-
-    /*
-     * IR_GIVE_OPTIONAL_FIELD (ir, precondAttributesRecord, "precondattributes");
-     */
-    return IRRT_OK;
+    return M->initializeFrom(ir);
 }
 
 

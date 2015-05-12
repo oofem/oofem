@@ -35,8 +35,6 @@
 
 #include "tr1darcy.h"
 #include "fei2dtrlin.h"
-#include "node.h"
-#include "domain.h"
 #include "gaussintegrationrule.h"
 #include "gausspoint.h"
 #include "bcgeomtype.h"
@@ -46,7 +44,6 @@
 #include "boundaryload.h"
 #include "mathfem.h"
 #include "crosssection.h"
-#include "matresponsemode.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -98,7 +95,7 @@ void Tr1Darcy :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mod
     for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
         const FloatArray &lcoords = gp->giveNaturalCoordinates();
         ///@todo Should we make it return the transpose instead?
-        double detJ = this->interpolation_lin.evaldNdx( BT, lcoords, FEIElementGeometryWrapper(this) );
+        double detJ = fabs( this->interpolation_lin.evaldNdx( BT, lcoords, FEIElementGeometryWrapper(this) ) );
 
         mat->giveCharacteristicMatrix(K, mode, gp, tStep);
 
@@ -134,7 +131,7 @@ void Tr1Darcy :: computeInternalForcesVector(FloatArray &answer, TimeStep *tStep
     for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
         const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
-        double detJ = this->interpolation_lin.giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(this) );
+        double detJ = fabs( this->interpolation_lin.giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(this) ) );
         this->interpolation_lin.evaldNdx( BT, lcoords, FEIElementGeometryWrapper(this) );
         this->interpolation_lin.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
         B.beTranspositionOf(BT);

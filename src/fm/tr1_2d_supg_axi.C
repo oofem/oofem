@@ -225,7 +225,6 @@ TR1_2D_SUPG_AXI :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep)
     FloatMatrix _b;
 
     double dV;
-    FloatArray bs;
 
     // stabilization term K_delta
     FloatArray un, n;

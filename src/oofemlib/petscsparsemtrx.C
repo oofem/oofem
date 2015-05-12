@@ -36,6 +36,7 @@
 #include "engngm.h"
 #include "activebc.h"
 #include "element.h"
+#include "dofmanager.h"
 #include "sparsemtrxtype.h"
 #include "classfactory.h"
 
@@ -49,11 +50,11 @@ REGISTER_SparseMtrx(PetscSparseMtrx, SMT_PetscMtrx);
 
 
 PetscSparseMtrx :: PetscSparseMtrx(int n, int m) : SparseMtrx(n, m),
-    mtrx(NULL), symmFlag(false), leqs(0), geqs(0), di(0), kspInit(false), newValues(true), localIS(NULL), globalIS(NULL) { }
+    mtrx(NULL), symmFlag(false), leqs(0), geqs(0), blocksize(1), di(0), kspInit(false), newValues(true), localIS(NULL), globalIS(NULL) { }
 
 
 PetscSparseMtrx :: PetscSparseMtrx() : SparseMtrx(),
-    mtrx(NULL), symmFlag(false), leqs(0), geqs(0), di(0), kspInit(false), newValues(true), localIS(NULL), globalIS(NULL) { }
+    mtrx(NULL), symmFlag(false), leqs(0), geqs(0), blocksize(1), di(0), kspInit(false), newValues(true), localIS(NULL), globalIS(NULL){ }
 
 
 PetscSparseMtrx :: ~PetscSparseMtrx()
@@ -296,6 +297,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, const Unkn
 {
     IntArray loc;
     Domain *domain = eModel->giveDomain(di);
+    blocksize = 1;
 
     if ( mtrx ) {
         MatDestroy(& mtrx);
@@ -402,6 +404,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, const Unkn
 {
     IntArray loc;
     Domain *domain = eModel->giveDomain(di);
+    blocksize = 1;
 
     // Delete old stuff first;
     if ( mtrx ) {
@@ -520,14 +523,10 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, const Unkn
         MatSetSizes(mtrx, leqs, leqs, geqs, geqs);
         MatSetType(mtrx, MATMPIAIJ);
         MatSetFromOptions(mtrx);
-        MatSetUp(mtrx);
         MatMPIAIJSetPreallocation( mtrx, 0, d_nnz.givePointer(), 0, o_nnz.givePointer() );
         //MatMPIBAIJSetPreallocation( mtrx, 1, 0, d_nnz.givePointer(), 0, o_nnz.givePointer() );
         //MatMPISBAIJSetPreallocation( mtrx, 1, 0, d_nnz_sym.givePointer(), 0, o_nnz_sym.givePointer() );
         //MatXAIJSetPreallocation( mtrx, 1, d_nnz.givePointer(), o_nnz.givePointer(), d_nnz_sym.givePointer(), o_nnz_sym.givePointer());
-
-        MatSetOption(mtrx, MAT_ROW_ORIENTED, PETSC_FALSE); // To allow the insertion of values using MatSetValues in column major order
-        MatSetOption(mtrx, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
 
         // Creates scatter context for PETSc.
         ISCreateGeneral(this->emodel->giveParallelComm(), context->giveNumberOfNaturalEqs(), n2g->giveN2Gmap()->givePointer(), PETSC_USE_POINTER, & globalIS);
@@ -536,83 +535,122 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, const Unkn
  #ifdef __VERBOSE_PARALLEL
         VERBOSEPARALLEL_PRINT("PetscSparseMtrx:: buildInternalStructure", "done", rank);
  #endif
-    } else {
+    } else
 #endif
-
-    leqs = geqs = eModel->giveNumberOfDomainEquations(di, s);
-    IntArray d_nnz(leqs), d_nnz_sym(leqs);
-
     {
-        // allocation map:
-        std :: vector< IntArray > rows_upper(leqs);
+        leqs = geqs = eModel->giveNumberOfDomainEquations(di, s);
+        IntArray d_nnz, d_nnz_sym, indices, rowstart;
 
-        for ( auto &elem : domain->giveElements() ) {
-            elem->giveLocationArray(loc, s);
-            for ( int ii : loc ) {
-                if ( ii > 0 ) {
-                    for ( int jj : loc ) {
-                        if ( jj >= ii ) {
-                            rows_upper [ ii - 1 ].insertSortedOnce( jj - 1, loc.giveSize() );
+        MatType type = MATSEQBAIJ;
+
+        MatCreate(PETSC_COMM_SELF, & mtrx);
+        MatSetSizes(mtrx, leqs, leqs, geqs, geqs);
+        MatSetType(mtrx, type);
+        MatSetFromOptions(mtrx);
+        MatGetType( mtrx, &type );
+
+        if ( strcmp(type, MATDENSE) != 0 ) {
+            // Dry assembly (computes the nonzero structure) (and the blocks)
+            std :: vector< IntArray > rows_upper(leqs), blocks;
+
+            for ( auto &elem : domain->giveElements() ) {
+                elem->giveLocationArray(loc, s);
+                for ( int ii : loc ) {
+                    if ( ii > 0 ) {
+                        for ( int jj : loc ) {
+                            if ( jj >= ii ) {
+                                rows_upper [ ii - 1 ].insertSortedOnce( jj - 1, loc.giveSize() );
+                            }
                         }
                     }
                 }
             }
-        }
 
-        // Structure from active boundary conditions.
-        std :: vector< IntArray >r_locs, c_locs;
-        for ( auto &gbc : domain->giveBcs() ) {
-            ActiveBoundaryCondition *activebc = dynamic_cast< ActiveBoundaryCondition * >( gbc.get() );
-            if ( activebc ) {
-                activebc->giveLocationArrays(r_locs, c_locs, TangentStiffnessMatrix, s, s);
-                for ( std :: size_t k = 0; k < r_locs.size(); k++ ) {
-                    IntArray &krloc = r_locs [ k ];
-                    IntArray &kcloc = c_locs [ k ];
-                    for ( int ii : krloc ) {
-                        if ( ii > 0 ) {
-                            for ( int jj : kcloc ) {
-                                if ( jj >= ii ) {
-                                    rows_upper [ ii - 1 ].insertSortedOnce( jj - 1, loc.giveSize() );
+            // Structure from active boundary conditions.
+            std :: vector< IntArray > r_locs, c_locs;
+            for ( auto &gbc : domain->giveBcs() ) {
+                ActiveBoundaryCondition *activebc = dynamic_cast< ActiveBoundaryCondition * >( gbc.get() );
+                if ( activebc ) {
+                    activebc->giveLocationArrays(r_locs, c_locs, TangentStiffnessMatrix, s, s);
+                    for ( std :: size_t k = 0; k < r_locs.size(); k++ ) {
+                        for ( int ii : r_locs [ k ] ) {
+                            if ( ii > 0 ) {
+                                for ( int jj : c_locs [ k ] ) {
+                                    if ( jj >= ii ) {
+                                        rows_upper [ ii - 1 ].insertSortedOnce( jj - 1, loc.giveSize() );
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-        }
 
-        for ( int i = 0; i < leqs; i++ ) {
-            d_nnz_sym(i) = rows_upper [ i ].giveSize();
-            // We can optimize to use only rows_upper by using the fact that the problem has symmetric nonzero-structure.
-            d_nnz(i) += d_nnz_sym(i);
-            for ( int j = 1; j <= rows_upper [ i ].giveSize(); ++j ) {
-                if ( rows_upper [ i ].at(j) != i ) {
-                    d_nnz( rows_upper [ i ].at(j) )++;
+
+            int nnz = 0;
+            for ( auto &row_upper : rows_upper ) {
+                nnz += row_upper.giveSize();
+            }
+
+            if ( strcmp(type, MATSEQAIJ) != 0 ) {
+                // Compute optimal block size (test various sizes and compute the "wasted" zeros).
+                int maxblock = domain->giveNumberOfDofManagers() > 0 ? domain->giveDofManager(1)->giveNumberOfDofs() : 0;
+                for ( int bsize = maxblock; bsize > 1; --bsize ) {
+                    int nblocks = ceil(rows_upper.size() / (double)bsize);
+                    blocks.clear();
+                    blocks.resize(nblocks);
+                    for ( int i = 0; i < leqs; i++ ) {
+                        int blockrow = i / bsize;
+                        for ( int j : rows_upper [ i ] ) {
+                            int blockcol = j / bsize;
+                            blocks [ blockrow ].insertSortedOnce( blockcol );
+                        }
+                    }
+                    // See how much space (and operations) we risk wasting with this block size:
+                    int bnnz = 0;
+                    for ( auto &block : blocks ) {
+                        bnnz += block.giveSize() * bsize * bsize;
+                    }
+                    OOFEM_LOG_DEBUG("Block size %d resulted in nnz = %d -> %d using %d^2 blocks\n", bsize, nnz, bnnz, nblocks);
+                    if ( bnnz <=  nnz * 1.2 ) {
+                        blocksize = bsize;
+                        break;
+                    }
+                }
+            }
+
+            if ( blocksize == 1 ) {
+                blocks = rows_upper;
+            }
+
+            int nblocks = ceil(rows_upper.size() / (double)blocksize);
+            d_nnz_sym.resize(nblocks);
+            d_nnz.resize(nblocks);
+            for ( int i = 0; i < nblocks; i++ ) {
+                d_nnz_sym[i] = blocks [ i ].giveSize();
+                // We can optimize to use only upper half by using the fact that the problem has symmetric nonzero-structure.
+                d_nnz[i] += d_nnz_sym[i];
+                for ( int jj : blocks [ i ] ) {
+                    if (  jj != i ) {
+                        d_nnz[ jj ]++;
+                    }
                 }
             }
         }
+
+        // Based on the user selected type, determine the block size;
+        if ( strcmp(type, MATSEQAIJ) == 0 ) {
+            MatSeqAIJSetPreallocation( mtrx, 0, d_nnz.givePointer() );
+        } else if ( strcmp(type, MATSEQBAIJ) == 0 ) {
+            MatSeqBAIJSetPreallocation( mtrx, blocksize, 0, d_nnz.givePointer() );
+        } else if ( strcmp(type, MATSEQSBAIJ) == 0 )  {
+            MatSeqSBAIJSetPreallocation( mtrx, blocksize, 0, d_nnz_sym.givePointer() );
+        }
     }
-
-    MatCreate(PETSC_COMM_SELF, & mtrx);
-    MatSetSizes(mtrx, leqs, leqs, geqs, geqs);
-    MatSetType(mtrx, MATSEQAIJ);
-    //MatSetType(mtrx, MATSBAIJ);
-    //MatSetType(mtrx, MATDENSE);
-    MatSetFromOptions(mtrx);
-
-    MatSetUp(mtrx);
-    MatSeqAIJSetPreallocation( mtrx, 0, d_nnz.givePointer() );
-    ///@todo Should we try to support block sizes > 1 ? Could be very important in large systems.
-    MatSeqBAIJSetPreallocation( mtrx, 1, 0, d_nnz.givePointer() );
-    MatSeqSBAIJSetPreallocation( mtrx, 1, 0, d_nnz_sym.givePointer() );
 
     MatSetOption(mtrx, MAT_ROW_ORIENTED, PETSC_FALSE); // To allow the insertion of values using MatSetValues in column major order
     MatSetOption(mtrx, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
-    //MatSetOption(mtrx, MAT_STRUCTURALLY_SYMMETRIC, PETSC_TRUE);
-
-#ifdef __PARALLEL_MODE
-}
-#endif
+    MatSetOption(mtrx, MAT_STRUCTURALLY_SYMMETRIC, PETSC_TRUE);
 
     nRows = nColumns = geqs;
     this->newValues = true;
@@ -640,13 +678,38 @@ PetscSparseMtrx :: assemble(const IntArray &loc, const FloatMatrix &mat)
         }
     }
 
-    MatSetValues(this->mtrx, ndofe, gloc.givePointer(), ndofe, gloc.givePointer(), mat.givePointer(), ADD_VALUES);
-
-    //mat.printYourself();
-    //loc.printYourself();
-    //MatView(this->mtrx,PETSC_VIEWER_STDOUT_SELF);
     this->version++;
     this->newValues = true;
+
+    // Block'ify the matrix in order to use MatSetValuesBlocked (doing this work really is faster)
+    if ( this->blocksize > 1 && ndofe % this->blocksize == 0 ) {
+        int nblocke = ndofe / this->blocksize;
+        IntArray bloc(nblocke);
+        for ( int b = 0; b < nblocke; ++b ) {
+            int i = b * blocksize;
+            // Have to check alignment inside the block:
+            if ( gloc[i] != -1 && gloc[i] % this->blocksize != 0 ) {
+                MatSetValues(this->mtrx, ndofe, gloc.givePointer(), ndofe, gloc.givePointer(), mat.givePointer(), ADD_VALUES);
+                return 1;
+            }
+            // Have to verify that this is indeed a series of increments in blocks:
+            for ( int k = 1; k < this->blocksize; ++k ) {
+                bool ok_seq = gloc[i] + k == gloc[i+k];
+                bool ok_bc = gloc[i] == -1 && gloc[i+k] == -1;
+                if ( !(ok_bc || ok_seq) ) {
+                    // Then we can't use block assembling for this element.
+                    MatSetValues(this->mtrx, ndofe, gloc.givePointer(), ndofe, gloc.givePointer(), mat.givePointer(), ADD_VALUES);
+                    return 1;
+                }
+            }
+            bloc[b] = gloc[i] == -1 ? -1 : gloc[i] / blocksize;
+        }
+        MatSetValuesBlocked(this->mtrx, nblocke, bloc.givePointer(), nblocke, bloc.givePointer(), mat.givePointer(), ADD_VALUES);
+    } else {
+        MatSetValues(this->mtrx, ndofe, gloc.givePointer(), ndofe, gloc.givePointer(), mat.givePointer(), ADD_VALUES);
+    }
+
+    //MatView(this->mtrx,PETSC_VIEWER_STDOUT_SELF);
     return 1;
 }
 

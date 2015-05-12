@@ -349,7 +349,7 @@ DKTPlate :: giveNodeCoordinates(double &x1, double &x2, double &x3,
 IRResultType
 DKTPlate :: initializeFrom(InputRecord *ir)
 {
-    return this->NLStructuralElement :: initializeFrom(ir);
+    return NLStructuralElement :: initializeFrom(ir);
 }
 
 
@@ -783,10 +783,8 @@ DKTPlate :: computeVertexBendingMoments(FloatMatrix &answer, TimeStep *tStep)
 
     // the results should be cached somehow, as computing on the fly is highly inefficient
     // due to multiple requests
-    FloatMatrix dndx;
     answer.resize(5, 3);
 
-    FloatMatrix b;
     FloatArray eps, m;
     FloatArray coords [ 3 ]; // vertex local coordinates
     coords [ 0 ] = {

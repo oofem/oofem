@@ -86,9 +86,7 @@ FEI3dLineLin :: evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const
 void
 FEI3dLineLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    double ksi;
-    FloatArray n(2);
-    ksi = lcoords.at(1);
+    double ksi = lcoords.at(1);
 
     answer.beScaled( ( 1. - ksi ) * 0.5, * cellgeo.giveVertexCoordinates(1) );
     answer.add( ( 1. + ksi ) * 0.5, * cellgeo.giveVertexCoordinates(2) );

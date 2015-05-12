@@ -185,7 +185,7 @@ TrPlanestressRotAllman :: computeStiffnessMatrix(FloatMatrix &answer, MatRespons
 void
 TrPlanestressRotAllman :: computeStiffnessMatrixZeroEnergyStabilization(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
-    FloatMatrix b(1, 9), d(1, 1);
+    FloatMatrix b(1, 9);
     FloatMatrix dnx;
     FloatArray lec = {0.333333333333, 0.333333333333, 0.333333333333}; // element center in local coordinates
     std::vector< FloatArray > lxy; 
@@ -391,7 +391,10 @@ TrPlanestressRotAllman :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 IRResultType
 TrPlanestressRotAllman :: initializeFrom(InputRecord *ir)
 {
-    TrPlaneStress2d :: initializeFrom(ir);
+    IRResultType result = TrPlaneStress2d :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
     numberOfGaussPoints = 4;
     return IRRT_OK;
 }

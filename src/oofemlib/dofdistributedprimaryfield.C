@@ -229,7 +229,6 @@ DofDistributedPrimaryField :: applyInitialCondition(InitialCondition &ic)
         return;
     }
 
-    IntArray loc_s, loc_ps;
     Domain *d = ic.giveDomain();
     Set *set = d->giveSet(ic.giveSetNumber());
     TimeStep *tStep = emodel->giveSolutionStepWhenIcApply();

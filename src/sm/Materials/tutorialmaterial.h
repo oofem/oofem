@@ -35,8 +35,9 @@
 #ifndef tutorialmaterial_h
 #define tutorialmaterial_h
 
-#include "Materials/isolinearelasticmaterial.h"
+#include "Materials/structuralmaterial.h"
 #include "Materials/structuralms.h"
+#include "Materials/isolinearelasticmaterial.h"
 
 ///@name Input fields for TutorialMaterial
 //@{
@@ -50,10 +51,9 @@ class Domain;
 
 /**
  * This class implements a isotropic plastic linear material (J2 plasticity condition is used).
- * Both kinematic and isotropic hardening is supported.
  * @author Jim Brozoulis
  */
-class TutorialMaterial : public IsotropicLinearElasticMaterial
+class TutorialMaterial : public StructuralMaterial
 {
 protected:
     /// Hardening modulus.
@@ -61,12 +61,15 @@ protected:
 
     /// Initial (uniaxial) yield stress.
     double sig0;
+    
+    IsotropicLinearElasticMaterial D;
 
 public:
     TutorialMaterial(int n, Domain * d);
     virtual ~TutorialMaterial();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &ir);
     virtual const char *giveInputRecordName() const { return _IFT_TutorialMaterial_Name; }
     virtual const char *giveClassName() const { return "TutorialMaterial"; }
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return true; }
@@ -76,12 +79,15 @@ public:
     virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
     
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    
+
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+
+    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+
 protected:
     static void giveDeviatoricProjectionMatrix(FloatMatrix &answer);
     
     static double computeJ2InvariantOf(const FloatArray &sigV);
-    //double evaluateYieldFunction();
 
     static void computeSphDevPartOf(const FloatArray &sigV, FloatArray &sigSph, FloatArray &sigDev); 
 };

@@ -76,7 +76,7 @@ protected:
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeGaussPoints();
 
-    Element_Geometry_Type giveGeometryType() const { return EGT_quad_21_interface; };
+    Element_Geometry_Type giveGeometryType() const { return EGT_quad_21_interface; }
 
     /// If linear interpolation should be used.
 	bool linear;

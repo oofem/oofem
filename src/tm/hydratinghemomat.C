@@ -52,9 +52,12 @@ HydratingHeMoMaterial :: initializeFrom(InputRecord *ir)
     double dvalue;
 
     // set k, c - necessary; rc beton Hellmich 2428 kJ/m3
-    HeMoTKMaterial :: initializeFrom(ir);
+    result = HeMoTKMaterial :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
+
     // setup hydration model
-    HydrationModelInterface :: initializeFrom(ir);
+    result = HydrationModelInterface :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     dvalue = -2.;
     IR_GIVE_OPTIONAL_FIELD(ir, dvalue, _IFT_HydratingHeMoMaterial_hydration);
@@ -67,7 +70,8 @@ HydratingHeMoMaterial :: initializeFrom(InputRecord *ir)
     /* if (ir->hasField("tout")) {
      * teplotaOut = 1;
      * printf("HydratingHeMoMat %d: additional teplota.out output selected.\n", giveNumber());
-     * } else */teplotaOut = 0;
+     * } else */
+    teplotaOut = 0;
 
     if ( hydration ) {
         // mixture type: 1 - mtLafarge, 2 - mtHuber, 3 - mtC60

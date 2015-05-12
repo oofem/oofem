@@ -190,19 +190,6 @@ SUPGElement2 :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Valu
 }
 
 
-double
-SUPGElement2 :: giveCharacteristicValue(CharType mtrx, TimeStep *tStep)
-{
-    if ( mtrx == CriticalTimeStep ) {
-        return this->computeCriticalTimeStep(tStep);
-    } else {
-        OOFEM_ERROR("Unknown Type of characteristic mtrx.");
-    }
-
-    return 0.0;
-}
-
-
 int
 SUPGElement2 :: checkConsistency()
 //
@@ -323,7 +310,7 @@ SUPGElement2 :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *tStep)
 void
 SUPGElement2 :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep *tStep)
 {
-    FloatMatrix n, b, bn, grad_u, grad_uN, N;
+    FloatMatrix n, b, bn, grad_u, grad_uN;
 
     answer.clear();
 
@@ -352,7 +339,7 @@ SUPGElement2 :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep 
 void
 SUPGElement2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep)
 {
-    FloatArray u, eps, stress, bs, dDB_u;
+    FloatArray u, eps, stress, dDB_u;
     FloatMatrix b, un_gu, dDB;
     double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
 
@@ -382,7 +369,6 @@ SUPGElement2 :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRespon
 {
     FloatMatrix _db, _d, _b, dDB, un_gu;
     double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
-    FloatArray dDB_u;
 
     answer.clear();
 
@@ -618,7 +604,7 @@ SUPGElement2 :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
     answer.clear();
 
     int rule = 0;
-    FloatArray un, gVector, s, helpLoadVector;
+    FloatArray gVector, helpLoadVector;
     FloatMatrix b, nu;
 
     // add body load (gravity) termms
@@ -674,7 +660,7 @@ void
 SUPGElement2 :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *tStep)
 {
     int nLoads;
-    FloatArray s, gVector, helpLoadVector;
+    FloatArray gVector, helpLoadVector;
     FloatMatrix g;
 
     int rule = 1;

@@ -564,7 +564,7 @@ TrPlaneStrRot :: initializeFrom(InputRecord *ir)
     IRResultType result;              // Required by IR_GIVE_FIELD macro
 
     numberOfGaussPoints = 4;
-    result = this->StructuralElement :: initializeFrom(ir);
+    result = StructuralElement :: initializeFrom(ir);
     if ( result != IRRT_OK ) {
         return result;
     }
@@ -667,6 +667,23 @@ TrPlaneStrRot :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
 //
 {
     return this->giveCharacteristicLengthForPlaneElements(normalToCrackPlane);
+}
+
+
+int
+TrPlaneStrRot :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
+{
+    if ( type == IST_StressTensor ) {
+        const FloatArray &help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
+        answer = {help.at(1), help.at(2), 0., 0., 0.,  help.at(3)};
+        return 1;
+    } else if ( type == IST_StrainTensor ) {
+        const FloatArray &help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
+        answer = {help.at(1), help.at(2), 0., 0., 0.,  help.at(3)};
+        return 1;
+    } else {
+        return TrPlaneStress2d :: giveIPValue(answer, gp, type, tStep);
+    }
 }
 
 } // end namespace oofem

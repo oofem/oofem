@@ -51,6 +51,7 @@
 #include "dynamicinputrecord.h"
 #include "domain.h"
 #include "unknownnumberingscheme.h"
+#include "assemblercallback.h"
 
 namespace oofem {
 REGISTER_BoundaryCondition(MixedGradientPressureDirichlet);
@@ -239,10 +240,10 @@ void MixedGradientPressureDirichlet :: computeFields(FloatArray &sigmaDev, doubl
     // sigma = residual (since we use the slave dofs) = f_ext - f_int
     sigmaDev.resize(npeq);
     sigmaDev.zero();
-    emodel->assembleVector(sigmaDev, tStep, InternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
+    emodel->assembleVector(sigmaDev, tStep, InternalForceAssembler(), VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
     tmp.resize(npeq);
     tmp.zero();
-    emodel->assembleVector(tmp, tStep, ExternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
+    emodel->assembleVector(tmp, tStep, ExternalForceAssembler(), VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
     sigmaDev.subtract(tmp);
     // Divide by the RVE-volume
     sigmaDev.times( 1.0 / this->domainSize() );
@@ -281,7 +282,7 @@ void MixedGradientPressureDirichlet :: computeTangents(FloatMatrix &Ed, FloatArr
         // Sets up RHS for all sensitivity problems;
         std :: unique_ptr< SparseMtrx > Kfp( classFactory.createSparseMtrx(stype) );
         Kfp->buildInternalStructure(rve, 1, fnum, pnum);
-        rve->assemble(*Kfp, tStep,TangentStiffnessMatrix, fnum, pnum, this->domain);
+        rve->assemble(*Kfp, tStep, TangentAssembler(TangentStiffness), fnum, pnum, this->domain);
 
         // Setup up indices and locations
         int neq = Kfp->giveNumberOfRows();
@@ -316,7 +317,7 @@ void MixedGradientPressureDirichlet :: computeTangents(FloatMatrix &Ed, FloatArr
             OOFEM_ERROR("MixedGradientPressureDirichlet :: computeTangents - Couldn't create sparse matrix of type %d\n", stype);
         }
         Kff->buildInternalStructure(rve, 1, fnum);
-        rve->assemble(*Kff, tStep,TangentStiffnessMatrix, fnum, this->domain);
+        rve->assemble(*Kff, tStep, TangentAssembler(TangentStiffness), fnum, this->domain);
         solver->solve(*Kff, rhs_p, s_p);
         solver->solve(*Kff, rhs_d, s_d);
     }
@@ -334,8 +335,8 @@ void MixedGradientPressureDirichlet :: computeTangents(FloatMatrix &Ed, FloatArr
         std :: unique_ptr< SparseMtrx > Kpp( classFactory.createSparseMtrx(stype) );
         Kpf->buildInternalStructure(rve, 1, pnum, fnum);
         Kpp->buildInternalStructure(rve, 1, pnum);
-        rve->assemble(*Kpf, tStep,TangentStiffnessMatrix, pnum, fnum, this->domain);
-        rve->assemble(*Kpp, tStep,TangentStiffnessMatrix, pnum, this->domain);
+        rve->assemble(*Kpf, tStep, TangentAssembler(TangentStiffness), pnum, fnum, this->domain);
+        rve->assemble(*Kpp, tStep, TangentAssembler(TangentStiffness), pnum, this->domain);
 
         FloatMatrix tmpMat;
         Kpp->times(ddev_pert, tmpMat);
@@ -446,13 +447,11 @@ IRResultType MixedGradientPressureDirichlet :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;
 
-    MixedGradientPressureBC :: initializeFrom(ir);
-
     this->centerCoord.resize( domain->giveNumberOfSpatialDimensions() );
     this->centerCoord.zero();
     IR_GIVE_OPTIONAL_FIELD(ir, this->centerCoord, _IFT_MixedGradientPressure_centerCoords)
 
-    return IRRT_OK;
+    return MixedGradientPressureBC :: initializeFrom(ir);
 }
 
 

@@ -150,7 +150,8 @@ InterpolatingFuction :: initializeFrom(InputRecord *ir)
     std :: ifstream inputField( name.c_str() );
 
     if ( !inputField.is_open() ) {
-        OOFEM_ERROR("Unable to open file %s", name.c_str());
+        OOFEM_WARNING("Unable to open file %s", name.c_str());
+        return IRRT_BAD_FORMAT;
     }
 
     double deltaX, deltaY;

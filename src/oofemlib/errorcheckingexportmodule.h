@@ -160,7 +160,7 @@ public:
     virtual void doOutput(TimeStep *tStep, bool forcedOutput = false);
 
 
-    virtual const char *giveClassName() const { return "ErrorCheckingExportModule"; };
+    virtual const char *giveClassName() const { return "ErrorCheckingExportModule"; }
     virtual const char *giveInputRecordName() const { return _IFT_ErrorCheckingExportModule_Name; }
 };
 } // end namespace oofem

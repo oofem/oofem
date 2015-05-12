@@ -121,7 +121,6 @@ LIBeam3dNL2 :: updateTempQuaternion(TimeStep *tStep)
     if ( tStep->giveSolutionStateCounter() != tempQCounter ) {
         // update temporary quaternion
         FloatArray u, centreSpin(3), q2(4);
-        FloatMatrix dR(3, 3);
         double centreSpinSize;
 
         // ask element's displacement increments
@@ -227,9 +226,8 @@ LIBeam3dNL2 :: computeQuaternionFromRotMtrx(FloatArray &answer, FloatMatrix &R)
 void
 LIBeam3dNL2 :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
-    FloatArray ui(3), xd(3), eps(3), curv(3), ac(3);
-    FloatMatrix sc(3, 3), tmid(3, 3), tempTc;
-    IntArray mask(1);
+    FloatArray xd(3), eps(3), curv(3);
+    FloatMatrix tempTc;
 
     // update temp triad
     this->updateTempQuaternion(tStep);
@@ -452,7 +450,10 @@ LIBeam3dNL2 :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     // first call parent
-    NLStructuralElement :: initializeFrom(ir);
+    result = NLStructuralElement :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     IR_GIVE_FIELD(ir, referenceNode, _IFT_LIBeam3dNL2_refnode);
     if ( referenceNode == 0 ) {
@@ -792,8 +793,7 @@ void
 LIBeam3dNL2 :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
 {
     GaussPoint *gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0);
-    FloatArray ui(3), xd(3), curv(3), ac(3), PrevEpsilon;
-    FloatMatrix sc(3, 3), tmid(3, 3), tc(3, 3);
+    FloatArray ui(3), ac(3), PrevEpsilon;
 
     answer.resize(3);
 
@@ -833,7 +833,7 @@ LIBeam3dNL2 :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
     // update curvature
     // exact procedure due to Simo & Vu Quoc
     FloatMatrix dR, Rn, Ro;
-    FloatArray e, om, omp, acp(3), kapgn1(3);
+    FloatArray om, omp, acp(3), kapgn1(3);
     double acSize, coeff;
 
     this->computeVectorOf(VM_Incremental, tStep, ui);

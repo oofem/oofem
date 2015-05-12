@@ -94,6 +94,9 @@ public:
 
     virtual TimeStep *giveNextStep();
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
+    
+    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep);
+    virtual int requiresUnknownsDictionaryUpdate() { return true; }
 
     virtual fMode giveFormulation() { return TL; }
 

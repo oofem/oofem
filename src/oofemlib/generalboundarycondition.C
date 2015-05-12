@@ -33,10 +33,8 @@
  */
 
 #include "generalboundarycondition.h"
-#include "valuemodetype.h"
 #include "bcvaltype.h"
 #include "function.h"
-#include "reinforcement.h"
 #include "timestep.h"
 #include "datastream.h"
 #include "contextioerr.h"
@@ -71,7 +69,8 @@ GeneralBoundaryCondition :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, timeFunction, _IFT_GeneralBoundaryCondition_timeFunct);
     if ( timeFunction <= 0 ) {
-        OOFEM_ERROR("bad TimeFunction id");
+        OOFEM_WARNING("bad TimeFunction id");
+        return IRRT_BAD_FORMAT;
     }
 
     int val = 0;

@@ -197,7 +197,7 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_INFO("Assembling stiffness matrix\n");
  #endif
     stiffnessMatrix->zero();
-    this->assemble( *stiffnessMatrix, tStep, TangentStiffnessMatrix,
+    this->assemble( *stiffnessMatrix, tStep, TangentAssembler(TangentStiffness),
                    EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #endif
 
@@ -210,11 +210,11 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
     loadVector.zero();
 
     // Internal forces first, negated;
-    this->assembleVector( loadVector, tStep, InternalForcesVector, VM_Total,
+    this->assembleVector( loadVector, tStep, InternalForceAssembler(), VM_Total,
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
     loadVector.negated();
 
-    this->assembleVector( loadVector, tStep, ExternalForcesVector, VM_Total,
+    this->assembleVector( loadVector, tStep, ExternalForceAssembler(), VM_Total,
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
     this->updateSharedDofManagers(loadVector, EModelDefaultEquationNumbering(), ReactionExchangeTag);
 
@@ -242,12 +242,12 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Assembling stiffness  matrix\n");
 #endif
-    this->assemble( *stiffnessMatrix, tStep, TangentStiffnessMatrix,
+    this->assemble( *stiffnessMatrix, tStep, TangentAssembler(TangentStiffness),
                    EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Assembling  initial stress matrix\n");
 #endif
-    this->assemble( *initialStressMatrix, tStep, InitialStressMatrix,
+    this->assemble( *initialStressMatrix, tStep, InitialStressMatrixAssembler(),
                    EModelDefaultEquationNumbering(), this->giveDomain(1) );
     initialStressMatrix->times(-1.0);
 
@@ -285,7 +285,7 @@ LinearStability :: terminateLinStatic(TimeStep *tStep)
     FILE *File = this->giveOutputStream();
     tStep->setTime(0.);
 
-    fprintf(File, "\nOutput for time % .3e \n\n", tStep->giveTargetTime() );
+    fprintf(File, "\nOutput for time %.3e \n\n", tStep->giveTargetTime() );
     fprintf(File, "Linear static:\n\n");
 
     if ( requiresUnknownsDictionaryUpdate() ) {
@@ -353,7 +353,7 @@ void LinearStability :: terminate(TimeStep *tStep)
     int nnodes = domain->giveNumberOfDofManagers();
 
     for ( int i = 1; i <= numberOfRequiredEigenValues; i++ ) {
-        fprintf(outputStream, "\nOutput for eigen value no.  % .3e \n", ( double ) i);
+        fprintf(outputStream, "\nOutput for eigen value no.  %.3e \n", ( double ) i);
         fprintf( outputStream,
                 "Printing eigen vector no. %d, corresponding eigen value is %15.8e\n\n",
                 i, eigVal.at(i) );

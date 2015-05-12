@@ -126,7 +126,6 @@ StructuralInterfaceMaterial :: give1dStiffnessMatrix_Eng(FloatMatrix &answer, Ma
 {
     FloatMatrix answer3D;
     give3dStiffnessMatrix_Eng(answer3D, mode, gp, tStep);
-    IntArray mask;
     answer.resize(1,1);
     answer.at(1,1) = answer3D.at(3,3);
 

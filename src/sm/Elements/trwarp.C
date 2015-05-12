@@ -84,9 +84,7 @@ IRResultType
 Tr_Warp :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 1;
-    this->StructuralElement :: initializeFrom(ir);
-
-    return IRRT_OK;
+    return StructuralElement :: initializeFrom(ir);
 }
 
 
@@ -197,7 +195,6 @@ double
 Tr_Warp :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double determinant = fabs( this->interp.edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
-    FloatArray gc;
     return determinant * gp->giveWeight();
 }
 

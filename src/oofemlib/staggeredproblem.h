@@ -176,21 +176,6 @@ public:
 
     virtual EngngModel *giveSlaveProblem(int i);
     virtual int giveNumberOfSlaveProblems() { return (int)inputStreamNames.size(); }
-
-    virtual int giveNumberOfFirstStep() {
-        if ( master ) {
-            return master->giveNumberOfFirstStep();
-        } else {
-            return 1;
-        }
-    }
-    virtual int giveNumberOfTimeStepWhenIcApply() {
-        if ( master ) {
-            return master->giveNumberOfTimeStepWhenIcApply();
-        } else {
-            return 0;
-        }
-    }
     virtual int instanciateDefaultMetaStep(InputRecord *ir);
 
 protected:

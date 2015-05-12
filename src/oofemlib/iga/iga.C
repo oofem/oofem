@@ -169,7 +169,8 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
             }
         }
     } else {
-        OOFEM_ERROR("unsupported number of spatial dimensions (nsd = %d)", nsd);
+        OOFEM_WARNING("unsupported number of spatial dimensions (nsd = %d)", nsd);
+        return IRRT_BAD_FORMAT;
     }
 
 #ifdef __PARALLEL_MODE
@@ -274,7 +275,8 @@ IRResultType IGATSplineElement :: initializeFrom(InputRecord *ir)
             }
         }
     } else {
-        OOFEM_ERROR("unsupported number of spatial dimensions (nsd = %d)", nsd);
+        OOFEM_WARNING("unsupported number of spatial dimensions (nsd = %d)", nsd);
+        return IRRT_BAD_FORMAT;
     }
 
     return IRRT_OK;

@@ -91,8 +91,6 @@ MatlabExportModule :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                    // Required by IR_GIVE_FIELD macro
 
-    ExportModule :: initializeFrom(ir);
-
     exportMesh = ir->hasField(_IFT_MatlabExportModule_mesh);
     exportData = ir->hasField(_IFT_MatlabExportModule_data);
     exportArea = ir->hasField(_IFT_MatlabExportModule_area);
@@ -117,7 +115,7 @@ MatlabExportModule :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, IPFieldsElSet, _IFT_MatlabExportModule_IPFieldsElSet);
     }
 
-    return IRRT_OK;
+    return ExportModule :: initializeFrom(ir);
 }
 
 
@@ -371,17 +369,17 @@ MatlabExportModule :: doOutputData(TimeStep *tStep, FILE *FID)
 void
 MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
 {
-    FloatArray v_hat, GradPTemp, v_hatTemp;
+    FloatArray v_hat;
 
     Domain *domain  = emodel->giveDomain(1);
 
     v_hat.clear();
 
+        ///@todo Sort out this hack in a nicer (modular) way / Mikael
+#if 0
     for ( auto &elem : domain->giveElements() ) {
 #ifdef __FM_MODULE
 
-        ///@todo Sort out this hack in a nicer (modular) way / Mikael
-#if 0
         if ( Tr21Stokes *Tr = dynamic_cast< Tr21Stokes * >( elem.get() ) ) {
             Tr->giveIntegratedVelocity(v_hatTemp, tStep);
             v_hat.add(v_hatTemp);
@@ -389,10 +387,10 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
             Tet->giveIntegratedVelocity(v_hatTemp, tStep);
             v_hat.add(v_hatTemp);
         }
-#endif
 
 #endif
     }
+#endif
 
     // Compute intrinsic area/volume
     double intrinsicSize = 1.0;
@@ -428,8 +426,6 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
                 fprintf(FID, "\tspecials.weakperiodic{%u}.descType=%u;\n", wpbccount, wpbc->giveBasisType() );
                 fprintf(FID, "\tspecials.weakperiodic{%u}.coefficients=[", wpbccount);
                 for ( Dof *dof: *wpbc->giveInternalDofManager(j) ) {
-                    FloatArray unknowns;
-                    IntArray DofMask;
                     double X = dof->giveUnknown(VM_Total, tStep);
                     fprintf(FID, "%e\t", X);
                 }
@@ -442,8 +438,6 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
         if (sbsf) {
             fprintf(FID, "\tspecials.solutionbasedsf{%u}.values=[", sbsfcount);
             for ( Dof *dof: *sbsf->giveInternalDofManager(1) ) {                  // Only one internal dof manager
-                FloatArray unknowns;
-                IntArray DofMask;
                 double X = dof->giveUnknown(VM_Total, tStep);
                 fprintf(FID, "%e\t", X);
             }
@@ -747,7 +741,7 @@ MatlabExportModule :: doOutputHomogenizeDofIDs(TimeStep *tStep,    FILE *FID)
     }
 
 
-    for ( std :: size_t i = 0; i<HomQuantities.size(); i ++) {
+    for ( std :: size_t i = 0; i < HomQuantities.size(); i ++) {
         FloatArray *thisIS;
         thisIS = HomQuantities.at(i);
         thisIS->times(1.0/Vol);

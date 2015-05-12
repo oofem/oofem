@@ -192,7 +192,11 @@ NonLinearStatic :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    LinearStatic :: initializeFrom(ir);
+    result = LinearStatic :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+
     nonlocalStiffnessFlag = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, nonlocalStiffnessFlag, _IFT_NonLinearStatic_nonlocstiff);
 
@@ -528,14 +532,14 @@ NonLinearStatic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
 #ifdef VERBOSE
             OOFEM_LOG_DEBUG("Assembling tangent stiffness matrix\n");
 #endif
-            this->assemble(*stiffnessMatrix, tStep, TangentStiffnessMatrix,
+            this->assemble(*stiffnessMatrix, tStep, TangentAssembler(TangentStiffness),
                            EModelDefaultEquationNumbering(), d);
         } else if ( ( stiffMode == nls_secantStiffness ) || ( stiffMode == nls_secantInitialStiffness && initFlag ) ) {
 #ifdef VERBOSE
             OOFEM_LOG_DEBUG("Assembling secant stiffness matrix\n");
 #endif
             stiffnessMatrix->zero(); // zero stiffness matrix
-            this->assemble(*stiffnessMatrix, tStep, SecantStiffnessMatrix,
+            this->assemble(*stiffnessMatrix, tStep, TangentAssembler(SecantStiffness),
                            EModelDefaultEquationNumbering(), d);
             initFlag = 0;
         } else if ( ( stiffMode == nls_elasticStiffness ) && ( initFlag ||
@@ -544,7 +548,7 @@ NonLinearStatic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
             OOFEM_LOG_DEBUG("Assembling elastic stiffness matrix\n");
 #endif
             stiffnessMatrix->zero(); // zero stiffness matrix
-            this->assemble(*stiffnessMatrix, tStep, ElasticStiffnessMatrix,
+            this->assemble(*stiffnessMatrix, tStep, TangentAssembler(ElasticStiffness),
                            EModelDefaultEquationNumbering(), d);
             initFlag = 0;
         } else {
@@ -576,7 +580,7 @@ NonLinearStatic :: printOutputAt(FILE *File, TimeStep *tStep)
         return;                                                                      // do not print even Solution step header
     }
 
-    fprintf( File, "\n\nOutput for time % .3e, solution step number %d\n", tStep->giveTargetTime(), tStep->giveNumber() );
+    fprintf( File, "\n\nOutput for time %.3e, solution step number %d\n", tStep->giveTargetTime(), tStep->giveNumber() );
     fprintf(File, "Reached load level : %20.6f in %d iterations\n\n",
             cumulatedLoadLevel + loadLevel, currentIterations);
 
@@ -740,7 +744,7 @@ NonLinearStatic :: updateDomainLinks()
 
 
 void
-NonLinearStatic :: assemble(SparseMtrx &answer, TimeStep *tStep, CharType type,
+NonLinearStatic :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAssembler &ma,
                             const UnknownNumberingScheme &s, Domain *domain)
 {
 #ifdef TIME_REPORT
@@ -748,9 +752,9 @@ NonLinearStatic :: assemble(SparseMtrx &answer, TimeStep *tStep, CharType type,
     timer.startTimer();
 #endif
 
-    LinearStatic :: assemble(answer, tStep, type, s, domain);
+    LinearStatic :: assemble(answer, tStep, ma, s, domain);
 
-    if ( ( nonlocalStiffnessFlag ) && ( type == TangentStiffnessMatrix ) ) {
+    if ( ( nonlocalStiffnessFlag ) && dynamic_cast< const TangentAssembler* >(&ma) ) {
         // add nonlocal contribution
         for ( auto &elem : domain->giveElements() ) {
             static_cast< StructuralElement * >( elem.get() )->addNonlocalStiffnessContributions(answer, s, tStep);
@@ -822,16 +826,16 @@ NonLinearStatic :: assembleIncrementalReferenceLoadVectors(FloatArray &_incremen
 
     if ( _refMode == SparseNonLinearSystemNM :: rlm_incremental ) {
         ///@todo This was almost definitely wrong before. It never seems to be used. Is this code even relevant?
-        this->assembleVector(_incrementalLoadVector, tStep, ExternalForcesVector,
+        this->assembleVector(_incrementalLoadVector, tStep, ExternalForceAssembler(),
                              VM_Incremental, EModelDefaultEquationNumbering(), sourceDomain);
 
-        this->assembleVector(_incrementalLoadVectorOfPrescribed, tStep, ExternalForcesVector,
+        this->assembleVector(_incrementalLoadVectorOfPrescribed, tStep, ExternalForceAssembler(),
                              VM_Incremental, EModelDefaultPrescribedEquationNumbering(), sourceDomain);
     } else {
-        this->assembleVector(_incrementalLoadVector, tStep, ExternalForcesVector,
+        this->assembleVector(_incrementalLoadVector, tStep, ExternalForceAssembler(),
                              VM_Total, EModelDefaultEquationNumbering(), sourceDomain);
 
-        this->assembleVector(_incrementalLoadVectorOfPrescribed, tStep, ExternalForcesVector,
+        this->assembleVector(_incrementalLoadVectorOfPrescribed, tStep, ExternalForceAssembler(),
                              VM_Total, EModelDefaultPrescribedEquationNumbering(), sourceDomain);
     }
 

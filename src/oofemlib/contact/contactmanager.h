@@ -90,7 +90,7 @@ public:
 
     Domain *giveDomain() { return this->domain; }
     int numberOfContactDefinitions;
-    ContactDefinition *giveContactDefinition(const int num) { return this->contactDefinitionList[num-1].get(); };
+    ContactDefinition *giveContactDefinition(const int num) { return this->contactDefinitionList[num-1].get(); }
     int giveNumberOfContactDefinitions() const { return (int)contactDefinitionList.size(); }
 
     

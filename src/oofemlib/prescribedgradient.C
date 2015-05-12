@@ -50,8 +50,8 @@
 #include "unknownnumberingscheme.h"
 #include "sparsemtrx.h"
 #include "sparselinsystemnm.h"
-
-#include <cmath>
+#include "assemblercallback.h"
+#include "mathfem.h"
 
 namespace oofem {
 REGISTER_BoundaryCondition(PrescribedGradient);
@@ -162,9 +162,9 @@ void PrescribedGradient :: computeField(FloatArray &sigma, TimeStep *tStep)
 
     R_c.zero();
     R_ext.zero();
-    emodel->assembleVector( R_c, tStep, InternalForcesVector, VM_Total,
+    emodel->assembleVector( R_c, tStep, InternalForceAssembler(), VM_Total,
                             EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
-    emodel->assembleVector( R_ext, tStep, ExternalForcesVector, VM_Total,
+    emodel->assembleVector( R_ext, tStep, ExternalForceAssembler(), VM_Total,
                             EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
     R_c.subtract(R_ext);
 
@@ -206,10 +206,10 @@ void PrescribedGradient :: computeTangent(FloatMatrix &tangent, TimeStep *tStep)
     Kfp->buildInternalStructure(rve, 1, fnum, pnum);
     Kpf->buildInternalStructure(rve, 1, pnum, fnum);
     Kpp->buildInternalStructure(rve, 1, pnum);
-    rve->assemble(*Kff, tStep,TangentStiffnessMatrix, fnum, this->domain);
-    rve->assemble(*Kfp, tStep,TangentStiffnessMatrix, fnum, pnum, this->domain);
-    rve->assemble(*Kpf, tStep,TangentStiffnessMatrix, pnum, fnum, this->domain);
-    rve->assemble(*Kpp, tStep,TangentStiffnessMatrix, pnum, this->domain);
+    rve->assemble(*Kff, tStep, TangentAssembler(TangentStiffness), fnum, this->domain);
+    rve->assemble(*Kfp, tStep, TangentAssembler(TangentStiffness), fnum, pnum, this->domain);
+    rve->assemble(*Kpf, tStep, TangentAssembler(TangentStiffness), pnum, fnum, this->domain);
+    rve->assemble(*Kpp, tStep, TangentAssembler(TangentStiffness), pnum, this->domain);
 
     FloatMatrix C, X, Kpfa, KfpC, a;
 

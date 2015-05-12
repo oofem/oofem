@@ -1705,12 +1705,13 @@ DomainTransactionManager *
 Domain :: giveTransactionManager()
 {
     if ( !transactionManager ) {
-        if ( ( transactionManager = new DomainTransactionManager(this) ) == NULL ) {
+        transactionManager.reset( new DomainTransactionManager(this) );
+        if ( !transactionManager ) {
             OOFEM_ERROR("allocation failed");
         }
     }
 
-    return transactionManager;
+    return transactionManager.get();
 }
 
 

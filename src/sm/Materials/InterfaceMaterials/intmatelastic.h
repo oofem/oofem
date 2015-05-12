@@ -77,7 +77,7 @@ public:
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new StructuralInterfaceMaterialStatus(1, domain, gp); }
 
-    virtual bool hasAnalyticalTangentStiffness() const { return true; };
+    virtual bool hasAnalyticalTangentStiffness() const { return true; }
 
 protected:
 	double k;

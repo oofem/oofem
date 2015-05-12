@@ -56,6 +56,38 @@
 namespace oofem {
 REGISTER_EngngModel(NonStationaryTransportProblem);
 
+void TransportExternalForceAssembler :: vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const
+{
+    TransportElement *telem = static_cast< TransportElement* >(&element);
+    telem->computeBCVectorAt(vec, tStep, mode);
+    FloatArray tmp;
+    telem->computeInternalSourceRhsVectorAt(tmp, tStep, mode);
+    vec.add(tmp);    
+}
+
+
+MidpointLhsAssembler :: MidpointLhsAssembler(bool lumped, double alpha) : 
+    MatrixAssembler(), lumped(lumped), alpha(alpha)
+{}
+
+
+void MidpointLhsAssembler :: matrixFromElement(FloatMatrix &answer, Element &el, TimeStep *tStep) const
+{
+    FloatMatrix capacity;
+    el.giveCharacteristicMatrix(answer, TangentStiffnessMatrix, tStep);
+    el.giveCharacteristicMatrix(capacity, this->lumped ? LumpedMassMatrix : MassMatrix, tStep);
+    answer.times(this->alpha);
+    answer.add(1. / tStep->giveTimeIncrement(), capacity);
+}
+
+
+void IntSourceLHSAssembler :: matrixFromElement(FloatMatrix &answer, Element &el, TimeStep *tStep) const
+{
+    static_cast< TransportElement * >( &el )->computeIntSourceLHSMatrix(answer, tStep);
+}
+
+
+
 NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel *_master = NULL) : StationaryTransportProblem(i, _master)
 {
     ndomains = 1;
@@ -97,7 +129,8 @@ NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-    EngngModel :: initializeFrom(ir);
+    result = EngngModel :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     if ( ir->hasField(_IFT_NonStationaryTransportProblem_initt) ) {
         IR_GIVE_FIELD(ir, initT, _IFT_NonStationaryTransportProblem_initt);
@@ -110,7 +143,8 @@ NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
     } else if ( ir->hasField(_IFT_NonStationaryTransportProblem_prescribedtimes) ) {
         IR_GIVE_FIELD(ir, discreteTimes, _IFT_NonStationaryTransportProblem_prescribedtimes);
     } else {
-        OOFEM_ERROR("Time step not defined");
+        OOFEM_WARNING("Time step not defined");
+        return IRRT_BAD_FORMAT;
     }
 
     IR_GIVE_FIELD(ir, alpha, _IFT_NonStationaryTransportProblem_alpha);
@@ -269,16 +303,14 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
         //project initial conditions to have temporary temperature in integration points
 
         //edge or surface load on elements
-        this->assembleVectorFromElements( bcRhs, stepWhenIcApply.get(), ElementBCTransportVector,
+        //add internal source vector on elements
+        this->assembleVectorFromElements( bcRhs, stepWhenIcApply.get(), TransportExternalForceAssembler(),
                                          VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //add prescribed value, such as temperature, on nodes
         this->assembleDirichletBcRhsVector( bcRhs, stepWhenIcApply.get(), VM_Total,
-                                           NSTP_MidpointLhs, EModelDefaultEquationNumbering(), this->giveDomain(1) );
-        //add internal source vector on elements
-        this->assembleVectorFromElements( bcRhs, stepWhenIcApply.get(), ElementInternalSourceVector,
-                                         VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //add nodal load
-        this->assembleVectorFromDofManagers( bcRhs, stepWhenIcApply.get(), ExternalForcesVector,
+        this->assembleVectorFromDofManagers( bcRhs, stepWhenIcApply.get(), ExternalForceAssembler(),
                                             VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
     }
 
@@ -300,7 +332,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 #endif
 
         //Add contribution of alpha*K+C/dt (where K has contributions from conductivity and neumann b.c.s)
-        this->assemble( *conductivityMatrix, stepWhenIcApply.get(), NSTP_MidpointLhs,
+        this->assemble( *conductivityMatrix, stepWhenIcApply.get(), MidpointLhsAssembler(lumpedCapacityStab, alpha),
                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
     }
 
@@ -324,15 +356,13 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     rhs.times(1. - alpha);
     bcRhs.zero();
     //boundary conditions evaluated at targetTime
-    this->assembleVectorFromElements( bcRhs, tStep, ElementBCTransportVector,
+    this->assembleVectorFromElements( bcRhs, tStep, TransportExternalForceAssembler(),
                                      VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    this->assembleDirichletBcRhsVector( bcRhs, tStep, VM_Total, NSTP_MidpointLhs,
+    this->assembleDirichletBcRhsVector( bcRhs, tStep, VM_Total,
                                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    this->assembleVectorFromElements( bcRhs, tStep, ElementInternalSourceVector,
-                                     VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     // assembling load from nodes
-    this->assembleVectorFromDofManagers( bcRhs, tStep, InternalForcesVector, VM_Total,
+    this->assembleVectorFromDofManagers( bcRhs, tStep, InternalForceAssembler(), VM_Total,
                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
     for ( int i = 1; i <= neq; i++ ) {
         rhs.at(i) += bcRhs.at(i) * alpha;
@@ -536,56 +566,11 @@ NonStationaryTransportProblem :: giveUnknownDictHashIndx(ValueModeType mode, Tim
 
 
 void
-NonStationaryTransportProblem :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
-                                                                 CharType type, TimeStep *tStep, Domain *domain)
-{
-    // we don't directly call element->GiveCharacteristicMatrix() function, because some
-    // engngm classes may require special modification of base types supported on
-    // element class level
-
-    if ( ( type == NSTP_MidpointLhs ) || ( type == NSTP_MidpointRhs ) ) {
-        Element *element;
-        FloatMatrix charMtrx1, charMtrx2;
-
-        element = domain->giveElement(num);
-        element->giveCharacteristicMatrix(answer, TangentStiffnessMatrix, tStep);
-        element->giveCharacteristicMatrix(charMtrx2, CapacityMatrix, tStep);
-
-        if ( lumpedCapacityStab ) {
-            int size = charMtrx2.giveNumberOfRows();
-            for ( int i = 1; i <= size; i++ ) {
-                double s = 0.0;
-                for ( int j = 1; j <= size; j++ ) {
-                    s += charMtrx2.at(i, j);
-                    charMtrx2.at(i, j) = 0.0;
-                }
-
-                charMtrx2.at(i, i) = s;
-            }
-        }
-
-        if ( type == NSTP_MidpointLhs ) {
-            answer.times(this->alpha);
-            charMtrx2.times( 1. / tStep->giveTimeIncrement() );
-        } else {
-            answer.times(this->alpha - 1.0);
-            charMtrx2.times( 1. / tStep->giveTimeIncrement() );
-        }
-
-        answer.add(charMtrx2);
-        return;
-    } else {
-        EngngModel :: giveElementCharacteristicMatrix(answer, num, type, tStep, domain);
-    }
-}
-
-
-void
 NonStationaryTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer,
                                                               const UnknownNumberingScheme &s, TimeStep *tStep)
 {
     IntArray loc;
-    FloatMatrix charMtrx;
+    FloatMatrix charMtrx, charMtrx2;
     FloatArray unknownVec, contrib, intSource;
     Element *element;
 
@@ -603,7 +588,11 @@ NonStationaryTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer
 
         element->giveLocationArray(loc, s);
         //(alpha-1)*K+C/dt
-        this->giveElementCharacteristicMatrix(charMtrx, i, NSTP_MidpointRhs, tStep, domain);
+        element->giveCharacteristicMatrix(charMtrx, TangentStiffnessMatrix, tStep);
+        element->giveCharacteristicMatrix(charMtrx2, lumpedCapacityStab ? LumpedMassMatrix : MassMatrix, tStep);
+
+        charMtrx.times(this->alpha - 1.0);
+        charMtrx.add(1. / tStep->giveTimeIncrement(), charMtrx2);
 
         if ( charMtrx.isNotEmpty() ) {
             element->computeVectorOf(VM_Total, tStep, unknownVec);
@@ -689,12 +678,13 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
 
 void
 NonStationaryTransportProblem :: assembleDirichletBcRhsVector(FloatArray &answer, TimeStep *tStep,
-                                                              ValueModeType mode, CharType lhsType,
+                                                              ValueModeType mode,
                                                               const UnknownNumberingScheme &ns, Domain *d)
 {
     IntArray loc, dofids;
     FloatArray rp, charVec;
     FloatMatrix s;
+    FloatMatrix capacity;
 
     int nelem = d->giveNumberOfElements();
 
@@ -706,7 +696,11 @@ NonStationaryTransportProblem :: assembleDirichletBcRhsVector(FloatArray &answer
         if ( rp.containsOnlyZeroes() ) {
             continue;
         } else {
-            this->giveElementCharacteristicMatrix(s, ielem, lhsType, tStep, d);
+            element->giveCharacteristicMatrix(s, TangentStiffnessMatrix, tStep);
+            element->giveCharacteristicMatrix(capacity, lumpedCapacityStab ? LumpedMassMatrix : MassMatrix, tStep);
+            s.times(this->alpha);
+            s.add(1. / tStep->giveTimeIncrement(), capacity);
+
             charVec.beProductOf(s, rp);
             charVec.negated();
 

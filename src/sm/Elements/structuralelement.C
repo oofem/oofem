@@ -54,7 +54,7 @@
 #include "nonlocmatstiffinterface.h"
 #include "mathfem.h"
 #include "materialmapperinterface.h"
-#include <math.h>
+
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
  #include "connectivitytable.h"
@@ -543,7 +543,6 @@ StructuralElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
     double mass = 0.;
 
     IntArray nodeDofIDMask, dimFlag(3);
-    IntArray nodalArray;
     int indx = 0, ldofs, dim;
     double summ;
 
@@ -648,6 +647,15 @@ StructuralElement :: computeResultingIPEigenstrainAt(FloatArray &answer, TimeSte
 }
 
 
+void
+StructuralElement :: computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
+{
+    FloatArray u;
+    FloatMatrix n;
+    this->computeNmatrixAt(lcoords, n);
+    this->computeVectorOf(mode, tStep, u);
+    answer.beProductOf(n, u);
+}
 
 void
 StructuralElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
@@ -793,10 +801,6 @@ StructuralElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, Tim
 
 void
 StructuralElement :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
-// Computes the vector containing the stresses at the Gauss point gp of
-// the receiver, at time step tStep. The nature of these stresses depends
-// on the element's type.
-// this version assumes TOTAL LAGRANGE APPROACH
 {
     this->giveStructuralCrossSection()->giveRealStresses(answer, gp, strain, tStep);
 }
@@ -886,7 +890,7 @@ StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &a
 // has been called for the same time step.
 //
 {
-    FloatMatrix b, R;
+    FloatMatrix b;
     FloatArray temp, u, stress, strain;
     IntArray irlocnum;
 

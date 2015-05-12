@@ -42,18 +42,17 @@ namespace oofem {
 void
 FEI2dTrLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    answer.resize(3);
-
-    answer.at(1) = lcoords.at(1);
-    answer.at(2) = lcoords.at(2);
-    answer.at(3) = 1. - lcoords.at(1) - lcoords.at(2);
+    answer = {
+        lcoords.at(1),
+        lcoords.at(2),
+        1. - lcoords.at(1) - lcoords.at(2)
+    };
 }
 
 double
 FEI2dTrLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double x1, x2, x3, y1, y2, y3, detJ;
-    answer.resize(3, 2);
 
     x1 = cellgeo.giveVertexCoordinates(1)->at(xind);
     x2 = cellgeo.giveVertexCoordinates(2)->at(xind);
@@ -65,6 +64,7 @@ FEI2dTrLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEI
 
     detJ = x1 * ( y2 - y3 ) + x2 * ( -y1 + y3 ) + x3 * ( y1 - y2 );
 
+    answer.resize(3, 2);
     answer.at(1, 1) = ( y2 - y3 ) / detJ;
     answer.at(1, 2) = ( x3 - x2 ) / detJ;
 
@@ -81,14 +81,14 @@ void
 FEI2dTrLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double l1, l2, l3;
-    //answer.resize(2);
-    answer.resize(3);
-    answer.zero();
 
     l1 = lcoords.at(1);
     l2 = lcoords.at(2);
     l3 = 1.0 - l1 - l2;
 
+    //answer.resize(2);
+    answer.resize(3);
+    answer.zero();
     answer.at(1) = ( l1 * cellgeo.giveVertexCoordinates(1)->at(xind) +
                     l2 * cellgeo.giveVertexCoordinates(2)->at(xind) +
                     l3 * cellgeo.giveVertexCoordinates(3)->at(xind) );
@@ -103,7 +103,6 @@ int
 FEI2dTrLin :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo)
 {
     double detJ, x1, x2, x3, y1, y2, y3;
-    answer.resize(3);
 
     x1 = cellgeo.giveVertexCoordinates(1)->at(xind);
     x2 = cellgeo.giveVertexCoordinates(2)->at(xind);
@@ -115,6 +114,7 @@ FEI2dTrLin :: global2local(FloatArray &answer, const FloatArray &coords, const F
 
     detJ = x1 * ( y2 - y3 ) + x2 * ( -y1 + y3 ) + x3 * ( y1 - y2 );
 
+    answer.resize(3);
     answer.at(1) = ( ( x2 * y3 - x3 * y2 ) + ( y2 - y3 ) * coords.at(xind) + ( x3 - x2 ) * coords.at(yind) ) / detJ;
     answer.at(2) = ( ( x3 * y1 - x1 * y3 ) + ( y3 - y1 ) * coords.at(xind) + ( x1 - x3 ) * coords.at(yind) ) / detJ;
 
@@ -164,33 +164,28 @@ void
 FEI2dTrLin :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double ksi = lcoords.at(1);
-    answer.resize(2);
-
-    answer.at(1) = ( 1. - ksi ) * 0.5;
-    answer.at(2) = ( 1. + ksi ) * 0.5;
+    answer = { ( 1. - ksi ) * 0.5, ( 1. + ksi ) * 0.5 };
 }
 
 void
 FEI2dTrLin :: edgeEvaldNds(FloatArray &answer, int iedge,
                            const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    double l;
     IntArray edgeNodes;
     this->computeLocalEdgeMapping(edgeNodes, iedge);
-    l = this->edgeComputeLength(edgeNodes, cellgeo);
+    double l = this->edgeComputeLength(edgeNodes, cellgeo);
 
-    answer.resize(2);
-    answer.at(1) = -1.0 / l;
-    answer.at(2) =  1.0 / l;
+    answer = { -1.0 / l, 1.0 / l };
 }
 
 double FEI2dTrLin :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     IntArray edgeNodes;
     this->computeLocalEdgeMapping(edgeNodes, iedge);
-    normal.resize(2);
-    normal.at(1) = cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(yind) - cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(yind);
-    normal.at(2) = -( cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(xind) - cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(xind) );
+    normal = {
+        cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(yind) - cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(yind),
+        cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(xind) - cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(xind)
+    };
     return normal.normalize() * 0.5;
 }
 
@@ -264,7 +259,7 @@ FEI2dTrLin :: giveArea(const FEICellGeometry &cellgeo) const
     x3 = p->at(1);
     y3 = p->at(2);
 
-    return 0.5 * ( x1 * ( y2 - y3 ) + x2 * ( -y1 + y3 ) + x3 * ( y1 - y2 ) ); ///@todo Absolute value or not?
+    return fabs( 0.5 * ( x1 * ( y2 - y3 ) + x2 * ( -y1 + y3 ) + x3 * ( y1 - y2 ) ) );
 }
 
 double

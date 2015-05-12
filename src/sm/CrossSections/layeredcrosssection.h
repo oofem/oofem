@@ -215,11 +215,7 @@ public:
     void setupLayeredIntegrationRule(std :: vector< std :: unique_ptr< IntegrationRule > > &layerIntegrationRulesArray, Element *el, int numInPlanePoints);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep);
-    virtual double give(int aProperty, GaussPoint *gp)
-    {
-        OOFEM_ERROR("not implemented yet");
-        return 0.0;
-    };
+    virtual double give(int aProperty, GaussPoint *gp);
 
     virtual int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip)
     {
@@ -241,13 +237,13 @@ public:
 
 
     virtual void giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep)
-    { OOFEM_ERROR("not implemented"); };
+    { OOFEM_ERROR("not implemented"); }
     virtual void giveCauchyStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep)
-    { OOFEM_ERROR("not implemented"); };
+    { OOFEM_ERROR("not implemented"); }
     virtual void giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-    { OOFEM_ERROR("not implemented"); };
+    { OOFEM_ERROR("not implemented"); }
     virtual void giveStiffnessMatrix_dCde(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-    { OOFEM_ERROR("not implemented"); };
+    { OOFEM_ERROR("not implemented"); }
 
 
 protected:

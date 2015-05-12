@@ -94,12 +94,18 @@ TransportElement :: giveCharacteristicMatrix(FloatMatrix &answer,
         answer.add(tmp);
     } else if ( mtrx == ConductivityMatrix ) {
         this->computeConductivityMatrix(answer, Conductivity, tStep);
-    } else if ( mtrx == CapacityMatrix ) {
+    } else if ( mtrx == CapacityMatrix || mtrx == MassMatrix ) {
         this->computeCapacityMatrix(answer, tStep);
-    } else if ( mtrx == LHSBCMatrix ) {
-        this->computeBCMtrxAt(answer, tStep, VM_Total);
-    } else if ( mtrx == IntSourceLHSMatrix ) {
-        this->computeIntSourceLHSMatrix(answer, tStep);
+    } else if ( mtrx == LumpedMassMatrix ) {
+        this->computeCapacityMatrix(answer, tStep);
+        for ( int i = 1; i <= answer.giveNumberOfRows(); i++ ) {
+            double s = 0.0;
+            for ( int j = 1; j <= answer.giveNumberOfColumns(); j++ ) {
+                s += answer.at(i, j);
+                answer.at(i, j) = 0.0;
+            }
+            answer.at(i, i) = s;
+        }
     } else {
         OOFEM_ERROR("Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx));
     }
@@ -121,10 +127,6 @@ TransportElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, 
         this->computeInertiaForcesVector(answer, tStep);
     } else if ( mtrx == LumpedMassMatrix ) {
         this->computeLumpedCapacityVector(answer, tStep);
-    } else if ( mtrx == ElementBCTransportVector ) { ///@todo Remove this, only external and internal.
-        this->computeBCVectorAt(answer, tStep, mode);
-    } else if ( mtrx == ElementInternalSourceVector ) { ///@todo Remove this, only external and internal.
-        this->computeInternalSourceRhsVectorAt(answer, tStep, mode);
     } else {
         OOFEM_ERROR( "Unknown Type of characteristic mtrx (%s)",
                 __CharTypeToString(mtrx) );
@@ -482,7 +484,6 @@ TransportElement :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
         if ( mat->hasInternalSource() ) {
             // add internal source produced by material (if any)
             FloatArray val;
-            double dV = this->computeVolumeAround(gp);
             mat->computeInternalSourceVector(val, gp, tStep, VM_Total);
             answer.plusProduct(N, val, dV);
         }
@@ -938,7 +939,7 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
                 int numberOfEdgeIPs = ( int ) ceil( ( approxOrder + 1. ) / 2. );
                 GaussIntegrationRule iRule(1, this, 1, 1);
                 iRule.SetUpPointsOnLine(numberOfEdgeIPs, _Unknown);
-                FloatArray val, n;
+                FloatArray n;
                 IntArray mask;
                 FloatMatrix subAnswer;
 
@@ -952,7 +953,7 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
                 this->giveEdgeDofMapping(mask, id);
                 answer.assemble(subAnswer, mask);
             } else if ( ltype == SurfaceLoadBGT ) {
-                FloatArray val, n;
+                FloatArray n;
                 IntArray mask;
                 FloatMatrix subAnswer;
 
@@ -1016,6 +1017,17 @@ TransportElement :: assembleLocalContribution(FloatArray &answer, FloatArray &sr
     }
 }
 
+
+void
+TransportElement :: computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
+{
+    FloatArray u;
+    FloatMatrix n;
+    this->computeNmatrixAt(n, lcoords);
+    this->computeVectorOf(mode, tStep, u);
+    answer.beProductOf(n, u);
+}
+
 void
 TransportElement :: computeFlow(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
@@ -1073,8 +1085,11 @@ TransportElement :: updateInternalState(TimeStep *tStep)
 // Updates the receiver at the end of a solution step
 {
     FloatArray stateVector, r;
+#if 0
     FloatArray gradient, flux;
-    FloatMatrix n, B;
+    FloatMatrix B;
+#endif
+    FloatMatrix n;
     IntArray dofid;
     TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
 
@@ -1105,7 +1120,7 @@ TransportElement :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, Pr
                                                           TimeStep *tStep)
 {
     int indx;
-    FloatArray elemvector, f, lc;
+    FloatArray elemvector, lc;
     FloatMatrix n;
     IntArray elemdofs;
     // determine element dof ids

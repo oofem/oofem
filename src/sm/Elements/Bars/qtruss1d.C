@@ -61,12 +61,7 @@ QTruss1d :: QTruss1d(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
 IRResultType
 QTruss1d :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result = this->StructuralElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    return IRRT_OK;
+    return StructuralElement :: initializeFrom(ir);
 }
 
 void

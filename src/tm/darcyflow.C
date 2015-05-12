@@ -38,7 +38,8 @@ IRResultType DarcyFlow :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-    EngngModel :: initializeFrom(ir);
+    result = EngngModel :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     int val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_lstype);
@@ -86,7 +87,7 @@ void DarcyFlow :: solveYourselfAt(TimeStep *tStep)
     // Build initial/external load (LoadVector)
     this->externalForces.resize(neq);
     this->externalForces.zero();
-    this->assembleVectorFromElements( this->externalForces, tStep, ExternalForcesVector, VM_Total,
+    this->assembleVectorFromElements( this->externalForces, tStep, ExternalForceAssembler(), VM_Total,
                                      EModelDefaultEquationNumbering(), this->giveDomain(1) );
     this->updateSharedDofManagers(this->externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
 
@@ -99,7 +100,6 @@ void DarcyFlow :: solveYourselfAt(TimeStep *tStep)
     this->updateComponent( tStep, InternalRhs, this->giveDomain(1) );
     this->updateComponent( tStep, NonLinearLhs, this->giveDomain(1) );
 
-    FloatArray incrementalLoadVector(0); // Should be allowed to be null
     NM_Status status = this->nMethod->solve(*this->stiffnessMatrix,
                                             this->externalForces,
                                             NULL,
@@ -172,7 +172,7 @@ void DarcyFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d
     switch ( cmpn ) {
     case InternalRhs:
         this->internalForces.zero();
-        this->assembleVector(this->internalForces, tStep,  InternalForcesVector, VM_Total,
+        this->assembleVector(this->internalForces, tStep, InternalForceAssembler(), VM_Total,
                              EModelDefaultEquationNumbering(), d, & this->ebeNorm);
         this->updateSharedDofManagers(this->externalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
         break;
@@ -180,7 +180,7 @@ void DarcyFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d
     case NonLinearLhs:
 
         this->stiffnessMatrix->zero();
-        this->assemble( *this->stiffnessMatrix, tStep, TangentStiffnessMatrix,
+        this->assemble( *this->stiffnessMatrix, tStep, TangentAssembler(TangentStiffness),
                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
         break;
 

@@ -853,7 +853,7 @@ PolygonLine :: PolygonLine() : BasicGeometry()
 
 void PolygonLine :: computeNormalSignDist(double &oDist, const FloatArray &iPoint) const
 {
-    const FloatArray &point = {iPoint[0], iPoint[1]};
+    FloatArray point = {iPoint[0], iPoint[1]};
 
     oDist = std :: numeric_limits< double > :: max();
     int numSeg = this->giveNrVertices() - 1;

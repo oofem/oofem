@@ -127,8 +127,8 @@ public:
     // identification and auxiliary functions
     std::vector< std::vector<int> > vIindex;
     std::vector< std::vector<int> > svIndex;
-    int giveSymVI(int ind1, int ind2) {  return svIndex[ind1-1][ind2-1]; };
-    int giveVI(int ind1, int ind2) {  return this->vIindex[ind1-1][ind2-1]; };    
+    int giveSymVI(int ind1, int ind2) { return svIndex[ind1-1][ind2-1]; }
+    int giveVI(int ind1, int ind2) { return this->vIindex[ind1-1][ind2-1]; }    
       
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "StructuralMaterial"; }
@@ -302,6 +302,22 @@ public:
      */
     static void computePrincipalValDir(FloatArray &answer, FloatMatrix &dir, const FloatArray &s,
                                        stressStrainPrincMode mode);
+
+    /**
+     * Computes split of receiver into deviatoric and volumetric part.
+     * @param dev Deviatoric part.
+     * @param s Input vector
+     * @return Volumetric part (diagonal components divided by 3).
+     */
+    static double computeDeviatoricVolumetricSplit(FloatArray &dev, const FloatArray &s);
+
+    static double computeFirstInvariant(const FloatArray &s);
+    static double computeSecondStressInvariant(const FloatArray &s);
+    static double computeThirdStressInvariant(const FloatArray &s);
+
+    static double computeFirstCoordinate(const FloatArray &s);
+    static double computeSecondCoordinate(const FloatArray &s);
+    static double computeThirdCoordinate(const FloatArray &s);
 
     /**
      * Computes full 3d material stiffness matrix at given integration point, time, respecting load history

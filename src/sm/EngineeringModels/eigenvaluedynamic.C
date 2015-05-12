@@ -165,9 +165,9 @@ void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep)
         massMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
         massMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
 
-        this->assemble( *stiffnessMatrix, tStep, TangentStiffnessMatrix,
+        this->assemble( *stiffnessMatrix, tStep, TangentAssembler(TangentStiffness),
                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
-        this->assemble( *massMatrix, tStep, MassMatrix,
+        this->assemble( *massMatrix, tStep, MassMatrixAssembler(),
                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //
         // create resulting objects eigVec and eigVal
@@ -207,7 +207,7 @@ void EigenValueDynamic :: terminate(TimeStep *tStep)
     FILE *outputStream = this->giveOutputStream();
 
     // print loadcase header
-    fprintf(outputStream, "\nOutput for time % .3e \n\n", 1.0);
+    fprintf(outputStream, "\nOutput for time %.3e \n\n", 1.0);
     // print eigen values on output
     fprintf(outputStream, "\n\nEigen Values (Omega^2) are:\n-----------------\n");
 
@@ -221,7 +221,7 @@ void EigenValueDynamic :: terminate(TimeStep *tStep)
     fprintf(outputStream, "\n\n");
 
     for ( int i = 1; i <=  numberOfRequiredEigenValues; i++ ) {
-        fprintf(outputStream, "\nOutput for eigen value no.  % .3e \n", ( double ) i);
+        fprintf(outputStream, "\nOutput for eigen value no.  %.3e \n", ( double ) i);
         fprintf( outputStream,
                 "Printing eigen vector no. %d, corresponding eigen value is %15.8e\n\n",
                 i, eigVal.at(i) );

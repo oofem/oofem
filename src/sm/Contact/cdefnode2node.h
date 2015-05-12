@@ -78,8 +78,8 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual const char *giveClassName() const { return "ContactDefinitionNode2Node"; };
-    virtual const char *giveInputRecordName() const { return _IFT_ContactDefinitionNode2Node_Name; };
+    virtual const char *giveClassName() const { return "ContactDefinitionNode2Node"; }
+    virtual const char *giveInputRecordName() const { return _IFT_ContactDefinitionNode2Node_Name; }
  
 };
 
@@ -104,8 +104,8 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual const char *giveClassName() const { return "ContactDefinitionNode2NodeL"; };
-    virtual const char *giveInputRecordName() const { return _IFT_ContactDefinitionNode2NodeL_Name; };
+    virtual const char *giveClassName() const { return "ContactDefinitionNode2NodeL"; }
+    virtual const char *giveInputRecordName() const { return _IFT_ContactDefinitionNode2NodeL_Name; }
 
 };
 

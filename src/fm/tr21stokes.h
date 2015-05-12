@@ -39,7 +39,6 @@
 #include "nodalaveragingrecoverymodel.h"
 #include "zznodalrecoverymodel.h"
 #include "spatiallocalizer.h"
-#include "eleminterpmapperinterface.h"
 #include "matresponsemode.h"
 
 #define _IFT_Tr21Stokes_Name "tr21stokes"
@@ -58,8 +57,7 @@ class FEI2dTrQuad;
 class Tr21Stokes : public FMElement,
 public NodalAveragingRecoveryModelInterface,
 public ZZNodalRecoveryModelInterface,
-public SpatialLocalizerInterface,
-public EIPrimaryUnknownMapperInterface
+public SpatialLocalizerInterface
 {
 protected:
     /// Interpolation for pressure
@@ -110,9 +108,7 @@ public:
 
     virtual Interface *giveInterface(InterfaceType it);
 
-    // Element interpolation interface:
-    virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType u,
-                                                                       TimeStep *tStep, const FloatArray &coords, FloatArray &answer);
+    virtual void computeField(ValueModeType u, TimeStep *tStep, const FloatArray &coords, FloatArray &answer);
 
     // Nodal averaging interface:
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);

@@ -350,12 +350,16 @@ CohesiveSurface3d :: initializeFrom(InputRecord *ir)
     IRResultType result;
 
     // first call parent
-    StructuralElement :: initializeFrom(ir);
+    result = StructuralElement :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     // read the area from the input file
     IR_GIVE_FIELD(ir, area, _IFT_CohSur3d_area);
     if ( area < 0. ) {
-        OOFEM_ERROR("negative area specified");
+        OOFEM_WARNING("negative area specified");
+        return IRRT_BAD_FORMAT;
     }
 
     // read shift constants of second (periodic) particle form the input file (if defined)
@@ -367,11 +371,13 @@ CohesiveSurface3d :: initializeFrom(InputRecord *ir)
     // evaluate number of Dof Managers
     numberOfDofMans = dofManArray.giveSize();
     if ( numberOfDofMans <= 0 ) {
-        OOFEM_ERROR("unread nodes: Element %d", this->giveNumber() );
+        OOFEM_WARNING("unread nodes: Element %d", this->giveNumber() );
+        return IRRT_BAD_FORMAT;
     }
 
     if ( ( numberOfDofMans == 3 ) & ( kx == 0 ) & ( ky == 0 ) & ( kz == 0 ) ) {
-        OOFEM_ERROR("no periodic shift defined: Element %d", this->giveNumber() );
+        OOFEM_WARNING("no periodic shift defined: Element %d", this->giveNumber() );
+        return IRRT_BAD_FORMAT;
     }
 
 
@@ -387,10 +393,10 @@ CohesiveSurface3d :: initializeFrom(InputRecord *ir)
     // evaluate the length
     giveLength();
     if ( length <= 0. ) {
-        OOFEM_ERROR("negative length evaluated: Element %d", this->giveNumber() )
-
+        OOFEM_WARNING("negative length evaluated: Element %d", this->giveNumber() );
+        return IRRT_BAD_FORMAT;
         // evaluate the coordinates of the center
-        evaluateCenter();
+        evaluateCenter(); /// @todo This will never execute. Verify this / Mikael
     }
 
     // evaluate the local coordinate system

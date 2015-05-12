@@ -57,10 +57,6 @@ VariableCrossSection :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    // will read density and other inheritted parameters as constants
-    // NOTE: do not call SimpleCrossSection here (as the parameter names are same, but different type is used here!!!!)
-    this->CrossSection :: initializeFrom(ir);
-
     if ( ir->hasField(_IFT_SimpleCrossSection_thick) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, thicknessExpr, _IFT_SimpleCrossSection_thick);
     }
@@ -99,7 +95,9 @@ VariableCrossSection :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_OPTIONAL_FIELD(ir, this->materialNumber, _IFT_SimpleCrossSection_MaterialNumber);
 
-    return IRRT_OK;
+    // will read density and other inheritted parameters as constants
+    // NOTE: do not call SimpleCrossSection here (as the parameter names are same, but different type is used here!!!!)
+    return CrossSection :: initializeFrom(ir);
 }
 
 

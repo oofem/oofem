@@ -81,11 +81,7 @@ IntMatElastic :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, cons
 
     this->initTempStatus(gp);
 
-    answer.resize( jumpVector.giveSize() );
-
-    answer.at(1) = k*jumpVector.at(1);
-    answer.at(2) = k*jumpVector.at(2);
-    answer.at(3) = k*jumpVector.at(3);
+    answer.beScaled(k, jumpVector);
 
     status->letTempJumpBe(jumpVector);
     status->letTempFirstPKTractionBe(answer);
@@ -95,18 +91,9 @@ IntMatElastic :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, cons
 void
 IntMatElastic :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-	StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus(gp) );
-
-    FloatArray jumpVector;
-
-    jumpVector = status->giveTempJump();
-
     answer.resize(3, 3);
-    answer.zero();
-
-    answer.at(1, 1) = k;
-    answer.at(2, 2) = k;
-    answer.at(3, 3) = k;
+    answer.beUnitMatrix();
+    answer.times(k);
 }
 
 IRResultType
@@ -116,8 +103,7 @@ IntMatElastic :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, k, _IFT_IntMatElastic_kn);
 
-    StructuralInterfaceMaterial :: initializeFrom(ir);
-    return IRRT_OK;
+    return StructuralInterfaceMaterial :: initializeFrom(ir);
 }
 
 void IntMatElastic :: giveInputRecord(DynamicInputRecord &input)

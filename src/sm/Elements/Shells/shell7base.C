@@ -59,9 +59,8 @@ Shell7Base :: Shell7Base(int n, Domain *aDomain) : NLStructuralElement(n, aDomai
 
 IRResultType Shell7Base :: initializeFrom(InputRecord *ir)
 {
-    this->NLStructuralElement :: initializeFrom(ir);
-    return IRRT_OK;
-   
+    return NLStructuralElement :: initializeFrom(ir);
+
 }
 
 int 
@@ -504,15 +503,14 @@ Shell7Base :: computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, 
 {
     FloatMatrix A [ 3 ] [ 3 ], lambda[ 3 ], A_lambda(3,18), LB;
     FloatMatrix L(18,18), B;
-    FloatMatrix K, tempAnswer;
+    FloatMatrix tempAnswer;
 
     int ndofs = Shell7Base :: giveNumberOfDofs();
     answer.resize(ndofs, ndofs); tempAnswer.resize(ndofs, ndofs);
     answer.zero(); tempAnswer.zero();
 
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();     
-    FloatMatrix temp;
-    FloatArray genEpsI, genEpsJ, genEps;
+    FloatArray genEps;
 
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
         StructuralMaterial *mat = static_cast< StructuralMaterial* >( domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) ) );
@@ -555,7 +553,6 @@ Shell7Base :: computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, 
 void
 Shell7Base :: computeLinearizedStiffness(GaussPoint *gp, StructuralMaterial *mat, TimeStep *tStep, FloatMatrix A [ 3 ] [ 3 ]) 
 {
-    FloatArray Pcart;
     const FloatArray &lcoords = gp->giveNaturalCoordinates();
     FloatMatrix D;
 
@@ -809,7 +806,6 @@ Shell7Base :: computeSectionalForcesAt(FloatArray &sectionalForces, IntegrationP
     // \Lambda_i * P * G^I
     FloatArray PG1(3), PG2(3), PG3(3);
     FloatMatrix lambda[3], Gcon, P, PG;
-    FloatArray PVector, temp;
     this->computeStressMatrix(P, genEps, ip, mat, tStep);
 
     this->evalInitialContravarBaseVectorsAt(ip->giveNaturalCoordinates(), Gcon);
@@ -981,8 +977,7 @@ Shell7Base :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
     this->giveUpdatedSolutionVector(solVec, tStep);
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();     // conversion of data
 
-    FloatMatrix M11(18, 18), M12(18, 18), M13(18, 6), M22(18, 18), M23(18, 6), M33(6, 6), M(42,42);
-    M.zero();
+    FloatMatrix M(42,42);
 
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
         Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) );
@@ -1581,7 +1576,7 @@ Shell7Base :: giveGeneralizedStrainComponents(FloatArray genEps, FloatArray &dph
 
 
 void
-Shell7Base :: giveUnknownsAt(const FloatArray &lCoords, FloatArray &solVec, FloatArray &x, FloatArray &m, double gam, TimeStep *tStep)
+Shell7Base :: giveUnknownsAt(const FloatArray &lCoords, FloatArray &solVec, FloatArray &x, FloatArray &m, double &gam, TimeStep *tStep)
 {
     // returns the unknowns evaluated at a point (xi1, xi2, xi3)
     FloatMatrix N;
@@ -1591,7 +1586,6 @@ Shell7Base :: giveUnknownsAt(const FloatArray &lCoords, FloatArray &solVec, Floa
     x = { temp.at(1), temp.at(2), temp.at(3) };
     m = { temp.at(4), temp.at(5), temp.at(6) };
     gam = temp.at(7);
-
 }
 
 

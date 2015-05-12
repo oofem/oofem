@@ -110,10 +110,6 @@ public:
     virtual const char *giveClassName() const { return "DIIDynamic"; }
     virtual const char *giveInputRecordName() const { return _IFT_DIIDynamic_Name; }
     virtual fMode giveFormulation() { return TL; }
-    virtual int giveNumberOfTimeStepWhenIcApply() { return 0; }
-
-    virtual void giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
-                                                 CharType type, TimeStep *tStep, Domain *domain);
 
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
 

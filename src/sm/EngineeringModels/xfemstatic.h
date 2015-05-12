@@ -79,7 +79,7 @@ public:
     virtual void updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep);
 
     void setUpdateStructureFlag(bool flag) { updateStructureFlag = flag; }
-    bool needsStructureUpdate() { return updateStructureFlag; };
+    bool needsStructureUpdate() { return updateStructureFlag; }
 
     void buildDofMap();
     void setValsFromDofMap(FloatArray &oArray, const FloatArray &iArray);

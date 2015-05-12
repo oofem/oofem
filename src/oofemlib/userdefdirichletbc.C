@@ -132,9 +132,12 @@ UserDefDirichletBC :: initializeFrom(InputRecord *ir)
 // Sets up the dictionary where the receiver stores the conditions it
 // imposes.
 {
-    GeneralBoundaryCondition :: initializeFrom(ir);
-
     IRResultType result;                // Required by IR_GIVE_FIELD macro
+
+    result = GeneralBoundaryCondition :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     IR_GIVE_FIELD(ir, this->mFileName, _IFT_UserDefDirichletBC_filename);
 
@@ -146,9 +149,13 @@ UserDefDirichletBC :: initializeFrom(InputRecord *ir)
     if ( mpModule != NULL ) {
         // Load and call Python function
         mpFunc = PyObject_GetAttrString(mpModule, "giveUserDefBC");
+        if ( !mpFunc ) {
+            OOFEM_WARNING("Cannot find function 'giveUserDefBC' in file: %s", this->mFileName.c_str());
+            return IRRT_BAD_FORMAT;
+        }
     } else   {
-        printf( "this->mFileName.c_str(): %s\n", this->mFileName.c_str() );
-        OOFEM_ERROR("mpModule == NULL")
+        OOFEM_WARNING("Cannot find module in file: %s", this->mFileName.c_str());
+        return IRRT_BAD_FORMAT;
     }
 
     return IRRT_OK;

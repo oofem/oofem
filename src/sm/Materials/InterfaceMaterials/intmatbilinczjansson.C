@@ -525,7 +525,6 @@ const double tolerance = 1.0e-12; // small number
 IRResultType
 IntMatBilinearCZJansson :: initializeFrom(InputRecord *ir)
 {
-    //const char *__proc = "initializeFrom";  // Required by IR_GIVE_FIELD macro
     IRResultType result;                    // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, kn0, _IFT_IntMatBilinearCZJansson_kn);
@@ -546,26 +545,29 @@ IntMatBilinearCZJansson :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, gamma, _IFT_IntMatBilinearCZJansson_gamma);
 
-    this->checkConsistency();                                // check validity of the material paramters
-    this->printYourself();
+    // check validity of the material paramters
+    if ( this->kn0 < 0.0 ) {
+        OOFEM_WARNING("stiffness kn0 is negative (%.2e)", this->kn0);
+        return IRRT_BAD_FORMAT;
+    } else if ( this->ks0 < 0.0 ) {
+        OOFEM_WARNING("stiffness ks0 is negative (%.2e)", this->ks0);
+        return IRRT_BAD_FORMAT;
+    } else if ( this->GIc < 0.0 ) {
+        OOFEM_WARNING("GIc is negative (%.2e)", this->GIc);
+        return IRRT_BAD_FORMAT;
+    } else if ( this->GIIc < 0.0 ) {
+        OOFEM_WARNING("GIIc is negative (%.2e)", this->GIIc);
+        return IRRT_BAD_FORMAT;
+    } else if ( this->gamma < 0.0  ) { 
+        OOFEM_WARNING("gamma (%.2e) is below zero which is unphysical",  this->gamma);
+        return IRRT_BAD_FORMAT;
+    }
     return IRRT_OK;
 }
 
 int
 IntMatBilinearCZJansson :: checkConsistency()
 {
-    if ( this->kn0 < 0.0 ) {
-        OOFEM_ERROR("stiffness kn0 is negative (%.2e)", this->kn0);
-    } else if ( this->ks0 < 0.0 ) {
-        OOFEM_ERROR("stiffness ks0 is negative (%.2e)", this->ks0);
-    } else if ( this->GIc < 0.0 ) {
-        OOFEM_ERROR("GIc is negative (%.2e)", this->GIc);
-    } else if ( this->GIIc < 0.0 ) {
-        OOFEM_ERROR("GIIc is negative (%.2e)", this->GIIc);
-    } else if ( this->gamma < 0.0  ) { 
-        OOFEM_ERROR("gamma (%.2e) is below zero which is unphysical",
-            this->gamma);
-    }
     return 1;
 }
 

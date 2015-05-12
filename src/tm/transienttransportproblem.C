@@ -148,15 +148,15 @@ void TransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
 
         if ( lumped ) {
             capacityDiag.resize(neq);
-            this->assembleVector( capacityDiag, tStep, LumpedMassMatrix, VM_Total, EModelDefaultEquationNumbering(), d );
+            this->assembleVector( capacityDiag, tStep, LumpedMassVectorAssembler(), VM_Total, EModelDefaultEquationNumbering(), d );
         } else {
             capacityMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
             capacityMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
-            this->assemble( *capacityMatrix, tStep, CapacityMatrix, EModelDefaultEquationNumbering(), d );
+            this->assemble( *capacityMatrix, tStep, MassMatrixAssembler(), EModelDefaultEquationNumbering(), d );
         }
         
         if ( this->keepTangent ) {
-            this->assemble( *effectiveMatrix, tStep, TangentStiffnessMatrix,
+            this->assemble( *effectiveMatrix, tStep, TangentAssembler(TangentStiffness),
                            EModelDefaultEquationNumbering(), d );
             effectiveMatrix->times(alpha);
             if ( lumped ) {
@@ -171,7 +171,7 @@ void TransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_INFO("Assembling external forces\n");
     FloatArray externalForces(neq);
     externalForces.zero();
-    this->assembleVector( externalForces, tStep, ExternalForcesVector, VM_Total, EModelDefaultEquationNumbering(), d );
+    this->assembleVector( externalForces, tStep, ExternalForceAssembler(), VM_Total, EModelDefaultEquationNumbering(), d );
     this->updateSharedDofManagers(externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
 
     // set-up numerical method
@@ -218,7 +218,7 @@ TransientTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn
     if ( cmpn == InternalRhs ) {
         // F_eff = F(T^(k)) + C * dT/dt^(k)
         this->internalForces.zero();
-        this->assembleVector(this->internalForces, tStep, InternalForcesVector, VM_Total,
+        this->assembleVector(this->internalForces, tStep, InternalForceAssembler(), VM_Total,
                              EModelDefaultEquationNumbering(), this->giveDomain(1), & this->eNorm);
         this->updateSharedDofManagers(this->internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
 
@@ -233,7 +233,7 @@ TransientTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn
             }
         } else {
             FloatArray tmp;
-            this->assembleVector(this->internalForces, tStep, InertiaForcesVector, VM_Total,
+            this->assembleVector(this->internalForces, tStep, InertiaForceAssembler(), VM_Total,
                                 EModelDefaultEquationNumbering(), this->giveDomain(1), & tmp);
             this->eNorm.add(tmp); ///@todo Fix this, assembleVector shouldn't zero eNorm inside the functions. / Mikael
         }
@@ -242,7 +242,7 @@ TransientTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn
         // K_eff = (a*K + C/dt)
         if ( !this->keepTangent ) {
             this->effectiveMatrix->zero();
-            this->assemble( *effectiveMatrix, tStep, TangentStiffnessMatrix,
+            this->assemble( *effectiveMatrix, tStep, TangentAssembler(TangentStiffness),
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
             effectiveMatrix->times(alpha);
             if ( lumped ) {

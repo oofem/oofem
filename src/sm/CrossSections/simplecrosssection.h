@@ -151,8 +151,8 @@ public:
     virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep);
     virtual Material *giveMaterial(IntegrationPoint *ip);
 
-    int giveMaterialNumber() const { return this->materialNumber; };
-    void setMaterialNumber(int matNum) { this->materialNumber = matNum; };
+    int giveMaterialNumber() const { return this->materialNumber; }
+    void setMaterialNumber(int matNum) { this->materialNumber = matNum; }
     virtual int checkConsistency();
     virtual Interface *giveMaterialInterface(InterfaceType t, IntegrationPoint *ip);
 

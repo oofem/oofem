@@ -79,7 +79,7 @@ FluidDynamicMaterialStatus :: printOutputAt(FILE *File, TimeStep *tStep)
 {
     fprintf(File, "\n deviatoric stresses");
     for ( double e: deviatoricStressVector ) {
-        fprintf( File, " % .4e", e );
+        fprintf( File, " %.4e", e );
     }
 
     fprintf(File, "\n");

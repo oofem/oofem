@@ -18,15 +18,14 @@
 namespace oofem {
 REGISTER_EnrichmentFront(EnrFrontCohesiveBranchFuncOneEl)
 
-EnrFrontCohesiveBranchFuncOneEl::EnrFrontCohesiveBranchFuncOneEl() {
+EnrFrontCohesiveBranchFuncOneEl::EnrFrontCohesiveBranchFuncOneEl()
+{
     mpBranchFunc = new CohesiveBranchFunction();
 }
 
-EnrFrontCohesiveBranchFuncOneEl::~EnrFrontCohesiveBranchFuncOneEl() {
-    if ( mpBranchFunc != NULL ) {
-        delete mpBranchFunc;
-        mpBranchFunc = NULL;
-    }
+EnrFrontCohesiveBranchFuncOneEl::~EnrFrontCohesiveBranchFuncOneEl()
+{
+    delete mpBranchFunc;
 }
 
 

@@ -58,7 +58,6 @@ FEI2dQuadLin Quad1PlaneStrain :: interp(1, 2);
 Quad1PlaneStrain :: Quad1PlaneStrain(int n, Domain *aDomain) :
     PlaneStrainElement(n, aDomain), ZZNodalRecoveryModelInterface(this), SPRNodalRecoveryModelInterface(),
     SpatialLocalizerInterface(this),
-    EIPrimaryUnknownMapperInterface(),
     HuertaErrorEstimatorInterface()
 {
     numberOfDofMans  = 4;
@@ -153,7 +152,7 @@ IRResultType
 Quad1PlaneStrain :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 4;
-    IRResultType result = this->NLStructuralElement :: initializeFrom(ir);
+    IRResultType result = NLStructuralElement :: initializeFrom(ir);
     if ( result != IRRT_OK ) {
         return result;
     }
@@ -179,8 +178,6 @@ Quad1PlaneStrain :: giveInterface(InterfaceType interface)
         return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
         return static_cast< SpatialLocalizerInterface * >(this);
-    } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
         return static_cast< HuertaErrorEstimatorInterface * >(this);
     }
@@ -643,19 +640,6 @@ SPRPatchType
 Quad1PlaneStrain :: SPRNodalRecoveryMI_givePatchType()
 {
     return SPRPatchType_2dxy;
-}
-
-
-void
-Quad1PlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-                                                                     TimeStep *tStep, const FloatArray &lcoords,
-                                                                     FloatArray &answer)
-{
-    FloatArray u;
-    FloatMatrix n;
-    this->computeNmatrixAt(lcoords, n);
-    this->computeVectorOf(mode, tStep, u);
-    answer.beProductOf(n, u);
 }
 
 } // end namespace oofem

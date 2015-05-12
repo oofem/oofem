@@ -442,8 +442,6 @@ SimpleCrossSection :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     double value;
 
-    this->CrossSection :: initializeFrom(ir);
-
     double thick = 0.0;
     if ( ir->hasField(_IFT_SimpleCrossSection_thick) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, thick, _IFT_SimpleCrossSection_thick);
@@ -500,7 +498,7 @@ SimpleCrossSection :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_OPTIONAL_FIELD(ir, this->materialNumber, _IFT_SimpleCrossSection_MaterialNumber);
 
-    return IRRT_OK;
+    return CrossSection :: initializeFrom(ir);
 }
 
 

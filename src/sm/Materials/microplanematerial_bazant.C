@@ -57,7 +57,6 @@ MicroplaneMaterial_Bazant :: giveRealStressVector(FloatArray &answer,
 
     Microplane *mPlane;
     FloatArray mPlaneStressCmpns, mPlaneStrainCmpns;
-    FloatArray stressIncrement;
 
     answer.resize(6);
     answer.zero();
@@ -144,10 +143,10 @@ MicroplaneMaterial_Bazant :: giveRealStressVector(FloatArray &answer,
     status->letTempStrainVectorBe(totalStrain);
 
     // uncomment this
-    // stressIncrement = answer;
+    // FloatArray stressIncrement = answer;
     // crossSection->giveReducedCharacteristicVector(stressIncrement, gp, answer);
-    // stressIncrement.subtract (status -> giveStressVector());
-    // status -> letStressIncrementVectorBe (stressIncrement);
+    // stressIncrement.subtract(status->giveStressVector());
+    // status->letStressIncrementVectorBe(stressIncrement);
     status->letTempStressVectorBe(answer);
 }
 } // end namespace oofem

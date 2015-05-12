@@ -64,24 +64,32 @@ IRResultType
 TR_SHELL01 :: initializeFrom(InputRecord *ir)
 {
     // proc tady neni return = this...   ??? termitovo
-    this->StructuralElement :: initializeFrom(ir);
+    IRResultType result = StructuralElement :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
-    /*
-     * IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_Element_nip);
-     * if ( val != -1 ) {
-     *  OOFEM_ERROR("key word NIP is not allowed for element TR_SHELL01");
-     * }
-     *
-     *
-     * IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_TrPlaneStrRot_niprot, "niprot");
-     * if ( val != -1 ) {
-     *  OOFEM_ERROR("key word NIProt is not allowed for element TR_SHELL01");
-     * }
-     */
+#if 0
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_Element_nip);
+    if ( val != -1 ) {
+        OOFEM_WARNING("key word NIP is not allowed for element TR_SHELL01");
+        return result;
+    }
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_TrPlaneStrRot_niprot, "niprot");
+    if ( val != -1 ) {
+        OOFEM_WARNING("key word NIProt is not allowed for element TR_SHELL01");
+        return result;
+    }
+#endif
 
-    //
-    plate->initializeFrom(ir);
-    membrane->initializeFrom(ir);
+    result = plate->initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+    result = membrane->initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     return IRRT_OK;
 }
@@ -274,7 +282,7 @@ TR_SHELL01 :: printOutputAt(FILE *file, TimeStep *tStep)
         fprintf(file, "  strains    ");
         // eps_x, eps_y, eps_z, eps_yz, eps_xz, eps_xy (global)
         fprintf( file,
-                " % .4e % .4e % .4e % .4e % .4e % .4e ",
+                " %.4e %.4e %.4e %.4e %.4e %.4e ",
                 v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
 
         plate->giveIPValue(v, gp, IST_ShellCurvatureTensor, tStep);
@@ -284,7 +292,7 @@ TR_SHELL01 :: printOutputAt(FILE *file, TimeStep *tStep)
         fprintf(file, "\n              curvatures ");
         // k_x, k_y, k_z, k_yz, k_xz, k_xy (global)
         fprintf( file,
-                " % .4e % .4e % .4e % .4e % .4e % .4e ",
+                " %.4e %.4e %.4e %.4e %.4e %.4e ",
                 v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
 
         // Forces - Moments
@@ -295,7 +303,7 @@ TR_SHELL01 :: printOutputAt(FILE *file, TimeStep *tStep)
         fprintf(file, "\n              stresses   ");
         // n_x, n_y, n_z, v_yz, v_xz, v_xy (global)
         fprintf( file,
-                " % .4e % .4e % .4e % .4e % .4e % .4e ",
+                " %.4e %.4e %.4e %.4e %.4e %.4e ",
                 v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
 
         plate->giveIPValue(v, gp, IST_ShellMomentumTensor, tStep);
@@ -305,7 +313,7 @@ TR_SHELL01 :: printOutputAt(FILE *file, TimeStep *tStep)
         fprintf(file, "\n              moments    ");
         // m_x, m_y, m_z, m_yz, m_xz, m_xy (global)
         fprintf( file,
-                " % .4e % .4e % .4e % .4e % .4e % .4e ",
+                " %.4e %.4e %.4e %.4e %.4e %.4e ",
                 v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
 
         fprintf(file, "\n");

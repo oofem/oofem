@@ -1090,7 +1090,6 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
     IntArray *connectivity, boundary(1);
     int startNode, endNode, inode, m, pos, nd, bc, dofs;
     Node *node;
-    std :: string str;
 
     if ( nodeId != 0 ) {
         startNode = endNode = nodeId;
@@ -1254,7 +1253,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
                                 }
                             } else {
                                 if ( sideNumBc != 0 ) {
-                                    IntArray bcs, dofids;
+                                    IntArray bcs;
 
                                     // I rely on the fact that bc dofs to be reproduced are ordered with respect to the dof ordering of the corner node
 
@@ -1505,7 +1504,6 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
     IntArray *connectivity, boundary(2);
     int startNode, endNode, inode, n, m, pos, nd, bc, dofs;
     Node *node;
-    std :: string str;
 
     if ( nodeId != 0 ) {
         startNode = endNode = nodeId;
@@ -2060,7 +2058,6 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
     IntArray *connectivity, boundary(3);
     int startNode, endNode, inode, k, n, m, pos, nd, bc, dofs;
     Node *node;
-    std :: string str;
 
     if ( nodeId != 0 ) {
         startNode = endNode = nodeId;
@@ -3063,7 +3060,7 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
         eNorm = uNorm = 0.0;
         for ( ielem = 1; ielem <= localElemId; ielem++ ) {
             element = refinedDomain->giveElement(ielem);
-            refinedProblem->giveElementCharacteristicMatrix(mat, ielem, STIFFNESS_TYPE, refinedTStep, refinedDomain);
+            element->giveCharacteristicMatrix(mat, STIFFNESS_TYPE, refinedTStep);
 
             this->extractVectorFrom(element, elementError, elementVector, dofs, refinedTStep);
             this->extractVectorFrom(element, patchError, patchVector, dofs, refinedTStep);
@@ -3822,7 +3819,7 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
             }
 
             element = refinedDomain->giveElement(ielem);
-            refinedProblem->giveElementCharacteristicMatrix(mat, ielem, STIFFNESS_TYPE, refinedTStep, refinedDomain);
+            element->giveCharacteristicMatrix(mat, STIFFNESS_TYPE, refinedTStep);
 
             this->extractVectorFrom(element, errorSolution, errorVector, dofs, refinedTStep);
             tmpVector.beProductOf(mat, errorVector);
@@ -3909,7 +3906,6 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
 {
     char line [ 1024 ];
     EngngModel *problem = this->domain->giveEngngModel();
-    std :: string str;
     int i, nmstep, nsteps = 0;
     int ddfunc = 0, ddmSize = 0, ddvSize = 0, hpcSize = 0, hpcwSize = 0, renumber = 1;
     int controlMode = 0, hpcMode = 0, stiffMode = 0, maxIter = 30, reqIter = 3, manrmsteps = 0;

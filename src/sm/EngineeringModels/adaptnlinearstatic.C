@@ -91,7 +91,6 @@ AdaptiveNonLinearStatic :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     int _val;
 
-    NonLinearStatic :: initializeFrom(ir);
     int meshPackageId = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, meshPackageId, _IFT_AdaptiveNonLinearStatic_meshpackage);
     meshPackage = ( MeshPackageType ) meshPackageId;
@@ -102,7 +101,7 @@ AdaptiveNonLinearStatic :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_AdaptiveNonLinearStatic_preMappingLoadBalancingFlag);
     preMappingLoadBalancingFlag = _val > 0;
 
-    return IRRT_OK;
+    return NonLinearStatic :: initializeFrom(ir);
 }
 
 void
@@ -357,7 +356,7 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
 
             stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
             stiffnessMatrix->zero(); // zero stiffness matrix
-            this->assemble( *stiffnessMatrix, this->giveCurrentStep(), SecantStiffnessMatrix,
+            this->assemble( *stiffnessMatrix, this->giveCurrentStep(), TangentAssembler(SecantStiffness),
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
             initFlag = 0;
         }
@@ -675,7 +674,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
 
             stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
             stiffnessMatrix->zero(); // zero stiffness matrix
-            this->assemble( *stiffnessMatrix, this->giveCurrentStep(), SecantStiffnessMatrix,
+            this->assemble( *stiffnessMatrix, this->giveCurrentStep(), TangentAssembler(SecantStiffness),
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
             initFlag = 0;
         }

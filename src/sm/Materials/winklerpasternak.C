@@ -53,13 +53,10 @@ WinklerPasternakMaterial :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    StructuralMaterial :: initializeFrom(ir);
-    // we use rather object's member data than to store data into slow
-    // key-val dictionary with lot of memory allocations
-
     IR_GIVE_FIELD(ir, c1, _IFT_WinklerPasternakMaterial_C1);
     IR_GIVE_FIELD(ir, c2, _IFT_WinklerPasternakMaterial_C2);
-    return IRRT_OK;
+
+    return StructuralMaterial :: initializeFrom(ir);
 }
 
 
@@ -76,15 +73,14 @@ WinklerPasternakMaterial :: giveInputRecord(DynamicInputRecord &input)
 void 
 WinklerPasternakMaterial::giveRealStressVector_2dPlateSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
 {
-  FloatMatrix tangent;
-  this->give2dPlateSubSoilStiffMtrx(tangent, ElasticStiffness, gp, tStep);
-  answer.beProductOf(tangent, reducedE);
+    FloatMatrix tangent;
+    this->give2dPlateSubSoilStiffMtrx(tangent, ElasticStiffness, gp, tStep);
+    answer.beProductOf(tangent, reducedE);
 
-  StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-  status->letTempStrainVectorBe(reducedE);
-  status->letTempStressVectorBe(answer);
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+    status->letTempStrainVectorBe(reducedE);
+    status->letTempStressVectorBe(answer);
 }
-
 
 
 void

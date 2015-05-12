@@ -66,7 +66,7 @@ extern "C" {
 
 namespace oofem {
 
-bool FloatArray ::isFinite() const
+bool FloatArray :: isFinite() const
 {
     for(double val : values) {
         if(!std::isfinite(val)) {
@@ -752,7 +752,7 @@ void FloatArray :: printYourself() const
 }
 
 
-void FloatArray :: printYourself(const std::string name) const
+void FloatArray :: printYourself(const std::string &name) const
 // Prints the receiver on screen.
 {
     printf("%s (%d): \n", name.c_str(), this->giveSize());

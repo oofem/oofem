@@ -79,7 +79,8 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    EngngModel :: initializeFrom(ir);
+    result = EngngModel :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     int val = SMT_Skyline;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
@@ -163,7 +164,7 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
         conductivityMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
         if ( this->keepTangent ) {
             this->conductivityMatrix->zero();
-            this->assemble( *conductivityMatrix, tStep, TangentStiffnessMatrix,
+            this->assemble( *conductivityMatrix, tStep, TangentAssembler(TangentStiffness),
                             EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
     }
@@ -175,7 +176,7 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 #endif
     FloatArray externalForces(neq);
     externalForces.zero();
-    this->assembleVector( externalForces, tStep, ExternalForcesVector, VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVector( externalForces, tStep, ExternalForceAssembler(), VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
     this->updateSharedDofManagers(externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
 
     // set-up numerical method
@@ -214,7 +215,7 @@ StationaryTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmp
 {
     if ( cmpn == InternalRhs ) {
         this->internalForces.zero();
-        this->assembleVector(this->internalForces, tStep, InternalForcesVector, VM_Total,
+        this->assembleVector(this->internalForces, tStep, InternalForceAssembler(), VM_Total,
                              EModelDefaultEquationNumbering(), this->giveDomain(1), & this->eNorm);
         this->updateSharedDofManagers(this->internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
         return;
@@ -222,7 +223,7 @@ StationaryTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmp
         if ( !this->keepTangent ) {
             // Optimization for linear problems, we can keep the old matrix (which could save its factorization)
             this->conductivityMatrix->zero();
-            this->assemble( *conductivityMatrix, tStep, TangentStiffnessMatrix,
+            this->assemble( *conductivityMatrix, tStep, TangentAssembler(TangentStiffness),
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
         return;

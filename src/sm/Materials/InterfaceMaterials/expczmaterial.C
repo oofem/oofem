@@ -443,17 +443,17 @@ ExpCZMaterial :: initializeFrom(InputRecord *ir)
     this->q = GIIc / GIc;
     this->r = 0.0; // fix
 
-    //this->checkConsistency();                                // check validity of the material paramters
-    this->printYourself();
+    // check validity of the material paramters
+    if ( this->GIc < 0.0 ) {
+        OOFEM_WARNING("GIc is negative (%.2e)", this->GIc);
+        return IRRT_BAD_FORMAT;
+    }
     return IRRT_OK;
 }
 
 int
 ExpCZMaterial :: checkConsistency()
 {
-    if ( this->GIc < 0.0 ) {
-        OOFEM_ERROR("GIc is negative (%.2e)", this->GIc);
-    }
     return 1;
 }
 

@@ -78,7 +78,6 @@ public:
 
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
-    virtual double giveCharacteristicValue(CharType type, TimeStep *tStep);
     virtual void updateStabilizationCoeffs(TimeStep *tStep) { }
     virtual void updateElementForNewInterfacePosition(TimeStep *tStep) { }
 

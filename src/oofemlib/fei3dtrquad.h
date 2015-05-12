@@ -77,7 +77,7 @@ public:
                                                   const FEICellGeometry &cellgeo);
     virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge);
 
-    virtual int giveNumberOfEdges() const { return 3; };
+    virtual int giveNumberOfEdges() const { return 3; }
 
     // Surface
     virtual void surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo);

@@ -70,7 +70,10 @@ WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;
 
-    ActiveBoundaryCondition :: initializeFrom(ir);     ///@todo Carl, remove this line and use elementsidespositive/negative instead.
+    result = ActiveBoundaryCondition :: initializeFrom(ir);     ///@todo Carl, remove this line and use elementsidespositive/negative instead.
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     orderOfPolygon = 2;
     IR_GIVE_OPTIONAL_FIELD(ir, orderOfPolygon, _IFT_WeakPeriodicBoundaryCondition_order);
@@ -85,7 +88,8 @@ WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
     ngp = -1;        // Pressure as default
     IR_GIVE_OPTIONAL_FIELD(ir, ngp, _IFT_WeakPeriodicBoundaryCondition_ngp);
     if ( ngp != -1 ) {
-        OOFEM_ERROR("ngp isn't being used anymore! see how the interpolator constructs the integration rule automatically.");
+        OOFEM_WARNING("ngp isn't being used anymore! see how the interpolator constructs the integration rule automatically.");
+        return IRRT_BAD_FORMAT;
     }
 
     IntArray temp;
@@ -434,7 +438,6 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx &answer, TimeStep *tSt
     gammaDman->giveLocationArray(gamma_ids, c_loc, c_s);
 
     FloatMatrix B, BT;
-    FloatArray gcoords, normal;
     int normalSign, dofCountOnBoundary;
 
     updateSminmax();
@@ -561,7 +564,6 @@ void WeakPeriodicBoundaryCondition :: assembleVector(FloatArray &answer, TimeSte
 
     FloatMatrix B;
 
-    FloatArray gcoords, normal;
     int normalSign, dofCountOnBoundary;
 
     updateSminmax();
@@ -574,7 +576,7 @@ void WeakPeriodicBoundaryCondition :: assembleVector(FloatArray &answer, TimeSte
             Element *thisElement = this->domain->giveElement( element [ thisSide ].at(ielement) );
 
             // Find dofs for this element which should be periodic
-            IntArray bNodes, nodeDofIDMask, periodicDofIDMask, nodalArray;
+            IntArray bNodes, periodicDofIDMask, nodalArray;
             periodicDofIDMask.resize(1);
             periodicDofIDMask.at(1) = dofid;
 

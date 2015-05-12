@@ -60,7 +60,7 @@ public:
      */
     NonlocalBarrier(int n, Domain * aDomain);
     /// Destructor.
-    virtual ~NonlocalBarrier() { };
+    virtual ~NonlocalBarrier() { }
 
     /*
      * Abstract method returning true if the barrier is activated

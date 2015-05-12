@@ -87,16 +87,7 @@ IRResultType
 QBrick1_ht :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 27;
-    IRResultType result = this->TransportElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    if ( ( numberOfGaussPoints != 8 ) && ( numberOfGaussPoints != 27 ) && ( numberOfGaussPoints != 64 ) ) {
-        numberOfGaussPoints = 27;
-    }
-
-    return IRRT_OK;
+    return TransportElement :: initializeFrom(ir);
 }
 
 

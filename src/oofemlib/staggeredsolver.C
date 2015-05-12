@@ -61,7 +61,10 @@ StaggeredSolver :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    NRSolver ::initializeFrom(ir);
+    result = NRSolver ::initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     IR_GIVE_FIELD(ir, this->totalIdList, _IFT_StaggeredSolver_DofIdList);
     IR_GIVE_FIELD(ir, this->idPos, _IFT_StaggeredSolver_DofIdListPositions);
@@ -119,7 +122,7 @@ StaggeredSolver :: instanciateYourself()
 void
 StaggeredSolver :: giveTotalLocationArray(IntArray &condensedLocationArray, const UnknownNumberingScheme &s, Domain *d)
 {
-    IntArray masterDofIDs, nodalArray, ids, locationArray;
+    IntArray nodalArray, ids, locationArray;
     locationArray.clear();
     
     for ( auto &dman : d->giveDofManagers() ) {

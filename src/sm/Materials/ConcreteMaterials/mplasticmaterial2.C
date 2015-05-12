@@ -109,12 +109,8 @@ MPlasticMaterial2 :: giveRealStressVector(FloatArray &answer,
 {
     FloatArray strainSpaceHardeningVariables;
     FloatArray fullStressVector;
-    FloatArray strainIncrement, elasticStrainVectorR;
     FloatArray strainVectorR, plasticStrainVectorR;
-    FloatArray helpVec, helpVec2;
-    FloatMatrix elasticModuli, hardeningModuli, consistentModuli;
-    FloatMatrix elasticModuliInverse, hardeningModuliInverse;
-    FloatMatrix helpMtrx, helpMtrx2;
+    FloatArray helpVec;
     IntArray activeConditionMap(this->nsurf);
     FloatArray gamma;
 
@@ -200,12 +196,12 @@ MPlasticMaterial2 :: closestPointReturn(FloatArray &answer,
                                         TimeStep *tStep)
 {
     FloatArray fullStressVector;
-    FloatArray strainIncrement, elasticStrainVectorR;
-    FloatArray fullStressSpaceHardeningVars, residualVectorR, gradientVectorR;
+    FloatArray elasticStrainVectorR;
+    FloatArray residualVectorR;
     FloatArray helpVector, helpVector2;
     FloatArray dgamma, dgammared, tempGamma, dkappa;
-    FloatMatrix elasticModuli, hardeningModuli, consistentModuli;
-    FloatMatrix elasticModuliInverse, hardeningModuliInverse;
+    FloatMatrix elasticModuli, consistentModuli;
+    FloatMatrix elasticModuliInverse;
     FloatMatrix helpMtrx, helpMtrx2;
     FloatMatrix ks, kl, lmat, rmat, gradientMatrix;
     FloatMatrix gmat;
@@ -849,8 +845,7 @@ MPlasticMaterial2 :: cuttingPlaneReturn(FloatArray &answer,
 {
     FloatArray elasticStrainVectorR;
     FloatArray fullStressVector;
-    FloatArray fSigmaGradientVectorR, gGradientVectorR, helpVector, helpVector2, rhs, dkappa;
-    FloatArray di, dj;
+    FloatArray helpVector, helpVector2, rhs, dkappa;
     FloatMatrix elasticModuli, helpMtrx, helpMtrx2, gmat;
     FloatMatrix kl, ks, lmat, rmat;
     IntArray initialConditionMap;
@@ -1357,7 +1352,7 @@ MPlasticMaterial2 :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     //
 
     FloatMatrix consistentModuli, elasticModuli, umat, vmat;
-    FloatMatrix consistentModuliInverse, elasticModuliInverse, kl, ks;
+    FloatMatrix elasticModuliInverse, kl, ks;
     FloatMatrix gradientMatrix, gmat, gmatInv, gradMat, helpMtrx, helpMtrx2, answerR;
     FloatArray gradientVector, stressVector, fullStressVector;
     FloatArray strainSpaceHardeningVariables, helpVector;
@@ -1512,9 +1507,9 @@ MPlasticMaterial2 :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
     // described by temp variables.
     //
 
-    FloatMatrix dmat, elasticModuli, umat, vmat;
+    FloatMatrix elasticModuli, umat, vmat;
     FloatMatrix gmat, gmatInv, helpMtrx, helpMtrx2, kl, ks;
-    FloatArray gradientVector, stressVector, fullStressVector;
+    FloatArray stressVector, fullStressVector;
     FloatArray strainSpaceHardeningVariables, helpVector, helpVector2;
     std :: vector< FloatArray > yieldGradSigVec(this->nsurf), loadGradSigVec(this->nsurf), * loadGradSigVecPtr;
     std :: vector< FloatArray > yieldGradKVec(this->nsurf), loadGradKVec(this->nsurf);
@@ -2098,7 +2093,6 @@ MPlasticMaterial2Status :: ~MPlasticMaterial2Status()
 void
 MPlasticMaterial2Status :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-    int n;
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");
     if ( ( state_flag == MPlasticMaterial2Status :: PM_Yielding ) || ( state_flag == MPlasticMaterial2Status :: PM_Unloading ) ) {
@@ -2108,23 +2102,21 @@ MPlasticMaterial2Status :: printOutputAt(FILE *file, TimeStep *tStep)
             fprintf(file, " Unloading,");
         }
 
-        n = plasticStrainVector.giveSize();
         fprintf(file, " Plastic strains");
-        for ( int i = 1; i <= n; i++ ) {
-            fprintf( file, " % .4e", plasticStrainVector.at(i) );
+        for ( auto &val : plasticStrainVector ) {
+            fprintf( file, " %.4e", val );
         }
 
         if ( strainSpaceHardeningVarsVector.giveSize() ) {
-            n = strainSpaceHardeningVarsVector.giveSize();
             fprintf(file, " Strain space hardening vars");
-            for ( int i = 1; i <= n; i++ ) {
-                fprintf( file, " % .4e", strainSpaceHardeningVarsVector.at(i) );
+            for ( auto &val : strainSpaceHardeningVarsVector ) {
+                fprintf( file, " %.4e", val );
             }
         }
 
         fprintf(file, " ActiveConditionMap");
-        for ( int i = 1; i <= activeConditionMap.giveSize(); i++ ) {
-            fprintf( file, " %d", activeConditionMap.at(i) );
+        for ( auto &val : activeConditionMap ) {
+            fprintf( file, " %d", val );
         }
     }
 

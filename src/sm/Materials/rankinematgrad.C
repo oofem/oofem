@@ -303,8 +303,6 @@ RankineMatGrad :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                             // Required by IR_GIVE_FIELD macro
 
-    RankineMat :: initializeFrom(ir);
-
     IR_GIVE_FIELD(ir, L, _IFT_RankineMatGrad_L);
     if ( L < 0.0 ) {
         L = 0.0;
@@ -316,7 +314,7 @@ RankineMatGrad :: initializeFrom(InputRecord *ir)
     negligible_damage = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, negligible_damage, _IFT_RankineMatGrad_negligibleDamage);
 
-    return IRRT_OK;
+    return RankineMat :: initializeFrom(ir);
 }
 
 

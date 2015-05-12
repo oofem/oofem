@@ -86,7 +86,7 @@ public:
 
     virtual double LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep);
     virtual void LS_PCS_computedN(FloatMatrix &answer);
-    virtual double LS_PCS_computeVolume() { return 0.0; };
+    virtual double LS_PCS_computeVolume() { return 0.0; }
     virtual double LS_PCS_computeS(LevelSetPCS *ls, TimeStep *tStep);
     virtual void LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi);
 

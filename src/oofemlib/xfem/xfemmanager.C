@@ -140,7 +140,7 @@ IRResultType XfemManager :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, mNumTriRef, _IFT_XfemManager_numberOfTriRefs);
 
     IR_GIVE_OPTIONAL_FIELD(ir, mEnrDofScaleFac, _IFT_XfemManager_enrDofScaleFac);
-    printf("mEnrDofScaleFac: %e\n", mEnrDofScaleFac );
+    //printf("mEnrDofScaleFac: %e\n", mEnrDofScaleFac );
 
     IR_GIVE_OPTIONAL_FIELD(ir, doVTKExport, _IFT_XfemManager_VTKExport);
     if ( doVTKExport ) {

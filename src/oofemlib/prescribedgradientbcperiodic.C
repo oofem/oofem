@@ -181,10 +181,10 @@ void PrescribedGradientBCPeriodic :: computeField(FloatArray &sigma, TimeStep *t
     // sigma = residual (since we use the slave dofs) = f_ext - f_int
     sig_tmp.resize(npeq);
     sig_tmp.zero();
-    emodel->assembleVector(sig_tmp, tStep, InternalForcesVector, VM_Total, pnum, this->domain);
+    emodel->assembleVector(sig_tmp, tStep, InternalForceAssembler(), VM_Total, pnum, this->domain);
     tmp.resize(npeq);
     tmp.zero();
-    emodel->assembleVector(tmp, tStep, ExternalForcesVector, VM_Total, pnum, this->domain);
+    emodel->assembleVector(tmp, tStep, ExternalForceAssembler(), VM_Total, pnum, this->domain);
     sig_tmp.subtract(tmp);
     // Divide by the RVE-volume
     sig_tmp.times(1.0 / ( this->domainSize(this->giveDomain(), this->set) + this->domainSize(this->giveDomain(), this->masterSet) ));
@@ -217,9 +217,9 @@ void PrescribedGradientBCPeriodic :: computeTangent(FloatMatrix &E, TimeStep *tS
     Kff->buildInternalStructure(rve, this->domain->giveNumber(), fnum);
     Kfp->buildInternalStructure(rve, this->domain->giveNumber(), fnum, pnum);
     Kpp->buildInternalStructure(rve, this->domain->giveNumber(), pnum);
-    rve->assemble(*Kff, tStep, TangentStiffnessMatrix, fnum, this->domain);
-    rve->assemble(*Kfp, tStep, TangentStiffnessMatrix, fnum, pnum, this->domain);
-    rve->assemble(*Kpp, tStep, TangentStiffnessMatrix, pnum, this->domain);
+    rve->assemble(*Kff, tStep, TangentAssembler(TangentStiffness), fnum, this->domain);
+    rve->assemble(*Kfp, tStep, TangentAssembler(TangentStiffness), fnum, pnum, this->domain);
+    rve->assemble(*Kpp, tStep, TangentAssembler(TangentStiffness), pnum, this->domain);
 
     int neq = Kfp->giveNumberOfRows();
     int nsd = this->domain->giveNumberOfSpatialDimensions();

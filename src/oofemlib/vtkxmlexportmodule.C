@@ -100,8 +100,6 @@ VTKXMLExportModule :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     int val;
 
-    ExportModule :: initializeFrom(ir);
-
     IR_GIVE_OPTIONAL_FIELD(ir, cellVarsToExport, _IFT_VTKXMLExportModule_cellvars); // Macro - see internalstatetype.h
     IR_GIVE_OPTIONAL_FIELD(ir, internalVarsToExport, _IFT_VTKXMLExportModule_vars); // Macro - see internalstatetype.h
     IR_GIVE_OPTIONAL_FIELD(ir, primaryVarsToExport, _IFT_VTKXMLExportModule_primvars); // Macro - see unknowntype.h
@@ -116,7 +114,8 @@ VTKXMLExportModule :: initializeFrom(InputRecord *ir)
     
     regionSets.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, regionSets, _IFT_VTKXMLExportModule_regionsets); // Macro
-    return IRRT_OK;
+
+    return ExportModule :: initializeFrom(ir);
 }
 
 
@@ -694,9 +693,10 @@ VTKXMLExportModule :: writeVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep)
     // Write output: node coords
     int numNodes = vtkPiece.giveNumberOfNodes();
     int numEl = vtkPiece.giveNumberOfCells();
-    FloatArray vtkCoords(3), coords;
+    FloatArray coords;
 
 #ifdef __VTK_MODULE
+    FloatArray vtkCoords(3);
     for ( int inode = 1; inode <= numNodes; inode++ ) {
         coords = vtkPiece.giveNodeCoords(inode);
         vtkCoords.zero();
@@ -1084,12 +1084,7 @@ VTKXMLExportModule :: writeIntVars(VTKPiece &vtkPiece)
     int n = internalVarsToExport.giveSize();
     for ( int i = 1; i <= n; i++ ) {
         InternalStateType type = ( InternalStateType ) internalVarsToExport.at(i);
-        InternalStateValueType valType = giveInternalStateValueType(type);
-        int ncomponents = giveInternalStateTypeSize(valType);
-
-        //if ( type == IST_AbaqusStateVector ) {
-        //    ncomponents = 23;
-        //}
+        int ncomponents;
 
         const char *name = __InternalStateTypeToString(type);
         int numNodes = vtkPiece.giveNumberOfNodes();
@@ -1551,8 +1546,8 @@ VTKXMLExportModule :: exportExternalForces(VTKPiece &vtkPiece, IntArray &mapG2L,
     int neq = emodel->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
     int npeq = emodel->giveNumberOfDomainEquations( 1, EModelDefaultPrescribedEquationNumbering() );
     FloatArray extForces(neq), extForcesP(npeq);
-    emodel->assembleVector(extForces, tStep, ExternalForcesVector, VM_Total, EModelDefaultEquationNumbering(), d);
-    emodel->assembleVector(extForcesP, tStep, ExternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), d);
+    emodel->assembleVector(extForces, tStep, ExternalForceAssembler(), VM_Total, EModelDefaultEquationNumbering(), d);
+    emodel->assembleVector(extForcesP, tStep, ExternalForceAssembler(), VM_Total, EModelDefaultPrescribedEquationNumbering(), d);
 
     vtkPiece.setNumberOfLoadsToExport(externalForcesToExport.giveSize(), mapL2G.giveSize());
     for ( int i = 1; i <= externalForcesToExport.giveSize(); i++ ) {
@@ -1660,34 +1655,29 @@ VTKXMLExportModule :: exportCellVars(VTKPiece &vtkPiece, int numCells, TimeStep 
 void
 VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, InternalStateType type, TimeStep *tStep)
 {
-    FloatMatrix rotMat(3, 3);
-    int col = 0;
-    FloatArray valueArray, temp;
-    IntArray redIndx;
-
     InternalStateValueType valType = giveInternalStateValueType(type);
     int ncomponents = giveInternalStateTypeSize(valType);
 
-    valueArray.resize(ncomponents);
+    answer.resize(ncomponents);
 
     switch ( type ) {
         // Special scalars
     case IST_MaterialNumber:
         // commented by bp: do what user wants
         //OOFEM_WARNING1("Material numbers are deprecated, outputing cross section number instead...");
-        valueArray.at(1) = ( double ) el->giveMaterial()->giveNumber();
+        answer.at(1) = ( double ) el->giveMaterial()->giveNumber();
         break;
     case IST_CrossSectionNumber:
-        valueArray.at(1) = ( double ) el->giveCrossSection()->giveNumber();
+        answer.at(1) = ( double ) el->giveCrossSection()->giveNumber();
         break;
     case IST_ElementNumber:
-        valueArray.at(1) = ( double ) el->giveNumber();
+        answer.at(1) = ( double ) el->giveNumber();
         break;
     case IST_Pressure: ///@todo This case seems redundant, remove? /JB, /// Why this special treatment for pressure? / Mikael
         if ( el->giveNumberOfInternalDofManagers() == 1 ) {
             //IntArray pmask(1); pmask.at(1) = P_f;
             //el->giveInternalDofManager(1)->giveUnknownVector (answer, pmask, VM_Total, tStep);
-            //valueArray.at(1) = answer.at(1);
+            //answer.at(1) = answer.at(1);
         }
 
         break;
@@ -1696,54 +1686,50 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
     case IST_MaterialOrientation_x:
     case IST_MaterialOrientation_y:
     case IST_MaterialOrientation_z:
+        {
+            FloatMatrix rotMat;
+            int col = 0;
+            if ( type == IST_MaterialOrientation_x ) {
+                col = 1;
+            } else if ( type == IST_MaterialOrientation_y ) {
+                col = 2;
+            } else if ( type == IST_MaterialOrientation_z ) {
+                col = 3;
+            }
 
-        if ( type == IST_MaterialOrientation_x ) {
-            col = 1;
+            if ( !el->giveLocalCoordinateSystem(rotMat) ) {
+                rotMat.resize(3,3);
+                rotMat.beUnitMatrix();
+            }
+
+            answer.beColumnOf(rotMat, col);
+            break;
         }
-
-        if ( type == IST_MaterialOrientation_y ) {
-            col = 2;
-        }
-
-        if ( type == IST_MaterialOrientation_z ) {
-            col = 3;
-        }
-
-        if ( !el->giveLocalCoordinateSystem(rotMat) ) {
-            rotMat.zero(); ///@todo shouldn't it be an identity matrix? /JB
-        }
-
-        valueArray.beColumnOf(rotMat, col);
-        break;
 
         // Export cell data as average from ip's as default
     default:
 
         // compute cell average from ip values
         IntegrationRule * iRule = el->giveDefaultIntegrationRulePtr();
-        computeIPAverage(temp, iRule, el, type, tStep); // if element has more than one iRule?? /JB
-
+        computeIPAverage(answer, iRule, el, type, tStep); // if element has more than one iRule?? /JB
         // Reshape the Voigt vectors to include all components (duplicated if necessary, VTK insists on 9 components for tensors.)
 #if 1
-        // Is this part necessary now when giveIPValue returns full form? Only need to symmetrize in case of 6 components /JB
-        if ( ncomponents == 9 && temp.giveSize() != 9 ) { // If it has 9 components, then it is assumed to be proper already.
-            this->makeFullTensorForm(valueArray, temp);
-        } else if ( valType == ISVT_VECTOR && temp.giveSize() < 3 ) {
-            valueArray = {temp.giveSize() > 1 ? temp.at(1) : 0.0,
-                          temp.giveSize() > 2 ? temp.at(2) : 0.0,
-                          0.0};
-        } else if ( ncomponents != temp.giveSize() ) { // Trying to gracefully handle bad cases, just output zeros.
-            valueArray.resize(9);
-            valueArray.zero();
-        } else {
-            valueArray = temp;
+        /// @todo Is this part necessary now when giveIPValue returns full form? Only need to symmetrize in case of 6 components /JB
+        /// @todo Some material models aren't exporting values correctly (yet) / Mikael
+        if ( ncomponents == 9 && answer.giveSize() != 9 ) { // If it has 9 components, then it is assumed to be proper already.
+            FloatArray temp = answer;
+            this->makeFullTensorForm(answer, temp);
+        } else if ( valType == ISVT_VECTOR && answer.giveSize() < 3 ) {
+            answer = {answer.giveSize() > 1 ? answer.at(1) : 0.0,
+                      answer.giveSize() > 2 ? answer.at(2) : 0.0,
+                      0.0};
+        } else if ( ncomponents != answer.giveSize() ) { // Trying to gracefully handle bad cases, just output zeros.
+            answer.resize(ncomponents);
+            answer.zero();
         }
 
 #endif
     }
-
-
-    answer = valueArray;
 }
 
 

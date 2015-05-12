@@ -109,7 +109,6 @@ IntElPoint :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     setCoordMode();
     
 
-    FloatArray N;
     switch ( mode ) {
     case ie1d_1d:
         answer.resize(1, 2);
@@ -232,9 +231,14 @@ IntElPoint :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;  // Required by IR_GIVE_FIELD macro
 
-    StructuralInterfaceElement :: initializeFrom(ir);
+    result = StructuralInterfaceElement :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+
     if ( ir->hasField(_IFT_IntElPoint_refnode) &&  ir->hasField(_IFT_IntElPoint_normal) ) {
-        OOFEM_ERROR("Ambiguous input: 'refnode' and 'normal' cannot both be specified");
+        OOFEM_WARNING("Ambiguous input: 'refnode' and 'normal' cannot both be specified");
+        return IRRT_BAD_FORMAT;
     }
     IR_GIVE_OPTIONAL_FIELD(ir, referenceNode, _IFT_IntElPoint_refnode);
     IR_GIVE_OPTIONAL_FIELD(ir, normal, _IFT_IntElPoint_normal);  

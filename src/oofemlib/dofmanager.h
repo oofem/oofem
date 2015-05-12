@@ -353,13 +353,6 @@ public:
     /**@name Load related functions */
     //@{
     /**
-     * Computes the load vector of receiver in given time.
-     * @param answer Load vector.
-     * @param tStep Time step when answer is computed.
-     * @param mode Determines response mode.
-     */
-    virtual void computeLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
-    /**
      * Computes the load vector for given load.
      * @param answer Load vector for given load.
      * @param load Given load.

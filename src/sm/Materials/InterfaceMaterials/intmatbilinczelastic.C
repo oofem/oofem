@@ -236,10 +236,24 @@ IntMatBilinearCZElastic :: initializeFrom(InputRecord *ir)
     this->gnmax = 2.0 * GIc / sigfn;                         // @todo defaults to zero - will this cause problems?
     this->kn1 = -this->sigfn / ( this->gnmax - this->gn0 );  // slope during softening part in normal dir
 
-    StructuralInterfaceMaterial :: initializeFrom(ir);
+    result = StructuralInterfaceMaterial :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
-    this->checkConsistency();                                // check validity of the material paramters
-//    this->printYourself();
+    // check validity of the material paramters
+    double kn0min = 0.5 * this->sigfn * this->sigfn / this->GIc;
+    if ( this->kn0 < 0.0 ) {
+        OOFEM_WARNING("stiffness kn0 is negative (%.2e)", this->kn0);
+        return IRRT_BAD_FORMAT;
+    } else if ( this->ks0 < 0.0 ) {
+        OOFEM_WARNING("stiffness ks0 is negative (%.2e)", this->ks0);
+        return IRRT_BAD_FORMAT;
+    } else if ( this->GIc < 0.0 ) {
+        OOFEM_WARNING("GIc is negative (%.2e)", this->GIc);
+        return IRRT_BAD_FORMAT;
+    } else if ( this->kn0 < kn0min  ) { // => gn0 > gnmax
+        //OOFEM_WARNING("kn0 (%.2e) is below minimum stiffness (%.2e), => gn0 > gnmax, which is unphysical", this->kn0, kn0min);
+        //return IRRT_BAD_FORMAT;
+    }
     return IRRT_OK;
 }
 
@@ -257,17 +271,6 @@ void IntMatBilinearCZElastic :: giveInputRecord(DynamicInputRecord &input)
 int
 IntMatBilinearCZElastic :: checkConsistency()
 {
-    double kn0min = 0.5 * this->sigfn * this->sigfn / this->GIc;
-    if ( this->kn0 < 0.0 ) {
-        OOFEM_ERROR("stiffness kn0 is negative (%.2e)", this->kn0);
-    } else if ( this->ks0 < 0.0 ) {
-        OOFEM_ERROR("stiffness ks0 is negative (%.2e)", this->ks0);
-    } else if ( this->GIc < 0.0 ) {
-        OOFEM_ERROR("GIc is negative (%.2e)", this->GIc);
-    } else if ( this->kn0 < kn0min  ) { // => gn0 > gnmax
-        //   OOFEM_ERROR("kn0 (%.2e) is below minimum stiffness (%.2e), => gn0 > gnmax, which is unphysical" ,
-        //       this->kn0, kn0min);
-    }
     return 1;
 }
 

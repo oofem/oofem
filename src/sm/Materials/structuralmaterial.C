@@ -45,23 +45,21 @@
 #include "engngm.h"
 #include "fieldmanager.h"
 #include "dynamicinputrecord.h"
-#include "eleminterpmapperinterface.h"
 
 namespace oofem {
 StructuralMaterial :: StructuralMaterial(int n, Domain * d) : Material(n, d) 
 { 
-  
-      // Voigt index map
-      vIindex.resize(3);
-      vIindex[0] = { 1, 6, 5 };
-      vIindex[1] = { 9, 2, 4 };
-      vIindex[2] = { 8, 7, 3 };  
+    // Voigt index map
+    vIindex.resize(3);
+    vIindex[0] = { 1, 6, 5 };
+    vIindex[1] = { 9, 2, 4 };
+    vIindex[2] = { 8, 7, 3 };  
       
-      // Symmetric Voigt index map
-      svIndex.resize(3);
-      svIndex[0] = { 1, 6, 5 };
-      svIndex[1] = { 6, 2, 4 };
-      svIndex[2] = { 5, 4, 3 };       
+    // Symmetric Voigt index map
+    svIndex.resize(3);
+    svIndex[0] = { 1, 6, 5 };
+    svIndex[1] = { 6, 2, 4 };
+    svIndex[2] = { 5, 4, 3 };       
     
 }  
 int
@@ -135,8 +133,8 @@ StructuralMaterial :: giveRealStressVector_StressControl(FloatArray &answer, Gau
     // Iterate to find full vE.
     // Compute the negated the array of control since we need stressControl as well;
 
-    stressControl.resize( 9 - strainControl.giveSize() );
-    for ( int i = 1, j = 1; i <= 9; i++ ) {
+    stressControl.resize( 6 - strainControl.giveSize() );
+    for ( int i = 1, j = 1; i <= 6; i++ ) {
         if ( !strainControl.contains(i) ) {
             stressControl.at(j++) = i;
         }
@@ -149,18 +147,26 @@ StructuralMaterial :: giveRealStressVector_StressControl(FloatArray &answer, Gau
     }
 
     // Iterate to find full vE.
-    for ( int k = 0; k < 100; k++ ) { // Allow for a generous 100 iterations.
+    for ( int k = 0; k < 10; k++ ) { // Allow for a generous 100 iterations.
         this->giveRealStressVector_3d(vS, gp, vE, tStep);
-        vS.printYourself();
+        // For debugging the iterations:
+        //vE.printYourself("vE");
+        //vS.printYourself("vS");
         reducedvS.beSubArrayOf(vS, stressControl);
-        if ( reducedvS.computeNorm() < 1e-6 ) { ///@todo We need a tolerance here!
-            StructuralMaterial :: giveReducedVectorForm(answer, vS, _1dMat);
+        // Pick out the (response) stresses for the controlled strains
+        answer.beSubArrayOf(vS, strainControl);
+        if ( reducedvS.computeNorm() <= 1e0 && k >= 1 ) { // Absolute tolerance right now (with at least one iteration)
+            ///@todo We need a relative tolerance here!
+            /// A relative tolerance like this could work, but if a really small increment is performed it won't work
+            /// (it will be limited by machine precision)
+        //if ( reducedvS.computeNorm() <= 1e-6 * answer.computeNorm() ) {
             return;
         }
 
         this->give3dMaterialStiffnessMatrix(tangent, TangentStiffness, gp, tStep);
         reducedTangent.beSubMatrixOf(tangent, stressControl, stressControl);
         reducedTangent.solveForRhs(reducedvS, increment_vE);
+        increment_vE.negated();
         vE.assemble(increment_vE, stressControl);
     }
 
@@ -313,7 +319,7 @@ StructuralMaterial :: giveFirstPKStressVector_1d(FloatArray &answer, GaussPoint 
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
     IntArray P_control; // Determines which components are controlled by P resp.
-    FloatArray old_vF, vF, increment_vF, vP, vP_control;
+    FloatArray vF, increment_vF, vP, vP_control;
     FloatMatrix tangent, tangent_Pcontrol;
     // Compute the negated the array of control since we need P_control as well;
     P_control.resize(8);
@@ -1395,6 +1401,85 @@ StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &di
 
 
 double
+StructuralMaterial :: computeDeviatoricVolumetricSplit(FloatArray &dev, const FloatArray &s)
+{
+    double vol = s[0] + s[1] + s[2];
+    double mean = vol / 3.0;
+    dev = s;
+    dev.at(1) -= vol;
+    dev.at(2) -= vol;
+    dev.at(3) -= vol;
+    return mean;
+}
+
+
+double
+StructuralMaterial :: computeFirstInvariant(const FloatArray &s)
+{
+    if ( s.giveSize() == 1 ) {
+        return s [ 0 ];
+    } else {
+        return s [ 0 ] + s [ 1 ] + s [ 2 ];
+    }
+}
+
+double
+StructuralMaterial :: computeSecondStressInvariant(const FloatArray &s)
+{
+    return .5 * ( s [ 0 ] * s [ 0 ] + s [ 1 ] * s [ 1 ] + s [ 2 ] * s [ 2 ] ) +
+            s [ 3 ] * s [ 3 ] + s [ 4 ] * s [ 4 ] + s [ 5 ] * s [ 5 ];
+}
+
+double
+StructuralMaterial :: computeThirdStressInvariant(const FloatArray &s)
+{
+    return ( 1. / 3. ) * ( s [ 0 ] * s [ 0 ] * s [ 0 ] + 3. * s [ 0 ] * s [ 5 ] * s [ 5 ] +
+                            3. * s [ 0 ] * s [ 4 ] * s [ 4 ] + 6. * s [ 3 ] * s [ 5 ] * s [ 4 ] +
+                            3. * s [ 1 ] * s [ 5 ] * s [ 5 ] + 3 * s [ 2 ] * s [ 4 ] * s [ 4 ] +
+                            s [ 1 ] * s [ 1 ] * s [ 1 ] + 3. * s [ 1 ] * s [ 3 ] * s [ 3 ] +
+                            3. * s [ 2 ] * s [ 3 ] * s [ 3 ] + s [ 2 ] * s [ 2 ] * s [ 2 ] );
+}
+
+
+double
+StructuralMaterial :: computeFirstCoordinate(const FloatArray &s)
+{
+    // This function computes the first Haigh-Westergaard coordinate
+    return computeFirstInvariant(s) / sqrt(3.);
+}
+
+double
+StructuralMaterial :: computeSecondCoordinate(const FloatArray &s)
+{
+    // This function computes the second Haigh-Westergaard coordinate
+    // from the deviatoric stress state
+    return sqrt( 2. * computeSecondStressInvariant(s) );
+}
+
+double
+StructuralMaterial :: computeThirdCoordinate(const FloatArray &s)
+{
+    // This function computes the third Haigh-Westergaard coordinate
+    // from the deviatoric stress state
+    double c1 = 0.0;
+    if ( computeSecondStressInvariant(s) == 0. ) {
+        c1 = 0.0;
+    } else {
+        c1 = ( 3. * sqrt(3.) / 2. ) * computeThirdStressInvariant(s) / ( pow( computeSecondStressInvariant(s), ( 3. / 2. ) ) );
+    }
+
+    if ( c1 > 1.0 ) {
+        c1 = 1.0;
+    }
+
+    if ( c1 < -1.0 ) {
+        c1 = -1.0;
+    }
+
+    return 1. / 3. * acos(c1);
+}
+
+double
 StructuralMaterial :: computeVonMisesStress(const FloatArray *currentStress)
 {
     double J2;
@@ -2060,15 +2145,10 @@ StructuralMaterial :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-#  ifdef VERBOSE
-    // VERBOSE_PRINT1 ("Instanciating material ",this->giveNumber())
-#  endif
-    this->Material :: initializeFrom(ir);
-
     referenceTemperature = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, referenceTemperature, _IFT_StructuralMaterial_referencetemperature);
 
-    return IRRT_OK;
+    return Material :: initializeFrom(ir);
 }
 
 
