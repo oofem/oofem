@@ -85,7 +85,7 @@ void freeStoreError()
 }
 
 // debug
-void oofem_debug(EngngModel &emodel);
+void oofem_debug(EngngModel *emodel);
 
 void oofem_print_help();
 void oofem_print_version();
@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
          inputFileFlag = false, outputFileFlag = false, errOutputFileFlag = false;
     std :: stringstream inputFileName, outputFileName, errOutputFileName;
     std :: vector< const char * >modulesArgs;
-    std :: unique_ptr< EngngModel > problem;
+    EngngModel *problem = 0;
 
     int rank = 0;
 
@@ -249,7 +249,7 @@ int main(int argc, char *argv[])
     OOFEM_LOG_FORCED(PRG_HEADER_SM);
 
     OOFEMTXTDataReader dr( inputFileName.str ( ).c_str() );
-    problem.reset( :: InstanciateProblem(& dr, _processor, contextFlag, NULL, parallelFlag) );
+    problem = :: InstanciateProblem(& dr, _processor, contextFlag, NULL, parallelFlag);
     dr.finish();
     if ( !problem ) {
         OOFEM_LOG_ERROR("Couldn't instanciate problem, exiting");
@@ -278,13 +278,14 @@ int main(int argc, char *argv[])
     }
 
     if ( debugFlag ) {
-        oofem_debug(*problem);
+        oofem_debug(problem);
     }
 
 
     try {
         problem->solveYourself();
     } catch(OOFEM_Terminate & c) {
+        delete problem;
 
         oofem_finalize_modules();
 
@@ -298,6 +299,7 @@ int main(int argc, char *argv[])
     }
 #endif
     oofem_logger.printStatistics();
+    delete problem;
 
     oofem_finalize_modules();
 
@@ -360,7 +362,7 @@ void oofem_finalize_modules()
 //#include "loadbalancer.h"
 //#include "xfem/iga.h"
 
-void oofem_debug(EngngModel &emodel)
+void oofem_debug(EngngModel *emodel)
 {
     //FloatMatrix k;
     //((BsplinePlaneStressElement*)emodel.giveDomain(1)->giveElement(1))->giveCharacteristicMatrix(k, TangentStiffnessMatrix, NULL);
