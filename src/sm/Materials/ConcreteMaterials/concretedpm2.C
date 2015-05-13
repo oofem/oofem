@@ -53,11 +53,14 @@ REGISTER_Material(ConcreteDPM2);
 
 ConcreteDPM2Status :: ConcreteDPM2Status(int n, Domain *d, GaussPoint *gp) :
     StructuralMaterialStatus(n, d, gp),
-    plasticStrain( gp->giveMaterialMode() ),
-    tempPlasticStrain( gp->giveMaterialMode() )
+    plasticStrain(6),
+    tempPlasticStrain(6)
 {
-    tempPlasticStrain.zero();
-    plasticStrain.zero();
+    strainVector.resize(6);
+    stressVector.resize(6);
+    tempStressVector = stressVector;
+    tempStrainVector = strainVector;
+
     kappaP = tempKappaP = 0.;
 
     equivStrain = tempEquivStrain = 0.;
@@ -175,7 +178,6 @@ void
 ConcreteDPM2Status :: printOutputAt(FILE *file, TimeStep *tStep)
 {
     // Call corresponding function of the parent class to print
-    // variables defined there.
     StructuralMaterialStatus :: printOutputAt(file, tStep);
 
     fprintf(file, "\tstatus { ");
@@ -200,12 +202,8 @@ ConcreteDPM2Status :: printOutputAt(FILE *file, TimeStep *tStep)
     }
 
     // print plastic strain vector and inelastic strain vector
-    StrainVector plasticStrainVector( gp->giveMaterialMode() );
-    giveFullPlasticStrainVector(plasticStrainVector);
-
-    StrainVector inelasticStrainVector( gp->giveMaterialMode() ); ///@todo Is this material mode really correct? Shouldn't it be the full material mode?
-    StructuralMaterial :: giveFullSymVectorForm( inelasticStrainVector, strainVector, gp->giveMaterialMode() );
-
+    FloatArray plasticStrainVector = this->givePlasticStrain();
+    FloatArray inelasticStrainVector = strainVector;
     inelasticStrainVector.subtract(plasticStrainVector);
     inelasticStrainVector.times(damageTension);
     inelasticStrainVector.add(plasticStrainVector);
@@ -258,8 +256,6 @@ ConcreteDPM2Status :: saveContext(DataStream &stream, ContextMode mode, void *ob
     if ( ( iores = StructuralMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    // write raw data
 
     if ( ( iores = plasticStrain.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
@@ -460,16 +456,15 @@ ConcreteDPM2Status :: restoreContext(DataStream &stream, ContextMode mode, void 
 void
 ConcreteDPM2Status :: computeWork(GaussPoint *gp, double gf)
 {
-    MaterialMode matMode = gp->giveMaterialMode();
-    StrainVector tempTotalstrain(tempStrainVector, matMode);
-    StrainVector totalstrain(strainVector, matMode);
+    FloatArray tempTotalstrain = tempStrainVector;
+    FloatArray totalstrain = strainVector;
 
     //Calculate increase or decrease of total strain tensor during iteration/step
-    StrainVector deltaTotalStrain(tempTotalstrain);
+    FloatArray deltaTotalStrain = tempTotalstrain;
     deltaTotalStrain.subtract(totalstrain);
 
     //Ask for stress tensor at step
-    StressVector stress(tempStressVector, matMode);
+    FloatArray stress = tempStressVector;
     int n = stress.giveSize();
     //Calculate increase/decrease in total work
     double dSW = ( tempStressVector.dotProduct(deltaTotalStrain, n) + stressVector.dotProduct(deltaTotalStrain, n) ) / 2.;
@@ -477,8 +472,7 @@ ConcreteDPM2Status :: computeWork(GaussPoint *gp, double gf)
     double tempStressWork = this->giveTempStressWork() + dSW;
 
     //Calculate temporary elastic strain
-    StrainVector tempElasticStrain(matMode);
-    tempElasticStrain = tempTotalstrain;
+    FloatArray tempElasticStrain = tempTotalstrain;
     tempElasticStrain.subtract(tempPlasticStrain);
 
     //Calculate elastically stored energy density
@@ -512,7 +506,6 @@ ConcreteDPM2 :: ConcreteDPM2(int n, Domain *d) :
     yieldTol = 0.;
     yieldTolDamage = 0.;
     newtonIter = 0;
-    matMode = _Unknown;
 
     linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
 }
@@ -646,111 +639,12 @@ void
 ConcreteDPM2 :: giveRealStressVector_1d(FloatArray &answer,
                                         GaussPoint *gp,
                                         const FloatArray &strainVector,
-                                        TimeStep *atTime)
+                                        TimeStep *tStep)
 {
-    if ( matMode == _Unknown ) {
-        matMode = gp->giveMaterialMode();
-    }
-
     ConcreteDPM2Status *status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
 
     // Initialize temp variables for this gauss point
-    //    status->initTempStatus();
-    //this->initGpForNewStep(gp);
     this->initTempStatus(gp);
-    status->letTempStrainVectorBe(strainVector);
-
-    StrainVector strain(strainVector, matMode);
-
-    //Calculate strain rate
-    //Time step
-    double deltaTime = 1.;
-    if ( strainRateFlag == 1 ) {
-        if ( atTime->giveTimeIncrement() == 0 ) { //Problem with the first step. For some reason the time increment is zero
-            deltaTime = this->timeFactor;
-        } else {
-            deltaTime = atTime->giveTimeIncrement() * this->timeFactor;
-        }
-    } else {
-        if ( atTime->giveTimeIncrement() == 0 ) {
-            deltaTime = 1.;
-        } else {
-            deltaTime = atTime->giveTimeIncrement();
-        }
-    }
-
-    // perform plasticity return
-    performPlasticityReturn(gp, strain);
-
-    // compute the nominal stress
-    StressVector stress(matMode);
-    StressVector effectiveStress(matMode);
-
-    // compute elastic strains and trial stress
-    StrainVector elasticStrain = strain;
-    elasticStrain.subtract( status->giveTempPlasticStrain() );
-    elasticStrain.applyElasticStiffness(effectiveStress, eM, nu);
-
-
-    StressVector effectiveStressTension(matMode);
-    StressVector effectiveStressCompression(matMode);
-    double alpha = 0.;
-    if ( effectiveStress.at(1) >= 0 ) { //1D tensile stress state
-        alpha = 0.;
-        effectiveStressTension = effectiveStress;
-        effectiveStressCompression.zero();
-    } else if ( effectiveStress.at(1) < 0 ) {      //1D compressive stress state
-        alpha = 1.;
-        effectiveStressTension.zero();
-        effectiveStressCompression = effectiveStress;
-    }
-
-    status->letTempAlphaBe(alpha);
-
-
-    FloatArray damages(2);
-    damages.zero();
-    computeDamage(damages, strain, deltaTime, gp, atTime, alpha);
-
-    //Split damage in a tension and compression part
-
-    if ( isotropicFlag == 0 ) { //Default
-        effectiveStressTension.times( 1. - damages.at(1) );
-        effectiveStressCompression.times( 1. - damages.at(2) );
-        stress = effectiveStressTension;
-        stress.add(effectiveStressCompression);
-    } else { //Consider only tensile damage. Reduction to a fully isotropic model
-        stress = effectiveStress;
-        stress.times( 1. - damages.at(1) );
-    }
-
-    status->letTempStressVectorBe(stress);
-#ifdef keep_track_of_dissipated_energy
-    double gf = pow(ft, 2) / this->eM; //rough estimation only for this purpose
-    status->computeWork(gp, gf);
-#endif
-    assignStateFlag(gp);
-    answer = stress;
-}
-
-void
-ConcreteDPM2 :: giveRealStressVector_3d(FloatArray &answer,
-                                     GaussPoint *gp,
-                                     const FloatArray &strainVector,
-                                     TimeStep *tStep)
-{
-    if ( matMode == _Unknown ) {
-        matMode = gp->giveMaterialMode();
-    }
-
-    ConcreteDPM2Status *status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
-
-    // Initialize temp variables for this gauss point
-    status->initTempStatus();
-
-    status->letTempStrainVectorBe(strainVector);
-
-    StrainVector strain(strainVector, matMode);
 
     //Calculate strain rate
     //Time step
@@ -769,58 +663,135 @@ ConcreteDPM2 :: giveRealStressVector_3d(FloatArray &answer,
         }
     }
 
+    FloatMatrix D;
+    this->giveLinearElasticMaterial()->give1dStressStiffMtrx(D, ElasticStiffness, gp, tStep);
+    
     // perform plasticity return
-    performPlasticityReturn(gp, strain);
-
-    // compute the nominal stress
-    StressVector stress(matMode);
-    StressVector effectiveStress(matMode);
+    performPlasticityReturn(gp, D, strainVector);
 
     // compute elastic strains and trial stress
-    StrainVector elasticStrain = strain;
+    FloatArray effectiveStress;
+    FloatArray elasticStrain = strainVector;
     elasticStrain.subtract( status->giveTempPlasticStrain() );
-    elasticStrain.applyElasticStiffness(effectiveStress, eM, nu);
+    effectiveStress.beProductOf(D, elasticStrain);
 
 
-    StressVector effectiveStressTension(matMode);
-    StressVector effectiveStressCompression(matMode);
-    double alpha;
+    FloatArray effectiveStressTension;
+    FloatArray effectiveStressCompression;
+    double alpha = 0.;
+    if ( effectiveStress.at(1) >= 0 ) { //1D tensile stress state
+        alpha = 0.;
+        effectiveStressTension = effectiveStress;
+        effectiveStressCompression.zero();
+    } else if ( effectiveStress.at(1) < 0 ) {      //1D compressive stress state
+        alpha = 1.;
+        effectiveStressTension.zero();
+        effectiveStressCompression = effectiveStress;
+    }
 
-    alpha = computeAlpha(effectiveStressTension, effectiveStressCompression, effectiveStress);
-
-    status->letTempAlphaBe(alpha);
-
-
-    FloatArray damages(2);
-    damages.zero();
-    computeDamage(damages, strain, deltaTime, gp, tStep, alpha);
+    FloatArray damages;
+    computeDamage(damages, strainVector, D, deltaTime, gp, tStep, alpha);
 
     //Split damage in a tension and compression part
 
     if ( isotropicFlag == 0 ) { //Default
         effectiveStressTension.times( 1. - damages.at(1) );
         effectiveStressCompression.times( 1. - damages.at(2) );
-        stress = effectiveStressTension;
-        stress.add(effectiveStressCompression);
+        answer = effectiveStressTension;
+        answer.add(effectiveStressCompression);
     } else { //Consider only tensile damage. Reduction to a fully isotropic model
-        stress = effectiveStress;
-        stress.times( 1. - damages.at(1) );
+        answer = effectiveStress;
+        answer.times( 1. - damages.at(1) );
     }
 
-    status->letTempStressVectorBe(stress);
+    status->letTempStrainVectorBe(strainVector);
+    status->letTempAlphaBe(alpha);
+    status->letTempStressVectorBe(answer);
 #ifdef keep_track_of_dissipated_energy
     double gf = pow(ft, 2) / this->eM; //rough estimation only for this purpose
     status->computeWork(gp, gf);
 #endif
     assignStateFlag(gp);
+}
 
-    answer = stress;
+
+void
+ConcreteDPM2 :: giveRealStressVector_3d(FloatArray &answer,
+                                     GaussPoint *gp,
+                                     const FloatArray &strainVector,
+                                     TimeStep *tStep)
+{
+    ConcreteDPM2Status *status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
+
+    // Initialize temp variables for this gauss point
+    status->initTempStatus();
+
+    //Calculate strain rate
+    //Time step
+    double deltaTime = 1.;
+    if ( strainRateFlag == 1 ) {
+        if ( tStep->giveTimeIncrement() == 0 ) { //Problem with the first step. For some reason the time increment is zero
+            deltaTime = this->timeFactor;
+        } else {
+            deltaTime = tStep->giveTimeIncrement() * this->timeFactor;
+        }
+    } else {
+        if ( tStep->giveTimeIncrement() == 0 ) {
+            deltaTime = 1.;
+        } else {
+            deltaTime = tStep->giveTimeIncrement();
+        }
+    }
+
+    FloatMatrix D;
+    this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(D, ElasticStiffness, gp, tStep);
+
+    // perform plasticity return
+    performPlasticityReturn(gp, D, strainVector);
+
+
+    // compute elastic strains and trial stress
+    FloatArray effectiveStress;
+    FloatArray elasticStrain = strainVector;
+    elasticStrain.subtract( status->giveTempPlasticStrain() );
+    effectiveStress.beProductOf(D, elasticStrain);
+
+    FloatArray effectiveStressTension;
+    FloatArray effectiveStressCompression;
+    double alpha;
+
+    alpha = computeAlpha(effectiveStressTension, effectiveStressCompression, effectiveStress);
+
+    FloatArray damages;
+    computeDamage(damages, strainVector, D, deltaTime, gp, tStep, alpha);
+
+    //Split damage in a tension and compression part
+
+    if ( isotropicFlag == 0 ) { //Default
+        effectiveStressTension.times( 1. - damages.at(1) );
+        effectiveStressCompression.times( 1. - damages.at(2) );
+        answer = effectiveStressTension;
+        answer.add(effectiveStressCompression);
+    } else { //Consider only tensile damage. Reduction to a fully isotropic model
+        answer = effectiveStress;
+        answer.times( 1. - damages.at(1) );
+    }
+
+    status->letTempStrainVectorBe(strainVector);
+    status->letTempAlphaBe(alpha);
+    status->letTempStressVectorBe(answer);
+#ifdef keep_track_of_dissipated_energy
+    double gf = pow(ft, 2) / this->eM; //rough estimation only for this purpose
+    status->computeWork(gp, gf);
+#endif
+    assignStateFlag(gp);
 }
 
 
 void
 ConcreteDPM2 :: computeDamage(FloatArray &answer,
-                              const StrainVector &strain,
+                              const FloatArray &strain,
+                              const FloatMatrix &D,
                               double deltaTime,
                               GaussPoint *gp,
                               TimeStep *tStep,
@@ -842,7 +813,7 @@ ConcreteDPM2 :: computeDamage(FloatArray &answer,
     int unAndReloadingFlag = 0;
     double minEquivStrain = 0.;
 
-    unAndReloadingFlag = checkForUnAndReloading(tempEquivStrain, minEquivStrain, gp);
+    unAndReloadingFlag = checkForUnAndReloading(tempEquivStrain, minEquivStrain, D, gp);
 
     if ( ( status->giveDamageTension() == 0. ) && ( status->giveDamageCompression() == 0. ) ) {
         rateFactor = computeRateFactor(tempAlpha, deltaTime, gp, tStep);
@@ -979,6 +950,7 @@ ConcreteDPM2 :: computeDamage(FloatArray &answer,
     status->letTempKappaDCompressionTwoBe(tempKappaDCompressionTwo);
     status->letTempDamageCompressionBe(tempDamageCompression);
 
+    answer.resize(2);
     answer.at(1) = tempDamageTension;
     answer.at(2) = tempDamageCompression;
 }
@@ -986,6 +958,7 @@ ConcreteDPM2 :: computeDamage(FloatArray &answer,
 int
 ConcreteDPM2 :: checkForUnAndReloading(double &tempEquivStrain,
                                        double &minEquivStrain,
+                                       const FloatMatrix &D,
                                        GaussPoint *gp)
 {
     ConcreteDPM2Status *status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
@@ -993,30 +966,31 @@ ConcreteDPM2 :: checkForUnAndReloading(double &tempEquivStrain,
     double sigEffective, rhoEffective, thetaEffective;
 
     //Access old and new strains
-    StrainVector oldStrain(status->giveStrainVector(), matMode);
-    StrainVector strain(status->giveTempStrainVector(), matMode);
+    FloatArray oldStrain = status->giveStrainVector();
+    FloatArray strain = status->giveTempStrainVector();
 
     //Compute the temp equivalent strain
-    StressVector tempEffectiveStress(matMode);
-    StrainVector tempElasticStrain = strain;
+    FloatArray tempEffectiveStress;
+    FloatArray tempElasticStrain = strain;
     tempElasticStrain.subtract( status->giveTempPlasticStrain() );
-    tempElasticStrain.applyElasticStiffness(tempEffectiveStress, eM, nu);
+    tempEffectiveStress.beProductOf(D, tempElasticStrain);
     computeTrialCoordinates(tempEffectiveStress, sigEffective, rhoEffective, thetaEffective);
     tempEquivStrain = computeEquivalentStrain(sigEffective, rhoEffective, thetaEffective);
     //Get the equivalent strain from the status
     double equivStrain = status->giveEquivStrain();
 
     //Compute the increment of effective stress
-    StressVector effectiveStress(matMode);
-    StrainVector elasticStrain = oldStrain;
-    elasticStrain.subtract( status->givePlasticStrain() );
-    elasticStrain.applyElasticStiffness(effectiveStress, eM, nu);
-    StressVector deltaEffectiveStress(matMode);
+    FloatArray effectiveStress;
+    FloatArray elasticStrain = oldStrain;
+    for ( int i = 1; i <= elasticStrain.giveSize(); ++i ) elasticStrain.at(i) -= status->givePlasticStrain().at(i);
+    //elasticStrain.subtract( status->givePlasticStrain() );
+    effectiveStress.beProductOf(D, elasticStrain);
+    FloatArray deltaEffectiveStress;
     deltaEffectiveStress = tempEffectiveStress;
     deltaEffectiveStress.subtract(effectiveStress);
 
     //Compute equivalent strains for stress state slightly greater than the effective stress and smaller than the temp effective stress
-    StressVector intermediateEffectiveStress(matMode);
+    FloatArray intermediateEffectiveStress;
     intermediateEffectiveStress = effectiveStress;
     //For slightly more than effective stress
     intermediateEffectiveStress.add(0.01 * deltaEffectiveStress);
@@ -1067,11 +1041,11 @@ ConcreteDPM2 :: computeRateFactor(double alpha,
     ConcreteDPM2Status *status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
 
     //Access old and new strain
-    StrainVector strain(status->giveTempStrainVector(), matMode);
+    FloatArray strain = status->giveTempStrainVector();
 
     //Determine the principal values of the strain
     FloatArray principalStrain;
-    strain.computePrincipalValues(principalStrain);
+    StructuralMaterial :: computePrincipalValues(principalStrain, strain, principal_strain); ///@todo CHECK
     //Determine max and min value;
     double maxStrain = -1.e20, minStrain = 1.e20;
     for ( int k = 1; k <= principalStrain.giveSize(); k++ ) {
@@ -1088,7 +1062,7 @@ ConcreteDPM2 :: computeRateFactor(double alpha,
 
     //Evaluate the equivalent strains
     double strainRate;
-    double oldRateStrain =   status->giveRateStrain();
+    double oldRateStrain = status->giveRateStrain();
     if ( 1. - alpha > DYNCON_TOL ) { //Tension
         strainRate = ( maxStrain - oldRateStrain ) / deltaTime;
         status->letTempRateStrainBe(maxStrain);
@@ -1146,18 +1120,14 @@ ConcreteDPM2 :: computeRateFactor(double alpha,
 double
 ConcreteDPM2 :: computeDeltaPlasticStrainNormTension(double tempKappaD, double kappaD, GaussPoint *gp)
 {
-    if ( matMode == _Unknown ) {
-        matMode = gp->giveMaterialMode();
-    }
-
     ConcreteDPM2Status *status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
 
-    const StrainVector &tempPlasticStrain = status->giveTempPlasticStrain();
-    const StrainVector &plasticStrain = status->givePlasticStrain();
+    const FloatArray &tempPlasticStrain = status->giveTempPlasticStrain();
+    const FloatArray &plasticStrain = status->givePlasticStrain();
 
-    StrainVector deltaPlasticStrain(matMode);
-    deltaPlasticStrain = tempPlasticStrain;
-    deltaPlasticStrain.subtract(plasticStrain);
+    FloatArray deltaPlasticStrain = tempPlasticStrain;
+    for ( int i = 1; i <= deltaPlasticStrain.giveSize(); ++i ) deltaPlasticStrain.at(i) -= plasticStrain.at(i);
+    //deltaPlasticStrain.subtract(plasticStrain);
 
     double deltaPlasticStrainNorm = 0;
 
@@ -1182,27 +1152,23 @@ ConcreteDPM2 :: computeDeltaPlasticStrainNormTension(double tempKappaD, double k
 double
 ConcreteDPM2 :: computeDeltaPlasticStrainNormCompression(double tempAlpha, double tempKappaD, double kappaD, GaussPoint *gp)
 {
-    if ( matMode == _Unknown ) {
-        matMode = gp->giveMaterialMode();
-    }
-
     ConcreteDPM2Status *status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
 
-    const StrainVector &tempPlasticStrain = status->giveTempPlasticStrain();
-    const StrainVector &plasticStrain = status->givePlasticStrain();
+    const FloatArray &tempPlasticStrain = status->giveTempPlasticStrain();
+    const FloatArray &plasticStrain = status->givePlasticStrain();
 
-    StrainVector deltaPlasticStrain(matMode);
+    FloatArray deltaPlasticStrain;
     deltaPlasticStrain.add(tempAlpha, tempPlasticStrain);
-    deltaPlasticStrain.add(-tempAlpha, plasticStrain);
+    for ( int i = 1; i <= deltaPlasticStrain.giveSize(); ++i ) deltaPlasticStrain.at(i) -= tempAlpha * plasticStrain.at(i);
+    //deltaPlasticStrain.add(-tempAlpha, plasticStrain);
 
     double deltaPlasticStrainNorm = 0;
 
     //Distinguish pre-peak, peak and post-peak
-    double factor = 0.;
     if ( tempKappaD < e0 * ( 1. - yieldTolDamage ) ) {
         deltaPlasticStrainNorm = 0.;
     } else if ( tempKappaD > e0 * ( 1. - yieldTolDamage ) && kappaD < e0 * ( 1. - yieldTolDamage ) ) {
-        factor = ( 1. - ( e0 - kappaD ) / ( tempKappaD - kappaD ) );
+        double factor = ( 1. - ( e0 - kappaD ) / ( tempKappaD - kappaD ) );
         deltaPlasticStrain.times(factor);
         deltaPlasticStrainNorm = deltaPlasticStrain.computeNorm();
     } else {
@@ -1285,7 +1251,7 @@ ConcreteDPM2 :: computeDamageParamTension(double equivStrain, double kappaOne, d
 
                 omega -= residual / dResidualDOmega;
                 if ( nite > newtonIter ) {
-                    OOFEM_ERROR("computeDamageParam: algorithm not converging");
+                    OOFEM_ERROR("algorithm not converging");
                 }
             } while ( fabs(residual / ft) >= 1.e-8 );
         }
@@ -1327,7 +1293,7 @@ ConcreteDPM2 :: computeDamageParamCompression(double equivStrain, double kappaOn
 
             omega -= residual / dResidualDOmega;
             if ( nite > newtonIter ) {
-                OOFEM_ERROR("computeDamageParam: algorithm not converging");
+                OOFEM_ERROR("algorithm not converging");
             }
         } while ( fabs(residual / ft) >= 1.e-8 );
     } else {
@@ -1348,34 +1314,34 @@ ConcreteDPM2 :: computeDamageParamCompression(double equivStrain, double kappaOn
 
 void
 ConcreteDPM2 :: initDamaged(double kappaD,
-                            const StrainVector &strain,
+                            const FloatArray &strain,
                             GaussPoint *gp)
 {
     if ( kappaD <= 0. ) {
         return;
     }
 
-    int i, indx = 1;
+    int indx = 1;
     double le;
     FloatArray principalStrains, crackPlaneNormal(3);
-    FloatMatrix principalDir(3, 3);
+    FloatMatrix principalDir;
     ConcreteDPM2Status *status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
 
     if ( helem > 0. ) {
         status->setLe(helem);
-    } else if ( matMode == _1dMat ) {
+    } else if ( strain.giveSize() == 1 ) {
         le = gp->giveElement()->computeLength();
         status->setLe(le);
-    } else if ( ( status->giveDamageTension() == 0. ) && ( status->giveDamageCompression() == 0. ) ) {
-        strain.computePrincipalValDir(principalStrains, principalDir);
+    } else if ( status->giveDamageTension() == 0. && status->giveDamageCompression() == 0. ) {
+        StructuralMaterial :: computePrincipalValDir(principalStrains, principalDir, strain, principal_strain);
         // find index of max positive principal strain
-        for ( i = 2; i <= 3; i++ ) {
+        for ( int i = 2; i <= 3; i++ ) {
             if ( principalStrains.at(i) > principalStrains.at(indx) ) {
                 indx = i;
             }
         }
 
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             crackPlaneNormal.at(i) = principalDir.at(i, indx);
         }
 
@@ -1398,10 +1364,8 @@ ConcreteDPM2 :: initDamaged(double kappaD,
 
 
 double
-ConcreteDPM2 :: computeDuctilityMeasureDamage(const StrainVector &strain, GaussPoint *gp)
+ConcreteDPM2 :: computeDuctilityMeasureDamage(const FloatArray &strain, GaussPoint *gp)
 {
-    double ductilityMeasure;
-
     //Angle in uniaxial compression is atan(1./sqrt(6.))=0.387597
     double alphaZero = 0.40824829;
 
@@ -1416,42 +1380,41 @@ ConcreteDPM2 :: computeDuctilityMeasureDamage(const StrainVector &strain, GaussP
         Rs = 0;
     }
 
-    ductilityMeasure = 1. + ( ASoft - 1. ) * Rs;
-
-    return ductilityMeasure;
+    return 1. + ( ASoft - 1. ) * Rs; // ductilityMeasure
 }
 
 
 void
 ConcreteDPM2 :: performPlasticityReturn(GaussPoint *gp,
-                                        StrainVector &strain)
+                                        const FloatMatrix &D,
+                                        const FloatArray &strain)
 {
     ConcreteDPM2Status *status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
-    if ( matMode == _Unknown ) {
-        matMode = gp->giveMaterialMode();
-    }
+
+    FloatMatrix C;
+    C.beInverseOf(D);
 
     //get temp plastic strain and tempKappa
-    StrainVector tempPlasticStrain = status->giveTempPlasticStrain();
-    double tempKappaP = status->giveTempKappaP();
+    FloatArray tempPlasticStrain = status->givePlasticStrain();
+    double tempKappaP = status->giveKappaP();
 
     // compute elastic strains and trial stress
-    StressVector effectiveStress(matMode);
-    StrainVector elasticStrain = strain;
-    elasticStrain.subtract(tempPlasticStrain);
-    elasticStrain.applyElasticStiffness(effectiveStress, eM, nu);
+    FloatArray effectiveStress;
+    FloatArray elasticStrain = strain;
+    for ( int i = 1; i <= elasticStrain.giveSize(); ++i ) elasticStrain.at(i) -= tempPlasticStrain.at(i);
+    effectiveStress.beProductOf(D, elasticStrain);
 
     //Compute trial coordinates
     computeTrialCoordinates(effectiveStress, this->sig, this->rho, this->thetaTrial);
 
     double yieldValue;
 
-    StrainVector convergedStrain(matMode);
+    FloatArray convergedStrain;
 
     //What happens here to thermal strains that are subtracted first?
-    StrainVector oldStrain(status->giveStrainVector(), matMode);
-    StrainVector tempStrain(matMode);
-    StrainVector deltaStrain(matMode);
+    FloatArray oldStrain = status->giveStrainVector();
+    FloatArray tempStrain;
+    FloatArray deltaStrain;
 
     // introduce a strange subincrementation flag
     int subIncrementFlag = 0;
@@ -1468,8 +1431,9 @@ ConcreteDPM2 :: performPlasticityReturn(GaussPoint *gp,
     returnResult = RR_NotConverged;
     while ( returnResult == RR_NotConverged || subIncrementFlag == 1 ) {
         elasticStrain = tempStrain;
-        elasticStrain.subtract(tempPlasticStrain);
-        elasticStrain.applyElasticStiffness(effectiveStress, eM, nu);
+        for ( int i = 1; i <= elasticStrain.giveSize(); ++i ) elasticStrain.at(i) -= tempPlasticStrain.at(i);
+        //elasticStrain.subtract(tempPlasticStrain);
+        effectiveStress.beProductOf(D, elasticStrain);
         double theta;
         computeTrialCoordinates(effectiveStress, this->sig, this->rho, theta);
         yieldValue = computeYieldValue(this->sig, this->rho, this->thetaTrial, tempKappaP);
@@ -1477,17 +1441,18 @@ ConcreteDPM2 :: performPlasticityReturn(GaussPoint *gp,
         apexStress = 0.;
 
         if ( yieldValue > 0. ) {
-            checkForVertexCase(apexStress, sig, tempKappaP);
+            checkForVertexCase(apexStress, sig, tempKappaP, strain.giveSize() == 1);
             if ( returnType == RT_Tension || returnType == RT_Compression ) {
                 tempKappaP = performVertexReturn(effectiveStress, apexStress, tempKappaP, gp);
+                status->letTempKappaPBe(tempKappaP);
             }
             if ( returnType == RT_Regular ) {
-                tempKappaP = performRegularReturn(effectiveStress, gp);
+                tempKappaP = performRegularReturn(effectiveStress, tempKappaP, gp);
+                status->letTempKappaPBe(tempKappaP);
             }
         } else {
             returnResult = RR_Converged;
-            StrainVector plasticStrain(status->givePlasticStrain(), matMode);
-            tempPlasticStrain = plasticStrain;
+            tempPlasticStrain = status->givePlasticStrain();
             status->letTempPlasticStrainBe(tempPlasticStrain);
             status->letTempKappaPBe(tempKappaP);
             break;
@@ -1498,11 +1463,11 @@ ConcreteDPM2 :: performPlasticityReturn(GaussPoint *gp,
             if ( subincrementcounter > 10 ) {
                 OOFEM_LOG_INFO( "Unstable element %d \n", gp->giveElement()->giveGlobalNumber() );
                 OOFEM_LOG_INFO( "Old strain vector %g %g %g %g %g %g  \n", oldStrain.at(1), oldStrain.at(2), oldStrain.at(3), oldStrain.at(4), oldStrain.at(5), oldStrain.at(6) );
-                StrainVector help(status->giveTempPlasticStrain(), matMode);
-                StressVector help1(matMode);
+                FloatArray help = status->giveTempPlasticStrain();
+                FloatArray help1;
                 double sig1, rho1, theta1;
                 oldStrain.subtract(help);
-                oldStrain.applyElasticStiffness(help1, eM, nu);
+                help1.beProductOf(D, oldStrain);
                 OOFEM_LOG_INFO( "Old plastic strain vector %g %g %g %g %g %g  \n", help.at(1), help.at(2), help.at(3), help.at(4), help.at(5), help.at(6) );
                 OOFEM_LOG_INFO( "New strain vector %g %g %g %g %g %g  \n", strain.at(1), strain.at(2), strain.at(3), strain.at(4), strain.at(5), strain.at(6) );
                 computeTrialCoordinates(effectiveStress, this->sig, this->rho, theta);
@@ -1516,7 +1481,7 @@ ConcreteDPM2 :: performPlasticityReturn(GaussPoint *gp,
                     OOFEM_LOG_INFO("Regular case %g \n", 15.18);
                 }
                 OOFEM_LOG_INFO("KappaP old %g new %g yieldfun %g\n", status->giveTempKappaP(), tempKappaP, yieldValue);
-                OOFEM_ERROR("ConcreteDPM2 :: performPlasticityReturn - Could not reach convergence with small deltaStrain, giving up.");
+                OOFEM_ERROR("Could not reach convergence with small deltaStrain, giving up.");
             } else if ( subincrementcounter > 9 && tempKappaP < 1. ) {
                 tempKappaP = 1.;
                 status->letTempKappaPBe(tempKappaP);
@@ -1527,19 +1492,17 @@ ConcreteDPM2 :: performPlasticityReturn(GaussPoint *gp,
             tempStrain = convergedStrain;
             tempStrain.add(deltaStrain);
         } else if ( returnResult == RR_Converged && subIncrementFlag == 0 ) {
-            effectiveStress.applyElasticCompliance(elasticStrain, eM, nu);
+            elasticStrain.beProductOf(C, effectiveStress);
             tempPlasticStrain = strain;
             tempPlasticStrain.subtract(elasticStrain);
             status->letTempPlasticStrainBe(tempPlasticStrain);
-            status->letTempKappaPBe(tempKappaP);
         } else if ( returnResult == RR_Converged && subIncrementFlag == 1 ) {
             OOFEM_LOG_INFO("Subincrementation %d required\n", subincrementcounter);
             subincrementcounter = 0;
-            effectiveStress.applyElasticCompliance(elasticStrain, eM, nu);
+            elasticStrain.beProductOf(C, effectiveStress);
             tempPlasticStrain = tempStrain;
             tempPlasticStrain.subtract(elasticStrain);
             status->letTempPlasticStrainBe(tempPlasticStrain);
-            status->letTempKappaPBe(tempKappaP);
 
             subIncrementFlag = 0;
             returnResult = RR_NotConverged;
@@ -1554,9 +1517,10 @@ ConcreteDPM2 :: performPlasticityReturn(GaussPoint *gp,
 bool
 ConcreteDPM2 :: checkForVertexCase(double &answer,
                                    double sig,
-                                   double tempKappa)
+                                   double tempKappa,
+                                   bool mat1d)
 {
-    if ( matMode == _1dMat ) {
+    if ( mat1d ) {
         returnType = RT_Regular;
         return false;
     }
@@ -1575,12 +1539,11 @@ ConcreteDPM2 :: checkForVertexCase(double &answer,
 
 
 double
-ConcreteDPM2 :: performVertexReturn(StressVector &effectiveStress,
+ConcreteDPM2 :: performVertexReturn(FloatArray &effectiveStress,
                                     double apexStress, double tempKappaP,
                                     GaussPoint *gp)
 {
-    //    ConcreteDPM2Status *status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
-    StressVector deviatoricStressTrial(matMode);
+    FloatArray deviatoricStressTrial;
     double sigTrial;
     double yieldValue = 0.;
     double yieldValueMid = 0.;
@@ -1590,10 +1553,9 @@ ConcreteDPM2 :: performVertexReturn(StressVector &effectiveStress,
     double sigAnswer;
     double ratioPotential;
 
-    effectiveStress.computeDeviatoricVolumetricSplit(deviatoricStressTrial, sigTrial);
-    double rhoTrial = deviatoricStressTrial.computeSecondCoordinate();
+    sigTrial = computeDeviatoricVolumetricSplit(deviatoricStressTrial, effectiveStress);
+    double rhoTrial = computeSecondCoordinate(deviatoricStressTrial);
 
-    //    double tempKappaP = status->giveTempKappaP();
     double kappaInitial = tempKappaP;
 
     sig2 = apexStress;
@@ -1754,24 +1716,21 @@ ConcreteDPM2 :: computeRatioPotential(double sig,
 
 
 double
-ConcreteDPM2 :: performRegularReturn(StressVector &effectiveStress,
+ConcreteDPM2 :: performRegularReturn(FloatArray &effectiveStress,
+                                     double kappaP,
                                      GaussPoint *gp)
 {
-    ConcreteDPM2Status *status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
-
-    MaterialMode matMode = gp->giveMaterialMode();
-    StressVector trialStress(matMode), deviatoricTrialStress(matMode);
+    FloatArray trialStress, deviatoricTrialStress;
+    FloatArray residuals, residualsNorm, deltaIncrement, dGDInv;
+    FloatMatrix jacobian;
+    FloatArray unknowns;
 
     double yieldValue;
-
-    FloatArray residuals(4), unknowns, residualsNorm, dGDInv;
-    FloatMatrix jacobian;
     double dKappaDDeltaLambda;
-    FloatArray deltaIncrement;
-
     double deltaLambda = 0.;
     double normOfResiduals = 0.;
     int iterationCount = 0;
+    bool mode3d = effectiveStress.giveSize() > 1;
 
     //Define stressVariables
     double trialSig, trialRho;
@@ -1783,12 +1742,11 @@ ConcreteDPM2 :: performRegularReturn(StressVector &effectiveStress,
     FloatMatrix stressPrincipalDir;
 
     //compute invariants from stress state
-    if ( matMode != _1dMat ) {
-        trialStress.computePrincipalValDir(helpStress, stressPrincipalDir);
-        trialStress.computeDeviatoricVolumetricSplit(deviatoricTrialStress, trialSig);
-        trialRho = deviatoricTrialStress.computeSecondCoordinate();
+    if ( mode3d ) {
+        StructuralMaterial :: computePrincipalValDir(helpStress, stressPrincipalDir, trialStress, principal_stress);
+        trialSig = computeDeviatoricVolumetricSplit(deviatoricTrialStress, trialStress);
+        trialRho = computeSecondCoordinate(deviatoricTrialStress);
     } else {  //1d case
-        residuals.resize(3);
         double angle; // this variable is used only as an input to the function computeTrialCoordinates and is not important and it is already calculated
         computeTrialCoordinates(trialStress, trialSig, trialRho, angle);
     }
@@ -1797,18 +1755,19 @@ ConcreteDPM2 :: performRegularReturn(StressVector &effectiveStress,
     rho = trialRho;
 
 
-    // Do the same for kappa
-    double kappaP = status->giveTempKappaP();
+    // Starting guess:
     double tempKappaP = kappaP;
 
     //initialise unknowns
-    if ( matMode != _1dMat ) {
+    if ( mode3d ) {
+        residuals.resize(4);
         unknowns.resize(4);
         unknowns.at(1) = trialSig;
         unknowns.at(2) = trialRho;
         unknowns.at(3) = tempKappaP;
         unknowns.at(4) = 0.;
     } else {  //1D case
+        residuals.resize(3);
         unknowns.resize(3);
         unknowns.at(1) = trialSig * 3.; // It is calculated as the volumetric stress in this case sigma/3
         unknowns.at(2) = tempKappaP;
@@ -1830,11 +1789,11 @@ ConcreteDPM2 :: performRegularReturn(StressVector &effectiveStress,
         iterationCount++;
         if ( iterationCount == newtonIter ) {
             returnResult = RR_NotConverged;
-            return status->giveTempKappaP();
+            return kappaP;
         }
 
         residualsNorm = residuals;
-        if ( matMode != _1dMat ) {
+        if ( effectiveStress.giveSize() > 1 ) {
             //Normalize residuals. Think about it more.
             residualsNorm.at(1) /= this->kM;
             residualsNorm.at(2) /= 2. * this->gM;
@@ -1846,23 +1805,21 @@ ConcreteDPM2 :: performRegularReturn(StressVector &effectiveStress,
 
         if ( isnan(normOfResiduals) ) {
             returnResult = RR_NotConverged;
-            return status->giveTempKappaP();
+            return kappaP;
         }
 
         if ( normOfResiduals > yieldTol  ) {
             // Test to run newton iteration using inverse of Jacobian
-            if ( matMode != _1dMat ) {
+            if ( mode3d ) {
                 computeJacobian(jacobian, sig, rho, tempKappaP, deltaLambda, gp);
 
                 if ( !jacobian.solveForRhs(residuals, deltaIncrement) ) {
                     returnResult = RR_NotConverged;
-                    return status->giveTempKappaP();
+                    return kappaP;
                 }
 
-                deltaIncrement.negated();
-
                 //compute Unknowns
-                unknowns.add(deltaIncrement);
+                unknowns.subtract(deltaIncrement);
 
                 if ( unknowns.at(4) <= 0. ) { //Keep deltaLambda greater than zero!
                     unknowns.at(4) = 0.;
@@ -1888,7 +1845,6 @@ ConcreteDPM2 :: performRegularReturn(StressVector &effectiveStress,
                 dKappaDDeltaLambda = computeDKappaDDeltaLambda(sig, rho, tempKappaP);
 
                 residuals.at(1) = sig - trialSig + this->kM *deltaLambda *dGDInv.at(1);
-
                 residuals.at(2) = rho - trialRho + ( 2. * this->gM ) * deltaLambda * dGDInv.at(2);
                 residuals.at(3) = -tempKappaP + kappaP + deltaLambda * dKappaDDeltaLambda;
                 residuals.at(4) = computeYieldValue(sig, rho, thetaTrial, tempKappaP);
@@ -1897,13 +1853,11 @@ ConcreteDPM2 :: performRegularReturn(StressVector &effectiveStress,
 
                 if ( !jacobian.solveForRhs(residuals, deltaIncrement) ) {
                     returnResult = RR_NotConverged;
-                    return status->giveTempKappaP();
+                    return kappaP;
                 }
 
-                deltaIncrement.negated();
-
                 //compute Unknowns
-                unknowns.add(deltaIncrement);
+                unknowns.subtract(deltaIncrement);
 
                 if ( unknowns.at(3) <= 0. ) { //Keep deltaLambda greater equal than zero!
                     unknowns.at(3) = 0.;
@@ -1922,10 +1876,9 @@ ConcreteDPM2 :: performRegularReturn(StressVector &effectiveStress,
 
                 /* Compute the mVector holding the derivatives of the g function and the hardening function*/
                 double dginv = computeDGDInv1d(unknowns.at(1), tempKappaP);
-                dKappaDDeltaLambda = computeDKappaDDeltaLambda(unknowns.at(1), 1., tempKappaP);
+                dKappaDDeltaLambda = computeDKappaDDeltaLambda1d(unknowns.at(1), tempKappaP);
 
                 residuals.at(1) = 3. * ( sig - trialSig ) + this->eM *deltaLambda * dginv;
-
                 residuals.at(2) = -tempKappaP + kappaP + deltaLambda * dKappaDDeltaLambda;
                 residuals.at(3) = computeYieldValue(sig, rho, thetaTrial, tempKappaP);
             }
@@ -1933,26 +1886,16 @@ ConcreteDPM2 :: performRegularReturn(StressVector &effectiveStress,
     }
 
     returnResult = RR_Converged;
-    if ( matMode == _1dMat ) {
-        effectiveStress.at(1) = sig * 3;
-    } else {
-        StressVector stressPrincipal(_3dMat);
-        StressVector stressTemp(_3dMat);
+    if ( mode3d ) {
+        FloatArray stressPrincipal(6);
         stressPrincipal.zero();
 
         stressPrincipal(0) = sig + sqrt(2. / 3.) * rho * cos(thetaTrial);
         stressPrincipal(1) = sig + sqrt(2. / 3.) * rho * cos(thetaTrial - 2. * M_PI / 3.);
         stressPrincipal(2) = sig + sqrt(2. / 3.) * rho * cos(thetaTrial + 2. * M_PI / 3.);
-        if ( matMode == _PlaneStrain ) {
-            transformStressVectorTo(stressTemp, stressPrincipalDir, stressPrincipal, 1);
-            effectiveStress(0) = stressTemp(0);
-            effectiveStress(1) = stressTemp(1);
-            effectiveStress(2) = stressTemp(2);
-            effectiveStress(3) = stressTemp(5);
-        } else {
-            transformStressVectorTo(stressTemp, stressPrincipalDir, stressPrincipal, 1);
-            effectiveStress = stressTemp;
-        }
+        transformStressVectorTo(effectiveStress, stressPrincipalDir, stressPrincipal, 1);
+    } else {
+        effectiveStress.at(1) = sig * 3;
     }
 
     return tempKappaP;
@@ -1966,21 +1909,15 @@ ConcreteDPM2 :: compute1dJacobian(FloatMatrix &answer,
                                   GaussPoint *gp)
 {
     double dFDInv = computeDFDInv1d(totalsigma, kappa);
-
     double dGDInv = computeDGDInv1d(totalsigma, kappa);
-
     double dDGDDInv = computeDDGDDInv1d(totalsigma, kappa);
-
     double dKappaDDeltaLambda = computeDKappaDDeltaLambda(totalsigma, 1, kappa);
-
-    double dFDKappa = computeDFDKappa(totalsigma, 1, kappa);
-
+    double dFDKappa = computeDFDKappa(totalsigma, 1, kappa, true);
     double dDGDInvDKappa = computeDDGDInvDKappa1d(totalsigma, kappa);
-
     double dDKappaDDeltaLambdaDKappa = computeDDKappaDDeltaLambdaDKappa1d(totalsigma, kappa);
-
     double dDKappaDDeltaLambdaDInv = computeDDKappaDDeltaLambdaDInv1d(totalsigma, kappa);
 
+    answer.resize(3, 3);
     /* Compute matrix*/
     /* 1st row */
     answer.at(1, 1) = 1. + this->eM * deltaLambda * dDGDDInv;
@@ -2016,7 +1953,7 @@ ConcreteDPM2 :: computeJacobian(FloatMatrix &answer,
 
     double dKappaDDeltaLambda = computeDKappaDDeltaLambda(sig, rho, kappa);
 
-    double dFDKappa = computeDFDKappa(sig, rho, kappa);
+    double dFDKappa = computeDFDKappa(sig, rho, kappa, false);
 
     FloatArray dDGDInvDKappa;
     computeDDGDInvDKappa(dDGDInvDKappa, sig, rho, kappa);
@@ -2030,9 +1967,8 @@ ConcreteDPM2 :: computeJacobian(FloatMatrix &answer,
     computeDDKappaDDeltaLambdaDInv(dDKappaDDeltaLambdaDInv, sig, rho, kappa);
 
 
-    /* Compute matrix*/
     answer.resize(4, 4);
-    answer.zero();
+    /* Compute matrix*/
     answer.at(1, 1) = 1. + this->kM *deltaLambda *dDGDDInv.at(1, 1);
     answer.at(1, 2) = this->kM * deltaLambda * dDGDDInv.at(1, 2);
     answer.at(1, 3) = this->kM * deltaLambda * dDGDInvDKappa.at(1);
@@ -2053,6 +1989,8 @@ ConcreteDPM2 :: computeJacobian(FloatMatrix &answer,
     answer.at(4, 3) = dFDKappa;
     answer.at(4, 4) = 0.;
 }
+
+
 
 
 double
@@ -2087,7 +2025,8 @@ ConcreteDPM2 :: computeYieldValue(double sig,
 double
 ConcreteDPM2 :: computeDFDKappa(double sig,
                                 double rho,
-                                double tempKappa)
+                                double tempKappa,
+                                bool mode1d)
 {
     double dFDKappa;
     double theta = thetaTrial;
@@ -2103,7 +2042,7 @@ ConcreteDPM2 :: computeDFDKappa(double sig,
         ( 2 * ( 1. - pow(ecc, 2) ) * cos(theta) + ( 2. * ecc - 1. ) * sqrt(4. * ( 1. - pow(ecc, 2) ) * pow(cos(theta), 2) + 5. * pow(ecc, 2) - 4. * ecc) );
 
 
-    if ( matMode != _1dMat ) {
+    if ( !mode1d ) {
         //compute help functions Al, Bl
         double Al = ( 1. - yieldHardOne ) * pow( ( sig / fc + rho / ( sqrt(6.) * fc ) ), 2. ) + sqrt(3. / 2.) * rho / fc;
 
@@ -2115,7 +2054,7 @@ ConcreteDPM2 :: computeDFDKappa(double sig,
         double dFDYieldHardTwo = pow(yieldHardOne, 2.) * m * ( sig / fc + rho * rFunction / ( sqrt(6.) * fc ) ) - 2. *yieldHardTwo *pow(yieldHardOne, 2.);
 
         // compute dFDKappa
-        dFDKappa =  dFDYieldHardOne * dYieldHardOneDKappa +
+        dFDKappa = dFDYieldHardOne * dYieldHardOneDKappa +
                    dFDYieldHardTwo * dYieldHardTwoDKappa;
     } else {  //1d case
         dFDKappa = -2 * pow(2 * sig / 3 / fc, 2) * ( sig / fc + pow(2 / 3 * sig / fc, 2) * ( 1 - yieldHardOne ) ) * dYieldHardOneDKappa +
@@ -2179,9 +2118,19 @@ ConcreteDPM2 :: computeDFDInv(FloatArray &answer,
     //compute dfdrho
     double dfdrho = AL / ( sqrt(6.) * fc ) * ( 4. * ( 1. - yieldHardOne ) * BL + 6. ) + rFunction *m *yieldHardTwo *pow(yieldHardOne, 2.) / ( sqrt(6.) * fc );
 
-    answer = {dfdsig, dfdrho};
+    answer.resize(2);
+    answer(0) = dfdsig;
+    answer(1) = dfdrho;
 }
 
+
+double
+ConcreteDPM2 :: computeDKappaDDeltaLambda1d(double sig, double tempKappa)
+{
+    double equivalentDGDStress = fabs(computeDGDInv1d(sig, tempKappa)); // In 1D is the absolute value
+    double ductilityMeasure = computeDuctilityMeasure(sig / 3., sqrt(2. / 3.) * sig, this->thetaTrial);
+    return equivalentDGDStress / ductilityMeasure; // dKappaDDeltaLambda
+}
 
 
 double
@@ -2189,30 +2138,21 @@ ConcreteDPM2 :: computeDKappaDDeltaLambda(double sig,
                                           double rho,
                                           double tempKappa)
 {
-    //Variables
     double equivalentDGDStress;
     double ductilityMeasure;
 
-    if ( matMode != _1dMat ) {
-        FloatArray dGDInv(2);
-        computeDGDInv(dGDInv, sig, rho, tempKappa);
+    FloatArray dGDInv;
+    computeDGDInv(dGDInv, sig, rho, tempKappa);
 
-        equivalentDGDStress = sqrt( 1. / 3. * pow(dGDInv(0), 2.) +
-                                    pow(dGDInv(1), 2.) );
+    equivalentDGDStress = sqrt( 1. / 3. * pow(dGDInv(0), 2.) + pow(dGDInv(1), 2.) );
 
-        ductilityMeasure = computeDuctilityMeasure(sig, rho, this->thetaTrial);
-    } else {  //1D case
-        equivalentDGDStress = fabs(computeDGDInv1d(sig, tempKappa)); // In 1D is the absolute value
-        ductilityMeasure = computeDuctilityMeasure(sig / 3., sqrt(2. / 3.) * sig, this->thetaTrial);
-    }
+    ductilityMeasure = computeDuctilityMeasure(sig, rho, this->thetaTrial);
 
-    double dKappaDDeltaLambda = equivalentDGDStress / ductilityMeasure;
-    return dKappaDDeltaLambda;
+    return equivalentDGDStress / ductilityMeasure; // dKappaDDeltaLambda
 }
 
 double
-ConcreteDPM2 :: computeDDKappaDDeltaLambdaDInv1d(double sigma,
-                                                 double tempKappa)
+ConcreteDPM2 :: computeDDKappaDDeltaLambdaDInv1d(double sigma, double tempKappa)
 {
     double dGDInv;
     double dDGDDInv;
@@ -2243,10 +2183,9 @@ ConcreteDPM2 :: computeDDKappaDDeltaLambdaDInv(FloatArray &answer,
                                                double rho,
                                                double tempKappa)
 {
-    //Variables
     double equivalentDGDStress;
-    FloatArray dGDInv(2);
-    FloatMatrix dDGDDInv(2, 2);
+    FloatArray dGDInv;
+    FloatMatrix dDGDDInv;
     FloatArray dEquivalentDGDStressDInv(2);
 
     //Compute first and second derivative of plastic potential
@@ -2254,8 +2193,7 @@ ConcreteDPM2 :: computeDDKappaDDeltaLambdaDInv(FloatArray &answer,
     computeDDGDDInv(dDGDDInv, sig, rho, tempKappa);
 
     //Compute equivalentDGDStress
-    equivalentDGDStress = sqrt( 1. / 3. * pow(dGDInv(0), 2.) +
-                                pow(dGDInv(1), 2.) );
+    equivalentDGDStress = sqrt( 1. / 3. * pow(dGDInv(0), 2.) + pow(dGDInv(1), 2.) );
 
     //computeDuctilityMeasure
     double ductilityMeasure = computeDuctilityMeasure(sig, rho, this->thetaTrial);
@@ -2266,13 +2204,12 @@ ConcreteDPM2 :: computeDDKappaDDeltaLambdaDInv(FloatArray &answer,
     dEquivalentDGDStressDInv(1) =
         ( 2. / 3. * dGDInv(0) * dDGDDInv(0, 1) + 2. * dGDInv(1) * dDGDDInv(1, 1) ) / ( 2. * equivalentDGDStress );
 
-    answer.zero();
-    answer.resize(2);
 
     // compute the derivative of
     FloatArray dDuctilityMeasureDInv(2);
     computeDDuctilityMeasureDInv(dDuctilityMeasureDInv, sig, rho, tempKappa);
 
+    answer.resize(2);
     answer(0) = ( dEquivalentDGDStressDInv(0) * ductilityMeasure - equivalentDGDStress * dDuctilityMeasureDInv(0) ) / pow(ductilityMeasure, 2.);
 
     answer(1) = ( dEquivalentDGDStressDInv(1) * ductilityMeasure - equivalentDGDStress * dDuctilityMeasureDInv(1) ) / pow(ductilityMeasure, 2.);
@@ -2280,11 +2217,43 @@ ConcreteDPM2 :: computeDDKappaDDeltaLambdaDInv(FloatArray &answer,
 
 
 double
-ConcreteDPM2 :: computeDDKappaDDeltaLambdaDKappa1d(double sig, double tempKappa)
+ConcreteDPM2 :: computeDDKappaDDeltaLambdaDKappa(double sig, double rho, double tempKappa)
 {
-    double equivalentDGDStress;
-    double dEquivalentDGDStressDKappa;
-    double ductilityMeasure;
+    double equivalentDGDStress, dEquivalentDGDStressDKappa, ductilityMeasure;
+
+    FloatArray dGDInv, dDGDInvDKappa;
+
+    //Compute first and second derivative of plastic potential
+    computeDGDInv(dGDInv, sig, rho, tempKappa);
+    computeDDGDInvDKappa(dDGDInvDKappa, sig, rho, tempKappa);
+
+    equivalentDGDStress = sqrt( 1. / 3. * pow(dGDInv(0), 2.) +
+                                pow(dGDInv(1), 2.) );
+
+    ductilityMeasure = computeDuctilityMeasure(sig, rho, this->thetaTrial);  //computeDuctilityMeasure
+    //Compute dEquivalentDGDStressDKappa
+    dEquivalentDGDStressDKappa =
+        ( 2. / 3. * dGDInv(0) * dDGDInvDKappa(0) + 2. * dGDInv(1) * dDGDInvDKappa(1) ) / ( 2. * equivalentDGDStress );
+
+#if 0
+    // compute the derivative of
+    double dDuctilityMeasureDKappa = 0.;
+
+    ///@todo Is this right? This is *NEVER* used.
+    double dDKappaDDeltaLambdaDKappa =
+        ( dEquivalentDGDStressDKappa * ductilityMeasure -
+            equivalentDGDStress * dDuctilityMeasureDKappa ) / pow(ductilityMeasure, 2.);
+#endif
+    return dEquivalentDGDStressDKappa / ductilityMeasure; // dDKappaDDeltaLambdaDKappa
+}
+
+
+double
+ConcreteDPM2 :: computeDDKappaDDeltaLambdaDKappa1d(double sig,
+                                                 double tempKappa)
+{
+    double equivalentDGDStress, dEquivalentDGDStressDKappa, ductilityMeasure;
+
     equivalentDGDStress = computeDGDInv1d(sig, tempKappa);
     dEquivalentDGDStressDKappa = computeDDGDInvDKappa1d(sig, tempKappa);
     if ( equivalentDGDStress < 0 ) {
@@ -2296,39 +2265,6 @@ ConcreteDPM2 :: computeDDKappaDDeltaLambdaDKappa1d(double sig, double tempKappa)
     return dEquivalentDGDStressDKappa / ductilityMeasure; // dDKappaDDeltaLambdaDKappa
 }
 
-
-double
-ConcreteDPM2 :: computeDDKappaDDeltaLambdaDKappa(double sig,
-                                                 double rho,
-                                                 double tempKappa)
-{
-    double equivalentDGDStress;
-    double dEquivalentDGDStressDKappa;
-    double ductilityMeasure;
-    FloatArray dGDInv;
-    FloatArray dDGDInvDKappa;
-
-    //Compute first and second derivative of plastic potential
-    computeDGDInv(dGDInv, sig, rho, tempKappa);
-    computeDDGDInvDKappa(dDGDInvDKappa, sig, rho, tempKappa);
-
-    equivalentDGDStress = sqrt( 1. / 3. * pow(dGDInv(0), 2.) + pow(dGDInv(1), 2.) );
-
-    ductilityMeasure = computeDuctilityMeasure(sig, rho, this->thetaTrial);  //computeDuctilityMeasure
-    //Compute dEquivalentDGDStressDKappa
-    dEquivalentDGDStressDKappa =
-        ( 2. / 3. * dGDInv(0) * dDGDInvDKappa(0) + 2. * dGDInv(1) * dDGDInvDKappa(1) ) / ( 2. * equivalentDGDStress );
-#if 0
-    // compute the derivative of
-    double dDuctilityMeasureDKappa = 0.;
-
-    ///@todo Is this right? This is *NEVER* used.
-    dDKappaDDeltaLambdaDKappa =
-        ( dEquivalentDGDStressDKappa * ductilityMeasure -
-            equivalentDGDStress * dDuctilityMeasureDKappa ) / pow(ductilityMeasure, 2.);
-#endif
-    return dEquivalentDGDStressDKappa / ductilityMeasure; // dDKappaDDeltaLambdaDKappa
-}
 
 double
 ConcreteDPM2 :: computeDDuctilityMeasureDInv1d(double sigma,
@@ -2470,7 +2406,6 @@ ConcreteDPM2 :: computeDDGDInvDKappa(FloatArray &answer,
 {
     //Compute dilation parameter
 
-
     //compute yieldHard and yieldSoft
     double yieldHardOne = computeHardeningOne(tempKappa);
     double yieldHardTwo = computeHardeningTwo(tempKappa);
@@ -2595,17 +2530,17 @@ ConcreteDPM2 :: computeDDGDDInv(FloatMatrix &answer,
 
 
 double
-ConcreteDPM2 :: computeAlpha(StressVector &effectiveStressTension,
-                             StressVector &effectiveStressCompression,
-                             StressVector &effectiveStress)
+ConcreteDPM2 :: computeAlpha(FloatArray &effectiveStressTension,
+                             FloatArray &effectiveStressCompression,
+                             FloatArray &effectiveStress)
 {
-    FloatMatrix stressPrincipalDir(3, 3);
-    StressVector principalStress(_3dMat);
-    effectiveStress.computePrincipalValDir(principalStress, stressPrincipalDir);
+    FloatMatrix stressPrincipalDir;
+    FloatArray principalStress;
+    StructuralMaterial :: computePrincipalValDir(principalStress, stressPrincipalDir, effectiveStress, principal_stress);
 
     //Split the principal values in a tension and a compression part
-    StressVector principalStressTension(_3dMat);
-    StressVector principalStressCompression(_3dMat);
+    FloatArray principalStressTension(6);
+    FloatArray principalStressCompression(6);
 
     for ( int i = 1; i <= principalStress.giveSize(); i++ ) {
         if ( principalStress.at(i) >= 0 ) {
@@ -2619,29 +2554,11 @@ ConcreteDPM2 :: computeAlpha(StressVector &effectiveStressTension,
 
     //Transform the tension and compression principal stresses back to the original coordinate system
 
-    StressVector stressTemp(_3dMat);
-
     //Take care of type of stress state for tension
-    transformStressVectorTo(stressTemp, stressPrincipalDir, principalStressTension, 1);
-    if ( matMode == _PlaneStrain ) {
-        effectiveStressTension(0) = stressTemp(0);
-        effectiveStressTension(1) = stressTemp(1);
-        effectiveStressTension(2) = stressTemp(2);
-        effectiveStressTension(3) = stressTemp(5);
-    } else {
-        effectiveStressTension = stressTemp;
-    }
+    transformStressVectorTo(effectiveStressTension, stressPrincipalDir, principalStressTension, 1);
 
     //Take care of type of stress state for compression
-    transformStressVectorTo(stressTemp, stressPrincipalDir, principalStressCompression, 1);
-    if ( matMode == _PlaneStrain ) {
-        effectiveStressCompression(0) = stressTemp(0);
-        effectiveStressCompression(1) = stressTemp(1);
-        effectiveStressCompression(2) = stressTemp(2);
-        effectiveStressCompression(3) = stressTemp(5);
-    } else {
-        effectiveStressCompression = stressTemp;
-    }
+    transformStressVectorTo(effectiveStressCompression, stressPrincipalDir, principalStressCompression, 1);
 
     //Determine the two factors from the stress
 
@@ -2724,13 +2641,13 @@ ConcreteDPM2 :: computeHardeningTwoPrime(double kappa) const
 void
 ConcreteDPM2 :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
-    ConcreteDPM2Status *status = ( ConcreteDPM2Status * ) this->giveStatus(gp);
-    double om;
+    ConcreteDPM2Status *status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
     if ( mode == ElasticStiffness ) {
         answer.resize(1, 1);
         answer.at(1, 1) = eM;
     } else if ( mode == SecantStiffness ) {
-        StrainVector strain(status->giveTempStrainVector(), _1dMat);
+        double om;
+        const FloatArray &strain = status->giveTempStrainVector();
         if ( strain.at(1) >= 0 || isotropicFlag == 1 ) {
             om = status->giveTempDamageTension();
         } else {
@@ -2745,13 +2662,10 @@ ConcreteDPM2 :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode,
         answer.at(1, 1) = eM;
         answer.times(1.0 - om);
     } else {
-        OOFEM_WARNING("ConcreteDPM2 :: give1dStressStiffMtrx ... unknown type of stiffness (tangent stiffness not implemented for 1d). Elastic stiffness used!\n");
+        OOFEM_WARNING("unknown type of stiffness (tangent stiffness not implemented for 1d). Elastic stiffness used!\n");
         answer.resize(1, 1);
         answer.at(1, 1) = eM;
     }
-
-
-    return;
 }
 
 void
@@ -2761,37 +2675,26 @@ ConcreteDPM2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                               TimeStep *tStep)
 {
     if ( mode == ElasticStiffness ) {
-        FloatMatrix stiff;
-        this->giveLinearElasticMaterial()->giveStiffnessMatrix(stiff, mode, gp, tStep);
-        this->giveFullSymMatrixForm( answer, stiff, gp->giveMaterialMode() );
+        this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
     } else if ( mode == SecantStiffness ) {
-        this->compute3dSecantStiffness(answer, mode, gp, tStep);
+        this->compute3dSecantStiffness(answer, gp, tStep);
     } else if ( mode == TangentStiffness ) {
-        OOFEM_WARNING("unknown type of stiffness (tangent stiffness not implemented for 1d). Elastic stiffness used!");
-        FloatMatrix stiff;
-        this->giveLinearElasticMaterial()->giveStiffnessMatrix(stiff, mode, gp, tStep);
-        this->giveFullSymMatrixForm( answer, stiff, gp->giveMaterialMode() );
+        OOFEM_WARNING("unknown type of stiffness (tangent stiffness not implemented). Elastic stiffness used!");
+        this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
     }
 }
 
 void
 ConcreteDPM2 :: compute3dSecantStiffness(FloatMatrix &answer,
-                                       MatResponseMode mode,
                                        GaussPoint *gp,
                                        TimeStep *tStep)
 {
-    this->matMode = gp->giveMaterialMode();
     ConcreteDPM2Status *status = static_cast< ConcreteDPM2Status * >( giveStatus(gp) );
 
-    double omegaTension;
-
     //  Damage parameters
-    omegaTension = status->giveTempDamageTension();
-    if ( omegaTension > 0.999999 ) {
-        omegaTension = 0.999999;
-    }
+    double omegaTension = min(status->giveTempDamageTension(), 0.999999);
 
-    this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, ElasticStiffness, gp, tStep);
 
     if ( isotropicFlag == 1 ) {
         answer.times(1. - omegaTension);
@@ -2799,19 +2702,14 @@ ConcreteDPM2 :: compute3dSecantStiffness(FloatMatrix &answer,
     }
 
 
-    StrainVector strain(status->giveTempStrainVector(), matMode);
-    StressVector effectiveStress(matMode);
-    StrainVector elasticStrain = strain;
+    FloatArray effectiveStress;
+    FloatArray elasticStrain = status->giveTempStrainVector();
     elasticStrain.subtract( status->giveTempPlasticStrain() );
-    elasticStrain.applyElasticStiffness(effectiveStress, eM, nu);
+    effectiveStress.beProductOf(answer, elasticStrain);
 
     //Calculate the principal values of the effective stress
-    StressVector fullEffectiveStress(_3dMat);
-    effectiveStress.convertToFullForm(fullEffectiveStress);
-    FloatMatrix stressPrincipalDir(3, 3);
-    StressVector principalStress(_3dMat);
-    fullEffectiveStress.computePrincipalValDir(principalStress, stressPrincipalDir);
-
+    FloatArray principalStress;
+    StructuralMaterial :: computePrincipalValues(principalStress, effectiveStress, principal_stress);
 
     //exclude two special cases.
     if ( principalStress.containsOnlyZeroes() ) {
@@ -2824,28 +2722,27 @@ ConcreteDPM2 :: compute3dSecantStiffness(FloatMatrix &answer,
         }
     }
 
-
     answer.times(1. - omegaTension);
 }
 
 
 
 void
-ConcreteDPM2 :: computeTrialCoordinates(const StressVector &stress, double &sigNew, double &rhoNew, double &thetaNew)
+ConcreteDPM2 :: computeTrialCoordinates(const FloatArray &stress, double &sigNew, double &rhoNew, double &thetaNew)
 {
-    if ( matMode == _1dMat ) { //1d case
-        sigNew = stress.computeFirstInvariant() / 3.;
-        rhoNew = stress.computeFirstInvariant() * sqrt(2. / 3.);
+    if ( stress.giveSize() == 1 ) { //1d case
+        sigNew = stress[0] / 3.;
+        rhoNew = stress[0] * sqrt(2. / 3.);
         if ( sigNew >= 0 ) {
             thetaNew = 0.;
         } else {
             thetaNew = M_PI / 6;
         }
     } else {
-        StressVector deviatoricStress(matMode);
-        stress.computeDeviatoricVolumetricSplit(deviatoricStress, sigNew);
-        rhoNew = deviatoricStress.computeSecondCoordinate();
-        thetaNew = deviatoricStress.computeThirdCoordinate();
+        FloatArray deviatoricStress;
+        sigNew = computeDeviatoricVolumetricSplit(deviatoricStress, stress);
+        rhoNew = computeSecondCoordinate(deviatoricStress);
+        thetaNew = computeThirdCoordinate(deviatoricStress);
     }
 }
 
@@ -2887,14 +2784,13 @@ ConcreteDPM2 :: assignStateFlag(GaussPoint *gp)
 
 void
 ConcreteDPM2 :: computeDRhoDStress(FloatArray &answer,
-                                   const StressVector &stress) const
+                                   const FloatArray &stress) const
 {
     int size = 6;
     //compute volumetric deviatoric split
-    StressVector deviatoricStress(_3dMat);
-    double volumetricStress;
-    stress.computeDeviatoricVolumetricSplit(deviatoricStress, volumetricStress);
-    double rho = deviatoricStress.computeSecondCoordinate();
+    FloatArray deviatoricStress;
+    computeDeviatoricVolumetricSplit(deviatoricStress, stress);
+    double rho = computeSecondCoordinate(deviatoricStress);
 
     //compute the derivative of J2 with respect to the stress
     FloatArray dJ2DStress;
@@ -2924,16 +2820,15 @@ ConcreteDPM2 :: computeDSigDStress(FloatArray &answer) const
 
 void
 ConcreteDPM2 :: computeDDRhoDDStress(FloatMatrix &answer,
-                                     const StressVector &stress) const
+                                     const FloatArray &stress) const
 
 {
     int size = 6;
 
     //compute volumetric deviatoric split
-    StressVector deviatoricStress(_3dMat);
-    double volumetricStress;
-    stress.computeDeviatoricVolumetricSplit(deviatoricStress, volumetricStress);
-    double rho = deviatoricStress.computeSecondCoordinate();
+    FloatArray deviatoricStress;
+    computeDeviatoricVolumetricSplit(deviatoricStress, stress);
+    double rho = computeSecondCoordinate(deviatoricStress);
 
 
     //compute first dericative of J2
@@ -2963,18 +2858,11 @@ ConcreteDPM2 :: computeDDRhoDDStress(FloatMatrix &answer,
     ddJ2ddstress(2, 0) = -1. / 3.;
     ddJ2ddstress(2, 1) = -1. / 3.;
 
-    //compute square of the first derivative of J2
-    FloatMatrix dJ2DJ2(size, size);
-    for ( int v = 0; v < size; v++ ) {
-        for ( int w = 0; w < size; ++w ) {
-            dJ2DJ2(v, w) = dJ2dstress(v) * dJ2dstress(w);
-        }
-    }
-
     //compute the second derivative of rho
     answer = ddJ2ddstress;
     answer.times(1. / rho);
-    answer.add(-1. / ( rho * rho * rho ), dJ2DJ2);
+    //compute square of the first derivative of J2
+    answer.plusDyadUnsym(dJ2dstress, dJ2dstress, -1. / ( rho * rho * rho ));
 }
 
 int
@@ -2987,11 +2875,7 @@ ConcreteDPM2 :: giveIPValue(FloatArray &answer,
 
     switch ( type ) {
     case IST_PlasticStrainTensor:
-    {
-        StrainVector e(_Unknown);
-        status->giveFullPlasticStrainVector(e);
-        answer = e;
-    }
+        answer = status->givePlasticStrain();
         return 1;
 
     case IST_DamageTensor:
