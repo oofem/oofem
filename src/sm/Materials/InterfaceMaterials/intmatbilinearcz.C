@@ -118,6 +118,9 @@ int IntMatBilinearCZ :: checkConsistency()
 void IntMatBilinearCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
                                                 const FloatMatrix &F, TimeStep *tStep)
 {
+
+    double maxDamage = 0.99999999;
+
     IntMatBilinearCZStatus *status = static_cast< IntMatBilinearCZStatus * >( this->giveStatus(gp) );
 
     status->mJumpNew = jump;
@@ -132,9 +135,9 @@ void IntMatBilinearCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *
     double TTrTang              = sqrt( pow(tractionTrial.at(1), 2.0) + pow(tractionTrial.at(2), 2.0) );
     double phiTr = computeYieldFunction(TTrNormal, TTrTang);
 
-    const double damageTol = 1.0e-6;
-    if ( status->mDamageOld > ( 1.0 - damageTol ) ) {
-        status->mDamageNew = 1.0;
+    if ( status->mDamageOld > maxDamage ) {
+        status->mDamageNew = maxDamage;
+        status->mDamageOld = maxDamage;
         status->mPlastMultIncNew = 0.0;
         answer.resize(3);
         answer.zero();
@@ -153,13 +156,14 @@ void IntMatBilinearCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *
     if ( phiTr < 0.0 ) {
         status->mDamageNew = status->mDamageOld;
         status->mPlastMultIncNew = 0.0;
-        answer.beScaled( ( 1.0 - status->mDamageNew ), answer );
-
         status->mTractionNew = answer;
+
 
         status->letTempJumpBe(jump);
         status->letTempFirstPKTractionBe(answer);
         status->letTempTractionBe(answer);
+
+        answer.beScaled( ( 1.0 - status->mDamageNew ), answer );
 
         return;
     } else {
@@ -177,7 +181,7 @@ void IntMatBilinearCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *
             computeTraction(answer, tractionTrial, plastMultInc);
 
             double TNormal      = answer.at(3);
-            double TTang                = sqrt( pow(answer.at(1), 2.0) + pow(answer.at(2), 2.0) );
+            double TTang        = sqrt( pow(answer.at(1), 2.0) + pow(answer.at(2), 2.0) );
             double phi = computeYieldFunction(TNormal, TTang);
 
             //          if(iter > 20) {
@@ -197,16 +201,8 @@ void IntMatBilinearCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *
                 double damageInc = status->mPlastMultIncNew / S;
                 status->mDamageNew = status->mDamageOld + damageInc;
 
-                if ( status->mDamageNew > 1.0 ) {
-                    status->mDamageNew = 1.0;
-                }
-
-                if(mSemiExplicit) {
-//                    computeTraction(answer, tractionTrial, status->mPlastMultIncOld);
-                    answer.beScaled( ( 1.0 - status->mDamageOld ), answer );
-               }
-                else {
-                    answer.beScaled( ( 1.0 - status->mDamageNew ), answer );
+                if ( status->mDamageNew > maxDamage ) {
+                    status->mDamageNew = maxDamage;
                 }
 
                 status->mTractionNew = answer;
@@ -215,6 +211,14 @@ void IntMatBilinearCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *
                 status->letTempJumpBe(jump);
                 status->letTempFirstPKTractionBe(answer);
                 status->letTempTractionBe(answer);
+
+                if(mSemiExplicit) {
+                    computeTraction(answer, tractionTrial, status->mPlastMultIncOld);
+                    answer.beScaled( ( 1.0 - status->mDamageOld ), answer );
+               }
+                else {
+                    answer.beScaled( ( 1.0 - status->mDamageNew ), answer );
+                }
 
                 return;
             }
