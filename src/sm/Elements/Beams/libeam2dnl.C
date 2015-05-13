@@ -391,6 +391,13 @@ LIBeam2dNL :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
 
 
 void
+LIBeam2dNL :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveGeneralizedStress_Beam2d(answer, gp, strain, tStep);
+}
+
+
+void
 LIBeam2dNL :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep)
 //
 // returns full 3d strain vector of given layer (whose z-coordinate from center-line is

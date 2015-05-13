@@ -60,6 +60,7 @@ public:
     virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
     virtual const char *giveInputRecordName() const { return _IFT_tet21ghostsolid_Name; }
     virtual int computeNumberOfDofs() { return 70; }
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
     virtual MaterialMode giveMaterialMode() { return _3dMat; }
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual void computeNumericStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);

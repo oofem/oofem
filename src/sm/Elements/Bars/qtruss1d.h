@@ -60,6 +60,8 @@ public:
     virtual int computeNumberOfDofs() { return 3; }
     virtual void giveDofManDofIDMask(int inode, IntArray &) const;
 
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+
     virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane)
     { return this->computeLength(); }
 

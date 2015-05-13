@@ -432,7 +432,7 @@ PhaseFieldElement :: initializeFrom(InputRecord *ir)
 //            //dpmat->giveRealStressVector(answer, gp, Epsilon, nlCumulatedStrain, stepN);
 //            return;
 //        } else {
-//            OOFEM_ERROR("giveRealStresses : unsupported mode");
+//            OOFEM_ERROR("unsupported mode");
 //        }
 //    } else if ( nlGeo == 1 ) {
 //        if ( elem->giveDomain()->giveEngngModel()->giveFormulation() == TL ) {
@@ -442,7 +442,7 @@ PhaseFieldElement :: initializeFrom(InputRecord *ir)
 //              //  dpmat->giveFirstPKStressVector(answer, gp, vF, nlCumulatedStrain, stepN);
 //                return;
 //            } else {
-//                OOFEM_ERROR("giveRealStresses : unsupported mode");
+//                OOFEM_ERROR("unsupported mode");
 //            }
 //        }
 //
