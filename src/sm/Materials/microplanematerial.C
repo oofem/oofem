@@ -78,11 +78,7 @@ MicroplaneMaterial :: giveMicroplane(int i, GaussPoint *masterGp)
 MaterialMode
 MicroplaneMaterial :: giveCorrespondingSlaveMaterialMode(MaterialMode masterMode)
 {
-    if ( masterMode == _3dMat ) {
-        return _3dMicroplane;
-    }
-
-    return _Unknown;
+    return _3dMicroplane;
 }
 
 IntegrationPointStatus *
@@ -109,17 +105,13 @@ MicroplaneMaterial :: giveMicroplaneStatus(GaussPoint *gp)
 void
 MicroplaneMaterial :: initTempStatus(GaussPoint *gp)
 {
-    int mPlaneIndex;
-    Microplane *mPlane;
-    MaterialStatus *status;
-
     // init master
     this->giveStatus(gp)->initTempStatus();
 
     // init master microplanes
-    for ( mPlaneIndex = 0; mPlaneIndex < numberOfMicroplanes; mPlaneIndex++ ) {
-        mPlane = this->giveMicroplane(mPlaneIndex, gp);
-        status = dynamic_cast< MaterialStatus * >( this->giveMicroplaneStatus(mPlane) );
+    for ( int mPlaneIndex = 0; mPlaneIndex < numberOfMicroplanes; mPlaneIndex++ ) {
+        Microplane *mPlane = this->giveMicroplane(mPlaneIndex, gp);
+        MaterialStatus *status = dynamic_cast< MaterialStatus * >( this->giveMicroplaneStatus(mPlane) );
         if ( status ) {
             status->initTempStatus();
         }
@@ -130,9 +122,6 @@ contextIOResultType
 MicroplaneMaterial :: saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp)
 {
     contextIOResultType iores;
-    int mPlaneIndex;
-    Microplane *mPlane;
-    IntegrationPointStatus *status;
 
     if ( gp == NULL ) {
         THROW_CIOERR(CIO_BADOBJ);
@@ -144,9 +133,9 @@ MicroplaneMaterial :: saveIPContext(DataStream &stream, ContextMode mode, GaussP
     }
 
     // save microplanes
-    for ( mPlaneIndex = 0; mPlaneIndex < numberOfMicroplanes; mPlaneIndex++ ) {
-        mPlane = this->giveMicroplane(mPlaneIndex, gp);
-        status =  this->giveMicroplaneStatus(mPlane);
+    for ( int mPlaneIndex = 0; mPlaneIndex < numberOfMicroplanes; mPlaneIndex++ ) {
+        Microplane *mPlane = this->giveMicroplane(mPlaneIndex, gp);
+        IntegrationPointStatus *status =  this->giveMicroplaneStatus(mPlane);
         if ( status ) {
             if ( ( iores = status->saveContext(stream, mode, gp) ) != CIO_OK ) {
                 THROW_CIOERR(iores);
@@ -161,9 +150,6 @@ contextIOResultType
 MicroplaneMaterial :: restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp)
 {
     contextIOResultType iores;
-    int mPlaneIndex;
-    Microplane *mPlane;
-    IntegrationPointStatus *status;
 
     // corresponding gp is passed in obj
     if ( gp == NULL ) {
@@ -176,9 +162,9 @@ MicroplaneMaterial :: restoreIPContext(DataStream &stream, ContextMode mode, Gau
     }
 
     // save microplanes
-    for ( mPlaneIndex = 0; mPlaneIndex < numberOfMicroplanes; mPlaneIndex++ ) {
-        mPlane = this->giveMicroplane(mPlaneIndex, gp);
-        status =  this->giveMicroplaneStatus(mPlane);
+    for ( int mPlaneIndex = 0; mPlaneIndex < numberOfMicroplanes; mPlaneIndex++ ) {
+        Microplane *mPlane = this->giveMicroplane(mPlaneIndex, gp);
+        IntegrationPointStatus *status =  this->giveMicroplaneStatus(mPlane);
         if ( status ) {
             if ( ( iores = status->restoreContext(stream, mode, gp) ) != CIO_OK ) {
                 THROW_CIOERR(iores);
@@ -216,10 +202,9 @@ MicroplaneMaterial :: computeNormalStrainComponent(Microplane *mplane,
                                                    const FloatArray &macroStrain)
 {
     int mnumber = mplane->giveNumber();
-    int i;
     double en = 0.0;
 
-    for ( i = 0; i < 6; i++ ) {
+    for ( int i = 0; i < 6; i++ ) {
         en += N [ mnumber - 1 ] [ i ] * macroStrain.at(i + 1);
     }
 
@@ -260,10 +245,9 @@ MicroplaneMaterial :: computeShearLStrainComponent(Microplane *mplane,
                                                    const FloatArray &macroStrain)
 {
     int mnumber = mplane->giveNumber();
-    int i;
     double el = 0.0;
 
-    for ( i = 0; i < 6; i++ ) {
+    for ( int i = 0; i < 6; i++ ) {
         el += L [ mnumber - 1 ] [ i ] * macroStrain.at(i + 1);
     }
 

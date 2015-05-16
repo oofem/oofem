@@ -172,6 +172,7 @@ void AbaqusUserMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
         stressh.times(1.0 / h);
         En.setColumn(stressh, i);
     }
+    this->giveRealStressVector_3d(stress, form, gp, strain, tStep);
 
     printf("En = ");
     En.printYourself();
