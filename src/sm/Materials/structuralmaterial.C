@@ -2095,8 +2095,8 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
                 fullAnswer.times( et.at(1) );
             }
 
-            //StructuralMaterial :: giveReducedSymVectorForm( answer, fullAnswer, gp->giveMaterialMode() );
-            answer = fullAnswer;
+            StructuralMaterial :: giveReducedSymVectorForm( answer, fullAnswer, gp->giveMaterialMode() );
+            //answer = fullAnswer;
         }
     }
 
