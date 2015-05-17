@@ -47,21 +47,23 @@
 #include "dynamicinputrecord.h"
 
 namespace oofem {
-StructuralMaterial :: StructuralMaterial(int n, Domain * d) : Material(n, d) 
-{ 
-    // Voigt index map
-    vIindex.resize(3);
-    vIindex[0] = { 1, 6, 5 };
-    vIindex[1] = { 9, 2, 4 };
-    vIindex[2] = { 8, 7, 3 };  
-      
-    // Symmetric Voigt index map
-    svIndex.resize(3);
-    svIndex[0] = { 1, 6, 5 };
-    svIndex[1] = { 6, 2, 4 };
-    svIndex[2] = { 5, 4, 3 };       
     
-}  
+std::vector< std::vector<int> > StructuralMaterial :: vIindex = {
+    { 1, 6, 5 },
+    { 9, 2, 4 },
+    { 8, 7, 3 }  
+};
+
+std::vector< std::vector<int> > StructuralMaterial :: svIndex = {
+    { 1, 6, 5 },
+    { 6, 2, 4 },
+    { 5, 4, 3 }
+};
+
+
+StructuralMaterial :: StructuralMaterial(int n, Domain * d) : Material(n, d) { }  
+
+
 int
 StructuralMaterial :: hasMaterialModeCapability(MaterialMode mode)
 //
@@ -1413,6 +1415,78 @@ StructuralMaterial :: computeDeviatoricVolumetricSplit(FloatArray &dev, const Fl
 }
 
 
+void
+StructuralMaterial :: computeDeviatoricVolumetricSum(FloatArray &s, const FloatArray &dev, double mean)
+{
+    s = dev;
+    s[0] += mean;
+    s[1] += mean;
+    s[2] += mean;
+}
+
+void
+StructuralMaterial :: applyDeviatoricElasticCompliance(FloatArray &strain, const FloatArray &stress, double EModulus, double nu)
+{
+    applyDeviatoricElasticCompliance( strain, stress, EModulus / 2. / ( 1. + nu ) );
+}
+
+void
+StructuralMaterial :: applyDeviatoricElasticCompliance(FloatArray &strain, const FloatArray &stress, double GModulus)
+{
+    strain.resize(6);
+    strain[0] = 1. / ( 2. * GModulus ) * stress [ 0 ];
+    strain[1] = 1. / ( 2. * GModulus ) * stress [ 1 ];
+    strain[2] = 1. / ( 2. * GModulus ) * stress [ 2 ];
+    strain[3] = 1. / GModulus * stress [ 3 ];
+    strain[4] = 1. / GModulus * stress [ 4 ];
+    strain[5] = 1. / GModulus * stress [ 5 ];
+}
+
+
+void
+StructuralMaterial :: applyDeviatoricElasticStiffness(FloatArray &stress, const FloatArray &strain, double EModulus, double nu)
+{
+    applyDeviatoricElasticStiffness( stress, strain, EModulus / ( 2. * ( 1. + nu ) ) );
+}
+
+void
+StructuralMaterial :: applyDeviatoricElasticStiffness(FloatArray &stress, const FloatArray &strain, double GModulus)
+{
+    stress.resize(6);
+    stress[0] = 2. * GModulus * strain [ 0 ];
+    stress[1] = 2. * GModulus * strain [ 1 ];
+    stress[2] = 2. * GModulus * strain [ 2 ];
+    stress[3] = GModulus * strain [ 3 ];
+    stress[4] = GModulus * strain [ 4 ];
+    stress[5] = GModulus * strain [ 5 ];
+}
+
+void
+StructuralMaterial :: applyElasticStiffness(FloatArray &stress, const FloatArray &strain, double EModulus, double nu)
+{
+    double factor = EModulus / ( ( 1. + nu ) * ( 1. - 2. * nu ) );
+    
+    stress.resize(6);
+    stress[0] = factor * ( ( 1. - nu ) * strain [ 0 ] + nu * strain [ 1 ] + nu * strain [ 2 ] );
+    stress[1] = factor * ( nu * strain [ 0 ] + ( 1. - nu ) * strain [ 1 ] + nu * strain [ 2 ] );
+    stress[2] = factor * ( nu * strain [ 0 ] + nu * strain [ 1 ] + ( 1. - nu ) * strain [ 2 ] );
+    stress[3] = factor * ( ( ( 1. - 2. * nu ) / 2. ) * strain [ 3 ] );
+    stress[4] = factor * ( ( ( 1. - 2. * nu ) / 2. ) * strain [ 4 ] );
+    stress[5] = factor * ( ( ( 1. - 2. * nu ) / 2. ) * strain [ 5 ] );
+}
+
+void
+StructuralMaterial :: applyElasticCompliance(FloatArray &strain, const FloatArray &stress, double EModulus, double nu)
+{
+    strain.resize(6);
+    strain[0] = ( stress [ 0 ] - nu * stress [ 1 ] - nu * stress [ 2 ] ) / EModulus;
+    strain[1] = ( -nu * stress [ 0 ] + stress [ 1 ] - nu * stress [ 2 ] ) / EModulus;
+    strain[2] = ( -nu * stress [ 0 ] - nu * stress [ 1 ] + stress [ 2 ] ) / EModulus;
+    strain[3] = ( 2. * ( 1. + nu ) * stress [ 3 ] ) / EModulus;
+    strain[4] = ( 2. * ( 1. + nu ) * stress [ 4 ] ) / EModulus;
+    strain[5] = ( 2. * ( 1. + nu ) * stress [ 5 ] ) / EModulus;
+}
+
 double
 StructuralMaterial :: computeFirstInvariant(const FloatArray &s)
 {
@@ -2021,7 +2095,8 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
                 fullAnswer.times( et.at(1) );
             }
 
-            StructuralMaterial :: giveReducedSymVectorForm( answer, fullAnswer, gp->giveMaterialMode() );
+            //StructuralMaterial :: giveReducedSymVectorForm( answer, fullAnswer, gp->giveMaterialMode() );
+            answer = fullAnswer;
         }
     }
 
