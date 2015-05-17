@@ -240,8 +240,8 @@ void IntMatBilinearCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *
 
 void IntMatBilinearCZ :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("not implemented. Use numerical Jacobian instead.");
-    //this->give3dStiffnessMatrix_dTdj_Num(answer, rMode, gp, tStep);
+    OOFEM_WARNING("not implemented. Use numerical Jacobian instead.");
+    this->give3dStiffnessMatrix_dTdj_Num(answer, gp, tStep);
 }
 
 double IntMatBilinearCZ :: computeYieldFunction(const double &iTractionNormal, const double &iTractionTang) const

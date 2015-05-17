@@ -184,7 +184,6 @@ public:
 
     virtual int hasNonLinearBehaviour()   { return 1; }
 
-    virtual int hasMaterialModeCapability(MaterialMode mode); // remove
     virtual const char *giveClassName() const { return "IntMatBilinearCZJansson"; }
     virtual const char *giveInputRecordName() const { return _IFT_IntMatBilinearCZJansson_Name; }
 
@@ -192,8 +191,6 @@ public:
     virtual void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
                                         const FloatMatrix &F, TimeStep *tStep);
     virtual void give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-
-    virtual void give3dStiffnessMatrix_dTdj_num(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
     virtual bool hasAnalyticalTangentStiffness() const { return true; }
 

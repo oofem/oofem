@@ -32,16 +32,7 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-/*
- * intmatelastic.C
- *
- *  Created on: Jan 10, 2015
- *      Author: erik
- */
-
 #include "intmatelastic.h"
-
 #include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
@@ -54,30 +45,16 @@
 namespace oofem {
 REGISTER_Material(IntMatElastic);
 
-IntMatElastic::IntMatElastic(int n, Domain *d) : StructuralInterfaceMaterial(n, d) {
+IntMatElastic :: IntMatElastic(int n, Domain *d) : StructuralInterfaceMaterial(n, d) { }
 
-}
+IntMatElastic :: ~IntMatElastic() { }
 
-IntMatElastic::~IntMatElastic() {
-
-}
-
-int
-IntMatElastic :: hasMaterialModeCapability(MaterialMode mode)
-{
-    // returns whether receiver supports given mode
-    if ( mode == _3dInterface ) {
-        return 1;
-    } else {
-        return 0;
-    }
-}
 
 void
 IntMatElastic :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jumpVector,
                                                   const FloatMatrix &F, TimeStep *tStep)
 {
-	StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus(gp) );
+    StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
 
