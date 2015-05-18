@@ -38,8 +38,6 @@
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
-#include "stressvector.h"
-#include "strainvector.h"
 #include "mathfem.h"
 #include "contextioerr.h"
 #include "datastream.h"
@@ -62,13 +60,6 @@ MisesMat :: MisesMat(int n, Domain *d) : StructuralMaterial(n, d)
 MisesMat :: ~MisesMat()
 {
     delete linearElasticMaterial;
-}
-
-// specifies whether a given material mode is supported by this model
-int
-MisesMat :: hasMaterialModeCapability(MaterialMode mode)
-{
-    return mode == _3dMat || mode == _1dMat || mode == _PlaneStrain;
 }
 
 // reads the model parameters from the input file
@@ -106,22 +97,40 @@ MisesMat :: CreateStatus(GaussPoint *gp) const
     return new MisesMatStatus(1, this->giveDomain(), gp);
 }
 
-
-// returns the stress vector in 3d stress space
 void
-MisesMat :: giveRealStressVector(FloatArray &answer,
+MisesMat :: giveRealStressVector_1d(FloatArray &answer,
                                  GaussPoint *gp,
                                  const FloatArray &totalStrain,
                                  TimeStep *tStep)
 {
     MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
-    this->initTempStatus(gp);
-    //this->initGpForNewStep(gp);
+    this->giveRealStressVector_3d(answer, gp, totalStrain, tStep);
+
+    LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
+    double E = lmat->give('E', gp);
+    double nu = lmat->give('n', gp);
+
+    FloatArray strain = status->getTempPlasticStrain();
+    strain[0] = totalStrain[0];
+    strain[1] -= nu / E * answer[0];
+    strain[2] -= nu / E * answer[0];
+    status->letTempStrainVectorBe(strain);
+    /// @note: One should obtain the same answer using the iterations in the default implementation (this is verified for this model).
+    //StructuralMaterial :: giveRealStressVector_1d(answer, gp, totalStrain, tStep);
+}
+
+void
+MisesMat :: giveRealStressVector_3d(FloatArray &answer,
+                                 GaussPoint *gp,
+                                 const FloatArray &totalStrain,
+                                 TimeStep *tStep)
+{
+    MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
+
     this->performPlasticityReturn(gp, totalStrain);
     double omega = computeDamage(gp, tStep);
-    FloatArray totalStress = status->giveTempEffectiveStress();
-    totalStress.times(1 - omega);
-    answer = totalStress;
+    answer = status->giveTempEffectiveStress();
+    answer.times(1 - omega);
     status->setTempDamage(omega);
     status->letTempStrainVectorBe(totalStrain);
     status->letTempStressVectorBe(answer);
@@ -136,12 +145,9 @@ MisesMat :: giveFirstPKStressVector_3d(FloatArray &answer,
 {
     MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
 
-    this->initTempStatus(gp);
-    //this->initGpForNewStep(gp);
-
     double kappa, dKappa, yieldValue, mi;
     FloatMatrix F, oldF, invOldF;
-    FloatArray s(6);
+    FloatArray s;
     F.beMatrixForm(totalDefGradOOFEM); //(method assumes full 3D)
 
     kappa = status->giveCumulativePlasticStrain();
@@ -167,19 +173,19 @@ MisesMat :: giveFirstPKStressVector_3d(FloatArray &answer,
     FloatArray e;
     e.beSymVectorFormOfStrain(E);
 
-    StrainVector leftCauchyGreen(_3dMat);
-    StrainVector leftCauchyGreenDev(_3dMat);
+    FloatArray leftCauchyGreen;
+    FloatArray leftCauchyGreenDev;
     double leftCauchyGreenVol;
 
     leftCauchyGreen.beSymVectorFormOfStrain(trialLeftCauchyGreen);
 
-    leftCauchyGreen.computeDeviatoricVolumetricSplit(leftCauchyGreenDev, leftCauchyGreenVol);
-    StressVector trialStressDev(_3dMat);
-    leftCauchyGreenDev.applyDeviatoricElasticStiffness(trialStressDev, G / 2.);
+    leftCauchyGreenVol = computeDeviatoricVolumetricSplit(leftCauchyGreenDev, leftCauchyGreen);
+    FloatArray trialStressDev;
+    applyDeviatoricElasticStiffness(trialStressDev, leftCauchyGreenDev, G / 2.);
     s = trialStressDev;
 
     //check for plastic loading
-    double trialS = trialStressDev.computeStressNorm();
+    double trialS = computeStressNorm(trialStressDev);
     double sigmaY = sig0 + H * kappa;
     //yieldValue = sqrt(3./2.)*trialS-sigmaY;
     yieldValue = trialS - sqrt(2. / 3.) * sigmaY;
@@ -260,66 +266,62 @@ MisesMat :: computeGLPlasticStrain(const FloatMatrix &F, FloatMatrix &Ep, FloatM
 }
 
 
-// returns the stress vector in 3d stress space
-// computed from the previous plastic strain and current total strain
 void
 MisesMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain)
 {
-    double kappa, yieldValue, dKappa;
-    FloatArray plStrain;
-    MaterialMode mode = gp->giveMaterialMode();
     MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
-    StressVector fullStress(mode);
-    //this->initGpForNewStep(gp);
+    double kappa;
+    FloatArray plStrain;
+    FloatArray fullStress;
     // get the initial plastic strain and initial kappa from the status
     plStrain = status->givePlasticStrain();
     kappa = status->giveCumulativePlasticStrain();
 
     // === radial return algorithm ===
-    if ( mode == _1dMat ) {
+    if ( totalStrain.giveSize() == 1 ) {
         LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
         double E = lmat->give('E', gp);
         /*trial stress*/
+        fullStress.resize(6);
         fullStress.at(1) = E * ( totalStrain.at(1) - plStrain.at(1) );
-        double sigmaY = sig0 + H * kappa;
         double trialS = fabs(fullStress.at(1));
         /*yield function*/
-        yieldValue = trialS - sigmaY;
+        double yieldValue = trialS - (sig0 + H * kappa);
         // === radial return algorithm ===
         if ( yieldValue > 0 ) {
-            dKappa = yieldValue / ( H + E );
+            double dKappa = yieldValue / ( H + E );
             kappa += dKappa;
-            fullStress.at(1) = fullStress.at(1) - dKappa *E *signum( fullStress.at(1) );
-            plStrain.at(1) = plStrain.at(1) + dKappa *signum( fullStress.at(1) );
+            plStrain.at(1) += dKappa * signum( fullStress.at(1) );
+            plStrain.at(2) -= 0.5 * dKappa * signum( fullStress.at(1) );
+            plStrain.at(3) -= 0.5 * dKappa * signum( fullStress.at(1) );
+            fullStress.at(1) -= dKappa * E * signum( fullStress.at(1) );
         }
     } else {
         // elastic predictor
-        StrainVector elStrain(totalStrain, mode);
+        FloatArray elStrain = totalStrain;
         elStrain.subtract(plStrain);
-        StrainVector elStrainDev(mode);
+        FloatArray elStrainDev;
         double elStrainVol;
-        elStrain.computeDeviatoricVolumetricSplit(elStrainDev, elStrainVol);
-        StressVector trialStressDev(mode);
-        elStrainDev.applyDeviatoricElasticStiffness(trialStressDev, G);
+        elStrainVol = computeDeviatoricVolumetricSplit(elStrainDev, elStrain);
+        FloatArray trialStressDev;
+        applyDeviatoricElasticStiffness(trialStressDev, elStrainDev, G);
         /**************************************************************/
-        double trialStressVol;
-        trialStressVol = 3 * K * elStrainVol;
+        double trialStressVol = 3 * K * elStrainVol;
         /**************************************************************/
 
         // store the deviatoric and trial stress (reused by algorithmic stiffness)
         status->letTrialStressDevBe(trialStressDev);
         status->setTrialStressVol(trialStressVol);
         // check the yield condition at the trial state
-        double trialS = trialStressDev.computeStressNorm();
-        double sigmaY = sig0 + H * kappa;
-        yieldValue = sqrt(3. / 2.) * trialS - sigmaY;
+        double trialS = computeStressNorm(trialStressDev);
+        double yieldValue = sqrt(3./2.) * trialS - (sig0 + H * kappa);
         if ( yieldValue > 0. ) {
             // increment of cumulative plastic strain
-            dKappa = yieldValue / ( H + 3. * G );
+            double dKappa = yieldValue / ( H + 3. * G );
             kappa += dKappa;
-            StrainVector dPlStrain(mode);
+            FloatArray dPlStrain;
             // the following line is equivalent to multiplication by scaling matrix P
-            trialStressDev.applyDeviatoricElasticCompliance(dPlStrain, 0.5);
+            applyDeviatoricElasticCompliance(dPlStrain, trialStressDev, 0.5);
             // increment of plastic strain
             plStrain.add(sqrt(3. / 2.) * dKappa / trialS, dPlStrain);
             // scaling of deviatoric trial stress
@@ -329,8 +331,7 @@ MisesMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrai
         // assemble the stress from the elastically computed volumetric part
         // and scaled deviatoric part
 
-        double stressVol = 3. * K * elStrainVol;
-        trialStressDev.computeDeviatoricVolumetricSum(fullStress, stressVol);
+        computeDeviatoricVolumetricSum(fullStress, trialStressDev, trialStressVol);
     }
 
     // store the effective stress in status
@@ -339,7 +340,6 @@ MisesMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrai
     status->letTempPlasticStrainBe(plStrain);
     status->setTempCumulativePlasticStrain(kappa);
 }
-
 
 double
 MisesMat :: computeDamageParam(double tempKappa)
@@ -424,9 +424,9 @@ MisesMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     double sigmaY = sig0 + H * kappa;
 
     // trial deviatoric stress and its norm
-    StressVector trialStressDev(status->giveTrialStressDev(), _3dMat);
+    const FloatArray &trialStressDev = status->giveTrialStressDev();
     //double trialStressVol = status->giveTrialStressVol();
-    double trialS = trialStressDev.computeStressNorm();
+    double trialS = computeStressNorm(trialStressDev);
 
     // one correction term
     FloatMatrix stiffnessCorrection(6, 6);
@@ -486,59 +486,6 @@ MisesMat :: give1dStressStiffMtrx(FloatMatrix &answer,
 }
 
 void
-MisesMat :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                     MatResponseMode mode,
-                                     GaussPoint *gp,
-                                     TimeStep *tStep)
-{
-    this->giveLinearElasticMaterial()->givePlaneStrainStiffMtrx(answer, mode, gp, tStep);
-    if ( mode != TangentStiffness ) {
-        return;
-    }
-
-    MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
-    double tempKappa = status->giveTempCumulativePlasticStrain();
-    double kappa = status->giveCumulativePlasticStrain();
-    double dKappa = tempKappa - kappa;
-
-    if ( dKappa <= 0.0 ) { // elastic loading - elastic stiffness plays the role of tangent stiffness
-        return;
-    }
-
-    // === plastic loading ===
-    // yield stress at the beginning of the step
-    double sigmaY = sig0 + H * kappa;
-
-    // trial deviatoric stress and its norm
-    StressVector trialStressDev(status->giveTrialStressDev(), _PlaneStrain);
-    //double trialStressVol = status->giveTrialStressVol();
-    double trialS = trialStressDev.computeStressNorm();
-
-    // one correction term
-    double factor = -2. * sqrt(6.) * G * G / trialS;
-    double factor1 = factor * sigmaY / ( ( H + 3. * G ) * trialS * trialS );
-    answer.plusDyadUnsym(trialStressDev, trialStressDev, factor1);
-
-    // another correction term
-    FloatMatrix Idev;
-    Idev.resize(4, 4);
-    Idev.zero();
-    Idev.at(1, 1) = Idev.at(2, 2) = Idev.at(3, 3) = 2. / 3.;
-    Idev.at(1, 2) = Idev.at(1, 3) = Idev.at(2, 1) = -1. / 3.;
-    Idev.at(2, 3) = Idev.at(3, 1) = Idev.at(3, 2) = -1. / 3.;
-    Idev.at(4, 4) = 0.5;
-    answer.add(factor * dKappa, Idev);
-
-    //influence of damage
-    double omega = status->giveTempDamage();
-    answer.times(1. - omega);
-    const FloatArray &effStress = status->giveTempEffectiveStress();
-    double omegaPrime = computeDamageParamPrime(tempKappa);
-    double scalar = -omegaPrime *sqrt(6.) * G / ( 3. * G + H ) / trialS;
-    answer.plusDyadUnsym(effStress, trialStressDev, scalar);
-}
-
-void
 MisesMat :: give3dLSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
@@ -554,9 +501,9 @@ MisesMat :: give3dLSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode
     F.beMatrixForm( status->giveTempFVector() );
     double J = F.giveDeterminant();
 
-    StressVector trialStressDev(status->giveTrialStressDev(), _3dMat);
+    const FloatArray &trialStressDev = status->giveTrialStressDev();
     double trialStressVol = status->giveTrialStressVol();
-    double trialS = trialStressDev.computeStressNorm();
+    double trialS = computeStressNorm(trialStressDev);
     FloatArray n = trialStressDev;
     if ( trialS == 0 ) {
         n.resize(6);
@@ -746,8 +693,11 @@ MisesMat :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
 //=============================================================================
 
 MisesMatStatus :: MisesMatStatus(int n, Domain *d, GaussPoint *g) :
-    StructuralMaterialStatus(n, d, g), plasticStrain(), tempPlasticStrain(), trialStressD()
+    StructuralMaterialStatus(n, d, g), plasticStrain(6), tempPlasticStrain(), trialStressD()
 {
+    stressVector.resize(6);
+    strainVector.resize(6);
+    
     damage = tempDamage = 0.;
     kappa = tempKappa = 0.;
     effStress.resize(6);
@@ -762,8 +712,6 @@ MisesMatStatus :: ~MisesMatStatus()
 void
 MisesMatStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-    //int i, n;
-
     StructuralMaterialStatus :: printOutputAt(file, tStep);
 
     fprintf(file, "status { ");

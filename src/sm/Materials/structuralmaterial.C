@@ -157,7 +157,7 @@ StructuralMaterial :: giveRealStressVector_StressControl(FloatArray &answer, Gau
         reducedvS.beSubArrayOf(vS, stressControl);
         // Pick out the (response) stresses for the controlled strains
         answer.beSubArrayOf(vS, strainControl);
-        if ( reducedvS.computeNorm() <= 1e0 && k >= 1 ) { // Absolute tolerance right now (with at least one iteration)
+        if ( reducedvS.computeNorm() <= 1e0 && k >= 5 ) { // Absolute tolerance right now (with at least one iteration)
             ///@todo We need a relative tolerance here!
             /// A relative tolerance like this could work, but if a really small increment is performed it won't work
             /// (it will be limited by machine precision)
@@ -1488,13 +1488,24 @@ StructuralMaterial :: applyElasticCompliance(FloatArray &strain, const FloatArra
 }
 
 double
+StructuralMaterial :: computeStressNorm(const FloatArray &s)
+{
+    if ( s.giveSize() == 1 ) {
+        return fabs(s [ 0 ]);
+    }
+
+    return sqrt(s [ 0 ] * s [ 0 ] + s [ 1 ] * s [ 1 ] + s [ 2 ] * s [ 2 ] +
+                2. * s [ 3 ] * s [ 3 ] + 2. * s [ 4 ] * s [ 4 ] + 2. * s [ 5 ] * s [ 5 ]);
+}
+
+double
 StructuralMaterial :: computeFirstInvariant(const FloatArray &s)
 {
     if ( s.giveSize() == 1 ) {
         return s [ 0 ];
-    } else {
-        return s [ 0 ] + s [ 1 ] + s [ 2 ];
     }
+
+    return s [ 0 ] + s [ 1 ] + s [ 2 ];
 }
 
 double

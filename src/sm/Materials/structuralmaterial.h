@@ -327,6 +327,8 @@ public:
     static void applyElasticStiffness(FloatArray &stress, const FloatArray &strain, double EModulus, double nu);
     static void applyElasticCompliance(FloatArray &strain, const FloatArray &stress, double EModulus, double nu);
 
+    static double computeStressNorm(const FloatArray &stress);
+
     static double computeFirstInvariant(const FloatArray &s);
     static double computeSecondStressInvariant(const FloatArray &s);
     static double computeThirdStressInvariant(const FloatArray &s);
