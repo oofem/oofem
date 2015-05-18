@@ -41,102 +41,51 @@
 #include "contextioerr.h"
 
 namespace oofem {
+///@todo This unit has a *unit*! There are no small numbers, and we should change the code to avoid the need for this at all cost. / Mikael
 const double tolerance = 1.0e-12; // small number
-ExpCZMaterial :: ExpCZMaterial(int n, Domain *d) : StructuralMaterial(n, d)
-    //
-    // constructor
-    //
+
+ExpCZMaterial :: ExpCZMaterial(int n, Domain *d) : StructuralInterfaceMaterial(n, d)
 { }
 
 
 ExpCZMaterial :: ~ExpCZMaterial()
-//
-// destructor
-//
 { }
-
-int
-ExpCZMaterial :: hasMaterialModeCapability(MaterialMode mode)
-{
-    // returns whether receiver supports given mode
-    if ( mode == _3dInterface ) {
-        return 1;
-    } else {
-        return 0;
-    }
-}
-
-
 
 
 void
-ExpCZMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-                                      const FloatArray &jumpVector,
-                                      TimeStep *tStep)
-//
-// returns real stress vector in 3d stress space of receiver according to
-// previous level of stress and current
-// strain increment, the only way, how to correctly update gp records
-//
+ExpCZMaterial :: giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
 {
     ExpCZMaterialStatus *status = static_cast< ExpCZMaterialStatus * >( this->giveStatus(gp) );
 
-    //this->initGpForNewStep(gp);
-    this->initTempStatus(gp);
-
-    answer.resize( jumpVector.giveSize() );
-    answer.zero();
-    //@todo for now only study normal stress
+    /// @todo only study normal stress for now
     // no degradation in shear
     // jumpVector = [shear 1 shear 2 normal]
-    double gn  = jumpVector.at(3);
-    double gs1 = jumpVector.at(1);
-    double gs2 = jumpVector.at(2);
+    double gn  = jump.at(3);
+    double gs1 = jump.at(1);
+    double gs2 = jump.at(2);
     double gs  = sqrt(gs1 * gs1 + gs2 * gs2);
 
     double xin  = gn / ( gn0 + tolerance );
     double xit  = gs / ( gs0 + tolerance );
     double tn   = GIc / gn0 *exp(-xin) * ( xin * exp(-xit * xit) + ( 1.0 - q ) / ( r - 1.0 ) * ( 1.0 - exp(-xit * xit) ) * ( r - xin ) );
 
+    answer.resize(3);
     answer.at(1) = 0.0;
     answer.at(2) = 0.0;
     answer.at(3) = tn;
 
-
     // update gp
-    status->letTempStrainVectorBe(jumpVector);
-    status->letTempStressVectorBe(answer);
-}
-
-void
-ExpCZMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                          MatResponseForm form, MatResponseMode rMode,
-                                          GaussPoint *gp, TimeStep *tStep)
-//
-// Returns characteristic material stiffness matrix of the receiver
-//
-{
-    MaterialMode mMode = gp->giveMaterialMode();
-    switch ( mMode ) {
-    case _3dInterface:
-    case _3dMat:
-        give3dInterfaceMaterialStiffnessMatrix(answer, form, rMode, gp, tStep);
-        break;
-    default:
-        StructuralMaterial :: giveCharacteristicMatrix(answer, form, rMode, gp, tStep);
-    }
+    status->letTempJumpBe(jump);
+    status->letTempTractionBe(answer);
 }
 
 
 void
-ExpCZMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
-                                                        GaussPoint *gp, TimeStep *tStep)
+ExpCZMaterial :: give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
     ExpCZMaterialStatus *status = static_cast< ExpCZMaterialStatus * >( this->giveStatus(gp) );
 
-    FloatArray jumpVector;
-    jumpVector = status->giveTempStrainVector();
-    //@todo for now only study normal stress
+    const FloatArray &jumpVector = status->giveTempJump();
     // jumpVector = [shear 1 shear 2 normal]
     double gn  = jumpVector.at(3);
     double gs1 = jumpVector.at(1);
@@ -159,269 +108,12 @@ ExpCZMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, Mat
 }
 
 
-
-#if 0
-int
-ExpCZMaterial :: giveSizeOfReducedStressStrainVector(MaterialMode mode)
-//
-// returns the size of reduced stress-strain vector
-// according to mode given by gp.
-//
-{
-    switch ( mode ) {
-    case _2dInterface:
-        return 2;
-
-    case _3dInterface:
-        return 3;
-
-    default:
-        return StructuralMaterial :: giveSizeOfReducedStressStrainVector(mode);
-    }
-}
-
-
-int
-ExpCZMaterial :: giveStressStrainComponentIndOf(MatResponseForm form, MaterialMode mmode, int ind)
-//
-// this function returns index of reduced(if form == ReducedForm)
-// or Full(if form==FullForm) stressStrain component in Full or reduced
-// stressStrainVector acording to stressStrain mode of given gp.
-//
-{
-    //MaterialMode mode  = gp -> giveMaterialMode ();
-
-    if ( ( mmode == _2dInterface ) || ( mmode == _3dInterface ) ) {
-        return ind;
-    } else {
-        return StructuralMaterial :: giveStressStrainComponentIndOf(form, mmode, ind);
-    }
-}
-
-
-void
-ExpCZMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm form,
-                                      MaterialMode mmode) const
-//
-// this function returns mask of reduced(if form == ReducedForm)
-// or Full(if form==FullForm) stressStrain vector in full or
-// reduced StressStrainVector
-// acording to stressStrain mode of given gp.
-//
-//
-// mask has size of reduced or full StressStrain Vector and  i-th component
-// is index to full or reduced StressStrainVector where corresponding
-// stressStrain resides.
-//
-// Reduced form is sub-vector (of stress or strain components),
-// where components corresponding to imposed zero stress (plane stress,...)
-// are not included. On the other hand, if zero strain component is imposed
-// (Plane strain, ..) this condition must be taken into account in geometrical
-// relations, and corresponding component is included in reduced vector.
-//
-{
-    if ( mmode == _2dInterface ) {
-        answer.resize(2);
-        for ( int i = 1; i <= 2; i++ ) {
-            answer.at(i) = i;
-        }
-    } else if ( mmode == _3dInterface ) {
-        answer.resize(3);
-        for ( int i = 1; i <= 3; i++ ) {
-            answer.at(i) = i;
-        }
-    } else {
-        StructuralMaterial :: giveStressStrainMask(answer, form, mmode);
-    }
-}
-
-
-void
-ExpCZMaterial :: giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
-                                                 const FloatArray &charVector3d)
-//
-// returns reduced stressVector or strainVector from full 3d vector reduced
-// to vector required by gp->giveStressStrainMode()
-//
-{
-    MaterialMode mode = gp->giveMaterialMode();
-
-    if ( ( mode == _2dInterface ) || ( mode == _3dInterface ) ) {
-        answer = charVector3d;
-        return;
-    } else {
-        StructuralMaterial :: giveReducedCharacteristicVector(answer, gp, charVector3d);
-    }
-}
-
-
-void
-ExpCZMaterial :: giveFullCharacteristicVector(FloatArray &answer,
-                                              GaussPoint *gp,
-                                              const FloatArray &strainVector)
-//
-// returns full 3d general strain vector from strainVector in reducedMode
-// based on StressStrainMode in gp. Included are strains which
-// perform nonzero work.
-// General strain vector has one of the following forms:
-// 1) strainVector3d {eps_x,eps_y,eps_z,gamma_yz,gamma_zx,gamma_xy}
-// 2) strainVectorShell {eps_x,eps_y,gamma_xy, kappa_x, kappa_y, kappa_xy, gamma_zx, gamma_zy}
-//
-// you must assigng your stress strain mode to one of the folloving modes (or add new)
-// FullForm of MaterialStiffnessMatrix must have the same form.
-//
-{
-    MaterialMode mode = gp->giveMaterialMode();
-    if ( ( mode == _2dInterface ) || ( mode == _3dInterface ) ) {
-        answer = strainVector;
-        return;
-    } else {
-        StructuralMaterial :: giveFullCharacteristicVector(answer, gp, strainVector);
-    }
-}
-
-
-void
-ExpCZMaterial :: give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
-                                                        GaussPoint *gp, TimeStep *tStep)
-{
-    double om, un;
-    IsoInterfaceDamageMaterialStatus *status = static_cast< IsoInterfaceDamageMaterialStatus * >( this->giveStatus(gp) );
-
-
-    if ( ( rMode == ElasticStiffness ) || ( rMode == SecantStiffness ) || ( rMode == TangentStiffness ) ) {
-        // assemble eleastic stiffness
-        answer.resize(2, 2);
-        answer.at(1, 1) = kn;
-        answer.at(2, 2) = ks;
-        answer.at(1, 2) = answer.at(2, 1) = 0.0;
-
-        if ( rMode == ElasticStiffness ) {
-            return;
-        }
-
-        if ( rMode == SecantStiffness ) {
-            // Secant stiffness
-            om = status->giveTempDamage();
-            un = status->giveTempStrainVector().at(1);
-            om = min(om, maxOmega);
-            // damage in tension only
-            if ( un >= 0 ) {
-                answer.times(1.0 - om);
-            }
-
-            return;
-        } else {
-            // Tangent Stiffness
-            FloatArray se(2), e(2);
-            e = status->giveTempStrainVector();
-            se.beProductOf(answer, e);
-
-            om = status->giveTempDamage();
-            un = status->giveTempStrainVector().at(1);
-            om = min(om, maxOmega);
-            // damage in tension only
-            if ( un >= 0 ) {
-                answer.times(1.0 - om);
-                return;
-
-                /* Unreachable code - commented out to supress compiler warnings
-                 * double dom = -( -e0 / un / un * exp( -( ft / gf ) * ( un - e0 ) ) + e0 / un * exp( -( ft / gf ) * ( un - e0 ) ) * ( -( ft / gf ) ) );
-                 * if ( ( om > 0. ) && ( status->giveTempKappa() > status->giveKappa() ) ) {
-                 *  answer.at(1, 1) -= se.at(1) * dom;
-                 *  answer.at(2, 1) -= se.at(2) * dom;
-                 * }
-                 */
-            }
-        }
-    }  else {
-        OOFEM_ERROR("unknown MatResponseMode");
-    }
-}
-
-
-void
-ExpCZMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
-                                                        GaussPoint *gp, TimeStep *tStep)
-{
-    double om, un;
-    IsoInterfaceDamageMaterialStatus *status = static_cast< IsoInterfaceDamageMaterialStatus * >( this->giveStatus(gp) );
-
-
-    if ( ( rMode == ElasticStiffness ) || ( rMode == SecantStiffness ) || ( rMode == TangentStiffness ) ) {
-        // assemble eleastic stiffness
-        answer.resize(3, 3);
-        answer.at(1, 1) = kn;
-        answer.at(2, 2) = ks;
-        answer.at(3, 3) = ks;
-        answer.at(1, 2) = answer.at(2, 1) = answer.at(1, 3) = answer.at(3, 1) = answer.at(2, 3) = answer.at(3, 2) = 0.0;
-
-        if ( rMode == ElasticStiffness ) {
-            return;
-        }
-
-        if ( rMode == SecantStiffness ) {
-            // Secant stiffness
-            om = status->giveTempDamage();
-            un = status->giveTempStrainVector().at(1);
-            om = min(om, maxOmega);
-            // damage in tension only
-            if ( un >= 0 ) {
-                answer.times(1.0 - om);
-            }
-
-            return;
-        } else {
-            // Tangent Stiffness
-            FloatArray se, e;
-            e = status->giveTempStrainVector();
-            se.beProductOf(answer, e);
-
-            om = status->giveTempDamage();
-            un = status->giveTempStrainVector().at(1);
-            om = min(om, maxOmega);
-            // damage in tension only
-            if ( un >= 0 ) {
-                answer.times(1.0 - om);
-                return;
-                /* Unreachable code - commented out to supress compiler warnings
-                 * double dom = -( -e0 / un / un * exp( -( ft / gf ) * ( un - e0 ) ) + e0 / un * exp( -( ft / gf ) * ( un - e0 ) ) * ( -( ft / gf ) ) );
-                 * if ( ( om > 0. ) && ( status->giveTempKappa() > status->giveKappa() ) ) {
-                 *  answer.at(1, 1) -= se.at(1) * dom;
-                 *  answer.at(2, 1) -= se.at(2) * dom;
-                 * }
-                 */
-            }
-        }
-    }  else {
-        OOFEM_ERROR("unknown MatResponseMode");
-    }
-}
-
-
-#endif
-
 int
 ExpCZMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     ExpCZMaterialStatus *status = static_cast< ExpCZMaterialStatus * >( this->giveStatus(gp) );
-    return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
+    return StructuralInterfaceMaterial :: giveIPValue(answer, gp, type, tStep);
 }
-
-int
-ExpCZMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
-}
-
-
-int
-ExpCZMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
-{
-    return StructuralMaterial :: giveIPValueSize(type, gp);
-}
-
-
 
 
 IRResultType
@@ -436,8 +128,8 @@ ExpCZMaterial :: initializeFrom(InputRecord *ir)
 
     GIIc = 0.0;
 
-    this->gn0 = GIc  / ( this->sigfn * exp(1.0) + tolerance );                // normal jump at max stress
-    this->gs0 = GIIc / ( sqrt( 0.5 * exp(1.0) ) * this->sigfs + tolerance );      // shear jump at max stress
+    this->gn0 = GIc  / ( this->sigfn * M_E + tolerance );                // normal jump at max stress
+    this->gs0 = GIIc / ( sqrt( 0.5 * M_E ) * this->sigfs + tolerance );      // shear jump at max stress
 
 
     this->q = GIIc / GIc;
@@ -477,7 +169,7 @@ ExpCZMaterial :: printYourself()
     printf("  r     = %e \n", this->r);
 }
 
-ExpCZMaterialStatus :: ExpCZMaterialStatus(int n, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g)
+ExpCZMaterialStatus :: ExpCZMaterialStatus(int n, Domain *d, GaussPoint *g) : StructuralInterfaceMaterialStatus(n, d, g)
 { }
 
 
@@ -488,7 +180,7 @@ ExpCZMaterialStatus :: ~ExpCZMaterialStatus()
 void
 ExpCZMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-    StructuralMaterialStatus :: printOutputAt(file, tStep);
+    StructuralInterfaceMaterialStatus :: printOutputAt(file, tStep);
     /*
      * fprintf(file, "status { ");
      * if ( this->damage > 0.0 ) {
@@ -503,7 +195,7 @@ ExpCZMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 void
 ExpCZMaterialStatus :: initTempStatus()
 {
-    StructuralMaterialStatus :: initTempStatus();
+    StructuralInterfaceMaterialStatus :: initTempStatus();
     //this->tempKappa = this->kappa;
     //this->tempDamage = this->damage;
 }
@@ -511,7 +203,7 @@ ExpCZMaterialStatus :: initTempStatus()
 void
 ExpCZMaterialStatus :: updateYourself(TimeStep *tStep)
 {
-    StructuralMaterialStatus :: updateYourself(tStep);
+    StructuralInterfaceMaterialStatus :: updateYourself(tStep);
 }
 
 #if 0
@@ -521,7 +213,7 @@ ExpCZMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *o
     contextIOResultType iores;
 
     // save parent class status
-    if ( ( iores = StructuralMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
+    if ( ( iores = StructuralInterfaceMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -543,7 +235,7 @@ ExpCZMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void
     contextIOResultType iores;
 
     // read parent class status
-    if ( ( iores = StructuralMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
+    if ( ( iores = StructuralInterfaceMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

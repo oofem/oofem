@@ -35,10 +35,8 @@
 #ifndef mat_cebfip90_h
 #define mat_cebfip90_h
 
-#include "material.h"
-#include "Materials/linearelasticmaterial.h"
-#include "../sm/Materials/structuralmaterial.h"
-#include "../sm/Materials/structuralms.h"
+#include "structuralinterfacematerial.h"
+#include "structuralinterfacematerialstatus.h"
 
 ///@name Input fields for CebFipSlip90Material
 //@{
@@ -51,14 +49,12 @@
 //@}
 
 namespace oofem {
-// material contant's keys for give()
-class GaussPoint;
 
 /**
  * This class implements associated Material Status to IsoInterfaceDamageMaterial.
  * Stores scalar measure of the largest strain level reached.
  */
-class CebFipSlip90MaterialStatus : public StructuralMaterialStatus
+class CebFipSlip90MaterialStatus : public StructuralInterfaceMaterialStatus
 {
 protected:
     /// Scalar measure of the largest slip reached in material.
@@ -98,7 +94,7 @@ public:
  * is postulated in explicit form, relation damage parameter (omega) to scalar measure
  * of the largest strain level ever reached in material (kappa).
  */
-class CebFipSlip90Material : public StructuralMaterial
+class CebFipSlip90Material : public StructuralInterfaceMaterial
 {
 protected:
     /// Max force (stress).
@@ -121,26 +117,16 @@ public:
     virtual ~CebFipSlip90Material();
 
     virtual int hasNonLinearBehaviour() { return 1; }
-    virtual int hasMaterialModeCapability(MaterialMode mode);
 
     virtual const char *giveInputRecordName() const { return _IFT_CebFipSlip90Material_Name; }
     virtual const char *giveClassName() const { return "CebFipSlip90Material"; }
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseMode mode,
-                                               GaussPoint *gp,
-                                               TimeStep *tStep);
-
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                                      const FloatArray &reducedStrain, TimeStep *tStep);
-
-    virtual void  giveStiffnessMatrix(FloatMatrix &answer,
-                                      MatResponseMode mode,
-                                      GaussPoint *gp,
-                                      TimeStep *tStep);
+    virtual void giveEngTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep);
+    virtual void give1dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+
+    virtual bool hasAnalyticalTangentStiffness() const { return true; }
 
     /**
      * Computes the value of bond force/stress, based on given value of slip value.
@@ -158,9 +144,6 @@ public:
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new CebFipSlip90MaterialStatus(1, domain, gp); }
 
-protected:
-    void give1dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
-                                                GaussPoint *gp, TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // mat_cebfip90_h

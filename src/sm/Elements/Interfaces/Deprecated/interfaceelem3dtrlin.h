@@ -81,6 +81,9 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_wedge_1; }
     virtual integrationDomain giveIntegrationDomain() const { return _Triangle; }
+
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     virtual MaterialMode giveMaterialMode() { return _3dInterface; }
 
 protected:

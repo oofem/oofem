@@ -56,8 +56,6 @@ IntMatElastic :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, cons
 {
     StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus(gp) );
 
-    this->initTempStatus(gp);
-
     answer.beScaled(k, jumpVector);
 
     status->letTempJumpBe(jumpVector);

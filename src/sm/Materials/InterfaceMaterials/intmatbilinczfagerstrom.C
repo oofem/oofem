@@ -63,8 +63,6 @@ IntMatBilinearCZFagerstrom :: giveFirstPKTraction_3d(FloatArray &answer, GaussPo
     // strain increment, the only way, how to correctly update gp records
     
     IntMatBilinearCZFagerstromStatus *status = static_cast< IntMatBilinearCZFagerstromStatus * >( this->giveStatus(gp) );
-
-    this->initTempStatus(gp);
     
     FloatMatrix Finv;
     Finv.beInverseOf(F);
@@ -370,15 +368,15 @@ IntMatBilinearCZFagerstrom :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, Ma
 }
 
 int
-IntMatBilinearCZFagerstrom :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+IntMatBilinearCZFagerstrom :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    IntMatBilinearCZFagerstromStatus *status = static_cast< IntMatBilinearCZFagerstromStatus * >( this->giveStatus(aGaussPoint) );
+    IntMatBilinearCZFagerstromStatus *status = static_cast< IntMatBilinearCZFagerstromStatus * >( this->giveStatus(gp) );
     if ( type == IST_DamageScalar ) {     
         answer.resize(1);
-        answer.at(1) = status->giveTempDamage();
+        answer.at(1) = status->giveDamage();
         return 1;
     } else {
-        return StructuralInterfaceMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+        return StructuralInterfaceMaterial :: giveIPValue(answer, gp, type, tStep);
     }
 
 }
@@ -536,9 +534,9 @@ IntMatBilinearCZFagerstromStatus :: initTempStatus()
 }
 
 void
-IntMatBilinearCZFagerstromStatus :: updateYourself(TimeStep *atTime)
+IntMatBilinearCZFagerstromStatus :: updateYourself(TimeStep *tStep)
 {
-    StructuralInterfaceMaterialStatus :: updateYourself(atTime);
+    StructuralInterfaceMaterialStatus :: updateYourself(tStep);
     damage = tempDamage;
     oldMaterialJump = tempMaterialJump;
     QEffective = tempQEffective;

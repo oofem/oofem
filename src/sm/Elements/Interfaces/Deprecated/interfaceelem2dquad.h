@@ -82,6 +82,8 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_InterfaceElem2dQuad_Name; }
     virtual const char *giveClassName() const { return "InterfaceElem2dQuad"; }
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     virtual MaterialMode giveMaterialMode() { return _2dInterface; }
 
 protected:
