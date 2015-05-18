@@ -1401,10 +1401,6 @@ Shell7Base :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &an
     // test if underlying element provides interpolation
     if ( interpol ) {
         ///@todo fix this whole compostie recovery thing in a better way
-        //if ( !this->giveIPValueSize(type, gp) ) {
-        //    OOFEM_ERROR3("ZZNodalRecoveryMI_computeNNMatrix: Element %d not supporting type %d", this->giveNumber(), type);
-        //    return;
-        //}
 
         interpol->evalN( answer, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     } else {

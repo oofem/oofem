@@ -115,12 +115,6 @@ public:
  * which will implement constitutive model dependent part.
  * Some general purpose services are implemented on this level. For details, how to store
  * material model related history variables in integration points, see base class @ref Material documentation.
- *
- * The constitutive model can in general support several material modes (plane stress, plane strain ,... modes).
- * Its capabilities can be examined using hasMaterialModeCapability  service.
- * It is generally assumed, that results obtained from constitutive model services are according to
- * valid material mode. This mode is determined from integration point, which is compulsory parameter of all material
- * services.
  */
 class TransportMaterial : public Material
 {
