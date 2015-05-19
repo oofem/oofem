@@ -42,6 +42,7 @@
 #include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
+#include "CrossSections/structuralcrosssection.h"
 #include "classfactory.h"
 #include "load.h"
 
@@ -85,6 +86,13 @@ Tr_Warp :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 1;
     return StructuralElement :: initializeFrom(ir);
+}
+
+
+void
+Tr_Warp :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveRealStress_Warping(answer, gp, strain, tStep);
 }
 
 

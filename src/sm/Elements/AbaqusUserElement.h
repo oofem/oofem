@@ -217,12 +217,16 @@ public:
     }
 
 protected:
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) {
+        OOFEM_ERROR("function not defined for abaqusUserElement and should never be called. This is a bug.");
+    }
+
     virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS) {
-        OOFEM_ERROR("function not defined for abaqusUserElement and should never be called.");
+        OOFEM_ERROR("function not defined for abaqusUserElement and should never be called. This is a bug.");
     }
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) {
-        OOFEM_ERROR("function not defined for abaqusUserElement and should never be called.");
+        OOFEM_ERROR("function not defined for abaqusUserElement and should never be called. This is a bug.");
         return 0;
     }
 };

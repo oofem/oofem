@@ -112,10 +112,13 @@ public:
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_point; }
 
 protected:
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+    { answer.clear(); }
+
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
                                   int lowerIndx = 1, int upperIndx = ALL_STRAINS)
-    { }
-    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) { }
+    { answer.clear(); }
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) { answer.clear(); }
     virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
     double computeSpringInternalForce(TimeStep *tStep);
 };

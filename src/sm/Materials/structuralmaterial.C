@@ -1406,9 +1406,9 @@ StructuralMaterial :: computeDeviatoricVolumetricSplit(FloatArray &dev, const Fl
     double vol = s[0] + s[1] + s[2];
     double mean = vol / 3.0;
     dev = s;
-    dev.at(1) -= vol;
-    dev.at(2) -= vol;
-    dev.at(3) -= vol;
+    dev.at(1) -= mean;
+    dev.at(2) -= mean;
+    dev.at(3) -= mean;
     return mean;
 }
 
