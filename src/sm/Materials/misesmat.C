@@ -103,20 +103,30 @@ MisesMat :: giveRealStressVector_1d(FloatArray &answer,
                                  const FloatArray &totalStrain,
                                  TimeStep *tStep)
 {
+    /// @note: One should obtain the same answer using the iterations in the default implementation (this is verified for this model).
+#if 1
     MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
-    this->giveRealStressVector_3d(answer, gp, totalStrain, tStep);
 
+    this->performPlasticityReturn(gp, totalStrain);
+    double omega = computeDamage(gp, tStep);
+    answer = status->giveTempEffectiveStress();
+    answer.times(1 - omega);
+
+    // Compute the other components of the strain:
     LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
-    double E = lmat->give('E', gp);
-    double nu = lmat->give('n', gp);
+    double E = lmat->give('E', gp), nu = lmat->give('n', gp);
 
     FloatArray strain = status->getTempPlasticStrain();
     strain[0] = totalStrain[0];
-    strain[1] -= nu / E * answer[0];
-    strain[2] -= nu / E * answer[0];
+    strain[1] -= nu / E * status->giveTempEffectiveStress()[0];
+    strain[2] -= nu / E * status->giveTempEffectiveStress()[0];
+
     status->letTempStrainVectorBe(strain);
-    /// @note: One should obtain the same answer using the iterations in the default implementation (this is verified for this model).
-    //StructuralMaterial :: giveRealStressVector_1d(answer, gp, totalStrain, tStep);
+    status->setTempDamage(omega);
+    status->letTempStressVectorBe(answer);
+#else
+    StructuralMaterial :: giveRealStressVector_1d(answer, gp, totalStrain, tStep);
+#endif
 }
 
 void
@@ -713,6 +723,12 @@ void
 MisesMatStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
+
+    fprintf(file, "              plastic  ");
+    for ( auto &val : this->plasticStrain ) {
+        fprintf(file, "%.4e ", val);
+    }
+    fprintf(file, "\n");
 
     fprintf(file, "status { ");
     /*
