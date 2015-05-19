@@ -39,8 +39,6 @@
 #include "floatmatrix.h"
 
 #include "../sm/Materials/structuralms.h"
-#include "strainvector.h"
-#include "stressvector.h"
 #include "../sm/Materials/structuralmaterial.h"
 #include "Materials/isolinearelasticmaterial.h"
 
@@ -76,8 +74,8 @@ protected:
     double tempVolumetricPlasticStrain;
 
     /// Deviatoric of plastic strain.
-    StrainVector plasticStrainDeviator;
-    StrainVector tempPlasticStrainDeviator;
+    FloatArray plasticStrainDeviator;
+    FloatArray tempPlasticStrainDeviator;
 
     /// Hardening variable.
     double kappa;
@@ -107,18 +105,18 @@ public:
      * Get the full plastic strain vector from the material status.
      * @param answer Plastic strain vector.
      */
-    void  giveFullPlasticStrainVector(StrainVector &answer) const
+    void  givePlasticStrainVector(FloatArray &answer) const
     {
-        StrainVector plasticStrainVector(_3dMat);
-        plasticStrainDeviator.computeDeviatoricVolumetricSum(plasticStrainVector,
-                                                             volumetricPlasticStrain);
-        plasticStrainVector.convertToFullForm(answer);
+        answer = plasticStrainDeviator;
+        answer[0] += volumetricPlasticStrain;
+        answer[1] += volumetricPlasticStrain;
+        answer[2] += volumetricPlasticStrain;
     }
     /**
      * Get the plastic strain deviator from the material status.
      * @return Plastic strain deviator.
      */
-    const StrainVector &givePlasticStrainDeviator() const { return plasticStrainDeviator; }
+    const FloatArray &givePlasticStrainDeviator() const { return plasticStrainDeviator; }
     /**
      * Get the volumetric plastic strain from the material status.
      * @return Volumetric plastic strain.
@@ -139,16 +137,18 @@ public:
      * Get the temp value of the full plastic strain vector from the material status.
      * @param answer Temp value of plastic strain vector.
      */
-    void giveTempPlasticStrainVector(StrainVector &answer) const
+    void giveTempPlasticStrainVector(FloatArray &answer) const
     {
-        tempPlasticStrainDeviator.computeDeviatoricVolumetricSum(answer,
-                                                                 tempVolumetricPlasticStrain);
+        answer = tempPlasticStrainDeviator;
+        answer[0] += tempVolumetricPlasticStrain;
+        answer[1] += tempVolumetricPlasticStrain;
+        answer[2] += tempVolumetricPlasticStrain;
     }
     /**
      * Get the temp value of the plastic strain deviator from the material status.
      * @param answer Temp value of plastic strain deviator.
      */
-    const StrainVector &giveTempPlasticStrainDeviator() const { return tempPlasticStrainDeviator; }
+    const FloatArray &giveTempPlasticStrainDeviator() const { return tempPlasticStrainDeviator; }
     /**
      * Get the temp value of the volumetric strain deviator from the material status.
      * @return Temp value of volumetric plastic strain
@@ -169,7 +169,7 @@ public:
      * Assign the temp value of deviatoric plastic strain.
      * @param v New temp value of deviatoric plastic strain.
      */
-    void letTempPlasticStrainDeviatorBe(const StrainVector &v) { tempPlasticStrainDeviator = v; }
+    void letTempPlasticStrainDeviatorBe(const FloatArray &v) { tempPlasticStrainDeviator = v; }
     /**
      * Assign the temp value of volumetric plastic strain.
      * @param v New temp value of volumetric plastic strain.
@@ -222,18 +222,6 @@ protected:
     /// Associated linear elastic material.
     IsotropicLinearElasticMaterial *LEMaterial;
 
-    /// Hardening variable
-    double kappa;
-    double tempKappa;
-
-    /// Volumetric stress, i.e. 1/3 of the trace of sigma.
-    double volumetricStress;
-    /// Volumetric part of elastic trial strain.
-    double volumetricElasticTrialStrain;
-    /// J2-invariant of elastic trial stress.
-    double trialStressJTwo;
-    /// Deviatoric part of stress.
-    StressVector stressDeviator;
     /// Yield tolerance.
     double yieldTol;
     /// Maximum number of iterations for stress return.
@@ -246,20 +234,14 @@ public:
     virtual ~DruckerPragerPlasticitySM();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int hasMaterialModeCapability(MaterialMode mMode);
 
     virtual const char *giveClassName() const { return "DruckerPragerPlasticitySM"; }
     virtual const char *giveInputRecordName() const { return _IFT_DruckerPragerPlasticitySM_Name; }
 
-    virtual void giveRealStressVector(FloatArray &answer,
+    virtual void giveRealStressVector_3d(FloatArray &answer,
                                       GaussPoint *gp,
                                       const FloatArray &strainVector,
                                       TimeStep *tStep);
-
-    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    virtual void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep);
@@ -270,8 +252,7 @@ public:
      * @param gp Gauss point.
      * @param strain Strain vector of this Gauss point.
      */
-    void performLocalStressReturn(GaussPoint *gp,
-                                  const StrainVector &strain);
+    void performLocalStressReturn(GaussPoint *gp, const FloatArray &strain);
     /**
      * Check if the trial stress state falls within the vertex region.
      * @param eM Elasticity modulus.
@@ -279,21 +260,21 @@ public:
      * @param kM Bulk modulus.
      * @return True for vertex case and false if regular stress return has to be used.
      */
-    bool checkForVertexCase(double eM, double gM, double kM);
+    bool checkForVertexCase(double eM, double gM, double kM, double trialStressJTwo, double volumetricStress, double tempKappa);
     /**
      * Perform stress return for regular case, i.e. if the trial stress state does not lie within the vertex region.
      * @param eM Elasticity modulus.
      * @param gM Shear modulus.
      * @param kM Bulk modulus.
      */
-    void performRegularReturn(double eM, double gM, double kM);
+    void performRegularReturn(double eM, double gM, double kM, double trialStressJTwo, FloatArray &stressDeviator, double &volumetricStress, double &tempKappa);
     /**
      * Perform stress return for vertex case, i.e. if the trial stress state lies within the vertex region.
      * @param eM Elasticity modulus.
      * @param gM Shear modulus.
      * @param kM Bulk modulus.
      */
-    void performVertexReturn(double eM, double gM, double kM);
+    void performVertexReturn(double eM, double gM, double kM, double trialStressJTwo, FloatArray &stressDeviator, double &volumetricStress, double &tempKappa, double volumetricElasticTrialStrain, double kappa);
     /**
      * Compute the yield value based on stress and hardening variable.
      * @param meanStress 1/3 of trace of sigma.
