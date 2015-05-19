@@ -568,23 +568,16 @@ RheoChainMaterial :: restoreIPContext(DataStream &stream, ContextMode mode, Gaus
 
 RheoChainMaterialStatus :: RheoChainMaterialStatus(int n, Domain *d,
                                                    GaussPoint *g, int nunits) :
-    StructuralMaterialStatus(n, d, g), shrinkageStrain() {
-    // constructor
-    nUnits = nunits;
-
-    hiddenVars.resize(nUnits);
-    tempHiddenVars.resize(nUnits);
-    for ( int i = 0; i < nUnits; i++ ) {
-        hiddenVars [ i ].clear();
-        tempHiddenVars [ i ].clear();
-    }
-}
-
-
-RheoChainMaterialStatus :: ~RheoChainMaterialStatus()
+    StructuralMaterialStatus(n, d, g),
+    nUnits(nunits),
+    hiddenVars(nUnits),
+    tempHiddenVars(nUnits),
+    shrinkageStrain()
 {
-    // destructor
 }
+
+
+RheoChainMaterialStatus :: ~RheoChainMaterialStatus() { }
 
 
 void
@@ -603,17 +596,14 @@ void
 RheoChainMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
     // printing of hidden variables
-    // useful only for debugging
-    FloatArray helpVec;
 
     StructuralMaterialStatus :: printOutputAt(file, tStep);
 
     fprintf(file, "{hidden variables: ");
     for ( int i = 0; i < nUnits; i++ ) {
-        StructuralMaterial :: giveFullSymVectorForm( helpVec, hiddenVars [ i ], gp->giveMaterialMode() ); // JB
         fprintf(file, "{ ");
-        for ( int j = 1; j <= helpVec.giveSize(); j++ ) {
-            fprintf( file, "%f ", helpVec.at(j) );
+        for ( auto &val : hiddenVars[i] ) {
+            fprintf( file, "%f ", val );
         }
 
         fprintf(file, "} ");
@@ -621,8 +611,8 @@ RheoChainMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 
     if ( shrinkageStrain.isNotEmpty() ) {
         fprintf(file, "shrinkageStrain: {");
-        for ( int j = 1; j <= shrinkageStrain.giveSize(); j++ ) {
-            fprintf( file, "%f ", shrinkageStrain.at(j) );
+        for ( auto &val : shrinkageStrain ) {
+            fprintf( file, "%f ", val );
         }
 
         fprintf(file, "} ");

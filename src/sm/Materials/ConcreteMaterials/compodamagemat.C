@@ -455,7 +455,7 @@ void CompoDamageMat :: giveCharLength(CompoDamageMatStatus *status, GaussPoint *
             crackPlaneNormal.at(j) = elementCs.at(j, i);
         }
 
-       status->elemCharLength.at(i) = gp->giveElement()->giveCharacteristicLength(crackPlaneNormal);
+        status->elemCharLength.at(i) = gp->giveElement()->giveCharacteristicLength(crackPlaneNormal);
     }
 }
 

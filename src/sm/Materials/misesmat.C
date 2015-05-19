@@ -82,8 +82,10 @@ MisesMat :: initializeFrom(InputRecord *ir)
     H = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, H, _IFT_MisesMat_h); // hardening modulus
     /*********************************************************************************************************/
-    IR_GIVE_FIELD(ir, omega_crit, _IFT_MisesMat_omega_crit); // critical damage
+    omega_crit = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, omega_crit, _IFT_MisesMat_omega_crit); // critical damage
 
+    a = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, a, _IFT_MisesMat_a); // exponent in damage law
     /********************************************************************************************************/
 
@@ -439,18 +441,16 @@ MisesMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     double trialS = computeStressNorm(trialStressDev);
 
     // one correction term
-    FloatMatrix stiffnessCorrection(6, 6);
+    FloatMatrix stiffnessCorrection;
     stiffnessCorrection.beDyadicProductOf(trialStressDev, trialStressDev);
     double factor = -2. * sqrt(6.) * G * G / trialS;
     double factor1 = factor * sigmaY / ( ( H + 3. * G ) * trialS * trialS );
-    stiffnessCorrection.times(factor1);
-    answer.add(stiffnessCorrection);
+    answer.add(factor1, stiffnessCorrection);
 
     // another correction term
     stiffnessCorrection.bePinvID();
     double factor2 = factor * dKappa;
-    stiffnessCorrection.times(factor2);
-    answer.add(stiffnessCorrection);
+    answer.add(factor2, stiffnessCorrection);
 
     //influence of damage
     //    double omega = computeDamageParam(tempKappa);
@@ -482,7 +482,7 @@ MisesMat :: give1dStressStiffMtrx(FloatMatrix &answer,
     }
 
 
-    if ( ( tempKappa - kappa ) <= 0.0 ) { // elastic loading - elastic stiffness plays the role of tangent stiffness
+    if ( tempKappa <= kappa ) { // elastic loading - elastic stiffness plays the role of tangent stiffness
         answer.times(1 - omega);
         return;
     }
@@ -683,9 +683,7 @@ MisesMat :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
 {
     MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
     if ( type == IST_PlasticStrainTensor ) {
-        const FloatArray &ep = status->givePlasDef();
-        ///@todo Fix this so that it doesn't just fill in zeros for plane stress:
-        StructuralMaterial :: giveFullSymVectorForm( answer, ep, gp->giveMaterialMode() );
+        answer = status->givePlasDef();
         return 1;
     } else if ( type == IST_MaxEquivalentStrainLevel ) {
         answer.resize(1);

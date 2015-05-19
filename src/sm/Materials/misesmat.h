@@ -110,9 +110,6 @@ public:
     /// Returns a reference to the basic elastic material.
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
-    //virtual int giveSizeOfFullHardeningVarsVector();
-    //virtual int giveSizeOfReducedHardeningVarsVector(GaussPoint *gp);
-
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
