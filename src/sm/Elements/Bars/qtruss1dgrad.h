@@ -65,7 +65,7 @@ public:
 
 protected:
     virtual void computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    virtual void computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeNkappaMatrixAt(GaussPoint *gp, FloatArray &answer);
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual void computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer);
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
