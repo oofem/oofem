@@ -172,8 +172,8 @@ set (sm_material
     Materials/RheoChainMaterials/maxwellChM.C 
     Materials/RheoChainMaterials/kelvinChM.C
     Materials/RheoChainMaterials/kelvinChSolM.C
+    Materials/RheoChainMaterials/b3mat.C
     Materials/structuralfe2material.C
-    Materials/b3mat.C
     Materials/rcsd.C 
     Materials/rcsde.C 
     Materials/rcsdnl.C
