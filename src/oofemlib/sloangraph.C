@@ -124,6 +124,8 @@ void SloanGraph :: initialize()
 
     IntArray dofMasters;
     for ( auto &dman : dmans ) {
+      // according to forum discussion Peter & Mikael
+      count = 0;
         ++count;
         if ( dman->hasAnySlaveDofs() ) {
             std :: set< int >masters;

@@ -345,6 +345,7 @@ B3SolidMaterial :: computeCharTimes()
     this->nUnits = j;
 
     this->charTimes.resize(this->nUnits);
+    this->charTimes.zero();
 
     for ( int mu = 1; mu <= this->nUnits; mu++ ) {
         charTimes.at(mu) = Tau1 * pow(10., mu - 1);
@@ -376,6 +377,7 @@ B3SolidMaterial :: computeCharCoefficients(FloatArray &answer, double tStep)
       // evaluation of moduli of elasticity for the remaining units
       // (Solidifying kelvin units with retardation times tauMu)
       answer.resize(nUnits);
+      answer.zero();
       for ( mu = 1; mu <= this->nUnits; mu++ ) {
 	tauMu = pow(2 * this->giveCharTime(mu), 0.1);
         answer.at(mu) = 10.e6 * pow(1 + tauMu / lambda0ToPowN, 2) / ( log(10.0) * q2 * ( tauMu / lambda0ToPowN ) * ( 0.9 + tauMu / lambda0ToPowN ) );
@@ -628,6 +630,7 @@ B3SolidMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, Tim
 	sigma = status->giveViscoelasticStressVector();         //stress vector at the beginning of time-step
         this->giveUnitComplianceMatrix(C, gp, tStep);
         reducedAnswer.resize( C.giveNumberOfRows() );
+	reducedAnswer.zero();
 
         reducedAnswer.beProductOf(C, sigma);
         reducedAnswer.times( tStep->giveTimeIncrement() / ( timeFactor * eta ) );

@@ -115,16 +115,16 @@ protected:
 
 #ifdef keep_track_of_strains
     double dryingShrinkageStrain;
-    double dryingShrinkageStrainIncrement;
+    double tempDryingShrinkageStrain;
     double autogenousShrinkageStrain;
-    double autogenousShrinkageStrainIncrement;
+    double tempAutogenousShrinkageStrain;
     FloatArray creepStrain;
     FloatArray creepStrainIncrement;
 #endif
 
 
 public:
-    MPSMaterialStatus(int n, Domain * d, GaussPoint * g, int nunits);
+    MPSMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits);
     virtual ~MPSMaterialStatus() { }
 
     virtual void updateYourself(TimeStep *tStep);
@@ -174,11 +174,15 @@ public:
     bool giveStoredEmodulusFlag(void) { return storedEmodulusFlag; }
 
 #ifdef keep_track_of_strains
-    void setDryingShrinkageStrainIncrement(double src) { dryingShrinkageStrainIncrement = src; }
+    void setTempDryingShrinkageStrain(double src) { tempDryingShrinkageStrain = src; }
+    double giveTempDryingShrinkageStrain(void) { return tempDryingShrinkageStrain; }
     double giveDryingShrinkageStrain(void) { return dryingShrinkageStrain; }
-    void setAutogenousShrinkageStrainIncrement(double src) { autogenousShrinkageStrainIncrement = src; }
+
+    void setTempAutogenousShrinkageStrain(double src) { tempAutogenousShrinkageStrain = src; }
+    double giveTempAutogenousShrinkageStrain(void) { return tempAutogenousShrinkageStrain; }
     double giveAutogenousShrinkageStrain(void) { return autogenousShrinkageStrain; }
-    void setCreepStrainIncrement(FloatArray src) { creepStrainIncrement  = std :: move(src);}
+
+    void setCreepStrainIncrement(FloatArray src) { creepStrainIncrement  = std :: move(src); }
     const FloatArray &giveCreepStrain() const { return creepStrain; }
 #endif
 
@@ -238,7 +242,7 @@ protected:
     /// exponent in the microprestress/viscosity governing equation
     double p;
     /// parameters for nonlinear shrinkage function
-    double sh_a ,sh_hC, sh_n;
+    double sh_a, sh_hC, sh_n;
     /// parameter for autogenous shrinkage according to fib MC 2010
     double eps_cas0;
     /// parameters for autogenous shrinkage according to B4 model
@@ -246,13 +250,13 @@ protected:
 
     /// scaling factor 1. for Pa, 1.e6 for MPa - only for empirical formulas - q1-q4 and ft and gf
     double stiffnessFactor;
-    
+
     /// 0 for Kelvin, 273.15 for Celsius
     double temperScaleDifference;
 
 
 public:
-    MPSMaterial(int n, Domain * d) : KelvinChainSolidMaterial(n, d) { }
+    MPSMaterial(int n, Domain *d) : KelvinChainSolidMaterial(n, d) { }
     virtual ~MPSMaterial() { }
 
     virtual const char *giveInputRecordName() const { return _IFT_MPSMaterial_Name; }
@@ -268,6 +272,9 @@ public:
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     virtual void giveShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
+
+    /// Evaluation of the basic creep compliance function - can be used to compute elastic modulus in derived damage material
+    virtual double computeCreepFunction(double t, double t_prime);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 

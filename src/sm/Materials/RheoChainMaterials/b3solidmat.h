@@ -62,7 +62,7 @@ protected:
     double microprestress_new;
 
 public:
-    B3SolidMaterialStatus(int n, Domain * d, GaussPoint * g, int nunits);
+    B3SolidMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits);
     virtual ~B3SolidMaterialStatus() { }
 
     virtual void updateYourself(TimeStep *tStep);
@@ -120,7 +120,7 @@ protected:
 
 
 public:
-    B3SolidMaterial(int n, Domain * d) : KelvinChainMaterial(n, d) {
+    B3SolidMaterial(int n, Domain *d) : KelvinChainMaterial(n, d) {
         shMode = B3_NoShrinkage;
     }
     virtual ~B3SolidMaterial() { }
@@ -139,6 +139,9 @@ public:
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
+    /// Evaluation of the compliance function of the non-aging solidifying constituent.
+    virtual double computeCreepFunction(double t, double t_prime);
+
 protected:
     virtual int hasIncrementalShrinkageFormulation() { return 1; }
 
@@ -148,9 +151,6 @@ protected:
     void computePointShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     void predictParametersFrom(double, double, double, double, double, double, double);
-
-    /// Evaluation of the compliance function of the non-aging solidifying constituent.
-    virtual double computeCreepFunction(double t, double t_prime);
 
     /// Evaluation of the relative volume of the solidified material.
     double computeSolidifiedVolume(TimeStep *tStep);

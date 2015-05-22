@@ -97,7 +97,7 @@ protected:
     double talpha;   ///< Thermal dilatation coeff.
     //@}
 public:
-    B3Material(int n, Domain * d) : MaxwellChainMaterial(n, d) {
+    B3Material(int n, Domain *d) : MaxwellChainMaterial(n, d) {
         shMode = B3_NoShrinkage;
     }
     virtual ~B3Material() { }
@@ -110,6 +110,8 @@ public:
 
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
+    virtual double computeCreepFunction(double t, double t_prime);
+
 protected:
     virtual int hasIncrementalShrinkageFormulation() { return 1; }
 
@@ -117,7 +119,6 @@ protected:
     /// Free shrinkage at material point, requires staggered analysis.
     virtual void computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
     void predictParametersFrom(double, double, double, double, double, double, double);
-    virtual double computeCreepFunction(double t, double t_prime);
 
     /**
      * Function calculates relative humidity from water content (inverse relation form sorption isotherm).

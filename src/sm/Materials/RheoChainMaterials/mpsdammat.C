@@ -64,6 +64,7 @@ MPSDamMaterialStatus :: MPSDamMaterialStatus(int n, Domain *d, GaussPoint *g, in
 
     int rsize = StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() );
     effectiveStressVector.resize(rsize);
+    effectiveStressVector.zero();
     tempEffectiveStressVector = effectiveStressVector;
 
 #ifdef supplementary_info
@@ -199,8 +200,9 @@ MPSDamMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, voi
 }
 
 //   ***********************************************************************************
-//   ***   CLASS Damage extension of MPS model for creep and shrinkage of concrete   ***
+//   ***   CLASS Damage extension of MPS model for creep and shrinakge of concrete   ***
 //   ***********************************************************************************
+
 
 MPSDamMaterial :: MPSDamMaterial(int n, Domain *d) : MPSMaterial(n, d)
 
@@ -224,6 +226,7 @@ MPSDamMaterial :: hasMaterialModeCapability(MaterialMode mode)
 }
 
 
+
 IRResultType
 MPSDamMaterial :: initializeFrom(InputRecord *ir)
 {
@@ -237,7 +240,8 @@ MPSDamMaterial :: initializeFrom(InputRecord *ir)
     }
 
     // initialize dummy elastic modulus E
-    E = 20.e9 / MPSMaterial :: stiffnessFactor;
+    //E = 20.e9 / MPSMaterial::stiffnessFactor;
+    E = 1. / MPSMaterial :: computeCreepFunction(28.01, 28);
 
     int damageLaw = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, damageLaw, _IFT_MPSDamMaterial_damageLaw);
@@ -277,6 +281,8 @@ MPSDamMaterial :: initializeFrom(InputRecord *ir)
             OOFEM_ERROR("Softening type number %d is unknown", damageLaw);
         }
     }
+
+
 
     return IRRT_OK;
 }
@@ -409,10 +415,10 @@ MPSDamMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const
             }
 
             if ( mode == _PlaneStress ) {
-                principalStress.resize(3);
+                principalStress.resizeWithValues(3);
                 givePlaneStressVectorTranformationMtrx(Tstress, principalDir, true);
             } else {
-                principalStress.resize(6);
+                principalStress.resizeWithValues(6);
                 giveStressVectorTranformationMtrx(Tstress, principalDir, true);
             }
 
@@ -443,13 +449,15 @@ MPSDamMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const
 
         double crackWidth;
         //case when the strain localizes into narrow band and after a while the stresses relax
-        crackWidth = status->giveCharLength() * omega * principalStrains.at(1);
 
-        /* FloatArray reducedStrain;
-         * this->giveStressDependentPartOfStrainVector(reducedStrain, gp, totalStrain, tStep, VM_Incremental);
-         * this->computePrincipalValues(principalStrains, reducedStrain, principal_strain);
-         * crackWidth = max(crackWidth, this->giveCharLength() * omega * principalStrains.at(1) );
-         */
+        double strainWithoutTemperShrink = principalStrains.at(1);
+        strainWithoutTemperShrink -=  status->giveTempThermalStrain();
+        strainWithoutTemperShrink -=  status->giveTempDryingShrinkageStrain();
+        strainWithoutTemperShrink -=  status->giveTempAutogenousShrinkageStrain();
+
+
+        crackWidth = status->giveCharLength() * omega * strainWithoutTemperShrink;
+
         status->setCrackWidth(crackWidth);
     }
 
@@ -707,7 +715,7 @@ MPSDamMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 {
     RheoChainMaterial :: give3dMaterialStiffnessMatrix(answer, ElasticStiffness, gp, tStep);
 
-    if ( mode == ElasticStiffness ) {
+    if ( mode == ElasticStiffness || ( mode == SecantStiffness && !this->isotropic ) ) {
         return;
     }
 
@@ -726,7 +734,7 @@ MPSDamMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
 {
     RheoChainMaterial :: givePlaneStressStiffMtrx(answer, ElasticStiffness, gp, tStep);
 
-    if ( mode == ElasticStiffness ) {
+    if ( mode == ElasticStiffness || ( mode == SecantStiffness && !this->isotropic ) ) {
         return;
     }
 
@@ -744,7 +752,7 @@ MPSDamMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
 {
     RheoChainMaterial :: givePlaneStrainStiffMtrx(answer, ElasticStiffness, gp, tStep);
 
-    if ( mode == ElasticStiffness ) {
+    if ( mode == ElasticStiffness || ( mode == SecantStiffness && !this->isotropic ) ) {
         return;
     }
 
@@ -763,7 +771,7 @@ MPSDamMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
 {
     RheoChainMaterial :: give1dStressStiffMtrx(answer, ElasticStiffness, gp, tStep);
 
-    if ( mode == ElasticStiffness ) {
+    if ( mode == ElasticStiffness || ( mode == SecantStiffness && !this->isotropic ) ) {
         return;
     }
 
@@ -805,18 +813,22 @@ MPSDamMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateT
         return 1;
     } else if ( type == IST_CharacteristicLength ) {
         answer.resize(1);
+        answer.zero();
         answer.at(1) = status->giveCharLength();
         return 1;
     } else if ( type == IST_CrackVector ) {
         answer.resize(3);
+        answer.zero();
         status->giveCrackVector(answer);
         return 1;
     } else if ( type == IST_CrackWidth ) {
         answer.resize(1);
+        answer.zero();
         answer.at(1) = status->giveCrackWidth();
         return 1;
     } else if ( type == IST_TensileStrength ) {
         answer.resize(1);
+        answer.zero();
         answer.at(1) =  status->giveResidualTensileStrength();
         return 1;
     } else {
