@@ -175,7 +175,9 @@ NRSolver :: initializeFrom(InputRecord *ir)
     }
 
  
+    this->constrainedNRminiter = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->constrainedNRminiter, _IFT_NRSolver_constrainedNRminiter);
+    this->constrainedNRFlag = this->constrainedNRminiter != 0;
 
     return SparseNonLinearSystemNM :: initializeFrom(ir);
 }
@@ -291,7 +293,7 @@ NRSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
         } else if ( this->constrainedNRFlag && ( nite > this->constrainedNRminiter ) ) {
             ///@todo This doesn't check units, it is nonsense and must be corrected / Mikael
             if ( this->forceErrVec.computeSquaredNorm() > this->forceErrVecOld.computeSquaredNorm() ) {
-                printf("Constraining increment to be %e times full increment...\n", this->constrainedNRalpha);
+                OOFEM_LOG_INFO("Constraining increment to be %e times full increment...\n", this->constrainedNRalpha);
                 ddX.times(this->constrainedNRalpha);
             }   
             //this->giveConstrainedNRSolver()->solve(X, & ddX, this->forceErrVec, this->forceErrVecOld, status, tStep);
