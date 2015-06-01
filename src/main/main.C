@@ -301,8 +301,6 @@ int main(int argc, char *argv[])
     oofem_logger.printStatistics();
     delete problem;
 
-    problem.reset();
-
     oofem_finalize_modules();
 
     return 0;

@@ -95,9 +95,6 @@ public:
     virtual TimeStep *giveNextStep();
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
     
-    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep);
-    virtual int requiresUnknownsDictionaryUpdate() { return true; }
-
     virtual fMode giveFormulation() { return TL; }
 
     void setSolution(TimeStep *tStep, const FloatArray &vectorToStore);
@@ -105,7 +102,6 @@ public:
     virtual bool requiresEquationRenumbering(TimeStep *tStep);
 
     virtual int requiresUnknownsDictionaryUpdate() { return true; }
-    virtual void updateDofUnknownsDictionary(DofManager *, TimeStep *);
     virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep);
 
     // identification
