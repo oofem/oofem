@@ -199,7 +199,6 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
         this->field->initialize(VM_Total, tStep->givePreviousStep(), this->solution, EModelDefaultEquationNumbering() );
         this->field->update(VM_Total, tStep, this->solution, EModelDefaultEquationNumbering() );
     }
-    this->field->applyBoundaryCondition(tStep); ///@todo Temporary hack to override the incorrect values that is set by "update" above. Remove this when that is fixed.
 
     FloatArray incrementOfSolution(neq), externalForces(neq);
 
@@ -291,10 +290,10 @@ void StaticStructural :: terminate(TimeStep *tStep)
 double StaticStructural :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 {
     double val1 = dof->giveUnknownsDictionaryValue(tStep, VM_Total);
-    double val0 = dof->giveUnknownsDictionaryValue(tStep->givePreviousStep(), VM_Total);
     if ( mode == VM_Total ) {
         return val1;
     } else if ( mode == VM_Incremental ) {
+        double val0 = dof->giveUnknownsDictionaryValue(tStep->givePreviousStep(), VM_Total);
         return val1 - val0;
     } else {
         OOFEM_ERROR("Unknown value mode requested");
