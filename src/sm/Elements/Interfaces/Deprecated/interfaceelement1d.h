@@ -36,7 +36,6 @@
 #define interfaceelement1d_h
 
 #include "../sm/Elements/structuralelement.h"
-#include "gaussintegrationrule.h"
 
 ///@name Input fields for Material
 //@{
@@ -90,6 +89,8 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_point; }
     virtual integrationDomain giveIntegrationDomain() const { return _Point; }
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     virtual MaterialMode giveMaterialMode();
 
 protected:

@@ -40,6 +40,7 @@
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
+#include "../sm/CrossSections/structuralcrosssection.h"
 #include "mathfem.h"
 #include "classfactory.h"
 
@@ -77,6 +78,11 @@ QTruss1d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoor
     return 1;
 }
 
+void
+QTruss1d :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveRealStress_1d(answer, gp, strain, tStep);
+}
 
 double
 QTruss1d :: computeVolumeAround(GaussPoint *gp)

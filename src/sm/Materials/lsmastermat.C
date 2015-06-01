@@ -58,13 +58,6 @@ LargeStrainMasterMaterial :: LargeStrainMasterMaterial(int n, Domain *d) : Struc
 LargeStrainMasterMaterial :: ~LargeStrainMasterMaterial()
 { }
 
-// specifies whether a given material mode is supported by this model
-int
-LargeStrainMasterMaterial :: hasMaterialModeCapability(MaterialMode mode)
-{
-    return mode == _3dMat;
-}
-
 // reads the model parameters from the input file
 IRResultType
 LargeStrainMasterMaterial :: initializeFrom(InputRecord *ir)
@@ -90,84 +83,75 @@ LargeStrainMasterMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, Gaus
 {
     LargeStrainMasterMaterialStatus *status = static_cast< LargeStrainMasterMaterialStatus * >( this->giveStatus(gp) );
     this->initTempStatus(gp);
-    MaterialMode mode = gp->giveMaterialMode();
-    if  ( mode == _3dMat ) {
-        StructuralMaterial *sMat = dynamic_cast< StructuralMaterial * >( domain->giveMaterial(slaveMat) );
-        if ( sMat == NULL ) {
-            OOFEM_WARNING("material %d has no Structural support", slaveMat);
-            return;
-        }
 
-        double lambda1, lambda2, lambda3, E1, E2, E3;
-        FloatArray eVals, SethHillStrainVector, stressVector, stressM;
-        FloatMatrix F, Ft, C, eVecs, SethHillStrain;
-        FloatMatrix L1, L2, T, tT;
-        //store of deformation gradient into 3x3 matrix
-        F.beMatrixForm(vF);
-        //compute right Cauchy-Green tensor(C), its eigenvalues and eigenvectors
-        Ft.beTranspositionOf(F);
-        C.beProductOf(Ft, F);
-        // compute eigen values and eigen vectors of C
-        C.jaco_(eVals, eVecs, 40);
-        // compute Seth - Hill's strain measure, it depends on mParameter
-        lambda1 = eVals.at(1);
-        lambda2 = eVals.at(2);
-        lambda3 = eVals.at(3);
-        if ( m == 0 ) {
-            E1 = 1. / 2. * log(lambda1);
-            E2 = 1. / 2. * log(lambda2);
-            E3 = 1. / 2. * log(lambda3);
-        } else {
-            E1 = 1. / ( 2. * m ) * ( pow(lambda1, m) - 1. );
-            E2 = 1. / ( 2. * m ) * ( pow(lambda2, m) - 1. );
-            E3 = 1. / ( 2. * m ) * ( pow(lambda3, m) - 1. );
-        }
+    StructuralMaterial *sMat = static_cast< StructuralMaterial * >( domain->giveMaterial(slaveMat) );
 
-        SethHillStrain.resize(3, 3);
-        for ( int i = 1; i < 4; i++ ) {
-            for ( int j = 1; j < 4; j++ ) {
-                SethHillStrain.at(i, j) = E1 * eVecs.at(i, 1) * eVecs.at(j, 1) + E2 *eVecs.at(i, 2) * eVecs.at(j, 2) + E3 *eVecs.at(i, 3) * eVecs.at(j, 3);
-            }
-        }
-
-        SethHillStrainVector.beSymVectorFormOfStrain(SethHillStrain);
-        sMat->giveRealStressVector_3d(stressVector, gp, SethHillStrainVector, tStep);
-        this->constructTransformationMatrix(T, eVecs);
-        tT.beTranspositionOf(T);
-
-        stressVector.at(4) = 2 * stressVector.at(4);
-        stressVector.at(5) = 2 * stressVector.at(5);
-        stressVector.at(6) = 2 * stressVector.at(6);
-
-
-        stressM.beProductOf(T, stressVector);
-        stressM.at(4) = 1. / 2. *  stressM.at(4);
-        stressM.at(5) = 1. / 2. *  stressM.at(5);
-        stressM.at(6) = 1. / 2. *  stressM.at(6);
-
-        this->constructL1L2TransformationMatrices(L1, L2, eVecs, stressM, E1, E2, E3);
-
-        FloatMatrix junk, P, TL;
-        FloatArray secondPK;
-        junk.beProductOf(L1, T);
-        P.beProductOf(tT, junk);
-        //transformation of the stress to the 2PK stress and then to 1PK
-        stressVector.at(4) = 0.5 * stressVector.at(4);
-        stressVector.at(5) = 0.5 * stressVector.at(5);
-        stressVector.at(6) = 0.5 * stressVector.at(6);
-        secondPK.beProductOf(P, stressVector);
-        this->convert_S_2_P( answer, secondPK, vF, gp->giveMaterialMode() );
-        junk.zero();
-        junk.beProductOf(L2, T);
-        TL.beProductOf(tT, junk);
-        status->setPmatrix(P);
-        status->setTLmatrix(TL);
-        status->letTempStressVectorBe(answer);
+    double lambda1, lambda2, lambda3, E1, E2, E3;
+    FloatArray eVals, SethHillStrainVector, stressVector, stressM;
+    FloatMatrix F, Ft, C, eVecs, SethHillStrain;
+    FloatMatrix L1, L2, T, tT;
+    //store of deformation gradient into 3x3 matrix
+    F.beMatrixForm(vF);
+    //compute right Cauchy-Green tensor(C), its eigenvalues and eigenvectors
+    Ft.beTranspositionOf(F);
+    C.beProductOf(Ft, F);
+    // compute eigen values and eigen vectors of C
+    C.jaco_(eVals, eVecs, 40);
+    // compute Seth - Hill's strain measure, it depends on mParameter
+    lambda1 = eVals.at(1);
+    lambda2 = eVals.at(2);
+    lambda3 = eVals.at(3);
+    if ( m == 0 ) {
+        E1 = 1. / 2. * log(lambda1);
+        E2 = 1. / 2. * log(lambda2);
+        E3 = 1. / 2. * log(lambda3);
     } else {
-        OOFEM_ERROR("Unknown material mode.");
+        E1 = 1. / ( 2. * m ) * ( pow(lambda1, m) - 1. );
+        E2 = 1. / ( 2. * m ) * ( pow(lambda2, m) - 1. );
+        E3 = 1. / ( 2. * m ) * ( pow(lambda3, m) - 1. );
     }
-}
 
+    SethHillStrain.resize(3, 3);
+    for ( int i = 1; i < 4; i++ ) {
+        for ( int j = 1; j < 4; j++ ) {
+            SethHillStrain.at(i, j) = E1 * eVecs.at(i, 1) * eVecs.at(j, 1) + E2 *eVecs.at(i, 2) * eVecs.at(j, 2) + E3 *eVecs.at(i, 3) * eVecs.at(j, 3);
+        }
+    }
+
+    SethHillStrainVector.beSymVectorFormOfStrain(SethHillStrain);
+    sMat->giveRealStressVector_3d(stressVector, gp, SethHillStrainVector, tStep);
+    this->constructTransformationMatrix(T, eVecs);
+    tT.beTranspositionOf(T);
+
+    stressVector.at(4) = 2 * stressVector.at(4);
+    stressVector.at(5) = 2 * stressVector.at(5);
+    stressVector.at(6) = 2 * stressVector.at(6);
+
+
+    stressM.beProductOf(T, stressVector);
+    stressM.at(4) = 1. / 2. *  stressM.at(4);
+    stressM.at(5) = 1. / 2. *  stressM.at(5);
+    stressM.at(6) = 1. / 2. *  stressM.at(6);
+
+    this->constructL1L2TransformationMatrices(L1, L2, eVecs, stressM, E1, E2, E3);
+
+    FloatMatrix junk, P, TL;
+    FloatArray secondPK;
+    junk.beProductOf(L1, T);
+    P.beProductOf(tT, junk);
+    //transformation of the stress to the 2PK stress and then to 1PK
+    stressVector.at(4) = 0.5 * stressVector.at(4);
+    stressVector.at(5) = 0.5 * stressVector.at(5);
+    stressVector.at(6) = 0.5 * stressVector.at(6);
+    secondPK.beProductOf(P, stressVector);
+    this->convert_S_2_P( answer, secondPK, vF, gp->giveMaterialMode() );
+    junk.zero();
+    junk.beProductOf(L2, T);
+    TL.beProductOf(tT, junk);
+    status->setPmatrix(P);
+    status->setTLmatrix(TL);
+    status->letTempStressVectorBe(answer);
+}
 
 
 void
@@ -367,70 +351,48 @@ LargeStrainMasterMaterial :: constructL1L2TransformationMatrices(FloatMatrix &an
 }
 
 void
-LargeStrainMasterMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+LargeStrainMasterMaterial :: give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     LargeStrainMasterMaterialStatus *status = static_cast< LargeStrainMasterMaterialStatus * >( this->giveStatus(gp) );
-    Material *mat;
-    StructuralMaterial *sMat;
+    StructuralMaterial *sMat = static_cast< StructuralMaterial * >( domain->giveMaterial(slaveMat) );
     FloatMatrix stiffness;
-    MaterialMode mMode = gp->giveMaterialMode();
-    if ( mMode == _3dMat ) {
-        mat = domain->giveMaterial(slaveMat);
-        sMat = dynamic_cast< StructuralMaterial * >(mat);
-        if ( sMat == NULL ) {
-            OOFEM_WARNING("material %d has no Structural support", slaveMat);
-            return;
-        }
 
-        sMat->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
-    } else {
-        mat = domain->giveMaterial(slaveMat);
-        sMat = dynamic_cast< StructuralMaterial * >(mat);
-        if ( sMat == NULL ) {
-            OOFEM_WARNING("material %d has no Structural support", slaveMat);
-            return;
-        }
+    sMat->give3dMaterialStiffnessMatrix(stiffness, mode, gp, tStep);
+    FloatMatrix junk;
+    ///////////////////////////////////////////////////////////
+    stiffness.at(1, 4) = 2. * stiffness.at(1, 4);
+    stiffness.at(4, 1) = 2. * stiffness.at(4, 1);
+    stiffness.at(1, 5) = 2. * stiffness.at(1, 5);
+    stiffness.at(5, 1) = 2. * stiffness.at(5, 1);
+    stiffness.at(1, 6) = 2. * stiffness.at(1, 6);
+    stiffness.at(6, 1) = 2. * stiffness.at(6, 1);
+    stiffness.at(2, 4) = 2. * stiffness.at(2, 4);
+    stiffness.at(4, 2) = 2. * stiffness.at(4, 2);
+    stiffness.at(2, 5) = 2. * stiffness.at(2, 5);
+    stiffness.at(5, 2) = 2. * stiffness.at(5, 2);
+    stiffness.at(2, 6) = 2. * stiffness.at(2, 6);
+    stiffness.at(6, 2) = 2. * stiffness.at(6, 2);
+    stiffness.at(3, 4) = 2. * stiffness.at(3, 4);
+    stiffness.at(4, 3) = 2. * stiffness.at(4, 3);
+    stiffness.at(3, 5) = 2. * stiffness.at(3, 5);
+    stiffness.at(5, 3) = 2. * stiffness.at(5, 3);
+    stiffness.at(3, 6) = 2. * stiffness.at(3, 6);
+    stiffness.at(6, 3) = 2. * stiffness.at(6, 3);
+    stiffness.at(4, 4) = 4. * stiffness.at(4, 4);
+    stiffness.at(4, 5) = 4. * stiffness.at(4, 5);
+    stiffness.at(5, 4) = 4. * stiffness.at(5, 4);
+    stiffness.at(4, 6) = 4. * stiffness.at(4, 6);
+    stiffness.at(6, 4) = 4. * stiffness.at(6, 4);
+    stiffness.at(5, 5) = 4. * stiffness.at(5, 5);
+    stiffness.at(5, 6) = 4. * stiffness.at(5, 6);
+    stiffness.at(6, 5) = 4. * stiffness.at(6, 5);
+    stiffness.at(6, 6) = 4. * stiffness.at(6, 6);
+    /////////////////////////////////////////////////////////////
+    junk.beProductOf(stiffness, status->givePmatrix());
+    stiffness.beProductOf(status->givePmatrix(), junk);
+    stiffness.add(status->giveTLmatrix());
 
-        sMat->give3dMaterialStiffnessMatrix(stiffness, mode, gp, tStep);
-        FloatMatrix junk;
-        ///////////////////////////////////////////////////////////
-        stiffness.at(1, 4) = 2. * stiffness.at(1, 4);
-        stiffness.at(4, 1) = 2. * stiffness.at(4, 1);
-        stiffness.at(1, 5) = 2. * stiffness.at(1, 5);
-        stiffness.at(5, 1) = 2. * stiffness.at(5, 1);
-        stiffness.at(1, 6) = 2. * stiffness.at(1, 6);
-        stiffness.at(6, 1) = 2. * stiffness.at(6, 1);
-        stiffness.at(2, 4) = 2. * stiffness.at(2, 4);
-        stiffness.at(4, 2) = 2. * stiffness.at(4, 2);
-        stiffness.at(2, 5) = 2. * stiffness.at(2, 5);
-        stiffness.at(5, 2) = 2. * stiffness.at(5, 2);
-        stiffness.at(2, 6) = 2. * stiffness.at(2, 6);
-        stiffness.at(6, 2) = 2. * stiffness.at(6, 2);
-        stiffness.at(3, 4) = 2. * stiffness.at(3, 4);
-        stiffness.at(4, 3) = 2. * stiffness.at(4, 3);
-        stiffness.at(3, 5) = 2. * stiffness.at(3, 5);
-        stiffness.at(5, 3) = 2. * stiffness.at(5, 3);
-        stiffness.at(3, 6) = 2. * stiffness.at(3, 6);
-        stiffness.at(6, 3) = 2. * stiffness.at(6, 3);
-        stiffness.at(4, 4) = 4. * stiffness.at(4, 4);
-        stiffness.at(4, 5) = 4. * stiffness.at(4, 5);
-        stiffness.at(5, 4) = 4. * stiffness.at(5, 4);
-        stiffness.at(4, 6) = 4. * stiffness.at(4, 6);
-        stiffness.at(6, 4) = 4. * stiffness.at(6, 4);
-        stiffness.at(5, 5) = 4. * stiffness.at(5, 5);
-        stiffness.at(5, 6) = 4. * stiffness.at(5, 6);
-        stiffness.at(6, 5) = 4. * stiffness.at(6, 5);
-        stiffness.at(6, 6) = 4. * stiffness.at(6, 6);
-        /////////////////////////////////////////////////////////////
-        junk.beProductOf(stiffness, status->givePmatrix());
-        stiffness.beProductOf(status->givePmatrix(), junk);
-        stiffness.add(status->giveTLmatrix());
-
-
-        FloatArray vF = status->giveTempFVector();
-        FloatArray vS = status->giveTempStressVector();
-        this->convert_dSdE_2_dPdF( answer, stiffness, vS, vF, gp->giveMaterialMode() );
-    }
+    this->convert_dSdE_2_dPdF( answer, stiffness, status->giveTempStressVector(), status->giveTempFVector(), _3dMat );
 }
 
 
@@ -446,17 +408,8 @@ LargeStrainMasterMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Int
         answer = status->giveStrainVector();
         return 1;
     } else {
-        Material *mat;
-        StructuralMaterial *sMat;
-        mat = domain->giveMaterial(slaveMat);
-        sMat = dynamic_cast< StructuralMaterial * >(mat);
-        if ( sMat == NULL ) {
-            OOFEM_WARNING("material %d has no Structural support", slaveMat);
-            return 0;
-        }
-
-        int result = sMat->giveIPValue(answer, gp, type, tStep);
-        return result;
+        StructuralMaterial *sMat = static_cast< StructuralMaterial * >( domain->giveMaterial(slaveMat) );
+        return sMat->giveIPValue(answer, gp, type, tStep);
     }
 }
 
@@ -480,10 +433,7 @@ LargeStrainMasterMaterialStatus :: ~LargeStrainMasterMaterialStatus()
 void
 LargeStrainMasterMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-    Material *mat;
-    StructuralMaterial *sMat;
-    mat = domain->giveMaterial(slaveMat);
-    sMat = static_cast< StructuralMaterial * >(mat);
+    StructuralMaterial *sMat = static_cast< StructuralMaterial * >( domain->giveMaterial(slaveMat) );
     MaterialStatus *mS = sMat->giveStatus(gp);
 
     mS->printOutputAt(file, tStep);
@@ -494,10 +444,7 @@ LargeStrainMasterMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 // initializes temporary variables based on their values at the previous equlibrium state
 void LargeStrainMasterMaterialStatus :: initTempStatus()
 {
-    Material *mat;
-    StructuralMaterial *sMat;
-    mat = domain->giveMaterial(slaveMat);
-    sMat = static_cast< StructuralMaterial * >(mat);
+    StructuralMaterial *sMat = static_cast< StructuralMaterial * >( domain->giveMaterial(slaveMat) );
     MaterialStatus *mS = sMat->giveStatus(gp);
     mS->initTempStatus();
     //StructuralMaterialStatus :: initTempStatus();
@@ -508,10 +455,7 @@ void LargeStrainMasterMaterialStatus :: initTempStatus()
 void
 LargeStrainMasterMaterialStatus :: updateYourself(TimeStep *tStep)
 {
-    Material *mat;
-    StructuralMaterial *sMat;
-    mat = domain->giveMaterial(slaveMat);
-    sMat = static_cast< StructuralMaterial * >(mat);
+    StructuralMaterial *sMat = static_cast< StructuralMaterial * >( domain->giveMaterial(slaveMat) );
     MaterialStatus *mS = sMat->giveStatus(gp);
     mS->updateYourself(tStep);
     //  StructuralMaterialStatus :: updateYourself(tStep);
@@ -524,10 +468,7 @@ contextIOResultType
 LargeStrainMasterMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
-    Material *mat;
-    StructuralMaterial *sMat;
-    mat = domain->giveMaterial(slaveMat);
-    sMat = dynamic_cast< StructuralMaterial * >(mat);
+    StructuralMaterial *sMat = dynamic_cast< StructuralMaterial * >( domain->giveMaterial(slaveMat) );
     MaterialStatus *mS = sMat->giveStatus(gp);
     // save parent class status
     if ( ( iores = mS->saveContext(stream, mode, obj) ) != CIO_OK ) {

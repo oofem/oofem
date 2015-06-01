@@ -56,14 +56,13 @@ public:
 
     NLStructuralElement *giveElement() { return this; } 
     virtual int computeNumberOfDofs() { return 12; }
-    virtual void giveDofManDofIDMask( int inode, EquationID EqID, IntArray &answer ) const;
-    virtual void giveDofManDofIDMask_u( IntArray &answer );
-    virtual void giveDofManDofIDMask_d( IntArray &answer );
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
+    virtual void giveDofManDofIDMask_u(IntArray &answer);
+    virtual void giveDofManDofIDMask_d(IntArray &answer);
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_PlaneStressPhF2d_Name; }
     virtual const char *giveClassName() const { return "PlaneStressPhF2d"; }
-
 
     virtual void computeStiffnessMatrix( FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep ) 
     {
@@ -73,9 +72,6 @@ public:
     {
         PhaseFieldElement :: giveInternalForcesVector( answer, tStep, useUpdatedGpRecord );
     }
-protected:
-
-    
 };
 } // end namespace oofem
 #endif // qplanstrss_h

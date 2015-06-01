@@ -82,6 +82,8 @@ public:
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
+    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+
 protected:
     static void giveDeviatoricProjectionMatrix(FloatMatrix &answer);
     

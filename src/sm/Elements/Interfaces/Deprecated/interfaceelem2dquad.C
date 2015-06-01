@@ -34,7 +34,6 @@
 
 #include "interfaceelem2dquad.h"
 #include "node.h"
-#include "crosssection.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
@@ -42,6 +41,7 @@
 #include "intarray.h"
 #include "mathfem.h"
 #include "fei2dlinequad.h"
+#include "../sm/CrossSections/structuralinterfacecrosssection.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -135,6 +135,20 @@ InterfaceElem2dQuad :: computeVolumeAround(GaussPoint *gp)
     }
 
     return sqrt(dx * dx + dy * dy) * weight * thickness * r;
+}
+
+
+void
+InterfaceElem2dQuad :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+{
+    static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->giveEngTraction_2d(answer, gp, strain, tStep);
+}
+
+
+void
+InterfaceElem2dQuad :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->give2dStiffnessMatrix_Eng(answer, rMode, gp, tStep);
 }
 
 

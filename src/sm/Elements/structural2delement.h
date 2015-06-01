@@ -102,6 +102,7 @@ public:
     virtual ~PlaneStressElement() { }
     virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx = 1, int upperIndx = ALL_STRAINS) ;
@@ -120,6 +121,7 @@ public:
     virtual ~PlaneStrainElement() { }
     virtual MaterialMode giveMaterialMode() { return _PlaneStrain; }
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx = 1, int upperIndx = ALL_STRAINS) ;
@@ -139,6 +141,8 @@ public:
     virtual ~AxisymElement() { }
     virtual MaterialMode giveMaterialMode() { return _3dMat; }
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+
     virtual double giveCharacteristicLength(const FloatArray &crackToNormalPlane);
     virtual double computeVolumeAround(GaussPoint *gp);
 

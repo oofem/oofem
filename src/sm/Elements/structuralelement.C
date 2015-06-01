@@ -801,10 +801,6 @@ StructuralElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, Tim
 
 void
 StructuralElement :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
-// Computes the vector containing the stresses at the Gauss point gp of
-// the receiver, at time step tStep. The nature of these stresses depends
-// on the element's type.
-// this version assumes TOTAL LAGRANGE APPROACH
 {
     this->giveStructuralCrossSection()->giveRealStresses(answer, gp, strain, tStep);
 }

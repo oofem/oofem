@@ -97,6 +97,12 @@ NumericalMethod *StaticStructural :: giveNumericalMethod(MetaStep *mStep)
     return nMethod.get();
 }
 
+int
+StaticStructural :: giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep)
+{
+    return tStep->giveNumber() % 2;
+}
+
 IRResultType
 StaticStructural :: initializeFrom(InputRecord *ir)
 {
@@ -117,7 +123,7 @@ StaticStructural :: initializeFrom(InputRecord *ir)
     this->solverType = 0; // Default NR
     IR_GIVE_OPTIONAL_FIELD(ir, solverType, _IFT_StaticStructural_solvertype);
 
-    int _val = IG_None;
+    int _val = IG_Tangent;
     IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_EngngModel_initialGuess);
     this->initialGuessType = ( InitialGuess ) _val;
     
@@ -193,6 +199,7 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
         this->field->initialize(VM_Total, tStep->givePreviousStep(), this->solution, EModelDefaultEquationNumbering() );
         this->field->update(VM_Total, tStep, this->solution, EModelDefaultEquationNumbering() );
     }
+    this->field->applyBoundaryCondition(tStep); ///@todo Temporary hack to override the incorrect values that is set by "update" above. Remove this when that is fixed.
 
     FloatArray incrementOfSolution(neq), externalForces(neq);
 
@@ -212,10 +219,18 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
 
     if ( this->initialGuessType == IG_Tangent ) {
         OOFEM_LOG_RELEVANT("Computing initial guess\n");
-        FloatArray extrapolatedForces;
+        FloatArray extrapolatedForces(neq);
         this->assembleExtrapolatedForces( extrapolatedForces, tStep, TangentStiffnessMatrix, this->giveDomain(di) );
         extrapolatedForces.negated();
-
+        ///@todo Need to find a general way to support this before enabling it by default.
+        //this->assembleVector(extrapolatedForces, tStep, LinearizedDilationForceAssembler(), VM_Incremental, EModelDefaultEquationNumbering(), this->giveDomain(di) );
+#if 0
+        // Some debug stuff:
+        extrapolatedForces.printYourself("extrapolatedForces");
+        this->internalForces.zero();
+        this->assembleVectorFromElements(this->internalForces, tStep, InternalForceAssembler(), VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(di));
+        this->internalForces.printYourself("internal forces");
+#endif
         OOFEM_LOG_RELEVANT("Computing old tangent\n");
         this->updateComponent( tStep, NonLinearLhs, this->giveDomain(di) );
         SparseLinearSystemNM *linSolver = nMethod->giveLinearSolver();
@@ -223,6 +238,9 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
         linSolver->solve(*stiffnessMatrix, extrapolatedForces, incrementOfSolution);
         OOFEM_LOG_RELEVANT("Initial guess found\n");
         this->solution.add(incrementOfSolution);
+        
+        this->field->update(VM_Total, tStep, this->solution, EModelDefaultEquationNumbering());
+        this->field->applyBoundaryCondition(tStep); ///@todo Temporary hack to override the incorrect values that is set by "update" above. Remove this when that is fixed.
     } else if ( this->initialGuessType != IG_None ) {
         OOFEM_ERROR("Initial guess type: %d not supported", initialGuessType);
     } else {
@@ -272,6 +290,16 @@ void StaticStructural :: terminate(TimeStep *tStep)
 
 double StaticStructural :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 {
+    double val1 = dof->giveUnknownsDictionaryValue(tStep, VM_Total);
+    double val0 = dof->giveUnknownsDictionaryValue(tStep->givePreviousStep(), VM_Total);
+    if ( mode == VM_Total ) {
+        return val1;
+    } else if ( mode == VM_Incremental ) {
+        return val1 - val0;
+    } else {
+        OOFEM_ERROR("Unknown value mode requested");
+        return 0;
+    }
     return this->field->giveUnknownValue(dof, mode, tStep);
 }
 
@@ -445,25 +473,6 @@ StaticStructural :: estimateMaxPackSize(IntArray &commMap, DataStream &buff, int
     }
 
     return 0;
-}
-
-void
-StaticStructural :: updateDofUnknownsDictionary(DofManager *dman, TimeStep *tStep)
-{
-
-    for (Dof *dof : *dman ) {
-        double val;
-        val = dof->giveUnknown(VM_Total, tStep);
-
-        dof->updateUnknownsDictionary(tStep, VM_Total, val);
-    }
-
-}
-
-int
-StaticStructural :: giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep)
-{
-    return tStep->giveNumber();
 }
 
 } // end namespace oofem

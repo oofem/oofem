@@ -45,72 +45,25 @@
 namespace oofem {
 REGISTER_Material(IsoInterfaceDamageMaterial);
 
-IsoInterfaceDamageMaterial :: IsoInterfaceDamageMaterial(int n, Domain *d) : StructuralMaterial(n, d)
-    //
-    // constructor
-    //
+IsoInterfaceDamageMaterial :: IsoInterfaceDamageMaterial(int n, Domain *d) : StructuralInterfaceMaterial(n, d)
 {
     maxOmega = 0.999999;
     beta = 0.;
 }
 
 
-IsoInterfaceDamageMaterial :: ~IsoInterfaceDamageMaterial()
-//
-// destructor
-//
-{ }
-
-int
-IsoInterfaceDamageMaterial :: hasMaterialModeCapability(MaterialMode mode)
-//
-// returns whether receiver supports given mode
-//
-{
-    return mode == _2dInterface || mode == _3dInterface;
-}
+IsoInterfaceDamageMaterial :: ~IsoInterfaceDamageMaterial() { }
 
 
 void
-IsoInterfaceDamageMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                            MatResponseMode mode,
-                                                            GaussPoint *gp,
-                                                            TimeStep *tStep)
-//
-// computes full constitutive matrix for case of gp stress-strain state.
-//
-{
-    OOFEM_ERROR("not implemented");
-}
-
-
-void
-IsoInterfaceDamageMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                                                   const FloatArray &totalStrain,
-                                                   TimeStep *tStep)
-//
-// returns real stress vector in 3d stress space of receiver according to
-// previous level of stress and current
-// strain increment, the only way, how to correctly update gp records
-//
+IsoInterfaceDamageMaterial :: giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
 {
     IsoInterfaceDamageMaterialStatus *status = static_cast< IsoInterfaceDamageMaterialStatus * >( this->giveStatus(gp) );
-    FloatArray reducedTotalStrainVector;
     FloatMatrix de;
     double equivStrain, tempKappa = 0.0, omega = 0.0;
 
-    //this->initGpForNewStep(gp);
-    this->initTempStatus(gp);
-    
-    // subtract stress independent part
-    // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
-    // therefore it is always necessary to subtract the total eigen strain value
-    this->giveStressDependentPartOfStrainVector(reducedTotalStrainVector, gp, totalStrain, tStep, VM_Total);
-
-    //crossSection->giveFullCharacteristicVector(totalStrainVector, gp, reducedTotalStrainVector);
-
     // compute equivalent strain
-    this->computeEquivalentStrain(equivStrain, reducedTotalStrainVector, gp, tStep);
+    this->computeEquivalentStrain(equivStrain, jump, gp, tStep);
 
     // compute value of loading function if strainLevel crit apply
     tempKappa = status->giveKappa();
@@ -122,156 +75,71 @@ IsoInterfaceDamageMaterial :: giveRealStressVector(FloatArray &answer, GaussPoin
         // damage grows
         tempKappa = equivStrain;
         // evaluate damage
-        this->computeDamageParam(omega, tempKappa, reducedTotalStrainVector, gp);
+        this->computeDamageParam(omega, tempKappa, jump, gp);
     }
 
-    this->giveStiffnessMatrix(de, ElasticStiffness, gp, tStep);
+    this->give3dStiffnessMatrix_Eng(de, ElasticStiffness, gp, tStep);
     de.times(1.0 - omega);
-    answer.beProductOf(de, reducedTotalStrainVector);
+    answer.beProductOf(de, jump);
 
     // update gp
-    status->letTempStrainVectorBe(totalStrain);
-    status->letTempStressVectorBe(answer);
+    status->letTempJumpBe(jump);
+    status->letTempTractionBe(answer);
     status->setTempKappa(tempKappa);
     status->setTempDamage(omega);
 }
 
-void
-IsoInterfaceDamageMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
-                                                  MatResponseMode rMode,
-                                                  GaussPoint *gp, TimeStep *tStep)
-//
-// Returns characteristic material stiffness matrix of the receiver
-//
-{
-    MaterialMode mMode = gp->giveMaterialMode();
-    switch ( mMode ) {
-    case _2dInterface:
-        give2dInterfaceMaterialStiffnessMatrix(answer, rMode, gp, tStep);
-        break;
-    case _3dInterface:
-        give3dInterfaceMaterialStiffnessMatrix(answer, rMode, gp, tStep);
-        break;
-    default:
-        StructuralMaterial :: giveStiffnessMatrix(answer, rMode, gp, tStep);
-    }
-}
-
 
 void
-IsoInterfaceDamageMaterial :: give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
-                                                                     GaussPoint *gp, TimeStep *tStep)
+IsoInterfaceDamageMaterial :: give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
     double om, un;
     IsoInterfaceDamageMaterialStatus *status = static_cast< IsoInterfaceDamageMaterialStatus * >( this->giveStatus(gp) );
 
+    // assemble eleastic stiffness
+    answer.resize(3, 3);
+    answer.zero();
+    answer.at(1, 1) = kn;
+    answer.at(2, 2) = ks;
+    answer.at(3, 3) = ks;
 
-    if ( ( rMode == ElasticStiffness ) || ( rMode == SecantStiffness ) || ( rMode == TangentStiffness ) ) {
-        // assemble eleastic stiffness
-        answer.resize(2, 2);
-        answer.at(1, 1) = kn;
-        answer.at(2, 2) = ks;
-        answer.at(1, 2) = answer.at(2, 1) = 0.0;
-
-        if ( rMode == ElasticStiffness ) {
-            return;
-        }
-
-        if ( rMode == SecantStiffness ) {
-            // Secant stiffness
-            om = status->giveTempDamage();
-            un = status->giveTempStrainVector().at(1);
-            om = min(om, maxOmega);
-            // damage in tension only
-            if ( un >= 0 ) {
-                answer.times(1.0 - om);
-            }
-
-            return;
-        } else {
-            // Tangent Stiffness
-            FloatArray se(2), e(2);
-            e = status->giveTempStrainVector();
-            se.beProductOf(answer, e);
-
-            om = status->giveTempDamage();
-            un = status->giveTempStrainVector().at(1);
-            om = min(om, maxOmega);
-            // damage in tension only
-            if ( un >= 0 ) {
-                answer.times(1.0 - om);
-                return;
-
-                /* Unreachable code - commented out to supress compiler warnings
-                 * double dom = -( -e0 / un / un * exp( -( ft / gf ) * ( un - e0 ) ) + e0 / un * exp( -( ft / gf ) * ( un - e0 ) ) * ( -( ft / gf ) ) );
-                 * if ( ( om > 0. ) && ( status->giveTempKappa() > status->giveKappa() ) ) {
-                 *  answer.at(1, 1) -= se.at(1) * dom;
-                 *  answer.at(2, 1) -= se.at(2) * dom;
-                 * }
-                 */
-            }
-        }
-    }  else {
-        OOFEM_ERROR("unknown MatResponseMode");
+    if ( rMode == ElasticStiffness ) {
+        return;
     }
-}
 
-
-void
-IsoInterfaceDamageMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
-                                                                     GaussPoint *gp, TimeStep *tStep)
-{
-    double om, un;
-    IsoInterfaceDamageMaterialStatus *status = static_cast< IsoInterfaceDamageMaterialStatus * >( this->giveStatus(gp) );
-
-
-    if ( ( rMode == ElasticStiffness ) || ( rMode == SecantStiffness ) || ( rMode == TangentStiffness ) ) {
-        // assemble eleastic stiffness
-        answer.resize(3, 3);
-        answer.at(1, 1) = kn;
-        answer.at(2, 2) = ks;
-        answer.at(3, 3) = ks;
-        answer.at(1, 2) = answer.at(2, 1) = answer.at(1, 3) = answer.at(3, 1) = answer.at(2, 3) = answer.at(3, 2) = 0.0;
-
-        if ( rMode == ElasticStiffness ) {
-            return;
+    if ( rMode == SecantStiffness ) {
+        // Secant stiffness
+        om = status->giveTempDamage();
+        un = status->giveTempJump().at(1);
+        om = min(om, maxOmega);
+        // damage in tension only
+        if ( un >= 0 ) {
+            answer.times(1.0 - om);
         }
 
-        if ( rMode == SecantStiffness ) {
-            // Secant stiffness
-            om = status->giveTempDamage();
-            un = status->giveTempStrainVector().at(1);
-            om = min(om, maxOmega);
-            // damage in tension only
-            if ( un >= 0 ) {
-                answer.times(1.0 - om);
-            }
+        return;
+    } else {
+        // Tangent Stiffness
+        FloatArray se;
+        const FloatArray &e = status->giveTempJump();
+        se.beProductOf(answer, e);
 
+        om = status->giveTempDamage();
+        un = status->giveTempJump().at(1);
+        om = min(om, maxOmega);
+        // damage in tension only
+        if ( un >= 0 ) {
+            answer.times(1.0 - om);
             return;
-        } else {
-            // Tangent Stiffness
-            FloatArray se, e;
-            e = status->giveTempStrainVector();
-            se.beProductOf(answer, e);
-
-            om = status->giveTempDamage();
-            un = status->giveTempStrainVector().at(1);
-            om = min(om, maxOmega);
-            // damage in tension only
-            if ( un >= 0 ) {
-                answer.times(1.0 - om);
-                return;
-                /* Unreachable code - commented out to supress compiler warnings
-                 * double dom = -( -e0 / un / un * exp( -( ft / gf ) * ( un - e0 ) ) + e0 / un * exp( -( ft / gf ) * ( un - e0 ) ) * ( -( ft / gf ) ) );
-                 * if ( ( om > 0. ) && ( status->giveTempKappa() > status->giveKappa() ) ) {
-                 *  answer.at(1, 1) -= se.at(1) * dom;
-                 *  answer.at(2, 1) -= se.at(2) * dom;
-                 * }
-                 */
+#if 0
+            // Unreachable code - commented out to supress compiler warnings
+            double dom = -( -e0 / un / un * exp( -( ft / gf ) * ( un - e0 ) ) + e0 / un * exp( -( ft / gf ) * ( un - e0 ) ) * ( -( ft / gf ) ) );
+            if ( ( om > 0. ) && ( status->giveTempKappa() > status->giveKappa() ) ) {
+                answer.at(1, 1) -= se.at(1) * dom;
+                answer.at(2, 1) -= se.at(2) * dom;
             }
+#endif
         }
-    }  else {
-        OOFEM_ERROR("unknown MatResponseMode");
     }
 }
 
@@ -303,25 +171,8 @@ IsoInterfaceDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, In
         answer.at(1) = status->giveKappa();
         return 1;
     } else {
-        return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
+        return StructuralInterfaceMaterial :: giveIPValue(answer, gp, type, tStep);
     }
-}
-
-void
-IsoInterfaceDamageMaterial :: giveThermalDilatationVector(FloatArray &answer,
-                                                          GaussPoint *gp,  TimeStep *tStep)
-//
-// returns a FloatArray(6) of initial strain vector
-// eps_0 = {exx_0, eyy_0, ezz_0, gyz_0, gxz_0, gxy_0}^T
-// caused by unit temperature in direction of
-// gp (element) local axes
-//
-{
-    answer.resize(6);
-    answer.zero();
-    answer.at(1) = this->tempDillatCoeff;
-    answer.at(2) = this->tempDillatCoeff;
-    answer.at(3) = this->tempDillatCoeff;
 }
 
 
@@ -345,15 +196,14 @@ IsoInterfaceDamageMaterial :: initializeFrom(InputRecord *ir)
     beta = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, beta, _IFT_IsoInterfaceDamageMaterial_beta);
 
-    IR_GIVE_FIELD(ir, tempDillatCoeff, _IFT_IsoInterfaceDamageMaterial_talpha);
-    return StructuralMaterial :: initializeFrom(ir);
+    return StructuralInterfaceMaterial :: initializeFrom(ir);
 }
 
 
 void
 IsoInterfaceDamageMaterial :: giveInputRecord(DynamicInputRecord &input)
 {
-    StructuralMaterial :: giveInputRecord(input);
+    StructuralInterfaceMaterial :: giveInputRecord(input);
 
     input.setField(this->kn, _IFT_IsoInterfaceDamageMaterial_kn);
     input.setField(this->ks, _IFT_IsoInterfaceDamageMaterial_ks);
@@ -362,18 +212,16 @@ IsoInterfaceDamageMaterial :: giveInputRecord(DynamicInputRecord &input)
     input.setField(this->gf, _IFT_IsoInterfaceDamageMaterial_gf);
 
     input.setField(this->maxOmega, _IFT_IsoInterfaceDamageMaterial_maxOmega);
-    input.setField(this->tempDillatCoeff, _IFT_IsoInterfaceDamageMaterial_talpha);
 }
 
 
 void
-IsoInterfaceDamageMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+IsoInterfaceDamageMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &jump, GaussPoint *gp, TimeStep *tStep)
 {
-    // kappa = macbra( strain.at(1) );
-    double epsNplus = macbra( strain.at(1) );
-    double epsT2 = strain.at(2) * strain.at(2);
-    if ( strain.giveSize() == 3 ) {
-        epsT2 += strain.at(3) * strain.at(3);
+    double epsNplus = macbra( jump.at(1) );
+    double epsT2 = jump.at(2) * jump.at(2);
+    if ( jump.giveSize() == 3 ) {
+        epsT2 += jump.at(3) * jump.at(3);
     }
     kappa = sqrt(epsNplus * epsNplus + beta * epsT2);
 }
@@ -389,7 +237,7 @@ IsoInterfaceDamageMaterial :: computeDamageParam(double &omega, double kappa, co
 }
 
 
-IsoInterfaceDamageMaterialStatus :: IsoInterfaceDamageMaterialStatus(int n, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g)
+IsoInterfaceDamageMaterialStatus :: IsoInterfaceDamageMaterialStatus(int n, Domain *d, GaussPoint *g) : StructuralInterfaceMaterialStatus(n, d, g)
 {
     kappa = tempKappa = 0.0;
     damage = tempDamage = 0.0;
@@ -403,7 +251,7 @@ IsoInterfaceDamageMaterialStatus :: ~IsoInterfaceDamageMaterialStatus()
 void
 IsoInterfaceDamageMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-    StructuralMaterialStatus :: printOutputAt(file, tStep);
+    StructuralInterfaceMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");
     if ( this->damage > 0.0 ) {
         fprintf(file, "kappa %f, damage %f ", this->kappa, this->damage);
@@ -416,7 +264,7 @@ IsoInterfaceDamageMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 void
 IsoInterfaceDamageMaterialStatus :: initTempStatus()
 {
-    StructuralMaterialStatus :: initTempStatus();
+    StructuralInterfaceMaterialStatus :: initTempStatus();
     this->tempKappa = this->kappa;
     this->tempDamage = this->damage;
 }
@@ -424,7 +272,7 @@ IsoInterfaceDamageMaterialStatus :: initTempStatus()
 void
 IsoInterfaceDamageMaterialStatus :: updateYourself(TimeStep *tStep)
 {
-    StructuralMaterialStatus :: updateYourself(tStep);
+    StructuralInterfaceMaterialStatus :: updateYourself(tStep);
     this->kappa = this->tempKappa;
     this->damage = this->tempDamage;
 }
@@ -436,7 +284,7 @@ IsoInterfaceDamageMaterialStatus :: saveContext(DataStream &stream, ContextMode 
     contextIOResultType iores;
 
     // save parent class status
-    if ( ( iores = StructuralMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
+    if ( ( iores = StructuralInterfaceMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -458,7 +306,7 @@ IsoInterfaceDamageMaterialStatus :: restoreContext(DataStream &stream, ContextMo
     contextIOResultType iores;
 
     // read parent class status
-    if ( ( iores = StructuralMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
+    if ( ( iores = StructuralInterfaceMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

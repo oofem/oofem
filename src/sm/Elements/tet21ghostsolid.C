@@ -163,6 +163,12 @@ tet21ghostsolid :: computeNumericStiffnessMatrix(FloatMatrix &answer, MatRespons
 }
 
 void
+tet21ghostsolid :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveRealStress_3d(answer, gp, strain, tStep);
+}
+
+void
 tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
 

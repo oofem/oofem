@@ -47,21 +47,23 @@
 #include "dynamicinputrecord.h"
 
 namespace oofem {
-StructuralMaterial :: StructuralMaterial(int n, Domain * d) : Material(n, d) 
-{ 
-    // Voigt index map
-    vIindex.resize(3);
-    vIindex[0] = { 1, 6, 5 };
-    vIindex[1] = { 9, 2, 4 };
-    vIindex[2] = { 8, 7, 3 };  
-      
-    // Symmetric Voigt index map
-    svIndex.resize(3);
-    svIndex[0] = { 1, 6, 5 };
-    svIndex[1] = { 6, 2, 4 };
-    svIndex[2] = { 5, 4, 3 };       
     
-}  
+std::vector< std::vector<int> > StructuralMaterial :: vIindex = {
+    { 1, 6, 5 },
+    { 9, 2, 4 },
+    { 8, 7, 3 }  
+};
+
+std::vector< std::vector<int> > StructuralMaterial :: svIndex = {
+    { 1, 6, 5 },
+    { 6, 2, 4 },
+    { 5, 4, 3 }
+};
+
+
+StructuralMaterial :: StructuralMaterial(int n, Domain * d) : Material(n, d) { }  
+
+
 int
 StructuralMaterial :: hasMaterialModeCapability(MaterialMode mode)
 //
@@ -155,7 +157,7 @@ StructuralMaterial :: giveRealStressVector_StressControl(FloatArray &answer, Gau
         reducedvS.beSubArrayOf(vS, stressControl);
         // Pick out the (response) stresses for the controlled strains
         answer.beSubArrayOf(vS, strainControl);
-        if ( reducedvS.computeNorm() <= 1e0 && k >= 1 ) { // Absolute tolerance right now (with at least one iteration)
+        if ( reducedvS.computeNorm() <= 1e0 && k >= 5 ) { // Absolute tolerance right now (with at least one iteration)
             ///@todo We need a relative tolerance here!
             /// A relative tolerance like this could work, but if a really small increment is performed it won't work
             /// (it will be limited by machine precision)
@@ -351,7 +353,7 @@ StructuralMaterial :: giveFirstPKStressVector_1d(FloatArray &answer, GaussPoint 
 
 
 void
-StructuralMaterial :: convert_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix &C, FloatArray &S, FloatArray &F, MaterialMode matMode)
+StructuralMaterial :: convert_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix &C, const FloatArray &S, const FloatArray &F, MaterialMode matMode)
 {
     // Converts the reduced dSdE-stiffness to reduced dPdF-sitiffness for different MaterialModes
     // Performs the following operation dPdF = I_ik * S_jl + F_im F_kn C_mjnl,
@@ -1401,6 +1403,168 @@ StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &di
 
 
 double
+StructuralMaterial :: computeDeviatoricVolumetricSplit(FloatArray &dev, const FloatArray &s)
+{
+    double vol = s[0] + s[1] + s[2];
+    double mean = vol / 3.0;
+    dev = s;
+    dev.at(1) -= mean;
+    dev.at(2) -= mean;
+    dev.at(3) -= mean;
+    return mean;
+}
+
+
+void
+StructuralMaterial :: computeDeviatoricVolumetricSum(FloatArray &s, const FloatArray &dev, double mean)
+{
+    s = dev;
+    s[0] += mean;
+    s[1] += mean;
+    s[2] += mean;
+}
+
+void
+StructuralMaterial :: applyDeviatoricElasticCompliance(FloatArray &strain, const FloatArray &stress, double EModulus, double nu)
+{
+    applyDeviatoricElasticCompliance( strain, stress, EModulus / 2. / ( 1. + nu ) );
+}
+
+void
+StructuralMaterial :: applyDeviatoricElasticCompliance(FloatArray &strain, const FloatArray &stress, double GModulus)
+{
+    strain.resize(6);
+    strain[0] = 1. / ( 2. * GModulus ) * stress [ 0 ];
+    strain[1] = 1. / ( 2. * GModulus ) * stress [ 1 ];
+    strain[2] = 1. / ( 2. * GModulus ) * stress [ 2 ];
+    strain[3] = 1. / GModulus * stress [ 3 ];
+    strain[4] = 1. / GModulus * stress [ 4 ];
+    strain[5] = 1. / GModulus * stress [ 5 ];
+}
+
+
+void
+StructuralMaterial :: applyDeviatoricElasticStiffness(FloatArray &stress, const FloatArray &strain, double EModulus, double nu)
+{
+    applyDeviatoricElasticStiffness( stress, strain, EModulus / ( 2. * ( 1. + nu ) ) );
+}
+
+void
+StructuralMaterial :: applyDeviatoricElasticStiffness(FloatArray &stress, const FloatArray &strain, double GModulus)
+{
+    stress.resize(6);
+    stress[0] = 2. * GModulus * strain [ 0 ];
+    stress[1] = 2. * GModulus * strain [ 1 ];
+    stress[2] = 2. * GModulus * strain [ 2 ];
+    stress[3] = GModulus * strain [ 3 ];
+    stress[4] = GModulus * strain [ 4 ];
+    stress[5] = GModulus * strain [ 5 ];
+}
+
+void
+StructuralMaterial :: applyElasticStiffness(FloatArray &stress, const FloatArray &strain, double EModulus, double nu)
+{
+    double factor = EModulus / ( ( 1. + nu ) * ( 1. - 2. * nu ) );
+    
+    stress.resize(6);
+    stress[0] = factor * ( ( 1. - nu ) * strain [ 0 ] + nu * strain [ 1 ] + nu * strain [ 2 ] );
+    stress[1] = factor * ( nu * strain [ 0 ] + ( 1. - nu ) * strain [ 1 ] + nu * strain [ 2 ] );
+    stress[2] = factor * ( nu * strain [ 0 ] + nu * strain [ 1 ] + ( 1. - nu ) * strain [ 2 ] );
+    stress[3] = factor * ( ( ( 1. - 2. * nu ) / 2. ) * strain [ 3 ] );
+    stress[4] = factor * ( ( ( 1. - 2. * nu ) / 2. ) * strain [ 4 ] );
+    stress[5] = factor * ( ( ( 1. - 2. * nu ) / 2. ) * strain [ 5 ] );
+}
+
+void
+StructuralMaterial :: applyElasticCompliance(FloatArray &strain, const FloatArray &stress, double EModulus, double nu)
+{
+    strain.resize(6);
+    strain[0] = ( stress [ 0 ] - nu * stress [ 1 ] - nu * stress [ 2 ] ) / EModulus;
+    strain[1] = ( -nu * stress [ 0 ] + stress [ 1 ] - nu * stress [ 2 ] ) / EModulus;
+    strain[2] = ( -nu * stress [ 0 ] - nu * stress [ 1 ] + stress [ 2 ] ) / EModulus;
+    strain[3] = ( 2. * ( 1. + nu ) * stress [ 3 ] ) / EModulus;
+    strain[4] = ( 2. * ( 1. + nu ) * stress [ 4 ] ) / EModulus;
+    strain[5] = ( 2. * ( 1. + nu ) * stress [ 5 ] ) / EModulus;
+}
+
+double
+StructuralMaterial :: computeStressNorm(const FloatArray &s)
+{
+    if ( s.giveSize() == 1 ) {
+        return fabs(s [ 0 ]);
+    }
+
+    return sqrt(s [ 0 ] * s [ 0 ] + s [ 1 ] * s [ 1 ] + s [ 2 ] * s [ 2 ] +
+                2. * s [ 3 ] * s [ 3 ] + 2. * s [ 4 ] * s [ 4 ] + 2. * s [ 5 ] * s [ 5 ]);
+}
+
+double
+StructuralMaterial :: computeFirstInvariant(const FloatArray &s)
+{
+    if ( s.giveSize() == 1 ) {
+        return s [ 0 ];
+    }
+
+    return s [ 0 ] + s [ 1 ] + s [ 2 ];
+}
+
+double
+StructuralMaterial :: computeSecondStressInvariant(const FloatArray &s)
+{
+    return .5 * ( s [ 0 ] * s [ 0 ] + s [ 1 ] * s [ 1 ] + s [ 2 ] * s [ 2 ] ) +
+            s [ 3 ] * s [ 3 ] + s [ 4 ] * s [ 4 ] + s [ 5 ] * s [ 5 ];
+}
+
+double
+StructuralMaterial :: computeThirdStressInvariant(const FloatArray &s)
+{
+    return ( 1. / 3. ) * ( s [ 0 ] * s [ 0 ] * s [ 0 ] + 3. * s [ 0 ] * s [ 5 ] * s [ 5 ] +
+                            3. * s [ 0 ] * s [ 4 ] * s [ 4 ] + 6. * s [ 3 ] * s [ 5 ] * s [ 4 ] +
+                            3. * s [ 1 ] * s [ 5 ] * s [ 5 ] + 3 * s [ 2 ] * s [ 4 ] * s [ 4 ] +
+                            s [ 1 ] * s [ 1 ] * s [ 1 ] + 3. * s [ 1 ] * s [ 3 ] * s [ 3 ] +
+                            3. * s [ 2 ] * s [ 3 ] * s [ 3 ] + s [ 2 ] * s [ 2 ] * s [ 2 ] );
+}
+
+
+double
+StructuralMaterial :: computeFirstCoordinate(const FloatArray &s)
+{
+    // This function computes the first Haigh-Westergaard coordinate
+    return computeFirstInvariant(s) / sqrt(3.);
+}
+
+double
+StructuralMaterial :: computeSecondCoordinate(const FloatArray &s)
+{
+    // This function computes the second Haigh-Westergaard coordinate
+    // from the deviatoric stress state
+    return sqrt( 2. * computeSecondStressInvariant(s) );
+}
+
+double
+StructuralMaterial :: computeThirdCoordinate(const FloatArray &s)
+{
+    // This function computes the third Haigh-Westergaard coordinate
+    // from the deviatoric stress state
+    double c1 = 0.0;
+    if ( computeSecondStressInvariant(s) == 0. ) {
+        c1 = 0.0;
+    } else {
+        c1 = ( 3. * sqrt(3.) / 2. ) * computeThirdStressInvariant(s) / ( pow( computeSecondStressInvariant(s), ( 3. / 2. ) ) );
+    }
+
+    if ( c1 > 1.0 ) {
+        c1 = 1.0;
+    }
+
+    if ( c1 < -1.0 ) {
+        c1 = -1.0;
+    }
+
+    return 1. / 3. * acos(c1);
+}
+
+double
 StructuralMaterial :: computeVonMisesStress(const FloatArray *currentStress)
 {
     double J2;
@@ -1943,6 +2107,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
             }
 
             StructuralMaterial :: giveReducedSymVectorForm( answer, fullAnswer, gp->giveMaterialMode() );
+            //answer = fullAnswer;
         }
     }
 

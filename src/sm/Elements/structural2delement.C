@@ -288,7 +288,11 @@ PlaneStressElement :: computeStressVector(FloatArray &answer, const FloatArray &
     this->giveStructuralCrossSection()->giveRealStress_PlaneStress(answer, gp, strain, tStep);
 }
 
-
+void
+PlaneStressElement :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveStiffnessMatrix_PlaneStress(answer, rMode, gp, tStep);
+}
 
 
 
@@ -307,7 +311,6 @@ PlaneStrainElement :: PlaneStrainElement(int n, Domain *aDomain) :
 
 void 
 PlaneStrainElement :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx, int upperIndx)
-
 // Returns the [ 4 x (nno*2) ] strain-displacement matrix {B} of the receiver,
 // evaluated at gp.
 {
@@ -334,7 +337,7 @@ PlaneStrainElement :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     // Returns the [ 5 x (nno*2) ] displacement gradient matrix {BH} of the receiver,
     // evaluated at gp.
-    // @todo not checked if correct
+    /// @todo not checked if correct
   
     FloatMatrix dNdx;
     this->giveInterpolation()->evaldNdx( dNdx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
@@ -357,7 +360,11 @@ PlaneStrainElement :: computeStressVector(FloatArray &answer, const FloatArray &
     this->giveStructuralCrossSection()->giveRealStress_PlaneStrain(answer, gp, strain, tStep);
 }
 
-
+void
+PlaneStrainElement :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveStiffnessMatrix_PlaneStrain(answer, rMode, gp, tStep);
+}
 
 
 
@@ -512,6 +519,12 @@ AxisymElement :: computeStressVector(FloatArray &answer, const FloatArray &strai
     this->giveStructuralCrossSection()->giveRealStress_3d(answer, gp, strain, tStep);
 }
 
-
+void
+AxisymElement :: computeConstitutiveMatrixAt(FloatMatrix &answer,
+                                                 MatResponseMode rMode, GaussPoint *gp,
+                                                 TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveStiffnessMatrix_3d(answer, rMode, gp, tStep);
+}
 
 } // end namespace oofem

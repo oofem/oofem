@@ -79,6 +79,9 @@ public:
     { return this->computeLength(); }
 
     virtual double computeVolumeAround(GaussPoint *gp);
+    
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
     virtual int testElementExtension(ElementExtension ext) { return 0; }
 
@@ -93,7 +96,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_Truss1d_Name; }
     virtual const char *giveClassName() const { return "Truss1d"; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _1dMat; }
 
     // NodalAveragingRecoveryMInterface

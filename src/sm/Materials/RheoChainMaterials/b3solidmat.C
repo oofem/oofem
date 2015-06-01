@@ -40,7 +40,7 @@
 #include "datastream.h"
 #include "classfactory.h"
 #include "engngm.h"
-#include "Materials/b3mat.h"
+#include "b3mat.h"
 
 namespace oofem {
 REGISTER_Material(B3SolidMaterial);

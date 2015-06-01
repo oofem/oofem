@@ -216,6 +216,11 @@ Truss3d :: computeStressVector(FloatArray &answer, const FloatArray &strain, Gau
     this->giveStructuralCrossSection()->giveRealStress_1d(answer, gp, strain, tStep);
 }
 
+void
+Truss3d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveStiffnessMatrix_1d(answer, rMode, gp, tStep);
+}
 
 void
 Truss3d :: giveDofManDofIDMask(int inode, IntArray &answer) const

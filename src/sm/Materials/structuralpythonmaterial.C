@@ -213,7 +213,7 @@ void StructuralPythonMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answ
         }
 
         // Reset the stress internal variables
-        this->giveRealStressVector(stress, gp, vE, tStep);
+        this->giveRealStressVector_3d(stress, gp, vE, tStep);
     }
 }
 

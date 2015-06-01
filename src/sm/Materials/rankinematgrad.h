@@ -34,7 +34,7 @@
 
 #ifndef RankineMatGrad_h
 
-#include "Materials/rankinemat.h"
+#include "rankinemat.h"
 #include "structuralnonlocalmaterialext.h"
 #include "nonlocmatstiffinterface.h"
 #include "graddpmaterialextensioninterface.h"
@@ -91,9 +91,7 @@ protected:
 
 public:
     RankineMatGrad(int n, Domain * d);
-    virtual ~RankineMatGrad() {
-        ;
-    }
+    virtual ~RankineMatGrad() { }
 
     virtual const char *giveClassName() const { return "RankineMatGrad"; }
     virtual const char *giveInputRecordName() const { return _IFT_RankineMatGrad_Name; }

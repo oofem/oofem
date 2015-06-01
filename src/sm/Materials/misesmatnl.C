@@ -49,9 +49,6 @@ namespace oofem {
 REGISTER_Material(MisesMatNl);
 
 MisesMatNl :: MisesMatNl(int n, Domain *d) : MisesMat(n, d), StructuralNonlocalMaterialExtensionInterface(d), NonlocalMaterialStiffnessInterface()
-    //
-    // constructor
-    //
 {
     Rf = 0.;
     exponent = 1.;
@@ -60,19 +57,22 @@ MisesMatNl :: MisesMatNl(int n, Domain *d) : MisesMat(n, d), StructuralNonlocalM
 
 
 MisesMatNl :: ~MisesMatNl()
-//
-// destructor
-//
 { }
 
 
 void
-MisesMatNl :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
+MisesMatNl :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
+                                   const FloatArray &totalStrain, TimeStep *tStep)
+{
+    OOFEM_ERROR("3D mode not supported");
+}
+
+
+void
+MisesMatNl :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp,
                                    const FloatArray &totalStrain, TimeStep *tStep)
 {
     MisesMatNlStatus *nlStatus = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
-    //this->initGpForNewStep(gp);
-    this->initTempStatus(gp);
     
     double tempDam;
     performPlasticityReturn(gp, totalStrain);
@@ -88,10 +88,8 @@ void
 MisesMatNl :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     answer.resize(1, 1);
-    answer.zero();
     LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
     double E = lmat->give('E', gp);
-    double nlKappa;
     MisesMatNlStatus *status = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
     double kappa = status->giveCumulativePlasticStrain();
     double tempKappa = status->giveTempCumulativePlasticStrain();
@@ -111,8 +109,9 @@ MisesMatNl :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, G
     double stress = stressVector.at(1);
     answer.at(1, 1) = ( 1. - tempDamage ) * E * H / ( E + H );
     if ( tempDamage > damage ) {
+        double nlKappa;
         this->computeCumPlasticStrain(nlKappa, gp, tStep);
-        answer.at(1, 1) = answer.at(1, 1) - ( 1 - mm ) * computeDamageParamPrime(nlKappa) * E / ( E + H ) * stress * sgn(stress);
+        answer.at(1, 1) -= ( 1 - mm ) * computeDamageParamPrime(nlKappa) * E / ( E + H ) * stress * sgn(stress);
     }
 }
 

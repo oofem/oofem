@@ -115,12 +115,20 @@ TutorialMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
     
     if ( phiTrial < 0.0 ) { // elastic
         answer = trialStress;
+
+        status->letTempPlasticStrainBe(status->givePlasticStrain());
     } else { // plastic loading
         double G = D.giveShearModulus();
         double mu = phiTrial / ( 3.0 * G + H ); // plastic multiplier
         answer = devTrialStress * ( 1.0 - 3.0*G*mu/effectiveTrialStress); // radial return
         answer.add(sphTrialStress);
-        kappa += H*mu; 
+        kappa += H*mu;
+
+        FloatArray plasticStrain = status->givePlasticStrain();
+        FloatArray dPlStrain;
+        applyDeviatoricElasticCompliance(dPlStrain, devTrialStress, 0.5);
+        plasticStrain.add(mu * 3. / (2. * effectiveTrialStress), dPlStrain);
+        status->letTempPlasticStrainBe(plasticStrain);
     }
     
     // Store the temporary values for the given iteration
@@ -175,7 +183,7 @@ TutorialMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRespon
     FloatArray devTrialStress = status->giveTempDevTrialStress();
 
     double J2 = this->computeJ2InvariantOf(devTrialStress);
-    double effectiveTrialStress = sqrt(3) * sqrt(J2);
+    double effectiveTrialStress = sqrt(3 * J2);
     
     // evaluate the yield surface
     double kappa = status->giveKappa();
@@ -203,6 +211,14 @@ TutorialMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRespon
         answer = elasticStiffness;
         answer.subtract(correction);
     }
+}
+
+
+void
+TutorialMaterial :: giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+{
+    double alpha = D.give(tAlpha, gp);
+    answer = {alpha, alpha, alpha, 0., 0., 0.};
 }
 
 

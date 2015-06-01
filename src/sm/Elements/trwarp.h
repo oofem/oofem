@@ -46,7 +46,6 @@ class FEI2dTrLin;
 
 /**
  * Triangle (2d) element with linear approximation for free warping analysis.
- * @todo Use the interpolation classes.
  */
 class Tr_Warp : public StructuralElement, public SpatialLocalizerInterface, public ZZNodalRecoveryModelInterface
 {
@@ -69,6 +68,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _Warping; }
     virtual double giveThicknessAt(const FloatArray &gcoords);
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui);
     virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
     //virtual void updateInternalState(TimeStep *tStep) { }

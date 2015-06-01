@@ -143,12 +143,17 @@ Truss1d :: computeVolumeAround(GaussPoint *gp)
 }
 
 
-IRResultType
-Truss1d :: initializeFrom(InputRecord *ir)
+void
+Truss1d :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    return StructuralElement :: initializeFrom(ir);
+    this->giveStructuralCrossSection()->giveRealStress_1d(answer, gp, strain, tStep);
 }
 
+void
+Truss1d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveStiffnessMatrix_1d(answer, rMode, gp, tStep);
+}
 
 void
 Truss1d :: giveDofManDofIDMask(int inode, IntArray &answer) const

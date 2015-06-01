@@ -1736,7 +1736,7 @@ MPlasticMaterial2 :: givePlaneStressStiffMtrx(FloatMatrix &answer,
             this->giveElastoPlasticStiffnessMatrix(answer, mode, gp, tStep);
         }
     } else {
-        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
+        this->giveLinearElasticMaterial()->givePlaneStressStiffMtrx(answer, mode, gp, tStep);
     }
 }
 
@@ -1760,7 +1760,7 @@ MPlasticMaterial2 :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
             this->giveElastoPlasticStiffnessMatrix(answer, mode, gp, tStep);
         }
     } else {
-        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
+        this->giveLinearElasticMaterial()->givePlaneStrainStiffMtrx(answer, mode, gp, tStep);
     }
 }
 
@@ -1782,7 +1782,7 @@ MPlasticMaterial2 :: give1dStressStiffMtrx(FloatMatrix &answer,
             this->giveElastoPlasticStiffnessMatrix(answer, mode, gp, tStep);
         }
     } else {
-        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
+        this->giveLinearElasticMaterial()->give1dStressStiffMtrx(answer, mode, gp, tStep);
     }
 }
 
@@ -1808,7 +1808,7 @@ MPlasticMaterial2 :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
             this->giveElastoPlasticStiffnessMatrix(answer, mode, gp, tStep);
         }
     } else {
-        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
+        this->giveLinearElasticMaterial()->give2dBeamLayerStiffMtrx(answer, mode, gp, tStep);
     }
 }
 
@@ -1834,7 +1834,7 @@ MPlasticMaterial2 :: givePlateLayerStiffMtrx(FloatMatrix &answer,
             this->giveElastoPlasticStiffnessMatrix(answer, mode, gp, tStep);
         }
     } else {
-        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
+        this->giveLinearElasticMaterial()->givePlateLayerStiffMtrx(answer, mode, gp, tStep);
     }
 }
 
@@ -1858,7 +1858,7 @@ MPlasticMaterial2 :: giveFiberStiffMtrx(FloatMatrix &answer,
             this->giveElastoPlasticStiffnessMatrix(answer, mode, gp, tStep);
         }
     } else {
-        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
+        this->giveLinearElasticMaterial()->giveFiberStiffMtrx(answer, mode, gp, tStep);
     }
 }
 

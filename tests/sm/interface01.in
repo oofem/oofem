@@ -11,12 +11,12 @@ node 2     coords 3 0.5  0      0      bc 2 0 1
 node 3     coords 3 0    1.     0      bc 2 0 1
 node 4     coords 3 0.5  1.     0      bc 2 0 1
 node 5     coords 3 0.5  1.     0      bc 2 2 1 
-PlaneStress2D 1   nodes 4   1 2 4 3 crosssect 1 mat 1
-Interface1d 2   nodes 2   4 5 crosssect 2 mat 2 normal 2 1. 0.
-SimpleCS 1 thick 0.1
-SimpleCS 2 thick 0.1 width 0.1
+PlaneStress2D 1   nodes 4   1 2 4 3 crosssect 1
+Interface1d 2   nodes 2   4 5 crosssect 2 normal 2 1. 0.
+SimpleCS 1 thick 0.1 material 1
+InterfaceCS 2 thickness 0.1 material 2
 IsoLe 1 d 2500. E 40.e+3 n 0.15 talpha 2.40e-6
-simpleintermat 2 d 1.0 kn 1.e+3 fc 1.0 stiffcoeff 0.2   
+simpleintermat 2 kn 1.e+3 fc 1.0 stiffcoeff 0.2   
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
 BoundaryCondition 2 loadTimeFunction 2 prescribedvalue 0.01
 ConstantFunction 1 f(t) 1.0
@@ -24,10 +24,10 @@ PiecewiseLinFunction 2 npoints 3 t 3 0 4 9 f(t) 3 0. -1. 1.
 #%BEGIN_CHECK% tolerance 1.e-4
 ##Step 1
 #NODE tStep 2 number 4 dof 1 unknown d value -1.39973869e-03
-#ELEMENT tStep 2 number 2 gp 1 keyword 1 component 1 value -1.1003e+00
+#ELEMENT tStep 2 number 2 gp 1 keyword 99 component 1 value -1.1003e+00
 #REACTION tStep 2 number 5 dof 1 value -1.1003e+00
 ##Step 10
 #NODE tStep 10 number 4 dof 1 unknown d value 2.02829954e-03 
-#ELEMENT tStep 10 number 2 gp 1 keyword 1 component 1 value 1.5943e+00
+#ELEMENT tStep 10 number 2 gp 1 keyword 99 component 1 value 1.5943e+00
 #REACTION tStep 10 number 5 dof 1 value 1.5943e+00
 #%END_CHECK%

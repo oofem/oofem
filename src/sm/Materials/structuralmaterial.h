@@ -53,7 +53,7 @@ namespace oofem {
 #define STRAIN_STEPS 10.0
 
 class GaussPoint;
-//@todo Update documentation
+///@todo Update documentation
 /**
  * Abstract base class for all "structural" constitutive models. It declares common  services provided
  * by all structural material models. The implementation of these services is partly left on derived classes,
@@ -105,7 +105,9 @@ class GaussPoint;
  * pass their requests to corresponding cross section model. Cross section performs all necessary integration over
  * its volume and invokes material model services.
  *
- * @author Jim Brouzoulis (among others)
+ * @author almost everyone
+ * @author Jim Brouzoulis
+ * @author Mikael Öhman
  */
 class StructuralMaterial : public Material
 {
@@ -114,22 +116,24 @@ protected:
     double referenceTemperature;
 
 public:
+    /// Voigt index map
+    static std::vector< std::vector<int> > vIindex;
+
+    /// Symmetric Voigt index map
+    static std::vector< std::vector<int> > svIndex;
+
+    static int giveSymVI(int ind1, int ind2) { return svIndex[ind1-1][ind2-1]; }
+    static int giveVI(int ind1, int ind2) { return vIindex[ind1-1][ind2-1]; }    
+
     /**
      * Constructor. Creates material with given number, belonging to given domain.
      * @param n Material number.
      * @param d Domain to which new material will belong.
      */
-    //StructuralMaterial(int n, Domain * d) : Material(n, d) { }
     StructuralMaterial(int n, Domain * d);
     /// Destructor.
     virtual ~StructuralMaterial() { }
 
-    // identification and auxiliary functions
-    std::vector< std::vector<int> > vIindex;
-    std::vector< std::vector<int> > svIndex;
-    int giveSymVI(int ind1, int ind2) { return svIndex[ind1-1][ind2-1]; }
-    int giveVI(int ind1, int ind2) { return this->vIindex[ind1-1][ind2-1]; }    
-      
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "StructuralMaterial"; }
 
@@ -249,7 +253,7 @@ public:
     virtual void giveEshelbyStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
 
     void give_dPdF_from(const FloatMatrix &dSdE, FloatMatrix &answer, GaussPoint *gp);
-    void convert_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix &dSdE, FloatArray &S, FloatArray &F, MaterialMode matMode);
+    void convert_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix &dSdE, const FloatArray &S, const FloatArray &F, MaterialMode matMode);
 
     static void convert_P_2_S(FloatArray &answer, const FloatArray &reducedvP, const FloatArray &reducedvF, MaterialMode matMode);
     static void convert_S_2_P(FloatArray &answer, const FloatArray &reducedvS, const FloatArray &reducedvF, MaterialMode matMode);
@@ -286,6 +290,8 @@ public:
     virtual void computeStressIndependentStrainVector(FloatArray &answer,
                                                       GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
+    /// Common functions for convenience
+    //@{
     /**
      * Auxiliary member function that computes principal values of stress/strain vector.
      * @param answer Computed principal values.
@@ -302,6 +308,35 @@ public:
      */
     static void computePrincipalValDir(FloatArray &answer, FloatMatrix &dir, const FloatArray &s,
                                        stressStrainPrincMode mode);
+
+    /**
+     * Computes split of receiver into deviatoric and volumetric part.
+     * @param dev Deviatoric part.
+     * @param s Input vector
+     * @return Volumetric part (diagonal components divided by 3).
+     */
+    static double computeDeviatoricVolumetricSplit(FloatArray &dev, const FloatArray &s);
+    static void computeDeviatoricVolumetricSum(FloatArray &s, const FloatArray &dev, double mean);
+
+    static void applyDeviatoricElasticCompliance(FloatArray &strain, const FloatArray &stress, double EModulus, double nu);
+    static void applyDeviatoricElasticCompliance(FloatArray &strain, const FloatArray &stress, double GModulus);
+
+    static void applyDeviatoricElasticStiffness(FloatArray &stress, const FloatArray &strain, double EModulus, double nu);
+    static void applyDeviatoricElasticStiffness(FloatArray &stress, const FloatArray &strain, double GModulus);
+    
+    static void applyElasticStiffness(FloatArray &stress, const FloatArray &strain, double EModulus, double nu);
+    static void applyElasticCompliance(FloatArray &strain, const FloatArray &stress, double EModulus, double nu);
+
+    static double computeStressNorm(const FloatArray &stress);
+
+    static double computeFirstInvariant(const FloatArray &s);
+    static double computeSecondStressInvariant(const FloatArray &s);
+    static double computeThirdStressInvariant(const FloatArray &s);
+
+    static double computeFirstCoordinate(const FloatArray &s);
+    static double computeSecondCoordinate(const FloatArray &s);
+    static double computeThirdCoordinate(const FloatArray &s);
+    //@}
 
     /**
      * Computes full 3d material stiffness matrix at given integration point, time, respecting load history

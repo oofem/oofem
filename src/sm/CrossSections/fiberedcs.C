@@ -216,15 +216,6 @@ FiberedCrossSection :: giveCharMaterialStiffnessMatrix(FloatMatrix &answer,
         this->give3dShellStiffMtrx(answer, rMode, gp, tStep);
     } else {
         OOFEM_ERROR("Not implemented for bulk materials.");
-        ///@todo What about the fibers?! Rather give just an error message if the fibers aren't supported than to just silently ignore them.
-#if 0
-        StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
-        if ( mat->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
-            mat->giveStiffnessMatrix(answer, rMode, gp, tStep);
-        } else {
-            OOFEM_ERROR("unsupported StressStrainMode");
-        }
-#endif
     }
 }
 
