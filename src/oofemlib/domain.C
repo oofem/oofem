@@ -604,7 +604,7 @@ void Domain :: setFunction(int i, Function *obj) { functionList[i-1].reset(obj);
 void Domain :: setSet(int i, Set *obj) { setList[i-1].reset(obj); }
 
 void Domain :: clearBoundaryConditions() { bcList.clear(); }
-
+void Domain :: clearElements() { elementList.clear(); }
 int
 Domain :: instanciateYourself(DataReader *dr)
 // Creates all objects mentioned in the data file.

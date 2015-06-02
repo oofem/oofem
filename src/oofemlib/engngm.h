@@ -688,6 +688,8 @@ public:
     }
     /// Returns next time step (next to current step) of receiver.
     virtual TimeStep *giveNextStep() { return NULL; }
+	/// Does a pre-initialization of the next time step (implement if necessarry)
+	virtual void preInitializeNextStep() {}
     /// Returns the solution step when Initial Conditions (IC) apply.
     virtual TimeStep *giveSolutionStepWhenIcApply() {
         if ( master ) {

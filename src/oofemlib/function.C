@@ -59,6 +59,8 @@ Function :: evaluate(TimeStep *tStep, ValueModeType mode)
         } else {
             return this->evaluateAtTime( tStep->giveIntrinsicTime() ) - this->evaluateAtTime( tStep->giveIntrinsicTime() - tStep->giveTimeIncrement() );
         }
+    } else if (mode == VM_Intermediate) {
+      return this->evaluateAtTime( tStep->giveIntrinsicTime() );
     } else {
         OOFEM_ERROR("unsupported mode(%d)", mode);
     }

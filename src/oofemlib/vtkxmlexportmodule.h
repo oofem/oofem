@@ -64,6 +64,7 @@
 #define _IFT_VTKXMLExportModule_stype "stype"
 #define _IFT_VTKXMLExportModule_regionsets "regionsets"
 #define _IFT_VTKXMLExportModule_timescale "timescale"
+#define _IFT_VTKXMLExportModule_particleexportflag "particleexportflag"
 //@}
 
 namespace oofem {
@@ -173,6 +174,8 @@ protected:
 
     /// Scaling time in output, e.g. conversion from seconds to hours
     double timeScale;
+	/// particle export flag
+	bool particleExportFlag;
 
     /// Buffer for earlier time steps exported to *.pvd file.
     std :: list< std :: string >pvdBuffer;

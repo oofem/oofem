@@ -531,6 +531,11 @@ Element :: setDofManagers(const IntArray &_dmans)
     this->dofManArray = _dmans;
 }
 
+void
+Element :: setBodyLoads(const IntArray &_bodyLoads)
+{
+    this->bodyLoadArray = _bodyLoads;
+}
 
 void
 Element :: setIntegrationRules(std :: vector< std :: unique_ptr< IntegrationRule > > irlist)

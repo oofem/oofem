@@ -308,17 +308,12 @@ NonLinearDynamic :: terminate(TimeStep *tStep)
     this->saveStepContext(tStep);
 }
 
-void
-NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
+void 
+NonLinearDynamic :: initializeYourself(TimeStep *tStep)
 {
-    // creates system of governing eq's and solves them at given time step
-    // first assemble problem at current time step
-
-    int neq = this->giveNumberOfDomainEquations( di, EModelDefaultEquationNumbering() );
-
-    // Time-stepping constants
-    this->determineConstants(tStep);
-
+	Domain *domain = this->giveDomain(1);
+	int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
+	
     if ( ( tStep->giveNumber() == giveNumberOfFirstStep() ) && initFlag ) {
         // Initialization
         incrementOfDisplacement.resize(neq);
@@ -346,7 +341,7 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
                                                  -deltaT, deltaT, 0);
 
         // Considering initial conditions.
-        for ( auto &node : this->giveDomain(di)->giveDofManagers() ) {
+        for ( auto &node : domain->giveDofManagers() ) {
             for ( Dof *dof: *node ) {
                 // Ask for initial values obtained from
                 // bc (boundary conditions) and ic (initial conditions).
@@ -362,9 +357,22 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
                 }
             }
         }
+		this->giveInternalForces(internalForces, true, 1, tStep);
+	}
+}
 
-        this->giveInternalForces(internalForces, true, di, tStep);
-    }
+void
+NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
+{
+    // creates system of governing eq's and solves them at given time step
+    // first assemble problem at current time step
+
+    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
+
+    // Time-stepping constants
+    this->determineConstants(tStep);
+
+
 
     if ( initFlag ) {
         // First assemble problem at current time step.
