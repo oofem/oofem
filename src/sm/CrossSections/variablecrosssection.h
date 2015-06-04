@@ -79,6 +79,12 @@ protected:
     ScalarFunction shearAreazExpr;
     /// Expression for cross section beam drilling stiffness
     ScalarFunction drillingStiffnessExpr;
+    /// Expression for director vector component in x-axis
+    ScalarFunction directorxExpr;
+    /// Expression for director vector component in y-axis
+    ScalarFunction directoryExpr;
+    /// Expression for director vector component in z-axis
+    ScalarFunction directorzExpr;
 
     /// if set to true, all expressions are in element local cs, otherwise are expressed in global cs
     bool localFormulationFlag;
@@ -89,7 +95,7 @@ public:
      * @param n Cross section number.
      * @param d Associated domain.
      */
-    VariableCrossSection(int n, Domain * d) : SimpleCrossSection(n, d) {
+    VariableCrossSection(int n, Domain *d) : SimpleCrossSection(n, d) {
         localFormulationFlag = false;
     }
 

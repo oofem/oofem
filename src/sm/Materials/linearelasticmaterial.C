@@ -82,6 +82,37 @@ LinearElasticMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint 
 }
 
 
+
+void
+LinearElasticMaterial :: giveRealStressVector_3dDegeneratedShell(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    FloatArray strainVector;
+    FloatMatrix d;
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+
+    this->giveStressDependentPartOfStrainVector(strainVector, gp, reducedStrain, tStep, VM_Total);
+
+    this->give3dMaterialStiffnessMatrix(d, TangentStiffness, gp, tStep);
+
+    d.at(1, 1) -= d.at(1, 3) * d.at(3, 1) / d.at(3, 3);
+    d.at(2, 1) -= d.at(2, 3) * d.at(3, 1) / d.at(3, 3);
+    d.at(1, 2) -= d.at(1, 3) * d.at(3, 2) / d.at(3, 3);
+    d.at(2, 2) -= d.at(2, 3) * d.at(3, 2) / d.at(3, 3);
+
+    d.at(3, 1) = 0.0;
+    d.at(3, 2) = 0.0;
+    d.at(3, 3) = 0.0;
+    d.at(2, 3) = 0.0;
+    d.at(1, 3) = 0.0;
+
+
+    answer.beProductOf(d, strainVector);
+
+    // update gp
+    status->letTempStrainVectorBe(reducedStrain);
+    status->letTempStressVectorBe(answer);
+}
+
 void
 LinearElasticMaterial :: giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
 {
@@ -144,7 +175,7 @@ LinearElasticMaterial :: giveRealStressVector_Warping(FloatArray &answer, GaussP
     // where x and y are the global coordinates of the Gauss point (the origin must be at the centroid of the cross section)
     //       G is the shear modulus of elasticity and theta is the relative twist (dPhi_z/dz)
     FloatArray gcoords;
-    Element* elem = gp->giveElement();
+    Element *elem = gp->giveElement();
     elem->computeGlobalCoordinates( gcoords, * ( gp->giveNaturalCoordinates() ) );
     answer.resize(2);
     answer.at(1) = reducedStrain.at(1);
@@ -221,16 +252,16 @@ LinearElasticMaterial :: giveEshelbyStressVector_PlaneStrain(FloatArray &answer,
     FloatMatrix H;
     H.beMatrixForm(fullFv);
 
-    H(0,0) -= 1.0;
-    H(1,1) -= 1.0;
-    H(2,2) -= 1.0;
+    H(0, 0) -= 1.0;
+    H(1, 1) -= 1.0;
+    H(2, 2) -= 1.0;
 
 
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
     const FloatArray &stressV = status->giveTempStressVector();
 
     FloatArray fullStressV;
-    StructuralMaterial::giveFullSymVectorForm(fullStressV, stressV, _PlaneStrain);
+    StructuralMaterial :: giveFullSymVectorForm(fullStressV, stressV, _PlaneStrain);
 
     FloatMatrix stress;
     stress.beMatrixFormOfStress(fullStressV);
@@ -239,18 +270,18 @@ LinearElasticMaterial :: giveEshelbyStressVector_PlaneStrain(FloatArray &answer,
     double energyDens = giveEnergyDensity(gp, tStep);
 
 
-    FloatMatrix eshelbyStress(3,3);
+    FloatMatrix eshelbyStress(3, 3);
     eshelbyStress.beTProductOf(H, stress);
     eshelbyStress.negated();
 
-    eshelbyStress(0,0) += energyDens;
-    eshelbyStress(1,1) += energyDens;
-    eshelbyStress(2,2) += energyDens;
+    eshelbyStress(0, 0) += energyDens;
+    eshelbyStress(1, 1) += energyDens;
+    eshelbyStress(2, 2) += energyDens;
 
 
     FloatArray eshelbyStressV;
     eshelbyStressV.beVectorForm(eshelbyStress);
-    StructuralMaterial :: giveReducedVectorForm( answer, eshelbyStressV, _PlaneStrain );
+    StructuralMaterial :: giveReducedVectorForm(answer, eshelbyStressV, _PlaneStrain);
 }
 
 double
@@ -260,7 +291,7 @@ LinearElasticMaterial :: giveEnergyDensity(GaussPoint *gp, TimeStep *tStep)
     const FloatArray &strain = status->giveTempStrainVector();
     const FloatArray &stress = status->giveTempStressVector();
 
-    return 0.5*stress.dotProduct(strain);
+    return 0.5 * stress.dotProduct(strain);
 }
 
 
@@ -269,5 +300,4 @@ LinearElasticMaterial :: CreateStatus(GaussPoint *gp) const
 {
     return new StructuralMaterialStatus(1, this->giveDomain(), gp);
 }
-
 } // end namespace oofem

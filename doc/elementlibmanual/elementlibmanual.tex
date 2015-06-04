@@ -909,6 +909,29 @@ The element features are summarized in Table~\ref{quad1mindlinsummary}.
 \end{elementsummary}
 
 
+
+\subsubsection {MITC4Shell Element}
+A four-node quadrilateral shell element formulated using three-dimensional continuum mechanics theory degenerated to shell behaviour. The element is applicable to thick and thin shells as the ``mixed interpolation of tensorial components'' (MITC) approach is used to remove shear locking. The implementation is based on the following paper: Dvorkin, E.N., Bathe, K.J.: A continuum mechanics based four-node shell element for general non-linear analysis, Eng.Comput., Vol.1, 77-88, 1984. 
+
+Although element requires generally six DOFs per node, no stiffness to local rotation along z-axis (rotation around director vector) is supplied. The element features are summarized in Table~\ref{mitc4shellsummary}.
+
+\begin{elementsummary}{mitc4shell}{Quadrilateral, bilinear, four-node shell element using the MITC technique.}{-}{mitc4shell element summary}{mitc4shellsummary}
+\elementDescription{Unknowns}{Six dofs (u,v,w-displacements and u,v,w rotations) are in general required in each node. Note, that although element requires generally six DOFs per node, no stiffness to local rotation along z-axis (rotation around director vector) is supplied.}
+\elementDescription{Approximation}{Linear approximation of displacements and rotations.}
+\elementDescription{Integration}{Integration of all terms using eight point formula.}
+\elementDescription{Features}{Variable cross section support.}
+\elementDescription{CS properties}{Cross section thickness is required (measured along director vector). Director vectors components are required \optField{directorx}{in}\optField{directory}{in}\optField{directorz}{in}(default: directorX=0, directorY=0, directorZ=1).}
+\elementDescription{Loads}{Body and boundary loads are supported.}
+\elementDescription{Output}{On output, the shell strain ($s_s$), and shell force ($s_f$) tensors in \textbf{global coordinate system} are printed as vector form with 6 components, with the following meaning:
+\begin{eqnarray*}
+s_s&=&\{\varepsilon_x, \varepsilon_y, \varepsilon_z, \varepsilon_{yz}, \varepsilon_{xz}, \varepsilon_{xy}\},\\
+s_f&=&\{\sigma_x, \sigma_y, \sigma_z, \sigma_{yz}, \sigma_{xz}, \sigma_{xy}\}.
+\end{eqnarray*}
+\elementDescription{Nlgeo}{0.}
+\elementDescription{Status}{-}
+\end{elementsummary}
+
+
 \subsubsection{Sub-soil Elements}
 \subsubsection{quad1plateSubsoil Element} \label{quad1platesubsoil}
 This class implements an quadrilateral, bilinear, four-node plate subsoil element.

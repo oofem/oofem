@@ -53,6 +53,16 @@ SimpleCrossSection :: giveRealStress_3d(FloatArray &answer, GaussPoint *gp, cons
     mat->giveRealStressVector_3d(answer, gp, strain, tStep);
 }
 
+void
+SimpleCrossSection :: giveRealStress_3dDegeneratedShell(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    IntArray strainControl = {
+        1, 2, 4, 5, 6
+    };
+    mat->giveRealStressVector_ShellStressControl(answer, gp, strain, strainControl, tStep);
+}
+
 
 void
 SimpleCrossSection :: giveRealStress_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
@@ -121,13 +131,13 @@ SimpleCrossSection :: giveStiffnessMatrix_1d(FloatMatrix &answer, MatResponseMod
 void
 SimpleCrossSection :: giveGeneralizedStress_Beam2d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-  /**Note: (by bp): This assumes that the behaviour is elastic
-     there exist a nuumber of nonlinear integral material models for beams defined directly in terms of integral forces and moments and corresponding 
-     deformations and curvatures. This would require to implement support at material model level.
-     Mikael: That would not be a continuum material model, but it would highly depend on the cross-section shape, thus, it should be a special cross-section model instead.
-     This cross-section assumes you can split the response into inertia moments and pure material response. This is only possible for a constant, elastic response (i.e. elastic).
-     Therefore, this cross-section may only be allowed to give the elastic response.
-  */
+    /**Note: (by bp): This assumes that the behaviour is elastic
+     * there exist a nuumber of nonlinear integral material models for beams defined directly in terms of integral forces and moments and corresponding
+     * deformations and curvatures. This would require to implement support at material model level.
+     * Mikael: That would not be a continuum material model, but it would highly depend on the cross-section shape, thus, it should be a special cross-section model instead.
+     * This cross-section assumes you can split the response into inertia moments and pure material response. This is only possible for a constant, elastic response (i.e. elastic).
+     * Therefore, this cross-section may only be allowed to give the elastic response.
+     */
     StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
     FloatArray elasticStrain, et, e0;
     FloatMatrix tangent;
@@ -152,11 +162,11 @@ SimpleCrossSection :: giveGeneralizedStress_Beam2d(FloatArray &answer, GaussPoin
 void
 SimpleCrossSection :: giveGeneralizedStress_Beam3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-  /**Note: (by bp): This assumes that the behaviour is elastic
-     there exist a nuumber of nonlinear integral material models for beams defined directly in terms of integral forces and moments and corresponding 
-     deformations and curvatures. This would require to implement support at material model level.
-     Mikael: See earlier response to comment
-  */
+    /**Note: (by bp): This assumes that the behaviour is elastic
+     * there exist a nuumber of nonlinear integral material models for beams defined directly in terms of integral forces and moments and corresponding
+     * deformations and curvatures. This would require to implement support at material model level.
+     * Mikael: See earlier response to comment
+     */
     StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
     FloatArray elasticStrain, et, e0;
     FloatMatrix tangent;
@@ -185,13 +195,13 @@ SimpleCrossSection :: giveGeneralizedStress_Beam3d(FloatArray &answer, GaussPoin
 void
 SimpleCrossSection :: giveGeneralizedStress_Plate(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-  /**Note: (by bp): This assumes that the behaviour is elastic
-     there exist a nuumber of nonlinear integral material models for beams/plates/shells
-     defined directly in terms of integral forces and moments and corresponding 
-     deformations and curvatures. This would require to implement support at material model level.
-     Mikael: See earlier response to comment
-  */
-   StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    /**Note: (by bp): This assumes that the behaviour is elastic
+     * there exist a nuumber of nonlinear integral material models for beams/plates/shells
+     * defined directly in terms of integral forces and moments and corresponding
+     * deformations and curvatures. This would require to implement support at material model level.
+     * Mikael: See earlier response to comment
+     */
+    StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
     FloatArray elasticStrain, et, e0;
     FloatMatrix tangent;
     elasticStrain = strain;
@@ -215,12 +225,12 @@ SimpleCrossSection :: giveGeneralizedStress_Plate(FloatArray &answer, GaussPoint
 void
 SimpleCrossSection :: giveGeneralizedStress_Shell(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-  /**Note: (by bp): This assumes that the behaviour is elastic
-     there exist a nuumber of nonlinear integral material models for beams/plates/shells
-     defined directly in terms of integral forces and moments and corresponding 
-     deformations and curvatures. This would require to implement support at material model level.
-     Mikael: See earlier response to comment
-  */
+    /**Note: (by bp): This assumes that the behaviour is elastic
+     * there exist a nuumber of nonlinear integral material models for beams/plates/shells
+     * defined directly in terms of integral forces and moments and corresponding
+     * deformations and curvatures. This would require to implement support at material model level.
+     * Mikael: See earlier response to comment
+     */
     StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
     FloatArray elasticStrain, et, e0;
     FloatMatrix tangent;
@@ -259,14 +269,14 @@ SimpleCrossSection :: giveGeneralizedStress_MembraneRot(FloatArray &answer, Gaus
     ///@todo We should support nonlinear behavior for the membrane part. In fact, should be even bundle the rotation part with the membrane?
     /// We gain nothing from this design anyway as the rotation field is always separate. Separate manual integration by the element would be an option.
 }
-  
-void 
+
+void
 SimpleCrossSection :: giveGeneralizedStress_PlateSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep)
 {
-  StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
-  return mat->giveRealStressVector_2dPlateSubSoil (answer, gp, generalizedStrain, tStep);
+    StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    return mat->giveRealStressVector_2dPlateSubSoil(answer, gp, generalizedStrain, tStep);
 }
-  
+
 
 void
 SimpleCrossSection :: giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
@@ -280,6 +290,8 @@ SimpleCrossSection :: giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatRe
         this->give2dPlateStiffMtrx(answer, rMode, gp, tStep);
     } else if ( mode == _3dShell ) {
         this->give3dShellStiffMtrx(answer, rMode, gp, tStep);
+    } else if ( mode == _3dDegeneratedShell ) {
+        this->give3dDegeneratedShellStiffMtrx(answer, rMode, gp, tStep);
     } else {
         StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
 
@@ -414,6 +426,24 @@ SimpleCrossSection :: give3dShellStiffMtrx(FloatMatrix &answer, MatResponseMode 
 
 
 void
+SimpleCrossSection :: give3dDegeneratedShellStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    mat->give3dMaterialStiffnessMatrix(answer, rMode, gp, tStep);
+
+    answer.at(1, 1) -= answer.at(1, 3) * answer.at(3, 1) / answer.at(3, 3);
+    answer.at(2, 1) -= answer.at(2, 3) * answer.at(3, 1) / answer.at(3, 3);
+    answer.at(1, 2) -= answer.at(1, 3) * answer.at(3, 2) / answer.at(3, 3);
+    answer.at(2, 2) -= answer.at(2, 3) * answer.at(3, 2) / answer.at(3, 3);
+
+    answer.at(3, 1) = 0.0;
+    answer.at(3, 2) = 0.0;
+    answer.at(3, 3) = 0.0;
+    answer.at(2, 3) = 0.0;
+    answer.at(1, 3) = 0.0;
+}
+
+void
 SimpleCrossSection :: giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
     StructuralMaterial *mat;
@@ -500,6 +530,18 @@ SimpleCrossSection :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_OPTIONAL_FIELD(ir, this->materialNumber, _IFT_SimpleCrossSection_MaterialNumber);
 
+    value = 0.0;
+    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_directorx);
+    propertyDictionary->add(CS_DirectorVectorX, value);
+
+    value = 0.0;
+    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_directory);
+    propertyDictionary->add(CS_DirectorVectorY, value);
+
+    value = 1.0;
+    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_directorz);
+    propertyDictionary->add(CS_DirectorVectorZ, value);
+
     return IRRT_OK;
 }
 
@@ -546,6 +588,18 @@ SimpleCrossSection :: giveInputRecord(DynamicInputRecord &input)
     }
 
     input.setField(this->materialNumber, _IFT_SimpleCrossSection_MaterialNumber);
+
+    if ( this->propertyDictionary->includes(CS_DirectorVectorX) ) {
+        input.setField(this->propertyDictionary->at(CS_DirectorVectorX), _IFT_SimpleCrossSection_directorx);
+    }
+
+    if ( this->propertyDictionary->includes(CS_DirectorVectorY) ) {
+        input.setField(this->propertyDictionary->at(CS_DirectorVectorY), _IFT_SimpleCrossSection_directory);
+    }
+
+    if ( this->propertyDictionary->includes(CS_DirectorVectorZ) ) {
+        input.setField(this->propertyDictionary->at(CS_DirectorVectorZ), _IFT_SimpleCrossSection_directorz);
+    }
 }
 
 void
@@ -614,7 +668,7 @@ SimpleCrossSection :: checkConsistency()
     int result = 1;
     Material *mat = this->giveDomain()->giveMaterial(this->materialNumber);
     if ( !dynamic_cast< StructuralMaterial * >(mat) ) {
-        OOFEM_WARNING("material %s without structural support", mat->giveClassName() );
+        OOFEM_WARNING( "material %s without structural support", mat->giveClassName() );
         result = 0;
     }
 
@@ -654,7 +708,7 @@ SimpleCrossSection :: giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, co
     } else if ( mode == _1dMat ) {
         mat->giveFirstPKStressVector_1d(answer, gp, reducedvF, tStep);
     } else {
-        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mode) );
+        OOFEM_ERROR( "unknown mode (%s)", __MaterialModeToString(mode) );
     }
 }
 
@@ -687,13 +741,13 @@ SimpleCrossSection :: giveEshelbyStresses(FloatArray &answer, GaussPoint *gp, co
     StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
 
     if ( mode == _3dMat ) {
-//        mat->giveCauchyStressVector_3d(answer, gp, reducedvF, tStep);
+        //        mat->giveCauchyStressVector_3d(answer, gp, reducedvF, tStep);
     } else if ( mode == _PlaneStrain ) {
         mat->giveEshelbyStressVector_PlaneStrain(answer, gp, reducedvF, tStep);
     } else if ( mode == _PlaneStress ) {
-//        mat->giveCauchyStressVector_PlaneStress(answer, gp, reducedvF, tStep);
+        //        mat->giveCauchyStressVector_PlaneStress(answer, gp, reducedvF, tStep);
     } else if ( mode == _1dMat ) {
-//        mat->giveCauchyStressVector_1d(answer, gp, reducedvF, tStep);
+        //        mat->giveCauchyStressVector_1d(answer, gp, reducedvF, tStep);
     }
 }
 
@@ -715,7 +769,7 @@ SimpleCrossSection :: giveStiffnessMatrix_dPdF(FloatMatrix &answer,
     } else if ( mode == _1dMat ) {
         mat->give1dStressStiffMtrx_dPdF(answer, rMode, gp, tStep);
     } else {
-        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mode) );
+        OOFEM_ERROR( "unknown mode (%s)", __MaterialModeToString(mode) );
     }
 }
 
@@ -737,7 +791,7 @@ SimpleCrossSection :: giveStiffnessMatrix_dCde(FloatMatrix &answer,
     } else if ( mode == _1dMat ) {
         mat->give1dStressStiffMtrx_dCde(answer, rMode, gp, tStep);
     } else {
-        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mode) );
+        OOFEM_ERROR( "unknown mode (%s)", __MaterialModeToString(mode) );
     }
 }
 
@@ -791,5 +845,4 @@ SimpleCrossSection :: estimatePackSize(DataStream &buff, GaussPoint *gp)
 {
     return this->giveMaterial(gp)->estimatePackSize(buff, gp);
 }
-
 } // end namespace oofem

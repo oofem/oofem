@@ -46,6 +46,7 @@ namespace oofem {
     ENUM_ITEM(_3dMode) \
     ENUM_ITEM(_3dAxisymmMode) \
     ENUM_ITEM(_2dMindlinPlateMode) \
+    ENUM_ITEM(_3dDegeneratedShellMode) \
     ENUM_ITEM(_3dShellMode) \
     ENUM_ITEM(_2dTrussMode) \
     ENUM_ITEM(_1dTrussMode) \
@@ -55,12 +56,12 @@ namespace oofem {
     ENUM_ITEM(_HeatMass1Mode) /* Coupled heat and mass (1 matter) transfer */ \
     ENUM_ITEM(_2dIncompressibleFlow) /* 2d Incompressible flow, no energy eq */ \
     ENUM_ITEM(_3dIncompressibleFlow) /* 3d Incompressible flow, no energy eq */ \
-    ENUM_ITEM(_2dLatticeMode)\
-    ENUM_ITEM(_2dLatticeMassTransportMode)\
-    ENUM_ITEM(_3dLatticeMode)\
-    ENUM_ITEM(_3dLatticeMassTransportMode)\
-    ENUM_ITEM(_2dLatticeHeatTransferMode)\
-    ENUM_ITEM(_3dLatticeHeatTransferMode)\
+    ENUM_ITEM(_2dLatticeMode) \
+    ENUM_ITEM(_2dLatticeMassTransportMode) \
+    ENUM_ITEM(_3dLatticeMode) \
+    ENUM_ITEM(_3dLatticeMassTransportMode) \
+    ENUM_ITEM(_2dLatticeHeatTransferMode) \
+    ENUM_ITEM(_3dLatticeHeatTransferMode) \
     ENUM_ITEM(_3dDirShellMode) /* 7 parameter shell based on director fields */ \
     ENUM_ITEM(_WarpingMode) /* free warping of a cross section */ \
     /**

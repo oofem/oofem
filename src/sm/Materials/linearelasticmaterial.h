@@ -58,12 +58,13 @@ class LinearElasticMaterial : public StructuralMaterial
 {
 public:
     /// Constructor.
-    LinearElasticMaterial(int n, Domain * d) : StructuralMaterial(n, d) { }
+    LinearElasticMaterial(int n, Domain *d) : StructuralMaterial(n, d) { }
     /// Destructor.
     virtual ~LinearElasticMaterial() { }
 
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
     virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
+    virtual void giveRealStressVector_3dDegeneratedShell(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
     virtual void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
     virtual void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
     virtual void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);

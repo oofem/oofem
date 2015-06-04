@@ -74,7 +74,7 @@ void
 ScalarFunction :: setValue(double val)
 {
     this->dvType = DV_ValueType;
-    this->dValue = 0.0;
+    this->dValue = val;
 }
 
 
@@ -104,7 +104,7 @@ ScalarFunction :: eval(std :: map< std :: string, FunctionArgument >valDict, Dom
         Parser p;
         int err;
         // process valDict and call internal parser
-        for ( const auto &named_arg: valDict ) {
+        for ( const auto &named_arg : valDict ) {
             const FunctionArgument &arg = named_arg.second;
             if ( arg.type == FunctionArgument :: FAT_double ) {
                 buff << named_arg.first << "=" << arg.val0 << ";";

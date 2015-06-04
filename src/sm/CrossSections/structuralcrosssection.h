@@ -80,7 +80,7 @@ public:
      * @param n Cross section number.
      * @param d Domain to which new cross section will belong.
      */
-    StructuralCrossSection(int n, Domain * d) : CrossSection(n, d)  { }
+    StructuralCrossSection(int n, Domain *d) : CrossSection(n, d)  { }
     /// Destructor.
     virtual ~StructuralCrossSection() { }
 
@@ -101,6 +101,7 @@ public:
     //@{
     void giveRealStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
     virtual void giveRealStress_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) = 0;
+    virtual void giveRealStress_3dDegeneratedShell(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) { OOFEM_ERROR("not implemented"); };
     virtual void giveRealStress_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) = 0;
     virtual void giveRealStress_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) = 0;
     virtual void giveRealStress_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) = 0;

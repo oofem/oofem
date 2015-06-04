@@ -171,6 +171,7 @@ public:
     virtual void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
     /// Iteratively calls giveRealStressVector_3d to find the stress controlled equal to zero·
     virtual void giveRealStressVector_StressControl(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, const IntArray &strainControl, TimeStep *tStep);
+    virtual void giveRealStressVector_ShellStressControl(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, const IntArray &strainControl, TimeStep *tStep);
     /// Default implementation relies on giveRealStressVector_StressControl
     virtual void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
     /// Default implementation relies on giveRealStressVector_StressControl

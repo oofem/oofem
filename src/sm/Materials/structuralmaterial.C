@@ -92,6 +92,8 @@ StructuralMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, c
     MaterialMode mode = gp->giveMaterialMode();
     if ( mode == _3dMat ) {
         this->giveRealStressVector_3d(answer, gp, reducedStrain, tStep);
+    } else if ( mode == _3dDegeneratedShell ) {
+        this->giveRealStressVector_3d(answer, gp, reducedStrain, tStep);
     } else if ( mode == _PlaneStrain ) {
         this->giveRealStressVector_PlaneStrain(answer, gp, reducedStrain, tStep);
     } else if ( mode == _PlaneStress ) {
@@ -181,6 +183,57 @@ StructuralMaterial :: giveRealStressVector_StressControl(FloatArray &answer, Gau
     OOFEM_WARNING("Iteration did not converge");
     answer.clear();
 }
+
+
+void
+StructuralMaterial :: giveRealStressVector_ShellStressControl(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, const IntArray &strainControl, TimeStep *tStep)
+// calculates stress vector (6 components) with assumption of sigma_z = 0
+// used by MITC4Shell
+{
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+
+    IntArray stressControl;
+    FloatArray vE, increment_vE, vS, reducedvS;
+    FloatMatrix tangent, reducedTangent;
+    // Iterate to find full vE.
+    // Compute the negated the array of control since we need stressControl as well;
+
+    stressControl.resize( 6 - strainControl.giveSize() );
+    for ( int i = 1, j = 1; i <= 6; i++ ) {
+        if ( !strainControl.contains(i) ) {
+            stressControl.at(j++) = i;
+        }
+    }
+
+    // Initial guess;
+    vE = status->giveStrainVector();
+    vE = strain;
+    // step 0: vE = {., ., 0, ., ., .}
+    // step n: vE = {., ., sum(ve(n)), ., ., .}
+
+
+    // Iterate to find full vE.
+    for ( int k = 0; k < 100; k++ ) { // Allow for a generous 100 iterations.
+        this->giveRealStressVector_3d(answer, gp, vE, tStep);
+        // step 0: answer = full stress vector
+        // step n: answer = {., ., ->0, ., ., .}
+        reducedvS.beSubArrayOf(answer, stressControl);
+        if ( reducedvS.computeNorm() < 1e-6 ) {
+            return;
+        }
+
+        this->give3dMaterialStiffnessMatrix(tangent, TangentStiffness, gp, tStep);
+        reducedTangent.beSubMatrixOf(tangent, stressControl, stressControl);
+        reducedTangent.solveForRhs(reducedvS, increment_vE);
+        increment_vE.negated();
+        vE.assemble(increment_vE, stressControl);
+    }
+
+    OOFEM_WARNING("StructuralMaterial :: giveRealStressVector_ShellStressControl - Iteration did not converge");
+    answer.clear();
+}
+
+
 
 
 void
@@ -813,6 +866,13 @@ StructuralMaterial :: giveVoigtSymVectorMask(IntArray &answer, MaterialMode mmod
     case _3dMicroplane:
         answer.enumerate(6);
         return 6;
+
+    case _3dDegeneratedShell:
+        answer = {
+            1, 2, 3, 4, 5, 6
+        };
+        return 6;
+
 
     case _PlaneStress:
         answer = {
@@ -1504,7 +1564,7 @@ StructuralMaterial :: computeVonMisesStress(const FloatArray *currentStress)
 
         return sqrt( currentStress->at(1) * currentStress->at(1) + currentStress->at(2) * currentStress->at(2)
                      - currentStress->at(1) * currentStress->at(2) + 3 * currentStress->at(3) * currentStress->at(3) );
-    } else if ( currentStress->giveSize() == 4 )   {
+    } else if ( currentStress->giveSize() == 4 ) {
         // Plane strain
         v1 = ( ( currentStress->at(1) - currentStress->at(2) ) * ( currentStress->at(1) - currentStress->at(2) ) );
         v2 = ( ( currentStress->at(2) - currentStress->at(3) ) * ( currentStress->at(2) - currentStress->at(3) ) );
@@ -1513,7 +1573,7 @@ StructuralMaterial :: computeVonMisesStress(const FloatArray *currentStress)
         J2 = ( 1. / 6. ) * ( v1 + v2 + v3 ) + currentStress->at(4) * currentStress->at(4);
 
         return sqrt(3 * J2);
-    } else if ( currentStress->giveSize() == 6 )   {
+    } else if ( currentStress->giveSize() == 6 ) {
         // 3D
         v1 = ( ( currentStress->at(1) - currentStress->at(2) ) * ( currentStress->at(1) - currentStress->at(2) ) );
         v2 = ( ( currentStress->at(2) - currentStress->at(3) ) * ( currentStress->at(2) - currentStress->at(3) ) );
@@ -1523,7 +1583,7 @@ StructuralMaterial :: computeVonMisesStress(const FloatArray *currentStress)
              currentStress->at(5) * currentStress->at(5) + currentStress->at(6) * currentStress->at(6);
 
         return sqrt(3 * J2);
-    } else   {
+    } else {
         return 0.0;
     }
 }
