@@ -221,6 +221,45 @@ Beam3d :: computeClampedStiffnessMatrix(FloatMatrix &answer,
 }
 
 
+void
+Beam3d :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep)
+{
+    if ( edge != 1 ) {
+        OOFEM_ERROR("Beam3D only has 1 edge (the midline) that supports loads. Attempted to apply load to edge %d", edge);
+    }
+
+    double l = this->computeLength();
+    FloatArray coords, t;
+    FloatMatrix N, T;
+
+    answer.clear();
+    for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
+        this->computeNmatrixAt(lcoords, N);
+        if ( load ) {
+            this->computeGlobalCoordinates(coords, lcoords);
+            load->computeValues(t, tStep, coords, {D_u, D_v, D_w, R_u, R_v, R_w}, mode);
+        } else {
+            load->computeValues(t, tStep, lcoords, {D_u, D_v, D_w, R_u, R_v, R_w}, mode);
+        }
+
+        if ( load->giveCoordSystMode() == Load :: CST_Global ) {
+            if ( this->computeLoadGToLRotationMtrx(T) ) {
+                t.rotatedWith(T, 'n');
+            }
+        }
+
+        double dV = gp->giveWeight() * 0.5 * l;
+        answer.plusProduct(N, t, dV);
+    }
+
+    // Loads from sets expects global c.s.
+    this->computeGtoLRotationMatrix(T);
+    answer.rotatedWith(T, 't');
+    ///@todo Decide if we want local or global c.s. for loads over sets.
+}
+
+
 int
 Beam3d :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
 {

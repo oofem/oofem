@@ -616,7 +616,7 @@ StructuralElement :: computeResultingIPTemperatureAt(FloatArray &answer, TimeSte
         n = bodyLoadArray.at(i);
         load = domain->giveLoad(n);
         if ( load->giveBCValType() == TemperatureBVT ) {
-            static_cast< StructuralTemperatureLoad * >(load)->computeValueAt(temperature, tStep, gCoords, mode);
+            load->computeValueAt(temperature, tStep, gCoords, mode);
             answer.add(temperature);
         }
     }
@@ -640,7 +640,7 @@ StructuralElement :: computeResultingIPEigenstrainAt(FloatArray &answer, TimeSte
         n = bodyLoadArray.at(i);
         load = domain->giveLoad(n);
         if ( load->giveBCValType() == EigenstrainBVT ) {
-            static_cast< StructuralEigenstrainLoad * >(load)->computeValueAt(eigenstrain, tStep, gCoords, mode);
+            load->computeValueAt(eigenstrain, tStep, gCoords, mode);
             answer.add(eigenstrain);
         }
     }
