@@ -71,6 +71,7 @@ public:
 
     // Overloaded methods:
     virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode);
+    virtual void computeValues(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, const IntArray &dofids, ValueModeType mode);
     virtual int giveApproxOrder() { return 0; }
 
     /**
