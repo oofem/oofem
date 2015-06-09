@@ -260,10 +260,14 @@ class CTRLParser:
         #attach all following lines until empty line is hit. This is the end of OOFEM section
         while True:
             line=self.file.readline()
+            dataline=line.split()
+            
             if line.strip() == '':
                 break
+            
+            if dataline[0].lower() == 'set':
+                self.nset=self.nset + 1;
             self.footer+= line
-        print "Number of sets = %d\n"%self.nset
 
         #look, whether the next line contains extractor data
         #pos = self.file.tell()

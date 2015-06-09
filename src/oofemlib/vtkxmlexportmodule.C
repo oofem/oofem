@@ -675,7 +675,7 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
         this->exportIntVars(vtkPiece, mapG2L, mapL2G, region, tStep);
         this->exportExternalForces(vtkPiece, mapG2L, mapL2G, region, tStep);
 
-        this->exportCellVars(vtkPiece, numRegionEl, tStep);
+        this->exportCellVars(vtkPiece, elems, tStep);
     } // end of default piece for simple geometry elements
 }
 
@@ -1630,23 +1630,23 @@ VTKXMLExportModule :: writeExternalForces(VTKPiece &vtkPiece)
 //----------------------------------------------------
 
 void
-VTKXMLExportModule :: exportCellVars(VTKPiece &vtkPiece, int numCells, TimeStep *tStep)
+VTKXMLExportModule :: exportCellVars(VTKPiece &vtkPiece, const IntArray &elems, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
     FloatArray valueArray;
 
-    vtkPiece.setNumberOfCellVarsToExport(cellVarsToExport.giveSize(), numCells);
+    vtkPiece.setNumberOfCellVarsToExport(cellVarsToExport.giveSize(), elems.giveSize());
     for ( int field = 1; field <= cellVarsToExport.giveSize(); field++ ) {
         InternalStateType type = ( InternalStateType ) cellVarsToExport.at(field);
 
-        for ( int ielem = 1; ielem <= numCells; ielem++ ) {
-            Element *el = d->giveElement(ielem); ///@todo should be a pointer to an element in the region /JB
+        for ( int subIndex = 1; subIndex <= elems.giveSize(); ++subIndex ) {
+            Element *el = d->giveElement(elems.at(subIndex)); ///@todo should be a pointer to an element in the region /JB
             if ( el->giveParallelMode() != Element_local ) {
                 continue;
             }
 
             this->getCellVariableFromIS(valueArray, el, type, tStep);
-            vtkPiece.setCellVar(field, ielem, valueArray);
+            vtkPiece.setCellVar(field, subIndex, valueArray);
         }
     }
 }

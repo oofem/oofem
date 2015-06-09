@@ -50,6 +50,8 @@
 #include "classfactory.h"
 #include "set.h"
 #include "unknownnumberingscheme.h"
+#include "prescribedmean.h"
+#include "feinterpol.h"
 
 #ifdef __FM_MODULE
 #include "../fm/tr21stokes.h"
@@ -79,6 +81,7 @@ MatlabExportModule :: MatlabExportModule(int n, EngngModel *e) : ExportModule(n,
     elList.clear();
     reactionForcesNodeSet = 0;
     IPFieldsElSet = 0;
+    noscaling = false;
 }
 
 
@@ -90,6 +93,8 @@ IRResultType
 MatlabExportModule :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                    // Required by IR_GIVE_FIELD macro
+
+    ExportModule :: initializeFrom(ir);
 
     exportMesh = ir->hasField(_IFT_MatlabExportModule_mesh);
     exportData = ir->hasField(_IFT_MatlabExportModule_data);
@@ -114,6 +119,9 @@ MatlabExportModule :: initializeFrom(InputRecord *ir)
         IPFieldsElSet = 0;
         IR_GIVE_OPTIONAL_FIELD(ir, IPFieldsElSet, _IFT_MatlabExportModule_IPFieldsElSet);
     }
+
+    noscaling = ir->hasField(_IFT_MatlabExportModule_noScaledHomogenization);
+    IR_GIVE_OPTIONAL_FIELD(ir, regionsets, _IFT_MatlabExportModule_regionsets);
 
     return ExportModule :: initializeFrom(ir);
 }
@@ -149,8 +157,8 @@ MatlabExportModule :: computeArea(TimeStep *tStep)
         }
     } else {
 
-        for ( size_t i = 0; i < partVolume.size(); i++ ) {
-            partVolume.at(i) = 0.0;
+        for (size_t i = 0; i<partVolume.size(); i++ ) {
+            partVolume.at(i)=0.0;
         }
 
         for ( auto &elem : domain->giveElements() ) {
@@ -186,8 +194,6 @@ MatlabExportModule :: computeArea(TimeStep *tStep)
             } else {
                 partVolume.at(j) = partVolume.at(j) + v;
             }
-
-            //printf("%s, partVolume.at(%u)=%f\n", eName.c_str(), j, partVolume.at(j));
 
             Volume = Volume + v;
 
@@ -299,7 +305,6 @@ MatlabExportModule :: doOutputMesh(TimeStep *tStep, FILE *FID)
     fprintf(FID, "\tmesh.p=[");
     for ( auto &dman : domain->giveDofManagers() ) {
         for ( int j = 1; j <= domain->giveNumberOfSpatialDimensions(); j++) {
-            //double x = dman->giveCoordinate(1), y = dman->giveCoordinate(2);
             double c = dman->giveCoordinate(j);
             fprintf(FID, "%f, ", c);
         }
@@ -369,10 +374,10 @@ MatlabExportModule :: doOutputData(TimeStep *tStep, FILE *FID)
 void
 MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
 {
-    FloatArray v_hat;
+//    FloatArray v_hat, GradPTemp, v_hatTemp;
 
     Domain *domain  = emodel->giveDomain(1);
-
+/*
     v_hat.clear();
 
         ///@todo Sort out this hack in a nicer (modular) way / Mikael
@@ -416,8 +421,10 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
         fprintf(FID, "]; %% No velocities\n");
     }
 
+    */
+
     // Output weak periodic boundary conditions
-    unsigned int wpbccount = 1, sbsfcount = 1;
+    unsigned int wpbccount = 1, sbsfcount = 1, mcount = 1;
 
     for ( auto &gbc : domain->giveBcs() ) {
         WeakPeriodicBoundaryCondition *wpbc = dynamic_cast< WeakPeriodicBoundaryCondition * >( gbc.get() );
@@ -443,6 +450,16 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
             }
             fprintf(FID, "];\n");
             sbsfcount++;
+        }
+        PrescribedMean *m = dynamic_cast<PrescribedMean *> ( gbc.get() );
+        if (m) {
+            fprintf(FID, "\tspecials.prescribedmean{%u}.value=[", mcount);
+            for ( Dof *dof: *m->giveInternalDofManager(1)) {
+                double X = dof->giveUnknown(VM_Total, tStep);
+                fprintf(FID, "%e\t", X);
+            }
+            fprintf(FID, "];\n");
+            mcount++;
         }
     }
 }
@@ -528,7 +545,7 @@ MatlabExportModule :: doOutputReactionForces(TimeStep *tStep,    FILE *FID)
         fprintf(FID, "];\n");
 
         // Output dof ID's
-        
+
         fprintf( FID, "\tReactionForces.DofIDs{%i} = [", i);
         if ( dofManMap.contains( dManNum ) ) {
             for ( int id: dofIDs ) {
@@ -544,10 +561,6 @@ void
 MatlabExportModule :: doOutputIntegrationPointFields(TimeStep *tStep,    FILE *FID)
 {
 
-    //if ( !testTimeStepOutput(tStep) ) {
-    //    return;
-    //}
-
     int domainIndex = 1;
     Domain *domain  = emodel->giveDomain( domainIndex );
 
@@ -555,7 +568,7 @@ MatlabExportModule :: doOutputIntegrationPointFields(TimeStep *tStep,    FILE *F
     fprintf( FID, "\n %%%% Export of internal variables in integration points \n\n" );
     fprintf( FID, "\n %% for interpretation of internal var. numbers see internalstatetype.h\n");
 
-    
+
     int numVars = this->internalVarsToExport.giveSize();
     // Output the internalVarsToExport-list
     fprintf( FID, "\tIntegrationPointFields.InternalVarsToExport = [" );
@@ -564,7 +577,7 @@ MatlabExportModule :: doOutputIntegrationPointFields(TimeStep *tStep,    FILE *F
     }
     fprintf( FID, "];\n" );
 
-    
+
 
 
     if ( this->IPFieldsElSet > 0 ) {
@@ -576,7 +589,7 @@ MatlabExportModule :: doOutputIntegrationPointFields(TimeStep *tStep,    FILE *F
     FloatArray valueArray;
 
     int nelem = this->elList.giveSize();
-    
+
     fprintf( FID, "\tIntegrationPointFields.Elements = cell(%i,1); \n", nelem );
 
     for ( int ielem = 1; ielem <= nelem; ielem++ ) {
@@ -603,7 +616,7 @@ MatlabExportModule :: doOutputIntegrationPointFields(TimeStep *tStep,    FILE *F
                 // export Gauss point coordinates
                 fprintf( FID, "\tIntegrationPointFields.Elements{%i}.integrationRule{%i}.ip{%i}.coords = [",
                          ielem, i, ip->giveNumber());
-                
+
                 FloatArray coords;
                 el->computeGlobalCoordinates( coords, ip->giveNaturalCoordinates() );
                 for ( int ic = 1; ic <= coords.giveSize(); ic++ ) {
@@ -651,7 +664,6 @@ MatlabExportModule :: giveOutputStream(TimeStep *tStep)
 
     char fext[100];
     sprintf( fext, "_m%d_%d", this->number, tStep->giveNumber() );
-    //fileName += fext;
 
     if ( this->testSubStepOutput() ) {
         // include tStep version in output file name
@@ -696,8 +708,6 @@ MatlabExportModule :: giveOutputStream(TimeStep *tStep)
 
     fileName += ".m";
 
-    // printf("Filename: %s\n", functionname.c_str());
-
     if ( ( answer = fopen(fileName.c_str(), "w") ) == NULL ) {
         OOFEM_ERROR("failed to open file %s", fileName.c_str() );
     }
@@ -719,10 +729,11 @@ MatlabExportModule :: doOutputHomogenizeDofIDs(TimeStep *tStep,    FILE *FID)
         HomQuantities.at(j) = new FloatArray;
     }
 
-
     int nelem = this->elList.giveSize();
     for (int i = 1; i<=nelem; i++) {
         Element *e = this->emodel->giveDomain(1)->giveElement(elList.at(i));
+        FEInterpolation *Interpolation = e->giveInterpolation();
+
         Vol = Vol + e->computeVolumeAreaOrLength();
 
         for ( GaussPoint *gp: *e->giveDefaultIntegrationRulePtr() ) {
@@ -730,7 +741,9 @@ MatlabExportModule :: doOutputHomogenizeDofIDs(TimeStep *tStep,    FILE *FID)
             for (int j=0; j<internalVarsToExport.giveSize(); j++) {
                 FloatArray elementValues;
                 e->giveIPValue(elementValues, gp, (InternalStateType) internalVarsToExport(j), tStep);
-                elementValues.times(gp->giveWeight());
+                double detJ=fabs(Interpolation->giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(e)));
+
+                elementValues.times(gp->giveWeight()*detJ);
                 if (HomQuantities.at(j)->giveSize() == 0) {
                     HomQuantities.at(j)->resize(elementValues.giveSize());
                     HomQuantities.at(j)->zero();
@@ -740,6 +753,8 @@ MatlabExportModule :: doOutputHomogenizeDofIDs(TimeStep *tStep,    FILE *FID)
         }
     }
 
+
+    if (noscaling) Vol=1.0;
 
     for ( std :: size_t i = 0; i < HomQuantities.size(); i ++) {
         FloatArray *thisIS;
@@ -754,7 +769,7 @@ MatlabExportModule :: doOutputHomogenizeDofIDs(TimeStep *tStep,    FILE *FID)
             }
         }
         fprintf(FID, "];\n");
-        // HomQuantities.at(i)->printYourself();
+        delete HomQuantities.at(i);
     }
 
 }

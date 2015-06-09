@@ -14,10 +14,12 @@ set (core_unsorted
     weakperiodicbc.C
     solutionbasedshapefunction.C
     fracturemanager.C
+    neumannmomentload.C
     parallelcontext.C
     contact/contactmanager.C
     contact/contactdefinition.C
     contact/contactelement.C
+    prescribedmean.C
     # Semi sorted:
     errorestimator.C meshqualityerrorestimator.C remeshingcrit.C
     sloangraph.C sloangraphnode.C sloanlevelstruct.C
