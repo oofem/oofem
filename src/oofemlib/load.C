@@ -57,8 +57,15 @@ FloatArray &Load :: giveComponentArray()
 
 
 void
-Load :: computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, const IntArray &dofids, ValueModeType mode)
+Load :: computeValues(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, const IntArray &dofids, ValueModeType mode)
 {
+    ///@note Backwards compatibility with input files that don't specify dofs.
+#if 1
+    if ( this->dofs.giveSize() == 0 ) {
+        this->computeValueAt(answer, tStep, coords, mode);
+    }
+#endif
+
     FloatArray loaded_dofs;
     this->computeValueAt(loaded_dofs, tStep, coords, mode);
     

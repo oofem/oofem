@@ -129,7 +129,7 @@ public:
      * @param dofids List of DOF IDs to evaluate for.
      * @param mode Determines response mode.
      */    
-    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, const IntArray &dofids, ValueModeType mode);
+    virtual void computeValues(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, const IntArray &dofids, ValueModeType mode);
     /**
      * Returns the value of dofExcludeMask corresponding to given index.
      * See the description of dofExcludeMask attribute for more details.
