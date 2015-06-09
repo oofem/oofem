@@ -199,6 +199,7 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
         this->field->initialize(VM_Total, tStep->givePreviousStep(), this->solution, EModelDefaultEquationNumbering() );
         this->field->update(VM_Total, tStep, this->solution, EModelDefaultEquationNumbering() );
     }
+    this->field->applyBoundaryCondition(tStep); ///@todo Temporary hack to override the incorrect values that is set by "update" above. Remove this when that is fixed.
 
     FloatArray incrementOfSolution(neq), externalForces(neq);
 

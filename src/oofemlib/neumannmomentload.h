@@ -45,29 +45,29 @@
 
 /**
  * This class contains a Neumann type boundary condition given as
- * $t=p+g\cdot[x-\bar{x}]\otimes n $
- * where $p$ is a prescribed constant (eg pressure), $g$ is the gradient (pressure gradient), $x$ is the coordinate, $\bar{x}$ is the
+ * @f[ t=p+g\cdot[x-\bar{x}]\otimes n @f]
+ * where @f$ p @f$ is a prescribed constant (eg pressure), @f$ g @f$ is the gradient (pressure gradient), @f$ x @f$ is the coordinate, @f$ \bar{x} @f$ is the
  * centre of the structure and $n$ is the outward pointing normal.
  */
 namespace oofem {
 class OOFEM_EXPORT NeumannMomentLoad : public BoundaryLoad
 {
 private:
-    // Center of structure
+    /// Center of structure
     FloatArray xbar;
-    // Set containing elements used to calculate xbar
+    /// Set containing elements used to calculate xbar
     int cset;
-    // Array containing elements elements in set cset
+    /// Array containing elements elements in set cset
     IntArray celements;
-    // Gradient
+    /// Gradient
     FloatArray g;
-    // Constant
+    /// Constant
     double p;
 
-    // Compute centre of mass for set cset
+    /// Compute centre of mass for set cset
     void computeXbar();
 
-    // Compute normal at center of element
+    /// Compute normal at center of element
     void computeNormal(FloatArray &answer, Element *e, int side);
 public:
     NeumannMomentLoad(int i, Domain * d) : BoundaryLoad(i, d) { }
