@@ -534,7 +534,6 @@ Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
         switch ( edgeLoad->giveApproxOrder() ) {
         case 0:
 
-            //edgeLoad->computeComponentArrayAt(components, tStep, mode);
             if ( edgeLoad->giveFormulationType() == Load :: FT_Entity ) {
                 coords.resize(1);
                 coords.at(1) = 0.0;
@@ -542,8 +541,7 @@ Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
                 coords = * ( this->giveNode(1)->giveCoordinates() );
             }
 
-            edgeLoad->computeValueAt(components, tStep, coords, mode);
-
+            edgeLoad->computeValues(components, tStep, coords, {D_u, D_v, D_w, R_u, R_v, R_w}, mode);
 
             // prepare transformation coeffs
             if ( edgeLoad->giveCoordSystMode() == Load :: CST_Global ) {
@@ -576,11 +574,6 @@ Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
             break;
 
         case 1:
-            /*
-             * coords.at(1) = -1.;
-             * edgeLoad->computeValueAt(components, tStep, coords, mode);
-             */
-
             if ( edgeLoad->giveFormulationType() == Load :: FT_Entity ) {
                 coords.resize(1);
                 coords.at(1) = -1.0;
@@ -588,7 +581,7 @@ Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
                 coords = * ( this->giveNode(1)->giveCoordinates() );
             }
 
-            edgeLoad->computeValueAt(components, tStep, coords, mode);
+            edgeLoad->computeValues(components, tStep, coords, {D_u, D_v, D_w, R_u, R_v, R_w}, mode);
 
 
             // prepare transformation coeffs
@@ -605,10 +598,6 @@ Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
             fmy = components.at(5);
             fmz = components.at(6);
 
-            /*
-             * coords.at(1) = 1.;
-             * edgeLoad->computeValueAt(endComponents, tStep, coords, mode);
-             */
             if ( edgeLoad->giveFormulationType() == Load :: FT_Entity ) {
                 coords.resize(1);
                 coords.at(1) = 1.0;
@@ -616,7 +605,7 @@ Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
                 coords = * ( this->giveNode(2)->giveCoordinates() );
             }
 
-            edgeLoad->computeValueAt(endComponents, tStep, coords, mode);
+            edgeLoad->computeValues(endComponents, tStep, coords, {D_u, D_v, D_w, R_u, R_v, R_w}, mode);
 
             // prepare transformation coeffs
             if ( edgeLoad->giveCoordSystMode() == Load :: CST_Global ) {

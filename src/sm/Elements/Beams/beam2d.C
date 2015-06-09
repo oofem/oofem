@@ -432,7 +432,7 @@ Beam2d :: giveEndForcesVector(FloatArray &answer, TimeStep *tStep)
 void
 Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, TimeStep *tStep, ValueModeType mode)
 {
-    FloatArray coords, components, help;
+    FloatArray coords, components, components2;
     double l = this->computeLength();
     double kappa = this->giveKappaCoeff(tStep);
     double fx, fz, fm, dfx, dfz, dfm;
@@ -446,7 +446,6 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
 
         answer.resize(6);
         answer.zero();
-        //  edgeLoad->computeComponentArrayAt(components, tStep, mode);
 
         // prepare transformation coeffs
         sine = sin( this->givePitch() );
@@ -462,7 +461,7 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
                 coords = * ( this->giveNode(1)->giveCoordinates() );
             }
 
-            edgeLoad->computeValueAt(components, tStep, coords, mode);
+            edgeLoad->computeValues(components, tStep, coords, {D_u, D_w, R_v}, mode);
 
             if ( edgeLoad->giveCoordSystMode() == Load :: CST_Global ) {
                 fx = cosine * components.at(1) + sine *components.at(2);
@@ -486,30 +485,11 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
             components.resize(6);
 
             if ( edgeLoad->giveFormulationType() == Load :: FT_Entity ) {
-                coords.resize(1);
-                coords.at(1) = -1.0;
-                edgeLoad->computeValueAt(help, tStep, coords, mode);
-                for ( int i = 1; i <= 3; i++ ) {
-                    components.at(i) = help.at(i);
-                }
-
-                coords.at(1) = 1.0;
-                edgeLoad->computeValueAt(help, tStep, coords, mode);
-                for ( int i = 1; i <= 3; i++ ) {
-                    components.at(i + 3) = help.at(i);
-                }
+                edgeLoad->computeValues(components, tStep, {-1.0}, {D_u, D_w, R_v}, mode);
+                edgeLoad->computeValues(components2, tStep, {1.0}, {D_u, D_w, R_v}, mode);
             } else {
-                coords = * ( this->giveNode(1)->giveCoordinates() );
-                edgeLoad->computeValueAt(help, tStep, coords, mode);
-                for ( int i = 1; i <= 3; i++ ) {
-                    components.at(i) = help.at(i);
-                }
-
-                coords = * ( this->giveNode(2)->giveCoordinates() );
-                edgeLoad->computeValueAt(help, tStep, coords, mode);
-                for ( int i = 1; i <= 3; i++ ) {
-                    components.at(i + 3) = help.at(i);
-                }
+                edgeLoad->computeValues(components, tStep, *this->giveNode(1)->giveCoordinates(), {D_u, D_w, R_v}, mode);
+                edgeLoad->computeValues(components2, tStep, *this->giveNode(2)->giveCoordinates(), {D_u, D_w, R_v}, mode);
             }
 
 
@@ -518,16 +498,16 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
                 fz = -sine *components.at(1) + cosine *components.at(2);
                 fm = components.at(3);
 
-                dfx = cosine * ( components.at(4) - components.at(1) ) + sine * ( components.at(5) - components.at(2) );
-                dfz = -sine * ( components.at(4) - components.at(1) ) + cosine * ( components.at(5) - components.at(2) );
-                dfm = components.at(6) - components.at(3);
+                dfx = cosine * ( components2.at(1) - components.at(1) ) + sine * ( components2.at(2) - components.at(2) );
+                dfz = -sine * ( components2.at(1) - components.at(1) ) + cosine * ( components2.at(2) - components.at(2) );
+                dfm = components2.at(3) - components.at(3);
             } else {
                 fx = components.at(1);
                 fz = components.at(2);
                 fm = components.at(3);
-                dfx = components.at(4) - components.at(1);
-                dfz = components.at(5) - components.at(2);
-                dfm = components.at(6) - components.at(3);
+                dfx = components2.at(1) - components.at(1);
+                dfz = components2.at(2) - components.at(2);
+                dfm = components2.at(3) - components.at(3);
             }
 
             answer.at(1) = fx * l / 2. + dfx * l / 6.;
