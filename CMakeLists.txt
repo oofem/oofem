@@ -78,6 +78,7 @@ option (USE_OPENMP "Compile with OpenMP support (for parallel assembly)" OFF)
 option (USE_DSS "Enable DSS module" OFF) # No reason to use this
 option (USE_IML "Enable iml++ solvers" OFF) # or this
 option (USE_SPOOLES "Enable SPOOLES-solver" OFF) # or this
+option (USE_MKLPARDISO "Enable MKLPARDISO solver support" OFF)
 option (USE_PETSC "Enable PETSc support (required for parallel)" OFF)
 option (USE_SLEPC "Enable SLEPc support" OFF)
 option (USE_LAPACK "Use LAPACK" OFF)
@@ -272,9 +273,28 @@ if (USE_METIS)
     endif ()
     list (APPEND EXT_LIBS ${METIS_LIB})
     list (APPEND MODULE_LIST "metis")
-    add_definitions (-D__METIS_MODULE)
 endif ()
 
+if (USE_MKLPARDISO)
+    # Find the actual libraries:
+    list(APPEND MKL_LIBS "mkl_core" "mkl_gf_lp64" "mkl_gnu_thread" "pthread")
+    foreach (f ${MKL_LIBS})
+        if (MKL_DIR)
+            find_library (${f}_LIB ${f} PATH "${MKL_DIR}/mkl/lib/intel64/" DOC "MKLPARDISO (library)")
+            include_directories ("${MKL_DIR}/mkl/include")
+        else ()
+            find_library (${f}_LIB ${f} HINTS "/opt/intel/composerxe/mkl/lib/intel64/" DOC "MKLPARDISO (library)")
+            include_directories ("/opt/intel/composerxe/mkl/include")
+        endif ()
+        if (${${f}_LIB} STREQUAL "${f}_LIB-NOTFOUND")
+            message (FATAL_ERROR "MKLPARDISO library not found")
+        endif ()
+        list (APPEND EXT_LIBS ${${f}_LIB})
+    endforeach ()
+
+    #list (APPEND EXT_LIBS ${MKLPARDISO_LIB})
+    list (APPEND MODULE_LIST "MKLPARDISO")
+endif ()
 
 if (USE_SLEPC)
     if (SLEPC_DIR)

@@ -125,6 +125,10 @@ public:
     virtual SparseMtrxType giveType() const { return SMT_CompCol; }
     virtual bool isAsymmetric() const { return true; }
 
+    // Breaks encapsulation, but access is needed for PARDISO solver;
+    const FloatArray &giveValues() { return val_; }
+    const IntArray &giveRowIndex() { return rowind_; }
+    const IntArray &giveColPtr() { return colptr_; }
 
     const double &val(int i) const { return val_(i); }
     const int &row_ind(int i) const { return rowind_(i); }
