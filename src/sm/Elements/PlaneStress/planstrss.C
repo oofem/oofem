@@ -85,7 +85,7 @@ PlaneStress2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, i
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
 
     answer.resize(3, 8);
     answer.zero();
@@ -96,7 +96,7 @@ PlaneStress2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, i
     }
 
 #ifdef  PlaneStress2d_reducedShearIntegration
-    this->interpolation.evaldNdx( dnx, {0., 0.}, FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, {0., 0.}, *this->giveCellGeometryWrapper() );
 #endif
 
     for ( int i = 1; i <= 4; i++ ) {
@@ -115,7 +115,7 @@ PlaneStress2d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
 
     answer.resize(4, 8);
 
@@ -125,7 +125,7 @@ PlaneStress2d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     }
 
 #ifdef  PlaneStress2d_reducedShearIntegration
-    this->interpolation.evaldNdx( dnx, {0., 0.}, FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, {0., 0.}, *this->giveCellGeometryWrapper() );
 #endif
 
     for ( int i = 1; i <= 4; i++ ) {
@@ -220,7 +220,7 @@ PlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrac
 
         // gradient of function phi at the current GP
         FloatMatrix dnx;
-        this->interpolation.evaldNdx( dnx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+        this->interpolation.evaldNdx( dnx, gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
         FloatArray gradPhi(2);
         gradPhi.zero();
         for ( int i = 1; i <= 4; i++ ) {
@@ -349,16 +349,16 @@ void PlaneStress2d :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
     EASValsSetFillStyle(FILL_HOLLOW);
     p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveCoordinate(1);
     p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveCoordinate(2);
-    p [ 0 ].z = 0.;
+    p [ 0 ].z = ( FPNum ) this->giveNode(1)->giveCoordinate(3);
     p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveCoordinate(1);
     p [ 1 ].y = ( FPNum ) this->giveNode(2)->giveCoordinate(2);
-    p [ 1 ].z = 0.;
+    p [ 1 ].z = ( FPNum ) this->giveNode(2)->giveCoordinate(3);
     p [ 2 ].x = ( FPNum ) this->giveNode(3)->giveCoordinate(1);
     p [ 2 ].y = ( FPNum ) this->giveNode(3)->giveCoordinate(2);
-    p [ 2 ].z = 0.;
+    p [ 2 ].z = ( FPNum ) this->giveNode(3)->giveCoordinate(3);
     p [ 3 ].x = ( FPNum ) this->giveNode(4)->giveCoordinate(1);
     p [ 3 ].y = ( FPNum ) this->giveNode(4)->giveCoordinate(2);
-    p [ 3 ].z = 0.;
+    p [ 3 ].z = ( FPNum ) this->giveNode(4)->giveCoordinate(3); 
 
     go =  CreateQuad3D(p);
     EGWithMaskChangeAttributes(WIDTH_MASK | FILL_MASK | COLOR_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK | LAYER_MASK, go);
@@ -385,16 +385,16 @@ void PlaneStress2d :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tS
     EASValsSetFillStyle(FILL_HOLLOW);
     p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(1, tStep, defScale);
     p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(2, tStep, defScale);
-    p [ 0 ].z = 0.;
+    p [ 0 ].z = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(3, tStep, defScale);
     p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveUpdatedCoordinate(1, tStep, defScale);
     p [ 1 ].y = ( FPNum ) this->giveNode(2)->giveUpdatedCoordinate(2, tStep, defScale);
-    p [ 1 ].z = 0.;
+    p [ 1 ].z = ( FPNum ) this->giveNode(2)->giveUpdatedCoordinate(3, tStep, defScale);
     p [ 2 ].x = ( FPNum ) this->giveNode(3)->giveUpdatedCoordinate(1, tStep, defScale);
     p [ 2 ].y = ( FPNum ) this->giveNode(3)->giveUpdatedCoordinate(2, tStep, defScale);
-    p [ 2 ].z = 0.;
+    p [ 2 ].z = ( FPNum ) this->giveNode(3)->giveUpdatedCoordinate(3, tStep, defScale);
     p [ 3 ].x = ( FPNum ) this->giveNode(4)->giveUpdatedCoordinate(1, tStep, defScale);
     p [ 3 ].y = ( FPNum ) this->giveNode(4)->giveUpdatedCoordinate(2, tStep, defScale);
-    p [ 3 ].z = 0.;
+    p [ 3 ].z = ( FPNum ) this->giveNode(4)->giveUpdatedCoordinate(3, tStep, defScale);
 
     go =  CreateQuad3D(p);
     EGWithMaskChangeAttributes(WIDTH_MASK | FILL_MASK | COLOR_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK | LAYER_MASK, go);
@@ -525,11 +525,11 @@ void PlaneStress2d :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
                 defScale = gc.getDefScale();
                 pp [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, defScale);
                 pp [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, defScale);
-                pp [ i ].z = 0.;
+                pp [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(3, tStep, defScale);
             } else {
                 pp [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
                 pp [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
-                pp [ i ].z = 0.;
+                pp [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(3);
             }
         }
 

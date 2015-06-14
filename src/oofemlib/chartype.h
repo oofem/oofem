@@ -64,7 +64,27 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(ExternalForcesVector, 150)                                       \
     ENUM_ITEM_WITH_VALUE(InternalForcesVector, 151)                                       \
     ENUM_ITEM_WITH_VALUE(LastEquilibratedInternalForcesVector, 152)                       \
-    ENUM_ITEM_WITH_VALUE(InertiaForcesVector, 160)
+    ENUM_ITEM_WITH_VALUE(InertiaForcesVector, 160) \
+    /* PFEM */	\
+    ENUM_ITEM_WITH_VALUE(AuxVelocityLhs, 200)                                    \
+    ENUM_ITEM_WITH_VALUE(VelocityLhs, 201)                                       \
+    ENUM_ITEM_WITH_VALUE(LoadVector, 202)                                        \
+      /*for pressureLhs see CBS */					         \
+    ENUM_ITEM_WITH_VALUE(PressureGradientMatrix, 203)                            \
+    ENUM_ITEM_WITH_VALUE(DivergenceMatrix, 204)					 \
+    ENUM_ITEM_WITH_VALUE(VelocityLaplacianMatrix, 205)                           \
+    ENUM_ITEM_WITH_VALUE(PressureLaplacianMatrix, 206)	                         \
+    ENUM_ITEM_WITH_VALUE(StabilizationMassMatrix, 207)	                         \
+    /* PFEM vectors */  \
+    ENUM_ITEM_WITH_VALUE(PressureGradientVector, 208)		                 \
+    ENUM_ITEM_WITH_VALUE(MassVelocityVector, 209)		                 \
+    ENUM_ITEM_WITH_VALUE(MassAuxVelocityVector, 210)		                 \
+    ENUM_ITEM_WITH_VALUE(LaplacePressureVector, 211)		                 \
+    ENUM_ITEM_WITH_VALUE(LaplaceVelocityVector, 212)		                 \
+    ENUM_ITEM_WITH_VALUE(DivergenceAuxVelocityVector, 213)                       \
+    ENUM_ITEM_WITH_VALUE(DivergenceVelocityVector, 214)		                 \
+    ENUM_ITEM_WITH_VALUE(DivergenceDeviatoricStressVector, 215)
+
 
 enum CharType {
     CharType_DEF

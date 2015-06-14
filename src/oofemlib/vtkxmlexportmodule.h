@@ -64,6 +64,7 @@
 #define _IFT_VTKXMLExportModule_stype "stype"
 #define _IFT_VTKXMLExportModule_regionsets "regionsets"
 #define _IFT_VTKXMLExportModule_timescale "timescale"
+#define _IFT_VTKXMLExportModule_particleexportflag "particleexportflag"
 //@}
 
 namespace oofem {
@@ -173,6 +174,8 @@ protected:
 
     /// Scaling time in output, e.g. conversion from seconds to hours
     double timeScale;
+	/// particle export flag
+	bool particleExportFlag;
 
     /// Buffer for earlier time steps exported to *.pvd file.
     std :: list< std :: string >pvdBuffer;
@@ -321,7 +324,8 @@ protected:
      * The i-th value contains the corresponding global node number.
      */
     int initRegionNodeNumbering(IntArray &mapG2L, IntArray &mapL2G,
-                                int &regionDofMans, int &totalcells,
+                                int &regionDofMans, 
+				int &totalcells,
                                 Domain *domain, TimeStep *tStep, int reg);
     /// Returns number of regions (aka regionSets)
     int giveNumberOfRegions();

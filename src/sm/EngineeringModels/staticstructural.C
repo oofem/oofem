@@ -262,6 +262,7 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
     NM_Status status = this->nMethod->solve(*this->stiffnessMatrix,
                                             externalForces,
                                             NULL,
+                                            NULL,
                                             this->solution,
                                             incrementOfSolution,
                                             this->internalForces,

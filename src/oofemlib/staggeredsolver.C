@@ -149,7 +149,7 @@ StaggeredSolver :: giveTotalLocationArray(IntArray &condensedLocationArray, cons
 
 
 NM_Status
-StaggeredSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
+StaggeredSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0, FloatArray *iR,
                   FloatArray &Xtotal, FloatArray &dXtotal, FloatArray &F,
                   const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                   int &nite, TimeStep *tStep)

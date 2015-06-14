@@ -579,6 +579,12 @@ public:
     void setDofManagers(const IntArray &dmans);
 
     /**
+     * Sets receiver bodyLoadArray.
+     * @param bodyLoads Array with body loads indices.
+     */
+    void setBodyLoads(const IntArray &bodyLoads);
+
+    /**
      * Sets integration rules.
      * @param irlist List of integration rules.
      */

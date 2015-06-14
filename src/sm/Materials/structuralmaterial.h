@@ -130,7 +130,7 @@ public:
      * @param n Material number.
      * @param d Domain to which new material will belong.
      */
-    StructuralMaterial(int n, Domain * d);
+    StructuralMaterial(int n, Domain *d);
     /// Destructor.
     virtual ~StructuralMaterial() { }
 
@@ -175,6 +175,7 @@ public:
     virtual void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
     /// Iteratively calls giveRealStressVector_3d to find the stress controlled equal to zero·
     virtual void giveRealStressVector_StressControl(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, const IntArray &strainControl, TimeStep *tStep);
+    virtual void giveRealStressVector_ShellStressControl(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, const IntArray &strainControl, TimeStep *tStep);
     /// Default implementation relies on giveRealStressVector_StressControl
     virtual void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
     /// Default implementation relies on giveRealStressVector_StressControl
@@ -187,9 +188,11 @@ public:
     virtual void giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
     /// Default implementation relies on giveRealStressVector_StressControl
     virtual void giveRealStressVector_Fiber(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
+    virtual void giveRealStressVector_Lattice2d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
+    virtual void giveRealStressVector_Lattice3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
     /// Default implementation is not provided
     virtual void giveRealStressVector_2dPlateSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
-    
+
     /**
      * @name Methods associated with the First PK stress tensor.
      * Computes the first Piola-Kirchhoff stress vector for given total deformation gradient and integration point.
@@ -575,6 +578,31 @@ public:
     virtual void giveFiberStiffMtrx(FloatMatrix &answer,
                                     MatResponseMode mmode, GaussPoint *gp,
                                     TimeStep *tStep);
+
+
+    /**
+     * Method for computing 2d lattice stiffness matrix of receiver.
+     * @param answer Stiffness matrix.
+     * @param mmode Material response mode.
+     * @param gp Integration point, which load history is used.
+     * @param tStep Time step (most models are able to respond only when tStep is current time step).
+     */
+    virtual void give2dLatticeStiffMtrx(FloatMatrix &answer,
+                                        MatResponseMode mmode, GaussPoint *gp,
+                                        TimeStep *tStep);
+
+    /**
+     * Method for computing 3d lattice stiffness matrix of receiver.
+     * @param answer Stiffness matrix.
+     * @param mmode Material response mode.
+     * @param gp Integration point, which load history is used.
+     * @param tStep Time step (most models are able to respond only when tStep is current time step).
+     */
+    virtual void give3dLatticeStiffMtrx(FloatMatrix &answer,
+                                        MatResponseMode mmode, GaussPoint *gp,
+                                        TimeStep *tStep);
+
+
     /**
      * Method for computing stiffness matrix of plate subsoil model.
      * Default method is emty; the implementation should be provided by the particular model.

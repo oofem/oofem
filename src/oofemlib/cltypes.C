@@ -95,6 +95,11 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_DeviatoricStrain:
     case IST_DeviatoricStress:
     case IST_CauchyStressTensor:
+    case IST_AutogenousShrinkageTensor:
+    case IST_DryingShrinkageTensor:
+    case IST_TotalShrinkageTensor:
+    case IST_ThermalStrainTensor:
+    case IST_CreepStrainTensor:
         return ISVT_TENSOR_S3;
 
     case IST_BeamForceMomentumTensor:
@@ -175,6 +180,8 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_XFEMLevelSetPhi:
     case IST_Maturity:
     case IST_CrossSectionNumber:
+    case IST_CrackWidth:
+    case IST_TensileStrength:
         return ISVT_SCALAR;
 
     default:
@@ -207,7 +214,7 @@ InternalStateValueType giveInternalStateValueType(UnknownType type)
 {
     if ( ( type == DisplacementVector ) || ( type == EigenVector ) || ( type == VelocityVector ) || ( type == DirectorField ) ) {
         return ISVT_VECTOR;
-    } else if ( ( type == FluxVector ) || ( type == PressureVector ) || ( type == Temperature ) || (type == Humidity) ) {
+    } else if ( ( type == FluxVector ) || ( type == PressureVector ) || ( type == Temperature ) || (type == Humidity) || (type == DeplanationFunction) ) {
         return ISVT_SCALAR;
     } else {
         OOFEM_ERROR( "unsupported UnknownType %s", __UnknownTypeToString(type) );

@@ -74,23 +74,23 @@ PropagationLawCrackPrescribedDir 1 angle 0.0 incrementLength 0.55
 ## Node displacements
 #NODE tStep 3 number 7 dof 1 unknown d value 4.50638159e-05
 #NODE tStep 3 number 7 dof 2 unknown d value -1.86660437e-05
-#NODE tStep 3 number 7 dof 23 unknown d value -6.27467174e-05
-#NODE tStep 3 number 7 dof 24 unknown d value 9.16976083e-05
-#NODE tStep 3 number 7 dof 25 unknown d value -3.11213305e-05
-#NODE tStep 3 number 7 dof 26 unknown d value 1.43042924e-06
-#NODE tStep 3 number 7 dof 27 unknown d value -3.61969364e-06
-#NODE tStep 3 number 7 dof 28 unknown d value 3.00146746e-05
-#NODE tStep 3 number 7 dof 29 unknown d value -5.01824534e-05
-#NODE tStep 3 number 7 dof 30 unknown d value -5.90330599e-05
+#NODE tStep 3 number 7 dof 500 unknown d value -6.27467174e-05
+#NODE tStep 3 number 7 dof 501 unknown d value 9.16976083e-05
+#NODE tStep 3 number 7 dof 502 unknown d value -3.11213305e-05
+#NODE tStep 3 number 7 dof 503 unknown d value 1.43042924e-06
+#NODE tStep 3 number 7 dof 504 unknown d value -3.61969364e-06
+#NODE tStep 3 number 7 dof 505 unknown d value 3.00146746e-05
+#NODE tStep 3 number 7 dof 506 unknown d value -5.01824534e-05
+#NODE tStep 3 number 7 dof 507 unknown d value -5.90330599e-05
 ##
 #NODE tStep 3 number 12 dof 1 unknown d value 2.03706640e-05
 #NODE tStep 3 number 12 dof 2 unknown d value -2.05723734e-04
-#NODE tStep 3 number 12 dof 23 unknown d value -2.09874544e-05
-#NODE tStep 3 number 12 dof 24 unknown d value 2.05774314e-04
+#NODE tStep 3 number 12 dof 500 unknown d value -2.09874544e-05
+#NODE tStep 3 number 12 dof 501 unknown d value 2.05774314e-04
 ##
 #NODE tStep 3 number 15 dof 1 unknown d value 2.58181092e-05
 #NODE tStep 3 number 15 dof 2 unknown d value -1.56830857e-04
-#NODE tStep 3 number 15 dof 23 unknown d value -2.37294598e-05
-#NODE tStep 3 number 15 dof 24 unknown d value 1.57563142e-04
+#NODE tStep 3 number 15 dof 500 unknown d value -2.37294598e-05
+#NODE tStep 3 number 15 dof 501 unknown d value 1.57563142e-04
 #%END_CHECK%
 

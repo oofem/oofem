@@ -107,7 +107,7 @@ TrPlanestressRotAllman :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMat
 
     this->computeLocalNodalCoordinates(lxy); // get ready for tranformation into 3d
     this->qinterpolation.evalN( n, iLocCoord, FEIVertexListGeometryWrapper(lxy) );
-    this->interp.evalN( L, iLocCoord, FEIElementGeometryWrapper(this) );
+    this->interp.evalN( L, iLocCoord, FEIVertexListGeometryWrapper(lxy));
 
     answer.at(1, 1) = answer.at(2, 2) = n.at(1) + n.at(4) / 2. + n.at(6) / 2.;
     answer.at(1, 4) = answer.at(2, 5) = n.at(2) + n.at(4) / 2. + n.at(5) / 2.;

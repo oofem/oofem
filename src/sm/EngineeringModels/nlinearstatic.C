@@ -200,6 +200,11 @@ NonLinearStatic :: initializeFrom(InputRecord *ir)
     nonlocalStiffnessFlag = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, nonlocalStiffnessFlag, _IFT_NonLinearStatic_nonlocstiff);
 
+    updateElasticStiffnessFlag = false;
+    if ( ir->hasField(_IFT_NonLinearStatic_updateElasticStiffnessFlag) ) {
+      updateElasticStiffnessFlag = true;
+    }
+    
 #ifdef __PARALLEL_MODE
     if ( isParallel() ) {
         //commBuff = new CommunicatorBuff (this->giveNumberOfProcesses(), CBT_dynamic);
@@ -267,6 +272,17 @@ double NonLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeStep *tSt
     return 0.0;
 }
 
+TimeStep *NonLinearStatic :: giveSolutionStepWhenIcApply()
+{
+    if ( !stepWhenIcApply ) {
+        int inin = giveNumberOfTimeStepWhenIcApply();
+	//        int nFirst = giveNumberOfFirstStep();
+        stepWhenIcApply.reset(new TimeStep(inin, this, 0, -deltaT, deltaT, 0));
+    }
+
+    return stepWhenIcApply.get();
+}
+
 
 TimeStep *NonLinearStatic :: giveNextStep()
 {
@@ -293,6 +309,10 @@ TimeStep *NonLinearStatic :: giveNextStep()
                 OOFEM_ERROR("no next step available, mStepNum=%d > nMetaSteps=%d", mStepNum, nMetaSteps);
             }
         }
+    } else {
+        // first step -> generate initial step
+        TimeStep *newStep = giveSolutionStepWhenIcApply();
+        currentStep.reset(new TimeStep(*newStep));
     }
 
     previousStep = std :: move(currentStep);
@@ -478,11 +498,12 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
     OOFEM_LOG_RELEVANT( "\n\nSolving       [step number %5d.%d, time = %e]\n\n", tStep->giveNumber(), tStep->giveVersion(), tStep->giveIntrinsicTime() );
 #endif
 
+    FloatArray extrapolatedForces;
+    FloatArray *extrapolatedForcesPtr = &extrapolatedForces;
     if ( this->initialGuessType == IG_Tangent ) {
 #ifdef VERBOSE
         OOFEM_LOG_RELEVANT("Computing initial guess\n");
 #endif
-        FloatArray extrapolatedForces;
         this->assembleExtrapolatedForces( extrapolatedForces, tStep, TangentStiffnessMatrix, this->giveDomain(di) );
         extrapolatedForces.negated();
 
@@ -492,25 +513,30 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
         linSolver->solve(*stiffnessMatrix, extrapolatedForces, incrementOfDisplacement);
         OOFEM_LOG_RELEVANT("initial guess found\n");
         totalDisplacement.add(incrementOfDisplacement);
+    } else if ( this->initialGuessType == IG_Original ) {
+        incrementOfDisplacement.zero();
+        this->assembleExtrapolatedForces( extrapolatedForces, tStep, ElasticStiffnessMatrix, this->giveDomain(di) );
+        extrapolatedForces.negated();
+        
     } else if ( this->initialGuessType != IG_None ) {
         OOFEM_ERROR("Initial guess type: %d not supported", initialGuessType);
     } else {
         incrementOfDisplacement.zero();
+        extrapolatedForcesPtr = NULL;
     }
 
     //totalDisplacement.printYourself();
     if ( initialLoadVector.isNotEmpty() ) {
-        numMetStatus = nMethod->solve(*stiffnessMatrix, incrementalLoadVector, & initialLoadVector,
+      numMetStatus = nMethod->solve(*stiffnessMatrix, incrementalLoadVector, & initialLoadVector, extrapolatedForcesPtr,
                                       totalDisplacement, incrementOfDisplacement, internalForces,
                                       internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, tStep);
     } else {
-        numMetStatus = nMethod->solve(*stiffnessMatrix, incrementalLoadVector, NULL,
+      numMetStatus = nMethod->solve(*stiffnessMatrix, incrementalLoadVector, NULL, extrapolatedForcesPtr,
                                       totalDisplacement, incrementOfDisplacement, internalForces,
                                       internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, tStep);
     }
     ///@todo Martin: ta bort!!!
     //this->updateComponent(tStep, NonLinearLhs, this->giveDomain(di));
-
     ///@todo Use temporary variables. updateYourself() should set the final values, while proceedStep should be callable multiple times for each step (if necessary). / Mikael
     OOFEM_LOG_RELEVANT("Equilibrium reached at load level = %f in %d iterations\n", cumulatedLoadLevel + loadLevel, currentIterations);
     prevStepLength =  currentStepLength;
@@ -543,7 +569,7 @@ NonLinearStatic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
                            EModelDefaultEquationNumbering(), d);
             initFlag = 0;
         } else if ( ( stiffMode == nls_elasticStiffness ) && ( initFlag ||
-                                                              ( this->giveMetaStep( tStep->giveMetaStepNumber() )->giveFirstStepNumber() == tStep->giveNumber() ) ) ) {
+                                                              ( this->giveMetaStep( tStep->giveMetaStepNumber() )->giveFirstStepNumber() == tStep->giveNumber() ) || (updateElasticStiffnessFlag) ) ) {
 #ifdef VERBOSE
             OOFEM_LOG_DEBUG("Assembling elastic stiffness matrix\n");
 #endif

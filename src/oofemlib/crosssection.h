@@ -67,6 +67,9 @@ enum CrossSectionProperty {
     CS_TopZCoord,      ///< Top z coordinate
     CS_BottomZCoord,   ///< Bottom z coordinate
     CS_NumLayers,      ///< Number of layers that makes up the cross section
+    CS_DirectorVectorX, ///< Director vector component in x-axis
+    CS_DirectorVectorY, ///< Director vector component in y-axis
+    CS_DirectorVectorZ, ///< Director vector component in z-axis
 };
 
 /**
@@ -115,7 +118,7 @@ public:
      * @param n Cross section number.
      * @param d Domain.
      */
-    CrossSection(int n, Domain * d);
+    CrossSection(int n, Domain *d);
     /// Destructor.
     virtual ~CrossSection();
 

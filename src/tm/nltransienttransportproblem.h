@@ -65,6 +65,7 @@ protected:
     int nsmax;
     nlttp_ModeType NR_Mode;
     int MANRMSteps;
+    int currentIterations;
 
 public:
     /// Constructor.
@@ -85,6 +86,9 @@ public:
     virtual fMode giveFormulation() { return nonLinFormulation; }
     virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep);
     virtual void updateDofUnknownsDictionary(DofManager *dman, TimeStep *tStep);
+
+    virtual int giveCurrentNumberOfIterations() {return currentIterations;}
+
     /**
      * Copy unknowns in DOF's from previous to current position.
      * @param mode What the unknown describes (increment, total value etc.).

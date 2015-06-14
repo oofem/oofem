@@ -527,6 +527,7 @@ EngngModel :: solveYourself()
             this->timer.startTimer(EngngModelTimer :: EMTT_SolutionStepTimer);
             this->timer.initTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
 
+			this->preInitializeNextStep();
             this->giveNextStep();
 
             // renumber equations if necessary. Ensure to call forceEquationNumbering() for staggered problems
@@ -535,7 +536,8 @@ EngngModel :: solveYourself()
             }
 
             OOFEM_LOG_DEBUG("Number of equations %d\n", this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering()) );
-            
+
+            this->initializeYourself( this->giveCurrentStep() );
             this->solveYourselfAt( this->giveCurrentStep() );
             this->updateYourself( this->giveCurrentStep() );
 
@@ -1713,7 +1715,7 @@ void EngngModel :: drawNodes(oofegGraphicContext &gc)
 {
     Domain *d = this->giveDomain( gc.getActiveDomain() );
     TimeStep *tStep = this->giveCurrentStep();
-    for ( auto &dman : d->giveElements() ) {
+    for ( auto &dman : d->giveDofManagers() ) {
         dman->drawYourself(gc, tStep);
     }
 }

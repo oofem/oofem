@@ -578,7 +578,7 @@ void Domain :: setSet(int i, Set *obj) { setList[i-1].reset(obj); }
 void Domain :: setXfemManager(XfemManager *ipXfemManager) { xfemManager.reset(ipXfemManager); }
 
 void Domain :: clearBoundaryConditions() { bcList.clear(); }
-
+void Domain :: clearElements() { elementList.clear(); }
 int
 Domain :: instanciateYourself(DataReader *dr)
 // Creates all objects mentioned in the data file.
@@ -1120,6 +1120,14 @@ Domain :: giveDefaultNodeDofIDArry()
         defaultNodeDofIDArry = {D_u, D_v, D_w, W_u, W_v, W_w, Gamma};
     }  else if ( dType == _2dLatticeMassTransportMode ) {
         defaultNodeDofIDArry = {P_f};
+    }  else if ( dType == _3dLatticeMassTransportMode ) {
+        defaultNodeDofIDArry = {P_f};
+    }  else if ( dType == _3dLatticeMode ) {
+        defaultNodeDofIDArry = {D_u, D_v, D_w, R_u, R_v, R_w};
+    }  else if ( dType == _2dLatticeHeatTransferMode ) {
+        defaultNodeDofIDArry = {T_f};
+    }  else if ( dType == _3dLatticeHeatTransferMode ) {
+        defaultNodeDofIDArry = {T_f};
     }  else if ( dType == _WarpingMode ) {
         defaultNodeDofIDArry = {D_w};
     } else {
@@ -1185,6 +1193,14 @@ Domain :: resolveDomainDofsDefaults(const char *typeName)
         dType = _3dDirShellMode;
     } else if  ( !strncmp(typeName, "2dmasslatticetransport", 22) ) {
         dType = _2dLatticeMassTransportMode;
+    } else if  ( !strncmp(typeName, "3dlattice", 9) ) {
+        dType = _3dLatticeMode;
+    } else if  ( !strncmp(typeName, "3dmasslatticetransport", 22) ) {
+        dType = _3dLatticeMassTransportMode;
+    } else if  ( !strncmp(typeName, "2dheatlattice", 13) ) {
+        dType = _3dLatticeMassTransportMode;
+    } else if  ( !strncmp(typeName, "3dheatlattice", 13) ) {
+        dType = _3dLatticeMassTransportMode;
     } else if  ( !strncmp(typeName, "3d", 2) ) {
         dType = _3dMode;
     } else if  ( !strncmp(typeName, "warping", 7) ) {
@@ -1870,6 +1886,7 @@ Domain :: renumberDofManData(DomainTransactionManager *tm)
 {
     SpecificEntityRenumberingFunctor< Domain > domainGToLFunctor(this, &Domain :: LB_giveUpdatedGlobalNumber);
     SpecificEntityRenumberingFunctor< Domain > domainLToLFunctor(this, &Domain :: LB_giveUpdatedLocalNumber);
+
 
     for ( auto &map: dmanMap ) {
         if ( tm->dofmanTransactions.find(map.first) != tm->dofmanTransactions.end() ) {

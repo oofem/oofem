@@ -200,18 +200,10 @@ TimeStep *DIIDynamic :: giveNextStep()
     return currentStep.get();
 }
 
-void DIIDynamic :: solveYourself()
+void DIIDynamic :: initializeYourself(TimeStep *tStep)
 {
-    StructuralEngngModel :: solveYourself();
-}
-
-void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
-{
-    // Determine the constants.
-    this->determineConstants(tStep);
-
     Domain *domain = this->giveDomain(1);
-    int neq =  this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
+	int neq =  this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
 
     if ( tStep->isTheFirstStep() ) {
         TimeStep *stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0,
@@ -250,6 +242,22 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
 
         delete stepWhenIcApply;
     }   // End of initialization.
+}
+
+void DIIDynamic :: solveYourself()
+{
+    StructuralEngngModel :: solveYourself();
+}
+
+void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
+{
+    // Determine the constants.
+    this->determineConstants(tStep);
+
+    Domain *domain = this->giveDomain(1);
+    int neq =  this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
+
+    
 
     if ( initFlag ) {
 #ifdef VERBOSE
@@ -283,7 +291,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
         initFlag = 0;
     }
 
-    if ( ( previousStep != NULL ) && ( tStep->giveTimeDiscretization() != previousStep->giveTimeDiscretization() ) ) {
+    if ( ( tStep->givePreviousStep() != NULL ) && ( tStep->giveTimeDiscretization() != tStep->givePreviousStep()->giveTimeDiscretization() ) ) {
 #ifdef VERBOSE
         OOFEM_LOG_DEBUG("Assembling stiffness matrix\n");
 #endif
@@ -481,9 +489,8 @@ DIIDynamic :: assembleLoadVector(FloatArray &_loadVector, Domain *domain, ValueM
 void
 DIIDynamic :: determineConstants(TimeStep *tStep)
 {
-    if ( currentStep->isTheFirstStep() &&
-        ( initialTimeDiscretization == TD_ThreePointBackward ) ) {
-        currentStep->setTimeDiscretization(TD_TwoPointBackward);
+    if ( this->giveCurrentStep()->isTheFirstStep() && initialTimeDiscretization == TD_ThreePointBackward ) {
+        this->giveCurrentStep()->setTimeDiscretization( TD_TwoPointBackward );
     }
 
     deltaT = tStep->giveTimeIncrement();

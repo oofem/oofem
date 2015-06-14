@@ -63,6 +63,7 @@ Load :: computeValues(FloatArray &answer, TimeStep *tStep, const FloatArray &coo
 #if 1
     if ( this->dofs.giveSize() == 0 ) {
         this->computeValueAt(answer, tStep, coords, mode);
+        return;
     }
 #endif
 

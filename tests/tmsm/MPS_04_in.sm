@@ -1,0 +1,88 @@
+MPS_04_out.sm
+# 
+tests on creep with damage
+#
+# element 1: drying creep, staggered problem, p = infinity (zero size effect) or equivalently \tilde{p} = 1, zero shrinkage, no fracture
+# element 2: drying creep, staggered problem, p = infinity (zero size effect) or equivalently \tilde{p} = 1, zero shrinkage, fib parameters
+# element 3: drying creep, staggered problem, p = infinity (zero size effect) or equivalently \tilde{p} = 1, zero shrinkage, specified ft and gf
+#
+nonlinearstatic nsteps 500  deltaT 1. rtolv 1.e-8 MaxIter 5000 controllmode 1 stiffMode 1 renumber 1 miniter 3 updateelasticstiffnessflag manrmsteps 5 nmodules 1
+#
+errorcheck
+# vtkxml tstep_step 1 domain_all vars 2 1 4 primvars 1 1 
+#
+domain 2dPlaneStress
+#
+OutputManager tstep_all dofman_all element_all
+ndofman 12 nelem 3 ncrosssect 1 nmat 3 nbc 2 nic 0 nltf 2
+#
+#
+# NODES
+#
+node   1   coords 3  0.0  0.0  0.0 bc 2 1 1 
+node   2   coords 3  0.1  0.0  0.0 bc 2 2 0
+node   3   coords 3  0.0  0.1  0.0 bc 2 1 0 
+node   4   coords 3  0.1  0.1  0.0 bc 2 2 0
+#
+node   5   coords 3  0.0  0.2  0.0 bc 2 1 1 
+node   6   coords 3  0.1  0.2  0.0 bc 2 2 0
+node   7   coords 3  0.0  0.3  0.0 bc 2 1 0 
+node   8   coords 3  0.1  0.3  0.0 bc 2 2 0
+#
+node   9   coords 3  0.0  0.4  0.0 bc 2 1 1 
+node   10  coords 3  0.1  0.4  0.0 bc 2 2 0
+node   11  coords 3  0.0  0.5  0.0 bc 2 1 0 
+node   12  coords 3  0.1  0.5  0.0 bc 2 2 0
+#
+#
+# ELEMENTS
+#
+planestress2d   1   nodes 4   1 2 4 3 crossSect 1 mat 1 
+#
+planestress2d   2   nodes 4   5 6 8 7 crossSect 1 mat 2 
+#
+planestress2d   3   nodes 4   9 10 12 11 crossSect 1 mat 3
+#
+# CROSSECTION
+#
+SimpleCS 1 thick 1.0 width 1.0
+#
+#
+# MATERIAL
+#
+mps 1 d 0. n 0.2 talpha 0. referencetemperature 296. mode 0 fc 30. cc 340. w/c 0.523 a/c 5.28 stiffnessfactor 1.e6  timefactor 1. lambda0 1. begoftimeofinterest 1.e-6 endoftimeofinterest 1.e4 relMatAge 7. CoupledAnalysisType 2 ksh 0.0 t0 7. k3 35. p 1000.
+#
+mpsdammat 2 d 0. n 0.2 talpha 0. mode 0 fc 30. cc 340. w/c 0.523 a/c 5.28 stiffnessfactor 1.e6  timefactor 1. lambda0 1. begoftimeofinterest 1.e-6 endoftimeofinterest 1.e4 relMatAge 7. CoupledAnalysisType 2 ksh 0.0 t0 7. k3 35. p 1000. fib fib_s 0.25 
+#
+mpsdammat 3 d 0. n 0.2 talpha 0. mode 0 fc 30. cc 340. w/c 0.523 a/c 5.28 stiffnessfactor 1.e6  timefactor 1. lambda0 1. begoftimeofinterest 1.e-6 endoftimeofinterest 1.e4 relMatAge 7. CoupledAnalysisType 2 ksh 0.0 t0 7. k3 35. p 1000. damlaw 0 ft 2.0 gf 80e-6 isotropic 
+#
+#
+# BOUNDARY CONDITIONS
+#
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.
+BoundaryCondition 2 loadTimeFunction 2 prescribedvalue 5.e-5
+#
+#
+# TIME FUNCTION
+#
+ConstantFunction 1 f(t) 1.0
+PiecewiseLinFunction 2 npoints 5 t 5 -1e7. 0. 1.e2 1.e3 1.e4 f(t) 5 0.0 0.0 0.4 1.0 1.0 
+#
+#
+#%BEGIN_CHECK% 
+#REACTION tStep 5  number 2 dof 1 value	2.121700e-06 tolerance 1.e-10
+#REACTION tStep 11 number 2 dof 1 value 1.730600e-04 tolerance 1.e-8
+#REACTION tStep 17 number 2 dof 1 value 1.202300e-02 tolerance 1.e-6
+#REACTION tStep 23 number 2 dof 1 value 2.218100e-01 tolerance 1.e-5
+#REACTION tStep 26 number 2 dof 1 value 7.894700e-02 tolerance 1.e-6
+#REACTION tStep 5  number 6 dof 1 value 2.121700e-06 tolerance 1.e-10
+#REACTION tStep 11 number 6 dof 1 value 1.730600e-04 tolerance 1.e-8
+#REACTION tStep 17 number 6 dof 1 value 1.202300e-02 tolerance 1.e-6
+#REACTION tStep 23 number 6 dof 1 value 8.761500e-02 tolerance 1.e-6
+#REACTION tStep 26 number 6 dof 1 value 3.118400e-02 tolerance 1.e-6
+#REACTION tStep 5  number 10 dof 1  value 2.121700e-06 tolerance 1.e-10
+#REACTION tStep 11 number 10 dof 1  value 1.730600e-04 tolerance 1.e-8
+#REACTION tStep 17 number 10 dof 1  value 1.202300e-02 tolerance 1.e-6
+#REACTION tStep 23 number 10 dof 1  value 7.470900e-02 tolerance 1.e-6
+#REACTION tStep 26 number 10 dof 1  value 2.659100e-02 tolerance  1.e-6
+#%END_CHECK%

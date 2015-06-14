@@ -105,6 +105,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual TimeStep *giveNextStep();
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
+	virtual void initializeYourself(TimeStep *tStep);
 
     // identification
     virtual const char *giveClassName() const { return "DIIDynamic"; }
@@ -118,6 +119,8 @@ public:
     void determineConstants(TimeStep *tStep);
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+
+	TimeDiscretizationType giveInitialTimeDiscretization() { return initialTimeDiscretization; }
 };
 } // end namespace oofem
 #endif // diidynamic_h

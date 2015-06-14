@@ -86,6 +86,7 @@ IRResultType AbaqusUserMaterial :: initializeFrom(InputRecord *ir)
     umatname = "umat";
     IR_GIVE_OPTIONAL_FIELD(ir, umatname, _IFT_AbaqusUserMaterial_name);
     strncpy(this->cmname, umatname.c_str(), 80);
+    IR_GIVE_OPTIONAL_FIELD(ir, this->initialStress, _IFT_AbaqusUserMaterial_initialStress);
 
 #ifdef _WIN32
     ///@todo Check all the windows support.
@@ -110,6 +111,7 @@ IRResultType AbaqusUserMaterial :: initializeFrom(InputRecord *ir)
     }
 
     * ( void ** ) ( & this->umat ) = dlsym(this->umatobj, "umat_");
+
     char *dlresult = dlerror();
     if ( dlresult ) {
         OOFEM_ERROR("couldn't load symbol umat,\ndlerror: %s\n", dlresult);
@@ -264,10 +266,12 @@ void AbaqusUserMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoin
     int nshr = 3;
 
     int ntens = ndi + nshr;
-    FloatArray strain = reducedStrain;
+    FloatArray strain = ms->giveStrainVector();
     FloatArray stress = ms->giveStressVector();
+    // adding the initial stress
+    stress.add(initialStress);
     FloatArray strainIncrement;
-    strainIncrement.beDifferenceOf(reducedStrain, ms->giveStrainVector());
+    strainIncrement.beDifferenceOf(reducedStrain, strain);
     FloatArray state = ms->giveStateVector();
     FloatMatrix jacobian(ntens, ntens);
     int numProperties = this->properties.giveSize();
@@ -389,6 +393,8 @@ void AbaqusUserMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoin
 
     // Change to OOFEM's component order
     stress.changeComponentOrder();
+    // subtracking the initial stress
+    stress.subtract(initialStress);
     strain.changeComponentOrder();
     strainIncrement.changeComponentOrder();
     jacobian.changeComponentOrder();
@@ -610,6 +616,25 @@ void AbaqusUserMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussP
     OOFEM_LOG_DEBUG("AbaqusUserMaterial :: giveRealStressVector_3d - Calling subroutine was successful");
 }
 
+
+int AbaqusUserMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
+{
+    AbaqusUserMaterialStatus *ms = static_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );
+    if ( type == IST_Undefined || type == IST_AbaqusStateVector ) {
+        // The undefined value is used to just dump the entire state vector.
+        answer = ms->giveStateVector();
+        return 1;
+    } else if ( type == IST_StressTensor ) {
+        StructuralMaterial :: giveFullSymVectorForm( answer, ms->giveStressVector(), gp->giveMaterialMode() );
+	answer.add(initialStress);
+        return 1;
+    } else {
+        return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
+    }
+}
+
+
+
 void AbaqusUserMaterialStatus :: initTempStatus()
 {
     stateVector.resize(numState);
@@ -634,15 +659,20 @@ void AbaqusUserMaterialStatus :: updateYourself(TimeStep *tStep)
     stateVector = tempStateVector;
 }
 
-int AbaqusUserMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
+void AbaqusUserMaterialStatus :: printOutputAt(FILE *File, TimeStep *tStep)
+// Prints the strains and stresses on the data file.
 {
-    AbaqusUserMaterialStatus *ms = static_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );
-    if ( type == IST_Undefined || type == IST_AbaqusStateVector ) {
-        // The undefined value is used to just dump the entire state vector.
-        answer = ms->giveStateVector();
-        return 1;
-    } else {
-        return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
+    StructuralMaterialStatus :: printOutputAt(File, tStep);
+
+    fprintf(File, "  stateVector ");
+    FloatArray state = this->giveStateVector();
+    for ( auto &var : state ) {
+        fprintf( File, " % .4e", var );
     }
+
+    fprintf(File, "\n");
 }
+
+
+
 } // end namespace oofem

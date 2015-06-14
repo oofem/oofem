@@ -36,7 +36,7 @@
 #define structural2delement_h
 
 #include "Elements/nlstructuralelement.h"
-
+#include "feinterpol2d.h"
 
 
 namespace oofem {
@@ -53,6 +53,17 @@ class IntArray;
 class Structural2DElement : public NLStructuralElement
 {
 
+protected:
+  /** 
+   * To facilitate the transformation of 2d elements into 3d, the complexity of transformation from 3d to
+   *  local 2d system can be efficiently hidden in custom FEICellGeometry wrapper, that performs the transformation
+   * into local system. This way, the existing 2d intrpolation classes can be used.
+   * The element maintain its FEICellGeometry, which is accesible through the giveCellGeometryWrapper. 
+   * Generalization to 3d then would require only substitution of the geometry warpper and definition of 
+   * element transformation matrix.
+   */
+  FEICellGeometry* cellGeometryWrapper;
+
 public:
     /**
      * Constructor. Creates element with given number, belonging to given domain.
@@ -61,10 +72,13 @@ public:
      */
     Structural2DElement(int n, Domain * d);
     /// Destructor.
-    virtual ~Structural2DElement() { }
+    virtual ~Structural2DElement();
     virtual void postInitialize();
     virtual int giveNumberOfNodes() const;
-    
+    /**
+     * Returns the Cell Geometry Wrapper. Default inplementation creates FEIElementGeometryWrapper.
+     */
+    virtual FEICellGeometry* giveCellGeometryWrapper();
     
     virtual int computeNumberOfDofs();
     virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;

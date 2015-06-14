@@ -195,6 +195,7 @@ public:
         IG_None = 0, ///< No special treatment for new iterations. Probably means ending up using @f$ {}^{n+1}x = {}^{n}x @f$ for all free dofs.
         IG_Tangent = 1, ///< Solves an approximated tangent problem from the last iteration. Useful for changing Dirichlet boundary conditions.
         //IG_Extrapolated = 2, ///< Assumes constant increment extrapolating @f$ {}^{n+1}x = {}^{n}x + \Delta t\delta{x}'@f$, where @f$ \delta x' = ({}^{n}x - {}^{n-1}x)/{}^{n}Delta t@f$.
+        IG_Original = 3
     };
 
 protected:
@@ -515,6 +516,11 @@ public:
      * @return Nonzero if successful.
      */
     int exchangeRemoteElementData(int ExchangeTag);
+    /**
+     * Returns number of iterations that was required to reach equilibrium - used for adaptive step length in 
+     * staggered problem
+     */
+    virtual int giveCurrentNumberOfIterations() {return 1;}
 
 #ifdef __PARALLEL_MODE
     /// Returns the communication object of reciever.
@@ -678,6 +684,8 @@ public:
     }
     /// Returns next time step (next to current step) of receiver.
     virtual TimeStep *giveNextStep() { return NULL; }
+	/// Does a pre-initialization of the next time step (implement if necessarry)
+	virtual void preInitializeNextStep() {}
     /// Returns the solution step when Initial Conditions (IC) apply.
     virtual TimeStep *giveSolutionStepWhenIcApply() {
         if ( master ) {
