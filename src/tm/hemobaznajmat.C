@@ -329,15 +329,15 @@ HeMoBazNajMaterial :: isCharacteristicMtrxSymmetric(MatResponseMode mode)
 }
 
 int
-HeMoBazNajMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+HeMoBazNajMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
 // IST_Humidity overriden to use inverse_sorption_isotherm
 {
     if ( type == IST_Humidity ) {
         answer.resize(1);
-        answer.at(1) = giveHumidity(aGaussPoint, VM_Velocity); // VM_Previous = equilibrated value of humidity
+        answer.at(1) = giveHumidity(gp, VM_Velocity); // VM_Previous = equilibrated value of humidity
         return 1;
     } else {
-        return TransportMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+        return TransportMaterial :: giveIPValue(answer, gp, type, atTime);
     }
 }
 } // end namespace oofem

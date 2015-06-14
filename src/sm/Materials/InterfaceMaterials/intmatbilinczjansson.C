@@ -398,15 +398,15 @@ IntMatBilinearCZJansson :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatRe
 
 
 int
-IntMatBilinearCZJansson :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+IntMatBilinearCZJansson :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
 {
-    IntMatBilinearCZJanssonStatus *status = static_cast< IntMatBilinearCZJanssonStatus * >( this->giveStatus(aGaussPoint) );
+    IntMatBilinearCZJanssonStatus *status = static_cast< IntMatBilinearCZJanssonStatus * >( this->giveStatus(gp) );
     if ( type == IST_DamageScalar ) {     
         answer.resize(1);
         answer.at(1) = status->giveTempDamage();
         return 1;
     } else {
-        return StructuralInterfaceMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+        return StructuralInterfaceMaterial :: giveIPValue(answer, gp, type, atTime);
     }
 
 }

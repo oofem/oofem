@@ -87,30 +87,30 @@ void InteractionLoad :: giveInputRecord(DynamicInputRecord& input)
 }
 
 void
-InteractionLoad::computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode)
+InteractionLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode)
 {
-	FloatArray pressureArray(this->componentArray);
-	//tStep->giveEngngModel();
-	FluidStructureProblem *fsiProblem = dynamic_cast<FluidStructureProblem*>(domain->giveEngngModel()->giveMasterEngngModel());
-	if (fsiProblem) {
-		for ( int i = 1; i <= fsiProblem->giveNumberOfSlaveProblems(); i++ ) {
-			PFEM *pfem = dynamic_cast<PFEM*>(fsiProblem->giveSlaveProblem(i));
-			if (pfem) {
-				for ( int j = 1; j <= coupledParticles.giveSize(); j++) {
-					DofManager *dman = pfem->giveDomain(1)->giveDofManager(coupledParticles.at(j));
-					Dof *pressureDof = dman->giveDofWithID(P_f);
-					double pressureValue = pfem->giveUnknownComponent(VM_Total, tStep, pfem->giveDomain(1), pressureDof);
-					pressureValue = pressureValue > 0 ? pressureValue : 0.0;
-					for ( int k = 1; k <= nDofs; k++) {
-						pressureArray.at(nDofs * (j - 1) + k) *= pressureValue;
-					}
-				}
-			}
-		}
-	}
-	// Evaluates the value at specific integration point
-    int i, j, nSize;
-    double value, factor;
+    FloatArray pressureArray = this->componentArray;
+    //tStep->giveEngngModel();
+    FluidStructureProblem *fsiProblem = dynamic_cast<FluidStructureProblem*>(domain->giveEngngModel()->giveMasterEngngModel());
+    if (fsiProblem) {
+        for ( int i = 1; i <= fsiProblem->giveNumberOfSlaveProblems(); i++ ) {
+            FEM *pfem = dynamic_cast<PFEM*>(fsiProblem->giveSlaveProblem(i));
+            if (pfem) {
+                for ( int j = 1; j <= coupledParticles.giveSize(); j++) {
+                    DofManager *dman = pfem->giveDomain(1)->giveDofManager(coupledParticles.at(j));
+                    Dof *pressureDof = dman->giveDofWithID(P_f);
+                    double pressureValue = pfem->giveUnknownComponent(VM_Total, tStep, pfem->giveDomain(1), pressureDof);
+                    pressureValue = pressureValue > 0 ? pressureValue : 0.0;
+                    for ( int k = 1; k <= nDofs; k++) {
+                        pressureArray.at(nDofs * (j - 1) + k) *= pressureValue;
+                    }
+                }
+            }
+        }
+    }
+    // Evaluates the value at specific integration point
+    int nSize;
+    double factor;
     FloatArray N;
 
     if ( ( mode != VM_Total ) && ( mode != VM_Incremental ) ) {
@@ -126,8 +126,9 @@ InteractionLoad::computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray 
         OOFEM_ERROR("computeValueAt: componentArray size mismatch");
     }
 
-    for ( i = 1; i <= nDofs; i++ ) {
-        for ( value = 0., j = 1; j <= nSize; j++ ) {
+    for ( int i = 1; i <= nDofs; i++ ) {
+        double value = 0.;
+        for ( int j = 1; j <= nSize; j++ ) {
             value += N.at(j) * pressureArray.at(i + ( j - 1 ) * nDofs);
         }
 

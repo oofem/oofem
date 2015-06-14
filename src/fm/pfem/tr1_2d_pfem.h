@@ -120,7 +120,7 @@ public:
      */
     contextIOResultType   restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    double computeVolumeAround(GaussPoint *aGaussPoint);
+    double computeVolumeAround(GaussPoint *gp);
 
     /** Interface requesting service */
     Interface *giveInterface(InterfaceType);

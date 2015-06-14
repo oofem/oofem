@@ -78,7 +78,7 @@ protected:
     SparseMtrxType sparseMtrxType;
 
     /// left-hand side matrix for the auxiliary velocity equations
-    SparseMtrx *avLhs;
+    FloatArray avLhs;
     /// left-hand side matrix for the pressure equations
     SparseMtrx *pLhs;
     /// left-hand side matrix for the velocity equations
@@ -129,7 +129,7 @@ protected:
 public:
     PFEM(int i, EngngModel * _master = NULL) :
         EngngModel(i, _master)
-        , avLhs(NULL)
+        , avLhs()
         , pLhs(NULL)
         , vLhs(NULL)
         , PressureField(this, 1, FT_Pressure, 1)

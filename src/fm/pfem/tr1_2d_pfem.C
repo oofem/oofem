@@ -70,28 +70,25 @@ IntArray TR1_2D_PFEM :: edge_ordering [ 3 ] = {
     IntArray(6), IntArray(6), IntArray(6)
 };
 
-  IntArray TR1_2D_PFEM :: velocityDofMask = {1,2,4,5,7,8};
-  IntArray TR1_2D_PFEM :: pressureDofMask = {3,6,9};
+IntArray TR1_2D_PFEM :: velocityDofMask = {1,2,4,5,7,8};
+IntArray TR1_2D_PFEM :: pressureDofMask = {3,6,9};
 
 
 TR1_2D_PFEM :: TR1_2D_PFEM(int n, Domain *aDomain, int particle1, int particle2, int particle3, int mat, int cs) :
     PFEMElement2d(n, aDomain)
-
 {
     // Constructor.
     numberOfDofMans  = 3;
-    IntArray dmans(3), aBodyLoadArry(1);
-    dmans.at(1) = particle1;
-    dmans.at(2) = particle2;
-    dmans.at(3) = particle3;
+    IntArray aBodyLoadArry(1);
     aBodyLoadArry.at(1) = 3;
-    this->setDofManagers(dmans);
+    this->setDofManagers({particle1, particle2, particle3});
     // CHECK THIS - NOT NICE
     this->setBodyLoads(aBodyLoadArry);
     this->material = mat;
     this->setCrossSection(cs);
     this->postInitialize();
 }
+
 TR1_2D_PFEM :: ~TR1_2D_PFEM()
 // Destructor
 { }
@@ -105,12 +102,10 @@ TR1_2D_PFEM :: computeNumberOfDofs()
 void
 TR1_2D_PFEM ::   giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-        answer.resize(3);
-        answer.at(1) = V_u;
-        answer.at(2) = V_v;
-	answer.at(3) = P_f;
+    answer = {V_u, V_v, P_f};
 
 }
+
 // NOT IN USE
 void
 TR1_2D_PFEM ::   giveElementDofIDMask(IntArray &answer) const
@@ -122,10 +117,10 @@ TR1_2D_PFEM ::   giveElementDofIDMask(IntArray &answer) const
 IRResultType
 TR1_2D_PFEM :: initializeFrom(InputRecord *ir)
 {
-    this->PFEMElement :: initializeFrom(ir);
+    IRResultType ret = this->PFEMElement :: initializeFrom(ir);
 
     this->computeGaussPoints();
-    return IRRT_OK;
+    return ret;
 }
 
 void
@@ -142,20 +137,16 @@ TR1_2D_PFEM :: computeGaussPoints()
 void
 TR1_2D_PFEM :: computeForceVector(FloatArray &answer, TimeStep *atTime) //F
 {
-    //copied form tr21stokes.C :: computeLoadVector
-    int i, load_number, load_id;
-    Load *load;
-    bcGeomType ltype;
     FloatArray vec;
 
     int nLoads = this->boundaryLoadArray.giveSize() / 2;
     answer.resize(6);
     answer.zero();
-    for ( i = 1; i <= nLoads; i++ ) {  // For each Neumann boundary condition
-        load_number = this->boundaryLoadArray.at(2 * i - 1);
-        load_id = this->boundaryLoadArray.at(2 * i);
-        load = this->domain->giveLoad(load_number);
-        ltype = load->giveBCGeoType();
+    for ( int i = 1; i <= nLoads; i++ ) {  // For each Neumann boundary condition
+        int load_number = this->boundaryLoadArray.at(2 * i - 1);
+        int load_id = this->boundaryLoadArray.at(2 * i);
+        Load *load = this->domain->giveLoad(load_number);
+        bcGeomType ltype = load->giveBCGeoType();
 
         if ( ltype == EdgeLoadBGT ) {
             this->computeEdgeBCSubVectorAt(vec, load, load_id, atTime);
@@ -164,16 +155,14 @@ TR1_2D_PFEM :: computeForceVector(FloatArray &answer, TimeStep *atTime) //F
     }
 
     nLoads = this->giveBodyLoadArray()->giveSize();
-    for ( i = 1; i <= nLoads; i++ ) {
-        load  = domain->giveLoad( bodyLoadArray.at(i) );
-        ltype = load->giveBCGeoType();
+    for ( int i = 1; i <= nLoads; i++ ) {
+        Load *load = domain->giveLoad( bodyLoadArray.at(i) );
+        bcGeomType ltype = load->giveBCGeoType();
         if ( ltype == BodyLoadBGT && load->giveBCValType() == ForceLoadBVT ) {
             this->computeBodyLoadVectorAt(vec, load, atTime);
             answer.add(vec);
         }
     }
-
-    return;
 }
 
 //copied from tr21stokes
@@ -181,23 +170,18 @@ void
 TR1_2D_PFEM :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *atTime)
 {
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ].get();
-    GaussPoint *gp;
-    FloatArray N, gVector, *lcoords, temparray(6);
-    double dA, detJ, rho;
+    FloatArray N, gVector;
 
     answer.resize(6);
     answer.zero();
 
     load->computeComponentArrayAt(gVector, atTime, VM_Total);
-    temparray.zero();
     if ( gVector.giveSize() ) {
-        for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-            gp = iRule->getIntegrationPoint(k);
-            lcoords = gp->giveNaturalCoordinates();
-            rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
-            detJ = this->pressureInterpolation.giveTransformationJacobian( * lcoords, FEIElementGeometryWrapper(this) );
-            dA = detJ * gp->giveWeight();
-            this->pressureInterpolation.evalN( N, * lcoords, FEIElementGeometryWrapper(this) );
+        for ( auto &gp : *iRule ) {
+            double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+            double detJ = this->pressureInterpolation.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+            double dA = detJ * gp->giveWeight();
+            this->pressureInterpolation.evalN( N, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
             for ( int j = 0; j < 3; j++ ) {
                 answer(2 * j)     += N(j) * rho * gVector(0) * dA;
                 answer(2 * j + 1) += N(j) * rho * gVector(1) * dA;
@@ -221,24 +205,22 @@ TR1_2D_PFEM :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iEdg
         int numberOfEdgeIPs = ( int ) ceil( ( boundaryLoad->giveApproxOrder() + 1. ) / 2. ) * 2;
 
         GaussIntegrationRule iRule(1, this, 1, 1);
-        GaussPoint *gp;
         FloatArray N, t, f(6), f2(6);
         IntArray edge_mapping;
 
         f.zero();
         iRule.setUpIntegrationPoints(_Line, numberOfEdgeIPs, _Unknown);
 
-        for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
-            gp = iRule.getIntegrationPoint(i);
-            FloatArray *lcoords = gp->giveNaturalCoordinates();
-            this->pressureInterpolation.edgeEvalN( N, iEdge, * lcoords, FEIElementGeometryWrapper(this) );
-            double dS = gp->giveWeight() * this->pressureInterpolation.edgeGiveTransformationJacobian( iEdge, * lcoords, FEIElementGeometryWrapper(this) );
+        for ( auto &gp : iRule ) {
+            const FloatArray &lcoords = gp->giveNaturalCoordinates();
+            this->pressureInterpolation.edgeEvalN( N, iEdge, lcoords, FEIElementGeometryWrapper(this) );
+            double dS = gp->giveWeight() * this->pressureInterpolation.edgeGiveTransformationJacobian( iEdge, lcoords, FEIElementGeometryWrapper(this) );
 
             if ( boundaryLoad->giveFormulationType() == Load :: FT_Entity ) {         // Edge load in xi-eta system
-                boundaryLoad->computeValueAt(t, atTime, * lcoords, VM_Total);
+                boundaryLoad->computeValueAt(t, atTime, lcoords, VM_Total);
             } else {   // Edge load in x-y system
                 FloatArray gcoords;
-                this->pressureInterpolation.edgeLocal2global( gcoords, iEdge, * lcoords, FEIElementGeometryWrapper(this) );
+                this->pressureInterpolation.edgeLocal2global( gcoords, iEdge, lcoords, FEIElementGeometryWrapper(this) );
                 boundaryLoad->computeValueAt(t, atTime, gcoords, VM_Total);
             }
 
@@ -260,12 +242,11 @@ TR1_2D_PFEM :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iEdg
 void
 TR1_2D_PFEM :: computeDiagonalMassMtrx(FloatMatrix &answer, TimeStep *atTime)
 {
-    int i;
     answer.resize(6, 6);
     answer.zero();
     double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     double mm = rho * this->area / 3.0;
-    for ( i = 1; i <= 6; i++ ) {
+    for ( int i = 1; i <= 6; i++ ) {
         answer.at(i, i) = mm;
     }
 }
@@ -493,18 +474,11 @@ contextIOResultType TR1_2D_PFEM :: restoreContext(DataStream *stream, ContextMod
 }
 
 double
-TR1_2D_PFEM :: computeVolumeAround(GaussPoint *aGaussPoint)
-// Returns the portion of the receiver which is attached to aGaussPoint.
+TR1_2D_PFEM :: computeVolumeAround(GaussPoint *gp)
+// Returns the portion of the receiver which is attached to gp.
 {
-    double determinant, weight, volume;
-
-    determinant = fabs( this->velocityInterpolation.giveTransformationJacobian( * aGaussPoint->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
-
-
-    weight      = aGaussPoint->giveWeight();
-    volume      = determinant * weight;
-
-    return volume;
+    double determinant = fabs( this->velocityInterpolation.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    return determinant * gp->giveWeight();
 }
 
 #ifdef __OOFEG

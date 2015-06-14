@@ -40,6 +40,7 @@
 #include "fluidstructureproblem.h"
 #include "../../sm/EngineeringModels/structengngmodel.h"
 #include "domain.h"
+#include "dof.h"
 //#include "inputrecord.h"
 
 #ifndef __MAKEDEPEND

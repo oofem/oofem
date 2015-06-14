@@ -1883,7 +1883,7 @@ void
 Shell7BaseXFEM :: computeEnrichedNmatrixAt(const FloatArray &lCoords, FloatMatrix &answer, EnrichmentItem *ei)
 {
     // Returns the displacement interpolation matrix {N} of the receiver,
-    // evaluated at aGaussPoint.
+    // evaluated at gp.
 
     int ndofs = Shell7Base :: giveNumberOfDofs();
     int ndofs_xm  = 3 * this->giveNumberOfDofManagers();
@@ -2014,7 +2014,7 @@ Shell7BaseXFEM :: edgeComputeEnrichedNmatrixAt(const FloatArray &lCoords, FloatM
 void
 Shell7BaseXFEM :: edgeComputeEnrichedBmatrixAt(const FloatArray &lCoords, FloatMatrix &answer, EnrichmentItem *ei, const int edge)
 {
-/* Returns the  matrix {B} of the receiver, evaluated at aGaussPoint. Such that
+/* Returns the  matrix {B} of the receiver, evaluated at gp. Such that
  * B*a = [dxbar_dxi, dwdxi, w, dgamdxi, gam]^T, where a is the vector of unknowns
  */
 

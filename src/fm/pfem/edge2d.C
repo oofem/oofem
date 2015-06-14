@@ -37,10 +37,8 @@
 
 namespace oofem {
 Edge2D :: Edge2D(int node1, int node2) :
-    nodes(2)
+    nodes{node1, node2}
 {
-    nodes.at(1) = node1;
-    nodes.at(2) = node2;
 }
 
 Edge2D :: ~Edge2D()
@@ -49,12 +47,8 @@ Edge2D :: ~Edge2D()
 bool
 Edge2D :: operator == ( const Edge2D & right )
 {
-    if ( ( this->nodes.at(1) == right.nodes.at(1) && this->nodes.at(2) == right.nodes.at(2) ) ||
-        ( this->nodes.at(1) == right.nodes.at(2) && this->nodes.at(2) == right.nodes.at(1) ) ) {
-        return true;
-    } else {
-        return false;
-    }
+    return ( this->nodes.at(1) == right.nodes.at(1) && this->nodes.at(2) == right.nodes.at(2) ) ||
+           ( this->nodes.at(1) == right.nodes.at(2) && this->nodes.at(2) == right.nodes.at(1) );
 }
 
 
