@@ -36,7 +36,6 @@
 #define fluidstructureproblem_h
 
 #include "staggeredproblem.h"
-#include "alist.h"
 #include "inputrecord.h"
 
 ///@name Input fields for StaggeredProblem
@@ -105,9 +104,9 @@ protected:
     /// List of slave models to which this model is coupled    
 ///    IntArray coupledModels;
 
-	IntArray interactionParticles;
-	double tol;
-	int iterationNumber;
+    IntArray interactionParticles;
+    double tol;
+    int iterationNumber;
 
 public:
     /**
@@ -145,8 +144,8 @@ public:
     virtual TimeStep *giveNextStep();
     virtual TimeStep *giveSolutionStepWhenIcApply();
 
-	virtual void preInitializeNextStep();
-	
+    virtual void preInitializeNextStep();
+
     // identification
     virtual const char *giveClassName() const { return "FluidStructureProblem"; }
     virtual const char *giveInputRecordName() const { return _IFT_FluidStructureProblem_Name; }
@@ -195,7 +194,7 @@ public:
     }
     virtual int instanciateDefaultMetaStep(InputRecord *ir);
 
-	int giveIterationNumber() {return iterationNumber;}
+    int giveIterationNumber() {return iterationNumber;}
 
 protected:
     int instanciateSlaveProblems();

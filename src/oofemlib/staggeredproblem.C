@@ -247,33 +247,33 @@ StaggeredProblem :: giveDeltaT(int n)
       double adjustedDeltaT = deltaT;
 
       if ( currentStep != NULL ) {
-	if ( currentStep->giveNumber() != 0 ) {
+            if ( currentStep->giveNumber() != 0 ) {
 
-	  // return prescribed deltaT for times until time = adaptiveStepSince
-	  // can be used for consecutive force loading applied in a specified number of steps
-	  if ( !(currentStep->giveTargetTime() > this->adaptiveStepSince ) ) {
-	    return adjustedDeltaT;
-	  }
+                // return prescribed deltaT for times until time = adaptiveStepSince
+                // can be used for consecutive force loading applied in a specified number of steps
+                if ( !(currentStep->giveTargetTime() > this->adaptiveStepSince ) ) {
+                    return adjustedDeltaT;
+                }
 
-	  for (int i = 1; i <= this->giveNumberOfSlaveProblems(); i++ ) {
-	    sp = this->giveSlaveProblem(i);
-	    nite = max(sp->giveCurrentNumberOfIterations(), nite);
-	  }
-	  
-	  if ( nite > reqIterations ) {
-	    adjustedDeltaT =  this->prevStepLength * reqIterations / nite;
-	  } else {
-	    adjustedDeltaT  =  this->prevStepLength * sqrt( sqrt( ( double ) reqIterations / ( double ) nite ) );
-	  }
-	  
-	  if ( adjustedDeltaT > maxStepLength ) {
-	    adjustedDeltaT = maxStepLength;
-	  }
-	  
-	  if ( adjustedDeltaT < minStepLength ) {
-	    adjustedDeltaT = minStepLength;
-	  }
-	}
+                for (int i = 1; i <= this->giveNumberOfSlaveProblems(); i++ ) {
+                    sp = this->giveSlaveProblem(i);
+                    nite = max(sp->giveCurrentNumberOfIterations(), nite);
+                }
+                
+                if ( nite > reqIterations ) {
+                    adjustedDeltaT =  this->prevStepLength * reqIterations / nite;
+                } else {
+                    adjustedDeltaT  =  this->prevStepLength * sqrt( sqrt( ( double ) reqIterations / ( double ) nite ) );
+                }
+                
+                if ( adjustedDeltaT > maxStepLength ) {
+                    adjustedDeltaT = maxStepLength;
+                }
+                
+                if ( adjustedDeltaT < minStepLength ) {
+                    adjustedDeltaT = minStepLength;
+                }
+            }
       }
       
       this->currentStepLength = adjustedDeltaT;
@@ -401,10 +401,10 @@ StaggeredProblem :: solveYourself()
             }
 
 #endif
-	    
-	        if ( (sp->giveCurrentStep()->giveTargetTime() >= this->endOfTimeOfInterest) && this->adaptiveStepLength ) {
-	            break;
-	        }
+
+            if ( (sp->giveCurrentStep()->giveTargetTime() >= this->endOfTimeOfInterest) && this->adaptiveStepLength ) {
+                break;
+            }
         }
     }
 }

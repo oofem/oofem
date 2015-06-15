@@ -1279,7 +1279,7 @@ Domain :: createDofs()
     /////////////////// Step 1. Scan all required nodal dofs.
     std :: vector< std :: set< int > > node_dofs( this->giveNumberOfDofManagers() );
     for ( auto &element: this->elementList ) {
-		IntArray dofids;
+        IntArray dofids;
         // Scan for all dofs needed by element.
         for ( int j = 1; j <= element->giveNumberOfNodes(); ++j ) {
             element->giveDofManDofIDMask(j, dofids);

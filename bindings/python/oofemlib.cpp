@@ -321,8 +321,8 @@ struct PySparseMtrx : SparseMtrx, wrapper<SparseMtrx>
     }
 
     const char *giveClassName() const {
-		 return this->get_override("giveClassName")();
-	 }
+        return this->get_override("giveClassName")();
+    }
 };
 
 void (PySparseMtrx::*sm_times_1)(const FloatArray &x, FloatArray &ans) const  = &PySparseMtrx::times;
@@ -634,9 +634,11 @@ class PyDofManager : public DofManager, public wrapper<DofManager>
 public:
     PyDofManager (int n, Domain *d) : DofManager (n,d) {}
 
-  void giveUnknownVector(FloatArray &answer, const IntArray &dofMask, ValueModeType mode, TimeStep *stepN, bool padding) {
+    void giveUnknownVector(FloatArray &answer, const IntArray &dofMask, ValueModeType mode, TimeStep *stepN, bool padding) {
         if ( override f = this->get_override("giveUnknownVector") ) {
-	  f (answer, dofMask, mode, stepN, padding); return;}
+            f (answer, dofMask, mode, stepN, padding);
+            return;
+        }
         DofManager::giveUnknownVector(answer, dofMask, mode, stepN);
     }
     bool computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry) {
@@ -644,8 +646,8 @@ public:
         return DofManager::computeL2GTransformation(answer, dofIDArry);
     }
 
-  void default_giveUnknownVector(FloatArray &answer, const IntArray &dofMask, ValueModeType mode, TimeStep *stepN, bool padding)
-  { return this->DofManager::giveUnknownVector(answer, dofMask, mode, stepN, padding); }
+    void default_giveUnknownVector(FloatArray &answer, const IntArray &dofMask, ValueModeType mode, TimeStep *stepN, bool padding)
+    { return this->DofManager::giveUnknownVector(answer, dofMask, mode, stepN, padding); }
 };
 
   void (DofManager::*giveUnknownVector_1)(FloatArray &answer, const IntArray &dofMask, ValueModeType mode, TimeStep *stepN, bool padding) = &DofManager::giveUnknownVector;

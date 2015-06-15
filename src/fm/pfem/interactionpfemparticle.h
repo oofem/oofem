@@ -61,7 +61,7 @@ class FluidStructureProblem;
 class OOFEM_EXPORT InteractionPFEMParticle : public PFEMParticle
 {
 protected:
-	int coupledNode;
+    int coupledNode;
 
 public:
     /**
@@ -90,7 +90,7 @@ public:
     virtual void givePrescribedUnknownVector(FloatArray &answer, const IntArray &dofMask,
                                              ValueModeType mode, TimeStep *stepN);
 
-	void giveCoupledVelocities(FloatArray &answer, TimeStep *stepN);
+    void giveCoupledVelocities(FloatArray &answer, TimeStep *stepN);
 
     virtual void printOutputAt(FILE *stream, TimeStep *stepN);
 
@@ -99,7 +99,7 @@ public:
      */
     virtual const char *giveClassName() const { return "InteractionPFEMParticle"; }
 
-	virtual const char *giveInputRecordName() const { return _IFT_InteractionPFEMParticle_Name; }
+    virtual const char *giveInputRecordName() const { return _IFT_InteractionPFEMParticle_Name; }
     
 
 #ifdef __OOFEG
@@ -107,8 +107,8 @@ public:
 #endif
 
 private:
-	StructuralEngngModel* giveStructuralProblem();
-	FluidStructureProblem* giveFluidStructureMasterProblem();
+    StructuralEngngModel* giveStructuralProblem();
+    FluidStructureProblem* giveFluidStructureMasterProblem();
 };
 } // end namespace oofem
 #endif // interactionpfemparticle_h

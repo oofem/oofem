@@ -711,25 +711,25 @@ public:
 
         // first determine domain extends (bounding box), and check for degenerated domain type
         for ( i = 1; i <= nnode; i++ ) {
-	    dman = domain->giveDofManager(i);
-	    coords = ( ( ( Node * ) dman )->giveCoordinates() );
-	    if ( init ) {
-	        init = 0;
-	        for ( j = 1; j <= coords->giveSize(); j++ ) {
-		    minc.at(j) = maxc.at(j) = coords->at(j);
-	        }
-	    } else {
-	        for ( j = 1; j <= coords->giveSize(); j++ ) {
-		    if ( coords->at(j) < minc.at(j) ) {
-		        minc.at(j) = coords->at(j);
-		    }
-		
-		    if ( coords->at(j) > maxc.at(j) ) {
-		        maxc.at(j) = coords->at(j);
-		    }
-		}
-	    }
-	    
+            dman = domain->giveDofManager(i);
+            coords = static_cast< Node * >( dman )->giveCoordinates();
+            if ( init ) {
+                init = 0;
+                for ( j = 1; j <= coords->giveSize(); j++ ) {
+                    minc.at(j) = maxc.at(j) = coords->at(j);
+                }
+            } else {
+                for ( j = 1; j <= coords->giveSize(); j++ ) {
+                    if ( coords->at(j) < minc.at(j) ) {
+                        minc.at(j) = coords->at(j);
+                    }
+                
+                    if ( coords->at(j) > maxc.at(j) ) {
+                        maxc.at(j) = coords->at(j);
+                    }
+                }
+            }
+            
         }                 // end loop over nodes
 
         BBX.setOrigin(minc);

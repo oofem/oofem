@@ -240,7 +240,7 @@ public:
     virtual const char *giveClassName() const { return "PrimaryField"; }
 
 
-	int giveActualStepNumber() {return actualStepNumber;}
+    int giveActualStepNumber() { return actualStepNumber; }
 protected:
     int resolveIndx(TimeStep *tStep, int shift);
     FloatArray *giveSolutionVector(int);

@@ -80,6 +80,24 @@
 namespace oofem {
 REGISTER_EngngModel(PFEM);
 
+
+void PressureRhsAssembler :: vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const
+{
+    PFEMElement &pelem = static_cast< PFEMElement & >( element );
+
+    FloatMatrix d;
+    pelem.giveCharacteristicMatrix(d, DivergenceMatrix, tStep);
+    FloatArray u_star;
+    pelem.computeVectorOf(VM_Intermediate, tStep, u_star);
+    vec.beProductOf(d, u_star);
+
+    FloatArray reducedVec;
+    pelem.computePrescribedRhsVector(reducedVec, tStep, mode);
+    reducedVec.negated();
+    vec.assemble(reducedVec, pelem.givePressureDofMask());
+}
+
+
 NumericalMethod *PFEM :: giveNumericalMethod(MetaStep *mStep)
 {
     if ( nMethod ) {
@@ -185,13 +203,11 @@ PFEM :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof
 {
     if ( mode == VM_Intermediate ) {
         if ( AuxVelocity.isNotEmpty() ) {
-	  int index = avns.giveDofEquationNumber(dof);
-	  if (index > 0 && index <= AuxVelocity.giveSize())
-	    {
-	      return AuxVelocity.at( index );
-	    }
-	  else
-	    return 0.0;
+            int index = avns.giveDofEquationNumber(dof);
+            if (index > 0 && index <= AuxVelocity.giveSize()) {
+                return AuxVelocity.at( index );
+            } else
+                return 0.0;
         } else {
             return 0.;
         }
@@ -205,7 +221,7 @@ PFEM :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof
                 return 0.; // to make compiler happy
             }
         } else {
-	    return 0.0;
+            return 0.0;
         }
     }
 }
@@ -328,7 +344,7 @@ PFEM :: giveNextStep()
 
     avLhs.resize(auxmomneq);
 
-    this->assembleVector( avLhs, tStep, LumpedMassVectorAssembler(), avns, this->giveDomain(1) );
+    this->assembleVector( avLhs, tStep, LumpedMassVectorAssembler(), VM_Total, avns, this->giveDomain(1) );
 
     if ( pLhs ) {
         delete pLhs;
@@ -347,17 +363,8 @@ PFEM :: giveNextStep()
 
     //////////////////////////////////////////////////////////////////////////
 
-    if ( vLhs ) {
-        delete vLhs;
-    }
-
-    vLhs = classFactory.createSparseMtrx(sparseMtrxType);
-    if ( vLhs == NULL ) {
-        OOFEM_ERROR("solveYourselfAt: sparse matrix creation failed");
-    }
-
-    vLhs->buildInternalStructure(this, 1, vns);
-    this->assemble( vLhs, tStep, LumpedMassMatrix, vns, this->giveDomain(1) );
+    vLhs.resize(momneq);
+    this->assembleVector( vLhs, tStep, LumpedMassVectorAssembler(), VM_Total, vns, this->giveDomain(1) );
 
     if ( tStep->giveNumber() == giveNumberOfFirstStep() ) {
         TimeStep *stepWhenIcApply = tStep->givePreviousStep();
@@ -417,7 +424,7 @@ PFEM :: giveNextStep()
 
         this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetaStepNumber() ) );
         AuxVelocity.resize(rhs.giveSize());
-	for ( int i = 1; i <= momneq; i++ ) {
+        for ( int i = 1; i <= momneq; i++ ) {
             AuxVelocity.at(i) = rhs.at(i) / avLhs.at(i);
         }
 
@@ -426,12 +433,16 @@ PFEM :: giveNextStep()
         rhs.resize(presneq);
         rhs.zero();
 
+#if 1
+        this->assembleVectorFromElements( rhs, tStep, PressureRhsAssembler(), VM_Total, pns, this->giveDomain(1) );
+        
+#else
         this->assembleVectorFromElements( rhs, tStep, PrescribedRhsVector, VM_Total, pns, this->giveDomain(1) );
 
         rhs.times(-1.0);
 
         this->assembleVectorFromElements( rhs, tStep, DivergenceAuxVelocityVector, VM_Total, pns, this->giveDomain(1) );
-
+#endif
 
         this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetaStepNumber() ) );
         pressureVector->resize(presneq);
@@ -460,7 +471,10 @@ PFEM :: giveNextStep()
 
         this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetaStepNumber() ) );
 
-        nMethod->solve(*vLhs, rhs, *velocityVector);
+        velocityVector->resize(rhs.giveSize());
+        for ( int i = 1; i <= momneq; i++ ) {
+            velocityVector->at(i) = rhs.at(i) / vLhs.at(i);
+        }
 
         for ( int i = 1; i <= this->giveDomain(1)->giveNumberOfDofManagers(); i++ ) {
             PFEMParticle *particle = dynamic_cast< PFEMParticle * >( this->giveDomain(1)->giveDofManager(i) );
@@ -521,12 +535,12 @@ PFEM :: giveNextStep()
                         velocityVector->at(eqnum) = previousValue;
                     }
                 }
-		j++;
+                j++;
             }
         }
     }
     tStep->incrementStateCounter();
-  }
+}
 
 
 void
@@ -759,19 +773,19 @@ PFEM :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
     if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
         iDof->printSingleOutputAt(stream, atTime, '*', VM_Intermediate);
         iDof->printSingleOutputAt(stream, atTime, 'u', VM_Total);
-		
-	// printing coordinate in DofMan Output
-	DofManager* dman = iDof->giveDofManager();
-	double coordinate = 0.0;
-	int dofNumber = 0;
-	switch ( type ) {
-	case V_u: dofNumber = 1; break;
-	case V_v: dofNumber = 2; break;
-	case V_w: dofNumber = 3; break;
-	default:;
-	}
-	coordinate = dman->giveCoordinate(dofNumber);
-	fprintf(stream, "  dof %d   c % .8e\n", dofNumber, coordinate);
+
+        // printing coordinate in DofMan Output
+        DofManager* dman = iDof->giveDofManager();
+        double coordinate = 0.0;
+        int dofNumber = 0;
+        switch ( type ) {
+        case V_u: dofNumber = 1; break;
+        case V_v: dofNumber = 2; break;
+        case V_w: dofNumber = 3; break;
+        default:;
+        }
+        coordinate = dman->giveCoordinate(dofNumber);
+        fprintf(stream, "  dof %d   c % .8e\n", dofNumber, coordinate);
     } else if ( ( type == P_f ) ) {
         iDof->printSingleOutputAt(stream, atTime, 'p', VM_Total);
     } else {
@@ -895,96 +909,93 @@ PFEM :: deactivateTooCloseParticles()
     Domain *d = this->giveDomain(1);
     // deactivating particles
     if ( particleRemovalRatio > 1.e-6 ) { // >0
-	for ( int i = 1; i <= d->giveNumberOfElements(); i++ ) {
-	    TR1_2D_PFEM *element = dynamic_cast< TR1_2D_PFEM * >( d->giveElement(i) );
-	    
-	    PFEMParticle *particle1 = dynamic_cast< PFEMParticle * >( element->giveNode(1) );
-	    PFEMParticle *particle2 = dynamic_cast< PFEMParticle * >( element->giveNode(2) );
-	    PFEMParticle *particle3 = dynamic_cast< PFEMParticle * >( element->giveNode(3) );
-	    
-	    double l12 = particle1->giveCoordinates()->distance( particle2->giveCoordinates() );
-	    double l23 = particle2->giveCoordinates()->distance( particle3->giveCoordinates() );
-	    double l31 = particle3->giveCoordinates()->distance( particle1->giveCoordinates() );
-	    
-	    double maxLength = max( l12, max(l23, l31) );
-	    double minLength = min( l12, min(l23, l31) );
-	    
-	    if ( minLength / maxLength < particleRemovalRatio ) {
-		if ( fabs(l12 - minLength) < 1.e-6 ) {             // ==
-		    if ( particle1->isActive() && particle2->isActive() ) {
-			bool isSupported = false;
-			
-			for ( Dof* jDof: *particle1 ) {//int j = 1; j <= particle1->giveNumberOfDofs(); 
-			    DofIDItem type  =  jDof->giveDofID();
-			    if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-				if ( jDof->giveBcId() ) {
-				    isSupported = true;
-				}
-			    }
-			}
-			if (isSupported == false) {
-			    particle1->deactivate();
-			}
-			else {
-			    particle2->deactivate();
-			}
-		    } else if ( particle1->isActive() == false || particle2->isActive() == false )     {
-			;                        // it was deactivated by other element
-		    } else   {
-			OOFEM_ERROR("Both particles deactivated");
-		    }
-		}
-		
-		if ( fabs(l23 - minLength) < 1.e-6 ) {             // ==
-		    if ( particle2->isActive() && particle3->isActive() ) {
-			bool isSupported = false;
-			
-			for ( Dof* jDof  : *particle2 ) {
-			    DofIDItem type  =  jDof->giveDofID();
-			    if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-				if ( jDof->giveBcId() ) {
-				    isSupported = true;
-				}
-			    }
-			}
-			if (isSupported == false) {
-			    particle2->deactivate();
-			}
-			else {
-			    particle3->deactivate();
-			}
-		    } else if ( particle2->isActive() == false || particle3->isActive() == false )     {
-			;                        // it was deactivated by other element
-		    } else   {
-			OOFEM_ERROR("Both particles deactivated");
-		    }
-		}
-		
-		if ( fabs(l31 - minLength) < 1.e-6 ) {             // ==
-		    if ( particle3->isActive() && particle1->isActive() ) {
-			bool isSupported = false;
-			for ( Dof* jDof  : *particle3 ) {
-			    DofIDItem type  =  jDof->giveDofID();
-			    if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-				if ( jDof->giveBcId() ) {
-				    isSupported = true;
-				}
-			    }
-			}
-			if (isSupported == false) {
-			    particle3->deactivate();
-			}
-			else {
-			    particle1->deactivate();
-			}
-		    } else if ( particle3->isActive() == false || particle1->isActive() == false )     {
-			;                        // it was deactivated by other element
-		    } else   {
-			OOFEM_ERROR("Both particles deactivated");
-		    }
-		}
-	    }
-	}
+        for ( int i = 1; i <= d->giveNumberOfElements(); i++ ) {
+            TR1_2D_PFEM *element = dynamic_cast< TR1_2D_PFEM * >( d->giveElement(i) );
+            
+            PFEMParticle *particle1 = dynamic_cast< PFEMParticle * >( element->giveNode(1) );
+            PFEMParticle *particle2 = dynamic_cast< PFEMParticle * >( element->giveNode(2) );
+            PFEMParticle *particle3 = dynamic_cast< PFEMParticle * >( element->giveNode(3) );
+            
+            double l12 = particle1->giveCoordinates()->distance( particle2->giveCoordinates() );
+            double l23 = particle2->giveCoordinates()->distance( particle3->giveCoordinates() );
+            double l31 = particle3->giveCoordinates()->distance( particle1->giveCoordinates() );
+            
+            double maxLength = max( l12, max(l23, l31) );
+            double minLength = min( l12, min(l23, l31) );
+            
+            if ( minLength / maxLength < particleRemovalRatio ) {
+                if ( fabs(l12 - minLength) < 1.e-6 ) {             // ==
+                    if ( particle1->isActive() && particle2->isActive() ) {
+                        bool isSupported = false;
+                
+                        for ( Dof* jDof: *particle1 ) {//int j = 1; j <= particle1->giveNumberOfDofs(); 
+                            DofIDItem type  =  jDof->giveDofID();
+                            if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
+                                if ( jDof->giveBcId() ) {
+                                    isSupported = true;
+                                }
+                            }
+                        }
+                        if (isSupported == false) {
+                            particle1->deactivate();
+                        } else {
+                            particle2->deactivate();
+                        }
+                    } else if ( particle1->isActive() == false || particle2->isActive() == false )     {
+                        ;                        // it was deactivated by other element
+                    } else   {
+                        OOFEM_ERROR("Both particles deactivated");
+                    }
+                }
+
+                if ( fabs(l23 - minLength) < 1.e-6 ) {             // ==
+                    if ( particle2->isActive() && particle3->isActive() ) {
+                        bool isSupported = false;
+                
+                        for ( Dof* jDof  : *particle2 ) {
+                            DofIDItem type  =  jDof->giveDofID();
+                            if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
+                                if ( jDof->giveBcId() ) {
+                                    isSupported = true;
+                                }
+                            }
+                        }
+                        if (isSupported == false) {
+                            particle2->deactivate();
+                        } else {
+                            particle3->deactivate();
+                        }
+                    } else if ( particle2->isActive() == false || particle3->isActive() == false )     {
+                        ;                        // it was deactivated by other element
+                    } else {
+                        OOFEM_ERROR("Both particles deactivated");
+                    }
+                }
+            
+                if ( fabs(l31 - minLength) < 1.e-6 ) {             // ==
+                    if ( particle3->isActive() && particle1->isActive() ) {
+                        bool isSupported = false;
+                        for ( Dof* jDof  : *particle3 ) {
+                            DofIDItem type  =  jDof->giveDofID();
+                            if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
+                                if ( jDof->giveBcId() ) {
+                                    isSupported = true;
+                                }
+                            }
+                        }
+                        if (isSupported == false) {
+                            particle3->deactivate();
+                        } else {
+                            particle1->deactivate();
+                        }
+                    } else if ( particle3->isActive() == false || particle1->isActive() == false ) {
+                        ;                        // it was deactivated by other element
+                    } else   {
+                        OOFEM_ERROR("Both particles deactivated");
+                    }
+                }
+            }
+        }
     }
 }
 } // end namespace oofem

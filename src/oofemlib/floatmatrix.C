@@ -197,15 +197,14 @@ void FloatMatrix :: checkBounds(int i, int j) const
     }
 
     if ( j > nColumns ) {
-		printf("APA \n");
         OOFEM_ERROR("matrix error on columns : %d > %d", j, nColumns);
     }
 }
 
-bool FloatMatrix ::isFinite() const
+bool FloatMatrix :: isFinite() const
 {
-    for(double val : values) {
-        if(!std::isfinite(val)) {
+    for (double val : values) {
+        if ( !std::isfinite(val) ) {
             return false;
         }
     }

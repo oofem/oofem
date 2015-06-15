@@ -42,7 +42,6 @@
 #ifndef delaunaytrinagulator_h
 #define delaunaytrinagulator_h
 
-#include "alist.h"
 #include <list>
 #include "contextioresulttype.h"
 #include "timer.h"

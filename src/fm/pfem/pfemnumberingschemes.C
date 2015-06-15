@@ -60,10 +60,10 @@ PressureNumberingScheme :: init(Domain *domain, TimeStep *tStep)
     this->nodalPressureEquationNumbers.resize(nnode);
     for ( inode = 1; inode <= nnode; inode++ ) {
         idofman = domain->giveDofManager(inode);
-	for ( Dof *jDof: *idofman ) {
-	  //        ndofs = idofman->giveNumberOfDofs();
-	  //        for ( int j = 1; j <= ndofs; j++ ) {
-	  //            jDof  =  idofman->giveDof(j);
+        for ( Dof *jDof: *idofman ) {
+        //        ndofs = idofman->giveNumberOfDofs();
+        //        for ( int j = 1; j <= ndofs; j++ ) {
+        //            jDof  =  idofman->giveDof(j);
             if ( jDof->giveDofID() == P_f ) {
                 if ( jDof->hasBc(tStep) ) {
                     this->nodalPressureEquationNumbers.at(inode) = --pres_neq;

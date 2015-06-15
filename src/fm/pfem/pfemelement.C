@@ -133,7 +133,7 @@ PFEMElement ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx, Valu
 
     if ( mtrx == LoadVector ) {
         this->computeForceVector(reducedVector, tStep);
-	answer.assemble(reducedVector, this->giveVelocityDofMask()); 
+        answer.assemble(reducedVector, this->giveVelocityDofMask()); 
     } else if ( mtrx == PressureGradientVector ) {
         FloatMatrix g;
         this->giveCharacteristicMatrix(g, PressureGradientMatrix, tStep);
@@ -176,11 +176,6 @@ PFEMElement ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx, Valu
         FloatArray u;
         this->computeVectorOfVelocities(VM_Total, tStep, u);
         answer.beProductOf(d, u);
-    } else if ( mtrx == DivergenceDeviatoricStressVector ) {
-        this->computeDeviatoricStressDivergence(answer, tStep);
-    } else if ( mtrx == PrescribedRhsVector ) {
-        this->computePrescribedRhsVector(reducedVector, tStep, mode);
-        answer.assemble(reducedVector, this->givePressureDofMask());
     } else {
         OOFEM_ERROR("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
     }
@@ -202,7 +197,7 @@ PFEMElement :: updateInternalState(TimeStep *stepN)
     // force updating strains & stresses
     for ( auto &iRule: integrationRulesArray ) {
         for ( GaussPoint *gp: *iRule ) {
-	    computeDeviatoricStress(stress, gp, stepN);
+            computeDeviatoricStress(stress, gp, stepN);
         }
     }
 }

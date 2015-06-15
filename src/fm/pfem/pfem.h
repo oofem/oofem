@@ -65,6 +65,14 @@
 //@}
 
 namespace oofem {
+
+class PressureRhsAssembler : public VectorAssembler
+{
+public:
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+};
+
+
 /**
  * This class represents PFEM method for solving incompressible Navier-Stokes equations
  */
@@ -82,7 +90,7 @@ protected:
     /// left-hand side matrix for the pressure equations
     SparseMtrx *pLhs;
     /// left-hand side matrix for the velocity equations
-    SparseMtrx *vLhs;
+    FloatArray vLhs;
 
     // TODO: consider using DofDistributedPrimaryField for pressure and velocity
     /// Pressure field
@@ -131,7 +139,7 @@ public:
         EngngModel(i, _master)
         , avLhs()
         , pLhs(NULL)
-        , vLhs(NULL)
+        , vLhs()
         , PressureField(this, 1, FT_Pressure, 1)
         , VelocityField(this, 1, FT_Velocity, 1)
         , pns()
@@ -142,10 +150,10 @@ public:
         nMethod = NULL;
         domainVolume = 0.0;
         printVolumeReport = false;
-	discretizationScheme = 1; // implicit iterative scheme is default
-	associatedCrossSection = 0;
-	associatedMaterial = 0;
-	associatedPressureBC = 0;
+        discretizationScheme = 1; // implicit iterative scheme is default
+        associatedCrossSection = 0;
+        associatedMaterial = 0;
+        associatedPressureBC = 0;
     }
     ~PFEM() { }
 

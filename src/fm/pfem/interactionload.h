@@ -73,12 +73,12 @@ protected:
     /// Coordinates of start and end point
     //FloatArray startCoords, endCoords;
     //FormulationType formulation;
-	IntArray coupledParticles;
+    IntArray coupledParticles;
 
 public:
     InteractionLoad(int i, Domain *d) : LinearEdgeLoad(i, d) , coupledParticles(2){ }
 
-	virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
+    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
 
     virtual int giveApproxOrder() { return 1; }
     virtual IRResultType initializeFrom(InputRecord *ir);

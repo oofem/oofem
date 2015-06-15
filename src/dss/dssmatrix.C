@@ -232,7 +232,7 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
                 }
             } else {
                     mcn [ _c++ ] = -1; // no corresponding row in sparse mtrx structure
-	    }
+            }
         }
 
         for ( int i = _ndofs + 1; i <= bsize; i++ ) {

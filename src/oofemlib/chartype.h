@@ -82,8 +82,7 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(LaplacePressureVector, 211)		                 \
     ENUM_ITEM_WITH_VALUE(LaplaceVelocityVector, 212)		                 \
     ENUM_ITEM_WITH_VALUE(DivergenceAuxVelocityVector, 213)                       \
-    ENUM_ITEM_WITH_VALUE(DivergenceVelocityVector, 214)		                 \
-    ENUM_ITEM_WITH_VALUE(DivergenceDeviatoricStressVector, 215)
+    ENUM_ITEM_WITH_VALUE(DivergenceVelocityVector, 214)
 
 
 enum CharType {

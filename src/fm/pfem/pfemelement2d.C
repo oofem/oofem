@@ -173,7 +173,7 @@ PFEMElement2d :: computeGradientMatrix(FloatMatrix &answer, TimeStep *atTime) //
         this->givePressureInterpolation()->evaldNdx( dnx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
         temp.resize( 2 * dnx.giveNumberOfRows(), N.giveSize() );
-	temp.zero();
+        temp.zero();
         for ( int i = 1; i <= dnx.giveNumberOfRows(); i++ ) {
             for ( int j = 1; j <= N.giveSize(); j++ ) {
                 temp.at(2 * i - 1, j) = N.at(i) * dnx.at(j, 1);
@@ -199,7 +199,7 @@ PFEMElement2d :: computeDivergenceMatrix(FloatMatrix &answer, TimeStep *atTime) 
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ].get();
     for ( auto &gp : *iRule ) {
 
-	this->giveVelocityInterpolation()->evalN( N, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+        this->giveVelocityInterpolation()->evalN( N, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
         this->giveVelocityInterpolation()->evaldNdx( dnx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
         temp.resize( N.giveSize(), 2 * dnx.giveNumberOfRows() );

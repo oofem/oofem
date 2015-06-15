@@ -51,9 +51,7 @@ InteractionLoad :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    LinearEdgeLoad :: initializeFrom(ir);
-
-	IR_GIVE_FIELD(ir, coupledParticles, _IFT_InteractionLoad_CoupledParticles);
+    IR_GIVE_FIELD(ir, coupledParticles, _IFT_InteractionLoad_CoupledParticles);
  ///   if ( componentArray.giveSize() != nDofs * 2 ) {
  ///       _error("instanciateFrom: componentArray size mismatch");
  ///   }
@@ -72,7 +70,7 @@ InteractionLoad :: initializeFrom(InputRecord *ir)
  ///       this->formulation = FT_Entity;
  ///   }
 
-    return IRRT_OK;
+    return LinearEdgeLoad :: initializeFrom(ir);
 }
 
 
@@ -94,7 +92,7 @@ InteractionLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArra
     FluidStructureProblem *fsiProblem = dynamic_cast<FluidStructureProblem*>(domain->giveEngngModel()->giveMasterEngngModel());
     if (fsiProblem) {
         for ( int i = 1; i <= fsiProblem->giveNumberOfSlaveProblems(); i++ ) {
-            FEM *pfem = dynamic_cast<PFEM*>(fsiProblem->giveSlaveProblem(i));
+            PFEM *pfem = dynamic_cast<PFEM*>(fsiProblem->giveSlaveProblem(i));
             if (pfem) {
                 for ( int j = 1; j <= coupledParticles.giveSize(); j++) {
                     DofManager *dman = pfem->giveDomain(1)->giveDofManager(coupledParticles.at(j));
@@ -144,7 +142,7 @@ InteractionLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArra
 void
 InteractionLoad :: computeNArray(FloatArray &answer, FloatArray &coords) const
 {
-	LinearEdgeLoad :: computeNArray(answer, coords);
+    LinearEdgeLoad :: computeNArray(answer, coords);
  ///   // compute local isoparametric coordinates of given point
  ///   double ksi;
  ///
