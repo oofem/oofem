@@ -432,8 +432,14 @@ Beam2d :: giveEndForcesVector(FloatArray &answer, TimeStep *tStep)
 void
 Beam2d :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep)
 {
+    answer.clear();
+
     if ( edge != 1 ) {
         OOFEM_ERROR("Beam2D only has 1 edge (the midline) that supports loads. Attempted to apply load to edge %d", edge);
+    }
+
+    if ( type != ExternalForcesVector ) {
+        return;
     }
 
     double l = this->computeLength();

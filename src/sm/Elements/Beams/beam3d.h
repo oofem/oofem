@@ -47,6 +47,9 @@
 //@}
 
 namespace oofem {
+
+class FEI3dLineLin;
+
 /**
  * This class implements a 2-dimensional beam element
  * with cubic lateral displacement interpolation (rotations are quadratic)
@@ -57,11 +60,16 @@ namespace oofem {
  * This class is not derived from liBeam3d or truss element, because it does not support
  * any material nonlinearities (if should, stiffness must be integrated)
  * 
- * @author Giovanni (among others)
+ * @author Giovanni
+ * @author Mikael Öhman
+ * @author (several other authors)
  */
 class Beam3d : public StructuralElement, public FiberedCrossSectionInterface
 {
 protected:
+    /// Geometry interpolator only.
+    static FEI3dLineLin interp;
+
     double kappay, kappaz, length;
     int referenceNode;
     double referenceAngle = 0;
@@ -71,6 +79,8 @@ protected:
 public:
     Beam3d(int n, Domain *d);
     virtual ~Beam3d();
+
+    virtual FEInterpolation *giveInterpolation() const;
 
     virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL);
     virtual void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep);

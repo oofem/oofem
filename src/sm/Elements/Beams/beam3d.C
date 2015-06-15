@@ -45,6 +45,7 @@
 #include "engngm.h"
 #include "boundaryload.h"
 #include "mathfem.h"
+#include "fei3dlinelin.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -53,6 +54,8 @@
 
 namespace oofem {
 REGISTER_Element(Beam3d);
+
+FEI3dLineLin Beam3d :: interp;
 
 Beam3d :: Beam3d(int n, Domain *aDomain) : StructuralElement(n, aDomain)
 {
@@ -70,6 +73,7 @@ Beam3d :: ~Beam3d()
     delete dofsToCondense;
 }
 
+FEInterpolation *Beam3d :: giveInterpolation() const { return & interp; }
 
 void
 Beam3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
@@ -224,15 +228,20 @@ Beam3d :: computeClampedStiffnessMatrix(FloatMatrix &answer,
 void
 Beam3d :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep)
 {
+    answer.clear();
+
     if ( edge != 1 ) {
         OOFEM_ERROR("Beam3D only has 1 edge (the midline) that supports loads. Attempted to apply load to edge %d", edge);
+    }
+
+    if ( type != ExternalForcesVector ) {
+        return;
     }
 
     double l = this->computeLength();
     FloatArray coords, t;
     FloatMatrix N, T;
 
-    answer.clear();
     for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
         const FloatArray &lcoords = gp->giveNaturalCoordinates();
         this->computeNmatrixAt(lcoords, N);
