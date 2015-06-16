@@ -71,6 +71,7 @@ Load :: computeValues(FloatArray &answer, TimeStep *tStep, const FloatArray &coo
     this->computeValueAt(loaded_dofs, tStep, coords, mode);
 
     answer.resize(dofids.giveSize());
+    answer.zero();
     for ( int i = 0; i < dofids.giveSize(); ++i ) {
         int index = this->dofs.findFirstIndexOf(dofids[i]);
         if ( index > 0 ) {
