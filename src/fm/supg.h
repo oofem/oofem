@@ -43,7 +43,6 @@
 #include "assemblercallback.h"
 
 #include <memory>
-#include <boost/concept_check.hpp>
 
 ///@name Input fields for SUPG
 //@{
