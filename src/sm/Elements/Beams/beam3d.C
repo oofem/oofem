@@ -258,8 +258,8 @@ Beam3d :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, 
             }
         }
 
-        double dV = gp->giveWeight() * 0.5 * l;
-        answer.plusProduct(N, t, dV);
+        double dl = gp->giveWeight() * 0.5 * l;
+        answer.plusProduct(N, t, dl);
     }
 
     // Loads from sets expects global c.s.
@@ -385,6 +385,7 @@ Beam3d :: computeKappaCoeffs(TimeStep *tStep)
     } else {
         kappaz = 0.;
     }
+    //kappaz = kappay = 0.;
 }
 
 
@@ -726,6 +727,10 @@ Beam3d :: printOutputAt(FILE *File, TimeStep *tStep)
     }
 
     fprintf(File, "\n");
+
+    for ( auto &iRule: integrationRulesArray ) {
+        iRule->printOutputAt(File, tStep);
+    }
 }
 
 

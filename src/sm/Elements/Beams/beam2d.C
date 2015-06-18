@@ -463,8 +463,8 @@ Beam2d :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, 
             }
         }
 
-        double dV = gp->giveWeight() * 0.5 * l;
-        answer.plusProduct(N, t, dV);
+        double dl = gp->giveWeight() * 0.5 * l;
+        answer.plusProduct(N, t, dl);
     }
 
     // Loads from sets expects global c.s.
@@ -622,6 +622,10 @@ Beam2d :: printOutputAt(FILE *File, TimeStep *tStep)
     }
 
     fprintf(File, "\n");
+ 
+    for ( auto &iRule: integrationRulesArray ) {
+        iRule->printOutputAt(File, tStep);
+    }
 }
 
 
