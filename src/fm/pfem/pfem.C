@@ -81,7 +81,7 @@ namespace oofem {
 REGISTER_EngngModel(PFEM);
 
 
-void PressureRhsAssembler :: vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const
+void PFEMPressureRhsAssembler :: vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const
 {
     PFEMElement &pelem = static_cast< PFEMElement & >( element );
 
@@ -95,6 +95,79 @@ void PressureRhsAssembler :: vectorFromElement(FloatArray &vec, Element &element
     pelem.computePrescribedRhsVector(reducedVec, tStep, mode);
     reducedVec.negated();
     vec.assemble(reducedVec, pelem.givePressureDofMask());
+}
+
+
+void PFEMCorrectionRhsAssembler :: vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const
+{
+    PFEMElement &pelem = static_cast< PFEMElement & >( element );
+
+    FloatMatrix g;
+    FloatArray p;
+    pelem.computeVectorOfPressures(VM_Total, tStep, p);
+    pelem.computeGradientMatrix(g, tStep);
+    vec.beProductOf(g, p);
+    vec.times(-deltaT);
+
+    FloatMatrix m;
+    FloatArray u;
+    pelem.computeDiagonalMassMtrx(m, tStep);
+    pelem.computeVectorOfVelocities(VM_Intermediate, tStep, u);
+    for ( int i = 0; i < m.giveNumberOfColumns(); ++i ) {
+        vec[i] += m(i, i) * u[i];
+    }
+}
+
+void PFEMCorrectionRhsAssembler :: locationFromElement(IntArray& loc, Element& element, const UnknownNumberingScheme& s, IntArray* dofIds) const
+{
+    // Note: For 2D, the V_w will just be ignored anyweay, so it's safe to use all three always.
+    element.giveLocationArray(loc, {V_u, V_v, V_w}, s, dofIds);
+}
+
+
+void PFEMLaplaceVelocityAssembler :: vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const
+{
+    PFEMElement &pelem = static_cast< PFEMElement & >( element );
+
+    FloatMatrix l;
+    FloatArray u;
+    pelem.computeStiffnessMatrix(l, TangentStiffness, tStep);
+    pelem.computeVectorOfVelocities(VM_Total, tStep, u);
+    vec.beProductOf(l, u);
+}
+
+void PFEMLaplaceVelocityAssembler :: locationFromElement(IntArray& loc, Element& element, const UnknownNumberingScheme& s, IntArray* dofIds) const
+{
+    element.giveLocationArray(loc, {V_u, V_v, V_w}, s, dofIds);
+}
+
+
+void PFEMMassVelocityAssembler :: vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const
+{
+    PFEMElement &pelem = static_cast< PFEMElement & >( element );
+
+    FloatMatrix m;
+    FloatArray u;
+    pelem.computeDiagonalMassMtrx(m, tStep);
+    pelem.computeVectorOfVelocities(VM_Total, tStep, u);
+    vec.beProductOf(m, u);
+}
+
+void PFEMMassVelocityAssembler :: locationFromElement(IntArray& loc, Element& element, const UnknownNumberingScheme& s, IntArray* dofIds) const
+{
+    element.giveLocationArray(loc, {V_u, V_v, V_w}, s, dofIds);
+}
+
+
+void PFEMPressureLaplacianAssembler :: matrixFromElement(FloatMatrix& mat, Element& element, TimeStep* tStep) const
+{
+    PFEMElement &pelem = static_cast< PFEMElement & >( element );
+    pelem.computePressureLaplacianMatrix(mat, tStep);
+}
+
+void PFEMPressureLaplacianAssembler :: locationFromElement(IntArray& loc, Element& element, const UnknownNumberingScheme& s, IntArray* dofIds) const
+{
+    element.giveLocationArray(loc, {P_f}, s, dofIds);
 }
 
 
@@ -125,24 +198,16 @@ PFEM :: forceEquationNumbering(int id)
 
     // first initialize default numbering (for velocity unknowns only)
 
-    int i, nnodes;
-    DofManager *inode;
     Domain *domain = this->giveDomain(id);
     TimeStep *currStep = this->giveCurrentStep();
-    IntArray loc;
-    DofIDItem type;
 
     this->domainNeqs.at(id) = 0;
     this->domainPrescribedNeqs.at(id) = 0;
 
-
-    nnodes = domain->giveNumberOfDofManagers();
-
     // number velocities first
-    for ( i = 1; i <= nnodes; i++ ) {
-      inode = domain->giveDofManager(i);
-        for ( Dof *jDof: *inode ) {
-            type  =  jDof->giveDofID();
+    for ( auto &dman : domain->giveDofManagers() ) {
+        for ( Dof *jDof: *dman ) {
+            DofIDItem type = jDof->giveDofID();
             if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
                 jDof->askNewEquationNumber(currStep);
             }
@@ -325,9 +390,9 @@ PFEM :: giveNextStep()
     return currentStep.get();
 }
 
-  void
-  PFEM :: solveYourselfAt(TimeStep *tStep)
-  {
+void
+PFEM :: solveYourselfAt(TimeStep *tStep)
+{
     int auxmomneq = this->giveNumberOfDomainEquations(1, avns);
     int momneq =  this->giveNumberOfDomainEquations(1, vns);
     int presneq =  this->giveNumberOfDomainEquations(1, pns);
@@ -357,7 +422,7 @@ PFEM :: giveNextStep()
 
     pLhs->buildInternalStructure(this, 1, pns);
 
-    this->assemble( pLhs, tStep, PressureLaplacianMatrix, pns, this->giveDomain(1) );
+    this->assemble( *pLhs, tStep, PFEMPressureLaplacianAssembler(), pns, this->giveDomain(1) );
 
     pLhs->times(deltaT);
 
@@ -408,19 +473,27 @@ PFEM :: giveNextStep()
 
         if ( discretizationScheme == 1 ) { //implicit
             if ( iteration > 1 ) {
-                this->assembleVectorFromElements( rhs, tStep, LaplaceVelocityVector, VM_Total, avns, this->giveDomain(1) );
+                this->assembleVectorFromElements( rhs, tStep, PFEMLaplaceVelocityAssembler(), VM_Total, avns, this->giveDomain(1) );
             }
         } else if ( discretizationScheme == 0 ) { // explicit
-            this->assembleVectorFromElements( rhs, tStep->givePreviousStep(), LaplaceVelocityVector, VM_Total, avns, this->giveDomain(1) );
+            this->assembleVectorFromElements( rhs, tStep->givePreviousStep(), PFEMLaplaceVelocityAssembler(), VM_Total, avns, this->giveDomain(1) );
         }
 
         rhs.negated();
 
-        this->assembleVectorFromElements( rhs, tStep, LoadVector, VM_Total, avns, this->giveDomain(1) );
+        ///@todo This ought to be constant, so bring it outside the loop instead? / Mikael
+        this->assembleVector( rhs, tStep, ExternalForceAssembler(), VM_Total, avns, this->giveDomain(1) );
 
         rhs.times(deltaT);
 
-        this->assembleVectorFromElements( rhs, tStep->givePreviousStep(), MassVelocityVector, VM_Total, avns, this->giveDomain(1) );
+#if 0
+        ///@todo Isn't the MassVelocity just this simple computation? It will be faster to do this. / Mikael
+        for ( int i = 1; i <= momneq; i++ ) {
+            rhs.at(i) += avLhs.at(i) * oldVelocityVector.at(i);
+        }
+#else
+        this->assembleVectorFromElements( rhs, tStep->givePreviousStep(), PFEMMassVelocityAssembler(), VM_Total, avns, this->giveDomain(1) );
+#endif
 
         this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetaStepNumber() ) );
         AuxVelocity.resize(rhs.giveSize());
@@ -434,9 +507,9 @@ PFEM :: giveNextStep()
         rhs.zero();
 
 #if 1
-        this->assembleVectorFromElements( rhs, tStep, PressureRhsAssembler(), VM_Total, pns, this->giveDomain(1) );
-        
+        this->assembleVectorFromElements( rhs, tStep, PFEMPressureRhsAssembler(), VM_Total, pns, this->giveDomain(1) );
 #else
+        ///@todo Old code for reference, remove when new callback function is verified to work properly. / Mikael
         this->assembleVectorFromElements( rhs, tStep, PrescribedRhsVector, VM_Total, pns, this->giveDomain(1) );
 
         rhs.times(-1.0);
@@ -448,8 +521,8 @@ PFEM :: giveNextStep()
         pressureVector->resize(presneq);
         nMethod->solve(*pLhs, rhs, *pressureVector);
 
-        for ( int i = 1; i <= this->giveDomain(1)->giveNumberOfDofManagers(); i++ ) {
-            this->updateDofUnknownsDictionaryPressure(this->giveDomain(1)->giveDofManager(i), tStep);
+        for ( auto &dman : this->giveDomain(1)->giveDofManagers() ) {
+            this->updateDofUnknownsDictionaryPressure(dman.get(), tStep);
         }
 
         /**************************** STEP 3 - velocity correction step ********************************/
@@ -460,6 +533,10 @@ PFEM :: giveNextStep()
         rhs.zero();
         velocityVector->resize(momneq);
 
+#if 1
+        this->assembleVectorFromElements( rhs, tStep, PFEMCorrectionRhsAssembler(deltaT), VM_Total, vns, this->giveDomain(1) );
+#else
+        ///@todo Old code for reference, remove when new callback function is verified to work properly. / Mikael
         this->assembleVectorFromElements( rhs, tStep, PressureGradientVector, VM_Total, vns, this->giveDomain(1) );
 
         rhs.times(-1.0);
@@ -467,7 +544,7 @@ PFEM :: giveNextStep()
         rhs.times(deltaT);
 
         this->assembleVectorFromElements( rhs, tStep, MassAuxVelocityVector, VM_Total, vns, this->giveDomain(1) );
-
+#endif
 
         this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetaStepNumber() ) );
 
@@ -515,27 +592,24 @@ PFEM :: giveNextStep()
 
 
 
-
     Domain *d = this->giveDomain(1);
-    for ( int i = 1; i <= this->giveDomain(1)->giveNumberOfDofManagers(); i++ ) {
-        PFEMParticle *particle = dynamic_cast< PFEMParticle * >( d->giveDofManager(i) );
+    for ( auto &dman : d->giveDofManagers() ) {
+        PFEMParticle *particle = dynamic_cast< PFEMParticle * >( dman.get() );
 
         if ( particle->isFree() && particle->isActive() ) {
-            int j = 1;
             for ( Dof *dof : *particle) {
-                DofIDItem type  =  dof->giveDofID();
-                if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
+                DofIDItem type = dof->giveDofID();
+                if ( type == V_u || type == V_v || type == V_w ) {
                     int eqnum = dof->giveEquationNumber(vns);
                     if ( eqnum ) {
                         double previousValue = dof->giveUnknown( VM_Total, tStep->givePreviousStep() );
                         Load *load = d->giveLoad(3);
                         FloatArray gVector;
                         load->computeComponentArrayAt(gVector, tStep, VM_Total);
-                        previousValue += gVector.at(j) * deltaT;
+                        previousValue += gVector[type - V_w] * deltaT; // Get the corresponding coordinate index for the velocities.
                         velocityVector->at(eqnum) = previousValue;
                     }
                 }
-                j++;
             }
         }
     }
@@ -557,9 +631,7 @@ PFEM :: updateYourself(TimeStep *stepN)
 void
 PFEM :: updateInternalState(TimeStep *stepN)
 {
-    for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
-        Domain *domain = this->giveDomain(idomain);
-
+    for ( auto &domain : this->domainList ) {
         if ( requiresUnknownsDictionaryUpdate() ) {
             for ( auto &dman : domain->giveDofManagers() ) {
                 this->updateDofUnknownsDictionary(dman.get(), stepN);
@@ -694,7 +766,7 @@ PFEM :: saveContext(DataStream *stream, ContextMode mode, void *obj)
         fclose(file);
         delete stream;
         stream = NULL;
-    }                                                                   // ensure consistent records
+    }
 
     return CIO_OK;
 }
@@ -743,7 +815,7 @@ PFEM :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
         fclose(file);
         delete stream;
         stream = NULL;
-    }                                                                   // ensure consistent records
+    }
 
     return CIO_OK;
 }
@@ -941,7 +1013,7 @@ PFEM :: deactivateTooCloseParticles()
                         } else {
                             particle2->deactivate();
                         }
-                    } else if ( particle1->isActive() == false || particle2->isActive() == false )     {
+                    } else if ( particle1->isActive() == false || particle2->isActive() == false ) {
                         ;                        // it was deactivated by other element
                     } else   {
                         OOFEM_ERROR("Both particles deactivated");
@@ -965,7 +1037,7 @@ PFEM :: deactivateTooCloseParticles()
                         } else {
                             particle3->deactivate();
                         }
-                    } else if ( particle2->isActive() == false || particle3->isActive() == false )     {
+                    } else if ( particle2->isActive() == false || particle3->isActive() == false ) {
                         ;                        // it was deactivated by other element
                     } else {
                         OOFEM_ERROR("Both particles deactivated");

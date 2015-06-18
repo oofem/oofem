@@ -68,7 +68,6 @@ namespace oofem {
     /* PFEM */	\
     ENUM_ITEM_WITH_VALUE(AuxVelocityLhs, 200)                                    \
     ENUM_ITEM_WITH_VALUE(VelocityLhs, 201)                                       \
-    ENUM_ITEM_WITH_VALUE(LoadVector, 202)                                        \
       /*for pressureLhs see CBS */					         \
     ENUM_ITEM_WITH_VALUE(PressureGradientMatrix, 203)                            \
     ENUM_ITEM_WITH_VALUE(DivergenceMatrix, 204)					 \
