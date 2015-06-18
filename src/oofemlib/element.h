@@ -51,6 +51,7 @@
 #include "unknowntype.h"
 #include "integrationrule.h"
 #include "dofiditem.h"
+#include "floatarray.h"
 
 #include <cstdio>
 #include <vector>
