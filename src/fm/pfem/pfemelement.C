@@ -131,7 +131,7 @@ PFEMElement ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx, Valu
     answer.resize(this->computeNumberOfDofs());
     answer.zero();
 
-    if ( mtrx == LoadVector ) {
+    if ( mtrx == ExternalForcesVector ) {
         this->computeForceVector(reducedVector, tStep);
         answer.assemble(reducedVector, this->giveVelocityDofMask()); 
     } else if ( mtrx == PressureGradientVector ) {

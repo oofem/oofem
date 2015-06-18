@@ -40,14 +40,12 @@
 #include "sparsemtrx.h"
 #include "primaryfield.h"
 #include "dofdistributedprimaryfield.h"
-//<RESTRICTED_SECTION>
-#include "materialinterface.h"
-//</RESTRICTED_SECTION>
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
-
 #include "pfemnumberingschemes.h"
+#include "materialinterface.h"
+#include "assemblercallback.h"
+
+#include <stdio.h>
+
 
 ///@name Input fields for PFEM
 //@{
@@ -66,12 +64,46 @@
 
 namespace oofem {
 
-class PressureRhsAssembler : public VectorAssembler
+class PFEMPressureRhsAssembler : public VectorAssembler
 {
 public:
     virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
 };
 
+
+class PFEMCorrectionRhsAssembler : public VectorAssembler
+{
+protected:
+    double deltaT;
+
+public:
+    PFEMCorrectionRhsAssembler(double deltaT) : VectorAssembler(), deltaT(deltaT) {}
+
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+    virtual void locationFromElement(IntArray &loc, Element &element, const UnknownNumberingScheme &s, IntArray *dofIds = nullptr) const;
+};
+
+
+class PFEMLaplaceVelocityAssembler : public VectorAssembler
+{
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+    virtual void locationFromElement(IntArray &loc, Element &element, const UnknownNumberingScheme &s, IntArray *dofIds = nullptr) const;
+};
+
+
+class PFEMMassVelocityAssembler : public VectorAssembler
+{
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+    virtual void locationFromElement(IntArray &loc, Element &element, const UnknownNumberingScheme &s, IntArray *dofIds = nullptr) const;
+};
+
+
+class PFEMPressureLaplacianAssembler : public MatrixAssembler
+{
+public:
+    virtual void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const;
+    virtual void locationFromElement(IntArray &loc, Element &element, const UnknownNumberingScheme &s, IntArray *dofIds = nullptr) const;
+};
 
 /**
  * This class represents PFEM method for solving incompressible Navier-Stokes equations
