@@ -41,6 +41,11 @@
 #include <cstring>
 #include <algorithm>
 #include <memory>
+#include <numeric>
+#include <cmath>
+#include <iostream>
+#include <fstream>
+#include <iomanip>
 
 namespace oofem {
 
@@ -250,6 +255,21 @@ void IntArray :: printYourself(const std::string name) const
     printf("\n");
 }
 
+void IntArray :: printYourselfToFile(const std::string filename, const bool showDimensions) const
+// Prints the receiver to file.
+{
+    std :: ofstream arrayfile (filename);
+    if (arrayfile.is_open()) {
+        if (showDimensions)
+            arrayfile << "IntArray of size : " << this->giveSize() << "\n";
+        for ( int x: *this ) {
+            arrayfile << x << "\t";
+        }
+        arrayfile.close();
+    } else {
+        OOFEM_ERROR("Failed to write to file");
+    }
+}
 
 contextIOResultType IntArray :: storeYourself(DataStream &stream) const
 {

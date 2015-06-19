@@ -47,6 +47,9 @@
 #include <cstdlib>
 #include <cstring>
 #include <ostream>
+#include <iostream>
+#include <fstream>
+#include <iomanip>
 #include <numeric>
 #define RESIZE(nr, nc) \
     { \
@@ -1466,6 +1469,27 @@ void FloatMatrix :: printYourself() const
         }
     } else {
         printf("   large matrix : coefficients not printed \n");
+    }
+}
+
+void FloatMatrix :: printYourselfToFile(const std::string filename, const bool showDimensions) const
+// Prints the receiver to file.
+{
+    std :: ofstream matrixfile (filename);
+    if (matrixfile.is_open()) {
+        if (showDimensions)
+            matrixfile << "FloatMatrix with dimensions : " << nRows << ", " << nColumns << "\n";
+        matrixfile << std::scientific << std::right << std::setprecision(3);
+        for ( int i = 1; i <= nRows; ++i ) {
+            for ( int j = 1; j <= nColumns; ++j ) {
+                matrixfile << std::setw(10) << this->at(i, j) << "\t";
+            }
+
+            matrixfile << "\n";
+        }
+        matrixfile.close();
+    } else {
+        OOFEM_ERROR("Failed to write to file");
     }
 }
 

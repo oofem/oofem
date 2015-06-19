@@ -313,7 +313,15 @@ public:
      * Prints receiver on stdout with custom name.  
      * @param name Display name of reciever.
      */
-    void printYourself(const std::string name) const;    
+    void printYourself(const std::string name) const;
+
+    /**
+     * Print receiver to file
+     * @param filename Name of recieving file.
+     * @param showDimensions Determins if dimesions should be included in output
+     */
+    void printYourselfToFile(const std::string filename, const bool showDimensions=true) const;
+
     /**
      * Breaks encapsulation. Avoid using this unless absolutely necessary.
      * @return Internal pointer to stored values.
