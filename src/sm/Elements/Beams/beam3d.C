@@ -385,7 +385,6 @@ Beam3d :: computeKappaCoeffs(TimeStep *tStep)
     } else {
         kappaz = 0.;
     }
-    //kappaz = kappay = 0.;
 }
 
 
