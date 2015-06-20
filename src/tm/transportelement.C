@@ -50,6 +50,7 @@
 #include "feinterpol.h"
 #include "feinterpol2d.h"
 #include "feinterpol3d.h"
+#include "dof.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
