@@ -43,8 +43,12 @@
 #include "mathfem.h"
 #include "contextioerr.h"
 #include "datastream.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material(LargeStrainMasterMaterial);
+
 // constructor
 LargeStrainMasterMaterialGrad :: LargeStrainMasterMaterialGrad(int n, Domain *d) : LargeStrainMasterMaterial(n, d), GradDpMaterialExtensionInterface(d)
 {
