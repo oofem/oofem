@@ -35,7 +35,7 @@
 #include "rvestokesflow.h"
 #include "util.h"
 #include "oofemtxtdatareader.h"
-#include "stokesflowvelocityhomogenization.h"
+#include "../fm/stokesflowvelocityhomogenization.h"
 #include "engngm.h"
 #include "contextioerr.h"
 #include "gausspoint.h"
