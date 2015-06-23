@@ -86,8 +86,6 @@ public:
 
 protected:
     static void giveDeviatoricProjectionMatrix(FloatMatrix &answer);
-    
-    static double computeJ2InvariantOf(const FloatArray &sigV);
 
     static void computeSphDevPartOf(const FloatArray &sigV, FloatArray &sigSph, FloatArray &sigDev); 
 };
