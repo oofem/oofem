@@ -808,17 +808,16 @@ Node :: drawYourself(oofegGraphicContext &gc, TimeStep *tStep)
             pp [ 0 ].z = ( FPNum ) this->giveCoordinate(3);
             pp [ 1 ].x = pp [ 1 ].y = pp [ 1 ].z = 0.0;
 
-            FloatArray load;
+            FloatArray load, f;
             FloatMatrix t;
             IntArray dofIDArry(0);
             
             load.clear();
-            for ( int iload : *node->giveLoadArray() ) {   // to more than one load
+            for ( int iload : *this->giveLoadArray() ) {   // to more than one load
                 Load *loadN = domain->giveLoad(iload);
-                self->computeLoadVector(load, loadN, ExternalForcesVector, tStep, VM_Total);
-                charVec.add(load);
+                this->computeLoadVector(f, loadN, ExternalForcesVector, tStep, VM_Total);
+                load.add(f);
             }
-            computeLoadVectorAt(load, tStep, VM_Total);
             if ( computeL2GTransformation(t, dofIDArry) ) {
                 load.rotatedWith(t, 'n');
             }
