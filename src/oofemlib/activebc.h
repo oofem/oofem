@@ -37,6 +37,7 @@
 
 #include "generalboundarycondition.h"
 #include "intarray.h"
+#include "inputrecord.h"
 #include "chartype.h"
 #include "valuemodetype.h"
 #include "error.h"

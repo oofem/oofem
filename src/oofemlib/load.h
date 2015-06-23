@@ -39,6 +39,7 @@
 #include "intarray.h"
 #include "floatarray.h"
 #include "valuemodetype.h"
+#include "error.h"
 
 ///@name Input fields for Load
 //@{

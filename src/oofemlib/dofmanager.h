@@ -36,6 +36,7 @@
 #define dofmanager_h
 
 #include <cstdio>
+#include <map>
 
 #include "femcmpnn.h"
 #include "intarray.h"
