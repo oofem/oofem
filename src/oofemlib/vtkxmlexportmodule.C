@@ -74,15 +74,12 @@
 namespace oofem {
 REGISTER_ExportModule(VTKXMLExportModule)
 
+IntArray VTKXMLExportModule :: redToFull = {1, 5, 9, 8, 7, 4, 6, 3, 2}; //position of xx, yy, zz, yz, xz, xy in tensor
+
 VTKXMLExportModule :: VTKXMLExportModule(int n, EngngModel *e) : ExportModule(n, e), internalVarsToExport(), primaryVarsToExport(), regionSets(), defaultElementSet( 0, e->giveDomain(1) )
 {
     primVarSmoother = NULL;
     smoother = NULL;
-    redToFull = {1, 5, 9, 6, 3, 2}; //position of xx, yy, zz, yz, xz, xy in tensor
-
-#ifdef __VTK_MODULE
-    //this->intVarArray = vtkSmartPointer<vtkDoubleArray>::New();
-#endif
 }
 
 
@@ -150,7 +147,7 @@ VTKXMLExportModule :: terminate()
 
 
 void
-VTKXMLExportModule :: makeFullTensorForm(FloatArray &answer, const FloatArray &reducedForm)
+VTKXMLExportModule :: makeFullTensorForm(FloatArray &answer, const FloatArray &reducedForm, InternalStateValueType vtype)
 {
     answer.resize(9);
     answer.zero();
@@ -159,23 +156,20 @@ VTKXMLExportModule :: makeFullTensorForm(FloatArray &answer, const FloatArray &r
         answer.at( redToFull.at(i) ) = reducedForm.at(i);
     }
 
-    // Symmetrize
-    answer.at(4) = answer.at(2);
-    answer.at(7) = answer.at(3);
-    answer.at(8) = answer.at(6);
-}
+    if ( vtype == ISVT_TENSOR_S3E ) {
+        answer.at(4) *= 0.5;
+        answer.at(7) *= 0.5;
+        answer.at(8) *= 0.5;
+    }
 
-void
-VTKXMLExportModule :: makeFullVectorForm(FloatArray &answer, const FloatArray &input)
-{
-    answer.resize(3);
-    answer.zero();
-    
-    int isize = min(input.giveSize(), 3); // so it will simply truncate larger arrays
-    for ( int i = 1; i <= isize; i++ ) {
-        answer.at(i) = input.at(i);
+    // Symmetrize if needed
+    if ( vtype != ISVT_TENSOR_G ) {
+        answer.at(2) = answer.at(4);
+        answer.at(3) = answer.at(7);
+        answer.at(6) = answer.at(8);
     }
 }
+
 
 std :: string
 VTKXMLExportModule :: giveOutputFileName(TimeStep *tStep)
@@ -932,12 +926,9 @@ VTKXMLExportModule :: giveDataHeaders(std :: string &pointHeader, std :: string 
         } else if ( vtype == ISVT_VECTOR ) {
             vectors += __InternalStateTypeToString(isttype);
             vectors.append(" ");
-        } else if ( vtype == ISVT_TENSOR_S3 || vtype == ISVT_TENSOR_S3E ) {
+        } else if ( vtype == ISVT_TENSOR_S3 || vtype == ISVT_TENSOR_S3E || vtype == ISVT_TENSOR_G ) {
             tensors += __InternalStateTypeToString(isttype);
             tensors.append(" ");
-        } else if ( vtype == ISVT_TENSOR_G ) { //@todo shouldn't this go under tensor?
-            vectors += __InternalStateTypeToString(isttype);
-            vectors.append(" ");
         } else {
             OOFEM_ERROR("unsupported variable type %s\n", __InternalStateTypeToString(isttype) );
         }
@@ -976,14 +967,11 @@ VTKXMLExportModule :: giveDataHeaders(std :: string &pointHeader, std :: string 
         } else if ( vtype == ISVT_VECTOR ) {
             vectors += __InternalStateTypeToString(isttype);
             vectors.append(" ");
-        } else if ( vtype == ISVT_TENSOR_S3 || vtype == ISVT_TENSOR_S3E ) {
+        } else if ( vtype == ISVT_TENSOR_S3 || vtype == ISVT_TENSOR_S3E || vtype == ISVT_TENSOR_G ) {
             tensors += __InternalStateTypeToString(isttype);
             tensors.append(" ");
-        } else if ( vtype == ISVT_TENSOR_G ) { //@todo shouldn't this go under tensor?
-            vectors += __InternalStateTypeToString(isttype);
-            vectors.append(" ");
         } else {
-            fprintf( stderr, "VTKXMLExportModule::cellVarsToExport: unsupported variable type %s\n", __InternalStateTypeToString(isttype) );
+            OOFEM_WARNING("unsupported variable type %s\n", __InternalStateTypeToString(isttype) );
         }
     }
 
@@ -1093,14 +1081,10 @@ VTKXMLExportModule :: getNodalVariableFromIS(FloatArray &answer, Node *node, Tim
     if ( valType == ISVT_SCALAR ) {
         answer.at(1) = valSize ? val->at(1) : 0.0;
     } else if ( valType == ISVT_VECTOR ) {
-        makeFullVectorForm(answer, *val);
-    } else if ( valType == ISVT_TENSOR_S3 || valType == ISVT_TENSOR_S3E ) {
-        this->makeFullTensorForm(answer, * val);
-    } else if ( valType == ISVT_TENSOR_G ) { // export general tensor values as scalars
-        int isize = min(val->giveSize(), 9);
-        for ( int i = 1; i <= isize; i++ ) {
-            answer.at(i) = val->at(i);
-        }
+        answer = *val;
+        answer.resizeWithValues(3);
+    } else if ( valType == ISVT_TENSOR_S3 || valType == ISVT_TENSOR_S3E || valType == ISVT_TENSOR_G ) {
+        this->makeFullTensorForm(answer, * val, valType);
     } else {
         OOFEM_ERROR("ISVT_UNDEFINED encountered")
     }
@@ -1148,14 +1132,10 @@ VTKXMLExportModule :: getNodalVariableFromXFEMST(FloatArray &answer, Node *node,
     if ( valType == ISVT_SCALAR ) {
         answer.at(1) = valSize ? val->at(1) : 0.0;
     } else if ( valType == ISVT_VECTOR ) {
-        makeFullVectorForm(answer, *val);
-    } else if ( valType == ISVT_TENSOR_S3 || valType == ISVT_TENSOR_S3E ) {
-        this->makeFullTensorForm(answer, * val);
-    } else if ( valType == ISVT_TENSOR_G ) { // export general tensor values as scalars
-        int isize = min(val->giveSize(), 9);
-        for ( int i = 1; i <= isize; i++ ) {
-            answer.at(i) = val->at(i);
-        }
+        answer = *val;
+        answer.resizeWithValues(3);
+    } else if ( valType == ISVT_TENSOR_S3 || valType == ISVT_TENSOR_S3E || valType == ISVT_TENSOR_G ) {
+        this->makeFullTensorForm(answer, * val, valType);
     } else {
         OOFEM_ERROR("ISVT_UNDEFINED encountered")
     }
@@ -1810,22 +1790,16 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
         IntegrationRule * iRule = el->giveDefaultIntegrationRulePtr();
         computeIPAverage(answer, iRule, el, type, tStep); // if element has more than one iRule?? /JB
         // Reshape the Voigt vectors to include all components (duplicated if necessary, VTK insists on 9 components for tensors.)
-#if 1
         /// @todo Is this part necessary now when giveIPValue returns full form? Only need to symmetrize in case of 6 components /JB
         /// @todo Some material models aren't exporting values correctly (yet) / Mikael
-        if ( ncomponents == 9 && answer.giveSize() != 9 ) { // If it has 9 components, then it is assumed to be proper already.
+        if ( valType == ISVT_TENSOR_S3 || valType == ISVT_TENSOR_S3E || valType == ISVT_TENSOR_G ) {
             FloatArray temp = answer;
-            this->makeFullTensorForm(answer, temp);
+            this->makeFullTensorForm(answer, temp, valType);
         } else if ( valType == ISVT_VECTOR && answer.giveSize() < 3 ) {
-            answer = {answer.giveSize() > 1 ? answer.at(1) : 0.0,
-                      answer.giveSize() > 2 ? answer.at(2) : 0.0,
-                      0.0};
+            answer.resizeWithValues(3);
         } else if ( ncomponents != answer.giveSize() ) { // Trying to gracefully handle bad cases, just output zeros.
-            answer.resize(ncomponents);
-            answer.zero();
+            answer.resizeWithValues(ncomponents);
         }
-
-#endif
     }
 }
 
@@ -2101,14 +2075,11 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
             } else if ( vtype == ISVT_VECTOR ) {
                 vectors += __InternalStateTypeToString(isttype);
                 vectors.append(" ");
-            } else if ( ( vtype == ISVT_TENSOR_S3 ) || ( vtype == ISVT_TENSOR_S3E ) ) {
+            } else if ( vtype == ISVT_TENSOR_S3 || vtype == ISVT_TENSOR_S3E || vtype == ISVT_TENSOR_G ) {
                 tensors += __InternalStateTypeToString(isttype);
                 tensors.append(" ");
-            } else if ( vtype == ISVT_TENSOR_G ) {
-                vectors += __InternalStateTypeToString(isttype);
-                vectors.append(" ");
             } else {
-                fprintf( stderr, "VTKXMLExportModule::exportIntVarsInGpAs: unsupported variable type %s\n", __InternalStateTypeToString(isttype) );
+                OOFEM_WARNING("unsupported variable type %s\n", __InternalStateTypeToString(isttype) );
             }
         }
 
@@ -2126,12 +2097,10 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
                 nc = 1;
             } else if ( vtype == ISVT_VECTOR ) {
                 nc = 3;
-            } else if ( ( vtype == ISVT_TENSOR_S3 ) || ( vtype == ISVT_TENSOR_S3E ) ) {
-                nc = 9;
-            } else if ( vtype == ISVT_TENSOR_G ) {
+            } else if ( vtype == ISVT_TENSOR_S3 || vtype == ISVT_TENSOR_S3E || vtype == ISVT_TENSOR_G ) {
                 nc = 9;
             } else {
-                fprintf( stderr, "VTKXMLExportModule::exportIntVarsInGpAs: unsupported variable type %s\n", __InternalStateTypeToString(isttype) );
+                OOFEM_WARNING("unsupported variable type %s\n", __InternalStateTypeToString(isttype) );
             }
 
             fprintf(stream, "  <DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"%d\" format=\"ascii\">", __InternalStateTypeToString(isttype), nc);
@@ -2143,11 +2112,10 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
                     d->giveElement(ielem)->giveIPValue(value, gp, isttype, tStep);
 
                     if ( vtype == ISVT_VECTOR ) {
+                        value.resizeWithValues(3);
+                    } else if ( vtype == ISVT_TENSOR_S3 || vtype == ISVT_TENSOR_S3E || vtype == ISVT_TENSOR_G ) {
                         FloatArray help = value;
-                        makeFullVectorForm(value, help);
-                    } else if ( ( vtype == ISVT_TENSOR_S3 ) || ( vtype == ISVT_TENSOR_S3E ) ) {
-                        FloatArray help = value;
-                        this->makeFullTensorForm(value, help);
+                        this->makeFullTensorForm(value, help, vtype);
                     }
 
                     for ( double v: value ) {
