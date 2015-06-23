@@ -336,7 +336,7 @@ ErrorCheckingExportModule :: initializeFrom(InputRecord *ir)
     }
     double tol = 0.;
     if ( this->scanToErrorChecks(inputStream,  tol) ) {
-        while ( true ) {
+        for (;;) {
             std :: unique_ptr< ErrorCheckingRule > rule(this->giveErrorCheck(inputStream, tol));
             if ( !rule ) {
                 break;

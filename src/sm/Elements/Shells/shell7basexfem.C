@@ -1594,7 +1594,6 @@ Shell7BaseXFEM :: computeEnrTractionForce(FloatArray &answer, const int iEdge, B
     answer.printYourself("f_ext old");
 #else
 
-    if(1) {
     int approxOrder = edgeLoad->giveApproxOrder() + this->giveInterpolation()->giveInterpolationOrder();
     int numberOfGaussPoints = ( int ) ceil( ( approxOrder + 1. ) / 2. );
     GaussIntegrationRule iRule(1, this, 1, 1);
@@ -1652,7 +1651,6 @@ Shell7BaseXFEM :: computeEnrTractionForce(FloatArray &answer, const int iEdge, B
         Nf.plusProduct(N, fT, dL);
     }
     answer.assemble(Nf, this->giveOrderingDofTypes() );
-    }
 #endif
 }
 

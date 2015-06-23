@@ -201,16 +201,15 @@ StaggeredSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0, FloatArra
     //-------------------------------------------------    
   
     // Compute external forces 
-    int numDofIdGroups = this->UnknownNumberingSchemeList.size();
+    int numDofIdGroups = (int)this->UnknownNumberingSchemeList.size();
     FloatArray RRT(numDofIdGroups);
     for ( int dG = 0; dG < numDofIdGroups; dG++ ) {
         this->fExtList[dG].beSubArrayOf( RT, locArrayList[dG] );        
         RRT(dG) = this->fExtList[dG].computeSquaredNorm();
     }
-    
-    int nStaggeredIter = 0;
-    do {
-      
+
+    for (int nStaggeredIter = 0;; ++nStaggeredIter) {
+
         // Staggered iterations
         for ( int dG = 0; dG < (int)this->UnknownNumberingSchemeList.size(); dG++ ) {
             printf("\nSolving for dof group %d \n", dG+1);
@@ -225,8 +224,7 @@ StaggeredSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0, FloatArra
                 applyConstraintsToStiffness(k);
             }
 
-            nite = 0;
-            do {
+            for (nite = 0;; ++nite) {
                 // Compute the residual
                 engngModel->updateComponent(tStep, InternalRhs, domain);
                 RHS.beDifferenceOf(RT, F); 
@@ -280,13 +278,13 @@ StaggeredSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0, FloatArra
                 if ( this->lsFlag && ( nite > 0 ) ) { // Why not nite == 0 ?
                     // line search
                     LineSearchNM :: LS_status LSstatus;
-                    double eta;               
+                    double eta;
                     this->giveLineSearchSolver()->solve( X[dG], ddX[dG], fIntList[dG], fExtList[dG], R0, prescribedEqs, 1.0, eta, LSstatus, tStep);
                 } else if ( this->constrainedNRFlag && ( nite > this->constrainedNRminiter ) ) { 
                     if ( this->forceErrVec.computeSquaredNorm() > this->forceErrVecOld.computeSquaredNorm() ) {
                         printf("Constraining increment to be %e times full increment...\n", this->constrainedNRalpha);
                         ddX[dG].times(this->constrainedNRalpha);
-                    }   
+                    }
                 }
                 X[dG].add(ddX[dG]);
                 dX[dG].add(ddX[dG]);
@@ -300,13 +298,12 @@ StaggeredSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0, FloatArra
                 
                 tStep->incrementStateCounter(); // update solution state counter
                 tStep->incrementSubStepNumber();
-                nite++; // iteration increment
 
                 engngModel->giveExportModuleManager()->doOutput(tStep, true);
-            } while ( true ); // end of iteration
+            }
         }
-      
-    
+
+
         printf("\nStaggered iteration (all dof id's) \n");
         
         // Check convergence of total system
@@ -314,15 +311,9 @@ StaggeredSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0, FloatArra
         converged = this->checkConvergence(RT, F, RHS, ddXtotal, Xtotal, RRTtotal, internalForcesEBENorm, nStaggeredIter, errorOutOfRangeFlag);
         if ( converged && ( nStaggeredIter >= minIterations ) ) {
             break;
-        }    
-        
-        nStaggeredIter++;
-    
-   } while ( true ); // end of iteration 
+        }
+   }
 
-   
-   
-   
     status |= NM_Success;
     solved = 1;
 

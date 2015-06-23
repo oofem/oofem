@@ -259,7 +259,7 @@ LinQuad3DPlaneStress :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
             cht = GlobalForceTensor;
         } else {
             cht = GlobalStrainTensor;
-	    c = 1.0; // tensor components reported
+            c = 1.0; // tensor components reported
         }
 
         this->giveCharacteristicTensor(globTensor, cht, gp, tStep);
@@ -274,8 +274,8 @@ LinQuad3DPlaneStress :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
         answer.at(8) = c*globTensor.at(2, 3); //syzForce
         answer.at(9) = globTensor.at(3, 3); //szzForce
         // mutiply stresses by thickness to get forces
-	if (cht == GlobalForceTensor)
-	  answer.times( this->giveCrossSection()->give(CS_Thickness, gp) );
+    if (cht == GlobalForceTensor)
+        answer.times( this->giveCrossSection()->give(CS_Thickness, gp) );
 
         return 1;
     } else if ( ( type == IST_ShellMomentumTensor ) || ( type == IST_ShellCurvatureTensor ) ) {

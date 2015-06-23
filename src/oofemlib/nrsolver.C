@@ -245,7 +245,7 @@ NRSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0, FloatArray *iR,
     }
 
     nite = 0;
-    do {
+    for ( nite = 0; ; ++nite ) {
       // Compute the residual
       engngModel->updateComponent(tStep, InternalRhs, domain);
       if (nite || iR == NULL) {
@@ -309,10 +309,9 @@ NRSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0, FloatArray *iR,
         dX.add(ddX);
         tStep->incrementStateCounter(); // update solution state counter
         tStep->incrementSubStepNumber();
-        nite++; // iteration increment
 
         engngModel->giveExportModuleManager()->doOutput(tStep, true);
-    } while ( true ); // end of iteration
+    }
 
     status |= NM_Success;
     solved = 1;
