@@ -43,6 +43,7 @@
 #include "dynamicinputrecord.h"
 #include "engngm.h"
 #include "node.h"
+#include "dof.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
