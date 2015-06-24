@@ -35,7 +35,6 @@
 #ifndef DELAMINATION_H_
 #define DELAMINATION_H_
 
-#include "xfem/enrichmentitem.h"
 #include "xfem/listbasedei.h"
 
 ///@name Input fields for Delamination

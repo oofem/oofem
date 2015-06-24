@@ -47,6 +47,7 @@
 #include "dynamicinputrecord.h"
 #include "domain.h"
 #include "unknownnumberingscheme.h"
+#include "entityrenumberingscheme.h"
 #include "engngm.h"
 
 namespace oofem {

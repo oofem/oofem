@@ -290,8 +290,8 @@ Delamination :: appendInputRecords(DynamicDataReader &oDR)
     DynamicInputRecord *eiRec = new DynamicInputRecord();
     FEMComponent :: giveInputRecord(* eiRec);
 
-    eiRec->setField(mEnrFrontIndex,                     _IFT_EnrichmentItem_front);
-    eiRec->setField(mPropLawIndex,                      _IFT_EnrichmentItem_propagationlaw);
+    eiRec->setField(mEnrFrontIndex, _IFT_EnrichmentItem_front);
+    eiRec->setField(mPropLawIndex, _IFT_EnrichmentItem_propagationlaw);
 
     // Delamination specific records
     eiRec->setField(this->interfaceNum, _IFT_Delamination_interfacenum);

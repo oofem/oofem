@@ -40,6 +40,8 @@
 
 #include "enrichmentitem.h"
 
+#include <vector>
+
 namespace oofem {
 class XfemManager;
 class Domain;

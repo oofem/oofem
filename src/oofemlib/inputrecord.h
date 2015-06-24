@@ -41,6 +41,7 @@
 
 #include "logger.h" // for missing __func__ in MSC
 #include "oofemcfg.h"
+#include "irresulttype.h"
 
 namespace oofem {
 class IntArray;
@@ -49,15 +50,6 @@ class FloatMatrix;
 class Dictionary;
 class Range;
 class ScalarFunction;
-
-/**
- * Type defining the return values of InputRecord reading operations.
- * IRRT_OK the corresponding value to given keyword was successfully read.
- *       the answer parameter contains the value.
- * IRRT_NOTFOUND the keyword is not found; the answer is not modified
- * IRRT_BAD_FORMAT the keyword was found but the record is not correctly formatted.
- */
-enum IRResultType { IRRT_OK = 0, IRRT_NOTFOUND, IRRT_BAD_FORMAT };
 
 /// Identifier of fields in input records.
 typedef const char *InputFieldType;

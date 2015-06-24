@@ -32,68 +32,20 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-/*
- * The original idea for this class comes from
- * Dubois-Pelerin, Y.: "Object-Oriented  Finite Elements: Programming concepts and Implementation",
- * PhD Thesis, EPFL, Lausanne, 1992.
- */
-
-#include "femcmpnn.h"
-#include "datastream.h"
-#include "contextioerr.h"
-#include "dynamicinputrecord.h"
-
-#include <cstdarg>
-
+#ifndef irresulttype_h
+#define irresulttype_h
 
 namespace oofem {
-contextIOResultType
-FEMComponent :: saveContext(DataStream &stream, ContextMode mode, void *obj)
-{
-    if ( mode & CM_Definition ) {
-        if ( !stream.write(number) ) {
-            THROW_CIOERR(CIO_IOERR);
-        }
-    }
 
-    return CIO_OK;
+/**
+ * Type defining the return values of InputRecord reading operations.
+ * IRRT_OK the corresponding value to given keyword was successfully read.
+ *       the answer parameter contains the value.
+ * IRRT_NOTFOUND the keyword is not found; the answer is not modified
+ * IRRT_BAD_FORMAT the keyword was found but the record is not correctly formatted.
+ */
+enum IRResultType { IRRT_OK = 0, IRRT_NOTFOUND, IRRT_BAD_FORMAT };
+
 }
 
-
-contextIOResultType
-FEMComponent :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-{
-    if ( mode & CM_Definition ) {
-        if ( !stream.read(number) ) {
-            THROW_CIOERR(CIO_IOERR);
-        }
-    }
-
-    return CIO_OK;
-}
-
-
-void
-FEMComponent :: giveInputRecord(DynamicInputRecord &input)
-{
-    input.setRecordKeywordField( this->giveInputRecordName(), this->giveNumber() );
-}
-
-
-std :: string
-FEMComponent :: errorInfo(const char *func) const
-{
-    return std :: string(this->giveClassName()) + "::" + func + ", number: " + std::to_string(this->giveNumber());
-}
-
-IRResultType FEMComponent :: initializeFrom(InputRecord* ir)
-{
-    return IRRT_OK;
-}
-
-int FEMComponent :: checkConsistency()
-{
-    return 1;
-}
-
-} // end namespace oofem
+#endif // irresulttype_h

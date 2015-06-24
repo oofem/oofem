@@ -33,6 +33,7 @@
  */
 
 #include "initialcondition.h"
+#include "inputrecord.h"
 #include "cltypes.h"
 
 namespace oofem {

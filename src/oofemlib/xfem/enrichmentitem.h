@@ -36,17 +36,15 @@
 #define enrichmentitem_h
 
 #include "femcmpnn.h"
-#include "floatmatrix.h"
 #include "dofiditem.h"
 #include "tipinfo.h"
-
-#include <memory>
-
+#include "intarray.h"
 #include "dofmanager.h"
-#include <algorithm>
-#include <unordered_map>
-
 #include "xfem/enrichmentfronts/enrichmentfront.h"
+#include "error.h"
+
+#include <vector>
+#include <unordered_map>
 
 ///@name Input fields for XFEM
 //@{
@@ -80,7 +78,9 @@ class GaussPoint;
 class Element;
 class CrossSection;
 class Node;
-
+class FloatMatrix;
+class DofManager;
+class DataReader;
 
 enum NodeEnrichmentType : int {
     NodeEnr_NONE = 0,

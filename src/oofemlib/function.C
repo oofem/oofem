@@ -34,6 +34,7 @@
 
 #include "function.h"
 #include "timestep.h"
+#include "error.h"
 
 namespace oofem {
 Function :: Function(int n, Domain *d) :
