@@ -48,9 +48,9 @@ class FEI3dTetQuad;
 class FEI3dTetLin;
 
 class tet21ghostsolid : public NLStructuralElement,
-        public NodalAveragingRecoveryModelInterface,
-        public SpatialLocalizerInterface,
-        public EIPrimaryUnknownMapperInterface
+    public NodalAveragingRecoveryModelInterface,
+    public SpatialLocalizerInterface,
+    public EIPrimaryUnknownMapperInterface
 {
 private:
     FloatMatrix Dghost;
@@ -76,6 +76,7 @@ public:
     virtual void computeNumericStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
     virtual void giveInternalForcesVectorGivenSolution(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord, FloatArray &SolutionVector);
+
     virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
     virtual void computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
 
@@ -88,6 +89,8 @@ public:
     virtual bool giveRowTransformationMatrix(TimeStep *tStep);
     virtual const char *giveClassName() const { return "tet21ghostsolid"; }
 
+    virtual void computeNumericStiffnessMatrixDebug(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
+    virtual void giveInternalForcesVectorGivenSolutionDebug(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord, FloatArray &SolutionVector, bool ExtraLogging);
 
     virtual Interface *giveInterface(InterfaceType it);
 
@@ -115,8 +118,6 @@ protected:
     static IntArray conservation_ordering;
     /// Ordering of ghost displacements equations
     static IntArray ghostdisplacement_ordering;
-
 };
-
 }
 #endif // TET21GHOSTSOLID_H
