@@ -904,12 +904,12 @@ MITC4Shell :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
 
         this->giveCharacteristicTensor(globTensor, cht, gp, tStep);
 
-        answer.at(1) = globTensor.at(1, 1); //sx
-        answer.at(2) = globTensor.at(2, 2); //sy
-        answer.at(3) = globTensor.at(3, 3); //sz
-        answer.at(4) = globTensor.at(1, 2); //sxy
-        answer.at(5) = globTensor.at(2, 3); //syz
-        answer.at(6) = globTensor.at(1, 3); //szx
+        answer.at(1) = globTensor.at(1, 1); //xx
+        answer.at(2) = globTensor.at(2, 2); //yy
+        answer.at(3) = globTensor.at(3, 3); //zz
+        answer.at(4) = 2 * globTensor.at(1, 2); //xy
+        answer.at(5) = 2 * globTensor.at(2, 3); //yz
+        answer.at(6) = 2 * globTensor.at(1, 3); //zx
 
         return 1;
     } else if ( type == IST_ShellForceTensor ) {
@@ -917,12 +917,12 @@ MITC4Shell :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
 
         this->giveCharacteristicTensor(globTensor, cht, gp, tStep);
 
-        answer.at(1) = globTensor.at(1, 1); //sx
-        answer.at(2) = globTensor.at(2, 2); //sy
-        answer.at(3) = globTensor.at(3, 3); //sz
-        answer.at(4) = globTensor.at(1, 2); //sxy
-        answer.at(5) = globTensor.at(2, 3); //syz
-        answer.at(6) = globTensor.at(1, 3); //szx
+        answer.at(1) = globTensor.at(1, 1); //xx
+        answer.at(2) = globTensor.at(2, 2); //yy
+        answer.at(3) = globTensor.at(3, 3); //zz
+        answer.at(4) = globTensor.at(1, 2); //xy
+        answer.at(5) = globTensor.at(2, 3); //yz
+        answer.at(6) = globTensor.at(1, 3); //zx
 
         return 1;
     } else {

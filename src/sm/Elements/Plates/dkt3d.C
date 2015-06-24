@@ -391,31 +391,20 @@ DKTPlate3d :: printOutputAt(FILE *file, TimeStep *tStep)
             this->giveIPValue(v, gp, IST_ShellStrainTensor, tStep);
             fprintf(file, "  strains    ");
             // eps_x, eps_y, eps_z, eps_yz, eps_xz, eps_xy (global)
-            fprintf( file,
-                    " %.4e %.4e %.4e %.4e %.4e %.4e ",
-                    v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
+            for ( auto &val : v ) fprintf(file, " %.4e", val);
 
             this->giveIPValue(v, gp, IST_ShellCurvatureTensor, tStep);
             fprintf(file, "\n              curvatures ");
-            // k_x, k_y, k_z, k_yz, k_xz, k_xy (global)
-            fprintf( file,
-                    " %.4e %.4e %.4e %.4e %.4e %.4e ",
-                    v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
+            for ( auto &val : v ) fprintf(file, " %.4e", val);
 
             // Forces - Moments
             this->giveIPValue(v, gp, IST_ShellForceTensor, tStep);
             fprintf(file, "\n              stresses   ");
-            // n_x, n_y, n_z, v_yz, v_xz, v_xy (global)
-            fprintf( file,
-                    " %.4e %.4e %.4e %.4e %.4e %.4e ",
-                    v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
+            for ( auto &val : v ) fprintf(file, " %.4e", val);
 
             this->giveIPValue(v, gp, IST_ShellMomentumTensor, tStep);
             fprintf(file, "\n              moments    ");
-            // m_x, m_y, m_z, m_yz, m_xz, m_xy (global)
-            fprintf( file,
-                    " %.4e %.4e %.4e %.4e %.4e %.4e ",
-                    v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
+            for ( auto &val : v ) fprintf(file, " %.4e", val);
 
             fprintf(file, "\n");
         }

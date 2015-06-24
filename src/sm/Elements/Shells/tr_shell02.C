@@ -222,8 +222,8 @@ TR_SHELL02 :: computeVolumeAround(GaussPoint *gp)
 int
 TR_SHELL02 :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    if ( ( type == IST_ShellForceTensor ) || ( type == IST_ShellStrainTensor ) ||
-        ( type == IST_ShellMomentumTensor ) || ( type == IST_ShellCurvatureTensor ) ) {
+    if ( type == IST_ShellForceTensor || type == IST_ShellStrainTensor ||
+        type == IST_ShellMomentumTensor || type == IST_ShellCurvatureTensor ) {
         FloatArray aux;
         GaussPoint *membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
         GaussPoint *plateGP = plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
