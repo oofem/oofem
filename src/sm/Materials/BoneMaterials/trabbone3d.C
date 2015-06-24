@@ -416,15 +416,13 @@ TrabBone3D :: projectOnYieldSurface(double &tempKappa, FloatArray &tempEffective
                 max_num_iter = 4000;
                 double eta = 0.1;
                 beta = 25.e-4;
-                int j = 0;
                 int jMax = 10;
                 double alfa = 1;
                 double M = ( errorR * errorR + errorF * errorF ) / 2;
                 double dM = -2 * M;
                 double newDeltaKappa;
                 FloatArray tempStress;
-                while ( true ) {
-                    j++;
+                for ( int j = 0;; ++j ) {
                     tempStress = incTempEffectiveStress;
                     tempStress.times(-alfa);
                     tempStress.add(tempEffectiveStress);

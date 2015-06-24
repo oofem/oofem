@@ -1097,8 +1097,6 @@ MPSMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeSte
         //        sigma = status->giveStressVector();       //stress vector at the beginning of time-step
         sigma = status->giveViscoelasticStressVector();
         this->giveUnitComplianceMatrix(C, gp, tStep);
-        reducedAnswer.resize( C.giveNumberOfRows() );
-	reducedAnswer.zero();
 
         reducedAnswer.beProductOf(C, sigma);
 
@@ -1113,9 +1111,9 @@ MPSMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeSte
             //            if ( tStep->isTheFirstStep() ) {
             // is the first time step or the material has been just activated (i.e. the previous time was less than casting time)
             if ( tStep->isTheFirstStep() || ( tStep->giveIntrinsicTime() - tStep->giveTimeIncrement() - this->castingTime < 0. ) ) {
-                etaR = this->giveInitViscosity(tStep) /  this->computePsiR(gp, tStep, 0);
+                etaR = this->giveInitViscosity(tStep) / this->computePsiR(gp, tStep, 0);
             } else {
-                etaR = status->giveFlowTermViscosity() /  this->computePsiR(gp, tStep, 0);
+                etaR = status->giveFlowTermViscosity() / this->computePsiR(gp, tStep, 0);
             }
 
             dEtaR =  eta /  this->computePsiR(gp, tStep, 1) - etaR;
@@ -1150,8 +1148,6 @@ MPSMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeSte
         status->setCreepStrainIncrement(answer);
 #endif
 
-
-        return;
     } else {
         /* error - total mode not implemented yet */
         OOFEM_ERROR("mode is not supported");
