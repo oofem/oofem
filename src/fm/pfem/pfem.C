@@ -121,7 +121,8 @@ void PFEMCorrectionRhsAssembler :: vectorFromElement(FloatArray &vec, Element &e
 void PFEMCorrectionRhsAssembler :: locationFromElement(IntArray& loc, Element& element, const UnknownNumberingScheme& s, IntArray* dofIds) const
 {
     // Note: For 2D, the V_w will just be ignored anyweay, so it's safe to use all three always.
-    element.giveLocationArray(loc, {V_u, V_v, V_w}, s, dofIds);
+    //element.giveLocationArray(loc, {V_u, V_v, V_w}, s, dofIds);
+    element.giveLocationArray(loc, {V_u, V_v}, s, dofIds);
 }
 
 
@@ -138,7 +139,8 @@ void PFEMLaplaceVelocityAssembler :: vectorFromElement(FloatArray &vec, Element 
 
 void PFEMLaplaceVelocityAssembler :: locationFromElement(IntArray& loc, Element& element, const UnknownNumberingScheme& s, IntArray* dofIds) const
 {
-    element.giveLocationArray(loc, {V_u, V_v, V_w}, s, dofIds);
+  //element.giveLocationArray(loc, {V_u, V_v, V_w}, s, dofIds);
+    element.giveLocationArray(loc, {V_u, V_v}, s, dofIds);
 }
 
 
@@ -155,7 +157,8 @@ void PFEMMassVelocityAssembler :: vectorFromElement(FloatArray &vec, Element &el
 
 void PFEMMassVelocityAssembler :: locationFromElement(IntArray& loc, Element& element, const UnknownNumberingScheme& s, IntArray* dofIds) const
 {
-    element.giveLocationArray(loc, {V_u, V_v, V_w}, s, dofIds);
+  //element.giveLocationArray(loc, {V_u, V_v, V_w}, s, dofIds);
+    element.giveLocationArray(loc, {V_u, V_v}, s, dofIds);
 }
 
 

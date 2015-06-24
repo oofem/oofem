@@ -87,6 +87,7 @@ public:
     /// Destructor
     ~TR1_2D_PFEM();
 
+    virtual void computeDiagonalMassMtrx(FloatArray &answer, TimeStep *);
     virtual void computeDiagonalMassMtrx(FloatMatrix &answer, TimeStep *);
 
     virtual double computeCriticalTimeStep(TimeStep *tStep);

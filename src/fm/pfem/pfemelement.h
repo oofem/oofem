@@ -75,7 +75,9 @@ public:
     // characteristic  matrix
     void giveCharacteristicMatrix(FloatMatrix &answer, CharType, TimeStep *);
     void giveCharacteristicVector(FloatArray &answer, CharType, ValueModeType, TimeStep *);
-
+ 
+    /** Calculates diagonal mass matrix as vector*/
+    virtual void computeDiagonalMassMtrx(FloatArray &answer, TimeStep *) = 0;
     /** Calculates diagonal mass matrix */
     virtual void computeDiagonalMassMtrx(FloatMatrix &answer, TimeStep *) = 0;
     /// Calculates critical time step

@@ -176,6 +176,9 @@ PFEMElement ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx, Valu
         FloatArray u;
         this->computeVectorOfVelocities(VM_Total, tStep, u);
         answer.beProductOf(d, u);
+    } else if ( mtrx == LumpedMassMatrix ) {
+        this->computeDiagonalMassMtrx(reducedVector, tStep);
+        answer.assemble(reducedVector, this->giveVelocityDofMask());
     } else {
         OOFEM_ERROR("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
     }
