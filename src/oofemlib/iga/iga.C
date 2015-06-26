@@ -1062,8 +1062,7 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
 
                 for ( k = 0; k < 2; k++ ) {
                     // create a dummy ip's
-                    FloatArray *cc = new FloatArray(c [ k ]);   // constructor of gp does not make its own copy
-                    GaussPoint gp(iRule, 999, cc, 1.0, _PlaneStress);
+                    GaussPoint gp(iRule, 999, c [ k ], 1.0, _PlaneStress);
 
                     // compute displacements at gp
                     se->computeNMatrixAt(N, & gp);
@@ -1119,8 +1118,7 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
 
                     for ( k = 0; k < 4; k++ ) {
                         // create a dummy ip's
-                        FloatArray *cc = new FloatArray(c [ k ]);   // constructor of gp does not make its own copy
-                        GaussPoint gp(iRule, 999, cc, 1.0, _PlaneStress);
+                        GaussPoint gp(iRule, 999, c [ k ], 1.0, _PlaneStress);
 
                         // compute displacements at gp
                         se->computeNMatrixAt(N, & gp);
@@ -1195,8 +1193,7 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
 
                         for ( m = 0; m < 8; m++ ) {
                             // create a dummy ip's
-                            FloatArray *cc = new FloatArray(c [ m ]);   // constructor of gp does not make its own copy
-                            GaussPoint gp(iRule, 999, cc, 1.0, _3dMat);
+                            GaussPoint gp(iRule, 999, c [ m ], 1.0, _3dMat);
 
                             // compute displacements at gp
                             se->computeNMatrixAt(N, & gp);
