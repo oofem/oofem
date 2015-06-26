@@ -109,12 +109,9 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
 #endif
     //Delete lhs matrix and create a new one. This is necessary due to growing/decreasing number of equations.
     if ( tStep->isTheFirstStep() || this->changingProblemSize ) {
-        if ( conductivityMatrix ) {
-            delete conductivityMatrix;
-        }
 
-        conductivityMatrix = classFactory.createSparseMtrx(sparseMtrxType);
-        if ( conductivityMatrix == NULL ) {
+        conductivityMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+        if ( !conductivityMatrix ) {
             OOFEM_ERROR("sparse matrix creation failed");
         }
 

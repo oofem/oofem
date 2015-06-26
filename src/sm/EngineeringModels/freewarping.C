@@ -62,9 +62,7 @@ REGISTER_EngngModel(FreeWarping);
 
 FreeWarping :: FreeWarping(int i, EngngModel *_master) : StructuralEngngModel(i, _master), loadVector(), displacementVector()
 {
-    stiffnessMatrix = NULL;
     ndomains = 1;
-    nMethod = NULL;
     initFlag = 1;
     solverType = ST_Direct;
 }
@@ -72,30 +70,24 @@ FreeWarping :: FreeWarping(int i, EngngModel *_master) : StructuralEngngModel(i,
 
 FreeWarping :: ~FreeWarping()
 {
-    delete stiffnessMatrix;
-    delete nMethod;
 }
 
 
 NumericalMethod *FreeWarping :: giveNumericalMethod(MetaStep *mStep)
 {
-    if ( nMethod ) {
-        return nMethod;
-    }
-
     if ( isParallel() ) {
         if ( ( solverType == ST_Petsc ) || ( solverType == ST_Feti ) ) {
-            nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
+            nMethod.reset( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
         }
     } else {
-        nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
+        nMethod.reset( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
     }
 
-    if ( nMethod == NULL ) {
+    if ( !nMethod ) {
         OOFEM_ERROR("linear solver creation failed");
     }
 
-    return nMethod;
+    return nMethod.get();
 }
 
 IRResultType
@@ -286,8 +278,8 @@ void FreeWarping :: solveYourselfAt(TimeStep *tStep)
         //
         // first step  assemble stiffness Matrix
         //
-        stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
-        if ( stiffnessMatrix == NULL ) {
+        stiffnessMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+        if ( !stiffnessMatrix ) {
             OOFEM_ERROR("sparse matrix creation failed");
         }
 
@@ -298,7 +290,7 @@ void FreeWarping :: solveYourselfAt(TimeStep *tStep)
         //
         // original stiffnes Matrix is singular (no Dirichlet b.c's exist for free warping problem)
         // thus one diagonal element is made stiffer (for each warping crosssection)
-        this->updateStiffnessMatrix(stiffnessMatrix);
+        this->updateStiffnessMatrix(stiffnessMatrix.get());
 
         initFlag = 0;
     }
@@ -423,16 +415,16 @@ FreeWarping :: updateStiffnessMatrix(SparseMtrx *answer)
 {
     // increase diagonal stiffness (coresponding to the 1st node of 1st element ) for each crosssection
     for ( int j = 1; j <= this->giveDomain(1)->giveNumberOfCrossSectionModels(); j++ ) {
-        for ( int i = 1; i <= this->giveDomain(1)->giveNumberOfElements(); i++ ) {
-            int CSnumber = this->giveDomain(1)->giveElement(i)->giveCrossSection()->giveNumber();
+        for ( auto &elem : this->giveDomain(1)->giveElements() ) {
+            int CSnumber = elem->giveCrossSection()->giveNumber();
             if ( CSnumber == j ) {
                 IntArray locationArray;
                 EModelDefaultEquationNumbering s;
-                this->giveDomain(1)->giveElement(i)->giveLocationArray(locationArray, s);
+                elem->giveLocationArray(locationArray, s);
                 if ( locationArray.at(1) != 0 ) {
                     int cn = locationArray.at(1);
                     if ( answer->at(cn, cn) != 0 ) {
-                        answer->at(cn, cn) = 2 * answer->at(cn, cn);
+                        answer->at(cn, cn) *= 2;
                     } else {
                         answer->at(cn, cn) = 1000;
                     }

@@ -54,7 +54,6 @@ int RVEStokesFlow :: n = 1;
 RVEStokesFlowMaterialStatus :: RVEStokesFlowMaterialStatus(int n, Domain *d, GaussPoint *g, const std :: string &inputfile) :
     TransportMaterialStatus(n, d, g), oldTangent(true)
 {
-    
     OOFEM_LOG_INFO( "************************** Instanciating microproblem from file %s\n", inputfile.c_str() );
     OOFEMTXTDataReader dr( inputfile.c_str() );
 

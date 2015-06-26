@@ -48,10 +48,7 @@
 #include "load.h"
 #include "timestep.h"
 #include "boundaryload.h"
-#ifndef __MAKEDEPEND
- #include <math.h>
- #include <stdio.h>
-#endif
+#include "mathfem.h"
 #include "contextioerr.h"
 
 #ifdef __OOFEG
@@ -62,13 +59,10 @@
 namespace oofem {
 PFEMElement2d :: PFEMElement2d(int n, Domain *aDomain) :
     PFEMElement(n, aDomain)
-
 {
-    // Constructor.
 }
 
 PFEMElement2d :: ~PFEMElement2d()
-// Destructor
 { }
 
 

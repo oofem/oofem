@@ -39,8 +39,6 @@
 
 #include "pfem.h"
 #include "nummet.h"
-#include "ldltfact.h"
-//#include "imlsolver.h"
 #include "timestep.h"
 #include "metastep.h"
 #include "element.h"
@@ -48,10 +46,8 @@
 #include "elementside.h"
 #include "dof.h"
 #include "initialcondition.h"
-
 #include "verbose.h"
 #include "connectivitytable.h"
-#include "cbselement.h"
 #include "pfemelement.h"
 #include "tr1_2d_pfem.h"
 #include "delaunaytriangulator.h"
@@ -60,22 +56,11 @@
 #include "octreelocalizert.h" //changed from "octreelocalizer.h"
 #include "spatiallocalizer.h"
 #include "classfactory.h"
-//#include "usrdefsub.h"
 #include "mathfem.h"
 #include "datastream.h"
-//<RESTRICTED_SECTION>
-#include "leplic.h"
-//</RESTRICTED_SECTION>
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
-#ifdef TIME_REPORT
- #ifndef __MAKEDEPEND
-  #include <time.h>
- #endif
-//#include "clock.h"
-#endif
 #include "contextioerr.h"
+#include "leplic.h"
+
 
 namespace oofem {
 REGISTER_EngngModel(PFEM);
@@ -373,7 +358,7 @@ PFEM :: giveNextStep()
         double idt = ielem->computeCriticalTimeStep(previousStep.get());
         if ( idt < ndt ) {
             ndt = idt;
-            printf("Reducing time step due to element #%i \n", i);
+            OOFEM_LOG_INFO("Reducing time step due to element #%i \n", i);
         }
         volume += ielem->computeArea();
     }
@@ -414,12 +399,8 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
 
     this->assembleVector( avLhs, tStep, LumpedMassVectorAssembler(), VM_Total, avns, this->giveDomain(1) );
 
-    if ( pLhs ) {
-        delete pLhs;
-    }
-
-    pLhs = classFactory.createSparseMtrx(sparseMtrxType);
-    if ( pLhs == NULL ) {
+    pLhs.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+    if ( !pLhs ) {
         OOFEM_ERROR("solveYourselfAt: sparse matrix creation failed");
     }
 
@@ -590,7 +571,7 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
     if ( iteration > 49 ) {
         OOFEM_ERROR("Maximal iteration count exceded");
     } else {
-        printf("\n %i iterations performed.\n", iteration);
+        OOFEM_LOG_INFO("\n %i iterations performed.\n", iteration);
     }
 
 

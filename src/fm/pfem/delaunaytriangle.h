@@ -89,7 +89,7 @@ private:
     /// Flag for Delaunay property
     bool validFlag;
     /// In order to allow fast search in octree, every triangle stores list of octree cells where its circumscribed circle is contained.
-    std :: list< LocalInsertionData< DelaunayTriangle * > > *listOfCellsContainedInAndPosition;
+    std :: list< LocalInsertionData< DelaunayTriangle * > > listOfCellsContainedInAndPosition;
 };
 } // end namespace oofem
 #endif // delaunaytriangle_h

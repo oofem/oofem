@@ -49,13 +49,9 @@
 #include "load.h"
 #include "timestep.h"
 #include "boundaryload.h"
-#ifndef __MAKEDEPEND
- #include <math.h>
- #include <stdio.h>
-#endif
+#include "mathfem.h"
 #include "contextioerr.h"
 
-#include <assert.h>
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
  #include "connectivitytable.h"

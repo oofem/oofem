@@ -44,8 +44,6 @@
 #include "materialinterface.h"
 #include "assemblercallback.h"
 
-#include <stdio.h>
-
 
 ///@name Input fields for PFEM
 //@{
@@ -120,7 +118,7 @@ protected:
     /// left-hand side matrix for the auxiliary velocity equations
     FloatArray avLhs;
     /// left-hand side matrix for the pressure equations
-    SparseMtrx *pLhs;
+    std :: unique_ptr< SparseMtrx > pLhs;
     /// left-hand side matrix for the velocity equations
     FloatArray vLhs;
 
@@ -170,7 +168,7 @@ public:
     PFEM(int i, EngngModel * _master = NULL) :
         EngngModel(i, _master)
         , avLhs()
-        , pLhs(NULL)
+        , pLhs()
         , vLhs()
         , PressureField(this, 1, FT_Pressure, 1)
         , VelocityField(this, 1, FT_Velocity, 1)

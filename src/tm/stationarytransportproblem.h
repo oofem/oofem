@@ -59,9 +59,9 @@ class StationaryTransportProblem : public EngngModel
 protected:
     SparseMtrxType sparseMtrxType;
     /// This field stores solution vector. For fixed size of problem, the PrimaryField is used, for growing/decreasing size, DofDistributedPrimaryField applies.
-    PrimaryField *UnknownsField;
+    std :: unique_ptr< PrimaryField > UnknownsField;
 
-    SparseMtrx *conductivityMatrix;
+    std :: unique_ptr< SparseMtrx > conductivityMatrix;
     FloatArray internalForces;
     FloatArray eNorm;
 

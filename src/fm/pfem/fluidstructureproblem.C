@@ -62,9 +62,6 @@ REGISTER_EngngModel( FluidStructureProblem );
 FluidStructureProblem :: FluidStructureProblem(int i, EngngModel *_master) : StaggeredProblem(i, _master)
 {
 ///    ndomains = 1; // domain is needed to store the time step ltf
-///    nModels  = 2;
-///    emodelList = new AList< EngngModel >(nModels);
-///    inputStreamNames = new std :: string [ nModels ];
 
 ///    dtTimeFunction = 0;
 ///    stepMultiplier = 1.;
@@ -75,8 +72,6 @@ FluidStructureProblem :: FluidStructureProblem(int i, EngngModel *_master) : Sta
 
 FluidStructureProblem :: ~FluidStructureProblem()
 {
-///    delete emodelList;
-///    delete [] inputStreamNames;
 }
 
 ///////////

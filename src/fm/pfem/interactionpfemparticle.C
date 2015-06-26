@@ -41,12 +41,8 @@
 #include "../../sm/EngineeringModels/structengngmodel.h"
 #include "domain.h"
 #include "dof.h"
-//#include "inputrecord.h"
+#include "mathfem.h"
 
-#ifndef __MAKEDEPEND
- #include <math.h>
- #include <stdlib.h>
-#endif
 
 namespace oofem {
 REGISTER_DofManager(InteractionPFEMParticle);

@@ -53,17 +53,13 @@ DIIDynamic :: DIIDynamic(int i, EngngModel *_master) : StructuralEngngModel(i, _
     previousDisplacementVector(), previousVelocityVector(), previousAccelerationVector(), previousIncrementOfDisplacement(), help()
 {
     initFlag = true;
-    stiffnessMatrix = NULL;
     ndomains = 1;
-    nMethod = NULL;
 
     initialTimeDiscretization = TD_ThreePointBackward;
 }
 
 DIIDynamic :: ~DIIDynamic()
 {
-    delete stiffnessMatrix;
-    delete nMethod;
 }
 
 NumericalMethod *DIIDynamic :: giveNumericalMethod(MetaStep *mStep)
@@ -71,15 +67,15 @@ NumericalMethod *DIIDynamic :: giveNumericalMethod(MetaStep *mStep)
 // - SolutionOfLinearEquations
 {
     if ( nMethod ) {
-        return nMethod;
+        return nMethod.get();
     }
 
-    nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
-    if ( nMethod == NULL ) {
+    nMethod.reset( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
+    if ( !nMethod ) {
         OOFEM_ERROR("linear solver creation failed");
     }
 
-    return nMethod;
+    return nMethod.get();
 }
 
 
@@ -257,14 +253,13 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
     Domain *domain = this->giveDomain(1);
     int neq =  this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
 
-    
 
     if ( initFlag ) {
 #ifdef VERBOSE
         OOFEM_LOG_DEBUG("Assembling stiffness matrix\n");
 #endif
-        stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
-        if ( stiffnessMatrix == NULL ) {
+        stiffnessMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+        if ( !stiffnessMatrix ) {
             OOFEM_ERROR("sparse matrix creation failed");
         }
 
@@ -276,17 +271,10 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
         help.resize(neq);
         help.zero();
 
-        previousDisplacementVector.resize(neq);
-        previousVelocityVector.resize(neq);
-        previousAccelerationVector.resize(neq);
-        previousLoadVector.resize(neq);
-
-        for ( int i = 1; i <= neq; i++ ) {
-            previousDisplacementVector.at(i) = displacementVector.at(i);
-            previousVelocityVector.at(i)     = velocityVector.at(i);
-            previousAccelerationVector.at(i) = accelerationVector.at(i);
-            previousLoadVector.at(i)         = loadVector.at(i);
-        }
+        previousDisplacementVector = displacementVector;
+        previousVelocityVector = velocityVector;
+        previousAccelerationVector = accelerationVector;
+        previousLoadVector = loadVector;
 
         initFlag = 0;
     }
@@ -402,15 +390,11 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
 
 void DIIDynamic :: updateYourself(TimeStep *tStep)
 {
-    int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
-
-    for ( int i = 1; i <= neq; i++ ) {
-        previousIncrementOfDisplacement.at(i) = displacementVector.at(i) - previousDisplacementVector.at(i);
-        previousDisplacementVector.at(i)      = displacementVector.at(i);
-        previousVelocityVector.at(i)          = velocityVector.at(i);
-        previousAccelerationVector.at(i)      = accelerationVector.at(i);
-        previousLoadVector.at(i)              = loadVector.at(i);
-    }
+    previousIncrementOfDisplacement.beDifferenceOf(displacementVector, previousDisplacementVector);
+    previousDisplacementVector = displacementVector;
+    previousVelocityVector = velocityVector;
+    previousAccelerationVector = accelerationVector;
+    previousLoadVector = loadVector;
 
     StructuralEngngModel :: updateYourself(tStep);
 }

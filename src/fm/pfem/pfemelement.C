@@ -44,16 +44,10 @@
 #include "intarray.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
-//#include "debug.h"
 #include "verbose.h"
 #include "material.h"
-
 #include "elementside.h"
 #include "mathfem.h"
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
- #include <stdio.h>
-#endif
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"

@@ -97,13 +97,11 @@ NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel
     dtFunction = 0;
     internalVarUpdateStamp = 0;
     changingProblemSize = false;
-    linSolver = NULL;
     solverType = ST_Direct;
 }
 
 NonStationaryTransportProblem :: ~NonStationaryTransportProblem()
 {
-    delete linSolver;
 }
 
 
@@ -112,16 +110,12 @@ NumericalMethod *NonStationaryTransportProblem :: giveNumericalMethod(MetaStep *
 //     - SolutionOfLinearEquations
 
 {
-    if ( linSolver ) {
-        return linSolver;
-    }
-
-    linSolver = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
-    if ( linSolver == NULL ) {
+    linSolver.reset( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
+    if ( !linSolver ) {
         OOFEM_ERROR("linear solver creation failed");
     }
 
-    return linSolver;
+    return linSolver.get();
 }
 
 IRResultType
@@ -159,9 +153,9 @@ NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
     //secure equation renumbering, otherwise keep efficient algorithms
     if ( ir->hasField(_IFT_NonStationaryTransportProblem_changingproblemsize) ) {
         changingProblemSize = true;
-        UnknownsField = new DofDistributedPrimaryField(this, 1, FT_TransportProblemUnknowns, 1);
+        UnknownsField.reset( new DofDistributedPrimaryField(this, 1, FT_TransportProblemUnknowns, 1) );
     } else {
-        UnknownsField = new PrimaryField(this, 1, FT_TransportProblemUnknowns, 1);
+        UnknownsField.reset( new PrimaryField(this, 1, FT_TransportProblemUnknowns, 1) );
     }
 
     //read other input data from StationaryTransportProblem
@@ -316,12 +310,9 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 
     //Create a new lhs matrix if necessary
     if ( tStep->isTheFirstStep() || this->changingProblemSize ) {
-        if ( conductivityMatrix ) {
-            delete conductivityMatrix;
-        }
 
-        conductivityMatrix = classFactory.createSparseMtrx(sparseMtrxType);
-        if ( conductivityMatrix == NULL ) {
+        conductivityMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+        if ( !conductivityMatrix ) {
             OOFEM_ERROR("sparse matrix creation failed");
         }
 

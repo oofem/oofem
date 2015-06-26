@@ -49,10 +49,8 @@
 #include "mathfem.h"
 #include "timer.h"
 
-#ifndef __MAKEDEPEND
- #include <set>
- #include <list>
-#endif
+#include <set>
+#include <list>
 
 namespace oofem {
 class Domain;

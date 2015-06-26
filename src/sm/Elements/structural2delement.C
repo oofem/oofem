@@ -47,8 +47,9 @@ Structural2DElement :: Structural2DElement(int n, Domain *aDomain) :
   cellGeometryWrapper = NULL;
 }
 
-Structural2DElement :: ~Structural2DElement() {
-  if (cellGeometryWrapper) delete cellGeometryWrapper;
+Structural2DElement :: ~Structural2DElement()
+{
+    if ( cellGeometryWrapper ) delete cellGeometryWrapper;
 }
 
 void
@@ -68,12 +69,13 @@ Structural2DElement :: giveNumberOfNodes() const
 
 
 FEICellGeometry*
-Structural2DElement::giveCellGeometryWrapper() {
-  if (cellGeometryWrapper) {
+Structural2DElement::giveCellGeometryWrapper() 
+{
+    if ( !cellGeometryWrapper ) {
+        cellGeometryWrapper = new FEIElementGeometryWrapper(this);
+    }
+
     return cellGeometryWrapper;
-  } else {
-    return (cellGeometryWrapper=new FEIElementGeometryWrapper(this));
-  }
 }
  
 

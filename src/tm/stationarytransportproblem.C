@@ -51,17 +51,13 @@ REGISTER_EngngModel(StationaryTransportProblem);
 
 StationaryTransportProblem :: StationaryTransportProblem(int i, EngngModel *_master = NULL) : EngngModel(i, _master)
 {
-    UnknownsField = NULL;
-    conductivityMatrix = NULL;
     ndomains = 1;
     nMethod = NULL;
 }
 
 StationaryTransportProblem :: ~StationaryTransportProblem()
 {
-    delete conductivityMatrix;
     delete nMethod;
-    delete UnknownsField;
 }
 
 NumericalMethod *StationaryTransportProblem :: giveNumericalMethod(MetaStep *mStep)
@@ -96,17 +92,17 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
         FieldManager *fm = this->giveContext()->giveFieldManager();
         for ( int i = 1; i <= exportFields.giveSize(); i++ ) {
             if ( exportFields.at(i) == FT_Temperature ) {
-                std :: shared_ptr< Field > _temperatureField( new MaskedPrimaryField ( FT_Temperature, this->UnknownsField, {T_f} ) );
+                std :: shared_ptr< Field > _temperatureField( new MaskedPrimaryField ( FT_Temperature, this->UnknownsField.get(), {T_f} ) );
                 fm->registerField( _temperatureField, ( FieldType ) exportFields.at(i) );
             } else if ( exportFields.at(i) == FT_HumidityConcentration ) {
-                std :: shared_ptr< Field > _concentrationField( new MaskedPrimaryField ( FT_HumidityConcentration, this->UnknownsField, {C_1} ) );
+                std :: shared_ptr< Field > _concentrationField( new MaskedPrimaryField ( FT_HumidityConcentration, this->UnknownsField.get(), {C_1} ) );
                 fm->registerField( _concentrationField, ( FieldType ) exportFields.at(i) );
             }
         }
     }
 
-    if ( UnknownsField == NULL ) { // can exist from nonstationary transport problem
-        UnknownsField = new PrimaryField(this, 1, FT_TransportProblemUnknowns, 0);
+    if ( !UnknownsField ) { // can exist from nonstationary transport problem
+        UnknownsField.reset( new PrimaryField(this, 1, FT_TransportProblemUnknowns, 0) );
     }
 
     return IRRT_OK;
@@ -156,7 +152,7 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
         solutionVector->resize(neq);
         solutionVector->zero();
 
-        conductivityMatrix = classFactory.createSparseMtrx(sparseMtrxType);
+        conductivityMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
         if ( conductivityMatrix == NULL ) {
             OOFEM_ERROR("sparse matrix creation failed");
         }
