@@ -393,7 +393,6 @@ CCTPlate3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeSte
 void
 CCTPlate3d :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
-    int i, j;
     FloatMatrix ne;
     this->computeNmatrixAt(sgp->giveNaturalCoordinates(), ne);
 
@@ -406,8 +405,8 @@ CCTPlate3d :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint
         2, 3, 4, 8, 9, 10, 14, 15, 16
     };
 
-    for ( i = 0; i < 3; i++ ) {
-        for ( j = 0; j < 9; j++ ) {
+    for ( int i = 0; i < 3; i++ ) {
+        for ( int j = 0; j < 9; j++ ) {
             answer(ri [ i ], ci [ j ]) = ne(i, j);
         }
     }

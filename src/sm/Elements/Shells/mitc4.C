@@ -873,17 +873,11 @@ MITC4Shell :: printOutputAt(FILE *file, TimeStep *tStep)
         fprintf( file, "  GP 1.%d :", gp->giveNumber() );
         this->giveIPValue(v, gp, IST_ShellStrainTensor, tStep);
         fprintf(file, "  strains    ");
-        // eps_x, eps_y, eps_z, eps_yz, eps_zx, eps_xy (global)
-        fprintf( file,
-                 " % .4e % .4e % .4e % .4e % .4e % .4e ",
-                 v.at(1), v.at(2), v.at(3), v.at(4), v.at(5), v.at(6) );
+        for ( auto &val : v ) fprintf(file, " %.4e", val);
 
         this->giveIPValue(v, gp, IST_ShellForceTensor, tStep);
         fprintf(file, "\n              stresses   ");
-        // sig_x, sig_y, sig_z, sig_yz, sig_xz, sig_xy (global)
-        fprintf( file,
-                 " % .4e % .4e % .4e % .4e % .4e % .4e ",
-                 v.at(1), v.at(2), v.at(3),  v.at(4), v.at(5), v.at(6) );
+        for ( auto &val : v ) fprintf(file, " %.4e", val);
 
         fprintf(file, "\n");
     }
@@ -907,9 +901,9 @@ MITC4Shell :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
         answer.at(1) = globTensor.at(1, 1); //xx
         answer.at(2) = globTensor.at(2, 2); //yy
         answer.at(3) = globTensor.at(3, 3); //zz
-        answer.at(4) = 2 * globTensor.at(1, 2); //xy
-        answer.at(5) = 2 * globTensor.at(2, 3); //yz
-        answer.at(6) = 2 * globTensor.at(1, 3); //zx
+        answer.at(4) = 2 * globTensor.at(2, 3); //yz
+        answer.at(5) = 2 * globTensor.at(1, 3); //xz
+        answer.at(6) = 2 * globTensor.at(2, 3); //yz
 
         return 1;
     } else if ( type == IST_ShellForceTensor ) {
@@ -920,9 +914,9 @@ MITC4Shell :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
         answer.at(1) = globTensor.at(1, 1); //xx
         answer.at(2) = globTensor.at(2, 2); //yy
         answer.at(3) = globTensor.at(3, 3); //zz
-        answer.at(4) = globTensor.at(1, 2); //xy
-        answer.at(5) = globTensor.at(2, 3); //yz
-        answer.at(6) = globTensor.at(1, 3); //zx
+        answer.at(4) = globTensor.at(2, 3); //yz
+        answer.at(5) = globTensor.at(1, 3); //xz
+        answer.at(6) = globTensor.at(2, 3); //yz
 
         return 1;
     } else {
@@ -945,7 +939,6 @@ MITC4Shell :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coor
     for ( int _i = 0; _i < 4; _i++ ) {
         this->giveLocalCoordinates( lc [ _i ], * this->giveNode(_i + 1)->giveCoordinates() );
     }
-    // FEI2dTrLin _interp(1, 2);
     bool inplane = interp_lin.global2local( llc, inputCoords_ElCS, FEIVertexListGeometryWrapper(lc) ) > 0;
     answer.resize(2);
     answer.at(1) = inputCoords_ElCS.at(1);
