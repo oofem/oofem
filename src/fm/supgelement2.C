@@ -43,6 +43,7 @@
 #include "fluiddynamicmaterial.h"
 #include "integrationrule.h"
 #include "node.h"
+#include "dof.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
