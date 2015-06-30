@@ -33,6 +33,7 @@
  */
 
 #include "../sm/Elements/Interfaces/cohsur3d.h"
+#include "dof.h"
 #include "node.h"
 #include "particle.h"
 #include "gaussintegrationrule.h"
