@@ -37,7 +37,6 @@
 #include "oofemtxtdatareader.h"
 #include "domain.h"
 #include "gausspoint.h"
-#include "engngm.h"
 #include "contextioerr.h"
 #include "util.h"
 #include "classfactory.h"
@@ -90,14 +89,13 @@ void FE2FluidMaterial :: computeDeviatoricStressVector(FloatArray &stress_dev, d
     bc->setPrescribedDeviatoricGradientFromVoigt(eps);
     bc->setPrescribedPressure(pressure);
     // Solve subscale problem
-    ms->giveRVE()->solveYourselfAt(tStep);
+    ms->giveRVE()->solveYourselfAt(ms->giveRVE()->giveCurrentStep());
 
     bc->computeFields(stress_dev, r_vol, tStep);
+
     ms->letDeviatoricStressVectorBe(stress_dev);
     ms->letDeviatoricStrainRateVectorBe(eps);
-
     ms->letPressureBe(pressure);
-
     ms->markOldTangents(); // Mark this so that tangents are reevaluated if they are needed.
     // One could also just compute them here, but you don't actually need them if the problem has converged, so this method saves on that iteration.
     // Computing the tangents are often *more* expensive than computeFields, so this is well worth the time it saves
@@ -251,7 +249,7 @@ IRResultType FE2FluidMaterial :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;
     IR_GIVE_FIELD(ir, this->inputfile, _IFT_FE2FluidMaterial_fileName);
-    return this->FluidDynamicMaterial :: initializeFrom(ir);
+    return FluidDynamicMaterial :: initializeFrom(ir);
 }
 
 void FE2FluidMaterial :: giveInputRecord(DynamicInputRecord &input)

@@ -66,7 +66,7 @@ public:
     /// Constructor. The user should call initializeFrom and init services in this given order to ensure consistency.
     CompRow_ILUPreconditioner() : Preconditioner() { }
     /// Destructor
-    virtual ~CompRow_ILUPreconditioner(void) { };
+    virtual ~CompRow_ILUPreconditioner(void) { }
 
     /**
      * Initializes the receiver (constructs the precontioning matrix M) of given matrix.

@@ -36,7 +36,8 @@
 #ifndef prescribedgradientperiodic_h_
 #define prescribedgradientperiodic_h_
 
-#include "prescribedgradientbc.h"
+#include "prescribedgradienthomogenization.h"
+#include "activebc.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 
@@ -56,7 +57,7 @@ class Node;
  *
  * @author Mikael Öhman
  */
-class OOFEM_EXPORT PrescribedGradientBCPeriodic : public PrescribedGradientBC
+class OOFEM_EXPORT PrescribedGradientBCPeriodic : public ActiveBoundaryCondition, public PrescribedGradientHomogenization
 {
 protected:
     std :: unique_ptr< Node > strain;
@@ -67,9 +68,10 @@ protected:
     
     int masterSet;
 
+    /**
+     * This is the central support function, which finds the corresponding slave nodes for each master node.
+     */
     void findSlaveToMasterMap();
-
-    virtual double domainSize();
 
 public:
     PrescribedGradientBCPeriodic(int n, Domain *d);
@@ -86,8 +88,8 @@ public:
     virtual Dof *giveMasterDof(ActiveDof *dof, int mdof);
 
     virtual void computeDofTransformation(ActiveDof *dof, FloatArray &masterContribs);
-    virtual void computeFields(FloatArray &sigma, TimeStep *tStep);
-    virtual void computeTangents(FloatMatrix &E, TimeStep *tStep);
+    virtual void computeField(FloatArray &sigma, TimeStep *tStep);
+    virtual void computeTangent(FloatMatrix &E, TimeStep *tStep);
     double giveUnknown(double val, ValueModeType mode, TimeStep *tStep, ActiveDof *dof);
     virtual double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep, ActiveDof *dof);
     virtual double giveUnknown(ValueModeType mode, TimeStep *tStep, ActiveDof *dof);

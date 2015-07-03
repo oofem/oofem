@@ -52,18 +52,18 @@
 #include "domain.h"
 #include "spatiallocalizer.h"
 #include "feinterpol.h"
+#include "unknownnumberingscheme.h"
 
 namespace oofem {
 REGISTER_BoundaryCondition(PrescribedGradientBCPeriodic);
 
-PrescribedGradientBCPeriodic :: PrescribedGradientBCPeriodic(int n, Domain *d) : PrescribedGradientBC(n, d)
+PrescribedGradientBCPeriodic :: PrescribedGradientBCPeriodic(int n, Domain *d) : ActiveBoundaryCondition(n, d), PrescribedGradientHomogenization(),
+    strain( new Node(1, d) )
 {
     // The unknown volumetric strain
     int nsd = d->giveNumberOfSpatialDimensions();
     int components = nsd * nsd;
     // The prescribed strains.
-    strain.reset(new Node(1, d));
-    strain_id.clear();
     for ( int i = 0; i < components; i++ ) {
         int dofid = d->giveNextFreeDofID();
         strain_id.followedBy(dofid);
@@ -89,30 +89,6 @@ int PrescribedGradientBCPeriodic :: giveNumberOfInternalDofManagers()
 DofManager *PrescribedGradientBCPeriodic :: giveInternalDofManager(int i)
 {
     return this->strain.get();
-}
-
-
-double PrescribedGradientBCPeriodic :: domainSize()
-{
-    int nsd = this->domain->giveNumberOfSpatialDimensions();
-    double domain_size = 0.0;
-    // This requires the boundary to be consistent and ordered correctly.
-    Set *set = this->giveDomain()->giveSet(this->set);
-    const IntArray &boundaries = set->giveBoundaryList();
-    for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
-        Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
-        FEInterpolation *fei = e->giveInterpolation();
-        domain_size += fei->evalNXIntegral( boundaries.at(pos * 2), FEIElementGeometryWrapper(e) );
-    }
-
-    Set *masterSet = this->giveDomain()->giveSet(this->masterSet);
-    const IntArray &masterBoundaries = masterSet->giveBoundaryList();
-    for ( int pos = 1; pos <= masterBoundaries.giveSize() / 2; ++pos ) {
-        Element *e = this->giveDomain()->giveElement( masterBoundaries.at(pos * 2 - 1) );
-        FEInterpolation *fei = e->giveInterpolation();
-        domain_size += fei->evalNXIntegral( masterBoundaries.at(pos * 2), FEIElementGeometryWrapper(e) );
-    }
-    return fabs(domain_size / nsd);
 }
 
 
@@ -196,41 +172,84 @@ Dof *PrescribedGradientBCPeriodic :: giveMasterDof(ActiveDof *dof, int mdof)
 }
 
 
-void PrescribedGradientBCPeriodic :: computeFields(FloatArray &sigma, TimeStep *tStep)
+void PrescribedGradientBCPeriodic :: computeField(FloatArray &sigma, TimeStep *tStep)
 {
+    DofIDEquationNumbering pnum(true, strain_id);
     EngngModel *emodel = this->giveDomain()->giveEngngModel();
-    FloatArray tmp;
-    int npeq = emodel->giveNumberOfDomainEquations( this->giveDomain()->giveNumber(), EModelDefaultPrescribedEquationNumbering() );
+    FloatArray tmp, sig_tmp;
+    int npeq = strain_id.giveSize();
     // sigma = residual (since we use the slave dofs) = f_ext - f_int
-    sigma.resize(npeq);
-    sigma.zero();
-    emodel->assembleVector(sigma, tStep, InternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
+    sig_tmp.resize(npeq);
+    sig_tmp.zero();
+    emodel->assembleVector(sig_tmp, tStep, InternalForceAssembler(), VM_Total, pnum, this->domain);
     tmp.resize(npeq);
     tmp.zero();
-    emodel->assembleVector(tmp, tStep, ExternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
-    sigma.subtract(tmp);
+    emodel->assembleVector(tmp, tStep, ExternalForceAssembler(), VM_Total, pnum, this->domain);
+    sig_tmp.subtract(tmp);
     // Divide by the RVE-volume
-    sigma.times( 1.0 / this->domainSize() );
+    sig_tmp.times(1.0 / ( this->domainSize(this->giveDomain(), this->set) + this->domainSize(this->giveDomain(), this->masterSet) ));
+
+    sigma.resize(sig_tmp.giveSize());
+    if ( sig_tmp.giveSize() == 9 ) {
+        sigma.assemble(sig_tmp, {1, 9, 8, 6, 2, 7, 5, 4, 3});
+    } else if ( sig_tmp.giveSize() == 4 ) {
+        sigma.assemble(sig_tmp, {1, 4, 3, 2});
+    } else {
+        sigma = sig_tmp;
+    }
+    //sigma.printYourself("sigma after assembling = ");
+    //OOFEM_WARNING("why is this called?");
 }
 
 
-void PrescribedGradientBCPeriodic :: computeTangents(FloatMatrix &E, TimeStep *tStep)
+void PrescribedGradientBCPeriodic :: computeTangent(FloatMatrix &E, TimeStep *tStep)
 {
-    ///@todo Implement tangent computations
     EModelDefaultEquationNumbering fnum;
-    EModelDefaultPrescribedEquationNumbering pnum;
+    DofIDEquationNumbering pnum(true, strain_id);
     EngngModel *rve = this->giveDomain()->giveEngngModel();
     ///@todo Get this from engineering model
-    SparseLinearSystemNM *solver = classFactory.createSparseLinSolver( ST_Petsc, this->domain, this->domain->giveEngngModel() ); // = rve->giveLinearSolver();
+    std :: unique_ptr< SparseLinearSystemNM > solver( classFactory.createSparseLinSolver( ST_Petsc, this->domain, this->domain->giveEngngModel() ) ); // = rve->giveLinearSolver();
     SparseMtrxType stype = solver->giveRecommendedMatrix(true);
     std :: unique_ptr< SparseMtrx > Kff( classFactory.createSparseMtrx( stype ) );
+    std :: unique_ptr< SparseMtrx > Kfp( classFactory.createSparseMtrx( stype ) );
+    std :: unique_ptr< SparseMtrx > Kpp( classFactory.createSparseMtrx( stype ) );
 
-    Kff->buildInternalStructure(rve, 1, fnum);
-    rve->assemble(Kff.get(), tStep, StiffnessMatrix, fnum, this->domain);
+    Kff->buildInternalStructure(rve, this->domain->giveNumber(), fnum);
+    Kfp->buildInternalStructure(rve, this->domain->giveNumber(), fnum, pnum);
+    Kpp->buildInternalStructure(rve, this->domain->giveNumber(), pnum);
+    rve->assemble(*Kff, tStep, TangentAssembler(TangentStiffness), fnum, this->domain);
+    rve->assemble(*Kfp, tStep, TangentAssembler(TangentStiffness), fnum, pnum, this->domain);
+    rve->assemble(*Kpp, tStep, TangentAssembler(TangentStiffness), pnum, this->domain);
 
-    OOFEM_ERROR("Not implemented yet");
+    int neq = Kfp->giveNumberOfRows();
+    int nsd = this->domain->giveNumberOfSpatialDimensions();
+    int ncomp = nsd * nsd;
 
-    delete solver; ///@todo Remove this when solver is taken from engngmodel
+    FloatMatrix grad_pert(ncomp, ncomp), rhs, sol(neq, ncomp);
+    grad_pert.resize(ncomp, ncomp); // In fact, npeq should most likely equal ndev
+    grad_pert.beUnitMatrix();
+
+    // Compute the solution to each of the pertubation of eps
+    Kfp->times(grad_pert, rhs);
+    solver->solve(*Kff, rhs, sol);
+
+    // Compute the solution to each of the pertubation of eps
+    FloatMatrix E_tmp;
+    Kfp->timesT(sol, E_tmp); // Assuming symmetry of stiffness matrix
+    // This is probably always zero, but for generality
+    FloatMatrix tmpMat;
+    Kpp->times(grad_pert, tmpMat);
+    E_tmp.subtract(tmpMat);
+    E_tmp.times( - 1.0 / ( this->domainSize(this->giveDomain(), this->set) + this->domainSize(this->giveDomain(), this->masterSet) ));
+    
+    E.resize(E_tmp.giveNumberOfRows(), E_tmp.giveNumberOfColumns());
+    if ( nsd == 3 ) {
+        E.assemble(E_tmp, {1, 9, 8, 6, 2, 7, 5, 4, 3});
+    } else if ( nsd == 2 ) {
+        E.assemble(E_tmp, {1, 4, 3, 2});
+    } else {
+        E = E_tmp;
+    }
 }
 
 
@@ -338,13 +357,15 @@ IRResultType PrescribedGradientBCPeriodic :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, this->masterSet, _IFT_PrescribedGradientBCPeriodic_masterSet)
     IR_GIVE_FIELD(ir, this->jump, _IFT_PrescribedGradientBCPeriodic_jump)
 
-    return PrescribedGradientBC :: initializeFrom(ir);
+    ActiveBoundaryCondition :: initializeFrom(ir);
+    return PrescribedGradientHomogenization::initializeFrom(ir);
 }
 
 
 void PrescribedGradientBCPeriodic :: giveInputRecord(DynamicInputRecord &input)
 {
-    PrescribedGradientBC :: giveInputRecord(input);
+    ActiveBoundaryCondition :: giveInputRecord(input);
+    PrescribedGradientHomogenization :: giveInputRecord(input);
     input.setField(this->masterSet, _IFT_PrescribedGradientBCPeriodic_masterSet);
     input.setField(this->jump, _IFT_PrescribedGradientBCPeriodic_jump);
 }

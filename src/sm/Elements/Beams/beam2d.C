@@ -386,7 +386,8 @@ Beam2d :: initializeFrom(InputRecord *ir)
         IntArray val;
         IR_GIVE_FIELD(ir, val, _IFT_Beam2d_dofstocondense);
         if ( val.giveSize() >= 6 ) {
-            OOFEM_ERROR("wrong input data for condensed dofs");
+            OOFEM_WARNING("wrong input data for condensed dofs");
+            return IRRT_BAD_FORMAT;
         }
 
         dofsToCondense = new IntArray(val);
@@ -416,7 +417,7 @@ void
 Beam2d :: giveEndForcesVector(FloatArray &answer, TimeStep *tStep)
 {
     // stress equivalent vector in nodes (vector of internal forces)
-    FloatArray u, load;
+    FloatArray load;
 
     this->giveInternalForcesVector(answer, tStep, false);
 
@@ -429,10 +430,54 @@ Beam2d :: giveEndForcesVector(FloatArray &answer, TimeStep *tStep)
 
 
 void
+Beam2d :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep)
+{
+    answer.clear();
+
+    if ( edge != 1 ) {
+        OOFEM_ERROR("Beam2D only has 1 edge (the midline) that supports loads. Attempted to apply load to edge %d", edge);
+    }
+
+    if ( type != ExternalForcesVector ) {
+        return;
+    }
+
+    double l = this->computeLength();
+    FloatArray coords, t;
+    FloatMatrix N, T;
+
+    answer.clear();
+    for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
+        this->computeNmatrixAt(lcoords, N);
+        if ( load ) {
+            this->computeGlobalCoordinates(coords, lcoords);
+            load->computeValues(t, tStep, coords, {D_u, D_w, R_v}, mode);
+        } else {
+            load->computeValues(t, tStep, lcoords, {D_u, D_w, R_v}, mode);
+        }
+
+        if ( load->giveCoordSystMode() == Load :: CST_Global ) {
+            if ( this->computeLoadGToLRotationMtrx(T) ) {
+                t.rotatedWith(T, 'n');
+            }
+        }
+
+        double dl = gp->giveWeight() * 0.5 * l;
+        answer.plusProduct(N, t, dl);
+    }
+
+    // Loads from sets expects global c.s.
+    this->computeGtoLRotationMatrix(T);
+    answer.rotatedWith(T, 't');
+    ///@todo Decide if we want local or global c.s. for loads over sets.
+}
+
+
+void
 Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, TimeStep *tStep, ValueModeType mode)
 {
-    FloatArray coords, components, help;
-    FloatMatrix T;
+    FloatArray coords, components, components2;
     double l = this->computeLength();
     double kappa = this->giveKappaCoeff(tStep);
     double fx, fz, fm, dfx, dfz, dfm;
@@ -443,13 +488,9 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
     //
     BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >(load);
     if ( edgeLoad ) {
-        if ( edgeLoad->giveNumberOfDofs() != 3 ) {
-            OOFEM_ERROR("load number of dofs mismatch");
-        }
 
         answer.resize(6);
         answer.zero();
-        //  edgeLoad->computeComponentArrayAt(components, tStep, mode);
 
         // prepare transformation coeffs
         sine = sin( this->givePitch() );
@@ -465,7 +506,7 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
                 coords = * ( this->giveNode(1)->giveCoordinates() );
             }
 
-            edgeLoad->computeValueAt(components, tStep, coords, mode);
+            edgeLoad->computeValues(components, tStep, coords, {D_u, D_w, R_v}, mode);
 
             if ( edgeLoad->giveCoordSystMode() == Load :: CST_Global ) {
                 fx = cosine * components.at(1) + sine *components.at(2);
@@ -489,30 +530,11 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
             components.resize(6);
 
             if ( edgeLoad->giveFormulationType() == Load :: FT_Entity ) {
-                coords.resize(1);
-                coords.at(1) = -1.0;
-                edgeLoad->computeValueAt(help, tStep, coords, mode);
-                for ( int i = 1; i <= 3; i++ ) {
-                    components.at(i) = help.at(i);
-                }
-
-                coords.at(1) = 1.0;
-                edgeLoad->computeValueAt(help, tStep, coords, mode);
-                for ( int i = 1; i <= 3; i++ ) {
-                    components.at(i + 3) = help.at(i);
-                }
+                edgeLoad->computeValues(components, tStep, {-1.0}, {D_u, D_w, R_v}, mode);
+                edgeLoad->computeValues(components2, tStep, {1.0}, {D_u, D_w, R_v}, mode);
             } else {
-                coords = * ( this->giveNode(1)->giveCoordinates() );
-                edgeLoad->computeValueAt(help, tStep, coords, mode);
-                for ( int i = 1; i <= 3; i++ ) {
-                    components.at(i) = help.at(i);
-                }
-
-                coords = * ( this->giveNode(2)->giveCoordinates() );
-                edgeLoad->computeValueAt(help, tStep, coords, mode);
-                for ( int i = 1; i <= 3; i++ ) {
-                    components.at(i + 3) = help.at(i);
-                }
+                edgeLoad->computeValues(components, tStep, *this->giveNode(1)->giveCoordinates(), {D_u, D_w, R_v}, mode);
+                edgeLoad->computeValues(components2, tStep, *this->giveNode(2)->giveCoordinates(), {D_u, D_w, R_v}, mode);
             }
 
 
@@ -521,16 +543,16 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
                 fz = -sine *components.at(1) + cosine *components.at(2);
                 fm = components.at(3);
 
-                dfx = cosine * ( components.at(4) - components.at(1) ) + sine * ( components.at(5) - components.at(2) );
-                dfz = -sine * ( components.at(4) - components.at(1) ) + cosine * ( components.at(5) - components.at(2) );
-                dfm = components.at(6) - components.at(3);
+                dfx = cosine * ( components2.at(1) - components.at(1) ) + sine * ( components2.at(2) - components.at(2) );
+                dfz = -sine * ( components2.at(1) - components.at(1) ) + cosine * ( components2.at(2) - components.at(2) );
+                dfm = components2.at(3) - components.at(3);
             } else {
                 fx = components.at(1);
                 fz = components.at(2);
                 fm = components.at(3);
-                dfx = components.at(4) - components.at(1);
-                dfz = components.at(5) - components.at(2);
-                dfm = components.at(6) - components.at(3);
+                dfx = components2.at(1) - components.at(1);
+                dfz = components2.at(2) - components.at(2);
+                dfm = components2.at(3) - components.at(3);
             }
 
             answer.at(1) = fx * l / 2. + dfx * l / 6.;
@@ -557,7 +579,7 @@ Beam2d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tSte
 {
     FloatArray lc(1);
     StructuralElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
-    answer.times( this->giveCrossSection()->give(CS_Area, & lc, NULL, this) );
+    answer.times( this->giveCrossSection()->give(CS_Area, lc, this) );
 }
 
 
@@ -579,11 +601,7 @@ Beam2d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type
 void
 Beam2d :: printOutputAt(FILE *File, TimeStep *tStep)
 {
-    // Performs end-of-step operations.
-
-    int n;
     FloatArray rl, Fl;
-    FloatMatrix T;
 
     fprintf(File, "beam element %d :\n", number);
 
@@ -594,18 +612,20 @@ Beam2d :: printOutputAt(FILE *File, TimeStep *tStep)
     this->giveEndForcesVector(Fl, tStep);
 
     fprintf(File, "  local displacements ");
-    n = rl.giveSize();
-    for ( int i = 1; i <= n; i++ ) {
-        fprintf( File, " % .4e", rl.at(i) );
+    for ( auto &val : rl ) {
+        fprintf( File, " %.4e", val );
     }
 
     fprintf(File, "\n  local end forces    ");
-    n = Fl.giveSize();
-    for ( int i = 1; i <= n; i++ ) {
-        fprintf( File, " % .4e", Fl.at(i) );
+    for ( auto &val : Fl ) {
+        fprintf( File, " %.4e", val );
     }
 
     fprintf(File, "\n");
+ 
+    for ( auto &iRule: integrationRulesArray ) {
+        iRule->printOutputAt(File, tStep);
+    }
 }
 
 

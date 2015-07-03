@@ -106,7 +106,7 @@ PlasticMaterial :: giveRealStressVector(FloatArray &answer,
 {
     FloatArray strainSpaceHardeningVariables;
     FloatArray fullStressVector, *fullStressSpaceHardeningVars, *residualVectorR;
-    FloatArray strainIncrement, elasticStrainVectorR;
+    FloatArray elasticStrainVectorR;
     FloatArray strainVectorR, plasticStrainVectorR, *gradientVectorR;
     FloatArray helpVec, helpVec2;
     double yieldValue, Gamma, dGamma, helpVal1, helpVal2;
@@ -404,12 +404,11 @@ PlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     //
 
     FloatMatrix consistentModuli, elasticModuli, hardeningModuli;
-    FloatMatrix consistentModuliInverse, elasticModuliInverse, hardeningModuliInverse;
+    FloatMatrix elasticModuliInverse, hardeningModuliInverse;
     FloatMatrix consistentSubModuli, answerR;
     FloatArray *gradientVector, stressVector, fullStressVector;
     FloatArray *stressSpaceHardeningVars;
     FloatArray strainSpaceHardeningVariables, helpVector;
-    IntArray mask;
     double s, Gamma;
     int sizeR;
     PlasticMaterialStatus *status = static_cast< PlasticMaterialStatus * >( this->giveStatus(gp) );
@@ -725,8 +724,6 @@ PlasticMaterialStatus :: ~PlasticMaterialStatus()
 void
 PlasticMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-    int i, n;
-
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");
     if ( ( state_flag == PM_Yielding ) || ( state_flag == PM_Unloading ) ) {
@@ -736,17 +733,15 @@ PlasticMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
             fprintf(file, " Unloading, ");
         }
 
-        n = plasticStrainVector.giveSize();
         fprintf(file, " plastic strains ");
-        for ( i = 1; i <= n; i++ ) {
-            fprintf( file, " % .4e", plasticStrainVector.at(i) );
+        for ( auto &val : plasticStrainVector ) {
+            fprintf( file, " %.4e", val );
         }
 
         if ( strainSpaceHardeningVarsVector.giveSize() ) {
-            n = strainSpaceHardeningVarsVector.giveSize();
             fprintf(file, ", strain space hardening vars ");
-            for ( i = 1; i <= n; i++ ) {
-                fprintf( file, " % .4e", strainSpaceHardeningVarsVector.at(i) );
+            for ( auto &val : strainSpaceHardeningVarsVector ) {
+                fprintf( file, " %.4e", val );
             }
         }
     }

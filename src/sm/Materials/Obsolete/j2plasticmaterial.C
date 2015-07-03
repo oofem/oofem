@@ -47,18 +47,12 @@ REGISTER_Material(J2plasticMaterial);
 
 J2plasticMaterial :: J2plasticMaterial(int n, Domain *d) : PlasticMaterial(n, d)
 {
-    //
-    // constructor
-    //
     kinematicHardeningFlag = isotropicHardeningFlag = 0;
     linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
 }
 
 J2plasticMaterial :: ~J2plasticMaterial()
 {
-    //
-    // destructor
-    //
 }
 
 IRResultType
@@ -67,14 +61,14 @@ J2plasticMaterial :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     double value;
 
-    PlasticMaterial :: initializeFrom(ir);
-    linearElasticMaterial->initializeFrom(ir);
+    result = PlasticMaterial :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
+    result = linearElasticMaterial->initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     IR_GIVE_FIELD(ir, value, _IFT_J2plasticMaterial_ry);
     k = value / sqrt(3.0);
 
-    //  E = readDouble (initString,"e");
-    // nu = readDouble (initString,"nu");
     kinematicModuli = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, kinematicModuli, _IFT_J2plasticMaterial_khm);
 

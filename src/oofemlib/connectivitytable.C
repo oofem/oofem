@@ -32,21 +32,13 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <set>
-
+#include "connectivitytable.h"
 #include "domain.h"
 #include "element.h"
 #include "dofmanager.h"
-#include "connectivitytable.h"
+#include "intarray.h"
 
 namespace oofem {
-ConnectivityTable :: ~ConnectivityTable()
-// destructor
-{
-    this->reset();
-}
 
 void
 ConnectivityTable :: reset()
@@ -113,20 +105,19 @@ ConnectivityTable :: giveDofManConnectivityArray(int dofman)
 void
 ConnectivityTable :: giveElementNeighbourList(IntArray &answer, IntArray &elemList)
 {
-    int nelems = elemList.giveSize();
     if ( nodalConnectivityFlag == 0 ) {
         this->instanciateConnectivityTable();
     }
 
     answer.resize(0);
 
-    for ( int i = 1; i <= nelems; i++ ) {
-        Element *ielem = domain->giveElement( elemList.at(i) );
+    for ( auto &el_num : elemList ) {
+        Element *ielem = domain->giveElement( el_num );
         int nnode = ielem->giveNumberOfDofManagers();
         for ( int j = 1; j <= nnode; j++ ) {
             int jnode = ielem->giveDofManager(j)->giveNumber();
-            for ( int k = 1; k <= this->nodalConnectivity[jnode-1].giveSize(); k++ ) {
-                answer.insertSortedOnce( this->nodalConnectivity[jnode-1].at(k) );
+            for ( auto &val : this->nodalConnectivity[jnode-1] ) {
+                answer.insertSortedOnce( val );
             }
         }
     }
@@ -145,8 +136,8 @@ ConnectivityTable :: giveNodeNeighbourList(IntArray &answer, IntArray &nodeList)
 
     for ( int i = 1; i <= nnodes; i++ ) {
         int inode = nodeList.at(i);
-        for ( int k = 1; k <= this->nodalConnectivity[inode-1].giveSize(); k++ ) {
-            answer.insertSortedOnce( this->nodalConnectivity[inode-1].at(k) );
+        for ( auto &val : this->nodalConnectivity[inode-1] ) {
+            answer.insertSortedOnce( val );
         }
     }
 }

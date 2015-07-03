@@ -54,28 +54,28 @@
 #include "set.h"
 #include "dynamicinputrecord.h"
 #include "feinterpol.h"
+#include "unknownnumberingscheme.h"
 
 namespace oofem {
 REGISTER_BoundaryCondition(MixedGradientPressureNeumann);
 
-MixedGradientPressureNeumann :: MixedGradientPressureNeumann(int n, Domain *d) : MixedGradientPressureBC(n, d)
+MixedGradientPressureNeumann :: MixedGradientPressureNeumann(int n, Domain *d) : MixedGradientPressureBC(n, d),
+    sigmaDev(new Node(-1, d)) // Node number lacks meaning here.
 {
     ///@todo Rethink this. Should be created as part of createDofs()
     int nsd = d->giveNumberOfSpatialDimensions();
     int components = nsd * nsd - 1;
-    this->sigmaDev = new Node(0, d); // Node number lacks meaning here.
     for ( int i = 0; i < components; i++ ) {
         int dofid = d->giveNextFreeDofID();
         dev_id.followedBy(dofid);
         // Just putting in X_i id-items since they don't matter.
-        sigmaDev->appendDof( new MasterDof( sigmaDev, ( DofIDItem )dofid ) );
+        sigmaDev->appendDof( new MasterDof( sigmaDev.get(), ( DofIDItem )dofid ) );
     }
 }
 
 
 MixedGradientPressureNeumann :: ~MixedGradientPressureNeumann()
 {
-    delete sigmaDev;
 }
 
 
@@ -87,7 +87,7 @@ int MixedGradientPressureNeumann :: giveNumberOfInternalDofManagers()
 
 DofManager *MixedGradientPressureNeumann :: giveInternalDofManager(int i)
 {
-    return this->sigmaDev;
+    return this->sigmaDev.get();
 }
 
 
@@ -278,7 +278,6 @@ void MixedGradientPressureNeumann :: integrateVolTangent(FloatArray &answer, Ele
 {
     FloatArray normal, n;
     FloatMatrix nMatrix;
-    IntArray boundaryNodes;
 
     FEInterpolation *interp = e->giveInterpolation(); // Geometry interpolation
     // Some assumptions here, either velocity or displacement unknowns. Perhaps its better to just as for a certain equation id?
@@ -291,11 +290,11 @@ void MixedGradientPressureNeumann :: integrateVolTangent(FloatArray &answer, Ele
     int nsd = e->giveDomain()->giveNumberOfSpatialDimensions();
     // Order here should be the normal (which takes the first derivative) thus -1
     int order = interp->giveInterpolationOrder() - 1 + interpUnknown->giveInterpolationOrder();
-    IntegrationRule *ir = interp->giveBoundaryIntegrationRule(order, boundary);
+    std  :: unique_ptr< IntegrationRule > ir( interp->giveBoundaryIntegrationRule(order, boundary) );
 
     answer.clear();
     for ( GaussPoint *gp: *ir ) {
-        FloatArray &lcoords = * gp->giveNaturalCoordinates();
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
         FEIElementGeometryWrapper cellgeo(e);
 
         // Evaluate the normal;
@@ -306,7 +305,6 @@ void MixedGradientPressureNeumann :: integrateVolTangent(FloatArray &answer, Ele
 
         answer.plusProduct( nMatrix, normal, detJ * gp->giveWeight() );
     }
-    delete ir;
 }
 
 
@@ -327,11 +325,11 @@ void MixedGradientPressureNeumann :: integrateDevTangent(FloatMatrix &answer, El
     int nsd = e->giveDomain()->giveNumberOfSpatialDimensions();
     // Order here should be the normal (which takes the first derivative) thus -1
     int order = interp->giveInterpolationOrder() - 1 + interpUnknown->giveInterpolationOrder();
-    IntegrationRule *ir = interp->giveBoundaryIntegrationRule(order, boundary);
+    std :: unique_ptr< IntegrationRule > ir( interp->giveBoundaryIntegrationRule(order, boundary) );
 
     answer.clear();
     for ( GaussPoint *gp: *ir ) {
-        FloatArray &lcoords = * gp->giveNaturalCoordinates();
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
         FEIElementGeometryWrapper cellgeo(e);
 
         // Evaluate the normal;
@@ -393,7 +391,6 @@ void MixedGradientPressureNeumann :: integrateDevTangent(FloatMatrix &answer, El
 
         answer.add(detJ * gp->giveWeight(), contrib);
     }
-    delete ir;
 }
 
 
@@ -468,10 +465,10 @@ void MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeStep
 }
 
 
-void MixedGradientPressureNeumann :: assemble(SparseMtrx *answer, TimeStep *tStep,
+void MixedGradientPressureNeumann :: assemble(SparseMtrx &answer, TimeStep *tStep,
                                               CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
-    if ( type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == StiffnessMatrix || type == ElasticStiffnessMatrix ) {
+    if ( type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == ElasticStiffnessMatrix ) {
         FloatMatrix Ke, KeT;
         IntArray loc_r, loc_c, sigma_loc_r, sigma_loc_c;
         IntArray bNodes;
@@ -494,8 +491,8 @@ void MixedGradientPressureNeumann :: assemble(SparseMtrx *answer, TimeStep *tSte
             Ke.negated();
             KeT.beTranspositionOf(Ke);
 
-            answer->assemble(sigma_loc_r, loc_c, Ke); // Contribution to delta_s_i equations
-            answer->assemble(loc_r, sigma_loc_c, KeT); // Contributions to delta_v equations
+            answer.assemble(sigma_loc_r, loc_c, Ke); // Contribution to delta_s_i equations
+            answer.assemble(loc_r, sigma_loc_c, KeT); // Contributions to delta_v equations
         }
     }
 }
@@ -543,12 +540,11 @@ void MixedGradientPressureNeumann :: computeFields(FloatArray &sigmaDev, double 
 
 void MixedGradientPressureNeumann :: computeTangents(FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, TimeStep *tStep)
 {
-    //double size = this->domainSize();
     // Fetch some information from the engineering model
     EngngModel *rve = this->giveDomain()->giveEngngModel();
     ///@todo Get this from engineering model
-    SparseLinearSystemNM *solver = classFactory.createSparseLinSolver( ST_Petsc, this->domain, this->domain->giveEngngModel() ); // = rve->giveLinearSolver();
-    SparseMtrx *Kff;
+    std :: unique_ptr< SparseLinearSystemNM > solver( 
+        classFactory.createSparseLinSolver( ST_Petsc, this->domain, this->domain->giveEngngModel() ) ); // = rve->giveLinearSolver();
     SparseMtrxType stype = solver->giveRecommendedMatrix(true);
     EModelDefaultEquationNumbering fnum;
     Set *set = this->giveDomain()->giveSet(this->set);
@@ -557,12 +553,12 @@ void MixedGradientPressureNeumann :: computeTangents(FloatMatrix &Ed, FloatArray
     double rve_size = this->domainSize();
 
     // Set up and assemble tangent FE-matrix which will make up the sensitivity analysis for the macroscopic material tangent.
-    Kff = classFactory.createSparseMtrx(stype);
+    std :: unique_ptr< SparseMtrx > Kff( classFactory.createSparseMtrx(stype) );
     if ( !Kff ) {
         OOFEM_ERROR("Couldn't create sparse matrix of type %d\n", stype);
     }
     Kff->buildInternalStructure(rve, this->domain->giveNumber(), fnum);
-    rve->assemble(Kff, tStep, StiffnessMatrix, fnum, fnum, this->domain);
+    rve->assemble(*Kff, tStep, TangentAssembler(TangentStiffness), fnum, fnum, this->domain);
 
     // Setup up indices and locations
     int neq = Kff->giveNumberOfRows();
@@ -600,8 +596,8 @@ void MixedGradientPressureNeumann :: computeTangents(FloatMatrix &Ed, FloatArray
     }
 
     // Solve all sensitivities
-    solver->solve(Kff, ddev_pert, s_d);
-    solver->solve(Kff, & p_pert, & s_p);
+    solver->solve(*Kff, ddev_pert, s_d);
+    solver->solve(*Kff, p_pert, s_p);
 
     // Extract the stress response from the solutions
     FloatArray sigma_p(ndev);
@@ -658,9 +654,6 @@ void MixedGradientPressureNeumann :: computeTangents(FloatMatrix &Ed, FloatArray
         Ep.clear();
         Ed.clear();
     }
-
-    delete Kff;
-    delete solver; ///@todo Remove this when solver is taken from engngmodel
 }
 
 

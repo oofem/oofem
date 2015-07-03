@@ -119,7 +119,7 @@ public:
     const double &val(int i) const { return val_(i); }
     const int &row_ind(int i) const { return rowind_(i); }
     const int &col_ptr(int i) const { return colptr_(i); }
-    int dim(int i) const { return dim_ [ i ]; };
+    int dim(int i) const { return dim_ [ i ]; }
 
 protected:
     /*******************************/
@@ -130,8 +130,8 @@ protected:
     int &row_ind(int i) { return rowind_(i); }
     int &col_ptr(int i) { return colptr_(i); }
 
-    int size(int i) const { return dim_ [ i ]; };
-    int NumNonzeros() const { return nz_; };
+    int size(int i) const { return dim_ [ i ]; }
+    int NumNonzeros() const { return nz_; }
     int base() const { return base_; }
 
     /***********************************/

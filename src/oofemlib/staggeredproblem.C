@@ -127,13 +127,14 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-
     if ( ir->hasField(_IFT_StaggeredProblem_deltat) ) {
-        EngngModel :: initializeFrom(ir);
+        result = EngngModel :: initializeFrom(ir);
+        if ( result != IRRT_OK ) return result;
         IR_GIVE_FIELD(ir, deltaT, _IFT_StaggeredProblem_deltat);
         dtFunction = 0;
     } else if ( ir->hasField(_IFT_StaggeredProblem_prescribedtimes) ) {
-        EngngModel :: initializeFrom(ir);
+        result = EngngModel :: initializeFrom(ir);
+        if ( result != IRRT_OK ) return result;
         IR_GIVE_FIELD(ir, discreteTimes, _IFT_StaggeredProblem_prescribedtimes);
         dtFunction = 0;
     } else {
@@ -164,7 +165,8 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, dtFunction, _IFT_StaggeredProblem_dtf);
     IR_GIVE_OPTIONAL_FIELD(ir, stepMultiplier, _IFT_StaggeredProblem_stepmultiplier);
     if ( stepMultiplier < 0 ) {
-        OOFEM_ERROR("stepMultiplier must be > 0")
+        OOFEM_WARNING("stepMultiplier must be > 0");
+        return IRRT_BAD_FORMAT;
     }
 
     //    timeLag = 0.;
@@ -229,7 +231,7 @@ StaggeredProblem :: giveDeltaT(int n)
     }
 
     //in the first step the time increment is taken as the initial, user-specified value
-    if ( stepMultiplier != 1 && currentStep != NULL ) {
+    if ( stepMultiplier != 1 && currentStep ) {
         if ( currentStep->giveNumber() >= 2 ) {
             return ( currentStep->giveTargetTime() * ( stepMultiplier ) );
         }
@@ -245,33 +247,33 @@ StaggeredProblem :: giveDeltaT(int n)
       double adjustedDeltaT = deltaT;
 
       if ( currentStep != NULL ) {
-	if ( currentStep->giveNumber() != 0 ) {
+            if ( currentStep->giveNumber() != 0 ) {
 
-	  // return prescribed deltaT for times until time = adaptiveStepSince
-	  // can be used for consecutive force loading applied in a specified number of steps
-	  if ( !(currentStep->giveTargetTime() > this->adaptiveStepSince ) ) {
-	    return adjustedDeltaT;
-	  }
+                // return prescribed deltaT for times until time = adaptiveStepSince
+                // can be used for consecutive force loading applied in a specified number of steps
+                if ( !(currentStep->giveTargetTime() > this->adaptiveStepSince ) ) {
+                    return adjustedDeltaT;
+                }
 
-	  for (int i = 1; i <= this->giveNumberOfSlaveProblems(); i++ ) {
-	    sp = this->giveSlaveProblem(i);
-	    nite = max(sp->giveCurrentNumberOfIterations(), nite);
-	  }
-	  
-	  if ( nite > reqIterations ) {
-	    adjustedDeltaT =  this->prevStepLength * reqIterations / nite;
-	  } else {
-	    adjustedDeltaT  =  this->prevStepLength * sqrt( sqrt( ( double ) reqIterations / ( double ) nite ) );
-	  }
-	  
-	  if ( adjustedDeltaT > maxStepLength ) {
-	    adjustedDeltaT = maxStepLength;
-	  }
-	  
-	  if ( adjustedDeltaT < minStepLength ) {
-	    adjustedDeltaT = minStepLength;
-	  }
-	}
+                for (int i = 1; i <= this->giveNumberOfSlaveProblems(); i++ ) {
+                    sp = this->giveSlaveProblem(i);
+                    nite = max(sp->giveCurrentNumberOfIterations(), nite);
+                }
+                
+                if ( nite > reqIterations ) {
+                    adjustedDeltaT =  this->prevStepLength * reqIterations / nite;
+                } else {
+                    adjustedDeltaT  =  this->prevStepLength * sqrt( sqrt( ( double ) reqIterations / ( double ) nite ) );
+                }
+                
+                if ( adjustedDeltaT > maxStepLength ) {
+                    adjustedDeltaT = maxStepLength;
+                }
+                
+                if ( adjustedDeltaT < minStepLength ) {
+                    adjustedDeltaT = minStepLength;
+                }
+            }
       }
       
       this->currentStepLength = adjustedDeltaT;
@@ -301,13 +303,13 @@ StaggeredProblem :: giveDiscreteTime(int iStep)
 TimeStep *
 StaggeredProblem :: giveSolutionStepWhenIcApply()
 {
-    if ( stepWhenIcApply == NULL ) {
+    if ( !stepWhenIcApply ) {
         int inin = giveNumberOfTimeStepWhenIcApply();
         int nFirst = giveNumberOfFirstStep();
-        stepWhenIcApply = new TimeStep(inin, this, 0, -giveDeltaT ( nFirst ), giveDeltaT ( nFirst ), 0);
+        stepWhenIcApply.reset( new TimeStep(inin, this, 0, -giveDeltaT ( nFirst ), giveDeltaT ( nFirst ), 0) );
     }
 
-    return stepWhenIcApply;
+    return stepWhenIcApply.get();
 }
 
 TimeStep *
@@ -317,39 +319,32 @@ StaggeredProblem :: giveNextStep()
     double totalTime = 0;
     StateCounterType counter = 1;
 
-    if ( previousStep != NULL ) {
-        delete previousStep;
-        previousStep = NULL;
-    }
-
-    if ( currentStep != NULL ) {
+    if ( currentStep ) {
         istep =  currentStep->giveNumber() + 1;
         totalTime = currentStep->giveTargetTime() + this->giveDeltaT(istep);
         counter = currentStep->giveSolutionStateCounter() + 1;
     } else {
-        TimeStep *newStep;
         // first step -> generate initial step
-        newStep = giveSolutionStepWhenIcApply();
-        currentStep = new TimeStep(*newStep);
+        currentStep.reset(new TimeStep(*giveSolutionStepWhenIcApply()));
     }
 
-    previousStep = currentStep;
+    previousStep = std :: move(currentStep);
 
     if ( (totalTime >= this->endOfTimeOfInterest) && this->adaptiveStepLength ) {
-      totalTime = this->endOfTimeOfInterest;
-      OOFEM_LOG_INFO("\n==================================================================\n");
-      OOFEM_LOG_INFO("\nAdjusting time step length to: %lf \n\n", totalTime-previousStep->giveTargetTime());
-      currentStep = new TimeStep(istep, this, 1, totalTime, totalTime-previousStep->giveTargetTime() , counter);
+        totalTime = this->endOfTimeOfInterest;
+        OOFEM_LOG_INFO("\n==================================================================\n");
+        OOFEM_LOG_INFO("\nAdjusting time step length to: %lf \n\n", totalTime-previousStep->giveTargetTime());
+        currentStep.reset(new TimeStep(istep, this, 1, totalTime, totalTime-previousStep->giveTargetTime() , counter));
     } else {
-      if (this->adaptiveStepLength) {
-      OOFEM_LOG_INFO("\n==================================================================\n");
-      OOFEM_LOG_INFO("\nAdjusting time step length to: %lf \n\n",  this->giveDeltaT ( istep ));
-      }
-      currentStep = new TimeStep(istep, this, 1, totalTime, this->giveDeltaT ( istep ), counter);
+        if (this->adaptiveStepLength) {
+            OOFEM_LOG_INFO("\n==================================================================\n");
+            OOFEM_LOG_INFO("\nAdjusting time step length to: %lf \n\n",  this->giveDeltaT ( istep ));
+        }
+        currentStep.reset(new TimeStep(istep, this, 1, totalTime, this->giveDeltaT ( istep ), counter));
     }
 
     // time and dt variables are set eq to 0 for statics - has no meaning
-    return currentStep;
+    return currentStep.get();
 }
 
 
@@ -406,10 +401,10 @@ StaggeredProblem :: solveYourself()
             }
 
 #endif
-	    
-	        if ( (sp->giveCurrentStep()->giveTargetTime() >= this->endOfTimeOfInterest) && this->adaptiveStepLength ) {
-	            break;
-	        }
+
+            if ( (sp->giveCurrentStep()->giveTargetTime() >= this->endOfTimeOfInterest) && this->adaptiveStepLength ) {
+                break;
+            }
         }
     }
 }

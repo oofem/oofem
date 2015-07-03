@@ -64,11 +64,20 @@ IRResultType
 TR_SHELL02 :: initializeFrom(InputRecord *ir)
 {
     // proc tady neni return = this...   ??? termitovo
-    this->StructuralElement :: initializeFrom(ir);
+    IRResultType result = StructuralElement :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
-    //
-    plate->initializeFrom(ir);
-    membrane->initializeFrom(ir);
+    result = plate->initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+
+    result = membrane->initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     return IRRT_OK;
 }
@@ -213,8 +222,8 @@ TR_SHELL02 :: computeVolumeAround(GaussPoint *gp)
 int
 TR_SHELL02 :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    if ( ( type == IST_ShellForceTensor ) || ( type == IST_ShellStrainTensor ) ||
-        ( type == IST_ShellMomentumTensor ) || ( type == IST_ShellCurvatureTensor ) ) {
+    if ( type == IST_ShellForceTensor || type == IST_ShellStrainTensor ||
+        type == IST_ShellMomentumTensor || type == IST_ShellCurvatureTensor ) {
         FloatArray aux;
         GaussPoint *membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
         GaussPoint *plateGP = plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
@@ -259,20 +268,14 @@ TR_SHELL02 :: printOutputAt(FILE *file, TimeStep *tStep)
         v.add(aux);
 
         fprintf(file, "  strains    ");
-        // eps_x, eps_y, eps_z, eps_yz, eps_xz, eps_xy (global)
-        fprintf( file,
-                " % .4e % .4e % .4e % .4e % .4e % .4e ",
-                v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
+        for ( auto &val : v ) fprintf(file, " %.4e", val);
 
         plate->giveIPValue(v, gp, IST_ShellCurvatureTensor, tStep);
         membrane->giveIPValue(aux, membraneGP, IST_ShellCurvatureTensor, tStep);
         v.add(aux);
 
         fprintf(file, "\n              curvatures ");
-        // k_x, k_y, k_z, k_yz, k_xz, k_xy (global)
-        fprintf( file,
-                " % .4e % .4e % .4e % .4e % .4e % .4e ",
-                v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
+        for ( auto &val : v ) fprintf(file, " %.4e", val);
 
         // Forces - Moments
         plate->giveIPValue(v, gp, IST_ShellForceTensor, tStep);
@@ -280,20 +283,14 @@ TR_SHELL02 :: printOutputAt(FILE *file, TimeStep *tStep)
         v.add(aux);
 
         fprintf(file, "\n              stresses   ");
-        // n_x, n_y, n_z, v_yz, v_xz, v_xy (global)
-        fprintf( file,
-                " % .4e % .4e % .4e % .4e % .4e % .4e ",
-                v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
+        for ( auto &val : v ) fprintf(file, " %.4e", val);
 
         plate->giveIPValue(v, gp, IST_ShellMomentumTensor, tStep);
         membrane->giveIPValue(aux, membraneGP, IST_ShellMomentumTensor, tStep);
         v.add(aux);
 
         fprintf(file, "\n              moments    ");
-        // m_x, m_y, m_z, m_yz, m_xz, m_xy (global)
-        fprintf( file,
-                " % .4e % .4e % .4e % .4e % .4e % .4e ",
-                v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
+        for ( auto &val : v ) fprintf(file, " %.4e", val);
 
         fprintf(file, "\n");
     }

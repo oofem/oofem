@@ -37,7 +37,6 @@
 #define stokesflowvelocityhomogenization_h
 
 #include "stokesflow.h"
-#include "rveengngmodel.h"
 #include "engngm.h"
 #include "sparselinsystemnm.h"
 #include "classfactory.h"
@@ -52,22 +51,11 @@ namespace oofem
  * @author Carl Sandström
  *
  */
-class StokesFlowVelocityHomogenization : public StokesFlow, public rveEngngModel
+class StokesFlowVelocityHomogenization : public StokesFlow
 {
-protected:
-    double areaOfDomain;
-    double areaOfRVE;
-
 public:
     StokesFlowVelocityHomogenization(int i, EngngModel * _master = NULL);
     virtual ~StokesFlowVelocityHomogenization();
-
-    virtual void solveYourselfAt(TimeStep *tStep);
-
-    void handlePrescribedValues();
-
-    /** Compute area of domain (excludes holes)*/
-    double giveAreaOfDomain();
 
     /** Compute area of domain (includes holes)*/
     double giveAreaOfRVE();
@@ -77,13 +65,12 @@ public:
 
 
     void computeTangent(FloatMatrix &answer, TimeStep *tStep);
-
-    virtual void rveSetBoundaryConditions(int type, FloatArray value);
-    virtual void rveGiveCharacteristicData(int type, void *value, void *answer, TimeStep *tStep);
+    /** Computes the mean velocity and pressure gradient */
+    void computeSeepage(FloatArray &v, TimeStep *tStep);
+    void applyPressureGradient(const FloatArray &grad);
 
 private:
-    /** Computes the mean velocity and pressure gradient */
-    void getMeans(FloatArray &gradP, FloatArray &v, TimeStep *tStep);
+    void integrateNMatrix(FloatMatrix &N, Element &elem, TimeStep *tStep);
 };
 }
 #endif // stokesflowvelocityhomogenization_h

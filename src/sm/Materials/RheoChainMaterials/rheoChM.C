@@ -88,7 +88,7 @@ RheoChainMaterial :: giveRealStressVector(FloatArray &answer,
 // strain increment at time tStep.
 //
 {
-    FloatArray stressIncrement, stressVector, strainIncrement, reducedStrain, eigenStrain;
+    FloatArray stressIncrement, stressVector, strainIncrement, reducedStrain;
     FloatMatrix Binv;
     double Emodulus;
     RheoChainMaterialStatus *status = static_cast< RheoChainMaterialStatus * >( this->giveStatus(gp) );
@@ -539,7 +539,9 @@ RheoChainMaterial :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    StructuralMaterial :: initializeFrom(ir);
+    result = StructuralMaterial :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
+
 
     if ( ir->hasField(_IFT_RheoChainMaterial_lattice) ) {
         lattice = true;
@@ -665,17 +667,13 @@ RheoChainMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSta
 
 RheoChainMaterialStatus :: RheoChainMaterialStatus(int n, Domain *d,
                                                    GaussPoint *g, int nunits) :
-    StructuralMaterialStatus(n, d, g), shrinkageStrain() {
-    // constructor
-    nUnits = nunits;
+    StructuralMaterialStatus(n, d, g),
+    nUnits(nunits),
+    hiddenVars(nUnits),
+    tempHiddenVars(nUnits),
+    shrinkageStrain()
+{
 
-    hiddenVars.resize(nUnits);
-    tempHiddenVars.resize(nUnits);
-
-    for ( int i = 0; i < nUnits; i++ ) {
-        hiddenVars [ i ].clear();
-        tempHiddenVars [ i ].clear();
-    }
 
 #ifdef keep_track_of_strains
     thermalStrain = 0.;
@@ -684,10 +682,7 @@ RheoChainMaterialStatus :: RheoChainMaterialStatus(int n, Domain *d,
 }
 
 
-RheoChainMaterialStatus :: ~RheoChainMaterialStatus()
-{
-    // destructor
-}
+RheoChainMaterialStatus :: ~RheoChainMaterialStatus() { }
 
 
 void
@@ -706,17 +701,14 @@ void
 RheoChainMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
     // printing of hidden variables
-    // useful only for debugging
-    FloatArray helpVec;
 
     StructuralMaterialStatus :: printOutputAt(file, tStep);
 
     fprintf(file, "{hidden variables: ");
     for ( int i = 0; i < nUnits; i++ ) {
-        StructuralMaterial :: giveFullSymVectorForm( helpVec, hiddenVars [ i ], gp->giveMaterialMode() ); // JB
         fprintf(file, "{ ");
-        for ( int j = 1; j <= helpVec.giveSize(); j++ ) {
-            fprintf( file, "%f ", helpVec.at(j) );
+        for ( auto &val : hiddenVars[i] ) {
+            fprintf( file, "%f ", val );
         }
 
         fprintf(file, "} ");
@@ -724,8 +716,8 @@ RheoChainMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 
     if ( shrinkageStrain.isNotEmpty() ) {
         fprintf(file, "shrinkageStrain: {");
-        for ( int j = 1; j <= shrinkageStrain.giveSize(); j++ ) {
-            fprintf( file, "%f ", shrinkageStrain.at(j) );
+        for ( auto &val : shrinkageStrain ) {
+            fprintf( file, "%f ", val );
         }
 
         fprintf(file, "} ");

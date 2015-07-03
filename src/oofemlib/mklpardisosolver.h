@@ -32,61 +32,37 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef rvematerial_h
-#define rvematerial_h
+#ifndef mklpardisosolver_h
+#define mklpardisosolver_h
 
-#include <cstdio>
-#include <cstdlib>
-
-#include "material.h"
-#include "floatarray.h"
-#include "floatmatrix.h"
-#include "engngm.h"
-
-///@name Input fields for RVEMaterial
-//@{
-#define _IFT_RVEMaterial_bctype "bctype"
-#define _IFT_RVEMaterial_supressoutput "supressoutput"
-#define _IFT_RVEMaterial_fileName "file"
-//@}
+#include "sparselinsystemnm.h"
 
 namespace oofem {
+
 /**
- * @author Carl Sandström
+ * Implements the solution of linear system of equation in the form @f$ A\cdot x=b @f$ using solvers
+ * from MKL Pardiso. It will not work with Pardiso 5.0.
+ * Only works with the CSC (compressed sparse column) sparse matrix implementation.
+ * 
+ * @author Mikael Öhman
  */
-class OOFEM_EXPORT RVEMaterial //: virtual public Material
+class OOFEM_EXPORT MKLPardisoSolver : public SparseLinearSystemNM
 {
-private:
-    //int stdoutFID;
-    //fpos_t stdoutPos;
-
-protected:
-    /// Name of .in file containing the RVE
-    std :: string rveFilename;
-    std :: string rveLogFilename;
-    /// Type of boundary condition.
-    int BCType;
-
 public:
-    EngngModel *rve;
+    /**
+     * Constructor.
+     * @param d Domain which solver belongs to.
+     * @param m Engineering model which solver belongs to.
+     */
+    MKLPardisoSolver(Domain * d, EngngModel * m);
 
-    // Constructor
-    RVEMaterial(int n, Domain * d) { }; // : Material(n, d) { };
+    virtual ~MKLPardisoSolver();
 
-    // Destructor
-    ~RVEMaterial() {
-        delete rve;
-    };
+    virtual NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x);
 
-    int SupressRVEoutput;
-
-    IRResultType initializeFrom(InputRecord *ir);
-
-    void suppressStdout();
-    void enableStdout();
-
-    const char *giveClassName() const { return "RVEMaterial"; };
+    virtual const char *giveClassName() const { return "MKLPardisoSolver"; }
+    virtual LinSystSolverType giveLinSystSolverType() const { return ST_MKLPardiso; }
+    virtual SparseMtrxType giveRecommendedMatrix(bool symmetric) const { return SMT_CompCol; }
 };
-}
-
-#endif // rvematerial_h
+} // end namespace oofem
+#endif // mklpardisosolver_h

@@ -42,7 +42,8 @@
 #include "classfactory.h"
 #include "util.h"
 #include "contextioerr.h"
-#include "prescribedgradient.h"
+#include "generalboundarycondition.h"
+#include "prescribedgradienthomogenization.h"
 
 #include <sstream>
 
@@ -87,6 +88,7 @@ void
 StructuralFE2Material :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
                                  const FloatArray &totalStrain, TimeStep *tStep)
 {
+    FloatArray ans9;
     StructuralFE2MaterialStatus *ms = static_cast< StructuralFE2MaterialStatus * >( this->giveStatus(gp) );
 
     ms->setTimeStep(tStep);
@@ -95,10 +97,11 @@ StructuralFE2Material :: giveRealStressVector_3d(FloatArray &answer, GaussPoint 
     // Solve subscale problem
     ms->giveRVE()->solveYourselfAt(tStep);
     // Post-process the stress
-    ms->giveBC()->computeField(answer, tStep);
+    ms->giveBC()->computeField(ans9, tStep);
+    answer = {ans9[0], ans9[1], ans9[2], 0.5*(ans9[3]+ans9[6]), 0.5*(ans9[4]+ans9[7]), 0.5*(ans9[5]+ans9[8])};
     // Update the material status variables
-    ms->letStressVectorBe(answer);
-    ms->letStrainVectorBe(totalStrain);
+    ms->letTempStressVectorBe(answer);
+    ms->letTempStrainVectorBe(totalStrain);
     ms->markOldTangent(); // Mark this so that tangent is reevaluated if they are needed.
 }
 
@@ -106,10 +109,63 @@ StructuralFE2Material :: giveRealStressVector_3d(FloatArray &answer, GaussPoint 
 void
 StructuralFE2Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
- 
     StructuralFE2MaterialStatus *ms = static_cast< StructuralFE2MaterialStatus * >( this->giveStatus(gp) );
     ms->computeTangent(tStep);
-    answer = ms->giveTangent();
+    const FloatMatrix &ans9 = ms->giveTangent();
+
+    // Compute the (minor) symmetrized tangent:
+    answer.resize(6, 6);
+    for ( int i = 0; i < 6; ++i ) {
+        for ( int j = 0; j < 6; ++j ) {
+            answer(i, j) = ans9(i, j);
+        }
+    }
+    for ( int i = 0; i < 6; ++i ) {
+        for ( int j = 6; j < 9; ++j ) {
+            answer(i, j-3) += ans9(i, j);
+            answer(j-3, i) += ans9(j, i);
+        }
+    }
+    for ( int i = 6; i < 9; ++i ) {
+        for ( int j = 6; j < 9; ++j ) {
+             answer(j-3, i-3) += ans9(j, i);
+         }
+    }
+    for ( int i = 0; i < 6; ++i ) {
+        for ( int j = 3; j < 6; ++j ) {
+             answer(j, i) *= 0.5;
+             answer(i, j) *= 0.5;
+        }
+    }
+#if 0
+    // Numerical ATS for debugging
+    FloatMatrix numericalATS(6, 6);
+    FloatArray dsig;
+    // Note! We need a copy of the temp strain, since the pertubations might change it.
+    FloatArray tempStrain = ms->giveTempStrainVector();
+
+    FloatArray sig, strain, sigPert;
+    giveRealStressVector_3d(sig, gp, tempStrain, tStep);
+    double hh = 1e-6;
+    for ( int k = 1; k <= 6; ++k ) {
+        strain = tempStrain;
+        strain.at(k) += hh;
+        giveRealStressVector_3d(sigPert, gp, strain, tStep);
+        dsig.beDifferenceOf(sigPert, sig);
+        numericalATS.setColumn(dsig, k);
+    }
+    numericalATS.times(1. / hh);
+    giveRealStressVector_3d(sig, gp, tempStrain, tStep); // Reset
+
+    //answer.printYourself("Analytical deviatoric tangent");
+    //numericalATS.printYourself("Numerical deviatoric tangent");
+
+    numericalATS.subtract(answer);
+    double norm = numericalATS.computeFrobeniusNorm();
+    if ( norm > answer.computeFrobeniusNorm() * 1e-3 && norm > 0.0 ) {
+        OOFEM_ERROR("Error in deviatoric tangent");
+    }
+#endif
 }
 
 
@@ -149,9 +205,9 @@ StructuralFE2MaterialStatus :: createRVE(int n, GaussPoint *gp, const std :: str
 
     this->rve->letOutputBaseFileNameBe( name.str() );
 
-    this->bc = dynamic_cast< PrescribedGradient * >( this->rve->giveDomain(1)->giveBc(1) );
+    this->bc = dynamic_cast< PrescribedGradientHomogenization * >( this->rve->giveDomain(1)->giveBc(1) );
     if ( !this->bc ) {
-        OOFEM_ERROR("RVE doesn't have necessary boundary condition; should have a type of PrescribedGradient as first b.c.");
+        OOFEM_ERROR("RVE doesn't have necessary boundary condition; should have a type of PrescribedGradientHomogenization as first b.c.");
     }
 
     return true;

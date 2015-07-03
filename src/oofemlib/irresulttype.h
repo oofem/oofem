@@ -7,6 +7,7 @@
  *            ##   ##  ##   ##  ##      ##      ##     ##
  *            #####    #####   ##      ######  ##     ##
  *
+ *
  *             OOFEM : Object Oriented Finite Element Code
  *
  *               Copyright (C) 1993 - 2013   Borek Patzak
@@ -31,6 +32,20 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "rveengngmodel.h"
+#ifndef irresulttype_h
+#define irresulttype_h
 
-namespace oofem { }
+namespace oofem {
+
+/**
+ * Type defining the return values of InputRecord reading operations.
+ * IRRT_OK the corresponding value to given keyword was successfully read.
+ *       the answer parameter contains the value.
+ * IRRT_NOTFOUND the keyword is not found; the answer is not modified
+ * IRRT_BAD_FORMAT the keyword was found but the record is not correctly formatted.
+ */
+enum IRResultType { IRRT_OK = 0, IRRT_NOTFOUND, IRRT_BAD_FORMAT };
+
+}
+
+#endif // irresulttype_h

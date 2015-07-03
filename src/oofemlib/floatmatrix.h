@@ -143,7 +143,7 @@ public:
         return * this;
     }
     /// Destructor.
-    ~FloatMatrix() {};
+    ~FloatMatrix() {}
 
     /**
      * Checks size of receiver towards requested bounds.
@@ -405,8 +405,9 @@ public:
      * @param b RHS of linear system.
      * @param answer Solution of linear equations.
      * @param transpose Solves for the transpose of K.
+     * @return False if K is singular, otherwise true.
      */
-    void solveForRhs(const FloatArray &b, FloatArray &answer, bool transpose = false);
+    bool solveForRhs(const FloatArray &b, FloatArray &answer, bool transpose = false);
     /**
      * Solves the  system of linear equations @f$ K\cdot A = B @f$ . Uses Gaussian elimination with pivoting directly on receiver.
      * @param B RHS of linear system.

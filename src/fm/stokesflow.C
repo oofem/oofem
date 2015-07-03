@@ -45,6 +45,7 @@
 #include "parallelcontext.h"
 #include "exportmodulemanager.h"
 #include "dofdistributedprimaryfield.h"
+#include "unknownnumberingscheme.h"
 
 namespace oofem {
 REGISTER_EngngModel(StokesFlow);
@@ -136,7 +137,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     // Build initial/external load (LoadVector)
     externalForces.resize(neq);
     externalForces.zero();
-    this->assembleVector( externalForces, tStep, ExternalForcesVector, VM_Total,
+    this->assembleVector( externalForces, tStep, ExternalForceAssembler(), VM_Total,
                          EModelDefaultEquationNumbering(), d );
     this->updateSharedDofManagers(externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
 
@@ -150,13 +151,13 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     double loadLevel;
     int currentIterations;
     this->updateComponent( tStep, InternalRhs, d );
-    NM_Status status = this->nMethod->solve(this->stiffnessMatrix.get(),
-                                            & externalForces,
+    NM_Status status = this->nMethod->solve(*this->stiffnessMatrix,
+                                            externalForces,
                                             NULL,
                                             NULL,
-                                            & solutionVector,
-                                            & incrementOfSolution,
-                                            & this->internalForces,
+                                            solutionVector,
+                                            incrementOfSolution,
+                                            this->internalForces,
 
                                             this->eNorm,
                                             loadLevel, // Only relevant for incrementalBCLoadVector?
@@ -188,13 +189,13 @@ void StokesFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
 
     if ( cmpn == InternalRhs ) {
         this->internalForces.zero();
-        this->assembleVector(this->internalForces, tStep, InternalForcesVector, VM_Total,
+        this->assembleVector(this->internalForces, tStep, InternalForceAssembler(), VM_Total,
                              EModelDefaultEquationNumbering(), d, & this->eNorm);
         this->updateSharedDofManagers(this->internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
         return;
     } else if ( cmpn == NonLinearLhs ) {
         this->stiffnessMatrix->zero();
-        this->assemble(this->stiffnessMatrix.get(), tStep, StiffnessMatrix,
+        this->assemble(*stiffnessMatrix, tStep, TangentAssembler(TangentStiffness),
                        EModelDefaultEquationNumbering(), d);
         return;
     } else {
@@ -244,11 +245,6 @@ int StokesFlow :: checkConsistency()
     return EngngModel :: checkConsistency();
 }
 
-void StokesFlow :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
-{
-    iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
-}
-
 void StokesFlow :: updateInternalState(TimeStep *tStep)
 {
     for ( auto &domain: domainList ) {
@@ -283,22 +279,14 @@ NumericalMethod *StokesFlow :: giveNumericalMethod(MetaStep *mStep)
 
 TimeStep *StokesFlow :: giveNextStep()
 {
-    delete previousStep;
-
-    if ( currentStep == NULL ) {
-        int istep = this->giveNumberOfFirstStep();
+    if ( !currentStep ) {
         // first step -> generate initial step
-        previousStep = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -this->deltaT, this->deltaT, 0);
-        currentStep = new TimeStep(istep, this, 1, 0.0, this->deltaT, 1);
-    } else {
-        int istep = currentStep->giveNumber() + 1;
-        StateCounterType counter = currentStep->giveSolutionStateCounter() + 1;
-        previousStep = currentStep;
-        double dt = currentStep->giveTimeIncrement();
-        double totalTime = currentStep->giveTargetTime() + dt;
-        currentStep = new TimeStep(istep, this, 1, totalTime, dt, counter);
+        //currentStep.reset( new TimeStep(*giveSolutionStepWhenIcApply()) );
+        currentStep.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 1, 0., this->deltaT, 0) );
     }
+    previousStep = std :: move(currentStep);
+    currentStep.reset( new TimeStep(*previousStep, this->deltaT) );
 
-    return currentStep;
+    return currentStep.get();
 }
 } // end namespace oofem

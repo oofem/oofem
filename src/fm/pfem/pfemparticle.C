@@ -39,12 +39,7 @@
 #include "fmode.h"
 #include "domain.h"
 #include "engngm.h"
-
-#ifndef __MAKEDEPEND
- #include <math.h>
- #include <stdlib.h>
-#endif
-
+#include "mathfem.h"
 
 
 namespace oofem {

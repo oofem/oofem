@@ -40,6 +40,7 @@
 #include "valuemodetype.h"
 #include "integrationdomain.h"
 #include "dofmantransftype.h"
+#include "floatarray.h"
 
 #include <memory>
 
@@ -197,6 +198,8 @@ public:
     {
         OOFEM_ERROR("not implemented");
     }
+
+    virtual void computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer);
 
     /**
      * Computes force dependent part of load vector. It is load vector induced by applied force loading.
@@ -539,6 +542,7 @@ protected:
     }
     //@}
 
+public:
     /**
      * Computes the stress vector of receiver at given integration point, at time step tStep.
      * The nature of these stresses depends on the element's type.
@@ -565,7 +569,6 @@ protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
                                   int lowerIndx = 1, int upperIndx = ALL_STRAINS) = 0;
 
-public:
     /**
      * Computes interpolation matrix for element unknowns.
      * The order and meaning of unknowns is element dependent.

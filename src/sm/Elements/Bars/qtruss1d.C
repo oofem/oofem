@@ -40,6 +40,7 @@
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
+#include "../sm/CrossSections/structuralcrosssection.h"
 #include "mathfem.h"
 #include "classfactory.h"
 
@@ -61,12 +62,7 @@ QTruss1d :: QTruss1d(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
 IRResultType
 QTruss1d :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result = this->StructuralElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    return IRRT_OK;
+    return StructuralElement :: initializeFrom(ir);
 }
 
 void
@@ -82,13 +78,18 @@ QTruss1d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoor
     return 1;
 }
 
+void
+QTruss1d :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveRealStress_1d(answer, gp, strain, tStep);
+}
 
 double
 QTruss1d :: computeVolumeAround(GaussPoint *gp)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
-    double detJ = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    double detJ = fabs( this->interpolation.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     double weight  = gp->giveWeight();
     return detJ *weight *this->giveCrossSection()->give(CS_Area, gp);
 }
@@ -107,7 +108,7 @@ void QTruss1d :: computeGaussPoints()
 void
 QTruss1d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 {
-    this->interpolation.evaldNdx( answer, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( answer, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 void

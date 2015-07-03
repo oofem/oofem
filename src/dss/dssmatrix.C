@@ -39,6 +39,7 @@
 #include "domain.h"
 #include "element.h"
 #include "dofmanager.h"
+#include "dof.h"
 #include "sparsemtrxtype.h"
 #include "classfactory.h"
 #include "activebc.h"
@@ -52,10 +53,9 @@ REGISTER_SparseMtrx( DSSMatrixLDL, SMT_DSS_sym_LDL);
 REGISTER_SparseMtrx( DSSMatrixLL, SMT_DSS_sym_LL);
 REGISTER_SparseMtrx( DSSMatrixLU, SMT_DSS_unsym_LU);
 
-DSSMatrix :: DSSMatrix(dssType _t) : SparseMtrx()
+DSSMatrix :: DSSMatrix(dssType _t) : SparseMtrx(), _dss(new DSSolver())
 {
     eDSSolverType _st = eDSSFactorizationLDLT;
-    _dss = new DSSolver();
     _type = _t;
     if ( _t == sym_LDL ) {
         _st = eDSSFactorizationLDLT;
@@ -68,15 +68,13 @@ DSSMatrix :: DSSMatrix(dssType _t) : SparseMtrx()
     }
 
     _dss->Initialize(0, _st);
-    _sm = NULL;
     isFactorized = false;
 }
 
 
-DSSMatrix :: DSSMatrix(dssType _t, int n) : SparseMtrx(n, n)
+DSSMatrix :: DSSMatrix(dssType _t, int n) : SparseMtrx(n, n), _dss(new DSSolver())
 {
     eDSSolverType _st = eDSSFactorizationLDLT;
-    _dss = new DSSolver();
     _type = _t;
     if ( _t == sym_LDL ) {
         _st = eDSSFactorizationLDLT;
@@ -89,14 +87,11 @@ DSSMatrix :: DSSMatrix(dssType _t, int n) : SparseMtrx(n, n)
     }
 
     _dss->Initialize(0, _st);
-    _sm = NULL;
     isFactorized = false;
 }
 
 DSSMatrix :: ~DSSMatrix()
 {
-    delete _dss;
-    delete _sm;
 }
 
 /*****************************/
@@ -194,11 +189,8 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
 
     colptr_ [ neq ] = indx;
 
-    if ( _sm ) {
-        delete _sm;
-    }
-
-    if ( ( _sm = new SparseMatrixF(neq, NULL, rowind_, colptr_, 0, 0, true) ) == NULL ) {
+    _sm.reset( new SparseMatrixF(neq, NULL, rowind_, colptr_, 0, 0, true) ); 
+    if ( !_sm ) {
         OOFEM_FATAL("free store exhausted, exiting");
     }
 
@@ -240,7 +232,7 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
                 }
             } else {
                     mcn [ _c++ ] = -1; // no corresponding row in sparse mtrx structure
-	    }
+            }
         }
 
         for ( int i = _ndofs + 1; i <= bsize; i++ ) {
@@ -277,11 +269,11 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
     }
     
     if ( _succ ) {
-        _dss->SetMatrixPattern(_sm, bsize);
+        _dss->SetMatrixPattern(_sm.get(), bsize);
         _dss->LoadMCN(ndofmans+ndofmansbc, bsize, mcn);
     } else {
         OOFEM_LOG_INFO("DSSMatrix: using assumed block structure");
-        _dss->SetMatrixPattern(_sm, bsize);
+        _dss->SetMatrixPattern(_sm.get(), bsize);
     }
 
     _dss->PreFactorize();
@@ -408,10 +400,10 @@ SparseMtrx *DSSMatrix :: factorized()
     return this;
 }
 
-void DSSMatrix :: solve(FloatArray *b, FloatArray *x)
+void DSSMatrix :: solve(FloatArray &b, FloatArray &x)
 {
-    x->resize( b->giveSize() );
-    _dss->Solve( x->givePointer(), b->givePointer() );
+    x.resize( b.giveSize() );
+    _dss->Solve( x.givePointer(), b.givePointer() );
 }
 
 /*********************/

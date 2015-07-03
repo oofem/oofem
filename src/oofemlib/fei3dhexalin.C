@@ -164,9 +164,8 @@ FEI3dHexaLin :: global2local(FloatArray &answer, const FloatArray &coords, const
     answer.zero();
 
     // apply Newton-Raphson to solve the problem
-    do {
+    for ( ;; ) {
         if ( ( ++nite ) > 10 ) {
-            // fprintf(stderr, "FEI3dHexaLin :: global2local: no convergence after 10 iterations");
             answer.zero();
             return false;
         }
@@ -202,7 +201,7 @@ FEI3dHexaLin :: global2local(FloatArray &answer, const FloatArray &coords, const
 
         // update guess
         answer.subtract(delta);
-    } while ( true );
+    }
 
     // test if inside
     bool inside = true;

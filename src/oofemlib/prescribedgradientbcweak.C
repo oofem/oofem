@@ -46,7 +46,9 @@
 #include "spatiallocalizer.h"
 #include "geometry.h"
 #include "dynamicinputrecord.h"
+#include "timestep.h"
 #include "function.h"
+#include "engngm.h"
 
 #include "xfem/XFEMDebugTools.h"
 
@@ -56,7 +58,8 @@
 
 namespace oofem {
 PrescribedGradientBCWeak :: PrescribedGradientBCWeak(int n, Domain *d) :
-    PrescribedGradientBC(n, d),
+    ActiveBoundaryCondition(n, d),
+    PrescribedGradientHomogenization(),
     mTractionInterpOrder(0),
     mNumTractionNodesAtIntersections(1),
     mTractionNodeSpacing(1),
@@ -65,13 +68,22 @@ PrescribedGradientBCWeak :: PrescribedGradientBCWeak(int n, Domain *d) :
     mTangDistPadding(0.0),
     mTracDofScaling(1.0e0),
     mpDisplacementLock(NULL),
+    mLockNodeInd(0),
     mDispLockScaling(1.0)
 {
     // Compute bounding box of the domain
     computeDomainBoundingBox(* d, mLC, mUC);
 }
 
-PrescribedGradientBCWeak :: ~PrescribedGradientBCWeak() {
+PrescribedGradientBCWeak :: ~PrescribedGradientBCWeak()
+{
+    clear();
+}
+
+void PrescribedGradientBCWeak :: clear()
+{
+    mpTractionNodes.clear();
+
     for ( size_t i = 0; i < mpTractionMasterNodes.size(); i++ ) {
         if ( mpTractionMasterNodes [ i ] != NULL ) {
             delete mpTractionMasterNodes [ i ];
@@ -92,7 +104,13 @@ PrescribedGradientBCWeak :: ~PrescribedGradientBCWeak() {
         delete mpDisplacementLock;
         mpDisplacementLock = NULL;
     }
+
+    mMapTractionElDispElGamma.clear();
+    mTractionElInteriorCoordinates.clear();
+    mTracElDispNodes.clear();
 }
+
+//#define DAMAGE_TEST
 
 int PrescribedGradientBCWeak :: giveNumberOfInternalDofManagers()
 {
@@ -117,7 +135,14 @@ DofManager *PrescribedGradientBCWeak :: giveInternalDofManager(int i)
 IRResultType PrescribedGradientBCWeak :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;
-    PrescribedGradientBC :: initializeFrom(ir);
+    result = ActiveBoundaryCondition :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+    result = PrescribedGradientHomogenization :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     IR_GIVE_FIELD(ir, mTractionInterpOrder, _IFT_PrescribedGradientBCWeak_TractionInterpOrder);
     printf("mTractionInterpOrder: %d\n", mTractionInterpOrder);
@@ -154,7 +179,8 @@ IRResultType PrescribedGradientBCWeak :: initializeFrom(InputRecord *ir)
 
 void PrescribedGradientBCWeak :: giveInputRecord(DynamicInputRecord &input)
 {
-    PrescribedGradientBC :: giveInputRecord(input);
+    ActiveBoundaryCondition :: giveInputRecord(input);
+    PrescribedGradientHomogenization :: giveInputRecord(input);
 
     input.setField(mTractionInterpOrder, _IFT_PrescribedGradientBCWeak_TractionInterpOrder);
     input.setField(mNumTractionNodesAtIntersections, _IFT_PrescribedGradientBCWeak_NumTractionNodesAtIntersections);
@@ -199,7 +225,7 @@ void PrescribedGradientBCWeak :: assembleVector(FloatArray &answer, TimeStep *tS
             IntegrationRule *ir = createNewIntegrationRule(i);
 
             for ( GaussPoint *gp: *ir ) {
-                const FloatArray &locCoordsOnLine = * gp->giveNaturalCoordinates();
+                const FloatArray &locCoordsOnLine = gp->giveNaturalCoordinates();
 
                 // Compute N^trac
                 FloatArray N, Ntrac;
@@ -239,7 +265,7 @@ void PrescribedGradientBCWeak :: assembleVector(FloatArray &answer, TimeStep *tS
 
             fExt.negated();
 
-            double loadLevel = this->giveTimeFunction()->evaluate(tStep, mode);
+            double loadLevel = this->giveTimeFunction()->evaluateAtTime(tStep->giveTargetTime());
             fExt.times(loadLevel);
 
             // Assemble
@@ -303,10 +329,10 @@ void PrescribedGradientBCWeak :: assembleVector(FloatArray &answer, TimeStep *tS
             mpDisplacementLock->giveCompleteLocationArray(dispLockRows, s);
 
             FloatArray fe_dispLock;
-            int lockNodeInd = 1;
 
+            int lockNodePlaceInArray = domain->giveDofManPlaceInArray(mLockNodeInd);
             FloatArray nodeUnknowns;
-            domain->giveDofManager(lockNodeInd)->giveCompleteUnknownVector(nodeUnknowns, mode, tStep);
+            domain->giveDofManager(lockNodePlaceInArray)->giveCompleteUnknownVector(nodeUnknowns, mode, tStep);
 
             for ( int i = 0; i < domain->giveNumberOfSpatialDimensions(); i++ ) {
                 fe_dispLock.push_back(nodeUnknowns [ i ]);
@@ -320,10 +346,10 @@ void PrescribedGradientBCWeak :: assembleVector(FloatArray &answer, TimeStep *tS
 }
 
 
-void PrescribedGradientBCWeak :: assemble(SparseMtrx *answer, TimeStep *tStep,
+void PrescribedGradientBCWeak :: assemble(SparseMtrx &answer, TimeStep *tStep,
                                           CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
-    if ( type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == StiffnessMatrix || type == ElasticStiffnessMatrix ) {
+    if ( type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == ElasticStiffnessMatrix ) {
         FloatMatrix Ke, KeT;
         IntArray tracRows, tracCols, dispRows, dispCols;
 
@@ -339,13 +365,13 @@ void PrescribedGradientBCWeak :: assemble(SparseMtrx *answer, TimeStep *tStep,
             Ke.negated();
             KeT.beTranspositionOf(Ke);
 
-            answer->assemble(tracRows, dispCols, Ke);
-            answer->assemble(dispRows, tracCols, KeT);
+            answer.assemble(tracRows, dispCols, Ke);
+            answer.assemble(dispRows, tracCols, KeT);
 
 
             FloatMatrix KZero( tracRows.giveSize(), tracCols.giveSize() );
             KZero.zero();
-            answer->assemble(tracRows, tracCols, KZero);
+            answer.assemble(tracRows, tracCols, KZero);
         }
 
 
@@ -355,8 +381,8 @@ void PrescribedGradientBCWeak :: assemble(SparseMtrx *answer, TimeStep *tStep,
             KeDispLock.beUnitMatrix();
             KeDispLock.times(mDispLockScaling);
 
-            int lockNodeInd = 1;
-            DofManager *node = domain->giveDofManager(lockNodeInd);
+            int placeInArray = domain->giveDofManPlaceInArray(mLockNodeInd);
+            DofManager *node = domain->giveDofManager(placeInArray);
 
             IntArray lockRows, lockCols, nodeRows, nodeCols;
             mpDisplacementLock->giveCompleteLocationArray(lockRows, r_s);
@@ -376,14 +402,14 @@ void PrescribedGradientBCWeak :: assemble(SparseMtrx *answer, TimeStep *tStep,
                 nodeColsRed.followedBy(nodeCols [ m ]);
             }
 
-            answer->assemble(lockRows, nodeColsRed, KeDispLock);
-            answer->assemble(nodeRowsRed, lockCols, KeDispLock);
+            answer.assemble(lockRows, nodeColsRed, KeDispLock);
+            answer.assemble(nodeRowsRed, lockCols, KeDispLock);
 
             FloatMatrix KZero( lockRows.giveSize(), lockCols.giveSize() );
             KZero.zero();
-            answer->assemble(lockRows, lockCols, KZero);
+            answer.assemble(lockRows, lockCols, KZero);
         }
-    } else   {
+    } else {
         printf("Skipping assembly in PrescribedGradientBCWeak::assemble().\n");
     }
 }
@@ -484,7 +510,7 @@ void PrescribedGradientBCWeak :: giveTractionLocationArrays(int iTracElInd, IntA
 {
     rows.clear();
 
-    IntArray tracElRows, trac_loc_c, trac_loc_r;
+    IntArray tracElRows, trac_loc_r;
 
     const TractionElement &tEl = * ( mpTractionElements [ iTracElInd ] );
     for ( int tracNodeInd : tEl.mTractionNodeInd ) {
@@ -510,7 +536,7 @@ void PrescribedGradientBCWeak :: giveDisplacementLocationArrays(int iTracElInd, 
 
 void PrescribedGradientBCWeak :: computeField(FloatArray &sigma, TimeStep *tStep)
 {
-    double dSize = domainSize();
+    double dSize = domainSize(this->giveDomain(), this->giveSetNumber());
 
     const int dim = domain->giveNumberOfSpatialDimensions();
     FloatMatrix stressMatrix(dim, dim);
@@ -521,7 +547,7 @@ void PrescribedGradientBCWeak :: computeField(FloatArray &sigma, TimeStep *tStep
         IntegrationRule *ir = createNewIntegrationRule(i);
 
         for ( GaussPoint *gp: *ir ) {
-            const FloatArray &locCoordsOnLine = * gp->giveNaturalCoordinates();
+            const FloatArray &locCoordsOnLine = gp->giveNaturalCoordinates();
 
             // Compute N^trac
             FloatArray N, Ntrac;
@@ -595,6 +621,11 @@ void PrescribedGradientBCWeak :: computeField(FloatArray &sigma, TimeStep *tStep
 #endif
 }
 
+void PrescribedGradientBCWeak :: computeTangent(FloatMatrix& E, TimeStep* tStep)
+{
+    OOFEM_ERROR("Not implemented yet.");
+}
+
 void PrescribedGradientBCWeak :: giveTractionElNormal(size_t iElInd, FloatArray &oNormal, FloatArray &oTangent) const
 {
     const FloatArray &xS = mpTractionElements [ iElInd ]->mStartCoord;
@@ -640,6 +671,13 @@ void PrescribedGradientBCWeak :: giveTraction(size_t iElInd, FloatArray &oStartT
     } else   {
         mpTractionNodes [ mpTractionElements [ iElInd ]->mTractionNodeInd [ 1 ] ]->giveCompleteUnknownVector(oEndTraction, mode, tStep);
     }
+}
+
+void PrescribedGradientBCWeak :: recomputeTractionMesh()
+{
+    printf("Recomputing traction mesh.\n");
+    clear();
+    postInitialize();
 }
 
 void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodicity, int iNumSides)
@@ -773,8 +811,13 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
 
                     int numClosePoints = 0;
                     const double meshTol2 = meshTol * meshTol;
-                    for ( auto bndPos : bndNodeCoords [ sideInd ] ) {
+                    for ( auto &bndPos : bndNodeCoords [ sideInd ] ) {
                         if ( bndPos.first.distance_square(intersecPoints [ i ]) < meshTol2 ) {
+
+                            if(numClosePoints < mNumTractionNodesAtIntersections) {
+                                bndPos.second = true;
+                            }
+
                             numClosePoints++;
                         }
                     }
@@ -789,6 +832,159 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
                     }
                 } else   {
                     if ( mMeshIsPeriodic ) {
+
+                        if ( pointIsMapapble(intersecPoints [ i ]) ) {
+                            FloatArray xPlus;
+                            giveMirroredPointOnGammaPlus(xPlus, intersecPoints [ i ]);
+
+                            int sideInd = giveSideIndex(xPlus);
+
+                            int numClosePoints = 0;
+                            const double meshTol2 = meshTol * meshTol;
+                            for ( auto &bndPos : bndNodeCoords [ sideInd ] ) {
+                                if ( bndPos.first.distance_square(xPlus) < meshTol2 ) {
+
+                                    if(numClosePoints < mNumTractionNodesAtIntersections) {
+                                        bndPos.second = true;
+                                    }
+
+                                    numClosePoints++;
+                                }
+                            }
+
+                            if ( numClosePoints < mNumTractionNodesAtIntersections ) {
+                                for ( int j = 0; j < mNumTractionNodesAtIntersections - numClosePoints; j++ ) {
+                                    std :: pair< FloatArray, bool >nodeCoord = {
+                                        xPlus, true
+                                    };
+                                    bndNodeCoords [ sideInd ].push_back(nodeCoord);
+                                }
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+
+
+
+
+    }
+
+
+
+    SpatialLocalizer *localizer = domain->giveSpatialLocalizer();
+
+    // Also add traction nodes where cohesive zone elements intersect the boundary
+    for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
+        Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
+        int boundary = boundaries.at(pos * 2);
+
+        e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+
+        // Add the start and end nodes of the segment
+        DofManager *startNode   = e->giveDofManager(bNodes [ 0 ]);
+        const FloatArray &xS    = * ( startNode->giveCoordinates() );
+
+        DofManager *endNode     = e->giveDofManager(bNodes [ 1 ]);
+        const FloatArray &xE    = * ( endNode->giveCoordinates() );
+
+        double radius = xS.distance(xE)*1.0e-2;
+
+        std :: set< int >elListS;
+        localizer->giveAllElementsWithNodesWithinBox(elListS, xS, radius);
+
+        std :: vector< FloatArray >intersecPoints;
+
+
+        // Also add traction nodes where cohesive zone elements intersect the boundary
+        for(int elInd : elListS) {
+
+            Element *el = domain->giveElement(elInd);
+
+            if( strcmp(el->giveClassName(),"IntElLine1" ) == 0 || strcmp(el->giveClassName(),"IntElLine2" ) == 0 )
+            {
+#ifdef DAMAGE_TEST
+                if(damageExceedsTolerance(el)) {
+//                    OOFEM_ERROR("Damage exceeds tolerance.")
+//                    printf("Damage exceeds tolerance. Adding traction node.\n");
+                    intersecPoints.push_back(xS);
+                    break;
+                }
+
+#else
+                intersecPoints.push_back(xS);
+                break;
+
+#endif
+            }
+
+        }
+
+
+        std :: set< int >elListE;
+        localizer->giveAllElementsWithNodesWithinBox(elListE, xE, radius);
+
+
+
+        for(int elInd : elListE) {
+
+            Element *el = domain->giveElement(elInd);
+
+            if( strcmp(el->giveClassName(),"IntElLine1" ) == 0 || strcmp(el->giveClassName(),"IntElLine2" ) == 0 )
+            {
+
+#ifdef DAMAGE_TEST
+                if(damageExceedsTolerance(el)) {
+//                    OOFEM_ERROR("Damage exceeds tolerance.")
+//                    printf("Damage exceeds tolerance. Adding traction node.\n");
+                    intersecPoints.push_back(xE);
+                    break;
+                }
+#else
+                intersecPoints.push_back(xE);
+                break;
+#endif
+
+
+            }
+
+        }
+
+
+
+        for ( size_t i = 0; i < intersecPoints.size(); i++ ) {
+            if ( boundaryPointIsOnActiveBoundary(intersecPoints [ i ]) ) {
+                int sideInd = giveSideIndex(intersecPoints [ i ]);
+
+                int numClosePoints = 0;
+                const double meshTol2 = meshTol * meshTol;
+                for ( auto &bndPos : bndNodeCoords [ sideInd ] ) {
+                    if ( bndPos.first.distance_square(intersecPoints [ i ]) < meshTol2 ) {
+
+                        if(numClosePoints < mNumTractionNodesAtIntersections) {
+                            bndPos.second = true;
+                        }
+
+                        numClosePoints++;
+                    }
+                }
+
+                if ( numClosePoints < mNumTractionNodesAtIntersections ) {
+                    for ( int j = 0; j < mNumTractionNodesAtIntersections - numClosePoints; j++ ) {
+                        std :: pair< FloatArray, bool >nodeCoord = {
+                            intersecPoints [ i ], true
+                        };
+
+                        bndNodeCoords [ sideInd ].push_back(nodeCoord);
+                    }
+                }
+            } else   {
+                if ( mMeshIsPeriodic ) {
+
+                    if ( pointIsMapapble(intersecPoints [ i ]) ) {
+
                         FloatArray xPlus;
                         giveMirroredPointOnGammaPlus(xPlus, intersecPoints [ i ]);
 
@@ -796,8 +992,12 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
 
                         int numClosePoints = 0;
                         const double meshTol2 = meshTol * meshTol;
-                        for ( auto bndPos : bndNodeCoords [ sideInd ] ) {
+                        for ( auto &bndPos : bndNodeCoords [ sideInd ] ) {
                             if ( bndPos.first.distance_square(xPlus) < meshTol2 ) {
+
+                                if(numClosePoints < mNumTractionNodesAtIntersections) {
+                                    bndPos.second = true;
+                                }
                                 numClosePoints++;
                             }
                         }
@@ -811,9 +1011,11 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
                             }
                         }
                     }
+
                 }
             }
         }
+
     }
 
     // Sort boundary nodes
@@ -1011,6 +1213,7 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
 
         int numNodes = domain->giveNumberOfDofManagers();
         mpDisplacementLock = new Node(numNodes + 1, domain);
+        mLockNodeInd = domain->giveElement(1)->giveNode(1)->giveGlobalNumber();
 
 
         int nsd = domain->giveNumberOfSpatialDimensions();
@@ -1023,6 +1226,23 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
             mpDisplacementLock->appendDof( new MasterDof(mpDisplacementLock, ( DofIDItem ) dofid) );
         }
     }
+}
+
+bool PrescribedGradientBCWeak :: damageExceedsTolerance(Element *el)
+{
+    TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
+
+    double maxDamage = 0.0, damageTol = 0.01;
+    for ( auto &gp: *el->giveDefaultIntegrationRulePtr() ) {
+        FloatArray damage;
+        el->giveIPValue(damage, gp, IST_DamageScalar, tStep);
+//                    printf("damage: "); damage.printYourself();
+        maxDamage = std::max(maxDamage, damage(0));
+    }
+
+//    printf("maxDamage: %e\n", maxDamage);
+
+    return maxDamage >= damageTol;
 }
 
 void PrescribedGradientBCWeak :: buildMaps(const std :: vector< std :: pair< FloatArray, bool > > &iBndNodeCoordsFull)
@@ -1251,7 +1471,7 @@ void PrescribedGradientBCWeak :: assembleTangentGPContribution(FloatMatrix &oTan
 
     const TractionElement &tEl = * ( mpTractionElements [ iTracElInd ] );
     double detJ = 0.5 * tEl.mStartCoord.distance(tEl.mEndCoord);
-    const FloatArray &locCoordsOnLine = * iGP.giveNaturalCoordinates();
+    const FloatArray &locCoordsOnLine = iGP.giveNaturalCoordinates();
 
     //////////////////////////////////
     // Compute traction N-matrix
@@ -1280,19 +1500,22 @@ void PrescribedGradientBCWeak :: assembleTangentGPContribution(FloatMatrix &oTan
     FloatMatrix NdispMat_minus;
 
     if ( xfemElInt_minus != NULL && domain->hasXfemManager() ) {
-        //printf("Computing enriched N-matrix.\n");
+        // If the element is an XFEM element, we use the XfemElementInterface to compute the N-matrix
+        // of the enriched element.
         xfemElInt_minus->XfemElementInterface_createEnrNmatrixAt(NdispMat_minus, dispElLocCoord_minus, * dispEl_minus, false);
     } else   {
-        if(!domain->hasXfemManager()) {
-            printf("!domain->hasXfemManager()\n");
-        }
+        // Otherwise, use the usual N-matrix.
+        const int numNodes = dispEl_minus->giveNumberOfDofManagers();
+        FloatArray N(numNodes);
 
-        if(xfemElInt_minus == NULL) {
-            printf("xfemElInt_minus == NULL\n");
-            printf("dispEl_minus->giveClassName(): %s\n", dispEl_minus->giveClassName() );
-        }
+        const int dim = dispEl_minus->giveSpatialDimension();
 
-        OOFEM_ERROR("Unable to compute N-matrix.")
+        NdispMat_minus.resize(dim, dim * numNodes);
+        NdispMat_minus.zero();
+        dispEl_minus->giveInterpolation()->evalN( N, dispElLocCoord_minus, FEIElementGeometryWrapper(dispEl_minus) );
+
+        NdispMat_minus.beNMatrixOf(N, dim);
+
     }
 
     FloatMatrix contrib;
@@ -1370,7 +1593,7 @@ void PrescribedGradientBCWeak :: computeNTraction(FloatArray &oN, const double &
 {
     if ( mTractionInterpOrder == 0 ) {
         iEl.computeN_Constant(oN, iXi);
-    } else if ( mTractionInterpOrder == 1 )    {
+    } else if ( mTractionInterpOrder == 1 ) {
         iEl.computeN_Linear(oN, iXi);
     }
 
@@ -1399,23 +1622,6 @@ void PrescribedGradientBCWeak :: giveDisplacementUnknows(FloatArray &oDispUnknow
         domain->giveDofManager(nodeInd)->giveCompleteUnknownVector(nodeUnknowns, mode, tStep);
         oDispUnknowns.append(nodeUnknowns);
     }
-}
-
-double PrescribedGradientBCWeak :: domainSize()
-{
-    int nsd = this->domain->giveNumberOfSpatialDimensions();
-    double domain_size = 0.0;
-    // This requires the boundary to be consistent and ordered correctly.
-    Set *set = this->giveDomain()->giveSet(this->set);
-    const IntArray &boundaries = set->giveBoundaryList();
-
-    for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
-        Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
-        int boundary = boundaries.at(pos * 2);
-        FEInterpolation *fei = e->giveInterpolation();
-        domain_size += fei->evalNXIntegral( boundary, FEIElementGeometryWrapper(e) );
-    }
-    return fabs(domain_size / nsd);
 }
 
 bool PrescribedGradientBCWeak :: pointIsOnGammaPlus(const FloatArray &iPos) const

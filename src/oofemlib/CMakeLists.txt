@@ -11,14 +11,15 @@ set (core_unsorted
     geotoolbox.C geometry.C
     datastream.C
     set.C
-    rvematerial.C
     weakperiodicbc.C
     solutionbasedshapefunction.C
     fracturemanager.C
+    neumannmomentload.C
     parallelcontext.C
     contact/contactmanager.C
     contact/contactdefinition.C
     contact/contactelement.C
+    prescribedmean.C
     # Semi sorted:
     errorestimator.C meshqualityerrorestimator.C remeshingcrit.C
     sloangraph.C sloangraphnode.C sloanlevelstruct.C
@@ -33,6 +34,8 @@ set (core_unsorted
     rowcol.C skyline.C skylineu.C
     ldltfact.C
     inverseit.C subspaceit.C gjacobi.C
+    #
+    symcompcol.C compcol.C
     )
 
 #oofegutils
@@ -43,7 +46,7 @@ endif ()
 
 if (USE_IML)
     list (APPEND core_unsorted
-        iml/dyncomprow.C iml/dyncompcol.C iml/symcompcol.C iml/compcol.C
+        iml/dyncomprow.C iml/dyncompcol.C
         iml/precond.C iml/voidprecond.C iml/icprecond.C iml/iluprecond.C iml/ilucomprowprecond.C iml/diagpre.C
         iml/imlsolver.C
         )
@@ -83,6 +86,10 @@ set (core_nm
 
 if (USE_PETSC)
     list (APPEND core_nm petscsolver.C petscsparsemtrx.C)
+endif ()
+
+if (USE_MKLPARDISO)
+    list (APPEND core_nm mklpardisosolver.C)
 endif ()
 
 set (core_fields
@@ -241,8 +248,8 @@ endif ()
 set (core_bc
     generalboundarycondition.C
     boundarycondition.C
+    prescribedgradienthomogenization.C
     prescribedgradient.C
-    prescribedgradientbc.C
     prescribedgradientbcneumann.C
     prescribedgradientbcweak.C
     prescribedgradientbcweakperiodic.C

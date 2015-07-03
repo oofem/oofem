@@ -74,7 +74,7 @@ public:
      * @param x solution array
      * @return NM_Status value
      */
-    virtual NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
+    virtual NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x);
 
     virtual const char *giveClassName() const { return "LDLTFactorization"; }
     virtual LinSystSolverType giveLinSystSolverType() const { return ST_Direct; }

@@ -37,10 +37,6 @@
 
 #include "node.h"
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
-
 ///@name Input fields for Pfemparticle
 //@{
 #define _IFT_PFEMParticle_Name "pfemparticle"
@@ -77,14 +73,7 @@ public:
      */
     ~PFEMParticle(void) { }
 
-    /**
-     * Initializes receiver acording to object description stored in input record.
-     */
     virtual IRResultType initializeFrom(InputRecord *ir);
-    /**
-     * Checks internal data consistency in node.
-     * @return nonzero if receiver check is o.k.
-     */
     virtual int checkConsistency();
 
     virtual void updateYourself(TimeStep *tStep);
@@ -106,11 +95,7 @@ public:
 
     virtual void printOutputAt(FILE *stream, TimeStep *stepN);
 
-    /**
-     * Returns class name of the receiver.
-     */
     virtual const char *giveClassName() const { return "PFEMParticle"; }
-
     virtual const char *giveInputRecordName() const { return _IFT_PFEMParticle_Name; }
 
 #ifdef __OOFEG

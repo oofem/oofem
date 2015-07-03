@@ -116,7 +116,8 @@ B3SolidMaterial :: initializeFrom(InputRecord *ir)
     if ( this->shMode == B3_PointShrinkage ) {   // #2 in enumerator
 
         if ( this->MicroPrestress == 0 ) {
-            OOFEM_ERROR("to use B3_PointShrinkageMPS - MicroPrestress must be = 1");       //or else no external fiels would be found
+            OOFEM_WARNING("to use B3_PointShrinkageMPS - MicroPrestress must be = 1");       //or else no external fiels would be found
+            return IRRT_BAD_FORMAT;
         }
 
         kSh = -1;
@@ -129,7 +130,8 @@ B3SolidMaterial :: initializeFrom(InputRecord *ir)
 
         // either kSh or initHum and finalHum must be given in input record
         if ( !( ( this->kSh != -1 ) || ( ( initHum != -1 ) && ( finalHum != -1 ) ) ) ) {
-            OOFEM_ERROR("either kSh or initHum and finalHum must be given in input record");
+            OOFEM_WARNING("either kSh or initHum and finalHum must be given in input record");
+            return IRRT_BAD_FORMAT;
         }
         
          if ( ( ( initHum < 0.2 ) || ( initHum > 0.98 ) || ( finalHum < 0.2 ) || ( finalHum > 0.98 ) ) && ( this->kSh == -1 ) ) {
@@ -177,8 +179,7 @@ B3SolidMaterial :: initializeFrom(InputRecord *ir)
     }
 
     // ph!!!
-    //KelvinChainMaterial :: initializeFrom(ir);
-
+    //return KelvinChainMaterial :: initializeFrom(ir);
     return IRRT_OK;
 }
 
@@ -278,6 +279,7 @@ B3SolidMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
     v = computeSolidifiedVolume(tStep);
     eta = this->computeFlowTermViscosity(gp, tStep);     //evaluated in the middle of the time-step
 
+    ///@todo THREAD UNSAFE!
     t_halfstep = relMatAge + ( tStep->giveTargetTime() - 0.5 * tStep->giveTimeIncrement() ) / timeFactor;
     this->updateEparModuli( t_halfstep );
 
@@ -497,7 +499,7 @@ B3SolidMaterial :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, 
 
     double TauSh, St, kh, help, E607, Et0Tau, EpsShInf, EpsSh;
     double time = relMatAge + tStep->giveTargetTime() / timeFactor;
-    int size = 6;
+    int size;
     FloatArray fullAnswer;
     MaterialMode mode = gp->giveMaterialMode();
 
@@ -790,7 +792,7 @@ B3SolidMaterial :: giveHumidity(GaussPoint *gp, TimeStep *tStep) //computes humi
 
     if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {
         // humidity field registered
-        gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveNaturalCoordinates() );
+        gp->giveElement()->computeGlobalCoordinates( gcoords, gp->giveNaturalCoordinates() );
         if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, tStep) ) ) {
             OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
         }
@@ -821,7 +823,7 @@ B3SolidMaterial :: giveHumidityIncrement(GaussPoint *gp, TimeStep *tStep) //comp
 
     if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {
         // humidity field registered
-        gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveNaturalCoordinates() );
+        gp->giveElement()->computeGlobalCoordinates( gcoords, gp->giveNaturalCoordinates() );
         if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, tStep) ) ) {
             OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
         }

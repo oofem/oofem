@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-// Class SymCompCol
+// Class CompCol
 
 // inspired by
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -66,10 +66,10 @@
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*          Compressed column symmetric sparse matrix (0-based)          */
+/*          Compressed column sparse matrix (0-based)                    */
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-#include "symcompcol.h"
+#include "compcol.h"
 #include "floatarray.h"
 #include "engngm.h"
 #include "domain.h"
@@ -81,34 +81,98 @@
 #include <set>
 
 namespace oofem {
-REGISTER_SparseMtrx(SymCompCol, SMT_SymCompCol);
+REGISTER_SparseMtrx(CompCol, SMT_CompCol);
 
-SymCompCol :: SymCompCol(void) : CompCol()
-{ }
+CompCol :: CompCol(void) : SparseMtrx(), val_(0), rowind_(0), colptr_(0), base_(0), nz_(0)
+{
+    dim_ [ 0 ] = 0;
+    dim_ [ 1 ] = 0;
+}
 
 
-SymCompCol :: SymCompCol(int n) : CompCol(n)
-{ }
+CompCol :: CompCol(int n) : SparseMtrx(n, n), val_(0), rowind_(0), colptr_(n), base_(0), nz_(0)
+{
+    dim_ [ 0 ] = n;
+    dim_ [ 1 ] = n;
+}
 
 
 /*****************************/
 /*  Copy constructor         */
 /*****************************/
 
-SymCompCol :: SymCompCol(const SymCompCol &S) : CompCol(S)
-{ }
-
-
-SparseMtrx *SymCompCol :: GiveCopy() const
+CompCol :: CompCol(const CompCol &S) : SparseMtrx(S.nRows, S.nColumns),
+    val_(S.val_), rowind_(S.rowind_), colptr_(S.colptr_),
+    base_(S.base_), nz_(S.nz_)
 {
-    SymCompCol *result = new SymCompCol(*this);
+    dim_ [ 0 ] = S.dim_ [ 0 ];
+    dim_ [ 1 ] = S.dim_ [ 1 ];
+    nRows = S.nRows;
+    nColumns = S.nColumns;
+}
+
+
+
+/***************************/
+/* Assignment operator...  */
+/***************************/
+
+CompCol &CompCol :: operator = ( const CompCol & C )
+{
+    dim_ [ 0 ] = C.dim_ [ 0 ];
+    dim_ [ 1 ] = C.dim_ [ 1 ];
+    nRows   = C.nRows;
+    nColumns = C.nColumns;
+
+    base_   = C.base_;
+    nz_     = C.nz_;
+    val_    = C.val_;
+    rowind_ = C.rowind_;
+    colptr_ = C.colptr_;
+    this->version = C.version;
+
+    return * this;
+}
+
+
+
+SparseMtrx *CompCol :: GiveCopy() const
+{
+    CompCol *result = new CompCol(*this);
     return result;
 }
 
 
-#define MAP(i, j) map [ ( j ) * neq - ( j ) * ( ( j ) + 1 ) / 2 + ( i ) ]
+void CompCol :: times(const FloatArray &x, FloatArray &answer) const
+{
+    int M = dim_ [ 0 ];
+    int N = dim_ [ 1 ];
 
-int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &s)
+    //      Check for compatible dimensions:
+    if ( x.giveSize() != N ) {
+        OOFEM_ERROR("incompatible dimensions");
+    }
+
+    answer.resize(M);
+    answer.zero();
+
+    for ( int j = 0; j < N; j++ ) {
+        double rhs = x(j);
+        for ( int t = colptr_(j); t < colptr_(j + 1); t++ ) {
+            answer( rowind_(t) ) += val_(t) * rhs;
+        }
+    }
+}
+
+void CompCol :: times(double x)
+{
+    val_.times(x);
+
+    // increment version
+    this->version++;
+}
+
+int CompCol :: buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &s)
 {
     IntArray loc;
     Domain *domain = eModel->giveDomain(di);
@@ -125,13 +189,14 @@ int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
         for ( int ii : loc ) {
             if ( ii > 0 ) {
                 for ( int jj : loc ) {
-                    if ( jj > 0 && ii >= jj ) {
+                    if ( jj > 0 ) {
                         columns [ jj - 1 ].insert(ii - 1);
                     }
                 }
             }
         }
     }
+
 
     // loop over active boundary conditions
     std :: vector< IntArray >r_locs;
@@ -145,9 +210,9 @@ int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
                 IntArray &krloc = r_locs [ k ];
                 IntArray &kcloc = c_locs [ k ];
                 for ( int ii : krloc ) {
-                    if ( ii > 0 ) {
+                    if ( ii ) {
                         for ( int jj : kcloc ) {
-                            if ( jj > 0 && ii >= jj ) {
+                            if ( jj ) {
                                 columns [ jj - 1 ].insert(ii - 1);
                             }
                         }
@@ -157,11 +222,8 @@ int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
         }
     }
 
-
-
-
-    for ( auto &val : columns ) {
-        this->nz_ += val.size();
+    for ( int i = 0; i < neq; i++ ) {
+        this->nz_ += columns [ i ].size();
     }
 
     rowind_.resize(nz_);
@@ -170,7 +232,7 @@ int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
 
     for ( int j = 0; j < neq; j++ ) { // column loop
         colptr_(j) = indx;
-        for ( int row: columns [ j ] ) { // row loop
+        for ( int row: columns [  j ] ) { // row loop
             rowind_(indx++) = row;
         }
     }
@@ -181,7 +243,7 @@ int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
     val_.resize(nz_);
     val_.zero();
 
-    OOFEM_LOG_INFO("SymCompCol info: neq is %d, nwk is %d\n", neq, nz_);
+    OOFEM_LOG_DEBUG("CompCol info: neq is %d, nwk is %d\n", neq, nz_);
 
     dim_ [ 0 ] = dim_ [ 1 ] = nColumns = nRows = neq;
 
@@ -192,75 +254,38 @@ int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
 }
 
 
-
-void SymCompCol :: times(const FloatArray &x, FloatArray &answer) const
+int CompCol :: assemble(const IntArray &loc, const FloatMatrix &mat)
 {
-    int M = dim_ [ 0 ];
-    int N = dim_ [ 1 ];
-
-    //      Check for compatible dimensions:
-    if ( x.giveSize() != N ) {
-        OOFEM_ERROR("incompatible dimensions");
-    }
-
-    answer.resize(M);
-    answer.zero();
-
-    int j, t;
-    double rhs, sum;
-
-    for ( j = 0; j < N; j++ ) {
-        rhs = x(j);
-        sum = 0.0;
-        for ( t = colptr_(j) + 1; t < colptr_(j + 1); t++ ) {
-            answer( rowind_(t) ) += val_(t) * rhs; // column loop
-            sum += val_(t) * x( rowind_(t) ); // row loop
-        }
-
-        answer(j) += sum;
-        answer(j) += val_( colptr_(j) ) * rhs; // diagonal
-    }
-}
-
-void SymCompCol :: times(double x)
-{
-    for ( int t = 0; t < nz_; t++ ) {
-        val_(t) *= x;
-    }
-
-    // increment version
-    this->version++;
-}
-
-
-
-int SymCompCol :: assemble(const IntArray &loc, const FloatMatrix &mat)
-{
-    int i, j, ii, jj, dim;
-    //   RowColumn* rowColumnJJ ; // 13 November 1996 - not needed anymore
+    int dim = mat.giveNumberOfRows();
 
 #  ifdef DEBUG
-    dim = mat.giveNumberOfRows();
     if ( dim != loc.giveSize() ) {
         OOFEM_ERROR("dimension of 'k' and 'loc' mismatch");
     }
-
-    //this -> checkSizeTowards(loc) ;
 #  endif
 
-    // added to make it work for nonlocal model !!!!!!!!!!!!!!!!!!!!!!!!!!
-    // checkSizeTowards(loc) ;
-
-
-    dim = mat.giveNumberOfRows();
-
-    for ( j = 1; j <= dim; j++ ) {
-        jj = loc.at(j);
+    for ( int j = 0; j < dim; j++ ) {
+        int jj = loc[j];
         if ( jj ) {
-            for ( i = 1; i <= dim; i++ ) {
-                ii = loc.at(i);
-                if ( ii && ( ii >= jj ) ) { // assemble only lower triangular part
-                    this->at(ii, jj) += mat.at(i, j);
+            int cstart = colptr_[jj - 1];
+            int t = cstart;
+            int last_ii = this->nRows + 1; // Ensures that t is set correctly the first time.
+            for ( int i = 0; i < dim; i++ ) {
+                int ii = loc[i];
+                if ( ii ) {
+                    // Some heuristics that speed up most cases ( benifits are large for incremental sub-blocks, e.g. locs = [123, 124, 125, 245, 246, 247] ):
+                    if ( ii < last_ii )
+                        t = cstart;
+                    else if ( ii > last_ii )
+                        t++;
+                    for ( ; rowind_[t] < ii - 1; t++ ) {
+#  ifdef DEBUG
+                        if ( t >= colptr_[jj] )
+                            OOFEM_ERROR("Couldn't find row %d in the sparse structure", ii);
+#  endif
+                    }
+                    val_[t] += mat(i, j);
+                    last_ii = ii;
                 }
             }
         }
@@ -272,21 +297,35 @@ int SymCompCol :: assemble(const IntArray &loc, const FloatMatrix &mat)
     return 1;
 }
 
-int SymCompCol :: assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat)
+int CompCol :: assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat)
 {
-    int i, j, ii, jj, dim1, dim2;
-
-    // this->checkSizeTowards(rloc, cloc);
+    int dim1, dim2;
 
     dim1 = mat.giveNumberOfRows();
     dim2 = mat.giveNumberOfColumns();
-    for ( i = 1; i <= dim1; i++ ) {
-        ii = rloc.at(i);
-        if ( ii ) {
-            for ( j = 1; j <= dim2; j++ ) {
-                jj = cloc.at(j);
-                if ( jj && ( ii >= jj ) ) {
-                    this->at(ii, jj) += mat.at(i, j);
+
+    for ( int j = 0; j < dim2; j++ ) {
+        int jj = cloc[j];
+        if ( jj ) {
+            int cstart = colptr_[jj - 1];
+            int t = cstart;
+            int last_ii = this->nRows + 1; // Ensures that t is set correctly the first time.
+            for ( int i = 0; i < dim1; i++ ) {
+                int ii = rloc[i];
+                if ( ii ) {
+                    // Some heuristics that speed up most cases ( benifits are large for incremental sub-blocks, e.g. locs = [123, 124, 125, 245, 246, 247] ):
+                    if ( ii < last_ii )
+                        t = cstart;
+                    else if ( ii > last_ii )
+                        t++;
+                    for ( ; rowind_[t] < ii - 1; t++ ) {
+#  ifdef DEBUG
+                        if ( t >= colptr_[jj] )
+                            OOFEM_ERROR("Couldn't find row %d in the sparse structure", ii);
+#  endif
+                    }
+                    val_[t] += mat(i, j);
+                    last_ii = ii;
                 }
             }
         }
@@ -298,52 +337,45 @@ int SymCompCol :: assemble(const IntArray &rloc, const IntArray &cloc, const Flo
     return 1;
 }
 
-void SymCompCol :: zero()
+void CompCol :: zero()
 {
-    for ( int t = 0; t < nz_; t++ ) {
-        val_(t) = 0.0;
-    }
+    val_.zero();
 
     // increment version
     this->version++;
 }
+
+
+void CompCol :: toFloatMatrix(FloatMatrix &answer) const
+{ }
+
+void CompCol :: printYourself() const
+{ }
 
 /*********************/
 /*   Array access    */
 /*********************/
 
-double &SymCompCol :: at(int i, int j)
+double &CompCol :: at(int i, int j)
 {
-    int ii = i, jj = j;
-    if ( ii < jj ) {
-        ii = j;
-        jj = i;
-    }
-
     // increment version
     this->version++;
 
-    for ( int t = colptr_(jj - 1); t < colptr_(jj); t++ ) {
-        if ( rowind_(t) == ( ii - 1 ) ) {
+    for ( int t = colptr_(j - 1); t < colptr_(j); t++ ) {
+        if ( rowind_(t) == i - 1 ) {
             return val_(t);
         }
     }
 
-    OOFEM_ERROR("Array accessing exception -- out of bounds");
+    OOFEM_ERROR("Array accessing exception -- (%d,%d) out of bounds", i, j);
     return val_(0); // return to suppress compiler warning message
 }
 
 
-double SymCompCol :: at(int i, int j) const
+double CompCol :: at(int i, int j) const
 {
-    int ii = i, jj = j;
-    if ( ii < jj ) {
-        ii = j;
-        jj = i;
-    }
-
-    for ( int t = colptr_(jj - 1); t < colptr_(jj); t++ ) {
-        if ( rowind_(t) == ( ii - 1 ) ) {
+    for ( int t = colptr_(j - 1); t < colptr_(j); t++ ) {
+        if ( rowind_(t) == i - 1 ) {
             return val_(t);
         }
     }
@@ -351,21 +383,15 @@ double SymCompCol :: at(int i, int j) const
     if ( i <= dim_ [ 0 ] && j <= dim_ [ 1 ] ) {
         return 0.0;
     } else {
-        OOFEM_ERROR("Array accessing exception -- index out of bounds (%d,%d)", i, j);
+        OOFEM_ERROR("Array accessing exception -- (%d,%d) out of bounds", i, j);
         return ( 0 ); // return to suppress compiler warning message
     }
 }
 
-double SymCompCol :: operator() (int i, int j)  const
+double CompCol :: operator() (int i, int j)  const
 {
-    int ii = i, jj = j;
-    if ( ii < jj ) {
-        ii = j;
-        jj = i;
-    }
-
-    for ( int t = colptr_(jj); t < colptr_(jj + 1); t++ ) {
-        if ( rowind_(t) == ii ) {
+    for ( int t = colptr_(j); t < colptr_(j + 1); t++ ) {
+        if ( rowind_(t) == i ) {
             return val_(t);
         }
     }
@@ -373,29 +399,48 @@ double SymCompCol :: operator() (int i, int j)  const
     if ( i < dim_ [ 0 ] && j < dim_ [ 1 ] ) {
         return 0.0;
     } else {
-        OOFEM_ERROR("Array accessing exception, index out of bounds (%d,%d)", i, j);
+        OOFEM_ERROR("Array accessing exception -- (%d,%d) out of bounds", i, j);
         return ( 0 ); // return to suppress compiler warning message
     }
 }
 
-double &SymCompCol :: operator() (int i, int j)
+double &CompCol :: operator() (int i, int j)
 {
-    int ii = i, jj = j;
-    if ( ii < jj ) {
-        ii = j;
-        jj = i;
-    }
-
     // increment version
     this->version++;
 
-    for ( int t = colptr_(jj); t < colptr_(jj + 1); t++ ) {
-        if ( rowind_(t) == ii ) {
+    for ( int t = colptr_(j); t < colptr_(j + 1); t++ ) {
+        if ( rowind_(t) == i ) {
             return val_(t);
         }
     }
 
     OOFEM_ERROR("Array element (%d,%d) not in sparse structure -- cannot assign", i, j);
     return val_(0); // return to suppress compiler warning message
+}
+
+void CompCol :: timesT(const FloatArray &x, FloatArray &answer) const
+{
+    int M = dim_ [ 0 ];
+    int N = dim_ [ 1 ];
+
+    //      Check for compatible dimensions:
+    if ( x.giveSize() != M ) {
+        OOFEM_ERROR("Error in CompCol -- incompatible dimensions");
+    }
+
+    answer.resize(N);
+    answer.zero();
+    int i, t;
+    double r;
+
+    for ( i = 0; i < N; i++ ) {
+        r = 0.0;
+        for ( t = colptr_(i); t < colptr_(i + 1); t++ ) {
+            r += val_(t) * x( rowind_(t) );
+        }
+
+        answer(i) = r;
+    }
 }
 } // end namespace oofem

@@ -66,12 +66,11 @@ IRResultType MacroLSpace :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;              // Required by IR_GIVE_FIELD macro
 
-    this->LSpace :: initializeFrom(ir);
-
     IR_GIVE_FIELD(ir, this->microMasterNodes, _IFT_MacroLspace_microMasterNodes);
 
     if ( this->microMasterNodes.giveSize() != 8 ) {
-        OOFEM_ERROR("Need 8 master nodes from the microproblem defined on macroLspace element");
+        OOFEM_WARNING("Need 8 master nodes from the microproblem defined on macroLspace element");
+        return IRRT_BAD_FORMAT;
     }
 
     IR_GIVE_FIELD(ir, this->microBoundaryNodes, _IFT_MacroLspace_microBoundaryNodes);
@@ -92,7 +91,7 @@ IRResultType MacroLSpace :: initializeFrom(InputRecord *ir)
         }
     }
 #endif
-    return IRRT_OK;
+    return LSpace :: initializeFrom(ir);;
 }
 
 

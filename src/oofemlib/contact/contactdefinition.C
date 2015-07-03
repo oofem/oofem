@@ -51,33 +51,30 @@ ContactDefinition :: ContactDefinition(ContactManager *cMan)
     this->cMan = cMan;
     this->numberOfConstraintEq = 0;
 }
-    /// Destructor.
+
+
 ContactDefinition :: ~ContactDefinition()
 {
 }
 
 
-
-
 int
 ContactDefinition :: instanciateYourself(DataReader *dr)
 {
-  
-    for ( ContactElement *cEl : this->masterElementList ) { 
+    for ( ContactElement *cEl : this->masterElementList ) {
         cEl->instanciateYourself(dr);
         cEl->setupIntegrationPoints();
     }
     
-  return 1;
+    return 1;
 }
-
 
 
 void 
 ContactDefinition :: createContactDofs()
 {
     // Creates new dofs due associated with the contact (Lagrange multipliers) and appends them to the dof managers
-// Creates new dofs due associated with the contact (Lagrange multipliers) and appends them to the dof managers
+    // Creates new dofs due associated with the contact (Lagrange multipliers) and appends them to the dof managers
 
     //TODO This is a bit ugly, find a better solution than asking the contact el
     if ( int numDofs = this->giveNumberOfConstraintEqToAdd() ) {
@@ -87,9 +84,7 @@ ContactDefinition :: createContactDofs()
         for ( int i = 1; i <= numDofs; i++ ) {
             dofIdArray.at(i) = this->cMan->giveDomain()->giveNextFreeDofID();
         }
-        
-        
-        
+
         for ( ContactElement *cEl : this->masterElementList ) { 
             
             cEl->giveDofManagersToAppendTo(dofMans);
@@ -105,7 +100,6 @@ ContactDefinition :: createContactDofs()
                         dMan->appendDof( new MasterDof( dMan, ( DofIDItem ) dofid ) );
                     }
                 }
-              
             }
         }  
     }
@@ -121,7 +115,7 @@ ContactDefinition :: computeContactForces(FloatArray &answer, TimeStep *tStep, C
     IntArray locArray;
     
     // TODO ask masters that are potentially in contact and not everyone
-    for ( ContactElement *master : this->masterElementList ) {
+    for ( auto &master : this->masterElementList ) {
         
         // These acts as external forces so move them to the lhs
         master->computeContactForces(Fc, tStep, type, mode, s, domain, eNorms);
@@ -131,25 +125,23 @@ ContactDefinition :: computeContactForces(FloatArray &answer, TimeStep *tStep, C
             master->giveLocationArray(locArray, s);
             answer.assemble(Fc, locArray);
         
-          if ( eNorms ) {
-              eNorms->assembleSquared( Fc, locArray );
-          }
-          
+            if ( eNorms ) {
+                eNorms->assembleSquared( Fc, locArray );
+            }
         }
     }
-  
-  
 }
 
+
 void
-ContactDefinition :: computeContactTangent(SparseMtrx *answer, TimeStep *tStep,
+ContactDefinition :: computeContactTangent(SparseMtrx &answer, TimeStep *tStep,
                       CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
   
     FloatMatrix Kc;
     IntArray locArrayR, locArrayC;
     
-    for ( ContactElement *master : this->masterElementList ) {
+    for ( auto &master : this->masterElementList ) {
         
         //if ( master->isInContact() ) { // tangent becomes singular with this
             //printf("node in contact: computeContactTangent\n\n");
@@ -160,16 +152,10 @@ ContactDefinition :: computeContactTangent(SparseMtrx *answer, TimeStep *tStep,
             master->giveLocationArray(locArrayR, r_s);
             master->giveLocationArray(locArrayC, c_s);
             
-            answer->assemble(locArrayR, locArrayC, Kc);
+            answer.assemble(locArrayR, locArrayC, Kc);
         //}
     }
-    
-  
 }
-
-
-
-
 
 
 }

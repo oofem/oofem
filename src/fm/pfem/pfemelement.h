@@ -64,9 +64,6 @@ class IntArray;
 class PFEMElement : public FMElement
 {
 public:
-protected:
-  
-public:
     /// Constructor
     PFEMElement(int, Domain *);
     // Destructor
@@ -78,22 +75,17 @@ public:
     // characteristic  matrix
     void giveCharacteristicMatrix(FloatMatrix &answer, CharType, TimeStep *);
     void giveCharacteristicVector(FloatArray &answer, CharType, ValueModeType, TimeStep *);
-    virtual double giveCharacteristicValue(CharType, TimeStep *);
-
+ 
+    /** Calculates diagonal mass matrix as vector*/
+    virtual void computeDiagonalMassMtrx(FloatArray &answer, TimeStep *) = 0;
     /** Calculates diagonal mass matrix */
-    virtual void          computeDiagonalMassMtrx(FloatMatrix &answer, TimeStep *) = 0;
+    virtual void computeDiagonalMassMtrx(FloatMatrix &answer, TimeStep *) = 0;
     /// Calculates critical time step
-    virtual double        computeCriticalTimeStep(TimeStep *tStep) = 0;
-    // time step termination
-    /**
-     * Updates element state corresponding to newly reached solution.
-     * It computes stress vector in each element integration point (to ensure that data in integration point's
-     * statuses are valid).
-     * @param tStep finished time step
-     */
-    void                  updateInternalState(TimeStep *);
-    void                  printOutputAt(FILE *, TimeStep *);
-    virtual int           checkConsistency();
+    virtual double computeCriticalTimeStep(TimeStep *tStep) = 0;
+
+    virtual void updateInternalState(TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual int checkConsistency();
 
     /// Returns the interpolation for velocity
     virtual FEInterpolation *giveVelocityInterpolation() = 0;
@@ -101,23 +93,22 @@ public:
     virtual FEInterpolation *givePressureInterpolation() = 0;
 
     // definition
-    const char *giveClassName() const { return "PFEMElement"; }
+    virtual const char *giveClassName() const { return "PFEMElement"; }
 
     virtual const IntArray& giveVelocityDofMask() const = 0;
     virtual const IntArray& givePressureDofMask() const = 0;
 
 #ifdef __OOFEG
-    int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
+    virtual int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
                                 int node, TimeStep *atTime);
     //
     // Graphics output
     //
-    //void          drawYourself (oofegGraphicContext&);
-    //virtual void  drawRawGeometry (oofegGraphicContext&) {}
-    //virtual void  drawDeformedGeometry(oofegGraphicContext&, UnknownType) {}
+    //virtual void drawYourself(oofegGraphicContext&);
+    //virtual void drawRawGeometry(oofegGraphicContext&) {}
+    //virtual void drawDeformedGeometry(oofegGraphicContext&, UnknownType) {}
 #endif
 
-protected:
     /// Computes deviatoric stress vector in given integration point and solution step from given total strain vector
     virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *) = 0;
     /// Calculates the divergence of the deviatoric stress
@@ -139,10 +130,4 @@ protected:
 };
 } // end namespace oofem
 #endif // pfemelement_h
-
-
-
-
-
-
 

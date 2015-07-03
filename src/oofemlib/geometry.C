@@ -63,12 +63,6 @@ BasicGeometry :: BasicGeometry(const BasicGeometry &iBasicGeometry) :
 BasicGeometry :: ~BasicGeometry()
 { }
 
-// TODO: change to const FloatArray &iVertex
-void BasicGeometry :: setVertex(FloatArray *vertex)
-{
-    mVertices.push_back(* vertex);
-    delete vertex;
-}
 
 void  BasicGeometry :: removeDuplicatePoints(const double &iTolSquare)
 {
@@ -665,8 +659,7 @@ void Circle :: computeNormalSignDist(double &oDist, const FloatArray &iPoint) co
 
 void Circle :: giveGlobalCoordinates(FloatArray &oGlobalCoord, const double &iArcPos) const
 {
-    const double pi = 3.14159265359;
-    double angle = 2.0*pi*iArcPos;
+    double angle = 2.0*M_PI*iArcPos;
 
     oGlobalCoord.resize(2);
     oGlobalCoord = { mVertices[0][0] + radius*cos(angle), mVertices[0][1] + radius*sin(angle) };
@@ -860,7 +853,7 @@ PolygonLine :: PolygonLine() : BasicGeometry()
 
 void PolygonLine :: computeNormalSignDist(double &oDist, const FloatArray &iPoint) const
 {
-    const FloatArray &point = {iPoint[0], iPoint[1]};
+    FloatArray point = {iPoint[0], iPoint[1]};
 
     oDist = std :: numeric_limits< double > :: max();
     int numSeg = this->giveNrVertices() - 1;

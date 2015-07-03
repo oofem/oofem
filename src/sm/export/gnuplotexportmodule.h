@@ -39,6 +39,7 @@
 #include "floatarray.h"
 
 #include <unordered_map>
+#include <memory>
 
 ///@name Input fields for GnuplotExportModule
 //@{
@@ -80,7 +81,8 @@ class MaterialForceEvaluator;
  *
  * Created on: Jan 29, 2014
  */
-class OOFEM_EXPORT GnuplotExportModule : public ExportModule {
+class OOFEM_EXPORT GnuplotExportModule : public ExportModule
+{
 public:
     GnuplotExportModule(int n, EngngModel *e);
     virtual ~GnuplotExportModule();
@@ -90,7 +92,7 @@ public:
     virtual void initialize();
     virtual void terminate();
 
-    virtual const char *giveClassName() const { return "GnuplotExportModule"; };
+    virtual const char *giveClassName() const { return "GnuplotExportModule"; }
     virtual const char *giveInputRecordName() const { return _IFT_GnuplotExportModule_Name; }
 
     /**
@@ -112,7 +114,7 @@ public:
     /**
      * Help functions
      */
-    void outputGradient(PrescribedGradientBC &iBC, TimeStep *tStep);
+    void outputGradient(int bc, Domain &d, FloatArray &grad, TimeStep *tStep);
 
     /**
      * Mesh output
@@ -148,7 +150,7 @@ protected:
     /**
      * Evaluator for material forces.
      */
-    MaterialForceEvaluator *mpMatForceEvaluator;
+    std :: unique_ptr< MaterialForceEvaluator > mpMatForceEvaluator;
     FloatArray mMatForceRadii;
 
     /**

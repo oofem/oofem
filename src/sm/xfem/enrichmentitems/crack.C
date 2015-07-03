@@ -50,16 +50,14 @@ Crack :: Crack(int n, XfemManager *xm, Domain *aDomain) : HybridEI(n, xm, aDomai
 
 IRResultType Crack :: initializeFrom(InputRecord *ir)
 {
-    EnrichmentItem :: initializeFrom(ir);
-
-    return IRRT_OK;
+    return EnrichmentItem :: initializeFrom(ir);
 }
 
 void Crack :: AppendCohesiveZoneGaussPoint(GaussPoint *ipGP)
 {
     StructuralInterfaceMaterialStatus *matStat = dynamic_cast< StructuralInterfaceMaterialStatus * >( ipGP->giveMaterialStatus() );
-    matStat->printYourself();
-    if ( matStat != NULL ) {
+
+    if ( matStat ) {
         // Compute arc length position of the Gauss point
         const FloatArray &coord =  ipGP->giveGlobalCoordinates();
         double tangDist = 0.0, arcPos = 0.0;
@@ -92,7 +90,7 @@ void Crack :: computeCrackIntersectionPoints(Crack &iCrack, std :: vector< Float
     const double tol = 1.0e-12;
 
     // Enrichment domain of the current crack
-    PolygonLine *polygonLine1 = dynamic_cast< PolygonLine * >( mpBasicGeometry );
+    PolygonLine *polygonLine1 = dynamic_cast< PolygonLine * >( mpBasicGeometry.get() );
 
     // Enrichment domain of the crack given as input
     PolygonLine *polygonLine2 = dynamic_cast< PolygonLine * >( iCrack.giveGeometry() );
@@ -119,7 +117,7 @@ void Crack :: computeArcPoints(const std :: vector< FloatArray > &iIntersectionP
     const double tol = 1.0e-12;
 
     // Enrichment domain of the current crack
-    PolygonLine *polygonLine1 = dynamic_cast< PolygonLine * >( mpBasicGeometry );
+    PolygonLine *polygonLine1 = dynamic_cast< PolygonLine * >( mpBasicGeometry.get() );
 
     if ( polygonLine1 != NULL ) {
         for ( FloatArray pos:iIntersectionPoints ) {
@@ -138,7 +136,7 @@ void Crack :: computeArcPoints(const std :: vector< FloatArray > &iIntersectionP
 
 double Crack :: computeLength()
 {
-    PolygonLine *polygonLine = dynamic_cast< PolygonLine * >( mpBasicGeometry );
+    PolygonLine *polygonLine = dynamic_cast< PolygonLine * >( mpBasicGeometry.get() );
 
     if ( polygonLine != NULL ) {
         return polygonLine->computeLength();

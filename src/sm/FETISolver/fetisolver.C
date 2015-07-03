@@ -40,6 +40,7 @@
 #include "dofmanager.h"
 #include "engngm.h"
 #include "domain.h"
+#include "unknownnumberingscheme.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -1048,7 +1049,7 @@ FETISolver :: masterMapGammas()
 
 
 NM_Status
-FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partitionSolution)
+FETISolver :: solve(SparseMtrx &A, FloatArray &partitionLoad, FloatArray &partitionSolution)
 {
     int tnse = 0, rank = domain->giveEngngModel()->giveRank();
     int source, tag;
@@ -1056,13 +1057,13 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
     double nom = 0.0, denom, alpha, beta, energyNorm = 0.0;
     FloatMatrix l1;
     StaticCommunicationBuffer commBuff(MPI_COMM_WORLD);
-    Skyline *partitionStiffness = dynamic_cast< Skyline * >(A);
+    Skyline *partitionStiffness = dynamic_cast< Skyline * >(&A);
     if ( !partitionStiffness ) {
         OOFEM_ERROR("unsuported sparse matrix type");
     }
 
 
-    if ( ( partitionSolution->giveSize() ) != partitionLoad->giveSize() ) {
+    if ( ( partitionSolution.giveSize() ) != partitionLoad.giveSize() ) {
         OOFEM_ERROR("size mismatch");
     }
 
@@ -1120,7 +1121,7 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
         qq.resize(nse);
         qq.zero();
 
-        qq.beTProductOf(rbm, * partitionLoad);
+        qq.beTProductOf(rbm, partitionLoad);
         qq.negated();
     }
 
@@ -1293,7 +1294,7 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
                     rank, "FETISolver :: solveYourselfAt");
 #endif
 
-    dd.subtract(* partitionLoad);
+    dd.subtract(partitionLoad);
     partitionStiffness->ldl_feti_sky(pp, dd, nse, limit, se);
 
     if ( rank == 0 ) {
@@ -1586,14 +1587,14 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
     //dd.printYourself();
 #endif
 
-    partitionLoad->subtract(dd);
+    partitionLoad.subtract(dd);
 #ifdef __VERBOSE_PARALLEL
     // fprintf(stdout, "\n[process rank %3d]: %-30s: Partition load dump:\n",
     //    rank,"FETISolver :: solveYourselfAt");
-    //partitionLoad->printYourself();
+    //partitionLoad.printYourself();
 #endif
-    partitionStiffness->ldl_feti_sky(* partitionSolution, * partitionLoad, nse, limit, se);
-    pp = * partitionSolution;
+    partitionStiffness->ldl_feti_sky(partitionSolution, partitionLoad, nse, limit, se);
+    pp = partitionSolution;
 
 #ifdef __VERBOSE_PARALLEL
     //fprintf(stdout, "\n[process rank %3d]: %-30s: Partition solution dump:\n",
@@ -1666,9 +1667,7 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
         FloatArray help;
         help.beProductOf(rbm, localGammas);
 
-        for ( int j = 1; j <= neq; j++ ) {
-            partitionSolution->at(j) += help.at(j);
-        }
+        partitionSolution.add(help);
     }
 
     return NM_Success;

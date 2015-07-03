@@ -45,6 +45,8 @@
 #include "floatarray.h"
 #include "linesearch.h"
 
+#include <memory>
+
 ///@name Input fields for NRSolver
 //@{
 #define _IFT_NRSolver_Name "nrsolver"
@@ -99,7 +101,7 @@ protected:
     int MANRMSteps;
 
     /// linear system solver
-    SparseLinearSystemNM *linSolver;
+    std :: unique_ptr< SparseLinearSystemNM > linSolver;
     /// linear system solver ID
     LinSystSolverType solverType;
     /// sparse matrix version, used to control constrains application to stiffness
@@ -129,7 +131,7 @@ protected:
     /// Flag indicating whether to use line-search
     bool lsFlag;
     /// Line search solver
-    LineSearchNM *linesearchSolver;
+    std :: unique_ptr< LineSearchNM > linesearchSolver;
     /// Flag indicating if the stiffness should be evaluated before the residual in the first iteration.
     bool mCalcStiffBeforeRes;
     /// Flag indicating whether to use constrained Newton
@@ -152,8 +154,8 @@ public:
     virtual ~NRSolver();
 
     // Overloaded methods:
-    virtual NM_Status solve(SparseMtrx *k, FloatArray *R, FloatArray *R0, FloatArray *iR,
-                            FloatArray *X, FloatArray *dX, FloatArray *F,
+    virtual NM_Status solve(SparseMtrx &k, FloatArray &R, FloatArray *R0, FloatArray *iR,
+                            FloatArray &X, FloatArray &dX, FloatArray &F,
                             const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                             int &nite, TimeStep *);
     virtual void printState(FILE *outputStream);
@@ -185,8 +187,8 @@ protected:
 
     /// Initiates prescribed equations
     void initPrescribedEqs();
-    void applyConstraintsToStiffness(SparseMtrx *k);
-    void applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, FloatArray &R,
+    void applyConstraintsToStiffness(SparseMtrx &k);
+    void applyConstraintsToLoadIncrement(int nite, const SparseMtrx &k, FloatArray &R,
                                          referenceLoadInputModeType rlm, TimeStep *tStep);
 
     /**

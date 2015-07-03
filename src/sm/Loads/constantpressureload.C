@@ -41,21 +41,23 @@
 namespace oofem {
 REGISTER_BoundaryCondition(ConstantPressureLoad);
 
-ConstantPressureLoad :: ConstantPressureLoad(int i, Domain *d) : BoundaryLoad(i, d) {
+ConstantPressureLoad :: ConstantPressureLoad(int i, Domain *d) : BoundaryLoad(i, d)
+{
     this->loadOffset = 0.0;
 }
 
 IRResultType
 ConstantPressureLoad :: initializeFrom(InputRecord *ir)
 {
-    BoundaryLoad :: initializeFrom(ir);
-    if ( componentArray.giveSize() != nDofs ) {
-        OOFEM_ERROR("componentArray size mismatch");
-    }
-
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     IR_GIVE_OPTIONAL_FIELD(ir, this->loadOffset, _IFT_ConstantPressureLoad_LoadOffset);
-    return IRRT_OK;
+#if 1
+    if ( ir->hasField(_IFT_GeneralBoundaryCondition_dofs) ) {
+        OOFEM_WARNING("Constant pressure load should not specify DOFs");
+        return IRRT_BAD_FORMAT;
+    }
+#endif
+    return BoundaryLoad :: initializeFrom(ir);
 }
 
 void
@@ -64,22 +66,20 @@ ConstantPressureLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, cons
     // we overload general implementation on the boundary load level due
     // to implementation efficiency
 
-    double factor;
-
     if ( ( mode != VM_Total ) && ( mode != VM_Incremental ) ) {
         OOFEM_ERROR("mode not supported");
     }
 
     // ask time distribution
-
-    /*
-     * factor = this -> giveTimeFunction() -> at(tStep->giveTime()) ;
-     * if ((mode==VM_Incremental) && (!tStep->isTheFirstStep()))
-     * //factor -= this->giveTimeFunction()->at(tStep->givePreviousStep()->giveTime()) ;
-     * factor -= this->giveTimeFunction()->at(tStep->giveTime()-tStep->giveTimeIncrement()) ;
-     */
-    factor = this->giveTimeFunction()->evaluate(tStep, mode);
+    double factor = this->giveTimeFunction()->evaluate(tStep, mode);
     answer = componentArray;
     answer.times(factor);
 }
+
+void
+ConstantPressureLoad :: computeValues(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, const IntArray &dofids, ValueModeType mode)
+{
+    OOFEM_ERROR("Should not be called for constant pressure loads");
+}
+
 } // end namespace oofem

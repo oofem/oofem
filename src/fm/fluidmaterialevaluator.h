@@ -91,8 +91,6 @@ public:
 
     virtual void solveYourself();
 
-    /// Empty implementation, not relevant for this problem class.
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep) { };
     virtual int checkConsistency();
     virtual void doStepOutput(TimeStep *tStep);
     virtual TimeStep *giveNextStep();

@@ -54,7 +54,7 @@ public:
     QPlaneStressPhF2d(int n, Domain *d);
     virtual ~QPlaneStressPhF2d() { }
 
-    NLStructuralElement *giveElement() { return this; }; 
+    NLStructuralElement *giveElement() { return this; } 
 
     virtual int computeNumberOfDofs() { return 24; }
     virtual void giveDofManDofIDMask( int inode, IntArray &answer ) const;

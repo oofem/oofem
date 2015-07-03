@@ -38,21 +38,16 @@
 #include "mesherinterface.h"
 #include "floatarray.h"
 #include "intarray.h"
-#include "alist.h"
 #include "element.h"
 #include "dofmanager.h"
 #include "connectivitytable.h"
 
+#include <memory>
+#include <vector>
 #include <queue>
 #include <list>
 
 namespace oofem {
-// increase the number of at once allocated fields if the fine (multilevel) subdivision
-// with many new nodes and elements is too slow
-
-#define RS_ARRAY_CHUNK   20
-
-
 
 #define SHARED_IRREGULAR_DATA_TAG 7654
 #define SUBDIVISION_SHARED_IRREGULAR_REC_TAG 7655
@@ -339,10 +334,10 @@ public:
     class RS_Mesh
     {
         // HUHU protected? private?
-        AList< Subdivision :: RS_Node >nodes;
-        AList< Subdivision :: RS_Element >elements;
+        std :: vector< std :: unique_ptr< Subdivision :: RS_Node > >nodes;
+        std :: vector< std :: unique_ptr< Subdivision :: RS_Element > >elements;
 #ifdef __PARALLEL_MODE
-        AList< Subdivision :: RS_SharedEdge >edges;
+        std :: vector< std :: unique_ptr< Subdivision :: RS_SharedEdge > >edges;
 #endif
         Subdivision *subdivision;
 
@@ -355,35 +350,27 @@ public:
 
 public:
 #ifdef __PARALLEL_MODE
-        RS_Mesh(Subdivision * s) : nodes(0, RS_ARRAY_CHUNK), elements(0, RS_ARRAY_CHUNK), edges(0, RS_ARRAY_CHUNK) {
+        RS_Mesh(Subdivision * s) : nodes(), elements(), edges() {
             this->subdivision = s;
             sharedNodeMapInitialized = false;
         }
-        ~RS_Mesh() {
-            nodes.clear();
-            elements.clear();
-            edges.clear();
-        }
 #else
-        RS_Mesh(Subdivision * s) : nodes(0, RS_ARRAY_CHUNK), elements(0, RS_ARRAY_CHUNK) {
+        RS_Mesh(Subdivision * s) : nodes(), elements() {
             this->subdivision = s;
         }
-        ~RS_Mesh() {
-            nodes.clear();
-            elements.clear();
-        }
 #endif
+        ~RS_Mesh() {}
 
-        Subdivision :: RS_Node *giveNode(int i) { return nodes.at(i); }
-        Subdivision :: RS_Element *giveElement(int i) { return elements.at(i); }
-        int giveNumberOfNodes() { return nodes.giveSize(); }
-        int giveNumberOfElements() { return elements.giveSize(); }
-        void addNode(int num, Subdivision :: RS_Node *obj) { nodes.put(num, obj); }
-        void addElement(int num, Subdivision :: RS_Element *obj) { elements.put(num, obj); }
+        Subdivision :: RS_Node *giveNode(int i) { return nodes[i-1].get(); }
+        Subdivision :: RS_Element *giveElement(int i) { return elements[i-1].get(); }
+        int giveNumberOfNodes() { return (int)nodes.size(); }
+        int giveNumberOfElements() { return (int)elements.size(); }
+        void addNode(Subdivision :: RS_Node *obj) { nodes.emplace_back(obj); }
+        void addElement(Subdivision :: RS_Element *obj) { elements.emplace_back(obj); }
 #ifdef __PARALLEL_MODE
-        Subdivision :: RS_SharedEdge *giveEdge(int i) { return edges.at(i); }
-        int giveNumberOfEdges() { return edges.giveSize(); }
-        void addEdge(int num, Subdivision :: RS_SharedEdge *obj) { edges.put(num, obj); }
+        Subdivision :: RS_SharedEdge *giveEdge(int i) { return edges[i-1].get(); }
+        int giveNumberOfEdges() { return (int)edges.size(); }
+        void addEdge(Subdivision :: RS_SharedEdge *obj) { edges.emplace_back(obj); }
         void initGlobalSharedNodeMap() { sharedNodeMap.clear(); }
         void insertGlobalSharedNodeMap(Subdivision :: RS_Node *node);
         int sharedNodeGlobal2Local(int _globnum);

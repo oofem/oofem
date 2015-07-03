@@ -53,22 +53,17 @@
 #include <string>
 #include <algorithm>
 #include <set>
+#include <memory>
 
 namespace oofem {
 //REGISTER_EnrichmentItem(GeometryBasedEI)
 
 GeometryBasedEI :: GeometryBasedEI(int n, XfemManager *xm, Domain *aDomain) :
-    EnrichmentItem(n, xm, aDomain),
-    mpBasicGeometry(NULL)
+    EnrichmentItem(n, xm, aDomain)
 {}
 
 GeometryBasedEI :: ~GeometryBasedEI()
-{
-    if ( mpBasicGeometry != NULL ) {
-        delete mpBasicGeometry;
-        mpBasicGeometry = NULL;
-    }
-}
+{}
 
 int GeometryBasedEI :: instanciateYourself(DataReader *dr)
 {
@@ -94,8 +89,8 @@ int GeometryBasedEI :: instanciateYourself(DataReader *dr)
     // Instantiate geometry
     mir = dr->giveInputRecord(DataReader :: IR_geoRec, 1);
     result = mir->giveRecordKeywordField(name);
-    mpBasicGeometry = classFactory.createGeometry( name.c_str() );
-    if ( mpBasicGeometry == NULL ) {
+    mpBasicGeometry.reset( classFactory.createGeometry( name.c_str() ) );
+    if ( !mpBasicGeometry ) {
         OOFEM_ERROR( "unknown geometry domain (%s)", name.c_str() );
     }
 
@@ -552,10 +547,9 @@ void GeometryBasedEI :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJu
     Element *el = localizer->giveElementContainingPoint( iGP.giveGlobalCoordinates() );
     if ( el != NULL ) {
         FloatArray N;
-        FloatArray locCoord = * ( iGP.giveNaturalCoordinates() );
-        //        el->computeLocalCoordinates(locCoord, iGlobalCoord);
         FEInterpolation *interp = el->giveInterpolation();
-        interp->evalN( N, locCoord, FEIElementGeometryWrapper(el) );
+        interp->evalN( N, iGP.giveNaturalCoordinates(), FEIElementGeometryWrapper(el) );
+        //el->computeLocalCoordinates(locCoord, iGlobalCoord);
 
         evalLevelSetNormal( normalSignDist, iGP.giveGlobalCoordinates(), N, el->giveDofManArray() );
     }

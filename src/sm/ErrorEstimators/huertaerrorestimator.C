@@ -66,6 +66,7 @@
 #include "boundarycondition.h"
 #include "feinterpol.h"
 #include "gausspoint.h"
+#include "unknownnumberingscheme.h"
 
 #include <vector>
 #include <string>
@@ -552,11 +553,11 @@ HuertaErrorEstimator :: giveValue(EE_ValueType type, TimeStep *tStep)
 RemeshingCriteria *
 HuertaErrorEstimator :: giveRemeshingCrit()
 {
-    if ( this->rc ) {
-        return this->rc;
+    if ( !this->rc ) {
+        this->rc.reset( new HuertaRemeshingCriteria(1, this) );
     }
 
-    return ( this->rc = new HuertaRemeshingCriteria(1, this) );
+    return this->rc.get();
 }
 
 
@@ -1089,7 +1090,6 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
     IntArray *connectivity, boundary(1);
     int startNode, endNode, inode, m, pos, nd, bc, dofs;
     Node *node;
-    std :: string str;
 
     if ( nodeId != 0 ) {
         startNode = endNode = nodeId;
@@ -1253,7 +1253,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
                                 }
                             } else {
                                 if ( sideNumBc != 0 ) {
-                                    IntArray bcs, dofids;
+                                    IntArray bcs;
 
                                     // I rely on the fact that bc dofs to be reproduced are ordered with respect to the dof ordering of the corner node
 
@@ -1363,16 +1363,15 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
             int idof;
             double u, du = 1.0 / ( level + 1 );
             double xc, yc, zc, xm, ym, zm;
-            FloatArray globCoord(3), * locCoord;
+            FloatArray globCoord(3);
             FloatMatrix Nmatrix;
             FloatArray uCoarse, uFine;
 
             MaterialMode mmode = element->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0)->giveMaterialMode();
 
             // create a fictitious integration point
-            locCoord = new FloatArray;
             IntegrationRule ir(1, element);
-            auto *gp = new GaussPoint(&ir, 1, locCoord, 1.0, mmode);
+            auto *gp = new GaussPoint(&ir, 1, {}, 1.0, mmode);
 
             for ( inode = startNode; inode <= endNode; inode++ ) {
                 xc = corner [ inode - 1 ]->at(1);
@@ -1421,7 +1420,10 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
                             globCoord.at(3) = zc * ( 1.0 - u ) + zm * u;
 
                             // this effectively rewrites the local coordinates of the fictitious integration point
-                            element->computeLocalCoordinates(* locCoord, globCoord);
+                            FloatArray lcoord;
+                            element->computeLocalCoordinates(lcoord, globCoord);
+                            gp->setNaturalCoordinates(lcoord);
+                            
                             // get N matrix at the fictitious integration point
                             this->HuertaErrorEstimatorI_computeNmatrixAt(gp, Nmatrix);
                             // get displacement at the fictitious integration point
@@ -1502,7 +1504,6 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
     IntArray *connectivity, boundary(2);
     int startNode, endNode, inode, n, m, pos, nd, bc, dofs;
     Node *node;
-    std :: string str;
 
     if ( nodeId != 0 ) {
         startNode = endNode = nodeId;
@@ -1863,16 +1864,15 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
             double u, v, du = 1.0 / ( level + 1 ), dv = 1.0 / ( level + 1 );
             double xc, yc, zc, xs1, ys1, zs1, xs2, ys2, zs2, xm, ym, zm;
             GaussPoint *gp;
-            FloatArray globCoord(3), * locCoord;
+            FloatArray globCoord(3);
             FloatMatrix Nmatrix;
             FloatArray uCoarse, uFine;
 
-			MaterialMode mmode = element->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0)->giveMaterialMode();
+            MaterialMode mmode = element->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0)->giveMaterialMode();
 
             // create a fictitious integration point
-            locCoord = new FloatArray;
             IntegrationRule ir(0, element);
-            gp = new GaussPoint( &ir, 1, locCoord, 1.0, mmode);
+            gp = new GaussPoint( &ir, 1, {}, 1.0, mmode);
 
             for ( inode = startNode; inode <= endNode; inode++ ) {
                 s1 = inode;
@@ -1953,7 +1953,9 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                                 globCoord.at(3) = ( zc * ( 1.0 - u ) + zs1 * u ) * ( 1.0 - v ) + ( zs2 * ( 1.0 - u ) + zm * u ) * v;
 
                                 // this effectively rewrites the local coordinates of the fictitious integration point
-                                element->computeLocalCoordinates(* locCoord, globCoord);
+                                FloatArray lcoord;
+                                element->computeLocalCoordinates(lcoord, globCoord);
+                                gp->setNaturalCoordinates(lcoord);
                                 // get N matrix at the fictitious integration point
                                 this->HuertaErrorEstimatorI_computeNmatrixAt(gp, Nmatrix);
                                 // get displacement at the fictitious integration point
@@ -2056,7 +2058,6 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
     IntArray *connectivity, boundary(3);
     int startNode, endNode, inode, k, n, m, pos, nd, bc, dofs;
     Node *node;
-    std :: string str;
 
     if ( nodeId != 0 ) {
         startNode = endNode = nodeId;
@@ -2536,16 +2537,15 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
             double xc, yc, zc, xm, ym, zm;
             double xs1, ys1, zs1, xs2, ys2, zs2, xs3, ys3, zs3;
             double xf1, yf1, zf1, xf2, yf2, zf2, xf3, yf3, zf3;
-            FloatArray globCoord(3), * locCoord;
+            FloatArray globCoord(3);
             FloatMatrix Nmatrix;
             FloatArray uCoarse, uFine;
 
-			MaterialMode mmode = element->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0)->giveMaterialMode();
+            MaterialMode mmode = element->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0)->giveMaterialMode();
 
             // create a fictitious integration point
-            locCoord = new FloatArray;
             IntegrationRule irule(0, element);
-			auto gp = new GaussPoint(&irule, 1, locCoord, 1.0, mmode);
+            auto gp = new GaussPoint(&irule, 1, {}, 1.0, mmode);
             for ( inode = startNode; inode <= endNode; inode++ ) {
                 s1 = hexaSideNode [ inode - 1 ] [ 0 ];
                 s2 = hexaSideNode [ inode - 1 ] [ 1 ];
@@ -2656,7 +2656,9 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                                                       + ( ( zs3 * ( 1.0 - u ) + zf2 * u ) * ( 1.0 - v ) + ( zf3 * ( 1.0 - u ) + zm * u ) * v ) * w;
 
                                     // this effectively rewrites the local coordinates of the fictitious integration point
-                                    element->computeLocalCoordinates(* locCoord, globCoord);
+                                    FloatArray lcoord;
+                                    element->computeLocalCoordinates(lcoord, globCoord);
+                                    gp->setNaturalCoordinates(lcoord);
                                     // get N matrix at the fictitious integration point
                                     this->HuertaErrorEstimatorI_computeNmatrixAt(gp, Nmatrix);
                                     // get displacement at the fictitious integration point
@@ -2982,8 +2984,6 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
                 coarseSol = sol;
             }
 
-            //    coarseSol = nodeDof -> giveBcValue(VM_Total, refinedTStep);
-
             coarseSolution.at(pos) = coarseSol;
             elementError.at(pos) = sol - coarseSol;
             patchError.at(pos) = primaryUnknownError.at( ( globalNodeIdArray.at(inode) - 1 ) * dofs + idof ) - coarseSol;
@@ -3060,7 +3060,7 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
         eNorm = uNorm = 0.0;
         for ( ielem = 1; ielem <= localElemId; ielem++ ) {
             element = refinedDomain->giveElement(ielem);
-            refinedProblem->giveElementCharacteristicMatrix(mat, ielem, STIFFNESS_TYPE, refinedTStep, refinedDomain);
+            element->giveCharacteristicMatrix(mat, STIFFNESS_TYPE, refinedTStep);
 
             this->extractVectorFrom(element, elementError, elementVector, dofs, refinedTStep);
             this->extractVectorFrom(element, patchError, patchVector, dofs, refinedTStep);
@@ -3732,8 +3732,6 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
                 // coarse solution is identical with fine solution at BC
                 coarseSolution.at(pos) = fineSolution.at(pos);
             }
-
-            //    coarseSolution.at(pos) = nodeDof -> giveBcValue(VM_Total, refinedTStep);
         }
     }
 
@@ -3821,7 +3819,7 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
             }
 
             element = refinedDomain->giveElement(ielem);
-            refinedProblem->giveElementCharacteristicMatrix(mat, ielem, STIFFNESS_TYPE, refinedTStep, refinedDomain);
+            element->giveCharacteristicMatrix(mat, STIFFNESS_TYPE, refinedTStep);
 
             this->extractVectorFrom(element, errorSolution, errorVector, dofs, refinedTStep);
             tmpVector.beProductOf(mat, errorVector);
@@ -3908,7 +3906,6 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
 {
     char line [ 1024 ];
     EngngModel *problem = this->domain->giveEngngModel();
-    std :: string str;
     int i, nmstep, nsteps = 0;
     int ddfunc = 0, ddmSize = 0, ddvSize = 0, hpcSize = 0, hpcwSize = 0, renumber = 1;
     int controlMode = 0, hpcMode = 0, stiffMode = 0, maxIter = 30, reqIter = 3, manrmsteps = 0;

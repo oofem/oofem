@@ -44,6 +44,7 @@
 #include "intarray.h"
 #include "generalboundarycondition.h"
 
+#include <memory>
 #include <ctime>
 #include <set>
 
@@ -71,21 +72,23 @@ void SloanGraph :: initialize()
 
     this->nodes.reserve(nnodes);
     this->dmans.reserve(nnodes);
+    std :: map< DofManager*, int > dman2map;
 
     // Add dof managers.
     int count = 0;
     for ( auto &dman : domain->giveDofManagers() ) {
         nodes.emplace_back(this, ++count);
         dmans.push_back(dman.get());
+        dman2map.insert({dman.get(), count});
     }
     // Add element internal dof managers
     for ( auto &elem : domain->giveElements() ) {
         this->nodes.reserve( nodes.size() + elem->giveNumberOfInternalDofManagers() );
         this->dmans.reserve( dmans.size() + elem->giveNumberOfInternalDofManagers() );
         for ( int j = 1; j <= elem->giveNumberOfInternalDofManagers(); ++j ) {
-            ///@todo This must be broken! The index "i" will overlap with node numbers. Rethink the approach! / Mikael
             nodes.emplace_back(this, ++count);
             dmans.push_back( elem->giveInternalDofManager(j) );
+            dman2map.insert({elem->giveInternalDofManager(j), count});
         }
     }
     // Add boundary condition internal dof managers
@@ -93,9 +96,9 @@ void SloanGraph :: initialize()
         this->nodes.reserve( nodes.size() + bc->giveNumberOfInternalDofManagers() );
         this->dmans.reserve( dmans.size() + bc->giveNumberOfInternalDofManagers() );
         for ( int j = 1; j <= bc->giveNumberOfInternalDofManagers(); ++j ) {
-            ///@todo This must be broken! The index "i" will overlap with node numbers. Rethink the approach! / Mikael
             nodes.emplace_back(this, ++count);
             dmans.push_back( bc->giveInternalDofManager(j) );
+            dman2map.insert({bc->giveInternalDofManager(j), count});
         }
     }
 
@@ -106,10 +109,10 @@ void SloanGraph :: initialize()
         int ndofmans = ielemnodes + ielemintdmans;
         connections.resize(ndofmans);
         for ( int j = 1; j <= ielemnodes; j++ ) {
-            connections.at(j) = elem->giveDofManager(j)->giveNumber();
+            connections.at(j) = dman2map[ elem->giveDofManager(j) ];
         }
         for ( int j = 1; j <= ielemintdmans; j++ ) {
-            connections.at(ielemnodes + j) = nnodes + elem->giveInternalDofManager(j)->giveNumber();
+            connections.at(ielemnodes + j) = dman2map[ elem->giveInternalDofManager(j) ];
         }
         for ( int j = 1; j <= ndofmans; j++ ) {
             for ( int k = j + 1; k <= ndofmans; k++ ) {
@@ -121,8 +124,8 @@ void SloanGraph :: initialize()
     }
     ///@todo Add connections from dof managers to boundary condition internal dof managers.
 
-
     IntArray dofMasters;
+    count = 0;
     for ( auto &dman : dmans ) {
       // according to forum discussion Peter & Mikael
       count = 0;
@@ -181,7 +184,7 @@ SloanGraph :: findPeripheralNodes()
     //if (startNode && endNode) return;
 
     int InitialRoot;
-    SloanLevelStructure *Spine;
+    std :: unique_ptr< SloanLevelStructure > Spine;
 
     // clock_t time_0 = ::clock();
     if ( SpineQuality == Best ) {
@@ -194,7 +197,7 @@ SloanGraph :: findPeripheralNodes()
     }
 
     // initial spine
-    Spine = new SloanLevelStructure(this, InitialRoot);
+    Spine.reset( new SloanLevelStructure(this, InitialRoot) );
     this->startNode = InitialRoot;
 
     int CurrentDiameter = Spine->giveDepth();
@@ -205,22 +208,20 @@ SloanGraph :: findPeripheralNodes()
     while ( newStartNode ) {
         newStartNode = 0;
 
-        this->extractCandidates(candidates, Spine);
+        this->extractCandidates(candidates, *Spine);
         int MinimumWidth = domain->giveNumberOfDofManagers();
 
         for ( int Root: candidates ) {
-            SloanLevelStructure *TrialSpine = new SloanLevelStructure(this, Root);
+            std :: unique_ptr< SloanLevelStructure > TrialSpine( new SloanLevelStructure(this, Root) );
             // abort level struc assembly if TrialWidth>MinimumWidth.
             if ( TrialSpine->formYourself(MinimumWidth) == 0 ) {
-                delete TrialSpine;
                 continue;
             }
 
             TrialDepth = TrialSpine->giveDepth();
             TrialWidth = TrialSpine->giveWidth();
             if ( TrialWidth < MinimumWidth && TrialDepth > CurrentDiameter ) {
-                delete Spine;
-                Spine = TrialSpine;
+                Spine = std :: move( TrialSpine );
                 this->startNode = Root;
                 CurrentDiameter = Spine->giveDepth();
                 newStartNode = 1;
@@ -231,12 +232,8 @@ SloanGraph :: findPeripheralNodes()
                 MinimumWidth = TrialWidth;
                 this->endNode = Root;
             }
-
-            delete TrialSpine;
         } // end loop over candidates
     }
-
-    delete Spine;
 
     //clock_t time_1 = ::clock();
 
@@ -245,14 +242,10 @@ SloanGraph :: findPeripheralNodes()
 
 
 void
-SloanGraph :: extractCandidates(std :: list< int > &candidates, SloanLevelStructure *Spine)
+SloanGraph :: extractCandidates(std :: list< int > &candidates, SloanLevelStructure &Spine)
 {
-    if ( !Spine ) {
-        OOFEM_ERROR("Invalid spine");
-    }
-
-    int NumberOfLevels = Spine->giveDepth();
-    IntArray LastLevel = Spine->giveLevel(NumberOfLevels);
+    int NumberOfLevels = Spine.giveDepth();
+    IntArray LastLevel = Spine.giveLevel(NumberOfLevels);
     sort( LastLevel, SloanNodalDegreeOrderingCrit(this) );
 
     candidates.clear();
@@ -270,10 +263,8 @@ SloanGraph :: extractCandidates(std :: list< int > &candidates, SloanLevelStruct
 int
 SloanGraph :: computeTrueDiameter()
 {
-    SloanLevelStructure *LSC = new SloanLevelStructure( this, findBestRoot() );
-    int Diameter = LSC->giveDepth();
-    delete LSC;
-    return Diameter;
+    SloanLevelStructure LSC( this, findBestRoot() );
+    return LSC.giveDepth();
 }
 
 int

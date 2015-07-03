@@ -37,6 +37,7 @@
 #include "classfactory.h"
 #include "inputrecord.h"
 #include "datareader.h"
+#include "error.h"
 
 #include <cstring>
 

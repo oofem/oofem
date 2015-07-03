@@ -65,6 +65,7 @@ set (sm_element
     Elements/PlaneStress/planstrss.C
     Elements/PlaneStress/planstrssxfem.C
     Elements/PlaneStress/trplanstrssxfem.C
+    Elements/PlaneStress/qtrplanstrssxfem.C
     Elements/PlaneStress/qtrplstrgrad.C
     Elements/PlaneStress/trplanrot3d.C
     Elements/PlaneStress/qplanestressgrad.C
@@ -72,6 +73,7 @@ set (sm_element
     Elements/PlaneStress/basicelement.C
     Elements/PlaneStress/trplanestressrotallman3d.C
     Elements/PlaneStress/linquad3d_planestress.C
+    Elements/AbaqusUserElement.C
     Elements/htselement.C
     Elements/latticestructuralelement.C
     Elements/graddpelement.C 
@@ -165,6 +167,7 @@ set (sm_material
     Materials/ConcreteMaterials/mazarsmodelnl.C
     Materials/ConcreteMaterials/mplasticmaterial2.C
     Materials/ConcreteMaterials/compodamagemat.C
+    Materials/RheoChainMaterials/b3solidmat.C
     Materials/RheoChainMaterials/rheoChM.C 
     Materials/RheoChainMaterials/maxwellChM.C 
     Materials/RheoChainMaterials/kelvinChM.C
@@ -179,14 +182,12 @@ set (sm_material
     Materials/rcsd.C 
     Materials/rcsde.C 
     Materials/rcsdnl.C
-    Materials/RheoChainMaterials/mooneyrivlin.C # TODO This isn't a rheochain material at al
+    Materials/mooneyrivlin.C
     Materials/m4.C
     Materials/microplane_m1.C
     Materials/druckerPragerPlasticitySM.C
     Materials/druckerpragercutmat.C
-    Materials/masonry02.C
     Materials/j2mat.C
-    Materials/mat_cebfip90.C
     Materials/mdm.C
     Materials/micromaterial.C
     Materials/hyperelasticmaterial.C
@@ -219,6 +220,7 @@ set (sm_interface_materials
     Materials/InterfaceMaterials/structuralinterfacematerial.C
     Materials/InterfaceMaterials/bondceb.C
     Materials/InterfaceMaterials/cohint.C
+    Materials/InterfaceMaterials/intmatelastic.C
     Materials/InterfaceMaterials/intmatbilinczfagerstrom.C
     Materials/InterfaceMaterials/intmatbilinczjansson.C
     Materials/InterfaceMaterials/intmatbilinearcz.C
@@ -231,6 +233,8 @@ set (sm_interface_materials
     Materials/InterfaceMaterials/Deprecated/isointerfacedamage01.C
     Materials/InterfaceMaterials/Deprecated/isointerfacedamage02.C
     Materials/InterfaceMaterials/Deprecated/simpleinterfacemat.C
+    Materials/InterfaceMaterials/masonry02.C
+    Materials/InterfaceMaterials/mat_cebfip90.C
     )
 
 set (sm_error

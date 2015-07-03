@@ -120,6 +120,8 @@ public:
      */
     TimeStep(int n, EngngModel * e, int mn, double tt, double dt, StateCounterType counter, TimeDiscretizationType td = TD_Unspecified);
     TimeStep(const TimeStep &);
+    /// Convenience ctor for constructing the next timestep based on the previous one.
+    TimeStep(const TimeStep &previous, double dt);
     TimeStep(EngngModel * e);
     TimeStep &operator = ( const TimeStep & );
 

@@ -35,7 +35,8 @@
 #include "xfem/hybridei.h"
 #include "xfemmanager.h"
 #include "node.h"
-
+#include "domain.h"
+#include "floatmatrix.h"
 #include "classfactory.h"
 
 #include <string>
@@ -48,9 +49,8 @@ HybridEI :: HybridEI(int n, XfemManager *xm, Domain *aDomain) :
     GeometryBasedEI(n, xm, aDomain)
 {}
 
-HybridEI :: ~HybridEI() {
-    // TODO Auto-generated destructor stub
-}
+HybridEI :: ~HybridEI()
+{}
 
 void HybridEI :: evalLevelSetNormal(double &oLevelSet, const FloatArray &iGlobalCoord, const FloatArray &iN, const IntArray &iNodeInd) const
 {

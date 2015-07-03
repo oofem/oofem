@@ -38,31 +38,6 @@
 #include "../sm/Materials/structuralms.h"
 
 namespace oofem {
-void
-LinearElasticMaterial :: giveRealStressVector(FloatArray &answer,
-                                              GaussPoint *gp,
-                                              const FloatArray &reducedStrain,
-                                              TimeStep *tStep)
-{
-    FloatArray strainVector;
-    FloatMatrix d;
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-
-    // subtract stress independent part
-    // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
-    // therefore it is necessary to subtract always the total eigen strain value
-    this->giveStressDependentPartOfStrainVector(strainVector, gp,
-                                                reducedStrain,
-                                                tStep, VM_Total);
-
-    this->giveStiffnessMatrix(d, TangentStiffness, gp, tStep);
-    answer.beProductOf(d, strainVector);
-
-    // update gp
-    status->letTempStrainVectorBe(reducedStrain);
-    status->letTempStressVectorBe(answer);
-}
-
 
 void
 LinearElasticMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
@@ -176,7 +151,7 @@ LinearElasticMaterial :: giveRealStressVector_Warping(FloatArray &answer, GaussP
     //       G is the shear modulus of elasticity and theta is the relative twist (dPhi_z/dz)
     FloatArray gcoords;
     Element *elem = gp->giveElement();
-    elem->computeGlobalCoordinates( gcoords, * ( gp->giveNaturalCoordinates() ) );
+    elem->computeGlobalCoordinates( gcoords, gp->giveNaturalCoordinates() );
     answer.resize(2);
     answer.at(1) = reducedStrain.at(1);
     answer.at(2) = reducedStrain.at(2);

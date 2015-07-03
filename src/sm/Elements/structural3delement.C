@@ -56,7 +56,7 @@ Structural3DElement :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int
 {
     FEInterpolation *interp = this->giveInterpolation();
     FloatMatrix dNdx; 
-    interp->evaldNdx( dNdx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    interp->evaldNdx( dNdx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     
     answer.resize(6, dNdx.giveNumberOfRows() * 3);
     answer.zero();
@@ -82,7 +82,7 @@ Structural3DElement :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FEInterpolation *interp = this->giveInterpolation();
     FloatMatrix dNdx; 
-    interp->evaldNdx( dNdx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    interp->evaldNdx( dNdx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     
     answer.resize(9, dNdx.giveNumberOfRows() * 3);
     answer.zero();
@@ -115,20 +115,17 @@ Structural3DElement :: computeStressVector(FloatArray &answer, const FloatArray 
     this->giveStructuralCrossSection()->giveRealStress_3d(answer, gp, strain, tStep);
 }
 
+void
+Structural3DElement :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveStiffnessMatrix_3d(answer, rMode, gp, tStep);
+}
+
 
 void
 Structural3DElement :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v, D_w};
-}
-
-
-
-IRResultType
-Structural3DElement :: initializeFrom(InputRecord *ir)
-{
-    // Initialise the element from the input record   
-    return this->NLStructuralElement :: initializeFrom(ir); 
 }
 
 
@@ -160,7 +157,7 @@ Structural3DElement :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, volume;
-    determinant = fabs( this->giveInterpolation()->giveTransformationJacobian( * gp->giveNaturalCoordinates(),
+    determinant = fabs( this->giveInterpolation()->giveTransformationJacobian( gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) ) );
 
     weight = gp->giveWeight();
@@ -182,8 +179,6 @@ Structural3DElement :: giveCharacteristicLength(const FloatArray &normalToCrackP
 
 
 // Surface support
-
-
 void
 Structural3DElement :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
@@ -195,7 +190,7 @@ Structural3DElement :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, G
     // Evaluate the shape functions at the position of the gp. 
     FloatArray N;
     static_cast< FEInterpolation3d* > ( this->giveInterpolation() )->
-        surfaceEvalN( N, iSurf, * sgp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );  
+        surfaceEvalN( N, iSurf, sgp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );  
     answer.beNMatrixOf(N, 3);
 }
 
@@ -230,7 +225,7 @@ Structural3DElement :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
     double determinant, weight, volume;
     determinant = fabs( static_cast< FEInterpolation3d* > ( this->giveInterpolation() )-> 
-        surfaceGiveTransformationJacobian( iSurf, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+        surfaceGiveTransformationJacobian( iSurf, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
 
     weight = gp->giveWeight();
     volume = determinant * weight;
@@ -242,7 +237,7 @@ void
 Structural3DElement :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf)
 {
     static_cast< FEInterpolation3d* > ( this->giveInterpolation() )-> 
-        surfaceLocal2global( answer, iSurf, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+        surfaceLocal2global( answer, iSurf, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -274,7 +269,7 @@ Structural3DElement :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, Gaus
     // Evaluate the shape functions at the position of the gp. 
     FloatArray N;
     static_cast< FEInterpolation3d* > ( this->giveInterpolation() )->
-        edgeEvalN( N, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );  
+        edgeEvalN( N, iedge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );  
     answer.beNMatrixOf(N, 3);
 }
 
@@ -304,7 +299,7 @@ void
 Structural3DElement :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
     static_cast< FEInterpolation3d* > ( this->giveInterpolation() )->
-        edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+        edgeLocal2global( answer, iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -317,7 +312,7 @@ Structural3DElement :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
      * The returned value is used for integration of a line integral (external forces).
      */
     double detJ = static_cast< FEInterpolation3d* > ( this->giveInterpolation() )->
-        edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+        edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     return detJ * gp->giveWeight();
 }
 

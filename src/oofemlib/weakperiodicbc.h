@@ -37,20 +37,24 @@
 
 #include <vector>
 #include <iostream>
+#include <memory>
 
 #include "activebc.h"
 #include "inputrecord.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
+#include "gausspoint.h"
 
 ///@name Input fields for WeakPeriodicBoundaryCondition
 //@{
 #define _IFT_WeakPeriodicBoundaryCondition_Name "weakperiodicbc"
 #define _IFT_WeakPeriodicBoundaryCondition_order "order"
 #define _IFT_WeakPeriodicBoundaryCondition_descritizationType "descritizationtype"
-#define _IFT_WeakPeriodicBoundaryCondition_dofid "dofid"
+#define _IFT_WeakPeriodicBoundaryCondition_dofids "dofids"
 #define _IFT_WeakPeriodicBoundaryCondition_ngp "ngp"
+#define _IFT_WeakPeriodicBoundaryCondition_gradient "gradient"
+#define _IFT_WeakPeriodicBoundaryCondition_nlgeo "nlgeo"
 #define _IFT_WeakPeriodicBoundaryCondition_elementSidesPositive "elementsidespositive"
 #define _IFT_WeakPeriodicBoundaryCondition_elementSidesNegative "elementsidesnegative"
 #define _IFT_WeakPeriodicBoundaryCondition_elementSidesPositiveSet "elementsidespositiveset"
@@ -76,6 +80,9 @@ private:
     int bcID;
     int orderOfPolygon;
 
+    /** Contains prescribed gradient */
+    FloatArray g;
+
     /** Direction of normal. 1 if normal in x, 2 if y and 3 if z. */
     int direction;
 
@@ -98,7 +105,7 @@ private:
     int negSet;
 
     /** ID of dofs on which weak periodicity is imposed */
-    int dofid;
+    IntArray dofids;
 
     /** sideSign is the sign of the normal for each side */
     signed int sideSign [ 2 ];
@@ -115,11 +122,13 @@ private:
 
     void updateDirection();
 
+    double computeBaseFunctionValue(int baseID, FloatArray coordinate);
+
     double computeBaseFunctionValue1D(int baseID, double coordinate);
 
     double computeBaseFunctionValue2D(int baseID, FloatArray coordinate);
 
-    Node *gammaDman;
+    std :: unique_ptr< Node > gammaDman;
     IntArray gamma_ids;
 
     double factorial(int n);
@@ -136,6 +145,18 @@ private:
 
     /** gsMatrix contains coefficients for the Gram-Schmidt polynomials*/
     FloatMatrix gsMatrix;
+
+    void computeDeformationGradient(FloatMatrix &answer, Element *e, FloatArray *lcoord, TimeStep *tStep);
+
+    /** Number of terms in polynomial */
+    int tcount;
+
+    /** Number of dofIDs*/
+    int ndofids;
+
+    /** Use finite strains? */
+    bool nlgeo;
+
 public:
     WeakPeriodicBoundaryCondition(int n, Domain * d);
     virtual ~WeakPeriodicBoundaryCondition();
@@ -144,12 +165,20 @@ public:
 
     basisType giveBasisType() { return useBasisType; }
 
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, CharType type,
+    virtual void assemble(SparseMtrx &answer, TimeStep *tStep, CharType type,
                           const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
     virtual void assembleVector(FloatArray &answer, TimeStep *tStep,
                                 CharType type, ValueModeType mode,
                                 const UnknownNumberingScheme &s, FloatArray *eNorm = NULL);
+
+    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
+                                  CharType type, ValueModeType mode,
+                                  const UnknownNumberingScheme &s, FloatArray *eNorm = NULL);
+
+    void giveExternalForcesVector(FloatArray &answer, TimeStep *tStep,
+                                  CharType type, ValueModeType mode,
+                                  const UnknownNumberingScheme &s);
 
     virtual int giveNumberOfInternalDofManagers();
 
@@ -161,7 +190,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_WeakPeriodicBoundaryCondition_Name; }
 
 protected:
-    void computeElementTangent(FloatMatrix &answer, Element *e, int boundary);
+    void computeElementTangent(FloatMatrix &answer, Element *e, int boundary, TimeStep *tStep);
 };
 }
 #endif /* WEAKPERIODICBC_H_ */

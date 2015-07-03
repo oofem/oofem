@@ -159,7 +159,7 @@ protected:
     IntArray ipInternalVarsToExport;
 
     /// Map from Voigt to full tensor.
-    IntArray redToFull;
+    static IntArray redToFull;
 
     /// Smoother type.
     NodalRecoveryModel :: NodalRecoveryModelType stype;
@@ -174,15 +174,14 @@ protected:
 
     /// Scaling time in output, e.g. conversion from seconds to hours
     double timeScale;
-	/// particle export flag
-	bool particleExportFlag;
+    /// particle export flag
+    bool particleExportFlag;
 
     /// Buffer for earlier time steps exported to *.pvd file.
     std :: list< std :: string >pvdBuffer;
-    
+
     /// Buffer for earlier time steps with gauss points exported to *.gp.pvd file.
     std :: list< std :: string >gpPvdBuffer;
-    
 
 public:
     /// Constructor. Creates empty Output Manager. By default all components are selected.
@@ -230,10 +229,7 @@ public:
 protected:
 
     /// Gives the full form of given symmetrically stored tensors, missing components are filled with zeros.
-    void makeFullTensorForm(FloatArray &answer, const FloatArray &reducedForm);
-    
-    /// Gives an array with three components, it will pad with zero missing components.
-    void makeFullVectorForm(FloatArray &answer, const FloatArray &input);
+    static void makeFullTensorForm(FloatArray &answer, const FloatArray &reducedForm, InternalStateValueType vtype);
 
     /// Returns the filename for the given time step.
     std :: string giveOutputFileName(TimeStep *tStep);
@@ -302,7 +298,7 @@ protected:
     //  Exports cell variables (typically internal variables).
     //
 
-    void exportCellVars(VTKPiece &piece, int numCells, int region, TimeStep *tStep);
+    void exportCellVars(VTKPiece &piece, const IntArray &elems, TimeStep *tStep);
 
     //
     //  Exports a single cell variable (typically an internal variable).
@@ -372,8 +368,8 @@ class OOFEM_EXPORT VTKXMLExportModuleElementInterface : public Interface
 public:
     VTKXMLExportModuleElementInterface() : Interface() { }
     virtual const char *giveClassName() const { return "VTKXMLExportModuleElementInterface"; }
-    virtual void giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep) { };
-    virtual void giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep) { };
+    virtual void giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep) { }
+    virtual void giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep) { }
 };
 } // end namespace oofem
 #endif // vtkxmlexportmodule_h

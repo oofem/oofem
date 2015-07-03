@@ -335,7 +335,6 @@ SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDeter
     int nelem, ndofman, count, patchElements, j, includes, npap, ipap;
     const IntArray *papDofManConnectivity = domain->giveConnectivityTable()->giveDofManConnectivityArray(papNumber);
     std :: list< int >dofManToDetermineList;
-    std :: list< int > :: iterator dofManToDetermineListIter;
     SPRNodalRecoveryModelInterface *interface;
     IntArray toDetermine, toDetermine2, elemPap, papInv;
     Element *element;
@@ -467,7 +466,6 @@ SPRNodalRecoveryModel :: computePatch(FloatMatrix &a, IntArray &patchElems, int 
     int nelem, neq;
     FloatArray ipVal, coords, P;
     FloatMatrix A, rhs;
-    SPRNodalRecoveryModelInterface *interface;
 
     neq = this->giveNumberOfUnknownPolynomialCoefficients(regType);
     rhs.resize(neq, regionValSize);
@@ -479,7 +477,7 @@ SPRNodalRecoveryModel :: computePatch(FloatMatrix &a, IntArray &patchElems, int 
     nelem = patchElems.giveSize();
     for ( int ielem = 1; ielem <= nelem; ielem++ ) {
         Element *element = domain->giveElement( patchElems.at(ielem) );
-        if ( ( interface = static_cast< SPRNodalRecoveryModelInterface * >( element->giveInterface(SPRNodalRecoveryModelInterfaceType) ) ) ) {
+        if ( element->giveInterface(SPRNodalRecoveryModelInterfaceType) ) {
             IntegrationRule *iRule = element->giveDefaultIntegrationRulePtr();
             for ( GaussPoint *gp: *iRule ) {
                 int hasVal = element->giveIPValue(ipVal, gp, type, tStep);
@@ -492,7 +490,7 @@ SPRNodalRecoveryModel :: computePatch(FloatMatrix &a, IntArray &patchElems, int 
                     rhs.zero();
                 }
 
-                element->computeGlobalCoordinates( coords, * gp->giveSubPatchCoordinates() );
+                element->computeGlobalCoordinates( coords, gp->giveSubPatchCoordinates() );
                 // compute ip contribution
                 this->computePolynomialTerms(P, coords, regType);
                 for ( int j = 1; j <= neq; j++ ) {

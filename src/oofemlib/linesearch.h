@@ -88,7 +88,7 @@ public:
      * @param status Linesearch status
      * @param tStep Time step.
      */
-    virtual NM_Status solve(FloatArray *r, FloatArray *dr, FloatArray *F, FloatArray *R, FloatArray *R0,
+    virtual NM_Status solve(FloatArray &r, FloatArray &dr, FloatArray &F, FloatArray &R, FloatArray *R0,
                             IntArray &eqnmask, double lambda, double &etaValue, LS_status &status, TimeStep *tStep);
 
     virtual IRResultType initializeFrom(InputRecord *ir);

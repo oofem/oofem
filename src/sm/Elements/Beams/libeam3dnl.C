@@ -351,7 +351,10 @@ LIBeam3dNL :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     // first call parent
-    NLStructuralElement :: initializeFrom(ir);
+    result = NLStructuralElement :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     IR_GIVE_FIELD(ir, referenceNode, _IFT_LIBeam3dNL_refnode);
     if ( referenceNode == 0 ) {
@@ -540,7 +543,7 @@ LIBeam3dNL :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *g
      * without regarding particular side
      */
 
-    this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
+    this->computeNmatrixAt(gp->giveSubPatchCoordinates(), answer);
 }
 
 
@@ -577,7 +580,7 @@ LIBeam3dNL :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 LIBeam3dNL :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    computeGlobalCoordinates( answer, * ( gp->giveNaturalCoordinates() ) );
+    computeGlobalCoordinates( answer, gp->giveNaturalCoordinates() );
 }
 
 
@@ -693,7 +696,7 @@ LIBeam3dNL :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *
 {
     FloatArray lc(1);
     NLStructuralElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
-    answer.times( this->giveCrossSection()->give(CS_Area, & lc, NULL, this) );
+    answer.times( this->giveCrossSection()->give(CS_Area, lc, this) );
 }
 
 
@@ -732,7 +735,7 @@ LIBeam3dNL :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
     IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
     GaussPoint *gp = iRule->getIntegrationPoint(0);
 
-    FloatArray ui(3), xd(3), curv(3), ac(3), PrevEpsilon;
+    FloatArray ui(3), ac(3), PrevEpsilon;
     FloatMatrix sc(3, 3), tmid(3, 3);
 
     // update curvature at midpoint

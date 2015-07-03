@@ -43,8 +43,12 @@
 #include "mathfem.h"
 #include "contextioerr.h"
 #include "datastream.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material(LargeStrainMasterMaterial);
+
 // constructor
 LargeStrainMasterMaterialGrad :: LargeStrainMasterMaterialGrad(int n, Domain *d) : LargeStrainMasterMaterial(n, d), GradDpMaterialExtensionInterface(d)
 {
@@ -220,7 +224,7 @@ LargeStrainMasterMaterialGrad :: giveFirstPKStressVectorGrad(FloatArray &answer1
 
         double lambda1, lambda2, lambda3, E1, E2, E3;
         FloatArray eVals, SethHillStrainVector, stressVector, stressM;
-        FloatMatrix F, Ft, C, eVecs, SethHillStrain, stress(3, 3);
+        FloatMatrix F, Ft, C, eVecs, SethHillStrain;
         FloatMatrix L1, L2, T, tT;
         //store of deformation gradient into 3x3 matrix
         F.beMatrixForm(vF);
@@ -292,18 +296,13 @@ LargeStrainMasterMaterialGrad :: giveFirstPKStressVectorGrad(FloatArray &answer1
 }
 
 
-
-
-
-
-
-
 IRResultType
 LargeStrainMasterMaterialGrad :: initializeFrom(InputRecord *ir)
 {
-    LargeStrainMasterMaterial :: initializeFrom(ir);
-    return IRRT_OK;
+    return LargeStrainMasterMaterial :: initializeFrom(ir);
 }
+
+
 
 //=============================================================================
 

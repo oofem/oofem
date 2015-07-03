@@ -31,6 +31,7 @@
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef structuralinterfacematerial_h
 #define structuralinterfacematerial_h
 
@@ -54,15 +55,6 @@ class GaussPoint;
  * Abstract base class for all "structural" interface models. It declares common  services provided
  * by all interface material models. The implementation of these services is partly left on derived classes,
  * which will implement constitutive model dependent part.
- * Some general purpose services are implemented on this level. For details, how to store
- * material model related history variables in integration points, see base class @ref Material documentation.
- *
- * Its capabilities can be examined using hasMaterialModeCapability  service.
- * It is generally assumed, that results obtained from constitutive model services are according to
- * valid material mode. This mode is determined from integration point, which is compulsory parameter of all material
- * services.
- * Full and reduced formats of stress/strain vectors are introduced for convenience.
- * Methods for converting vectors between full and reduced format are provided.
  *
  * Structural material introduces following basic stress/strain modes
  * - 3d state - all components of general stress/strain vector are generally nonzero.
@@ -103,11 +95,9 @@ public:
      * @param tStep Current time step (most models are able to respond only when tStep is current time step).
      */
     virtual void giveFirstPKTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
-                                         const FloatMatrix &reducedF, TimeStep *tStep )
-    { OOFEM_ERROR("not implemented "); }
+                                         const FloatMatrix &reducedF, TimeStep *tStep);
     virtual void giveFirstPKTraction_2d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
-                                         const FloatMatrix &reducedF, TimeStep *tStep )
-    { OOFEM_ERROR("not implemented "); }
+                                         const FloatMatrix &reducedF, TimeStep *tStep);
     virtual void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
                                         const FloatMatrix &F, TimeStep *tStep)
     { OOFEM_ERROR("not implemented "); }
@@ -124,36 +114,21 @@ public:
      * @param gp Gauss point.
      * @param tStep Time step.
      */
-    virtual void give1dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-    { OOFEM_ERROR("not implemented "); }
-    virtual void give2dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-    { OOFEM_ERROR("not implemented "); }
+    virtual void give1dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give2dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     virtual void give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
-    virtual void give1dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void give2dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void give3dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give1dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give2dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
-    // Numerical stiffness (intended to work regardless of dimension)
-    virtual void giveStiffnessMatrix_dTdj_Num(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    void give1dStiffnessMatrix_dTdj_Num(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
+    void give2dStiffnessMatrix_dTdj_Num(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
+    void give3dStiffnessMatrix_dTdj_Num(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
 
-    virtual void giveStiffnessMatrix_dTdj_Num( FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep,
-                                               void (*giveTraction)( FloatArray, GaussPoint*, const FloatArray,
-                                               const FloatMatrix, TimeStep* ) );
-
-    virtual void giveStiffnessMatrix_Eng_Num( FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep,
-                                               void( *giveTraction )( FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
-                                               TimeStep *tStep ) );
-
-    virtual void give1dStiffnessMatrix_dTdj_Num( FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep );
-    virtual void give2dStiffnessMatrix_dTdj_Num( FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep );
-    virtual void give3dStiffnessMatrix_dTdj_Num( FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep );
-
-    virtual void give1dStiffnessMatrix_Eng_Num( FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep );
-    virtual void give2dStiffnessMatrix_Eng_Num( FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep );
-    virtual void give3dStiffnessMatrix_Eng_Num( FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep );
-
-    void giveReducedJump( FloatArray &answer, FloatArray &jump3d, const int size );
+    void give1dStiffnessMatrix_Eng_Num(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
+    void give2dStiffnessMatrix_Eng_Num(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
+    void give3dStiffnessMatrix_Eng_Num(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
 
     /**
      * Tells if the model has implemented analytical tangent stiffness.

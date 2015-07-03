@@ -60,8 +60,6 @@ int DiscontinuousSegmentIntegrationRule :: SetUpPointsOnLine(int iNumPointsPerSe
 
     double totalLength = mXS.distance(mXE);
 
-    FEI1dLin linInterp(1);
-
     std :: vector< FloatArray >newGPCoord;
 
     // Loop over line segments
@@ -70,14 +68,13 @@ int DiscontinuousSegmentIntegrationRule :: SetUpPointsOnLine(int iNumPointsPerSe
             FloatArray global;
             GaussPoint * &gp = this->gaussPoints [ pointsPassed ];
 
-            FloatArray *coord = new FloatArray(1);
-            coord->at(1) = coords_xi.at(j + 1);
-            gp = new GaussPoint(this, pointsPassed + 1, coord, weights.at(j + 1), mode);
+            gp = new GaussPoint(this, pointsPassed + 1, {coords_xi.at(j + 1)}, weights.at(j + 1), mode);
 
+            const FloatArray &coord = gp->giveNaturalCoordinates();
 
             global.resize( mXS.giveSize() );
             for ( int m = 1; m <= mXS.giveSize(); m++ ) {
-                global.at(m) = 0.5 * ( ( 1.0 - coord->at(1) ) * mSegments [ i ].giveVertex(1).at(m) + ( 1.0 + coord->at(1) ) * mSegments [ i ].giveVertex(2).at(m) );
+                global.at(m) = 0.5 * ( ( 1.0 - coord.at(1) ) * mSegments [ i ].giveVertex(1).at(m) + ( 1.0 + coord.at(1) ) * mSegments [ i ].giveVertex(2).at(m) );
             }
 
             newGPCoord.push_back(global);

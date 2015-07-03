@@ -84,8 +84,11 @@ DruckerPragerCutMat :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                 // required by IR_GIVE_FIELD macro
 
-    StructuralMaterial :: initializeFrom(ir);
-    linearElasticMaterial->initializeFrom(ir); // takes care of elastic constants
+    result = StructuralMaterial :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
+    result = linearElasticMaterial->initializeFrom(ir); // takes care of elastic constants
+    if ( result != IRRT_OK ) return result;
+
     G = static_cast< IsotropicLinearElasticMaterial * >(linearElasticMaterial)->giveShearModulus();
     K = static_cast< IsotropicLinearElasticMaterial * >(linearElasticMaterial)->giveBulkModulus();
 

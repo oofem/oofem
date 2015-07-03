@@ -37,7 +37,6 @@
 #include "delaunaytriangle.h"
 #include "tr1_2d_pfem.h"
 #include "intarray.h"
-#include "alist.h"
 #include "contextioerr.h"
 #include "verbose.h"
 #include "timer.h"
@@ -184,7 +183,7 @@ void DelaunayTriangulator :: writeMesh()
                 hasNoBcOnItself = true;
                 dman = domain->giveDofManager( ( * elIT )->giveNode(i) );
                 for ( Dof* dof: *dman) {
-		    type  =  dof->giveDofID();
+                    type = dof->giveDofID();
                     if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
                         if ( dof->giveBcId() ) {
                             hasNoBcOnItself = false;
@@ -201,7 +200,7 @@ void DelaunayTriangulator :: writeMesh()
 
             if ( oneIsFree ) {
                 Dof *dofOnNode1 = domain->giveDofManager( ( * elIT )->giveNode(1) )->giveDofWithID(P_f);
-		dofOnNode1->setBcId(pressureBC);
+                dofOnNode1->setBcId(pressureBC);
                 
 
                 Dof *dofOnNode2 = domain->giveDofManager( ( * elIT )->giveNode(2) )->giveDofWithID(P_f);

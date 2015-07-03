@@ -51,7 +51,6 @@
 #include "../sm/Materials/InterfaceMaterials/structuralinterfacematerialstatus.h"
 #include "xfem/XFEMDebugTools.h"
 #include "prescribedgradient.h"
-#include "prescribedgradientbc.h"
 #include "prescribedgradientbcneumann.h"
 #include "prescribedgradientbcweak.h"
 #include "gausspoint.h"
@@ -68,24 +67,19 @@ namespace oofem {
 REGISTER_ExportModule(GnuplotExportModule)
 
 GnuplotExportModule::GnuplotExportModule(int n, EngngModel *e):
-ExportModule(n, e),
-mExportReactionForces(false),
-mExportBoundaryConditions(false),
-mExportBoundaryConditionsExtra(false),
-mExportMesh(false),
-mExportXFEM(false),
-mExportCrackLength(false),
-mMonitorNodeIndex(-1)
-{
-    mpMatForceEvaluator = new  MaterialForceEvaluator();
-}
+    ExportModule(n, e),
+    mExportReactionForces(false),
+    mExportBoundaryConditions(false),
+    mExportBoundaryConditionsExtra(false),
+    mExportMesh(false),
+    mExportXFEM(false),
+    mExportCrackLength(false),
+    mMonitorNodeIndex(-1),
+    mpMatForceEvaluator( new  MaterialForceEvaluator() )
+{}
 
-GnuplotExportModule::~GnuplotExportModule() {
-    if(mpMatForceEvaluator != NULL) {
-        delete mpMatForceEvaluator;
-        mpMatForceEvaluator = NULL;
-    }
-}
+GnuplotExportModule::~GnuplotExportModule()
+{}
 
 IRResultType GnuplotExportModule::initializeFrom(InputRecord *ir)
 {
@@ -200,7 +194,6 @@ void GnuplotExportModule::outputReactionForces(TimeStep *tStep)
         OOFEM_ERROR("failed to cast to StructuralEngngModel.");
     }
 
-    IntArray ielemDofMask;
     FloatArray reactions;
     IntArray dofManMap, dofidMap, eqnMap;
 
@@ -246,14 +239,15 @@ void GnuplotExportModule::outputReactionForces(TimeStep *tStep)
             DofManager *dMan = domain->giveDofManager( dofManMap.at(i) );
             Dof *dof = dMan->giveDofWithID( dofidMap.at(i) );
 
-            if( dof->giveBcId() == bcInd+1) {
+            if ( dof->giveBcId() == bcInd+1 ) {
                 fR.at( dofidMap.at(i) ) += reactions.at( eqnMap.at(i) );
 
                 // Slightly dirty
                 BoundaryCondition *bc = dynamic_cast<BoundaryCondition*> (domain->giveBc(bcInd+1));
-                if(bc != NULL) {
-                    disp.at(bcInd+1) = bc->give(dof, VM_Total, tStep);
+                if ( bc != NULL ) {
+                    disp.at(bcInd+1) = bc->give(dof, VM_Total, tStep->giveTargetTime());
                 }
+                ///@todo This function should be using the primaryfield instead of asking BCs directly. / Mikael
             }
         }
 
@@ -302,7 +296,7 @@ void GnuplotExportModule::outputXFEM(Crack &iCrack, TimeStep *tStep)
 {
     const std::vector<GaussPoint*> &czGaussPoints = iCrack.giveCohesiveZoneGaussPoints();
 
-    std::vector<double> arcLengthPositions, normalJumps, tangJumps;
+    std::vector<double> arcLengthPositions, normalJumps, tangJumps, normalTractions;
 
     const BasicGeometry *bg = iCrack.giveGeometry();
 
@@ -312,7 +306,7 @@ void GnuplotExportModule::outputXFEM(Crack &iCrack, TimeStep *tStep)
         if(matStat != NULL) {
 
             // Compute arc length position of the Gauss point
-            const FloatArray &coord = *(gp->giveNaturalCoordinates());
+            const FloatArray &coord = (gp->giveGlobalCoordinates());
             double tangDist = 0.0, arcPos = 0.0;
             bg->computeTangentialSignDist(tangDist, coord, arcPos);
             arcLengthPositions.push_back(arcPos);
@@ -326,6 +320,10 @@ void GnuplotExportModule::outputXFEM(Crack &iCrack, TimeStep *tStep)
 
 
             tangJumps.push_back( jumpLoc.at(2) );
+
+
+            const FloatArray &trac = matStat->giveFirstPKTraction();
+            normalTractions.push_back(trac.at(3));
         }
     }
 
@@ -352,6 +350,11 @@ void GnuplotExportModule::outputXFEM(Crack &iCrack, TimeStep *tStep)
         strTangJump << "TangJumpGnuplotEI" << eiIndex << "Time" << time << ".dat";
         std :: string nameTangJump = strTangJump.str();
         XFEMDebugTools::WriteArrayToGnuplot(nameTangJump, arcLengthPositions, tangJumps);
+
+        std :: stringstream strNormalTrac;
+        strNormalTrac << "NormalTracGnuplotEI" << eiIndex << "Time" << time << ".dat";
+        std :: string nameNormalTrac = strNormalTrac.str();
+        XFEMDebugTools::WriteArrayToGnuplot(nameNormalTrac, arcLengthPositions, normalTractions);
 
 
         std::vector<FloatArray> matForcesStart, matForcesEnd;
@@ -434,7 +437,7 @@ void GnuplotExportModule::outputXFEMGeometry(const std::vector< std::vector<Floa
     WritePointsToGnuplot(nameCracks, iEnrItemPoints);
 }
 
-void GnuplotExportModule::outputBoundaryCondition(PrescribedGradient &iBC, TimeStep *tStep)
+void GnuplotExportModule :: outputBoundaryCondition(PrescribedGradient &iBC, TimeStep *tStep)
 {
     FloatArray stress;
     iBC.computeField(stress, tStep);
@@ -462,6 +465,9 @@ void GnuplotExportModule::outputBoundaryCondition(PrescribedGradient &iBC, TimeS
 
     XFEMDebugTools::WriteArrayToGnuplot(nameMeanStress, componentArray, stressArray);
 
+    FloatArray grad;
+    iBC.giveGradientVoigt(grad);
+    outputGradient(iBC.giveNumber(), *iBC.giveDomain(), grad, tStep);
 }
 
 void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCNeumann &iBC, TimeStep *tStep)
@@ -493,8 +499,10 @@ void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCNeumann &i
     XFEMDebugTools::WriteArrayToGnuplot(nameMeanStress, componentArray, stressArray);
 
     // Homogenized strain
-    outputGradient(iBC, ts);
-
+    
+    FloatArray grad;
+    iBC.giveGradientVoigt(grad);
+    outputGradient(iBC.giveNumber(), *iBC.giveDomain(), grad, tStep);
 }
 
 void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCWeak &iBC, TimeStep *tStep)
@@ -527,7 +535,10 @@ void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCWeak &iBC,
 
 
     // Homogenized strain
-    outputGradient(iBC, ts);
+    FloatArray grad;
+    iBC.giveGradientVoigt(grad);
+    outputGradient(iBC.giveNumber(), *iBC.giveDomain(), grad, tStep);
+
 #if 0
     FloatArray grad;
     iBC.giveGradientVoigt(grad);
@@ -719,14 +730,10 @@ void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCWeak &iBC,
     }
 }
 
-void GnuplotExportModule::outputGradient(PrescribedGradientBC &iBC, TimeStep *tStep)
+void GnuplotExportModule::outputGradient(int bc, Domain &d, FloatArray &grad, TimeStep *tStep)
 {
-    int bcIndex = iBC.giveNumber();
-
     // Homogenized strain
-    FloatArray grad;
-    iBC.giveGradientVoigt(grad);
-    double timeFactor = iBC.giveTimeFunction()->evaluate(tStep, VM_Total);
+    double timeFactor = d.giveBc(bc)->giveTimeFunction()->evaluateAtTime(tStep->giveTargetTime());
     printf("timeFactor: %e\n", timeFactor );
     grad.times(timeFactor);
     printf("Mean grad computed in Gnuplot export module: "); grad.printYourself();
@@ -735,7 +742,7 @@ void GnuplotExportModule::outputGradient(PrescribedGradientBC &iBC, TimeStep *tS
 
 
     std :: stringstream strMeanGrad;
-    strMeanGrad << "PrescribedGradientGnuplotMeanGrad" << bcIndex << "Time" << time << ".dat";
+    strMeanGrad << "PrescribedGradientGnuplotMeanGrad" << bc << "Time" << time << ".dat";
     std :: string nameMeanGrad = strMeanGrad.str();
     std::vector<double> componentArrayGrad, gradArray;
 

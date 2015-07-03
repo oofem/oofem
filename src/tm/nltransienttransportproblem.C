@@ -41,6 +41,8 @@
 #include "transportelement.h"
 #include "classfactory.h"
 #include "mathfem.h"
+#include "assemblercallback.h"
+#include "unknownnumberingscheme.h"
 
 namespace oofem {
 REGISTER_EngngModel(NLTransientTransportProblem);
@@ -60,7 +62,9 @@ NLTransientTransportProblem :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-    NonStationaryTransportProblem :: initializeFrom(ir);
+    result = NonStationaryTransportProblem :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
+
     int val = 30;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_NLTransientTransportProblem_nsmax);
     nsmax = val;
@@ -86,7 +90,7 @@ NLTransientTransportProblem :: giveNextStep()
     NonStationaryTransportProblem :: giveNextStep();
     intrinsicTime = previousStep->giveTargetTime() + this->alpha*(currentStep->giveTargetTime()-previousStep->giveTargetTime());
     currentStep->setIntrinsicTime(intrinsicTime);
-    return currentStep;
+    return currentStep.get();
 }
 
 
@@ -105,12 +109,9 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
 #endif
     //Delete lhs matrix and create a new one. This is necessary due to growing/decreasing number of equations.
     if ( tStep->isTheFirstStep() || this->changingProblemSize ) {
-        if ( conductivityMatrix ) {
-            delete conductivityMatrix;
-        }
 
-        conductivityMatrix = classFactory.createSparseMtrx(sparseMtrxType);
-        if ( conductivityMatrix == NULL ) {
+        conductivityMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+        if ( !conductivityMatrix ) {
             OOFEM_ERROR("sparse matrix creation failed");
         }
 
@@ -122,10 +123,10 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
 
     //create previous solution from IC or from previous tStep
     if ( tStep->isTheFirstStep() ) {
-        if ( stepWhenIcApply == NULL ) {
-            stepWhenIcApply = new TimeStep( *tStep->givePreviousStep() );
+        if ( !stepWhenIcApply ) {
+            stepWhenIcApply.reset( new TimeStep( *tStep->givePreviousStep() ) );
         }
-        this->applyIC(stepWhenIcApply); //insert solution to hash=1(previous), if changes in equation numbering
+        this->applyIC(stepWhenIcApply.get()); //insert solution to hash=1(previous), if changes in equation numbering
     }
 
     double dTTau = tStep->giveTimeIncrement();
@@ -170,26 +171,22 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
         if ( ( nite == 1 ) || ( NR_Mode == nrsolverFullNRM ) || ( ( NR_Mode == nrsolverAccelNRM ) && ( nite % MANRMSteps == 0 ) ) ) {
             conductivityMatrix->zero();
             //Assembling left hand side - start with conductivity matrix
-            this->assemble( conductivityMatrix, & TauStep, LHSBCMatrix,
-                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            this->assemble( conductivityMatrix, & TauStep, IntSourceLHSMatrix,
+            this->assemble( *conductivityMatrix, & TauStep, IntSourceLHSAssembler(),
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
             conductivityMatrix->times(alpha);
             //Add capacity matrix
-            this->assemble( conductivityMatrix, & TauStep, NSTP_MidpointLhs,
+            this->assemble( *conductivityMatrix, & TauStep, MidpointLhsAssembler(lumpedCapacityStab, alpha),
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
 
         rhs.resize(neq);
         rhs.zero();
         //edge or surface load on element
-        this->assembleVectorFromElements( rhs, & TauStep, ElementBCTransportVector, VM_Total,
-                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //add internal source vector on elements
-        this->assembleVectorFromElements( rhs, & TauStep, ElementInternalSourceVector, VM_Total,
+        this->assembleVectorFromElements( rhs, & TauStep, TransportExternalForceAssembler(), VM_Total,
                                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //add nodal load
-        this->assembleVectorFromDofManagers( rhs, & TauStep, ExternalForcesVector, VM_Total,
+        this->assembleVectorFromDofManagers( rhs, & TauStep, ExternalForceAssembler(), VM_Total,
                                             EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
         // subtract the rhs part depending on previous solution
@@ -205,7 +202,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
         // compute norm of residuals from balance equations
         solutionErr = rhs.computeNorm();
 
-        linSolver->solve(conductivityMatrix, & rhs, & solutionVectorIncrement);
+        linSolver->solve(*conductivityMatrix, rhs, solutionVectorIncrement);
         solutionVector->add(solutionVectorIncrement);
         this->updateInternalState(& TauStep); //insert to hash=0(current), if changes in equation numbering
         // compute error in the solutionvector increment
@@ -393,7 +390,7 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer,
     //
     double t = tStep->giveTargetTime();
     IntArray loc;
-    FloatMatrix charMtrxCond, charMtrxCap, bcMtrx;
+    FloatMatrix charMtrxCond, charMtrxCap;
     FloatArray r, drdt, contrib, help;
     Element *element;
     TimeStep *previousStep = this->givePreviousStep(); //r_t
@@ -417,8 +414,7 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer,
 
         element->giveLocationArray(loc, ns);
 
-        element->giveCharacteristicMatrix(charMtrxCond, ConductivityMatrix, tStep);
-        element->giveCharacteristicMatrix(bcMtrx, LHSBCMatrix, tStep);
+        element->giveCharacteristicMatrix(charMtrxCond, TangentStiffnessMatrix, tStep);
         element->giveCharacteristicMatrix(charMtrxCap, CapacityMatrix, tStep);
 
 
@@ -460,9 +456,6 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer,
         }
 
         help.beProductOf(charMtrxCap, drdt);
-        if ( bcMtrx.isNotEmpty() ) {
-            charMtrxCond.add(bcMtrx);
-        }
 
         contrib.beProductOf(charMtrxCond, r);
         contrib.add(help);

@@ -52,21 +52,16 @@ MasterDof :: MasterDof(DofManager *aNode, int nbc, int nic, DofIDItem id) : Dof(
     equationNumber = 0;                         // means "uninitialized"
     bc             = nbc;
     ic             = nic;
-    unknowns       = new Dictionary();
-    /*   unknowns       = new Dictionary() ;           // unknown size ?
-     * pastUnknowns   = NULL ; */
 }
 
 MasterDof :: MasterDof(DofManager *aNode, DofIDItem id) : Dof(aNode, id)
 {
     ic = bc = equationNumber = 0;                        // means "uninitialized"
-    unknowns = new Dictionary();
 }
 
 
 MasterDof :: ~MasterDof()
 {
-    delete unknowns;
 }
 
 
@@ -151,13 +146,6 @@ double MasterDof :: giveUnknown(ValueModeType mode, TimeStep *tStep)
 // is not a predicted unknown) or initial condition. tStep is not the
 // current time step n, it is assumed to be the previous one (n-1).
 {
-    double value;
-
-#ifdef DEBUG
-    //if (type != this->giveUnknownType ())
-    // OOFEM_ERROR("Noncompatible Request");
-#endif
-
     if ( dofManager->giveParallelMode() == DofManager_null ) {
         return 0.0;
     }
@@ -165,14 +153,12 @@ double MasterDof :: giveUnknown(ValueModeType mode, TimeStep *tStep)
     // first try if IC apply
     if ( tStep->giveNumber() == dofManager->giveDomain()->giveEngngModel()->giveNumberOfTimeStepWhenIcApply() ) { // step when Ic apply
         if ( this->hasIcOn(mode) ) {
-            value = this->giveIc()->give(mode);
+            return this->giveIc()->give(mode);
         } else if ( this->hasBc(tStep) ) {
-            value = this->giveBcValue(mode, tStep);
+            return this->giveBcValue(mode, tStep);
         } else {
-            value = 0.;
+            return 0.;
         }
-
-        return value;
     }
 
     //  if ( dofManager->giveDomain()->giveEngngModel()->requiresUnknownsDictionaryUpdate() ) {
@@ -194,8 +180,7 @@ double MasterDof :: giveUnknown(ValueModeType mode, TimeStep *tStep)
     //  }
 
     if ( !dofManager->giveDomain()->giveEngngModel()->requiresUnknownsDictionaryUpdate() && this->hasBc(tStep) ) {
-        value = this->giveBcValue(mode, tStep);
-        return value;
+        return this->giveBcValue(mode, tStep);
     }
 
     return ( dofManager->giveDomain()->giveEngngModel()->
@@ -206,8 +191,6 @@ double MasterDof :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeSte
 // The key method of class Dof. Returns the value of the unknown field
 // (e.g., the displacement) associated to the receiver, at tStep.
 {
-    double value;
-
     if ( dofManager->giveParallelMode() == DofManager_null ) {
         return 0.0;
     }
@@ -215,23 +198,19 @@ double MasterDof :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeSte
     // first try if IC apply
     if ( tStep->giveNumber() == dofManager->giveDomain()->giveEngngModel()->giveNumberOfTimeStepWhenIcApply() ) { // step when Ic apply
         if ( this->hasIcOn(mode) ) {
-            value = this->giveIc()->give(mode);
+            return this->giveIc()->give(mode);
         } else {
-            value = 0.;
+            return 0.;
         }
-
-        return value;
     }
 
     // then ask bor BC
     if ( this->hasBc(tStep) ) {    // bound . cond.
-        //value = this -> giveBcValue(giveUnknownType(),mode,tStep) ;
-        value = this->giveBcValue(mode, tStep);
-        return value;
+        return this->giveBcValue(mode, tStep);
     }
 
     // try ask field for unknown
-    return ( field.giveUnknownValue(this, mode, tStep) );
+    return field.giveUnknownValue(this, mode, tStep);
 }
 
 
@@ -292,9 +271,6 @@ void MasterDof :: updateYourself(TimeStep *tStep)
 // Updates the receiver at end of step.
 {
     Dof :: updateYourself(tStep);
-    /*   delete pastUnknowns ;
-     * pastUnknowns = unknowns ;
-     * unknowns     = new Dictionary() ; */
 }
 
 void MasterDof :: updateUnknownsDictionary(TimeStep *tStep, ValueModeType mode, double dofValue)
@@ -303,13 +279,13 @@ void MasterDof :: updateUnknownsDictionary(TimeStep *tStep, ValueModeType mode, 
     // to value dofValue.
 
     int hash = dofManager->giveDomain()->giveEngngModel()->giveUnknownDictHashIndx(mode, tStep);
-    unknowns->at(hash) = dofValue;
+    unknowns.at(hash) = dofValue;
 }
 
 double MasterDof :: giveUnknownsDictionaryValue(TimeStep *tStep, ValueModeType mode)
 {
     int hash = dofManager->giveDomain()->giveEngngModel()->giveUnknownDictHashIndx(mode, tStep);
-    return unknowns->at(hash);
+    return unknowns.at(hash);
 }
 
 void MasterDof :: printYourself()
@@ -347,7 +323,7 @@ contextIOResultType MasterDof :: saveContext(DataStream &stream, ContextMode mod
     }
 
     if ( ( mode & CM_UnknownDictState ) || ( dofManager->giveDomain()->giveEngngModel()->requiresUnknownsDictionaryUpdate() ) ) {
-        if ( ( iores = unknowns->saveContext(stream, mode, obj) ) != CIO_OK ) {
+        if ( ( iores = unknowns.saveContext(stream, mode, obj) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
@@ -385,7 +361,7 @@ contextIOResultType MasterDof :: restoreContext(DataStream &stream, ContextMode 
     }
 
     if ( ( mode & CM_UnknownDictState ) || ( dofManager->giveDomain()->giveEngngModel()->requiresUnknownsDictionaryUpdate() ) ) {
-        if ( ( iores = unknowns->restoreContext(stream, mode, obj) ) != CIO_OK ) {
+        if ( ( iores = unknowns.restoreContext(stream, mode, obj) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }

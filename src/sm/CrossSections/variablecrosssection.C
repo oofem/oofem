@@ -57,10 +57,6 @@ VariableCrossSection :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    // will read density and other inheritted parameters as constants
-    // NOTE: do not call SimpleCrossSection here (as the parameter names are same, but different type is used here!!!!)
-    this->CrossSection :: initializeFrom(ir);
-
     if ( ir->hasField(_IFT_SimpleCrossSection_thick) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, thicknessExpr, _IFT_SimpleCrossSection_thick);
     }
@@ -115,8 +111,10 @@ VariableCrossSection :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, directorzExpr, _IFT_SimpleCrossSection_directorz);
     }
 
+    // will read density and other inheritted parameters as constants
+    // NOTE: do not call SimpleCrossSection here (as the parameter names are same, but different type is used here!!!!)
+    return CrossSection :: initializeFrom(ir);
 
-    return IRRT_OK;
 }
 
 
@@ -181,34 +179,34 @@ VariableCrossSection :: give(CrossSectionProperty aProperty, GaussPoint *gpx)
 
 
 double
-VariableCrossSection :: give(CrossSectionProperty aProperty, const FloatArray *coords, Element *elem, bool local)
+VariableCrossSection :: give(CrossSectionProperty aProperty, const FloatArray &coords, Element *elem, bool local)
 {
     double value = 0.0;
     const ScalarFunction *expr;
 
-    if ( propertyDictionary->includes(aProperty) ) {
-        value = propertyDictionary->at(aProperty);
+    if ( propertyDictionary.includes(aProperty) ) {
+        value = propertyDictionary.at(aProperty);
     } else {
         this->giveExpression(& expr, aProperty);
 
         FloatArray c;
         if ( this->localFormulationFlag ) {
             if ( local ) {
-                c = * coords;
+                c = coords;
             } else {
                 // convert given coords into local cs
-                if ( !elem->computeLocalCoordinates(c, * coords) ) {
+                if ( !elem->computeLocalCoordinates(c, coords) ) {
                     OOFEM_ERROR( "computeLocalCoordinates failed (element %d)", elem->giveNumber() );
                 }
             }
         } else { // global coordinates needed
             if ( local ) {
                 // convert given coords into global cs
-                if ( !elem->computeGlobalCoordinates(c, * coords) ) {
+                if ( !elem->computeGlobalCoordinates(c, coords) ) {
                     OOFEM_ERROR( "computeGlobalCoordinates failed (element %d)", elem->giveNumber() );
                 }
             } else {
-                c = * coords;
+                c = coords;
             }
         }
         // evaluate the expression

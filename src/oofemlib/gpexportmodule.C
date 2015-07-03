@@ -59,11 +59,9 @@ GPExportModule :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;              // Required by IR_GIVE_FIELD macro
 
-    ExportModule :: initializeFrom(ir);
-
     IR_GIVE_FIELD(ir, vartypes, _IFT_GPExportModule_vartypes);
     IR_GIVE_OPTIONAL_FIELD(ir, ncoords, _IFT_GPExportModule_ncoords);
-    return IRRT_OK;
+    return ExportModule :: initializeFrom(ir);
 }
 
 
@@ -111,7 +109,7 @@ GPExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
                 // export Gauss point coordinates
                 if ( ncoords ) { // no coordinates exported if ncoords==0
-                    elem->computeGlobalCoordinates( gcoords, * ( gp->giveNaturalCoordinates() ) );
+                    elem->computeGlobalCoordinates( gcoords, gp->giveNaturalCoordinates() );
                     int nc = gcoords.giveSize();
                     if ( ncoords >= 0 ) {
                         fprintf(stream, "%d ", ncoords);

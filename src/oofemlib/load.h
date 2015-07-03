@@ -39,6 +39,7 @@
 #include "intarray.h"
 #include "floatarray.h"
 #include "valuemodetype.h"
+#include "error.h"
 
 ///@name Input fields for Load
 //@{
@@ -114,16 +115,22 @@ public:
     virtual void computeComponentArrayAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     /**
      * Computes components values of load at given point - global coordinates (coordinates given).
-     * Default implementation computes product of approximation matrix and
-     * with "vertex" value array attribute and the result is then multiplied by
-     * corresponding load time function value respecting load response mode.
      * @param answer Component values at given point and time.
      * @param tStep Time step representing time.
-     * @param coords Global (or local) problem coordinates, which are used to
-     * evaluate components values.
+     * @param coords Global (or local) problem coordinates, which are used to evaluate components values.
      * @param mode Determines response mode.
      */
     virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode) = 0;
+    /**
+     * Computes components values for specified dof ids. If a dof id is not defined for the load, zero value is inserted.
+     * Typically boundary conditions would specify the full, or a subset of the dofids.
+     * @param answer Component values at given point and time.
+     * @param tStep Time step representing time.
+     * @param coords Global (or local) problem coordinates, which are used to evaluate components values.
+     * @param dofids List of DOF IDs to evaluate for.
+     * @param mode Determines response mode.
+     */    
+    virtual void computeValues(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, const IntArray &dofids, ValueModeType mode);
     /**
      * Returns the value of dofExcludeMask corresponding to given index.
      * See the description of dofExcludeMask attribute for more details.

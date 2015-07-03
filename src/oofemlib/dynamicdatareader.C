@@ -46,14 +46,13 @@ DynamicDataReader :: DynamicDataReader() : DataReader()
 
 DynamicDataReader :: ~DynamicDataReader()
 {
-    this->finish();
 }
 
 void
 DynamicDataReader :: insertInputRecord(InputRecordType type, InputRecord *record)
 {
     // Should care about the record type, but its a hassle.
-    this->recordList.push_back(record);
+    this->recordList.emplace_back(record);
 }
 
 InputRecord *
@@ -66,16 +65,12 @@ DynamicDataReader :: giveInputRecord(InputRecordType typeId, int recordId)
     } else {
         ++this->it;
     }
-    return * ( this->it );
+    return this->it->get();
 }
 
 void
 DynamicDataReader :: finish()
 {
-    // Not sure if i need to do this;
-    for ( auto &rec: this->recordList ) {
-        delete rec;
-    }
     this->recordList.clear();
 }
 

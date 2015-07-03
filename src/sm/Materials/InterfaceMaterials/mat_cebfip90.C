@@ -45,66 +45,21 @@
 namespace oofem {
 REGISTER_Material(CebFipSlip90Material);
 
-CebFipSlip90Material :: CebFipSlip90Material(int n, Domain *d) : StructuralMaterial(n, d)
-    //
-    // constructor
-    //
+CebFipSlip90Material :: CebFipSlip90Material(int n, Domain *d) : StructuralInterfaceMaterial(n, d)
 { }
 
 
 CebFipSlip90Material :: ~CebFipSlip90Material()
-//
-// destructor
-//
 { }
 
-int
-CebFipSlip90Material :: hasMaterialModeCapability(MaterialMode mode)
-//
-// returns whether receiver supports given mode
-//
-{
-    return mode == _1dInterface;
-}
-
 
 void
-CebFipSlip90Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                      MatResponseMode mode,
-                                                      GaussPoint *gp,
-                                                      TimeStep *tStep)
-//
-// computes full constitutive matrix for case of gp stress-strain state.
-//
-{
-    OOFEM_ERROR("not implemented");
-}
-
-
-void
-CebFipSlip90Material :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                                             const FloatArray &totalStrain,
-                                             TimeStep *tStep)
-//
-// returns real stress vector in 3d stress space of receiver according to
-// previous level of stress and current
-// strain increment, the only way, how to correctly update gp records
-//
+CebFipSlip90Material :: giveEngTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
 {
     CebFipSlip90MaterialStatus *status = static_cast< CebFipSlip90MaterialStatus * >( this->giveStatus(gp) );
-    FloatArray reducedTotalStrainVector;
     double f, slip, tempKappa;
 
-    //this->initGpForNewStep(gp);
-    this->initTempStatus(gp);
-    
-    // subtract stress independent part
-    // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
-    // therefore it is necessary to subtract always the total eigen strain value
-    this->giveStressDependentPartOfStrainVector(reducedTotalStrainVector, gp, totalStrain, tStep, VM_Total);
-
-    //crossSection->giveFullCharacteristicVector(totalStrainVector, gp, reducedTotalStrainVector);
-    slip = reducedTotalStrainVector.at(1);
+    slip = jump.at(1);
     // compute value of loading function if strainLevel crit apply
     f = fabs(slip) - status->giveKappa();
 
@@ -125,51 +80,30 @@ CebFipSlip90Material :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     }
 
     // update gp
-    status->letTempStrainVectorBe(totalStrain);
-    status->letTempStressVectorBe(answer);
+    status->letTempJumpBe(jump);
+    status->letTempTractionBe(answer);
     status->setTempKappa(tempKappa);
 }
 
 
 void
-CebFipSlip90Material :: giveStiffnessMatrix(FloatMatrix &answer,
-                                            MatResponseMode rMode,
-                                            GaussPoint *gp, TimeStep *tStep)
-//
-// Returns characteristic material stiffness matrix of the receiver
-//
+CebFipSlip90Material :: give1dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
-    MaterialMode mMode = gp->giveMaterialMode();
-    switch ( mMode ) {
-    case _1dInterface:
-        give1dInterfaceMaterialStiffnessMatrix(answer, rMode, gp, tStep);
-        break;
-    default:
-        StructuralMaterial :: giveStiffnessMatrix(answer, rMode, gp, tStep);
-    }
-}
-
-
-void
-CebFipSlip90Material :: give1dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
-                                                               GaussPoint *gp, TimeStep *tStep)
-{
-    double kappa;
     CebFipSlip90MaterialStatus *status = static_cast< CebFipSlip90MaterialStatus * >( this->giveStatus(gp) );
     answer.resize(1, 1);
 
-    if ( ( rMode == ElasticStiffness ) || ( rMode == SecantStiffness ) ) {
-        kappa = status->giveKappa();
+    if ( mode == ElasticStiffness || mode == SecantStiffness ) {
+        double kappa = status->giveKappa();
 
         if ( kappa > 0.0 ) {
             answer.at(1, 1) = ( this->computeBondForce(kappa) / kappa );
         } else {
             answer.at(1, 1) = computeBondForceStiffness(0.0);
         }
-    } else if ( rMode == TangentStiffness ) {
+    } else if ( mode == TangentStiffness ) {
         answer.at(1, 1) = computeBondForceStiffness( status->giveTempKappa() );
     }  else {
-        OOFEM_ERROR("unknown MatResponseMode (%s)", __MatResponseModeToString(rMode) );
+        OOFEM_ERROR("unknown MatResponseMode (%s)", __MatResponseModeToString(mode) );
     }
 }
 
@@ -177,21 +111,15 @@ CebFipSlip90Material :: give1dInterfaceMaterialStiffnessMatrix(FloatMatrix &answ
 int
 CebFipSlip90Material :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
-}
+    CebFipSlip90MaterialStatus *status = static_cast< CebFipSlip90MaterialStatus * >( this->giveStatus(gp) );
 
-void
-CebFipSlip90Material :: giveThermalDilatationVector(FloatArray &answer,
-                                                    GaussPoint *gp,  TimeStep *tStep)
-//
-// returns a FloatArray(6) of initial strain vector
-// eps_0 = {exx_0, eyy_0, ezz_0, gyz_0, gxz_0, gxy_0}^T
-// caused by unit temperature in direction of
-// gp (element) local axes
-//
-{
-    answer.resize(1);
-    answer.at(1) = 0.0;
+    if ( type == IST_DamageScalar ) {     
+        answer.resize(1);
+        answer.at(1) = status->giveKappa();
+        return 1;
+    } else {
+        return StructuralInterfaceMaterial :: giveIPValue(answer, gp, type, tStep);
+    }
 }
 
 
@@ -208,14 +136,14 @@ CebFipSlip90Material :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, s3, _IFT_CebFipSlip90Material_s3);
 
     alpha = 0.4;
-    return StructuralMaterial :: initializeFrom(ir);
+    return StructuralInterfaceMaterial :: initializeFrom(ir);
 }
 
 
 void
 CebFipSlip90Material :: giveInputRecord(DynamicInputRecord &input)
 {
-    StructuralMaterial :: giveInputRecord(input);
+    StructuralInterfaceMaterial :: giveInputRecord(input);
     input.setField(this->tmax, _IFT_CebFipSlip90Material_tmax);
     input.setField(this->tres, _IFT_CebFipSlip90Material_tres);
 
@@ -259,7 +187,7 @@ CebFipSlip90Material :: computeBondForceStiffness(double s)
 }
 
 
-CebFipSlip90MaterialStatus :: CebFipSlip90MaterialStatus(int n, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g)
+CebFipSlip90MaterialStatus :: CebFipSlip90MaterialStatus(int n, Domain *d, GaussPoint *g) : StructuralInterfaceMaterialStatus(n, d, g)
 {
     kappa = tempKappa = 0.0;
 }
@@ -272,7 +200,7 @@ CebFipSlip90MaterialStatus :: ~CebFipSlip90MaterialStatus()
 void
 CebFipSlip90MaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-    StructuralMaterialStatus :: printOutputAt(file, tStep);
+    StructuralInterfaceMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");
     fprintf(file, "kappa %f", this->kappa);
 
@@ -283,7 +211,7 @@ CebFipSlip90MaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 void
 CebFipSlip90MaterialStatus :: initTempStatus()
 {
-    StructuralMaterialStatus :: initTempStatus();
+    StructuralInterfaceMaterialStatus :: initTempStatus();
     this->tempKappa = this->kappa;
 }
 
@@ -291,7 +219,7 @@ CebFipSlip90MaterialStatus :: initTempStatus()
 void
 CebFipSlip90MaterialStatus :: updateYourself(TimeStep *tStep)
 {
-    StructuralMaterialStatus :: updateYourself(tStep);
+    StructuralInterfaceMaterialStatus :: updateYourself(tStep);
     this->kappa = this->tempKappa;
 }
 
@@ -302,7 +230,7 @@ CebFipSlip90MaterialStatus :: saveContext(DataStream &stream, ContextMode mode, 
     contextIOResultType iores;
 
     // save parent class status
-    if ( ( iores = StructuralMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
+    if ( ( iores = StructuralInterfaceMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -321,7 +249,7 @@ CebFipSlip90MaterialStatus :: restoreContext(DataStream &stream, ContextMode mod
     contextIOResultType iores;
 
     // read parent class status
-    if ( ( iores = StructuralMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
+    if ( ( iores = StructuralInterfaceMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

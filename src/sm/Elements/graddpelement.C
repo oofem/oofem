@@ -59,25 +59,25 @@ GradDpElement :: GradDpElement()
 { }
 
 void
-GradDpElement :: setDisplacementLocationArray(IntArray &answer, int nPrimNodes, int nPrimVars, int nSecNodes, int nSecVars)
+GradDpElement :: setDisplacementLocationArray()
 {
-    answer.resize(locSize);
+    locU.resize(locSize);
 
     for ( int i = 1; i <= totalSize; i++ ) {
         if ( i < nSecNodes * nPrimVars + 1 ) {
-            answer.at(i) = i + ( int ) ( ( ( i - 1 ) / nPrimVars ) ) * nSecVars;
+            locU.at(i) = i + ( int ) ( ( ( i - 1 ) / nPrimVars ) ) * nSecVars;
         } else if ( i > nSecNodes * ( nPrimVars + nSecVars ) ) {
-            answer.at(i - nSecVars * nSecNodes) = i;
+            locU.at(i - nSecVars * nSecNodes) = i;
         }
     }
 }
 
 void
-GradDpElement :: setNonlocalLocationArray(IntArray &answer, int nPrimNodes, int nPrimVars, int nSecNodes, int nSecVars)
+GradDpElement :: setNonlocalLocationArray()
 {
-    answer.resize(nlSize);
+    locK.resize(nlSize);
     for ( int i = 1; i <= nlSize; i++ ) {
-        answer.at(i) = i * nPrimVars + i;
+        locK.at(i) = i * nPrimVars + i;
     }
 }
 
@@ -85,38 +85,12 @@ GradDpElement :: setNonlocalLocationArray(IntArray &answer, int nPrimNodes, int 
 void
 GradDpElement :: computeDisplacementDegreesOfFreedom(FloatArray &answer, TimeStep *tStep)
 {
-    ///@todo Just use this instead! (should work, but I don't have any tests right now)
-#if 0
     this->giveStructuralElement()->computeVectorOf({D_u, D_v, D_w}, VM_Total, tStep, answer);
-#else
-    StructuralElement *elem = this->giveStructuralElement();
-    FloatArray u;
-    answer.resize(locSize);
-
-    elem->computeVectorOf(VM_Total, tStep, u);
-    u.resizeWithValues(totalSize);
-    for ( int i = 1; i <= locSize; i++ ) {
-        answer.at(i) = u.at( locU.at(i) );
-    }
-#endif
 }
 
 void GradDpElement :: computeNonlocalDegreesOfFreedom(FloatArray &answer, TimeStep *tStep)
 {
-    ///@todo Just use this instead! (should work, but I don't have any tests right now)
-#if 0
     this->giveStructuralElement()->computeVectorOf({G_0}, VM_Total, tStep, answer);
-#else
-    StructuralElement *elem = this->giveStructuralElement();
-    FloatArray u;
-    answer.resize(nlSize);
-
-    elem->computeVectorOf(VM_Total, tStep, u);
-    u.resizeWithValues(totalSize);
-    for  ( int i = 1; i <= nlSize; i++ ) {
-        answer.at(i) = u.at( locK.at(i) );
-    }
-#endif
 }
 
 void
@@ -202,14 +176,11 @@ GradDpElement :: computeDeformationGradientVector(FloatArray &answer, GaussPoint
 void
 GradDpElement :: computeNonlocalCumulatedStrain(double &answer, GaussPoint *gp, TimeStep *tStep)
 {
-    FloatMatrix Nk;
-    FloatArray u;
-    FloatArray aux;
+    FloatArray Nk, u;
 
     this->computeNkappaMatrixAt(gp, Nk);
     this->computeNonlocalDegreesOfFreedom(u, tStep);
-    aux.beProductOf(Nk, u);
-    answer = aux.at(1);
+    answer = Nk.dotProduct(u);
 }
 
 
@@ -218,7 +189,6 @@ GradDpElement :: computeNonlocalGradient(FloatArray &answer, GaussPoint *gp, Tim
 {
     FloatMatrix Bk;
     FloatArray u;
-    FloatArray aux;
 
     this->computeBkappaMatrixAt(gp, Bk);
     this->computeNonlocalDegreesOfFreedom(u, tStep);
@@ -229,30 +199,25 @@ GradDpElement :: computeNonlocalGradient(FloatArray &answer, GaussPoint *gp, Tim
 void
 GradDpElement :: giveNonlocalInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
-    double dV, localCumulatedStrain = 0.;
+    double localCumulatedStrain = 0.;
     NLStructuralElement *elem = this->giveNLStructuralElement();
-    FloatMatrix stiffKappa, Nk;
-    FloatArray fKappa(nlSize), aux(nlSize), dKappa, stress;
+    FloatMatrix stiffKappa;
+    FloatArray Nk;
+    FloatArray aux, dKappa, stress;
 
-    aux.zero();
     int size = nSecVars * nSecNodes;
 
     //set displacement and nonlocal location array
-    this->setDisplacementLocationArray(locU, nPrimNodes, nPrimVars, nSecNodes, nSecVars);
-    this->setNonlocalLocationArray(locK, nPrimNodes, nPrimVars, nSecNodes, nSecVars);
+    this->setDisplacementLocationArray();
+    this->setNonlocalLocationArray();
 
     answer.resize(size);
     for ( GaussPoint *gp: *elem->giveIntegrationRule(0) ) {
         this->computeNkappaMatrixAt(gp, Nk);
-        for ( int j = 1; j <= nlSize; j++ ) {
-            fKappa.at(j) = Nk.at(1, j);
-        }
 
-        dV  = elem->computeVolumeAround(gp);
+        double dV = elem->computeVolumeAround(gp);
         this->computeStressVectorAndLocalCumulatedStrain(stress, localCumulatedStrain, gp, tStep);
-        fKappa.times(localCumulatedStrain);
-        fKappa.times(-dV);
-        aux.add(fKappa);
+        aux.add(-dV * localCumulatedStrain, Nk);
     }
 
     this->computeStiffnessMatrix_kk(stiffKappa, TangentStiffness, tStep);
@@ -314,8 +279,8 @@ void
 GradDpElement :: computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
 {
     //set displacement and nonlocal location array
-    this->setDisplacementLocationArray(locU, nPrimNodes, nPrimVars, nSecNodes, nSecVars);
-    this->setNonlocalLocationArray(locK, nPrimNodes, nPrimVars, nSecNodes, nSecVars);
+    this->setDisplacementLocationArray();
+    this->setNonlocalLocationArray();
 
 
     FloatArray localForces(locSize);
@@ -359,9 +324,8 @@ void
 GradDpElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
     //set displacement and nonlocal location array
-    this->setDisplacementLocationArray(locU, nPrimNodes, nPrimVars, nSecNodes, nSecVars);
-    this->setNonlocalLocationArray(locK, nPrimNodes, nPrimVars, nSecNodes, nSecVars);
-
+    this->setDisplacementLocationArray();
+    this->setNonlocalLocationArray();
 
     answer.resize(totalSize, totalSize);
     answer.zero();
@@ -384,7 +348,6 @@ GradDpElement :: computeStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode 
     NLStructuralElement *elem = this->giveNLStructuralElement();
     StructuralCrossSection *cs = elem->giveStructuralCrossSection();
     FloatMatrix B, D, DB;
-
 
     int nlGeo = elem->giveGeometryMode();
     bool matStiffSymmFlag = elem->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode);
@@ -431,17 +394,17 @@ GradDpElement :: computeStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode 
 void
 GradDpElement :: computeStiffnessMatrix_ku(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
-    //OOFEM_ERROR("test");
     double dV;
     NLStructuralElement *elem = this->giveNLStructuralElement();
-    FloatMatrix B, DkuB, Dku, Nk;
+    FloatArray Nk;
+    FloatMatrix B, DkuB, Dku;
     StructuralCrossSection *cs = elem->giveStructuralCrossSection();
 
     answer.clear();
 
     int nlGeo = elem->giveGeometryMode();
 
-    for ( GaussPoint *gp: *elem->giveIntegrationRule(0) ) {
+    for ( auto &gp: *elem->giveIntegrationRule(0) ) {
 
         GradDpMaterialExtensionInterface *dpmat = dynamic_cast< GradDpMaterialExtensionInterface * >(
             cs->giveMaterialInterface(GradDpMaterialExtensionInterfaceType, gp) );
@@ -538,12 +501,13 @@ GradDpElement :: computeStiffnessMatrix_kk(FloatMatrix &answer, MatResponseMode 
     StructuralElement *elem = this->giveStructuralElement();
     double dV;
     FloatMatrix lStiff;
-    FloatMatrix Bk, Nk, LBk;
+    FloatArray Nk;
+    FloatMatrix Bk, LBk;
     StructuralCrossSection *cs = elem->giveStructuralCrossSection();
 
     answer.clear();
 
-    for ( GaussPoint *gp: *elem->giveIntegrationRule(0) ) {
+    for ( auto &gp: *elem->giveIntegrationRule(0) ) {
 
         GradDpMaterialExtensionInterface *dpmat = dynamic_cast< GradDpMaterialExtensionInterface * >(
             cs->giveMaterialInterface(GradDpMaterialExtensionInterfaceType, gp) );
@@ -575,11 +539,12 @@ GradDpElement :: computeStiffnessMatrix_uk(FloatMatrix &answer, MatResponseMode 
     double dV;
     StructuralCrossSection *cs = elem->giveStructuralCrossSection();
     int nlGeo = elem->giveGeometryMode();
-    FloatMatrix B, Nk, SNk, gPSigma;
+    FloatArray Nk;
+    FloatMatrix B, SNk, gPSigma;
 
     answer.clear();
 
-    for ( GaussPoint *gp: *elem->giveIntegrationRule(0) ) {
+    for ( auto &gp: *elem->giveIntegrationRule(0) ) {
 
         GradDpMaterialExtensionInterface *dpmat = dynamic_cast< GradDpMaterialExtensionInterface * >(
             cs->giveMaterialInterface(GradDpMaterialExtensionInterfaceType, gp) );

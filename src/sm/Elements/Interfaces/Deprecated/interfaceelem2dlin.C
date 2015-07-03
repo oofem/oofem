@@ -34,7 +34,6 @@
 
 #include "interfaceelem2dlin.h"
 #include "node.h"
-#include "crosssection.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
@@ -42,6 +41,7 @@
 #include "intarray.h"
 #include "mathfem.h"
 #include "fei2dlinelin.h"
+#include "../sm/CrossSections/structuralinterfacecrosssection.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -71,7 +71,7 @@ InterfaceElem2dLin :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int 
 //
 {
     FloatArray n;
-    this->interp.evalN (n, *gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));
+    this->interp.evalN (n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(2, 8);
     answer.zero();
@@ -104,13 +104,27 @@ InterfaceElem2dLin :: computeVolumeAround(GaussPoint *gp)
     double r = 1.0;
     if (this->axisymmode) {
         FloatArray n(2);
-        this->interp.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+        this->interp.evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
         r = n.at(1)*this->giveNode(1)->giveCoordinate(1) + n.at(2)*this->giveNode(2)->giveCoordinate(1);
     }
 
 
-    double result = this->interp.giveTransformationJacobian(* gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));
+    double result = this->interp.giveTransformationJacobian(gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));
     return result * gp->giveWeight() * r;
+}
+
+
+void
+InterfaceElem2dLin :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+{
+    static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->giveEngTraction_2d(answer, gp, strain, tStep);
+}
+
+
+void
+InterfaceElem2dLin :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->give2dStiffnessMatrix_Eng(answer, rMode, gp, tStep);
 }
 
 
@@ -244,7 +258,7 @@ void InterfaceElem2dLin :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 
         indx = gc.giveIntVarIndx();
 
-        result += this->computeGlobalCoordinates( gcoord, * ( gp->giveNaturalCoordinates() ) );
+        result += this->computeGlobalCoordinates( gcoord, gp->giveNaturalCoordinates() );
 
         p [ 0 ].x = ( FPNum ) gcoord.at(1);
         p [ 0 ].y = ( FPNum ) gcoord.at(2);

@@ -101,7 +101,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_MicroMaterial_Name; }
     virtual const char *giveClassName() const { return "MicroMaterial"; }
 
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *, const FloatArray &, TimeStep *);
+    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *, const FloatArray &, TimeStep *);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 

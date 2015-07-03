@@ -57,6 +57,31 @@ FloatArray &Load :: giveComponentArray()
 
 
 void
+Load :: computeValues(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, const IntArray &dofids, ValueModeType mode)
+{
+    ///@note Backwards compatibility with input files that don't specify dofs.
+#if 1
+    if ( this->dofs.giveSize() == 0 ) {
+        this->computeValueAt(answer, tStep, coords, mode);
+        return;
+    }
+#endif
+
+    FloatArray loaded_dofs;
+    this->computeValueAt(loaded_dofs, tStep, coords, mode);
+
+    answer.resize(dofids.giveSize());
+    answer.zero();
+    for ( int i = 0; i < dofids.giveSize(); ++i ) {
+        int index = this->dofs.findFirstIndexOf(dofids[i]);
+        if ( index > 0 ) {
+            answer[i] = loaded_dofs.at(index);
+        }
+    }
+}
+
+
+void
 Load :: computeComponentArrayAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
 // Returns an array, the load induced at tStep by the receiver.
 {
@@ -80,7 +105,7 @@ Load :: initializeFrom(InputRecord *ir)
 #  ifdef VERBOSE
     // VERBOSE_PRINT1 ("Instanciating load ",number)
 #  endif
-    GeneralBoundaryCondition :: initializeFrom(ir);
+
     IR_GIVE_FIELD(ir, componentArray, _IFT_Load_components);
 
     int size = componentArray.giveSize();
@@ -88,7 +113,8 @@ Load :: initializeFrom(InputRecord *ir)
     dofExcludeMask.zero();
     IR_GIVE_OPTIONAL_FIELD(ir, dofExcludeMask, _IFT_Load_dofexcludemask);
     if ( dofExcludeMask.giveSize() != size ) {
-        OOFEM_ERROR("dofExcludeMask and componentArray size mismatch");
+        OOFEM_WARNING("dofExcludeMask and componentArray size mismatch");
+        return IRRT_BAD_FORMAT;
     } else {
         for ( int i = 1; i <= size; i++ ) {
             if ( dofExcludeMask.at(i) ) {
@@ -97,7 +123,7 @@ Load :: initializeFrom(InputRecord *ir)
         }
     }
 
-    return IRRT_OK;
+    return GeneralBoundaryCondition :: initializeFrom(ir);
 }
 
 

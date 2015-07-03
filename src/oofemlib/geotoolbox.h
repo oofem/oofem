@@ -92,7 +92,7 @@ class OOFEM_EXPORT Polygon
 {
     std :: list< Vertex >vertices;
 public:
-    Polygon() { };
+    Polygon() { }
     void addVertex(Vertex v) { vertices.push_back(v); }
     double computeVolume() const;
     int testPoint(double x, double y) const;

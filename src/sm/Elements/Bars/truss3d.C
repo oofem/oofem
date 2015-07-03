@@ -94,7 +94,7 @@ Truss3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 //
 {
     FloatMatrix dN;
-    this->interp.evaldNdx( dN, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evaldNdx( dN, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(1, 6);
     answer.at(1, 1) = dN.at(1, 1);
@@ -164,7 +164,7 @@ Truss3d :: computeVolumeAround(GaussPoint *gp)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
-    double detJ = this->interp.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    double detJ = this->interp.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     double weight  = gp->giveWeight();
     return detJ *weight *this->giveCrossSection()->give(CS_Area, gp);
 }
@@ -216,6 +216,11 @@ Truss3d :: computeStressVector(FloatArray &answer, const FloatArray &strain, Gau
     this->giveStructuralCrossSection()->giveRealStress_1d(answer, gp, strain, tStep);
 }
 
+void
+Truss3d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveStiffnessMatrix_1d(answer, rMode, gp, tStep);
+}
 
 void
 Truss3d :: giveDofManDofIDMask(int inode, IntArray &answer) const
@@ -227,7 +232,7 @@ Truss3d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 void
 Truss3d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
-    this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
+    this->computeNmatrixAt(gp->giveSubPatchCoordinates(), answer);
 }
 
 
@@ -261,14 +266,14 @@ Truss3d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
     }
 
     double weight = gp->giveWeight();
-    return this->interp.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) * weight;
+    return this->interp.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) * weight;
 }
 
 
 void
 Truss3d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    computeGlobalCoordinates( answer, * ( gp->giveNaturalCoordinates() ) );
+    computeGlobalCoordinates( answer, gp->giveNaturalCoordinates() );
 }
 
 

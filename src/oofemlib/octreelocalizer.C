@@ -381,7 +381,7 @@ OctreeSpatialLocalizer :: initElementIPDataStructure()
         Element *ielem = this->giveDomain()->giveElement(i);
         if ( ielem->giveNumberOfIntegrationRules() > 0 ) {
             for ( GaussPoint *jGp: *ielem->giveDefaultIntegrationRulePtr() ) {
-                if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveNaturalCoordinates() ) ) ) {
+                if ( ielem->computeGlobalCoordinates( jGpCoords, jGp->giveNaturalCoordinates() ) ) {
                     this->insertIPElementIntoOctree(this->rootCell, i, jGpCoords);
                 } else {
                     OOFEM_ERROR("computeGlobalCoordinates failed");
@@ -749,10 +749,8 @@ OctreeSpatialLocalizer :: giveElementClosestToPoint(FloatArray &lcoords, FloatAr
     Element *answer = NULL;
     std :: list< OctantRec * >cellList;
     OctantRec *currCell;
-    FloatArray currLcoords;
-    FloatArray currClosest;
     double radius, prevRadius;
-    FloatArray c  = this->rootCell->giveOrigin();
+    FloatArray c = this->rootCell->giveOrigin();
 
     this->initElementDataStructure(region);
 
@@ -852,7 +850,7 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region, bo
                 // test if element already visited
                 // if (!visitedElems.insert(*pos).second) continue;
                 for ( GaussPoint *jGp: *ielem->giveDefaultIntegrationRulePtr() ) {
-                    if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveNaturalCoordinates() ) ) ) {
+                    if ( ielem->computeGlobalCoordinates( jGpCoords, jGp->giveNaturalCoordinates() ) ) {
                         // compute distance
                         double dist = coords.distance(jGpCoords);
                         if ( dist < minDist ) {
@@ -874,7 +872,7 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region, bo
                         std :: unique_ptr< IntegrationRule > &iRule = xFemEl->mpCZIntegrationRules [ czRuleIndex ];
                         if ( iRule ) {
                             for ( GaussPoint *jGp: *iRule ) {
-                                if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveNaturalCoordinates() ) ) ) {
+                                if ( ielem->computeGlobalCoordinates( jGpCoords, jGp->giveNaturalCoordinates() ) ) {
                                     // compute distance
                                     double dist = coords.distance(jGpCoords);
                                     //printf("czRuleIndex: %d j: %d dist: %e\n", czRuleIndex, j, dist);
@@ -1017,7 +1015,7 @@ OctreeSpatialLocalizer :: giveClosestIPWithinOctant(OctantRec *currentCell, //el
                     // if (!visitedElems.insert(*pos).second) continue;
                     // is one of his ip's  within given bbox -> inset it into elemSet
                     for ( GaussPoint *gp: *ielem->giveDefaultIntegrationRulePtr() ) {
-                        if ( ielem->computeGlobalCoordinates( jGpCoords, * ( gp->giveNaturalCoordinates() ) ) ) {
+                        if ( ielem->computeGlobalCoordinates( jGpCoords, gp->giveNaturalCoordinates() ) ) {
                             currDist = coords.distance(jGpCoords);
                             // multiple insertion are handled by STL set implementation
                             if ( currDist <= dist ) {
@@ -1039,7 +1037,7 @@ OctreeSpatialLocalizer :: giveClosestIPWithinOctant(OctantRec *currentCell, //el
                             std :: unique_ptr< IntegrationRule > &iRule = xFemEl->mpCZIntegrationRules [ czRuleIndex ];
                             if ( iRule ) {
                                 for ( GaussPoint *gp: *iRule ) {
-                                    if ( ielem->computeGlobalCoordinates( jGpCoords, * ( gp->giveNaturalCoordinates() ) ) ) {
+                                    if ( ielem->computeGlobalCoordinates( jGpCoords, gp->giveNaturalCoordinates() ) ) {
                                         currDist = coords.distance(jGpCoords);
                                         // multiple insertion are handled by STL set implementation
                                         if ( currDist <= dist ) {
@@ -1118,7 +1116,7 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, Set &elementSe
                 // test if element already visited
                 // if (!visitedElems.insert(ielem).second) continue;
                 for ( GaussPoint *jGp: *ielem->giveDefaultIntegrationRulePtr() ) {
-                    if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveNaturalCoordinates() ) ) ) {
+                    if ( ielem->computeGlobalCoordinates( jGpCoords, jGp->giveNaturalCoordinates() ) ) {
                         // compute distance
                         double dist = coords.distance(jGpCoords);
                         if ( dist < minDist ) {
@@ -1140,7 +1138,7 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, Set &elementSe
                         std :: unique_ptr< IntegrationRule > &iRule = xFemEl->mpCZIntegrationRules [ czRuleIndex ];
                         if ( iRule ) {
                             for ( GaussPoint *jGp: *iRule ) {
-                                if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveNaturalCoordinates() ) ) ) {
+                                if ( ielem->computeGlobalCoordinates( jGpCoords, jGp->giveNaturalCoordinates() ) ) {
                                     // compute distance
                                     double dist = coords.distance(jGpCoords);
                                     //printf("czRuleIndex: %d j: %d dist: %e\n", czRuleIndex, j, dist);
@@ -1282,7 +1280,7 @@ OctreeSpatialLocalizer :: giveClosestIPWithinOctant(OctantRec *currentCell, //el
                     // if (!visitedElems.insert(iel).second) continue;
                     // is one of his ip's  within given bbox -> inset it into elemSet
                     for ( GaussPoint *gp: *ielem->giveDefaultIntegrationRulePtr() ) {
-                        if ( ielem->computeGlobalCoordinates( jGpCoords, * ( gp->giveNaturalCoordinates() ) ) ) {
+                        if ( ielem->computeGlobalCoordinates( jGpCoords, gp->giveNaturalCoordinates() ) ) {
                             currDist = coords.distance(jGpCoords);
                             // multiple insertion are handled by STL set implementation
                             if ( currDist <= dist ) {
@@ -1304,7 +1302,7 @@ OctreeSpatialLocalizer :: giveClosestIPWithinOctant(OctantRec *currentCell, //el
                             std :: unique_ptr< IntegrationRule > &iRule = xFemEl->mpCZIntegrationRules [ czRuleIndex ];
                             if ( iRule ) {
                                 for ( GaussPoint *gp: *iRule ) {
-                                    if ( ielem->computeGlobalCoordinates( jGpCoords, * ( gp->giveNaturalCoordinates() ) ) ) {
+                                    if ( ielem->computeGlobalCoordinates( jGpCoords, gp->giveNaturalCoordinates() ) ) {
                                         currDist = coords.distance(jGpCoords);
                                         // multiple insertion are handled by STL set implementation
                                         if ( currDist <= dist ) {
@@ -1404,7 +1402,7 @@ OctreeSpatialLocalizer :: giveElementsWithIPWithinBox(elementContainerType &elem
                 if ( !iCohesiveZoneGP ) {
                     // is one of his ip's  within given bbox -> inset it into elemSet
                     for ( GaussPoint *gp: *ielem->giveDefaultIntegrationRulePtr() ) {
-                        if ( ielem->computeGlobalCoordinates( jGpCoords, * ( gp->giveNaturalCoordinates() ) ) ) {
+                        if ( ielem->computeGlobalCoordinates( jGpCoords, gp->giveNaturalCoordinates() ) ) {
                             currDist = coords.distance(jGpCoords);
                             // multiple insertion are handled by STL set implementation
                             if ( currDist <= radius ) {
@@ -1425,7 +1423,7 @@ OctreeSpatialLocalizer :: giveElementsWithIPWithinBox(elementContainerType &elem
                             std :: unique_ptr< IntegrationRule > &iRule = xFemEl->mpCZIntegrationRules [ czRuleIndex ];
                             if ( iRule ) {
                                 for ( GaussPoint *gp: *iRule ) {
-                                    if ( ielem->computeGlobalCoordinates( jGpCoords, * ( gp->giveNaturalCoordinates() ) ) ) {
+                                    if ( ielem->computeGlobalCoordinates( jGpCoords, gp->giveNaturalCoordinates() ) ) {
                                         currDist = coords.distance(jGpCoords);
                                         // multiple insertion are handled by STL set implementation
                                         if ( currDist <= radius ) {

@@ -146,7 +146,7 @@ HeMoKunzelMaterial :: give(int aProperty, GaussPoint *gp)
 // 'E') of the receiver.
 //
 {
-    return this->Material :: give(aProperty, gp);
+    return Material :: give(aProperty, gp);
 }
 
 
@@ -634,15 +634,15 @@ HeMoKunzelMaterial :: isCharacteristicMtrxSymmetric(MatResponseMode mode)
 }
 
 int
-HeMoKunzelMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+HeMoKunzelMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
 // IST_Humidity overriden to use inverse_sorption_isotherm
 {
     if ( type == IST_Humidity ) {
         answer.resize(1);
-        answer.at(1) = giveHumidity(aGaussPoint, VM_Velocity); // VM_Previous = equilibrated value of humidity
+        answer.at(1) = giveHumidity(gp, VM_Velocity); // VM_Previous = equilibrated value of humidity
         return 1;
     } else {
-        return TransportMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+        return TransportMaterial :: giveIPValue(answer, gp, type, atTime);
     }
 }
 

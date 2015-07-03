@@ -57,39 +57,17 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(ElasticStiffnessMatrix, 4)             \
     ENUM_ITEM_WITH_VALUE(MassMatrix, 5)                         \
     ENUM_ITEM_WITH_VALUE(LumpedMassMatrix, 6)                   \
-    ENUM_ITEM_WITH_VALUE(EffectiveStiffnessMatrix, 7)           \
-    ENUM_ITEM_WITH_VALUE(EffectiveMassMatrix, 8)                \
     ENUM_ITEM_WITH_VALUE(ConductivityMatrix, 9)                 \
     ENUM_ITEM_WITH_VALUE(CapacityMatrix, 10)                    \
     ENUM_ITEM_WITH_VALUE(InitialStressMatrix, 11)               \
-    ENUM_ITEM_WITH_VALUE(HeatAndMoistureCharMatrix, 12)         \
-    /* CBS */ \
-    ENUM_ITEM_WITH_VALUE(IntermediateConvectionTerm, 50)        \
-    ENUM_ITEM_WITH_VALUE(IntermediateDiffusionTerm, 51)         \
-    ENUM_ITEM_WITH_VALUE(DensityRhsVelocityTerms, 52)           \
-    ENUM_ITEM_WITH_VALUE(DensityRhsPressureTerms, 53)           \
-    ENUM_ITEM_WITH_VALUE(DensityPrescribedTractionPressure, 54) \
-    ENUM_ITEM_WITH_VALUE(NumberOfNodalPrescribedTractionPressureContributions, 55)   \
-    ENUM_ITEM_WITH_VALUE(PressureLhs, 56)                                            \
-    ENUM_ITEM_WITH_VALUE(CorrectionRhs, 57)                                          \
-    ENUM_ITEM_WITH_VALUE(CriticalTimeStep, 58)                                       \
-    ENUM_ITEM_WITH_VALUE(PrescribedVelocityRhsVector, 59)                            \
-    ENUM_ITEM_WITH_VALUE(PrescribedDensityRhsVector, 60)                             \
     /* characteristic vectors */ \
     ENUM_ITEM_WITH_VALUE(ExternalForcesVector, 150)                                       \
     ENUM_ITEM_WITH_VALUE(InternalForcesVector, 151)                                       \
     ENUM_ITEM_WITH_VALUE(LastEquilibratedInternalForcesVector, 152)                       \
-    ENUM_ITEM_WITH_VALUE(ElementBCTransportVector, 153)                                   \
-    ENUM_ITEM_WITH_VALUE(ElementInternalSourceVector, 154)                                \
-    ENUM_ITEM_WITH_VALUE(LHSBCMatrix, 155) /* LHS due to Boundary Conditions (Transport problems) */ \
-    ENUM_ITEM_WITH_VALUE(NSTP_MidpointLhs, 156) /* NonStationaryTransportProblem - LHS for midpoint discretization alg. */ \
-    ENUM_ITEM_WITH_VALUE(NSTP_MidpointRhs, 157) /* NonStationaryTransportProblem - RHS for midpoint discretization alg. */ \
-    ENUM_ITEM_WITH_VALUE(IntSourceLHSMatrix, 158) /* LHS due to material internal source (Transport problems) */ \
-    ENUM_ITEM_WITH_VALUE(PrescribedRhsVector, 159) \
+    ENUM_ITEM_WITH_VALUE(InertiaForcesVector, 160) \
     /* PFEM */	\
     ENUM_ITEM_WITH_VALUE(AuxVelocityLhs, 200)                                    \
     ENUM_ITEM_WITH_VALUE(VelocityLhs, 201)                                       \
-    ENUM_ITEM_WITH_VALUE(LoadVector, 202)                                        \
       /*for pressureLhs see CBS */					         \
     ENUM_ITEM_WITH_VALUE(PressureGradientMatrix, 203)                            \
     ENUM_ITEM_WITH_VALUE(DivergenceMatrix, 204)					 \
@@ -103,8 +81,7 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(LaplacePressureVector, 211)		                 \
     ENUM_ITEM_WITH_VALUE(LaplaceVelocityVector, 212)		                 \
     ENUM_ITEM_WITH_VALUE(DivergenceAuxVelocityVector, 213)                       \
-    ENUM_ITEM_WITH_VALUE(DivergenceVelocityVector, 214)		                 \
-    ENUM_ITEM_WITH_VALUE(DivergenceDeviatoricStressVector, 215)
+    ENUM_ITEM_WITH_VALUE(DivergenceVelocityVector, 214)
 
 
 enum CharType {

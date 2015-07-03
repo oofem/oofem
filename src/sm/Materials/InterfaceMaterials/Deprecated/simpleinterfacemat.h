@@ -32,17 +32,11 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-//   **********************************************************************
-//   *** CLASS SIMPLE INTERFACE MATERIAL FOR INTERFACE ELEMENTS   *********
-//   **********************************************************************
-
 #ifndef simpleinterfacemat_h
 #define simpleinterfacemat_h
 
-#include "material.h"
-#include "Materials/linearelasticmaterial.h"
-#include "../sm/Materials/structuralmaterial.h"
-#include "../sm/Materials/structuralms.h"
+#include "../structuralinterfacematerial.h"
+#include "../structuralinterfacematerialstatus.h"
 
 ///@name Input fields for SimpleInterfaceMaterial
 //@{
@@ -58,7 +52,7 @@ namespace oofem {
 /**
  * This class implements associated Material Status to SimpleInterfaceMaterial.
  */
-class SimpleInterfaceMaterialStatus : public StructuralMaterialStatus
+class SimpleInterfaceMaterialStatus : public StructuralInterfaceMaterialStatus
 {
 protected:
     bool shearYieldingFlag;
@@ -80,10 +74,9 @@ public:
     virtual void updateYourself(TimeStep *tStep);
 
     const FloatArray &giveShearStressShift();
-    const FloatArray &giveTempShearStressShift();
+    void setTempShearStressShift(FloatArray newShearStressShift) { tempShearStressShift = newShearStressShift; }
     bool giveShearYieldingFlag(){return shearYieldingFlag;}
     void setShearYieldingFlag(bool sY){ shearYieldingFlag = sY;}
-    void setTempShearStressShift(FloatArray newShearStressShift) { tempShearStressShift = newShearStressShift; };
 
     virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
@@ -96,7 +89,7 @@ public:
  * is postulated in explicit form, relatin damage parameter (omega) to scalar measure
  * of the largest strain level ever reached in material (kappa).
  */
-class SimpleInterfaceMaterial : public StructuralMaterial
+class SimpleInterfaceMaterial : public StructuralInterfaceMaterial
 {
 protected:
   double kn, ks;
@@ -112,25 +105,15 @@ public:
     virtual ~SimpleInterfaceMaterial();
 
     virtual int hasNonLinearBehaviour() { return 1; }
-    virtual int hasMaterialModeCapability(MaterialMode mode);
+    virtual bool hasAnalyticalTangentStiffness() const { return true; }
+
     virtual const char *giveInputRecordName() const { return _IFT_SimpleInterfaceMaterial_Name; }
     virtual const char *giveClassName() const { return "SimpleInterfaceMaterial"; }
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseMode mode,
-                                               GaussPoint *gp,
-                                               TimeStep *tStep);
-
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *,
-                                      const FloatArray &, TimeStep *);
-
-    virtual void  giveStiffnessMatrix(FloatMatrix &answer,
-                                      MatResponseMode mode,
-                                      GaussPoint *gp,
-                                      TimeStep *tStep);
+    virtual void giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep);
+    virtual void give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);

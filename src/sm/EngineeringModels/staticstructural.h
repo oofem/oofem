@@ -94,13 +94,15 @@ public:
 
     virtual TimeStep *giveNextStep();
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
-
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
+    
     virtual fMode giveFormulation() { return TL; }
 
     void setSolution(TimeStep *tStep, const FloatArray &vectorToStore);
 
     virtual bool requiresEquationRenumbering(TimeStep *tStep);
+
+    virtual int requiresUnknownsDictionaryUpdate() { return true; }
+    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep);
 
     // identification
     virtual const char *giveInputRecordName() const { return _IFT_StaticStructural_Name; }

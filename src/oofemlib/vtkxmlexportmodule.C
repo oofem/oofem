@@ -38,12 +38,14 @@
 #include "timestep.h"
 #include "engngm.h"
 #include "node.h"
+#include "dof.h"
 #include "materialinterface.h"
 #include "mathfem.h"
 #include "cltypes.h"
 #include "material.h"
 #include "classfactory.h"
 #include "crosssection.h"
+#include "unknownnumberingscheme.h"
 
 #include "xfem/xfemmanager.h"
 #include "xfem/enrichmentitem.h"
@@ -72,15 +74,12 @@
 namespace oofem {
 REGISTER_ExportModule(VTKXMLExportModule)
 
+IntArray VTKXMLExportModule :: redToFull = {1, 5, 9, 8, 7, 4, 6, 3, 2}; //position of xx, yy, zz, yz, xz, xy in tensor
+
 VTKXMLExportModule :: VTKXMLExportModule(int n, EngngModel *e) : ExportModule(n, e), internalVarsToExport(), primaryVarsToExport(), regionSets(), defaultElementSet( 0, e->giveDomain(1) )
 {
     primVarSmoother = NULL;
     smoother = NULL;
-    redToFull = {1, 5, 9, 6, 3, 2}; //position of xx, yy, zz, yz, xz, xy in tensor
-
-#ifdef __VTK_MODULE
-    //this->intVarArray = vtkSmartPointer<vtkDoubleArray>::New();
-#endif
 }
 
 
@@ -102,8 +101,6 @@ VTKXMLExportModule :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     int val;
 
-    ExportModule :: initializeFrom(ir);
-
     IR_GIVE_OPTIONAL_FIELD(ir, cellVarsToExport, _IFT_VTKXMLExportModule_cellvars); // Macro - see internalstatetype.h
     IR_GIVE_OPTIONAL_FIELD(ir, internalVarsToExport, _IFT_VTKXMLExportModule_vars); // Macro - see internalstatetype.h
     IR_GIVE_OPTIONAL_FIELD(ir, primaryVarsToExport, _IFT_VTKXMLExportModule_primvars); // Macro - see unknowntype.h
@@ -121,8 +118,8 @@ VTKXMLExportModule :: initializeFrom(InputRecord *ir)
 
 	this->particleExportFlag = false;
     IR_GIVE_OPTIONAL_FIELD(ir, particleExportFlag, _IFT_VTKXMLExportModule_particleexportflag); // Macro
-    
-    return IRRT_OK;
+
+    return ExportModule :: initializeFrom(ir);
 }
 
 
@@ -150,7 +147,7 @@ VTKXMLExportModule :: terminate()
 
 
 void
-VTKXMLExportModule :: makeFullTensorForm(FloatArray &answer, const FloatArray &reducedForm)
+VTKXMLExportModule :: makeFullTensorForm(FloatArray &answer, const FloatArray &reducedForm, InternalStateValueType vtype)
 {
     answer.resize(9);
     answer.zero();
@@ -159,23 +156,20 @@ VTKXMLExportModule :: makeFullTensorForm(FloatArray &answer, const FloatArray &r
         answer.at( redToFull.at(i) ) = reducedForm.at(i);
     }
 
-    // Symmetrize
-    answer.at(4) = answer.at(2);
-    answer.at(7) = answer.at(3);
-    answer.at(8) = answer.at(6);
-}
+    if ( vtype == ISVT_TENSOR_S3E ) {
+        answer.at(4) *= 0.5;
+        answer.at(7) *= 0.5;
+        answer.at(8) *= 0.5;
+    }
 
-void
-VTKXMLExportModule :: makeFullVectorForm(FloatArray &answer, const FloatArray &input)
-{
-    answer.resize(3);
-    answer.zero();
-    
-    int isize = min(input.giveSize(), 3); // so it will simply truncate larger arrays
-    for ( int i = 1; i <= isize; i++ ) {
-        answer.at(i) = input.at(i);
+    // Symmetrize if needed
+    if ( vtype != ISVT_TENSOR_G ) {
+        answer.at(2) = answer.at(4);
+        answer.at(3) = answer.at(7);
+        answer.at(6) = answer.at(8);
     }
 }
+
 
 std :: string
 VTKXMLExportModule :: giveOutputFileName(TimeStep *tStep)
@@ -759,7 +753,7 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
         this->exportIntVars(vtkPiece, mapG2L, mapL2G, region, tStep);
         this->exportExternalForces(vtkPiece, mapG2L, mapL2G, region, tStep);
 
-        this->exportCellVars(vtkPiece, numRegionEl, region, tStep);
+        this->exportCellVars(vtkPiece, elems, tStep);
     } // end of default piece for simple geometry elements
 }
 
@@ -777,9 +771,10 @@ VTKXMLExportModule :: writeVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep)
     // Write output: node coords
     int numNodes = vtkPiece.giveNumberOfNodes();
     int numEl = vtkPiece.giveNumberOfCells();
-    FloatArray vtkCoords(3), coords;
+    FloatArray coords;
 
 #ifdef __VTK_MODULE
+    FloatArray vtkCoords(3);
     for ( int inode = 1; inode <= numNodes; inode++ ) {
         coords = vtkPiece.giveNodeCoords(inode);
         vtkCoords.zero();
@@ -931,12 +926,9 @@ VTKXMLExportModule :: giveDataHeaders(std :: string &pointHeader, std :: string 
         } else if ( vtype == ISVT_VECTOR ) {
             vectors += __InternalStateTypeToString(isttype);
             vectors.append(" ");
-        } else if ( vtype == ISVT_TENSOR_S3 || vtype == ISVT_TENSOR_S3E ) {
+        } else if ( vtype == ISVT_TENSOR_S3 || vtype == ISVT_TENSOR_S3E || vtype == ISVT_TENSOR_G ) {
             tensors += __InternalStateTypeToString(isttype);
             tensors.append(" ");
-        } else if ( vtype == ISVT_TENSOR_G ) { //@todo shouldn't this go under tensor?
-            vectors += __InternalStateTypeToString(isttype);
-            vectors.append(" ");
         } else {
             OOFEM_ERROR("unsupported variable type %s\n", __InternalStateTypeToString(isttype) );
         }
@@ -975,14 +967,11 @@ VTKXMLExportModule :: giveDataHeaders(std :: string &pointHeader, std :: string 
         } else if ( vtype == ISVT_VECTOR ) {
             vectors += __InternalStateTypeToString(isttype);
             vectors.append(" ");
-        } else if ( vtype == ISVT_TENSOR_S3 || vtype == ISVT_TENSOR_S3E ) {
+        } else if ( vtype == ISVT_TENSOR_S3 || vtype == ISVT_TENSOR_S3E || vtype == ISVT_TENSOR_G ) {
             tensors += __InternalStateTypeToString(isttype);
             tensors.append(" ");
-        } else if ( vtype == ISVT_TENSOR_G ) { //@todo shouldn't this go under tensor?
-            vectors += __InternalStateTypeToString(isttype);
-            vectors.append(" ");
         } else {
-            fprintf( stderr, "VTKXMLExportModule::cellVarsToExport: unsupported variable type %s\n", __InternalStateTypeToString(isttype) );
+            OOFEM_WARNING("unsupported variable type %s\n", __InternalStateTypeToString(isttype) );
         }
     }
 
@@ -1092,14 +1081,10 @@ VTKXMLExportModule :: getNodalVariableFromIS(FloatArray &answer, Node *node, Tim
     if ( valType == ISVT_SCALAR ) {
         answer.at(1) = valSize ? val->at(1) : 0.0;
     } else if ( valType == ISVT_VECTOR ) {
-        makeFullVectorForm(answer, *val);
-    } else if ( valType == ISVT_TENSOR_S3 || valType == ISVT_TENSOR_S3E ) {
-        this->makeFullTensorForm(answer, * val);
-    } else if ( valType == ISVT_TENSOR_G ) { // export general tensor values as scalars
-        int isize = min(val->giveSize(), 9);
-        for ( int i = 1; i <= isize; i++ ) {
-            answer.at(i) = val->at(i);
-        }
+        answer = *val;
+        answer.resizeWithValues(3);
+    } else if ( valType == ISVT_TENSOR_S3 || valType == ISVT_TENSOR_S3E || valType == ISVT_TENSOR_G ) {
+        this->makeFullTensorForm(answer, * val, valType);
     } else {
         OOFEM_ERROR("ISVT_UNDEFINED encountered")
     }
@@ -1147,14 +1132,10 @@ VTKXMLExportModule :: getNodalVariableFromXFEMST(FloatArray &answer, Node *node,
     if ( valType == ISVT_SCALAR ) {
         answer.at(1) = valSize ? val->at(1) : 0.0;
     } else if ( valType == ISVT_VECTOR ) {
-        makeFullVectorForm(answer, *val);
-    } else if ( valType == ISVT_TENSOR_S3 || valType == ISVT_TENSOR_S3E ) {
-        this->makeFullTensorForm(answer, * val);
-    } else if ( valType == ISVT_TENSOR_G ) { // export general tensor values as scalars
-        int isize = min(val->giveSize(), 9);
-        for ( int i = 1; i <= isize; i++ ) {
-            answer.at(i) = val->at(i);
-        }
+        answer = *val;
+        answer.resizeWithValues(3);
+    } else if ( valType == ISVT_TENSOR_S3 || valType == ISVT_TENSOR_S3E || valType == ISVT_TENSOR_G ) {
+        this->makeFullTensorForm(answer, * val, valType);
     } else {
         OOFEM_ERROR("ISVT_UNDEFINED encountered")
     }
@@ -1167,12 +1148,7 @@ VTKXMLExportModule :: writeIntVars(VTKPiece &vtkPiece)
     int n = internalVarsToExport.giveSize();
     for ( int i = 1; i <= n; i++ ) {
         InternalStateType type = ( InternalStateType ) internalVarsToExport.at(i);
-        InternalStateValueType valType = giveInternalStateValueType(type);
-        int ncomponents = giveInternalStateTypeSize(valType);
-
-        //if ( type == IST_AbaqusStateVector ) {
-        //    ncomponents = 23;
-        //}
+        int ncomponents;
 
         const char *name = __InternalStateTypeToString(type);
         int numNodes = vtkPiece.giveNumberOfNodes();
@@ -1640,8 +1616,8 @@ VTKXMLExportModule :: exportExternalForces(VTKPiece &vtkPiece, IntArray &mapG2L,
     int neq = emodel->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
     int npeq = emodel->giveNumberOfDomainEquations( 1, EModelDefaultPrescribedEquationNumbering() );
     FloatArray extForces(neq), extForcesP(npeq);
-    emodel->assembleVector(extForces, tStep, ExternalForcesVector, VM_Total, EModelDefaultEquationNumbering(), d);
-    emodel->assembleVector(extForcesP, tStep, ExternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), d);
+    emodel->assembleVector(extForces, tStep, ExternalForceAssembler(), VM_Total, EModelDefaultEquationNumbering(), d);
+    emodel->assembleVector(extForcesP, tStep, ExternalForceAssembler(), VM_Total, EModelDefaultPrescribedEquationNumbering(), d);
 
     vtkPiece.setNumberOfLoadsToExport(externalForcesToExport.giveSize(), mapL2G.giveSize());
     for ( int i = 1; i <= externalForcesToExport.giveSize(); i++ ) {
@@ -1724,22 +1700,23 @@ VTKXMLExportModule :: writeExternalForces(VTKPiece &vtkPiece)
 //----------------------------------------------------
 
 void
-VTKXMLExportModule :: exportCellVars(VTKPiece &vtkPiece, int numCells, int region, TimeStep *tStep)
+VTKXMLExportModule :: exportCellVars(VTKPiece &vtkPiece, const IntArray &elems, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
     FloatArray valueArray;
 
-    vtkPiece.setNumberOfCellVarsToExport(cellVarsToExport.giveSize(), numCells);
-    const IntArray &elements = this->giveRegionSet(region)->giveElementList();
+    vtkPiece.setNumberOfCellVarsToExport(cellVarsToExport.giveSize(), elems.giveSize());
     for ( int field = 1; field <= cellVarsToExport.giveSize(); field++ ) {
         InternalStateType type = ( InternalStateType ) cellVarsToExport.at(field);
-        for ( int i = 1; i <= elements.giveSize(); i++ ) {
-          Element *el = d->giveElement(elements.at(i));
-          if ( el->giveParallelMode() != Element_local ) {
-            continue;
-          }
-          this->getCellVariableFromIS(valueArray, el, type, tStep);
-          vtkPiece.setCellVar(field, i, valueArray);
+
+        for ( int subIndex = 1; subIndex <= elems.giveSize(); ++subIndex ) {
+            Element *el = d->giveElement(elems.at(subIndex)); ///@todo should be a pointer to an element in the region /JB
+            if ( el->giveParallelMode() != Element_local ) {
+                continue;
+            }
+
+            this->getCellVariableFromIS(valueArray, el, type, tStep);
+            vtkPiece.setCellVar(field, subIndex, valueArray);
         }
     }
 }
@@ -1748,42 +1725,37 @@ VTKXMLExportModule :: exportCellVars(VTKPiece &vtkPiece, int numCells, int regio
 void
 VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, InternalStateType type, TimeStep *tStep)
 {
-    FloatMatrix rotMat(3, 3);
-    int col = 0;
-    FloatArray valueArray, temp;
-    IntArray redIndx;
-
     InternalStateValueType valType = giveInternalStateValueType(type);
     int ncomponents = giveInternalStateTypeSize(valType);
 
-    valueArray.resize(ncomponents);
+    answer.resize(ncomponents);
 
     switch ( type ) {
         // Special scalars
     case IST_MaterialNumber:
         // commented by bp: do what user wants
         //OOFEM_WARNING1("Material numbers are deprecated, outputing cross section number instead...");
-        valueArray.at(1) = ( double ) el->giveMaterial()->giveNumber();
+        answer.at(1) = ( double ) el->giveMaterial()->giveNumber();
         break;
     case IST_CrossSectionNumber:
-        valueArray.at(1) = ( double ) el->giveCrossSection()->giveNumber();
+        answer.at(1) = ( double ) el->giveCrossSection()->giveNumber();
         break;
     case IST_ElementNumber:
-        valueArray.at(1) = ( double ) el->giveNumber();
+        answer.at(1) = ( double ) el->giveNumber();
         break;
     case IST_Pressure: ///@todo This case seems redundant, remove? /JB, /// Why this special treatment for pressure? / Mikael
         if ( el->giveNumberOfInternalDofManagers() == 1 ) {
             //IntArray pmask(1); pmask.at(1) = P_f;
             //el->giveInternalDofManager(1)->giveUnknownVector (answer, pmask, VM_Total, tStep);
-            //valueArray.at(1) = answer.at(1);
+            //answer.at(1) = answer.at(1);
         }
 
         break;
     case IST_AbaqusStateVector:
       {
-         // compute cell average from ip values
+        // compute cell average from ip values
         IntegrationRule * iRule = el->giveDefaultIntegrationRulePtr();
-        computeIPAverage(valueArray, iRule, el, type, tStep); // if element has more than one iRule?? /JB
+        computeIPAverage(answer, iRule, el, type, tStep); // if element has more than one iRule?? /JB
       }
       break;
 
@@ -1791,54 +1763,44 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
     case IST_MaterialOrientation_x:
     case IST_MaterialOrientation_y:
     case IST_MaterialOrientation_z:
+        {
+            FloatMatrix rotMat;
+            int col = 0;
+            if ( type == IST_MaterialOrientation_x ) {
+                col = 1;
+            } else if ( type == IST_MaterialOrientation_y ) {
+                col = 2;
+            } else if ( type == IST_MaterialOrientation_z ) {
+                col = 3;
+            }
 
-        if ( type == IST_MaterialOrientation_x ) {
-            col = 1;
+            if ( !el->giveLocalCoordinateSystem(rotMat) ) {
+                rotMat.resize(3,3);
+                rotMat.beUnitMatrix();
+            }
+
+            answer.beColumnOf(rotMat, col);
+            break;
         }
-
-        if ( type == IST_MaterialOrientation_y ) {
-            col = 2;
-        }
-
-        if ( type == IST_MaterialOrientation_z ) {
-            col = 3;
-        }
-
-        if ( !el->giveLocalCoordinateSystem(rotMat) ) {
-            rotMat.zero(); ///@todo shouldn't it be an identity matrix? /JB
-        }
-
-        valueArray.beColumnOf(rotMat, col);
-        break;
 
         // Export cell data as average from ip's as default
     default:
 
         // compute cell average from ip values
         IntegrationRule * iRule = el->giveDefaultIntegrationRulePtr();
-        computeIPAverage(temp, iRule, el, type, tStep); // if element has more than one iRule?? /JB
-
+        computeIPAverage(answer, iRule, el, type, tStep); // if element has more than one iRule?? /JB
         // Reshape the Voigt vectors to include all components (duplicated if necessary, VTK insists on 9 components for tensors.)
-#if 1
-        // Is this part necessary now when giveIPValue returns full form? Only need to symmetrize in case of 6 components /JB
-        if ( ncomponents == 9 && temp.giveSize() != 9 ) { // If it has 9 components, then it is assumed to be proper already.
-            this->makeFullTensorForm(valueArray, temp);
-        } else if ( valType == ISVT_VECTOR && temp.giveSize() < 3 ) {
-            valueArray = {temp.giveSize() > 1 ? temp.at(1) : 0.0,
-                          temp.giveSize() > 2 ? temp.at(2) : 0.0,
-                          0.0};
-        } else if ( ncomponents != temp.giveSize() ) { // Trying to gracefully handle bad cases, just output zeros.
-            valueArray.resize(9);
-            valueArray.zero();
-        } else {
-            valueArray = temp;
+        /// @todo Is this part necessary now when giveIPValue returns full form? Only need to symmetrize in case of 6 components /JB
+        /// @todo Some material models aren't exporting values correctly (yet) / Mikael
+        if ( valType == ISVT_TENSOR_S3 || valType == ISVT_TENSOR_S3E || valType == ISVT_TENSOR_G ) {
+            FloatArray temp = answer;
+            this->makeFullTensorForm(answer, temp, valType);
+        } else if ( valType == ISVT_VECTOR && answer.giveSize() < 3 ) {
+            answer.resizeWithValues(3);
+        } else if ( ncomponents != answer.giveSize() ) { // Trying to gracefully handle bad cases, just output zeros.
+            answer.resizeWithValues(ncomponents);
         }
-
-#endif
     }
-
-
-    answer = valueArray;
 }
 
 
@@ -2037,7 +1999,7 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
     int nc = 0;
-    FloatArray *lc, gc, value;
+    FloatArray gc, value;
     FILE *stream;
     InternalStateType isttype;
     InternalStateValueType vtype;
@@ -2069,8 +2031,7 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
             int ielem = elements.at(i);
 
             for ( GaussPoint *gp: *d->giveElement(ielem)->giveDefaultIntegrationRulePtr() ) {
-                lc = gp->giveNaturalCoordinates();
-                d->giveElement(ielem)->computeGlobalCoordinates(gc, * lc);
+                d->giveElement(ielem)->computeGlobalCoordinates(gc, gp->giveNaturalCoordinates());
                 for ( double c: gc ) {
                     fprintf( stream, "%e ", c );
                 }
@@ -2114,14 +2075,11 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
             } else if ( vtype == ISVT_VECTOR ) {
                 vectors += __InternalStateTypeToString(isttype);
                 vectors.append(" ");
-            } else if ( ( vtype == ISVT_TENSOR_S3 ) || ( vtype == ISVT_TENSOR_S3E ) ) {
+            } else if ( vtype == ISVT_TENSOR_S3 || vtype == ISVT_TENSOR_S3E || vtype == ISVT_TENSOR_G ) {
                 tensors += __InternalStateTypeToString(isttype);
                 tensors.append(" ");
-            } else if ( vtype == ISVT_TENSOR_G ) {
-                vectors += __InternalStateTypeToString(isttype);
-                vectors.append(" ");
             } else {
-                fprintf( stderr, "VTKXMLExportModule::exportIntVarsInGpAs: unsupported variable type %s\n", __InternalStateTypeToString(isttype) );
+                OOFEM_WARNING("unsupported variable type %s\n", __InternalStateTypeToString(isttype) );
             }
         }
 
@@ -2139,12 +2097,10 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
                 nc = 1;
             } else if ( vtype == ISVT_VECTOR ) {
                 nc = 3;
-            } else if ( ( vtype == ISVT_TENSOR_S3 ) || ( vtype == ISVT_TENSOR_S3E ) ) {
-                nc = 9;
-            } else if ( vtype == ISVT_TENSOR_G ) {
+            } else if ( vtype == ISVT_TENSOR_S3 || vtype == ISVT_TENSOR_S3E || vtype == ISVT_TENSOR_G ) {
                 nc = 9;
             } else {
-                fprintf( stderr, "VTKXMLExportModule::exportIntVarsInGpAs: unsupported variable type %s\n", __InternalStateTypeToString(isttype) );
+                OOFEM_WARNING("unsupported variable type %s\n", __InternalStateTypeToString(isttype) );
             }
 
             fprintf(stream, "  <DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"%d\" format=\"ascii\">", __InternalStateTypeToString(isttype), nc);
@@ -2156,11 +2112,10 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
                     d->giveElement(ielem)->giveIPValue(value, gp, isttype, tStep);
 
                     if ( vtype == ISVT_VECTOR ) {
+                        value.resizeWithValues(3);
+                    } else if ( vtype == ISVT_TENSOR_S3 || vtype == ISVT_TENSOR_S3E || vtype == ISVT_TENSOR_G ) {
                         FloatArray help = value;
-                        makeFullVectorForm(value, help);
-                    } else if ( ( vtype == ISVT_TENSOR_S3 ) || ( vtype == ISVT_TENSOR_S3E ) ) {
-                        FloatArray help = value;
-                        this->makeFullTensorForm(value, help);
+                        this->makeFullTensorForm(value, help, vtype);
                     }
 
                     for ( double v: value ) {

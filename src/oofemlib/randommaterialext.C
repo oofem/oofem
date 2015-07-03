@@ -70,7 +70,8 @@ RandomMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, randomVariableGenerators, _IFT_RandomMaterialExt_randGen);
 
     if ( randVariables.giveSize() != randomVariableGenerators.giveSize() ) {
-        OOFEM_ERROR("Incompatible size of randvars and randdist attrs");
+        OOFEM_WARNING("Incompatible size of randvars and randdist attrs");
+        return IRRT_BAD_FORMAT;
     }
 
     return IRRT_OK;
@@ -89,7 +90,7 @@ bool
 RandomMaterialExtensionInterface :: give(int key, GaussPoint *gp, double &value)
 {
     ///@todo Have to wrap it through the material to ensure that it gets an actual material status (for now at least). Doesn't play nicely with layered cross-sections.
-    MaterialStatus *status = static_cast< MaterialStatus * >( gp->giveMaterial()->giveStatus(gp) );
+    MaterialStatus *status =  gp->giveMaterial()->giveStatus(gp);
     RandomMaterialStatusExtensionInterface *interface = dynamic_cast< RandomMaterialStatusExtensionInterface * >
                                                         ( status->giveInterface(RandomMaterialStatusExtensionInterfaceType) );
     return interface->_giveProperty(key, value);
@@ -101,13 +102,13 @@ RandomMaterialExtensionInterface :: _generateStatusVariables(GaussPoint *gp) con
     // Have to wrap it through the material to ensure that it gets an actual material status (for now at least)
     int size = randVariables.giveSize();
     double value;
-    MaterialStatus *matStat = static_cast< MaterialStatus * >( gp->giveMaterial()->giveStatus(gp) );
+    MaterialStatus *matStat = gp->giveMaterial()->giveStatus(gp);
     RandomMaterialStatusExtensionInterface *status = static_cast< RandomMaterialStatusExtensionInterface * >
                                                      ( matStat->giveInterface(RandomMaterialStatusExtensionInterfaceType) );
 
     for ( int i = 1; i <= size; i++ ) {
-        FloatArray globalCoordinates, randomVal;
-        if ( gp->giveElement()->computeGlobalCoordinates( globalCoordinates, * ( gp->giveSubPatchCoordinates() ) ) ) {
+        FloatArray globalCoordinates;
+        if ( gp->giveElement()->computeGlobalCoordinates( globalCoordinates, gp->giveSubPatchCoordinates() ) ) {
             Function *f = gp->giveElement()->giveDomain()->giveFunction( randomVariableGenerators.at(i) );
             value = f->evaluate({{"x", globalCoordinates}});
             status->_setProperty(randVariables.at(i), value);

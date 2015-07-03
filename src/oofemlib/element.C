@@ -56,6 +56,7 @@
 #include "dofmanager.h"
 #include "node.h"
 #include "gausspoint.h"
+#include "unknownnumberingscheme.h"
 #include "dynamicinputrecord.h"
 #include "matstatmapperint.h"
 #include "cltypes.h"
@@ -211,7 +212,7 @@ int
 Element :: computeNumberOfPrimaryMasterDofs()
 {
     int answer = 0;
-    IntArray nodeDofIDMask, dofMask;
+    IntArray nodeDofIDMask;
 
     for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
         this->giveDofManDofIDMask(i, nodeDofIDMask);
@@ -274,11 +275,10 @@ bool
 Element :: computeDofTransformationMatrix(FloatMatrix &answer, const IntArray &nodes, bool includeInternal)
 {
     bool flag = false;
-    int numberOfDofMans = nodes.giveSize();
 
     // test if transformation is necessary
-    for ( int i = 1; i <= numberOfDofMans; i++ ) {
-        flag = flag || this->giveDofManager( nodes.at(i) )->requiresTransformation();
+    for ( int n : nodes ) {
+        flag = flag || this->giveDofManager( n )->requiresTransformation();
     }
 
     if ( !flag ) {
@@ -295,9 +295,9 @@ Element :: computeDofTransformationMatrix(FloatMatrix &answer, const IntArray &n
     IntArray dofIDmask;
     int nr, nc, lastRowPos = 0, lastColPos = 0;
     // loop over nodes
-    for ( int i = 1; i <= numberOfDofMans; i++ ) {
-        this->giveDofManDofIDMask(nodes.at(i), dofIDmask);
-        if ( !this->giveDofManager( nodes.at(i) )->computeM2GTransformation(dofManT, dofIDmask) ) {
+    for ( int n : nodes ) {
+        this->giveDofManDofIDMask(n, dofIDmask);
+        if ( !this->giveDofManager( n )->computeM2GTransformation(dofManT, dofIDmask) ) {
             dofManT.resize( dofIDmask.giveSize(), dofIDmask.giveSize() );
             dofManT.zero();
             dofManT.beUnitMatrix();
@@ -458,7 +458,6 @@ Material *Element :: giveMaterial()
 {
 #ifdef DEBUG
     if ( !material ) {
-        // material = this -> readInteger("mat") ;
         OOFEM_ERROR("material not defined");
     }
 #endif
@@ -1093,11 +1092,10 @@ Element :: giveCharacteristicLengthForAxisymmElements(const FloatArray &normalTo
         return this->giveLengthInDir(normalToCrackPlane);
     } else { // if not, take the average distance from axis of symmetry multiplied by pi
         double r = 0.;
-        int i;
-        for ( i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
+        for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
             r += this->giveNode(i)->giveCoordinate(1);
         }
-        r = r * 3.1415926 / ( ( double ) this->giveNumberOfDofManagers() );
+        r = r * M_PI / ( ( double ) this->giveNumberOfDofManagers() );
         return r;
     }
 }
@@ -1408,9 +1406,10 @@ Element :: adaptiveFinish(TimeStep *tStep)
 void
 Element :: updateLocalNumbering(EntityRenumberingFunctor &f)
 {
-    for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
-        dofManArray.at(i) = f(dofManArray.at(i), ERS_DofManager);
+    for ( auto &dnum : dofManArray ) {
+        dnum = f(dnum, ERS_DofManager);
     }
+    
 }
 
 

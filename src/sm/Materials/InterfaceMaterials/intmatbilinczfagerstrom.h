@@ -187,7 +187,6 @@ public:
 
     virtual int hasNonLinearBehaviour()   { return 1; }
 
-    virtual int hasMaterialModeCapability(MaterialMode mode); // remove
     virtual const char *giveClassName() const { return "IntMatBilinearCZFagerstrom"; }
     virtual const char *giveInputRecordName() const { return _IFT_IntMatBilinearCZFagerstrom_Name; }
 
@@ -195,8 +194,6 @@ public:
     virtual void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
                                         const FloatMatrix &F, TimeStep *tStep);
     virtual void give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-
-    void give3dStiffnessMatrix_dTdj_num(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
     /**
      * Tells if the model has implemented analytical tangent stiffness.

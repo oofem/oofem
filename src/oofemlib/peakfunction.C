@@ -57,10 +57,9 @@ PeakFunction :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-    Function :: initializeFrom(ir);
     IR_GIVE_FIELD(ir, t, _IFT_PeakFunction_t);
     IR_GIVE_FIELD(ir, value, _IFT_PeakFunction_ft);
 
-    return IRRT_OK;
+    return Function :: initializeFrom(ir);
 }
 } // end namespace oofem

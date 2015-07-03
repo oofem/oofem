@@ -14,6 +14,7 @@
 #include "linsystsolvertype.h"
 #include "sparselinsystemnm.h"
 #include "sparsenonlinsystemnm.h"
+#include "primaryfield.h"
 
 #define _IFT_DarcyFlow_Name "darcyflow"
 
@@ -32,11 +33,11 @@ private:
     LinSystSolverType solverType;
 
 protected:
-    PrimaryField *PressureField;
+    std :: unique_ptr< PrimaryField > PressureField;
     SparseMtrxType sparseMtrxType;
-    SparseNonLinearSystemNM *nMethod;
+    std :: unique_ptr< SparseNonLinearSystemNM > nMethod;
 
-    SparseMtrx *stiffnessMatrix;
+    std :: unique_ptr< SparseMtrx > stiffnessMatrix;
     FloatArray internalForces;
     FloatArray externalForces;
     FloatArray incrementOfSolution;
@@ -57,9 +58,9 @@ public:
     virtual void solveYourselfAt(TimeStep *tStep);
     virtual void updateYourself(TimeStep *tStep);
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL) { return CIO_IOERR; };
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL) { return CIO_IOERR; };
-    virtual int checkConsistency() { return 1; };
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL) { return CIO_IOERR; }
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL) { return CIO_IOERR; }
+    virtual int checkConsistency() { return 1; }
     virtual fMode giveFormulation() { return TL; }
 
     virtual void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d);
@@ -67,7 +68,6 @@ public:
     virtual double giveUnknownComponent(ValueModeType, TimeStep *, Domain *, Dof *);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
     void DumpMatricesToFile(FloatMatrix *LHS, FloatArray *RHS, FloatArray *SolutionVector);
 
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);

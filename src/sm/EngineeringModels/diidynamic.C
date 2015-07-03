@@ -42,6 +42,7 @@
 #include "contextioerr.h"
 #include "datastream.h"
 #include "verbose.h"
+#include "unknownnumberingscheme.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -52,17 +53,13 @@ DIIDynamic :: DIIDynamic(int i, EngngModel *_master) : StructuralEngngModel(i, _
     previousDisplacementVector(), previousVelocityVector(), previousAccelerationVector(), previousIncrementOfDisplacement(), help()
 {
     initFlag = true;
-    stiffnessMatrix = NULL;
     ndomains = 1;
-    nMethod = NULL;
 
     initialTimeDiscretization = TD_ThreePointBackward;
 }
 
 DIIDynamic :: ~DIIDynamic()
 {
-    delete stiffnessMatrix;
-    delete nMethod;
 }
 
 NumericalMethod *DIIDynamic :: giveNumericalMethod(MetaStep *mStep)
@@ -70,15 +67,15 @@ NumericalMethod *DIIDynamic :: giveNumericalMethod(MetaStep *mStep)
 // - SolutionOfLinearEquations
 {
     if ( nMethod ) {
-        return nMethod;
+        return nMethod.get();
     }
 
-    nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
-    if ( nMethod == NULL ) {
+    nMethod.reset( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
+    if ( !nMethod ) {
         OOFEM_ERROR("linear solver creation failed");
     }
 
-    return nMethod;
+    return nMethod.get();
 }
 
 
@@ -87,7 +84,11 @@ DIIDynamic :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    StructuralEngngModel :: initializeFrom(ir);
+    result = StructuralEngngModel :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+
     int val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_lstype);
     solverType = ( LinSystSolverType ) val;
@@ -126,7 +127,8 @@ DIIDynamic :: initializeFrom(InputRecord *ir)
             theta = 1.37;
         }
     } else {
-        OOFEM_ERROR("Time-stepping scheme not found!");
+        OOFEM_WARNING("Time-stepping scheme not found!");
+        return IRRT_BAD_FORMAT;
     }
 
     IR_GIVE_FIELD(ir, deltaT, _IFT_DIIDynamic_deltat);
@@ -176,23 +178,22 @@ TimeStep *DIIDynamic :: giveNextStep()
     StateCounterType counter = 1;
     TimeDiscretizationType td = initialTimeDiscretization;
 
-    delete previousStep;
-    if ( currentStep != NULL ) {
+    if ( currentStep ) {
         totalTime = currentStep->giveTargetTime() + deltaT;
         istep     = currentStep->giveNumber() + 1;
         counter   = currentStep->giveSolutionStateCounter() + 1;
         td        = currentStep->giveTimeDiscretization();
-        if ( ( currentStep->giveNumber() == giveNumberOfFirstStep() ) &&
+        if ( currentStep->isTheFirstStep() &&
             ( initialTimeDiscretization == TD_ThreePointBackward ) ) {
             td = TD_ThreePointBackward;
         }
     }
 
-    previousStep = currentStep;
+    previousStep = std :: move(currentStep);
 
-    currentStep  = new TimeStep(istep, this, 1, totalTime, deltaT, counter, td);
+    currentStep.reset( new TimeStep(istep, this, 1, totalTime, deltaT, counter, td) );
 
-    return currentStep;
+    return currentStep.get();
 }
 
 void DIIDynamic :: initializeYourself(TimeStep *tStep)
@@ -200,7 +201,7 @@ void DIIDynamic :: initializeYourself(TimeStep *tStep)
     Domain *domain = this->giveDomain(1);
 	int neq =  this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
 
-    if ( tStep->giveNumber() == giveNumberOfFirstStep() ) {
+    if ( tStep->isTheFirstStep() ) {
         TimeStep *stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0,
                                                  -deltaT, deltaT, 0);
         //
@@ -252,36 +253,28 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
     Domain *domain = this->giveDomain(1);
     int neq =  this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
 
-    
 
     if ( initFlag ) {
 #ifdef VERBOSE
         OOFEM_LOG_DEBUG("Assembling stiffness matrix\n");
 #endif
-        stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
-        if ( stiffnessMatrix == NULL ) {
+        stiffnessMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+        if ( !stiffnessMatrix ) {
             OOFEM_ERROR("sparse matrix creation failed");
         }
 
         stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
 
-        this->assemble(stiffnessMatrix, tStep, EffectiveStiffnessMatrix,
+        this->assemble(*stiffnessMatrix, tStep, EffectiveTangentAssembler(false, 1 + this->delta * a1,  this->a0 + this->eta * this->a1),
                        EModelDefaultEquationNumbering(), domain);
 
         help.resize(neq);
         help.zero();
 
-        previousDisplacementVector.resize(neq);
-        previousVelocityVector.resize(neq);
-        previousAccelerationVector.resize(neq);
-        previousLoadVector.resize(neq);
-
-        for ( int i = 1; i <= neq; i++ ) {
-            previousDisplacementVector.at(i) = displacementVector.at(i);
-            previousVelocityVector.at(i)     = velocityVector.at(i);
-            previousAccelerationVector.at(i) = accelerationVector.at(i);
-            previousLoadVector.at(i)         = loadVector.at(i);
-        }
+        previousDisplacementVector = displacementVector;
+        previousVelocityVector = velocityVector;
+        previousAccelerationVector = accelerationVector;
+        previousLoadVector = loadVector;
 
         initFlag = 0;
     }
@@ -291,7 +284,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
         OOFEM_LOG_DEBUG("Assembling stiffness matrix\n");
 #endif
         stiffnessMatrix->zero();
-        this->assemble(stiffnessMatrix, tStep, EffectiveStiffnessMatrix,
+        this->assemble(*stiffnessMatrix, tStep, EffectiveTangentAssembler(false, 1 + this->delta * a1,  this->a0 + this->eta * this->a1),
                        EModelDefaultEquationNumbering(), domain);
     }
 
@@ -316,6 +309,9 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
     }
 
     this->timesMtrx(help, rhs, MassMatrix, domain, tStep);
+    //this->assembleVector(help, tStep, MatrixProductAssembler(MassMatrix(), rhs), VM_Total, 
+    //                    EModelDefaultEquationNumbering(), this->giveDomain(1));
+
     help.zero();
 
     if ( delta != 0 ) {
@@ -325,7 +321,10 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
                                   + a5 * previousAccelerationVector.at(i)
                                   + a6 * previousIncrementOfDisplacement.at(i) );
         }
-        this->timesMtrx(help, rhs2, StiffnessMatrix, domain, tStep);
+        this->timesMtrx(help, rhs2, TangentStiffnessMatrix, domain, tStep);
+        //this->assembleVector(help, tStep, MatrixProductAssembler(TangentAssembler(), rhs2), VM_Total, 
+        //                    EModelDefaultEquationNumbering(), this->giveDomain(1));
+
         help.zero();
         for ( int i = 1; i <= neq; i++ ) {
             rhs.at(i) += rhs2.at(i);
@@ -350,7 +349,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_RELEVANT( "\n\nSolving [step number %8d, time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
 #endif
 
-    nMethod->solve(stiffnessMatrix, & rhs, & displacementVector);
+    nMethod->solve(*stiffnessMatrix, rhs, displacementVector);
 
     if ( tStep->giveTimeDiscretization() == TD_Wilson ) {
         OOFEM_LOG_INFO("TD_Wilson: Updating acceleration, velocity and displacement.\n");
@@ -389,45 +388,13 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
 }
 
 
-void
-DIIDynamic :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
-                                              CharType type, TimeStep *tStep, Domain *domain)
-{
-    // We don't directly call element ->GiveCharacteristicMatrix() function, because some
-    // engngm classes may require special modification of base types supported on
-    // element class level.
-
-    if ( type == EffectiveStiffnessMatrix ) {
-        Element *element;
-        FloatMatrix charMtrx;
-
-        element = domain->giveElement(num);
-        element->giveCharacteristicMatrix(answer, StiffnessMatrix, tStep);
-        answer.times(1 + this->delta * a1);
-
-        element->giveCharacteristicMatrix(charMtrx, MassMatrix, tStep);
-        charMtrx.times(this->a0 + this->eta * this->a1);
-
-        answer.add(charMtrx);
-
-        return;
-    } else {
-        StructuralEngngModel :: giveElementCharacteristicMatrix(answer, num, type, tStep, domain);
-    }
-}
-
-
 void DIIDynamic :: updateYourself(TimeStep *tStep)
 {
-    int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
-
-    for ( int i = 1; i <= neq; i++ ) {
-        previousIncrementOfDisplacement.at(i) = displacementVector.at(i) - previousDisplacementVector.at(i);
-        previousDisplacementVector.at(i)      = displacementVector.at(i);
-        previousVelocityVector.at(i)          = velocityVector.at(i);
-        previousAccelerationVector.at(i)      = accelerationVector.at(i);
-        previousLoadVector.at(i)              = loadVector.at(i);
-    }
+    previousIncrementOfDisplacement.beDifferenceOf(displacementVector, previousDisplacementVector);
+    previousDisplacementVector = displacementVector;
+    previousVelocityVector = velocityVector;
+    previousAccelerationVector = accelerationVector;
+    previousLoadVector = loadVector;
 
     StructuralEngngModel :: updateYourself(tStep);
 }
@@ -470,7 +437,7 @@ DIIDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type, Doma
         element->giveCharacteristicMatrix(charMtrx, type, tStep);
 
 #ifdef DEBUG
-        if ( ( n = loc.giveSize() ) != charMtrx.giveNumberOfRows() ) {
+        if ( loc.giveSize() != charMtrx.giveNumberOfRows() ) {
             OOFEM_ERROR("dimension mismatch");
         }
 
@@ -498,7 +465,7 @@ DIIDynamic :: assembleLoadVector(FloatArray &_loadVector, Domain *domain, ValueM
     _loadVector.resize( this->giveNumberOfDomainEquations( domain->giveNumber(), EModelDefaultEquationNumbering() ) );
     _loadVector.zero();
 
-    this->assembleVector(_loadVector, tStep, ExternalForcesVector, mode,
+    this->assembleVector(_loadVector, tStep, ExternalForceAssembler(), mode,
                          EModelDefaultEquationNumbering(), domain);
     this->updateSharedDofManagers(_loadVector, EModelDefaultEquationNumbering(), LoadExchangeTag);
 }
@@ -506,8 +473,7 @@ DIIDynamic :: assembleLoadVector(FloatArray &_loadVector, Domain *domain, ValueM
 void
 DIIDynamic :: determineConstants(TimeStep *tStep)
 {
-    if ( ( this->giveCurrentStep()->giveNumber() == giveNumberOfFirstStep() )
-         && ( initialTimeDiscretization == TD_ThreePointBackward ) ) {
+    if ( this->giveCurrentStep()->isTheFirstStep() && initialTimeDiscretization == TD_ThreePointBackward ) {
         this->giveCurrentStep()->setTimeDiscretization( TD_TwoPointBackward );
     }
 

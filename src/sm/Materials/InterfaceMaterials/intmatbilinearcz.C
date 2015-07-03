@@ -46,27 +46,11 @@ namespace oofem {
 REGISTER_Material(IntMatBilinearCZ);
 
 IntMatBilinearCZStatus :: IntMatBilinearCZStatus(int n, Domain *d, GaussPoint *g) : StructuralInterfaceMaterialStatus(n, d, g),
-    mDamageNew(0.0),
-    mDamageOld(0.0)
+    mDamageNew(0.), mDamageOld(0.),
+    mTractionOld(3), mTractionNew(3),
+    mJumpOld(3), mJumpNew(3),
+    mPlastMultIncNew(0.), mPlastMultIncOld(0.)
 {
-    mTractionOld.resize(3);
-    mTractionOld.zero();
-
-    mTractionNew.resize(3);
-    mTractionNew.zero();
-
-    mJumpOld.resize(3);
-    mJumpOld.zero();
-
-    mJumpNew.resize(3);
-    mJumpNew.zero();
-
-    mDamageOld = 0.0;
-    mDamageNew = 0.0;
-
-    mPlastMultIncNew = 0.0;
-    mPlastMultIncOld = 0.0;
-
 }
 
 
@@ -85,6 +69,8 @@ void IntMatBilinearCZStatus :: updateYourself(TimeStep *tStep)
     jump = mJumpNew;
 
     mPlastMultIncOld = mPlastMultIncNew;
+
+    StructuralInterfaceMaterialStatus ::updateYourself(tStep);
 }
 
 
@@ -132,6 +118,9 @@ int IntMatBilinearCZ :: checkConsistency()
 void IntMatBilinearCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
                                                 const FloatMatrix &F, TimeStep *tStep)
 {
+
+    double maxDamage = 0.99999999;
+
     IntMatBilinearCZStatus *status = static_cast< IntMatBilinearCZStatus * >( this->giveStatus(gp) );
 
     status->mJumpNew = jump;
@@ -146,13 +135,18 @@ void IntMatBilinearCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *
     double TTrTang              = sqrt( pow(tractionTrial.at(1), 2.0) + pow(tractionTrial.at(2), 2.0) );
     double phiTr = computeYieldFunction(TTrNormal, TTrTang);
 
-    const double damageTol = 1.0e-6;
-    if ( status->mDamageOld > ( 1.0 - damageTol ) ) {
-        status->mDamageNew = 1.0;
+    if ( status->mDamageOld > maxDamage ) {
+        status->mDamageNew = maxDamage;
+        status->mDamageOld = maxDamage;
         status->mPlastMultIncNew = 0.0;
         answer.resize(3);
         answer.zero();
         status->mTractionNew = answer;
+
+        status->letTempJumpBe(jump);
+        status->letTempFirstPKTractionBe(answer);
+        status->letTempTractionBe(answer);
+
         return;
     }
 
@@ -162,9 +156,15 @@ void IntMatBilinearCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *
     if ( phiTr < 0.0 ) {
         status->mDamageNew = status->mDamageOld;
         status->mPlastMultIncNew = 0.0;
+        status->mTractionNew = answer;
+
+
+        status->letTempJumpBe(jump);
+        status->letTempFirstPKTractionBe(answer);
+        status->letTempTractionBe(answer);
+
         answer.beScaled( ( 1.0 - status->mDamageNew ), answer );
 
-        status->mTractionNew = answer;
         return;
     } else {
         // Iterate to find plastic strain increment.
@@ -181,7 +181,7 @@ void IntMatBilinearCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *
             computeTraction(answer, tractionTrial, plastMultInc);
 
             double TNormal      = answer.at(3);
-            double TTang                = sqrt( pow(answer.at(1), 2.0) + pow(answer.at(2), 2.0) );
+            double TTang        = sqrt( pow(answer.at(1), 2.0) + pow(answer.at(2), 2.0) );
             double phi = computeYieldFunction(TNormal, TTang);
 
             //          if(iter > 20) {
@@ -201,16 +201,8 @@ void IntMatBilinearCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *
                 double damageInc = status->mPlastMultIncNew / S;
                 status->mDamageNew = status->mDamageOld + damageInc;
 
-                if ( status->mDamageNew > 1.0 ) {
-                    status->mDamageNew = 1.0;
-                }
-
-                if(mSemiExplicit) {
-//                    computeTraction(answer, tractionTrial, status->mPlastMultIncOld);
-                    answer.beScaled( ( 1.0 - status->mDamageOld ), answer );
-               }
-                else {
-                    answer.beScaled( ( 1.0 - status->mDamageNew ), answer );
+                if ( status->mDamageNew > maxDamage ) {
+                    status->mDamageNew = maxDamage;
                 }
 
                 status->mTractionNew = answer;
@@ -218,7 +210,16 @@ void IntMatBilinearCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *
                 // Jim
                 status->letTempJumpBe(jump);
                 status->letTempFirstPKTractionBe(answer);
-                
+                status->letTempTractionBe(answer);
+
+                if(mSemiExplicit) {
+                    computeTraction(answer, tractionTrial, status->mPlastMultIncOld);
+                    answer.beScaled( ( 1.0 - status->mDamageOld ), answer );
+               }
+                else {
+                    answer.beScaled( ( 1.0 - status->mDamageNew ), answer );
+                }
+
                 return;
             }
 
@@ -239,8 +240,8 @@ void IntMatBilinearCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *
 
 void IntMatBilinearCZ :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("not implemented. Use numerical Jacobian instead.");
-    //this->give3dStiffnessMatrix_dTdj_Num(answer, rMode, gp, tStep);
+    OOFEM_WARNING("not implemented. Use numerical Jacobian instead.");
+    this->give3dStiffnessMatrix_dTdj_Num(answer, gp, tStep);
 }
 
 double IntMatBilinearCZ :: computeYieldFunction(const double &iTractionNormal, const double &iTractionTang) const
@@ -299,11 +300,7 @@ IRResultType IntMatBilinearCZ :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, mGamma, _IFT_IntMatBilinearCZ_gamma);
 
-    StructuralInterfaceMaterial :: initializeFrom(ir);
-
-    this->checkConsistency();
-    this->printYourself();
-    return IRRT_OK;
+    return StructuralInterfaceMaterial :: initializeFrom(ir);
 }
 
 void IntMatBilinearCZ :: giveInputRecord(DynamicInputRecord &input)

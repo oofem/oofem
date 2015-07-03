@@ -35,7 +35,6 @@
 #include "linearelasticmaterial.h"
 #include "isolinearelasticmaterial.h"
 #include "../sm/CrossSections/simplecrosssection.h"
-#include "material.h"
 #include "../sm/Materials/structuralms.h"
 #include "floatmatrix.h"
 #include "gausspoint.h"
@@ -62,19 +61,17 @@ IsotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     double value;
-
-    this->LinearElasticMaterial :: initializeFrom(ir);
     // we use rather object's member data than to store data into slow
     // key-val dictionary with lot of memory allocations
 
     IR_GIVE_FIELD(ir, E, _IFT_IsotropicLinearElasticMaterial_e);
     IR_GIVE_FIELD(ir, nu, _IFT_IsotropicLinearElasticMaterial_n);
     IR_GIVE_FIELD(ir, value, _IFT_IsotropicLinearElasticMaterial_talpha);
-    propertyDictionary->add(tAlpha, value);
+    propertyDictionary.add(tAlpha, value);
     // compute  value of shear modulus
     G = E / ( 2.0 * ( 1. + nu ) );
 
-    return IRRT_OK;
+    return LinearElasticMaterial :: initializeFrom(ir);;
 }
 
 
@@ -86,7 +83,7 @@ IsotropicLinearElasticMaterial :: giveInputRecord(DynamicInputRecord &input)
 
     input.setField(this->E, _IFT_IsotropicLinearElasticMaterial_e);
     input.setField(this->nu, _IFT_IsotropicLinearElasticMaterial_n);
-    input.setField(this->propertyDictionary->at(tAlpha), _IFT_IsotropicLinearElasticMaterial_talpha);
+    input.setField(this->propertyDictionary.at(tAlpha), _IFT_IsotropicLinearElasticMaterial_talpha);
 }
 
 

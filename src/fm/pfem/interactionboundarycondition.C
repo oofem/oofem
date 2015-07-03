@@ -57,21 +57,20 @@ double InteractionBoundaryCondition :: give(Dof *dof, ValueModeType mode, TimeSt
     }
     double prescribedValue = this->values.at(index);
     return prescribedValue * factor;
-	*/
-	double value = 0.0;
+    */
+    double value = 0.0;
 
-	InteractionPFEMParticle* interactionParticle = dynamic_cast<InteractionPFEMParticle*>(dof->giveDofManager());
-	if (interactionParticle)
-	{
-		FloatArray velocities;
-		interactionParticle->giveCoupledVelocities(velocities, stepN);
-		if (dof->giveDofID() == V_u)
-			value = velocities.at(1);
-		else if (dof->giveDofID() == V_v)
-			value = velocities.at(2);
-	}
+    InteractionPFEMParticle* interactionParticle = dynamic_cast<InteractionPFEMParticle*>(dof->giveDofManager());
+    if ( interactionParticle ) {
+        FloatArray velocities;
+        interactionParticle->giveCoupledVelocities(velocities, stepN);
+        if (dof->giveDofID() == V_u)
+            value = velocities.at(1);
+        else if (dof->giveDofID() == V_v)
+            value = velocities.at(2);
+    }
 
-	return value;
+    return value;
 }
 
 } // end namespace oofem

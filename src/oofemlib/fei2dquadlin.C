@@ -59,15 +59,16 @@ void
 FEI2dQuadLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double ksi, eta;
-    answer.resize(4);
 
     ksi = lcoords.at(1);
     eta = lcoords.at(2);
 
-    answer.at(1) = ( 1. + ksi ) * ( 1. + eta ) * 0.25;
-    answer.at(2) = ( 1. - ksi ) * ( 1. + eta ) * 0.25;
-    answer.at(3) = ( 1. - ksi ) * ( 1. - eta ) * 0.25;
-    answer.at(4) = ( 1. + ksi ) * ( 1. - eta ) * 0.25;
+    answer = {
+        ( 1. + ksi ) * ( 1. + eta ) * 0.25,
+        ( 1. - ksi ) * ( 1. + eta ) * 0.25,
+        ( 1. - ksi ) * ( 1. - eta ) * 0.25,
+        ( 1. + ksi ) * ( 1. - eta ) * 0.25
+    };
 }
 
 double
@@ -253,10 +254,7 @@ void
 FEI2dQuadLin :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords,  const FEICellGeometry &cellgeo)
 {
     double ksi = lcoords.at(1);
-    answer.resize(2);
-
-    answer.at(1) = ( 1. - ksi ) * 0.5;
-    answer.at(2) = ( 1. + ksi ) * 0.5;
+    answer = { ( 1. - ksi ) * 0.5, ( 1. + ksi ) * 0.5 };
 }
 
 double
@@ -268,9 +266,10 @@ FEI2dQuadLin :: edgeEvalNormal(FloatArray &answer, int iedge, const FloatArray &
     nodeA = edgeNodes.at(1);
     nodeB = edgeNodes.at(2);
 
-    answer.resize(2);
-    answer.at(1) = -(cellgeo.giveVertexCoordinates(nodeB)->at(yind) - cellgeo.giveVertexCoordinates(nodeA)->at(yind) );
-    answer.at(2) =  (cellgeo.giveVertexCoordinates(nodeB)->at(xind) - cellgeo.giveVertexCoordinates(nodeA)->at(xind) );
+    answer = {
+        cellgeo.giveVertexCoordinates(nodeA)->at(yind) - cellgeo.giveVertexCoordinates(nodeB)->at(yind),
+        cellgeo.giveVertexCoordinates(nodeB)->at(xind) - cellgeo.giveVertexCoordinates(nodeA)->at(xind)
+    };
     return answer.normalize() * 0.5;
 }
 
@@ -278,14 +277,11 @@ void
 FEI2dQuadLin :: edgeEvaldNds(FloatArray &answer, int iedge,
                              const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    double l;
     IntArray edgeNodes;
     this->computeLocalEdgeMapping(edgeNodes, iedge);
-    l = this->edgeComputeLength(edgeNodes, cellgeo);
+    double l = this->edgeComputeLength(edgeNodes, cellgeo);
 
-    answer.resize(2);
-    answer.at(1) = -1.0 / l;
-    answer.at(2) =  1.0 / l;
+    answer = { -1.0 / l, 1.0 / l };
 }
 
 void

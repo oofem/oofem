@@ -141,8 +141,8 @@ DKTPlate :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
 // evaluated at gp.
 {
     // get node coordinates
-  double x1, x2, x3, y1, y2, y3, z1, z2, z3;
-  this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z1, z2, z3);
+    double x1, x2, x3, y1, y2, y3, z1, z2, z3;
+    this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z1, z2, z3);
 
 
     double ksi = gp->giveNaturalCoordinate(1);
@@ -349,7 +349,7 @@ DKTPlate :: giveNodeCoordinates(double &x1, double &x2, double &x3,
 IRResultType
 DKTPlate :: initializeFrom(InputRecord *ir)
 {
-    return this->NLStructuralElement :: initializeFrom(ir);
+    return NLStructuralElement :: initializeFrom(ir);
 }
 
 
@@ -395,7 +395,7 @@ DKTPlate :: computeVolumeAround(GaussPoint *gp)
                               lc[0].at(3), lc[1].at(3), lc[2].at(3));
 
     weight = gp->giveWeight();
-    detJ = fabs( this->interp_lin.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc) ) );
+    detJ = fabs( this->interp_lin.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc) ) );
     return detJ * weight; ///@todo What about thickness?
 }
 
@@ -448,8 +448,8 @@ DKTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
 //does check that the point is in the element thickness
 {
     // get node coordinates
-  double x1, x2, x3, y1, y2, y3, z1, z2, z3;
-  this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z1, z2, z3);
+    double x1, x2, x3, y1, y2, y3, z1, z2, z3;
+    this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z1, z2, z3);
 
     // Fetch local coordinates.
     bool ok = this->interp_lin.global2local( answer, coords, FEIElementGeometryWrapper(this) ) > 0;
@@ -471,7 +471,7 @@ DKTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
 
     //check that the z is within the element
     StructuralCrossSection *cs = this->giveStructuralCrossSection();
-    double elthick = cs->give(CS_Thickness, & answer, NULL, this);
+    double elthick = cs->give(CS_Thickness, answer, this);
 
     if ( elthick / 2.0 + midplZ - fabs( coords.at(3) ) < -POINT_TOL ) {
         answer.zero();
@@ -487,55 +487,32 @@ int
 DKTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     FloatArray help;
-    answer.resize(9);
-    if ( ( type == IST_ShellForceTensor ) || ( type == IST_ShellMomentumTensor ) ) {
-        help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
-        this->computeShearForces(help, gp, tStep); // postprocess shear forces
+    answer.resize(6);
+    if ( type == IST_ShellForceTensor || type == IST_ShellStrainTensor ) {
         if ( type == IST_ShellForceTensor ) {
-            answer.at(1) = 0.0; // nx
-            answer.at(2) = 0.0; // vxy
-            answer.at(3) = help.at(4); // vxz
-            answer.at(4) = 0.0; // vyx
-            answer.at(5) = 0.0; // ny
-            answer.at(6) = help.at(5); // vyz
-            answer.at(7) = help.at(4); // vzx
-            answer.at(8) = help.at(5); // vzy
-            answer.at(9) = 0.0; // nz
+            help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         } else {
-            answer.at(1) = help.at(1); // mx
-            answer.at(2) = help.at(3); // mxy
-            answer.at(3) = 0.0;      // mxz
-            answer.at(4) = help.at(3); // mxy
-            answer.at(5) = help.at(2); // my
-            answer.at(6) = 0.0;      // myz
-            answer.at(7) = 0.0;      // mzx
-            answer.at(8) = 0.0;      // mzy
-            answer.at(9) = 0.0;      // mz
+            help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
         }
+        answer.at(1) = 0.0; // nx
+        answer.at(2) = 0.0; // ny
+        answer.at(3) = 0.0; // nz
+        answer.at(4) = help.at(5); // vyz
+        answer.at(5) = help.at(4); // vxz
+        answer.at(6) = 0.0; // vxy
         return 1;
-    } else if ( ( type == IST_ShellStrainTensor )  || ( type == IST_ShellCurvatureTensor ) ) {
-        help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
-        if ( type == IST_ShellForceTensor ) {
-            answer.at(1) = 0.0; // nx
-            answer.at(2) = 0.0; // vxy
-            answer.at(3) = help.at(4); // vxz
-            answer.at(4) = 0.0; // vyx
-            answer.at(5) = 0.0; // ny
-            answer.at(6) = help.at(5); // vyz
-            answer.at(7) = help.at(4); // vzx
-            answer.at(8) = help.at(5); // nzy
-            answer.at(9) = 0.0; // nz
+    } else if ( type == IST_ShellMomentumTensor || type == IST_ShellCurvatureTensor ) {
+        if ( type == IST_ShellMomentumTensor ) {
+            help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         } else {
-            answer.at(1) = help.at(1); // mx
-            answer.at(2) = help.at(3); // mxy
-            answer.at(3) = 0.0;      // mxz
-            answer.at(4) = help.at(3); // mxy
-            answer.at(5) = help.at(2); // my
-            answer.at(6) = 0.0;      // myz
-            answer.at(7) = 0.0;      // mzx
-            answer.at(8) = 0.0;      // mzy
-            answer.at(9) = 0.0;      // mz
+            help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
         }
+        answer.at(1) = help.at(1); // mx
+        answer.at(2) = help.at(2); // my
+        answer.at(3) = 0.0;        // mz
+        answer.at(4) = 0.0;        // myz
+        answer.at(5) = 0.0;        // mxz
+        answer.at(6) = help.at(3); // mxy
         return 1;
     } else {
         return NLStructuralElement :: giveIPValue(answer, gp, type, tStep);
@@ -626,7 +603,7 @@ DKTPlate :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
     FloatArray n;
 
-    this->interp_lin.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.edgeEvalN( n, iedge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 6);
     answer.at(1, 1) = n.at(1);
@@ -673,7 +650,7 @@ DKTPlate :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 DKTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     return detJ *gp->giveWeight();
 }
 
@@ -681,7 +658,7 @@ DKTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 DKTPlate :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interp_lin.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.edgeLocal2global( answer, iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -725,7 +702,7 @@ DKTPlate :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gauss
 void
 DKTPlate :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
-    this->computeNmatrixAt(* sgp->giveNaturalCoordinates(), answer);
+    this->computeNmatrixAt(sgp->giveNaturalCoordinates(), answer);
 }
 
 void
@@ -761,7 +738,7 @@ DKTPlate :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 void
 DKTPlate :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
 {
-    this->computeGlobalCoordinates( answer, * gp->giveNaturalCoordinates() );
+    this->computeGlobalCoordinates( answer, gp->giveNaturalCoordinates() );
 }
 
 
@@ -783,10 +760,8 @@ DKTPlate :: computeVertexBendingMoments(FloatMatrix &answer, TimeStep *tStep)
 
     // the results should be cached somehow, as computing on the fly is highly inefficient
     // due to multiple requests
-    FloatMatrix dndx;
     answer.resize(5, 3);
 
-    FloatMatrix b;
     FloatArray eps, m;
     FloatArray coords [ 3 ]; // vertex local coordinates
     coords [ 0 ] = {
@@ -824,7 +799,7 @@ DKTPlate :: computeShearForces(FloatArray &answer, GaussPoint *gp, TimeStep *tSt
     answer.resize(5);
 
     this->computeVertexBendingMoments(m, tStep);
-    this->interp_lin.evaldNdx( dndx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.evaldNdx( dndx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     for ( int i = 1; i <= this->numberOfDofMans; i++ ) {
         answer.at(4) += m.at(1, i) * dndx.at(i, 1) + m.at(3, i) * dndx.at(i, 2); //dMxdx + dMxydy
         answer.at(5) += m.at(2, i) * dndx.at(i, 2) + m.at(3, i) * dndx.at(i, 1); //dMydy + dMxydx

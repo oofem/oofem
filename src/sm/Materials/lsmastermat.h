@@ -76,7 +76,6 @@ public:
     LargeStrainMasterMaterial(int n, Domain * d);
     virtual ~LargeStrainMasterMaterial();
 
-    virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual int hasNonLinearBehaviour() { return 1; }
@@ -89,12 +88,12 @@ public:
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+    virtual void give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer,
                                                MatResponseMode,
                                                GaussPoint *gp,
                                                TimeStep *tStep);
 
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *, const FloatArray &, TimeStep *)
+    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *, const FloatArray &, TimeStep *)
     { OOFEM_ERROR("not implemented, this material is designed for large strains only"); }
     virtual void giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &vF, TimeStep *tStep);
 

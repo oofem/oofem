@@ -34,18 +34,17 @@
 
 #include "errorestimator.h"
 #include "remeshingcrit.h"
+#include "inputrecord.h"
 
 namespace oofem {
 ErrorEstimator :: ErrorEstimator(int n, Domain *d) : FEMComponent(n, d)
 {
-    rc = NULL;
     skippedNelems = 0;
     regionSkipMap.clear();
 }
 
 ErrorEstimator :: ~ErrorEstimator()
 {
-    delete rc;
 }
 
 void

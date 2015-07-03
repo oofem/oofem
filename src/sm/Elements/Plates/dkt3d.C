@@ -233,48 +233,40 @@ DKTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
     FloatMatrix globTensor;
     CharTensor cht;
 
-    answer.resize(9);
+    answer.resize(6);
 
-    if ( ( type == IST_ShellForceTensor ) || ( type == IST_ShellStrainTensor ) ) {
-        double c = 1.0;
-        if ( type == IST_ShellForceTensor ) {
-            cht = GlobalForceTensor;
+    if (  type == IST_ShellCurvatureTensor || type == IST_ShellStrainTensor ) {
+        if ( type == IST_ShellCurvatureTensor ) {
+            cht = GlobalCurvatureTensor;
         } else {
             cht = GlobalStrainTensor;
-	    c = 1.0; // tensor components reported
         }
 
         this->giveCharacteristicTensor(globTensor, cht, gp, tStep);
 
-        answer.at(1) = globTensor.at(1, 1); //sxForce
-        answer.at(2) = c*globTensor.at(2, 1); //qxyForce
-        answer.at(3) = c*globTensor.at(3, 1); //qxzForce
-        answer.at(4) = c*globTensor.at(1, 2); //qxyForce
-        answer.at(5) = globTensor.at(2, 2); //syForce
-        answer.at(6) = c*globTensor.at(2, 3); //syzForce
-        answer.at(7) = c*globTensor.at(1, 3); //qxzForce
-        answer.at(8) = c*globTensor.at(2, 3); //syzForce
-        answer.at(9) = globTensor.at(3, 3); //szForce
+        answer.at(1) = globTensor.at(1, 1); //xx
+        answer.at(2) = globTensor.at(2, 2); //yy
+        answer.at(3) = globTensor.at(3, 3); //zz
+        answer.at(4) = 2*globTensor.at(2, 3); //yz
+        answer.at(5) = 2*globTensor.at(1, 3); //xz
+        answer.at(6) = 2*globTensor.at(2, 3); //yz
 
         return 1;
-    } else if ( ( type == IST_ShellMomentumTensor ) || ( type == IST_ShellCurvatureTensor ) ) {
+    } else if ( type == IST_ShellMomentumTensor || type == IST_ShellForceTensor ) {
         if ( type == IST_ShellMomentumTensor ) {
             cht = GlobalMomentumTensor;
         } else {
-            cht = GlobalCurvatureTensor;
+            cht = GlobalForceTensor;
         }
 
         this->giveCharacteristicTensor(globTensor, cht, gp, tStep);
 
-        answer.at(1)  = globTensor.at(1, 1); //mxForce
-        answer.at(2)  = globTensor.at(1, 2); //mxyForce
-        answer.at(3)  = globTensor.at(1, 3); //mxzForce
-        answer.at(4)  = globTensor.at(1, 2); //mxyForce
-        answer.at(5)  = globTensor.at(2, 2); //myForce
-        answer.at(6)  = globTensor.at(2, 3); //myzForce
-        answer.at(7)  = globTensor.at(1, 3); //mxzForce
-        answer.at(8)  = globTensor.at(2, 3); //myzForce
-        answer.at(9)  = globTensor.at(3, 3); //mzForce
+        answer.at(1) = globTensor.at(1, 1); //xx
+        answer.at(2) = globTensor.at(2, 2); //yy
+        answer.at(3) = globTensor.at(3, 3); //zz
+        answer.at(4) = globTensor.at(2, 3); //yz
+        answer.at(5) = globTensor.at(1, 3); //xz
+        answer.at(6) = globTensor.at(2, 3); //yz
 
         return 1;
     } else {
@@ -304,9 +296,8 @@ DKTPlate3d :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
 void
 DKTPlate3d :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
-    int i, j;
     FloatMatrix ne;
-    this->computeNmatrixAt(* sgp->giveNaturalCoordinates(), ne);
+    this->computeNmatrixAt(sgp->giveNaturalCoordinates(), ne);
 
     answer.resize(6, 18);
     answer.zero();
@@ -317,8 +308,8 @@ DKTPlate3d :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint
         2, 3, 4, 8, 9, 10, 14, 15, 16
     };
 
-    for ( i = 0; i < 3; i++ ) {
-        for ( j = 0; j < 9; j++ ) {
+    for ( int i = 0; i < 3; i++ ) {
+        for ( int j = 0; j < 9; j++ ) {
             answer(ri [ i ], ci [ j ]) = ne(i, j);
         }
     }
@@ -365,7 +356,7 @@ DKTPlate3d :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 void
 DKTPlate3d :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
 {
-    this->computeGlobalCoordinates( answer, * gp->giveNaturalCoordinates() );
+    this->computeGlobalCoordinates( answer, gp->giveNaturalCoordinates() );
 }
 
 
@@ -391,31 +382,20 @@ DKTPlate3d :: printOutputAt(FILE *file, TimeStep *tStep)
             this->giveIPValue(v, gp, IST_ShellStrainTensor, tStep);
             fprintf(file, "  strains    ");
             // eps_x, eps_y, eps_z, eps_yz, eps_xz, eps_xy (global)
-            fprintf( file,
-                    " % .4e % .4e % .4e % .4e % .4e % .4e ",
-                    v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
+            for ( auto &val : v ) fprintf(file, " %.4e", val);
 
             this->giveIPValue(v, gp, IST_ShellCurvatureTensor, tStep);
             fprintf(file, "\n              curvatures ");
-            // k_x, k_y, k_z, k_yz, k_xz, k_xy (global)
-            fprintf( file,
-                    " % .4e % .4e % .4e % .4e % .4e % .4e ",
-                    v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
+            for ( auto &val : v ) fprintf(file, " %.4e", val);
 
             // Forces - Moments
             this->giveIPValue(v, gp, IST_ShellForceTensor, tStep);
             fprintf(file, "\n              stresses   ");
-            // n_x, n_y, n_z, v_yz, v_xz, v_xy (global)
-            fprintf( file,
-                    " % .4e % .4e % .4e % .4e % .4e % .4e ",
-                    v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
+            for ( auto &val : v ) fprintf(file, " %.4e", val);
 
             this->giveIPValue(v, gp, IST_ShellMomentumTensor, tStep);
             fprintf(file, "\n              moments    ");
-            // m_x, m_y, m_z, m_yz, m_xz, m_xy (global)
-            fprintf( file,
-                    " % .4e % .4e % .4e % .4e % .4e % .4e ",
-                    v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
+            for ( auto &val : v ) fprintf(file, " %.4e", val);
 
             fprintf(file, "\n");
         }
@@ -429,7 +409,7 @@ DKTPlate3d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *g
 {
     FloatArray n;
 
-    this->interp_lin.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.edgeEvalN( n, iedge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(6, 12);
     answer.at(3, 3) = n.at(1);
@@ -477,7 +457,7 @@ DKTPlate3d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 DKTPlate3d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     return detJ *gp->giveWeight();
 }
 
@@ -485,7 +465,7 @@ DKTPlate3d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 DKTPlate3d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interp_lin.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.edgeLocal2global( answer, iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -547,7 +527,7 @@ DKTPlate3d :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coor
     answer.resize(2);
     answer.at(1) = inputCoords_ElCS.at(1);
     answer.at(2) = inputCoords_ElCS.at(2);
-    GaussPoint _gp(NULL, 1, new FloatArray ( answer ), 2.0, _2dPlate);
+    GaussPoint _gp(NULL, 1, answer, 2.0, _2dPlate);
     // now check if the third local coordinate is within the thickness of element
     bool outofplane = ( fabs( inputCoords_ElCS.at(3) ) <= this->giveCrossSection()->give(CS_Thickness, & _gp) / 2. );
 

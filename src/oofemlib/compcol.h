@@ -76,7 +76,7 @@
 #include "intarray.h"
 
 namespace oofem {
-/**
+/*
  * Implementation of sparse matrix stored in compressed column storage.
  */
 class OOFEM_EXPORT CompCol : public SparseMtrx
@@ -125,11 +125,15 @@ public:
     virtual SparseMtrxType giveType() const { return SMT_CompCol; }
     virtual bool isAsymmetric() const { return true; }
 
+    // Breaks encapsulation, but access is needed for PARDISO solver;
+    const FloatArray &giveValues() { return val_; }
+    const IntArray &giveRowIndex() { return rowind_; }
+    const IntArray &giveColPtr() { return colptr_; }
 
     const double &val(int i) const { return val_(i); }
     const int &row_ind(int i) const { return rowind_(i); }
     const int &col_ptr(int i) const { return colptr_(i); }
-    int dim(int i) const { return dim_ [ i ]; };
+    int dim(int i) const { return dim_ [ i ]; }
 
 protected:
     /*******************************/
@@ -140,8 +144,8 @@ protected:
     int &row_ind(int i) { return rowind_(i); }
     int &col_ptr(int i) { return colptr_(i); }
 
-    int size(int i) const { return dim_ [ i ]; };
-    int NumNonzeros() const { return nz_; };
+    int size(int i) const { return dim_ [ i ]; }
+    int NumNonzeros() const { return nz_; }
     int base() const { return base_; }
 
     /***********************************/

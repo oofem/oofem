@@ -43,6 +43,8 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 
+#include <memory>
+
 #define _IFT_MixedGradientPressureDirichlet_Name "mixedgradientpressuredirichlet"
 
 namespace oofem {
@@ -80,11 +82,11 @@ protected:
     double pressure;
 
     /// DOF-manager containing the unknown volumetric strain(rate).
-    Node *voldman;
+    std :: unique_ptr< Node > voldman;
     int vol_id;
 
     /// DOF-manager containing the known deviatoric strain(rate).
-    Node *devdman;
+    std :: unique_ptr< Node > devdman;
     IntArray dev_id;
 
     Dof *giveVolDof();

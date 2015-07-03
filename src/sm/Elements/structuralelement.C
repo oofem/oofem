@@ -54,7 +54,8 @@
 #include "nonlocmatstiffinterface.h"
 #include "mathfem.h"
 #include "materialmapperinterface.h"
-#include <math.h>
+#include "unknownnumberingscheme.h"
+
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
  #include "connectivitytable.h"
@@ -125,7 +126,7 @@ void StructuralElement :: computeBoundaryLoadVector(FloatArray &answer, Boundary
     std :: unique_ptr< IntegrationRule >iRule( fei->giveBoundaryIntegrationRule(load->giveApproxOrder(), boundary) );
 
     for ( GaussPoint *gp: *iRule ) {
-        FloatArray &lcoords = * gp->giveNaturalCoordinates();
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
         if ( load->giveFormulationType() == Load :: FT_Entity ) {
             load->computeValueAt(force, tStep, lcoords, mode);
@@ -191,7 +192,7 @@ StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, 
 
     if ( force.giveSize() ) {
         for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
-            this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), n);
+            this->computeNmatrixAt(gp->giveSubPatchCoordinates(), n);
             dV  = this->computeVolumeAround(gp);
             dens = this->giveCrossSection()->give('d', gp);
             ntf.beTProductOf(n, force);
@@ -265,7 +266,7 @@ StructuralElement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
             dV  = this->computeEdgeVolumeAround(gp, iEdge);
 
             if ( edgeLoad->giveFormulationType() == Load :: FT_Entity ) {
-                edgeLoad->computeValueAt(force, tStep, * ( gp->giveNaturalCoordinates() ), mode);
+                edgeLoad->computeValueAt(force, tStep, gp->giveNaturalCoordinates(), mode);
             } else {
                 this->computeEdgeIpGlobalCoords(globalIPcoords, gp, iEdge);
                 edgeLoad->computeValueAt(force, tStep, globalIPcoords, mode);
@@ -342,7 +343,7 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
             dV  = this->computeSurfaceVolumeAround(gp, iSurf);
 
             if ( surfLoad->giveFormulationType() == Load :: FT_Entity ) {
-                surfLoad->computeValueAt(force, tStep, * ( gp->giveNaturalCoordinates() ), mode);
+                surfLoad->computeValueAt(force, tStep, gp->giveNaturalCoordinates(), mode);
             } else {
                 this->computeSurfIpGlobalCoords(globalIPcoords, gp, iSurf);
                 surfLoad->computeValueAt(force, tStep, globalIPcoords, mode);
@@ -418,7 +419,7 @@ StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *
     mass = 0.;
 
     for ( GaussPoint *gp: iRule ) {
-        this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), n);
+        this->computeNmatrixAt(gp->giveSubPatchCoordinates(), n);
         density = this->giveCrossSection()->give('d', gp);
 
         if ( ipDensity != NULL ) {
@@ -543,7 +544,6 @@ StructuralElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
     double mass = 0.;
 
     IntArray nodeDofIDMask, dimFlag(3);
-    IntArray nodalArray;
     int indx = 0, ldofs, dim;
     double summ;
 
@@ -607,7 +607,7 @@ StructuralElement :: computeResultingIPTemperatureAt(FloatArray &answer, TimeSte
     Load *load;
     FloatArray gCoords, temperature;
 
-    if ( this->computeGlobalCoordinates( gCoords, * ( gp->giveNaturalCoordinates() ) ) == 0 ) {
+    if ( this->computeGlobalCoordinates( gCoords, gp->giveNaturalCoordinates() ) == 0 ) {
         OOFEM_ERROR("computeGlobalCoordinates failed");
     }
 
@@ -617,7 +617,7 @@ StructuralElement :: computeResultingIPTemperatureAt(FloatArray &answer, TimeSte
         n = bodyLoadArray.at(i);
         load = domain->giveLoad(n);
         if ( load->giveBCValType() == TemperatureBVT ) {
-            static_cast< StructuralTemperatureLoad * >(load)->computeValueAt(temperature, tStep, gCoords, mode);
+            load->computeValueAt(temperature, tStep, gCoords, mode);
             answer.add(temperature);
         }
     }
@@ -631,7 +631,7 @@ StructuralElement :: computeResultingIPEigenstrainAt(FloatArray &answer, TimeSte
     Load *load;
     FloatArray gCoords, eigenstrain;
 
-    if ( this->computeGlobalCoordinates( gCoords, * ( gp->giveNaturalCoordinates() ) ) == 0 ) {
+    if ( this->computeGlobalCoordinates( gCoords, gp->giveNaturalCoordinates() ) == 0 ) {
         OOFEM_ERROR("computeGlobalCoordinates failed");
     }
 
@@ -641,13 +641,22 @@ StructuralElement :: computeResultingIPEigenstrainAt(FloatArray &answer, TimeSte
         n = bodyLoadArray.at(i);
         load = domain->giveLoad(n);
         if ( load->giveBCValType() == EigenstrainBVT ) {
-            static_cast< StructuralEigenstrainLoad * >(load)->computeValueAt(eigenstrain, tStep, gCoords, mode);
+            load->computeValueAt(eigenstrain, tStep, gCoords, mode);
             answer.add(eigenstrain);
         }
     }
 }
 
 
+void
+StructuralElement :: computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
+{
+    FloatArray u;
+    FloatMatrix n;
+    this->computeNmatrixAt(lcoords, n);
+    this->computeVectorOf(mode, tStep, u);
+    answer.beProductOf(n, u);
+}
 
 void
 StructuralElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
@@ -793,10 +802,6 @@ StructuralElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, Tim
 
 void
 StructuralElement :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
-// Computes the vector containing the stresses at the Gauss point gp of
-// the receiver, at time step tStep. The nature of these stresses depends
-// on the element's type.
-// this version assumes TOTAL LAGRANGE APPROACH
 {
     this->giveStructuralCrossSection()->giveRealStresses(answer, gp, strain, tStep);
 }
@@ -886,7 +891,7 @@ StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &a
 // has been called for the same time step.
 //
 {
-    FloatMatrix b, R;
+    FloatMatrix b;
     FloatArray temp, u, stress, strain;
     IntArray irlocnum;
 
@@ -961,9 +966,7 @@ StructuralElement :: giveCharacteristicMatrix(FloatMatrix &answer,
 // returns characteristics matrix of receiver according to mtrx
 //
 {
-    if ( mtrx == StiffnessMatrix ) {
-        this->computeStiffnessMatrix(answer, TangentStiffness, tStep);
-    } else if ( mtrx == TangentStiffnessMatrix ) {
+    if ( mtrx == TangentStiffnessMatrix ) {
         this->computeStiffnessMatrix(answer, TangentStiffness, tStep);
     } else if ( mtrx == SecantStiffnessMatrix ) {
         this->computeStiffnessMatrix(answer, SecantStiffness, tStep);
@@ -1212,7 +1215,7 @@ StructuralElement :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSta
         FloatArray u;
         FloatMatrix N;
         this->computeVectorOf(VM_Total, tStep, u);
-        this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), N);
+        this->computeNmatrixAt(gp->giveSubPatchCoordinates(), N);
         answer.beProductOf(N, u);
         return 1;
     }
@@ -1354,8 +1357,8 @@ StructuralElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateTy
 void
 StructuralElement :: showSparseMtrxStructure(CharType mtrx, oofegGraphicContext &gc, TimeStep *tStep)
 {
-    if ( ( mtrx == StiffnessMatrix ) || ( mtrx == TangentStiffnessMatrix ) ||
-        ( mtrx == SecantStiffnessMatrix ) || ( mtrx == ElasticStiffnessMatrix ) ) {
+    if ( mtrx == TangentStiffnessMatrix ||
+        mtrx == SecantStiffnessMatrix || mtrx == ElasticStiffnessMatrix ) {
         int i, j, n;
         IntArray loc;
         this->giveLocationArray( loc, EModelDefaultEquationNumbering() );
@@ -1439,7 +1442,7 @@ void
 StructuralElement :: showExtendedSparseMtrxStructure(CharType mtrx, oofegGraphicContext &gc, TimeStep *tStep)
 {
     NonlocalMaterialStiffnessInterface *interface;
-    if ( ( ( mtrx == StiffnessMatrix ) || ( mtrx == TangentStiffnessMatrix ) ) ) {
+    if ( mtrx == TangentStiffnessMatrix ) {
         //interface = static_cast< NonlocalMaterialStiffnessInterface * >
         //            ( this->giveMaterial()->giveInterface(NonlocalMaterialStiffnessInterfaceType) );
         //if ( interface == NULL ) {

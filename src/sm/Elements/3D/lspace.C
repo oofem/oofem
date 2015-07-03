@@ -58,7 +58,7 @@ FEI3dHexaLin LSpace :: interpolation;
 
 LSpace :: LSpace(int n, Domain *aDomain) : Structural3DElement(n, aDomain), ZZNodalRecoveryModelInterface(this),
     SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(this),
-    EIPrimaryUnknownMapperInterface(), HuertaErrorEstimatorInterface()
+    HuertaErrorEstimatorInterface()
     // Constructor.
 {
     numberOfDofMans  = 8;
@@ -79,8 +79,6 @@ LSpace :: giveInterface(InterfaceType interface)
         return static_cast< NodalAveragingRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
         return static_cast< SpatialLocalizerInterface * >(this);
-    } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
         return static_cast< HuertaErrorEstimatorInterface * >(this);
     }
@@ -93,7 +91,7 @@ IRResultType
 LSpace :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 8;
-    return this->Structural3DElement :: initializeFrom(ir);
+    return Structural3DElement :: initializeFrom(ir);
 }
 
 
@@ -148,7 +146,7 @@ LSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int nod
     double x1 = 0.0, x2 = 0.0, x3 = 0.0, y = 0.0;
     FloatMatrix A(4, 4);
     FloatMatrix b, r;
-    FloatArray val, *coord;
+    FloatArray val;
     double u, v, w;
 
     int size = 0;
@@ -163,10 +161,10 @@ LSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int nod
             r.zero();
         }
 
-        coord = gp->giveNaturalCoordinates();
-        u = coord->at(1);
-        v = coord->at(2);
-        w = coord->at(3);
+        const FloatArray &coord = gp->giveNaturalCoordinates();
+        u = coord.at(1);
+        v = coord.at(2);
+        w = coord.at(3);
 
         A.at(1, 1) += 1;
         A.at(1, 2) += u;
@@ -245,19 +243,6 @@ LSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int nod
     for ( int j = 1; j <= size; j++ ) {
         answer.at(j) = b.at(1, j) + x1 *b.at(2, j) * x2 * b.at(3, j) * x3 * b.at(4, j);
     }
-}
-
-
-void
-LSpace :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-                                                           TimeStep *tStep, const FloatArray &lcoords,
-                                                           FloatArray &answer)
-{
-    FloatArray u;
-    FloatMatrix n;
-    this->computeNmatrixAt(lcoords, n);
-    this->computeVectorOf(mode, tStep, u);
-    answer.beProductOf(n, u);
 }
 
 
@@ -341,7 +326,7 @@ LSpace :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refin
 
 void LSpace :: HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
-    computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
+    computeNmatrixAt(gp->giveSubPatchCoordinates(), answer);
 }
 
 
@@ -601,7 +586,7 @@ LSpace :: drawSpecial(oofegGraphicContext &gc, TimeStep *tStep)
 
             //
             // obtain gp global coordinates
-            this->computeGlobalCoordinates( gpc, * gp->giveNaturalCoordinates() );
+            this->computeGlobalCoordinates( gpc, gp->giveNaturalCoordinates() );
             length = 0.3333 * cbrt(this->computeVolumeAround(gp));
             if ( this->giveIPValue(crackDir, gp, IST_CrackDirs, tStep) ) {
                 this->giveIPValue(crackStatuses, gp, IST_CrackStatuses, tStep);

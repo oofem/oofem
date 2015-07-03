@@ -101,7 +101,11 @@ IRResultType Node :: initializeFrom(InputRecord *ir)
     // VERBOSE_PRINT1("Instanciating node ",number)
 #  endif
 
-    DofManager :: initializeFrom(ir);
+    result = DofManager :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+
     IR_GIVE_FIELD(ir, coordinates, _IFT_Node_coords);
 
     //
@@ -804,10 +808,16 @@ Node :: drawYourself(oofegGraphicContext &gc, TimeStep *tStep)
             pp [ 0 ].z = ( FPNum ) this->giveCoordinate(3);
             pp [ 1 ].x = pp [ 1 ].y = pp [ 1 ].z = 0.0;
 
-            FloatArray load;
+            FloatArray load, f;
             FloatMatrix t;
             IntArray dofIDArry(0);
-            computeLoadVectorAt(load, tStep, VM_Total);
+            
+            load.clear();
+            for ( int iload : *this->giveLoadArray() ) {   // to more than one load
+                Load *loadN = domain->giveLoad(iload);
+                this->computeLoadVector(f, loadN, ExternalForcesVector, tStep, VM_Total);
+                load.add(f);
+            }
             if ( computeL2GTransformation(t, dofIDArry) ) {
                 load.rotatedWith(t, 'n');
             }

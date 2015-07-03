@@ -47,6 +47,7 @@
 #define _IFT_TransientTransportProblem_alpha "alpha"
 #define _IFT_TransientTransportProblem_deltaT "deltat"
 #define _IFT_TransientTransportProblem_keepTangent "keeptangent"
+#define _IFT_TransientTransportProblem_lumped "lumped"
 //@}
 
 namespace oofem {
@@ -64,6 +65,7 @@ protected:
     std :: unique_ptr< PrimaryField > field;
 
     std :: unique_ptr< SparseMtrx > capacityMatrix;
+    FloatArray capacityDiag; /// In case of a lumped matrix, the diagonal entries are stored here.
     std :: unique_ptr< SparseMtrx > effectiveMatrix;
 
     FloatArray solution;
@@ -73,9 +75,10 @@ protected:
     /// Numerical method used to solve the problem
     std :: unique_ptr< SparseNonLinearSystemNM > nMethod;
 
-    bool alpha;
+    double alpha;
     double deltaT;
     bool keepTangent;
+    bool lumped;
 
 public:
     /// Constructor.
@@ -88,7 +91,10 @@ public:
     virtual double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    
+    virtual void applyIC();
 
+    virtual int requiresUnknownsDictionaryUpdate();
     virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep);
     virtual void updateDomainLinks();
 
@@ -101,8 +107,6 @@ public:
     virtual int forceEquationNumbering();
 
     virtual int checkConsistency();
-
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
 
     // identification
     virtual const char *giveInputRecordName() const { return _IFT_TransientTransportProblem_Name; }

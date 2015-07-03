@@ -44,11 +44,8 @@
 #include <string>
 
 #include "oofemcfg.h"
-#include "error.h"
 #include "interfacetype.h"
-#include "inputrecord.h"
-#include "datareader.h"
-#include "entityrenumberingscheme.h"
+#include "irresulttype.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
 
@@ -57,8 +54,13 @@ class DataStream;
 class Domain;
 class Interface;
 class TimeStep;
+class InputRecord;
 class DynamicInputRecord;
 class oofegGraphicContext;
+class EntityRenumberingFunctor;
+class FloatArray;
+class IntArray;
+class FloatMatrix;
 
 /**
  * The top abstract class of all classes constituting the finite element mesh.
@@ -127,7 +129,7 @@ public:
      * @param ir Input record to initialize from.
      * @return IRResultType
      */
-    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_NOTFOUND; };
+    virtual IRResultType initializeFrom(InputRecord *ir);
     /**
      * Setups the input record string of receiver.
      * @param input Dynamic input record to be filled by receiver.
@@ -159,7 +161,7 @@ public:
      * mesh components are instanciated.
      * @return Nonzero if receiver is consistent.
      */
-    virtual int checkConsistency() { return 1; }
+    virtual int checkConsistency();
     /**
      * Prints output of receiver to stream, for given time step.
      * This is used for output into the standard output file.

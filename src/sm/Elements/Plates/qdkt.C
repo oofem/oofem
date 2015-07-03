@@ -346,7 +346,7 @@ QDKTPlate :: giveNodeCoordinates(double &x1, double &x2, double &x3, double &x4,
 IRResultType
 QDKTPlate :: initializeFrom(InputRecord *ir)
 {
-    return this->NLStructuralElement :: initializeFrom(ir);
+    return NLStructuralElement :: initializeFrom(ir);
 }
 
 
@@ -388,7 +388,7 @@ QDKTPlate :: computeVolumeAround(GaussPoint *gp)
     double detJ, weight;
 
     weight = gp->giveWeight();
-    detJ = fabs( this->interp_lin.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    detJ = fabs( this->interp_lin.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     return detJ * weight; ///@todo What about thickness?
 }
 
@@ -438,7 +438,7 @@ QDKTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep
 
     if ( force.giveSize() ) {
         for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
-            this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), n);
+            this->computeNmatrixAt(gp->giveSubPatchCoordinates(), n);
             dV  = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness, gp);
             dens = this->giveCrossSection()->give('d', gp);
             ntf.beTProductOf(n, force);
@@ -482,7 +482,7 @@ QDKTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coord
 
     //check that the z is within the element
     StructuralCrossSection *cs = this->giveStructuralCrossSection();
-    double elthick = cs->give(CS_Thickness, & answer, NULL, this);
+    double elthick = cs->give(CS_Thickness, answer, this);
 
     if ( elthick / 2.0 + midplZ - fabs( coords.at(3) ) < -POINT_TOL ) {
         answer.zero();
@@ -498,54 +498,32 @@ int
 QDKTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     FloatArray help;
-    answer.resize(9);
-    if ( ( type == IST_ShellForceTensor ) || ( type == IST_ShellMomentumTensor ) ) {
-        help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
-       if ( type == IST_ShellForceTensor ) {
-            answer.at(1) = 0.0; // nx
-            answer.at(2) = 0.0; // vxy
-            answer.at(3) = help.at(4); // vxz
-            answer.at(4) = 0.0; // vyx
-            answer.at(5) = 0.0; // ny
-            answer.at(6) = help.at(5); // vyz
-            answer.at(7) = help.at(4); // vzx
-            answer.at(8) = help.at(5); // vzy
-            answer.at(9) = 0.0; // nz
-        } else {
-            answer.at(1) = help.at(1); // mx
-            answer.at(2) = help.at(3); // mxy
-            answer.at(3) = 0.0;      // mxz
-            answer.at(4) = help.at(3); // mxy
-            answer.at(5) = help.at(2); // my
-            answer.at(6) = 0.0;      // myz
-            answer.at(7) = 0.0;      // mzx
-            answer.at(8) = 0.0;      // mzy
-            answer.at(9) = 0.0;      // mz
-        }
-        return 1;
-    } else if ( ( type == IST_ShellStrainTensor )  || ( type == IST_ShellCurvatureTensor ) ) {
-        help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
+    answer.resize(6);
+    if ( type == IST_ShellForceTensor || type == IST_ShellStrainTensor ) {
         if ( type == IST_ShellForceTensor ) {
-            answer.at(1) = 0.0; // nx
-            answer.at(2) = 0.0; // vxy
-            answer.at(3) = help.at(4); // vxz
-            answer.at(4) = 0.0; // vyx
-            answer.at(5) = 0.0; // ny
-            answer.at(6) = help.at(5); // vyz
-            answer.at(7) = help.at(4); // vzx
-            answer.at(8) = help.at(5); // nzy
-            answer.at(9) = 0.0; // nz
+            help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         } else {
-            answer.at(1) = help.at(1); // mx
-            answer.at(2) = help.at(3); // mxy
-            answer.at(3) = 0.0;      // mxz
-            answer.at(4) = help.at(3); // mxy
-            answer.at(5) = help.at(2); // my
-            answer.at(6) = 0.0;      // myz
-            answer.at(7) = 0.0;      // mzx
-            answer.at(8) = 0.0;      // mzy
-            answer.at(9) = 0.0;      // mz
+            help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
         }
+        answer.at(1) = 0.0; // nx
+        answer.at(2) = 0.0; // ny
+        answer.at(3) = 0.0; // nz
+        answer.at(4) = help.at(5); // vyz
+        answer.at(5) = help.at(4); // vxz
+        answer.at(6) = 0.0; // vxy
+        return 1;
+    } else if ( type == IST_ShellMomentumTensor || type == IST_ShellCurvatureTensor ) {
+        if ( type == IST_ShellMomentumTensor ) {
+            help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
+        } else {
+            help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
+        }
+        answer.at(1) = help.at(1); // mx
+        answer.at(2) = help.at(2); // my
+        answer.at(3) = 0.0;        // mz
+        answer.at(4) = 0.0;        // myz
+        answer.at(5) = 0.0;        // mxz
+        answer.at(6) = help.at(3); // mxy
         return 1;
     } else {
         return NLStructuralElement :: giveIPValue(answer, gp, type, tStep);
@@ -621,7 +599,7 @@ QDKTPlate :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp
 {
     FloatArray n;
 
-    this->interp_lin.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.edgeEvalN( n, iedge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 6);
     answer.at(1, 1) = n.at(1);
@@ -649,7 +627,7 @@ QDKTPlate :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 QDKTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     return detJ *gp->giveWeight();
 }
 
@@ -657,7 +635,7 @@ QDKTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 QDKTPlate :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interp_lin.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.edgeLocal2global( answer, iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -700,7 +678,7 @@ QDKTPlate :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gaus
 void
 QDKTPlate :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
-    this->computeNmatrixAt(* sgp->giveNaturalCoordinates(), answer);
+    this->computeNmatrixAt(sgp->giveNaturalCoordinates(), answer);
 }
 
 void
@@ -736,7 +714,7 @@ QDKTPlate :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 void
 QDKTPlate :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
 {
-    this->computeGlobalCoordinates( answer, * gp->giveNaturalCoordinates() );
+    this->computeGlobalCoordinates( answer, gp->giveNaturalCoordinates() );
 }
 
 
@@ -918,7 +896,6 @@ QDKTPlate :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
         }
 
         IntArray ind(4);
-        FloatArray *gpCoords;
         WCRec pp [ 9 ];
 
         for ( i = 0; i < 4; i++ ) {
@@ -950,18 +927,18 @@ QDKTPlate :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
         pp [ 8 ].z = 0.25 * ( pp [ 0 ].z + pp [ 1 ].z + pp [ 2 ].z + pp [ 3 ].z );
 
         for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
-            gpCoords = gp->giveNaturalCoordinates();
-            if ( ( gpCoords->at(1) > 0. ) && ( gpCoords->at(2) > 0. ) ) {
+            const FloatArray &gpCoords = gp->giveNaturalCoordinates();
+            if ( ( gpCoords.at(1) > 0. ) && ( gpCoords.at(2) > 0. ) ) {
                 ind.at(1) = 0;
                 ind.at(2) = 4;
                 ind.at(3) = 8;
                 ind.at(4) = 7;
-            } else if ( ( gpCoords->at(1) < 0. ) && ( gpCoords->at(2) > 0. ) ) {
+            } else if ( ( gpCoords.at(1) < 0. ) && ( gpCoords.at(2) > 0. ) ) {
                 ind.at(1) = 4;
                 ind.at(2) = 1;
                 ind.at(3) = 5;
                 ind.at(4) = 8;
-            } else if ( ( gpCoords->at(1) < 0. ) && ( gpCoords->at(2) < 0. ) ) {
+            } else if ( ( gpCoords.at(1) < 0. ) && ( gpCoords.at(2) < 0. ) ) {
                 ind.at(1) = 5;
                 ind.at(2) = 2;
                 ind.at(3) = 6;

@@ -85,19 +85,19 @@ FEI2dQuadQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEIC
 {
     double ksi, eta;
 
-    answer.resize(8);
-
     ksi = lcoords.at(1);
     eta = lcoords.at(2);
 
-    answer.at(1) = ( 1. + ksi ) * ( 1. + eta ) * 0.25 * ( ksi + eta - 1. );
-    answer.at(2) = ( 1. - ksi ) * ( 1. + eta ) * 0.25 * ( -ksi + eta - 1. );
-    answer.at(3) = ( 1. - ksi ) * ( 1. - eta ) * 0.25 * ( -ksi - eta - 1. );
-    answer.at(4) = ( 1. + ksi ) * ( 1. - eta ) * 0.25 * ( ksi - eta - 1. );
-    answer.at(5) = 0.5 * ( 1. - ksi * ksi ) * ( 1. + eta );
-    answer.at(6) = 0.5 * ( 1. - ksi ) * ( 1. - eta * eta );
-    answer.at(7) = 0.5 * ( 1. - ksi * ksi ) * ( 1. - eta );
-    answer.at(8) = 0.5 * ( 1. + ksi ) * ( 1. - eta * eta );
+    answer = {
+        ( 1. + ksi ) * ( 1. + eta ) * 0.25 * ( ksi + eta - 1. ),
+        ( 1. - ksi ) * ( 1. + eta ) * 0.25 * ( -ksi + eta - 1. ),
+        ( 1. - ksi ) * ( 1. - eta ) * 0.25 * ( -ksi - eta - 1. ),
+        ( 1. + ksi ) * ( 1. - eta ) * 0.25 * ( ksi - eta - 1. ),
+        0.5 * ( 1. - ksi * ksi ) * ( 1. + eta ),
+        0.5 * ( 1. - ksi ) * ( 1. - eta * eta ),
+        0.5 * ( 1. - ksi * ksi ) * ( 1. - eta ),
+        0.5 * ( 1. + ksi ) * ( 1. - eta * eta )
+    };
 }
 
 double
@@ -125,11 +125,11 @@ void
 FEI2dQuadQuad :: local2global(FloatArray &answer, const FloatArray &lcoords,  const FEICellGeometry &cellgeo)
 {
     FloatArray n;
-    answer.resize(2);
-    answer.zero();
 
     this->evalN(n, lcoords, cellgeo);
 
+    answer.resize(2);
+    answer.zero();
     for ( int i = 1; i <= n.giveSize(); i++ ) {
         answer.at(1) += n.at(i) * cellgeo.giveVertexCoordinates(i)->at(xind);
         answer.at(2) += n.at(i) * cellgeo.giveVertexCoordinates(i)->at(yind);
@@ -212,17 +212,12 @@ FEI2dQuadQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEI
 void
 FEI2dQuadQuad :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    /*
-     *   1-------3-------2
-     */
+    // 1-------3-------2
 
     double n3, ksi = lcoords.at(1);
-    answer.resize(3);
-
     n3 = 1. - ksi * ksi;
-    answer.at(1) = ( 1. - ksi - n3 ) * 0.5;
-    answer.at(2) = ( 1. + ksi - n3 ) * 0.5;
-    answer.at(3) = n3;
+
+    answer = { ( 1. - ksi - n3 ) * 0.5, ( 1. + ksi - n3 ) * 0.5, n3 };
 }
 
 void
@@ -230,10 +225,7 @@ FEI2dQuadQuad :: edgeEvaldNds(FloatArray &answer, int iedge,
                               const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double ksi = lcoords.at(1);
-    answer.resize(3);
-    answer.at(1) = ksi - 0.5;
-    answer.at(2) = ksi + 0.5;
-    answer.at(3) = ksi * 2.0;
+    answer = { ksi - 0.5, ksi + 0.5, ksi * 2.0 };
 }
 
 void

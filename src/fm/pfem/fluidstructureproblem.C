@@ -62,21 +62,16 @@ REGISTER_EngngModel( FluidStructureProblem );
 FluidStructureProblem :: FluidStructureProblem(int i, EngngModel *_master) : StaggeredProblem(i, _master)
 {
 ///    ndomains = 1; // domain is needed to store the time step ltf
-///    nModels  = 2;
-///    emodelList = new AList< EngngModel >(nModels);
-///    inputStreamNames = new std :: string [ nModels ];
 
 ///    dtTimeFunction = 0;
 ///    stepMultiplier = 1.;
 ///    timeDefinedByProb = 0;
-		tol = 1.e-3;
-		iterationNumber = 0;
+    tol = 1.e-3;
+    iterationNumber = 0;
 }
 
 FluidStructureProblem :: ~FluidStructureProblem()
 {
-///    delete emodelList;
-///    delete [] inputStreamNames;
 }
 
 ///////////
@@ -247,13 +242,13 @@ FluidStructureProblem :: giveDiscreteTime(int iStep)
 TimeStep *
 FluidStructureProblem :: giveSolutionStepWhenIcApply()
 {
-    if ( stepWhenIcApply == NULL ) {
+    if ( !stepWhenIcApply ) {
         int inin = giveNumberOfTimeStepWhenIcApply();
         int nFirst = giveNumberOfFirstStep();
-        stepWhenIcApply = new TimeStep(inin, this, 0, -giveDeltaT(nFirst), giveDeltaT(nFirst), 0);
+        stepWhenIcApply.reset(new TimeStep(inin, this, 0, -giveDeltaT(nFirst), giveDeltaT(nFirst), 0));
     }
 
-    return stepWhenIcApply;
+    return stepWhenIcApply.get();
 }
 
 TimeStep *
@@ -263,34 +258,28 @@ FluidStructureProblem :: giveNextStep()
     double totalTime = 0;
     StateCounterType counter = 1;
 
-    if ( previousStep != NULL ) {
-        delete previousStep;
-        previousStep = NULL;
-    }
-
     if ( currentStep != NULL ) {
-        istep =  currentStep->giveNumber() + 1;
+        istep = currentStep->giveNumber() + 1;
         totalTime = currentStep->giveTargetTime() + this->giveDeltaT(istep);
         counter = currentStep->giveSolutionStateCounter() + 1;
     } else {
-        TimeStep *newStep;
+        TimeStep *newStep = giveSolutionStepWhenIcApply();
         // first step -> generate initial step
-        newStep = giveSolutionStepWhenIcApply();
-        currentStep = new TimeStep(*newStep);
+        currentStep.reset(new TimeStep(*newStep));
     }
 
-    previousStep = currentStep;
-    currentStep = new TimeStep(istep, this, 1, totalTime, this->giveDeltaT(istep), counter);
+    previousStep = std :: move(currentStep);
+    currentStep.reset(new TimeStep(istep, this, 1, totalTime, this->giveDeltaT(istep), counter));
 
     // time and dt variables are set eq to 0 for statics - has no meaning
-    return currentStep;
+    return currentStep.get();
 }
 
 void
 FluidStructureProblem :: solveYourself()
 {
     if ( !timeDefinedByProb ) {
-		EngngModel :: solveYourself();
+        EngngModel :: solveYourself();
     } else { //time dictated by slave problem
         int imstep, jstep, nTimeSteps;
         int smstep = 1, sjstep = 1;
@@ -323,7 +312,7 @@ FluidStructureProblem :: solveYourself()
                     this->forceEquationNumbering();
                 }
 
-				this->initializeYourself( sp->giveCurrentStep() );
+                this->initializeYourself( sp->giveCurrentStep() );
                 this->solveYourselfAt( sp->giveCurrentStep() );
                 this->updateYourself( sp->giveCurrentStep() );
                 this->terminate( sp->giveCurrentStep() );
@@ -350,95 +339,94 @@ FluidStructureProblem :: solveYourself()
 void
 FluidStructureProblem :: initializeYourself(TimeStep *tStep)
 {
-        for ( auto &emodel: emodelList ) {
-	  //for ( int i = 1; i <= nModels; i++ ) {
-		emodel->initializeYourself(tStep);
-		
-		DIIDynamic* dynamicProblem = dynamic_cast<DIIDynamic*>(emodel.get());
-		if (dynamicProblem) {
-			this->giveCurrentStep()->setTimeDiscretization(dynamicProblem->giveInitialTimeDiscretization());
-		}
-		NonLinearDynamic* nonlinearDynamicProblem = dynamic_cast<NonLinearDynamic*>(emodel.get());
-		if (nonlinearDynamicProblem) {
-			this->giveCurrentStep()->setTimeDiscretization(nonlinearDynamicProblem->giveInitialTimeDiscretization());
-		}
-	}
+    for ( auto &emodel: emodelList ) {
+        //for ( int i = 1; i <= nModels; i++ ) {
+        emodel->initializeYourself(tStep);
+
+        DIIDynamic* dynamicProblem = dynamic_cast<DIIDynamic*>(emodel.get());
+        if (dynamicProblem) {
+            this->giveCurrentStep()->setTimeDiscretization(dynamicProblem->giveInitialTimeDiscretization());
+        }
+        NonLinearDynamic* nonlinearDynamicProblem = dynamic_cast<NonLinearDynamic*>(emodel.get());
+        if (nonlinearDynamicProblem) {
+            this->giveCurrentStep()->setTimeDiscretization(nonlinearDynamicProblem->giveInitialTimeDiscretization());
+        }
+    }
 }
 
 void
 FluidStructureProblem :: solveYourselfAt(TimeStep *stepN)
 {
-	PFEM* pfemProblem = dynamic_cast<PFEM*>(this->giveSlaveProblem(1));
-	Domain* pfemDomain = pfemProblem->giveDomain(1);
+    PFEM* pfemProblem = dynamic_cast<PFEM*>(this->giveSlaveProblem(1));
+    Domain* pfemDomain = pfemProblem->giveDomain(1);
 
 #ifdef VERBOSE
-	OOFEM_LOG_RELEVANT( "Solving [step number %5d, time %e]\n", stepN->giveNumber(), stepN->giveTargetTime() );
+    OOFEM_LOG_RELEVANT( "Solving [step number %5d, time %e]\n", stepN->giveNumber(), stepN->giveTargetTime() );
 #endif
 
-	FloatArray currentInteractionParticlesVelocities;
-	FloatArray currentInteractionParticlesPressures;
-	FloatArray previousInteractionParticlesVelocities;
-	FloatArray previousInteractionParticlesPressures;
+    FloatArray currentInteractionParticlesVelocities;
+    FloatArray currentInteractionParticlesPressures;
+    FloatArray previousInteractionParticlesVelocities;
+    FloatArray previousInteractionParticlesPressures;
 
-	if (stepN->isTheFirstStep()) {
-		int ndman = pfemDomain->giveNumberOfDofManagers();
-		for (int i = 1; i <= ndman; i++) {
-			if(dynamic_cast<InteractionPFEMParticle*>(pfemDomain->giveDofManager(i))) {
-				interactionParticles.followedBy(i, 10);
-			}
-		}
-	}
+    if (stepN->isTheFirstStep()) {
+        int ndman = pfemDomain->giveNumberOfDofManagers();
+        for (int i = 1; i <= ndman; i++) {
+            if(dynamic_cast<InteractionPFEMParticle*>(pfemDomain->giveDofManager(i))) {
+                interactionParticles.followedBy(i, 10);
+            }
+        }
+    }
 
-	currentInteractionParticlesVelocities.resize(2 * interactionParticles.giveSize());
-	previousInteractionParticlesVelocities.resize(2 * interactionParticles.giveSize());
-	currentInteractionParticlesPressures.resize(interactionParticles.giveSize());
-	previousInteractionParticlesPressures.resize(interactionParticles.giveSize());
+    currentInteractionParticlesVelocities.resize(2 * interactionParticles.giveSize());
+    previousInteractionParticlesVelocities.resize(2 * interactionParticles.giveSize());
+    currentInteractionParticlesPressures.resize(interactionParticles.giveSize());
+    previousInteractionParticlesPressures.resize(interactionParticles.giveSize());
 
-	double velocityDifference = 1.0;
-	double pressureDifference = 1.0;
+    double velocityDifference = 1.0;
+    double pressureDifference = 1.0;
 
-	iterationNumber = 0;
-	while ( ( (velocityDifference > tol) || (pressureDifference > tol) ) && iterationNumber < 50 )
-	{
-		previousInteractionParticlesPressures = currentInteractionParticlesPressures;
-		previousInteractionParticlesVelocities = currentInteractionParticlesVelocities;
+    iterationNumber = 0;
+    while ( ( (velocityDifference > tol) || (pressureDifference > tol) ) && iterationNumber < 50 ) {
+        previousInteractionParticlesPressures = currentInteractionParticlesPressures;
+        previousInteractionParticlesVelocities = currentInteractionParticlesVelocities;
 
                 for ( auto &emodel: emodelList ) {
-		  //		for ( int i = 1; i <= nModels; i++ ) {
-		  //			EngngModel *emodel = this->giveSlaveProblem(i);
-			emodel->solveYourselfAt(stepN);
-		}
+        //		for ( int i = 1; i <= nModels; i++ ) {
+        //			EngngModel *emodel = this->giveSlaveProblem(i);
+            emodel->solveYourselfAt(stepN);
+        }
 
-		for (int i = 1; i <= interactionParticles.giveSize(); i++) {
-			currentInteractionParticlesPressures.at(i) = pfemProblem->giveUnknownComponent(VM_Total, stepN, pfemDomain, pfemDomain->giveDofManager(interactionParticles.at(i))->giveDofWithID(P_f));
-			InteractionPFEMParticle *interactionParticle = dynamic_cast<InteractionPFEMParticle*>(pfemDomain->giveDofManager(interactionParticles.at(i)));
-			FloatArray velocities;
-			interactionParticle->giveCoupledVelocities(velocities, stepN);
-			currentInteractionParticlesVelocities.at(2*(i - 1) + 1) = velocities.at(1);
-			currentInteractionParticlesVelocities.at(2*(i - 1) + 2) = velocities.at(2);
-		}
+        for (int i = 1; i <= interactionParticles.giveSize(); i++) {
+            currentInteractionParticlesPressures.at(i) = pfemProblem->giveUnknownComponent(VM_Total, stepN, pfemDomain, pfemDomain->giveDofManager(interactionParticles.at(i))->giveDofWithID(P_f));
+            InteractionPFEMParticle *interactionParticle = dynamic_cast<InteractionPFEMParticle*>(pfemDomain->giveDofManager(interactionParticles.at(i)));
+            FloatArray velocities;
+            interactionParticle->giveCoupledVelocities(velocities, stepN);
+            currentInteractionParticlesVelocities.at(2*(i - 1) + 1) = velocities.at(1);
+            currentInteractionParticlesVelocities.at(2*(i - 1) + 2) = velocities.at(2);
+        }
 
-		pressureDifference = 0.0;
-		velocityDifference = 0.0;
-		for (int i = 1; i <= currentInteractionParticlesPressures.giveSize(); i++) {
-			pressureDifference += (currentInteractionParticlesPressures.at(i) - previousInteractionParticlesPressures.at(i))*(currentInteractionParticlesPressures.at(i) - previousInteractionParticlesPressures.at(i));
-			velocityDifference += (currentInteractionParticlesVelocities.at(2*(i - 1) + 1) - previousInteractionParticlesVelocities.at(2*(i -1) + 1))*(currentInteractionParticlesVelocities.at(2*(i - 1) + 1) - previousInteractionParticlesVelocities.at(2*(i -1) + 1));
-			velocityDifference += (currentInteractionParticlesVelocities.at(2*(i - 1) + 2) - previousInteractionParticlesVelocities.at(2*(i -1) + 2))*(currentInteractionParticlesVelocities.at(2*(i - 1) + 2) - previousInteractionParticlesVelocities.at(2*(i -1) + 2));
-		}
-		pressureDifference = sqrt(pressureDifference);
-		velocityDifference = sqrt(velocityDifference);
+        pressureDifference = 0.0;
+        velocityDifference = 0.0;
+        for (int i = 1; i <= currentInteractionParticlesPressures.giveSize(); i++) {
+            pressureDifference += (currentInteractionParticlesPressures.at(i) - previousInteractionParticlesPressures.at(i))*(currentInteractionParticlesPressures.at(i) - previousInteractionParticlesPressures.at(i));
+            velocityDifference += (currentInteractionParticlesVelocities.at(2*(i - 1) + 1) - previousInteractionParticlesVelocities.at(2*(i -1) + 1))*(currentInteractionParticlesVelocities.at(2*(i - 1) + 1) - previousInteractionParticlesVelocities.at(2*(i -1) + 1));
+            velocityDifference += (currentInteractionParticlesVelocities.at(2*(i - 1) + 2) - previousInteractionParticlesVelocities.at(2*(i -1) + 2))*(currentInteractionParticlesVelocities.at(2*(i - 1) + 2) - previousInteractionParticlesVelocities.at(2*(i -1) + 2));
+        }
+        pressureDifference = sqrt(pressureDifference);
+        velocityDifference = sqrt(velocityDifference);
 
-		if (iterationNumber > 0) {
-			pressureDifference /= previousInteractionParticlesPressures.computeNorm();
-			velocityDifference /= previousInteractionParticlesVelocities.computeNorm();
-		}
+        if (iterationNumber > 0) {
+            pressureDifference /= previousInteractionParticlesPressures.computeNorm();
+            velocityDifference /= previousInteractionParticlesVelocities.computeNorm();
+        }
 
-		OOFEM_LOG_RELEVANT("%3d %le %le\n", iterationNumber++, pressureDifference, velocityDifference );
-	}
-	if ( iterationNumber > 49 ) {
-		OOFEM_ERROR("Maximal fluid-structure interface iteration count exceded");
-	}
-	stepN->incrementStateCounter();
+        OOFEM_LOG_RELEVANT("%3d %le %le\n", iterationNumber++, pressureDifference, velocityDifference );
+    }
+    if ( iterationNumber > 49 ) {
+        OOFEM_ERROR("Maximal fluid-structure interface iteration count exceded");
+    }
+    stepN->incrementStateCounter();
 }
 
 int
@@ -460,8 +448,7 @@ FluidStructureProblem :: forceEquationNumbering()
 void
 FluidStructureProblem :: updateYourself(TimeStep *stepN)
 {
-  //    for ( int i = 1; i <= nModels; i++ ) {
-for ( auto &emodel: emodelList ) {
+    for ( auto &emodel: emodelList ) {
         emodel->updateYourself(stepN);
     }
 
@@ -472,7 +459,6 @@ void
 FluidStructureProblem :: terminate(TimeStep *tStep)
 {
     for ( auto &emodel: emodelList ) {
-      //    for ( int i = 1; i <= nModels; i++ ) {
         emodel->terminate(tStep);
     }
 
@@ -487,8 +473,7 @@ FluidStructureProblem :: doStepOutput(TimeStep *stepN)
     // print output
     this->printOutputAt(File, stepN);
     // export using export manager
-    //for ( int i = 1; i <= nModels; i++ ) {
-for ( auto &emodel: emodelList ) {
+    for ( auto &emodel: emodelList ) {
         emodel->giveExportModuleManager()->doOutput(stepN);
     }
 }
@@ -497,10 +482,8 @@ for ( auto &emodel: emodelList ) {
 void
 FluidStructureProblem :: printOutputAt(FILE *File, TimeStep *stepN)
 {
-    FILE *slaveFile;
-    //    for ( int i = 1; i <= nModels; i++ ) {
-for ( auto &emodel: emodelList ) {
-        slaveFile = emodel->giveOutputStream();
+    for ( auto &emodel: emodelList ) {
+        FILE *slaveFile = emodel->giveOutputStream();
         emodel->printOutputAt(slaveFile, stepN);
     }
 }
@@ -510,8 +493,8 @@ contextIOResultType
 FluidStructureProblem :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
     EngngModel :: saveContext(stream, mode, obj);
-    //    for ( int i = 1; i <= nModels; i++ ) {
-for ( auto &emodel: emodelList ) {
+    
+    for ( auto &emodel: emodelList ) {
         emodel->saveContext(stream, mode, obj);
     }
 
@@ -523,8 +506,7 @@ contextIOResultType
 FluidStructureProblem :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
     EngngModel :: restoreContext(stream, mode, obj);
-    //    for ( int i = 1; i <= nModels; i++ ) {
-for ( auto &emodel: emodelList ) {
+    for ( auto &emodel: emodelList ) {
         emodel->restoreContext(stream, mode, obj);
     }
 
@@ -551,8 +533,7 @@ FluidStructureProblem :: checkProblemConsistency()
     // check internal consistency
     // if success returns nonzero
     int result = 1;
-    //    for ( int i = 1; i <= nModels; i++ ) {
-for ( auto &emodel: emodelList ) {
+    for ( auto &emodel: emodelList ) {
         result &= emodel->checkProblemConsistency();
     }
 
@@ -572,8 +553,7 @@ for ( auto &emodel: emodelList ) {
 void
 FluidStructureProblem :: updateDomainLinks()
 {
-  //   for ( int i = 1; i <= nModels; i++ ) {
-for ( auto &emodel: emodelList ) {
+    for ( auto &emodel: emodelList ) {
         emodel->updateDomainLinks();
     }
 }
@@ -581,8 +561,7 @@ for ( auto &emodel: emodelList ) {
 void
 FluidStructureProblem :: setRenumberFlag()
 {
-  //    for ( int i = 1; i <= nModels; i++ ) {
-for ( auto &emodel: emodelList ) {
+    for ( auto &emodel: emodelList ) {
         emodel->setRenumberFlag();
     }
 }
@@ -590,23 +569,23 @@ for ( auto &emodel: emodelList ) {
 void
 FluidStructureProblem :: preInitializeNextStep()
 {
-  //	for ( int i = 1; i <= nModels; i++ ) {
-for ( auto &emodel: emodelList ) {
+    for ( auto &emodel: emodelList ) {
         emodel->preInitializeNextStep();
     }
 }
 
-//void
-//FluidStructureProblem :: postInitializeCurrentStep()
-//{
-//	for ( int i = 1; i <= nModels; i++ ) {
-//        DIIDynamic* dynamicProblem = dynamic_cast<DIIDynamic*>(this->giveSlaveProblem(i));
-//		if (dynamicProblem) {
-//			this->giveCurrentStep()->setTimeDiscretization(dynamicProblem->giveInitialTimeDiscretization());
-//		}
-//    }
-//}
-
+#if 0
+void
+FluidStructureProblem :: postInitializeCurrentStep()
+{
+    for ( int i = 1; i <= nModels; i++ ) {
+        DIIDynamic* dynamicProblem = dynamic_cast<DIIDynamic*>(this->giveSlaveProblem(i));
+        if (dynamicProblem) {
+            this->giveCurrentStep()->setTimeDiscretization(dynamicProblem->giveInitialTimeDiscretization());
+        }
+    }
+}
+#endif
 
 
 #ifdef __OOFEG

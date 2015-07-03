@@ -54,51 +54,52 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     double value;
-    int j, size;
+    int size;
     FloatArray triplets;
 
 
-    this->LinearElasticMaterial :: initializeFrom(ir);
+    result = LinearElasticMaterial :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     IR_GIVE_FIELD(ir, value, _IFT_OrthotropicLinearElasticMaterial_ex);
-    propertyDictionary->add(Ex, value);
+    propertyDictionary.add(Ex, value);
 
     IR_GIVE_FIELD(ir, value, _IFT_OrthotropicLinearElasticMaterial_ey);
-    propertyDictionary->add(Ey, value);
+    propertyDictionary.add(Ey, value);
 
     IR_GIVE_FIELD(ir, value, _IFT_OrthotropicLinearElasticMaterial_ez);
-    propertyDictionary->add(Ez, value);
+    propertyDictionary.add(Ez, value);
 
 
     IR_GIVE_FIELD(ir, value, _IFT_OrthotropicLinearElasticMaterial_nyyz);
-    propertyDictionary->add(NYyz, value);
+    propertyDictionary.add(NYyz, value);
 
     IR_GIVE_FIELD(ir, value, _IFT_OrthotropicLinearElasticMaterial_nyxz);
-    propertyDictionary->add(NYxz, value);
+    propertyDictionary.add(NYxz, value);
 
     IR_GIVE_FIELD(ir, value, _IFT_OrthotropicLinearElasticMaterial_nyxy);
-    propertyDictionary->add(NYxy, value);
+    propertyDictionary.add(NYxy, value);
 
 
     IR_GIVE_FIELD(ir, value, _IFT_OrthotropicLinearElasticMaterial_gyz);
-    propertyDictionary->add(Gyz, value);
+    propertyDictionary.add(Gyz, value);
 
     IR_GIVE_FIELD(ir, value, _IFT_OrthotropicLinearElasticMaterial_gxz);
-    propertyDictionary->add(Gxz, value);
+    propertyDictionary.add(Gxz, value);
 
     IR_GIVE_FIELD(ir, value, _IFT_OrthotropicLinearElasticMaterial_gxy);
-    propertyDictionary->add(Gxy, value);
+    propertyDictionary.add(Gxy, value);
 
 
 
     IR_GIVE_FIELD(ir, value, _IFT_OrthotropicLinearElasticMaterial_talphax);
-    propertyDictionary->add(tAlphax, value);
+    propertyDictionary.add(tAlphax, value);
 
     IR_GIVE_FIELD(ir, value, _IFT_OrthotropicLinearElasticMaterial_talphay);
-    propertyDictionary->add(tAlphay, value);
+    propertyDictionary.add(tAlphay, value);
 
     IR_GIVE_FIELD(ir, value, _IFT_OrthotropicLinearElasticMaterial_talphaz);
-    propertyDictionary->add(tAlphaz, value);
+    propertyDictionary.add(tAlphaz, value);
 
     // check for suspicious parameters
     // ask for dependent parameters (symmetry conditions) and check if reasonable
@@ -132,7 +133,7 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
         double n1 = 0.0, n2 = 0.0;
 
         localCoordinateSystem = new FloatMatrix(3, 3);
-        for ( j = 1; j <= 3; j++ ) {
+        for ( int j = 1; j <= 3; j++ ) {
             localCoordinateSystem->at(j, 1) = triplets.at(j);
             n1 += triplets.at(j) * triplets.at(j);
             localCoordinateSystem->at(j, 2) = triplets.at(j + 3);
@@ -141,7 +142,7 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
 
         n1 = sqrt(n1);
         n2 = sqrt(n2);
-        for ( j = 1; j <= 3; j++ ) { // normalize e1' e2'
+        for ( int j = 1; j <= 3; j++ ) { // normalize e1' e2'
             localCoordinateSystem->at(j, 1) /= n1;
             localCoordinateSystem->at(j, 2) /= n2;
         }
@@ -180,10 +181,7 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
         if ( size == 3 ) {
             cs_type = shellCS;
             triplets.normalize();
-            helpPlaneNormal = new FloatArray(3);
-            for ( j = 1; j < 4; j++ ) {
-                helpPlaneNormal->at(j) = triplets.at(j);
-            }
+            helpPlaneNormal = new FloatArray(triplets);
 
             //
             // store normal defining help plane into row matrix
@@ -198,9 +196,7 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
         //
         cs_type = localCS;
         localCoordinateSystem = new FloatMatrix(3, 3);
-        for ( j = 1; j < 4; j++ ) {
-            localCoordinateSystem->at(j, j) = 1.0;
-        }
+        localCoordinateSystem->beUnitMatrix();
     }
 
     return IRRT_OK;
@@ -213,40 +209,40 @@ OrthotropicLinearElasticMaterial :: giveInputRecord(DynamicInputRecord &input)
     Material :: giveInputRecord(input);
 
 
-    input.setField(propertyDictionary->at(Ex), _IFT_OrthotropicLinearElasticMaterial_ex);
+    input.setField(propertyDictionary.at(Ex), _IFT_OrthotropicLinearElasticMaterial_ex);
 
 
-    input.setField(propertyDictionary->at(Ey), _IFT_OrthotropicLinearElasticMaterial_ey);
+    input.setField(propertyDictionary.at(Ey), _IFT_OrthotropicLinearElasticMaterial_ey);
 
 
-    input.setField(propertyDictionary->at(Ez), _IFT_OrthotropicLinearElasticMaterial_ez);
+    input.setField(propertyDictionary.at(Ez), _IFT_OrthotropicLinearElasticMaterial_ez);
 
 
-    input.setField(propertyDictionary->at(NYyz), _IFT_OrthotropicLinearElasticMaterial_nyyz);
+    input.setField(propertyDictionary.at(NYyz), _IFT_OrthotropicLinearElasticMaterial_nyyz);
 
 
-    input.setField(propertyDictionary->at(NYxz), _IFT_OrthotropicLinearElasticMaterial_nyxz);
+    input.setField(propertyDictionary.at(NYxz), _IFT_OrthotropicLinearElasticMaterial_nyxz);
 
 
-    input.setField(propertyDictionary->at(NYxy), _IFT_OrthotropicLinearElasticMaterial_nyxy);
+    input.setField(propertyDictionary.at(NYxy), _IFT_OrthotropicLinearElasticMaterial_nyxy);
 
 
-    input.setField(propertyDictionary->at(Gyz), _IFT_OrthotropicLinearElasticMaterial_gyz);
+    input.setField(propertyDictionary.at(Gyz), _IFT_OrthotropicLinearElasticMaterial_gyz);
 
 
-    input.setField(propertyDictionary->at(Gxz), _IFT_OrthotropicLinearElasticMaterial_gxz);
+    input.setField(propertyDictionary.at(Gxz), _IFT_OrthotropicLinearElasticMaterial_gxz);
 
 
-    input.setField(propertyDictionary->at(Gxy), _IFT_OrthotropicLinearElasticMaterial_gxy);
+    input.setField(propertyDictionary.at(Gxy), _IFT_OrthotropicLinearElasticMaterial_gxy);
 
 
-    input.setField(propertyDictionary->at(tAlphax), _IFT_OrthotropicLinearElasticMaterial_talphax);
+    input.setField(propertyDictionary.at(tAlphax), _IFT_OrthotropicLinearElasticMaterial_talphax);
 
 
-    input.setField(propertyDictionary->at(tAlphay), _IFT_OrthotropicLinearElasticMaterial_talphay);
+    input.setField(propertyDictionary.at(tAlphay), _IFT_OrthotropicLinearElasticMaterial_talphay);
 
 
-    input.setField(propertyDictionary->at(tAlphaz), _IFT_OrthotropicLinearElasticMaterial_talphaz);
+    input.setField(propertyDictionary.at(tAlphaz), _IFT_OrthotropicLinearElasticMaterial_talphaz);
 
 
     ///@todo Should add optional arguments:

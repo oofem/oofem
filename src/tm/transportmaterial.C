@@ -79,15 +79,15 @@ void TransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tStep)
 
     fprintf(File, "  state");
 
-    for ( int i = 1; i <= field.giveSize(); i++ ) {
-        fprintf( File, " % .4e", field.at(i) );
+    for ( auto &val : field ) {
+        fprintf( File, " %.4e", val );
     }
 
     transpElem->computeFlow(flowVec, gp, tStep);
 
     fprintf(File, "   flow");
-    for ( int i = 1; i <= flowVec.giveSize(); i++ ) {
-        fprintf( File, " % .4e", flowVec.at(i) );
+    for ( auto &flow : flowVec ) {
+        fprintf( File, " %.4e", flow );
     }
 
     fprintf(File, "\n");

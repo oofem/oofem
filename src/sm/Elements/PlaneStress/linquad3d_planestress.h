@@ -55,25 +55,25 @@ class FEI2dQuadLin;
 class LinQuad3DPlaneStress : public PlaneStress2d
 {
 protected:
-  // local vertex coordinates
-  std :: vector< FloatArray > lc; 
-  /**
-   * Transformation Matrix form GtoL(3,3) is stored
-   * at the element level for computation efficiency
-   */
-  FloatMatrix *GtoLRotationMatrix;
+    /// Local vertex coordinates
+    std :: vector< FloatArray > lc; 
+    /**
+     * Transformation Matrix form GtoL(3,3) is stored
+     * at the element level for computation efficiency
+     */
+    FloatMatrix *GtoLRotationMatrix;
 
-  enum CharTensor {
-    LocalStrainTensor,
-    GlobalStrainTensor,
-    LocalCurvatureTensor,
-    GlobalCurvatureTensor,
+    enum CharTensor {
+        LocalStrainTensor,
+        GlobalStrainTensor,
+        LocalCurvatureTensor,
+        GlobalCurvatureTensor,
 
-    LocalForceTensor,
-    GlobalForceTensor,
-    LocalMomentumTensor,
-    GlobalMomentumTensor
-};
+        LocalForceTensor,
+        GlobalForceTensor,
+        LocalMomentumTensor,
+        GlobalMomentumTensor
+    };
 
 public:
     LinQuad3DPlaneStress(int n, Domain * d);
@@ -99,9 +99,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_LinQuad3DPlaneStress_Name; }
     virtual const char *giveClassName() const { return "LinQuad3DPlaneStress"; }
-
-protected:
-
 };
 } // end namespace oofem
 #endif // linquad3d_planestress_h

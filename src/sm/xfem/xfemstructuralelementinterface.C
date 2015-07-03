@@ -367,7 +367,11 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeConstitutiveM
                 StructuralCrossSection *structCS = dynamic_cast< StructuralCrossSection * >( cs );
 
                 if ( structCS != NULL ) {
-                    structCS->giveCharMaterialStiffnessMatrix(answer, rMode, gp, tStep);
+                    if ( mUsePlaneStrain ) {
+                        structCS->giveStiffnessMatrix_PlaneStrain(answer, rMode, gp, tStep);
+                    } else {
+                        structCS->giveStiffnessMatrix_PlaneStress(answer, rMode, gp, tStep);
+                    }
                     return;
                 } else {
                     OOFEM_ERROR("failed to fetch StructuralMaterial");
@@ -378,8 +382,12 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeConstitutiveM
 
     // If no enrichment modifies the material,
     // compute stiffness based on the bulk material.
-    StructuralElement &structEl = dynamic_cast< StructuralElement & >( ( * element ) );
-    structEl.StructuralElement :: computeConstitutiveMatrixAt(answer, rMode, gp, tStep);
+    StructuralCrossSection *cs = dynamic_cast< StructuralCrossSection * >( element->giveCrossSection() );
+    if ( mUsePlaneStrain ) {
+        cs->giveStiffnessMatrix_PlaneStrain(answer, rMode, gp, tStep);
+    } else {
+        cs->giveStiffnessMatrix_PlaneStress(answer, rMode, gp, tStep);
+    }
 }
 
 void XfemStructuralElementInterface :: XfemElementInterface_computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
@@ -416,7 +424,7 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeStressVector(
         }
     }
 
-
+    // If no enrichment modifies the material:
     if ( mUsePlaneStrain ) {
         cs->giveRealStress_PlaneStrain(answer, gp, strain, tStep);
     } else {
@@ -696,7 +704,7 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeConsistentMas
     mass = 0.;
 
     for ( GaussPoint *gp: *element->giveIntegrationRule(0) ) {
-        structEl->computeNmatrixAt(* ( gp->giveNaturalCoordinates() ), n);
+        structEl->computeNmatrixAt(gp->giveNaturalCoordinates(), n);
         density = structEl->giveMaterial()->give('d', gp);
 
         if ( ipDensity != NULL ) {

@@ -38,8 +38,6 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "../sm/Materials/structuralms.h"
-#include "strainvector.h"
-#include "stressvector.h"
 #include "../sm/Materials/structuralmaterial.h"
 #include "Materials/isolinearelasticmaterial.h"
 
@@ -81,8 +79,8 @@ public:
 
 protected:
     /// Plastic strain
-    StrainVector plasticStrain;
-    StrainVector tempPlasticStrain;
+    FloatArray plasticStrain;
+    FloatArray tempPlasticStrain;
 
     /// Hardening parameter q
     double q;
@@ -119,12 +117,12 @@ public:
      * Get the full plastic strain vector from the material status.
      * @return Plastic strain.
      */
-    const StrainVector &givePlasticStrain() const { return plasticStrain; }
+    const FloatArray &givePlasticStrain() const { return plasticStrain; }
     /**
      * Get the full plastic strain vector from the material status.
      * @return Volumetric part of plastic strain.
      */
-    double giveVolumetricPlasticStrain() const { return plasticStrain.computeVolumetricPart(); }
+    double giveVolumetricPlasticStrain() const { return ( plasticStrain.at(1) + plasticStrain.at(2) + plasticStrain.at(3) ) / 3.0; }
     /**
      * Get the value of hardening variable q from the material status.
      * @return Hardenenig variable q
@@ -140,7 +138,7 @@ public:
      * Get the temp value of the full plastic strain vector from the material status.
      * @return Temp value of plastic strain vector.
      */
-    const StrainVector &giveTempPlasticStrain() const { return tempPlasticStrain; }
+    const FloatArray &giveTempPlasticStrain() const { return tempPlasticStrain; }
     /**
      * Get the temp value of the hardening variable q from the material status.
      * @return Temp value of hardening variable kappaP.
@@ -156,7 +154,7 @@ public:
      * Assign the temp value of plastic strain.
      * @param v New temp value o plastic strain.
      */
-    void letTempPlasticStrainBe(const StrainVector &v) { tempPlasticStrain = v; }
+    void letTempPlasticStrainBe(const FloatArray &v) { tempPlasticStrain = v; }
     /**
      * Assign the temp value of variable q
      * @param v New temp value of variable q
@@ -172,7 +170,7 @@ public:
      * Assign the value of plastic strain.
      * @param v New value of plastic strain.
      */
-    void letPlasticStrainBe(const StrainVector &v) { plasticStrain = v; }
+    void letPlasticStrainBe(const FloatArray &v) { plasticStrain = v; }
     /**
      * Assign the value of variable q
      * @param v New value of variable q
@@ -343,7 +341,7 @@ protected:
      * @param gp Gauss point
      * @param strain Strain
      */
-    void performStressReturn(GaussPoint *gp, StrainVector strain);
+    void performStressReturn(GaussPoint *gp, const FloatArray &strain);
     /**
      * Computes direction of plastic yielding m1, equation 7.17
      * @param answer Result
@@ -352,7 +350,7 @@ protected:
      * @param i1 Trace of stress tensor
      * @param q Parameter q
      */
-    void computePlastStrainDirM1(StrainVector &answer, const StressVector &stressDeviator, double rho, double i1, double q);
+    void computePlastStrainDirM1(FloatArray &answer, const FloatArray &stressDeviator, double rho, double i1, double q);
     /**
      * Computes direction of plastic yielding m2, equation 7.19
      * @param answer Result
@@ -361,7 +359,7 @@ protected:
      * @param i1 Trace of stress tensor
      * @param q Parameter q
      */
-    void computePlastStrainDirM2(StrainVector &answer, const StressVector &stressDeviator, double rho, double i1, double q);
+    void computePlastStrainDirM2(FloatArray &answer, const FloatArray &stressDeviator, double rho, double i1, double q);
     /**
      * Computes direction of plastic yielding m2, equation 7.18
      * @param answer Result
@@ -370,7 +368,7 @@ protected:
      * @param i1 Trace of stress tensor
      * @param q Parameter q
      */
-    void computePlastStrainDirM3(StrainVector &answer, const StressVector &stressDeviator, double rho, double i1, double q);
+    void computePlastStrainDirM3(FloatArray &answer, const FloatArray &stressDeviator, double rho, double i1, double q);
     /**
      * Auxiliary equation H (7.33 or 7.34)
      * @param q Parameter q from previous step
@@ -455,20 +453,12 @@ public:
     virtual ~DustMaterial();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int hasMaterialModeCapability(MaterialMode mMode);
 
     virtual const char *giveClassName() const { return "DustMaterial"; }
     virtual const char *giveInputRecordName() const { return _IFT_DustMaterial_Name; }
 
-    virtual void giveRealStressVector(FloatArray &answer,
-                                      GaussPoint *gp,
-                                      const FloatArray &strainVector,
-                                      TimeStep *tStep);
-
-    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    virtual void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
+    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
+                                      const FloatArray &strainVector, TimeStep *tStep);
 
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,

@@ -44,7 +44,9 @@
 #include "contextioerr.h"
 #include "classfactory.h"
 #include "dofmanager.h"
+#include "dof.h"
 #include "domain.h"
+#include "unknownnumberingscheme.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -55,16 +57,14 @@ REGISTER_EngngModel(EigenValueDynamic);
 
 NumericalMethod *EigenValueDynamic :: giveNumericalMethod(MetaStep *mStep)
 {
-    if ( nMethod ) {
-        return nMethod;
+    if ( !nMethod ) {
+        nMethod.reset( classFactory.createGeneralizedEigenValueSolver(solverType, this->giveDomain(1), this) );
+        if ( !nMethod ) {
+            OOFEM_ERROR("solver creation failed");
+        }
     }
 
-    nMethod = classFactory.createGeneralizedEigenValueSolver(solverType, this->giveDomain(1), this);
-    if ( nMethod == NULL ) {
-        OOFEM_ERROR("solver creation failed");
-    }
-
-    return nMethod;
+    return nMethod.get();
 }
 
 IRResultType
@@ -115,6 +115,7 @@ double EigenValueDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *t
 
     switch ( mode ) {
     case VM_Total:  // EigenVector
+    case VM_Incremental:
         return eigVec.at( eq, ( int ) tStep->giveTargetTime() );
 
     default:
@@ -130,17 +131,15 @@ TimeStep *EigenValueDynamic :: giveNextStep()
     int istep = giveNumberOfFirstStep();
     StateCounterType counter = 1;
 
-    delete previousStep;
-    if ( currentStep != NULL ) {
-        istep =  currentStep->giveNumber() + 1;
+    if ( currentStep ) {
+        istep = currentStep->giveNumber() + 1;
         counter = currentStep->giveSolutionStateCounter() + 1;
     }
 
-    previousStep = currentStep;
-    currentStep = new TimeStep(istep, this, 1, ( double ) istep, 0., counter);
-    // time and dt variables are set eq to 0 for statics - has no meaning
+    previousStep = std :: move(currentStep);
+    currentStep.reset( new TimeStep(istep, this, 1, ( double ) istep, 0., counter) );
 
-    return currentStep;
+    return currentStep.get();
 }
 
 
@@ -160,15 +159,15 @@ void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep)
         // first step  assemble stiffness Matrix
         //
 
-        stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
+        stiffnessMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
         stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
 
-        massMatrix = classFactory.createSparseMtrx(sparseMtrxType);
+        massMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
         massMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
 
-        this->assemble( stiffnessMatrix, tStep, StiffnessMatrix,
+        this->assemble( *stiffnessMatrix, tStep, TangentAssembler(TangentStiffness),
                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
-        this->assemble( massMatrix, tStep, MassMatrix,
+        this->assemble( *massMatrix, tStep, MassMatrixAssembler(),
                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //
         // create resulting objects eigVec and eigVal
@@ -191,11 +190,10 @@ void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_INFO("Solving ...\n");
 #endif
 
-    nMethod->solve(stiffnessMatrix, massMatrix, & eigVal, & eigVec, rtolv, numberOfRequiredEigenValues);
+    nMethod->solve(*stiffnessMatrix, *massMatrix, eigVal, eigVec, rtolv, numberOfRequiredEigenValues);
 
-    delete stiffnessMatrix;
-    delete massMatrix;
-    stiffnessMatrix = massMatrix = NULL;
+    stiffnessMatrix.reset(NULL);
+    massMatrix.reset(NULL);
 }
 
 
@@ -209,7 +207,7 @@ void EigenValueDynamic :: terminate(TimeStep *tStep)
     FILE *outputStream = this->giveOutputStream();
 
     // print loadcase header
-    fprintf(outputStream, "\nOutput for time % .3e \n\n", 1.0);
+    fprintf(outputStream, "\nOutput for time %.3e \n\n", 1.0);
     // print eigen values on output
     fprintf(outputStream, "\n\nEigen Values (Omega^2) are:\n-----------------\n");
 
@@ -223,7 +221,7 @@ void EigenValueDynamic :: terminate(TimeStep *tStep)
     fprintf(outputStream, "\n\n");
 
     for ( int i = 1; i <=  numberOfRequiredEigenValues; i++ ) {
-        fprintf(outputStream, "\nOutput for eigen value no.  % .3e \n", ( double ) i);
+        fprintf(outputStream, "\nOutput for eigen value no.  %.3e \n", ( double ) i);
         fprintf( outputStream,
                 "Printing eigen vector no. %d, corresponding eigen value is %15.8e\n\n",
                 i, eigVal.at(i) );
@@ -368,13 +366,6 @@ int EigenValueDynamic :: resolveCorrespondingEigenStepNumber(void *obj)
     }
 
     return * istep;
-}
-
-
-void
-EigenValueDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
-{
-    iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
 }
 
 } // end namespace oofem

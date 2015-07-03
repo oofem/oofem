@@ -41,6 +41,8 @@
 
 #include "logger.h"
 
+#include <string>
+
 namespace oofem {
 /** Cause oofem program termination by calling exit. */
 OOFEM_EXPORT void oofem_exit(int code);

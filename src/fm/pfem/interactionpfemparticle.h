@@ -37,10 +37,6 @@
 
 #include "pfemparticle.h"
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
-
 ///@name Input fields for Pfemparticle
 //@{
 #define _IFT_InteractionPFEMParticle_Name "interactionpfemparticle"
@@ -61,7 +57,7 @@ class FluidStructureProblem;
 class OOFEM_EXPORT InteractionPFEMParticle : public PFEMParticle
 {
 protected:
-	int coupledNode;
+    int coupledNode;
 
 public:
     /**
@@ -75,14 +71,7 @@ public:
      */
     ~InteractionPFEMParticle(void) { }
 
-    /**
-     * Initializes receiver acording to object description stored in input record.
-     */
     virtual IRResultType initializeFrom(InputRecord *ir);
-    /**
-     * Checks internal data consistency in node.
-     * @return nonzero if receiver check is o.k.
-     */
     virtual int checkConsistency();
 
     virtual void updateYourself(TimeStep *tStep);
@@ -90,25 +79,20 @@ public:
     virtual void givePrescribedUnknownVector(FloatArray &answer, const IntArray &dofMask,
                                              ValueModeType mode, TimeStep *stepN);
 
-	void giveCoupledVelocities(FloatArray &answer, TimeStep *stepN);
+    void giveCoupledVelocities(FloatArray &answer, TimeStep *stepN);
 
     virtual void printOutputAt(FILE *stream, TimeStep *stepN);
 
-    /**
-     * Returns class name of the receiver.
-     */
     virtual const char *giveClassName() const { return "InteractionPFEMParticle"; }
-
-	virtual const char *giveInputRecordName() const { return _IFT_InteractionPFEMParticle_Name; }
-    
+    virtual const char *giveInputRecordName() const { return _IFT_InteractionPFEMParticle_Name; }
 
 #ifdef __OOFEG
     virtual void drawScalar(oofegGraphicContext &gc);
 #endif
 
 private:
-	StructuralEngngModel* giveStructuralProblem();
-	FluidStructureProblem* giveFluidStructureMasterProblem();
+    StructuralEngngModel* giveStructuralProblem();
+    FluidStructureProblem* giveFluidStructureMasterProblem();
 };
 } // end namespace oofem
 #endif // interactionpfemparticle_h

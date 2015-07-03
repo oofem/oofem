@@ -40,7 +40,6 @@
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
-#include "eleminterpmapperinterface.h"
 
 #define _IFT_Brick1_ht_Name "brick1ht"
 #define _IFT_Brick1_hmt_Name "brick1hmt"

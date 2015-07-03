@@ -126,6 +126,8 @@ protected:
     /// Maximum limit on omega. The purpose is elimination of a too compliant material which may cause convergency problems. Set to something like 0.99 if needed.
     double maxOmega;
 
+    bool semiExplicit; // If semi-explicit time integration should be used
+
 public:
     /// Constructor
     IntMatIsoDamage(int n, Domain *d);
@@ -168,9 +170,9 @@ public:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new IntMatIsoDamageStatus(1, domain, gp); }
 
 protected:
-    void give2dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode,
+    virtual void give2dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode,
                                                 GaussPoint *gp, TimeStep *tStep);
-    void give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode,
+    virtual void give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode,
                                                 GaussPoint *gp, TimeStep *tStep);
 };
 } // end namespace oofem

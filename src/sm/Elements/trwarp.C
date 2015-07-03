@@ -40,10 +40,12 @@
 #include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
+#include "CrossSections/structuralcrosssection.h"
 #include "classfactory.h"
 #include "load.h"
 #include "EngineeringModels/freewarping.h"
 #include "engngm.h"
+#include "dof.h"
 
 
 
@@ -81,9 +83,14 @@ IRResultType
 Tr_Warp :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 1;
-    this->StructuralElement :: initializeFrom(ir);
+    return StructuralElement :: initializeFrom(ir);
+}
 
-    return IRRT_OK;
+
+void
+Tr_Warp :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveRealStress_Warping(answer, gp, strain, tStep);
 }
 
 void
@@ -109,11 +116,11 @@ Tr_Warp :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
 {
     FloatMatrix dN;
     FloatArray tc(2);
-    this->interp.evaldNdx( dN, *  gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evaldNdx( dN, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     // gausspoint coordinates
     FloatArray gcoords;
     Element *elem = gp->giveElement();
-    elem->computeGlobalCoordinates( gcoords, * ( gp->giveNaturalCoordinates() ) );
+    elem->computeGlobalCoordinates( gcoords, gp->giveNaturalCoordinates() );
 
     this->transformCoordinates( tc, gcoords, this->giveCrossSection()->giveNumber() );
 
@@ -155,7 +162,7 @@ Tr_Warp :: computeFirstMomentOfArea(FloatArray &answer)
     GaussPoint *gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0);
     double A = this->computeVolumeAround(gp);
     Element *elem = gp->giveElement();
-    elem->computeGlobalCoordinates( answer, * ( gp->giveNaturalCoordinates() ) );
+    elem->computeGlobalCoordinates( answer, gp->giveNaturalCoordinates() );
     answer.times(A);
 }
 
@@ -164,7 +171,7 @@ Tr_Warp :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, volume;
-    determinant = fabs( this->interp.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    determinant = fabs( this->interp.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     weight = gp->giveWeight();
     volume = determinant * weight;
     return volume;
@@ -247,7 +254,7 @@ Tr_Warp :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tSt
         double f2 = ( dx * x1 + dy * y1 ) / 3.0 + ( dx * x2 + dy * y2 ) / 6.0;
 
         // the load value has the meaning of relative twist
-        double theta = this->giveDofManager(4)->giveDofWithID(24)->giveBcValue(VM_Total, tStep);
+        double theta = this->giveDofManager(4)->giveDofWithID(24)->giveUnknown(VM_Total, tStep);
         FloatArray reducedAnswer, b;
         b.resize(4);
         b.zero();
@@ -270,8 +277,7 @@ Tr_Warp :: giveThicknessAt(const FloatArray &gcoords)
 double
 Tr_Warp :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double determinant = fabs( this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
-    FloatArray gc;
+    double determinant = fabs( this->interp.edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     return determinant * gp->giveWeight();
 }
 
@@ -364,7 +370,7 @@ Tr_Warp :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &answer, InternalStateTy
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         double dV = elem->computeVolumeAround(gp);
-        interpol->evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(elem) );
+        interpol->evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(elem) );
         fullAnswer.plusDyadSymmUpper(n, dV);
         pok += ( n.at(1) * dV ); ///@todo What is this? Completely unused.
         volume += dV;
@@ -404,7 +410,7 @@ Tr_Warp :: ZZNodalRecoveryMI_computeNValProduct(FloatMatrix &answer, InternalSta
             continue;
         }
 
-        interpol->evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(elem) );
+        interpol->evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(elem) );
         answer.plusDyadUnsym(n, stressVector, dV);
 
         //  help.beTProductOf(n,stressVector);

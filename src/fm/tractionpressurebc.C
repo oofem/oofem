@@ -40,9 +40,7 @@
 namespace oofem {
 REGISTER_BoundaryCondition(TractionPressureBC);
 
-double TractionPressureBC :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
-// Returns the value at tStep of the prescribed value of the kinematic
-// unknown 'u'. Returns 0 if 'u' has no prescribed value.
+double TractionPressureBC :: give(Dof *dof, ValueModeType mode, double time)
 {
     return static_cast< CBS * >( this->domain->giveEngngModel() )->giveTractionPressure(dof);
 }

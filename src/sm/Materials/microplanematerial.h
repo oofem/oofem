@@ -102,9 +102,7 @@ public:
      * @param n Material number.
      * @param d Domain to which newly created material belongs.
      */
-    MicroplaneMaterial(int n, Domain *d) : StructuralMaterial(n, d) {
-        numberOfMicroplanes = 0;
-    }
+    MicroplaneMaterial(int n, Domain *d) : StructuralMaterial(n, d), numberOfMicroplanes(0) { }
     /// Destructor.
     virtual ~MicroplaneMaterial() { }
 
@@ -187,10 +185,6 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
-
-    // identification and auxiliary functions
-    virtual const char *giveClassName() const { return "MicroplaneMaterial"; }
-    virtual int hasMaterialModeCapability(MaterialMode mode) { return mode == _3dMat; }
 
     virtual IntegrationPointStatus *giveMicroplaneStatus(GaussPoint *gp);
 

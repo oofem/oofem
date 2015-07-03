@@ -98,7 +98,7 @@ public:
 
     virtual int mapStatus(MaterialStatus &oStatus) const;
 
-    void interpolateIntVarAt(FloatArray &answer, Element *elem, FloatArray &lcoords, std :: vector< FloatArray > &list, InternalStateType type, TimeStep *tStep) const;
+    void interpolateIntVarAt(FloatArray &answer, Element *elem, const FloatArray &lcoords, std :: vector< FloatArray > &list, InternalStateType type, TimeStep *tStep) const;
 
     virtual const char *giveClassName() const { return "MMAShapeFunctProjectionInterface"; }
 };

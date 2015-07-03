@@ -283,16 +283,16 @@ IRResultType
 Truss2d :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                            // Required by IR_GIVE_FIELD macro
-    this->NLStructuralElement :: initializeFrom(ir);
 
     cs_mode = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, cs_mode, _IFT_Truss2d_cs);
 
     if ( cs_mode != 0 && cs_mode != 1 && cs_mode != 2 ) {
-        OOFEM_ERROR("Unsupported value of cs_mode");
+        OOFEM_WARNING("Unsupported value of cs_mode");
+        return IRRT_BAD_FORMAT;
     }
 
-    return IRRT_OK;
+    return NLStructuralElement :: initializeFrom(ir);
 }
 
 
@@ -308,10 +308,25 @@ Truss2d :: giveDofManDofIDMask(int inode, IntArray &answer) const
     }
 }
 
+
+void
+Truss2d :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveRealStress_1d(answer, gp, strain, tStep);
+}
+
+
+void
+Truss2d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveStiffnessMatrix_1d(answer, rMode, gp, tStep);
+}
+
+
 void
 Truss2d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->computeGlobalCoordinates( answer, * ( gp->giveNaturalCoordinates() ) );
+    this->computeGlobalCoordinates( answer, gp->giveNaturalCoordinates() );
 }
 
 void
@@ -331,7 +346,7 @@ Truss2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
      * without regarding particular side
      */
 
-    this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
+    this->computeNmatrixAt(gp->giveSubPatchCoordinates(), answer);
 }
 
 

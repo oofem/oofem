@@ -37,7 +37,6 @@
 
 #include "CrossSections/layeredcrosssection.h"
 #include "Elements/nlstructuralelement.h"
-#include "eleminterpmapperinterface.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "vtkxmlexportmodule.h"
 #include "zznodalrecoverymodel.h"
@@ -207,7 +206,7 @@ protected:
 
     //void giveInitialSolutionVector(FloatArray &answer);
     void giveUpdatedSolutionVector(FloatArray &answer, TimeStep *tStep);
-    void giveUnknownsAt(const FloatArray &lcoords, FloatArray &solVec, FloatArray &x, FloatArray &m, double gam, TimeStep *tStep);
+    void giveUnknownsAt(const FloatArray &lcoords, FloatArray &solVec, FloatArray &x, FloatArray &m, double &gam, TimeStep *tStep);
 
     // Nodal averaging interface:
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
@@ -237,9 +236,11 @@ protected:
     void recoverShearStress(TimeStep *tStep);
     void computeBmatrixForStressRecAt(const FloatArray &lCoords, FloatMatrix &answer, int layer);
 
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+    { answer.clear(); }
 
     // N and B matrices
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS){};
+    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS) { answer.clear(); }
 
     virtual void computeBmatrixAt(const FloatArray &lCoords, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS);
     virtual void computeNmatrixAt(const FloatArray &iLocCoords, FloatMatrix &answer);
@@ -247,8 +248,8 @@ protected:
 
     virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep)
     {
-        OOFEM_ERROR("ComputeStrainVectorInLayer - Should not be called! Not meaningful for this element.");
-    };
+        OOFEM_ERROR("Should not be called! Not meaningful for this element.");
+    }
     virtual void edgeComputeBmatrixAt(const FloatArray &lCoords, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS);
 
     FloatArray convV6ToV9Stress(const FloatArray &V6);

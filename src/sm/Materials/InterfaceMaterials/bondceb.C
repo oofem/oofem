@@ -45,74 +45,31 @@
 namespace oofem {
 REGISTER_Material(BondCEBMaterial);
 
-BondCEBMaterial :: BondCEBMaterial(int n, Domain *d) : StructuralMaterial(n, d)
-    //
-    // constructor
-    //
+BondCEBMaterial :: BondCEBMaterial(int n, Domain *d) : StructuralInterfaceMaterial(n, d)
 {
     tauf = 0.;
     alpha = 0.4;
 }
 
 
-BondCEBMaterial :: ~BondCEBMaterial()
-//
-// destructor
-//
-{ }
-
-int
-BondCEBMaterial :: hasMaterialModeCapability(MaterialMode mode)
-//
-// returns whether receiver supports given mode
-//
-{
-    return mode == _2dInterface || mode == _3dInterface;
-}
+BondCEBMaterial :: ~BondCEBMaterial() { }
 
 
 void
-BondCEBMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                            MatResponseMode mode,
-                                                            GaussPoint *gp,
-                                                            TimeStep *tStep)
-//
-// computes full constitutive matrix for case of gp stress-strain state.
-//
+BondCEBMaterial :: giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
 {
-    OOFEM_ERROR("not implemented");
-}
-
-
-void
-BondCEBMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                                                   const FloatArray &totalStrain,
-                                                   TimeStep *tStep)
-//
-// returns the stress (traction) at the end of the step
-// corresponding to the given strain at the end of the step
-//
-{
-    MaterialMode mMode = gp->giveMaterialMode();    
-    int ntc = 2; // number of traction vector components (2 or 3)
-    if ( mMode == _3dInterface ) {
-      ntc = 3;
-    }
     BondCEBMaterialStatus *status = static_cast< BondCEBMaterialStatus * >( this->giveStatus(gp) );
 
-    //this->initGpForNewStep(gp);
-    this->initTempStatus(gp);
-    
     // normal traction evaluated elastically
-    answer.resize(ntc);
-    answer.at(1) = kn * totalStrain.at(1);
+    answer.resize(3);
+    answer.at(1) = kn * jump.at(1);
 
     // trial values of shear tractions evaluated elastically
     double s = 0., dKappa = 0.;
-    for ( int i = 2; i <= ntc; i++ ) {
-        double depsi = totalStrain.at(i) - status->giveStrainVector().at(i);
-        answer.at(i) = status->giveStressVector().at(i) + ks * depsi;
-        s += answer.at(i)*answer.at(i);
+    for ( int i = 2; i <= 3; i++ ) {
+        double depsi = jump.at(i) - status->giveJump().at(i);
+        answer.at(i) = status->giveTraction().at(i) + ks * depsi;
+        s += answer.at(i) * answer.at(i);
         dKappa += depsi*depsi;
      }
 
@@ -130,65 +87,42 @@ BondCEBMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 
     // reduce shear tractions, if needed
     if ( s > smax ) {
-        for ( int i = 2; i <= ntc; i++ ) {
-            answer.at(i) *= (smax/s);
+        for ( int i = 2; i <= 3; i++ ) {
+            answer.at(i) *= smax / s;
         }
     }
  
     // update gp
-    status->letTempStrainVectorBe(totalStrain);
-    status->letTempStressVectorBe(answer);
+    status->letTempJumpBe(jump);
+    status->letTempTractionBe(answer);
     status->setTempKappa(tempKappa);
+}
+
+
+void
+BondCEBMaterial :: give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    ///@todo Only elastic tangent supported
+    answer.resize(3, 3);
+    answer.zero();
+    answer.at(1, 1) = kn;
+    answer.at(2, 2) = answer.at(3, 3) = ks;
 }
 
 double
 BondCEBMaterial :: evaluateBondStress(const double kappa)
 {
-  if (kappa<=0.)
-    return 0.;
-  if (kappa<=s1)
-    return taumax*pow(kappa/s1,alpha);
-  if (kappa<=s2)
-    return taumax;
-  if (kappa<=s3)
-    return taumax - (taumax-tauf) * (kappa-s2) / (s3-s2);
-  return tauf;
+    if ( kappa <= 0. )
+        return 0.;
+    if ( kappa <= s1 )
+        return taumax * pow(kappa/s1, alpha);
+    if ( kappa <= s2 )
+        return taumax;
+    if ( kappa <= s3 )
+        return taumax - (taumax-tauf) * (kappa-s2) / (s3-s2);
+    return tauf;
 }
 
-void
-BondCEBMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
-                                                  MatResponseMode rMode,
-                                                  GaussPoint *gp, TimeStep *tStep)
-//
-// Returns characteristic material stiffness matrix of the receiver
-//
-{
-    MaterialMode mMode = gp->giveMaterialMode();
-    switch ( mMode ) {
-    case _2dInterface:
-        answer.resize(2, 2);
-        answer.zero();
-        answer.at(1, 1) = kn;
-        if ( rMode == ElasticStiffness ) {
-            answer.at(2, 2) = ks;
-        } else {
-            answer.at(2, 2) = ks;
-        }
-        break;
-    case _3dInterface:
-        answer.resize(3, 3);
-        answer.zero();
-        answer.at(1, 1) = kn;
-        if ( rMode == ElasticStiffness ) {
-            answer.at(2, 2) = answer.at(3, 3) = ks;
-        } else {
-            answer.at(2, 2) = answer.at(3, 3) = ks;
-        }
-        break;
-    default:
-        StructuralMaterial :: giveStiffnessMatrix(answer, rMode, gp, tStep);
-    }
-}
 
 int
 BondCEBMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
@@ -199,7 +133,7 @@ BondCEBMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalState
         answer.at(1) = status->giveKappa();
         return 1;
     } else {
-        return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
+        return StructuralInterfaceMaterial :: giveIPValue(answer, gp, type, tStep);
     }
 }
 
@@ -221,21 +155,21 @@ BondCEBMaterial :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, alpha, _IFT_BondCEBMaterial_al);
 
     // dependent parameter
-    s0 = pow(pow(s1,-alpha)*taumax/ks,1./(1.-alpha));
-    if (s0>s1) {
+    s0 = pow(pow(s1, -alpha)*taumax/ks, 1./(1.-alpha));
+    if ( s0 > s1 ) {
       s0 = s1;
       ks = taumax/s1;
       OOFEM_WARNING("Parameter ks adjusted");
     }
 
-    return StructuralMaterial :: initializeFrom(ir);
+    return StructuralInterfaceMaterial :: initializeFrom(ir);
 }
 
 
 void
 BondCEBMaterial :: giveInputRecord(DynamicInputRecord &input)
 {
-    StructuralMaterial :: giveInputRecord(input);
+    StructuralInterfaceMaterial :: giveInputRecord(input);
 
     input.setField(this->kn, _IFT_BondCEBMaterial_kn);
     input.setField(this->ks, _IFT_BondCEBMaterial_ks);
@@ -247,7 +181,7 @@ BondCEBMaterial :: giveInputRecord(DynamicInputRecord &input)
 
 
 
-BondCEBMaterialStatus :: BondCEBMaterialStatus(int n, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g)
+BondCEBMaterialStatus :: BondCEBMaterialStatus(int n, Domain *d, GaussPoint *g) : StructuralInterfaceMaterialStatus(n, d, g)
 {
     kappa = tempKappa = 0.0;
 }
@@ -260,7 +194,7 @@ BondCEBMaterialStatus :: ~BondCEBMaterialStatus()
 void
 BondCEBMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-    StructuralMaterialStatus :: printOutputAt(file, tStep);
+    StructuralInterfaceMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");
     if ( this->kappa > 0.0 ) {
         fprintf(file, "kappa %g ", this->kappa);
@@ -273,14 +207,14 @@ BondCEBMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 void
 BondCEBMaterialStatus :: initTempStatus()
 {
-    StructuralMaterialStatus :: initTempStatus();
+    StructuralInterfaceMaterialStatus :: initTempStatus();
     this->tempKappa = this->kappa;
 }
 
 void
 BondCEBMaterialStatus :: updateYourself(TimeStep *tStep)
 {
-    StructuralMaterialStatus :: updateYourself(tStep);
+    StructuralInterfaceMaterialStatus :: updateYourself(tStep);
     this->kappa = this->tempKappa;
 }
 
@@ -291,7 +225,7 @@ BondCEBMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void 
     contextIOResultType iores;
 
     // save parent class status
-    if ( ( iores = StructuralMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
+    if ( ( iores = StructuralInterfaceMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -309,7 +243,7 @@ BondCEBMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, vo
     contextIOResultType iores;
 
     // read parent class status
-    if ( ( iores = StructuralMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
+    if ( ( iores = StructuralInterfaceMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

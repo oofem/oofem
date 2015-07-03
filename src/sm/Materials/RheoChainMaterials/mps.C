@@ -174,13 +174,15 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
     this->stiffnessFactor = 1.e6;
     IR_GIVE_OPTIONAL_FIELD(ir, stiffnessFactor, _IFT_MPSMaterial_stiffnessfactor);
 
-    KelvinChainSolidMaterial :: initializeFrom(ir);
+    result = KelvinChainSolidMaterial :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     // checking timefactor - for MPS material must be equal to 1.
     double tf;
     IR_GIVE_FIELD(ir, tf, _IFT_RheoChainMaterial_timefactor);
     if ( tf != 1. ) {
-        OOFEM_ERROR("for MPS material timefactor must be equal to 1.");
+        OOFEM_WARNING("for MPS material timefactor must be equal to 1.");
+        return IRRT_BAD_FORMAT;
     }
 
     // initialize exponent p or p_tilde of the governing equation
@@ -223,7 +225,8 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
     int type = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, type, _IFT_MPSMaterial_coupledanalysistype);
     if ( type >= 4 ) {
-        OOFEM_ERROR("CoupledAnalysisType must be equal to 0, 1, 2 or 3");
+        OOFEM_WARNING("CoupledAnalysisType must be equal to 0, 1, 2 or 3");
+        return IRRT_BAD_FORMAT;
     }
 
     this->CoupledAnalysis = ( coupledAnalysisType ) type;
@@ -1094,8 +1097,6 @@ MPSMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeSte
         //        sigma = status->giveStressVector();       //stress vector at the beginning of time-step
         sigma = status->giveViscoelasticStressVector();
         this->giveUnitComplianceMatrix(C, gp, tStep);
-        reducedAnswer.resize( C.giveNumberOfRows() );
-	reducedAnswer.zero();
 
         reducedAnswer.beProductOf(C, sigma);
 
@@ -1110,9 +1111,9 @@ MPSMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeSte
             //            if ( tStep->isTheFirstStep() ) {
             // is the first time step or the material has been just activated (i.e. the previous time was less than casting time)
             if ( tStep->isTheFirstStep() || ( tStep->giveIntrinsicTime() - tStep->giveTimeIncrement() - this->castingTime < 0. ) ) {
-                etaR = this->giveInitViscosity(tStep) /  this->computePsiR(gp, tStep, 0);
+                etaR = this->giveInitViscosity(tStep) / this->computePsiR(gp, tStep, 0);
             } else {
-                etaR = status->giveFlowTermViscosity() /  this->computePsiR(gp, tStep, 0);
+                etaR = status->giveFlowTermViscosity() / this->computePsiR(gp, tStep, 0);
             }
 
             dEtaR =  eta /  this->computePsiR(gp, tStep, 1) - etaR;
@@ -1147,8 +1148,6 @@ MPSMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeSte
         status->setCreepStrainIncrement(answer);
 #endif
 
-
-        return;
     } else {
         /* error - total mode not implemented yet */
         OOFEM_ERROR("mode is not supported");
@@ -1345,7 +1344,7 @@ MPSMaterial :: giveHumidity(GaussPoint *gp, TimeStep *tStep, int option)
         FloatArray et2, ei2; // total and incremental values of water mass
 
         if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {
-            gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveNaturalCoordinates() );
+            gp->giveElement()->computeGlobalCoordinates( gcoords, gp->giveNaturalCoordinates() );
             if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, tStep) ) ) {
                 OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
             }
@@ -1405,7 +1404,7 @@ MPSMaterial :: giveTemperature(GaussPoint *gp, TimeStep *tStep, int option)
         FloatArray et1, ei1; // total and incremental values of temperature
 
         if ( ( tf = fm->giveField(FT_Temperature) ) ) {
-            gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveNaturalCoordinates() );
+            gp->giveElement()->computeGlobalCoordinates( gcoords, gp->giveNaturalCoordinates() );
             if ( ( err = tf->evaluateAt(et1, gcoords, VM_Total, tStep) ) ) {
                 OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
             }

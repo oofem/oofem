@@ -63,8 +63,7 @@ DofManExportModule :: initializeFrom(InputRecord *ir)
     // Read in dofMan's to export - defaults to all
     IR_GIVE_OPTIONAL_FIELD(ir, this->dofManList, _IFT_DofManExportModule_dmlist);
 
-    ExportModule :: initializeFrom(ir);
-    return IRRT_OK;
+    return ExportModule :: initializeFrom(ir);
 }
 
 

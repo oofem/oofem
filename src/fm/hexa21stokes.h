@@ -38,7 +38,7 @@
 #include "fmelement.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "spatiallocalizer.h"
-#include "eleminterpmapperinterface.h"
+#include "matresponsemode.h"
 
 #define _IFT_Hexa21Stokes_Name "hexa21stokes"
 
@@ -53,8 +53,7 @@ class FEI3dHexaTriQuad;
  */
 class Hexa21Stokes : public FMElement,
 public NodalAveragingRecoveryModelInterface,
-public SpatialLocalizerInterface,
-public EIPrimaryUnknownMapperInterface
+public SpatialLocalizerInterface
 {
 protected:
     /// Interpolation for pressure
@@ -77,7 +76,7 @@ public:
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
 
     void computeInternalForcesVector(FloatArray &answer, TimeStep *tStep);
-    void computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep);
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, TimeStep *tStep);
 
     void computeExternalForcesVector(FloatArray &answer, TimeStep *tStep);
     virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
@@ -98,9 +97,7 @@ public:
 
     virtual Interface *giveInterface(InterfaceType it);
 
-    // Element interpolation interface:
-    virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType u,
-                                                                       TimeStep *tStep, const FloatArray &coords, FloatArray &answer);
+    virtual void computeField(ValueModeType u, TimeStep *tStep, const FloatArray &coords, FloatArray &answer);
     // Nodal averaging interface:
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
 };

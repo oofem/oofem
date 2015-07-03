@@ -41,6 +41,7 @@
 #include "floatarray.h"
 #include "linesearch.h"
 #include "nrsolver.h"
+#include "unknownnumberingscheme.h"
 
 #include <set>
 #include <vector>
@@ -127,8 +128,8 @@ public:
     virtual ~StaggeredSolver() {}
 
     // Overloaded methods:
-    virtual NM_Status solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
-                            FloatArray *X, FloatArray *dX, FloatArray *F,
+    virtual NM_Status solve(SparseMtrx &k, FloatArray &R, FloatArray *R0, FloatArray *iR,
+                            FloatArray &X, FloatArray &dX, FloatArray &F,
                             const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                             int &nite, TimeStep *);
 

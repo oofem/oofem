@@ -122,25 +122,25 @@ public:
     /// Returns the const pointer to receiver's temporary deformation gradient vector.
     const FloatArray &giveTempFVector() const { return tempFVector; }
     /// Assigns strain vector to given vector v.
-    void letStrainVectorBe(FloatArray v) { strainVector = std :: move(v); }
+    void letStrainVectorBe(const FloatArray &v) { strainVector = v; }
     /// Assigns stressVector to given vector v.
-    void letStressVectorBe(FloatArray v) { stressVector = std :: move(v); }
+    void letStressVectorBe(const FloatArray &v) { stressVector = v; }
     /// Assigns PVector to given vector v.
-    void letPVectorBe(FloatArray v) { PVector = std :: move(v); }
+    void letPVectorBe(const FloatArray &v) { PVector = v; }
     /// Assigns CVector to given vector v.
-    void letCVectorBe(FloatArray v) { CVector = std :: move(v); }
+    void letCVectorBe(const FloatArray &v) { CVector = v; }
     /// Assigns FVector to given vector v.
-    void letFVectorBe(FloatArray v) { FVector = std :: move(v); }
+    void letFVectorBe(const FloatArray &v) { FVector = v; }
     /// Assigns tempStressVector to given vector v.
-    void letTempStressVectorBe(FloatArray v) { tempStressVector = std :: move(v); }
+    void letTempStressVectorBe(const FloatArray &v) { tempStressVector = v; }
     /// Assigns tempStrainVector to given vector v
-    void letTempStrainVectorBe(FloatArray v) { tempStrainVector = std :: move(v); }
+    void letTempStrainVectorBe(const FloatArray &v) { tempStrainVector = v; }
     /// Assigns tempPVector to given vector v
-    void letTempPVectorBe(FloatArray v) { tempPVector = std :: move(v); }
+    void letTempPVectorBe(const FloatArray &v) { tempPVector = v; }
     /// Assigns tempPVector to given vector v
-    void letTempCVectorBe(FloatArray v) { tempCVector = std :: move(v); }
+    void letTempCVectorBe(const FloatArray &v) { tempCVector = v; }
     /// Assigns tempFVector to given vector v
-    void letTempFVectorBe(FloatArray v) { tempFVector = std :: move(v); }
+    void letTempFVectorBe(const FloatArray &v) { tempFVector = v; }
 
     virtual const char *giveClassName() const { return "StructuralMaterialStatus"; }
 

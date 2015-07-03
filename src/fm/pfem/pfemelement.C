@@ -44,16 +44,10 @@
 #include "intarray.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
-//#include "debug.h"
 #include "verbose.h"
 #include "material.h"
-
 #include "elementside.h"
 #include "mathfem.h"
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
- #include <stdio.h>
-#endif
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -84,7 +78,6 @@ PFEMElement :: initializeFrom(InputRecord *ir)
 }
 
 
-
 void
 PFEMElement ::  giveCharacteristicMatrix(FloatMatrix &answer,
                                          CharType mtrx, TimeStep *tStep)
@@ -99,27 +92,25 @@ PFEMElement ::  giveCharacteristicMatrix(FloatMatrix &answer,
 
     if ( mtrx == LumpedMassMatrix ) {
         this->computeDiagonalMassMtrx(reducedAnswer, tStep);
-	answer.assemble(reducedAnswer, this->giveVelocityDofMask(), this->giveVelocityDofMask());
+        answer.assemble(reducedAnswer, this->giveVelocityDofMask(), this->giveVelocityDofMask());
     } else if ( mtrx == StiffnessMatrix ) { //Tangent stiffness matrix set as default
         this->computeStiffnessMatrix(reducedAnswer, TangentStiffness, tStep);
-	answer.assemble(reducedAnswer, this->giveVelocityDofMask(), this->giveVelocityDofMask());
+        answer.assemble(reducedAnswer, this->giveVelocityDofMask(), this->giveVelocityDofMask());
     } else if ( mtrx == TangentStiffnessMatrix ) {
         this->computeStiffnessMatrix(reducedAnswer, TangentStiffness, tStep);
-	answer.assemble(reducedAnswer, this->giveVelocityDofMask(), this->giveVelocityDofMask());
+        answer.assemble(reducedAnswer, this->giveVelocityDofMask(), this->giveVelocityDofMask());
     } else if ( mtrx == PressureGradientMatrix ) {
         this->computeGradientMatrix(reducedAnswer, tStep);
-	answer.assemble(reducedAnswer, this->giveVelocityDofMask(), this->givePressureDofMask());
+        answer.assemble(reducedAnswer, this->giveVelocityDofMask(), this->givePressureDofMask());
     } else if ( mtrx == DivergenceMatrix ) {
         this->computeDivergenceMatrix(reducedAnswer, tStep);
-	answer.assemble(reducedAnswer, this->givePressureDofMask(), this->giveVelocityDofMask());
+        answer.assemble(reducedAnswer, this->givePressureDofMask(), this->giveVelocityDofMask());
     } else if ( mtrx == PressureLaplacianMatrix ) {
         this->computePressureLaplacianMatrix(reducedAnswer, tStep);
-	answer.assemble(reducedAnswer, this->givePressureDofMask(), this->givePressureDofMask());
+        answer.assemble(reducedAnswer, this->givePressureDofMask(), this->givePressureDofMask());
     } else {
         OOFEM_ERROR("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
     }
-
-    return;
 }
 
 
@@ -134,32 +125,32 @@ PFEMElement ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx, Valu
     answer.resize(this->computeNumberOfDofs());
     answer.zero();
 
-    if ( mtrx == LoadVector ) {
+    if ( mtrx == ExternalForcesVector ) {
         this->computeForceVector(reducedVector, tStep);
-	answer.assemble(reducedVector, this->giveVelocityDofMask()); 
+        answer.assemble(reducedVector, this->giveVelocityDofMask()); 
     } else if ( mtrx == PressureGradientVector ) {
         FloatMatrix g;
         this->giveCharacteristicMatrix(g, PressureGradientMatrix, tStep);
         FloatArray p;
         this->computeVectorOfPressures(VM_Total, tStep, reducedVector);
-	p.resize(this->computeNumberOfDofs());
-	p.assemble(reducedVector, this->givePressureDofMask());
+        p.resize(this->computeNumberOfDofs());
+        p.assemble(reducedVector, this->givePressureDofMask());
         answer.beProductOf(g, p);
     } else if ( mtrx == MassVelocityVector ) {
         FloatMatrix m;
         FloatArray u;
         this->giveCharacteristicMatrix(m, LumpedMassMatrix, tStep);
         this->computeVectorOfVelocities(VM_Total, tStep, reducedVector);
-	u.resize(this->computeNumberOfDofs());
-	u.assemble(reducedVector, this->giveVelocityDofMask());
+        u.resize(this->computeNumberOfDofs());
+        u.assemble(reducedVector, this->giveVelocityDofMask());
         answer.beProductOf(m, u);
     } else if ( mtrx == LaplaceVelocityVector ) {
         FloatMatrix l;
         FloatArray u;
         this->giveCharacteristicMatrix(l, StiffnessMatrix, tStep);
         this->computeVectorOfVelocities(VM_Total, tStep, reducedVector);
-	u.resize(this->computeNumberOfDofs());
-	u.assemble(reducedVector, this->giveVelocityDofMask());
+        u.resize(this->computeNumberOfDofs());
+        u.assemble(reducedVector, this->giveVelocityDofMask());
         answer.beProductOf(l, u);
     } else if ( mtrx == MassAuxVelocityVector ) {
         FloatMatrix m;
@@ -179,28 +170,12 @@ PFEMElement ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx, Valu
         FloatArray u;
         this->computeVectorOfVelocities(VM_Total, tStep, u);
         answer.beProductOf(d, u);
-    } else if ( mtrx == DivergenceDeviatoricStressVector ) {
-        this->computeDeviatoricStressDivergence(answer, tStep);
-    } else if ( mtrx ==  PrescribedRhsVector ) {
-        this->computePrescribedRhsVector(reducedVector, tStep, mode);
-	answer.assemble(reducedVector, this->givePressureDofMask());
+    } else if ( mtrx == LumpedMassMatrix ) {
+        this->computeDiagonalMassMtrx(reducedVector, tStep);
+        answer.assemble(reducedVector, this->giveVelocityDofMask());
     } else {
         OOFEM_ERROR("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
     }
-
-    return;
-}
-
-double
-PFEMElement :: giveCharacteristicValue(CharType mtrx, TimeStep *tStep)
-{
-    if ( mtrx == CriticalTimeStep ) {
-        return this->computeCriticalTimeStep(tStep);
-    } else {
-        OOFEM_ERROR("giveCharacteristicValue: Unknown Type of characteristic mtrx.");
-    }
-
-    return 0.0;
 }
 
 int
@@ -219,7 +194,7 @@ PFEMElement :: updateInternalState(TimeStep *stepN)
     // force updating strains & stresses
     for ( auto &iRule: integrationRulesArray ) {
         for ( GaussPoint *gp: *iRule ) {
-	    computeDeviatoricStress(stress, gp, stepN);
+            computeDeviatoricStress(stress, gp, stepN);
         }
     }
 }

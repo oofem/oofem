@@ -365,10 +365,10 @@ void oofem_finalize_modules()
 void oofem_debug(EngngModel *emodel)
 {
     //FloatMatrix k;
-    //((BsplinePlaneStressElement*)emodel->giveDomain(1)->giveElement(1))->giveCharacteristicMatrix(k, StiffnessMatrix, NULL);
+    //((BsplinePlaneStressElement*)emodel.giveDomain(1)->giveElement(1))->giveCharacteristicMatrix(k, TangentStiffnessMatrix, NULL);
 
 #ifdef __PARALLEL_MODE
-    //LoadBalancer* lb = emodel->giveDomain(1)->giveLoadBalancer();
+    //LoadBalancer* lb = emodel.giveDomain(1)->giveLoadBalancer();
     //lb->calculateLoadTransfer();
     //lb->migrateLoad();
     //exit(1);

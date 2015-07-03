@@ -97,7 +97,7 @@ IntegrationRule :: findIntegrationPointClosestTo(const FloatArray &lcoord)
     double mindist = -1.;
     GaussPoint *minGp = NULL;
     for ( GaussPoint *gp: *this ) {
-        double dist = lcoord.distance_square(*gp->giveNaturalCoordinates());
+        double dist = lcoord.distance_square(gp->giveNaturalCoordinates());
         if ( dist <= mindist || mindist < 0. ) {
             mindist = dist;
             minGp = gp;
@@ -183,7 +183,7 @@ IntegrationRule :: saveContext(DataStream &stream, ContextMode mode, void *obj)
                 THROW_CIOERR(CIO_IOERR);
             }
 
-            if ( ( iores = gp->giveNaturalCoordinates()->storeYourself(stream) ) != CIO_OK ) {
+            if ( ( iores = gp->giveNaturalCoordinates().storeYourself(stream) ) != CIO_OK ) {
                 THROW_CIOERR(iores);
             }
 
@@ -272,7 +272,7 @@ IntegrationRule :: restoreContext(DataStream &stream, ContextMode mode, void *ob
             m = ( MaterialMode ) _m;
             // read dynamic flag
 
-            gp = new GaussPoint(this, i, ( new FloatArray ( c ) ), w, m);
+            gp = new GaussPoint(this, i, std :: move(c), w, m);
             i++;
         }
 
@@ -347,8 +347,7 @@ IntegrationRule :: setUpEmbeddedIntegrationPoints(integrationDomain mode, int nP
 int IntegrationRule :: SetUpPoint(MaterialMode mode)
 {
     this->gaussPoints.resize(1);
-    FloatArray *coord = new FloatArray(0);
-    this->gaussPoints [ 0 ] = new GaussPoint(this, 1, coord, 1.0, mode);
+    this->gaussPoints [ 0 ] = new GaussPoint(this, 1, FloatArray(0), 1.0, mode);
     this->intdomain = _Point;
     return 1;
 }

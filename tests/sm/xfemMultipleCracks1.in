@@ -21,7 +21,7 @@ intmatbilinearcz 2 kn 1.0e5 g1c 1.0e0 g2c 1.0e0 mu 0.0 gamma 0.5 sigf 1.e2
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
 BoundaryCondition 2 loadTimeFunction 1 prescribedvalue 0.2e-1
 #
-PiecewiseLinFunction 1 npoints 2 t 2 0.0 5.0 f(t) 2 0.0 1.0
+PiecewiseLinFunction 1 npoints 2 t 3 -1.0 1.0 6.0 f(t) 3 0.0 0.0 1.0
 XfemManager 1 numberofenrichmentitems 3 numberofgppertri 1 vtkexport 1 exportfields 3 2 3 4
 #DiscontinuousFunction 1
 #polygoncrack 1 points 6 -0.1 0.3 0.5 0.3 1.1 0.3
@@ -50,9 +50,9 @@ PolygonLine 2 points 8 -0.1 0.8 0.4 0.5 0.7 -0.1 0.8 -0.2
 #REACTION tStep 2 number 3 dof 1 value 5.01446686e+01
 #REACTION tStep 2 number 4 dof 1 value -2.36298729e+01
 ### step 3
-#REACTION tStep 3 number 3 dof 1 value 4.84668597e+01
-#REACTION tStep 3 number 4 dof 1 value -2.12253024e+01
+#REACTION tStep 3 number 3 dof 1 value 4.84198582e+01
+#REACTION tStep 3 number 4 dof 1 value -2.12055779e+01
 ### step 4
-#REACTION tStep 4 number 3 dof 1 value 4.10573153e+01
-#REACTION tStep 4 number 4 dof 1 value -1.76070972e+01
+#REACTION tStep 4 number 3 dof 1 value 4.06124787e+01
+#REACTION tStep 4 number 4 dof 1 value -1.75075395e+01
 #%END_CHECK%

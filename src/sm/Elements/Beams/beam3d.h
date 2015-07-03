@@ -43,9 +43,13 @@
 #define _IFT_Beam3d_Name "beam3d"
 #define _IFT_Beam3d_dofstocondense "dofstocondense"
 #define _IFT_Beam3d_refnode "refnode"
+#define _IFT_Beam3d_refangle "refangle"
 //@}
 
 namespace oofem {
+
+class FEI3dLineLin;
+
 /**
  * This class implements a 2-dimensional beam element
  * with cubic lateral displacement interpolation (rotations are quadratic)
@@ -55,17 +59,28 @@ namespace oofem {
  *
  * This class is not derived from liBeam3d or truss element, because it does not support
  * any material nonlinearities (if should, stiffness must be integrated)
+ * 
+ * @author Giovanni
+ * @author Mikael Öhman
+ * @author (several other authors)
  */
 class Beam3d : public StructuralElement, public FiberedCrossSectionInterface
 {
 protected:
+    /// Geometry interpolator only.
+    static FEI3dLineLin interp;
+
     double kappay, kappaz, length;
     int referenceNode;
+    double referenceAngle = 0;
+    bool usingAngle = false;
     IntArray *dofsToCondense;
 
 public:
-    Beam3d(int n, Domain * d);
+    Beam3d(int n, Domain *d);
     virtual ~Beam3d();
+
+    virtual FEInterpolation *giveInterpolation() const;
 
     virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL);
     virtual void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep);
@@ -110,11 +125,12 @@ public:
 
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
+    virtual void drawDeformedGeometry(oofegGraphicContext & gc, TimeStep * tStep, UnknownType);
 #endif
 
 protected:
     virtual void computeEdgeLoadVectorAt(FloatArray &answer, Load *, int, TimeStep *, ValueModeType mode);
+    virtual void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep);
     virtual int computeLoadGToLRotationMtrx(FloatMatrix &answer);
     virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
     virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &);

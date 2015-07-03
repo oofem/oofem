@@ -52,15 +52,16 @@ class SparseNonLinearSystemNM;
 
 /**
  * This class represents stationary transport problem.
+ * @author Mikael Öhman (among others)
  */
 class StationaryTransportProblem : public EngngModel
 {
 protected:
     SparseMtrxType sparseMtrxType;
     /// This field stores solution vector. For fixed size of problem, the PrimaryField is used, for growing/decreasing size, DofDistributedPrimaryField applies.
-    PrimaryField *UnknownsField;
+    std :: unique_ptr< PrimaryField > UnknownsField;
 
-    SparseMtrx *conductivityMatrix;
+    std :: unique_ptr< SparseMtrx > conductivityMatrix;
     FloatArray internalForces;
     FloatArray eNorm;
 
@@ -90,8 +91,6 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual int checkConsistency();
-
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
 
     // identification
     virtual const char *giveInputRecordName() const { return _IFT_StationaryTransportProblem_Name; }

@@ -45,54 +45,21 @@
 namespace oofem {
 REGISTER_Material(IntMatBilinearCZElastic);
 
-IntMatBilinearCZElastic :: IntMatBilinearCZElastic(int n, Domain *d) : StructuralInterfaceMaterial(n, d)
-    //
-    // constructor
-    //
-{ }
+IntMatBilinearCZElastic :: IntMatBilinearCZElastic(int n, Domain *d) : StructuralInterfaceMaterial(n, d) { }
 
 
-IntMatBilinearCZElastic :: ~IntMatBilinearCZElastic()
-//
-// destructor
-//
-{ }
-
-int
-IntMatBilinearCZElastic :: hasMaterialModeCapability(MaterialMode mode)
-{
-    // returns whether receiver supports given mode
-    if ( mode == _3dInterface ) {
-        return 1;
-    } else {
-        return 0;
-    }
-}
+IntMatBilinearCZElastic :: ~IntMatBilinearCZElastic() { }
 
 
-
-//
-//void
-//IntMatBilinearCZElastic :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-//                                                   const FloatArray &jumpVector,
-//                                                   TimeStep *tStep)
 void
 IntMatBilinearCZElastic :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jumpVector,
                                                   const FloatMatrix &F, TimeStep *tStep)
-//
-// returns real stress vector in 3d stress space of receiver according to
-// previous level of stress and current
-// strain increment, the only way, how to correctly update gp records
-//
 {
     IntMatBilinearCZElasticStatus *status = static_cast< IntMatBilinearCZElasticStatus * >( this->giveStatus(gp) );
 
-    //this->initGpForNewStep(gp);
-    this->initTempStatus(gp);
-
     answer.resize( jumpVector.giveSize() );
     answer.zero();
-    //@todo for now only study normal stress
+    /// @todo only study normal stress for now 
     // no degradation in shear
     // jumpVector = [shear 1 shear 2 normal]
     double gn  = jumpVector.at(3);
@@ -120,81 +87,40 @@ IntMatBilinearCZElastic :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint
     }
 
     // update gp
-    //status->letTempStrainVectorBe(jumpVector);
-    //status->letTempStressVectorBe(answer);
     status->letTempJumpBe(jumpVector);
     status->letTempFirstPKTractionBe(answer);
 }
 
 
-//void
-//IntMatBilinearCZElastic :: giveStiffnessMatrix(FloatMatrix &answer,
-//                                               MatResponseMode rMode,
-//                                               GaussPoint *gp,
-//                                               TimeStep *tStep)
-////
-//// Returns characteristic material stiffness matrix of the receiver
-////
-//{
-//    MaterialMode mMode = gp->giveMaterialMode();
-//    switch ( mMode ) {
-//    case _3dInterface:
-//    case _3dMat:
-//        give3dInterfaceMaterialStiffnessMatrix(answer, rMode, gp, tStep);
-//        break;
-//    default:
-//        //StructuralMaterial :: giveCharacteristicMatrix(answer, rMode, gp, tStep);
-//        StructuralMaterial ::give3dMaterialStiffnessMatrix(answer, rMode, gp, tStep);
-//    }
-//}
-
-
-//void
-//IntMatBilinearCZElastic :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
-//                                                                     GaussPoint *gp, TimeStep *tStep)
 void
 IntMatBilinearCZElastic :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
     IntMatBilinearCZElasticStatus *status = static_cast< IntMatBilinearCZElasticStatus * >( this->giveStatus(gp) );
 
-    FloatArray jumpVector;
-    //jumpVector = status->giveTempStrainVector();
-    jumpVector = status->giveTempJump();
-    //@todo for now only study normal stress
-    // jumpVector = [shear 1 shear 2 normal]
-    double gn  = jumpVector.at(3);
-    //double gs1 = jumpVector.at(1);
-    //double gs2 = jumpVector.at(2);
+    const FloatArray &jumpVector = status->giveTempJump();
+    double gn = jumpVector.at(3);
 
-
-    //if ( ( rMode == ElasticStiffness ) || ( rMode == SecantStiffness ) || ( rMode == TangentStiffness ) ) {
-    if ( rMode == TangentStiffness ) {
-        // assemble eleastic stiffness
-
-        answer.resize(3, 3);
-        answer.zero();
-        if ( gn <= 0.0 ) { // compresssion
-            answer.at(1, 1) = this->ks0;
-            answer.at(2, 2) = this->ks0;
-            answer.at(3, 3) = this->knc;
-        } else if ( gn <= this->gn0 ) { // first linear part
-            answer.at(1, 1) = this->ks0;
-            answer.at(2, 2) = this->ks0;
-            answer.at(3, 3) = this->kn0;
-            //printf("Linear branch...\n");
-        } else if ( gn <= this->gnmax  ) { // softening branch
-            answer.at(1, 1) = this->ks0; // no degradation in shear
-            answer.at(2, 2) = this->ks0;
-            answer.at(3, 3) = this->kn1;
-            //printf("Softening branch...\n");
-        } else {
-            answer.at(1, 1) = this->ks0;
-            answer.at(2, 2) = this->ks0;
-            answer.at(3, 3) = 0.0; // failed
-            //printf("Failed...\n");
-        }
-    }  else {
-        OOFEM_ERROR("unknown MatResponseMode");
+    answer.resize(3, 3);
+    answer.zero();
+    if ( gn <= 0.0 ) { // compresssion
+        answer.at(1, 1) = this->ks0;
+        answer.at(2, 2) = this->ks0;
+        answer.at(3, 3) = this->knc;
+    } else if ( gn <= this->gn0 ) { // first linear part
+        answer.at(1, 1) = this->ks0;
+        answer.at(2, 2) = this->ks0;
+        answer.at(3, 3) = this->kn0;
+        //printf("Linear branch...\n");
+    } else if ( gn <= this->gnmax  ) { // softening branch
+        answer.at(1, 1) = this->ks0; // no degradation in shear
+        answer.at(2, 2) = this->ks0;
+        answer.at(3, 3) = this->kn1;
+        //printf("Softening branch...\n");
+    } else {
+        answer.at(1, 1) = this->ks0;
+        answer.at(2, 2) = this->ks0;
+        answer.at(3, 3) = 0.0; // failed
+        //printf("Failed...\n");
     }
 }
 
@@ -202,7 +128,6 @@ IntMatBilinearCZElastic :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatRe
 int
 IntMatBilinearCZElastic :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    //IntMatBilinearCZElasticStatus *status = static_cast< IntMatBilinearCZElasticStatus * >( this->giveStatus(gp) );
     if ( type == IST_DamageScalar ) {
         answer.resize(1);
         answer.at(1) = 0.0; // no damage
@@ -236,10 +161,24 @@ IntMatBilinearCZElastic :: initializeFrom(InputRecord *ir)
     this->gnmax = 2.0 * GIc / sigfn;                         // @todo defaults to zero - will this cause problems?
     this->kn1 = -this->sigfn / ( this->gnmax - this->gn0 );  // slope during softening part in normal dir
 
-    StructuralInterfaceMaterial :: initializeFrom(ir);
+    result = StructuralInterfaceMaterial :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
-    this->checkConsistency();                                // check validity of the material paramters
-//    this->printYourself();
+    // check validity of the material paramters
+    double kn0min = 0.5 * this->sigfn * this->sigfn / this->GIc;
+    if ( this->kn0 < 0.0 ) {
+        OOFEM_WARNING("stiffness kn0 is negative (%.2e)", this->kn0);
+        return IRRT_BAD_FORMAT;
+    } else if ( this->ks0 < 0.0 ) {
+        OOFEM_WARNING("stiffness ks0 is negative (%.2e)", this->ks0);
+        return IRRT_BAD_FORMAT;
+    } else if ( this->GIc < 0.0 ) {
+        OOFEM_WARNING("GIc is negative (%.2e)", this->GIc);
+        return IRRT_BAD_FORMAT;
+    } else if ( this->kn0 < kn0min  ) { // => gn0 > gnmax
+        //OOFEM_WARNING("kn0 (%.2e) is below minimum stiffness (%.2e), => gn0 > gnmax, which is unphysical", this->kn0, kn0min);
+        //return IRRT_BAD_FORMAT;
+    }
     return IRRT_OK;
 }
 
@@ -257,17 +196,6 @@ void IntMatBilinearCZElastic :: giveInputRecord(DynamicInputRecord &input)
 int
 IntMatBilinearCZElastic :: checkConsistency()
 {
-    double kn0min = 0.5 * this->sigfn * this->sigfn / this->GIc;
-    if ( this->kn0 < 0.0 ) {
-        OOFEM_ERROR("stiffness kn0 is negative (%.2e)", this->kn0);
-    } else if ( this->ks0 < 0.0 ) {
-        OOFEM_ERROR("stiffness ks0 is negative (%.2e)", this->ks0);
-    } else if ( this->GIc < 0.0 ) {
-        OOFEM_ERROR("GIc is negative (%.2e)", this->GIc);
-    } else if ( this->kn0 < kn0min  ) { // => gn0 > gnmax
-        //   OOFEM_ERROR("kn0 (%.2e) is below minimum stiffness (%.2e), => gn0 > gnmax, which is unphysical" ,
-        //       this->kn0, kn0min);
-    }
     return 1;
 }
 
@@ -292,86 +220,4 @@ IntMatBilinearCZElastic :: printYourself()
     printf("  gnmax = %e \n", this->gnmax);
 }
 
-IntMatBilinearCZElasticStatus :: IntMatBilinearCZElasticStatus(int n, Domain *d, GaussPoint *g) : StructuralInterfaceMaterialStatus(n, d, g)
-{ }
-
-
-IntMatBilinearCZElasticStatus :: ~IntMatBilinearCZElasticStatus()
-{ }
-
-
-void
-IntMatBilinearCZElasticStatus :: printOutputAt(FILE *file, TimeStep *tStep)
-{
-    StructuralInterfaceMaterialStatus :: printOutputAt(file, tStep);
-    /*
-     * fprintf(file, "status { ");
-     * if ( this->damage > 0.0 ) {
-     *  fprintf(file, "kappa %f, damage %f ", this->kappa, this->damage);
-     * }
-     *
-     * fprintf(file, "}\n");
-     */
-}
-
-
-void
-IntMatBilinearCZElasticStatus :: initTempStatus()
-{
-    StructuralInterfaceMaterialStatus :: initTempStatus();
-    //this->tempKappa = this->kappa;
-    //this->tempDamage = this->damage;
-}
-
-void
-IntMatBilinearCZElasticStatus :: updateYourself(TimeStep *tStep)
-{
-    StructuralInterfaceMaterialStatus :: updateYourself(tStep);
-}
-
-#if 0
-contextIOResultType
-IntMatBilinearCZElasticStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
-{
-    contextIOResultType iores;
-
-    // save parent class status
-    if ( ( iores = StructuralMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // write a raw data
-    if ( !stream.write(kappa) ) {
-        THROW_CIOERR(CIO_IOERR);
-    }
-
-    if ( !stream.write(damage) ) {
-        THROW_CIOERR(CIO_IOERR);
-    }
-
-    return CIO_OK;
-}
-
-contextIOResultType
-IntMatBilinearCZElasticStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-{
-    contextIOResultType iores;
-
-    // read parent class status
-    if ( ( iores = StructuralMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // read raw data
-    if ( !stream.read(kappa) ) {
-        THROW_CIOERR(CIO_IOERR);
-    }
-
-    if ( !stream.read(damage) ) {
-        THROW_CIOERR(CIO_IOERR);
-    }
-
-    return CIO_OK;
-}
-#endif
 } // end namespace oofem

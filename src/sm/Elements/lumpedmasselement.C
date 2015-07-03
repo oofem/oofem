@@ -34,6 +34,7 @@
 
 #include "../sm/Elements/lumpedmasselement.h"
 #include "dofmanager.h"
+#include "dof.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
@@ -62,10 +63,7 @@ LumpedMassElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
     int ndofs = this->computeNumberOfDofs();
     answer.resize(ndofs, ndofs);
     answer.zero();
-
-    for ( int i = 1; i <= ndofs; i++ ) {
-        answer.at(i, i) = this->components.at(i);
-    }
+    answer.beDiagonal(this->components);
 }
 
 
@@ -74,10 +72,9 @@ LumpedMassElement :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-    this->StructuralElement :: initializeFrom(ir);
     IR_GIVE_FIELD(ir, components, _IFT_LumpedMassElement_components);
 
-    return IRRT_OK;
+    return StructuralElement :: initializeFrom(ir);
 }
 
 

@@ -35,13 +35,13 @@
 #include "interfaceelement1d.h"
 #include "domain.h"
 #include "node.h"
-#include "crosssection.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
 #include "feinterpol.h"
+#include "../sm/CrossSections/structuralinterfacecrosssection.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -80,6 +80,31 @@ InterfaceElem1d :: setCoordMode()
         OOFEM_ERROR("Unsupported domain type")
     }
 }
+
+
+void
+InterfaceElem1d :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+{
+    setCoordMode();
+    switch ( mode ) {
+    case ie1d_1d: static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->giveEngTraction_1d(answer, gp, strain, tStep); return;
+    case ie1d_2d: static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->giveEngTraction_2d(answer, gp, strain, tStep); return;
+    case ie1d_3d: static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->giveEngTraction_3d(answer, gp, strain, tStep); return;
+    }
+}
+
+
+void
+InterfaceElem1d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    setCoordMode();
+    switch ( mode ) {
+    case ie1d_1d: static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->give1dStiffnessMatrix_Eng(answer, rMode, gp, tStep); return;
+    case ie1d_2d: static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->give2dStiffnessMatrix_Eng(answer, rMode, gp, tStep); return;
+    case ie1d_3d: static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->give3dStiffnessMatrix_Eng(answer, rMode, gp, tStep); return;
+    }
+}
+
 
 
 MaterialMode
@@ -252,11 +277,32 @@ InterfaceElem1d :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    this->StructuralElement :: initializeFrom(ir);
+    result = StructuralElement :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+
     IR_GIVE_OPTIONAL_FIELD(ir, referenceNode, _IFT_InterfaceElem1d_refnode);
     IR_GIVE_OPTIONAL_FIELD(ir, normal, _IFT_InterfaceElem1d_normal);
     if ( referenceNode == 0 && normal.at(1) == 0 && normal.at(2) == 0 && normal.at(1) == 0 && normal.at(3) == 0 ) {
         OOFEM_ERROR("wrong reference node or normal specified");
+    }
+    if ( ir->hasField(_IFT_InterfaceElem1d_dofIDs) ) {
+        IR_GIVE_FIELD(ir, dofids, _IFT_InterfaceElem1d_refnode);
+    } else {
+        switch ( domain->giveNumberOfSpatialDimensions() ) {
+        case 1:
+            this->dofids = IntArray{D_u};
+            break;
+        case 2:
+            this->dofids = {D_u, D_v};
+            break;
+        case 3:
+            this->dofids = {D_u, D_v, D_w};
+            break;
+        default:
+            OOFEM_ERROR("Unsupported domain type")
+        }
     }
 
     this->computeLocalSlipDir(normal); ///@todo Move into postInitialize ?
@@ -289,25 +335,7 @@ InterfaceElem1d :: computeNumberOfDofs()
 void
 InterfaceElem1d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    switch ( domain->giveDomainType() ) {
-    case _2dPlaneStressMode:
-    case _PlaneStrainMode:
-    case _3dAxisymmMode:
-        answer = {D_u, D_v};
-        break;
-    case _3dMode:
-        answer = {D_u, D_v, D_w};
-        break;
-    case _2dTrussMode:
-    case _2dBeamMode:
-        answer = {D_u, D_w};
-        break;
-    case _1dTrussMode:
-        answer = {D_u};
-        break;
-    default:
-        OOFEM_ERROR("unsupported mode");
-    }
+    answer = this->dofids;
 }
 
 

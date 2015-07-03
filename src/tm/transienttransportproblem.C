@@ -33,16 +33,14 @@
  */
 
 #include "transienttransportproblem.h"
-#include "nummet.h"
 #include "timestep.h"
-#include "element.h"
 #include "dofdistributedprimaryfield.h"
-#include "verbose.h"
 #include "transportelement.h"
 #include "classfactory.h"
 #include "datastream.h"
 #include "contextioerr.h"
 #include "nrsolver.h"
+#include "unknownnumberingscheme.h"
 
 namespace oofem {
 REGISTER_EngngModel(TransientTransportProblem);
@@ -79,6 +77,8 @@ TransientTransportProblem :: initializeFrom(InputRecord *ir)
     
     this->keepTangent = ir->hasField(_IFT_TransientTransportProblem_keepTangent);
 
+    this->lumped = ir->hasField(_IFT_TransientTransportProblem_lumped);
+
     field.reset( new DofDistributedPrimaryField(this, 1, FT_TransportProblemUnknowns, 0) );
 
     return EngngModel :: initializeFrom(ir);
@@ -87,6 +87,7 @@ TransientTransportProblem :: initializeFrom(InputRecord *ir)
 
 double TransientTransportProblem :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 {
+    //return this->field->giveUnknownValue(dof, mode, tStep);
     double val1 = field->giveUnknownValue(dof, VM_Total, tStep);
     double val0 = field->giveUnknownValue(dof, VM_Total, tStep->givePreviousStep());
     if ( mode == VM_Total ) {
@@ -104,93 +105,95 @@ double TransientTransportProblem :: giveUnknownComponent(ValueModeType mode, Tim
 
 TimeStep *TransientTransportProblem :: giveNextStep()
 {
-    int istep = this->giveNumberOfFirstStep();
-    //int mstep = 1;
-    StateCounterType counter = 1;
-    double tt = 0.;
-
-    delete previousStep;
-
-    if ( currentStep != NULL ) {
-        istep = currentStep->giveNumber() + 1;
-        counter = currentStep->giveSolutionStateCounter() + 1;
-        tt = currentStep->giveTargetTime();
-        previousStep = currentStep;
-    } else {
-        previousStep = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, 0., this->deltaT, 0);
+    if ( !currentStep ) {
+        // first step -> generate initial step
+        currentStep.reset( new TimeStep( *giveSolutionStepWhenIcApply() ) );
     }
-
-    currentStep = new TimeStep(istep, this, 1, tt + this->deltaT, this->deltaT, counter);
-    // time and dt variables are set eq to 0 for statics - has no meaning
-    return currentStep;
+    
+    previousStep = std :: move(currentStep);
+    currentStep.reset( new TimeStep(*previousStep, this->deltaT) );
+    return currentStep.get();
 }
 
 
 TimeStep *TransientTransportProblem :: giveSolutionStepWhenIcApply()
 {
-    if ( stepWhenIcApply == NULL ) {
+    if ( !stepWhenIcApply ) {
         ///@todo Should we have this->initT ?
-        stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, 0., deltaT, 0);
+        stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, 0., deltaT, 0) );
+        // The initial step goes from [-deltaT, 0], so the intrinsic time is at: -deltaT  + alpha*deltaT
+        stepWhenIcApply->setIntrinsicTime(-deltaT + alpha * deltaT);
     }
 
-    return stepWhenIcApply;
+    return stepWhenIcApply.get();
 }
 
 
 void TransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
 {
-    field->advanceSolution(tStep);
+    Domain *d = this->giveDomain(1);
     int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
+
+    field->advanceSolution(tStep);
+    field->applyBoundaryCondition(tStep);
+    if ( tStep->isTheFirstStep() ) {
+        this->applyIC();
+    }
+    field->initialize(VM_Total, tStep, solution, EModelDefaultEquationNumbering());
+
 
     if ( !effectiveMatrix ) {
         effectiveMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
         effectiveMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
 
-        capacityMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
-        capacityMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
+        if ( lumped ) {
+            capacityDiag.resize(neq);
+            this->assembleVector( capacityDiag, tStep, LumpedMassVectorAssembler(), VM_Total, EModelDefaultEquationNumbering(), d );
+        } else {
+            capacityMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+            capacityMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
+            this->assemble( *capacityMatrix, tStep, MassMatrixAssembler(), EModelDefaultEquationNumbering(), d );
+        }
+        
+        if ( this->keepTangent ) {
+            this->assemble( *effectiveMatrix, tStep, TangentAssembler(TangentStiffness),
+                           EModelDefaultEquationNumbering(), d );
+            effectiveMatrix->times(alpha);
+            if ( lumped ) {
+                effectiveMatrix->addDiagonal(1./tStep->giveTimeIncrement(), capacityDiag);
+            } else {
+                effectiveMatrix->add(1./tStep->giveTimeIncrement(), *capacityMatrix);
+            }
+        }
     }
 
-    if ( tStep->isTheFirstStep() ) {
-        this->field->applyDefaultInitialCondition();
-    }
 
-    field->initialize(VM_Total, tStep, solution, EModelDefaultEquationNumbering());
-
-#ifdef VERBOSE
     OOFEM_LOG_INFO("Assembling external forces\n");
-#endif
     FloatArray externalForces(neq);
     externalForces.zero();
-    this->assembleVector( externalForces, tStep, ExternalForcesVector, VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVector( externalForces, tStep, ExternalForceAssembler(), VM_Total, EModelDefaultEquationNumbering(), d );
     this->updateSharedDofManagers(externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
-#if 1
-    FloatArray tmp;
-    this->capacityMatrix->times(solution, tmp);
-    externalForces.add(1.0 / tStep->giveTimeIncrement(), tmp);
-#endif
 
     // set-up numerical method
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
-#ifdef VERBOSE
-    OOFEM_LOG_INFO("Solving ...\n");
-#endif
+    OOFEM_LOG_INFO("Solving for %d unknowns...\n", neq);
 
     internalForces.resize(neq);
 
     FloatArray incrementOfSolution;
     double loadLevel;
     int currentIterations;
-    this->nMethod->solve(this->effectiveMatrix.get(),
-                         & externalForces,
+    this->nMethod->solve(*this->effectiveMatrix,
+                         externalForces,
+                         NULL, // ignore
                          NULL,
-                         NULL,
-                         & this->solution,
-                         & incrementOfSolution,
-                         & this->internalForces,
+                         this->solution,
+                         incrementOfSolution,
+                         this->internalForces,
                          this->eNorm,
-                         loadLevel, // Only relevant for incrementalBCLoadVector
-                         SparseNonLinearSystemNM :: rlm_total,
-                         currentIterations,
+                         loadLevel, // ignore
+                         SparseNonLinearSystemNM :: rlm_total, // ignore
+                         currentIterations, // ignore
                          tStep);
 }
 
@@ -198,42 +201,78 @@ void TransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
 void
 TransientTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
 {
-    // F(T) = Q + C*dT/dt
+    // F(T) + C*dT/dt = Q
     // Linearized:
-    // F(T^(k)) + K*a*dT_1 = Q + C*T_1^(k) + C/dt * dT_1
+    // F(T^(k)) + K*a*dT_1 = Q - C * dT/dt^(k) - C/dt * dT_1
     // Rearranged
-    // (a*K - C/dt) * dT_1 = Q + C*T_1^(k) - F(T^(k))
+    // (a*K + C/dt) * dT_1 = Q - (F(T^(k)) + C * dT/dt^(k))
+    // K_eff        * dT_1 = Q - F_eff
     // Update:
     // T_1 += dT_1
     
     ///@todo NRSolver should report when the solution changes instead of doing it this way.
     this->field->update(VM_Total, tStep, solution, EModelDefaultEquationNumbering());
+    ///@todo Need to reset the boundary conditions properly since some "update" is doing strange 
+    /// things such as applying the (wrong) boundary conditions. This call will be removed when that code can be removed.
+    this->field->applyBoundaryCondition(tStep);
 
     if ( cmpn == InternalRhs ) {
+        // F_eff = F(T^(k)) + C * dT/dt^(k)
         this->internalForces.zero();
-        this->assembleVector(this->internalForces, tStep, InternalForcesVector, VM_Total,
+        this->assembleVector(this->internalForces, tStep, InternalForceAssembler(), VM_Total,
                              EModelDefaultEquationNumbering(), this->giveDomain(1), & this->eNorm);
         this->updateSharedDofManagers(this->internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
-#if 0
-        ///@todo We must have this:
-        this->assembleVector(this->internalForces, tStep, InertiaForcesVector, VM_Total,
-                             EModelDefaultEquationNumbering(), this->giveDomain(1), & this->eNorm);
-#endif
-        return;
+
+        if ( lumped ) {
+            // Note, inertia contribution cannot be computed on element level when lumped mass matrices are used.
+            FloatArray oldSolution, vel;
+            this->field->initialize(VM_Total, tStep->givePreviousStep(), oldSolution, EModelDefaultEquationNumbering());
+            vel.beDifferenceOf(solution, oldSolution);
+            vel.times( 1./tStep->giveTimeIncrement() );
+            for ( int i = 0; i < vel.giveSize(); ++i ) {
+                this->internalForces[i] += this->capacityDiag[i] * vel[i];
+            }
+        } else {
+            FloatArray tmp;
+            this->assembleVector(this->internalForces, tStep, InertiaForceAssembler(), VM_Total,
+                                EModelDefaultEquationNumbering(), this->giveDomain(1), & tmp);
+            this->eNorm.add(tmp); ///@todo Fix this, assembleVector shouldn't zero eNorm inside the functions. / Mikael
+        }
+
     } else if ( cmpn == NonLinearLhs ) {
-        //if ( !this->keepTangent ) {
+        // K_eff = (a*K + C/dt)
+        if ( !this->keepTangent ) {
             this->effectiveMatrix->zero();
-            this->assemble( effectiveMatrix.get(), tStep, TangentStiffnessMatrix,
+            this->assemble( *effectiveMatrix, tStep, TangentAssembler(TangentStiffness),
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            ///@todo Check sign
-            effectiveMatrix->times(alpha * tStep->giveTimeIncrement());
-            this->assemble( effectiveMatrix.get(), tStep, CapacityMatrix,
-                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            effectiveMatrix->times(1. / tStep->giveTimeIncrement());
-        //}
-        return;
+            effectiveMatrix->times(alpha);
+            if ( lumped ) {
+                effectiveMatrix->addDiagonal(1./tStep->giveTimeIncrement(), capacityDiag);
+            } else {
+                effectiveMatrix->add(1./tStep->giveTimeIncrement(), *capacityMatrix);
+            }
+        }
     } else {
         OOFEM_ERROR("Unknown component");
+    }
+}
+
+
+void
+TransientTransportProblem :: applyIC()
+{
+    Domain *domain = this->giveDomain(1);
+    OOFEM_LOG_INFO("Applying initial conditions\n");
+
+    this->field->applyDefaultInitialCondition();
+
+    ///@todo It's rather strange that the models need the initial values.
+    // update element state according to given ic
+    TimeStep *s = this->giveSolutionStepWhenIcApply();
+    for ( auto &elem : domain->giveElements() ) {
+        TransportElement *element = static_cast< TransportElement * >( elem.get() );
+        element->updateInternalState(s);
+        element->updateYourself(s);
     }
 }
 
@@ -241,8 +280,9 @@ TransientTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn
 int
 TransientTransportProblem :: forceEquationNumbering()
 {
-    this->capacityMatrix.release();
-    this->effectiveMatrix.release();
+    this->capacityDiag.clear();
+    this->capacityMatrix.reset(NULL);
+    this->effectiveMatrix.reset(NULL);
     return EngngModel :: forceEquationNumbering();
 }
 
@@ -332,12 +372,16 @@ TransientTransportProblem :: giveUnknownDictHashIndx(ValueModeType mode, TimeSte
 
 
 int
+TransientTransportProblem :: requiresUnknownsDictionaryUpdate()
+{
+    return true;
+}
+
+int
 TransientTransportProblem :: checkConsistency()
 {
-    Domain *domain = this->giveDomain(1);
-
     // check for proper element type
-    for ( auto &elem : domain->giveElements() ) {
+    for ( auto &elem : this->giveDomain(1)->giveElements() ) {
         if ( !dynamic_cast< TransportElement * >( elem.get() ) ) {
             OOFEM_WARNING("Element %d has no TransportElement base", elem->giveLabel());
             return 0;
@@ -355,11 +399,5 @@ TransientTransportProblem :: updateDomainLinks()
     this->giveNumericalMethod( this->giveCurrentMetaStep() )->setDomain( this->giveDomain(1) );
 }
 
-
-void
-TransientTransportProblem :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
-{
-    iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
-}
 
 } // end namespace oofem

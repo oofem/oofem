@@ -185,7 +185,7 @@ ZZNodalRecoveryModel :: recoverValues(Set elementSet, InternalStateType type, Ti
         std :: ostringstream msg;
         int i = 0;
         for ( int dman: unresolvedDofMans ) {
-            msg << dman << ' ';
+            msg << this->domain->giveDofManager(dman)->giveLabel() << ' ';
             if ( ++i > 20 ) {
                 break;
             }
@@ -193,7 +193,7 @@ ZZNodalRecoveryModel :: recoverValues(Set elementSet, InternalStateType type, Ti
         if ( i > 20 ) {
             msg << "...";
         }
-        OOFEM_WARNING("some values of some dofmanagers undetermined\n[%s]", msg.str().c_str() );
+        OOFEM_WARNING("some values of some dofmanagers undetermined (in global numbers) \n[%s]", msg.str().c_str() );
     }
 
 
@@ -223,7 +223,7 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNValProduct(FloatMatri
           continue;
         }
 
-        interpol->evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(element) );
+        interpol->evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(element) );
         answer.plusDyadUnsym(n, stressVector, dV);
 
         //  help.beTProductOf(n,stressVector);
@@ -257,7 +257,7 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &a
 
     for ( GaussPoint *gp: *iRule ) {
         double dV = element->computeVolumeAround(gp);
-        interpol->evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(element) );
+        interpol->evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(element) );
         fullAnswer.plusDyadSymmUpper(n, dV);
         pok += ( n.at(1) * dV ); ///@todo What is this? Completely unused.
         volume += dV;

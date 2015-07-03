@@ -68,7 +68,7 @@ bool Inclusion :: isMaterialModified(GaussPoint &iGP, Element &iEl, CrossSection
 
     FloatArray N;
     FEInterpolation *interp = iEl.giveInterpolation();
-    interp->evalN( N, * iGP.giveNaturalCoordinates(), FEIElementGeometryWrapper(& iEl) );
+    interp->evalN( N, iGP.giveNaturalCoordinates(), FEIElementGeometryWrapper(& iEl) );
 
     const IntArray &elNodes = iEl.giveDofManArray();
 
@@ -85,12 +85,12 @@ bool Inclusion :: isMaterialModified(GaussPoint &iGP, Element &iEl, CrossSection
 
 IRResultType Inclusion :: initializeFrom(InputRecord *ir)
 {
-    EnrichmentItem :: initializeFrom(ir);
     IRResultType result;
+
     int crossSectionIndex = 0;
     IR_GIVE_FIELD(ir, crossSectionIndex, _IFT_Inclusion_CrossSection);
     mpCrossSection = this->giveDomain()->giveCrossSection(crossSectionIndex);
 
-    return IRRT_OK;
+    return EnrichmentItem :: initializeFrom(ir);
 }
 } /* namespace oofem */

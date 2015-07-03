@@ -121,7 +121,6 @@ LIBeam3dNL2 :: updateTempQuaternion(TimeStep *tStep)
     if ( tStep->giveSolutionStateCounter() != tempQCounter ) {
         // update temporary quaternion
         FloatArray u, centreSpin(3), q2(4);
-        FloatMatrix dR(3, 3);
         double centreSpinSize;
 
         // ask element's displacement increments
@@ -227,9 +226,8 @@ LIBeam3dNL2 :: computeQuaternionFromRotMtrx(FloatArray &answer, FloatMatrix &R)
 void
 LIBeam3dNL2 :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
-    FloatArray ui(3), xd(3), eps(3), curv(3), ac(3);
-    FloatMatrix sc(3, 3), tmid(3, 3), tempTc;
-    IntArray mask(1);
+    FloatArray xd(3), eps(3), curv(3);
+    FloatMatrix tempTc;
 
     // update temp triad
     this->updateTempQuaternion(tStep);
@@ -452,7 +450,10 @@ LIBeam3dNL2 :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     // first call parent
-    NLStructuralElement :: initializeFrom(ir);
+    result = NLStructuralElement :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     IR_GIVE_FIELD(ir, referenceNode, _IFT_LIBeam3dNL2_refnode);
     if ( referenceNode == 0 ) {
@@ -601,7 +602,7 @@ LIBeam3dNL2 :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *
      * without regarding particular side
      */
 
-    this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
+    this->computeNmatrixAt(gp->giveSubPatchCoordinates(), answer);
 }
 
 
@@ -638,7 +639,7 @@ LIBeam3dNL2 :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 LIBeam3dNL2 :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    computeGlobalCoordinates( answer, * ( gp->giveNaturalCoordinates() ) );
+    computeGlobalCoordinates( answer, gp->giveNaturalCoordinates() );
 }
 
 
@@ -678,33 +679,6 @@ LIBeam3dNL2 :: giveLocalCoordinateSystem(FloatMatrix &answer)
     return 1;
 }
 
-
-/*
- * int
- * LIBeam3dNL2 :: computeGtoLRotationMatrix (FloatMatrix& answer) // giveRotationMatrix ()
- * // Returns the rotation matrix of the receiver.
- * // rotation matrix is computed for original configuration only
- * {
- * FloatMatrix lcs;
- * int i,j;
- *
- * answer.resize(12,12);
- * answer.zero();
- *
- * this->giveLocalCoordinateSystem (lcs);
- *
- * for (i=1; i <= 3; i++)
- * for (j=1; j <= 3; j++) {
- * answer.at(i,j) = lcs.at(i,j);
- * answer.at(i+3, j+3) = lcs.at(i,j);
- * answer.at(i+6, j+6) = lcs.at(i,j);
- * answer.at(i+9, j+9) = lcs.at(i,j);
- * }
- *
- * //delete lcs;
- * return 1 ;
- * }
- */
 
 int
 LIBeam3dNL2 :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
@@ -755,7 +729,7 @@ LIBeam3dNL2 :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep 
 {
     FloatArray lc(1);
     NLStructuralElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
-    answer.times( this->giveCrossSection()->give(CS_Area, & lc, NULL, this) );
+    answer.times( this->giveCrossSection()->give(CS_Area, lc, this) );
 }
 
 
@@ -792,8 +766,7 @@ void
 LIBeam3dNL2 :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
 {
     GaussPoint *gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0);
-    FloatArray ui(3), xd(3), curv(3), ac(3), PrevEpsilon;
-    FloatMatrix sc(3, 3), tmid(3, 3), tc(3, 3);
+    FloatArray ui(3), ac(3), PrevEpsilon;
 
     answer.resize(3);
 
@@ -833,7 +806,7 @@ LIBeam3dNL2 :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
     // update curvature
     // exact procedure due to Simo & Vu Quoc
     FloatMatrix dR, Rn, Ro;
-    FloatArray e, om, omp, acp(3), kapgn1(3);
+    FloatArray om, omp, acp(3), kapgn1(3);
     double acSize, coeff;
 
     this->computeVectorOf(VM_Incremental, tStep, ui);

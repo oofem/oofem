@@ -40,14 +40,10 @@
 #include "sparsemtrx.h"
 #include "primaryfield.h"
 #include "dofdistributedprimaryfield.h"
-//<RESTRICTED_SECTION>
-#include "materialinterface.h"
-//</RESTRICTED_SECTION>
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
-
 #include "pfemnumberingschemes.h"
+#include "materialinterface.h"
+#include "assemblercallback.h"
+
 
 ///@name Input fields for PFEM
 //@{
@@ -65,6 +61,48 @@
 //@}
 
 namespace oofem {
+
+class PFEMPressureRhsAssembler : public VectorAssembler
+{
+public:
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+};
+
+
+class PFEMCorrectionRhsAssembler : public VectorAssembler
+{
+protected:
+    double deltaT;
+
+public:
+    PFEMCorrectionRhsAssembler(double deltaT) : VectorAssembler(), deltaT(deltaT) {}
+
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+    virtual void locationFromElement(IntArray &loc, Element &element, const UnknownNumberingScheme &s, IntArray *dofIds = nullptr) const;
+};
+
+
+class PFEMLaplaceVelocityAssembler : public VectorAssembler
+{
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+    virtual void locationFromElement(IntArray &loc, Element &element, const UnknownNumberingScheme &s, IntArray *dofIds = nullptr) const;
+};
+
+
+class PFEMMassVelocityAssembler : public VectorAssembler
+{
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+    virtual void locationFromElement(IntArray &loc, Element &element, const UnknownNumberingScheme &s, IntArray *dofIds = nullptr) const;
+};
+
+
+class PFEMPressureLaplacianAssembler : public MatrixAssembler
+{
+public:
+    virtual void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const;
+    virtual void locationFromElement(IntArray &loc, Element &element, const UnknownNumberingScheme &s, IntArray *dofIds = nullptr) const;
+};
+
 /**
  * This class represents PFEM method for solving incompressible Navier-Stokes equations
  */
@@ -78,11 +116,11 @@ protected:
     SparseMtrxType sparseMtrxType;
 
     /// left-hand side matrix for the auxiliary velocity equations
-    SparseMtrx *avLhs;
+    FloatArray avLhs;
     /// left-hand side matrix for the pressure equations
-    SparseMtrx *pLhs;
+    std :: unique_ptr< SparseMtrx > pLhs;
     /// left-hand side matrix for the velocity equations
-    SparseMtrx *vLhs;
+    FloatArray vLhs;
 
     // TODO: consider using DofDistributedPrimaryField for pressure and velocity
     /// Pressure field
@@ -129,9 +167,9 @@ protected:
 public:
     PFEM(int i, EngngModel * _master = NULL) :
         EngngModel(i, _master)
-        , avLhs(NULL)
-        , pLhs(NULL)
-        , vLhs(NULL)
+        , avLhs()
+        , pLhs()
+        , vLhs()
         , PressureField(this, 1, FT_Pressure, 1)
         , VelocityField(this, 1, FT_Velocity, 1)
         , pns()
@@ -142,10 +180,10 @@ public:
         nMethod = NULL;
         domainVolume = 0.0;
         printVolumeReport = false;
-	discretizationScheme = 1; // implicit iterative scheme is default
-	associatedCrossSection = 0;
-	associatedMaterial = 0;
-	associatedPressureBC = 0;
+        discretizationScheme = 1; // implicit iterative scheme is default
+        associatedCrossSection = 0;
+        associatedMaterial = 0;
+        associatedPressureBC = 0;
     }
     ~PFEM() { }
 

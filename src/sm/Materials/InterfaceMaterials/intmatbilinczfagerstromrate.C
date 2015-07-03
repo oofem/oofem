@@ -70,9 +70,6 @@ IntMatBilinearCZFagerstromRate :: giveFirstPKTraction_3d(FloatArray &answer, Gau
     
     IntMatBilinearCZFagerstromStatus *status = static_cast< IntMatBilinearCZFagerstromStatus * >( this->giveStatus(gp) );
 
-    //this->initGpForNewStep(gp);
-    this->initTempStatus(gp);
-
     FloatMatrix Finv(3,3);
 
     Finv.beInverseOf(F);
@@ -367,8 +364,6 @@ const double tolerance = 1.0e-12; // small number
 IRResultType
 IntMatBilinearCZFagerstromRate :: initializeFrom(InputRecord *ir)
 {
-
-    //const char *__proc = "initializeFrom";  // Required by IR_GIVE_FIELD macro
     IRResultType result;                    // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, kn0, _IFT_IntMatBilinearCZFagerstrom_kn);

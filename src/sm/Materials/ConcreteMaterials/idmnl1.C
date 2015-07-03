@@ -47,6 +47,7 @@
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
 #include "datastream.h"
+#include "unknownnumberingscheme.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -82,7 +83,7 @@ IDNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussP
      * computation. It is therefore necessary only to store local strain in corresponding status.
      * This service is declared at StructuralNonlocalMaterial level.
      */
-    FloatArray SDstrainVector, fullSDStrainVector;
+    FloatArray SDstrainVector;
     double equivStrain;
     IDNLMaterialStatus *nlstatus = static_cast< IDNLMaterialStatus * >( this->giveStatus(gp) );
 
@@ -133,7 +134,7 @@ IDNLMaterial :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
 
     Element *elem = gp->giveElement();
     FloatArray coords;
-    elem->computeGlobalCoordinates( coords, * ( gp->giveNaturalCoordinates() ) );
+    elem->computeGlobalCoordinates( coords, gp->giveNaturalCoordinates() );
     double xtarget = coords.at(1);
 
     double w, wsum = 0., x, xprev, damage, damageprev = 0.;
@@ -144,7 +145,7 @@ IDNLMaterial :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
     xprev = xtarget;
     for ( pos = postarget; pos != list->end(); ++pos ) {
         nearElem = ( pos->nearGp )->giveElement();
-        nearElem->computeGlobalCoordinates( coords, * ( ( pos->nearGp )->giveNaturalCoordinates() ) );
+        nearElem->computeGlobalCoordinates( coords, pos->nearGp->giveNaturalCoordinates() );
         x = coords.at(1);
         nonlocStatus = static_cast< IDNLMaterialStatus * >( this->giveStatus(pos->nearGp) );
         damage = nonlocStatus->giveTempDamage();
@@ -167,7 +168,7 @@ IDNLMaterial :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
     distance = 0.;
     for ( pos = postarget; pos != list->begin(); --pos ) {
         nearElem = ( pos->nearGp )->giveElement();
-        nearElem->computeGlobalCoordinates( coords, * ( ( pos->nearGp )->giveNaturalCoordinates() ) );
+        nearElem->computeGlobalCoordinates( coords, pos->nearGp->giveNaturalCoordinates() );
         x = coords.at(1);
         nonlocStatus = static_cast< IDNLMaterialStatus * >( this->giveStatus(pos->nearGp) );
         damage = nonlocStatus->giveTempDamage();
@@ -190,7 +191,7 @@ IDNLMaterial :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
     pos = list->begin();
     if ( pos != postarget ) {
         nearElem = ( pos->nearGp )->giveElement();
-        nearElem->computeGlobalCoordinates( coords, * ( ( pos->nearGp )->giveNaturalCoordinates() ) );
+        nearElem->computeGlobalCoordinates( coords, pos->nearGp->giveNaturalCoordinates() );
         x = coords.at(1);
         nonlocStatus = static_cast< IDNLMaterialStatus * >( this->giveStatus(pos->nearGp) );
         damage = nonlocStatus->giveTempDamage();
@@ -255,7 +256,7 @@ IDNLMaterial :: computeDistanceModifier(double damage)
 
     case 4: return 1. / pow(Rf / cl, damage);
 
-    case 5: return ( 2. * cl ) / ( cl + Rf + ( cl - Rf ) * cos(3.1415926 * damage) );
+    case 5: return ( 2. * cl ) / ( cl + Rf + ( cl - Rf ) * cos(M_PI * damage) );
 
     default: return 1.;
     }
@@ -366,8 +367,8 @@ IDNLMaterial :: computeStressBasedWeight(double &nx, double &ny, double &ratio, 
     }
     //Compute distance between source and receiver point
     FloatArray gpCoords, distance;
-    gp->giveElement()->computeGlobalCoordinates( gpCoords, * ( gp->giveNaturalCoordinates() ) );
-    jGp->giveElement()->computeGlobalCoordinates( distance, * ( jGp->giveNaturalCoordinates() ) );
+    gp->giveElement()->computeGlobalCoordinates( gpCoords, gp->giveNaturalCoordinates() );
+    jGp->giveElement()->computeGlobalCoordinates( distance, jGp->giveNaturalCoordinates() );
     distance.subtract(gpCoords); // Vector connecting the two Gauss points
 
     //Compute modified distance
@@ -391,11 +392,11 @@ IDNLMaterial :: computeStressBasedWeightForPeriodicCell(double &nx, double &ny, 
 {     
     double updatedWeight = 0.;
     FloatArray gpCoords, distance;
-    gp->giveElement()->computeGlobalCoordinates( gpCoords, * ( gp->giveNaturalCoordinates() ) );
+    gp->giveElement()->computeGlobalCoordinates( gpCoords, gp->giveNaturalCoordinates() );
     int ix, nper = 1; // could be increased in the future, if needed
 
     for (ix=-nper; ix<=nper; ix++) { // loop over periodic images shifted in x-direction
-      jGp->giveElement()->computeGlobalCoordinates( distance, * ( jGp->giveNaturalCoordinates() ) );
+      jGp->giveElement()->computeGlobalCoordinates( distance, jGp->giveNaturalCoordinates() );
       distance.at(1) += ix*px; // shift the x-coordinate
       distance.subtract(gpCoords); // Vector connecting the two Gauss points
 
@@ -513,8 +514,14 @@ IDNLMaterial :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    IsotropicDamageMaterial1 :: initializeFrom(ir);
-    StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
+    result = IsotropicDamageMaterial1 :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+    result = StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     averType = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, averType, _IFT_IDNLMaterial_averagingtype);
@@ -834,7 +841,7 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
     double coeff = 0.0, sum;
     IDNLMaterialStatus *status = static_cast< IDNLMaterialStatus * >( this->giveStatus(gp) );
     StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
-    FloatMatrix b, de, den, princDir(3, 3), t;
+    FloatMatrix b, de, princDir(3, 3), t;
     FloatArray stress, fullStress, strain, principalStress, help, nu;
 
     elem->giveLocationArray(rloc, s);
@@ -842,7 +849,7 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
     elem->computeBmatrixAt(gp, b);
 
     if ( this->equivStrainType == EST_Rankine_Standard ) {
-        FloatArray fullHelp, fullNu;
+        FloatArray fullHelp;
         LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
 
         lmat->giveStiffnessMatrix(de, SecantStiffness, gp, tStep);
@@ -989,7 +996,7 @@ IDNLMaterial :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
     //
     // return Elastic Stiffness matrix for normal Stresses
     LinearElasticMaterial *lMat = this->giveLinearElasticMaterial();
-    FloatMatrix deRed, de;
+    FloatMatrix de;
 
     lMat->give3dMaterialStiffnessMatrix(de, rMode, gp, tStep);
     // This isn't used? Do we need one with zeroed entries (below) or the general 3d stiffness (above)?

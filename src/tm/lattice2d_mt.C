@@ -159,7 +159,7 @@ Lattice2d_mt :: computeNmatrixAt(FloatMatrix &answer, const FloatArray &coords)
 
 
 void
-Lattice2d_mt :: computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *gp)
+Lattice2d_mt :: computeGradientMatrixAt(FloatMatrix &answer, const FloatArray &lcoords)
 {
     double l = this->giveLength();
 
@@ -183,7 +183,7 @@ Lattice2d_mt :: updateInternalState(TimeStep *tStep)
     // force updating ip values
     for ( auto &iRule: integrationRulesArray ) {
         for ( GaussPoint *gp: *iRule ) {
-            this->computeNmatrixAt( n, * gp->giveNaturalCoordinates() );
+            this->computeNmatrixAt( n, gp->giveNaturalCoordinates() );
             this->computeVectorOf({P_f}, VM_Total, tStep, r);
             f.beProductOf(n, r);
             mat->updateInternalState(f, gp, tStep);
@@ -211,8 +211,10 @@ IRResultType
 Lattice2d_mt :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
+
     // first call parent
-    this->LatticeTransportElement :: initializeFrom(ir);
+    result = LatticeTransportElement :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     dimension = 2.;
     IR_GIVE_OPTIONAL_FIELD(ir, dimension, _IFT_Lattice2DMT_dim);

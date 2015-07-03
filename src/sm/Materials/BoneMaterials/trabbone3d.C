@@ -260,7 +260,6 @@ TrabBone3D :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStr
     bool convergence;
     double tempKappa;
     FloatArray tempPlasDef, tempEffectiveStress, trialEffectiveStress;
-    FloatArray strainAfterSubstep, strainIncrement, strainSubIncrement;
     FloatMatrix elasticity, compliance;
 
     TrabBone3DStatus *status = static_cast< TrabBone3DStatus * >( this->giveStatus(gp) );
@@ -275,7 +274,6 @@ TrabBone3D :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStr
     // by values after the previous step
     tempPlasDef = status->givePlasDef();
     tempKappa = status->giveKappa();
-    convergence = true;
     // evaluate the trial stress
     trialEffectiveStress.beProductOf(elasticity, totalStrain - tempPlasDef);
     tempEffectiveStress = trialEffectiveStress;
@@ -316,8 +314,8 @@ TrabBone3D :: projectOnYieldSurface(double &tempKappa, FloatArray &tempEffective
     double deltaKappa, incKappa,  beta, tempScalar, norm, FS, SFS;
     double plasCriterion, plasModulus, viscoModulus, toSolveScalar, errorF, errorR;
     FloatArray incTempEffectiveStress, errLoop;
-    FloatArray toSolveTensor, plasFlowDirec, yieldDerivative, tempTensor2, tensorFF_S, F, scaledF;
-    FloatMatrix fabric, SSaTensor, tempTensor4, normAdjust, normedFFFF, derivPlasFlowDirec;
+    FloatArray toSolveTensor, plasFlowDirec, tempTensor2, tensorFF_S, F;
+    FloatMatrix fabric, SSaTensor, tempTensor4, normAdjust, derivPlasFlowDirec;
 
     this->constructAnisoFabricTensor(fabric);
     this->constructAnisoFtensor(F);
@@ -418,15 +416,13 @@ TrabBone3D :: projectOnYieldSurface(double &tempKappa, FloatArray &tempEffective
                 max_num_iter = 4000;
                 double eta = 0.1;
                 beta = 25.e-4;
-                int j = 0;
                 int jMax = 10;
                 double alfa = 1;
                 double M = ( errorR * errorR + errorF * errorF ) / 2;
                 double dM = -2 * M;
                 double newDeltaKappa;
                 FloatArray tempStress;
-                while ( true ) {
-                    j++;
+                for ( int j = 0;; ++j ) {
                     tempStress = incTempEffectiveStress;
                     tempStress.times(-alfa);
                     tempStress.add(tempEffectiveStress);
@@ -555,7 +551,7 @@ void
 TrabBone3D :: constructDerivativeOfPlasFlowDirec(FloatMatrix &answer, FloatMatrix &fabric, FloatArray &F, FloatArray &S)
 {
     double SFS, norm, SGS, h;
-    FloatArray FFS, FFSF, tempTensor2, tempTensor21, helpArray, dNorm;
+    FloatArray FFS, FFSF, tempTensor2, tempTensor21, dNorm;
     FloatMatrix normAdjust, tempTensor4, dNp, FSFS;
     //////////////////////////////////////////////////
     FFS.beProductOf(fabric, S);

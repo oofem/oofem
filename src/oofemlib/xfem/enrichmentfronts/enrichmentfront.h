@@ -51,7 +51,8 @@ class DynamicInputRecord;
 class GaussPoint;
 enum NodeEnrichmentType : int;
 
-struct EfInput {
+struct EfInput
+{
     EfInput() {}
     EfInput(const FloatArray &iPos, const double &iLevelSet, int iNodeInd, const FloatArray &iClosestPointOnCrack, const double &iArcPos, const FloatArray &iLocalTangDir) :
         mPos(iPos),
@@ -73,7 +74,7 @@ struct EfInput {
 };
 
 
-/*
+/**
  * Class EnrichmentFront: describes the edge or tip of an XFEM enrichment.
  * The purpose is to add a different treatment of the front than the "interior"
  * enrichments. We may, e.g.
@@ -86,14 +87,13 @@ struct EfInput {
  * @author Erik Svenning
  * @date Feb 14, 2014
  */
-
 class OOFEM_EXPORT EnrichmentFront
 {
 public:
-    EnrichmentFront() { };
-    virtual ~EnrichmentFront() { };
+    EnrichmentFront() { }
+    virtual ~EnrichmentFront() { }
 
-    /*
+    /**
      *  MarkNodesAsFront:
      *  Intput:
      *  -ioNodeEnrMarker:   A vector with the same size as the number of nodes in the mesh

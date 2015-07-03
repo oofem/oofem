@@ -55,7 +55,7 @@ ContactElement :: ContactElement()
 };  
   
   
-/*  
+#if 0
 Node2NodeContact :: Node2NodeContact(DofManager *master, DofManager *slave) : ContactElement()
 {   
     this->masterNode = master;
@@ -359,7 +359,7 @@ Node2NodeContactL :: giveDofManagersToAppendTo(IntArray &answer)
     answer = {this->masterNode->giveNumber()};
 }
     
-    */
+#endif
     
 }
 

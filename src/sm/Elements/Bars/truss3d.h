@@ -72,6 +72,7 @@ public:
     virtual int computeNumberOfDofs() { return 6; }
     virtual void giveDofManDofIDMask(int inode, IntArray &) const;
 
+
     // characteristic length (for crack band approach)
     virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane)
     { return this->computeLength(); }
@@ -95,6 +96,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _1dMat; }
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
 protected:
     // edge load support

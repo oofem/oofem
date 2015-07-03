@@ -57,7 +57,7 @@ public:
     /// Constructor
     PlaneStress2dXfem(int n, Domain * d) : PlaneStress2d(n, d), XfemStructuralElementInterface(this), VTKXMLExportModuleElementInterface() { numberOfDofMans = 4; }
     /// Destructor
-    virtual ~PlaneStress2dXfem() { };
+    virtual ~PlaneStress2dXfem() { }
 
     virtual Interface *giveInterface(InterfaceType it);
 

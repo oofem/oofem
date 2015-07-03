@@ -60,6 +60,8 @@ IntElLine1 :: IntElLine1(int n, Domain *aDomain) :
 {
     numberOfDofMans = 4;
     axisymmode = false;
+
+    numberOfGaussPoints = 4;
 }
 
 
@@ -70,7 +72,7 @@ IntElLine1 :: computeNmatrixAt(GaussPoint *ip, FloatMatrix &answer)
 
     FloatArray N;
     FEInterpolation *interp = this->giveInterpolation();
-    interp->evalN( N, * ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    interp->evalN( N, ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(2, 8);
     answer.zero();
@@ -90,7 +92,7 @@ IntElLine1 :: computeGaussPoints()
         integrationRulesArray.resize( 1 );
         //integrationRulesArray[ 0 ].reset( new LobattoIntegrationRule (1,domain, 1, 2) );
         integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 2) );
-        integrationRulesArray [ 0 ]->SetUpPointsOnLine(4, _2dInterface); ///@todo - should be a parameter with num of ip
+        integrationRulesArray [ 0 ]->SetUpPointsOnLine(this->numberOfGaussPoints, _2dInterface);
     }
 }
 
@@ -99,7 +101,7 @@ IntElLine1 :: computeCovarBaseVectorAt(IntegrationPoint *ip, FloatArray &G)
 {
     FloatMatrix dNdxi;
     FEInterpolation *interp = this->giveInterpolation();
-    interp->evaldNdxi( dNdxi, * ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    interp->evaldNdxi( dNdxi, ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     G.resize(2);
     G.zero();
     int numNodes = this->giveNumberOfNodes();
@@ -122,7 +124,7 @@ IntElLine1 :: computeAreaAround(IntegrationPoint *ip)
     if ( this->axisymmode ) {
         int numNodes = this->giveNumberOfNodes();
         FloatArray N;
-        this->interp.evalN( N, * ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+        this->interp.evalN( N, ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
         // interpolate radius
         double r = 0.0;
         for ( int i = 1; i <= N.giveSize(); i++ ) {
@@ -164,8 +166,8 @@ IntElLine1 :: computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 
     answer.resize(2, 2);
     answer.at(1, 1) =  G.at(1);
-    answer.at(2, 1) =  G.at(2);
-    answer.at(1, 2) = -G.at(2);
+    answer.at(2, 1) = -G.at(2);
+    answer.at(1, 2) =  G.at(2);
     answer.at(2, 2) =  G.at(1);
 
 }
@@ -265,7 +267,7 @@ void IntElLine1 :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 
         indx = gc.giveIntVarIndx();
 
-        result += this->computeGlobalCoordinates( gcoord, * ( gp->giveNaturalCoordinates() ) );
+        result += this->computeGlobalCoordinates( gcoord, gp->giveNaturalCoordinates() );
 
         p [ 0 ].x = ( FPNum ) gcoord.at(1);
         p [ 0 ].y = ( FPNum ) gcoord.at(2);

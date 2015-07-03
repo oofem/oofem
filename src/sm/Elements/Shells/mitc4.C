@@ -159,21 +159,21 @@ MITC4Shell ::  giveDirectorVectors(FloatArray &V1, FloatArray &V2, FloatArray &V
     c2 = this->giveNode(2)->giveCoordinates();
     c3 = this->giveNode(3)->giveCoordinates();
     c4 = this->giveNode(4)->giveCoordinates();
-    V1.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, c1, this, false);
-    V1.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, c1, this, false);
-    V1.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, c1, this, false);
+    V1.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, *c1, this, false);
+    V1.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, *c1, this, false);
+    V1.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, *c1, this, false);
 
-    V2.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, c2, this, false);
-    V2.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, c2, this, false);
-    V2.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, c2, this, false);
+    V2.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, *c2, this, false);
+    V2.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, *c2, this, false);
+    V2.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, *c2, this, false);
 
-    V3.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, c3, this, false);
-    V3.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, c3, this, false);
-    V3.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, c3, this, false);
+    V3.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, *c3, this, false);
+    V3.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, *c3, this, false);
+    V3.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, *c3, this, false);
 
-    V4.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, c4, this, false);
-    V4.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, c4, this, false);
-    V4.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, c4, this, false);
+    V4.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, *c4, this, false);
+    V4.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, *c4, this, false);
+    V4.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, *c4, this, false);
 
     V1.normalize();
     V2.normalize();
@@ -632,10 +632,10 @@ MITC4Shell :: giveThickness(double &a1, double &a2, double &a3, double &a4)
     c3 = this->giveNode(3)->giveCoordinates();
     c4 = this->giveNode(4)->giveCoordinates();
 
-    a1 = this->giveCrossSection()->give(CS_Thickness, c1, this, false);
-    a2 = this->giveCrossSection()->give(CS_Thickness, c2, this, false);
-    a3 = this->giveCrossSection()->give(CS_Thickness, c3, this, false);
-    a4 = this->giveCrossSection()->give(CS_Thickness, c4, this, false);
+    a1 = this->giveCrossSection()->give(CS_Thickness, *c1, this, false);
+    a2 = this->giveCrossSection()->give(CS_Thickness, *c2, this, false);
+    a3 = this->giveCrossSection()->give(CS_Thickness, *c3, this, false);
+    a4 = this->giveCrossSection()->give(CS_Thickness, *c4, this, false);
 }
 
 
@@ -873,17 +873,11 @@ MITC4Shell :: printOutputAt(FILE *file, TimeStep *tStep)
         fprintf( file, "  GP 1.%d :", gp->giveNumber() );
         this->giveIPValue(v, gp, IST_ShellStrainTensor, tStep);
         fprintf(file, "  strains    ");
-        // eps_x, eps_y, eps_z, eps_yz, eps_zx, eps_xy (global)
-        fprintf( file,
-                 " % .4e % .4e % .4e % .4e % .4e % .4e ",
-                 v.at(1), v.at(2), v.at(3), v.at(4), v.at(5), v.at(6) );
+        for ( auto &val : v ) fprintf(file, " %.4e", val);
 
         this->giveIPValue(v, gp, IST_ShellForceTensor, tStep);
         fprintf(file, "\n              stresses   ");
-        // sig_x, sig_y, sig_z, sig_yz, sig_xz, sig_xy (global)
-        fprintf( file,
-                 " % .4e % .4e % .4e % .4e % .4e % .4e ",
-                 v.at(1), v.at(2), v.at(3),  v.at(4), v.at(5), v.at(6) );
+        for ( auto &val : v ) fprintf(file, " %.4e", val);
 
         fprintf(file, "\n");
     }
@@ -904,12 +898,12 @@ MITC4Shell :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
 
         this->giveCharacteristicTensor(globTensor, cht, gp, tStep);
 
-        answer.at(1) = globTensor.at(1, 1); //sx
-        answer.at(2) = globTensor.at(2, 2); //sy
-        answer.at(3) = globTensor.at(3, 3); //sz
-        answer.at(4) = globTensor.at(1, 2); //sxy
-        answer.at(5) = globTensor.at(2, 3); //syz
-        answer.at(6) = globTensor.at(1, 3); //szx
+        answer.at(1) = globTensor.at(1, 1); //xx
+        answer.at(2) = globTensor.at(2, 2); //yy
+        answer.at(3) = globTensor.at(3, 3); //zz
+        answer.at(4) = 2 * globTensor.at(2, 3); //yz
+        answer.at(5) = 2 * globTensor.at(1, 3); //xz
+        answer.at(6) = 2 * globTensor.at(2, 3); //yz
 
         return 1;
     } else if ( type == IST_ShellForceTensor ) {
@@ -917,12 +911,12 @@ MITC4Shell :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
 
         this->giveCharacteristicTensor(globTensor, cht, gp, tStep);
 
-        answer.at(1) = globTensor.at(1, 1); //sx
-        answer.at(2) = globTensor.at(2, 2); //sy
-        answer.at(3) = globTensor.at(3, 3); //sz
-        answer.at(4) = globTensor.at(1, 2); //sxy
-        answer.at(5) = globTensor.at(2, 3); //syz
-        answer.at(6) = globTensor.at(1, 3); //szx
+        answer.at(1) = globTensor.at(1, 1); //xx
+        answer.at(2) = globTensor.at(2, 2); //yy
+        answer.at(3) = globTensor.at(3, 3); //zz
+        answer.at(4) = globTensor.at(2, 3); //yz
+        answer.at(5) = globTensor.at(1, 3); //xz
+        answer.at(6) = globTensor.at(2, 3); //yz
 
         return 1;
     } else {
@@ -945,12 +939,11 @@ MITC4Shell :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coor
     for ( int _i = 0; _i < 4; _i++ ) {
         this->giveLocalCoordinates( lc [ _i ], * this->giveNode(_i + 1)->giveCoordinates() );
     }
-    // FEI2dTrLin _interp(1, 2);
     bool inplane = interp_lin.global2local( llc, inputCoords_ElCS, FEIVertexListGeometryWrapper(lc) ) > 0;
     answer.resize(2);
     answer.at(1) = inputCoords_ElCS.at(1);
     answer.at(2) = inputCoords_ElCS.at(2);
-    GaussPoint _gp(NULL, 1, new FloatArray(answer), 2.0, _2dPlate);
+    GaussPoint _gp(NULL, 1, answer, 2.0, _2dPlate);
     // now check if the third local coordinate is within the thickness of element
     bool outofplane = ( fabs( inputCoords_ElCS.at(3) ) <= this->giveCrossSection()->give(CS_Thickness, & _gp) / 2. );
 
@@ -1020,7 +1013,7 @@ MITC4Shell :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int
     double x1 = 0.0, x2 = 0.0, x3 = 0.0, y = 0.0;
     FloatMatrix A(4, 4);
     FloatMatrix b, r;
-    FloatArray val, *coord;
+    FloatArray val;
     double u, v, w;
 
     int size = 0;
@@ -1035,10 +1028,10 @@ MITC4Shell :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int
             r.zero();
         }
 
-        coord = gp->giveNaturalCoordinates();
-        u = coord->at(1);
-        v = coord->at(2);
-        w = coord->at(3);
+        const FloatArray &coord = gp->giveNaturalCoordinates();
+        u = coord.at(1);
+        v = coord.at(2);
+        w = coord.at(3);
 
         A.at(1, 1) += 1;
         A.at(1, 2) += u;
@@ -1106,7 +1099,7 @@ MITC4Shell :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *g
     IntArray edgeNodes;
     FloatArray n;
 
-    this->interp_lin.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIVoidCellGeometry() );
+    this->interp_lin.edgeEvalN( n, iedge, gp->giveNaturalCoordinates(), FEIVoidCellGeometry() );
     this->interp_lin.computeLocalEdgeMapping(edgeNodes, iedge);
 
     answer.beNMatrixOf(n, 6);
@@ -1149,7 +1142,7 @@ MITC4Shell :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
                                lc [ 0 ].at(3), lc [ 1 ].at(3), lc [ 2 ].at(3), lc [ 3 ].at(3) );
 
 
-    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc) );
+    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc) );
     return detJ * gp->giveWeight();
 }
 
@@ -1163,7 +1156,7 @@ MITC4Shell :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
  *                          lc[0].at(3), lc[1].at(3), lc[2].at(3), lc[3].at(3));
  *
  * FloatArray local;
- * this->interp_lin.edgeLocal2global( local, iEdge, * gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc)  );
+ * this->interp_lin.edgeLocal2global( local, iEdge, gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc)  );
  * local.resize(3);
  * local.at(3) = 0.;
  *
@@ -1208,9 +1201,8 @@ MITC4Shell :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gau
 void
 MITC4Shell :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
-    FloatArray coords2(2);
+    const FloatArray &coords2 = sgp->giveNaturalCoordinates();
     FloatArray coords(3);
-    coords2 = * sgp->giveNaturalCoordinates();
     coords.at(1) = coords2.at(1);
     coords.at(2) = coords2.at(2);
     coords.at(3) = 0.0;

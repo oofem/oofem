@@ -40,7 +40,6 @@
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
-#include "eleminterpmapperinterface.h"
 
 #define _IFT_QBrick1_ht_Name "qbrick1ht"
 #define _IFT_QBrick1_hmt_Name "qbrick1hmt"

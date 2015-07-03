@@ -48,12 +48,12 @@
 namespace oofem {
 REGISTER_BoundaryCondition(LinearConstraintBC);
 
-LinearConstraintBC :: LinearConstraintBC(int n, Domain *d) : ActiveBoundaryCondition(n, d)
+LinearConstraintBC :: LinearConstraintBC(int n, Domain *d) : ActiveBoundaryCondition(n, d),
+    md( new Node(0, domain) )
 {
-    this->md = new Node(0, domain);
     // this is internal lagrange multiplier used to enforce the receiver constrain
     // this allocates a new equation related to this constraint
-    this->md->appendDof( new MasterDof( this->md, ( DofIDItem ) ( d->giveNextFreeDofID() ) ) );
+    this->md->appendDof( new MasterDof( this->md.get(), ( DofIDItem ) ( d->giveNextFreeDofID() ) ) );
     this->lhsType.clear();
     this->rhsType.clear();
 }
@@ -61,13 +61,11 @@ LinearConstraintBC :: LinearConstraintBC(int n, Domain *d) : ActiveBoundaryCondi
 
 LinearConstraintBC :: ~LinearConstraintBC()
 {
-    delete this->md;
 }
 
 
 IRResultType LinearConstraintBC :: initializeFrom(InputRecord *ir)
 {
-    ActiveBoundaryCondition :: initializeFrom(ir);
     IRResultType result;
     rhsTf = 0;
 
@@ -76,7 +74,8 @@ IRResultType LinearConstraintBC :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, dofmans, _IFT_LinearConstraintBC_dofmans);
     IR_GIVE_FIELD(ir, dofs, _IFT_LinearConstraintBC_dofs);
     if ( weights.giveSize() != dofmans.giveSize() ) {
-        OOFEM_ERROR("Size mismatch, weights %d and dofmans %d", weights.giveSize(), dofmans.giveSize());
+        OOFEM_WARNING("Size mismatch, weights %d and dofmans %d", weights.giveSize(), dofmans.giveSize());
+        return IRRT_BAD_FORMAT;
     }
     IR_GIVE_OPTIONAL_FIELD(ir, weightsTf, _IFT_LinearConstraintBC_weightsfuncs);
     IR_GIVE_OPTIONAL_FIELD(ir, rhsTf, _IFT_LinearConstraintBC_rhsfuncs);
@@ -84,7 +83,7 @@ IRResultType LinearConstraintBC :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, lhsType, _IFT_LinearConstraintBC_lhstype);
     IR_GIVE_FIELD(ir, rhsType, _IFT_LinearConstraintBC_rhstype);
 
-    return IRRT_OK;
+    return ActiveBoundaryCondition :: initializeFrom(ir);
 }
 
 
@@ -103,14 +102,14 @@ void LinearConstraintBC :: giveLocArray(const UnknownNumberingScheme &r_s,  IntA
 }
 
 
-void LinearConstraintBC :: assemble(SparseMtrx *answer, TimeStep *tStep,
+void LinearConstraintBC :: assemble(SparseMtrx &answer, TimeStep *tStep,
                                     CharType type, const UnknownNumberingScheme &r_s,
                                     const UnknownNumberingScheme &c_s)
 {
     int size = this->weights.giveSize();
     IntArray lambdaeq(1);
     FloatMatrix contrib(size, 1), contribt;
-    IntArray locr(size), locc(size);
+    IntArray locr(size);
 
     if ( !this->lhsType.contains( ( int ) type ) ) {
         return;
@@ -127,15 +126,15 @@ void LinearConstraintBC :: assemble(SparseMtrx *answer, TimeStep *tStep,
         }
         contribt.beTranspositionOf(contrib);
 
-        answer->assemble(lambdaeq, locr, contribt);
-        answer->assemble(locr, lambdaeq, contrib);
+        answer.assemble(lambdaeq, locr, contribt);
+        answer.assemble(locr, lambdaeq, contrib);
     } else {
         // the bc is not imposed at specific time step, however in order to make the equation system regular
         // we initialize the allocated equation to the following form 1*labmda = 0, forcing lagrange multiplier
         // of inactive condition to be zero.
         FloatMatrix help(1, 1);
         help.at(1, 1) = 1.0;
-        answer->assemble(lambdaeq, lambdaeq, help);
+        answer.assemble(lambdaeq, lambdaeq, help);
     }
 }
 
@@ -148,9 +147,6 @@ void LinearConstraintBC :: assembleVector(FloatArray &answer, TimeStep *tStep,
     double factor = 1.;
 
     if ( !this->rhsType.contains( ( int ) type ) ) {
-        return;
-    }
-    if ( !this->isImposed(tStep) ) {
         return;
     }
 
@@ -174,7 +170,7 @@ void LinearConstraintBC :: assembleVector(FloatArray &answer, TimeStep *tStep,
                 answer.at( s.giveDofEquationNumber( mdof ) ) += idof->giveUnknown(mode, tStep) * this->weights.at(_i) * factor;
             }
         }
-    } else {
+    } else if ( type == ExternalForcesVector ) {
         // use rhs value
 
         if ( rhsTf ) {

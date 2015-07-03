@@ -93,7 +93,7 @@ IRResultType
 L4Axisymm :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 4;
-    IRResultType result = this->NLStructuralElement :: initializeFrom(ir);
+    IRResultType result = NLStructuralElement :: initializeFrom(ir);
     if ( result != IRRT_OK ) {
         return result;
     }
@@ -123,37 +123,37 @@ L4Axisymm :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
 
     FloatArray N, NRed, redCoord;
     if ( numberOfFiAndShGaussPoints == 1 ) { // Reduced integration
-       redCoord  = {0.0, 0.0}; // eval in centroid
+        redCoord  = {0.0, 0.0}; // eval in centroid
     } else {
-      redCoord = *gp->giveNaturalCoordinates();
+        redCoord = gp->giveNaturalCoordinates();
     }
 
 
     FEInterpolation *interp = this->giveInterpolation();
         
 
-    interp->evalN( N, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    interp->evalN( N, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     interp->evalN( NRed, redCoord, FEIElementGeometryWrapper(this) );
     
     // Evaluate radius at center
     double r = 0.0;
     for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
-      double x = this->giveNode(i)->giveCoordinate(1);
-      r += x * NRed.at(i);
+        double x = this->giveNode(i)->giveCoordinate(1);
+        r += x * NRed.at(i);
     } 
     
     FloatMatrix dNdx, dNdxRed;
-    interp->evaldNdx( dNdx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    interp->evaldNdx( dNdx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     interp->evaldNdx( dNdxRed, redCoord, FEIElementGeometryWrapper(this) );
     answer.resize(6, dNdx.giveNumberOfRows() * 2);
     answer.zero();
 
     for ( int i = 1; i <= dNdx.giveNumberOfRows(); i++ ) {
-      answer.at(1, i * 2 - 1) = dNdx.at(i, 1);
-      answer.at(2, i * 2 - 0) = dNdx.at(i, 2);
-      answer.at(3, i * 2 - 1) = NRed.at(i) / r;
-      answer.at(6, 2 * i - 1) = dNdxRed.at(i, 2);
-      answer.at(6, 2 * i - 0) = dNdxRed.at(i, 1);
+        answer.at(1, i * 2 - 1) = dNdx.at(i, 1);
+        answer.at(2, i * 2 - 0) = dNdx.at(i, 2);
+        answer.at(3, i * 2 - 1) = NRed.at(i) / r;
+        answer.at(6, 2 * i - 1) = dNdxRed.at(i, 2);
+        answer.at(6, 2 * i - 0) = dNdxRed.at(i, 1);
     }
 }
 
@@ -355,7 +355,6 @@ void L4Axisymm :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
         }
 
         IntArray ind(4);
-        FloatArray *gpCoords;
         WCRec pp [ 9 ];
 
         for ( i = 0; i < 4; i++ ) {
@@ -387,18 +386,18 @@ void L4Axisymm :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
         pp [ 8 ].z = 0.25 * ( pp [ 0 ].z + pp [ 1 ].z + pp [ 2 ].z + pp [ 3 ].z );
 
         for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
-            gpCoords = gp->giveNaturalCoordinates();
-            if ( ( gpCoords->at(1) > 0. ) && ( gpCoords->at(2) > 0. ) ) {
+            const FloatArray &gpCoords = gp->giveNaturalCoordinates();
+            if ( ( gpCoords.at(1) > 0. ) && ( gpCoords.at(2) > 0. ) ) {
                 ind.at(1) = 0;
                 ind.at(2) = 4;
                 ind.at(3) = 8;
                 ind.at(4) = 7;
-            } else if ( ( gpCoords->at(1) < 0. ) && ( gpCoords->at(2) > 0. ) ) {
+            } else if ( ( gpCoords.at(1) < 0. ) && ( gpCoords.at(2) > 0. ) ) {
                 ind.at(1) = 4;
                 ind.at(2) = 1;
                 ind.at(3) = 5;
                 ind.at(4) = 8;
-            } else if ( ( gpCoords->at(1) < 0. ) && ( gpCoords->at(2) < 0. ) ) {
+            } else if ( ( gpCoords.at(1) < 0. ) && ( gpCoords.at(2) < 0. ) ) {
                 ind.at(1) = 5;
                 ind.at(2) = 2;
                 ind.at(3) = 6;

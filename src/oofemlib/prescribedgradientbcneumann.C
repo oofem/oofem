@@ -1,8 +1,35 @@
 /*
- * prescribedgradientbcneumann.C
  *
- *  Created on: Mar 5, 2014
- *      Author: svennine
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
+ *
+ *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2013   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "prescribedgradientbcneumann.h"
@@ -16,58 +43,58 @@
 #include "sparsemtrx.h"
 #include "xfem/xfemelementinterface.h"
 #include "xfem/integrationrules/discsegintegrationrule.h"
+#include "timestep.h"
 #include "function.h"
-
-#include <cmath>
+#include "sparselinsystemnm.h"
+#include "unknownnumberingscheme.h"
+#include "engngm.h"
+#include "mathfem.h"
 
 namespace oofem {
 REGISTER_BoundaryCondition(PrescribedGradientBCNeumann);
 
 PrescribedGradientBCNeumann :: PrescribedGradientBCNeumann(int n, Domain *d) :
-    PrescribedGradientBC(n, d)
+    ActiveBoundaryCondition(n, d),
+    PrescribedGradientHomogenization(),
+    mpSigmaHom( new Node(0, d) )
 {
     int nsd = d->giveNumberOfSpatialDimensions();
-    int numComponents = 0;
-
-    switch ( nsd ) {
-    case 1:
-        numComponents = 1;
-        break;
-
-    case 2:
-        numComponents = 4;
-        break;
-
-    case 3:
-        numComponents = 9;
-        break;
-    }
-
-    mSigmaIds.clear();
-    mpSigmaHom = new Node(0, d); // Node number lacks meaning here.
-    for ( int i = 0; i < numComponents; i++ ) {
+    for ( int i = 0; i < nsd * nsd; i++ ) {
         // Just putting in X_i id-items since they don't matter.
         int dofId = d->giveNextFreeDofID();
         mSigmaIds.followedBy(dofId);
-        mpSigmaHom->appendDof( new MasterDof( mpSigmaHom, ( DofIDItem ) ( dofId ) ) );
+        mpSigmaHom->appendDof( new MasterDof( mpSigmaHom.get(), ( DofIDItem ) ( dofId ) ) );
     }
 }
 
 PrescribedGradientBCNeumann :: ~PrescribedGradientBCNeumann()
 {
-    if ( mpSigmaHom != NULL ) {
-        delete mpSigmaHom;
-        mpSigmaHom = NULL;
-    }
 }
+
+
+IRResultType PrescribedGradientBCNeumann :: initializeFrom(InputRecord *ir)
+{
+    ActiveBoundaryCondition :: initializeFrom(ir);
+    return PrescribedGradientHomogenization :: initializeFrom(ir);
+}
+
+
+void PrescribedGradientBCNeumann :: giveInputRecord(DynamicInputRecord &input)
+{
+    ActiveBoundaryCondition :: giveInputRecord(input);
+    PrescribedGradientHomogenization :: giveInputRecord(input);
+}
+
 
 DofManager *PrescribedGradientBCNeumann :: giveInternalDofManager(int i)
 {
-    return mpSigmaHom;
+    return mpSigmaHom.get();
 }
 
 void PrescribedGradientBCNeumann :: scale(double s)
-{}
+{
+    this->mGradient.times(s);
+}
 
 void PrescribedGradientBCNeumann :: assembleVector(FloatArray &answer, TimeStep *tStep,
                                                    CharType type, ValueModeType mode,
@@ -82,14 +109,13 @@ void PrescribedGradientBCNeumann :: assembleVector(FloatArray &answer, TimeStep 
 
     if ( type == ExternalForcesVector ) {
         // The external forces have two contributions. On the additional equations for sigma, the load is simply the prescribed gradient.
-        double rve_size = this->domainSize();
+        double rve_size = this->domainSize(this->giveDomain(), this->giveSetNumber());
         FloatArray stressLoad;
         FloatArray gradVoigt;
         giveGradientVoigt(gradVoigt);
 
-        double loadLevel = this->giveTimeFunction()->evaluate(tStep, mode);
+        double loadLevel = this->giveTimeFunction()->evaluateAtTime(tStep->giveTargetTime());
         stressLoad.beScaled(-rve_size*loadLevel, gradVoigt);
-
 
         answer.assemble(stressLoad, sigma_loc);
     } else if ( type == InternalForcesVector ) {
@@ -135,10 +161,10 @@ void PrescribedGradientBCNeumann :: assembleVector(FloatArray &answer, TimeStep 
     }
 }
 
-void PrescribedGradientBCNeumann :: assemble(SparseMtrx *answer, TimeStep *tStep,
+void PrescribedGradientBCNeumann :: assemble(SparseMtrx &answer, TimeStep *tStep,
                                              CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
-    if ( type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == StiffnessMatrix || type == ElasticStiffnessMatrix ) {
+    if ( type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == ElasticStiffnessMatrix ) {
         FloatMatrix Ke, KeT;
         IntArray loc_r, loc_c, sigma_loc_r, sigma_loc_c;
         Set *set = this->giveDomain()->giveSet(this->set);
@@ -164,8 +190,8 @@ void PrescribedGradientBCNeumann :: assemble(SparseMtrx *answer, TimeStep *tStep
             Ke.negated();
             KeT.beTranspositionOf(Ke);
 
-            answer->assemble(sigma_loc_r, loc_c, Ke); // Contribution to delta_s_i equations
-            answer->assemble(loc_r, sigma_loc_c, KeT); // Contributions to delta_v equations
+            answer.assemble(sigma_loc_r, loc_c, Ke); // Contribution to delta_s_i equations
+            answer.assemble(loc_r, sigma_loc_c, KeT); // Contributions to delta_v equations
         }
     } else   {
         printf("Skipping assembly in PrescribedGradientBCNeumann::assemble().\n");
@@ -175,7 +201,7 @@ void PrescribedGradientBCNeumann :: assemble(SparseMtrx *answer, TimeStep *tStep
 void PrescribedGradientBCNeumann :: giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,
                                                        const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
-    IntArray bNodes, dofids;
+    IntArray dofids;
     IntArray loc_r, loc_c, sigma_loc_r, sigma_loc_c;
     int nsd = this->domain->giveNumberOfSpatialDimensions();
     DofIDItem id0 = this->domain->giveDofManager(1)->hasDofID(V_u) ? V_u : D_u; // Just check the first node if it has V_u or D_u.
@@ -221,6 +247,55 @@ void PrescribedGradientBCNeumann :: computeField(FloatArray &sigma, TimeStep *tS
     mpSigmaHom->giveUnknownVector(sigma, mSigmaIds, VM_Total, tStep);
 }
 
+
+void PrescribedGradientBCNeumann :: computeTangent(FloatMatrix &tangent, TimeStep *tStep)
+{
+    EngngModel *rve = this->giveDomain()->giveEngngModel();
+    ///@todo Get this from engineering model
+    std :: unique_ptr< SparseLinearSystemNM > solver( 
+        classFactory.createSparseLinSolver( ST_Petsc, this->domain, this->domain->giveEngngModel() ) ); // = rve->giveLinearSolver();
+    SparseMtrxType stype = solver->giveRecommendedMatrix(true);
+    EModelDefaultEquationNumbering fnum;
+    double rve_size = this->domainSize(this->giveDomain(), this->giveSetNumber());
+
+    // Set up and assemble tangent FE-matrix which will make up the sensitivity analysis for the macroscopic material tangent.
+    std :: unique_ptr< SparseMtrx > Kff( classFactory.createSparseMtrx(stype) );
+    if ( !Kff ) {
+        OOFEM_ERROR("Couldn't create sparse matrix of type %d\n", stype);
+    }
+    Kff->buildInternalStructure(rve, this->domain->giveNumber(), fnum);
+    rve->assemble(*Kff, tStep, TangentAssembler(TangentStiffness), fnum, fnum, this->domain);
+
+    // Setup up indices and locations
+    int neq = Kff->giveNumberOfRows();
+
+    // Indices and such of internal dofs
+    int n = this->mpSigmaHom->giveNumberOfDofs();
+
+    // Matrices and arrays for sensitivities
+    FloatMatrix grad_pert(neq, n), s_d(neq, n);
+
+    // Unit pertubations for d_dev
+    grad_pert.zero();
+    for ( int i = 1; i <= n; ++i ) {
+        int eqn = this->mpSigmaHom->giveDofWithID(this->mSigmaIds.at(i))->giveEquationNumber(fnum);
+        grad_pert.at(eqn, i) = -1.0 * rve_size;
+    }
+
+    // Solve all sensitivities
+    solver->solve(*Kff, grad_pert, s_d);
+
+    // Extract the stress response from the solutions
+    tangent.resize(n, n);
+    for ( int i = 1; i <= n; ++i ) {
+        int eqn = this->mpSigmaHom->giveDofWithID(this->mSigmaIds.at(i))->giveEquationNumber(fnum);
+        for ( int j = 1; j <= n; ++j ) {
+            tangent.at(i, j) = s_d.at(eqn, j);
+        }
+    }
+}
+
+
 void PrescribedGradientBCNeumann :: giveStressLocationArray(IntArray &oCols, const UnknownNumberingScheme &r_s)
 {
     mpSigmaHom->giveCompleteLocationArray(oCols, r_s);
@@ -233,7 +308,6 @@ void PrescribedGradientBCNeumann :: integrateTangent(FloatMatrix &oTangent, Elem
     FloatMatrix contrib;
 
     Domain *domain = e->giveDomain();
-    XfemElementInterface *xfemElInt = dynamic_cast< XfemElementInterface * >( e );
 
     FEInterpolation *interp = e->giveInterpolation(); // Geometry interpolation
 
@@ -241,34 +315,35 @@ void PrescribedGradientBCNeumann :: integrateTangent(FloatMatrix &oTangent, Elem
 
     // Interpolation order
     int order = interp->giveInterpolationOrder();
-    IntegrationRule *ir = NULL;
+    std :: unique_ptr< IntegrationRule > ir;
 
-    IntArray edgeNodes;
-    FEInterpolation2d *interp2d = dynamic_cast< FEInterpolation2d * >( interp );
-    if ( interp2d == NULL ) {
-        OOFEM_ERROR("failed to cast to FEInterpolation2d.")
-    }
-    interp2d->computeLocalEdgeMapping(edgeNodes, iBndIndex);
-
-    const FloatArray &xS = * ( e->giveDofManager( edgeNodes.at(1) )->giveCoordinates() );
-    const FloatArray &xE = * ( e->giveDofManager( edgeNodes.at( edgeNodes.giveSize() ) )->giveCoordinates() );
-
+    XfemElementInterface *xfemElInt = dynamic_cast< XfemElementInterface * >( e );
     if ( xfemElInt != NULL && domain->hasXfemManager() ) {
+        IntArray edgeNodes;
+        FEInterpolation2d *interp2d = dynamic_cast< FEInterpolation2d * >( interp );
+        if ( interp2d == NULL ) {
+            OOFEM_ERROR("failed to cast to FEInterpolation2d.")
+        }
+        interp2d->computeLocalEdgeMapping(edgeNodes, iBndIndex);
+
+        const FloatArray &xS = * ( e->giveDofManager( edgeNodes.at(1) )->giveCoordinates() );
+        const FloatArray &xE = * ( e->giveDofManager( edgeNodes.at( edgeNodes.giveSize() ) )->giveCoordinates() );
+
         std :: vector< Line >segments;
         std :: vector< FloatArray >intersecPoints;
         xfemElInt->partitionEdgeSegment(iBndIndex, segments, intersecPoints);
         MaterialMode matMode = e->giveMaterialMode();
-        ir = new DiscontinuousSegmentIntegrationRule(1, e, segments, xS, xE);
+        ir.reset( new DiscontinuousSegmentIntegrationRule(1, e, segments, xS, xE) );
         int numPointsPerSeg = 1;
         ir->SetUpPointsOnLine(numPointsPerSeg, matMode);
-    } else   {
-        ir = interp->giveBoundaryIntegrationRule(order, iBndIndex);
+    } else {
+        ir.reset( interp->giveBoundaryIntegrationRule(order, iBndIndex) );
     }
 
     oTangent.clear();
 
     for ( GaussPoint *gp: *ir ) {
-        FloatArray &lcoords = * gp->giveNaturalCoordinates();
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
         FEIElementGeometryWrapper cellgeo(e);
 
         // Evaluate the normal;
@@ -293,29 +368,42 @@ void PrescribedGradientBCNeumann :: integrateTangent(FloatMatrix &oTangent, Elem
             nMatrix.beNMatrixOf(n, nsd);
         }
 
-        if ( nsd == 3 ) {
-            OOFEM_ERROR("not implemented for nsd == 3.")
-        } else if ( nsd == 2 ) {
-            E_n.resize(4, 2);
-            E_n.at(1, 1) = normal.at(1);
-            E_n.at(1, 2) = 0.0;
+        E_n.resize(nsd*nsd, nsd);
+        E_n.zero();
 
-            E_n.at(2, 1) = 0.0;
+        if ( nsd == 3 ) {
+            E_n.at(1, 1) = normal.at(1);
+
+            E_n.at(2, 2) = normal.at(2);
+
+            E_n.at(3, 3) = normal.at(3);
+            
+            E_n.at(4, 1) = normal.at(2);
+
+            E_n.at(5, 1) = normal.at(3);
+
+            E_n.at(6, 2) = normal.at(3);
+
+            E_n.at(7, 2) = normal.at(1);
+
+            E_n.at(8, 3) = normal.at(1);
+
+            E_n.at(9, 3) = normal.at(2);
+        } else if ( nsd == 2 ) {
+            E_n.at(1, 1) = normal.at(1);
+
             E_n.at(2, 2) = normal.at(2);
 
             E_n.at(3, 1) = normal.at(2);
-            E_n.at(3, 2) = 0.0;
 
-            E_n.at(4, 1) = 0.0;
             E_n.at(4, 2) = normal.at(1);
         } else {
-            E_n.clear();
+            E_n.at(1, 1) = normal.at(1);
         }
 
         contrib.beProductOf(E_n, nMatrix);
 
         oTangent.add(detJ * gp->giveWeight(), contrib);
     }
-    delete ir;
 }
 } /* namespace oofem */

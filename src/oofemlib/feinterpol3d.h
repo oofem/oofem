@@ -44,7 +44,7 @@ namespace oofem {
 class OOFEM_EXPORT FEInterpolation3d : public FEInterpolation
 {
 public:
-    FEInterpolation3d(int o) : FEInterpolation(o) { };
+    FEInterpolation3d(int o) : FEInterpolation(o) { }
     virtual int giveNsd() { return 3; }
 
     /**

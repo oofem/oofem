@@ -119,7 +119,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_VariableCrossSection_Name; }
 
     virtual double give(CrossSectionProperty a, GaussPoint *gp);
-    virtual double give(CrossSectionProperty a, const FloatArray *coords, Element *elem, bool local);
+    virtual double give(CrossSectionProperty a, const FloatArray &coords, Element *elem, bool local);
 
 protected:
     void giveExpression(const ScalarFunction **expr, CrossSectionProperty aProperty) const;

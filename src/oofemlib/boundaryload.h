@@ -42,7 +42,6 @@
 
 ///@name Input fields for BoundaryLoad
 //@{
-#define _IFT_BoundaryLoad_ndofs "ndofs"
 #define _IFT_BoundaryLoad_loadtype "loadtype"
 #define _IFT_BoundaryLoad_cstype "cstype"
 #define _IFT_BoundaryLoad_properties "properties"
@@ -121,8 +120,6 @@ public:
     };
 
 protected:
-    /// Number of "DOFs" which represent load geometry.
-    int nDofs;
     /// Load type (its physical meaning).
     bcType lType;
     /// Load coordinate system.
@@ -138,17 +135,13 @@ public:
      * @param i Load number.
      * @param d Domain to which new object will belongs.
      */
-    BoundaryLoad(int i, Domain * d) : Load(i, d), nDofs(0), coordSystemType(CST_Global) { }
+    BoundaryLoad(int i, Domain * d) : Load(i, d), coordSystemType(CST_Global) { }
 
     virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode);
     /**
      * @return Approximation order of load geometry.
      */
     virtual int giveApproxOrder() = 0;
-    /**
-     * @return Receiver's number of "DOFs". Should correspond to number of DOFs on loaded entity.
-     */
-    int giveNumberOfDofs() { return nDofs; }
 
     virtual CoordSystType giveCoordSystMode() { return coordSystemType; }
     /**

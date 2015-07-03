@@ -78,7 +78,7 @@ public:
     /// Destructor
     virtual ~PrescribedGenStrainShell7() { }
 
-    virtual double give(Dof *dof, ValueModeType mode, TimeStep *tStep);
+    virtual double give(Dof *dof, ValueModeType mode, double time);
 
     virtual bcType giveType() const { return DirichletBT; }
 
@@ -131,9 +131,6 @@ public:
      * @param t Vector in voigt format.
      */
     virtual void setPrescribedGenStrainShell7Voigt(const FloatArray &t);
-
-    /// @warning Not used. Do not call.
-    virtual void setPrescribedValue(double) { OOFEM_ERROR("Scalar value not used for prescribed tensors."); }
 
     /**
      * Set the center coordinate for the prescribed values to be set for.

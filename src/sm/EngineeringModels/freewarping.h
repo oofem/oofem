@@ -64,21 +64,19 @@ class SparseMtrx;
 class FreeWarping : public StructuralEngngModel
 {
 protected:
-    SparseMtrx *stiffnessMatrix;
+    std :: unique_ptr< SparseMtrx > stiffnessMatrix;
     FloatArray loadVector;
     FloatArray displacementVector;
 
     LinSystSolverType solverType;
     SparseMtrxType sparseMtrxType;
     /// Numerical method used to solve the problem.
-    SparseLinearSystemNM *nMethod;
+    std :: unique_ptr< SparseLinearSystemNM > nMethod;
 
     /// computed center of gravity
     FloatArray cg;
     FloatMatrix CG;
     FloatArray SolutionAtCG;
-
-
 
     int initFlag; // needed?
 
@@ -100,8 +98,6 @@ public:
     virtual void terminate(TimeStep *tStep);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
 
     void getCenterOfGravity(FloatMatrix &answer) { answer = this->CG; }
 

@@ -128,7 +128,8 @@ HydrationModel :: initializeFrom(InputRecord *ir)
     if ( initialHydrationDegree >= 0. ) {
         OOFEM_LOG_INFO("HydrationModel: Hydration from %.2f.", initialHydrationDegree);
     } else {
-        OOFEM_ERROR("Hydration degree input incorrect, use 0..1 to set initial material hydration degree.");
+        OOFEM_WARNING("Hydration degree input incorrect, use 0..1 to set initial material hydration degree.");
+        return IRRT_BAD_FORMAT;
     }
 
     if ( ir->hasField(_IFT_HydrationModel_c60mix) ) {
@@ -607,8 +608,10 @@ HydrationModelInterface :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_HydrationModelInterface_hydration);
     if ( value >= 0. ) {
         OOFEM_LOG_INFO("HydratingMaterial: creating HydrationModel.");
-        if ( !( hydrationModel = new HydrationModel() ) ) {
-            OOFEM_ERROR("Could not create HydrationModel instance.");
+        hydrationModel.reset( new HydrationModel() );
+        if ( !hydrationModel ) {
+            OOFEM_WARNING("Could not create HydrationModel instance.");
+            return IRRT_BAD_FORMAT;
         }
 
         hydrationModel->initializeFrom(ir);
@@ -618,7 +621,8 @@ HydrationModelInterface :: initializeFrom(InputRecord *ir)
         constantHydrationDegree = -value;
         OOFEM_LOG_INFO("HydratingMaterial: Hydration degree set to %.2f.", -value);
     } else {
-        OOFEM_ERROR("Hydration degree input incorrect, use -1..<0 for constant hydration degree, 0..1 to set initial material hydration degree.");
+        OOFEM_WARNING("Hydration degree input incorrect, use -1..<0 for constant hydration degree, 0..1 to set initial material hydration degree.");
+        return IRRT_BAD_FORMAT;
     }
 
     // Material cast time - start of hydration
@@ -636,21 +640,19 @@ void
 HydrationModelInterface :: updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *tStep)
 {
     if ( hydrationModel ) {
-        TimeStep *hydraTime = new TimeStep( ( const TimeStep ) *tStep );
+        TimeStep hydraTime( ( const TimeStep ) *tStep );
         int notime = 0;
         if ( tStep->giveTargetTime() - tStep->giveTimeIncrement() < castAt ) {
             if ( tStep->giveTargetTime() >= castAt ) {
-                hydraTime->setTimeIncrement(tStep->giveTargetTime() - castAt);
+                hydraTime.setTimeIncrement(tStep->giveTargetTime() - castAt);
             } else {
                 notime = 1;
             }
         }
 
         if ( !notime ) {
-            hydrationModel->updateInternalState(vec, gp, hydraTime);
+            hydrationModel->updateInternalState(vec, gp, &hydraTime);
         }
-
-        delete hydraTime;
     }
 }
 

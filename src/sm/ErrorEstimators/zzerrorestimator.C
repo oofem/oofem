@@ -204,11 +204,11 @@ ZZErrorEstimator :: giveValue(EE_ValueType type, TimeStep *tStep)
 RemeshingCriteria *
 ZZErrorEstimator :: giveRemeshingCrit()
 {
-    if ( this->rc ) {
-        return this->rc;
+    if ( !this->rc ) {
+        this->rc.reset( new ZZRemeshingCriteria(1, this) );
     }
 
-    return ( this->rc = new ZZRemeshingCriteria(1, this) );
+    return this->rc.get();
 }
 
 
@@ -273,7 +273,7 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
     if ( norm == ZZErrorEstimator :: L2Norm ) {
         for ( GaussPoint *gp: *this->ZZErrorEstimatorI_giveIntegrationRule() ) {
             double dV = element->computeVolumeAround(gp);
-            interpol->evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(element) );
+            interpol->evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(element) );
 
             diff.beTProductOf(nodalRecoveredStreses, n);
 
@@ -291,7 +291,7 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
 
         for ( GaussPoint *gp: *this->ZZErrorEstimatorI_giveIntegrationRule() ) {
             double dV = element->computeVolumeAround(gp);
-            interpol->evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(element) );
+            interpol->evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(element) );
             selem->computeConstitutiveMatrixAt(D, TangentStiffness, gp, tStep);
             DInv.beInverseOf(D);
 

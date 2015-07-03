@@ -48,16 +48,24 @@
 
 namespace oofem {
 /**
- * This class implements Compressible Mooney - Rivlin material
- * @author: Martin Horák, nitramkaroh@seznam.cz
- * @references: R.W. Ogden: Non-Linear Elastic Deformations
- * @references: de Souza Neto, Peric, Owen: Computational Methods for Plasticity: Theory and Applications
+ * This class implements Compressible Mooney - Rivlin material.
+ *
+ * @author Martin Horák, nitramkaroh@seznam.cz
+ * 
+ * References: R.W. Ogden: Non-Linear Elastic Deformations,
+ * de Souza Neto, Peric, Owen: Computational Methods for Plasticity: Theory and Applications
+ *
  * Free energy is considered as:
- * \rho_0 \psi = C1(\bar{I}_1 - 3) + C2(\bar{I}_2-3) + \frac{1}{2} K[ln(J)]^2
- * C1, C2, and K are material parameters
- * \bar{I}_1 = J^{-2/3}I_1, where I_1 is the first invariant of C
- * \bar{I}_2 = J^{-4/3}I_2, where I_2 is the second invariant of C
- * Compressible Neo-Hookean model is obtained by setting C2 = 0
+ * @f[
+ * \rho_0 \psi = C_1(\bar{I}_1 - 3) + C_2(\bar{I}_2-3) + \frac{1}{2} K[ln(J)]^2
+ * @f]
+ * @f$ C_1 @f$, @f$ C_2 @f$, and @f$K@f$ are material parameters.
+ *
+ * @f$ \bar{I}_1 = J^{-2/3}I_1 @f$, where @f$I_1@f$ is the first invariant of @f$ \boldsymbol{C} @f$.
+ *
+ * @f$ \bar{I}_2 = J^{-4/3}I_2 @f$, where @f$I_2@f$ is the second invariant of @f$ \boldsymbol{C} @f$.
+ *
+ * Compressible Neo-Hookean model is obtained by setting @f$C_2 = 0@f$
  */
 class MooneyRivlinMaterial : public StructuralMaterial
 {
@@ -93,26 +101,5 @@ public:
     virtual const char *giveClassName() const { return "MooneyRivlinMaterial"; }
 };
 
-
-
-/**
- * This class implements associated MaterialStatus for MooneyRivlinMaterial.
- */
-class MooneyRivlinMaterialStatus : public StructuralMaterialStatus
-{
-public:
-    /// Constructor
-    MooneyRivlinMaterialStatus(int n, Domain *d, GaussPoint *g);
-    /// Destructor
-    virtual ~MooneyRivlinMaterialStatus();
-
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
-
-    // definition
-    virtual const char *giveClassName() const { return "MooneyRivlinMaterialStatus"; }
-
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
-};
 } // end namespace oofem
 #endif

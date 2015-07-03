@@ -174,7 +174,7 @@ RCM2Material :: giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint *
 {
     int ind;
     double maxErr;
-    FloatArray crackStrainVector, reducedTotalStrainVector;
+    FloatArray crackStrainVector;
     FloatArray strainIncrement, crackStrainIterativeIncrement;
     FloatArray prevPrincipalStrain;
     FloatArray dSigma;
@@ -183,15 +183,6 @@ RCM2Material :: giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint *
     IntArray activatedCracks, crackMapping;
     FloatMatrix dcr, de, decr, fullDecr, crackDirs;
     RCM2MaterialStatus *status = static_cast< RCM2MaterialStatus * >( this->giveStatus(gp) );
-
-    /*
-     * if (status -> giveStressVector() == NULL) status->letStressVectorBe(new FloatArray(this->giveSizeOfReducedStressStrainVector(gp->giveMaterialMode())));
-     * if (status -> giveStrainVector() == NULL) status->letStrainVectorBe(new FloatArray(this->giveSizeOfReducedStressStrainVector(gp->giveMaterialMode())));
-     * // if (status -> givePlasticStrainVector() == NULL) status->letPlasticStrainVectorBe(new FloatArray(6));
-     * if (status -> giveStressIncrementVector() == NULL) status->letStressIncrementVectorBe(new FloatArray(this->giveSizeOfReducedStressStrainVector(gp->giveMaterialMode())));
-     * if (status -> giveStrainIncrementVector() == NULL) status->letStrainIncrementVectorBe(new FloatArray(this->giveSizeOfReducedStressStrainVector(gp->giveMaterialMode())));
-     * // if (status -> givePlasticStrainIncrementVector() == NULL) status->letPlasticStrainIncrementVectorBe(new FloatArray(6));
-     */
 
     /*
      * // totalStressVector = gp -> giveStressVector()->GiveCopy();
@@ -824,9 +815,7 @@ RCM2Material :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, Gf, _IFT_RCM2Material_gf);
     IR_GIVE_FIELD(ir, Ft, _IFT_RCM2Material_ft);
 
-    this->giveLinearElasticMaterial()->initializeFrom(ir);
-
-    return IRRT_OK;
+    return this->giveLinearElasticMaterial()->initializeFrom(ir);
 }
 
 double
@@ -853,8 +842,8 @@ RCM2Material :: give(int aProperty, GaussPoint *gp)
         aProperty = 'G';
     }
 
-    if ( propertyDictionary->includes(aProperty) ) {
-        value = propertyDictionary->at(aProperty);
+    if ( propertyDictionary.includes(aProperty) ) {
+        value = propertyDictionary.at(aProperty);
     } else {
         if ( linearElasticMaterial ) {
             value = this->linearElasticMaterial->give(aProperty, gp);

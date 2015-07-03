@@ -66,7 +66,7 @@ extern "C" {
 
 namespace oofem {
 
-bool FloatArray ::isFinite() const
+bool FloatArray :: isFinite() const
 {
     for(double val : values) {
         if(!std::isfinite(val)) {
@@ -82,7 +82,7 @@ double &
 FloatArray :: operator() (int i)
 {
     if ( i >= this->giveSize() ) {
-        OOFEM_ERROR("array error on index : %d <= 0", i);
+        OOFEM_ERROR("array error on index : %d >= %d", i, this->giveSize());
     }
     return values [ i ];
 }
@@ -91,7 +91,7 @@ const double &
 FloatArray :: operator() (int i) const
 {
     if ( i >= this->giveSize() ) {
-        OOFEM_ERROR("array error on index : %d <= 0", i);
+        OOFEM_ERROR("array error on index : %d >= %d", i, this->giveSize());
     }
     return values [ i ];
 }
@@ -99,7 +99,7 @@ double &
 FloatArray :: operator[] (int i)
 {
     if ( i >= this->giveSize() ) {
-        OOFEM_ERROR("array error on index : %d <= 0", i);
+        OOFEM_ERROR("array error on index : %d >= %d", i, this->giveSize());
     }
     return values [ i ];
 }
@@ -108,7 +108,7 @@ const double &
 FloatArray :: operator[] (int i) const
 {
     if ( i >= this->giveSize() ) {
-        OOFEM_ERROR("array error on index : %d <= 0", i);
+        OOFEM_ERROR("array error on index : %d >= %d", i, this->giveSize());
     }
     return values [ i ];
 }
@@ -286,6 +286,14 @@ void FloatArray :: beMaxOf(const FloatArray &a, const FloatArray &b)
 {
     int n = a.giveSize();
 
+    if ( a.giveSize() == 0 ) {
+        *this = b;
+        return;
+    } else if ( b.giveSize() == 0 ) {
+        *this = a;
+        return;
+    }
+
 #  ifdef DEBUG
     if ( n != b.giveSize() ) {
         OOFEM_ERROR("dimension mismatch in beMaxOf(a[%d],b[%d])", n, b.giveSize());
@@ -304,6 +312,14 @@ void FloatArray :: beMaxOf(const FloatArray &a, const FloatArray &b)
 void FloatArray :: beMinOf(const FloatArray &a, const FloatArray &b)
 {
     int n = a.giveSize();
+
+    if ( a.giveSize() == 0 ) {
+        *this = b;
+        return;
+    } else if ( b.giveSize() == 0 ) {
+        *this = a;
+        return;
+    }
 
 #  ifdef DEBUG
     if ( n != b.giveSize() ) {
@@ -736,7 +752,7 @@ void FloatArray :: printYourself() const
 }
 
 
-void FloatArray :: printYourself(const std::string name) const
+void FloatArray :: printYourself(const std::string &name) const
 // Prints the receiver on screen.
 {
     printf("%s (%d): \n", name.c_str(), this->giveSize());
@@ -816,6 +832,13 @@ double FloatArray :: sum() const
 {
     return std::accumulate(this->begin(), this->end(), 0.);
 }
+
+
+double FloatArray :: product() const
+{
+    return std::accumulate(this->begin(), this->end(), 1.0, [](double a, double b) { return a*b; });
+}
+
 
 void FloatArray :: copySubVector(const FloatArray &src, int si)
 {

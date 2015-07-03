@@ -53,7 +53,6 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
     int indx = 0, nsd;
     numberOfGaussPoints = 1;
     double du, dv, dw;
-    const FloatArray *gpcoords;
     FloatArray newgpcoords;
     IntArray knotSpan;
 #ifdef __PARALLEL_MODE
@@ -105,10 +104,10 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
 
                 // remap local subelement gp coordinates into knot span coordinates and update integration weight
                 for ( GaussPoint *gp: *integrationRulesArray [ indx ] ) {
-                    gpcoords = gp->giveNaturalCoordinates();
+                    const FloatArray &gpcoords = gp->giveNaturalCoordinates();
 
-                    newgpcoords.at(1) = knotValuesU->at(ui) + du * ( gpcoords->at(1) / 2.0 + 0.5 );
-                    newgpcoords.at(2) = knotValuesV->at(vi) + dv * ( gpcoords->at(2) / 2.0 + 0.5 );
+                    newgpcoords.at(1) = knotValuesU->at(ui) + du * ( gpcoords.at(1) / 2.0 + 0.5 );
+                    newgpcoords.at(2) = knotValuesV->at(vi) + dv * ( gpcoords.at(2) / 2.0 + 0.5 );
                     gp->setNaturalCoordinates(newgpcoords);
                     gp->setWeight(gp->giveWeight() / 4.0 * du * dv);
                 }
@@ -156,11 +155,11 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
 
                     // remap local subelement gp coordinates into knot span coordinates and update integration weight
                     for ( GaussPoint *gp: *integrationRulesArray [ indx ] ) {
-                        gpcoords = gp->giveNaturalCoordinates();
+                        const FloatArray &gpcoords = gp->giveNaturalCoordinates();
 
-                        newgpcoords.at(1) = knotValuesU->at(ui) + du * ( gpcoords->at(1) / 2.0 + 0.5 );
-                        newgpcoords.at(2) = knotValuesV->at(vi) + dv * ( gpcoords->at(2) / 2.0 + 0.5 );
-                        newgpcoords.at(3) = knotValuesW->at(wi) + dw * ( gpcoords->at(3) / 2.0 + 0.5 );
+                        newgpcoords.at(1) = knotValuesU->at(ui) + du * ( gpcoords.at(1) / 2.0 + 0.5 );
+                        newgpcoords.at(2) = knotValuesV->at(vi) + dv * ( gpcoords.at(2) / 2.0 + 0.5 );
+                        newgpcoords.at(3) = knotValuesW->at(wi) + dw * ( gpcoords.at(3) / 2.0 + 0.5 );
                         gp->setNaturalCoordinates(newgpcoords);
                         gp->setWeight(gp->giveWeight() / 8.0 * du * dv * dw);
                     }
@@ -170,7 +169,8 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
             }
         }
     } else {
-        OOFEM_ERROR("unsupported number of spatial dimensions (nsd = %d)", nsd);
+        OOFEM_WARNING("unsupported number of spatial dimensions (nsd = %d)", nsd);
+        return IRRT_BAD_FORMAT;
     }
 
 #ifdef __PARALLEL_MODE
@@ -215,7 +215,6 @@ IRResultType IGATSplineElement :: initializeFrom(InputRecord *ir)
 
     int indx = 0, ui, vi, nsd, numberOfGaussPoints = 1;
     double du, dv;
-    const FloatArray *gpcoords;
     FloatArray newgpcoords;
     IntArray knotSpan;
 
@@ -264,10 +263,10 @@ IRResultType IGATSplineElement :: initializeFrom(InputRecord *ir)
 
                 // remap local subelement gp coordinates into knot span coordinates and update integration weight
                 for ( GaussPoint *gp: *integrationRulesArray [ indx ] ) {
-                    gpcoords = gp->giveNaturalCoordinates();
+                    const FloatArray &gpcoords = gp->giveNaturalCoordinates();
 
-                    newgpcoords.at(1) = knotValuesU->at(ui) + du * ( gpcoords->at(1) / 2.0 + 0.5 );
-                    newgpcoords.at(2) = knotValuesV->at(vi) + dv * ( gpcoords->at(2) / 2.0 + 0.5 );
+                    newgpcoords.at(1) = knotValuesU->at(ui) + du * ( gpcoords.at(1) / 2.0 + 0.5 );
+                    newgpcoords.at(2) = knotValuesV->at(vi) + dv * ( gpcoords.at(2) / 2.0 + 0.5 );
                     gp->setNaturalCoordinates(newgpcoords);
                     gp->setWeight(gp->giveWeight() / 4.0 * du * dv);
                 }
@@ -276,7 +275,8 @@ IRResultType IGATSplineElement :: initializeFrom(InputRecord *ir)
             }
         }
     } else {
-        OOFEM_ERROR("unsupported number of spatial dimensions (nsd = %d)", nsd);
+        OOFEM_WARNING("unsupported number of spatial dimensions (nsd = %d)", nsd);
+        return IRRT_BAD_FORMAT;
     }
 
     return IRRT_OK;
@@ -1062,8 +1062,7 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
 
                 for ( k = 0; k < 2; k++ ) {
                     // create a dummy ip's
-                    FloatArray *cc = new FloatArray(c [ k ]);   // constructor of gp does not make its own copy
-                    GaussPoint gp(iRule, 999, cc, 1.0, _PlaneStress);
+                    GaussPoint gp(iRule, 999, c [ k ], 1.0, _PlaneStress);
 
                     // compute displacements at gp
                     se->computeNMatrixAt(N, & gp);
@@ -1119,8 +1118,7 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
 
                     for ( k = 0; k < 4; k++ ) {
                         // create a dummy ip's
-                        FloatArray *cc = new FloatArray(c [ k ]);   // constructor of gp does not make its own copy
-                        GaussPoint gp(iRule, 999, cc, 1.0, _PlaneStress);
+                        GaussPoint gp(iRule, 999, c [ k ], 1.0, _PlaneStress);
 
                         // compute displacements at gp
                         se->computeNMatrixAt(N, & gp);
@@ -1195,8 +1193,7 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
 
                         for ( m = 0; m < 8; m++ ) {
                             // create a dummy ip's
-                            FloatArray *cc = new FloatArray(c [ m ]);   // constructor of gp does not make its own copy
-                            GaussPoint gp(iRule, 999, cc, 1.0, _3dMat);
+                            GaussPoint gp(iRule, 999, c [ m ], 1.0, _3dMat);
 
                             // compute displacements at gp
                             se->computeNMatrixAt(N, & gp);

@@ -260,7 +260,7 @@ public:
     virtual void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime);
 
     //    virtual InternalStateValueType giveIPValueType(InternalStateType type);
     //virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *, TimeStep *);

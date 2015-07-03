@@ -136,7 +136,7 @@ This manual describes in details the format and structure of OOFEM
 text input file. Input file can be prepared in any text editor or can be generated
 by a conversion program or FEM pre-processor.
 
-\Pmode{Some parts of this document are relevant only to the parallel version of the code (POOFEM).
+\Pmode{Some parts of this document are relevant only to the parallel enabled version of the code.
 These parts are distinguished by typing the text in sans serif font family.}
 \Pmode{The parallel model is based on domain decomposition. In this mode a set of input files must be provided, each one corresponding to 
 particular process and related domain partition. The corresponding domain partition input file is referred as partition input file. 
@@ -184,10 +184,10 @@ Relevant=2, Info=3, Debug=4).\\
 \end{tabularx}\\[1em]
 
 \Pmode{
-The parallel version uses the MPI (Message Passing Interface) standard for message-passing communication. Thus, to execute POOFEM program,
+The parallel version uses the MPI (Message Passing Interface) standard for message-passing communication. Thus, to execute OOFEM program for parallel (indicated by the \texttt{-p} flag),
 users must know the procedure for executing/scheduling MPI jobs on the particular system(s).
 For instance, when using the MPICH implementation of MPI and many others, the following command initiates a program that uses eight processors: \\[2mm]
-\texttt{mpirun -np 8 poofem program\_options}
+\texttt{mpirun -np 8 oofem -p program\_options}
 }
 
 

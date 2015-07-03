@@ -128,7 +128,7 @@ double FEI2dLineLin :: giveTransformationJacobian(const FloatArray &lcoords, con
 void FEI2dLineLin :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
 {
     int aNode = 0, bNode = 0;
-    edgeNodes.resize(1);
+    edgeNodes.resize(2);
 
     if ( iedge == 1 ) { // edge between nodes 1 2
         aNode = 1;

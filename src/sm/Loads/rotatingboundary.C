@@ -43,16 +43,22 @@
 namespace oofem {
 REGISTER_BoundaryCondition(RotatingBoundary);
 
-double RotatingBoundary :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
-// Returns the value at tStep of the prescribed value of the kinematic
-// unknown 'u'. Returns 0 if 'u' has no prescribed value.
+double RotatingBoundary :: give(Dof *dof, ValueModeType mode, double time)
 {
     DofIDItem id = dof->giveDofID();
     FloatArray *coords = dof->giveDofManager()->giveCoordinates();
     FloatArray answer, newcoords;
-    double theta;
+    double theta = 0.;
 
-    theta = this->giveTimeFunction()->evaluate(tStep, mode);
+    if ( mode == VM_Total ) {
+        theta = this->giveTimeFunction()->evaluateAtTime(time);
+    } else if ( mode == VM_Velocity ) {
+        theta = this->giveTimeFunction()->evaluateVelocityAtTime(time);
+    } else if ( mode == VM_Acceleration ) {
+        theta = this->giveTimeFunction()->evaluateAccelerationAtTime(time);
+    } else {
+        OOFEM_ERROR("Should not be called for value mode type then total, velocity, or acceleration.");
+    }
 
     if ( axis.giveSize() != 3 ) {
         OOFEM_ERROR("Size of rotation axis != 3.");
@@ -99,8 +105,7 @@ double RotatingBoundary :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
         OOFEM_ERROR("Size of coordinate system has to be 1, 2 or 3.");
     }
 
-    newcoords.subtract(center);
-    newcoords.add(* coords);
+    newcoords.beDifferenceOf(center, *coords);
     answer.beProductOf(R, newcoords);
     answer.add(center);
     answer.subtract(* coords);
@@ -122,19 +127,15 @@ double RotatingBoundary :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
 
 IRResultType
 RotatingBoundary :: initializeFrom(InputRecord *ir)
-// Sets up the dictionary where the receiver stores the conditions it
-// imposes.
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    GeneralBoundaryCondition :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, axis, _IFT_RotatingBoundary_axis);
     axis.normalize();
 
     IR_GIVE_OPTIONAL_FIELD(ir, center, _IFT_RotatingBoundary_center);
 
-    return IRRT_OK;
+    return GeneralBoundaryCondition :: initializeFrom(ir);
 }
 
 void

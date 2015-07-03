@@ -38,6 +38,7 @@
 #include "intarray.h"
 #include "classfactory.h"
 #include "domain.h"
+#include "entityrenumberingscheme.h"
 
 namespace oofem {
 REGISTER_DofManager(RigidArmNode);
@@ -51,13 +52,17 @@ RigidArmNode :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
 
-    Node :: initializeFrom(ir);
+    result = Node :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     IR_GIVE_FIELD(ir, masterDofMngr, _IFT_RigidArmNode_master);
 
     IR_GIVE_FIELD(ir, masterMask, _IFT_DofManager_mastermask);
     if ( masterMask.giveSize() != this->dofidmask->giveSize() ) {
-        OOFEM_ERROR("mastermask size mismatch");
+        OOFEM_WARNING("mastermask size mismatch");
+        return IRRT_BAD_FORMAT;
     }
 
     return IRRT_OK;

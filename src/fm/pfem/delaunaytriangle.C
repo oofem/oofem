@@ -44,8 +44,7 @@ DelaunayTriangle :: DelaunayTriangle(Domain *d, int node1, int node2, int node3)
     nodes(3),
 
     circumCircle(3),
-    validFlag(true),
-    listOfCellsContainedInAndPosition(NULL)
+    validFlag(true)
 {
     nodes.at(1) = node1;
     nodes.at(2) = node2;
@@ -56,10 +55,6 @@ DelaunayTriangle :: DelaunayTriangle(Domain *d, int node1, int node2, int node3)
 
 DelaunayTriangle :: ~DelaunayTriangle()
 {
-    if ( listOfCellsContainedInAndPosition ) {
-        listOfCellsContainedInAndPosition->clear();
-        delete listOfCellsContainedInAndPosition;
-    }
 }
 
 void
@@ -124,11 +119,7 @@ DelaunayTriangle :: computeCircumcircle()
 std :: list< LocalInsertionData< DelaunayTriangle * > > *
 DelaunayTriangle :: giveListOfCellsAndPosition()
 {
-    if ( listOfCellsContainedInAndPosition == NULL ) {
-        listOfCellsContainedInAndPosition = new std :: list< LocalInsertionData< DelaunayTriangle * > >;
-    }
-
-    return listOfCellsContainedInAndPosition;
+    return & listOfCellsContainedInAndPosition;
 }
 
 double

@@ -40,12 +40,9 @@
 #include "fluidstructureproblem.h"
 #include "../../sm/EngineeringModels/structengngmodel.h"
 #include "domain.h"
-//#include "inputrecord.h"
+#include "dof.h"
+#include "mathfem.h"
 
-#ifndef __MAKEDEPEND
- #include <math.h>
- #include <stdlib.h>
-#endif
 
 namespace oofem {
 REGISTER_DofManager(InteractionPFEMParticle);
@@ -66,9 +63,9 @@ InteractionPFEMParticle :: initializeFrom(InputRecord *ir)
 
     result = PFEMParticle :: initializeFrom(ir);
 
-	IR_GIVE_OPTIONAL_FIELD(ir, coupledNode, _IFT_InteractionPFEMParticle_CoupledNode);
+    IR_GIVE_OPTIONAL_FIELD(ir, coupledNode, _IFT_InteractionPFEMParticle_CoupledNode);
 
-	return (result != IRRT_OK) ? result : IRRT_OK;
+    return (result != IRRT_OK) ? result : IRRT_OK;
 }
 
 /**
@@ -77,7 +74,7 @@ InteractionPFEMParticle :: initializeFrom(InputRecord *ir)
 int
 InteractionPFEMParticle :: checkConsistency()
 {
-	return PFEMParticle :: checkConsistency();
+    return PFEMParticle :: checkConsistency();
 }
 
 void
@@ -90,51 +87,46 @@ void
 InteractionPFEMParticle :: givePrescribedUnknownVector(FloatArray &answer, const IntArray &dofIDArry,
                                                        ValueModeType mode, TimeStep *stepN)
 {
-	answer.resize( dofIDArry.giveSize() );
+    answer.resize( dofIDArry.giveSize() );
 
 
-	FloatArray velocities;
-	FluidStructureProblem *fsiProblem = this->giveFluidStructureMasterProblem();
-	if (fsiProblem) {
-		StructuralEngngModel *structuralProblem = this->giveStructuralProblem();
-		if (structuralProblem)
-		{
-		  int j = 1;
-			if (fsiProblem->giveIterationNumber() < 1) {  
-			  for (int dofid: dofIDArry ) {
-			    answer.at(j++) = this->giveDofWithID( dofid )->giveBcValue(mode, stepN);
-				}
-			}
-			else
-			{
-				DofManager *dman = structuralProblem->giveDomain(1)->giveDofManager(coupledNode);
-				//dman->giveUnknownVectorOfType(velocities, VelocityVector, VM_Velocity, stepN);
-				//dman->giveUnknownVector(velocities, dofIDArry, VM_Velocity, stepN);
-				dman->giveCompleteUnknownVector(velocities, VM_Velocity, stepN);
-				for ( int dofid: dofIDArry) {
-				  answer.at(dofid) = velocities.at( dofid );
+    FloatArray velocities;
+    FluidStructureProblem *fsiProblem = this->giveFluidStructureMasterProblem();
+    if (fsiProblem) {
+        StructuralEngngModel *structuralProblem = this->giveStructuralProblem();
+        if ( structuralProblem ) {
+            int j = 1;
+            if (fsiProblem->giveIterationNumber() < 1) {  
+                for (int dofid: dofIDArry ) {
+                    answer.at(j++) = this->giveDofWithID( dofid )->giveBcValue(mode, stepN);
+                }
+            } else {
+                DofManager *dman = structuralProblem->giveDomain(1)->giveDofManager(coupledNode);
+                //dman->giveUnknownVectorOfType(velocities, VelocityVector, VM_Velocity, stepN);
+                //dman->giveUnknownVector(velocities, dofIDArry, VM_Velocity, stepN);
+                dman->giveCompleteUnknownVector(velocities, VM_Velocity, stepN);
+                for ( int dofid: dofIDArry) {
+                    answer.at(dofid) = velocities.at( dofid );
+                }
+            }
+        }
+    }
 
-				}
-			}
-		}
-	}
-
-	// Transform to global c.s.
-	FloatMatrix L2G;
-	if (this->computeL2GTransformation(L2G, dofIDArry)) {
-		answer.rotatedWith(L2G, 'n');
-	}
+    // Transform to global c.s.
+    FloatMatrix L2G;
+    if (this->computeL2GTransformation(L2G, dofIDArry)) {
+        answer.rotatedWith(L2G, 'n');
+    }
 }
 
 void
 InteractionPFEMParticle::giveCoupledVelocities(FloatArray &answer, TimeStep *stepN)
 {
-	StructuralEngngModel* structuralProblem = this->giveStructuralProblem();
-	if (structuralProblem)
-	{
-		DofManager *dman = structuralProblem->giveDomain(1)->giveDofManager(coupledNode);
-		dman->giveCompleteUnknownVector(answer, VM_Velocity, stepN);
-	}
+    StructuralEngngModel* structuralProblem = this->giveStructuralProblem();
+    if ( structuralProblem ) {
+        DofManager *dman = structuralProblem->giveDomain(1)->giveDofManager(coupledNode);
+        dman->giveCompleteUnknownVector(answer, VM_Velocity, stepN);
+    }
 }
 
 void
@@ -146,29 +138,29 @@ InteractionPFEMParticle :: printOutputAt(FILE *stream, TimeStep *stepN)
 #ifdef __OOFEG
 void InteractionPFEMParticle :: drawScalar(oofegGraphicContext &gc)
 {
-	PFEMParticle :: drawScalar(gc);
+    PFEMParticle :: drawScalar(gc);
 }
 #endif
 
 StructuralEngngModel*
 InteractionPFEMParticle :: giveStructuralProblem()
 {
-	StructuralEngngModel *structuralProblem = NULL;
-	FluidStructureProblem *fsiProblem = this->giveFluidStructureMasterProblem();
-	if (fsiProblem)
-	{
-		for ( int i = 1; i <= fsiProblem->giveNumberOfSlaveProblems(); i++ ) {
-			 structuralProblem = dynamic_cast<StructuralEngngModel*>(fsiProblem->giveSlaveProblem(i));
-		}
-	}
-	return structuralProblem;
+    StructuralEngngModel *structuralProblem = NULL;
+    FluidStructureProblem *fsiProblem = this->giveFluidStructureMasterProblem();
+    if (fsiProblem)
+    {
+        for ( int i = 1; i <= fsiProblem->giveNumberOfSlaveProblems(); i++ ) {
+            structuralProblem = dynamic_cast<StructuralEngngModel*>(fsiProblem->giveSlaveProblem(i));
+        }
+    }
+    return structuralProblem;
 }
 
 FluidStructureProblem*
 InteractionPFEMParticle :: giveFluidStructureMasterProblem()
 {
-	FluidStructureProblem *fsiProblem = dynamic_cast<FluidStructureProblem*>(domain->giveEngngModel()->giveMasterEngngModel());
+    FluidStructureProblem *fsiProblem = dynamic_cast<FluidStructureProblem*>(domain->giveEngngModel()->giveMasterEngngModel());
 
-	return fsiProblem;
+    return fsiProblem;
 }
 } // end namespace oofem

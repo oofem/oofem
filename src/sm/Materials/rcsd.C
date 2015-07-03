@@ -200,7 +200,6 @@ RCSDMaterial :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
 
         if ( ( rMode == TangentStiffness ) || ( rMode == SecantStiffness ) ) {
             FloatMatrix reducedAnswer;
-            IntArray mask;
             double dCoeff;
 
             reducedAnswer = * status->giveDs0Matrix();
@@ -389,7 +388,7 @@ RCSDMaterial :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
     Ft = this->give(pscm_Ft, gp);
     Le = status->giveCharLength(i);
 
-    Ft = this->computeStrength(gp, Le);
+    Ft = this->computeStrength(gp, Le); ///@todo This overwrites the previous (untouched) value of Ft above. Is this right?
     minEffStrainForFullyOpenCrack = this->giveMinCrackStrainsForFullyOpenCrack(gp, i);
 
     if ( rMode == TangentStiffness ) {

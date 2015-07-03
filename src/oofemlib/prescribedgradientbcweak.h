@@ -35,7 +35,8 @@
 #ifndef PRESCRIBEDGRADIENTBCWEAK_H_
 #define PRESCRIBEDGRADIENTBCWEAK_H_
 
-#include "prescribedgradientbc.h"
+#include "prescribedgradienthomogenization.h"
+#include "activebc.h"
 #include "geometry.h"
 
 #include <unordered_map>
@@ -79,34 +80,32 @@ public:
  * @author Erik Svenning
  * @date April 17, 2014
  */
-class PrescribedGradientBCWeak : public PrescribedGradientBC
+class PrescribedGradientBCWeak : public ActiveBoundaryCondition, public PrescribedGradientHomogenization
 {
 public:
     PrescribedGradientBCWeak(int n, Domain *d);
     virtual ~PrescribedGradientBCWeak();
+
+    void clear();
 
     virtual int giveNumberOfInternalDofManagers();
     virtual DofManager *giveInternalDofManager(int i);
 
     virtual bcType giveType() const { return UnknownBT; }
 
-    /**
-     * Initializes receiver according to object description stored in input record.
-     * The input record contains two fields;
-     * - devGradient \#columns { d_11 d_22 ... d_21 ... } (required)
-     * - pressure p (required)
-     * The gradient should be in Voigt notation (only the deviatoric part will be used)
-     */
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual void postInitialize();
 
+    virtual void computeField(FloatArray &sigma, TimeStep *tStep);
+    virtual void computeTangent(FloatMatrix &E, TimeStep *tStep);
+
     virtual void assembleVector(FloatArray &answer, TimeStep *tStep,
                                 CharType type, ValueModeType mode,
                                 const UnknownNumberingScheme &s, FloatArray *eNorm = NULL);
 
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep,
+    virtual void assemble(SparseMtrx &answer, TimeStep *tStep,
                           CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
     virtual void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,
@@ -124,15 +123,7 @@ public:
     virtual const char *giveClassName() const { return "PrescribedGradientBCWeak"; }
     virtual const char *giveInputRecordName() const { return _IFT_PrescribedGradientBCWeak_Name; }
 
-    /**
-     * Computes the homogenized, macroscopic, field (stress).
-     * @param sigma Output quantity (typically stress).
-     * @param eid Equation ID to which sigma belongs.
-     * @param tStep Active time step.
-     */
-    void computeField(FloatArray &sigma, TimeStep *tStep);
-
-    /// Routines for postprocessing
+    // Routines for postprocessing
     size_t giveNumberOfTractionElements() const { return mpTractionElements.size(); }
     void giveTractionElCoord(size_t iElInd, FloatArray &oStartCoord, FloatArray &oEndCoord) const { oStartCoord = mpTractionElements [ iElInd ]->mStartCoord; oEndCoord = mpTractionElements [ iElInd ]->mEndCoord; }
     void giveTractionElNormal(size_t iElInd, FloatArray &oNormal, FloatArray &oTangent) const;
@@ -201,6 +192,7 @@ protected:
 
     /// Lock displacements in one node if periodic
     Node *mpDisplacementLock;
+    int mLockNodeInd;
     double mDispLockScaling;
 
     /// Elements for the independent traction discretization
@@ -223,7 +215,13 @@ protected:
 
     std :: unordered_map< int, std :: vector< int > >mTracElDispNodes;
 
+public:
+    void recomputeTractionMesh();
+
+protected:
     void createTractionMesh(bool iEnforceCornerPeriodicity, int iNumSides);
+    bool damageExceedsTolerance(Element *el);
+
     void buildMaps(const std :: vector< std :: pair< FloatArray, bool > > &iBndNodeCoordsFull);
 
     void integrateTangent(FloatMatrix &oTangent, size_t iTracElInd);
@@ -236,8 +234,6 @@ protected:
 
     void giveTractionUnknows(FloatArray &oTracUnknowns, ValueModeType mode, TimeStep *tStep, int iTracElInd);
     void giveDisplacementUnknows(FloatArray &oDispUnknowns, ValueModeType mode, TimeStep *tStep, int iTracElInd);
-
-    double domainSize();
 
     bool pointIsOnGammaPlus(const FloatArray &iPos) const;
     void giveMirroredPointOnGammaMinus(FloatArray &oPosMinus, const FloatArray &iPosPlus) const;

@@ -40,6 +40,7 @@
 #include "sparselinsystemnm.h"
 #include "primaryfield.h"
 #include "materialinterface.h"
+#include "assemblercallback.h"
 
 #include <memory>
 
@@ -65,6 +66,36 @@
 namespace oofem {
 class SparseMtrx;
 class SparseNonLinearSystemNM;
+
+/**
+ * Callback class for assembling SUPG internal forces
+ * @author Mikael Öhman
+ */
+class SUPGInternalForceAssembler : public VectorAssembler
+{
+protected:
+    double lscale, dscale, uscale;
+
+public:
+    SUPGInternalForceAssembler(double l, double d, double u);
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+};
+
+/**
+ * Callback class for assembling SUPG tangent matrices
+ * @author Mikael Öhman
+ */
+class SUPGTangentAssembler : public MatrixAssembler
+{
+protected:
+    MatResponseMode rmode;
+    double lscale, dscale, uscale;
+    double alpha;
+
+public:
+    SUPGTangentAssembler(MatResponseMode m, double l, double d, double u, double a);
+    virtual void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const;
+};
 
 /**
  * This class represents transient incompressible flow problem. Solution is based on
@@ -129,8 +160,6 @@ public:
     virtual double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
     virtual void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d);
     virtual double giveReynoldsNumber();
-    virtual void giveElementCharacteristicVector(FloatArray &answer, int num, CharType type, ValueModeType mode, TimeStep *tStep, Domain *domain);
-    virtual void giveElementCharacteristicMatrix(FloatMatrix &answer, int num, CharType type, TimeStep *tStep, Domain *domain);
 
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);

@@ -71,13 +71,14 @@ public:
 
     // Overloaded methods:
     virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode);
+    virtual void computeValues(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, const IntArray &dofids, ValueModeType mode);
     virtual int giveApproxOrder() { return 0; }
 
     /**
      * Sets a new load vector.
      * @param newValue New load.
      */
-    void updateLoad(const FloatArray &newValue) { componentArray = newValue; };
+    void updateLoad(const FloatArray &newValue) { componentArray = newValue; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual bcGeomType giveBCGeoType() const { return SurfaceLoadBGT; }

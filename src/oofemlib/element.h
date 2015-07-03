@@ -49,8 +49,9 @@
 #include "elementextension.h"
 #include "entityrenumberingscheme.h"
 #include "unknowntype.h"
-#include "unknownnumberingscheme.h"
 #include "integrationrule.h"
+#include "dofiditem.h"
+#include "floatarray.h"
 
 #include <cstdio>
 #include <vector>
@@ -83,6 +84,8 @@ class ElementSide;
 class FEInterpolation;
 class Load;
 class BoundaryLoad;
+class PrimaryField;
+class UnknownNumberingScheme;
 
 /**
  * In parallel mode, this type indicates the mode of element.
@@ -139,7 +142,7 @@ class OOFEM_EXPORT Element : public FEMComponent
 {
 protected:
     /// Number of dofmanagers
-    int numberOfDofMans;
+    int numberOfDofMans; ///@todo We should remove this parameter. It's redundant (and therefore possibly wrong) since the dofManArray stores it's length internally. 
     /// Array containing dofmanager numbers.
     IntArray dofManArray;
     /// Number of associated material.
@@ -435,12 +438,23 @@ public:
     { answer.clear(); }
     /**
      * Returns element dof mask for node. This mask defines the dof ordering of the element interpolation.
-     * Must be defined by particular element.
+     * Default implementation for most elements, with noteable exceptions such as XFEM and some types of shell elements.
      *
      * @param ut Equation DOFs belong to.
      * @param answer DOF mask for receiver.
      */
     virtual void giveElementDofIDMask(IntArray &answer) const { this->giveDofManDofIDMask(1, answer); }
+    /**
+     * Computes the unknown vector interpolated at the specified local coordinates.
+     * Used for exporting data and mapping fields.
+     * @see giveElementDofIDMask The unknown vector should match the element field as specified by the element dof IDs.
+     * @param mode Mode (total, increment, etc) of the output
+     * @param tStep Time step to evaluate at
+     * @param lcoords Local coordinates to evaluate at
+     * @param answer Results
+     */
+    virtual void computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
+    { OOFEM_ERROR("Missing support for computing unknown vector at local element coordinates\n"); }
     /**
      * Returns volume related to given integration point. Used typically in subroutines,
      * that perform integration over element volume. Should be implemented by particular

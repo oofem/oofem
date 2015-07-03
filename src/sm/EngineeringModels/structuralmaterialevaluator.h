@@ -47,6 +47,7 @@
 #define _IFT_StructuralMaterialEvaluator_componentFunctions "componentfunctions" ///< Integer list of time functions for each component
 #define _IFT_StructuralMaterialEvaluator_stressControl "stresscontrol" ///< Integer list of the stress components which are controlled
 #define _IFT_StructuralMaterialEvaluator_outputVariables "vars" ///< Variables (from integration point) to be written.
+#define _IFT_StructuralMaterialEvaluator_tolerance "tolerance" ///< Tolerance for stress control
 //@}
 
 namespace oofem {
@@ -72,6 +73,8 @@ protected:
 
     std :: ofstream outfile;
 
+    double tolerance;
+
 public:
     StructuralMaterialEvaluator(int i, EngngModel * _master = NULL);
     virtual ~StructuralMaterialEvaluator();
@@ -80,8 +83,6 @@ public:
 
     virtual void solveYourself();
 
-    /// Empty implementation, not relevant for this problem class.
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep) { };
     virtual int checkConsistency();
     virtual void doStepOutput(TimeStep *tStep);
     virtual TimeStep *giveNextStep();

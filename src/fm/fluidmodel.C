@@ -34,6 +34,7 @@
 
 #include "fluidmodel.h"
 #include "element.h"
+#include "dof.h"
 #include "generalboundarycondition.h"
 #include "dofmanager.h"
 
@@ -45,7 +46,6 @@ FluidModel :: forceEquationNumbering(int id)
     // Necessary to number DOFs in special order to guarantee that Skyline matrix factorization to work.
     Domain *domain = this->giveDomain(id);
     TimeStep *currStep = this->giveCurrentStep();
-    IntArray loc;
 
     this->domainNeqs.at(id) = 0;
     this->domainPrescribedNeqs.at(id) = 0;

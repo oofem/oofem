@@ -75,43 +75,49 @@ char cltypesGiveUnknownTypeModeKey(ValueModeType mode)
 InternalStateValueType giveInternalStateValueType(InternalStateType type)
 {
     switch ( type ) {
-    case IST_StressTensor:
     case IST_StrainTensor:
-        //case IST_CurvatureTensor:
-    case IST_DamageTensor:
-    case IST_DamageInvTensor:
-    case IST_PrincipalDamageTensor:
-    case IST_PrincipalDamageTempTensor:
-    case IST_StressTensorTemp:
-    case IST_StrainTensorTemp:
-    case IST_ForceTensorTemp:
-    case IST_MomentumTensorTemp:
-    case IST_CurvatureTensorTemp:
-    case IST_DamageTensorTemp:
-    case IST_DamageInvTensorTemp:
-    case IST_PlasticStrainTensor:
-    case IST_CylindricalStressTensor:
-    case IST_CylindricalStrainTensor:
     case IST_DeviatoricStrain:
+    case IST_PlasticStrainTensor:
+    case IST_ThermalStrainTensor:
+    case IST_CylindricalStrainTensor:
+    case IST_CreepStrainTensor:
+    case IST_StrainTensorTemp:
+    case IST_ShellForceTensor:
+    case IST_CurvatureTensorTemp:
+        return ISVT_TENSOR_S3E;
+
+    case IST_StressTensor:
+    case IST_StressTensorTemp:
+    case IST_CylindricalStressTensor:
     case IST_DeviatoricStress:
     case IST_CauchyStressTensor:
+    ///@todo Remove "Shell" from these. They are general;
+    case IST_ShellStrainTensor: ///@todo Are shell strains S3E as well?
+    case IST_ShellCurvatureTensor:
+    case IST_ForceTensorTemp:
+    ///@todo "Momentum" should be renamed "Moment"
+    case IST_ShellMomentumTensor:
+    case IST_MomentumTensorTemp:
+    ///@todo Should be have these are S3E or just S3?
     case IST_AutogenousShrinkageTensor:
     case IST_DryingShrinkageTensor:
     case IST_TotalShrinkageTensor:
-    case IST_ThermalStrainTensor:
-    case IST_CreepStrainTensor:
+    // Damage tensors
+    case IST_DamageTensor:
+    case IST_DamageTensorTemp:
+    case IST_DamageInvTensor:
+    case IST_DamageInvTensorTemp:
+    case IST_PrincipalDamageTensor:
+    case IST_PrincipalDamageTempTensor:
         return ISVT_TENSOR_S3;
+
+    case IST_DeformationGradientTensor:
+    case IST_FirstPKStressTensor:
+    //case IST_MaterialOrientation:
+        return ISVT_TENSOR_G;
 
     case IST_BeamForceMomentumTensor:
     case IST_BeamStrainCurvatureTensor:
-    case IST_ShellStrainTensor:
-    case IST_ShellCurvatureTensor:
-    case IST_ShellForceTensor:
-    case IST_ShellMomentumTensor:
-    case IST_DeformationGradientTensor:
-    case IST_FirstPKStressTensor:
-        return ISVT_TENSOR_G;
-
     case IST_PrincipalStressTensor:
     case IST_PrincipalStressTempTensor:
     case IST_PrincipalStrainTensor:
@@ -212,9 +218,9 @@ int giveInternalStateTypeSize(InternalStateValueType valType)
 
 InternalStateValueType giveInternalStateValueType(UnknownType type)
 {
-    if ( ( type == DisplacementVector ) || ( type == EigenVector ) || ( type == VelocityVector ) || ( type == DirectorField ) ) {
+    if ( type == DisplacementVector || type == EigenVector || type == VelocityVector || type == DirectorField ) {
         return ISVT_VECTOR;
-    } else if ( ( type == FluxVector ) || ( type == PressureVector ) || ( type == Temperature ) || (type == Humidity) || (type == DeplanationFunction) ) {
+    } else if ( type == FluxVector || type == PressureVector || type == Temperature || type == Humidity || type == DeplanationFunction ) {
         return ISVT_SCALAR;
     } else {
         OOFEM_ERROR( "unsupported UnknownType %s", __UnknownTypeToString(type) );

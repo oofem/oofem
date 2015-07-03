@@ -109,14 +109,12 @@ PeriodicPiecewiseLinFunction :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    PiecewiseLinFunction :: initializeFrom(ir);
-
     period = -1.0;
     IR_GIVE_OPTIONAL_FIELD(ir, period, _IFT_PeriodicPiecewiseLinFunction_period);
     addTF = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, addTF, _IFT_PeriodicPiecewiseLinFunction_addtf);
 
-    return IRRT_OK;
+    return PiecewiseLinFunction :: initializeFrom(ir);
 }
 
 

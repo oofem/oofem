@@ -47,8 +47,9 @@ Structural2DElement :: Structural2DElement(int n, Domain *aDomain) :
   cellGeometryWrapper = NULL;
 }
 
-Structural2DElement :: ~Structural2DElement() {
-  if (cellGeometryWrapper) delete cellGeometryWrapper;
+Structural2DElement :: ~Structural2DElement()
+{
+    if ( cellGeometryWrapper ) delete cellGeometryWrapper;
 }
 
 void
@@ -68,12 +69,13 @@ Structural2DElement :: giveNumberOfNodes() const
 
 
 FEICellGeometry*
-Structural2DElement::giveCellGeometryWrapper() {
-  if (cellGeometryWrapper) {
+Structural2DElement::giveCellGeometryWrapper() 
+{
+    if ( !cellGeometryWrapper ) {
+        cellGeometryWrapper = new FEIElementGeometryWrapper(this);
+    }
+
     return cellGeometryWrapper;
-  } else {
-    return (cellGeometryWrapper=new FEIElementGeometryWrapper(this));
-  }
 }
  
 
@@ -92,7 +94,7 @@ IRResultType
 Structural2DElement :: initializeFrom(InputRecord *ir)
 {
     // Initialise the element from the input record   
-    return this->NLStructuralElement :: initializeFrom(ir); 
+    return NLStructuralElement :: initializeFrom(ir);
     
 }
 
@@ -111,8 +113,8 @@ Structural2DElement :: computeVolumeAround(GaussPoint *gp)
     // Computes the volume element dV associated with the given gp.
 
     double weight = gp->giveWeight();
-    FloatArray *lCoords = gp->giveNaturalCoordinates(); // local/natural coords of the gp (parent domain)
-    double detJ = fabs( this->giveInterpolation()->giveTransformationJacobian( *lCoords, *this->giveCellGeometryWrapper() ) );
+    const FloatArray &lCoords = gp->giveNaturalCoordinates(); // local/natural coords of the gp (parent domain)
+    double detJ = fabs( this->giveInterpolation()->giveTransformationJacobian( lCoords, *this->giveCellGeometryWrapper() ) );
     double thickness = this->giveCrossSection()->give(CS_Thickness, gp); // the cross section keeps track of the thickness
     
     return detJ * thickness * weight; // dV
@@ -152,7 +154,7 @@ Structural2DElement :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, Gaus
     // Evaluate the shape functions at the position of the gp. 
     FloatArray N;
     static_cast< FEInterpolation2d* > ( this->giveInterpolation() )->
-        edgeEvalN( N, iedge, * gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );  
+        edgeEvalN( N, iedge, gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );  
     answer.beNMatrixOf(N, 2);
 }
 
@@ -180,7 +182,7 @@ void
 Structural2DElement :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
     static_cast< FEInterpolation2d* > ( this->giveInterpolation() )->
-        edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
+        edgeLocal2global( answer, iEdge, gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
 }
 
 
@@ -193,7 +195,7 @@ Structural2DElement :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
      * The returned value is used for integration of a line integral (external forces).
      */
     double detJ = static_cast< FEInterpolation2d* > ( this->giveInterpolation() )->
-        edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
+        edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
     return detJ * gp->giveWeight();
 }
 
@@ -212,7 +214,7 @@ Structural2DElement :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int i
     FloatArray normal(2);
 
     static_cast< FEInterpolation2d* > ( this->giveInterpolation() )->
-        edgeEvalNormal( normal, iEdge, * gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
+        edgeEvalNormal( normal, iEdge, gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
 
     answer.resize(2, 2);
     answer.zero();        
@@ -258,7 +260,7 @@ PlaneStressElement :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int 
 
     FEInterpolation *interp = this->giveInterpolation();
     FloatMatrix dNdx; 
-    interp->evaldNdx( dNdx, * gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
+    interp->evaldNdx( dNdx, gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
     
     answer.resize(3, dNdx.giveNumberOfRows() * 2);
     answer.zero();
@@ -281,7 +283,7 @@ PlaneStressElement :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     /// @todo not checked if correct
   
     FloatMatrix dNdx;
-    this->giveInterpolation()->evaldNdx( dNdx, * gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
+    this->giveInterpolation()->evaldNdx( dNdx, gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
 
     answer.resize(4, dNdx.giveNumberOfRows() * 2);
     answer.zero();
@@ -301,7 +303,11 @@ PlaneStressElement :: computeStressVector(FloatArray &answer, const FloatArray &
     this->giveStructuralCrossSection()->giveRealStress_PlaneStress(answer, gp, strain, tStep);
 }
 
-
+void
+PlaneStressElement :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveStiffnessMatrix_PlaneStress(answer, rMode, gp, tStep);
+}
 
 
 
@@ -320,13 +326,12 @@ PlaneStrainElement :: PlaneStrainElement(int n, Domain *aDomain) :
 
 void 
 PlaneStrainElement :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx, int upperIndx)
-
 // Returns the [ 4 x (nno*2) ] strain-displacement matrix {B} of the receiver,
 // evaluated at gp.
 {
     FEInterpolation *interp = this->giveInterpolation();
     FloatMatrix dNdx; 
-    interp->evaldNdx( dNdx, * gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
+    interp->evaldNdx( dNdx, gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
     
     
     answer.resize(4, dNdx.giveNumberOfRows() * 2);
@@ -347,10 +352,10 @@ PlaneStrainElement :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     // Returns the [ 5 x (nno*2) ] displacement gradient matrix {BH} of the receiver,
     // evaluated at gp.
-    // @todo not checked if correct
+    /// @todo not checked if correct
   
     FloatMatrix dNdx;
-    this->giveInterpolation()->evaldNdx( dNdx, * gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
+    this->giveInterpolation()->evaldNdx( dNdx, gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
 
     answer.resize(4, dNdx.giveNumberOfRows() * 2);
     answer.zero();
@@ -370,7 +375,11 @@ PlaneStrainElement :: computeStressVector(FloatArray &answer, const FloatArray &
     this->giveStructuralCrossSection()->giveRealStress_PlaneStrain(answer, gp, strain, tStep);
 }
 
-
+void
+PlaneStrainElement :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveStiffnessMatrix_PlaneStrain(answer, rMode, gp, tStep);
+}
 
 
 
@@ -402,7 +411,7 @@ AxisymElement :: computeVolumeAround(GaussPoint *gp)
     
     FloatArray N;
     static_cast< FEInterpolation2d* > ( this->giveInterpolation() )->
-        evalN( N, * gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );  
+        evalN( N, gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );  
         
     double r = 0.0;
     for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
@@ -411,7 +420,7 @@ AxisymElement :: computeVolumeAround(GaussPoint *gp)
     }
 
     double determinant = fabs(  static_cast< FEInterpolation2d* > ( this->giveInterpolation() )->
-        giveTransformationJacobian( * gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() ) );
+        giveTransformationJacobian( gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() ) );
 
     double weight = gp->giveWeight();
     return determinant * weight * r;
@@ -431,7 +440,7 @@ AxisymElement :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, i
     FEInterpolation *interp = this->giveInterpolation();
      
     FloatArray N;
-    interp->evalN( N, * gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
+    interp->evalN( N, gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
     double r = 0.0;
     for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
         double x = this->giveNode(i)->giveCoordinate(1);
@@ -439,7 +448,7 @@ AxisymElement :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, i
     } 
     
     FloatMatrix dNdx;
-    interp->evaldNdx( dNdx, * gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
+    interp->evaldNdx( dNdx, gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
     answer.resize(6, dNdx.giveNumberOfRows() * 2);
     answer.zero();
 
@@ -465,7 +474,7 @@ AxisymElement :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     FloatMatrix dnx;
 
     static_cast< FEInterpolation2d* > ( this->giveInterpolation() )->
-        evaldNdx( dnx, * gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
+        evaldNdx( dnx, gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
     int nRows = dnx.giveNumberOfRows();
     answer.resize(9, nRows*2);
     answer.zero();
@@ -499,7 +508,7 @@ AxisymElement :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
     FloatArray c(2);
     this->computeEdgeIpGlobalCoords(c, gp, iEdge);
     double result = static_cast< FEInterpolation2d* > ( this->giveInterpolation() )-> 
-        edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
+        edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
 
 
     return c.at(1) * result * gp->giveWeight();
@@ -525,6 +534,12 @@ AxisymElement :: computeStressVector(FloatArray &answer, const FloatArray &strai
     this->giveStructuralCrossSection()->giveRealStress_3d(answer, gp, strain, tStep);
 }
 
-
+void
+AxisymElement :: computeConstitutiveMatrixAt(FloatMatrix &answer,
+                                                 MatResponseMode rMode, GaussPoint *gp,
+                                                 TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveStiffnessMatrix_3d(answer, rMode, gp, tStep);
+}
 
 } // end namespace oofem

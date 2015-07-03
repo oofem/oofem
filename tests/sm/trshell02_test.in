@@ -105,12 +105,12 @@ ConstantFunction 1 f(t) 1.0
 #ELEMENT tStep 1 number 1 gp 1 keyword 1 component 2  value -2.0144e-02
 #ELEMENT tStep 1 number 1 gp 1 keyword 1 component 6  value -3.0217e-02
 ##
-#ELEMENT tStep 1 number 21 gp 1 keyword 104 component 5  value 6.3981e-02
-#ELEMENT tStep 1 number 21 gp 1 keyword 104 component 9  value -1.7254e-02
-#ELEMENT tStep 1 number 21 gp 1 keyword 104 component 6  value -2.518e-03
-#ELEMENT tStep 1 number 21 gp 1 keyword 10 component 5  value 9.5468e-01
-#ELEMENT tStep 1 number 21 gp 1 keyword 10 component 9  value -2.0144e-02
-#ELEMENT tStep 1 number 21 gp 1 keyword 10 component 6  value -3.0217e-02
+#ELEMENT tStep 1 number 21 gp 1 keyword 104 component 2  value 6.3981e-02
+#ELEMENT tStep 1 number 21 gp 1 keyword 104 component 3  value -1.7254e-02
+#ELEMENT tStep 1 number 21 gp 1 keyword 104 component 4  value -5.03609698e-03
+#ELEMENT tStep 1 number 21 gp 1 keyword 10 component 2  value 9.5468e-01
+#ELEMENT tStep 1 number 21 gp 1 keyword 10 component 3  value -2.0144e-02
+#ELEMENT tStep 1 number 21 gp 1 keyword 10 component 4  value -3.0217e-02
 ## plate
 #ELEMENT tStep 1 number 11 gp 1 keyword 4 component 4  value 7.5368e-01
 #ELEMENT tStep 1 number 11 gp 1 keyword 4 component 5  value -1.5347e-01
@@ -119,10 +119,10 @@ ConstantFunction 1 f(t) 1.0
 #ELEMENT tStep 1 number 11 gp 1 keyword 1 component 5  value 4.6604e-02
 #ELEMENT tStep 1 number 11 gp 1 keyword 1 component 6  value 1.9535e-02
 ##
-#ELEMENT tStep 1 number 21 gp 1 keyword 11 component 5  value 7.5368e-01
-#ELEMENT tStep 1 number 21 gp 1 keyword 11 component 9  value -1.5347e-01
-#ELEMENT tStep 1 number 21 gp 1 keyword 11 component 6  value 1.954e-02 
-#ELEMENT tStep 1 number 21 gp 1 keyword 9 component 5  value 9.5375e-01
-#ELEMENT tStep 1 number 21 gp 1 keyword 9 component 9  value 4.6604e-02
-#ELEMENT tStep 1 number 21 gp 1 keyword 9 component 6  value 1.9535e-02
+#ELEMENT tStep 1 number 21 gp 1 keyword 11 component 2  value 7.5368e-01
+#ELEMENT tStep 1 number 21 gp 1 keyword 11 component 3  value -1.5347e-01
+#ELEMENT tStep 1 number 21 gp 1 keyword 11 component 4  value 3.90704555e-02
+#ELEMENT tStep 1 number 21 gp 1 keyword 9 component 2  value 9.5375e-01
+#ELEMENT tStep 1 number 21 gp 1 keyword 9 component 3  value 4.6604e-02
+#ELEMENT tStep 1 number 21 gp 1 keyword 9 component 4  value 1.9535e-02
 #%END_CHECK%
