@@ -241,14 +241,15 @@ class CTRLParser:
         self.nbc=int(dataline[5])
         self.nic=int(dataline[7])
         self.nltf=int(dataline[9])
-        
-        xmanInd = dataline.index("nxfemman")
-        if xmanInd != -1:
-            self.nxfemman = int(dataline[xmanInd+1])
+
+        if "nxfemman" in dataline:
+            xmanInd = dataline.index("nxfemman")
+            if xmanInd != -1:
+                self.nxfemman = int(dataline[xmanInd+1])
 
         #read crossSect, material, bc, ic, and lft records into footer
         count = 0
-         
+
         while count < (self.ncrosssect+self.nmat+self.nbc+self.nic+self.nltf):
             line=self.file.readline()
             dataline=line.split()

@@ -71,11 +71,11 @@ IsotropicHeatTransferMaterial :: give(int aProperty, GaussPoint *gp)
 // Returns the value of the property aProperty (e.g. 'k' the conductivity of the receiver).
 //
 {
-    if ( aProperty == 'k' ) { //thermal conductivity [J/m/K]
+    if ( aProperty == 'k' ) { //thermal conductivity [W/m/K]
         return conductivity;
-    } else if ( aProperty == 'c' ) { //mass-specific heat capacity [J/kg]
+    } else if ( aProperty == 'c' ) { //mass-specific heat capacity [J/kg/K]
         return capacity;
-    } else if ( aProperty == HeatCapaCoeff ) { //volume-specific heat capacity [J/m3]
+    } else if ( aProperty == HeatCapaCoeff ) { //volume-specific heat capacity [J/m3/K]
         return ( capacity * this->give('d', gp) );
     }
 
