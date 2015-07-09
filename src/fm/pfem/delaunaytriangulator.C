@@ -62,12 +62,12 @@ DelaunayTriangulator :: ~DelaunayTriangulator()
 {
     // clean up triangle list
     for ( genIT = generalTriangleList.begin(); genIT != generalTriangleList.end(); ) {
-        delete(* genIT);
+        delete( * genIT );
         genIT = generalTriangleList.erase(genIT);
     }
 
     for ( elIT = edgeList.begin(); elIT != edgeList.end(); ++elIT ) {
-        delete(* elIT);
+        delete( * elIT );
     }
 }
 
@@ -151,17 +151,17 @@ void DelaunayTriangulator :: writeMesh()
     int mat = 0;
     int cs = 0;
     int pressureBC = 0;
-    PFEM* pfemEngngModel = dynamic_cast<PFEM*>(domain->giveEngngModel());
-    if (pfemEngngModel) {
-      mat = pfemEngngModel->giveAssociatedMaterialNumber();
-      cs = pfemEngngModel->giveAssociatedCrossSectionNumber();
-      pressureBC = pfemEngngModel->giveAssociatedPressureBC();
+    PFEM *pfemEngngModel = dynamic_cast< PFEM * >( domain->giveEngngModel() );
+    if ( pfemEngngModel ) {
+        mat = pfemEngngModel->giveAssociatedMaterialNumber();
+        cs = pfemEngngModel->giveAssociatedCrossSectionNumber();
+        pressureBC = pfemEngngModel->giveAssociatedPressureBC();
     }
 
     domain->resizeElements(nelem);
     //from domain.C
     for ( genIT = generalTriangleList.begin(); genIT != generalTriangleList.end(); genIT++ ) {
-        elem = new TR1_2D_PFEM(num, domain, ( *genIT )->giveNode(1), ( *genIT )->giveNode(2), ( *genIT )->giveNode(3), mat, cs);
+        elem = new TR1_2D_PFEM(num, domain, ( * genIT )->giveNode(1), ( * genIT )->giveNode(2), ( * genIT )->giveNode(3), mat, cs);
 
         domain->setElement(num, elem);
         num++;
@@ -172,38 +172,50 @@ void DelaunayTriangulator :: writeMesh()
         for ( int i = 1; i <= domain->giveNumberOfDofManagers(); i++ ) {
             Dof *jDof = domain->giveDofManager(i)->giveDofWithID(P_f);
             jDof->setBcId(0);
-            
+
             dynamic_cast< PFEMParticle * >( domain->giveDofManager(i) )->setOnAlphaShape(false);
         }
 
         // and then prescribe zero pressure on the free surface
         for ( elIT = alphaShapeEdgeList.begin(); elIT != alphaShapeEdgeList.end(); elIT++ ) {
             bool oneIsFree = false;
-            for ( int i = 1; i <= 2; i++ ) {
-                hasNoBcOnItself = true;
-                dman = domain->giveDofManager( ( * elIT )->giveNode(i) );
-                for ( Dof* dof: *dman) {
-                    type = dof->giveDofID();
-                    if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-                        if ( dof->giveBcId() ) {
-                            hasNoBcOnItself = false;
-                        }
+            hasNoBcOnItself = true;
+            dman = domain->giveDofManager( ( * elIT )->giveFirstNodeNumber() );
+            for ( Dof *dof: *dman ) {
+                type = dof->giveDofID();
+                if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
+                    if ( dof->giveBcId() ) {
+                        hasNoBcOnItself = false;
                     }
                 }
-
-                if ( hasNoBcOnItself ) {
-                    oneIsFree = true;
-                }
-
-                dynamic_cast< PFEMParticle * >(dman)->setOnAlphaShape();
             }
 
-            if ( oneIsFree ) {
-                Dof *dofOnNode1 = domain->giveDofManager( ( * elIT )->giveNode(1) )->giveDofWithID(P_f);
-                dofOnNode1->setBcId(pressureBC);
-                
+            if ( hasNoBcOnItself ) {
+                oneIsFree = true;
+            }
+            dynamic_cast< PFEMParticle * >( dman )->setOnAlphaShape();
 
-                Dof *dofOnNode2 = domain->giveDofManager( ( * elIT )->giveNode(2) )->giveDofWithID(P_f);
+            hasNoBcOnItself = true;
+            dman = domain->giveDofManager( ( * elIT )->giveSecondNodeNumber() );
+            for ( Dof *dof: *dman ) {
+                type = dof->giveDofID();
+                if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
+                    if ( dof->giveBcId() ) {
+                        hasNoBcOnItself = false;
+                    }
+                }
+            }
+
+            if ( hasNoBcOnItself ) {
+                oneIsFree = true;
+            }
+            dynamic_cast< PFEMParticle * >( dman )->setOnAlphaShape();
+
+            if ( oneIsFree ) {
+                Dof *dofOnNode1 = domain->giveDofManager( ( * elIT )->giveFirstNodeNumber() )->giveDofWithID(P_f);
+                dofOnNode1->setBcId(pressureBC);
+
+                Dof *dofOnNode2 = domain->giveDofManager( ( * elIT )->giveSecondNodeNumber() )->giveDofWithID(P_f);
                 dofOnNode2->setBcId(pressureBC);
             }
         }
@@ -231,7 +243,7 @@ void DelaunayTriangulator :: computeAlphaComplex()
 
         AlphaEdge2D *containedEdge;
 
-        AlphaEdge2D *edge1 = new AlphaEdge2D( par1, par2, ( *genIT )->giveEdgeLength(1, 2) );
+        AlphaEdge2D *edge1 = new AlphaEdge2D( par1, par2, ( * genIT )->giveEdgeLength(1, 2) );
 
         containedEdge = giveBackEdgeIfAlreadyContainedInList(edge1);
 
@@ -260,7 +272,7 @@ void DelaunayTriangulator :: computeAlphaComplex()
             edgeList.push_back(edge1);
         }
 
-        AlphaEdge2D *edge2 = new AlphaEdge2D( par2, par3, ( *genIT )->giveEdgeLength(2, 3) );
+        AlphaEdge2D *edge2 = new AlphaEdge2D( par2, par3, ( * genIT )->giveEdgeLength(2, 3) );
 
         containedEdge = giveBackEdgeIfAlreadyContainedInList(edge2);
 
@@ -290,7 +302,7 @@ void DelaunayTriangulator :: computeAlphaComplex()
             edgeList.push_back(edge2);
         }
 
-        AlphaEdge2D *edge3 = new AlphaEdge2D( par3, par1, ( *genIT )->giveEdgeLength(3, 1) );
+        AlphaEdge2D *edge3 = new AlphaEdge2D( par3, par1, ( * genIT )->giveEdgeLength(3, 1) );
 
         containedEdge = giveBackEdgeIfAlreadyContainedInList(edge3);
 
@@ -432,7 +444,7 @@ DelaunayTriangulator :: meshPolygon(int insertedNode, InsertTriangleBasedOnCircu
 {
     std :: list< Edge2D > :: iterator polygonIT;
     for ( polygonIT = polygon.begin(); polygonIT != polygon.end(); polygonIT++ ) {
-        DelaunayTriangle *newTriangle = new DelaunayTriangle(domain, ( *polygonIT ).giveNode(1), ( *polygonIT ).giveNode(2), insertedNode);
+        DelaunayTriangle *newTriangle = new DelaunayTriangle(domain, ( * polygonIT ).giveFirstNodeNumber(), ( * polygonIT ).giveSecondNodeNumber(), insertedNode);
 
         this->creativeTimer.resumeTimer();
         triangleOctree.insertMemberIntoOctree(newTriangle, tInsert);
@@ -474,10 +486,10 @@ DelaunayTriangulator :: cleanUpTriangleList()
         int node3 = ( * genIT )->giveNode(3);
 
         if ( node1 == nnode + 1 || node1 == nnode + 2 || node1 == nnode + 3 || node1 == nnode + 4 ||
-            node2 == nnode + 1 || node2 == nnode + 2 || node2 == nnode + 3 || node2 == nnode + 4 ||
-            node3 == nnode + 1 || node3 == nnode + 2 || node3 == nnode + 3 || node3 == nnode + 4 ||
-            !( ( * genIT )->giveValidFlag() ) ) {
-            delete(* genIT);
+             node2 == nnode + 1 || node2 == nnode + 2 || node2 == nnode + 3 || node2 == nnode + 4 ||
+             node3 == nnode + 1 || node3 == nnode + 2 || node3 == nnode + 3 || node3 == nnode + 4 ||
+             !( ( * genIT )->giveValidFlag() ) ) {
+            delete( * genIT );
             genIT = generalTriangleList.erase(genIT);
         } else {
             genIT++;
@@ -533,4 +545,3 @@ void DelaunayTriangulator :: buildInitialBBXMesh(InsertTriangleBasedOnCircumcirc
     triangleOctree.insertMemberIntoOctree(secondTriangle, tInsert);
 }
 } // end namespace oofem
-

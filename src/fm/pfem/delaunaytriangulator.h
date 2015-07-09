@@ -56,12 +56,18 @@ class IntArray;
 class FloatArray;
 class InsertionData;
 
+/**
+ * Mesh generator for the PFEM problem, using Bowyer-Watson algorithm of the Delaunay triangulation
+ * of a set of nodes (PFEMParticle) creating TR1_2D_PFEM elements.
+ */
 class DelaunayTriangulator
 {
 protected:
+    /// Domain of the PFEM problem containing nodes to be triangulated
     Domain *domain;
-    // Value of alpha
+    // Value of alpha for the boundary recognition via alpha shape algorithm
     double alphaValue;
+    // Number of nodes
     int nnode;
     // Option 2: setting bounds for computed Alpha
     //double minAlpha;
@@ -91,7 +97,7 @@ protected:
 
 public:
     /// Constructor
-    DelaunayTriangulator(Domain * d, double setAlpha);
+    DelaunayTriangulator(Domain *d, double setAlpha);
     /// Destructor
     ~DelaunayTriangulator();
 

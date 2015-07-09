@@ -59,17 +59,18 @@ class TimeStep;
 class DofManager;
 class IntArray;
 
-template< class T > class OctreeSpatialLocalizerT;
+template< class T >class OctreeSpatialLocalizerT;
 
 
 #define TEMPLATED_OCTREE_MAX_NODES_LIMIT 300
 
 #define TEMPLATED_OCTREE_MAX_DEPTH 15
 
+///
 enum boundingSphereStatus { SphereOutsideCell, SphereInsideCell, SphereContainsCell };
 
 /**
- * Squered bounding box for templated octree localizer
+ * Squared bounding box for templated octree localizer
  */
 class BoundingBox
 {
@@ -88,6 +89,7 @@ public:
     /// Destructor
     ~BoundingBox() { }
 
+    /// Sets the origin of the bounding box
     void setOrigin(FloatArray &coords)
     {
         origin.resize( coords.giveSize() );
@@ -95,11 +97,22 @@ public:
             origin.at(i) = coords.at(i);
         }
     }
-    void setSize(double s) { size = s; }
-    void setMask(int i, int mask) { spatialMask.at(i) = mask; }
 
+    /// Sets the size of the bounding box (all sides are equal)
+    void setSize(double s) { size = s; }
+    /// Sets the spatial mask
+    void setMask(int i, int mask) { spatialMask.at(i) = mask; }
+    /**
+     * Returns the bounding box origin
+     * @param answer the bounding box origin
+     */
     void giveOrigin(FloatArray &answer) { answer = this->origin; }
+    /// Gives the size of the bounding box
     double giveSize() { return size; }
+    /**
+     * Gives the spatial mask of the bounding box
+     * @param answer the mask of the bounding box
+     */
     void giveMask(IntArray &answer) { answer = this->spatialMask; }
 };
 
@@ -121,7 +134,9 @@ protected:
     CellPtrType parent;
     /// Child cells
     CellPtrType child [ 2 ] [ 2 ] [ 2 ];
+    /// Origin of the cell
     FloatArray origin;
+    /// Size of the cell
     double size;
 
     /// Octant cell member list
@@ -130,7 +145,7 @@ protected:
 public:
 
     /// Constructor
-    OctantRecT(LocalizerPtrType loc, CellPtrType parent, FloatArray & origin, double size)
+    OctantRecT(LocalizerPtrType loc, CellPtrType parent, FloatArray &origin, double size)
     {
         this->localizer = loc;
         this->parent = parent;
@@ -165,13 +180,19 @@ public:
         }
     }
 
-
+    /// @return Reference to parent; NULL if root.
     CellPtrType giveParent() { return this->parent; }
-
+    /**
+     * Gives the cell origin.
+     * @param answer Cell origin.
+     */
     void giveOrigin(FloatArray &answer) { answer = this->origin; }
-
+    /// Gives the size of the cell
     double giveSize() { return this->size; }
-
+    /**
+     * Gives 1 if a given point is contained in the cell, 0 otherwise.
+     * @param coords coordinates of tested point.
+     */
     int containsPoint(const FloatArray &coords) {
         for ( int i = 1; i <= coords.giveSize(); i++ ) {
             if ( localizer->giveOctreeMaskValue(i) ) {
@@ -187,17 +208,32 @@ public:
 
         return 1;
     }
-
+    /**
+     * Gives the Child at given local indices.
+     * @param xi First index.
+     * @param yi Second index.
+     * @param zi Third index.
+     * @return Child cell with given local cell coordinates.
+     */
     CellPtrType giveChild(int xi, int yi, int zi) {
         if ( ( xi >= 0 ) && ( xi < 2 ) && ( yi >= 0 ) && ( yi < 2 ) && ( zi >= 0 ) && ( zi < 2 ) ) {
             return this->child [ xi ] [ yi ] [ zi ];
         } else {
             OOFEM_ERROR("OctantRecT::giveChild invalid child index (%d,%d,%d)", xi, yi, zi);
         }
-
         return NULL;
     }
 
+    /**
+     * Returns the child containing given point.
+     * If not full 3d coordinates are provided, then only provided coordinates are taken into account,
+     * assuming remaining to be same as origin.
+     * If point is contained by receiver, corresponding child is set, otherwise.
+     * child is set to NULL.
+     * @param child
+     * @param coords Coordinate which child should contain.
+     * @return Child status.
+     */
     int giveChildContainingPoint(CellPtrType *child, const FloatArray &coords) {
         IntArray ind(3);
         if ( this->containsPoint(coords) ) {
@@ -222,6 +258,7 @@ public:
         }
     }
 
+    /// @return True if octant is terminal (no children).
     int isTerminalOctant()
     {
         if ( this->child [ 0 ] [ 0 ] [ 0 ] ) {
@@ -231,7 +268,11 @@ public:
         return 1;
     }
 
-    /// Divides the octant cell
+    /**
+     * Divide receiver further, creating corresponding children.
+     * @param level Depth of tree.
+     * @param octantMask Masking of dimensions.
+     */
     int divideLocally(int level, const IntArray &octantMask)
     {
         int i, j, k, result = 1;
@@ -271,7 +312,11 @@ public:
         return result;
     }
 
-    /// Tests the position of a bounding box in relation to the octant cell
+    /**
+     * Tests the position of a bounding box in relation to the octant cell
+     * @param testedBBX Tested bounding box
+     * @returns BoundingBoxStatus status
+     */
     OctantRec :: BoundingBoxStatus testBoundingBox(BoundingBox &testedBBX)
     {
         int i, test = 0;
@@ -310,7 +355,12 @@ public:
         }
     }
 
-    /// Tests the position of a bounding spere in relation to the octant cell
+    /**
+     *  Tests the position of a bounding spere in relation to the octant cell
+     * @param coords Coordinates of the spere center
+     * @param radius Radius of the sphere
+     * @returns boundingSpereStatus status
+     */
     boundingSphereStatus testBoundingSphere(const FloatArray &coords, double radius)
     {
         int i, test = 1, nsd, size = coords.giveSize();
@@ -405,11 +455,14 @@ template< class T >
 class LocalInsertionData
 {
 public:
+    /// Constructor
     LocalInsertionData() { }
     typedef OctantRecT< T > *CellPtrType;
     typedef typename std :: list< T > :: iterator listIteratorType;
 
+    /// Octant cell containing object
     OctantRecT< T > *containedInCell;
+    /// Iterator position in the list of cell objects
     listIteratorType posInCellDataList;
 };
 
@@ -418,7 +471,8 @@ public:
 /**
  * Functor base class responsible for insertion of members into the octree cell
  */
-template< class T > class SL_Insertion_Functor {
+template< class T >class SL_Insertion_Functor
+{
 protected:
     typedef typename std :: list< T > :: iterator listIteratorType;
 
@@ -441,11 +495,19 @@ protected:
     Domain *domain;
 
 public:
-    InsertNode(Domain * d) {
+    /// Constuctor
+    InsertNode(Domain *d) {
         domain = d;
     }
+    /// Destructor
     ~InsertNode() { }
 
+    /**
+     * Evaluates the position of a node
+     * @param nodeNr Number of the node in the domain
+     * @param cell Octant cell to be tested
+     * @returns true if the node is contained in the cell, false otherwise
+     */
     bool evaluate(int &nodeNr, OctantRecT< int > *cell)
     {
         FloatArray coords(3);
@@ -477,11 +539,19 @@ protected:
     Domain *domain;
 
 public:
-    InsertTriangleBasedOnCircumcircle(Domain * d) {
+    /// Constructor
+    InsertTriangleBasedOnCircumcircle(Domain *d) {
         domain = d;
     }
+    /// Destructor
     ~InsertTriangleBasedOnCircumcircle() { }
 
+    /**
+     * Evaluates the position of a triangle
+     * @param DTptr Delaunay triangle
+     * @param cell Octant cell to be tested
+     * @returns true if the cirumscribed circle of the circle lies inside or contains a part of the cell, false otherwise
+     */
     bool evaluate(DelaunayTriangle * &DTptr, OctantRecT< DelaunayTriangle * > *cell)
     {
         double radius = DTptr->giveCircumRadius();
@@ -509,7 +579,8 @@ public:
 /**
  * Functor base class for evaluating search tasks on the octree according given condition
  */
-template< class T > class SL_Evaluation_Functor {
+template< class T >class SL_Evaluation_Functor
+{
 public:
     /// Evaluates wether the search condition is accomplished or not
     virtual bool evaluate(T &obj) = 0;
@@ -522,9 +593,9 @@ public:
     /// (e.g. IPs around some given coordinates)
     virtual bool isBBXStage1Defined(BoundingBox &BBXStage1) = 0;
 
-    /// Stage2BBX is given by results of a prior search
-    /// e.g. we found a closest point to another point in an octant, BBX is defined by the distance from each other and the found closest point
-    /// now we have to check surrounding octants whithin this bounding, which may contain points closer to starting point
+    /// Stage2BBX is given by results of a prior search.
+    /// e.g. We found a closest point to another point in an octant, BBX is defined by the distance from each other and the found closest point.
+    /// Now we have to check surrounding octants whithin this bounding, which may contain points closer to starting point.
     virtual bool isBBXStage2Defined(BoundingBox &BBXStage2) = 0;
 };
 
@@ -544,19 +615,34 @@ protected:
     std :: list< int >closestNodeIndices;
 
 public:
-    ClosestNode(FloatArray * pos, Domain * d) {
+    /**
+     * Constructor
+     * @param pos Starting position of the search
+     * @param d Domain containing nodes
+     */
+    ClosestNode(FloatArray *pos, Domain *d) {
         initFlag = false;
         startingPosition = pos;
         domain = d;
     }
-
+    /// Destructor
     ~ClosestNode() { }
 
+    /**
+     * Gives the starting position of the search
+     * @param position startingPosition
+     */
     void giveStartingPosition(FloatArray &position)
     {
         position = * startingPosition;
     }
 
+    /**
+     * Evaluates a node. The closest nodes are stored in a container, if their distance to starting position is the same.
+     * Is the distance smaller than previous one, the container is emptied and new node is added.
+     * @param nodeNr Number of the node in the domain list
+     * @returns true after evaluation is processed.
+     */
     bool evaluate(int &nodeNr)
     {
         if ( initFlag ) {
@@ -580,6 +666,10 @@ public:
         return true;
     }
 
+    /**
+     * Gives the closest nodes
+     * @param answer List containing numbers of the closest nodes
+     */
     void giveResult(std :: list< int > &answer) {
         answer = closestNodeIndices;
     }
@@ -613,13 +703,23 @@ protected:
     std :: list< DelaunayTriangle * >result;
 
 public:
-    ElementCircumCirclesContainingNode(FloatArray * pos, Domain * d)
+    /**
+     * Constructor
+     * @param pos Starting position of the search
+     * @param d Domain containing nodes the triangles are defined by
+     */
+    ElementCircumCirclesContainingNode(FloatArray *pos, Domain *d)
     {
         startingPosition = pos;
         domain = d;
     }
     ~ElementCircumCirclesContainingNode() { }
 
+    /**
+     * Evaluates a triangle upon its circumscribed cricle.
+     * @param DTptr Delaunay triangle. nodeNr Number of the node in the domain list
+     * @returns true if the circumscribed circle of the Delaunay triangle contains the point, false otherwise
+     */
     bool evaluate(DelaunayTriangle * &DTptr)
     {
         double radius = DTptr->giveCircumRadius();
@@ -636,12 +736,19 @@ public:
         }
     }
 
-
+    /**
+     * Gives the starting position of the search
+     * @param position startingPosition
+     */
     void giveStartingPosition(FloatArray &answer)
     {
         answer = * startingPosition;
     }
 
+    /**
+     * Gives the triangles containing the node
+     * @param answer List containing Delaunay triangles
+     */
     void giveResult(std :: list< DelaunayTriangle * > &answer)
     {
         answer = result;
@@ -655,12 +762,12 @@ public:
 /**
  * Templated octree spatial localizer
  */
-template< class T > class OctreeSpatialLocalizerT
+template< class T >class OctreeSpatialLocalizerT
 {
 protected:
 
     typedef OctantRecT< T > *CellPtrType;
-    typedef std :: list< T > dataContainerType;
+    typedef std :: list< T >dataContainerType;
     typedef typename std :: list< T > :: iterator listIteratorType;
     typedef typename std :: list< T > :: const_iterator listConstIteratorType;
     IntArray octreeMask;
@@ -670,7 +777,7 @@ protected:
 
 public:
     /// Constructor
-    OctreeSpatialLocalizerT(int n, Domain * d) {
+    OctreeSpatialLocalizerT(int n, Domain *d) {
         rootCell = NULL;
         domain = d;
         maxDepthReached = 0;
@@ -721,13 +828,12 @@ public:
                     if ( coords->at(j) < minc.at(j) ) {
                         minc.at(j) = coords->at(j);
                     }
-                
+
                     if ( coords->at(j) > maxc.at(j) ) {
                         maxc.at(j) = coords->at(j);
                     }
                 }
             }
-            
         }                 // end loop over nodes
 
         BBX.setOrigin(minc);
@@ -1059,9 +1165,3 @@ protected:
 };
 } // end namespace oofem
 #endif // octreelocalizer_h
-
-
-
-
-
-

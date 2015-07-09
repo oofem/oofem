@@ -51,45 +51,58 @@ class Domain;
 class TimeStep;
 class IntArray;
 class FloatArray;
-template< class T > class LocalInsertionData;
+template< class T >class LocalInsertionData;
 
 /**
- * Delaunay triangle for triangulation of set of nodes.
+ * Delaunay triangle for the triangulation of a set of nodes.
  * According the definition a Delaunay triangle has an empty circumscribed circle.
  */
 class DelaunayTriangle
 {
 public:
     /// Constructor
-    DelaunayTriangle(Domain * d, int node1, int node2, int node3);
+    DelaunayTriangle(Domain *d, int node1, int node2, int node3);
     /// Destructor
     ~DelaunayTriangle();
 
+    /// gives the x coordinate of the center of the circumscribed circle
     double giveXCenterCoordinate() const { return circumCircle.at(1); }
+    /// gives the y coordinate of the center of the circumscribed circle
     double giveYCenterCoordinate() const { return circumCircle.at(2); }
+    /// gives the radius of the circumscribed circle
     double giveCircumRadius() const { return circumCircle.at(3); }
+    /// calculates the distance of a passed point to the center of the circumscribed circle
     double giveDistanceToCenter(const FloatArray &coords);
 
+    /// gives the i-node of the triangle
     int giveNode(int i) { return nodes.at(i); }
+    /// returns a list of octree cells and with iterator position in their member lists
     std :: list< LocalInsertionData< DelaunayTriangle * > > *giveListOfCellsAndPosition();
+    /// sets the flag whether Delaunay condition is fulfilled
     void setValidFlag(bool newFlag) { validFlag = newFlag; }
+    /// gives true if the delaunay triangle is valid
     bool giveValidFlag() { return validFlag; }
+    /// gives the length of the shortest triangle edge
     double giveShortestEdgeLength();
+    /// gives the length of the edge between two nodes
     double giveEdgeLength(int nodeA, int nodeB);
 
 
 private:
+    /// calculates the parameters of the circumscribed circle
     void computeCircumcircle();
+    /// sets up the parameters of the calculated circumscribed circle
     void setCircumCircle(double x, double y, double r);
-
+    /// Domain where the nodes are defined
     Domain *domain;
+    /// Nodes defining the triangle
     IntArray nodes;
     /// Parameters of the circumscribed circle: coordinates of center (x,y) and its radius
     FloatArray circumCircle;            //x, y, r
     /// Flag for Delaunay property
     bool validFlag;
     /// In order to allow fast search in octree, every triangle stores list of octree cells where its circumscribed circle is contained.
-    std :: list< LocalInsertionData< DelaunayTriangle * > > listOfCellsContainedInAndPosition;
+    std :: list< LocalInsertionData< DelaunayTriangle * > >listOfCellsContainedInAndPosition;
 };
 } // end namespace oofem
 #endif // delaunaytriangle_h
