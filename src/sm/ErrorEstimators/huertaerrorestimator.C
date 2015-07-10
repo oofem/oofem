@@ -244,7 +244,7 @@ HuertaErrorEstimator :: estimateError(EE_ErrorMode err_mode, TimeStep *tStep)
 
 #endif
 
-    primaryUnknownError.resize( this->refinedMesh.nodes * d->giveDefaultNodeDofIDArry().giveSize() );
+    primaryUnknownError.resize( this->refinedMesh.nodes * d->giveDofManager(1)->giveNumberOfDofs() );
     primaryUnknownError.zero();
 
     // uNormArray.resize(nelems);
@@ -1098,7 +1098,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
         endNode = nodes;
     }
 
-    dofs = element->giveDomain()->giveDefaultNodeDofIDArry().giveSize();
+    dofs = element->giveDomain()->giveDofManager(1)->giveNumberOfDofs();
 
     if ( mode == HuertaErrorEstimatorInterface :: CountMode ) {
         for ( inode = startNode; inode <= endNode; inode++ ) {
@@ -1151,7 +1151,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
         FloatMatrix *lcs;
         bool hasBc;
 
-        dofIdArray = element->giveDomain()->giveDefaultNodeDofIDArry();
+        element->giveElementDofIDMask(dofIdArray);
 
         for ( inode = startNode; inode <= endNode; inode++ ) {
             xc = corner [ inode - 1 ]->at(1);
@@ -1512,7 +1512,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
         endNode = nodes;
     }
 
-    dofs = element->giveDomain()->giveDefaultNodeDofIDArry().giveSize();
+    dofs = element->giveDomain()->giveDofManager(1)->giveNumberOfDofs();
 
     if ( mode == HuertaErrorEstimatorInterface :: CountMode ) {
         for ( inode = startNode; inode <= endNode; inode++ ) {
@@ -1585,7 +1585,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
         bool hasBc;
         FloatMatrix *lcs;
 
-        dofIdArray = element->giveDomain()->giveDefaultNodeDofIDArry();
+        element->giveElementDofIDMask(dofIdArray);
 
         sideBcDofIdList.resize(2);
 
@@ -2066,7 +2066,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
         endNode = nodes;
     }
 
-    dofs = element->giveDomain()->giveDefaultNodeDofIDArry().giveSize();
+    dofs = element->giveDomain()->giveDofManager(1)->giveNumberOfDofs();
 
     if ( mode == HuertaErrorEstimatorInterface :: CountMode ) {
 #ifdef DEBUG
@@ -2165,7 +2165,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
         bool hasBc;
         FloatMatrix *lcs;
 
-        dofIdArray = element->giveDomain()->giveDefaultNodeDofIDArry();
+        element->giveElementDofIDMask(dofIdArray);
 
         sideBcDofIdList.resize(3);
         faceBcDofIdList.resize(3);
@@ -2904,7 +2904,7 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
     et_setup = timer.getUtime();
 #endif
 
-    dofs = domain->giveDefaultNodeDofIDArry().giveSize();
+    dofs = domain->giveDofManager(1)->giveNumberOfDofs();
     dofIdArray = domain->giveDefaultNodeDofIDArry();
 
 #ifdef USE_INPUT_FILE
@@ -3203,7 +3203,7 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
     int mats, csects, loads, funcs, nlbarriers;
     int inode, elemId, ielem, elems, skipped = 0;
     const IntArray *con;
-    int idof, dofs, pos;
+    int dofs, pos;
     IntArray dofIdArray;
     FloatArray nodeSolution;
     Domain *domain = this->domain, *refinedDomain;
@@ -3438,7 +3438,7 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
     et_setup = timer.getUtime();
 #endif
 
-    dofs = domain->giveDefaultNodeDofIDArry().giveSize();
+    dofs = domain->giveDofManager(1)->giveNumberOfDofs();
     dofIdArray = domain->giveDefaultNodeDofIDArry();
 
 #ifdef USE_INPUT_FILE
@@ -3491,10 +3491,10 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
     refinedTStep = refinedProblem->giveCurrentStep();
 
     // store fine solution in primaryUnknownError
-    for ( inode = 1; inode <= localNodeId; inode++ ) {
+    for ( int inode = 1; inode <= localNodeId; inode++ ) {
         refinedDomain->giveNode(inode)->giveUnknownVector(nodeSolution, dofIdArray, VM_Total, refinedTStep);
         pos = globalNodeIdArray.at(inode);
-        for ( idof = 1; idof <= dofs; idof++ ) {
+        for ( int idof = 1; idof <= dofs; idof++ ) {
             primaryUnknownError.at( ( pos - 1 ) * dofs + idof ) = nodeSolution.at(idof);
         }
     }
@@ -3664,7 +3664,7 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
     et_setup = timer.getUtime();
  #endif
 
-    dofs = domain->giveDefaultNodeDofIDArry().giveSize();
+    dofs = domain->giveDofManager(1)->giveNumberOfDofs();
     dofIdArray = domain->giveDefaultNodeDofIDArry();
 
  #ifdef USE_INPUT_FILE

@@ -194,7 +194,7 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
         OOFEM_FATAL("free store exhausted, exiting");
     }
 
-    int bsize = eModel->giveDomain(1)->giveDefaultNodeDofIDArry().giveSize();
+
     /*
      *  Assemble block to equation mapping information
      */
@@ -203,9 +203,15 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
     int _ndofs, _neq, ndofmans = domain->giveNumberOfDofManagers();
     int ndofmansbc = 0;
 
+    ///@todo This still misses element internal dofs.
     // count number of internal dofmans on active bc
     for ( auto &bc : domain->giveBcs() ) {
         ndofmansbc += bc->giveNumberOfInternalDofManagers();
+    }
+
+    int bsize = 0;
+    if ( ndofmans > 0 ) {
+        bsize = domain->giveDofManager(1)->giveNumberOfDofs();
     }
 
     long *mcn = new long [ (ndofmans+ndofmansbc) * bsize ];

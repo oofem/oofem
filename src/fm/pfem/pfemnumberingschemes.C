@@ -171,21 +171,15 @@ AuxVelocityNumberingScheme :: init()
 void
 AuxVelocityNumberingScheme :: init(Domain *domain)
 {
-    if ( domain->giveDomainType() == _2dIncompressibleFlow ) {
-        neq = 2 * domain->giveNumberOfDofManagers();
-    } else {
-        OOFEM_ERROR("AuxVelocityNumberingScheme::giveDofEquationNumber: error");
-    }
+    neq = domain->giveNumberOfSpatialDimensions() * domain->giveNumberOfDofManagers();
 }
 
 int
 AuxVelocityNumberingScheme :: giveDofEquationNumber(Dof *dof) const
 {
-    DofIDItem type;
-    type =  dof->giveDofID();
+    DofIDItem type = dof->giveDofID();
     int c;
     int n = dof->giveDofManager()->giveGlobalNumber();
-    int eqNum = -1;
 
     if ( type == V_u ) {
         c = 1;
@@ -194,18 +188,10 @@ AuxVelocityNumberingScheme :: giveDofEquationNumber(Dof *dof) const
     } else if ( type == V_w ) {
         c = 3;
     } else {
-        c = 0;
+        return 0;
     }
 
-    if ( dof->giveDofManager()->giveDomain()->giveDomainType() == _2dIncompressibleFlow ) {
-        eqNum = 2 * ( n - 1 ) + c;
-    } else {
-        OOFEM_ERROR("AuxVelocityNumberingScheme::giveDofEquationNumber: error");
-    }
-
-    //_error("giveDofEquationNumber: error");
-
-    return eqNum;
+    return dof->giveDofManager()->giveDomain()->giveNumberOfSpatialDimensions() * ( n - 1 ) + c;
 }
 
 int

@@ -448,7 +448,7 @@ SUPG :: giveNextStep()
 void
 SUPG :: solveYourselfAt(TimeStep *tStep)
 {
-    int neq =  this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
+    int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
     FloatArray *solutionVector = NULL, *prevSolutionVector = NULL;
     FloatArray externalForces(neq);
     this->internalForces.resize(neq);
