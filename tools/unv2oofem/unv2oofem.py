@@ -202,7 +202,7 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
                     properties+=" "
                 properties+=igroup.oofem_properties
             outputLine+=properties
-            
+
             # write nodal record
             of.write(('%s\n') % (outputLine))
 
@@ -220,7 +220,7 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
             words=s.split()
             if (words[0].lower()=='set'):
                 setID=int(words[1])
-                                
+
                 if (words[2].lower()=='nodes'):
                     nodelist=[];
                     for nodeset in FEM.nodesets:
@@ -228,7 +228,7 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
                             if (setID==oofemset):
                                 nodelist.extend(nodeset.items)
                     setElements=list(set(nodelist))
-                    
+
                 elif (words[2].lower()=='elements'):
                     ellist=[]
                     for elemset in FEM.elemsets:
@@ -240,18 +240,18 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
                             if (setID==oofemset):
                                 ellist.extend(elemset.items)
                     setElements=list(set(ellist))
-                                      
+
                 elif (words[2].lower()=='elementboundaries'):
                     setElements=[]
                     for thisSet in boundarySets:
                         if (thisSet[0]==int(words[1])):
                             setElements.extend([thisSet[1], thisSet[2]])
-                                        
+
                 of.write('%s %s %s %u ' % ( words[0], words[1], words[2], len(setElements)) )
                 for setElement in setElements:
                     of.write('%u ' % setElement)
                 of.write('\n')
-                    
+
             else:
                 of.write('%s\n' % s)
 

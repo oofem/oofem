@@ -319,3 +319,4 @@ class CTRLParser:
                 #resolve elemtype
                 if elemmap[ielem].type in igroup.oofem_etypemap:
                     elemmap[ielem].oofem_elemtype = igroup.oofem_etypemap[elemmap[ielem].type]
+                    

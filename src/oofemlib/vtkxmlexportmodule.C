@@ -112,7 +112,7 @@ VTKXMLExportModule :: initializeFrom(InputRecord *ir)
     stype = ( NodalRecoveryModel :: NodalRecoveryModelType ) val;
     timeScale = 1.;
     IR_GIVE_OPTIONAL_FIELD(ir, timeScale, _IFT_VTKXMLExportModule_timescale); // Macro
-    
+
     regionSets.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, regionSets, _IFT_VTKXMLExportModule_regionsets); // Macro
 
@@ -530,7 +530,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
             std :: stringstream subStep;
             if (tstep_substeps_out_flag)
                 subStep << "." << tStep->giveSubStepNumber();
-            pvdEntry << "<DataSet timestep=\"" << tStep->giveIntrinsicTime()<< subStep.str() << "\" group=\"\" part=\"\" file=\"" << this->giveOutputBaseFileName(tStep) + ".gp.vtu" << "\"/>";
+            pvdEntry << "<DataSet timestep=\"" << tStep->giveIntrinsicTime()*this->timeScale << subStep.str() << "\" group=\"\" part=\"\" file=\"" << this->giveOutputBaseFileName(tStep) + ".gp.vtu" << "\"/>";
             this->gpPvdBuffer.push_back( pvdEntry.str() );
             this->writeGPVTKCollection();
         }
@@ -552,7 +552,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
             }
             if (tstep_substeps_out_flag)
                 subStep << "." << tStep->giveSubStepNumber();
-            pvdEntry << "<DataSet timestep=\"" << tStep->giveIntrinsicTime() << subStep.str() << "\" group=\"\" part=\"" << i << "\" file=\"" << this->emodel->giveOutputBaseFileName() << fext << ".vtu\"/>";
+            pvdEntry << "<DataSet timestep=\"" << tStep->giveIntrinsicTime()*this->timeScale << subStep.str() << "\" group=\"\" part=\"" << i << "\" file=\"" << this->emodel->giveOutputBaseFileName() << fext << ".vtu\"/>";
             this->pvdBuffer.push_back( pvdEntry.str() );
         }
 
@@ -562,7 +562,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         std :: stringstream subStep;
         if (tstep_substeps_out_flag)
             subStep << "." << tStep->giveSubStepNumber();
-        pvdEntry << "<DataSet timestep=\"" << tStep->giveIntrinsicTime() << subStep.str() << "\" group=\"\" part=\"\" file=\"" << fname << "\"/>";
+        pvdEntry << "<DataSet timestep=\"" << tStep->giveIntrinsicTime()*this->timeScale << subStep.str() << "\" group=\"\" part=\"\" file=\"" << fname << "\"/>";
         this->pvdBuffer.push_back( pvdEntry.str() );
         this->writeVTKCollection();
     }
