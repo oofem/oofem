@@ -313,9 +313,9 @@ NonLinearDynamic :: terminate(TimeStep *tStep)
 void 
 NonLinearDynamic :: initializeYourself(TimeStep *tStep)
 {
-	Domain *domain = this->giveDomain(1);
-	int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
-	
+    Domain *domain = this->giveDomain(1);
+    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
+
     if ( tStep->isTheFirstStep() && initFlag ) {
         // Initialization
         incrementOfDisplacement.resize(neq);
@@ -359,8 +359,8 @@ NonLinearDynamic :: initializeYourself(TimeStep *tStep)
                 }
             }
         }
-		this->giveInternalForces(internalForces, true, 1, tStep);
-	}
+        this->giveInternalForces(internalForces, true, 1, tStep);
+    }
 }
 
 void

@@ -40,9 +40,8 @@ DirectEI :: DirectEI(int n, XfemManager *xm, Domain *aDomain) :
     GeometryBasedEI(n, xm, aDomain)
 {}
 
-DirectEI :: ~DirectEI() {
-    // TODO Auto-generated destructor stub
-}
+DirectEI :: ~DirectEI()
+{}
 
 void DirectEI :: evalLevelSetNormal(double &oLevelSet, const FloatArray &iGlobalCoord, const FloatArray &iN, const IntArray &iNodeInd) const
 {

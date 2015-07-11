@@ -38,6 +38,7 @@
 #include "element.h"
 #include "dof.h"
 #include "maskedprimaryfield.h"
+#include "intvarfield.h"
 #include "verbose.h"
 #include "transportelement.h"
 #include "classfactory.h"
@@ -92,10 +93,13 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
         FieldManager *fm = this->giveContext()->giveFieldManager();
         for ( int i = 1; i <= exportFields.giveSize(); i++ ) {
             if ( exportFields.at(i) == FT_Temperature ) {
-                std :: shared_ptr< Field > _temperatureField( new MaskedPrimaryField ( FT_Temperature, this->UnknownsField.get(), {T_f} ) );
+                FM_FieldPtr _temperatureField( new MaskedPrimaryField ( ( FieldType ) exportFields.at(i), this->UnknownsField.get(), {T_f} ) );
                 fm->registerField( _temperatureField, ( FieldType ) exportFields.at(i) );
+
+                FM_FieldPtr strainField( new InternalVariableField( IST_StrainTensor, FT_Temperature, MMA_ClosestPoint, this->giveDomain(1) ) );
+                this->giveContext()->giveFieldManager()->registerField( strainField, FT_Temperature );
             } else if ( exportFields.at(i) == FT_HumidityConcentration ) {
-                std :: shared_ptr< Field > _concentrationField( new MaskedPrimaryField ( FT_HumidityConcentration, this->UnknownsField.get(), {C_1} ) );
+                FM_FieldPtr _concentrationField( new MaskedPrimaryField ( ( FieldType ) exportFields.at(i), this->UnknownsField.get(), {C_1} ) );
                 fm->registerField( _concentrationField, ( FieldType ) exportFields.at(i) );
             }
         }

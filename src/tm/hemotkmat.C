@@ -344,7 +344,7 @@ HeMoTKMaterial :: giveHumidity(GaussPoint *gp, ValueModeType mode)
         OOFEM_ERROR("undefined moisture status!");
     }
 
-    FloatArray state = ms->giveField();
+    const FloatArray &state = ms->giveField();
 
     if ( mode == VM_Total ) {
         return inverse_sorption_isotherm( tempState.at(2) );

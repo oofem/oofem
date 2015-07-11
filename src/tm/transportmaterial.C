@@ -179,7 +179,7 @@ TransportMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSta
 {
     TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
     if ( type == IST_Temperature || type == IST_MassConcentration_1 || type == IST_Humidity ) {
-        FloatArray vec = ms->giveField();
+        const FloatArray &vec = ms->giveField();
         answer = FloatArray{vec.at( ( type == IST_Temperature ) ? 1 : 2 ) };
         return 1;
     } else if ( type == IST_TemperatureFlow ) {

@@ -81,29 +81,6 @@ namespace oofem {
 class OOFEM_EXPORT FluidStructureProblem : public StaggeredProblem
 {
 protected:
-    /// Number of engineering models to run.
-///    int nModels;
-    /// List of engineering models to solve sequentially.
-///    AList< EngngModel > *emodelList;
-///    double deltaT;
-///    std :: string *inputStreamNames;
-    /// Associated time function for time step increment
-///    int dtTimeFunction;
-    /**
-     * Constant multiplier, optional input parameter. This parameter determines the ratio of
-     * two consecutive time steps. Efficient for creep and relaxation analyses.
-     */
-///    double stepMultiplier;
-
-    /// Specified times where the problem is solved
-///    FloatArray discreteTimes;
-
-    /// Optional parameter which specify problems to define load time functions
-///    int timeDefinedByProb;
-
-    /// List of slave models to which this model is coupled    
-///    IntArray coupledModels;
-
     IntArray interactionParticles;
     double tol;
     int iterationNumber;

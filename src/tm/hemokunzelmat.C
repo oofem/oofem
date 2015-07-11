@@ -655,7 +655,7 @@ HeMoKunzelMaterial :: giveHumidity(GaussPoint *gp, ValueModeType mode)
         OOFEM_ERROR("Undefined moisture status");
     }
 
-    FloatArray state = ms->giveField();
+    const FloatArray &state = ms->giveField();
 
     if ( mode == VM_Total ) {
         return tempState.at(2);
