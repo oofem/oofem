@@ -2905,7 +2905,7 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
 #endif
 
     dofs = domain->giveDofManager(1)->giveNumberOfDofs();
-    dofIdArray = domain->giveDefaultNodeDofIDArry();
+    domain->giveElement(1)->giveElementDofIDMask(dofIdArray);
 
 #ifdef USE_INPUT_FILE
     std :: ostringstream fileName;
@@ -3439,7 +3439,7 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
 #endif
 
     dofs = domain->giveDofManager(1)->giveNumberOfDofs();
-    dofIdArray = domain->giveDefaultNodeDofIDArry();
+    domain->giveElement(1)->giveElementDofIDMask(dofIdArray);
 
 #ifdef USE_INPUT_FILE
     std :: ostringstream fileName;
@@ -3665,7 +3665,7 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
  #endif
 
     dofs = domain->giveDofManager(1)->giveNumberOfDofs();
-    dofIdArray = domain->giveDefaultNodeDofIDArry();
+    domain->giveElement(1)->giveElementDofIDMask(dofIdArray);
 
  #ifdef USE_INPUT_FILE
     std :: ostringstream fileName;
