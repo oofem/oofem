@@ -45,6 +45,7 @@
 #include "mathfem.h"
 #include "engngm.h"
 #include "fluiddynamicmaterial.h"
+#include "fluidcrosssection.h"
 #include "load.h"
 #include "timestep.h"
 #include "boundaryload.h"
@@ -144,7 +145,7 @@ PFEMElement2d :: computePressureLaplacianMatrix(FloatMatrix &answer, TimeStep *a
         answer.add(dV, temp);
     }
 
-    double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+    double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
 
     answer.times(1.0 / rho);
 }

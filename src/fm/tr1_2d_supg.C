@@ -46,6 +46,7 @@
 #include "mathfem.h"
 #include "engngm.h"
 #include "fluiddynamicmaterial.h"
+#include "fluidcrosssection.h"
 #include "load.h"
 #include "timestep.h"
 #include "boundaryload.h"
@@ -148,7 +149,7 @@ TR1_2D_SUPG :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *tStep)
     answer.resize(6, 6);
     answer.zero();
     FloatArray un;
-    double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+    double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
 
     double ar6 = rho * area / 6.0;
     double ar12 = rho * area / 12.0;
@@ -207,7 +208,7 @@ TR1_2D_SUPG :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *tStep)
     answer.zero();
 
     FloatArray u, un;
-    double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+    double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     double dudx, dudy, dvdx, dvdy, usum, vsum, coeff;
     this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
     this->computeVectorOfVelocities(VM_Total, tStep, u);
@@ -251,7 +252,7 @@ TR1_2D_SUPG :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep *
     answer.zero();
 
     FloatArray u, un;
-    double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+    double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     this->computeVectorOfVelocities(VM_Total, tStep, u);
     this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
 
@@ -331,8 +332,8 @@ TR1_2D_SUPG :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep)
     eps.at(1) = ( b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5) );
     eps.at(2) = ( c [ 0 ] * u.at(2) + c [ 1 ] * u.at(4) + c [ 2 ] * u.at(6) );
     eps.at(3) = ( b [ 0 ] * u.at(2) + b [ 1 ] * u.at(4) + b [ 2 ] * u.at(6) + c [ 0 ] * u.at(1) + c [ 1 ] * u.at(3) + c [ 2 ] * u.at(5) );
-    static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->computeDeviatoricStressVector(stress, integrationRulesArray [ 0 ]->getIntegrationPoint(0),
-                                                                                                 eps, tStep);
+    static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial()->computeDeviatoricStressVector(
+        stress, integrationRulesArray [ 0 ]->getIntegrationPoint(0), eps, tStep);
     stress.times(1. / Re);
 
     // \int dNu/dxj \Tau_ij
@@ -373,12 +374,10 @@ TR1_2D_SUPG :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRespons
     _b.at(3, 5) = c [ 2 ];
     _b.at(3, 6) = b [ 2 ];
 
-    static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->giveDeviatoricStiffnessMatrix(_d, mode,
-                                                                                                 integrationRulesArray [ 0 ]->getIntegrationPoint(0),
-                                                                                                 tStep);
+    static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial()->giveDeviatoricStiffnessMatrix(
+        _d, mode, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
     _db.beProductOf(_d, _b);
     answer.plusProductUnsym(_b, _db, area); //answer.plusProduct (_b,_db,area);
-    //answer.symmetrized() ;
     answer.times(1. / Re);
 }
 
@@ -439,7 +438,7 @@ TR1_2D_SUPG :: computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *tS
 {
     answer.resize(6, 6);
     answer.zero();
-    double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+    double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     double coeff = area * t_lsic * rho;
     double n[] = {
         b [ 0 ], c [ 0 ], b [ 1 ], c [ 1 ], b [ 2 ], c [ 2 ]
@@ -503,7 +502,6 @@ TR1_2D_SUPG :: computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *
     answer.resize(3, 6);
     answer.zero();
     int w_dof_addr, u_dof_addr, d1j, d2j, km1, mm1;
-    //double rho = this->giveMaterial()->giveCharacteristicValue(Density, integrationRulesArray[0]->getIntegrationPoint(0), tStep);
     FloatArray u, un;
 
     this->computeVectorOfVelocities(VM_Total, tStep, u);
@@ -558,7 +556,7 @@ TR1_2D_SUPG :: computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *tStep)
 void
 TR1_2D_SUPG :: computePressureTerm_MC(FloatMatrix &answer, TimeStep *tStep)
 {
-    double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+    double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     double coeff = t_pspg * area / rho;
     answer.resize(3, 3);
 
@@ -574,9 +572,6 @@ TR1_2D_SUPG :: computePressureTerm_MC(FloatMatrix &answer, TimeStep *tStep)
 void
 TR1_2D_SUPG :: computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *tStep)
 {
-    //answer.resize(6, 6);
-    //answer.zero();
-
     int node1, node2, node3;
     int d1 = 1;
     int d2 = 1;
@@ -671,9 +666,6 @@ TR1_2D_SUPG :: computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *load,
 void
 TR1_2D_SUPG :: computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *tStep)
 {
-    //answer.resize(6, 6);
-    //answer.zero();
-
     int node1, node2, node3;
     int d1 = 1;
     int d2 = 1;
@@ -703,9 +695,6 @@ TR1_2D_SUPG :: computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Lo
     _t1 = giveNode(node2)->giveCoordinate(1) - giveNode(node1)->giveCoordinate(1);
     _t2 = giveNode(node2)->giveCoordinate(2) - giveNode(node1)->giveCoordinate(2);
     l = sqrt(_t1 * _t1 + _t2 * _t2);
-
-    //t1 = _t1 / l;
-    //t2 = _t2 / l;
 
     n1 = _t2 / l;
     n2 = -_t1 / l;
@@ -839,8 +828,8 @@ TR1_2D_SUPG :: computeHomogenizedReinforceTerm_MB(FloatMatrix &answer, Load *loa
     Reinforcement *reinfload  = dynamic_cast< Reinforcement * >(load);
     double kx = reinfload->givePermeability()->at(1);
     double ky = reinfload->givePermeability()->at(2);
-    // double tau_0 = this->giveMaterial()->give( YieldStress, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
-    double mu_0 = this->giveMaterial()->give( Viscosity, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+    double mu_0 = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial()->
+                    giveEffectiveViscosity( integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep );
     coeffx = area * mu_0 / ( 12.0 * kx );
     coeffy = area * mu_0 / ( 12.0 * ky );
     for ( int i = 1; i <= 3; i++ ) {
@@ -861,9 +850,9 @@ TR1_2D_SUPG :: computeHomogenizedReinforceTerm_MC(FloatMatrix &answer, Load *loa
     Reinforcement *reinfload  = dynamic_cast< Reinforcement * >(load);
     double kx = reinfload->givePermeability()->at(1);
     double ky = reinfload->givePermeability()->at(2);
-    // double tau_0 = this->giveMaterial()->give( YieldStress, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
-    double mu_0 = this->giveMaterial()->give( Viscosity, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
-    double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+    double mu_0 = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial()->
+                        giveEffectiveViscosity( integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep );
+    double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     coeffx = area * mu_0 / ( 3.0 * kx * rho );
     coeffy = area * mu_0 / ( 3.0 * ky * rho );
     for ( int i = 1; i <= 3; i++ ) {
@@ -882,7 +871,7 @@ TR1_2D_SUPG :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
 
     double usum [ 2 ];
     bcGeomType ltype;
-    double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+    double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     FloatArray un, gVector;
 
     // add body load (gravity) termms
@@ -908,14 +897,14 @@ TR1_2D_SUPG :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
             }
         }
 
-        if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ReinforceBVT ) ) {
+        if ( ltype == BodyLoadBGT && load->giveBCValType() == ReinforceBVT ) {
             Reinforcement *rload  = dynamic_cast< Reinforcement * >( domain->giveLoad( bodyLoadArray.at(i) ) );
             double phi = rload->givePorosity();
             double alpha = rload->giveshapefactor();
             double kx = rload->givePermeability()->at(1);
             double ky = rload->givePermeability()->at(2);
-            double tau_0 = this->giveMaterial()->give( YieldStress, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
-            //double mu_0 = this->giveMaterial()->give( Viscosity, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+            double tau_0 = static_cast< FluidCrossSection * >( this->giveCrossSection() )->
+                                giveFluidMaterial()->give( YieldStress, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
             gVector.resize(2);
             gVector.at(1) = tau_0 * sqrt(kx * phi) / ( kx * alpha );
             gVector.at(2) = tau_0 * sqrt(ky * phi) / ( ky * alpha );
@@ -932,7 +921,6 @@ TR1_2D_SUPG :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
     // loop over sides
     int n1, n2;
     double tx, ty, l;
-    //IntArray nodecounter (3);
 
     if ( true ) {
         FloatArray t, coords(1);
@@ -979,7 +967,6 @@ TR1_2D_SUPG :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *tStep)
 {
     int nLoads;
     double coeff;
-    bcGeomType ltype;
     FloatArray gVector;
 
     answer.resize(3);
@@ -988,7 +975,7 @@ TR1_2D_SUPG :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *tStep)
     nLoads    = this->giveBodyLoadArray()->giveSize();
     for ( int i = 1; i <= nLoads; i++ ) {
         Load *load  = domain->giveLoad( bodyLoadArray.at(i) );
-        ltype = load->giveBCGeoType();
+        bcGeomType ltype = load->giveBCGeoType();
         if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ForceLoadBVT ) ) {
             load->computeComponentArrayAt(gVector, tStep, VM_Total);
             if ( gVector.giveSize() ) {
@@ -1004,9 +991,11 @@ TR1_2D_SUPG :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *tStep)
             double alpha = rload->giveshapefactor();
             double kx = rload->givePermeability()->at(1);
             double ky = rload->givePermeability()->at(2);
-            double tau_0 = this->giveMaterial()->give( YieldStress, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
-            double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
-            //double mu_0 = this->giveMaterial()->give( Viscosity, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+            double tau_0 = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial()->
+                                give( YieldStress, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+            double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->
+                                giveDensity( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+
             gVector.resize(2);
             gVector.at(1) = tau_0 * sqrt(kx * phi) / ( kx * alpha * rho );
             gVector.at(2) = tau_0 * sqrt(ky * phi) / ( ky * alpha * rho );
@@ -1039,8 +1028,9 @@ TR1_2D_SUPG :: updateStabilizationCoeffs(TimeStep *tStep)
         gp = integrationRulesArray [ 1 ]->getIntegrationPoint(0);
     }
 
-    nu = this->giveMaterial()->giveCharacteristicValue( MRM_Viscosity, gp, tStep->givePreviousStep() );
-    rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+    nu = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial()->
+                    giveCharacteristicValue( MRM_Viscosity, gp, tStep->givePreviousStep() );
+    rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
 
     //this -> computeVectorOfVelocities(VM_Total,tStep->givePreviousStep(),un) ;
     this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), u);
@@ -1275,7 +1265,7 @@ TR1_2D_SUPG :: updateStabilizationCoeffs(TimeStep *tStep)
         gp = integrationRulesArray [ 1 ]->getIntegrationPoint(0);
     }
 
-    nu = static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->giveEffectiveViscosity( gp, tStep->givePreviousStep() );
+    nu = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial()->giveEffectiveViscosity( gp, tStep->givePreviousStep() );
     nu *= domain->giveEngngModel()->giveVariableScale(VST_Viscosity);
 
     dt = tStep->giveTimeIncrement() * tscale;
@@ -1741,15 +1731,9 @@ double
 TR1_2D_SUPG :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
-    double determinant, weight, volume;
+    double determinant = fabs( 4 * area * area * ( c [ 1 ] * b [ 0 ] - c [ 0 ] * b [ 1 ] ) );
 
-    determinant = fabs( 4 * area * area * ( c [ 1 ] * b [ 0 ] - c [ 0 ] * b [ 1 ] ) );
-
-
-    weight = gp->giveWeight();
-    volume = determinant * weight;
-
-    return volume;
+    return gp->giveWeight() * determinant;
 }
 
 
@@ -1920,7 +1904,7 @@ TR1_2D_SUPG :: printOutputAt(FILE *file, TimeStep *tStep)
 // Performs end-of-step operations.
 {
     SUPGElement :: printOutputAt(file, tStep);
-    double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+    double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     fprintf(file, "\telement_status { VOF %e, density %e }\n\n", this->giveVolumeFraction(), rho);
 }
 

@@ -46,6 +46,7 @@
 #include "engngm.h"
 #include "pfem.h"
 #include "fluiddynamicmaterial.h"
+#include "fluidcrosssection.h"
 #include "load.h"
 #include "timestep.h"
 #include "boundaryload.h"
@@ -174,7 +175,7 @@ TR1_2D_PFEM :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep 
     load->computeComponentArrayAt(gVector, atTime, VM_Total);
     if ( gVector.giveSize() ) {
         for ( auto &gp : *iRule ) {
-            double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+            double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
             double detJ = this->pressureInterpolation.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
             double dA = detJ * gp->giveWeight();
             this->pressureInterpolation.evalN( N, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
@@ -239,7 +240,7 @@ TR1_2D_PFEM :: computeDiagonalMassMtrx(FloatArray &answer, TimeStep *atTime)
     answer.resize(6);
     answer.zero();
 
-    double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+    double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     double mm = rho * this->area / 3.0;
     for ( int i = 1; i <= 6; i++ ) {
         answer.at(i) = mm;
@@ -251,7 +252,7 @@ TR1_2D_PFEM :: computeDiagonalMassMtrx(FloatMatrix &answer, TimeStep *atTime)
 {
     answer.resize(6, 6);
     answer.zero();
-    double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+    double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     double mm = rho * this->area / 3.0;
     for ( int i = 1; i <= 6; i++ ) {
         answer.at(i, i) = mm;
@@ -502,7 +503,7 @@ TR1_2D_PFEM :: giveInternalStateAtNode(FloatArray &answer, InternalStateType typ
     //</RESTRICTED_SECTION>
     if ( type == IST_Density ) {
         answer.resize(1);
-        answer.at(1) = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+        answer.at(1) = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
         return 1;
     } else {
         return PFEMElement :: giveInternalStateAtNode(answer, type, mode, node, atTime);

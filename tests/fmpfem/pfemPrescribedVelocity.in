@@ -13,7 +13,7 @@ pfemparticle 6 coords 3 2.0 1.0 0.0 bc 3 0 0 2
 pfemparticle 7 coords 3 0.0 2.0 0.0 bc 3 4 1 0
 pfemparticle 8 coords 3 1.0 2.0 0.0 bc 3 0 1 0
 pfemparticle 9 coords 3 2.0 2.0 0.0 bc 3 0 1 2
-emptycs 1
+fluidcs 1 mat 1
 newtonianfluid 1 d 1.e3 mu 1.e-3
 #prescribed zero velocity - wall condition
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0 valtype 5
