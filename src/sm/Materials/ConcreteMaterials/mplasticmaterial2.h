@@ -94,7 +94,7 @@ protected:
     IntArray activeConditionMap, tempActiveConditionMap;
 
 public:
-    MPlasticMaterial2Status(int n, Domain * d, GaussPoint * g);
+    MPlasticMaterial2Status(int n, Domain * d, GaussPoint * g, int statusSize);
     virtual ~MPlasticMaterial2Status();
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
@@ -226,8 +226,8 @@ public:
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
     // auxiliary functions
-    virtual int giveSizeOfFullHardeningVarsVector()  { return 0; }
-    virtual int giveSizeOfReducedHardeningVarsVector(GaussPoint *)  { return 0; }
+    virtual int giveSizeOfFullHardeningVarsVector() { return 0; }
+    virtual int giveSizeOfReducedHardeningVarsVector(GaussPoint *) const { return 0; }
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 

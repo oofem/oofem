@@ -119,7 +119,7 @@ public:
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
     virtual int giveSizeOfFullHardeningVarsVector() { return 4; }
-    virtual int giveSizeOfReducedHardeningVarsVector(GaussPoint *) { return 4; } //cummulative strain = one per each surface
+    virtual int giveSizeOfReducedHardeningVarsVector(GaussPoint *) const { return 4; } //cummulative strain = one per each surface
 
 protected:
     virtual int giveMaxNumberOfActiveYieldConds(GaussPoint *gp) { return 3; } //normally one less than number of all conditions

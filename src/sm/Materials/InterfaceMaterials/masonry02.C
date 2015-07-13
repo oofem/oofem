@@ -474,9 +474,7 @@ Masonry02 :: computeReducedSKGradientMatrix(FloatMatrix &gradientMatrix,  int i,
 MaterialStatus *
 Masonry02 :: CreateStatus(GaussPoint *gp) const
 {
-    MPlasticMaterial2Status *status;
-
-    status = new MPlasticMaterial2Status(1, this->giveDomain(), gp);
+    return new MPlasticMaterial2Status(1, this->giveDomain(), gp, this->giveSizeOfReducedHardeningVarsVector(gp));
     /*
      * // introduce initial pre-softening (using strainSpaceHardeningVarsVector) to
      * // avoid problems with undefined hardening moduli.
@@ -489,7 +487,6 @@ Masonry02 :: CreateStatus(GaussPoint *gp) const
      * status->letTempStrainSpaceHardeningVarsVectorBe(strainSpaceHardeningVarsVector);
      * status->letStrainSpaceHardeningVarsVectorBe(strainSpaceHardeningVarsVector);
      */
-    return status;
 }
 
 void

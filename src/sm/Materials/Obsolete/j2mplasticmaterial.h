@@ -95,7 +95,7 @@ protected:
     // auxiliary function
     double computeJ2InvariantAt(const FloatArray &stressVector);
     int giveSizeOfFullHardeningVarsVector();
-    int giveSizeOfReducedHardeningVarsVector(GaussPoint *gp);
+    int giveSizeOfReducedHardeningVarsVector(GaussPoint *gp) const;
     double giveIsotropicHardeningVar(const FloatArray &stressSpaceHardeningVars);
     void giveStressBackVector(FloatArray &answer,
                               const FloatArray &stressSpaceHardeningVars);

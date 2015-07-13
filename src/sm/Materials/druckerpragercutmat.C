@@ -107,14 +107,10 @@ DruckerPragerCutMat :: initializeFrom(InputRecord *ir)
 }
 
 
-// creates a new material status corresponding to this class
 MaterialStatus *
 DruckerPragerCutMat :: CreateStatus(GaussPoint *gp) const
 {
-    MPlasticMaterial2Status *status;
-    status = new MPlasticMaterial2Status(1, this->giveDomain(), gp);
-
-    return status;
+    return new MPlasticMaterial2Status(1, this->giveDomain(), gp, this->giveSizeOfReducedHardeningVarsVector(gp));
 }
 
 double

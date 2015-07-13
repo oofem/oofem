@@ -70,7 +70,7 @@ public:
     virtual const char *giveClassName() const { return "J2Mat"; }
 
     virtual int giveSizeOfFullHardeningVarsVector();
-    virtual int giveSizeOfReducedHardeningVarsVector(GaussPoint *gp);
+    virtual int giveSizeOfReducedHardeningVarsVector(GaussPoint *gp) const;
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
