@@ -1,1167 +1,1169 @@
 eigendyn_cct.out
 Free vibration  of CCT  elements  
 EigenValueDynamic nroot 10 rtolv 1.e-5 nmodules 1
-errorcheck filename "eigendyn_cct.in"
+errorcheck
 domain 2dMindlinPlate
 OutputManager tstep_all dofman_all element_all
-ndofman 432 nelem 720 ncrosssect  1 nmat 1 nbc 1 nic 0 nltf 1
-node 1 coords 3 0.000000 0.000000 0.000000 bc 3  1 1 0 
-node 2 coords 3 0.000000 10.000000 0.000000 bc 3  1 1 0
-node 3 coords 3 0.000000 1.562141 0.000000 bc 3  1 1 0 
-node 4 coords 3 1.562141 0.000000 0.000000 bc 3  0 0 0 
-node 5 coords 3 0.000000 9.140316 0.000000 bc 3  1 1 0 
-node 6 coords 3 1.562142 10.000000 0.000000 bc 3  0 0 0 
-node 7 coords 3 0.000000 7.812078 0.000000 bc 3  1 1 0 
-node 8 coords 3 0.000000 3.124531 0.000000 bc 3  1 1 0 
-node 9 coords 3 1.629056 1.635819 0.000000 bc 3  0 0 0 
-node 10 coords 3 3.124531 0.000000 0.000000 bc 3  0 0 0 
-node 11 coords 3 0.000000 4.687047 0.000000 bc 3  1 1 0 
-node 12 coords 3 0.000000 6.249562 0.000000 bc 3  1 1 0 
-node 13 coords 3 1.635389 8.817374 0.000000 bc 3  0 0 0 
-node 14 coords 3 3.124535 10.000000 0.000000 bc 3  0 0 0 
-node 15 coords 3 1.699780 7.392932 0.000000 bc 3  0 0 0 
-node 16 coords 3 1.709016 3.250815 0.000000 bc 3  0 0 0 
-node 17 coords 3 2.014165 4.481295 0.000000 bc 3  0 0 0 
-node 18 coords 3 3.381329 1.877563 0.000000 bc 3  0 0 0 
-node 19 coords 3 4.687047 10.000000 0.000000 bc 3  0 0 0 
-node 20 coords 3 4.687047 0.000000 0.000000 bc 3  0 0 0 
-node 21 coords 3 4.649752 1.653772 0.000000 bc 3  0 0 0 
-node 22 coords 3 6.249563 0.000000 0.000000 bc 3  0 0 0 
-node 23 coords 3 1.992282 5.839382 0.000000 bc 3  0 0 0 
-node 24 coords 3 3.428616 8.519368 0.000000 bc 3  0 0 0 
-node 25 coords 3 3.150845 7.056867 0.000000 bc 3  0 0 0 
-node 26 coords 3 3.235890 3.681839 0.000000 bc 3  0 0 0 
-node 27 coords 3 3.148020 4.923249 0.000000 bc 3  0 0 0 
-node 28 coords 3 5.061374 8.823665 0.000000 bc 3  0 0 0 
-node 29 coords 3 4.635407 2.908901 0.000000 bc 3  0 0 0 
-node 30 coords 3 6.249559 10.000000 0.000000 bc 3  0 0 0 
-node 31 coords 3 5.881021 1.792510 0.000000 bc 3  0 0 0 
-node 32 coords 3 7.812083 10.000000 0.000000 bc 3  0 0 0 
-node 33 coords 3 7.282673 1.282304 0.000000 bc 3  0 0 0 
-node 34 coords 3 7.812079 0.000000 0.000000 bc 3  0 0 0 
-node 35 coords 3 9.374593 0.000000 0.000000 bc 3  0 0 0 
-node 36 coords 3 3.962791 5.997505 0.000000 bc 3  0 0 0 
-node 37 coords 3 4.691198 7.435641 0.000000 bc 3  0 0 0 
-node 38 coords 3 4.558018 4.562110 0.000000 bc 3  0 0 0 
-node 39 coords 3 6.303660 8.123186 0.000000 bc 3  0 0 0 
-node 40 coords 3 6.098783 3.784294 0.000000 bc 3  0 0 0 
-node 41 coords 3 7.810124 8.956576 0.000000 bc 3  0 0 0 
-node 42 coords 3 7.520817 2.834540 0.000000 bc 3  0 0 0 
-node 43 coords 3 9.374595 10.000000 0.000000 bc 3  0 0 0 
-node 44 coords 3 8.889937 1.713293 0.000000 bc 3  0 0 0 
-node 45 coords 3 10.937107 10.000000 0.000000 bc 3  0 0 0 
-node 46 coords 3 10.387856 1.260358 0.000000 bc 3  0 0 0 
-node 47 coords 3 10.937110 0.000000 0.000000 bc 3  0 0 0 
-node 48 coords 3 12.499625 0.000000 0.000000 bc 3  0 0 0 
-node 49 coords 3 6.293016 5.999618 0.000000 bc 3  0 0 0 
-node 50 coords 3 7.805136 7.448772 0.000000 bc 3  0 0 0 
-node 51 coords 3 7.675110 4.481670 0.000000 bc 3  0 0 0 
-node 52 coords 3 9.349342 8.142202 0.000000 bc 3  0 0 0 
-node 53 coords 3 9.147359 3.735979 0.000000 bc 3  0 0 0 
-node 54 coords 3 10.922214 8.958875 0.000000 bc 3  0 0 0 
-node 55 coords 3 10.616093 2.798454 0.000000 bc 3  0 0 0 
-node 56 coords 3 12.499624 10.000000 0.000000 bc 3  0 0 0 
-node 57 coords 3 12.021654 1.707826 0.000000 bc 3  0 0 0 
-node 58 coords 3 14.062142 10.000000 0.000000 bc 3  0 0 0 
-node 59 coords 3 13.520765 1.258019 0.000000 bc 3  0 0 0 
-node 60 coords 3 14.062140 0.000000 0.000000 bc 3  0 0 0 
-node 61 coords 3 15.624656 0.000000 0.000000 bc 3  0 0 0 
-node 62 coords 3 9.299359 5.981937 0.000000 bc 3  0 0 0 
-node 63 coords 3 10.894179 7.446558 0.000000 bc 3  0 0 0 
-node 64 coords 3 10.764536 4.457840 0.000000 bc 3  0 0 0 
-node 65 coords 3 12.473912 8.140235 0.000000 bc 3  0 0 0 
-node 66 coords 3 12.277851 3.724283 0.000000 bc 3  0 0 0 
-node 67 coords 3 14.050719 8.957783 0.000000 bc 3  0 0 0 
-node 68 coords 3 13.763396 2.799692 0.000000 bc 3  0 0 0 
-node 69 coords 3 15.624655 10.000000 0.000000 bc 3  0 0 0 
-node 70 coords 3 15.147107 1.701088 0.000000 bc 3  0 0 0 
-node 71 coords 3 17.187172 10.000000 0.000000 bc 3  0 0 0 
-node 72 coords 3 16.647474 1.255948 0.000000 bc 3  0 0 0 
-node 73 coords 3 17.187172 0.000000 0.000000 bc 3  0 0 0 
-node 74 coords 3 18.749687 0.000000 0.000000 bc 3  0 0 0 
-node 75 coords 3 12.416188 5.973134 0.000000 bc 3  0 0 0 
-node 76 coords 3 14.024284 7.443196 0.000000 bc 3  0 0 0 
-node 77 coords 3 13.901106 4.452481 0.000000 bc 3  0 0 0 
-node 78 coords 3 15.604494 8.138456 0.000000 bc 3  0 0 0 
-node 79 coords 3 15.411476 3.719032 0.000000 bc 3  0 0 0 
-node 80 coords 3 17.178169 8.957259 0.000000 bc 3  0 0 0 
-node 81 coords 3 16.884600 2.790350 0.000000 bc 3  0 0 0 
-node 82 coords 3 18.749691 10.000000 0.000000 bc 3  0 0 0 
-node 83 coords 3 18.279942 1.704805 0.000000 bc 3  0 0 0 
-node 84 coords 3 20.312203 10.000000 0.000000 bc 3  0 0 0 
-node 85 coords 3 19.774485 1.256898 0.000000 bc 3  0 0 0 
-node 86 coords 3 20.312203 0.000000 0.000000 bc 3  0 0 0 
-node 87 coords 3 21.874718 0.000000 0.000000 bc 3  0 0 0 
-node 88 coords 3 15.549299 5.969250 0.000000 bc 3  0 0 0 
-node 89 coords 3 17.154532 7.441835 0.000000 bc 3  0 0 0 
-node 90 coords 3 17.031343 4.448618 0.000000 bc 3  0 0 0 
-node 91 coords 3 18.732151 8.138554 0.000000 bc 3  0 0 0 
-node 92 coords 3 18.542068 3.719317 0.000000 bc 3  0 0 0 
-node 93 coords 3 20.304062 8.957656 0.000000 bc 3  0 0 0 
-node 94 coords 3 20.020947 2.797741 0.000000 bc 3  0 0 0 
-node 95 coords 3 21.874720 10.000000 0.000000 bc 3  0 0 0 
-node 96 coords 3 21.399740 1.700940 0.000000 bc 3  0 0 0 
-node 97 coords 3 23.437237 10.000000 0.000000 bc 3  0 0 0 
-node 98 coords 3 22.898424 1.256585 0.000000 bc 3  0 0 0 
-node 99 coords 3 23.437233 0.000000 0.000000 bc 3  0 0 0 
-node 100 coords 3 24.999748 0.000000 0.000000 bc 3  0 0 0 
-node 101 coords 3 18.679110 5.968684 0.000000 bc 3  0 0 0 
-node 102 coords 3 20.281607 7.442234 0.000000 bc 3  0 0 0 
-node 103 coords 3 20.160774 4.450176 0.000000 bc 3  0 0 0 
-node 104 coords 3 21.857910 8.138893 0.000000 bc 3  0 0 0 
-node 105 coords 3 21.666494 3.718899 0.000000 bc 3  0 0 0 
-node 106 coords 3 23.429335 8.957629 0.000000 bc 3  0 0 0 
-node 107 coords 3 23.136633 2.791593 0.000000 bc 3  0 0 0 
-node 108 coords 3 24.999750 10.000000 0.000000 bc 3  0 0 0 
-node 109 coords 3 24.530601 1.705816 0.000000 bc 3  0 0 0 
-node 110 coords 3 26.562267 10.000000 0.000000 bc 3  0 0 0 
-node 111 coords 3 26.024735 1.257438 0.000000 bc 3  0 0 0 
-node 112 coords 3 26.562265 0.000000 0.000000 bc 3  0 0 0 
-node 113 coords 3 28.124779 0.000000 0.000000 bc 3  0 0 0 
-node 114 coords 3 21.805332 5.969109 0.000000 bc 3  0 0 0 
-node 115 coords 3 23.407196 7.442401 0.000000 bc 3  0 0 0 
-node 116 coords 3 23.284492 4.449586 0.000000 bc 3  0 0 0 
-node 117 coords 3 24.983213 8.138722 0.000000 bc 3  0 0 0 
-node 118 coords 3 24.793436 3.720787 0.000000 bc 3  0 0 0 
-node 119 coords 3 26.554424 8.957313 0.000000 bc 3  0 0 0 
-node 120 coords 3 26.271446 2.798525 0.000000 bc 3  0 0 0 
-node 121 coords 3 28.124779 10.000000 0.000000 bc 3  0 0 0 
-node 122 coords 3 27.649937 1.700732 0.000000 bc 3  0 0 0 
-node 123 coords 3 29.687292 10.000000 0.000000 bc 3  0 0 0 
-node 124 coords 3 29.148525 1.255850 0.000000 bc 3  0 0 0 
-node 125 coords 3 29.687298 0.000000 0.000000 bc 3  0 0 0 
-node 126 coords 3 31.249813 0.000000 0.000000 bc 3  0 0 0 
-node 127 coords 3 24.931030 5.969392 0.000000 bc 3  0 0 0 
-node 128 coords 3 26.532394 7.441917 0.000000 bc 3  0 0 0 
-node 129 coords 3 26.411640 4.450678 0.000000 bc 3  0 0 0 
-node 130 coords 3 28.108225 8.138010 0.000000 bc 3  0 0 0 
-node 131 coords 3 27.916859 3.718348 0.000000 bc 3  0 0 0 
-node 132 coords 3 29.679466 8.957128 0.000000 bc 3  0 0 0 
-node 133 coords 3 29.386789 2.790133 0.000000 bc 3  0 0 0 
-node 134 coords 3 31.249815 10.000000 0.000000 bc 3  0 0 0 
-node 135 coords 3 30.780691 1.704742 0.000000 bc 3  0 0 0 
-node 136 coords 3 32.812332 10.000000 0.000000 bc 3  0 0 0 
-node 137 coords 3 32.274807 1.256878 0.000000 bc 3  0 0 0 
-node 138 coords 3 32.812328 0.000000 0.000000 bc 3  0 0 0 
-node 139 coords 3 34.374844 0.000000 0.000000 bc 3  0 0 0 
-node 140 coords 3 28.055876 5.968312 0.000000 bc 3  0 0 0 
-node 141 coords 3 29.657435 7.441502 0.000000 bc 3  0 0 0 
-node 142 coords 3 29.534740 4.448227 0.000000 bc 3  0 0 0 
-node 143 coords 3 31.233335 8.138439 0.000000 bc 3  0 0 0 
-node 144 coords 3 31.043562 3.719173 0.000000 bc 3  0 0 0 
-node 145 coords 3 32.804504 8.957624 0.000000 bc 3  0 0 0 
-node 146 coords 3 32.521526 2.797697 0.000000 bc 3  0 0 0 
-node 147 coords 3 34.374844 10.000000 0.000000 bc 3  0 0 0 
-node 148 coords 3 33.900005 1.700926 0.000000 bc 3  0 0 0 
-node 149 coords 3 35.937363 10.000000 0.000000 bc 3  0 0 0 
-node 150 coords 3 35.398586 1.256581 0.000000 bc 3  0 0 0 
-node 151 coords 3 35.937359 0.000000 0.000000 bc 3  0 0 0 
-node 152 coords 3 37.499874 0.000000 0.000000 bc 3  0 0 0 
-node 153 coords 3 31.181206 5.968460 0.000000 bc 3  0 0 0 
-node 154 coords 3 32.782501 7.442152 0.000000 bc 3  0 0 0 
-node 155 coords 3 32.661743 4.450088 0.000000 bc 3  0 0 0 
-node 156 coords 3 34.358299 8.138865 0.000000 bc 3  0 0 0 
-node 157 coords 3 34.166935 3.718868 0.000000 bc 3  0 0 0 
-node 158 coords 3 35.929535 8.957622 0.000000 bc 3  0 0 0 
-node 159 coords 3 35.636852 2.791583 0.000000 bc 3  0 0 0 
-node 160 coords 3 37.499874 10.000000 0.000000 bc 3  0 0 0 
-node 161 coords 3 37.030754 1.705813 0.000000 bc 3  0 0 0 
-node 162 coords 3 39.062386 10.000000 0.000000 bc 3  0 0 0 
-node 163 coords 3 38.524868 1.257437 0.000000 bc 3  0 0 0 
-node 164 coords 3 39.062393 0.000000 0.000000 bc 3  0 0 0 
-node 165 coords 3 40.624905 0.000000 0.000000 bc 3  0 0 0 
-node 166 coords 3 34.305962 5.969057 0.000000 bc 3  0 0 0 
-node 167 coords 3 35.907505 7.442382 0.000000 bc 3  0 0 0 
-node 168 coords 3 35.784809 4.449567 0.000000 bc 3  0 0 0 
-node 169 coords 3 37.483402 8.138716 0.000000 bc 3  0 0 0 
-node 170 coords 3 37.293625 3.720780 0.000000 bc 3  0 0 0 
-node 171 coords 3 39.054565 8.957312 0.000000 bc 3  0 0 0 
-node 172 coords 3 38.771587 2.798523 0.000000 bc 3  0 0 0 
-node 173 coords 3 40.624905 10.000000 0.000000 bc 3  0 0 0 
-node 174 coords 3 40.150066 1.700732 0.000000 bc 3  0 0 0 
-node 175 coords 3 42.187424 10.000000 0.000000 bc 3  0 0 0 
-node 176 coords 3 41.648647 1.255850 0.000000 bc 3  0 0 0 
-node 177 coords 3 42.187420 0.000000 0.000000 bc 3  0 0 0 
-node 178 coords 3 43.749935 0.000000 0.000000 bc 3  0 0 0 
-node 179 coords 3 37.431274 5.969381 0.000000 bc 3  0 0 0 
-node 180 coords 3 39.032562 7.441913 0.000000 bc 3  0 0 0 
-node 181 coords 3 38.911800 4.450674 0.000000 bc 3  0 0 0 
-node 182 coords 3 40.608360 8.138009 0.000000 bc 3  0 0 0 
-node 183 coords 3 40.416992 3.718346 0.000000 bc 3  0 0 0 
-node 184 coords 3 42.179592 8.957127 0.000000 bc 3  0 0 0 
-node 185 coords 3 41.886910 2.790132 0.000000 bc 3  0 0 0 
-node 186 coords 3 43.749935 10.000000 0.000000 bc 3  0 0 0 
-node 187 coords 3 43.280811 1.704742 0.000000 bc 3  0 0 0 
-node 188 coords 3 45.312454 10.000000 0.000000 bc 3  0 0 0 
-node 189 coords 3 44.774929 1.256878 0.000000 bc 3  0 0 0 
-node 190 coords 3 45.312447 0.000000 0.000000 bc 3  0 0 0 
-node 191 coords 3 46.874966 0.000000 0.000000 bc 3  0 0 0 
-node 192 coords 3 40.556023 5.968310 0.000000 bc 3  0 0 0 
-node 193 coords 3 42.157562 7.441501 0.000000 bc 3  0 0 0 
-node 194 coords 3 42.034866 4.448226 0.000000 bc 3  0 0 0 
-node 195 coords 3 43.733456 8.138437 0.000000 bc 3  0 0 0 
-node 196 coords 3 43.543686 3.719173 0.000000 bc 3  0 0 0 
-node 197 coords 3 45.304626 8.957624 0.000000 bc 3  0 0 0 
-node 198 coords 3 45.021645 2.797697 0.000000 bc 3  0 0 0 
-node 199 coords 3 46.874966 10.000000 0.000000 bc 3  0 0 0 
-node 200 coords 3 46.400127 1.700926 0.000000 bc 3  0 0 0 
-node 201 coords 3 48.437481 10.000000 0.000000 bc 3  0 0 0 
-node 202 coords 3 47.898708 1.256581 0.000000 bc 3  0 0 0 
-node 203 coords 3 48.437481 0.000000 0.000000 bc 3  0 0 0 
-node 204 coords 3 50.000000 0.000000 0.000000 bc 3  0 0 0 
-node 205 coords 3 43.681328 5.968460 0.000000 bc 3  0 0 0 
-node 206 coords 3 45.282623 7.442151 0.000000 bc 3  0 0 0 
-node 207 coords 3 45.161865 4.450088 0.000000 bc 3  0 0 0 
-node 208 coords 3 46.858421 8.138865 0.000000 bc 3  0 0 0 
-node 209 coords 3 46.667057 3.718868 0.000000 bc 3  0 0 0 
-node 210 coords 3 48.429653 8.957622 0.000000 bc 3  0 0 0 
-node 211 coords 3 48.136974 2.791583 0.000000 bc 3  0 0 0 
-node 212 coords 3 50.000000 10.000000 0.000000 bc 3  0 0 0 
-node 213 coords 3 49.530872 1.705813 0.000000 bc 3  0 0 0 
-node 214 coords 3 51.562511 10.000000 0.000000 bc 3  0 0 0 
-node 215 coords 3 51.024994 1.257437 0.000000 bc 3  0 0 0 
-node 216 coords 3 51.562519 0.000000 0.000000 bc 3  0 0 0 
-node 217 coords 3 53.125031 0.000000 0.000000 bc 3  0 0 0 
-node 218 coords 3 46.806084 5.969057 0.000000 bc 3  0 0 0 
-node 219 coords 3 48.407623 7.442382 0.000000 bc 3  0 0 0 
-node 220 coords 3 48.284927 4.449567 0.000000 bc 3  0 0 0 
-node 221 coords 3 49.983517 8.138716 0.000000 bc 3  0 0 0 
-node 222 coords 3 49.793743 3.720780 0.000000 bc 3  0 0 0 
-node 223 coords 3 51.554691 8.957312 0.000000 bc 3  0 0 0 
-node 224 coords 3 51.271706 2.798523 0.000000 bc 3  0 0 0 
-node 225 coords 3 53.125031 10.000000 0.000000 bc 3  0 0 0 
-node 226 coords 3 52.650192 1.700732 0.000000 bc 3  0 0 0 
-node 227 coords 3 54.687546 10.000000 0.000000 bc 3  0 0 0 
-node 228 coords 3 54.148777 1.255850 0.000000 bc 3  0 0 0 
-node 229 coords 3 54.687546 0.000000 0.000000 bc 3  0 0 0 
-node 230 coords 3 56.250061 0.000000 0.000000 bc 3  0 0 0 
-node 231 coords 3 49.931389 5.969381 0.000000 bc 3  0 0 0 
-node 232 coords 3 51.532684 7.441913 0.000000 bc 3  0 0 0 
-node 233 coords 3 51.411923 4.450674 0.000000 bc 3  0 0 0 
-node 234 coords 3 53.108490 8.138009 0.000000 bc 3  0 0 0 
-node 235 coords 3 52.917118 3.718346 0.000000 bc 3  0 0 0 
-node 236 coords 3 54.679722 8.957127 0.000000 bc 3  0 0 0 
-node 237 coords 3 54.387043 2.790132 0.000000 bc 3  0 0 0 
-node 238 coords 3 56.250061 10.000000 0.000000 bc 3  0 0 0 
-node 239 coords 3 55.780941 1.704742 0.000000 bc 3  0 0 0 
-node 240 coords 3 57.812576 10.000000 0.000000 bc 3  0 0 0 
-node 241 coords 3 57.275055 1.256878 0.000000 bc 3  0 0 0 
-node 242 coords 3 57.812573 0.000000 0.000000 bc 3  0 0 0 
-node 243 coords 3 59.375088 0.000000 0.000000 bc 3  0 0 0 
-node 244 coords 3 53.056145 5.968310 0.000000 bc 3  0 0 0 
-node 245 coords 3 54.657692 7.441501 0.000000 bc 3  0 0 0 
-node 246 coords 3 54.534996 4.448226 0.000000 bc 3  0 0 0 
-node 247 coords 3 56.233593 8.138437 0.000000 bc 3  0 0 0 
-node 248 coords 3 56.043808 3.719173 0.000000 bc 3  0 0 0 
-node 249 coords 3 57.804756 8.957624 0.000000 bc 3  0 0 0 
-node 250 coords 3 57.521778 2.797697 0.000000 bc 3  0 0 0 
-node 251 coords 3 59.375092 10.000000 0.000000 bc 3  0 0 0 
-node 252 coords 3 58.900253 1.700926 0.000000 bc 3  0 0 0 
-node 253 coords 3 60.937607 10.000000 0.000000 bc 3  0 0 0 
-node 254 coords 3 60.398838 1.256581 0.000000 bc 3  0 0 0 
-node 255 coords 3 60.937607 0.000000 0.000000 bc 3  0 0 0 
-node 256 coords 3 62.500118 0.000000 0.000000 bc 3  0 0 0 
-node 257 coords 3 56.181461 5.968460 0.000000 bc 3  0 0 0 
-node 258 coords 3 57.782753 7.442151 0.000000 bc 3  0 0 0 
-node 259 coords 3 57.661987 4.450088 0.000000 bc 3  0 0 0 
-node 260 coords 3 59.358555 8.138865 0.000000 bc 3  0 0 0 
-node 261 coords 3 59.167179 3.718868 0.000000 bc 3  0 0 0 
-node 262 coords 3 60.929783 8.957622 0.000000 bc 3  0 0 0 
-node 263 coords 3 60.637104 2.791583 0.000000 bc 3  0 0 0 
-node 264 coords 3 62.500126 10.000000 0.000000 bc 3  0 0 0 
-node 265 coords 3 62.031002 1.705813 0.000000 bc 3  0 0 0 
-node 266 coords 3 64.062645 10.000000 0.000000 bc 3  0 0 0 
-node 267 coords 3 63.525116 1.257437 0.000000 bc 3  0 0 0 
-node 268 coords 3 64.062645 0.000000 0.000000 bc 3  0 0 0 
-node 269 coords 3 65.625160 0.000000 0.000000 bc 3  0 0 0 
-node 270 coords 3 59.306213 5.969057 0.000000 bc 3  0 0 0 
-node 271 coords 3 60.907753 7.442382 0.000000 bc 3  0 0 0 
-node 272 coords 3 60.785057 4.449567 0.000000 bc 3  0 0 0 
-node 273 coords 3 62.483654 8.138716 0.000000 bc 3  0 0 0 
-node 274 coords 3 62.293873 3.720780 0.000000 bc 3  0 0 0 
-node 275 coords 3 64.054817 8.957312 0.000000 bc 3  0 0 0 
-node 276 coords 3 63.771839 2.798523 0.000000 bc 3  0 0 0 
-node 277 coords 3 65.625160 10.000000 0.000000 bc 3  0 0 0 
-node 278 coords 3 65.150314 1.700732 0.000000 bc 3  0 0 0 
-node 279 coords 3 67.187675 10.000000 0.000000 bc 3  0 0 0 
-node 280 coords 3 66.648903 1.255850 0.000000 bc 3  0 0 0 
-node 281 coords 3 67.187675 0.000000 0.000000 bc 3  0 0 0 
-node 282 coords 3 68.750191 0.000000 0.000000 bc 3  0 0 0 
-node 283 coords 3 62.431522 5.969381 0.000000 bc 3  0 0 0 
-node 284 coords 3 64.032814 7.441913 0.000000 bc 3  0 0 0 
-node 285 coords 3 63.912056 4.450674 0.000000 bc 3  0 0 0 
-node 286 coords 3 65.608620 8.138009 0.000000 bc 3  0 0 0 
-node 287 coords 3 65.417244 3.718346 0.000000 bc 3  0 0 0 
-node 288 coords 3 67.179855 8.957127 0.000000 bc 3  0 0 0 
-node 289 coords 3 66.887169 2.790132 0.000000 bc 3  0 0 0 
-node 290 coords 3 68.750191 10.000000 0.000000 bc 3  0 0 0 
-node 291 coords 3 68.281067 1.704742 0.000000 bc 3  0 0 0 
-node 292 coords 3 70.312706 10.000000 0.000000 bc 3  0 0 0 
-node 293 coords 3 69.775185 1.256878 0.000000 bc 3  0 0 0 
-node 294 coords 3 70.312706 0.000000 0.000000 bc 3  0 0 0 
-node 295 coords 3 71.875221 0.000000 0.000000 bc 3  0 0 0 
-node 296 coords 3 65.556274 5.968310 0.000000 bc 3  0 0 0 
-node 297 coords 3 67.157822 7.441501 0.000000 bc 3  0 0 0 
-node 298 coords 3 67.035126 4.448226 0.000000 bc 3  0 0 0 
-node 299 coords 3 68.733719 8.138437 0.000000 bc 3  0 0 0 
-node 300 coords 3 68.543938 3.719173 0.000000 bc 3  0 0 0 
-node 301 coords 3 70.304878 8.957624 0.000000 bc 3  0 0 0 
-node 302 coords 3 70.021912 2.797697 0.000000 bc 3  0 0 0 
-node 303 coords 3 71.875221 10.000000 0.000000 bc 3  0 0 0 
-node 304 coords 3 71.400383 1.700926 0.000000 bc 3  0 0 0 
-node 305 coords 3 73.437736 10.000000 0.000000 bc 3  0 0 0 
-node 306 coords 3 72.898964 1.256581 0.000000 bc 3  0 0 0 
-node 307 coords 3 73.437729 0.000000 0.000000 bc 3  0 0 0 
-node 308 coords 3 75.000252 0.000000 0.000000 bc 3  0 0 0 
-node 309 coords 3 68.681587 5.968460 0.000000 bc 3  0 0 0 
-node 310 coords 3 70.282875 7.442152 0.000000 bc 3  0 0 0 
-node 311 coords 3 70.162125 4.450088 0.000000 bc 3  0 0 0 
-node 312 coords 3 71.858681 8.138865 0.000000 bc 3  0 0 0 
-node 313 coords 3 71.667313 3.718869 0.000000 bc 3  0 0 0 
-node 314 coords 3 73.429916 8.957622 0.000000 bc 3  0 0 0 
-node 315 coords 3 73.137245 2.791584 0.000000 bc 3  0 0 0 
-node 316 coords 3 75.000252 10.000000 0.000000 bc 3  0 0 0 
-node 317 coords 3 74.531151 1.705816 0.000000 bc 3  0 0 0 
-node 318 coords 3 76.562767 10.000000 0.000000 bc 3  0 0 0 
-node 319 coords 3 76.025291 1.257441 0.000000 bc 3  0 0 0 
-node 320 coords 3 76.562759 0.000000 0.000000 bc 3  0 0 0 
-node 321 coords 3 78.125282 0.000000 0.000000 bc 3  0 0 0 
-node 322 coords 3 71.806351 5.969058 0.000000 bc 3  0 0 0 
-node 323 coords 3 73.407906 7.442384 0.000000 bc 3  0 0 0 
-node 324 coords 3 73.285217 4.449569 0.000000 bc 3  0 0 0 
-node 325 coords 3 74.983803 8.138718 0.000000 bc 3  0 0 0 
-node 326 coords 3 74.794052 3.720785 0.000000 bc 3  0 0 0 
-node 327 coords 3 76.554985 8.957315 0.000000 bc 3  0 0 0 
-node 328 coords 3 76.272049 2.798530 0.000000 bc 3  0 0 0 
-node 329 coords 3 78.125282 10.000000 0.000000 bc 3  0 0 0 
-node 330 coords 3 77.650589 1.700745 0.000000 bc 3  0 0 0 
-node 331 coords 3 79.687798 10.000000 0.000000 bc 3  0 0 0 
-node 332 coords 3 79.149239 1.255871 0.000000 bc 3  0 0 0 
-node 333 coords 3 79.687798 0.000000 0.000000 bc 3  0 0 0 
-node 334 coords 3 74.931740 5.969388 0.000000 bc 3  0 0 0 
-node 335 coords 3 76.533073 7.441925 0.000000 bc 3  0 0 0 
-node 336 coords 3 76.412353 4.450690 0.000000 bc 3  0 0 0 
-node 337 coords 3 78.108917 8.138022 0.000000 bc 3  0 0 0 
-node 338 coords 3 77.917664 3.718374 0.000000 bc 3  0 0 0 
-node 339 coords 3 79.680206 8.957146 0.000000 bc 3  0 0 0 
-node 340 coords 3 79.387733 2.790176 0.000000 bc 3  0 0 0 
-node 341 coords 3 81.250313 10.000000 0.000000 bc 3  0 0 0 
-node 342 coords 3 80.781776 1.704808 0.000000 bc 3  0 0 0 
-node 343 coords 3 82.812828 10.000000 0.000000 bc 3  0 0 0 
-node 344 coords 3 82.276161 1.256987 0.000000 bc 3  0 0 0 
-node 345 coords 3 81.250313 0.000000 0.000000 bc 3  0 0 0 
-node 346 coords 3 78.056824 5.968350 0.000000 bc 3  0 0 0 
-node 347 coords 3 79.658562 7.441558 0.000000 bc 3  0 0 0 
-node 348 coords 3 79.536003 4.448302 0.000000 bc 3  0 0 0 
-node 349 coords 3 81.234680 8.138507 0.000000 bc 3  0 0 0 
-node 350 coords 3 81.045281 3.719307 0.000000 bc 3  0 0 0 
-node 351 coords 3 82.806023 8.957712 0.000000 bc 3  0 0 0 
-node 352 coords 3 82.523796 2.797904 0.000000 bc 3  0 0 0 
-node 353 coords 3 84.375343 10.000000 0.000000 bc 3  0 0 0 
-node 354 coords 3 85.937859 10.000000 0.000000 bc 3  0 0 0 
-node 355 coords 3 83.902794 1.701269 0.000000 bc 3  0 0 0 
-node 356 coords 3 82.812828 0.000000 0.000000 bc 3  0 0 0 
-node 357 coords 3 81.183403 5.968644 0.000000 bc 3  0 0 0 
-node 358 coords 3 82.785446 7.442414 0.000000 bc 3  0 0 0 
-node 359 coords 3 82.665100 4.450442 0.000000 bc 3  0 0 0 
-node 360 coords 3 84.362328 8.139201 0.000000 bc 3  0 0 0 
-node 361 coords 3 84.171890 3.719500 0.000000 bc 3  0 0 0 
-node 362 coords 3 85.933975 8.958001 0.000000 bc 3  0 0 0 
-node 363 coords 3 87.500374 10.000000 0.000000 bc 3  0 0 0 
-node 364 coords 3 89.062889 10.000000 0.000000 bc 3  0 0 0 
-node 365 coords 3 85.643829 2.792648 0.000000 bc 3  0 0 0 
-node 366 coords 3 85.402145 1.257117 0.000000 bc 3  0 0 0 
-node 367 coords 3 84.375343 0.000000 0.000000 bc 3  0 0 0 
-node 368 coords 3 84.312225 5.969837 0.000000 bc 3  0 0 0 
-node 369 coords 3 85.916038 7.443410 0.000000 bc 3  0 0 0 
-node 370 coords 3 85.794251 4.451058 0.000000 bc 3  0 0 0 
-node 371 coords 3 87.495659 8.139964 0.000000 bc 3  0 0 0 
-node 372 coords 3 89.065216 8.958293 0.000000 bc 3  0 0 0 
-node 373 coords 3 90.625404 10.000000 0.000000 bc 3  0 0 0 
-node 374 coords 3 92.187920 10.000000 0.000000 bc 3  0 0 0 
-node 375 coords 3 87.307144 3.723385 0.000000 bc 3  0 0 0 
-node 376 coords 3 87.038376 1.707299 0.000000 bc 3  0 0 0 
-node 377 coords 3 85.937859 0.000000 0.000000 bc 3  0 0 0 
-node 378 coords 3 87.446106 5.972102 0.000000 bc 3  0 0 0 
-node 379 coords 3 89.049233 7.444670 0.000000 bc 3  0 0 0 
-node 380 coords 3 93.750435 10.000000 0.000000 bc 3  0 0 0 
-node 381 coords 3 90.625801 8.140291 0.000000 bc 3  0 0 0 
-node 382 coords 3 92.178879 8.955817 0.000000 bc 3  0 0 0 
-node 383 coords 3 88.931076 4.455621 0.000000 bc 3  0 0 0 
-node 384 coords 3 88.790680 2.802937 0.000000 bc 3  0 0 0 
-node 385 coords 3 88.533874 1.259539 0.000000 bc 3  0 0 0 
-node 386 coords 3 87.500374 0.000000 0.000000 bc 3  0 0 0 
-node 387 coords 3 95.312950 10.000000 0.000000 bc 3  0 0 0 
-node 388 coords 3 96.875465 10.000000 0.000000 bc 3  0 0 0 
-node 389 coords 3 98.437859 10.000000 0.000000 bc 3  0 0 0 
-node 390 coords 3 100.000000 10.000000 0.000000 bc 3  1 1 0 
-node 391 coords 3 94.920090 8.832875 0.000000 bc 3  0 0 0 
-node 392 coords 3 90.568146 5.974805 0.000000 bc 3  0 0 0 
-node 393 coords 3 93.667877 8.124318 0.000000 bc 3  0 0 0 
-node 394 coords 3 92.144264 7.442989 0.000000 bc 3  0 0 0 
-node 395 coords 3 90.440720 3.726000 0.000000 bc 3  0 0 0 
-node 396 coords 3 90.165123 1.705139 0.000000 bc 3  0 0 0 
-node 397 coords 3 89.062897 0.000000 0.000000 bc 3  0 0 0 
-node 398 coords 3 96.542633 8.543344 0.000000 bc 3  0 0 0 
-node 399 coords 3 98.351677 8.831867 0.000000 bc 3  0 0 0 
-node 400 coords 3 100.000000 9.140316 0.000000 bc 3  1 1 0 
-node 401 coords 3 95.259209 7.447130 0.000000 bc 3  0 0 0 
-node 402 coords 3 96.773697 7.136864 0.000000 bc 3  0 0 0 
-node 403 coords 3 92.044212 4.458250 0.000000 bc 3  0 0 0 
-node 404 coords 3 93.599777 5.978810 0.000000 bc 3  0 0 0 
-node 405 coords 3 91.915131 2.799702 0.000000 bc 3  0 0 0 
-node 406 coords 3 91.663124 1.260735 0.000000 bc 3  0 0 0 
-node 407 coords 3 90.625404 0.000000 0.000000 bc 3  0 0 0 
-node 408 coords 3 98.244072 7.459643 0.000000 bc 3  0 0 0 
-node 409 coords 3 100.000000 7.812078 0.000000 bc 3  1 1 0 
-node 410 coords 3 95.976501 6.009067 0.000000 bc 3  0 0 0 
-node 411 coords 3 97.776085 6.127304 0.000000 bc 3  0 0 0 
-node 412 coords 3 93.566116 3.728398 0.000000 bc 3  0 0 0 
-node 413 coords 3 95.280006 4.473820 0.000000 bc 3  0 0 0 
-node 414 coords 3 93.292572 1.710355 0.000000 bc 3  0 0 0 
-node 415 coords 3 92.187920 0.000000 0.000000 bc 3  0 0 0 
-node 416 coords 3 100.000000 6.249562 0.000000 bc 3  1 1 0 
-node 417 coords 3 97.033386 4.787013 0.000000 bc 3  0 0 0 
-node 418 coords 3 98.587990 5.074357 0.000000 bc 3  0 0 0 
-node 419 coords 3 95.002876 2.781573 0.000000 bc 3  0 0 0 
-node 420 coords 3 96.394707 3.491285 0.000000 bc 3  0 0 0 
-node 421 coords 3 94.777298 1.279246 0.000000 bc 3  0 0 0 
-node 422 coords 3 93.750443 0.000000 0.000000 bc 3  0 0 0 
-node 423 coords 3 100.000000 4.687047 0.000000 bc 3  1 1 0 
-node 424 coords 3 98.116364 3.525165 0.000000 bc 3  0 0 0 
-node 425 coords 3 96.411171 1.827944 0.000000 bc 3  0 0 0 
-node 426 coords 3 95.312950 0.000000 0.000000 bc 3  0 0 0 
-node 427 coords 3 100.000000 3.124531 0.000000 bc 3  1 1 0 
-node 428 coords 3 98.314301 1.675019 0.000000 bc 3  0 0 0 
-node 429 coords 3 96.875465 0.000000 0.000000 bc 3  0 0 0 
-node 430 coords 3 100.000000 1.562141 0.000000 bc 3  1 1 0 
-node 431 coords 3 98.437859 0.000000 0.000000 bc 3  0 0 0 
-node 432 coords 3 100.000000 0.000000 0.000000 bc 3  1 1 0 
-CCTPlate 1 nodes 3  9 3 4 crossSect 1  mat 1 
-CCTPlate 2 nodes 3  4 3 1 crossSect 1  mat 1 
-CCTPlate 3 nodes 3  18 9 10 crossSect 1  mat 1 
-CCTPlate 4 nodes 3  10 9 4 crossSect 1  mat 1 
-CCTPlate 5 nodes 3  8 3 9 crossSect 1  mat 1 
-CCTPlate 6 nodes 3  8 9 16 crossSect 1  mat 1 
-CCTPlate 7 nodes 3  26 16 18 crossSect 1  mat 1 
-CCTPlate 8 nodes 3  18 16 9 crossSect 1  mat 1 
-CCTPlate 9 nodes 3  21 18 20 crossSect 1  mat 1 
-CCTPlate 10 nodes 3  20 18 10 crossSect 1  mat 1 
-CCTPlate 11 nodes 3  21 20 31 crossSect 1  mat 1 
-CCTPlate 12 nodes 3  31 20 22 crossSect 1  mat 1 
-CCTPlate 13 nodes 3  29 18 21 crossSect 1  mat 1 
-CCTPlate 14 nodes 3  18 29 26 crossSect 1  mat 1 
-CCTPlate 15 nodes 3  40 29 31 crossSect 1  mat 1 
-CCTPlate 16 nodes 3  31 29 21 crossSect 1  mat 1 
-CCTPlate 17 nodes 3  11 8 16 crossSect 1  mat 1 
-CCTPlate 18 nodes 3  11 16 17 crossSect 1  mat 1 
-CCTPlate 19 nodes 3  17 16 26 crossSect 1  mat 1 
-CCTPlate 20 nodes 3  17 26 27 crossSect 1  mat 1 
-CCTPlate 21 nodes 3  12 11 23 crossSect 1  mat 1 
-CCTPlate 22 nodes 3  23 11 17 crossSect 1  mat 1 
-CCTPlate 23 nodes 3  23 17 27 crossSect 1  mat 1 
-CCTPlate 24 nodes 3  23 27 36 crossSect 1  mat 1 
-CCTPlate 25 nodes 3  27 26 38 crossSect 1  mat 1 
-CCTPlate 26 nodes 3  27 38 36 crossSect 1  mat 1 
-CCTPlate 27 nodes 3  36 38 49 crossSect 1  mat 1 
-CCTPlate 28 nodes 3  49 38 40 crossSect 1  mat 1 
-CCTPlate 29 nodes 3  40 38 29 crossSect 1  mat 1 
-CCTPlate 30 nodes 3  29 38 26 crossSect 1  mat 1 
-CCTPlate 31 nodes 3  31 22 33 crossSect 1  mat 1 
-CCTPlate 32 nodes 3  33 22 34 crossSect 1  mat 1 
-CCTPlate 33 nodes 3  33 34 44 crossSect 1  mat 1 
-CCTPlate 34 nodes 3  44 34 35 crossSect 1  mat 1 
-CCTPlate 35 nodes 3  42 31 33 crossSect 1  mat 1 
-CCTPlate 36 nodes 3  31 42 40 crossSect 1  mat 1 
-CCTPlate 37 nodes 3  53 42 44 crossSect 1  mat 1 
-CCTPlate 38 nodes 3  44 42 33 crossSect 1  mat 1 
-CCTPlate 39 nodes 3  44 35 46 crossSect 1  mat 1 
-CCTPlate 40 nodes 3  46 35 47 crossSect 1  mat 1 
-CCTPlate 41 nodes 3  46 47 57 crossSect 1  mat 1 
-CCTPlate 42 nodes 3  57 47 48 crossSect 1  mat 1 
-CCTPlate 43 nodes 3  55 44 46 crossSect 1  mat 1 
-CCTPlate 44 nodes 3  44 55 53 crossSect 1  mat 1 
-CCTPlate 45 nodes 3  66 55 57 crossSect 1  mat 1 
-CCTPlate 46 nodes 3  57 55 46 crossSect 1  mat 1 
-CCTPlate 47 nodes 3  49 40 51 crossSect 1  mat 1 
-CCTPlate 48 nodes 3  49 51 62 crossSect 1  mat 1 
-CCTPlate 49 nodes 3  62 51 53 crossSect 1  mat 1 
-CCTPlate 50 nodes 3  53 51 42 crossSect 1  mat 1 
-CCTPlate 51 nodes 3  42 51 40 crossSect 1  mat 1 
-CCTPlate 52 nodes 3  62 53 64 crossSect 1  mat 1 
-CCTPlate 53 nodes 3  62 64 75 crossSect 1  mat 1 
-CCTPlate 54 nodes 3  75 64 66 crossSect 1  mat 1 
-CCTPlate 55 nodes 3  66 64 55 crossSect 1  mat 1 
-CCTPlate 56 nodes 3  55 64 53 crossSect 1  mat 1 
-CCTPlate 57 nodes 3  15 12 23 crossSect 1  mat 1 
-CCTPlate 58 nodes 3  12 15 7 crossSect 1  mat 1 
-CCTPlate 59 nodes 3  25 23 36 crossSect 1  mat 1 
-CCTPlate 60 nodes 3  23 25 15 crossSect 1  mat 1 
-CCTPlate 61 nodes 3  13 7 15 crossSect 1  mat 1 
-CCTPlate 62 nodes 3  7 13 5 crossSect 1  mat 1 
-CCTPlate 63 nodes 3  24 15 25 crossSect 1  mat 1 
-CCTPlate 64 nodes 3  15 24 13 crossSect 1  mat 1 
-CCTPlate 65 nodes 3  25 36 37 crossSect 1  mat 1 
-CCTPlate 66 nodes 3  25 37 24 crossSect 1  mat 1 
-CCTPlate 67 nodes 3  24 37 28 crossSect 1  mat 1 
-CCTPlate 68 nodes 3  28 37 39 crossSect 1  mat 1 
-CCTPlate 69 nodes 3  39 37 49 crossSect 1  mat 1 
-CCTPlate 70 nodes 3  49 37 36 crossSect 1  mat 1 
-CCTPlate 71 nodes 3  6 2 5 crossSect 1  mat 1 
-CCTPlate 72 nodes 3  6 5 13 crossSect 1  mat 1 
-CCTPlate 73 nodes 3  13 14 6 crossSect 1  mat 1 
-CCTPlate 74 nodes 3  14 13 24 crossSect 1  mat 1 
-CCTPlate 75 nodes 3  24 19 14 crossSect 1  mat 1 
-CCTPlate 76 nodes 3  19 24 28 crossSect 1  mat 1 
-CCTPlate 77 nodes 3  28 30 19 crossSect 1  mat 1 
-CCTPlate 78 nodes 3  30 28 39 crossSect 1  mat 1 
-CCTPlate 79 nodes 3  39 49 50 crossSect 1  mat 1 
-CCTPlate 80 nodes 3  39 50 41 crossSect 1  mat 1 
-CCTPlate 81 nodes 3  41 50 52 crossSect 1  mat 1 
-CCTPlate 82 nodes 3  52 50 62 crossSect 1  mat 1 
-CCTPlate 83 nodes 3  62 50 49 crossSect 1  mat 1 
-CCTPlate 84 nodes 3  52 62 63 crossSect 1  mat 1 
-CCTPlate 85 nodes 3  52 63 54 crossSect 1  mat 1 
-CCTPlate 86 nodes 3  54 63 65 crossSect 1  mat 1 
-CCTPlate 87 nodes 3  65 63 75 crossSect 1  mat 1 
-CCTPlate 88 nodes 3  75 63 62 crossSect 1  mat 1 
-CCTPlate 89 nodes 3  39 41 30 crossSect 1  mat 1 
-CCTPlate 90 nodes 3  30 41 32 crossSect 1  mat 1 
-CCTPlate 91 nodes 3  41 43 32 crossSect 1  mat 1 
-CCTPlate 92 nodes 3  43 41 52 crossSect 1  mat 1 
-CCTPlate 93 nodes 3  52 54 43 crossSect 1  mat 1 
-CCTPlate 94 nodes 3  43 54 45 crossSect 1  mat 1 
-CCTPlate 95 nodes 3  54 56 45 crossSect 1  mat 1 
-CCTPlate 96 nodes 3  56 54 65 crossSect 1  mat 1 
-CCTPlate 97 nodes 3  57 48 59 crossSect 1  mat 1 
-CCTPlate 98 nodes 3  59 48 60 crossSect 1  mat 1 
-CCTPlate 99 nodes 3  59 60 70 crossSect 1  mat 1 
-CCTPlate 100 nodes 3  70 60 61 crossSect 1  mat 1 
-CCTPlate 101 nodes 3  68 57 59 crossSect 1  mat 1 
-CCTPlate 102 nodes 3  57 68 66 crossSect 1  mat 1 
-CCTPlate 103 nodes 3  79 68 70 crossSect 1  mat 1 
-CCTPlate 104 nodes 3  70 68 59 crossSect 1  mat 1 
-CCTPlate 105 nodes 3  70 61 72 crossSect 1  mat 1 
-CCTPlate 106 nodes 3  72 61 73 crossSect 1  mat 1 
-CCTPlate 107 nodes 3  72 73 83 crossSect 1  mat 1 
-CCTPlate 108 nodes 3  83 73 74 crossSect 1  mat 1 
-CCTPlate 109 nodes 3  81 70 72 crossSect 1  mat 1 
-CCTPlate 110 nodes 3  70 81 79 crossSect 1  mat 1 
-CCTPlate 111 nodes 3  92 81 83 crossSect 1  mat 1 
-CCTPlate 112 nodes 3  83 81 72 crossSect 1  mat 1 
-CCTPlate 113 nodes 3  75 66 77 crossSect 1  mat 1 
-CCTPlate 114 nodes 3  75 77 88 crossSect 1  mat 1 
-CCTPlate 115 nodes 3  88 77 79 crossSect 1  mat 1 
-CCTPlate 116 nodes 3  79 77 68 crossSect 1  mat 1 
-CCTPlate 117 nodes 3  68 77 66 crossSect 1  mat 1 
-CCTPlate 118 nodes 3  88 79 90 crossSect 1  mat 1 
-CCTPlate 119 nodes 3  88 90 101 crossSect 1  mat 1 
-CCTPlate 120 nodes 3  101 90 92 crossSect 1  mat 1 
-CCTPlate 121 nodes 3  92 90 81 crossSect 1  mat 1 
-CCTPlate 122 nodes 3  81 90 79 crossSect 1  mat 1 
-CCTPlate 123 nodes 3  83 74 85 crossSect 1  mat 1 
-CCTPlate 124 nodes 3  85 74 86 crossSect 1  mat 1 
-CCTPlate 125 nodes 3  85 86 96 crossSect 1  mat 1 
-CCTPlate 126 nodes 3  96 86 87 crossSect 1  mat 1 
-CCTPlate 127 nodes 3  94 83 85 crossSect 1  mat 1 
-CCTPlate 128 nodes 3  83 94 92 crossSect 1  mat 1 
-CCTPlate 129 nodes 3  105 94 96 crossSect 1  mat 1 
-CCTPlate 130 nodes 3  96 94 85 crossSect 1  mat 1 
-CCTPlate 131 nodes 3  96 87 98 crossSect 1  mat 1 
-CCTPlate 132 nodes 3  98 87 99 crossSect 1  mat 1 
-CCTPlate 133 nodes 3  98 99 109 crossSect 1  mat 1 
-CCTPlate 134 nodes 3  109 99 100 crossSect 1  mat 1 
-CCTPlate 135 nodes 3  107 96 98 crossSect 1  mat 1 
-CCTPlate 136 nodes 3  96 107 105 crossSect 1  mat 1 
-CCTPlate 137 nodes 3  118 107 109 crossSect 1  mat 1 
-CCTPlate 138 nodes 3  109 107 98 crossSect 1  mat 1 
-CCTPlate 139 nodes 3  101 92 103 crossSect 1  mat 1 
-CCTPlate 140 nodes 3  101 103 114 crossSect 1  mat 1 
-CCTPlate 141 nodes 3  114 103 105 crossSect 1  mat 1 
-CCTPlate 142 nodes 3  105 103 94 crossSect 1  mat 1 
-CCTPlate 143 nodes 3  94 103 92 crossSect 1  mat 1 
-CCTPlate 144 nodes 3  114 105 116 crossSect 1  mat 1 
-CCTPlate 145 nodes 3  114 116 127 crossSect 1  mat 1 
-CCTPlate 146 nodes 3  127 116 118 crossSect 1  mat 1 
-CCTPlate 147 nodes 3  118 116 107 crossSect 1  mat 1 
-CCTPlate 148 nodes 3  107 116 105 crossSect 1  mat 1 
-CCTPlate 149 nodes 3  65 75 76 crossSect 1  mat 1 
-CCTPlate 150 nodes 3  65 76 67 crossSect 1  mat 1 
-CCTPlate 151 nodes 3  67 76 78 crossSect 1  mat 1 
-CCTPlate 152 nodes 3  78 76 88 crossSect 1  mat 1 
-CCTPlate 153 nodes 3  88 76 75 crossSect 1  mat 1 
-CCTPlate 154 nodes 3  78 88 89 crossSect 1  mat 1 
-CCTPlate 155 nodes 3  78 89 80 crossSect 1  mat 1 
-CCTPlate 156 nodes 3  80 89 91 crossSect 1  mat 1 
-CCTPlate 157 nodes 3  91 89 101 crossSect 1  mat 1 
-CCTPlate 158 nodes 3  101 89 88 crossSect 1  mat 1 
-CCTPlate 159 nodes 3  65 67 56 crossSect 1  mat 1 
-CCTPlate 160 nodes 3  56 67 58 crossSect 1  mat 1 
-CCTPlate 161 nodes 3  67 69 58 crossSect 1  mat 1 
-CCTPlate 162 nodes 3  69 67 78 crossSect 1  mat 1 
-CCTPlate 163 nodes 3  78 80 69 crossSect 1  mat 1 
-CCTPlate 164 nodes 3  69 80 71 crossSect 1  mat 1 
-CCTPlate 165 nodes 3  80 82 71 crossSect 1  mat 1 
-CCTPlate 166 nodes 3  82 80 91 crossSect 1  mat 1 
-CCTPlate 167 nodes 3  91 101 102 crossSect 1  mat 1 
-CCTPlate 168 nodes 3  91 102 93 crossSect 1  mat 1 
-CCTPlate 169 nodes 3  93 102 104 crossSect 1  mat 1 
-CCTPlate 170 nodes 3  104 102 114 crossSect 1  mat 1 
-CCTPlate 171 nodes 3  114 102 101 crossSect 1  mat 1 
-CCTPlate 172 nodes 3  104 114 115 crossSect 1  mat 1 
-CCTPlate 173 nodes 3  104 115 106 crossSect 1  mat 1 
-CCTPlate 174 nodes 3  106 115 117 crossSect 1  mat 1 
-CCTPlate 175 nodes 3  117 115 127 crossSect 1  mat 1 
-CCTPlate 176 nodes 3  127 115 114 crossSect 1  mat 1 
-CCTPlate 177 nodes 3  91 93 82 crossSect 1  mat 1 
-CCTPlate 178 nodes 3  82 93 84 crossSect 1  mat 1 
-CCTPlate 179 nodes 3  93 95 84 crossSect 1  mat 1 
-CCTPlate 180 nodes 3  95 93 104 crossSect 1  mat 1 
-CCTPlate 181 nodes 3  104 106 95 crossSect 1  mat 1 
-CCTPlate 182 nodes 3  95 106 97 crossSect 1  mat 1 
-CCTPlate 183 nodes 3  106 108 97 crossSect 1  mat 1 
-CCTPlate 184 nodes 3  108 106 117 crossSect 1  mat 1 
-CCTPlate 185 nodes 3  109 100 111 crossSect 1  mat 1 
-CCTPlate 186 nodes 3  111 100 112 crossSect 1  mat 1 
-CCTPlate 187 nodes 3  111 112 122 crossSect 1  mat 1 
-CCTPlate 188 nodes 3  122 112 113 crossSect 1  mat 1 
-CCTPlate 189 nodes 3  120 109 111 crossSect 1  mat 1 
-CCTPlate 190 nodes 3  109 120 118 crossSect 1  mat 1 
-CCTPlate 191 nodes 3  131 120 122 crossSect 1  mat 1 
-CCTPlate 192 nodes 3  122 120 111 crossSect 1  mat 1 
-CCTPlate 193 nodes 3  122 113 124 crossSect 1  mat 1 
-CCTPlate 194 nodes 3  124 113 125 crossSect 1  mat 1 
-CCTPlate 195 nodes 3  124 125 135 crossSect 1  mat 1 
-CCTPlate 196 nodes 3  135 125 126 crossSect 1  mat 1 
-CCTPlate 197 nodes 3  133 122 124 crossSect 1  mat 1 
-CCTPlate 198 nodes 3  122 133 131 crossSect 1  mat 1 
-CCTPlate 199 nodes 3  144 133 135 crossSect 1  mat 1 
-CCTPlate 200 nodes 3  135 133 124 crossSect 1  mat 1 
-CCTPlate 201 nodes 3  127 118 129 crossSect 1  mat 1 
-CCTPlate 202 nodes 3  127 129 140 crossSect 1  mat 1 
-CCTPlate 203 nodes 3  140 129 131 crossSect 1  mat 1 
-CCTPlate 204 nodes 3  131 129 120 crossSect 1  mat 1 
-CCTPlate 205 nodes 3  120 129 118 crossSect 1  mat 1 
-CCTPlate 206 nodes 3  140 131 142 crossSect 1  mat 1 
-CCTPlate 207 nodes 3  140 142 153 crossSect 1  mat 1 
-CCTPlate 208 nodes 3  153 142 144 crossSect 1  mat 1 
-CCTPlate 209 nodes 3  144 142 133 crossSect 1  mat 1 
-CCTPlate 210 nodes 3  133 142 131 crossSect 1  mat 1 
-CCTPlate 211 nodes 3  135 126 137 crossSect 1  mat 1 
-CCTPlate 212 nodes 3  137 126 138 crossSect 1  mat 1 
-CCTPlate 213 nodes 3  137 138 148 crossSect 1  mat 1 
-CCTPlate 214 nodes 3  148 138 139 crossSect 1  mat 1 
-CCTPlate 215 nodes 3  146 135 137 crossSect 1  mat 1 
-CCTPlate 216 nodes 3  135 146 144 crossSect 1  mat 1 
-CCTPlate 217 nodes 3  157 146 148 crossSect 1  mat 1 
-CCTPlate 218 nodes 3  148 146 137 crossSect 1  mat 1 
-CCTPlate 219 nodes 3  148 139 150 crossSect 1  mat 1 
-CCTPlate 220 nodes 3  150 139 151 crossSect 1  mat 1 
-CCTPlate 221 nodes 3  150 151 161 crossSect 1  mat 1 
-CCTPlate 222 nodes 3  161 151 152 crossSect 1  mat 1 
-CCTPlate 223 nodes 3  159 148 150 crossSect 1  mat 1 
-CCTPlate 224 nodes 3  148 159 157 crossSect 1  mat 1 
-CCTPlate 225 nodes 3  170 159 161 crossSect 1  mat 1 
-CCTPlate 226 nodes 3  161 159 150 crossSect 1  mat 1 
-CCTPlate 227 nodes 3  153 144 155 crossSect 1  mat 1 
-CCTPlate 228 nodes 3  153 155 166 crossSect 1  mat 1 
-CCTPlate 229 nodes 3  166 155 157 crossSect 1  mat 1 
-CCTPlate 230 nodes 3  157 155 146 crossSect 1  mat 1 
-CCTPlate 231 nodes 3  146 155 144 crossSect 1  mat 1 
-CCTPlate 232 nodes 3  166 157 168 crossSect 1  mat 1 
-CCTPlate 233 nodes 3  166 168 179 crossSect 1  mat 1 
-CCTPlate 234 nodes 3  179 168 170 crossSect 1  mat 1 
-CCTPlate 235 nodes 3  170 168 159 crossSect 1  mat 1 
-CCTPlate 236 nodes 3  159 168 157 crossSect 1  mat 1 
-CCTPlate 237 nodes 3  117 127 128 crossSect 1  mat 1 
-CCTPlate 238 nodes 3  117 128 119 crossSect 1  mat 1 
-CCTPlate 239 nodes 3  119 128 130 crossSect 1  mat 1 
-CCTPlate 240 nodes 3  130 128 140 crossSect 1  mat 1 
-CCTPlate 241 nodes 3  140 128 127 crossSect 1  mat 1 
-CCTPlate 242 nodes 3  130 140 141 crossSect 1  mat 1 
-CCTPlate 243 nodes 3  130 141 132 crossSect 1  mat 1 
-CCTPlate 244 nodes 3  132 141 143 crossSect 1  mat 1 
-CCTPlate 245 nodes 3  143 141 153 crossSect 1  mat 1 
-CCTPlate 246 nodes 3  153 141 140 crossSect 1  mat 1 
-CCTPlate 247 nodes 3  117 119 108 crossSect 1  mat 1 
-CCTPlate 248 nodes 3  108 119 110 crossSect 1  mat 1 
-CCTPlate 249 nodes 3  119 121 110 crossSect 1  mat 1 
-CCTPlate 250 nodes 3  121 119 130 crossSect 1  mat 1 
-CCTPlate 251 nodes 3  130 132 121 crossSect 1  mat 1 
-CCTPlate 252 nodes 3  121 132 123 crossSect 1  mat 1 
-CCTPlate 253 nodes 3  132 134 123 crossSect 1  mat 1 
-CCTPlate 254 nodes 3  134 132 143 crossSect 1  mat 1 
-CCTPlate 255 nodes 3  143 153 154 crossSect 1  mat 1 
-CCTPlate 256 nodes 3  143 154 145 crossSect 1  mat 1 
-CCTPlate 257 nodes 3  145 154 156 crossSect 1  mat 1 
-CCTPlate 258 nodes 3  156 154 166 crossSect 1  mat 1 
-CCTPlate 259 nodes 3  166 154 153 crossSect 1  mat 1 
-CCTPlate 260 nodes 3  156 166 167 crossSect 1  mat 1 
-CCTPlate 261 nodes 3  156 167 158 crossSect 1  mat 1 
-CCTPlate 262 nodes 3  158 167 169 crossSect 1  mat 1 
-CCTPlate 263 nodes 3  169 167 179 crossSect 1  mat 1 
-CCTPlate 264 nodes 3  179 167 166 crossSect 1  mat 1 
-CCTPlate 265 nodes 3  143 145 134 crossSect 1  mat 1 
-CCTPlate 266 nodes 3  134 145 136 crossSect 1  mat 1 
-CCTPlate 267 nodes 3  145 147 136 crossSect 1  mat 1 
-CCTPlate 268 nodes 3  147 145 156 crossSect 1  mat 1 
-CCTPlate 269 nodes 3  156 158 147 crossSect 1  mat 1 
-CCTPlate 270 nodes 3  147 158 149 crossSect 1  mat 1 
-CCTPlate 271 nodes 3  158 160 149 crossSect 1  mat 1 
-CCTPlate 272 nodes 3  160 158 169 crossSect 1  mat 1 
-CCTPlate 273 nodes 3  161 152 163 crossSect 1  mat 1 
-CCTPlate 274 nodes 3  163 152 164 crossSect 1  mat 1 
-CCTPlate 275 nodes 3  163 164 174 crossSect 1  mat 1 
-CCTPlate 276 nodes 3  174 164 165 crossSect 1  mat 1 
-CCTPlate 277 nodes 3  172 161 163 crossSect 1  mat 1 
-CCTPlate 278 nodes 3  161 172 170 crossSect 1  mat 1 
-CCTPlate 279 nodes 3  183 172 174 crossSect 1  mat 1 
-CCTPlate 280 nodes 3  174 172 163 crossSect 1  mat 1 
-CCTPlate 281 nodes 3  174 165 176 crossSect 1  mat 1 
-CCTPlate 282 nodes 3  176 165 177 crossSect 1  mat 1 
-CCTPlate 283 nodes 3  176 177 187 crossSect 1  mat 1 
-CCTPlate 284 nodes 3  187 177 178 crossSect 1  mat 1 
-CCTPlate 285 nodes 3  185 174 176 crossSect 1  mat 1 
-CCTPlate 286 nodes 3  174 185 183 crossSect 1  mat 1 
-CCTPlate 287 nodes 3  196 185 187 crossSect 1  mat 1 
-CCTPlate 288 nodes 3  187 185 176 crossSect 1  mat 1 
-CCTPlate 289 nodes 3  179 170 181 crossSect 1  mat 1 
-CCTPlate 290 nodes 3  179 181 192 crossSect 1  mat 1 
-CCTPlate 291 nodes 3  192 181 183 crossSect 1  mat 1 
-CCTPlate 292 nodes 3  183 181 172 crossSect 1  mat 1 
-CCTPlate 293 nodes 3  172 181 170 crossSect 1  mat 1 
-CCTPlate 294 nodes 3  192 183 194 crossSect 1  mat 1 
-CCTPlate 295 nodes 3  192 194 205 crossSect 1  mat 1 
-CCTPlate 296 nodes 3  205 194 196 crossSect 1  mat 1 
-CCTPlate 297 nodes 3  196 194 185 crossSect 1  mat 1 
-CCTPlate 298 nodes 3  185 194 183 crossSect 1  mat 1 
-CCTPlate 299 nodes 3  187 178 189 crossSect 1  mat 1 
-CCTPlate 300 nodes 3  189 178 190 crossSect 1  mat 1 
-CCTPlate 301 nodes 3  189 190 200 crossSect 1  mat 1 
-CCTPlate 302 nodes 3  200 190 191 crossSect 1  mat 1 
-CCTPlate 303 nodes 3  198 187 189 crossSect 1  mat 1 
-CCTPlate 304 nodes 3  187 198 196 crossSect 1  mat 1 
-CCTPlate 305 nodes 3  209 198 200 crossSect 1  mat 1 
-CCTPlate 306 nodes 3  200 198 189 crossSect 1  mat 1 
-CCTPlate 307 nodes 3  200 191 202 crossSect 1  mat 1 
-CCTPlate 308 nodes 3  202 191 203 crossSect 1  mat 1 
-CCTPlate 309 nodes 3  202 203 213 crossSect 1  mat 1 
-CCTPlate 310 nodes 3  213 203 204 crossSect 1  mat 1 
-CCTPlate 311 nodes 3  211 200 202 crossSect 1  mat 1 
-CCTPlate 312 nodes 3  200 211 209 crossSect 1  mat 1 
-CCTPlate 313 nodes 3  222 211 213 crossSect 1  mat 1 
-CCTPlate 314 nodes 3  213 211 202 crossSect 1  mat 1 
-CCTPlate 315 nodes 3  205 196 207 crossSect 1  mat 1 
-CCTPlate 316 nodes 3  205 207 218 crossSect 1  mat 1 
-CCTPlate 317 nodes 3  218 207 209 crossSect 1  mat 1 
-CCTPlate 318 nodes 3  209 207 198 crossSect 1  mat 1 
-CCTPlate 319 nodes 3  198 207 196 crossSect 1  mat 1 
-CCTPlate 320 nodes 3  218 209 220 crossSect 1  mat 1 
-CCTPlate 321 nodes 3  218 220 231 crossSect 1  mat 1 
-CCTPlate 322 nodes 3  231 220 222 crossSect 1  mat 1 
-CCTPlate 323 nodes 3  222 220 211 crossSect 1  mat 1 
-CCTPlate 324 nodes 3  211 220 209 crossSect 1  mat 1 
-CCTPlate 325 nodes 3  169 179 180 crossSect 1  mat 1 
-CCTPlate 326 nodes 3  169 180 171 crossSect 1  mat 1 
-CCTPlate 327 nodes 3  171 180 182 crossSect 1  mat 1 
-CCTPlate 328 nodes 3  182 180 192 crossSect 1  mat 1 
-CCTPlate 329 nodes 3  192 180 179 crossSect 1  mat 1 
-CCTPlate 330 nodes 3  182 192 193 crossSect 1  mat 1 
-CCTPlate 331 nodes 3  182 193 184 crossSect 1  mat 1 
-CCTPlate 332 nodes 3  184 193 195 crossSect 1  mat 1 
-CCTPlate 333 nodes 3  195 193 205 crossSect 1  mat 1 
-CCTPlate 334 nodes 3  205 193 192 crossSect 1  mat 1 
-CCTPlate 335 nodes 3  169 171 160 crossSect 1  mat 1 
-CCTPlate 336 nodes 3  160 171 162 crossSect 1  mat 1 
-CCTPlate 337 nodes 3  171 173 162 crossSect 1  mat 1 
-CCTPlate 338 nodes 3  173 171 182 crossSect 1  mat 1 
-CCTPlate 339 nodes 3  182 184 173 crossSect 1  mat 1 
-CCTPlate 340 nodes 3  173 184 175 crossSect 1  mat 1 
-CCTPlate 341 nodes 3  184 186 175 crossSect 1  mat 1 
-CCTPlate 342 nodes 3  186 184 195 crossSect 1  mat 1 
-CCTPlate 343 nodes 3  195 205 206 crossSect 1  mat 1 
-CCTPlate 344 nodes 3  195 206 197 crossSect 1  mat 1 
-CCTPlate 345 nodes 3  197 206 208 crossSect 1  mat 1 
-CCTPlate 346 nodes 3  208 206 218 crossSect 1  mat 1 
-CCTPlate 347 nodes 3  218 206 205 crossSect 1  mat 1 
-CCTPlate 348 nodes 3  208 218 219 crossSect 1  mat 1 
-CCTPlate 349 nodes 3  208 219 210 crossSect 1  mat 1 
-CCTPlate 350 nodes 3  210 219 221 crossSect 1  mat 1 
-CCTPlate 351 nodes 3  221 219 231 crossSect 1  mat 1 
-CCTPlate 352 nodes 3  231 219 218 crossSect 1  mat 1 
-CCTPlate 353 nodes 3  195 197 186 crossSect 1  mat 1 
-CCTPlate 354 nodes 3  186 197 188 crossSect 1  mat 1 
-CCTPlate 355 nodes 3  197 199 188 crossSect 1  mat 1 
-CCTPlate 356 nodes 3  199 197 208 crossSect 1  mat 1 
-CCTPlate 357 nodes 3  208 210 199 crossSect 1  mat 1 
-CCTPlate 358 nodes 3  199 210 201 crossSect 1  mat 1 
-CCTPlate 359 nodes 3  210 212 201 crossSect 1  mat 1 
-CCTPlate 360 nodes 3  212 210 221 crossSect 1  mat 1 
-CCTPlate 361 nodes 3  213 204 215 crossSect 1  mat 1 
-CCTPlate 362 nodes 3  215 204 216 crossSect 1  mat 1 
-CCTPlate 363 nodes 3  215 216 226 crossSect 1  mat 1 
-CCTPlate 364 nodes 3  226 216 217 crossSect 1  mat 1 
-CCTPlate 365 nodes 3  224 213 215 crossSect 1  mat 1 
-CCTPlate 366 nodes 3  213 224 222 crossSect 1  mat 1 
-CCTPlate 367 nodes 3  235 224 226 crossSect 1  mat 1 
-CCTPlate 368 nodes 3  226 224 215 crossSect 1  mat 1 
-CCTPlate 369 nodes 3  226 217 228 crossSect 1  mat 1 
-CCTPlate 370 nodes 3  228 217 229 crossSect 1  mat 1 
-CCTPlate 371 nodes 3  228 229 239 crossSect 1  mat 1 
-CCTPlate 372 nodes 3  239 229 230 crossSect 1  mat 1 
-CCTPlate 373 nodes 3  237 226 228 crossSect 1  mat 1 
-CCTPlate 374 nodes 3  226 237 235 crossSect 1  mat 1 
-CCTPlate 375 nodes 3  248 237 239 crossSect 1  mat 1 
-CCTPlate 376 nodes 3  239 237 228 crossSect 1  mat 1 
-CCTPlate 377 nodes 3  231 222 233 crossSect 1  mat 1 
-CCTPlate 378 nodes 3  231 233 244 crossSect 1  mat 1 
-CCTPlate 379 nodes 3  244 233 235 crossSect 1  mat 1 
-CCTPlate 380 nodes 3  235 233 224 crossSect 1  mat 1 
-CCTPlate 381 nodes 3  224 233 222 crossSect 1  mat 1 
-CCTPlate 382 nodes 3  244 235 246 crossSect 1  mat 1 
-CCTPlate 383 nodes 3  244 246 257 crossSect 1  mat 1 
-CCTPlate 384 nodes 3  257 246 248 crossSect 1  mat 1 
-CCTPlate 385 nodes 3  248 246 237 crossSect 1  mat 1 
-CCTPlate 386 nodes 3  237 246 235 crossSect 1  mat 1 
-CCTPlate 387 nodes 3  239 230 241 crossSect 1  mat 1 
-CCTPlate 388 nodes 3  241 230 242 crossSect 1  mat 1 
-CCTPlate 389 nodes 3  241 242 252 crossSect 1  mat 1 
-CCTPlate 390 nodes 3  252 242 243 crossSect 1  mat 1 
-CCTPlate 391 nodes 3  250 239 241 crossSect 1  mat 1 
-CCTPlate 392 nodes 3  239 250 248 crossSect 1  mat 1 
-CCTPlate 393 nodes 3  261 250 252 crossSect 1  mat 1 
-CCTPlate 394 nodes 3  252 250 241 crossSect 1  mat 1 
-CCTPlate 395 nodes 3  252 243 254 crossSect 1  mat 1 
-CCTPlate 396 nodes 3  254 243 255 crossSect 1  mat 1 
-CCTPlate 397 nodes 3  254 255 265 crossSect 1  mat 1 
-CCTPlate 398 nodes 3  265 255 256 crossSect 1  mat 1 
-CCTPlate 399 nodes 3  263 252 254 crossSect 1  mat 1 
-CCTPlate 400 nodes 3  252 263 261 crossSect 1  mat 1 
-CCTPlate 401 nodes 3  274 263 265 crossSect 1  mat 1 
-CCTPlate 402 nodes 3  265 263 254 crossSect 1  mat 1 
-CCTPlate 403 nodes 3  257 248 259 crossSect 1  mat 1 
-CCTPlate 404 nodes 3  257 259 270 crossSect 1  mat 1 
-CCTPlate 405 nodes 3  270 259 261 crossSect 1  mat 1 
-CCTPlate 406 nodes 3  261 259 250 crossSect 1  mat 1 
-CCTPlate 407 nodes 3  250 259 248 crossSect 1  mat 1 
-CCTPlate 408 nodes 3  270 261 272 crossSect 1  mat 1 
-CCTPlate 409 nodes 3  270 272 283 crossSect 1  mat 1 
-CCTPlate 410 nodes 3  283 272 274 crossSect 1  mat 1 
-CCTPlate 411 nodes 3  274 272 263 crossSect 1  mat 1 
-CCTPlate 412 nodes 3  263 272 261 crossSect 1  mat 1 
-CCTPlate 413 nodes 3  221 231 232 crossSect 1  mat 1 
-CCTPlate 414 nodes 3  221 232 223 crossSect 1  mat 1 
-CCTPlate 415 nodes 3  223 232 234 crossSect 1  mat 1 
-CCTPlate 416 nodes 3  234 232 244 crossSect 1  mat 1 
-CCTPlate 417 nodes 3  244 232 231 crossSect 1  mat 1 
-CCTPlate 418 nodes 3  234 244 245 crossSect 1  mat 1 
-CCTPlate 419 nodes 3  234 245 236 crossSect 1  mat 1 
-CCTPlate 420 nodes 3  236 245 247 crossSect 1  mat 1 
-CCTPlate 421 nodes 3  247 245 257 crossSect 1  mat 1 
-CCTPlate 422 nodes 3  257 245 244 crossSect 1  mat 1 
-CCTPlate 423 nodes 3  221 223 212 crossSect 1  mat 1 
-CCTPlate 424 nodes 3  212 223 214 crossSect 1  mat 1 
-CCTPlate 425 nodes 3  223 225 214 crossSect 1  mat 1 
-CCTPlate 426 nodes 3  225 223 234 crossSect 1  mat 1 
-CCTPlate 427 nodes 3  234 236 225 crossSect 1  mat 1 
-CCTPlate 428 nodes 3  225 236 227 crossSect 1  mat 1 
-CCTPlate 429 nodes 3  236 238 227 crossSect 1  mat 1 
-CCTPlate 430 nodes 3  238 236 247 crossSect 1  mat 1 
-CCTPlate 431 nodes 3  247 257 258 crossSect 1  mat 1 
-CCTPlate 432 nodes 3  247 258 249 crossSect 1  mat 1 
-CCTPlate 433 nodes 3  249 258 260 crossSect 1  mat 1 
-CCTPlate 434 nodes 3  260 258 270 crossSect 1  mat 1 
-CCTPlate 435 nodes 3  270 258 257 crossSect 1  mat 1 
-CCTPlate 436 nodes 3  260 270 271 crossSect 1  mat 1 
-CCTPlate 437 nodes 3  260 271 262 crossSect 1  mat 1 
-CCTPlate 438 nodes 3  262 271 273 crossSect 1  mat 1 
-CCTPlate 439 nodes 3  273 271 283 crossSect 1  mat 1 
-CCTPlate 440 nodes 3  283 271 270 crossSect 1  mat 1 
-CCTPlate 441 nodes 3  247 249 238 crossSect 1  mat 1 
-CCTPlate 442 nodes 3  238 249 240 crossSect 1  mat 1 
-CCTPlate 443 nodes 3  249 251 240 crossSect 1  mat 1 
-CCTPlate 444 nodes 3  251 249 260 crossSect 1  mat 1 
-CCTPlate 445 nodes 3  260 262 251 crossSect 1  mat 1 
-CCTPlate 446 nodes 3  251 262 253 crossSect 1  mat 1 
-CCTPlate 447 nodes 3  262 264 253 crossSect 1  mat 1 
-CCTPlate 448 nodes 3  264 262 273 crossSect 1  mat 1 
-CCTPlate 449 nodes 3  265 256 267 crossSect 1  mat 1 
-CCTPlate 450 nodes 3  267 256 268 crossSect 1  mat 1 
-CCTPlate 451 nodes 3  267 268 278 crossSect 1  mat 1 
-CCTPlate 452 nodes 3  278 268 269 crossSect 1  mat 1 
-CCTPlate 453 nodes 3  276 265 267 crossSect 1  mat 1 
-CCTPlate 454 nodes 3  265 276 274 crossSect 1  mat 1 
-CCTPlate 455 nodes 3  287 276 278 crossSect 1  mat 1 
-CCTPlate 456 nodes 3  278 276 267 crossSect 1  mat 1 
-CCTPlate 457 nodes 3  278 269 280 crossSect 1  mat 1 
-CCTPlate 458 nodes 3  280 269 281 crossSect 1  mat 1 
-CCTPlate 459 nodes 3  280 281 291 crossSect 1  mat 1 
-CCTPlate 460 nodes 3  291 281 282 crossSect 1  mat 1 
-CCTPlate 461 nodes 3  289 278 280 crossSect 1  mat 1 
-CCTPlate 462 nodes 3  278 289 287 crossSect 1  mat 1 
-CCTPlate 463 nodes 3  300 289 291 crossSect 1  mat 1 
-CCTPlate 464 nodes 3  291 289 280 crossSect 1  mat 1 
-CCTPlate 465 nodes 3  283 274 285 crossSect 1  mat 1 
-CCTPlate 466 nodes 3  283 285 296 crossSect 1  mat 1 
-CCTPlate 467 nodes 3  296 285 287 crossSect 1  mat 1 
-CCTPlate 468 nodes 3  287 285 276 crossSect 1  mat 1 
-CCTPlate 469 nodes 3  276 285 274 crossSect 1  mat 1 
-CCTPlate 470 nodes 3  296 287 298 crossSect 1  mat 1 
-CCTPlate 471 nodes 3  296 298 309 crossSect 1  mat 1 
-CCTPlate 472 nodes 3  309 298 300 crossSect 1  mat 1 
-CCTPlate 473 nodes 3  300 298 289 crossSect 1  mat 1 
-CCTPlate 474 nodes 3  289 298 287 crossSect 1  mat 1 
-CCTPlate 475 nodes 3  291 282 293 crossSect 1  mat 1 
-CCTPlate 476 nodes 3  293 282 294 crossSect 1  mat 1 
-CCTPlate 477 nodes 3  293 294 304 crossSect 1  mat 1 
-CCTPlate 478 nodes 3  304 294 295 crossSect 1  mat 1 
-CCTPlate 479 nodes 3  302 291 293 crossSect 1  mat 1 
-CCTPlate 480 nodes 3  291 302 300 crossSect 1  mat 1 
-CCTPlate 481 nodes 3  313 302 304 crossSect 1  mat 1 
-CCTPlate 482 nodes 3  304 302 293 crossSect 1  mat 1 
-CCTPlate 483 nodes 3  304 295 306 crossSect 1  mat 1 
-CCTPlate 484 nodes 3  306 295 307 crossSect 1  mat 1 
-CCTPlate 485 nodes 3  306 307 317 crossSect 1  mat 1 
-CCTPlate 486 nodes 3  317 307 308 crossSect 1  mat 1 
-CCTPlate 487 nodes 3  315 304 306 crossSect 1  mat 1 
-CCTPlate 488 nodes 3  304 315 313 crossSect 1  mat 1 
-CCTPlate 489 nodes 3  326 315 317 crossSect 1  mat 1 
-CCTPlate 490 nodes 3  317 315 306 crossSect 1  mat 1 
-CCTPlate 491 nodes 3  309 300 311 crossSect 1  mat 1 
-CCTPlate 492 nodes 3  309 311 322 crossSect 1  mat 1 
-CCTPlate 493 nodes 3  322 311 313 crossSect 1  mat 1 
-CCTPlate 494 nodes 3  313 311 302 crossSect 1  mat 1 
-CCTPlate 495 nodes 3  302 311 300 crossSect 1  mat 1 
-CCTPlate 496 nodes 3  322 313 324 crossSect 1  mat 1 
-CCTPlate 497 nodes 3  322 324 334 crossSect 1  mat 1 
-CCTPlate 498 nodes 3  334 324 326 crossSect 1  mat 1 
-CCTPlate 499 nodes 3  326 324 315 crossSect 1  mat 1 
-CCTPlate 500 nodes 3  315 324 313 crossSect 1  mat 1 
-CCTPlate 501 nodes 3  273 283 284 crossSect 1  mat 1 
-CCTPlate 502 nodes 3  273 284 275 crossSect 1  mat 1 
-CCTPlate 503 nodes 3  275 284 286 crossSect 1  mat 1 
-CCTPlate 504 nodes 3  286 284 296 crossSect 1  mat 1 
-CCTPlate 505 nodes 3  296 284 283 crossSect 1  mat 1 
-CCTPlate 506 nodes 3  286 296 297 crossSect 1  mat 1 
-CCTPlate 507 nodes 3  286 297 288 crossSect 1  mat 1 
-CCTPlate 508 nodes 3  288 297 299 crossSect 1  mat 1 
-CCTPlate 509 nodes 3  299 297 309 crossSect 1  mat 1 
-CCTPlate 510 nodes 3  309 297 296 crossSect 1  mat 1 
-CCTPlate 511 nodes 3  273 275 264 crossSect 1  mat 1 
-CCTPlate 512 nodes 3  264 275 266 crossSect 1  mat 1 
-CCTPlate 513 nodes 3  275 277 266 crossSect 1  mat 1 
-CCTPlate 514 nodes 3  277 275 286 crossSect 1  mat 1 
-CCTPlate 515 nodes 3  286 288 277 crossSect 1  mat 1 
-CCTPlate 516 nodes 3  277 288 279 crossSect 1  mat 1 
-CCTPlate 517 nodes 3  288 290 279 crossSect 1  mat 1 
-CCTPlate 518 nodes 3  290 288 299 crossSect 1  mat 1 
-CCTPlate 519 nodes 3  299 309 310 crossSect 1  mat 1 
-CCTPlate 520 nodes 3  299 310 301 crossSect 1  mat 1 
-CCTPlate 521 nodes 3  301 310 312 crossSect 1  mat 1 
-CCTPlate 522 nodes 3  312 310 322 crossSect 1  mat 1 
-CCTPlate 523 nodes 3  322 310 309 crossSect 1  mat 1 
-CCTPlate 524 nodes 3  312 322 323 crossSect 1  mat 1 
-CCTPlate 525 nodes 3  312 323 314 crossSect 1  mat 1 
-CCTPlate 526 nodes 3  314 323 325 crossSect 1  mat 1 
-CCTPlate 527 nodes 3  325 323 334 crossSect 1  mat 1 
-CCTPlate 528 nodes 3  334 323 322 crossSect 1  mat 1 
-CCTPlate 529 nodes 3  299 301 290 crossSect 1  mat 1 
-CCTPlate 530 nodes 3  290 301 292 crossSect 1  mat 1 
-CCTPlate 531 nodes 3  301 303 292 crossSect 1  mat 1 
-CCTPlate 532 nodes 3  303 301 312 crossSect 1  mat 1 
-CCTPlate 533 nodes 3  312 314 303 crossSect 1  mat 1 
-CCTPlate 534 nodes 3  303 314 305 crossSect 1  mat 1 
-CCTPlate 535 nodes 3  314 316 305 crossSect 1  mat 1 
-CCTPlate 536 nodes 3  316 314 325 crossSect 1  mat 1 
-CCTPlate 537 nodes 3  317 308 319 crossSect 1  mat 1 
-CCTPlate 538 nodes 3  319 308 320 crossSect 1  mat 1 
-CCTPlate 539 nodes 3  319 320 330 crossSect 1  mat 1 
-CCTPlate 540 nodes 3  330 320 321 crossSect 1  mat 1 
-CCTPlate 541 nodes 3  328 317 319 crossSect 1  mat 1 
-CCTPlate 542 nodes 3  317 328 326 crossSect 1  mat 1 
-CCTPlate 543 nodes 3  338 328 330 crossSect 1  mat 1 
-CCTPlate 544 nodes 3  330 328 319 crossSect 1  mat 1 
-CCTPlate 545 nodes 3  330 321 332 crossSect 1  mat 1 
-CCTPlate 546 nodes 3  332 321 333 crossSect 1  mat 1 
-CCTPlate 547 nodes 3  332 333 342 crossSect 1  mat 1 
-CCTPlate 548 nodes 3  342 333 345 crossSect 1  mat 1 
-CCTPlate 549 nodes 3  340 330 332 crossSect 1  mat 1 
-CCTPlate 550 nodes 3  330 340 338 crossSect 1  mat 1 
-CCTPlate 551 nodes 3  350 340 342 crossSect 1  mat 1 
-CCTPlate 552 nodes 3  342 340 332 crossSect 1  mat 1 
-CCTPlate 553 nodes 3  334 326 336 crossSect 1  mat 1 
-CCTPlate 554 nodes 3  334 336 346 crossSect 1  mat 1 
-CCTPlate 555 nodes 3  346 336 338 crossSect 1  mat 1 
-CCTPlate 556 nodes 3  338 336 328 crossSect 1  mat 1 
-CCTPlate 557 nodes 3  328 336 326 crossSect 1  mat 1 
-CCTPlate 558 nodes 3  346 338 348 crossSect 1  mat 1 
-CCTPlate 559 nodes 3  346 348 357 crossSect 1  mat 1 
-CCTPlate 560 nodes 3  357 348 350 crossSect 1  mat 1 
-CCTPlate 561 nodes 3  350 348 340 crossSect 1  mat 1 
-CCTPlate 562 nodes 3  340 348 338 crossSect 1  mat 1 
-CCTPlate 563 nodes 3  342 345 344 crossSect 1  mat 1 
-CCTPlate 564 nodes 3  344 345 356 crossSect 1  mat 1 
-CCTPlate 565 nodes 3  344 356 355 crossSect 1  mat 1 
-CCTPlate 566 nodes 3  355 356 367 crossSect 1  mat 1 
-CCTPlate 567 nodes 3  352 342 344 crossSect 1  mat 1 
-CCTPlate 568 nodes 3  342 352 350 crossSect 1  mat 1 
-CCTPlate 569 nodes 3  361 352 355 crossSect 1  mat 1 
-CCTPlate 570 nodes 3  355 352 344 crossSect 1  mat 1 
-CCTPlate 571 nodes 3  355 367 366 crossSect 1  mat 1 
-CCTPlate 572 nodes 3  366 367 377 crossSect 1  mat 1 
-CCTPlate 573 nodes 3  366 377 376 crossSect 1  mat 1 
-CCTPlate 574 nodes 3  376 377 386 crossSect 1  mat 1 
-CCTPlate 575 nodes 3  365 355 366 crossSect 1  mat 1 
-CCTPlate 576 nodes 3  355 365 361 crossSect 1  mat 1 
-CCTPlate 577 nodes 3  375 365 376 crossSect 1  mat 1 
-CCTPlate 578 nodes 3  376 365 366 crossSect 1  mat 1 
-CCTPlate 579 nodes 3  357 350 359 crossSect 1  mat 1 
-CCTPlate 580 nodes 3  357 359 368 crossSect 1  mat 1 
-CCTPlate 581 nodes 3  368 359 361 crossSect 1  mat 1 
-CCTPlate 582 nodes 3  361 359 352 crossSect 1  mat 1 
-CCTPlate 583 nodes 3  352 359 350 crossSect 1  mat 1 
-CCTPlate 584 nodes 3  368 361 370 crossSect 1  mat 1 
-CCTPlate 585 nodes 3  368 370 378 crossSect 1  mat 1 
-CCTPlate 586 nodes 3  378 370 375 crossSect 1  mat 1 
-CCTPlate 587 nodes 3  375 370 365 crossSect 1  mat 1 
-CCTPlate 588 nodes 3  365 370 361 crossSect 1  mat 1 
-CCTPlate 589 nodes 3  325 334 335 crossSect 1  mat 1 
-CCTPlate 590 nodes 3  325 335 327 crossSect 1  mat 1 
-CCTPlate 591 nodes 3  327 335 337 crossSect 1  mat 1 
-CCTPlate 592 nodes 3  337 335 346 crossSect 1  mat 1 
-CCTPlate 593 nodes 3  346 335 334 crossSect 1  mat 1 
-CCTPlate 594 nodes 3  337 346 347 crossSect 1  mat 1 
-CCTPlate 595 nodes 3  337 347 339 crossSect 1  mat 1 
-CCTPlate 596 nodes 3  339 347 349 crossSect 1  mat 1 
-CCTPlate 597 nodes 3  349 347 357 crossSect 1  mat 1 
-CCTPlate 598 nodes 3  357 347 346 crossSect 1  mat 1 
-CCTPlate 599 nodes 3  325 327 316 crossSect 1  mat 1 
-CCTPlate 600 nodes 3  316 327 318 crossSect 1  mat 1 
-CCTPlate 601 nodes 3  327 329 318 crossSect 1  mat 1 
-CCTPlate 602 nodes 3  329 327 337 crossSect 1  mat 1 
-CCTPlate 603 nodes 3  337 339 329 crossSect 1  mat 1 
-CCTPlate 604 nodes 3  329 339 331 crossSect 1  mat 1 
-CCTPlate 605 nodes 3  339 341 331 crossSect 1  mat 1 
-CCTPlate 606 nodes 3  341 339 349 crossSect 1  mat 1 
-CCTPlate 607 nodes 3  349 357 358 crossSect 1  mat 1 
-CCTPlate 608 nodes 3  349 358 351 crossSect 1  mat 1 
-CCTPlate 609 nodes 3  351 358 360 crossSect 1  mat 1 
-CCTPlate 610 nodes 3  360 358 368 crossSect 1  mat 1 
-CCTPlate 611 nodes 3  368 358 357 crossSect 1  mat 1 
-CCTPlate 612 nodes 3  360 368 369 crossSect 1  mat 1 
-CCTPlate 613 nodes 3  360 369 362 crossSect 1  mat 1 
-CCTPlate 614 nodes 3  362 369 371 crossSect 1  mat 1 
-CCTPlate 615 nodes 3  371 369 378 crossSect 1  mat 1 
-CCTPlate 616 nodes 3  378 369 368 crossSect 1  mat 1 
-CCTPlate 617 nodes 3  349 351 341 crossSect 1  mat 1 
-CCTPlate 618 nodes 3  341 351 343 crossSect 1  mat 1 
-CCTPlate 619 nodes 3  351 353 343 crossSect 1  mat 1 
-CCTPlate 620 nodes 3  353 351 360 crossSect 1  mat 1 
-CCTPlate 621 nodes 3  360 362 353 crossSect 1  mat 1 
-CCTPlate 622 nodes 3  353 362 354 crossSect 1  mat 1 
-CCTPlate 623 nodes 3  362 363 354 crossSect 1  mat 1 
-CCTPlate 624 nodes 3  363 362 371 crossSect 1  mat 1 
-CCTPlate 625 nodes 3  376 386 385 crossSect 1  mat 1 
-CCTPlate 626 nodes 3  385 386 397 crossSect 1  mat 1 
-CCTPlate 627 nodes 3  385 397 396 crossSect 1  mat 1 
-CCTPlate 628 nodes 3  396 397 407 crossSect 1  mat 1 
-CCTPlate 629 nodes 3  384 376 385 crossSect 1  mat 1 
-CCTPlate 630 nodes 3  376 384 375 crossSect 1  mat 1 
-CCTPlate 631 nodes 3  395 384 396 crossSect 1  mat 1 
-CCTPlate 632 nodes 3  396 384 385 crossSect 1  mat 1 
-CCTPlate 633 nodes 3  396 407 406 crossSect 1  mat 1 
-CCTPlate 634 nodes 3  406 407 415 crossSect 1  mat 1 
-CCTPlate 635 nodes 3  406 415 414 crossSect 1  mat 1 
-CCTPlate 636 nodes 3  414 415 422 crossSect 1  mat 1 
-CCTPlate 637 nodes 3  405 396 406 crossSect 1  mat 1 
-CCTPlate 638 nodes 3  396 405 395 crossSect 1  mat 1 
-CCTPlate 639 nodes 3  412 405 414 crossSect 1  mat 1 
-CCTPlate 640 nodes 3  414 405 406 crossSect 1  mat 1 
-CCTPlate 641 nodes 3  378 375 383 crossSect 1  mat 1 
-CCTPlate 642 nodes 3  378 383 392 crossSect 1  mat 1 
-CCTPlate 643 nodes 3  392 383 395 crossSect 1  mat 1 
-CCTPlate 644 nodes 3  395 383 384 crossSect 1  mat 1 
-CCTPlate 645 nodes 3  384 383 375 crossSect 1  mat 1 
-CCTPlate 646 nodes 3  392 395 403 crossSect 1  mat 1 
-CCTPlate 647 nodes 3  392 403 404 crossSect 1  mat 1 
-CCTPlate 648 nodes 3  404 403 412 crossSect 1  mat 1 
-CCTPlate 649 nodes 3  412 403 405 crossSect 1  mat 1 
-CCTPlate 650 nodes 3  405 403 395 crossSect 1  mat 1 
-CCTPlate 651 nodes 3  414 422 421 crossSect 1  mat 1 
-CCTPlate 652 nodes 3  421 422 426 crossSect 1  mat 1 
-CCTPlate 653 nodes 3  425 426 429 crossSect 1  mat 1 
-CCTPlate 654 nodes 3  426 425 421 crossSect 1  mat 1 
-CCTPlate 655 nodes 3  419 414 421 crossSect 1  mat 1 
-CCTPlate 656 nodes 3  414 419 412 crossSect 1  mat 1 
-CCTPlate 657 nodes 3  420 419 425 crossSect 1  mat 1 
-CCTPlate 658 nodes 3  425 419 421 crossSect 1  mat 1 
-CCTPlate 659 nodes 3  428 429 431 crossSect 1  mat 1 
-CCTPlate 660 nodes 3  429 428 425 crossSect 1  mat 1 
-CCTPlate 661 nodes 3  428 431 430 crossSect 1  mat 1 
-CCTPlate 662 nodes 3  430 431 432 crossSect 1  mat 1 
-CCTPlate 663 nodes 3  424 425 428 crossSect 1  mat 1 
-CCTPlate 664 nodes 3  425 424 420 crossSect 1  mat 1 
-CCTPlate 665 nodes 3  424 428 427 crossSect 1  mat 1 
-CCTPlate 666 nodes 3  427 428 430 crossSect 1  mat 1 
-CCTPlate 667 nodes 3  404 412 413 crossSect 1  mat 1 
-CCTPlate 668 nodes 3  404 413 410 crossSect 1  mat 1 
-CCTPlate 669 nodes 3  410 413 417 crossSect 1  mat 1 
-CCTPlate 670 nodes 3  417 413 420 crossSect 1  mat 1 
-CCTPlate 671 nodes 3  420 413 419 crossSect 1  mat 1 
-CCTPlate 672 nodes 3  419 413 412 crossSect 1  mat 1 
-CCTPlate 673 nodes 3  418 417 424 crossSect 1  mat 1 
-CCTPlate 674 nodes 3  424 417 420 crossSect 1  mat 1 
-CCTPlate 675 nodes 3  418 424 423 crossSect 1  mat 1 
-CCTPlate 676 nodes 3  423 424 427 crossSect 1  mat 1 
-CCTPlate 677 nodes 3  410 417 411 crossSect 1  mat 1 
-CCTPlate 678 nodes 3  411 417 418 crossSect 1  mat 1 
-CCTPlate 679 nodes 3  411 418 416 crossSect 1  mat 1 
-CCTPlate 680 nodes 3  416 418 423 crossSect 1  mat 1 
-CCTPlate 681 nodes 3  371 378 379 crossSect 1  mat 1 
-CCTPlate 682 nodes 3  371 379 372 crossSect 1  mat 1 
-CCTPlate 683 nodes 3  372 379 381 crossSect 1  mat 1 
-CCTPlate 684 nodes 3  381 379 392 crossSect 1  mat 1 
-CCTPlate 685 nodes 3  392 379 378 crossSect 1  mat 1 
-CCTPlate 686 nodes 3  381 392 394 crossSect 1  mat 1 
-CCTPlate 687 nodes 3  381 394 382 crossSect 1  mat 1 
-CCTPlate 688 nodes 3  382 394 393 crossSect 1  mat 1 
-CCTPlate 689 nodes 3  393 394 404 crossSect 1  mat 1 
-CCTPlate 690 nodes 3  404 394 392 crossSect 1  mat 1 
-CCTPlate 691 nodes 3  371 372 363 crossSect 1  mat 1 
-CCTPlate 692 nodes 3  363 372 364 crossSect 1  mat 1 
-CCTPlate 693 nodes 3  372 373 364 crossSect 1  mat 1 
-CCTPlate 694 nodes 3  373 372 381 crossSect 1  mat 1 
-CCTPlate 695 nodes 3  381 382 373 crossSect 1  mat 1 
-CCTPlate 696 nodes 3  373 382 374 crossSect 1  mat 1 
-CCTPlate 697 nodes 3  382 380 374 crossSect 1  mat 1 
-CCTPlate 698 nodes 3  380 382 393 crossSect 1  mat 1 
-CCTPlate 699 nodes 3  393 404 401 crossSect 1  mat 1 
-CCTPlate 700 nodes 3  393 401 391 crossSect 1  mat 1 
-CCTPlate 701 nodes 3  391 401 398 crossSect 1  mat 1 
-CCTPlate 702 nodes 3  398 401 402 crossSect 1  mat 1 
-CCTPlate 703 nodes 3  402 401 410 crossSect 1  mat 1 
-CCTPlate 704 nodes 3  410 401 404 crossSect 1  mat 1 
-CCTPlate 705 nodes 3  408 402 411 crossSect 1  mat 1 
-CCTPlate 706 nodes 3  411 402 410 crossSect 1  mat 1 
-CCTPlate 707 nodes 3  409 408 416 crossSect 1  mat 1 
-CCTPlate 708 nodes 3  416 408 411 crossSect 1  mat 1 
-CCTPlate 709 nodes 3  399 398 408 crossSect 1  mat 1 
-CCTPlate 710 nodes 3  408 398 402 crossSect 1  mat 1 
-CCTPlate 711 nodes 3  400 399 409 crossSect 1  mat 1 
-CCTPlate 712 nodes 3  409 399 408 crossSect 1  mat 1 
-CCTPlate 713 nodes 3  393 391 380 crossSect 1  mat 1 
-CCTPlate 714 nodes 3  380 391 387 crossSect 1  mat 1 
-CCTPlate 715 nodes 3  391 398 387 crossSect 1  mat 1 
-CCTPlate 716 nodes 3  387 398 388 crossSect 1  mat 1 
-CCTPlate 717 nodes 3  398 399 388 crossSect 1  mat 1 
-CCTPlate 718 nodes 3  388 399 389 crossSect 1  mat 1 
-CCTPlate 719 nodes 3  399 400 389 crossSect 1  mat 1 
-CCTPlate 720 nodes 3  389 400 390 crossSect 1  mat 1 
-SimpleCS 1 thick 1.0
+ndofman 432 nelem 720 ncrosssect  1 nmat 1 nbc 1 nic 0 nltf 1 nset 2
+node 1 coords 3 0.000000 0.000000 0.000000
+node 2 coords 3 0.000000 10.000000 0.000000
+node 3 coords 3 0.000000 1.562141 0.000000
+node 4 coords 3 1.562141 0.000000 0.000000
+node 5 coords 3 0.000000 9.140316 0.000000
+node 6 coords 3 1.562142 10.000000 0.000000
+node 7 coords 3 0.000000 7.812078 0.000000
+node 8 coords 3 0.000000 3.124531 0.000000
+node 9 coords 3 1.629056 1.635819 0.000000
+node 10 coords 3 3.124531 0.000000 0.000000
+node 11 coords 3 0.000000 4.687047 0.000000
+node 12 coords 3 0.000000 6.249562 0.000000
+node 13 coords 3 1.635389 8.817374 0.000000
+node 14 coords 3 3.124535 10.000000 0.000000
+node 15 coords 3 1.699780 7.392932 0.000000
+node 16 coords 3 1.709016 3.250815 0.000000
+node 17 coords 3 2.014165 4.481295 0.000000
+node 18 coords 3 3.381329 1.877563 0.000000
+node 19 coords 3 4.687047 10.000000 0.000000
+node 20 coords 3 4.687047 0.000000 0.000000
+node 21 coords 3 4.649752 1.653772 0.000000
+node 22 coords 3 6.249563 0.000000 0.000000
+node 23 coords 3 1.992282 5.839382 0.000000
+node 24 coords 3 3.428616 8.519368 0.000000
+node 25 coords 3 3.150845 7.056867 0.000000
+node 26 coords 3 3.235890 3.681839 0.000000
+node 27 coords 3 3.148020 4.923249 0.000000
+node 28 coords 3 5.061374 8.823665 0.000000
+node 29 coords 3 4.635407 2.908901 0.000000
+node 30 coords 3 6.249559 10.000000 0.000000
+node 31 coords 3 5.881021 1.792510 0.000000
+node 32 coords 3 7.812083 10.000000 0.000000
+node 33 coords 3 7.282673 1.282304 0.000000
+node 34 coords 3 7.812079 0.000000 0.000000
+node 35 coords 3 9.374593 0.000000 0.000000
+node 36 coords 3 3.962791 5.997505 0.000000
+node 37 coords 3 4.691198 7.435641 0.000000
+node 38 coords 3 4.558018 4.562110 0.000000
+node 39 coords 3 6.303660 8.123186 0.000000
+node 40 coords 3 6.098783 3.784294 0.000000
+node 41 coords 3 7.810124 8.956576 0.000000
+node 42 coords 3 7.520817 2.834540 0.000000
+node 43 coords 3 9.374595 10.000000 0.000000
+node 44 coords 3 8.889937 1.713293 0.000000
+node 45 coords 3 10.937107 10.000000 0.000000
+node 46 coords 3 10.387856 1.260358 0.000000
+node 47 coords 3 10.937110 0.000000 0.000000
+node 48 coords 3 12.499625 0.000000 0.000000
+node 49 coords 3 6.293016 5.999618 0.000000
+node 50 coords 3 7.805136 7.448772 0.000000
+node 51 coords 3 7.675110 4.481670 0.000000
+node 52 coords 3 9.349342 8.142202 0.000000
+node 53 coords 3 9.147359 3.735979 0.000000
+node 54 coords 3 10.922214 8.958875 0.000000
+node 55 coords 3 10.616093 2.798454 0.000000
+node 56 coords 3 12.499624 10.000000 0.000000
+node 57 coords 3 12.021654 1.707826 0.000000
+node 58 coords 3 14.062142 10.000000 0.000000
+node 59 coords 3 13.520765 1.258019 0.000000
+node 60 coords 3 14.062140 0.000000 0.000000
+node 61 coords 3 15.624656 0.000000 0.000000
+node 62 coords 3 9.299359 5.981937 0.000000
+node 63 coords 3 10.894179 7.446558 0.000000
+node 64 coords 3 10.764536 4.457840 0.000000
+node 65 coords 3 12.473912 8.140235 0.000000
+node 66 coords 3 12.277851 3.724283 0.000000
+node 67 coords 3 14.050719 8.957783 0.000000
+node 68 coords 3 13.763396 2.799692 0.000000
+node 69 coords 3 15.624655 10.000000 0.000000
+node 70 coords 3 15.147107 1.701088 0.000000
+node 71 coords 3 17.187172 10.000000 0.000000
+node 72 coords 3 16.647474 1.255948 0.000000
+node 73 coords 3 17.187172 0.000000 0.000000
+node 74 coords 3 18.749687 0.000000 0.000000
+node 75 coords 3 12.416188 5.973134 0.000000
+node 76 coords 3 14.024284 7.443196 0.000000
+node 77 coords 3 13.901106 4.452481 0.000000
+node 78 coords 3 15.604494 8.138456 0.000000
+node 79 coords 3 15.411476 3.719032 0.000000
+node 80 coords 3 17.178169 8.957259 0.000000
+node 81 coords 3 16.884600 2.790350 0.000000
+node 82 coords 3 18.749691 10.000000 0.000000
+node 83 coords 3 18.279942 1.704805 0.000000
+node 84 coords 3 20.312203 10.000000 0.000000
+node 85 coords 3 19.774485 1.256898 0.000000
+node 86 coords 3 20.312203 0.000000 0.000000
+node 87 coords 3 21.874718 0.000000 0.000000
+node 88 coords 3 15.549299 5.969250 0.000000
+node 89 coords 3 17.154532 7.441835 0.000000
+node 90 coords 3 17.031343 4.448618 0.000000
+node 91 coords 3 18.732151 8.138554 0.000000
+node 92 coords 3 18.542068 3.719317 0.000000
+node 93 coords 3 20.304062 8.957656 0.000000
+node 94 coords 3 20.020947 2.797741 0.000000
+node 95 coords 3 21.874720 10.000000 0.000000
+node 96 coords 3 21.399740 1.700940 0.000000
+node 97 coords 3 23.437237 10.000000 0.000000
+node 98 coords 3 22.898424 1.256585 0.000000
+node 99 coords 3 23.437233 0.000000 0.000000
+node 100 coords 3 24.999748 0.000000 0.000000
+node 101 coords 3 18.679110 5.968684 0.000000
+node 102 coords 3 20.281607 7.442234 0.000000
+node 103 coords 3 20.160774 4.450176 0.000000
+node 104 coords 3 21.857910 8.138893 0.000000
+node 105 coords 3 21.666494 3.718899 0.000000
+node 106 coords 3 23.429335 8.957629 0.000000
+node 107 coords 3 23.136633 2.791593 0.000000
+node 108 coords 3 24.999750 10.000000 0.000000
+node 109 coords 3 24.530601 1.705816 0.000000
+node 110 coords 3 26.562267 10.000000 0.000000
+node 111 coords 3 26.024735 1.257438 0.000000
+node 112 coords 3 26.562265 0.000000 0.000000
+node 113 coords 3 28.124779 0.000000 0.000000
+node 114 coords 3 21.805332 5.969109 0.000000
+node 115 coords 3 23.407196 7.442401 0.000000
+node 116 coords 3 23.284492 4.449586 0.000000
+node 117 coords 3 24.983213 8.138722 0.000000
+node 118 coords 3 24.793436 3.720787 0.000000
+node 119 coords 3 26.554424 8.957313 0.000000
+node 120 coords 3 26.271446 2.798525 0.000000
+node 121 coords 3 28.124779 10.000000 0.000000
+node 122 coords 3 27.649937 1.700732 0.000000
+node 123 coords 3 29.687292 10.000000 0.000000
+node 124 coords 3 29.148525 1.255850 0.000000
+node 125 coords 3 29.687298 0.000000 0.000000
+node 126 coords 3 31.249813 0.000000 0.000000
+node 127 coords 3 24.931030 5.969392 0.000000
+node 128 coords 3 26.532394 7.441917 0.000000
+node 129 coords 3 26.411640 4.450678 0.000000
+node 130 coords 3 28.108225 8.138010 0.000000
+node 131 coords 3 27.916859 3.718348 0.000000
+node 132 coords 3 29.679466 8.957128 0.000000
+node 133 coords 3 29.386789 2.790133 0.000000
+node 134 coords 3 31.249815 10.000000 0.000000
+node 135 coords 3 30.780691 1.704742 0.000000
+node 136 coords 3 32.812332 10.000000 0.000000
+node 137 coords 3 32.274807 1.256878 0.000000
+node 138 coords 3 32.812328 0.000000 0.000000
+node 139 coords 3 34.374844 0.000000 0.000000
+node 140 coords 3 28.055876 5.968312 0.000000
+node 141 coords 3 29.657435 7.441502 0.000000
+node 142 coords 3 29.534740 4.448227 0.000000
+node 143 coords 3 31.233335 8.138439 0.000000
+node 144 coords 3 31.043562 3.719173 0.000000
+node 145 coords 3 32.804504 8.957624 0.000000
+node 146 coords 3 32.521526 2.797697 0.000000
+node 147 coords 3 34.374844 10.000000 0.000000
+node 148 coords 3 33.900005 1.700926 0.000000
+node 149 coords 3 35.937363 10.000000 0.000000
+node 150 coords 3 35.398586 1.256581 0.000000
+node 151 coords 3 35.937359 0.000000 0.000000
+node 152 coords 3 37.499874 0.000000 0.000000
+node 153 coords 3 31.181206 5.968460 0.000000
+node 154 coords 3 32.782501 7.442152 0.000000
+node 155 coords 3 32.661743 4.450088 0.000000
+node 156 coords 3 34.358299 8.138865 0.000000
+node 157 coords 3 34.166935 3.718868 0.000000
+node 158 coords 3 35.929535 8.957622 0.000000
+node 159 coords 3 35.636852 2.791583 0.000000
+node 160 coords 3 37.499874 10.000000 0.000000
+node 161 coords 3 37.030754 1.705813 0.000000
+node 162 coords 3 39.062386 10.000000 0.000000
+node 163 coords 3 38.524868 1.257437 0.000000
+node 164 coords 3 39.062393 0.000000 0.000000
+node 165 coords 3 40.624905 0.000000 0.000000
+node 166 coords 3 34.305962 5.969057 0.000000
+node 167 coords 3 35.907505 7.442382 0.000000
+node 168 coords 3 35.784809 4.449567 0.000000
+node 169 coords 3 37.483402 8.138716 0.000000
+node 170 coords 3 37.293625 3.720780 0.000000
+node 171 coords 3 39.054565 8.957312 0.000000
+node 172 coords 3 38.771587 2.798523 0.000000
+node 173 coords 3 40.624905 10.000000 0.000000
+node 174 coords 3 40.150066 1.700732 0.000000
+node 175 coords 3 42.187424 10.000000 0.000000
+node 176 coords 3 41.648647 1.255850 0.000000
+node 177 coords 3 42.187420 0.000000 0.000000
+node 178 coords 3 43.749935 0.000000 0.000000
+node 179 coords 3 37.431274 5.969381 0.000000
+node 180 coords 3 39.032562 7.441913 0.000000
+node 181 coords 3 38.911800 4.450674 0.000000
+node 182 coords 3 40.608360 8.138009 0.000000
+node 183 coords 3 40.416992 3.718346 0.000000
+node 184 coords 3 42.179592 8.957127 0.000000
+node 185 coords 3 41.886910 2.790132 0.000000
+node 186 coords 3 43.749935 10.000000 0.000000
+node 187 coords 3 43.280811 1.704742 0.000000
+node 188 coords 3 45.312454 10.000000 0.000000
+node 189 coords 3 44.774929 1.256878 0.000000
+node 190 coords 3 45.312447 0.000000 0.000000
+node 191 coords 3 46.874966 0.000000 0.000000
+node 192 coords 3 40.556023 5.968310 0.000000
+node 193 coords 3 42.157562 7.441501 0.000000
+node 194 coords 3 42.034866 4.448226 0.000000
+node 195 coords 3 43.733456 8.138437 0.000000
+node 196 coords 3 43.543686 3.719173 0.000000
+node 197 coords 3 45.304626 8.957624 0.000000
+node 198 coords 3 45.021645 2.797697 0.000000
+node 199 coords 3 46.874966 10.000000 0.000000
+node 200 coords 3 46.400127 1.700926 0.000000
+node 201 coords 3 48.437481 10.000000 0.000000
+node 202 coords 3 47.898708 1.256581 0.000000
+node 203 coords 3 48.437481 0.000000 0.000000
+node 204 coords 3 50.000000 0.000000 0.000000
+node 205 coords 3 43.681328 5.968460 0.000000
+node 206 coords 3 45.282623 7.442151 0.000000
+node 207 coords 3 45.161865 4.450088 0.000000
+node 208 coords 3 46.858421 8.138865 0.000000
+node 209 coords 3 46.667057 3.718868 0.000000
+node 210 coords 3 48.429653 8.957622 0.000000
+node 211 coords 3 48.136974 2.791583 0.000000
+node 212 coords 3 50.000000 10.000000 0.000000
+node 213 coords 3 49.530872 1.705813 0.000000
+node 214 coords 3 51.562511 10.000000 0.000000
+node 215 coords 3 51.024994 1.257437 0.000000
+node 216 coords 3 51.562519 0.000000 0.000000
+node 217 coords 3 53.125031 0.000000 0.000000
+node 218 coords 3 46.806084 5.969057 0.000000
+node 219 coords 3 48.407623 7.442382 0.000000
+node 220 coords 3 48.284927 4.449567 0.000000
+node 221 coords 3 49.983517 8.138716 0.000000
+node 222 coords 3 49.793743 3.720780 0.000000
+node 223 coords 3 51.554691 8.957312 0.000000
+node 224 coords 3 51.271706 2.798523 0.000000
+node 225 coords 3 53.125031 10.000000 0.000000
+node 226 coords 3 52.650192 1.700732 0.000000
+node 227 coords 3 54.687546 10.000000 0.000000
+node 228 coords 3 54.148777 1.255850 0.000000
+node 229 coords 3 54.687546 0.000000 0.000000
+node 230 coords 3 56.250061 0.000000 0.000000
+node 231 coords 3 49.931389 5.969381 0.000000
+node 232 coords 3 51.532684 7.441913 0.000000
+node 233 coords 3 51.411923 4.450674 0.000000
+node 234 coords 3 53.108490 8.138009 0.000000
+node 235 coords 3 52.917118 3.718346 0.000000
+node 236 coords 3 54.679722 8.957127 0.000000
+node 237 coords 3 54.387043 2.790132 0.000000
+node 238 coords 3 56.250061 10.000000 0.000000
+node 239 coords 3 55.780941 1.704742 0.000000
+node 240 coords 3 57.812576 10.000000 0.000000
+node 241 coords 3 57.275055 1.256878 0.000000
+node 242 coords 3 57.812573 0.000000 0.000000
+node 243 coords 3 59.375088 0.000000 0.000000
+node 244 coords 3 53.056145 5.968310 0.000000
+node 245 coords 3 54.657692 7.441501 0.000000
+node 246 coords 3 54.534996 4.448226 0.000000
+node 247 coords 3 56.233593 8.138437 0.000000
+node 248 coords 3 56.043808 3.719173 0.000000
+node 249 coords 3 57.804756 8.957624 0.000000
+node 250 coords 3 57.521778 2.797697 0.000000
+node 251 coords 3 59.375092 10.000000 0.000000
+node 252 coords 3 58.900253 1.700926 0.000000
+node 253 coords 3 60.937607 10.000000 0.000000
+node 254 coords 3 60.398838 1.256581 0.000000
+node 255 coords 3 60.937607 0.000000 0.000000
+node 256 coords 3 62.500118 0.000000 0.000000
+node 257 coords 3 56.181461 5.968460 0.000000
+node 258 coords 3 57.782753 7.442151 0.000000
+node 259 coords 3 57.661987 4.450088 0.000000
+node 260 coords 3 59.358555 8.138865 0.000000
+node 261 coords 3 59.167179 3.718868 0.000000
+node 262 coords 3 60.929783 8.957622 0.000000
+node 263 coords 3 60.637104 2.791583 0.000000
+node 264 coords 3 62.500126 10.000000 0.000000
+node 265 coords 3 62.031002 1.705813 0.000000
+node 266 coords 3 64.062645 10.000000 0.000000
+node 267 coords 3 63.525116 1.257437 0.000000
+node 268 coords 3 64.062645 0.000000 0.000000
+node 269 coords 3 65.625160 0.000000 0.000000
+node 270 coords 3 59.306213 5.969057 0.000000
+node 271 coords 3 60.907753 7.442382 0.000000
+node 272 coords 3 60.785057 4.449567 0.000000
+node 273 coords 3 62.483654 8.138716 0.000000
+node 274 coords 3 62.293873 3.720780 0.000000
+node 275 coords 3 64.054817 8.957312 0.000000
+node 276 coords 3 63.771839 2.798523 0.000000
+node 277 coords 3 65.625160 10.000000 0.000000
+node 278 coords 3 65.150314 1.700732 0.000000
+node 279 coords 3 67.187675 10.000000 0.000000
+node 280 coords 3 66.648903 1.255850 0.000000
+node 281 coords 3 67.187675 0.000000 0.000000
+node 282 coords 3 68.750191 0.000000 0.000000
+node 283 coords 3 62.431522 5.969381 0.000000
+node 284 coords 3 64.032814 7.441913 0.000000
+node 285 coords 3 63.912056 4.450674 0.000000
+node 286 coords 3 65.608620 8.138009 0.000000
+node 287 coords 3 65.417244 3.718346 0.000000
+node 288 coords 3 67.179855 8.957127 0.000000
+node 289 coords 3 66.887169 2.790132 0.000000
+node 290 coords 3 68.750191 10.000000 0.000000
+node 291 coords 3 68.281067 1.704742 0.000000
+node 292 coords 3 70.312706 10.000000 0.000000
+node 293 coords 3 69.775185 1.256878 0.000000
+node 294 coords 3 70.312706 0.000000 0.000000
+node 295 coords 3 71.875221 0.000000 0.000000
+node 296 coords 3 65.556274 5.968310 0.000000
+node 297 coords 3 67.157822 7.441501 0.000000
+node 298 coords 3 67.035126 4.448226 0.000000
+node 299 coords 3 68.733719 8.138437 0.000000
+node 300 coords 3 68.543938 3.719173 0.000000
+node 301 coords 3 70.304878 8.957624 0.000000
+node 302 coords 3 70.021912 2.797697 0.000000
+node 303 coords 3 71.875221 10.000000 0.000000
+node 304 coords 3 71.400383 1.700926 0.000000
+node 305 coords 3 73.437736 10.000000 0.000000
+node 306 coords 3 72.898964 1.256581 0.000000
+node 307 coords 3 73.437729 0.000000 0.000000
+node 308 coords 3 75.000252 0.000000 0.000000
+node 309 coords 3 68.681587 5.968460 0.000000
+node 310 coords 3 70.282875 7.442152 0.000000
+node 311 coords 3 70.162125 4.450088 0.000000
+node 312 coords 3 71.858681 8.138865 0.000000
+node 313 coords 3 71.667313 3.718869 0.000000
+node 314 coords 3 73.429916 8.957622 0.000000
+node 315 coords 3 73.137245 2.791584 0.000000
+node 316 coords 3 75.000252 10.000000 0.000000
+node 317 coords 3 74.531151 1.705816 0.000000
+node 318 coords 3 76.562767 10.000000 0.000000
+node 319 coords 3 76.025291 1.257441 0.000000
+node 320 coords 3 76.562759 0.000000 0.000000
+node 321 coords 3 78.125282 0.000000 0.000000
+node 322 coords 3 71.806351 5.969058 0.000000
+node 323 coords 3 73.407906 7.442384 0.000000
+node 324 coords 3 73.285217 4.449569 0.000000
+node 325 coords 3 74.983803 8.138718 0.000000
+node 326 coords 3 74.794052 3.720785 0.000000
+node 327 coords 3 76.554985 8.957315 0.000000
+node 328 coords 3 76.272049 2.798530 0.000000
+node 329 coords 3 78.125282 10.000000 0.000000
+node 330 coords 3 77.650589 1.700745 0.000000
+node 331 coords 3 79.687798 10.000000 0.000000
+node 332 coords 3 79.149239 1.255871 0.000000
+node 333 coords 3 79.687798 0.000000 0.000000
+node 334 coords 3 74.931740 5.969388 0.000000
+node 335 coords 3 76.533073 7.441925 0.000000
+node 336 coords 3 76.412353 4.450690 0.000000
+node 337 coords 3 78.108917 8.138022 0.000000
+node 338 coords 3 77.917664 3.718374 0.000000
+node 339 coords 3 79.680206 8.957146 0.000000
+node 340 coords 3 79.387733 2.790176 0.000000
+node 341 coords 3 81.250313 10.000000 0.000000
+node 342 coords 3 80.781776 1.704808 0.000000
+node 343 coords 3 82.812828 10.000000 0.000000
+node 344 coords 3 82.276161 1.256987 0.000000
+node 345 coords 3 81.250313 0.000000 0.000000
+node 346 coords 3 78.056824 5.968350 0.000000
+node 347 coords 3 79.658562 7.441558 0.000000
+node 348 coords 3 79.536003 4.448302 0.000000
+node 349 coords 3 81.234680 8.138507 0.000000
+node 350 coords 3 81.045281 3.719307 0.000000
+node 351 coords 3 82.806023 8.957712 0.000000
+node 352 coords 3 82.523796 2.797904 0.000000
+node 353 coords 3 84.375343 10.000000 0.000000
+node 354 coords 3 85.937859 10.000000 0.000000
+node 355 coords 3 83.902794 1.701269 0.000000
+node 356 coords 3 82.812828 0.000000 0.000000
+node 357 coords 3 81.183403 5.968644 0.000000
+node 358 coords 3 82.785446 7.442414 0.000000
+node 359 coords 3 82.665100 4.450442 0.000000
+node 360 coords 3 84.362328 8.139201 0.000000
+node 361 coords 3 84.171890 3.719500 0.000000
+node 362 coords 3 85.933975 8.958001 0.000000
+node 363 coords 3 87.500374 10.000000 0.000000
+node 364 coords 3 89.062889 10.000000 0.000000
+node 365 coords 3 85.643829 2.792648 0.000000
+node 366 coords 3 85.402145 1.257117 0.000000
+node 367 coords 3 84.375343 0.000000 0.000000
+node 368 coords 3 84.312225 5.969837 0.000000
+node 369 coords 3 85.916038 7.443410 0.000000
+node 370 coords 3 85.794251 4.451058 0.000000
+node 371 coords 3 87.495659 8.139964 0.000000
+node 372 coords 3 89.065216 8.958293 0.000000
+node 373 coords 3 90.625404 10.000000 0.000000
+node 374 coords 3 92.187920 10.000000 0.000000
+node 375 coords 3 87.307144 3.723385 0.000000
+node 376 coords 3 87.038376 1.707299 0.000000
+node 377 coords 3 85.937859 0.000000 0.000000
+node 378 coords 3 87.446106 5.972102 0.000000
+node 379 coords 3 89.049233 7.444670 0.000000
+node 380 coords 3 93.750435 10.000000 0.000000
+node 381 coords 3 90.625801 8.140291 0.000000
+node 382 coords 3 92.178879 8.955817 0.000000
+node 383 coords 3 88.931076 4.455621 0.000000
+node 384 coords 3 88.790680 2.802937 0.000000
+node 385 coords 3 88.533874 1.259539 0.000000
+node 386 coords 3 87.500374 0.000000 0.000000
+node 387 coords 3 95.312950 10.000000 0.000000
+node 388 coords 3 96.875465 10.000000 0.000000
+node 389 coords 3 98.437859 10.000000 0.000000
+node 390 coords 3 100.000000 10.000000 0.000000
+node 391 coords 3 94.920090 8.832875 0.000000
+node 392 coords 3 90.568146 5.974805 0.000000
+node 393 coords 3 93.667877 8.124318 0.000000
+node 394 coords 3 92.144264 7.442989 0.000000
+node 395 coords 3 90.440720 3.726000 0.000000
+node 396 coords 3 90.165123 1.705139 0.000000
+node 397 coords 3 89.062897 0.000000 0.000000
+node 398 coords 3 96.542633 8.543344 0.000000
+node 399 coords 3 98.351677 8.831867 0.000000
+node 400 coords 3 100.000000 9.140316 0.000000
+node 401 coords 3 95.259209 7.447130 0.000000
+node 402 coords 3 96.773697 7.136864 0.000000
+node 403 coords 3 92.044212 4.458250 0.000000
+node 404 coords 3 93.599777 5.978810 0.000000
+node 405 coords 3 91.915131 2.799702 0.000000
+node 406 coords 3 91.663124 1.260735 0.000000
+node 407 coords 3 90.625404 0.000000 0.000000
+node 408 coords 3 98.244072 7.459643 0.000000
+node 409 coords 3 100.000000 7.812078 0.000000
+node 410 coords 3 95.976501 6.009067 0.000000
+node 411 coords 3 97.776085 6.127304 0.000000
+node 412 coords 3 93.566116 3.728398 0.000000
+node 413 coords 3 95.280006 4.473820 0.000000
+node 414 coords 3 93.292572 1.710355 0.000000
+node 415 coords 3 92.187920 0.000000 0.000000
+node 416 coords 3 100.000000 6.249562 0.000000
+node 417 coords 3 97.033386 4.787013 0.000000
+node 418 coords 3 98.587990 5.074357 0.000000
+node 419 coords 3 95.002876 2.781573 0.000000
+node 420 coords 3 96.394707 3.491285 0.000000
+node 421 coords 3 94.777298 1.279246 0.000000
+node 422 coords 3 93.750443 0.000000 0.000000
+node 423 coords 3 100.000000 4.687047 0.000000
+node 424 coords 3 98.116364 3.525165 0.000000
+node 425 coords 3 96.411171 1.827944 0.000000
+node 426 coords 3 95.312950 0.000000 0.000000
+node 427 coords 3 100.000000 3.124531 0.000000
+node 428 coords 3 98.314301 1.675019 0.000000
+node 429 coords 3 96.875465 0.000000 0.000000
+node 430 coords 3 100.000000 1.562141 0.000000
+node 431 coords 3 98.437859 0.000000 0.000000
+node 432 coords 3 100.000000 0.000000 0.000000
+CCTPlate 1 nodes 3  9 3 4
+CCTPlate 2 nodes 3  4 3 1
+CCTPlate 3 nodes 3  18 9 10
+CCTPlate 4 nodes 3  10 9 4
+CCTPlate 5 nodes 3  8 3 9
+CCTPlate 6 nodes 3  8 9 16
+CCTPlate 7 nodes 3  26 16 18
+CCTPlate 8 nodes 3  18 16 9
+CCTPlate 9 nodes 3  21 18 20
+CCTPlate 10 nodes 3  20 18 10
+CCTPlate 11 nodes 3  21 20 31
+CCTPlate 12 nodes 3  31 20 22
+CCTPlate 13 nodes 3  29 18 21
+CCTPlate 14 nodes 3  18 29 26
+CCTPlate 15 nodes 3  40 29 31
+CCTPlate 16 nodes 3  31 29 21
+CCTPlate 17 nodes 3  11 8 16
+CCTPlate 18 nodes 3  11 16 17
+CCTPlate 19 nodes 3  17 16 26
+CCTPlate 20 nodes 3  17 26 27
+CCTPlate 21 nodes 3  12 11 23
+CCTPlate 22 nodes 3  23 11 17
+CCTPlate 23 nodes 3  23 17 27
+CCTPlate 24 nodes 3  23 27 36
+CCTPlate 25 nodes 3  27 26 38
+CCTPlate 26 nodes 3  27 38 36
+CCTPlate 27 nodes 3  36 38 49
+CCTPlate 28 nodes 3  49 38 40
+CCTPlate 29 nodes 3  40 38 29
+CCTPlate 30 nodes 3  29 38 26
+CCTPlate 31 nodes 3  31 22 33
+CCTPlate 32 nodes 3  33 22 34
+CCTPlate 33 nodes 3  33 34 44
+CCTPlate 34 nodes 3  44 34 35
+CCTPlate 35 nodes 3  42 31 33
+CCTPlate 36 nodes 3  31 42 40
+CCTPlate 37 nodes 3  53 42 44
+CCTPlate 38 nodes 3  44 42 33
+CCTPlate 39 nodes 3  44 35 46
+CCTPlate 40 nodes 3  46 35 47
+CCTPlate 41 nodes 3  46 47 57
+CCTPlate 42 nodes 3  57 47 48
+CCTPlate 43 nodes 3  55 44 46
+CCTPlate 44 nodes 3  44 55 53
+CCTPlate 45 nodes 3  66 55 57
+CCTPlate 46 nodes 3  57 55 46
+CCTPlate 47 nodes 3  49 40 51
+CCTPlate 48 nodes 3  49 51 62
+CCTPlate 49 nodes 3  62 51 53
+CCTPlate 50 nodes 3  53 51 42
+CCTPlate 51 nodes 3  42 51 40
+CCTPlate 52 nodes 3  62 53 64
+CCTPlate 53 nodes 3  62 64 75
+CCTPlate 54 nodes 3  75 64 66
+CCTPlate 55 nodes 3  66 64 55
+CCTPlate 56 nodes 3  55 64 53
+CCTPlate 57 nodes 3  15 12 23
+CCTPlate 58 nodes 3  12 15 7
+CCTPlate 59 nodes 3  25 23 36
+CCTPlate 60 nodes 3  23 25 15
+CCTPlate 61 nodes 3  13 7 15
+CCTPlate 62 nodes 3  7 13 5
+CCTPlate 63 nodes 3  24 15 25
+CCTPlate 64 nodes 3  15 24 13
+CCTPlate 65 nodes 3  25 36 37
+CCTPlate 66 nodes 3  25 37 24
+CCTPlate 67 nodes 3  24 37 28
+CCTPlate 68 nodes 3  28 37 39
+CCTPlate 69 nodes 3  39 37 49
+CCTPlate 70 nodes 3  49 37 36
+CCTPlate 71 nodes 3  6 2 5
+CCTPlate 72 nodes 3  6 5 13
+CCTPlate 73 nodes 3  13 14 6
+CCTPlate 74 nodes 3  14 13 24
+CCTPlate 75 nodes 3  24 19 14
+CCTPlate 76 nodes 3  19 24 28
+CCTPlate 77 nodes 3  28 30 19
+CCTPlate 78 nodes 3  30 28 39
+CCTPlate 79 nodes 3  39 49 50
+CCTPlate 80 nodes 3  39 50 41
+CCTPlate 81 nodes 3  41 50 52
+CCTPlate 82 nodes 3  52 50 62
+CCTPlate 83 nodes 3  62 50 49
+CCTPlate 84 nodes 3  52 62 63
+CCTPlate 85 nodes 3  52 63 54
+CCTPlate 86 nodes 3  54 63 65
+CCTPlate 87 nodes 3  65 63 75
+CCTPlate 88 nodes 3  75 63 62
+CCTPlate 89 nodes 3  39 41 30
+CCTPlate 90 nodes 3  30 41 32
+CCTPlate 91 nodes 3  41 43 32
+CCTPlate 92 nodes 3  43 41 52
+CCTPlate 93 nodes 3  52 54 43
+CCTPlate 94 nodes 3  43 54 45
+CCTPlate 95 nodes 3  54 56 45
+CCTPlate 96 nodes 3  56 54 65
+CCTPlate 97 nodes 3  57 48 59
+CCTPlate 98 nodes 3  59 48 60
+CCTPlate 99 nodes 3  59 60 70
+CCTPlate 100 nodes 3  70 60 61
+CCTPlate 101 nodes 3  68 57 59
+CCTPlate 102 nodes 3  57 68 66
+CCTPlate 103 nodes 3  79 68 70
+CCTPlate 104 nodes 3  70 68 59
+CCTPlate 105 nodes 3  70 61 72
+CCTPlate 106 nodes 3  72 61 73
+CCTPlate 107 nodes 3  72 73 83
+CCTPlate 108 nodes 3  83 73 74
+CCTPlate 109 nodes 3  81 70 72
+CCTPlate 110 nodes 3  70 81 79
+CCTPlate 111 nodes 3  92 81 83
+CCTPlate 112 nodes 3  83 81 72
+CCTPlate 113 nodes 3  75 66 77
+CCTPlate 114 nodes 3  75 77 88
+CCTPlate 115 nodes 3  88 77 79
+CCTPlate 116 nodes 3  79 77 68
+CCTPlate 117 nodes 3  68 77 66
+CCTPlate 118 nodes 3  88 79 90
+CCTPlate 119 nodes 3  88 90 101
+CCTPlate 120 nodes 3  101 90 92
+CCTPlate 121 nodes 3  92 90 81
+CCTPlate 122 nodes 3  81 90 79
+CCTPlate 123 nodes 3  83 74 85
+CCTPlate 124 nodes 3  85 74 86
+CCTPlate 125 nodes 3  85 86 96
+CCTPlate 126 nodes 3  96 86 87
+CCTPlate 127 nodes 3  94 83 85
+CCTPlate 128 nodes 3  83 94 92
+CCTPlate 129 nodes 3  105 94 96
+CCTPlate 130 nodes 3  96 94 85
+CCTPlate 131 nodes 3  96 87 98
+CCTPlate 132 nodes 3  98 87 99
+CCTPlate 133 nodes 3  98 99 109
+CCTPlate 134 nodes 3  109 99 100
+CCTPlate 135 nodes 3  107 96 98
+CCTPlate 136 nodes 3  96 107 105
+CCTPlate 137 nodes 3  118 107 109
+CCTPlate 138 nodes 3  109 107 98
+CCTPlate 139 nodes 3  101 92 103
+CCTPlate 140 nodes 3  101 103 114
+CCTPlate 141 nodes 3  114 103 105
+CCTPlate 142 nodes 3  105 103 94
+CCTPlate 143 nodes 3  94 103 92
+CCTPlate 144 nodes 3  114 105 116
+CCTPlate 145 nodes 3  114 116 127
+CCTPlate 146 nodes 3  127 116 118
+CCTPlate 147 nodes 3  118 116 107
+CCTPlate 148 nodes 3  107 116 105
+CCTPlate 149 nodes 3  65 75 76
+CCTPlate 150 nodes 3  65 76 67
+CCTPlate 151 nodes 3  67 76 78
+CCTPlate 152 nodes 3  78 76 88
+CCTPlate 153 nodes 3  88 76 75
+CCTPlate 154 nodes 3  78 88 89
+CCTPlate 155 nodes 3  78 89 80
+CCTPlate 156 nodes 3  80 89 91
+CCTPlate 157 nodes 3  91 89 101
+CCTPlate 158 nodes 3  101 89 88
+CCTPlate 159 nodes 3  65 67 56
+CCTPlate 160 nodes 3  56 67 58
+CCTPlate 161 nodes 3  67 69 58
+CCTPlate 162 nodes 3  69 67 78
+CCTPlate 163 nodes 3  78 80 69
+CCTPlate 164 nodes 3  69 80 71
+CCTPlate 165 nodes 3  80 82 71
+CCTPlate 166 nodes 3  82 80 91
+CCTPlate 167 nodes 3  91 101 102
+CCTPlate 168 nodes 3  91 102 93
+CCTPlate 169 nodes 3  93 102 104
+CCTPlate 170 nodes 3  104 102 114
+CCTPlate 171 nodes 3  114 102 101
+CCTPlate 172 nodes 3  104 114 115
+CCTPlate 173 nodes 3  104 115 106
+CCTPlate 174 nodes 3  106 115 117
+CCTPlate 175 nodes 3  117 115 127
+CCTPlate 176 nodes 3  127 115 114
+CCTPlate 177 nodes 3  91 93 82
+CCTPlate 178 nodes 3  82 93 84
+CCTPlate 179 nodes 3  93 95 84
+CCTPlate 180 nodes 3  95 93 104
+CCTPlate 181 nodes 3  104 106 95
+CCTPlate 182 nodes 3  95 106 97
+CCTPlate 183 nodes 3  106 108 97
+CCTPlate 184 nodes 3  108 106 117
+CCTPlate 185 nodes 3  109 100 111
+CCTPlate 186 nodes 3  111 100 112
+CCTPlate 187 nodes 3  111 112 122
+CCTPlate 188 nodes 3  122 112 113
+CCTPlate 189 nodes 3  120 109 111
+CCTPlate 190 nodes 3  109 120 118
+CCTPlate 191 nodes 3  131 120 122
+CCTPlate 192 nodes 3  122 120 111
+CCTPlate 193 nodes 3  122 113 124
+CCTPlate 194 nodes 3  124 113 125
+CCTPlate 195 nodes 3  124 125 135
+CCTPlate 196 nodes 3  135 125 126
+CCTPlate 197 nodes 3  133 122 124
+CCTPlate 198 nodes 3  122 133 131
+CCTPlate 199 nodes 3  144 133 135
+CCTPlate 200 nodes 3  135 133 124
+CCTPlate 201 nodes 3  127 118 129
+CCTPlate 202 nodes 3  127 129 140
+CCTPlate 203 nodes 3  140 129 131
+CCTPlate 204 nodes 3  131 129 120
+CCTPlate 205 nodes 3  120 129 118
+CCTPlate 206 nodes 3  140 131 142
+CCTPlate 207 nodes 3  140 142 153
+CCTPlate 208 nodes 3  153 142 144
+CCTPlate 209 nodes 3  144 142 133
+CCTPlate 210 nodes 3  133 142 131
+CCTPlate 211 nodes 3  135 126 137
+CCTPlate 212 nodes 3  137 126 138
+CCTPlate 213 nodes 3  137 138 148
+CCTPlate 214 nodes 3  148 138 139
+CCTPlate 215 nodes 3  146 135 137
+CCTPlate 216 nodes 3  135 146 144
+CCTPlate 217 nodes 3  157 146 148
+CCTPlate 218 nodes 3  148 146 137
+CCTPlate 219 nodes 3  148 139 150
+CCTPlate 220 nodes 3  150 139 151
+CCTPlate 221 nodes 3  150 151 161
+CCTPlate 222 nodes 3  161 151 152
+CCTPlate 223 nodes 3  159 148 150
+CCTPlate 224 nodes 3  148 159 157
+CCTPlate 225 nodes 3  170 159 161
+CCTPlate 226 nodes 3  161 159 150
+CCTPlate 227 nodes 3  153 144 155
+CCTPlate 228 nodes 3  153 155 166
+CCTPlate 229 nodes 3  166 155 157
+CCTPlate 230 nodes 3  157 155 146
+CCTPlate 231 nodes 3  146 155 144
+CCTPlate 232 nodes 3  166 157 168
+CCTPlate 233 nodes 3  166 168 179
+CCTPlate 234 nodes 3  179 168 170
+CCTPlate 235 nodes 3  170 168 159
+CCTPlate 236 nodes 3  159 168 157
+CCTPlate 237 nodes 3  117 127 128
+CCTPlate 238 nodes 3  117 128 119
+CCTPlate 239 nodes 3  119 128 130
+CCTPlate 240 nodes 3  130 128 140
+CCTPlate 241 nodes 3  140 128 127
+CCTPlate 242 nodes 3  130 140 141
+CCTPlate 243 nodes 3  130 141 132
+CCTPlate 244 nodes 3  132 141 143
+CCTPlate 245 nodes 3  143 141 153
+CCTPlate 246 nodes 3  153 141 140
+CCTPlate 247 nodes 3  117 119 108
+CCTPlate 248 nodes 3  108 119 110
+CCTPlate 249 nodes 3  119 121 110
+CCTPlate 250 nodes 3  121 119 130
+CCTPlate 251 nodes 3  130 132 121
+CCTPlate 252 nodes 3  121 132 123
+CCTPlate 253 nodes 3  132 134 123
+CCTPlate 254 nodes 3  134 132 143
+CCTPlate 255 nodes 3  143 153 154
+CCTPlate 256 nodes 3  143 154 145
+CCTPlate 257 nodes 3  145 154 156
+CCTPlate 258 nodes 3  156 154 166
+CCTPlate 259 nodes 3  166 154 153
+CCTPlate 260 nodes 3  156 166 167
+CCTPlate 261 nodes 3  156 167 158
+CCTPlate 262 nodes 3  158 167 169
+CCTPlate 263 nodes 3  169 167 179
+CCTPlate 264 nodes 3  179 167 166
+CCTPlate 265 nodes 3  143 145 134
+CCTPlate 266 nodes 3  134 145 136
+CCTPlate 267 nodes 3  145 147 136
+CCTPlate 268 nodes 3  147 145 156
+CCTPlate 269 nodes 3  156 158 147
+CCTPlate 270 nodes 3  147 158 149
+CCTPlate 271 nodes 3  158 160 149
+CCTPlate 272 nodes 3  160 158 169
+CCTPlate 273 nodes 3  161 152 163
+CCTPlate 274 nodes 3  163 152 164
+CCTPlate 275 nodes 3  163 164 174
+CCTPlate 276 nodes 3  174 164 165
+CCTPlate 277 nodes 3  172 161 163
+CCTPlate 278 nodes 3  161 172 170
+CCTPlate 279 nodes 3  183 172 174
+CCTPlate 280 nodes 3  174 172 163
+CCTPlate 281 nodes 3  174 165 176
+CCTPlate 282 nodes 3  176 165 177
+CCTPlate 283 nodes 3  176 177 187
+CCTPlate 284 nodes 3  187 177 178
+CCTPlate 285 nodes 3  185 174 176
+CCTPlate 286 nodes 3  174 185 183
+CCTPlate 287 nodes 3  196 185 187
+CCTPlate 288 nodes 3  187 185 176
+CCTPlate 289 nodes 3  179 170 181
+CCTPlate 290 nodes 3  179 181 192
+CCTPlate 291 nodes 3  192 181 183
+CCTPlate 292 nodes 3  183 181 172
+CCTPlate 293 nodes 3  172 181 170
+CCTPlate 294 nodes 3  192 183 194
+CCTPlate 295 nodes 3  192 194 205
+CCTPlate 296 nodes 3  205 194 196
+CCTPlate 297 nodes 3  196 194 185
+CCTPlate 298 nodes 3  185 194 183
+CCTPlate 299 nodes 3  187 178 189
+CCTPlate 300 nodes 3  189 178 190
+CCTPlate 301 nodes 3  189 190 200
+CCTPlate 302 nodes 3  200 190 191
+CCTPlate 303 nodes 3  198 187 189
+CCTPlate 304 nodes 3  187 198 196
+CCTPlate 305 nodes 3  209 198 200
+CCTPlate 306 nodes 3  200 198 189
+CCTPlate 307 nodes 3  200 191 202
+CCTPlate 308 nodes 3  202 191 203
+CCTPlate 309 nodes 3  202 203 213
+CCTPlate 310 nodes 3  213 203 204
+CCTPlate 311 nodes 3  211 200 202
+CCTPlate 312 nodes 3  200 211 209
+CCTPlate 313 nodes 3  222 211 213
+CCTPlate 314 nodes 3  213 211 202
+CCTPlate 315 nodes 3  205 196 207
+CCTPlate 316 nodes 3  205 207 218
+CCTPlate 317 nodes 3  218 207 209
+CCTPlate 318 nodes 3  209 207 198
+CCTPlate 319 nodes 3  198 207 196
+CCTPlate 320 nodes 3  218 209 220
+CCTPlate 321 nodes 3  218 220 231
+CCTPlate 322 nodes 3  231 220 222
+CCTPlate 323 nodes 3  222 220 211
+CCTPlate 324 nodes 3  211 220 209
+CCTPlate 325 nodes 3  169 179 180
+CCTPlate 326 nodes 3  169 180 171
+CCTPlate 327 nodes 3  171 180 182
+CCTPlate 328 nodes 3  182 180 192
+CCTPlate 329 nodes 3  192 180 179
+CCTPlate 330 nodes 3  182 192 193
+CCTPlate 331 nodes 3  182 193 184
+CCTPlate 332 nodes 3  184 193 195
+CCTPlate 333 nodes 3  195 193 205
+CCTPlate 334 nodes 3  205 193 192
+CCTPlate 335 nodes 3  169 171 160
+CCTPlate 336 nodes 3  160 171 162
+CCTPlate 337 nodes 3  171 173 162
+CCTPlate 338 nodes 3  173 171 182
+CCTPlate 339 nodes 3  182 184 173
+CCTPlate 340 nodes 3  173 184 175
+CCTPlate 341 nodes 3  184 186 175
+CCTPlate 342 nodes 3  186 184 195
+CCTPlate 343 nodes 3  195 205 206
+CCTPlate 344 nodes 3  195 206 197
+CCTPlate 345 nodes 3  197 206 208
+CCTPlate 346 nodes 3  208 206 218
+CCTPlate 347 nodes 3  218 206 205
+CCTPlate 348 nodes 3  208 218 219
+CCTPlate 349 nodes 3  208 219 210
+CCTPlate 350 nodes 3  210 219 221
+CCTPlate 351 nodes 3  221 219 231
+CCTPlate 352 nodes 3  231 219 218
+CCTPlate 353 nodes 3  195 197 186
+CCTPlate 354 nodes 3  186 197 188
+CCTPlate 355 nodes 3  197 199 188
+CCTPlate 356 nodes 3  199 197 208
+CCTPlate 357 nodes 3  208 210 199
+CCTPlate 358 nodes 3  199 210 201
+CCTPlate 359 nodes 3  210 212 201
+CCTPlate 360 nodes 3  212 210 221
+CCTPlate 361 nodes 3  213 204 215
+CCTPlate 362 nodes 3  215 204 216
+CCTPlate 363 nodes 3  215 216 226
+CCTPlate 364 nodes 3  226 216 217
+CCTPlate 365 nodes 3  224 213 215
+CCTPlate 366 nodes 3  213 224 222
+CCTPlate 367 nodes 3  235 224 226
+CCTPlate 368 nodes 3  226 224 215
+CCTPlate 369 nodes 3  226 217 228
+CCTPlate 370 nodes 3  228 217 229
+CCTPlate 371 nodes 3  228 229 239
+CCTPlate 372 nodes 3  239 229 230
+CCTPlate 373 nodes 3  237 226 228
+CCTPlate 374 nodes 3  226 237 235
+CCTPlate 375 nodes 3  248 237 239
+CCTPlate 376 nodes 3  239 237 228
+CCTPlate 377 nodes 3  231 222 233
+CCTPlate 378 nodes 3  231 233 244
+CCTPlate 379 nodes 3  244 233 235
+CCTPlate 380 nodes 3  235 233 224
+CCTPlate 381 nodes 3  224 233 222
+CCTPlate 382 nodes 3  244 235 246
+CCTPlate 383 nodes 3  244 246 257
+CCTPlate 384 nodes 3  257 246 248
+CCTPlate 385 nodes 3  248 246 237
+CCTPlate 386 nodes 3  237 246 235
+CCTPlate 387 nodes 3  239 230 241
+CCTPlate 388 nodes 3  241 230 242
+CCTPlate 389 nodes 3  241 242 252
+CCTPlate 390 nodes 3  252 242 243
+CCTPlate 391 nodes 3  250 239 241
+CCTPlate 392 nodes 3  239 250 248
+CCTPlate 393 nodes 3  261 250 252
+CCTPlate 394 nodes 3  252 250 241
+CCTPlate 395 nodes 3  252 243 254
+CCTPlate 396 nodes 3  254 243 255
+CCTPlate 397 nodes 3  254 255 265
+CCTPlate 398 nodes 3  265 255 256
+CCTPlate 399 nodes 3  263 252 254
+CCTPlate 400 nodes 3  252 263 261
+CCTPlate 401 nodes 3  274 263 265
+CCTPlate 402 nodes 3  265 263 254
+CCTPlate 403 nodes 3  257 248 259
+CCTPlate 404 nodes 3  257 259 270
+CCTPlate 405 nodes 3  270 259 261
+CCTPlate 406 nodes 3  261 259 250
+CCTPlate 407 nodes 3  250 259 248
+CCTPlate 408 nodes 3  270 261 272
+CCTPlate 409 nodes 3  270 272 283
+CCTPlate 410 nodes 3  283 272 274
+CCTPlate 411 nodes 3  274 272 263
+CCTPlate 412 nodes 3  263 272 261
+CCTPlate 413 nodes 3  221 231 232
+CCTPlate 414 nodes 3  221 232 223
+CCTPlate 415 nodes 3  223 232 234
+CCTPlate 416 nodes 3  234 232 244
+CCTPlate 417 nodes 3  244 232 231
+CCTPlate 418 nodes 3  234 244 245
+CCTPlate 419 nodes 3  234 245 236
+CCTPlate 420 nodes 3  236 245 247
+CCTPlate 421 nodes 3  247 245 257
+CCTPlate 422 nodes 3  257 245 244
+CCTPlate 423 nodes 3  221 223 212
+CCTPlate 424 nodes 3  212 223 214
+CCTPlate 425 nodes 3  223 225 214
+CCTPlate 426 nodes 3  225 223 234
+CCTPlate 427 nodes 3  234 236 225
+CCTPlate 428 nodes 3  225 236 227
+CCTPlate 429 nodes 3  236 238 227
+CCTPlate 430 nodes 3  238 236 247
+CCTPlate 431 nodes 3  247 257 258
+CCTPlate 432 nodes 3  247 258 249
+CCTPlate 433 nodes 3  249 258 260
+CCTPlate 434 nodes 3  260 258 270
+CCTPlate 435 nodes 3  270 258 257
+CCTPlate 436 nodes 3  260 270 271
+CCTPlate 437 nodes 3  260 271 262
+CCTPlate 438 nodes 3  262 271 273
+CCTPlate 439 nodes 3  273 271 283
+CCTPlate 440 nodes 3  283 271 270
+CCTPlate 441 nodes 3  247 249 238
+CCTPlate 442 nodes 3  238 249 240
+CCTPlate 443 nodes 3  249 251 240
+CCTPlate 444 nodes 3  251 249 260
+CCTPlate 445 nodes 3  260 262 251
+CCTPlate 446 nodes 3  251 262 253
+CCTPlate 447 nodes 3  262 264 253
+CCTPlate 448 nodes 3  264 262 273
+CCTPlate 449 nodes 3  265 256 267
+CCTPlate 450 nodes 3  267 256 268
+CCTPlate 451 nodes 3  267 268 278
+CCTPlate 452 nodes 3  278 268 269
+CCTPlate 453 nodes 3  276 265 267
+CCTPlate 454 nodes 3  265 276 274
+CCTPlate 455 nodes 3  287 276 278
+CCTPlate 456 nodes 3  278 276 267
+CCTPlate 457 nodes 3  278 269 280
+CCTPlate 458 nodes 3  280 269 281
+CCTPlate 459 nodes 3  280 281 291
+CCTPlate 460 nodes 3  291 281 282
+CCTPlate 461 nodes 3  289 278 280
+CCTPlate 462 nodes 3  278 289 287
+CCTPlate 463 nodes 3  300 289 291
+CCTPlate 464 nodes 3  291 289 280
+CCTPlate 465 nodes 3  283 274 285
+CCTPlate 466 nodes 3  283 285 296
+CCTPlate 467 nodes 3  296 285 287
+CCTPlate 468 nodes 3  287 285 276
+CCTPlate 469 nodes 3  276 285 274
+CCTPlate 470 nodes 3  296 287 298
+CCTPlate 471 nodes 3  296 298 309
+CCTPlate 472 nodes 3  309 298 300
+CCTPlate 473 nodes 3  300 298 289
+CCTPlate 474 nodes 3  289 298 287
+CCTPlate 475 nodes 3  291 282 293
+CCTPlate 476 nodes 3  293 282 294
+CCTPlate 477 nodes 3  293 294 304
+CCTPlate 478 nodes 3  304 294 295
+CCTPlate 479 nodes 3  302 291 293
+CCTPlate 480 nodes 3  291 302 300
+CCTPlate 481 nodes 3  313 302 304
+CCTPlate 482 nodes 3  304 302 293
+CCTPlate 483 nodes 3  304 295 306
+CCTPlate 484 nodes 3  306 295 307
+CCTPlate 485 nodes 3  306 307 317
+CCTPlate 486 nodes 3  317 307 308
+CCTPlate 487 nodes 3  315 304 306
+CCTPlate 488 nodes 3  304 315 313
+CCTPlate 489 nodes 3  326 315 317
+CCTPlate 490 nodes 3  317 315 306
+CCTPlate 491 nodes 3  309 300 311
+CCTPlate 492 nodes 3  309 311 322
+CCTPlate 493 nodes 3  322 311 313
+CCTPlate 494 nodes 3  313 311 302
+CCTPlate 495 nodes 3  302 311 300
+CCTPlate 496 nodes 3  322 313 324
+CCTPlate 497 nodes 3  322 324 334
+CCTPlate 498 nodes 3  334 324 326
+CCTPlate 499 nodes 3  326 324 315
+CCTPlate 500 nodes 3  315 324 313
+CCTPlate 501 nodes 3  273 283 284
+CCTPlate 502 nodes 3  273 284 275
+CCTPlate 503 nodes 3  275 284 286
+CCTPlate 504 nodes 3  286 284 296
+CCTPlate 505 nodes 3  296 284 283
+CCTPlate 506 nodes 3  286 296 297
+CCTPlate 507 nodes 3  286 297 288
+CCTPlate 508 nodes 3  288 297 299
+CCTPlate 509 nodes 3  299 297 309
+CCTPlate 510 nodes 3  309 297 296
+CCTPlate 511 nodes 3  273 275 264
+CCTPlate 512 nodes 3  264 275 266
+CCTPlate 513 nodes 3  275 277 266
+CCTPlate 514 nodes 3  277 275 286
+CCTPlate 515 nodes 3  286 288 277
+CCTPlate 516 nodes 3  277 288 279
+CCTPlate 517 nodes 3  288 290 279
+CCTPlate 518 nodes 3  290 288 299
+CCTPlate 519 nodes 3  299 309 310
+CCTPlate 520 nodes 3  299 310 301
+CCTPlate 521 nodes 3  301 310 312
+CCTPlate 522 nodes 3  312 310 322
+CCTPlate 523 nodes 3  322 310 309
+CCTPlate 524 nodes 3  312 322 323
+CCTPlate 525 nodes 3  312 323 314
+CCTPlate 526 nodes 3  314 323 325
+CCTPlate 527 nodes 3  325 323 334
+CCTPlate 528 nodes 3  334 323 322
+CCTPlate 529 nodes 3  299 301 290
+CCTPlate 530 nodes 3  290 301 292
+CCTPlate 531 nodes 3  301 303 292
+CCTPlate 532 nodes 3  303 301 312
+CCTPlate 533 nodes 3  312 314 303
+CCTPlate 534 nodes 3  303 314 305
+CCTPlate 535 nodes 3  314 316 305
+CCTPlate 536 nodes 3  316 314 325
+CCTPlate 537 nodes 3  317 308 319
+CCTPlate 538 nodes 3  319 308 320
+CCTPlate 539 nodes 3  319 320 330
+CCTPlate 540 nodes 3  330 320 321
+CCTPlate 541 nodes 3  328 317 319
+CCTPlate 542 nodes 3  317 328 326
+CCTPlate 543 nodes 3  338 328 330
+CCTPlate 544 nodes 3  330 328 319
+CCTPlate 545 nodes 3  330 321 332
+CCTPlate 546 nodes 3  332 321 333
+CCTPlate 547 nodes 3  332 333 342
+CCTPlate 548 nodes 3  342 333 345
+CCTPlate 549 nodes 3  340 330 332
+CCTPlate 550 nodes 3  330 340 338
+CCTPlate 551 nodes 3  350 340 342
+CCTPlate 552 nodes 3  342 340 332
+CCTPlate 553 nodes 3  334 326 336
+CCTPlate 554 nodes 3  334 336 346
+CCTPlate 555 nodes 3  346 336 338
+CCTPlate 556 nodes 3  338 336 328
+CCTPlate 557 nodes 3  328 336 326
+CCTPlate 558 nodes 3  346 338 348
+CCTPlate 559 nodes 3  346 348 357
+CCTPlate 560 nodes 3  357 348 350
+CCTPlate 561 nodes 3  350 348 340
+CCTPlate 562 nodes 3  340 348 338
+CCTPlate 563 nodes 3  342 345 344
+CCTPlate 564 nodes 3  344 345 356
+CCTPlate 565 nodes 3  344 356 355
+CCTPlate 566 nodes 3  355 356 367
+CCTPlate 567 nodes 3  352 342 344
+CCTPlate 568 nodes 3  342 352 350
+CCTPlate 569 nodes 3  361 352 355
+CCTPlate 570 nodes 3  355 352 344
+CCTPlate 571 nodes 3  355 367 366
+CCTPlate 572 nodes 3  366 367 377
+CCTPlate 573 nodes 3  366 377 376
+CCTPlate 574 nodes 3  376 377 386
+CCTPlate 575 nodes 3  365 355 366
+CCTPlate 576 nodes 3  355 365 361
+CCTPlate 577 nodes 3  375 365 376
+CCTPlate 578 nodes 3  376 365 366
+CCTPlate 579 nodes 3  357 350 359
+CCTPlate 580 nodes 3  357 359 368
+CCTPlate 581 nodes 3  368 359 361
+CCTPlate 582 nodes 3  361 359 352
+CCTPlate 583 nodes 3  352 359 350
+CCTPlate 584 nodes 3  368 361 370
+CCTPlate 585 nodes 3  368 370 378
+CCTPlate 586 nodes 3  378 370 375
+CCTPlate 587 nodes 3  375 370 365
+CCTPlate 588 nodes 3  365 370 361
+CCTPlate 589 nodes 3  325 334 335
+CCTPlate 590 nodes 3  325 335 327
+CCTPlate 591 nodes 3  327 335 337
+CCTPlate 592 nodes 3  337 335 346
+CCTPlate 593 nodes 3  346 335 334
+CCTPlate 594 nodes 3  337 346 347
+CCTPlate 595 nodes 3  337 347 339
+CCTPlate 596 nodes 3  339 347 349
+CCTPlate 597 nodes 3  349 347 357
+CCTPlate 598 nodes 3  357 347 346
+CCTPlate 599 nodes 3  325 327 316
+CCTPlate 600 nodes 3  316 327 318
+CCTPlate 601 nodes 3  327 329 318
+CCTPlate 602 nodes 3  329 327 337
+CCTPlate 603 nodes 3  337 339 329
+CCTPlate 604 nodes 3  329 339 331
+CCTPlate 605 nodes 3  339 341 331
+CCTPlate 606 nodes 3  341 339 349
+CCTPlate 607 nodes 3  349 357 358
+CCTPlate 608 nodes 3  349 358 351
+CCTPlate 609 nodes 3  351 358 360
+CCTPlate 610 nodes 3  360 358 368
+CCTPlate 611 nodes 3  368 358 357
+CCTPlate 612 nodes 3  360 368 369
+CCTPlate 613 nodes 3  360 369 362
+CCTPlate 614 nodes 3  362 369 371
+CCTPlate 615 nodes 3  371 369 378
+CCTPlate 616 nodes 3  378 369 368
+CCTPlate 617 nodes 3  349 351 341
+CCTPlate 618 nodes 3  341 351 343
+CCTPlate 619 nodes 3  351 353 343
+CCTPlate 620 nodes 3  353 351 360
+CCTPlate 621 nodes 3  360 362 353
+CCTPlate 622 nodes 3  353 362 354
+CCTPlate 623 nodes 3  362 363 354
+CCTPlate 624 nodes 3  363 362 371
+CCTPlate 625 nodes 3  376 386 385
+CCTPlate 626 nodes 3  385 386 397
+CCTPlate 627 nodes 3  385 397 396
+CCTPlate 628 nodes 3  396 397 407
+CCTPlate 629 nodes 3  384 376 385
+CCTPlate 630 nodes 3  376 384 375
+CCTPlate 631 nodes 3  395 384 396
+CCTPlate 632 nodes 3  396 384 385
+CCTPlate 633 nodes 3  396 407 406
+CCTPlate 634 nodes 3  406 407 415
+CCTPlate 635 nodes 3  406 415 414
+CCTPlate 636 nodes 3  414 415 422
+CCTPlate 637 nodes 3  405 396 406
+CCTPlate 638 nodes 3  396 405 395
+CCTPlate 639 nodes 3  412 405 414
+CCTPlate 640 nodes 3  414 405 406
+CCTPlate 641 nodes 3  378 375 383
+CCTPlate 642 nodes 3  378 383 392
+CCTPlate 643 nodes 3  392 383 395
+CCTPlate 644 nodes 3  395 383 384
+CCTPlate 645 nodes 3  384 383 375
+CCTPlate 646 nodes 3  392 395 403
+CCTPlate 647 nodes 3  392 403 404
+CCTPlate 648 nodes 3  404 403 412
+CCTPlate 649 nodes 3  412 403 405
+CCTPlate 650 nodes 3  405 403 395
+CCTPlate 651 nodes 3  414 422 421
+CCTPlate 652 nodes 3  421 422 426
+CCTPlate 653 nodes 3  425 426 429
+CCTPlate 654 nodes 3  426 425 421
+CCTPlate 655 nodes 3  419 414 421
+CCTPlate 656 nodes 3  414 419 412
+CCTPlate 657 nodes 3  420 419 425
+CCTPlate 658 nodes 3  425 419 421
+CCTPlate 659 nodes 3  428 429 431
+CCTPlate 660 nodes 3  429 428 425
+CCTPlate 661 nodes 3  428 431 430
+CCTPlate 662 nodes 3  430 431 432
+CCTPlate 663 nodes 3  424 425 428
+CCTPlate 664 nodes 3  425 424 420
+CCTPlate 665 nodes 3  424 428 427
+CCTPlate 666 nodes 3  427 428 430
+CCTPlate 667 nodes 3  404 412 413
+CCTPlate 668 nodes 3  404 413 410
+CCTPlate 669 nodes 3  410 413 417
+CCTPlate 670 nodes 3  417 413 420
+CCTPlate 671 nodes 3  420 413 419
+CCTPlate 672 nodes 3  419 413 412
+CCTPlate 673 nodes 3  418 417 424
+CCTPlate 674 nodes 3  424 417 420
+CCTPlate 675 nodes 3  418 424 423
+CCTPlate 676 nodes 3  423 424 427
+CCTPlate 677 nodes 3  410 417 411
+CCTPlate 678 nodes 3  411 417 418
+CCTPlate 679 nodes 3  411 418 416
+CCTPlate 680 nodes 3  416 418 423
+CCTPlate 681 nodes 3  371 378 379
+CCTPlate 682 nodes 3  371 379 372
+CCTPlate 683 nodes 3  372 379 381
+CCTPlate 684 nodes 3  381 379 392
+CCTPlate 685 nodes 3  392 379 378
+CCTPlate 686 nodes 3  381 392 394
+CCTPlate 687 nodes 3  381 394 382
+CCTPlate 688 nodes 3  382 394 393
+CCTPlate 689 nodes 3  393 394 404
+CCTPlate 690 nodes 3  404 394 392
+CCTPlate 691 nodes 3  371 372 363
+CCTPlate 692 nodes 3  363 372 364
+CCTPlate 693 nodes 3  372 373 364
+CCTPlate 694 nodes 3  373 372 381
+CCTPlate 695 nodes 3  381 382 373
+CCTPlate 696 nodes 3  373 382 374
+CCTPlate 697 nodes 3  382 380 374
+CCTPlate 698 nodes 3  380 382 393
+CCTPlate 699 nodes 3  393 404 401
+CCTPlate 700 nodes 3  393 401 391
+CCTPlate 701 nodes 3  391 401 398
+CCTPlate 702 nodes 3  398 401 402
+CCTPlate 703 nodes 3  402 401 410
+CCTPlate 704 nodes 3  410 401 404
+CCTPlate 705 nodes 3  408 402 411
+CCTPlate 706 nodes 3  411 402 410
+CCTPlate 707 nodes 3  409 408 416
+CCTPlate 708 nodes 3  416 408 411
+CCTPlate 709 nodes 3  399 398 408
+CCTPlate 710 nodes 3  408 398 402
+CCTPlate 711 nodes 3  400 399 409
+CCTPlate 712 nodes 3  409 399 408
+CCTPlate 713 nodes 3  393 391 380
+CCTPlate 714 nodes 3  380 391 387
+CCTPlate 715 nodes 3  391 398 387
+CCTPlate 716 nodes 3  387 398 388
+CCTPlate 717 nodes 3  398 399 388
+CCTPlate 718 nodes 3  388 399 389
+CCTPlate 719 nodes 3  399 400 389
+CCTPlate 720 nodes 3  389 400 390
+SimpleCS 1 thick 1.0 material 1 set 1
 #HMH 1 Ry 4.0
 IsoLE 1 d 2500.  E 30.e9  n 0.15 tAlpha 0.000012
-BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
+BoundaryCondition  1 loadTimeFunction 1 dofs 2 3 4 values 2 0. 0. set 2
 ConstantFunction 1 f(t) 1.0 
+Set 1 elementranges {(1 720)}
+Set 2 nodes 16 1 2 3 5 7 8 11 12 390 400 409 416 423 427 430 432
 #
 #
 #%BEGIN_CHECK% tolerance 1.e-4

@@ -4,9 +4,9 @@ Test case with 2 interlaminar and 2 intralaminar cracks
 StaticStructural nsteps 1 lstype 0 smtype 0 maxiter 3 rtolf 1.0e-5 rtold -1.0 manrmsteps 1 nmodules 1
 #vtkxml tstep_all dofman_all element_all primvars 1 1 
 errorcheck 1
-domain 3dDirShell 
+domain 3dDirShell
 OutputManager tstep_all dofman_all element_all
-ndofman 9 nelem 2 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 2 nxfemman 1 nset 5 
+ndofman 9 nelem 2 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 2 nxfemman 1 nset 5
 node 1 coords 3 0.0  0.0  0.0
 node 2 coords 3 0.5  0.0  0.0
 node 3 coords 3 1.0  0.0  0.0
