@@ -37,8 +37,7 @@
 
 #include "exportmodule.h"
 #include "floatarray.h"
-#include "element.h"
-//#include <cstdio>
+#include "intarray.h"
 
 ///@name Input fields for MPSMaterial
 //@{
@@ -55,12 +54,11 @@ namespace oofem {
 class CrackExportModule : public ExportModule
 {
 protected:
-
   IntArray crossSections;
   double threshold;
 
 public:
-    /// Constructor. Creates empty Output Manager. By default all components are selected.
+    /// Constructor.
     CrackExportModule(int n, EngngModel *e);
     /// Destructor
     virtual ~CrackExportModule();
@@ -73,10 +71,6 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_CrackExportModule_Name; }
 
     static void writeToOutputFile(const std :: string &iName, const std :: vector< FloatArray > &iPoints);
-
-protected:
-
-
 };
 
 } // namespace oofem
