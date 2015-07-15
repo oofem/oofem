@@ -1010,6 +1010,11 @@ TR1_2D_SUPG :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *tStep)
 void
 TR1_2D_SUPG :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
 {
+    if ( type != ExternalForcesVector ) {
+        answer.clear();
+        return;
+    }
+
     FloatArray un;
     double coeff;
 
@@ -1022,7 +1027,7 @@ TR1_2D_SUPG :: computeLoadVector(FloatArray &answer, Load *load, CharType type, 
     double u2sum = un.at(2) + un.at(4) + un.at(6);
 
     answer.resize(9);
-    // MB
+
     if ( load->giveBCValType() == ForceLoadBVT ) {
         FloatArray gVector;
         load->computeComponentArrayAt(gVector, tStep, VM_Total);

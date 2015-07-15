@@ -652,7 +652,6 @@ SUPGElement2 :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
 }
 
 
-
 void
 SUPGElement2 :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *tStep)
 {
@@ -705,6 +704,53 @@ SUPGElement2 :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *tStep)
             OOFEM_ERROR("unsupported load type class");
         }
     }
+}
+
+
+void
+SUPGElement2 :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
+{
+    if ( type != ExternalForcesVector ) {
+        answer.clear();
+        return;
+    }
+
+    int rule = 1;
+    FloatArray un, nV;
+    FloatArray mb, mc;
+
+    this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
+
+    if ( load->giveBCValType() == ForceLoadBVT ) {
+        FloatMatrix b, g, nu;
+        FloatArray gVector;
+        load->computeComponentArrayAt(gVector, tStep, VM_Total);
+
+        for ( auto &gp : *integrationRulesArray [ rule ] ) {
+            double dV = this->computeVolumeAround(gp);
+            double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity(gp);
+
+            this->computeNuMatrix(nu, gp);
+            mb.plusProduct(nu, gVector, rho * dV);
+            if ( t_supg != 0 ) {
+                this->computeUDotGradUMatrix( b, gp, tStep->givePreviousStep() );
+                mb.plusProduct(b, gVector, t_supg * rho * dV);
+            }
+
+            if ( t_pspg != 0. ) {
+                this->computeGradPMatrix(g, gp);
+                mc.plusProduct(g, gVector, t_pspg * dV);
+            }
+        }
+    }
+
+    IntArray vloc, ploc;
+    this->giveLocalVelocityDofMap(vloc);
+    this->giveLocalPressureDofMap(ploc);
+    answer.resize(this->computeNumberOfDofs());
+    answer.zero();
+    answer.assemble(mb, vloc);
+    answer.assemble(mc, ploc);
 }
 
 void

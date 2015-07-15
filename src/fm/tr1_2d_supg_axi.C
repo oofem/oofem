@@ -708,6 +708,49 @@ TR1_2D_SUPG_AXI :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *tStep)
 
 
 void
+TR1_2D_SUPG_AXI :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
+{
+    if ( type != ExternalForcesVector ) {
+        answer.clear();
+        return;
+    }
+
+    FloatArray un, nV;
+
+    this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
+
+    answer.resize(9);
+
+    if ( load->giveBCValType() == ForceLoadBVT ) {
+        FloatArray gVector;
+        load->computeComponentArrayAt(gVector, tStep, VM_Total);
+
+        for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
+            double dV = this->computeVolumeAround(gp);
+            double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity(gp);
+            double coeff;
+            this->computeNVector(nV, gp);
+            double u = nV.at(1) * un.at(1) + nV.at(2) * un.at(3) + nV.at(3) * un.at(5);
+            double v = nV.at(1) * un.at(2) + nV.at(2) * un.at(4) + nV.at(3) * un.at(6);
+
+            coeff = rho * dV;
+            answer.at(1) += coeff * gVector.at(1) * ( nV.at(1) + t_supg * ( b [ 0 ] * u + c [ 0 ] * v ) );
+            answer.at(2) += coeff * gVector.at(2) * ( nV.at(1) + t_supg * ( b [ 0 ] * u + c [ 0 ] * v ) );
+            answer.at(4) += coeff * gVector.at(1) * ( nV.at(2) + t_supg * ( b [ 1 ] * u + c [ 1 ] * v ) );
+            answer.at(5) += coeff * gVector.at(2) * ( nV.at(2) + t_supg * ( b [ 1 ] * u + c [ 1 ] * v ) );
+            answer.at(7) += coeff * gVector.at(1) * ( nV.at(3) + t_supg * ( b [ 2 ] * u + c [ 2 ] * v ) );
+            answer.at(8) += coeff * gVector.at(2) * ( nV.at(3) + t_supg * ( b [ 2 ] * u + c [ 2 ] * v ) );
+
+            coeff = t_pspg * dV;
+            answer.at(3) += coeff * ( b [ 0 ] * gVector.at(1) + c [ 0 ] * gVector.at(2) );
+            answer.at(6) += coeff * ( b [ 1 ] * gVector.at(1) + c [ 1 ] * gVector.at(2) );
+            answer.at(9) += coeff * ( b [ 2 ] * gVector.at(1) + c [ 2 ] * gVector.at(2) );
+        }
+    }
+}
+
+
+void
 TR1_2D_SUPG_AXI :: computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *tStep)
 {
     int nLoads;
