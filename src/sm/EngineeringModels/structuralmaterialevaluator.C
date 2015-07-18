@@ -68,8 +68,8 @@ IRResultType StructuralMaterialEvaluator :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, this->cmpntFunctions, _IFT_StructuralMaterialEvaluator_componentFunctions);
     IR_GIVE_FIELD(ir, this->sControl, _IFT_StructuralMaterialEvaluator_stressControl);
 
+    tolerance = 1.0;
     if ( this->sControl.giveSize() > 0 ) {
-        tolerance = 1.0;
         IR_GIVE_FIELD(ir, this->tolerance, _IFT_StructuralMaterialEvaluator_tolerance);
     }
 
