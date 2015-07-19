@@ -122,9 +122,9 @@ public:
     const FloatMatrix &giveTLmatrix() { return TLmatrix; }
     const FloatMatrix &giveTransformationMatrix() { return transformationMatrix; }
 
-    void setPmatrix(FloatMatrix values) { Pmatrix = std :: move(values); }
-    void setTLmatrix(FloatMatrix values) { TLmatrix = std :: move(values); }
-    void setTransformationMatrix(FloatMatrix values) { transformationMatrix = std :: move(values); }
+    void setPmatrix(const FloatMatrix &values) { Pmatrix = values; }
+    void setTLmatrix(const FloatMatrix &values) { TLmatrix = values; }
+    void setTransformationMatrix(const FloatMatrix &values) { transformationMatrix = values; }
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 

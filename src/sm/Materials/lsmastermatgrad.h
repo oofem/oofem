@@ -85,24 +85,5 @@ public:
     virtual void giveFirstPKStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalDamageDrivningVariable, TimeStep *tStep);
 };
 
-//=============================================================================
-
-
-class LargeStrainMasterMaterialGradStatus : public LargeStrainMasterMaterialStatus
-{
-public:
-    LargeStrainMasterMaterialGradStatus(int n, Domain * d, GaussPoint * g, int s);
-    virtual ~LargeStrainMasterMaterialGradStatus();
-
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
-
-    virtual void initTempStatus();
-
-    virtual void updateYourself(TimeStep *);
-
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual const char *giveClassName() const { return "LargeStrainMasterMaterialGradStatus"; }
-};
 } // end namespace oofem
 #endif // misesmat_h
