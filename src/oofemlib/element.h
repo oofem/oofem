@@ -554,7 +554,7 @@ public:
      */
     virtual FEInterpolation *giveInterpolation(DofIDItem id) const { return giveInterpolation(); }
     /// @return Reference to the associated material of element.
-    Material *giveMaterial();
+    virtual Material *giveMaterial();
     /// @return Material number.
     int giveMaterialNumber() const {return material;}
     /// @return Reference to the associated crossSection of element.

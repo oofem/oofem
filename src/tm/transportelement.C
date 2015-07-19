@@ -46,7 +46,6 @@
 #include "mathfem.h"
 #include "crosssection.h"
 #include "transportcrosssection.h"
-#include "simpletransportcrosssection.h"
 #include "feinterpol.h"
 #include "feinterpol2d.h"
 #include "feinterpol3d.h"
@@ -143,8 +142,8 @@ TransportElement :: checkConsistency()
 //
 {
     int result = 1;
-    if ( !dynamic_cast< TransportMaterial * >( giveMaterial() ) ) {
-        OOFEM_WARNING("material without support for transport problems");
+    if ( this->material > 0 && !dynamic_cast< TransportMaterial* >( this->giveMaterial() ) ) {
+        OOFEM_WARNING("cross section without support for transport problems");
         result = 0;
     }
 
@@ -461,8 +460,6 @@ TransportElement :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
     FloatArray unknowns;
     this->computeVectorOf(VM_Total, tStep, unknowns);
 
-    //TransportCrossSection *cs = static_cast< SimpleTransportCrossSection * >( this->giveCrossSection() );
-    //TransportMaterial *mat = static_cast< SimpleTransportCrossSection * >( cs )->giveMaterial();
     TransportMaterial *mat = static_cast< TransportMaterial* >( this->giveMaterial() );
     FloatArray flux, grad, field;
     FloatMatrix B, N;
@@ -1153,6 +1150,24 @@ TransportElement :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, Pr
         OOFEM_ERROR("target point not in receiver volume");
         return 1; // failed
     }
+}
+
+
+TransportCrossSection *
+TransportElement :: giveTransportCrossSection()
+{
+    return static_cast< TransportCrossSection* >( this->giveCrossSection() );
+}
+
+
+Material *
+TransportElement :: giveMaterial()
+{
+    // This method is overloaded in order to have some backwards compatibility
+    if ( material ) {
+        return domain->giveMaterial(this->material);
+    }
+    return static_cast< TransportCrossSection* >( this->giveCrossSection() )->giveMaterial();
 }
 
 
