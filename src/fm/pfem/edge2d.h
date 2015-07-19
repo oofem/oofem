@@ -48,21 +48,22 @@ class Edge2D
 {
 private:
     /// Global node numbers
-    IntArray nodes;             //at 1 - nodeA; at 2 -nodeB
+    std :: pair< int, int >nodeNumbers;
 
 public:
     /// Constructor
     Edge2D(int node1, int node2);
     /// Destructor
     virtual ~Edge2D();
-    int giveNode(int n) { return nodes.at(n); }
-    virtual bool operator == ( const Edge2D & right );
+    int giveFirstNodeNumber() { return nodeNumbers.first; }
+    int giveSecondNodeNumber() { return nodeNumbers.second; }
+    virtual bool operator==(const Edge2D &right);
 };
 
 /**
  * Class for the boundary recognition method - alpha shape.
- * Case 1 - convex hull edge: alpha greater than outerAlphaBound, edge is part of alpha shape
- * Case 2 - shared edge: alpha greater than innerAlphaBound, edge lies within alpha shape;
+ * Case 1 - convex hull edge: alpha greater than outerAlphaBound, edge is part of alpha shape.
+ * Case 2 - shared edge: alpha greater than innerAlphaBound, edge lies within alpha shape.
  * Alpha between bounds, edge is exactly on alpha shape
  * Alpha smaller than outerAlphaBound, edge lies outside of alpha shape
  */
@@ -73,6 +74,7 @@ public:
     AlphaEdge2D(int node1, int node2, double _length);
     /// Destructor
     virtual ~AlphaEdge2D();
+
 
     void setOuterAlphaBound(double alphaMin) { outerAlphaBound = alphaMin; }
     void setInnerAlphaBound(double alphaMax) { innerAlphaBound = alphaMax; }
