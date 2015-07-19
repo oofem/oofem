@@ -625,8 +625,8 @@ int AbaqusUserMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Intern
         answer = ms->giveStateVector();
         return 1;
     } else if ( type == IST_StressTensor ) {
-        StructuralMaterial :: giveFullSymVectorForm( answer, ms->giveStressVector(), gp->giveMaterialMode() );
-	answer.add(initialStress);
+        answer = ms->giveStressVector();
+        answer.add(initialStress);
         return 1;
     } else {
         return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);

@@ -2179,7 +2179,6 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
                                                            GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
 {
     FloatArray et, eigenstrain;
-    MaterialMode matmode = gp->giveMaterialMode();
     if ( gp->giveIntegrationRule() == NULL ) {
         ///@todo Hack for loose gausspoints. We shouldn't ask for "gp->giveElement()". FIXME
         answer.clear();
@@ -2206,8 +2205,8 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
         selem->computeResultingIPEigenstrainAt(eigenstrain, tStep, gp, mode);
     }
 
-    if ( eigenstrain.giveSize() != 0 && eigenstrain.giveSize() != giveSizeOfVoigtSymVector(matmode) ) {
-        OOFEM_ERROR( "Number of given eigenstrain components %d is different than required %d by material mode %s, element %d", eigenstrain.giveSize(), giveSizeOfVoigtSymVector(matmode), __MaterialModeToString(matmode), elem->giveNumber() );
+    if ( eigenstrain.giveSize() != 0 && eigenstrain.giveSize() != giveSizeOfVoigtSymVector(gp->giveMaterialMode()) ) {
+        OOFEM_ERROR( "Number of given eigenstrain components %d is different than required %d by element %d", eigenstrain.giveSize(), giveSizeOfVoigtSymVector(gp->giveMaterialMode()), elem->giveNumber() );
     }
 
     /* add external source, if provided */

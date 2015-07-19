@@ -738,9 +738,8 @@ Shell7BaseXFEM :: computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep)
                     answer.assemble(tempRed, this->orderingArrays[dei->giveNumber()], this->orderingArrays[couplesToEi->giveNumber()]);
                     tempRedT.beTranspositionOf(tempRed);
                     answer.assemble(tempRedT, this->orderingArrays[couplesToEi->giveNumber()], this->orderingArrays[dei->giveNumber()]);  
-                }   
+                }
             }
-            
         }
     }
 }

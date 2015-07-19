@@ -66,19 +66,12 @@ M1Material :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-int
-M1Material :: hasMaterialModeCapability(MaterialMode mode)
-{
-    return mode == _3dMat;
-}
-
 void
 M1Material :: giveRealStressVector_3d(FloatArray &answer,
                                       GaussPoint *gp,
                                       const FloatArray &totalStrain,
                                       TimeStep *tStep)
 {
-    int i, imp;
     answer.resize(6);
     answer.zero();
 
@@ -96,7 +89,7 @@ M1Material :: giveRealStressVector_3d(FloatArray &answer,
     // loop over microplanes
     FloatArray sigN(numberOfMicroplanes);
     IntArray plState(numberOfMicroplanes);
-    for ( imp = 1; imp <= numberOfMicroplanes; imp++ ) {
+    for ( int imp = 1; imp <= numberOfMicroplanes; imp++ ) {
         Microplane *mPlane = this->giveMicroplane(imp - 1, gp);
         //IntegrationPointStatus *mPlaneStatus =  this->giveMicroplaneStatus(mPlane);
         double epsN = computeNormalStrainComponent(mPlane, totalStrain);
@@ -117,14 +110,12 @@ M1Material :: giveRealStressVector_3d(FloatArray &answer,
             plState.at(imp) = 0;
         }
         // add the contribution of the microplane to macroscopic stresses
-        for ( i = 1; i <= 6; i++ ) {
+        for ( int i = 1; i <= 6; i++ ) {
             answer.at(i) += N [ imp - 1 ] [ i - 1 ] * sigN.at(imp) * microplaneWeights [ imp - 1 ];
         }
     }
     // multiply the integral over unit hemisphere by 6
-    for ( i = 1; i <= 6; i++ ) {
-        answer.at(i) *= 6.;
-    }
+    answer.times(6);
 
     // update status
     status->letTempStrainVectorBe(totalStrain);
@@ -291,7 +282,6 @@ M1Material :: giveRealStressVector_PlaneStress(FloatArray &answer,
                                                const FloatArray &totalStrain,
                                                TimeStep *tStep)
 {
-    int i, imp;
     FloatArray sigmaN, deps, sigmaNyield;
     double depsN, epsN;
 
@@ -309,7 +299,7 @@ M1Material :: giveRealStressVector_PlaneStress(FloatArray &answer,
     }
     deps.beDifferenceOf( totalStrain, status->giveStrainVector() );
 
-    for ( imp = 1; imp <= nmp; imp++ ) {
+    for ( int imp = 1; imp <= nmp; imp++ ) {
         depsN = N.at(imp, 1) * deps.at(1) + N.at(imp, 2) * deps.at(2) + N.at(imp, 3) * deps.at(3);
         epsN = N.at(imp, 1) * totalStrain.at(1) + N.at(imp, 2) * totalStrain.at(2) + N.at(imp, 3) * totalStrain.at(3);
         sigmaN.at(imp) += EN * depsN;
@@ -321,7 +311,7 @@ M1Material :: giveRealStressVector_PlaneStress(FloatArray &answer,
             sigmaN.at(imp) = sy;
         }
         sigmaNyield.at(imp) = sy;
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             answer.at(i) += N.at(imp, i) * sigmaN.at(imp) * mw.at(imp);
         }
     }

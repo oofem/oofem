@@ -92,16 +92,14 @@ TutorialMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
     // subtract stress thermal expansion
     this->giveStressDependentPartOfStrainVector(strain, gp, totalStrain, tStep, VM_Total);
     
-    FloatArray deltaStrain;
-    deltaStrain.beDifferenceOf(strain, status->giveStrainVector());  
+    FloatArray trialElastStrain;
+    trialElastStrain.beDifferenceOf(strain, status->givePlasticStrain());
 
     // Compute trial stress = sig_tr = sig_old + E*delta_eps
     FloatMatrix elasticStiffness;
     D.give3dMaterialStiffnessMatrix(elasticStiffness, TangentStiffness, gp, tStep);
-    FloatArray trialStress, deltaStress;
-    deltaStress.beProductOf(elasticStiffness, deltaStrain);   // linear increment
-    trialStress = status->giveStressVector(); // last equilibriated stress
-    trialStress.add(deltaStress);
+    FloatArray trialStress;
+    trialStress.beProductOf(elasticStiffness, trialElastStrain);
 
     FloatArray sphTrialStress, devTrialStress;
     computeSphDevPartOf(trialStress, sphTrialStress, devTrialStress);

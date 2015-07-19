@@ -431,12 +431,10 @@ void CompCol :: timesT(const FloatArray &x, FloatArray &answer) const
 
     answer.resize(N);
     answer.zero();
-    int i, t;
-    double r;
 
-    for ( i = 0; i < N; i++ ) {
-        r = 0.0;
-        for ( t = colptr_(i); t < colptr_(i + 1); t++ ) {
+    for ( int i = 0; i < N; i++ ) {
+        double r = 0.0;
+        for ( int t = colptr_(i); t < colptr_(i + 1); t++ ) {
             r += val_(t) * x( rowind_(t) );
         }
 

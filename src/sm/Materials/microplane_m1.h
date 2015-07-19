@@ -115,7 +115,6 @@ public:
     virtual const char *giveClassName() const { return "M1Material"; }
     virtual const char *giveInputRecordName() const { return _IFT_M1Material_Name; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int hasMaterialModeCapability(MaterialMode mode);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new M1MaterialStatus(1, domain, gp); }
 
