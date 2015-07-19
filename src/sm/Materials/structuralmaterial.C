@@ -227,7 +227,7 @@ StructuralMaterial :: giveRealStressVector_ShellStressControl(FloatArray &answer
         vE.assemble(increment_vE, stressControl);
     }
 
-    OOFEM_WARNING("StructuralMaterial :: giveRealStressVector_ShellStressControl - Iteration did not converge");
+    OOFEM_WARNING("Iteration did not converge");
     answer.clear();
 }
 
@@ -754,45 +754,6 @@ StructuralMaterial :: give1dStressStiffMtrx_dCde(FloatMatrix &answer,
                                                  GaussPoint *gp, TimeStep *tStep)
 {
     OOFEM_ERROR("There is no default implementation");
-}
-
-
-void
-StructuralMaterial :: convert_P_2_S(FloatArray &answer, const FloatArray &reducedvP, const FloatArray &reducedvF, MaterialMode matMode)
-{
-    // Converts first Piola-Kirchhoff stress to second Piola-Kirchhoff stress: S = inv(F)*P
-    // Output size will be according to MaterialMode
-
-    FloatArray vF, vP;
-    StructuralMaterial :: giveFullVectorFormF(vF, reducedvF, matMode); // 9 components
-    StructuralMaterial :: giveFullVectorForm(vP, reducedvP, matMode);
-    FloatMatrix F, P, S, invF;
-    F.beMatrixForm(vF);
-    P.beMatrixForm(vP);
-    invF.beInverseOf(F);
-    S.beProductOf(invF, P);
-    FloatArray vS;
-    vS.beSymVectorForm(S); // 6 components
-
-    StructuralMaterial :: giveReducedSymVectorForm(answer, vS, matMode); // convert back to reduced size
-}
-
-
-void
-StructuralMaterial :: convert_S_2_P(FloatArray &answer, const FloatArray &reducedvS, const FloatArray &reducedvF, MaterialMode matMode)
-{
-    // Converts second Piola-Kirchhoff stress to first Piola-Kirchhoff stress: P = F*S
-    // Output size will be according to MaterialMode
-
-    FloatArray vF, vS, vP;
-    StructuralMaterial :: giveFullVectorFormF(vF, reducedvF, matMode);   // 9 components
-    StructuralMaterial :: giveFullSymVectorForm(vS, reducedvS, matMode); // 6 components
-    FloatMatrix F, P, S;
-    F.beMatrixForm(vF);
-    S.beMatrixForm(vS);
-    P.beProductOf(F, S);
-    vP.beVectorForm(P);
-    StructuralMaterial :: giveReducedVectorForm(answer, vP, matMode);   // convert back to reduced size
 }
 
 

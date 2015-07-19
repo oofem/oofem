@@ -258,14 +258,6 @@ public:
     void give_dPdF_from(const FloatMatrix &dSdE, FloatMatrix &answer, GaussPoint *gp);
     void convert_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix &dSdE, const FloatArray &S, const FloatArray &F, MaterialMode matMode);
 
-    static void convert_P_2_S(FloatArray &answer, const FloatArray &reducedvP, const FloatArray &reducedvF, MaterialMode matMode);
-    static void convert_S_2_P(FloatArray &answer, const FloatArray &reducedvS, const FloatArray &reducedvF, MaterialMode matMode);
-    //@todo is it neccesary to have these functions ?
-    static void convert_P_2_C(FloatArray &answer, const FloatArray &reducedvP, const FloatArray &reducedvF, MaterialMode matMode);
-    static void convert_C_2_P(FloatArray &answer, const FloatArray &reducedvS, const FloatArray &reducedvF, MaterialMode matMode);
-    static void convert_S_2_C(FloatArray &answer, const FloatArray &reducedvP, const FloatArray &reducedvF, MaterialMode matMode);
-    static void convert_C_2_S(FloatArray &answer, const FloatArray &reducedvS, const FloatArray &reducedvF, MaterialMode matMode);
-
     /**
      * Returns a vector of coefficients of thermal dilatation in direction of each material principal (local) axis.
      * @param answer Vector of thermal dilatation coefficients.
