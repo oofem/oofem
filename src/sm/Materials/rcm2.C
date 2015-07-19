@@ -631,7 +631,7 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
     int numberOfActiveCracks = status->giveNumberOfTempActiveCracks();
     int indi, indj, ii, jj;
     double G, princStressDis, princStrainDis;
-    FloatMatrix de, invDe, compliance, dcr, d, df, t, tt, tempCrackDirs;
+    FloatMatrix de, invDe, compliance, dcr, d, df, t, tempCrackDirs;
     FloatArray principalStressVector, principalStrainVector;
     IntArray mask;
 
@@ -723,8 +723,7 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
     //
 
     this->giveStressVectorTranformationMtrx(t, tempCrackDirs, 1);
-    tt.beTranspositionOf(t);
-    df.rotatedWith(tt);
+    df.rotatedWith(t, 't');
 
     StructuralMaterial :: giveReducedSymMatrixForm( answer, df, gp->giveMaterialMode() );
 }

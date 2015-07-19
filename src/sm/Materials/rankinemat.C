@@ -604,10 +604,9 @@ RankineMat :: evaluatePlaneStressStiffMtrx(FloatMatrix &answer,
     }
 
     // transform to global coordinates
-    FloatMatrix T(3, 3), TT;
+    FloatMatrix T;
     givePlaneStressVectorTranformationMtrx(T, nPrinc, true);
-    TT.beTranspositionOf(T);
-    answer.rotatedWith(TT);
+    answer.rotatedWith(T, 't');
 }
 
 // derivatives of final kappa with respect to final strain
