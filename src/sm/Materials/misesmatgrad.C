@@ -275,11 +275,11 @@ MisesMatGrad :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMo
         double damage = status->giveDamage();
         double sigmaY = sig0 + H * kappa;
         // trial deviatoric stress and its norm
-        StressVector trialStressDev(status->giveTrialStressDev(), _3dMat);
+        const FloatArray &trialStressDev = status->giveTrialStressDev();
         /*****************************************************/
         //double trialStressVol = status->giveTrialStressVol();
         /****************************************************/
-        double trialS = trialStressDev.computeStressNorm();
+        double trialS = computeStressNorm(trialStressDev);
         // one correction term
         FloatMatrix stiffnessCorrection(6, 6);
         stiffnessCorrection.beDyadicProductOf(trialStressDev, trialStressDev);
@@ -332,11 +332,11 @@ void
 MisesMatGrad :: givePlaneStrainKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MisesMatGradStatus *status = static_cast< MisesMatGradStatus * >( this->giveStatus(gp) );
-    answer.resize(1, 4);
-    answer.zero();
     StressVector trialStressDev(status->giveTrialStressDev(), _PlaneStrain);
     double tempKappa = status->giveTempCumulativePlasticStrain();
     double dKappa = tempKappa - status->giveCumulativePlasticStrain();
+    answer.resize(1, 4);
+    answer.zero();
     if ( dKappa > 0 ) {
         double trialS = trialStressDev.computeStressNorm();
         answer.at(1, 1) = trialStressDev.at(1);
@@ -353,12 +353,13 @@ void
 MisesMatGrad :: give3dKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MisesMatGradStatus *status = static_cast< MisesMatGradStatus * >( this->giveStatus(gp) );
-    answer.resize(1, 6);
-    StressVector trialStressDev(status->giveTrialStressDev(), _3dMat);
+    const FloatArray &trialStressDev = status->giveTrialStressDev();
     double tempKappa = status->giveTempCumulativePlasticStrain();
     double dKappa = tempKappa - status->giveCumulativePlasticStrain();
+    answer.resize(1, 6);
+    answer.zero();
     if ( dKappa > 0 ) {
-        double trialS = trialStressDev.computeStressNorm();
+        double trialS = computeStressNorm(trialStressDev);
         for ( int i = 1; i <= 6; i++ ) {
             answer.at(1, i) = trialStressDev.at(i);
         }

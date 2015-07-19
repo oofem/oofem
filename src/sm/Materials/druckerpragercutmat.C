@@ -37,8 +37,6 @@
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "gausspoint.h"
-#include "stressvector.h"
-#include "strainvector.h"
 #include "mathfem.h"
 #include "contextioerr.h"
 #include "datastream.h"
@@ -125,13 +123,10 @@ DruckerPragerCutMat :: computeYieldValueAt(GaussPoint *gp, int isurf, const Floa
         double volumetricStress;
         double DPYieldStressInShear = tau0 + H *strainSpaceHardeningVariables.at(4);
         double JTwo;
-        //MaterialMode mmode = gp->giveMaterialMode();
-        MaterialMode mmode = _3dMat;
-        StressVector stressVector1(stressVector, mmode); //convert from array
-        StressVector deviatoricStress(mmode);
+        FloatArray deviatoricStress;
 
-        stressVector1.computeDeviatoricVolumetricSplit(deviatoricStress, volumetricStress);
-        JTwo = deviatoricStress.computeSecondInvariant();
+        volumetricStress = this->computeDeviatoricVolumetricSplit(deviatoricStress, stressVector);
+        JTwo = computeSecondStressInvariant(deviatoricStress);
         return 3. * alpha * volumetricStress + sqrt(JTwo) - DPYieldStressInShear;
     }
 }
@@ -156,21 +151,18 @@ DruckerPragerCutMat :: computeStressGradientVector(FloatArray &answer, functType
         answer.at(5) = t.at(1, isurf) * t.at(3, isurf); //xz = 13
         answer.at(6) = t.at(1, isurf) * t.at(2, isurf); //xy = 12
     } else { //DP nonassociated
-        //MaterialMode mmode = gp->giveMaterialMode();
-        MaterialMode mmode = _3dMat;
-        StressVector stressVector1(stressVector, mmode); //convert from array
-        StressVector deviatoricStress(mmode);
-        double sqrtJTwo, volumetricStress;
+        double sqrtJTwo;
+        FloatArray deviatoricStress;
 
-        stressVector1.computeDeviatoricVolumetricSplit(deviatoricStress, volumetricStress);
-        sqrtJTwo = sqrt( deviatoricStress.computeSecondInvariant() );
+        this->computeDeviatoricVolumetricSplit(deviatoricStress, stressVector);
+        sqrtJTwo = sqrt( computeSecondStressInvariant(deviatoricStress) );
 
         answer.at(1) = alphaPsi + deviatoricStress.at(1) / 2. / sqrtJTwo;
         answer.at(2) = alphaPsi + deviatoricStress.at(2) / 2. / sqrtJTwo;
         answer.at(3) = alphaPsi + deviatoricStress.at(3) / 2. / sqrtJTwo;
-        answer.at(4) = stressVector1.at(4) / sqrtJTwo;
-        answer.at(5) = stressVector1.at(5) / sqrtJTwo;
-        answer.at(6) = stressVector1.at(6) / sqrtJTwo;
+        answer.at(4) = stressVector.at(4) / sqrtJTwo;
+        answer.at(5) = stressVector.at(5) / sqrtJTwo;
+        answer.at(6) = stressVector.at(6) / sqrtJTwo;
     }
 }
 
@@ -193,21 +185,17 @@ DruckerPragerCutMat :: computeReducedSSGradientMatrix(FloatMatrix &gradientMatri
     gradientMatrix.zero();
 
     if ( isurf == 4 ) {
-        int i, j;
         double c1 = 0.;
-        //MaterialMode mmode = gp->giveMaterialMode();
-        MaterialMode mmode = _3dMat;
-        StressVector stressVector1(fullStressVector, mmode); //convert from array
-        StressVector deviatoricStress(mmode);
-        double JTwo, sqrtJTwo, volumetricStress;
+        FloatArray deviatoricStress;
+        double JTwo, sqrtJTwo;
 
-        stressVector1.computeDeviatoricVolumetricSplit(deviatoricStress, volumetricStress);
-        JTwo = deviatoricStress.computeSecondInvariant();
+        computeDeviatoricVolumetricSplit(deviatoricStress, fullStressVector);
+        JTwo = computeSecondStressInvariant(deviatoricStress);
         sqrtJTwo = sqrt(JTwo);
 
         if ( gp->giveMaterialMode() == _3dMat ) {
-            for ( i = 1; i <= 6; i++ ) {
-                for ( j = i; j <= 6; j++ ) {
+            for ( int i = 1; i <= 6; i++ ) {
+                for ( int j = i; j <= 6; j++ ) {
                     if ( ( i == 1 && j == 1 ) || ( i == 2 && j == 2 ) || ( i == 3 && j == 3 ) ) {
                         c1 = 2 / 3.;
                     } else if ( ( i == 4 && j == 4 ) || ( i == 5 && j == 5 ) || ( i == 6 && j == 6 ) ) {
@@ -222,8 +210,8 @@ DruckerPragerCutMat :: computeReducedSSGradientMatrix(FloatMatrix &gradientMatri
             }
             gradientMatrix.symmetrized();
         } else if ( gp->giveMaterialMode() == _PlaneStrain ) {
-            for ( i = 1; i <= 4; i++ ) {
-                for ( j = i; j <= 4; j++ ) {
+            for ( int i = 1; i <= 4; i++ ) {
+                for ( int j = i; j <= 4; j++ ) {
                     if ( ( i == 1 && j == 1 ) || ( i == 2 && j == 2 ) || ( i == 3 && j == 3 ) ) {
                         c1 = 2 / 3.;
                     } else if ( ( i == 4 && j == 4 ) ) {
@@ -249,7 +237,6 @@ DruckerPragerCutMat :: computeReducedElasticModuli(FloatMatrix &answer,
                                                    GaussPoint *gp,
                                                    TimeStep *tStep)
 {  /* Returns elastic moduli in reduced stress-strain space*/
-   //MaterialMode mode = gp->giveMaterialMode();
     this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, ElasticStiffness, gp, tStep);
 }
 
