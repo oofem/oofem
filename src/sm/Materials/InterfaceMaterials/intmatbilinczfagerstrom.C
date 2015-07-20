@@ -266,15 +266,6 @@ void
 
 IntMatBilinearCZFagerstrom :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-
-    //this->initGpForNewStep(gp);
-
-    answer.resize(3,3);
-    answer.zero();
-    //this->give3dStiffnessMatrix_dTdj_num(answer, rMode, gp, tStep);
-    //OOFEM_WARNING("numerical tangent");
-    //answer.printYourself();
-
     IntMatBilinearCZFagerstromStatus *status = static_cast< IntMatBilinearCZFagerstromStatus * >( this->giveStatus(gp) );
 
     if (status->giveOldDamageDev()) {

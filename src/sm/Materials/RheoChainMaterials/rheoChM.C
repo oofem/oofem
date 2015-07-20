@@ -95,8 +95,6 @@ RheoChainMaterial :: giveRealStressVector(FloatArray &answer,
 
     // initialize the temporary material status and the Gauss point
     this->initTempStatus(gp);
-    //ph!!! was commented by someone - why???
-    this->initGpForNewStep(gp);
 
     if ( !this->isActivated(tStep) ) {
         FloatArray zeros;

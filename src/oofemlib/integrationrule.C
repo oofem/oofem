@@ -131,11 +131,8 @@ IntegrationRule :: initForNewStep()
 {
     // initializes receiver to new time step or can be used
     // if current time step must be restarted
-    //
-    // call material->initGpForNewStep() for all GPs.
-    //
     for ( GaussPoint *gp: *this ) {
-        gp->giveMaterial()->initGpForNewStep(gp);
+        gp->giveMaterial()->initTempStatus(gp);
     }
 }
 

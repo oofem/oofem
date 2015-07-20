@@ -226,7 +226,6 @@ public:
 
 protected:
 
-    virtual void initTempStatus(GaussPoint *gp);
     virtual void checkForNewActiveCracks(IntArray &answer, GaussPoint *gp, const FloatArray &,
                                          const FloatArray &, FloatArray &, const FloatArray &);
     virtual void updateCrackStatus(GaussPoint *gp, const FloatArray &crackStrain);

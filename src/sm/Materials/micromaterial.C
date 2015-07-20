@@ -173,7 +173,6 @@ void MicroMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp
 
     OOFEM_ERROR("Should not be called, use giveInternalForcesVector instead");
 
-    //     this->initGpForNewStep(gp);
     //     int nelem = microDomain->giveNumberOfElements();
     //     //int nnodes = microDomain->giveNumberOfDofManagers();
     //

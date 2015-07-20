@@ -135,7 +135,7 @@ MicroplaneMaterial :: saveIPContext(DataStream &stream, ContextMode mode, GaussP
     // save microplanes
     for ( int mPlaneIndex = 0; mPlaneIndex < numberOfMicroplanes; mPlaneIndex++ ) {
         Microplane *mPlane = this->giveMicroplane(mPlaneIndex, gp);
-        IntegrationPointStatus *status =  this->giveMicroplaneStatus(mPlane);
+        IntegrationPointStatus *status = this->giveMicroplaneStatus(mPlane);
         if ( status ) {
             if ( ( iores = status->saveContext(stream, mode, gp) ) != CIO_OK ) {
                 THROW_CIOERR(iores);

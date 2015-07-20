@@ -249,7 +249,6 @@ KelvinChainMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tStep)
             muthHiddenVarsVector.add(help);
             status->letTempHiddenVarsVectorBe(mu, muthHiddenVarsVector);
         } else {
-            //status->letHiddenVarsVectorBe( mu, (new FloatArray(help)) );
             status->letTempHiddenVarsVectorBe(mu, help);
         }
     }

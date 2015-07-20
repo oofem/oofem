@@ -111,7 +111,6 @@ IsotropicDamageMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *
     FloatMatrix de;
     double f, equivStrain, tempKappa = 0.0, omega = 0.0;
 
-    //this->initGpForNewStep(gp);
     this->initTempStatus(gp);
     
     // subtract stress independent part

@@ -130,7 +130,6 @@ MisesMatNl :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoi
     MisesMatNlStatus *nlstatus = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
-    //this->initGpForNewStep(gp);
     this->performPlasticityReturn(gp, strainVector);
     this->computeLocalCumPlasticStrain(cumPlasticStrain, gp, tStep);
     // standard formulation based on averaging of equivalent strain
@@ -430,8 +429,6 @@ MisesMatNl :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray &
     MisesMatNlStatus *status = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
     StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
     FloatMatrix b;
-    LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
-    double E = lmat->give('E', gp);
 
     elem->giveLocationArray(rloc, s);
     elem->computeBmatrixAt(gp, b);
@@ -440,6 +437,8 @@ MisesMatNl :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray &
 
     rcontrib.clear();
     if ( ( tempKappa - kappa ) > 0 ) {
+        LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
+        double E = lmat->give('E', gp);
         const FloatArray &stress = status->giveTempEffectiveStress();
         if ( gp->giveMaterialMode() == _1dMat ) {
             double coeff = sgn( stress.at(1) ) * E / ( E + H );

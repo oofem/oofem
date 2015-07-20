@@ -129,7 +129,6 @@ RCM2Material :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     RCM2MaterialStatus *status = static_cast< RCM2MaterialStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
-    //this->initGpForNewStep(gp);
 
     // subtract stress independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
@@ -339,19 +338,6 @@ RCM2Material :: giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint *
 
     // convergence not reached
     OOFEM_ERROR("convergence not reached");
-}
-
-
-void
-RCM2Material :: initTempStatus(GaussPoint *gp)
-//
-// Initialize MatStatus (respective it's temporary variables at the begining
-// of integrating incremental constitutive relations) to correct values
-//
-{
-    RCM2MaterialStatus *status = static_cast< RCM2MaterialStatus * >( this->giveStatus(gp) );
-
-    status->initTempStatus();
 }
 
 

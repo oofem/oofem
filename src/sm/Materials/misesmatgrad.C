@@ -459,7 +459,7 @@ void
 MisesMatGrad :: giveRealStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *tStep)
 {
     MisesMatGradStatus *status = static_cast< MisesMatGradStatus * >( this->giveStatus(gp) );
-    //this->initGpForNewStep(gp);
+
     this->initTempStatus(gp);
 
     double tempDamage;
