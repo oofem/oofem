@@ -75,6 +75,8 @@ public:
                                   const FloatArray &lcoords, const FEICellGeometry &cellgeo) { }
     virtual double evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo);
 
+    virtual int giveNumberOfNodes() const { return 2; }
+
     virtual IntegrationRule *giveIntegrationRule(int order);
 
 protected:

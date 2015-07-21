@@ -406,7 +406,7 @@ public:
     /**
      * Returns the number of geometric nodes of the receiver.
      */
-    virtual int giveNumberOfNodes() const 
+    virtual int giveNumberOfNodes() const
     { OOFEM_ERROR("giveNumberOfNodes: Not overloaded."); return -1;}
     //@}
     

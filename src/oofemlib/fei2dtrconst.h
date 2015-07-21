@@ -70,6 +70,8 @@ public:
 
     virtual IntegrationRule *giveIntegrationRule(int order);
 
+    virtual int giveNumberOfNodes() const { return 3; }
+
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
 };

@@ -73,6 +73,8 @@ public:
 
     virtual void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 
+    virtual int giveNumberOfNodes() const { return 2; }
+
     virtual IntegrationRule *giveIntegrationRule(int order);
     virtual IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary);
 };
