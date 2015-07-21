@@ -203,6 +203,12 @@ public:
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return true; }
 
+    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+    {
+        double alpha = this->linearElasticMaterial->give(tAlpha, gp);
+        answer = {alpha, alpha, alpha, 0, 0, 0};
+    }
+
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode,
                                                GaussPoint *gp,
