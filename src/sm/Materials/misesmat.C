@@ -788,11 +788,6 @@ void MisesMatStatus :: initTempStatus()
 {
     StructuralMaterialStatus :: initTempStatus();
 
-    if ( plasticStrain.giveSize() == 0 ) {
-        plasticStrain.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
-        plasticStrain.zero();
-    }
-
     tempDamage = damage;
     tempPlasticStrain = plasticStrain;
     tempKappa = kappa;
