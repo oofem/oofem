@@ -62,6 +62,9 @@ FEI2dQuadBiQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FE
     answer.at(9) = a [ 1 ] * b [ 1 ];
     answer.at(6) = a [ 2 ] * b [ 1 ];
 
+    answer.at(4) = a [ 0 ] * b [ 2 ];
+    answer.at(7) = a [ 1 ] * b [ 2 ];
+    answer.at(3) = a [ 2 ] * b [ 2 ];
 }
 
 
