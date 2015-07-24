@@ -75,7 +75,7 @@ IRResultType
 QTrPlaneStrainGrad :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 4;
-    return StructuralElement :: initializeFrom(ir);
+    return QTrPlaneStrain :: initializeFrom(ir);
 }
 
 void

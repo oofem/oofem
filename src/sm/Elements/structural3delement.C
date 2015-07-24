@@ -42,9 +42,7 @@ namespace oofem {
 Structural3DElement :: Structural3DElement(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain),
     matRotation(false)
-    // Constructor. Creates an element with number n, belonging to aDomain.
 {
-    //nlGeometry = 0; // Geometrical nonlinearities disabled as default
 }
 
 
@@ -120,16 +118,22 @@ Structural3DElement :: giveMaterialMode()
 void
 Structural3DElement :: giveMaterialOrientationAt(FloatArray &x, FloatArray &y, FloatArray &z, const FloatArray &lcoords)
 {
-    ///@todo This is subject to change. I'm not sure which is the best way to define a local c.s.
-    FloatMatrix jac;
-    FloatArray help;
-    this->giveInterpolation()->giveJacobianMatrixAt( jac, lcoords, FEIElementGeometryWrapper(this) );
-    x.beColumnOf(jac, 1); // This is {dx/dxi, dy/dxi, dz/dxi}
-    x.normalize();
-    help.beColumnOf(jac, 2);
-    z.beVectorProductOf(x, help); // Normal to the xi-eta plane.
-    z.normalize();
-    y.beVectorProductOf(z, x);
+    if ( this->elemLocalCS.isNotEmpty() ) { // User specified orientation
+        x.beColumnOf(this->elemLocalCS, 1);
+        y.beColumnOf(this->elemLocalCS, 2);
+        z.beColumnOf(this->elemLocalCS, 3);
+    } else {
+        ///@todo This is subject to change. I'm not sure which is the best way to define a local c.s.
+        FloatMatrix jac;
+        FloatArray help;
+        this->giveInterpolation()->giveJacobianMatrixAt( jac, lcoords, FEIElementGeometryWrapper(this) );
+        x.beColumnOf(jac, 1); // This is {dx/dxi, dy/dxi, dz/dxi}
+        x.normalize();
+        help.beColumnOf(jac, 2);
+        z.beVectorProductOf(x, help); // Normal to the xi-eta plane.
+        z.normalize();
+        y.beVectorProductOf(z, x);
+    }
 }
 
 

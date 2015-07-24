@@ -38,12 +38,9 @@
 #include "Elements/nlstructuralelement.h"
 #include "feinterpol2d.h"
 
+#define _IFT_Structural2DElement_materialCoordinateSystem "matcs" ///< [optional] Support for material directions based on element orientation.
 
 namespace oofem {
-class GaussPoint;
-class FloatMatrix;
-class FloatArray;
-class IntArray;
 
 /**
  * Base class for planar 2D elements.
@@ -54,15 +51,17 @@ class Structural2DElement : public NLStructuralElement
 {
 
 protected:
-  /** 
-   * To facilitate the transformation of 2d elements into 3d, the complexity of transformation from 3d to
-   *  local 2d system can be efficiently hidden in custom FEICellGeometry wrapper, that performs the transformation
-   * into local system. This way, the existing 2d intrpolation classes can be used.
-   * The element maintain its FEICellGeometry, which is accesible through the giveCellGeometryWrapper. 
-   * Generalization to 3d then would require only substitution of the geometry warpper and definition of 
-   * element transformation matrix.
-   */
-  FEICellGeometry* cellGeometryWrapper;
+    /** 
+     * To facilitate the transformation of 2d elements into 3d, the complexity of transformation from 3d to
+     *  local 2d system can be efficiently hidden in custom FEICellGeometry wrapper, that performs the transformation
+     * into local system. This way, the existing 2d intrpolation classes can be used.
+     * The element maintain its FEICellGeometry, which is accesible through the giveCellGeometryWrapper. 
+     * Generalization to 3d then would require only substitution of the geometry warpper and definition of 
+     * element transformation matrix.
+     */
+    FEICellGeometry* cellGeometryWrapper;
+
+    bool matRotation;
 
 public:
     /**
@@ -92,8 +91,8 @@ protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx = 1, int upperIndx = ALL_STRAINS) = 0 ;
     virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer) = 0;
     virtual void computeGaussPoints();
-    
-    
+
+    void giveMaterialOrientationAt( FloatArray &x, FloatArray &y, const FloatArray &lcoords);
     
     // Edge support
     virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
@@ -102,15 +101,12 @@ protected:
     virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
     virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
-    
 };
 
 
 
-// Plane stress element
 class PlaneStressElement : public Structural2DElement
 {
-
 public:
     PlaneStressElement(int n, Domain * d);
     virtual ~PlaneStressElement() { }
@@ -121,15 +117,11 @@ public:
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx = 1, int upperIndx = ALL_STRAINS) ;
     virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-
 };
 
 
-
-// Plane strain element
 class PlaneStrainElement : public Structural2DElement
 {
-
 public:
     PlaneStrainElement(int n, Domain * d);
     virtual ~PlaneStrainElement() { }
@@ -140,16 +132,11 @@ public:
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx = 1, int upperIndx = ALL_STRAINS) ;
     virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-
 };
 
 
-
-
-// Axisymmetric element
 class AxisymElement : public Structural2DElement
 {
-
 public:
     AxisymElement(int n, Domain * d);
     virtual ~AxisymElement() { }
@@ -168,6 +155,5 @@ protected:
 };
 
 
-
 } // end namespace oofem
-#endif // structural3delement_h
+#endif // structural2delement_h

@@ -152,7 +152,7 @@ IRResultType
 Quad1PlaneStrain :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 4;
-    IRResultType result = NLStructuralElement :: initializeFrom(ir);
+    IRResultType result = PlaneStrainElement :: initializeFrom(ir);
     if ( result != IRRT_OK ) {
         return result;
     }

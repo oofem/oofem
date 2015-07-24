@@ -80,7 +80,7 @@ QTrPlaneStressGrad :: giveDofManDofIDMask(int inode, IntArray &answer) const
 IRResultType
 QTrPlaneStressGrad :: initializeFrom(InputRecord *ir)
 {
-    return StructuralElement :: initializeFrom(ir);
+    return QTrPlaneStress2d :: initializeFrom(ir);
 }
 
 
