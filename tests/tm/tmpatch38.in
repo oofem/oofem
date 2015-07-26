@@ -6,66 +6,70 @@ StationaryProblem nsteps 1 nmodules 1
 errorcheck
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all
-ndofman 36 nelem 12 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1
-node 1 coords 3  3.0   0.0   0.0  bc 1 0
-node 2 coords 3  3.0   2.0   0.0  bc 1 0
-node 3 coords 3  3.0   4.0   0.0  bc 1 0
-node 4 coords 3  1.5   0.0   0.0  bc 1 0
-node 5 coords 3  1.5   2.0   0.0  bc 1 0
-node 6 coords 3  1.5   4.0   0.0  bc 1 0
-node 7 coords 3  0.0   0.0   0.0  bc 1 1
-node 8 coords 3  0.0   2.0   0.0  bc 1 1
-node 9 coords 3  0.0   4.0   0.0  bc 1 1
+ndofman 36 nelem 12 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1 nset 3
+node 1 coords 3  3.0   0.0   0.0
+node 2 coords 3  3.0   2.0   0.0
+node 3 coords 3  3.0   4.0   0.0
+node 4 coords 3  1.5   0.0   0.0
+node 5 coords 3  1.5   2.0   0.0
+node 6 coords 3  1.5   4.0   0.0
+node 7 coords 3  0.0   0.0   0.0
+node 8 coords 3  0.0   2.0   0.0
+node 9 coords 3  0.0   4.0   0.0
 #
-node 10 coords 3  3.0   0.0   2.5  bc 1 0
-node 11 coords 3  3.0   2.0   2.5  bc 1 0
-node 12 coords 3  3.0   4.0   2.5  bc 1 0
-node 13 coords 3  1.5   0.0   2.5  bc 1 0
-node 14 coords 3  1.5   2.0   2.5  bc 1 0
-node 15 coords 3  1.5   4.0   2.5  bc 1 0
-node 16 coords 3  0.0   0.0   2.5  bc 1 1
-node 17 coords 3  0.0   2.0   2.5  bc 1 1
-node 18 coords 3  0.0   4.0   2.5  bc 1 1
+node 10 coords 3  3.0   0.0   2.5
+node 11 coords 3  3.0   2.0   2.5
+node 12 coords 3  3.0   4.0   2.5
+node 13 coords 3  1.5   0.0   2.5
+node 14 coords 3  1.5   2.0   2.5
+node 15 coords 3  1.5   4.0   2.5
+node 16 coords 3  0.0   0.0   2.5
+node 17 coords 3  0.0   2.0   2.5
+node 18 coords 3  0.0   4.0   2.5
 #
-node 19 coords 3  3.0   0.0   5.0  bc 1 0
-node 20 coords 3  3.0   2.0   5.0  bc 1 0
-node 21 coords 3  3.0   4.0   5.0  bc 1 0
-node 22 coords 3  1.5   0.0   5.0  bc 1 0
-node 23 coords 3  1.5   2.0   5.0  bc 1 0
-node 24 coords 3  1.5   4.0   5.0  bc 1 0
-node 25 coords 3  0.0   0.0   5.0  bc 1 1
-node 26 coords 3  0.0   2.0   5.0  bc 1 1
-node 27 coords 3  0.0   4.0   5.0  bc 1 1
+node 19 coords 3  3.0   0.0   5.0
+node 20 coords 3  3.0   2.0   5.0
+node 21 coords 3  3.0   4.0   5.0
+node 22 coords 3  1.5   0.0   5.0
+node 23 coords 3  1.5   2.0   5.0
+node 24 coords 3  1.5   4.0   5.0
+node 25 coords 3  0.0   0.0   5.0
+node 26 coords 3  0.0   2.0   5.0
+node 27 coords 3  0.0   4.0   5.0
 #
-node 28 coords 3  3.0   0.0   7.5  bc 1 0
-node 29 coords 3  3.0   2.0   7.5  bc 1 0
-node 30 coords 3  3.0   4.0   7.5  bc 1 0
-node 31 coords 3  1.5   0.0   7.5  bc 1 0
-node 32 coords 3  1.5   2.0   7.5  bc 1 0
-node 33 coords 3  1.5   4.0   7.5  bc 1 0
-node 34 coords 3  0.0   0.0   7.5  bc 1 1
-node 35 coords 3  0.0   2.0   7.5  bc 1 1
-node 36 coords 3  0.0   4.0   7.5  bc 1 1
+node 28 coords 3  3.0   0.0   7.5
+node 29 coords 3  3.0   2.0   7.5
+node 30 coords 3  3.0   4.0   7.5
+node 31 coords 3  1.5   0.0   7.5
+node 32 coords 3  1.5   2.0   7.5
+node 33 coords 3  1.5   4.0   7.5
+node 34 coords 3  0.0   0.0   7.5
+node 35 coords 3  0.0   2.0   7.5
+node 36 coords 3  0.0   4.0   7.5
 #
-brick1ht 1 nodes 8 1 2 11 10 4 5 14 13  crossSect 1 mat 1 boundaryloads 2 2 1
-brick1ht 2 nodes 8 6 5 14 15 3 2 11 12  crossSect 1 mat 1 boundaryloads 2 2 2
-brick1ht 3 nodes 8 10 19 22 13 11 20 23 14 crossSect 1 mat 1 boundaryloads 2 2 3
-brick1ht 4 nodes 8 23 20 21 24 14 11 12 15 crossSect 1 mat 1 boundaryloads 2 2 4
-brick1ht 5 nodes 8 23 32 29 20 22 31 28 19 crossSect 1 mat 1 boundaryloads 2 2 5
-brick1ht 6 nodes 8 20 23 24 21 29 32 33 30 crossSect 1 mat 1 boundaryloads 2 2 6
+brick1ht 1 nodes 8 1 2 11 10 4 5 14 13
+brick1ht 2 nodes 8 6 5 14 15 3 2 11 12
+brick1ht 3 nodes 8 10 19 22 13 11 20 23 14
+brick1ht 4 nodes 8 23 20 21 24 14 11 12 15
+brick1ht 5 nodes 8 23 32 29 20 22 31 28 19
+brick1ht 6 nodes 8 20 23 24 21 29 32 33 30
 #
-brick1ht 7 nodes 8 4 5 14 13 7 8 17 16 crossSect 1 mat 1 
-brick1ht 8 nodes 8 5 6 15 14 8 9 18 17 crossSect 1 mat 1 
-brick1ht 9 nodes 8 13 14 23 22 16 17 26 25 crossSect 1 mat 1 
-brick1ht 10 nodes 8 14 15 24 23 17 18 27 26 crossSect 1 mat 1 
-brick1ht 11 nodes 8 22 23 32 31 25 26 35 34 crossSect 1 mat 1 
-brick1ht 12 nodes 8 23 24 33 32 26 27 36 35 crossSect 1 mat 1 
+brick1ht 7 nodes 8 4 5 14 13 7 8 17 16
+brick1ht 8 nodes 8 5 6 15 14 8 9 18 17
+brick1ht 9 nodes 8 13 14 23 22 16 17 26 25
+brick1ht 10 nodes 8 14 15 24 23 17 18 27 26
+brick1ht 11 nodes 8 22 23 32 31 25 26 35 34
+brick1ht 12 nodes 8 23 24 33 32 26 27 36 35
 #
-EmptyCS 1
+SimpleTransportCS 1 mat 1 set 1
 IsoHeat 1 d 2400. k 3.0 c 1000.0
-BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
-constantsurfaceload 2 loadTimeFunction 1 ndofs 1 components 1 15.0 properties 1 a 0.8 loadtype 3
+BoundaryCondition  1 loadTimeFunction 1 dofs 1 10 values 1 0.0 set 2
+constantsurfaceload 2 loadTimeFunction 1 components 1 15.0 properties 1 a 0.8 loadtype 3 set 3
 ConstantFunction 1 f(t) 1.0
+Set 1 elementranges {(1 12)}
+Set 2 nodes 12 7 8 9 16 17 18 25 26 27 34 35 36
+Set 3 elementboundaries 12 1 1  2 2  3 3  4 4  5 5  6 6
+
 #%BEGIN_CHECK%
 #NODE tStep 1 number 1 dof 10 unknown d value 6.66666667e+00
 #NODE tStep 1 number 2 dof 10 unknown d value 6.66666667e+00

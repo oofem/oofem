@@ -7,17 +7,18 @@ errorcheck
 #vtkxml tstep_step 1 domain_all primvars 1 6 vars 3 37 39 56 stype 1
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all
-ndofman 3 nelem 1 ncrosssect  1 nmat 1 nbc 1 nic 1 nltf 1
-node 1 coords 3  1.0   0.0   0.0 ic 1 1
-node 2 coords 3  2.2   0.0   0.0 ic 1 1
-node 3 coords 3  1.0   1.0   0.0 ic 1 1
-tr1ht 1 nodes 3 1 2 3 crossSect 1 mat 1
-SimpleCS 1 thick 0.15
+ndofman 3 nelem 1 ncrosssect  1 nmat 1 nbc 1 nic 1 nltf 1 nset 1
+node 1 coords 3  1.0   0.0   0.0
+node 2 coords 3  2.2   0.0   0.0
+node 3 coords 3  1.0   1.0   0.0
+tr1ht 1 nodes 3 1 2 3
+SimpleTransportCS 1 thickness 0.15 mat 1 set 1
 #Standard concrete k(conductivity)=1.7 W/m/K   c(capacity)=870 J/kg/K
 HydratingConcreteMat 1 d 2458. k 1.7 c 870.0 hydrationmodeltype 1 Qpot 509. masscement 409. referenceTemperature 25. tau 48600. beta 0.9 dohinf 0.85 activationenergy 38300 castingTime 0.
-BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 25.0
-InitialCondition 1 Conditions 1 u 25.0
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 10 values 1 25.0
+InitialCondition 1 Conditions 1 u 25.0 dofs 1 10 set 1
 ConstantFunction 1 f(t) 1.0
+Set 1 elements 1 1
 
 #%BEGIN_CHECK% tolerance 1.e-3
 #NODE tStep 21 number 1 dof 10 unknown d value 97.6606
