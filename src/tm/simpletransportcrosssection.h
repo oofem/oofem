@@ -39,6 +39,7 @@
 
 #define _IFT_SimpleTransportCrossSection_Name "simpletransportcs"
 #define _IFT_SimpleTransportCrossSection_material "mat"
+#define _IFT_SimpleTransportCrossSection_thickness "thickness"
 
 namespace oofem {
 class TransportMaterial;
@@ -53,6 +54,7 @@ class OOFEM_EXPORT SimpleTransportCrossSection : public TransportCrossSection
 {
 protected:
     int matNumber;
+    double thickness;
 
 public:
     /**
