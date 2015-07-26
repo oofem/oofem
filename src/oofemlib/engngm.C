@@ -755,9 +755,73 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
 
     int nbc = domain->giveNumberOfBoundaryConditions();
     for ( int i = 1; i <= nbc; ++i ) {
-        ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
-        if ( bc != NULL ) {
-            ma.assembleFromActiveBC(answer, *bc, tStep, s, s);
+        GeneralBoundaryCondition *bc = domain->giveBc(i);
+        ActiveBoundaryCondition *abc;
+        Load *load;
+
+        if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >(bc) ) ) {
+            ma.assembleFromActiveBC(answer, *abc, tStep, s, s);
+        } else if ( bc->giveSetNumber() && ( load = dynamic_cast< Load * >(bc) ) && bc->isImposed(tStep) ) {
+            // Now we assemble the corresponding load type fo the respective components in the set:
+            IntArray loc, bNodes;
+            FloatMatrix mat, R;
+            BodyLoad *bodyLoad;
+            BoundaryLoad *bLoad;
+            Set *set = domain->giveSet( bc->giveSetNumber() );
+
+            if ( ( bodyLoad = dynamic_cast< BodyLoad * >(load) ) ) { // Body load:
+                const IntArray &elements = set->giveElementList();
+                for ( int ielem = 1; ielem <= elements.giveSize(); ++ielem ) {
+                    Element *element = domain->giveElement( elements.at(ielem) );
+                    mat.clear();
+                    ma.matrixFromLoad(mat, *element, bodyLoad, tStep);
+
+                    if ( mat.isNotEmpty() ) {
+                        if ( element->giveRotationMatrix(R) ) {
+                            mat.rotatedWith(R);
+                        }
+
+                        ma.locationFromElement(loc, *element, s);
+                        answer.assemble(loc, mat);
+                    }
+                }
+            } else if ( ( bLoad = dynamic_cast< BoundaryLoad * >(load) ) ) { // Boundary load:
+                const IntArray &boundaries = set->giveBoundaryList();
+                for ( int ibnd = 1; ibnd <= boundaries.giveSize() / 2; ++ibnd ) {
+                    Element *element = domain->giveElement( boundaries.at(ibnd * 2 - 1) );
+                    int boundary = boundaries.at(ibnd * 2);
+                    mat.clear();
+                    ma.matrixFromBoundaryLoad(mat, *element, bLoad, boundary, tStep);
+
+                    if ( mat.isNotEmpty() ) {
+                        element->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+                        if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
+                            mat.rotatedWith(R);
+                        }
+
+                        ma.locationFromElementNodes(loc, *element, bNodes, s);
+                        answer.assemble(loc, mat);
+                    }
+                }
+                ///@todo Should we have a seperate entry for edge loads? Just sticking to the general "boundaryload" for now.
+                const IntArray &edgeBoundaries = set->giveEdgeList();
+                for ( int ibnd = 1; ibnd <= edgeBoundaries.giveSize() / 2; ++ibnd ) {
+                    Element *element = domain->giveElement( edgeBoundaries.at(ibnd * 2 - 1) );
+                    int boundary = edgeBoundaries.at(ibnd * 2);
+                    mat.clear();
+                    ma.matrixFromEdgeLoad(mat, *element, bLoad, boundary, tStep);
+
+                    if ( mat.isNotEmpty() ) {
+                        element->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
+                        if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
+                            mat.rotatedWith(R);
+                        }
+
+                        ma.locationFromElementNodes(loc, *element, bNodes, s);
+                        answer.assemble(loc, mat);
+                    }
+                }
+            }
         }
     }
     

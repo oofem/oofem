@@ -567,6 +567,7 @@ Element :: giveCharacteristicVector(FloatArray &answer, CharType type, ValueMode
 void
 Element :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
 {
+    answer.clear();
     OOFEM_ERROR("Unknown load type.");
 }
 
@@ -574,14 +575,22 @@ Element :: computeLoadVector(FloatArray &answer, Load *load, CharType type, Valu
 void
 Element :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep)
 {
+    answer.clear();
     OOFEM_ERROR("Unknown load type.");
 }
 
 
 void
+Element :: computeTangentFromBoundaryLoad(FloatMatrix &answer, BoundaryLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep)
+{
+    answer.clear();
+}
+
+void
 Element :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     ///@todo Change the load type to "BoundaryEdgeLoad" maybe?
+    answer.clear();
     OOFEM_ERROR("Unknown load type.");
 }
 
@@ -624,7 +633,6 @@ Element :: initializeFrom(InputRecord *ir)
     if ( ir->hasField(_IFT_Element_lcs) ) { //local coordinate system
         double n1 = 0.0, n2 = 0.0;
         FloatArray triplets;
-        triplets.clear();
         IR_GIVE_OPTIONAL_FIELD(ir, triplets, _IFT_Element_lcs);
         elemLocalCS.resize(3, 3);
         for ( int j = 1; j <= 3; j++ ) {
@@ -645,7 +653,6 @@ Element :: initializeFrom(InputRecord *ir)
         elemLocalCS.at(1, 3) = ( elemLocalCS.at(2, 1) * elemLocalCS.at(3, 2) - elemLocalCS.at(3, 1) * elemLocalCS.at(2, 2) );
         elemLocalCS.at(2, 3) = ( elemLocalCS.at(3, 1) * elemLocalCS.at(1, 2) - elemLocalCS.at(1, 1) * elemLocalCS.at(3, 2) );
         elemLocalCS.at(3, 3) = ( elemLocalCS.at(1, 1) * elemLocalCS.at(2, 2) - elemLocalCS.at(2, 1) * elemLocalCS.at(1, 2) );
-        //elemLocalCS.printYourself();
     }
 
     partitions.clear();

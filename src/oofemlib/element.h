@@ -48,6 +48,7 @@
 #include "internalstatetype.h"
 #include "elementextension.h"
 #include "entityrenumberingscheme.h"
+#include "matresponsemode.h"
 #include "unknowntype.h"
 #include "integrationrule.h"
 #include "dofiditem.h"
@@ -297,6 +298,16 @@ public:
      * @param tStep Time step when answer is computed.
      */
     virtual void computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
+    /**
+     * Computes the tangent contribution of the given load at the given boundary.
+     * @note Elements which do not have an contribution should resize the vector to be empty.
+     * @param answer Requested contribution of load.
+     * @param load Load to compute contribution from.
+     * @param boundary Boundary number.
+     * @param rmode Mode of the contribution.
+     * @param tStep Time step when answer is computed.
+     */
+    virtual void computeTangentFromBoundaryLoad(FloatMatrix &answer, BoundaryLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep);
     /**
      * Computes the contribution of the given load at the given boundary edge.
      * @note Elements which do not have an contribution should resize the vector to be empty.
