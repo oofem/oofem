@@ -14,11 +14,11 @@ node 6 coords 2 0.5 0.5
 node 7 coords 2 0.0 0.5
 node 8 coords 2 1.0 0.5
 node 9 coords 2 0.5 1.0
-tr21stokes 1 nodes 6 1 2 4 5 6 7 bodyloads 1 1
-tr21stokes 2 nodes 6 2 3 4 8 9 6 bodyloads 1 1
+tr21stokes 1 nodes 6 1 2 4 5 6 7
+tr21stokes 2 nodes 6 2 3 4 8 9 6
 fluidcs 1 mat 1 set 2
 newtonianfluid 1 mu 1.  d 1.
-deadweight 1 components 2 1. 0. loadtimefunction 1
+deadweight 1 components 2 1. 0. loadtimefunction 1 set 2
 BoundaryCondition 2 loadTimeFunction 1 dofs 3 7 8 11 values 3 0. 0. 0. set 1
 ConstantFunction 1 f(t) 1.0
 Set 1 nodes 4 2 3 5 8
