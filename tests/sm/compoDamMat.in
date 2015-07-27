@@ -2,28 +2,35 @@ compoDamMat.out
 test of orthotropic damage material on one LSpace element stretched in the y direction
 NonLinearStatic nsteps 47 controlmode 1 rtolv 0.00001 MaxIter 30 stiffmode 0 deltaT 1.0 nmodules 1
 errorcheck
-#vtk tstep_all domain_all primvars 1 1 vars 3 1 4 13
+#vtkxml tstep_all domain_all primvars 1 1 vars 3 1 4 13
 #hom tstep_all scale 1.
 domain 3d
 OutputManager tstep_all dofman_all element_all
-ndofman 8 nelem 2 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 2
-node 1 coords 3 0.000 0.000   2.000 bc 3 0 1 0
-node 2 coords 3 0.000 2.000   2.000 bc 3 0 2 0
-node 3 coords 3 2.000 2.000   2.000 bc 3 0 2 0
-node 4 coords 3 2.000 0.000   2.000 bc 3 0 1 0
-node 5 coords 3 0.000 0.000   0.000 bc 3 1 1 1
-node 6 coords 3 0.000 2.000   0.000 bc 3 0 2 0
-node 7 coords 3 2.000 2.000   0.000 bc 3 0 2 0
-node 8 coords 3 2.000 0.000   0.000 bc 3 0 1 1
-lspace 1 nodes 8 1 2 3 4 5 6 7 8 crossSect 1 mat 1
-truss3d 2 Nodes 2 1 2 mat 1 crosssect 1
-SimpleCS 1 thick 1.0 width 1.0
+ndofman 8 nelem 2 ncrosssect 1 nmat 1 nbc 4 nic 0 nltf 2 nset 5
+node 1 coords 3 0.000 0.000   2.000
+node 2 coords 3 0.000 2.000   2.000
+node 3 coords 3 2.000 2.000   2.000
+node 4 coords 3 2.000 0.000   2.000
+node 5 coords 3 0.000 0.000   0.000
+node 6 coords 3 0.000 2.000   0.000
+node 7 coords 3 2.000 2.000   0.000
+node 8 coords 3 2.000 0.000   0.000
+lspace 1 nodes 8 1 2 3 4 5 6 7 8
+truss3d 2 Nodes 2 1 2
+SimpleCS 1 thick 1.0 width 1.0 material 1 set 1
 compdammat 1 d 0.0 Exx 10.0 EyyEzz 2.0 nuxynuxz 0.2 nuyz 0.1 GxyGxz 8.0 Tension_f0_Gf 12  100.0 2000.0    7.0 100     130 11000   140 13000    150 13000   100 13000  Compres_f0_gf 12  -10.5 11000    -4.0 120    -10.3 11000   -10.4 11000    -10.5 11000   -10 11000 allowSnapBack 1 2
 #isole 1 E 10. n 0.2 talpha 0.0 d 0.0
-BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
-BoundaryCondition 2 loadTimeFunction 2 prescribedvalue 2.0
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 2 values 1 0.0 set 3
+BoundaryCondition 2 loadTimeFunction 2 dofs 1 2 values 1 2.0 set 2
+BoundaryCondition 3 loadTimeFunction 1 dofs 3 1 2 3 values 3 0.0 0.0 0.0 set 4
+BoundaryCondition 4 loadTimeFunction 1 dofs 2 2 3 values 2 0.0 0.0 set 5
 ConstantFunction 1 f(t) 1.0
 PiecewiseLinFunction 2 nPoints 7 t 7 0.0 10.0 20.0 30.0 40.0 50.0 55.0 f(t) 7 0.0 7.0 0.0 -10.0 0.0 28. 10.
+Set 1 elementranges {(1 2)}
+Set 2 nodes 4 2 3 6 7
+Set 3 nodes 2 1 4
+Set 4 nodes 1 5
+Set 5 nodes 1 8
 #
 #
 #%BEGIN_CHECK% tolerance 1.e-5

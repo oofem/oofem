@@ -1,6 +1,6 @@
 lb01.out
 Patch test of PlaneStress2d elements -> pure compression in x direction
-NonLinearStatic nsteps 3 controllmode 1 rtolv 1.e-3 refloadmode 0 nmodules 1
+NonLinearStatic nsteps 3 controlmode 1 rtolv 1.e-3 refloadmode 0 nmodules 1
 errorcheck filename "lb01.oofem.in"
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all

@@ -5,60 +5,62 @@ errorcheck
 #vtkxml tstep_all domain_all primvars 1 1
 domain 2dMindlinPlate
 OutputManager tstep_all dofman_all element_all
-ndofman 24 nelem 22 ncrosssect  1 nmat 1 nbc 1 nic 0 nltf 1
+ndofman 24 nelem 22 ncrosssect 1 nmat 1 nbc 1 nic 0 nltf 1 nset 2
 #pure bending along x axis
-node  1 coords 3  0.0  0.0  0.0 ndofs 1 dofidmask 1 3 bc 1 1
-node  2 coords 3  1.0  0.0  0.0 
-node  3 coords 3  2.0  0.0  0.0 
-node  4 coords 3  3.0  0.0  0.0 
-node  5 coords 3  4.0  0.0  0.0 
-node  6 coords 3  5.0  0.0  0.0 
-node  7 coords 3  6.0  0.0  0.0 
-node  8 coords 3  7.0  0.0  0.0 
-node  9 coords 3  8.0  0.0  0.0 
-node 10 coords 3  9.0  0.0  0.0 
-node 11 coords 3  10.0  0.0  0.0 
-node 12 coords 3  11.0  0.0  0.0 
+node  1 coords 3  0.0  0.0  0.0
+node  2 coords 3  1.0  0.0  0.0
+node  3 coords 3  2.0  0.0  0.0
+node  4 coords 3  3.0  0.0  0.0
+node  5 coords 3  4.0  0.0  0.0
+node  6 coords 3  5.0  0.0  0.0
+node  7 coords 3  6.0  0.0  0.0
+node  8 coords 3  7.0  0.0  0.0
+node  9 coords 3  8.0  0.0  0.0
+node 10 coords 3  9.0  0.0  0.0
+node 11 coords 3  10.0  0.0  0.0
+node 12 coords 3  11.0  0.0  0.0
 #
-node 21 coords 3  0.0  1.0  0.0  ndofs 1 dofidmask 1 3 bc 1 1
-node 22 coords 3  1.0  1.0  0.0 
-node 23 coords 3  2.0  1.0  0.0 
-node 24 coords 3  3.0  1.0  0.0 
-node 25 coords 3  4.0  1.0  0.0 
-node 26 coords 3  5.0  1.0  0.0 
-node 27 coords 3  6.0  1.0  0.0 
-node 28 coords 3  7.0  1.0  0.0 
-node 29 coords 3  8.0  1.0  0.0 
-node 30 coords 3  9.0  1.0  0.0 
-node 31 coords 3  10.0  1.0  0.0 
-node 32 coords 3  11.0  1.0  0.0 
+node 21 coords 3  0.0  1.0  0.0
+node 22 coords 3  1.0  1.0  0.0
+node 23 coords 3  2.0  1.0  0.0
+node 24 coords 3  3.0  1.0  0.0
+node 25 coords 3  4.0  1.0  0.0
+node 26 coords 3  5.0  1.0  0.0
+node 27 coords 3  6.0  1.0  0.0
+node 28 coords 3  7.0  1.0  0.0
+node 29 coords 3  8.0  1.0  0.0
+node 30 coords 3  9.0  1.0  0.0
+node 31 coords 3  10.0  1.0  0.0
+node 32 coords 3  11.0  1.0  0.0
 ##
-tria1platesubsoil 1 nodes 3 1 2 22 crosssect 1 mat 1 
-tria1platesubsoil 2 nodes 3 1 22 21 crosssect 1 mat 1 
-tria1platesubsoil 3 nodes 3 2 3 23 crosssect 1 mat 1 
-tria1platesubsoil 4 nodes 3 2 23 22 crosssect 1 mat 1 
-tria1platesubsoil 5 nodes 3 3 4 24 crosssect 1 mat 1 
-tria1platesubsoil 6 nodes 3 3 24 23 crosssect 1 mat 1 
-tria1platesubsoil 7 nodes 3 4 5 25 crosssect 1 mat 1 
-tria1platesubsoil 8 nodes 3 4 25 24 crosssect 1 mat 1 
-tria1platesubsoil 9 nodes 3 5 6 26 crosssect 1 mat 1 
-tria1platesubsoil 10 nodes 3 5 26 25 crosssect 1 mat 1 
-tria1platesubsoil 11 nodes 3 6 7 27 crosssect 1 mat 1 
-tria1platesubsoil 12 nodes 3 6 27 26 crosssect 1 mat 1 
-tria1platesubsoil 13 nodes 3 7 8 28 crosssect 1 mat 1 
-tria1platesubsoil 14 nodes 3 7 28 27 crosssect 1 mat 1 
-tria1platesubsoil 15 nodes 3 8 9 29 crosssect 1 mat 1 
-tria1platesubsoil 16 nodes 3 8 29 28 crosssect 1 mat 1 
-tria1platesubsoil 17 nodes 3 9 10 30 crosssect 1 mat 1 
-tria1platesubsoil 18 nodes 3 9 30 29 crosssect 1 mat 1 
-tria1platesubsoil 19 nodes 3 10 11 31 crosssect 1 mat 1 
-tria1platesubsoil 20 nodes 3 10 31 30 crosssect 1 mat 1 
-tria1platesubsoil 21 nodes 3 11 12 32 crosssect 1 mat 1 
-tria1platesubsoil 22 nodes 3 11 32 31 crosssect 1 mat 1 
-SimpleCS 1 thick 1.0
+tria1platesubsoil 1 nodes 3 1 2 22
+tria1platesubsoil 2 nodes 3 1 22 21
+tria1platesubsoil 3 nodes 3 2 3 23
+tria1platesubsoil 4 nodes 3 2 23 22
+tria1platesubsoil 5 nodes 3 3 4 24
+tria1platesubsoil 6 nodes 3 3 24 23
+tria1platesubsoil 7 nodes 3 4 5 25
+tria1platesubsoil 8 nodes 3 4 25 24
+tria1platesubsoil 9 nodes 3 5 6 26
+tria1platesubsoil 10 nodes 3 5 26 25
+tria1platesubsoil 11 nodes 3 6 7 27
+tria1platesubsoil 12 nodes 3 6 27 26
+tria1platesubsoil 13 nodes 3 7 8 28
+tria1platesubsoil 14 nodes 3 7 28 27
+tria1platesubsoil 15 nodes 3 8 9 29
+tria1platesubsoil 16 nodes 3 8 29 28
+tria1platesubsoil 17 nodes 3 9 10 30
+tria1platesubsoil 18 nodes 3 9 30 29
+tria1platesubsoil 19 nodes 3 10 11 31
+tria1platesubsoil 20 nodes 3 10 31 30
+tria1platesubsoil 21 nodes 3 11 12 32
+tria1platesubsoil 22 nodes 3 11 32 31
+SimpleCS 1 thick 1.0 material 1 set 1
 winklerpasternak 1 d 2500. c1 1.0 c2 2.0
-BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.1 
+BoundaryCondition  1 loadTimeFunction 1 dofs 1 3 values 1 0.1 set 2
 ConstantFunction 1 f(t) 1.0
+Set 1 elementranges {(1 22)}
+Set 2 nodes 2 1 21
 #
 # Exact solution: w = 0.1*exp(-sqrt(c1/c2)*x
 #%BEGIN_CHECK% tolerance 5.e-4

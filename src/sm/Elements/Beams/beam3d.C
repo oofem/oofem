@@ -778,7 +778,7 @@ Beam3d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, doub
     double kappay2 = kappay * kappay;
     double kappaz2 = kappaz * kappaz;
 
-    double density = this->giveMaterial()->give('d', gp); // constant density assumed
+    double density = this->giveStructuralCrossSection()->give('d', gp); // constant density assumed
     if ( ipDensity != NULL ) {
         // Override density if desired
         density = * ipDensity;

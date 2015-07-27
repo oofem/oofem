@@ -33,13 +33,8 @@
  */
 
 #include "warpingcrosssection.h"
-#include "gausspoint.h"
-//#include "structuralmaterial.h"
-#include "floatarray.h"
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
-//#include "structuralms.h"
-//#include "structuralelement.h"
 
 namespace oofem {
 REGISTER_CrossSection(WarpingCrossSection);
@@ -47,20 +42,15 @@ REGISTER_CrossSection(WarpingCrossSection);
 
 IRResultType
 WarpingCrossSection :: initializeFrom(InputRecord *ir)
-//
-// instanciates receiver from input record
-//
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    this->CrossSection :: initializeFrom(ir);
 
     int value;
     IR_GIVE_FIELD(ir, value, _IFT_WarpingCrossSection_WarpingNodeNumber);
     this->WarpingNodeNumber = value;
     //propertyDictionary->add(CS_Thickness, thick);
 
-
-    return IRRT_OK;
+    return SimpleCrossSection :: initializeFrom(ir);
 }
+
 } // end namespace oofem

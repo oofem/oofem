@@ -6,26 +6,32 @@ errorcheck
 hom tstep_all ists 2 4 1
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
-ndofman 9 nelem 4 ncrosssect 1 nmat 2 nbc 2 nic 0 nltf 1
-node 1 coords 2  0.0   0.0  bc 2 1 1
+ndofman 9 nelem 4 ncrosssect 2 nmat 2 nbc 3 nic 0 nltf 1 nset 4
+node 1 coords 2  0.0   0.0
 node 2 coords 2  1.5   0.0
-node 3 coords 2  4.0   0.0  bc 2 0 1 masterMask 2 1 1 DoFType 2 1 1
+node 3 coords 2  4.0   0.0  masterMask 2 1 1 DoFType 2 1 1
 node 4 coords 2  0.0   1.5
 node 5 coords 2  1.8   1.5
 node 6 coords 2  4.0   1.5  masterMask 2 4 4 DoFType 2 1 1
 node 7 coords 2  0.0   2.0  masterMask 2 1 1 DoFType 2 1 1
 node 8 coords 2  1.5   2.0  masterMask 2 2 2 DoFType 2 1 1
 node 9 coords 2  4.0   2.0  masterMask 2 7 7 DoFType 2 1 1
-PlaneStress2d 1 nodes 4 1 2 5 4  crossSect 1 mat 1 bodyLoads 1 2
-PlaneStress2d 2 nodes 4 2 3 6 5  crossSect 1 mat 2 bodyLoads 1 2
-PlaneStress2d 3 nodes 4 4 5 8 7  crossSect 1 mat 2 bodyLoads 1 2
-PlaneStress2d 4 nodes 4 5 6 9 8  crossSect 1 mat 1 bodyLoads 1 2
-SimpleCS 1 thick 0.15
+PlaneStress2d 1 nodes 4 1 2 5 4 bodyLoads 1 3
+PlaneStress2d 2 nodes 4 2 3 6 5 bodyLoads 1 3
+PlaneStress2d 3 nodes 4 4 5 8 7 bodyLoads 1 3
+PlaneStress2d 4 nodes 4 5 6 9 8 bodyLoads 1 3
+SimpleCS 1 thick 0.15 material 1 set 1
+SimpleCS 2 thick 0.15 material 2 set 2
 IsoLE 1 d 0. E 10.0 n 0.25 tAlpha 0.000012
 IsoLE 2 d 0. E 2.0 n 0.25 tAlpha 0.000012
-BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
-StructEigenstrainLoad 2 loadTimeFunction 1 Components 3 0.0 0.0 0.2
+BoundaryCondition  1 loadTimeFunction 1 dofs 2 1 2 values 2 0.0 set 3
+BoundaryCondition  2 loadTimeFunction 1 dofs 1 2 values 1 0.0 set 4
+StructEigenstrainLoad 3 loadTimeFunction 1 Components 3 0.0 0.0 0.2
 ConstantFunction 1 f(t) 1.0
+Set 1 elements 2 1 4
+Set 2 elements 2 2 3
+Set 3 nodes 1 1
+Set 4 nodes 1 3
 #
 #
 #%BEGIN_CHECK% tolerance 1.e-8

@@ -4,8 +4,8 @@ LinearStatic nsteps 1 nmodules 1
 errorcheck
 domain 3d
 OutputManager tstep_all dofman_all element_all
-ndofman 8 nelem 1 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1
-node 1 coords 4 0 0 0 1 bc 3 1 1 1  
+ndofman 8 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1 nset 0
+node 1 coords 4 0 0 0 1 bc 3 1 1 1
 node 2 coords 4 4 0 0 1 bc 3 0 1 1
 node 3 coords 4 0 3 0 1 bc 3 0 0 1
 node 4 coords 4 4 3 0 1 bc 3 0 0 1
@@ -13,9 +13,9 @@ node 5 coords 4 0 0 5 1 bc 3 0 0 2
 node 6 coords 4 4 0 5 1 bc 3 0 0 2
 node 7 coords 4 0 3 5 1 bc 3 0 0 2
 node 8 coords 4 4 3 5 1 bc 3 2 0 0  lcs 6 0 0 1 0 1 0
-nurbs3delement 1 nodes 8 1 2 3 4 5 6 7 8 mat 1 crossSect 1 knotvectoru 2 0 1 knotmultiplicityu 2 2 2 knotvectorv 2 0 1 knotmultiplicityv 2 2 2 knotvectorw 2 0 1 knotmultiplicityw 2 2 2 degree 3 1 1 1 nip 8
+nurbs3delement 1 nodes 8 1 2 3 4 5 6 7 8 crossSect 1 knotvectoru 2 0 1 knotmultiplicityu 2 2 2 knotvectorv 2 0 1 knotmultiplicityv 2 2 2 knotvectorw 2 0 1 knotmultiplicityw 2 2 2 degree 3 1 1 1 nip 8
 #
-SimpleCS 1
+SimpleCS 1 material 1
 #
 IsoLE 1 d 0. E 15.0e3 n 0.25 tAlpha 0.000012
 BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 

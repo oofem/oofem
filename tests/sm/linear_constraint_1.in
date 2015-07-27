@@ -4,20 +4,25 @@ LinearStatic nsteps 1 nmodules 1
 errorcheck
 domain 2dTruss
 OutputManager tstep_all dofman_all element_all
-ndofman 2 nelem 1 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 2
-Node 1 coords 3  0.  0.  0.  bc 2 1 1
-Node 2 coords 3  2.  0.  0.  bc 2 0 1
-Truss2d 1 nodes 2 1 2 mat 1 crossSect 1
-SimpleCS 1 thick 0.1 width 0.2
-IsoLE 1  tAlpha 0.000012  d 1.0  E 1.0  n 0.2  
-BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
+ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 2 nset 3
+Node 1 coords 3  0.  0.  0.
+Node 2 coords 3  2.  0.  0.
+Truss2d 1 nodes 2 1 2
+SimpleCS 1 thick 0.1 width 0.2 material 1 set 1
+IsoLE 1  tAlpha 0.000012  d 1.0  E 1.0  n 0.2
+BoundaryCondition  1 loadTimeFunction 1 dofs 2 1 3 values 2 0.0 0.0 set 2
+BoundaryCondition  2 loadTimeFunction 1 dofs 1 3 values 1 0.0 set 3
 #
 # LinearConstraintBC contributes to the following characteristic terms:
 # lhstype 4 1 2 3 4  - StiffnessMatrix, TangentStiffnessMatrix, SecantStiffnessMatrix, ElasticStiffnessMatrix
 # rhsType 48 - ExternalForcesVector
-LinearConstraintBC 2 loadTimeFunction 1 dofmans 1 2 dofs 1 1 weights 1 1 weightsLtf 1 2 rhs -0.15 rhsLtf 1  lhstype 4 1 2 3 4 rhsType 2 150 151
+LinearConstraintBC 3 loadTimeFunction 1 dofmans 1 2 dofs 1 1 weights 1 1 weightsLtf 1 2 rhs -0.15 rhsLtf 1  lhstype 4 1 2 3 4 rhsType 2 150 151
 ConstantFunction 1 f(t) 1.0
 ConstantFunction 2 f(t) 0.5
+Set 1 elementranges {1}
+Set 2 nodes 1 1
+Set 3 nodes 1 2
+
 #%BEGIN_CHECK% tolerance 1.e-6
 #NODE tStep 1 number 2 dof 1 unknown d value -0.30
 #REACTION tStep 1 number 1 dof 1 value 3.e-3

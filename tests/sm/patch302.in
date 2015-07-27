@@ -4,7 +4,7 @@ linearstatic nsteps 1 nmodules 1
 errorcheck
 domain 3d
 outputmanager tstep_all dofman_all element_all
-ndofman 90 nelem 32 ncrosssect 1 nmat 1 nbc 6 nic 0 nltf 1
+ndofman 90 nelem 32 ncrosssect 1 nmat 1 nbc 6 nic 0 nltf 1 nset 1
 node 1 coords 3 0.0 0.0 0.0 bc 3 1 1 1
 node 2 coords 3 0.0 0.0 0.5 bc 3 1 1 0
 node 3 coords 3 0.0 0.0 1.0 bc 3 1 1 0
@@ -95,39 +95,39 @@ node 87 coords 3 16.0 1.0 0.5 bc 3 0 1 0 load 1 3
 node 88 coords 3 16.0 1.0 1.0 bc 3 0 1 0 load 1 4
 node 89 coords 3 16.0 1.0 1.5 bc 3 0 1 0 load 1 5
 node 90 coords 3 16.0 1.0 2.0 bc 3 0 1 0 load 1 6
-lspacebb 1 nodes 8 1 6 7 2 46 51 52 47 crosssect 1 mat 1
-lspacebb 2 nodes 8 2 7 8 3 47 52 53 48 crosssect 1 mat 1
-lspacebb 3 nodes 8 3 8 9 4 48 53 54 49 crosssect 1 mat 1
-lspacebb 4 nodes 8 4 9 10 5 49 54 55 50 crosssect 1 mat 1
-lspacebb 5 nodes 8 6 11 12 7 51 56 57 52 crosssect 1 mat 1
-lspacebb 6 nodes 8 7 12 13 8 52 57 58 53 crosssect 1 mat 1
-lspacebb 7 nodes 8 8 13 14 9 53 58 59 54 crosssect 1 mat 1
-lspacebb 8 nodes 8 9 14 15 10 54 59 60 55 crosssect 1 mat 1
-lspacebb 9 nodes 8 11 16 17 12 56 61 62 57 crosssect 1 mat 1
-lspacebb 10 nodes 8 12 17 18 13 57 62 63 58 crosssect 1 mat 1
-lspacebb 11 nodes 8 13 18 19 14 58 63 64 59 crosssect 1 mat 1
-lspacebb 12 nodes 8 14 19 20 15 59 64 65 60 crosssect 1 mat 1
-lspacebb 13 nodes 8 16 21 22 17 61 66 67 62 crosssect 1 mat 1
-lspacebb 14 nodes 8 17 22 23 18 62 67 68 63 crosssect 1 mat 1
-lspacebb 15 nodes 8 18 23 24 19 63 68 69 64 crosssect 1 mat 1
-lspacebb 16 nodes 8 19 24 25 20 64 69 70 65 crosssect 1 mat 1
-lspacebb 17 nodes 8 21 26 27 22 66 71 72 67 crosssect 1 mat 1
-lspacebb 18 nodes 8 22 27 28 23 67 72 73 68 crosssect 1 mat 1
-lspacebb 19 nodes 8 23 28 29 24 68 73 74 69 crosssect 1 mat 1
-lspacebb 20 nodes 8 24 29 30 25 69 74 75 70 crosssect 1 mat 1
-lspacebb 21 nodes 8 26 31 32 27 71 76 77 72 crosssect 1 mat 1
-lspacebb 22 nodes 8 27 32 33 28 72 77 78 73 crosssect 1 mat 1
-lspacebb 23 nodes 8 28 33 34 29 73 78 79 74 crosssect 1 mat 1
-lspacebb 24 nodes 8 29 34 35 30 74 79 80 75 crosssect 1 mat 1
-lspacebb 25 nodes 8 31 36 37 32 76 81 82 77 crosssect 1 mat 1
-lspacebb 26 nodes 8 32 37 38 33 77 82 83 78 crosssect 1 mat 1
-lspacebb 27 nodes 8 33 38 39 34 78 83 84 79 crosssect 1 mat 1
-lspacebb 28 nodes 8 34 39 40 35 79 84 85 80 crosssect 1 mat 1
-lspacebb 29 nodes 8 36 41 42 37 81 86 87 82 crosssect 1 mat 1
-lspacebb 30 nodes 8 37 42 43 38 82 87 88 83 crosssect 1 mat 1
-lspacebb 31 nodes 8 38 43 44 39 83 88 89 84 crosssect 1 mat 1
-lspacebb 32 nodes 8 39 44 45 40 84 89 90 85 crosssect 1 mat 1
-simplecs 1
+lspacebb 1 nodes 8 1 6 7 2 46 51 52 47
+lspacebb 2 nodes 8 2 7 8 3 47 52 53 48
+lspacebb 3 nodes 8 3 8 9 4 48 53 54 49
+lspacebb 4 nodes 8 4 9 10 5 49 54 55 50
+lspacebb 5 nodes 8 6 11 12 7 51 56 57 52
+lspacebb 6 nodes 8 7 12 13 8 52 57 58 53
+lspacebb 7 nodes 8 8 13 14 9 53 58 59 54
+lspacebb 8 nodes 8 9 14 15 10 54 59 60 55
+lspacebb 9 nodes 8 11 16 17 12 56 61 62 57
+lspacebb 10 nodes 8 12 17 18 13 57 62 63 58
+lspacebb 11 nodes 8 13 18 19 14 58 63 64 59
+lspacebb 12 nodes 8 14 19 20 15 59 64 65 60
+lspacebb 13 nodes 8 16 21 22 17 61 66 67 62
+lspacebb 14 nodes 8 17 22 23 18 62 67 68 63
+lspacebb 15 nodes 8 18 23 24 19 63 68 69 64
+lspacebb 16 nodes 8 19 24 25 20 64 69 70 65
+lspacebb 17 nodes 8 21 26 27 22 66 71 72 67
+lspacebb 18 nodes 8 22 27 28 23 67 72 73 68
+lspacebb 19 nodes 8 23 28 29 24 68 73 74 69
+lspacebb 20 nodes 8 24 29 30 25 69 74 75 70
+lspacebb 21 nodes 8 26 31 32 27 71 76 77 72
+lspacebb 22 nodes 8 27 32 33 28 72 77 78 73
+lspacebb 23 nodes 8 28 33 34 29 73 78 79 74
+lspacebb 24 nodes 8 29 34 35 30 74 79 80 75
+lspacebb 25 nodes 8 31 36 37 32 76 81 82 77
+lspacebb 26 nodes 8 32 37 38 33 77 82 83 78
+lspacebb 27 nodes 8 33 38 39 34 78 83 84 79
+lspacebb 28 nodes 8 34 39 40 35 79 84 85 80
+lspacebb 29 nodes 8 36 41 42 37 81 86 87 82
+lspacebb 30 nodes 8 37 42 43 38 82 87 88 83
+lspacebb 31 nodes 8 38 43 44 39 83 88 89 84
+lspacebb 32 nodes 8 39 44 45 40 84 89 90 85
+simplecs 1 material 1 set 1
 isole 1 E 205.50003049998844 n 0.49999987500003124 talpha 0.0 d 0.0
 boundarycondition 1 loadtimefunction 1 prescribedvalue 0.0
 nodalload 2 loadTimeFunction 1 Components 3 0.0 0.0 -0.125 
@@ -136,6 +136,7 @@ nodalload 4 loadTimeFunction 1 Components 3 0.0 0.0 -0.25
 nodalload 5 loadTimeFunction 1 Components 3 0.0 0.0 -0.25
 nodalload 6 loadTimeFunction 1 Components 3 0.0 0.0 -0.125
 constantfunction 1 f(t) 0.25
+Set 1 elementranges {(1 32)}
 #
 #%BEGIN_CHECK%
 #NODE tStep 1 number 41 dof 3 unknown d value -9.61512810e-01 tolerance 1e-5

@@ -4,7 +4,7 @@ linearstatic nsteps 1 nmodules 1
 errorcheck
 domain 3dShell
 OutputManager tstep_all dofman_all element_all
-ndofman 25 nelem 16 ncrosssect 4 nmat 1  nbc 2 nic 0 nltf 1
+ndofman 25 nelem 16 ncrosssect 4 nmat 1 nbc 2 nic 0 nltf 1 nset 0
 node 1 coords 3 0.000000 0.000000 300.000000 bc 6 1 1 0 1 1 1 
 node 2 coords 3 0.000000 52.094453 295.442326 bc 6 1 0 0 0 1 1 
 node 3 coords 3 0.000000 102.606043 281.907786 bc 6 1 0 0 0 1 1 
@@ -30,26 +30,26 @@ node 22 coords 3 300.000000 52.094453 295.442326 bc 6 0 1 1 1 0 0
 node 23 coords 3 300.000000 102.606043 281.907786 bc 6 0 1 1 1 0 0 
 node 24 coords 3 300.000000 150.000000 259.807621 bc 6 0 1 1 1 0 0 
 node 25 coords 3 300.000000 192.836283 229.813333 lcs 6 1 0 0 0 0.766044 -0.642788 bc 6 0 1 1 1 0 1 
-mitc4shell 1 nodes 4  1 6 7 2 crosssect 1  mat 1   bodyLoads 1 2 
-mitc4shell 2 nodes 4  2 7 8 3 crosssect 2  mat 1   bodyLoads 1 2 
-mitc4shell 3 nodes 4  3 8 9 4 crosssect 3  mat 1   bodyLoads 1 2 
-mitc4shell 4 nodes 4  4 9 10 5 crosssect 4  mat 1   bodyLoads 1 2 
-mitc4shell 5 nodes 4  6 11 12 7 crosssect 1  mat 1   bodyLoads 1 2 
-mitc4shell 6 nodes 4  7 12 13 8 crosssect 2  mat 1   bodyLoads 1 2 
-mitc4shell 7 nodes 4  8 13 14 9 crosssect 3  mat 1   bodyLoads 1 2 
-mitc4shell 8 nodes 4  9 14 15 10 crosssect 4  mat 1   bodyLoads 1 2 
-mitc4shell 9 nodes 4  11 16 17 12 crosssect 1  mat 1   bodyLoads 1 2 
-mitc4shell 10 nodes 4  12 17 18 13 crosssect 2  mat 1   bodyLoads 1 2 
-mitc4shell 11 nodes 4  13 18 19 14 crosssect 3  mat 1   bodyLoads 1 2 
-mitc4shell 12 nodes 4  14 19 20 15 crosssect 4  mat 1   bodyLoads 1 2 
-mitc4shell 13 nodes 4  16 21 22 17 crosssect 1  mat 1   bodyLoads 1 2 
-mitc4shell 14 nodes 4  17 22 23 18 crosssect 2  mat 1   bodyLoads 1 2 
-mitc4shell 15 nodes 4  18 23 24 19 crosssect 3  mat 1   bodyLoads 1 2 
-mitc4shell 16 nodes 4  19 24 25 20 crosssect 4  mat 1   bodyLoads 1 2 
-VariableCS 1 thick 3. directorX 0.0 directorY $sin(1/8*40*3.14/180)$ directorZ $cos(1/8*40*3.14/180)$
-VariableCS 2 thick 3. directorX 0.0 directorY $sin(3/8*40*3.14/180)$ directorZ $cos(3/8*40*3.14/180)$
-VariableCS 3 thick 3. directorX 0.0 directorY $sin(5/8*40*3.14/180)$ directorZ $cos(5/8*40*3.14/180)$
-VariableCS 4 thick 3. directorX 0.0 directorY $sin(7/8*40*3.14/180)$ directorZ $cos(7/8*40*3.14/180)$
+mitc4shell 1 nodes 4  1 6 7 2 crosssect 1   bodyLoads 1 2 
+mitc4shell 2 nodes 4  2 7 8 3 crosssect 2   bodyLoads 1 2 
+mitc4shell 3 nodes 4  3 8 9 4 crosssect 3   bodyLoads 1 2 
+mitc4shell 4 nodes 4  4 9 10 5 crosssect 4   bodyLoads 1 2 
+mitc4shell 5 nodes 4  6 11 12 7 crosssect 1   bodyLoads 1 2 
+mitc4shell 6 nodes 4  7 12 13 8 crosssect 2   bodyLoads 1 2 
+mitc4shell 7 nodes 4  8 13 14 9 crosssect 3   bodyLoads 1 2 
+mitc4shell 8 nodes 4  9 14 15 10 crosssect 4   bodyLoads 1 2 
+mitc4shell 9 nodes 4  11 16 17 12 crosssect 1   bodyLoads 1 2 
+mitc4shell 10 nodes 4  12 17 18 13 crosssect 2   bodyLoads 1 2 
+mitc4shell 11 nodes 4  13 18 19 14 crosssect 3   bodyLoads 1 2 
+mitc4shell 12 nodes 4  14 19 20 15 crosssect 4   bodyLoads 1 2 
+mitc4shell 13 nodes 4  16 21 22 17 crosssect 1   bodyLoads 1 2 
+mitc4shell 14 nodes 4  17 22 23 18 crosssect 2   bodyLoads 1 2 
+mitc4shell 15 nodes 4  18 23 24 19 crosssect 3   bodyLoads 1 2 
+mitc4shell 16 nodes 4  19 24 25 20 crosssect 4   bodyLoads 1 2 
+VariableCS 1 thick 3. directorX 0.0 directorY $sin(1/8*40*3.14/180)$ directorZ $cos(1/8*40*3.14/180)$ material 1
+VariableCS 2 thick 3. directorX 0.0 directorY $sin(3/8*40*3.14/180)$ directorZ $cos(3/8*40*3.14/180)$ material 1
+VariableCS 3 thick 3. directorX 0.0 directorY $sin(5/8*40*3.14/180)$ directorZ $cos(5/8*40*3.14/180)$ material 1
+VariableCS 4 thick 3. directorX 0.0 directorY $sin(7/8*40*3.14/180)$ directorZ $cos(7/8*40*3.14/180)$ material 1
 IsoLE 1 d 0.208333 E 3.e6 n 0.00 talpha 0.000012
 BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
 Deadweight 2 loadTimeFunction 1 Components 6 0.0 0.0 -1.0 0.0 0.0 0.0

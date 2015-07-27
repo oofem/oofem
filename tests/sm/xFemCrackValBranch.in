@@ -5,7 +5,7 @@ errorcheck
 #vtkxml tstep_all domain_all primvars 1 1
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
-ndofman 16 nelem 9 ncrosssect 1 nmat 1 nbc 24 nic 0 nltf 1 nxfemman 1
+ndofman 16 nelem 9 ncrosssect 1 nmat 1 nbc 24 nic 0 nltf 1 nxfemman 1 nset 1
 node 1     coords 2  0        0        bc 2 1 2
 node 2     coords 2  2        0        bc 2 7 8
 node 3     coords 2  2        2        bc 2 13 14
@@ -18,20 +18,20 @@ node 9     coords 2  1.33333  2        bc 2 15 16
 node 10    coords 2  0.666667 2        bc 2 17 18
 node 11    coords 2  0        1.33333  bc 2 21 22
 node 12    coords 2  0        0.666667 bc 2 23 24
-node 13    coords 2  1.33333  0.666667 bc 2 0 0
-node 14    coords 2  1.33333  1.33333  bc 2 0 0
-node 15    coords 2  0.666667  0.66668 bc 2 0 0
-node 16    coords 2  0.666667  1.33335 bc 2 0 0
-PlaneStress2DXfem 13    nodes 4   2   6   13  7   mat 1 crosssect 1 nip 9 nlgeo 0
-PlaneStress2DXfem 14    nodes 4   7   13  14  8   mat 1 crosssect 1 nip 9 nlgeo 0
-PlaneStress2DXfem 15    nodes 4   8   14  9   3   mat 1 crosssect 1 nip 9 nlgeo 0
-PlaneStress2DXfem 16    nodes 4   6   5   15  13  mat 1 crosssect 1 nip 9 nlgeo 0
-PlaneStress2DXfem 17    nodes 4   13  15  16  14  mat 1 crosssect 1 nip 9 nlgeo 0
-PlaneStress2DXfem 18    nodes 4   14  16  10  9   mat 1 crosssect 1 nip 9 nlgeo 0
-PlaneStress2DXfem 19    nodes 4   5   1   12  15  mat 1 crosssect 1 nip 9 nlgeo 0
-PlaneStress2DXfem 20    nodes 4   15  12  11  16  mat 1 crosssect 1 nip 9 nlgeo 0
-PlaneStress2DXfem 21    nodes 4   16  11  4   10  mat 1 crosssect 1 nip 9 nlgeo 0
-SimpleCS 1 thick 1.0e-3 material 1
+node 13    coords 2  1.33333  0.666667
+node 14    coords 2  1.33333  1.33333
+node 15    coords 2  0.666667  0.66668
+node 16    coords 2  0.666667  1.33335
+PlaneStress2DXfem 13    nodes 4   2   6   13  7   mat 1 nip 9 nlgeo 0
+PlaneStress2DXfem 14    nodes 4   7   13  14  8   mat 1 nip 9 nlgeo 0
+PlaneStress2DXfem 15    nodes 4   8   14  9   3   mat 1 nip 9 nlgeo 0
+PlaneStress2DXfem 16    nodes 4   6   5   15  13  mat 1 nip 9 nlgeo 0
+PlaneStress2DXfem 17    nodes 4   13  15  16  14  mat 1 nip 9 nlgeo 0
+PlaneStress2DXfem 18    nodes 4   14  16  10  9   mat 1 nip 9 nlgeo 0
+PlaneStress2DXfem 19    nodes 4   5   1   12  15  mat 1 nip 9 nlgeo 0
+PlaneStress2DXfem 20    nodes 4   15  12  11  16  mat 1 nip 9 nlgeo 0
+PlaneStress2DXfem 21    nodes 4   16  11  4   10  mat 1 nip 9 nlgeo 0
+SimpleCS 1 thick 1.0e-3 material 1 set 1
 #
 #Linear elasticity
 IsoLE 1 d 0.0 E 1.0e4 n 0.3 tAlpha 0.0
@@ -63,7 +63,8 @@ BoundaryCondition 24 loadTimeFunction 1 prescribedvalue -0.000205723733501
 #UserDefDirichletBC 1 loadTimeFunction 1 filename userdefbc
 #
 ConstantFunction 1 f(t) 1.0
-XfemManager 1 numberofenrichmentitems 1 vtkexport 1 exportfields 3 2 3 4
+Set 1 elementranges {(13 21)}
+XfemManager 1 numberofenrichmentitems 1 vtkexport 0 exportfields 3 2 3 4
 crack 1 enrichmentfront 1 propagationlaw 1
 DiscontinuousFunction 1
 PolygonLine 1 points 6 -1.0 1.0 0.333333333333333 1.0 0.56666666666667 1.0

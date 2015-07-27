@@ -1,7 +1,7 @@
 layered_cube_lcs.out
 Test of layered, rotated cubes
 StaticStructural nsteps 1 nmodules 0
-#vtkxml tstep_all domain_all primvars 1 1 
+#vtkxml tstep_all domain_all primvars 1 1
 domain 3d
 OutputManager tstep_all dofman_all element_all
 ndofman 20 nelem 1 ncrosssect 1 nmat 3 nbc 2 nic 0 nltf 1 nset 4
@@ -36,7 +36,7 @@ OrthoLE 3 d 0. Ex 2.0 Ey 1. Ez 1. NYyz 0.25 NYxz 0.25 NYxy 0.25 Gyz 0.8 Gxz 0.4 
 BoundaryCondition 1 loadTimeFunction 1 values 3 0. 0. 0. dofs 3 1 2 3 set 2
 #BoundaryCondition 2 loadTimeFunction 1 values 3 0.86603. 0. 0.5 dofs 3 1 2 3 set 3
 #BoundaryCondition 3 loadTimeFunction 1 values 3 0.433015. 0. 0.25 dofs 3 1 2 3 set 0
-ConstantSurfaceLoad 2 loadtimefunction 1 ndofs 3 components 3 0.86603 0. 0.5 set 3
+ConstantSurfaceLoad 2 loadtimefunction 1 components 3 0.86603 0. 0.5 set 3
 ConstantFunction 1 f(t) 1.0
 Set 1 elementRanges {(1 1)}
 Set 2 elementboundaries 2 1 3

@@ -2,7 +2,7 @@ bdam7.oofem.out
 collapse of water column 
 supg nsteps 4 lstype 0 smtype 1 deltaT 1.e-2 rtolv 1.e-4 alpha 0.5 miflag 1 refVol 2.678062e-3 nmodules 1
 errorcheck
-#vtk tstep_step 10 domain_all primvars 2 1 5 vars 1 43
+#vtkxml tstep_step 10 domain_all primvars 2 1 5 vars 1 43
 domain 2dIncompFlow
 OutputManager tsteps_out {4} dofman_all element_all
 ndofman 558 nelem 1020 ncrosssect 1 nmat 3 nbc 4 nic 0 nltf 1 nset 4

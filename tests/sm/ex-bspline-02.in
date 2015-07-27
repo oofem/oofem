@@ -4,7 +4,7 @@ LinearStatic nsteps 1 nmodules 1
 errorcheck
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
-ndofman 12 nelem 1 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1
+ndofman 12 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1 nset 1
 node 1 coords 3 0   0   0   bc 2 1 1
 node 2 coords 3 2.  0.  0.  bc 2 0 1
 node 3 coords 3 4.  0.  0.  bc 2 0 1
@@ -18,14 +18,15 @@ node 10 coords 3 2. 2.  0.  bc 2 0 0
 node 11 coords 3 4. 2.  0.  bc 2 0 0
 node 12 coords 3 6. 2.  0.  bc 2 2 0
 #
-bsplineplanestresselement 1 nodes 12 1 2 3 4 5 6 7 8 9 10 11 12 crossSect 1 mat 1 knotvectoru 4 0 1 2 3 knotvectorv 3 0 1 2 knotmultiplicityu 4 2 1 1 2 degree 2 1 1 nip 4
+bsplineplanestresselement 1 nodes 12 1 2 3 4 5 6 7 8 9 10 11 12 knotvectoru 4 0 1 2 3 knotvectorv 3 0 1 2 knotmultiplicityu 4 2 1 1 2 degree 2 1 1 nip 4
 #
-SimpleCS 1 thick 0.15
+SimpleCS 1 thick 0.15 material 1 set 1
 #
 IsoLE 1 d 0. E 15.0 n 0.25 tAlpha 0.000012
 BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
 BoundaryCondition  2 loadTimeFunction 1 prescribedvalue 1.0 
 ConstantFunction 1 f(t) 1.0
+Set 1 elementranges {1}
 #
 #%BEGIN_CHECK% tolerance 1.e-8
 ## check reactions 

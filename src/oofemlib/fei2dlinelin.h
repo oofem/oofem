@@ -66,8 +66,9 @@ public:
     virtual double giveArea(const FEICellGeometry &cellgeo) { return 0.0; }
 
     // Edge (same as bulk for this type, so they are all ignored) (perhaps do it the other way around?).
+    virtual void boundaryEdgeGiveNodes(IntArray &answer, int boundary);
     virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge);
-    virtual void edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) { }
+    virtual void edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void edgeEvaldNds(FloatArray &answer, int iedge,
                               const FloatArray &lcoords, const FEICellGeometry &cellgeo);

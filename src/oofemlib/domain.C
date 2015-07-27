@@ -961,6 +961,10 @@ Domain :: instanciateYourself(DataReader *dr)
 
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
         xfemManager.reset( classFactory.createXfemManager(name.c_str(), this) );
+        if ( !xfemManager ) {
+            OOFEM_ERROR("Couldn't create xfemmanager: %s", name.c_str());
+        }
+
         xfemManager->initializeFrom(ir);
         xfemManager->instanciateYourself(dr);
 #  ifdef VERBOSE
@@ -975,6 +979,10 @@ Domain :: instanciateYourself(DataReader *dr)
 
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
         contactManager.reset( classFactory.createContactManager(name.c_str(), this) );
+        if ( !contactManager ) {
+            OOFEM_ERROR("Couldn't create contact manager: %s", name.c_str());
+        }
+
         contactManager->initializeFrom(ir);
         contactManager->instanciateYourself(dr);
     }
@@ -1033,13 +1041,6 @@ Domain :: instanciateYourself(DataReader *dr)
 void
 Domain :: postInitialize()
 {
-    // Dofs must be created before dof managers due their post-initialization:
-    this->createDofs();
-
-    for ( auto &dman: dofManagerList ) {
-        dman->postInitialize();
-    }
-
     // New  - in development /JB
     // set element cross sections based on element set definition and set the corresponding
     // material based on the cs
@@ -1053,6 +1054,12 @@ Domain :: postInitialize()
         }
     }
 
+    // Dofs must be created before dof managers due their post-initialization:
+    this->createDofs();
+
+    for ( auto &dman: dofManagerList ) {
+        dman->postInitialize();
+    }
 
     if ( this->hasXfemManager() ) {
         //this->giveXfemManager()->postInitialize();

@@ -2,7 +2,7 @@ axi04.oofem.out
 axisymmetric 2D pipe test, gravity load in cylinder; no friction
 supg nsteps 4 lstype 0 smtype 1 deltaT 0.00001 rtolv 1.e-4 alpha 0.5 nmodules 1
 errorcheck
-#vtk tstep_step 1 domain_all primvars 2 1 5 vars 1 43
+#vtkxml tstep_step 1 domain_all primvars 2 1 5 vars 1 43
 domain 2dIncompFlow
 OutputManager tstep_all dofman_all element_all
 ndofman 231 nelem 400 ncrosssect 1 nmat 1 nbc 4 nic 0 nltf 1 nset 1

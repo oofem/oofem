@@ -4,51 +4,53 @@ LinearStatic nsteps 1 nmodules 1
 errorcheck
 domain 3d
 OutputManager tstep_all dofman_all element_all
-ndofman 16 nelem 14 ncrosssect 2 nmat 2 nbc 2 nic 0 nltf 1
+ndofman 16 nelem 14 ncrosssect 2 nmat 2 nbc 2 nic 0 nltf 1 nset 2
 node 1 coords 3 0.2 0.  0.  bc 3 0 1 1
-node 2 coords 3 0.2 0.2 0.  
-node 3 coords 3 0.  0.2 0.  
+node 2 coords 3 0.2 0.2 0.
+node 3 coords 3 0.  0.2 0.
 node 4 coords 3 0.  0.  0.  bc 3 1 1 1
 node 5 coords 3 0.2 0.  0.2 bc 3 0 1 0
-node 6 coords 3 0.2 0.2 0.2 
-node 7 coords 3 0.  0.2 0.2 
-node 8 coords 3 0.  0.  0.2 bc 3 1 1 0 
+node 6 coords 3 0.2 0.2 0.2
+node 7 coords 3 0.  0.2 0.2
+node 8 coords 3 0.  0.  0.2 bc 3 1 1 0
 #
-node 9 coords 3 0.2 0.2  0. 
-node 10 coords 3 0.2 0.4 0. 
-node 11 coords 3 0.  0.4 0. 
-node 12 coords 3 0.  0.2  0. 
-node 13 coords 3 0.2 0.2  0.2 
-node 14 coords 3 0.2 0.4 0.2 
-node 15 coords 3 0.  0.4 0.2 
-node 16 coords 3 0.  0.2  0.2 
+node 9 coords 3 0.2 0.2  0.
+node 10 coords 3 0.2 0.4 0.
+node 11 coords 3 0.  0.4 0.
+node 12 coords 3 0.  0.2  0.
+node 13 coords 3 0.2 0.2  0.2
+node 14 coords 3 0.2 0.4 0.2
+node 15 coords 3 0.  0.4 0.2
+node 16 coords 3 0.  0.2  0.2
 #
-LTRSpace  1 nodes 4 1 8 5 6 crossSect 1
-LTRSpace  2 nodes 4 1 4 8 6 crossSect 1
-LTRSpace  3 nodes 4 1 2 4 6 crossSect 1
+LTRSpace  1 nodes 4 1 8 5 6
+LTRSpace  2 nodes 4 1 4 8 6
+LTRSpace  3 nodes 4 1 2 4 6
 #
-LTRSpace  4 nodes 4 2 6 7 4 crossSect 1
-LTRSpace  5 nodes 4 2 7 3 4 crossSect 1
-LTRSpace  6 nodes 4 6 8 7 4 crossSect 1
+LTRSpace  4 nodes 4 2 6 7 4
+LTRSpace  5 nodes 4 2 7 3 4
+LTRSpace  6 nodes 4 6 8 7 4
 #
-LTRSpace  7 nodes 4 9 16 13 14 crossSect 1
-LTRSpace  8 nodes 4 9 12 16 14 crossSect 1
-LTRSpace  9 nodes 4 9 10 12 14 crossSect 1
+LTRSpace  7 nodes 4 9 16 13 14
+LTRSpace  8 nodes 4 9 12 16 14
+LTRSpace  9 nodes 4 9 10 12 14
 #
-LTRSpace  10 nodes 4 10 14 15 12 crossSect 1 boundaryLoads 2 2 1 
-LTRSpace  11 nodes 4 10 15 11 12 crossSect 1 boundaryLoads 2 2 1
-LTRSpace  12 nodes 4 14 16 15 12 crossSect 1
+LTRSpace  10 nodes 4 10 14 15 12 boundaryLoads 2 2 1 
+LTRSpace  11 nodes 4 10 15 11 12 boundaryLoads 2 2 1
+LTRSpace  12 nodes 4 14 16 15 12
 #
-interface3dtrlin 13 nodes 6 2 7 6 9 16 13 crossSect 2
-interface3dtrlin 14 nodes 6 2 3 7 9 12 16 crossSect 2
+interface3dtrlin 13 nodes 6 2 7 6 9 16 13
+interface3dtrlin 14 nodes 6 2 3 7 9 12 16
 #
-SimpleCS 1 thick 1.0 material 1
-InterfaceCS 2 thickness 1.0 material 2
+SimpleCS 1 thick 1.0 material 1 set 1
+InterfaceCS 2 thickness 1.0 material 2 set 2
 IsoLE 1 d 0.0 E 15.0 n 0.25 tAlpha 0.000012
 isointrfdm01 2 ks 15.e3 kn 10.e3 ft 10.0 gf 20.0
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
-ConstantSurfaceLoad 2 ndofs 3 loadType 2 Components 3 0.0 1.0 0.0 loadTimeFunction 1 
+ConstantSurfaceLoad 2 loadType 2 Components 3 0.0 1.0 0.0 loadTimeFunction 1 
 ConstantFunction 1 f(t) 1.0
+Set 1 elementranges {(1 12)}
+Set 2 elementranges {(13 14)}
 #
 #
 #

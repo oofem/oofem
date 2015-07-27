@@ -1443,12 +1443,6 @@ StructuralElement :: showExtendedSparseMtrxStructure(CharType mtrx, oofegGraphic
 {
     NonlocalMaterialStiffnessInterface *interface;
     if ( mtrx == TangentStiffnessMatrix ) {
-        //interface = static_cast< NonlocalMaterialStiffnessInterface * >
-        //            ( this->giveMaterial()->giveInterface(NonlocalMaterialStiffnessInterfaceType) );
-        //if ( interface == NULL ) {
-        //    return;
-        //}
-
         // loop over element IP
         for ( IntegrationPoint *ip: *this->giveDefaultIntegrationRulePtr() ) {
             interface = static_cast< NonlocalMaterialStiffnessInterface * >( this->giveStructuralCrossSection()->

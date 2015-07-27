@@ -4,7 +4,7 @@ LinearStatic nsteps 1 nmodules 1
 errorcheck
 domain 3dshell
 OutputManager tstep_all dofman_all element_all
-ndofman 24 nelem 15 ncrosssect  1 nmat 1 nbc 3 nic 0 nltf 1
+ndofman 24 nelem 15 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 1 nset 1
 #pure bending along y axis
 node 1 coords 3  0.0  4.0  0.0   bc 6 1 1 1 1 1 1
 node 2 coords 3  0.0  0.0  0.0   bc 6 1 1 1 1 1 1
@@ -33,27 +33,28 @@ node 26 coords 3  23.2  1.2  0.0   bc 6 1 1 0 0 0 1
 node 27 coords 3  24.0  4.0  0.0   bc 6 1 1 0 0 0 1 load 1 3 
 node 28 coords 3  24.0  0.0  0.0   bc 6 1 1 1 0 0 1
 ##
-mitc4shell 1 nodes 4 2 4 3 1 crosssect 1 mat 1 
-mitc4shell 2 nodes 4 2 8 6 4 crosssect 1 mat 1 
-mitc4shell 3 nodes 4 4 6 5 3 crosssect 1 mat 1 
-mitc4shell 4 nodes 4 3 5 7 1 crosssect 1 mat 1 
-mitc4shell 5 nodes 4 5 6 8 7 crosssect 1 mat 1 
-mitc4shell 11 nodes 4 12 14 13 11 crosssect 1 mat 1 
-mitc4shell 12 nodes 4 12 18 16 14 crosssect 1 mat 1 
-mitc4shell 13 nodes 4 14 16 15 13 crosssect 1 mat 1 
-mitc4shell 14 nodes 4 13 15 17 11 crosssect 1 mat 1 
-mitc4shell 15 nodes 4 15 16 18 17 crosssect 1 mat 1 
-mitc4shell 21 nodes 4 22 24 23 21 crosssect 1 mat 1 
-mitc4shell 22 nodes 4 22 28 26 24 crosssect 1 mat 1 
-mitc4shell 23 nodes 4 24 26 25 23 crosssect 1 mat 1 
-mitc4shell 24 nodes 4 23 25 27 21 crosssect 1 mat 1 
-mitc4shell 25 nodes 4 25 26 28 27 crosssect 1 mat 1 
-SimpleCS 1 thick 0.1
+mitc4shell 1 nodes 4 2 4 3 1
+mitc4shell 2 nodes 4 2 8 6 4
+mitc4shell 3 nodes 4 4 6 5 3
+mitc4shell 4 nodes 4 3 5 7 1
+mitc4shell 5 nodes 4 5 6 8 7
+mitc4shell 11 nodes 4 12 14 13 11
+mitc4shell 12 nodes 4 12 18 16 14
+mitc4shell 13 nodes 4 14 16 15 13
+mitc4shell 14 nodes 4 13 15 17 11
+mitc4shell 15 nodes 4 15 16 18 17
+mitc4shell 21 nodes 4 22 24 23 21
+mitc4shell 22 nodes 4 22 28 26 24
+mitc4shell 23 nodes 4 24 26 25 23
+mitc4shell 24 nodes 4 23 25 27 21
+mitc4shell 25 nodes 4 25 26 28 27
+SimpleCS 1 thick 0.1 material 1 set 1
 IsoLE 1 d 2500.  E 15.0  n 0.25 tAlpha 0.000012
 BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
-NodalLoad 2 loadTimeFunction 1 Components 6 0 0 0.0 0.0 -2.5 0
-NodalLoad 3 loadTimeFunction 1 Components 6 0 0 5.0 0.0 0.0 0
+NodalLoad 2 loadTimeFunction 1 dofs 6 1 2 3 4 5 6 Components 6 0 0 0.0 0.0 -2.5 0
+NodalLoad 3 loadTimeFunction 1 dofs 6 1 2 3 4 5 6 Components 6 0 0 5.0 0.0 0.0 0
 ConstantFunction 1 f(t) 1.0
+Set 1 elementranges {(1 5) (11 15) (21 25)}
 #
 #
 #

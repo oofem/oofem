@@ -5,21 +5,25 @@ nsteps 5 rtolv 1.e-6 stiffMode 1 controlmode 1 maxiter 100
 errorcheck
 domain 3d
 OutputManager tstep_all dofman_all element_all
-ndofman 8 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1
-node 1 coords 3  0.0   0.0   0.0  bc 3 1 1 1
-node 2 coords 3  1.0   0.0   0.0  bc 3 1 2 1
-node 3 coords 3  1.0   1.0   0.0  bc 3 1 2 1
-node 4 coords 3  0.0   1.0   0.0  bc 3 1 1 1
-node 5 coords 3  0.0   0.0   1.0  bc 3 1 1 1
-node 6 coords 3  1.0   0.0   1.0  bc 3 1 2 1
-node 7 coords 3  1.0   1.0   1.0  bc 3 1 2 1
-node 8 coords 3  0.0   1.0   1.0  bc 3 1 1 1
-lspace  1 nodes 8 1 2 3 4 5 6 7 8  mat 1 crossSect 1 nlgeo 1
-SimpleCS 1
-IsoLE 1 d 0. E 15.0 n 0.25 talpha 1.0  
-BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
-BoundaryCondition  2 loadTimeFunction 1 prescribedvalue 0.5
+ndofman 8 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1 nset 3
+node 1 coords 3  0.0   0.0   0.0
+node 2 coords 3  1.0   0.0   0.0
+node 3 coords 3  1.0   1.0   0.0
+node 4 coords 3  0.0   1.0   0.0
+node 5 coords 3  0.0   0.0   1.0
+node 6 coords 3  1.0   0.0   1.0
+node 7 coords 3  1.0   1.0   1.0
+node 8 coords 3  0.0   1.0   1.0
+lspace  1 nodes 8 1 2 3 4 5 6 7 8 nlgeo 1
+SimpleCS 1 material 1 set 1
+IsoLE 1 d 0. E 15.0 n 0.25 talpha 1.0
+BoundaryCondition  1 loadTimeFunction 1 dofs 3 1 2 3 values 3 0.0 0.0 0.0 set 2
+BoundaryCondition  2 loadTimeFunction 1 dofs 3 1 2 3 values 3 0.0 0.5 0.0 set 3
 PiecewiseLinFunction 1 npoints 2 t 2 0. 1000. f(t) 2 0. 1000.
+Set 1 elementranges {1}
+Set 2 nodes 4 1 4 5 8
+Set 3 nodes 4 2 3 6 7
+
 #%BEGIN_CHECK% tolerance 1.e-12
 ## check Green-Lagrange strain tensor
 #ELEMENT tStep 2 number 1 gp 1 keyword 4 component 1  value 1.2500e-01

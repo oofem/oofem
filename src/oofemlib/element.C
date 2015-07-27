@@ -69,7 +69,7 @@
 
 namespace oofem {
 Element :: Element(int n, Domain *aDomain) :
-    FEMComponent(n, aDomain), dofManArray(), bodyLoadArray(), boundaryLoadArray(), integrationRulesArray()
+    FEMComponent(n, aDomain), dofManArray(), crossSection(0), bodyLoadArray(), boundaryLoadArray(), integrationRulesArray()
 {
     material           = 0;
     numberOfDofMans    = 0;
@@ -615,9 +615,11 @@ Element :: initializeFrom(InputRecord *ir)
     // VERBOSE_PRINT1("Instanciating element ",number);
 #  endif
     //IR_GIVE_FIELD(ir, material, _IFT_Element_mat);
+    material = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, material, _IFT_Element_mat);
 
     //IR_GIVE_FIELD(ir, crossSection, _IFT_Element_crosssect);
+    crossSection = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, crossSection, _IFT_Element_crosssect);
 
     IR_GIVE_FIELD(ir, dofManArray, _IFT_Element_nodes);
@@ -663,6 +665,7 @@ Element :: initializeFrom(InputRecord *ir)
         parallel_mode = Element_local;
     }
 
+    activityTimeFunction = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, activityTimeFunction, _IFT_Element_activityTimeFunction);
 
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, _IFT_Element_nip);

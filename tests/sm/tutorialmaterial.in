@@ -6,22 +6,24 @@ errorcheck
 #vtkxml 1 tstep_all domain_all cellvars 1 1 vars 2 1 81 primvars 1 1
 domain 3d
 OutputManager tstep_all dofman_all element_all
-ndofman 8 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1
-node 1 coords 3  0.0   0.0   0.0  bc 3 1 1 1
-node 2 coords 3  1.0   0.0   0.0  bc 3 1 1 1
-node 3 coords 3  1.0   1.0   0.0  bc 3 1 1 1
-node 4 coords 3  0.0   1.0   0.0  bc 3 1 1 1
-node 5 coords 3  0.0   0.0   1.0  bc 3 1 1 2
-node 6 coords 3  1.0   0.0   1.0  bc 3 1 1 2
-node 7 coords 3  1.0   1.0   1.0  bc 3 1 1 2
-node 8 coords 3  0.0   1.0   1.0  bc 3 1 1 2
-lspace  1 nodes 8 1 2 3 4 5 6 7 8  mat 1 crossSect 1
-SimpleCS 1
+ndofman 8 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1 nset 2
+node 1 coords 3  0.0   0.0   0.0
+node 2 coords 3  1.0   0.0   0.0
+node 3 coords 3  1.0   1.0   0.0
+node 4 coords 3  0.0   1.0   0.0
+node 5 coords 3  0.0   0.0   1.0
+node 6 coords 3  1.0   0.0   1.0
+node 7 coords 3  1.0   1.0   1.0
+node 8 coords 3  0.0   1.0   1.0
+lspace  1 nodes 8 1 2 3 4 5 6 7 8 crossSect 1
+SimpleCS 1 material 1
 #IsoLE 1 d 0. E 15.0 n 0.25 talpha 1.0  
 tutorialmaterial 1 d 0. E 200.0e9 n 0.3 sigy 500.0e6 H 10.0e9 talpha -1.0
-BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
-BoundaryCondition  2 loadTimeFunction 1 prescribedvalue 0.03
+BoundaryCondition  1 loadTimeFunction 1 dofs 3 1 2 3 values 3 0.0 0.0 0.0 set 1
+BoundaryCondition  2 loadTimeFunction 1 dofs 3 1 2 3 values 3 0.0 0.0 0.03 set 2
 PiecewiseLinFunction 1 npoints 2 t 2 1. 5. f(t) 2 0.1 1.
+Set 1 nodes 4 1 2 3 4
+Set 2 nodes 4 5 6 7 8
 #
 #%BEGIN_CHECK% tolerance 1.e4
 ## error has the unit Pa => tolerance = 10 kPa

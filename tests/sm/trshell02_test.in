@@ -29,51 +29,52 @@ LinearStatic nsteps 1 nmodules 1
 errorcheck
 domain 3dshell
 OutputManager tstep_all dofman_all element_all
-ndofman 16 nelem 8 ncrosssect  1 nmat 1 nbc 5 nic 0 nltf 1
+ndofman 16 nelem 8 ncrosssect  1 nmat 1 nbc 5 nic 0 nltf 1 nset 1
 # membrane part
-node 1 coords 3  0.0  0.0  0.0   bc 3 1 1 1 ndofs 3 dofidmask 3 1 2 6 
-node 2 coords 3  3.0  0.0  0.0   bc 3 0 0 0  load 1 3 ndofs 3 dofidmask 3 1 2 6 
-node 3 coords 3  3.0  2.0  0.0   bc 3 0 0 0  load 1 3 ndofs 3 dofidmask 3 1 2 6
-node 4 coords 3  0.0  2.0  0.0   bc 3 1 1 1  ndofs 3 dofidmask 3 1 2 6 
+node 1 coords 3  0.0  0.0  0.0   bc 3 1 1 1 dofidmask 3 1 2 6 
+node 2 coords 3  3.0  0.0  0.0   load 1 3 dofidmask 3 1 2 6 
+node 3 coords 3  3.0  2.0  0.0   load 1 3 dofidmask 3 1 2 6
+node 4 coords 3  0.0  2.0  0.0   bc 3 1 1 1 dofidmask 3 1 2 6 
 #  plate part
-node 11 coords 3  0.0  0.0  0.0   bc 3 1 1 1 ndofs 3 dofidmask 3 3 4 5
-node 12 coords 3  3.0  0.0  0.0   bc 3 0 0 0  load 1 4 ndofs 3 dofidmask 3 3 4 5
-node 13 coords 3  3.0  2.0  0.0   bc 3 0 0 0  load 1 4 ndofs 3 dofidmask 3 3 4 5
-node 14 coords 3  0.0  2.0  0.0   bc 3 1 1 1  ndofs 3 dofidmask 3 3 4 5
+node 11 coords 3  0.0  0.0  0.0   bc 3 1 1 1 dofidmask 3 3 4 5
+node 12 coords 3  3.0  0.0  0.0   load 1 4 dofidmask 3 3 4 5
+node 13 coords 3  3.0  2.0  0.0   load 1 4 dofidmask 3 3 4 5
+node 14 coords 3  0.0  2.0  0.0   bc 3 1 1 1 dofidmask 3 3 4 5
 # shell in yz plane
 node 21 coords 3  0.0  0.0  0.0                 bc 6 1 1 1 1 1 1
-node 22 coords 3  0.0  3.0  0.0   bc 6 0 0 0 0 0 0 load 1 2
-node 23 coords 3  0.0  3.0  2.0   bc 6 0 0 0 0 0 0 load 1 2
+node 22 coords 3  0.0  3.0  0.0   load 1 2
+node 23 coords 3  0.0  3.0  2.0   load 1 2
 node 24 coords 3  0.0  0.0  2.0   bc 6 1 1 1 1 1 1 
 # shell with arbitrary position in space (see before)
 node 31 coords 3  0.0  0.0  0.0                 bc 6 1 1 1 1 1 1
-node 32 coords 3  2.59808   0.00000  -1.50000   bc 6 0 0 0 0 0 0 load 1 5
-node 33 coords 3  3.09808   1.73205  -0.63397   bc 6 0 0 0 0 0 0 load 1 5
+node 32 coords 3  2.59808   0.00000  -1.50000   load 1 5
+node 33 coords 3  3.09808   1.73205  -0.63397   load 1 5
 node 34 coords 3  0.50000   1.73205   0.86603   bc 6 1 1 1 1 1 1 
 ##
 # simple membrane
-trplanestressrotallman 1 nodes 3 1 2 3 crosssect 1 mat 1 
-trplanestressrotallman 2 nodes 3 1 3 4 crosssect 1 mat 1 
+trplanestressrotallman 1 nodes 3 1 2 3
+trplanestressrotallman 2 nodes 3 1 3 4
 # simple plate
-DKTPlate 11 nodes 3 11 12 13 crosssect 1 mat 1 nip 4
-DKTPlate 12 nodes 3 11 13 14 crosssect 1 mat 1 nip 4
+DKTPlate 11 nodes 3 11 12 13 nip 4
+DKTPlate 12 nodes 3 11 13 14 nip 4
 # shell in yz plane
-tr_shell02 21 nodes 3 21 22 23 crosssect 1 mat 1 nip 4
-tr_shell02 22 nodes 3 21 23 24 crosssect 1 mat 1 nip 4
+tr_shell02 21 nodes 3 21 22 23 nip 4
+tr_shell02 22 nodes 3 21 23 24 nip 4
 #general position
-tr_shell02 31 nodes 3 31 32 33 crosssect 1 mat 1 nip 4
-tr_shell02 32 nodes 3 31 33 34 crosssect 1 mat 1 nip 4
+tr_shell02 31 nodes 3 31 32 33 nip 4
+tr_shell02 32 nodes 3 31 33 34 nip 4
 #
-SimpleCS 1 thick 1.0
+SimpleCS 1 thick 1.0 material 1 set 1
 IsoLE 1 d 2500.  E 15.0  n 0.25 tAlpha 0.000012
-BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
-NodalLoad 2 loadTimeFunction 1 Components 6 0.0 1.0 0.0 0.0 0.0 1.0
+BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
+NodalLoad 2 loadTimeFunction 1 dofs 6 1 2 3 4 5 6 Components 6 0.0 1.0 0.0 0.0 0.0 1.0
 # pure membrane load -> force in x dir
-NodalLoad 3 loadTimeFunction 1 Components 3 1.0 0.0 0.0 
+NodalLoad 3 loadTimeFunction 1 dofs 3 1 2 6 Components 3 1.0 0.0 0.0 
 # pure plate load -> moment m_y
-NodalLoad 4 loadTimeFunction 1 Components 3 0.0 0.0 1.0 
-NodalLoad 5 loadTimeFunction 1 Components 6 0.86603   0.00000  -0.50000 0.25000   0.86603   0.43301 
+NodalLoad 4 loadTimeFunction 1 dofs 3 3 4 5 Components 3 0.0 0.0 1.0
+NodalLoad 5 loadTimeFunction 1 dofs 6 1 2 3 4 5 6 Components 6 0.86603   0.00000  -0.50000 0.25000   0.86603   0.43301
 ConstantFunction 1 f(t) 1.0
+Set 1 elements 8 1 2 11 12 21 22 31 32
 #%BEGIN_CHECK% tolerance 1.e-4
 ## check nodes nodes
 ##membrane
