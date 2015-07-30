@@ -34,6 +34,7 @@ ConstantEdgeLoad 2 loadType 2 loadTimeFunction 1 Components 8 0. 0. 1.0 0. 0. 0.
 ConstantFunction 1 f(t) 50.
 Set 1 elementranges {(1 4)}
 Set 2 nodes 3  1 2 5
+# TODO: Should we have an edge or surface set here?
 Set 3 elementboundaries 2 3 2
 #
 #%BEGIN_CHECK% tolerance 1.e-5

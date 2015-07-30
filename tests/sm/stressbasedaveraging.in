@@ -8,14 +8,14 @@ errorcheck
 domain 2dPlaneStress
 #
 OutputManager tstep_all dofman_all element_all
-ndofman 6 nelem 4 ncrosssect 1 nmat 2 nbc 2 nic 0 nltf 2 nbarrier 1
+ndofman 6 nelem 4 ncrosssect 1 nmat 2 nbc 2 nic 0 nltf 2 nbarrier 1 nset 2
 #
-node     1 coords 2    0.000000000   0.0000000000 bc 2 1 1
-node     2 coords 2    1.0000000000  0.0000000000 bc 2 1 1
+node     1 coords 2    0.000000000   0.0000000000
+node     2 coords 2    1.0000000000  0.0000000000
 node     3 coords 2    4.0000000000  1.0000000000 
 node     4 coords 2    0.0000000000  1.0000000000 
-node     5 coords 2    4.0000000000  11.0000000000 bc 2 0 2
-node     6 coords 2    0.0000000000  11.0000000000 bc 2 0 2
+node     5 coords 2    4.0000000000  11.0000000000
+node     6 coords 2    0.0000000000  11.0000000000
 TrPlaneStress2d 1 nodes 3 1 2 4 mat 1 crossSect 1
 TrPlaneStress2d 2 nodes 3 2 3 4 mat 1 crossSect 1
 TrPlaneStress2d 3 nodes 3 4 3 5 mat 2 crossSect 1
@@ -27,11 +27,13 @@ idmnl1 1 d 0. E 29.6e9 n 0. talpha 0. r 2  equivstraintype 4 scaling 1 damlaw 7 
 idmnl1 2 d 0. E 29.6e9 n 0.2 talpha 0. r 2  equivstraintype 4 scaling 1 damlaw 7 ft 1.e6  ep 1.98e-4 e1 2.30e-4 e2 70.e-4 nd 0.85 wft 3 nlvariation 2 beta 0.2 
 #
 PolyLineBarrier 1 vertexnodes 2 1 2 
-BoundaryCondition 1 loadTimeFunction 1  d 0.0
-BoundaryCondition 2 loadTimeFunction 2  d -1.0
+BoundaryCondition 1 loadTimeFunction 1 dofs 2 1 2 values 2 0 0 set 1
+BoundaryCondition 2 loadTimeFunction 2 dofs 1 2 values 1 -1.0 set 2
 #
 ConstantFunction 1 f(t) 1.0
 PiecewiseLinFunction 2 nPoints 2 t 2 0. 5. f(t) 2 0. 5.e-5
+Set 1 nodes 2 1 2
+Set 2 nodes 2 5 6
 ###
 ### Used for Extractor
 ###

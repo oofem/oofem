@@ -4,15 +4,19 @@ LinearStatic nsteps 1 nmodules 1
 errorcheck
 domain 2dplanestress
 OutputManager tstep_all dofman_all element_all
-ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1 nset 0
-node 1 coords 3 0.  0.  0.  bc 2 1 1
-node 2 coords 3 0.  0.  0.  bc 2 1 0 load 1 2 
-Spring 1 nodes 2 1 2 crossSect 1 mode 1 orientation 3 0 1 0 k 2.0
-SimpleCS 1 thick 0.1 material 1
+ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 1 nset 3
+node 1 coords 3 0.  0.  0.
+node 2 coords 3 0.  0.  0.
+Spring 1 nodes 2 1 2 mode 1 orientation 3 0 1 0 k 2.0
+SimpleCS 1 thick 0.1 material 1 set 1
 dummymat 1
-BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
-NodalLoad 2 loadTimeFunction 1 dofs 2 1 2 Components 2 0.0 1.0
+BoundaryCondition 1 loadTimeFunction 1 dofs 2 1 2 values 2 0.0 0.0 set 2
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 3
+NodalLoad 3 loadTimeFunction 1 dofs 2 1 2 Components 2 0.0 1.0 set 3
 ConstantFunction 1 f(t) 1.0
+Set 1 elementranges {1}
+Set 2 nodes 1 1
+Set 3 nodes 1 2
 #
 #%BEGIN_CHECK% tolerance 1.e-4
 ## check nodal displacements

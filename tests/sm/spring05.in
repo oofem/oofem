@@ -4,20 +4,25 @@ LinearStatic nsteps 1 nmodules 1
 errorcheck
 domain 2dbeam
 OutputManager tstep_all dofman_all element_all
-ndofman 3 nelem 2 ncrosssect 2 nmat 2 nbc 3 nic 0 nltf 1 nset 0
-node 1 coords 3 0.  0.  0.  bc 3 1 1 1
-node 2 coords 3 0.  0.  0.  bc 3 1 1 0
-node 3 coords 3 3.  0.  0.  bc 3 0 1 0
-beam2d 1 nodes 2 2 3 crossSect 1 boundaryLoads 2 3 1
+ndofman 3 nelem 2 ncrosssect 2 nmat 2 nbc 4 nic 0 nltf 1 nset 4
+node 1 coords 3 0.  0.  0.
+node 2 coords 3 0.  0.  0.
+node 3 coords 3 3.  0.  0.
+beam2d 1 nodes 2 2 3 crossSect 1
 Spring 2 nodes 2 1 2 crossSect 2 mode 3 orientation 3 0 1 0 k 5.0
 SimpleCS 1 area 2.0 Iy 15.0 beamShearCoeff 1.e18 material 1
 SimpleCS 2 area 2.0 material 2
 IsoLE 1 d 1. E 1.0 n 0.2 tAlpha 1.2e-5
 DummyMat 2 
-BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
-NodalLoad 2 loadTimeFunction 1 dofs 2 1 2 Components 2 1.0 0.0
-ConstantEdgeLoad 3 loadTimeFunction 1 Components 3 0.0 10.0 0.0 loadType 3
+BoundaryCondition 1 loadTimeFunction 1 dofs 3 1 3 5 values 3 0 0 0 set 1
+BoundaryCondition 2 loadTimeFunction 1 dofs 2 1 3 values 2 0 0 set 2
+BoundaryCondition 3 loadTimeFunction 1 dofs 1 3 values 1 0 set 3
+ConstantEdgeLoad 4 loadTimeFunction 1 dofs 3 1 3 5 Components 3 0.0 10.0 0.0 loadType 3 set 4
 ConstantFunction 1 f(t) 1.0
+Set 1 nodes 1 1
+Set 2 nodes 1 2
+Set 3 nodes 1 3
+Set 4 elementedges 2 1 1
 ##
 ## Solution:
 ## Stiffness matrix of the system (dofs: rotation_at_node_1, rotation_at_node_2)

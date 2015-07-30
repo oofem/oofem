@@ -4,97 +4,97 @@ linearstatic nsteps 1 nmodules 1
 errorcheck
 domain 3d
 outputmanager tstep_all dofman_all element_all
-ndofman 90 nelem 32 ncrosssect 1 nmat 1 nbc 6 nic 0 nltf 1 nset 1
-node 1 coords 3 0.0 0.0 0.0 bc 3 1 1 1
-node 2 coords 3 0.0 0.0 0.5 bc 3 1 1 0
-node 3 coords 3 0.0 0.0 1.0 bc 3 1 1 0
-node 4 coords 3 0.0 0.0 1.5 bc 3 1 1 0
-node 5 coords 3 0.0 0.0 2.0 bc 3 1 1 0
-node 6 coords 3 2.0 0.0 0.0 bc 3 1 1 0
-node 7 coords 3 2.0 0.0 0.5 bc 3 0 1 0
-node 8 coords 3 2.0 0.0 1.0 bc 3 0 1 0
-node 9 coords 3 2.0 0.0 1.5 bc 3 0 1 0
-node 10 coords 3 2.0 0.0 2.0 bc 3 0 1 0
-node 11 coords 3 4.0 0.0 0.0 bc 3 1 1 0
-node 12 coords 3 4.0 0.0 0.5 bc 3 0 1 0
-node 13 coords 3 4.0 0.0 1.0 bc 3 0 1 0
-node 14 coords 3 4.0 0.0 1.5 bc 3 0 1 0
-node 15 coords 3 4.0 0.0 2.0 bc 3 0 1 0
-node 16 coords 3 6.0 0.0 0.0 bc 3 1 1 0
-node 17 coords 3 6.0 0.0 0.5 bc 3 0 1 0
-node 18 coords 3 6.0 0.0 1.0 bc 3 0 1 0
-node 19 coords 3 6.0 0.0 1.5 bc 3 0 1 0
-node 20 coords 3 6.0 0.0 2.0 bc 3 0 1 0
-node 21 coords 3 8.0 0.0 0.0 bc 3 1 1 0
-node 22 coords 3 8.0 0.0 0.5 bc 3 0 1 0
-node 23 coords 3 8.0 0.0 1.0 bc 3 0 1 0
-node 24 coords 3 8.0 0.0 1.5 bc 3 0 1 0
-node 25 coords 3 8.0 0.0 2.0 bc 3 0 1 0
-node 26 coords 3 10.0 0.0 0.0 bc 3 1 1 0
-node 27 coords 3 10.0 0.0 0.5 bc 3 0 1 0
-node 28 coords 3 10.0 0.0 1.0 bc 3 0 1 0
-node 29 coords 3 10.0 0.0 1.5 bc 3 0 1 0
-node 30 coords 3 10.0 0.0 2.0 bc 3 0 1 0
-node 31 coords 3 12.0 0.0 0.0 bc 3 1 1 0
-node 32 coords 3 12.0 0.0 0.5 bc 3 0 1 0
-node 33 coords 3 12.0 0.0 1.0 bc 3 0 1 0
-node 34 coords 3 12.0 0.0 1.5 bc 3 0 1 0
-node 35 coords 3 12.0 0.0 2.0 bc 3 0 1 0
-node 36 coords 3 14.0 0.0 0.0 bc 3 1 1 0
-node 37 coords 3 14.0 0.0 0.5 bc 3 0 1 0
-node 38 coords 3 14.0 0.0 1.0 bc 3 0 1 0
-node 39 coords 3 14.0 0.0 1.5 bc 3 0 1 0
-node 40 coords 3 14.0 0.0 2.0 bc 3 0 1 0
-node 41 coords 3 16.0 0.0 0.0 bc 3 1 1 0 load 1 2
-node 42 coords 3 16.0 0.0 0.5 bc 3 0 1 0 load 1 3
-node 43 coords 3 16.0 0.0 1.0 bc 3 0 1 0 load 1 4
-node 44 coords 3 16.0 0.0 1.5 bc 3 0 1 0 load 1 5
-node 45 coords 3 16.0 0.0 2.0 bc 3 0 1 0 load 1 6
-node 46 coords 3 0.0 1.0 0.0 bc 3 1 1 1
-node 47 coords 3 0.0 1.0 0.5 bc 3 1 1 0
-node 48 coords 3 0.0 1.0 1.0 bc 3 1 1 0
-node 49 coords 3 0.0 1.0 1.5 bc 3 1 1 0
-node 50 coords 3 0.0 1.0 2.0 bc 3 1 1 0
-node 51 coords 3 2.0 1.0 0.0 bc 3 1 1 0
-node 52 coords 3 2.0 1.0 0.5 bc 3 0 1 0
-node 53 coords 3 2.0 1.0 1.0 bc 3 0 1 0
-node 54 coords 3 2.0 1.0 1.5 bc 3 0 1 0
-node 55 coords 3 2.0 1.0 2.0 bc 3 0 1 0
-node 56 coords 3 4.0 1.0 0.0 bc 3 1 1 0
-node 57 coords 3 4.0 1.0 0.5 bc 3 0 1 0
-node 58 coords 3 4.0 1.0 1.0 bc 3 0 1 0
-node 59 coords 3 4.0 1.0 1.5 bc 3 0 1 0
-node 60 coords 3 4.0 1.0 2.0 bc 3 0 1 0
-node 61 coords 3 6.0 1.0 0.0 bc 3 1 1 0
-node 62 coords 3 6.0 1.0 0.5 bc 3 0 1 0
-node 63 coords 3 6.0 1.0 1.0 bc 3 0 1 0
-node 64 coords 3 6.0 1.0 1.5 bc 3 0 1 0
-node 65 coords 3 6.0 1.0 2.0 bc 3 0 1 0
-node 66 coords 3 8.0 1.0 0.0 bc 3 1 1 0
-node 67 coords 3 8.0 1.0 0.5 bc 3 0 1 0
-node 68 coords 3 8.0 1.0 1.0 bc 3 0 1 0
-node 69 coords 3 8.0 1.0 1.5 bc 3 0 1 0
-node 70 coords 3 8.0 1.0 2.0 bc 3 0 1 0
-node 71 coords 3 10.0 1.0 0.0 bc 3 1 1 0
-node 72 coords 3 10.0 1.0 0.5 bc 3 0 1 0
-node 73 coords 3 10.0 1.0 1.0 bc 3 0 1 0
-node 74 coords 3 10.0 1.0 1.5 bc 3 0 1 0
-node 75 coords 3 10.0 1.0 2.0 bc 3 0 1 0
-node 76 coords 3 12.0 1.0 0.0 bc 3 1 1 0
-node 77 coords 3 12.0 1.0 0.5 bc 3 0 1 0
-node 78 coords 3 12.0 1.0 1.0 bc 3 0 1 0
-node 79 coords 3 12.0 1.0 1.5 bc 3 0 1 0
-node 80 coords 3 12.0 1.0 2.0 bc 3 0 1 0
-node 81 coords 3 14.0 1.0 0.0 bc 3 1 1 0
-node 82 coords 3 14.0 1.0 0.5 bc 3 0 1 0
-node 83 coords 3 14.0 1.0 1.0 bc 3 0 1 0
-node 84 coords 3 14.0 1.0 1.5 bc 3 0 1 0
-node 85 coords 3 14.0 1.0 2.0 bc 3 0 1 0
-node 86 coords 3 16.0 1.0 0.0 bc 3 1 1 0 load 1 2
-node 87 coords 3 16.0 1.0 0.5 bc 3 0 1 0 load 1 3
-node 88 coords 3 16.0 1.0 1.0 bc 3 0 1 0 load 1 4
-node 89 coords 3 16.0 1.0 1.5 bc 3 0 1 0 load 1 5
-node 90 coords 3 16.0 1.0 2.0 bc 3 0 1 0 load 1 6
+ndofman 90 nelem 32 ncrosssect 1 nmat 1 nbc 5 nic 0 nltf 1 nset 5
+node 1 coords 3 0.0 0.0 0.0
+node 2 coords 3 0.0 0.0 0.5
+node 3 coords 3 0.0 0.0 1.0
+node 4 coords 3 0.0 0.0 1.5
+node 5 coords 3 0.0 0.0 2.0
+node 6 coords 3 2.0 0.0 0.0
+node 7 coords 3 2.0 0.0 0.5
+node 8 coords 3 2.0 0.0 1.0
+node 9 coords 3 2.0 0.0 1.5
+node 10 coords 3 2.0 0.0 2.0
+node 11 coords 3 4.0 0.0 0.0
+node 12 coords 3 4.0 0.0 0.5
+node 13 coords 3 4.0 0.0 1.0
+node 14 coords 3 4.0 0.0 1.5
+node 15 coords 3 4.0 0.0 2.0
+node 16 coords 3 6.0 0.0 0.0
+node 17 coords 3 6.0 0.0 0.5
+node 18 coords 3 6.0 0.0 1.0
+node 19 coords 3 6.0 0.0 1.5
+node 20 coords 3 6.0 0.0 2.0
+node 21 coords 3 8.0 0.0 0.0
+node 22 coords 3 8.0 0.0 0.5
+node 23 coords 3 8.0 0.0 1.0
+node 24 coords 3 8.0 0.0 1.5
+node 25 coords 3 8.0 0.0 2.0
+node 26 coords 3 10.0 0.0 0.0
+node 27 coords 3 10.0 0.0 0.5
+node 28 coords 3 10.0 0.0 1.0
+node 29 coords 3 10.0 0.0 1.5
+node 30 coords 3 10.0 0.0 2.0
+node 31 coords 3 12.0 0.0 0.0
+node 32 coords 3 12.0 0.0 0.5
+node 33 coords 3 12.0 0.0 1.0
+node 34 coords 3 12.0 0.0 1.5
+node 35 coords 3 12.0 0.0 2.0
+node 36 coords 3 14.0 0.0 0.0
+node 37 coords 3 14.0 0.0 0.5
+node 38 coords 3 14.0 0.0 1.0
+node 39 coords 3 14.0 0.0 1.5
+node 40 coords 3 14.0 0.0 2.0
+node 41 coords 3 16.0 0.0 0.0
+node 42 coords 3 16.0 0.0 0.5
+node 43 coords 3 16.0 0.0 1.0
+node 44 coords 3 16.0 0.0 1.5
+node 45 coords 3 16.0 0.0 2.0
+node 46 coords 3 0.0 1.0 0.0
+node 47 coords 3 0.0 1.0 0.5
+node 48 coords 3 0.0 1.0 1.0
+node 49 coords 3 0.0 1.0 1.5
+node 50 coords 3 0.0 1.0 2.0
+node 51 coords 3 2.0 1.0 0.0
+node 52 coords 3 2.0 1.0 0.5
+node 53 coords 3 2.0 1.0 1.0
+node 54 coords 3 2.0 1.0 1.5
+node 55 coords 3 2.0 1.0 2.0
+node 56 coords 3 4.0 1.0 0.0
+node 57 coords 3 4.0 1.0 0.5
+node 58 coords 3 4.0 1.0 1.0
+node 59 coords 3 4.0 1.0 1.5
+node 60 coords 3 4.0 1.0 2.0
+node 61 coords 3 6.0 1.0 0.0
+node 62 coords 3 6.0 1.0 0.5
+node 63 coords 3 6.0 1.0 1.0
+node 64 coords 3 6.0 1.0 1.5
+node 65 coords 3 6.0 1.0 2.0
+node 66 coords 3 8.0 1.0 0.0
+node 67 coords 3 8.0 1.0 0.5
+node 68 coords 3 8.0 1.0 1.0
+node 69 coords 3 8.0 1.0 1.5
+node 70 coords 3 8.0 1.0 2.0
+node 71 coords 3 10.0 1.0 0.0
+node 72 coords 3 10.0 1.0 0.5
+node 73 coords 3 10.0 1.0 1.0
+node 74 coords 3 10.0 1.0 1.5
+node 75 coords 3 10.0 1.0 2.0
+node 76 coords 3 12.0 1.0 0.0
+node 77 coords 3 12.0 1.0 0.5
+node 78 coords 3 12.0 1.0 1.0
+node 79 coords 3 12.0 1.0 1.5
+node 80 coords 3 12.0 1.0 2.0
+node 81 coords 3 14.0 1.0 0.0
+node 82 coords 3 14.0 1.0 0.5
+node 83 coords 3 14.0 1.0 1.0
+node 84 coords 3 14.0 1.0 1.5
+node 85 coords 3 14.0 1.0 2.0
+node 86 coords 3 16.0 1.0 0.0
+node 87 coords 3 16.0 1.0 0.5
+node 88 coords 3 16.0 1.0 1.0
+node 89 coords 3 16.0 1.0 1.5
+node 90 coords 3 16.0 1.0 2.0
 lspacebb 1 nodes 8 1 6 7 2 46 51 52 47
 lspacebb 2 nodes 8 2 7 8 3 47 52 53 48
 lspacebb 3 nodes 8 3 8 9 4 48 53 54 49
@@ -129,14 +129,17 @@ lspacebb 31 nodes 8 38 43 44 39 83 88 89 84
 lspacebb 32 nodes 8 39 44 45 40 84 89 90 85
 simplecs 1 material 1 set 1
 isole 1 E 205.50003049998844 n 0.49999987500003124 talpha 0.0 d 0.0
-boundarycondition 1 loadtimefunction 1 prescribedvalue 0.0
-nodalload 2 loadTimeFunction 1 Components 3 0.0 0.0 -0.125 
-nodalload 3 loadTimeFunction 1 Components 3 0.0 0.0 -0.25
-nodalload 4 loadTimeFunction 1 Components 3 0.0 0.0 -0.25
-nodalload 5 loadTimeFunction 1 Components 3 0.0 0.0 -0.25
-nodalload 6 loadTimeFunction 1 Components 3 0.0 0.0 -0.125
+boundarycondition 1 loadtimefunction 1 dofs 1 1 values 1 0.0 set 2
+boundarycondition 2 loadtimefunction 1 dofs 1 2 values 1 0.0 set 1
+boundarycondition 3 loadtimefunction 1 dofs 1 3 values 1 0.0 set 3
+nodalload 4 loadTimeFunction 1 dofs 1 3 Components 1 -0.125 set 4
+nodalload 5 loadTimeFunction 1 dofs 1 3 Components 1 -0.25 set 5
 constantfunction 1 f(t) 0.25
 Set 1 elementranges {(1 32)}
+Set 2 noderanges {(1 6) 11 16 21 26 31 36 41 (46 51) 56 61 66 71 76 81 86}
+Set 3 nodes 2 1 46
+Set 4 nodes 4 41 45 86 90
+Set 5 nodes 6 42 43 44 87 88 89
 #
 #%BEGIN_CHECK%
 #NODE tStep 1 number 41 dof 3 unknown d value -9.61512810e-01 tolerance 1e-5

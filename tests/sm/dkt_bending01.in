@@ -22,6 +22,7 @@ PeakFunction 3 t 2.0 f(t) 1.0
 Set 1 elementranges {(1 2)}
 Set 2 nodes 2 3 4
 Set 3 nodes 2 1 2
+# TODO: Should we have an edge or surface set here?
 Set 4 elementboundaries 2 2 1
 #
 #  exact solution
