@@ -78,6 +78,12 @@ public:
     virtual InputRecord *giveInputRecord(InputRecordType irType, int recordId) = 0;
 
     /**
+     * Peak in advance into the record list.
+     * @return True if next keyword is a set.
+     */
+    virtual bool peakNext(const std :: string &keyword) { return false; }
+
+    /**
      * Allows to detach all data connections.
      */
     virtual void finish() = 0;

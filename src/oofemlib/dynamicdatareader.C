@@ -68,6 +68,14 @@ DynamicDataReader :: giveInputRecord(InputRecordType typeId, int recordId)
     return this->it->get();
 }
 
+bool
+DynamicDataReader :: peakNext(const std :: string &keyword)
+{
+    std :: string nextKey;
+    (*this->it)->giveRecordKeywordField(nextKey);
+    return keyword.compare( nextKey ) == 0;
+}
+
 void
 DynamicDataReader :: finish()
 {

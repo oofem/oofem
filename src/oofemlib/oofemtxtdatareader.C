@@ -103,6 +103,14 @@ OOFEMTXTDataReader :: giveInputRecord(InputRecordType typeId, int recordId)
     return &(*this->it++);
 }
 
+bool
+OOFEMTXTDataReader :: peakNext(const std :: string &keyword)
+{
+    std :: string nextKey;
+    this->it->giveRecordKeywordField(nextKey);
+    return keyword.compare( nextKey ) == 0;
+}
+
 void
 OOFEMTXTDataReader :: finish()
 {
