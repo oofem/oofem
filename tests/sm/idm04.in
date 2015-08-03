@@ -5,16 +5,19 @@ errorcheck
 #vtkxml tstep_all domain_all primvars 1 1
 domain 1dtruss
 OutputManager tstep_all dofman_all element_all
-ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 2 nltf 1 nic 0
-node 1 coords 3 0.0 0.0 0.0 bc 1 1
-node 2 coords 3 0.5 0.0 0.0 load 1 2
-truss1d 1 nodes 2 1 2 crossSect 1 mat 1
-SimpleCS 1 thick 1.0 width 10.0 material 1
+ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 2 nltf 1 nic 0 nset 3
+node 1 coords 3 0.0 0.0 0.0
+node 2 coords 3 0.5 0.0 0.0
+truss1d 1 nodes 2 1 2 mat 1
+SimpleCS 1 thick 1.0 width 10.0 material 1 set 1
 #linear softening, fracturing strain
 idm1 1 d 1.0  E 10. n 0.2  e0 0.5 ef 1.2 equivstraintype 0 talpha 0.0 damlaw 1
-BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
-NodalLoad 2 loadTimeFunction 1 dofs 1 1 components 1 1.0
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 2
+NodalLoad 2 loadTimeFunction 1 dofs 1 1 components 1 1.0 set 3
 ConstantFunction 1 f(t) 1.0
+Set 1 elementranges {1}
+Set 2 nodes 1 1
+Set 3 nodes 1 2
 ###
 ### Used for Extractor
 ###
