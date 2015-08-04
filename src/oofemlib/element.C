@@ -335,7 +335,7 @@ Element :: computeDofTransformationMatrix(FloatMatrix &answer, const IntArray &n
             lastColPos += nc;
         }
     }
-    answer.resizeWithData(answer.giveNumberOfRows(), lastColPos);
+    answer.resizeWithData(lastRowPos, lastColPos);
     return true;
 }
 
