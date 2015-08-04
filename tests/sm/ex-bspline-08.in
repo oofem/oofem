@@ -4,19 +4,19 @@ LinearStatic nsteps 1 nmodules 1
 errorcheck
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
-ndofman 12 nelem 2 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1 nset 1
-node 1 coords   3 0   0   0   bc 2 1 1
-node 2 coords   3 2.  0.  0.  bc 2 0 1
-node 3 coords   3 6.  0.  0.  bc 2 2 1
-node 4 coords   3 0.  1.  0.  bc 2 1 0
-node 5 coords   3 4   1   0   bc 2 0 0
-node 6 coords   3 6.  1.  0.  bc 2 2 0
-node 7 coords   3 0.  3.  0.  bc 2 1 0
-node 8 coords   3 2.  3.  0.  bc 2 0 0
-node 9 coords   3 6   3   0   bc 2 2 0
-node 10 coords  3 0.  5.  0.  bc 2 1 0
-node 11 coords  3 4.  5.  0.  bc 2 0 0
-node 12 coords  3 6   5   0   bc 2 2 0
+ndofman 12 nelem 2 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 1 nset 4
+node 1 coords   3 0.  0.  0.
+node 2 coords   3 2.  0.  0.
+node 3 coords   3 6.  0.  0.
+node 4 coords   3 0.  1.  0.
+node 5 coords   3 4.  1.  0.
+node 6 coords   3 6.  1.  0.
+node 7 coords   3 0.  3.  0.
+node 8 coords   3 2.  3.  0.
+node 9 coords   3 6.  3.  0.
+node 10 coords  3 0.  5.  0.
+node 11 coords  3 4.  5.  0.
+node 12 coords  3 6.  5.  0.
 #
 bsplineplanestresselement 1 nodes 8 2 5 8 11 1 4 7 10 knotvectorv 2 0 1 knotvectoru 3 0 7 67 degree 2 2 1 nip 16
 bsplineplanestresselement 2 nodes 8 3 6 9 12 2 5 8 11 knotvectorv 2 0 1 knotvectoru 3 0 7 67 degree 2 2 1 nip 16
@@ -24,10 +24,14 @@ bsplineplanestresselement 2 nodes 8 3 6 9 12 2 5 8 11 knotvectorv 2 0 1 knotvect
 SimpleCS 1 thick 0.15 material 1 set 1
 #
 IsoLE 1 d 0. E 15.0 n 0.25 tAlpha 0.000012
-BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
-BoundaryCondition  2 loadTimeFunction 1 prescribedvalue 1.0 
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 2
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 2 values 1 0.0 set 3
+BoundaryCondition 3 loadTimeFunction 1 dofs 1 1 values 1 1.0 set 4
 ConstantFunction 1 f(t) 1.0
 Set 1 elementranges {(1 2)}
+Set 2 nodes 4 1 4 7 10
+Set 3 nodes 3 1 2 3
+Set 4 nodes 4 3 6 9 12
 
 #
 #%BEGIN_CHECK% tolerance 1.e-8
