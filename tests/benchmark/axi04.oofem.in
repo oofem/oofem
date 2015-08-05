@@ -5,67 +5,67 @@ errorcheck
 #vtkxml tstep_step 1 domain_all primvars 2 1 5 vars 1 43
 domain 2dIncompFlow
 OutputManager tstep_all dofman_all element_all
-ndofman 231 nelem 400 ncrosssect 1 nmat 1 nbc 4 nic 0 nltf 1 nset 1
-node 1 coords 3 0.000000e+00 0.000000e+00 0.000000e+00 bc 3 2 2 0
-node 2 coords 3 1.000000e+00 0.000000e+00 0.000000e+00 bc 3 2 2 0
-node 3 coords 3 1.000000e+00 2.000000e+00 0.000000e+00 bc 3 2 0 3
-node 4 coords 3 0.000000e+00 2.000000e+00 0.000000e+00 bc 3 2 0 3
-node 5 coords 3 1.000000e-01 0.000000e+00 0.000000e+00 bc 3 0 2 0
-node 6 coords 3 2.000000e-01 0.000000e+00 0.000000e+00 bc 3 0 2 0
-node 7 coords 3 3.000000e-01 0.000000e+00 0.000000e+00 bc 3 0 2 0
-node 8 coords 3 4.000000e-01 0.000000e+00 0.000000e+00 bc 3 0 2 0
-node 9 coords 3 5.000000e-01 0.000000e+00 0.000000e+00 bc 3 0 2 0
-node 10 coords 3 6.000000e-01 0.000000e+00 0.000000e+00 bc 3 0 2 0
-node 11 coords 3 7.000000e-01 0.000000e+00 0.000000e+00 bc 3 0 2 0
-node 12 coords 3 8.000000e-01 0.000000e+00 0.000000e+00 bc 3 0 2 0
-node 13 coords 3 9.000000e-01 0.000000e+00 0.000000e+00 bc 3 0 2 0
-node 14 coords 3 1.000000e+00 1.000000e-01 0.000000e+00 bc 3 2 0 0
-node 15 coords 3 1.000000e+00 2.000000e-01 0.000000e+00 bc 3 2 0 0
-node 16 coords 3 1.000000e+00 3.000000e-01 0.000000e+00 bc 3 2 0 0
-node 17 coords 3 1.000000e+00 4.000000e-01 0.000000e+00 bc 3 2 0 0
-node 18 coords 3 1.000000e+00 5.000000e-01 0.000000e+00 bc 3 2 0 0
-node 19 coords 3 1.000000e+00 6.000000e-01 0.000000e+00 bc 3 2 0 0
-node 20 coords 3 1.000000e+00 7.000000e-01 0.000000e+00 bc 3 2 0 0
-node 21 coords 3 1.000000e+00 8.000000e-01 0.000000e+00 bc 3 2 0 0
-node 22 coords 3 1.000000e+00 9.000000e-01 0.000000e+00 bc 3 2 0 0
-node 23 coords 3 1.000000e+00 1.000000e+00 0.000000e+00 bc 3 2 0 0
-node 24 coords 3 1.000000e+00 1.100000e+00 0.000000e+00 bc 3 2 0 0
-node 25 coords 3 1.000000e+00 1.200000e+00 0.000000e+00 bc 3 2 0 0
-node 26 coords 3 1.000000e+00 1.300000e+00 0.000000e+00 bc 3 2 0 0
-node 27 coords 3 1.000000e+00 1.400000e+00 0.000000e+00 bc 3 2 0 0
-node 28 coords 3 1.000000e+00 1.500000e+00 0.000000e+00 bc 3 2 0 0
-node 29 coords 3 1.000000e+00 1.600000e+00 0.000000e+00 bc 3 2 0 0
-node 30 coords 3 1.000000e+00 1.700000e+00 0.000000e+00 bc 3 2 0 0
-node 31 coords 3 1.000000e+00 1.800000e+00 0.000000e+00 bc 3 2 0 0
-node 32 coords 3 1.000000e+00 1.900000e+00 0.000000e+00 bc 3 2 0 0
-node 33 coords 3 9.000000e-01 2.000000e+00 0.000000e+00 bc 3 0 0 3
-node 34 coords 3 8.000000e-01 2.000000e+00 0.000000e+00 bc 3 0 0 3
-node 35 coords 3 7.000000e-01 2.000000e+00 0.000000e+00 bc 3 0 0 3
-node 36 coords 3 6.000000e-01 2.000000e+00 0.000000e+00 bc 3 0 0 3
-node 37 coords 3 5.000000e-01 2.000000e+00 0.000000e+00 bc 3 0 0 3
-node 38 coords 3 4.000000e-01 2.000000e+00 0.000000e+00 bc 3 0 0 3
-node 39 coords 3 3.000000e-01 2.000000e+00 0.000000e+00 bc 3 0 0 3
-node 40 coords 3 2.000000e-01 2.000000e+00 0.000000e+00 bc 3 0 0 3
-node 41 coords 3 1.000000e-01 2.000000e+00 0.000000e+00 bc 3 0 0 3
-node 42 coords 3 0.000000e+00 1.900000e+00 0.000000e+00 bc 3 2 0 0
-node 43 coords 3 0.000000e+00 1.800000e+00 0.000000e+00 bc 3 2 0 0
-node 44 coords 3 0.000000e+00 1.700000e+00 0.000000e+00 bc 3 2 0 0
-node 45 coords 3 0.000000e+00 1.600000e+00 0.000000e+00 bc 3 2 0 0
-node 46 coords 3 0.000000e+00 1.500000e+00 0.000000e+00 bc 3 2 0 0
-node 47 coords 3 0.000000e+00 1.400000e+00 0.000000e+00 bc 3 2 0 0
-node 48 coords 3 0.000000e+00 1.300000e+00 0.000000e+00 bc 3 2 0 0
-node 49 coords 3 0.000000e+00 1.200000e+00 0.000000e+00 bc 3 2 0 0
-node 50 coords 3 0.000000e+00 1.100000e+00 0.000000e+00 bc 3 2 0 0
-node 51 coords 3 0.000000e+00 1.000000e+00 0.000000e+00 bc 3 2 0 0
-node 52 coords 3 0.000000e+00 9.000000e-01 0.000000e+00 bc 3 2 0 0
-node 53 coords 3 0.000000e+00 8.000000e-01 0.000000e+00 bc 3 2 0 0
-node 54 coords 3 0.000000e+00 7.000000e-01 0.000000e+00 bc 3 2 0 0
-node 55 coords 3 0.000000e+00 6.000000e-01 0.000000e+00 bc 3 2 0 0
-node 56 coords 3 0.000000e+00 5.000000e-01 0.000000e+00 bc 3 2 0 0
-node 57 coords 3 0.000000e+00 4.000000e-01 0.000000e+00 bc 3 2 0 0
-node 58 coords 3 0.000000e+00 3.000000e-01 0.000000e+00 bc 3 2 0 0
-node 59 coords 3 0.000000e+00 2.000000e-01 0.000000e+00 bc 3 2 0 0
-node 60 coords 3 0.000000e+00 1.000000e-01 0.000000e+00 bc 3 2 0 0
+ndofman 231 nelem 400 ncrosssect 1 nmat 1 nbc 4 nic 0 nltf 1 nset 4
+node 1 coords 3 0.000000e+00 0.000000e+00 0.000000e+00
+node 2 coords 3 1.000000e+00 0.000000e+00 0.000000e+00
+node 3 coords 3 1.000000e+00 2.000000e+00 0.000000e+00
+node 4 coords 3 0.000000e+00 2.000000e+00 0.000000e+00
+node 5 coords 3 1.000000e-01 0.000000e+00 0.000000e+00
+node 6 coords 3 2.000000e-01 0.000000e+00 0.000000e+00
+node 7 coords 3 3.000000e-01 0.000000e+00 0.000000e+00
+node 8 coords 3 4.000000e-01 0.000000e+00 0.000000e+00
+node 9 coords 3 5.000000e-01 0.000000e+00 0.000000e+00
+node 10 coords 3 6.000000e-01 0.000000e+00 0.000000e+00
+node 11 coords 3 7.000000e-01 0.000000e+00 0.000000e+00
+node 12 coords 3 8.000000e-01 0.000000e+00 0.000000e+00
+node 13 coords 3 9.000000e-01 0.000000e+00 0.000000e+00
+node 14 coords 3 1.000000e+00 1.000000e-01 0.000000e+00
+node 15 coords 3 1.000000e+00 2.000000e-01 0.000000e+00
+node 16 coords 3 1.000000e+00 3.000000e-01 0.000000e+00
+node 17 coords 3 1.000000e+00 4.000000e-01 0.000000e+00
+node 18 coords 3 1.000000e+00 5.000000e-01 0.000000e+00
+node 19 coords 3 1.000000e+00 6.000000e-01 0.000000e+00
+node 20 coords 3 1.000000e+00 7.000000e-01 0.000000e+00
+node 21 coords 3 1.000000e+00 8.000000e-01 0.000000e+00
+node 22 coords 3 1.000000e+00 9.000000e-01 0.000000e+00
+node 23 coords 3 1.000000e+00 1.000000e+00 0.000000e+00
+node 24 coords 3 1.000000e+00 1.100000e+00 0.000000e+00
+node 25 coords 3 1.000000e+00 1.200000e+00 0.000000e+00
+node 26 coords 3 1.000000e+00 1.300000e+00 0.000000e+00
+node 27 coords 3 1.000000e+00 1.400000e+00 0.000000e+00
+node 28 coords 3 1.000000e+00 1.500000e+00 0.000000e+00
+node 29 coords 3 1.000000e+00 1.600000e+00 0.000000e+00
+node 30 coords 3 1.000000e+00 1.700000e+00 0.000000e+00
+node 31 coords 3 1.000000e+00 1.800000e+00 0.000000e+00
+node 32 coords 3 1.000000e+00 1.900000e+00 0.000000e+00
+node 33 coords 3 9.000000e-01 2.000000e+00 0.000000e+00
+node 34 coords 3 8.000000e-01 2.000000e+00 0.000000e+00
+node 35 coords 3 7.000000e-01 2.000000e+00 0.000000e+00
+node 36 coords 3 6.000000e-01 2.000000e+00 0.000000e+00
+node 37 coords 3 5.000000e-01 2.000000e+00 0.000000e+00
+node 38 coords 3 4.000000e-01 2.000000e+00 0.000000e+00
+node 39 coords 3 3.000000e-01 2.000000e+00 0.000000e+00
+node 40 coords 3 2.000000e-01 2.000000e+00 0.000000e+00
+node 41 coords 3 1.000000e-01 2.000000e+00 0.000000e+00
+node 42 coords 3 0.000000e+00 1.900000e+00 0.000000e+00
+node 43 coords 3 0.000000e+00 1.800000e+00 0.000000e+00
+node 44 coords 3 0.000000e+00 1.700000e+00 0.000000e+00
+node 45 coords 3 0.000000e+00 1.600000e+00 0.000000e+00
+node 46 coords 3 0.000000e+00 1.500000e+00 0.000000e+00
+node 47 coords 3 0.000000e+00 1.400000e+00 0.000000e+00
+node 48 coords 3 0.000000e+00 1.300000e+00 0.000000e+00
+node 49 coords 3 0.000000e+00 1.200000e+00 0.000000e+00
+node 50 coords 3 0.000000e+00 1.100000e+00 0.000000e+00
+node 51 coords 3 0.000000e+00 1.000000e+00 0.000000e+00
+node 52 coords 3 0.000000e+00 9.000000e-01 0.000000e+00
+node 53 coords 3 0.000000e+00 8.000000e-01 0.000000e+00
+node 54 coords 3 0.000000e+00 7.000000e-01 0.000000e+00
+node 55 coords 3 0.000000e+00 6.000000e-01 0.000000e+00
+node 56 coords 3 0.000000e+00 5.000000e-01 0.000000e+00
+node 57 coords 3 0.000000e+00 4.000000e-01 0.000000e+00
+node 58 coords 3 0.000000e+00 3.000000e-01 0.000000e+00
+node 59 coords 3 0.000000e+00 2.000000e-01 0.000000e+00
+node 60 coords 3 0.000000e+00 1.000000e-01 0.000000e+00
 node 61 coords 3 1.000000e-01 1.000000e-01 0.000000e+00
 node 62 coords 3 2.000000e-01 1.000000e-01 0.000000e+00
 node 63 coords 3 3.000000e-01 1.000000e-01 0.000000e+00
@@ -237,418 +237,421 @@ node 228 coords 3 6.000000e-01 1.900000e+00 0.000000e+00
 node 229 coords 3 7.000000e-01 1.900000e+00 0.000000e+00
 node 230 coords 3 8.000000e-01 1.900000e+00 0.000000e+00
 node 231 coords 3 9.000000e-01 1.900000e+00 0.000000e+00
-tr1supgaxi 1 nodes 3 60 1 5 bodyloads 1 4
-tr1supgaxi 2 nodes 3 5 61 60 bodyloads 1 4
-tr1supgaxi 3 nodes 3 61 5 6 bodyloads 1 4
-tr1supgaxi 4 nodes 3 6 62 61 bodyloads 1 4
-tr1supgaxi 5 nodes 3 62 6 7 bodyloads 1 4
-tr1supgaxi 6 nodes 3 7 63 62 bodyloads 1 4
-tr1supgaxi 7 nodes 3 63 7 8 bodyloads 1 4
-tr1supgaxi 8 nodes 3 8 64 63 bodyloads 1 4
-tr1supgaxi 9 nodes 3 64 8 9 bodyloads 1 4
-tr1supgaxi 10 nodes 3 9 65 64 bodyloads 1 4
-tr1supgaxi 11 nodes 3 65 9 10 bodyloads 1 4
-tr1supgaxi 12 nodes 3 10 66 65 bodyloads 1 4
-tr1supgaxi 13 nodes 3 66 10 11 bodyloads 1 4
-tr1supgaxi 14 nodes 3 11 67 66 bodyloads 1 4
-tr1supgaxi 15 nodes 3 67 11 12 bodyloads 1 4
-tr1supgaxi 16 nodes 3 12 68 67 bodyloads 1 4
-tr1supgaxi 17 nodes 3 68 12 13 bodyloads 1 4
-tr1supgaxi 18 nodes 3 13 69 68 bodyloads 1 4
-tr1supgaxi 19 nodes 3 69 13 2 bodyloads 1 4
-tr1supgaxi 20 nodes 3 2 14 69 bodyloads 1 4
-tr1supgaxi 21 nodes 3 59 60 61 bodyloads 1 4
-tr1supgaxi 22 nodes 3 61 70 59 bodyloads 1 4
-tr1supgaxi 23 nodes 3 70 61 62 bodyloads 1 4
-tr1supgaxi 24 nodes 3 62 71 70 bodyloads 1 4
-tr1supgaxi 25 nodes 3 71 62 63 bodyloads 1 4
-tr1supgaxi 26 nodes 3 63 72 71 bodyloads 1 4
-tr1supgaxi 27 nodes 3 72 63 64 bodyloads 1 4
-tr1supgaxi 28 nodes 3 64 73 72 bodyloads 1 4
-tr1supgaxi 29 nodes 3 73 64 65 bodyloads 1 4
-tr1supgaxi 30 nodes 3 65 74 73 bodyloads 1 4
-tr1supgaxi 31 nodes 3 74 65 66 bodyloads 1 4
-tr1supgaxi 32 nodes 3 66 75 74 bodyloads 1 4
-tr1supgaxi 33 nodes 3 75 66 67 bodyloads 1 4
-tr1supgaxi 34 nodes 3 67 76 75 bodyloads 1 4
-tr1supgaxi 35 nodes 3 76 67 68 bodyloads 1 4
-tr1supgaxi 36 nodes 3 68 77 76 bodyloads 1 4
-tr1supgaxi 37 nodes 3 77 68 69 bodyloads 1 4
-tr1supgaxi 38 nodes 3 69 78 77 bodyloads 1 4
-tr1supgaxi 39 nodes 3 78 69 14 bodyloads 1 4
-tr1supgaxi 40 nodes 3 14 15 78 bodyloads 1 4
-tr1supgaxi 41 nodes 3 58 59 70 bodyloads 1 4
-tr1supgaxi 42 nodes 3 70 79 58 bodyloads 1 4
-tr1supgaxi 43 nodes 3 79 70 71 bodyloads 1 4
-tr1supgaxi 44 nodes 3 71 80 79 bodyloads 1 4
-tr1supgaxi 45 nodes 3 80 71 72 bodyloads 1 4
-tr1supgaxi 46 nodes 3 72 81 80 bodyloads 1 4
-tr1supgaxi 47 nodes 3 81 72 73 bodyloads 1 4
-tr1supgaxi 48 nodes 3 73 82 81 bodyloads 1 4
-tr1supgaxi 49 nodes 3 82 73 74 bodyloads 1 4
-tr1supgaxi 50 nodes 3 74 83 82 bodyloads 1 4
-tr1supgaxi 51 nodes 3 83 74 75 bodyloads 1 4
-tr1supgaxi 52 nodes 3 75 84 83 bodyloads 1 4
-tr1supgaxi 53 nodes 3 84 75 76 bodyloads 1 4
-tr1supgaxi 54 nodes 3 76 85 84 bodyloads 1 4
-tr1supgaxi 55 nodes 3 85 76 77 bodyloads 1 4
-tr1supgaxi 56 nodes 3 77 86 85 bodyloads 1 4
-tr1supgaxi 57 nodes 3 86 77 78 bodyloads 1 4
-tr1supgaxi 58 nodes 3 78 87 86 bodyloads 1 4
-tr1supgaxi 59 nodes 3 87 78 15 bodyloads 1 4
-tr1supgaxi 60 nodes 3 15 16 87 bodyloads 1 4
-tr1supgaxi 61 nodes 3 57 58 79 bodyloads 1 4
-tr1supgaxi 62 nodes 3 79 88 57 bodyloads 1 4
-tr1supgaxi 63 nodes 3 88 79 80 bodyloads 1 4
-tr1supgaxi 64 nodes 3 80 89 88 bodyloads 1 4
-tr1supgaxi 65 nodes 3 89 80 81 bodyloads 1 4
-tr1supgaxi 66 nodes 3 81 90 89 bodyloads 1 4
-tr1supgaxi 67 nodes 3 90 81 82 bodyloads 1 4
-tr1supgaxi 68 nodes 3 82 91 90 bodyloads 1 4
-tr1supgaxi 69 nodes 3 91 82 83 bodyloads 1 4
-tr1supgaxi 70 nodes 3 83 92 91 bodyloads 1 4
-tr1supgaxi 71 nodes 3 92 83 84 bodyloads 1 4
-tr1supgaxi 72 nodes 3 84 93 92 bodyloads 1 4
-tr1supgaxi 73 nodes 3 93 84 85 bodyloads 1 4
-tr1supgaxi 74 nodes 3 85 94 93 bodyloads 1 4
-tr1supgaxi 75 nodes 3 94 85 86 bodyloads 1 4
-tr1supgaxi 76 nodes 3 86 95 94 bodyloads 1 4
-tr1supgaxi 77 nodes 3 95 86 87 bodyloads 1 4
-tr1supgaxi 78 nodes 3 87 96 95 bodyloads 1 4
-tr1supgaxi 79 nodes 3 96 87 16 bodyloads 1 4
-tr1supgaxi 80 nodes 3 16 17 96 bodyloads 1 4
-tr1supgaxi 81 nodes 3 56 57 88 bodyloads 1 4
-tr1supgaxi 82 nodes 3 88 97 56 bodyloads 1 4
-tr1supgaxi 83 nodes 3 97 88 89 bodyloads 1 4
-tr1supgaxi 84 nodes 3 89 98 97 bodyloads 1 4
-tr1supgaxi 85 nodes 3 98 89 90 bodyloads 1 4
-tr1supgaxi 86 nodes 3 90 99 98 bodyloads 1 4
-tr1supgaxi 87 nodes 3 99 90 91 bodyloads 1 4
-tr1supgaxi 88 nodes 3 91 100 99 bodyloads 1 4
-tr1supgaxi 89 nodes 3 100 91 92 bodyloads 1 4
-tr1supgaxi 90 nodes 3 92 101 100 bodyloads 1 4
-tr1supgaxi 91 nodes 3 101 92 93 bodyloads 1 4
-tr1supgaxi 92 nodes 3 93 102 101 bodyloads 1 4
-tr1supgaxi 93 nodes 3 102 93 94 bodyloads 1 4
-tr1supgaxi 94 nodes 3 94 103 102 bodyloads 1 4
-tr1supgaxi 95 nodes 3 103 94 95 bodyloads 1 4
-tr1supgaxi 96 nodes 3 95 104 103 bodyloads 1 4
-tr1supgaxi 97 nodes 3 104 95 96 bodyloads 1 4
-tr1supgaxi 98 nodes 3 96 105 104 bodyloads 1 4
-tr1supgaxi 99 nodes 3 105 96 17 bodyloads 1 4
-tr1supgaxi 100 nodes 3 17 18 105 bodyloads 1 4
-tr1supgaxi 101 nodes 3 55 56 97 bodyloads 1 4
-tr1supgaxi 102 nodes 3 97 106 55 bodyloads 1 4
-tr1supgaxi 103 nodes 3 106 97 98 bodyloads 1 4
-tr1supgaxi 104 nodes 3 98 107 106 bodyloads 1 4
-tr1supgaxi 105 nodes 3 107 98 99 bodyloads 1 4
-tr1supgaxi 106 nodes 3 99 108 107 bodyloads 1 4
-tr1supgaxi 107 nodes 3 108 99 100 bodyloads 1 4
-tr1supgaxi 108 nodes 3 100 109 108 bodyloads 1 4
-tr1supgaxi 109 nodes 3 109 100 101 bodyloads 1 4
-tr1supgaxi 110 nodes 3 101 110 109 bodyloads 1 4
-tr1supgaxi 111 nodes 3 110 101 102 bodyloads 1 4
-tr1supgaxi 112 nodes 3 102 111 110 bodyloads 1 4
-tr1supgaxi 113 nodes 3 111 102 103 bodyloads 1 4
-tr1supgaxi 114 nodes 3 103 112 111 bodyloads 1 4
-tr1supgaxi 115 nodes 3 112 103 104 bodyloads 1 4
-tr1supgaxi 116 nodes 3 104 113 112 bodyloads 1 4
-tr1supgaxi 117 nodes 3 113 104 105 bodyloads 1 4
-tr1supgaxi 118 nodes 3 105 114 113 bodyloads 1 4
-tr1supgaxi 119 nodes 3 114 105 18 bodyloads 1 4
-tr1supgaxi 120 nodes 3 18 19 114 bodyloads 1 4
-tr1supgaxi 121 nodes 3 54 55 106 bodyloads 1 4
-tr1supgaxi 122 nodes 3 106 115 54 bodyloads 1 4
-tr1supgaxi 123 nodes 3 115 106 107 bodyloads 1 4
-tr1supgaxi 124 nodes 3 107 116 115 bodyloads 1 4
-tr1supgaxi 125 nodes 3 116 107 108 bodyloads 1 4
-tr1supgaxi 126 nodes 3 108 117 116 bodyloads 1 4
-tr1supgaxi 127 nodes 3 117 108 109 bodyloads 1 4
-tr1supgaxi 128 nodes 3 109 118 117 bodyloads 1 4
-tr1supgaxi 129 nodes 3 118 109 110 bodyloads 1 4
-tr1supgaxi 130 nodes 3 110 119 118 bodyloads 1 4
-tr1supgaxi 131 nodes 3 119 110 111 bodyloads 1 4
-tr1supgaxi 132 nodes 3 111 120 119 bodyloads 1 4
-tr1supgaxi 133 nodes 3 120 111 112 bodyloads 1 4
-tr1supgaxi 134 nodes 3 112 121 120 bodyloads 1 4
-tr1supgaxi 135 nodes 3 121 112 113 bodyloads 1 4
-tr1supgaxi 136 nodes 3 113 122 121 bodyloads 1 4
-tr1supgaxi 137 nodes 3 122 113 114 bodyloads 1 4
-tr1supgaxi 138 nodes 3 114 123 122 bodyloads 1 4
-tr1supgaxi 139 nodes 3 123 114 19 bodyloads 1 4
-tr1supgaxi 140 nodes 3 19 20 123 bodyloads 1 4
-tr1supgaxi 141 nodes 3 53 54 115 bodyloads 1 4
-tr1supgaxi 142 nodes 3 115 124 53 bodyloads 1 4
-tr1supgaxi 143 nodes 3 124 115 116 bodyloads 1 4
-tr1supgaxi 144 nodes 3 116 125 124 bodyloads 1 4
-tr1supgaxi 145 nodes 3 125 116 117 bodyloads 1 4
-tr1supgaxi 146 nodes 3 117 126 125 bodyloads 1 4
-tr1supgaxi 147 nodes 3 126 117 118 bodyloads 1 4
-tr1supgaxi 148 nodes 3 118 127 126 bodyloads 1 4
-tr1supgaxi 149 nodes 3 127 118 119 bodyloads 1 4
-tr1supgaxi 150 nodes 3 119 128 127 bodyloads 1 4
-tr1supgaxi 151 nodes 3 128 119 120 bodyloads 1 4
-tr1supgaxi 152 nodes 3 120 129 128 bodyloads 1 4
-tr1supgaxi 153 nodes 3 129 120 121 bodyloads 1 4
-tr1supgaxi 154 nodes 3 121 130 129 bodyloads 1 4
-tr1supgaxi 155 nodes 3 130 121 122 bodyloads 1 4
-tr1supgaxi 156 nodes 3 122 131 130 bodyloads 1 4
-tr1supgaxi 157 nodes 3 131 122 123 bodyloads 1 4
-tr1supgaxi 158 nodes 3 123 132 131 bodyloads 1 4
-tr1supgaxi 159 nodes 3 132 123 20 bodyloads 1 4
-tr1supgaxi 160 nodes 3 20 21 132 bodyloads 1 4
-tr1supgaxi 161 nodes 3 52 53 124 bodyloads 1 4
-tr1supgaxi 162 nodes 3 124 133 52 bodyloads 1 4
-tr1supgaxi 163 nodes 3 133 124 125 bodyloads 1 4
-tr1supgaxi 164 nodes 3 125 134 133 bodyloads 1 4
-tr1supgaxi 165 nodes 3 134 125 126 bodyloads 1 4
-tr1supgaxi 166 nodes 3 126 135 134 bodyloads 1 4
-tr1supgaxi 167 nodes 3 135 126 127 bodyloads 1 4
-tr1supgaxi 168 nodes 3 127 136 135 bodyloads 1 4
-tr1supgaxi 169 nodes 3 136 127 128 bodyloads 1 4
-tr1supgaxi 170 nodes 3 128 137 136 bodyloads 1 4
-tr1supgaxi 171 nodes 3 137 128 129 bodyloads 1 4
-tr1supgaxi 172 nodes 3 129 138 137 bodyloads 1 4
-tr1supgaxi 173 nodes 3 138 129 130 bodyloads 1 4
-tr1supgaxi 174 nodes 3 130 139 138 bodyloads 1 4
-tr1supgaxi 175 nodes 3 139 130 131 bodyloads 1 4
-tr1supgaxi 176 nodes 3 131 140 139 bodyloads 1 4
-tr1supgaxi 177 nodes 3 140 131 132 bodyloads 1 4
-tr1supgaxi 178 nodes 3 132 141 140 bodyloads 1 4
-tr1supgaxi 179 nodes 3 141 132 21 bodyloads 1 4
-tr1supgaxi 180 nodes 3 21 22 141 bodyloads 1 4
-tr1supgaxi 181 nodes 3 51 52 133 bodyloads 1 4
-tr1supgaxi 182 nodes 3 133 142 51 bodyloads 1 4
-tr1supgaxi 183 nodes 3 142 133 134 bodyloads 1 4
-tr1supgaxi 184 nodes 3 134 143 142 bodyloads 1 4
-tr1supgaxi 185 nodes 3 143 134 135 bodyloads 1 4
-tr1supgaxi 186 nodes 3 135 144 143 bodyloads 1 4
-tr1supgaxi 187 nodes 3 144 135 136 bodyloads 1 4
-tr1supgaxi 188 nodes 3 136 145 144 bodyloads 1 4
-tr1supgaxi 189 nodes 3 145 136 137 bodyloads 1 4
-tr1supgaxi 190 nodes 3 137 146 145 bodyloads 1 4
-tr1supgaxi 191 nodes 3 146 137 138 bodyloads 1 4
-tr1supgaxi 192 nodes 3 138 147 146 bodyloads 1 4
-tr1supgaxi 193 nodes 3 147 138 139 bodyloads 1 4
-tr1supgaxi 194 nodes 3 139 148 147 bodyloads 1 4
-tr1supgaxi 195 nodes 3 148 139 140 bodyloads 1 4
-tr1supgaxi 196 nodes 3 140 149 148 bodyloads 1 4
-tr1supgaxi 197 nodes 3 149 140 141 bodyloads 1 4
-tr1supgaxi 198 nodes 3 141 150 149 bodyloads 1 4
-tr1supgaxi 199 nodes 3 150 141 22 bodyloads 1 4
-tr1supgaxi 200 nodes 3 22 23 150 bodyloads 1 4
-tr1supgaxi 201 nodes 3 50 51 142 bodyloads 1 4
-tr1supgaxi 202 nodes 3 142 151 50 bodyloads 1 4
-tr1supgaxi 203 nodes 3 151 142 143 bodyloads 1 4
-tr1supgaxi 204 nodes 3 143 152 151 bodyloads 1 4
-tr1supgaxi 205 nodes 3 152 143 144 bodyloads 1 4
-tr1supgaxi 206 nodes 3 144 153 152 bodyloads 1 4
-tr1supgaxi 207 nodes 3 153 144 145 bodyloads 1 4
-tr1supgaxi 208 nodes 3 145 154 153 bodyloads 1 4
-tr1supgaxi 209 nodes 3 154 145 146 bodyloads 1 4
-tr1supgaxi 210 nodes 3 146 155 154 bodyloads 1 4
-tr1supgaxi 211 nodes 3 155 146 147 bodyloads 1 4
-tr1supgaxi 212 nodes 3 147 156 155 bodyloads 1 4
-tr1supgaxi 213 nodes 3 156 147 148 bodyloads 1 4
-tr1supgaxi 214 nodes 3 148 157 156 bodyloads 1 4
-tr1supgaxi 215 nodes 3 157 148 149 bodyloads 1 4
-tr1supgaxi 216 nodes 3 149 158 157 bodyloads 1 4
-tr1supgaxi 217 nodes 3 158 149 150 bodyloads 1 4
-tr1supgaxi 218 nodes 3 150 159 158 bodyloads 1 4
-tr1supgaxi 219 nodes 3 159 150 23 bodyloads 1 4
-tr1supgaxi 220 nodes 3 23 24 159 bodyloads 1 4
-tr1supgaxi 221 nodes 3 49 50 151 bodyloads 1 4
-tr1supgaxi 222 nodes 3 151 160 49 bodyloads 1 4
-tr1supgaxi 223 nodes 3 160 151 152 bodyloads 1 4
-tr1supgaxi 224 nodes 3 152 161 160 bodyloads 1 4
-tr1supgaxi 225 nodes 3 161 152 153 bodyloads 1 4
-tr1supgaxi 226 nodes 3 153 162 161 bodyloads 1 4
-tr1supgaxi 227 nodes 3 162 153 154 bodyloads 1 4
-tr1supgaxi 228 nodes 3 154 163 162 bodyloads 1 4
-tr1supgaxi 229 nodes 3 163 154 155 bodyloads 1 4
-tr1supgaxi 230 nodes 3 155 164 163 bodyloads 1 4
-tr1supgaxi 231 nodes 3 164 155 156 bodyloads 1 4
-tr1supgaxi 232 nodes 3 156 165 164 bodyloads 1 4
-tr1supgaxi 233 nodes 3 165 156 157 bodyloads 1 4
-tr1supgaxi 234 nodes 3 157 166 165 bodyloads 1 4
-tr1supgaxi 235 nodes 3 166 157 158 bodyloads 1 4
-tr1supgaxi 236 nodes 3 158 167 166 bodyloads 1 4
-tr1supgaxi 237 nodes 3 167 158 159 bodyloads 1 4
-tr1supgaxi 238 nodes 3 159 168 167 bodyloads 1 4
-tr1supgaxi 239 nodes 3 168 159 24 bodyloads 1 4
-tr1supgaxi 240 nodes 3 24 25 168 bodyloads 1 4
-tr1supgaxi 241 nodes 3 48 49 160 bodyloads 1 4
-tr1supgaxi 242 nodes 3 160 169 48 bodyloads 1 4
-tr1supgaxi 243 nodes 3 169 160 161 bodyloads 1 4
-tr1supgaxi 244 nodes 3 161 170 169 bodyloads 1 4
-tr1supgaxi 245 nodes 3 170 161 162 bodyloads 1 4
-tr1supgaxi 246 nodes 3 162 171 170 bodyloads 1 4
-tr1supgaxi 247 nodes 3 171 162 163 bodyloads 1 4
-tr1supgaxi 248 nodes 3 163 172 171 bodyloads 1 4
-tr1supgaxi 249 nodes 3 172 163 164 bodyloads 1 4
-tr1supgaxi 250 nodes 3 164 173 172 bodyloads 1 4
-tr1supgaxi 251 nodes 3 173 164 165 bodyloads 1 4
-tr1supgaxi 252 nodes 3 165 174 173 bodyloads 1 4
-tr1supgaxi 253 nodes 3 174 165 166 bodyloads 1 4
-tr1supgaxi 254 nodes 3 166 175 174 bodyloads 1 4
-tr1supgaxi 255 nodes 3 175 166 167 bodyloads 1 4
-tr1supgaxi 256 nodes 3 167 176 175 bodyloads 1 4
-tr1supgaxi 257 nodes 3 176 167 168 bodyloads 1 4
-tr1supgaxi 258 nodes 3 168 177 176 bodyloads 1 4
-tr1supgaxi 259 nodes 3 177 168 25 bodyloads 1 4
-tr1supgaxi 260 nodes 3 25 26 177 bodyloads 1 4
-tr1supgaxi 261 nodes 3 47 48 169 bodyloads 1 4
-tr1supgaxi 262 nodes 3 169 178 47 bodyloads 1 4
-tr1supgaxi 263 nodes 3 178 169 170 bodyloads 1 4
-tr1supgaxi 264 nodes 3 170 179 178 bodyloads 1 4
-tr1supgaxi 265 nodes 3 179 170 171 bodyloads 1 4
-tr1supgaxi 266 nodes 3 171 180 179 bodyloads 1 4
-tr1supgaxi 267 nodes 3 180 171 172 bodyloads 1 4
-tr1supgaxi 268 nodes 3 172 181 180 bodyloads 1 4
-tr1supgaxi 269 nodes 3 181 172 173 bodyloads 1 4
-tr1supgaxi 270 nodes 3 173 182 181 bodyloads 1 4
-tr1supgaxi 271 nodes 3 182 173 174 bodyloads 1 4
-tr1supgaxi 272 nodes 3 174 183 182 bodyloads 1 4
-tr1supgaxi 273 nodes 3 183 174 175 bodyloads 1 4
-tr1supgaxi 274 nodes 3 175 184 183 bodyloads 1 4
-tr1supgaxi 275 nodes 3 184 175 176 bodyloads 1 4
-tr1supgaxi 276 nodes 3 176 185 184 bodyloads 1 4
-tr1supgaxi 277 nodes 3 185 176 177 bodyloads 1 4
-tr1supgaxi 278 nodes 3 177 186 185 bodyloads 1 4
-tr1supgaxi 279 nodes 3 186 177 26 bodyloads 1 4
-tr1supgaxi 280 nodes 3 26 27 186 bodyloads 1 4
-tr1supgaxi 281 nodes 3 46 47 178 bodyloads 1 4
-tr1supgaxi 282 nodes 3 178 187 46 bodyloads 1 4
-tr1supgaxi 283 nodes 3 187 178 179 bodyloads 1 4
-tr1supgaxi 284 nodes 3 179 188 187 bodyloads 1 4
-tr1supgaxi 285 nodes 3 188 179 180 bodyloads 1 4
-tr1supgaxi 286 nodes 3 180 189 188 bodyloads 1 4
-tr1supgaxi 287 nodes 3 189 180 181 bodyloads 1 4
-tr1supgaxi 288 nodes 3 181 190 189 bodyloads 1 4
-tr1supgaxi 289 nodes 3 190 181 182 bodyloads 1 4
-tr1supgaxi 290 nodes 3 182 191 190 bodyloads 1 4
-tr1supgaxi 291 nodes 3 191 182 183 bodyloads 1 4
-tr1supgaxi 292 nodes 3 183 192 191 bodyloads 1 4
-tr1supgaxi 293 nodes 3 192 183 184 bodyloads 1 4
-tr1supgaxi 294 nodes 3 184 193 192 bodyloads 1 4
-tr1supgaxi 295 nodes 3 193 184 185 bodyloads 1 4
-tr1supgaxi 296 nodes 3 185 194 193 bodyloads 1 4
-tr1supgaxi 297 nodes 3 194 185 186 bodyloads 1 4
-tr1supgaxi 298 nodes 3 186 195 194 bodyloads 1 4
-tr1supgaxi 299 nodes 3 195 186 27 bodyloads 1 4
-tr1supgaxi 300 nodes 3 27 28 195 bodyloads 1 4
-tr1supgaxi 301 nodes 3 45 46 187 bodyloads 1 4
-tr1supgaxi 302 nodes 3 187 196 45 bodyloads 1 4
-tr1supgaxi 303 nodes 3 196 187 188 bodyloads 1 4
-tr1supgaxi 304 nodes 3 188 197 196 bodyloads 1 4
-tr1supgaxi 305 nodes 3 197 188 189 bodyloads 1 4
-tr1supgaxi 306 nodes 3 189 198 197 bodyloads 1 4
-tr1supgaxi 307 nodes 3 198 189 190 bodyloads 1 4
-tr1supgaxi 308 nodes 3 190 199 198 bodyloads 1 4
-tr1supgaxi 309 nodes 3 199 190 191 bodyloads 1 4
-tr1supgaxi 310 nodes 3 191 200 199 bodyloads 1 4
-tr1supgaxi 311 nodes 3 200 191 192 bodyloads 1 4
-tr1supgaxi 312 nodes 3 192 201 200 bodyloads 1 4
-tr1supgaxi 313 nodes 3 201 192 193 bodyloads 1 4
-tr1supgaxi 314 nodes 3 193 202 201 bodyloads 1 4
-tr1supgaxi 315 nodes 3 202 193 194 bodyloads 1 4
-tr1supgaxi 316 nodes 3 194 203 202 bodyloads 1 4
-tr1supgaxi 317 nodes 3 203 194 195 bodyloads 1 4
-tr1supgaxi 318 nodes 3 195 204 203 bodyloads 1 4
-tr1supgaxi 319 nodes 3 204 195 28 bodyloads 1 4
-tr1supgaxi 320 nodes 3 28 29 204 bodyloads 1 4
-tr1supgaxi 321 nodes 3 44 45 196 bodyloads 1 4
-tr1supgaxi 322 nodes 3 196 205 44 bodyloads 1 4
-tr1supgaxi 323 nodes 3 205 196 197 bodyloads 1 4
-tr1supgaxi 324 nodes 3 197 206 205 bodyloads 1 4
-tr1supgaxi 325 nodes 3 206 197 198 bodyloads 1 4
-tr1supgaxi 326 nodes 3 198 207 206 bodyloads 1 4
-tr1supgaxi 327 nodes 3 207 198 199 bodyloads 1 4
-tr1supgaxi 328 nodes 3 199 208 207 bodyloads 1 4
-tr1supgaxi 329 nodes 3 208 199 200 bodyloads 1 4
-tr1supgaxi 330 nodes 3 200 209 208 bodyloads 1 4
-tr1supgaxi 331 nodes 3 209 200 201 bodyloads 1 4
-tr1supgaxi 332 nodes 3 201 210 209 bodyloads 1 4
-tr1supgaxi 333 nodes 3 210 201 202 bodyloads 1 4
-tr1supgaxi 334 nodes 3 202 211 210 bodyloads 1 4
-tr1supgaxi 335 nodes 3 211 202 203 bodyloads 1 4
-tr1supgaxi 336 nodes 3 203 212 211 bodyloads 1 4
-tr1supgaxi 337 nodes 3 212 203 204 bodyloads 1 4
-tr1supgaxi 338 nodes 3 204 213 212 bodyloads 1 4
-tr1supgaxi 339 nodes 3 213 204 29 bodyloads 1 4
-tr1supgaxi 340 nodes 3 29 30 213 bodyloads 1 4
-tr1supgaxi 341 nodes 3 43 44 205 bodyloads 1 4
-tr1supgaxi 342 nodes 3 205 214 43 bodyloads 1 4
-tr1supgaxi 343 nodes 3 214 205 206 bodyloads 1 4
-tr1supgaxi 344 nodes 3 206 215 214 bodyloads 1 4
-tr1supgaxi 345 nodes 3 215 206 207 bodyloads 1 4
-tr1supgaxi 346 nodes 3 207 216 215 bodyloads 1 4
-tr1supgaxi 347 nodes 3 216 207 208 bodyloads 1 4
-tr1supgaxi 348 nodes 3 208 217 216 bodyloads 1 4
-tr1supgaxi 349 nodes 3 217 208 209 bodyloads 1 4
-tr1supgaxi 350 nodes 3 209 218 217 bodyloads 1 4
-tr1supgaxi 351 nodes 3 218 209 210 bodyloads 1 4
-tr1supgaxi 352 nodes 3 210 219 218 bodyloads 1 4
-tr1supgaxi 353 nodes 3 219 210 211 bodyloads 1 4
-tr1supgaxi 354 nodes 3 211 220 219 bodyloads 1 4
-tr1supgaxi 355 nodes 3 220 211 212 bodyloads 1 4
-tr1supgaxi 356 nodes 3 212 221 220 bodyloads 1 4
-tr1supgaxi 357 nodes 3 221 212 213 bodyloads 1 4
-tr1supgaxi 358 nodes 3 213 222 221 bodyloads 1 4
-tr1supgaxi 359 nodes 3 222 213 30 bodyloads 1 4
-tr1supgaxi 360 nodes 3 30 31 222 bodyloads 1 4
-tr1supgaxi 361 nodes 3 42 43 214 bodyloads 1 4
-tr1supgaxi 362 nodes 3 214 223 42 bodyloads 1 4
-tr1supgaxi 363 nodes 3 223 214 215 bodyloads 1 4
-tr1supgaxi 364 nodes 3 215 224 223 bodyloads 1 4
-tr1supgaxi 365 nodes 3 224 215 216 bodyloads 1 4
-tr1supgaxi 366 nodes 3 216 225 224 bodyloads 1 4
-tr1supgaxi 367 nodes 3 225 216 217 bodyloads 1 4
-tr1supgaxi 368 nodes 3 217 226 225 bodyloads 1 4
-tr1supgaxi 369 nodes 3 226 217 218 bodyloads 1 4
-tr1supgaxi 370 nodes 3 218 227 226 bodyloads 1 4
-tr1supgaxi 371 nodes 3 227 218 219 bodyloads 1 4
-tr1supgaxi 372 nodes 3 219 228 227 bodyloads 1 4
-tr1supgaxi 373 nodes 3 228 219 220 bodyloads 1 4
-tr1supgaxi 374 nodes 3 220 229 228 bodyloads 1 4
-tr1supgaxi 375 nodes 3 229 220 221 bodyloads 1 4
-tr1supgaxi 376 nodes 3 221 230 229 bodyloads 1 4
-tr1supgaxi 377 nodes 3 230 221 222 bodyloads 1 4
-tr1supgaxi 378 nodes 3 222 231 230 bodyloads 1 4
-tr1supgaxi 379 nodes 3 231 222 31 bodyloads 1 4
-tr1supgaxi 380 nodes 3 31 32 231 bodyloads 1 4
-tr1supgaxi 381 nodes 3 4 42 223 bodyloads 1 4
-tr1supgaxi 382 nodes 3 223 41 4 bodyloads 1 4
-tr1supgaxi 383 nodes 3 41 223 224 bodyloads 1 4
-tr1supgaxi 384 nodes 3 224 40 41 bodyloads 1 4
-tr1supgaxi 385 nodes 3 40 224 225 bodyloads 1 4
-tr1supgaxi 386 nodes 3 225 39 40 bodyloads 1 4
-tr1supgaxi 387 nodes 3 39 225 226 bodyloads 1 4
-tr1supgaxi 388 nodes 3 226 38 39 bodyloads 1 4
-tr1supgaxi 389 nodes 3 38 226 227 bodyloads 1 4
-tr1supgaxi 390 nodes 3 227 37 38 bodyloads 1 4
-tr1supgaxi 391 nodes 3 37 227 228 bodyloads 1 4
-tr1supgaxi 392 nodes 3 228 36 37 bodyloads 1 4
-tr1supgaxi 393 nodes 3 36 228 229 bodyloads 1 4
-tr1supgaxi 394 nodes 3 229 35 36 bodyloads 1 4
-tr1supgaxi 395 nodes 3 35 229 230 bodyloads 1 4
-tr1supgaxi 396 nodes 3 230 34 35 bodyloads 1 4
-tr1supgaxi 397 nodes 3 34 230 231 bodyloads 1 4
-tr1supgaxi 398 nodes 3 231 33 34 bodyloads 1 4
-tr1supgaxi 399 nodes 3 33 231 32 bodyloads 1 4
-tr1supgaxi 400 nodes 3 32 3 33 bodyloads 1 4
+tr1supgaxi 1 nodes 3 60 1 5
+tr1supgaxi 2 nodes 3 5 61 60
+tr1supgaxi 3 nodes 3 61 5 6
+tr1supgaxi 4 nodes 3 6 62 61
+tr1supgaxi 5 nodes 3 62 6 7
+tr1supgaxi 6 nodes 3 7 63 62
+tr1supgaxi 7 nodes 3 63 7 8
+tr1supgaxi 8 nodes 3 8 64 63
+tr1supgaxi 9 nodes 3 64 8 9
+tr1supgaxi 10 nodes 3 9 65 64
+tr1supgaxi 11 nodes 3 65 9 10
+tr1supgaxi 12 nodes 3 10 66 65
+tr1supgaxi 13 nodes 3 66 10 11
+tr1supgaxi 14 nodes 3 11 67 66
+tr1supgaxi 15 nodes 3 67 11 12
+tr1supgaxi 16 nodes 3 12 68 67
+tr1supgaxi 17 nodes 3 68 12 13
+tr1supgaxi 18 nodes 3 13 69 68
+tr1supgaxi 19 nodes 3 69 13 2
+tr1supgaxi 20 nodes 3 2 14 69
+tr1supgaxi 21 nodes 3 59 60 61
+tr1supgaxi 22 nodes 3 61 70 59
+tr1supgaxi 23 nodes 3 70 61 62
+tr1supgaxi 24 nodes 3 62 71 70
+tr1supgaxi 25 nodes 3 71 62 63
+tr1supgaxi 26 nodes 3 63 72 71
+tr1supgaxi 27 nodes 3 72 63 64
+tr1supgaxi 28 nodes 3 64 73 72
+tr1supgaxi 29 nodes 3 73 64 65
+tr1supgaxi 30 nodes 3 65 74 73
+tr1supgaxi 31 nodes 3 74 65 66
+tr1supgaxi 32 nodes 3 66 75 74
+tr1supgaxi 33 nodes 3 75 66 67
+tr1supgaxi 34 nodes 3 67 76 75
+tr1supgaxi 35 nodes 3 76 67 68
+tr1supgaxi 36 nodes 3 68 77 76
+tr1supgaxi 37 nodes 3 77 68 69
+tr1supgaxi 38 nodes 3 69 78 77
+tr1supgaxi 39 nodes 3 78 69 14
+tr1supgaxi 40 nodes 3 14 15 78
+tr1supgaxi 41 nodes 3 58 59 70
+tr1supgaxi 42 nodes 3 70 79 58
+tr1supgaxi 43 nodes 3 79 70 71
+tr1supgaxi 44 nodes 3 71 80 79
+tr1supgaxi 45 nodes 3 80 71 72
+tr1supgaxi 46 nodes 3 72 81 80
+tr1supgaxi 47 nodes 3 81 72 73
+tr1supgaxi 48 nodes 3 73 82 81
+tr1supgaxi 49 nodes 3 82 73 74
+tr1supgaxi 50 nodes 3 74 83 82
+tr1supgaxi 51 nodes 3 83 74 75
+tr1supgaxi 52 nodes 3 75 84 83
+tr1supgaxi 53 nodes 3 84 75 76
+tr1supgaxi 54 nodes 3 76 85 84
+tr1supgaxi 55 nodes 3 85 76 77
+tr1supgaxi 56 nodes 3 77 86 85
+tr1supgaxi 57 nodes 3 86 77 78
+tr1supgaxi 58 nodes 3 78 87 86
+tr1supgaxi 59 nodes 3 87 78 15
+tr1supgaxi 60 nodes 3 15 16 87
+tr1supgaxi 61 nodes 3 57 58 79
+tr1supgaxi 62 nodes 3 79 88 57
+tr1supgaxi 63 nodes 3 88 79 80
+tr1supgaxi 64 nodes 3 80 89 88
+tr1supgaxi 65 nodes 3 89 80 81
+tr1supgaxi 66 nodes 3 81 90 89
+tr1supgaxi 67 nodes 3 90 81 82
+tr1supgaxi 68 nodes 3 82 91 90
+tr1supgaxi 69 nodes 3 91 82 83
+tr1supgaxi 70 nodes 3 83 92 91
+tr1supgaxi 71 nodes 3 92 83 84
+tr1supgaxi 72 nodes 3 84 93 92
+tr1supgaxi 73 nodes 3 93 84 85
+tr1supgaxi 74 nodes 3 85 94 93
+tr1supgaxi 75 nodes 3 94 85 86
+tr1supgaxi 76 nodes 3 86 95 94
+tr1supgaxi 77 nodes 3 95 86 87
+tr1supgaxi 78 nodes 3 87 96 95
+tr1supgaxi 79 nodes 3 96 87 16
+tr1supgaxi 80 nodes 3 16 17 96
+tr1supgaxi 81 nodes 3 56 57 88
+tr1supgaxi 82 nodes 3 88 97 56
+tr1supgaxi 83 nodes 3 97 88 89
+tr1supgaxi 84 nodes 3 89 98 97
+tr1supgaxi 85 nodes 3 98 89 90
+tr1supgaxi 86 nodes 3 90 99 98
+tr1supgaxi 87 nodes 3 99 90 91
+tr1supgaxi 88 nodes 3 91 100 99
+tr1supgaxi 89 nodes 3 100 91 92
+tr1supgaxi 90 nodes 3 92 101 100
+tr1supgaxi 91 nodes 3 101 92 93
+tr1supgaxi 92 nodes 3 93 102 101
+tr1supgaxi 93 nodes 3 102 93 94
+tr1supgaxi 94 nodes 3 94 103 102
+tr1supgaxi 95 nodes 3 103 94 95
+tr1supgaxi 96 nodes 3 95 104 103
+tr1supgaxi 97 nodes 3 104 95 96
+tr1supgaxi 98 nodes 3 96 105 104
+tr1supgaxi 99 nodes 3 105 96 17
+tr1supgaxi 100 nodes 3 17 18 105
+tr1supgaxi 101 nodes 3 55 56 97
+tr1supgaxi 102 nodes 3 97 106 55
+tr1supgaxi 103 nodes 3 106 97 98
+tr1supgaxi 104 nodes 3 98 107 106
+tr1supgaxi 105 nodes 3 107 98 99
+tr1supgaxi 106 nodes 3 99 108 107
+tr1supgaxi 107 nodes 3 108 99 100
+tr1supgaxi 108 nodes 3 100 109 108
+tr1supgaxi 109 nodes 3 109 100 101
+tr1supgaxi 110 nodes 3 101 110 109
+tr1supgaxi 111 nodes 3 110 101 102
+tr1supgaxi 112 nodes 3 102 111 110
+tr1supgaxi 113 nodes 3 111 102 103
+tr1supgaxi 114 nodes 3 103 112 111
+tr1supgaxi 115 nodes 3 112 103 104
+tr1supgaxi 116 nodes 3 104 113 112
+tr1supgaxi 117 nodes 3 113 104 105
+tr1supgaxi 118 nodes 3 105 114 113
+tr1supgaxi 119 nodes 3 114 105 18
+tr1supgaxi 120 nodes 3 18 19 114
+tr1supgaxi 121 nodes 3 54 55 106
+tr1supgaxi 122 nodes 3 106 115 54
+tr1supgaxi 123 nodes 3 115 106 107
+tr1supgaxi 124 nodes 3 107 116 115
+tr1supgaxi 125 nodes 3 116 107 108
+tr1supgaxi 126 nodes 3 108 117 116
+tr1supgaxi 127 nodes 3 117 108 109
+tr1supgaxi 128 nodes 3 109 118 117
+tr1supgaxi 129 nodes 3 118 109 110
+tr1supgaxi 130 nodes 3 110 119 118
+tr1supgaxi 131 nodes 3 119 110 111
+tr1supgaxi 132 nodes 3 111 120 119
+tr1supgaxi 133 nodes 3 120 111 112
+tr1supgaxi 134 nodes 3 112 121 120
+tr1supgaxi 135 nodes 3 121 112 113
+tr1supgaxi 136 nodes 3 113 122 121
+tr1supgaxi 137 nodes 3 122 113 114
+tr1supgaxi 138 nodes 3 114 123 122
+tr1supgaxi 139 nodes 3 123 114 19
+tr1supgaxi 140 nodes 3 19 20 123
+tr1supgaxi 141 nodes 3 53 54 115
+tr1supgaxi 142 nodes 3 115 124 53
+tr1supgaxi 143 nodes 3 124 115 116
+tr1supgaxi 144 nodes 3 116 125 124
+tr1supgaxi 145 nodes 3 125 116 117
+tr1supgaxi 146 nodes 3 117 126 125
+tr1supgaxi 147 nodes 3 126 117 118
+tr1supgaxi 148 nodes 3 118 127 126
+tr1supgaxi 149 nodes 3 127 118 119
+tr1supgaxi 150 nodes 3 119 128 127
+tr1supgaxi 151 nodes 3 128 119 120
+tr1supgaxi 152 nodes 3 120 129 128
+tr1supgaxi 153 nodes 3 129 120 121
+tr1supgaxi 154 nodes 3 121 130 129
+tr1supgaxi 155 nodes 3 130 121 122
+tr1supgaxi 156 nodes 3 122 131 130
+tr1supgaxi 157 nodes 3 131 122 123
+tr1supgaxi 158 nodes 3 123 132 131
+tr1supgaxi 159 nodes 3 132 123 20
+tr1supgaxi 160 nodes 3 20 21 132
+tr1supgaxi 161 nodes 3 52 53 124
+tr1supgaxi 162 nodes 3 124 133 52
+tr1supgaxi 163 nodes 3 133 124 125
+tr1supgaxi 164 nodes 3 125 134 133
+tr1supgaxi 165 nodes 3 134 125 126
+tr1supgaxi 166 nodes 3 126 135 134
+tr1supgaxi 167 nodes 3 135 126 127
+tr1supgaxi 168 nodes 3 127 136 135
+tr1supgaxi 169 nodes 3 136 127 128
+tr1supgaxi 170 nodes 3 128 137 136
+tr1supgaxi 171 nodes 3 137 128 129
+tr1supgaxi 172 nodes 3 129 138 137
+tr1supgaxi 173 nodes 3 138 129 130
+tr1supgaxi 174 nodes 3 130 139 138
+tr1supgaxi 175 nodes 3 139 130 131
+tr1supgaxi 176 nodes 3 131 140 139
+tr1supgaxi 177 nodes 3 140 131 132
+tr1supgaxi 178 nodes 3 132 141 140
+tr1supgaxi 179 nodes 3 141 132 21
+tr1supgaxi 180 nodes 3 21 22 141
+tr1supgaxi 181 nodes 3 51 52 133
+tr1supgaxi 182 nodes 3 133 142 51
+tr1supgaxi 183 nodes 3 142 133 134
+tr1supgaxi 184 nodes 3 134 143 142
+tr1supgaxi 185 nodes 3 143 134 135
+tr1supgaxi 186 nodes 3 135 144 143
+tr1supgaxi 187 nodes 3 144 135 136
+tr1supgaxi 188 nodes 3 136 145 144
+tr1supgaxi 189 nodes 3 145 136 137
+tr1supgaxi 190 nodes 3 137 146 145
+tr1supgaxi 191 nodes 3 146 137 138
+tr1supgaxi 192 nodes 3 138 147 146
+tr1supgaxi 193 nodes 3 147 138 139
+tr1supgaxi 194 nodes 3 139 148 147
+tr1supgaxi 195 nodes 3 148 139 140
+tr1supgaxi 196 nodes 3 140 149 148
+tr1supgaxi 197 nodes 3 149 140 141
+tr1supgaxi 198 nodes 3 141 150 149
+tr1supgaxi 199 nodes 3 150 141 22
+tr1supgaxi 200 nodes 3 22 23 150
+tr1supgaxi 201 nodes 3 50 51 142
+tr1supgaxi 202 nodes 3 142 151 50
+tr1supgaxi 203 nodes 3 151 142 143
+tr1supgaxi 204 nodes 3 143 152 151
+tr1supgaxi 205 nodes 3 152 143 144
+tr1supgaxi 206 nodes 3 144 153 152
+tr1supgaxi 207 nodes 3 153 144 145
+tr1supgaxi 208 nodes 3 145 154 153
+tr1supgaxi 209 nodes 3 154 145 146
+tr1supgaxi 210 nodes 3 146 155 154
+tr1supgaxi 211 nodes 3 155 146 147
+tr1supgaxi 212 nodes 3 147 156 155
+tr1supgaxi 213 nodes 3 156 147 148
+tr1supgaxi 214 nodes 3 148 157 156
+tr1supgaxi 215 nodes 3 157 148 149
+tr1supgaxi 216 nodes 3 149 158 157
+tr1supgaxi 217 nodes 3 158 149 150
+tr1supgaxi 218 nodes 3 150 159 158
+tr1supgaxi 219 nodes 3 159 150 23
+tr1supgaxi 220 nodes 3 23 24 159
+tr1supgaxi 221 nodes 3 49 50 151
+tr1supgaxi 222 nodes 3 151 160 49
+tr1supgaxi 223 nodes 3 160 151 152
+tr1supgaxi 224 nodes 3 152 161 160
+tr1supgaxi 225 nodes 3 161 152 153
+tr1supgaxi 226 nodes 3 153 162 161
+tr1supgaxi 227 nodes 3 162 153 154
+tr1supgaxi 228 nodes 3 154 163 162
+tr1supgaxi 229 nodes 3 163 154 155
+tr1supgaxi 230 nodes 3 155 164 163
+tr1supgaxi 231 nodes 3 164 155 156
+tr1supgaxi 232 nodes 3 156 165 164
+tr1supgaxi 233 nodes 3 165 156 157
+tr1supgaxi 234 nodes 3 157 166 165
+tr1supgaxi 235 nodes 3 166 157 158
+tr1supgaxi 236 nodes 3 158 167 166
+tr1supgaxi 237 nodes 3 167 158 159
+tr1supgaxi 238 nodes 3 159 168 167
+tr1supgaxi 239 nodes 3 168 159 24
+tr1supgaxi 240 nodes 3 24 25 168
+tr1supgaxi 241 nodes 3 48 49 160
+tr1supgaxi 242 nodes 3 160 169 48
+tr1supgaxi 243 nodes 3 169 160 161
+tr1supgaxi 244 nodes 3 161 170 169
+tr1supgaxi 245 nodes 3 170 161 162
+tr1supgaxi 246 nodes 3 162 171 170
+tr1supgaxi 247 nodes 3 171 162 163
+tr1supgaxi 248 nodes 3 163 172 171
+tr1supgaxi 249 nodes 3 172 163 164
+tr1supgaxi 250 nodes 3 164 173 172
+tr1supgaxi 251 nodes 3 173 164 165
+tr1supgaxi 252 nodes 3 165 174 173
+tr1supgaxi 253 nodes 3 174 165 166
+tr1supgaxi 254 nodes 3 166 175 174
+tr1supgaxi 255 nodes 3 175 166 167
+tr1supgaxi 256 nodes 3 167 176 175
+tr1supgaxi 257 nodes 3 176 167 168
+tr1supgaxi 258 nodes 3 168 177 176
+tr1supgaxi 259 nodes 3 177 168 25
+tr1supgaxi 260 nodes 3 25 26 177
+tr1supgaxi 261 nodes 3 47 48 169
+tr1supgaxi 262 nodes 3 169 178 47
+tr1supgaxi 263 nodes 3 178 169 170
+tr1supgaxi 264 nodes 3 170 179 178
+tr1supgaxi 265 nodes 3 179 170 171
+tr1supgaxi 266 nodes 3 171 180 179
+tr1supgaxi 267 nodes 3 180 171 172
+tr1supgaxi 268 nodes 3 172 181 180
+tr1supgaxi 269 nodes 3 181 172 173
+tr1supgaxi 270 nodes 3 173 182 181
+tr1supgaxi 271 nodes 3 182 173 174
+tr1supgaxi 272 nodes 3 174 183 182
+tr1supgaxi 273 nodes 3 183 174 175
+tr1supgaxi 274 nodes 3 175 184 183
+tr1supgaxi 275 nodes 3 184 175 176
+tr1supgaxi 276 nodes 3 176 185 184
+tr1supgaxi 277 nodes 3 185 176 177
+tr1supgaxi 278 nodes 3 177 186 185
+tr1supgaxi 279 nodes 3 186 177 26
+tr1supgaxi 280 nodes 3 26 27 186
+tr1supgaxi 281 nodes 3 46 47 178
+tr1supgaxi 282 nodes 3 178 187 46
+tr1supgaxi 283 nodes 3 187 178 179
+tr1supgaxi 284 nodes 3 179 188 187
+tr1supgaxi 285 nodes 3 188 179 180
+tr1supgaxi 286 nodes 3 180 189 188
+tr1supgaxi 287 nodes 3 189 180 181
+tr1supgaxi 288 nodes 3 181 190 189
+tr1supgaxi 289 nodes 3 190 181 182
+tr1supgaxi 290 nodes 3 182 191 190
+tr1supgaxi 291 nodes 3 191 182 183
+tr1supgaxi 292 nodes 3 183 192 191
+tr1supgaxi 293 nodes 3 192 183 184
+tr1supgaxi 294 nodes 3 184 193 192
+tr1supgaxi 295 nodes 3 193 184 185
+tr1supgaxi 296 nodes 3 185 194 193
+tr1supgaxi 297 nodes 3 194 185 186
+tr1supgaxi 298 nodes 3 186 195 194
+tr1supgaxi 299 nodes 3 195 186 27
+tr1supgaxi 300 nodes 3 27 28 195
+tr1supgaxi 301 nodes 3 45 46 187
+tr1supgaxi 302 nodes 3 187 196 45
+tr1supgaxi 303 nodes 3 196 187 188
+tr1supgaxi 304 nodes 3 188 197 196
+tr1supgaxi 305 nodes 3 197 188 189
+tr1supgaxi 306 nodes 3 189 198 197
+tr1supgaxi 307 nodes 3 198 189 190
+tr1supgaxi 308 nodes 3 190 199 198
+tr1supgaxi 309 nodes 3 199 190 191
+tr1supgaxi 310 nodes 3 191 200 199
+tr1supgaxi 311 nodes 3 200 191 192
+tr1supgaxi 312 nodes 3 192 201 200
+tr1supgaxi 313 nodes 3 201 192 193
+tr1supgaxi 314 nodes 3 193 202 201
+tr1supgaxi 315 nodes 3 202 193 194
+tr1supgaxi 316 nodes 3 194 203 202
+tr1supgaxi 317 nodes 3 203 194 195
+tr1supgaxi 318 nodes 3 195 204 203
+tr1supgaxi 319 nodes 3 204 195 28
+tr1supgaxi 320 nodes 3 28 29 204
+tr1supgaxi 321 nodes 3 44 45 196
+tr1supgaxi 322 nodes 3 196 205 44
+tr1supgaxi 323 nodes 3 205 196 197
+tr1supgaxi 324 nodes 3 197 206 205
+tr1supgaxi 325 nodes 3 206 197 198
+tr1supgaxi 326 nodes 3 198 207 206
+tr1supgaxi 327 nodes 3 207 198 199
+tr1supgaxi 328 nodes 3 199 208 207
+tr1supgaxi 329 nodes 3 208 199 200
+tr1supgaxi 330 nodes 3 200 209 208
+tr1supgaxi 331 nodes 3 209 200 201
+tr1supgaxi 332 nodes 3 201 210 209
+tr1supgaxi 333 nodes 3 210 201 202
+tr1supgaxi 334 nodes 3 202 211 210
+tr1supgaxi 335 nodes 3 211 202 203
+tr1supgaxi 336 nodes 3 203 212 211
+tr1supgaxi 337 nodes 3 212 203 204
+tr1supgaxi 338 nodes 3 204 213 212
+tr1supgaxi 339 nodes 3 213 204 29
+tr1supgaxi 340 nodes 3 29 30 213
+tr1supgaxi 341 nodes 3 43 44 205
+tr1supgaxi 342 nodes 3 205 214 43
+tr1supgaxi 343 nodes 3 214 205 206
+tr1supgaxi 344 nodes 3 206 215 214
+tr1supgaxi 345 nodes 3 215 206 207
+tr1supgaxi 346 nodes 3 207 216 215
+tr1supgaxi 347 nodes 3 216 207 208
+tr1supgaxi 348 nodes 3 208 217 216
+tr1supgaxi 349 nodes 3 217 208 209
+tr1supgaxi 350 nodes 3 209 218 217
+tr1supgaxi 351 nodes 3 218 209 210
+tr1supgaxi 352 nodes 3 210 219 218
+tr1supgaxi 353 nodes 3 219 210 211
+tr1supgaxi 354 nodes 3 211 220 219
+tr1supgaxi 355 nodes 3 220 211 212
+tr1supgaxi 356 nodes 3 212 221 220
+tr1supgaxi 357 nodes 3 221 212 213
+tr1supgaxi 358 nodes 3 213 222 221
+tr1supgaxi 359 nodes 3 222 213 30
+tr1supgaxi 360 nodes 3 30 31 222
+tr1supgaxi 361 nodes 3 42 43 214
+tr1supgaxi 362 nodes 3 214 223 42
+tr1supgaxi 363 nodes 3 223 214 215
+tr1supgaxi 364 nodes 3 215 224 223
+tr1supgaxi 365 nodes 3 224 215 216
+tr1supgaxi 366 nodes 3 216 225 224
+tr1supgaxi 367 nodes 3 225 216 217
+tr1supgaxi 368 nodes 3 217 226 225
+tr1supgaxi 369 nodes 3 226 217 218
+tr1supgaxi 370 nodes 3 218 227 226
+tr1supgaxi 371 nodes 3 227 218 219
+tr1supgaxi 372 nodes 3 219 228 227
+tr1supgaxi 373 nodes 3 228 219 220
+tr1supgaxi 374 nodes 3 220 229 228
+tr1supgaxi 375 nodes 3 229 220 221
+tr1supgaxi 376 nodes 3 221 230 229
+tr1supgaxi 377 nodes 3 230 221 222
+tr1supgaxi 378 nodes 3 222 231 230
+tr1supgaxi 379 nodes 3 231 222 31
+tr1supgaxi 380 nodes 3 31 32 231
+tr1supgaxi 381 nodes 3 4 42 223
+tr1supgaxi 382 nodes 3 223 41 4
+tr1supgaxi 383 nodes 3 41 223 224
+tr1supgaxi 384 nodes 3 224 40 41
+tr1supgaxi 385 nodes 3 40 224 225
+tr1supgaxi 386 nodes 3 225 39 40
+tr1supgaxi 387 nodes 3 39 225 226
+tr1supgaxi 388 nodes 3 226 38 39
+tr1supgaxi 389 nodes 3 38 226 227
+tr1supgaxi 390 nodes 3 227 37 38
+tr1supgaxi 391 nodes 3 37 227 228
+tr1supgaxi 392 nodes 3 228 36 37
+tr1supgaxi 393 nodes 3 36 228 229
+tr1supgaxi 394 nodes 3 229 35 36
+tr1supgaxi 395 nodes 3 35 229 230
+tr1supgaxi 396 nodes 3 230 34 35
+tr1supgaxi 397 nodes 3 34 230 231
+tr1supgaxi 398 nodes 3 231 33 34
+tr1supgaxi 399 nodes 3 33 231 32
+tr1supgaxi 400 nodes 3 32 3 33
 fluidcs 1 mat 1 set 1
 newtonianfluid 1 d 1.0 mu 1.0
 #binghamfluid2 1 d 2400 mu0 200 tau0 825.0 muinf 1.0
-#prescribed inlet velocity v = 1m/s
-BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 1.0
 #zero velocity (wall) condition
-BoundaryCondition 2 loadTimeFunction 1 prescribedvalue 0.0
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 7 values 1 0.0 set 2
+#zero velocity (wall) condition
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 8 values 1 0.0 set 3
 #pressure 
-BoundaryCondition 3 loadTimeFunction 1 prescribedvalue 0.0
-deadweight 4 components 2 0.0 -9.81 loadTimeFunction 1 valtype 2
+BoundaryCondition 3 loadTimeFunction 1 dofs 1 11 values 1 0.0 set 4
+deadweight 4 components 2 0.0 -9.81 loadTimeFunction 1 valtype 2 set 1
 ConstantFunction 1 f(t) 1.0
 Set 1 elementranges {(1 400)}
+Set 2 noderanges {(1 4) (14 32) (42 60)}
+Set 3 noderanges {1 2 (5 13)}
+Set 4 noderanges {3 4 (33 41)}
 
 #%BEGIN_CHECK% tolerance 1.e-2
 #NODE tStep 1 number 1 dof 11 unknown d value 19.62

@@ -8,24 +8,27 @@ errorcheck
 #vtkxml tstep_all domain_all vars 11 37 39 44 56 67 68 69 70 71 72 73 stype 1
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all
-ndofman 8 nelem 1 ncrosssect  1 nmat 1 nbc 2 nic 1 nltf 2
-node 1 coords 3  0.0   0.0   4.0  ic 1 1 bc 1 1
-node 2 coords 3  0.0   4.0   4.0  ic 1 1 bc 1 1
-node 3 coords 3  4.0   4.0   4.0  ic 1 1
-node 4 coords 3  4.0   0.0   4.0  ic 1 1 
-node 5 coords 3  0.0   0.0   0.0  ic 1 1 bc 1 1
-node 6 coords 3  0.0   4.0   0.0  ic 1 1 bc 1 1
-node 7 coords 3  4.0   4.0   0.0  ic 1 1
-node 8 coords 3  4.0   0.0   0.0  ic 1 1 
-Brick1ht 1 nodes 8 1 2 3 4 5 6 7 8 crossSect 1 mat 1 boundaryloads 2 2 5
-SimpleCS 1
+ndofman 8 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 1 nltf 2 nset 3
+node 1 coords 3  0.0   0.0   4.0
+node 2 coords 3  0.0   4.0   4.0
+node 3 coords 3  4.0   4.0   4.0
+node 4 coords 3  4.0   0.0   4.0
+node 5 coords 3  0.0   0.0   0.0
+node 6 coords 3  0.0   4.0   0.0
+node 7 coords 3  4.0   4.0   0.0
+node 8 coords 3  4.0   0.0   0.0
+Brick1ht 1 nodes 8 1 2 3 4 5 6 7 8 boundaryloads 2 2 5
+SimpleTransportCS 1 mat 1 set 1
 #Standard concrete k(conductivity)=1.7 W/m/K   c(capacity)=870 J/kg/K
 CemhydMat 1 d 2400. k 1.7 c 870. file "cemhyd01_XML.src" eachGP 1 densityType 0 conductivityType 0 capacityType 0 castingtime 0.
-BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 20.0 isImposedTimeFunction 2
-constantsurfaceload 2 loadTimeFunction 1 ndofs 1 components 1 10.0 properties 1 a 50.0 loadtype 3
-InitialCondition 1 Conditions 1 u 20.0
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 10 values 1 20.0 isImposedTimeFunction 2 set 2
+constantsurfaceload 2 loadTimeFunction 1 dofs 1 10 components 1 10.0 properties 1 a 50.0 loadtype 3 set 0
+InitialCondition 1 dofs 1 10 Conditions 1 u 20.0 set 1
 ConstantFunction 1 f(t) 1.0
 PiecewiseLinFunction 2 nPoints 4 t 4 -1.e+5 15000 15001 1.e+7 f(t) 4 1.0 1.0 0.0 0.0
+Set 1 elementranges {1}
+Set 2 elementboundaries 2 1 3
+Set 3 elementboundaries 2 1 5
 
 #%BEGIN_CHECK% tolerance 1.e-3
 ## TIME
