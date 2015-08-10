@@ -2,18 +2,21 @@ bar03.statics.oofem.out
 dynamic relaxation of a spring 0.01 
 NonLinearStatic nsteps 10 stepLength 0.01 minStepLength 0.01 rtolv 0.01 Psi 0.0 MaxIter 120 HPC 2 2 1 stiffmode 1 nmodules 1
 #nldeidynamic nsteps 1000 deltat 0.01 dumpcoef 0.0 drflag 1 tau 10.0 py 0.0666666666667
-errorcheck filename "dyn_bar03.statics.oofem.in"
+errorcheck
 domain 3d
 OutputManager tstep_all dofman_all element_all
-ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1
-node 1 coords 3 0.000000e+00 0.000000e+00 0.000000e+00 DofIDMask 1 1 bc 1 1 
-node 2 coords 3 1.000000e+00 0.000000e+00 0.000000e+00 DofIDMask 1 1 load 1 2
-truss1d 1 nodes 2 1 2 crossSect 1 mat 1
-SimpleCS 1 area 1.0
+ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1 nset 3
+node 1 coords 3 0.000000e+00 0.000000e+00 0.000000e+00
+node 2 coords 3 1.000000e+00 0.000000e+00 0.000000e+00
+truss1d 1 nodes 2 1 2 mat 1
+Set 1 elementranges {1}
+Set 2 nodes 1 1
+Set 3 nodes 1 2
+SimpleCS 1 area 1.0 material 1 set 1
 #IsoLE 1  E 15. n 0.2  d 1.0 talpha 0.0
 idm1 1 d 1.0 E 15.0 n 0.2 e0 0.02 wf 0.04 tAlpha 0.0 equivstraintype 0 
-BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
-NodalLoad 2 loadTimeFunction 1 components 1 1.0
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 2
+NodalLoad 2 loadTimeFunction 1 dofs 1 1 components 1 1.0 set 3
 ConstantFunction 1 f(t) 1.0 
 
 #%BEGIN_CHECK%
