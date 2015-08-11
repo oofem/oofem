@@ -46,10 +46,6 @@ PressureNumberingScheme :: ~PressureNumberingScheme()
 { }
 
 void
-PressureNumberingScheme :: init()
-{ }
-
-void
 PressureNumberingScheme :: init(Domain *domain, TimeStep *tStep)
 {
     isInitialized = true;
@@ -61,9 +57,6 @@ PressureNumberingScheme :: init(Domain *domain, TimeStep *tStep)
     for ( inode = 1; inode <= nnode; inode++ ) {
         idofman = domain->giveDofManager(inode);
         for ( Dof *jDof: *idofman ) {
-        //        ndofs = idofman->giveNumberOfDofs();
-        //        for ( int j = 1; j <= ndofs; j++ ) {
-        //            jDof  =  idofman->giveDof(j);
             if ( jDof->giveDofID() == P_f ) {
                 if ( jDof->hasBc(tStep) ) {
                     this->nodalPressureEquationNumbers.at(inode) = --pres_neq;
@@ -136,8 +129,8 @@ VelocityNumberingScheme :: giveDofToEquationNumber(Domain *d, int equationNumber
     bool found = false;
     Dof *foundDof = NULL;
     for ( int i = 1; i <= d->giveNumberOfDofManagers(); i++ ) {
-      DofManager* dman = d->giveDofManager(i);
-      for ( Dof *dof : *dman) {//= d->giveDofManager(i)->giveDof(j);
+        DofManager *dman = d->giveDofManager(i);
+        for ( Dof *dof : *dman ) {//= d->giveDofManager(i)->giveDof(j);
             DofIDItem id = dof->giveDofID();
             if ( id == V_u || id == V_v || id == V_w ) {
                 if ( dof->__giveEquationNumber() == equationNumber ) {
@@ -162,10 +155,6 @@ AuxVelocityNumberingScheme :: AuxVelocityNumberingScheme() :
 { }
 
 AuxVelocityNumberingScheme :: ~AuxVelocityNumberingScheme()
-{ }
-
-void
-AuxVelocityNumberingScheme :: init()
 { }
 
 void
