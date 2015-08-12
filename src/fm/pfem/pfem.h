@@ -61,14 +61,18 @@
 //@}
 
 namespace oofem {
-
+/**
+ * Implementation of callback class for assembling right-hand side of pressure equations
+ */
 class PFEMPressureRhsAssembler : public VectorAssembler
 {
 public:
     virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
 };
 
-
+/**
+ * Implementation of callback class for assembling right-hand side of velocity equations
+ */
 class PFEMCorrectionRhsAssembler : public VectorAssembler
 {
 protected:
@@ -81,21 +85,27 @@ public:
     virtual void locationFromElement(IntArray &loc, Element &element, const UnknownNumberingScheme &s, IntArray *dofIds = nullptr) const;
 };
 
-
+/**
+ * Implementation of callback class for assembling right-hand side vector of laplacian multiplied by velocity
+ */
 class PFEMLaplaceVelocityAssembler : public VectorAssembler
 {
     virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
     virtual void locationFromElement(IntArray &loc, Element &element, const UnknownNumberingScheme &s, IntArray *dofIds = nullptr) const;
 };
 
-
+/**
+ * Implementation of callback class for assembling right-hand side vector of mass matrix multiplied by velocity
+ */
 class PFEMMassVelocityAssembler : public VectorAssembler
 {
     virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
     virtual void locationFromElement(IntArray &loc, Element &element, const UnknownNumberingScheme &s, IntArray *dofIds = nullptr) const;
 };
 
-
+/**
+ * Callback class for assembling pressure laplacian matrix
+ */
 class PFEMPressureLaplacianAssembler : public MatrixAssembler
 {
 public:
@@ -105,21 +115,24 @@ public:
 
 /**
  * This class represents PFEM method for solving incompressible Navier-Stokes equations
+ *
+ * @author David Krybus
  */
 class PFEM : public EngngModel
 {
 protected:
     /// Numerical method used to solve the problem
     SparseLinearSystemNM *nMethod;
-
+    /// Used solver type for linear system of equations
     LinSystSolverType solverType;
+    /// Used type of sparse matrix
     SparseMtrxType sparseMtrxType;
 
-    /// left-hand side matrix for the auxiliary velocity equations
+    /// Left-hand side matrix for the auxiliary velocity equations
     FloatArray avLhs;
-    /// left-hand side matrix for the pressure equations
-    std :: unique_ptr< SparseMtrx > pLhs;
-    /// left-hand side matrix for the velocity equations
+    /// Left-hand side matrix for the pressure equations
+    std :: unique_ptr< SparseMtrx >pLhs;
+    /// Left-hand side matrix for the velocity equations
     FloatArray vLhs;
 
     // TODO: consider using DofDistributedPrimaryField for pressure and velocity
@@ -127,32 +140,31 @@ protected:
     PrimaryField PressureField;
     /// Velocity field
     PrimaryField VelocityField;
-
+    /// Array of auxiliary velocities used during computation
     FloatArray AuxVelocity;
-    FloatArray prescribedTractionPressure;
 
-    /// time step
+    /// Time step length
     double deltaT;
-    /// minimal value of time step
+    /// Minimal value of time step
     double minDeltaT;
-    /// value of alpha coefficient for the boundary recognition
+    /// Value of alpha coefficient for the boundary recognition
     double alphaShapeCoef;
-    /// element side ratio for the removal of the close partices
+    /// Element side ratio for the removal of the close partices
     double particleRemovalRatio;
-    
-    /// area or volume of the fluid domain, which can be controlled
+
+    /// Area or volume of the fluid domain, which can be controlled
     double domainVolume;
-    /// flag for volume report
+    /// Flag for volume report
     bool printVolumeReport;
 
-    /// explicit or implicit time discretization
+    /// Explicit or implicit time discretization
     int discretizationScheme;
 
-    /// number of cross section to associate with created elements
+    /// Number of cross section to associate with created elements
     int associatedCrossSection;
-    /// number of material to associate with created elements
+    /// Number of material to associate with created elements
     int associatedMaterial;
-    /// number of pressure boundary condition to be prescribed on free surface
+    /// Number of pressure boundary condition to be prescribed on free surface
     int associatedPressureBC;
 
     /// Pressure numbering
@@ -165,7 +177,7 @@ protected:
     VelocityNumberingScheme prescribedVns;
 
 public:
-    PFEM(int i, EngngModel * _master = NULL) :
+    PFEM(int i, EngngModel *_master = NULL) :
         EngngModel(i, _master)
         , avLhs()
         , pLhs()
@@ -213,7 +225,7 @@ public:
 
     //equation numbering using PressureNumberingScheme
     virtual int forceEquationNumbering(int id);
-    
+
     virtual int requiresUnknownsDictionaryUpdate() { return true; }
 
 
@@ -250,13 +262,13 @@ public:
     void updateDofUnknownsDictionaryVelocities(DofManager *inode, TimeStep *tStep);
     /// Resets the equation numberings as the mesh is recreated in each time step
     void resetEquationNumberings();
-    
+
     /// Returns number of material to be associated with created elements
-    int giveAssociatedMaterialNumber() {return associatedMaterial;}
+    int giveAssociatedMaterialNumber() { return associatedMaterial; }
     /// Returns number of cross section to be associated with created elements
-    int giveAssociatedCrossSectionNumber() {return associatedCrossSection;}
+    int giveAssociatedCrossSectionNumber() { return associatedCrossSection; }
     /// Returns number of zero pressure boundary condition to be prescribed on free surface
-    int giveAssociatedPressureBC() {return associatedPressureBC;}
+    int giveAssociatedPressureBC() { return associatedPressureBC; }
 
 protected:
     /**

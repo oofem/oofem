@@ -71,6 +71,8 @@ enum boundingSphereStatus { SphereOutsideCell, SphereInsideCell, SphereContainsC
 
 /**
  * Squared bounding box for templated octree localizer
+ *
+ * @author David Krybus
  */
 class BoundingBox
 {
@@ -118,6 +120,8 @@ public:
 
 /**
  * Templated octree cell containing data of T type
+ *
+ * @author David Krybus
  */
 template< class T >
 class OctantRecT
@@ -450,6 +454,8 @@ public:
 
 /**
  * Help class for storing pointer to octant cell and position of the member in the data list
+ *
+ * @author David Krybus
  */
 template< class T >
 class LocalInsertionData
@@ -470,6 +476,8 @@ public:
 
 /**
  * Functor base class responsible for insertion of members into the octree cell
+ *
+ * @author David Krybus
  */
 template< class T >class SL_Insertion_Functor
 {
@@ -488,6 +496,8 @@ public:
 
 /**
  * Functor for storing nodes in the octree
+ *
+ * @author David Krybus
  */
 class InsertNode : public SL_Insertion_Functor< int >
 {
@@ -532,6 +542,8 @@ public:
 
 /**
  * Functor for storing triangles in the octree according to theirs circumscribed circles
+ *
+ * @author David Krybus
  */
 class InsertTriangleBasedOnCircumcircle : public SL_Insertion_Functor< DelaunayTriangle * >
 {
@@ -578,6 +590,8 @@ public:
 
 /**
  * Functor base class for evaluating search tasks on the octree according given condition
+ *
+ * @author David Krybus
  */
 template< class T >class SL_Evaluation_Functor
 {
@@ -602,6 +616,8 @@ public:
 
 /**
  * Functor for closest node search
+ *
+ * @author David Krybus
  */
 class ClosestNode : public SL_Evaluation_Functor< int >
 {
@@ -694,6 +710,8 @@ public:
 
 /**
  * Functor for finding triangles whose circumscribed circles contains given node
+ *
+ * @author David Krybus
  */
 class ElementCircumCirclesContainingNode : public SL_Evaluation_Functor< DelaunayTriangle * >
 {
@@ -761,6 +779,8 @@ public:
 
 /**
  * Templated octree spatial localizer
+ *
+ * @author David Krybus
  */
 template< class T >class OctreeSpatialLocalizerT
 {

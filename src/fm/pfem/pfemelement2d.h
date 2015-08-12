@@ -62,6 +62,8 @@ class IntArray;
 /**
  * This class is the implementation of general 2d element with arbitrary interpolation of velocity and pressure fields.
  * Should be used with PFEM solution algorithm.
+ *
+ * @author David Krybus
  */
 class PFEMElement2d : public PFEMElement
 
@@ -149,10 +151,3 @@ protected:
 };
 } // end namespace oofem
 #endif // pfemelement_2d_h
-
-
-
-
-
-
-

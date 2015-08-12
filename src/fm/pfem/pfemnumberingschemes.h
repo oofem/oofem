@@ -44,6 +44,8 @@ namespace oofem {
 /**
  * Numbering scheme that takes into account only pressure DOFs in PFEM problems.
  * Pressure is scalar unknown in each node.
+ *
+ * @author David Krybus
  */
 class PressureNumberingScheme : public UnknownNumberingScheme
 {
@@ -84,6 +86,8 @@ public:
 
 /**
  * Velocity numbering scheme for PFEM purposes
+ *
+ * @author David Krybus
  */
 class VelocityNumberingScheme : public UnknownNumberingScheme
 {
@@ -115,6 +119,8 @@ public:
  * Numbering scheme for auxiliary velocity in PFEM problems.
  * Nodes are not subjected to any boundary conditions considering auxiliary velocities,
  * so every single node has full set of equations.
+ *
+ * @author David Krybus
  */
 class AuxVelocityNumberingScheme : public UnknownNumberingScheme
 {

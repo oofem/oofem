@@ -50,6 +50,8 @@ class IntArray;
 
 /**
  * Particle class being used in PFEM computations
+ *
+ * @author David Krybus
  */
 class PFEMParticle : public Node
 {
@@ -67,7 +69,7 @@ public:
      * @param n node number in domain aDomain
      * @param aDomain domain to which node belongs
      */
-    PFEMParticle(int n, Domain * aDomain);
+    PFEMParticle(int n, Domain *aDomain);
     /**
      * Destructor.
      */
