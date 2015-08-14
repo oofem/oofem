@@ -229,6 +229,38 @@ Shell7Base :: evalInitialCovarBaseVectorsAt(FloatArray &lcoords, FloatMatrix &Gc
     Gcov.setColumn(G1,1); Gcov.setColumn(G2,2); Gcov.setColumn(G3,3);
 }
 
+void
+Shell7Base :: computeInitialGeneralizedStrainVector(FloatArray &lcoords, FloatArray &genStrain)
+{
+
+    FloatArray M;
+    FloatMatrix dNdxi;
+
+    // In plane base vectors
+    this->fei->evaldNdxi( dNdxi, lcoords, FEIElementGeometryWrapper(this) );
+
+    FloatArray dPhi1(3), dPhi2(3), dM1(3), dM2(3); 
+    dPhi1.zero();
+    dPhi2.zero();
+    dM1.zero();
+    dM2.zero();
+    for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
+        FloatArray &xbar = * this->giveNode(i)->giveCoordinates();
+        M = this->giveInitialNodeDirector(i);
+        dPhi1 += dNdxi.at(i, 1) * xbar;
+        dPhi2 += dNdxi.at(i, 2) * xbar;   
+        dM1   += dNdxi.at(i, 1) * M;
+        dM2   += dNdxi.at(i, 2) * M;   
+    }
+
+    // Out of plane base vector = director
+    this->evalInitialDirectorAt(lcoords, M);     // G3=M
+    genStrain = {15, dPhi1.at(1), dPhi1.at(2), dPhi1.at(3),  dPhi2.at(1), dPhi2.at(2), dPhi2.at(3),  
+                            dM1.at(1), dM1.at(2), dM1.at(3), dM2.at(1), dM2.at(2), dM2.at(3),
+                            M.at(1), M.at(2), M.at(3) };
+
+    
+}
 
 void
 Shell7Base :: edgeEvalInitialCovarBaseVectorsAt(FloatArray &lcoords, const int iedge, FloatArray &G1, FloatArray &G3)
@@ -558,6 +590,70 @@ Shell7Base :: computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, 
             double dV = this->computeVolumeAroundLayer(gp, layer);
             tempAnswer.plusProductSymmUpper(B, LB, dV);
             
+            #if 1 // Print generalised strain in specific positions 60x60 plate
+    
+                if ( layer == 1 && this->giveGlobalNumber() == 225 && gp->giveNumber() == 1 ) {
+                    // coords [0.0302 0.0298]
+                    FloatArray initialGenStrain;
+                    this->computeInitialGeneralizedStrainVector(lCoords, initialGenStrain);
+                    
+                    FloatMatrix F;
+                    //lcoords.at(3) = 0.0;
+                    this->computeFAt(lCoords, F, genEps, tStep);
+                    
+                    FloatMatrix gcov, Gcon;
+                    this->evalCovarBaseVectorsAt(lCoords, gcov, genEps, tStep);
+                    this->evalInitialContravarBaseVectorsAt(lCoords, Gcon);
+                    
+                    std :: ofstream file;
+                    std :: string iName = "GeneralizedStrain_point1.txt";
+                    file.open( iName.data() );
+                    // Write header
+                    file << "Mid point: el number = 225, gp number = 1 \n";
+                    file << "Initial generalized strain \n";
+                    for ( size_t i = 1; i <= initialGenStrain.giveSize(); i++ ) {
+                        const double &y = initialGenStrain.at(i);
+                        file << y << "  ";
+                    }
+                    file << " \n";
+                    file << "Generalized strain \n";
+                    for ( size_t i = 1; i <= genEps.giveSize(); i++ ) {
+                        const double &y = genEps.at(i);
+                        file << y << "  ";
+                    }
+                    file << " \n";
+                }
+                if ( layer == 1 && this->giveGlobalNumber() == 16 && gp->giveNumber() == 1 ) {
+                    // coords [0.0298 0.0022]
+                    FloatArray initialGenStrain;
+                    this->computeInitialGeneralizedStrainVector(lCoords, initialGenStrain);
+                    
+                    FloatMatrix F;
+                    this->computeFAt(lCoords, F, genEps, tStep);        
+                    FloatMatrix gcov, Gcon;
+                    this->evalCovarBaseVectorsAt(lCoords, gcov, genEps, tStep);
+                    this->evalInitialContravarBaseVectorsAt(lCoords, Gcon);
+                    std :: ofstream file;
+                    std :: string iName = "GeneralizedStrain_point2.txt";
+                    file.open( iName.data() );
+                    // Write header
+                    file << "Edge point: el number = 16, gp number = 1 \n";
+                    
+                    file << "Initial generalized strain \n";
+                    for ( size_t i = 1; i <= initialGenStrain.giveSize(); i++ ) {
+                        const double &y = initialGenStrain.at(i);
+                        file << y << "  ";
+                    }
+                    file << " \n";
+                    file << "Generalized strain \n";
+                    for ( size_t i = 1; i <= genEps.giveSize(); i++ ) {
+                        const double &y = genEps.at(i);
+                        file << y << "  ";
+                    }
+                    file << " \n";
+                }
+            #endif
+            
         }
     }
     tempAnswer.symmetrized();
@@ -607,7 +703,6 @@ Shell7Base :: computeLinearizedStiffness(GaussPoint *gp, StructuralMaterial *mat
     
     // position 32
     A [ 2 ] [ 1 ].beTranspositionOf( A [ 1 ] [ 2 ] );
-
 
 
 }

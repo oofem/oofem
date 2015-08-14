@@ -138,7 +138,7 @@ protected:
     virtual void setupInitialNodeDirectors();
     void evalInitialDirectorAt(FloatArray &lCoords, FloatArray &answer);
 
-
+    void computeInitialGeneralizedStrainVector(FloatArray &lcoords, FloatArray &genStrain);
 
     void evalInitialContravarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &Gcon);
 
