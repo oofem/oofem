@@ -51,8 +51,6 @@
 #define _IFT_NlDEIDynamic_drflag "drflag"
 #define _IFT_NlDEIDynamic_tau "tau"
 #define _IFT_NlDEIDynamic_py "py"
-#define _IFT_NlDEIDynamic_nodecutmode "nodecutmode"
-#define _IFT_NlDEIDynamic_elementcutmode "elementcutmode"
 #define _IFT_NlDEIDynamic_nonlocalext "nonlocalext"
 //@}
 

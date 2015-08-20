@@ -204,8 +204,9 @@ The order of records in file is compulsory, and it has following structure:
 \item domain record, see section \ref{_DomainRecord},
 \item output manager record, see section \ref{_OutputManagerRecord},
 \item components size record, see section \ref{_ComponentsSizeRecord},
-\item node \& element-side  record(s), see section \ref{_NodeElementSideRecords},
+\item node record(s), see section \ref{_NodeElementSideRecords},
 \item element record(s), see section \ref{_ElementsRecords},
+\item set record(s), see section \ref{_SetRecords},
 \item cross section record(s), see section \ref{_CrossSectionRecords},
 \item material type  record(s), see section \ref{_MaterialTypeRecords},
 \item nonlocal barriers record(s), see section \ref{_NonlocalBarrierRecords},
@@ -230,10 +231,10 @@ Often, some attributes are specific to particular entity keyword. Then the gener
 
 \begin{lstlisting}[style=oofem, language=oofeminput, caption={Example of input records}]
 # nodal records
-Node 1 coords 3 0. 0. 0. bc 2 1 1
-Node 2 coords 3 0. 0. 2. bc 2 1 0 
+Node 1 coords 3 0. 0. 0.
+Node 2 coords 3 0. 0. 2. dofidmask 3 1 2 3
 # element record
-Truss2d 1 nodes 2 1 2 mat 1 crossSect 1
+Truss2d 1 nodes 2 1 2 crossSect 1
 \end{lstlisting}
 
 Each attribute value has a specific type, which describe its size and layout. To describe the type of an attribute, the following notation is used: 
@@ -257,9 +258,9 @@ val3 t
 
 \item \textbf{ia} - integer array. The format of integer array is
 ``size~val(1)~...~val(size)'', where size, val(1),...,val(size) are
-integer numbers. Values are separated by one or more spaces. As an example, consider the integer array attribute called \param{bc}$=\{1,2,3\}$:
-\begin{lstlisting}[style=oofem, language=oofeminput, moreemph={bc}]
-bc 3 1 2 3
+integer numbers. Values are separated by one or more spaces. As an example, consider the integer array attribute called \param{nodes}$=\{1,4,23\}$:
+\begin{lstlisting}[style=oofem, language=oofeminput, moreemph={nodes}]
+nodes 3 1 4 23
 \end{lstlisting}
 \item \textbf{ra} - real array. The format of real array is
 ``size~val(1)~...~val(size)'', where size is integer number and val(1),
@@ -526,27 +527,15 @@ how many time steps will be analyzed.
 
 The parallel version has the following additional syntax:\\ \\
 \begin{record}
-  \recentry{}{\PentKeyword{commode}}
   \recentry{}{\PoptFieldnotype{nonlocalext}}
 \end{record}
 
 \noindent
 \Pmode{
-The \PentKeyword{commode} keyword can be one from following:
-\begin{itemize}
-\item \entKeywordInst{nodecutmode} - indicates the node cut partitioning scheme is
-used. The cut is led along element edges or surfaces (see
-figures \ref{nodecut}, \ref{nodecut-lm}, and \ref{nodecut-nlm}).
-\item \entKeywordInst{elementcutmode} - the element cut partitioning is used. The
-partitioning cut led across the element edges or surfaces (see
-figures \ref{elmentcut} and \ref{elmentcut-lm}).
-\end{itemize}
-\Pmode{
 The \param{nonlocalext} turns on the nonlocal constitutive
 extension. The extension considers a band of remote elements involved
 in computation of nonlocal variables (see fig. \ref{nodecut-nlm} illustrating
 this approach for node-cut partitioning).
-}
 }
 
 \subsection{DEIDynamic}
@@ -1398,12 +1387,9 @@ IML\_ILUPrec  &2& SMT\_CompCol & Incomplete LU Decomposition\\
 IML\_ILUPrec  &3& SMT\_DynCompRow & Incomplete LU (ILUT) with\\
               & &                 &  fillup. \\
               & &                 & The \param{precondattributes} are:\\
-              & &                 & \optField{droptol}{rn}
-\optField{partfill}{in}.\\
-              & &                 & \param{droptol} dropping
-tolerance\\
-              & &                 & \param{partfill} level of
-fill-up\\
+              & &                 & \optField{droptol}{rn} \optField{partfill}{in}.\\
+              & &                 & \param{droptol} dropping tolerance\\
+              & &                 & \param{partfill} level of fill-up\\
 \hline
 IML\_ICPrec   &4& SMT\_SymCompCol&Incomplete Cholesky\\
               & & SMT\_CompCol   &with no fill up\\
@@ -1956,7 +1942,7 @@ These records describe individual DofManager records (i.e. nodes or element side
 \begin{record}
   \recentry{\entKeyword{DofManagerType}}{\componentNum}
   \recentry{}{[\field{load}{ra}]}
-  \recentry{}{[\field{ndofs}{in} \field{DofIDMask}{ia}]}
+  \recentry{}{[\field{DofIDMask}{ia}]}
   \recentry{}{\optField{bc}{ia}}
   \recentry{}{\optField{ic}{ia}}
   \recentry{}{[\field{doftype}{ia} \field{masterMask}{ia}]}
@@ -1968,6 +1954,10 @@ The numbering of individual dof managers is arbitrary, it could be even non-cont
 \Pmode{In parallel mode, the label represents a global id across all partitions.}
 
 
+By default, the nodal DOFs are determined by asking all the connected elements. Specifying additional dofs can be done using the using the \param{DofIDMask} array which determines their physical interpretation.
+Each item of \param{DofIDMask} array describes the physical meaning of corresponding DOF in dof manager. Currently the following values are supported: \{u-displacement=1, v-displacement=2, w-displacement=3, u-rotation=4, v-ro\-ta\-tion=5, w-rotation=6, u-velocity=7, v-velocity=8, w-velocity=9, temperature=10, pressure=11, special dofs for gradient-type constitutive models=12 and 13, mass concentration=14, special dofs for extended finite elements (XFEM)=15--30\}.
+\textbf{It is not allowed to have two DOFs with the same physical meaning in the same DofManager.}
+
 The applied primary (Dirichlet) boundary conditions are specified using
 "bc" record, while natural boundary conditions using "load" parameter.
 \begin{itemize}
@@ -1975,20 +1965,7 @@ The applied primary (Dirichlet) boundary conditions are specified using
 \item The load "array" contains record numbers of natural boundary conditions that are applied. The required record type for natural condition is "NodalLoad". The actual value is the summation of all contributions, if more than one natural bc is applied. See section on boundary conditions for the syntax. Please note, that the values of natural bc for individual DOFs are specified in its record, not in dofmanager record.
 \end{itemize}
 
-By default, if "bc" and/or "load" parameters are omitted, no primary
-and/or natural bc are applied. Analogously, initial conditions are represented using \param{ic} array. The size of \param{ic} array should be equal to number of DOFs in dof manager. The values of this array are corresponding initial condition record numbers or zero, if no initial condition is applied to corresponding DOF (in this case zero value is assumed as value of initial condition).
-
-By default, the number of DOFs per node or side  and their physical meanings are determined by domain record (\entKeyword{domainType} keyword).
-If it is necessary to have
-different number of DOFs, then the \param{ndofs} attribute
-determines number of DOFs in DofManager, and their physical meaning is
-determined by \param{DofIDMask} array. Size of this array
-should be equal to \param{ndofs} value. Each item of \param{DofIDMask}
-array describes the physical meaning of corresponding DOF in dof manager. Currently
-the following values are supported: \{u-displacement=1, v-displacement=2,
- w-displacement=3, u-rotation=4, v-ro\-ta\-tion=5, w-rotation=6, u-velocity=7, v-velocity=8, w-velocity=9,
-temperature=10, pressure=11, special dofs for gradient-type constitutive models=12 and 13, mass concentration=14, special dofs for extended finite elements (XFEM)=15--30\}.
-\textbf{It is not allowed to have two DOFs with the same physical meaning in the same DofManager.}
+By default, if "bc" and/or "load" parameters are omitted, no primary and/or natural bc are applied. Analogously, initial conditions are represented using \param{ic} array. The size of \param{ic} array should be equal to number of DOFs in dof manager. The values of this array are corresponding initial condition record numbers or zero, if no initial condition is applied to corresponding DOF (in this case zero value is assumed as value of initial condition).
 
 Parameters \param{dofType} and \param{masterMask} allows to connect some dof manager's dofs
 (so-called ``slave'' dofs)
@@ -2232,6 +2209,31 @@ corresponding element is local (this array should have size equal to one).
 
 Available material models, their outline and
 corresponding parameters are described in separate \textbf{Element Library Manual.}
+
+
+\subsection{Set records}
+\label{_SetRecords}
+
+Sets specify regions of the geometry as a combination of volumes, surfaces, edges, and nodes.
+The main usage of sets are to connect regions of elements to a given cross section or apply a boundary condition, though sets can be used for many other things as well.
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{Set}}{\componentNum}
+  \recentry{}{\optField{elements}{ia} \optField{elementranges}{rl}}
+  \recentry{}{\optField{nodes}{ia} \optField{noderanges}{rl}}
+  \recentry{}{\optField{elementboundaries}{ia} \optField{elementedges}{ia}}
+\end{record}
+
+Volumes (elements) and nodes can be specified using either a list, \param{elements}, \param{nodes}, or with a range list \param{elementranges}, \param{noderanges}.
+Edges \param{elementedges}, and surfaces \param{elementboundaries}, are specified in a interleaved list, every other number specifying the element, and edge/surface number (the total length of the list being twice the number of surfaces/edges).
+The internal numbering of edges/surfaces is available in the \textbf{Element Library Manual}.
+
+Note that edge loads (singular loads given in ``newton per length'' (or equivalent), should be applied to \param{elementedges}, surface loads ``newton per area'' on \param{elementboundaries}, and bulk loads ``newton per volume'' on \param{elements}.
+
+Example 1: A deadweight (gravity) load would be applied to the \param{elements} in a set, while a distributed line load would be applied to the midline ``edge'' of the beam element, thus should be applied to a \param{elementedges} set. In the latter case, the midline of the beam is defined as the first (and only) ``edge'' of the beam.
+
+Example 2: Axisymmetric structural element analysis: A deadweight load would be applied to \param{elements} in a set. A external pressure would be defined as a surface load an be applied to the \param{elementboundaries} in a set. The element integrates the load (analytically) around the axis, so the load would still count as a surface load.
+
 
 \subsection{Cross section records}
 \label{_CrossSectionRecords}
@@ -2559,22 +2561,22 @@ The individual DOFs are determined using dof manager numbers (\param{dofmans} ar
 
 \noindent
 \begin{record}[0.9\textwidth]
-  \recentry{\entKeywordInst{DeadWeight}}{\field{Components}{ra}}
+  \recentry{\entKeywordInst{DeadWeight}}{\field{components}{ra}}
 \end{record}
 Represents dead weight loading applied on element volume (for
 structural elements). For transport problems, it represents the
 internal source, i.e. the rate of (heat) generated per unit volume.
 The magnitude of load for specific i-th DOF is computed as product of material density,
-corresponding volume and i-th member of \param{Components} array.
+corresponding volume and i-th member of \param{components} array.
 \item Structural temperature load
 
 \noindent
 \begin{record}[0.9\textwidth]
-  \recentry{\entKeywordInst{StructTemperatureLoad}~}{\field{Components}{ra}}
+  \recentry{\entKeywordInst{StructTemperatureLoad}~}{\field{components}{ra}}
 \end{record}
 
 Represents temperature loading imposed to some elements. The members of
-\param{Components} array represent the change of temperature (or change
+\param{components} array represent the change of temperature (or change
 of temperature gradient) corresponding to
 specific element strain components. See element library manual for details.
 
@@ -2582,9 +2584,9 @@ specific element strain components. See element library manual for details.
 
 \noindent
 \begin{record}[0.9\textwidth]
-  \recentry{\entKeywordInst{StructEigenstrainLoad}~}{\field{Components}{ra}}
+  \recentry{\entKeywordInst{StructEigenstrainLoad}~}{\field{components}{ra}}
 \end{record}
-Prescribes eigenstrain (or stress-free strain) to a structural element. The array of \param{Components} is defined in the global coordinate system. The number of components corresponds to a material mode, e.g. plane stress has three components and 3D six. Periodic boundary conditions can be imposed using eigenstrains and master-slave nodes. Consider decomposition of strain into average and fluctuating part
+Prescribes eigenstrain (or stress-free strain) to a structural element. The array of \param{components} is defined in the global coordinate system. The number of components corresponds to a material mode, e.g. plane stress has three components and 3D six. Periodic boundary conditions can be imposed using eigenstrains and master-slave nodes. Consider decomposition of strain into average and fluctuating part
 \begin{equation}
 \tens{\strain}(\vect{x}) = \langle \tens{\strain} \rangle + \tens{\strain}^*(\vect{x})
 \end{equation}
@@ -2597,9 +2599,9 @@ where $\langle \tens{\strain} \rangle$ can be imposed as eigenstrain over the do
 \item Constant edge fluxes (load)
 
 \begin{record}[0.9\textwidth]
-  \recentry{\entKeywordInst{ConstantEdgeLoad}}{\field{ndofs}{in}}
+  \recentry{\entKeywordInst{ConstantEdgeLoad}}{}
   \recentry{}{\field{loadType}{in}}
-  \recentry{}{\field{Components}{ra}}
+  \recentry{}{\field{components}{ra}}
   \recentry{}{\optField{dofexcludemask}{ia}}
   \recentry{}{\optField{csType}{in}}
   \recentry{}{\optField{properties}{dc}}
@@ -2608,35 +2610,32 @@ where $\langle \tens{\strain} \rangle$ can be imposed as eigenstrain over the do
 \item Constant surface fluxes (load)
 
 \begin{record}[0.9\textwidth]
-  \recentry{\entKeywordInst{ConstantSurfaceLoad}}{\field{ndofs}{in}}
+  \recentry{\entKeywordInst{ConstantSurfaceLoad}}{}
   \recentry{}{\field{loadType}{in}}
-  \recentry{}{\field{Components}{ra}}
+  \recentry{}{\field{components}{ra}}
   \recentry{}{\optField{dofexcludemask}{ia}}
   \recentry{}{\optField{csType}{in}}
   \recentry{}{\optField{properties}{dc}}
   \recentry{}{\optField{propertytf}{dc}}
 \end{record}
-Represent constant edge/surface loads or boundary conditions. The \param{ndofs} parameter must be set
-equal to element's number of unknowns. Parameter \param{loadType}
-distinguishes the type of boundary condition. Supported values are:
-2 - prescribed flux input (Neumann boundary condition), 3 - uniform distributed load or the convection (Newton) bc. The transfer coefficient is defined by keyword \param{properties}, see later.
-If the boundary condition corresponds to distributed force load, the
-\param{Components} array contains components of distributed load
-corresponding to element unknowns.
+Represent constant edge/surface loads or boundary conditions.
+Parameter \param{loadType} distinguishes the type of boundary condition. Supported values are:
+2 - prescribed flux input (Neumann boundary condition), 3 - uniform distributed load or the convection (Newton) bc.
+The transfer coefficient is defined by keyword \param{properties}, see later.
+If the boundary condition corresponds to distributed force load, the \param{components} array contains components of distributed load corresponding to element unknowns.
 The load is specified for all DOFs of object to which is associated.
-For some types of boundary conditions the zero value of load does not mean
-that the load is not applied (Newton's type of bc, for example). Then
-some mask, which allows to exclude specific dofs is necessary.
+For some types of boundary conditions the zero value of load does not mean that the load is not applied (Newton's type of bc, for example).
+Then some mask, which allows to exclude specific dofs is necessary.
 The \param{dofexcludemask} parameter is introduced to alow this.
-It should have the same size as \param{Components} array, and by
+It should have the same size as \param{components} array, and by
 default is filled with zeroes. If some value of dofExcludeMask is set
 to nonzero, then the corresponding componentArray
 is set to zero and load is not applied for this DOF.
 If the boundary condition corresponds to prescribed flux input, then
-the \param{Components} array contains the components of prescribed
+the \param{components} array contains the components of prescribed
 input flux corresponding to element unknowns.
 If the boundary condition is a convection boundary condition
-(\param{loadType} = 6) then \param{Components} array contains the
+(\param{loadType} = 6) then \param{components} array contains the
 environmental values (temperature of the environment) corresponding to
 element unknowns, and \param{properties} dictionary should contain
 value of transfer (convection) coefficient (assumed to be a constant) under the key 'a'.
@@ -2649,20 +2648,18 @@ The load can be defined in global coordinate system (\param{csType} =
 \item Linear edge flux (load)
 
 \begin{record}[0.9\textwidth]
-  \recentry{\entKeywordInst{LinearEdgeLoad}}{\field{ndofs}{in}}
+  \recentry{\entKeywordInst{LinearEdgeLoad}}{}
   \recentry{}{\field{loadType}{in}}
-  \recentry{}{\field{Components}{ra}}
+  \recentry{}{\field{components}{ra}}
   \recentry{}{\optField{dofexcludemask}{ia}}
   \recentry{}{\optField{csType}{in}}
 \end{record}
 
-Represents linear edge load. The meanings of parameters \param{ndofs},
-\param{csType}, and \param{loadType} are the same as for
-\entKeywordInst{ConstantEdgeLoad}. In \param{Components}
-array are stored load components for corresponding unknowns at the
-beginning of edge (\param{ndofs} values), followed by values valid for
-end of edge (\param{ndofs} values). The load can be defined in global coordinate system (\param{csType} =
-0, default) or in entity - specific local coordinate system
+Represents linear edge load. The meanings of parameters \param{csType} and \param{loadType} are the same as for
+\entKeywordInst{ConstantEdgeLoad}.
+In \param{components} array are stored load components for corresponding unknowns at the
+beginning of edge, followed by values valid for end of edge.
+The load can be defined in global coordinate system (\param{csType} = 0, default) or in entity - specific local coordinate system
 (\param{csType} = 1).
 \end{itemize}
 
@@ -2839,11 +2836,8 @@ specified on a separate line according to\\
 \section{Examples}
 \subsection {Beam structure}
 The example of input file for simple beam structure is presented.
-Structure geometry and its constitutive and geometrical properties are
-shown in fig. (\ref{ex01}). The linear static analysis is required,
-the influence of shear is neglected. Please note that one input line
-which is too long to fit to page, is separated into two lines using
-backslash '$\backslash$' character, but OOFEM requires that it must be typed as one single line.
+Structure geometry and its constitutive and geometrical properties are shown in fig. (\ref{ex01}).
+The linear static analysis is required, the influence of shear is neglected.
 \begin{figure}[htb]
 \begin{htmlonly}
   \centerline{\includegraphics[width=0.7\textwidth]{ex01}}
@@ -2856,33 +2850,43 @@ backslash '$\backslash$' character, but OOFEM requires that it must be typed as 
 
 \end{figure}
 {\small\begin{verbatim}
-test41.out
+beam_example.out
 Simple Beam Structure - linear analysis
 #only momentum influence to the displacements is taken into account
 #beamShearCoeff is artificially enlarged.
-LinearStatic 1 nsteps 3
+LinearStatic nsteps 3
 domain 2dBeam
 OutputManager tstep_all dofman_all element_all
-ndofman 6 nelem 5 ncrosssect 1 nmat 1 nbc 5 nic 0 nltf 3
-node 1 coords 3 0.  0.  0.  bc 3 0 1 0
-node 2 coords 3 2.4 0.  0.  bc 3 0 0 0
-node 3 coords 3 3.8 0.  0.  bc 3 0 0 1
-node 4 coords 3 5.8 0.  1.5 bc 3 0 0 0 load 1 4
-node 5 coords 3 7.8 0.  3.0 bc 3 0 1 0
-node 6 coords 3 2.4 0.  3.0 bc 3 1 1 2
-Beam2d 1 nodes 2 1 2 mat 1 crossSect 1 boundaryLoads  2 3 1 bodyLoads 1 5
-Beam2d 2 nodes 2 2 3 mat 1 crossSect 1 DofsToCondense 1 6   bodyLoads 1 5
-Beam2d 3 nodes 2 3 4 mat 1 crossSect 1 DofsToCondense 1 3
-Beam2d 4 nodes 2 4 5 mat 1 crossSect 1
-Beam2d 5 nodes 2 6 2 mat 1 crossSect 1 DofsToCondense 1 6
-SimpleCS 1 area 0.162 Iy 0.0039366 beamShearCoeff 1.e18 thick 0.54
+ndofman 8 nelem 5 ncrosssect 1 nmat 1 nbc 5 nic 0 nltf 3 nset 5
+node 1 coords 3 0.  0.  0.
+node 2 coords 3 2.4 0.  0.
+# Create a second "hinged" node at 2
+node 21 coords 3 2.4 0.  0. dofidmask 3 1 3 5 doftype 3 1 1 0 mastermask 3 2 2 0
+node 3 coords 3 3.8 0.  0.
+# Create a second "hinged" node at 3
+node 31 coords 3 3.8 0.  0. dofidmask 3 1 3 5 doftype 3 1 1 0 mastermask 3 3 3 0
+node 4 coords 3 5.8 0.  1.5
+node 5 coords 3 7.8 0.  3.0
+node 6 coords 3 2.4 0.  3.0
+Beam2d 1 nodes 2 1 2 bodyLoads 1 5
+Beam2d 2 nodes 2 2 3 bodyLoads 1 5
+# Connect to the hinged node 31!
+Beam2d 3 nodes 2 31 4
+Beam2d 4 nodes 2 4 5
+# Connect to the hinged node 21!
+Beam2d 5 nodes 2 6 21
+Set 1 elementranges {(1 5)}
+Set 2 nodes 2 1 5
+Set 3 nodes 1 6
+Set 4 nodes 1 4
+Set 5 elementedges 2 1 1
+SimpleCS 1 area 0.162 Iy 0.0039366 beamShearCoeff 1.e18 thick 0.54 material 1 set 1
 IsoLE 1 d 1. E 30.e6 n 0.2 tAlpha 1.2e-5
-BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
-BoundaryCondition  2 loadTimeFunction 2 prescribedvalue -0.006e-3
-ConstantEdgeLoad 3 loadTimeFunction 1 Components 3 0. 10. 0.0\
-                   loadType 3 ndofs 3
-NodalLoad 4 loadTimeFunction 1 Components 3 -18.0 24.0 0.0
-StructTemperatureLoad 5 loadTimeFunction 3 Components 2 30.0 -20.0
+BoundaryCondition 1 loadTimeFunction 1 dofs 3 1 values 1 0.0 set 2
+BoundaryCondition 2 loadTimeFunction 2 dofs 3 1 3 5 values 3 0.0 0.0 -0.006e-3 set 3
+ConstantEdgeLoad 3 loadTimeFunction 1 dofs 1 3 components 1 10. loadType 3 set 5
+NodalLoad 4 loadTimeFunction 1 dofs 2 1 3 components 2 -18. 24. set 4
+StructTemperatureLoad 5 loadTimeFunction 3 components 2 30. -20.
 PeakFunction 1 t 1.0 f(t) 1.
 PeakFunction 2 t 2.0 f(t) 1.
 PeakFunction 3 t 3.0 f(t) 1.
@@ -2904,24 +2908,28 @@ Patch test of PlaneStress2d elements -> pure compression
 LinearStatic nsteps 1
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
-ndofman 8 nelem 5 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1
-node 1 coords 3  0.0   0.0   0.0  bc 2 1 1
-node 2 coords 3  0.0   4.0   0.0  bc 2 1 1
-node 3 coords 3  2.0   2.0   0.0  bc 2 0 0
-node 4 coords 3  3.0   1.0   0.0  bc 2 0 0
-node 5 coords 3  8.0   0.8   0.0  bc 2 0 0
-node 6 coords 3  7.0   3.0   0.0  bc 2 0 0
-node 7 coords 3  9.0   0.0   0.0  bc 2 0 1  load 1 2
-node 8 coords 3  9.0   4.0   0.0  bc 2 0 1  load 1 2
-PlaneStress2d 1 nodes 4 1 4 3 2  crossSect 1 mat 1 NIP 1
-PlaneStress2d 2 nodes 4 1 7 5 4  crossSect 1 mat 1 NIP 1
-PlaneStress2d 3 nodes 4 4 5 6 3  crossSect 1 mat 1 NIP 1
-PlaneStress2d 4 nodes 4 3 6 8 2  crossSect 1 mat 1 NIP 1
-PlaneStress2d 5 nodes 4 5 7 8 6  crossSect 1 mat 1 NIP 1
-SimpleCS 1 thick 1.0 width 1.0
+ndofman 8 nelem 5 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 1 nset 3
+node 1 coords 3  0.0   0.0   0.0
+node 2 coords 3  0.0   4.0   0.0
+node 3 coords 3  2.0   2.0   0.0
+node 4 coords 3  3.0   1.0   0.0
+node 5 coords 3  8.0   0.8   0.0
+node 6 coords 3  7.0   3.0   0.0
+node 7 coords 3  9.0   0.0   0.0
+node 8 coords 3  9.0   4.0   0.0
+PlaneStress2d 1 nodes 4 1 4 3 2  NIP 1
+PlaneStress2d 2 nodes 4 1 7 5 4  NIP 1
+PlaneStress2d 3 nodes 4 4 5 6 3  NIP 1
+PlaneStress2d 4 nodes 4 3 6 8 2  NIP 1
+PlaneStress2d 5 nodes 4 5 7 8 6  NIP 1
+Set 1 elementranges {(1 5)}
+Set 2 nodes 2 1 2
+Set 3 nodes 2 7 8
+SimpleCS 1 thick 1.0 width 1.0 material 1 set 1
 IsoLE 1 d 0. E 15.0 n 0.25 talpha 1.0
-BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
-NodalLoad 2 loadTimeFunction 1 Components 2 2.5 0.0
+BoundaryCondition 1 loadTimeFunction 1 dofs 2 1 2 values 1 0.0 set 2
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 2 values 1 0.0 set 3
+NodalLoad 3 loadTimeFunction 1 dofs 2 1 2 components 2 2.5 0.0 set 3
 ConstantFunction 1 f(t) 1.0
 \end{verbatim}}
 %\vspace*{1.5cm}
@@ -2957,19 +2965,24 @@ fig. \ref{nodecut-ex01}.
 partest.out.0
 Parallel test of explicit oofem computation
 #
-NlDEIDynamic nsteps 3 dumpcoef 0.0 deltaT 1.0 NodeCutMode
+NlDEIDynamic nsteps 3 dumpcoef 0.0 deltaT 1.0
 domain 2dTruss
 #
 OutputManager tstep_all dofman_all element_all
-ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1
+ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 1 nset 4
 #
-Node 1 coords 3 0. 0. 0. bc 2 1 1
-Node 2 coords 3 0. 0. 2. bc 2 1 0 Shared partitions 1 1
-Truss2d 1 nodes 2 1 2 mat 1 crossSect 1
-SimpleCS 1 thick 0.1 width 10.0
-IsoLE 1  tAlpha 0.000012  d 10.0  E 1.0  n 0.2
-BoundaryCondition  1 loadTimeFunction 1 conditions 1 d 0.0
-NodalLoad 2 loadTimeFunction 1 Components 2 0. 1.0
+Node 1 coords 3 0. 0. 0.
+Node 2 coords 3 0. 0. 2. Shared partitions 1 1
+Truss2d 1 nodes 2 1 2
+Set 1 elements 1 1
+Set 2 nodes 2 1 2
+Set 3 nodes 1 1
+Set 4 nodes 0
+SimpleCS 1 thick 0.1 width 10.0 material 1 set 1
+IsoLE 1 tAlpha 0.000012 d 10.0 E 1.0 n 0.2
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 2
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 3 values 1 0.0 set 3
+NodalLoad 3 loadTimeFunction 1 dofs 2 1 3 components 2 0. 1.0 set 4
 ConstantFunction 1 f(t) 1.0
 
 #
@@ -2978,19 +2991,24 @@ ConstantFunction 1 f(t) 1.0
 partest.out.1
 Parallel test of explicit oofem computation
 #
-NlDEIDynamic nsteps 3 dumpcoef 0.0 deltaT 1.0 NodeCutMode
+NlDEIDynamic nsteps 3 dumpcoef 0.0 deltaT 1.0
 domain 2dTruss
 #
 OutputManager tstep_all dofman_all element_all
-ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1
+ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 1 nset 4
 #
-Node 2 coords 3 0. 0. 2. bc 2 1 0 Shared partitions 1 0
-Node 3 coords 3 0. 0. 4. bc 2 1 0 load 1 2
-Truss2d 2 nodes 2 2 3 mat 1 crossSect 1
-SimpleCS 1 thick 0.1 width 10.0
-IsoLE 1  tAlpha 0.000012  d 10.0  E 1.0  n 0.2
-BoundaryCondition  1 loadTimeFunction 1 conditions 1 d 0.0
-NodalLoad 2 loadTimeFunction 1 Components 2 0. 1.0
+Node 2 coords 3 0. 0. 2. Shared partitions 1 0
+Node 3 coords 3 0. 0. 4.
+Truss2d 2 nodes 2 2 3
+Set 1 elements 1 2
+Set 2 nodes 2 2 3
+Set 3 nodes 0
+Set 4 nodes 1 3
+SimpleCS 1 thick 0.1 width 10.0 material 1 set 1
+IsoLE 1 tAlpha 0.000012 d 10.0 E 1.0 n 0.2
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 2
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 3 values 1 0.0 set 3
+NodalLoad 3 loadTimeFunction 1 dofs 2 1 3 components 2 0. 1.0 set 4
 ConstantFunction 1 f(t) 1.0
 \end{verbatim}
 
@@ -3018,22 +3036,26 @@ fig. \ref{nodecut-ex01}.
 partest2.out.0
 Parallel test of explicit oofem computation
 #
-NlDEIDynamic nsteps 5 dumpcoef 0.0 deltaT 1.0 ElementCutMode
+NlDEIDynamic nsteps 5 dumpcoef 0.0 deltaT 1.0
 domain 2dTruss
 #
 OutputManager tstep_all dofman_all element_all
-ndofman 3 nelem 2 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1
+ndofman 3 nelem 2 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 1 nset 4
 #
-Node 1 coords 3 0. 0. 0. bc 2 1 1
-Node 2 coords 3 0. 0. 2. bc 2 1 0
-Node 3 coords 3 0. 0. 4. bc 2 1 0 \
-       Remote partitions 1 1 load 1 2
-Truss2d 1 nodes 2 1 2 mat 1 crossSect 1
-Truss2d 2 nodes 2 2 3 mat 1 crossSect 1
-SimpleCS 1 thick 0.1 width 10.0
-IsoLE 1  tAlpha 0.000012  d 10.0  E 1.0  n 0.2
-BoundaryCondition  1 loadTimeFunction 1 conditions 1 d 0.0
-NodalLoad 2 loadTimeFunction 1 Components 2 0. 1.0
+Node 1 coords 3 0. 0. 0.
+Node 2 coords 3 0. 0. 2.
+Node 3 coords 3 0. 0. 4. Remote partitions 1 1
+Truss2d 1 nodes 2 1 2
+Truss2d 2 nodes 2 2 3
+Set 1 elements 2 1 2
+Set 2 nodes 3 1 2 3
+Set 3 nodes 1 1
+Set 4 nodes 1 3
+SimpleCS 1 thick 0.1 width 10.0 material 1 set 1
+IsoLE 1 tAlpha 0.000012 d 10.0 E 1.0 n 0.2
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 2
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 3 values 1 0.0 set 3
+NodalLoad 3 loadTimeFunction 1 dofs 2 1 3 components 2 0. 1.0 set 4
 ConstantFunction 1 f(t) 1.0
 
 
@@ -3043,19 +3065,24 @@ ConstantFunction 1 f(t) 1.0
 partest2.out.1
 Parallel test of explicit oofem computation
 #
-NlDEIDynamic nsteps 5 dumpcoef 0.0 deltaT 1.0 ElementCutMode
+NlDEIDynamic nsteps 5 dumpcoef 0.0 deltaT 1.0
 domain 2dTruss
 #
 OutputManager tstep_all dofman_all element_all
-ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1
+ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 1 nset 4
 #
-Node 2 coords 3 0. 0. 2. bc 2 1 0 Remote partitions 1 0
-Node 3 coords 3 0. 0. 4. bc 2 1 0 load 1 2
-Truss2d 2 nodes 2 2 3 mat 1 crossSect 1
-SimpleCS 1 thick 0.1 width 10.0
-IsoLE 1  tAlpha 0.000012  d 10.0  E 1.0  n 0.2
-BoundaryCondition  1 loadTimeFunction 1 conditions 1 d 0.0
-NodalLoad 2 loadTimeFunction 1 Components 2 0. 1.0
+Node 2 coords 3 0. 0. 2 Remote partitions 1 0
+Node 3 coords 3 0. 0. 4
+Truss2d 2 nodes 2 2 3
+Set 1 elements 1 2
+Set 2 nodes 2 2 3
+Set 3 nodes 0
+Set 4 nodes 1 3
+SimpleCS 1 thick 0.1 width 10.0 material 1 set 1
+IsoLE 1 tAlpha 0.000012 d 10.0 E 1.0 n 0.2
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 2
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 3 values 1 0.0 set 3
+NodalLoad 3 loadTimeFunction 1 dofs 2 1 3 components 2 0. 1.0 set 4
 ConstantFunction 1 f(t) 1.0
 \end{verbatim}
 
