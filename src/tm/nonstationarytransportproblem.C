@@ -192,14 +192,18 @@ double NonStationaryTransportProblem :: giveUnknownComponent(ValueModeType mode,
 
 
 TimeStep *
-NonStationaryTransportProblem :: giveSolutionStepWhenIcApply()
+NonStationaryTransportProblem :: giveSolutionStepWhenIcApply(bool force)
 {
+  if ( master && (!force)) {
+    return master->giveSolutionStepWhenIcApply();
+  } else {
     if ( !stepWhenIcApply ) {
         stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, this->initT - giveDeltaT ( giveNumberOfFirstStep() ), giveDeltaT ( giveNumberOfFirstStep() ), 0) );
         //stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -deltaT, deltaT, 0) );
     }
 
     return stepWhenIcApply.get();
+  }
 }
 
 
@@ -279,6 +283,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 
     //Right hand side
     FloatArray rhs;
+    TimeStep *icStep = this->giveSolutionStepWhenIcApply();
 
     int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
 #ifdef VERBOSE
@@ -287,24 +292,23 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 
     //Solution at the first time step needs history. Therefore, return back one time increment and create it.
     if ( tStep->isTheFirstStep() ) {
-        this->giveSolutionStepWhenIcApply();
 
         bcRhs.resize(neq); //rhs vector from solution step i-1
         bcRhs.zero();
 
-        this->applyIC(stepWhenIcApply.get());
+        this->applyIC(icStep);
 
         //project initial conditions to have temporary temperature in integration points
 
         //edge or surface load on elements
         //add internal source vector on elements
-        this->assembleVectorFromElements( bcRhs, stepWhenIcApply.get(), TransportExternalForceAssembler(),
+        this->assembleVectorFromElements( bcRhs, icStep, TransportExternalForceAssembler(),
                                          VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //add prescribed value, such as temperature, on nodes
-        this->assembleDirichletBcRhsVector( bcRhs, stepWhenIcApply.get(), VM_Total,
+        this->assembleDirichletBcRhsVector( bcRhs, icStep, VM_Total,
                                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //add nodal load
-        this->assembleVectorFromDofManagers( bcRhs, stepWhenIcApply.get(), ExternalForceAssembler(),
+        this->assembleVectorFromDofManagers( bcRhs, icStep, ExternalForceAssembler(),
                                             VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
     }
 
@@ -323,7 +327,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 #endif
 
         //Add contribution of alpha*K+C/dt (where K has contributions from conductivity and neumann b.c.s)
-        this->assemble( *conductivityMatrix, stepWhenIcApply.get(), MidpointLhsAssembler(lumpedCapacityStab, alpha),
+        this->assemble( *conductivityMatrix, icStep, MidpointLhsAssembler(lumpedCapacityStab, alpha),
                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
     }
 

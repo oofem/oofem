@@ -150,7 +150,7 @@ public:
     virtual void updateDomainLinks();
 
     virtual TimeStep *giveNextStep();
-    virtual TimeStep *giveSolutionStepWhenIcApply();
+    virtual TimeStep *giveSolutionStepWhenIcApply(bool force = false);
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
 
     virtual IRResultType initializeFrom(InputRecord *ir);

@@ -128,7 +128,7 @@ FEI3dHexaQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, con
     answer.zero();
 
     // apply Newton-Raphson to solve the problem
-    for ( int nite = 0; nite < 10; nite++ ) {
+    for ( int nite = 0; nite < 40; nite++ ) {
         // compute the residual
         this->local2global(guess, answer, cellgeo);
         res.beDifferenceOf(gcoords, guess);

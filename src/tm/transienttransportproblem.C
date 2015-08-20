@@ -116,8 +116,11 @@ TimeStep *TransientTransportProblem :: giveNextStep()
 }
 
 
-TimeStep *TransientTransportProblem :: giveSolutionStepWhenIcApply()
+TimeStep *TransientTransportProblem :: giveSolutionStepWhenIcApply(bool force)
 {
+  if ( master && (!force)) {
+    return master->giveSolutionStepWhenIcApply();
+  } else {
     if ( !stepWhenIcApply ) {
         ///@todo Should we have this->initT ?
         stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, 0., deltaT, 0) );
@@ -126,6 +129,7 @@ TimeStep *TransientTransportProblem :: giveSolutionStepWhenIcApply()
     }
 
     return stepWhenIcApply.get();
+  }
 }
 
 

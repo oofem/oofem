@@ -395,8 +395,11 @@ SUPG :: giveReynoldsNumber()
 
 
 TimeStep *
-SUPG :: giveSolutionStepWhenIcApply()
+SUPG :: giveSolutionStepWhenIcApply(bool force)
 {
+  if ( master && (!force)) {
+    return master->giveSolutionStepWhenIcApply();
+  } else {
     if ( !stepWhenIcApply ) {
         double dt = deltaT / this->giveVariableScale(VST_Time);
 
@@ -405,6 +408,7 @@ SUPG :: giveSolutionStepWhenIcApply()
     }
 
     return stepWhenIcApply.get();
+  }
 }
 
 TimeStep *

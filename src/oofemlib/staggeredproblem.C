@@ -98,12 +98,12 @@ int
 StaggeredProblem :: instanciateSlaveProblems()
 {
     //first instantiate master problem if defined
-    EngngModel *timeDefProb = NULL;
+    //EngngModel *timeDefProb = NULL;
     emodelList.resize(inputStreamNames.size());
     if ( timeDefinedByProb ) {
         OOFEMTXTDataReader dr( inputStreamNames [ timeDefinedByProb - 1 ] );
-        std :: unique_ptr< EngngModel >prob( InstanciateProblem(& dr, this->pMode, this->contextOutputMode, NULL) );
-        timeDefProb = prob.get();
+        std :: unique_ptr< EngngModel >prob( InstanciateProblem(& dr, this->pMode, this->contextOutputMode, this) );
+        //timeDefProb = prob.get();
         emodelList[timeDefinedByProb-1] = std::move(prob);
     }
 
@@ -114,7 +114,7 @@ StaggeredProblem :: instanciateSlaveProblems()
 
         OOFEMTXTDataReader dr( inputStreamNames [ i - 1 ] );
         //the slave problem dictating time needs to have attribute master=NULL, other problems point to the dictating slave
-        std :: unique_ptr< EngngModel >prob( InstanciateProblem(& dr, this->pMode, this->contextOutputMode, timeDefinedByProb ? timeDefProb : this) );
+        std :: unique_ptr< EngngModel >prob( InstanciateProblem(& dr, this->pMode, this->contextOutputMode, this) );
         emodelList[i-1] = std::move(prob);
     }
 
@@ -127,6 +127,10 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
+    IR_GIVE_FIELD(ir, numberOfSteps, _IFT_EngngModel_nsteps);
+    if ( numberOfSteps <= 0 ) {
+        OOFEM_ERROR("nsteps not specified, bad format");
+    }
     if ( ir->hasField(_IFT_StaggeredProblem_deltat) ) {
         result = EngngModel :: initializeFrom(ir);
         if ( result != IRRT_OK ) return result;
@@ -137,6 +141,8 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
         if ( result != IRRT_OK ) return result;
         IR_GIVE_FIELD(ir, discreteTimes, _IFT_StaggeredProblem_prescribedtimes);
         dtFunction = 0;
+    } else if ( ir->hasField(_IFT_StaggeredProblem_dtf) ) {
+        IR_GIVE_OPTIONAL_FIELD(ir, dtFunction, _IFT_StaggeredProblem_dtf);
     } else {
         IR_GIVE_FIELD(ir, timeDefinedByProb, _IFT_StaggeredProblem_timeDefinedByProb);
     }
@@ -155,14 +161,7 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
       IR_GIVE_OPTIONAL_FIELD(ir, adaptiveStepSince, _IFT_StaggeredProblem_adaptivestepsince);
     }
     
-    if ( dtFunction < 1 ) {
-        ndomains = 0;
-        domainNeqs.clear();
-        domainPrescribedNeqs.clear();
-        domainList.clear();
-    }
 
-    IR_GIVE_OPTIONAL_FIELD(ir, dtFunction, _IFT_StaggeredProblem_dtf);
     IR_GIVE_OPTIONAL_FIELD(ir, stepMultiplier, _IFT_StaggeredProblem_stepmultiplier);
     if ( stepMultiplier < 0 ) {
         OOFEM_WARNING("stepMultiplier must be > 0");
@@ -180,6 +179,14 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
 
     coupledModels.resize(3);
     IR_GIVE_OPTIONAL_FIELD(ir, this->coupledModels, _IFT_StaggeredProblem_coupling);
+
+
+    if ( dtFunction < 1 ) {
+        ndomains = 0;
+        domainNeqs.clear();
+        domainPrescribedNeqs.clear();
+        domainList.clear();
+    }
 
     return IRRT_OK;
 }
@@ -227,7 +234,7 @@ double
 StaggeredProblem :: giveDeltaT(int n)
 {
     if ( giveDtFunction() ) {
-        return deltaT *giveDtFunction()->evaluateAtTime(n);
+        return giveDtFunction()->evaluateAtTime(n);
     }
 
     //in the first step the time increment is taken as the initial, user-specified value
@@ -299,18 +306,53 @@ StaggeredProblem :: giveDiscreteTime(int iStep)
     OOFEM_ERROR("invalid iStep");
     return 0.0;
 }
+  
+TimeStep *
+StaggeredProblem::giveCurrentStep(bool force) 
+{
+  if (timeDefinedByProb) {
+    return emodelList[timeDefinedByProb-1].get()->giveCurrentStep(true);
+  } else {
+    return EngngModel::giveCurrentStep();
+  }
+}
+  
+TimeStep *
+StaggeredProblem::givePreviousStep(bool force)
+{
+  if (timeDefinedByProb) {
+    return emodelList[timeDefinedByProb-1].get()->givePreviousStep(true);
+  } else {
+    return EngngModel::givePreviousStep();
+  }
+}
 
 TimeStep *
-StaggeredProblem :: giveSolutionStepWhenIcApply()
+StaggeredProblem::giveSolutionStepWhenIcApply(bool force)
 {
+  if (timeDefinedByProb) {
+    return emodelList[timeDefinedByProb-1].get()->giveSolutionStepWhenIcApply(true);
+  } else {
     if ( !stepWhenIcApply ) {
-        int inin = giveNumberOfTimeStepWhenIcApply();
-        int nFirst = giveNumberOfFirstStep();
-        stepWhenIcApply.reset( new TimeStep(inin, this, 0, -giveDeltaT ( nFirst ), giveDeltaT ( nFirst ), 0) );
+      int inin = giveNumberOfTimeStepWhenIcApply();
+      int nFirst = giveNumberOfFirstStep();
+      stepWhenIcApply.reset( new TimeStep(inin, this, 0, -giveDeltaT ( nFirst ), giveDeltaT ( nFirst ), 0) );
     }
 
     return stepWhenIcApply.get();
+  }
 }
+ 
+int
+StaggeredProblem :: giveNumberOfFirstStep(bool force) {
+  if (timeDefinedByProb) {
+    return emodelList[timeDefinedByProb-1].get()->giveNumberOfFirstStep(true);
+  } else {
+    return EngngModel::giveNumberOfFirstStep();
+  }
+
+}
+
 
 TimeStep *
 StaggeredProblem :: giveNextStep()

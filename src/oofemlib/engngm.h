@@ -666,17 +666,21 @@ public:
     void resolveCorrespondingStepNumber(int &, int &, void *obj);
     /// Returns current meta step.
     MetaStep *giveCurrentMetaStep();
-    /// Returns current time step.
-    TimeStep *giveCurrentStep() {
-        if ( master ) {
+    /** Returns current time step. 
+     *  @param force when set to true then current step of receiver is returned instead of master (default)
+     */ 
+    virtual TimeStep *giveCurrentStep(bool force = false) {
+      if ( master && (!force)) {
             return master->giveCurrentStep();
         } else {
             return currentStep.get();
         }
     }
-    /// Returns previous time step.
-    TimeStep *givePreviousStep() {
-        if ( master ) {
+    /** Returns previous time step.
+     *  @param force when set to true then previous step of receiver is returned instead of master (default)
+     */ 
+    virtual TimeStep *givePreviousStep(bool force = false) {
+        if ( master && (!force)) {
             return master->givePreviousStep();
         } else {
             return previousStep.get();
@@ -686,17 +690,21 @@ public:
     virtual TimeStep *giveNextStep() { return NULL; }
     /// Does a pre-initialization of the next time step (implement if necessarry)
     virtual void preInitializeNextStep() {}
-    /// Returns the solution step when Initial Conditions (IC) apply.
-    virtual TimeStep *giveSolutionStepWhenIcApply() {
-        if ( master ) {
-            return master->giveCurrentStep();
+    /** Returns the solution step when Initial Conditions (IC) apply.
+     *  @param force when set to true then receiver reply is returned instead of master (default)
+     */ 
+    virtual TimeStep *giveSolutionStepWhenIcApply(bool force = false) {
+        if ( master && (!force)) {
+            return master->giveSolutionStepWhenIcApply();
         } else {
             return stepWhenIcApply.get();
         }
     }
-    /// Returns number of first time step used by receiver.
-    virtual int giveNumberOfFirstStep() {
-        if ( master ) {
+    /** Returns number of first time step used by receiver.
+     *  @param force when set to true then receiver reply is returned instead of master (default)
+     */ 
+    virtual int giveNumberOfFirstStep(bool force = false) {
+        if ( master && (!force)) {
             return master->giveNumberOfFirstStep();
         } else {
             return 1;
@@ -706,9 +714,11 @@ public:
     int giveNumberOfMetaSteps() { return nMetaSteps; }
     /// Returns the i-th meta step.
     MetaStep *giveMetaStep(int i);
-    /// Returns total number of steps.
-    int giveNumberOfSteps() {
-        if ( master ) {
+    /** Returns total number of steps.
+     *  @param force when set to true then receiver reply is returned instead of master (default)
+     */  
+    int giveNumberOfSteps(bool force = false) {
+        if ( master && (!force)) {
             return master->giveNumberOfSteps();
         } else {
             return numberOfSteps;

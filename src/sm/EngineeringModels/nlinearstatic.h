@@ -148,7 +148,7 @@ public:
 
     virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual TimeStep *giveSolutionStepWhenIcApply();
+    virtual TimeStep *giveSolutionStepWhenIcApply(bool force = false);
     virtual TimeStep *giveNextStep();
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
 
