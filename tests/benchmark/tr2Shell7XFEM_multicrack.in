@@ -29,8 +29,8 @@ IsoLE 1 d 1.0 E 126.0e9 n 0.0 tAlpha 1.0
 ## Boundary consitions 
 BoundaryCondition 1 loadTimeFunction 1 values 31   0. 0. 0. 0. 0. 0. 0.   0. 0. 0. 0. 0. 0.   0. 0. 0. 0. 0. 0.  0. 0. 0. 0. 0. 0.  0. 0. 0. 0. 0. 0. dofs 31   1 2 3 15 16 17 18   500 501 502 503 504 505   506 507 508 509 510 511  512 513 514 515 516 517  518 519 520 521 522 523 set 4  
 #
-ConstantEdgeLoad 2 ndofs 8 loadType 2 loadTimeFunction 1 Components 8 0. 0. -1.0e2 0. 0. 0. 0.0 -1.0   
-ConstantEdgeLoad 3 ndofs 8 loadType 2 loadTimeFunction 1 Components 8 0. 0. 1.0e2 0. 0. 0. 0.0 1.0   
+ConstantEdgeLoad 2 loadType 2 loadTimeFunction 1 Components 8 0. 0. -1.0e2 0. 0. 0. 0.0 -1.0   
+ConstantEdgeLoad 3 loadType 2 loadTimeFunction 1 Components 8 0. 0. 1.0e2 0. 0. 0. 0.0 1.0   
 #
 # 
 ## Load time functions 
