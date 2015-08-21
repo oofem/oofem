@@ -590,7 +590,7 @@ Shell7Base :: computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, 
             double dV = this->computeVolumeAroundLayer(gp, layer);
             tempAnswer.plusProductSymmUpper(B, LB, dV);
             
-            #if 1 // Print generalised strain in specific positions 60x60 plate
+            #if 0 // Print generalised strain in specific positions 60x60 plate
     
                 if ( layer == 1 && this->giveGlobalNumber() == 225 && gp->giveNumber() == 1 ) {
                     // coords [0.0302 0.0298]
@@ -2237,7 +2237,6 @@ Shell7Base :: nodalLeastSquareFitFromIP(std::vector<FloatArray> &recoveredValues
         ip = iRule->getIntegrationPoint(i);
         FloatArray tempIPvalues;
         this->giveIPValue(tempIPvalues, ip, type, tStep);
-        ///@todo Varför fungerar inte fler än ett lager?
 #if 0
         // Test of analytical dummy values in IPs
         FloatArray ipGlobalCoords;
@@ -2278,6 +2277,44 @@ Shell7Base :: nodalLeastSquareFitFromIP(std::vector<FloatArray> &recoveredValues
         }
     }
 }
+
+void 
+Shell7Base :: giveSPRcontribution(FloatMatrix &ipValues, FloatMatrix &Nbar, int layer, InternalStateType type, TimeStep *tStep)
+{ 
+    // composite element interpolator
+    FloatMatrix localNodeCoords;
+    this->interpolationForExport.giveLocalNodeCoords(localNodeCoords);
+
+    int numNodes = localNodeCoords.giveNumberOfColumns();
+    
+    IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
+    IntegrationPoint *ip;
+    int numIP = iRule->giveNumberOfIntegrationPoints();
+    FloatArray nodeCoords, ipCoords;
+    InternalStateValueType valueType =  giveInternalStateValueType(type);
+    
+    // Find IP values and set up matrix of base functions
+    // FloatMatrix Nbar, NbarTNbar, NbarTNbarInv, Nhat, ipValues, temprecovedValues, temprecovedValuesT; 
+    Nbar.resize(numIP,numNodes);
+    int numSC; 
+    if ( valueType == ISVT_TENSOR_S3 ) { numSC = 6; } else { numSC = 9; };
+    ipValues.resize(numIP,numSC);
+    
+    for ( int i = 0; i < numIP; i++ ) {
+        ip = iRule->getIntegrationPoint(i);
+        FloatArray tempIPvalues;
+        this->giveIPValue(tempIPvalues, ip, type, tStep);
+        ipValues.addSubVectorRow(tempIPvalues,i+1,1);
+        
+        // set up virtual cell geometry for an qwedge
+        std::vector<FloatArray> nodes;
+        giveFictiousNodeCoordsForExport(nodes, layer);
+        FEInterpolation *interpol = static_cast< FEInterpolation * >( &this->interpolationForExport );
+        FloatArray N;
+        interpol->evalN( N, *ip->giveNaturalCoordinates(), FEIVertexListGeometryWrapper( nodes ) ); 
+        Nbar.addSubVectorRow(N,i+1,1);
+    }
+}
   
 void 
 Shell7Base :: recoverShearStress(TimeStep *tStep)
@@ -2305,6 +2342,8 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
     Domain *d = this->giveDomain();
 //     std::vector<IntArray> indexMatches; indexMatches.resize(2);
     ///@todo Generalize this
+    int numTriaNodes = this->giveDofManArray().giveSize();
+    int numWedgeNodes = 15;
     std::vector<IntArray> triaInd2QwedgeInd; triaInd2QwedgeInd.resize(6);
     triaInd2QwedgeInd[0] = {1,4,13};
     triaInd2QwedgeInd[1] = {2,5,14};
@@ -2321,39 +2360,155 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
         stressRecoveryType SRtype = LSfit;
 //         stressRecoveryType SRtype = copyIPvalue;
         if ( this->giveGlobalNumber() == 126 ) {
-//             int centreElNum = this->giveGlobalNumber();
-            recoveredValues.resize(15);
+            
+# if 0
+            // Recover the average value of the contribution to each QWedge node from the connected elements in each layer.
+            // NB: assumes that the elements have the same positive normal direction
+            recoveredValues.resize(numWedgeNodes);
             IntArray centreElNum = {this->giveGlobalNumber()};
             IntArray centreElNodes = this->giveDofManArray(); 
             IntArray patchEls; 
             d->giveConnectivityTable()->giveElementNeighbourList(patchEls,centreElNum); 
             for (int patchElNum : patchEls) {
                 
+                // Get (pointer to) current element in patch and calculate its addition to the patch
                 Shell7Base *patchEl = static_cast<Shell7Base*>(d->giveElement(patchElNum));
                 patchEl->recoverValuesFromIP(patchRecoveredValues, layer, IST_StressTensor, tStep, SRtype); 
                 
                 // find index matches of nodes from centreElNodes
-                IntArray patchElNodes = patchEl->giveDofManArray();
-                for ( int centreIndex = 1; centreIndex <= this->giveNumberOfDofManagers(); centreIndex++ ) {
-                    int patchIndex = patchElNodes.findFirstIndexOf(centreElNodes.at(centreIndex));
-                    if (patchIndex) {
-//                         indexMatches[0].followedBy({centreIndex});
-//                         indexMatches[1].followedBy({patchIndex});
-                        IntArray centreQwedgeIndex = triaInd2QwedgeInd[centreIndex-1];
-                        IntArray patchQwedgeIndex = triaInd2QwedgeInd[patchIndex-1];
-                        for (int i = 1; i <= centreQwedgeIndex.giveSize(); i++) {
+                IntArray patchElNodes = patchEl->giveDofManArray();                                             // get global nodal numbers for current patch element
+                for ( int centreIndex = 1; centreIndex <= this->giveNumberOfDofManagers(); centreIndex++ ) {    // loop over centre elt nodes
+                    int patchIndex = patchElNodes.findFirstIndexOf(centreElNodes.at(centreIndex));              // find index for the centre elt nodes in the current patch elt
+                    if (patchIndex) {                                                                           // if centre node is found in current patch elt:
+                        IntArray centreQwedgeIndex = triaInd2QwedgeInd[centreIndex-1];                              // find the corresponding Qwedge index for the centre elt 
+                        IntArray patchQwedgeIndex = triaInd2QwedgeInd[patchIndex-1];                                // find the corresponding Qwedge index for the patch elt 
+                        for (int i = 1; i <= centreQwedgeIndex.giveSize(); i++) {                                   // add the contribution of the patch elt Qwedge nodes to the centre elt Qwedge nodes
                             recoveredValues[centreQwedgeIndex.at(i)-1] += patchRecoveredValues[patchQwedgeIndex.at(i)-1];
                         }
                     }
                 } 
             }
+            
             // Divide recoveredValues w number of elemental additions (numNodalPatchEls)
             for (int i = 0; i < (int)recoveredValues.size(); i++) {
+                
                 recoveredValues[i].times(1.0/(double)(numNodalPatchEls.at(i+1)));
             }
             
-//             indexMatches[0].resize(0); indexMatches[1].resize(0);
+#endif
+            // Recover using SPR. One patch for each corner of the element. 
+            // The LS-fit is constructed from IPvalues = Nbar*nodalValues, where the elements in ipValues are added from the tria element according to increasing global numbering.
+            // the elements in nodalValues are ordered using the global nodal numbering, ie the wedge nodes associated with the tria node of lowest global number comes first
+            // followed by the ones associated with the second lowest global node number etc. 
+                // NB: assumes that the elements have the same positive normal direction???
+                    // assumes (only) quadratic triangular elements with 6 in-plane IP.
+            ///@todo Move this outside element?
+            recoveredValues.resize(numWedgeNodes);
+            IntArray centreElNum = {this->giveGlobalNumber()};
+            IntArray centreElNodes = this->giveDofManArray(); 
+            const IntArray* patchEls; 
+            
+            IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
+            int numWedgeIP = iRule->giveNumberOfIntegrationPoints();             // No of Wedge IP
+            
+            for (int i = 1; i <= 3; i++) {  // for the three patches associated with a triangular element
+                
+                // fetch elements connected to a corned node (i.e. the centre of a patch)
+                patchEls = d->giveConnectivityTable()->giveDofManConnectivityArray(centreElNodes.at(i));
+                int numPatchEls = patchEls->giveSize(); 
+                //int numPatchTriaNodes = 10 + (numPatchEls-3)*3;                                          // assume Qtria
+                
+                ///@todo find (global) tria node numbers in patch and corresponding wedge node indices
+                // std::vector<IntArray> elTriaNodes; elTriaNodes.resize(numPatchEls);
+                IntArray patchTriaNodes; 
+                // patchWedgeNodes; 
+                IntArray isCornerNode; 
+                for (int patchElNum : *patchEls) { 
+                    // Get (pointer to) current element in patch and add the global tria node number (if not already added)
+                    Shell7Base *patchEl = static_cast<Shell7Base*>(d->giveElement(patchElNum));
+                    IntArray elTriaNodes = patchEl->giveDofManArray(); 
+                    for (int k = 1; k <= elTriaNodes.giveSize(); k++) {
+                        patchTriaNodes.insertSortedOnce(elTriaNodes.at(k));
+                        if (k <= 3) {
+                            isCornerNode.insertSortedOnce(elTriaNodes.at(k));
+                        }
+                    }
+                }
+                int numPatchTriaNodes = patchTriaNodes.giveSize();
+                
+                // Build coupling between tria and wedge nodes. 
+                std::vector<IntArray> patchTriaInd2QwedgeInd; patchTriaInd2QwedgeInd.resize(numPatchTriaNodes);
+                int numPatchWedgeNodes = 0;
+                for (int j = 0; j < numPatchTriaNodes; j++ ) {
+                    if (isCornerNode.contains(patchTriaNodes.at(j+1))) {
+                        patchTriaInd2QwedgeInd[j] = {numPatchWedgeNodes+1,numPatchWedgeNodes+2,numPatchWedgeNodes+3};
+                        numPatchWedgeNodes += 3; 
+                    }
+                    else {
+                        patchTriaInd2QwedgeInd[j] = {numPatchWedgeNodes+1,numPatchWedgeNodes+2};
+                        numPatchWedgeNodes += 2; 
+                    }
+                } 
+                
+                                                           // ger det här storleken på pekaren eller Intarrayen den pekar på?
+                // int numPatchWedgeNodes = numPatchEls + 2 + (numWedgeNodes - 8)*(numPatchEls - 2);        // No of (wedge) nodes in patch GÖR OM
+                int numPatchWedgeIP = numPatchEls * numWedgeIP;                                          // No of (wedge) IP in patch GÖR OM
+                if (numPatchWedgeNodes > numPatchWedgeIP) {
+                OOFEM_ERROR("Least square fit not possible for more nodes than IP.");
+                }
+                patchRecoveredValues.resize(numPatchWedgeNodes);
+                
+                // Find IP values and set up matrix of base functions
+                FloatMatrix Nbar, NbarTNbar, NbarTNbarInv, Nhat, ipValues, temprecovedValues, temprecovedValuesT; 
+                Nbar.resize(numPatchWedgeIP,numPatchWedgeNodes);
+                int numSC = 9;                                                                      // Assume type = IST_StressTensor
+                //if ( valueType == ISVT_TENSOR_S3 ) { numSC = 6; } else { numSC = 9; };
+                ipValues.resize(numPatchWedgeIP,numSC);
+                
+                // loop over elements in patch and collect IP values and their addition to matrix of base functions
+                int k = 0;
+                for (int patchElNum : *patchEls) {                                                  // funkar det här?
+                    // Get (pointer to) current element in patch and calculate its addition to the patch
+                    Shell7Base *patchEl = static_cast<Shell7Base*>(d->giveElement(patchElNum));
+                    
+                    // get current tria nodes
+                    IntArray elTriaNodes = patchEl->giveDofManArray();  // returnerar den här de i ordning enligt lokal nodnumrering??
+                    
+                    // collect patch element addition to SPR.
+                    FloatMatrix elIPvalues, elNbar;
+                    patchEl->giveSPRcontribution(elIPvalues, elNbar, layer, IST_StressTensor, tStep);
+                    
+                    // Add to contribution to patch. 
+                    ipValues.setSubMatrix(elIPvalues, 1 + numWedgeIP*k++, 1);
+                    
+                    for (int j = 1; j <= elTriaNodes.giveSize(); j++) {
+                        int elTriaNode = elTriaNodes.at(j);                                 // Global tria node number in element
+                        int elTriaIndex = patchTriaNodes.findFirstIndexOf(elTriaNode);      // corresponding index in patch tria nodes
+                        IntArray elWedgeIndex = triaInd2QwedgeInd[j-1];                     // corresponding wedge nodes for current tria node
+                        IntArray patchWedgeIndex = patchTriaInd2QwedgeInd[elTriaIndex-1];   // corresponding patch wedge nodes for current tria node
+                        for (int l = 1; l <= elWedgeIndex.giveSize(); l++) {
+                            FloatArray elNbarColumn;
+                            elNbar.copyColumn(elNbarColumn,elWedgeIndex.at(l));
+                            Nbar.addSubVectorCol(elNbarColumn, 1 + numWedgeIP*(k-1), patchWedgeIndex(l));
+                        }
+                    }
+                    
+                }
+                
+                // Nhat = inv(Nbar^T*Nbar)*Nbar^T
+                NbarTNbar.beTProductOf(Nbar,Nbar);
+                NbarTNbarInv.beInverseOf(NbarTNbar);
+                Nhat.beProductTOf(NbarTNbarInv,Nbar);
+
+                temprecovedValues.beProductOf(Nhat,ipValues);
+                temprecovedValuesT.beTranspositionOf(temprecovedValues);
+                
+                // spara recoved values på ett bra ställe. Hur ska man göra med att vi söker för mittelementet...
+            }
+            
         } else {
+            
+            // or do standard recovery for only one element
             this->recoverValuesFromIP(recoveredValues, layer, IST_StressTensor, tStep, SRtype);  
         }
         

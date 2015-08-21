@@ -242,6 +242,7 @@ protected:
     void nodalLeastSquareFitFromIP(std::vector<FloatArray> &recoveredValues, int layer, InternalStateType type, TimeStep *tStep);
     void recoverShearStress(TimeStep *tStep);
     void computeBmatrixForStressRecAt(FloatArray &lcoords, FloatMatrix &answer, int layer, bool intSzz = false);
+    void giveSPRcontribution(FloatMatrix &ipValues, FloatMatrix &Nbar, int layer, InternalStateType type, TimeStep *tStep);
 
 
     // N and B matrices
