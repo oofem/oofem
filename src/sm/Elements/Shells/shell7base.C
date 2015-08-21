@@ -2321,7 +2321,7 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
 {
     // Recover shear stresses at ip by numerical integration of the momentum balance through the thickness
     std::vector<FloatArray> recoveredValues;
-    std::vector<FloatArray> patchRecoveredValues;
+//     std::vector<FloatArray> patchRecoveredValues;
     
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();     // conversion of types
     
@@ -2342,7 +2342,7 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
     Domain *d = this->giveDomain();
 //     std::vector<IntArray> indexMatches; indexMatches.resize(2);
     ///@todo Generalize this
-    int numTriaNodes = this->giveDofManArray().giveSize();
+//    int numTriaNodes = this->giveDofManArray().giveSize();
     int numWedgeNodes = 15;
     std::vector<IntArray> triaInd2QwedgeInd; triaInd2QwedgeInd.resize(6);
     triaInd2QwedgeInd[0] = {1,4,13};
@@ -2351,7 +2351,7 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
     triaInd2QwedgeInd[3] = {7,10};
     triaInd2QwedgeInd[4] = {8,11};
     triaInd2QwedgeInd[5] = {9,12};
-    IntArray numNodalPatchEls = {6,6,6,6,6,6,2,2,2,2,2,2,6,6,6};
+//    IntArray numNodalPatchEls = {6,6,6,6,6,6,2,2,2,2,2,2,6,6,6};
     
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
         IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];   // Var sätts vilken typ av integrregel som gäller för lagret? qwedge?
@@ -2405,7 +2405,7 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
             ///@todo Move this outside element?
             recoveredValues.resize(numWedgeNodes);
             IntArray centreElNum = {this->giveGlobalNumber()};
-            IntArray centreElNodes = this->giveDofManArray(); 
+            IntArray centreElTriaNodes = this->giveDofManArray(); 
             const IntArray* patchEls; 
             
             IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
@@ -2414,7 +2414,7 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
             for (int i = 1; i <= 3; i++) {  // for the three patches associated with a triangular element
                 
                 // fetch elements connected to a corned node (i.e. the centre of a patch)
-                patchEls = d->giveConnectivityTable()->giveDofManConnectivityArray(centreElNodes.at(i));
+                patchEls = d->giveConnectivityTable()->giveDofManConnectivityArray(centreElTriaNodes.at(i));
                 int numPatchEls = patchEls->giveSize(); 
                 //int numPatchTriaNodes = 10 + (numPatchEls-3)*3;                                          // assume Qtria
                 
@@ -2430,7 +2430,7 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
                     for (int k = 1; k <= elTriaNodes.giveSize(); k++) {
                         patchTriaNodes.insertSortedOnce(elTriaNodes.at(k));
                         if (k <= 3) {
-                            isCornerNode.insertSortedOnce(elTriaNodes.at(k));
+                            isCornerNode.insertSortedOnce(elTriaNodes.at(k));       // store array of patch triangle nodes that are element corner nodes (since these have specific No of wedge nodes associated)
                         }
                     }
                 }
@@ -2456,7 +2456,6 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
                 if (numPatchWedgeNodes > numPatchWedgeIP) {
                 OOFEM_ERROR("Least square fit not possible for more nodes than IP.");
                 }
-                patchRecoveredValues.resize(numPatchWedgeNodes);
                 
                 // Find IP values and set up matrix of base functions
                 FloatMatrix Nbar, NbarTNbar, NbarTNbarInv, Nhat, ipValues, temprecovedValues, temprecovedValuesT; 
@@ -2503,7 +2502,29 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
                 temprecovedValues.beProductOf(Nhat,ipValues);
                 temprecovedValuesT.beTranspositionOf(temprecovedValues);
                 
-                // spara recoved values på ett bra ställe. Hur ska man göra med att vi söker för mittelementet...
+//                 // save recovered values of patch
+//                 ///@todo se över nodnumrering?
+//                 patchRecoveredValues.resize(numPatchWedgeNodes);
+//                 for (int inode = 0; inode < numPatchWedgeNodes; inode++ ) {
+//                     patchRecoveredValues[inode].beColumnOf(temprecovedValuesT,inode+1);
+//                 }
+                
+                // Save recoved values to centre element (NB: don't save to patch nodes at the moment)
+                for (int inode = 1; inode <= centreElTriaNodes.giveSize(); inode++ ) {
+                    int elTriaNode = centreElTriaNodes.at(inode);                               // Global tria node number in element
+                    int elTriaIndex = patchTriaNodes.findFirstIndexOf(elTriaNode);              // corresponding index in patch tria nodes (if part of patch at all)
+                    if ( elTriaIndex ) {
+                        IntArray elWedgeIndex = triaInd2QwedgeInd[inode-1];                         // corresponding wedge nodes for current tria node
+                        IntArray patchWedgeIndex = patchTriaInd2QwedgeInd[elTriaIndex-1];   // corresponding patch wedge nodes for current tria node
+                        int numWedgeNodes = elWedgeIndex.giveSize();
+                        double midNodeScale = (3.0-(double)(numWedgeNodes))/2.0 + ((double)(numWedgeNodes)-2.0);             // mid nodes get contribution from two patches
+                        for (int jnode = 1; jnode <= elWedgeIndex.giveSize(); jnode++ ) {
+                            FloatArray recoveredValuesColumn; recoveredValuesColumn.beColumnOf(temprecovedValuesT,patchWedgeIndex.at(jnode));
+                            recoveredValuesColumn.times(midNodeScale);                      // scale mid nodes w 1/2, else scale is 1.0
+                            recoveredValues[elWedgeIndex.at(jnode)-1] = recoveredValuesColumn;
+                        }
+                    }
+                }
             }
             
         } else {
