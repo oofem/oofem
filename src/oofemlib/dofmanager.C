@@ -336,7 +336,7 @@ DofManager :: initializeFrom(InputRecord *ir)
 
     ///@todo This is unnecessary, we should just check if user has supplied a dofidmask field or not and just drop "numberOfDofs"). It is left for now because it will give lots of warnings otherwise, but it is effectively ignored.
     int dummy;
-    IR_GIVE_OPTIONAL_FIELD(ir, dummy, _IFT_DofManager_ndofs);
+    IR_GIVE_OPTIONAL_FIELD(ir, dummy, "ndofs");
 
     if ( ir->hasField(_IFT_DofManager_dofidmask) ) {
         IR_GIVE_FIELD(ir, dofIDArry, _IFT_DofManager_dofidmask);
