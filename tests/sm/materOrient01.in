@@ -11,7 +11,7 @@ materOrient01.out
 # o----------------------------------->x
 #
 test of local coordinate system with material orientation on element
-NonLinearStatic nsteps 1 controlmode 1 rtolv 0.00001 MaxIter 30 stiffmode 0 deltaT 1.0 nmodules 1
+StaticStructural nsteps 1 rtolf 1e-5 deltaT 1.0 nmodules 1
 errorcheck
 #vtkxml tstep_all domain_all primvars 1 1 vars 2 1 4 stype 1
 domain 2dPlaneStress

@@ -1,6 +1,6 @@
 InterfaceEL_Line1.out
 Test of interface element - linear line element: Written by Jim Brouzoulis, Chalmers University of Technology.
-nonlinearstatic nsteps 5 deltat 1.0 controlmode 1 rtolv 1.0e-6 MaxIter 10 minIter 2 stiffmode 0 nmodules 1 manrmsteps 1
+staticstructural nsteps 5 deltat 1.0 rtolf 1.e-6 MaxIter 10 minIter 2 nmodules 1 manrmsteps 1
 #vtkxml tstep_all dofman_all element_all primvars 1 1 vars 1 1
 errorcheck
 Domain 2dPlaneStress
@@ -17,8 +17,8 @@ node 6 coords 3  1        0.3      0
 node 7 coords 3  1        1.0      0
 node 8 coords 3  0        1.0      0
 #
-PlaneStress2D 1 nodes 4   1   2   3   4 crosssect 1 nip 9 nlgeo 0
-PlaneStress2D 2 nodes 4   5   6   7   8 crosssect 1 nip 9 nlgeo 0
+PlaneStress2D 1 nodes 4   1   2   3   4 crosssect 1 nip 9
+PlaneStress2D 2 nodes 4   5   6   7   8 crosssect 1 nip 9
 IntElLine1 3 nodes 4  4 3 5 6 crossSect 2
 #
 # Cross sections:
@@ -33,7 +33,7 @@ IntElLine1 3 nodes 4  4 3 5 6 crossSect 2
   BoundaryCondition 1 loadTimeFunction 1 dofs 2 1 2 values 2 0.0 0.0 set 1
   BoundaryCondition 2 loadTimeFunction 1 dofs 2 1 2 values 2 0.8e-1 0. set 2
 #
-  PiecewiseLinFunction 1 npoints 2 t 2 0.0 5.0 f(t) 2 0.0 1.0
+  PiecewiseLinFunction 1 t 2 1.0 6.0 f(t) 2 0.0 1.0
 #
 Set 1 nodes 2 1 2
 Set 2 nodes 2 7 8

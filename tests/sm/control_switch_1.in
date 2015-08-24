@@ -13,10 +13,10 @@ Test of nonproportional loading and solution control load switching
 # result - the return to original unloaded state
 #
 NonLinearStatic nsteps 4 nmsteps 4 nmodules 1
-nsteps 1 controlmode 0 stepLength 2.5 rtolv 0.0001 MaxIter 2000 Psi 0. reqIterations 80 HPC 2 2 1 refloadmode 0
-nsteps 1 controlmode 1 rtolv 0.0001 MaxIter 2000 stiffmode 1 ddm 4 2 1 3 1 ddv 2 -2.5 -2.5 ddltf 3 refloadmode 0
-nsteps 1 controlmode 1 rtolv 0.0001 MaxIter 2000 stiffmode 1 refloadmode 0
-nsteps 1 controlmode 0 stepLength 6.66666740e-01 rtolv 0.0001 MaxIter 2000 stiffmode 1 Psi 0. HPC 2 3 2  refloadmode 0
+nsteps 1 controlmode 0 stepLength 2.5 rtolf 1e-4 MaxIter 2000 Psi 0. reqIterations 80 HPC 2 2 1 refloadmode 0
+nsteps 1 controlmode 1 rtolf 1e-4 MaxIter 2000 stiffmode 1 ddm 4 2 1 3 1 ddv 2 -2.5 -2.5 ddltf 3 refloadmode 0
+nsteps 1 controlmode 1 rtolf 1e-4 MaxIter 2000 stiffmode 1 refloadmode 0
+nsteps 1 controlmode 0 stepLength 6.66666740e-01 rtolf 1e-4 MaxIter 2000 stiffmode 1 Psi 0. HPC 2 3 2  refloadmode 0
 errorcheck
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all

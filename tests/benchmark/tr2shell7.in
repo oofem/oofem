@@ -1,6 +1,6 @@
 tr2shell7.out
 Cantilever beam with edge load
-Nonlinearstatic nsteps 1 lstype 0 smtype 0 rtolf 1.0e-4 manrmsteps 1 controlmode 1 nmodules 1 initialguess 1
+StaticStructural nsteps 1 rtolf 1.0e-4 manrmsteps 1 nmodules 1
 errorcheck
 #vtkxml tstep_all dofman_all element_all primvars 1 1 
 domain 3dDirShell

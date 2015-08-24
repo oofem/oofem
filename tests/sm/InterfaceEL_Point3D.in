@@ -1,6 +1,6 @@
 InterfaceEL_Point3D.out
 One brick element with one contact element. The contact is linear with a constant stiffness. Brick is loaded in uniaxial tension in y direction. Node 6 has higher stiffness due to the added interface element.
-NonLinearStatic nsteps 2 controlmode 1 rtolv 1.e-4 MaxIter 300 stiffmode 1 manrmsteps 30 deltaT 1.0 renumber 1 nmodules 1
+StaticStructural nsteps 2 rtolf 1.e-4 manrmsteps 30 deltaT 1.0 nmodules 1
 #vtkxml tstep_all primvars 1 1
 errorcheck
 domain 3d
@@ -28,7 +28,7 @@ BoundaryCondition 2 loadTimeFunction 2 dofs 3 1 2 3 values 3 0 0 0 set 2
 BoundaryCondition 3 loadTimeFunction 2 dofs 2 2 3 values 2 0 0 set 3
 nodalload 4 loadTimeFunction 2 dofs 3 1 2 3 Components 3 0.0 1.e+3 0.0 set 4
 ConstantFunction 1 f(t) 1.0
-PiecewiseLinFunction 2 nPoints 2 t 2 0.0 20.0 f(t) 2 1.0 21.
+PiecewiseLinFunction 2 t 2 1.0 2.0 f(t) 2 1.0 3.0
 Set 1 nodes 2 1 4
 Set 2 nodes 2 5 9
 Set 3 nodes 1 8

@@ -1,6 +1,6 @@
 planestress_j2.out
 Nonlinear plastic bar (2dplanestress computation)
-NonLinearStatic nsteps 6 stepLength 6.  minStepLength 6. rtolv 0.000001 Psi 0.0 MaxIter 30 HPC 2 20 1 nmodules 1
+NonLinearStatic nsteps 6 stepLength 6. minStepLength 6. rtolf 1e-6 Psi 0.0 MaxIter 30 HPC 2 20 1 nmodules 1
 errorcheck
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all

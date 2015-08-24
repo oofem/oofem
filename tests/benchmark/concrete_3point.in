@@ -1,6 +1,6 @@
 concrete_3point.out
 Test: 3-point bending, triangular elements, 1 loaded point
-NonLinearStatic nsteps 20 stepLength 0.025  rtolv 0.0001 Psi 0.0 MaxIter 200 reqIterations 80 HPC 2 1 2 stiffmode 1 nmodules 1
+NonLinearStatic nsteps 20 stepLength 0.025  rtolf 1e-4 Psi 0.0 MaxIter 200 reqIterations 80 HPC 2 1 2 stiffmode 1 nmodules 1
 errorcheck
 domain 2dPlaneStress
 #

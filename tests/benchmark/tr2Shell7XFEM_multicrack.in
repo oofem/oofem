@@ -1,7 +1,6 @@
 Tr2Shell7XFEM_multicrack.out
 Test case with 2 interlaminar and 2 intralaminar cracks
-#XFEMStatic nsteps 1 lstype 0 smtype 0 maxiter 3 rtolf 1.0e-5 rtold -1.0 manrmsteps 1 controlmode 1 nmodules 1 initialguess 1
-StaticStructural nsteps 1 lstype 0 smtype 0 maxiter 3 rtolf 1.0e-5 rtold -1.0 manrmsteps 1 nmodules 1
+StaticStructural nsteps 1 maxiter 3 rtolf 1.0e-5 manrmsteps 1 nmodules 1
 #vtkxml tstep_all dofman_all element_all primvars 1 1 
 errorcheck 1
 domain 3dDirShell
@@ -34,8 +33,8 @@ ConstantEdgeLoad 3 loadType 2 loadTimeFunction 1 Components 8 0. 0. 1.0e2 0. 0. 
 #
 # 
 ## Load time functions 
-ConstantFunction 1 f(t) 1.0  
-PiecewiseLinFunction 2 nPoints 2  t 2  0. 1. f(t) 2  0.0 0.1   
+ConstantFunction 1 f(t) 1.0
+PiecewiseLinFunction 2 t 2  0. 1. f(t) 2  0.0 0.1   
 # 
 ## Sets 
 # crackedEl

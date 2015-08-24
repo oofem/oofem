@@ -1,6 +1,6 @@
 xfemCrackPropMatForce.out
 XFEM simulation: Crack propagation with material forces. Written by Erik Svenning, Chalmers University of Technology.
-StaticStructural nsteps 3 deltat 1.0 rtolv 1.0e-6 MaxIter 20 minIter 2 nmodules 1 recomputeaftercrackprop
+StaticStructural nsteps 3 deltat 1.0 rtolf 1.0e-6 MaxIter 20 minIter 2 nmodules 1 recomputeaftercrackprop
 errorcheck
 #vtkxml tstep_all domain_all primvars 1 1 cellvars 2 1 81
 domain 2dPlaneStress
@@ -50,7 +50,7 @@ BoundaryCondition 12 loadTimeFunction 1 dofs 2 1 2 values 2 2.03706640257e-05 -0
 # Preferably, we would have used a python script to prescribe the b.c, but the test can't rely on python support.
 #UserDefDirichletBC 1 loadTimeFunction 1 filename userdefbc set 2
 #ConstantFunction 1 f(t) 1.0
-PiecewiseLinFunction 1 npoints 2 t 2 0.0 3.0 f(t) 2 0.0 1.0
+PiecewiseLinFunction 1 t 2 0.0 3.0 f(t) 2 0.0 1.0
 Set 1 elementranges {(13 21)}
 Set 2 nodes 1 1
 Set 3 nodes 1 2

@@ -1,6 +1,6 @@
 interface01.out
 2D quadrilateral with one contacts. The contact works in compression and separates in tension.
-NonLinearStatic nsteps 10 controlmode 1 rtolv 1.e-3 MaxIter 300 stiffmode 1 manrmsteps 30 deltaT 1.0 renumber 1 nmodules 1
+StaticStructural nsteps 10 rtolf 1.e-3 manrmsteps 30 deltaT 1.0 nmodules 1
 errorcheck
 #vtkxml tstep_all primvars 1 1 stype 2
 domain 2dPlaneStress
@@ -21,7 +21,7 @@ BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 1
 BoundaryCondition 2 loadTimeFunction 2 dofs 1 1 values 1 0.01 set 2
 BoundaryCondition 3 loadTimeFunction 1 dofs 1 2 values 1 0.0 set 3
 ConstantFunction 1 f(t) 1.0
-PiecewiseLinFunction 2 npoints 3 t 3 0 4 9 f(t) 3 0. -1. 1.
+PiecewiseLinFunction 2 t 3 1 5 10 f(t) 3 0. -1. 1.
 Set 1 nodes 1 1
 Set 2 nodes 1 5
 Set 3 noderanges {(1 5)}

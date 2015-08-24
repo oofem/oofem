@@ -17,7 +17,7 @@ IsoHeat 1 d 1. k 1.0 c 1.0
 deadweight 1 loadTimeFunction 1 components 1 0.001 set 0
 InitialCondition 1 Conditions 1 u 25.0 dofs 1 10 set 1
 ConstantFunction 1 f(t) 1.0
-#PiecewiseLinFunction 1 nPoints 2 t 2 -3600 36000 f(t) 2 1.0 36.0
+#PiecewiseLinFunction 1 t 2 -3600 36000 f(t) 2 1.0 36.0
 Set 1 elementranges {1}
 
 #%BEGIN_CHECK%

@@ -1,6 +1,6 @@
 plasticRemap1.out
 Test case for mapping of state variables between domains. This is a quite academic test case: at the end of each time step, the domain is cloned and the state variables are mapped to the new domain. Written by Erik Svenning, Chalmers University of Technology.
-StaticStructural nsteps 5 deltat 1.0 rtolv 1.0e-6 MaxIter 25 minIter 2 nmodules 1 manrmsteps 1
+StaticStructural nsteps 5 deltat 1.0 rtolf 1.0e-7 MaxIter 25 minIter 2 nmodules 1 manrmsteps 1
 errorcheck
 #vtkxml tstep_all domain_all primvars 1 1 cellvars 1 1
 domain 2dPlaneStress
@@ -19,7 +19,7 @@ BoundaryCondition 1 loadTimeFunction 1 dofs 2 1 2 values 2 0.0 0.0 set 1
 BoundaryCondition 2 loadTimeFunction 1 dofs 1 2 values 1 0.0 set 2
 BoundaryCondition 3 loadTimeFunction 1 dofs 1 2 values 1 0.08e-1 set 3
 #
-PiecewiseLinFunction 1 npoints 2 t 2 1.0 6.0 f(t) 2 0.0 1.0
+PiecewiseLinFunction 1 t 2 1.0 6.0 f(t) 2 0.0 1.0
 Set 1 nodes 1 1
 Set 2 nodes 1 2
 Set 3 nodes 2 3 4

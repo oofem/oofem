@@ -1,7 +1,7 @@
 patch160.out
 test of Truss2d elements with j2plasticMaterial
 #LinearStatic nsteps 1
-NonLinearStatic nsteps 6 stepLength 6.  minStepLength 0.1 rtolv 0.001 Psi 0.0 MaxIter 30 nmodules 1
+NonLinearStatic nsteps 6 stepLength 6.  minStepLength 0.1 rtolf 1e-5 Psi 0.0 MaxIter 30 nmodules 1
 errorcheck
 domain 2dTruss
 OutputManager tstep_all dofman_all element_all

@@ -1,7 +1,7 @@
 lattice2drandom.out
 Direct tension. 2D Lattice Model with random input
 NonLinearStatic nmsteps 1 nsteps 1 contextOutputStep 1000 nmodules 1
-nsteps 1 rtolv 1.e-3 maxiter 2000 stiffMode 0 controlmode 0 steplength 1.e-5 minsteplength 1.e-5 hpcmode 2 hpc 2 2 1 hpcw 1 1.
+nsteps 1 rtolf 1.e-5 maxiter 2000 stiffMode 0 controlmode 0 steplength 1.e-5 minsteplength 1.e-5 hpcmode 2 hpc 2 2 1 hpcw 1 1.
 errorcheck
 domain 2dLattice
 OutputManager tstep_all dofman_all element_all

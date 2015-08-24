@@ -30,7 +30,7 @@ BoundaryCondition  1 loadTimeFunction 1 dofs 1 10 values 1 0.0 set 2
 BoundaryCondition  2 loadTimeFunction 2 dofs 1 10 values 1 15.0 set 3
 ConstantFunction 1 f(t) 1.0
 #ConstantFunction 2 f(t) 1.0
-Piecewiselinfunction 2 npoints 3 t 3 0. 1 10e10 f(t) 3 0. 1. 1.
+Piecewiselinfunction 2 t 3 0. 1 10e10 f(t) 3 0. 1. 1.
 Set 1 elementranges {(1 2)}
 Set 2 nodes 4 1 2 3 4
 Set 3 nodes 4 9 10 11 12

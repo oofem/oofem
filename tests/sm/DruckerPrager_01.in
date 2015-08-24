@@ -1,6 +1,6 @@
 DruckerPrager_01.out
 Test of DruckerPrager material under plane-strain conditions
-NonLinearStatic nsteps 10 rtolv 1.e-6 controlmode 1 maxiter 100 nmodules 1
+StaticStructural nsteps 10 rtolf 1.e-6 maxiter 100 nmodules 1
 errorcheck
 #vtkxml tstep_step 1 domain_all primvars 1 1 vars 3 1 4 27 stype 1
 domain 2dPlaneStress
@@ -17,7 +17,7 @@ BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0. set 2
 BoundaryCondition 2 loadTimeFunction 2 dofs 1 1 values 1 4.e-4 set 3
 BoundaryCondition 3 loadTimeFunction 1 dofs 1 2 values 1 0. set 4
 ConstantFunction 1 f(t) 1.0
-PiecewiseLinFunction 2 npoints 2 t 2 0. 100. f(t) 2 0. 100.
+PiecewiseLinFunction 2 t 2 1. 101. f(t) 2 0. 100.
 Set 1 elementranges {1}
 Set 2 nodes 2 1 4
 Set 3 nodes 2 2 3

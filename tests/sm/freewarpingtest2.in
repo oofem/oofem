@@ -3995,7 +3995,7 @@ warpingcs 1 warpingNode 1 material 1 set 1
 warpingcs 2 warpingNode 2 material 1 set 2
 IsoLE 1 d 0. E 35000.0 n 0.25 talpha 0.000012
 BoundaryCondition 1 loadTimeFunction 1 dofs 1 24 values 1 1.0 set 3
-PiecewiseLinFunction 1 npoints 2 t 2 0. 1000. f(t) 2 0.0 1000.
+PiecewiseLinFunction 1 t 2 0. 1000. f(t) 2 0.0 1000.
 Set 1 elementranges {(1 1634)}
 Set 2 elementranges {(1635 2586)}
 Set 3 nodes 2 1 2

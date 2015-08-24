@@ -1,7 +1,6 @@
 brick_nlgeo_3.out
 test of Brick elements with nlgeo 1(strain is the Green-Lagrangian strain) loaded by pure shear 
-NonLinearStatic  nmsteps 1 nsteps 1 nmodules 1
-nsteps 5 rtolv 1.e-6 stiffMode 1 controlmode 1 maxiter 100
+StaticStructural nsteps 5 nmodules 1
 errorcheck
 domain 3d
 OutputManager tstep_all dofman_all element_all
@@ -17,9 +16,9 @@ node 8 coords 3  0.0   1.0   1.0
 lspace  1 nodes 8 1 2 3 4 5 6 7 8 nlgeo 1
 SimpleCS 1 material 1 set 1
 IsoLE 1 d 0. E 15.0 n 0.25 talpha 1.0
-BoundaryCondition  1 loadTimeFunction 1 dofs 3 1 2 3 values 3 0.0 0.0 0.0 set 2
-BoundaryCondition  2 loadTimeFunction 1 dofs 3 1 2 3 values 3 0.0 0.5 0.0 set 3
-PiecewiseLinFunction 1 npoints 2 t 2 0. 1000. f(t) 2 0. 1000.
+BoundaryCondition 1 loadTimeFunction 1 dofs 3 1 2 3 values 3 0.0 0.0 0.0 set 2
+BoundaryCondition 2 loadTimeFunction 1 dofs 3 1 2 3 values 3 0.0 0.5 0.0 set 3
+PiecewiseLinFunction 1 t 2 1. 1001. f(t) 2 0. 1000.
 Set 1 elementranges {1}
 Set 2 nodes 4 1 4 5 8
 Set 3 nodes 4 2 3 6 7

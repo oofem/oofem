@@ -1,7 +1,7 @@
 distancebasedaveraging.out
 test of 4 triangles - distance-based averaging close to boundaries
 #
-NonLinearStatic nsteps 5  rtolv 1.e-4 stiffMode 1 maxiter 500 controlmode 1 nmodules 1
+StaticStructural nsteps 4 rtolf 1.e-6 nmodules 1
 errorcheck
 #
 domain 2dPlaneStress
@@ -9,12 +9,12 @@ domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
 ndofman 6 nelem 4 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 2 nbarrier 1 nset 3
 #
-node     1 coords 2    0.000000000   0.0000000000
-node     2 coords 2    1.0000000000  0.0000000000
-node     3 coords 2    4.0000000000  1.0000000000
-node     4 coords 2    0.0000000000  1.0000000000
-node     5 coords 2    4.0000000000  11.0000000000
-node     6 coords 2    0.0000000000  11.0000000000
+node     1 coords 2    0.0  0.0
+node     2 coords 2    1.0  0.0
+node     3 coords 2    4.0  1.0
+node     4 coords 2    0.0  1.0
+node     5 coords 2    4.0  11.0
+node     6 coords 2    0.0  11.0
 TrPlaneStress2d 1 nodes 3 1 2 4 mat 1
 TrPlaneStress2d 2 nodes 3 2 3 4 mat 1
 TrPlaneStress2d 3 nodes 3 4 3 5 mat 1
@@ -29,7 +29,7 @@ BoundaryCondition 1 loadTimeFunction 1 dofs 2 1 2 values 2 0 0 set 2
 BoundaryCondition 2 loadTimeFunction 2 dofs 1 2 values 1 1 set 3
 #
 ConstantFunction 1 f(t) 1.0
-PiecewiseLinFunction 2 nPoints 2 t 2 0. 5. f(t) 2 0. 5.e-5
+PiecewiseLinFunction 2 t 2 0. 5. f(t) 2 0. 5.e-5
 Set 1 elementranges {(1 4)}
 Set 2 nodes 2 1 2
 Set 3 nodes 2 5 6
@@ -37,13 +37,13 @@ Set 3 nodes 2 5 6
 ### Used for Extractor
 ###
 #%BEGIN_CHECK% tolerance 1.e-6
-#ELEMENT tStep 5 number 1 gp 1 keyword 52 component 1 value 1.75234e-1
-#ELEMENT tStep 5 number 2 gp 1 keyword 52 component 1 value 2.05269e-1
-#ELEMENT tStep 5 number 4 gp 1 keyword 52 component 1 value 1.70018e-1
-#ELEMENT tStep 4 number 1 gp 1 keyword 52 component 1 value 1.50396e-1
-#ELEMENT tStep 4 number 2 gp 1 keyword 52 component 1 value 1.76820e-1
-#ELEMENT tStep 4 number 4 gp 1 keyword 52 component 1 value 1.46518e-1
-#ELEMENT tStep 3 number 1 gp 1 keyword 52 component 1 value 1.20966e-1
-#ELEMENT tStep 3 number 2 gp 1 keyword 52 component 1 value 1.42824e-1
-#ELEMENT tStep 3 number 4 gp 1 keyword 52 component 1 value 1.18401e-1
+#ELEMENT tStep 4 number 1 gp 1 keyword 52 component 1 value 1.75245428e-01
+#ELEMENT tStep 4 number 2 gp 1 keyword 52 component 1 value 2.05277561e-01
+#ELEMENT tStep 4 number 4 gp 1 keyword 52 component 1 value 1.70016637e-01
+#ELEMENT tStep 3 number 1 gp 1 keyword 52 component 1 value 1.50404105e-01
+#ELEMENT tStep 3 number 2 gp 1 keyword 52 component 1 value 1.76826567e-01
+#ELEMENT tStep 3 number 4 gp 1 keyword 52 component 1 value 1.46516933e-01
+#ELEMENT tStep 2 number 1 gp 1 keyword 52 component 1 value 1.20972920e-01
+#ELEMENT tStep 2 number 2 gp 1 keyword 52 component 1 value 1.42828797e-01
+#ELEMENT tStep 2 number 4 gp 1 keyword 52 component 1 value 1.18401e-1
 #%END_CHECK%  
