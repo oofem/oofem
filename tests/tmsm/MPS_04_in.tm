@@ -9,40 +9,41 @@ nltransienttransportproblem nsteps 26 alpha 0.5 rtol 1.e-10 lumpedcapa nsmax 100
 domain mass1transfer
 #
 OutputManager tstep_all dofman_all element_all
-ndofman 12 nelem 3 ncrosssect 1 nmat 1 nbc 1 nic 1 nltf 1
+ndofman 12 nelem 3 ncrosssect 1 nmat 1 nbc 1 nic 1 nltf 1 nset 1
 #
 #
 # NODES
 #
-node   1   coords 3  0.0  0.0  0.0 ic 1 1 bc 1 1
-node   2   coords 3  0.1  0.0  0.0 ic 1 1 bc 1 1
-node   3   coords 3  0.0  0.1  0.0 ic 1 1 bc 1 1
-node   4   coords 3  0.1  0.1  0.0 ic 1 1 bc 1 1
+node   1   coords 3  0.0  0.0  0.0
+node   2   coords 3  0.1  0.0  0.0
+node   3   coords 3  0.0  0.1  0.0
+node   4   coords 3  0.1  0.1  0.0
 #
-node   5   coords 3  0.0  0.2  0.0 ic 1 1 bc 1 1
-node   6   coords 3  0.1  0.2  0.0 ic 1 1 bc 1 1
-node   7   coords 3  0.0  0.3  0.0 ic 1 1 bc 1 1
-node   8   coords 3  0.1  0.3  0.0 ic 1 1 bc 1 1
+node   5   coords 3  0.0  0.2  0.0
+node   6   coords 3  0.1  0.2  0.0
+node   7   coords 3  0.0  0.3  0.0
+node   8   coords 3  0.1  0.3  0.0
 #
-node   9   coords 3  0.0  0.4  0.0 ic 1 1 bc 1 1
-node   10  coords 3  0.1  0.4  0.0 ic 1 1 bc 1 1
-node   11  coords 3  0.0  0.5  0.0 ic 1 1 bc 1 1
-node   12  coords 3  0.1  0.5  0.0 ic 1 1 bc 1 1
+node   9   coords 3  0.0  0.4  0.0
+node   10  coords 3  0.1  0.4  0.0
+node   11  coords 3  0.0  0.5  0.0
+node   12  coords 3  0.1  0.5  0.0
 #
 #
 #
 # ELEMENTS
 #
-quad1mt   1   nodes 4   1 2 4 3 crossSect 1 mat 1 
+quad1mt   1   nodes 4   1 2 4 3
 #
-quad1mt   2   nodes 4   5 6 8 7 crossSect 1 mat 1 
+quad1mt   2   nodes 4   5 6 8 7
 #
-quad1mt   3   nodes 4   9 10 12 11 crossSect 1 mat 1
+quad1mt   3   nodes 4   9 10 12 11
 #
+Set 1 elementranges {(1 3)}
 #
 # CROSSECTION
 #
-SimpleCS 1 thick 1.0 width 1.0
+SimpleTransportCS 1 thickness 1.0 mat 1 set 1
 #
 #
 # MATERIAL
@@ -52,9 +53,9 @@ isolinmoisturemat 1 d 2400. perm 1.e-5 capa 1.
 #
 # BOUNDARY AND INITIAL CONDITIONS
 #
-BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 1.0
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 14 values 1 1.0 set 1
 #
-InitialCondition 1 Conditions 1 u 0.98
+InitialCondition 1 conditions 1 u 0.98 dofs 1 14 set 1
 #
 #
 # TIME FUNCTION
