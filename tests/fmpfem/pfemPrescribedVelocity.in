@@ -1,6 +1,7 @@
 pfemPrescribedVelocity.out
 simplification of flow in a pipe - prescribed velocity on one side, no gravity
-PFEM nsteps 3 lstype 0 smtype 1 deltaT 1.e-2 alphashapecoef 0.0 material 1 cs 1 pressure 2
+PFEM nsteps 3 lstype 0 smtype 1 deltaT 1.e-2 alphashapecoef 0.0 material 1 cs 1 pressure 2 nmodules 1
+errorcheck
 domain 2dIncompFlow
 OutputManager tstep_all dofman_all element_all
 ndofman 9 nelem 0 ncrosssect 1 nmat 1 nbc 4 nic 1 nltf 1

@@ -395,7 +395,8 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
     double d_vnorm = 1.0;
 
     AuxVelocity.resize(auxmomneq);
-
+    
+    avLhs.clear();
     avLhs.resize(auxmomneq);
 
     this->assembleVector( avLhs, tStep, LumpedMassVectorAssembler(), VM_Total, avns, this->giveDomain(1) );
@@ -413,7 +414,9 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
 
     //////////////////////////////////////////////////////////////////////////
 
+    vLhs.clear();
     vLhs.resize(momneq);
+
     this->assembleVector( vLhs, tStep, LumpedMassVectorAssembler(), VM_Total, vns, this->giveDomain(1) );
 
     if ( tStep->giveNumber() == giveNumberOfFirstStep() ) {
@@ -477,12 +480,14 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
             rhs.at(i) +=  avLhs.at(i) * oldVelocityVector.at(i);
         }
 #else
-        this->assembleVectorFromElements( rhs, tStep->givePreviousStep(), PFEMMassVelocityAssembler(), VM_Total, avns, this->giveDomain(1) );
+	if ( tStep->isTheFirstStep() == false) {
+	    this->assembleVectorFromElements( rhs, tStep->givePreviousStep(), PFEMMassVelocityAssembler(), VM_Total, avns, this->giveDomain(1) );
+	}
 #endif
 
         this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetaStepNumber() ) );
         AuxVelocity.resize( rhs.giveSize() );
-        for ( int i = 1; i <= momneq; i++ ) {
+        for ( int i = 1; i <= auxmomneq; i++ ) {
             AuxVelocity.at(i) = rhs.at(i) / avLhs.at(i);
         }
 

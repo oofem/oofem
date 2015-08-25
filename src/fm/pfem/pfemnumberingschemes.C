@@ -78,8 +78,14 @@ PressureNumberingScheme :: reset()
 int
 PressureNumberingScheme :: giveDofEquationNumber(Dof *dof) const
 {
-    int dofEqNum = this->nodalPressureEquationNumbers.at( dof->giveDofManNumber() );
-    return ( dofEqNum > 0 ) ? dofEqNum : 0;
+    int dofEqNum = 0;
+    DofIDItem id = dof->giveDofID();
+    if ( id == P_f ) {
+        dofEqNum = this->nodalPressureEquationNumbers.at( dof->giveDofManNumber() );
+	if ( dofEqNum < 0 )
+	    dofEqNum = 0;
+    }
+    return dofEqNum;
 }
 
 
