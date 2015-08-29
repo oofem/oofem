@@ -2045,7 +2045,7 @@ Shell7Base :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExp
     for ( int fieldNum = 1; fieldNum <= internalVarsToExport.giveSize(); fieldNum++ ) {
         InternalStateType type = ( InternalStateType ) internalVarsToExport.at(fieldNum);
         nodeNum = 1;
-    if ( 0 ) {
+    if ( 1 ) {
     // Recover shear stresses
     this->recoverShearStress(tStep);
     }
@@ -2229,9 +2229,9 @@ Shell7Base :: nodalLeastSquareFitFromIP(std::vector<FloatArray> &recoveredValues
     // Find IP values and set up matrix of base functions
     FloatMatrix Nbar, NbarTNbar, NbarTNbarInv, Nhat, ipValues, temprecovedValues, temprecovedValuesT; 
     Nbar.resize(numIP,numNodes);
-    int numSC; 
-    if ( valueType == ISVT_TENSOR_S3 ) { numSC = 6; } else { numSC = 9; };
-    ipValues.resize(numIP,numSC);
+    //int numSC; 
+    //if ( valueType == ISVT_TENSOR_S3 ) { numSC = 6; } else { numSC = 9; };
+    //ipValues.resize(numIP,numSC);
     
     for ( int i = 0; i < numIP; i++ ) {
         ip = iRule->getIntegrationPoint(i);
@@ -2267,13 +2267,12 @@ Shell7Base :: nodalLeastSquareFitFromIP(std::vector<FloatArray> &recoveredValues
     ///@todo se över nodnumrering.
     IntArray strangeNodeNumbering = {2, 1, 3, 5, 4, 6, 7, 9, 8, 10, 12, 11, 13, 14, 15 };
     for (int i = 0; i < numNodes; i++ ) {
-//     for (int i : strangeNodeNumbering ) {
         if ( valueType == ISVT_TENSOR_S3 ) {
-//                     recoveredValues[i].resize(9);
-            FloatArray nodalStresses; nodalStresses.beColumnOf(temprecovedValuesT,i+1);
+            FloatArray nodalStresses; 
+            nodalStresses.beColumnOf(temprecovedValuesT,i+1);
             recoveredValues[strangeNodeNumbering(i)-1] = convV6ToV9Stress(nodalStresses);
         } else {
-            recoveredValues[i].beColumnOf(temprecovedValuesT,i+1);
+            recoveredValues[strangeNodeNumbering(i)-1].beColumnOf(temprecovedValuesT,i+1);
         }
     }
 }
@@ -2321,7 +2320,7 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
 {
     // Recover shear stresses at ip by numerical integration of the momentum balance through the thickness
     std::vector<FloatArray> recoveredValues;
-//     std::vector<FloatArray> patchRecoveredValues;
+    std::vector<FloatArray> patchRecoveredValues;
     
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();     // conversion of types
     
@@ -2344,14 +2343,16 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
     ///@todo Generalize this
 //    int numTriaNodes = this->giveDofManArray().giveSize();
     int numWedgeNodes = 15;
+    // coupling between triangle nodes and wedge nodes. NB: wedge nodes ordered from bottom and up (not that it matters). 
     std::vector<IntArray> triaInd2QwedgeInd; triaInd2QwedgeInd.resize(6);
-    triaInd2QwedgeInd[0] = {1,4,13};
-    triaInd2QwedgeInd[1] = {2,5,14};
-    triaInd2QwedgeInd[2] = {3,6,15};
+    triaInd2QwedgeInd[0] = {1,13,4};
+    triaInd2QwedgeInd[1] = {2,14,5};
+    triaInd2QwedgeInd[2] = {3,15,6};
     triaInd2QwedgeInd[3] = {7,10};
     triaInd2QwedgeInd[4] = {8,11};
     triaInd2QwedgeInd[5] = {9,12};
-//    IntArray numNodalPatchEls = {6,6,6,6,6,6,2,2,2,2,2,2,6,6,6};
+    IntArray numNodalPatchEls = {6,6,6,6,6,6,2,2,2,2,2,2,6,6,6};
+//    InternalStateValueType valueType =  giveInternalStateValueType(IST_StressTensor);
     
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
         IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];   // Var sätts vilken typ av integrregel som gäller för lagret? qwedge?
@@ -2396,6 +2397,7 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
             }
             
 #endif
+#if 1
             // Recover using SPR. One patch for each corner of the element. 
             // The LS-fit is constructed from IPvalues = Nbar*nodalValues, where the elements in ipValues are added from the tria element according to increasing global numbering.
             // the elements in nodalValues are ordered using the global nodal numbering, ie the wedge nodes associated with the tria node of lowest global number comes first
@@ -2436,8 +2438,12 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
                 }
                 int numPatchTriaNodes = patchTriaNodes.giveSize();
                 
-                // Build coupling between tria and wedge nodes. 
-                std::vector<IntArray> patchTriaInd2QwedgeInd; patchTriaInd2QwedgeInd.resize(numPatchTriaNodes);
+                // Build coupling between tria and wedge nodes.
+                // patchTriaInd2QwedgeInd is a vector with one element for each patch tria node. 
+                // Each element contains an IntArray with the wedge node numbers of the patch. 
+                // The wedge nodes are numbered according to increasing global tria node they are associated with
+                std::vector<IntArray> patchTriaInd2QwedgeInd; 
+                patchTriaInd2QwedgeInd.resize(numPatchTriaNodes);
                 int numPatchWedgeNodes = 0;
                 for (int j = 0; j < numPatchTriaNodes; j++ ) {
                     if (isCornerNode.contains(patchTriaNodes.at(j+1))) {
@@ -2460,12 +2466,12 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
                 // Find IP values and set up matrix of base functions
                 FloatMatrix Nbar, NbarTNbar, NbarTNbarInv, Nhat, ipValues, temprecovedValues, temprecovedValuesT; 
                 Nbar.resize(numPatchWedgeIP,numPatchWedgeNodes);
-                int numSC = 9;                                                                      // Assume type = IST_StressTensor
+                int numSC = 9;                                                                      // 
                 //if ( valueType == ISVT_TENSOR_S3 ) { numSC = 6; } else { numSC = 9; };
                 ipValues.resize(numPatchWedgeIP,numSC);
                 
                 // loop over elements in patch and collect IP values and their addition to matrix of base functions
-                int k = 0;
+                int elNum = 0;
                 for (int patchElNum : *patchEls) {                                                  // funkar det här?
                     // Get (pointer to) current element in patch and calculate its addition to the patch
                     Shell7Base *patchEl = static_cast<Shell7Base*>(d->giveElement(patchElNum));
@@ -2478,7 +2484,7 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
                     patchEl->giveSPRcontribution(elIPvalues, elNbar, layer, IST_StressTensor, tStep);
                     
                     // Add to contribution to patch. 
-                    ipValues.setSubMatrix(elIPvalues, 1 + numWedgeIP*k++, 1);
+                    ipValues.setSubMatrix(elIPvalues, 1 + numWedgeIP*elNum++, 1);
                     
                     for (int j = 1; j <= elTriaNodes.giveSize(); j++) {
                         int elTriaNode = elTriaNodes.at(j);                                 // Global tria node number in element
@@ -2488,7 +2494,7 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
                         for (int l = 1; l <= elWedgeIndex.giveSize(); l++) {
                             FloatArray elNbarColumn;
                             elNbar.copyColumn(elNbarColumn,elWedgeIndex.at(l));
-                            Nbar.addSubVectorCol(elNbarColumn, 1 + numWedgeIP*(k-1), patchWedgeIndex(l));
+                            Nbar.addSubVectorCol(elNbarColumn, 1 + numWedgeIP*(elNum-1), patchWedgeIndex.at(l));
                         }
                     }
                     
@@ -2508,8 +2514,11 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
 //                 for (int inode = 0; inode < numPatchWedgeNodes; inode++ ) {
 //                     patchRecoveredValues[inode].beColumnOf(temprecovedValuesT,inode+1);
 //                 }
+
+                // Save recoved values to centre element (NB: don't save to other patch nodes at the moment)
+                ///@todo se över nodnumrering.
+                IntArray strangeNodeNumbering = {2, 1, 3, 5, 4, 6, 7, 9, 8, 10, 12, 11, 13, 14, 15 };
                 
-                // Save recoved values to centre element (NB: don't save to patch nodes at the moment)
                 for (int inode = 1; inode <= centreElTriaNodes.giveSize(); inode++ ) {
                     int elTriaNode = centreElTriaNodes.at(inode);                               // Global tria node number in element
                     int elTriaIndex = patchTriaNodes.findFirstIndexOf(elTriaNode);              // corresponding index in patch tria nodes (if part of patch at all)
@@ -2521,12 +2530,12 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
                         for (int jnode = 1; jnode <= elWedgeIndex.giveSize(); jnode++ ) {
                             FloatArray recoveredValuesColumn; recoveredValuesColumn.beColumnOf(temprecovedValuesT,patchWedgeIndex.at(jnode));
                             recoveredValuesColumn.times(midNodeScale);                      // scale mid nodes w 1/2, else scale is 1.0
-                            recoveredValues[elWedgeIndex.at(jnode)-1] = recoveredValuesColumn;
+                            recoveredValues[strangeNodeNumbering.at(elWedgeIndex.at(jnode))-1] = recoveredValuesColumn;
                         }
                     }
                 }
             }
-            
+#endif
         } else {
             
             // or do standard recovery for only one element

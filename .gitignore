@@ -5,6 +5,9 @@
 # ignore all files under targets dir
 targets/
 
+# ignore all files under release dir
+release/
+
 # test results
 *.out
 *.vtu
