@@ -59,6 +59,8 @@ class InsertionData;
 /**
  * Mesh generator for the PFEM problem, using Bowyer-Watson algorithm of the Delaunay triangulation
  * of a set of nodes (PFEMParticle) creating TR1_2D_PFEM elements.
+ *
+ * @author David Krybus
  */
 class DelaunayTriangulator
 {

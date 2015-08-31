@@ -32,9 +32,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-//   **************************************************************************************
-//   *** CLASS GENERAL ELEMENT CLASS FOR FLUID DYNAMIC PROBLEMS SOLVED WITH PFEM METHOD ***
-//   **************************************************************************************
+//   ********************************************************************************
+//   *** GENERAL ELEMENT CLASS FOR FLUID DYNAMIC PROBLEMS SOLVED WITH PFEM METHOD ***
+//   ********************************************************************************
 
 #ifndef pfemelement_h
 #define pfemelement_h
@@ -60,22 +60,24 @@ class IntArray;
 /**
  * This abstract class represent a general base element class for
  * fluid dynamic problems solved using PFEM algorithm.
+ *
+ * @author David Krybus
  */
 class PFEMElement : public FMElement
 {
 public:
     /// Constructor
     PFEMElement(int, Domain *);
-    // Destructor
+    /// Destructor
     ~PFEMElement();
 
     ///Initializes receiver acording to object description stored in input record.
     IRResultType initializeFrom(InputRecord *ir);
 
     // characteristic  matrix
-    void giveCharacteristicMatrix(FloatMatrix &answer, CharType, TimeStep *);
-    void giveCharacteristicVector(FloatArray &answer, CharType, ValueModeType, TimeStep *);
- 
+    void giveCharacteristicMatrix(FloatMatrix & answer, CharType, TimeStep *);
+    void giveCharacteristicVector(FloatArray & answer, CharType, ValueModeType, TimeStep *);
+
     /** Calculates diagonal mass matrix as vector*/
     virtual void computeDiagonalMassMtrx(FloatArray &answer, TimeStep *) = 0;
     /** Calculates diagonal mass matrix */
@@ -95,12 +97,14 @@ public:
     // definition
     virtual const char *giveClassName() const { return "PFEMElement"; }
 
-    virtual const IntArray& giveVelocityDofMask() const = 0;
-    virtual const IntArray& givePressureDofMask() const = 0;
+    /// Returns mask of velocity Dofs
+    virtual const IntArray &giveVelocityDofMask() const = 0;
+    /// Returns mask of pressure Dofs
+    virtual const IntArray &givePressureDofMask() const = 0;
 
 #ifdef __OOFEG
     virtual int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                int node, TimeStep *atTime);
+                                        int node, TimeStep *atTime);
     //
     // Graphics output
     //
@@ -130,4 +134,3 @@ public:
 };
 } // end namespace oofem
 #endif // pfemelement_h
-

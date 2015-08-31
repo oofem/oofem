@@ -62,7 +62,7 @@ class IntArray;
 
 /**
  * This class is the implementation of triangular PFEM element with linear (and equal order) interpolation of velocity and pressure fields.
- * 
+ *
  * @author David Krybus
  */
 class TR1_2D_PFEM : public PFEMElement2d
@@ -72,17 +72,29 @@ protected:
     double c [ 3 ];
     double area;
 
+    /// Interpolation for velocity unknowns
     static FEI2dTrLin velocityInterpolation;
+    /// Interpolation for pressure unknowns
     static FEI2dTrLin pressureInterpolation;
 
-    static IntArray ordering;
     static IntArray edge_ordering [ 3 ];
 
+    /// Mask of velocity Dofs
     static IntArray velocityDofMask;
+    /// Mask of pressure Dofs
     static IntArray pressureDofMask;
 
 public:
-    /// Constructor
+    /**
+     * Constructor of TR1_2D_PFEM Element. Creates an element with number n belonging to domain aDomain.
+     * @param n Element's number
+     * @param aDomain Pointer to the domain to which element belongs.
+     * @param particle1 number of first PFEMParticle
+     * @param particle2 number of second PFEMParticle
+     * @param particle3 number of third PFEMParticle
+     * @param mat number of associated Material
+     * @param cs number of associated CrossSection
+     */
     TR1_2D_PFEM(int n, Domain *aDomain, int particle1, int particle2, int particle3, int mat, int cs);
     /// Destructor
     ~TR1_2D_PFEM();
@@ -117,7 +129,7 @@ public:
 
 #ifdef __OOFEG
     virtual int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                int node, TimeStep *atTime);
+                                        int node, TimeStep *atTime);
     //
     // Graphics output
     //
@@ -136,13 +148,13 @@ public:
     virtual FEInterpolation *giveInterpolation() const { return & velocityInterpolation; }
     virtual FEInterpolation *giveInterpolation(DofIDItem id) const { return id == P_f ? & pressureInterpolation : & velocityInterpolation; }
 
-    virtual const IntArray& giveVelocityDofMask() const
+    virtual const IntArray &giveVelocityDofMask() const
     {
-      return this->velocityDofMask;
+        return this->velocityDofMask;
     }
-    virtual const IntArray& givePressureDofMask() const
+    virtual const IntArray &givePressureDofMask() const
     {
-      return this->pressureDofMask;
+        return this->pressureDofMask;
     }
 
 protected:
@@ -160,4 +172,3 @@ protected:
 };
 } // end namespace oofem
 #endif // tr1_2d_pfem_h
-

@@ -62,13 +62,16 @@ namespace oofem {
 FEI2dTrLin TR1_2D_PFEM :: velocityInterpolation(1, 2);
 FEI2dTrLin TR1_2D_PFEM :: pressureInterpolation(1, 2);
 
-IntArray TR1_2D_PFEM :: ordering(9);
 IntArray TR1_2D_PFEM :: edge_ordering [ 3 ] = {
     IntArray(6), IntArray(6), IntArray(6)
 };
 
-IntArray TR1_2D_PFEM :: velocityDofMask = {1,2,4,5,7,8};
-IntArray TR1_2D_PFEM :: pressureDofMask = {3,6,9};
+IntArray TR1_2D_PFEM :: velocityDofMask = {
+    1, 2, 4, 5, 7, 8
+};
+IntArray TR1_2D_PFEM :: pressureDofMask = {
+    3, 6, 9
+};
 
 
 TR1_2D_PFEM :: TR1_2D_PFEM(int n, Domain *aDomain, int particle1, int particle2, int particle3, int mat, int cs) :
@@ -78,7 +81,7 @@ TR1_2D_PFEM :: TR1_2D_PFEM(int n, Domain *aDomain, int particle1, int particle2,
     numberOfDofMans  = 3;
     IntArray aBodyLoadArry(1);
     aBodyLoadArry.at(1) = 3;
-    this->setDofManagers({particle1, particle2, particle3});
+    this->setDofManagers({ particle1, particle2, particle3 });
     // CHECK THIS - NOT NICE
     this->setBodyLoads(aBodyLoadArry);
     this->material = mat;
@@ -99,15 +102,16 @@ TR1_2D_PFEM :: computeNumberOfDofs()
 void
 TR1_2D_PFEM ::   giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer = {V_u, V_v, P_f};
-
+    answer = {
+        V_u, V_v, P_f
+    };
 }
 
 // NOT IN USE
 void
 TR1_2D_PFEM ::   giveElementDofIDMask(IntArray &answer) const
 {
-  this->giveDofManDofIDMask(1, answer);
+    this->giveDofManDofIDMask(1, answer);
 }
 
 
@@ -124,7 +128,7 @@ void
 TR1_2D_PFEM :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-  if ( integrationRulesArray.size() == 0 ) {
+    if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize(1);
         integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3) );
         integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, 3, _2dFlow);
@@ -456,7 +460,7 @@ contextIOResultType TR1_2D_PFEM :: saveContext(DataStream *stream, ContextMode m
 {
     contextIOResultType iores;
 
-    if ( ( iores = PFEMElement :: saveContext(*stream, mode, obj) ) != CIO_OK ) {
+    if ( ( iores = PFEMElement :: saveContext(* stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -473,7 +477,7 @@ contextIOResultType TR1_2D_PFEM :: restoreContext(DataStream *stream, ContextMod
 {
     contextIOResultType iores;
 
-    if ( ( iores = PFEMElement :: restoreContext(*stream, mode, obj) ) != CIO_OK ) {
+    if ( ( iores = PFEMElement :: restoreContext(* stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

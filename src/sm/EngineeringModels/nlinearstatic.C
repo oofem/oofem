@@ -272,8 +272,11 @@ double NonLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeStep *tSt
     return 0.0;
 }
 
-TimeStep *NonLinearStatic :: giveSolutionStepWhenIcApply()
+TimeStep *NonLinearStatic :: giveSolutionStepWhenIcApply(bool force)
 {
+  if ( master && (!force)) {
+    return master->giveSolutionStepWhenIcApply();
+  } else {
     if ( !stepWhenIcApply ) {
         int inin = giveNumberOfTimeStepWhenIcApply();
 	//        int nFirst = giveNumberOfFirstStep();
@@ -281,6 +284,7 @@ TimeStep *NonLinearStatic :: giveSolutionStepWhenIcApply()
     }
 
     return stepWhenIcApply.get();
+  }
 }
 
 

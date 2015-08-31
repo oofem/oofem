@@ -155,7 +155,7 @@ public:
     virtual const char *giveClassName() const { return "NlDEIDynamic"; }
     virtual fMode giveFormulation() { return TL; }
 
-    virtual int giveNumberOfFirstStep() { return 0; }
+    virtual int giveNumberOfFirstStep(bool force = false) { return 0; }
 
 protected:
     /**

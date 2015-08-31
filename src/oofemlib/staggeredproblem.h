@@ -168,8 +168,13 @@ public:
 
     void printYourself();
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
+
+    virtual TimeStep *giveCurrentStep(bool force = false);
+    virtual TimeStep *givePreviousStep(bool force = false);
+    virtual TimeStep *giveSolutionStepWhenIcApply(bool force = false);
+    virtual int giveNumberOfFirstStep(bool force = false);
+
     virtual TimeStep *giveNextStep();
-    virtual TimeStep *giveSolutionStepWhenIcApply();
 
     // identification
     virtual const char *giveClassName() const { return "StaggeredProblem"; }

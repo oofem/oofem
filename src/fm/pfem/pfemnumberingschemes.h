@@ -42,16 +42,22 @@
 
 namespace oofem {
 /**
- * Numbering scheme that takes into account only pressure DOFs.
- * It takes the advantage that pressure is a scalar unknown in each node.
+ * Numbering scheme that takes into account only pressure DOFs in PFEM problems.
+ * Pressure is scalar unknown in each node.
+ *
+ * @author David Krybus
  */
 class PressureNumberingScheme : public UnknownNumberingScheme
 {
 protected:
     Domain *domain;
+    /// Container storing particular equation numbers for each node
     IntArray nodalPressureEquationNumbers;
+    /// Last given number of equation
     int neq;
+    /// Last given number of prescribed equation
     int pres_neq;
+    /// Flag controlling wether the numbering has been initialized or not
     bool isInitialized;
 
 public:
@@ -60,27 +66,12 @@ public:
     /// Destructor
     virtual ~PressureNumberingScheme();
 
-
-    virtual void init();
     /**
-     * Initializes the receiver, if necessary.
+     * Initializes the receiver
      */
     virtual void init(Domain *domain, TimeStep *tStep);
-    /**
-     * Returns true, if receiver is the default engngModel equation numbering scheme;
-     * This is useful for some components (typically elements), that cache their code numbers
-     * for default numbering to avoid repeated evaluation.
-     */
     virtual bool isDefault() const { return false; }
-    /**
-     * Returns the equation number for corresponding DOF. The numbering should return nonzero value if
-     * the equation is assigned to the given DOF, zero otherwise.
-     */
     virtual int giveDofEquationNumber(Dof *dof) const;
-
-    /**
-     * Returns required number of domain equation. Number is always less or equal to the sum of all DOFs gathered from all nodes.
-     */
     virtual int giveRequiredNumberOfDomainEquation() const;
 
     /// Returns total number of equations
@@ -95,10 +86,13 @@ public:
 
 /**
  * Velocity numbering scheme for PFEM purposes
+ *
+ * @author David Krybus
  */
 class VelocityNumberingScheme : public UnknownNumberingScheme
 {
 protected:
+    /// Last given equation number
     int numEqs;
     /// prescribed equations or not
     bool prescribed;
@@ -117,13 +111,16 @@ public:
 
     /// Asks new equation number
     int askNewEquationNumber() { return ++numEqs; }
-
+    /// Returns Dof with passed equation number
     Dof *giveDofToEquationNumber(Domain *d, int equationNumber);
 };
 
 /**
- * Numbering scheme for auxiliary velocity, taking advantage that no boundary conditions is applied,
- * so every single node has full set of equations
+ * Numbering scheme for auxiliary velocity in PFEM problems.
+ * Nodes are not subjected to any boundary conditions considering auxiliary velocities,
+ * so every single node has full set of equations.
+ *
+ * @author David Krybus
  */
 class AuxVelocityNumberingScheme : public UnknownNumberingScheme
 {
@@ -131,6 +128,7 @@ protected:
     Domain *domain;
     /// Nodal equation numbers are stored in an IntArray
     IntArray nodalAuxVelocityEquationNumbers;
+    /// Number of equations
     int neq;
 
 public:
@@ -142,8 +140,7 @@ public:
     /// Resets the numbering in order to start numbering again from 1
     virtual void reset() { neq = 0; }
 
-    /// Initializes the numbering schem
-    virtual void init();
+    /// Initializes the numbering scheme
     virtual void init(Domain *domain);
 
     virtual int giveDofEquationNumber(Dof *dof) const;
