@@ -2088,31 +2088,6 @@ Shell7Base :: recoverValuesFromIP(std::vector<FloatArray> &recoveredValues, int 
 {
     // recover nodal values from IP:s
     
-//     // Dummy test S_xx = -T/A*(L-x)*z;
-// 
-//     std::vector<FloatArray> globalNodeCoords;
-//     giveFictiousNodeCoordsForExport(globalNodeCoords, layer);
-//     
-//     int numNodes = 15;
-//     recoveredValues.resize(15);
-//     for ( int i = 1; i <= numNodes; i++ ) {
-//         double val = 7.8608e+09 * ( 0.2 - globalNodeCoords[i-1].at(1) ) * globalNodeCoords[i-1].at(3);
-//         recoveredValues[i-1] = {val};
-//     }
-//     if (this->giveGlobalNumber() == 20) {
-//         for (FloatArray inod: recoveredValues) {
-//             inod.printYourself("Analytiska värden");
-//         }
-//     }
-//     nodalLeastSquareFitFromIP(recoveredValues, layer, type, tStep);
-//     if (this->giveGlobalNumber() == 20) {
-//         for (FloatArray inod: recoveredValues) {
-//             inod.printYourself("CopyIP-värden");
-//         }
-//     }
-
-//      return;
-    
     switch (SRtype) {
         case copyIPvalue:
             // Find closest ip to the nodes
@@ -2278,7 +2253,7 @@ Shell7Base :: nodalLeastSquareFitFromIP(std::vector<FloatArray> &recoveredValues
 }
 
 void 
-Shell7Base :: giveSPRcontribution(FloatMatrix &ipValues, FloatMatrix &Nbar, int layer, InternalStateType type, TimeStep *tStep)
+Shell7Base :: giveL2contribution(FloatMatrix &ipValues, FloatMatrix &Nbar, int layer, InternalStateType type, TimeStep *tStep)
 { 
     // composite element interpolator
     FloatMatrix localNodeCoords;
@@ -2319,8 +2294,6 @@ void
 Shell7Base :: recoverShearStress(TimeStep *tStep)
 {
     // Recover shear stresses at ip by numerical integration of the momentum balance through the thickness
-    std::vector<FloatArray> recoveredValues;
-    std::vector<FloatArray> patchRecoveredValues;
     
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();     // conversion of types
     
@@ -2330,271 +2303,137 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
     //}
     
     GaussIntegrationRule iRuleThickness(1, this);
-    iRuleThickness.SetUpPointsOnLine(this->layeredCS->giveNumIntegrationPointsInLayer(), _Unknown);    
+    int numThicknessIP = this->layeredCS->giveNumIntegrationPointsInLayer();
+    iRuleThickness.SetUpPointsOnLine(numThicknessIP, _Unknown);    
     
     int numInPlaneIP = this->giveNumberOfInPlaneIP();
     double totalThickness = this->layeredCS->computeIntegralThick(); 
-    double integralThickness = 0;
+    double integralThickness = 0.0;
     FloatArray dS, Sold;
     FloatMatrix B, dSmat(3,numInPlaneIP), SmatOld(3,numInPlaneIP); // 3 stress components (S_xz, S_yz, S_zz) * num of in plane ip 
     SmatOld.zero();
     Domain *d = this->giveDomain();
-//     std::vector<IntArray> indexMatches; indexMatches.resize(2);
-    ///@todo Generalize this
-//    int numTriaNodes = this->giveDofManArray().giveSize();
-    int numWedgeNodes = 15;
-    // coupling between triangle nodes and wedge nodes. NB: wedge nodes ordered from bottom and up (not that it matters). 
-    std::vector<IntArray> triaInd2QwedgeInd; triaInd2QwedgeInd.resize(6);
-    triaInd2QwedgeInd[0] = {1,13,4};
-    triaInd2QwedgeInd[1] = {2,14,5};
-    triaInd2QwedgeInd[2] = {3,15,6};
-    triaInd2QwedgeInd[3] = {7,10};
-    triaInd2QwedgeInd[4] = {8,11};
-    triaInd2QwedgeInd[5] = {9,12};
-    IntArray numNodalPatchEls = {6,6,6,6,6,6,2,2,2,2,2,2,6,6,6};
-//    InternalStateValueType valueType =  giveInternalStateValueType(IST_StressTensor);
     
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
         IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];   // Var sätts vilken typ av integrregel som gäller för lagret? qwedge?
 
-        // Find S_xx, S_xy and S_yy stresses in nodal points for layer
-        stressRecoveryType SRtype = LSfit;
-//         stressRecoveryType SRtype = copyIPvalue;
-        if ( this->giveGlobalNumber() == 126 ) {
-            
-# if 0
-            // Recover the average value of the contribution to each QWedge node from the connected elements in each layer.
-            // NB: assumes that the elements have the same positive normal direction
-            recoveredValues.resize(numWedgeNodes);
-            IntArray centreElNum = {this->giveGlobalNumber()};
-            IntArray centreElNodes = this->giveDofManArray(); 
-            IntArray patchEls; 
-            d->giveConnectivityTable()->giveElementNeighbourList(patchEls,centreElNum); 
-            for (int patchElNum : patchEls) {
-                
-                // Get (pointer to) current element in patch and calculate its addition to the patch
-                Shell7Base *patchEl = static_cast<Shell7Base*>(d->giveElement(patchElNum));
-                patchEl->recoverValuesFromIP(patchRecoveredValues, layer, IST_StressTensor, tStep, SRtype); 
-                
-                // find index matches of nodes from centreElNodes
-                IntArray patchElNodes = patchEl->giveDofManArray();                                             // get global nodal numbers for current patch element
-                for ( int centreIndex = 1; centreIndex <= this->giveNumberOfDofManagers(); centreIndex++ ) {    // loop over centre elt nodes
-                    int patchIndex = patchElNodes.findFirstIndexOf(centreElNodes.at(centreIndex));              // find index for the centre elt nodes in the current patch elt
-                    if (patchIndex) {                                                                           // if centre node is found in current patch elt:
-                        IntArray centreQwedgeIndex = triaInd2QwedgeInd[centreIndex-1];                              // find the corresponding Qwedge index for the centre elt 
-                        IntArray patchQwedgeIndex = triaInd2QwedgeInd[patchIndex-1];                                // find the corresponding Qwedge index for the patch elt 
-                        for (int i = 1; i <= centreQwedgeIndex.giveSize(); i++) {                                   // add the contribution of the patch elt Qwedge nodes to the centre elt Qwedge nodes
-                            recoveredValues[centreQwedgeIndex.at(i)-1] += patchRecoveredValues[patchQwedgeIndex.at(i)-1];
-                        }
-                    }
-                } 
-            }
-            
-            // Divide recoveredValues w number of elemental additions (numNodalPatchEls)
-            for (int i = 0; i < (int)recoveredValues.size(); i++) {
-                
-                recoveredValues[i].times(1.0/(double)(numNodalPatchEls.at(i+1)));
-            }
-            
-#endif
-#if 1
-            // Recover using SPR. One patch for each corner of the element. 
-            // The LS-fit is constructed from IPvalues = Nbar*nodalValues, where the elements in ipValues are added from the tria element according to increasing global numbering.
-            // the elements in nodalValues are ordered using the global nodal numbering, ie the wedge nodes associated with the tria node of lowest global number comes first
-            // followed by the ones associated with the second lowest global node number etc. 
-                // NB: assumes that the elements have the same positive normal direction???
-                    // assumes (only) quadratic triangular elements with 6 in-plane IP.
-            ///@todo Move this outside element?
-            recoveredValues.resize(numWedgeNodes);
-            IntArray centreElNum = {this->giveGlobalNumber()};
-            IntArray centreElTriaNodes = this->giveDofManArray(); 
-            const IntArray* patchEls; 
-            
-            IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
-            int numWedgeIP = iRule->giveNumberOfIntegrationPoints();             // No of Wedge IP
-            
-            for (int i = 1; i <= 3; i++) {  // for the three patches associated with a triangular element
-                
-                // fetch elements connected to a corned node (i.e. the centre of a patch)
-                patchEls = d->giveConnectivityTable()->giveDofManConnectivityArray(centreElTriaNodes.at(i));
-                int numPatchEls = patchEls->giveSize(); 
-                //int numPatchTriaNodes = 10 + (numPatchEls-3)*3;                                          // assume Qtria
-                
-                ///@todo find (global) tria node numbers in patch and corresponding wedge node indices
-                // std::vector<IntArray> elTriaNodes; elTriaNodes.resize(numPatchEls);
-                IntArray patchTriaNodes; 
-                // patchWedgeNodes; 
-                IntArray isCornerNode; 
-                for (int patchElNum : *patchEls) { 
-                    // Get (pointer to) current element in patch and add the global tria node number (if not already added)
-                    Shell7Base *patchEl = static_cast<Shell7Base*>(d->giveElement(patchElNum));
-                    IntArray elTriaNodes = patchEl->giveDofManArray(); 
-                    for (int k = 1; k <= elTriaNodes.giveSize(); k++) {
-                        patchTriaNodes.insertSortedOnce(elTriaNodes.at(k));
-                        if (k <= 3) {
-                            isCornerNode.insertSortedOnce(elTriaNodes.at(k));       // store array of patch triangle nodes that are element corner nodes (since these have specific No of wedge nodes associated)
-                        }
-                    }
-                }
-                int numPatchTriaNodes = patchTriaNodes.giveSize();
-                
-                // Build coupling between tria and wedge nodes.
-                // patchTriaInd2QwedgeInd is a vector with one element for each patch tria node. 
-                // Each element contains an IntArray with the wedge node numbers of the patch. 
-                // The wedge nodes are numbered according to increasing global tria node they are associated with
-                std::vector<IntArray> patchTriaInd2QwedgeInd; 
-                patchTriaInd2QwedgeInd.resize(numPatchTriaNodes);
-                int numPatchWedgeNodes = 0;
-                for (int j = 0; j < numPatchTriaNodes; j++ ) {
-                    if (isCornerNode.contains(patchTriaNodes.at(j+1))) {
-                        patchTriaInd2QwedgeInd[j] = {numPatchWedgeNodes+1,numPatchWedgeNodes+2,numPatchWedgeNodes+3};
-                        numPatchWedgeNodes += 3; 
-                    }
-                    else {
-                        patchTriaInd2QwedgeInd[j] = {numPatchWedgeNodes+1,numPatchWedgeNodes+2};
-                        numPatchWedgeNodes += 2; 
-                    }
-                } 
-                
-                                                           // ger det här storleken på pekaren eller Intarrayen den pekar på?
-                // int numPatchWedgeNodes = numPatchEls + 2 + (numWedgeNodes - 8)*(numPatchEls - 2);        // No of (wedge) nodes in patch GÖR OM
-                int numPatchWedgeIP = numPatchEls * numWedgeIP;                                          // No of (wedge) IP in patch GÖR OM
-                if (numPatchWedgeNodes > numPatchWedgeIP) {
-                OOFEM_ERROR("Least square fit not possible for more nodes than IP.");
-                }
-                
-                // Find IP values and set up matrix of base functions
-                FloatMatrix Nbar, NbarTNbar, NbarTNbarInv, Nhat, ipValues, temprecovedValues, temprecovedValuesT; 
-                Nbar.resize(numPatchWedgeIP,numPatchWedgeNodes);
-                int numSC = 9;                                                                      // 
-                //if ( valueType == ISVT_TENSOR_S3 ) { numSC = 6; } else { numSC = 9; };
-                ipValues.resize(numPatchWedgeIP,numSC);
-                
-                // loop over elements in patch and collect IP values and their addition to matrix of base functions
-                int elNum = 0;
-                for (int patchElNum : *patchEls) {                                                  // funkar det här?
-                    // Get (pointer to) current element in patch and calculate its addition to the patch
-                    Shell7Base *patchEl = static_cast<Shell7Base*>(d->giveElement(patchElNum));
-                    
-                    // get current tria nodes
-                    IntArray elTriaNodes = patchEl->giveDofManArray();  // returnerar den här de i ordning enligt lokal nodnumrering??
-                    
-                    // collect patch element addition to SPR.
-                    FloatMatrix elIPvalues, elNbar;
-                    patchEl->giveSPRcontribution(elIPvalues, elNbar, layer, IST_StressTensor, tStep);
-                    
-                    // Add to contribution to patch. 
-                    ipValues.setSubMatrix(elIPvalues, 1 + numWedgeIP*elNum++, 1);
-                    
-                    for (int j = 1; j <= elTriaNodes.giveSize(); j++) {
-                        int elTriaNode = elTriaNodes.at(j);                                 // Global tria node number in element
-                        int elTriaIndex = patchTriaNodes.findFirstIndexOf(elTriaNode);      // corresponding index in patch tria nodes
-                        IntArray elWedgeIndex = triaInd2QwedgeInd[j-1];                     // corresponding wedge nodes for current tria node
-                        IntArray patchWedgeIndex = patchTriaInd2QwedgeInd[elTriaIndex-1];   // corresponding patch wedge nodes for current tria node
-                        for (int l = 1; l <= elWedgeIndex.giveSize(); l++) {
-                            FloatArray elNbarColumn;
-                            elNbar.copyColumn(elNbarColumn,elWedgeIndex.at(l));
-                            Nbar.addSubVectorCol(elNbarColumn, 1 + numWedgeIP*(elNum-1), patchWedgeIndex.at(l));
-                        }
-                    }
-                    
-                }
-                
-                // Nhat = inv(Nbar^T*Nbar)*Nbar^T
-                NbarTNbar.beTProductOf(Nbar,Nbar);
-                NbarTNbarInv.beInverseOf(NbarTNbar);
-                Nhat.beProductTOf(NbarTNbarInv,Nbar);
 
-                temprecovedValues.beProductOf(Nhat,ipValues);
-                temprecovedValuesT.beTranspositionOf(temprecovedValues);
-                
-//                 // save recovered values of patch
-//                 ///@todo se över nodnumrering?
-//                 patchRecoveredValues.resize(numPatchWedgeNodes);
-//                 for (int inode = 0; inode < numPatchWedgeNodes; inode++ ) {
-//                     patchRecoveredValues[inode].beColumnOf(temprecovedValuesT,inode+1);
-//                 }
-
-                // Save recoved values to centre element (NB: don't save to other patch nodes at the moment)
-                ///@todo se över nodnumrering.
-                IntArray strangeNodeNumbering = {2, 1, 3, 5, 4, 6, 7, 9, 8, 10, 12, 11, 13, 14, 15 };
-                
-                for (int inode = 1; inode <= centreElTriaNodes.giveSize(); inode++ ) {
-                    int elTriaNode = centreElTriaNodes.at(inode);                               // Global tria node number in element
-                    int elTriaIndex = patchTriaNodes.findFirstIndexOf(elTriaNode);              // corresponding index in patch tria nodes (if part of patch at all)
-                    if ( elTriaIndex ) {
-                        IntArray elWedgeIndex = triaInd2QwedgeInd[inode-1];                         // corresponding wedge nodes for current tria node
-                        IntArray patchWedgeIndex = patchTriaInd2QwedgeInd[elTriaIndex-1];   // corresponding patch wedge nodes for current tria node
-                        int numWedgeNodes = elWedgeIndex.giveSize();
-                        double midNodeScale = (3.0-(double)(numWedgeNodes))/2.0 + ((double)(numWedgeNodes)-2.0);             // mid nodes get contribution from two patches
-                        for (int jnode = 1; jnode <= elWedgeIndex.giveSize(); jnode++ ) {
-                            FloatArray recoveredValuesColumn; recoveredValuesColumn.beColumnOf(temprecovedValuesT,patchWedgeIndex.at(jnode));
-                            recoveredValuesColumn.times(midNodeScale);                      // scale mid nodes w 1/2, else scale is 1.0
-                            recoveredValues[strangeNodeNumbering.at(elWedgeIndex.at(jnode))-1] = recoveredValuesColumn;
-                        }
-                    }
-                }
-            }
-#endif
-        } else {
-            
-            // or do standard recovery for only one element
-            this->recoverValuesFromIP(recoveredValues, layer, IST_StressTensor, tStep, SRtype);  
+        /* Recover values by a polynomial fit to the stress values in a patch of elements closest to the this element.
+            * The vector of GPvalues is [GPvalue] = [P(x_GP,y_GP,z_GP)]*a, where 
+            * P(x,y,z) = [1 x y z yz xz xz x^2 y^2] (NB: z^2 term omitted)
+            * a = [a1 ... a9] is the vector of coefficients of P
+            * a = inv(A)*b, where 
+            * A = [P]^T*[P], b = [P]^T*[GPvalue], calculated over the appropriate patch.
+            * the gradient of the GP value (used in the stress recovery) is then directly calculated by
+            * d[GPvalue]/di = [dP/di|GP]*a, i = x,y,z.
+            * dP/dx = [0 1 0 0 0 z y 2x 0]
+            * dP/dy = [0 0 1 0 z 0 x 0 2y]
+            * dP/dz = [0 0 0 1 y x 0 0 0 ]
+            * The values in the GP is overwritten by the recovery
+            */
+        
+        if (numThicknessIP < 2) {
+            // Polynomial fit involves linear z-component at the moment
+            OOFEM_ERROR("To few thickness IP per layer to do polynomial fit");
         }
         
-        double thickness = this->layeredCS->giveLayerThickness(layer);
-
-        //set up vector of stresses in the ip's = [S1_xx, S1_yy, S1_xy, ..., Sn_xx, Sn_yy, Sn_xy]
-        int numNodes = this->interpolationForExport.giveNumberOfNodes();	///@todo lägg till interpolationForExport för SR
-        FloatArray aS(numNodes*3); 
-        for ( int j = 1, pos = 0; j <= numNodes; j++, pos+=3 ) {
-            aS.at(pos + 1) = recoveredValues[j-1].at(1);   // S_xx
-            aS.at(pos + 2) = recoveredValues[j-1].at(2);   // S_yy
-            aS.at(pos + 3) = recoveredValues[j-1].at(6);   // S_xy
+        //recoveredValues.resize(numWedgeNodes);
+        IntArray centreElNum = {this->giveGlobalNumber()};
+        IntArray centreElNodes = this->giveDofManArray(); 
+        IntArray patchEls; 
+        FloatMatrix patchIpValues, P;
+        int numSampledIP = 0, numCoefficents = 9;
+        d->giveConnectivityTable()->giveElementNeighbourList(patchEls,centreElNum); 
+        for (int patchElNum : patchEls) {
+        //for (int iElt = 0; iElt < patchEls.giveSize(); iElt++) {
+            
+            // Get (pointer to) current element in patch and calculate its addition to the patch
+            Shell7Base *patchEl = static_cast<Shell7Base*>(d->giveElement(patchElNum));
+            //Shell7Base *patchEl = static_cast<Shell7Base*>(d->giveElement(patchEls.at(iElt+1)));
+            //patchEl->recoverValuesFromIP(patchRecoveredValues, layer, IST_StressTensor, tStep, SRtype); 
+            IntegrationRule *iRule = patchEl->integrationRulesArray[layer-1];                                     // Stämmer det här???
+            IntegrationPoint *ip;
+            int numEltIP = iRule->giveNumberOfIntegrationPoints();
+            //FloatMatrix elementIpValues, elementIpCoords;
+            //InternalStateValueType valueType =  giveInternalStateValueType(IST_StressTensor);
+            
+            // Loop over IP:s in wedge interpolation
+            for ( int iIP = 0; iIP < numEltIP; iIP++ ) {
+                ip = iRule->getIntegrationPoint(iIP);
+                
+                // Collect IP-value
+                FloatArray tempIPvalues;
+                patchEl->giveIPValue(tempIPvalues, ip, IST_StressTensor, tStep);
+                patchIpValues.addSubVectorRow(tempIPvalues,numSampledIP + iIP+1,1);
+                
+                // Collect global coordinates for IP and assemble to P.
+                FloatArray IpCoords;
+                IpCoords = ip->giveGlobalCoordinates();
+                FloatArray iRowP = {1,IpCoords.at(1),IpCoords.at(2),IpCoords.at(3),
+                                    IpCoords.at(2)*IpCoords.at(3),IpCoords.at(1)*IpCoords.at(3),IpCoords.at(1)*IpCoords.at(2),
+                                    IpCoords.at(1)*IpCoords.at(1),IpCoords.at(2)*IpCoords.at(2)};
+                P.addSubVectorRow(iRowP,numSampledIP + iIP+1,1);
+                
+            }
+            // add number of already sampled IPs 
+            numSampledIP += numEltIP;
         }
-
-        // Integrate S_xz, S_yz in all IP-stacks
+        
+        if (numSampledIP < numCoefficents*numThicknessIP) {
+            // Polynomial fit involves quadratic x- and y-components
+            OOFEM_ERROR("To few in-plane IP to do polynomial fit");
+        }
+        
+        // Find polynomial coefficients for patch
+        FloatMatrix A, invA, Abar, a;
+        // A = P^T*P
+        A.beTProductOf(P,P);
+        invA.beInverseOf(A);
+        // Abar = inv(A)*P^T
+        Abar.beProductTOf(invA,P);
+        // a = Abar*ipValues, a.size = 9 x StressComponents (9 = number of coefficients)
+        a.beProductOf(Abar,patchIpValues);
+        
+        
+        // Assemble appropriate coefficients matrix for computing S_xz and S_yz
+        // aSzz = [a(:,1)^T a(:,6)^T; a(:,6)^T a(:,2)^T]
+        FloatMatrix aSiz; 
+        aSiz.resize(2,numCoefficents*2);
+        for (int iCol = 1; iCol <= numCoefficents; iCol++) {
+            aSiz.at(1,iCol) = a.at(iCol,1);
+            aSiz.at(1,iCol+numCoefficents) = a.at(iCol,6);
+            aSiz.at(2,iCol) = a.at(iCol,6);
+            aSiz.at(2,iCol+numCoefficents) = a.at(iCol,2);
+        }
+        
+        // Integrate gradient of S_xz, S_yz in all IP-stacks
         dSmat.zero(); 
+        double thickness = this->layeredCS->giveLayerThickness(layer);
         double detJ = thickness / 2;
+        
+        
         for ( int j = 0; j < numInPlaneIP; j++ ) { 
-
+            
             // Integrate over thickness
             for ( int i = 0; i < iRuleThickness.giveNumberOfIntegrationPoints(); i++ ) {
                 double  dz = detJ * iRuleThickness.getIntegrationPoint(i)->giveWeight(); 
 
                 int point = i*numInPlaneIP + j; // integration point number
                 GaussPoint *gp = iRuleL->getIntegrationPoint(point);
-                // Compute S_xz, S_yz in layer interface
-                FloatArray lCoords = { gp->giveNaturalCoordinate(1), gp->giveNaturalCoordinate(2), iRuleThickness.getIntegrationPoint(i)->giveNaturalCoordinate(1) };
-//                 this->computeBmatrixForStressRecAt(lCoords, B, layer);
-                this->computeBmatrixForStressRecAt(*gp->giveNaturalCoordinates(), B, layer);
-                dS.beProductOf(B,aS*(-dz));     // stress increment
-#if 0
-                // analytical values for gradient.
-                dS = { 7.8608e+09 * gp->giveNaturalCoordinate(3)*totalThickness/2.0 *(dz), 0., 0.};
-                // Test parabolic S_xx. all other comp zero.
-                dS.zero();
-                double zeta = gp->giveNaturalCoordinate(3);
-                zeta *= totalThickness/2;
-                dS.at(1) = zeta*zeta*dz;
-#endif
+                FloatArray GPcoords = gp->giveGlobalCoordinates();
+                
+                // calculate gradient (wrt x and y) of stresses at GP position such that
+                // [a(ij) a(ij)]*gradP = dS_ij/dx + dS_ij/dy
+                FloatArray gradP;
+                this->givePolynomialGradientForStressRecAt(gradP,GPcoords);
+                dS.beProductOf(aSiz,gradP*(-dz));   // stress increment in z-direction, NB: minus sign from integral
+                
                 // add increment from each level
                 dSmat.at(1,j+1) += dS.at(1);    // S_xz
                 dSmat.at(2,j+1) += dS.at(2);    // S_yz
                 
-#if 0
-                // Test w/o interpolation accross layer. NB for one layer
-                ///@todo "ta bort" detta avsnitt
-                StructuralMaterialStatus* status = dynamic_cast< StructuralMaterialStatus* > ( gp->giveMaterialStatus() );
-                Sold = status->giveStressVector();
-                Sold.at(5) = dSmat.at(1,j+1);
-                Sold.at(4) = dSmat.at(2,j+1);
-                status->letStressVectorBe(Sold);
-#endif
-            
             }
-
-#if 1
+            
             // Replace old stresses with recovered. Stresses in IP are linear interpolations of values in layer interfaces.  
             // this type of replacement should probably not be done as it may affect the convergence in a nonlinear case
             for ( int i = 0; i < this->layeredCS->giveNumIntegrationPointsInLayer(); i++ ) {
@@ -2612,7 +2451,7 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
                 Sold.at(5) = SmatOld.at(1,j+1) + zeta*dSmat.at(1,j+1)/thickness; // S_xz
                 Sold.at(4) = SmatOld.at(2,j+1) + zeta*dSmat.at(2,j+1)/thickness; // S_yz
                 
-                Sold.at(3) = SmatOld.at(3,j+1) + zeta*dSmat.at(3,j+1)/thickness; // S_xx
+                //Sold.at(3) = SmatOld.at(3,j+1) + zeta*dSmat.at(3,j+1)/thickness; // S_zz
                 if ( Sold.giveSize() > 6 ) {
                     Sold.at(8) = Sold.at(5); // S_xz
                     Sold.at(7) = Sold.at(4); // S_yz
@@ -2620,64 +2459,36 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
                 status->letStressVectorBe(Sold);
 
             }
-#endif
-            
         }
-        recoveredValues.clear();
-#if 1        
-        // Find S_xz and S_yz stresses in nodal points for layer (NB: these are recoved values)
-        this->recoverValuesFromIP(recoveredValues, layer, IST_StressTensor, tStep, SRtype);
-                
-        //set up vector of stresses in the ip's = [S1_xz, S1_yz, ..., Sn_xz, Sn_yz]
-        aS.resize(numNodes*2); 
-        for ( int j = 1, pos = 0; j <= numNodes; j++, pos+=2 ) {
-            aS.at(pos + 1) = recoveredValues[j-1].at(5);   // S_xz
-            aS.at(pos + 2) = recoveredValues[j-1].at(4);   // S_yz
-        }
-        
-        // Integrate S_zz in all IP stacks
-        for ( int j = 0; j < numInPlaneIP; j++ ) { 
-
-            // Integrate over thickness
-            for ( int i = 0; i < iRuleThickness.giveNumberOfIntegrationPoints(); i++ ) { 
-                
-                double  dz = detJ * iRuleThickness.getIntegrationPoint(i)->giveWeight(); 
-
-                int point = i*numInPlaneIP + j; // integration point number
-                GaussPoint *gp = iRuleL->getIntegrationPoint(point);
-                // Compute S_zz in layer interface. NB different B matrix with intSzz = true
-                this->computeBmatrixForStressRecAt(*gp->giveNaturalCoordinates(), B, layer, true);
-                dS.beProductOf(B,aS*(-dz));     // stress increment
-                dSmat.at(3,j+1) += dS.at(1);    // add increment from each level
-            }
-            
-            // Replace old stresses with recovered. Stresses in IP are linear interpolations of values in layer interfaces.  
-            // this should probably not be done as it may affect the convergence in a nonlinear case
-            for ( int i = 0; i < this->layeredCS->giveNumIntegrationPointsInLayer(); i++ ) {
-
-                int point = i*numInPlaneIP + j; // integration point number
-                GaussPoint *gp = iRuleL->getIntegrationPoint(point);
-                StructuralMaterialStatus* status = dynamic_cast< StructuralMaterialStatus* > ( gp->giveMaterialStatus() );
-                Sold = status->giveStressVector();
-                
-                double zeta = gp->giveNaturalCoordinate(3) + 1; // IP height position in parent coord + 1
-                zeta *= totalThickness/2;                       // IP height in shell coord + half shell thickness
-                zeta -= integralThickness;                      // IP height position from current layer bottom
-                Sold.at(3) = SmatOld.at(3,j+1) + zeta*dSmat.at(3,j+1)/thickness; // S_zz
-
-                status->letStressVectorBe(Sold);
-            }
-        }
-#endif        
         SmatOld.add(dSmat);
         integralThickness += thickness;
         
-        recoveredValues.clear();
-    }
+        ///@todo Add Recovery of Szz
+    } 
 
 }
 
+void
+Shell7Base :: givePolynomialGradientForStressRecAt(FloatArray &answer, FloatArray &coords)
+{
+    /* Return the special matrix {gradP} of the reciever evaluated at a global coordinate (of a Gauss point)
+     * Used for integration of S_xz and S_yz such that
+     * a(ij)*gradP = dS_ij/dx + dS_ij/dy, where a(ij) is a vector of coefficients to the polynomial
+     * P(x,y,z) = [1 x y z yz xz xz x^2 y^2] (NB: z^2 term omitted)
+     * associated with stress component ij.
+     * The gradient of P(x,y,z) is given by
+     * dP/dx = [0 1 0 0 0 z y 2x 0]
+     * dP/dy = [0 0 1 0 z 0 x 0 2y]
+     * dP/dz = [0 0 0 1 y x 0 0 0 ] (NB not returned atm)
+     * answer = gradP = [dP/dx dP/dy]^T
+     */
+    
+    answer.zero();
+    answer = {0,1,0,0,           0,coords.at(3),coords.at(2),2*coords.at(1),             0,
+              0,0,1,0,coords.at(3),           0,coords.at(1),             0,2*coords.at(2)};
+}
 
+#if 0
 void
 Shell7Base :: computeBmatrixForStressRecAt(FloatArray &lcoords, FloatMatrix &answer, int layer, bool intSzz)
 {
@@ -2721,7 +2532,7 @@ Shell7Base :: computeBmatrixForStressRecAt(FloatArray &lcoords, FloatMatrix &ans
         }
     }
 }
-
+#endif
 
 
 
