@@ -52,7 +52,8 @@ class StructuralEngngModel;
 class FluidStructureProblem;
 
 /**
- * Particle class being used in PFEM computations
+ * This class represents a fluid particle attached to a node on the structural part
+ * of the interface. The linked structural node is attribute of this class.
  */
 class OOFEM_EXPORT InteractionPFEMParticle : public PFEMParticle
 {
@@ -65,7 +66,7 @@ public:
      * @param n node number in domain aDomain
      * @param aDomain domain to which node belongs
      */
-    InteractionPFEMParticle(int n, Domain * aDomain);
+    InteractionPFEMParticle(int n, Domain *aDomain);
     /**
      * Destructor.
      */
@@ -91,8 +92,8 @@ public:
 #endif
 
 private:
-    StructuralEngngModel* giveStructuralProblem();
-    FluidStructureProblem* giveFluidStructureMasterProblem();
+    StructuralEngngModel *giveStructuralProblem();
+    FluidStructureProblem *giveFluidStructureMasterProblem();
 };
 } // end namespace oofem
 #endif // interactionpfemparticle_h

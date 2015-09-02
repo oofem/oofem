@@ -43,8 +43,7 @@
 #include "function.h"
 
 namespace oofem {
-
-REGISTER_BoundaryCondition( InteractionLoad );
+REGISTER_BoundaryCondition(InteractionLoad);
 
 IRResultType
 InteractionLoad :: initializeFrom(InputRecord *ir)
@@ -58,13 +57,13 @@ InteractionLoad :: initializeFrom(InputRecord *ir)
 }
 
 
-void InteractionLoad :: giveInputRecord(DynamicInputRecord& input)
+void InteractionLoad :: giveInputRecord(DynamicInputRecord &input)
 {
-    LinearEdgeLoad :: giveInputRecord ( input );
+    LinearEdgeLoad :: giveInputRecord(input);
 }
 
 void
-InteractionLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode)
+InteractionLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode)
 {
     int nSize, nDofs;
     double factor;
@@ -81,24 +80,24 @@ InteractionLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArra
     nDofs = this->componentArray.giveSize() / nSize;
 
     FloatArray pressureArray = this->componentArray;
-    FluidStructureProblem *fsiProblem = dynamic_cast<FluidStructureProblem*>(domain->giveEngngModel()->giveMasterEngngModel());
-    if (fsiProblem) {
+    FluidStructureProblem *fsiProblem = dynamic_cast< FluidStructureProblem * >( domain->giveEngngModel()->giveMasterEngngModel() );
+    if ( fsiProblem ) {
         for ( int i = 1; i <= fsiProblem->giveNumberOfSlaveProblems(); i++ ) {
-            PFEM *pfem = dynamic_cast<PFEM*>(fsiProblem->giveSlaveProblem(i));
-            if (pfem) {
-                for ( int j = 1; j <= coupledParticles.giveSize(); j++) {
-                    DofManager *dman = pfem->giveDomain(1)->giveDofManager(coupledParticles.at(j));
+            PFEM *pfem = dynamic_cast< PFEM * >( fsiProblem->giveSlaveProblem(i) );
+            if ( pfem ) {
+                for ( int j = 1; j <= coupledParticles.giveSize(); j++ ) {
+                    DofManager *dman = pfem->giveDomain(1)->giveDofManager( coupledParticles.at(j) );
                     Dof *pressureDof = dman->giveDofWithID(P_f);
                     double pressureValue = pfem->giveUnknownComponent(VM_Total, tStep, pfem->giveDomain(1), pressureDof);
                     pressureValue = pressureValue > 0 ? pressureValue : 0.0;
-                    for ( int k = 1; k <= nDofs; k++) {
-                        pressureArray.at(nDofs * (j - 1) + k) *= pressureValue;
+                    for ( int k = 1; k <= nDofs; k++ ) {
+                        pressureArray.at(nDofs * ( j - 1 ) + k) *= pressureValue;
                     }
                 }
             }
         }
     }
-    
+
     answer.resize(nDofs);
 
     if ( ( pressureArray.giveSize() / nSize ) != nDofs ) {
@@ -113,14 +112,14 @@ InteractionLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArra
 
         answer.at(i) = value;
     }
-   
+
     factor = this->giveTimeFunction()->evaluate(tStep, mode);
 
     answer.times(factor);
 }
 
 void
-InteractionLoad :: computeNArray(FloatArray &answer, FloatArray &coords) const
+InteractionLoad :: computeNArray(FloatArray &answer, const FloatArray &coords) const
 {
     LinearEdgeLoad :: computeNArray(answer, coords);
 }
