@@ -2289,6 +2289,41 @@ Shell7Base :: giveL2contribution(FloatMatrix &ipValues, FloatMatrix &Nbar, int l
         Nbar.addSubVectorRow(N,i+1,1);
     }
 }
+
+void
+Shell7Base :: giveSPRcontribution(FloatMatrix &eltIPvalues, FloatMatrix &eltPolynomialValues, int layer, InternalStateType type, TimeStep *tStep)
+{
+    /* Returns the integration point values and polynomial values of the element interpolation wedge at layer, such that
+       [GPvalue] = [P(x_GP,y_GP,z_GP)]*a, where 
+       P(x,y,z) = [1 x y z yz xz xz x^2 y^2] (NB: z^2 term omitted)
+       a = [a1 ... a9] is the vector of coefficients, which is to be found by the polynomial least square fit.
+    */
+    
+    IntegrationRule *iRule = this->integrationRulesArray[layer-1];                                     // Stämmer det här???
+    IntegrationPoint *ip;
+    int numEltIP = iRule->giveNumberOfIntegrationPoints();
+    eltIPvalues.clear();
+    eltPolynomialValues.clear();
+    
+    // Loop over IP:s in wedge interpolation
+    for ( int iIP = 0; iIP < numEltIP; iIP++ ) {
+        ip = iRule->getIntegrationPoint(iIP);
+        
+        // Collect IP-value
+        FloatArray IPvalues;
+        this->giveIPValue(IPvalues, ip, type, tStep);
+        eltIPvalues.addSubVectorRow(IPvalues,iIP+1,1);
+        
+        // Collect global coordinates for IP and assemble to P.
+        FloatArray IpCoords;
+        IpCoords = ip->giveGlobalCoordinates();
+        FloatArray iRowP = {1,IpCoords.at(1),IpCoords.at(2),IpCoords.at(3),
+                            IpCoords.at(2)*IpCoords.at(3),IpCoords.at(1)*IpCoords.at(3),IpCoords.at(1)*IpCoords.at(2),
+                            IpCoords.at(1)*IpCoords.at(1),IpCoords.at(2)*IpCoords.at(2)};
+        eltPolynomialValues.addSubVectorRow(iRowP,iIP+1,1);
+        
+    }
+}
   
 void 
 Shell7Base :: recoverShearStress(TimeStep *tStep)
@@ -2341,21 +2376,20 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
         IntArray centreElNum = {this->giveGlobalNumber()};
         IntArray centreElNodes = this->giveDofManArray(); 
         IntArray patchEls; 
-        FloatMatrix patchIpValues, P;
         int numSampledIP = 0, numCoefficents = 9;
+        int numPatchEls = patchEls.giveSize();
+//         FloatMatrix patchIpValues(numPatchEls*numThicknessIP*numInPlaneIP,6), P(numPatchEls*numThicknessIP*numInPlaneIP,numCoefficents);
+        FloatMatrix patchIpValues, P;
+        
         d->giveConnectivityTable()->giveElementNeighbourList(patchEls,centreElNum); 
-        for (int patchElNum : patchEls) {
-        //for (int iElt = 0; iElt < patchEls.giveSize(); iElt++) {
+        for (int patchElNum : patchEls) {            
             
             // Get (pointer to) current element in patch and calculate its addition to the patch
             Shell7Base *patchEl = static_cast<Shell7Base*>(d->giveElement(patchElNum));
-            //Shell7Base *patchEl = static_cast<Shell7Base*>(d->giveElement(patchEls.at(iElt+1)));
-            //patchEl->recoverValuesFromIP(patchRecoveredValues, layer, IST_StressTensor, tStep, SRtype); 
+            
             IntegrationRule *iRule = patchEl->integrationRulesArray[layer-1];                                     // Stämmer det här???
             IntegrationPoint *ip;
             int numEltIP = iRule->giveNumberOfIntegrationPoints();
-            //FloatMatrix elementIpValues, elementIpCoords;
-            //InternalStateValueType valueType =  giveInternalStateValueType(IST_StressTensor);
             
             // Loop over IP:s in wedge interpolation
             for ( int iIP = 0; iIP < numEltIP; iIP++ ) {
@@ -2375,7 +2409,19 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
                 P.addSubVectorRow(iRowP,numSampledIP + iIP+1,1);
                 
             }
-            // add number of already sampled IPs 
+#if 0       
+            // Replace above with function
+            // Get contribution from element in patch
+            FloatMatrix eltIPvalues, eltPolynomialValues;
+            patchEl->giveSPRcontribution(eltIPvalues,eltPolynomialValues,layer,IST_StressTensor,tStep);
+            int numEltIP = eltIPvalues.giveNumberOfRows();
+            
+            // Add to patch
+            P.setSubMatrix(eltPolynomialValues,numSampledIP+1,1);
+            patchIpValues.setSubMatrix(eltIPvalues,numSampledIP+1,1);
+#endif
+
+            // increase number of sampled IPs 
             numSampledIP += numEltIP;
         }
         
@@ -2396,7 +2442,7 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
         
         
         // Assemble appropriate coefficients matrix for computing S_xz and S_yz
-        // aSzz = [a(:,1)^T a(:,6)^T; a(:,6)^T a(:,2)^T]
+        // aSiz = [a(:,1)^T a(:,6)^T; a(:,6)^T a(:,2)^T]
         FloatMatrix aSiz; 
         aSiz.resize(2,numCoefficents*2);
         for (int iCol = 1; iCol <= numCoefficents; iCol++) {
@@ -2460,10 +2506,102 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
 
             }
         }
+//         SmatOld.add(dSmat);
+//         integralThickness += thickness;
+        
+        ///@todo Add Recovery of Szz
+        // Hur gör jag detta? Det måste ju ske efter att alla element har genomgått en recovery av Sxz och Syz, annars är det ju ingen poäng... 
+        // Om vi inte kan hävda att det räcker att anpassa till ett element.. 
+        // Testar för ett element nedan.
+                
+        IntegrationRule *iRule = this->integrationRulesArray[layer-1];                                     // Stämmer det här???
+        IntegrationPoint *ip;
+        int numEltIP = iRule->giveNumberOfIntegrationPoints();
+        P.clear(); 
+        patchIpValues.clear();
+        
+        // Loop over IP:s in wedge interpolation
+        for ( int iIP = 0; iIP < numEltIP; iIP++ ) {
+            ip = iRule->getIntegrationPoint(iIP);
+            
+            // Collect IP-value
+            FloatArray tempIPvalues;
+            this->giveIPValue(tempIPvalues, ip, IST_StressTensor, tStep);
+            patchIpValues.addSubVectorRow(tempIPvalues,numSampledIP + iIP+1,1);
+            
+            // Collect global coordinates for IP and assemble to P.
+            FloatArray IpCoords;
+            IpCoords = ip->giveGlobalCoordinates();
+            FloatArray iRowP = {1,IpCoords.at(1),IpCoords.at(2),IpCoords.at(3),
+                                IpCoords.at(2)*IpCoords.at(3),IpCoords.at(1)*IpCoords.at(3),IpCoords.at(1)*IpCoords.at(2),
+                                IpCoords.at(1)*IpCoords.at(1),IpCoords.at(2)*IpCoords.at(2)};
+            P.addSubVectorRow(iRowP,numSampledIP + iIP+1,1);
+                
+        }
+        // Find polynomial coefficients for patch
+        A.clear(); invA.clear(); Abar.clear(); a.clear();
+        // A = P^T*P
+        A.beTProductOf(P,P);
+        invA.beInverseOf(A);
+        // Abar = inv(A)*P^T
+        Abar.beProductTOf(invA,P);
+        // a = Abar*ipValues, a.size = 9 x StressComponents (9 = number of coefficients)
+        a.beProductOf(Abar,patchIpValues);
+        
+        // Assemble appropriate coefficients matrix for computing S_xz and S_yz
+        // aSzz = [a(:,5)^T a(:,4)^T]
+        FloatMatrix aSzz; 
+        aSzz.resize(1,numCoefficents*2);
+        for (int iCol = 1; iCol <= numCoefficents; iCol++) {
+            aSzz.at(1,iCol) = a.at(iCol,5);
+            aSzz.at(1,iCol+numCoefficents) = a.at(iCol,4);
+        }
+        
+        // Integrate gradient of S_zz, in all IP-stacks
+        for ( int j = 0; j < numInPlaneIP; j++ ) { 
+            
+            // Integrate over thickness
+            for ( int i = 0; i < iRuleThickness.giveNumberOfIntegrationPoints(); i++ ) {
+                double  dz = detJ * iRuleThickness.getIntegrationPoint(i)->giveWeight(); 
+
+                int point = i*numInPlaneIP + j; // integration point number
+                GaussPoint *gp = iRuleL->getIntegrationPoint(point);
+                FloatArray GPcoords = gp->giveGlobalCoordinates();
+                
+                // calculate gradient (wrt x and y) of stresses at GP position such that
+                // [a(ij) a(ij)]*gradP = dS_ij/dx + dS_ij/dy
+                FloatArray gradP;
+                this->givePolynomialGradientForStressRecAt(gradP,GPcoords);
+                dS.beProductOf(aSzz,gradP*(-dz));   // stress increment in z-direction, NB: minus sign from integral
+                
+                // add increment from each level
+                dSmat.at(3,j+1) += dS.at(1);    // S_zz
+                
+            }
+            
+            // Replace old stresses with recovered. Stresses in IP are linear interpolations of values in layer interfaces.  
+            // this type of replacement should probably not be done as it may affect the convergence in a nonlinear case
+            for ( int i = 0; i < this->layeredCS->giveNumIntegrationPointsInLayer(); i++ ) {
+
+                int point = i*numInPlaneIP + j; // integration point number
+                GaussPoint *gp = iRuleL->getIntegrationPoint(point);
+                StructuralMaterialStatus* status = dynamic_cast< StructuralMaterialStatus* > ( gp->giveMaterialStatus() );
+//                 this->giveIPValue(Sold, gp, IST_StressTensor, tStep);
+                Sold = status->giveStressVector();
+                
+                double zeta = gp->giveNaturalCoordinate(3) + 1; // IP height position in parent coord + 1
+                zeta *= totalThickness/2;                       // IP height in shell coord + half shell thickness
+                ///@todo should this be layerthickness?
+                zeta -= integralThickness;                      // IP height position from current layer bottom
+                Sold.at(3) = SmatOld.at(3,j+1) + zeta*dSmat.at(3,j+1)/thickness; // S_zz
+                
+                status->letStressVectorBe(Sold);
+
+            }
+        }
         SmatOld.add(dSmat);
         integralThickness += thickness;
         
-        ///@todo Add Recovery of Szz
     } 
 
 }
