@@ -1238,6 +1238,60 @@ non-symmetrical system
 matrix. The scheme should be compatible with solver type. See section
 \ref{sparselinsolver} for further details.
 
+\subsection{Transient incompressible flow\\PFEM Algorithm}
+\label{pfemIncomp}
+\begin{record}
+  \recentry{\entKeywordInst{PFEM}}{\field{nsteps}{in}}
+  \recentry{}{\field{deltaT}{rn}}
+  \recentry{}{\field{material}{in}}
+  \recentry{}{\field{cs}{in}}
+  \recentry{}{\field{pressure}{in}}
+  \recentry{}{\optField{mindeltat}{rn}}
+  \recentry{}{\optField{alphashapecoef}{rn}}
+  \recentry{}{\optField{removalratio}{rn}}
+  \recentry{}{\optField{scheme}{in}}
+  \recentry{}{\optField{lstype}{in} \optField{smtype}{in}}
+\end{record}
+
+Solves the transient incompressible flow using particle finite element
+method based on the Lagrangian formulation of Navier-Stokes equations.
+
+Mesh nodes are represented by PFEMParticles~\ref{pfemparticles}, which 
+can freely move and even separate from the main domain. To integrate 
+governing equations in each solution step, a temporary mesh, built from 
+particles, is needed. The mesh is rebuilt from scratch in each solution 
+step to prevent large distortion of elements. Paramters \param{cs} and
+\param{material} assign types from cross section and material record to 
+created elements. Thus, the problem is defined without any elements in
+the input file.
+
+Mesh is generated using Delaunay triangulation and Alpha shape technique
+for the identification of the free surface. The parameter
+\param{alphashapecoef} should reflect initial distribution of PFEMParticles.
+Value approximately equal to 1,5-multiple of shortest distance of two 
+neighboring particles has been found well. On the free surface the zero-pressure
+boundary condition is enforced. This  must be defined in boundary condition
+record under the number defined by \param{pressure}.
+
+Parameter \param{scheme} controls whether the  equation system for the 
+components of the auxiliary velocity is solved explicitly (0) or implicitly
+(1). The last is the default option.
+
+Parameter \param{nsteps} determines number of solution
+steps. Parameter \param{deltaT} is time step length used for
+integration. To ensure numerical stability, step length is adapted upon mesh
+geometry and velocity of paricular nodes. To avoid to short time length a minimal
+size can be defined by \param{mindeltat}. Alternatively prescribing limit
+\param{removalratio} of the element edge length too close particles can be removed
+from solution.
+
+Parameter \param{lstype} allows to select solver for linear system of
+equations. Parameter \param{smtype} allows to select sparse matrix storage
+scheme. Please note, that the present algorithm leads to a
+non-symmetrical system
+matrix. The scheme should be compatible with solver type. See section
+\ref{sparselinsolver} for further details.
+
 \subsection{Staggered Problem}
 \label{staggeredproblem}
 \begin{record}
@@ -1285,6 +1339,46 @@ can be used only when this module is configured.
 Note: All material models derived from StructuralMaterial base will
 take into account the external registered temperature field, if
 provided.
+
+\subsection{FluidStructure Problem}
+\label{fluidstructureproblem}
+\begin{record}
+  \recentry{\entKeywordInst{FluidStructureProblem}}{\field{nsteps}{in} \field{deltaT}{rn}}
+  \recentry{}{\field{prob1}{s} \field{prob2}{s}}
+\end{record}
+
+Represents a fluid-structure analysis based on StaggeredProblem but providing
+iterative synchronization of sub-problems. The implementation uses the the PFEM
+model~\ref{pfemIncomp} for the fluid part. For the structural part a full dynamic
+analysis using implicit direct integration DIIDynamic\ref{DIIDynamic} is considered.
+
+The coupling of both phases is based on the idea of enforcing compatibility on the 
+interface. Special fluid particle are attached to every structural node on the 
+interface that can be hit by the fluid. These special particles have no degrees of 
+freedom associated, so no equations are solved on them. However, their movement is 
+fully determined by associated structural nodes. Their velocities governed by the 
+solid part affect the fluid equation naturally.
+
+This iterative procedure is based on the so-called Dirichlet-Neumann approach.
+Dirichlet boundary conditions are the prescribed velocities on the fluid side of
+the interface, whereas applied forces on the structural side represent the Neumann
+boundary conditions.
+
+The convergence criterion is based on the difference of the pressure and velocity
+values on the interface from the subsequent iterative steps. Once they are smaller
+than prescribed tolerance, the iteration is terminated and solution can proceed to
+the next step.
+
+The subproblem input files are described using
+\param{prob1} and \param{prob2} parameters, which are strings
+containing a path to sub-problem input files, the \param{prob1}
+contains input file path of the first sub-problem, which runs first
+for each solution step, the \param{prob2} contains input file path of
+the second sub-problem. The time step sequence is controlled by the number of steps
+\param{nsteps} and the time step length \param{deltaT}.
+
+Note: This problem type \textbf{is included in PFEM module} and it
+can be used only when this module is configured.
 
 \subsection{Sparse linear solver parameters}
 \label{sparselinsolver}
@@ -2159,6 +2253,24 @@ but given explicitly, as well as the connected dof managers (\param{masterDMan})
   \recentry{\entKeywordInst{ElementSide}}{}
 \end{record}
 Represents an abstraction for element side, which holds some unknowns.
+
+\item PFEMParticle \label{pfemparticles}
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{PFEMParticle}}{\field{coords}{ra}}
+\end{record}
+Represent the particle used in PFEM analysis.
+
+\item InteractionPFEMParticle \label{interactionparticle}
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{InteractionPFEMParticle}}{\field{coords}{ra}}
+  \recentry{}{\field{bc}{ia}}
+  \recentry{}{\field{coupledNode}{in}}
+\end{record}
+Represent a special particle used in the PFEM-part of the FluidStructureProblem. The particle is 
+attached to \param{coupledNode} from the structural counter part. InteractionBoundaryCondition~\ref{interactionbc} must be prescribed under \param{bc} to access the velocities from solid nodes.
+
 \end{itemize}
 
 \subsection{Element records}
@@ -2552,6 +2664,15 @@ where $r_i$ are unknowns related to DOFs determined by \param{dofmans} and \para
 
 The individual DOFs are determined using dof manager numbers (\param{dofmans} array) and corresponding DOF indices (\param{dofs}). The weights corresponding to participating DOFs are specified using \param{weights} array. The weights are multiplied by value returned by load time function, associated to individual weight using optional \param{weightsLtf} array. By default, all weights are set to 1. The constant $c$ is determined by \param{rhs} parameter and it is multiplied by the value of load time function, specified using \param{rhsLtf} parameter, or by 1 by default. The characteristic component, to which this boundary condition contributes must be identified using \param{lhstype} and \param{rhsType} parameters, values of which are corresponding to CharType enum. The left hand side contribution is assembled into terms identified by \param{lhstype}. The rhs contribution is assembled into the term identified by \param{rhsType} parameter. Note, that multiple values are allowed, this allows to select all variants of stifness matrix, for example. Note, that the size of \param{dofmans}, \param{dofs}, \param{weights}, \param{weightsLtf} arrays should be equal.
 
+\item InteractionBoundaryCondition \label{interactionbc}
+
+\noindent
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{InteractionBoundaryCondition}}{}
+\end{record}
+
+Is a special boundary condition prescribed on InteractionPFEMParticles~\ref{interactionparticle} in the PFEM part of the FluidStructureProblem. This sort of particles is regarded as it would have prescribed velocities, but the values change dynamically, as the solid part deforms. The velocities are obtained from coupled structural nodes.
+
 \end{itemize}
 \paragraph{Body loads}
 \begin{itemize}
@@ -2664,6 +2785,27 @@ beginning of edge (\param{ndofs} values), followed by values valid for
 end of edge (\param{ndofs} values). The load can be defined in global coordinate system (\param{csType} =
 0, default) or in entity - specific local coordinate system
 (\param{csType} = 1).
+\item InteractionLoad
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{InteractionLoad}}{\field{ndofs}{in}}
+  \recentry{}{\field{loadType}{in}}
+  \recentry{}{\field{Components}{ra}}
+  \recentry{}{\optField{csType}{in}}
+  \recentry{}{\field{coupledparticles}{ia}}
+\end{record}
+
+Represents a fluid pressure induced load in the solid part of the FluidStructureProblem. 
+The meanings of parameters \param{ndofs},
+\param{csType}, and \param{loadType} are the same as for
+\entKeywordInst{LinearEdgeLoad}. In \param{Components}
+array are stored load components for corresponding unknowns at the
+beginning of edge (\param{ndofs} values), followed by values valid for
+end of edge (\param{ndofs} values). The load should be defined in global 
+coordinate system (\param{csType} = 0) as it acts in normal direction of the edge.
+Array \param{coupledparticles} assign PFEMParticles from the fluid part of the problem 
+providing fluid pressure.
+
 \end{itemize}
 
 
