@@ -1,6 +1,6 @@
 InterfaceEL_SurfTr1.out
 Patch test for a interface element with a linear triangle surface
-LinearStatic nsteps 1 nmodules 1
+StaticStructural nsteps 1 nmodules 1 rtold 1e-5
 errorcheck
 domain 3d
 OutputManager tstep_all dofman_all element_all

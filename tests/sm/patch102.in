@@ -28,7 +28,7 @@ SimpleCS 1 thick 1.0 material 1 set 1
 IsoLE 1 d 1.0 E 10. n 0.1 tAlpha 0.000012
 #load and boundary condition section
 BoundaryCondition 1 loadTimeFunction 1 dofs 2 1 2 values 2 0 0 set 2
-BoundaryCondition 2 loadTimeFunction 1 dofs 2 1 values 1 0 set 3
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 1 values 1 0 set 3
 NodalLoad 3 loadTimeFunction 1 dofs 2 1 2 Components 2 0. 1.5 set 3
 #load time function list
 ConstantFunction 1 f(t) 1.0

@@ -18,7 +18,7 @@ InterfaceCS 2 material 2
 IsoLe 1 d 2500. E 40.e+3 n 0.15 talpha 2.40e-6 
 IntMatCoulombContact 2 kn 1.e+3 fc 1.0 stiffcoeff 0.2
 BoundaryCondition 1 loadTimeFunction 1 dofs 2 1 2 values 2 0.0 0.0 set 1
-BoundaryCondition 2 loadTimeFunction 2 dofs 1   2 values 2     0.0 set 2
+BoundaryCondition 2 loadTimeFunction 2 dofs 1   2 values 1     0.0 set 2
 BoundaryCondition 3 loadTimeFunction 2 dofs 2 1 2 values 2 0.01 0.0 set 3
 ConstantFunction 1 f(t) 1.0
 PiecewiseLinFunction 2 t 3 1 5 10 f(t) 3 0. -1. 1.

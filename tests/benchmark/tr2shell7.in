@@ -6,27 +6,27 @@ errorcheck
 domain 3dDirShell
 OutputManager tstep_all dofman_all element_all
 ndofman 15 nelem 4 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1 nset 2
-node      1 coords 3  0.00,           0.,           0.
-node      2 coords 3  0.50,           0.,           0.
-node      3 coords 3  1.00,           0.,           0.
-node      4 coords 3  0.00,  0.200000003,           0.
-node      5 coords 3  0.50,  0.200000003,           0.
-node      6 coords 3  1.00,  0.200000003,           0.
-node      7 coords 3  0.25,           0.,           0.
-node      8 coords 3  0.50,  0.100000001,           0.
-node      9 coords 3  0.25,  0.100000001,           0.
-node     10 coords 3  0.25,  0.200000003,           0.
-node     11 coords 3  0.00,  0.100000001,           0.
-node     12 coords 3  0.75,           0.,           0.
-node     13 coords 3  1.00,  0.100000001,           0.
-node     14 coords 3  0.75,  0.100000001,           0.
-node     15 coords 3  0.75,  0.200000003,           0.
+node      1 coords 3  0.00           0.           0.
+node      2 coords 3  0.50           0.           0.
+node      3 coords 3  1.00           0.           0.
+node      4 coords 3  0.00  0.200000003           0.
+node      5 coords 3  0.50  0.200000003           0.
+node      6 coords 3  1.00  0.200000003           0.
+node      7 coords 3  0.25           0.           0.
+node      8 coords 3  0.50  0.100000001           0.
+node      9 coords 3  0.25  0.100000001           0.
+node     10 coords 3  0.25  0.200000003           0.
+node     11 coords 3  0.00  0.100000001           0.
+node     12 coords 3  0.75           0.           0.
+node     13 coords 3  1.00  0.100000001           0.
+node     14 coords 3  0.75  0.100000001           0.
+node     15 coords 3  0.75  0.200000003           0.
 Tr2Shell7 1 nodes 6 1 2 5  7  8  9
 Tr2Shell7 2 nodes 6 5 4 1 10 11  9
 Tr2Shell7 3 nodes 6 2 3 6 12 13 14 boundaryLoads  2 2 2
 Tr2Shell7 4 nodes 6 6 5 2 15  8 14
 layeredCS 1 nlayers 2 layermaterials 2  1 1  thicks 2  1.00000e-002 1.00000e-002 nintegrationpoints 2 set 1
-IsoLE 1 d 1. E 1e9. n 0.0 tAlpha 0.
+IsoLE 1 d 1. E 1e9 n 0.0 tAlpha 0.
 BoundaryCondition 1 loadTimeFunction 1 dofs 7 1 2 3 15 16 17 18 values 7 0. 0. 0. 0. 0. 0. 0. set 2
 ConstantEdgeLoad 2 loadType 2 loadTimeFunction 1 Components 8 0. 0. 1.0 0. 0. 0. 0.0 1.0
 ConstantFunction 1 f(t) 1.
@@ -42,4 +42,3 @@ Set 2 nodes 3 1 4 11
 #NODE tStep 1 number 13 dof 17 unknown d value -2.81536282e-007
 #NODE tStep 1 number 13 dof 18 unknown d value -5.30812682e-007
 #%END_CHECK%
-  

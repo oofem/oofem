@@ -3,7 +3,8 @@ Test of linear axisymmetric triangular elements, thick ring with internal overpr
 #Exact solution for radial displacement u_r = (100+r^2)/(525*r)
 #Exact solution for radial stress sig_r = 40./21.*(1-100./r^2)
 #Exact solution for hoop stress sig_theta = 40./21.*(1+100./r^2)
-LinearStatic nsteps 1 nmodules 1
+#LinearStatic nsteps 1 nmodules 1
+StaticStructural nsteps 1 nmodules 1
 errorcheck
 #vtkxml tstep_step 1 cellvars 1 46 vars 3 1 2 4 primvars 1 1 stype 2
 domain 2dPlaneStress

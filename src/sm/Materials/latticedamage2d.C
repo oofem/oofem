@@ -291,8 +291,7 @@ LatticeDamage2d :: computeStressIndependentStrainVector(FloatArray &answer,
 MaterialStatus *
 LatticeDamage2d :: CreateStatus(GaussPoint *gp) const
 {
-    LatticeDamage2dStatus *answer = new LatticeDamage2dStatus(1, LatticeDamage2d :: domain, gp);
-    return answer;
+    return new LatticeDamage2dStatus(1, LatticeDamage2d :: domain, gp);
 }
 
 MaterialStatus *

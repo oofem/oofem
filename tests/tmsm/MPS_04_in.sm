@@ -73,7 +73,7 @@ BoundaryCondition 3 loadTimeFunction 2 dofs 1 1 values 1 5.e-5 set 3
 # TIME FUNCTION
 #
 ConstantFunction 1 f(t) 1.0
-PiecewiseLinFunction 2 npoints 5 t 5 -1e7. 0. 1.e2 1.e3 1.e4 f(t) 5 0.0 0.0 0.4 1.0 1.0 
+PiecewiseLinFunction 2 npoints 5 t 5 -1e7 0. 1.e2 1.e3 1.e4 f(t) 5 0.0 0.0 0.4 1.0 1.0 
 #
 #
 #%BEGIN_CHECK% 

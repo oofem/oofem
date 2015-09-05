@@ -10,7 +10,7 @@ node 1 coords 2 0.0 0.0
 node 2 coords 2 0.001 0.0
 lattice2D 1 nodes 2 1 2 crossSect 1 mat 1 gpCoords 2 0.0005 0. width 0.001 thick 1.0
 simplecs 1 material 1
-latticedamage2d 1 d 0 talpha 0. e 30.e9 e0 100.e-6 wf 100.e-4 coh 2. ec 10. stype 1. randvars 1 800 randgen 1 2 
+latticedamage2d 1 d 0 talpha 0. e 30.e9 e0 100.e-6 wf 100.e-4 coh 2. ec 10. stype 1 randvars 1 800 randgen 1 2 
 BoundaryCondition 1 loadTimeFunction 1 dofs 3 1 2 6 values 3 0. 0. 0. set 1
 BoundaryCondition 2 loadTimeFunction 1 dofs 1 6 values 1 0. set 2
 NodalLoad 3 loadTimeFunction 1 dofs 3 1 2 6 Components 3 1. 0. 0. set 2

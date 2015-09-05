@@ -1,6 +1,6 @@
 lattice2dcrackinput.out
 Direct tension. 2D Model
-nltransienttransportproblem nsteps 1. deltat 6.00 rtol 5.e-11 alpha 1. nsmax 2000 contextOutputStep 100 nmodules 1
+nltransienttransportproblem nsteps 1 deltat 6.00 rtol 5.e-11 alpha 1. nsmax 2000 contextOutputStep 100 nmodules 1
 errorcheck
 domain 2dMassLatticeTransport 
 OutputManager tstep_all dofman_all element_all 

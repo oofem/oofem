@@ -105,7 +105,8 @@ OOFEMTXTInputRecord :: giveRecordKeywordField(std :: string &answer, int &value)
     if ( tokenizer.giveNumberOfTokens() > 0 ) {
         answer = std :: string( tokenizer.giveToken(1) );
         setReadFlag(1);
-        if ( scanInteger(tokenizer.giveToken(2), value) == 0 ) {
+        auto ptr = scanInteger(tokenizer.giveToken(2), value);
+        if ( ptr == NULL || *ptr != 0 ) {
             return IRRT_BAD_FORMAT;
         }
         setReadFlag(2);
@@ -134,7 +135,8 @@ OOFEMTXTInputRecord :: giveField(int &answer, InputFieldType id)
 {
     int indx = this->giveKeywordIndx(id);
     if ( indx ) {
-        if ( scanInteger(tokenizer.giveToken(indx + 1), answer) == 0 ) {
+        auto ptr = scanInteger(tokenizer.giveToken(indx + 1), answer);
+        if ( ptr == NULL || *ptr != 0 ) {
             return IRRT_BAD_FORMAT;
         }
 
@@ -151,7 +153,8 @@ OOFEMTXTInputRecord :: giveField(double &answer, InputFieldType id)
 {
     int indx = this->giveKeywordIndx(id);
     if ( indx ) {
-        if ( scanDouble(tokenizer.giveToken(indx + 1), answer) == NULL ) {
+        auto ptr = scanDouble(tokenizer.giveToken(indx + 1), answer);
+        if ( ptr == NULL || *ptr != 0 ) {
             return IRRT_BAD_FORMAT;
         }
 
@@ -169,7 +172,8 @@ OOFEMTXTInputRecord :: giveField(bool &answer, InputFieldType id)
     int val;
     int indx = this->giveKeywordIndx(id);
     if ( indx ) {
-        if ( scanInteger(tokenizer.giveToken(indx + 1), val) == 0 ) {
+        auto ptr = scanInteger(tokenizer.giveToken(indx + 1), val);
+        if ( ptr == NULL || *ptr != 0 ) {
             return IRRT_BAD_FORMAT;
         }
 
@@ -215,7 +219,8 @@ OOFEMTXTInputRecord :: giveField(IntArray &answer, InputFieldType id)
     int indx = this->giveKeywordIndx(id);
     if ( indx ) {
         setReadFlag(indx);
-        if ( scanInteger(tokenizer.giveToken(++indx), size) == 0 ) {
+        auto ptr = scanInteger(tokenizer.giveToken(++indx), size);
+        if ( ptr == NULL || *ptr != 0) {
             return IRRT_BAD_FORMAT;
         }
 
@@ -223,7 +228,8 @@ OOFEMTXTInputRecord :: giveField(IntArray &answer, InputFieldType id)
         setReadFlag(indx);
 
         for ( int i = 1; i <= size; i++ ) {
-            if ( scanInteger(tokenizer.giveToken(indx + i), value) == 0 ) {
+            ptr = scanInteger(tokenizer.giveToken(indx + i), value);
+            if ( ptr == NULL || *ptr != 0 ) {
                 return IRRT_BAD_FORMAT;
             }
 
@@ -245,7 +251,8 @@ OOFEMTXTInputRecord :: giveField(FloatArray &answer, InputFieldType id)
     int indx = this->giveKeywordIndx(id);
     if ( indx ) {
         setReadFlag(indx);
-        if ( scanInteger(tokenizer.giveToken(++indx), size) == NULL ) {
+        auto ptr = scanInteger(tokenizer.giveToken(++indx), size);
+        if ( ptr == NULL || *ptr != 0 ) {
             return IRRT_BAD_FORMAT;
         }
 
@@ -253,7 +260,8 @@ OOFEMTXTInputRecord :: giveField(FloatArray &answer, InputFieldType id)
         setReadFlag(indx);
 
         for ( int i = 1; i <= size; i++ ) {
-            if ( scanDouble(tokenizer.giveToken(indx + i), value) == NULL ) {
+            auto ptr = scanDouble(tokenizer.giveToken(indx + i), value);
+            if ( ptr == NULL || *ptr != 0 ) {
                 return IRRT_BAD_FORMAT;
             }
 
@@ -275,12 +283,14 @@ OOFEMTXTInputRecord :: giveField(FloatMatrix &answer, InputFieldType id)
     if ( indx ) {
         setReadFlag(indx);
 
-        if ( scanInteger(tokenizer.giveToken(++indx), nrows) == 0 ) {
+        auto ptr = scanInteger(tokenizer.giveToken(++indx), nrows);
+        if ( ptr == NULL || *ptr != 0 ) {
             return IRRT_BAD_FORMAT;
         }
 
         setReadFlag(indx);
-        if ( scanInteger(tokenizer.giveToken(++indx), ncols) == 0 ) {
+        ptr = scanInteger(tokenizer.giveToken(++indx), ncols);
+        if ( ptr == NULL || *ptr != 0 ) {
             return IRRT_BAD_FORMAT;
         }
 
@@ -304,7 +314,8 @@ OOFEMTXTInputRecord :: giveField(std :: vector< std :: string > &answer, InputFi
     int indx = this->giveKeywordIndx(id);
     if ( indx ) {
         setReadFlag(indx);
-        if ( scanInteger(tokenizer.giveToken(++indx), size) == 0 ) {
+        auto ptr = scanInteger(tokenizer.giveToken(++indx), size);
+        if ( ptr == NULL || *ptr != 0 ) {
             return IRRT_BAD_FORMAT;
         }
         answer.reserve(size);
@@ -329,7 +340,8 @@ OOFEMTXTInputRecord :: giveField(Dictionary &answer, InputFieldType id)
     int indx = this->giveKeywordIndx(id);
     if ( indx ) {
         setReadFlag(indx);
-        if ( scanInteger(tokenizer.giveToken(++indx), size) == NULL ) {
+        auto ptr = scanInteger(tokenizer.giveToken(++indx), size);
+        if ( ptr == NULL || *ptr != 0 ) {
             return IRRT_BAD_FORMAT;
         }
 
@@ -339,7 +351,8 @@ OOFEMTXTInputRecord :: giveField(Dictionary &answer, InputFieldType id)
         for ( int i = 1; i <= size; i++ ) {
             key = ( tokenizer.giveToken(++indx) ) [ 0 ];
             setReadFlag(indx);
-            if ( scanDouble(tokenizer.giveToken(++indx), value) == NULL ) {
+            auto ptr = scanDouble(tokenizer.giveToken(++indx), value);
+            if ( ptr == NULL || *ptr != 0 ) {
                 return IRRT_BAD_FORMAT;
             }
 
@@ -406,7 +419,8 @@ OOFEMTXTInputRecord :: giveField(ScalarFunction &answer, InputFieldType id)
         if ( * rec == '@' ) {
             // reference to function
             int refVal;
-            if ( scanInteger(rec + 1, refVal) == 0 ) {
+            auto ptr = scanInteger(rec + 1, refVal);
+            if ( ptr == NULL || *ptr != 0 ) {
                 return IRRT_BAD_FORMAT;
             }
             setReadFlag(indx);
@@ -422,7 +436,8 @@ OOFEMTXTInputRecord :: giveField(ScalarFunction &answer, InputFieldType id)
             answer.setSimpleExpression(_v); // get rid of enclosing '$'
         } else {
             double val;
-            if ( scanDouble(tokenizer.giveToken(indx), val) == NULL ) {
+            auto ptr = scanDouble(tokenizer.giveToken(indx), val);
+            if ( ptr == NULL || *ptr != 0 ) {
                 return IRRT_BAD_FORMAT;
             }
 
@@ -454,7 +469,6 @@ OOFEMTXTInputRecord :: printYourself()
     printf( "%s", this->record.c_str() );
 }
 
-
 const char *
 OOFEMTXTInputRecord :: scanInteger(const char *source, int &value)
 {
@@ -471,7 +485,6 @@ OOFEMTXTInputRecord :: scanInteger(const char *source, int &value)
     value = strtol(source, & endptr, 10);
     return endptr;
 }
-
 
 const char *
 OOFEMTXTInputRecord :: scanDouble(const char *source, double &value)
