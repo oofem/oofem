@@ -42,6 +42,8 @@
 \newcommand{\dev}{\mathrm{dev}}
 \newcommand{\vol}{\mathrm{vol}}
 
+\newcommand{\pard}[2]{\frac{\partial{#1}}{\partial{#2}}}
+
 \newcommand{\param}[1]{\texttt{#1}} % Use when referring to attributes in text.
 \newcommand{\optional}[1]{[#1]} % Denotes optional parameter
 \newcommand{\field}[2]{\param{#1}~\#{\tiny(#2)}} % Attribute #1 = identifier, #2 = type
@@ -1291,6 +1293,110 @@ scheme. Please note, that the present algorithm leads to a
 non-symmetrical system
 matrix. The scheme should be compatible with solver type. See section
 \ref{sparselinsolver} for further details.
+
+\subsubsection{Lagrangian governing equations of incompressible fluid}
+The Particle finite element method (PFEM) is based on the Lagrangian form of the Navier-Stokes equation for incompressible Newtonian fluids. Assuming the density does not change in time for an incompressible fluid, the continuity equation reduces to zero requirements for the divergence of the velocity. The Navier-Stokes equations take the form
+\begin{eqnarray}
+\rho\pard{\mbf{u}}{t} &=& \rho\mbf{b} + \nabla\cdot\mbf{\sigma} \label{eq:navier-stokes2}\;,\\
+\nabla\cdot\mbf{u} &=& 0\;. \label{eq:navier-stokes2b}
+\end{eqnarray}
+For the deviatoric stress in Newtonian fluids a linear dependency of stress tensor and strain rate tensor is adopted and for the Newtonian fluids. Considering the incompressibility of the fluid, the Cauchy stress reads
+\begin{equation}\label{eq:stokes}
+\mbf{\sigma}=-p\mbf{I} + 2\mu \nabla^s\mbf{u}\;.
+\end{equation}
+This equation is known as \emph{Stokes' law} and its Cartesian form writes
+\begin{equation}
+\sigma_{ij}=-p\delta_{ij}+\mu\left(\pard{u_i}{x_j}+\pard{u_j}{x_i}\right)\;.
+\end{equation}
+\par
+Substituting the expression of Cauchy stress from Stokes' law~(\ref{eq:stokes}) into the momentum equation~(\ref{eq:navier-stokes2}) and rewriting gives
+\begin{equation}
+\rho\pard{\mbf{u}}{t} = \rho\mbf{b} + \mu\nabla^2\mbf{u} - \nabla p\;.\label{eq:momentum}
+\end{equation}
+\par
+The governing equations of the mass~(\ref{eq:navier-stokes2b}) and momentum conservation~(\ref{eq:momentum}) form can be written in the Cartesian form for the individual component $i$ using Einstein summation convention
+\begin{eqnarray}
+\rho \pard{u_i}{t} &=& - \frac{\partial}{\partial x_i}p+\mu\frac{\partial}{\partial x_j}\left(\frac{\partial u_i}{\partial x_j}\right)+\rho b_i \;, \label{eq:mb}\\
+\pard{u_i}{x_i} &=& 0\;.
+\end{eqnarray}
+The equations are accompanied by a set of standard boundary conditions imposed on the complementary parts of the domain boundary
+\begin{eqnarray}
+  \tau_{ij}\nu_j - p\nu_i &=& \bar \sigma_{ni} \qquad \mbox{on } \Gamma_{\sigma}\;, \\
+  u_i\nu_i &=& \bar u_n \qquad\; \mbox{on } \Gamma_n\;, \\
+  u_i\zeta_i &=& \bar u_t \qquad\;\, \mbox{on } \Gamma_t\;,
+\end{eqnarray}
+where $\nu$ or $n$ denotes the normal direction to the boundary and $\zeta$ or $t$ the tangential one. The bar sign over a quantity $\bar x$ stands for its prescribed value.
+
+\subsubsection{Time discretization}
+For the time discretization of the momentum equation, a general trapezoid rule can be adopted. Using this rule, the time derivative of a generic function $\phi$ can be approximated by following equation
+\begin{equation}
+[\phi(x,t)]^{n+\theta} = \theta\phi(x,t^{n+1})+(1-\theta)\phi(x,t^n)=\theta\phi^{n+1}+(1-\theta)\phi^n\;.
+\end{equation}
+Rewriting the time derivative on the left hand side of the momentum balance~(\ref{eq:mb}) as a finite difference in time and applying the trapezoidal rule on the right hand side, we obtain
+\begin{equation}\label{eq:momentum-general}
+  \rho\pard{u_i}{t} \approx \rho\frac{u^{n+1}_i-u^n_i}{\Delta t}= \left[ - \frac{\partial}{\partial x_i}p+\mu\frac{\partial}{\partial x_j}\left(\frac{\partial u_i}{\partial x_j}\right)+\rho b_i\right]^{n+\theta}\;.
+\end{equation}
+The parameter $\theta$ can take values from the interval $[0,1]$.  The approximation is considered as a weighted average of the derivative values in the time step $n$ and $n+1$. Using a specific value of the $\theta$ parameter, well-known methods can be recovered: The explicit Euler method $\theta=0$, the backward Euler for $\theta=1$ or the Crank-Nicolson method $\theta=1/2$. The current implemantation of PFEM allows the use of explicit and backward (implicit) method.
+
+\subsubsection{Fractional step scheme}
+Beside the three velocity components, the discretized momentum balance equations~(\ref{eq:momentum-general}) for a three dimensional case includes pressure as a coupling variable. A possible approach to decouple them is the application of so-called \emph{fractional step method}. The main idea of this method consists in introducing an intermediate velocity as supplementary variable and splitting the momentum equation. The modification introduced by R.Codina~\cite{Codina01} splits the the discretized time step is split into two sub-steps. The implicit part of the pressure is avoided and assigned to the second step.
+\begin{equation}
+  \pard{u_i}{t} \approx \frac{u^{n+1}_i-u^n_i}{\Delta t}=\frac{u^{n+1}_i-u^*_i+u^*_i-u^n_i}{\Delta t}= \left[ - \frac{1}{\rho}\frac{\partial}{\partial x_i}p+\frac{\mu}{\rho}\frac{\partial}{\partial x_j}\left(\frac{\partial u_i}{\partial x_j}\right)+b_i\right]^{n+\theta}\;.
+\end{equation}
+where the intermediate velocity $u^*_i$ is introduced. Splitting the equation in the following manner gives the expression for the unknown velocities
+\begin{subequations}
+  \begin{eqnarray}\label{rce:uistar}
+    \mbox{(A)}\qquad u^*_i &=& u^n_i+b_i\Delta t - \frac{\Delta t}{\rho}\pard{}{x_i}\gamma p^n+\frac{\Delta t\mu}{\rho}\pard{}{x_j}\left(\pard{u^{n+\theta}_i}{x_j}\right)\;,\\
+    \mbox{(C)}\quad u^{n+1}_i &=& u^*_i- \frac{\Delta t}{\rho}\pard{}{x_i}(p^{n+1}-\gamma p^n)\;. \label{eq:uin1}
+  \end{eqnarray}
+\end{subequations}
+The pressure split is here introduced by the new parameter $\gamma$ defining the amount of splitting and can take values from 0 to 1. The body loads are considered to be constant over time step.
+\par
+In a similar way, the fractional step method is applied on the mass conservation equation. Here, the time derivative of density would be approximated. As we examine an incompressible flow, whose density does not change in time, merely the intermediate velocity term is incorporated in the divergence of the velocity.
+\begin{equation}
+  \pard{(u^{n+1}_i-u^*_i+u^*_i)}{x_i} = 0 \;,
+\end{equation}
+which can be decomposed into two sub-equations
+\begin{subequations}
+  \begin{eqnarray}\label{rce:mass}
+	\pard{u^*_i}{x_i} &=& 0 \\
+      \pard{(u^{n+1}_i-u^*_i)}{x_i} &=& 0\;.
+  \end{eqnarray}
+\end{subequations}
+By substituting for the velocity difference into the equation~(\ref{eq:uin1}) we obtain
+\begin{equation}
+\pard{}{x_i}(u^{n+1}_i - u^*_i) = \pard{}{x_i}\left(-\frac{\Delta t}{\rho}\pard{}{x_i}(p^{n+1}-\gamma p^n)\right)\;.
+\end{equation}
+Now we can sum the separated mass equations together. This operation gives the coupled mass-momentum equation
+\begin{equation}
+  \mbox{(B)}\qquad  \pard{u^*_i}{x_i} - \frac{\Delta t}{\rho}\frac{\partial^2}{\partial x^2_i}(p^{n+1}-\gamma p^n) = 0\;.
+\end{equation}
+The final set of equations reads
+\begin{eqnarray}
+\mbox{(A)}\qquad\quad\quad\; u^*_i  &=& u^n_i+b_i\Delta t - \frac{\Delta t}{\rho}\pard{}{x_i}\gamma p^n+\frac{\Delta t\mu}{\rho}\pard{}{x_j}\left(\pard{u^{n+\theta}_i}{x_j}\right)\;,\\
+ \mbox{(B)} \quad \frac{\partial^2}{\partial x^2_i}(p^{n+1}) &=& \frac{\rho}{\Delta t}\pard{u^*_i}{x_i}+\frac{\partial^2}{\partial x^2_i}(\gamma p^n)\;, \\
+ \mbox{(C)} \qquad\quad\;\,u^{n+1}_i &=& u^*_i- \frac{\Delta t}{\rho}\pard{}{x_i}(p^{n+1}-\gamma p^n)\;.
+\end{eqnarray}
+\par
+The above PFEM formulation is based on the paper by Idelsohn, O\~nate and Del Pin~\cite{Idelsohn04}. The authors described an approach using arbitrary time discretization scheme and pressure split factor. Their choice of implicit scheme $\theta = 1$ was motivated by better convergence properties, whereas the decision for $\gamma = 0$ leading to greater pressure split was driven by better pressure stabilization.
+\subsubsection{Spatial discretization}
+The unknown functions of velocity and pressure are approximated using equal order interpolation for all variables in the final configuration
+\begin{eqnarray}
+u_i&=&\mbf{N}^T(X,t)\mbf{U}_i\\
+p&=&\mbf{N}^T(X,t)\mbf{P} \;.
+\end{eqnarray}
+By applying the Galerkin weighted residual method on the splitted governing equations, following system of linear algebraic equations is obtained 
+\begin{eqnarray}
+\mbox{(A)}\quad\quad\mbf{M}\mbf{U}^* &=& \mbf{M}\mbf{U}^n + \Delta t\mbf{F} - \frac{\Delta t\mu}{\rho}\mbf{K}\mbf{U}^{n+\theta}\;,\label{eq:systemA} \\
+\mbox{(B)}\quad\;\; \mbf{L}\mbf{P}^{n+1} &=&\frac{\rho}{\Delta t}\left(\mbf{G}^T\mbf{U}^*-\hat{\mbf{U}}\right) \;, \label{eq:systemB} \\
+\mbox{(C)}\quad \mbf{M}\mbf{U}^{n+1} &=& \mbf{M}\mbf{U}^* - \frac{\rho}{\Delta t}\mbf{G}\mbf{P}^{n+1} \;.\label{eq:systemC}
+\end{eqnarray}
+\par
+The matrix $\mbf{M}$ denotes the mass matrix in a lumped form, whereas the vector $\mbf{F}$ stands for the load vector. The matrix $\mbf{G}$ represents the gradient operator, which is the transposition of the divergence operator denoted simply as $\mbf{G}^T$. Matrices $\mbf{K}$ and $\mbf{L}$ are build in a similar way however noted differently. Both mean the Laplacian operator. Due to its common use in computational mechanics, the classical notation of the stiffness matrix $\mbf{K}$ is used. Prescribed velocity components are enclosed in vector $\hat{\mbf{U}}$.
+\par
+In each computational time step, an iteration is performed until the equilibrium is reached. Depending on the value of $\theta$ used, the equation system for the components of the auxiliary velocity $U^*_i$~(\ref{eq:systemA}) can be solved either explicitly $\theta = 0$ or implicitly $\theta \neq 0$. Then, the calculated values of the auxiliary velocity are used as input for the pressure computation~(\ref{eq:systemB}). The last system of equations~(\ref{eq:systemC}) determines the velocity values at the end of the time step, taking auxiliary velocities and pressure or pressure increments into account.
+\par
+Let us summarize the iterative step. The position of the particles at the end of the previous time step is known, as well as the the value of the velocity $u^n$ and pressure $p^n$. The set of governing equations is build up for the unknowns at the end of the solution step $\theta^{n+1}$, however based on the geometry of the previous step. The changes in the position are neglected. Once the convergence is reached, the final position is computed from the old one modified by the displacement due to obtained velocity. After that, solution can proceed to the next time step.
 
 \subsection{Staggered Problem}
 \label{staggeredproblem}
@@ -3200,6 +3306,14 @@ BoundaryCondition  1 loadTimeFunction 1 conditions 1 d 0.0
 NodalLoad 2 loadTimeFunction 1 Components 2 0. 1.0
 ConstantFunction 1 f(t) 1.0
 \end{verbatim}
+
+\addcontentsline{toc}{section}{References}
+\begin{thebibliography}{9}
+\bibitem{Codina01} R. Codina: Pressure Stability in Fractional Step Finite Element Methods for Incompressible Flows. {\em Journal of Computational Physics} 170(1): 112 -- 140, 2001.
+\bibitem{Idelsohn04} S. R. Idelsohn, E. O\~nate, E. and F. Del Pin.
+\newblock The particle finite element method: a powerful tool to solve incompressible flows with free-surfaces and breaking waves.
+\newblock {\em International Journal for Numerical Methods in Engineering}, 61: 964--989, 2004.
+\end{thebibliography}
 
 \section{Figures}
 %\subsection {Node cut mode}
