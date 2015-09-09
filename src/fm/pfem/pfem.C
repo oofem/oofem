@@ -395,7 +395,7 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
     double d_vnorm = 1.0;
 
     AuxVelocity.resize(auxmomneq);
-    
+
     avLhs.clear();
     avLhs.resize(auxmomneq);
 
@@ -447,6 +447,10 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
         }
     }
 
+    FloatArray externalForces;
+    externalForces.resize(auxmomneq);
+    this->assembleVector( externalForces, tStep, ExternalForceAssembler(), VM_Total, avns, this->giveDomain(1) );
+
     int iteration = 0;
     do {
         iteration++;
@@ -469,21 +473,20 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
 
         rhs.negated();
 
-        ///@todo This ought to be constant, so bring it outside the loop instead? / Mikael
-        this->assembleVector( rhs, tStep, ExternalForceAssembler(), VM_Total, avns, this->giveDomain(1) );
+        // constant member placed outside of the loop
+        rhs.add(externalForces);
 
         rhs.times(deltaT);
 
-#if 0
-        ///@todo Isn't the MassVelocity just this simple computation? It will be faster to do this. / Mikael
-        for ( int i = 1; i <= momneq; i++ ) {
-            rhs.at(i) +=  avLhs.at(i) * oldVelocityVector.at(i);
+
+        /// assumming the mass matrix is always lumped, PFEMMassVelocityAssembler could be replaced by:
+        // for ( int i = 1; i <= momneq; i++ ) {
+        //     rhs.at(i) +=  avLhs.at(i) * oldVelocityVector.at(i);
+        // }
+
+        if ( tStep->isTheFirstStep() == false ) {
+            this->assembleVectorFromElements( rhs, tStep->givePreviousStep(), PFEMMassVelocityAssembler(), VM_Total, avns, this->giveDomain(1) );
         }
-#else
-	if ( tStep->isTheFirstStep() == false) {
-	    this->assembleVectorFromElements( rhs, tStep->givePreviousStep(), PFEMMassVelocityAssembler(), VM_Total, avns, this->giveDomain(1) );
-	}
-#endif
 
         this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetaStepNumber() ) );
         AuxVelocity.resize( rhs.giveSize() );
@@ -496,16 +499,7 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
         rhs.resize(presneq);
         rhs.zero();
 
-#if 1
         this->assembleVectorFromElements( rhs, tStep, PFEMPressureRhsAssembler(), VM_Total, pns, this->giveDomain(1) );
-#else
-        ///@todo Old code for reference, remove when new callback function is verified to work properly. / Mikael
-        this->assembleVectorFromElements( rhs, tStep, PrescribedRhsVector, VM_Total, pns, this->giveDomain(1) );
-
-        rhs.times(-1.0);
-
-        this->assembleVectorFromElements( rhs, tStep, DivergenceAuxVelocityVector, VM_Total, pns, this->giveDomain(1) );
-#endif
 
         this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetaStepNumber() ) );
         pressureVector->resize(presneq);
@@ -523,18 +517,7 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
         rhs.zero();
         velocityVector->resize(momneq);
 
-#if 1
         this->assembleVectorFromElements( rhs, tStep, PFEMCorrectionRhsAssembler(deltaT), VM_Total, vns, this->giveDomain(1) );
-#else
-        ///@todo Old code for reference, remove when new callback function is verified to work properly. / Mikael
-        this->assembleVectorFromElements( rhs, tStep, PressureGradientVector, VM_Total, vns, this->giveDomain(1) );
-
-        rhs.times(-1.0);
-
-        rhs.times(deltaT);
-
-        this->assembleVectorFromElements( rhs, tStep, MassAuxVelocityVector, VM_Total, vns, this->giveDomain(1) );
-#endif
 
         this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetaStepNumber() ) );
 
