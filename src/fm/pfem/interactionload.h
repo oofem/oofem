@@ -52,20 +52,10 @@ namespace oofem {
 class TimeStep;
 
 /**
- * This class implements a linear boundary load (force, moment,...) that acts
- * on straight segment.
- * A boundary load is usually attribute of one or more elements.
- *
- * The boundary load describes its geometry and values (it is assumed, that user will specify
- * all necessary dofs) on element boundary using isoparametric approximation.
- * Elements can request the order of approximation (for setting up the appropriate
- * integration rule order) and the array of values (for each dof) at specific integration point
- * on the boundary.
- *
- * Elements must take care, on which boundary the load acts on (side number, ...).
- *
- * @note{This class is not restricted to structural problems. For example, in thermal analysis,
- * a boundary load load would be a  heat source.}
+ * This class implements a fluid-to-solid interface in the FluidStructureProblem.
+ * Its attributes are the corresponding fluid PFEMParticles providing the pressure.
+ * The pressure load acts in normal edge direction, so a transformation to the global
+ * coordinate system is performed.
  */
 class OOFEM_EXPORT InteractionLoad : public LinearEdgeLoad
 {
@@ -76,9 +66,9 @@ protected:
     IntArray coupledParticles;
 
 public:
-    InteractionLoad(int i, Domain *d) : LinearEdgeLoad(i, d) , coupledParticles(2){ }
+    InteractionLoad(int i, Domain *d) : LinearEdgeLoad(i, d), coupledParticles(2) { }
 
-    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
+    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode);
 
     virtual int giveApproxOrder() { return 1; }
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -90,7 +80,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_InteractionLoad_Name; }
 
 protected:
-    virtual void computeNArray(FloatArray &answer, FloatArray &coords) const;
+    virtual void computeNArray(FloatArray &answer, const FloatArray &coords) const;
 };
 } // end namespace oofem
 #endif // interactionload_h

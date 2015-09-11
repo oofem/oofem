@@ -43,34 +43,25 @@
 #include "dof.h"
 
 namespace oofem {
-
-REGISTER_BoundaryCondition( InteractionBoundaryCondition );
+REGISTER_BoundaryCondition(InteractionBoundaryCondition);
 
 double InteractionBoundaryCondition :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
 // Returns the value at stepN of the prescribed value of the kinematic
 // unknown 'u'. Returns 0 if 'u' has no prescribed value.
 {
-    /*double factor = this->giveLoadTimeFunction()->evaluate(stepN, mode);
-    int index = this->dofs.findFirstIndexOf(dof->giveDofID());
-    if ( !index ) {
-        index = 1;
-    }
-    double prescribedValue = this->values.at(index);
-    return prescribedValue * factor;
-    */
     double value = 0.0;
 
-    InteractionPFEMParticle* interactionParticle = dynamic_cast<InteractionPFEMParticle*>(dof->giveDofManager());
+    InteractionPFEMParticle *interactionParticle = dynamic_cast< InteractionPFEMParticle * >( dof->giveDofManager() );
     if ( interactionParticle ) {
         FloatArray velocities;
         interactionParticle->giveCoupledVelocities(velocities, stepN);
-        if (dof->giveDofID() == V_u)
+        if ( dof->giveDofID() == V_u ) {
             value = velocities.at(1);
-        else if (dof->giveDofID() == V_v)
+        } else if ( dof->giveDofID() == V_v ) {
             value = velocities.at(2);
+        }
     }
 
     return value;
 }
-
 } // end namespace oofem

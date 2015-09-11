@@ -715,6 +715,14 @@ foreach (case ${benchmarks})
     add_test (NAME "benchmark_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/benchmark COMMAND ${oofem_cmd} "-f" ${case})
 endforeach (case)
 
+# PFEM Benchmarks
+if (USE_SM AND USE_FM AND USE_PFEM)
+    file (GLOB pfembenchmarks RELATIVE "${oofem_TEST_DIR}/pfembenchmark" "${oofem_TEST_DIR}/pfembenchmark/*.in")
+    foreach (case ${pfembenchmarks})
+        add_test (NAME "benchmark_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/pfembenchmark COMMAND ${oofem_cmd} "-f" ${case})
+    endforeach (case)
+endif()
+
 # Custom targets for test and benchmarks (which can conveniently be accessed from IDEs)
 
 ProcessorCount(N)

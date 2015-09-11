@@ -41,7 +41,7 @@
 
 /**
  * @name Dirichlet boundary condition.
- * 
+ *
  */
 //@{
 #define _IFT_InteractionBoundaryCondition_Name "interactionboundarycondition"
@@ -54,23 +54,25 @@ namespace oofem {
 class TimeStep;
 class Dof;
 
-
+/**
+ * This class represent a b.c. which is enforced on InteractionPFEMParticles.
+ * The attached structural node provides velocity.
+ */
 class OOFEM_EXPORT InteractionBoundaryCondition : public BoundaryCondition
 {
 protected:
-    
+
 public:
-    
+
     InteractionBoundaryCondition(int i, Domain *d) : BoundaryCondition(i, d)
     { }
     /// Destructor
     virtual ~InteractionBoundaryCondition() { }
-    
+
     virtual double give(Dof *dof, ValueModeType mode, TimeStep *tStep);
-    
+
     virtual const char *giveClassName() const { return "IntertactionBoundaryCondition"; }
     virtual const char *giveInputRecordName() const { return _IFT_InteractionBoundaryCondition_Name; }
 };
 } // end namespace oofem
 #endif //inteactionboundarycondition_h
-
