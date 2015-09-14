@@ -62,10 +62,6 @@ FluidStructureProblem :: FluidStructureProblem(int i, EngngModel *_master) : Sta
 {
     ndomains = 1; // domain is needed to store the time step ltf
 
-    ///    dtTimeFunction = 0;
-    ///    stepMultiplier = 1.;
-    ///    timeDefinedByProb = 0;
-    tol = 1.e-3;
     iterationNumber = 0;
     this->setRenumberFlag();
 }
@@ -73,6 +69,28 @@ FluidStructureProblem :: FluidStructureProblem(int i, EngngModel *_master) : Sta
 FluidStructureProblem :: ~FluidStructureProblem()
 {}
 
+
+IRResultType
+FluidStructureProblem :: initializeFrom(InputRecord *ir)
+{
+    IRResultType result;                // Required by IR_GIVE_FIELD macro
+
+    result = StaggeredProblem :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+
+    maxiter = 50;
+    IR_GIVE_OPTIONAL_FIELD(ir, maxiter, _IFT_FluidStructureProblem_maxiter);
+
+    rtolv = 1.e-3;
+    IR_GIVE_OPTIONAL_FIELD(ir, rtolv, _IFT_FluidStructureProblem_rtolv);
+
+    rtolp = 1.e-3;
+    IR_GIVE_OPTIONAL_FIELD(ir, rtolp, _IFT_FluidStructureProblem_rtolp);
+
+    return IRRT_OK;
+}
 
 void
 FluidStructureProblem :: initializeYourself(TimeStep *tStep)
@@ -124,7 +142,7 @@ FluidStructureProblem :: solveYourselfAt(TimeStep *stepN)
     double pressureDifference = 1.0;
 
     iterationNumber = 0;
-    while ( ( ( velocityDifference > tol ) || ( pressureDifference > tol ) ) && iterationNumber < 50 ) {
+    while ( ( ( velocityDifference > rtolv ) || ( pressureDifference > rtolp ) ) && iterationNumber < maxiter ) {
         previousInteractionParticlesPressures = currentInteractionParticlesPressures;
         previousInteractionParticlesVelocities = currentInteractionParticlesVelocities;
 

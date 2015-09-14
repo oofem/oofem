@@ -38,17 +38,13 @@
 #include "staggeredproblem.h"
 #include "inputrecord.h"
 
-///@name Input fields for StaggeredProblem
+///@name Input fields for FluidStructureProblem
 //@{
 #define _IFT_FluidStructureProblem_Name "fluidstuctureproblem"
-#define _IFT_StaggeredProblem_deltat "deltat"
-#define _IFT_StaggeredProblem_dtf "dtf"
-#define _IFT_StaggeredProblem_timeDefinedByProb "timedefinedbyprob"
-#define _IFT_StaggeredProblem_stepmultiplier "stepmultiplier"
-#define _IFT_StaggeredProblem_prescribedtimes "prescribedtimes"
-#define _IFT_StaggeredProblem_prob1 "prob1"
-#define _IFT_StaggeredProblem_prob2 "prob2"
-#define _IFT_StaggeredProblem_coupling "coupling"
+#define _IFT_FluidStructureProblem_rtolv "rtolv"
+#define _IFT_FluidStructureProblem_rtolp "rtolp"
+#define _IFT_FluidStructureProblem_maxiter "maxiter"
+
 //@}
 
 namespace oofem {
@@ -65,8 +61,13 @@ class OOFEM_EXPORT FluidStructureProblem : public StaggeredProblem
 {
 protected:
     IntArray interactionParticles;
-    double tol;
+    /// Iteration counter
     int iterationNumber;
+
+    /// Convergence tolerance.
+    double rtolv, rtolp;
+    /// Max number of iterations.
+    int maxiter;
 
 public:
     /**
@@ -83,6 +84,8 @@ public:
     virtual void solveYourselfAt(TimeStep *tStep);
     virtual void initializeYourself(TimeStep *tStep);
     virtual int initializeAdaptive(int stepNumber) { return 0; }
+
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     void printYourself();
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime) { }
