@@ -57,6 +57,9 @@
 #define _IFT_PFEM_associatedMaterial "material"
 #define _IFT_PFEM_associatedCrossSection "cs"
 #define _IFT_PFEM_pressureBC "pressure"
+#define _IFT_PFEM_rtolv "rtolv"
+#define _IFT_PFEM_rtolp "rtolp"
+#define _IFT_PFEM_maxiter "maxiter"
 
 //@}
 
@@ -151,6 +154,10 @@ protected:
     double alphaShapeCoef;
     /// Element side ratio for the removal of the close partices
     double particleRemovalRatio;
+    /// Convergence tolerance.
+    double rtolv, rtolp;
+    /// Max number of iterations.
+    int maxiter;
 
     /// Area or volume of the fluid domain, which can be controlled
     double domainVolume;

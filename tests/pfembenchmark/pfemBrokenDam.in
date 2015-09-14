@@ -1,6 +1,6 @@
 pfemBrokenDam.out
 Watter column colapse - Koshizuka & Oka experiment (exact experiment size - in meters), implicit computation
-PFEM nsteps 30 nmodules 1 lstype 0 smtype 1 deltaT 1.e-3 mindeltat 1.e-5 alphashapecoef 0.0205 removalratio 0.1 scheme 1 material 1 cs 1 pressure 2
+PFEM nsteps 30 nmodules 1 lstype 0 smtype 1 deltaT 1.e-3 mindeltat 1.e-5 alphashapecoef 0.0205 maxiter 200 rtolv 1.e-10 rtolp 1.e-10 removalratio 0.1 scheme 1 material 1 cs 1 pressure 2
 errorcheck
 domain 2dIncompFlow
 OutputManager tstep_all dofman_all

@@ -232,6 +232,15 @@ PFEM :: initializeFrom(InputRecord *ir)
     alphaShapeCoef = 1.0;
     IR_GIVE_OPTIONAL_FIELD(ir, alphaShapeCoef, _IFT_PFEM_alphashapecoef);
 
+    maxiter = 50;
+    IR_GIVE_OPTIONAL_FIELD(ir, maxiter, _IFT_PFEM_maxiter);
+
+    rtolv = 1.e-8;
+    IR_GIVE_OPTIONAL_FIELD(ir, rtolv, _IFT_PFEM_rtolv);
+
+    rtolp = 1.e-8;
+    IR_GIVE_OPTIONAL_FIELD(ir, rtolp, _IFT_PFEM_rtolp);
+
     particleRemovalRatio = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, particleRemovalRatio, _IFT_PFEM_particalRemovalRatio);
 
@@ -554,7 +563,7 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
                 d_pnorm = max(d_pnorm, fabs( diffPressure.at(i) ) > 1.e-6 ? fabs( diffPressure.at(i) / pressureVectorLastStep.at(i) ) : 0);
             }
         }
-    } while ( discretizationScheme == 1 && ( d_vnorm > 1.e-8 || d_pnorm > 1.e-8 ) && iteration < 50 );
+    } while ( discretizationScheme == 1 && ( d_vnorm > rtolv || d_pnorm > rtolp ) && iteration < maxiter );
 
     if ( iteration > 49 ) {
         OOFEM_ERROR("Maximal iteration count exceded");

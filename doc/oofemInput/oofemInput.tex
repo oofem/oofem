@@ -1249,6 +1249,9 @@ matrix. The scheme should be compatible with solver type. See section
   \recentry{}{\field{cs}{in}}
   \recentry{}{\field{pressure}{in}}
   \recentry{}{\optField{mindeltat}{rn}}
+  \recentry{}{\optField{maxiter}{in}}
+  \recentry{}{\optField{rtolv}{rn}}
+  \recentry{}{\optField{rtolp}{rn}}
   \recentry{}{\optField{alphashapecoef}{rn}}
   \recentry{}{\optField{removalratio}{rn}}
   \recentry{}{\optField{scheme}{in}}
@@ -1286,6 +1289,11 @@ geometry and velocity of paricular nodes. To avoid to short time length a minima
 size can be defined by \param{mindeltat}. Alternatively prescribing limit
 \param{removalratio} of the element edge length too close particles can be removed
 from solution.
+
+Optional parameters \param{rtolv} and \param{rtolp} allow to
+specify relative norms for velocity and pressure difference of two subsequent iteration
+step. Default values are 1.e-8. By default maximal 50 iterations are performed, if
+not specified by \param{maxiter}.
 
 Parameter \param{lstype} allows to select solver for linear system of
 equations. Parameter \param{smtype} allows to select sparse matrix storage
@@ -1451,6 +1459,9 @@ provided.
 \begin{record}
   \recentry{\entKeywordInst{FluidStructureProblem}}{\field{nsteps}{in} \field{deltaT}{rn}}
   \recentry{}{\field{prob1}{s} \field{prob2}{s}}
+  \recentry{}{\optField{maxiter}{in}}
+  \recentry{}{\optField{rtolv}{rn}}
+  \recentry{}{\optField{rtolp}{rn}}
 \end{record}
 
 Represents a fluid-structure analysis based on StaggeredProblem but providing
@@ -1482,6 +1493,11 @@ contains input file path of the first sub-problem, which runs first
 for each solution step, the \param{prob2} contains input file path of
 the second sub-problem. The time step sequence is controlled by the number of steps
 \param{nsteps} and the time step length \param{deltaT}.
+
+Optional parameters \param{rtolv} and \param{rtolp} allow to
+specify relative norms for velocity and pressure differnce of two subsequent iteration
+step. Default values are 1.e-3. By default maximal 50 iterations are performed, if
+not specified by \param{maxiter}.
 
 Note: This problem type \textbf{is included in PFEM module} and it
 can be used only when this module is configured.
