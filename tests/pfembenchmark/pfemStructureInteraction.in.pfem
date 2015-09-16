@@ -1,6 +1,6 @@
 pfemStructureInteraction.out.pfem
 simple hydrostatic example, implicit scheme
-PFEM nsteps 3 nmodules 1 lstype 0 smtype 1 renumber 1 deltaT 1.e-4 alphashapecoef 0.8 scheme 1 material 1 cs 1 pressure 2
+PFEM nsteps 3 nmodules 1 lstype 0 smtype 1 renumber 1 deltaT 1.e-4 alphashapecoef 0.8 scheme 1 material 1 cs 1 pressure 2 rtolv 1.e-8 rtolp 1.e-8
 errorcheck
 domain 2dIncompFlow
 OutputManager tstep_all dofman_all element_all
@@ -251,5 +251,5 @@ InitialCondition 1 conditions 1 u 1.0 valtype 5
 ConstantFunction 1 f(t) 1.0
 
 #%BEGIN_CHECK%
-#NODE tStep 10 number 1 dof 11 unknown d value 9.8934e+04 tolerance 1.0
+#NODE tStep 10 number 1 dof 11 unknown d value 9.8934e+04 tolerance 25
 #%END_CHECK%
