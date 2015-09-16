@@ -565,7 +565,7 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
         }
     } while ( discretizationScheme == 1 && ( d_vnorm > rtolv || d_pnorm > rtolp ) && iteration < maxiter );
 
-    if ( iteration > 49 ) {
+    if ( iteration > maxiter ) {
         OOFEM_ERROR("Maximal iteration count exceded");
     } else {
         OOFEM_LOG_INFO("\n %i iterations performed.\n", iteration);
