@@ -53,5 +53,5 @@ InteractionLoad 11 loadTimeFunction 1 Components 4 1.0 0.0 1.0 0.0 loadType 3 nd
 ConstantFunction 1 f(t) 1.0
 
 #%BEGIN_CHECK%
-#NODE tStep 10 number 22 dof 1 unknown d value 1.32749369e-02 tolerance 1.e-06
+#NODE tStep 10 number 22 dof 1 unknown d value 1.32749369e-02 tolerance 1.e-05
 #%END_CHECK%

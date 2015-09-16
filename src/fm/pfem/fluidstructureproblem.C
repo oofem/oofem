@@ -176,7 +176,7 @@ FluidStructureProblem :: solveYourselfAt(TimeStep *stepN)
 
         OOFEM_LOG_RELEVANT("%3d %le %le\n", iterationNumber++, pressureDifference, velocityDifference);
     }
-    if ( iterationNumber > 49 ) {
+    if ( iterationNumber > maxiter ) {
         OOFEM_ERROR("Maximal fluid-structure interface iteration count exceded");
     }
     stepN->incrementStateCounter();
