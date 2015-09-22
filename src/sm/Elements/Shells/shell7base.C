@@ -2344,14 +2344,16 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
     int numInPlaneIP = this->giveNumberOfInPlaneIP();
     double totalThickness = this->layeredCS->computeIntegralThick(); 
     double integralThickness = 0.0;
-    FloatArray dS, Sold;
+    double zeroThicknessLevel = - 0.5 * totalThickness;     // assumes midplane is the geometric midplane of layered structure.
+//     double zeroThicknessLevel = this->layeredCS->give( CS_BottomZCoord, &lCoords, this, false );  
+    FloatArray dS, Sold, S;
     FloatMatrix B, dSmat(3,numInPlaneIP), SmatOld(3,numInPlaneIP); // 3 stress components (S_xz, S_yz, S_zz) * num of in plane ip 
     SmatOld.zero();
     Domain *d = this->giveDomain();
     
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
         IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];   // Var sätts vilken typ av integrregel som gäller för lagret? qwedge?
-
+        int numLayerIP = iRuleL->giveNumberOfIntegrationPoints();
 
         /* Recover values by a polynomial fit to the stress values in a patch of elements closest to the this element.
             * The vector of GPvalues is [GPvalue] = [P(x_GP,y_GP,z_GP)]*a, where 
@@ -2377,7 +2379,7 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
         IntArray centreElNodes = this->giveDofManArray(); 
         IntArray patchEls; 
         int numSampledIP = 0, numCoefficents = 9;
-        int numPatchEls = patchEls.giveSize();
+//         int numPatchEls = patchEls.giveSize();
 //         FloatMatrix patchIpValues(numPatchEls*numThicknessIP*numInPlaneIP,6), P(numPatchEls*numThicknessIP*numInPlaneIP,numCoefficents);
         FloatMatrix patchIpValues, P;
         
@@ -2403,6 +2405,7 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
                 // Collect global coordinates for IP and assemble to P.
                 FloatArray IpCoords;
                 IpCoords = ip->giveGlobalCoordinates();
+                IpCoords.at(3) -= zeroThicknessLevel;    // make bottom of layer ref point for polynimial fit.             
                 FloatArray iRowP = {1,IpCoords.at(1),IpCoords.at(2),IpCoords.at(3),
                                     IpCoords.at(2)*IpCoords.at(3),IpCoords.at(1)*IpCoords.at(3),IpCoords.at(1)*IpCoords.at(2),
                                     IpCoords.at(1)*IpCoords.at(1),IpCoords.at(2)*IpCoords.at(2)};
@@ -2458,6 +2461,69 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
         double detJ = thickness / 2;
         
         
+        // Update recovered stresses
+#if 1
+        for ( int j = 0; j < numInPlaneIP; j++ ) { 
+            
+            FloatArray GPcoords(3);
+            // Integrate over thickness
+            for ( int i = 0; i < this->layeredCS->giveNumIntegrationPointsInLayer(); i++ ) {
+
+                int point = i*numInPlaneIP + j; // integration point number
+                
+                GaussPoint *gp = iRuleL->getIntegrationPoint(point);
+                GPcoords.zero();
+                GPcoords = gp->giveGlobalCoordinates();
+#if 0
+                if (this->giveGlobalNumber() == 126 && j == 0) {
+                    GPcoords.printYourself("GP-coords (global z)");
+                }
+#endif
+                GPcoords.at(3) -= zeroThicknessLevel;
+#if 0
+                if (this->giveGlobalNumber() == 126 && j == 0) {
+                    GPcoords.printYourself("GP-coords  (local z)");
+                }
+#endif
+                
+                // Calculate z-integration of fitted stress variation in position of GP such that 
+                // Siz = - Integral( dS_ij/dx + dS_ij/dy )dz = - [a(ij) a(ij)]*Integral( dP/dx dP/dy )dz = - [a(ij) a(ij)]*IntGradP + Sij^k-1
+            
+                FloatArray intGradP;
+                this->giveZintegratedPolynomialGradientForStressRecAt(intGradP,GPcoords);
+                dS.zero();
+                dS.beProductOf(aSiz,intGradP*(-1.0));
+                // add stresses from lower interface
+                dS.at(1) += SmatOld.at(1,j+1);      // S_xz
+                dS.at(2) += SmatOld.at(2,j+1);      // S_yz
+                
+                // Replace stresses
+                StructuralMaterialStatus* status = dynamic_cast< StructuralMaterialStatus* > ( gp->giveMaterialStatus() );
+                Sold = status->giveStressVector();
+                Sold.at(5) = dS.at(1); // S_xz
+                Sold.at(4) = dS.at(2); // S_yz
+                
+                if ( Sold.giveSize() > 6 ) {
+                    Sold.at(8) = Sold.at(5); // S_xz
+                    Sold.at(7) = Sold.at(4); // S_yz
+                }
+                status->letStressVectorBe(Sold);
+                
+                
+            }
+            
+            // Calculate stresses at upper interface of layer (use the x-y-coords of the upper GP of the layer)
+            GPcoords.at(3) = thickness;
+            FloatArray intGradP;
+            this->giveZintegratedPolynomialGradientForStressRecAt(intGradP,GPcoords);
+            dS.beProductOf(aSiz,intGradP*(-1.0));
+            
+            SmatOld.at(1,j+1) += dS.at(1);      // S_xz
+            SmatOld.at(2,j+1) += dS.at(2);      // S_xz
+        }
+#endif
+                
+#if 0
         for ( int j = 0; j < numInPlaneIP; j++ ) { 
             
             // Integrate over thickness
@@ -2467,6 +2533,7 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
                 int point = i*numInPlaneIP + j; // integration point number
                 GaussPoint *gp = iRuleL->getIntegrationPoint(point);
                 FloatArray GPcoords = gp->giveGlobalCoordinates();
+                GPcoords.at(3) -= zeroThicknessLevel;    // make bottom of layer ref point for polynimial fit
                 
                 // calculate gradient (wrt x and y) of stresses at GP position such that
                 // [a(ij) a(ij)]*gradP = dS_ij/dx + dS_ij/dy
@@ -2506,9 +2573,10 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
 
             }
         }
-//         SmatOld.add(dSmat);
-//         integralThickness += thickness;
+        SmatOld.add(dSmat);
+#endif
         
+#if 0
         ///@todo Add Recovery of Szz
         // Hur gör jag detta? Det måste ju ske efter att alla element har genomgått en recovery av Sxz och Syz, annars är det ju ingen poäng... 
         // Om vi inte kan hävda att det räcker att anpassa till ett element.. 
@@ -2532,6 +2600,7 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
             // Collect global coordinates for IP and assemble to P.
             FloatArray IpCoords;
             IpCoords = ip->giveGlobalCoordinates();
+            IpCoords.at(3) -= integralThickness;    // make bottom of layer ref point for polynimial fit.
             FloatArray iRowP = {1,IpCoords.at(1),IpCoords.at(2),IpCoords.at(3),
                                 IpCoords.at(2)*IpCoords.at(3),IpCoords.at(1)*IpCoords.at(3),IpCoords.at(1)*IpCoords.at(2),
                                 IpCoords.at(1)*IpCoords.at(1),IpCoords.at(2)*IpCoords.at(2)};
@@ -2600,7 +2669,9 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
             }
         }
         SmatOld.add(dSmat);
+#endif
         integralThickness += thickness;
+        zeroThicknessLevel += thickness;
         
     } 
 
@@ -2622,8 +2693,31 @@ Shell7Base :: givePolynomialGradientForStressRecAt(FloatArray &answer, FloatArra
      */
     
     answer.zero();
-    answer = {0,1,0,0,           0,coords.at(3),coords.at(2),2*coords.at(1),             0,
-              0,0,1,0,coords.at(3),           0,coords.at(1),             0,2*coords.at(2)};
+    answer = {0,1,0,0,           0,coords.at(3),coords.at(2),2.0*coords.at(1),             0,
+              0,0,1,0,coords.at(3),           0,coords.at(1),             0,2.0*coords.at(2)};
+}
+
+void
+Shell7Base :: giveZintegratedPolynomialGradientForStressRecAt(FloatArray &answer, FloatArray &coords)
+{
+    /* Return the special matrix {gradP} of the reciever evaluated at a global coordinate (of a Gauss point)
+     * Used for integration of S_xz and S_yz such that
+     * a(ij)*gradP = dS_ij/dx + dS_ij/dy, where a(ij) is a vector of coefficients to the polynomial
+     * P(x,y,z) = [1 x y z yz xz xz x^2 y^2] (NB: z^2 term omitted)
+     * associated with stress component ij.
+     * The gradient of P(x,y,z) is given by
+     * dP/dx = [0 1 0 0 0 z y 2x 0]
+     * dP/dy = [0 0 1 0 z 0 x 0 2y]
+     * dP/dz = [0 0 0 1 y x 0 0 0 ] (NB not returned atm)
+     * and the z-integration is then:
+     * I[dP/dx]dz = [0 z 0 0 0     z^2/2 yz 2xz 0]
+     * I[dP/dx]yz = [0 0 z 0 z^2/2 0     xz 0 2yz]
+     * answer = IntgradP = [dP/dx dP/dy]^T
+     */
+    
+    answer.zero();
+    answer = {0,coords.at(3),           0,0,                                  0,coords.at(3)*coords.at(3)*(1.0/2.0),coords.at(2)*coords.at(3),2.0*coords.at(1)*coords.at(3),                            0,
+              0,           0,coords.at(3),0,coords.at(3)*coords.at(3)*(1.0/2.0),                                  0,coords.at(1)*coords.at(3),                            0,2.0*coords.at(2)*coords.at(3)};
 }
 
 #if 0

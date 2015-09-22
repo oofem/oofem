@@ -243,6 +243,7 @@ protected:
     void recoverShearStress(TimeStep *tStep);
 //    void computeBmatrixForStressRecAt(FloatArray &lcoords, FloatMatrix &answer, int layer, bool intSzz = false);
     void givePolynomialGradientForStressRecAt(FloatArray &answer, FloatArray &coords);
+    void giveZintegratedPolynomialGradientForStressRecAt(FloatArray &answer, FloatArray &coords);
     void giveL2contribution(FloatMatrix &ipValues, FloatMatrix &Nbar, int layer, InternalStateType type, TimeStep *tStep);
     void giveSPRcontribution(FloatMatrix &eltIPvalues, FloatMatrix &eltPolynomialValues, int layer, InternalStateType type, TimeStep *tStep);
 
