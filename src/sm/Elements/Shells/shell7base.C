@@ -2444,8 +2444,9 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
         a.beProductOf(Abar,patchIpValues);
         
         
-        // Assemble appropriate coefficients matrix for computing S_xz and S_yz
+        // Assemble appropriate coefficients matrix for computing S_xz and S_yz and S_zz
         // aSiz = [a(:,1)^T a(:,6)^T; a(:,6)^T a(:,2)^T]
+        // aSzz = sum[a81 a76 a82]
         FloatMatrix aSiz; 
         aSiz.resize(2,numCoefficents*2);
         for (int iCol = 1; iCol <= numCoefficents; iCol++) {
@@ -2454,8 +2455,10 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
             aSiz.at(2,iCol) = a.at(iCol,6);
             aSiz.at(2,iCol+numCoefficents) = a.at(iCol,2);
         }
+        double aSzz = a.at(8,1) + a.at(7,6) + a.at(8,2); 
         
-        // Integrate gradient of S_xz, S_yz in all IP-stacks
+        
+        // Integrate gradient of S_xz, S_yz and S_zz in all IP-stacks
         dSmat.zero(); 
         double thickness = this->layeredCS->giveLayerThickness(layer);
         double detJ = thickness / 2;
@@ -2474,17 +2477,7 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
                 GaussPoint *gp = iRuleL->getIntegrationPoint(point);
                 GPcoords.zero();
                 GPcoords = gp->giveGlobalCoordinates();
-#if 0
-                if (this->giveGlobalNumber() == 126 && j == 0) {
-                    GPcoords.printYourself("GP-coords (global z)");
-                }
-#endif
                 GPcoords.at(3) -= zeroThicknessLevel;
-#if 0
-                if (this->giveGlobalNumber() == 126 && j == 0) {
-                    GPcoords.printYourself("GP-coords  (local z)");
-                }
-#endif
                 
                 // Calculate z-integration of fitted stress variation in position of GP such that 
                 // Siz = - Integral( dS_ij/dx + dS_ij/dy )dz = - [a(ij) a(ij)]*Integral( dP/dx dP/dy )dz = - [a(ij) a(ij)]*IntGradP + Sij^k-1
@@ -2497,11 +2490,13 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
                 dS.at(1) += SmatOld.at(1,j+1);      // S_xz
                 dS.at(2) += SmatOld.at(2,j+1);      // S_yz
                 
+                
                 // Replace stresses
                 StructuralMaterialStatus* status = dynamic_cast< StructuralMaterialStatus* > ( gp->giveMaterialStatus() );
                 Sold = status->giveStressVector();
                 Sold.at(5) = dS.at(1); // S_xz
                 Sold.at(4) = dS.at(2); // S_yz
+                Sold.at(3) = -aSzz*GPcoords.at(3)*GPcoords.at(3) + SmatOld.at(3,j+1);   // S_zz
                 
                 if ( Sold.giveSize() > 6 ) {
                     Sold.at(8) = Sold.at(5); // S_xz
@@ -2520,6 +2515,8 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
             
             SmatOld.at(1,j+1) += dS.at(1);      // S_xz
             SmatOld.at(2,j+1) += dS.at(2);      // S_xz
+            SmatOld.at(3,j+1) += -aSzz*GPcoords.at(3)*GPcoords.at(3) + SmatOld.at(3,j+1);   // S_zz
+            
         }
 #endif
                 
@@ -2708,11 +2705,12 @@ Shell7Base :: giveZintegratedPolynomialGradientForStressRecAt(FloatArray &answer
      * The gradient of P(x,y,z) is given by
      * dP/dx = [0 1 0 0 0 z y 2x 0]
      * dP/dy = [0 0 1 0 z 0 x 0 2y]
-     * dP/dz = [0 0 0 1 y x 0 0 0 ] (NB not returned atm)
+     * dP/dz = [0 0 0 1 y x 0 0 0 ]
      * and the z-integration is then:
      * I[dP/dx]dz = [0 z 0 0 0     z^2/2 yz 2xz 0]
-     * I[dP/dx]yz = [0 0 z 0 z^2/2 0     xz 0 2yz]
-     * answer = IntgradP = [dP/dx dP/dy]^T
+     * I[dP/dy]yz = [0 0 z 0 z^2/2 0     xz 0 2yz]
+     * I[dP/dx]yz = [0 0 0 z 0 z^2/2 0     xz 0 2yz]
+     * answer = IntgradP = [I[dP/dx]dz I[dP/dy]yz]^T
      */
     
     answer.zero();
