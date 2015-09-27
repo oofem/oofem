@@ -989,11 +989,11 @@ void FieldManager_registerField (FieldManager* fm, Field* a, FieldType key) // o
   printf("Registering field\n");
 };
 
-  Field* FieldManager_getField(FieldManager *fm, FieldType key)
-  {
-    FM_FieldPtr ptr = fm->giveField(key);
-    return ptr.get();
-  }
+Field* FieldManager_getField(FieldManager *fm, FieldType key)
+{
+  FM_FieldPtr ptr = fm->giveField(key);
+  return ptr.get();
+}
 
 
 class PyFieldManager : public FieldManager, public wrapper<FieldManager>
@@ -1003,7 +1003,7 @@ public:
   void myRegisterField(Field* a, FieldType key) {
     FieldManager_registerField (this, a, key);
   }
-
+  // XXX useless?
   Field* myGiveField(FieldType key) {
     return FieldManager_getField(this, key);
   }
@@ -1014,7 +1014,7 @@ void pyclass_FieldManager()
     class_<FieldManager, PyFieldManager, boost::noncopyable>("FieldManager", no_init)
         .def("registerField", &PyFieldManager::myRegisterField)
         .def("isFieldRegistered", &FieldManager::isFieldRegistered)
-        .def("giveField", &PyFieldManager::myGiveField, return_internal_reference<>())
+        .def("giveField", FieldManager_getField, return_internal_reference<>())
         .def("unregisterField", &FieldManager::unregisterField)
         ;
 }
