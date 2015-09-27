@@ -1,0 +1,10 @@
+language: cpp
+script:
+   - cmake -DUSE_PYTHON_BINDINGS=ON .
+   - make
+   - make test
+sudo: false
+addons:
+   apt:
+      packages:
+         - libboost-python-dev

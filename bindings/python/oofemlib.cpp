@@ -54,6 +54,7 @@ namespace bp = boost::python;
 #include "floatmatrix.h"
 #include "intarray.h"
 #include "engngm.h"
+#include "unknownnumberingscheme.h"
 #include "domain.h"
 #include "sparsemtrx.h"
 #include "load.h"
@@ -170,7 +171,7 @@ void pyclass_FloatArray()
 /*****************************************************
 * FloatMatrix
 *****************************************************/
-void (FloatMatrix::*solveForRhs_1)(const FloatArray &b, FloatArray &answer, bool) = &FloatMatrix::solveForRhs;
+bool (FloatMatrix::*solveForRhs_1)(const FloatArray &b, FloatArray &answer, bool) = &FloatMatrix::solveForRhs;
 void (FloatMatrix::*solveForRhs_2)(const FloatMatrix &b, FloatMatrix &answer, bool) = &FloatMatrix::solveForRhs;
 void (FloatMatrix::*assemble_1)(const FloatMatrix&, const IntArray&) = &FloatMatrix::assemble;
 void (FloatMatrix::*assemble_2)(const FloatMatrix&, const IntArray&, const IntArray&) = &FloatMatrix::assemble;
@@ -357,13 +358,22 @@ void pyclass_SpatialLocalizer()
 {
     class_<SpatialLocalizer, boost::noncopyable>("SpatialLocalizer", no_init)
       .def("giveElementContainingPoint", pure_virtual(giveElementContainingPoint_1), return_internal_reference<>())
-        .def("giveElementCloseToPoint", &SpatialLocalizer::giveElementCloseToPoint, return_internal_reference<>())
+        // XXX .def("giveElementCloseToPoint", &SpatialLocalizer::giveElementCloseToPoint, return_internal_reference<>())
         .def("giveElementClosestToPoint", &SpatialLocalizer::giveElementClosestToPoint, return_internal_reference<>())
         .def("init", &SpatialLocalizer::init)
         .def("giveClassName", &SpatialLocalizer::giveClassName)
         ;
 }
 
+
+void pyclass_UnknownNumberingScheme(){
+	class_<UnknownNumberingScheme,boost::noncopyable>("UnknownNumberingScheme",no_init)
+		.def("giveDofEquationNumber",pure_virtual(&UnknownNumberingScheme::giveDofEquationNumber))
+		.def("giveRequiredNumberOfDomainEquation",&UnknownNumberingScheme::giveRequiredNumberOfDomainEquation)
+		.def("isDefault",&UnknownNumberingScheme::isDefault)
+		.def("init",&UnknownNumberingScheme::init)
+		;
+}
 
 /*****************************************************
 * EngngModelContext
@@ -837,7 +847,7 @@ void pyclass_BoundaryCondition()
 {
     class_<BoundaryCondition, bases<GeneralBoundaryCondition>, boost::noncopyable >("BoundaryCondition", init<int, Domain*>())
         .def("setPrescribedValue", &BoundaryCondition::setPrescribedValue)
-        .def("give", &BoundaryCondition::give)
+        // XXX .def("give", &BoundaryCondition::give)
         .def("isImposed", &BoundaryCondition::isImposed)
         ;
 }
@@ -1594,6 +1604,7 @@ BOOST_PYTHON_MODULE (liboofem)
     pyclass_SparseMtrx();
     pyclass_SpatialLocalizer();
     pyclass_EngngModelContext();
+	 pyclass_UnknownNumberingScheme();
     pyclass_EngngModel();
     pyclass_ExportModuleManager();
     pyclass_ExportModule();
@@ -1634,12 +1645,11 @@ BOOST_PYTHON_MODULE (liboofem)
     pyenum_domainType();
 
 
-    //def("make_foo", make_foo, return_value_policy<manage_new_object>())
     def("InstanciateProblem", InstanciateProblem_1, return_value_policy<manage_new_object>());
     def("createDofManValueFieldPtr", &DofManValueField_create, with_custodian_and_ward_postcall<0,2>());
-    //def("FieldManager_registerField", &FieldManager_registerField);
+    def("FieldManager_registerField", &FieldManager_registerField);
 
-    implicitly_convertible<std::auto_ptr<DofManValueField>, std::auto_ptr<Field> >();
+	 implicitly_convertible<std::auto_ptr<DofManValueField>, std::auto_ptr<Field> >();
     register_ptr_to_python< std::auto_ptr<Field> >();
 
     def("material2structuralMaterial", &material2structuralMaterial, return_internal_reference<>());
