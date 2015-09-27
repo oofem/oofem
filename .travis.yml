@@ -1,6 +1,6 @@
 language: cpp
 script:
-   - cmake -DUSE_PYTHON_BINDINGS=ON .
+   - CXX=g++-4.8 cmake -DUSE_PYTHON_BINDINGS=ON .
    - make
    - make test
 sudo: false
@@ -8,3 +8,4 @@ addons:
    apt:
       packages:
          - libboost-python-dev
+         - gcc-4.8
