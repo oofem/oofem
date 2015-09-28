@@ -995,6 +995,12 @@ Field* FieldManager_getField(FieldManager *fm, FieldType key)
   return ptr.get();
 }
 
+bp::list FieldManager_giveRegisteredKeys(FieldManager* fm){
+	bp::list ret;
+	for(const auto& k: fm->giveRegisteredKeys()) ret.append(k);
+	return ret;
+}
+
 
 class PyFieldManager : public FieldManager, public wrapper<FieldManager>
 {
@@ -1016,6 +1022,7 @@ void pyclass_FieldManager()
         .def("isFieldRegistered", &FieldManager::isFieldRegistered)
         .def("giveField", FieldManager_getField, return_internal_reference<>())
         .def("unregisterField", &FieldManager::unregisterField)
+		  .def("giveRegisteredKeys",FieldManager_giveRegisteredKeys)
         ;
 }
 

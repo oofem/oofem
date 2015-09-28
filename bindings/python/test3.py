@@ -8,5 +8,8 @@ pb.terminateAnalysis()
 
 fm=pb.giveContext().giveFieldManager()
 print fm
+print fm.giveRegisteredKeys()
 # why is this one None?
-print fm.giveField(liboofem.FieldType.FT_Displacements)
+#print fm.giveField(liboofem.FieldType.FT_Displacements)
+#for i in range(100):
+#    print fm.giveField(liboofem.FieldType(i))
