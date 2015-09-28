@@ -11,3 +11,4 @@ addons:
       packages:
          - libboost-python-dev
          - g++-4.8
+         - binutils-gold
