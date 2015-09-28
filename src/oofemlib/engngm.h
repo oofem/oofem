@@ -495,9 +495,10 @@ public:
     virtual double giveUnknownComponent(ValueModeType, TimeStep *, Domain *, Dof *) { return 0.0; }
 
     /**
-     * Returns the smart pointer to requested field, Null otherwise. The return value uses shared_ptr, as some registered fields may be
-     * ovned (and maintained) by emodel, while some may be cretead on demand and thus reliable reference 
-     * counting mechanism is essential. 
+     * Returns the smart pointer to requested field, Null otherwise. 
+     * The return value uses shared_ptr, as some registered fields may be
+     * owned (and maintained) by emodel, while some may be cretead on demand 
+     * and thus reliable reference counting mechanism is essential. 
      *
      */
     virtual EModelFieldPtr giveField (FieldType key, TimeStep *) { return EModelFieldPtr();}
