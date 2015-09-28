@@ -61,6 +61,7 @@
 #endif
 
 #include <string>
+#include <memory>
 
 ///@name Input fields for general Engineering models.
 //@{
@@ -107,6 +108,8 @@ class CommunicatorBuff;
 class ProcessCommunicator;
 class UnknownNumberingScheme;
 
+
+typedef std :: shared_ptr< Field > EModelFieldPtr;
 
 /**
  * Class EngngModelContext represents a context, which is shared by all problem engng sub-models.
@@ -490,6 +493,15 @@ public:
      * @see Dof::giveUnknown
      */
     virtual double giveUnknownComponent(ValueModeType, TimeStep *, Domain *, Dof *) { return 0.0; }
+
+    /**
+     * Returns the smart pointer to requested field, Null otherwise. The return value uses shared_ptr, as some registered fields may be
+     * ovned (and maintained) by emodel, while some may be cretead on demand and thus reliable reference 
+     * counting mechanism is essential. 
+     *
+     */
+    virtual EModelFieldPtr giveField (FieldType key, TimeStep *) { return EModelFieldPtr();}
+
 
     ///Returns the master engnmodel
     EngngModel *giveMasterEngngModel() { return this->master; }
