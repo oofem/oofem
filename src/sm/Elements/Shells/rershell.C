@@ -88,7 +88,6 @@ RerShell :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
 // Returns the [8x18] strain-displacement matrix {B} of the receiver,
 // evaluated at gp.
 {
-    int i, j, k, ii, ki;
     FloatArray b(3), c(3), nodeCoords;
     double x1, x2, x3, y1, y2, y3, area;
 
@@ -118,12 +117,12 @@ RerShell :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
     answer.resize(8, 18);
     answer.zero();
 
-    for ( i = 1; i <= 3; i++ ) {
-        j = i + 1 - i / 3 * 3;
-        k = j + 1 - j / 3 * 3;
+    for ( int i = 1; i <= 3; i++ ) {
+        int j = i + 1 - i / 3 * 3;
+        int k = j + 1 - j / 3 * 3;
 
-        ii = 6 * ( i - 1 );
-        ki = 6 * ( k - 1 );
+        int ii = 6 * ( i - 1 );
+        int ki = 6 * ( k - 1 );
 
         answer.at(1, ii + 1) = b.at(i); // Eps_X
         answer.at(1, ki + 4) = -( b.at(i) - b.at(j) ) / Rx * area / 12.;
@@ -611,7 +610,7 @@ RerShell :: printOutputAt(FILE *file, TimeStep *tStep)
 {
     FloatArray v;
 
-    fprintf(file, "element %d ( %d):\n", this->giveLabel(), number);
+    fprintf(file, "element %d (%8d):\n", this->giveLabel(), number);
 
     for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
 
