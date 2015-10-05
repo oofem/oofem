@@ -35,7 +35,7 @@ Set 4 nodes 1 3
 ##
 ## check all nodes
 ## check element no. 3 force vector
-#ELEMENT tStep 1 number 3 gp 1 keyword 7 component 1  value -2.01446385e+00
-#ELEMENT tStep 1 number 3 gp 1 keyword 7 component 2  value 6.19183772e+00
-#ELEMENT tStep 1 number 3 gp 1 keyword 7 component 3  value -5.35313452e+00
+#BEAM_ELEMENT tStep 1 number 3 keyword 1 component 1  value 2.01446385 
+#BEAM_ELEMENT tStep 1 number 3 keyword 1 component 2  value 3.48915211 
+#BEAM_ELEMENT tStep 1 number 3 keyword 1 component 3  value -6.97830422
 #%END_CHECK%
