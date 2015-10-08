@@ -110,11 +110,12 @@ NumericalMethod *NonStationaryTransportProblem :: giveNumericalMethod(MetaStep *
 //     - SolutionOfLinearEquations
 
 {
-    linSolver.reset( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
-    if ( !linSolver ) {
-        OOFEM_ERROR("linear solver creation failed");
-    }
-
+    if (!linSolver)
+        linSolver.reset( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
+//     linSolver.reset( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
+//     if ( !linSolver ) {
+//         OOFEM_ERROR("linear solver creation failed");
+//     }
     return linSolver.get();
 }
 

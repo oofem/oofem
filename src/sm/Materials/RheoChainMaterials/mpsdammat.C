@@ -529,7 +529,7 @@ double
 MPSDamMaterial :: computeTensileStrength(double equivalentTime)
 {
     double fcm, ftm;
-    // returns fcm in MPa - formula 5.5-51
+    // returns fcm in MPa - formula 5.1-51, Table 5.1-9
     fcm = exp( fib_s * ( 1. - sqrt(28. * MPSMaterial :: lambda0 / equivalentTime) ) ) * fib_fcm28;
     // ftm adjusted according to the stiffnessFactor (MPa by default)
     if ( fcm >= 20. ) {
