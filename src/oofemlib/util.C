@@ -75,6 +75,7 @@ EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag
     }
 
     problem->instanciateYourself( dr, emodelir, dataOutputFileName.c_str(), desc.c_str() );
+    problem->postInitialize();
 
     delete emodelir;
 

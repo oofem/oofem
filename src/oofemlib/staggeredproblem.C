@@ -346,10 +346,10 @@ StaggeredProblem :: giveSolutionStepWhenIcApply(bool force)
 
 int
 StaggeredProblem :: giveNumberOfFirstStep(bool force) {
-    if ( timeDefinedByProb ) {
+    if ( timeDefinedByProb && !force) {
         return emodelList [ timeDefinedByProb - 1 ].get()->giveNumberOfFirstStep(true);
     } else {
-        return EngngModel :: giveNumberOfFirstStep();
+        return EngngModel :: giveNumberOfFirstStep(force);
     }
 }
 

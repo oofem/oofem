@@ -361,13 +361,8 @@ EngngModel :: instanciateMetaSteps(DataReader *dr)
         result &= metaStepList[i-1].initializeFrom(ir);
     }
 
-    // set meta step bounds
-    int istep = this->giveNumberOfFirstStep();
-    for ( auto &metaStep: metaStepList ) {
-        istep = metaStep.setStepBounds(istep);
-    }
 
-    this->numberOfSteps = istep - 1;
+    this->numberOfSteps = metaStepList.size();
     OOFEM_LOG_RELEVANT("Total number of solution steps     %d\n", numberOfSteps);
     return result;
 }
@@ -385,9 +380,6 @@ EngngModel :: instanciateDefaultMetaStep(InputRecord *ir)
     metaStepList.clear();
     //MetaStep *mstep = new MetaStep(1, this, numberOfSteps, *ir);
     metaStepList.emplace_back(1, this, numberOfSteps, *ir);
-
-    // set meta step bounds
-    metaStepList[0].setStepBounds(this->giveNumberOfFirstStep());
 
     OOFEM_LOG_RELEVANT("Total number of solution steps     %d\n",  numberOfSteps);
     return 1;
@@ -1723,6 +1715,14 @@ EngngModel :: checkProblemConsistency()
 void
 EngngModel :: postInitialize()
 {
+
+    // set meta step bounds
+    int istep = this->giveNumberOfFirstStep(true);
+    for ( auto &metaStep: metaStepList ) {
+        istep = metaStep.setStepBounds(istep);
+    }
+
+
     for ( auto &domain: domainList ) {
         domain->postInitialize();
     }
