@@ -1305,12 +1305,12 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
         }
 
         //Problem with numerical stability for hydrostatic case, handle directly-TODO
-        if (fabs( s.at(4) ) < 1.e-20 && fabs( s.at(5)) < 1.e-20 && fabs( s.at(6)) < 1.e-20 ){
-            solve = false;
-            s1 = s.at(1);
-            s2 = s.at(2);
-            s3 = s.at(3);
-        }
+//         if (fabs( s.at(4) ) < 1.e-20 && fabs( s.at(5)) < 1.e-20 && fabs( s.at(6)) < 1.e-20 ){
+//             solve = false;
+//             s1 = s.at(1);
+//             s2 = s.at(2);
+//             s3 = s.at(3);
+//         }
 
 
         if ( mode == principal_stress ) {
