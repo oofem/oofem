@@ -213,6 +213,7 @@ MPSDamMaterial :: MPSDamMaterial(int n, Domain *d) : MPSMaterial(n, d)
     ecsMethod = ECSM_Projection;
     const_e0 = 0.;
     const_gf = 0.;
+    checkSnapBack = 1; //snapback check by default
 }
 
 
@@ -282,7 +283,7 @@ MPSDamMaterial :: initializeFrom(InputRecord *ir)
         }
     }
 
-
+    IR_GIVE_OPTIONAL_FIELD(ir, checkSnapBack, _IFT_MPSDamMaterial_checkSnapBack);
 
     return IRRT_OK;
 }
@@ -529,7 +530,7 @@ double
 MPSDamMaterial :: computeTensileStrength(double equivalentTime)
 {
     double fcm, ftm;
-    // returns fcm in MPa - formula 5.5-51
+    // returns fcm in MPa - formula 5.1-51, Table 5.1-9
     fcm = exp( fib_s * ( 1. - sqrt(28. * MPSMaterial :: lambda0 / equivalentTime) ) ) * fib_fcm28;
     // ftm adjusted according to the stiffnessFactor (MPa by default)
     if ( fcm >= 20. ) {
@@ -594,7 +595,10 @@ MPSDamMaterial :: computeDamageForCohesiveCrack(double &omega, double kappa, Gau
                 OOFEM_WARNING("Gf unsupported for softening type softType = %d", softType);
             }
 
-            OOFEM_ERROR("Material number %d, decrease e0, or increase Gf from %f to Gf=%f", this->giveNumber(), gf, minGf);
+            OOFEM_WARNING("Material number %d, decrease e0, or increase Gf from %f to Gf=%f", this->giveNumber(), gf, minGf);
+            if ( checkSnapBack ) {
+                OOFEM_ERROR("");
+            }
         }
 
         if ( this->softType == ST_Linear_Cohesive_Crack ) {
@@ -630,7 +634,12 @@ MPSDamMaterial :: computeDamageForCohesiveCrack(double &omega, double kappa, Gau
         }
 
         if ( omega < 0.0 ) {
-            OOFEM_ERROR("damage parameter is %f, which is smaller than 0, snap-back problems", omega);
+            OOFEM_WARNING("damage parameter is %f, which is smaller than 0, snap-back problems", omega);
+            omega = 1.;
+            if ( checkSnapBack ) {
+                OOFEM_ERROR("");
+            }
+
         }
     }
 
@@ -690,7 +699,10 @@ MPSDamMaterial :: initDamaged(double kappa, FloatArray &principalDirection, Gaus
         status->setCharLength(le);
 
         if ( gf != 0. && e0 >= ( wf / le ) ) { // case for a given fracture energy
-            OOFEM_ERROR("Fracturing strain %e is lower than the elastic strain e0=%e, possible snap-back. Element number %d, wf %e, le %e", wf / le, e0, gp->giveElement()->giveLabel(), wf, le);
+            OOFEM_WARNING("Fracturing strain %e is lower than the elastic strain e0=%e, possible snap-back. Element number %d, wf %e, le %e", wf / le, e0, gp->giveElement()->giveLabel(), wf, le);
+            if ( checkSnapBack ) {
+                OOFEM_ERROR("");
+            }
         }
     }
 }
