@@ -96,8 +96,8 @@ public:
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
-    void callStressFunction(PyObject *func, const FloatArray &oldStrain, const FloatArray &oldStress, const FloatArray &strain, FloatArray &stress, PyObject *stateDict, TimeStep *tStep) const;
-    void callTangentFunction(FloatMatrix &answer, PyObject *func, const FloatArray &strain, const FloatArray &stress, PyObject *stateDict, TimeStep *tStep) const;
+    void callStressFunction(PyObject *func, const FloatArray &oldStrain, const FloatArray &oldStress, const FloatArray &strain, FloatArray &stress, PyObject *stateDict, PyObject *tempStateDict, TimeStep *tStep) const;
+    void callTangentFunction(FloatMatrix &answer, PyObject *func, const FloatArray &strain, const FloatArray &stress, PyObject *stateDict, PyObject *tempStateDict, TimeStep *tStep) const;
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
@@ -138,7 +138,7 @@ public:
     void reinitTempStateDictionary();
 
     PyObject *giveStateDictionary() { return stateDict; }
-    PyObject *giveTempStateDictionary() { return stateDict; }
+    PyObject *giveTempStateDictionary() { return tempStateDict; }
 
     virtual const char *giveClassName() const { return "StructuralPythonMaterialStatus"; }
 };
