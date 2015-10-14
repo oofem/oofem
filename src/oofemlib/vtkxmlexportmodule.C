@@ -414,77 +414,75 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
             }
         }
     }  // end loop over composite elements
-	} else { // if (particleExportFlag)
+    } else { // if (particleExportFlag)
 #ifdef __PFEM_MODULE
-	// write out the particles (nodes exported as vertices = VTK_VERTEX)
-	Domain *d  = emodel->giveDomain(1);
-	int nnode = d->giveNumberOfDofManagers();
+        // write out the particles (nodes exported as vertices = VTK_VERTEX)
+        Domain *d  = emodel->giveDomain(1);
+        int nnode = d->giveNumberOfDofManagers();
 
-	int nActiveNode = 0;
-	for (int inode = 1; inode<=nnode; inode++) {
-		PFEMParticle *particle = dynamic_cast<PFEMParticle*>(d->giveNode(inode));
-		if (particle) {
-			if (particle->isActive())
-				nActiveNode++;
-		}
-	}
+        int nActiveNode = 0;
+        for (int inode = 1; inode<=nnode; inode++) {
+            PFEMParticle *particle = dynamic_cast<PFEMParticle*>(d->giveNode(inode));
+            if (particle) {
+                if (particle->isActive())
+                    nActiveNode++;
+            }
+        }
 
-	DofManager *node;
-	FloatArray *coords;
-	fprintf(this->fileStream, "<Piece NumberOfPoints=\"%d\" NumberOfCells=\"%d\">\n", nActiveNode, nActiveNode);
-	fprintf(this->fileStream, "<Points>\n <DataArray type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\"> ");
+        DofManager *node;
+        FloatArray *coords;
+        fprintf(this->fileStream, "<Piece NumberOfPoints=\"%d\" NumberOfCells=\"%d\">\n", nActiveNode, nActiveNode);
+        fprintf(this->fileStream, "<Points>\n <DataArray type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\"> ");
 
-	for (int inode = 1; inode<=nnode; inode++) {
-		node = d->giveNode(inode);
-		PFEMParticle *particle = dynamic_cast<PFEMParticle*>(node);
-		if (particle)
-		{
-			if (particle->isActive())
-			{
-				coords = node->giveCoordinates();
-				///@todo move this below into setNodeCoords since it should alwas be 3 components anyway
-				for ( int i = 1; i <= coords->giveSize(); i++ ) {
-					fprintf( this->fileStream, "%e ", coords->at(i) );
-				}
+        for (int inode = 1; inode<=nnode; inode++) {
+            node = d->giveNode(inode);
+            PFEMParticle *particle = dynamic_cast<PFEMParticle*>(node);
+            if (particle) {
+                if (particle->isActive()) {
+                    coords = node->giveCoordinates();
+                    ///@todo move this below into setNodeCoords since it should alwas be 3 components anyway
+                    for ( int i = 1; i <= coords->giveSize(); i++ ) {
+                        fprintf( this->fileStream, "%e ", coords->at(i) );
+                    }
 
-				for ( int i = coords->giveSize() + 1; i <= 3; i++ ) {
-					fprintf(this->fileStream, "%e ", 0.0);
-				}
-			}
-                }          
+                    for ( int i = coords->giveSize() + 1; i <= 3; i++ ) {
+                        fprintf(this->fileStream, "%e ", 0.0);
+                    }
+                }
+            }
          }
 
-	fprintf(this->fileStream, "</DataArray>\n</Points>\n");
+        fprintf(this->fileStream, "</DataArray>\n</Points>\n");
 
 
-	// output the cells connectivity data
-	fprintf(this->fileStream, "<Cells>\n");
-	fprintf(this->fileStream, " <DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\"> ");
+        // output the cells connectivity data
+        fprintf(this->fileStream, "<Cells>\n");
+        fprintf(this->fileStream, " <DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\"> ");
 
-	for ( int ielem = 1; ielem <= nActiveNode; ielem++ ) {
+        for ( int ielem = 1; ielem <= nActiveNode; ielem++ ) {
             fprintf(this->fileStream, "%d ", ielem - 1);
         }
 
-	fprintf(this->fileStream, "</DataArray>\n");
+        fprintf(this->fileStream, "</DataArray>\n");
 
-	// output the offsets (index of individual element data in connectivity array)
-	fprintf(this->fileStream, " <DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\"> ");
+        // output the offsets (index of individual element data in connectivity array)
+        fprintf(this->fileStream, " <DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\"> ");
 
-	for ( int ielem = 1; ielem <= nActiveNode; ielem++ ) {
+        for ( int ielem = 1; ielem <= nActiveNode; ielem++ ) {
             fprintf( this->fileStream, "%d ", ielem);
         }
-	fprintf(this->fileStream, "</DataArray>\n");
+        fprintf(this->fileStream, "</DataArray>\n");
 
 
-	// output cell (element) types
-	fprintf(this->fileStream, " <DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\"> ");
-	for ( int ielem = 1; ielem <= nActiveNode; ielem++ ) {
+        // output cell (element) types
+        fprintf(this->fileStream, " <DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\"> ");
+        for ( int ielem = 1; ielem <= nActiveNode; ielem++ ) {
             fprintf( this->fileStream, "%d ", 1);
         }
 
-	fprintf(this->fileStream, "</DataArray>\n");
-	fprintf(this->fileStream, "</Cells>\n");
-	fprintf(this->fileStream, "</Piece>\n");
+        fprintf(this->fileStream, "</DataArray>\n");
+        fprintf(this->fileStream, "</Cells>\n");
+        fprintf(this->fileStream, "</Piece>\n");
 #endif //__PFEM_MODULE
     }
 

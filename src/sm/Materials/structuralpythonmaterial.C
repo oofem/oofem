@@ -71,10 +71,10 @@ IRResultType StructuralPythonMaterial :: initializeFrom(InputRecord *ir)
 
     if ( mpModule != NULL ) {
         // Load and call Python function
-        smallDef = PyObject_GetAttrString(mpModule, "giveStress");
-        largeDef = PyObject_GetAttrString(mpModule, "givePK1Stress");
-        smallDefTangent = PyObject_GetAttrString(mpModule, "giveStressTangent");
-        largeDefTangent = PyObject_GetAttrString(mpModule, "givePK1StressTangent");
+        smallDef = PyObject_GetAttrString(mpModule, "computeStress");
+        largeDef = PyObject_GetAttrString(mpModule, "computePK1Stress");
+        smallDefTangent = PyObject_GetAttrString(mpModule, "computeStressTangent");
+        largeDefTangent = PyObject_GetAttrString(mpModule, "computePK1StressTangent");
         if ( smallDefTangent == NULL && smallDef != NULL) {
             OOFEM_WARNING("Using numerical tangent for small deformations");
         }
@@ -297,15 +297,29 @@ void StructuralPythonMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, 
 
 int StructuralPythonMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    //StructuralPythonMaterialStatus *ms = static_cast< StructuralPythonMaterialStatus * >( this->giveStatus(gp) );
-    ///@todo This should be possible to support if we move away from the enum IST values and use strings.
-    PyObject *val = NULL; //PyDict_GetItemString(this->stateDict, type.c_str());
-    if ( val != NULL ) {
-        OOFEM_ERROR("Not implemented yet"); ///@todo Implement conversion from dictionary to "answer"
-        return 1;
-    } else {
-        return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
+    StructuralPythonMaterialStatus *ms = static_cast< StructuralPythonMaterialStatus * >( this->giveStatus(gp) );
+    std :: string s = std :: to_string( type );
+    PyObject *val = PyDict_GetItemString(ms->giveStateDictionary(), s.c_str());
+    if ( val ) {
+        
+        if ( PyFloat_Check(val) != 0 ) {
+            answer = FloatArray{PyFloat_AS_DOUBLE(val)};
+        } else if ( PyList_Check(val) != 0 ) {
+            // Convert function output back to C++ form:
+            int size = PyList_Size(val);
+            answer.resize(size);
+            for ( int i = 0; i < size; i++ ) {
+                PyObject *val = PyList_GET_ITEM(val, i);
+                answer[i] = PyFloat_AS_DOUBLE(val);
+                //Py_DECREF(val);
+            }
+            return 1;
+        } else {
+            OOFEM_WARNING("Dictionary entry of material state is not a list (only lists supported for now)");
+            return 0;
+        }
     }
+    return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
 }
 
 

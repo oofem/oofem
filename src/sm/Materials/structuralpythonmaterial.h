@@ -54,15 +54,15 @@ namespace oofem {
  * Custom user supplied python scripts for material models.
  * The python module should contain the functions
  * @code{.py}
- * giveStress(oldStrain, oldStress, strain, state, time) # returns stress
- * givePK1Stress(oldF, oldP, F, state, time) # returns P
+ * computeStress(oldStrain, oldStress, strain, state, time) # returns stress
+ * computePK1Stress(oldF, oldP, F, state, time) # returns P
  * @endcode
  * and optionally
  * @code{.py}
- * giveStressTangent(strain, stress, state, time) # returns ds/de
- * givePK1StressTangent(F, P, state, time) # return dP/dF
+ * computeStressTangent(strain, stress, state, time) # returns ds/de
+ * computePK1StressTangent(F, P, state, time) # return dP/dF
  * @endcode
- * else numerical derivatives are used.
+ * else numerical derivatives are used. The state variable should be a dictionary storing either doubles or arrays of doubles.
  * 
  * This code is still experimental, and needs extensive testing.
  * @author Mikael Öhman

@@ -44,6 +44,7 @@
 #include "classfactory.h"
 #include "dofmanager.h"
 #include "dof.h"
+#include "error.h"
 
 namespace oofem {
 REGISTER_BoundaryCondition(UserDefDirichletBC);
