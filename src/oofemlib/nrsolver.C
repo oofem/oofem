@@ -246,16 +246,16 @@ NRSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0, FloatArray *iR,
 
     nite = 0;
     for ( nite = 0; ; ++nite ) {
-      // Compute the residual
-      engngModel->updateComponent(tStep, InternalRhs, domain);
-      if (nite || iR == NULL) {
-        rhs.beDifferenceOf(RT, F);
-      } else {
-        rhs = R;
-        if (iR) {
-          rhs.add(*iR); // add initial guess
+        // Compute the residual
+        engngModel->updateComponent(tStep, InternalRhs, domain);
+        if (nite || iR == NULL) {
+            rhs.beDifferenceOf(RT, F);
+        } else {
+            rhs = R;
+            if (iR) {
+                rhs.add(*iR); // add initial guess
+            }
         }
-      }
         if ( this->prescribedDofsFlag ) {
             this->applyConstraintsToLoadIncrement(nite, k, rhs, rlm, tStep);
         }
