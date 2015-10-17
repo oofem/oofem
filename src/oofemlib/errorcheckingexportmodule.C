@@ -349,10 +349,8 @@ ErrorCheckingExportModule :: initializeFrom(InputRecord *ir)
     this->writeIST.clear();
     writeChecks = ir->hasField(_IFT_ErrorCheckingExportModule_writeIST);
     if ( writeChecks ) {
-        printf("check\n");
         IR_GIVE_FIELD(ir, this->writeIST, _IFT_ErrorCheckingExportModule_writeIST);
     }
-    this->writeIST.printYourself("IST");
 
     if ( errorCheckingRules.size() == 0 && !writeChecks ) {
         OOFEM_WARNING("No rules found (possibly wrong file or syntax).");
