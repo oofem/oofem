@@ -142,7 +142,6 @@ IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
 }
 
 
-
 void TSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
@@ -184,7 +183,6 @@ void TSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords
         answer.at(count--) /= sum;
     }
 }
-
 
 
 double TSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
@@ -384,6 +382,7 @@ void TSplineInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const F
     double w, xw, yw, product, weight;
     int count;
     std :: vector< FloatArray > ders(nsd);
+    jacobian.resize(nsd, nsd);
 
     /*
      * IntArray Bin(2,2);      // binomial coefficients from 0 to d=1
@@ -454,19 +453,19 @@ void TSplineInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const F
         weight = wders(0, 0);
 
         // optimized version of A4.4 for d=1, binomial coefficients ignored
-        /*
-         *      Sders[0](0,0) = Aders[0](0,0) / weight;
-         *      Sders[1](0,0) = Aders[1](0,0) / weight;
-         *      Sders[0](0,1) = (Aders[0](0,1)-wders(0,1)*Sders[0](0,0)) / weight;
-         *      Sders[1](0,1) = (Aders[1](0,1)-wders(0,1)*Sders[1](0,0)) / weight;
-         *      Sders[0](1,0) = (Aders[0](1,0)-wders(1,0)*Sders[0](0,0)) / weight;
-         *      Sders[1](1,0) = (Aders[1](1,0)-wders(1,0)*Sders[1](0,0)) / weight;
-         *
-         *      jacobian(0,0) = Sders[0](1,0);   // dx/du
-         *      jacobian(0,1) = Sders[1](1,0);   // dy/du
-         *      jacobian(1,0) = Sders[0](0,1);   // dx/dv
-         *      jacobian(1,1) = Sders[1](0,1);   // dy/dv
-         */
+#if 0
+        Sders[0](0,0) = Aders[0](0,0) / weight;
+        Sders[1](0,0) = Aders[1](0,0) / weight;
+        Sders[0](0,1) = (Aders[0](0,1)-wders(0,1)*Sders[0](0,0)) / weight;
+        Sders[1](0,1) = (Aders[1](0,1)-wders(0,1)*Sders[1](0,0)) / weight;
+        Sders[0](1,0) = (Aders[0](1,0)-wders(1,0)*Sders[0](0,0)) / weight;
+        Sders[1](1,0) = (Aders[1](1,0)-wders(1,0)*Sders[1](0,0)) / weight;
+
+        jacobian(0,0) = Sders[0](1,0);   // dx/du
+        jacobian(0,1) = Sders[1](1,0);   // dy/du
+        jacobian(1,0) = Sders[0](0,1);   // dx/dv
+        jacobian(1,1) = Sders[1](0,1);   // dy/dv
+#endif
 
         temp(0) = Aders [ 0 ](0, 0) / weight;
         temp(1) = Aders [ 1 ](0, 0) / weight;

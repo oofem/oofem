@@ -473,23 +473,17 @@ void BSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &
                 tmp.zero();
                 for ( int k = 0; k <= degree [ 0 ]; k++ ) {
                     vertexCoordsPtr = cellgeo.giveVertexCoordinates(ind + k);
-                    tmp(0) += N [ 0 ](k) * vertexCoordsPtr->at(1);
-                    tmp(1) += N [ 0 ](k) * vertexCoordsPtr->at(2);
-                    tmp(2) += N [ 0 ](k) * vertexCoordsPtr->at(3);
+                    tmp.add(N [ 0 ](k), *vertexCoordsPtr);
                 }
 
                 ind += numberOfControlPoints [ 0 ];
 
-                temp(0) += N [ 1 ](l) * tmp(0);
-                temp(1) += N [ 1 ](l) * tmp(1);
-                temp(2) += N [ 1 ](l) * tmp(2);
+                temp.add(N [ 1 ](l), tmp);
             }
 
             ind = indx + numberOfControlPoints [ 0 ] * numberOfControlPoints [ 1 ];
 
-            answer(0) += N [ 2 ](m) * temp(0);
-            answer(1) += N [ 2 ](m) * temp(1);
-            answer(2) += N [ 2 ](m) * temp(2);
+            answer.add(N [ 2 ](m), temp);
         }
     } else {
         OOFEM_ERROR("local2global not implemented for nsd = %d", nsd);
@@ -504,7 +498,7 @@ void BSplineInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const F
     IntArray span(nsd);
     int indx, ind, uind, vind, tind;
     std :: vector< FloatMatrix > ders(nsd);
-
+    jacobian.resize(nsd, nsd);
 
     if ( gw->knotSpan ) {
         span = * gw->knotSpan;
@@ -573,28 +567,15 @@ void BSplineInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const F
                 for ( int k = 0; k <= degree [ 0 ]; k++ ) {
                     vertexCoordsPtr = cellgeo.giveVertexCoordinates(ind + k);
 
-                    tmp1(0) += ders [ 0 ](1, k) * vertexCoordsPtr->at(1);                // sum(dNu/du*x)
-                    tmp1(1) += ders [ 0 ](1, k) * vertexCoordsPtr->at(2);                // sum(dNu/du*y)
-                    tmp1(2) += ders [ 0 ](1, k) * vertexCoordsPtr->at(3);                // sum(dNu/du*z)
-
-                    tmp2(0) += ders [ 0 ](0, k) * vertexCoordsPtr->at(1);                // sum(Nu*x)
-                    tmp2(1) += ders [ 0 ](0, k) * vertexCoordsPtr->at(2);                // sum(Nu*y)
-                    tmp2(2) += ders [ 0 ](0, k) * vertexCoordsPtr->at(3);                // sum(Nu*y)
+                    tmp1.add(ders [ 0 ](1, k), *vertexCoordsPtr); // sum(dNu/du*x)
+                    tmp2.add(ders [ 0 ](0, k), *vertexCoordsPtr); // sum(Nu*x)
                 }
 
                 ind += numberOfControlPoints [ 0 ];
 
-                temp1(0) += ders [ 1 ](0, l) * tmp1(0);            // sum(Nv*sum(dNu/du*x)
-                temp1(1) += ders [ 1 ](0, l) * tmp1(1);            // sum(Nv*sum(dNu/du*y)
-                temp1(2) += ders [ 1 ](0, l) * tmp1(2);            // sum(Nv*sum(dNu/du*z)
-
-                temp2(0) += ders [ 1 ](1, l) * tmp2(0);            // sum(dNv/dv*sum(Nu*x)
-                temp2(1) += ders [ 1 ](1, l) * tmp2(1);            // sum(dNv/dv*sum(Nu*y)
-                temp2(2) += ders [ 1 ](1, l) * tmp2(1);            // sum(dNv/dv*sum(Nu*z)
-
-                temp3(0) += ders [ 1 ](0, l) * tmp2(0);            // sum(Nv*sum(Nu*x)
-                temp3(1) += ders [ 1 ](0, l) * tmp2(1);            // sum(Nv*sum(Nu*y)
-                temp3(2) += ders [ 1 ](0, l) * tmp2(1);            // sum(Nv*sum(Nu*z)
+                temp1.add(ders [ 1 ](0, l), tmp1); // sum(Nv*sum(dNu/du*x)
+                temp2.add(ders [ 1 ](1, l), tmp2); // sum(dNv/dv*sum(Nu*x)
+                temp3.add(ders [ 1 ](0, l), tmp2); // sum(Nv*sum(Nu*x)
             }
 
             ind = indx + numberOfControlPoints [ 0 ] * numberOfControlPoints [ 1 ];

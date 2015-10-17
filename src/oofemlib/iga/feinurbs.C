@@ -655,6 +655,7 @@ void NURBSInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const Flo
     double w, weight;
     int ind, indx, uind, vind, tind;
     std :: vector< FloatMatrix > ders(nsd);
+    jacobian.resize(nsd, nsd);
 
     if ( gw->knotSpan ) {
         span = * gw->knotSpan;
