@@ -219,7 +219,7 @@ public:
      * @param cellgeo Underlying cell geometry.
      * @return Determinant of the transformation.
      */
-    virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
+    virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 
     /// Initializes receiver according to object description stored in input record.
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
