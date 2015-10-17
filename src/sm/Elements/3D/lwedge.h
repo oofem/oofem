@@ -50,10 +50,6 @@ class FEI3dWedgeLin;
 
 /**
  * This class implements a Linear 3d  6 - node elasticity finite element.
- *
- * Each node has 3 degrees of freedom.
- * One single additional attribute is needed for Gauss integration purpose :
- * 'jacobianMatrix'. This 3x3 matrix contains polynomials.
  */
 class LWedge : public Structural3DElement, public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, public SpatialLocalizerInterface
 {

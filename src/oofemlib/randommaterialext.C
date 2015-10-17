@@ -102,7 +102,7 @@ RandomMaterialExtensionInterface :: _generateStatusVariables(GaussPoint *gp) con
     // Have to wrap it through the material to ensure that it gets an actual material status (for now at least)
     int size = randVariables.giveSize();
     double value;
-    MaterialStatus *matStat = gp->giveMaterial()->giveStatus(gp);
+    MaterialStatus *matStat = static_cast< MaterialStatus* >( gp->giveMaterialStatus() );
     RandomMaterialStatusExtensionInterface *status = static_cast< RandomMaterialStatusExtensionInterface * >
                                                      ( matStat->giveInterface(RandomMaterialStatusExtensionInterfaceType) );
 
