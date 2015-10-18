@@ -225,7 +225,6 @@ IntMatCoulombContactStatus :: IntMatCoulombContactStatus(int n, Domain *d, Gauss
     tempShearStressShift.resize(size);
     shearStressShift.zero();
     tempShearStressShift.zero();
-    //this->initTempStatus();
 }
 
 
