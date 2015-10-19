@@ -109,7 +109,13 @@ class ProcessCommunicator;
 class UnknownNumberingScheme;
 
 
-typedef std :: shared_ptr< Field > EModelFieldPtr;
+#ifdef BOOST_PYTHON
+#include <boost/smart_ptr.hpp>
+ typedef boost::shared_ptr< Field > EModelFieldPtr;
+#else
+ typedef std :: shared_ptr< Field > EModelFieldPtr;
+#endif
+
 
 /**
  * Class EngngModelContext represents a context, which is shared by all problem engng sub-models.

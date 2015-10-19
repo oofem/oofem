@@ -45,10 +45,10 @@ Set 3 nodes 1 4
 #NODE tStep 1 number 4 dof 3 unknown d value 27.0
 #NODE tStep 1 number 4 dof 5 unknown d value -6.0
 ## check element no. 1,2 force vector
-#ELEMENT tStep 1 number 1 gp 1 keyword 7 component 1  value 2.0000e+00
-#ELEMENT tStep 1 number 1 gp 1 keyword 7 component 2  value -4.00000000e+00
-#ELEMENT tStep 1 number 1 gp 1 keyword 7 component 3  value 5.33333333e+00
-#ELEMENT tStep 1 number 2 gp 1 keyword 7 component 1  value  2.0000e+00
-#ELEMENT tStep 1 number 2 gp 1 keyword 7 component 2  value  0.0
-#ELEMENT tStep 1 number 2 gp 1 keyword 7 component 3  value 1.06666667e+01
+#BEAM_ELEMENT tStep 1 number 1 keyword 1 component 1  value -2.0000e+00
+#BEAM_ELEMENT tStep 1 number 1 keyword 1 component 2  value 0.0
+#BEAM_ELEMENT tStep 1 number 1 keyword 1 component 3  value 4.0
+#BEAM_ELEMENT tStep 1 number 2 keyword 1 component 1  value -2.0000e+00
+#BEAM_ELEMENT tStep 1 number 2 keyword 1 component 2  value 0.0
+#BEAM_ELEMENT tStep 1 number 2 keyword 1 component 3  value 0.0
 #%END_CHECK%

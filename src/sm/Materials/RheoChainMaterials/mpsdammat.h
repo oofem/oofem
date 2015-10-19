@@ -55,7 +55,7 @@
 #define _IFT_MPSDamMaterial_maxOmega "maxomega"
 
 #define _IFT_MPSDamMaterial_damageLaw "damlaw"
-
+#define _IFT_MPSDamMaterial_checkSnapBack "checksnapback"
 #define _IFT_MPSDamMaterial_ft "ft"
 #define _IFT_MPSDamMaterial_gf "gf"
 
@@ -207,7 +207,8 @@ protected:
      */
     enum SofteningType { ST_Exponential_Cohesive_Crack, ST_Linear_Cohesive_Crack, ST_Disable_Damage };
 
-
+    /// Check possible snap back flag
+    int checkSnapBack;
 
     /// Parameter specifying the type of softening (damage law).
     SofteningType softType;

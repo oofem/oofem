@@ -1251,6 +1251,7 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
 
     double swap;
     int nonzeroFlag = 0;
+    bool solve = true;
     if ( ( size == 3 ) || ( size == 4 ) ) {
         // 2D problem
         double ast, dst, D = 0.0;
@@ -1303,6 +1304,13 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
             return;
         }
 
+        //Problem with numerical stability for hydrostatic case, handle directly-TODO
+//         if (fabs( s.at(4) ) < 1.e-20 && fabs( s.at(5)) < 1.e-20 && fabs( s.at(6)) < 1.e-20 ){
+//             solve = false;
+//             s1 = s.at(1);
+//             s2 = s.at(2);
+//             s3 = s.at(3);
+//         }
 
 
         if ( mode == principal_stress ) {
@@ -1337,7 +1345,9 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
          * This allows to overcome various rounding errors when solving general cubic equation.
          */
         int n;
-        cubic3r( ( double ) -1., I1, -I2, I3, & s1, & s2, & s3, & n );
+        if ( solve ){
+            cubic3r( ( double ) -1., I1, -I2, I3, & s1, & s2, & s3, & n );
+        }
 
         if ( n > 0 ) {
             answer.at(1) = s1;
@@ -1350,8 +1360,22 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
         if ( n > 2 ) {
             answer.at(3) = s3;
         }
+    
+         //Check NaN
+//     if (answer.at(1)  != answer.at(1)) {
+//         s.pY();
+//         printf("%.10e %.10e %.10e\n", I1, I2, I3);
+//         exit(0);
+//     }
+//         
+        
+        
     }
 
+   
+    
+    
+    
     //sort the results
     for ( int i = 1; i < answer.giveSize(); i++ ) {
         for ( int j = 1; j < answer.giveSize(); j++ ) {

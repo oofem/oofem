@@ -228,6 +228,7 @@ void DofManager :: giveCompleteLocationArray(IntArray &locationArray, const Unkn
         }
     } else {
         IntArray temp;
+        locationArray.resize(0);
         for ( Dof *dof: *this ) {
             dof->giveEquationNumbers(temp, s);
             locationArray.followedBy(temp);

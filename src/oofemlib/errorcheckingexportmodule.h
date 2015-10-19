@@ -102,6 +102,24 @@ public:
     virtual bool check(Domain *domain, TimeStep *tStep);
 };
 
+/// Checks a beam element value (in terms of  end forces and and-displacements)
+class OOFEM_EXPORT BeamElementErrorCheckingRule : public ErrorCheckingRule
+{
+public:
+  enum BeamElementValueType{
+    BET_localEndDisplacement,
+    BET_localEndForces
+  } ;
+protected:
+    BeamElementValueType ist;
+    int component;
+
+public:
+    BeamElementErrorCheckingRule(const std :: string &line, double tol);
+    virtual bool check(Domain *domain, TimeStep *tStep);
+};
+
+
 /// Checks a reaction force value
 class OOFEM_EXPORT ReactionErrorCheckingRule : public ErrorCheckingRule
 {
