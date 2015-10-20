@@ -108,13 +108,7 @@ class CommunicatorBuff;
 class ProcessCommunicator;
 class UnknownNumberingScheme;
 
-
-#ifdef BOOST_PYTHON
-#include <boost/smart_ptr.hpp>
- typedef boost::shared_ptr< Field > EModelFieldPtr;
-#else
- typedef std :: shared_ptr< Field > EModelFieldPtr;
-#endif
+typedef std :: shared_ptr< Field > EModelFieldPtr;
 
 
 /**

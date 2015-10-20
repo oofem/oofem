@@ -456,12 +456,13 @@ void pyclass_EngngModel()
         .def("setRenumberFlag", &PyEngngModel::setRenumberFlag)
         .def("giveNumberOfSteps", &EngngModel::giveNumberOfSteps)
         .add_property("numberOfSteps",&PyEngngModel::giveNumberOfSteps)
-        .def("giveCurrentStep", &EngngModel::giveCurrentStep, return_internal_reference<>())
-        .add_property("currentStep",make_function(&PyEngngModel::giveCurrentStep, return_internal_reference<>()))
+        .def("giveCurrentStep", &EngngModel::giveCurrentStep,(boost::python::arg("force")=false), return_internal_reference<>())
+        // .add_property("currentStep",make_function(&PyEngngModel::giveCurrentStep, return_internal_reference<>()))
         .def("giveNextStep",&EngngModel::giveNextStep, &PyEngngModel::default_giveNextStep, return_internal_reference<>())
         .def("giveExportModuleManager",&EngngModel::giveExportModuleManager, return_internal_reference<>())
         .add_property("exportModuleManager",make_function(&PyEngngModel::giveExportModuleManager, return_internal_reference<>()))
         .def("giveContext", &PyEngngModel::giveContext, return_internal_reference<>())
+		  .def("giveField",&EngngModel::giveField)
         .add_property("context", make_function(&PyEngngModel::giveContext, return_internal_reference<>()))
         ;
 }
@@ -933,7 +934,6 @@ void pyclass_DataStream()
         ;
 }
 
-
 /*****************************************************
 * Field
 *****************************************************/
@@ -941,6 +941,7 @@ class PyField : public Field, public wrapper<Field>
 {
 public:
     PyField (FieldType b): Field(b) {}
+	#if 0
     int evaluateAt(FloatArray &answer, FloatArray &coords,
             ValueModeType mode, TimeStep *atTime) {
         return this->get_override("evaluateAt")(answer, coords,mode,atTime);
@@ -955,10 +956,12 @@ public:
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode) {
         return this->get_override("restoreContext")(stream, mode);
     }
+	#endif
 };
 
-int (PyField::*evaluateAtPos)(FloatArray &answer, FloatArray &coords, ValueModeType mode, TimeStep *atTime) = &PyField::evaluateAt;
-int (PyField::*evaluateAtDman)(FloatArray &answer, DofManager* dman, ValueModeType mode, TimeStep *atTime) = &PyField::evaluateAt;
+
+int (Field::*Field_evaluateAtPos)(FloatArray &answer, FloatArray &coords, ValueModeType mode, TimeStep *atTime) = &Field::evaluateAt;
+int (Field::*Field_evaluateAtDman)(FloatArray &answer, DofManager* dman, ValueModeType mode, TimeStep *atTime) = &Field::evaluateAt;
 
 std::auto_ptr<Field> DofManValueField_create (FieldType t, Domain* d) { return std::auto_ptr<Field> ( new DofManValueField(t, d) ); }
 
@@ -967,10 +970,10 @@ void pyclass_Field()
     //this class is held by auto_ptr:  to allow for taking ownership of a raw pointer
     //see http://www.boost.org/doc/libs/1_47_0/libs/python/doc/v2/faq.html#ownership for detail
     // also see http://stackoverflow.com/questions/4112561/boost-python-ownership-of-pointer-variables
-    class_<Field, PyField, boost::noncopyable>("Field", no_init)
-        .def("evaluateAtPos", evaluateAtPos)
-        .def("evaluateAtDman", evaluateAtDman)
-        .def("giveType", &PyField::giveType)
+    class_<PyField, EModelFieldPtr, boost::noncopyable>("Field", no_init)
+        .def("evaluateAtPos", pure_virtual(Field_evaluateAtPos))
+        .def("evaluateAtDman", pure_virtual(Field_evaluateAtDman))
+        .def("giveType", &Field::giveType)
         ;
 }
 
@@ -1033,7 +1036,7 @@ void pyclass_FieldManager()
 void pyclass_DofManValueField()
 {
     class_<DofManValueField, bases<Field>, boost::noncopyable >("DofManValueField", no_init)
-        .def("evaluateAt", evaluateAtPos)
+        .def("evaluateAt", Field_evaluateAtPos)
         .def("setDofManValue",&DofManValueField::setDofManValue)
         ;
 }
