@@ -55,33 +55,36 @@ Set 5 nodes 1 1
 #NODE tStep 1 number 2 dof 4 unknown d value -1.08941223e-04 tolerance 1e-10
 #NODE tStep 1 number 2 dof 5 unknown d value 3.76789811e-04 tolerance 1e-10
 ## check element no. 1 force vector
-#ELEMENT tStep 1 number 1 gp 1 keyword 7 component 1  value 0.
-#ELEMENT tStep 1 number 1 gp 1 keyword 7 component 2  value 0.
-#ELEMENT tStep 1 number 1 gp 1 keyword 7 component 3  value 5.71353601e+02
-#ELEMENT tStep 1 number 1 gp 1 keyword 7 component 4  value 0.
-#ELEMENT tStep 1 number 1 gp 1 keyword 7 component 5  value -1.01431499e+00
-#ELEMENT tStep 1 number 1 gp 1 keyword 7 component 6  value 0.
+#BEAM_ELEMENT tStep 1 number 1 keyword 1 component 1  value 0. 
+#BEAM_ELEMENT tStep 1 number 1 keyword 1 component 2  value 0. 
+#BEAM_ELEMENT tStep 1 number 1 keyword 1 component 3  value 15 
+#BEAM_ELEMENT tStep 1 number 1 keyword 1 component 4  value 0. 
+#BEAM_ELEMENT tStep 1 number 1 keyword 1 component 5  value 0. 
+#BEAM_ELEMENT tStep 1 number 1 keyword 1 component 6  value 0. 
+#BEAM_ELEMENT tStep 1 number 1 keyword 1 component 9  value -15 
+#BEAM_ELEMENT tStep 1 number 1 keyword 1 component 11  value -9.0 
+
 ##
-#ELEMENT tStep 1 number 2 gp 1 keyword 7 component 1  value 0.
-#ELEMENT tStep 1 number 2 gp 1 keyword 7 component 2  value 0.
-#ELEMENT tStep 1 number 2 gp 1 keyword 7 component 3  value -1.10768752e+01
-#ELEMENT tStep 1 number 2 gp 1 keyword 7 component 4  value 1.15420317e+00
-#ELEMENT tStep 1 number 2 gp 1 keyword 7 component 5  value -2.36741040e+00
-#ELEMENT tStep 1 number 2 gp 1 keyword 7 component 6  value 0.
+#BEAM_ELEMENT tStep 1 number 2 keyword 1 component 1  value 0. 
+#BEAM_ELEMENT tStep 1 number 2 keyword 1 component 2  value 0. 
+#BEAM_ELEMENT tStep 1 number 2 keyword 1 component 3  value 3.06981196 
+#BEAM_ELEMENT tStep 1 number 2 keyword 1 component 4  value -1.15420317 
+#BEAM_ELEMENT tStep 1 number 2 keyword 1 component 5  value 1.08731059 
+#BEAM_ELEMENT tStep 1 number 2 keyword 1 component 6  value 0. 
 ##
-#ELEMENT tStep 1 number 3 gp 1 keyword 7 component 1  value 0.
-#ELEMENT tStep 1 number 3 gp 1 keyword 7 component 2  value 0.
-#ELEMENT tStep 1 number 3 gp 1 keyword 7 component 3  value 1.55769245e+01
-#ELEMENT tStep 1 number 3 gp 1 keyword 7 component 4  value -4.22010102e+00
-#ELEMENT tStep 1 number 3 gp 1 keyword 7 component 5  value -1.97505202e+01
-#ELEMENT tStep 1 number 3 gp 1 keyword 7 component 6  value 0.
+#BEAM_ELEMENT tStep 1 number 3  keyword 1 component 1  value 0. 
+#BEAM_ELEMENT tStep 1 number 3  keyword 1 component 2  value 0. 
+#BEAM_ELEMENT tStep 1 number 3  keyword 1 component 3  value -1.30444584e+01 
+#BEAM_ELEMENT tStep 1 number 3  keyword 1 component 4  value 4.22010102e+00 
+#BEAM_ELEMENT tStep 1 number 3  keyword 1 component 5  value 2.48959829e+01 
+#BEAM_ELEMENT tStep 1 number 3  keyword 1 component 6  value 0. 
 ##
-#ELEMENT tStep 1 number 4 gp 1 keyword 7 component 1  value 0.
-#ELEMENT tStep 1 number 4 gp 1 keyword 7 component 2  value 0.
-#ELEMENT tStep 1 number 4 gp 1 keyword 7 component 3  value -9.36939060e+00
-#ELEMENT tStep 1 number 4 gp 1 keyword 7 component 4  value 3.69258839e+00
-#ELEMENT tStep 1 number 4 gp 1 keyword 7 component 5  value 1.46785040e+01
-#ELEMENT tStep 1 number 4 gp 1 keyword 7 component 6  value 0.
+#BEAM_ELEMENT tStep 1 number 4  keyword 1 component 1  value 0. 
+#BEAM_ELEMENT tStep 1 number 4  keyword 1 component 2  value 0. 
+#BEAM_ELEMENT tStep 1 number 4  keyword 1 component 3  value 4.13572961e+00 
+#BEAM_ELEMENT tStep 1 number 4  keyword 1 component 4  value -3.69258839e+00
+#BEAM_ELEMENT tStep 1 number 4  keyword 1 component 5  value -1.65429184e+01
+#BEAM_ELEMENT tStep 1 number 4  keyword 1 component 6  value 0. 
 ##
 ##
 #%END_CHECK%

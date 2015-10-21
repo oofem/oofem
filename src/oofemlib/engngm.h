@@ -61,6 +61,7 @@
 #endif
 
 #include <string>
+#include <memory>
 
 ///@name Input fields for general Engineering models.
 //@{
@@ -106,6 +107,14 @@ class ProcessCommunicatorBuff;
 class CommunicatorBuff;
 class ProcessCommunicator;
 class UnknownNumberingScheme;
+
+
+#ifdef BOOST_PYTHON
+#include <boost/smart_ptr.hpp>
+ typedef boost::shared_ptr< Field > EModelFieldPtr;
+#else
+ typedef std :: shared_ptr< Field > EModelFieldPtr;
+#endif
 
 
 /**
@@ -490,6 +499,16 @@ public:
      * @see Dof::giveUnknown
      */
     virtual double giveUnknownComponent(ValueModeType, TimeStep *, Domain *, Dof *) { return 0.0; }
+
+    /**
+     * Returns the smart pointer to requested field, Null otherwise. 
+     * The return value uses shared_ptr, as some registered fields may be
+     * owned (and maintained) by emodel, while some may be cretead on demand 
+     * and thus reliable reference counting mechanism is essential. 
+     *
+     */
+    virtual EModelFieldPtr giveField (FieldType key, TimeStep *) { return EModelFieldPtr();}
+
 
     ///Returns the master engnmodel
     EngngModel *giveMasterEngngModel() { return this->master; }

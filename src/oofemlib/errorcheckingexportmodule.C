@@ -46,6 +46,8 @@
 #include "dof.h"
 #ifdef __SM_MODULE
  #include "../sm/EngineeringModels/structengngmodel.h"
+ #include "../sm/Elements/Beams/beam2d.h"
+ #include "../sm/Elements/Beams/beam3d.h"
 #endif
 
 namespace oofem {
@@ -174,6 +176,71 @@ ElementErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
                       tstep, number, gpnum, ist, component,
                       elementValue, value, fabs(elementValue-value), tolerance );
         ipval.printYourself();
+    }
+    return check;
+}
+
+BeamElementErrorCheckingRule :: BeamElementErrorCheckingRule(const std :: string &line, double tol) :
+    ErrorCheckingRule(tol)
+{
+    int istnum;
+    int ret = std :: sscanf(line.c_str(), "#BEAM_ELEMENT tStep %d number %d keyword %d component %d value %le tolerance %le",
+                  &tstep, & number, & istnum, & component, & value, & tolerance);
+    if ( ret < 5 ) {
+        OOFEM_ERROR("Something wrong in the error checking rule: %s\n", line.c_str());
+    }
+    ist = (BeamElementErrorCheckingRule::BeamElementValueType)istnum;
+}
+
+bool
+BeamElementErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
+{
+    // Rule doesn't apply yet.
+    if ( tStep->giveNumber() != tstep ) {
+        return true;
+    }
+
+    FloatArray val;
+    Element *element = domain->giveGlobalElement(number);
+    if ( !element ) {
+        if ( domain->giveEngngModel()->isParallel() ) {
+            return true;
+        } else {
+            OOFEM_WARNING("Element %d not found.", number);
+            return false;
+        }
+    }
+    if ( element->giveParallelMode() != Element_local ) {
+      return true;
+    }
+
+    if (ist == BET_localEndDisplacement) {
+      element->computeVectorOf(VM_Total, tStep, val);
+    } else if (ist ==  BET_localEndForces) {
+      if(Beam2d* b = dynamic_cast<Beam2d*>(element)) b->giveEndForcesVector(val, tStep);
+      else if(Beam3d* b = dynamic_cast<Beam3d*>(element)) b->giveEndForcesVector(val, tStep);
+      else {
+        OOFEM_WARNING("Element %d has no beam interface.", number);
+        return false;
+      }
+    }
+
+    if ( component > val.giveSize() || component < 1 ) {
+        OOFEM_WARNING("Check failed in: beam_element %d, ist %d, component %d:\n"
+                      "Component not found!",
+                      number, ist, component);
+        val.printYourself();
+        return false;
+    }
+
+    double elementValue = val.at(component);
+    bool check = checkValue(elementValue);
+    if ( !check ) {
+        OOFEM_WARNING("Check failed in: tstep %d, beam_element %d, ist %d, component %d:\n"
+                      "value is %.8e, but should be %.8e ( error is %e but tolerance is %e )",
+                      tstep, number, ist, component,
+                      elementValue, value, fabs(elementValue-value), tolerance );
+        val.printYourself();
     }
     return check;
 }
@@ -332,7 +399,8 @@ ErrorCheckingExportModule :: initializeFrom(InputRecord *ir)
     // Reads all the rules;
     std :: ifstream inputStream(this->filename);
     if ( !inputStream ) {
-        OOFEM_ERROR("Couldn't open file '%s'\n", this->filename.c_str());
+        OOFEM_WARNING("Couldn't open file '%s'\n", this->filename.c_str());
+        return IRRT_BAD_FORMAT;
     }
     double tol = 0.;
     if ( this->scanToErrorChecks(inputStream,  tol) ) {
@@ -343,14 +411,16 @@ ErrorCheckingExportModule :: initializeFrom(InputRecord *ir)
             }
             errorCheckingRules.push_back(std :: move(rule));
         }
-    } else {
-        OOFEM_WARNING("No rules found!");
     }
 
     this->writeIST.clear();
-    writeChecks = ir->hasField(_IFT_ErrorCheckingExportModule_writeChecks);
+    writeChecks = ir->hasField(_IFT_ErrorCheckingExportModule_writeIST);
     if ( writeChecks ) {
         IR_GIVE_FIELD(ir, this->writeIST, _IFT_ErrorCheckingExportModule_writeIST);
+    }
+
+    if ( errorCheckingRules.size() == 0 && !writeChecks ) {
+        OOFEM_WARNING("No rules found (possibly wrong file or syntax).");
     }
 
     return ExportModule :: initializeFrom(ir);
@@ -467,6 +537,8 @@ ErrorCheckingExportModule :: giveErrorCheck(std :: ifstream &stream, double erro
         return new NodeErrorCheckingRule(line, errorTolerance);
     } else if ( line.compare(0, 8, "#ELEMENT") == 0 ) {
         return new ElementErrorCheckingRule(line, errorTolerance);
+    } else if ( line.compare(0, 13, "#BEAM_ELEMENT") == 0 ) {
+        return new BeamElementErrorCheckingRule(line, errorTolerance);
     } else if ( line.compare(0, 9, "#REACTION") == 0 ) {
         return new ReactionErrorCheckingRule(line, errorTolerance);
     } else if ( line.compare(0, 10, "#LOADLEVEL") == 0 ) {

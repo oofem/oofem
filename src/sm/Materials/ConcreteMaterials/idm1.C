@@ -1254,7 +1254,7 @@ double
 IsotropicDamageMaterial1 :: give(int aProperty, GaussPoint *gp)
 {
     double answer;
-    if ( RandomMaterialExtensionInterface :: give(aProperty, gp, answer) ) {
+    if ( static_cast< IsotropicDamageMaterial1Status * >( this->giveStatus(gp) )->_giveProperty(aProperty, answer) ) {
         return answer;
     } else if ( aProperty == e0_ID ) {
         return this->e0;
@@ -1288,8 +1288,7 @@ IsotropicDamageMaterial1 :: giveInterface(InterfaceType type)
 MaterialStatus *
 IsotropicDamageMaterial1 :: CreateStatus(GaussPoint *gp) const
 {
-    IsotropicDamageMaterial1Status *answer = new IsotropicDamageMaterial1Status(1, IsotropicDamageMaterial1 :: domain, gp);
-    return answer;
+    return new IsotropicDamageMaterial1Status(1, IsotropicDamageMaterial1 :: domain, gp);
 }
 
 MaterialStatus *

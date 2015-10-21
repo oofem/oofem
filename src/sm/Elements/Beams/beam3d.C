@@ -95,25 +95,30 @@ Beam3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 
     answer.at(1, 1) =  -1. / l;
     answer.at(1, 7) =   1. / l;
-    answer.at(2, 2) =   ( -2. * kappaz ) / ( l * c1z );
-    answer.at(2, 6) =   kappaz / ( l * c1z );
-    answer.at(2, 8) =   2. * kappaz / ( l * c1z );
-    answer.at(2, 12) =   kappaz / ( l * c1z );
-    answer.at(3, 3) =   ( -2. * kappay ) / ( l * c1y );
-    answer.at(3, 5) =   kappay / ( l * c1y );
-    answer.at(3, 9) =   2. * kappay / ( l * c1y );
-    answer.at(3, 11) =   kappay / ( l * c1y );
+
+    answer.at(2, 3) =   ( -2. * kappay ) / ( l * c1y );
+    answer.at(2, 5) =   kappay / (c1y );
+    answer.at(2, 9) =   2. * kappay / ( l * c1y );
+    answer.at(2, 11) =  kappay / (c1y );
+
+    answer.at(3, 2) =   ( -2. * kappaz ) / ( l * c1z );
+    answer.at(3, 6) =   -kappaz / (c1z );
+    answer.at(3, 8) =   2. * kappaz / ( l * c1z );
+    answer.at(3, 12) =  -kappaz / (c1z );
+
 
     answer.at(4, 4) =  -1. / l;
     answer.at(4, 10) =   1. / l;
+
     answer.at(5, 3) =   ( 6. - 12. * ksi ) / ( l * l * c1y );
     answer.at(5, 5) =   ( -2. * ( 2. + kappay ) + 6. * ksi ) / ( l * c1y );
     answer.at(5, 9) =   ( -6. + 12. * ksi ) / ( l * l * c1y );
     answer.at(5, 11) =   ( -2. * ( 1. - kappay ) + 6. * ksi ) / ( l * c1y );
-    answer.at(6, 2) =  -( 6. - 12. * ksi ) / ( l * l * c1z ); // new
+
+    answer.at(6, 2) =   -1.0*( 6. - 12. * ksi ) / ( l * l * c1z ); 
     answer.at(6, 6) =   ( -2. * ( 2. + kappaz ) + 6. * ksi ) / ( l * c1z );
-    answer.at(6, 8) =   (  6. - 12. * ksi ) / ( l * l * c1z ); // new
-    answer.at(6, 12) =   ( -2. * ( 1. - kappaz ) + 6. * ksi ) / ( l * c1z );
+    answer.at(6, 8) =   -1.0*( -6. + 12. * ksi ) / ( l * l * c1z ); 
+    answer.at(6, 12) =  ( -2. * ( 1. - kappaz ) + 6. * ksi ) / ( l * c1z );
 }
 
 
@@ -708,7 +713,7 @@ Beam3d :: printOutputAt(FILE *File, TimeStep *tStep)
 {
     FloatArray rl, Fl;
 
-    fprintf(File, "beam element %d :\n", number);
+    fprintf(File, "beam element %d (%8d) :\n", this->giveLabel(), this->giveNumber() );
 
     // ask for global element displacement vector
     this->computeVectorOf(VM_Total, tStep, rl);

@@ -81,7 +81,7 @@ StructuralInterfaceElement :: computeStiffnessMatrix(FloatMatrix &answer, MatRes
         }
 
         this->computeTransformationMatrixAt(ip, rotationMatGtoL);
-        D.rotatedWith(rotationMatGtoL, 't');                      // transform stiffness to global coord system
+        D.rotatedWith(rotationMatGtoL, 'n');                      // transform stiffness to global coord system
 
         this->computeNmatrixAt(ip, N);
         DN.beProductOf(D, N);

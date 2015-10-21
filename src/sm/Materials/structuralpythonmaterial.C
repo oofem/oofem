@@ -345,7 +345,6 @@ StructuralPythonMaterialStatus :: StructuralPythonMaterialStatus(Domain *d, Gaus
 {
     this->stateDict = PyDict_New();
     this->tempStateDict = PyDict_New();
-    this->initTempStatus();
 }
 
 StructuralPythonMaterialStatus :: ~StructuralPythonMaterialStatus()

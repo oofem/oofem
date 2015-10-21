@@ -645,7 +645,7 @@ double
 LatticeDamage2d :: give(int aProperty, GaussPoint *gp)
 {
     double answer;
-    if ( RandomMaterialExtensionInterface :: give(aProperty, gp, answer) ) {
+    if ( static_cast< LatticeDamage2dStatus * >( this->giveStatus(gp) )->_giveProperty(aProperty, answer) ) {
         return answer;
     } else if ( aProperty == e0_ID ) {
         return 1.;

@@ -1,4 +1,3 @@
-
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -83,34 +82,34 @@ public:
     MITC4Shell(int n, Domain *d);
     virtual ~MITC4Shell() { }
 
-    FEInterpolation *giveInterpolation() const;
-    FEInterpolation *giveInterpolation(DofIDItem id) const;
-    int testElementExtension(ElementExtension ext) { return ( ( ( ext == Element_EdgeLoadSupport ) || ( ext == Element_SurfaceLoadSupport ) ) ? 1 : 0 ); }
+    virtual FEInterpolation *giveInterpolation() const;
+    virtual FEInterpolation *giveInterpolation(DofIDItem id) const;
+    virtual int testElementExtension(ElementExtension ext) { return ( ( ( ext == Element_EdgeLoadSupport ) || ( ext == Element_SurfaceLoadSupport ) ) ? 1 : 0 ); }
 
-    Interface *giveInterface(InterfaceType interface);
+    virtual Interface *giveInterface(InterfaceType interface);
 
-    void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
-    void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
-    int SPRNodalRecoveryMI_giveNumberOfIP();
-    SPRPatchType SPRNodalRecoveryMI_givePatchType();
-    void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
+    virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
+    virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
+    virtual int SPRNodalRecoveryMI_giveNumberOfIP();
+    virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
+    virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
 
 
     // transformation
-    bool computeGtoLRotationMatrix(FloatMatrix &answer);
+    virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
     int computeIFGToLRotationMtrx(FloatMatrix &answer);
-    int computeLoadGToLRotationMtrx(FloatMatrix &answer);
+    virtual int computeLoadGToLRotationMtrx(FloatMatrix &answer);
     void computeLToDirectorRotationMatrix(FloatMatrix &answer1, FloatMatrix &answer2, FloatMatrix &answer3, FloatMatrix &answer4);
-    int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
+    virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
 
 
 protected:
 
-    void computeGaussPoints();
-    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
-    void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeGaussPoints();
+    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
 
 
 private:
@@ -123,34 +122,34 @@ private:
     void giveJacobian(GaussPoint *gp, FloatMatrix &jacobianMatrix);
     void giveLocalCoordinates(FloatArray &answer, FloatArray &global);
     const FloatMatrix *computeGtoLRotationMatrix();
-    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     void giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, GaussPoint *gp, TimeStep *tStep);
-    void printOutputAt(FILE *file, TimeStep *tStep);
-    int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-    bool computeLocalCoordinates(FloatArray &answer, const FloatArray &coords);
-    double computeVolumeAround(GaussPoint *gp);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
+    virtual bool computeLocalCoordinates(FloatArray &answer, const FloatArray &coords);
+    virtual double computeVolumeAround(GaussPoint *gp);
     void computeLocalBaseVectors(FloatArray &e1, FloatArray &e2, FloatArray &e3);
 
 
     // definition & identification
-    const char *giveClassName() const { return "MITC4Shell"; }
-    const char *giveInputRecordName() const { return _IFT_MITC4Shell_Name; }
-    IRResultType initializeFrom(InputRecord *ir);
-    int computeNumberOfDofs() { return 24; }
-    int computeNumberOfGlobalDofs() { return 24; }
-    integrationDomain giveIntegrationDomain() const { return _Cube; }
-    MaterialMode giveMaterialMode() { return _3dDegeneratedShell; }
+    virtual const char *giveClassName() const { return "MITC4Shell"; }
+    virtual const char *giveInputRecordName() const { return _IFT_MITC4Shell_Name; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual int computeNumberOfDofs() { return 24; }
+    virtual int computeNumberOfGlobalDofs() { return 24; }
+    virtual integrationDomain giveIntegrationDomain() const { return _Cube; }
+    virtual MaterialMode giveMaterialMode() { return _3dDegeneratedShell; }
 
 
     // edge & body load
-    double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
-    void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
-    void giveDofManDofIDMask(int inode, IntArray &) const;
-    double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf);
-    IntegrationRule *GetSurfaceIntegrationRule(int approxOrder);
-    void  computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp);
-    void  giveSurfaceDofMapping(IntArray &answer, int iSurf) const;
+    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
+    virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
+    virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
+    virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf);
+    virtual IntegrationRule *GetSurfaceIntegrationRule(int approxOrder);
+    virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp);
+    virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const;
     //    void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
 };
 } // end namespace oofem

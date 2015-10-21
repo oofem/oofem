@@ -17,7 +17,7 @@ nsteps 9 stiffMode 2 controlmode 0 psi 0.0 steplength 0.0001 rtolv 0.0001 MaxIte
 #metastep 5
 nsteps 10 stiffMode 2 controlmode 0 psi 0.0 steplength 0.001 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll lstype 3
 #
-errorcheck "brazil_2d_nl.oofem.in"
+errorcheck "brazil_2d_errorcheck.in"
 domain PlaneStrain
 OutputManager tstep_all dofman_all element_all
 ndofman 139 nelem 118 ncrosssect 2 nmat 2 nbc 2 nic 0 nltf 1

@@ -290,15 +290,6 @@ FEI3dTetQuad :: giveCharacteristicLength(const FEICellGeometry &cellgeo) const
 }
 
 
-double
-FEI3dTetQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-{
-    FloatMatrix jacobianMatrix;
-    this->giveJacobianMatrixAt(jacobianMatrix, lcoords, cellgeo);
-    return jacobianMatrix.giveDeterminant();
-}
-
-
 void
 FEI3dTetQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {

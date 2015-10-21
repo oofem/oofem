@@ -65,8 +65,7 @@ StaggeredProblem :: StaggeredProblem(int i, EngngModel *_master) : EngngModel(i,
 }
 
 StaggeredProblem :: ~StaggeredProblem()
-{
-}
+{}
 
 ///////////
 int
@@ -99,23 +98,23 @@ StaggeredProblem :: instanciateSlaveProblems()
 {
     //first instantiate master problem if defined
     //EngngModel *timeDefProb = NULL;
-    emodelList.resize(inputStreamNames.size());
+    emodelList.resize( inputStreamNames.size() );
     if ( timeDefinedByProb ) {
-        OOFEMTXTDataReader dr( inputStreamNames [ timeDefinedByProb - 1 ] );
+        OOFEMTXTDataReader dr(inputStreamNames [ timeDefinedByProb - 1 ]);
         std :: unique_ptr< EngngModel >prob( InstanciateProblem(& dr, this->pMode, this->contextOutputMode, this) );
         //timeDefProb = prob.get();
-        emodelList[timeDefinedByProb-1] = std::move(prob);
+        emodelList [ timeDefinedByProb - 1 ] = std :: move(prob);
     }
 
-    for ( int i = 1; i <= (int)inputStreamNames.size(); i++ ) {
+    for ( int i = 1; i <= ( int ) inputStreamNames.size(); i++ ) {
         if ( i == timeDefinedByProb ) {
             continue;
         }
 
-        OOFEMTXTDataReader dr( inputStreamNames [ i - 1 ] );
+        OOFEMTXTDataReader dr(inputStreamNames [ i - 1 ]);
         //the slave problem dictating time needs to have attribute master=NULL, other problems point to the dictating slave
         std :: unique_ptr< EngngModel >prob( InstanciateProblem(& dr, this->pMode, this->contextOutputMode, this) );
-        emodelList[i-1] = std::move(prob);
+        emodelList [ i - 1 ] = std :: move(prob);
     }
 
     return 1;
@@ -133,12 +132,16 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
     }
     if ( ir->hasField(_IFT_StaggeredProblem_deltat) ) {
         result = EngngModel :: initializeFrom(ir);
-        if ( result != IRRT_OK ) return result;
+        if ( result != IRRT_OK ) {
+            return result;
+        }
         IR_GIVE_FIELD(ir, deltaT, _IFT_StaggeredProblem_deltat);
         dtFunction = 0;
     } else if ( ir->hasField(_IFT_StaggeredProblem_prescribedtimes) ) {
         result = EngngModel :: initializeFrom(ir);
-        if ( result != IRRT_OK ) return result;
+        if ( result != IRRT_OK ) {
+            return result;
+        }
         IR_GIVE_FIELD(ir, discreteTimes, _IFT_StaggeredProblem_prescribedtimes);
         dtFunction = 0;
     } else if ( ir->hasField(_IFT_StaggeredProblem_dtf) ) {
@@ -148,19 +151,19 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
     }
 
     if ( ir->hasField(_IFT_StaggeredProblem_adaptiveStepLength) ) {
-      adaptiveStepLength = true;
-      this->minStepLength = 0.;
-      IR_GIVE_OPTIONAL_FIELD(ir, minStepLength, _IFT_StaggeredProblem_minsteplength);
-      this->maxStepLength = 1.e32;
-      IR_GIVE_OPTIONAL_FIELD(ir, maxStepLength, _IFT_StaggeredProblem_maxsteplength);
-      this->reqIterations = 1;
-      IR_GIVE_OPTIONAL_FIELD(ir, reqIterations, _IFT_StaggeredProblem_reqiterations);
-      this->endOfTimeOfInterest = 1.e32;
-      IR_GIVE_OPTIONAL_FIELD(ir, endOfTimeOfInterest, _IFT_StaggeredProblem_endoftimeofinterest);
-      this->adaptiveStepSince = 0.;
-      IR_GIVE_OPTIONAL_FIELD(ir, adaptiveStepSince, _IFT_StaggeredProblem_adaptivestepsince);
+        adaptiveStepLength = true;
+        this->minStepLength = 0.;
+        IR_GIVE_OPTIONAL_FIELD(ir, minStepLength, _IFT_StaggeredProblem_minsteplength);
+        this->maxStepLength = 1.e32;
+        IR_GIVE_OPTIONAL_FIELD(ir, maxStepLength, _IFT_StaggeredProblem_maxsteplength);
+        this->reqIterations = 1;
+        IR_GIVE_OPTIONAL_FIELD(ir, reqIterations, _IFT_StaggeredProblem_reqiterations);
+        this->endOfTimeOfInterest = 1.e32;
+        IR_GIVE_OPTIONAL_FIELD(ir, endOfTimeOfInterest, _IFT_StaggeredProblem_endoftimeofinterest);
+        this->adaptiveStepSince = 0.;
+        IR_GIVE_OPTIONAL_FIELD(ir, adaptiveStepSince, _IFT_StaggeredProblem_adaptivestepsince);
     }
-    
+
 
     IR_GIVE_OPTIONAL_FIELD(ir, stepMultiplier, _IFT_StaggeredProblem_stepmultiplier);
     if ( stepMultiplier < 0 ) {
@@ -249,46 +252,44 @@ StaggeredProblem :: giveDeltaT(int n)
     }
 
     if ( adaptiveStepLength ) {
-      EngngModel *sp;
-      int nite = 1;
-      double adjustedDeltaT = deltaT;
+        EngngModel *sp;
+        int nite = 1;
+        double adjustedDeltaT = deltaT;
 
-      if ( currentStep != NULL ) {
+        if ( currentStep != NULL ) {
             if ( currentStep->giveNumber() != 0 ) {
-
                 // return prescribed deltaT for times until time = adaptiveStepSince
                 // can be used for consecutive force loading applied in a specified number of steps
-                if ( !(currentStep->giveTargetTime() > this->adaptiveStepSince ) ) {
+                if ( !( currentStep->giveTargetTime() > this->adaptiveStepSince ) ) {
                     return adjustedDeltaT;
                 }
 
-                for (int i = 1; i <= this->giveNumberOfSlaveProblems(); i++ ) {
+                for ( int i = 1; i <= this->giveNumberOfSlaveProblems(); i++ ) {
                     sp = this->giveSlaveProblem(i);
                     nite = max(sp->giveCurrentNumberOfIterations(), nite);
                 }
-                
+
                 if ( nite > reqIterations ) {
                     adjustedDeltaT =  this->prevStepLength * reqIterations / nite;
                 } else {
                     adjustedDeltaT  =  this->prevStepLength * sqrt( sqrt( ( double ) reqIterations / ( double ) nite ) );
                 }
-                
+
                 if ( adjustedDeltaT > maxStepLength ) {
                     adjustedDeltaT = maxStepLength;
                 }
-                
+
                 if ( adjustedDeltaT < minStepLength ) {
                     adjustedDeltaT = minStepLength;
                 }
             }
-      }
-      
-      this->currentStepLength = adjustedDeltaT;
-      
-      return adjustedDeltaT;
-      
+        }
+
+        this->currentStepLength = adjustedDeltaT;
+
+        return adjustedDeltaT;
     }
-    
+
     return deltaT;
 }
 
@@ -306,51 +307,50 @@ StaggeredProblem :: giveDiscreteTime(int iStep)
     OOFEM_ERROR("invalid iStep");
     return 0.0;
 }
-  
-TimeStep *
-StaggeredProblem::giveCurrentStep(bool force) 
-{
-  if (timeDefinedByProb) {
-    return emodelList[timeDefinedByProb-1].get()->giveCurrentStep(true);
-  } else {
-    return EngngModel::giveCurrentStep();
-  }
-}
-  
-TimeStep *
-StaggeredProblem::givePreviousStep(bool force)
-{
-  if (timeDefinedByProb) {
-    return emodelList[timeDefinedByProb-1].get()->givePreviousStep(true);
-  } else {
-    return EngngModel::givePreviousStep();
-  }
-}
 
 TimeStep *
-StaggeredProblem::giveSolutionStepWhenIcApply(bool force)
+StaggeredProblem :: giveCurrentStep(bool force)
 {
-  if (timeDefinedByProb) {
-    return emodelList[timeDefinedByProb-1].get()->giveSolutionStepWhenIcApply(true);
-  } else {
-    if ( !stepWhenIcApply ) {
-      int inin = giveNumberOfTimeStepWhenIcApply();
-      int nFirst = giveNumberOfFirstStep();
-      stepWhenIcApply.reset( new TimeStep(inin, this, 0, -giveDeltaT ( nFirst ), giveDeltaT ( nFirst ), 0) );
+    if ( timeDefinedByProb ) {
+        return emodelList [ timeDefinedByProb - 1 ].get()->giveCurrentStep(true);
+    } else {
+        return EngngModel :: giveCurrentStep();
     }
-
-    return stepWhenIcApply.get();
-  }
 }
- 
+
+TimeStep *
+StaggeredProblem :: givePreviousStep(bool force)
+{
+    if ( timeDefinedByProb ) {
+        return emodelList [ timeDefinedByProb - 1 ].get()->givePreviousStep(true);
+    } else {
+        return EngngModel :: givePreviousStep();
+    }
+}
+
+TimeStep *
+StaggeredProblem :: giveSolutionStepWhenIcApply(bool force)
+{
+    if ( timeDefinedByProb ) {
+        return emodelList [ timeDefinedByProb - 1 ].get()->giveSolutionStepWhenIcApply(true);
+    } else {
+        if ( !stepWhenIcApply ) {
+            int inin = giveNumberOfTimeStepWhenIcApply();
+            int nFirst = giveNumberOfFirstStep();
+            stepWhenIcApply.reset( new TimeStep(inin, this, 0, -giveDeltaT(nFirst), giveDeltaT(nFirst), 0) );
+        }
+
+        return stepWhenIcApply.get();
+    }
+}
+
 int
 StaggeredProblem :: giveNumberOfFirstStep(bool force) {
-  if (timeDefinedByProb) {
-    return emodelList[timeDefinedByProb-1].get()->giveNumberOfFirstStep(true);
-  } else {
-    return EngngModel::giveNumberOfFirstStep();
-  }
-
+    if ( timeDefinedByProb && !force) {
+        return emodelList [ timeDefinedByProb - 1 ].get()->giveNumberOfFirstStep(true);
+    } else {
+        return EngngModel :: giveNumberOfFirstStep(force);
+    }
 }
 
 
@@ -367,22 +367,22 @@ StaggeredProblem :: giveNextStep()
         counter = currentStep->giveSolutionStateCounter() + 1;
     } else {
         // first step -> generate initial step
-        currentStep.reset(new TimeStep(*giveSolutionStepWhenIcApply()));
+        currentStep.reset( new TimeStep( * giveSolutionStepWhenIcApply() ) );
     }
 
     previousStep = std :: move(currentStep);
 
-    if ( (totalTime >= this->endOfTimeOfInterest) && this->adaptiveStepLength ) {
+    if ( ( totalTime >= this->endOfTimeOfInterest ) && this->adaptiveStepLength ) {
         totalTime = this->endOfTimeOfInterest;
         OOFEM_LOG_INFO("\n==================================================================\n");
-        OOFEM_LOG_INFO("\nAdjusting time step length to: %lf \n\n", totalTime-previousStep->giveTargetTime());
-        currentStep.reset(new TimeStep(istep, this, 1, totalTime, totalTime-previousStep->giveTargetTime() , counter));
+        OOFEM_LOG_INFO( "\nAdjusting time step length to: %lf \n\n", totalTime - previousStep->giveTargetTime() );
+        currentStep.reset( new TimeStep(istep, this, 1, totalTime, totalTime - previousStep->giveTargetTime(), counter) );
     } else {
-        if (this->adaptiveStepLength) {
+        if ( this->adaptiveStepLength ) {
             OOFEM_LOG_INFO("\n==================================================================\n");
-            OOFEM_LOG_INFO("\nAdjusting time step length to: %lf \n\n",  this->giveDeltaT ( istep ));
+            OOFEM_LOG_INFO( "\nAdjusting time step length to: %lf \n\n",  this->giveDeltaT(istep) );
         }
-        currentStep.reset(new TimeStep(istep, this, 1, totalTime, this->giveDeltaT ( istep ), counter));
+        currentStep.reset( new TimeStep(istep, this, 1, totalTime, this->giveDeltaT(istep), counter) );
     }
 
     // time and dt variables are set eq to 0 for statics - has no meaning
@@ -418,6 +418,7 @@ StaggeredProblem :: solveYourself()
         for ( int jstep = sjstep; jstep <= nTimeSteps; jstep++ ) { //loop over time steps
             this->timer.startTimer(EngngModelTimer :: EMTT_SolutionStepTimer);
             this->timer.initTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
+            sp->preInitializeNextStep();
             sp->giveNextStep();
 
             // renumber equations if necessary. Ensure to call forceEquationNumbering() for staggered problems
@@ -425,6 +426,7 @@ StaggeredProblem :: solveYourself()
                 this->forceEquationNumbering();
             }
 
+            this->initializeYourself( sp->giveCurrentStep() );
             this->solveYourselfAt( sp->giveCurrentStep() );
             this->updateYourself( sp->giveCurrentStep() );
             this->terminate( sp->giveCurrentStep() );
@@ -432,7 +434,7 @@ StaggeredProblem :: solveYourself()
             this->timer.stopTimer(EngngModelTimer :: EMTT_SolutionStepTimer);
             double _steptime = this->timer.getUtime(EngngModelTimer :: EMTT_SolutionStepTimer);
             OOFEM_LOG_INFO("EngngModel info: user time consumed by solution step %d: %.2fs\n",
-                            sp->giveCurrentStep()->giveNumber(), _steptime);
+                           sp->giveCurrentStep()->giveNumber(), _steptime);
 
             fprintf(out, "\nUser time consumed by solution step %d: %.3f [s]\n\n",
                     sp->giveCurrentStep()->giveNumber(), _steptime);
@@ -444,7 +446,7 @@ StaggeredProblem :: solveYourself()
 
 #endif
 
-            if ( (sp->giveCurrentStep()->giveTargetTime() >= this->endOfTimeOfInterest) && this->adaptiveStepLength ) {
+            if ( ( sp->giveCurrentStep()->giveTargetTime() >= this->endOfTimeOfInterest ) && this->adaptiveStepLength ) {
                 break;
             }
         }
@@ -481,7 +483,7 @@ StaggeredProblem :: forceEquationNumbering()
 void
 StaggeredProblem :: updateYourself(TimeStep *tStep)
 {
-    if (adaptiveStepLength) {
+    if ( adaptiveStepLength ) {
         this->prevStepLength = this->currentStepLength;
     }
 
@@ -555,7 +557,7 @@ EngngModel *
 StaggeredProblem :: giveSlaveProblem(int i)
 {
     if ( ( i > 0 ) && ( i <= this->giveNumberOfSlaveProblems() ) ) {
-        return this->emodelList[i-1].get();
+        return this->emodelList [ i - 1 ].get();
     } else {
         OOFEM_ERROR("Undefined problem");
     }

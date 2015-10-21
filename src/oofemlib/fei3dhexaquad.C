@@ -167,16 +167,6 @@ FEI3dHexaQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, con
     return inside;
 }
 
-double
-FEI3dHexaQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-{
-    FloatMatrix jacobianMatrix;
-
-    this->giveJacobianMatrixAt(jacobianMatrix, lcoords, cellgeo);
-    return jacobianMatrix.giveDeterminant();
-}
-
-
 void FEI3dHexaQuad :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double u = lcoords.at(1);

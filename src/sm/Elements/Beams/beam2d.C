@@ -67,7 +67,7 @@ Beam2d :: Beam2d(int n, Domain *aDomain) : StructuralElement(n, aDomain), Layere
     kappa = -1; // set kappa to undef value (should be always > 0.)
     length = 0.;
     pitch = 10.;  // a dummy value
-    numberOfGaussPoints = 3;
+    numberOfGaussPoints = 4;
 
     dofsToCondense = NULL;
 }
@@ -115,9 +115,9 @@ Beam2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
     answer.at(2, 5) =   ( -6. + 12. * ksi ) / ( l * l * c1 );
     answer.at(2, 6) =   ( -2. * ( 1. - kappa ) + 6. * ksi ) / ( l * c1 );
     answer.at(3, 2) =   ( -2. * kappa ) / ( l * c1 );
-    answer.at(3, 3) =   kappa / ( l * c1 );
+    answer.at(3, 3) =   kappa / ( c1 );
     answer.at(3, 5) =   2. * kappa / ( l * c1 );
-    answer.at(3, 6) =   kappa / ( l * c1 );
+    answer.at(3, 6) =   kappa / ( c1 );
 }
 
 
@@ -603,7 +603,7 @@ Beam2d :: printOutputAt(FILE *File, TimeStep *tStep)
 {
     FloatArray rl, Fl;
 
-    fprintf(File, "beam element %d :\n", number);
+    fprintf(File, "beam element %d (%8d) :\n", this->giveLabel(), this->giveNumber() );
 
     // ask for global element displacement vector
     this->computeVectorOf(VM_Total, tStep, rl);

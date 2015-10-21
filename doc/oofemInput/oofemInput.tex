@@ -42,6 +42,8 @@
 \newcommand{\dev}{\mathrm{dev}}
 \newcommand{\vol}{\mathrm{vol}}
 
+\newcommand{\pard}[2]{\frac{\partial{#1}}{\partial{#2}}}
+
 \newcommand{\param}[1]{\texttt{#1}} % Use when referring to attributes in text.
 \newcommand{\optional}[1]{[#1]} % Denotes optional parameter
 \newcommand{\field}[2]{\param{#1}~\#{\tiny(#2)}} % Attribute #1 = identifier, #2 = type
@@ -1227,6 +1229,172 @@ non-symmetrical system
 matrix. The scheme should be compatible with solver type. See section
 \ref{sparselinsolver} for further details.
 
+\subsection{Transient incompressible flow\\PFEM Algorithm}
+\label{pfemIncomp}
+\begin{record}
+  \recentry{\entKeywordInst{PFEM}}{\field{nsteps}{in}}
+  \recentry{}{\field{deltaT}{rn}}
+  \recentry{}{\field{material}{in}}
+  \recentry{}{\field{cs}{in}}
+  \recentry{}{\field{pressure}{in}}
+  \recentry{}{\optField{mindeltat}{rn}}
+  \recentry{}{\optField{maxiter}{in}}
+  \recentry{}{\optField{rtolv}{rn}}
+  \recentry{}{\optField{rtolp}{rn}}
+  \recentry{}{\optField{alphashapecoef}{rn}}
+  \recentry{}{\optField{removalratio}{rn}}
+  \recentry{}{\optField{scheme}{in}}
+  \recentry{}{\optField{lstype}{in} \optField{smtype}{in}}
+\end{record}
+
+Solves the transient incompressible flow using particle finite element
+method based on the Lagrangian formulation of Navier-Stokes equations.
+
+Mesh nodes are represented by PFEMParticles~\ref{pfemparticles}, which 
+can freely move and even separate from the main domain. To integrate 
+governing equations in each solution step, a temporary mesh, built from 
+particles, is needed. The mesh is rebuilt from scratch in each solution 
+step to prevent large distortion of elements. Paramters \param{cs} and
+\param{material} assign types from cross section and material record to 
+created elements. Thus, the problem is defined without any elements in
+the input file.
+
+Mesh is generated using Delaunay triangulation and Alpha shape technique
+for the identification of the free surface. The parameter
+\param{alphashapecoef} should reflect initial distribution of PFEMParticles.
+Value approximately equal to 1,5-multiple of shortest distance of two 
+neighboring particles has been found well. On the free surface the zero-pressure
+boundary condition is enforced. This  must be defined in boundary condition
+record under the number defined by \param{pressure}.
+
+Parameter \param{scheme} controls whether the  equation system for the 
+components of the auxiliary velocity is solved explicitly (0) or implicitly
+(1). The last is the default option.
+
+Parameter \param{nsteps} determines number of solution
+steps. Parameter \param{deltaT} is time step length used for
+integration. To ensure numerical stability, step length is adapted upon mesh
+geometry and velocity of paricular nodes. To avoid to short time length a minimal
+size can be defined by \param{mindeltat}. Alternatively prescribing limit
+\param{removalratio} of the element edge length too close particles can be removed
+from solution.
+
+Optional parameters \param{rtolv} and \param{rtolp} allow to
+specify relative norms for velocity and pressure difference of two subsequent iteration
+step. Default values are 1.e-8. By default maximal 50 iterations are performed, if
+not specified by \param{maxiter}.
+
+Parameter \param{lstype} allows to select solver for linear system of
+equations. Parameter \param{smtype} allows to select sparse matrix storage
+scheme. Please note, that the present algorithm leads to a
+non-symmetrical system
+matrix. The scheme should be compatible with solver type. See section
+\ref{sparselinsolver} for further details.
+
+\subsubsection{Lagrangian governing equations of incompressible fluid}
+The Particle finite element method (PFEM) is based on the Lagrangian form of the Navier-Stokes equation for incompressible Newtonian fluids. Assuming the density does not change in time for an incompressible fluid, the continuity equation reduces to zero requirements for the divergence of the velocity. The Navier-Stokes equations take the form
+\begin{eqnarray}
+\rho\pard{\mbf{u}}{t} &=& \rho\mbf{b} + \nabla\cdot\mbf{\sigma} \label{eq:navier-stokes2}\;,\\
+\nabla\cdot\mbf{u} &=& 0\;. \label{eq:navier-stokes2b}
+\end{eqnarray}
+For the deviatoric stress in Newtonian fluids a linear dependency of stress tensor and strain rate tensor is adopted and for the Newtonian fluids. Considering the incompressibility of the fluid, the Cauchy stress reads
+\begin{equation}\label{eq:stokes}
+\mbf{\sigma}=-p\mbf{I} + 2\mu \nabla^s\mbf{u}\;.
+\end{equation}
+This equation is known as \emph{Stokes' law} and its Cartesian form writes
+\begin{equation}
+\sigma_{ij}=-p\delta_{ij}+\mu\left(\pard{u_i}{x_j}+\pard{u_j}{x_i}\right)\;.
+\end{equation}
+\par
+Substituting the expression of Cauchy stress from Stokes' law~(\ref{eq:stokes}) into the momentum equation~(\ref{eq:navier-stokes2}) and rewriting gives
+\begin{equation}
+\rho\pard{\mbf{u}}{t} = \rho\mbf{b} + \mu\nabla^2\mbf{u} - \nabla p\;.\label{eq:momentum}
+\end{equation}
+\par
+The governing equations of the mass~(\ref{eq:navier-stokes2b}) and momentum conservation~(\ref{eq:momentum}) form can be written in the Cartesian form for the individual component $i$ using Einstein summation convention
+\begin{eqnarray}
+\rho \pard{u_i}{t} &=& - \frac{\partial}{\partial x_i}p+\mu\frac{\partial}{\partial x_j}\left(\frac{\partial u_i}{\partial x_j}\right)+\rho b_i \;, \label{eq:mb}\\
+\pard{u_i}{x_i} &=& 0\;.
+\end{eqnarray}
+The equations are accompanied by a set of standard boundary conditions imposed on the complementary parts of the domain boundary
+\begin{eqnarray}
+  \tau_{ij}\nu_j - p\nu_i &=& \bar \sigma_{ni} \qquad \mbox{on } \Gamma_{\sigma}\;, \\
+  u_i\nu_i &=& \bar u_n \qquad\; \mbox{on } \Gamma_n\;, \\
+  u_i\zeta_i &=& \bar u_t \qquad\;\, \mbox{on } \Gamma_t\;,
+\end{eqnarray}
+where $\nu$ or $n$ denotes the normal direction to the boundary and $\zeta$ or $t$ the tangential one. The bar sign over a quantity $\bar x$ stands for its prescribed value.
+
+\subsubsection{Time discretization}
+For the time discretization of the momentum equation, a general trapezoid rule can be adopted. Using this rule, the time derivative of a generic function $\phi$ can be approximated by following equation
+\begin{equation}
+[\phi(x,t)]^{n+\theta} = \theta\phi(x,t^{n+1})+(1-\theta)\phi(x,t^n)=\theta\phi^{n+1}+(1-\theta)\phi^n\;.
+\end{equation}
+Rewriting the time derivative on the left hand side of the momentum balance~(\ref{eq:mb}) as a finite difference in time and applying the trapezoidal rule on the right hand side, we obtain
+\begin{equation}\label{eq:momentum-general}
+  \rho\pard{u_i}{t} \approx \rho\frac{u^{n+1}_i-u^n_i}{\Delta t}= \left[ - \frac{\partial}{\partial x_i}p+\mu\frac{\partial}{\partial x_j}\left(\frac{\partial u_i}{\partial x_j}\right)+\rho b_i\right]^{n+\theta}\;.
+\end{equation}
+The parameter $\theta$ can take values from the interval $[0,1]$.  The approximation is considered as a weighted average of the derivative values in the time step $n$ and $n+1$. Using a specific value of the $\theta$ parameter, well-known methods can be recovered: The explicit Euler method $\theta=0$, the backward Euler for $\theta=1$ or the Crank-Nicolson method $\theta=1/2$. The current implemantation of PFEM allows the use of explicit and backward (implicit) method.
+
+\subsubsection{Fractional step scheme}
+Beside the three velocity components, the discretized momentum balance equations~(\ref{eq:momentum-general}) for a three dimensional case includes pressure as a coupling variable. A possible approach to decouple them is the application of so-called \emph{fractional step method}. The main idea of this method consists in introducing an intermediate velocity as supplementary variable and splitting the momentum equation. The modification introduced by R.Codina~\cite{Codina01} splits the the discretized time step is split into two sub-steps. The implicit part of the pressure is avoided and assigned to the second step.
+\begin{equation}
+  \pard{u_i}{t} \approx \frac{u^{n+1}_i-u^n_i}{\Delta t}=\frac{u^{n+1}_i-u^*_i+u^*_i-u^n_i}{\Delta t}= \left[ - \frac{1}{\rho}\frac{\partial}{\partial x_i}p+\frac{\mu}{\rho}\frac{\partial}{\partial x_j}\left(\frac{\partial u_i}{\partial x_j}\right)+b_i\right]^{n+\theta}\;.
+\end{equation}
+where the intermediate velocity $u^*_i$ is introduced. Splitting the equation in the following manner gives the expression for the unknown velocities
+\begin{subequations}
+  \begin{eqnarray}\label{rce:uistar}
+    \mbox{(A)}\qquad u^*_i &=& u^n_i+b_i\Delta t - \frac{\Delta t}{\rho}\pard{}{x_i}\gamma p^n+\frac{\Delta t\mu}{\rho}\pard{}{x_j}\left(\pard{u^{n+\theta}_i}{x_j}\right)\;,\\
+    \mbox{(C)}\quad u^{n+1}_i &=& u^*_i- \frac{\Delta t}{\rho}\pard{}{x_i}(p^{n+1}-\gamma p^n)\;. \label{eq:uin1}
+  \end{eqnarray}
+\end{subequations}
+The pressure split is here introduced by the new parameter $\gamma$ defining the amount of splitting and can take values from 0 to 1. The body loads are considered to be constant over time step.
+\par
+In a similar way, the fractional step method is applied on the mass conservation equation. Here, the time derivative of density would be approximated. As we examine an incompressible flow, whose density does not change in time, merely the intermediate velocity term is incorporated in the divergence of the velocity.
+\begin{equation}
+  \pard{(u^{n+1}_i-u^*_i+u^*_i)}{x_i} = 0 \;,
+\end{equation}
+which can be decomposed into two sub-equations
+\begin{subequations}
+  \begin{eqnarray}\label{rce:mass}
+	\pard{u^*_i}{x_i} &=& 0 \\
+      \pard{(u^{n+1}_i-u^*_i)}{x_i} &=& 0\;.
+  \end{eqnarray}
+\end{subequations}
+By substituting for the velocity difference into the equation~(\ref{eq:uin1}) we obtain
+\begin{equation}
+\pard{}{x_i}(u^{n+1}_i - u^*_i) = \pard{}{x_i}\left(-\frac{\Delta t}{\rho}\pard{}{x_i}(p^{n+1}-\gamma p^n)\right)\;.
+\end{equation}
+Now we can sum the separated mass equations together. This operation gives the coupled mass-momentum equation
+\begin{equation}
+  \mbox{(B)}\qquad  \pard{u^*_i}{x_i} - \frac{\Delta t}{\rho}\frac{\partial^2}{\partial x^2_i}(p^{n+1}-\gamma p^n) = 0\;.
+\end{equation}
+The final set of equations reads
+\begin{eqnarray}
+\mbox{(A)}\qquad\quad\quad\; u^*_i  &=& u^n_i+b_i\Delta t - \frac{\Delta t}{\rho}\pard{}{x_i}\gamma p^n+\frac{\Delta t\mu}{\rho}\pard{}{x_j}\left(\pard{u^{n+\theta}_i}{x_j}\right)\;,\\
+ \mbox{(B)} \quad \frac{\partial^2}{\partial x^2_i}(p^{n+1}) &=& \frac{\rho}{\Delta t}\pard{u^*_i}{x_i}+\frac{\partial^2}{\partial x^2_i}(\gamma p^n)\;, \\
+ \mbox{(C)} \qquad\quad\;\,u^{n+1}_i &=& u^*_i- \frac{\Delta t}{\rho}\pard{}{x_i}(p^{n+1}-\gamma p^n)\;.
+\end{eqnarray}
+\par
+The above PFEM formulation is based on the paper by Idelsohn, O\~nate and Del Pin~\cite{Idelsohn04}. The authors described an approach using arbitrary time discretization scheme and pressure split factor. Their choice of implicit scheme $\theta = 1$ was motivated by better convergence properties, whereas the decision for $\gamma = 0$ leading to greater pressure split was driven by better pressure stabilization.
+\subsubsection{Spatial discretization}
+The unknown functions of velocity and pressure are approximated using equal order interpolation for all variables in the final configuration
+\begin{eqnarray}
+u_i&=&\mbf{N}^T(X,t)\mbf{U}_i\\
+p&=&\mbf{N}^T(X,t)\mbf{P} \;.
+\end{eqnarray}
+By applying the Galerkin weighted residual method on the splitted governing equations, following system of linear algebraic equations is obtained 
+\begin{eqnarray}
+\mbox{(A)}\quad\quad\mbf{M}\mbf{U}^* &=& \mbf{M}\mbf{U}^n + \Delta t\mbf{F} - \frac{\Delta t\mu}{\rho}\mbf{K}\mbf{U}^{n+\theta}\;,\label{eq:systemA} \\
+\mbox{(B)}\quad\;\; \mbf{L}\mbf{P}^{n+1} &=&\frac{\rho}{\Delta t}\left(\mbf{G}^T\mbf{U}^*-\hat{\mbf{U}}\right) \;, \label{eq:systemB} \\
+\mbox{(C)}\quad \mbf{M}\mbf{U}^{n+1} &=& \mbf{M}\mbf{U}^* - \frac{\rho}{\Delta t}\mbf{G}\mbf{P}^{n+1} \;.\label{eq:systemC}
+\end{eqnarray}
+\par
+The matrix $\mbf{M}$ denotes the mass matrix in a lumped form, whereas the vector $\mbf{F}$ stands for the load vector. The matrix $\mbf{G}$ represents the gradient operator, which is the transposition of the divergence operator denoted simply as $\mbf{G}^T$. Matrices $\mbf{K}$ and $\mbf{L}$ are build in a similar way however noted differently. Both mean the Laplacian operator. Due to its common use in computational mechanics, the classical notation of the stiffness matrix $\mbf{K}$ is used. Prescribed velocity components are enclosed in vector $\hat{\mbf{U}}$.
+\par
+In each computational time step, an iteration is performed until the equilibrium is reached. Depending on the value of $\theta$ used, the equation system for the components of the auxiliary velocity $U^*_i$~(\ref{eq:systemA}) can be solved either explicitly $\theta = 0$ or implicitly $\theta \neq 0$. Then, the calculated values of the auxiliary velocity are used as input for the pressure computation~(\ref{eq:systemB}). The last system of equations~(\ref{eq:systemC}) determines the velocity values at the end of the time step, taking auxiliary velocities and pressure or pressure increments into account.
+\par
+Let us summarize the iterative step. The position of the particles at the end of the previous time step is known, as well as the the value of the velocity $u^n$ and pressure $p^n$. The set of governing equations is build up for the unknowns at the end of the solution step $\theta^{n+1}$, however based on the geometry of the previous step. The changes in the position are neglected. Once the convergence is reached, the final position is computed from the old one modified by the displacement due to obtained velocity. After that, solution can proceed to the next time step.
+
 \subsection{Staggered Problem}
 \label{staggeredproblem}
 \begin{record}
@@ -1274,6 +1442,54 @@ can be used only when this module is configured.
 Note: All material models derived from StructuralMaterial base will
 take into account the external registered temperature field, if
 provided.
+
+\subsection{FluidStructure Problem}
+\label{fluidstructureproblem}
+\begin{record}
+  \recentry{\entKeywordInst{FluidStructureProblem}}{\field{nsteps}{in} \field{deltaT}{rn}}
+  \recentry{}{\field{prob1}{s} \field{prob2}{s}}
+  \recentry{}{\optField{maxiter}{in}}
+  \recentry{}{\optField{rtolv}{rn}}
+  \recentry{}{\optField{rtolp}{rn}}
+\end{record}
+
+Represents a fluid-structure analysis based on StaggeredProblem but providing
+iterative synchronization of sub-problems. The implementation uses the the PFEM
+model~\ref{pfemIncomp} for the fluid part. For the structural part a full dynamic
+analysis using implicit direct integration DIIDynamic\ref{DIIDynamic} is considered.
+
+The coupling of both phases is based on the idea of enforcing compatibility on the 
+interface. Special fluid particle are attached to every structural node on the 
+interface that can be hit by the fluid. These special particles have no degrees of 
+freedom associated, so no equations are solved on them. However, their movement is 
+fully determined by associated structural nodes. Their velocities governed by the 
+solid part affect the fluid equation naturally.
+
+This iterative procedure is based on the so-called Dirichlet-Neumann approach.
+Dirichlet boundary conditions are the prescribed velocities on the fluid side of
+the interface, whereas applied forces on the structural side represent the Neumann
+boundary conditions.
+
+The convergence criterion is based on the difference of the pressure and velocity
+values on the interface from the subsequent iterative steps. Once they are smaller
+than prescribed tolerance, the iteration is terminated and solution can proceed to
+the next step.
+
+The subproblem input files are described using
+\param{prob1} and \param{prob2} parameters, which are strings
+containing a path to sub-problem input files, the \param{prob1}
+contains input file path of the first sub-problem, which runs first
+for each solution step, the \param{prob2} contains input file path of
+the second sub-problem. The time step sequence is controlled by the number of steps
+\param{nsteps} and the time step length \param{deltaT}.
+
+Optional parameters \param{rtolv} and \param{rtolp} allow to
+specify relative norms for velocity and pressure differnce of two subsequent iteration
+step. Default values are 1.e-3. By default maximal 50 iterations are performed, if
+not specified by \param{maxiter}.
+
+Note: This problem type \textbf{is included in PFEM module} and it
+can be used only when this module is configured.
 
 \subsection{Sparse linear solver parameters}
 \label{sparselinsolver}
@@ -2136,6 +2352,24 @@ but given explicitly, as well as the connected dof managers (\param{masterDMan})
   \recentry{\entKeywordInst{ElementSide}}{}
 \end{record}
 Represents an abstraction for element side, which holds some unknowns.
+
+\item PFEMParticle \label{pfemparticles}
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{PFEMParticle}}{\field{coords}{ra}}
+\end{record}
+Represent the particle used in PFEM analysis.
+
+\item InteractionPFEMParticle \label{interactionparticle}
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{InteractionPFEMParticle}}{\field{coords}{ra}}
+  \recentry{}{\field{bc}{ia}}
+  \recentry{}{\field{coupledNode}{in}}
+\end{record}
+Represent a special particle used in the PFEM-part of the FluidStructureProblem. The particle is 
+attached to \param{coupledNode} from the structural counter part. InteractionBoundaryCondition~\ref{interactionbc} must be prescribed under \param{bc} to access the velocities from solid nodes.
+
 \end{itemize}
 
 \subsection{Element records}
@@ -2554,6 +2788,15 @@ where $r_i$ are unknowns related to DOFs determined by \param{dofmans} and \para
 
 The individual DOFs are determined using dof manager numbers (\param{dofmans} array) and corresponding DOF indices (\param{dofs}). The weights corresponding to participating DOFs are specified using \param{weights} array. The weights are multiplied by value returned by load time function, associated to individual weight using optional \param{weightsLtf} array. By default, all weights are set to 1. The constant $c$ is determined by \param{rhs} parameter and it is multiplied by the value of load time function, specified using \param{rhsLtf} parameter, or by 1 by default. The characteristic component, to which this boundary condition contributes must be identified using \param{lhstype} and \param{rhsType} parameters, values of which are corresponding to CharType enum. The left hand side contribution is assembled into terms identified by \param{lhstype}. The rhs contribution is assembled into the term identified by \param{rhsType} parameter. Note, that multiple values are allowed, this allows to select all variants of stifness matrix, for example. Note, that the size of \param{dofmans}, \param{dofs}, \param{weights}, \param{weightsLtf} arrays should be equal.
 
+\item InteractionBoundaryCondition \label{interactionbc}
+
+\noindent
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{InteractionBoundaryCondition}}{}
+\end{record}
+
+Is a special boundary condition prescribed on InteractionPFEMParticles~\ref{interactionparticle} in the PFEM part of the FluidStructureProblem. This sort of particles is regarded as it would have prescribed velocities, but the values change dynamically, as the solid part deforms. The velocities are obtained from coupled structural nodes.
+
 \end{itemize}
 \paragraph{Body loads}
 \begin{itemize}
@@ -2661,6 +2904,27 @@ In \param{components} array are stored load components for corresponding unknown
 beginning of edge, followed by values valid for end of edge.
 The load can be defined in global coordinate system (\param{csType} = 0, default) or in entity - specific local coordinate system
 (\param{csType} = 1).
+\item InteractionLoad
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{InteractionLoad}}{\field{ndofs}{in}}
+  \recentry{}{\field{loadType}{in}}
+  \recentry{}{\field{Components}{ra}}
+  \recentry{}{\optField{csType}{in}}
+  \recentry{}{\field{coupledparticles}{ia}}
+\end{record}
+
+Represents a fluid pressure induced load in the solid part of the FluidStructureProblem. 
+The meanings of parameters \param{ndofs},
+\param{csType}, and \param{loadType} are the same as for
+\entKeywordInst{LinearEdgeLoad}. In \param{Components}
+array are stored load components for corresponding unknowns at the
+beginning of edge (\param{ndofs} values), followed by values valid for
+end of edge (\param{ndofs} values). The load should be defined in global 
+coordinate system (\param{csType} = 0) as it acts in normal direction of the edge.
+Array \param{coupledparticles} assign PFEMParticles from the fluid part of the problem 
+providing fluid pressure.
+
 \end{itemize}
 
 
@@ -3085,6 +3349,14 @@ BoundaryCondition 2 loadTimeFunction 1 dofs 1 3 values 1 0.0 set 3
 NodalLoad 3 loadTimeFunction 1 dofs 2 1 3 components 2 0. 1.0 set 4
 ConstantFunction 1 f(t) 1.0
 \end{verbatim}
+
+\addcontentsline{toc}{section}{References}
+\begin{thebibliography}{9}
+\bibitem{Codina01} R. Codina: Pressure Stability in Fractional Step Finite Element Methods for Incompressible Flows. {\em Journal of Computational Physics} 170(1): 112 -- 140, 2001.
+\bibitem{Idelsohn04} S. R. Idelsohn, E. O\~nate, E. and F. Del Pin.
+\newblock The particle finite element method: a powerful tool to solve incompressible flows with free-surfaces and breaking waves.
+\newblock {\em International Journal for Numerical Methods in Engineering}, 61: 964--989, 2004.
+\end{thebibliography}
 
 \section{Figures}
 %\subsection {Node cut mode}

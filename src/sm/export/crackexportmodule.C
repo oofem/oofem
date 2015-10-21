@@ -40,7 +40,8 @@
 #include "timestep.h"
 #include "engngm.h"
 #include "classfactory.h"
-#include "isodamagemodel.h"
+#include "Materials/isodamagemodel.h"
+#include "Materials/structuralmaterial.h"
 #include "crosssection.h"
 #include "floatarray.h"
 
@@ -134,8 +135,7 @@ CrackExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
                 for ( auto &gp: *iRule ) {
 
-                    IsotropicDamageMaterial *mat = static_cast< IsotropicDamageMaterial*>( gp->giveMaterial() );
-                    IsotropicDamageMaterialStatus *matStatus = static_cast< IsotropicDamageMaterialStatus * >( mat->giveStatus(gp) );
+                    IsotropicDamageMaterialStatus *matStatus = static_cast< IsotropicDamageMaterialStatus * >( gp->giveStatus() );
 
                     damage = matStatus->giveDamage();
                     //elem->giveIPValue(strainVector, gp, IST_StrainTensor, tStep);
@@ -145,6 +145,8 @@ CrackExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
                         weight = elem->computeVolumeAround(gp);
                         totWeight += weight;
 
+                        elementLength = matStatus->giveLe();
+                        strainVector = matStatus->giveStrainVector();
                         matStatus->giveCrackVector(crackVector);
                         crackVector.times(1./damage);
 
@@ -156,13 +158,10 @@ CrackExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
                         princDir.at(1,2) = crackVector.at(1);
                         princDir.at(2,2) = crackVector.at(2);
 
-                        elementLength = matStatus->giveLe();
-
-                        strainVector = matStatus->giveStrainVector();
                         // modify shear strain in order to allow transformation with the stress transformation matrix
                         strainVector.at(3) /= 2.;
 
-                        mat->givePlaneStressVectorTranformationMtrx(rotMatrix, princDir, false);
+                        StructuralMaterial :: givePlaneStressVectorTranformationMtrx(rotMatrix, princDir, false);
                         princStrain.beProductOf(rotMatrix, strainVector);
 
                         crackWidth += elementLength * princStrain.at(1) * damage * weight;
