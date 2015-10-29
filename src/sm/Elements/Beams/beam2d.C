@@ -71,14 +71,13 @@ Beam2d :: Beam2d(int n, Domain *aDomain) : StructuralElement(n, aDomain), Layere
     pitch = 10.;  // a dummy value
     numberOfGaussPoints = 4;
 
-    //dofsToCondense = NULL;
     ghostNodes [ 0 ] = ghostNodes [ 1 ] = NULL;
+    numberOfCondensedDofs = 0;
 }
 
 
 Beam2d :: ~Beam2d()
 {
-    //delete dofsToCondense;
     if ( ghostNodes [ 0 ] ) {
         delete ghostNodes [ 0 ];
     }
@@ -186,21 +185,6 @@ Beam2d :: computeLocalStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode
 {
     this->computeClampedStiffnessMatrix(answer, rMode, tStep);
     return;
-
-    /*
-     * if (this->hasDofs2Condense()) {
-     * FloatMatrix stiff;
-     * // compute clamped stifness
-     * this->computeClampedStiffnessMatrix(stiff, rMode, tStep);
-     * // condense requested dofs
-     * this->realocateDofs2Ghosts(answer, stiff);
-     * } else {
-     * this->computeClampedStiffnessMatrix(answer, rMode, tStep);
-     * }
-     */
-    //if ( dofsToCondense ) {
-    //    this->condense(& answer, NULL, NULL, dofsToCondense);
-    // }
 }
 
 
@@ -446,6 +430,7 @@ Beam2d :: initializeFrom(InputRecord *ir)
         DofIDItem mask[] = {
             D_u, D_w, R_v
         };
+        this->numberOfCondensedDofs = val.giveSize();
         for ( int i = 1; i <= val.giveSize(); i++ ) {
             if ( val.at(i) <= 3 ) {
                 if ( ghostNodes [ 0 ] == NULL ) {
@@ -460,11 +445,7 @@ Beam2d :: initializeFrom(InputRecord *ir)
             }
         }
 
-        //dofsToCondense = new IntArray(val);
-    } else {
-        //dofsToCondense = NULL;
     }
-
     return IRRT_OK;
 }
 
@@ -706,15 +687,6 @@ Beam2d :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *tStep, Value
 // Computes the load vector of the receiver, at tStep.
 {
     StructuralElement :: computeLocalForceLoadVector(answer, tStep, mode);
-    // condense requested dofs in local c.s
-    /*
-     * if ( answer.giveSize() && dofsToCondense ) {
-     *  if ( answer.giveSize() != 0 ) {
-     *      this->computeClampedStiffnessMatrix(stiff, TangentStiffness, tStep);
-     *      this->condense(& stiff, NULL, & answer, dofsToCondense);
-     *  }
-     * }
-     */
 }
 
 
@@ -763,16 +735,6 @@ Beam2d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, doub
     answer.at(6, 6) = c2 * l * l * l * ( 1. / 105. + kappa / 30. + kappa2 / 30. );
 
     answer.symmetrized();
-
-
-
-    // condense requested dofs
-    /*
-     * if ( dofsToCondense ) {
-     *  this->computeClampedStiffnessMatrix(stiff, TangentStiffness, tStep);
-     *  this->condense(& stiff, & answer, NULL, dofsToCondense);
-     * }
-     */
 
     mass = l * area * density;
 }
@@ -827,15 +789,6 @@ Beam2d :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
 
     N = ( -endForces.at(1) + endForces.at(4) ) / 2.;
     answer.times( N / ( l * ( 1. + 2. * kappa ) * ( 1. + 2. * kappa ) ) );
-
-
-    // condense requested dofs
-    /*
-     * if ( dofsToCondense ) {
-     *  this->computeClampedStiffnessMatrix(stiff, TangentStiffness, tStep);
-     *  this->condense(& stiff, & answer, NULL, dofsToCondense);
-     * }
-     */
 
     //answer.beLumpedOf (mass);
 }

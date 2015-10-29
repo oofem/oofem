@@ -63,7 +63,6 @@ class Beam2d : public StructuralElement, public LayeredCrossSectionInterface
 {
 protected:
     double kappa, pitch, length;
-    //IntArray *dofsToCondense;
     /**
      * Ghost nodes are used to introduce additional DOFs at element.
      * These are needed as we actually do not want to condense selected DOFs, but rather
@@ -71,6 +70,8 @@ protected:
      * the global system, avoiding the need to postprocess local displacements at element.
      */
     DofManager *ghostNodes [ 2 ];
+    /// number of condensed DOFs
+    int numberOfCondensedDofs;
 
     static FEI2dLineLin interp_geom;
     static FEI2dLineHermite interp_beam;
@@ -95,7 +96,7 @@ public:
     virtual FEInterpolation *giveInterpolation(DofIDItem id) const { return NULL; }
 
     virtual int computeNumberOfDofs() { return 6; }
-    virtual int computeNumberOfGlobalDofs() { return 6 + this->giveNumberOfInternalDofManagers(); }
+    virtual int computeNumberOfGlobalDofs() { return 6 + this->numberOfCondensedDofs; }
     virtual void giveDofManDofIDMask(int inode, IntArray &) const;
     virtual int giveNumberOfInternalDofManagers() const { return ( ghostNodes [ 0 ] != NULL ) + ( ghostNodes [ 1 ] != NULL ); }
     virtual DofManager *giveInternalDofManager(int i) const {
