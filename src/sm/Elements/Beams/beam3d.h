@@ -37,6 +37,7 @@
 
 #include "../sm/Elements/structuralelement.h"
 #include "../sm/CrossSections/fiberedcs.h"
+#include "dofmanager.h"
 
 ///@name Input fields for Beam3d
 //@{
@@ -74,7 +75,17 @@ protected:
     int referenceNode;
     double referenceAngle = 0;
     bool usingAngle = false;
-    IntArray *dofsToCondense;
+    //IntArray *dofsToCondense;
+    /*
+     * Ghost nodes are used to introduce additional DOFs at element.
+     * These are needed as we actually do not want to condense selected DOFs, but rather
+     * allocate an extra equation to these. This allows to get cooresponding DOFs directly from
+     * the global system, avoiding the need to postprocess local displacements at element.
+     */
+    DofManager *ghostNodes [ 2 ];
+    /// number of condensed DOFs
+    int numberOfCondensedDofs;
+    
 
 public:
     Beam3d(int n, Domain *d);
@@ -99,7 +110,32 @@ public:
     //int hasLayeredSupport () {return 1;}
 
     virtual int computeNumberOfDofs() { return 12; }
+    virtual int computeNumberOfGlobalDofs() { return 12 + this->numberOfCondensedDofs; }
     virtual void giveDofManDofIDMask(int inode, IntArray &) const;
+    virtual int giveNumberOfInternalDofManagers() const { return ( ghostNodes [ 0 ] != NULL ) + ( ghostNodes [ 1 ] != NULL ); }
+    virtual DofManager *giveInternalDofManager(int i) const {
+        if ( i == 1 ) {
+            if ( ghostNodes [ 0 ] ) { return ghostNodes [ 0 ]; } else { return ghostNodes [ 1 ]; }
+        } else if ( i == 2 ) { // i==2
+            return ghostNodes [ 1 ];
+        } else {
+            OOFEM_ERROR("No such DOF available on Element %d", number);
+            return NULL;
+        }
+    }
+    virtual void giveInternalDofManDofIDMask(int i, IntArray &answer) const {
+        if ( i == 1 ) {
+            if ( ghostNodes [ 0 ] ) {
+                ghostNodes [ 0 ]->giveCompleteMasterDofIDArray(answer);
+            } else {
+                ghostNodes [ 1 ]->giveCompleteMasterDofIDArray(answer);
+            }
+        } else if ( i == 2 ) { // i==2
+            ghostNodes [ 1 ]->giveCompleteMasterDofIDArray(answer);
+        } else {
+            OOFEM_ERROR("No such DOF available on Element %d", number);
+        }
+    }
     virtual double computeVolumeAround(GaussPoint *gp);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
@@ -151,6 +187,8 @@ protected:
 
     virtual MaterialMode giveMaterialMode() { return _3dBeam; }
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }
+
+    bool hasDofs2Condense() { return ( ghostNodes [ 0 ] || ghostNodes [ 1 ] ); }
 };
 } // end namespace oofem
 #endif // beam3d_h

@@ -111,7 +111,8 @@ public:
     virtual void LoadMatrixNumbers(SparseMatrixF &sm);
     virtual void SolveLV(const LargeVector &b, LargeVector &x);
     virtual void MultiplyByVector(const LargeVectorAttach &x, LargeVectorAttach &y);
-
+    virtual void times(double x);
+    
     virtual void Factorize();
     virtual void Factorize_Incomplete();
 

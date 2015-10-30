@@ -982,6 +982,10 @@ void DSSolver :: MulMatrixByVector(double *b, double *c)
     //sm.mxv_scr(b,c);
 }
 
+//multiply by a scalar
+void DSSolver :: times(double x) {
+    matrix->times(x);
+}
 
 // positive number n is success after n iterations
 // negative number n is failed after -n iterations
