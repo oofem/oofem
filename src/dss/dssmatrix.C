@@ -152,7 +152,7 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
         if ( bc != NULL ) {
             bc->giveLocationArrays(r_locs, c_locs, UnknownCharType, s, s);
             for (std::size_t k = 0; k < r_locs.size(); k++) {
-                IntArray &krloassembleVectorFrc = r_locs[k];
+                IntArray &krloc = r_locs[k];
                 IntArray &kcloc = c_locs[k];
                 for ( int ii : krloc ) {
                     if ( ii > 0 ) {
