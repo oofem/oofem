@@ -37,6 +37,7 @@
 
 #include "sparsemtrx.h"
 #include "intarray.h"
+#include "floatarray.h"
 
 #include <memory>
 
