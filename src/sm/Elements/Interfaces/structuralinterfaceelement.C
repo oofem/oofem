@@ -222,6 +222,10 @@ StructuralInterfaceElement :: giveCharacteristicVector(FloatArray &answer, CharT
          * and this will cause to integrate internal forces using existing (nontemp, equlibrated) stresses in
          * statuses. Mainly used to compute reaction forces */
         this->giveInternalForcesVector(answer, tStep, 1);
+    } else if (mtrx == ExternalForcesVector ) {
+      answer.clear();
+    } else {
+      OOFEM_ERROR("Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx) );
     }
 }
 
