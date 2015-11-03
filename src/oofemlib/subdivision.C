@@ -3914,7 +3914,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
 #ifdef __PARALLEL_MODE
  #ifdef __VERBOSE_PARALLEL
     nnodes = ( * dNew )->giveNumberOfDofManagers();
-    for ( inode = 1; inode <= nnodes; inode++ ) {
+    for ( int inode = 1; inode <= nnodes; inode++ ) {
         if ( ( * dNew )->giveDofManager(inode)->giveParallelMode() == DofManager_shared ) {
             //OOFEM_LOG_INFO ("[%d] Shared Node %d[%d]\n", this->giveRank(), inode, (*dNew)->giveDofManager(inode)->giveGlobalNumber());
         }

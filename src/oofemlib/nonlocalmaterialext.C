@@ -262,7 +262,7 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
 #ifdef __PARALLEL_MODE
  #ifdef __VERBOSE_PARALLEL
         fprintf( stderr, "%d(%d):", gp->giveElement()->giveGlobalNumber(), gp->giveNumber() );
-        for ( auto &lir: iList ) {
+        for ( auto &lir: *iList ) {
             fprintf(stderr, "%d,%d(%e)", lir.nearGp->giveElement()->giveGlobalNumber(), lir.nearGp->giveNumber(), lir.weight);
         }
 
