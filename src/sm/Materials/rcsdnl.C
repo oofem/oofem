@@ -567,7 +567,7 @@ RCSDNLMaterial :: packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip
     this->buildNonlocalPointTable(ip);
     this->updateDomainBeforeNonlocAverage(tStep);
 
-    return status->giveLocalStrainVectorForAverage().storeYourself(buff);
+    return (status->giveLocalStrainVectorForAverage().storeYourself(buff) == CIO_OK);
 }
 
 int
@@ -577,7 +577,7 @@ RCSDNLMaterial :: unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, Gau
     RCSDNLMaterialStatus *status = static_cast< RCSDNLMaterialStatus * >( this->giveStatus(ip) );
     FloatArray localStrainVectorForAverage;
 
-    result = localStrainVectorForAverage.restoreYourself(buff);
+    result = (localStrainVectorForAverage.restoreYourself(buff) == CIO_OK);
     status->setLocalStrainVectorForAverage(localStrainVectorForAverage);
     return result;
 }
