@@ -101,7 +101,14 @@ AdaptiveNonLinearStatic :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_AdaptiveNonLinearStatic_preMappingLoadBalancingFlag);
     preMappingLoadBalancingFlag = _val > 0;
 
-    return NonLinearStatic :: initializeFrom(ir);
+    result = NonLinearStatic :: initializeFrom(ir);
+
+    // check if error estimator initioalized
+    if (this->defaultErrEstimator == NULL) {
+      OOFEM_ERROR ("AdaptiveNonLinearStatic :: initializeFrom: Error estimator not defined [eetype missing]");
+    }
+
+    return result;
 }
 
 void
