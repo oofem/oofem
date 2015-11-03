@@ -512,8 +512,11 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     //domainList->put(1, dNew);
     //dNew->setNumber(1);
     //domainList->put(2, NULL);
-    domainList[0] = std :: move(domainList[1]);
+
+    //domainList[0] = std :: move(domainList[1]);
+    domainList.erase(domainList.begin());
     domainList[0]->setNumber(1);
+
     parallelContextList = {parallelContextList[1]};
 
     // keep equation numbering of new domain
