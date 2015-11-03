@@ -71,7 +71,7 @@ namespace oofem {
 //#define __VERBOSE_PARALLEL
 
 //#define DEBUG_CHECK
-//#define DEBUG_INFO
+#define DEBUG_INFO
 //#define DEBUG_SMOOTHING
 
 // QUICK_HACK enables comparison of sequential and parallel version when smoothing is applied;
@@ -3825,7 +3825,6 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
             // local elements have array partitions empty !
 #endif
             ( * dNew )->setElement(eNum, elem);
-            elem->postInitialize();
         } else {
             OOFEM_ERROR("parent element missing");
         }
@@ -3837,6 +3836,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     ( * dNew )->resizeCrossSectionModels(ncrosssect);
     for ( int i = 1; i <= ncrosssect; i++ ) {
         DynamicInputRecord ir( *domain->giveCrossSection ( i ) );
+        ir.giveRecordKeywordField(name);
 
         crossSection = classFactory.createCrossSection(name.c_str(), i, * dNew);
         crossSection->initializeFrom(& ir);
@@ -3848,6 +3848,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     ( * dNew )->resizeMaterials(nmat);
     for ( int i = 1; i <= nmat; i++ ) {
         DynamicInputRecord ir( *domain->giveMaterial ( i ) );
+        ir.giveRecordKeywordField(name);
 
         mat = classFactory.createMaterial(name.c_str(), i, * dNew);
         mat->initializeFrom(& ir);
@@ -3859,7 +3860,8 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     ( * dNew )->resizeNonlocalBarriers(nbarriers);
     for ( int i = 1; i <= nbarriers; i++ ) {
         DynamicInputRecord ir( *domain->giveNonlocalBarrier ( i ) );
-
+        ir.giveRecordKeywordField(name);
+        
         barrier = classFactory.createNonlocalBarrier(name.c_str(), i, * dNew);
         barrier->initializeFrom(& ir);
         ( * dNew )->setNonlocalBarrier(i, barrier);
@@ -3870,6 +3872,8 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     ( * dNew )->resizeBoundaryConditions(nbc);
     for ( int i = 1; i <= nbc; i++ ) {
         DynamicInputRecord ir( *domain->giveBc ( i ) );
+        ir.giveRecordKeywordField(name);
+
 
         bc = classFactory.createBoundaryCondition(name.c_str(), i, * dNew);
         bc->initializeFrom(& ir);
@@ -3898,6 +3902,9 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
         func->initializeFrom(& ir);
         ( * dNew )->setFunction(i, func);
     }
+
+    // post initialize components
+    ( * dNew )->postInitialize();
 
     // copy output manager settings
     ( * dNew )->giveOutputManager()->beCopyOf( domain->giveOutputManager() );
@@ -4046,9 +4053,13 @@ Subdivision :: bisectMesh()
             rdensity = elem->giveRequiredDensity();
 
             // first select all candidates for local bisection based on required mesh density
+
             if ( rdensity < iedensity ) {
                 subdivqueue.push(ie);
                 elem->setQueueFlag(true);
+
+
+
 #ifndef __PARALLEL_MODE
                 repeat = 1;                // force repetition in seqeuntial run
 #endif
