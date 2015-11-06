@@ -326,11 +326,11 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
         break;
     case 7:
         this->softType = ST_SmoothExtended;
-        double E, ep, ft; // auxiliary input variables
+        double E; // auxiliary input variables
         IR_GIVE_FIELD(ir, E, _IFT_IsotropicLinearElasticMaterial_e);
-        IR_GIVE_FIELD(ir, ep, _IFT_IsotropicDamageMaterial1_ep);
-        IR_GIVE_FIELD(ir, ft, _IFT_IsotropicDamageMaterial1_ft);
-        this->md = 1. / log(E * ep / ft);
+        IR_GIVE_FIELD(ir, this->ep, _IFT_IsotropicDamageMaterial1_ep);
+        IR_GIVE_FIELD(ir, this->ft, _IFT_IsotropicDamageMaterial1_ft);
+        this->md = 1. / log(E * this->ep / this->ft);
         this->e0 = ep * pow(md, 1. / md);
         IR_GIVE_FIELD(ir, e1, _IFT_IsotropicDamageMaterial1_e1);
         this->s1 = e1 * exp( -pow(e1 / e0, md) );
@@ -379,67 +379,68 @@ IsotropicDamageMaterial1 :: giveInputRecord(DynamicInputRecord &input)
     IsotropicDamageMaterial :: giveInputRecord(input);
     RandomMaterialExtensionInterface :: giveInputRecord(input);
 
-    input.setField(this->e0, _IFT_IsotropicDamageMaterial1_e0);
-    input.setField(this->ef, _IFT_IsotropicDamageMaterial1_ef);
     input.setField(this->equivStrainType, _IFT_IsotropicDamageMaterial1_equivstraintype);
-
-    input.setField(this->checkSnapBack, _IFT_IsotropicDamageMaterial1_checkSnapBack);
-
-    input.setField(this->equivStrainType, _IFT_IsotropicDamageMaterial1_equivstraintype);
-    if ( this->equivStrainType == EST_Mises ) {
-        input.setField(this->k, _IFT_IsotropicDamageMaterial1_k);
-    }
-
     input.setField(this->damageLaw, _IFT_IsotropicDamageMaterial1_damageLaw);
-    if ( this->damageLaw != 7 ) {
-        input.setField(this->e0, _IFT_IsotropicDamageMaterial1_e0);
+    if ( ( damageLaw != 6 ) && ( damageLaw != 7 ) ) {
+      input.setField(this->e0, _IFT_IsotropicDamageMaterial1_e0);
     }
-
     switch ( damageLaw ) {
-    case 0:
-        if ( this->softType == ST_Exponential_Cohesive_Crack ) {
-            input.setField(this->wf, _IFT_IsotropicDamageMaterial1_wf);
-        } else if ( this->softType == ST_Exponential_Cohesive_Crack ) {
-            input.setField(this->gf, _IFT_IsotropicDamageMaterial1_gf);
-        } else {
-            input.setField(this->ef, _IFT_IsotropicDamageMaterial1_ef);
-        }
-
-        break;
-    case 1:     // linear softening law
-        if ( this->softType == ST_Linear_Cohesive_Crack ) {
-            input.setField(this->wf, _IFT_IsotropicDamageMaterial1_wf);
-        } else if ( this->softType == ST_Linear_Cohesive_Crack ) {
-            input.setField(this->gf, _IFT_IsotropicDamageMaterial1_gf);
-        } else {
-            input.setField(this->ef, _IFT_IsotropicDamageMaterial1_ef);
-        }
-
-        break;
-    case 2:     // bilinear softening
+    case 0:     // exponential softening - default
+      if (this->softType == ST_Exponential_Cohesive_Crack) {
+        input.setField(this->wf, _IFT_IsotropicDamageMaterial1_wf);
         input.setField(this->gf, _IFT_IsotropicDamageMaterial1_gf);
-        input.setField(this->ek, _IFT_IsotropicDamageMaterial1_ek);
-        input.setField(this->gft, _IFT_IsotropicDamageMaterial1_gft);
-
+      } else if (this->softType == ST_Exponential) {
+        input.setField(this->ef, _IFT_IsotropicDamageMaterial1_ef);
+      }
+      break;
+    case 1:
+      if (this->softType == ST_Linear_Cohesive_Crack) {
+        if (this->wf !=0.0) 
+          input.setField(this->wf, _IFT_IsotropicDamageMaterial1_wf);
+        else if (this->gf != 0.0) 
+          input.setField(this->gf, _IFT_IsotropicDamageMaterial1_gf);
+        else 
+          input.setField(this->ef, _IFT_IsotropicDamageMaterial1_ef);
+      }
+      break;
+    case 2:
+      if (this->softType == ST_BiLinear_Cohesive_Crack) {
+         input.setField(this->gf, _IFT_IsotropicDamageMaterial1_gf);
+         input.setField(this->gft, _IFT_IsotropicDamageMaterial1_gft);
+         if (this->ek != 0.0) {
+           input.setField(this->ek, _IFT_IsotropicDamageMaterial1_ek);
+         } else {
+           input.setField(this->wk, _IFT_IsotropicDamageMaterial1_wk);
+         }
+      } else if (this->wk != 0.0) {
         input.setField(this->wf, _IFT_IsotropicDamageMaterial1_wf);
         input.setField(this->wk, _IFT_IsotropicDamageMaterial1_wk);
         input.setField(this->sk, _IFT_IsotropicDamageMaterial1_sk);
 
-        break;
+      }
+      break;
+    case 3:
+      input.setField(this->wf, _IFT_IsotropicDamageMaterial1_wf);
+      break;
     case 4:
-        input.setField(this->At, _IFT_IsotropicDamageMaterial1_At);
-        input.setField(this->Bt, _IFT_IsotropicDamageMaterial1_Bt);
-        break;
+      input.setField(this->At, _IFT_IsotropicDamageMaterial1_At);
+      input.setField(this->Bt, _IFT_IsotropicDamageMaterial1_Bt);
+      break;
     case 5:
-        input.setField(this->md, _IFT_IsotropicDamageMaterial1_md);
-        break;
+      input.setField(this->md, _IFT_IsotropicDamageMaterial1_md);
+      break;
     case 7:
-        input.setField(this->e1, _IFT_IsotropicDamageMaterial1_e1);
-        input.setField(this->e2, _IFT_IsotropicDamageMaterial1_e2);
-        input.setField(this->nd, _IFT_IsotropicDamageMaterial1_nd);
-        break;
+      input.setField(this->ep, _IFT_IsotropicDamageMaterial1_ep);
+      input.setField(this->ft, _IFT_IsotropicDamageMaterial1_ft);
+      input.setField(this->e1, _IFT_IsotropicDamageMaterial1_e1);
+      input.setField(this->e2, _IFT_IsotropicDamageMaterial1_e2);
+      input.setField(this->nd, _IFT_IsotropicDamageMaterial1_nd);
+      break;
+    case 8:
+      input.setField(this->ef, _IFT_IsotropicDamageMaterial1_ef);
+      input.setField(this->md, _IFT_IsotropicDamageMaterial1_md);
+      break;
     }
-
     if ( softType == ST_Exponential_Cohesive_Crack || softType == ST_Linear_Cohesive_Crack || softType == ST_BiLinear_Cohesive_Crack ) {
         input.setField(this->ecsMethod, _IFT_IsotropicDamageMaterial1_ecsm);
     }
@@ -1128,7 +1129,9 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
 
     StructuralMaterial :: giveFullSymVectorForm( fullStrain, strainVector, gp->giveMaterialMode() );
 
-    if ( ( kappa > e0 ) && ( status->giveDamage() == 0. ) ) {
+    
+    if ( ( kappa > e0 ) && (( status->giveDamage() == 0. ) || (status->giveLe() == 0.0))) {
+      // zero Le can happen after adaptive update; need to recompute Le
         this->computePrincipalValDir(principalStrains, principalDir, fullStrain, principal_strain);
         // find index of max positive principal strain
         for (int i = 2; i <= 3; i++ ) {
