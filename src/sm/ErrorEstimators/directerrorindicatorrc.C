@@ -192,6 +192,7 @@ DirectErrorIndicatorRC :: estimateMeshDensities(TimeStep *tStep)
 
             if ( proposedDensity < ( currDensity * this->remeshingDensityRatioToggle ) ) {
                 this->currStrategy  = RemeshingFromCurrentState_RS;
+                OOFEM_LOG_DEBUG("DirectEI: remeshing required for node %d, den %e, required_dens %e\n", inode, currDensity, proposedDensity);
             }
         } else {
             // evaluate the required size
@@ -201,6 +202,7 @@ DirectErrorIndicatorRC :: estimateMeshDensities(TimeStep *tStep)
             this->nodalDensities.at(inode) = proposedDensity;
 
             if ( proposedDensity < ( currDensity * this->remeshingDensityRatioToggle ) ) {
+                OOFEM_LOG_DEBUG("DirectEI: remeshing required for node %d, den %e, required_dens %e\n", inode, currDensity, proposedDensity);
                 this->currStrategy  = RemeshingFromCurrentState_RS;
             }
         }
