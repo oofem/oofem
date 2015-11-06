@@ -92,7 +92,8 @@ EIPrimaryUnknownMapper :: mapAndUpdate(FloatArray &answer, ValueModeType mode,
                     Dof *dof = *it;
                     if ( dof->isPrimaryDof() ) {
                         int eq = dof->giveEquationNumber(EModelDefaultEquationNumbering());
-                        answer.at( eq ) += unknownValues.at(ii);
+                        if (eq)
+                          answer.at( eq ) += unknownValues.at(ii);
                     }
                 }
             }
