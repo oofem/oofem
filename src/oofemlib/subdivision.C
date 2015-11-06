@@ -71,7 +71,7 @@ namespace oofem {
 //#define __VERBOSE_PARALLEL
 
 //#define DEBUG_CHECK
-#define DEBUG_INFO
+//#define DEBUG_INFO
 //#define DEBUG_SMOOTHING
 
 // QUICK_HACK enables comparison of sequential and parallel version when smoothing is applied;
@@ -3414,8 +3414,8 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
         _node = new Subdivision :: RS_Node( i, mesh, i, * ( domain->giveNode ( i )->giveCoordinates() ),
                                            domain->giveErrorEstimator ( )->giveRemeshingCrit ( )->giveRequiredDofManDensity ( i, tStep ),
                                            domain->giveNode ( i )->isBoundary() );
-#ifdef __PARALLEL_MODE
         _node->setGlobalNumber( domain->giveNode(i)->giveGlobalNumber() );
+#ifdef __PARALLEL_MODE
         _node->setParallelMode( domain->giveNode(i)->giveParallelMode() );
         _node->setPartitions( * domain->giveNode(i)->givePartitionList() );
 #endif
@@ -3446,9 +3446,8 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
             OOFEM_ERROR("Unsupported element geometry (element %d)", i);
             _element = NULL;
         }
-
-#ifdef __PARALLEL_MODE
         _element->setGlobalNumber( domain->giveElement(i)->giveGlobalNumber() );
+#ifdef __PARALLEL_MODE
         _element->setParallelMode( domain->giveElement(i)->giveParallelMode() );
 #endif
     }
@@ -3558,6 +3557,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     GeneralBoundaryCondition *bc;
     InitialCondition *ic;
     Function *func;
+    Set *set;
     std :: string name;
 
     // create new mesh (missing param for new mesh!)
@@ -3592,8 +3592,8 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
                 node->appendDof(dof);
             }
 
-#ifdef __PARALLEL_MODE
             node->setGlobalNumber( parentNodePtr->giveGlobalNumber() );
+#ifdef __PARALLEL_MODE
             node->setParallelMode( parentNodePtr->giveParallelMode() );
             node->setPartitionList( parentNodePtr->givePartitionList() );
 #endif
@@ -3727,6 +3727,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
 
                                 if ( idof == 2 ) {
                                     dof = new MasterDof( node, 2, 0, ( DofIDItem ) dofIDArrayPtr.at ( idof ) );
+                                    OOFEM_LOG_INFO("Subdivision: Conrolled Node %d", inode);
                                 }
                             }
                         }
@@ -3760,9 +3761,9 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
                 node->appendDof(dof);
             }
 
+            node->setGlobalNumber( mesh->giveNode(inode)->giveGlobalNumber() );
 #ifdef __PARALLEL_MODE
             node->setParallelMode( mesh->giveNode(inode)->giveParallelMode() );
-            node->setGlobalNumber( mesh->giveNode(inode)->giveGlobalNumber() );
             node->setPartitionList( mesh->giveNode(inode)->givePartitions() );
 #endif
         }
@@ -3817,11 +3818,10 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
             ir.giveRecordKeywordField(name);
             elem = classFactory.createElement(name.c_str(), eNum, * dNew);
             elem->initializeFrom(& ir);
-
+            elem->setGlobalNumber( mesh->giveElement(ielem)->giveGlobalNumber() );
 #ifdef __PARALLEL_MODE
             //ir.setRecordKeywordNumber( mesh->giveElement(ielem)->giveGlobalNumber() );
             // not subdivided elements inherit globNum, subdivided give -1
-            elem->setGlobalNumber( mesh->giveElement(ielem)->giveGlobalNumber() );
             // local elements have array partitions empty !
 #endif
             ( * dNew )->setElement(eNum, elem);
@@ -3903,6 +3903,19 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
         ( * dNew )->setFunction(i, func);
     }
 
+    // sets
+    int nset = domain->giveNumberOfSets();
+    ( * dNew )->resizeSets(nset);
+    for ( int i = 1; i <= nset; i++ ) {
+        DynamicInputRecord ir( *domain->giveSet ( i ) );
+        ir.giveRecordKeywordField(name);
+
+        set = new Set(i, * dNew);
+        set->initializeFrom(& ir);
+        ( * dNew )->setSet(i, set);
+    }
+    
+
     // post initialize components
     ( * dNew )->postInitialize();
 
@@ -3916,6 +3929,19 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
 #else
     OOFEM_LOG_INFO( "Subdivision: created new mesh (%d nodes and %d elements) in %.2fs\n",
                    nnodes, eNum, timer.getUtime() );
+    if (0) {
+      for (int in=1; in<=(*dNew)->giveNumberOfDofManagers(); in++) {
+        DynamicInputRecord ir;
+        (*dNew)->giveDofManager(in)->giveInputRecord(ir);
+        OOFEM_LOG_INFO("%s\n", ir.giveRecordAsString().c_str());
+      }
+      for (int in=1; in<=(*dNew)->giveNumberOfElements(); in++) {
+        DynamicInputRecord ir;
+        (*dNew)->giveElement(in)->giveInputRecord(ir);
+        OOFEM_LOG_INFO("%s\n", ir.giveRecordAsString().c_str());
+      }
+    }
+
 #endif
 
 #ifdef __PARALLEL_MODE
@@ -3968,7 +3994,9 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     if ( this->giveRank() == 0 ) {
         OOFEM_LOG_INFO("Subdivision: new mesh info: %d nodes, %d elements in total\n", globalVals [ 1 ], globalVals [ 0 ]);
     }
-
+#else
+    // we need to assign global numbers to newly generated elements
+    this->assignGlobalNumbersToElements(* dNew);
 #endif
 
     return MI_OK;
@@ -3983,26 +4011,28 @@ Subdivision :: bisectMesh()
     double iedensity, rdensity;
     int repeat = 1, loop = 0, max_loop = 0;     // max_loop != 0 use only for debugging
     RS_Element *elem;
+    RS_Node *node;
     //std::queue<int> subdivqueue;
 #ifdef __PARALLEL_MODE
-    RS_Node *node;
-    int in, remote_elems = 0;
+    int remote_elems = 0;
     int myrank = this->giveRank();
     int problem_size = this->giveNumberOfProcesses();
     int value;
     int *partitionsIrregulars = new int[ problem_size ];
 #endif
+    
 
-#ifdef __PARALLEL_MODE
     // get the max globnum on the initial mesh
     // determine max global number of local nodes
     int maxlocalglobal = 0, maxglobalnumber;
-    for ( in = 1; in <= nnodes; in++ ) {
+    for ( int in = 1; in <= nnodes; in++ ) {
         maxlocalglobal = max( maxlocalglobal, mesh->giveNode(in)->giveGlobalNumber() );
     }
-
+#ifdef __PARALLEL_MODE
     // determine max global number on all partitions
     MPI_Allreduce(& maxlocalglobal, & maxglobalnumber, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
+#else
+    maxglobalnumber=maxlocalglobal;
 #endif
 
     // repeat bisection until no new element is created
@@ -4109,7 +4139,9 @@ Subdivision :: bisectMesh()
         int in;
         nnodes = mesh->giveNumberOfNodes();
 
-#ifdef __PARALLEL_MODE
+#ifndef __PARALLEL_MODE
+        int myrank = 0;
+#endif
         // assign global numbers to newly introduced irregulars while
         // keeping global numbering of existing (master) nodes
         // idea: first determine the max globnum already assigned
@@ -4122,24 +4154,25 @@ Subdivision :: bisectMesh()
         // the shared irregulars receive their number from partition with the lowest rank.
 
         // count local irregulars that receive their global number from this partition
-        int localIrregulars = 0, globalIrregulars = 0;
+        int localIrregulars = 0;
         for ( in = nnodes_old; in <= nnodes; in++ ) {
             if ( this->isNodeLocalIrregular(mesh->giveNode(in), myrank) && ( mesh->giveNode(in)->giveGlobalNumber() == 0 ) ) {
                 localIrregulars++;
             }
         }
 
+        int localOffset = 0;
+#ifdef __PARALLEL_MODE
  #ifdef __VERBOSE_PARALLEL
         OOFEM_LOG_INFO("[%d] Subdivision::bisectMesh: number of new local irregulars is %d\n", myrank, localIrregulars);
  #endif
-        int irank, localOffset = 0, gnum;
+        int irank, gnum,  globalIrregulars = 0;
         // gather number of local irregulars from all partitions
         MPI_Allgather(& localIrregulars, 1, MPI_INT, partitionsIrregulars, 1, MPI_INT, MPI_COMM_WORLD);
         // compute local offset
         for ( irank = 0; irank < myrank; irank++ ) {
             localOffset += partitionsIrregulars [ irank ];
         }
-
         // start to assign global numbers to local irregulars
         int availGlobNum = maxglobalnumber + localOffset;
         for ( in = nnodes_old; in <= nnodes; in++ ) {
@@ -4152,7 +4185,21 @@ Subdivision :: bisectMesh()
  #endif
             }
         }
+#else
+        localOffset=localIrregulars;
+        // start to assign global numbers to local irregulars
+        int availGlobNum = maxglobalnumber + localOffset;
+        for ( in = nnodes_old; in <= nnodes; in++ ) {
+            node = mesh->giveNode(in);
+            if ( this->isNodeLocalIrregular(node, myrank) && ( node->giveGlobalNumber() == 0 ) ) {
+                // set negative globnum to mark newly assigned nodes with globnum to participate in shared globnum data exchange
+                node->setGlobalNumber( ( ++availGlobNum ) );
+            }
+        }
 
+#endif
+
+#ifdef __PARALLEL_MODE
         // finally, communicate global numbers assigned to shared irregulars
         this->assignGlobalNumbersToSharedIrregulars();
         for ( in = nnodes_old; in <= nnodes; in++ ) {
@@ -4602,6 +4649,132 @@ Subdivision :: smoothMesh()
 }
 
 
+bool
+Subdivision :: isNodeLocalIrregular(Subdivision :: RS_Node *node, int myrank)
+{
+#ifdef __PARALLEL_MODE
+    if ( node->isIrregular() ) {
+        if ( node->giveParallelMode() == DofManager_local ) {
+            return true;
+        } else if ( node->giveParallelMode() == DofManager_shared ) {
+            int i, minpart, npart;
+            const IntArray *partitions = node->givePartitions();
+            npart = partitions->giveSize();
+            minpart = myrank;
+            for ( i = 1; i <= npart; i++ ) {
+                minpart = min( minpart, partitions->at(i) );
+            }
+
+            if ( minpart == myrank ) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
+#else
+    return node->isIrregular();
+#endif
+}
+
+void
+Subdivision :: assignGlobalNumbersToElements(Domain *d)
+{
+
+#ifdef __PARALLEL_MODE
+
+    int problem_size = this->giveNumberOfProcesses();
+    int myrank = this->giveRank();
+    int i, nelems, numberOfLocalElementsToNumber = 0;
+    int *partitionNumberOfElements = new int[ problem_size ];
+    int localMaxGlobnum = 0, globalMaxGlobnum;
+
+    // idea: first determine the number of local elements waiting for new global id
+    // and also determine max global number assigned up to now
+    nelems = d->giveNumberOfElements();
+    for ( i = 1; i <= nelems; i++ ) {
+        localMaxGlobnum = max( localMaxGlobnum, d->giveElement(i)->giveGlobalNumber() );
+ #ifdef DEBUG_CHECK
+        if ( d->giveElement(i)->giveParallelMode() == Element_remote ) {
+            OOFEM_ERROR("unexpected remote element %d ", i);
+        }
+
+ #endif
+        if ( d->giveElement(i)->giveGlobalNumber() <= 0 ) {
+            numberOfLocalElementsToNumber++;
+        }
+    }
+
+    // determine number of elements across all partitions
+    MPI_Allgather(& numberOfLocalElementsToNumber, 1, MPI_INT,
+                  partitionNumberOfElements, 1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Allreduce(& localMaxGlobnum, & globalMaxGlobnum, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
+ #ifdef __VERBOSE_PARALLEL
+    OOFEM_LOG_INFO("[%d] Subdivision::assignGlobalNumbersToElements: max globnum %d, new elements %d\n", myrank, globalMaxGlobnum, numberOfLocalElementsToNumber);
+ #endif
+
+    // compute local offset
+    int startOffset = globalMaxGlobnum, availGlobNum;
+    for ( i = 0; i < myrank; i++ ) {
+        startOffset += partitionNumberOfElements [ i ];
+    }
+
+    // lets assign global numbers on each partition to local elements
+    availGlobNum = startOffset;
+    for ( i = 1; i <= nelems; i++ ) {
+        if ( d->giveElement(i)->giveGlobalNumber() <= 0 ) {
+            d->giveElement(i)->setGlobalNumber(++availGlobNum);
+        }
+    }
+
+ #ifdef __VERBOSE_PARALLEL
+    /*
+     * for (i=1; i<=nelems; i++) {
+     * OOFEM_LOG_INFO ("[%d] Element %d[%d]\n", myrank, i,d->giveElement(i)->giveGlobalNumber());
+     * }
+     */
+ #endif
+
+    if (partitionNumberOfElements) {
+      delete[] partitionNumberOfElements;
+    }
+
+#else // local case
+
+    int i, nelems, numberOfLocalElementsToNumber = 0;
+    int localMaxGlobnum = 0;
+
+    // idea: first determine the number of local elements waiting for new global id
+    // and also determine max global number assigned up to now
+    nelems = d->giveNumberOfElements();
+    for ( i = 1; i <= nelems; i++ ) {
+        localMaxGlobnum = max( localMaxGlobnum, d->giveElement(i)->giveGlobalNumber() );
+        if ( d->giveElement(i)->giveGlobalNumber() <= 0 ) {
+            numberOfLocalElementsToNumber++;
+        }
+    }
+
+    // compute local offset
+    int startOffset = localMaxGlobnum, availGlobNum;
+
+    // lets assign global numbers on each partition to local elements
+    availGlobNum = startOffset;
+    for ( i = 1; i <= nelems; i++ ) {
+        if ( d->giveElement(i)->giveGlobalNumber() <= 0 ) {
+            d->giveElement(i)->setGlobalNumber(++availGlobNum);
+        }
+    }
+
+#endif
+
+}
+
+
+
 #ifdef __PARALLEL_MODE
 bool
 Subdivision :: exchangeSharedIrregulars()
@@ -5027,7 +5200,6 @@ Subdivision :: unpackIrregularSharedGlobnums(Subdivision *s, ProcessCommunicator
     return 1;
 }
 
-
 bool
 Subdivision :: isNodeLocalSharedIrregular(Subdivision :: RS_Node *node, int myrank)
 {
@@ -5055,33 +5227,7 @@ Subdivision :: isNodeLocalSharedIrregular(Subdivision :: RS_Node *node, int myra
 }
 
 
-bool
-Subdivision :: isNodeLocalIrregular(Subdivision :: RS_Node *node, int myrank)
-{
-    if ( node->isIrregular() ) {
-        if ( node->giveParallelMode() == DofManager_local ) {
-            return true;
-        } else if ( node->giveParallelMode() == DofManager_shared ) {
-            int i, minpart, npart;
-            const IntArray *partitions = node->givePartitions();
-            npart = partitions->giveSize();
-            minpart = myrank;
-            for ( i = 1; i <= npart; i++ ) {
-                minpart = min( minpart, partitions->at(i) );
-            }
 
-            if ( minpart == myrank ) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
-    } else {
-        return false;
-    }
-}
 
 
 int
@@ -5328,66 +5474,6 @@ Subdivision :: unpackRemoteElements(Domain *d, ProcessCommunicator &pc)
     return 1;
 }
 
-void
-Subdivision :: assignGlobalNumbersToElements(Domain *d)
-{
-    int problem_size = this->giveNumberOfProcesses();
-    int myrank = this->giveRank();
-    int i, nelems, numberOfLocalElementsToNumber = 0;
-    int *partitionNumberOfElements = new int[ problem_size ];
-    int localMaxGlobnum = 0, globalMaxGlobnum;
-
-    // idea: first determine the number of local elements waiting for new global id
-    // and also determine max global number assigned up to now
-    nelems = d->giveNumberOfElements();
-    for ( i = 1; i <= nelems; i++ ) {
-        localMaxGlobnum = max( localMaxGlobnum, d->giveElement(i)->giveGlobalNumber() );
- #ifdef DEBUG_CHECK
-        if ( d->giveElement(i)->giveParallelMode() == Element_remote ) {
-            OOFEM_ERROR("unexpected remote element %d ", i);
-        }
-
- #endif
-        if ( d->giveElement(i)->giveGlobalNumber() <= 0 ) {
-            numberOfLocalElementsToNumber++;
-        }
-    }
-
-    // determine number of elements across all partitions
-    MPI_Allgather(& numberOfLocalElementsToNumber, 1, MPI_INT,
-                  partitionNumberOfElements, 1, MPI_INT, MPI_COMM_WORLD);
-    MPI_Allreduce(& localMaxGlobnum, & globalMaxGlobnum, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
- #ifdef __VERBOSE_PARALLEL
-    OOFEM_LOG_INFO("[%d] Subdivision::assignGlobalNumbersToElements: max globnum %d, new elements %d\n", myrank, globalMaxGlobnum, numberOfLocalElementsToNumber);
- #endif
-
-    // compute local offset
-    int startOffset = globalMaxGlobnum, availGlobNum;
-    for ( i = 0; i < myrank; i++ ) {
-        startOffset += partitionNumberOfElements [ i ];
-    }
-
-    // lets assign global numbers on each partition to local elements
-    availGlobNum = startOffset;
-    for ( i = 1; i <= nelems; i++ ) {
-        if ( d->giveElement(i)->giveGlobalNumber() <= 0 ) {
-            d->giveElement(i)->setGlobalNumber(++availGlobNum);
-        }
-    }
-
- #ifdef __VERBOSE_PARALLEL
-    /*
-     * for (i=1; i<=nelems; i++) {
-     * OOFEM_LOG_INFO ("[%d] Element %d[%d]\n", myrank, i,d->giveElement(i)->giveGlobalNumber());
-     * }
-     */
- #endif
-
-    if (partitionNumberOfElements) {
-      delete[] partitionNumberOfElements;
-    }
-
-}
 
 
 
