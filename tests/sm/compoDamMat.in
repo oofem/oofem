@@ -4,7 +4,7 @@ test of orthotropic damage material on one LSpace element stretched in the y dir
 # I set the initialguess to 0 (which is a bad guess) to get the same behavior as before.
 StaticStructural nsteps 46 rtolf 1e-5 miniter 30 maxIter 30 deltaT 1.0 nmodules 1 initialguess 0
 errorcheck
-#vtkxml tstep_all domain_all primvars 1 1 vars 3 1 4 13
+#vtkxml tstep_all domain_all primvars 1 1 cellvars 1 61 vars 4 1 4 13
 #hom tstep_all scale 1.
 domain 3d
 OutputManager tstep_all dofman_all element_all

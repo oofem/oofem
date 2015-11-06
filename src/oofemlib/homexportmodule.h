@@ -43,7 +43,7 @@
 #define _IFT_HOMExportModule_Name "hom"
 #define _IFT_HOMExportModule_ISTs "ists" /// List of internal state types used for output
 #define _IFT_HOMExportModule_scale "scale" ///[optional] Scales the output variables
-#define _IFT_HOMExportModule_matnum "matnum" ///[optional] If specified, only these material are used
+//#define _IFT_HOMExportModule_matnum "matnum" ///[optional] If specified, only these materials are used
 //@}
 
 namespace oofem {
@@ -62,8 +62,8 @@ protected:
     double scale;
     /// Stream for file.
     FILE *stream;
-    /// Material numbers over which averaging is performed.
-    IntArray matnum;
+    /// Material numbers over which averaging is performed. - replaced by 'regionsets'
+    //IntArray matnum;
     /// Internal states to export
     IntArray ists;
 

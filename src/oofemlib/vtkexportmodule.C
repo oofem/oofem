@@ -216,6 +216,7 @@ VTKExportModule :: initialize()
         delete this->smoother;
         this->smoother = NULL;
     }
+    ExportModule :: initialize();
 }
 
 
