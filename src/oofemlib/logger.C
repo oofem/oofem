@@ -246,7 +246,8 @@ Logger :: writeLogMsg(logLevelType level, const char *format, ...)
     }
 
 
-    if ( rank == 0 ) {
+    //    if ( rank == 0 ) {
+    if (1) {
         va_list args;
 
         if ( level <= this->logLevel ) {
