@@ -39,6 +39,7 @@
 #include "intarray.h"
 #include "inputrecord.h"
 #include "range.h"
+#include "set.h"
 
 #include <list>
 
@@ -50,6 +51,8 @@
 #define _IFT_ExportModule_subtstepsout "subtsteps_out"
 #define _IFT_ExportModule_domainall "domain_all"
 #define _IFT_ExportModule_domainmask "domain_mask"
+#define _IFT_ExportModule_regionsets "regionsets"
+#define _IFT_ExportModule_timescale "timescale"
 //@}
 
 namespace oofem {
@@ -91,6 +94,21 @@ protected:
     /// Domain selection mask.
     IntArray domainMask;
 
+    /// regions represented by sets
+    IntArray regionSets;
+
+    /// Scaling time in output, e.g. conversion from seconds to hours
+    double timeScale;
+
+    /// Returns number of regions (aka regionSets)
+    int giveNumberOfRegions();
+
+    /// Default region set
+    Set defaultElementSet;
+
+    /// Returns element set
+    Set *giveRegionSet(int i);
+
 public:
 
     /// Constructor. Creates empty Output Manager with number n.
@@ -119,7 +137,14 @@ public:
      */
     bool testSubStepOutput() { return this->tstep_substeps_out_flag; }
 
-    virtual void initialize() { }
+    virtual void initialize();
+
+    /**
+     * Fill regionSets with all elements if regionSets is initially empty.
+     * Implementation depends on derived classes.
+    */
+    virtual void initializeElementSet();
+
     /**
      * Terminates the receiver.
      * The terminating messages should be printed.

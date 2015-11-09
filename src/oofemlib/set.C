@@ -59,7 +59,7 @@ IRResultType Set :: initializeFrom(InputRecord *ir)
     this->computeIntArray(this->nodes, inputNodes, inputNodeRanges);
 
 
-    if ( ir->hasField(_IFT_Set_allElements) ) { // generate a list with all the el numbers
+    if ( ir->hasField(_IFT_Set_allElements) ) { // generate a list with all the element numbers
         this->elements.enumerate(this->giveDomain()->giveNumberOfElements());
         mElementListIsSorted = false;
     } else {

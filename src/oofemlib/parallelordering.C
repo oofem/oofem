@@ -406,30 +406,27 @@ Natural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberin
      */
 
 #ifdef  __VERBOSE_PARALLEL
-    if ( et == et_standard ) {
-        int _eq;
-        char *ptr;
-        char *locname = "local", *shname = "shared", *unkname = "unknown";
-        for ( int i = 1; i <= ndofman; i++ ) {
-            dman = d->giveDofManager(i);
-            if ( dman->giveParallelMode() == DofManager_local ) {
-                ptr = locname;
-            } else if ( dman->giveParallelMode() == DofManager_shared ) {
-                ptr = shname;
-            } else {
-                ptr = unkname;
-            }
-
-            ndofs = dman->giveNumberOfDofs();
-            for ( Dof *dof: *dman ) {
-                DofIDItem id = dof->giveDofID();
-                if ( ( _eq = dof->giveEquationNumber(dn) ) ) {
-                    fprintf( stderr, "[%d] n:%6s %d[%d] (%d), leq = %d, geq = %d\n", emodel->giveRank(), ptr, i, dman->giveGlobalNumber(), id, _eq, locGlobMap.at(_eq) );
-                } else {
-                    fprintf(stderr, "[%d] n:%6s %d[%d] (%d), leq = %d, geq = %d\n", emodel->giveRank(), ptr, i, dman->giveGlobalNumber(), id, _eq, 0);
-                }
-            }
+    int _eq;
+    char *ptr;
+    char locname[] = "local", shname[] = "shared", unkname[] = "unknown";
+    for ( int i = 1; i <= ndofman; i++ ) {
+      dman = d->giveDofManager(i);
+      if ( dman->giveParallelMode() == DofManager_local ) {
+        ptr = locname;
+      } else if ( dman->giveParallelMode() == DofManager_shared ) {
+        ptr = shname;
+      } else {
+        ptr = unkname;
+      }
+      
+      for ( Dof *dof: *dman ) {
+        DofIDItem id = dof->giveDofID();
+        if ( ( _eq = dof->giveEquationNumber(n) ) ) {
+          fprintf( stderr, "[%d] n:%6s %d[%d] (%d), leq = %d, geq = %d\n", emodel->giveRank(), ptr, i, dman->giveGlobalNumber(), id, _eq, locGlobMap.at(_eq) );
+        } else {
+          fprintf(stderr, "[%d] n:%6s %d[%d] (%d), leq = %d, geq = %d\n", emodel->giveRank(), ptr, i, dman->giveGlobalNumber(), id, _eq, 0);
         }
+      }
     }
 
 #endif

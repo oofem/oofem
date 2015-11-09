@@ -34,7 +34,6 @@
 
 #include "dssmatrix.h"
 #include "error.h"
-#include "floatarray.h"
 #include "engngm.h"
 #include "domain.h"
 #include "element.h"
