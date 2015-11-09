@@ -3929,20 +3929,22 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
 #else
     OOFEM_LOG_INFO( "Subdivision: created new mesh (%d nodes and %d elements) in %.2fs\n",
                    nnodes, eNum, timer.getUtime() );
+#endif
+
     if (0) {
       for (int in=1; in<=(*dNew)->giveNumberOfDofManagers(); in++) {
         DynamicInputRecord ir;
         (*dNew)->giveDofManager(in)->giveInputRecord(ir);
-        OOFEM_LOG_INFO("%s\n", ir.giveRecordAsString().c_str());
+        OOFEM_LOG_INFO("G%d:%s\n", (*dNew)->giveDofManager(in)->giveGlobalNumber(), ir.giveRecordAsString().c_str());
       }
       for (int in=1; in<=(*dNew)->giveNumberOfElements(); in++) {
         DynamicInputRecord ir;
         (*dNew)->giveElement(in)->giveInputRecord(ir);
-        OOFEM_LOG_INFO("%s\n", ir.giveRecordAsString().c_str());
+        OOFEM_LOG_INFO("G:%d:%s\n", (*dNew)->giveElement(in)->giveGlobalNumber(), ir.giveRecordAsString().c_str());
       }
     }
 
-#endif
+
 
 #ifdef __PARALLEL_MODE
  #ifdef __VERBOSE_PARALLEL
@@ -4021,8 +4023,7 @@ Subdivision :: bisectMesh()
     int *partitionsIrregulars = new int[ problem_size ];
 #endif
     
-
-    // get the max globnum on the initial mesh
+    // get the max globnum on the mesh
     // determine max global number of local nodes
     int maxlocalglobal = 0, maxglobalnumber;
     for ( int in = 1; in <= nnodes; in++ ) {
@@ -4035,8 +4036,11 @@ Subdivision :: bisectMesh()
     maxglobalnumber=maxlocalglobal;
 #endif
 
+
     // repeat bisection until no new element is created
     while ( repeat && ( loop < max_loop || max_loop == 0 ) ) {
+
+
         nnodes_old = nnodes;
 #ifdef __PARALLEL_MODE
         OOFEM_LOG_INFO("[%d] Subdivision::bisectMesh: entering bisection loop %d\n", myrank, ++loop);
@@ -4132,7 +4136,7 @@ Subdivision :: bisectMesh()
 
 #ifdef __PARALLEL_MODE
         // in parallel communicate with neighbours the irregular nodes on shared bondary
-    }
+        }
 
 #endif
 
@@ -4155,17 +4159,17 @@ Subdivision :: bisectMesh()
 
         // count local irregulars that receive their global number from this partition
         int localIrregulars = 0;
-        for ( in = nnodes_old; in <= nnodes; in++ ) {
+        for ( in = nnodes_old+1; in <= nnodes; in++ ) {
             if ( this->isNodeLocalIrregular(mesh->giveNode(in), myrank) && ( mesh->giveNode(in)->giveGlobalNumber() == 0 ) ) {
                 localIrregulars++;
             }
         }
 
-        int localOffset = 0;
 #ifdef __PARALLEL_MODE
  #ifdef __VERBOSE_PARALLEL
         OOFEM_LOG_INFO("[%d] Subdivision::bisectMesh: number of new local irregulars is %d\n", myrank, localIrregulars);
  #endif
+        int localOffset = 0;
         int irank, gnum,  globalIrregulars = 0;
         // gather number of local irregulars from all partitions
         MPI_Allgather(& localIrregulars, 1, MPI_INT, partitionsIrregulars, 1, MPI_INT, MPI_COMM_WORLD);
@@ -4175,7 +4179,7 @@ Subdivision :: bisectMesh()
         }
         // start to assign global numbers to local irregulars
         int availGlobNum = maxglobalnumber + localOffset;
-        for ( in = nnodes_old; in <= nnodes; in++ ) {
+        for ( in = nnodes_old+1; in <= nnodes; in++ ) {
             node = mesh->giveNode(in);
             if ( this->isNodeLocalIrregular(node, myrank) && ( node->giveGlobalNumber() == 0 ) ) {
                 // set negative globnum to mark newly assigned nodes with globnum to participate in shared globnum data exchange
@@ -4186,15 +4190,12 @@ Subdivision :: bisectMesh()
             }
         }
 #else
-        localOffset=localIrregulars;
+        int localOffset=0;
         // start to assign global numbers to local irregulars
-        int availGlobNum = maxglobalnumber + localOffset;
-        for ( in = nnodes_old; in <= nnodes; in++ ) {
+        int availGlobNum = maxglobalnumber+localOffset;
+        for ( in = nnodes_old+1; in <= nnodes; in++ ) {
             node = mesh->giveNode(in);
-            if ( this->isNodeLocalIrregular(node, myrank) && ( node->giveGlobalNumber() == 0 ) ) {
-                // set negative globnum to mark newly assigned nodes with globnum to participate in shared globnum data exchange
-                node->setGlobalNumber( ( ++availGlobNum ) );
-            }
+            node->setGlobalNumber( ( ++availGlobNum ) );
         }
 
 #endif
@@ -4202,7 +4203,7 @@ Subdivision :: bisectMesh()
 #ifdef __PARALLEL_MODE
         // finally, communicate global numbers assigned to shared irregulars
         this->assignGlobalNumbersToSharedIrregulars();
-        for ( in = nnodes_old; in <= nnodes; in++ ) {
+        for ( in = nnodes_old+1; in <= nnodes; in++ ) {
             node = mesh->giveNode(in);
             gnum = node->giveGlobalNumber();
             if ( gnum < 0 ) {
@@ -4229,6 +4230,8 @@ Subdivision :: bisectMesh()
             repeat = 1;                                    // force repetition in parallel run
         }
 
+#else
+        maxglobalnumber+=localIrregulars;
 #endif
 
         // symbolic bisection is finished;
@@ -4251,7 +4254,7 @@ Subdivision :: bisectMesh()
 
         // unmark local unshared irregulars marked for connectivity setup
         // important this may be not done before generate !!!
-        for ( in = nnodes_old; in <= nnodes; in++ ) {
+        for ( in = nnodes_old+1; in <= nnodes; in++ ) {
             if ( mesh->giveNode(in)->giveNumber() < 0 ) {
                 mesh->giveNode(in)->setNumber( -mesh->giveNode(in)->giveNumber() );
             }
@@ -4299,7 +4302,7 @@ Subdivision :: bisectMesh()
         ESIEventLoop( YES, const_cast< char * >("Subdivision Bisection; Press Ctrl-p to continue") );
  #endif
 #endif
-    }
+    } // end bisection loop
 #ifdef __PARALLEL_MODE
     if (partitionsIrregulars) {
       delete[] partitionsIrregulars;
