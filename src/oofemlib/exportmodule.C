@@ -84,17 +84,17 @@ ExportModule :: initializeFrom(InputRecord *ir)
 }
 
 void ExportModule :: initialize(){
-    
+  initializeElementSet();
 }
 
 void ExportModule :: initializeElementSet(){
-    if ( regionSets.isEmpty() ) {
-        // default: whole domain region
-        regionSets.resize(1);
-        regionSets.at(1) = -1;
 
-        defaultElementSet.addAllElements();
-    }
+  // default: whole domain region
+  regionSets.resize(1);
+  regionSets.at(1) = 0;
+  defaultElementSet.clear();
+  defaultElementSet.setDomain(emodel->giveDomain(1));
+  defaultElementSet.addAllElements();
 }
 
 
