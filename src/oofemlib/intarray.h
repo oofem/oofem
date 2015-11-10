@@ -309,6 +309,9 @@ public:
     /// Prints receiver on stdout.
     void printYourself() const;
 
+    /// Abbreviation for printYourself().
+    void pY() const;
+
     /**
      * Prints receiver on stdout with custom name.  
      * @param name Display name of reciever.

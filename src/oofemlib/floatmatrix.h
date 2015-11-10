@@ -534,7 +534,7 @@ public:
      * @param name Display name of reciever.
      */
     void printYourself(const std::string &name) const;
-    
+
     /// Higher accuracy than printYourself.
     void pY() const;
 

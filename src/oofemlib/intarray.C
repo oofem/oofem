@@ -250,6 +250,10 @@ void IntArray :: printYourself(const std::string name) const
     printf("\n");
 }
 
+void IntArray :: pY() const {
+    printYourself();
+}
+
 
 contextIOResultType IntArray :: storeYourself(DataStream &stream) const
 {

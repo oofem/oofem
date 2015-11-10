@@ -41,10 +41,11 @@ enum bcType {
     UnknownBT,      ///< Unknown.
     DirichletBT,    ///< Prescribed value.
     TransmissionBC, ///< Neumann type (prescribed flux).
-    ConvectionBC,   ///< Newton type.
+    ConvectionBC,   ///< Newton type - transfer coefficient
     SlipWithFriction,
     PenetrationWithResistance,
-    OutFlowBC
+    OutFlowBC,
+    RadiationBC     ///< Stefan-Boltzmann law.
 };
 } // end namespace oofem
 #endif // bctype_h
