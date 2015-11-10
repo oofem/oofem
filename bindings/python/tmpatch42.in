@@ -1,0 +1,57 @@
+tmpatch42.out
+Patch test of Tetrah1_ht elements 
+StationaryProblem nsteps 1 nmodules 1
+#NonStationaryProblem nsteps 200 deltat 600000.0 alpha 0.5
+#nltransienttransportproblem nsteps 200 deltat 600000.0 rtol 0.001 alpha 0.5 nsmax 300 lumpedcapa
+errorcheck
+domain HeatTransfer
+OutputManager tstep_all dofman_all element_all
+ndofman 12 nelem 12 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1 nset 3
+node 1 coords 3  3.0   0.0   0.0
+node 2 coords 3  3.0   1.0   0.0
+node 3 coords 3  0.0   1.0   0.0
+node 4 coords 3  0.0   0.0   0.0
+node 5 coords 3  3.0   0.0   3.0
+node 6 coords 3  3.0   1.0   3.0
+node 7 coords 3  0.0   1.0   3.0
+node 8 coords 3  0.0   0.0   3.0
+#
+node 9 coords 3   3.0   8.0   0.0
+node 10 coords 3  0.0   8.0   0.0
+node 11 coords 3  0.0   8.0   3.0
+node 12 coords 3  3.0   8.0   3.0
+#
+tetrah1ht 1 nodes 4 1 2 4 5
+tetrah1ht 2 nodes 4 2 3 4 6
+tetrah1ht 3 nodes 4 5 6 2 4
+tetrah1ht 4 nodes 4 6 7 3 4
+tetrah1ht 5 nodes 4 5 8 6 4
+tetrah1ht 6 nodes 4 6 8 7 4
+#
+tetrah1ht 7  nodes 4 2 9 3 6
+tetrah1ht 8  nodes 4 9 10 3 12
+tetrah1ht 9  nodes 4 6 12 9 3
+tetrah1ht 10 nodes 4 12 11 10 3
+tetrah1ht 11 nodes 4 6 7 12 3
+tetrah1ht 12 nodes 4 12 7 11 3
+#
+#
+SimpleTransportCS 1 mat 1 set 1
+IsoHeat 1 d 2400. k 3.0 c 1000.0
+BoundaryCondition  1 loadTimeFunction 1 dofs 1 10 values 1 0.0 set 2
+constantsurfaceload 2 loadTimeFunction 1 components 1 15.0 properties 1 a 0.8 loadtype 3 set 3
+ConstantFunction 1 f(t) 1.0
+Set 1 elementranges {(1 12)}
+Set 2 nodes 4 1 4 5 8
+Set 3 elementboundaries 4  8 2  10 1
+
+#%BEGIN_CHECK%
+#NODE tStep 1 number 2 dof 10 unknown d value 1.2765957447
+#NODE tStep 1 number 3 dof 10 unknown d value 1.2765957447
+#NODE tStep 1 number 6 dof 10 unknown d value 1.2765957447
+#NODE tStep 1 number 7 dof 10 unknown d value 1.2765957447
+#NODE tStep 1 number 9 dof 10 unknown d value  10.212765957
+#NODE tStep 1 number 10 dof 10 unknown d value 10.212765957
+#NODE tStep 1 number 11 dof 10 unknown d value 10.212765957
+#NODE tStep 1 number 12 dof 10 unknown d value 10.212765957
+#%END_CHECK%
