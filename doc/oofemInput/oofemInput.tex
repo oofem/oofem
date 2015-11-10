@@ -2862,9 +2862,9 @@ where $\langle \tens{\strain} \rangle$ can be imposed as eigenstrain over the do
   \recentry{}{\optField{propertytf}{dc}}
 \end{record}
 Represent constant edge/surface loads or boundary conditions.
-Parameter \param{loadType} distinguishes the type of boundary condition. Supported values are:
-2 - prescribed flux input (Neumann boundary condition), 3 - uniform distributed load or the convection (Newton) bc.
-The transfer coefficient is defined by keyword \param{properties}, see later.
+Parameter \param{loadType} distinguishes the type of boundary condition. Supported values are specified in bctype.h:
+2 - prescribed flux input (Neumann boundary condition), 3 - uniform distributed load or the convection (Newton) bc, 7-Stefan-Bolzmann law for radiation.
+
 If the boundary condition corresponds to distributed force load, the \param{components} array contains components of distributed load corresponding to element unknowns.
 The load is specified for all DOFs of object to which is associated.
 For some types of boundary conditions the zero value of load does not mean that the load is not applied (Newton's type of bc, for example).
@@ -2877,13 +2877,16 @@ is set to zero and load is not applied for this DOF.
 If the boundary condition corresponds to prescribed flux input, then
 the \param{components} array contains the components of prescribed
 input flux corresponding to element unknowns.
-If the boundary condition is a convection boundary condition
-(\param{loadType} = 6) then \param{components} array contains the
+
+\param{loadType} = 3 specifies convection boundary condition then \param{components} array contains the
 environmental values (temperature of the environment) corresponding to
 element unknowns, and \param{properties} dictionary should contain
 value of transfer (convection) coefficient (assumed to be a constant) under the key 'a'.
 
-The properties can vary in time. Each property can have associated time function which determines its time variation. The time functions are set up using optional \param{propertytf} dictionary, containing for selected properties the corresponding time function number. The time function must be registered under the same key as in \param{properties} dictionary. The property value is then computed by product of property value (determined by \param{properties}) and corresponding time finction evaluated at given time. If no time function provided for particula property, a unit constant function is assumed.
+\param{loadType} = 7 specifies radiative boundary condition and requires to specify emmisivity 
+$\varepsilon \in \langle 0,1 \rangle$ and the \param{components} array contains the environmental values (temperature of the environment).
+
+The properties can vary in time. Each property can have associated time function which determines its time variation. The time functions are set up using optional \param{propertytf} dictionary, containing for selected properties the corresponding time function number. The time function must be registered under the same key as in \param{properties} dictionary. The property value is then computed by product of property value (determined by \param{properties}) and corresponding time function evaluated at given time. If no time function provided for particula property, a unit constant function is assumed.
 
 The load can be defined in global coordinate system (\param{csType} =
 0, default) or in entity - specific local coordinate system
