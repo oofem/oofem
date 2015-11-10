@@ -44,6 +44,8 @@
 #include "timestep.h"
 #include "classfactory.h"
 #include "dof.h"
+#include "oofemtxtinputrecord.h"
+#include "irresulttype.h"
 #ifdef __SM_MODULE
  #include "../sm/EngineeringModels/structengngmodel.h"
  #include "../sm/Elements/Beams/beam2d.h"
@@ -62,11 +64,33 @@ ErrorCheckingRule :: checkValue(double computedValue)
 
 
 NodeErrorCheckingRule :: NodeErrorCheckingRule(const std :: string &line, double tol) :
-    ErrorCheckingRule(tol)
+  ErrorCheckingRule(tol)
 {
+/*
+  IRResultType result;
+  char unknown;
+  std :: string  kwd;
+  OOFEMTXTInputRecord rec (0, line), *ptr = &rec;
+  rec.giveRecordKeywordField(kwd);
+  if (kwd == "#NODE") {
+    IR_GIVE_FIELD (ptr,tstep, "tStep");
+    IR_GIVE_OPTIONAL_FIELD (ptr,tsubstep, "tStepVer");
+    IR_GIVE_FIELD (ptr,number, "number");
+    IR_GIVE_FIELD (ptr,dofid, "dofid");
+    IR_GIVE_FIELD (ptr,unknown, "unknown");
+    IR_GIVE_FIELD (ptr,value, "value");
+    IR_GIVE_OPTIONAL_FIELD (ptr,tolerance, "tolerance");
+  } else {
+    OOFEM_ERROR("Something wrong in the error checking rule: %s\n", line.c_str());
+  }
+*/
     char unknown;
     int ret = std :: sscanf(line.c_str(), "#NODE tStep %d number %d dof %d unknown %c value %le tolerance %le",
                   &tstep, & number, & dofid, & unknown, & value, & tolerance);
+    if ( ret < 2 ) {
+      ret = std :: sscanf(line.c_str(), "#NODE tStep %d tStepVer %d number %d dof %d unknown %c value %le tolerance %le",
+                          &tstep, &tsubstep, & number, & dofid, & unknown, & value, & tolerance);
+    }
     if ( ret < 5 ) {
         OOFEM_ERROR("Something wrong in the error checking rule: %s\n", line.c_str());
     }
@@ -86,7 +110,7 @@ bool
 NodeErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
 {
     // Rule doesn't apply yet.
-    if ( tStep->giveNumber() != tstep ) {
+    if ( (tStep->giveNumber() != tstep ) || (tStep->giveVersion() != tsubstep) )  {
         return true;
     }
 
@@ -124,7 +148,14 @@ ElementErrorCheckingRule :: ElementErrorCheckingRule(const std :: string &line, 
     int istnum;
     int ret = std :: sscanf(line.c_str(), "#ELEMENT tStep %d number %d irule %d gp %d keyword %d component %d value %le tolerance %le",
                   &tstep, & number, & irule, & gpnum, & istnum, & component, & value, & tolerance);
-    if ( ret < 3 ) {
+    if ( ret < 2 ) {
+      ret = std :: sscanf(line.c_str(), "#ELEMENT tStep %d tStepVer %d number %d irule %d gp %d keyword %d component %d value %le tolerance %le",
+                          &tstep, &tsubstep, & number, & irule, & gpnum, & istnum, & component, & value, & tolerance);
+      if (ret < 4) {
+        ret = std :: sscanf(line.c_str(), "#ELEMENT tStep %d tStepVer %d  number %d gp %d keyword %d component %d value %le tolerance %le",
+                              &tstep, &tsubstep, & number, & gpnum, & istnum, & component, & value, & tolerance);
+        }
+    } else if ( ret < 3 ) {
         ret = std :: sscanf(line.c_str(), "#ELEMENT tStep %d number %d gp %d keyword %d component %d value %le tolerance %le",
                     &tstep, & number, & gpnum, & istnum, & component, & value, & tolerance);
     }
@@ -138,7 +169,7 @@ bool
 ElementErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
 {
     // Rule doesn't apply yet.
-    if ( tStep->giveNumber() != tstep ) {
+     if ( (tStep->giveNumber() != tstep ) || (tStep->giveVersion() != tsubstep) )  {
         return true;
     }
 
@@ -186,6 +217,10 @@ BeamElementErrorCheckingRule :: BeamElementErrorCheckingRule(const std :: string
     int istnum;
     int ret = std :: sscanf(line.c_str(), "#BEAM_ELEMENT tStep %d number %d keyword %d component %d value %le tolerance %le",
                   &tstep, & number, & istnum, & component, & value, & tolerance);
+    if ( ret < 2 ) {
+      ret = std :: sscanf(line.c_str(), "#BEAM_ELEMENT tStep %d tStepVer %d number %d keyword %d component %d value %le tolerance %le",
+                  &tstep, &tsubstep, & number, & istnum, & component, & value, & tolerance);
+    }
     if ( ret < 5 ) {
         OOFEM_ERROR("Something wrong in the error checking rule: %s\n", line.c_str());
     }
@@ -196,7 +231,7 @@ bool
 BeamElementErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
 {
     // Rule doesn't apply yet.
-    if ( tStep->giveNumber() != tstep ) {
+    if ( (tStep->giveNumber() != tstep ) || (tStep->giveVersion() != tsubstep) )  {
         return true;
     }
 
@@ -251,6 +286,10 @@ ReactionErrorCheckingRule :: ReactionErrorCheckingRule(const std :: string &line
 {
     int ret = std :: sscanf(line.c_str(), "#REACTION tStep %d number %d dof %d value %le tolerance %le", 
                   &tstep, & number, & dofid, & value, & tolerance);
+    if ( ret < 2 ) {
+      ret = std :: sscanf(line.c_str(), "#REACTION tStep %d tStepVer %d number %d dof %d value %le tolerance %le", 
+                  &tstep, &tsubstep, & number, & dofid, & value, & tolerance);
+    }
     if ( ret < 4 ) {
         OOFEM_ERROR("Something wrong in the error checking rule: %s\n", line.c_str());
     }
@@ -260,7 +299,7 @@ bool
 ReactionErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
 {
     // Rule doesn't apply yet.
-    if ( tStep->giveNumber() != tstep ) {
+    if ( (tStep->giveNumber() != tstep ) || (tStep->giveVersion() != tsubstep) )  {
         return true;
     }
 

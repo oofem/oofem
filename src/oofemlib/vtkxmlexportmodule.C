@@ -125,7 +125,6 @@ VTKXMLExportModule :: initialize()
         delete this->smoother;
         this->smoother = NULL;
     }
-    initializeElementSet();
 
     ExportModule :: initialize();
 }
