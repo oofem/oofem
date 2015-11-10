@@ -1,6 +1,6 @@
 adapt02.out
 adaptive 3d test (subdivision+mapping+adaptnlinearstatic)
-adaptnlinearstatic nsteps 5 controllmode 1 rtolv 0.0001 MaxIter 800 stiffMode 1 contextOutputStep 1  manrmsteps 1 varType 1 minlim 0.20 maxlim 1.0 mindens 1.6 maxdens 1.6 meshpackage 3 defdens 100.0 equilmc 1 renumber 1 lstype 3 smtype 7 eetype 0 istype 13 nmodules 2 lstol 1.e-8
+adaptnlinearstatic nsteps 5 controllmode 1 rtolv 0.0001 MaxIter 800 stiffMode 1 contextOutputStep 1  manrmsteps 1 varType 1 minlim 0.20 maxlim 1.0 mindens 1.6 maxdens 1.6 meshpackage 3 defdens 100.0 equilmc 1 renumber 1 lstype 0 smtype 0 eetype 0 istype 13 nmodules 2 
 errorcheck
 vtkxml domain_all tstep_all vars 2 1 13
 domain 3d
