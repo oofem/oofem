@@ -62,7 +62,7 @@ void TransportExternalForceAssembler :: vectorFromElement(FloatArray &vec, Eleme
     telem->computeBCVectorAt(vec, tStep, mode);
     FloatArray tmp;
     telem->computeInternalSourceRhsVectorAt(tmp, tStep, mode);
-    vec.add(tmp);    
+    vec.add(tmp);
 }
 
 

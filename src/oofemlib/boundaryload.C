@@ -132,7 +132,7 @@ BoundaryLoad :: giveProperty(int aProperty, TimeStep *tStep)
             return propertyDictionary.at(aProperty);
         }
     } else {
-        OOFEM_ERROR("property not defined");
+        OOFEM_ERROR("Property '%c' not defined", (char)aProperty);
     }
 
     return 0.0;
