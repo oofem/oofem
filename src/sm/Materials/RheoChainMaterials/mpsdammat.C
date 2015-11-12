@@ -838,10 +838,16 @@ MPSDamMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateT
         answer.zero();
         answer.at(1) = status->giveCrackWidth();
         return 1;
-    } else if ( type == IST_TensileStrength ) {
+    } else if ( type == IST_ResidualTensileStrength ) {
         answer.resize(1);
         answer.zero();
         answer.at(1) =  status->giveResidualTensileStrength();
+        return 1;
+    } else if ( type == IST_TensileStrength ) {
+        double tequiv = this->computeEquivalentTime(gp, tStep, 1);
+        answer.resize(1);
+        answer.zero();
+        answer.at(1) =  this->computeTensileStrength(tequiv);
         return 1;
     } else {
         return MPSMaterial :: giveIPValue(answer, gp, type, tStep);
