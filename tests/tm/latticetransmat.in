@@ -27,14 +27,14 @@ simpletransportcs 1 set 1 mat 1
 #
 latticetransmat 1 d 1.e-9 k 1.e-13 vis 1.e-9 thetas 0.0924 thetar 0. contype 1 m 0.4396 a 18.6237
 #
-BoundaryCondition 1 loadTimeFunction 1 dofs 1 14 values 1 0. set 2
-InitialCondition 1 conditions 1 u 0.1 valtype 1 dofs 1 14 set 1
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 11 values 1 0. set 2
+InitialCondition 1 conditions 1 u 0.1 valtype 1 dofs 1 11 set 1
 ConstantFunction 1 f(t) 1.
 Set 1 elementranges {(1 6)}
 Set 2 nodes 1 1
 #
 #%BEGIN_CHECK% tolerance 1.e-5
-#NODE tStep 20 number 2  dof 1 unknown d value 3.22169279e-02
-#NODE tStep 20 number 7 dof 1 unknown d value 9.56257368e-02
+#NODE tStep 2 number 2 dof 11 unknown d value 3.22169279e-02
+#NODE tStep 2 number 7 dof 11 unknown d value 9.56257368e-02
 #REACTION tStep 20 number 1 dof 1 value 6.5013e-10
 #%END_CHECK%
