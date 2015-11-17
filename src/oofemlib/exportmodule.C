@@ -90,8 +90,6 @@ void ExportModule :: initialize(){
 void ExportModule :: initializeElementSet(){
     if ( regionSets.isEmpty() ){
         // default: whole domain region
-        regionSets.resize(1);
-        regionSets.at(1) = 0;
         defaultElementSet.clear();
         defaultElementSet.setDomain(emodel->giveDomain(1));
         defaultElementSet.addAllElements();
@@ -102,17 +100,25 @@ void ExportModule :: initializeElementSet(){
 int ExportModule :: giveNumberOfRegions()
 {
     // Returns number of regions (aka sets)
+  if (regionSets.isEmpty())
+    return 1; // defaultElementSet
+  else 
     return this->regionSets.giveSize();
 }
 
 Set *ExportModule :: giveRegionSet(int i)
 {
+  if (regionSets.isEmpty()) {
+    return & this->defaultElementSet;
+  }  else {
     int setid = regionSets.at(i);
     if ( setid > 0 ) {
         return emodel->giveDomain(1)->giveSet(setid);
     } else {
+        OOFEM_ERROR ("Bad set index");
         return & this->defaultElementSet;
     }
+  }
 }
 
 std :: string
