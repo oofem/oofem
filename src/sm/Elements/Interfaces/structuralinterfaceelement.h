@@ -94,6 +94,8 @@ public:
     /// Destructor.
     virtual ~StructuralInterfaceElement();
 
+    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
+
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType, TimeStep *tStep);
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
 

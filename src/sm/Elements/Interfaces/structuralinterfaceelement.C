@@ -59,6 +59,22 @@ StructuralInterfaceElement :: StructuralInterfaceElement(int n, Domain *aDomain)
 StructuralInterfaceElement :: ~StructuralInterfaceElement()
 { }
 
+int StructuralInterfaceElement :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) {
+    FloatArray N;
+    FEInterpolation *interp = this->giveInterpolation();
+    interp->evalN( N, lcoords, FEIElementGeometryWrapper(this) );
+
+    answer.resize(this->giveDofManager(1)->giveCoordinates()->giveSize());
+    answer.zero();
+
+    int numNodes = this->giveNumberOfNodes();
+    for(int i = 1; i <= numNodes/2; i++) {
+    	FloatArray &nodeCoord = *(this->giveDofManager(i)->giveCoordinates());
+    	answer.add(N.at(i), nodeCoord );
+    }
+
+    return true;
+}
 
 
 void
