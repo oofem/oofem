@@ -152,6 +152,9 @@ protected:
     
     void computeTripleProduct(FloatMatrix &answer, const FloatMatrix &a, const FloatMatrix &b, const FloatMatrix &c);
     
+    // Recovery of through thickness stresses by momentum balance
+    void recoverShearStress(TimeStep *tStep);
+    
 
 public:
     Shell7BaseXFEM(int n, Domain * d);

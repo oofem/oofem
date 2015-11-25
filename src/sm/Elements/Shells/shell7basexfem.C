@@ -52,7 +52,7 @@ namespace oofem {
 /* Scale factor fo the discontinuous dofs. Implies that the corresponding 
    dofs must be scaled with 1/factor in the input file
 */
-const double DISC_DOF_SCALE_FAC = 1.0e-3;
+const double DISC_DOF_SCALE_FAC = 1.0;
 
 Shell7BaseXFEM :: Shell7BaseXFEM(int n, Domain *aDomain) : Shell7Base(n, aDomain), XfemElementInterface(this) 
 {
@@ -78,7 +78,7 @@ Shell7BaseXFEM :: postInitialize()
     Shell7Base :: postInitialize();
     this->xMan =  this->giveDomain()->giveXfemManager();
     
-
+    ///@todo This needs to be updated dymically and not only initialized
     // Set up ordering arrays and arrays with the actived dofs
     int numEI = xMan->giveNumberOfEnrichmentItems();
     this->orderingArrays.resize(numEI);
@@ -336,8 +336,11 @@ Shell7BaseXFEM :: computeOrderingArray( IntArray &orderingArray, IntArray &activ
 
     int activeDofPos = 0, activeDofIndex = 0, orderingDofIndex = 0;
     
+    // collect dofIdMask (D_u, D_v, D_w, W_u, W_v, W_w or Gamma) for all dofmanagers and create an IntArray with the ordering of the dofIdMask as:
+    // D_u = 1, D_v = 2, D_w = 3, W_u = 15, W_v = 16, W_w = 17, Gamma = 18 (found using findDofWithDofId)
+    // if the enrichment is null the base mask is used
     IntArray dofManDofIdMask, dofManDofIdMaskAll;
-    for ( int i = 1; i <= numberOfDofMans; i++ ) {
+    for ( int i = 1; i <= numberOfDofMans; i++ ) {  
         DofManager *dMan = this->giveDofManager(i);
         
 
@@ -350,7 +353,7 @@ Shell7BaseXFEM :: computeOrderingArray( IntArray &orderingArray, IntArray &activ
         }
     
         for (int j = 1; j <= dofManDofIdMask.giveSize(); j++ ) {
-            int pos = dMan->findDofWithDofId( ( DofIDItem ) dofManDofIdMask.at(j) ) - dMan->begin() + 1;
+            int pos = dMan->findDofWithDofId( ( DofIDItem ) dofManDofIdMask.at(j) ) - dMan->begin() + 1;    //  retrun
             activeDofPos++;
             ordering_temp      .at(activeDofPos) = orderingDofIndex + pos;
             activeDofsArrayTemp.at(activeDofPos) = activeDofIndex   + j;
@@ -405,8 +408,9 @@ Shell7BaseXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, 
             tempRed.beSubArrayOf(temp, this->activeDofsArrays[i-1]);
             answer.assemble(tempRed, this->orderingArrays[i-1]);
 
-            // Cohesive zone model
-            if ( this->hasCohesiveZone(i) ) {
+            // Cohesive zone model NB: only implemented for delaminations
+            Delamination *dei =  dynamic_cast< Delamination * >( ei );
+            if ( this->hasCohesiveZone(dei->giveDelamInterfaceNum()) ) {
                 this->computeCohesiveForces( fCZ, tStep, solVec, solVecD, this->xMan->giveEnrichmentItem(i));
                 tempRed.beSubArrayOf(fCZ, this->activeDofsArrays[i-1]);
                 answer.assemble(tempRed, this->orderingArrays[i-1]);
@@ -622,11 +626,12 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
         answerTemp.zero();
 
         FloatMatrix B, NEnr, BEnr, F;  
-        int delamNum = dei->giveNumber();
-        IntegrationRule *iRuleL = czIntegrationRulesArray [ delamNum - 1 ]; ///TODO switch to giveIntefaceNum?
+        //int delamNum = dei->giveNumber();
+        int interfaceNum = dei->giveDelamInterfaceNum();
+        IntegrationRule *iRuleL = czIntegrationRulesArray [ interfaceNum - 1 ];
 
         StructuralInterfaceMaterial *intMat = static_cast < StructuralInterfaceMaterial * > 
-            (this->layeredCS->giveInterfaceMaterial(delamNum) );
+            (this->layeredCS->giveInterfaceMaterial(interfaceNum) );
 
         FloatMatrix lambda, lambdaN, Q;
         FloatArray Fp, T, nCov, jump, unknowns, genEpsC, genEpsD;
@@ -2263,14 +2268,18 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
     }
 
 
-
     // Export nodal variables from internal fields
     
     vtkPiece.setNumberOfInternalVarsToExport( internalVarsToExport.giveSize(), numTotalNodes );
     for ( int fieldNum = 1; fieldNum <= internalVarsToExport.giveSize(); fieldNum++ ) {
         InternalStateType type = ( InternalStateType ) internalVarsToExport.at(fieldNum);
         nodeNum = 1;
-        //this->recoverShearStress(tStep);
+        
+        if ( 1 ) {
+        // Recover shear stresses
+        this->recoverShearStress(tStep);
+        }
+        
         //int currentCell = 1;
         for ( int layer = 1; layer <= numLayers; layer++ ) {
             numSubCells = (int)this->numSubDivisionsArray[layer - 1];
@@ -2744,7 +2753,7 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
     for ( int fieldNum = 1; fieldNum <= internalVarsToExport.giveSize(); fieldNum++ ) {
         InternalStateType type = ( InternalStateType ) internalVarsToExport.at(fieldNum);
         nodeNum = 1;
-        //this->recoverShearStress(tStep);
+        
         //int currentCell = 1;
         for ( int layer = 1; layer <= numInterfaces; layer++ ) {
             for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
@@ -2924,6 +2933,123 @@ Shell7BaseXFEM :: computeTripleProduct(FloatMatrix &answer, const FloatMatrix &a
     FloatMatrix temp;
     temp.beTProductOf(a, b);
     answer.beProductOf(temp, c);
+}
+
+
+void 
+Shell7BaseXFEM :: recoverShearStress(TimeStep *tStep)
+{
+    // Recover shear stresses at ip by numerical integration of the momentum balance through the thickness (overloaded from shell7base)
+    // Kalla på SR-metod för lager i basklassen. om randvillkor eller annat behöver tas i beaktining kan det göras därefter. 
+    
+    int numberOfLayers = this->layeredCS->giveNumberOfLayers();         int numThicknessIP = this->layeredCS->giveNumIntegrationPointsInLayer();        
+    if (numThicknessIP < 2) {
+        // Polynomial fit involves linear z-component at the moment
+        OOFEM_ERROR("To few thickness IP per layer to do polynomial fit");
+    }   
+    int numInPlaneIP = 6; ///@todo generalise this!
+    
+    // Check if delamination/CZ is active. Then use hasCohesiveZone to decide whether the cohforces need to be calculated (otherwise traction BC need to be found)
+    // Find (possible) layer/interface BC, starting from bottom
+    IntArray layerHasBC(numberOfLayers+1); 
+    layerHasBC.zero();
+    
+    bool hasDelamination = true;
+    int numEI = this->xMan->giveNumberOfEnrichmentItems();
+    for ( int i = 1; i <= numEI; i++ ) {
+
+        EnrichmentItem *ei = this->xMan->giveEnrichmentItem(i);
+        if ( ei->isElementEnriched(this) ) {
+            hasDelamination = true;
+            // Find cohesive material (for delamination)
+            Delamination *dei =  dynamic_cast< Delamination * >( ei );
+            int delaminationInterfaceNum = dei->giveDelamInterfaceNum();
+            layerHasBC.at(delaminationInterfaceNum+1) = i;
+        }
+    }
+    
+    ///@todo add bottom/top BC
+    FloatMatrix SmatOld(3,numInPlaneIP); // 3 stress components (S_xz, S_yz, S_zz) * num of in plane ip 
+    SmatOld.zero();
+    
+    if ( hasDelamination ) {
+        double totalThickness = this->layeredCS->computeIntegralThick(); 
+        double zeroThicknessLevel = - 0.5 * totalThickness;         // assumes midplane is the geometric midplane of layered structure.
+        FloatMatrix dSmat(3,numInPlaneIP);                          // 3 stress components (S_xz, S_yz, S_zz) * num of in plane ip 
+        FloatMatrix dSmatLayerIP(3,numInPlaneIP*numThicknessIP);    // 3 stress components (S_xz, S_yz, S_zz) * num of wedge ip 
+        
+        for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
+        
+            Shell7Base :: giveLayerContributionToSR(dSmat, dSmatLayerIP, layer, zeroThicknessLevel, tStep); // NB: performed in global system
+            
+            Shell7Base :: updateLayerStressesSR(dSmatLayerIP, SmatOld, layer);
+            //dSmatLayerIP.printYourself(); 
+            //printf("enr func in dofman %d = %e \n", layer, layer);
+            
+            SmatOld.add(dSmat); 
+            zeroThicknessLevel += this->layeredCS->giveLayerThickness(layer); ///@todo add jump?
+#if 0       
+            // Add traction from delamination CZ. NB: assumes same number order of GPs in interface and shell elements
+            if ( layerHasBC.at(layer+1) ) {
+                
+                EnrichmentItem *ei = this->xMan->giveEnrichmentItem(layerHasBC.at(layer+1));
+                Delamination *dei =  dynamic_cast< Delamination * >( ei );
+                int interfaceNum = dei->giveDelamInterfaceNum();
+                IntegrationRule *iRuleI = czIntegrationRulesArray [ interfaceNum - 1 ];
+                if (iRuleI->giveNumberOfIntegrationPoints() != numInPlaneIP ) {
+                    OOFEM_ERROR("Interface IPs doesn't match the element IPs");
+                }
+                
+                FloatArray lCoords(3), nCov, CZPKtraction(3);
+                CZPKtraction.zero();
+                FloatMatrix Q;
+                int iIGP = 1;
+                for ( GaussPoint *gp: *iRuleI ) {
+                    double xi = dei->giveDelamXiCoord();
+                    lCoords.at(1) = gp->giveNaturalCoordinate(1);
+                    lCoords.at(2) = gp->giveNaturalCoordinate(2);
+                    lCoords.at(3) = xi;
+                    #if 0
+                    FloatArray GPcoords = gp->giveGlobalCoordinates();
+                        if (this->giveGlobalNumber() == 126) {
+                            GPcoords.printYourself("interface GPs");
+                        }
+                    #endif
+                    this->evalInitialCovarNormalAt(nCov, lCoords); 
+                    Q.beLocalCoordSys(nCov);
+                    
+                    StructuralInterfaceMaterialStatus* intMatStatus = static_cast < StructuralInterfaceMaterialStatus* > ( gp->giveMaterialStatus() );
+                    if (intMatStatus == 0) {
+                        OOFEM_ERROR("NULL pointer to material status");
+                    }
+                    
+//                     CZPKtraction = intMatStatus->giveFirstPKTraction(); // 3 components in local coords
+
+//                     CZPKtraction.rotatedWith(Q,'t'); // transform back to global coord system
+//                     #if 1
+//                         if (this->giveGlobalNumber() == 126) {
+//                             CZPKtraction.printYourself();
+//                         }
+//                     #endif
+                    
+                }
+            }
+#endif
+        }
+        
+    } else {
+        Shell7Base :: recoverShearStress(tStep); 
+    }
+    
+    
+    // Göra stress rec som vanlig men fråga i-planet-dofmanagern om den är berikad. Isf behöver randvillkor (fr delaminering eller CZ) tas i beaktining. 
+    // Hur gör vi med generella RV på topp/botten? Behöver troligtvis impelementeras snart. 
+    // this->layeredCS->giveInterfaceMaterial();
+//     int numberOfInterfaces = this->layeredCS->giveNumberOfLayers() - 1;
+//     
+//             status* intmatstatus = static_cast < StructuralInterfaceMaterialStatus * > (gp->giveMaterialStatus() );
+//             CZPKtraction = intmatstatus->giveFirstPKTraction
+
 }
 
 

@@ -295,7 +295,7 @@ EnrichmentItem :: giveNumberOfEnrDofs() const
 
 bool EnrichmentItem :: isElementEnriched(const Element *element) const
 {
-    for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
+    for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {           // check if any of dofmanagers (nodes) are enrichment
         if ( this->isDofManEnriched( * ( element->giveDofManager(i) ) ) ) {
             return true;
         }

@@ -240,7 +240,9 @@ protected:
     void recoverValuesFromIP(std::vector<FloatArray> &nodes, int layer, InternalStateType type, TimeStep *tStep, stressRecoveryType SRtype = copyIPvalue);
     void CopyIPvaluesToNodes(std::vector<FloatArray> &recoveredValues, int layer, InternalStateType type, TimeStep *tStep);
     void nodalLeastSquareFitFromIP(std::vector<FloatArray> &recoveredValues, int layer, InternalStateType type, TimeStep *tStep);
-    void recoverShearStress(TimeStep *tStep);
+    virtual void recoverShearStress(TimeStep *tStep);
+    void giveLayerContributionToSR(FloatMatrix &dSmat, FloatMatrix &dSmatLayerIP, int layer, double zeroThicknessLevel, TimeStep *tStep);
+    void updateLayerStressesSR(FloatMatrix &dSmatLayerIP, FloatMatrix &SmatOld, int layer);
 //    void computeBmatrixForStressRecAt(FloatArray &lcoords, FloatMatrix &answer, int layer, bool intSzz = false);
     void givePolynomialGradientForStressRecAt(FloatArray &answer, FloatArray &coords);
     void giveZintegratedPolynomialGradientForStressRecAt(FloatArray &answer, FloatArray &coords);
