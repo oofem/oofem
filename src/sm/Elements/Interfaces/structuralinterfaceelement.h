@@ -134,7 +134,7 @@ public:
      * (fast, but engineering model must ensure valid status data in each integration point).
      */
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
-    virtual void computeTraction(FloatArray &traction, IntegrationPoint *ip, FloatArray &jump, TimeStep *tStep);
+    virtual void computeTraction(FloatArray &traction, IntegrationPoint *ip, const FloatArray &jump, TimeStep *tStep);
     virtual void computeSpatialJump(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
