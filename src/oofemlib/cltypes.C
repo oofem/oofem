@@ -130,6 +130,7 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_InterfaceFirstPKTraction:
     case IST_InterfaceTraction:
     case IST_InterfaceJump:
+    case IST_InterfaceNormal:
         return ISVT_VECTOR;
 
     case IST_MaxEquivalentStrainLevel:

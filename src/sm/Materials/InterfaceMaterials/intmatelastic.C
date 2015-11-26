@@ -85,7 +85,7 @@ IntMatElastic :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, cons
 
     status->letTempJumpBe(jumpVector);
     status->letTempFirstPKTractionBe(answer);
-
+    status->letTempTractionBe(answer);
 }
 
 void

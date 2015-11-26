@@ -1475,9 +1475,9 @@ void PrescribedGradientBCWeak :: assembleTangentGPContribution(FloatMatrix &oTan
 
     //////////////////////////////////
     // Compute traction N-matrix
-    FloatArray N, Ntrac;
+    FloatArray Ntrac;
     computeNTraction(Ntrac, locCoordsOnLine [ 0 ], tEl);
-    tEl.computeN_Linear(N, locCoordsOnLine [ 0 ]);
+//    tEl.computeN_Linear(N, locCoordsOnLine [ 0 ]);
 
 
     FloatMatrix NtracMat;
@@ -1573,7 +1573,7 @@ IntegrationRule *PrescribedGradientBCWeak :: createNewIntegrationRule(int iTracE
     // Take material mode from first element
     MaterialMode matMode = domain->giveElement(1)->giveMaterialMode();
 
-    int numPointsPerSeg = 3;
+    int numPointsPerSeg = 4;
     ir->SetUpPointsOnLine(numPointsPerSeg, matMode);
 
     for ( GaussPoint *gp : *ir ) {
@@ -1595,6 +1595,7 @@ void PrescribedGradientBCWeak :: computeNTraction(FloatArray &oN, const double &
         iEl.computeN_Constant(oN, iXi);
     } else if ( mTractionInterpOrder == 1 ) {
         iEl.computeN_Linear(oN, iXi);
+//        iEl.computeN_PiecewiseConst(oN, iXi);
     }
 
     oN.times(mTracDofScaling);

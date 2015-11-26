@@ -152,7 +152,8 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_StrainTensor_Reduced, 102) \
     ENUM_ITEM_WITH_VALUE(IST_CrossSectionNumber, 103 ) \
     ENUM_ITEM_WITH_VALUE(IST_ShellStrainTensor, 104) \
-    ENUM_ITEM_WITH_VALUE(IST_AbaqusStateVector, 105)
+    ENUM_ITEM_WITH_VALUE(IST_AbaqusStateVector, 105) \
+    ENUM_ITEM_WITH_VALUE(IST_InterfaceNormal, 106)
 
 
 /**
