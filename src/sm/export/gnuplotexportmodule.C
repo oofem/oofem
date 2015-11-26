@@ -60,6 +60,7 @@
 #include "dofmanager.h"
 #include "xfem/matforceevaluator.h"
 #include "function.h"
+#include "Elements/Interfaces/structuralinterfaceelement.h"
 
 #include <sstream>
 
@@ -74,6 +75,7 @@ GnuplotExportModule::GnuplotExportModule(int n, EngngModel *e):
     mExportMesh(false),
     mExportXFEM(false),
     mExportCrackLength(false),
+	mExportInterfaceEl(false),
     mMonitorNodeIndex(-1),
     mpMatForceEvaluator( new  MaterialForceEvaluator() )
 {}
@@ -89,6 +91,7 @@ IRResultType GnuplotExportModule::initializeFrom(InputRecord *ir)
     mExportMesh = ir->hasField(_IFT_GnuplotExportModule_mesh);
     mExportXFEM = ir->hasField(_IFT_GnuplotExportModule_xfem);
     mExportCrackLength = ir->hasField(_IFT_GnuplotExportModule_cracklength);
+    mExportInterfaceEl = ir->hasField(_IFT_GnuplotExportModule_interface_el);
 
     ir->giveOptionalField(mMonitorNodeIndex, _IFT_GnuplotExportModule_monitornode);
 
@@ -169,6 +172,10 @@ void GnuplotExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
     if(mMonitorNodeIndex != -1) {
         DofManager *dMan = domain->giveDofManager(mMonitorNodeIndex);
         outputNodeDisp(*dMan, tStep);
+    }
+
+    if(mExportInterfaceEl) {
+    	outputInterfaceEl(*domain, tStep);
     }
 }
 
@@ -814,6 +821,58 @@ void GnuplotExportModule :: outputNodeDisp(DofManager &iDMan, TimeStep *tStep)
 
     std :: string name = "MonitorNodeSolGnuplot.dat";
     WritePointsToGnuplot(name, nodeDispHist);
+}
+
+void GnuplotExportModule :: outputInterfaceEl(Domain &d, TimeStep *tStep) {
+//	printf("Exporting interface el.\n");
+
+	std::vector<FloatArray> points, tractions;
+
+	int numEl = d.giveNumberOfElements();
+	for(int i = 1; i <= numEl; i++) {
+		Element *el = d.giveElement(i);
+
+		StructuralInterfaceElement *intEl = dynamic_cast<StructuralInterfaceElement*>(el);
+
+		if(intEl) {
+//			printf("Found StructuralInterfaceElement.\n");
+
+			IntegrationRule *ir = intEl->giveDefaultIntegrationRulePtr();
+
+			int numGP = ir->giveNumberOfIntegrationPoints();
+//			printf("numGP: %d\n", numGP );
+
+			for(int gpInd = 0; gpInd < numGP; gpInd++ ) {
+				GaussPoint *gp = ir->getIntegrationPoint(gpInd);
+//				gp->giveGlobalCoordinates().printYourself();
+
+				points.push_back( (gp->giveGlobalCoordinates()) );
+
+			    MaterialStatus *ms = static_cast< MaterialStatus * >( gp->giveMaterialStatus() );
+				StructuralInterfaceMaterialStatus *ims = static_cast<StructuralInterfaceMaterialStatus*>(ms);
+
+				FloatArray traction = ims->giveTraction();
+//				printf("traction: "); traction.printYourself();
+				tractions.push_back(traction);
+			}
+
+		}
+	}
+
+
+    // Export y vs normal traction
+    FILE * pFileY;
+    char fileNameY[100];
+    sprintf(fileNameY, "NormalTractionVsY.dat");
+    pFileY = fopen ( fileNameY , "wb" );
+
+    fprintf(pFileY, "#y tn\n");
+    for ( size_t j = 0; j < points.size(); j++ ) {
+    	fprintf(pFileY, "%e %e\n", points[j][1], tractions[j].at(3) );
+    }
+
+    fclose(pFileY);
+
 }
 
 
