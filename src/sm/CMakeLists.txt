@@ -90,7 +90,9 @@ set (sm_interface_elements
     Elements/Interfaces/structuralinterfaceelement.C
     Elements/Interfaces/intelpoint.C
     Elements/Interfaces/intelline1.C
+    Elements/Interfaces/intelline1intpen.C
     Elements/Interfaces/intelline2.C
+    Elements/Interfaces/intelline2intpen.C
     Elements/Interfaces/intelsurftr1.C
     Elements/Interfaces/Deprecated/interfaceelement1d.C
     Elements/Interfaces/Deprecated/interfaceelem2dlin.C
