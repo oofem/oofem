@@ -54,6 +54,10 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_IntElLine1IntPen_Name; }
     virtual const char *giveClassName() const { return "IntElLine1IntPen"; }
 
+    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
+
+
+    virtual void computeCovarBaseVectorAt(GaussPoint *gp, FloatArray &G);
 
     /**
      * Computes the stiffness/tangent matrix of receiver. Default implementation computes element stiffness using
@@ -72,7 +76,7 @@ public:
      * @param rMode Response mode.
      * @param tStep Time step.
      */
-//    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
+    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
 
 
     /**
@@ -89,11 +93,13 @@ public:
      * nonzero the stresses are taken directly from integration point status (should be derived from StructuralMaterialStatus)
      * (fast, but engineering model must ensure valid status data in each integration point).
      */
-//    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
+    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
 
 protected:
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeGaussPoints();
+
+    Element_Geometry_Type giveGeometryType() const { return EGT_quad_21_interface; }
 
 };
 

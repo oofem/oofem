@@ -8,11 +8,18 @@
 #include "intelline1intpen.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
+#include "dofmanager.h"
+#include "fei2dlinelin.h"
+#include "fei2dlinequad.h"
+#include "feinterpol.h"
 
 namespace oofem {
 REGISTER_Element(IntElLine1IntPen);
 
 IntElLine1IntPen::IntElLine1IntPen(int n, Domain * d) : IntElLine1(n, d) {
+    numberOfDofMans = 6;
+
+    numberOfGaussPoints = 4;
 
 }
 
@@ -20,12 +27,80 @@ IntElLine1IntPen::~IntElLine1IntPen() {
 
 }
 
-#if 0
+int IntElLine1IntPen :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) {
+    FloatArray N;
+    FEInterpolation *interp = this->giveInterpolation();
+    interp->evalN( N, lcoords, FEIElementGeometryWrapper(this) );
+
+    answer.resize(this->giveDofManager(1)->giveCoordinates()->giveSize());
+    answer.zero();
+
+
+    double xi_0 = 0.;
+    FloatArray xiScaled = {0.};
+
+    if(lcoords.at(1) < xi_0 ){
+    	xiScaled = {lcoords.at(1)*2. + 1.};
+    	interp->evalN( N, xiScaled, FEIElementGeometryWrapper(this) );
+
+    	const FloatArray &x1 = *(this->giveDofManager(1)->giveCoordinates());
+    	answer.add(N.at(1), x1 );
+
+    	const FloatArray &x3 = *(this->giveDofManager(3)->giveCoordinates());
+    	answer.add(N.at(2), x3 );
+    }
+    else {
+    	xiScaled = {lcoords.at(1)*2. - 1.};
+    	interp->evalN( N, xiScaled, FEIElementGeometryWrapper(this) );
+
+    	const FloatArray &x3 = *(this->giveDofManager(3)->giveCoordinates());
+    	answer.add(N.at(1), x3 );
+
+    	const FloatArray &x2 = *(this->giveDofManager(2)->giveCoordinates());
+    	answer.add(N.at(2), x2 );
+    }
+
+
+
+
+    return true;
+}
+
+void
+IntElLine1IntPen :: computeCovarBaseVectorAt(IntegrationPoint *ip, FloatArray &G)
+{
+//	printf("Entering IntElLine2IntPen :: computeCovarBaseVectorAt\n");
+
+	// Since we are averaging over the whole element, always evaluate the base vectors at xi = 0.
+
+	FloatArray xi_0 = {0.0};
+
+    FloatMatrix dNdxi;
+    FEInterpolation *interp = this->giveInterpolation();
+//    interp->evaldNdxi( dNdxi, ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    interp->evaldNdxi( dNdxi, xi_0, FEIElementGeometryWrapper(this) );
+
+    G.resize(2);
+    G.zero();
+
+    double X1_i = 0.5 * ( this->giveNode(1)->giveCoordinate(1) + this->giveNode(4)->giveCoordinate(1) ); // (mean) point on the fictious mid surface
+    double X2_i = 0.5 * ( this->giveNode(1)->giveCoordinate(2) + this->giveNode(4)->giveCoordinate(2) );
+    G.at(1) += dNdxi.at(1, 1) * X1_i;
+    G.at(2) += dNdxi.at(1, 1) * X2_i;
+
+
+    X1_i = 0.5 * ( this->giveNode(2)->giveCoordinate(1) + this->giveNode(5)->giveCoordinate(1) ); // (mean) point on the fictious mid surface
+    X2_i = 0.5 * ( this->giveNode(2)->giveCoordinate(2) + this->giveNode(5)->giveCoordinate(2) );
+    G.at(1) += dNdxi.at(2, 1) * X1_i;
+    G.at(2) += dNdxi.at(2, 1) * X2_i;
+
+}
+
+
+
 void
 IntElLine1IntPen :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
-	double xi_0 = 0.0;
-
     // Computes the stiffness matrix of the receiver K_cohesive = int_A ( N^t * dT/dj * N ) dA
     FloatMatrix N, D, DN;
     bool matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode);
@@ -39,15 +114,13 @@ IntElLine1IntPen :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode 
     // wish to project onto the space of constant functions on each element.
 
     // Projecting the basis functions gives a constant for each basis function.
-    FloatMatrix proj_N_c1, proj_N_c2;
-    proj_N_c1.clear();
-    proj_N_c2.clear();
+    FloatMatrix proj_N;
+    proj_N.clear();
 
-    FloatMatrix proj_DN_c1, proj_DN_c2;
-    proj_DN_c1.clear();
-    proj_DN_c2.clear();
+    FloatMatrix proj_DN;
+    proj_DN.clear();
 
-    double area1 = 0., area2 = 0.;
+    double area = 0.;
 
     for ( auto &ip: *this->giveDefaultIntegrationRulePtr() ) {
 
@@ -62,35 +135,24 @@ IntElLine1IntPen :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode 
         }
 
         this->computeTransformationMatrixAt(ip, rotationMatGtoL);
-        D.rotatedWith(rotationMatGtoL, 't');                      // transform stiffness to global coord system
+        D.rotatedWith(rotationMatGtoL, 'n');                      // transform stiffness to global coord system
 
         this->computeNmatrixAt(ip, N);
         DN.beProductOf(D, N);
 
 
         double dA = this->computeAreaAround(ip);
+        area += dA;
 
-        if(ip->giveNaturalCoordinate(1) < xi_0) {
-            area1 += dA;
-
-            proj_N_c1.add(dA, N);
-            proj_DN_c1.add(dA, DN);
-        }
-        else {
-            area2 += dA;
-
-            proj_N_c2.add(dA, N);
-            proj_DN_c2.add(dA, DN);
-        }
+        proj_N.add(dA, N);
+        proj_DN.add(dA, DN);
     }
 
 //    printf("area: %e\n", area);
-    proj_N_c1.times(1./area1);
-    proj_DN_c1.times(1./area1);
+    proj_N.times(1./area);
+    proj_DN.times(1./area);
 
-    proj_N_c2.times(1./area2);
-    proj_DN_c2.times(1./area2);
-
+//    printf("proj_N: "); proj_N.printYourself();
 
     for ( auto &ip: *this->giveDefaultIntegrationRulePtr() ) {
 
@@ -103,30 +165,16 @@ IntElLine1IntPen :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode 
         }
 
         this->computeTransformationMatrixAt(ip, rotationMatGtoL);
-        D.rotatedWith(rotationMatGtoL, 't');                      // transform stiffness to global coord system
+        D.rotatedWith(rotationMatGtoL, 'n');                      // transform stiffness to global coord system
 
-        if(ip->giveNaturalCoordinate(1) < xi_0) {
-
-			DN.beProductOf(D, proj_N_c1);
+        DN.beProductOf(D, proj_N);
 
 
-			double dA = this->computeAreaAround(ip);
-			if ( matStiffSymmFlag ) {
-				answer.plusProductSymmUpper(proj_N_c1, DN, dA);
-			} else {
-				answer.plusProductUnsym(proj_N_c1, DN, dA);
-			}
-        }
-        else {
-			DN.beProductOf(D, proj_N_c2);
-
-
-			double dA = this->computeAreaAround(ip);
-			if ( matStiffSymmFlag ) {
-				answer.plusProductSymmUpper(proj_N_c2, DN, dA);
-			} else {
-				answer.plusProductUnsym(proj_N_c2, DN, dA);
-			}
+        double dA = this->computeAreaAround(ip);
+        if ( matStiffSymmFlag ) {
+            answer.plusProductSymmUpper(proj_N, DN, dA);
+        } else {
+            answer.plusProductUnsym(proj_N, DN, dA);
         }
     }
 
@@ -134,6 +182,7 @@ IntElLine1IntPen :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode 
     if ( matStiffSymmFlag ) {
         answer.symmetrized();
     }
+
 }
 
 
@@ -147,8 +196,6 @@ IntElLine1IntPen :: giveInternalForcesVector(FloatArray &answer,
 	// test function for the cohesive zone are projected onto a reduced
 	// space. The purpose of the projection is to improve the stability
 	// properties of the formulation, thereby avoiding traction oscilations.
-
-	double xi_0 = 0.0;
 
     FloatMatrix N;
     FloatArray u, traction, jump;
@@ -168,17 +215,19 @@ IntElLine1IntPen :: giveInternalForcesVector(FloatArray &answer,
     // The setting is as follows: we have an interface with quadratic interpolation and we
     // wish to project onto the space of constant functions on each element.
 
+    // The projection of t becomes a constant
+//    FloatArray proj_t;
+//    proj_t.clear();
 
-    FloatArray proj_jump_c1, proj_jump_c2;
-    proj_jump_c1.clear();
-    proj_jump_c2.clear();
+
+    FloatArray proj_jump;
+    proj_jump.clear();
 
     // Projecting the basis functions gives a constant for each basis function.
-    FloatMatrix proj_N_c1, proj_N_c2;
-    proj_N_c1.clear();
-    proj_N_c2.clear();
+    FloatMatrix proj_N;
+    proj_N.clear();
 
-    double area1 = 0., area2 = 0.;
+    double area = 0.;
 
     for ( auto &ip: *this->giveDefaultIntegrationRulePtr() ) {
 
@@ -187,27 +236,15 @@ IntElLine1IntPen :: giveInternalForcesVector(FloatArray &answer,
 //        this->computeTraction(traction, ip, jump, tStep);
 
         double dA = this->computeAreaAround(ip);
+        area += dA;
 
-        if(ip->giveNaturalCoordinate(1) < xi_0) {
-            area1 += dA;
-            proj_jump_c1.add(dA, jump);
-            proj_N_c1.add(dA, N);
-        }
-        else {
-            area2 += dA;
-            proj_jump_c2.add(dA, jump);
-            proj_N_c2.add(dA, N);
-        }
-
+        proj_jump.add(dA, jump);
+        proj_N.add(dA, N);
     }
 
-//    printf("area1: %e\n", area1);
-    proj_jump_c1.times(1./area1);
-    proj_N_c1.times(1./area1);
-
-//    printf("area2: %e\n", area2);
-    proj_jump_c2.times(1./area2);
-    proj_N_c2.times(1./area2);
+//    printf("area: %e\n", area);
+    proj_jump.times(1./area);
+    proj_N.times(1./area);
 
 //    printf("proj_N: "); proj_N.printYourself();
 
@@ -216,26 +253,14 @@ IntElLine1IntPen :: giveInternalForcesVector(FloatArray &answer,
     for ( auto &ip: *this->giveDefaultIntegrationRulePtr() ) {
 //        this->computeNmatrixAt(ip, N);
 //        jump.beProductOf(N, u);
-        if(ip->giveNaturalCoordinate(1) < xi_0) {
+        this->computeTraction(traction, ip, proj_jump, tStep);
 
-			this->computeTraction(traction, ip, proj_jump_c1, tStep);
-
-			// compute internal cohesive forces as f = N^T*traction dA
-			double dA = this->computeAreaAround(ip);
-			answer.plusProduct(proj_N_c1, traction, dA);
-        }
-        else {
-
-			this->computeTraction(traction, ip, proj_jump_c2, tStep);
-
-			// compute internal cohesive forces as f = N^T*traction dA
-			double dA = this->computeAreaAround(ip);
-			answer.plusProduct(proj_N_c2, traction, dA);
-        }
+        // compute internal cohesive forces as f = N^T*traction dA
+        double dA = this->computeAreaAround(ip);
+        answer.plusProduct(proj_N, traction, dA);
     }
 
 }
-#endif
 
 void
 IntElLine1IntPen :: computeNmatrixAt(GaussPoint *ip, FloatMatrix &answer)
@@ -247,20 +272,36 @@ IntElLine1IntPen :: computeNmatrixAt(GaussPoint *ip, FloatMatrix &answer)
 //    interp->evalN( N, ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     double xi_0 = 0.;
+    FloatArray xiScaled = {0.};
+
+    answer.resize(2, 12);
+    answer.zero();
+
     if(ip->giveNaturalCoordinate(1) < xi_0 ){
-    	N = {1., 0.};
+    	xiScaled = {ip->giveNaturalCoordinate(1)*2. + 1.};
+    	interp->evalN( N, xiScaled, FEIElementGeometryWrapper(this) );
+
+		answer.at(1, 1) = answer.at(2, 2) = -N.at(1);
+//		answer.at(1, 3) = answer.at(2, 4) = -N.at(2);
+		answer.at(1, 5) = answer.at(2, 6) = -N.at(2);
+
+		answer.at(1, 7) = answer.at(2, 8) = N.at(1);
+//		answer.at(1, 9) = answer.at(2, 10) = N.at(2);
+		answer.at(1, 11) = answer.at(2, 12) = N.at(2);
     }
     else {
-    	N = {0., 1.};
+    	xiScaled = {ip->giveNaturalCoordinate(1)*2. - 1.};
+    	interp->evalN( N, xiScaled, FEIElementGeometryWrapper(this) );
+
+//		answer.at(1, 1) = answer.at(2, 2) = -N.at(1);
+		answer.at(1, 3) = answer.at(2, 4) = -N.at(2);
+		answer.at(1, 5) = answer.at(2, 6) = -N.at(1);
+
+//		answer.at(1, 7) = answer.at(2, 8) = N.at(1);
+		answer.at(1, 9) = answer.at(2, 10) = N.at(2);
+		answer.at(1, 11) = answer.at(2, 12) = N.at(1);
     }
 
-    answer.resize(2, 8);
-    answer.zero();
-    answer.at(1, 1) = answer.at(2, 2) = -N.at(1);
-    answer.at(1, 3) = answer.at(2, 4) = -N.at(2);
-
-    answer.at(1, 5) = answer.at(2, 6) = N.at(1);
-    answer.at(1, 7) = answer.at(2, 8) = N.at(2);
 }
 
 void
@@ -273,7 +314,7 @@ IntElLine1IntPen :: computeGaussPoints()
 //        integrationRulesArray[ 0 ].reset( new LobattoIntegrationRule (1,this, 1, 2, false) );
 //        integrationRulesArray [ 0 ]->SetUpPointsOnLine(2, _2dInterface);
 
-        int numGP = 64;
+        int numGP = 16;
         integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 2) );
         integrationRulesArray [ 0 ]->SetUpPointsOnLine(numGP, _2dInterface);
     }
