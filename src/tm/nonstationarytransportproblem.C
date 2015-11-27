@@ -62,7 +62,7 @@ void TransportExternalForceAssembler :: vectorFromElement(FloatArray &vec, Eleme
     telem->computeBCVectorAt(vec, tStep, mode);
     FloatArray tmp;
     telem->computeInternalSourceRhsVectorAt(tmp, tStep, mode);
-    vec.add(tmp);    
+    vec.add(tmp);
 }
 
 
@@ -85,7 +85,6 @@ void IntSourceLHSAssembler :: matrixFromElement(FloatMatrix &answer, Element &el
 {
     static_cast< TransportElement * >( &el )->computeIntSourceLHSMatrix(answer, tStep);
 }
-
 
 
 NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel *_master = NULL) : StationaryTransportProblem(i, _master)
@@ -194,16 +193,19 @@ double NonStationaryTransportProblem :: giveUnknownComponent(ValueModeType mode,
 TimeStep *
 NonStationaryTransportProblem :: giveSolutionStepWhenIcApply(bool force)
 {
-  if ( master && (!force)) {
-    return master->giveSolutionStepWhenIcApply();
-  } else {
-    if ( !stepWhenIcApply ) {
-        stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, this->initT - giveDeltaT ( giveNumberOfFirstStep() ), giveDeltaT ( giveNumberOfFirstStep() ), 0) );
-        //stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -deltaT, deltaT, 0) );
-    }
+    if ( master && (!force)) {
+        return master->giveSolutionStepWhenIcApply();
+    } else {
+        if ( !stepWhenIcApply ) {
+            //stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, this->initT - giveDeltaT ( giveNumberOfFirstStep() ), giveDeltaT ( giveNumberOfFirstStep() ), 0) );
+            //stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -deltaT, deltaT, 0) );
+            stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, 0., deltaT, 0) );
+            // The initial step goes from [-deltaT, 0], so the intrinsic time is at: -deltaT  + alpha*deltaT
+            stepWhenIcApply->setIntrinsicTime(-deltaT + alpha * deltaT);
+        }
 
-    return stepWhenIcApply.get();
-  }
+        return stepWhenIcApply.get();
+    }
 }
 
 

@@ -41,6 +41,8 @@
 #include "contextioerr.h"
 #include "nrsolver.h"
 #include "unknownnumberingscheme.h"
+// Temporary:
+#include "generalboundarycondition.h"
 
 namespace oofem {
 REGISTER_EngngModel(TransientTransportProblem);
@@ -112,24 +114,25 @@ TimeStep *TransientTransportProblem :: giveNextStep()
     
     previousStep = std :: move(currentStep);
     currentStep.reset( new TimeStep(*previousStep, this->deltaT) );
+    currentStep->setIntrinsicTime(previousStep->giveTargetTime() + alpha * deltaT);
     return currentStep.get();
 }
 
 
 TimeStep *TransientTransportProblem :: giveSolutionStepWhenIcApply(bool force)
 {
-  if ( master && (!force)) {
-    return master->giveSolutionStepWhenIcApply();
-  } else {
-    if ( !stepWhenIcApply ) {
-        ///@todo Should we have this->initT ?
-        stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, 0., deltaT, 0) );
-        // The initial step goes from [-deltaT, 0], so the intrinsic time is at: -deltaT  + alpha*deltaT
-        stepWhenIcApply->setIntrinsicTime(-deltaT + alpha * deltaT);
-    }
+    if ( master && (!force)) {
+        return master->giveSolutionStepWhenIcApply();
+    } else {
+        if ( !stepWhenIcApply ) {
+            ///@todo Should we have this->initT ?
+            stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, 0., deltaT, 0) );
+            // The initial step goes from [-deltaT, 0], so the intrinsic time is at: -deltaT  + alpha*deltaT
+            stepWhenIcApply->setIntrinsicTime(-deltaT + alpha * deltaT);
+        }
 
-    return stepWhenIcApply.get();
-  }
+        return stepWhenIcApply.get();
+    }
 }
 
 
@@ -138,11 +141,36 @@ void TransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
     Domain *d = this->giveDomain(1);
     int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
 
-    field->advanceSolution(tStep);
-    field->applyBoundaryCondition(tStep);
     if ( tStep->isTheFirstStep() ) {
         this->applyIC();
     }
+
+    field->advanceSolution(tStep);
+
+#if 1
+    // This is what advanceSolution should be doing, but it can't be there yet 
+    // (backwards compatibility issues due to inconsistencies in other solvers).
+    TimeStep *prev = tStep->givePreviousStep();
+    for ( auto &dman : d->giveDofManagers() ) {
+        static_cast< DofDistributedPrimaryField* >(field.get())->setInitialGuess(*dman, tStep, prev);
+    }
+
+    for ( auto &elem : d->giveElements() ) {
+        int ndman = elem->giveNumberOfInternalDofManagers();
+        for ( int i = 1; i <= ndman; i++ ) {
+            static_cast< DofDistributedPrimaryField* >(field.get())->setInitialGuess(*elem->giveInternalDofManager(i), tStep, prev);
+        }
+    }
+
+    for ( auto &bc : d->giveBcs() ) {
+        int ndman = bc->giveNumberOfInternalDofManagers();
+        for ( int i = 1; i <= ndman; i++ ) {
+            static_cast< DofDistributedPrimaryField* >(field.get())->setInitialGuess(*bc->giveInternalDofManager(i), tStep, prev);
+        }
+    }
+#endif
+
+    field->applyBoundaryCondition(tStep);
     field->initialize(VM_Total, tStep, solution, EModelDefaultEquationNumbering());
 
 

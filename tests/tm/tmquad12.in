@@ -1,7 +1,7 @@
 tmquad12.out
 Test of Quad1_ht elements with the change of problem size
 NonStationaryProblem nsteps 20 deltat 600.0 alpha 0.5 changingProblemSize nmodules 1
-#nltransienttransportproblem nsteps 20 deltat 600.0 rtol 0.001 alpha 0.5 nsmax 30 changingProblemSize nmodules 0
+#nltransienttransportproblem nsteps 20 deltat 600.0 rtol 0.001 alpha 0.5 nsmax 30 changingProblemSize nmodules 1
 errorcheck
 #vtkxml tstep_all domain_all primvars 1 6 vars 1 56 stype 1
 domain HeatTransfer
