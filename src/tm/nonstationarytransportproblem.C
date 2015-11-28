@@ -197,11 +197,8 @@ NonStationaryTransportProblem :: giveSolutionStepWhenIcApply(bool force)
         return master->giveSolutionStepWhenIcApply();
     } else {
         if ( !stepWhenIcApply ) {
-            //stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, this->initT - giveDeltaT ( giveNumberOfFirstStep() ), giveDeltaT ( giveNumberOfFirstStep() ), 0) );
+            stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, this->initT - giveDeltaT ( giveNumberOfFirstStep() ), giveDeltaT ( giveNumberOfFirstStep() ), 0) );
             //stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -deltaT, deltaT, 0) );
-            stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, 0., deltaT, 0) );
-            // The initial step goes from [-deltaT, 0], so the intrinsic time is at: -deltaT  + alpha*deltaT
-            stepWhenIcApply->setIntrinsicTime(-deltaT + alpha * deltaT);
         }
 
         return stepWhenIcApply.get();
