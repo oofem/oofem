@@ -50,7 +50,7 @@ namespace oofem {
  * This class represent the sparse matrix interface to DSS library. It allows to build internal structure,
  * assemble the DSS sparse matrix, and to factorize and back substitution operations.
  */
-class DSSMatrix : public SparseMtrx
+class OOFEM_EXPORT DSSMatrix : public SparseMtrx
 {
 public:
     /// Possible storage schemes and factorization types

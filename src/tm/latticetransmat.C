@@ -203,18 +203,17 @@ LatticeTransportMaterial :: computeConductivity(double suction,
         int couplingFlag = ( static_cast< LatticeTransportElement * >( gp->giveElement() ) )->giveCouplingFlag();
 
         if ( couplingFlag == 1 && coupledModels.at(1) != 0 && !tStep->isTheFirstStep() ) {
-	  IntArray couplingNumbers;
-	  
-	  static_cast< LatticeTransportElement * >( gp->giveElement())->giveCouplingNumbers(couplingNumbers);
-	    for(int i = 1; i <=crackLengths.giveSize();i++){
-	      if(couplingNumbers.at(i) != 0){
-		crackWidths.at(i) = static_cast< LatticeStructuralElement* >( domain->giveEngngModel()->giveMasterEngngModel()->giveSlaveProblem( coupledModels.at(1) )->giveDomain(1)->giveElement(couplingNumbers.at(i)))->giveCrackWidth();
-	      }
-	      else{
-		crackWidths.at(i) = 0.;
-	      }
-	    }	       	    
-	}
+            IntArray couplingNumbers;
+            
+            static_cast< LatticeTransportElement * >( gp->giveElement())->giveCouplingNumbers(couplingNumbers);
+            for (int i = 1; i <= crackLengths.giveSize(); i++) {
+                if ( couplingNumbers.at(i) != 0 ) {
+                    crackWidths.at(i) = static_cast< LatticeStructuralElement* >( domain->giveEngngModel()->giveMasterEngngModel()->giveSlaveProblem( coupledModels.at(1) )->giveDomain(1)->giveElement(couplingNumbers.at(i)))->giveCrackWidth();
+                } else {
+                    crackWidths.at(i) = 0.;
+                }
+            }
+        }
     }
 #endif
     
@@ -227,19 +226,17 @@ LatticeTransportMaterial :: computeConductivity(double suction,
     double crackContribution = 0.;
 
     for(int i = 1; i <=crackLengths.giveSize();i++){
-      if(crackWidths.at(i)<this->crackLimit || this->crackLimit < 0.){
-	crackContribution += pow(crackWidths.at(i), 3.) / crackLengths.at(i) ;
-      }
-      else{
-	printf("Limit is activated\n");
-	crackContribution += pow(crackLimit, 3.) / crackLengths.at(i) ;
-      }
+        if(crackWidths.at(i)<this->crackLimit || this->crackLimit < 0.){
+            crackContribution += pow(crackWidths.at(i), 3.) / crackLengths.at(i) ;
+        } else {
+            printf("Limit is activated\n");
+            crackContribution += pow(crackLimit, 3.) / crackLengths.at(i) ;
+        }
     }
 
     crackContribution *=  this->crackTortuosity * relativePermeability/ (12. * this->viscosity );
   
     conductivity += crackContribution;
-
     
     return this->density * conductivity;
 }
@@ -253,18 +250,17 @@ LatticeTransportMaterial :: computeCapacity(double suction, GaussPoint *gp)
 
     this->density = this->give('d', gp);
 
-    if(conType == 0){
-      cap = this->capacity;
-    }
-    else{
-      if ( suction < this->suctionAirEntry) {
-        cap = 0.;
-      } else {
-        double partOne = this->paramM / ( this->paramA * ( 1. - this->paramM ) );
-        double partTwo = pow( suction / this->paramA, this->paramM / ( 1. - this->paramM ) );
-        double partThree = pow(1. + pow( suction / this->paramA, 1. / ( 1. - this->paramM ) ), -this->paramM - 1.);
-        cap = ( this->thetaM - this->thetaR ) * partOne * partTwo * partThree;
-      }
+    if ( conType == 0 ) {
+        cap = this->capacity;
+    } else {
+        if ( suction < this->suctionAirEntry) {
+            cap = 0.;
+        } else {
+            double partOne = this->paramM / ( this->paramA * ( 1. - this->paramM ) );
+            double partTwo = pow( suction / this->paramA, this->paramM / ( 1. - this->paramM ) );
+            double partThree = pow(1. + pow( suction / this->paramA, 1. / ( 1. - this->paramM ) ), -this->paramM - 1.);
+            cap = ( this->thetaM - this->thetaR ) * partOne * partTwo * partThree;
+        }
     }
 
     return this->density * cap;
@@ -274,8 +270,7 @@ LatticeTransportMaterial :: computeCapacity(double suction, GaussPoint *gp)
 MaterialStatus *
 LatticeTransportMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    LatticeTransportMaterialStatus *answer = new LatticeTransportMaterialStatus(1, LatticeTransportMaterial :: domain, gp);
-    return answer;
+    return new LatticeTransportMaterialStatus(1, LatticeTransportMaterial :: domain, gp);
 }
 
 
