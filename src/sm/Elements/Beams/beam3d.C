@@ -430,11 +430,15 @@ Beam3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
     lx.beDifferenceOf(*nodeB->giveCoordinates(), *nodeA->giveCoordinates());
     lx.normalize();
 
-    if ( !this->usingAngle ) {
+    if ( this->referenceNode ) {
         Node *refNode = this->giveDomain()->giveNode(this->referenceNode);
         help.beDifferenceOf(*refNode->giveCoordinates(), *nodeA->giveCoordinates());
 
         lz.beVectorProductOf(lx, help);
+        lz.normalize();
+    } else if ( this->zaxis.giveSize() > 0 ) {
+        lz = this->zaxis;
+        lz.add(lz.dotProduct(lx), lx);
         lz.normalize();
     } else {
         FloatMatrix rot(3, 3);
@@ -483,16 +487,21 @@ Beam3d :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                    // Required by IR_GIVE_FIELD macro
 
-    if ( ir->hasField(_IFT_Beam3d_refnode) ) {
+    referenceNode = 0;
+    referenceAngle = 0;
+    this->zaxis.clear();
+    if ( ir->hasField(_IFT_Beam3d_zaxis) ) {
+        IR_GIVE_FIELD(ir, this->zaxis, _IFT_Beam3d_zaxis);
+    } else if ( ir->hasField(_IFT_Beam3d_refnode) ) {
         IR_GIVE_FIELD(ir, referenceNode, _IFT_Beam3d_refnode);
         if ( referenceNode == 0 ) {
             OOFEM_WARNING("wrong reference node specified. Using default orientation.");
         }
     } else if ( ir->hasField(_IFT_Beam3d_refangle) ) {
         IR_GIVE_FIELD(ir, referenceAngle, _IFT_Beam3d_refangle);
-        usingAngle = true;
     } else {
-        OOFEM_ERROR("reference node or reference angle not set")
+        OOFEM_WARNING("y-axis, reference node or angle not set");
+        return IRRT_NOTFOUND;
     }
 
     if ( ir->hasField(_IFT_Beam3d_dofstocondense) ) {
@@ -963,7 +972,7 @@ void
 Beam3d :: updateLocalNumbering(EntityRenumberingFunctor &f)
 {
     StructuralElement :: updateLocalNumbering(f);
-    if ( !this->usingAngle ) {
+    if ( this->referenceNode ) {
         this->referenceNode = f(this->referenceNode, ERS_DofManager);
     }
 }
