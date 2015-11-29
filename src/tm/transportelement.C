@@ -540,6 +540,7 @@ TransportElement :: computeLumpedCapacityVector(FloatArray &answer, TimeStep *tS
 
     int size = cap.giveNumberOfRows();
     answer.resize(size);
+    answer.zero();
     for ( int i = 1; i <= size; i++ ) {
         for ( int j = 1; j <= size; j++ ) {
             answer.at(i) += cap.at(i, j);
@@ -1176,6 +1177,7 @@ TransportElement :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, Pr
         this->computeNmatrixAt(n, lc);
         // compute answer
         answer.resize( dofId.giveSize() );
+        answer.zero();
         for ( int i = 1; i <= dofId.giveSize(); i++ ) {
             if ( ( indx = elemdofs.findFirstIndexOf( dofId.at(i) ) ) ) {
                 double sum = 0.0;
