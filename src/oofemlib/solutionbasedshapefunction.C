@@ -596,6 +596,7 @@ SolutionbasedShapeFunction :: giveValueAtPoint(FloatArray &answer, const FloatAr
     if ( elementAtCoords == NULL ) {
         OOFEM_WARNING("Cannot find element closest to point");
         coords.pY();
+        return;
     }
 
     IntArray eldofids;

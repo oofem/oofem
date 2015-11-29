@@ -773,7 +773,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
             if ( this->constrainedNRFlag ) {
                 // store the errors from the current iteration for use in the next
                 forceErrVec.at(1) = forceErr;
-            }       
+            }
         }
 
         if ( rtold.at(1) > 0.0 ) {
