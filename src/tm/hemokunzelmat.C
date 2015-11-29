@@ -164,14 +164,14 @@ HeMoKunzelMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const F
     double h = s.at(2);
     double t = s.at(1);
 
-    FloatArray ans_w, ans_t;
-    FloatArray grad_w, grad_t;
     int size = grad.giveSize() / 2;
+    FloatArray ans_w, ans_t;
+    FloatArray grad_w(size), grad_t(size);
     for ( int i = 1; i <= size; ++i ) {
         grad_w.at(i) = grad.at(i);
     }
-    for ( int i = size + 1; i <= size * 2; ++i ) {
-        grad_t.at(i) = grad.at(i);
+    for ( int i = 1; i <= 2; ++i ) {
+        grad_t.at(i) = grad.at(i+size);
     }
 
     ans_w.beScaled(perm_mm(h, t), grad_w);

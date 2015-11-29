@@ -133,6 +133,7 @@ TransportElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, 
     }
 }
 
+
 int
 TransportElement :: checkConsistency()
 //
@@ -220,6 +221,29 @@ TransportElement :: computeNmatrixAt(FloatMatrix &answer, const FloatArray &lcoo
         answer.beNMatrixOf(n, 1);
     } else {
         answer.beNMatrixOf(n, 2);
+    }
+}
+
+
+void
+TransportElement :: computeBmatrixAt(FloatMatrix &answer, const FloatArray &lcoords)
+{
+    FloatMatrix dnx;
+    ///@todo We should change the transposition in evaldNdx;
+    this->giveInterpolation()->evaldNdx( dnx, lcoords, FEIElementGeometryWrapper(this) );
+    if ( emode == HeatTransferEM || emode == Mass1TransferEM ) {
+        answer.beTranspositionOf(dnx);
+    } else if ( this->emode == HeatMass1TransferEM ) {
+        int nodes = dnx.giveNumberOfRows();
+        int nsd = dnx.giveNumberOfColumns();
+        answer.resize(nsd*2, nodes*2);
+        answer.zero();
+        for (int i = 0; i < nodes; ++i) {
+            for (int j = 0; j < nsd; ++j) {
+                answer(j, i*2) = dnx(i, j);
+                answer(j+nsd, i*2+1) = dnx(i, j);
+            }
+        }
     }
 }
 
@@ -456,7 +480,6 @@ TransportElement :: computeConstitutiveMatrixAt(FloatMatrix &answer,
 void
 TransportElement :: computeInternalForcesVector(FloatArray &answer, TimeStep *tStep)
 {
-    FloatArray tmp;
     FloatArray unknowns;
     this->computeVectorOf(VM_Total, tStep, unknowns);
 
@@ -469,7 +492,8 @@ TransportElement :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
         const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
         this->computeNmatrixAt(N, lcoords);
-        this->computeGradientMatrixAt(B, lcoords);
+        this->computeBmatrixAt(B, lcoords);
+
         field.beProductOf(N, unknowns);
         grad.beProductOf(B, unknowns);
 
@@ -492,8 +516,7 @@ TransportElement :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
     FloatMatrix bc_tangent;
     this->computeBCMtrxAt(bc_tangent, tStep, VM_Total);
     if ( bc_tangent.isNotEmpty() ) {
-        tmp.beProductOf(bc_tangent, unknowns);
-        answer.add(tmp);
+        answer.plusProduct(bc_tangent, unknowns, 1.0);
     }
 }
 
