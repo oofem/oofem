@@ -71,7 +71,7 @@ namespace oofem {
 //#define __VERBOSE_PARALLEL
 
 //#define DEBUG_CHECK
-//#define DEBUG_INFO
+#define DEBUG_INFO
 //#define DEBUG_SMOOTHING
 
 // QUICK_HACK enables comparison of sequential and parallel version when smoothing is applied;
@@ -89,7 +89,7 @@ namespace oofem {
 #ifdef __OOFEG
  #define DRAW_IRREGULAR_NODES
  #define DRAW_REMOTE_ELEMENTS
-//#define DRAW_MESH_BEFORE_BISECTION
+ #define DRAW_MESH_BEFORE_BISECTION
 //#define DRAW_MESH_AFTER_BISECTION
  #define DRAW_MESH_AFTER_EACH_BISECTION_LEVEL
 #endif
@@ -4905,11 +4905,17 @@ Subdivision :: unpackSharedIrregulars(Subdivision *s, ProcessCommunicator &pc)
             // I do rely on the fact that the arrays are ordered !!!
             // I am using zero chunk because array common is large enough
             elems = iElems->findCommonValuesSorted(* jElems, common, 0);
+            if ( !elems) {
+               // get type of the next record
+               pcbuff->read(_type);
+               continue;
+            }            
+            /*
             if ( !elems ) {
                 OOFEM_ERROR("no element found sharing nodes %d and %d",
                              iNode, jNode);
             }
-
+            */
             // check on the first element whether irregular exists
             elem = mesh->giveElement( common.at(1) );
             eIndex = elem->giveEdgeIndex(iNode, jNode);
@@ -5159,9 +5165,15 @@ Subdivision :: unpackIrregularSharedGlobnums(Subdivision *s, ProcessCommunicator
             // I am using zero chunk because array common is large enough
             elems = iElems->findCommonValuesSorted(* jElems, common, 0);
             if ( !elems ) {
+               pcbuff->read(_type);
+               continue;
+            }
+            /*
+            if ( !elems ) {
                 OOFEM_ERROR("no element found sharing nodes %d and %d",
                              iNode, jNode);
             }
+            */
 
             // assign globnum to appropriate edge on the first element
             elem = mesh->giveElement( common.at(1) );
@@ -5656,6 +5668,11 @@ Subdivision :: unpackSharedEdges(Subdivision *s, ProcessCommunicator &pc)
 
             iNode = mesh->sharedNodeGlobal2Local( edgeInfo.at(1) );
             jNode = mesh->sharedNodeGlobal2Local( edgeInfo.at(2) );
+
+            if (!(iNode && jNode)) {
+               pcbuff->read(_type);
+               continue;
+            }
 
             // get elements incident simultaneiusly to iNode and jNode
             iElems = mesh->giveNode(iNode)->giveConnectedElements();

@@ -47,7 +47,7 @@
 #include <set>
 
 namespace oofem {
-#define NonlocalMaterialWTP_DEBUG_PRINT 0
+#define NonlocalMaterialWTP_DEBUG_PRINT 1
 
 /*
  * Returns array storing nonlocal dependency

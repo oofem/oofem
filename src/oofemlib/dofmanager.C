@@ -949,10 +949,11 @@ void DofManager :: updateLocalNumbering(EntityRenumberingFunctor &f)
 {
     //update masterNode numbering
     if ( this->dofMastermap ) {
-        for ( auto mapper: *this->dofMastermap ) {
+        for ( auto & mapper: *this->dofMastermap ) {
             mapper.second = f( mapper.second, ERS_DofManager );
         }
     }
+
     for ( Dof *dof: *this ) {
         dof->updateLocalNumbering(f);
     }
