@@ -302,7 +302,7 @@ NRSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0, FloatArray *iR,
             if ( this->forceErrVec.computeSquaredNorm() > this->forceErrVecOld.computeSquaredNorm() ) {
                 OOFEM_LOG_INFO("Constraining increment to be %e times full increment...\n", this->constrainedNRalpha);
                 ddX.times(this->constrainedNRalpha);
-            }   
+            }
             //this->giveConstrainedNRSolver()->solve(X, & ddX, this->forceErrVec, this->forceErrVecOld, status, tStep);
         }
         X.add(ddX);

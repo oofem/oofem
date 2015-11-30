@@ -155,14 +155,12 @@ HeMoKunzelMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const F
 {
     TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
 
-    FloatArray s;
-    //     s = ms->giveTempStateVector();
-    s = ms->giveTempField();
-    if ( s.isEmpty() ) {
-        OOFEM_ERROR("matcond1d: undefined state vector");
-    }
-    double h = s.at(2);
-    double t = s.at(1);
+    ms->setTempField(field);
+    ms->setTempGradient(grad);
+
+    field.printYourself("field");
+    double h = field.at(2);
+    double t = field.at(1);
 
     int size = grad.giveSize() / 2;
     FloatArray ans_w, ans_t;
@@ -184,8 +182,6 @@ HeMoKunzelMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const F
     answer.addSubVector(ans_w, 1);
     answer.addSubVector(ans_t, size + 1);
 
-    ms->setTempField(field);
-    ms->setTempGradient(grad);
     ms->setTempFlux(answer);
 }
 

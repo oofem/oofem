@@ -507,7 +507,7 @@ TransportElement :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
             // add internal source produced by material (if any)
             FloatArray val;
             mat->computeInternalSourceVector(val, gp, tStep, VM_Total);
-            answer.plusProduct(N, val, dV);
+            answer.plusProduct(N, val, -dV);
         }
     }
 
