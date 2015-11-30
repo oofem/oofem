@@ -158,7 +158,6 @@ HeMoKunzelMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const F
     ms->setTempField(field);
     ms->setTempGradient(grad);
 
-    field.printYourself("field");
     double h = field.at(2);
     double t = field.at(1);
 
