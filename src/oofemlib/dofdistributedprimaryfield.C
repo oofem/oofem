@@ -252,9 +252,12 @@ DofDistributedPrimaryField :: applyInitialCondition(InitialCondition &ic)
             tot1 = tot0;
         }
 #endif
-        for ( auto &dof : *dman ) {
-            //dof->updateUnknownsDictionary(tStep, VM_Total, tot1);
-            dof->updateUnknownsDictionary(tStep, VM_Total, tot0);
+        for ( int dofid : ic.giveDofIDs() ) {
+            if ( dman->findDofWithDofId((DofIDItem)dofid) != dman->end() ) {
+                Dof *dof = dman->giveDofWithID(dofid);
+                //dof->updateUnknownsDictionary(tStep, VM_Total, tot1);
+                dof->updateUnknownsDictionary(tStep, VM_Total, tot0);
+            }
         }
     }
 }
