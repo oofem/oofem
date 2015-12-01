@@ -43,6 +43,7 @@
 #include "boundarycondition.h"
 #include "initialcondition.h"
 #include "element.h"
+#include "activebc.h"
 
 
 namespace oofem {
@@ -259,6 +260,7 @@ DofDistributedPrimaryField :: applyInitialCondition(InitialCondition &ic)
     }
 }
 
+
 void
 DofDistributedPrimaryField :: applyBoundaryCondition(TimeStep *tStep)
 {
@@ -274,12 +276,22 @@ DofDistributedPrimaryField :: applyBoundaryCondition(TimeStep *tStep)
     }
 
     for ( auto &bc : d->giveBcs() ) {
-        BoundaryCondition *dbc = dynamic_cast< BoundaryCondition* >(bc.get());
-        if ( dbc && dbc->isImposed(tStep) ) {
-            this->applyBoundaryCondition(*dbc, tStep);
+        if ( bc->isImposed(tStep) ) {
+            BoundaryCondition *dbc = dynamic_cast< BoundaryCondition* >(bc.get());
+            ActiveBoundaryCondition *abc = dynamic_cast< ActiveBoundaryCondition* >(bc.get());
+            if ( dbc && dbc->isImposed(tStep) ) {
+                this->applyBoundaryCondition(*dbc, tStep);
+            } else if ( abc ) {
+                for ( auto &dof : *abc->giveInternalDofManager(1) ) {
+                    if ( dof->isPrimaryDof() && abc->hasBc(dof, tStep) ) {
+                        dof->updateUnknownsDictionary( tStep, VM_Total, abc->giveBcValue(dof, VM_Total, tStep) );
+                    }
+                }
+            }
         }
     }
 }
+
 
 void
 DofDistributedPrimaryField :: applyBoundaryCondition(BoundaryCondition &bc, TimeStep *tStep)

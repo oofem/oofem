@@ -316,6 +316,11 @@ double PrescribedGradientBCPeriodic :: giveUnknown(ValueModeType mode, TimeStep 
     }
 
     DofManager *master = this->domain->giveDofManager(this->slavemap[dof->giveDofManager()->giveNumber()]);
+
+    if ( mode == VM_Incremental ) {
+        double val = master->giveDofWithID(dof->giveDofID())->giveUnknown(mode, tStep);
+        return this->giveUnknown(val, mode, tStep, dof);
+    }
     double val = master->giveDofWithID(dof->giveDofID())->giveUnknown(mode, tStep);
     return this->giveUnknown(val, mode, tStep, dof);
 }
@@ -327,7 +332,7 @@ bool PrescribedGradientBCPeriodic :: isPrimaryDof(ActiveDof *dof)
 }
 
 
-double PrescribedGradientBCPeriodic :: giveBcValue(ActiveDof *dof, ValueModeType mode, TimeStep *tStep)
+double PrescribedGradientBCPeriodic :: giveBcValue(Dof *dof, ValueModeType mode, TimeStep *tStep)
 {
     if ( this->isStrainDof(dof) ) {
         int index = strain_id.findFirstIndexOf(dof->giveDofID());
@@ -338,13 +343,13 @@ double PrescribedGradientBCPeriodic :: giveBcValue(ActiveDof *dof, ValueModeType
 }
 
 
-bool PrescribedGradientBCPeriodic :: hasBc(ActiveDof *dof, TimeStep *tStep)
+bool PrescribedGradientBCPeriodic :: hasBc(Dof *dof, TimeStep *tStep)
 {
     return this->isStrainDof(dof);
 }
 
 
-bool PrescribedGradientBCPeriodic :: isStrainDof(ActiveDof *dof)
+bool PrescribedGradientBCPeriodic :: isStrainDof(Dof *dof)
 {
     return this->strain.get() == dof->giveDofManager();
 }
