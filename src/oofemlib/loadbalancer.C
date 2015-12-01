@@ -51,8 +51,8 @@
 #include "nonlocalmatwtp.h"
 
 namespace oofem {
-#define __VERBOSE_PARALLEL
-#define LoadBalancer_debug_print
+  //#define __VERBOSE_PARALLEL
+  //#define LoadBalancer_debug_print
 
 LoadBalancer :: LoadBalancer(Domain *d)  : wtpList()
 {

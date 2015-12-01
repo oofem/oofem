@@ -71,7 +71,7 @@ namespace oofem {
 //#define __VERBOSE_PARALLEL
 
 //#define DEBUG_CHECK
-#define DEBUG_INFO
+//#define DEBUG_INFO
 //#define DEBUG_SMOOTHING
 
 // QUICK_HACK enables comparison of sequential and parallel version when smoothing is applied;
