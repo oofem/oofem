@@ -42,20 +42,25 @@
 #include "logger.h"
 
 #include <string>
+#include <cstdio>
+#include <cstdlib>
 
 namespace oofem {
 /** Cause oofem program termination by calling exit. */
-OOFEM_EXPORT void oofem_exit(int code);
+#define OOFEM_EXIT(code) \
+    oofem_logger.printStatistics(); \
+    fprintf(stderr, "oofem exit code %d\n", code); \
+    exit(code);
 
 /**
  * Macros for printing errors.
  * This macro can be used only within classes that implement errorInfo function.
  */
 //@{
-#define OOFEM_FATAL(...) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_FATAL, errorInfo(__func__).c_str(), __FILE__, __LINE__, __VA_ARGS__); oofem_exit(1); }
-#define OOFEM_ERROR(...) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, errorInfo(__func__).c_str(), __FILE__, __LINE__, __VA_ARGS__); oofem_exit(1); }
+#define OOFEM_FATAL(...) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_FATAL, errorInfo(__func__).c_str(), __FILE__, __LINE__, __VA_ARGS__); OOFEM_EXIT(1); }
+#define OOFEM_ERROR(...) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, errorInfo(__func__).c_str(), __FILE__, __LINE__, __VA_ARGS__); OOFEM_EXIT(1); }
 #define OOFEM_WARNING(...) oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, errorInfo(__func__).c_str(), __FILE__, __LINE__, __VA_ARGS__)
-#define OOFEM_SERROR(...) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, __func__, __FILE__, __LINE__, __VA_ARGS__); oofem_exit(1); }
+#define OOFEM_SERROR(...) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, __func__, __FILE__, __LINE__, __VA_ARGS__); OOFEM_EXIT(1); }
 #define OOFEM_SWARNING(...) oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, __func__, __FILE__, __LINE__, __VA_ARGS__)
 //@}
 

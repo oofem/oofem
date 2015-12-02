@@ -297,8 +297,7 @@ RerShell :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMo
 void
 RerShell :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-
-this->giveStructuralCrossSection()->giveGeneralizedStress_Shell(answer, gp, strain, tStep);
+    this->giveStructuralCrossSection()->giveGeneralizedStress_Shell(answer, gp, strain, tStep);
 }
 
 void
