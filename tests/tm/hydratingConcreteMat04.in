@@ -2,11 +2,12 @@ hydratingConcreteMat04.out
 Test of hydrating concrete material, linear triangluar element with a heat source, transient nonlinear solver, adiabatic conditions, affinity hydration model
 #NonStationaryProblem nsteps 30 deltat 360.0 alpha 0.5 nmodules 0
 NlTransientTransportProblem nsteps 30 deltat 3600.0 rtol 1.e-5 alpha 0.5 nsmax 30 nmodules 1
+#TransientTransport nsteps 30 deltat 3600.0 alpha 0.5 nmodules 1
 errorcheck
 #vtkxml tstep_step 1 domain_all primvars 1 6 vars 4 37 39 56 95 stype 1
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all
-ndofman 3 nelem 1 ncrosssect  1 nmat 1 nbc 1 nic 1 nltf 1 nset 1
+ndofman 3 nelem 1 ncrosssect 1 nmat 1 nbc 1 nic 1 nltf 1 nset 1
 node 1 coords 3  1.0   0.0   0.0
 node 2 coords 3  2.2   0.0   0.0
 node 3 coords 3  1.0   1.0   0.0

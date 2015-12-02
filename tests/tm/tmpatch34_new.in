@@ -3,7 +3,7 @@ Patch test of Quad1_ht elements
 #StationaryProblem nsteps 2 
 #NonStationaryProblem nsteps 100 deltat 6e5 alpha 0.5 nmodules 2
 #nltransienttransportproblem nsteps 100 deltat 6e5 rtol 0.001 alpha 0.5 nsmax 300 nmodules 2
-transienttransport nsteps 100 deltat 6e5 alpha 0.5 nmodules 1 rtolf 1e-9
+transienttransport nsteps 100 deltat 6e5 alpha 0.5 nmodules 1
 #stationaryproblem nsteps 1 nmodules 2
 errorcheck
 #vtkxml tstep_all domain_all primvars 1 6
