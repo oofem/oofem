@@ -838,7 +838,6 @@ TransportElement :: computeBodyBCSubVectorAt(FloatArray &answer, Load *load,
 {
     FloatArray val, globalIPcoords, n;
     answer.resize( this->giveNumberOfDofManagers() );
-    answer.zero();
 
     std :: unique_ptr< IntegrationRule > iRule( this->giveInterpolation()->giveIntegrationRule(load->giveApproxOrder()) );
     for ( GaussPoint *gp : *iRule ) {
