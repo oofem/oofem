@@ -41,6 +41,11 @@
 #include "domain.h"
 
 namespace oofem {
+
+BoundaryLoad :: BoundaryLoad(int i, Domain * d) : Load(i, d), coordSystemType(CST_Global){
+
+}
+
 void
 BoundaryLoad :: computeComponentArrayAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
 {
@@ -104,6 +109,8 @@ BoundaryLoad :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, propertyDictionary, _IFT_BoundaryLoad_properties);
     IR_GIVE_OPTIONAL_FIELD(ir, propertyTimeFunctDictionary, _IFT_BoundaryLoad_propertyTimeFunctions);
 
+    IR_GIVE_OPTIONAL_FIELD(ir, propertyMultExpr, _IFT_BoundaryLoad_propertyMultExpr);
+
     return result;
 }
 
@@ -116,25 +123,40 @@ BoundaryLoad :: giveInputRecord(DynamicInputRecord &input)
     input.setField(this->coordSystemType, _IFT_BoundaryLoad_cstype);
     input.setField(this->propertyDictionary, _IFT_BoundaryLoad_properties);
     input.setField(this->propertyTimeFunctDictionary, _IFT_BoundaryLoad_propertyTimeFunctions);
+    input.setField(this->propertyMultExpr, _IFT_BoundaryLoad_propertyMultExpr);
 }
 
+void
+BoundaryLoad :: setVariableState(int aVariable, double val){
+    variableState.at(aVariable) = val;
+}
+
+double
+BoundaryLoad :: giveVariableState(int aVariable){
+    return variableState.at(aVariable);
+}
 
 double
 BoundaryLoad :: giveProperty(int aProperty, TimeStep *tStep)
 // Returns the value of the property aProperty (e.g. the area
 // 'A') of the receiver.
 {
+    double answer;
     if ( propertyDictionary.includes(aProperty) ) {
         // check if time fuction registered under the same key
         if ( propertyTimeFunctDictionary.includes(aProperty) ) {
-            return propertyDictionary.at(aProperty) * domain->giveFunction( (int)propertyTimeFunctDictionary.at(aProperty) )->evaluate(tStep, VM_Total);
+            answer = propertyDictionary.at(aProperty) * domain->giveFunction( (int)propertyTimeFunctDictionary.at(aProperty) )->evaluate(tStep, VM_Total);
         } else {
-            return propertyDictionary.at(aProperty);
+            answer = propertyDictionary.at(aProperty);
         }
     } else {
         OOFEM_ERROR("Property '%c' not defined", (char)aProperty);
     }
 
-    return 0.0;
+    if ( propertyMultExpr.isDefined() ){
+        double x = giveVariableState('x');
+        answer *= propertyMultExpr.eval( { { "x", x } }, this->giveDomain() );
+    }
+    return answer;
 }
 } // end namespace oofem

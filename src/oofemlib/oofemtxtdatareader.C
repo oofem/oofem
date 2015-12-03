@@ -116,7 +116,7 @@ OOFEMTXTDataReader :: finish()
 {
     if ( this->it != this->recordList.end() ) {
         OOFEM_WARNING("There are unread lines in the input file\n"
-            "The most common cause is missing cause are missing entries in the domain record, e.g. 'nset'");
+            "The most common cause are missing entries in the domain record, e.g. 'nset'");
     }
     this->recordList.clear();
 }

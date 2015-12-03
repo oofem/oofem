@@ -68,14 +68,18 @@ class ScalarFunction
     int fReference;
 
     /// Enum value determining the dataValue type.
-    enum { DV_ValueType, DV_SimpleExpressionType, DV_FunctionReferenceType } dvType;
+    enum { DV_Undefined, DV_ValueType, DV_SimpleExpressionType, DV_FunctionReferenceType } dvType;
 
 public:
+    /**
+     * Creates empty constant scalar function.
+     */
+    ScalarFunction();
     /**
      * Creates constant scalar function defined by given value.
      * @param val Defines the constant value
      */
-    ScalarFunction(double val = 0);
+    ScalarFunction(double val);
     /**
      * Creates scalar funtion defined by given simple expression.
      * @param val String with simple expression
@@ -128,6 +132,11 @@ public:
      * @param d domain managing external functions
      */
     //double eval(double time, const FloatArray &coords, Domain *d) const;
+    
+    /**
+     * True if receiver is defined.
+     */
+    bool isDefined() const;
 
     friend std :: ostream &operator << ( std :: ostream & out, const ScalarFunction & s );
 };

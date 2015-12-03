@@ -351,7 +351,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
     // Write output: VTK header
 #ifndef __VTK_MODULE
-    fprintf(this->fileStream, "<!-- TimeStep %e Computed %d-%02d-%02d at %02d:%02d:%02d -->\n", tStep->giveIntrinsicTime()*timeScale, current->tm_year + 1900, current->tm_mon + 1, current->tm_mday, current->tm_hour,  current->tm_min,  current->tm_sec);
+    fprintf(this->fileStream, "<!-- TimeStep %e Computed %d-%02d-%02d at %02d:%02d:%02d -->\n", tStep->giveTargetTime()*timeScale, current->tm_year + 1900, current->tm_mon + 1, current->tm_mday, current->tm_hour,  current->tm_min,  current->tm_sec);
     fprintf(this->fileStream, "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">\n");
     fprintf(this->fileStream, "<UnstructuredGrid>\n");
 #endif
@@ -519,7 +519,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
             std :: stringstream subStep;
             if (tstep_substeps_out_flag)
                 subStep << "." << tStep->giveSubStepNumber();
-            pvdEntry << "<DataSet timestep=\"" << tStep->giveIntrinsicTime()*this->timeScale << subStep.str() << "\" group=\"\" part=\"\" file=\"" << this->giveOutputBaseFileName(tStep) + ".gp.vtu" << "\"/>";
+            pvdEntry << "<DataSet timestep=\"" << tStep->giveTargetTime()*this->timeScale << subStep.str() << "\" group=\"\" part=\"\" file=\"" << this->giveOutputBaseFileName(tStep) + ".gp.vtu" << "\"/>";
             this->gpPvdBuffer.push_back( pvdEntry.str() );
             this->writeGPVTKCollection();
         }

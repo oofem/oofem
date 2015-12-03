@@ -50,6 +50,7 @@
 #include "feinterpol2d.h"
 #include "feinterpol3d.h"
 #include "dof.h"
+#include "stationarytransportproblem.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -870,6 +871,20 @@ TransportElement :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int
         double dV, coeff = 1.0;
 
         for ( GaussPoint *gp: iRule ) {
+            if( edgeLoad->propertyMultExpr.isDefined()) {//dependence on state variable
+                ///@todo Deal with coupled fields
+                if ( emode!=HeatTransferEM && emode!=Mass1TransferEM ){
+                    OOFEM_ERROR("Not implemented for >=2 coupled fields");
+                }
+                FloatArray unknowns;
+                IntArray dofid;
+                this->computeEgdeNAt( n, iEdge, gp->giveNaturalCoordinates() );
+                this->giveElementDofIDMask(dofid);
+                this->giveEdgeDofMapping(mask, iEdge);
+                this->computeBoundaryVectorOf(mask, dofid, VM_Total, tStep, unknowns);
+                double value = n.dotProduct(unknowns);//unknown in IP
+                edgeLoad->setVariableState('x', value);
+            }
             if ( load->giveType() == TransmissionBC ) {
                 coeff = -1.0;
             } else if ( load->giveType() == ConvectionBC ) {
@@ -877,7 +892,7 @@ TransportElement :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int
             } else if ( load->giveType() == RadiationBC ){
                 coeff = getRadiativeHeatTranferCoef(edgeLoad, tStep);
             }
-            
+
             const FloatArray &lcoords = gp->giveNaturalCoordinates();
             this->computeEgdeNAt(n, iEdge, lcoords);
             dV = this->computeEdgeVolumeAround(gp, iEdge);
@@ -922,6 +937,20 @@ TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
 
         std :: unique_ptr< IntegrationRule > iRule( this->GetSurfaceIntegrationRule(approxOrder) );
         for ( GaussPoint *gp: *iRule ) {
+            if( surfLoad->propertyMultExpr.isDefined()) {//dependence on state variable
+                    if ( emode!=HeatTransferEM && emode!=Mass1TransferEM ){
+                        ///@todo Deal with coupled fields
+                        OOFEM_ERROR("Not implemented for >=2 coupled fields");
+                    }
+                    FloatArray unknowns;
+                    IntArray dofid;
+                    this->computeSurfaceNAt( n, iSurf, gp->giveNaturalCoordinates() );
+                    this->giveElementDofIDMask(dofid);
+                    this->giveSurfaceDofMapping(mask, iSurf);
+                    this->computeBoundaryVectorOf(mask, dofid, VM_Total, tStep, unknowns);
+                    double value = n.dotProduct(unknowns);//unknown in IP
+                    surfLoad->setVariableState('x', value);
+                }
             if ( load->giveType() == TransmissionBC ) {
                 coeff = -1.0;
             } else if ( load->giveType() == ConvectionBC ) {
@@ -929,7 +958,7 @@ TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
             } else if ( load->giveType() == RadiationBC ) {
                 coeff = getRadiativeHeatTranferCoef(surfLoad, tStep);
             }
-            
+
             this->computeSurfaceNAt( n, iSurf, gp->giveNaturalCoordinates() );
             double dV = this->computeSurfaceVolumeAround(gp, iSurf);
 
@@ -985,7 +1014,19 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
                 for ( GaussPoint *gp: iRule ) {
                     this->computeEgdeNAt( n, id, gp->giveNaturalCoordinates() );
                     double dV = this->computeEdgeVolumeAround(gp, id);
-
+                    if( edgeLoad->propertyMultExpr.isDefined()) {//dependence on state variable
+                        if ( emode!=HeatTransferEM && emode!=Mass1TransferEM ){
+                            ///@todo Deal with coupled fields
+                            OOFEM_ERROR("Not implemented for >=2 coupled fields");
+                        }
+                        FloatArray unknowns;
+                        IntArray dofid;
+                        this->giveElementDofIDMask(dofid);
+                        this->giveEdgeDofMapping(mask, id);
+                        this->computeBoundaryVectorOf(mask, dofid, VM_Total, tStep, unknowns);
+                        double value = n.dotProduct(unknowns);//unknown in IP
+                        edgeLoad->setVariableState('x', value);
+                    }
                     if ( load->giveType() == ConvectionBC ) {
                         subAnswer.plusDyadSymmUpper( n, dV * edgeLoad->giveProperty('a', tStep) );
                     } else if ( load->giveType() == RadiationBC ) {
@@ -1013,6 +1054,19 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
                 for ( GaussPoint *gp: *iRule ) {
                     this->computeSurfaceNAt( n, id, gp->giveNaturalCoordinates() );
                     double dV = this->computeSurfaceVolumeAround(gp, id);
+                    if( surfLoad->propertyMultExpr.isDefined()) {//dependence on state variable
+                        if ( emode!=HeatTransferEM && emode!=Mass1TransferEM ){
+                            ///@todo Deal with coupled fields
+                            OOFEM_ERROR("Not implemented for >=2 coupled fields");
+                        }
+                        FloatArray unknowns;
+                        IntArray dofid;
+                        this->giveElementDofIDMask(dofid);
+                        this->giveSurfaceDofMapping(mask, id);
+                        this->computeBoundaryVectorOf(mask, dofid, VM_Total, tStep, unknowns);
+                        double value = n.dotProduct(unknowns);//unknown in IP
+                        surfLoad->setVariableState('x', value);
+                    }
                     if ( load->giveType() == ConvectionBC ) {
                         subAnswer.plusDyadSymmUpper( n, dV * surfLoad->giveProperty('a', tStep) );
                     } else if ( load->giveType() == RadiationBC ) {
