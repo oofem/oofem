@@ -50,6 +50,7 @@
 #define _IFT_TransientTransportProblem_prescribedTimes "prescribedtimes" ///< Discrete times for each time step.
 #define _IFT_TransientTransportProblem_keepTangent "keeptangent" ///< Fixes the tangent to be reused on each step.
 #define _IFT_TransientTransportProblem_lumped "lumped" ///< Use of lumped "mass" matrix
+#define _IFT_TransientTransportProblem_exportFields "exportfields" ///< Fields to export for staggered problems.
 //@}
 
 namespace oofem {
@@ -84,6 +85,8 @@ protected:
     double deltaT;
     bool keepTangent;
     bool lumped;
+
+    IntArray exportFields;
 
 public:
     /// Constructor.

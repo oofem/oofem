@@ -35,6 +35,7 @@
 #include "transienttransportproblem.h"
 #include "timestep.h"
 #include "dofdistributedprimaryfield.h"
+#include "maskedprimaryfield.h"
 #include "transportelement.h"
 #include "classfactory.h"
 #include "datastream.h"
@@ -99,6 +100,22 @@ TransientTransportProblem :: initializeFrom(InputRecord *ir)
     this->lumped = ir->hasField(_IFT_TransientTransportProblem_lumped);
 
     field.reset( new DofDistributedPrimaryField(this, 1, FT_TransportProblemUnknowns, 0) );
+
+    // read field export flag
+    exportFields.clear();
+    IR_GIVE_OPTIONAL_FIELD(ir, exportFields, _IFT_TransientTransportProblem_exportFields);
+    if ( exportFields.giveSize() ) {
+        FieldManager *fm = this->giveContext()->giveFieldManager();
+        for ( int i = 1; i <= exportFields.giveSize(); i++ ) {
+            if ( exportFields.at(i) == FT_Temperature ) {
+                FM_FieldPtr _temperatureField( new MaskedPrimaryField ( ( FieldType ) exportFields.at(i), this->field.get(), {T_f} ) );
+                fm->registerField( _temperatureField, ( FieldType ) exportFields.at(i) );
+            } else if ( exportFields.at(i) == FT_HumidityConcentration ) {
+                FM_FieldPtr _concentrationField( new MaskedPrimaryField ( ( FieldType ) exportFields.at(i), this->field.get(), {C_1} ) );
+                fm->registerField( _concentrationField, ( FieldType ) exportFields.at(i) );
+            }
+        }
+    }
 
     return EngngModel :: initializeFrom(ir);
 }
