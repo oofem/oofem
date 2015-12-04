@@ -1071,7 +1071,7 @@ double
 MPSMaterial :: giveInitViscosity(TimeStep *tStep)
 {
     if ( ( t0 - tStep->giveTimeIncrement() ) <= 0. ) {
-        OOFEM_ERROR("length of the first time step must be bigger than t0");
+        OOFEM_ERROR("length of the first time step increment %e must be smaller than t0 %e", tStep->giveTimeIncrement(), t0);
     }
 
     return ( t0 - tStep->giveTimeIncrement() ) / q4;

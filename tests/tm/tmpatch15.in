@@ -35,5 +35,4 @@ Set 3 elementboundaries 2 2 2
 #NODE tStep 200 number 6 dof 10 unknown d value 10.212765957
 #%END_CHECK%
 
-1.27659465e+00
-1.27659574e+00
+

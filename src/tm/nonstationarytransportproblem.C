@@ -337,11 +337,26 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     }
 
     //prepare position in UnknownsField to store the results
+    FloatArray *solutionVector;
     UnknownsField->advanceSolution(tStep);
+    solutionVector = UnknownsField->giveSolutionVector(tStep);
+//     solutionVector->resize(neq);
+//     solutionVector->zero();
 
-    FloatArray *solutionVector = UnknownsField->giveSolutionVector(tStep);
-    solutionVector->resize(neq);
-    solutionVector->zero();
+    //Initialize and give solutionVector from previous solution
+    //copy previous solution vector so we can use solution-dependent boundary conditions
+    if ( changingProblemSize ) {
+        if ( !tStep->isTheFirstStep() ) {
+            //copy recent solution to previous position, copy from hash=0 to hash=1(previous)
+            copyUnknownsInDictionary( VM_Total, tStep, tStep->givePreviousStep() );
+        }
+        UnknownsField->initialize( VM_Total, tStep->givePreviousStep(), *solutionVector, EModelDefaultEquationNumbering() );
+    } else {
+        //copy previous solution vector to actual
+        *solutionVector = *UnknownsField->giveSolutionVector( tStep->givePreviousStep() );
+    }
+
+    ///@todo missing this->updateInternalState(& TauStep);
 
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Assembling rhs\n");
@@ -368,13 +383,11 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     // set-up numerical model
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
 
-    //
     // call numerical model to solve arised problem
-    //
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Solving ...\n");
 #endif
-    UnknownsField->giveSolutionVector(tStep)->resize(neq);
+//     UnknownsField->giveSolutionVector(tStep)->resize(neq);
     linSolver->solve(*conductivityMatrix, rhs, *UnknownsField->giveSolutionVector(tStep) );
     // update solution state counter
     tStep->incrementStateCounter();
@@ -410,6 +423,19 @@ NonStationaryTransportProblem :: updateYourself(TimeStep *tStep)
     VERBOSE_PRINT0("Updated Materials ", 0)
  #endif
 #endif
+}
+
+void
+NonStationaryTransportProblem :: copyUnknownsInDictionary(ValueModeType mode, TimeStep *fromTime, TimeStep *toTime)
+{
+    Domain *domain = this->giveDomain(1);
+
+    for ( auto &node : domain->giveDofManagers() ) {
+        for ( Dof *dof: *node ) {
+            double val = dof->giveUnknown(mode, fromTime);
+            dof->updateUnknownsDictionary(toTime, mode, val);
+        }
+    }
 }
 
 
