@@ -699,7 +699,7 @@ MPSDamMaterial :: initDamaged(double kappa, FloatArray &principalDirection, Gaus
         status->setCharLength(le);
 
         if ( gf != 0. && e0 >= ( wf / le ) ) { // case for a given fracture energy
-            OOFEM_WARNING("Fracturing strain %e is lower than the elastic strain e0=%e, possible snap-back. Element number %d, wf %e, le %e", wf / le, e0, gp->giveElement()->giveLabel(), wf, le);
+            OOFEM_WARNING("Fracturing strain %e is lower than the elastic strain e0=%e, possible snap-back. Element number %d, wf %e, le %e. Increase fracturing strain or decrease element size by at least %f", wf / le, e0, gp->giveElement()->giveLabel(), wf, le, e0/(wf/le) );
             if ( checkSnapBack ) {
                 OOFEM_ERROR("");
             }
@@ -848,6 +848,25 @@ MPSDamMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateT
         answer.resize(1);
         answer.zero();
         answer.at(1) =  this->computeTensileStrength(tequiv);
+        return 1;
+    } else if ( type == IST_CrackIndex ) {
+        //ratio of real principal stress / strength. 1 if damage already occured.
+        FloatArray principalStress;
+        MPSDamMaterialStatus *status = static_cast< MPSDamMaterialStatus * >( this->giveStatus(gp) );
+        answer.resize(1);
+        answer.zero();
+        if ( status->giveDamage()>0. ){
+            answer.at(1)=1.;
+            return 1;
+        }
+        //FloatArray effectiveStress = status->giveTempViscoelasticStressVector();
+        //StructuralMaterial :: computePrincipalValues(principalStress, effectiveStress, principal_stress);
+        StructuralMaterial :: giveIPValue(principalStress, gp, IST_PrincipalStressTensor, tStep);
+        double tequiv = this->computeEquivalentTime(gp, tStep, 1);
+        double ft = this->computeTensileStrength(tequiv);
+        if (ft > 1.e-20 && principalStress.at(1)>1.e-20){
+            answer.at(1) = principalStress.at(1)/ft;
+        }
         return 1;
     } else {
         return MPSMaterial :: giveIPValue(answer, gp, type, tStep);

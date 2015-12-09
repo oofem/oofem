@@ -931,7 +931,7 @@ TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
         answer.resize( this->giveNumberOfDofManagers() );
         answer.zero();
 
-        double coeff;
+        double coeff=0.;
         int approxOrder = surfLoad->giveApproxOrder() + this->giveApproxOrder(indx);
 
         std :: unique_ptr< IntegrationRule > iRule( this->GetSurfaceIntegrationRule(approxOrder) );
@@ -956,6 +956,8 @@ TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
                 coeff = surfLoad->giveProperty('a', tStep);
             } else if ( load->giveType() == RadiationBC ) {
                 coeff = getRadiativeHeatTranferCoef(surfLoad, tStep);
+            } else {
+                OOFEM_ERROR("Unknown load type");
             }
 
             this->computeSurfaceNAt( n, iSurf, gp->giveNaturalCoordinates() );

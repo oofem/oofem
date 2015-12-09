@@ -104,7 +104,7 @@ public:
     virtual const FloatArray &giveViscoelasticStressVector() const { return effectiveStressVector; }
     /// Assigns tempStressVector to given vector v.
     void letTempViscoelasticStressVectorBe(FloatArray v) { tempEffectiveStressVector = std :: move(v); }
-
+    virtual const FloatArray &giveTempViscoelasticStressVector() const { return tempEffectiveStressVector; }
 
     /// Returns the last equilibrated scalar measure of the largest strain level.
     double giveKappa() { return kappa; }

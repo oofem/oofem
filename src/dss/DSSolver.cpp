@@ -79,7 +79,7 @@ long DSSolver :: Initialize(unsigned char run_code, eDSSolverType solverType, eD
 {
     Dispose();
     eMT->Writeln("");
-    eMT->Writeln("Sparse Direct initialized!");
+    eMT->Writeln("Sparse Direct initialized");
     this->SolverType = solverType;
     this->MatrixType = matrixType;
     this->run_code = run_code;
@@ -360,7 +360,7 @@ bool DSSolver :: PreFactorize()
         case eDSSFactorizationLLT:
         case eDSSFactorizationLU:
         case eDSSFastCG:
-            eMT->Writeln("Skyline matrix doesn't support this solver type!");
+            eMT->Writeln("Skyline matrix doesn't support this solver type.");
             break;
         default:
             eMT->Writeln("Unknown solver type.");
@@ -383,7 +383,7 @@ bool DSSolver :: PreFactorize()
 void DSSolver :: LoadZeros()
 {
     if ( matrix == NULL ) {
-        eMT->Writeln("First allocate the matrix!");
+        eMT->Writeln("First allocate the matrix.");
         return;
     }
 
@@ -581,7 +581,7 @@ void DSSolver :: EndSolverWriteInfo()
 bool DSSolver :: StartSolver()
 {
     if ( sm.neq == 0 ) {
-        eMT->Write("Can't factorize empty matrix!");
+        eMT->Write("Can't factorize empty matrix.");
         return false;
     }
 

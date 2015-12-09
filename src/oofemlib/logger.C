@@ -236,6 +236,7 @@ Logger :: writeLogMsg(logLevelType level, const char *format, ...)
 #ifdef __PARALLEL_MODE
     MPI_Comm_rank(MPI_COMM_WORLD, & rank);
 #endif
+    (void)rank;//prevent a warning about unused variable
     FILE *stream = this->logStream;
     if ( level == LOG_LEVEL_FATAL || level == LOG_LEVEL_ERROR ) {
         numberOfErr++;
