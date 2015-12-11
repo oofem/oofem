@@ -37,7 +37,13 @@
 
 #include "boundaryload.h"
 
+///@name Input fields for ConstantSurfaceLoad
+//@{
+#define _IFT_ConstantSurfaceLoad_LoadOffset "loadoffset"
 #define _IFT_ConstantSurfaceLoad_Name "constantsurfaceload"
+//@}
+
+// #define _IFT_ConstantSurfaceLoad_Name "constantsurfaceload"
 
 namespace oofem {
 /**
@@ -62,7 +68,8 @@ namespace oofem {
 class OOFEM_EXPORT ConstantSurfaceLoad : public BoundaryLoad
 {
 public:
-    ConstantSurfaceLoad(int i, Domain * d) : BoundaryLoad(i, d) { }
+//     ConstantSurfaceLoad(int i, Domain * d) : BoundaryLoad(i, d) { }
+    ConstantSurfaceLoad(int i, Domain * d);
 
     // Overloaded methods:
     virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode);
@@ -79,9 +86,11 @@ public:
 
     virtual const char *giveClassName() const { return "ConstantSurfaceLoad"; }
     virtual const char *giveInputRecordName() const { return _IFT_ConstantSurfaceLoad_Name; }
+    double giveLoadOffset() { return this->loadOffset; }
 
 private:
     virtual void computeNArray(FloatArray &answer, const FloatArray &coords) const { answer.clear(); }
+    double loadOffset;  // xi-coord offset of load. xi=-1 -> bottom, xi=0 -> midsurface (default), xi=1 -> top surface
 };
 } // end namespace oofem
 #endif // constantsurfaceload_h

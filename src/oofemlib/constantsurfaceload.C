@@ -41,6 +41,10 @@
 namespace oofem {
 REGISTER_BoundaryCondition(ConstantSurfaceLoad);
 
+ConstantSurfaceLoad :: ConstantSurfaceLoad(int i, Domain *d) : BoundaryLoad(i, d) {
+    this->loadOffset = 0.0;
+}
+
 IRResultType
 ConstantSurfaceLoad :: initializeFrom(InputRecord *ir)
 {
@@ -49,6 +53,8 @@ ConstantSurfaceLoad :: initializeFrom(InputRecord *ir)
         OOFEM_ERROR("componentArray size mismatch");
     }
 
+    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    IR_GIVE_OPTIONAL_FIELD(ir, this->loadOffset, _IFT_ConstantSurfaceLoad_LoadOffset);
     return IRRT_OK;
 }
 

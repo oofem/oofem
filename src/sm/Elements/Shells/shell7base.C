@@ -710,13 +710,14 @@ Shell7Base :: computeLinearizedStiffness(GaussPoint *gp, StructuralMaterial *mat
 void
 Shell7Base :: computePressureTangentMatrix(FloatMatrix &answer, Load *load, const int iSurf, TimeStep *tStep)
 {
-    // Computes tangent matrix associated with the linearization of pressure loading. Assumes constant pressure.
+    // Computes tangent matrix associated with the linearization of pressure loading (ConstantPressureLoad). Assumes constant pressure over element area.
     ConstantPressureLoad* pLoad = dynamic_cast< ConstantPressureLoad * >( load );
     
     //IntegrationRule *iRule = giveInterpolation()->giveBoundaryIntegrationRule(load->giveApproxOrder(), iSurf);
     int nPointsTri = 6; //todo generalize
     IntegrationRule *iRule = new GaussIntegrationRule(1, this);
-    iRule->SetUpPointsOnWedge(nPointsTri, 1, _3dMat); //@todo replce with triangle which has a xi3-coord
+    //iRule->SetUpPointsOnWedge(nPointsTri, 1, _3dMat); //@todo replce with triangle which has a xi3-coord
+    iRule->SetUpPointsOnTriangle(nPointsTri, _3dMat);
     
     FloatMatrix N, B, LB, NLB, L(7, 18), gcov, W1, W2;
     FloatArray lcoords(3), solVec, pressure;
@@ -741,7 +742,7 @@ Shell7Base :: computePressureTangentMatrix(FloatMatrix &answer, Load *load, cons
         genEps.beProductOf(B, solVec);     
 
         // Traction tangent, L =  lambdaN * ( W2*lambdaG_1 - W1*lambdaG_2  ) 
-        load->computeValueAt(pressure, tStep, *(ip->giveNaturalCoordinates()), VM_Total);        // pressure component   
+        load->computeValueAt(pressure, tStep, lcoords, VM_Total);        // pressure component  Kallas computeValueAt i load.h eller ConstantPressureLoad.h här?
         this->evalCovarBaseVectorsAt(lcoords, gcov, genEps, tStep);
         g1.beColumnOf(gcov,1);
         g2.beColumnOf(gcov,2);
@@ -1046,7 +1047,7 @@ Shell7Base :: computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
         mass.at(7, 7) = factors.at(6) * m.dotProduct(m);        // F
         mass.symmetrized();
         double xi = 0.0;
-        double dA = this->computeAreaAround(gp, xi);
+        double dA = this->computeAreaAround(gp, xi);   // NB: the wedge intepolation creates a triangle with area 1
         Ntm.beTProductOf(N, mass);
         NtmN.beProductOf(Ntm, N);         // switch to sym prod upper something
         NtmN.times(dA * rho);
@@ -1206,7 +1207,7 @@ Shell7Base :: computeConvectiveMassForce(FloatArray &answer, TimeStep *tStep)
         fm.at(6) = fac2 * dm.at(3) * dgam;
         fm.at(7) = fac3 * m.dotProduct(dm) * gam;
         double xi = 0.0;
-        dA = this->computeAreaAround(gp, xi);
+        dA = this->computeAreaAround(gp, xi);   // NB: the wedge intepolation creates a triangle with area 1
         answer.plusProduct(N, fm, dA);
     }
     
@@ -1240,6 +1241,7 @@ Shell7Base :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
     if ( surfLoad ) {
         FloatArray solVec, force;
         this->giveUpdatedSolutionVector(solVec, tStep);
+//         printf("computeSurfaceLoadVectorAt");
         this->computePressureForce(force, solVec, iSurf, surfLoad, tStep, mode);
         IntArray mask;
         this->giveSurfaceDofMapping(mask, 1);         // same dofs regardless of iSurf->1
@@ -1258,39 +1260,58 @@ void
 Shell7Base :: computePressureForce(FloatArray &answer, FloatArray solVec, const int iSurf, BoundaryLoad *surfLoad, TimeStep *tStep, ValueModeType mode)
 {
     // Computes pressure loading. Acts normal to the current (deformed) surface.
-    ConstantPressureLoad* pLoad = dynamic_cast< ConstantPressureLoad * >( surfLoad );
+//     ConstantPressureLoad* pLoad = dynamic_cast< ConstantPressureLoad * >( surfLoad );
+//     ConstantSurfaceLoad*  sLoad = dynamic_cast< ConstantSurfaceLoad *  >( surfLoad );
+    double xi = 0.0;
+    if ( ConstantPressureLoad* pLoad = dynamic_cast< ConstantPressureLoad * >( surfLoad ) ) {
+        xi = pLoad->giveLoadOffset();
+        //printf("pLoad xi = %e \n",xi);
+    } 
+    else if ( ConstantSurfaceLoad* sLoad = dynamic_cast< ConstantSurfaceLoad * >( surfLoad ) ) {
+        xi = sLoad->giveLoadOffset();
+        //printf("sLoad xi = %e \n",xi);
+    } 
+    
     int nPointsTri = 6; //todo generalize
     IntegrationRule *iRule = new GaussIntegrationRule(1, this);
-    iRule->SetUpPointsOnWedge(nPointsTri, 1, _3dMat); //@todo replce with triangle which has a xi3-coord
+//     iRule->SetUpPointsOnWedge(nPointsTri, 1, _3dMat); //@todo replce with triangle which has a xi3-coord
+    iRule->SetUpPointsOnTriangle(nPointsTri, _3dMat);
     
-    
+//     double totalArea = 0.0;
     FloatMatrix N, B, lambda;
     FloatArray Fp, fp, genEps, genEpsC, lCoords(3), traction, solVecC;
 
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         IntegrationPoint *ip = iRule->getIntegrationPoint(i);
-        lCoords.at(1) = ip->giveNaturalCoordinate(1);
-        lCoords.at(2) = ip->giveNaturalCoordinate(2);
-        lCoords.at(1) = pLoad->giveLoadOffset( );
+        lCoords.at(1) = ip->giveNaturalCoordinate(1); // xi1 of triangle
+        lCoords.at(2) = ip->giveNaturalCoordinate(2); // xi2 of triangle
+        lCoords.at(3) = xi;
         double zeta = giveGlobalZcoord( lCoords );
         this->computeBmatrixAt(lCoords, B);
         this->computeNmatrixAt(lCoords, N);
         this->giveUpdatedSolutionVector(solVecC, tStep);
         genEpsC.beProductOf(B, solVecC);       
         this->computePressureForceAt(ip, traction, iSurf, genEpsC, surfLoad, tStep, mode);
+        
       
         genEps.beProductOf(B, solVec);
         this->computeLambdaNMatrix(lambda, genEps, zeta);
         fp.beTProductOf(lambda,traction);
 
-        double xi = pLoad->giveLoadOffset();
         double dA = this->computeAreaAround(ip, xi);
+//         totalArea += dA;
+//         if ( this->giveGlobalNumber() == 50) {
+//             traction.printYourself("Traction in gp");
+//             printf("total area %e \n",totalArea);
+//         }
 
         Fp.plusProduct(N, fp, dA);
     }
     answer.resize( Shell7Base :: giveNumberOfDofs() );
     answer.zero();
     answer.assemble(Fp, this->giveOrderingDofTypes());
+
+    delete iRule;
 }
 
 
@@ -1318,8 +1339,12 @@ Shell7Base :: computePressureForceAt(GaussPoint *gp, FloatArray &traction, const
         surfLoad->computeValueAt(load, tStep, lcoords, mode);        // pressure component
         traction.beVectorProductOf(g1, g2);        // normal vector (should not be normalized due to integraton in reference config.)
         traction.times( -load.at(1) );
-    } else if ( dynamic_cast< ConstantSurfaceLoad * >( surfLoad ) ) {
-        surfLoad->computeValueAt(traction, tStep, *(gp->giveNaturalCoordinates()), mode);        // traction vector
+    } else if ( ConstantSurfaceLoad* sLoad = dynamic_cast< ConstantSurfaceLoad * >( surfLoad ) ) {
+        FloatArray lcoords(3);
+        lcoords.at(1) = gp->giveNaturalCoordinate(1);
+        lcoords.at(2) = gp->giveNaturalCoordinate(2);
+        lcoords.at(3) = sLoad->giveLoadOffset();
+        surfLoad->computeValueAt(traction, tStep, lcoords, mode);        // traction vector
     } else {
         OOFEM_ERROR("incompatible load type");
     }
@@ -2332,6 +2357,35 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
 {
     // Recover shear stresses at ip by integration of the momentum balance through the thickness
     
+    // Find top and bottom BC
+    int nLoads = this->boundaryLoadArray.giveSize() / 2;
+    FloatArray tractionBC = {0,0,-1.0e6};
+    double xi = 0.0;
+    for ( int i = 1; i <= nLoads; i++ ) {     // For each pressure load that is applied
+        int load_number = this->boundaryLoadArray.at(2 * i - 1);
+        int iSurf = this->boundaryLoadArray.at(2 * i);         // load_id
+        Load *load = this->domain->giveLoad(load_number);    
+        
+        if ( ConstantSurfaceLoad* sLoad = dynamic_cast< ConstantSurfaceLoad * >( load ) ) {
+                xi = sLoad->giveLoadOffset();
+        } else {
+            OOFEM_ERROR("Load type not supported");
+        }
+//         FloatArray temp;
+//         
+//         tractionBC.add(temp);
+//         temp.printYourself();
+    }
+    // Assume linear variation of placement
+    FloatArray tractionTop, tractionBtm; 
+    tractionTop.beScaled(((1.0+xi)/2.0),tractionBC);
+    tractionBtm.beScaled(((1.0-xi)/2.0),tractionBC);
+    if (this->giveGlobalNumber() == 50) {
+        tractionTop.printYourself("tractionTop");
+        tractionBtm.printYourself("tractionBtm");
+    }
+    
+    
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();     // conversion of types
     
     //if ( !this->srIntegrationRulesArray ) { //create new rule
@@ -2355,11 +2409,28 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
     double zeroThicknessLevel = - 0.5 * totalThickness;     // assumes midplane is the geometric midplane of layered structure.
 //     double zeroThicknessLevel = this->layeredCS->give( CS_BottomZCoord, &lCoords, this, false );  
 //     FloatArray Sold;
-    FloatMatrix dSmat(3,numInPlaneIP), SmatOld(3,numInPlaneIP); // 3 stress components (S_xz, S_yz, S_zz) * num of in plane ip 
+    FloatMatrix dSmat(3,numInPlaneIP), SmatOld(3,numInPlaneIP);  // 3 stress components (S_xz, S_yz, S_zz) * num of in plane ip 
     FloatMatrix dSmatLayerIP(3,numInPlaneIP*numThicknessIP);
-    SmatOld.zero();
     
+    // Assuming cont dSzz/dz across layers
+    FloatArray dSzzdzOld(numInPlaneIP); dSzzdzOld.zero();
+    
+    // Fitting of Szz to traction BC
+    std::vector <FloatMatrix> dSzzmatIP; dSzzmatIP.resize(numberOfLayers);
+    std::vector <FloatMatrix> dSzzmat; dSzzmat.resize(numberOfLayers);
+    std::vector <FloatArray> dSzzmatIPupd; dSzzmatIPupd.resize(numberOfLayers);
+    
+    SmatOld = tractionBtm;
+    
+    // Integration from the bottom
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
+        if ( layer == 1 ) {
+            for ( int i = 1; i <= numInPlaneIP ; i++) {
+                SmatOld.at(1,i) = tractionBtm.at(1);
+                SmatOld.at(2,i) = tractionBtm.at(2);
+                SmatOld.at(3,i) = tractionBtm.at(3);
+            }
+        }
 
         /* Recover values by a polynomial fit to the stress values in a patch of elements closest to the this element.
             * The vector of GPvalues is [GPvalue] = [P(x_GP,y_GP,z_GP)]*a, where 
@@ -2379,7 +2450,16 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
         
         
 //         IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ]; 
-        giveLayerContributionToSR(dSmat, dSmatLayerIP, layer, zeroThicknessLevel, tStep);
+        giveLayerContributionToSR(dSmat, dSmatLayerIP, layer, dSzzdzOld, zeroThicknessLevel, tStep);
+        
+//         if (this->giveGlobalNumber() == 50) {
+//             dSzzdzOld.printYourself("Updated dSzzdz");
+//         }
+        
+        // Fitting of Szz to traction BC
+        dSzzmatIP[layer-1] = dSmatLayerIP;
+        dSzzmat[layer-1] = dSmat;
+        updateLayerTransvShearStressesSR(dSmatLayerIP, SmatOld, layer);
 #if 0
         
         //recoveredValues.resize(numWedgeNodes);
@@ -2516,7 +2596,8 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
         }
 #endif
         
-        updateLayerStressesSR(dSmatLayerIP, SmatOld, layer);
+        
+//         updateLayerTransvStressesSR(dSmatLayerIP, SmatOld, layer);
 #if 0        
         // add stresses from lower interface AND replace stresses in wedge GP
         for ( int j = 0; j < numInPlaneIP; j++ ) { 
@@ -2560,9 +2641,8 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
         } 
 #endif
 
-        SmatOld.add(dSmat); 
-        zeroThicknessLevel += this->layeredCS->giveLayerThickness(layer);
-                
+        SmatOld.add(dSmat); // Integrated stress over laminate
+        zeroThicknessLevel += this->layeredCS->giveLayerThickness(layer);      
 #if 0
         for ( int j = 0; j < numInPlaneIP; j++ ) { 
             
@@ -2618,11 +2698,70 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
 //         integralThickness += thickness;
         
     } 
-
+    
+    // Fitting of Szz to traction BC
+# if 1
+    FloatArray GPcoords;
+    zeroThicknessLevel = - 0.5 * totalThickness; 
+    FloatArray SzzOld(numInPlaneIP); SzzOld.zero();
+        
+    for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
+        
+        IntegrationRule *iRuleL = this->integrationRulesArray [ layer - 1 ];  
+        dSzzmatIPupd[layer-1].resize(numInPlaneIP*numThicknessIP);
+    
+        for ( int j = 0 ; j < numInPlaneIP ; j++ ) { 
+            if ( layer == 1 ) {
+                SzzOld.at(j+1) = tractionBtm.at(3);
+            }
+//             SzzOld.printYourself();
+        
+            // Assume same inclination of linear term in each layer
+            double C1 = (1.0/totalThickness)*(tractionTop.at(3) - tractionBtm.at(3) - SmatOld.at(3,j+1));
+//             double C1 = 0.0;
+//             double Szz = 0.0;
+            
+            for ( int i = 0 ; i < numThicknessIP ; i++ ) {
+                
+                int point = i*numInPlaneIP + j; // wedge integration point number
+            
+                GaussPoint *gp = iRuleL->getIntegrationPoint(point);
+                GPcoords.zero();
+                GPcoords = gp->giveGlobalCoordinates();
+                #if 0
+                    if (this->giveGlobalNumber() == 126) {
+                        if (layer == 1) {
+                            if (i == 0) {
+                                GPcoords.printYourself("wedge GPs");
+                            }
+                        }
+                    }
+                #endif
+                GPcoords.at(3) -= zeroThicknessLevel;
+                
+//                 Szz = dSzzmatIP[layer-1].at(3,point) + C1*GPcoords.at(3) + SzzOld.at(j+1);
+                dSzzmatIPupd[layer-1].at(point+1) = dSzzmatIP[layer-1].at(3,point+1) + C1*GPcoords.at(3) + SzzOld.at(j+1);
+//                 dSzzmatIPupd[layer-1].printYourself("updated Szz");
+            }
+            
+            GPcoords.at(3) = this->layeredCS->giveLayerThickness(layer);
+            SzzOld.at(j+1) += dSzzmat[layer -1].at(3,j+1) + C1*GPcoords.at(3);
+            
+        }  
+        zeroThicknessLevel += this->layeredCS->giveLayerThickness(layer);  
+    }
+    
+    FloatArray zeros(numInPlaneIP); zeros.zero();
+    for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
+//         dSzzmatIP[layer -1].printYourself();
+        updateLayerTransvNormalStressSR( dSzzmatIPupd[layer -1], zeros, layer); // traction on bottom already taken into account in the integration. 
+    }
+#endif
+    
 }
 
 void 
-Shell7Base :: giveLayerContributionToSR(FloatMatrix &dSmat, FloatMatrix &dSmatLayerIP, int layer, double zeroThicknessLevel, TimeStep *tStep)
+Shell7Base :: giveLayerContributionToSR(FloatMatrix &dSmat, FloatMatrix &dSmatLayerIP, int layer, FloatArray &dSzzdzOld, double zeroThicknessLevel, TimeStep *tStep)
 {
     /* Recover values by a polynomial fit to the stress values in a patch of elements closest to the this element.
     * The vector of GPvalues is [GPvalue] = [P(x_GP,y_GP,z_GP)]*a, where 
@@ -2647,10 +2786,12 @@ Shell7Base :: giveLayerContributionToSR(FloatMatrix &dSmat, FloatMatrix &dSmatLa
     IntArray centreElNum = {this->giveGlobalNumber()};
     IntArray centreElNodes = this->giveDofManArray(); 
     IntArray patchEls; 
-    int numSampledIP = 0, numCoefficents = 9;
+    int numSampledIP = 0, numCoefficents = 11;
 //         int numPatchEls = patchEls.giveSize();
 //         FloatMatrix patchIpValues(numPatchEls*numThicknessIP*numInPlaneIP,6), P(numPatchEls*numThicknessIP*numInPlaneIP,numCoefficents);
     FloatMatrix patchIpValues, P;
+    patchIpValues.zero();
+    P.zero();
     
     Domain *d = this->giveDomain();
     d->giveConnectivityTable()->giveElementNeighbourList(patchEls,centreElNum); 
@@ -2678,13 +2819,30 @@ Shell7Base :: giveLayerContributionToSR(FloatMatrix &dSmat, FloatMatrix &dSmatLa
             // Collect global coordinates for IP and assemble to P.
             FloatArray IpCoords;
             IpCoords = ip->giveGlobalCoordinates();
-            IpCoords.at(3) -= zeroThicknessLevel;    // make bottom of layer ref point for polynimial fit.             
-            FloatArray iRowP = {1,IpCoords.at(1),IpCoords.at(2),IpCoords.at(3),
+//             IpCoords.at(3) -= zeroThicknessLevel;    // make bottom of layer ref point for polynimial fit, ie using layer z-coords (not shell)    
+/*            FloatArray iRowP = {1,IpCoords.at(1),IpCoords.at(2),IpCoords.at(3),
                                 IpCoords.at(2)*IpCoords.at(3),IpCoords.at(1)*IpCoords.at(3),IpCoords.at(1)*IpCoords.at(2),
-                                IpCoords.at(1)*IpCoords.at(1),IpCoords.at(2)*IpCoords.at(2)};
+                                IpCoords.at(1)*IpCoords.at(1),IpCoords.at(2)*IpCoords.at(2)};  */ 
+            // P = [1 x y z yz xz xy x² y² x²y x²z]
+            FloatArray iRowP = {1.0,IpCoords.at(1),IpCoords.at(2),IpCoords.at(3),
+                                IpCoords.at(2)*IpCoords.at(3),IpCoords.at(1)*IpCoords.at(3),IpCoords.at(1)*IpCoords.at(2),
+                                IpCoords.at(1)*IpCoords.at(1),IpCoords.at(2)*IpCoords.at(2),
+                                IpCoords.at(1)*IpCoords.at(1)*IpCoords.at(3),IpCoords.at(2)*IpCoords.at(2)*IpCoords.at(3)}; 
+            // P = [x y yz xz xy x² y² x²y x²z]
+//             FloatArray iRowP = {IpCoords.at(1),IpCoords.at(2),
+//                                 IpCoords.at(2)*IpCoords.at(3),IpCoords.at(1)*IpCoords.at(3),IpCoords.at(1)*IpCoords.at(2),
+//                                 IpCoords.at(1)*IpCoords.at(1),IpCoords.at(2)*IpCoords.at(2),
+//                                 IpCoords.at(1)*IpCoords.at(1)*IpCoords.at(3),IpCoords.at(2)*IpCoords.at(2)*IpCoords.at(3)};
+            // P = [x y yz xz xy x² y² x³ y³ xyz x²z y²z]
+//             FloatArray iRowP = {IpCoords.at(1),IpCoords.at(2),
+//                                 IpCoords.at(2)*IpCoords.at(3),IpCoords.at(1)*IpCoords.at(3),IpCoords.at(1)*IpCoords.at(2),
+//                                 IpCoords.at(1)*IpCoords.at(1),IpCoords.at(2)*IpCoords.at(2),
+//                                 IpCoords.at(1)*IpCoords.at(1)*IpCoords.at(1),IpCoords.at(2)*IpCoords.at(2)*IpCoords.at(2),IpCoords.at(1)*IpCoords.at(2)*IpCoords.at(3),
+//                                 IpCoords.at(1)*IpCoords.at(1)*IpCoords.at(3),IpCoords.at(2)*IpCoords.at(2)*IpCoords.at(3)};
             P.addSubVectorRow(iRowP,numSampledIP + iIP+1,1);
             
         }
+        
 #if 0       
         // Replace above with function
         // Get contribution from element in patch
@@ -2719,16 +2877,21 @@ Shell7Base :: giveLayerContributionToSR(FloatMatrix &dSmat, FloatMatrix &dSmatLa
     
     // Assemble appropriate coefficients matrix for computing S_xz and S_yz and S_zz
     // aSiz = [a(:,1)^T a(:,6)^T; a(:,6)^T a(:,2)^T]
+    // aSzz = [a(:,1)^T 2*a(:,6)^T a(:,2)^T]
     // aSzz = sum[a81 a76 a82]
-    FloatMatrix aSiz; 
+    FloatMatrix aSiz, aSzz; 
     aSiz.resize(2,numCoefficents*2);
+    aSzz.resize(1,numCoefficents*3);
     for (int iCol = 1; iCol <= numCoefficents; iCol++) {
         aSiz.at(1,iCol) = a.at(iCol,1);
         aSiz.at(1,iCol+numCoefficents) = a.at(iCol,6);
         aSiz.at(2,iCol) = a.at(iCol,6);
         aSiz.at(2,iCol+numCoefficents) = a.at(iCol,2);
+        aSzz.at(1,iCol) = a.at(iCol,1);
+        aSzz.at(1,iCol+numCoefficents) = 2.0*a.at(iCol,6);
+        aSzz.at(1,iCol+2*numCoefficents) = a.at(iCol,2);
     }
-    double aSzz = a.at(8,1) + a.at(7,6) + a.at(8,2); 
+//     double aSzz = a.at(8,1) + a.at(7,6) + a.at(8,2); 
     
     
     // Integrate gradient of S_xz, S_yz and S_zz in all IP-stacks
@@ -2738,8 +2901,33 @@ Shell7Base :: giveLayerContributionToSR(FloatMatrix &dSmat, FloatMatrix &dSmatLa
     
     // Compute recovered stresses
     for ( int j = 0; j < numInPlaneIP; j++ ) { 
+        FloatArray dS, GPcoords(3), dSzz;
         
-        FloatArray dS, GPcoords(3);
+        // Approximation at bottom of layer (to fulfill integration BC)
+        FloatArray dSBtm, dSzzBtm, dSzzdzBtm;
+        GaussPoint *gp = iRuleL->getIntegrationPoint(j);
+        GPcoords.zero();
+        GPcoords = gp->giveGlobalCoordinates();
+        GPcoords.at(3) = zeroThicknessLevel;
+        // S_xz and S_yz
+        dSBtm.zero();
+        FloatArray intGradPBtm;
+        this->giveZintegratedPolynomialGradientForStressRecAt(intGradPBtm,GPcoords);
+        dSBtm.beProductOf(aSiz,intGradPBtm);
+        // S_zz and dSzz/dz
+        dSzzBtm.zero();
+        FloatArray int2Grad2PBtm;
+        this->giveZ2integratedPolynomial2GradientForStressRecAt(int2Grad2PBtm,GPcoords);
+        dSzzBtm.beProductOf(aSzz,int2Grad2PBtm*(-1.0));
+        dSzzdzBtm.zero();
+        FloatArray intGrad2PBtm;
+        this->giveZintegratedPolynomial2GradientForStressRecAt(intGrad2PBtm,GPcoords);
+        dSzzdzBtm.beProductOf(aSzz,intGrad2PBtm*(-1.0));
+        
+//         if (this->giveGlobalNumber() == 50) {
+//             dSzzBtm.printYourself("dSzzBtm");
+//             dSzzdzBtm.printYourself("dSzzdzBtm");
+//         }
         
         // thickness GPs
         for ( int i = 0; i < numThicknessIP; i++ ) {
@@ -2758,36 +2946,188 @@ Shell7Base :: giveLayerContributionToSR(FloatMatrix &dSmat, FloatMatrix &dSmatLa
                     }
                 }
             #endif
-            GPcoords.at(3) -= zeroThicknessLevel;
+//             GPcoords.at(3) -= zeroThicknessLevel;                      // Using layer z-coords (not shell)
             
             // Calculate z-integration of fitted stress variation in position of GP such that 
             // Siz = - Integral( dS_ij/dx + dS_ij/dy )dz = - [a(ij) a(ij)]*Integral( dP/dx dP/dy )dz = - [a(ij) a(ij)]*IntGradP + Sij^k-1
-        
+            
+            // S_xz and S_yz
+            dS.zero();
             FloatArray intGradP;
             this->giveZintegratedPolynomialGradientForStressRecAt(intGradP,GPcoords);
-            dS.zero();
             dS.beProductOf(aSiz,intGradP*(-1.0));
-            dSmatLayerIP.at(1,point+1) = dS.at(1);                             // S_xz
-            dSmatLayerIP.at(2,point+1) = dS.at(2);                             // S_yz
-            dSmatLayerIP.at(3,point+1) = -aSzz*GPcoords.at(3)*GPcoords.at(3);  // S_zz
+//             dSmatLayerIP.at(1,point+1) = dS.at(1);                             // S_xz
+//             dSmatLayerIP.at(2,point+1) = dS.at(2);                             // S_yz
+            dSmatLayerIP.at(1,point+1) = dS.at(1) + dSBtm.at(1);                             // S_xz Using polynomial fit to shell coordinates
+            dSmatLayerIP.at(2,point+1) = dS.at(2) + dSBtm.at(2);                             // S_yz Using polynomial fit to shell coordinates
+            
+            // S_zz
+            dSzz.zero();
+            FloatArray int2Grad2P;
+            this->giveZ2integratedPolynomial2GradientForStressRecAt(int2Grad2P,GPcoords);
+            dSzz.beProductOf(aSzz,int2Grad2P);
+            // Using only polynomial fit
+    //         dSmatLayerIP.at(3,point+1) = dSzz.at(1);
+            // Using polynomial fit + (dSzz/dz)*z at top of previous layer
+    //         dSmatLayerIP.at(3,point+1) = dSzz.at(1) + dSzzdzOld.at(j+1)*GPcoords.at(3);       
+            // Using polynomial fit to shell coordinates
+            dSmatLayerIP.at(3,point+1) = dSzz.at(1) + dSzzBtm.at(1);
+            // Using polynomial fit to shell coordinates + (dSzz/dz)*z at top of previous layer
+    //         dSmatLayerIP.at(3,point+1) = dSzz.at(1) + dSzzdzBtm.at(1)*(GPcoords.at(3)-zeroThicknessLevel) + dSzzBtm.at(1) - dSzzdzOld.at(j+1)*(GPcoords.at(3)-zeroThicknessLevel);       
+            // Old polynomial fit
+    //         dSmatLayerIP.at(3,point+1) = aSzz*GPcoords.at(3)*GPcoords.at(3);  
+
         }
         
         // Calculate stresses at upper interface of layer (use the x-y-coords of the upper GP of the layer)
-        GPcoords.at(3) = thickness;
+        
+//         GPcoords.at(3) = thickness;                      // Using layer z-coords (not shell)
+        GPcoords.at(3) = thickness + zeroThicknessLevel;
+        
+        // S_xz and S_yz
+        dS.zero();
         FloatArray intGradP;
         this->giveZintegratedPolynomialGradientForStressRecAt(intGradP,GPcoords);
-        dS.zero();
         dS.beProductOf(aSiz,intGradP*(-1.0));
+//         dSmat.at(1,j+1) = dS.at(1);      // S_xz
+//         dSmat.at(2,j+1) = dS.at(2);      // S_yz
+        dSmat.at(1,j+1) = dS.at(1) + dSBtm.at(1);      // S_xz
+        dSmat.at(2,j+1) = dS.at(2) + dSBtm.at(2);      // S_yz
         
-        dSmat.at(1,j+1) = dS.at(1);      // S_xz
-        dSmat.at(2,j+1) = dS.at(2);      // S_xz
-        dSmat.at(3,j+1) = -aSzz*GPcoords.at(3)*GPcoords.at(3);   // S_zz
+        // S_zz
+        dSzz.zero();
+        FloatArray int2Grad2P;
+        this->giveZ2integratedPolynomial2GradientForStressRecAt(int2Grad2P,GPcoords);
+        dSzz.beProductOf(aSzz,int2Grad2P);
+        // Using only polynomial fit
+//         dSmat.at(3,j+1) = dSzz.at(1);
+        // Using polynomial fit + (dSzz/dz)*z at top of previous layer
+//         dSmat.at(3,j+1) = dSzz.at(1) + dSzzdzOld.at(j+1)*GPcoords.at(3);       
+        // Using polynomial fit to shell coordinates
+        dSmat.at(3,j+1) = dSzz.at(1) + dSzzBtm.at(1);
+        // Using polynomial fit to shell coordinates + (dSzz/dz)*z at top of previous layer
+//         dSmat.at(3,j+1) = dSzz.at(1) + dSzzdzBtm.at(1)*(GPcoords.at(3)-zeroThicknessLevel) + dSzzBtm.at(1) - dSzzdzOld.at(j+1)*(GPcoords.at(3)-zeroThicknessLevel);       
+        // Old polynomial fit
+//         dSmat.at(3,j+1) = aSzz*GPcoords.at(3)*GPcoords.at(3);                
+        
+        // dSzz/dz at top
+        FloatArray dSzzdz;
+        dSzzdz.zero();
+        FloatArray intGrad2P;
+        this->giveZintegratedPolynomial2GradientForStressRecAt(intGrad2P,GPcoords);        
+//         if (layer == 1) {
+        dSzzdz.beProductOf(aSzz,intGrad2P);
+        dSzzdzOld.at(j+1) += dSzzdz.at(1);      //NB dSzz/dsz = d(int2Grad2P*aSzz)/dz + d(dSzzdzOld*z)/dz = intGrad2P*aSzz + dSzzdzOld*z)/dz
+//         }
+//         if (this->giveGlobalNumber() == 50) {
+//             aSzz.printYourself("aSzz");
+//             intGrad2P.printYourself("intGrad2P");
+//         }
         
     }
+    
+# if 0
+    // Fit P2(x,y) = [x y xy]*a to S_xz and S_xy in element layer and add to integration of Szz. 
+    int numCoefficents2 = 2;
+    FloatMatrix eltIpValues, P2;
+    eltIpValues.zero();
+    P2.zero();
+    
+    // Loop over IP:s in wedge interpolation
+    IntegrationPoint *ip;
+    int numEltIP = iRuleL->giveNumberOfIntegrationPoints();
+    for ( int iIP = 0; iIP < numEltIP; iIP++ ) {
+        ip = iRuleL->getIntegrationPoint(iIP);    
+        
+        // Collect IP-value
+        FloatArray tempIPvalues;
+        this->giveIPValue(tempIPvalues, ip, IST_StressTensor, tStep);
+        FloatArray tempSaz(2); tempSaz.beSubArrayOf(tempIPvalues,{4,5});     // extract Syz and Sxz
+        eltIpValues.addSubVectorRow(tempSaz,iIP+1,1);
+        
+        // Collect global coordinates for IP and assemble to P.
+        FloatArray IpCoords;
+        IpCoords = ip->giveGlobalCoordinates();
+        IpCoords.at(3) -= zeroThicknessLevel;    // make bottom of layer ref point for polynimial fit. 
+        // P = [x y]
+        FloatArray iRowP = {IpCoords.at(1),IpCoords.at(2)}; 
+        // P = [x y xy]
+//         FloatArray iRowP = {IpCoords.at(1),IpCoords.at(2),IpCoords.at(1)*IpCoords.at(2)};
+        P2.addSubVectorRow(iRowP,iIP+1,1);
+        
+    }
+    
+    // Find polynomial coefficients for patch
+    FloatMatrix A2, invA2, A2bar, a2;
+    // A2 = P2^T*P2
+    A2.beTProductOf(P2,P2);
+    invA2.beInverseOf(A2);
+    // A2bar = inv(A2)*P2^T
+    A2bar.beProductTOf(invA2,P2);
+    // a2 = A2bar*ipValues, a2.size = number of coefficients x 2
+    a2.beProductOf(A2bar,eltIpValues);
+    
+    // Assemble appropriate coefficients matrix for computing S_zz
+    // a2Szz = [a2(:,1)^T a2(:,2)^T]
+    FloatMatrix a2Szz; 
+    a2Szz.resize(1,numCoefficents2*2);
+    FloatArray temp; 
+    temp.beColumnOf(a2,1);
+    a2Szz.addSubVectorRow(temp,1,1);
+    temp.beColumnOf(a2,2);
+    a2Szz.addSubVectorRow(temp,1,numCoefficents2+1);
+//     if ( this->giveGlobalNumber() == 50) {
+//         a2.printYourself("a2");
+//         a2Szz.printYourself("a2Szz");
+//     }   
+    
+    for ( int j = 0; j < numInPlaneIP; j++ ) { 
+        
+        FloatArray GPcoords(3), dSzz2;
+        
+        // thickness GPs
+        for ( int i = 0; i < numThicknessIP; i++ ) {
+
+            int point = i*numInPlaneIP + j; // wedge integration point number
+            
+            GaussPoint *gp = iRuleL->getIntegrationPoint(point);
+            GPcoords.zero();
+            GPcoords = gp->giveGlobalCoordinates();
+            GPcoords.at(3) -= zeroThicknessLevel;
+            
+            dSzz2.zero();
+            // P = [x y]
+            FloatArray intGradP2 = {GPcoords.at(3),0,
+                                    0,GPcoords.at(3)};
+            // P = [x y xy]
+    //         FloatArray intGradP2 = {GPcoords.at(3),0,GPcoords.at(2)*GPcoords.at(3),
+    //                                 0,GPcoords.at(3),GPcoords.at(1)*GPcoords.at(3)};
+            dSzz2.beProductOf(a2Szz,intGradP2*(-1.0));
+            dSmatLayerIP.at(3,point+1) += dSzz2.at(1);  
+        }
+        
+        GPcoords.at(3) = thickness;
+        dSzz2.zero();
+        // P = [x y]
+        FloatArray intGradP2 = {GPcoords.at(3),0,
+                                0,GPcoords.at(3)};
+        // P = [x y xy]
+//         FloatArray intGradP2 = {GPcoords.at(3),0,GPcoords.at(2)*GPcoords.at(3),
+//                                 0,GPcoords.at(3),GPcoords.at(1)*GPcoords.at(3)};
+        dSzz2.beProductOf(a2Szz,intGradP2*(-1.0));
+        if ( this->giveGlobalNumber() == 50) {
+            a2Szz.printYourself("a2Szz");
+            intGradP2.printYourself("intGradP2");
+            dSzz2.printYourself("dSzz2");
+        } 
+        dSmat.at(3,j+1) += dSzz2.at(1);   
+    }
+# endif
+    
 }
 
 void
-Shell7Base :: updateLayerStressesSR(FloatMatrix &dSmatLayerIP, FloatMatrix &SmatOld, int layer)
+Shell7Base :: updateLayerTransvStressesSR(FloatMatrix &dSmatLayerIP, FloatMatrix &SmatOld, int layer)
 {
     // add stresses from lower interface AND replace stresses in wedge GP
     
@@ -2807,6 +3147,40 @@ Shell7Base :: updateLayerStressesSR(FloatMatrix &dSmatLayerIP, FloatMatrix &Smat
             GaussPoint *gp = iRuleL->getIntegrationPoint(point);
             StructuralMaterialStatus* status = dynamic_cast< StructuralMaterialStatus* > ( gp->giveMaterialStatus() );
             FloatArray Sold = status->giveStressVector(); 
+            
+            Sold.at(5) = dSmatLayerIP.at(1,point+1); // S_xz
+            Sold.at(4) = dSmatLayerIP.at(2,point+1); // S_yz
+            Sold.at(3) = dSmatLayerIP.at(3,point+1); // S_zz        
+            if ( Sold.giveSize() > 6 ) {
+                Sold.at(8) = Sold.at(5); // S_xz
+                Sold.at(7) = Sold.at(4); // S_yz
+            }
+            status->letStressVectorBe(Sold);
+        }
+    } 
+}
+
+# if 1
+void
+Shell7Base :: updateLayerTransvShearStressesSR(FloatMatrix &dSmatLayerIP, FloatMatrix &SmatOld, int layer)
+{
+    // add stresses from lower interface AND replace stresses in wedge GP
+    
+    IntegrationRule *iRuleL = this->integrationRulesArray [ layer - 1 ];  
+    
+    int numInPlaneIP = 6; ///@todo generalise this! 
+    int numThicknessIP = this->layeredCS->giveNumIntegrationPointsInLayer();         
+    
+    for ( int j = 0; j < numInPlaneIP; j++ ) { 
+        for ( int i = 0; i < numThicknessIP; i++ ) {
+            int point = i*numInPlaneIP + j; // wedge integration point number
+            dSmatLayerIP.at(1,point+1) += SmatOld.at(1,j+1);  // S_xz
+            dSmatLayerIP.at(2,point+1) += SmatOld.at(2,j+1);  // S_yz
+            
+            // Replace stresses
+            GaussPoint *gp = iRuleL->getIntegrationPoint(point);
+            StructuralMaterialStatus* status = dynamic_cast< StructuralMaterialStatus* > ( gp->giveMaterialStatus() );
+            FloatArray Sold = status->giveStressVector(); 
             #if 0
                 if (this->giveGlobalNumber() == 126) {
                     if (j == 3) {
@@ -2817,27 +3191,44 @@ Shell7Base :: updateLayerStressesSR(FloatMatrix &dSmatLayerIP, FloatMatrix &Smat
                 }
             #endif
             Sold.at(5) = dSmatLayerIP.at(1,point+1); // S_xz
-            Sold.at(4) = dSmatLayerIP.at(2,point+1); // S_yz
-            Sold.at(3) = dSmatLayerIP.at(3,point+1); // S_zz        
+            Sold.at(4) = dSmatLayerIP.at(2,point+1); // S_yz   
             if ( Sold.giveSize() > 6 ) {
                 Sold.at(8) = Sold.at(5); // S_xz
                 Sold.at(7) = Sold.at(4); // S_yz
             }
             status->letStressVectorBe(Sold);
-            #if 0
-                if (this->giveGlobalNumber() == 126) {
-                    if (j == 3) {
-                        if (i == 1) {
-                            Sold.printYourself("Recovered");
-                        }
-                    }
-                }
-            #endif
         }
     } 
 }
 
+void
+Shell7Base :: updateLayerTransvNormalStressSR(FloatArray &dSzzMatLayerIP, FloatArray &SzzMatOld, int layer)
+{
+    // add stresses from lower interface AND replace stresses in wedge GP
+    
+    IntegrationRule *iRuleL = this->integrationRulesArray [ layer - 1 ];  
+    
+    int numInPlaneIP = 6; ///@todo generalise this! 
+    int numThicknessIP = this->layeredCS->giveNumIntegrationPointsInLayer();         
+    
+    for ( int j = 0; j < numInPlaneIP; j++ ) { 
+        for ( int i = 0; i < numThicknessIP; i++ ) {
+            int point = i*numInPlaneIP + j; // wedge integration point number
+            dSzzMatLayerIP.at(point+1) += SzzMatOld.at(j+1);  // S_zz
+            
+            // Replace stresses
+            GaussPoint *gp = iRuleL->getIntegrationPoint(point);
+            StructuralMaterialStatus* status = dynamic_cast< StructuralMaterialStatus* > ( gp->giveMaterialStatus() );
+            FloatArray Sold = status->giveStressVector(); 
+            
+            Sold.at(3) = dSzzMatLayerIP.at(point+1); // S_zz        
+            status->letStressVectorBe(Sold);
+        }
+    } 
+}
+# endif
 
+#if 0
 void
 Shell7Base :: givePolynomialGradientForStressRecAt(FloatArray &answer, FloatArray &coords)
 {
@@ -2857,6 +3248,7 @@ Shell7Base :: givePolynomialGradientForStressRecAt(FloatArray &answer, FloatArra
     answer = {0,1,0,0,           0,coords.at(3),coords.at(2),2.0*coords.at(1),             0,
               0,0,1,0,coords.at(3),           0,coords.at(1),             0,2.0*coords.at(2)};
 }
+#endif
 
 void
 Shell7Base :: giveZintegratedPolynomialGradientForStressRecAt(FloatArray &answer, FloatArray &coords)
@@ -2876,8 +3268,95 @@ Shell7Base :: giveZintegratedPolynomialGradientForStressRecAt(FloatArray &answer
      */
     
     answer.zero();
-    answer = {0,coords.at(3),           0,0,                                  0,coords.at(3)*coords.at(3)*(1.0/2.0),coords.at(2)*coords.at(3),2.0*coords.at(1)*coords.at(3),                            0,
-              0,           0,coords.at(3),0,coords.at(3)*coords.at(3)*(1.0/2.0),                                  0,coords.at(1)*coords.at(3),                            0,2.0*coords.at(2)*coords.at(3)};
+    // P = [1 x y z yz xz xy x² y²]
+//     answer = {0,coords.at(3),           0,0,                                  0,0.5*coords.at(3)*coords.at(3),coords.at(2)*coords.at(3),2.0*coords.at(1)*coords.at(3),                            0,
+//               0,           0,coords.at(3),0,0.5*coords.at(3)*coords.at(3),                                  0,coords.at(1)*coords.at(3),                            0,2.0*coords.at(2)*coords.at(3)};
+    
+    // P = [1 x y z yz xz xy x² y² x²z y²z]
+    answer = {0,coords.at(3),0,0,0,0.5*coords.at(3)*coords.at(3),coords.at(2)*coords.at(3),2.0*coords.at(1)*coords.at(3),0,coords.at(1)*coords.at(3)*coords.at(3),0,
+              0,0,coords.at(3),0,0.5*coords.at(3)*coords.at(3),0,coords.at(1)*coords.at(3),0,2.0*coords.at(2)*coords.at(3),0,coords.at(2)*coords.at(3)*coords.at(3)};
+    
+    // P = [x y yz xz xy x² y² x²z y²z]
+//     answer = {coords.at(3),0,0,0.5*coords.at(3)*coords.at(3),coords.at(2)*coords.at(3),2.0*coords.at(1)*coords.at(3),0,coords.at(1)*coords.at(3)*coords.at(3),0,
+//               0,coords.at(3),0.5*coords.at(3)*coords.at(3),0,coords.at(1)*coords.at(3),0,2.0*coords.at(2)*coords.at(3),0,coords.at(2)*coords.at(3)*coords.at(3)};
+    
+    // P = [x y yz xz xy x² y² x²z y²z xyz]
+//     answer = {coords.at(3),0,0,0.5*coords.at(3)*coords.at(3),coords.at(2)*coords.at(3),2.0*coords.at(1)*coords.at(3),0,coords.at(1)*coords.at(3)*coords.at(3),0,0.5*coords.at(2)*coords.at(3)*coords.at(3),
+//               0,coords.at(3),0.5*coords.at(3)*coords.at(3),0,coords.at(1)*coords.at(3),0,2.0*coords.at(2)*coords.at(3),0,coords.at(2)*coords.at(3)*coords.at(3),0.5*coords.at(1)*coords.at(3)*coords.at(3)};
+        
+    // P = [x y yz xz xy x² y² x³ y³ xyz x²z y²z]
+//     answer = {coords.at(3),0,0,0.5*coords.at(3)*coords.at(3),coords.at(2)*coords.at(3),2.0*coords.at(1)*coords.at(3),0,3.0*coords.at(1)*coords.at(1)*coords.at(3),0,0.5*coords.at(2)*coords.at(3)*coords.at(3),coords.at(1)*coords.at(3)*coords.at(3),0,
+//               0,coords.at(3),0.5*coords.at(3)*coords.at(3),0,coords.at(1)*coords.at(3),0,2.0*coords.at(2)*coords.at(3),0,3.0*coords.at(2)*coords.at(2)*coords.at(3),0.5*coords.at(1)*coords.at(3)*coords.at(3),0,coords.at(2)*coords.at(3)*coords.at(3)};
+
+    
+}
+
+void 
+Shell7Base :: giveZintegratedPolynomial2GradientForStressRecAt(FloatArray &answer, FloatArray &coords)
+{    
+    /* 
+     * answer = Intgrad2P = [ d(I[dP/dx]dz)/dx d(I[dP/dx]dz)/dy d(I[dP/dy]dz)/dy]^T
+     */
+    answer.zero();
+    // P = [1 x y z yz xz xy x² y² x²z y²z]
+    answer = {0,0,0,0,0,0,0,2.0*coords.at(3),0,coords.at(3)*coords.at(3),0,
+              0,0,0,0,0,0,coords.at(3),0,0,0,0,
+              0,0,0,0,0,0,0,0,2.0*coords.at(3),0,coords.at(3)*coords.at(3)};
+    
+    // P = [x y yz xz xy x² y² x²z y²z]
+//     answer = {0,0,0,0,0,2.0*coords.at(3),0,coords.at(3)*coords.at(3),0,
+//               0,0,0,0,coords.at(3),0,0,0,0,
+//               0,0,0,0,0,0,2.0*coords.at(3),0,coords.at(3)*coords.at(3)};
+              
+    // P = [x y yz xz xy x² y² x²z y²z]
+//     answer = {0,0,0,0,0,2.0*coords.at(3),0,6.0*coords.at(1)*coords.at(3),0,0,coords.at(3)*coords.at(3),0,
+//               0,0,0,0,coords.at(3),0,0,0,0,0.5*coords.at(3)*coords.at(3),0,0,
+//               0,0,0,0,0,0,2.0*coords.at(3),0,6.0*coords.at(2)*coords.at(3),0,0,coords.at(3)*coords.at(3)};
+      
+}
+
+void
+Shell7Base :: giveZ2integratedPolynomial2GradientForStressRecAt(FloatArray &answer, FloatArray &coords)
+{
+    /* Return the special matrix {gradP} of the reciever evaluated at a global coordinate (of a Gauss point)
+     * Used for integration of S_zz such that
+     * a(ij)*gradP = dS_ij/dx + dS_ij/dy, where a(ij) is a vector of coefficients to the polynomial
+     * P(x,y,z) = [x y yz xz xy x² y² x²y x²z y²x y²z]
+     * associated with stress component ij.
+     * The gradient of P(x,y,z) is given by
+     * dP/dx = [1 0 0 z y 2x 0 2xy 2xz y² 0]
+     * dP/dy = [0 1 z 0 x 0 2y x² 0 2xy 2yz]
+     * and the z-integration is then:
+     * I[dP/dx]dz = [z 0 0 z²/2 yz 2xz 0 2xyz xz² y²z 0]
+     * I[dP/dy]dz = [0 z z²/2 0 xz 0 2yz x²z 0 2xyz yz²]
+     * derivated wrt x and y
+     * d(I[dP/dx]dz)/dx = [0 0 0 0 0 2z 0 2yz z² 0 0]
+     * d(I[dP/dy]dz)/dy = [0 0 0 0 0 0 2z 0 0 2xz z²]
+     * d(I[dP/dx]dz)/dy = [I[dP/dy]dz]dx = [0 0 0 0 z 0 0 2xz 0 2yz 0]
+     * and ones again integrated over z:
+     * I[d(I[dP/dx]dz)/dx]dz = [0 0 0 0 0 z² 0 yz² z³/3 0 0]
+     * I[d(I[dP/dy]dz)/dy]dz = [0 0 0 0 0 0 z² 0 0 xz² z³/3]
+     * I[d(I[dP/dx]dz)/dy]dz = I[d(I[dP/dy]dz)/dx]dz = [0 0 0 0 z²/2 0 0 xz² 0 yz² 0]
+     * answer = int2grad2P = [I[d(I[dP/dx]dz)/dx]dz I[d(I[dP/dx]dz)/dy]dz I[d(I[dP/dy]dz)/dy]dz]^T
+     */
+    
+    answer.zero();
+    
+    // P = [1 x y z yz xz xy x² y² x²z y²z]
+    answer = {0,0,0,0,0,0,0,coords.at(3)*coords.at(3),0,(1.0/3.0)*coords.at(3)*coords.at(3)*coords.at(3),0,
+              0,0,0,0,0,0,0.5*coords.at(3)*coords.at(3),0,0,0,0,
+              0,0,0,0,0,0,0,0,coords.at(3)*coords.at(3),0,(1.0/3.0)*coords.at(3)*coords.at(3)*coords.at(3)};
+    
+    // P = [x y yz xz xy x² y² x²z y²z]
+//     answer = {0,0,0,0,0,coords.at(3)*coords.at(3),0,(1.0/3.0)*coords.at(3)*coords.at(3)*coords.at(3),0,
+//               0,0,0,0,0.5*coords.at(3)*coords.at(3),0,0,0,0,
+//               0,0,0,0,0,0,coords.at(3)*coords.at(3),0,(1.0/3.0)*coords.at(3)*coords.at(3)*coords.at(3)};
+//               
+    // P = [x y yz xz xy x² y² x²z y²z]
+//     answer = {0,0,0,0,0,coords.at(3)*coords.at(3),0,3.0*coords.at(1)*coords.at(3)*coords.at(3),0,0,(1.0/3.0)*coords.at(3)*coords.at(3)*coords.at(3),0,
+//               0,0,0,0,0.5*coords.at(3)*coords.at(3),0,0,0,0,(1.0/6.0)*coords.at(3)*coords.at(3)*coords.at(3),0,0,
+//               0,0,0,0,0,0,coords.at(3)*coords.at(3),0,3.0*coords.at(2)*coords.at(3)*coords.at(3),0,0,(1.0/3.0)*coords.at(3)*coords.at(3)*coords.at(3)};
+              
 }
 
 #if 0

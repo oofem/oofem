@@ -2275,7 +2275,7 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
         InternalStateType type = ( InternalStateType ) internalVarsToExport.at(fieldNum);
         nodeNum = 1;
         
-        if ( 1 ) {
+        if ( 0 ) {
         // Recover shear stresses
         this->recoverShearStress(tStep);
         }
@@ -2970,6 +2970,7 @@ Shell7BaseXFEM :: recoverShearStress(TimeStep *tStep)
     
     ///@todo add bottom/top BC
     FloatMatrix SmatOld(3,numInPlaneIP); // 3 stress components (S_xz, S_yz, S_zz) * num of in plane ip 
+    FloatArray ddSmatOld(numInPlaneIP); // dSzz/dz of previous layer
     SmatOld.zero();
     
     if ( hasDelamination ) {
@@ -2979,76 +2980,99 @@ Shell7BaseXFEM :: recoverShearStress(TimeStep *tStep)
         FloatMatrix dSmatLayerIP(3,numInPlaneIP*numThicknessIP);    // 3 stress components (S_xz, S_yz, S_zz) * num of wedge ip 
         
         for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
-        
-            Shell7Base :: giveLayerContributionToSR(dSmat, dSmatLayerIP, layer, zeroThicknessLevel, tStep); // NB: performed in global system
             
-            Shell7Base :: updateLayerStressesSR(dSmatLayerIP, SmatOld, layer);
+            // Bör det vara this här istället för Shell7Base?
+//             Shell7Base :: giveLayerContributionToSR(dSmat, dSmatLayerIP, layer, zeroThicknessLevel, tStep); // NB: performed in global system
+            this->giveLayerContributionToSR(dSmat, dSmatLayerIP, layer, ddSmatOld, zeroThicknessLevel, tStep); // NB: performed in global system
+            
+//             Shell7Base :: updateLayerStressesSR(dSmatLayerIP, SmatOld, layer);
+            this->updateLayerTransvStressesSR(dSmatLayerIP, SmatOld, layer);
             //dSmatLayerIP.printYourself(); 
             //printf("enr func in dofman %d = %e \n", layer, layer);
             
             SmatOld.add(dSmat); 
+            if (this->giveGlobalNumber() == 126) {
+                SmatOld.printYourself();
+            }
             zeroThicknessLevel += this->layeredCS->giveLayerThickness(layer); ///@todo add jump?
-#if 0       
+            
             // Add traction from delamination CZ. NB: assumes same number order of GPs in interface and shell elements
             if ( layerHasBC.at(layer+1) ) {
                 
                 EnrichmentItem *ei = this->xMan->giveEnrichmentItem(layerHasBC.at(layer+1));
                 Delamination *dei =  dynamic_cast< Delamination * >( ei );
                 int interfaceNum = dei->giveDelamInterfaceNum();
-                IntegrationRule *iRuleI = czIntegrationRulesArray [ interfaceNum - 1 ];
-                if (iRuleI->giveNumberOfIntegrationPoints() != numInPlaneIP ) {
-                    OOFEM_ERROR("Interface IPs doesn't match the element IPs");
-                }
                 
-                FloatArray lCoords(3), nCov, CZPKtraction(3);
-                CZPKtraction.zero();
-                FloatMatrix Q;
-                int iIGP = 1;
-                for ( GaussPoint *gp: *iRuleI ) {
-                    double xi = dei->giveDelamXiCoord();
-                    lCoords.at(1) = gp->giveNaturalCoordinate(1);
-                    lCoords.at(2) = gp->giveNaturalCoordinate(2);
-                    lCoords.at(3) = xi;
-                    #if 0
-                    FloatArray GPcoords = gp->giveGlobalCoordinates();
-                        if (this->giveGlobalNumber() == 126) {
-                            GPcoords.printYourself("interface GPs");
-                        }
-                    #endif
-                    this->evalInitialCovarNormalAt(nCov, lCoords); 
-                    Q.beLocalCoordSys(nCov);
-                    
-                    StructuralInterfaceMaterialStatus* intMatStatus = static_cast < StructuralInterfaceMaterialStatus* > ( gp->giveMaterialStatus() );
-                    if (intMatStatus == 0) {
-                        OOFEM_ERROR("NULL pointer to material status");
+                if ( this->hasCohesiveZone( interfaceNum ) ) {
+#if 1  
+                    // CZ traction 
+                    IntegrationRule *iRuleI = czIntegrationRulesArray [ interfaceNum - 1 ];
+                    if (iRuleI->giveNumberOfIntegrationPoints() != numInPlaneIP ) {
+                        OOFEM_ERROR("Interface IPs doesn't match the element IPs");
                     }
                     
-//                     CZPKtraction = intMatStatus->giveFirstPKTraction(); // 3 components in local coords
+                    FloatArray lCoords(3), nCov, CZPKtraction(3);
+                    CZPKtraction.zero();
+                    FloatMatrix Q;
+                    int iIGP = 1;
+                    for ( GaussPoint *gp: *iRuleI ) {
+                        double xi = dei->giveDelamXiCoord();
+                        lCoords.at(1) = gp->giveNaturalCoordinate(1);
+                        lCoords.at(2) = gp->giveNaturalCoordinate(2);
+                        lCoords.at(3) = xi;
+                        #if 0
+                        FloatArray GPcoords = gp->giveGlobalCoordinates();
+                            if (this->giveGlobalNumber() == 126) {
+                                GPcoords.printYourself("interface GPs");
+                            }
+                        #endif
+//                         this->evalInitialCovarNormalAt(nCov, lCoords); // intial coords
+                        
+                        // Find PK-traction in current coords.
+                        FloatArray solVecC;
+                        this->giveUpdatedSolutionVector(solVecC, tStep);
+                        FloatMatrix B;
+                        this->computeEnrichedBmatrixAt(lCoords, B, NULL);   // NULL => Shell7base :: computeBmatrixAt, otherwise include dei
+                        FloatArray genEpsC;                        
+                        genEpsC.beProductOf(B, solVecC);
+                        this->evalCovarNormalAt(nCov, lCoords, genEpsC, tStep);     // Denna verkar ta hänsyn till hoppet, men hur ser jag till att det är normalen ovanför delamineringen?
+                        Q.beLocalCoordSys(nCov);
+                        
+                        StructuralInterfaceMaterialStatus* intMatStatus = static_cast < StructuralInterfaceMaterialStatus* > ( gp->giveMaterialStatus() );
+                        if (intMatStatus == 0) {
+                            OOFEM_ERROR("NULL pointer to material status");
+                        }
+                        
+                        CZPKtraction = intMatStatus->giveFirstPKTraction(); // 3 components in local coords
 
-//                     CZPKtraction.rotatedWith(Q,'t'); // transform back to global coord system
-//                     #if 1
-//                         if (this->giveGlobalNumber() == 126) {
-//                             CZPKtraction.printYourself();
-//                         }
-//                     #endif
-                    
-                }
-            }
+                        CZPKtraction.rotatedWith(Q,'t'); // transform back to global coord system
+                        #if 0
+                            if (this->giveGlobalNumber() == 126) {
+                                CZPKtraction.printYourself();
+                            }
+                        #endif
+                        // Set BC stresses
+                        SmatOld.at(1,iIGP) = CZPKtraction.at(1);
+                        SmatOld.at(2,iIGP) = CZPKtraction.at(2);
+                        SmatOld.at(3,iIGP) = CZPKtraction.at(3);
+                        iIGP++;
 #endif
+                    }
+                } else {
+                    // Delamination zero traction
+                    SmatOld.zero();
+                }
+                # if 0
+                if (this->giveGlobalNumber() == 126) {
+                    SmatOld.printYourself();
+                }
+                # endif
+            }
         }
         
     } else {
         Shell7Base :: recoverShearStress(tStep); 
     }
-    
-    
-    // Göra stress rec som vanlig men fråga i-planet-dofmanagern om den är berikad. Isf behöver randvillkor (fr delaminering eller CZ) tas i beaktining. 
-    // Hur gör vi med generella RV på topp/botten? Behöver troligtvis impelementeras snart. 
-    // this->layeredCS->giveInterfaceMaterial();
-//     int numberOfInterfaces = this->layeredCS->giveNumberOfLayers() - 1;
-//     
-//             status* intmatstatus = static_cast < StructuralInterfaceMaterialStatus * > (gp->giveMaterialStatus() );
-//             CZPKtraction = intmatstatus->giveFirstPKTraction
 
 }
 

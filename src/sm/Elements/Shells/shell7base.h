@@ -241,11 +241,15 @@ protected:
     void CopyIPvaluesToNodes(std::vector<FloatArray> &recoveredValues, int layer, InternalStateType type, TimeStep *tStep);
     void nodalLeastSquareFitFromIP(std::vector<FloatArray> &recoveredValues, int layer, InternalStateType type, TimeStep *tStep);
     virtual void recoverShearStress(TimeStep *tStep);
-    void giveLayerContributionToSR(FloatMatrix &dSmat, FloatMatrix &dSmatLayerIP, int layer, double zeroThicknessLevel, TimeStep *tStep);
-    void updateLayerStressesSR(FloatMatrix &dSmatLayerIP, FloatMatrix &SmatOld, int layer);
+    void giveLayerContributionToSR(FloatMatrix &dSmat, FloatMatrix &dSmatLayerIP, int layer, FloatArray &ddSmatOld, double zeroThicknessLevel, TimeStep *tStep);
+    void updateLayerTransvStressesSR(FloatMatrix &dSmatLayerIP, FloatMatrix &SmatOld, int layer);
+    void updateLayerTransvShearStressesSR(FloatMatrix &dSmatLayerIP, FloatMatrix &SmatOld, int layer);
+    void updateLayerTransvNormalStressSR(FloatArray &dSzzMatLayerIP, FloatArray &SzzMatOld, int layer);
 //    void computeBmatrixForStressRecAt(FloatArray &lcoords, FloatMatrix &answer, int layer, bool intSzz = false);
-    void givePolynomialGradientForStressRecAt(FloatArray &answer, FloatArray &coords);
+//     void givePolynomial2GradientForStressRecAt(FloatArray &answer, FloatArray &coords);
     void giveZintegratedPolynomialGradientForStressRecAt(FloatArray &answer, FloatArray &coords);
+    void giveZintegratedPolynomial2GradientForStressRecAt(FloatArray &answer, FloatArray &coords);
+    void giveZ2integratedPolynomial2GradientForStressRecAt(FloatArray &answer, FloatArray &coords);
     void giveL2contribution(FloatMatrix &ipValues, FloatMatrix &Nbar, int layer, InternalStateType type, TimeStep *tStep);
     void giveSPRcontribution(FloatMatrix &eltIPvalues, FloatMatrix &eltPolynomialValues, int layer, InternalStateType type, TimeStep *tStep);
 
