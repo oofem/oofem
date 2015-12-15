@@ -222,7 +222,7 @@ IntElPoint :: computeAreaAround(GaussPoint *gp)
 {
     // The modeled area/extension around the connected nodes. 
     // Compare with the cs area of a bar. ///@todo replace with cs-property? /JB
-    return this->area;  
+    return this->area;
 }
 
 
@@ -241,7 +241,7 @@ IntElPoint :: initializeFrom(InputRecord *ir)
         return IRRT_BAD_FORMAT;
     }
     IR_GIVE_OPTIONAL_FIELD(ir, referenceNode, _IFT_IntElPoint_refnode);
-    IR_GIVE_OPTIONAL_FIELD(ir, normal, _IFT_IntElPoint_normal);  
+    IR_GIVE_OPTIONAL_FIELD(ir, normal, _IFT_IntElPoint_normal);
     
     this->area = 1.0; // Default area ///@todo Make non-optional? /JB
     IR_GIVE_OPTIONAL_FIELD(ir, this->area, _IFT_IntElPoint_area);

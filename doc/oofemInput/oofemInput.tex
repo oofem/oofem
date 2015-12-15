@@ -2643,7 +2643,7 @@ following:
 \begin{record}
   \recentry{\entKeyword{EntType}}{\componentNum}
   \recentry{}{\field{loadTimeFunction}{in}}
-  \recentry{}{\optField{valType}{in} \optField{defaultDofs}{ia}}
+  \recentry{}{\optField{valType}{in} \optField{dofs}{ia}}
   \recentry{}{\optField{is\-Impo\-sed\-Ti\-me\-Fun\-ction}{in}}
 \end{record}
 
@@ -2653,11 +2653,11 @@ Time function value (given by \param{loadTimeFunction} parameter) is a multiplie
 each  component (value of loading or value of boundary condition)
 describes its time variation.
 The optional parameter \param{valType} allows to determine the
-physical meaning of bc value, which is sometimes requared. Supported
+physical meaning of bc value, which is sometimes required. Supported
 values are (1 - temperature, 2 - force/traction,
 3 - pressure, 4 - humudity, 5 - velocity, 6 - displacement).
-Another optional parameter \param{defaultDofs} is used to determine which dofs the boundary condition should act
-upon when new nodes are created on the boundaries.
+Another optional parameter \param{dofs} is used to determine which dofs the boundary condition should act
+upon. It is not relevant for all BCs..
 
 The nonzero value of \param{isImposedTimeFunction} time function
 indicates that given boundary condition is active, zero value

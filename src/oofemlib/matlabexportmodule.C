@@ -136,29 +136,29 @@ MatlabExportModule :: computeArea(TimeStep *tStep)
     smax.clear();
     smin.clear();
 
-    for (int i=1; i<=domain->giveNumberOfSpatialDimensions(); i++) {
+    for (int i = 1; i <= domain->giveNumberOfSpatialDimensions(); i++) {
         smax.push_back(domain->giveDofManager(1)->giveCoordinate(i));
         smin.push_back(domain->giveDofManager(1)->giveCoordinate(i));
     }
 
     for ( int i = 0; i < domain->giveNumberOfDofManagers(); i++ ) {
-        for (int j=0; j < domain->giveNumberOfSpatialDimensions(); j++) {
+        for (int j = 0; j < domain->giveNumberOfSpatialDimensions(); j++) {
             smax.at(j)=max(smax.at(j), domain->giveDofManager(i+1)->giveCoordinate(j+1));
             smin.at(j)=min(smin.at(j), domain->giveDofManager(i+1)->giveCoordinate(j+1));
         }
     }
 
-    Area=0;
-    Volume=0;
+    Area = 0;
+    Volume = 0;
 
     if ( domain->giveNumberOfSpatialDimensions() == 2 ) {
         for ( auto &elem : domain->giveElements() ) {
-            Area = Area + elem->computeArea();
+            Area += elem->computeArea();
         }
     } else {
 
-        for (size_t i = 0; i<partVolume.size(); i++ ) {
-            partVolume.at(i)=0.0;
+        for (size_t i = 0; i < partVolume.size(); i++ ) {
+            partVolume.at(i) = 0.0;
         }
 
         for ( auto &elem : domain->giveElements() ) {
@@ -190,12 +190,11 @@ MatlabExportModule :: computeArea(TimeStep *tStep)
             if ( j == -1 ) {
                 partName.push_back( elem->giveClassName() );
                 partVolume.push_back( v );
-                j = partVolume.size()-1;
             } else {
-                partVolume.at(j) = partVolume.at(j) + v;
+                partVolume.at(j) += v;
             }
 
-            Volume = Volume + v;
+            Volume += v;
 
         }
     }

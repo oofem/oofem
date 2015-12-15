@@ -379,7 +379,7 @@ DynamicInputRecord :: report_error(const char *_class, const char *proc, InputFi
     oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, NULL, file, line,
                               "Input error: \"%s\", field keyword \"%s\"\n%s::%s",
                               strerror(result), id, _class, proc);
-    oofem_exit(1); ///@todo We should never directly exit when dealing with user input.
+    OOFEM_EXIT(1); ///@todo We should never directly exit when dealing with user input.
 }
 
 // Helpful macro since we have so many separate records

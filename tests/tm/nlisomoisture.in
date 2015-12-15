@@ -2,13 +2,14 @@ nlisomoisture.out
 test of nonlinear isotropic material for moisture transport
 #
 nltransienttransportproblem nsteps 5 alpha 0.5 rtol 1.e-10 lumpedcapa nsmax 1000 prescribedtimes 5 0.01 0.1 0.2 0.3 0.4 nmodules 1
+#TransientTransport nsteps 5 alpha 0.5 lumped rtolf 1e-10 prescribedtimes 5 0.01 0.1 0.2 0.3 0.4 nmodules 1
 errorcheck
 # nmodules 1
 # vtkxml tstep_all domain_all primvars 1 3
 #
 domain mass1transfer
 OutputManager tsteps_out {5} dofman_output {1 7 13 19 25 31 37} element_output {1}
-ndofman  42 nelem  14 ncrosssect 7 nmat 7 nbc 1 nic 1 nltf 1 nset 2
+ndofman 42 nelem 14 ncrosssect 7 nmat 7 nbc 1 nic 1 nltf 1 nset 2
 #
 node   1   coords 3  0.000  0.000  0.0
 node   2   coords 3  0.001  0.000  0.0

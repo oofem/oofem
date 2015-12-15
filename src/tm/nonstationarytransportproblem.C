@@ -62,7 +62,7 @@ void TransportExternalForceAssembler :: vectorFromElement(FloatArray &vec, Eleme
     telem->computeBCVectorAt(vec, tStep, mode);
     FloatArray tmp;
     telem->computeInternalSourceRhsVectorAt(tmp, tStep, mode);
-    vec.add(tmp);    
+    vec.add(tmp);
 }
 
 
@@ -85,7 +85,6 @@ void IntSourceLHSAssembler :: matrixFromElement(FloatMatrix &answer, Element &el
 {
     static_cast< TransportElement * >( &el )->computeIntSourceLHSMatrix(answer, tStep);
 }
-
 
 
 NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel *_master = NULL) : StationaryTransportProblem(i, _master)

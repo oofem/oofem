@@ -258,7 +258,7 @@ ContextIOERR :: print()
         oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, NULL, file, line, 
                                   "ContextIOERR encountered, error code: %d", error);
     }
-    oofem_exit(1);
+    OOFEM_EXIT(1);
 }
 
 /*

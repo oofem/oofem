@@ -108,7 +108,11 @@ LatticeTransportMaterial :: initializeFrom(InputRecord *ir)
 void
 LatticeTransportMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep)
 {
-    ///@todo Is there anything meaningful to do here for lattice models?
+    LatticeTransportMaterialStatus *status = static_cast< LatticeTransportMaterialStatus * >( this->giveStatus(gp) );
+    status->setTempField(field);
+    double suction = field.at(1);
+    double c = this->computeConductivity(suction, gp, tStep);
+    answer.beScaled(-c, grad);
 }
 
 
@@ -218,19 +222,19 @@ LatticeTransportMaterial :: computeConductivity(double suction,
 #endif
     
     //Read in crack widths from transport element
-    if (!domain->giveEngngModel()->giveMasterEngngModel()){
-      static_cast< LatticeTransportElement * >( gp->giveElement() )->giveCrackWidths(crackWidths);
+    if ( !domain->giveEngngModel()->giveMasterEngngModel() ) {
+        static_cast< LatticeTransportElement * >( gp->giveElement() )->giveCrackWidths(crackWidths);
     }
     
     //Use crack width and apply cubic law
     double crackContribution = 0.;
 
-    for(int i = 1; i <=crackLengths.giveSize();i++){
-        if(crackWidths.at(i)<this->crackLimit || this->crackLimit < 0.){
-            crackContribution += pow(crackWidths.at(i), 3.) / crackLengths.at(i) ;
+    for (int i = 1; i <= crackLengths.giveSize(); i++) {
+        if ( crackWidths.at(i) < this->crackLimit || this->crackLimit < 0. ) {
+            crackContribution += pow(crackWidths.at(i), 3.) / crackLengths.at(i);
         } else {
             printf("Limit is activated\n");
-            crackContribution += pow(crackLimit, 3.) / crackLengths.at(i) ;
+            crackContribution += pow(crackLimit, 3.) / crackLengths.at(i);
         }
     }
 
