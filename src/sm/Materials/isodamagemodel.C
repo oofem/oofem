@@ -295,7 +295,6 @@ IsotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Inter
         answer.at(1) = status->giveCrackAngle();
         return 1;
     } else if ( type == IST_CrackVector ) {
-        answer.resize(3);
         status->giveCrackVector(answer);
         return 1;
 
