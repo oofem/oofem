@@ -99,11 +99,20 @@ void DofManager :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
     if ( load->giveBCGeoType() != NodalLoadBGT ) {
         OOFEM_ERROR("incompatible load type applied");
     }
+
+    answer.clear();
     if ( type != ExternalForcesVector ) {
-        answer.clear();
         return;
     }
-    load->computeComponentArrayAt(answer, tStep, mode);
+
+    if ( load->giveDofIDs().giveSize() == 0 ) {
+        load->computeComponentArrayAt(answer, tStep, mode);
+    } else {
+        answer.resize(this->giveNumberOfDofs());
+        FloatArray tmp;
+        load->computeComponentArrayAt(tmp, tStep, mode);
+        answer.assemble(tmp, load->giveDofIDs());
+    }
 }
 
 

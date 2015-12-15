@@ -177,8 +177,8 @@ void Node :: giveInputRecord(DynamicInputRecord &input)
 void
 Node :: computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeStep *tStep, ValueModeType mode)
 {
+    answer.clear();
     if ( type != ExternalForcesVector ) {
-        answer.clear();
         return;
     }
 
@@ -191,12 +191,19 @@ Node :: computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeSte
         OOFEM_ERROR("incompatible load type applied");
     }
 
-    loadN->computeComponentArrayAt(answer, tStep, mode); // can be NULL
+    if ( load->giveDofIDs().giveSize() == 0 ) {
+        load->computeComponentArrayAt(answer, tStep, mode);
+    } else {
+        answer.resize(this->giveNumberOfDofs());
+        FloatArray tmp;
+        load->computeComponentArrayAt(tmp, tStep, mode);
+        answer.assemble(tmp, load->giveDofIDs());
+    }
+
     // Transform from Global to Local c.s.
     if ( loadN->giveCoordSystMode() == NodalLoad :: CST_Global ) {
-        IntArray dofIDarry(0);
         FloatMatrix L2G;
-        if ( this->computeL2GTransformation(L2G, dofIDarry) ) {
+        if ( this->computeL2GTransformation(L2G, loadN->giveDofIDs()) ) {
             answer.rotatedWith(L2G, 't');
         }
     }
