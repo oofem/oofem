@@ -134,7 +134,7 @@ public:
     double givegf() { return var_gf; }
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
-
+    virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
 #ifdef supplementary_info

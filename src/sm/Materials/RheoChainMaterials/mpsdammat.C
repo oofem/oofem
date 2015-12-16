@@ -75,6 +75,21 @@ MPSDamMaterialStatus :: MPSDamMaterialStatus(int n, Domain *d, GaussPoint *g, in
 
 
 void
+MPSDamMaterialStatus :: initTempStatus()
+{
+    MPSMaterialStatus :: initTempStatus();
+
+    this->tempKappa = this->kappa;
+    this->tempDamage = this->damage;
+
+    this->tempEffectiveStressVector = this->effectiveStressVector;
+
+    if ( !damage ) {
+        var_e0 = var_gf = 0.;
+    }
+}
+
+void
 MPSDamMaterialStatus :: updateYourself(TimeStep *tStep)
 {
     MPSMaterialStatus :: updateYourself(tStep);
@@ -533,6 +548,15 @@ MPSDamMaterial :: computeTensileStrength(double equivalentTime)
     // returns fcm in MPa - formula 5.1-51, Table 5.1-9
     fcm = exp( fib_s * ( 1. - sqrt(28. * MPSMaterial :: lambda0 / equivalentTime) ) ) * fib_fcm28;
     // ftm adjusted according to the stiffnessFactor (MPa by default)
+    if ( fcm >= 58. ) {
+      ftm = 2.12 * log ( 1. + 0.1 * fcm ) * 1.e6 / MPSMaterial :: stiffnessFactor;
+    } else if ( fcm <= 20. ) {
+      ftm = 0.07862 * fcm * 1.e6 / MPSMaterial :: stiffnessFactor; // 12^(2/3) * 0.3 / 20 = 0.07862
+    } else {
+      ftm = 0.3 * pow(fcm - 8., 2. / 3.) * 1.e6 / MPSMaterial :: stiffnessFactor; //5.1-3a
+    }
+
+    /*
     if ( fcm >= 20. ) {
         ftm = 0.3 * pow(fcm - 8., 2. / 3.) * 1.e6 / MPSMaterial :: stiffnessFactor; //5.1-3a
     } else if ( fcm < 8. ) {
@@ -541,7 +565,8 @@ MPSDamMaterial :: computeTensileStrength(double equivalentTime)
     } else {
         // smooth transition
         ftm = 0.3 * pow(fcm - ( 8. * ( fcm - 8. ) / ( 20. - 8. ) ), 2. / 3.) * 1.e6 / MPSMaterial :: stiffnessFactor;
-    }
+	}*/
+
     return ftm;
 }
 
@@ -844,10 +869,13 @@ MPSDamMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateT
         answer.at(1) =  status->giveResidualTensileStrength();
         return 1;
     } else if ( type == IST_TensileStrength ) {
-        double tequiv = this->computeEquivalentTime(gp, tStep, 1);
+        MPSDamMaterialStatus *status = static_cast< MPSDamMaterialStatus * >( this->giveStatus(gp) );
+        double tequiv = status->giveEquivalentTime();
         answer.resize(1);
         answer.zero();
-        answer.at(1) =  this->computeTensileStrength(tequiv);
+	    if (tequiv >= this->castingTime) {
+	      answer.at(1) =  this->computeTensileStrength(tequiv);
+	    }
         return 1;
     } else if ( type == IST_CrackIndex ) {
         //ratio of real principal stress / strength. 1 if damage already occured.
@@ -862,10 +890,12 @@ MPSDamMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateT
         //FloatArray effectiveStress = status->giveTempViscoelasticStressVector();
         //StructuralMaterial :: computePrincipalValues(principalStress, effectiveStress, principal_stress);
         StructuralMaterial :: giveIPValue(principalStress, gp, IST_PrincipalStressTensor, tStep);
-        double tequiv = this->computeEquivalentTime(gp, tStep, 1);
-        double ft = this->computeTensileStrength(tequiv);
-        if (ft > 1.e-20 && principalStress.at(1)>1.e-20){
-            answer.at(1) = principalStress.at(1)/ft;
+        double tequiv = status->giveEquivalentTime();
+	    if (tequiv >= this->castingTime) {
+	        double ft = this->computeTensileStrength(tequiv);
+	        if (ft > 1.e-20 && principalStress.at(1)>1.e-20){
+                answer.at(1) = principalStress.at(1)/ft;
+	        } 
         }
         return 1;
     } else {

@@ -127,6 +127,7 @@ public:
     MPSMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits);
     virtual ~MPSMaterialStatus() { }
 
+    virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
     virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
