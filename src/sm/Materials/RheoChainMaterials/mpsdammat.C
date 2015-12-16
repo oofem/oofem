@@ -262,10 +262,10 @@ MPSDamMaterial :: initializeFrom(InputRecord *ir)
     int damageLaw = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, damageLaw, _IFT_MPSDamMaterial_damageLaw);
 
-    this->fib = false;
+    this->timeDepFracturing = false;
 
-    if ( ir->hasField(_IFT_MPSDamMaterial_fib) ) {
-        this->fib = true;
+    if ( ir->hasField(_IFT_MPSDamMaterial_timedepfracturing) ) {
+        this->timeDepFracturing = true;
         //
         IR_GIVE_FIELD(ir, fib_s, _IFT_MPSDamMaterial_fib_s);
         // the same compressive strength as for the prediction using the B3 formulas
@@ -360,7 +360,7 @@ MPSDamMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const
         double residualStrength = 0.;
         double e0;
 
-        if ( ( this->fib ) && ( this->givee0(gp) == 0. ) ) {
+        if ( ( this->timeDepFracturing ) && ( this->givee0(gp) == 0. ) ) {
             this->initDamagedFib(gp, tStep);
         }
 
@@ -509,7 +509,7 @@ MPSDamMaterial :: initDamagedFib(GaussPoint *gp, TimeStep *tStep)
 double
 MPSDamMaterial :: givee0(GaussPoint *gp)
 {
-    if ( this->fib ) {
+    if ( this->timeDepFracturing ) {
         MPSDamMaterialStatus *status = ( MPSDamMaterialStatus * ) this->giveStatus(gp);
         return status->givee0();
     } else {
@@ -520,7 +520,7 @@ MPSDamMaterial :: givee0(GaussPoint *gp)
 double
 MPSDamMaterial :: givegf(GaussPoint *gp)
 {
-    if ( this->fib ) {
+    if ( this->timeDepFracturing ) {
         MPSDamMaterialStatus *status = ( MPSDamMaterialStatus * ) this->giveStatus(gp);
         return status->givegf();
     } else {
@@ -699,7 +699,7 @@ MPSDamMaterial :: initDamaged(double kappa, FloatArray &principalDirection, Gaus
 
     MPSDamMaterialStatus *status = static_cast< MPSDamMaterialStatus * >( this->giveStatus(gp) );
 
-    if ( this->fib ) {
+    if ( this->timeDepFracturing ) {
         this->initDamagedFib(gp, tStep);
     }
 

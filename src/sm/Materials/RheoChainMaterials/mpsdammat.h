@@ -47,7 +47,7 @@
 //@{
 #define _IFT_MPSDamMaterial_Name "mpsdammat"
 //prediction of tensile strength and fracture energy accroding to fib MC2010
-#define _IFT_MPSDamMaterial_fib "fib"
+#define _IFT_MPSDamMaterial_timedepfracturing "timedepfracturing"
 #define _IFT_MPSDamMaterial_fib_s "fib_s"
 
 #define _IFT_MPSDamMaterial_isotropic "isotropic"
@@ -180,7 +180,7 @@ class MPSDamMaterial : public MPSMaterial
 {
 protected:
 
-    bool fib;
+    bool timeDepFracturing;
     double fib_s;
     double fib_fcm28;
     bool isotropic;
