@@ -1269,9 +1269,11 @@ MPSMaterial :: computeFibAutogenousShrinkageStrainVector(FloatArray &answer, Gau
         MPSMaterialStatus *status = static_cast< MPSMaterialStatus * >( this->giveStatus(gp) );
         t_equiv_beg = status->giveEquivalentTime();
     }
+    // time must be converted into days
     t_equiv_beg /= this->lambda0;
 
     t_equiv_end = this->computeEquivalentTime(gp, tStep, 1);
+    // time must be converted into days
     t_equiv_end /= this->lambda0;
 
     eps_cas = eps_cas0 * ( -exp( -0.2 * sqrt(t_equiv_end) ) + exp( -0.2 * sqrt(t_equiv_beg) ) );
@@ -1323,11 +1325,10 @@ MPSMaterial :: computeB4AutogenousShrinkageStrainVector(FloatArray &answer, Gaus
         MPSMaterialStatus *status = static_cast< MPSMaterialStatus * >( this->giveStatus(gp) );
         t_equiv_beg = status->giveEquivalentTime();
     }
-    t_equiv_beg /= this->lambda0;
 
     t_equiv_end = this->computeEquivalentTime(gp, tStep, 1);
-    t_equiv_end /= this->lambda0;
-
+    //  t_equiv_beg, t_equiv_end and b4_tau_au are in time-units of the analysis
+   
     eps_au = b4_eps_au_infty * ( pow(1. + pow(b4_tau_au / t_equiv_end, b4_alpha), b4_r_t) -  pow(1. + pow(b4_tau_au / t_equiv_beg, b4_alpha), b4_r_t) );
 
     fullAnswer.resize(size);
