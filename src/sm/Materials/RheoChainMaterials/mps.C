@@ -1328,7 +1328,6 @@ MPSMaterial :: computeB4AutogenousShrinkageStrainVector(FloatArray &answer, Gaus
 
     t_equiv_end = this->computeEquivalentTime(gp, tStep, 1);
     //  t_equiv_beg, t_equiv_end and b4_tau_au are in time-units of the analysis
-   
     eps_au = b4_eps_au_infty * ( pow(1. + pow(b4_tau_au / t_equiv_end, b4_alpha), b4_r_t) -  pow(1. + pow(b4_tau_au / t_equiv_beg, b4_alpha), b4_r_t) );
 
     fullAnswer.resize(size);
