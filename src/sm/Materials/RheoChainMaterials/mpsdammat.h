@@ -59,6 +59,9 @@
 #define _IFT_MPSDamMaterial_ft "ft"
 #define _IFT_MPSDamMaterial_gf "gf"
 
+#define _IFT_MPSDamMaterial_ft28 "ft28"
+#define _IFT_MPSDamMaterial_gf28 "gf28"
+
 //@}
 
 namespace oofem {
@@ -215,6 +218,11 @@ protected:
 
     /// Method used for evaluation of characteristic element size
     ElementCharSizeMethod ecsMethod;
+
+    /// 28-day value of tensile strength. Used only with "timedepfracturing"
+    double ft28;
+    /// 28-day value of fracture energy. Used only with "timedepfracturing"
+    double gf28;
 
 public:
     MPSDamMaterial(int n, Domain *d);

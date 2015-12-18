@@ -269,7 +269,28 @@ MPSDamMaterial :: initializeFrom(InputRecord *ir)
         //
         IR_GIVE_FIELD(ir, fib_s, _IFT_MPSDamMaterial_fib_s);
         // the same compressive strength as for the prediction using the B3 formulas
-        IR_GIVE_FIELD(ir, fib_fcm28, _IFT_MPSMaterial_fc);
+
+	this->gf28 = 0.;
+	this->ft28 = 0.;
+	
+	if (  ( ir->hasField(_IFT_MPSDamMaterial_ft28) ) && ( ir->hasField(_IFT_MPSDamMaterial_gf28) ) )  {
+	    
+	    IR_GIVE_FIELD(ir, gf28, _IFT_MPSDamMaterial_gf28);
+	    if (gf28 < 0.) {
+	      OOFEM_WARNING("Fracture energy at 28 days must be positive");
+	    }
+	    IR_GIVE_FIELD(ir, ft28, _IFT_MPSDamMaterial_ft28);
+	    
+	    if (ft28 < 0.) {
+	      OOFEM_WARNING("Tensile strength at 28 days must be positive");
+	    }
+	    
+	  } else {
+	    IR_GIVE_OPTIONAL_FIELD(ir, gf28, _IFT_MPSDamMaterial_gf28);
+	    IR_GIVE_OPTIONAL_FIELD(ir, ft28, _IFT_MPSDamMaterial_ft28);
+	    IR_GIVE_FIELD(ir, fib_fcm28, _IFT_MPSMaterial_fc);
+	  }
+
     } else {
         double ft;
 
@@ -536,8 +557,18 @@ MPSDamMaterial :: computeFractureEnergy(double equivalentTime)
     double fractureEnergy;
     // evolution of the mean compressive strength with respect to equivalent time/age/maturity
     // returns fcm in MPa
-    fcm = exp( fib_s * ( 1. - sqrt(28. * MPSMaterial :: lambda0 / equivalentTime) ) ) * fib_fcm28;
+
+    if (this->gf28 > 0.) {
+      double fcm28mod;
+      fcm28mod =  pow ( this->gf28 * MPSMaterial :: stiffnessFactor / 73. , 1. / 0.18 );
+      fcm = exp( fib_s * ( 1. - sqrt(28. * MPSMaterial :: lambda0 / equivalentTime) ) ) * fcm28mod;
+
+    } else {
+      fcm = exp( fib_s * ( 1. - sqrt(28. * MPSMaterial :: lambda0 / equivalentTime) ) ) * fib_fcm28;
+    }
+
     fractureEnergy = 73. * pow(fcm, 0.18) / MPSMaterial :: stiffnessFactor;
+
     return fractureEnergy;
 }
 
@@ -545,8 +576,19 @@ double
 MPSDamMaterial :: computeTensileStrength(double equivalentTime)
 {
     double fcm, ftm;
-    // returns fcm in MPa - formula 5.1-51, Table 5.1-9
-    fcm = exp( fib_s * ( 1. - sqrt(28. * MPSMaterial :: lambda0 / equivalentTime) ) ) * fib_fcm28;
+
+
+    if (this->ft28 > 0.) {
+      double fcm28mod;
+      fcm28mod = pow ( this->ft28 * MPSMaterial :: stiffnessFactor / 0.3e6, 3./2. ) + 8.;
+      fcm = exp( fib_s * ( 1. - sqrt(28. * MPSMaterial :: lambda0 / equivalentTime) ) ) * fcm28mod;
+
+    } else {
+      // returns fcm in MPa - formula 5.1-51, Table 5.1-9
+      fcm = exp( fib_s * ( 1. - sqrt(28. * MPSMaterial :: lambda0 / equivalentTime) ) ) * fib_fcm28;
+    }
+
+
     // ftm adjusted according to the stiffnessFactor (MPa by default)
     if ( fcm >= 58. ) {
       ftm = 2.12 * log ( 1. + 0.1 * fcm ) * 1.e6 / MPSMaterial :: stiffnessFactor;
@@ -555,6 +597,7 @@ MPSDamMaterial :: computeTensileStrength(double equivalentTime)
     } else {
       ftm = 0.3 * pow(fcm - 8., 2. / 3.) * 1.e6 / MPSMaterial :: stiffnessFactor; //5.1-3a
     }
+    
 
     /*
     if ( fcm >= 20. ) {
