@@ -231,7 +231,9 @@ void CrackExportModule :: writeToOutputFile(const std :: string &iName, const st
 
 void
 CrackExportModule :: initialize()
-{}
+{
+    ExportModule :: initialize();
+}
 
 
 void

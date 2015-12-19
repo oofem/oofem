@@ -42,7 +42,6 @@
 #include "internalstatevaluetype.h"
 #include "integrationrule.h"
 #include "xfem/xfemmanager.h"
-#include "set.h"
 
 
 #ifdef __VTK_MODULE
@@ -62,8 +61,6 @@
 #define _IFT_VTKXMLExportModule_externalForces "externalforces"
 #define _IFT_VTKXMLExportModule_ipvars "ipvars"
 #define _IFT_VTKXMLExportModule_stype "stype"
-#define _IFT_VTKXMLExportModule_regionsets "regionsets"
-#define _IFT_VTKXMLExportModule_timescale "timescale"
 #define _IFT_VTKXMLExportModule_particleexportflag "particleexportflag"
 //@}
 
@@ -167,13 +164,7 @@ protected:
     NodalRecoveryModel *smoother;
     /// Smoother for primary variables.
     NodalRecoveryModel *primVarSmoother;
-    /// regions represented by sets
-    IntArray regionSets;
-    /// Default region set
-    Set defaultElementSet;
 
-    /// Scaling time in output, e.g. conversion from seconds to hours
-    double timeScale;
     /// particle export flag
     bool particleExportFlag;
 
@@ -323,10 +314,6 @@ protected:
                                 int &regionDofMans, 
 				int &totalcells,
                                 Domain *domain, TimeStep *tStep, int reg);
-    /// Returns number of regions (aka regionSets)
-    int giveNumberOfRegions();
-    /// Returns element set
-    Set *giveRegionSet(int i);
     /**
      * Writes a VTK collection file where time step data is stored.
      */

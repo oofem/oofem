@@ -51,6 +51,6 @@ Set 2 nodes 2 1 17
 #
 #%BEGIN_CHECK% tolerance 1.e-3
 ## check eigen values
-#EIGVAL tStep 1 EigNum 1 value 2.85378786e+03
-#EIGVAL tStep 1 EigNum 2 value 4.56620244e+04
+#EIGVAL tStep 1 EigNum 1 value 2.85378786e+03 tolerance 1.e-3
+#EIGVAL tStep 1 EigNum 2 value 4.56620244e+04 tolerance 2.e-2
 #%END_CHECK%

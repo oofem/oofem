@@ -34,7 +34,6 @@
 
 #include "dssmatrix.h"
 #include "error.h"
-#include "floatarray.h"
 #include "engngm.h"
 #include "domain.h"
 #include "element.h"
@@ -116,7 +115,7 @@ void DSSMatrix :: times(const FloatArray &x, FloatArray &answer) const
 
 void DSSMatrix :: times(double x)
 {
-    OOFEM_ERROR("not implemented");
+    _dss->times(x);
 }
 
 int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &s)

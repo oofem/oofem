@@ -205,6 +205,9 @@ protected:
     /// Check possible snap back flag
     int checkSnapBack;
 
+    /// auxiliary input variablesfor softType == ST_SmoothExtended
+    double ep, ft;
+
     /// Method used for evaluation of characteristic element size
     ElementCharSizeMethod ecsMethod;
 

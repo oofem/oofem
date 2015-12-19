@@ -270,6 +270,7 @@ void SparseMatrixF :: LoadMatrix(FILE *stream)
     adr = NULL;
     ci = NULL;
     a = NULL;
+
     bool low = false, up = false;
     //BinaryReader b = null;
     //try

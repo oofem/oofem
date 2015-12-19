@@ -1,0 +1,49 @@
+adapt02.out
+adaptive 3d test (subdivision+mapping+adaptnlinearstatic)
+adaptnlinearstatic nsteps 5 controllmode 1 rtolv 0.0001 MaxIter 800 stiffMode 1 contextOutputStep 1  manrmsteps 1 varType 1 minlim 0.20 maxlim 1.0 mindens 1.6 maxdens 1.6 meshpackage 3 defdens 100.0 equilmc 1 renumber 1 lstype 0 smtype 0 eetype 0 istype 13 nmodules 2 
+errorcheck
+vtkxml domain_all tstep_all vars 2 1 13
+domain 3d
+OutputManager tstep_all dofman_all element_all
+ndofman 6 nelem 3 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 2 nset 0
+node 1 coords 3 0. 0. 0. bc 3 1 1 1
+node 2 coords 3 3. 0. 0. bc 3 0 1 1
+node 3 coords 3 0. 3. 0. bc 3 1 0 1
+node 4 coords 3 0. 0. 6. bc 3 1 1 2
+node 5 coords 3 3. 0. 6. bc 3 0 1 2
+node 6 coords 3 0. 3. 6. bc 3 1 0 2
+LTRSpace  1 nodes 4 1 2 3 4 crosssect 1 mat 1 
+LTRSpace  2 nodes 4 4 5 2 3 crosssect 1 mat 1
+LTRSpace  3 nodes 4 4 6 5 3 crosssect 1 mat 1
+SimpleCS 1 
+idm1 1 E 1.0 n 0.18 e0 2.0 gf 36. damlaw 1  talpha 0.0 d 0.0
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0 
+BoundaryCondition 2 loadTimeFunction 2 prescribedvalue 6.0 
+ConstantFunction 1 f(t) 1.0
+PiecewiseLinFunction 2 npoints 2 t 2 0 100 f(t) 2 1.0 101.0
+#
+#
+#
+#%BEGIN_CHECK% tolerance 1.e-5
+#NODE tStep 1 number 6 dof 3 unknown d value 6.0
+#ELEMENT tStep 1 tStepVer 0 number 1 gp 1 keyword 4 component 3  value 1.0
+#ELEMENT tStep 1 tStepVer 0 number 1 gp 1 keyword 1 component 3  value 1.0
+#ELEMENT tStep 1 tStepVer 0 number 1 gp 1 keyword 13 component 1  value 0.0
+##
+#NODE tStep 2 number 6 dof 3 unknown d value 12.0
+#ELEMENT tStep 2 tStepVer 0 number 1 gp 1 keyword 4 component 3  value 2.0
+#ELEMENT tStep 2 tStepVer 0 number 1 gp 1 keyword 1 component 3  value 2.0
+#ELEMENT tStep 2 tStepVer 0 number 1 gp 1 keyword 13 component 1  value 0.0
+##
+#NODE tStep 3 number 6 dof 3 unknown d value 18.0
+#ELEMENT tStep 3 tStepVer 0 number 1 gp 1 keyword 4 component 3  value 3.0
+#ELEMENT tStep 3 tStepVer 0 number 1 gp 1 keyword 1 component 3  value 1.5
+#ELEMENT tStep 3 tStepVer 0 number 1 gp 1 keyword 13 component 1  value 0.5
+## After mapping
+#NODE tStep 3 tStepVer 1 number 6 dof 3 unknown d value 18.0
+##ELEMENT tStep 3 tStepVer 1 number 1 gp 1 keyword 4 component 3  value 3.0
+##ELEMENT tStep 3 tStepVer 1 number 1 gp 1 keyword 1 component 3  value 1.4749 tolerance 1.e-4
+##ELEMENT tStep 3 tStepVer 1 number 1 gp 1 keyword 13 component 1  value 0.511260 tolerance 1.e-4
+
+
+#%END_CHECK%

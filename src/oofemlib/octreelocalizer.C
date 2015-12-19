@@ -703,7 +703,7 @@ OctreeSpatialLocalizer :: giveElementContainingPoint(OctantRec *cell, const Floa
 
             SpatialLocalizerInterface *interface = static_cast< SpatialLocalizerInterface * >( ielemptr->giveInterface(SpatialLocalizerInterfaceType) );
             if ( interface ) {
-                if ( eset && ( eset->hasElement( ielemptr->giveNumber() ) ) ) {
+                if ( eset && ( !eset->hasElement( ielemptr->giveNumber() ) ) ) {
                     continue;
                 }
 

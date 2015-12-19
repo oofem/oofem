@@ -121,7 +121,9 @@ POIExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
 void
 POIExportModule :: initialize()
-{ }
+{ 
+    ExportModule :: initialize();
+}
 
 
 void

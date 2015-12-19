@@ -1,0 +1,40 @@
+tmpatch39.out
+Patch test of Brick_ht elements, heat transfer coefficient depending on temperature
+#StationaryProblem nsteps 1 nmodules 0
+#NonStationaryProblem nsteps 5 deltat 6000.0 alpha 0.5 nmodules 0
+#TransientTransport nsteps 5 deltat 6000.0 alpha 0.5 lumped nmodules 1
+nltransienttransportproblem nsteps 5 deltat 6000.0 rtol 0.001 alpha 0.5 nsmax 300 lumpedcapa nmodules 1
+errorcheck
+domain HeatTransfer
+OutputManager tstep_all dofman_all element_all
+ndofman 12 nelem 2 ncrosssect 1 nmat 1 nbc 2 nic 1 nltf 1 nset 2
+node 1 coords 3  0.0   0.0   0.0
+node 2 coords 3  2.0   0.0   0.0
+node 3 coords 3  2.0   2.0   0.0
+node 4 coords 3  0.0   2.0   0.0
+node 5 coords 3  0.0   0.0   1.0
+node 6 coords 3  2.0   0.0   1.0
+node 7 coords 3  2.0   2.0   1.0
+node 8 coords 3  0.0   2.0   1.0
+node 9 coords 3   0.0  0.0   8.0
+node 10 coords 3  2.0  0.0   8.0
+node 11 coords 3  2.0  2.0   8.0
+node 12 coords 3  0.0  2.0   8.0
+brick1ht 1 nodes 8 1 2 3 4 5 6 7 8
+brick1ht 2 nodes 8 5 6 7 8 9 10 11 12 boundaryloads 2 2 2
+SimpleTransportCS 1 mat 1 set 1
+IsoHeat 1 d 2400. k 3.0 c 1000.0
+BoundaryCondition  1 loadTimeFunction 1 dofs 1 10 values 1 0.0 set 2
+constantsurfaceload 2 loadTimeFunction 1 components 1 15.0 properties 1 a 1.0 propertymultexpr $2.5*x$ loadtype 3
+InitialCondition 1 Conditions 1 u 5.0 dofs 1 10 set 1
+ConstantFunction 1 f(t) 1.0
+Set 1 elementranges {(1 2)}
+Set 2 nodes 4 1 2 3 4
+#Set 3 elementboundaries 2 2 2
+
+#%BEGIN_CHECK%
+#NODE tStep 5 number 5 dof 10 unknown d value 4.95831978e+00
+#NODE tStep 5 number 6 dof 10 unknown d value 4.95831978e+00
+#NODE tStep 5 number 10 dof 10 unknown d value 5.45555230e+00
+#NODE tStep 5 number 12 dof 10 unknown d value 5.45555230e+00
+#%END_CHECK%

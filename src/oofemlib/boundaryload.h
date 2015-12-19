@@ -39,6 +39,7 @@
 #include "bctype.h"
 #include "valuemodetype.h"
 #include "dictionary.h"
+#include "scalarfunction.h"
 
 ///@name Input fields for BoundaryLoad
 //@{
@@ -46,6 +47,7 @@
 #define _IFT_BoundaryLoad_cstype "cstype"
 #define _IFT_BoundaryLoad_properties "properties"
 #define _IFT_BoundaryLoad_propertyTimeFunctions "propertytf"
+#define _IFT_BoundaryLoad_propertyMultExpr "propertymultexpr"
 //@}
 
 namespace oofem {
@@ -128,6 +130,8 @@ protected:
     Dictionary propertyDictionary;
     /// Optional time-functions for properties
     Dictionary propertyTimeFunctDictionary;
+    /// Temporal storage of state variables, particularly for boundary conditions depending on them, e.g. convection depending on actual temperature
+    Dictionary variableState;
 
 public:
     /**
@@ -135,7 +139,7 @@ public:
      * @param i Load number.
      * @param d Domain to which new object will belongs.
      */
-    BoundaryLoad(int i, Domain * d) : Load(i, d), coordSystemType(CST_Global) { }
+    BoundaryLoad(int i, Domain * d);
 
     virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode);
     /**
@@ -160,6 +164,23 @@ public:
      */
     virtual bcType giveType() const { return lType; }
     virtual double giveProperty(int aProperty, TimeStep *tStep);
+
+    /**
+     * Temporal storage of state variables, particularly for boundary conditions 
+     * depending on them, e.g. convection depending on actual temperature
+     * @param aVariable Variable name.
+     * @param val Value of a variable which is used for evaluating boundary load
+     */
+    virtual void setVariableState(int aVariable, double val);
+
+    /**
+     * Obtain value of a state variable.
+     * @param aVariable Variable name.
+     * @return Variable value.
+     */
+    virtual double giveVariableState(int aVariable);
+    /// Expression to multiply all properties
+    ScalarFunction propertyMultExpr;
 
 protected:
     /**

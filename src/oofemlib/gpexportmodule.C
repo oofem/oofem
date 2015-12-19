@@ -160,7 +160,9 @@ GPExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
 void
 GPExportModule :: initialize()
-{ }
+{ 
+    ExportModule :: initialize();
+}
 
 
 void

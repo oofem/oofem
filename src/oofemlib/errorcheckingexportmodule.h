@@ -63,17 +63,19 @@ class OOFEM_EXPORT ErrorCheckingRule
 {
 protected:
     int tstep;
+    int tsubstep;
     int number;
     double tolerance;
     double value;
 
 public:
-    ErrorCheckingRule(double tol) : tolerance(tol) {}
+ ErrorCheckingRule(double tol) : tolerance(tol) {tsubstep=0;}
 
     /// Checks if the rule is correct.
     virtual bool check(Domain *domain, TimeStep *tStep) = 0;
 
     bool checkValue(double computedValue);
+    virtual const char *giveClassName() const = 0;
 };
 
 /// Checks a node value
@@ -86,6 +88,7 @@ protected:
 public:
     NodeErrorCheckingRule(const std :: string &line, double tol);
     virtual bool check(Domain *domain, TimeStep *tStep);
+    virtual const char *giveClassName() const {return "NodeErrorCheckingRule";}
 };
 
 /// Checks an element value
@@ -100,6 +103,7 @@ protected:
 public:
     ElementErrorCheckingRule(const std :: string &line, double tol);
     virtual bool check(Domain *domain, TimeStep *tStep);
+    virtual const char *giveClassName() const {return "ElementErrorCheckingRule";}
 };
 
 /// Checks a beam element value (in terms of  end forces and and-displacements)
@@ -117,6 +121,7 @@ protected:
 public:
     BeamElementErrorCheckingRule(const std :: string &line, double tol);
     virtual bool check(Domain *domain, TimeStep *tStep);
+    virtual const char *giveClassName() const {return "BeamElementErrorCheckingRule";}
 };
 
 
@@ -129,6 +134,7 @@ protected:
 public:
     ReactionErrorCheckingRule(const std :: string &line, double tol);
     virtual bool check(Domain *domain, TimeStep *tStep);
+    virtual const char *giveClassName() const {return "ReactionErrorCheckingRule";}
 };
 
 /// Checks a reaction force value
@@ -137,6 +143,7 @@ class OOFEM_EXPORT LoadLevelErrorCheckingRule : public ErrorCheckingRule
 public:
     LoadLevelErrorCheckingRule(const std :: string &line, double tol);
     virtual bool check(Domain *domain, TimeStep *tStep);
+    virtual const char *giveClassName() const {return "LoadLevelErrorCheckingRule";}
 };
 
 /// Checks eigen value
@@ -145,6 +152,7 @@ class OOFEM_EXPORT EigenValueErrorCheckingRule : public ErrorCheckingRule
 public:
     EigenValueErrorCheckingRule(const std :: string &line, double tol);
     virtual bool check(Domain *domain, TimeStep *tStep);
+    virtual const char *giveClassName() const {return "EigenValueErrorCheckingRule";}
 };
 
 

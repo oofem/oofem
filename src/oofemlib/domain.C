@@ -1402,7 +1402,10 @@ Domain :: createDofs()
     for ( int i = 1; i <= this->giveNumberOfDofManagers(); ++i ) {
         DofManager *dman = this->giveDofManager(i);
         //printf("Dofs in node %d (of %d) = %d\n", i, this->giveNumberOfDofManagers(), node_dofs[i-1].size());
-        dman->setNumberOfDofs(0);
+
+        /* do not delete existing DOFs; that may be created during adaptive solution scheme (mesh generator applies DOFs) */
+        if (0) dman->setNumberOfDofs(0);
+
         for ( int id: node_dofs [ i - 1 ] ) {
             // Find bc and ic if there are any, otherwise zero.
             int bcid = dof_bc [ i - 1 ].find(id) != dof_bc [ i - 1 ].end() ? dof_bc [ i - 1 ] [ id ] : 0;
@@ -1432,16 +1435,21 @@ Domain :: createDofs()
                 OOFEM_ERROR("Incompatible dof type (%d) in node %d", dtype, i);
             }
 
-            // Finally create the new DOF:
+
+
+            // Finally create the new DOF: 
             //printf("Creating: node %d, id = %d, dofType = %d, bc = %d, ic = %d\n", i, id, dtype, bcid, icid);
-            Dof *dof = classFactory.createDof(dtype, (DofIDItem)id, dman);
-            dof->setBcId(bcid); // Note: slave dofs and such will simple ignore this.
-            dof->setIcId(icid);
-            // Slave dofs obtain their weights post-initialization, simple slave dofs must have their master node specified.
-            if ( dtype == DT_simpleSlave ) {
+            if (!dman->hasDofID((DofIDItem)id)) {
+
+              Dof *dof = classFactory.createDof(dtype, (DofIDItem)id, dman);
+              dof->setBcId(bcid); // Note: slave dofs and such will simple ignore this.
+              dof->setIcId(icid);
+              // Slave dofs obtain their weights post-initialization, simple slave dofs must have their master node specified.
+              if ( dtype == DT_simpleSlave ) {
                 static_cast< SimpleSlaveDof * >(dof)->setMasterDofManagerNum( ( * dman->giveMasterMap() ) [ id ] );
+              }
+              dman->appendDof(dof);
             }
-            dman->appendDof(dof);
         }
     }
 

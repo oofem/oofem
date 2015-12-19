@@ -923,7 +923,6 @@ void EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *t
 {
     ///@todo This should be removed when it loads are given through sets.
     IntArray loc, dofids;
-    FloatArray contribution;
     FloatArray charVec;
     FloatMatrix R;
     IntArray dofIDarry;
@@ -940,28 +939,31 @@ void EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *t
         charVec.clear();
         for ( int iload : *node->giveLoadArray() ) {   // to more than one load
             Load *load = domain->giveLoad(iload);
-            va.vectorFromNodeLoad(contribution, *node, static_cast< NodalLoad* >(load), tStep, mode);
-            charVec.add(contribution);
-        }
+            va.vectorFromNodeLoad(charVec, *node, static_cast< NodalLoad* >(load), tStep, mode);
 
-        if ( node->giveParallelMode() == DofManager_shared ) {
-            charVec.times( 1. / ( node->givePartitionsConnectivitySize() ) );
-        }
-
-        if ( charVec.isNotEmpty() ) {
-            if ( node->computeM2LTransformation(R, dofIDarry) ) {
-                charVec.rotatedWith(R, 't');
+            if ( node->giveParallelMode() == DofManager_shared ) {
+                charVec.times( 1. / ( node->givePartitionsConnectivitySize() ) );
             }
 
-            node->giveCompleteLocationArray(loc, s);
+            if ( charVec.isNotEmpty() ) {
+                if ( node->computeM2LTransformation(R, dofIDarry) ) {
+                    charVec.rotatedWith(R, 't');
+                }
+
+                if ( load->giveDofIDs().giveSize() ) {
+                    node->giveLocationArray(load->giveDofIDs(), loc, s);
+                } else {
+                    node->giveCompleteLocationArray(loc, s);
+                }
 #ifdef _OPENMP
  #pragma omp critical
 #endif
-            {
-                answer.assemble(charVec, loc);
-                if ( eNorms ) {
-                    node->giveCompleteMasterDofIDArray(dofids);
-                    eNorms->assembleSquared(charVec, dofids);
+                {
+                    answer.assemble(charVec, loc);
+                    if ( eNorms ) {
+                        node->giveCompleteMasterDofIDArray(dofids);
+                        eNorms->assembleSquared(charVec, dofids);
+                    }
                 }
             }
         }
@@ -1903,6 +1905,8 @@ EngngModel :: balanceLoad(TimeStep *tStep)
             lb->migrateLoad( this->giveDomain(1) );
             // renumber itself
             this->forceEquationNumbering();
+            // re-init export modules
+            this->giveExportModuleManager()->initialize();
  #ifdef __VERBOSE_PARALLEL
             // debug print
             EModelDefaultEquationNumbering dn;
