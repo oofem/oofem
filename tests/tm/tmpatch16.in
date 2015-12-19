@@ -13,6 +13,7 @@ Test of Quad1_ht elements, heat transfer coefficient depending on temperature
 #StationaryProblem nsteps 1
 NonStationaryProblem nsteps 5 deltat 60000.0 alpha 0.5 nmodules 1
 #nltransienttransportproblem nsteps 5 deltat 60000.0 rtol 0.001 alpha 0.5 nsmax 20 nmodules 1
+#TransientTransport nsteps 5 deltat 60000.0 alpha 0.5 nmodules 1
 errorcheck
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all
