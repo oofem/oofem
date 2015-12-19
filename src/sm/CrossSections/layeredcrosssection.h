@@ -165,6 +165,8 @@ public:
         return this->layerMaterials.at(layer);
     }
 
+    virtual Material *giveMaterial(IntegrationPoint *ip);
+
     int giveInterfaceMaterialNum(int interface) {
         return this->interfacerMaterials.at(interface);
     }
