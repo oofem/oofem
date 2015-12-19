@@ -191,14 +191,7 @@ Node :: computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeSte
         OOFEM_ERROR("incompatible load type applied");
     }
 
-    if ( load->giveDofIDs().giveSize() == 0 ) {
-        load->computeComponentArrayAt(answer, tStep, mode);
-    } else {
-        answer.resize(this->giveNumberOfDofs());
-        FloatArray tmp;
-        load->computeComponentArrayAt(tmp, tStep, mode);
-        answer.assemble(tmp, load->giveDofIDs());
-    }
+    load->computeComponentArrayAt(answer, tStep, mode);
 
     // Transform from Global to Local c.s.
     if ( loadN->giveCoordSystMode() == NodalLoad :: CST_Global ) {
