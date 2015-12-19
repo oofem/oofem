@@ -210,6 +210,13 @@ protected:
      */
     virtual void assembleDirichletBcRhsVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode,
                                               const UnknownNumberingScheme &s, Domain *d);
+    /**
+     * Copy unknowns in DOF's from previous to current position.
+     * @param mode What the unknown describes (increment, total value etc.).
+     * @param fromTime From which time step to obtain value.
+     * @param toTime To which time to copy.
+     */
+    virtual void copyUnknownsInDictionary(ValueModeType mode, TimeStep *fromTime, TimeStep *toTime);
 
     /**
      * Updates IP values on elements.

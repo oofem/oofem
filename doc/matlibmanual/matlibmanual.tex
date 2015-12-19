@@ -5637,8 +5637,26 @@ There are two options how to initialize the solution vector at time $t + \Delta 
 
 Note that the matrices $\mbf{K}(\mbf{r}_\tau), \mbf{C}(\mbf{r}_\tau)$ and the vector $\mbf{F}(\mbf{r}_\tau)$ depend on the solution vector $\mbf{r}_\tau$. For this reason, the matrices are updated in each iteration step (Newton method) or only after several steps (modified Newton method). The residuum $\mbf{R}_\tau^{i}$ and the vector $\mbf{F}_\tau(\mbf{r}_\tau)$ are updated in each iteration, using the most recent capacity and conductivity matrices.
 
+\subsection{Heat flux from radiation}
+
+Heat flow from a body surrounded by a medium at a temperature $T_\infty$ is governed by the Stefan-Boltzmann Law
+\begin{eqnarray}
+q(T, T_\infty) = \varepsilon \sigma (T^4 - T_\infty^4)\label{eq:StefanBoltzmann}
+\end{eqnarray}
+where $\varepsilon\in\langle 0, 1 \rangle$ represents emissivity between the surface and the boundary at temperature $T_\infty$. $\sigma=5.67\cdot 10^{-8}$ W/m$^{-2}$K$^{-4}$ stands for a Stefan-Boltzmann constant. Since the unknown temperature $T$ is in the forth power, it is necessary to linearize this equation. The most straightforward approach is using Taylor expansion around $T_\infty$ and neglecting higher-order terms
+\begin{eqnarray}
+q(T, T_\infty) &\approx& q(T=T_\infty) + \frac{\partial q(T,T_\infty)}{\partial T_\infty} (T_\infty-T) = 4\varepsilon \sigma T_\infty^3 (T-T_\infty)
+\end{eqnarray}
+leading to so-called radiation heat transfer coefficient $\alpha_{rad}=4\varepsilon \sigma T_\infty^3$. The latter resembles similar coefficient as in convective heat transfer. Other methods for \refeq{eq:StefanBoltzmann} could be based on Oseen or Newton-Kantorovich linearization.
+
+Alternatively (not implemented), radiative heat transfer coefficient $\alpha_{rad}$ can be expressed as \cite[pp.28]{Baehr:06}
+\begin{eqnarray}
+q(T, T_\infty) = \varepsilon \sigma \frac{T^4 - T_\infty^4}{T-T_\infty}(T-T_\infty) = \underbrace{\varepsilon \sigma (T^2+T_\infty^2)(T+T_\infty)}_{\alpha_{rad}}(T-T_\infty)
+\end{eqnarray}
+
 %\subsection{Other Elements}
 \begin{thebibliography}{99}
+\bibitem{Baehr:06} H.D. Baehr and K. Stephan: Heat and Mass Transfer, Springer, 2006.
 \bibitem{Bazant:72} Z.P.~Ba\v{z}ant, L.J.~Najjar.
 \newblock  Nonlinear water diffusion in nonsaturated concrete.
 \newblock {\em Materials and Structures}, 5:3--20, 1972.

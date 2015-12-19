@@ -318,22 +318,22 @@ void DynamicInputRecord :: setField(std :: string item, InputFieldType id)
 
 void DynamicInputRecord :: setField(FloatArray item, InputFieldType id)
 {
-    this->floatArrayRecord.insert({id, std :: move(item)});
+    this->floatArrayRecord [id] = std :: move(item);
 }
 
 void DynamicInputRecord :: setField(IntArray item, InputFieldType id)
 {
-    this->intArrayRecord.insert({id, std :: move(item)});
+    this->intArrayRecord [id] = std :: move(item);
 }
 
 void DynamicInputRecord :: setField(FloatMatrix item, InputFieldType id)
 {
-    this->matrixRecord.insert({id, std :: move(item)});
+    this->matrixRecord [id] = std :: move(item);
 }
 
 void DynamicInputRecord :: setField(std :: vector< std :: string > item, InputFieldType id)
 {
-    this->stringListRecord.insert({id, std :: move(item)});
+    this->stringListRecord [id] = std :: move(item);
 }
 
 void DynamicInputRecord :: setField(const Dictionary &item, InputFieldType id)

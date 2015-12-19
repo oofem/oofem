@@ -52,7 +52,7 @@
 #include "unknownnumberingscheme.h"
 #include "prescribedmean.h"
 #include "feinterpol.h"
-
+    
 #ifdef __FM_MODULE
 #include "../fm/tr21stokes.h"
 #include "../fm/tet21stokes.h"
@@ -121,7 +121,6 @@ MatlabExportModule :: initializeFrom(InputRecord *ir)
     }
 
     noscaling = ir->hasField(_IFT_MatlabExportModule_noScaledHomogenization);
-    IR_GIVE_OPTIONAL_FIELD(ir, regionsets, _IFT_MatlabExportModule_regionsets);
 
     return ExportModule :: initializeFrom(ir);
 }
@@ -648,7 +647,9 @@ MatlabExportModule :: doOutputIntegrationPointFields(TimeStep *tStep,    FILE *F
 
 void
 MatlabExportModule :: initialize()
-{ }
+{ 
+    ExportModule :: initialize();
+}
 
 
 void

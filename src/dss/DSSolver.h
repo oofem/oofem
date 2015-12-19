@@ -171,7 +171,7 @@ struct ISolver
 
     // c = A * b
     virtual void MulMatrixByVector(double *b, double *c) = 0;
-
+    
     // Copute x by Preconditioned Conjugate gradient method
     virtual int PreCG(double *b, double *x, double epsilon, int max_iter) = 0;
 
@@ -243,6 +243,9 @@ public:
     virtual void changedecomp();
     virtual bool IsFactorized();
 
+    //multiply by a scalar
+    virtual void times(double x);
+    
     virtual bool Factorize();
     virtual bool PreFactorize();
 

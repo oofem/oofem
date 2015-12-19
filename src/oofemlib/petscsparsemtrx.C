@@ -439,7 +439,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, const Unkn
         n2g->init(eModel, di, s);
 
  #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "PetscSparseMtrx:: buildInternalStructure", "", eModel - giveRank() );
+        VERBOSEPARALLEL_PRINT( "PetscSparseMtrx:: buildInternalStructure", "", eModel->giveRank() );
  #endif
 
         leqs = n2g->giveNumberOfLocalEqs();
@@ -448,7 +448,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, const Unkn
         //printf("%d, leqs = %d, geqs = %d\n", this->emodel->giveRank(), leqs, geqs);
 
  #ifdef __VERBOSE_PARALLEL
-        OOFEM_LOG_INFO( "[%d]PetscSparseMtrx:: buildInternalStructure: l_eqs = %d, g_eqs = %d, n_eqs = %d\n", rank, leqs, geqs, eModel->giveNumberOfDomainEquations(ut) );
+        OOFEM_LOG_INFO( "[%d]PetscSparseMtrx:: buildInternalStructure: l_eqs = %d, g_eqs = %d, n_eqs = %d\n", eModel->giveRank(), leqs, geqs, eModel->giveNumberOfDomainEquations(di, s) );
  #endif
 
         IntArray d_nnz(leqs), o_nnz(leqs), d_nnz_sym(leqs), o_nnz_sym(leqs);
@@ -533,7 +533,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, const Unkn
         ISCreateStride(this->emodel->giveParallelComm(), context->giveNumberOfNaturalEqs(), 0, 1, & localIS);
 
  #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT("PetscSparseMtrx:: buildInternalStructure", "done", rank);
+        VERBOSEPARALLEL_PRINT("PetscSparseMtrx:: buildInternalStructure", "done", eModel->giveRank());
  #endif
     } else
 #endif

@@ -1903,6 +1903,8 @@ EngngModel :: balanceLoad(TimeStep *tStep)
             lb->migrateLoad( this->giveDomain(1) );
             // renumber itself
             this->forceEquationNumbering();
+            // re-init export modules
+            this->giveExportModuleManager()->initialize();
  #ifdef __VERBOSE_PARALLEL
             // debug print
             EModelDefaultEquationNumbering dn;

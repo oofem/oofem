@@ -1323,7 +1323,7 @@ MDM :: packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip)
     this->buildNonlocalPointTable(ip);
     this->updateDomainBeforeNonlocAverage(tStep);
 
-    return status->giveLocalDamageTensorForAveragePtr()->storeYourself(buff);
+    return (status->giveLocalDamageTensorForAveragePtr()->storeYourself(buff) == CIO_OK);
 }
 
 int
@@ -1333,7 +1333,7 @@ MDM :: unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip
     MDMStatus *status = static_cast< MDMStatus * >( this->giveStatus(ip) );
     FloatMatrix _LocalDamageTensorForAverage;
 
-    result = _LocalDamageTensorForAverage.restoreYourself(buff);
+    result = (_LocalDamageTensorForAverage.restoreYourself(buff) == CIO_OK);
     status->setLocalDamageTensorForAverage(_LocalDamageTensorForAverage);
     return result;
 }

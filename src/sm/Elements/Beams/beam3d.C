@@ -47,6 +47,8 @@
 #include "mathfem.h"
 #include "fei3dlinelin.h"
 #include "classfactory.h"
+#include "elementinternaldofman.h"
+#include "masterdof.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -65,12 +67,20 @@ Beam3d :: Beam3d(int n, Domain *aDomain) : StructuralElement(n, aDomain)
     numberOfGaussPoints = 3;
     length = 0.;
     kappay = kappaz = -1.0;
-    dofsToCondense = NULL;
+
+    ghostNodes [ 0 ] = ghostNodes [ 1 ] = NULL;
+    numberOfCondensedDofs = 0;
 }
 
 Beam3d :: ~Beam3d()
 {
-    delete dofsToCondense;
+
+    if ( ghostNodes [ 0 ] ) {
+        delete ghostNodes [ 0 ];
+    }
+    if ( ghostNodes [ 1 ] ) {
+        delete ghostNodes [ 1 ];
+    }
 }
 
 FEInterpolation *Beam3d :: giveInterpolation() const { return & interp; }
@@ -190,11 +200,6 @@ Beam3d :: computeLocalStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode
 {
     // compute clamped stifness
     this->computeClampedStiffnessMatrix(answer, rMode, tStep);
-
-    // condense requested dofs
-    if ( dofsToCondense ) {
-        this->condense(& answer, NULL, NULL, dofsToCondense);
-    }
 }
 
 
@@ -298,8 +303,9 @@ Beam3d :: computeGtoLRotationMatrix(FloatMatrix &answer)
 // Returns the rotation matrix of the receiver.
 {
     FloatMatrix lcs;
-
-    answer.resize(12, 12);
+    
+    int ndofs = computeNumberOfGlobalDofs();
+    answer.resize(ndofs, ndofs);
     answer.zero();
 
     this->giveLocalCoordinateSystem(lcs);
@@ -311,7 +317,39 @@ Beam3d :: computeGtoLRotationMatrix(FloatMatrix &answer)
             answer.at(i + 9, j + 9) = lcs.at(i, j);
         }
     }
-    return 1;
+
+    for ( int i = 13; i <= ndofs; i++ ) {
+        answer.at(i, i) = 1.0;
+    }
+
+    if ( this->hasDofs2Condense() ) {
+        int condensedDofCounter = 0;
+        DofIDItem dofids[] = {
+          D_u, D_v, D_w, R_u, R_v, R_w
+        };
+        FloatMatrix l2p(12, ndofs); // local -> primary
+        l2p.zero();
+        // loop over nodes
+        for ( int inode = 0; inode < 2; inode++ ) {
+            // loop over DOFs
+            for ( int idof = 0; idof < 6; idof++ ) {
+                int eq = inode * 6 + idof + 1;
+                if ( ghostNodes [ inode ] ) {
+                    if ( ghostNodes [ inode ]->hasDofID(dofids [ idof ]) ) {
+                        condensedDofCounter++;
+                        l2p.at(eq, 12 + condensedDofCounter) = 1.0;
+                        continue;
+                    }
+                }
+                l2p.at(eq, eq) = 1.0;
+            }
+        }
+
+        FloatMatrix g2l(answer);
+        answer.beProductOf(l2p, g2l);
+    }
+
+    return true;
 }
 
 
@@ -512,9 +550,27 @@ Beam3d :: initializeFrom(InputRecord *ir)
             return IRRT_BAD_FORMAT;
         }
 
-        dofsToCondense = new IntArray(val);
+        //dofsToCondense = new IntArray(val);
+        DofIDItem mask[] = {
+          D_u, D_v, D_w, R_u, R_v, R_w
+        };
+        this->numberOfCondensedDofs = val.giveSize();
+        for ( int i = 1; i <= val.giveSize(); i++ ) {
+            if ( val.at(i) <= 6 ) {
+                if ( ghostNodes [ 0 ] == NULL ) {
+                    ghostNodes [ 0 ] = new ElementDofManager(1, giveDomain(), this);
+                }
+                ghostNodes [ 0 ]->appendDof( new MasterDof(ghostNodes [ 0 ], mask [ val.at(i) - 1 ]) );
+            } else {
+                if ( ghostNodes [ 1 ] == NULL ) {
+                    ghostNodes [ 1 ] = new ElementDofManager(1, giveDomain(), this);
+                }
+                ghostNodes [ 1 ]->appendDof( new MasterDof(ghostNodes [ 1 ], mask [ val.at(i) - 7 ]) );
+            }
+        }
+
     } else {
-        dofsToCondense = NULL;
+      //dofsToCondense = NULL;
     }
 
     return StructuralElement :: initializeFrom(ir);
@@ -533,13 +589,6 @@ Beam3d :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useU
     answer.beProductOf(stiffness, u);
 #else
     StructuralElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord);
-
-    if ( this->dofsToCondense ) {
-        ///@todo Pretty sure this won't work for nonlinear problems. I think dofsToCondense should just be replaced by an extra slave node.
-        FloatMatrix stiff;
-        this->computeClampedStiffnessMatrix(stiff, TangentStiffness, tStep);
-        this->condense(& stiff, NULL, & answer, this->dofsToCondense);
-    }
 #endif
 }
 
@@ -754,14 +803,6 @@ Beam3d :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *tStep, Value
     FloatMatrix stiff;
 
     StructuralElement :: computeLocalForceLoadVector(answer, tStep, mode); // in global c.s
-
-    if ( answer.giveSize() && dofsToCondense ) {
-        // condense requested dofs
-        if ( answer.giveSize() != 0 ) {
-            this->computeClampedStiffnessMatrix(stiff, TangentStiffness, tStep);
-            this->condense(& stiff, NULL, & answer, dofsToCondense);
-        }
-    }
 }
 
 
@@ -833,12 +874,6 @@ Beam3d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, doub
     answer.at(12, 12) = c2z * l * l * l * ( 1. / 105. + kappaz / 30. + kappaz2 / 30. );
 
     answer.symmetrized();
-
-    // condense requested dofs
-    if ( dofsToCondense ) {
-        this->computeClampedStiffnessMatrix(stiff, TangentStiffness, tStep);
-        this->condense(& stiff, & answer, NULL, dofsToCondense);
-    }
 
     mass = area * l * density;
 }
@@ -929,12 +964,6 @@ Beam3d :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
 
     N = ( -endForces.at(1) + endForces.at(7) ) / 2.;
     answer.times(N / l);
-
-    // condense requested dofs
-    if ( dofsToCondense ) {
-        this->computeClampedStiffnessMatrix(stiff, TangentStiffness, tStep);
-        this->condense(& stiff, & answer, NULL, dofsToCondense);
-    }
 
     //answer.beLumpedOf (mass);
 }
