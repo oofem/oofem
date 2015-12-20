@@ -1856,8 +1856,11 @@ TR1_2D_SUPG2 :: printOutputAt(FILE *file, TimeStep *tStep)
         gp = integrationRulesArray [ 1 ]->getIntegrationPoint(0);
     }
 
-    double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity(gp);
-    fprintf(file, "VOF %e, density %e\n\n", this->giveVolumeFraction(), rho);
+    double rho0 = this->_giveMaterial(0)->give('d', gp);
+    double rho1 = this->_giveMaterial(1)->give('d', gp);
+    double vof = this->giveVolumeFraction();
+    
+    fprintf(file, "VOF %e, density %e\n\n", vof, rho0*vof + rho1*(1-vof));
 }
 
 
