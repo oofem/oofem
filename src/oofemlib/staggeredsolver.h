@@ -107,7 +107,7 @@ private:
   
     // Lists for each dof group
     std :: vector< CustomEquationNumbering > UnknownNumberingSchemeList;
-    std :: vector< SparseMtrx *> stiffnessMatrixList;
+    std :: vector< std :: unique_ptr< SparseMtrx > > stiffnessMatrixList;
     std :: vector< FloatArray > fIntList;
     std :: vector< FloatArray > fExtList;
     
