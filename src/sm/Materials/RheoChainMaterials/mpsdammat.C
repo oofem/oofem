@@ -553,12 +553,19 @@ MPSDamMaterial :: givegf(GaussPoint *gp)
 double
 MPSDamMaterial :: computeFractureEnergy(double equivalentTime)
 {
-    double fcm;
-    double fractureEnergy;
+
+    double fractureEnergy, fractureEnergy28;
+    double ftm, ftm28;
+
+    // the fracture energy has the same time evolution as the tensile strength, 
+    // the direct relation to the mean value of compressive strength according to Model Code 
+    // highly overestimates the initial (early age) value of the fracture energy 
+    //( fractureEnergy = 73. * fcm(t)^0.18 )
+
     // evolution of the mean compressive strength with respect to equivalent time/age/maturity
     // returns fcm in MPa
 
-    if (this->gf28 > 0.) {
+    /*    if (this->gf28 > 0.) {
       double fcm28mod;
       fcm28mod =  pow ( this->gf28 * MPSMaterial :: stiffnessFactor / 73. , 1. / 0.18 );
       fcm = exp( fib_s * ( 1. - sqrt(28. * MPSMaterial :: lambda0 / equivalentTime) ) ) * fcm28mod;
@@ -568,7 +575,25 @@ MPSDamMaterial :: computeFractureEnergy(double equivalentTime)
     }
 
     fractureEnergy = 73. * pow(fcm, 0.18) / MPSMaterial :: stiffnessFactor;
+    */
 
+    // 1) read or estimate the 28-day value of fracture energy
+
+    if (this->gf28 > 0.) {
+      fractureEnergy28 = this->gf28;
+    } else {
+      fractureEnergy28 = 73. * pow(fib_fcm28, 0.18) / MPSMaterial :: stiffnessFactor;
+    }
+
+    // 2) compute the tensile strengh according to provided equivalent time
+
+    ftm = this->computeTensileStrength(equivalentTime);
+    ftm28 = this->computeTensileStrength(28. * MPSMaterial :: lambda0);
+
+    // 3) calculate the resulting fracture energy as gf28 * ft/ft28
+
+    fractureEnergy = fractureEnergy28 * ftm / ftm28;
+    
     return fractureEnergy;
 }
 
