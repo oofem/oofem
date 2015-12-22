@@ -458,16 +458,19 @@ DofManager :: initializeFrom(InputRecord *ir)
 void DofManager :: giveInputRecord(DynamicInputRecord &input)
 {
     FEMComponent :: giveInputRecord(input);
-    if ( this->dofidmask ) {
-        input.setField(* this->dofidmask, _IFT_DofManager_dofidmask);
-    }
 
-    IntArray mbc;
+    IntArray mbc, dofids;
+    // Ignore here mBC and dofidmask as they may not correspod to actual state.
+    // They just decribe the state at init, but after some dofs may have been
+    // added dynamically (xfem, subdivision, etc).
     for ( Dof *dof: *this ) {
+      dofids.followedBy(dof->giveDofID(),3);
       if (dof->giveBcId()) mbc.followedBy(dof->giveBcId(),3);
       else mbc.followedBy(0,3);
     }
     input.setField(mbc, _IFT_DofManager_bc);
+    input.setField(dofids, _IFT_DofManager_dofidmask);
+
 
     if ( this->dofTypemap ) {
         IntArray typeMask( this->dofidmask->giveSize() );
