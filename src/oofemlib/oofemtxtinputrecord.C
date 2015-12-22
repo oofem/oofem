@@ -669,8 +669,8 @@ OOFEMTXTInputRecord :: report_error(const char *_class, const char *proc, InputF
                                     IRResultType result, const char *file, int line)
 {
     oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, NULL, file, line,
-                              "Input error on line %d: \"%s\", field keyword \"%s\"\n%s::%s",
-                              lineNumber, strerror(result), id, _class, proc);
+                              "Input error on line %d: \"%s\", field keyword \"%s\"\nIn function %s::%s\nRecord:\"%s\"",
+                              lineNumber, strerror(result), id, _class, proc, this->giveRecordAsString().c_str());
     oofem_exit(1); ///@todo We should never directly exit when dealing with user input.
 }
 } // end namespace oofem
