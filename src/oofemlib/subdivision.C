@@ -68,9 +68,8 @@
 #endif
 
 namespace oofem {
-//#define __VERBOSE_PARALLEL
-
-//#define DEBUG_CHECK
+#define __VERBOSE_PARALLEL
+#define DEBUG_CHECK
 //#define DEBUG_INFO
 //#define DEBUG_SMOOTHING
 
@@ -89,9 +88,9 @@ namespace oofem {
 #ifdef __OOFEG
  #define DRAW_IRREGULAR_NODES
  #define DRAW_REMOTE_ELEMENTS
- #define DRAW_MESH_BEFORE_BISECTION
-//#define DRAW_MESH_AFTER_BISECTION
- #define DRAW_MESH_AFTER_EACH_BISECTION_LEVEL
+  //#define DRAW_MESH_BEFORE_BISECTION
+ #define DRAW_MESH_AFTER_BISECTION
+  //#define DRAW_MESH_AFTER_EACH_BISECTION_LEVEL
 #endif
 
 
@@ -697,8 +696,10 @@ Subdivision :: RS_Triangle :: bisect(std :: queue< int > &subdivqueue, std :: li
  #endif
 #endif
 
+#ifdef __PARALLEL_MODE
 #ifdef __VERBOSE_PARALLEL
         OOFEM_LOG_INFO("[%d] RS_Triangle::bisecting %d nodes %d %d %d, leIndex %d, new irregular %d\n", mesh->giveSubdivision()->giveRank(), this->number, nodes.at(1), nodes.at(2), nodes.at(3), leIndex, iNum);
+#endif
 #endif
 
 #ifdef QUICK_HACK
@@ -3931,19 +3932,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
                    nnodes, eNum, timer.getUtime() );
 #endif
 
-    if (0) {
-      for (int in=1; in<=(*dNew)->giveNumberOfDofManagers(); in++) {
-        DynamicInputRecord ir;
-        (*dNew)->giveDofManager(in)->giveInputRecord(ir);
-        OOFEM_LOG_INFO("G%d:%s\n", (*dNew)->giveDofManager(in)->giveGlobalNumber(), ir.giveRecordAsString().c_str());
-      }
-      for (int in=1; in<=(*dNew)->giveNumberOfElements(); in++) {
-        DynamicInputRecord ir;
-        (*dNew)->giveElement(in)->giveInputRecord(ir);
-        OOFEM_LOG_INFO("G:%d:%s\n", (*dNew)->giveElement(in)->giveGlobalNumber(), ir.giveRecordAsString().c_str());
-      }
-    }
-
+ 
 
 
 #ifdef __PARALLEL_MODE
@@ -3975,6 +3964,24 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     ( * dNew )->commitTransactions( ( * dNew )->giveTransactionManager() );
 
     // print some statistics
+    if (1) {
+      for (int in=1; in<=(*dNew)->giveNumberOfDofManagers(); in++) {
+        DynamicInputRecord ir;
+        (*dNew)->giveDofManager(in)->giveInputRecord(ir);
+        OOFEM_LOG_INFO("[%d]:[%d]:%s\n", this->giveRank(), (*dNew)->giveDofManager(in)->giveGlobalNumber(), ir.giveRecordAsString().c_str());
+      }
+      IntArray nodes;
+      for (int in=1; in<=(*dNew)->giveNumberOfElements(); in++) {
+        DynamicInputRecord ir;
+        (*dNew)->giveElement(in)->giveInputRecord(ir);
+        nodes = (*dNew)->giveElement(in)->giveDofManArray();
+        // translate local node numbers to globnums
+        for (int ii=1; ii<=nodes.giveSize(); ii++)
+          nodes.at(ii) = (*dNew)->giveNode(nodes.at(ii))->giveGlobalNumber();
+        ir.setField(nodes, "gnodes");
+        OOFEM_LOG_INFO("[%d]:[%d]:%s\n", this->giveRank(), (*dNew)->giveElement(in)->giveGlobalNumber(), ir.giveRecordAsString().c_str());
+      }
+    }
     nelems = ( * dNew )->giveNumberOfElements();
     int localVals [ 2 ], globalVals [ 2 ];
     localVals [ 0 ] = 0;
@@ -4226,8 +4233,10 @@ Subdivision :: bisectMesh()
             maxglobalnumber += globalIrregulars;
             // exchange shared edges
             // this must be done after globnums are assigned to new shared irregulars
+            /* BP
             this->exchangeSharedEdges();
             repeat = 1;                                    // force repetition in parallel run
+            */
         }
 
 #else
@@ -4252,6 +4261,14 @@ Subdivision :: bisectMesh()
             elem->generate(sharedEdgesQueue);
         }
 
+#ifdef __PARALLEL_MODE
+        if ( globalIrregulars ) {
+            // exchange shared edges
+            // this must be done after globnums are assigned to new shared irregulars
+            this->exchangeSharedEdges();
+            repeat = 1;                                    // force repetition in parallel run
+        }
+#endif
         // unmark local unshared irregulars marked for connectivity setup
         // important this may be not done before generate !!!
         for ( in = nnodes_old+1; in <= nnodes; in++ ) {
@@ -4905,17 +4922,18 @@ Subdivision :: unpackSharedIrregulars(Subdivision *s, ProcessCommunicator &pc)
             // I do rely on the fact that the arrays are ordered !!!
             // I am using zero chunk because array common is large enough
             elems = iElems->findCommonValuesSorted(* jElems, common, 0);
+#if 0
             if ( !elems) {
                // get type of the next record
                pcbuff->read(_type);
                continue;
             }            
-            /*
+#else
             if ( !elems ) {
-                OOFEM_ERROR("no element found sharing nodes %d and %d",
-                             iNode, jNode);
+                OOFEM_ERROR("[%d] no element found sharing nodes %d[%d] and %d[%d]",
+                            myrank, iNode, edgeInfo.at(1), jNode, edgeInfo.at(2));
             }
-            */
+#endif
             // check on the first element whether irregular exists
             elem = mesh->giveElement( common.at(1) );
             eIndex = elem->giveEdgeIndex(iNode, jNode);
@@ -5164,16 +5182,17 @@ Subdivision :: unpackIrregularSharedGlobnums(Subdivision *s, ProcessCommunicator
             // I do rely on the fact that the arrays are ordered !!!
             // I am using zero chunk because array common is large enough
             elems = iElems->findCommonValuesSorted(* jElems, common, 0);
+#if 0
             if ( !elems ) {
                pcbuff->read(_type);
                continue;
             }
-            /*
+#else
             if ( !elems ) {
                 OOFEM_ERROR("no element found sharing nodes %d and %d",
                              iNode, jNode);
             }
-            */
+#endif
 
             // assign globnum to appropriate edge on the first element
             elem = mesh->giveElement( common.at(1) );
