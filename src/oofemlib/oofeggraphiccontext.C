@@ -46,7 +46,9 @@ namespace oofem {
 EngngModel *oofegGraphicContext :: emodel = NULL;
 EFringeTable oofegGraphicContext :: ft;
 EPixel oofegGraphicContext :: meshFillColor;
+EPixel oofegGraphicContext :: remoteMeshFillColor;
 EPixel oofegGraphicContext :: edgeColor;
+EPixel oofegGraphicContext :: remoteEdgeColor;
 EPixel oofegGraphicContext :: nodeColor;
 EPixel oofegGraphicContext :: bcicColor;
 EPixel oofegGraphicContext :: bcForceColor;
@@ -95,7 +97,9 @@ oofegGraphicContext :: init(EngngModel *d)
 
         emodel = d;
         meshFillColor = ColorGetPixelFromString(const_cast< char * >("black"), & suc);
+        remoteMeshFillColor = ColorGetPixelFromString(const_cast< char * >("DarkGray"), & suc);
         edgeColor = ColorGetPixelFromString(const_cast< char * >("black"), & suc);
+        edgeColor = ColorGetPixelFromString(const_cast< char * >("DarkGray"), & suc);
         deformedElementColor = ColorGetPixelFromString(const_cast< char * >("BlueViolet"), & suc);
         nodeColor  = ColorGetPixelFromString(const_cast< char * >("black"), & suc);
         bcicColor  = ColorGetPixelFromString(const_cast< char * >("orange"), & suc);
