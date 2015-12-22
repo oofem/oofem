@@ -101,15 +101,6 @@ FEI3dTrLin :: global2local(FloatArray &answer, const FloatArray &gcoords, const 
 }
 
 
-double
-FEI3dTrLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-{
-    FloatMatrix jacobianMatrix;
-    this->giveJacobianMatrixAt(jacobianMatrix, lcoords, cellgeo);
-    return jacobianMatrix.giveDeterminant();
-}
-
-
 void
 FEI3dTrLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {

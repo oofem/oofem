@@ -438,7 +438,8 @@ ErrorCheckingExportModule :: initializeFrom(InputRecord *ir)
     // Reads all the rules;
     std :: ifstream inputStream(this->filename);
     if ( !inputStream ) {
-        OOFEM_ERROR("Couldn't open file '%s'\n", this->filename.c_str());
+        OOFEM_WARNING("Couldn't open file '%s'\n", this->filename.c_str());
+        return IRRT_BAD_FORMAT;
     }
     double tol = 0.;
     if ( this->scanToErrorChecks(inputStream,  tol) ) {
@@ -449,14 +450,16 @@ ErrorCheckingExportModule :: initializeFrom(InputRecord *ir)
             }
             errorCheckingRules.push_back(std :: move(rule));
         }
-    } else {
-        OOFEM_WARNING("No rules found!");
     }
 
     this->writeIST.clear();
-    writeChecks = ir->hasField(_IFT_ErrorCheckingExportModule_writeChecks);
+    writeChecks = ir->hasField(_IFT_ErrorCheckingExportModule_writeIST);
     if ( writeChecks ) {
         IR_GIVE_FIELD(ir, this->writeIST, _IFT_ErrorCheckingExportModule_writeIST);
+    }
+
+    if ( errorCheckingRules.size() == 0 && !writeChecks ) {
+        OOFEM_WARNING("No rules found (possibly wrong file or syntax).");
     }
 
     return ExportModule :: initializeFrom(ir);

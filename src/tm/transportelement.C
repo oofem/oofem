@@ -57,9 +57,12 @@
 #endif
 
 namespace oofem {
+
+const double TransportElement :: stefanBoltzmann = 5.67e-8; //W/m2/K4
+
 TransportElement :: TransportElement(int n, Domain *aDomain, ElementMode em) :
-    Element(n, aDomain), emode( em ){
-    stefanBoltzmann = 5.67e-8; //W/m2/K4
+    Element(n, aDomain), emode( em )
+{
 }
 
 
@@ -134,6 +137,7 @@ TransportElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, 
                 __CharTypeToString(mtrx) );
     }
 }
+
 
 int
 TransportElement :: checkConsistency()
@@ -222,6 +226,29 @@ TransportElement :: computeNmatrixAt(FloatMatrix &answer, const FloatArray &lcoo
         answer.beNMatrixOf(n, 1);
     } else {
         answer.beNMatrixOf(n, 2);
+    }
+}
+
+
+void
+TransportElement :: computeBmatrixAt(FloatMatrix &answer, const FloatArray &lcoords)
+{
+    FloatMatrix dnx;
+    ///@todo We should change the transposition in evaldNdx;
+    this->giveInterpolation()->evaldNdx( dnx, lcoords, FEIElementGeometryWrapper(this) );
+    if ( emode == HeatTransferEM || emode == Mass1TransferEM ) {
+        answer.beTranspositionOf(dnx);
+    } else if ( this->emode == HeatMass1TransferEM ) {
+        int nodes = dnx.giveNumberOfRows();
+        int nsd = dnx.giveNumberOfColumns();
+        answer.resize(nsd*2, nodes*2);
+        answer.zero();
+        for (int i = 0; i < nodes; ++i) {
+            for (int j = 0; j < nsd; ++j) {
+                answer(j, i*2) = dnx(i, j);
+                answer(j+nsd, i*2+1) = dnx(i, j);
+            }
+        }
     }
 }
 
@@ -458,7 +485,6 @@ TransportElement :: computeConstitutiveMatrixAt(FloatMatrix &answer,
 void
 TransportElement :: computeInternalForcesVector(FloatArray &answer, TimeStep *tStep)
 {
-    FloatArray tmp;
     FloatArray unknowns;
     this->computeVectorOf(VM_Total, tStep, unknowns);
 
@@ -471,7 +497,8 @@ TransportElement :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
         const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
         this->computeNmatrixAt(N, lcoords);
-        this->computeGradientMatrixAt(B, lcoords);
+        this->computeBmatrixAt(B, lcoords);
+
         field.beProductOf(N, unknowns);
         grad.beProductOf(B, unknowns);
 
@@ -485,7 +512,7 @@ TransportElement :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
             // add internal source produced by material (if any)
             FloatArray val;
             mat->computeInternalSourceVector(val, gp, tStep, VM_Total);
-            answer.plusProduct(N, val, dV);
+            answer.plusProduct(N, val, -dV);
         }
     }
 
@@ -494,8 +521,7 @@ TransportElement :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
     FloatMatrix bc_tangent;
     this->computeBCMtrxAt(bc_tangent, tStep, VM_Total);
     if ( bc_tangent.isNotEmpty() ) {
-        tmp.beProductOf(bc_tangent, unknowns);
-        answer.add(tmp);
+        answer.plusProduct(bc_tangent, unknowns, 1.0);
     }
 }
 
@@ -519,6 +545,7 @@ TransportElement :: computeLumpedCapacityVector(FloatArray &answer, TimeStep *tS
 
     int size = cap.giveNumberOfRows();
     answer.resize(size);
+    answer.zero();
     for ( int i = 1; i <= size; i++ ) {
         for ( int j = 1; j <= size; j++ ) {
             answer.at(i) += cap.at(i, j);
@@ -931,7 +958,7 @@ TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
         answer.resize( this->giveNumberOfDofManagers() );
         answer.zero();
 
-        double coeff;
+        double coeff=0.;
         int approxOrder = surfLoad->giveApproxOrder() + this->giveApproxOrder(indx);
 
         std :: unique_ptr< IntegrationRule > iRule( this->GetSurfaceIntegrationRule(approxOrder) );
@@ -956,6 +983,8 @@ TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
                 coeff = surfLoad->giveProperty('a', tStep);
             } else if ( load->giveType() == RadiationBC ) {
                 coeff = getRadiativeHeatTranferCoef(surfLoad, tStep);
+            } else {
+                OOFEM_ERROR("Unknown load type");
             }
 
             this->computeSurfaceNAt( n, iSurf, gp->giveNaturalCoordinates() );
@@ -1119,11 +1148,13 @@ TransportElement :: assembleLocalContribution(FloatArray &answer, FloatArray &sr
 }
 
 double
-TransportElement :: getRadiativeHeatTranferCoef(BoundaryLoad *bLoad, TimeStep *tStep){
+TransportElement :: getRadiativeHeatTranferCoef(BoundaryLoad *bLoad, TimeStep *tStep)
+{
     double answer = 0;
-    FloatArray *components = bLoad->GiveCopyOfComponentArray();
+    ///@todo Why aren't this code using the standard approach of calling computeComponentArrayAt(...) to get the time function scaling and all?
+    const FloatArray &components = bLoad->giveComponentArray();
     
-    answer = components->at(1);//T_infty
+    answer = components.at(1);//T_infty
     answer += 273.15;
     answer = answer*answer*answer;
     answer *= 4 * bLoad->giveProperty('e', tStep) * stefanBoltzmann;
@@ -1246,6 +1277,7 @@ TransportElement :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, Pr
         this->computeNmatrixAt(n, lc);
         // compute answer
         answer.resize( dofId.giveSize() );
+        answer.zero();
         for ( int i = 1; i <= dofId.giveSize(); i++ ) {
             if ( ( indx = elemdofs.findFirstIndexOf( dofId.at(i) ) ) ) {
                 double sum = 0.0;

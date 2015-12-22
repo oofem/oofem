@@ -54,15 +54,15 @@ namespace oofem {
  * Custom user supplied python scripts for material models.
  * The python module should contain the functions
  * @code{.py}
- * giveStress(oldStrain, oldStress, strain, state, time) # returns stress
- * givePK1Stress(oldF, oldP, F, state, time) # returns P
+ * computeStress(oldStrain, oldStress, strain, state, time) # returns stress
+ * computePK1Stress(oldF, oldP, F, state, time) # returns P
  * @endcode
  * and optionally
  * @code{.py}
- * giveStressTangent(strain, stress, state, time) # returns ds/de
- * givePK1StressTangent(F, P, state, time) # return dP/dF
+ * computeStressTangent(strain, stress, state, time) # returns ds/de
+ * computePK1StressTangent(F, P, state, time) # return dP/dF
  * @endcode
- * else numerical derivatives are used.
+ * else numerical derivatives are used. The state variable should be a dictionary storing either doubles or arrays of doubles.
  * 
  * This code is still experimental, and needs extensive testing.
  * @author Mikael Öhman
@@ -96,8 +96,8 @@ public:
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
-    void callStressFunction(PyObject *func, const FloatArray &oldStrain, const FloatArray &oldStress, const FloatArray &strain, FloatArray &stress, PyObject *stateDict, TimeStep *tStep) const;
-    void callTangentFunction(FloatMatrix &answer, PyObject *func, const FloatArray &strain, const FloatArray &stress, PyObject *stateDict, TimeStep *tStep) const;
+    void callStressFunction(PyObject *func, const FloatArray &oldStrain, const FloatArray &oldStress, const FloatArray &strain, FloatArray &stress, PyObject *stateDict, PyObject *tempStateDict, TimeStep *tStep) const;
+    void callTangentFunction(FloatMatrix &answer, PyObject *func, const FloatArray &strain, const FloatArray &stress, PyObject *stateDict, PyObject *tempStateDict, TimeStep *tStep) const;
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
@@ -138,7 +138,7 @@ public:
     void reinitTempStateDictionary();
 
     PyObject *giveStateDictionary() { return stateDict; }
-    PyObject *giveTempStateDictionary() { return stateDict; }
+    PyObject *giveTempStateDictionary() { return tempStateDict; }
 
     virtual const char *giveClassName() const { return "StructuralPythonMaterialStatus"; }
 };

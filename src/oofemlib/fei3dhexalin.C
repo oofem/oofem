@@ -218,15 +218,6 @@ FEI3dHexaLin :: global2local(FloatArray &answer, const FloatArray &coords, const
     return inside;
 }
 
-
-double
-FEI3dHexaLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-{
-    FloatMatrix jacobianMatrix;
-    this->giveJacobianMatrixAt(jacobianMatrix, lcoords, cellgeo);
-    return jacobianMatrix.giveDeterminant();
-}
-
 void
 FEI3dHexaLin :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {

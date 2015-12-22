@@ -123,7 +123,7 @@ errorestimate_re = re.compile(r"""
         """, re.X)
 
 
-gprecord_re = re.compile (r"""[ ]*(stresses|strains|status|element_status|curvatures|moments)\s*""",re.X)
+gprecord_re = re.compile (r"""[ ]*(stresses|strains|status|element_status|curvatures|moments|{)\s*""",re.X)
 #gpstrain_re = re.compile (r"""[ ]strains\s*([\s+-e\d]+)""",re.X)
 #gpstatus_re = re.compile (r"""status\s.*""", re.X)
 #gpelementstatus_re = re.compile (r"""element_status\s.*""", re.X)
@@ -360,7 +360,7 @@ def check_errorestimate_rec (context):
 
         if ((rec[0] == 'ee') and timeflag):
             context.recVal[irec]=context.recvalue
-    
+
 
 def match_primary_rec (context, line):
     global mode, debug
@@ -510,7 +510,6 @@ def match_gprec (context):
         while (match):
             line = match_singlegprec (context, line)
             match=gp_re.search(line)
-
         else:
             return line
 
@@ -637,8 +636,10 @@ slave file fails, master fails as well.
 Example (for checker mode):
 patch100.out
 #%BEGIN_CHECK% tolerance 1.e-4
-#ELEMENT tStep 1 number 1 gp 1 component 1 keyword "stresses" value -8.3333e+00
-#ELEMENT tStep 1 number 1 gp 1 component 1 keyword "strains"  value -5.2083e-01
+##Get stress
+#ELEMENT tStep 1 number 1 gp 1 component 1 keyword 1 value -8.3333e+00
+##Get strain
+#ELEMENT tStep 1 number 1 gp 1 component 1 keyword 4  value -5.2083e-01
 #DOFMAN  tStep 1 number 4 dof 1 type d value -1.5625
 #%END_CHECK%
 """ )
@@ -698,7 +699,7 @@ def process_file (infilename, parentfilename):
                 context.userrec.append (('include',result)) #remember result
                 recursion_level = recursion_level-1
             else:
-                print ( "Allowed recursion level reached, file:",match.group(2) )
+                print ( "Allowed recursion level reached, file:", match.group(2) )
                 return 2
 
         match = parse_input_rec (context, line)

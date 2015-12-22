@@ -152,11 +152,11 @@ public:
     virtual bool requiresActiveDofs() { return true; }
     virtual bool isPrimaryDof(ActiveDof *dof);
 
-    virtual double giveBcValue(ActiveDof *dof, ValueModeType mode, TimeStep *tStep);
-    virtual bool hasBc(ActiveDof *dof, TimeStep *tStep);
+    virtual double giveBcValue(Dof *dof, ValueModeType mode, TimeStep *tStep);
+    virtual bool hasBc(Dof *dof, TimeStep *tStep);
 
     /// Returns true is DOF represents one of the deviatoric parts.
-    bool isDevDof(ActiveDof *dof);
+    bool isDevDof(Dof *dof);
 
     virtual int giveNumberOfMasterDofs(ActiveDof *dof);
     virtual Dof *giveMasterDof(ActiveDof *dof, int mdof);

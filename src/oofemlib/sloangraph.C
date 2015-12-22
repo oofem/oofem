@@ -125,10 +125,9 @@ void SloanGraph :: initialize()
     ///@todo Add connections from dof managers to boundary condition internal dof managers.
 
     IntArray dofMasters;
-    count = 0;
     for ( auto &dman : dmans ) {
-      // according to forum discussion Peter & Mikael
-      count = 0;
+        // according to forum discussion Peter & Mikael
+        count = 0;
         ++count;
         if ( dman->hasAnySlaveDofs() ) {
             std :: set< int >masters;

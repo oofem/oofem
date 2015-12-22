@@ -47,7 +47,6 @@
 //@{
 #define _IFT_ErrorCheckingExportModule_Name "errorcheck"
 #define _IFT_ErrorCheckingExportModule_filename "filename" ///< Filename where rules are defined (normally the input file).
-#define _IFT_ErrorCheckingExportModule_writeChecks "writechecks" ///< Defines if rules should be written
 #define _IFT_ErrorCheckingExportModule_writeIST "writeist" ///< Which internal state types to write rules for.
 //@}
 

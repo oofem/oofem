@@ -614,7 +614,7 @@ MisesMat :: give3dLSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode
     // trial deviatoric stress and its norm
 
 
-    double beta0, beta1, beta2, beta3, beta4;
+    double beta1, beta3, beta4;
     if ( trialS == 0 ) {
         beta1 = 0;
     } else {
@@ -622,13 +622,11 @@ MisesMat :: give3dLSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode
     }
 
     if ( trialStressVol == 0 ) {
-        beta0 = 0;
-        beta2 = 0;
         beta3 = beta1;
         beta4 = 0;
     } else {
-        beta0 = 1 + H / 3 / trialStressVol;
-        beta2 = ( 1 - 1 / beta0 ) * 2. / 3. * trialS * dKappa / trialStressVol;
+        double beta0 = 1 + H / 3 / trialStressVol;
+        double beta2 = ( 1 - 1 / beta0 ) * 2. / 3. * trialS * dKappa / trialStressVol;
         beta3 = 1 / beta0 - beta1 + beta2;
         beta4 = ( 1 / beta0 - beta1 ) * trialS / trialStressVol;
     }

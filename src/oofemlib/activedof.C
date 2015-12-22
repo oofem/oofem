@@ -42,7 +42,8 @@
 
 namespace oofem {
 ActiveDof :: ActiveDof(DofManager *aNode, DofIDItem id, int bc) : Dof(aNode, id), equationNumber(0), bc(bc), activeBC(NULL)
-{ }
+{
+}
 
 void ActiveDof :: initialize(int cntOfMstrDfMngr, const IntArray &masterNodes, const IntArray *mstrDofID, const FloatArray &mstrContribution)
 {

@@ -1,6 +1,7 @@
 tmpatch17.out
 Patch test of Quad1_ht elements with radiation source. Heat flow stabilizes at value -30.1 W/m2 which corresponds to temperature 8.05C. Temperature values in C.
 #NlTransientTransportProblem nsteps 20 deltat 24000. rtol 1.e-5 alpha 0.5 nmodules 1
+#TransientTransport nsteps 20 deltat 24000. alpha 0.5 nmodules 1
 NonStationaryProblem nsteps 20 deltat 24000. alpha 0.5 nmodules 1
 #vtkxml tstep_all domain_all primvars 1 6 vars 1 56 stype 1
 errorcheck

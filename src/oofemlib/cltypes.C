@@ -189,6 +189,7 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_CrackWidth:
     case IST_TensileStrength:
     case IST_ResidualTensileStrength:
+    case IST_CrackIndex:
         return ISVT_SCALAR;
 
     default:
@@ -259,7 +260,7 @@ ContextIOERR :: print()
         oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, NULL, file, line, 
                                   "ContextIOERR encountered, error code: %d", error);
     }
-    oofem_exit(1);
+    OOFEM_EXIT(1);
 }
 
 /*

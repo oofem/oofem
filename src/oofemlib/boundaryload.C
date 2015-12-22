@@ -94,6 +94,9 @@ BoundaryLoad :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     result = Load :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     int dummy;
     IR_GIVE_OPTIONAL_FIELD(ir, dummy, "ndofs");
@@ -111,7 +114,7 @@ BoundaryLoad :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_OPTIONAL_FIELD(ir, propertyMultExpr, _IFT_BoundaryLoad_propertyMultExpr);
 
-    return result;
+    return IRRT_OK;
 }
 
 
@@ -127,12 +130,14 @@ BoundaryLoad :: giveInputRecord(DynamicInputRecord &input)
 }
 
 void
-BoundaryLoad :: setVariableState(int aVariable, double val){
+BoundaryLoad :: setVariableState(int aVariable, double val)
+{
     variableState.at(aVariable) = val;
 }
 
 double
-BoundaryLoad :: giveVariableState(int aVariable){
+BoundaryLoad :: giveVariableState(int aVariable)
+{
     return variableState.at(aVariable);
 }
 

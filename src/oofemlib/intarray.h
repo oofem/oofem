@@ -283,9 +283,8 @@ public:
      * Insert once (does not make any assumption about receiver state or ordering, quite
      * inefficient). More efficient version insertSortedOnce exist.
      * @param p Value to insert.
-     * @return Index of sorted value.
      */
-    int insertOnce(int p);
+    void insertOnce(int p);
     /**
      * Sorts array.
      */

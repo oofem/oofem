@@ -40,12 +40,13 @@
 #include "timestep.h"
 #include "engngm.h"
 #include "classfactory.h"
-#include "isodamagemodel.h"
+#include "Materials/structuralmaterial.h"
 #include "crosssection.h"
 #include "floatarray.h"
 
 #include <fstream>
 #include <sstream>
+#include <boost/concept_check.hpp>
 
 namespace oofem {
 
@@ -81,7 +82,7 @@ void
 CrackExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 {
     if ( !testTimeStepOutput(tStep) ) {
-      return;
+        return;
     }
 
     double crackLength_projection;
@@ -96,31 +97,18 @@ CrackExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     FloatMatrix rotMatrix;
     FloatArray strainVector, princStrain;
 
-    FloatArray output;
-
     double weight, totWeight;
 
-    //InternalStateType vartype;
-
     Domain *d  = emodel->giveDomain(1);
-    int nelem = d->giveNumberOfElements();
-
-    //double index = tStep->giveNumber();
 
     std::vector< FloatArray > pointsVector;
 
-
-    // loop over elements
-    for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-
-        Element *elem = d->giveElement(ielem);
+    for ( auto &elem : d->giveElements() ) {
 
         int csNumber = elem->giveCrossSection()->giveNumber();
         if ( this->crossSections.containsSorted( csNumber ) ) {
-            //if (true) {
 
             totWeight = 0.;
-
             crackWidth = 0.;
             crackLength_projection = 0.;
             crackLength_sqrt = 0.;
@@ -129,23 +117,21 @@ CrackExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
             for ( int i = 0; i < elem->giveNumberOfIntegrationRules(); i++ ) {
                 IntegrationRule *iRule = elem->giveIntegrationRule(i);
 
-                output.resize(5);
-
-
                 for ( auto &gp: *iRule ) {
 
-                    IsotropicDamageMaterial *mat = static_cast< IsotropicDamageMaterial*>( gp->giveMaterial() );
-                    IsotropicDamageMaterialStatus *matStatus = static_cast< IsotropicDamageMaterialStatus * >( mat->giveStatus(gp) );
-
-                    damage = matStatus->giveDamage();
-                    //elem->giveIPValue(strainVector, gp, IST_StrainTensor, tStep);
+                    FloatArray tmp;
+                    elem->giveIPValue(tmp, gp, IST_DamageScalar, tStep);
+                    damage = tmp.at(1);
+                    elem->giveIPValue(strainVector, gp, IST_StrainTensor, tStep);
 
                     if ( damage > 0. ) {
 
                         weight = elem->computeVolumeAround(gp);
                         totWeight += weight;
 
-                        matStatus->giveCrackVector(crackVector);
+                        elem->giveIPValue(tmp, gp, IST_CharacteristicLength, tStep);
+                        elementLength = tmp.at(1);
+                        elem->giveIPValue(crackVector, gp, IST_CrackVector, tStep);
                         crackVector.times(1./damage);
 
                         princDir.resize(2,2);
@@ -156,13 +142,10 @@ CrackExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
                         princDir.at(1,2) = crackVector.at(1);
                         princDir.at(2,2) = crackVector.at(2);
 
-                        elementLength = matStatus->giveLe();
-
-                        strainVector = matStatus->giveStrainVector();
                         // modify shear strain in order to allow transformation with the stress transformation matrix
-                        strainVector.at(3) /= 2.;
+                        strainVector = {strainVector(0), strainVector(1), strainVector(6)*0.5};
 
-                        mat->givePlaneStressVectorTranformationMtrx(rotMatrix, princDir, false);
+                        StructuralMaterial ::  givePlaneStressVectorTranformationMtrx(rotMatrix, princDir, false);
                         princStrain.beProductOf(rotMatrix, strainVector);
 
                         crackWidth += elementLength * princStrain.at(1) * damage * weight;
@@ -206,13 +189,13 @@ CrackExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
                 if ( crackWidth >= threshold ) {
 
-                    output.at(1) = ielem;
-                    output.at(2) = crackWidth;
-                    output.at(3) = crackAngle;
-                    output.at(4) = crackLength_projection;
-                    output.at(5) = crackLength_sqrt;
-
-                    pointsVector.push_back(output);
+                    pointsVector.emplace_back({
+                            elem->giveNumber(),
+                            crackWidth,
+                            crackAngle,
+                            crackLength_projection,
+                            crackLength_sqrt
+                    });
                 }
             }
         }

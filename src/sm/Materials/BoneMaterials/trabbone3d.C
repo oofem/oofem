@@ -536,10 +536,8 @@ TrabBone3D :: constructPlasFlowDirec(FloatArray &answer, double  &norm, FloatMat
     // scaling matrix
     this->constructNormAdjustTensor(normAdjust);
     //direction of Np
-    answer.zero();
-    answer.add(FFS);
-    answer.times(1. / SFS);
-    answer.add(F);
+    answer = F;
+    answer.add(1. / SFS, FFS);
     tempTensor2.beProductOf(normAdjust, answer);
     //norm Np
     norm = sqrt( answer.dotProduct(tempTensor2) );

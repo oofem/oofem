@@ -1435,6 +1435,7 @@ StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &di
         // 2D problem
         ss.resize(2, 2);
         answer.resize(2);
+        dir.resize(2, 2);
 
         for ( int i = 1; i <= size; i++ ) {
             if ( fabs( s.at(i) ) > 1.e-20 ) {
@@ -1444,6 +1445,7 @@ StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &di
 
         if ( nonzeroFlag == 0 ) {
             answer.zero();
+            dir.zero();
             ss.zero();
             return;
         }
@@ -1463,6 +1465,7 @@ StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &di
         double help;
         ss.resize(3, 3);
         answer.resize(3);
+        dir.resize(3, 3);
 
         for ( int i = 1; i <= size; i++ ) {
             if ( fabs( s.at(i) ) > 1.e-20 ) {
@@ -1472,6 +1475,7 @@ StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &di
 
         if ( nonzeroFlag == 0 ) {
             answer.zero();
+            dir.zero();
             ss.zero();
             return;
         }

@@ -87,7 +87,6 @@ void IntSourceLHSAssembler :: matrixFromElement(FloatMatrix &answer, Element &el
 }
 
 
-
 NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel *_master = NULL) : StationaryTransportProblem(i, _master)
 {
     ndomains = 1;
@@ -194,16 +193,16 @@ double NonStationaryTransportProblem :: giveUnknownComponent(ValueModeType mode,
 TimeStep *
 NonStationaryTransportProblem :: giveSolutionStepWhenIcApply(bool force)
 {
-  if ( master && (!force)) {
-    return master->giveSolutionStepWhenIcApply();
-  } else {
-    if ( !stepWhenIcApply ) {
-        stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, this->initT - giveDeltaT ( giveNumberOfFirstStep() ), giveDeltaT ( giveNumberOfFirstStep() ), 0) );
-        //stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -deltaT, deltaT, 0) );
-    }
+    if ( master && (!force)) {
+        return master->giveSolutionStepWhenIcApply();
+    } else {
+        if ( !stepWhenIcApply ) {
+            stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, this->initT - giveDeltaT ( giveNumberOfFirstStep() ), giveDeltaT ( giveNumberOfFirstStep() ), 0) );
+            //stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -deltaT, deltaT, 0) );
+        }
 
-    return stepWhenIcApply.get();
-  }
+        return stepWhenIcApply.get();
+    }
 }
 
 

@@ -45,6 +45,7 @@
 #define _IFT_Beam3d_dofstocondense "dofstocondense"
 #define _IFT_Beam3d_refnode "refnode"
 #define _IFT_Beam3d_refangle "refangle"
+#define _IFT_Beam3d_zaxis "zaxis"
 //@}
 
 namespace oofem {
@@ -73,8 +74,8 @@ protected:
 
     double kappay, kappaz, length;
     int referenceNode;
+    FloatArray zaxis;
     double referenceAngle = 0;
-    bool usingAngle = false;
     //IntArray *dofsToCondense;
     /*
      * Ghost nodes are used to introduce additional DOFs at element.

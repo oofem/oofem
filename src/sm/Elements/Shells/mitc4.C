@@ -867,7 +867,7 @@ MITC4Shell :: printOutputAt(FILE *file, TimeStep *tStep)
 {
     FloatArray v;
 
-    fprintf(file, "element %d ( %d):\n", this->giveLabel(), number);
+    fprintf(file, "element %d (%8d):\n", this->giveLabel(), number);
 
     for ( GaussPoint *gp : *integrationRulesArray [ 0 ] ) {
         fprintf( file, "  GP 1.%d :", gp->giveNumber() );

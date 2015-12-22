@@ -298,7 +298,7 @@ HydrationModel :: giveStatus(GaussPoint *gp) const
     HydrationModelStatus *status = NULL;
     if ( hmi ) {
         status = hmi->giveHydrationModelStatus();
-        if ( status == NULL ) {
+        if ( !status ) {
             status = static_cast< HydrationModelStatus * >( this->CreateStatus(gp) );
             hmi->setHydrationModelStatus(status);
         }

@@ -1,6 +1,7 @@
 HeMoKunzel_1.out
 Heat and moisture transport - Kunzel's model. Direct solver and unsymmetric skyline.
-nltransienttransportproblem nsteps 10 deltat 36000. alpha 0.5 rtol 1.e-10 nsmax 150 lumpedcapa lstype 0 smtype 1 nmodules 1
+nltransienttransportproblem nsteps 9 deltat 36000. alpha 0.5 rtol 1.e-10 nsmax 150 lumpedcapa lstype 0 smtype 1 nmodules 1
+#transienttransport nsteps 9 deltat 36000. alpha 0.5 lumped rtolf 1e-10 lstype 0 smtype 1 nmodules 1
 Errorcheck
 #vtkxml tstep_all domain_all primvars 2 6 7 vars 2 37 40 stype 1
 domain HeMa1
@@ -34,6 +35,11 @@ BoundaryCondition 2 loadTimeFunction 1 dofs 1 10 values 1 323.15 set 3
 InitialCondition 1 Conditions 1 u 293.15 dofs 1 10 set 1
 # humidity ic
 InitialCondition 2 Conditions 1 u 0.9 dofs 1 14 set 1
+####
+#InitialCondition 3 Conditions 1 u 298.15 dofs 1 10 set 2
+#InitialCondition 4 Conditions 1 u 0.6 dofs 1 14 set 2
+#InitialCondition 5 Conditions 1 u 323.15 dofs 1 10 set 3
+####
 ConstantFunction 1 f(t) 1.
 Set 1 elementranges {(1 8)}
 Set 2 nodes 2 1 6

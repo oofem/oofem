@@ -134,7 +134,7 @@ FEI3dWedgeQuad :: global2local(FloatArray &answer, const FloatArray &coords, con
 double
 FEI3dWedgeQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    FloatMatrix jacobianMatrix(3, 3);
+    FloatMatrix jacobianMatrix;
 
     this->giveJacobianMatrixAt(jacobianMatrix, lcoords, cellgeo);
     return jacobianMatrix.giveDeterminant() / 2.; ///@todo Should this really be a factor 1/2 here?

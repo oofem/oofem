@@ -165,15 +165,11 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
-protected:
     /**
      * @return Pointer to receiver component array, where component values of boundary condition are stored.
      */
-    FloatArray &giveComponentArray();
-
-public:
+    const FloatArray &giveComponentArray() const;
     void setComponentArray(FloatArray &arry) { componentArray = arry; }
-    FloatArray* GiveCopyOfComponentArray() { return new FloatArray(componentArray); }
 };
 } // end namespace oofem
 #endif // load_h

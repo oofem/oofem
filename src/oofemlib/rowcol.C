@@ -218,16 +218,14 @@ RowColumn :: growTo(int newStart)
 void RowColumn :: printYourself()
 // Prints the receiver on screen.
 {
-    int i;
-
     printf("Row-column %d : start = %d, diag = %.5f\n   col : ",
            number, start, diag);
-    for ( i = 0; i < number - start; i++ ) {
+    for ( int i = 0; i < number - start; i++ ) {
         printf(" % .5f", column [ i ]);
     }
 
     printf("\n   row : ");
-    for ( i = 0; i < number - start; i++ ) {
+    for ( int i = 0; i < number - start; i++ ) {
         printf(" % .5f", row [ i ]);
     }
 
@@ -239,11 +237,11 @@ void
 RowColumn :: zero()
 // Sets all coefficients of the receiver to 0.
 {
-    int i, size = number - start;
+    int size = number - start;
 
     diag = 0.;
     if ( size ) {
-        for ( i = 0; i < size; i++ ) {
+        for ( int i = 0; i < size; i++ ) {
             column [ i ] = 0.0;
             row [ i ]    = 0.0;
         }
@@ -254,7 +252,6 @@ RowColumn *
 RowColumn :: GiveCopy()
 {
     int i;
-    RowColumn *answer;
     double *newRow, *newColumn, *p1, *p2;
     int size = number - start;
 
@@ -282,8 +279,7 @@ RowColumn :: GiveCopy()
         newRow = newColumn = NULL;
     }
 
-    answer = new RowColumn(this->number, this->start, newRow, newColumn, this->diag);
-    return answer;
+    return new RowColumn(this->number, this->start, newRow, newColumn, this->diag);
 }
 
 

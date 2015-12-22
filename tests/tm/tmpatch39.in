@@ -2,6 +2,7 @@ tmpatch39.out
 Patch test of Brick_ht elements, heat transfer coefficient depending on temperature
 #StationaryProblem nsteps 1 nmodules 0
 #NonStationaryProblem nsteps 5 deltat 6000.0 alpha 0.5 nmodules 0
+#TransientTransport nsteps 5 deltat 6000.0 alpha 0.5 lumped nmodules 1
 nltransienttransportproblem nsteps 5 deltat 6000.0 rtol 0.001 alpha 0.5 nsmax 300 lumpedcapa nmodules 1
 errorcheck
 domain HeatTransfer

@@ -47,8 +47,6 @@ class TransportCrossSection;
  * This abstract class represent a general base element class for transport problems.
  * In actual implementation, the same approximation order of all unknowns is assumed,
  * but this can be easily implemented.
- * @todo A lot of missing documentation.
- * @todo Nonlinear problems.
  */
 class TransportElement : public Element, public EIPrimaryFieldInterface
 {
@@ -57,8 +55,8 @@ public:
 
 protected:
     ElementMode emode;
-    ///Stefan–Boltzmann constant W/m2/K4
-    double stefanBoltzmann;
+    /// Stefan–Boltzmann constant W/m2/K4
+    static const double stefanBoltzmann;
 
 public:
     TransportElement(int n, Domain * d, ElementMode em = HeatTransferEM);
@@ -222,6 +220,7 @@ protected:
      * In the default implementation the same approximation order is assumed, but it can be extended.
      */
     virtual void computeNmatrixAt(FloatMatrix &answer, const FloatArray &lcoords);
+    virtual void computeBmatrixAt(FloatMatrix &answer, const FloatArray &lcoords);
     /**
      * Computes the gradient matrix corresponding to one unknown.
      */
