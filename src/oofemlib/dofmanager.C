@@ -453,9 +453,12 @@ void DofManager :: giveInputRecord(DynamicInputRecord &input)
         input.setField(* this->dofidmask, _IFT_DofManager_dofidmask);
     }
 
-    if ( mBC.giveSize() > 0 ) {
-        input.setField(mBC, _IFT_DofManager_bc);
+    IntArray mbc;
+    for ( Dof *dof: *this ) {
+      if (dof->giveBcId()) mbc.followedBy(dof->giveBcId(),3);
+      else mbc.followedBy(0,3);
     }
+    input.setField(mbc, _IFT_DofManager_bc);
 
     if ( this->dofTypemap ) {
         IntArray typeMask( this->dofidmask->giveSize() );
