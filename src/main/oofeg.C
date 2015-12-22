@@ -156,6 +156,7 @@ void kappa2compPlot(Widget w, XtPointer ptr, XtPointer call_data);
 void dissworkcompPlot(Widget w, XtPointer ptr, XtPointer call_data);
 void stressworkcompPlot(Widget w, XtPointer ptr, XtPointer call_data);
 void freeenergycompPlot(Widget w, XtPointer ptr, XtPointer call_data);
+void localequivstrainPlot(Widget w, XtPointer ptr, XtPointer call_data);
 //emj
 void princdamagecompPlot(Widget w, XtPointer ptr, XtPointer call_data);
 void emptyaction(Widget w, XtPointer ptr, XtPointer call_data);
@@ -818,6 +819,7 @@ void ESICustomize(Widget parent_pane)
                     oofeg_add_menu_item( "DISS_WORK", "diss_work ", scalardamage_palette, dissworkcompPlot, ( XtPointer ) ( vectorAddr + 0 ) );
                     oofeg_add_menu_item( "STRESS_WORK", "stress_work ", scalardamage_palette, stressworkcompPlot, ( XtPointer ) ( vectorAddr + 0 ) );
                     oofeg_add_menu_item( "FREE_ENERGY", "free_energy ", scalardamage_palette, freeenergycompPlot, ( XtPointer ) ( vectorAddr + 0 ) );
+                    oofeg_add_menu_item( "LOCAL_EQUIV_STRAIN", "local_equiv_strain ", scalardamage_palette, localequivstrainPlot, ( XtPointer ) ( vectorAddr + 0 ) );
                 }
                 //emj
 
@@ -1511,6 +1513,18 @@ void freeenergycompPlot(Widget w, XtPointer ptr, XtPointer call_data)
 {
     updateDefPlotFlag();
     gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setInternalStateType(IST_FreeEnergyDensity);
+    gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setIntVarIndx(1);
+    gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setPlotMode(OGC_scalarPlot);
+
+    setupData(gc [ OOFEG_VARPLOT_PATTERN_LAYER ]);
+    if ( gc [ OOFEG_VARPLOT_PATTERN_LAYER ].getActiveStep() != -1 ) {
+        drawData(gc [ OOFEG_VARPLOT_PATTERN_LAYER ]);
+    }
+}
+void localequivstrainPlot(Widget w, XtPointer ptr, XtPointer call_data)
+{
+    updateDefPlotFlag();
+    gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setInternalStateType(IST_LocalEquivalentStrain);
     gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setIntVarIndx(1);
     gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setPlotMode(OGC_scalarPlot);
 
