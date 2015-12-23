@@ -52,7 +52,7 @@ namespace oofem {
 
 REGISTER_Material(BinghamFluidMaterial2);
 ///@todo Remove the alternative ID. Just stick to "binghamfluid".
-static bool __dummy_BinghamFluidMaterial2_alt = GiveClassFactory().registerMaterial("binghamfluid2", matCreator< BinghamFluidMaterial2 > );
+static bool __dummy_BinghamFluidMaterial2_alt __attribute__((unused)) = GiveClassFactory().registerMaterial("binghamfluid2", matCreator< BinghamFluidMaterial2 > );
 
 BinghamFluidMaterial2 :: BinghamFluidMaterial2(int n, Domain *d) : FluidDynamicMaterial(n, d),
     mu_0(0.),
