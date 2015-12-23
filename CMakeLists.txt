@@ -709,20 +709,46 @@ if (USE_FM AND USE_PFEM)
     endforeach (case)
 endif()
 
-# Benchmarks
-file (GLOB benchmarks RELATIVE "${oofem_TEST_DIR}/benchmark" "${oofem_TEST_DIR}/benchmark/*.in")
-foreach (case ${benchmarks})
-    add_test (NAME "benchmark_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/benchmark COMMAND ${oofem_cmd} "-f" ${case})
-endforeach (case)
 
-# PFEM Benchmarks
-if (USE_SM AND USE_FM AND USE_PFEM)
-    file (GLOB pfembenchmarks RELATIVE "${oofem_TEST_DIR}/pfembenchmark" "${oofem_TEST_DIR}/pfembenchmark/*.in")
-    foreach (case ${pfembenchmarks})
-        add_test (NAME "benchmark_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/pfembenchmark COMMAND ${oofem_cmd} "-f" ${case})
+######################## Benchmarks ########################################
+
+set (oofem_BENCHMARK_DIR "${oofem_SOURCE_DIR}/tests/benchmark")
+
+if (USE_TM AND USE_SM AND USE_DSS)
+    file (GLOB tmsmdss_benchmark RELATIVE "${oofem_BENCHMARK_DIR}/tmsmdss" "${oofem_BENCHMARK_DIR}/tmsmdss/*.in")
+    foreach (case ${tmsmdss_benchmark})
+        add_test (NAME "benchmark_${case}" WORKING_DIRECTORY ${oofem_BENCHMARK_DIR}/tmsmdss COMMAND ${oofem_cmd} "-f" ${case})
     endforeach (case)
 endif()
 
+if (USE_FM)
+    file (GLOB fm_benchmark RELATIVE "${oofem_BENCHMARK_DIR}/fm" "${oofem_BENCHMARK_DIR}/fm/*.in")
+    foreach (case ${fm_benchmark})
+        add_test (NAME "benchmark_${case}" WORKING_DIRECTORY ${oofem_BENCHMARK_DIR}/fm COMMAND ${oofem_cmd} "-f" ${case})
+    endforeach (case)
+endif()
+
+if (USE_SM)
+    file (GLOB sm_benchmark RELATIVE "${oofem_BENCHMARK_DIR}/sm" "${oofem_BENCHMARK_DIR}/sm/*.in")
+    foreach (case ${sm_benchmark})
+        add_test (NAME "benchmark_${case}" WORKING_DIRECTORY ${oofem_BENCHMARK_DIR}/sm COMMAND ${oofem_cmd} "-f" ${case})
+    endforeach (case)
+endif()
+
+if (USE_TM)
+    file (GLOB tm_benchmark RELATIVE "${oofem_BENCHMARK_DIR}/tm" "${oofem_BENCHMARK_DIR}/tm/*.in")
+    foreach (case ${tm_benchmark})
+        add_test (NAME "benchmark_${case}" WORKING_DIRECTORY ${oofem_BENCHMARK_DIR}/tm COMMAND ${oofem_cmd} "-f" ${case})
+    endforeach (case)
+endif()
+
+if (USE_FM AND USE_SM AND USE_PFEM)
+    file (GLOB fmpfem_benchmark RELATIVE "${oofem_BENCHMARK_DIR}/fmpfem" "${oofem_BENCHMARK_DIR}/fmpfem/*.in")
+    foreach (case ${fmpfem_benchmark})
+        add_test (NAME "benchmark_${case}" WORKING_DIRECTORY ${oofem_BENCHMARK_DIR}/fmpfem COMMAND ${oofem_cmd} "-f" ${case})
+    endforeach (case)
+endif()   
+  
 # Custom targets for test and benchmarks (which can conveniently be accessed from IDEs)
 
 ProcessorCount(N)

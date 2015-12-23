@@ -67,7 +67,7 @@ NumericalMethod *IncrementalLinearStatic :: giveNumericalMethod(MetaStep *mStep)
     if ( !nMethod ) {
         nMethod.reset( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
         if ( !nMethod ) {
-            OOFEM_ERROR("linear solver creation failed");
+            OOFEM_ERROR("linear solver creation failed for lstype %d", solverType);
         }
     }
 
