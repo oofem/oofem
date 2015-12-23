@@ -1,9 +1,9 @@
 MPS_block01_in.out.sm
 OOFEM input file for structural analysis, automatically generated, test for ConTemp, a brick with size x=3 y=0.5 z=0.5. Damage happens at time step 9 due to temperature profile. Mesh is slightly distorted to localize damage.
 #
-nonlinearstatic nsteps 10 deltaT 1. rtolv 1.e-3 MaxIter 1000 controllmode 1 stiffMode 2 renumber 1 updateelasticstiffnessflag lstype 0 smtype 0 miniter 3 nmodules 1
-#vtkxml tstep_step 1 domain_all vars 11 1 2 112 111 4 106 109 110 52 90 113 primvars 1 1 cellvars 2 90 82 stype 1 regionsets 1 1 timescale 2.77777e-4
-#vtkxml tstep_step 1 domain_all vars 5 1 2 4 27 28 primvars 1 1 stype 1 regionsets 2 2 3 timescale 2.77777e-4
+nonlinearstatic nsteps 10 deltaT 1. rtolv 1.e-3 MaxIter 1000 controllmode 1 stiffMode 2 renumber 1 updateelasticstiffnessflag lstype 0 smtype 0 miniter 3 nmodules 3
+vtkxml tstep_step 1 domain_all vars 11 1 2 112 111 4 106 109 110 52 90 114 primvars 1 1 cellvars 2 90 82 stype 1 regionsets 1 1 timescale 2.77777e-4
+vtkxml tstep_step 1 domain_all vars 5 1 2 4 27 28 primvars 1 1 stype 1 regionsets 2 2 3 timescale 2.77777e-4
 errorcheck
 #hom tstep_all ists 1 52 regionsets 1 1 timescale 2.77777e-4
 #

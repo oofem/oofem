@@ -593,7 +593,7 @@ MPSDamMaterial :: computeFractureEnergy(double equivalentTime)
     // 3) calculate the resulting fracture energy as gf28 * ft/ft28
 
     fractureEnergy = fractureEnergy28 * ftm / ftm28;
-    
+
     return fractureEnergy;
 }
 
