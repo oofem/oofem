@@ -1,14 +1,14 @@
-MPS_block02_in.out.sm
-OOFEM input file for structural analysis, automatically generated, test for ConTemp, a brick with size x=3 y=0.5 z=0.5. The same geometry as MPS_block01_in.out.sm with different BC. No damage happens in the simulation. Test mainly for stress relaxation. Mesh is slightly distorted (it would localize damage).
+MPS_block01_in.out.sm
+OOFEM input file for structural analysis, automatically generated, test for ConTemp, a brick with size x=3 y=0.5 z=0.5. Damage happens at time step 9 due to temperature profile. Mesh is slightly distorted to localize damage.
 #
-nonlinearstatic nsteps 10 deltaT 1. rtolv 1.e-3 MaxIter 1000 controllmode 1 stiffMode 2 renumber 1 updateelasticstiffnessflag lstype 4 smtype 8 miniter 3 nmodules 1
-#vtkxml tstep_step 1 domain_all vars 11 1 2 112 111 4 106 109 110 52 90 113 primvars 1 1 cellvars 2 90 82 stype 1 regionsets 1 1 timescale 2.77777e-4
-#vtkxml tstep_step 1 domain_all vars 5 1 2 4 27 28 primvars 1 1 stype 1 regionsets 2 2 3 timescale 2.77777e-4
+nonlinearstatic nsteps 10 deltaT 1. rtolv 1.e-3 MaxIter 1000 controllmode 1 stiffMode 2 renumber 1 updateelasticstiffnessflag lstype 4 smtype 8 miniter 3 nmodules 4
+vtkxml tstep_step 1 domain_all vars 11 1 2 112 111 4 106 109 110 52 90 114 primvars 1 1 cellvars 2 90 82 stype 1 regionsets 1 1 timescale 2.77777e-4
+vtkxml tstep_step 1 domain_all vars 5 1 2 4 27 28 primvars 1 1 stype 1 regionsets 2 2 3 timescale 2.77777e-4
+hom tstep_all ists 1 52 regionsets 1 1 timescale 2.77777e-4
 errorcheck
-#hom tstep_all ists 1 52 regionsets 1 1 timescale 2.77777e-4
 #
 domain 3d
-OutputManager tstep_all dofman_output {  } element_output { 30 }
+OutputManager tstep_all dofman_output { 39 } element_output { 30 }
 ndofman 118 nelem  48 ncrosssect   1 nmat   1 nbc   3 nic 0 nltf 3 nset   3
 #
 #
@@ -28,7 +28,7 @@ node   9   coords 3  2.0000000  0.0000000  0.0000000 bc 3 0 0 1
 node  10   coords 3  2.2500000  0.0000000  0.0000000 bc 3 0 0 1
 node  11   coords 3  2.5000000  0.0000000  0.0000000 bc 3 0 0 1
 node  12   coords 3  2.7500000  0.0000000  0.0000000 bc 3 0 0 1
-node  13   coords 3  3.0000000  0.0000000  0.0000000 bc 3 1 0 1
+node  13   coords 3  3.0000000  0.0000000  0.0000000 bc 3 0 0 1
 node  14   coords 3  0.0000000  0.2500000  0.0000000 bc 3 1 0 1
 node  15   coords 3  0.2500000  0.2500000  0.0000000 bc 3 0 0 1
 node  16   coords 3  0.5000000  0.2500000  0.0000000 bc 3 0 0 1
@@ -41,7 +41,7 @@ node  22   coords 3  2.0000000  0.2500000  0.0000000 bc 3 0 0 1
 node  23   coords 3  2.2500000  0.2500000  0.0000000 bc 3 0 0 1
 node  24   coords 3  2.5000000  0.2500000  0.0000000 bc 3 0 0 1
 node  25   coords 3  2.7500000  0.2500000  0.0000000 bc 3 0 0 1
-node  26   coords 3  3.0000000  0.2500000  0.0000000 bc 3 1 0 1
+node  26   coords 3  3.0000000  0.2500000  0.0000000 bc 3 0 0 1
 node  27   coords 3  0.0000000  0.5000000  0.0000000 bc 3 1 1 1
 node  28   coords 3  0.2500000  0.5000000  0.0000000 bc 3 0 1 1
 node  29   coords 3  0.5000000  0.5000000  0.0000000 bc 3 0 1 1
@@ -54,7 +54,7 @@ node  35   coords 3  2.0000000  0.5000000  0.0000000 bc 3 0 1 1
 node  36   coords 3  2.2500000  0.5000000  0.0000000 bc 3 0 1 1
 node  37   coords 3  2.5000000  0.5000000  0.0000000 bc 3 0 1 1
 node  38   coords 3  2.7500000  0.5000000  0.0000000 bc 3 0 1 1
-node  39   coords 3  3.0000000  0.5000000  0.0000000 bc 3 1 1 1
+node  39   coords 3  3.0000000  0.5000000  0.0000000 bc 3 0 1 1
 node  40   coords 3  0.0000000  0.0000000  0.2500000 bc 3 1 0 0
 node  41   coords 3  0.2500000  0.0000000  0.2500000
 node  42   coords 3  0.5000000  0.0000000  0.2500000
@@ -67,7 +67,7 @@ node  48   coords 3  2.0000000  0.0000000  0.2500000
 node  49   coords 3  2.2500000  0.0000000  0.2500000
 node  50   coords 3  2.5000000  0.0000000  0.2500000
 node  51   coords 3  2.7500000  0.0000000  0.2500000
-node  52   coords 3  3.0000000  0.0000000  0.2500000 bc 3 1 0 0
+node  52   coords 3  3.0000000  0.0000000  0.2500000
 node  53   coords 3  0.0000000  0.2500000  0.2500000 bc 3 1 0 0
 node  54   coords 3  0.2500000  0.2500000  0.2500000
 node  55   coords 3  0.5000000  0.2500000  0.2500000
@@ -80,7 +80,7 @@ node  61   coords 3  2.0000000  0.2500000  0.2500000
 node  62   coords 3  2.2500000  0.2500000  0.2500000
 node  63   coords 3  2.5000000  0.2500000  0.2500000
 node  64   coords 3  2.7500000  0.2500000  0.2500000
-node  65   coords 3  3.0000000  0.2500000  0.2500000 bc 3 1 0 0
+node  65   coords 3  3.0000000  0.2500000  0.2500000
 node  66   coords 3  0.0000000  0.5000000  0.2500000 bc 3 1 1 0
 node  67   coords 3  0.2500000  0.5000000  0.2500000 bc 3 0 1 0
 node  68   coords 3  0.5000000  0.5000000  0.2500000 bc 3 0 1 0
@@ -93,7 +93,7 @@ node  74   coords 3  2.0000000  0.5000000  0.2500000 bc 3 0 1 0
 node  75   coords 3  2.2500000  0.5000000  0.2500000 bc 3 0 1 0
 node  76   coords 3  2.5000000  0.5000000  0.2500000 bc 3 0 1 0
 node  77   coords 3  2.7500000  0.5000000  0.2500000 bc 3 0 1 0
-node  78   coords 3  3.0000000  0.5000000  0.2500000 bc 3 1 1 0
+node  78   coords 3  3.0000000  0.5000000  0.2500000 bc 3 0 1 0
 node  79   coords 3  0.0000000  0.0000000  0.5000000 bc 3 1 0 0
 node  80   coords 3  0.2500000  0.0000000  0.5000000
 node  81   coords 3  0.5000000  0.0000000  0.5000000
@@ -106,7 +106,7 @@ node  87   coords 3  2.0000000  0.0000000  0.5000000
 node  88   coords 3  2.2500000  0.0000000  0.5000000
 node  89   coords 3  2.5000000  0.0000000  0.5000000
 node  90   coords 3  2.7500000  0.0000000  0.5000000
-node  91   coords 3  3.0000000  0.0000000  0.5000000 bc 3 1 0 0
+node  91   coords 3  3.0000000  0.0000000  0.5000000
 node  92   coords 3  0.0000000  0.2500000  0.5000000 bc 3 1 0 0
 node  93   coords 3  0.2500000  0.2500000  0.5000000
 node  94   coords 3  0.5000000  0.2500000  0.5000000
@@ -119,7 +119,7 @@ node 100   coords 3  2.0000000  0.2500000  0.5000000
 node 101   coords 3  2.2500000  0.2500000  0.5000000
 node 102   coords 3  2.5000000  0.2500000  0.5000000
 node 103   coords 3  2.7500000  0.2500000  0.5000000
-node 104   coords 3  3.0000000  0.2500000  0.5000000 bc 3 1 0 0
+node 104   coords 3  3.0000000  0.2500000  0.5000000
 node 105   coords 3  0.0000000  0.5000000  0.5000000 bc 3 1 1 0
 node 106   coords 3  0.2500000  0.5000000  0.5000000 bc 3 0 1 0
 node 107   coords 3  0.5000000  0.5000000  0.5000000 bc 3 0 1 0
@@ -132,7 +132,7 @@ node 113   coords 3  2.0000000  0.5000000  0.5000000 bc 3 0 1 0
 node 114   coords 3  2.2500000  0.5000000  0.5000000 bc 3 0 1 0
 node 115   coords 3  2.5000000  0.5000000  0.5000000 bc 3 0 1 0
 node 116   coords 3  2.7500000  0.5000000  0.5000000 bc 3 0 1 0
-node 117   coords 3  3.0000000  0.5000000  0.5000000 bc 3 1 1 0
+node 117   coords 3  3.0000000  0.5000000  0.5000000 bc 3 0 1 0
 #
 #
 #
@@ -254,12 +254,17 @@ set 3 elementranges { }
 #
 #
 #%BEGIN_CHECK% tolerance 1e-7
+#NODE tStep 3  number 39 dof 1 unknown d value 0.0000000
+#NODE tStep 5  number 39 dof 1 unknown d value 3.95752383e-05
+#NODE tStep 10  number 39 dof 1 unknown d value 2.54309424e-04
+#NODE tStep 15  number 39 dof 1 unknown d value 3.35112601e-04
+#NODE tStep 20  number 39 dof 1 unknown d value 3.20745589e-04
 ##Check element's stress vector
-#ELEMENT tStep 3 number 30 gp 2 keyword 1 component 2  value 0.0000000
-#ELEMENT tStep 5 number 30 gp 2 keyword 1 component 2  value 1.21539983e-02
-#ELEMENT tStep 10 number 30 gp 2 keyword 1 component 2  value 1.75472462e-01
-#ELEMENT tStep 15 number 30 gp 2 keyword 1 component 2  value 2.64463479e-01
-#ELEMENT tStep 20 number 30 gp 2 keyword 1 component 2  value 2.42319800e-01
+#ELEMENT tStep 3 number 30 gp 1 keyword 1 component 2  value 0.0000000
+#ELEMENT tStep 5 number 30 gp 1 keyword 1 component 2  value 5.04242356e-03
+#ELEMENT tStep 10 number 30 gp 1 keyword 1 component 2  value 8.42788709e-02
+#ELEMENT tStep 15 number 30 gp 1 keyword 1 component 2  value 1.38147757e-01
+#ELEMENT tStep 20 number 30 gp 1 keyword 1 component 2  value 1.30354212e-01
 #%END_CHECK%
 
 

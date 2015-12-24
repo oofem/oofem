@@ -714,10 +714,10 @@ endif()
 
 set (oofem_BENCHMARK_DIR "${oofem_SOURCE_DIR}/tests/benchmark")
 
-if (USE_TM AND USE_SM AND USE_DSS)
-    file (GLOB tmsmdss_benchmark RELATIVE "${oofem_BENCHMARK_DIR}/tmsmdss" "${oofem_BENCHMARK_DIR}/tmsmdss/*.in")
-    foreach (case ${tmsmdss_benchmark})
-        add_test (NAME "benchmark_${case}" WORKING_DIRECTORY ${oofem_BENCHMARK_DIR}/tmsmdss COMMAND ${oofem_cmd} "-f" ${case})
+if (USE_TM AND USE_SM AND USE_DSS AND USE_IML)
+    file (GLOB tmsmdssiml_benchmark RELATIVE "${oofem_BENCHMARK_DIR}/tmsmdssiml" "${oofem_BENCHMARK_DIR}/tmsmdssiml/*.in")
+    foreach (case ${tmsmdssiml_benchmark})
+        add_test (NAME "benchmark_${case}" WORKING_DIRECTORY ${oofem_BENCHMARK_DIR}/tmsmdssiml COMMAND ${oofem_cmd} "-f" ${case})
     endforeach (case)
 endif()
 

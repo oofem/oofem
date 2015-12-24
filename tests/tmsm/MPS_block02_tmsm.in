@@ -1,0 +1,3 @@
+MPS_block02_tmsm.out
+Creep, damage and temperature effects on a single block
+StaggeredProblem nsteps 100000 prob1 "MPS_block02_in.tm" prob2 "MPS_block02_in.sm" adaptiveStepLength deltaT 10800 adaptivestepsince 360000 minStepLength 3600 maxStepLength 36000 reqIterations 20 endOfTimeOfInterest 162000

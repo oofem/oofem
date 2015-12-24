@@ -1,7 +1,7 @@
 MPS_block02_in.out.tm
 OOFEM input file for thermal analysis, automatically generated, test for ConTemp, a brick with size x=3 y=0.5 z=0.5
-NlTransientTransportProblem nsteps 10 deltat 7200 rtol 1.e-4 alpha 0.6  nsmax 200 lstype 1 smtype 4 lstol 1e-5 lsiter 200 lsprecond 1 renumber 1 exportfields 1 5 nmodules 1
-#vtkxml tstep_all domain_all primvars 1 6 vars 3 39 56 95 stype 2 timescale 2.77777e-4
+NlTransientTransportProblem nsteps 10 deltat 7200 rtol 1.e-4 alpha 0.6  nsmax 200 lstype 1 smtype 4 lstol 1e-5 lsiter 200 lsprecond 1 renumber 1 exportfields 1 5 nmodules 2
+vtkxml tstep_all domain_all primvars 1 6 vars 3 39 56 95 stype 2 timescale 2.77777e-4
 errorcheck
 domain HeatTransfer
 OutputManager tstep_all dofman_output { 21 }
