@@ -43,6 +43,7 @@
 #include "internalstatevaluetype.h"
 #include "dictionary.h"
 #include "crosssectextension.h"
+#include "gausspoint.h"
 
 ///@name Input fields for CrossSection
 //@{
@@ -51,6 +52,7 @@
 
 namespace oofem {
 class IntegrationRule;
+class Material;
 
 /// List of properties possibly stored in a cross section.
 enum CrossSectionProperty {
@@ -67,6 +69,9 @@ enum CrossSectionProperty {
     CS_TopZCoord,      ///< Top z coordinate
     CS_BottomZCoord,   ///< Bottom z coordinate
     CS_NumLayers,      ///< Number of layers that makes up the cross section
+    CS_DirectorVectorX, ///< Director vector component in x-axis
+    CS_DirectorVectorY, ///< Director vector component in y-axis
+    CS_DirectorVectorZ, ///< Director vector component in z-axis
 };
 
 /**
@@ -115,7 +120,7 @@ public:
      * @param n Cross section number.
      * @param d Domain.
      */
-    CrossSection(int n, Domain * d);
+    CrossSection(int n, Domain *d);
     /// Destructor.
     virtual ~CrossSection();
 
@@ -243,6 +248,12 @@ public:
     virtual double predictRelativeRedistributionCost(GaussPoint *gp) { return 1.0; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+
+    /**
+     * Returns the material associated with the GP.
+     * Default implementation uses gp->giveMaterial() for backwards compatibility, but it should be overloaded in each specialized cross-section.
+     */
+    virtual Material *giveMaterial(IntegrationPoint *ip) { return ip->giveMaterial(); }
 
     /**
      * Stores integration point state to output stream.

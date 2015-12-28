@@ -38,6 +38,7 @@
 #include "fmelement.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "spatiallocalizer.h"
+#include "eleminterpmapperinterface.h"
 #include "matresponsemode.h"
 
 #define _IFT_Tet21Stokes_Name "tet21stokes"
@@ -53,7 +54,8 @@ class FEI3dTetQuad;
  */
 class Tet21Stokes : public FMElement,
 public NodalAveragingRecoveryModelInterface,
-public SpatialLocalizerInterface
+public SpatialLocalizerInterface,
+public EIPrimaryUnknownMapperInterface
 {
 protected:
     /// Interpolation for pressure
@@ -103,7 +105,9 @@ public:
 
     virtual Interface *giveInterface(InterfaceType it);
 
-    virtual void computeField(ValueModeType u, TimeStep *tStep, const FloatArray &coords, FloatArray &answer);
+    // Element interpolation interface:
+    virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType u,
+                                                                       TimeStep *tStep, const FloatArray &coords, FloatArray &answer);
 
     // Nodal averaging interface:
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);

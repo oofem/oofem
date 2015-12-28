@@ -41,18 +41,40 @@
 namespace oofem {
 Load :: Load(int i, Domain *aDomain) :
     GeneralBoundaryCondition(i, aDomain), componentArray(), dofExcludeMask()
-    // Constructor. Creates a load with number i, belonging to aDomain.
 {
     timeFunction = 0;
 }
 
 
-FloatArray &Load :: giveComponentArray()
-// Returns the array that contains the components of the receiver. If
-// this array does not exist yet, forms it by reading its values in the
-// data file.
+const FloatArray &
+Load :: giveComponentArray() const
 {
     return componentArray;
+}
+
+
+void
+Load :: computeValues(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, const IntArray &dofids, ValueModeType mode)
+{
+    ///@note Backwards compatibility with input files that don't specify dofs.
+#if 1
+    if ( this->dofs.giveSize() == 0 ) {
+        this->computeValueAt(answer, tStep, coords, mode);
+        return;
+    }
+#endif
+
+    FloatArray loaded_dofs;
+    this->computeValueAt(loaded_dofs, tStep, coords, mode);
+
+    answer.resize(dofids.giveSize());
+    answer.zero();
+    for ( int i = 0; i < dofids.giveSize(); ++i ) {
+        int index = this->dofs.findFirstIndexOf(dofids[i]);
+        if ( index > 0 ) {
+            answer[i] = loaded_dofs.at(index);
+        }
+    }
 }
 
 
@@ -63,7 +85,7 @@ Load :: computeComponentArrayAt(FloatArray &answer, TimeStep *tStep, ValueModeTy
     double factor;
 
     factor = this->giveTimeFunction()->evaluate(tStep, mode);
-    answer  = this->giveComponentArray();
+    answer = componentArray;
     answer.times(factor);
 
     if ( !isImposed(tStep) ) {

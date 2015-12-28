@@ -39,6 +39,7 @@
 #include "field.h"
 
 #include <map>
+#include <vector>
 #include <memory>
 
 namespace oofem {
@@ -78,6 +79,11 @@ public:
      * Unregisters (deletes) the field registered under given key.
      */
     void unregisterField(FieldType key);
+    /**
+     * Returns list of registered field keys, which can be obtained by calling giveField.
+     */
+    std::vector<FieldType> giveRegisteredKeys();
+
 };
 } // end namespace oofem
 #endif // fieldmanager_h

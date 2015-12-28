@@ -219,8 +219,7 @@ void TangentAssembler :: matrixFromLoad(FloatMatrix& mat, Element& element, Body
 
 void TangentAssembler :: matrixFromBoundaryLoad(FloatMatrix& mat, Element& element, BoundaryLoad* load, int boundary, TimeStep* tStep) const
 {
-    mat.clear();
-    //element.computeTangentFromBoundaryLoad(mat, load, boundary, this->rmode, tStep);
+    element.computeTangentFromBoundaryLoad(mat, load, boundary, this->rmode, tStep);
 }
 
 void TangentAssembler :: matrixFromEdgeLoad(FloatMatrix& mat, Element& element, BoundaryLoad* load, int edge, TimeStep* tStep) const

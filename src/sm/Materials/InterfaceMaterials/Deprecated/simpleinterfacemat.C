@@ -45,68 +45,23 @@
 namespace oofem {
 REGISTER_Material(SimpleInterfaceMaterial);
 
-SimpleInterfaceMaterial :: SimpleInterfaceMaterial(int n, Domain *d) : StructuralMaterial(n, d)
-    //
-    // constructor
-    //
-{ }
+SimpleInterfaceMaterial :: SimpleInterfaceMaterial(int n, Domain *d) : StructuralInterfaceMaterial(n, d) { }
 
 
-SimpleInterfaceMaterial :: ~SimpleInterfaceMaterial()
-//
-// destructor
-//
-{ }
-
-int
-SimpleInterfaceMaterial :: hasMaterialModeCapability(MaterialMode mode)
-//
-// returns whether receiver supports given mode
-//
-{
-    return mode == _1dInterface || mode == _2dInterface || mode == _3dInterface;
-}
+SimpleInterfaceMaterial :: ~SimpleInterfaceMaterial() { }
 
 
 void
-SimpleInterfaceMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                         MatResponseMode mode,
-                                                         GaussPoint *gp,
-                                                         TimeStep *tStep)
-//
-// computes full constitutive matrix for case of gp stress-strain state.
-//
-{
-    OOFEM_ERROR("not implemented");
-}
-
-
-void
-SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                                                //const FloatArray &totalStrain,// @todo temporary -should not be here /JB
-                                                const FloatArray &strainVector,
-                                                TimeStep *tStep)
-//
-// returns real stress vector in 3d stress space of receiver according to
-// previous level of stress and current
-// strain increment, the only way, how to correctly update gp records
-//
+SimpleInterfaceMaterial :: giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
 {
     SimpleInterfaceMaterialStatus *status = static_cast< SimpleInterfaceMaterialStatus * >( this->giveStatus(gp) );
-    //this->initGpForNewStep(gp);
-    this->initTempStatus(gp);
-    FloatArray shearStrain(2), shearStress; //, strainVector;
-    StructuralElement *el = static_cast< StructuralElement * >( gp->giveElement() );
-    //el->computeStrainVector(strainVector, gp, tStep);
-
-    FloatArray tempShearStressShift = status->giveTempShearStressShift();
-    const double normalStrain = strainVector.at(1);
+    bool shearYieldingFlag = false;
+    FloatArray shearJump(2), shearTraction;
+    FloatArray tempShearStressShift = status->giveShearStressShift();
+    double normalStrain = jump.at(1);
     double normalStress, maxShearStress, dp;
     double shift = -this->kn * this->stiffCoeff * normalClearance;
 
-    MaterialMode mMode = el->giveMaterialMode();
-    //answer.resize(giveSizeOfReducedStressStrainVector(mMode));
-    answer.zero();
     if ( normalStrain + normalClearance <= 0. ) {
         normalStress = this->kn * ( normalStrain + normalClearance ) + shift; //in compression and after the clearance gap closed
         maxShearStress = fabs(normalStress) * this->frictCoeff;
@@ -115,130 +70,55 @@ SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *
         maxShearStress = 0.;
     }
 
-    switch ( mMode ) {
-    case _1dInterface:
-        answer.resize(1);
-        break;
-    case _2dInterface:
-        answer.resize(2);
-        shearStrain.at(1) = strainVector.at(2);
-        shearStress.beScaled(this->kn, shearStrain);
-        shearStress.subtract(tempShearStressShift);
-        dp = shearStress.dotProduct(shearStress, 1);
-        if ( dp > maxShearStress * maxShearStress ) {
-            shearStress.times( maxShearStress / sqrt(dp) );
-        }
 
-        tempShearStressShift.beScaled(this->kn, shearStrain);
-        tempShearStressShift.subtract(shearStress);
-        answer.at(2) = shearStress.at(1);
-        break;
-    case _3dInterface:
-    case _3dMat: //JB
-        answer.resize(3);
-        shearStrain.at(1) = strainVector.at(2);
-        shearStrain.at(2) = strainVector.at(3);
-        shearStress.beScaled(this->kn, shearStrain);
-        shearStress.subtract(tempShearStressShift);
-        dp = shearStress.dotProduct(shearStress, 2);
-        if ( dp > maxShearStress * maxShearStress ) {
-            shearStress.times( maxShearStress / sqrt(dp) );
-        }
-
-        tempShearStressShift.beScaled(this->kn, shearStrain);
-        tempShearStressShift.subtract(shearStress);
-        answer.at(2) = shearStress.at(1);
-        answer.at(3) = shearStress.at(2);
-        break;
-    default:
-        OOFEM_ERROR("Unsupported interface mode");
+    shearJump.at(1) = jump.at(2);
+    shearJump.at(2) = jump.at(3);
+    shearTraction.beScaled(this->ks, shearJump);
+    shearTraction.subtract(tempShearStressShift);
+    dp = shearTraction.dotProduct(shearTraction, 2);
+    if ( dp > maxShearStress * maxShearStress ) {
+        shearYieldingFlag = true;
+        shearTraction.times( maxShearStress / sqrt(dp) );
     }
 
+    tempShearStressShift.beScaled(this->ks, shearJump);
+    tempShearStressShift.subtract(shearTraction);
+
     double lim = 1.e+50;
-    answer.at(1) = min(normalStress, lim);  //threshold on maximum
-    answer.at(1) = max(answer.at(1), -lim);  //threshold on minimum
-    //answer.at(1) = normalStress > lim ? lim : normalStress < -lim ? -lim : normalStress;
+    answer.resize(3);
+    answer.at(1) = max(min(normalStress, lim), -lim);  //threshold on maximum/minimum
+    answer.at(2) = shearTraction.at(1);
+    answer.at(3) = shearTraction.at(2);
+
     // update gp
+    status->setShearYieldingFlag(shearYieldingFlag);
     status->setTempShearStressShift(tempShearStressShift);
-    status->letTempStrainVectorBe(strainVector);
-    status->letTempStressVectorBe(answer);
+    status->letTempJumpBe(jump);
+    status->letTempTractionBe(answer);
 }
 
 
 void
-SimpleInterfaceMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseMode rMode,
-                                               GaussPoint *gp, TimeStep *tStep)
-//
-// Returns characteristic material stiffness matrix of the receiver
-//
+SimpleInterfaceMaterial :: give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    MaterialMode mMode = gp->giveElement()->giveMaterialMode();
+    SimpleInterfaceMaterialStatus *status = static_cast< SimpleInterfaceMaterialStatus * >( this->giveStatus(gp) );
+    double normalJump = status->giveTempJump().at(1);
 
-    FloatArray strainVector;
-    StructuralElement *el = static_cast< StructuralElement * >( gp->giveElement() );
-    double normalStrain;
-
-    el->computeStrainVector(strainVector, gp, tStep);
-    normalStrain = strainVector.at(1);
-    answer.zero();
-    switch ( mMode ) {
-    case _1dInterface:
-        answer.resize(1, 1);
-        if ( rMode == SecantStiffness || rMode == TangentStiffness ) {
-            if ( normalStrain + normalClearance <= 0 ) {
-                answer.at(1, 1) = this->kn; //in compression and after the clearance gap closed
-            } else {
-                answer.at(1, 1) = this->kn * this->stiffCoeff;
-            }
+    answer.resize(3, 3);
+    if ( rMode == SecantStiffness || rMode == TangentStiffness ) {
+        if ( normalJump + normalClearance <= 0. ) {
+	      answer.at(1, 1) = kn;
+	      if ( status->giveShearYieldingFlag() )
+		answer.at(2, 2) = answer.at(3, 3) = 0;
+	      else
+		answer.at(2, 2) = answer.at(3, 3) = ks;//this->kn; //in compression and after the clearance gap closed
         } else {
-            if ( rMode == ElasticStiffness ) {
-                answer.at(1, 1) = this->kn;
-            } else {
-                OOFEM_ERROR("unknown MatResponseMode (%s)", __MatResponseModeToString(rMode) );
-            }
+            answer.at(1, 1) = this->kn * this->stiffCoeff;
+            answer.at(2, 2) = answer.at(3, 3) = 0;
         }
-
-        return;
-
-    case _2dInterface:
-        answer.resize(2, 2);
-        if ( rMode == SecantStiffness || rMode == TangentStiffness ) {
-            if ( normalStrain + normalClearance <= 0. ) {
-                answer.at(1, 1) = answer.at(2, 2) = this->kn; //in compression and after the clearance gap closed
-            } else {
-                answer.at(1, 1) = answer.at(2, 2) = this->kn * this->stiffCoeff;
-            }
-        } else {
-            if ( rMode == ElasticStiffness ) {
-                answer.at(1, 1) = answer.at(2, 2) = this->kn;
-            } else {
-                OOFEM_ERROR("unknown MatResponseMode (%s)", __MatResponseModeToString(rMode) );
-            }
-        }
-
-        return;
-
-    case _3dInterface:
-        answer.resize(3, 3);
-        if ( rMode == SecantStiffness || rMode == TangentStiffness ) {
-            if ( normalStrain + normalClearance <= 0. ) {
-                answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = this->kn; //in compression and after the clearance gap closed
-            } else {
-                answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = this->kn * this->stiffCoeff;
-            }
-        } else {
-            if ( rMode == ElasticStiffness ) {
-                answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = this->kn;
-            } else {
-                OOFEM_ERROR("unknown MatResponseMode (%s)", __MatResponseModeToString(rMode) );
-            }
-        }
-
-        return;
-
-    default:
-        StructuralMaterial :: giveStiffnessMatrix(answer, rMode, gp, tStep);
+    } else {
+        answer.at(1, 1) = kn;
+        answer.at(2, 2) = answer.at(3, 3) = this->ks;
     }
 }
 
@@ -246,22 +126,7 @@ SimpleInterfaceMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
 int
 SimpleInterfaceMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
-}
-
-
-void
-SimpleInterfaceMaterial :: giveThermalDilatationVector(FloatArray &answer,
-                                                       GaussPoint *gp,  TimeStep *tStep)
-//
-// returns a strain vector
-// eps_0 = {exx_0, eyy_0, ezz_0, gyz_0, gxz_0, gxy_0}^T
-// caused by unit temperature in direction of
-// gp (element) local axes
-//
-{
-    answer.resize(1);
-    answer.at(1) = 0.0;
+    return StructuralInterfaceMaterial :: giveIPValue(answer, gp, type, tStep);
 }
 
 
@@ -274,18 +139,20 @@ SimpleInterfaceMaterial :: initializeFrom(InputRecord *ir)
     stiffCoeff = 0.;
     normalClearance = 0.;
     IR_GIVE_FIELD(ir, kn, _IFT_SimpleInterfaceMaterial_kn);
+    ks = kn;
+    IR_GIVE_OPTIONAL_FIELD(ir, ks, _IFT_SimpleInterfaceMaterial_ks);
     IR_GIVE_OPTIONAL_FIELD(ir, frictCoeff, _IFT_SimpleInterfaceMaterial_frictCoeff);
     IR_GIVE_OPTIONAL_FIELD(ir, stiffCoeff, _IFT_SimpleInterfaceMaterial_stiffCoeff);
     IR_GIVE_OPTIONAL_FIELD(ir, normalClearance, _IFT_SimpleInterfaceMaterial_normalClearance);
 
-    return StructuralMaterial :: initializeFrom(ir);
+    return StructuralInterfaceMaterial :: initializeFrom(ir);
 }
 
 
 void
 SimpleInterfaceMaterial :: giveInputRecord(DynamicInputRecord &input)
 {
-    StructuralMaterial :: giveInputRecord(input);
+    StructuralInterfaceMaterial :: giveInputRecord(input);
     input.setField(this->kn, _IFT_SimpleInterfaceMaterial_kn);
     input.setField(this->frictCoeff, _IFT_SimpleInterfaceMaterial_frictCoeff);
     input.setField(this->stiffCoeff, _IFT_SimpleInterfaceMaterial_stiffCoeff);
@@ -293,12 +160,13 @@ SimpleInterfaceMaterial :: giveInputRecord(DynamicInputRecord &input)
 }
 
 
-SimpleInterfaceMaterialStatus :: SimpleInterfaceMaterialStatus(int n, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g)
+SimpleInterfaceMaterialStatus :: SimpleInterfaceMaterialStatus(int n, Domain *d, GaussPoint *g) : StructuralInterfaceMaterialStatus(n, d, g)
 {
     shearStressShift.resize(2);
     tempShearStressShift.resize(2);
     shearStressShift.zero();
     tempShearStressShift.zero();
+    shearYieldingFlag = false;
 }
 
 
@@ -309,7 +177,7 @@ SimpleInterfaceMaterialStatus :: ~SimpleInterfaceMaterialStatus()
 void
 SimpleInterfaceMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-    StructuralMaterialStatus :: printOutputAt(file, tStep);
+    StructuralInterfaceMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");
     fprintf( file, "shearStressShift (%f, %f)", this->shearStressShift.at(1), this->shearStressShift.at(2) );
     fprintf(file, "}\n");
@@ -319,7 +187,7 @@ SimpleInterfaceMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 void
 SimpleInterfaceMaterialStatus :: initTempStatus()
 {
-    StructuralMaterialStatus :: initTempStatus();
+    StructuralInterfaceMaterialStatus :: initTempStatus();
     tempShearStressShift = shearStressShift;
 }
 
@@ -327,7 +195,7 @@ SimpleInterfaceMaterialStatus :: initTempStatus()
 void
 SimpleInterfaceMaterialStatus :: updateYourself(TimeStep *tStep)
 {
-    StructuralMaterialStatus :: updateYourself(tStep);
+    StructuralInterfaceMaterialStatus :: updateYourself(tStep);
     shearStressShift = tempShearStressShift;
 }
 
@@ -339,20 +207,13 @@ SimpleInterfaceMaterialStatus :: giveShearStressShift()
 }
 
 
-const FloatArray &
-SimpleInterfaceMaterialStatus :: giveTempShearStressShift()
-{
-    return tempShearStressShift;
-}
-
-
 contextIOResultType
 SimpleInterfaceMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
     // save parent class status
-    if ( ( iores = StructuralMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
+    if ( ( iores = StructuralInterfaceMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -371,7 +232,7 @@ SimpleInterfaceMaterialStatus :: restoreContext(DataStream &stream, ContextMode 
     contextIOResultType iores;
 
     // read parent class status
-    if ( ( iores = StructuralMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
+    if ( ( iores = StructuralInterfaceMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

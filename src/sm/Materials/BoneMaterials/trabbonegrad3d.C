@@ -284,7 +284,7 @@ void
 TrabBoneGrad3D :: giveRealStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *tStep)
 {
     TrabBoneGrad3DStatus *status = static_cast< TrabBoneGrad3DStatus * >( this->giveStatus(gp) );
-    //this->initGpForNewStep(gp);
+
     this->initTempStatus(gp);
 
     TrabBone3D :: performPlasticityReturn(gp, totalStrain, tStep);

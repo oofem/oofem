@@ -35,8 +35,8 @@
 #ifndef bondceb_h
 #define bondceb_h
 
-#include "../sm/Materials/structuralmaterial.h"
-#include "../sm/Materials/structuralms.h"
+#include "structuralinterfacematerial.h"
+#include "structuralinterfacematerialstatus.h"
 
 ///@name Input fields for BondCEBMaterial
 //@{
@@ -52,18 +52,18 @@
 //@}
 
 namespace oofem {
-class GaussPoint;
 
 /**
- * This class implements associated Material Status to BondCEBMaterial.
+ * This class implements associated status to BondCEBInterfaceMaterial.
  */
-class BondCEBMaterialStatus : public StructuralMaterialStatus
+class BondCEBMaterialStatus : public StructuralInterfaceMaterialStatus
 {
 protected:
     /// Cumulative slip.
     double kappa;
     /// Non-equilibrated cumulative slip.
     double tempKappa;
+
 public:
     /// Constructor
     BondCEBMaterialStatus(int n, Domain * d, GaussPoint * g);
@@ -102,7 +102,7 @@ public:
  * is governed by normal component of generalized strain vector (normal relative displacement)
  * by an exponential softening law.
  */
-class BondCEBMaterial : public StructuralMaterial
+class BondCEBMaterial : public StructuralInterfaceMaterial
 {
 protected:
     /// Normal elastic stiffness.
@@ -124,27 +124,16 @@ public:
     /// Destructor
     virtual ~BondCEBMaterial();
 
-    virtual int hasNonLinearBehaviour()   { return 1; }
+    virtual int hasNonLinearBehaviour() { return 1; }
+    virtual bool hasAnalyticalTangentStiffness() const { return true; }
 
-    virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveInputRecordName() const { return _IFT_BondCEBMaterial_Name; }
     virtual const char *giveClassName() const { return "BondCEBMaterial"; }
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseMode mode,
-                                               GaussPoint *gp,
-                                               TimeStep *tStep);
-
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                                      const FloatArray &reducedStrain, TimeStep *tStep);
-
-    virtual void giveStiffnessMatrix(FloatMatrix &answer,
-                                     MatResponseMode mode,
-                                     GaussPoint *gp,
-                                     TimeStep *tStep);
+    virtual void giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep);
+    virtual void give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-    //virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);

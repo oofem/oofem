@@ -47,7 +47,8 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(Temperature, 6)                   \
     ENUM_ITEM_WITH_VALUE(Humidity, 7)                      \
     ENUM_ITEM_WITH_VALUE(EigenVector, 8)                   \
-    ENUM_ITEM_WITH_VALUE(DirectorField, 15) /* Vector field */
+    ENUM_ITEM_WITH_VALUE(DirectorField, 15) /* Vector field */ \
+    ENUM_ITEM_WITH_VALUE(DeplanationFunction, 16)
 /**
  * Type representing particular unknown (its physical meaning).
  */

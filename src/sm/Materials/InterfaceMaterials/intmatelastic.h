@@ -31,12 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-/*
- * intmatelastic.h
- *
- *  Created on: Jan 10, 2015
- *      Author: erik
- */
 
 #ifndef INTMATELASTIC_H_
 #define INTMATELASTIC_H_
@@ -55,15 +49,16 @@ namespace oofem {
 
 /**
  * Linear elastic cohesive zone.
+ * @author Erik Svenning
  */
-class IntMatElastic : public StructuralInterfaceMaterial {
+class IntMatElastic : public StructuralInterfaceMaterial
+{
 public:
 	IntMatElastic(int n, Domain * d);
 	virtual ~IntMatElastic();
 
     virtual int hasNonLinearBehaviour()   { return 0; }
 
-    virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "IntMatElastic"; }
     virtual const char *giveInputRecordName() const { return _IFT_IntMatElastic_Name; }
 

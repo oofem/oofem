@@ -155,37 +155,32 @@ HeMoKunzelMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const F
 {
     TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
 
-    FloatArray s;
-    //     s = ms->giveTempStateVector();
-    s = ms->giveTempField();
-    if ( s.isEmpty() ) {
-        OOFEM_ERROR("matcond1d: undefined state vector");
-    }
-    double h = s.at(2);
-    double t = s.at(1);
+    ms->setTempField(field);
+    ms->setTempGradient(grad);
 
-    FloatArray ans_w, ans_t;
-    FloatArray grad_w, grad_t;
+    double h = field.at(2);
+    double t = field.at(1);
+
     int size = grad.giveSize() / 2;
+    FloatArray ans_h, ans_m;
+    FloatArray grad_h(size), grad_m(size);
     for ( int i = 1; i <= size; ++i ) {
-        grad_w.at(i) = grad.at(i);
+        grad_h.at(i) = grad.at(i);
     }
-    for ( int i = size + 1; i <= size * 2; ++i ) {
-        grad_t.at(i) = grad.at(i);
+    for ( int i = 1; i <= 2; ++i ) {
+        grad_m.at(i) = grad.at(i+size);
     }
 
-    ans_w.beScaled(perm_mm(h, t), grad_w);
-    ans_w.beScaled(perm_mh(h, t), grad_t);
-    ans_t.beScaled(perm_hm(h, t), grad_w);
-    ans_t.beScaled(perm_hh(h, t), grad_t);
+    ans_m.add(-perm_mm(h, t), grad_m);
+    ans_m.add(-perm_mh(h, t), grad_h);
+    ans_h.add(-perm_hm(h, t), grad_m);
+    ans_h.add(-perm_hh(h, t), grad_h);
 
     answer.resize(size * 2);
     answer.zero();
-    answer.addSubVector(ans_w, 1);
-    answer.addSubVector(ans_t, size + 1);
+    answer.addSubVector(ans_h, 1);
+    answer.addSubVector(ans_m, size + 1);
 
-    ms->setTempField(field);
-    ms->setTempGradient(grad);
     ms->setTempFlux(answer);
 }
 
@@ -634,15 +629,15 @@ HeMoKunzelMaterial :: isCharacteristicMtrxSymmetric(MatResponseMode mode)
 }
 
 int
-HeMoKunzelMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+HeMoKunzelMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
 // IST_Humidity overriden to use inverse_sorption_isotherm
 {
     if ( type == IST_Humidity ) {
         answer.resize(1);
-        answer.at(1) = giveHumidity(aGaussPoint, VM_Velocity); // VM_Previous = equilibrated value of humidity
+        answer.at(1) = giveHumidity(gp, VM_Velocity); // VM_Previous = equilibrated value of humidity
         return 1;
     } else {
-        return TransportMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+        return TransportMaterial :: giveIPValue(answer, gp, type, atTime);
     }
 }
 
@@ -655,7 +650,7 @@ HeMoKunzelMaterial :: giveHumidity(GaussPoint *gp, ValueModeType mode)
         OOFEM_ERROR("Undefined moisture status");
     }
 
-    FloatArray state = ms->giveField();
+    const FloatArray &state = ms->giveField();
 
     if ( mode == VM_Total ) {
         return tempState.at(2);

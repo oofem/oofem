@@ -390,7 +390,6 @@ IDGMaterial :: giveRealStressVectorGrad(FloatArray &answer1, double &answer2, Ga
     FloatMatrix de;
     double f, equivStrain, tempKappa = 0.0, omega = 0.0;
 
-    //this->initGpForNewStep(gp);
     this->initTempStatus(gp);
     
     // subtract stress independent part

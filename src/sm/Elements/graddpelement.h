@@ -62,10 +62,10 @@ protected:
     virtual StructuralElement *giveStructuralElement() = 0;
     virtual NLStructuralElement *giveNLStructuralElement() = 0;
 
-    virtual void computeNkappaMatrixAt(GaussPoint *, FloatMatrix &) = 0;
-    virtual void computeBkappaMatrixAt(GaussPoint *, FloatMatrix &) = 0;
-    void setDisplacementLocationArray(IntArray &answer, int nPrimNodes, int nPrimVars, int nSecNodes, int nSecVars);
-    void setNonlocalLocationArray(IntArray &answer, int nPrimNodes, int nPrimVars, int nSecNodes, int nSecVars);
+    virtual void computeNkappaMatrixAt(GaussPoint *gp, FloatArray &answer) = 0;
+    virtual void computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer) = 0;
+    void setDisplacementLocationArray();
+    void setNonlocalLocationArray();
 
     void computeStiffnessMatrix(FloatMatrix &, MatResponseMode, TimeStep *);
     void computeStiffnessMatrix_uu(FloatMatrix &, MatResponseMode, TimeStep *);

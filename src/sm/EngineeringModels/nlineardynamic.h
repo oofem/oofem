@@ -125,6 +125,7 @@ public:
     virtual void updateYourself(TimeStep *tStep);
     virtual void updateComponent(TimeStep *tStep, NumericalCmpn, Domain *d);
     virtual void updateAttributes(MetaStep *mStep);
+	virtual void initializeYourself(TimeStep *tStep);
 
     virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
 
@@ -144,6 +145,8 @@ public:
     virtual int useNonlocalStiffnessOption() { return this->nonlocalStiffnessFlag; }
     virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) { return ( int ) mode; }
     void timesMtrx(FloatArray &answer, FloatArray &vec, CharType type, Domain *domain, TimeStep *tStep);
+
+	TimeDiscretizationType giveInitialTimeDiscretization() { return initialTimeDiscretization; }
 
 #ifdef __OOFEG
     void showSparseMtrxStructure(int type, oofegGraphicContext &gc, TimeStep *tStep);

@@ -86,8 +86,6 @@ public:
 
 protected:
     static void giveDeviatoricProjectionMatrix(FloatMatrix &answer);
-    
-    static double computeJ2InvariantOf(const FloatArray &sigV);
 
     static void computeSphDevPartOf(const FloatArray &sigV, FloatArray &sigSph, FloatArray &sigDev); 
 };
@@ -105,8 +103,8 @@ protected:
     
     FloatArray tempDevTrialStress;
 
-    double tempKappa;
-    double kappa;
+    double tempK;
+    double k;
 
 public:
     TutorialMaterialStatus(int n, Domain * d, GaussPoint * g);
@@ -116,9 +114,9 @@ public:
 
     void letTempPlasticStrainBe(const FloatArray &values) { tempPlasticStrain = values; }
 
-    double giveKappa() { return this->kappa; }
+    double giveK() { return this->k; }
 
-    void letTempKappaBe(double value) { tempKappa = value; }
+    void letTempKBe(double value) { tempK = value; }
     
     void letTempDevTrialStressBe(const FloatArray &values) { tempDevTrialStress = values; }
     const FloatArray &giveTempDevTrialStress() { return tempDevTrialStress; }

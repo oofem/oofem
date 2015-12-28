@@ -34,6 +34,7 @@
 
 #include "function.h"
 #include "timestep.h"
+#include "error.h"
 
 namespace oofem {
 Function :: Function(int n, Domain *d) :
@@ -51,6 +52,8 @@ Function :: evaluate(TimeStep *tStep, ValueModeType mode)
         return this->evaluateAccelerationAtTime( tStep->giveIntrinsicTime() );
     } else if ( mode == VM_Incremental ) {
         return this->evaluateAtTime( tStep->giveTargetTime() ) - this->evaluateAtTime( tStep->giveTargetTime() - tStep->giveTimeIncrement() );
+    } else if (mode == VM_Intermediate) {
+      return this->evaluateAtTime( tStep->giveIntrinsicTime() );
     } else {
         OOFEM_ERROR("unsupported mode(%d)", mode);
     }

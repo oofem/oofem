@@ -47,6 +47,7 @@
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
 #include "datastream.h"
+#include "unknownnumberingscheme.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -87,7 +88,6 @@ IDNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussP
     IDNLMaterialStatus *nlstatus = static_cast< IDNLMaterialStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
-    //this->initGpForNewStep(gp);
 
     // subtract stress-independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp

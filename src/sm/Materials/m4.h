@@ -53,7 +53,7 @@
 
 namespace oofem {
 /**
- * Related material model status to BazantMBCMaterial class
+ * Related material model status to M4Material class
  * for storing history  variables in particular integration point
  * (microplane). Unique copy for each microplane must exist.
  */
@@ -84,7 +84,7 @@ protected:
 
     double c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12;
     double c13, c14, c15, c16, c17, c18, c19, c20; /*c... fixed empirical constants*/
-    double k1, k2, k3, k4, k5, E, nu, mu;
+    double k1, k2, k3, k4, k5, mu;
     double EV, ED, ET;
     double talpha;
 
@@ -98,11 +98,6 @@ public:
     M4Material(int n, Domain *d);
     /// Destructor.
     virtual ~M4Material() { }
-
-    virtual void giveStiffnessMatrix(FloatMatrix &answer,
-                                     MatResponseMode mode,
-                                     GaussPoint *gp,
-                                     TimeStep *tStep);
 
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
@@ -119,8 +114,6 @@ public:
               double c11, double c12, double Et);
 
     virtual void updateVolumetricStressTo(Microplane *mPlane, double sigv);
-
-    virtual int hasMaterialModeCapability(MaterialMode mode);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual const char *giveInputRecordName() const { return _IFT_M4Material_Name; }

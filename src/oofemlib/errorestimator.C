@@ -34,6 +34,7 @@
 
 #include "errorestimator.h"
 #include "remeshingcrit.h"
+#include "inputrecord.h"
 
 namespace oofem {
 ErrorEstimator :: ErrorEstimator(int n, Domain *d) : FEMComponent(n, d)

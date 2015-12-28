@@ -153,7 +153,15 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_CrossSectionNumber, 103 ) \
     ENUM_ITEM_WITH_VALUE(IST_ShellStrainTensor, 104) \
     ENUM_ITEM_WITH_VALUE(IST_AbaqusStateVector, 105) \
-    ENUM_ITEM_WITH_VALUE(IST_InterfaceNormal, 106)
+    ENUM_ITEM_WITH_VALUE(IST_AutogenousShrinkageTensor, 106) \
+    ENUM_ITEM_WITH_VALUE(IST_DryingShrinkageTensor, 107) \
+    ENUM_ITEM_WITH_VALUE(IST_TotalShrinkageTensor, 108) \
+    ENUM_ITEM_WITH_VALUE(IST_ThermalStrainTensor, 109) \
+    ENUM_ITEM_WITH_VALUE(IST_CreepStrainTensor, 110) \
+    ENUM_ITEM_WITH_VALUE(IST_TensileStrength, 111) \
+    ENUM_ITEM_WITH_VALUE(IST_ResidualTensileStrength, 112) \
+    ENUM_ITEM_WITH_VALUE(IST_CrackIndex, 113) \
+    ENUM_ITEM_WITH_VALUE(IST_InterfaceNormal, 114)
 
 
 /**

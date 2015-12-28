@@ -39,6 +39,8 @@
 
 #include "enrichmentitem.h"
 
+#include <memory>
+
 namespace oofem {
 class XfemManager;
 class Domain;

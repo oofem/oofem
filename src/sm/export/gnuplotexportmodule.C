@@ -181,7 +181,7 @@ void GnuplotExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
 
 void GnuplotExportModule::initialize()
 {
-
+    ExportModule :: initialize();
 }
 
 void GnuplotExportModule::terminate()

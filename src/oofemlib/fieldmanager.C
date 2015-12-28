@@ -44,6 +44,9 @@ FieldManager :: registerField(std :: shared_ptr< Field >eField, FieldType key)
     this->externalFields.insert({key, eField});
 }
 
+
+
+
 bool
 FieldManager :: isFieldRegistered(FieldType key)
 {
@@ -71,6 +74,14 @@ FieldManager :: unregisterField(FieldType key)
     }
 
     this->externalFields.erase(i);
+}
+
+std::vector<FieldType>
+FieldManager :: giveRegisteredKeys()
+{
+    std::vector<FieldType> ret;
+    for(const auto& keyField: this->externalFields) ret.push_back(keyField.first);
+    return ret;
 }
 
 } // end namespace oofem

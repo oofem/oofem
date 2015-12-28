@@ -66,7 +66,7 @@ OOFEM_TOP_DIR
 |   |              contributed by R. Vondracek)
 |   |
 |   |-- main     - contains the sources of main() and implementation of some 
-|                  global functions for oofem, oofeg, and poofem targets.
+|                  global functions for oofem, oofeg.
 |
 |-- tools   - sources for several utility programs.
 |

@@ -36,6 +36,7 @@
 #include "dofmanager.h"
 #include "domain.h"
 #include "datastream.h"
+#include "entityrenumberingscheme.h"
 #include "contextioerr.h"
 
 namespace oofem {

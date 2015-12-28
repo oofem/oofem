@@ -34,7 +34,6 @@
 
 #include "interfaceelem2dlin.h"
 #include "node.h"
-#include "crosssection.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
@@ -42,6 +41,7 @@
 #include "intarray.h"
 #include "mathfem.h"
 #include "fei2dlinelin.h"
+#include "../sm/CrossSections/structuralinterfacecrosssection.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -111,6 +111,20 @@ InterfaceElem2dLin :: computeVolumeAround(GaussPoint *gp)
 
     double result = this->interp.giveTransformationJacobian(gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));
     return result * gp->giveWeight() * r;
+}
+
+
+void
+InterfaceElem2dLin :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+{
+    static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->giveEngTraction_2d(answer, gp, strain, tStep);
+}
+
+
+void
+InterfaceElem2dLin :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->give2dStiffnessMatrix_Eng(answer, rMode, gp, tStep);
 }
 
 

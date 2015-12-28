@@ -54,6 +54,25 @@ set (fm_levelset
     fastmarchingmethod.C
     )
 
+if (USE_PFEM)
+    set (fm_pfem
+        pfem/delaunaytriangulator.C
+	pfem/edge2d.C
+	pfem/delaunaytriangle.C
+	pfem/pfem.C
+	pfem/pfemelement.C
+	pfem/pfemelement2d.C
+	pfem/pfemparticle.C
+	pfem/pfemnumberingschemes.C
+	pfem/delaunaytriangle.C
+	pfem/tr1_2d_pfem.C
+	pfem/fluidstructureproblem.C
+	pfem/interactionload.C
+	pfem/interactionpfemparticle.C
+	pfem/interactionboundarycondition.C
+	)
+endif ()
+
 set (fm
     ${fm_emodel}
     ${fm_element}
@@ -63,6 +82,7 @@ set (fm
     ${fm_interface}
     ${fm_levelset}
     ${fm_new}
+    ${fm_pfem}
     )
 
 add_library (fm

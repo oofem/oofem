@@ -1,0 +1,44 @@
+layered_cube_lcs.out
+Test of layered, rotated cubes
+StaticStructural nsteps 1 nmodules 0
+#vtkxml tstep_all domain_all primvars 1 1
+domain 3d
+OutputManager tstep_all dofman_all element_all
+ndofman 20 nelem 1 ncrosssect 1 nmat 3 nbc 2 nic 0 nltf 1 nset 4
+node  1 coords 3 -1.36603  -1.00000   0.36603
+node  2 coords 3 -1.36603   1.00000   0.36603
+node  3 coords 3  0.36603   1.00000   1.36603
+node  4 coords 3  0.36603  -1.00000   1.36603
+node  5 coords 3 -0.36603  -1.00000  -1.36603
+node  6 coords 3 -0.36603   1.00000  -1.36603
+node  7 coords 3  1.36603   1.00000  -0.36603
+node  8 coords 3  1.36603  -1.00000  -0.36603
+node  9 coords 3 -1.36603   0.00000   0.36603
+node 10 coords 3 -0.50000   1.00000   0.86603
+node 11 coords 3  0.36603   0.00000   1.36603
+node 12 coords 3 -0.50000  -1.00000   0.86603
+node 13 coords 3 -0.36603   0.00000  -1.36603
+node 14 coords 3  0.50000   1.00000  -0.86603
+node 15 coords 3  1.36603   0.00000  -0.36603
+node 16 coords 3  0.50000  -1.00000  -0.86603
+node 17 coords 3 -0.86603  -1.00000  -0.50000
+node 18 coords 3 -0.86603   1.00000  -0.50000
+node 19 coords 3  0.86603   1.00000   0.50000
+node 20 coords 3  0.86603  -1.00000   0.50000
+#
+QSpace 1 nodes 20 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 matcs
+#
+#SimpleCS 1 set 1 material 1
+LayeredCS 1 set 1 nLayers 2 LayerMaterials 2 2 3 Thicks 2 1. 1. Widths 2 1. 1. nintegrationpoints 3 rotations 2 0. 45.
+IsoLE 1 d 0. E 1.0 n 0.25 tAlpha 0.0
+OrthoLE 2 d 0. Ex 1.0 Ey 1. Ez 1. NYyz 0.25 NYxz 0.25 NYxy 0.25 Gyz 1.4 Gxz 1.4 Gxy 1.4 tAlphaX 0.0 tAlphaY 0.0 tAlphaZ 0.0
+OrthoLE 3 d 0. Ex 2.0 Ey 1. Ez 1. NYyz 0.25 NYxz 0.25 NYxy 0.25 Gyz 0.8 Gxz 0.4 Gxy 0.4 tAlphaX 0.0 tAlphaY 0.0 tAlphaZ 0.0
+BoundaryCondition 1 loadTimeFunction 1 values 3 0. 0. 0. dofs 3 1 2 3 set 2
+#BoundaryCondition 2 loadTimeFunction 1 values 3 0.86603. 0. 0.5 dofs 3 1 2 3 set 3
+#BoundaryCondition 3 loadTimeFunction 1 values 3 0.433015. 0. 0.25 dofs 3 1 2 3 set 0
+ConstantSurfaceLoad 2 loadtimefunction 1 components 3 0.86603 0. 0.5 set 3
+ConstantFunction 1 f(t) 1.0
+Set 1 elementRanges {(1 1)}
+Set 2 elementboundaries 2 1 3
+Set 3 elementboundaries 2 1 5
+Set 4 nodes 4 10 12 14 16

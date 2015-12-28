@@ -510,6 +510,8 @@ public:
     void setTopology(TopologyDescription *topo, bool destroyOld = true);
     /// Clear all boundary conditions.
     void clearBoundaryConditions();
+    /// Clear all elements
+    void clearElements();
     /// Clear receiver.
     void clear();
     //@}

@@ -37,6 +37,7 @@
 
 #include "../sm/Elements/structuralelement.h"
 #include "../sm/CrossSections/layeredcrosssection.h"
+#include "dofmanager.h"
 
 ///@name Input fields for Beam2d
 //@{
@@ -62,13 +63,21 @@ class Beam2d : public StructuralElement, public LayeredCrossSectionInterface
 {
 protected:
     double kappa, pitch, length;
-    IntArray *dofsToCondense;
+    /**
+     * Ghost nodes are used to introduce additional DOFs at element.
+     * These are needed as we actually do not want to condense selected DOFs, but rather
+     * allocate an extra equation to these. This allows to get cooresponding DOFs directly from
+     * the global system, avoiding the need to postprocess local displacements at element.
+     */
+    DofManager *ghostNodes [ 2 ];
+    /// number of condensed DOFs
+    int numberOfCondensedDofs;
 
     static FEI2dLineLin interp_geom;
     static FEI2dLineHermite interp_beam;
 
 public:
-    Beam2d(int n, Domain * aDomain);
+    Beam2d(int n, Domain *aDomain);
     virtual ~Beam2d();
 
     virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL);
@@ -87,7 +96,33 @@ public:
     virtual FEInterpolation *giveInterpolation(DofIDItem id) const { return NULL; }
 
     virtual int computeNumberOfDofs() { return 6; }
+    virtual int computeNumberOfGlobalDofs() { return 6 + this->numberOfCondensedDofs; }
     virtual void giveDofManDofIDMask(int inode, IntArray &) const;
+    virtual int giveNumberOfInternalDofManagers() const { return ( ghostNodes [ 0 ] != NULL ) + ( ghostNodes [ 1 ] != NULL ); }
+    virtual DofManager *giveInternalDofManager(int i) const {
+        if ( i == 1 ) {
+            if ( ghostNodes [ 0 ] ) { return ghostNodes [ 0 ]; } else { return ghostNodes [ 1 ]; }
+        } else if ( i == 2 ) { // i==2
+            return ghostNodes [ 1 ];
+        } else {
+            OOFEM_ERROR("No such DOF available on Element %d", number);
+            return NULL;
+        }
+    }
+    virtual void giveInternalDofManDofIDMask(int i, IntArray &answer) const {
+        if ( i == 1 ) {
+            if ( ghostNodes [ 0 ] ) {
+                ghostNodes [ 0 ]->giveCompleteMasterDofIDArray(answer);
+            } else {
+                ghostNodes [ 1 ]->giveCompleteMasterDofIDArray(answer);
+            }
+        } else if ( i == 2 ) { // i==2
+            ghostNodes [ 1 ]->giveCompleteMasterDofIDArray(answer);
+        } else {
+            OOFEM_ERROR("No such DOF available on Element %d", number);
+        }
+    }
+
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual void  printOutputAt(FILE *file, TimeStep *tStep);
 
@@ -97,7 +132,7 @@ public:
 
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
+    virtual void drawDeformedGeometry(oofegGraphicContext & gc, TimeStep * tStep, UnknownType);
 #endif
 
     virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
@@ -107,6 +142,7 @@ public:
 
 protected:
     virtual void computeEdgeLoadVectorAt(FloatArray &answer, Load *, int, TimeStep *, ValueModeType mode);
+    virtual void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep);
     virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
     virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &);
     virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
@@ -126,6 +162,9 @@ protected:
     virtual void computeGaussPoints();
     virtual MaterialMode giveMaterialMode() { return _2dBeam; }
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }
+
+
+    bool hasDofs2Condense() { return ( ghostNodes [ 0 ] || ghostNodes [ 1 ] ); }
 };
 } // end namespace oofem
 #endif // beam2d_h

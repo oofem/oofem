@@ -96,7 +96,7 @@ protected:
     std :: unique_ptr< GaussPoint >slaveGp1;
 
 public:
-    /// Constructor - creates new BinghamFluidMaterial2Status with number n, belonging to domain d and IntegrationPoint g.
+    /// Constructor
     TwoFluidMaterialStatus(int n, Domain * d, GaussPoint * g, const IntArray & slaveMaterial);
     /// Destructor
     virtual ~TwoFluidMaterialStatus() { }

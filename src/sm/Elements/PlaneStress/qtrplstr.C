@@ -91,7 +91,7 @@ IRResultType
 QTrPlaneStress2d :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 4;
-    return StructuralElement :: initializeFrom(ir);
+    return PlaneStressElement :: initializeFrom(ir);
 }
 
 

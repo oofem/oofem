@@ -34,6 +34,7 @@
 
 #include "particle.h"
 #include "classfactory.h"
+#include "error.h"
 
 namespace oofem {
 REGISTER_DofManager(Particle);
@@ -50,7 +51,8 @@ Particle :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, radius, _IFT_Particle_rad);
     if ( radius < 0.0 ) {
-        OOFEM_ERROR("negative radius");
+        OOFEM_WARNING("negative radius");
+        return IRRT_BAD_FORMAT;
     }
 
     return Node :: initializeFrom(ir);

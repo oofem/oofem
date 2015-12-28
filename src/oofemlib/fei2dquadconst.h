@@ -67,6 +67,8 @@ public:
 
     virtual IntegrationRule *giveIntegrationRule(int order);
 
+    virtual int giveNumberOfNodes() const { return 4; }
+
 protected:
     /**
      * Computes the length of a given edge.

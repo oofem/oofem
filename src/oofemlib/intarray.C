@@ -250,6 +250,10 @@ void IntArray :: printYourself(const std::string name) const
     printf("\n");
 }
 
+void IntArray :: pY() const {
+    printYourself();
+}
+
 
 contextIOResultType IntArray :: storeYourself(DataStream &stream) const
 {
@@ -372,13 +376,11 @@ int IntArray :: findCommonValuesSorted(const IntArray &iarray, IntArray &common,
 }
 
 
-int IntArray :: insertOnce(int _p)
+void IntArray :: insertOnce(int _p)
 {
     if ( !this->findFirstIndexOf(_p) ) {
         this->followedBy(_p, 2);
     }
-
-    return this->giveSize();
 }
 
 

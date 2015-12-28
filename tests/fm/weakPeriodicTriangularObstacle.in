@@ -1,54 +1,54 @@
 weakPeriodicTriangularObstacle.out
 Test for SolutionbasedFormFunction
-stokesflow nsteps 1 lstype 0  smtype 1  rtolv 0.01  linesearch 0  maxiter 1000 nmodules 1
+stokesflow nsteps 1 rtolf 0.01 lstype 0  smtype 1 linesearch 0 maxiter 1000 nmodules 1
 errorcheck
 #vtkxml tstep_all domain_all primvars 2 4 5
 domain 2dIncompFlow
 OutputManager tstep_all dofman_all element_all
-ndofman 24       nelem 8       ncrosssect  1 nmat 1 nbc 9 nic 0 nltf 1  nset 7
-node 1  coords 2 0.0 	0.0
-node 2  coords 2 2.0 	0.0
-node 3  coords 2 2.0 	2.0
-node 4  coords 2 0.0 	2.0
-node 5  coords 2 0.0 	1.0
-node 6  coords 2 0.5 	0.5
-node 7  coords 2 1.0 	1.0
-node 8  coords 2 0.5 	1.5
-node 9  coords 2 1.0 	0.0
-node 10 coords 2 1.0 	0.3
-node 11 coords 2 1.5 	0.5
-node 12 coords 2 2.0 	1.0
-node 13 coords 2 1.5 	1.5
-node 14 coords 2 1.0 	1.7
-node 15 coords 2 1.0 	2.0
-node 16 coords 2 0.25 	1.75
-node 17 coords 2 0.25 	1.25
-node 18 coords 2 0.25 	0.75
-node 19 coords 2 0.25 	0.25
-node 20 coords 2 0.0 	1.5
-node 21 coords 2 0.0 	0.5
-node 22 coords 2 0.75 	0.75
-node 23 coords 2 0.75 	1.25
-node 24 coords 2 0.5 	1.0
-tr21stokes	1	nodes	6	1 2 6 9 10 19	crossSect 1 mat 1 
-tr21stokes	2	nodes	6	2 7 6 11 22 10	crossSect 1 mat 1 
-tr21stokes	3	nodes	6	2 3 7 12 13 11 	crossSect 1 mat 1 
-tr21stokes	4	nodes	6	3 8 7 14 23 13	crossSect 1 mat 1 
-tr21stokes	5	nodes	6	3 4 8 15 16 14	crossSect 1 mat 1 
-tr21stokes	6	nodes	6	4 5 8 20 17 16	crossSect 1 mat 1 
-tr21stokes	7	nodes	6	5 6 8 18 24 17	crossSect 1 mat 1 
-tr21stokes	8	nodes	6	5 1 6 21 19 18	crossSect 1 mat 1
+ndofman 24 nelem 8 ncrosssect 1 nmat 1 nbc 9 nic 0 nltf 1 nset 7
+node 1  coords 2 0.0 0.0
+node 2  coords 2 2.0 0.0
+node 3  coords 2 2.0 2.0
+node 4  coords 2 0.0 2.0
+node 5  coords 2 0.0 1.0
+node 6  coords 2 0.5 0.5
+node 7  coords 2 1.0 1.0
+node 8  coords 2 0.5 1.5
+node 9  coords 2 1.0 0.0
+node 10 coords 2 1.0 0.3
+node 11 coords 2 1.5 0.5
+node 12 coords 2 2.0 1.0
+node 13 coords 2 1.5 1.5
+node 14 coords 2 1.0 1.7
+node 15 coords 2 1.0 2.0
+node 16 coords 2 0.25 1.75
+node 17 coords 2 0.25 1.25
+node 18 coords 2 0.25 0.75
+node 19 coords 2 0.25 0.25
+node 20 coords 2 0.0 1.5
+node 21 coords 2 0.0 0.5
+node 22 coords 2 0.75 0.75
+node 23 coords 2 0.75 1.25
+node 24 coords 2 0.5 1.0
+tr21stokes 1 nodes 6  1 2 6 9 10 19
+tr21stokes 2 nodes 6  2 7 6 11 22 10
+tr21stokes 3 nodes 6  2 3 7 12 13 11
+tr21stokes 4 nodes 6  3 8 7 14 23 13
+tr21stokes 5 nodes 6  3 4 8 15 16 14
+tr21stokes 6 nodes 6  4 5 8 20 17 16
+tr21stokes 7 nodes 6  5 6 8 18 24 17
+tr21stokes 8 nodes 6  5 1 6 21 19 18
 fluidcs 1 mat 1 set 7
 newtonianfluid 1 mu 1.000000  d 1.000000
 deadweight 1 components 2 -1.0 -0.0 loadTimeFunction 1 valtype 4 set 7
 BoundaryCondition 2 loadTimeFunction 1 set 5 values 1 0. dofs 1 11
 BoundaryCondition 3 loadTimeFunction 1 set 6 values 2 0. 0. dofs 2 7 8
-weakperiodicbc 4 elementsidespositiveset 1 elementsidesnegativeset 2 loadTimeFunction 1 order 2 dofid 7 descritizationtype 1
-weakperiodicbc 5 elementsidespositiveset 3 elementsidesnegativeset 4 loadTimeFunction 1 order 2 dofid 7 descritizationtype 1
-weakperiodicbc 6 elementsidespositiveset 1 elementsidesnegativeset 2 loadTimeFunction 1 order 2 dofid 8 descritizationtype 1
-weakperiodicbc 7 elementsidespositiveset 3 elementsidesnegativeset 4 loadTimeFunction 1 order 2 dofid 8 descritizationtype 1
-weakperiodicbc 8 elementsidespositiveset 1 elementsidesnegativeset 2 loadTimeFunction 1 order 2 dofid 11 descritizationtype 1
-weakperiodicbc 9 elementsidespositiveset 3 elementsidesnegativeset 4 loadTimeFunction 1 order 2 dofid 11 descritizationtype 1
+weakperiodicbc 4 elementsidespositiveset 1 elementsidesnegativeset 2 loadTimeFunction 1 order 2 dofids 1 7 descritizationtype 1
+weakperiodicbc 5 elementsidespositiveset 3 elementsidesnegativeset 4 loadTimeFunction 1 order 2 dofids 1 7 descritizationtype 1
+weakperiodicbc 6 elementsidespositiveset 1 elementsidesnegativeset 2 loadTimeFunction 1 order 2 dofids 1 8 descritizationtype 1
+weakperiodicbc 7 elementsidespositiveset 3 elementsidesnegativeset 4 loadTimeFunction 1 order 2 dofids 1 8 descritizationtype 1
+weakperiodicbc 8 elementsidespositiveset 1 elementsidesnegativeset 2 loadTimeFunction 1 order 2 dofids 1 11 descritizationtype 1
+weakperiodicbc 9 elementsidespositiveset 3 elementsidesnegativeset 4 loadTimeFunction 1 order 2 dofids 1 11 descritizationtype 1
 ConstantFunction 1 f(t) 1.0
 # Positive X
 set 1 elementboundaries 2 3 1

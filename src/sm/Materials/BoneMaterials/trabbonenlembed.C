@@ -67,7 +67,6 @@ TrabBoneNLEmbed :: updateBeforeNonlocAverage(const FloatArray &strainVector, Gau
     TrabBoneNLEmbedStatus *nlstatus = static_cast< TrabBoneNLEmbedStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
-    //this->initGpForNewStep(gp);
     this->giveStressDependentPartOfStrainVector(SDstrainVector, gp, strainVector, tStep, VM_Total);
 
     nlstatus->letTempStrainVectorBe(strainVector);

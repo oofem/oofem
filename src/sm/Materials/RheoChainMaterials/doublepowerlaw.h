@@ -60,15 +60,16 @@ protected:
     double alpha;
 
 public:
-    DoublePowerLawMaterial(int n, Domain * d) : MaxwellChainMaterial(n, d) { }
+    DoublePowerLawMaterial(int n, Domain *d) : MaxwellChainMaterial(n, d) { }
     virtual ~DoublePowerLawMaterial() { }
 
     virtual const char *giveClassName() const { return "DoublePowerLawMaterial"; }
     virtual const char *giveInputRecordName() const { return _IFT_DoublePowerLawMaterial_Name; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
+    virtual double computeCreepFunction(double t, double t_prime);
+
 protected:
-    virtual double computeCreepFunction(double tStep, double ofAge);
 };
 } // end namespace oofem
 #endif // doublepowerlaw_h

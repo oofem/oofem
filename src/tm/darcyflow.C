@@ -103,6 +103,7 @@ void DarcyFlow :: solveYourselfAt(TimeStep *tStep)
     NM_Status status = this->nMethod->solve(*this->stiffnessMatrix,
                                             this->externalForces,
                                             NULL,
+                                            NULL,
                                             * solutionVector,
                                             this->incrementOfSolution,
                                             this->internalForces,

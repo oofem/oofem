@@ -313,7 +313,7 @@ void SparseGridMtxLDL :: MultiplyByVector(const LargeVectorAttach &x, LargeVecto
     double *py = y.DataPtr();
     double *px = x.DataPtr();
     for ( long bj = 0; bj < n_blocks; bj++ ) {
-        SparseGridColumn &columnJ = * Columns [ bj ];
+        SparseGridColumn &columnJ = *Columns [ bj ];
         //Columns[bj].MultBlockByVectorSym(BlockArith,x,ref y,block_size,bj);
         long cnt = columnJ.Entries;
         for ( long idx = 0; idx < cnt; idx++ ) {
@@ -327,6 +327,22 @@ void SparseGridMtxLDL :: MultiplyByVector(const LargeVectorAttach &x, LargeVecto
         BlockArith->MultDiagonalBlockByVector(Columns_data + bj * block_storage, px + bj * block_size, py + bj * block_size);
     }
 } //MultiplyByVector
+
+void SparseGridMtxLDL :: times(double x) {
+//     long neq = n_blocks * block_size - noDummyDOFs;
+//     for ( long i = 0; i < neq; i++ ) {
+//         for ( long j = 0; j < neq; j++ ) {
+//             printf("%ld %ld %lf\n", i,j, ElementAt(i, j));
+//         }
+//     }
+
+//     printf("n_blocks %ld block_size %ld columns_data_length %ld \n", n_blocks, block_size, columns_data_length );
+
+    for ( long i = 0; i < columns_data_length; i++ ) {
+        Columns_data[i] *= x;
+    }
+
+}
 
 void SparseGridMtxLDL :: Factorize()
 {

@@ -48,9 +48,11 @@
 #include "internalstatetype.h"
 #include "elementextension.h"
 #include "entityrenumberingscheme.h"
+#include "matresponsemode.h"
 #include "unknowntype.h"
 #include "integrationrule.h"
 #include "dofiditem.h"
+#include "floatarray.h"
 
 #include <cstdio>
 #include <vector>
@@ -296,6 +298,16 @@ public:
      * @param tStep Time step when answer is computed.
      */
     virtual void computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
+    /**
+     * Computes the tangent contribution of the given load at the given boundary.
+     * @note Elements which do not have an contribution should resize the vector to be empty.
+     * @param answer Requested contribution of load.
+     * @param load Load to compute contribution from.
+     * @param boundary Boundary number.
+     * @param rmode Mode of the contribution.
+     * @param tStep Time step when answer is computed.
+     */
+    virtual void computeTangentFromBoundaryLoad(FloatMatrix &answer, BoundaryLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep);
     /**
      * Computes the contribution of the given load at the given boundary edge.
      * @note Elements which do not have an contribution should resize the vector to be empty.
@@ -553,7 +565,7 @@ public:
      */
     virtual FEInterpolation *giveInterpolation(DofIDItem id) const { return giveInterpolation(); }
     /// @return Reference to the associated material of element.
-    Material *giveMaterial();
+    virtual Material *giveMaterial();
     /// @return Material number.
     int giveMaterialNumber() const {return material;}
     /// @return Reference to the associated crossSection of element.
@@ -577,6 +589,12 @@ public:
      * @param dmans Array with dof manager indices.
      */
     void setDofManagers(const IntArray &dmans);
+
+    /**
+     * Sets receiver bodyLoadArray.
+     * @param bodyLoads Array with body loads indices.
+     */
+    void setBodyLoads(const IntArray &bodyLoads);
 
     /**
      * Sets integration rules.

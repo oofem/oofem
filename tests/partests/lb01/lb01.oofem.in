@@ -1,42 +1,47 @@
 lb01.out
 Patch test of PlaneStress2d elements -> pure compression in x direction
-NonLinearStatic nsteps 3 controllmode 1 rtolv 1.e-3 refloadmode 0 nmodules 1
+NonLinearStatic nsteps 3 controlmode 1 rtolv 1.e-3 refloadmode 0 nmodules 1
 errorcheck filename "lb01.oofem.in"
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
-ndofman 18 nelem 10 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1
-node 1 coords 3  0.0   0.0   0.0  bc 2 1 1 
-node 2 coords 3  0.0   1.0   0.0  bc 2 1 0 
-node 3 coords 3  0.0   2.0   0.0  bc 2 1 0 
-node 4 coords 3  1.0   0.0   0.0  bc 2 0 0 
-node 5 coords 3  1.0   1.0   0.0  bc 2 0 0 
-node 6 coords 3  1.0   2.0   0.0  bc 2 0 0 
-node 7 coords 3  2.0   0.0   0.0  bc 2 0 0 
-node 8 coords 3  2.0   1.0   0.0  bc 2 0 0 
-node 9 coords 3  2.0   2.0   0.0  bc 2 0 0 
-node 10 coords 3 3.0   0.0   0.0  bc 2 0 0 
-node 11 coords 3 3.0   1.0   0.0  bc 2 0 0 
-node 12 coords 3 3.0   2.0   0.0  bc 2 0 0 
-node 13 coords 3 4.0   0.0   0.0  bc 2 0 0 
-node 14 coords 3 4.0   1.0   0.0  bc 2 0 0 
-node 15 coords 3 4.0   2.0   0.0  bc 2 0 0 
-node 16 coords 3 5.0   0.0   0.0  bc 2 0 0  load 1 2
-node 17 coords 3 5.0   1.0   0.0  bc 2 0 0  load 1 2
-node 18 coords 3 5.0   2.0   0.0  bc 2 0 0  load 1 2
-PlaneStress2d 1 nodes 4 1 4 5 2  crossSect 1 mat 1 
-PlaneStress2d 2 nodes 4 2 5 6 3  crossSect 1 mat 1 
-PlaneStress2d 3 nodes 4 4 7 8 5  crossSect 1 mat 1 
-PlaneStress2d 4 nodes 4 5 8 9 6  crossSect 1 mat 1 
-PlaneStress2d 5 nodes 4 7 10 11 8 crossSect 1 mat 1 
-PlaneStress2d 6 nodes 4 8 11 12 9 crossSect 1 mat 1 
-PlaneStress2d 7 nodes 4 10 13 14 11 crossSect 1 mat 1 
-PlaneStress2d 8 nodes 4 11 14 15 12 crossSect 1 mat 1 
-PlaneStress2d 9 nodes 4 13 16 17 14 crossSect 1 mat 1 
-PlaneStress2d 10 nodes 4 14 17 18 15 crossSect 1 mat 1 
-SimpleCS 1 thick 0.15 width 1.0
+ndofman 18 nelem 10 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 1 nset 4
+node 1 coords 3  0.0   0.0   0.0
+node 2 coords 3  0.0   1.0   0.0
+node 3 coords 3  0.0   2.0   0.0
+node 4 coords 3  1.0   0.0   0.0
+node 5 coords 3  1.0   1.0   0.0
+node 6 coords 3  1.0   2.0   0.0
+node 7 coords 3  2.0   0.0   0.0
+node 8 coords 3  2.0   1.0   0.0
+node 9 coords 3  2.0   2.0   0.0
+node 10 coords 3 3.0   0.0   0.0
+node 11 coords 3 3.0   1.0   0.0
+node 12 coords 3 3.0   2.0   0.0
+node 13 coords 3 4.0   0.0   0.0
+node 14 coords 3 4.0   1.0   0.0
+node 15 coords 3 4.0   2.0   0.0
+node 16 coords 3 5.0   0.0   0.0
+node 17 coords 3 5.0   1.0   0.0
+node 18 coords 3 5.0   2.0   0.0
+PlaneStress2d 1 nodes 4 1 4 5 2
+PlaneStress2d 2 nodes 4 2 5 6 3
+PlaneStress2d 3 nodes 4 4 7 8 5
+PlaneStress2d 4 nodes 4 5 8 9 6
+PlaneStress2d 5 nodes 4 7 10 11 8
+PlaneStress2d 6 nodes 4 8 11 12 9
+PlaneStress2d 7 nodes 4 10 13 14 11
+PlaneStress2d 8 nodes 4 11 14 15 12
+PlaneStress2d 9 nodes 4 13 16 17 14
+PlaneStress2d 10 nodes 4 14 17 18 15
+Set 1 elementranges {(1 10)}
+Set 2 nodes 3 1 2 3
+Set 3 nodes 1 1
+Set 4 nodes 3 16 17 18
+SimpleCS 1 thick 0.15 width 1.0 material 1 set 1
 IsoLE 1 d 0. E 15.0 n 0.25 tAlpha 0.000012
-BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
-NodalLoad 2 loadTimeFunction 1 Components 2 -2.5 0.0
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 2
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 2 values 1 0.0 set 3
+NodalLoad 3 loadTimeFunction 1 dofs 2 1 2 Components 2 -2.5 0.0 set 4
 ConstantFunction 1 f(t) 1.0
 #
 #

@@ -76,7 +76,6 @@ public:
     LargeStrainMasterMaterial(int n, Domain * d);
     virtual ~LargeStrainMasterMaterial();
 
-    virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual int hasNonLinearBehaviour() { return 1; }
@@ -89,12 +88,12 @@ public:
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+    virtual void give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer,
                                                MatResponseMode,
                                                GaussPoint *gp,
                                                TimeStep *tStep);
 
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *, const FloatArray &, TimeStep *)
+    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *, const FloatArray &, TimeStep *)
     { OOFEM_ERROR("not implemented, this material is designed for large strains only"); }
     virtual void giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &vF, TimeStep *tStep);
 
@@ -123,9 +122,9 @@ public:
     const FloatMatrix &giveTLmatrix() { return TLmatrix; }
     const FloatMatrix &giveTransformationMatrix() { return transformationMatrix; }
 
-    void setPmatrix(FloatMatrix values) { Pmatrix = std :: move(values); }
-    void setTLmatrix(FloatMatrix values) { TLmatrix = std :: move(values); }
-    void setTransformationMatrix(FloatMatrix values) { transformationMatrix = std :: move(values); }
+    void setPmatrix(const FloatMatrix &values) { Pmatrix = values; }
+    void setTLmatrix(const FloatMatrix &values) { TLmatrix = values; }
+    void setTransformationMatrix(const FloatMatrix &values) { transformationMatrix = values; }
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 

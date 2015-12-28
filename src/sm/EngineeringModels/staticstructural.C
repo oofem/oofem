@@ -193,6 +193,13 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
     this->field->applyBoundaryCondition(tStep); ///@todo Temporary hack, advanceSolution should apply the boundary conditions directly.
 
     neq = this->giveNumberOfDomainEquations( di, EModelDefaultEquationNumbering() );
+    if (tStep->giveNumber()==1) {
+        this->field->initialize(VM_Total, tStep, this->solution, EModelDefaultEquationNumbering() );
+    } else {
+        this->field->initialize(VM_Total, tStep->givePreviousStep(), this->solution, EModelDefaultEquationNumbering() );
+        this->field->update(VM_Total, tStep, this->solution, EModelDefaultEquationNumbering() );
+    }
+    this->field->applyBoundaryCondition(tStep); ///@todo Temporary hack to override the incorrect values that is set by "update" above. Remove this when that is fixed.
 
     FloatArray incrementOfSolution(neq), externalForces(neq);
 
@@ -209,11 +216,6 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
 
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
     this->initMetaStepAttributes( this->giveCurrentMetaStep() );
-
-    // Construct the initial guess, starting with the old solution:
-    this->field->initialize(VM_Total, tStep->givePreviousStep(), this->solution, EModelDefaultEquationNumbering() ); 
-    this->field->update(VM_Total, tStep, this->solution, EModelDefaultEquationNumbering());
-    this->field->applyBoundaryCondition(tStep); ///@todo Temporary hack to override the incorrect values that is set by "update" above. Remove this when that is fixed.
 
     if ( this->initialGuessType == IG_Tangent ) {
         OOFEM_LOG_RELEVANT("Computing initial guess\n");
@@ -244,6 +246,7 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
     } else {
         incrementOfSolution.zero();
     }
+
     // Build initial/external load
     externalForces.zero();
     this->assembleVector( externalForces, tStep, ExternalForceAssembler(), VM_Total,
@@ -258,6 +261,7 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
     int currentIterations;
     NM_Status status = this->nMethod->solve(*this->stiffnessMatrix,
                                             externalForces,
+                                            NULL,
                                             NULL,
                                             this->solution,
                                             incrementOfSolution,
@@ -288,10 +292,10 @@ void StaticStructural :: terminate(TimeStep *tStep)
 double StaticStructural :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 {
     double val1 = dof->giveUnknownsDictionaryValue(tStep, VM_Total);
-    double val0 = dof->giveUnknownsDictionaryValue(tStep->givePreviousStep(), VM_Total);
     if ( mode == VM_Total ) {
         return val1;
     } else if ( mode == VM_Incremental ) {
+        double val0 = dof->giveUnknownsDictionaryValue(tStep->givePreviousStep(), VM_Total);
         return val1 - val0;
     } else {
         OOFEM_ERROR("Unknown value mode requested");
@@ -428,7 +432,7 @@ StaticStructural :: requiresEquationRenumbering(TimeStep *tStep)
         ActiveBoundaryCondition *active_bc = dynamic_cast< ActiveBoundaryCondition * >(gbc.get());
         BoundaryCondition *bc = dynamic_cast< BoundaryCondition * >(gbc.get());
         // We only need to consider Dirichlet b.c.s
-        if ( bc || ( active_bc && active_bc->requiresActiveDofs() ) ) {
+        if ( bc || ( active_bc && ( active_bc->requiresActiveDofs() || active_bc->giveNumberOfInternalDofManagers() ) ) ) {
             // Check of the dirichlet b.c. has changed in the last step (if so we need to renumber)
             if ( gbc->isImposed(tStep) != gbc->isImposed(tStep->givePreviousStep()) ) {
                 return true;

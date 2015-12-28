@@ -41,8 +41,10 @@
 #include "floatmatrix.h"
 #include "fluidmodel.h"
 #include "fluiddynamicmaterial.h"
+#include "fluidcrosssection.h"
 #include "integrationrule.h"
 #include "node.h"
+#include "dof.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -199,12 +201,6 @@ SUPGElement2 :: checkConsistency()
 //
 {
     int result = 1;
-    /*
-     * if (!this->giveMaterial()->testMaterialExtension(Material_TransportCapability)) {
-     * OOFEM_WARNING("material without support for transport problems");
-     * result =0;
-     * }
-     */
     return result;
 }
 
@@ -272,7 +268,7 @@ SUPGElement2 :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *tStep)
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix( b, gp, tStep->givePreviousStep() );
         double dV = this->computeVolumeAround(gp);
-        double rho = this->giveMaterial()->give('d', gp);
+        double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity(gp);
         /* consistent part */
         answer.plusProductUnsym(n, n, rho * dV);
         /* supg stabilization */
@@ -298,7 +294,7 @@ SUPGElement2 :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *tStep)
         this->computeUDotGradUMatrix(b, gp, tStep);
         v.beProductOf(b, u);
         double dV = this->computeVolumeAround(gp);
-        double rho = this->giveMaterial()->give('d', gp);
+        double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity(gp);
         /* consistent part */
         answer.plusProduct(n, v, rho * dV);
 
@@ -321,7 +317,7 @@ SUPGElement2 :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep 
         this->computeUDotGradUMatrix( bn, gp, tStep->givePreviousStep() );
         this->computeUDotGradUMatrix(b, gp, tStep);
         double dV  = this->computeVolumeAround(gp);
-        double rho = this->giveMaterial()->give('d', gp);
+        double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity(gp);
 
         this->computeGradUMatrix(grad_u, gp, tStep);
 
@@ -345,6 +341,7 @@ SUPGElement2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep)
 
     answer.clear();
 
+    FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
     this->computeVectorOfVelocities(VM_Total, tStep, u);
 
     int rule = 1;
@@ -354,7 +351,7 @@ SUPGElement2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep)
         this->computeDivTauMatrix(dDB, gp, tStep);
         this->computeUDotGradUMatrix( un_gu, gp, tStep->givePreviousStep() );
         eps.beProductOf(b, u);
-        static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->computeDeviatoricStressVector(stress, gp, eps, tStep);
+        mat->computeDeviatoricStressVector(stress, gp, eps, tStep);
         dDB_u.beProductOf(dDB, u);
         /* consistent part */
         answer.plusProduct(b, stress, dV / Re);
@@ -372,11 +369,13 @@ SUPGElement2 :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRespon
 
     answer.clear();
 
+    FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
+
     int rule = 1;
     for ( GaussPoint *gp: *this->integrationRulesArray [ rule ] ) {
         double dV = this->computeVolumeAround(gp);
         this->computeBMatrix(_b, gp);
-        static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->giveDeviatoricStiffnessMatrix(_d, mode, gp, tStep);
+        mat->giveDeviatoricStiffnessMatrix(_d, mode, gp, tStep);
 
         this->computeDivTauMatrix(dDB, gp, tStep);
         this->computeUDotGradUMatrix( un_gu, gp, tStep->givePreviousStep() );
@@ -430,7 +429,7 @@ SUPGElement2 :: computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *t
     int rule = 0;
     for ( GaussPoint *gp: *this->integrationRulesArray [ rule ] ) {
         double dV = this->computeVolumeAround(gp);
-        double rho = this->giveMaterial()->give('d', gp);
+        double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity(gp);
         this->computeDivUMatrix(b, gp);
 
         answer.plusProductSymmUpper(b, b, dV * rho * t_lsic);
@@ -507,9 +506,7 @@ SUPGElement2 :: computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, TimeStep 
     int rule = 1;
     for ( GaussPoint *gp: *this->integrationRulesArray [ rule ] ) {
         double dV = this->computeVolumeAround(gp);
-        double rho = this->giveMaterial()->give('d', gp);
-
-        //( ( FluidDynamicMaterial * ) this->giveMaterial() )->giveDeviatoricStiffnessMatrix(_d, TangentStiffness,gp, tStep);
+        double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity(gp);
 
         this->computeDivTauMatrix(dDB, gp, tStep);
         this->computeGradPMatrix(g, gp);
@@ -536,7 +533,7 @@ SUPGElement2 :: computeDiffusionTerm_MC(FloatArray &answer, TimeStep *tStep)
      *
      * for ( GaussPoint *gp: *this->integrationRulesArray [ 1 ] ) {
      *  dV  = this->computeVolumeAround(gp);
-     *  rho = this->giveMaterial()->give('d', gp);
+     *  rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity(gp);
      *
      *  coeff = (-1.0) * dV * t_pspg / rho;
      *
@@ -588,7 +585,7 @@ SUPGElement2 :: computePressureTerm_MC(FloatMatrix &answer, TimeStep *tStep)
     for ( GaussPoint *gp: *this->integrationRulesArray [ rule ] ) {
         this->computeGradPMatrix(g, gp);
         double dV  = this->computeVolumeAround(gp);
-        double rho = this->giveMaterial()->give('d', gp);
+        double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity(gp);
         answer.plusProductSymmUpper(g, g, dV * t_pspg / rho);
     }
 
@@ -619,7 +616,7 @@ SUPGElement2 :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
                     this->computeUDotGradUMatrix( b, gp, tStep->givePreviousStep() );
                     this->computeNuMatrix(nu, gp);
                     double dV  = this->computeVolumeAround(gp);
-                    double rho = this->giveMaterial()->give('d', gp);
+                    double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity(gp);
                     answer.plusProduct(b, gVector, t_supg * rho * dV);
                     answer.plusProduct(nu, gVector, rho * dV);
                 }
@@ -653,7 +650,6 @@ SUPGElement2 :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
         }
     }
 }
-
 
 
 void
@@ -710,6 +706,53 @@ SUPGElement2 :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *tStep)
     }
 }
 
+
+void
+SUPGElement2 :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
+{
+    if ( type != ExternalForcesVector ) {
+        answer.clear();
+        return;
+    }
+
+    int rule = 1;
+    FloatArray un, nV;
+    FloatArray mb, mc;
+
+    this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
+
+    if ( load->giveBCValType() == ForceLoadBVT ) {
+        FloatMatrix b, g, nu;
+        FloatArray gVector;
+        load->computeComponentArrayAt(gVector, tStep, VM_Total);
+
+        for ( auto &gp : *integrationRulesArray [ rule ] ) {
+            double dV = this->computeVolumeAround(gp);
+            double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity(gp);
+
+            this->computeNuMatrix(nu, gp);
+            mb.plusProduct(nu, gVector, rho * dV);
+            if ( t_supg != 0 ) {
+                this->computeUDotGradUMatrix( b, gp, tStep->givePreviousStep() );
+                mb.plusProduct(b, gVector, t_supg * rho * dV);
+            }
+
+            if ( t_pspg != 0. ) {
+                this->computeGradPMatrix(g, gp);
+                mc.plusProduct(g, gVector, t_pspg * dV);
+            }
+        }
+    }
+
+    IntArray vloc, ploc;
+    this->giveLocalVelocityDofMap(vloc);
+    this->giveLocalPressureDofMap(ploc);
+    answer.resize(this->computeNumberOfDofs());
+    answer.zero();
+    answer.assemble(mb, vloc);
+    answer.assemble(mc, ploc);
+}
+
 void
 SUPGElement2 :: computeEdgeLoadVector_MB(FloatArray &answer, Load *load, int id, TimeStep *tStep)
 {
@@ -754,6 +797,6 @@ SUPGElement2 :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, Time
     // compute deviatoric strain
     this->computeDeviatoricStrain(eps, gp, tStep);
     // call material to compute stress
-    static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->computeDeviatoricStressVector(answer, gp, eps, tStep);
+    static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial()->computeDeviatoricStressVector(answer, gp, eps, tStep);
 }
 } // end namespace oofem

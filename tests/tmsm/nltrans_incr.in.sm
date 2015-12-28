@@ -1,31 +1,35 @@
 nltrans_incr.out.sm
 Quadrilateral elements subjected to temperature strains, changes in static system
-IncrLinearStatic endOfTimeOfInterest 5.0  prescribedTimes 3. 1. 2. 3. nmodules 1
+IncrLinearStatic endOfTimeOfInterest 5.0  prescribedTimes 3 1. 2. 3. nmodules 1
 errorcheck
 #vtkxml tstep_all vars 2 1 4 primvars 1 1 stype 1
 domain 2dplanestress
 OutputManager tstep_all dofman_all element_all
-ndofman 9 nelem 4 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 2
-node 1 coords 3 0.000000e+00 0.000000e+00 0.000000e+00   bc 2 1 1
-node 2 coords 3 0.100000e+00 0.000000e+00 0.000000e+00   bc 2 0 1
-node 3 coords 3 0.200000e+00 0.000000e+00 0.000000e+00   bc 2 0 1
-node 4 coords 3 0.000000e+00 1.000000e+00 0.000000e+00   
-node 5 coords 3 0.100000e+00 1.000000e+00 0.000000e+00   
-node 6 coords 3 0.200000e+00 1.000000e+00 0.000000e+00   
-node 7 coords 3 0.000000e+00 2.000000e+00 0.000000e+00   bc 2 0 2
-node 8 coords 3 0.100000e+00 2.000000e+00 0.000000e+00   bc 2 0 2
-node 9 coords 3 0.200000e+00 2.000000e+00 0.000000e+00   bc 2 0 2
-planestress2d 1 nodes 4 1 2 5 4 crosssect 1 mat 1 
-planestress2d 2 nodes 4 2 3 6 5 crosssect 1 mat 1
-planestress2d 3 nodes 4 4 5 8 7 crosssect 1 mat 1
-planestress2d 4 nodes 4 5 6 9 8 crosssect 1 mat 1
-SimpleCS 1 thick 1.0
+ndofman 9 nelem 4 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 2 nset 4
+node 1 coords 3 0.000000e+00 0.000000e+00 0.000000e+00
+node 2 coords 3 0.100000e+00 0.000000e+00 0.000000e+00
+node 3 coords 3 0.200000e+00 0.000000e+00 0.000000e+00
+node 4 coords 3 0.000000e+00 1.000000e+00 0.000000e+00
+node 5 coords 3 0.100000e+00 1.000000e+00 0.000000e+00
+node 6 coords 3 0.200000e+00 1.000000e+00 0.000000e+00
+node 7 coords 3 0.000000e+00 2.000000e+00 0.000000e+00
+node 8 coords 3 0.100000e+00 2.000000e+00 0.000000e+00
+node 9 coords 3 0.200000e+00 2.000000e+00 0.000000e+00
+planestress2d 1 nodes 4 1 2 5 4
+planestress2d 2 nodes 4 2 3 6 5
+planestress2d 3 nodes 4 4 5 8 7
+planestress2d 4 nodes 4 5 6 9 8
+SimpleCS 1 thick 1.0 material 1 set 1
 IsoLe 1 d 2400. E 10e3 n 0.15 talpha 12.e-6
-BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
-BoundaryCondition 2 loadTimeFunction 1 prescribedvalue 0.0 isImposedTimeFunction 2
-#BoundaryCondition 2 loadTimeFunction 1 prescribedvalue 0.0
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 2
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 2 values 1 0.0 set 3
+BoundaryCondition 3 loadTimeFunction 1 dofs 1 2 values 1 0.0 isImposedTimeFunction 2 set 4
 ConstantFunction 1 f(t) 1.0
 UsrDefLTF 2 f(t) h(72000.)
+Set 1 elementranges {(1 4)}
+Set 2 nodes 1 1
+Set 3 nodes 3 1 2 3
+Set 4 nodes 3 7 8 9
 #
 #%BEGIN_CHECK% tolerance 1.e-8
 #NODE tStep 1 number 4 dof 1 unknown d value 3.50423014e-06
@@ -47,4 +51,3 @@ UsrDefLTF 2 f(t) h(72000.)
 #ELEMENT tStep 3 number 1 gp 1 keyword 4  component 1  value 1.5896e-03
 #ELEMENT tStep 3 number 1 gp 1 keyword 1 component 1  value -7.15601165e-01
 #%END_CHECK%
-

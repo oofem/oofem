@@ -2,53 +2,57 @@ bazantnajjar.out
 drying at 50% RH - axisymmetric
 #
 nltransienttransportproblem nsteps 8 alpha 0.5 rtol 1.e-10 lumpedcapa nsmax 1000 prescribedtimes 8 0.01 0.1 0.5 1. 2. 4. 6. 8. nmodules 1
+# Problem with NRSolver and "small" errors, will end up using absolute error in this case. Should be fixed.
+#transienttransport nsteps 8 alpha 0.5 rtolf 1e-12 lumped prescribedtimes 8 0.01 0.1 0.5 1. 2. 4. 6. 8. nmodules 1
 errorcheck
 # nmodules 1
 # vtkxml tstep_all domain_all primvars 1 3
 #
 domain mass1transfer
 OutputManager tsteps_out {4 8} dofman_output {1 3 5} element_output {1}
-ndofman  22 nelem  10 ncrosssect 1 nmat 1 nbc 1 nic 1 nltf 1
+ndofman 22 nelem 10 ncrosssect 1 nmat 1 nbc 1 nic 1 nltf 1 nset 2
 #
-node   1   coords 3  0.000  0.0  0.0 ic 1 1 
-node   2   coords 3  0.001  0.0  0.0 ic 1 1 
-node   3   coords 3  0.002  0.0  0.0 ic 1 1 
-node   4   coords 3  0.003  0.0  0.0 ic 1 1 
-node   5   coords 3  0.004  0.0  0.0 ic 1 1 
-node   6   coords 3  0.005  0.0  0.0 ic 1 1 
-node   7   coords 3  0.006  0.0  0.0 ic 1 1 
-node   8   coords 3  0.007  0.0  0.0 ic 1 1 
-node   9   coords 3  0.008  0.0  0.0 ic 1 1 
-node  10   coords 3  0.009  0.0  0.0 ic 1 1 
-node  11   coords 3  0.010  0.0  0.0 ic 1 1 bc 1   1
-node  12   coords 3  0.000  0.01  0.0 ic 1 1 
-node  13   coords 3  0.001  0.01  0.0 ic 1 1 
-node  14   coords 3  0.002  0.01  0.0 ic 1 1 
-node  15   coords 3  0.003  0.01  0.0 ic 1 1 
-node  16   coords 3  0.004  0.01  0.0 ic 1 1 
-node  17   coords 3  0.005  0.01  0.0 ic 1 1 
-node  18   coords 3  0.006  0.01  0.0 ic 1 1 
-node  19   coords 3  0.007  0.01  0.0 ic 1 1 
-node  20   coords 3  0.008  0.01  0.0 ic 1 1 
-node  21   coords 3  0.009  0.01  0.0 ic 1 1
-node  22   coords 3  0.010  0.01  0.0 ic 1 1 bc 1   1
+node   1   coords 3  0.000  0.0  0.0
+node   2   coords 3  0.001  0.0  0.0
+node   3   coords 3  0.002  0.0  0.0
+node   4   coords 3  0.003  0.0  0.0
+node   5   coords 3  0.004  0.0  0.0
+node   6   coords 3  0.005  0.0  0.0
+node   7   coords 3  0.006  0.0  0.0
+node   8   coords 3  0.007  0.0  0.0
+node   9   coords 3  0.008  0.0  0.0
+node  10   coords 3  0.009  0.0  0.0
+node  11   coords 3  0.010  0.0  0.0
+node  12   coords 3  0.000  0.01  0.0
+node  13   coords 3  0.001  0.01  0.0
+node  14   coords 3  0.002  0.01  0.0
+node  15   coords 3  0.003  0.01  0.0
+node  16   coords 3  0.004  0.01  0.0
+node  17   coords 3  0.005  0.01  0.0
+node  18   coords 3  0.006  0.01  0.0
+node  19   coords 3  0.007  0.01  0.0
+node  20   coords 3  0.008  0.01  0.0
+node  21   coords 3  0.009  0.01  0.0
+node  22   coords 3  0.010  0.01  0.0
 #
-quadaxisym1mt   1   nodes 4    1   2  13  12 crossSect 1 mat 1 
-quadaxisym1mt   2   nodes 4    2   3  14  13 crossSect 1 mat 1 
-quadaxisym1mt   3   nodes 4    3   4  15  14 crossSect 1 mat 1 
-quadaxisym1mt   4   nodes 4    4   5  16  15 crossSect 1 mat 1 
-quadaxisym1mt   5   nodes 4    5   6  17  16 crossSect 1 mat 1 
-quadaxisym1mt   6   nodes 4    6   7  18  17 crossSect 1 mat 1 
-quadaxisym1mt   7   nodes 4    7   8  19  18 crossSect 1 mat 1 
-quadaxisym1mt   8   nodes 4    8   9  20  19 crossSect 1 mat 1 
-quadaxisym1mt   9   nodes 4    9  10  21  20 crossSect 1 mat 1 
-quadaxisym1mt  10   nodes 4   10  11  22  21 crossSect 1 mat 1 
+quadaxisym1mt   1   nodes 4    1   2  13  12
+quadaxisym1mt   2   nodes 4    2   3  14  13
+quadaxisym1mt   3   nodes 4    3   4  15  14
+quadaxisym1mt   4   nodes 4    4   5  16  15
+quadaxisym1mt   5   nodes 4    5   6  17  16
+quadaxisym1mt   6   nodes 4    6   7  18  17
+quadaxisym1mt   7   nodes 4    7   8  19  18
+quadaxisym1mt   8   nodes 4    8   9  20  19
+quadaxisym1mt   9   nodes 4    9  10  21  20
+quadaxisym1mt  10   nodes 4   10  11  22  21
 #
-EmptyCS 1
+SimpleTransportCS 1 mat 1 set 1
 bazantnajjarmoisturemat 1 d 2400. C1 3.1e-05 alpha0 0.02 hC 0.775 n 5
-BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 1.
-InitialCondition 1 Conditions 1 u 1.00
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 14 values 1 1.0 set 2
+InitialCondition 1 Conditions 1 u 1.00 dofs 1 14 set 1
 ConstantFunction 1 f(t) 0.5
+Set 1 elementranges {(1 10)}
+Set 2 nodes 2 11 22
 ##
 ##
 #

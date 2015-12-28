@@ -7,28 +7,33 @@ IncrLinearStatic endOfTimeOfInterest 5.0  prescribedTimes 5 1. 2. 3. 4. 5. nmodu
 errorcheck
 domain 2dTruss
 OutputManager tstep_all dofman_all element_all
-ndofman 4 nelem 3 ncrosssect  1 nmat 1 nbc 6 nic 0 nltf 5
-node 1 coords 3 0.  0.  0.  bc 2 1 1
-node 2 coords 3 2.  0.  0.  bc 2 3 1
-node 3 coords 3 4.  0.  0.  bc 2 2 1
-node 4 coords 3 6.  0.  0.  bc 2 0 1 load 3 4 5 6
-Truss2d 1 nodes 2 1 2 crossSect 1 mat 1
-Truss2d 2 nodes 2 2 3 crossSect 1 mat 1
-Truss2d 3 nodes 2 3 4 crossSect 1 mat 1
-SimpleCS 1 thick 1.0 width 1.0
+ndofman 4 nelem 3 ncrosssect 1 nmat 1 nbc 7 nic 0 nltf 5 nset 5
+node 1 coords 3 0.  0.  0.
+node 2 coords 3 2.  0.  0.
+node 3 coords 3 4.  0.  0.
+node 4 coords 3 6.  0.  0.
+Truss2d 1 nodes 2 1 2
+Truss2d 2 nodes 2 2 3
+Truss2d 3 nodes 2 3 4
+SimpleCS 1 thick 1.0 width 1.0 material 1 set 1
 IsoLE 1 tAlpha 0.000012  d 1.0  E 0.5  n 0.2
-BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
-BoundaryCondition  2 loadTimeFunction 2 isImposedTimeFunction 2  prescribedvalue 0.0
-BoundaryCondition  3 loadTimeFunction 4 isImposedTimeFunction 4  prescribedvalue 1.0
-NodalLoad 4 loadTimeFunction 1 Components 2 1.0 0.0
-NodalLoad 5 loadTimeFunction 3 Components 2 1.0 0.0
-NodalLoad 6 loadTimeFunction 5 Components 2 -1.0 0.0
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 3 values 1 0.0 set 1
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 2
+BoundaryCondition 3 loadTimeFunction 2 isImposedTimeFunction 2 dofs 1 1 values 1 0.0 set 4
+BoundaryCondition 4 loadTimeFunction 4 isImposedTimeFunction 4 dofs 1 1 values 1 1.0 set 3
+NodalLoad 5 loadTimeFunction 1 dofs 2 1 3 Components 2 1.0 0.0 set 5
+NodalLoad 6 loadTimeFunction 3 dofs 2 1 3 Components 2 1.0 0.0 set 5
+NodalLoad 7 loadTimeFunction 5 dofs 2 1 3 Components 2 -1.0 0.0 set 5
 ConstantFunction 1 f(t) 1.0
 PeakFunction 2 t 2.0 f(t)  1.
 HeavisideLTF 3 origin 1.5 value 1.0
 HeavisideLTF 4 origin 3.5 value 1.0
 HeavisideLTF 5 origin 4.5 value 1.0
-
+Set 1 elementranges {(1 3)}
+Set 2 nodes 1 1
+Set 3 nodes 1 2
+Set 4 nodes 1 3
+Set 5 nodes 1 4
 #
 #
 #%BEGIN_CHECK% tolerance 1.e-12

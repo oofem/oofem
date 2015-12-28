@@ -40,9 +40,11 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "fluiddynamicmaterial.h"
+#include "fluidcrosssection.h"
 #include "dynamicinputrecord.h"
 #include "engngm.h"
 #include "node.h"
+#include "dof.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -228,7 +230,7 @@ SUPGElement :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeS
     // compute deviatoric strain
     this->computeDeviatoricStrain(eps, gp, tStep);
     // call material to compute stress
-    static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->computeDeviatoricStressVector(answer, gp, eps, tStep);
+    static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial()->computeDeviatoricStressVector(answer, gp, eps, tStep);
 }
 
 
@@ -338,12 +340,6 @@ SUPGElement :: checkConsistency()
 //
 {
     int result = 1;
-    /*
-     * if (!this->giveMaterial()->testMaterialExtension(Material_TransportCapability)) {
-     * OOFEM_WARNING("material without support for transport problems");
-     * result =0;
-     * }
-     */
     return result;
 }
 

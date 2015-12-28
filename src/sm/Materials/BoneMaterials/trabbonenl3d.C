@@ -71,7 +71,6 @@ TrabBoneNL3D :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussP
     TrabBoneNL3DStatus *nlStatus = static_cast< TrabBoneNL3DStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
-    //this->initGpForNewStep(gp);
     this->giveStressDependentPartOfStrainVector(SDstrainVector, gp, strainVector, tStep, VM_Total);
 
     nlStatus->letTempStrainVectorBe(strainVector);
@@ -246,17 +245,10 @@ TrabBoneNL3D :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
     TrabBoneNL3DStatus *nlStatus = static_cast< TrabBoneNL3DStatus * >( this->giveStatus(gp) );
     StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
 
-    int ncols, nsize;
-    double sum, beta;
-    FloatArray remoteNu, plasFlowDirec, prodTensor;
-    FloatMatrix b, SSaTensor;
+    FloatMatrix b;
 
     elem->giveLocationArray(rloc, s);
     elem->computeBmatrixAt(gp, b);
-
-    ncols = b.giveNumberOfColumns();
-    rcontrib.resize(ncols);
-
 
     double kappa = nlStatus->giveKappa();
     double tempKappa = nlStatus->giveTempKappa();
@@ -266,26 +258,17 @@ TrabBoneNL3D :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
     }
 
     if ( dKappa > 0.0 ) {
-        plasFlowDirec = nlStatus->givePlasFlowDirec();
-        SSaTensor = nlStatus->giveSSaTensor();
-        beta = nlStatus->giveBeta();
+        FloatArray remoteNu, prodTensor;
+        const FloatArray &plasFlowDirec = nlStatus->givePlasFlowDirec();
+        const FloatMatrix &SSaTensor = nlStatus->giveSSaTensor();
+        double beta = nlStatus->giveBeta();
 
         prodTensor.beTProductOf(SSaTensor, plasFlowDirec);
         remoteNu = 1 / beta * prodTensor;
-        nsize = remoteNu.giveSize();
-
-        for ( int i = 1; i <= ncols; i++ ) {
-            sum = 0.0;
-            for ( int j = 1; j <= nsize; j++ ) {
-                sum += remoteNu.at(j) * b.at(j, i);
-            }
-
-            rcontrib.at(i) = sum;
-        }
+        rcontrib.beTProductOf(b, remoteNu);
     } else {
-        for ( int i = 1; i <= ncols; i++ ) {
-            rcontrib.at(i) = 0.;
-        }
+        rcontrib.resize(b.giveNumberOfColumns());
+        rcontrib.zero();
     }
 }
 
@@ -295,9 +278,9 @@ TrabBoneNL3D :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
                                         const FloatArray &totalStrain, TimeStep *tStep)
 {
     TrabBoneNL3DStatus *nlStatus = static_cast< TrabBoneNL3DStatus * >( this->giveStatus(gp) );
-    //this->initGpForNewStep(gp);
+
     this->initTempStatus(gp);
-    
+
     double tempDam;
     FloatArray effStress, totalStress, densStress;
 

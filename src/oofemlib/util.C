@@ -37,6 +37,7 @@
 #include "classfactory.h"
 #include "inputrecord.h"
 #include "datareader.h"
+#include "error.h"
 
 #include <cstring>
 
@@ -62,7 +63,7 @@ EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag
 
     problem = classFactory.createEngngModel(problemName.c_str(), 1, _master);
     if ( !problem ) {
-        OOFEM_WARNING( "Failed to construct engineering model if type \"%s\".\n", problemName.c_str() );
+        OOFEM_WARNING( "Failed to construct engineering model of type \"%s\".\n", problemName.c_str() );
         return NULL;
     }
 
@@ -74,6 +75,7 @@ EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag
     }
 
     problem->instanciateYourself( dr, emodelir, dataOutputFileName.c_str(), desc.c_str() );
+    problem->postInitialize();
 
     delete emodelir;
 

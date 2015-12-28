@@ -94,9 +94,9 @@ public:
     virtual double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep, ActiveDof *dof);
     virtual double giveUnknown(ValueModeType mode, TimeStep *tStep, ActiveDof *dof);
     virtual bool isPrimaryDof(ActiveDof *dof);
-    virtual double giveBcValue(ActiveDof *dof, ValueModeType mode, TimeStep *tStep);
-    virtual bool hasBc(ActiveDof *dof, TimeStep *tStep);
-    bool isStrainDof(ActiveDof *dof);
+    virtual double giveBcValue(Dof *dof, ValueModeType mode, TimeStep *tStep);
+    virtual bool hasBc(Dof *dof, TimeStep *tStep);
+    bool isStrainDof(Dof *dof);
 
     virtual bool requiresActiveDofs() { return true; }
 

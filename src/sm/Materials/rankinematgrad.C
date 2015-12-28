@@ -255,7 +255,7 @@ void
 RankineMatGrad :: giveRealStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *tStep)
 {
     RankineMatGradStatus *status = static_cast< RankineMatGradStatus * >( this->giveStatus(gp) );
-    //this->initGpForNewStep(gp);
+
     this->initTempStatus(gp);
 
     double tempDamage;

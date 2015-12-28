@@ -43,6 +43,7 @@
 #include "engngm.h"
 #include "classfactory.h"
 #include "gausspoint.h"
+#include "crosssection.h"
 #include <cassert>
 
 namespace oofem {
@@ -78,9 +79,9 @@ GPInitModule :: doInit()
     // loop over elements
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
         Element *elem = d->giveElement(ielem);
-        Material *mat = elem->giveMaterial();
         // loop over Gauss points
-        for ( GaussPoint *gp: *elem->giveDefaultIntegrationRulePtr() ) {
+        for ( auto &gp: *elem->giveDefaultIntegrationRulePtr() ) {
+            Material *mat = elem->giveCrossSection()->giveMaterial(gp);
             MaterialStatus *status = static_cast< MaterialStatus * >( gp->giveMaterialStatus() );
             if ( fscanf(initStream, "%d %d", & ie, & ig) != 2 ) {
                 OOFEM_ERROR("initStream reading error");
@@ -121,9 +122,9 @@ GPInitModule :: doInit()
 
                 mat->setIPValue(value, gp, vartype);
             }
-
             // restore consistency (compute dependent internal variables)
             status->restoreConsistency();
+
         }
     }
 

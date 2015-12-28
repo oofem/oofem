@@ -67,8 +67,8 @@ public:
 protected:
     ///////////////////////////////////////////////////////////////////////////////
     void computeGaussPoints();
-    void computeNkappaMatrixAt(GaussPoint *, FloatMatrix &);
-    void computeBkappaMatrixAt(GaussPoint *, FloatMatrix &);
+    void computeNkappaMatrixAt(GaussPoint *gp, FloatArray &answer);
+    void computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer);
     StructuralElement *giveStructuralElement() { return this; }
     NLStructuralElement *giveNLStructuralElement() { return this; }
 

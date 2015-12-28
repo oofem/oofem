@@ -37,6 +37,9 @@
 
 #include "../sm/Elements/nlstructuralelement.h"
 #include "floatmatrix.h"
+#include "nodalaveragingrecoverymodel.h"
+#include "spatiallocalizer.h"
+#include "eleminterpmapperinterface.h"
 
 #define _IFT_tet21ghostsolid_Name "tet21ghostsolid"
 
@@ -44,12 +47,17 @@ namespace oofem {
 class FEI3dTetQuad;
 class FEI3dTetLin;
 
-class tet21ghostsolid : public NLStructuralElement
+class tet21ghostsolid : public NLStructuralElement,
+        public NodalAveragingRecoveryModelInterface,
+        public SpatialLocalizerInterface,
+        public EIPrimaryUnknownMapperInterface
 {
 private:
     FloatMatrix Dghost;
     bool computeItransform;
     FloatMatrix Itransform;
+    static IntArray velocitydofsonside;
+    static IntArray displacementdofsonside;
 
     void giveUnknownData(FloatArray &u_prev, FloatArray &u, FloatArray &inc, TimeStep *tStep);
 
@@ -57,6 +65,8 @@ public:
     tet21ghostsolid(int n, Domain *d);
 
     virtual FEInterpolation *giveInterpolation() const;
+    virtual FEInterpolation *giveInterpolation(DofIDItem id) const;
+
     virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
     virtual const char *giveInputRecordName() const { return _IFT_tet21ghostsolid_Name; }
     virtual int computeNumberOfDofs() { return 70; }
@@ -67,11 +77,29 @@ public:
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
     virtual void giveInternalForcesVectorGivenSolution(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord, FloatArray &SolutionVector);
     virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
-    virtual void computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, FloatArray &u);
+    virtual void computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
+
+    virtual void computeDeformationGradientVectorFromDispl(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, FloatArray &u);
+    virtual void computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeDeformationGradientVectorAt(FloatArray &answer, FloatArray lcoord, TimeStep *tStep);
+
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual double computeVolumeAround(GaussPoint *gp);
-    virtual bool giveRowTransformationMatrix(FloatMatrix &Itransform, TimeStep *tStep);
+    virtual bool giveRowTransformationMatrix(TimeStep *tStep);
     virtual const char *giveClassName() const { return "tet21ghostsolid"; }
+
+
+    virtual Interface *giveInterface(InterfaceType it);
+
+    // Spatial localizer interface:
+    virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
+
+    // Element interpolation interface:
+    virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType u,
+                                                                       TimeStep *tStep, const FloatArray &coords, FloatArray &answer);
+
+    // Nodal averaging interface:
+    virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
 
 protected:
     static FEI3dTetQuad interpolation;

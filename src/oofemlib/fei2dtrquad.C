@@ -205,16 +205,6 @@ FEI2dTrQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const
     return inside;
 }
 
-
-double
-FEI2dTrQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-{
-    FloatMatrix jacobianMatrix;
-    this->giveJacobianMatrixAt(jacobianMatrix, lcoords, cellgeo);
-    return jacobianMatrix.giveDeterminant();
-}
-
-
 void
 FEI2dTrQuad :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {

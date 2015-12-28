@@ -47,21 +47,23 @@
 #include "dynamicinputrecord.h"
 
 namespace oofem {
-StructuralMaterial :: StructuralMaterial(int n, Domain * d) : Material(n, d) 
-{ 
-    // Voigt index map
-    vIindex.resize(3);
-    vIindex[0] = { 1, 6, 5 };
-    vIindex[1] = { 9, 2, 4 };
-    vIindex[2] = { 8, 7, 3 };  
-      
-    // Symmetric Voigt index map
-    svIndex.resize(3);
-    svIndex[0] = { 1, 6, 5 };
-    svIndex[1] = { 6, 2, 4 };
-    svIndex[2] = { 5, 4, 3 };       
     
-}  
+std::vector< std::vector<int> > StructuralMaterial :: vIindex = {
+    { 1, 6, 5 },
+    { 9, 2, 4 },
+    { 8, 7, 3 }  
+};
+
+std::vector< std::vector<int> > StructuralMaterial :: svIndex = {
+    { 1, 6, 5 },
+    { 6, 2, 4 },
+    { 5, 4, 3 }
+};
+
+
+StructuralMaterial :: StructuralMaterial(int n, Domain * d) : Material(n, d) { }  
+
+
 int
 StructuralMaterial :: hasMaterialModeCapability(MaterialMode mode)
 //
@@ -80,6 +82,8 @@ StructuralMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, c
     MaterialMode mode = gp->giveMaterialMode();
     if ( mode == _3dMat ) {
         this->giveRealStressVector_3d(answer, gp, reducedStrain, tStep);
+    } else if ( mode == _3dDegeneratedShell ) {
+        this->giveRealStressVector_3d(answer, gp, reducedStrain, tStep);
     } else if ( mode == _PlaneStrain ) {
         this->giveRealStressVector_PlaneStrain(answer, gp, reducedStrain, tStep);
     } else if ( mode == _PlaneStress ) {
@@ -92,8 +96,12 @@ StructuralMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, c
         this->giveRealStressVector_PlateLayer(answer, gp, reducedStrain, tStep);
     } else if ( mode == _Fiber ) {
         this->giveRealStressVector_Fiber(answer, gp, reducedStrain, tStep);
+    } else if ( mode == _2dLattice ) {
+        this->giveRealStressVector_Lattice2d(answer, gp, reducedStrain, tStep);
+    } else if ( mode == _3dLattice ) {
+        this->giveRealStressVector_Lattice3d(answer, gp, reducedStrain, tStep);
     } else if ( mode == _2dPlateSubSoil ) {
-        this->giveRealStressVector_2dPlateSubSoil (answer, gp, reducedStrain, tStep);
+        this->giveRealStressVector_2dPlateSubSoil(answer, gp, reducedStrain, tStep);
     }
 }
 
@@ -155,7 +163,7 @@ StructuralMaterial :: giveRealStressVector_StressControl(FloatArray &answer, Gau
         reducedvS.beSubArrayOf(vS, stressControl);
         // Pick out the (response) stresses for the controlled strains
         answer.beSubArrayOf(vS, strainControl);
-        if ( reducedvS.computeNorm() <= 1e0 && k >= 1 ) { // Absolute tolerance right now (with at least one iteration)
+        if ( reducedvS.computeNorm() <= 1e0 && k >= 5 ) { // Absolute tolerance right now (with at least one iteration)
             ///@todo We need a relative tolerance here!
             /// A relative tolerance like this could work, but if a really small increment is performed it won't work
             /// (it will be limited by machine precision)
@@ -173,6 +181,57 @@ StructuralMaterial :: giveRealStressVector_StressControl(FloatArray &answer, Gau
     OOFEM_WARNING("Iteration did not converge");
     answer.clear();
 }
+
+
+void
+StructuralMaterial :: giveRealStressVector_ShellStressControl(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, const IntArray &strainControl, TimeStep *tStep)
+// calculates stress vector (6 components) with assumption of sigma_z = 0
+// used by MITC4Shell
+{
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+
+    IntArray stressControl;
+    FloatArray vE, increment_vE, vS, reducedvS;
+    FloatMatrix tangent, reducedTangent;
+    // Iterate to find full vE.
+    // Compute the negated the array of control since we need stressControl as well;
+
+    stressControl.resize( 6 - strainControl.giveSize() );
+    for ( int i = 1, j = 1; i <= 6; i++ ) {
+        if ( !strainControl.contains(i) ) {
+            stressControl.at(j++) = i;
+        }
+    }
+
+    // Initial guess;
+    vE = status->giveStrainVector();
+    vE = strain;
+    // step 0: vE = {., ., 0, ., ., .}
+    // step n: vE = {., ., sum(ve(n)), ., ., .}
+
+
+    // Iterate to find full vE.
+    for ( int k = 0; k < 100; k++ ) { // Allow for a generous 100 iterations.
+        this->giveRealStressVector_3d(answer, gp, vE, tStep);
+        // step 0: answer = full stress vector
+        // step n: answer = {., ., ->0, ., ., .}
+        reducedvS.beSubArrayOf(answer, stressControl);
+        if ( reducedvS.computeNorm() < 1e-6 ) {
+            return;
+        }
+
+        this->give3dMaterialStiffnessMatrix(tangent, TangentStiffness, gp, tStep);
+        reducedTangent.beSubMatrixOf(tangent, stressControl, stressControl);
+        reducedTangent.solveForRhs(reducedvS, increment_vE);
+        increment_vE.negated();
+        vE.assemble(increment_vE, stressControl);
+    }
+
+    OOFEM_WARNING("Iteration did not converge");
+    answer.clear();
+}
+
+
 
 
 void
@@ -218,6 +277,20 @@ StructuralMaterial :: giveRealStressVector_Fiber(FloatArray &answer, GaussPoint 
     StructuralMaterial :: giveVoigtSymVectorMask(strainControl, _Fiber);
     this->giveRealStressVector_StressControl(answer, gp, reducedStrain, strainControl, tStep);
 }
+
+
+void
+StructuralMaterial :: giveRealStressVector_Lattice2d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    OOFEM_ERROR("2dLattice mode not supported");
+}
+
+void
+StructuralMaterial :: giveRealStressVector_Lattice3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    OOFEM_ERROR("3dLattice mode not supported");
+}
+
 
 void
 StructuralMaterial :: giveRealStressVector_2dPlateSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
@@ -351,7 +424,7 @@ StructuralMaterial :: giveFirstPKStressVector_1d(FloatArray &answer, GaussPoint 
 
 
 void
-StructuralMaterial :: convert_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix &C, FloatArray &S, FloatArray &F, MaterialMode matMode)
+StructuralMaterial :: convert_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix &C, const FloatArray &S, const FloatArray &F, MaterialMode matMode)
 {
     // Converts the reduced dSdE-stiffness to reduced dPdF-sitiffness for different MaterialModes
     // Performs the following operation dPdF = I_ik * S_jl + F_im F_kn C_mjnl,
@@ -361,8 +434,8 @@ StructuralMaterial :: convert_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix
     if ( matMode == _3dMat ) {
         //Save terms associated with H = [du/dx, dv/dy, dw/dz, dv/dz, du/dz, du/dy, dw/dy, dw/dx, dv/dx]
 
-#if 1    
-      
+#if 1
+
         answer.resize(9, 9);
         answer(0, 0) = F(0) * C(0, 0) * F(0) + F(0) * C(0, 5) * F(5) + F(0) * C(0, 4) * F(4) + F(5) * C(5, 0) * F(0) + F(5) * C(5, 5) * F(5) + F(5) * C(5, 4) * F(4) + F(4) * C(4, 0) * F(0) + F(4) * C(4, 5) * F(5) + F(4) * C(4, 4) * F(4) + S(0);
         answer(0, 1) = F(0) * C(0, 5) * F(8) + F(0) * C(0, 1) * F(1) + F(0) * C(0, 3) * F(3) + F(5) * C(5, 5) * F(8) + F(5) * C(5, 1) * F(1) + F(5) * C(5, 3) * F(3) + F(4) * C(4, 5) * F(8) + F(4) * C(4, 1) * F(1) + F(4) * C(4, 3) * F(3) + 0.0;
@@ -447,31 +520,28 @@ StructuralMaterial :: convert_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix
         answer(8, 8) = F(8) * C(0, 0) * F(8) + F(8) * C(0, 5) * F(1) + F(8) * C(0, 4) * F(3) + F(1) * C(5, 0) * F(8) + F(1) * C(5, 5) * F(1) + F(1) * C(5, 4) * F(3) + F(3) * C(4, 0) * F(8) + F(3) * C(4, 5) * F(1) + F(3) * C(4, 4) * F(3) + S(0);
 
 #else
-      ///@todo Experimental - added 110814 by JB
-      // Conversion expressed in index form. Seems a tiny bit slower than that above but easier to debug.  
-      FloatMatrix I(3,3);
-      I.beUnitMatrix();
+        ///@todo Experimental - added 110814 by JB
+        // Conversion expressed in index form. Seems a tiny bit slower than that above but easier to debug.
+        FloatMatrix I(3, 3);
+        I.beUnitMatrix();
 
-      //I_ik * S_jl + F_im F_kn C_mjnl
-      answer.resize(9,9);
-      for ( int i = 1; i <= 3; i++) {
-        for ( int j = 1; j <= 3; j++) {
-          for ( int k = 1; k <= 3; k++) {
-            for ( int l = 1; l <= 3; l++) {
-              for ( int m = 1; m <= 3; m++) {
-                for ( int n = 1; n <= 3; n++) {
-          
-                  answer.at( giveVI(i,j), giveVI(k,l) ) += I.at(i,k) * S.at(giveSymVI(j,l)) + F.at(giveVI(i,m)) * F.at(giveVI(k,n)) * C.at(giveSymVI(m,j),giveSymVI(n,l) );
-              
+        //I_ik * S_jl + F_im F_kn C_mjnl
+        answer.resize(9, 9);
+        for ( int i = 1; i <= 3; i++ ) {
+            for ( int j = 1; j <= 3; j++ ) {
+                for ( int k = 1; k <= 3; k++ ) {
+                    for ( int l = 1; l <= 3; l++ ) {
+                        for ( int m = 1; m <= 3; m++ ) {
+                            for ( int n = 1; n <= 3; n++ ) {
+                                answer.at( giveVI(i, j), giveVI(k, l) ) += I.at(i, k) * S.at( giveSymVI(j, l) ) + F.at( giveVI(i, m) ) * F.at( giveVI(k, n) ) * C.at( giveSymVI(m, j), giveSymVI(n, l) );
+                            }
+                        }
+                    }
                 }
-              }
             }
-          }
         }
-      }
-      
-#endif
 
+#endif
     } else if ( matMode == _PlaneStress ) {
         // Save terms associated with H = [du/dx dv/dy du/dy dv/dx]
 
@@ -590,11 +660,18 @@ StructuralMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
         this->giveFiberStiffMtrx(answer, rMode, gp, tStep);
         break;
     case _Warping:
-        answer.resize(2,2);
+        answer.resize(2, 2);
         answer.beUnitMatrix();
         break;
+    case _2dLattice:
+        this->give2dLatticeStiffMtrx(answer, rMode, gp, tStep);
+        break;
+    case _3dLattice:
+        this->give3dLatticeStiffMtrx(answer, rMode, gp, tStep);
+        break;
+
     default:
-        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR( "unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -681,45 +758,6 @@ StructuralMaterial :: give1dStressStiffMtrx_dCde(FloatMatrix &answer,
 
 
 void
-StructuralMaterial :: convert_P_2_S(FloatArray &answer, const FloatArray &reducedvP, const FloatArray &reducedvF, MaterialMode matMode)
-{
-    // Converts first Piola-Kirchhoff stress to second Piola-Kirchhoff stress: S = inv(F)*P
-    // Output size will be according to MaterialMode
-
-    FloatArray vF, vP;
-    StructuralMaterial :: giveFullVectorFormF(vF, reducedvF, matMode); // 9 components
-    StructuralMaterial :: giveFullVectorForm(vP, reducedvP, matMode);
-    FloatMatrix F, P, S, invF;
-    F.beMatrixForm(vF);
-    P.beMatrixForm(vP);
-    invF.beInverseOf(F);
-    S.beProductOf(invF, P);
-    FloatArray vS;
-    vS.beSymVectorForm(S); // 6 components
-
-    StructuralMaterial :: giveReducedSymVectorForm(answer, vS, matMode); // convert back to reduced size
-}
-
-
-void
-StructuralMaterial :: convert_S_2_P(FloatArray &answer, const FloatArray &reducedvS, const FloatArray &reducedvF, MaterialMode matMode)
-{
-    // Converts second Piola-Kirchhoff stress to first Piola-Kirchhoff stress: P = F*S
-    // Output size will be according to MaterialMode
-
-    FloatArray vF, vS, vP;
-    StructuralMaterial :: giveFullVectorFormF(vF, reducedvF, matMode);   // 9 components
-    StructuralMaterial :: giveFullSymVectorForm(vS, reducedvS, matMode); // 6 components
-    FloatMatrix F, P, S;
-    F.beMatrixForm(vF);
-    S.beMatrixForm(vS);
-    P.beProductOf(F, S);
-    vP.beVectorForm(P);
-    StructuralMaterial :: giveReducedVectorForm(answer, vP, matMode);   // convert back to reduced size
-}
-
-
-void
 StructuralMaterial :: giveStressDependentPartOfStrainVector(FloatArray &answer, GaussPoint *gp,
                                                             const FloatArray &reducedStrainVector,
                                                             TimeStep *tStep, ValueModeType mode)
@@ -788,40 +826,65 @@ StructuralMaterial :: giveVoigtSymVectorMask(IntArray &answer, MaterialMode mmod
         answer.enumerate(6);
         return 6;
 
+    case _3dDegeneratedShell:
+        answer = {
+            1, 2, 3, 4, 5, 6
+        };
+        return 6;
+
+
     case _PlaneStress:
-        answer = {1, 2, 6};
+        answer = {
+            1, 2, 6
+        };
         return 6;
 
     case _PlaneStrain:
-        answer = {1, 2, 3, 6};
+        answer = {
+            1, 2, 3, 6
+        };
         return 6;
 
     case _1dMat:
-        answer = {1};
+        answer = {
+            1
+        };
         return 6;
 
     case _Warping:
-        answer = {4, 5};
+        answer = {
+            4, 5
+        };
         return 6;
 
     case _PlateLayer:
-        answer = {1, 2, 4, 5, 6};
+        answer = {
+            1, 2, 4, 5, 6
+        };
         return 6;
 
     case _2dBeamLayer:
-        answer = {1, 5};
+        answer = {
+            1, 5
+        };
         return 6;
 
     case _Fiber:
-        answer = {1, 5, 6};
+        answer = {
+            1, 5, 6
+        };
         return 6;
 
     case _2dPlate:
-        answer = {4, 5, 6, 7, 8};
+        answer = {
+            4, 5, 6, 7, 8
+        };
         return 8;
 
     case _2dBeam:
-        answer = {1, 4, 7};
+        answer = {
+            1, 4, 7
+        };
         return 8;
 
     case _3dBeam: ///@todo This isn't actually fixed yet. Should be made compatible with 3dShell and 2dBeam
@@ -830,7 +893,9 @@ StructuralMaterial :: giveVoigtSymVectorMask(IntArray &answer, MaterialMode mmod
         return 6;
 
 #else
-        answer = {1, 5, 6, 7, 8, 9};
+        answer = {
+            1, 5, 6, 7, 8, 9
+        };
         return 12;
 
 #endif
@@ -839,27 +904,45 @@ StructuralMaterial :: giveVoigtSymVectorMask(IntArray &answer, MaterialMode mmod
         return 8;
 
     case _PlaneStressRot:
-        answer = {1, 2, 6, 7};
+        answer = {
+            1, 2, 6, 7
+        };
         return 7;
 
     case _1dInterface:
-        answer = {1};
+        answer = {
+            1
+        };
         return 1;
 
     case _2dInterface:
-        answer = {1, 2};
+        answer = {
+            1, 2
+        };
         return 2;
 
     case _3dInterface:
-        answer = {1, 2, 3};
+        answer = {
+            1, 2, 3
+        };
         return 3;
 
     case _2dLattice:
-        answer = {1, 2, 3};
+        answer = {
+            1, 2, 3
+        };
         return 3;
 
+    case _3dLattice:
+        answer = {
+            1, 2, 3, 4, 5, 6
+        };
+        return 6;
+
     case _2dPlateSubSoil:
-        answer = {3, 5, 4};
+        answer = {
+            3, 5, 4
+        };
         return 6;
 
     case _Unknown:
@@ -1101,9 +1184,34 @@ StructuralMaterial :: giveFiberStiffMtrx(FloatMatrix &answer,
 }
 
 void
-StructuralMaterial::give2dPlateSubSoilStiffMtrx(FloatMatrix &answer,
-                            MatResponseMode mmode, GaussPoint *gp,
-                            TimeStep *tStep)
+StructuralMaterial :: give2dLatticeStiffMtrx(FloatMatrix &answer,
+                                             MatResponseMode mode,
+                                             GaussPoint *gp,
+                                             TimeStep *tStep)
+//
+// return material stiffness matrix for 2dlattice
+//
+{
+    OOFEM_ERROR("No general implementation provided");
+}
+
+void
+StructuralMaterial :: give3dLatticeStiffMtrx(FloatMatrix &answer,
+                                             MatResponseMode mode,
+                                             GaussPoint *gp,
+                                             TimeStep *tStep)
+//
+// return material stiffness matrix for 2dlattice
+//
+{
+    OOFEM_ERROR("No general implementation provided");
+}
+
+
+void
+StructuralMaterial :: give2dPlateSubSoilStiffMtrx(FloatMatrix &answer,
+                                                  MatResponseMode mmode, GaussPoint *gp,
+                                                  TimeStep *tStep)
 {
     OOFEM_ERROR("No general implementation provided");
 }
@@ -1143,6 +1251,7 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
 
     double swap;
     int nonzeroFlag = 0;
+    bool solve = true;
     if ( ( size == 3 ) || ( size == 4 ) ) {
         // 2D problem
         double ast, dst, D = 0.0;
@@ -1195,31 +1304,38 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
             return;
         }
 
+        //Problem with numerical stability for hydrostatic case, handle directly-TODO
+//         if (fabs( s.at(4) ) < 1.e-20 && fabs( s.at(5)) < 1.e-20 && fabs( s.at(6)) < 1.e-20 ){
+//             solve = false;
+//             s1 = s.at(1);
+//             s2 = s.at(2);
+//             s3 = s.at(3);
+//         }
 
 
         if ( mode == principal_stress ) {
             I1 = s.at(1) + s.at(2) + s.at(3);
             I2 = s.at(1) * s.at(2) + s.at(2) * s.at(3) + s.at(3) * s.at(1) -
-            ( s.at(4) * s.at(4) + s.at(5) * s.at(5) + s.at(6) * s.at(6) );
+                 ( s.at(4) * s.at(4) + s.at(5) * s.at(5) + s.at(6) * s.at(6) );
             I3 = s.at(1) * s.at(2) * s.at(3) + 2. * s.at(4) * s.at(5) * s.at(6) -
-            ( s.at(1) * s.at(4) * s.at(4) + s.at(2) * s.at(5) * s.at(5) +
-             s.at(3) * s.at(6) * s.at(6) );
+                 ( s.at(1) * s.at(4) * s.at(4) + s.at(2) * s.at(5) * s.at(5) +
+                   s.at(3) * s.at(6) * s.at(6) );
         } else if ( mode == principal_deviatoricstress ) {
             help = ( s.at(1) + s.at(2) + s.at(3) ) / 3.0;
             I1 = 0.;
             I2 = -( 1. / 6. ) * ( ( s.at(1) - s.at(2) ) * ( s.at(1) - s.at(2) ) + ( s.at(2) - s.at(3) ) * ( s.at(2) - s.at(3) ) +
-                                 ( s.at(3) - s.at(1) ) * ( s.at(3) - s.at(1) ) ) - s.at(4) * s.at(4) - s.at(5) * s.at(5) -
-            s.at(6) * s.at(6);
+                                  ( s.at(3) - s.at(1) ) * ( s.at(3) - s.at(1) ) ) - s.at(4) * s.at(4) - s.at(5) * s.at(5) -
+                 s.at(6) * s.at(6);
             I3 = ( s.at(1) - help ) * ( s.at(2) - help ) * ( s.at(3) - help ) + 2. * s.at(4) * s.at(5) * s.at(6) -
-            s.at(5) * s.at(5) * ( s.at(2) - help ) - s.at(4) * s.at(4) * ( s.at(1) - help ) -
-            s.at(6) * s.at(6) * ( s.at(3) - help );
+                 s.at(5) * s.at(5) * ( s.at(2) - help ) - s.at(4) * s.at(4) * ( s.at(1) - help ) -
+                 s.at(6) * s.at(6) * ( s.at(3) - help );
         } else if ( mode == principal_strain ) {
             I1 = s.at(1) + s.at(2) + s.at(3);
             I2 = s.at(1) * s.at(2) + s.at(2) * s.at(3) + s.at(3) * s.at(1) -
-            0.25 * ( s.at(4) * s.at(4) + s.at(5) * s.at(5) + s.at(6) * s.at(6) );
+                 0.25 * ( s.at(4) * s.at(4) + s.at(5) * s.at(5) + s.at(6) * s.at(6) );
             I3 = s.at(1) * s.at(2) * s.at(3) +
-            0.25 * ( s.at(4) * s.at(5) * s.at(6) - s.at(1) * s.at(4) * s.at(4) -
-                    s.at(2) * s.at(5) * s.at(5) - s.at(3) * s.at(6) * s.at(6) );
+                 0.25 * ( s.at(4) * s.at(5) * s.at(6) - s.at(1) * s.at(4) * s.at(4) -
+                          s.at(2) * s.at(5) * s.at(5) - s.at(3) * s.at(6) * s.at(6) );
         } else {
             OOFEM_SERROR("not supported");
         }
@@ -1229,7 +1345,9 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
          * This allows to overcome various rounding errors when solving general cubic equation.
          */
         int n;
-        cubic3r( ( double ) -1., I1, -I2, I3, & s1, & s2, & s3, & n );
+        if ( solve ){
+            cubic3r( ( double ) -1., I1, -I2, I3, & s1, & s2, & s3, & n );
+        }
 
         if ( n > 0 ) {
             answer.at(1) = s1;
@@ -1242,8 +1360,22 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
         if ( n > 2 ) {
             answer.at(3) = s3;
         }
+    
+         //Check NaN
+//     if (answer.at(1)  != answer.at(1)) {
+//         s.pY();
+//         printf("%.10e %.10e %.10e\n", I1, I2, I3);
+//         exit(0);
+//     }
+//         
+        
+        
     }
 
+   
+    
+    
+    
     //sort the results
     for ( int i = 1; i < answer.giveSize(); i++ ) {
         for ( int j = 1; j < answer.giveSize(); j++ ) {
@@ -1303,6 +1435,7 @@ StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &di
         // 2D problem
         ss.resize(2, 2);
         answer.resize(2);
+        dir.resize(2, 2);
 
         for ( int i = 1; i <= size; i++ ) {
             if ( fabs( s.at(i) ) > 1.e-20 ) {
@@ -1312,6 +1445,7 @@ StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &di
 
         if ( nonzeroFlag == 0 ) {
             answer.zero();
+            dir.zero();
             ss.zero();
             return;
         }
@@ -1331,6 +1465,7 @@ StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &di
         double help;
         ss.resize(3, 3);
         answer.resize(3);
+        dir.resize(3, 3);
 
         for ( int i = 1; i <= size; i++ ) {
             if ( fabs( s.at(i) ) > 1.e-20 ) {
@@ -1340,6 +1475,7 @@ StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &di
 
         if ( nonzeroFlag == 0 ) {
             answer.zero();
+            dir.zero();
             ss.zero();
             return;
         }
@@ -1413,14 +1549,97 @@ StructuralMaterial :: computeDeviatoricVolumetricSplit(FloatArray &dev, const Fl
 }
 
 
+void
+StructuralMaterial :: computeDeviatoricVolumetricSum(FloatArray &s, const FloatArray &dev, double mean)
+{
+    s = dev;
+    s[0] += mean;
+    s[1] += mean;
+    s[2] += mean;
+}
+
+void
+StructuralMaterial :: applyDeviatoricElasticCompliance(FloatArray &strain, const FloatArray &stress, double EModulus, double nu)
+{
+    applyDeviatoricElasticCompliance( strain, stress, EModulus / 2. / ( 1. + nu ) );
+}
+
+void
+StructuralMaterial :: applyDeviatoricElasticCompliance(FloatArray &strain, const FloatArray &stress, double GModulus)
+{
+    strain.resize(6);
+    strain[0] = 1. / ( 2. * GModulus ) * stress [ 0 ];
+    strain[1] = 1. / ( 2. * GModulus ) * stress [ 1 ];
+    strain[2] = 1. / ( 2. * GModulus ) * stress [ 2 ];
+    strain[3] = 1. / GModulus * stress [ 3 ];
+    strain[4] = 1. / GModulus * stress [ 4 ];
+    strain[5] = 1. / GModulus * stress [ 5 ];
+}
+
+
+void
+StructuralMaterial :: applyDeviatoricElasticStiffness(FloatArray &stress, const FloatArray &strain, double EModulus, double nu)
+{
+    applyDeviatoricElasticStiffness( stress, strain, EModulus / ( 2. * ( 1. + nu ) ) );
+}
+
+void
+StructuralMaterial :: applyDeviatoricElasticStiffness(FloatArray &stress, const FloatArray &strain, double GModulus)
+{
+    stress.resize(6);
+    stress[0] = 2. * GModulus * strain [ 0 ];
+    stress[1] = 2. * GModulus * strain [ 1 ];
+    stress[2] = 2. * GModulus * strain [ 2 ];
+    stress[3] = GModulus * strain [ 3 ];
+    stress[4] = GModulus * strain [ 4 ];
+    stress[5] = GModulus * strain [ 5 ];
+}
+
+void
+StructuralMaterial :: applyElasticStiffness(FloatArray &stress, const FloatArray &strain, double EModulus, double nu)
+{
+    double factor = EModulus / ( ( 1. + nu ) * ( 1. - 2. * nu ) );
+    
+    stress.resize(6);
+    stress[0] = factor * ( ( 1. - nu ) * strain [ 0 ] + nu * strain [ 1 ] + nu * strain [ 2 ] );
+    stress[1] = factor * ( nu * strain [ 0 ] + ( 1. - nu ) * strain [ 1 ] + nu * strain [ 2 ] );
+    stress[2] = factor * ( nu * strain [ 0 ] + nu * strain [ 1 ] + ( 1. - nu ) * strain [ 2 ] );
+    stress[3] = factor * ( ( ( 1. - 2. * nu ) / 2. ) * strain [ 3 ] );
+    stress[4] = factor * ( ( ( 1. - 2. * nu ) / 2. ) * strain [ 4 ] );
+    stress[5] = factor * ( ( ( 1. - 2. * nu ) / 2. ) * strain [ 5 ] );
+}
+
+void
+StructuralMaterial :: applyElasticCompliance(FloatArray &strain, const FloatArray &stress, double EModulus, double nu)
+{
+    strain.resize(6);
+    strain[0] = ( stress [ 0 ] - nu * stress [ 1 ] - nu * stress [ 2 ] ) / EModulus;
+    strain[1] = ( -nu * stress [ 0 ] + stress [ 1 ] - nu * stress [ 2 ] ) / EModulus;
+    strain[2] = ( -nu * stress [ 0 ] - nu * stress [ 1 ] + stress [ 2 ] ) / EModulus;
+    strain[3] = ( 2. * ( 1. + nu ) * stress [ 3 ] ) / EModulus;
+    strain[4] = ( 2. * ( 1. + nu ) * stress [ 4 ] ) / EModulus;
+    strain[5] = ( 2. * ( 1. + nu ) * stress [ 5 ] ) / EModulus;
+}
+
+double
+StructuralMaterial :: computeStressNorm(const FloatArray &s)
+{
+    if ( s.giveSize() == 1 ) {
+        return fabs(s [ 0 ]);
+    }
+
+    return sqrt(s [ 0 ] * s [ 0 ] + s [ 1 ] * s [ 1 ] + s [ 2 ] * s [ 2 ] +
+                2. * s [ 3 ] * s [ 3 ] + 2. * s [ 4 ] * s [ 4 ] + 2. * s [ 5 ] * s [ 5 ]);
+}
+
 double
 StructuralMaterial :: computeFirstInvariant(const FloatArray &s)
 {
     if ( s.giveSize() == 1 ) {
         return s [ 0 ];
-    } else {
-        return s [ 0 ] + s [ 1 ] + s [ 2 ];
     }
+
+    return s [ 0 ] + s [ 1 ] + s [ 2 ];
 }
 
 double
@@ -1492,10 +1711,9 @@ StructuralMaterial :: computeVonMisesStress(const FloatArray *currentStress)
     if ( currentStress->giveSize() == 3 ) {
         // Plane stress
 
-        return sqrt( currentStress->at(1)*currentStress->at(1) + currentStress->at(2)*currentStress->at(2)
-                    -currentStress->at(1)*currentStress->at(2) + 3*currentStress->at(3)*currentStress->at(3) );
-    }
-    else if ( currentStress->giveSize() == 4 ) {
+        return sqrt( currentStress->at(1) * currentStress->at(1) + currentStress->at(2) * currentStress->at(2)
+                     - currentStress->at(1) * currentStress->at(2) + 3 * currentStress->at(3) * currentStress->at(3) );
+    } else if ( currentStress->giveSize() == 4 ) {
         // Plane strain
         v1 = ( ( currentStress->at(1) - currentStress->at(2) ) * ( currentStress->at(1) - currentStress->at(2) ) );
         v2 = ( ( currentStress->at(2) - currentStress->at(3) ) * ( currentStress->at(2) - currentStress->at(3) ) );
@@ -1504,22 +1722,19 @@ StructuralMaterial :: computeVonMisesStress(const FloatArray *currentStress)
         J2 = ( 1. / 6. ) * ( v1 + v2 + v3 ) + currentStress->at(4) * currentStress->at(4);
 
         return sqrt(3 * J2);
-    }
-    else if ( currentStress->giveSize() == 6 ) {
+    } else if ( currentStress->giveSize() == 6 ) {
         // 3D
         v1 = ( ( currentStress->at(1) - currentStress->at(2) ) * ( currentStress->at(1) - currentStress->at(2) ) );
         v2 = ( ( currentStress->at(2) - currentStress->at(3) ) * ( currentStress->at(2) - currentStress->at(3) ) );
         v3 = ( ( currentStress->at(3) - currentStress->at(1) ) * ( currentStress->at(3) - currentStress->at(1) ) );
 
         J2 = ( 1. / 6. ) * ( v1 + v2 + v3 ) + currentStress->at(4) * currentStress->at(4) +
-        currentStress->at(5) * currentStress->at(5) + currentStress->at(6) * currentStress->at(6);
+             currentStress->at(5) * currentStress->at(5) + currentStress->at(6) * currentStress->at(6);
 
         return sqrt(3 * J2);
-    }
-    else {
+    } else {
         return 0.0;
     }
-
 }
 
 
@@ -1946,7 +2161,6 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSt
     } else {
         return Material :: giveIPValue(answer, gp, type, tStep);
     }
-
 }
 
 void
@@ -1954,7 +2168,6 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
                                                            GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
 {
     FloatArray et, eigenstrain;
-    MaterialMode matmode = gp->giveMaterialMode();
     if ( gp->giveIntegrationRule() == NULL ) {
         ///@todo Hack for loose gausspoints. We shouldn't ask for "gp->giveElement()". FIXME
         answer.clear();
@@ -1981,8 +2194,8 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
         selem->computeResultingIPEigenstrainAt(eigenstrain, tStep, gp, mode);
     }
 
-    if ( eigenstrain.giveSize() != 0 && eigenstrain.giveSize() != giveSizeOfVoigtSymVector(matmode) ) {
-        OOFEM_ERROR("Number of given eigenstrain components %d is different than required %d by material mode %s, element %d", eigenstrain.giveSize(), giveSizeOfVoigtSymVector(matmode), __MaterialModeToString(matmode), elem->giveNumber() );
+    if ( eigenstrain.giveSize() != 0 && eigenstrain.giveSize() != giveSizeOfVoigtSymVector(gp->giveMaterialMode()) ) {
+        OOFEM_ERROR( "Number of given eigenstrain components %d is different than required %d by element %d", eigenstrain.giveSize(), giveSizeOfVoigtSymVector(gp->giveMaterialMode()), elem->giveNumber() );
     }
 
     /* add external source, if provided */
@@ -2022,6 +2235,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
             }
 
             StructuralMaterial :: giveReducedSymVectorForm( answer, fullAnswer, gp->giveMaterialMode() );
+            //answer = fullAnswer;
         }
     }
 
@@ -2029,7 +2243,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
     if ( answer.giveSize() ) {
         if ( eigenstrain.giveSize() ) {
             if ( answer.giveSize() != eigenstrain.giveSize() ) {
-                OOFEM_ERROR("Vector of temperature strains has the size %d which is different with the size of eigenstrain vector %d, element %d", answer.giveSize(), eigenstrain.giveSize(), elem->giveNumber() );
+                OOFEM_ERROR( "Vector of temperature strains has the size %d which is different with the size of eigenstrain vector %d, element %d", answer.giveSize(), eigenstrain.giveSize(), elem->giveNumber() );
             }
 
             answer.add(eigenstrain);
@@ -2048,7 +2262,7 @@ StructuralMaterial :: giveFullSymVectorForm(FloatArray &answer, const FloatArray
     if ( vec.giveSize() == 6 ) {
         // If we use default 3D implementation to treat e.g. plane strain.
         answer = vec;
-    } else   {
+    } else {
         IntArray indx;
         answer.resize( StructuralMaterial :: giveVoigtSymVectorMask(indx, matMode) );
         answer.zero();
@@ -2101,7 +2315,7 @@ StructuralMaterial :: giveReducedSymVectorForm(FloatArray &answer, const FloatAr
 
     if ( indx.giveSize() == vec.giveSize() ) {
         answer = vec;
-    } else   {
+    } else {
         answer.resize( indx.giveSize() );
         for ( int i = 1; i <= indx.giveSize(); i++ ) {
             answer.at(i) = vec.at( indx.at(i) );

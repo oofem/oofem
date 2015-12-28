@@ -64,7 +64,7 @@ void MathTracer :: Writeln()
 void MathTracer :: Writeln(const char *str)
 {
     puts(str);
-    printf("\n");
+    //printf("\n");
 }
 
 void MathTracer :: Write(const char *str)

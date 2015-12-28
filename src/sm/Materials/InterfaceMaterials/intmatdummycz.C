@@ -32,13 +32,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-/*
- * intmatdummycz.C
- *
- *  Created on: Jan 24, 2014
- *      Author: svennine
- */
-
 #include "intmatdummycz.h"
 #include "classfactory.h"
 #include "gausspoint.h"
@@ -46,12 +39,12 @@
 namespace oofem {
 REGISTER_Material(IntMatDummyCZ);
 
-IntMatDummyCZ::IntMatDummyCZ(int n, Domain *d) : StructuralInterfaceMaterial(n, d)
+IntMatDummyCZ :: IntMatDummyCZ(int n, Domain *d) : StructuralInterfaceMaterial(n, d)
 {
 
 }
 
-IntMatDummyCZ::~IntMatDummyCZ()
+IntMatDummyCZ :: ~IntMatDummyCZ()
 {
 
 }

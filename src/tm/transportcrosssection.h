@@ -37,7 +37,6 @@
 
 #include "crosssection.h"
 
-#define _IFT_SimpleTransportCrossSection_material "mat"
 
 namespace oofem {
 class TransportMaterial;
@@ -61,7 +60,7 @@ public:
     virtual ~TransportCrossSection() { }
 
     /// @todo Temporary function that hands out the material. Must be removed for future layered support, but input files will still look the same.
-    TransportMaterial *giveMaterial();
+    virtual TransportMaterial *giveMaterial() = 0;
 };
 } // end namespace oofem
 #endif // transportcrosssection_h

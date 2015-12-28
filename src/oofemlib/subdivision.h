@@ -83,8 +83,8 @@ protected:
         // if it is on boundary of 3D region and incident to edge subjected to bisection
         // (in such a case the list is built on the fly)
         IntArray connectedElements;
-#ifdef __PARALLEL_MODE
         int globalNumber;
+#ifdef __PARALLEL_MODE
         dofManagerParallelMode parallel_mode;
         /**
          * List of partition sharing the shared dof manager or
@@ -100,9 +100,9 @@ public:
             this->requiredDensity = rd;
             this->boundary = boundary;
             this->parent = parent;
+            this->globalNumber  = 0;
 #ifdef __PARALLEL_MODE
             this->parallel_mode = DofManager_local;
-            this->globalNumber  = 0;
 #endif
         }
         virtual ~RS_Node() { }
@@ -120,15 +120,16 @@ public:
         void insertConnectedElement(int num) { connectedElements.insertSorted(num, 10); }
         void eraseConnectedElement(int num) { connectedElements.eraseSorted(num); }
         void preallocateConnectedElements(int size) { connectedElements.preallocate(size); }
+        int giveGlobalNumber() { return globalNumber; }
+        void setGlobalNumber(int gn) { this->globalNumber = gn; }
+        virtual bool isIrregular() { return false; }
+
 #ifdef __PARALLEL_MODE
         void numberSharedEdges();
         dofManagerParallelMode giveParallelMode() const { return parallel_mode; }
         void setParallelMode(dofManagerParallelMode _mode) { parallel_mode = _mode; }
         const IntArray *givePartitions()  { return & partitions; }
         void setPartitions(IntArray _p) { partitions = std :: move(_p); }
-        int giveGlobalNumber() { return globalNumber; }
-        void setGlobalNumber(int gn) { this->globalNumber = gn; }
-        virtual bool isIrregular() { return false; }
         int importConnectivity(ConnectivityTable *ct);
 #endif
 #ifdef __OOFEG
@@ -173,8 +174,8 @@ protected:
         RS_Mesh *mesh;
         // flag whether element is in bisection queue
         bool queue_flag;
-#ifdef __PARALLEL_MODE
         int globalNumber;
+#ifdef __PARALLEL_MODE
         elementParallelMode parallel_mode;
         // numbers of shared edges
         IntArray shared_edges;
@@ -187,8 +188,8 @@ public:
             this->mesh = m;
             this->parent = parent;
             this->queue_flag = false;
-#ifdef __PARALLEL_MODE
             this->globalNumber = -1;
+#ifdef __PARALLEL_MODE
             this->parallel_mode = Element_local;
 #endif
         }
@@ -234,6 +235,8 @@ public:
 #ifdef __OOFEG
         virtual void  drawGeometry() { }
 #endif
+        int giveGlobalNumber() { return globalNumber; }
+        void setGlobalNumber(int gn) { this->globalNumber = gn; }
 
 #ifdef __PARALLEL_MODE
         virtual void numberSharedEdges(int iNode, IntArray &connNodes) = 0;
@@ -244,8 +247,6 @@ public:
         elementParallelMode giveParallelMode() const { return parallel_mode; }
         // Sets parallel mode of element
         void setParallelMode(elementParallelMode _mode) { parallel_mode = _mode; }
-        int giveGlobalNumber() { return globalNumber; }
-        void setGlobalNumber(int gn) { this->globalNumber = gn; }
 #endif
     };
 
@@ -423,6 +424,10 @@ protected:
     Subdivision :: RS_Mesh *giveMesh() { return mesh; }
     void bisectMesh();
     void smoothMesh();
+
+    bool isNodeLocalIrregular(Subdivision :: RS_Node *node, int myrank);
+    void assignGlobalNumbersToElements(Domain *d);
+
 #ifdef __PARALLEL_MODE
     /**
      * Exchanges the shared irregulars between partitions. Returns true if any shared irregular has been
@@ -438,7 +443,6 @@ protected:
     int packSharedEdges(Subdivision *s, ProcessCommunicator &pc);
     int unpackSharedEdges(Subdivision *s, ProcessCommunicator &pc);
 
-    bool isNodeLocalIrregular(Subdivision :: RS_Node *node, int myrank);
     /// Returns true if receiver is irregular, shared node locally maintatined
     bool isNodeLocalSharedIrregular(Subdivision :: RS_Node *node, int myrank);
 
@@ -449,7 +453,6 @@ protected:
     int packRemoteElements(RS_packRemoteElemsStruct *s, ProcessCommunicator &pc);
     int unpackRemoteElements(Domain *d, ProcessCommunicator &pc);
 
-    void assignGlobalNumbersToElements(Domain *d);
 #endif
 };
 } // end namespace oofem

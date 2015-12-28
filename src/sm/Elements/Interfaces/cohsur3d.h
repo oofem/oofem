@@ -95,7 +95,9 @@ protected:
     virtual void computeGaussPoints();
     void evaluateCenter();
     void evaluateLocalCoordinateSystem();
-public:
+
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     virtual MaterialMode giveMaterialMode() { return _3dInterface; }
 };
 } // namespace oofem

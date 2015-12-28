@@ -4,26 +4,29 @@ LinearStatic nsteps 1 nmodules 1
 errorcheck
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
-ndofman 8 nelem 5 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1
-node 1 coords 2  0.0        0.0        bc 2 1 1 lcs 6 0.8660254 0.5 0.0 -0.5 0.8660254 0.0
-node 2 coords 2  -2.0       3.46410162 bc 2 1 1 lcs 6 0.8660254 0.5 0.0 -0.5 0.8660254 0.0
-node 3 coords 2  0.73205081 2.73205081 bc 2 0 1 lcs 6 0.8660254 0.5 0.0 -0.5 0.8660254 0.0
-node 4 coords 2  2.09807621 2.36602540 bc 2 0 1 lcs 6 0.8660254 0.5 0.0 -0.5 0.8660254 0.0
-node 5 coords 2  6.52820323 4.69282032 bc 2 0 1 lcs 6 0.8660254 0.5 0.0 -0.5 0.8660254 0.0
-node 6 coords 2  4.56217783 6.09807621 bc 2 0 1 lcs 6 0.8660254 0.5 0.0 -0.5 0.8660254 0.0
-node 7 coords 2  7.79422863 4.5        bc 2 0 1 lcs 6 0.8660254 0.5 0.0 -0.5 0.8660254 0.0
-node 8 coords 2  5.79422863 7.96410162 bc 2 0 1 lcs 6 0.8660254 0.5 0.0 -0.5 0.8660254 0.0
-PlaneStress2d 1 nodes 4 1 4 3 2  crossSect 1 mat 1
-PlaneStress2d 2 nodes 4 1 7 5 4  crossSect 1 mat 1
-PlaneStress2d 3 nodes 4 4 5 6 3  crossSect 1 mat 1
-PlaneStress2d 4 nodes 4 3 6 8 2  crossSect 1 mat 1
-PlaneStress2d 5 nodes 4 5 7 8 6  crossSect 1 mat 1 boundaryLoads 2 2 2
-SimpleCS 1 thick 0.15
+ndofman 8 nelem 5 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 1 nset 3
+node 1 coords 2  0.0        0.0        lcs 6 0.8660254 0.5 0.0 -0.5 0.8660254 0.0
+node 2 coords 2  -2.0       3.46410162 lcs 6 0.8660254 0.5 0.0 -0.5 0.8660254 0.0
+node 3 coords 2  0.73205081 2.73205081 lcs 6 0.8660254 0.5 0.0 -0.5 0.8660254 0.0
+node 4 coords 2  2.09807621 2.36602540 lcs 6 0.8660254 0.5 0.0 -0.5 0.8660254 0.0
+node 5 coords 2  6.52820323 4.69282032 lcs 6 0.8660254 0.5 0.0 -0.5 0.8660254 0.0
+node 6 coords 2  4.56217783 6.09807621 lcs 6 0.8660254 0.5 0.0 -0.5 0.8660254 0.0
+node 7 coords 2  7.79422863 4.5        lcs 6 0.8660254 0.5 0.0 -0.5 0.8660254 0.0
+node 8 coords 2  5.79422863 7.96410162 lcs 6 0.8660254 0.5 0.0 -0.5 0.8660254 0.0
+PlaneStress2d 1 nodes 4 1 4 3 2
+PlaneStress2d 2 nodes 4 1 7 5 4
+PlaneStress2d 3 nodes 4 4 5 6 3
+PlaneStress2d 4 nodes 4 3 6 8 2
+PlaneStress2d 5 nodes 4 5 7 8 6 boundaryLoads 2 3 2
+SimpleCS 1 thick 0.15 material 1 set 1
 IsoLE 1 d 0. E 15.0 n 0.25 tAlpha 0.000012
-BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
-#NodalLoad 1 loadTimeFunction 1 Components 2 -2.5 0.0
-ConstantEdgeLoad 2 loadTimeFunction 1 Components 2 0.0 1.25 loadType 3 ndofs 2 csType 1
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 2 values 1 0 set 1
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 1 values 1 0 set 2
+ConstantEdgeLoad 3 loadTimeFunction 1 dofs 2 1 2 Components 2 0.0 1.25 loadType 3 csType 1 set 0
 ConstantFunction 1 f(t) 1.0
+Set 1 elementranges {(1 5)}
+Set 2 nodes 2 1 2
+Set 3 elementboundaries 2 5 2
 #
 #
 #

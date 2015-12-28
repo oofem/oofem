@@ -35,53 +35,24 @@
 #ifndef cohint_h
 #define cohint_h
 
-#include "material.h"
-#include "Materials/linearelasticmaterial.h"
-#include "../sm/Materials/structuralmaterial.h"
-#include "../sm/Materials/structuralms.h"
-#include "cltypes.h"
+#include "structuralinterfacematerial.h"
+#include "structuralinterfacematerialstatus.h"
 
 namespace oofem {
-///@name Input fields for RankineMat
+///@name Input fields for cohesive interface material
 //@{
 #define _IFT_CohesiveInterfaceMaterial_Name "cohint"
-#define _IFT_IsoInterfaceDamageMaterial_kn "kn"
-#define _IFT_IsoInterfaceDamageMaterial_ks "ks"
+#define _IFT_CohesiveInterfaceMaterial_kn "kn"
+#define _IFT_CohesiveInterfaceMaterial_ks "ks"
 //@}
 
 /**
- * This class implements associated Material Status to CohesiveInterfaceMaterial.
+ * Class representing cohesive interface material model.
  * @author Milan Jirasek
  */
-class CohesiveInterfaceMaterialStatus : public StructuralMaterialStatus
-{
-public:
-    /// Constructor
-    CohesiveInterfaceMaterialStatus(int n, Domain * d, GaussPoint * g);
-    /// Destructor
-    virtual ~CohesiveInterfaceMaterialStatus();
-
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
-
-    // definition
-    virtual const char *giveClassName() const { return "CohesiveInterfaceMaterialStatus"; }
-
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
-
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-};
-
-
-/**
- * Class representing cohesive interface material model.
- */
-class CohesiveInterfaceMaterial : public StructuralMaterial
+class CohesiveInterfaceMaterial : public StructuralInterfaceMaterial
 {
 protected:
-    /// Coefficient of thermal dilatation.
-    double tempDillatCoeff;
     /// Elastic properties (normal and shear moduli).
     double kn, ks;
 
@@ -92,39 +63,20 @@ public:
     virtual ~CohesiveInterfaceMaterial() { }
 
     virtual int hasNonLinearBehaviour() { return 0; }
-    virtual int hasMaterialModeCapability(MaterialMode mode) { return ( mode == _3dInterface ); }
+    virtual bool hasAnalyticalTangentStiffness() const { return true; }
 
     virtual const char *giveClassName() const { return "CohesiveInterfaceMaterial"; }
     virtual const char *giveInputRecordName() const { return _IFT_CohesiveInterfaceMaterial_Name; }
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseMode,
-                                               GaussPoint *gp,
-                                               TimeStep *tStep);
-
-    double computeVolumetricStrain(GaussPoint *gp, TimeStep *tStep);
-
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                                      const FloatArray &reducedStrain, TimeStep *tStep);
-
-    virtual void  giveStiffnessMatrix(FloatMatrix &answer,
-                                      MatResponseMode mode,
-                                      GaussPoint *gp,
-                                      TimeStep *tStep);
+    virtual void giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep);
+    virtual void give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-
-    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new CohesiveInterfaceMaterialStatus(1, FEMComponent :: domain, gp); }
-
-protected:
-    // Overloaded to use specialized versions of these services possibly implemented by linearElastic member
-    void give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
-                                                GaussPoint *gp, TimeStep *tStep);
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new StructuralInterfaceMaterialStatus(1, FEMComponent :: domain, gp); }
 };
 } // namespace oofem
 #endif

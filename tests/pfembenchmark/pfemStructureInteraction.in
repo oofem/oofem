@@ -1,0 +1,3 @@
+pfemStructureInteraction.out
+Fluid-Structure Interaction, dam example with hydrostatic pressure only
+FluidStuctureProblem nsteps 10 deltaT 1.e-2 prob1 "pfemStructureInteraction.in.pfem" prob2 "pfemStructureInteraction.in.sm" maxiter 100 rtolv 1.e-5 rtolp 1.e-5

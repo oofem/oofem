@@ -41,7 +41,7 @@ REGISTER_Element(BasicElement);
 
 // Interpolator describing shape functions for the approximated unknowns.
 // 1 -> first spatial index, 2 -> second spatial index
-FEI2dTrLin BasicElement :: interp(1, 2);    
+FEI2dTrLin BasicElement :: interp(1, 2);
 
 BasicElement :: BasicElement(int n, Domain *aDomain) : PlaneStressElement(n, aDomain)
 {
