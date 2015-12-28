@@ -427,7 +427,7 @@ StructuralInterfaceMaterial :: give2dStiffnessMatrix_Eng_Num( FloatMatrix &answe
 
     StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus( gp ) );
     if(status) {
-        const double eps = 1.0e-9;
+        const double eps = 1.0e-12;
         FloatArray t, tPlus, tMinus;
         FloatArray tempJump, jump, jumpPlus, jumpMinus, Kcolumn;
         tempJump = status->giveTempJump( );

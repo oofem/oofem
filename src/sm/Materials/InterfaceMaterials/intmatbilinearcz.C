@@ -163,7 +163,13 @@ void IntMatBilinearCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *
         status->letTempFirstPKTractionBe(answer);
         status->letTempTractionBe(answer);
 
-        answer.beScaled( ( 1.0 - status->mDamageNew ), answer );
+//        answer.beScaled( ( 1.0 - status->mDamageNew ), answer );
+        answer.at(1) *= ( 1.0 - status->mDamageNew );
+        answer.at(2) *= ( 1.0 - status->mDamageNew );
+
+        if(answer.at(3) > 0.0) {
+            answer.at(3) *= ( 1.0 - status->mDamageNew );
+        }
 
         return;
     } else {
@@ -214,10 +220,25 @@ void IntMatBilinearCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *
 
                 if(mSemiExplicit) {
                     computeTraction(answer, tractionTrial, status->mPlastMultIncOld);
-                    answer.beScaled( ( 1.0 - status->mDamageOld ), answer );
+
+//                    answer.beScaled( ( 1.0 - status->mDamageOld ), answer );
+
+                    answer.at(1) *= ( 1.0 - status->mDamageOld );
+                    answer.at(2) *= ( 1.0 - status->mDamageOld );
+
+                    if(answer.at(3) > 0.0) {
+                        answer.at(3) *= ( 1.0 - status->mDamageOld );
+                    }
                }
                 else {
-                    answer.beScaled( ( 1.0 - status->mDamageNew ), answer );
+//                    answer.beScaled( ( 1.0 - status->mDamageNew ), answer );
+
+                    answer.at(1) *= ( 1.0 - status->mDamageNew );
+                    answer.at(2) *= ( 1.0 - status->mDamageNew );
+
+                    if(answer.at(3) > 0.0) {
+                        answer.at(3) *= ( 1.0 - status->mDamageNew );
+                    }
                 }
 
                 return;
@@ -299,6 +320,11 @@ IRResultType IntMatBilinearCZ :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, mMu, _IFT_IntMatBilinearCZ_mu);
 
     IR_GIVE_FIELD(ir, mGamma, _IFT_IntMatBilinearCZ_gamma);
+
+    if( ir->hasField(_IFT_IntMatBilinearCZ_semiexplicit) ) {
+    	mSemiExplicit = true;
+    	printf("In IntMatBilinearCZ::initializeFrom: Semi-explicit time integration activated.\n");
+    }
 
     return StructuralInterfaceMaterial :: initializeFrom(ir);
 }

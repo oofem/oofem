@@ -12,6 +12,7 @@
 #include "fei2dlinelin.h"
 #include "fei2dlinequad.h"
 #include "feinterpol.h"
+#include "../sm/Materials/InterfaceMaterials/structuralinterfacematerialstatus.h"
 
 namespace oofem {
 REGISTER_Element(IntElLine1IntPen);
@@ -74,6 +75,7 @@ IntElLine1IntPen :: computeCovarBaseVectorAt(IntegrationPoint *ip, FloatArray &G
 	// Since we are averaging over the whole element, always evaluate the base vectors at xi = 0.
 
 	FloatArray xi_0 = {0.0};
+//	FloatArray xi_0 = {ip->giveNaturalCoordinate(1)};
 
     FloatMatrix dNdxi;
     FEInterpolation *interp = this->giveInterpolation();
@@ -101,6 +103,7 @@ IntElLine1IntPen :: computeCovarBaseVectorAt(IntegrationPoint *ip, FloatArray &G
 void
 IntElLine1IntPen :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
+#if 1
     // Computes the stiffness matrix of the receiver K_cohesive = int_A ( N^t * dT/dj * N ) dA
     FloatMatrix N, D, DN;
     bool matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode);
@@ -183,6 +186,97 @@ IntElLine1IntPen :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode 
         answer.symmetrized();
     }
 
+#else
+
+    // Computes the stiffness matrix of the receiver K_cohesive = int_A ( N^t * dT/dj * N ) dA
+    FloatMatrix N, D, DN;
+    bool matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode);
+    answer.clear();
+
+    FloatMatrix rotationMatGtoL;
+    FloatArray u;
+
+    // First loop over GP: compute projection of test function and traction.
+    // The setting is as follows: we have an interface with quadratic interpolation and we
+    // wish to project onto the space of constant functions on each element.
+
+    // Projecting the basis functions gives a constant for each basis function.
+    FloatMatrix proj_N;
+    proj_N.clear();
+
+    FloatMatrix proj_DN;
+    proj_DN.clear();
+
+    double area = 0.;
+
+    for ( auto &ip: *this->giveDefaultIntegrationRulePtr() ) {
+
+        this->computeNmatrixAt(ip, N);
+
+        if ( this->nlGeometry == 0 ) {
+            this->giveStiffnessMatrix_Eng(D, rMode, ip, tStep);
+        } else if ( this->nlGeometry == 1 ) {
+            this->giveStiffnessMatrix_dTdj(D, rMode, ip, tStep);
+        } else {
+            OOFEM_ERROR("nlgeometry must be 0 or 1!")
+        }
+
+        this->computeTransformationMatrixAt(ip, rotationMatGtoL);
+        D.rotatedWith(rotationMatGtoL, 'n');                      // transform stiffness to global coord system
+
+        this->computeNmatrixAt(ip, N);
+        DN.beProductOf(D, N);
+
+
+        double dA = this->computeAreaAround(ip);
+        area += dA;
+
+        proj_N.add(dA, N);
+        proj_DN.add(dA, DN);
+    }
+
+//    printf("area: %e\n", area);
+    proj_N.times(1./area);
+    proj_DN.times(1./area);
+
+//    printf("proj_N: "); proj_N.printYourself();
+
+    for ( auto &ip: *this->giveDefaultIntegrationRulePtr() ) {
+
+        if ( this->nlGeometry == 0 ) {
+            this->giveStiffnessMatrix_Eng(D, rMode, ip, tStep);
+        } else if ( this->nlGeometry == 1 ) {
+            this->giveStiffnessMatrix_dTdj(D, rMode, ip, tStep);
+        } else {
+            OOFEM_ERROR("nlgeometry must be 0 or 1!")
+        }
+
+//        this->computeTransformationMatrixAt(ip, rotationMatGtoL);
+//        D.rotatedWith(rotationMatGtoL, 'n');                      // transform stiffness to global coord system
+//
+//        DN.beProductOf(D, proj_N);
+
+
+        double dA = this->computeAreaAround(ip);
+        if ( matStiffSymmFlag ) {
+            answer.plusProductSymmUpper(proj_N, proj_DN, dA);
+//            answer.plusProductSymmUpper(proj_DN, proj_N, dA);
+        } else {
+            answer.plusProductUnsym(proj_N, proj_DN, dA);
+//            answer.plusProductUnsym(proj_DN, proj_N, dA);
+        }
+    }
+
+
+    if ( matStiffSymmFlag ) {
+        answer.symmetrized();
+    }
+
+
+
+#endif
+
+
 }
 
 
@@ -190,6 +284,7 @@ void
 IntElLine1IntPen :: giveInternalForcesVector(FloatArray &answer,
                                                        TimeStep *tStep, int useUpdatedGpRecord)
 {
+#if 1
     // Computes internal forces
 	// For this element we use an "interior penalty" formulation, where
 	// the cohesive zone contribution is weakened, i.e. the traction and
@@ -249,6 +344,23 @@ IntElLine1IntPen :: giveInternalForcesVector(FloatArray &answer,
 //    printf("proj_N: "); proj_N.printYourself();
 
 
+    /////////////////////////////////////////////////////////
+    //
+    //	Find c2 such that c1 = t{c2}
+    //
+    /////////////////////////////////////////////////////////
+
+//    // Initial guess
+//    FloatArray c2 = proj_jump;
+//    int maxIter = 10;
+//    for(int iter = 0; iter < maxIter; iter++) {
+//
+//        this->computeTraction(traction, ip, c2, tStep);
+//
+//
+//    }
+
+
     // Second loop over GP: assemble contribution to internal forces as we are used to.
     for ( auto &ip: *this->giveDefaultIntegrationRulePtr() ) {
 //        this->computeNmatrixAt(ip, N);
@@ -261,6 +373,101 @@ IntElLine1IntPen :: giveInternalForcesVector(FloatArray &answer,
     }
 
 }
+
+#else
+// Computes internal forces
+// For this element we use an "interior penalty" formulation, where
+// the cohesive zone contribution is weakened, i.e. the traction and
+// test function for the cohesive zone are projected onto a reduced
+// space. The purpose of the projection is to improve the stability
+// properties of the formulation, thereby avoiding traction oscilations.
+
+FloatMatrix N;
+FloatArray u, traction, jump;
+
+this->computeVectorOf(VM_Total, tStep, u);
+// subtract initial displacements, if defined
+if ( initialDisplacements.giveSize() ) {
+    u.subtract(initialDisplacements);
+}
+
+// zero answer will resize accordingly when adding first contribution
+answer.clear();
+
+
+
+// First loop over GP: compute projection of test function and traction.
+// The setting is as follows: we have an interface with quadratic interpolation and we
+// wish to project onto the space of constant functions on each element.
+
+// The projection of t becomes a constant
+    FloatArray proj_t;
+    proj_t.clear();
+
+
+//FloatArray proj_jump;
+//proj_jump.clear();
+
+// Projecting the basis functions gives a constant for each basis function.
+FloatMatrix proj_N;
+proj_N.clear();
+
+double area = 0.;
+
+for ( auto &ip: *this->giveDefaultIntegrationRulePtr() ) {
+
+    this->computeNmatrixAt(ip, N);
+    jump.beProductOf(N, u);
+    this->computeTraction(traction, ip, jump, tStep);
+
+    double dA = this->computeAreaAround(ip);
+    area += dA;
+
+//    printf("traction: "); traction.printYourself();
+//    proj_jump.add(dA, jump);
+    proj_t.add(dA, traction);
+    proj_N.add(dA, N);
+}
+
+//    printf("area: %e\n", area);
+//proj_jump.times(1./area);
+proj_t.times(1./area);
+//printf("proj_t: "); proj_t.printYourself();
+//printf("\n\n");
+proj_N.times(1./area);
+
+//    printf("proj_N: "); proj_N.printYourself();
+
+FloatMatrix rotationMatGtoL;
+
+// Second loop over GP: assemble contribution to internal forces as we are used to.
+for ( auto &ip: *this->giveDefaultIntegrationRulePtr() ) {
+        this->computeNmatrixAt(ip, N);
+//        jump.beProductOf(N, u);
+//    this->computeTraction(traction, ip, proj_jump, tStep);
+
+    // compute internal cohesive forces as f = N^T*traction dA
+    double dA = this->computeAreaAround(ip);
+    answer.plusProduct(proj_N, proj_t, dA);
+//    answer.plusProduct(N, proj_t, dA);
+
+    StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( ip->giveMaterialStatus() );
+    FloatArray proj_t_gp = proj_t;
+
+    this->computeTransformationMatrixAt(ip, rotationMatGtoL);
+    proj_t_gp.rotatedWith(rotationMatGtoL, 'n');                      // transform to local coord system
+
+    FloatArray proj_t_gp_3D = {proj_t_gp.at(1), 0., proj_t_gp.at(2)};
+    status->letProjectedTractionBe(proj_t_gp_3D);
+
+//    FloatArray proj_t_gp = proj_t;
+//    printf("proj_t_gp: "); proj_t_gp.printYourself();
+}
+
+}
+
+
+#endif
 
 void
 IntElLine1IntPen :: computeNmatrixAt(GaussPoint *ip, FloatMatrix &answer)
@@ -314,7 +521,7 @@ IntElLine1IntPen :: computeGaussPoints()
 //        integrationRulesArray[ 0 ].reset( new LobattoIntegrationRule (1,this, 1, 2, false) );
 //        integrationRulesArray [ 0 ]->SetUpPointsOnLine(2, _2dInterface);
 
-        int numGP = 16;
+        int numGP = 4;
         integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 2) );
         integrationRulesArray [ 0 ]->SetUpPointsOnLine(numGP, _2dInterface);
     }

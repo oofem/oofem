@@ -90,6 +90,8 @@ NRSolver :: NRSolver(Domain *d, EngngModel *m) :
 
     smConstraintVersion = 0;
     mCalcStiffBeforeRes = true;
+
+    maxIncAllowed = 1.0e10;
 }
 
 
@@ -176,6 +178,9 @@ NRSolver :: initializeFrom(InputRecord *ir)
 
  
     IR_GIVE_OPTIONAL_FIELD(ir, this->constrainedNRminiter, _IFT_NRSolver_constrainedNRminiter);
+
+
+    IR_GIVE_OPTIONAL_FIELD(ir, this->maxIncAllowed, _IFT_NRSolver_maxinc);
 
     return SparseNonLinearSystemNM :: initializeFrom(ir);
 }
@@ -296,6 +301,25 @@ NRSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
             }   
             //this->giveConstrainedNRSolver()->solve(X, & ddX, this->forceErrVec, this->forceErrVecOld, status, tStep);
         }
+
+
+        /////////////////////////////////////////
+
+        double maxInc = 0.0;
+        for(double inc : ddX) {
+        	if(fabs(inc) > maxInc) {
+        		maxInc = fabs(inc);
+        	}
+        }
+
+        if(maxInc > maxIncAllowed) {
+        	printf("Restricting increment.\n");
+        	ddX.times(maxIncAllowed/maxInc);
+        }
+
+        /////////////////////////////////////////
+
+
         X.add(ddX);
         dX.add(ddX);
         tStep->incrementStateCounter(); // update solution state counter
