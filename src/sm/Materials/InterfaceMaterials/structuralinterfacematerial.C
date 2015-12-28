@@ -91,7 +91,7 @@ StructuralInterfaceMaterial :: giveInputRecord(DynamicInputRecord &input)
 }
 
 
-#if 1
+#if 0
 void
 StructuralInterfaceMaterial :: giveStiffnessMatrix_dTdj_Num(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {

@@ -751,7 +751,7 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
         this->exportIntVars(vtkPiece, mapG2L, mapL2G, region, tStep);
         this->exportExternalForces(vtkPiece, mapG2L, mapL2G, region, tStep);
 
-        this->exportCellVars(vtkPiece, numRegionEl, regionElInd, tStep);
+        this->exportCellVars(vtkPiece, regionElInd, tStep);
     } // end of default piece for simple geometry elements
 }
 
