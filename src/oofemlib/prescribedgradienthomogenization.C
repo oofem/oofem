@@ -103,7 +103,11 @@ void PrescribedGradientHomogenization :: giveGradientVoigt(FloatArray &oGradient
         };
         break;
     case 3:
-        OOFEM_ERROR("PrescribedGradientHomogenization :: giveGradientVoigt() not implemented for 3 rows.\n")
+        // TODO: Fix this properly.
+        oGradient = {
+            mGradient.at(1, 1), mGradient.at(2, 2), mGradient.at(1, 2), mGradient.at(2, 1)
+        };
+//        OOFEM_ERROR("PrescribedGradientHomogenization :: giveGradientVoigt() not implemented for 3 rows.\n")
         break;
     }
 }
