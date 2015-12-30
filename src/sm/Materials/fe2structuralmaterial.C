@@ -41,6 +41,8 @@
 #include "domain.h"
 #include "contextioerr.h"
 #include "gausspoint.h"
+#include "prescribedgradienthomogenization.h"
+#include "activebc.h"
 
 #include "engngm.h"
 #include "util.h"
@@ -86,9 +88,9 @@ bool FE2StructuralMaterialStatus :: createRVE(int n, GaussPoint *gp, const std :
 
     this->rve->letOutputBaseFileNameBe( name.str() );
 
-    this->bc = dynamic_cast< PrescribedGradientBCWeak * >( this->rve->giveDomain(1)->giveBc(1) );
+    this->bc = dynamic_cast< PrescribedGradientHomogenization * >( this->rve->giveDomain(1)->giveBc(1) );
     if ( !this->bc ) {
-        OOFEM_ERROR("RVE doesn't have necessary boundary condition; should have MixedGradientPressure as first b.c. (in first domain)");
+        OOFEM_ERROR("RVE doesn't have necessary boundary condition; should have PrescribedGradientHomogenization as first b.c. (in first domain)");
     }
 
     return true;
@@ -176,7 +178,7 @@ void FE2StructuralMaterial ::giveRealStressVector_3d(FloatArray &answer, GaussPo
 
     ms->setTimeStep(tStep);
 
-    PrescribedGradientBCWeak *bc = ms->giveBC();
+    PrescribedGradientHomogenization *bc = ms->giveBC();
 
     // Set strain
 //    printf("reducedE: "); reducedE.printYourself();
@@ -187,8 +189,16 @@ void FE2StructuralMaterial ::giveRealStressVector_3d(FloatArray &answer, GaussPo
     ms->giveRVE()->solveYourselfAt(ms->giveRVE()->giveCurrentStep());
 
     // Compute homogenized stress
-    bc->computeField(answer, tStep);
+    FloatArray stress;
+    bc->computeField(stress, tStep);
 //    printf("Homogenized stress: "); answer.printYourself();
+
+    if(stress.giveSize() == 6) {
+    	answer = stress;
+    }
+    else {
+    	StructuralMaterial::giveFullSymVectorForm(answer, stress, gp->giveMaterialMode() );
+    }
 
     ms->letTempStressVectorBe(answer);
 

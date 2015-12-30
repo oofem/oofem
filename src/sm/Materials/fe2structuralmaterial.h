@@ -36,7 +36,7 @@
 #define SRC_SM_MATERIALS_FE2STRUCTURALMATERIAL_H_
 
 #include "structuralmaterial.h"
-#include "prescribedgradientbcweak.h"
+#include "prescribedgradienthomogenization.h"
 #include "structuralms.h"
 
 #include <memory>
@@ -62,7 +62,7 @@ protected:
     std :: unique_ptr< EngngModel > rve;
 
     /// Boundary condition on RVE that performs the computational homogenization.
-    PrescribedGradientBCWeak *bc;
+    PrescribedGradientHomogenization *bc;
 
 public:
     /**
@@ -77,7 +77,7 @@ public:
     virtual ~FE2StructuralMaterialStatus();
 
     EngngModel *giveRVE() { return this->rve.get(); }
-    PrescribedGradientBCWeak *giveBC() { return this->bc; }
+    PrescribedGradientHomogenization *giveBC() { return this->bc; }
 
     /// Initiates the RVE problem.
     bool createRVE(int n, GaussPoint *gp, const std :: string &inputfile);
