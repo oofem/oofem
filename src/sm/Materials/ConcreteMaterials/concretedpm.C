@@ -431,7 +431,7 @@ ConcreteDPM :: giveRealStressVector_3d(FloatArray &answer,
 
     // subtract stress-independent part of strain
     // (due to temperature changes, shrinkage, etc.)
-    this->giveStressDependentPartOfStrainVector(strain, gp, strainVector, tStep, VM_Total);
+    this->giveStressDependentPartOfStrainVector_3d(strain, gp, strainVector, tStep, VM_Total);
 
     // perform plasticity return
     performPlasticityReturn(gp, strain);
