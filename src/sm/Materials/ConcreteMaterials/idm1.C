@@ -45,8 +45,7 @@
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
 #include "engngm.h"
-// debug bp
-#include "Materials/structuralnonlocalmaterialext.h"
+
 
 namespace oofem {
 REGISTER_Material(IsotropicDamageMaterial1);
@@ -1369,11 +1368,6 @@ IsotropicDamageMaterial1 :: MMI_map(GaussPoint *gp, Domain *oldd, TimeStep *tSte
         FloatArray sr;
         this->giveReducedSymVectorForm(sr, intVal, gp->giveMaterialMode());
         status->letTempStrainVectorBe(sr);
-        // begin bp
-        StructuralNonlocalMaterialExtensionInterface *me = static_cast< StructuralNonlocalMaterialExtensionInterface * >( this->giveInterface(NonlocalMaterialExtensionInterfaceType) );
-
-        if ( me ) me->updateBeforeNonlocAverage(intVal, gp, tStep);
-        // end bp
     }
 
     return result;
