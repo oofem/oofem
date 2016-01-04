@@ -74,6 +74,7 @@ class IntArray;
 class Element;
 class DataStream;
 class DynamicInputRecord;
+class NucleationCriterion;
 //class InternalStateValueType;
 
 //
@@ -147,6 +148,11 @@ protected:
      */
     std :: vector< int >mMaterialModifyingEnrItemIndices;
 
+    /**
+     * Nucleation of new enrichment items. (For example, nucleation of new cracks.)
+     */
+    std::vector< std :: unique_ptr< NucleationCriterion > > mNucleationCriteria;
+
 public:
 
     /**
@@ -212,6 +218,9 @@ public:
 
     void propagateFronts(bool &oAnyFronHasPropagated);
     bool hasPropagatingFronts();
+
+    void nucleateEnrichmentItems(bool &oNewItemsWereNucleated);
+    bool hasNucleationCriteria();
 
     bool giveVtkDebug() const { return mDebugVTK; }
     void setVtkDebug(bool iDebug) { mDebugVTK = iDebug; }

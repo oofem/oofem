@@ -226,6 +226,7 @@ set (core_xfem
     xfem/enrichmentfronts/enrichmentfrontintersection.C
     xfem/integrationrules/discsegintegrationrule.C
     xfem/xfemtolerances.C
+    xfem/nucleationcriterion.C
     )
 
 set (core_parallel
