@@ -17,6 +17,8 @@
 \newcommand{\elemkeyword}[1]{\descitem{Keyword}~{\em #1}}
 \newcommand{\elemparam}[2]{{{#1\tiny (#2)}~\#}}
 \newcommand{\optelemparam}[2]{[{~\elemparam{#1}{#2}}]}
+\newcommand{\elemstring}[1]{{#1}}
+\newcommand{\optelemstring}[1]{[{~\elemstring{#1}~}]}
 \newcommand{\param}[1]{{\it #1}}
 \newcommand{\optparam}[1]{[{\it #1}]}
 \newcommand{\be}{\begin{equation}}
@@ -2701,15 +2703,15 @@ Model B3 is an aging viscoelastic model for concrete creep and shrinkage, develo
 
 The first version, ``B3mat'', is kept in OOFEM for compatibility. It is based on an aging Maxwell chain. The moduli of individual units in the chain are evaluated in each step using the least-squares method.
 
-The second, more recent version, is referred to as ``B3solidmat''. Depending on the specified input it exploits either a non-aging Kelvin chain combined with the solidification theory, or an aging Kelvin chain. It is extended to the so-called microprestress-solidification theory (MPS), which in this implementation  takes into account only the effects of variable humidity on creep; the effects of temperature on creep are not considered. 
+The second, more recent version, is referred to as ``B3solidmat''. Depending on the specified input it exploits either a non-aging Kelvin chain combined with the solidification theory, or an aging Kelvin chain. It is extended to the so-called Microprestress-Solidification theory (MPS), which in this implementation  takes into account only the effects of variable humidity on creep; the effects of temperature on creep are not considered. 
 The underlying rheological chain consists of four serially coupled components. The solidifying Kelvin chain represents short-term creep; it is serially coupled with a non-aging elastic spring that reflects instantaneous deformation. Long-term creep is captured by an aging dashpot with viscosity dependent on the microprestress, the evolution of which is affected by changes of humidity. The last  unit describes volumetric deformations (shrinkage and thermal strains).
 Drying creep is incorporated either by the 
 ``averaged cross-sectional approach'', or by the ``point approach''.
 
 %%%% MPS
-The latest version is denoted as ``MPS'' and is based on the microprestress-solidification theory. The rheological model consists of the same four components as in  ``B3solidmat'', but now the implemented exponential algorithm is designed especially for the solidifying Kelvin chain, which is a special case of an aging Kelvin chain. This model takes into account both humidity and temperature effects on creep. Drying creep is incorporated exclusively by the so-called
-``point approach''. The model can operate in two modes,
-controlled by the keyword $CoupledAnalysisType$. The first mode ($CoupledAnalysisType = 0$) solves only the basic creep and runs as a single problem, while the second mode ($CoupledAnalysisType = 1$) needs to be run as a staggered problem with humidity and temperature analysis preceding the mechanical problem.
+The latest version is denoted as ``MPS'' and is based on the microprestress-solidification theory \cite{Bazant-89-I} \cite{Bazant-97-I} \cite{JirHav14a}. The rheological model consists of the same four components as in  ``B3solidmat'', but now the implemented exponential algorithm is designed especially for the solidifying Kelvin chain, which is a special case of an aging Kelvin chain. This model takes into account both humidity and temperature effects on creep. Drying creep is incorporated exclusively by the so-called
+``point approach''. The model can operate in four modes,
+controlled by the keyword $CoupledAnalysisType$. The first mode ($CoupledAnalysisType = 0$) solves only the basic creep and runs as a single problem, while the remaining three modes need to be run as a staggered problem with humidity and/or temperature analysis preceding the mechanical problem; both humidity and temperature fields are read when $CoupledAnalysisType = 1$, only the field of relative humidity is taken into account when $CoupledAnalysisType = 2$ and finally, only temperature when $CoupledAnalysisType = 3$.
 
 The basic creep is in the microprestress-solidification theory influenced by the same four parameters $q_1$ - $q_4$ as in the model B3. Values of these parameters can be estimated from the composition of concrete mixture and its compressive strength using the following empirical formulae: 
 \begin{eqnarray}
@@ -2749,24 +2751,22 @@ Evolution of viscosity of the aging dashpot is governed by the differential
 equation 
 \begin{equation}
 \label{eq:mps_viscosity}
-\dot{\eta}+\frac{1}{\mu_S T_0} \left |  T \frac{\dot{h}}{h} - \kappa_T k_T(T) \dot{T}  \right | \left( \mu_S \eta \right)^{p/\left(p-1\right)} = \frac{\psi_S}{q_4}
+\dot{\eta}+\frac{1}{\mu_S T_0} \left |  T \frac{\dot{h}}{h} - \kappa_T k_T \dot{T}  \right | \left( \mu_S \eta \right)^{p/\left(p-1\right)} = \frac{\psi_S}{q_4}
 \end{equation}
-where $h$ is the relative pore humidity, $T$ is the absolute temperature [K], $T_0 = 298$ K is the room temperature,  and parameter $p = 2$. 
-Function $k_T$ is given by 
+where $h$ is the relative pore humidity, $T$ is the absolute temperature [K], $T_0 = 298$ K is the room temperature, and parameter $p = 2$. Parameter $k_T$ is different for monotonically increasing and for cyclic temperature, and is defined as
 \begin{equation}
-\quad k_T(T) = \mbox{e}^{-c_T \left (T_{max}-T\right )}
-\label{eq:mps_k_T}
+\kappa_T = \left \{ \begin{array}{ll}
+k_{Tm} & \quad \mathrm{if} \; T = T_{max} \; \mathrm{and} \; \dot{T} > 0 \\
+k_{Tc} & \quad \mathrm{if} \; T < T_{max} \; \mathrm{or} \; \dot{T} \leq 0 
+\end{array} \right.
+\label{eq:mps_temperature}
 \end{equation}
-where parameter $c_T$ controls the influence of cyclic temperature on creep, and $T_{max}$ stands for the maximum reached temperature in the previous history. 
-This is a modification of the opriginal MPS theory, proposed by Havl\'{a}sek and Jir\'{a}sek. 
-%Parameter $\kappa_T$ replaces $\ln h$ which in case of basic creep eliminates the sensitivity of the original model on the choice of relative pore humidity $h$ reached by self-desicca.
-
+in which  $k_{Tm}$ [-] and $k_{Tc}$ [-] are new parameters and $T_{\max}$ is the
+maximum temperature attained in the previous history of the material point. 
 
 Equation (\ref{eq:mps_viscosity}) differs from the one presented in the original work; it replaces the differential equation for microprestress, which is not used here. The evolution of viscosity can be captured directly, without the need for microprestress. What matters is only the relative humidity and temperature and their rates. Parameters $c_0$ and $k_1$ of the original MPS theory
 are replaced by $\mu_S = c_0 T_0^{p-1} k_1^{p-1} q_4 (p-1)^p$. 
 The initial value of viscosity is defined as $\eta(t_0) = t_0/q_4$, where $t_0$ is age of concrete at the onset drying or when the temperature starts changing.
-
-
 
 %%%%     MODIFIED TIMES %%%%
 As mentioned above, under variable humidity and temperature conditions the physical time $t$ in function $v(t)$ describing evolution of the solidified volume is replaced by the equivalent time $t_e$. In a similar spirit, $t$ is replaced by the solidification time $t_s$ in the equation describing creep of the solidifying constituent, and by the reduced time $t_r$ in equation $\mbox{d} \varepsilon_f / \mbox{d} t_r = \sigma / \eta(t)$ relating the flow strain rate to the stress.
@@ -2794,10 +2794,70 @@ Functions describing the influence of humidity have the form
 \end{eqnarray}
 where $\alpha_e$, $\alpha_r$ and $\alpha_s$ are parameters. 
 
+At sealed conditions (or $CoupledAnalysisType = 2$) the auxiliary coefficients $\beta_{eT} = \beta_{rT} = \beta_{sT} = 1$ while at room temperature (or with $CoupledAnalysisType = 3$) factors $\beta_{e,h} = \beta_{r,h}  = \beta_{s,h} = 1$.
+
+It turned out that both the size effect on drying creep as well as its delay behind drying shrinkage can be addressed through parameter $p$ in the governing equation (\ref{eq:mps_viscosity}). In the experiments, the average (cross-sectional) drying creep is decreasing with specimen size. Unfortunately, for the standard value $p=2$, the MPS model exhibits the opposite trend. For $p = \infty$ the size effect disappears, and for $p < 0$ it corresponds to the experiments. It should be noted that for negative or infinite values of $p$ the underlying theory loses its original physical background. 
+If the experimental data of drying creep measured on different sizes
+are missing, the exponent $p = \infty$ can be taken as a realistic
+estimate.  
+
+When parameter $p$ is changed from its recommended value $p = 2$ it is advantageous to rewrite the governing differential equation to the following form
+%
+\begin{equation}
+{\dot \eta_f + \frac{k_3}{T_0} \left| T \frac{\dot h}{h}  - \kappa_T  \dot T \right|  \eta_f^{\tilde{p}} = \frac{\psi_S}{q_4}}
+\label{eq:mps_reformulate}
+\end{equation}
+%
+with newly introduced parameters
+%
+\begin{equation}
+\label{eq:mps_p}
+\tilde{p} = p / (p-1)
+\end{equation}
+%
+\begin{equation}
+\label{eq:mps_k3}
+k_3 = \mu_S^{\frac{1}{p-1}}
+\end{equation}
+
+With the ``standard value'' $p = 2$ (reverted size effect) the new
+parameter $\tilde{p}$ is also 2, for $p < 0$ (correct size effect)
+$\tilde{p} < 1$ and finally with $p = \infty$ the first parameter
+$\tilde{p} = 1$ and the second parameter $k_3$ becomes
+dimensionless. The other advantage of $\tilde{p} = 1$ is that the
+governing differential equation becomes linear and can be solved
+directly. 
+
+
 %%%%     HYGRO AND THERMAL STRAIN  %%%%
-The rate of thermal strain is expressed as $\dot{\varepsilon}_T = \alpha_T \dot{T}$ and the rate of shrinkage strain as $\dot{\varepsilon}_{sh} = k_{sh} \dot{h}$, where both $\alpha_T$ and $k_{sh}$ are assumed to be constant in time and independent of temperature and humidity. 
+The rate of thermal strain is expressed as $\dot{\varepsilon}_T = \alpha_T \dot{T}$ and the rate of drying shrinkage strain as $\dot{\varepsilon}_{sh} = k_{sh} \dot{h}$, where both $\alpha_T$ and $k_{sh}$ are assumed to be constant in time and independent of temperature and humidity. 
 
+There are two options to simulate the autogenous shrinkage in the MPS material model. The first one is according to the B4 model 
+\begin{equation}
+\varepsilon_{sh,au,B4}(t_e) = \varepsilon_{sh,au,B4}^\infty \left[ 1 + \left( \frac{ \tau_{au} }{t_e} \right) ^ {w/c/0.38} \right]^{-4.5}
+\label{eq:auto_shr_b4}
+\end{equation}
+and the second one is proposed in the Model Code 2010
+\begin{equation}
+\varepsilon_{sh,au,fib}(t_e) = \varepsilon_{sh,au,fib}^\infty \left( 1- \exp \left( -0.2 \: \sqrt{t_e} \right) \right)
+\label{eq:auto_shr_fib}
+\end{equation}
 
+For the normally hardening cement, the ultimate value of the autogenous shrinkage can be estimated from the composition using the empirical formula of the B4 model
+%
+\begin{eqnarray}
+\varepsilon_{sh,au,B4}^\infty = -210 \times 10^{-6}  \left ( \frac{a/c}{6} \right ) ^{-0.75} \left ( \frac{w/c}{0.38} \right ) ^ {-3.5}\label{eq:auto_ultimate_B4}
+\end{eqnarray}
+%
+
+Similarly, in the Model Code, the ultimate shrinkage strain can be estimated from the mean concrete strength at the age of 28 days and from the cement grade 
+%
+\begin{eqnarray}
+\varepsilon_{sh,au,fib}^\infty = -\alpha_{as} \left( \frac{ 0.1 f_{cm} } { 6 + 0.1 f_{cm} }\right) ^{2.5} \times 10^{-6}
+\label{eq:auto_ultimate_fib}
+\end{eqnarray}
+%
+where $\alpha_{as}$ is 600 for cement grades 42.5 R and 52.5 R and N, 700 for 32.5 R and 42.5 N and 800 for 32.5 N.
 
 
 The model description and parameters are summarized
@@ -3113,14 +3173,22 @@ Record Format & \descitem{mps}
 %mode = 1 
 \elemparam{q1}{rn} \elemparam{q2}{rn} \elemparam{q3}{rn} \elemparam{q4}{rn}
 %
-% sorption isotherm description
-\elemparam{w\_h}{rn} \elemparam{ncoeff}{rn} \elemparam{a}{rn}
 %
 % MPS
-\elemparam{t0}{rn} \elemparam{ksh}{rn} \elemparam{mus}{rn} 
+\elemparam{t0}{rn} \elemparam{ksh}{rn} 
+\optelemparam{mus}{rn} \elemparam{k3}{rn} 
+%
 \optelemparam{alphaE}{rn} \optelemparam{alphaR}{rn} \optelemparam{alphaS}{rn}
 \optelemparam{QEtoR}{rn} \optelemparam{QRtoR}{rn} \optelemparam{QStoR}{rn}
-\optelemparam{cT}{rn} \elemparam{kappaT}{rn}
+%
+\elemparam{kTm}{rn}  \optelemparam{kTc}{rn} 
+%
+\optelemparam{p}{rn} \optelemparam{p\_tilde}{rn}  
+%
+\optelemparam{alpha\_as}{rn} \optelemparam{eps\_cas0}{rn}
+\optelemparam{b4\_eps\_au\_infty}{rn} \optelemparam{b4\_tau\_au}{rn} \optelemparam{b4\_alpha}{rn} \optelemparam{b4\_r\_t}{rn} \optelemparam{b4\_cem\_type}{rn} 
+%
+\optelemstring{temperInCelsius}
 %             
 \\Parameters 
 &- \param{num} material model number\\
@@ -3130,9 +3198,10 @@ Record Format & \descitem{mps}
 &- \param{referencetemperature} reference temperature only to thermal expansion of material\\
 
 &- \param{mode} optional parameter; if $mode = 0$ (default),  parameters $q1-q4$ are predicted from composition of the concrete mixture (parameters fc, cc, w/c, a/c and stiffnessfactor need to be specified). Otherwise values of parameters $q1-q4$ are expected.\\
-&- \param{CoupledAnalysisType} $0=$ basic creep; $1=$ (default) drying creep shrinkage; the problem must be run as a staggered problem with preceding analysis of humidity and temperature distribution. Following parameters must be specified: \param{w\_h}, \param{ncoeff}, \param{rn}, \param{t0}, \param{mus}, \param{kappaT}\\
+&- \param{CoupledAnalysisType} $0=$ basic creep; $1=$ (default) drying creep, shrinkage, temperature transient creep and creep at elevated temperature; $2=$ drying creep, shrinkage; $3=$ temperature transient creep and creep at elevated temperature; for choice \# 1, 2, 3 the problem must be run as a staggered problem with preceding analysis of humidity and/or temperature distribution; 
+Following parameters must be specified: \param{t0}, \param{mus} or \param{k3} (according to exponent \param{p}), \param{kTm} (compulsory for choice \#3 otherwise optional)\\
 %
-&- \param{lambda0} scaling factor equal to 1.0 day in time units of analysis (eg. 86400 if the analysis runs in seconds)\\
+&- \param{lambda0} scaling factor equal to 1.0 day in time units of analysis (e.g. 86400 if the analysis runs in seconds)\\
 &- \param{begoftimeofinterest} lower boundary of time interval with good approximation of the compliance function; default value = 0.01 $lambda0$\\  
 &- \param{endoftimeofinterest} upper boundary of time interval with good approximation of the compliance function; default value = 10000. $lambda0$\\  
 &- \param{timefactor} scaling factor, for mps material must be equal to 1.0\\
@@ -3151,11 +3220,12 @@ Record Format & \descitem{mps}
 &- \param{cc} cement content of concrete mixture  [kg m$^{-3}$] \\
 &- \param{w/c} water to cement weight ratio\\
 &- \param{a/c} aggregate to cement weight ratio\\
-&- \param{stiffnessfactor} scaling factor converting ``predicted" parameters $q_1$ - $q_4$ into proper units (eg. 1.0 if stiffness is measured in Pa, 1.e6 for MPa)\\
+&- \param{stiffnessfactor} scaling factor converting ``predicted" parameters $q_1$ - $q_4$ into proper units (e.g. 1.0 if stiffness is measured in Pa, 1.e6 for MPa)\\
 &- \param{q1}, \param{q2}, \param{q3}, \param{q4} parameters of B3 model for basic creep\\
-&- \param{w\_h}, \param{ncoeff}, \param{a} sorption isotherm parameters obtained from experiments [Pedersen, 1990] \\
 %
+&- \param{p} and \param{p\_tilde} replaceable parameters in the governing equation for viscosity, default value is $p = 2$ \\
 &- \param{mus} parameter governing to the evolution of viscosity; for exponent $p=2$, $\mu_S = c_0 c_1 q_4$ [Pa$^{-1}$ s$^{-1}$] \\
+&- \param{k3} dimensionless parameter governing to the evolution of viscosity replacing \param{mus} in the special case when $p > 100$ (then $p$ is automatically set to $\infty$ which is equivalent to $p\_tilde = 1$)\\
 &- \param{ksh} parameter relating rate of shrinkage to rate of humidity [-], default value is 0.0, i.e. no shrinkage\\
 &- \param{t0} time of the first temperature or humidity change\\
 &- \param{alphaE} constant, default value 10.\\
@@ -3164,6 +3234,11 @@ Record Format & \descitem{mps}
 &- \param{QEtoR} activation energy ratio, default value 2700. K\\
 &- \param{QRtoR} activation energy ratio, default value 5000. K\\
 &- \param{QStoR} activation energy ratio, default value 3000. K\\
+&- \param{kTm} replaces $\ln{h}$ in the governing equation for viscosity\\
+&- \param{kTc} controls creep at cyclic temperature \\
+&- \param{alpha\_as} and \param{eps\_cas0} control the ultimate value of autogenous shrinkage according to {\sl{fib}} Model Code 2010; this ultimate value can be provided either directly via \param{eps\_cas0} (negative value for contraction) or  using \param{alpha\_as}, see equation (\ref{eq:auto_ultimate_fib})\\
+&- \param{b4\_eps\_au\_infty}, \param{b4\_tau\_au}, \param{b4\_alpha}, \param{b4\_r\_t}, \param{b4\_cem\_type} control the evolution and the ultimate value of autogenous shrinkage according to model B4; all parameters are predicted from composition if the \param{b4\_cem\_type} is provided; however, this prediction can be manually overridden\\
+&- \param{temperInCelsius} this string enables to run the supplementary transport problem with temperature in Celsius instead of Kelvin \\
 %
 Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 2dPlateLayer, 2dBeamLayer, 3dShellLayer\\
@@ -3207,8 +3282,7 @@ parameters $q_i$ specified by user, simulation time in seconds and stiffnesses i
   timefactor 1. lambda0 86400. begoftimeofinterest 864.\\ 
 endoftimeofinterest 2.592e9  relMatAge 2419200. CoupledAnalysisType
 1. \\
-ksh 0.0004921875. t0 2419200. kappaT 0.005051 mus 4.0509259e-8 \\
-a 4.8670917 w\_h 0.04761543 ncoeff 0.18166781} 
+ksh 0.0004921875. t0 2419200. kappaT 0.005051 mus 4.0509259e-8} 
 
 
 \end{enumerate}
@@ -3246,6 +3320,177 @@ In order to suppress shrinkage set $es0 = 0.0$
 \end{itemize}
 In order to suppress shrinkage set $kSh = 0.0$
 \end{itemize}
+
+
+\subsubsection{MPS damage model}
+
+This model extends the model based on the Microprestress-Solidification theory, described in previous section and summarized in Tab.~\ref{mps_table} for ``MPS'', by tensile cracking.
+
+This extension uses the isotropic damage model with Rankine definition of the equivalent deformation
+defined as the biggest principal effective stress divided by the
+elastic modulus. The softening law cannot deal directly with the
+strain because due to creep strain increases and this would lead to
+further softening without additional loading.
+
+Two different approaches are implemented. The first one, default, (\#1) reduces
+the stiffness only in the directions of tension (in case the tensile
+strength is exceeded). A full stiffness is restored in compression and
+after unloading from tension.  
+
+The other approach (\#2) is the standard isotropic damage model which
+reduces the stiffness equally in all directions independently of
+loading. This approach leads to faster convergence because the secant
+stiffness can be used instead of the incremental viscoelastic
+stiffness which must be used in the first approach. The second
+approach becomes useful when the loading is monotonic or when the
+benefit of the accelerated computation prevails over the consequences
+of the reduced/underestimated stiffness in compression. 
+
+Proper energy dissipation is guaranteed by the crack-band approach.
+
+The following algorithm is used to compute the stress vector (in each time step and until the iteration criteria are met):
+\begin{enumerate}
+
+\item{Compute effective stress}
+\begin{equation}
+\sigma_{\mathrm{eff},k+1} = \sigma_{\mathrm{eff},k} + \bar{E}_k \boldsymbol{D}_\nu (\Delta \varepsilon_k - \Delta \varepsilon_k'' - \Delta \varepsilon_{sh,k} - \Delta \varepsilon_{T,k})
+\end{equation}
+%
+where $\sigma_{\mathrm{eff},k}$ is the effective stress vector in the preceding step, $\bar{E}_k$ is the incremental stiffness, $\boldsymbol{D}_\nu$ is a unit stiffness matrix and $\Delta \varepsilon_k$, $\Delta \varepsilon_k''$, $\Delta \varepsilon_{sh,k}$, $\Delta \varepsilon_{T,k}$ are the increments of the total strain, strain due to creep, shrinkage strain (sum of drying and autogenous shrinkage) and thermal strain, respectively.
+
+
+\item{Compute principal effective stresses $\sigma_{\mathrm{eff,1}}$, $\sigma_{\mathrm{eff,2}}$, $\sigma_{\mathrm{eff,3}}$}
+
+\item{Evaluate equivalent deformation}
+\begin{equation}
+\tilde \varepsilon = \mathrm{max}(\sigma_{\mathrm{eff,1}}, \sigma_{\mathrm{eff,2}}, \sigma_{\mathrm{eff,3}})/E
+\end{equation}
+
+\item If the stress exceeds the material strength, initialize and fix the fracture parameters $f_t$ and $G_F$ (exponential softening assumed).
+%
+\begin{equation}
+\varepsilon_{c,f} = \frac{G_f}{f_t \: h}
+\end{equation}
+%
+where $h$ is the characteristic length of the finite element in the direction of the biggest principal stress. 
+
+\item{Evaluate corresponding damage}
+%
+if $\tilde \varepsilon > \varepsilon_0$
+\begin{equation}
+\omega = 1 - \frac{\varepsilon_0}{\tilde \varepsilon} \exp \left(-\frac{\tilde \varepsilon - \varepsilon_0}{\varepsilon_{c,f} - \varepsilon_0} \right)
+\end{equation}
+
+
+\item{Compute principal nominal stresses}
+\begin{itemize}
+\item approach \#1:\\
+for $i = 1, 2, 3$\\
+if $\sigma_{\mathrm{eff},i} > 0$, $\sigma_{i} = (1-\omega) \sigma_{\mathrm{eff},i} $\\
+else $\sigma_{i} = \sigma_{\mathrm{eff},i}$
+\item approach \#2:\\
+for $i = 1, 2, 3$\\
+$\sigma_{i} = (1-\omega) \sigma_{\mathrm{eff},i} $
+\end{itemize}
+
+\item{Construct the stress vector in the original configuration}
+\begin{equation}
+\boldsymbol {\sigma} = \boldsymbol{T} \boldsymbol {\sigma}_{princ}
+\end{equation}
+where $\boldsymbol{T}$ is the stress transformation matrix.
+
+\end{enumerate}
+
+The tensile strength and fracture energy can be defined either as fixed, time-independent values (parameters $ft$, $gf$) or as variable, depending on the equivalent hydration time $t_e$. The latter case is activated by keyword $timeDepFracturing$; tensile strength and fracture energy are then linked to the current value of the mean compressive strength using (slightly modified) formulae from the {\sl{fib}} Model Code 2010.
+
+For $0 \: \mathrm{MPa} \leq f_{cm}(t) \leq 20$ MPa the tensile
+strength is computed from a linear function 
+\begin{equation}
+f_{tm}(t) = 0.015 \cdot 12^{2/3} \cdot f_{cm}(t) = 0.07862 f_{cm}(t)
+\end{equation}
+which starts at the origin and at $f_{cm}(t) = 20$ MPa connects to expression
+\begin{equation}
+f_{tm}(t) = 0.3 (f_{cm}(t) - 8 \: \mathrm{MPa})^{2/3} 
+\end{equation}
+which is valid for $20 \: \mathrm{MPa} \leq f_{cm}(t) \leq 58$ MPa.
+Finally, for $f_{cm}(t) > 58$ MPa 
+\begin{equation}
+f_{tm}(t) = 2.12 \: \ln \left( 1 + 0.1 f_{cm}(t) \right ) 
+\end{equation}
+
+Following the guidelines from the Model Code 2010 (section 5.1.5.2),
+the fracture energy $G_f$ can be estimated from the mean compressive
+strength at 28 days using an empirical formula
+\begin{equation}
+G_{f,28} = 73 \times \left( f_{cm,28} \right)^{0.18}
+\label{gf}
+\end{equation}
+In this function, the mean compressive strength must be provided in MPa and
+the resulting fracture energy is in N/m.
+
+The growth in fracture
+energy is approximately proportional to the tensile strength. 
+The current value of fracture energy is very simply computed as 
+\begin{equation}
+ G_f(t) = G_{f,28} \times f_{tm}(t) / f_{tm,28}(28)
+\label{gf_time}
+\end{equation}
+
+
+The development of the mean compressive strength in time is adopted
+entirely from the Model Code 2010 (see section 5.1.9.1)
+\begin{equation}
+f_{cm}(t) = f_{cm,28} \exp{\left( fib\_s \: \left( 1 - \sqrt{28/t_e} \right) \right) }
+\label{fcm}
+\end{equation}
+where $fib\_s$ is a cement-type dependent coefficient (0.38 for cement 32.5 N; 0.25 for 32.5 R and 42.5 N; 0.2 for 42.5 R and 52.5 N and R), $t_e$ is the equivalent age and $f_{cm,28}$ is the mean compressive strength at the age of 28 days. 
+
+For some concretes the prediction formulae do not provide accurate predictions, therefore it is possible to scale the evolution of tensile strength and fracture energy by providing their 28-day values \param{ft28} and \param{gf28}. 
+
+The model description and parameters are summarized in Tab.~\ref{mps_dam_table}.
+
+\begin{table}[!htb]
+\begin{mmt}
+\hline
+Description & MPS damage model for concrete creep with cracking\\
+& \textbf{(additionaly all parameters from Table \ref{mps_table})}\\
+\hline
+Record Format & \descitem{MPSDamMat} 
+\optelemparam{ft}{rn} 
+\optelemparam{gf}{rn} 
+\optelemstring{timeDepFracturing}
+\optelemparam{fib\_s}{rn}
+\optelemparam{ft28}{rn} 
+\optelemparam{gf28}{rn} 
+%
+\optelemparam{damlaw}{in}
+\optelemstring{isotropic}
+\optelemparam{checksnapback}{in}
+%          
+\\Parameters 
+&- \param{ft} tensile strength (constant in time)\\
+&- \param{gf} fracture energy (constant in time)\\
+&- \param{timeDepFracturing} string activating {\sl{fib}} MC 2010 prediction for 
+tensile strength and fracture energy + their time evolution\\
+&- \param{ft28} manual override for the {\sl{fib}} MC 2010 prediction of hydration-dependent tensile strength\\
+&- \param{gf28} manual override for the {\sl{fib}} MC 2010 prediction of hydration-dependent fracture energy\\
+&- \param{fib\_s} cement-type dependent coefficient (compulsory with \param{timeDepFracturing})\\ 
+&- \param{damageLaw} traction-separation law: 0 = exponential softening (default), 1 = linear softening, 6 = damage disabled \\
+&- \param{isotropic} string activating same reduction of stiffness after the onset of cracking both in in compression and tension (enables to use secant stiffness matrix for faster convergence)\\
+&- \param{checkSnapBack} switch for snap-back checking; 1 = activated (default), 0 = deactiavated\\
+%
+Supported modes& 3dMat, PlaneStress, PlaneStrain\\
+\hline
+\end{mmt}
+
+\caption{MPS damage--summary.}
+\label{mps_dam_table}
+
+\end{table}
+
+
+
+
 
 
 \clearpage
@@ -5706,6 +5951,11 @@ In Rock Under Compression, International Journal of Fracture Mechanics
 \bibitem{Vree:95} J.H.P. de Vree, W.A.M. Brekelmans, and M.A.J. van Gils: Comparison of nonlocal approaches in continuum damage mechanics. Computers and Structures 55(4), 581–588, 1995.
 \bibitem{Xi} Y. Xi, Z.P. Ba\v{z}ant, H.M. Jennings: Moisture Diffusion
   in Cementitious Materials, Advn Cem Bas Mat, 1994.
+\bibitem{Bazant-89-I} Z.P. Ba\v{z}ant, S. Prasannan: Solidification theory for concrete creep. {I}: Formulation. Journal of Engineering Mechanics 115(8), 1691–1703, 1989.
+\bibitem{Bazant-97-I} Z.P. Ba\v{z}ant, A.B. Hauggaard, F. Ulm: Microprestress-solidification theory for concrete creep. {I}: Aging and drying effects. Journal of Engineering Mechanics 123(11), 1188–1194, 1997.
+\bibitem{JirHav14a} M. Jir\'{a}sek, P. Havl\'{a}sek: Microprestress-Solidification Theory of Concrete Creep: Reformulation and Improvement. Cement and Concrete Research 60, 51–62, 2014.
+
+
 \end{thebibliography}
 
 \end{document}
