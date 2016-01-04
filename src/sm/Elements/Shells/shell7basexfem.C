@@ -78,7 +78,7 @@ Shell7BaseXFEM :: postInitialize()
     Shell7Base :: postInitialize();
     this->xMan =  this->giveDomain()->giveXfemManager();
     
-    ///@todo This needs to be updated dymically and not only initialized
+    ///TODO This needs to be updated dymically and not only initialized
     // Set up ordering arrays and arrays with the actived dofs
     int numEI = xMan->giveNumberOfEnrichmentItems();
     this->orderingArrays.resize(numEI);
@@ -99,7 +99,7 @@ Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteriaStatus *fcStat
 {
     
     // Compute necessary quantities for evaluation of failure criterias
-    ///@todo Ugly code and not tested in a while so probably broken
+    ///TODO Ugly code and not tested in a while so probably broken
 
     if ( DamagedNeighborLayeredStatus * status = dynamic_cast< DamagedNeighborLayeredStatus * >(fcStatus) ) {
         /*
@@ -146,7 +146,7 @@ Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteriaStatus *fcStat
     //switch ( fc->giveType() ) {
     //case FC_MaxShearStress:
     //    
-    //    this->computeDelaminatedInterfaceList(delaminatedInterfaceList); ///@todo remove the need for this method - JB
+    //    this->computeDelaminatedInterfaceList(delaminatedInterfaceList); ///TODO remove the need for this method - JB
     //    
     //    fc->quantities.resize(numInterfaces); // will overwrite this every time
     //    //fc->elQuantities[ this->giveNumber() - 1 ].
@@ -200,7 +200,7 @@ Interface
     } else if ( it == XfemElementInterfaceType ) {
         return static_cast< XfemElementInterface * >(this);
     } else {
-        return Shell7Base :: giveInterface(it); ///@todo remove
+        return Shell7Base :: giveInterface(it); ///TODO remove
     }
 }
 
@@ -314,7 +314,7 @@ void
 Shell7BaseXFEM :: edgeGiveUpdatedSolutionVector(FloatArray &answer, const int iedge, TimeStep *tStep)
 {
     Shell7Base :: edgeGiveUpdatedSolutionVector(answer, iedge, tStep);
-    answer.times(DISC_DOF_SCALE_FAC); ///@todo should this be here?
+    answer.times(DISC_DOF_SCALE_FAC); ///TODO should this be here?
 }
 
 
@@ -518,7 +518,7 @@ Shell7BaseXFEM :: edgeEvaluateLevelSet(const FloatArray &lCoords, EnrichmentItem
     // Evaluates the corresponding level set depending on the type of enrichment
     double levelSet = 0.0;
     if ( dynamic_cast< Delamination * >( ei ) ) {
-        double xiLoad = 0.0; ///@todo need info about load position
+        double xiLoad = 0.0; ///TODO need info about load position
         levelSet = xiLoad - dynamic_cast< Delamination * >( ei )->giveDelamXiCoord();
     } else if ( dynamic_cast< Crack * >( ei ) ) {
         FloatArray N;
@@ -779,8 +779,8 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
         Q.beLocalCoordSys(nCov);
         K.rotatedWith(Q,'t');   // rotate back to global coord system
 
-        ///@todo Use N*lambda and then apply plusProductUnsym instead;
-        this->computeTripleProduct(temp, lambda, K, lambda); ///@todo Fix JB 090814
+        ///TODO Use N*lambda and then apply plusProductUnsym instead;
+        this->computeTripleProduct(temp, lambda, K, lambda); ///TODO Fix JB 090814
         this->computeTripleProduct(tangent, N, temp, N);
         double dA = this->computeAreaAround(gp, xi);
         answerTemp.add(dA,tangent);
@@ -1349,7 +1349,7 @@ Shell7BaseXFEM :: computePressureTangentMatrixDis(FloatMatrix &KCC, FloatMatrix 
 
 
     FloatMatrix KCCtemp, KCDtemp, KDDtemp;
-    this->computeTripleProduct(KCCtemp, N, LCC, B );    ///@todo Fix 090814
+    this->computeTripleProduct(KCCtemp, N, LCC, B );    ///TODO Fix 090814
     this->computeTripleProduct(KCDtemp, N, LCD, B );
     this->computeTripleProduct(KDDtemp, N, LDD, B );
     
@@ -1367,7 +1367,7 @@ Shell7BaseXFEM :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
 {
     // Num refers in this case to  numerical integration in both in-plane and through the thickness.
     // For analytically integrated throught he thickness, see computeMassMatrix
-    ///@todo broken!
+    ///TODO broken!
 
 #if 0
     FloatMatrix mass, temp;
@@ -1506,7 +1506,7 @@ Shell7BaseXFEM :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iE
         FloatArray componentsTemp, coordsTemp(1);
         coordsTemp.at(1) = 0.0;
         edgeLoad->computeValueAt(componentsTemp, tStep, coordsTemp, VM_Total);
-        ///@todo Add support for load defined over certain area
+        ///TODO Add support for load defined over certain area
         //double xi = 0.0; // defaults to geometric midplane
         //if ( componentsTemp.giveSize() == 8 ) {
         //    xi = componentsTemp.at(8);   // use the 8th component to store the-xi coord where the load acts
@@ -2275,7 +2275,7 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
         InternalStateType type = ( InternalStateType ) internalVarsToExport.at(fieldNum);
         nodeNum = 1;
         
-        if ( 0 ) {
+        if ( 1 ) {
         // Recover shear stresses
         this->recoverShearStress(tStep);
         }
@@ -2409,7 +2409,7 @@ Shell7BaseXFEM :: giveFictiousNodeCoordsForExport(std::vector<FloatArray> &nodes
         localCoords.at(1) = nodeLocalXi1Coords.at(i);
         localCoords.at(2) = nodeLocalXi2Coords.at(i);
         localCoords.at(3) = nodeLocalXi3Coords.at(i);
-        ///@todo Check this Jim, you overwrite "localCoords" the the code above is useless.
+        ///TODO Check this Jim, you overwrite "localCoords" the the code above is useless.
         localCoords.beColumnOf(localNodeCoords,i);
 
         this->vtkEvalInitialGlobalCoordinateAt(localCoords, layer, nodes[i-1]);
@@ -2942,19 +2942,14 @@ Shell7BaseXFEM :: recoverShearStress(TimeStep *tStep)
     // Recover shear stresses at ip by numerical integration of the momentum balance through the thickness (overloaded from shell7base)
     // Kalla på SR-metod för lager i basklassen. om randvillkor eller annat behöver tas i beaktining kan det göras därefter. 
     
-    int numberOfLayers = this->layeredCS->giveNumberOfLayers();         int numThicknessIP = this->layeredCS->giveNumIntegrationPointsInLayer();        
-    if (numThicknessIP < 2) {
-        // Polynomial fit involves linear z-component at the moment
-        OOFEM_ERROR("To few thickness IP per layer to do polynomial fit");
-    }   
-    int numInPlaneIP = 6; ///@todo generalise this!
+    int numberOfLayers = this->layeredCS->giveNumberOfLayers();         
     
     // Check if delamination/CZ is active. Then use hasCohesiveZone to decide whether the cohforces need to be calculated (otherwise traction BC need to be found)
     // Find (possible) layer/interface BC, starting from bottom
     IntArray layerHasBC(numberOfLayers+1); 
     layerHasBC.zero();
     
-    bool hasDelamination = true;
+    bool hasDelamination = false;
     int numEI = this->xMan->giveNumberOfEnrichmentItems();
     for ( int i = 1; i <= numEI; i++ ) {
 
@@ -2968,12 +2963,19 @@ Shell7BaseXFEM :: recoverShearStress(TimeStep *tStep)
         }
     }
     
-    ///@todo add bottom/top BC
-    FloatMatrix SmatOld(3,numInPlaneIP); // 3 stress components (S_xz, S_yz, S_zz) * num of in plane ip 
-    FloatArray ddSmatOld(numInPlaneIP); // dSzz/dz of previous layer
-    SmatOld.zero();
+    ///TODO add bottom/top BC
     
     if ( hasDelamination ) {
+        int numInPlaneIP = 6; ///TODO generalise this 
+        int numThicknessIP = this->layeredCS->giveNumIntegrationPointsInLayer();        
+        if (numThicknessIP < 2) {
+            // Polynomial fit involves linear z-component at the moment
+            OOFEM_ERROR("To few thickness IP per layer to do polynomial fit");
+        }   
+        
+        FloatMatrix SmatOld(3,numInPlaneIP); // 3 stress components (S_xz, S_yz, S_zz) * num of in plane ip 
+        FloatArray ddSmatOld(numInPlaneIP); // dSzz/dz of previous layer
+        SmatOld.zero();
         double totalThickness = this->layeredCS->computeIntegralThick(); 
         double zeroThicknessLevel = - 0.5 * totalThickness;         // assumes midplane is the geometric midplane of layered structure.
         FloatMatrix dSmat(3,numInPlaneIP);                          // 3 stress components (S_xz, S_yz, S_zz) * num of in plane ip 
@@ -2983,7 +2985,7 @@ Shell7BaseXFEM :: recoverShearStress(TimeStep *tStep)
             
             // Bör det vara this här istället för Shell7Base?
 //             Shell7Base :: giveLayerContributionToSR(dSmat, dSmatLayerIP, layer, zeroThicknessLevel, tStep); // NB: performed in global system
-            this->giveLayerContributionToSR(dSmat, dSmatLayerIP, layer, ddSmatOld, zeroThicknessLevel, tStep); // NB: performed in global system
+            this->giveLayerContributionToSR(dSmat, dSmatLayerIP, layer, zeroThicknessLevel, tStep); // NB: performed in global system
             
 //             Shell7Base :: updateLayerStressesSR(dSmatLayerIP, SmatOld, layer);
             this->updateLayerTransvStressesSR(dSmatLayerIP, SmatOld, layer);
@@ -2994,7 +2996,7 @@ Shell7BaseXFEM :: recoverShearStress(TimeStep *tStep)
             if (this->giveGlobalNumber() == 126) {
                 SmatOld.printYourself();
             }
-            zeroThicknessLevel += this->layeredCS->giveLayerThickness(layer); ///@todo add jump?
+            zeroThicknessLevel += this->layeredCS->giveLayerThickness(layer); ///TODO add jump?
             
             // Add traction from delamination CZ. NB: assumes same number order of GPs in interface and shell elements
             if ( layerHasBC.at(layer+1) ) {

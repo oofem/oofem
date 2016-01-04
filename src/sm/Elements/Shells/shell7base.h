@@ -237,14 +237,16 @@ protected:
     
     // Recovery of through thickness stresses by momentum balance
     enum stressRecoveryType {copyIPvalue, LSfit, L2fit}; 
+    void giveTractionBC(FloatArray &tractionTop, FloatArray &tractionBtm, TimeStep *tStep);
     void recoverValuesFromIP(std::vector<FloatArray> &nodes, int layer, InternalStateType type, TimeStep *tStep, stressRecoveryType SRtype = copyIPvalue);
     void CopyIPvaluesToNodes(std::vector<FloatArray> &recoveredValues, int layer, InternalStateType type, TimeStep *tStep);
     void nodalLeastSquareFitFromIP(std::vector<FloatArray> &recoveredValues, int layer, InternalStateType type, TimeStep *tStep);
     virtual void recoverShearStress(TimeStep *tStep);
-    void giveLayerContributionToSR(FloatMatrix &dSmat, FloatMatrix &dSmatLayerIP, int layer, FloatArray &ddSmatOld, double zeroThicknessLevel, TimeStep *tStep);
+    void giveLayerContributionToSR(FloatMatrix &dSmat, FloatMatrix &dSmatLayerIP, int layer, double zeroThicknessLevel, TimeStep *tStep);
+    void fitRecoveredStress2BC(std::vector<FloatMatrix> &answer, std::vector<FloatMatrix> &dSmat, std::vector<FloatMatrix> &dSmatIP, FloatMatrix &SmatOld, FloatArray &tractionBtm, FloatArray &tractionTop, double zeroThicknessLevel, FloatArray fulfillBC);
     void updateLayerTransvStressesSR(FloatMatrix &dSmatLayerIP, FloatMatrix &SmatOld, int layer);
     void updateLayerTransvShearStressesSR(FloatMatrix &dSmatLayerIP, FloatMatrix &SmatOld, int layer);
-    void updateLayerTransvNormalStressSR(FloatArray &dSzzMatLayerIP, FloatArray &SzzMatOld, int layer);
+    void updateLayerTransvNormalStressSR(FloatMatrix &dSzzMatLayerIP, FloatArray &SzzMatOld, int layer);
 //    void computeBmatrixForStressRecAt(FloatArray &lcoords, FloatMatrix &answer, int layer, bool intSzz = false);
 //     void givePolynomial2GradientForStressRecAt(FloatArray &answer, FloatArray &coords);
     void giveZintegratedPolynomialGradientForStressRecAt(FloatArray &answer, FloatArray &coords);
