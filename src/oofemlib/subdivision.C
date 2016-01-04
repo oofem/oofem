@@ -68,7 +68,7 @@
 #endif
 
 namespace oofem {
-#define __VERBOSE_PARALLEL
+//#define __VERBOSE_PARALLEL
 #define DEBUG_CHECK
 //#define DEBUG_INFO
 //#define DEBUG_SMOOTHING
@@ -3964,7 +3964,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     ( * dNew )->commitTransactions( ( * dNew )->giveTransactionManager() );
 
     // print some statistics
-    if (1) {
+    if (0) {
       for (int in=1; in<=(*dNew)->giveNumberOfDofManagers(); in++) {
         DynamicInputRecord ir;
         (*dNew)->giveDofManager(in)->giveInputRecord(ir);
