@@ -96,9 +96,8 @@ public:
 
 
     // transformation
-    virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
-    int computeIFGToLRotationMtrx(FloatMatrix &answer);
-    virtual int computeLoadGToLRotationMtrx(FloatMatrix &answer);
+    bool computeGtoLRotationMatrix(FloatMatrix &answer);
+    int computeLoadGToLRotationMtrx(FloatMatrix &answer);
     void computeLToDirectorRotationMatrix(FloatMatrix &answer1, FloatMatrix &answer2, FloatMatrix &answer3, FloatMatrix &answer4);
     virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
 

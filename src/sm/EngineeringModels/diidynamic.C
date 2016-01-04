@@ -72,7 +72,7 @@ NumericalMethod *DIIDynamic :: giveNumericalMethod(MetaStep *mStep)
 
     nMethod.reset( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
     if ( !nMethod ) {
-        OOFEM_ERROR("linear solver creation failed");
+        OOFEM_ERROR("linear solver creation failed for lstype %d", solverType);
     }
 
     return nMethod.get();

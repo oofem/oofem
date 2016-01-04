@@ -112,7 +112,7 @@ NumericalMethod *NonStationaryTransportProblem :: giveNumericalMethod(MetaStep *
     if (!linSolver) 
         linSolver.reset( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
         if ( !linSolver ) {
-            OOFEM_ERROR("linear solver creation failed");
+            OOFEM_ERROR("linear solver creation failed for lstype %d", solverType);
         }
     return linSolver.get();
 }

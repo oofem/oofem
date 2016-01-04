@@ -84,7 +84,7 @@ NumericalMethod *FreeWarping :: giveNumericalMethod(MetaStep *mStep)
     }
 
     if ( !nMethod ) {
-        OOFEM_ERROR("linear solver creation failed");
+        OOFEM_ERROR("linear solver creation failed for lstype %d", solverType);
     }
 
     return nMethod.get();
