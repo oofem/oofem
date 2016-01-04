@@ -184,7 +184,7 @@ void Quad1_ht :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 
 void Quad1_ht :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
-    int result = 0;
+    int i, result = 0;
     WCRec p [ 4 ];
     double s [ 4 ];
     InternalStateType itype = gc.giveIntVarType();
@@ -207,7 +207,7 @@ void Quad1_ht :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 
         int indx = gc.giveIntVarIndx();
 
-        for ( int i = 1; i <= 4; i++ ) {
+        for ( i = 1; i <= 4; i++ ) {
             s [ i - 1 ] = v [ i - 1 ].at(indx);
         }
 
@@ -233,7 +233,7 @@ void Quad1_ht :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
         }
 
         FloatArray r;
-        for ( int i = 0; i < 4; i++ ) {
+        for ( i = 0; i < 4; i++ ) {
             this->giveNode(i + 1)->giveUnknownVector(r, dofMask, VM_Total, tStep);
             s [ i ] = r.at(1);
 
