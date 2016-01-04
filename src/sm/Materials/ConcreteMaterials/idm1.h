@@ -47,7 +47,7 @@
 /*
  * Selects the use of mapped strain or projected strain from element.
  */
-//#define IDM_USE_MAPPEDSTRAIN
+#define IDM_USE_MAPPEDSTRAIN
 
 #include "material.h"
 #include "Materials/linearelasticmaterial.h"
@@ -173,8 +173,20 @@ protected:
     /// Parameters used in Hordijk's softening law
     double c1, c2;
 
-    /// Type characterizing the algorithm used to compute equivalent strain measure.
-    enum EquivStrainType { EST_Unknown, EST_Mazars, EST_Rankine_Smooth, EST_Rankine_Standard, EST_ElasticEnergy, EST_ElasticEnergyPositiveStress, EST_ElasticEnergyPositiveStrain, EST_Mises, EST_Griffith };
+    /** Type characterizing the algorithm used to compute equivalent strain measure.
+        Note that the assigned numbers to enum values have to correspond to values
+        used in initializeFrom to resovle EquivStrainType. If not, the consistency 
+        between initializeFrom and giveInputRecord methods is lost.
+     */
+    enum EquivStrainType { EST_Mazars=0, 
+                           EST_Rankine_Smooth=1,
+                           EST_ElasticEnergy=2,
+                           EST_Mises=3,
+                           EST_Rankine_Standard=4,
+                           EST_ElasticEnergyPositiveStress=5,
+                           EST_ElasticEnergyPositiveStrain=6,
+                           EST_Griffith=7,
+                           EST_Unknown = 100};
     /// Parameter specifying the definition of equivalent strain.
     EquivStrainType equivStrainType;
 
