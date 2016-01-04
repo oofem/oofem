@@ -40,12 +40,18 @@
 
 namespace oofem {
 Structural3DElement :: Structural3DElement(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain)
-    // Constructor. Creates an element with number n, belonging to aDomain.
+    NLStructuralElement(n, aDomain),
+    matRotation(false)
 {
-    //nlGeometry = 0; // Geometrical nonlinearities disabled as default
 }
 
+
+IRResultType
+Structural3DElement :: initializeFrom(InputRecord *ir)
+{
+    this->matRotation = ir->hasField(_IFT_Structural3DElement_materialCoordinateSystem);
+    return NLStructuralElement :: initializeFrom(ir);
+}
 
 
 void
@@ -110,15 +116,79 @@ Structural3DElement :: giveMaterialMode()
 
 
 void
-Structural3DElement :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+Structural3DElement :: giveMaterialOrientationAt(FloatArray &x, FloatArray &y, FloatArray &z, const FloatArray &lcoords)
 {
-    this->giveStructuralCrossSection()->giveRealStress_3d(answer, gp, strain, tStep);
+    if ( this->elemLocalCS.isNotEmpty() ) { // User specified orientation
+        x.beColumnOf(this->elemLocalCS, 1);
+        y.beColumnOf(this->elemLocalCS, 2);
+        z.beColumnOf(this->elemLocalCS, 3);
+    } else {
+        ///@todo This is subject to change. I'm not sure which is the best way to define a local c.s.
+        FloatMatrix jac;
+        FloatArray help;
+        this->giveInterpolation()->giveJacobianMatrixAt( jac, lcoords, FEIElementGeometryWrapper(this) );
+        x.beColumnOf(jac, 1); // This is {dx/dxi, dy/dxi, dz/dxi}
+        x.normalize();
+        help.beColumnOf(jac, 2);
+        z.beVectorProductOf(x, help); // Normal to the xi-eta plane.
+        z.normalize();
+        y.beVectorProductOf(z, x);
+    }
+}
+
+
+void
+Structural3DElement :: computeStressVector(FloatArray &answer, const FloatArray &e, GaussPoint *gp, TimeStep *tStep)
+{
+    if ( this->matRotation ) {
+        ///@todo This won't work properly with "useUpdatedGpRecord" (!)
+        FloatArray x, y, z;
+        FloatArray rotStrain, s;
+
+        this->giveMaterialOrientationAt( x, y, z, gp->giveNaturalCoordinates() );
+        // Transform from global c.s. to material c.s.
+        rotStrain = {
+            e(0) * x(0) * x(0) + e(5) * x(0) * x(1) + e(1) * x(1) * x(1) + e(4) * x(0) * x(2) + e(3) * x(1) * x(2) + e(2) * x(2) * x(2),
+            e(0) * y(0) * y(0) + e(5) * y(0) * y(1) + e(1) * y(1) * y(1) + e(4) * y(0) * y(2) + e(3) * y(1) * y(2) + e(2) * y(2) * y(2),
+            e(0) * z(0) * z(0) + e(5) * z(0) * z(1) + e(1) * z(1) * z(1) + e(4) * z(0) * z(2) + e(3) * z(1) * z(2) + e(2) * z(2) * z(2),
+            2 * e(0) * y(0) * z(0) + e(4) * y(2) * z(0) + 2 * e(1) * y(1) * z(1) + e(3) * y(2) * z(1) + e(5) * ( y(1) * z(0) + y(0) * z(1) ) + ( e(4) * y(0) + e(3) * y(1) + 2 * e(2) * y(2) ) * z(2),
+            2 * e(0) * x(0) * z(0) + e(4) * x(2) * z(0) + 2 * e(1) * x(1) * z(1) + e(3) * x(2) * z(1) + e(5) * ( x(1) * z(0) + x(0) * z(1) ) + ( e(4) * x(0) + e(3) * x(1) + 2 * e(2) * x(2) ) * z(2),
+            2 * e(0) * x(0) * y(0) + e(4) * x(2) * y(0) + 2 * e(1) * x(1) * y(1) + e(3) * x(2) * y(1) + e(5) * ( x(1) * y(0) + x(0) * y(1) ) + ( e(4) * x(0) + e(3) * x(1) + 2 * e(2) * x(2) ) * y(2)
+        };
+        this->giveStructuralCrossSection()->giveRealStress_3d(s, gp, rotStrain, tStep);
+        answer = {
+            s(0) * x(0) * x(0) + 2 * s(5) * x(0) * y(0) + s(1) * y(0) * y(0) + 2 * ( s(4) * x(0) + s(3) * y(0) ) * z(0) + s(2) * z(0) * z(0),
+            s(0) * x(1) * x(1) + 2 * s(5) * x(1) * y(1) + s(1) * y(1) * y(1) + 2 * ( s(4) * x(1) + s(3) * y(1) ) * z(1) + s(2) * z(1) * z(1),
+            s(0) * x(2) * x(2) + 2 * s(5) * x(2) * y(2) + s(1) * y(2) * y(2) + 2 * ( s(4) * x(2) + s(3) * y(2) ) * z(2) + s(2) * z(2) * z(2),
+            y(2) * ( s(5) * x(1) + s(1) * y(1) + s(3) * z(1) ) + x(2) * ( s(0) * x(1) + s(5) * y(1) + s(4) * z(1) ) + ( s(4) * x(1) + s(3) * y(1) + s(2) * z(1) ) * z(2),
+            y(2) * ( s(5) * x(0) + s(1) * y(0) + s(3) * z(0) ) + x(2) * ( s(0) * x(0) + s(5) * y(0) + s(4) * z(0) ) + ( s(4) * x(0) + s(3) * y(0) + s(2) * z(0) ) * z(2),
+            y(1) * ( s(5) * x(0) + s(1) * y(0) + s(3) * z(0) ) + x(1) * ( s(0) * x(0) + s(5) * y(0) + s(4) * z(0) ) + ( s(4) * x(0) + s(3) * y(0) + s(2) * z(0) ) * z(1)
+        };
+    } else {
+        this->giveStructuralCrossSection()->giveRealStress_3d(answer, gp, e, tStep);
+    }
 }
 
 void
 Structural3DElement :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
     this->giveStructuralCrossSection()->giveStiffnessMatrix_3d(answer, rMode, gp, tStep);
+    if ( this->matRotation ) {
+        FloatArray x, y, z;
+        FloatMatrix Q;
+
+        this->giveMaterialOrientationAt( x, y, z, gp->giveNaturalCoordinates() );
+
+        Q = {
+            { x(0) * x(0), x(1) * x(1), x(2) * x(2), x(1) * x(2), x(0) * x(2), x(0) * x(1) },
+            { y(0) * y(0), y(1) * y(1), y(2) * y(2), y(1) * y(2), y(0) * y(2), y(0) * y(1) },
+            { z(0) * z(0), z(1) * z(1), z(2) * z(2), z(1) * z(2), z(0) * z(2), z(0) * z(1) },
+            { 2 * y(0) * z(0), 2 * y(1) * z(1), 2 * y(2) * z(2), y(2) * z(1) + y(1) * z(2), y(2) * z(0) + y(0) * z(2), y(1) * z(0) + y(0) * z(1) },
+            { 2 * x(0) * z(0), 2 * x(1) * z(1), 2 * x(2) * z(2), x(2) * z(1) + x(1) * z(2), x(2) * z(0) + x(0) * z(2), x(1) * z(0) + x(0) * z(1) },
+            { 2 * x(0) * y(0), 2 * x(1) * y(1), 2 * x(2) * y(2), x(2) * y(1) + x(1) * y(2), x(2) * y(0) + x(0) * y(2), x(1) * y(0) + x(0) * y(1) }
+        };
+        answer.rotatedWith(Q, 't');
+    }
 }
 
 
@@ -131,12 +201,11 @@ Structural3DElement :: giveDofManDofIDMask(int inode, IntArray &answer) const
 
 int 
 Structural3DElement :: computeNumberOfDofs() 
-{ 
+{
     ///@todo move one hiearchy up and generalize
     IntArray dofIdMask; 
     this->giveDofManDofIDMask(-1, dofIdMask); // ok for standard elements
     return this->giveInterpolation()->giveNumberOfNodes() * dofIdMask.giveSize(); 
-  
 }
 
 

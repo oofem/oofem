@@ -1,0 +1,57 @@
+pfemStructureInteraction.out.sm
+dam calculated as incremental linear dynamic problem
+DIIDynamic nsteps 3 nmodules 1 deltaT 1.e-3 renumber 1 delta 0.005
+errorcheck
+domain 2dPlaneStress
+OutputManager tstep_all dofman_all element_all
+ndofman 22 nelem 10 ncrosssect 1 nmat 1 nbc 11 nic 0 nltf 1
+node 1 coords 2 20.0 0.0 bc 2 1 1
+node 2 coords 2 21.0 0.0 bc 2 1 1
+node 3 coords 2 20.0 1.0 bc 2 0 0
+node 4 coords 2 21.0 1.0 bc 2 0 0
+node 5 coords 2 20.0 2.0 bc 2 0 0
+node 6 coords 2 21.0 2.0 bc 2 0 0
+node 7 coords 2 20.0 3.0 bc 2 0 0
+node 8 coords 2 21.0 3.0 bc 2 0 0
+node 9 coords 2 20.0 4.0 bc 2 0 0
+node 10 coords 2 21.0 4.0 bc 2 0 0
+node 11 coords 2 20.0 5.0 bc 2 0 0
+node 12 coords 2 21.0 5.0 bc 2 0 0
+node 13 coords 2 20.0 6.0 bc 2 0 0
+node 14 coords 2 21.0 6.0 bc 2 0 0
+node 15 coords 2 20.0 7.0 bc 2 0 0
+node 16 coords 2 21.0 7.0 bc 2 0 0
+node 17 coords 2 20.0 8.0 bc 2 0 0
+node 18 coords 2 21.0 8.0 bc 2 0 0
+node 19 coords 2 20.0 9.0 bc 2 0 0
+node 20 coords 2 21.0 9.0 bc 2 0 0
+node 21 coords 2 20.0 10.0 bc 2 0 0
+node 22 coords 2 21.0 10.0 bc 2 0 0
+quad1planestrain 1 nodes 4 1 2 4 3 crossSect 1 mat 1 boundaryLoads 2 2 4
+quad1planestrain 2 nodes 4 3 4 6 5 crossSect 1 mat 1 boundaryLoads 2 3 4
+quad1planestrain 3 nodes 4 5 6 8 7 crossSect 1 mat 1 boundaryLoads 2 4 4
+quad1planestrain 4 nodes 4 7 8 10 9 crossSect 1 mat 1 boundaryLoads 2 5 4
+quad1planestrain 5 nodes 4 9 10 12 11 crossSect 1 mat 1 boundaryLoads 2 6 4
+quad1planestrain 6 nodes 4 11 12 14 13 crossSect 1 mat 1 boundaryLoads 2 7 4
+quad1planestrain 7 nodes 4 13 14 16 15 crossSect 1 mat 1 boundaryLoads 2 8 4
+quad1planestrain 8 nodes 4 15 16 18 17 crossSect 1 mat 1 boundaryLoads 2 9 4
+quad1planestrain 9 nodes 4 17 18 20 19 crossSect 1 mat 1 boundaryLoads 2 10 4
+quad1planestrain 10 nodes 4 19 20 22 21 crossSect 1 mat 1 boundaryLoads 2 11 4
+SimpleCS 1 thick 1.0
+IsoLE 1 d 2500.0 E 30.e9 n 0.2 tAlpha 0.000012
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
+InteractionLoad 2 loadTimeFunction 1 Components 4 1.0 0.0 1.0 0.0 loadType 3 ndofs 2 csType 0 coupledparticles 2 42 21
+InteractionLoad 3 loadTimeFunction 1 Components 4 1.0 0.0 1.0 0.0 loadType 3 ndofs 2 csType 0 coupledparticles 2 63 42
+InteractionLoad 4 loadTimeFunction 1 Components 4 1.0 0.0 1.0 0.0 loadType 3 ndofs 2 csType 0 coupledparticles 2 84 63
+InteractionLoad 5 loadTimeFunction 1 Components 4 1.0 0.0 1.0 0.0 loadType 3 ndofs 2 csType 0 coupledparticles 2 105 84
+InteractionLoad 6 loadTimeFunction 1 Components 4 1.0 0.0 1.0 0.0 loadType 3 ndofs 2 csType 0 coupledparticles 2 126 105
+InteractionLoad 7 loadTimeFunction 1 Components 4 1.0 0.0 1.0 0.0 loadType 3 ndofs 2 csType 0 coupledparticles 2 147 126
+InteractionLoad 8 loadTimeFunction 1 Components 4 1.0 0.0 1.0 0.0 loadType 3 ndofs 2 csType 0 coupledparticles 2 168 147
+InteractionLoad 9 loadTimeFunction 1 Components 4 1.0 0.0 1.0 0.0 loadType 3 ndofs 2 csType 0 coupledparticles 2 189 158
+InteractionLoad 10 loadTimeFunction 1 Components 4 1.0 0.0 1.0 0.0 loadType 3 ndofs 2 csType 0 coupledparticles 2 210 189
+InteractionLoad 11 loadTimeFunction 1 Components 4 1.0 0.0 1.0 0.0 loadType 3 ndofs 2 csType 0 coupledparticles 2 231 210
+ConstantFunction 1 f(t) 1.0
+
+#%BEGIN_CHECK%
+#NODE tStep 10 number 22 dof 1 unknown d value 1.32749369e-02 tolerance 1.e-05
+#%END_CHECK%

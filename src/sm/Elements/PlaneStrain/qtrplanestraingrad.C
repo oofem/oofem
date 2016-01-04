@@ -75,7 +75,7 @@ IRResultType
 QTrPlaneStrainGrad :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 4;
-    return StructuralElement :: initializeFrom(ir);
+    return QTrPlaneStrain :: initializeFrom(ir);
 }
 
 void
@@ -89,11 +89,9 @@ QTrPlaneStrainGrad :: computeGaussPoints()
 }
 
 void
-QTrPlaneStrainGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
+QTrPlaneStrainGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatArray &answer)
 {
-    FloatArray n;
-    this->interpolation_lin.evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-    answer.beNMatrixOf(n, 1);
+    this->interpolation_lin.evalN( answer, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 void

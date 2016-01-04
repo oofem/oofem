@@ -76,6 +76,8 @@ public:
     virtual void edgeLocal2global(FloatArray &answer, int iedge,
                                   const FloatArray &lcoords, const FEICellGeometry &cellgeo) { }
 
+    virtual int giveNumberOfNodes() const { return 2; }
+
     virtual IntegrationRule *giveIntegrationRule(int order);
 };
 } // end namespace oofem

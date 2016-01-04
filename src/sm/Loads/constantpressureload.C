@@ -41,7 +41,8 @@
 namespace oofem {
 REGISTER_BoundaryCondition(ConstantPressureLoad);
 
-ConstantPressureLoad :: ConstantPressureLoad(int i, Domain *d) : BoundaryLoad(i, d) {
+ConstantPressureLoad :: ConstantPressureLoad(int i, Domain *d) : BoundaryLoad(i, d)
+{
     this->loadOffset = 0.0;
 }
 
@@ -50,6 +51,12 @@ ConstantPressureLoad :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     IR_GIVE_OPTIONAL_FIELD(ir, this->loadOffset, _IFT_ConstantPressureLoad_LoadOffset);
+#if 1
+    if ( ir->hasField(_IFT_GeneralBoundaryCondition_dofs) ) {
+        OOFEM_WARNING("Constant pressure load should not specify DOFs");
+        return IRRT_BAD_FORMAT;
+    }
+#endif
     return BoundaryLoad :: initializeFrom(ir);
 }
 
@@ -68,4 +75,11 @@ ConstantPressureLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, cons
     answer = componentArray;
     answer.times(factor);
 }
+
+void
+ConstantPressureLoad :: computeValues(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, const IntArray &dofids, ValueModeType mode)
+{
+    OOFEM_ERROR("Should not be called for constant pressure loads");
+}
+
 } // end namespace oofem

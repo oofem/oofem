@@ -74,6 +74,13 @@ FluidCrossSection :: checkConsistency()
 }
 
 
+double
+FluidCrossSection :: giveDensity(GaussPoint *gp)
+{
+    return this->domain->giveMaterial(this->matNumber)->give('d', gp);
+}
+
+
 int
 FluidCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep)
 {

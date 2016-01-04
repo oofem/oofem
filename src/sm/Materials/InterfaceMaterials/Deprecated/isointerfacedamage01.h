@@ -35,8 +35,8 @@
 #ifndef isointerfacedamage01_h
 #define isointerfacedamage01_h
 
-#include "../sm/Materials/structuralmaterial.h"
-#include "../sm/Materials/structuralms.h"
+#include "../structuralinterfacematerial.h"
+#include "../structuralinterfacematerialstatus.h"
 
 ///@name Input fields for IsoInterfaceDamageMaterial
 //@{
@@ -46,17 +46,15 @@
 #define _IFT_IsoInterfaceDamageMaterial_ft "ft"
 #define _IFT_IsoInterfaceDamageMaterial_gf "gf"
 #define _IFT_IsoInterfaceDamageMaterial_maxOmega "maxomega"
-#define _IFT_IsoInterfaceDamageMaterial_talpha "talpha"
 #define _IFT_IsoInterfaceDamageMaterial_beta "beta"
 //@}
 
 namespace oofem {
-class GaussPoint;
 
 /**
  * This class implements associated Material Status to IsoInterfaceDamageMaterial.
  */
-class IsoInterfaceDamageMaterialStatus : public StructuralMaterialStatus
+class IsoInterfaceDamageMaterialStatus : public StructuralInterfaceMaterialStatus
 {
 protected:
     /// Scalar measure of the largest equivalent displacement ever reached in material.
@@ -67,6 +65,7 @@ protected:
     double damage;
     /// Non-equilibrated damage level of material.
     double tempDamage;
+
 public:
     /// Constructor
     IsoInterfaceDamageMaterialStatus(int n, Domain * d, GaussPoint * g);
@@ -111,7 +110,7 @@ public:
  * is governed by normal component of generalized strain vector (normal relative displacement)
  * by an exponential softening law.
  */
-class IsoInterfaceDamageMaterial : public StructuralMaterial
+class IsoInterfaceDamageMaterial : public StructuralInterfaceMaterial
 {
 protected:
     /// Coefficient of thermal dilatation.
@@ -137,36 +136,18 @@ public:
     /// Destructor
     virtual ~IsoInterfaceDamageMaterial();
 
-    virtual int hasNonLinearBehaviour()   { return 1; }
+    virtual int hasNonLinearBehaviour() { return 1; }
+    virtual bool hasAnalyticalTangentStiffness() const { return true; }
 
-    virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveInputRecordName() const { return _IFT_IsoInterfaceDamageMaterial_Name; }
     virtual const char *giveClassName() const { return "IsoInterfaceDamageMaterial"; }
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseMode mode,
-                                               GaussPoint *gp,
-                                               TimeStep *tStep);
-
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                                      const FloatArray &reducedStrain, TimeStep *tStep);
-
-    virtual void giveStiffnessMatrix(FloatMatrix &answer,
-                                     MatResponseMode mode,
-                                     GaussPoint *gp,
-                                     TimeStep *tStep);
+    virtual void giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep);
+    virtual void give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
-    /**
-     * Computes the equivalent strain measure from given strain vector (full form).
-     * @param[out] kappa Return parameter containing the corresponding equivalent strain.
-     * @param strain Total strain vector in full form.
-     * @param gp Integration point.
-     * @param tStep Time step.
-     */
-    virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    void computeEquivalentStrain(double &kappa, const FloatArray &jump, GaussPoint *gp, TimeStep *tStep);
 
     /**
      * computes the value of damage parameter omega, based on given value of equivalent strain.
@@ -181,12 +162,6 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new IsoInterfaceDamageMaterialStatus(1, domain, gp); }
-
-protected:
-    void give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
-                                                GaussPoint *gp, TimeStep *tStep);
-    void give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
-                                                GaussPoint *gp, TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // isointerfacedamage01_h

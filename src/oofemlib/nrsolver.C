@@ -90,6 +90,8 @@ NRSolver :: NRSolver(Domain *d, EngngModel *m) :
 
     smConstraintVersion = 0;
     mCalcStiffBeforeRes = true;
+
+    maxIncAllowed = 1.0e10;
 }
 
 
@@ -175,14 +177,19 @@ NRSolver :: initializeFrom(InputRecord *ir)
     }
 
  
+    this->constrainedNRminiter = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->constrainedNRminiter, _IFT_NRSolver_constrainedNRminiter);
+    this->constrainedNRFlag = this->constrainedNRminiter != 0;
+
+
+    IR_GIVE_OPTIONAL_FIELD(ir, this->maxIncAllowed, _IFT_NRSolver_maxinc);
 
     return SparseNonLinearSystemNM :: initializeFrom(ir);
 }
 
 
 NM_Status
-NRSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
+NRSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0, FloatArray *iR,
                   FloatArray &X, FloatArray &dX, FloatArray &F,
                   const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                   int &nite, TimeStep *tStep)
@@ -243,10 +250,17 @@ NRSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
     }
 
     nite = 0;
-    do {
+    for ( nite = 0; ; ++nite ) {
         // Compute the residual
         engngModel->updateComponent(tStep, InternalRhs, domain);
-        rhs.beDifferenceOf(RT, F);
+        if (nite || iR == NULL) {
+            rhs.beDifferenceOf(RT, F);
+        } else {
+            rhs = R;
+            if (iR) {
+                rhs.add(*iR); // add initial guess
+            }
+        }
         if ( this->prescribedDofsFlag ) {
             this->applyConstraintsToLoadIncrement(nite, k, rhs, rlm, tStep);
         }
@@ -291,19 +305,37 @@ NRSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
         } else if ( this->constrainedNRFlag && ( nite > this->constrainedNRminiter ) ) {
             ///@todo This doesn't check units, it is nonsense and must be corrected / Mikael
             if ( this->forceErrVec.computeSquaredNorm() > this->forceErrVecOld.computeSquaredNorm() ) {
-                printf("Constraining increment to be %e times full increment...\n", this->constrainedNRalpha);
+                OOFEM_LOG_INFO("Constraining increment to be %e times full increment...\n", this->constrainedNRalpha);
                 ddX.times(this->constrainedNRalpha);
-            }   
+            }
             //this->giveConstrainedNRSolver()->solve(X, & ddX, this->forceErrVec, this->forceErrVecOld, status, tStep);
         }
+
+
+        /////////////////////////////////////////
+
+        double maxInc = 0.0;
+        for(double inc : ddX) {
+        	if(fabs(inc) > maxInc) {
+        		maxInc = fabs(inc);
+        	}
+        }
+
+        if(maxInc > maxIncAllowed) {
+        	printf("Restricting increment.\n");
+        	ddX.times(maxIncAllowed/maxInc);
+        }
+
+        /////////////////////////////////////////
+
+
         X.add(ddX);
         dX.add(ddX);
         tStep->incrementStateCounter(); // update solution state counter
         tStep->incrementSubStepNumber();
-        nite++; // iteration increment
 
         engngModel->giveExportModuleManager()->doOutput(tStep, true);
-    } while ( true ); // end of iteration
+    }
 
     status |= NM_Success;
     solved = 1;
@@ -765,7 +797,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
             if ( this->constrainedNRFlag ) {
                 // store the errors from the current iteration for use in the next
                 forceErrVec.at(1) = forceErr;
-            }       
+            }
         }
 
         if ( rtold.at(1) > 0.0 ) {

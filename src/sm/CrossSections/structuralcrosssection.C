@@ -65,7 +65,7 @@ StructuralCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp, c
     } else {
         // This should never happen ?
         ///@todo this part only works for simple cross section and will be removed soon when new interface elements are done /JB
-        StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveMaterial() );
+        StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
         if ( mat->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
             mat->giveRealStressVector(answer, gp, strain, tStep);
         } else {

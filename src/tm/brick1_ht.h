@@ -67,7 +67,6 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_Brick1_ht_Name; }
     virtual const char *giveClassName() const { return "Brick1_ht"; }
 
-    // virtual int computeNumberOfDofs() { return ( emode == HeatTransferEM ) ? 8 : 16; }
     virtual int computeNumberOfDofs() { return 8; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _3dHeat; }

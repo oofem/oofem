@@ -111,7 +111,6 @@ IsotropicDamageMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *
     FloatMatrix de;
     double f, equivStrain, tempKappa = 0.0, omega = 0.0;
 
-    //this->initGpForNewStep(gp);
     this->initTempStatus(gp);
     
     // subtract stress independent part
@@ -296,7 +295,6 @@ IsotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Inter
         answer.at(1) = status->giveCrackAngle();
         return 1;
     } else if ( type == IST_CrackVector ) {
-        answer.resize(3);
         status->giveCrackVector(answer);
         return 1;
 

@@ -57,10 +57,9 @@ public:
     virtual double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual int giveNumberOfNodes() const { return 4; }
-    
+
     // Edge
     virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge);
     virtual int giveNumberOfEdges() const { return 4; }
@@ -74,9 +73,11 @@ public:
 
     virtual IntegrationRule *giveIntegrationRule(int order);
 
+
+    void giveDerivatives(FloatMatrix &dn, const FloatArray &lc);
+
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
-    void giveDerivatives(FloatMatrix &dn, const FloatArray &lc);
 };
 } // end namespace oofem
 #endif // fei2dquadlin_h

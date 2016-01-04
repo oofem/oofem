@@ -33,6 +33,7 @@
  */
 
 #include "cbselement.h"
+#include "dof.h"
 #include "node.h"
 #include "integrationrule.h"
 #include "intarray.h"

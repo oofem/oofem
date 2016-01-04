@@ -62,7 +62,7 @@ void TransportExternalForceAssembler :: vectorFromElement(FloatArray &vec, Eleme
     telem->computeBCVectorAt(vec, tStep, mode);
     FloatArray tmp;
     telem->computeInternalSourceRhsVectorAt(tmp, tStep, mode);
-    vec.add(tmp);    
+    vec.add(tmp);
 }
 
 
@@ -87,7 +87,6 @@ void IntSourceLHSAssembler :: matrixFromElement(FloatMatrix &answer, Element &el
 }
 
 
-
 NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel *_master = NULL) : StationaryTransportProblem(i, _master)
 {
     ndomains = 1;
@@ -97,13 +96,11 @@ NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel
     dtFunction = 0;
     internalVarUpdateStamp = 0;
     changingProblemSize = false;
-    linSolver = NULL;
     solverType = ST_Direct;
 }
 
 NonStationaryTransportProblem :: ~NonStationaryTransportProblem()
 {
-    delete linSolver;
 }
 
 
@@ -112,16 +109,12 @@ NumericalMethod *NonStationaryTransportProblem :: giveNumericalMethod(MetaStep *
 //     - SolutionOfLinearEquations
 
 {
-    if ( linSolver ) {
-        return linSolver;
-    }
-
-    linSolver = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
-    if ( linSolver == NULL ) {
-        OOFEM_ERROR("linear solver creation failed");
-    }
-
-    return linSolver;
+    if (!linSolver) 
+        linSolver.reset( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
+        if ( !linSolver ) {
+            OOFEM_ERROR("linear solver creation failed");
+        }
+    return linSolver.get();
 }
 
 IRResultType
@@ -159,9 +152,9 @@ NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
     //secure equation renumbering, otherwise keep efficient algorithms
     if ( ir->hasField(_IFT_NonStationaryTransportProblem_changingproblemsize) ) {
         changingProblemSize = true;
-        UnknownsField = new DofDistributedPrimaryField(this, 1, FT_TransportProblemUnknowns, 1);
+        UnknownsField.reset( new DofDistributedPrimaryField(this, 1, FT_TransportProblemUnknowns, 1) );
     } else {
-        UnknownsField = new PrimaryField(this, 1, FT_TransportProblemUnknowns, 1);
+        UnknownsField.reset( new PrimaryField(this, 1, FT_TransportProblemUnknowns, 1) );
     }
 
     //read other input data from StationaryTransportProblem
@@ -198,14 +191,18 @@ double NonStationaryTransportProblem :: giveUnknownComponent(ValueModeType mode,
 
 
 TimeStep *
-NonStationaryTransportProblem :: giveSolutionStepWhenIcApply()
+NonStationaryTransportProblem :: giveSolutionStepWhenIcApply(bool force)
 {
-    if ( !stepWhenIcApply ) {
-        stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, this->initT - giveDeltaT ( giveNumberOfFirstStep() ), giveDeltaT ( giveNumberOfFirstStep() ), 0) );
-        //stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -deltaT, deltaT, 0) );
-    }
+    if ( master && (!force)) {
+        return master->giveSolutionStepWhenIcApply();
+    } else {
+        if ( !stepWhenIcApply ) {
+            stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, this->initT - giveDeltaT ( giveNumberOfFirstStep() ), giveDeltaT ( giveNumberOfFirstStep() ), 0) );
+            //stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -deltaT, deltaT, 0) );
+        }
 
-    return stepWhenIcApply.get();
+        return stepWhenIcApply.get();
+    }
 }
 
 
@@ -285,6 +282,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 
     //Right hand side
     FloatArray rhs;
+    TimeStep *icStep = this->giveSolutionStepWhenIcApply();
 
     int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
 #ifdef VERBOSE
@@ -293,35 +291,31 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 
     //Solution at the first time step needs history. Therefore, return back one time increment and create it.
     if ( tStep->isTheFirstStep() ) {
-        this->giveSolutionStepWhenIcApply();
 
         bcRhs.resize(neq); //rhs vector from solution step i-1
         bcRhs.zero();
 
-        this->applyIC(stepWhenIcApply.get());
+        this->applyIC(icStep);
 
         //project initial conditions to have temporary temperature in integration points
 
         //edge or surface load on elements
         //add internal source vector on elements
-        this->assembleVectorFromElements( bcRhs, stepWhenIcApply.get(), TransportExternalForceAssembler(),
+        this->assembleVectorFromElements( bcRhs, icStep, TransportExternalForceAssembler(),
                                          VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //add prescribed value, such as temperature, on nodes
-        this->assembleDirichletBcRhsVector( bcRhs, stepWhenIcApply.get(), VM_Total,
+        this->assembleDirichletBcRhsVector( bcRhs, icStep, VM_Total,
                                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //add nodal load
-        this->assembleVectorFromDofManagers( bcRhs, stepWhenIcApply.get(), ExternalForceAssembler(),
+        this->assembleVectorFromDofManagers( bcRhs, icStep, ExternalForceAssembler(),
                                             VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
     }
 
     //Create a new lhs matrix if necessary
     if ( tStep->isTheFirstStep() || this->changingProblemSize ) {
-        if ( conductivityMatrix ) {
-            delete conductivityMatrix;
-        }
 
-        conductivityMatrix = classFactory.createSparseMtrx(sparseMtrxType);
-        if ( conductivityMatrix == NULL ) {
+        conductivityMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+        if ( !conductivityMatrix ) {
             OOFEM_ERROR("sparse matrix creation failed");
         }
 
@@ -332,7 +326,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 #endif
 
         //Add contribution of alpha*K+C/dt (where K has contributions from conductivity and neumann b.c.s)
-        this->assemble( *conductivityMatrix, stepWhenIcApply.get(), MidpointLhsAssembler(lumpedCapacityStab, alpha),
+        this->assemble( *conductivityMatrix, icStep, MidpointLhsAssembler(lumpedCapacityStab, alpha),
                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
     }
 
@@ -342,11 +336,26 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     }
 
     //prepare position in UnknownsField to store the results
+    FloatArray *solutionVector;
     UnknownsField->advanceSolution(tStep);
+    solutionVector = UnknownsField->giveSolutionVector(tStep);
+//     solutionVector->resize(neq);
+//     solutionVector->zero();
 
-    FloatArray *solutionVector = UnknownsField->giveSolutionVector(tStep);
-    solutionVector->resize(neq);
-    solutionVector->zero();
+    //Initialize and give solutionVector from previous solution
+    //copy previous solution vector so we can use solution-dependent boundary conditions
+    if ( changingProblemSize ) {
+        if ( !tStep->isTheFirstStep() ) {
+            //copy recent solution to previous position, copy from hash=0 to hash=1(previous)
+            copyUnknownsInDictionary( VM_Total, tStep, tStep->givePreviousStep() );
+        }
+        UnknownsField->initialize( VM_Total, tStep->givePreviousStep(), *solutionVector, EModelDefaultEquationNumbering() );
+    } else {
+        //copy previous solution vector to actual
+        *solutionVector = *UnknownsField->giveSolutionVector( tStep->givePreviousStep() );
+    }
+
+    ///@todo missing this->updateInternalState(& TauStep);
 
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Assembling rhs\n");
@@ -373,13 +382,11 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     // set-up numerical model
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
 
-    //
     // call numerical model to solve arised problem
-    //
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Solving ...\n");
 #endif
-    UnknownsField->giveSolutionVector(tStep)->resize(neq);
+//     UnknownsField->giveSolutionVector(tStep)->resize(neq);
     linSolver->solve(*conductivityMatrix, rhs, *UnknownsField->giveSolutionVector(tStep) );
     // update solution state counter
     tStep->incrementStateCounter();
@@ -415,6 +422,19 @@ NonStationaryTransportProblem :: updateYourself(TimeStep *tStep)
     VERBOSE_PRINT0("Updated Materials ", 0)
  #endif
 #endif
+}
+
+void
+NonStationaryTransportProblem :: copyUnknownsInDictionary(ValueModeType mode, TimeStep *fromTime, TimeStep *toTime)
+{
+    Domain *domain = this->giveDomain(1);
+
+    for ( auto &node : domain->giveDofManagers() ) {
+        for ( Dof *dof: *node ) {
+            double val = dof->giveUnknown(mode, fromTime);
+            dof->updateUnknownsDictionary(toTime, mode, val);
+        }
+    }
 }
 
 

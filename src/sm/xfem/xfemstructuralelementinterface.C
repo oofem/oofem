@@ -705,7 +705,7 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeConsistentMas
 
     for ( GaussPoint *gp: *element->giveIntegrationRule(0) ) {
         structEl->computeNmatrixAt(gp->giveNaturalCoordinates(), n);
-        density = structEl->giveMaterial()->give('d', gp);
+        density = structEl->giveStructuralCrossSection()->give('d', gp);
 
         if ( ipDensity != NULL ) {
             // Override density if desired

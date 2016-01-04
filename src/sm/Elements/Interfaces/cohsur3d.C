@@ -33,6 +33,7 @@
  */
 
 #include "../sm/Elements/Interfaces/cohsur3d.h"
+#include "dof.h"
 #include "node.h"
 #include "particle.h"
 #include "gaussintegrationrule.h"
@@ -40,7 +41,7 @@
 #include "intarray.h"
 #include "floatarray.h"
 #include "mathfem.h"
-#include "crosssection.h"
+#include "../sm/CrossSections/structuralinterfacecrosssection.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -224,6 +225,21 @@ CohesiveSurface3d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v, D_w, R_u, R_v, R_w};
 }
+
+
+void
+CohesiveSurface3d :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+{
+    static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->giveEngTraction_3d(answer, gp, strain, tStep);
+}
+
+
+void
+CohesiveSurface3d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->give3dStiffnessMatrix_Eng(answer, rMode, gp, tStep);
+}
+
 
 double
 CohesiveSurface3d :: giveLength()

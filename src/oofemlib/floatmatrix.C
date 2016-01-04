@@ -44,6 +44,7 @@
 #include "error.h"
 #include "datastream.h"
 
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <ostream>
@@ -197,15 +198,14 @@ void FloatMatrix :: checkBounds(int i, int j) const
     }
 
     if ( j > nColumns ) {
-		printf("APA \n");
         OOFEM_ERROR("matrix error on columns : %d > %d", j, nColumns);
     }
 }
 
-bool FloatMatrix ::isFinite() const
+bool FloatMatrix :: isFinite() const
 {
-    for(double val : values) {
-        if(!std::isfinite(val)) {
+    for (double val : values) {
+        if ( !std::isfinite(val) ) {
             return false;
         }
     }
@@ -1470,7 +1470,7 @@ void FloatMatrix :: printYourself() const
 }
 
 
-void FloatMatrix :: printYourself(const std::string name) const
+void FloatMatrix :: printYourself(const std::string &name) const
 // Prints the receiver on screen.
 {
     printf("%s (%d x %d): \n", name.c_str(), nRows, nColumns);
@@ -1504,6 +1504,20 @@ void FloatMatrix :: pY() const
     }
 
     printf("];\n");
+}
+
+
+void FloatMatrix :: writeCSV(const std :: string &name) const
+{
+    FILE *file = fopen(name.c_str(), "w");
+    for ( int i = 1; i <= nRows; ++i ) {
+        for ( int j = 1; j <= nColumns; ++j ) {
+            fprintf(file, "%10.3e, ", this->at(i, j) );
+        }
+
+        fprintf(file, "\n");
+    }
+    fclose(file);
 }
 
 

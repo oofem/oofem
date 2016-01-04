@@ -103,12 +103,20 @@ OOFEMTXTDataReader :: giveInputRecord(InputRecordType typeId, int recordId)
     return &(*this->it++);
 }
 
+bool
+OOFEMTXTDataReader :: peakNext(const std :: string &keyword)
+{
+    std :: string nextKey;
+    this->it->giveRecordKeywordField(nextKey);
+    return keyword.compare( nextKey ) == 0;
+}
+
 void
 OOFEMTXTDataReader :: finish()
 {
     if ( this->it != this->recordList.end() ) {
         OOFEM_WARNING("There are unread lines in the input file\n"
-            "The most common cause is missing cause are missing entries in the domain record, e.g. 'nset'");
+            "The most common cause are missing entries in the domain record, e.g. 'nset'");
     }
     this->recordList.clear();
 }

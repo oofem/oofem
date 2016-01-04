@@ -40,57 +40,31 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "classfactory.h"
-//#include "Elements/Shells/shell7base.h"
 #include "intmatbilinczfagerstrom.h"
 #include "dynamicinputrecord.h"
 
 
 namespace oofem {
 
-    REGISTER_Material( IntMatBilinearCZFagerstrom );
+REGISTER_Material( IntMatBilinearCZFagerstrom );
 
 
-IntMatBilinearCZFagerstrom :: IntMatBilinearCZFagerstrom(int n, Domain *d) : StructuralInterfaceMaterial(n, d)
-{
-    // constructor
-}
+IntMatBilinearCZFagerstrom :: IntMatBilinearCZFagerstrom(int n, Domain *d) : StructuralInterfaceMaterial(n, d) { }
 
-
-IntMatBilinearCZFagerstrom :: ~IntMatBilinearCZFagerstrom()
-{
-    // destructor
-}
-
-int
-IntMatBilinearCZFagerstrom :: hasMaterialModeCapability(MaterialMode mode)
-{
-    // returns whether receiver supports given mode
-    if ( mode == _3dInterface ) {
-        return 1;
-    } else {
-        return 0;
-    }
-}
-
-
+IntMatBilinearCZFagerstrom :: ~IntMatBilinearCZFagerstrom() { }
 
 
 void 
 IntMatBilinearCZFagerstrom :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &d,
                                                      const FloatMatrix &F, TimeStep *tStep)
 {
-    // returns real stress vector in 3d stress space of receiver according to
+    // returns vector in 3d stress space of receiver according to
     // previous level of stress and current
     // strain increment, the only way, how to correctly update gp records
-    //
     
     IntMatBilinearCZFagerstromStatus *status = static_cast< IntMatBilinearCZFagerstromStatus * >( this->giveStatus(gp) );
-
-    //this->initGpForNewStep(gp);
-    this->initTempStatus(gp);
     
-    FloatMatrix Finv(3,3);
-
+    FloatMatrix Finv;
     Finv.beInverseOf(F);
     status->letTempInverseDefGradBe(Finv);
 
@@ -151,7 +125,7 @@ IntMatBilinearCZFagerstrom :: giveFirstPKTraction_3d(FloatArray &answer, GaussPo
         Qold = status->giveEffectiveMandelTraction();  ///@todo Martin: check with Mikael/Jim
         Qtemp = Qtrial;
 
-        if (loadFun/sigf < 0.0000001) {
+        if ( loadFun/sigf < 1e-7 ) {
             dAlpha = 0.0;  // new_alpha=old_alpha
             status->letTempEffectiveMandelTractionBe(Qtemp);
             Qtemp.times(1-oldDamage);
@@ -213,9 +187,9 @@ IntMatBilinearCZFagerstrom :: giveFirstPKTraction_3d(FloatArray &answer, GaussPo
 
                 inc.beProductOf(Smati,R);
 
-                dJElastic.at(1) = dJElastic.at(1) - inc.at(1);
-                dJElastic.at(2) = dJElastic.at(2) - inc.at(2);
-                dJElastic.at(3) = dJElastic.at(3) - inc.at(3);
+                dJElastic.at(1) -= inc.at(1);
+                dJElastic.at(2) -= inc.at(2);
+                dJElastic.at(3) -= inc.at(3);
                 dAlpha = dAlpha - inc.at(4);
 
                 Qtemp.at(1) = Qold.at(1) + Kstiff.at(1,1)*dJElastic.at(1);
@@ -272,12 +246,10 @@ IntMatBilinearCZFagerstrom :: giveFirstPKTraction_3d(FloatArray &answer, GaussPo
         //}
     }
 
-    Qtemp.at(1) = Qtemp.at(1) + Qtemp_comp.at(1);
-    Qtemp.at(2) = Qtemp.at(2) + Qtemp_comp.at(2);
-    Qtemp.at(3) = Qtemp.at(3) + Qtemp_comp.at(3);
+    Qtemp.add(Qtemp_comp);
 
 
-    answer.beTProductOf(Finv,Qtemp);                // t_1_hat = MATMUL(TRANSPOSE(Fci),Q)
+    answer.beTProductOf(Finv, Qtemp);                // t_1_hat = MATMUL(TRANSPOSE(Fci),Q)
     //answer.times(1-oldDamage-dAlpha);             // t1_s = (1-al)*t_1_hat
 
         
@@ -294,15 +266,6 @@ void
 
 IntMatBilinearCZFagerstrom :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-
-    //this->initGpForNewStep(gp);
-
-    answer.resize(3,3);
-    answer.zero();
-    //this->give3dStiffnessMatrix_dTdj_num(answer, rMode, gp, tStep);
-    //printf("numerical tangent \n");
-    //answer.printYourself();
-
     IntMatBilinearCZFagerstromStatus *status = static_cast< IntMatBilinearCZFagerstromStatus * >( this->giveStatus(gp) );
 
     if (status->giveOldDamageDev()) {
@@ -312,10 +275,10 @@ IntMatBilinearCZFagerstrom :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, Ma
     } else {
 
         double damage = status->giveTempDamage();
-        FloatMatrix Finv = status->giveTempInverseDefGrad();
+        const FloatMatrix &Finv = status->giveTempInverseDefGrad();
+        const FloatArray &J = status->giveTempJump();
         FloatMatrix help;
         FloatMatrix Kstiff(3,3);
-        FloatArray J = status->giveTempJump();
 
         //FloatMatrix Rot = status->giveTempRotationMatrix();
         Kstiff.zero();
@@ -324,15 +287,15 @@ IntMatBilinearCZFagerstrom :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, Ma
         Kstiff.at(3,3) = this->kn0;
         //Kstiff.rotatedWith(Rot);
 
-        if (damage >= 1.0) {
+        if ( damage >= 1.0 ) {
             answer.resize(3,3);
             answer.zero();
-            if (J.at(3)<0) {
+            if ( J.at(3) < 0 ) {
                 Kstiff.at(1,1) = 0.0;
                 Kstiff.at(2,2) = 0.0;
                 Kstiff.at(3,3) = this->knc;
-                help.beProductOf(Kstiff,Finv);
-                answer.beTProductOf(Finv,help);
+                help.beProductOf(Kstiff, Finv);
+                answer.beTProductOf(Finv, help);
                 //printf("fully damaged");
                 //answer.printYourself();
             }
@@ -340,12 +303,12 @@ IntMatBilinearCZFagerstrom :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, Ma
         
             if ( status->giveTempDamage() - status->giveDamage()==0.0 ) {
 
-                if (J.at(3)<0) {
+                if ( J.at(3) < 0 ) {
                     Kstiff.at(3,3) = Kstiff.at(3,3) + (this->knc)/(1-damage);
                 }
 
-                help.beProductOf(Kstiff,Finv);
-                answer.beTProductOf(Finv,help);
+                help.beProductOf(Kstiff, Finv);
+                answer.beTProductOf(Finv, help);
                 answer.times(1-damage); // Ea=(1-new_alpha)*MATMUL(TRANSPOSE(Fci),MATMUL(Keye3,Fci))
 
                 //printf("elastic step");
@@ -385,8 +348,8 @@ IntMatBilinearCZFagerstrom :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, Ma
                 }
 
                 //printf("plastic step");
-                help.beProductOf(answer,Finv); // Ea = (1-new_alpha)*MATMUL(TRANSPOSE(Fci),MATMUL(Ea_h,Fci)) -&
-                answer.beTProductOf(Finv,help); // t1halFci_o
+                help.beProductOf(answer, Finv); // Ea = (1-new_alpha)*MATMUL(TRANSPOSE(Fci),MATMUL(Ea_h,Fci)) -&
+                answer.beTProductOf(Finv, help); // t1halFci_o
                 answer.subtract(t1hatFinvOpen);
             }
         }
@@ -395,94 +358,16 @@ IntMatBilinearCZFagerstrom :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, Ma
 
 }
 
-
-void 
-IntMatBilinearCZFagerstrom :: give3dStiffnessMatrix_dTdj_num(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-{
-
-    IntMatBilinearCZFagerstromStatus *status = static_cast< IntMatBilinearCZFagerstromStatus * >( this->giveStatus(gp) );
-
-    //double damage = status->giveTempDamage();
-    FloatMatrix Finv = status->giveTempInverseDefGrad();
-    FloatMatrix  F;
-    FloatArray J = status->giveTempJump();
-    FloatArray T(3), dpert(3), d(3), Tpert(3);
-
-
-    T.zero();
-    Tpert.zero();
-    dpert.zero();
-
-    F.beInverseOf(Finv);
-    d.beProductOf(F,J);
-
-    giveFirstPKTraction_3d(T, gp, d, F, tStep);
-
-    double eps; 
-
-    dpert = d;
-
-    if ( dpert.at(1) > 0 ) {
-        eps = 1e-8;
-    } else {
-        eps = -1e-8;
-    }
-
-    dpert.at(1) +=eps;
-
-    giveFirstPKTraction_3d(Tpert, gp, dpert, F, tStep);
-
-    answer.at(1,1) = (Tpert.at(1) - T.at(1))/eps;
-    answer.at(2,1) = (Tpert.at(2) - T.at(2))/eps;
-    answer.at(3,1) = (Tpert.at(3) - T.at(3))/eps;
-
-    dpert = d;
-
-    if ( dpert.at(2) > 0) {
-        eps=1e-8;
-    } else {
-        eps=-1e-8;
-    }
-
-    dpert.at(2) +=eps;
-
-    giveFirstPKTraction_3d(Tpert, gp, dpert, F, tStep);
-
-    answer.at(1,2) = (Tpert.at(1) - T.at(1))/eps;
-    answer.at(2,2) = (Tpert.at(2) - T.at(2))/eps;
-    answer.at(3,2) = (Tpert.at(3) - T.at(3))/eps;
-
-    dpert = d;
-
-    if ( dpert.at(3) > 0 ) {
-        eps=1e-8;
-    } else {
-        eps=-1e-8;
-    }
-
-    dpert.at(3) +=eps;
-
-    giveFirstPKTraction_3d(Tpert, gp, dpert, F, tStep);
-
-    answer.at(1,3) = (Tpert.at(1) - T.at(1))/eps;
-    answer.at(2,3) = (Tpert.at(2) - T.at(2))/eps;
-    answer.at(3,3) = (Tpert.at(3) - T.at(3))/eps;
-
-
-}
-
-
-
 int
-IntMatBilinearCZFagerstrom :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+IntMatBilinearCZFagerstrom :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    IntMatBilinearCZFagerstromStatus *status = static_cast< IntMatBilinearCZFagerstromStatus * >( this->giveStatus(aGaussPoint) );
+    IntMatBilinearCZFagerstromStatus *status = static_cast< IntMatBilinearCZFagerstromStatus * >( this->giveStatus(gp) );
     if ( type == IST_DamageScalar ) {     
         answer.resize(1);
-        answer.at(1) = status->giveTempDamage();
+        answer.at(1) = status->giveDamage();
         return 1;
     } else {
-        return StructuralInterfaceMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+        return StructuralInterfaceMaterial :: giveIPValue(answer, gp, type, tStep);
     }
 
 }
@@ -590,13 +475,9 @@ IntMatBilinearCZFagerstromStatus :: IntMatBilinearCZFagerstromStatus(int n, Doma
     tempQEffective = oldMaterialJump;
 
     tempFInv.resize(3,3);
-    tempFInv.zero();
-    tempFInv.at(1,1)=1.;
-    tempFInv.at(2,2)=1.;
-    tempFInv.at(3,3)=1.;
+    tempFInv.beUnitMatrix();
 
     old_dTdJ.resize(3,3);
-    old_dTdJ.zero();
 
     oldDamageDev = false;
 
@@ -610,7 +491,7 @@ IntMatBilinearCZFagerstromStatus :: ~IntMatBilinearCZFagerstromStatus()
 
 
 void
-    IntMatBilinearCZFagerstromStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+IntMatBilinearCZFagerstromStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
     ///@todo Martin: check need of this
     StructuralInterfaceMaterialStatus :: printOutputAt(file, tStep);
@@ -626,9 +507,8 @@ void
 
 
 void
-    IntMatBilinearCZFagerstromStatus :: initTempStatus()
+IntMatBilinearCZFagerstromStatus :: initTempStatus()
 {
-    ///@todo Martin: Is this really necessary in this particular case??
     StructuralInterfaceMaterialStatus :: initTempStatus();
 
     tempMaterialJump = oldMaterialJump;
@@ -636,23 +516,18 @@ void
     tempQEffective = QEffective;
 
     tempFInv.resize(3,3);
-    tempFInv.zero();
+    tempFInv.beUnitMatrix();
 
     Iep = tempFInv;
     alphav = oldMaterialJump;
-
-    tempFInv.at(1,1)=1.;
-    tempFInv.at(2,2)=1.;
-    tempFInv.at(3,3)=1.;
 
     tempDamageDev = false;
 }
 
 void
-    IntMatBilinearCZFagerstromStatus :: updateYourself(TimeStep *atTime)
+IntMatBilinearCZFagerstromStatus :: updateYourself(TimeStep *tStep)
 {
-    ///@todo Martin: kolla behovet av denna
-    StructuralInterfaceMaterialStatus :: updateYourself(atTime);
+    StructuralInterfaceMaterialStatus :: updateYourself(tStep);
     damage = tempDamage;
     oldMaterialJump = tempMaterialJump;
     QEffective = tempQEffective;

@@ -42,7 +42,6 @@
 #include "internalstatevaluetype.h"
 #include "integrationrule.h"
 #include "xfem/xfemmanager.h"
-#include "set.h"
 
 
 #ifdef __VTK_MODULE
@@ -62,8 +61,7 @@
 #define _IFT_VTKXMLExportModule_externalForces "externalforces"
 #define _IFT_VTKXMLExportModule_ipvars "ipvars"
 #define _IFT_VTKXMLExportModule_stype "stype"
-#define _IFT_VTKXMLExportModule_regionsets "regionsets"
-#define _IFT_VTKXMLExportModule_timescale "timescale"
+#define _IFT_VTKXMLExportModule_particleexportflag "particleexportflag"
 //@}
 
 namespace oofem {
@@ -158,7 +156,7 @@ protected:
     IntArray ipInternalVarsToExport;
 
     /// Map from Voigt to full tensor.
-    IntArray redToFull;
+    static IntArray redToFull;
 
     /// Smoother type.
     NodalRecoveryModel :: NodalRecoveryModelType stype;
@@ -166,20 +164,15 @@ protected:
     NodalRecoveryModel *smoother;
     /// Smoother for primary variables.
     NodalRecoveryModel *primVarSmoother;
-    /// regions represented by sets
-    IntArray regionSets;
-    /// Default region set
-    Set defaultElementSet;
 
-    /// Scaling time in output, e.g. conversion from seconds to hours
-    double timeScale;
+    /// particle export flag
+    bool particleExportFlag;
 
     /// Buffer for earlier time steps exported to *.pvd file.
     std :: list< std :: string >pvdBuffer;
-    
+
     /// Buffer for earlier time steps with gauss points exported to *.gp.pvd file.
     std :: list< std :: string >gpPvdBuffer;
-    
 
 public:
     /// Constructor. Creates empty Output Manager. By default all components are selected.
@@ -227,10 +220,7 @@ public:
 protected:
 
     /// Gives the full form of given symmetrically stored tensors, missing components are filled with zeros.
-    void makeFullTensorForm(FloatArray &answer, const FloatArray &reducedForm);
-    
-    /// Gives an array with three components, it will pad with zero missing components.
-    void makeFullVectorForm(FloatArray &answer, const FloatArray &input);
+    static void makeFullTensorForm(FloatArray &answer, const FloatArray &reducedForm, InternalStateValueType vtype);
 
     /// Returns the filename for the given time step.
     std :: string giveOutputFileName(TimeStep *tStep);
@@ -299,7 +289,7 @@ protected:
     //  Exports cell variables (typically internal variables).
     //
 
-    void exportCellVars(VTKPiece &piece, int numCells, const IntArray &iCellInd, TimeStep *tStep);
+    void exportCellVars(VTKPiece &piece, const IntArray &elems, TimeStep *tStep);
 
     //
     //  Exports a single cell variable (typically an internal variable).
@@ -321,12 +311,9 @@ protected:
      * The i-th value contains the corresponding global node number.
      */
     int initRegionNodeNumbering(IntArray &mapG2L, IntArray &mapL2G,
-                                int &regionDofMans, int &totalcells,
+                                int &regionDofMans, 
+				int &totalcells,
                                 Domain *domain, TimeStep *tStep, int reg);
-    /// Returns number of regions (aka regionSets)
-    int giveNumberOfRegions();
-    /// Returns element set
-    Set *giveRegionSet(int i);
     /**
      * Writes a VTK collection file where time step data is stored.
      */

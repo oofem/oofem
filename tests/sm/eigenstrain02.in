@@ -3,24 +3,26 @@ Eigenstrain test of PlaneStress2d elements -> imposed shear with horizontal stra
 LinearStatic nsteps 1 nmodules 1
 errorcheck
 #LinearStatic nsteps 1 nmodules 2
-#vtk tstep_all domain_all primvars 1 1 vars 2 1 4 stype 1
+#vtkxml tstep_all domain_all primvars 1 1 vars 2 1 4 stype 1
 #hom tstep_all
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
-ndofman 6 nelem 2 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1
-node 1 coords 3  0.0   0.0   0.0  bc 2 1 1
-node 2 coords 3  4.0   0.0   0.0  bc 2 1 1
-node 3 coords 3  6.0   0.0   0.0  bc 2 0 0
-node 4 coords 3  6.0   2.0   0.0  bc 2 0 0
-node 5 coords 3  4.0   2.0   0.0  bc 2 1 1
-node 6 coords 3  0.0   2.0   0.0  bc 2 1 1
-PlaneStress2d 1 nodes 4 1 2 5 6  crossSect 1 mat 1 bodyLoads 1 2
-PlaneStress2d 2 nodes 4 2 3 4 5  crossSect 1 mat 1 bodyLoads 1 2
-SimpleCS 1 thick 0.15
+ndofman 6 nelem 2 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1 nset 2
+node 1 coords 3  0.0   0.0   0.0
+node 2 coords 3  4.0   0.0   0.0
+node 3 coords 3  6.0   0.0   0.0
+node 4 coords 3  6.0   2.0   0.0
+node 5 coords 3  4.0   2.0   0.0
+node 6 coords 3  0.0   2.0   0.0
+PlaneStress2d 1 nodes 4 1 2 5 6 bodyLoads 1 2
+PlaneStress2d 2 nodes 4 2 3 4 5 bodyLoads 1 2
+SimpleCS 1 thick 0.15 material 1 set 1
 IsoLE 1 d 0. E 12.0 n 0.25  tAlpha 0.000012
-BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
+BoundaryCondition  1 loadTimeFunction 1 dofs 2 1 2 values 2 0.0 0.0 set 2
 StructEigenstrainLoad 2 loadTimeFunction 1 Components 3 0.1 0.0 0.2
 ConstantFunction 1 f(t) 1.0
+Set 1 elementranges {(1 2)}
+Set 2 nodes 4 1 2 5 6
 #
 #
 #%BEGIN_CHECK% tolerance 1.e-8

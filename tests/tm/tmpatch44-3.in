@@ -5,23 +5,25 @@ errorcheck
 #vtkxml tstep_all domain_all primvars 1 6 vars 2 37 56 stype 1
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all
-ndofman 6 nelem 4 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1
-node 1 coords 3  1.0   0.0   0.0  bc 1 1
+ndofman 6 nelem 4 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1 nset 2
+node 1 coords 3  1.0   0.0   0.0
 node 2 coords 3  2.2   0.0   0.0
 node 3 coords 3  4.0   0.0   0.0
-node 4 coords 3  1.0   1.0   0.0  bc 1 1
+node 4 coords 3  1.0   1.0   0.0
 node 5 coords 3  2.2   1.0   0.0
 node 6 coords 3  4.0   1.0   0.0
-Traxisym1ht 1 nodes 3 1 2 4 crossSect 1 mat 1 bodyloads 1 2
-Traxisym1ht 2 nodes 3 2 5 4 crossSect 1 mat 1 bodyloads 1 2
-Traxisym1ht 3 nodes 3 2 3 5 crossSect 1 mat 1 bodyloads 1 2
-Traxisym1ht 4 nodes 3 3 6 5 crossSect 1 mat 1 bodyloads 1 2
-SimpleCS 1 thick 0.15
+Traxisym1ht 1 nodes 3 1 2 4
+Traxisym1ht 2 nodes 3 2 5 4
+Traxisym1ht 3 nodes 3 2 3 5
+Traxisym1ht 4 nodes 3 3 6 5
+SimpleTransportCS 1 mat 1 set 1 thickness 0.15
 IsoHeat 1 d 0. k 3.0 c 0.0
-BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 10.0
+BoundaryCondition  1 loadTimeFunction 1 dofs 1 10 values 1 10.0 set 2
 # Internal source 
-deadweight 2 loadTimeFunction 1 components 1 50.
+deadweight 2 loadTimeFunction 1 components 1 50. set 1
 ConstantFunction 1 f(t) 1.0
+Set 1 elementranges {(1 4)}
+Set 2 nodes 2 1 4
 
 #exact solution for this case is -4.1666666*x^2+133.33333333*log(x)+14.1666666, T(2.2)=99.127648, T(4.)=132.339249
 #%BEGIN_CHECK%

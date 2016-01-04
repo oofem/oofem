@@ -106,7 +106,7 @@ CylindricalALM :: ~CylindricalALM()
 
 
 NM_Status
-CylindricalALM :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
+CylindricalALM :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0, FloatArray *iR,
                         FloatArray &X, FloatArray &dX, FloatArray &F,
                         const FloatArray &internalForcesEBENorm, double &ReachedLambda, referenceLoadInputModeType rlm,
                         int &nite, TimeStep *tStep)
@@ -763,7 +763,7 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
     // solveYourselfAt() subroutine. The need for converting is indicated by
     // calm_HPControl = hpc_init
     if ( calm_HPCDmanDofSrcArray.giveSize() != 0 ) {
-        int i, nsize;
+        int nsize;
         if ( hpcMode == 1 ) {
             calm_Control = calm_hpc_on;
         } else if ( hpcMode == 2 ) {
@@ -780,7 +780,7 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
         if ( calm_HPCWeights.giveSize() == 0 ) {
             // no weights -> set to 1.0 by default
             calm_HPCWeights.resize(nsize);
-            for ( i = 1; i <= nsize; i++ ) {
+            for ( int i = 1; i <= nsize; i++ ) {
                 calm_HPCWeights.at(i) = 1.0;
             }
         } else if ( nsize != calm_HPCWeights.giveSize() ) {

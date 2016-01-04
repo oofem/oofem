@@ -62,7 +62,7 @@ DynamicRelaxationSolver :: initializeFrom(InputRecord *ir)
 
 
 NM_Status
-DynamicRelaxationSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
+DynamicRelaxationSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0, FloatArray *iR,
                   FloatArray &X, FloatArray &dX, FloatArray &F,
                   const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                   int &nite, TimeStep *tStep)
@@ -116,9 +116,8 @@ DynamicRelaxationSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
             Le = size;
         }
     }
-    
-    nite = 0;
-    do {
+
+    for ( nite = 0; ; ++nite ) {
         // Compute the residual
         engngModel->updateComponent(tStep, InternalRhs, domain);
         rhs.beDifferenceOf(RT, F);
@@ -154,8 +153,7 @@ DynamicRelaxationSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
         dX.beDifferenceOf(X, X_0);
         tStep->incrementStateCounter(); // update solution state counter
         tStep->incrementSubStepNumber();
-        nite++; // iteration increment
-    } while ( true ); // end of iteration
+    }
 
     status |= NM_Success;
     solved = 1;

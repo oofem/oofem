@@ -69,7 +69,7 @@
 
 namespace oofem {
 Element :: Element(int n, Domain *aDomain) :
-    FEMComponent(n, aDomain), dofManArray(), bodyLoadArray(), boundaryLoadArray(), integrationRulesArray()
+    FEMComponent(n, aDomain), dofManArray(), crossSection(0), bodyLoadArray(), boundaryLoadArray(), integrationRulesArray()
 {
     material           = 0;
     numberOfDofMans    = 0;
@@ -335,7 +335,7 @@ Element :: computeDofTransformationMatrix(FloatMatrix &answer, const IntArray &n
             lastColPos += nc;
         }
     }
-    answer.resizeWithData(answer.giveNumberOfRows(), lastColPos);
+    answer.resizeWithData(lastRowPos, lastColPos);
     return true;
 }
 
@@ -530,6 +530,11 @@ Element :: setDofManagers(const IntArray &_dmans)
     this->dofManArray = _dmans;
 }
 
+void
+Element :: setBodyLoads(const IntArray &_bodyLoads)
+{
+    this->bodyLoadArray = _bodyLoads;
+}
 
 void
 Element :: setIntegrationRules(std :: vector< std :: unique_ptr< IntegrationRule > > irlist)
@@ -562,6 +567,7 @@ Element :: giveCharacteristicVector(FloatArray &answer, CharType type, ValueMode
 void
 Element :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
 {
+    answer.clear();
     OOFEM_ERROR("Unknown load type.");
 }
 
@@ -569,14 +575,22 @@ Element :: computeLoadVector(FloatArray &answer, Load *load, CharType type, Valu
 void
 Element :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep)
 {
+    answer.clear();
     OOFEM_ERROR("Unknown load type.");
 }
 
 
 void
+Element :: computeTangentFromBoundaryLoad(FloatMatrix &answer, BoundaryLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep)
+{
+    answer.clear();
+}
+
+void
 Element :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     ///@todo Change the load type to "BoundaryEdgeLoad" maybe?
+    answer.clear();
     OOFEM_ERROR("Unknown load type.");
 }
 
@@ -601,9 +615,11 @@ Element :: initializeFrom(InputRecord *ir)
     // VERBOSE_PRINT1("Instanciating element ",number);
 #  endif
     //IR_GIVE_FIELD(ir, material, _IFT_Element_mat);
+    material = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, material, _IFT_Element_mat);
 
     //IR_GIVE_FIELD(ir, crossSection, _IFT_Element_crosssect);
+    crossSection = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, crossSection, _IFT_Element_crosssect);
 
     IR_GIVE_FIELD(ir, dofManArray, _IFT_Element_nodes);
@@ -619,7 +635,6 @@ Element :: initializeFrom(InputRecord *ir)
     if ( ir->hasField(_IFT_Element_lcs) ) { //local coordinate system
         double n1 = 0.0, n2 = 0.0;
         FloatArray triplets;
-        triplets.clear();
         IR_GIVE_OPTIONAL_FIELD(ir, triplets, _IFT_Element_lcs);
         elemLocalCS.resize(3, 3);
         for ( int j = 1; j <= 3; j++ ) {
@@ -640,7 +655,6 @@ Element :: initializeFrom(InputRecord *ir)
         elemLocalCS.at(1, 3) = ( elemLocalCS.at(2, 1) * elemLocalCS.at(3, 2) - elemLocalCS.at(3, 1) * elemLocalCS.at(2, 2) );
         elemLocalCS.at(2, 3) = ( elemLocalCS.at(3, 1) * elemLocalCS.at(1, 2) - elemLocalCS.at(1, 1) * elemLocalCS.at(3, 2) );
         elemLocalCS.at(3, 3) = ( elemLocalCS.at(1, 1) * elemLocalCS.at(2, 2) - elemLocalCS.at(2, 1) * elemLocalCS.at(1, 2) );
-        //elemLocalCS.printYourself();
     }
 
     partitions.clear();
@@ -651,6 +665,7 @@ Element :: initializeFrom(InputRecord *ir)
         parallel_mode = Element_local;
     }
 
+    activityTimeFunction = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, activityTimeFunction, _IFT_Element_activityTimeFunction);
 
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, _IFT_Element_nip);
@@ -763,7 +778,9 @@ Element :: initForNewStep()
 // if current time step must be restarted
 {
     for ( auto &iRule: integrationRulesArray ) {
-        iRule->initForNewStep();
+        for ( auto &gp: *iRule ) {
+            this->giveCrossSection()->giveMaterial(gp)->initTempStatus(gp);
+        }
     }
 }
 

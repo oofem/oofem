@@ -720,9 +720,6 @@ void
 LIBeam3dNL :: initForNewStep()
 // initializes receiver to new time step or can be used
 // if current time step must be restarted
-//
-// call material->initGpForNewStep() for all GPs.
-//
 {
     NLStructuralElement :: initForNewStep();
     tempTc = tc;

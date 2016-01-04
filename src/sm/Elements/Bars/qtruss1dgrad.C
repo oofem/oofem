@@ -114,11 +114,9 @@ QTruss1dGrad :: computeForceLoadVector(FloatArray &answer, TimeStep *tStep, Valu
 
 
 void
-QTruss1dGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
+QTruss1dGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatArray &answer)
 {
-    FloatArray n;
-    this->interpolation_lin.evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-    answer.beNMatrixOf(n, 1);
+    this->interpolation_lin.evalN( answer, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 

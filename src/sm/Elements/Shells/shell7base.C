@@ -1401,10 +1401,6 @@ Shell7Base :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &an
     // test if underlying element provides interpolation
     if ( interpol ) {
         ///@todo fix this whole compostie recovery thing in a better way
-        //if ( !this->giveIPValueSize(type, gp) ) {
-        //    OOFEM_ERROR3("ZZNodalRecoveryMI_computeNNMatrix: Element %d not supporting type %d", this->giveNumber(), type);
-        //    return;
-        //}
 
         interpol->evalN( answer, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     } else {
@@ -1630,7 +1626,7 @@ Shell7Base :: edgeComputeNmatrixAt(const FloatArray &lcoords, FloatMatrix &answe
 void
 Shell7Base :: edgeComputeBmatrixAt(const FloatArray &lcoords, FloatMatrix &answer, int li, int ui)
 {
-/* Returns the  matrix {B} of the receiver, evaluated at aGaussPoint. Such that
+/* Returns the  matrix {B} of the receiver, evaluated at gp. Such that
  * B*a = [dxbar_dxi, dwdxi, w, dgamdxi, gam]^T, where a is the vector of unknowns
  */
 
@@ -1680,7 +1676,7 @@ Shell7Base :: edgeComputeBmatrixAt(const FloatArray &lcoords, FloatMatrix &answe
 void
 Shell7Base :: computeBmatrixAt(const FloatArray &lcoords, FloatMatrix &answer, int li, int ui)
 {
-    // Returns the  matrix {B} of the receiver, evaluated at aGaussPoint. Such that
+    // Returns the  matrix {B} of the receiver, evaluated at gp. Such that
     // B*a = [dxbar_dxi, dwdxi, w, dgamdxi, gam]^T, where a is the vector of unknowns
  
     int ndofs = Shell7Base :: giveNumberOfDofs();
@@ -1737,7 +1733,7 @@ void
 Shell7Base :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 {
     // Returns the displacement interpolation matrix {N} of the receiver,
-    // evaluated at aGaussPoint.
+    // evaluated at gp.
 
     int ndofs = Shell7Base :: giveNumberOfDofs();
     int ndofs_xm  = 3 * this->giveNumberOfDofManagers();
@@ -2062,7 +2058,7 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
 void
 Shell7Base :: computeBmatrixForStressRecAt(const FloatArray &lcoords, FloatMatrix &answer, int layer)
 {
-    // Returns the  special matrix {B} of the receiver, evaluated at aGaussPoint. Such that
+    // Returns the  special matrix {B} of the receiver, evaluated at gp. Such that
     // B*a = [dS_xx/dx + dS_xy/dy, dS_yx/dx + dS_yy/dy ]^T, where a is the vector of in plane 
     // stresses [S_xx, S_yy, S_xy]
  

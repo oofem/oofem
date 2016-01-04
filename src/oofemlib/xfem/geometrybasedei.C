@@ -53,6 +53,7 @@
 #include <string>
 #include <algorithm>
 #include <set>
+#include <memory>
 
 namespace oofem {
 //REGISTER_EnrichmentItem(GeometryBasedEI)

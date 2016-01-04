@@ -1,0 +1,137 @@
+MPS_02.sm.out
+# 
+drying creep of plane-stress elements in tension
+#
+# element 1: basic creep, staggered problem
+# element 2: creep at decreased humidity, staggered problem
+# element 3: drying creep, staggered problem, p = 2 (standard value) or equivalently \tilde{p} = 2, zero shrinkage
+# element 4: drying creep, staggered problem, p = infinity (zero size effect) or quivalently \tilde{p} = 1, zero shrinkage
+# element 5: drying creep, staggered problem, p = -1.5 (correct size effect) or quivalently \tilde{p} = 0.6, zero shrinkage
+# element 6: shrinkage
+#
+IncrLinearStatic endOfTimeOfInterest 10000.00000 nsteps 25 prescribedTimes 25 0.0001 0.0002 0.0005 0.001 0.002 0.005 0.01 0.02 0.05 0.1 0.2 0.5 1. 2. 5. 10. 20. 50. 100. 200. 500. 1000. 2000. 5000. 10000. nmodules 1
+#
+errorcheck
+# vtkxml tstep_step 1 domain_all vars 2 1 4 primvars 1 1 
+#
+domain 2dPlaneStress
+#
+OutputManager tstep_all dofman_all element_all
+ndofman 24 nelem 6 ncrosssect 4 nmat 4 nbc 3 nic 0 nltf 2 nset 3
+#
+#
+# NODES
+#
+node   1   coords 3  0.0  0.0  0.0
+node   2   coords 3  0.1  0.0  0.0
+node   3   coords 3  0.0  0.1  0.0
+node   4   coords 3  0.1  0.1  0.0
+#
+node   5   coords 3  0.0  0.2  0.0
+node   6   coords 3  0.1  0.2  0.0
+node   7   coords 3  0.0  0.3  0.0
+node   8   coords 3  0.1  0.3  0.0
+#
+node   9   coords 3  0.0  0.4  0.0
+node   10  coords 3  0.1  0.4  0.0
+node   11  coords 3  0.0  0.5  0.0
+node   12  coords 3  0.1  0.5  0.0
+#
+node   13  coords 3  0.0  0.6  0.0
+node   14  coords 3  0.1  0.6  0.0
+node   15  coords 3  0.0  0.7  0.0
+node   16  coords 3  0.1  0.7  0.0
+#
+node   17  coords 3  0.0  0.8  0.0
+node   18  coords 3  0.1  0.8  0.0
+node   19  coords 3  0.0  0.9  0.0
+node   20  coords 3  0.1  0.9  0.0
+#
+node   21  coords 3  0.0  1.0  0.0
+node   22  coords 3  0.1  1.0  0.0
+node   23  coords 3  0.0  1.1  0.0
+node   24  coords 3  0.1  1.1  0.0
+#
+#
+# ELEMENTS
+#
+planestress2d   1   nodes 4   1 2 4 3 crossSect 1
+#
+planestress2d   2   nodes 4   5 6 8 7 crossSect 1
+#
+planestress2d   3   nodes 4   9 10 12 11 crossSect 1
+#
+planestress2d   4   nodes 4   13 14 16 15 crossSect 2
+#
+planestress2d   5   nodes 4   17 18 20 19 crossSect 3
+#
+planestress2d   6   nodes 4   21 22 24 23 crossSect 4
+#
+Set 1 nodes 6 1 5 9 13 17 21
+Set 2 nodes 6 3 7 11 15 19 23
+Set 3 nodes 12 2 4 6 8 10 12 14 16 18 20 22 24
+#
+# CROSSECTION
+#
+SimpleCS 1 thick 1.0 material 1
+SimpleCS 2 thick 1.0 material 2
+SimpleCS 3 thick 1.0 material 3
+SimpleCS 4 thick 1.0 material 4
+#
+#
+# MATERIAL
+#
+mps 1 d 0. n 0.2 talpha 12.e-6 referencetemperature 296. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 1. begoftimeofinterest 1.e-6 endoftimeofinterest 1.e4 relMatAge 7. CoupledAnalysisType 2 ksh 0.0 t0 7. mus 5.e-6
+#
+mps 2 d 0. n 0.2 talpha 12.e-6 referencetemperature 296. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 1. begoftimeofinterest 1.e-6 endoftimeofinterest 1.e4 relMatAge 7. CoupledAnalysisType 2 ksh 0.0 t0 7. k3 35. p 1000.
+#
+mps 3 d 0. n 0.2 talpha 12.e-6 referencetemperature 296. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 1. begoftimeofinterest 1.e-6 endoftimeofinterest 1.e4 relMatAge 7. CoupledAnalysisType 2 ksh 0.0 t0 7. mus 2.e-10 p -1.5
+#
+mps 4 d 0. n 0.2 talpha 12.e-6 referencetemperature 296. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 1. begoftimeofinterest 1.e-6 endoftimeofinterest 1.e4 relMatAge 7. CoupledAnalysisType 2 ksh 0.0025 t0 7. mus 5.e-6
+#
+#
+# BOUNDARY CONDITIONS
+#
+BoundaryCondition 1 loadTimeFunction 1 dofs 2 1 2 values 2 0. 0. set 1
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 1 values 1 0. set 2
+NodalLoad 3 loadTimeFunction 2 dofs 2 1 2 components 2 0.05 0. set 3
+#
+#
+# TIME FUNCTION
+#
+ConstantFunction 1 f(t) 1.0
+ConstantFunction 2 f(t) 1.0
+#
+#
+#%BEGIN_CHECK% tolerance 1.e-11
+#NODE tStep 5  number 2 dof 1 unknown d value 4.928538e-06
+#NODE tStep 11 number 2 dof 1 unknown d value 6.080910e-06
+#NODE tStep 17 number 2 dof 1 unknown d value 7.886156e-06
+#NODE tStep 23 number 2 dof 1 unknown d value 1.079582e-05 
+#NODE tStep 26 number 2 dof 1 unknown d value 1.221882e-05
+#NODE tStep 5  number 6 dof 1 unknown d value 4.689125e-06
+#NODE tStep 11 number 6 dof 1 unknown d value 5.757860e-06
+#NODE tStep 17 number 6 dof 1 unknown d value 7.369494e-06
+#NODE tStep 23 number 6 dof 1 unknown d value 1.107454e-05
+#NODE tStep 26 number 6 dof 1 unknown d value 1.314412e-05
+#NODE tStep 5  number 10 dof 1 unknown d value 4.928538e-06
+#NODE tStep 11 number 10 dof 1 unknown d value 6.080910e-06
+#NODE tStep 17 number 10 dof 1 unknown d value 8.063393e-06
+#NODE tStep 23 number 10 dof 1 unknown d value 1.594227e-05
+#NODE tStep 26 number 10 dof 1 unknown d value 3.020580e-05 
+#NODE tStep 5  number 14 dof 1 unknown d value 4.928538e-06
+#NODE tStep 11 number 14 dof 1 unknown d value 6.080910e-06
+#NODE tStep 17 number 14 dof 1 unknown d value 1.061499e-05
+#NODE tStep 23 number 14 dof 1 unknown d value 2.016076e-05
+#NODE tStep 26 number 14 dof 1 unknown d value 2.554121e-05
+#NODE tStep 5  number 18 dof 1 unknown d value 4.928538e-06
+#NODE tStep 11 number 18 dof 1 unknown d value 6.080910e-06
+#NODE tStep 17 number 18 dof 1 unknown d value 1.198810e-05
+#NODE tStep 23 number 18 dof 1 unknown d value 1.981528e-05
+#NODE tStep 26 number 18 dof 1 unknown d value 2.211433e-05
+#NODE tStep 5  number 22 dof 1 unknown d value 4.928538e-06
+#NODE tStep 11 number 22 dof 1 unknown d value 6.080910e-06
+#NODE tStep 17 number 22 dof 1 unknown d value -3.693661e-05
+#NODE tStep 23 number 22 dof 1 unknown d value -7.905773e-05
+#NODE tStep 26 number 22 dof 1 unknown d value -8.979420e-05
+#%END_CHECK%

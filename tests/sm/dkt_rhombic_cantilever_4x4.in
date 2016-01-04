@@ -5,79 +5,81 @@ LinearStatic nsteps 1 nmodules 1
 errorcheck
 domain 2dMindlinPlate
 OutputManager tstep_all dofman_all element_all
-ndofman 25 nelem 32 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1
-node  1 coords 3  0.0  0.0  0.0   bc 3 1 1 1
-node  2 coords 3  3.0  0.0  0.0   bc 3 1 1 1
-node  3 coords 3  6.0  0.0  0.0   bc 3 1 1 1 
-node  4 coords 3  9.0  0.0  0.0   bc 3 1 1 1 
-node  5 coords 3 12.0  0.0  0.0   bc 3 1 1 1 
+ndofman 25 nelem 32 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1 nset 2
+node  1 coords 3  0.0  0.0  0.0
+node  2 coords 3  3.0  0.0  0.0
+node  3 coords 3  6.0  0.0  0.0
+node  4 coords 3  9.0  0.0  0.0
+node  5 coords 3 12.0  0.0  0.0
 #
-node  6 coords 3  2.12132  2.12132  0.0   bc 3 0 0 0
-node  7 coords 3  5.12132  2.12132  0.0   bc 3 0 0 0
-node  8 coords 3  8.12132  2.12132  0.0   bc 3 0 0 0 
-node  9 coords 3 11.12132  2.12132  0.0   bc 3 0 0 0 
-node 10 coords 3 14.12132  2.12132  0.0   bc 3 0 0 0 
+node  6 coords 3  2.12132  2.12132  0.0
+node  7 coords 3  5.12132  2.12132  0.0
+node  8 coords 3  8.12132  2.12132  0.0
+node  9 coords 3 11.12132  2.12132  0.0
+node 10 coords 3 14.12132  2.12132  0.0
 #
-node 11 coords 3  4.24264  4.24264  0.0   bc 3 0 0 0
-node 12 coords 3  7.24264  4.24264  0.0   bc 3 0 0 0
-node 13 coords 3 10.24264  4.24264  0.0   bc 3 0 0 0 
-node 14 coords 3 13.24264  4.24264  0.0   bc 3 0 0 0 
-node 15 coords 3 16.24264  4.24264  0.0   bc 3 0 0 0 
+node 11 coords 3  4.24264  4.24264  0.0
+node 12 coords 3  7.24264  4.24264  0.0
+node 13 coords 3 10.24264  4.24264  0.0
+node 14 coords 3 13.24264  4.24264  0.0
+node 15 coords 3 16.24264  4.24264  0.0
 #
-node 16 coords 3  6.363961  6.363961  0.0   bc 3 0 0 0
-node 17 coords 3  9.363961  6.363961  0.0   bc 3 0 0 0
-node 18 coords 3 12.363961  6.363961  0.0   bc 3 0 0 0 
-node 19 coords 3 15.363961  6.363961  0.0   bc 3 0 0 0 
-node 20 coords 3 18.363961  6.363961  0.0   bc 3 0 0 0 
+node 16 coords 3  6.363961  6.363961  0.0
+node 17 coords 3  9.363961  6.363961  0.0
+node 18 coords 3 12.363961  6.363961  0.0
+node 19 coords 3 15.363961  6.363961  0.0
+node 20 coords 3 18.363961  6.363961  0.0
 #
-node 21 coords 3  8.485281  8.485281  0.0   bc 3 0 0 0
-node 22 coords 3 11.485281  8.485281  0.0   bc 3 0 0 0
-node 23 coords 3 14.485281  8.485281  0.0   bc 3 0 0 0 
-node 24 coords 3 17.485281  8.485281  0.0   bc 3 0 0 0 
-node 25 coords 3 20.485281  8.485281  0.0   bc 3 0 0 0 
+node 21 coords 3  8.485281  8.485281  0.0
+node 22 coords 3 11.485281  8.485281  0.0
+node 23 coords 3 14.485281  8.485281  0.0
+node 24 coords 3 17.485281  8.485281  0.0
+node 25 coords 3 20.485281  8.485281  0.0
 #
-DKTPlate 1 nodes 3  1 2 7 mat 1 crossSect 1 bodyloads 1 2
-DKTPlate 2 nodes 3  7 6 1 mat 1 crossSect 1 bodyloads 1 2
-DKTPlate 3 nodes 3  2 3 8 mat 1 crossSect 1 bodyloads 1 2
-DKTPlate 4 nodes 3  8 7 2 mat 1 crossSect 1 bodyloads 1 2
-DKTPlate 5 nodes 3  3 4 9 mat 1 crossSect 1 bodyloads 1 2
-DKTPlate 6 nodes 3  9 8 3 mat 1 crossSect 1 bodyloads 1 2
-DKTPlate 7 nodes 3  4 5 10 mat 1 crossSect 1 bodyloads 1 2
-DKTPlate 8 nodes 3  10 9 4 mat 1 crossSect 1 bodyloads 1 2
+DKTPlate 1 nodes 3  1 2 7
+DKTPlate 2 nodes 3  7 6 1
+DKTPlate 3 nodes 3  2 3 8
+DKTPlate 4 nodes 3  8 7 2
+DKTPlate 5 nodes 3  3 4 9
+DKTPlate 6 nodes 3  9 8 3
+DKTPlate 7 nodes 3  4 5 10
+DKTPlate 8 nodes 3  10 9 4
 #
-DKTPlate  9 nodes 3  6  7 12 mat 1 crossSect 1 bodyloads 1 2
-DKTPlate 10 nodes 3 12 11  6 mat 1 crossSect 1 bodyloads 1 2
-DKTPlate 11 nodes 3  7  8 13 mat 1 crossSect 1 bodyloads 1 2
-DKTPlate 12 nodes 3 13 12  7 mat 1 crossSect 1 bodyloads 1 2
-DKTPlate 13 nodes 3  8  9 14 mat 1 crossSect 1 bodyloads 1 2
-DKTPlate 14 nodes 3 14 13  8 mat 1 crossSect 1 bodyloads 1 2
-DKTPlate 15 nodes 3  9 10 15 mat 1 crossSect 1 bodyloads 1 2
-DKTPlate 16 nodes 3 15 14  9 mat 1 crossSect 1 bodyloads 1 2
+DKTPlate  9 nodes 3  6  7 12
+DKTPlate 10 nodes 3 12 11  6
+DKTPlate 11 nodes 3  7  8 13
+DKTPlate 12 nodes 3 13 12  7
+DKTPlate 13 nodes 3  8  9 14
+DKTPlate 14 nodes 3 14 13  8
+DKTPlate 15 nodes 3  9 10 15
+DKTPlate 16 nodes 3 15 14  9
 #
-DKTPlate 17 nodes 3 11 12 17 mat 1 crossSect 1 bodyloads 1 2
-DKTPlate 18 nodes 3 17 16 11 mat 1 crossSect 1 bodyloads 1 2
-DKTPlate 19 nodes 3 12 13 18 mat 1 crossSect 1 bodyloads 1 2
-DKTPlate 20 nodes 3 18 17 12 mat 1 crossSect 1 bodyloads 1 2
-DKTPlate 21 nodes 3 13 14 19 mat 1 crossSect 1 bodyloads 1 2
-DKTPlate 22 nodes 3 19 18 13 mat 1 crossSect 1 bodyloads 1 2
-DKTPlate 23 nodes 3 14 15 20 mat 1 crossSect 1 bodyloads 1 2
-DKTPlate 24 nodes 3 20 19 14 mat 1 crossSect 1 bodyloads 1 2
+DKTPlate 17 nodes 3 11 12 17
+DKTPlate 18 nodes 3 17 16 11
+DKTPlate 19 nodes 3 12 13 18
+DKTPlate 20 nodes 3 18 17 12
+DKTPlate 21 nodes 3 13 14 19
+DKTPlate 22 nodes 3 19 18 13
+DKTPlate 23 nodes 3 14 15 20
+DKTPlate 24 nodes 3 20 19 14
 #
-DKTPlate 25 nodes 3 16 17 22 mat 1 crossSect 1 bodyloads 1 2
-DKTPlate 26 nodes 3 22 21 16 mat 1 crossSect 1 bodyloads 1 2
-DKTPlate 27 nodes 3 17 18 23 mat 1 crossSect 1 bodyloads 1 2
-DKTPlate 28 nodes 3 23 22 17 mat 1 crossSect 1 bodyloads 1 2
-DKTPlate 29 nodes 3 18 19 24 mat 1 crossSect 1 bodyloads 1 2
-DKTPlate 30 nodes 3 24 23 18 mat 1 crossSect 1 bodyloads 1 2
-DKTPlate 31 nodes 3 19 20 25 mat 1 crossSect 1 bodyloads 1 2
-DKTPlate 32 nodes 3 25 24 19 mat 1 crossSect 1 bodyloads 1 2
+DKTPlate 25 nodes 3 16 17 22
+DKTPlate 26 nodes 3 22 21 16
+DKTPlate 27 nodes 3 17 18 23
+DKTPlate 28 nodes 3 23 22 17
+DKTPlate 29 nodes 3 18 19 24
+DKTPlate 30 nodes 3 24 23 18
+DKTPlate 31 nodes 3 19 20 25
+DKTPlate 32 nodes 3 25 24 19
 #
-SimpleCS 1 thick 0.125
+SimpleCS 1 thick 0.125 material 1 set 1
 IsoLE 1 d 1.0  E 10.5e6  n 0.3 tAlpha 0.000012
-BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
+BoundaryCondition  1 loadTimeFunction 1 dofs 3 3 4 5 values 3 0 0 0 set 2
 # q= 0.26066, b=0.26066/thicness = 2.08528
-Deadweight 2 loadTimeFunction 1 Components 3 2.08528 0.0 0.0
+Deadweight 2 loadTimeFunction 1 Components 3 2.08528 0.0 0.0 set 1
 ConstantFunction 1 f(t) 1.0
+Set 1 elementranges {(1 32)}
+Set 2 nodes 5 1 2 3 4 5
 #
 #  expected solution
 #  (see J.L. Batoz, K.J.Bathe, L.W.Ho: A study of thee node triangular plate elements, IJNME, vol. 15, 1771-1812, 1980.)

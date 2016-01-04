@@ -1,27 +1,29 @@
 hydratingConcreteMat05.out
 Test of hydrating concrete material, two linear triangluar element with two heat sources, transient nonlinear solver, isothermal conditions, affinity hydration model with ordinary and slag cement
 NlTransientTransportProblem nsteps 30 deltat 10800. rtol 1.e-5 alpha 0.5 nsmax 30 nmodules 1
+#TransientTransport nsteps 30 deltat 10800. alpha 0.5 nmodules 1
 errorcheck
 #vtkxml tstep_step 1 domain_all primvars 1 6 vars 4 37 39 56 95 stype 1
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all
-ndofman 6 nelem 2 ncrosssect 2 nmat 2 nbc 1 nic 1 nltf 1
-node 1 coords 3  1.0   0.0   0.0 ic 1 1 bc 1 1
-node 2 coords 3  2.2   0.0   0.0 ic 1 1 bc 1 1
-node 3 coords 3  1.0   1.0   0.0 ic 1 1 bc 1 1
-node 4 coords 3  3.0   0.0   0.0 ic 1 1 bc 1 1
-node 5 coords 3  4.2   0.0   0.0 ic 1 1 bc 1 1
-node 6 coords 3  3.0   1.0   0.0 ic 1 1 bc 1 1
-tr1ht 1 nodes 3 1 2 3 crossSect 1 mat 1
-tr1ht 2 nodes 3 3 4 5 crossSect 2 mat 2
-SimpleCS 1 thick 0.15
-SimpleCS 2 thick 0.15
+ndofman 6 nelem 2 ncrosssect 2 nmat 2 nbc 1 nic 1 nltf 1 nset 1
+node 1 coords 3  1.0   0.0   0.0
+node 2 coords 3  2.2   0.0   0.0
+node 3 coords 3  1.0   1.0   0.0
+node 4 coords 3  3.0   0.0   0.0
+node 5 coords 3  4.2   0.0   0.0
+node 6 coords 3  3.0   1.0   0.0
+tr1ht 1 nodes 3 1 2 3 crossSect 1
+tr1ht 2 nodes 3 3 4 5 crossSect 2
+SimpleTransportCS 1 thickness 0.15 mat 1
+SimpleTransportCS 2 thickness 0.15 mat 2
 #Standard concrete k(conductivity)=1.7 W/m/K   c(capacity)=870 J/kg/K
 HydratingConcreteMat 1 d 2458. k 1.7 c 870.0 hydrationmodeltype 2 Qpot 509. masscement 400. b1 3.51861e-4 b2 8.0e-6 eta 7.4 dohinf 0.85 activationenergy 38300 minModelTimeStepIntegrations 30 castingTime 7200. maturityT0 20.
 HydratingConcreteMat 2 d 2458. k 1.7 c 870.0 hydrationmodeltype 2 Qpot 509. masscement 400. b1 3.51861e-4 b2 8.0e-6 eta 7.4 DoH1 0.20 P1 8.0 dohinf 0.85 activationenergy 38300 minModelTimeStepIntegrations 30 castingTime 7200. maturityT0 20.
-BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 25.0
-InitialCondition 1 Conditions 1 u 25.0
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 10 values 1 25.0 set 1
+InitialCondition 1 Conditions 1 u 25.0 dofs 1 10 set 1
 ConstantFunction 1 f(t) 1.0
+Set 1 elements 2 1 2
 
 #%BEGIN_CHECK% tolerance 1.e-3
 #ELEMENT tStep 6 number 1 gp 1 keyword 39 component 1 value 1.799370e-01

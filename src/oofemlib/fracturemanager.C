@@ -99,8 +99,9 @@ int FractureManager :: instanciateYourself(DataReader *dr)
         }
 
         FailureCriteria *failCriteria = classFactory.createFailureCriteria(name.c_str(), i, this);
-        if ( failCriteria == NULL ) {
+        if ( !failCriteria ) {
             OOFEM_ERROR( "unknown failure criteria (%s)", name.c_str() );
+            return 0;
         }
         failCriteria->initializeFrom(mir);
 

@@ -1,69 +1,70 @@
 xFemCrackValBranch.out
 XFEM simulation: A crack with branch functions. Written by Erik Svenning, Chalmers University of Technology.
-StaticStructural nsteps 3 deltat 1.0 rtolv 1.0e-6 MaxIter 20 minIter 2 nmodules 1
+StaticStructural nsteps 3 deltat 1.0 rtolf 1.0e-6 MaxIter 20 minIter 2 nmodules 1
 errorcheck
 #vtkxml tstep_all domain_all primvars 1 1
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
-ndofman 16 nelem 9 ncrosssect 1 nmat 1 nbc 24 nic 0 nltf 1 nxfemman 1
-node 1     coords 2  0        0        bc 2 1 2
-node 2     coords 2  2        0        bc 2 7 8
-node 3     coords 2  2        2        bc 2 13 14
-node 4     coords 2  0        2        bc 2 19 20
-node 5     coords 2  0.666667 0        bc 2 3 4
-node 6     coords 2  1.33333  0        bc 2 5 6
-node 7     coords 2  2        0.666667 bc 2 9 10
-node 8     coords 2  2        1.33333  bc 2 11 12
-node 9     coords 2  1.33333  2        bc 2 15 16
-node 10    coords 2  0.666667 2        bc 2 17 18
-node 11    coords 2  0        1.33333  bc 2 21 22
-node 12    coords 2  0        0.666667 bc 2 23 24
-node 13    coords 2  1.33333  0.666667 bc 2 0 0
-node 14    coords 2  1.33333  1.33333  bc 2 0 0
-node 15    coords 2  0.666667  0.66668 bc 2 0 0
-node 16    coords 2  0.666667  1.33335 bc 2 0 0
-PlaneStress2DXfem 13    nodes 4   2   6   13  7   mat 1 crosssect 1 nip 9 nlgeo 0
-PlaneStress2DXfem 14    nodes 4   7   13  14  8   mat 1 crosssect 1 nip 9 nlgeo 0
-PlaneStress2DXfem 15    nodes 4   8   14  9   3   mat 1 crosssect 1 nip 9 nlgeo 0
-PlaneStress2DXfem 16    nodes 4   6   5   15  13  mat 1 crosssect 1 nip 9 nlgeo 0
-PlaneStress2DXfem 17    nodes 4   13  15  16  14  mat 1 crosssect 1 nip 9 nlgeo 0
-PlaneStress2DXfem 18    nodes 4   14  16  10  9   mat 1 crosssect 1 nip 9 nlgeo 0
-PlaneStress2DXfem 19    nodes 4   5   1   12  15  mat 1 crosssect 1 nip 9 nlgeo 0
-PlaneStress2DXfem 20    nodes 4   15  12  11  16  mat 1 crosssect 1 nip 9 nlgeo 0
-PlaneStress2DXfem 21    nodes 4   16  11  4   10  mat 1 crosssect 1 nip 9 nlgeo 0
-SimpleCS 1 thick 1.0e-3 material 1
+ndofman 16 nelem 9 ncrosssect 1 nmat 1 nbc 12 nic 0 nltf 1 nxfemman 1 nset 13
+node 1     coords 2  0        0
+node 2     coords 2  2        0
+node 3     coords 2  2        2
+node 4     coords 2  0        2
+node 5     coords 2  0.666667 0
+node 6     coords 2  1.33333  0
+node 7     coords 2  2        0.666667
+node 8     coords 2  2        1.33333
+node 9     coords 2  1.33333  2
+node 10    coords 2  0.666667 2
+node 11    coords 2  0        1.33333
+node 12    coords 2  0        0.666667
+node 13    coords 2  1.33333  0.666667
+node 14    coords 2  1.33333  1.33333
+node 15    coords 2  0.666667  0.66668
+node 16    coords 2  0.666667  1.33335
+PlaneStress2DXfem 13    nodes 4   2   6   13  7   mat 1 nip 9 nlgeo 0
+PlaneStress2DXfem 14    nodes 4   7   13  14  8   mat 1 nip 9 nlgeo 0
+PlaneStress2DXfem 15    nodes 4   8   14  9   3   mat 1 nip 9 nlgeo 0
+PlaneStress2DXfem 16    nodes 4   6   5   15  13  mat 1 nip 9 nlgeo 0
+PlaneStress2DXfem 17    nodes 4   13  15  16  14  mat 1 nip 9 nlgeo 0
+PlaneStress2DXfem 18    nodes 4   14  16  10  9   mat 1 nip 9 nlgeo 0
+PlaneStress2DXfem 19    nodes 4   5   1   12  15  mat 1 nip 9 nlgeo 0
+PlaneStress2DXfem 20    nodes 4   15  12  11  16  mat 1 nip 9 nlgeo 0
+PlaneStress2DXfem 21    nodes 4   16  11  4   10  mat 1 nip 9 nlgeo 0
+SimpleCS 1 thick 1.0e-3 material 1 set 1
 #
 #Linear elasticity
 IsoLE 1 d 0.0 E 1.0e4 n 0.3 tAlpha 0.0
-BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 5.66353275479e-05
-BoundaryCondition 2 loadTimeFunction 1 prescribedvalue -0.00020447150274
-BoundaryCondition 3 loadTimeFunction 1 prescribedvalue 6.57089407543e-05
-BoundaryCondition 4 loadTimeFunction 1 prescribedvalue -0.000158635415938
-BoundaryCondition 5 loadTimeFunction 1 prescribedvalue 7.45081185944e-05
-BoundaryCondition 6 loadTimeFunction 1 prescribedvalue -0.000103374492509
-BoundaryCondition 7 loadTimeFunction 1 prescribedvalue 7.60549569053e-05
-BoundaryCondition 8 loadTimeFunction 1 prescribedvalue -5.48173114204e-05
-BoundaryCondition 9 loadTimeFunction 1 prescribedvalue 4.50638159004e-05
-BoundaryCondition 10 loadTimeFunction 1 prescribedvalue -1.86660437182e-05
-BoundaryCondition 11 loadTimeFunction 1 prescribedvalue 4.50638159004e-05
-BoundaryCondition 12 loadTimeFunction 1 prescribedvalue 1.86660437182e-05
-BoundaryCondition 13 loadTimeFunction 1 prescribedvalue 7.60549569053e-05
-BoundaryCondition 14 loadTimeFunction 1 prescribedvalue 5.48173114204e-05
-BoundaryCondition 15 loadTimeFunction 1 prescribedvalue 7.45081185944e-05
-BoundaryCondition 16 loadTimeFunction 1 prescribedvalue 0.000103374492509
-BoundaryCondition 17 loadTimeFunction 1 prescribedvalue 6.57089407543e-05
-BoundaryCondition 18 loadTimeFunction 1 prescribedvalue 0.000158635415938
-BoundaryCondition 19 loadTimeFunction 1 prescribedvalue 5.66353275479e-05
-BoundaryCondition 20 loadTimeFunction 1 prescribedvalue 0.00020447150274
-BoundaryCondition 21 loadTimeFunction 1 prescribedvalue 2.03706640257e-05
-BoundaryCondition 22 loadTimeFunction 1 prescribedvalue 0.000205723733501
-BoundaryCondition 23 loadTimeFunction 1 prescribedvalue 2.03706640257e-05
-BoundaryCondition 24 loadTimeFunction 1 prescribedvalue -0.000205723733501
+BoundaryCondition 1 loadTimeFunction 1 dofs 2 1 2 values 2 5.66353275479e-05 -0.00020447150274 set 2
+BoundaryCondition 2 loadTimeFunction 1 dofs 2 1 2 values 2 6.57089407543e-05 -0.000158635415938 set 6
+BoundaryCondition 3 loadTimeFunction 1 dofs 2 1 2 values 2 7.45081185944e-05 -0.000103374492509 set 7
+BoundaryCondition 4 loadTimeFunction 1 dofs 2 1 2 values 2 7.60549569053e-05 -5.48173114204e-05 set 3
+BoundaryCondition 5 loadTimeFunction 1 dofs 2 1 2 values 2 4.50638159004e-05 -1.86660437182e-05 set 8
+BoundaryCondition 6 loadTimeFunction 1 dofs 2 1 2 values 2 4.50638159004e-05 1.86660437182e-05 set 9
+BoundaryCondition 7 loadTimeFunction 1 dofs 2 1 2 values 2 7.60549569053e-05 5.48173114204e-05 set 4
+BoundaryCondition 8 loadTimeFunction 1 dofs 2 1 2 values 2 7.45081185944e-05 0.000103374492509 set 10
+BoundaryCondition 9 loadTimeFunction 1 dofs 2 1 2 values 2 6.57089407543e-05 0.000158635415938 set 11
+BoundaryCondition 10 loadTimeFunction 1 dofs 2 1 2 values 2 5.66353275479e-05 0.00020447150274 set 5
+BoundaryCondition 11 loadTimeFunction 1 dofs 2 1 2 values 2 2.03706640257e-05 0.000205723733501 set 12
+BoundaryCondition 12 loadTimeFunction 1 dofs 2 1 2 values 2 2.03706640257e-05 -0.000205723733501 set 13
 #
 #UserDefDirichletBC 1 loadTimeFunction 1 filename userdefbc
 #
 ConstantFunction 1 f(t) 1.0
-XfemManager 1 numberofenrichmentitems 1 vtkexport 1 exportfields 3 2 3 4
+Set 1 elementranges {(13 21)}
+Set 2 nodes 1 1
+Set 3 nodes 1 2
+Set 4 nodes 1 3
+Set 5 nodes 1 4
+Set 6 nodes 1 5
+Set 7 nodes 1 6
+Set 8 nodes 1 7
+Set 9 nodes 1 8
+Set 10 nodes 1 9
+Set 11 nodes 1 10
+Set 12 nodes 1 11
+Set 13 nodes 1 12
+XfemManager 1 numberofenrichmentitems 1 vtkexport 0 exportfields 3 2 3 4
 crack 1 enrichmentfront 1 propagationlaw 1
 DiscontinuousFunction 1
 PolygonLine 1 points 6 -1.0 1.0 0.333333333333333 1.0 0.56666666666667 1.0
@@ -74,23 +75,23 @@ PropagationLawCrackPrescribedDir 1 angle 0.0 incrementLength 0.55
 ## Node displacements
 #NODE tStep 3 number 7 dof 1 unknown d value 4.50638159e-05
 #NODE tStep 3 number 7 dof 2 unknown d value -1.86660437e-05
-#NODE tStep 3 number 7 dof 23 unknown d value -6.27467174e-05
-#NODE tStep 3 number 7 dof 24 unknown d value 9.16976083e-05
-#NODE tStep 3 number 7 dof 25 unknown d value -3.11213305e-05
-#NODE tStep 3 number 7 dof 26 unknown d value 1.43042924e-06
-#NODE tStep 3 number 7 dof 27 unknown d value -3.61969364e-06
-#NODE tStep 3 number 7 dof 28 unknown d value 3.00146746e-05
-#NODE tStep 3 number 7 dof 29 unknown d value -5.01824534e-05
-#NODE tStep 3 number 7 dof 30 unknown d value -5.90330599e-05
+#NODE tStep 3 number 7 dof 500 unknown d value -6.27467174e-05
+#NODE tStep 3 number 7 dof 501 unknown d value 9.16976083e-05
+#NODE tStep 3 number 7 dof 502 unknown d value -3.11213305e-05
+#NODE tStep 3 number 7 dof 503 unknown d value 1.43042924e-06
+#NODE tStep 3 number 7 dof 504 unknown d value -3.61969364e-06
+#NODE tStep 3 number 7 dof 505 unknown d value 3.00146746e-05
+#NODE tStep 3 number 7 dof 506 unknown d value -5.01824534e-05
+#NODE tStep 3 number 7 dof 507 unknown d value -5.90330599e-05
 ##
 #NODE tStep 3 number 12 dof 1 unknown d value 2.03706640e-05
 #NODE tStep 3 number 12 dof 2 unknown d value -2.05723734e-04
-#NODE tStep 3 number 12 dof 23 unknown d value -2.09874544e-05
-#NODE tStep 3 number 12 dof 24 unknown d value 2.05774314e-04
+#NODE tStep 3 number 12 dof 500 unknown d value -2.09874544e-05
+#NODE tStep 3 number 12 dof 501 unknown d value 2.05774314e-04
 ##
 #NODE tStep 3 number 15 dof 1 unknown d value 2.58181092e-05
 #NODE tStep 3 number 15 dof 2 unknown d value -1.56830857e-04
-#NODE tStep 3 number 15 dof 23 unknown d value -2.37294598e-05
-#NODE tStep 3 number 15 dof 24 unknown d value 1.57563142e-04
+#NODE tStep 3 number 15 dof 500 unknown d value -2.37294598e-05
+#NODE tStep 3 number 15 dof 501 unknown d value 1.57563142e-04
 #%END_CHECK%
 

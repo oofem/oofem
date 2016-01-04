@@ -138,14 +138,9 @@ RankinePlasticMaterial :: computeStressSpaceHardeningVars(FloatArray &answer, Ga
 }
 
 
-
-
 MaterialStatus *
 RankinePlasticMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    MPlasticMaterialStatus *status;
-
-    status = new MPlasticMaterialStatus(1, this->giveDomain(), gp);
-    return status;
+    return new MPlasticMaterialStatus(1, this->giveDomain(), gp, this->giveSizeOfReducedHardeningVarsVector(gp));
 }
 } // end namespace oofem

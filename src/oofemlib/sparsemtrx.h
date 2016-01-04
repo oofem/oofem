@@ -264,11 +264,11 @@ public:
     /// Converts receiving sparse matrix to a dense float matrix.
     virtual void toFloatMatrix(FloatMatrix &answer) const { OOFEM_ERROR("Not implemented"); }
     /// Prints the receiver statistics (one-line) to stdout.
-    virtual void printStatistics() const { OOFEM_LOG_INFO("Not implemented"); }
+    virtual void printStatistics() const {  OOFEM_LOG_INFO("Not implemented file %s, line %d\n", __FILE__, __LINE__); }
     /// Prints receiver to stdout. Works only for relatively small matrices.
-    virtual void printYourself() const { OOFEM_LOG_INFO("Not implemented"); }
+    virtual void printYourself() const { OOFEM_LOG_INFO("Not implemented file %s, line %d\n", __FILE__, __LINE__); }
     /// Helpful for debugging, writes the matrix to given file.
-    virtual void writeToFile(const char *fname) const { OOFEM_LOG_INFO("Not implemented"); }
+    virtual void writeToFile(const char *fname) const { OOFEM_LOG_INFO("Not implemented file %s, line %d\n", __FILE__, __LINE__); }
     /// Sparse matrix type identification
     virtual SparseMtrxType giveType() const = 0;
     /// Returns true if asymmetric

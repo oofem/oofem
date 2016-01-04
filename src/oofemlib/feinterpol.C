@@ -37,4 +37,13 @@
 
 namespace oofem {
 int FEIElementGeometryWrapper :: giveNumberOfVertices() const { return elem->giveNumberOfNodes(); }
+
+double
+FEInterpolation :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+{
+    FloatMatrix jacobianMatrix;
+    this->giveJacobianMatrixAt(jacobianMatrix, lcoords, cellgeo);
+    return jacobianMatrix.giveDeterminant();
+}
+
 } // end namespace oofem

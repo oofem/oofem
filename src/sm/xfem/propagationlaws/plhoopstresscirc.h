@@ -38,16 +38,11 @@
 #include "xfem/propagationlaw.h"
 
 #define _IFT_PLHoopStressCirc_Name "propagationlawhoopstresscirc"
-// Radius of circle used for stress sampling points
-#define _IFT_PLHoopStressCirc_Radius "radius"
-// Angle between sampling points on the circle
-#define _IFT_PLHoopStressCirc_AngleInc "angleinc"
-// Increment length per time step
-#define _IFT_PLHoopStressCirc_IncLength "incrementlength"
-// Threshold for crack propagation
-#define _IFT_PLHoopStressCirc_HoopStressThreshold "hoopstressthreshold"
-// If radial basis functions should be used for stress interpolation
-#define _IFT_PLHoopStressCirc_RadialBasisFunc "useradialbasisfunc"
+#define _IFT_PLHoopStressCirc_Radius "radius" ///< Radius of circle used for stress sampling points
+#define _IFT_PLHoopStressCirc_AngleInc "angleinc" ///< Angle between sampling points on the circle
+#define _IFT_PLHoopStressCirc_IncLength "incrementlength" ///< Increment length per time step
+#define _IFT_PLHoopStressCirc_HoopStressThreshold "hoopstressthreshold" ///< Threshold for crack propagation
+#define _IFT_PLHoopStressCirc_RadialBasisFunc "useradialbasisfunc" ///< If radial basis functions should be used for stress interpolation
 
 namespace oofem {
 class Domain;
@@ -57,7 +52,7 @@ class DynamicInputRecord;
 
 /**
  * Propagation law that propagates the crack in the direction
- * that gives \sigma_{r\theta} = 0.
+ * that gives @f$ \sigma_{r\theta} = 0 @f$.
  * Based on
  * T.P. Fries and M. Baydoun:
  * "Crack propagation with the extended finite element method

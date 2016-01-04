@@ -47,6 +47,7 @@
 #include "dynamicinputrecord.h"
 #include "domain.h"
 #include "unknownnumberingscheme.h"
+#include "entityrenumberingscheme.h"
 #include "engngm.h"
 
 namespace oofem {
@@ -98,11 +99,20 @@ void DofManager :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
     if ( load->giveBCGeoType() != NodalLoadBGT ) {
         OOFEM_ERROR("incompatible load type applied");
     }
+
+    answer.clear();
     if ( type != ExternalForcesVector ) {
-        answer.clear();
         return;
     }
-    load->computeComponentArrayAt(answer, tStep, mode);
+
+    if ( load->giveDofIDs().giveSize() == 0 ) {
+        load->computeComponentArrayAt(answer, tStep, mode);
+    } else {
+        answer.resize(this->giveNumberOfDofs());
+        FloatArray tmp;
+        load->computeComponentArrayAt(tmp, tStep, mode);
+        answer.assemble(tmp, load->giveDofIDs());
+    }
 }
 
 
@@ -227,6 +237,7 @@ void DofManager :: giveCompleteLocationArray(IntArray &locationArray, const Unkn
         }
     } else {
         IntArray temp;
+        locationArray.resize(0);
         for ( Dof *dof: *this ) {
             dof->giveEquationNumbers(temp, s);
             locationArray.followedBy(temp);
@@ -335,7 +346,7 @@ DofManager :: initializeFrom(InputRecord *ir)
 
     ///@todo This is unnecessary, we should just check if user has supplied a dofidmask field or not and just drop "numberOfDofs"). It is left for now because it will give lots of warnings otherwise, but it is effectively ignored.
     int dummy;
-    IR_GIVE_OPTIONAL_FIELD(ir, dummy, _IFT_DofManager_ndofs);
+    IR_GIVE_OPTIONAL_FIELD(ir, dummy, "ndofs");
 
     if ( ir->hasField(_IFT_DofManager_dofidmask) ) {
         IR_GIVE_FIELD(ir, dofIDArry, _IFT_DofManager_dofidmask);
@@ -947,10 +958,11 @@ void DofManager :: updateLocalNumbering(EntityRenumberingFunctor &f)
 {
     //update masterNode numbering
     if ( this->dofMastermap ) {
-        for ( auto mapper: *this->dofMastermap ) {
+        for ( auto & mapper: *this->dofMastermap ) {
             mapper.second = f( mapper.second, ERS_DofManager );
         }
     }
+
     for ( Dof *dof: *this ) {
         dof->updateLocalNumbering(f);
     }

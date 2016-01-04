@@ -52,19 +52,13 @@ IntMatCoulombContact :: ~IntMatCoulombContact() { }
 void
 IntMatCoulombContact :: giveEngTraction_3d( FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
 {
-    // Returns the (engineering) traction vector in 3d based on the spatial jump.
-
     IntMatCoulombContactStatus *status = static_cast< IntMatCoulombContactStatus * >( this->giveStatus( gp ) );
-    //this->initGpForNewStep( gp );
-    this->initTempStatus(gp);
 
     double normalJump = jump.at( 3 );
-    FloatArray shearJump;
-    shearJump = { jump.at(1), jump.at(2) };
+    FloatArray shearJump = { jump.at(1), jump.at(2) };
 
     double normalStress = 0.0;
-    FloatArray shearStress, tempShearStressShift;
-    tempShearStressShift = status->giveTempShearStressShift();
+    FloatArray shearStress, tempShearStressShift = status->giveShearStressShift();
     this->computeEngTraction( normalStress, shearStress, tempShearStressShift,
                               normalJump, shearJump );
     
@@ -78,26 +72,19 @@ IntMatCoulombContact :: giveEngTraction_3d( FloatArray &answer, GaussPoint *gp, 
     status->setTempShearStressShift( tempShearStressShift );
     status->letTempJumpBe( jump );
     status->letTempTractionBe( answer );
-
 }
 
 
-
-
 void
-IntMatCoulombContact::giveEngTraction_2d( FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep )
+IntMatCoulombContact :: giveEngTraction_2d( FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep )
 {
-    // Returns the (engineering) traction vector in 2d based on the spatial jump.
-
     IntMatCoulombContactStatus *status = static_cast< IntMatCoulombContactStatus * >( this->giveStatus( gp ) );
-    this->initGpForNewStep( gp );
+
     double normalJump = jump.at( 2 );
-    FloatArray shearJump;
-    shearJump = FloatArray{ jump.at(1) };
+    FloatArray shearJump = FloatArray{ jump.at(1) };
 
     double normalStress = 0.0;
-    FloatArray shearStress, tempShearStressShift;
-    tempShearStressShift = status->giveTempShearStressShift();
+    FloatArray shearStress, tempShearStressShift = status->giveShearStressShift();
     this->computeEngTraction( normalStress, shearStress, tempShearStressShift,
                               normalJump, shearJump );
 
@@ -110,18 +97,16 @@ IntMatCoulombContact::giveEngTraction_2d( FloatArray &answer, GaussPoint *gp, co
     status->setTempShearStressShift( tempShearStressShift );
     status->letTempJumpBe( jump );
     status->letTempTractionBe( answer );
-
 }
 
 
 void
-IntMatCoulombContact::giveEngTraction_1d( FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep )
+IntMatCoulombContact :: giveEngTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
 {
     // Returns the (engineering) traction vector (normal stress only) in 1d based on the 
     // spatial jump. The shear stress is not relevant in this case.
 
     IntMatCoulombContactStatus *status = static_cast< IntMatCoulombContactStatus * >( this->giveStatus( gp ) );
-    this->initGpForNewStep( gp );
 
     double normalJump = jump.at( 1 );
     FloatArray shearJump(0);
@@ -142,29 +127,28 @@ IntMatCoulombContact::giveEngTraction_1d( FloatArray &answer, GaussPoint *gp, co
 
 
 void 
-IntMatCoulombContact::computeEngTraction( double &normalStress, FloatArray &shearStress,
-FloatArray &tempShearStressShift, const double normalJump, const FloatArray &shearJump )
+IntMatCoulombContact :: computeEngTraction(double &normalStress, FloatArray &shearStress,
+                                         FloatArray &tempShearStressShift, double normalJump, const FloatArray &shearJump )
 {
 
     double maxShearStress = 0.0;
     double shift = -this->kn * this->stiffCoeff * normalClearance;
 
-    if(normalJump + normalClearance <= 0.) {
+    if ( normalJump + normalClearance <= 0. ) {
         normalStress = this->kn * ( normalJump + normalClearance ) + shift; //in compression and after the clearance gap closed
         maxShearStress = fabs( normalStress ) * this->frictCoeff;
-    }
-    else {
+    } else {
         normalStress = this->kn * this->stiffCoeff * ( normalJump + normalClearance ) + shift;
         maxShearStress = 0.;
     }
 
-    if(shearJump.giveSize() != 0) {
+    if ( shearJump.giveSize() != 0 ) {
 
         shearStress = this->kn * shearJump - tempShearStressShift;
-        double dp = shearStress.dotProduct( shearStress );
-        const double eps = 1.0e-15; // small number
-        if(dp > maxShearStress * maxShearStress) {
-            shearStress.times( maxShearStress / ( sqrt( dp ) + eps ) );
+        double dp = shearStress.computeNorm();
+        double eps = 1.0e-15; // small number
+        if ( dp > maxShearStress ) {
+            shearStress.times( maxShearStress / ( dp + eps ) );
         }
         tempShearStressShift = this->kn * shearJump - shearStress;
 
@@ -184,16 +168,15 @@ IntMatCoulombContact :: giveGeneralStiffnessMatrix(FloatMatrix &answer,
 {
 
     IntMatCoulombContactStatus *status = static_cast< IntMatCoulombContactStatus * > ( this->giveStatus(gp) );
-    FloatArray jump;
-    jump = status->giveTempJump();
+    const FloatArray &jump = status->giveTempJump();
 
     //const int numSpaceDim = jump.giveSize();
-    const double normalJump = jump.at( numSpaceDim );
+    double normalJump = jump.at( numSpaceDim );
 
     answer.resize( numSpaceDim, numSpaceDim );
     answer.beUnitMatrix();
-    if(rMode == SecantStiffness || rMode == TangentStiffness) {
-        if( normalJump + normalClearance <= 0) {
+    if ( rMode == SecantStiffness || rMode == TangentStiffness ) {
+        if ( normalJump + normalClearance <= 0 ) {
             answer.times( this->kn ); //in compression and after the clearance gap closed
         } else {
             answer.times( this->kn * this->stiffCoeff );
@@ -242,7 +225,6 @@ IntMatCoulombContactStatus :: IntMatCoulombContactStatus(int n, Domain *d, Gauss
     tempShearStressShift.resize(size);
     shearStressShift.zero();
     tempShearStressShift.zero();
-    //this->initTempStatus();
 }
 
 
@@ -281,10 +263,9 @@ IntMatCoulombContactStatus :: updateYourself(TimeStep *tStep)
 
 
 FloatArray
-IntMatCoulombContactStatus :: giveTempShearStressShift()
+IntMatCoulombContactStatus :: giveShearStressShift()
 {
-    FloatArray answer = tempShearStressShift;
-    return answer;
+    return shearStressShift;
 }
 
 

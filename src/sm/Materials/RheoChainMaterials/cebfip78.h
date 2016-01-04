@@ -64,15 +64,16 @@ protected:
     double u;      ///< Surface imposed to environment [mm^2]; temporary here ; should be in crosssection level.
 
 public:
-    CebFip78Material(int n, Domain * d) : MaxwellChainMaterial(n, d) { }
+    CebFip78Material(int n, Domain *d) : MaxwellChainMaterial(n, d) { }
     virtual ~CebFip78Material() { }
 
     virtual const char *giveClassName() const { return "CebFip78Material"; }
     virtual const char *giveInputRecordName() const { return _IFT_CebFip78Material_Name; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
+    virtual double computeCreepFunction(double t, double t_prime);
+
 protected:
-    virtual double computeCreepFunction(double tStep, double ofAge);
 };
 } // end namespace oofem
 #endif // cebfip78_h

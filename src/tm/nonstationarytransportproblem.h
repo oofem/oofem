@@ -112,7 +112,7 @@ protected:
     StateCounterType internalVarUpdateStamp;
 
     LinSystSolverType solverType; ///@todo Remove this and use nonlinear methods.
-    SparseLinearSystemNM *linSolver; ///@todo Remove this and use nonlinear methods.
+    std :: unique_ptr< SparseLinearSystemNM > linSolver; ///@todo Remove this and use nonlinear methods.
 
     /// Right hand side vector from boundary conditions.
     FloatArray bcRhs;
@@ -150,7 +150,7 @@ public:
     virtual void updateDomainLinks();
 
     virtual TimeStep *giveNextStep();
-    virtual TimeStep *giveSolutionStepWhenIcApply();
+    virtual TimeStep *giveSolutionStepWhenIcApply(bool force = false);
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -210,6 +210,13 @@ protected:
      */
     virtual void assembleDirichletBcRhsVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode,
                                               const UnknownNumberingScheme &s, Domain *d);
+    /**
+     * Copy unknowns in DOF's from previous to current position.
+     * @param mode What the unknown describes (increment, total value etc.).
+     * @param fromTime From which time step to obtain value.
+     * @param toTime To which time to copy.
+     */
+    virtual void copyUnknownsInDictionary(ValueModeType mode, TimeStep *fromTime, TimeStep *toTime);
 
     /**
      * Updates IP values on elements.

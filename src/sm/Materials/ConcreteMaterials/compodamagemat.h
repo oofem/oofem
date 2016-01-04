@@ -60,7 +60,7 @@
 namespace oofem {
 /**
  * Class for maintaining Gauss point values for CompoDamageMat model.
- * Prefix temp* refers to unequilibrated values, e.g. tempOmega[] is a temporal damage array
+ * Prefix temp* refers to unequilibrated values, e.g. tempOmega is a temporal damage array
  *
  * @author Vit Smilauer
  */

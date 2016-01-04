@@ -251,14 +251,14 @@ PhaseFieldElement :: computeNd_matrixAt(const FloatArray &lCoords, FloatMatrix &
 }
 
 void
-PhaseFieldElement :: computeBd_matrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+PhaseFieldElement :: computeBd_matrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 {
     // Returns the [numSpaceDim x nDofs] gradient matrix {B_d} of the receiver,
     // evaluated at gp.
 
     NLStructuralElement *el = this->giveElement( );
     FloatMatrix dNdx;
-    el->giveInterpolation( )->evaldNdx( dNdx, *aGaussPoint->giveCoordinates( ), FEIElementGeometryWrapper( el ) );
+    el->giveInterpolation( )->evaldNdx( dNdx, *gp->giveCoordinates( ), FEIElementGeometryWrapper( el ) );
     answer.beTranspositionOf( dNdx );
 }
 
@@ -427,23 +427,12 @@ PhaseFieldElement :: initializeFrom(InputRecord *ir)
 //    if ( nlGeo == 0 ) {
 //        FloatArray Epsilon;
 //        this->computeLocalStrainVector(Epsilon, gp, stepN);
-//        
-//        if(cs->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
-//            //dpmat->giveRealStressVector(answer, gp, Epsilon, nlCumulatedStrain, stepN);
-//            return;
-//        } else {
-//            OOFEM_ERROR("unsupported mode");
-//        }
+//        dpmat->giveRealStressVector(answer, gp, Epsilon, nlCumulatedStrain, stepN);
 //    } else if ( nlGeo == 1 ) {
 //        if ( elem->giveDomain()->giveEngngModel()->giveFormulation() == TL ) {
 //            FloatArray vF;
 //            this->computeDeformationGradientVector(vF, gp, stepN);
-//            if( cs->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
-//              //  dpmat->giveFirstPKStressVector(answer, gp, vF, nlCumulatedStrain, stepN);
-//                return;
-//            } else {
-//                OOFEM_ERROR("unsupported mode");
-//            }
+//            dpmat->giveFirstPKStressVector(answer, gp, vF, nlCumulatedStrain, stepN);
 //        }
 //
 //    }

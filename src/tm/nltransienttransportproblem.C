@@ -109,12 +109,9 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
 #endif
     //Delete lhs matrix and create a new one. This is necessary due to growing/decreasing number of equations.
     if ( tStep->isTheFirstStep() || this->changingProblemSize ) {
-        if ( conductivityMatrix ) {
-            delete conductivityMatrix;
-        }
 
-        conductivityMatrix = classFactory.createSparseMtrx(sparseMtrxType);
-        if ( conductivityMatrix == NULL ) {
+        conductivityMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+        if ( !conductivityMatrix ) {
             OOFEM_ERROR("sparse matrix creation failed");
         }
 
@@ -217,6 +214,8 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
 
         OOFEM_LOG_INFO("%-15e %-10d %-15e %-15e\n", tStep->giveTargetTime(), nite, solutionErr, incrementErr);
 
+        currentIterations = nite;
+
         if ( nite >= nsmax ) {
             OOFEM_ERROR("convergence not reached after %d iterations", nsmax);
         }
@@ -310,7 +309,13 @@ void
 NLTransientTransportProblem :: updateYourself(TimeStep *tStep)
 {
     //this->updateInternalState(tStep);
+    //Set intrinsic time for a staggered problem here. This is important for materials such as hydratingconcretemat, who keep history of intrinsic times.
+    double intrinsicTime = tStep->giveIntrinsicTime();
+    double Tau = tStep->giveTargetTime() - ( 1. - alpha ) * tStep->giveTimeIncrement();
+    tStep->setIntrinsicTime(Tau);
     NonStationaryTransportProblem :: updateYourself(tStep);
+    //return back to original intrinsic time
+    tStep->setIntrinsicTime(intrinsicTime);
 }
 
 int
@@ -347,20 +352,6 @@ NLTransientTransportProblem :: updateDofUnknownsDictionary(DofManager *inode, Ti
 
         //update temperature, which is present in every node
         dof->updateUnknownsDictionary(tStep, VM_Total, val);
-    }
-}
-
-
-void
-NLTransientTransportProblem :: copyUnknownsInDictionary(ValueModeType mode, TimeStep *fromTime, TimeStep *toTime)
-{
-    Domain *domain = this->giveDomain(1);
-
-    for ( auto &node : domain->giveDofManagers() ) {
-        for ( Dof *dof: *node ) {
-            double val = dof->giveUnknown(mode, fromTime);
-            dof->updateUnknownsDictionary(toTime, mode, val);
-        }
     }
 }
 

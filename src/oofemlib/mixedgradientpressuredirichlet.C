@@ -421,7 +421,7 @@ bool MixedGradientPressureDirichlet :: isPrimaryDof(ActiveDof *dof)
 }
 
 
-double MixedGradientPressureDirichlet :: giveBcValue(ActiveDof *dof, ValueModeType mode, TimeStep *tStep)
+double MixedGradientPressureDirichlet :: giveBcValue(Dof *dof, ValueModeType mode, TimeStep *tStep)
 {
     if ( this->isDevDof(dof) ) {
         return this->devGradient( dev_id.findFirstIndexOf(dof->giveDofID()) );
@@ -431,13 +431,13 @@ double MixedGradientPressureDirichlet :: giveBcValue(ActiveDof *dof, ValueModeTy
 }
 
 
-bool MixedGradientPressureDirichlet :: hasBc(ActiveDof *dof, TimeStep *tStep)
+bool MixedGradientPressureDirichlet :: hasBc(Dof *dof, TimeStep *tStep)
 {
     return this->isDevDof(dof);
 }
 
 
-bool MixedGradientPressureDirichlet :: isDevDof(ActiveDof *dof)
+bool MixedGradientPressureDirichlet :: isDevDof(Dof *dof)
 {
     return devdman.get() == dof->giveDofManager();
 }

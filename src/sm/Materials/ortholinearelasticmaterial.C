@@ -210,38 +210,19 @@ OrthotropicLinearElasticMaterial :: giveInputRecord(DynamicInputRecord &input)
 
 
     input.setField(propertyDictionary.at(Ex), _IFT_OrthotropicLinearElasticMaterial_ex);
-
-
     input.setField(propertyDictionary.at(Ey), _IFT_OrthotropicLinearElasticMaterial_ey);
-
-
     input.setField(propertyDictionary.at(Ez), _IFT_OrthotropicLinearElasticMaterial_ez);
 
-
     input.setField(propertyDictionary.at(NYyz), _IFT_OrthotropicLinearElasticMaterial_nyyz);
-
-
     input.setField(propertyDictionary.at(NYxz), _IFT_OrthotropicLinearElasticMaterial_nyxz);
-
-
     input.setField(propertyDictionary.at(NYxy), _IFT_OrthotropicLinearElasticMaterial_nyxy);
 
-
     input.setField(propertyDictionary.at(Gyz), _IFT_OrthotropicLinearElasticMaterial_gyz);
-
-
     input.setField(propertyDictionary.at(Gxz), _IFT_OrthotropicLinearElasticMaterial_gxz);
-
-
     input.setField(propertyDictionary.at(Gxy), _IFT_OrthotropicLinearElasticMaterial_gxy);
 
-
     input.setField(propertyDictionary.at(tAlphax), _IFT_OrthotropicLinearElasticMaterial_talphax);
-
-
     input.setField(propertyDictionary.at(tAlphay), _IFT_OrthotropicLinearElasticMaterial_talphay);
-
-
     input.setField(propertyDictionary.at(tAlphaz), _IFT_OrthotropicLinearElasticMaterial_talphaz);
 
 
@@ -298,7 +279,6 @@ OrthotropicLinearElasticMaterial :: give3dLocalMaterialStiffnessMatrix(FloatMatr
                                                                        TimeStep *tStep)
 {
     double eksi, nxz, nyz, nxy, nzx, nzy, nyx;
-    int i, j;
 
     nxz = this->give(NYxz, gp);
     nyz = this->give(NYyz, gp);
@@ -320,8 +300,8 @@ OrthotropicLinearElasticMaterial :: give3dLocalMaterialStiffnessMatrix(FloatMatr
     answer.at(3, 3) =  this->give(Ez, gp) * ( 1. - nyx * nxy ) / eksi;
 
     // define the lower triangle
-    for ( i = 1; i < 4; i++ ) {
-        for ( j = 1; j < i; j++ ) {
+    for ( int i = 1; i < 4; i++ ) {
+        for ( int j = 1; j < i; j++ ) {
             answer.at(i, j) = answer.at(j, i);
         }
     }

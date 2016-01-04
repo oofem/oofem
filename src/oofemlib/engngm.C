@@ -361,13 +361,8 @@ EngngModel :: instanciateMetaSteps(DataReader *dr)
         result &= metaStepList[i-1].initializeFrom(ir);
     }
 
-    // set meta step bounds
-    int istep = this->giveNumberOfFirstStep();
-    for ( auto &metaStep: metaStepList ) {
-        istep = metaStep.setStepBounds(istep);
-    }
 
-    this->numberOfSteps = istep - 1;
+    this->numberOfSteps = metaStepList.size();
     OOFEM_LOG_RELEVANT("Total number of solution steps     %d\n", numberOfSteps);
     return result;
 }
@@ -385,9 +380,6 @@ EngngModel :: instanciateDefaultMetaStep(InputRecord *ir)
     metaStepList.clear();
     //MetaStep *mstep = new MetaStep(1, this, numberOfSteps, *ir);
     metaStepList.emplace_back(1, this, numberOfSteps, *ir);
-
-    // set meta step bounds
-    metaStepList[0].setStepBounds(this->giveNumberOfFirstStep());
 
     OOFEM_LOG_RELEVANT("Total number of solution steps     %d\n",  numberOfSteps);
     return 1;
@@ -527,6 +519,7 @@ EngngModel :: solveYourself()
             this->timer.startTimer(EngngModelTimer :: EMTT_SolutionStepTimer);
             this->timer.initTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
 
+            this->preInitializeNextStep();
             this->giveNextStep();
 
             // renumber equations if necessary. Ensure to call forceEquationNumbering() for staggered problems
@@ -535,7 +528,8 @@ EngngModel :: solveYourself()
             }
 
             OOFEM_LOG_DEBUG("Number of equations %d\n", this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering()) );
-            
+
+            this->initializeYourself( this->giveCurrentStep() );
             this->solveYourselfAt( this->giveCurrentStep() );
             this->updateYourself( this->giveCurrentStep() );
 
@@ -753,9 +747,73 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
 
     int nbc = domain->giveNumberOfBoundaryConditions();
     for ( int i = 1; i <= nbc; ++i ) {
-        ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
-        if ( bc != NULL ) {
-            ma.assembleFromActiveBC(answer, *bc, tStep, s, s);
+        GeneralBoundaryCondition *bc = domain->giveBc(i);
+        ActiveBoundaryCondition *abc;
+        Load *load;
+
+        if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >(bc) ) ) {
+            ma.assembleFromActiveBC(answer, *abc, tStep, s, s);
+        } else if ( bc->giveSetNumber() && ( load = dynamic_cast< Load * >(bc) ) && bc->isImposed(tStep) ) {
+            // Now we assemble the corresponding load type fo the respective components in the set:
+            IntArray loc, bNodes;
+            FloatMatrix mat, R;
+            BodyLoad *bodyLoad;
+            BoundaryLoad *bLoad;
+            Set *set = domain->giveSet( bc->giveSetNumber() );
+
+            if ( ( bodyLoad = dynamic_cast< BodyLoad * >(load) ) ) { // Body load:
+                const IntArray &elements = set->giveElementList();
+                for ( int ielem = 1; ielem <= elements.giveSize(); ++ielem ) {
+                    Element *element = domain->giveElement( elements.at(ielem) );
+                    mat.clear();
+                    ma.matrixFromLoad(mat, *element, bodyLoad, tStep);
+
+                    if ( mat.isNotEmpty() ) {
+                        if ( element->giveRotationMatrix(R) ) {
+                            mat.rotatedWith(R);
+                        }
+
+                        ma.locationFromElement(loc, *element, s);
+                        answer.assemble(loc, mat);
+                    }
+                }
+            } else if ( ( bLoad = dynamic_cast< BoundaryLoad * >(load) ) ) { // Boundary load:
+                const IntArray &boundaries = set->giveBoundaryList();
+                for ( int ibnd = 1; ibnd <= boundaries.giveSize() / 2; ++ibnd ) {
+                    Element *element = domain->giveElement( boundaries.at(ibnd * 2 - 1) );
+                    int boundary = boundaries.at(ibnd * 2);
+                    mat.clear();
+                    ma.matrixFromBoundaryLoad(mat, *element, bLoad, boundary, tStep);
+
+                    if ( mat.isNotEmpty() ) {
+                        element->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+                        if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
+                            mat.rotatedWith(R);
+                        }
+
+                        ma.locationFromElementNodes(loc, *element, bNodes, s);
+                        answer.assemble(loc, mat);
+                    }
+                }
+                ///@todo Should we have a seperate entry for edge loads? Just sticking to the general "boundaryload" for now.
+                const IntArray &edgeBoundaries = set->giveEdgeList();
+                for ( int ibnd = 1; ibnd <= edgeBoundaries.giveSize() / 2; ++ibnd ) {
+                    Element *element = domain->giveElement( edgeBoundaries.at(ibnd * 2 - 1) );
+                    int boundary = edgeBoundaries.at(ibnd * 2);
+                    mat.clear();
+                    ma.matrixFromEdgeLoad(mat, *element, bLoad, boundary, tStep);
+
+                    if ( mat.isNotEmpty() ) {
+                        element->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
+                        if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
+                            mat.rotatedWith(R);
+                        }
+
+                        ma.locationFromElementNodes(loc, *element, bNodes, s);
+                        answer.assemble(loc, mat);
+                    }
+                }
+            }
         }
     }
     
@@ -865,7 +923,6 @@ void EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *t
 {
     ///@todo This should be removed when it loads are given through sets.
     IntArray loc, dofids;
-    FloatArray contribution;
     FloatArray charVec;
     FloatMatrix R;
     IntArray dofIDarry;
@@ -882,28 +939,31 @@ void EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *t
         charVec.clear();
         for ( int iload : *node->giveLoadArray() ) {   // to more than one load
             Load *load = domain->giveLoad(iload);
-            va.vectorFromNodeLoad(contribution, *node, static_cast< NodalLoad* >(load), tStep, mode);
-            charVec.add(contribution);
-        }
+            va.vectorFromNodeLoad(charVec, *node, static_cast< NodalLoad* >(load), tStep, mode);
 
-        if ( node->giveParallelMode() == DofManager_shared ) {
-            charVec.times( 1. / ( node->givePartitionsConnectivitySize() ) );
-        }
-
-        if ( charVec.isNotEmpty() ) {
-            if ( node->computeM2LTransformation(R, dofIDarry) ) {
-                charVec.rotatedWith(R, 't');
+            if ( node->giveParallelMode() == DofManager_shared ) {
+                charVec.times( 1. / ( node->givePartitionsConnectivitySize() ) );
             }
 
-            node->giveCompleteLocationArray(loc, s);
+            if ( charVec.isNotEmpty() ) {
+                if ( node->computeM2LTransformation(R, dofIDarry) ) {
+                    charVec.rotatedWith(R, 't');
+                }
+
+                if ( load->giveDofIDs().giveSize() ) {
+                    node->giveLocationArray(load->giveDofIDs(), loc, s);
+                } else {
+                    node->giveCompleteLocationArray(loc, s);
+                }
 #ifdef _OPENMP
  #pragma omp critical
 #endif
-            {
-                answer.assemble(charVec, loc);
-                if ( eNorms ) {
-                    node->giveCompleteMasterDofIDArray(dofids);
-                    eNorms->assembleSquared(charVec, dofids);
+                {
+                    answer.assemble(charVec, loc);
+                    if ( eNorms ) {
+                        node->giveCompleteMasterDofIDArray(dofids);
+                        eNorms->assembleSquared(charVec, dofids);
+                    }
                 }
             }
         }
@@ -1657,6 +1717,14 @@ EngngModel :: checkProblemConsistency()
 void
 EngngModel :: postInitialize()
 {
+
+    // set meta step bounds
+    int istep = this->giveNumberOfFirstStep(true);
+    for ( auto &metaStep: metaStepList ) {
+        istep = metaStep.setStepBounds(istep);
+    }
+
+
     for ( auto &domain: domainList ) {
         domain->postInitialize();
     }
@@ -1713,7 +1781,7 @@ void EngngModel :: drawNodes(oofegGraphicContext &gc)
 {
     Domain *d = this->giveDomain( gc.getActiveDomain() );
     TimeStep *tStep = this->giveCurrentStep();
-    for ( auto &dman : d->giveElements() ) {
+    for ( auto &dman : d->giveDofManagers() ) {
         dman->drawYourself(gc, tStep);
     }
 }
@@ -1837,6 +1905,8 @@ EngngModel :: balanceLoad(TimeStep *tStep)
             lb->migrateLoad( this->giveDomain(1) );
             // renumber itself
             this->forceEquationNumbering();
+            // re-init export modules
+            this->giveExportModuleManager()->initialize();
  #ifdef __VERBOSE_PARALLEL
             // debug print
             EModelDefaultEquationNumbering dn;

@@ -201,37 +201,34 @@ HTSelement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
     FloatMatrix invF;
     invF.beInverseOf(F);
 
-    FloatMatrix FG, At;
-    At.beTranspositionOf(A);
+    FloatMatrix FG;
     FG.beProductOf(invF, A);
-    answer.beProductOf(At, FG);
+    answer.beTProductOf(A, FG);
 }
 
 
 void
 HTSelement :: computePuVectorAt(FloatArray &answer, FloatMatrix N, FloatArray u, GaussPoint *gp, int sideNumber) //\int{(NSv)^T*u}
 {
-    FloatMatrix Sv, NSv, NSvT;
+    FloatMatrix Sv, NSv;
     //answer.resize() ??? otazka zda bude nutne ji preskejlovat, asi alo jo vzhledem k tomu jaky element vracim (ctverec, trojuhelnik)
     answer.zero(); //radsi ano
     this->computeSvMatrixAt(Sv, gp, sideNumber); //the quation is whether (NSv)^t Uv will operate on the same gp
     //if so, this matrix should be calculated just once in F matrix
     NSv.beProductOf(N, Sv);
-    NSvT.beTranspositionOf(NSv);
-    //  answer.beProductOf(NSvT, u);
+    //  answer.beTProductOf(NSv, u);
 } //end of computePuVectorAt
 
 
 void
 HTSelement :: computePsVectorAt(FloatArray &answer, FloatArray t, GaussPoint *gp) //\int{Ugamma^T*t}
 {
-    FloatMatrix Ugamma, UgammaT;
+    FloatMatrix Ugamma;
     //answer.resize() ??? otazka zda bude nutne ji preskejlovat, asi alo jo vzhledem k tomu jaky element vracim (ctverec, trojuhelnik)
     answer.zero(); //radsi ano
     //vytahnout t - zatizeni na hrane
     this->computeUgammaMatrixAt(Ugamma, gp);
-    UgammaT.beTranspositionOf(Ugamma);
-    answer.beProductOf(UgammaT, t);
+    answer.beTProductOf(Ugamma, t);
 } //end of computePsVectorAt
 
 void
@@ -356,7 +353,7 @@ HTSelement :: computeOutwardNormalMatrix(FloatMatrix &answer, int sideNumber)
 void
 HTSelement :: computeFMatrixAt(FloatMatrix &answer, FloatMatrix N, GaussPoint *gp, int sideNumber) //\int{(NSv)^T Uv}
 {
-    FloatMatrix Uv, Sv, NSv, NSvT;
+    FloatMatrix Uv, Sv, NSv;
     //answer.resize() ??? otazka zda bude nutne ji preskejlovat, asi alo jo vzhledem k tomu jaky element vracim (ctverec, trojuhelnik)
     answer.zero(); //radsi ano
 
@@ -364,8 +361,7 @@ HTSelement :: computeFMatrixAt(FloatMatrix &answer, FloatMatrix N, GaussPoint *g
     this->computeSvMatrixAt(Sv, gp, sideNumber);
 
     NSv.beProductOf(N, Sv);
-    NSvT.beTranspositionOf(NSv);
-    answer.beProductOf(NSvT, Uv);
+    answer.beTProductOf(NSv, Uv);
 } //end of computeFMatrixAt
 
 
@@ -375,13 +371,12 @@ HTSelement :: computeAMatrixAt(FloatMatrix &answer, FloatMatrix N, GaussPoint *g
 {
     //answer.resize() ??? otazka zda bude nutne ji preskejlovat, asi alo jo vzhledem k tomu jaky element vracim (ctverec, trojuhelnik)
     answer.zero(); //radsi ano
-    FloatMatrix Sv, Ugamma, NSv, NSvT;
+    FloatMatrix Sv, Ugamma, NSv;
 
     this->computeUgammaMatrixAt(Ugamma, gp);
     this->computeSvMatrixAt(Sv, gp, sideNumber);
     NSv.beProductOf(N, Sv);
-    NSvT.beTranspositionOf(NSv);
-    answer.beProductOf(NSvT, Ugamma);
+    answer.beTProductOf(NSv, Ugamma);
 } //end of computeAMatrixAt
 
 

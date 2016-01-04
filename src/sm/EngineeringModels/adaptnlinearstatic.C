@@ -101,7 +101,14 @@ AdaptiveNonLinearStatic :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_AdaptiveNonLinearStatic_preMappingLoadBalancingFlag);
     preMappingLoadBalancingFlag = _val > 0;
 
-    return NonLinearStatic :: initializeFrom(ir);
+    result = NonLinearStatic :: initializeFrom(ir);
+
+    // check if error estimator initioalized
+    if (this->defaultErrEstimator == NULL) {
+      OOFEM_ERROR ("AdaptiveNonLinearStatic :: initializeFrom: Error estimator not defined [eetype missing]");
+    }
+
+    return result;
 }
 
 void
@@ -114,7 +121,7 @@ AdaptiveNonLinearStatic :: solveYourselfAt(TimeStep *tStep)
     ESIEventLoop( YES, const_cast< char * >("AdaptiveNonLinearStatic: Solution finished; Press Ctrl-p to continue") );
 #endif
 
-    this->terminate( this->giveCurrentStep() );
+    //this->terminate( this->giveCurrentStep() );
 
 #ifdef __PARALLEL_MODE
     if ( preMappingLoadBalancingFlag ) {
@@ -135,6 +142,9 @@ AdaptiveNonLinearStatic :: solveYourselfAt(TimeStep *tStep)
     if ( strategy == NoRemeshing_RS ) {
         //
     } else if ( ( strategy == RemeshingFromCurrentState_RS ) || ( strategy == RemeshingFromPreviousState_RS ) ) {
+
+        this->terminate( this->giveCurrentStep() ); // make output 
+
         // do remeshing
         MesherInterface *mesher = classFactory.createMesherInterface( meshPackage, this->giveDomain(1) );
 
@@ -383,11 +393,11 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
         //nMethod -> solveYourselfAt(this->giveCurrentStep()) ;
         nMethod->setStepLength(deltaL / 5.0);
         if ( initialLoadVector.isNotEmpty() ) {
-            numMetStatus = nMethod->solve( *stiffnessMatrix, incrementalLoadVector, & initialLoadVector,
+          numMetStatus = nMethod->solve( *stiffnessMatrix, incrementalLoadVector, & initialLoadVector, NULL,
                                           totalDisplacement, incrementOfDisplacement, internalForces,
                                           internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         } else {
-            numMetStatus = nMethod->solve( *stiffnessMatrix, incrementalLoadVector, NULL,
+          numMetStatus = nMethod->solve( *stiffnessMatrix, incrementalLoadVector, NULL, NULL, 
                                           totalDisplacement, incrementOfDisplacement, internalForces,
                                           internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         }
@@ -505,8 +515,11 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     //domainList->put(1, dNew);
     //dNew->setNumber(1);
     //domainList->put(2, NULL);
-    domainList[0] = std :: move(domainList[1]);
+
+    //domainList[0] = std :: move(domainList[1]);
+    domainList.erase(domainList.begin());
     domainList[0]->setNumber(1);
+
     parallelContextList = {parallelContextList[1]};
 
     // keep equation numbering of new domain
@@ -676,6 +689,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
             stiffnessMatrix->zero(); // zero stiffness matrix
             this->assemble( *stiffnessMatrix, this->giveCurrentStep(), TangentAssembler(SecantStiffness),
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
+
             initFlag = 0;
         }
 
@@ -699,11 +713,11 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
         //nMethod -> solveYourselfAt(this->giveCurrentStep()) ;
         nMethod->setStepLength(deltaL / 5.0);
         if ( initialLoadVector.isNotEmpty() ) {
-            numMetStatus = nMethod->solve( *stiffnessMatrix, incrementalLoadVector, & initialLoadVector,
+          numMetStatus = nMethod->solve( *stiffnessMatrix, incrementalLoadVector, & initialLoadVector, NULL, 
                                           totalDisplacement, incrementOfDisplacement, internalForces,
                                           internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         } else {
-            numMetStatus = nMethod->solve( *stiffnessMatrix, incrementalLoadVector, NULL,
+          numMetStatus = nMethod->solve( *stiffnessMatrix, incrementalLoadVector, NULL, NULL,
                                           totalDisplacement, incrementOfDisplacement, internalForces,
                                           internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         }

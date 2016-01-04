@@ -37,6 +37,7 @@
 #include "dynamicinputrecord.h"
 #include "dynamicdatareader.h"
 #include "datareader.h"
+#include "mathfem.h"
 
 #include "xfem/enrichmentitems/crack.h"
 #include "xfem/enrichmentfronts/enrichmentfrontintersection.h"

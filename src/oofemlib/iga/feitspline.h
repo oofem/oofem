@@ -81,7 +81,7 @@ public:
         OOFEM_ERROR("Not yet implemented, contact lazy dr for implementation");
         return 0;
     }
-    virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 
     virtual int giveKnotSpanBasisFuncMask(const IntArray &knotSpan, IntArray &mask);
     virtual int giveNumberOfKnotSpanBasisFunctions(const IntArray &knotSpan);

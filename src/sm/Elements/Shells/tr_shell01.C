@@ -120,7 +120,6 @@ void TR_SHELL01 :: setCrossSection(int csIndx)
 }
 
 
-
 void
 TR_SHELL01 :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode, TimeStep *tStep)
 //
@@ -221,7 +220,6 @@ TR_SHELL01 :: giveInterface(InterfaceType interface)
         return static_cast< SpatialLocalizerInterface * >(this);
     }
 
-
     return NULL;
 }
 
@@ -234,8 +232,8 @@ TR_SHELL01 :: computeVolumeAround(GaussPoint *gp)
 int
 TR_SHELL01 :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    if ( ( type == IST_ShellForceTensor ) || ( type == IST_ShellStrainTensor ) ||
-        ( type == IST_ShellMomentumTensor ) || ( type == IST_ShellCurvatureTensor ) ) {
+    if ( type == IST_ShellForceTensor || type == IST_ShellStrainTensor ||
+        type == IST_ShellMomentumTensor || type == IST_ShellCurvatureTensor ) {
         FloatArray aux;
         GaussPoint *membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
         GaussPoint *plateGP = plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
@@ -250,76 +248,56 @@ TR_SHELL01 :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
 }
 
 
-//
-// The element interface required by NodalAveragingRecoveryModel
-//
 void
 TR_SHELL01 :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                          InternalStateType type, TimeStep *tStep)
 {
-    this->giveIPValue(answer, NULL, type, tStep);
+    this->giveIPValue(answer, this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0), type, tStep);
 }
-
-
 
 
 void
 TR_SHELL01 :: printOutputAt(FILE *file, TimeStep *tStep)
-// Performs end-of-step operations.
 {
-    FloatArray v, aux;
+    FloatArray v;
     IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
     fprintf( file, "element %d (%8d) :\n", this->giveLabel(), this->giveNumber() );
 
-    for ( GaussPoint *gp: *iRule ) {
+    for ( auto &gp: *iRule ) {
         fprintf( file, "  GP %2d.%-2d :", iRule->giveNumber(), gp->giveNumber() );
-        GaussPoint *membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
         // Strain - Curvature
-        plate->giveIPValue(v, gp, IST_ShellStrainTensor, tStep);
-        membrane->giveIPValue(aux, membraneGP, IST_ShellStrainTensor, tStep);
-        v.add(aux);
+        this->giveIPValue(v, gp, IST_ShellStrainTensor, tStep);
 
         fprintf(file, "  strains    ");
-        // eps_x, eps_y, eps_z, eps_yz, eps_xz, eps_xy (global)
-        fprintf( file,
-                " %.4e %.4e %.4e %.4e %.4e %.4e ",
-                v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
+        // eps_x, eps_y, eps_z, eps_yz, eps_xz, eps_xy
+        fprintf(file, " %.4e %.4e %.4e %.4e %.4e %.4e ",
+                v.at(1), v.at(2), v.at(3), v.at(4), v.at(5), v.at(6) );
 
-        plate->giveIPValue(v, gp, IST_ShellCurvatureTensor, tStep);
-        membrane->giveIPValue(aux, membraneGP, IST_ShellCurvatureTensor, tStep);
-        v.add(aux);
+        this->giveIPValue(v, gp, IST_ShellCurvatureTensor, tStep);
 
         fprintf(file, "\n              curvatures ");
-        // k_x, k_y, k_z, k_yz, k_xz, k_xy (global)
-        fprintf( file,
-                " %.4e %.4e %.4e %.4e %.4e %.4e ",
-                v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
+        // k_x, k_y, k_z, k_yz, k_xz, k_xy
+        fprintf(file, " %.4e %.4e %.4e %.4e %.4e %.4e ",
+                v.at(1), v.at(2), v.at(3), v.at(4), v.at(5), v.at(6) );
 
         // Forces - Moments
-        plate->giveIPValue(v, gp, IST_ShellForceTensor, tStep);
-        membrane->giveIPValue(aux, membraneGP, IST_ShellForceTensor, tStep);
-        v.add(aux);
+        this->giveIPValue(v, gp, IST_ShellForceTensor, tStep);
 
         fprintf(file, "\n              stresses   ");
-        // n_x, n_y, n_z, v_yz, v_xz, v_xy (global)
-        fprintf( file,
-                " %.4e %.4e %.4e %.4e %.4e %.4e ",
-                v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
+        // n_x, n_y, n_z, v_yz, v_xz, v_xy
+        fprintf(file, " %.4e %.4e %.4e %.4e %.4e %.4e ",
+                v.at(1), v.at(2), v.at(3), v.at(4), v.at(5), v.at(6) );
 
-        plate->giveIPValue(v, gp, IST_ShellMomentumTensor, tStep);
-        membrane->giveIPValue(aux, membraneGP, IST_ShellMomentumTensor, tStep);
-        v.add(aux);
+        this->giveIPValue(v, gp, IST_ShellMomentumTensor, tStep);
 
         fprintf(file, "\n              moments    ");
-        // m_x, m_y, m_z, m_yz, m_xz, m_xy (global)
-        fprintf( file,
-                " %.4e %.4e %.4e %.4e %.4e %.4e ",
-                v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
+        // m_x, m_y, m_z, m_yz, m_xz, m_xy
+        fprintf(file, " %.4e %.4e %.4e %.4e %.4e %.4e ",
+                v.at(1), v.at(2), v.at(3), v.at(4), v.at(5), v.at(6) );
 
         fprintf(file, "\n");
     }
 }
-
 
 
 contextIOResultType
@@ -531,7 +509,7 @@ TR_SHELL01 :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, Unk
 void
 TR_SHELL01 :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
-    int i, indx, result = 0;
+    int indx, result = 0;
     WCRec p [ 3 ];
     GraphicObj *tr;
     FloatArray v1, v2, v3;
@@ -569,7 +547,7 @@ TR_SHELL01 :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
     s [ 2 ] = v3.at(indx);
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
     if ( gc.getScalarAlgo() == SA_ISO_SURF ) {
-        for ( i = 0; i < 3; i++ ) {
+        for ( int i = 0; i < 3; i++ ) {
             if ( gc.getInternalVarsDefGeoFlag() ) {
                 // use deformed geometry
                 defScale = gc.getDefScale();

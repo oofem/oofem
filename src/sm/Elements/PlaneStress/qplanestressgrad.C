@@ -75,7 +75,7 @@ QPlaneStressGrad :: giveDofManDofIDMask(int inode, IntArray &answer) const
 IRResultType
 QPlaneStressGrad :: initializeFrom(InputRecord *ir)
 {
-    return StructuralElement :: initializeFrom(ir);
+    return QPlaneStress2d :: initializeFrom(ir);
 }
 
 
@@ -90,11 +90,9 @@ QPlaneStressGrad :: computeGaussPoints()
 }
 
 void
-QPlaneStressGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
+QPlaneStressGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatArray &answer)
 {
-    FloatArray n;
-    this->interpolation_lin.evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-    answer.beNMatrixOf(n, 1);
+    this->interpolation_lin.evalN(answer, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 void

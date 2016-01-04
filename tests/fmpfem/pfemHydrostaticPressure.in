@@ -1,0 +1,35 @@
+pfemHydrostaticPressure.out
+distribution of hydrostatic pressure in a fluid at rest 
+PFEM nsteps 3 lstype 0 smtype 1 deltaT 1.e-2 alphashapecoef 0.8 material 1 cs 1 pressure 2 nmodules 1
+errorcheck
+domain 2dIncompFlow
+OutputManager tstep_all dofman_all element_all
+ndofman 9 nelem 0 ncrosssect 1 nmat 1 nbc 4 nic 1 nltf 1 nset 2
+pfemparticle 1 coords 3 0.0 0.0 0.0 dofidmask 3 7 8 11
+pfemparticle 2 coords 3 1.0 0.0 0.0 dofidmask 3 7 8 11
+pfemparticle 3 coords 3 2.0 0.0 0.0 dofidmask 3 7 8 11
+pfemparticle 4 coords 3 0.0 1.0 0.0 dofidmask 3 7 8 11
+pfemparticle 5 coords 3 1.0 1.0 0.0 dofidmask 3 7 8 11
+pfemparticle 6 coords 3 2.0 1.0 0.0 dofidmask 3 7 8 11
+pfemparticle 7 coords 3 0.0 2.0 0.0 dofidmask 3 7 8 11
+pfemparticle 8 coords 3 1.0 2.0 0.0 dofidmask 3 7 8 11
+pfemparticle 9 coords 3 2.0 2.0 0.0 dofidmask 3 7 8 11
+fluidcs 1 mat 1
+newtonianfluid 1 d 1.e3 mu 1.e-3
+#prescribed zero velocity - wall condition
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 7 values 1 0.0 valtype 5 set 1
+#prescribed zero velocity - wall condition
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 8 values 1 0.0 valtype 5 set 2
+#pressure 
+BoundaryCondition 4 loadTimeFunction 1 dofs 1 11 values 1 0.0 valtype 3
+#gravity 
+deadweight 3 components 2 0.0 -9.81 loadTimeFunction 1 valtype 2
+#ic for velocity
+InitialCondition 1 conditions 1 u 1.0 valtype 5
+ConstantFunction 1 f(t) 1.0
+Set 1 nodes 7 1 2 3 4 6 7 9
+Set 2 nodes 3 1 2 3
+
+#%BEGIN_CHECK%
+#NODE tStep 3 number 2 dof 11 unknown d value 1.96200000e+04
+#%END_CHECK%

@@ -179,7 +179,6 @@ RankineMat :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const 
 
     // initialization
     this->initTempStatus(gp);
-    //this->initGpForNewStep(gp);
 
     // elastoplasticity
     this->performPlasticityReturn(gp, totalStrain);
@@ -209,7 +208,6 @@ RankineMat :: giveRealStressVector_PlaneStress(FloatArray &answer,
 
     // initialization
     this->initTempStatus(gp);
-    //this->initGpForNewStep(gp);
 
     // elastoplasticity
     this->performPlasticityReturn(gp, totalStrain);
@@ -604,10 +602,9 @@ RankineMat :: evaluatePlaneStressStiffMtrx(FloatMatrix &answer,
     }
 
     // transform to global coordinates
-    FloatMatrix T(3, 3), TT;
+    FloatMatrix T;
     givePlaneStressVectorTranformationMtrx(T, nPrinc, true);
-    TT.beTranspositionOf(T);
-    answer.rotatedWith(TT);
+    answer.rotatedWith(T, 't');
 }
 
 // derivatives of final kappa with respect to final strain

@@ -170,9 +170,9 @@ public:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new IntMatIsoDamageStatus(1, domain, gp); }
 
 protected:
-    void give2dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode,
+    virtual void give2dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode,
                                                 GaussPoint *gp, TimeStep *tStep);
-    void give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode,
+    virtual void give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode,
                                                 GaussPoint *gp, TimeStep *tStep);
 };
 } // end namespace oofem

@@ -32,7 +32,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-
 #include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
@@ -40,38 +39,17 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "classfactory.h"
-//#include "shell7base.h"
 #include "intmatbilinczjansson.h"
-//#include "vld.h"
 
 namespace oofem {
 
-    REGISTER_Material( IntMatBilinearCZJansson );
+REGISTER_Material( IntMatBilinearCZJansson );
 
 
-IntMatBilinearCZJansson :: IntMatBilinearCZJansson(int n, Domain *d) : StructuralInterfaceMaterial(n, d)
-{
-    // constructor
-}
+IntMatBilinearCZJansson :: IntMatBilinearCZJansson(int n, Domain *d) : StructuralInterfaceMaterial(n, d) { }
 
 
-IntMatBilinearCZJansson :: ~IntMatBilinearCZJansson()
-{
-    // destructor
-}
-
-int
-IntMatBilinearCZJansson :: hasMaterialModeCapability(MaterialMode mode)
-{
-    // returns whether receiver supports given mode
-    if ( mode == _3dInterface ) {
-        return 1;
-    } else {
-        return 0;
-    }
-}
-
-
+IntMatBilinearCZJansson :: ~IntMatBilinearCZJansson() { }
 
 
 void 
@@ -81,19 +59,15 @@ IntMatBilinearCZJansson :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint
     // returns real stress vector in 3d stress space of receiver according to
     // previous level of stress and current
     // strain increment, the only way, how to correctly update gp records
-    //
     
     IntMatBilinearCZJanssonStatus *status = static_cast< IntMatBilinearCZJanssonStatus * >( this->giveStatus(gp) );
 
-    //this->initGpForNewStep(gp);
-    this->initTempStatus(gp);
-
-    FloatMatrix Finv(3,3);
+    FloatMatrix Finv;
 
     Finv.beInverseOf(F);
     status->letTempInverseDefGradBe(Finv);
 
-    FloatArray dJ(3);
+    FloatArray dJ;
     dJ.beProductOf(Finv,d);
 
 
@@ -105,7 +79,7 @@ IntMatBilinearCZJansson :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint
     Qtemp.zero();
     Qtemp_comp.zero();
 
-    if (dJ.at(3)<0) {
+    if ( dJ.at(3) < 0 ) {
         Qtemp_comp.at(3) = this->knc*dJ.at(3);
     }
 
@@ -127,7 +101,7 @@ IntMatBilinearCZJansson :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint
 
         dJ.subtract(status->giveOldMaterialJump());
 
-        help.beProductOf(Kstiff,dJ);
+        help.beProductOf(Kstiff, dJ);
         Qtrial.add(help); 
 
         double Qn = Qtrial.at(3);
@@ -200,7 +174,7 @@ IntMatBilinearCZJansson :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint
             
             dAlpha = (1/xi-1)*sigf/(2*Kstiff.at(3,3))*eta;
 
-            if (oldDamage + dAlpha > 1) {
+            if ( oldDamage + dAlpha > 1 ) {
                 dAlpha = 1-oldDamage;
             }
             
@@ -208,7 +182,7 @@ IntMatBilinearCZJansson :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint
 
             double Qt1,Qt2;
 
-            if (Qt_trial > 0) {
+            if ( Qt_trial > 0 ) {
                 Qt1 = Qt*QtrialShear.at(1)/Qt_trial;
                 Qt2 = Qt*QtrialShear.at(2)/Qt_trial;
             } else {
@@ -217,7 +191,7 @@ IntMatBilinearCZJansson :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint
             }
 
 
-            FloatArray Mstar(3),M(3);
+            FloatArray Mstar(3), M(3);
 
             Mstar.at(1) = 2*Qt1*this->kn0/Kstiff.at(1,1)/(sigf);    // Qt = sqrt(Qt1^2 + Qt2^2)
             Mstar.at(2) = 2*Qt2*this->kn0/Kstiff.at(2,2)/(sigf);
@@ -233,7 +207,7 @@ IntMatBilinearCZJansson :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint
             Smat.at(1,1) = 1.0 + dAlpha*(1/eta)*2*this->kn0/(sigf);     // S_mat(1:2,1:2) = eye3(1:2,1:2)+ dalpha*S*dMdJtn_e(1:2,1:2)
             Smat.at(2,2) = 1.0 + dAlpha*(1/eta)*2*this->kn0/(sigf);
             
-            if (Qn_M>0) {
+            if ( Qn_M > 0 ) {
                 Smat.at(3,3) = 1.0 + dAlpha*(1/eta)*2*Kstiff.at(3,3)/(sigf);
             } else {
                 Smat.at(3,3) = 1.0;
@@ -302,9 +276,7 @@ IntMatBilinearCZJansson :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint
         //}
     }
 
-    Qtemp.at(1) = Qtemp.at(1) + Qtemp_comp.at(1);
-    Qtemp.at(2) = Qtemp.at(2) + Qtemp_comp.at(2);
-    Qtemp.at(3) = Qtemp.at(3) + Qtemp_comp.at(3);
+    Qtemp.add(Qtemp_comp);
 
     answer.beTProductOf(Finv,Qtemp);                    // t_1_hat = MATMUL(TRANSPOSE(Fci),Q)
 //    answer.times(1-oldDamage-dAlpha);                 // t1_s = (1-al)*t_1_hat
@@ -327,7 +299,7 @@ IntMatBilinearCZJansson :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatRe
     answer.resize(3,3);
     answer.zero();
     //this->give3dStiffnessMatrix_dTdj_num(answer, rMode, gp, tStep);
-    //printf("numerical tangent \n");
+    //OOFEM_WARNING("numerical tangent");
     //answer.printYourself();
 
     IntMatBilinearCZJanssonStatus *status = static_cast< IntMatBilinearCZJanssonStatus * >( this->giveStatus(gp) );
@@ -339,10 +311,10 @@ IntMatBilinearCZJansson :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatRe
     } else {
     
         double damage = status->giveTempDamage();
-        FloatMatrix Finv = status->giveTempInverseDefGrad();
+        const FloatMatrix &Finv = status->giveTempInverseDefGrad();
         FloatMatrix help;
         FloatMatrix Kstiff(3,3);
-        FloatArray J = status->giveTempJump();
+        const FloatArray &J = status->giveTempJump();
         answer.zero();
 
         //FloatMatrix Rot = status->giveTempRotationMatrix();
@@ -360,19 +332,19 @@ IntMatBilinearCZJansson :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatRe
                 Kstiff.at(2,2) = 0.0;
                 Kstiff.at(3,3) = this->knc;
 
-                help.beProductOf(Kstiff,Finv);
-                answer.beTProductOf(Finv,help);
+                help.beProductOf(Kstiff, Finv);
+                answer.beTProductOf(Finv, help);
                 //answer.printYourself();
             }
         } else {
             if ( status->giveTempDamage() - status->giveDamage()==0.0 ) {
             
-                if (J.at(3)<0) {
+                if ( J.at(3) < 0 ) {
                     Kstiff.at(3,3) = Kstiff.at(3,3) + (this->knc)/(1-damage);
                 }
 
-                help.beProductOf(Kstiff,Finv);
-                answer.beTProductOf(Finv,help);
+                help.beProductOf(Kstiff, Finv);
+                answer.beTProductOf(Finv, help);
                 answer.times(1-damage);  // Ea=(1-new_alpha)*MATMUL(TRANSPOSE(Fci),MATMUL(Keye3,Fci))
             } else {
                 FloatMatrix Iep = status->giveTempIep();
@@ -386,7 +358,7 @@ IntMatBilinearCZJansson :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatRe
                 //} else {
                 //    Kstiff.times((1-damage));
                 //}
-                Kstiff.times((1-damage));
+                Kstiff.times(1-damage);
 
                 answer.beProductOf(Kstiff, Iep);
                 //answer.rotatedWith(Rot);                  // Ea_h = MATMUL(TRANSPOSE(Rot),MATMUL(Keye3,Iep))
@@ -404,8 +376,8 @@ IntMatBilinearCZJansson :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatRe
 
                 t1hatFinvOpen.beDyadicProductOf(temp1,temp2);
 
-                if (J.at(3)<0) {
-                    answer.at(3,3) = answer.at(3,3) + this->knc;
+                if ( J.at(3) < 0 ) {
+                    answer.at(3,3) += this->knc;
                 }
 
                 help.beProductOf(answer,Finv);              // Ea = (1-new_alpha)*MATMUL(TRANSPOSE(Fci),MATMUL(Ea_h,Fci)) -&
@@ -424,97 +396,20 @@ IntMatBilinearCZJansson :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatRe
 
 }
 
-void 
-IntMatBilinearCZJansson :: give3dStiffnessMatrix_dTdj_num(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-{
-
-    IntMatBilinearCZJanssonStatus *status = static_cast< IntMatBilinearCZJanssonStatus * >( this->giveStatus(gp) );
-
-    //double damage = status->giveTempDamage();
-    FloatMatrix Finv = status->giveTempInverseDefGrad();
-    FloatMatrix  F;
-    FloatArray J = status->giveTempJump();
-    FloatArray T(3), dpert(3), d(3), Tpert(3);
-
-
-    T.zero();
-    Tpert.zero();
-    dpert.zero();
-
-    F.beInverseOf(Finv);
-    d.beProductOf(F,J);
-
-    giveFirstPKTraction_3d(T, gp, d, F, tStep);
-
-    double eps; 
-
-    dpert = d;
-
-    if (dpert.at(1)>0) {
-        eps=1e-8;
-    } else {
-        eps=-1e-8;
-    }
-
-    dpert.at(1) +=eps;
-
-    giveFirstPKTraction_3d(Tpert, gp, dpert, F, tStep);
-
-    answer.at(1,1) = (Tpert.at(1) - T.at(1))/eps;
-    answer.at(2,1) = (Tpert.at(2) - T.at(2))/eps;
-    answer.at(3,1) = (Tpert.at(3) - T.at(3))/eps;
-
-    dpert = d;
-
-    if (dpert.at(2)>0) {
-        eps=1e-8;
-    } else {
-        eps=-1e-8;
-    }
-
-    dpert.at(2) +=eps;
-
-    giveFirstPKTraction_3d(Tpert, gp, dpert, F, tStep);
-
-    answer.at(1,2) = (Tpert.at(1) - T.at(1))/eps;
-    answer.at(2,2) = (Tpert.at(2) - T.at(2))/eps;
-    answer.at(3,2) = (Tpert.at(3) - T.at(3))/eps;
-
-    dpert = d;
-
-    if (dpert.at(3)>0) {
-        eps=1e-8;
-    } else {
-        eps=-1e-8;
-    }
-
-    dpert.at(3) +=eps;
-
-    giveFirstPKTraction_3d(Tpert, gp, dpert, F, tStep);
-
-    answer.at(1,3) = (Tpert.at(1) - T.at(1))/eps;
-    answer.at(2,3) = (Tpert.at(2) - T.at(2))/eps;
-    answer.at(3,3) = (Tpert.at(3) - T.at(3))/eps;
-
-
-}
-
 
 int
-IntMatBilinearCZJansson :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+IntMatBilinearCZJansson :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
 {
-    IntMatBilinearCZJanssonStatus *status = static_cast< IntMatBilinearCZJanssonStatus * >( this->giveStatus(aGaussPoint) );
+    IntMatBilinearCZJanssonStatus *status = static_cast< IntMatBilinearCZJanssonStatus * >( this->giveStatus(gp) );
     if ( type == IST_DamageScalar ) {     
         answer.resize(1);
         answer.at(1) = status->giveTempDamage();
         return 1;
     } else {
-        return StructuralInterfaceMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+        return StructuralInterfaceMaterial :: giveIPValue(answer, gp, type, atTime);
     }
 
 }
-
-
 
 
 
@@ -605,10 +500,7 @@ IntMatBilinearCZJanssonStatus :: IntMatBilinearCZJanssonStatus(int n, Domain *d,
 
         
     tempFInv.resize(3,3);
-    tempFInv.zero();
-    tempFInv.at(1,1)=1.;
-    tempFInv.at(2,2)=1.;
-    tempFInv.at(3,3)=1.;
+    tempFInv.beUnitMatrix();
 
     old_dTdJ.resize(3,3);
     old_dTdJ.zero();
@@ -616,8 +508,8 @@ IntMatBilinearCZJanssonStatus :: IntMatBilinearCZJanssonStatus(int n, Domain *d,
     oldDamageDev = false;
 
 
-    #if 0
-    //@todo Martin: Very bad implementation of intialisation of Rot
+#if 0
+    ///@todo Martin: Very bad implementation of intialisation of Rot
     //*************************************************************
     FloatMatrix Gcov;
     FloatArray N;
@@ -671,9 +563,8 @@ void
 
 
 void
-    IntMatBilinearCZJanssonStatus :: initTempStatus()
+IntMatBilinearCZJanssonStatus :: initTempStatus()
 {
-    ///@todo Martin: Is this really necessary in this particular case??
     StructuralInterfaceMaterialStatus :: initTempStatus();
 
     tempMaterialJump = oldMaterialJump;
@@ -694,9 +585,8 @@ void
 }
 
 void
-    IntMatBilinearCZJanssonStatus :: updateYourself(TimeStep *atTime)
+IntMatBilinearCZJanssonStatus :: updateYourself(TimeStep *atTime)
 {
-    ///@todo Martin: kolla behovet av denna
     StructuralInterfaceMaterialStatus :: updateYourself(atTime);
     damage = tempDamage;
     oldMaterialJump = tempMaterialJump;
@@ -704,7 +594,6 @@ void
 
     old_dTdJ = temp_dTdJ;
     oldDamageDev = tempDamageDev;
-
 }
 
 

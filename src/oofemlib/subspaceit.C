@@ -184,9 +184,7 @@ SubspaceIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, Floa
     //
     // start of iteration loop
     //
-    nite = 0;
-    do {                        // label 100
-        nite++;
+    for ( nite = 0; ; ++nite ) {               // label 100
 # ifdef DETAILED_REPORT
         printf("SubspaceIteration :: solveYourselfAt: Iteration loop no. %d\n", nite);
 # endif
@@ -413,7 +411,7 @@ label400:
         }
 
         continue;
-    } while ( 1 );
+    }
 
 
     // compute eigenvectors

@@ -84,6 +84,7 @@ public:
     virtual void computePressureTerm_MC(FloatMatrix &answer, TimeStep *tStep);
     virtual void computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep);
     virtual void computeBCRhsTerm_MC(FloatArray &answer, TimeStep *tStep);
+    virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
 
     virtual double computeCriticalTimeStep(TimeStep *tStep) = 0;
 

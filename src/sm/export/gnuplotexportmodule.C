@@ -181,7 +181,7 @@ void GnuplotExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
 
 void GnuplotExportModule::initialize()
 {
-
+    ExportModule :: initialize();
 }
 
 void GnuplotExportModule::terminate()
@@ -252,7 +252,7 @@ void GnuplotExportModule::outputReactionForces(TimeStep *tStep)
                 // Slightly dirty
                 BoundaryCondition *bc = dynamic_cast<BoundaryCondition*> (domain->giveBc(bcInd+1));
                 if ( bc != NULL ) {
-                    disp.at(bcInd+1) = bc->give(dof, VM_Total, tStep->giveTargetTime());
+                    disp.at(bcInd+1) = std::max( disp.at(bcInd+1), bc->give(dof, VM_Total, tStep->giveTargetTime()) );
                 }
                 ///@todo This function should be using the primaryfield instead of asking BCs directly. / Mikael
             }
@@ -826,7 +826,7 @@ void GnuplotExportModule :: outputNodeDisp(DofManager &iDMan, TimeStep *tStep)
 void GnuplotExportModule :: outputInterfaceEl(Domain &d, TimeStep *tStep) {
 //	printf("Exporting interface el.\n");
 
-	std::vector<FloatArray> points, tractions;
+	std::vector<FloatArray> points, tractions, tractionsProj;
 
 	int numEl = d.giveNumberOfElements();
 	for(int i = 1; i <= numEl; i++) {
@@ -854,17 +854,82 @@ void GnuplotExportModule :: outputInterfaceEl(Domain &d, TimeStep *tStep) {
 				FloatArray traction = ims->giveTraction();
 //				printf("traction: "); traction.printYourself();
 				tractions.push_back(traction);
+
+
+				FloatArray tractionProj = ims->giveProjectedTraction();
+				tractionsProj.push_back(tractionProj);
+
 			}
 
 		}
 	}
 
+    // Export x vs normal traction
+
+    double time = 0.0;
+
+    TimeStep *ts = emodel->giveCurrentStep();
+    if ( ts != NULL ) {
+        time = ts->giveTargetTime();
+    }
+
+    FILE * pFileX;
+    std :: stringstream strFileNameX;
+    strFileNameX << "NormalTractionVsXTime" << time << ".dat";
+    std :: string nameStringX = strFileNameX.str();
+
+    pFileX = fopen ( nameStringX.c_str() , "wb" );
+
+    fprintf(pFileX, "#x tn\n");
+    for ( size_t j = 0; j < points.size(); j++ ) {
+    	fprintf(pFileX, "%e %e\n", points[j][0], tractions[j].at(3) );
+    }
+
+    fclose(pFileX);
+
+
+//    FILE * pFileXProj;
+//    std :: stringstream strFileNameXProj;
+//    strFileNameXProj << "NormalTractionProjVsXTime" << time << ".dat";
+//    std :: string nameStringXProj = strFileNameXProj.str();
+//
+//    pFileXProj = fopen ( nameStringXProj.c_str() , "wb" );
+//
+//    fprintf(pFileXProj, "#x tn\n");
+//    for ( size_t j = 0; j < points.size(); j++ ) {
+////    	printf("tractionsProj[j]: "); tractionsProj[j].printYourself();
+//    	fprintf(pFileXProj, "%e %e\n", points[j][0], tractionsProj[j].at(3) );
+//    }
+//
+//    fclose(pFileXProj);
+
+
+    // Export x vs shear traction
+
+    FILE * pFileXshear;
+    std :: stringstream strFileNameXshear;
+    strFileNameXshear << "ShearTractionVsXTime" << time << ".dat";
+    std :: string nameStringXshear = strFileNameXshear.str();
+
+    pFileXshear = fopen ( nameStringXshear.c_str() , "wb" );
+
+    fprintf(pFileXshear, "#x tn\n");
+    for ( size_t j = 0; j < points.size(); j++ ) {
+    	fprintf(pFileXshear, "%e %e\n", points[j][0], tractions[j].at(1) );
+    }
+
+    fclose(pFileXshear);
+
+
+
 
     // Export y vs normal traction
     FILE * pFileY;
-    char fileNameY[100];
-    sprintf(fileNameY, "NormalTractionVsY.dat");
-    pFileY = fopen ( fileNameY , "wb" );
+    std :: stringstream strFileNameY;
+    strFileNameY << "NormalTractionVsYTime" << time << ".dat";
+    std :: string nameStringY = strFileNameY.str();
+
+    pFileY = fopen ( nameStringY.c_str() , "wb" );
 
     fprintf(pFileY, "#y tn\n");
     for ( size_t j = 0; j < points.size(); j++ ) {
@@ -872,6 +937,24 @@ void GnuplotExportModule :: outputInterfaceEl(Domain &d, TimeStep *tStep) {
     }
 
     fclose(pFileY);
+
+
+
+
+    // Export y vs shear traction
+    FILE * pFileYshear;
+    std :: stringstream strFileNameYshear;
+    strFileNameYshear << "ShearTractionVsYTime" << time << ".dat";
+    std :: string nameStringYshear = strFileNameYshear.str();
+
+    pFileYshear = fopen ( nameStringYshear.c_str() , "wb" );
+
+    fprintf(pFileYshear, "#y tn\n");
+    for ( size_t j = 0; j < points.size(); j++ ) {
+    	fprintf(pFileYshear, "%e %e\n", points[j][1], tractions[j].at(1) );
+    }
+
+    fclose(pFileYshear);
 
 }
 

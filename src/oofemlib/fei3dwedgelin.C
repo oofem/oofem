@@ -61,7 +61,7 @@ FEI3dWedgeLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEIC
 double
 FEI3dWedgeLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    FloatMatrix jacobianMatrix(2, 2), inv, dNduvw, coords;
+    FloatMatrix jacobianMatrix, inv, dNduvw, coords;
 
     this->giveLocalDerivative(dNduvw, lcoords);
     coords.resize(3, 6);
@@ -158,7 +158,7 @@ FEI3dWedgeLin :: global2local(FloatArray &answer, const FloatArray &gcoords, con
 double
 FEI3dWedgeLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    FloatMatrix jacobianMatrix(3, 3);
+    FloatMatrix jacobianMatrix;
 
     this->giveJacobianMatrixAt(jacobianMatrix, lcoords, cellgeo);
     return jacobianMatrix.giveDeterminant() / 2.; ///@todo Should this really be a factor 1/2 here?

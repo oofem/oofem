@@ -249,7 +249,7 @@ protected:
     virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep)
     {
         OOFEM_ERROR("Should not be called! Not meaningful for this element.");
-    };
+    }
     virtual void edgeComputeBmatrixAt(const FloatArray &lCoords, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS);
 
     FloatArray convV6ToV9Stress(const FloatArray &V6);

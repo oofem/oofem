@@ -1,0 +1,52 @@
+adapt01.out
+Test of adaptive solution with state remapping 
+adaptnlinearstatic nsteps 5 controllmode 1 rtolv 0.0001 MaxIter 800 stiffMode 1 contextOutputStep 1  manrmsteps 1 varType 1 minlim 0.20 maxlim 1.0 mindens 0.5 maxdens 0.5 meshpackage 3 defdens 100.0 equilmc 1 renumber 1 lstype 0 smtype 0 eetype 0 istype 13 nmodules 1
+errorcheck
+domain 2dplanestress
+OutputManager tstep_all dofman_all element_all
+ndofman 4 nelem 2 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 2
+node 1 coords 3 0.0 0.0 0.0 bc 2 1 1
+node 2 coords 3 1.0 0.0 0.0 bc 2 2 1
+node 3 coords 3 1.0 1.0 0.0 bc 2 2 0
+node 4 coords 3 0.0 1.0 0.0 bc 2 1 0
+TrPlaneStress2d 1 nodes 3 1 2 3 crossSect 1 mat 1
+TrPlaneStress2d 2 nodes 3 1 3 4 crossSect 1 mat 1
+#
+SimpleCS 1 thick 1.0
+# ft is 2.0
+idm1 1 E 34.e3 n 0.18 e0 5.e-5 gf 0.123 damlaw 1  talpha 0.0 d 0.0
+#
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0 
+BoundaryCondition 2 loadTimeFunction 2 prescribedvalue 3.e-5
+ConstantFunction 1 f(t) 1.0
+PiecewiseLinFunction 2 nPoints 5 t 5 0.0 15.0 45. 60. 1060. f(t) 5 1.0 16.0 76.0 121.0 4121.0
+#%BEGIN_CHECK% tolerance 1.e-6
+## check reactions 
+#NODE tStep 3 number 2 dof 1 unknown d value 9.e-5 
+#NODE tStep 3 number 3 dof 1 unknown d value 9.e-5
+#NODE tStep 3 number 3 dof 2 unknown d value -1.62e-5
+##
+#ELEMENT tStep 3 number 1 gp 1 keyword 4 component 1  value 9.e-5
+#ELEMENT tStep 3 number 1 gp 1 keyword 4 component 2  value -1.62e-5 
+#ELEMENT tStep 3 number 1 gp 1 keyword 2 component 1  value 1.6995 tolerance 1.e-3
+#ELEMENT tStep 3 number 1 gp 1 keyword 2 component 2  value 0.0
+#ELEMENT tStep 3 number 1 gp 1 keyword 13 component 1  value 0.444598 tolerance 1.e-3
+##
+#NODE tStep 4 number 2 dof 1 unknown d value 1.2e-4
+#NODE tStep 4 number 3 dof 1 unknown d value 1.2e-4
+#NODE tStep 4 number 3 dof 2 unknown d value -2.16096386e-05
+#NODE tStep 4 number 5 dof 1 unknown d value 5.99817844e-05
+##
+#ELEMENT tStep 3 tStepVer 1 number 3 gp 1 keyword 4 component 1  value 9.0000e-05
+#ELEMENT tStep 3 tStepVer 1 number 3 gp 1 keyword 4 component 2  value -1.62e-5
+#ELEMENT tStep 3 tStepVer 1 number 3 gp 1 keyword 1 component 1  value 1.6998 tolerance 1.e-3
+#ELEMENT tStep 3 tStepVer 1 number 3 gp 1 keyword 1 component 2  value 0.0
+#ELEMENT tStep 3 tStepVer 1 number 3 gp 1 keyword 13 component 1  value 0.444521 tolerance 1.e-3
+##
+#ELEMENT tStep 5 tStepVer 0 number 3 gp 1 keyword 4 component 1  value 1.4995e-04
+#ELEMENT tStep 5 tStepVer 0 number 3 gp 1 keyword 4 component 2  value -2.6988e-05
+#ELEMENT tStep 5 tStepVer 0 number 3 gp 1 keyword 1 component 1  value 1.6994e+00 tolerance 1.e-4
+##ELEMENT tStep 5 tStepVer 0 number 3 gp 1 keyword 1 component 2  value 4.6502e-05
+#ELEMENT tStep 5 tStepVer 0 number 3 gp 1 keyword 13 component 1  value 0.666679 tolerance 1.e-3
+
+#%END_CHECK%

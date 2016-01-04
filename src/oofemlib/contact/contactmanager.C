@@ -36,6 +36,7 @@
 #include "contact/contactdefinition.h"
 #include "classfactory.h"
 #include "numericalcmpn.h"
+#include "error.h"
 
 namespace oofem {
 REGISTER_ContactManager(ContactManager)

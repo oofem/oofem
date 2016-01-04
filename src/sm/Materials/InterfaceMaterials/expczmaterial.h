@@ -35,8 +35,8 @@
 #ifndef expczmaterial_h
 #define expczmaterial_h
 
-#include "../sm/Materials/structuralmaterial.h"
-#include "../sm/Materials/structuralms.h"
+#include "structuralinterfacematerial.h"
+#include "structuralinterfacematerialstatus.h"
 
 ///@name Input fields for ExpCZMaterial
 //@{
@@ -49,12 +49,11 @@
 //@}
 
 namespace oofem {
-//class IntegrationPoint;
 
 /**
- * This class implements associated Material Status to IsoInterfaceDamageMaterial.
+ * This class implements associated status to ExpCZMaterial.
  */
-class ExpCZMaterialStatus : public StructuralMaterialStatus
+class ExpCZMaterialStatus : public StructuralInterfaceMaterialStatus
 {
 protected:
 
@@ -89,7 +88,7 @@ public:
  * is governed by normal component of generalized strain vector (normal relative displacement)
  * by an exponential softening law.
  */
-class ExpCZMaterial : public StructuralMaterial
+class ExpCZMaterial : public StructuralInterfaceMaterial
 {
 protected:
     /// Material parameters
@@ -100,44 +99,35 @@ protected:
     double sigfn;
     double sigfs;
 
-    double gn0;   // normal jump at damage initiation
-    double gs0;   // shear jump at damage initiations
+    /// normal jump at damage initiation
+    double gn0;
+    /// shear jump at damage initiations
+    double gs0;
     double q;
     double r;
 
-    virtual int checkConsistency();
-    void give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
-                                                GaussPoint *gp, TimeStep *tStep);
 public:
     /// Constructor
     ExpCZMaterial(int n, Domain * d);
     /// Destructor
     virtual ~ExpCZMaterial();
 
-    virtual int hasNonLinearBehaviour()   { return 1; }
+    virtual int hasNonLinearBehaviour() { return 1; }
+    virtual int checkConsistency();
 
-    virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "ExpCZMaterial"; }
 
-    virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-                                      const FloatArray &reducedStrain, TimeStep *tStep);
-
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer,
-                                          MatResponseForm form,
-                                          MatResponseMode mode,
-                                          GaussPoint *gp,
-                                          TimeStep *tStep);
+    virtual void giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep);
+    virtual void give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
     virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
-    //virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
-
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new ExpCZMaterialStatus(1, domain, gp); }
-    void printYourself();
+    virtual void printYourself();
 };
 } // end namespace oofem
 #endif // isointerfacedamage01_h

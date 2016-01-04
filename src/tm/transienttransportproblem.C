@@ -35,17 +35,29 @@
 #include "transienttransportproblem.h"
 #include "timestep.h"
 #include "dofdistributedprimaryfield.h"
+#include "maskedprimaryfield.h"
 #include "transportelement.h"
 #include "classfactory.h"
 #include "datastream.h"
 #include "contextioerr.h"
 #include "nrsolver.h"
 #include "unknownnumberingscheme.h"
+#include "function.h"
+// Temporary:
+#include "generalboundarycondition.h"
+#include "boundarycondition.h"
+#include "activebc.h"
 
 namespace oofem {
 REGISTER_EngngModel(TransientTransportProblem);
 
-TransientTransportProblem :: TransientTransportProblem(int i, EngngModel *_master = NULL) : EngngModel(i, _master)
+TransientTransportProblem :: TransientTransportProblem(int i, EngngModel *_master = NULL) : EngngModel(i, _master),
+    alpha(0.5),
+    dtFunction(0),
+    prescribedTimes(),
+    deltaT(1.),
+    keepTangent(false),
+    lumped(false)
 {
     ndomains = 1;
 }
@@ -72,14 +84,38 @@ TransientTransportProblem :: initializeFrom(InputRecord *ir)
     this->sparseMtrxType = ( SparseMtrxType ) val;
 
     IR_GIVE_FIELD(ir, this->alpha, _IFT_TransientTransportProblem_alpha);
-    
-    IR_GIVE_FIELD(ir, this->deltaT, _IFT_TransientTransportProblem_deltaT);
-    
+
+    prescribedTimes.clear();
+    dtFunction = 0;
+    if ( ir->hasField(_IFT_TransientTransportProblem_dtFunction) ) {
+        IR_GIVE_FIELD(ir, this->dtFunction, _IFT_TransientTransportProblem_dtFunction);
+    } else if ( ir->hasField(_IFT_TransientTransportProblem_prescribedTimes) ) {
+        IR_GIVE_FIELD(ir, this->prescribedTimes, _IFT_TransientTransportProblem_prescribedTimes);
+    } else {
+        IR_GIVE_FIELD(ir, this->deltaT, _IFT_TransientTransportProblem_deltaT);
+    }
+
     this->keepTangent = ir->hasField(_IFT_TransientTransportProblem_keepTangent);
 
     this->lumped = ir->hasField(_IFT_TransientTransportProblem_lumped);
 
     field.reset( new DofDistributedPrimaryField(this, 1, FT_TransportProblemUnknowns, 0) );
+
+    // read field export flag
+    exportFields.clear();
+    IR_GIVE_OPTIONAL_FIELD(ir, exportFields, _IFT_TransientTransportProblem_exportFields);
+    if ( exportFields.giveSize() ) {
+        FieldManager *fm = this->giveContext()->giveFieldManager();
+        for ( int i = 1; i <= exportFields.giveSize(); i++ ) {
+            if ( exportFields.at(i) == FT_Temperature ) {
+                FM_FieldPtr _temperatureField( new MaskedPrimaryField ( ( FieldType ) exportFields.at(i), this->field.get(), {T_f} ) );
+                fm->registerField( _temperatureField, ( FieldType ) exportFields.at(i) );
+            } else if ( exportFields.at(i) == FT_HumidityConcentration ) {
+                FM_FieldPtr _concentrationField( new MaskedPrimaryField ( ( FieldType ) exportFields.at(i), this->field.get(), {C_1} ) );
+                fm->registerField( _concentrationField, ( FieldType ) exportFields.at(i) );
+            }
+        }
+    }
 
     return EngngModel :: initializeFrom(ir);
 }
@@ -103,6 +139,32 @@ double TransientTransportProblem :: giveUnknownComponent(ValueModeType mode, Tim
 }
 
 
+double
+TransientTransportProblem :: giveDeltaT(int n)
+{
+    if ( this->dtFunction ) {
+        return this->giveDomain(1)->giveFunction(this->dtFunction)->evaluateAtTime(n);
+    } else if ( this->prescribedTimes.giveSize() > 0 ) {
+        return this->giveDiscreteTime(n) - this->giveDiscreteTime(n - 1);
+    } else {
+        return this->deltaT;
+    }
+}
+
+double
+TransientTransportProblem :: giveDiscreteTime(int iStep)
+{
+    if ( iStep > 0 && iStep <= this->prescribedTimes.giveSize() ) {
+        return ( this->prescribedTimes.at(iStep) );
+    } else if ( iStep == 0 ) {
+        return 0.0;
+    }
+
+    OOFEM_ERROR("invalid iStep");
+    return 0.0;
+}
+
+
 TimeStep *TransientTransportProblem :: giveNextStep()
 {
     if ( !currentStep ) {
@@ -110,22 +172,28 @@ TimeStep *TransientTransportProblem :: giveNextStep()
         currentStep.reset( new TimeStep( *giveSolutionStepWhenIcApply() ) );
     }
     
+    double dt = this->giveDeltaT(currentStep->giveNumber()+1);
     previousStep = std :: move(currentStep);
-    currentStep.reset( new TimeStep(*previousStep, this->deltaT) );
+    currentStep.reset( new TimeStep(*previousStep, dt) );
+    currentStep->setIntrinsicTime(previousStep->giveTargetTime() + alpha * dt);
     return currentStep.get();
 }
 
 
-TimeStep *TransientTransportProblem :: giveSolutionStepWhenIcApply()
+TimeStep *TransientTransportProblem :: giveSolutionStepWhenIcApply(bool force)
 {
-    if ( !stepWhenIcApply ) {
-        ///@todo Should we have this->initT ?
-        stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, 0., deltaT, 0) );
-        // The initial step goes from [-deltaT, 0], so the intrinsic time is at: -deltaT  + alpha*deltaT
-        stepWhenIcApply->setIntrinsicTime(-deltaT + alpha * deltaT);
-    }
+    if ( master && (!force)) {
+        return master->giveSolutionStepWhenIcApply();
+    } else {
+        if ( !stepWhenIcApply ) {
+            double dt = this->giveDeltaT(1);
+            stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, 0., dt, 0) );
+            // The initial step goes from [-dt, 0], so the intrinsic time is at: -deltaT  + alpha*dt
+            stepWhenIcApply->setIntrinsicTime(-dt + alpha * dt);
+        }
 
-    return stepWhenIcApply.get();
+        return stepWhenIcApply.get();
+    }
 }
 
 
@@ -134,11 +202,36 @@ void TransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
     Domain *d = this->giveDomain(1);
     int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
 
-    field->advanceSolution(tStep);
-    field->applyBoundaryCondition(tStep);
     if ( tStep->isTheFirstStep() ) {
         this->applyIC();
     }
+
+    field->advanceSolution(tStep);
+
+#if 1
+    // This is what advanceSolution should be doing, but it can't be there yet 
+    // (backwards compatibility issues due to inconsistencies in other solvers).
+    TimeStep *prev = tStep->givePreviousStep();
+    for ( auto &dman : d->giveDofManagers() ) {
+        static_cast< DofDistributedPrimaryField* >(field.get())->setInitialGuess(*dman, tStep, prev);
+    }
+
+    for ( auto &elem : d->giveElements() ) {
+        int ndman = elem->giveNumberOfInternalDofManagers();
+        for ( int i = 1; i <= ndman; i++ ) {
+            static_cast< DofDistributedPrimaryField* >(field.get())->setInitialGuess(*elem->giveInternalDofManager(i), tStep, prev);
+        }
+    }
+
+    for ( auto &bc : d->giveBcs() ) {
+        int ndman = bc->giveNumberOfInternalDofManagers();
+        for ( int i = 1; i <= ndman; i++ ) {
+            static_cast< DofDistributedPrimaryField* >(field.get())->setInitialGuess(*bc->giveInternalDofManager(i), tStep, prev);
+        }
+    }
+#endif
+
+    field->applyBoundaryCondition(tStep);
     field->initialize(VM_Total, tStep, solution, EModelDefaultEquationNumbering());
 
 
@@ -186,6 +279,7 @@ void TransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
     this->nMethod->solve(*this->effectiveMatrix,
                          externalForces,
                          NULL, // ignore
+                         NULL,
                          this->solution,
                          incrementOfSolution,
                          this->internalForces,
@@ -275,6 +369,29 @@ TransientTransportProblem :: applyIC()
     }
 }
 
+
+bool
+TransientTransportProblem :: requiresEquationRenumbering(TimeStep *tStep)
+{
+    ///@todo This method should be set as the default behavior instead of relying on a user specified flag. Then this function should be removed.
+    if ( tStep->isTheFirstStep() ) {
+        return true;
+    }
+    // Check if Dirichlet b.c.s has changed.
+    Domain *d = this->giveDomain(1);
+    for ( auto &gbc : d->giveBcs() ) {
+        ActiveBoundaryCondition *active_bc = dynamic_cast< ActiveBoundaryCondition * >(gbc.get());
+        BoundaryCondition *bc = dynamic_cast< BoundaryCondition * >(gbc.get());
+        // We only need to consider Dirichlet b.c.s
+        if ( bc || ( active_bc && ( active_bc->requiresActiveDofs() || active_bc->giveNumberOfInternalDofManagers() ) ) ) {
+            // Check of the dirichlet b.c. has changed in the last step (if so we need to renumber)
+            if ( gbc->isImposed(tStep) != gbc->isImposed(tStep->givePreviousStep()) ) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
 
 int
 TransientTransportProblem :: forceEquationNumbering()

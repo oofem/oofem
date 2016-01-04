@@ -25,7 +25,11 @@ endif ()
 if (MSVC)
     add_definitions (-D_USE_MATH_DEFINES)
     set (CMAKE_REQUIRED_DEFINITIONS "-D_USE_MATH_DEFINES")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W4 -wd4786 -wd4100 -wd4996 -wd4706 -wd4512 -wd4251")
+    # I'm not sure we should block these warnings or not:
+    # C4800 Conversion from int to bool performance warning (we should probably be using bool in most of these places though).
+    # C4127 Conditional expression is constant: Most of these uses are intentional (debugging code etc.)
+    # C4267 size_t to int conversion. Most of these are indices, but many places can be replaced by a for-each loop as well.
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W4 -wd4786 -wd4100 -wd4996 -wd4706 -wd4512 -wd4251 -wd4800")
 else ()
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fPIC")
 endif ()
@@ -78,6 +82,7 @@ option (USE_OPENMP "Compile with OpenMP support (for parallel assembly)" OFF)
 option (USE_DSS "Enable DSS module" OFF) # No reason to use this
 option (USE_IML "Enable iml++ solvers" OFF) # or this
 option (USE_SPOOLES "Enable SPOOLES-solver" OFF) # or this
+option (USE_MKLPARDISO "Enable MKLPARDISO solver support" OFF)
 option (USE_PETSC "Enable PETSc support (required for parallel)" OFF)
 option (USE_SLEPC "Enable SLEPc support" OFF)
 option (USE_LAPACK "Use LAPACK" OFF)
@@ -88,6 +93,7 @@ option (USE_VTK "Enable VTK (for exporting binary VTU-files)" OFF)
 # Internal modules
 option (USE_SM "Enable structural mechanics module" ON)
 option (USE_FM "Enable fluid mechanics module" ON)
+option (USE_PFEM "Enable PFEM module" OFF)
 option (USE_TM "Enable heat/mass transfer module" ON)
 option (USE_CEMHYD "Enable CemHyd support" OFF)
 #option (USE_BOOST "Enable Boost" OFF)
@@ -122,6 +128,9 @@ if (USE_FM)
         list (APPEND LIBS $<TARGET_OBJECTS:fm>)
     endif ()
     list (APPEND MODULE_LIST "fm")
+    if (USE_PFEM)
+        add_definitions (-D__PFEM_MODULE)
+    endif ()
 endif ()
 
 if (USE_TM)
@@ -272,9 +281,28 @@ if (USE_METIS)
     endif ()
     list (APPEND EXT_LIBS ${METIS_LIB})
     list (APPEND MODULE_LIST "metis")
-    add_definitions (-D__METIS_MODULE)
 endif ()
 
+if (USE_MKLPARDISO)
+    # Find the actual libraries:
+    list(APPEND MKL_LIBS "mkl_core" "mkl_gf_lp64" "mkl_gnu_thread" "pthread")
+    foreach (f ${MKL_LIBS})
+        if (MKL_DIR)
+            find_library (${f}_LIB ${f} PATH "${MKL_DIR}/mkl/lib/intel64/" DOC "MKLPARDISO (library)")
+            include_directories ("${MKL_DIR}/mkl/include")
+        else ()
+            find_library (${f}_LIB ${f} HINTS "/opt/intel/composerxe/mkl/lib/intel64/" DOC "MKLPARDISO (library)")
+            include_directories ("/opt/intel/composerxe/mkl/include")
+        endif ()
+        if (${${f}_LIB} STREQUAL "${f}_LIB-NOTFOUND")
+            message (FATAL_ERROR "MKLPARDISO library not found")
+        endif ()
+        list (APPEND EXT_LIBS ${${f}_LIB})
+    endforeach ()
+
+    #list (APPEND EXT_LIBS ${MKLPARDISO_LIB})
+    list (APPEND MODULE_LIST "MKLPARDISO")
+endif ()
 
 if (USE_SLEPC)
     if (SLEPC_DIR)
@@ -674,11 +702,26 @@ if (USE_TM AND USE_CEMHYD)
     endforeach (case)
 endif()
 
+if (USE_FM AND USE_PFEM)
+    file (GLOB fmpfem_tests RELATIVE "${oofem_TEST_DIR}/fmpfem" "${oofem_TEST_DIR}/fmpfem/*.in")
+    foreach (case ${fmpfem_tests})
+        add_test (NAME "test_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/fmpfem COMMAND ${oofem_cmd} "-f" ${case})
+    endforeach (case)
+endif()
+
 # Benchmarks
 file (GLOB benchmarks RELATIVE "${oofem_TEST_DIR}/benchmark" "${oofem_TEST_DIR}/benchmark/*.in")
 foreach (case ${benchmarks})
     add_test (NAME "benchmark_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/benchmark COMMAND ${oofem_cmd} "-f" ${case})
 endforeach (case)
+
+# PFEM Benchmarks
+if (USE_SM AND USE_FM AND USE_PFEM)
+    file (GLOB pfembenchmarks RELATIVE "${oofem_TEST_DIR}/pfembenchmark" "${oofem_TEST_DIR}/pfembenchmark/*.in")
+    foreach (case ${pfembenchmarks})
+        add_test (NAME "benchmark_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/pfembenchmark COMMAND ${oofem_cmd} "-f" ${case})
+    endforeach (case)
+endif()
 
 # Custom targets for test and benchmarks (which can conveniently be accessed from IDEs)
 

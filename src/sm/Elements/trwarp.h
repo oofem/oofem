@@ -35,15 +35,15 @@
 #ifndef tr_warp_h
 #define tr_warp_h
 
-#include "../sm/Elements/structuralelement.h"
+#include "structuralelement.h"
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
+#include "fei2dtrlin.h"
 
 #define _IFT_Tr_Warp_Name "trwarp"
 
-namespace oofem {
-class FEI2dTrLin;
 
+namespace oofem {
 /**
  * Triangle (2d) element with linear approximation for free warping analysis.
  */
@@ -52,41 +52,64 @@ class Tr_Warp : public StructuralElement, public SpatialLocalizerInterface, publ
 protected:
     static FEI2dTrLin interp;
 
-public:
-    Tr_Warp(int n, Domain * d);
-    virtual ~Tr_Warp();
 
+public:
+    Tr_Warp(int n, Domain *d);
+    virtual ~Tr_Warp();
+    virtual void computeFirstMomentOfArea(FloatArray &answer);
     virtual double computeVolumeAround(GaussPoint *gp);
-    virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
-    virtual void computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep, ValueModeType mode);
+    void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
+    virtual void computeLocalForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
+    virtual void computeEdgeLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
+
+
 
     // definition
     virtual const char *giveInputRecordName() const { return _IFT_Tr_Warp_Name; }
     virtual const char *giveClassName() const { return "Tr_WarpElement"; }
 
-    virtual int computeNumberOfDofs() { return 3; }
+    virtual int computeNumberOfDofs() { return 4; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _Warping; }
     virtual double giveThicknessAt(const FloatArray &gcoords);
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui);
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
-    //virtual void updateInternalState(TimeStep *tStep) { }
+    void giveDofManDofIDMask(int inode, IntArray &answer) const;
 
     virtual Interface *giveInterface(InterfaceType t);
 
-    virtual FEInterpolation *giveInterpolation() const;
+    virtual void giveInternalDofManDofIDMask(int inode, IntArray &answer) const;
+    virtual DofManager *giveInternalDofManager(int i) const;
 
+
+
+    virtual int giveNumberOfInternalDofManagers() const { return 1; }
+
+
+
+    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
+    void ZZNodalRecoveryMI_computeNNMatrix(FloatArray &answer, InternalStateType type);
+    bool ZZNodalRecoveryMI_computeNValProduct(FloatMatrix &answer, InternalStateType type,
+                                              TimeStep *tStep);
+    virtual Element *SpatialLocalizerI_giveElement() { return this; }
+    virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
+    virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
+
+    virtual FEInterpolation *giveInterpolation() const { return & this->interp; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
 #ifdef __OOFEG
     // Graphics output
-    //virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) {}
-    //virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) {}
+    //void drawYourself(oofegGraphicContext&);
+    //virtual void drawRawGeometry(oofegGraphicContext&) {}
+    //virtual void drawDeformedGeometry(oofegGraphicContext&, UnknownType) {}
 #endif
 
 protected:
     virtual void computeGaussPoints();
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
+    void transformCoordinates(FloatArray &answer, FloatArray &c, const int CGnumber);
+    virtual void  postInitialize();
 };
-
 } // end namespace oofem
 #endif // tr_warp_h

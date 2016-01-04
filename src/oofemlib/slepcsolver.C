@@ -55,7 +55,7 @@ SLEPcSolver :: SLEPcSolver(Domain *d, EngngModel *m) : SparseGeneralEigenValueSy
 SLEPcSolver :: ~SLEPcSolver()
 {
     if ( epsInit ) {
-        EPSDestroy(eps);
+        EPSDestroy(& eps);
     }
 }
 
@@ -183,7 +183,7 @@ SLEPcSolver :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, FloatMatri
             }
         }
 
-        ierr = VecDestroy(Vr);
+        ierr = VecDestroy(& Vr);
         CHKERRQ(ierr);
     } else {
         OOFEM_ERROR("No converged eigenpairs");
