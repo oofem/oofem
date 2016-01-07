@@ -40,13 +40,13 @@ Set 2 nodes 2 7 8
 #
 #%BEGIN_CHECK% tolerance 1.e-5
 ## step 2
-#REACTION tStep 2 number 1 dof 1 value -1.87990066e+001 
-#REACTION tStep 2 number 1 dof 2 value -1.07274924e+001
-#REACTION tStep 2 number 8 dof 1 value  1.87990065e+001 
-#REACTION tStep 2 number 8 dof 2 value -2.68704521e+001
+#REACTION tStep 2 number 1 dof 1 value -1.87968676e+01
+#REACTION tStep 2 number 1 dof 2 value -1.06925475e+01
+#REACTION tStep 2 number 8 dof 1 value  1.87968670e+01 
+#REACTION tStep 2 number 8 dof 2 value -2.69011191e+01
 ## step 5
 #REACTION tStep 5 number 1 dof 1 value 0.0 
-#REACTION tStep 5 number 1 dof 2 value 0.0
+#REACTION tStep 5 number 1 dof 2 value 7.64490194e+00
 #REACTION tStep 5 number 8 dof 1 value 0.0
-#REACTION tStep 5 number 8 dof 2 value 0.0
+#REACTION tStep 5 number 8 dof 2 value -7.64490244e+00
 #%END_CHECK%

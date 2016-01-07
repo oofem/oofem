@@ -59,6 +59,22 @@ StructuralInterfaceElement :: StructuralInterfaceElement(int n, Domain *aDomain)
 StructuralInterfaceElement :: ~StructuralInterfaceElement()
 { }
 
+int StructuralInterfaceElement :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) {
+    FloatArray N;
+    FEInterpolation *interp = this->giveInterpolation();
+    interp->evalN( N, lcoords, FEIElementGeometryWrapper(this) );
+
+    answer.resize(this->giveDofManager(1)->giveCoordinates()->giveSize());
+    answer.zero();
+
+    int numNodes = this->giveNumberOfNodes();
+    for(int i = 1; i <= numNodes/2; i++) {
+    	FloatArray &nodeCoord = *(this->giveDofManager(i)->giveCoordinates());
+    	answer.add(N.at(i), nodeCoord );
+    }
+
+    return true;
+}
 
 
 void
@@ -170,21 +186,28 @@ StructuralInterfaceElement :: giveInternalForcesVector(FloatArray &answer,
 
 
 void
-StructuralInterfaceElement :: computeTraction(FloatArray &traction, IntegrationPoint *ip, FloatArray &jump, TimeStep *tStep)
+StructuralInterfaceElement :: computeTraction(FloatArray &traction, IntegrationPoint *ip, const FloatArray &jump, TimeStep *tStep)
 {
     // Returns the traction in global coordinate system
     FloatMatrix rotationMatGtoL, F;
     this->computeTransformationMatrixAt(ip, rotationMatGtoL);
-    jump.rotatedWith(rotationMatGtoL, 'n');      // transform jump to local coord system
+
+    FloatArray jumpRot = jump;
+    jumpRot.rotatedWith(rotationMatGtoL, 'n');      // transform jump to local coord system
 
     if ( this->nlGeometry == 0 ) {
-        this->giveEngTraction(traction, ip, jump, tStep);
+        this->giveEngTraction(traction, ip, jumpRot, tStep);
     } else if ( this->nlGeometry == 1 ) {
         ///@todo compute F in a proper way
         F.beUnitMatrix();
         F.rotatedWith(rotationMatGtoL, 'n');
-        this->giveFirstPKTraction(traction, ip, jump, F, tStep);
+        this->giveFirstPKTraction(traction, ip, jumpRot, F, tStep);
     }
+
+    StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( ip->giveMaterialStatus() );
+    FloatArray normal = {rotationMatGtoL.at(2,1), rotationMatGtoL.at(2,2), 0.};
+//    printf("normal: "); normal.printYourself();
+    status->letNormalBe(normal);
 
     traction.rotatedWith(rotationMatGtoL, 't');     // transform traction to global coord system
 }

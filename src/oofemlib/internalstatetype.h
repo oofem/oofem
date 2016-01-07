@@ -160,7 +160,9 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_CreepStrainTensor, 110) \
     ENUM_ITEM_WITH_VALUE(IST_TensileStrength, 111) \
     ENUM_ITEM_WITH_VALUE(IST_ResidualTensileStrength, 112) \
-    ENUM_ITEM_WITH_VALUE(IST_CrackIndex, 113)
+    ENUM_ITEM_WITH_VALUE(IST_CrackIndex, 113) \
+    ENUM_ITEM_WITH_VALUE(IST_InterfaceNormal, 114)
+
 
 /**
  * Type  representing the physical meaning of element or constitutive model internal variable.
