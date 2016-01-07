@@ -1074,7 +1074,7 @@ Element :: giveLengthInDir(const FloatArray &normalToCrackPlane)
 
     return maxDis - minDis;
 }
-    
+
 double 
 Element :: giveCharacteristicLengthForPlaneElements(const FloatArray &normalToCrackPlane) 
 //
@@ -1090,7 +1090,7 @@ Element :: giveCharacteristicLengthForPlaneElements(const FloatArray &normalToCr
         return this->computeMeanSize();
     }
 }
-    
+
 double 
 Element :: giveCharacteristicLengthForAxisymmElements(const FloatArray &normalToCrackPlane) 
 //
