@@ -1238,13 +1238,14 @@ Shell7Base :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
                                          int iSurf, TimeStep *tStep, ValueModeType mode)
 {
     BoundaryLoad *surfLoad = dynamic_cast< BoundaryLoad * >( load );
+    
     if ( surfLoad ) {
         FloatArray solVec, force;
         this->giveUpdatedSolutionVector(solVec, tStep);
 //         printf("computeSurfaceLoadVectorAt");
         this->computePressureForce(force, solVec, iSurf, surfLoad, tStep, mode);
         IntArray mask;
-        this->giveSurfaceDofMapping(mask, 1);         // same dofs regardless of iSurf->1
+        this->giveSurfaceDofMapping(mask, 0);         // shell has only one surface id (0) thus iSurf=0 regardless and same dofs will results
         answer.resize( this->computeNumberOfDofs() );
         answer.zero();
         answer.assemble(force, mask);
@@ -1289,7 +1290,7 @@ Shell7Base :: computePressureForce(FloatArray &answer, FloatArray solVec, const 
         double zeta = giveGlobalZcoord( lCoords );
         this->computeBmatrixAt(lCoords, B);
         this->computeNmatrixAt(lCoords, N);
-        this->giveUpdatedSolutionVector(solVecC, tStep);
+        this->giveUpdatedSolutionVector(solVecC, tStep); // TODO blir int solVecC samma som solVec här
         genEpsC.beProductOf(B, solVecC);       
         this->computePressureForceAt(ip, traction, iSurf, genEpsC, surfLoad, tStep, mode);
         
@@ -2353,8 +2354,11 @@ Shell7Base :: giveSPRcontribution(FloatMatrix &eltIPvalues, FloatMatrix &eltPoly
 }
 
 void
-Shell7Base :: giveTractionBC(FloatArray &tractionTop, FloatArray &tractionBtm, TimeStep *tStep)
+Shell7Base :: giveTractionBC(FloatMatrix &tractionTop, FloatMatrix &tractionBtm, TimeStep *tStep)
 {
+    int numInPlaneIP = tractionTop.giveNumberOfColumns(); 
+    tractionTop.zero(); tractionBtm.zero();
+    
     int numLoads = this->boundaryLoadArray.giveSize() / 2;
     
     for ( int i = 1; i <= numLoads; i++ ) {     // For each pressure load that is applied
@@ -2365,34 +2369,37 @@ Shell7Base :: giveTractionBC(FloatArray &tractionTop, FloatArray &tractionBtm, T
         
         if ( ConstantSurfaceLoad* sLoad = dynamic_cast< ConstantSurfaceLoad * >( load ) ) {
             
+//             FloatArray tractionBC, tempTractionTop, tempTractionBtm; tempTractionTop.clear(); tempTractionBtm.clear();
             FloatArray tractionBC;
             load->computeComponentArrayAt(tractionBC,tStep,VM_Total);   ///TODO: update VM-mode?
             double xi = sLoad->giveLoadOffset();
+            if ( tractionBC.giveSize() != tractionBtm.giveNumberOfRows() ) {
+                OOFEM_ERROR("Number of stress components don't match");
+            }
             
             // Assume linear variation of placement
-            tractionTop.add(((1.0+xi)/2.0),tractionBC);        // positive z-normal
-            tractionBtm.add((-(1.0-xi)/2.0),tractionBC);       // negative z-normal            
-            
+            //tempTractionTop.add(((1.0+xi)/2.0),tractionBC);        // positive z-normal
+            //tempTractionBtm.add((-(1.0-xi)/2.0),tractionBC);       // negative z-normal            
+            for (int iIP = 1 ; iIP <= numInPlaneIP ; iIP++ ) {
+                
+                tractionTop.addSubVectorCol(((1.0+xi)/2.0)*tractionBC,1,iIP);
+                tractionBtm.addSubVectorCol((-(1.0-xi)/2.0)*tractionBC,1,iIP);
+            }
         } else {
             OOFEM_ERROR("Load type not supported");
         }
     }
     
-    if (this->giveGlobalNumber() == 48) {
-        tractionTop.printYourself("tractionTop");
-        tractionBtm.printYourself("tractionBtm");
-    }
+//     if (this->giveGlobalNumber() == 48) {
+//         tractionTop.printYourself("tractionTop");
+//         tractionBtm.printYourself("tractionBtm");
+//     }
 }
   
 void 
 Shell7Base :: recoverShearStress(TimeStep *tStep)
 {
-    // Recover shear stresses at ip by integration of the momentum balance through the thickness
-    
-    // Find top and bottom BC NB: assumes constant over element surface.
-    FloatArray tractionTop, tractionBtm; 
-    giveTractionBC(tractionTop, tractionBtm, tStep);
-    
+    // Recover shear stresses at ip by integration of the momentum balance through the thickness    
     
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();     // conversion of types
     
@@ -2418,17 +2425,19 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
     std::vector <FloatMatrix> dSmat; dSmat.resize(numberOfLayers);              //recovered stress values at layer top
     std::vector <FloatMatrix> dSmatIPupd; dSmatIPupd.resize(numberOfLayers);     //recovered stress values in wedge IPs fitted to  top and btm traction BC. 
     
-    SmatOld.zero();
+    // Find top and bottom BC NB: assumes constant over element surface.
+    FloatMatrix tractionTop(3,numInPlaneIP), tractionBtm(3,numInPlaneIP); 
+    giveTractionBC(tractionTop, tractionBtm, tStep);
+    SmatOld = tractionBtm;        // integration performed from bottom
+//     SmatOld.zero();    
+//     for ( int i = 1; i <= numInPlaneIP ; i++) {
+//         SmatOld.at(1,i) = tractionBtm.at(1);
+//         SmatOld.at(2,i) = tractionBtm.at(2);
+//         SmatOld.at(3,i) = tractionBtm.at(3);
+//     }
     
     // Integration from the bottom
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
-        if ( layer == 1 ) {
-            for ( int i = 1; i <= numInPlaneIP ; i++) {
-                SmatOld.at(1,i) = tractionBtm.at(1);
-                SmatOld.at(2,i) = tractionBtm.at(2);
-                SmatOld.at(3,i) = tractionBtm.at(3);
-            }
-        }
 
         /* Recover values by a polynomial fit to the stress values in a patch of elements closest to the this element.
             * The vector of GPvalues is [GPvalue] = [P(x_GP,y_GP,z_GP)]*a, where 
@@ -2498,7 +2507,7 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
 #endif
 
     // All transverse stress components
-    fitRecoveredStress2BC(dSmatIPupd, dSmat, dSmatIP, SmatOld, tractionBtm, tractionTop, zeroThicknessLevel, {0.0,0.0,1.0});
+    fitRecoveredStress2BC(dSmatIPupd, dSmat, dSmatIP, SmatOld, tractionBtm, tractionTop, zeroThicknessLevel, {0.0,0.0,1.0}, 1, numberOfLayers);    // {0.0,0.0,1.0}: only Szz fulfills BC, shear stress integration error is only distributed to top and btm
     
     FloatMatrix zeros(3,numInPlaneIP); zeros.zero();
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
@@ -2530,8 +2539,8 @@ Shell7Base :: giveLayerContributionToSR(FloatMatrix &dSmatLayer, FloatMatrix &dS
        
     int numInPlaneIP = 6; ///TODO generalise this; 
     int numThicknessIP = this->layeredCS->giveNumIntegrationPointsInLayer();     
-    dSmatLayer.resize(3,numInPlaneIP);                  // 3 stress components (S_xz, S_yz, S_zz) * num of in plane ip 
-    dSmatLayerIP.resize(3,numInPlaneIP*numThicknessIP); // 3 stress components (S_xz, S_yz, S_zz) * num of wedge IP
+    dSmatLayer.clear(); dSmatLayer.resize(3,numInPlaneIP);                  // 3 stress components (S_xz, S_yz, S_zz) * num of in plane ip 
+    dSmatLayerIP.clear(); dSmatLayerIP.resize(3,numInPlaneIP*numThicknessIP); // 3 stress components (S_xz, S_yz, S_zz) * num of wedge IP
     
     //recoveredValues.resize(numWedgeNodes);
     IntArray centreElNum = {this->giveGlobalNumber()};
@@ -2847,7 +2856,7 @@ Shell7Base :: giveLayerContributionToSR(FloatMatrix &dSmatLayer, FloatMatrix &dS
 }
 
 void 
-Shell7Base :: fitRecoveredStress2BC(std::vector<FloatMatrix> &answer, std::vector<FloatMatrix> &dSmat, std::vector<FloatMatrix> &dSmatIP, FloatMatrix &SmatOld, FloatArray &tractionBtm, FloatArray &tractionTop, double zeroThicknessLevel, FloatArray fulfillBC)
+Shell7Base :: fitRecoveredStress2BC(std::vector<FloatMatrix> &answer, std::vector<FloatMatrix> &dSmat, std::vector<FloatMatrix> &dSmatIP, FloatMatrix &SmatOld, FloatMatrix &tractionBtm, FloatMatrix &tractionTop, double zeroThicknessLevel, FloatArray fulfillBC, int startLayer, int endLayer)
 {
     
     // Adjust the integrated stress values to take top and bottom surface BC into account
@@ -2855,12 +2864,19 @@ Shell7Base :: fitRecoveredStress2BC(std::vector<FloatMatrix> &answer, std::vecto
     // NB: recovery of normal stress (Szz) requires both top and bottom BC fulfillment.
     
     int numInPlaneIP = 6; ///TODO generalise this.
-    double totalThickness = this->layeredCS->computeIntegralThick(); 
-    int numberOfLayers = this->layeredCS->giveNumberOfLayers();
+    int numberOfLayers = startLayer - endLayer + 1;
     int numThicknessIP = this->layeredCS->giveNumIntegrationPointsInLayer();    
     int numSC = SmatOld.giveNumberOfRows();    // assume same number of stress component to be fitted in each layer
+    double totalThickness = 0.0;
+    if ( numberOfLayers == this->layeredCS->giveNumberOfLayers() ) {
+        totalThickness = this->layeredCS->computeIntegralThick(); 
+    } else {
+        for ( int layer = startLayer ; layer <= endLayer; layer++ ) {
+            totalThickness += this->layeredCS->giveLayerThickness(layer);
+        }
+    }
     
-    if (numSC != tractionBtm.giveSize() || numSC != tractionTop.giveSize()) {
+    if (numSC != tractionBtm.giveNumberOfRows() || numSC != tractionTop.giveNumberOfRows() ) {
         OOFEM_ERROR("Number of stress components don't match");
     }
     
@@ -2873,30 +2889,30 @@ Shell7Base :: fitRecoveredStress2BC(std::vector<FloatMatrix> &answer, std::vecto
         
         for ( int j = 0 ; j < numInPlaneIP ; j++ ) { 
         
-            intError.at(iSC,j+1) = tractionTop.at(iSC) - SmatOld.at(iSC,j+1);
+            intError.at(iSC,j+1) = tractionTop.at(iSC,j+1) - SmatOld.at(iSC,j+1);
             C1.at(iSC,j+1) = (1.0/totalThickness)*intError.at(iSC,j+1);
-            SOld.at(iSC,j+1) = tractionBtm.at(iSC) - 0.5*(1.0 - fulfillBC.at(iSC))*intError.at(iSC,j+1);    // last term distributes integration error on top and btm if fulfillBC = 0;
+            SOld.at(iSC,j+1) = tractionBtm.at(iSC,j+1) - 0.5*(1.0 - fulfillBC.at(iSC))*intError.at(iSC,j+1);    // last term distributes integration error on top and btm if fulfillBC = 0;
             
         }
     }
             
     FloatArray GPcoords;
         
-    for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
+    for ( int layer = startLayer ; layer <= endLayer; layer++ ) {
         
         IntegrationRule *iRuleL = this->integrationRulesArray [ layer - 1 ];  
-        answer[layer-1].resize(numSC,numInPlaneIP*numThicknessIP);
+        answer[layer-startLayer].resize(numSC,numInPlaneIP*numThicknessIP);
         
         for ( int iSC = 1; iSC <= numSC; iSC++) {
         
             for ( int j = 0 ; j < numInPlaneIP ; j++ ) { 
                 
 //                 if ( layer == 1 ) {
-//                     SOld.at(iSC,j+1) = tractionBtm.at(iSC);
+//                     SOld.at(iSC,j+1) = tractionBtm.at(iSC,j+1);
 //                 }
             
                 // Assume constant integration error across thickness
-                //double C1 = (1.0/totalThickness)*(tractionTop.at(iSC) - SmatOld.at(iSC,j+1));
+                //double C1 = (1.0/totalThickness)*(tractionTop.at(iSC,j+1) - SmatOld.at(iSC,j+1));
                 
                 for ( int i = 0 ; i < numThicknessIP ; i++ ) {
                     
@@ -2905,13 +2921,13 @@ Shell7Base :: fitRecoveredStress2BC(std::vector<FloatMatrix> &answer, std::vecto
                     GaussPoint *gp = iRuleL->getIntegrationPoint(point);
                     GPcoords.zero();
                     GPcoords = gp->giveGlobalCoordinates();
-                    GPcoords.at(3) -= zeroThicknessLevel;
+                    GPcoords.at(3) -= zeroThicknessLevel; ///TODO det här är nog fel för delaminering..
                     
-                    answer[layer-1].at(iSC,point+1) = dSmatIP[layer-1].at(iSC,point+1) + C1.at(iSC,j+1)*GPcoords.at(3) + SOld.at(iSC,j+1);
+                    answer[layer-startLayer].at(iSC,point+1) = dSmatIP[layer-startLayer].at(iSC,point+1) + C1.at(iSC,j+1)*GPcoords.at(3) + SOld.at(iSC,j+1);
                 }
                 
                 GPcoords.at(3) = this->layeredCS->giveLayerThickness(layer);
-                SOld.at(iSC,j+1) += dSmat[layer -1].at(iSC,j+1) + C1.at(iSC,j+1)*GPcoords.at(3);
+                SOld.at(iSC,j+1) += dSmat[layer-startLayer].at(iSC,j+1) + C1.at(iSC,j+1)*GPcoords.at(3);
                 
             }  
         }

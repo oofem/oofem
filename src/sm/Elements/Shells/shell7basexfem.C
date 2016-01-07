@@ -35,6 +35,7 @@
 #include "Elements/Shells/shell7basexfem.h"
 #include "Elements/Shells/shell7base.h"
 #include "Loads/constantpressureload.h"
+#include "constantsurfaceload.h"
 #include "Materials/InterfaceMaterials/intmatbilinczfagerstrom.h"
 #include "xfem/enrichmentitems/crack.h"
 #include "xfem/enrichmentitems/shellcrack.h"
@@ -1705,12 +1706,14 @@ Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
 
     if ( surfLoad ) {
         answer.resize( this->giveNumberOfDofs() );
+        //printf("number of dofs: %d \n",this->giveNumberOfDofs());
         answer.zero();
 
         // Continuous part
         FloatArray solVec, force;
         this->giveUpdatedSolutionVector(solVec, tStep);
         this->computePressureForce(force, solVec, iSurf, surfLoad, tStep, mode);
+        //if (this->giveGlobalNumber() == 48) {force.printYourself("cont force vector");}
 
         IntArray activeDofs, ordering, eiDofIdArray;
         this->computeOrderingArray(ordering, activeDofs, NULL);
@@ -1722,6 +1725,10 @@ Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
         double xi = 0.0; // defaults to geometric midplane
         if ( ConstantPressureLoad * pLoad = dynamic_cast< ConstantPressureLoad * >(load) ) {
             xi = pLoad->giveLoadOffset();
+        } 
+        else if ( ConstantSurfaceLoad * sLoad = dynamic_cast< ConstantSurfaceLoad * >( surfLoad ) ) {
+            xi = sLoad->giveLoadOffset();
+            //printf("sLoad xi = %e \n",xi);
         }
         std :: vector< double > ef;
         FloatArray temp, tempRed, lCoords(2);
@@ -2946,41 +2953,167 @@ Shell7BaseXFEM :: recoverShearStress(TimeStep *tStep)
     
     // Check if delamination/CZ is active. Then use hasCohesiveZone to decide whether the cohforces need to be calculated (otherwise traction BC need to be found)
     // Find (possible) layer/interface BC, starting from bottom
-    IntArray layerHasBC(numberOfLayers+1); 
-    layerHasBC.zero();
+//     IntArray layerHasBC(numberOfLayers+1); layerHasBC.zero();
+    IntArray delaminationInterface; delaminationInterface.clear(); // interface (starting from 1) which contains delamination
+    IntArray interfaceEI(numberOfLayers-1);
     
     bool hasDelamination = false;
     int numEI = this->xMan->giveNumberOfEnrichmentItems();
-    for ( int i = 1; i <= numEI; i++ ) {
+    for ( int iEI = 1; iEI <= numEI; iEI++ ) {
 
-        EnrichmentItem *ei = this->xMan->giveEnrichmentItem(i);
+        EnrichmentItem *ei = this->xMan->giveEnrichmentItem(iEI);
         if ( ei->isElementEnriched(this) ) {
             hasDelamination = true;
             // Find cohesive material (for delamination)
             Delamination *dei =  dynamic_cast< Delamination * >( ei );
             int delaminationInterfaceNum = dei->giveDelamInterfaceNum();
-            layerHasBC.at(delaminationInterfaceNum+1) = i;
+//             layerHasBC.at(delaminationInterfaceNum+1) = iEI;
+            delaminationInterface.followedBy(delaminationInterfaceNum);
+            interfaceEI.at(delaminationInterfaceNum) = iEI;
         }
     }
-    
-    ///TODO add bottom/top BC
+    if (this->giveGlobalNumber() == 48) { delaminationInterface.printYourself("Interface number with delamination"); }
     
     if ( hasDelamination ) {
+        
         int numInPlaneIP = 6; ///TODO generalise this 
         int numThicknessIP = this->layeredCS->giveNumIntegrationPointsInLayer();        
         if (numThicknessIP < 2) {
             // Polynomial fit involves linear z-component at the moment
             OOFEM_ERROR("To few thickness IP per layer to do polynomial fit");
-        }   
+        }  
+        
+        int numDel = delaminationInterface.giveSize();
+        
+        // Find top and bottom BC NB: assumes constant over element surface.
+        // traction BC added to vector of BC.
+        std::vector <FloatMatrix> tractionBC; tractionBC.resize(numDel+2);
+        tractionBC[numDel+1].resize(3,numInPlaneIP);
+        tractionBC[0].resize(3,numInPlaneIP);
+        giveTractionBC(tractionBC[numDel+1],tractionBC[0], tStep); 
+        if (this->giveGlobalNumber() == 48) {tractionBC[numDel+1].printYourself("tractionTop"); tractionBC[0].printYourself("tractionBtm");}
+        
+#if 0
+        FloatArray tractionTop, tractionBtm; 
+        giveTractionBC(tractionTop,tractionBtm, tStep); 
+        for ( int i = 1 ; i <= numInPlaneIP ; i++) {
+            tractionBC[0].at(1,i) = tractionBtm.at(1);
+            tractionBC[0].at(2,i) = tractionBtm.at(2);
+            tractionBC[0].at(3,i) = tractionBtm.at(3);
+            tractionBC[numDel+1].at(1,i) = tractionTop.at(1);
+            tractionBC[numDel+1].at(2,i) = tractionTop.at(2);
+            tractionBC[numDel+1].at(3,i) = tractionTop.at(3);
+        }
+#endif
+        
+        for (int iDel = 1 ; iDel <= numDel ; iDel++) {
+            
+            tractionBC[iDel].resize(3,numInPlaneIP);
+            
+            int interfaceNum = delaminationInterface.at(iDel);
+            EnrichmentItem *ei = this->xMan->giveEnrichmentItem(interfaceEI.at(interfaceNum));
+            Delamination *dei =  dynamic_cast< Delamination * >( ei );
+            
+            if ( this->hasCohesiveZone( interfaceNum ) ) {
+#if 1  
+                // CZ traction 
+                IntegrationRule *iRuleI = czIntegrationRulesArray [ interfaceNum - 1 ];
+                if (iRuleI->giveNumberOfIntegrationPoints() != numInPlaneIP ) {
+                    OOFEM_ERROR("Interface IPs doesn't match the element IPs");
+                }
+                
+                FloatArray lCoords(3), nCov, CZPKtraction(3);
+                CZPKtraction.zero();
+                FloatMatrix Q;
+                int iIGP = 1;
+                for ( GaussPoint *gp: *iRuleI ) {
+                    double xi = dei->giveDelamXiCoord();
+                    lCoords.at(1) = gp->giveNaturalCoordinate(1);
+                    lCoords.at(2) = gp->giveNaturalCoordinate(2);
+                    lCoords.at(3) = xi;
+                    #if 0
+                    FloatArray GPcoords = gp->giveGlobalCoordinates();
+                        if (this->giveGlobalNumber() == 126) {
+                            GPcoords.printYourself("interface GPs");
+                        }
+                    #endif
+//                         this->evalInitialCovarNormalAt(nCov, lCoords); // intial coords
+                    
+                    // Find PK-traction in current coords.
+                    FloatArray solVecC;
+                    this->giveUpdatedSolutionVector(solVecC, tStep);
+                    FloatMatrix B;
+                    this->computeEnrichedBmatrixAt(lCoords, B, NULL);   // NULL => Shell7base :: computeBmatrixAt, otherwise include dei
+                    FloatArray genEpsC;                        
+                    genEpsC.beProductOf(B, solVecC);
+                    this->evalCovarNormalAt(nCov, lCoords, genEpsC, tStep);     // Denna verkar ta hänsyn till hoppet, men hur ser jag till att det är normalen ovanför delamineringen?
+                    Q.beLocalCoordSys(nCov);
+                    
+                    StructuralInterfaceMaterialStatus* intMatStatus = static_cast < StructuralInterfaceMaterialStatus* > ( gp->giveMaterialStatus() );
+                    if (intMatStatus == 0) {
+                        OOFEM_ERROR("NULL pointer to material status");
+                    }
+                    
+                    CZPKtraction = intMatStatus->giveFirstPKTraction(); // 3 components in local coords
+
+                    CZPKtraction.rotatedWith(Q,'t'); // transform back to global coord system
+                    #if 0
+                        if (this->giveGlobalNumber() == 126) {
+                            CZPKtraction.printYourself();
+                        }
+                    #endif
+                    // Set BC stresses
+                    tractionBC[iDel].at(1,iIGP) = CZPKtraction.at(1);
+                    tractionBC[iDel].at(2,iIGP) = CZPKtraction.at(2);
+                    tractionBC[iDel].at(3,iIGP) = CZPKtraction.at(3);
+                    iIGP++;
+#endif
+                }
+            } else {
+                // Delamination zero traction
+                tractionBC[iDel].zero();
+            }
+            if (this->giveGlobalNumber() == 48) {tractionBC[iDel].printYourself("tractionDel");}
+        } 
         
         FloatMatrix SmatOld(3,numInPlaneIP); // 3 stress components (S_xz, S_yz, S_zz) * num of in plane ip 
         FloatArray ddSmatOld(numInPlaneIP); // dSzz/dz of previous layer
-        SmatOld.zero();
         double totalThickness = this->layeredCS->computeIntegralThick(); 
         double zeroThicknessLevel = - 0.5 * totalThickness;         // assumes midplane is the geometric midplane of layered structure.
         FloatMatrix dSmat(3,numInPlaneIP);                          // 3 stress components (S_xz, S_yz, S_zz) * num of in plane ip 
         FloatMatrix dSmatLayerIP(3,numInPlaneIP*numThicknessIP);    // 3 stress components (S_xz, S_yz, S_zz) * num of wedge ip 
-        
+                
+        int layerOld = 0;
+        int iInt = 0;
+        delaminationInterface.followedBy(numberOfLayers);
+        for ( int topLayer : delaminationInterface) {  
+            SmatOld = tractionBC[iInt];
+            int numDelLayers = topLayer-layerOld;
+            std::vector <FloatMatrix> dSmatIP; dSmatIP.resize(numDelLayers);              //recovered stress values in wedge IPs
+            std::vector <FloatMatrix> dSmat; dSmat.resize(numDelLayers);              //recovered stress values at layer top
+            std::vector <FloatMatrix> dSmatIPupd; dSmatIPupd.resize(numDelLayers);     //recovered stress values in wedge IPs fitted to  top and btm traction BC. 
+            
+            double dz = 0.0;
+            for ( int layer = 1 ; layer <= numDelLayers; layer++ ) {
+                        
+                this->giveLayerContributionToSR(dSmat[layer-1], dSmatIP[layer-1], layer+layerOld, zeroThicknessLevel + dz, tStep);
+                SmatOld.add(dSmat[layer-1]); // Integrated stress over laminate
+                dz += this->layeredCS->giveLayerThickness(layer);   
+                
+            }
+            // All transverse stress components
+            this->fitRecoveredStress2BC(dSmatIPupd, dSmat, dSmatIP, SmatOld, tractionBC[iInt], tractionBC[iInt+1], zeroThicknessLevel, {0.0,0.0,1.0}, layerOld+1, topLayer);
+            
+            FloatMatrix zeros(3,numInPlaneIP); zeros.zero();
+            for ( int layer = 1 ; layer <= numDelLayers; layer++ ) {
+                //if (this->giveGlobalNumber() == 48 ) { dSmatIPupd[layer-1].printYourself(); }
+                this->updateLayerTransvStressesSR( dSmatIPupd[layer-1], zeros, layer+layerOld); // traction on bottom already taken into account in the integration. 
+            }
+            zeroThicknessLevel += dz;
+            layerOld = topLayer;
+            iInt++;
+        }
+#if 0
         for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
             
             // Bör det vara this här istället för Shell7Base?
@@ -3071,6 +3204,7 @@ Shell7BaseXFEM :: recoverShearStress(TimeStep *tStep)
                 # endif
             }
         }
+#endif
         
     } else {
         Shell7Base :: recoverShearStress(tStep); 
