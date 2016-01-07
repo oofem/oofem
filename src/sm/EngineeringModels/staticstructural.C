@@ -231,16 +231,18 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
         this->assembleVectorFromElements(this->internalForces, tStep, InternalForceAssembler(), VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(di));
         this->internalForces.printYourself("internal forces");
 #endif
-        OOFEM_LOG_RELEVANT("Computing old tangent\n");
-        this->updateComponent( tStep, NonLinearLhs, this->giveDomain(di) );
-        SparseLinearSystemNM *linSolver = nMethod->giveLinearSolver();
-        OOFEM_LOG_RELEVANT("Solving for increment\n");
-        linSolver->solve(*stiffnessMatrix, extrapolatedForces, incrementOfSolution);
-        OOFEM_LOG_RELEVANT("Initial guess found\n");
-        this->solution.add(incrementOfSolution);
-        
-        this->field->update(VM_Total, tStep, this->solution, EModelDefaultEquationNumbering());
-        this->field->applyBoundaryCondition(tStep); ///@todo Temporary hack to override the incorrect values that is set by "update" above. Remove this when that is fixed.
+        if ( extrapolatedForces.computeNorm() > 0. ) {
+            OOFEM_LOG_RELEVANT("Computing old tangent\n");
+            this->updateComponent( tStep, NonLinearLhs, this->giveDomain(di) );
+            SparseLinearSystemNM *linSolver = nMethod->giveLinearSolver();
+            OOFEM_LOG_RELEVANT("Solving for increment\n");
+            linSolver->solve(*stiffnessMatrix, extrapolatedForces, incrementOfSolution);
+            OOFEM_LOG_RELEVANT("Initial guess found\n");
+            this->solution.add(incrementOfSolution);
+            
+            this->field->update(VM_Total, tStep, this->solution, EModelDefaultEquationNumbering());
+            this->field->applyBoundaryCondition(tStep); ///@todo Temporary hack to override the incorrect values that is set by "update" above. Remove this when that is fixed.
+        }
     } else if ( this->initialGuessType != IG_None ) {
         OOFEM_ERROR("Initial guess type: %d not supported", initialGuessType);
     } else {
