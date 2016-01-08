@@ -418,7 +418,7 @@ DIIDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type, Doma
     int nelem = domain->giveNumberOfElements();
     int neq   = this->giveNumberOfDomainEquations( domain->giveNumber(), EModelDefaultEquationNumbering() );
     int i, j, k, jj, kk, n;
-    FloatMatrix charMtrx;
+    FloatMatrix charMtrx, R;
     IntArray loc;
     Element *element;
     EModelDefaultEquationNumbering en;
@@ -435,6 +435,12 @@ DIIDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type, Doma
 
         element->giveLocationArray(loc, en);
         element->giveCharacteristicMatrix(charMtrx, type, tStep);
+        if ( charMtrx.isNotEmpty() ) {
+          ///@todo This rotation matrix is not flexible enough.. it can only work with full size matrices and doesn't allow for flexibility in the matrixassembler.
+          if ( element->giveRotationMatrix(R) ) {
+            charMtrx.rotatedWith(R);
+          }
+        }
 
 #ifdef DEBUG
         if ( loc.giveSize() != charMtrx.giveNumberOfRows() ) {
