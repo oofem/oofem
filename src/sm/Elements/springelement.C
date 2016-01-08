@@ -132,6 +132,13 @@ SpringElement :: computeSpringInternalForce(TimeStep *tStep)
     return ( this->springConstant * ( u.at(2) - u.at(1) ) );
 }
 
+void 
+SpringElement::computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
+{
+  answer.resize(2, 2);
+  answer.at(1,1)=answer.at(2,2) = this->mass/2.0;
+  answer.at(1,2)=answer.at(2,1) = 0.0;
+}
 
 int
 SpringElement :: computeNumberOfGlobalDofs()
@@ -155,6 +162,8 @@ SpringElement :: initializeFrom(InputRecord *ir)
     int _mode;
     IR_GIVE_FIELD(ir, _mode, _IFT_SpringElement_mode);
     IR_GIVE_FIELD(ir, springConstant, _IFT_SpringElement_springConstant);
+    this->mass = 0.0;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->mass, _IFT_SpringElement_mass);
 
     this->mode = ( SpringElementType ) _mode;
     if ( mode != SE_1D_SPRING ) {

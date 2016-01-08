@@ -43,6 +43,8 @@
 #define _IFT_SpringElement_mode "mode"
 #define _IFT_SpringElement_orientation "orientation"
 #define _IFT_SpringElement_springConstant "k"
+#define _IFT_SpringElement_mass "m"
+
 //@}
 
 namespace oofem {
@@ -67,6 +69,8 @@ public:
 protected:
     /// The longitudinal spring constant [Force/Length], torsional spring constant [Force*Length/Radians].
     double springConstant;
+    /// total mass of the spring; to be distributed to nodes
+    double mass;
     /**
      * Orientation vector. Defines orientation of spring element- for spring it defines the direction of spring,
      * for torsional spring it defines the axis of rotation.
@@ -79,7 +83,7 @@ public:
     SpringElement(int n, Domain * d);
     virtual ~SpringElement() { }
 
-    virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep) { }
+    virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
     virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     { computeLumpedMassMatrix(answer, tStep); }
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
