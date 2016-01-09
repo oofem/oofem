@@ -325,7 +325,7 @@ TrPlaneStress2dXFEM :: giveCompositeExportData(std::vector< VTKPiece > &vtkPiece
 
     if(numCells == 0) {
         // Enriched but uncut element
-        // Visualize as a quad
+        // Visualize as triangle
         vtkPieces[0].setNumberOfCells(1);
 
         int numTotalNodes = 3;
@@ -413,6 +413,10 @@ TrPlaneStress2dXFEM :: giveCompositeExportData(std::vector< VTKPiece > &vtkPiece
             FloatArray average;
             std :: unique_ptr< IntegrationRule > &iRule = integrationRulesArray [ 0 ];
             VTKXMLExportModule :: computeIPAverage(average, iRule.get(), this, type, tStep);
+
+            if(average.giveSize() == 0) {
+            	average = {0., 0., 0., 0., 0., 0.};
+            }
 
             FloatArray averageV9(9);
             averageV9.at(1) = average.at(1);

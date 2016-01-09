@@ -72,8 +72,8 @@ PrescribedGradientBCPeriodic :: PrescribedGradientBCPeriodic(int n, Domain *d) :
         // Just putting in X_i id-items since they don't matter.
         // These don't actually need to be active, they are masterdofs with prescribed values, its
         // easier to just have them here rather than trying to make another Dirichlet boundary condition.
-        strain->appendDof( new ActiveDof( strain.get(), (DofIDItem)dofid, this->giveNumber() ) );
-        //strain->appendDof( new MasterDof(strain.get(), this->giveNumber(), 0, (DofIDItem)dofid ) );
+        //strain->appendDof( new ActiveDof( strain.get(), (DofIDItem)dofid, this->giveNumber() ) );
+        strain->appendDof( new MasterDof(strain.get(), this->giveNumber(), 0, (DofIDItem)dofid ) );
     }
 }
 

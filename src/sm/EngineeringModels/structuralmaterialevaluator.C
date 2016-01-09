@@ -136,18 +136,27 @@ void StructuralMaterialEvaluator :: solveYourself()
             }
 
             for ( int iter = 1; iter < maxiter; iter++ ) {
+#if 0
+                // Debugging:
+                mat->give3dMaterialStiffnessMatrix(tangent, TangentStiffness, gp, tStep);
+                tangent.printYourself("tangent");
+                break;
+#endif
+
+                strain.printYourself("Macro strain guess");
                 mat->giveRealStressVector_3d(stress, gp, strain, tStep);
                 for ( int j = 1; j <= sControl.giveSize(); ++j ) {
                     res.at(j) = stressC.at(j) - stress.at( sControl.at(j) );
                 }
 
-                OOFEM_LOG_RELEVANT( "Time step: %d, Material %d, Iteration: %d,  Residual = %e\n", istep, imat, iter, res.computeNorm() );
+                OOFEM_LOG_INFO("*** Time step: %d (t = %.2e), Material %d, Iteration: %d,  Residual = %e (tolerance %.2e)\n", 
+                              istep, tStep->giveIntrinsicTime(), imat, iter, res.computeNorm(), tolerance);
+
                 if ( res.computeNorm() <= tolerance ) {
                     break;
-                }
+                } else {
+                    mat->give3dMaterialStiffnessMatrix(tangent, TangentStiffness, gp, tStep);
 
-                mat->give3dMaterialStiffnessMatrix(tangent, TangentStiffness, gp, tStep);
-                if ( res.giveSize() > 0 ) {
                     // Pick out the stress-controlled part;
                     reducedTangent.beSubMatrixOf(tangent, sControl, sControl);
 

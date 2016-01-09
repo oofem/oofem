@@ -64,6 +64,9 @@ StructuralInterfaceMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, I
     } else if ( type == IST_DeformationGradientTensor ) {
         answer.beVectorForm( status->giveF() );
         return 1;
+    } else if ( type == IST_InterfaceNormal ) {
+        answer = status->giveNormal();
+        return 1;
     } else {
         return Material :: giveIPValue(answer, gp, type, tStep);
     }
@@ -86,6 +89,42 @@ StructuralInterfaceMaterial :: giveInputRecord(DynamicInputRecord &input)
 {
     Material :: giveInputRecord(input);
 }
+
+
+#if 0
+void
+StructuralInterfaceMaterial :: giveStiffnessMatrix_dTdj_Num(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    // Default implementation for computation of the numerical tangent
+    // Computes the material stiffness using a central difference method
+
+    StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus(gp) );
+    if ( status ) {
+        FloatMatrix F;
+        F = status->giveTempF();
+        int dim = F.giveNumberOfRows();
+        answer.resize(dim, dim);
+        answer.zero();
+        const double eps = 1.0e-9;
+        FloatArray T, TPlus, TMinus;
+
+        FloatArray jump, jumpPlus, jumpMinus, Kcolumn;
+        jump = status->giveTempJump();
+        for ( int i = 1; i <= dim; i++ ) {
+            jumpPlus = jumpMinus = jump;
+            jumpPlus.at(i)  += eps;
+            jumpMinus.at(i) -= eps;
+            this->giveFirstPKTraction_3d(TPlus, gp, jumpPlus, F, tStep);
+            this->giveFirstPKTraction_3d(TMinus, gp, jumpMinus, F, tStep);
+
+            Kcolumn = ( TPlus - TMinus );
+            answer.setColumn(Kcolumn, i);
+        }
+        answer.times( 1.0 / ( 2 * eps ) );
+        this->giveFirstPKTraction_3d(T, gp, jump, F, tStep); // reset temp values by recomputing the stress
+    }
+}
+#endif
 
 
 void
@@ -340,7 +379,7 @@ StructuralInterfaceMaterial :: give2dStiffnessMatrix_Eng_Num(FloatMatrix &answer
     // Computes the material stiffness using a central difference method
 
     StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus( gp ) );
-    double eps = 1.0e-9;
+    double eps = 1.0e-12;
     FloatArray t, tPlus, tMinus;
     FloatArray tempJump, jumpPlus, jumpMinus, Kcolumn;
     FloatArray jump = {status->giveTempJump().at(1), status->giveTempJump().at(3)};

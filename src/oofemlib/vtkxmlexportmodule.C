@@ -704,6 +704,7 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
         //-------------------------------------------
         IntArray cellNodes;
         vtkPiece.setNumberOfCells(numRegionEl);
+        IntArray regionElInd;
 
         int offset = 0;
         int cellNum = 0;
@@ -721,6 +722,8 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
             if ( elem->giveParallelMode() != Element_local ) {
                 continue;
             }
+
+            regionElInd.followedBy(ei);
 
             cellNum++;
 
@@ -748,7 +751,7 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
         this->exportIntVars(vtkPiece, mapG2L, mapL2G, region, tStep);
         this->exportExternalForces(vtkPiece, mapG2L, mapL2G, region, tStep);
 
-        this->exportCellVars(vtkPiece, elems, tStep);
+        this->exportCellVars(vtkPiece, regionElInd, tStep);
     } // end of default piece for simple geometry elements
 }
 

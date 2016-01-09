@@ -145,21 +145,21 @@ IRResultType PrescribedGradientBCWeak :: initializeFrom(InputRecord *ir)
     }
 
     IR_GIVE_FIELD(ir, mTractionInterpOrder, _IFT_PrescribedGradientBCWeak_TractionInterpOrder);
-    printf("mTractionInterpOrder: %d\n", mTractionInterpOrder);
+//    printf("mTractionInterpOrder: %d\n", mTractionInterpOrder);
 
     IR_GIVE_FIELD(ir, mNumTractionNodesAtIntersections, _IFT_PrescribedGradientBCWeak_NumTractionNodesAtIntersections);
-    printf("mNumTractionNodesAtIntersections: %d\n", mNumTractionNodesAtIntersections);
+//    printf("mNumTractionNodesAtIntersections: %d\n", mNumTractionNodesAtIntersections);
 
     if ( mNumTractionNodesAtIntersections > 1 && mTractionInterpOrder == 0 ) {
         OOFEM_ERROR("mNumTractionNodesAtIntersections > 1 is not allowed if mTractionInterpOrder == 0.")
     }
 
     IR_GIVE_FIELD(ir, mTractionNodeSpacing, _IFT_PrescribedGradientBCWeak_NumTractionNodeSpacing);
-    printf("mTractionNodeSpacing: %d\n", mTractionNodeSpacing);
+//    printf("mTractionNodeSpacing: %d\n", mTractionNodeSpacing);
 
     int duplicateCorners = 0;
     IR_GIVE_FIELD(ir, duplicateCorners, _IFT_PrescribedGradientBCWeak_DuplicateCornerNodes);
-    printf("duplicateCorners: %d\n", duplicateCorners);
+//    printf("duplicateCorners: %d\n", duplicateCorners);
 
     if ( duplicateCorners == 1 ) {
         mDuplicateCornerNodes = true;
@@ -169,10 +169,10 @@ IRResultType PrescribedGradientBCWeak :: initializeFrom(InputRecord *ir)
 
     mTangDistPadding = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, mTangDistPadding, _IFT_PrescribedGradientBCWeak_TangDistPadding);
-    printf("mTangDistPadding: %e\n", mTangDistPadding);
+//    printf("mTangDistPadding: %e\n", mTangDistPadding);
 
     IR_GIVE_OPTIONAL_FIELD(ir, mTracDofScaling, _IFT_PrescribedGradientBCWeak_TracDofScaling);
-    printf("mTracDofScaling: %e\n", mTracDofScaling );
+//    printf("mTracDofScaling: %e\n", mTracDofScaling );
 
     return IRRT_OK;
 }
@@ -595,7 +595,7 @@ void PrescribedGradientBCWeak :: computeField(FloatArray &sigma, TimeStep *tStep
 
     if ( dim == 2 ) {
         sigma = {
-            stressMatrix(0, 0), stressMatrix(1, 1), stressMatrix(0, 1), stressMatrix(1, 0)
+            stressMatrix(0, 0), stressMatrix(1, 1), 0.0, 0.0, 0.0, 0.5*(stressMatrix(0, 1) + stressMatrix(1, 0))
         };
     } else   {
         sigma.beVectorForm(stressMatrix);
@@ -1198,14 +1198,14 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
 
     buildMaps(allBndNodeCoords);
 
-    // Write traction nodes to debug vtk
-    std :: vector< FloatArray >nodeCoord;
-    for ( Node *node : mpTractionNodes ) {
-        nodeCoord.push_back( * ( node->giveCoordinates() ) );
-    }
+//    // Write traction nodes to debug vtk
+//    std :: vector< FloatArray >nodeCoord;
+//    for ( Node *node : mpTractionNodes ) {
+//        nodeCoord.push_back( * ( node->giveCoordinates() ) );
+//    }
 
-    std :: string fileName("TractionNodeCoord.vtk");
-    XFEMDebugTools :: WritePointsToVTK(fileName, nodeCoord);
+//    std :: string fileName("TractionNodeCoord.vtk");
+//    XFEMDebugTools :: WritePointsToVTK(fileName, nodeCoord);
 
 
     if ( mMeshIsPeriodic ) {
@@ -1475,9 +1475,9 @@ void PrescribedGradientBCWeak :: assembleTangentGPContribution(FloatMatrix &oTan
 
     //////////////////////////////////
     // Compute traction N-matrix
-    FloatArray N, Ntrac;
+    FloatArray Ntrac;
     computeNTraction(Ntrac, locCoordsOnLine [ 0 ], tEl);
-    tEl.computeN_Linear(N, locCoordsOnLine [ 0 ]);
+//    tEl.computeN_Linear(N, locCoordsOnLine [ 0 ]);
 
 
     FloatMatrix NtracMat;
@@ -1573,18 +1573,18 @@ IntegrationRule *PrescribedGradientBCWeak :: createNewIntegrationRule(int iTracE
     // Take material mode from first element
     MaterialMode matMode = domain->giveElement(1)->giveMaterialMode();
 
-    int numPointsPerSeg = 3;
+    int numPointsPerSeg = 4;
     ir->SetUpPointsOnLine(numPointsPerSeg, matMode);
 
     for ( GaussPoint *gp : *ir ) {
         tracGpCoord.push_back( gp->giveGlobalCoordinates() );
     }
 
-    std :: stringstream str3;
-    str3 << "tracGpCoordEl" << iTracElInd << ".vtk";
-    std :: string name3 = str3.str();
-
-    XFEMDebugTools :: WritePointsToVTK(name3, tracGpCoord);
+//    std :: stringstream str3;
+//    str3 << "tracGpCoordEl" << iTracElInd << ".vtk";
+//    std :: string name3 = str3.str();
+//
+//    XFEMDebugTools :: WritePointsToVTK(name3, tracGpCoord);
 
     return ir;
 }
@@ -1595,6 +1595,7 @@ void PrescribedGradientBCWeak :: computeNTraction(FloatArray &oN, const double &
         iEl.computeN_Constant(oN, iXi);
     } else if ( mTractionInterpOrder == 1 ) {
         iEl.computeN_Linear(oN, iXi);
+//        iEl.computeN_PiecewiseConst(oN, iXi);
     }
 
     oN.times(mTracDofScaling);
