@@ -212,7 +212,6 @@ set (sm_material
     Materials/graddpmaterialextensioninterface.C
     Materials/rcm2.C
     Materials/isodamagemodel.C
-    Materials/fe2structuralmaterial.C
     )
 
 if (USE_PYTHON)
