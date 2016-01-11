@@ -52,7 +52,8 @@ REGISTER_Material(StructuralFE2Material);
 
 int StructuralFE2Material :: n = 1;
 
-StructuralFE2Material :: StructuralFE2Material(int n, Domain *d) : StructuralMaterial(n, d)
+StructuralFE2Material :: StructuralFE2Material(int n, Domain *d) : StructuralMaterial(n, d),
+useNumTangent(false)
 {}
 
 StructuralFE2Material :: ~StructuralFE2Material()
@@ -65,6 +66,10 @@ StructuralFE2Material :: initializeFrom(InputRecord *ir)
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
     IR_GIVE_FIELD(ir, this->inputfile, _IFT_StructuralFE2Material_fileName);
 
+    if( ir->hasField(_IFT_StructuralFE2Material_useNumericalTangent) ) {
+    	useNumTangent = true;
+    }
+
     return StructuralMaterial :: initializeFrom(ir);
 }
 
@@ -74,6 +79,10 @@ StructuralFE2Material :: giveInputRecord(DynamicInputRecord &input)
 {
     StructuralMaterial :: giveInputRecord(input);
     input.setField(this->inputfile, _IFT_StructuralFE2Material_fileName);
+
+    if(useNumTangent) {
+    	input.setField(_IFT_StructuralFE2Material_useNumericalTangent);
+    }
 }
 
 
@@ -88,7 +97,7 @@ void
 StructuralFE2Material :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
                                  const FloatArray &totalStrain, TimeStep *tStep)
 {
-    FloatArray ans9;
+    FloatArray stress;
     StructuralFE2MaterialStatus *ms = static_cast< StructuralFE2MaterialStatus * >( this->giveStatus(gp) );
 
     ms->setTimeStep(tStep);
@@ -97,8 +106,16 @@ StructuralFE2Material :: giveRealStressVector_3d(FloatArray &answer, GaussPoint 
     // Solve subscale problem
     ms->giveRVE()->solveYourselfAt(tStep);
     // Post-process the stress
-    ms->giveBC()->computeField(ans9, tStep);
-    answer = {ans9[0], ans9[1], ans9[2], 0.5*(ans9[3]+ans9[6]), 0.5*(ans9[4]+ans9[7]), 0.5*(ans9[5]+ans9[8])};
+    ms->giveBC()->computeField(stress, tStep);
+
+    if(stress.giveSize() == 6) {
+    	answer = stress;
+    }
+    else {
+    	StructuralMaterial::giveFullSymVectorForm(answer, stress, gp->giveMaterialMode() );
+    }
+
+//    answer = {ans9[0], ans9[1], ans9[2], 0.5*(ans9[3]+ans9[6]), 0.5*(ans9[4]+ans9[7]), 0.5*(ans9[5]+ans9[8])};
     // Update the material status variables
     ms->letTempStressVectorBe(answer);
     ms->letTempStrainVectorBe(totalStrain);
@@ -109,63 +126,101 @@ StructuralFE2Material :: giveRealStressVector_3d(FloatArray &answer, GaussPoint 
 void
 StructuralFE2Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
-    StructuralFE2MaterialStatus *ms = static_cast< StructuralFE2MaterialStatus * >( this->giveStatus(gp) );
-    ms->computeTangent(tStep);
-    const FloatMatrix &ans9 = ms->giveTangent();
+	if(useNumTangent) {
+		// Numerical tangent
+		StructuralFE2MaterialStatus *status = static_cast<StructuralFE2MaterialStatus*>( this->giveStatus( gp ) );
+	    double h = 1.0e-9;
 
-    // Compute the (minor) symmetrized tangent:
-    answer.resize(6, 6);
-    for ( int i = 0; i < 6; ++i ) {
-        for ( int j = 0; j < 6; ++j ) {
-            answer(i, j) = ans9(i, j);
-        }
-    }
-    for ( int i = 0; i < 6; ++i ) {
-        for ( int j = 6; j < 9; ++j ) {
-            answer(i, j-3) += ans9(i, j);
-            answer(j-3, i) += ans9(j, i);
-        }
-    }
-    for ( int i = 6; i < 9; ++i ) {
-        for ( int j = 6; j < 9; ++j ) {
-             answer(j-3, i-3) += ans9(j, i);
-         }
-    }
-    for ( int i = 0; i < 6; ++i ) {
-        for ( int j = 3; j < 6; ++j ) {
-             answer(j, i) *= 0.5;
-             answer(i, j) *= 0.5;
-        }
-    }
-#if 0
-    // Numerical ATS for debugging
-    FloatMatrix numericalATS(6, 6);
-    FloatArray dsig;
-    // Note! We need a copy of the temp strain, since the pertubations might change it.
-    FloatArray tempStrain = ms->giveTempStrainVector();
+	    const FloatArray &epsRed = status->giveTempStrainVector();
+	    FloatArray eps;
+	    StructuralMaterial::giveFullSymVectorForm(eps, epsRed, gp->giveMaterialMode() );
 
-    FloatArray sig, strain, sigPert;
-    giveRealStressVector_3d(sig, gp, tempStrain, tStep);
-    double hh = 1e-6;
-    for ( int k = 1; k <= 6; ++k ) {
-        strain = tempStrain;
-        strain.at(k) += hh;
-        giveRealStressVector_3d(sigPert, gp, strain, tStep);
-        dsig.beDifferenceOf(sigPert, sig);
-        numericalATS.setColumn(dsig, k);
-    }
-    numericalATS.times(1. / hh);
-    giveRealStressVector_3d(sig, gp, tempStrain, tStep); // Reset
 
-    //answer.printYourself("Analytical deviatoric tangent");
-    //numericalATS.printYourself("Numerical deviatoric tangent");
+	    int dim = eps.giveSize();
+	    answer.resize(dim, dim);
+	    answer.zero();
 
-    numericalATS.subtract(answer);
-    double norm = numericalATS.computeFrobeniusNorm();
-    if ( norm > answer.computeFrobeniusNorm() * 1e-3 && norm > 0.0 ) {
-        OOFEM_ERROR("Error in deviatoric tangent");
-    }
-#endif
+	    FloatArray sig, sigPert, epsPert;
+
+	    for(int i = 1; i <= dim; i++) {
+	    	// Add a small perturbation to the strain
+	    	epsPert = eps;
+	    	epsPert.at(i) += h;
+
+	    	giveRealStressVector_3d(sigPert, gp, epsPert, tStep);
+	    	answer.setColumn(sigPert, i);
+	    }
+
+		giveRealStressVector_3d(sig, gp, eps, tStep);
+
+	    for(int i = 1; i <= dim; i++) {
+	        for(int j = 1; j <= dim; j++) {
+	        	answer.at(j,i) -= sig.at(j);
+	        	answer.at(j,i) /= h;
+	        }
+	    }
+
+	}
+	else {
+
+		StructuralFE2MaterialStatus *ms = static_cast< StructuralFE2MaterialStatus * >( this->giveStatus(gp) );
+		ms->computeTangent(tStep);
+		const FloatMatrix &ans9 = ms->giveTangent();
+
+		// Compute the (minor) symmetrized tangent:
+		answer.resize(6, 6);
+		for ( int i = 0; i < 6; ++i ) {
+			for ( int j = 0; j < 6; ++j ) {
+				answer(i, j) = ans9(i, j);
+			}
+		}
+		for ( int i = 0; i < 6; ++i ) {
+			for ( int j = 6; j < 9; ++j ) {
+				answer(i, j-3) += ans9(i, j);
+				answer(j-3, i) += ans9(j, i);
+			}
+		}
+		for ( int i = 6; i < 9; ++i ) {
+			for ( int j = 6; j < 9; ++j ) {
+				 answer(j-3, i-3) += ans9(j, i);
+			 }
+		}
+		for ( int i = 0; i < 6; ++i ) {
+			for ( int j = 3; j < 6; ++j ) {
+				 answer(j, i) *= 0.5;
+				 answer(i, j) *= 0.5;
+			}
+		}
+		#if 0
+		// Numerical ATS for debugging
+		FloatMatrix numericalATS(6, 6);
+		FloatArray dsig;
+		// Note! We need a copy of the temp strain, since the pertubations might change it.
+		FloatArray tempStrain = ms->giveTempStrainVector();
+
+		FloatArray sig, strain, sigPert;
+		giveRealStressVector_3d(sig, gp, tempStrain, tStep);
+		double hh = 1e-6;
+		for ( int k = 1; k <= 6; ++k ) {
+			strain = tempStrain;
+			strain.at(k) += hh;
+			giveRealStressVector_3d(sigPert, gp, strain, tStep);
+			dsig.beDifferenceOf(sigPert, sig);
+			numericalATS.setColumn(dsig, k);
+		}
+		numericalATS.times(1. / hh);
+		giveRealStressVector_3d(sig, gp, tempStrain, tStep); // Reset
+
+		//answer.printYourself("Analytical deviatoric tangent");
+		//numericalATS.printYourself("Numerical deviatoric tangent");
+
+		numericalATS.subtract(answer);
+		double norm = numericalATS.computeFrobeniusNorm();
+		if ( norm > answer.computeFrobeniusNorm() * 1e-3 && norm > 0.0 ) {
+			OOFEM_ERROR("Error in deviatoric tangent");
+		}
+		#endif
+	}
 }
 
 
