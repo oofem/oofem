@@ -51,6 +51,7 @@
 #include "internalstatevaluetype.h"
 #include "XFEMDebugTools.h"
 #include "xfemtolerances.h"
+#include "nucleationcriterion.h"
 
 namespace oofem {
 REGISTER_XfemManager(XfemManager)
@@ -202,6 +203,8 @@ int XfemManager :: instanciateYourself(DataReader *dr)
 
     updateNodeEnrichmentItemMap();
 
+    mNucleationCriteria.push_back( std::unique_ptr<NucleationCriterion>(new NucleationCriterion()) );
+
     return 1;
 }
 
@@ -331,6 +334,19 @@ bool XfemManager :: hasPropagatingFronts()
     }
 
     return false;
+}
+
+void XfemManager :: nucleateEnrichmentItems(bool &oNewItemsWereNucleated)
+{
+	printf("Entering XfemManager :: nucleateEnrichmentItems\n");
+
+	oNewItemsWereNucleated = false;
+	return;
+}
+
+bool XfemManager :: hasNucleationCriteria()
+{
+	return ( mNucleationCriteria.size() > 0 );
 }
 
 void XfemManager :: updateNodeEnrichmentItemMap()

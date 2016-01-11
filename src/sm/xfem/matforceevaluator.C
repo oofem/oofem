@@ -158,6 +158,7 @@ void MaterialForceEvaluator::computeMaterialForce(FloatArray &oMatForce, Domain 
                 FloatMatrix eshelbyStress2D;
                 eshelbyStress2D.beSubMatrixOf(eshelbyStress3D, 1, 2, 1, 2);
 
+//                printf("eshelbyStress2D: "); eshelbyStress2D.printYourself();
 
                 if( computeWeightFunctionInPoint( pos, iTipInfo.mGlobalCoord, iRadius) > 0.0 ) {
                     // Add contribution

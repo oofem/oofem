@@ -275,6 +275,7 @@ set (sm_xfem
     xfem/propagationlaws/plmaterialforce.C
     xfem/xfemstructuremanager.C
     xfem/matforceevaluator.C
+    xfem/nucleationcriteria/ncprincipalstress.C
     EngineeringModels/xfemsolverinterface.C
     )
 

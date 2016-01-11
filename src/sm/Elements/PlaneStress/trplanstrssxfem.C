@@ -323,9 +323,9 @@ TrPlaneStress2dXFEM :: giveCompositeExportData(std::vector< VTKPiece > &vtkPiece
 
     const int numCells = mSubTri.size();
 
-    if(numCells == 0) {
+    if(numCells == 0 || true) {
         // Enriched but uncut element
-        // Visualize as triangle
+        // Visualize as a triangle
         vtkPieces[0].setNumberOfCells(1);
 
         int numTotalNodes = 3;
