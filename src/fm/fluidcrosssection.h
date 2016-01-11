@@ -73,11 +73,9 @@ public:
 
     FluidDynamicMaterial *giveFluidMaterial();
 
-#ifdef __PARALLEL_MODE
-    virtual int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *gp);
-    virtual int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *gp);
-    virtual int estimatePackSize(CommunicationBuffer &buff, GaussPoint *gp);
-#endif
+    virtual int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp);
+    virtual int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp);
+    virtual int estimatePackSize(DataStream &buff, GaussPoint *gp);
 
     virtual const char *giveClassName() const { return "FluidCrossSection"; }
     virtual const char *giveInputRecordName() const { return _IFT_FluidCrossSection_Name; }

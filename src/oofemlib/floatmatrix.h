@@ -64,7 +64,6 @@ namespace oofem {
 class FloatArray;
 class IntArray;
 class DataStream;
-class CommunicationBuffer;
 
 /**
  * Implementation of matrix containing floating point numbers. FloatMatrix can grow and shrink
@@ -263,9 +262,13 @@ public:
      */
     //bool computeEigenValuesSymmetric(FloatArray &lambda, FloatMatrix &v, int neigs = 0) const;
     /**
-     * Returns the determinant of the receiver. The receiver should be a square matrix.
-     * Current implementation works for (3,3) and smaller matrices.
+     * Modifies receiver to be a diagonal matrix with the components specified in diag.
      * @return Determinant of receiver.
+     */
+    void beDiagonal(const FloatArray &diag);
+    /**
+     * Returns the trace of the receiver. The receiver should be a square matrix.
+     * @return Trace of receiver.
      */
     double giveTrace() const;
     /**
@@ -558,16 +561,12 @@ public:
     void changeComponentOrder();
 
     // Overloaded methods:
-    contextIOResultType storeYourself(DataStream *stream, ContextMode mode);
-    contextIOResultType restoreYourself(DataStream *stream, ContextMode mode);
+    contextIOResultType storeYourself(DataStream &stream) const;
+    contextIOResultType restoreYourself(DataStream &stream);
+    int givePackSize(DataStream &buff) const;
 
     friend std :: ostream &operator<<(std :: ostream &out, const FloatMatrix &r);
 
-#ifdef __PARALLEL_MODE
-    int packToCommBuffer(CommunicationBuffer &buff) const;
-    int unpackFromCommBuffer(CommunicationBuffer &buff);
-    int givePackSize(CommunicationBuffer &buff);
-#endif
 
 #ifdef BOOST_PYTHON
     void __setitem__(boost :: python :: api :: object t, double val);

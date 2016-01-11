@@ -84,7 +84,7 @@ QPlaneStressGrad :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
@@ -93,7 +93,7 @@ void
 QPlaneStressGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatArray n;
-    this->interpolation_lin.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation_lin.evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beNMatrixOf(n, 1);
 }
 
@@ -101,7 +101,7 @@ void
 QPlaneStressGrad :: computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
-    this->interpolation_lin.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation_lin.evaldNdx( dnx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beTranspositionOf(dnx);
 }
 }

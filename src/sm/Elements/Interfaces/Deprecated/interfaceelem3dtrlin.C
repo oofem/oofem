@@ -71,7 +71,7 @@ InterfaceElement3dTrLin :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
 //
 {
     FloatArray n;
-    this->interpolation.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 18);
     answer.zero();
@@ -93,8 +93,8 @@ InterfaceElement3dTrLin :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );
-        //integrationRulesArray[0] = new LobattoIntegrationRule (1,domain, 1, 2);
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
+        //integrationRulesArray[0].reset( new LobattoIntegrationRule (1,domain, 1, 2) );
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3) );
         integrationRulesArray [ 0 ]->SetUpPointsOnTriangle(4, _3dInterface);
     }
 }
@@ -141,7 +141,7 @@ InterfaceElement3dTrLin :: computeVolumeAround(GaussPoint *gp)
         lncp[ i - 1 ].beProductOf(lcs, *this->giveNode(i)->giveCoordinates());
     }
 
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lncp) ) );
+    determinant = fabs( this->interpolation.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lncp) ) );
     weight      = gp->giveWeight();
     thickness   = this->giveCrossSection()->give(CS_Thickness, gp);
     volume      = determinant * weight * thickness;

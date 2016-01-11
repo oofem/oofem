@@ -67,9 +67,9 @@ protected:
     virtual void postInitialize();
     void computeOrderingArray(IntArray &orderingArray, IntArray &activeDofsArray,  EnrichmentItem *ei);
 
-    virtual void evalCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcon, FloatArray &solVec, TimeStep *tStep);
+    virtual void evalCovarBaseVectorsAt(const FloatArray &lCoords, FloatMatrix &gcon, FloatArray &solVec, TimeStep *tStep);
     void discGiveInitialSolutionVector(FloatArray &answer, IntArray &eiDofIdArray); // should be replaced with general function
-    void computeDiscGeneralizedStrainVector(FloatArray &dGenEps, FloatArray &lCoords, EnrichmentItem *ei, TimeStep *tStep);
+    void computeDiscGeneralizedStrainVector(FloatArray &dGenEps, const FloatArray &lCoords, EnrichmentItem *ei, TimeStep *tStep);
     void computeDiscSolutionVector(IntArray &dofIdArray , TimeStep *tStep, FloatArray &solVecD);
     void computeInterfaceJumpAt(int interf, FloatArray &lCoords, TimeStep *tStep, FloatArray &answer);
 
@@ -79,11 +79,11 @@ protected:
     void computeSectionalForcesAt(FloatArray &sectionalForces, IntegrationPoint *ip, Material *mat, TimeStep *tStep, FloatArray &genEps, double zeta);
     
     double evaluateLevelSet(const FloatArray &lCoords, EnrichmentItem *ei);
-    double edgeEvaluateLevelSet(const FloatArray &lCoords, EnrichmentItem *ei, const int edge);
-    double evaluateHeavisideGamma(double xi, ShellCrack *ei);
-    double evaluateHeavisideGamma(double xi, Delamination *ei);
+//    double edgeEvaluateLevelSet(const FloatArray &lCoords, EnrichmentItem *ei, const int edge);
+    double evaluateHeavisideXi(double xi, ShellCrack *ei);
+    double evaluateHeavisideXi(double xi, Delamination *ei);
     double evaluateCutHeaviside(const double xi, const double xiBottom, const double xiTop) const;
-    void computeCohesiveForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, EnrichmentItem *ei);
+    void computeCohesiveForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, EnrichmentItem *ei, EnrichmentItem *coupledToEi);
     
     // Tangent matrices
     void computeLambdaGMatricesDis(FloatMatrix lambdaD [ 3 ], double zeta);
@@ -95,16 +95,19 @@ protected:
     virtual void discComputeStiffness(FloatMatrix &LCC, FloatMatrix &LDD, FloatMatrix &LDC, IntegrationPoint *ip, int layer, FloatMatrix A [ 3 ] [ 3 ], TimeStep *tStep);
     
     double EvaluateEnrFuncInDofMan(int dofManNum, EnrichmentItem *ei);
-    void computeEnrichedBmatrixAt(FloatArray &lCoords, FloatMatrix &answer, EnrichmentItem *ei);
-    void computeEnrichedNmatrixAt(const FloatArray &iLocCoords, FloatMatrix &answer, EnrichmentItem *ei);
-    void edgeComputeEnrichedNmatrixAt(FloatArray &lCoords, FloatMatrix &answer, EnrichmentItem *ei, const int edge);
-    void edgeComputeEnrichedBmatrixAt(FloatArray &lcoords, FloatMatrix &answer, EnrichmentItem *ei, const int edge);
+    void computeEnrichedBmatrixAt(const FloatArray &lCoords, FloatMatrix &answer, EnrichmentItem *ei);
+    void computeEnrichedNmatrixAt(const FloatArray &lCoords, FloatMatrix &answer, EnrichmentItem *ei);
+    void computeCohesiveNmatrixAt(const FloatArray &lCoords, FloatMatrix &answer, EnrichmentItem *ei);
+    
     virtual void edgeGiveUpdatedSolutionVector(FloatArray &answer, const int iedge, TimeStep *tStep);
 
-    void edgeEvalEnrCovarBaseVectorsAt(FloatArray &lCoords, const int iedge, FloatMatrix &gcov, TimeStep *tStep, EnrichmentItem *ei);
+    void edgeEvalEnrCovarBaseVectorsAt(const FloatArray &lCoords, const int iedge, FloatMatrix &gcov, TimeStep *tStep, EnrichmentItem *ei);
     void computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep);
-    void computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep, FloatArray &solVecD, Delamination *dei);
+    void computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep, Delamination *dei, EnrichmentItem *ei_j, EnrichmentItem *ei_k);
 
+    void edgeComputeEnrichedNmatrixAt(const FloatArray &lCoords, FloatMatrix &answer, EnrichmentItem *ei, const int edge);
+    void edgeComputeEnrichedBmatrixAt(const FloatArray &lCoords, FloatMatrix &answer, EnrichmentItem *ei, const int edge);
+    
     void computePressureTangentMatrixDis(FloatMatrix &KCC, FloatMatrix &KCD, FloatMatrix &KDD, IntegrationPoint *ip, Load *load, const int iSurf, TimeStep *tStep);
 
     // External loads
@@ -123,8 +126,8 @@ protected:
     virtual void giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep );
     virtual void giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep );
 
-    virtual void vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep);
-    void giveDisUnknownsAt(FloatArray &lcoords, EnrichmentItem *ei, FloatArray &solVec, FloatArray &x, FloatArray &m, double gam, TimeStep *tStep);
+    virtual void vtkEvalUpdatedGlobalCoordinateAt(const FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep);
+    void giveDisUnknownsAt(const FloatArray &lCoords, EnrichmentItem *ei, FloatArray &solVec, FloatArray &x, FloatArray &m, double gam, TimeStep *tStep);
     IntArray DelaminatedInterfaceList;
     void computeFailureCriteriaQuantities(FailureCriteriaStatus *fc, TimeStep *tStep);
 
@@ -171,9 +174,10 @@ public:
     virtual int giveNumberOfDofs();
 
     bool hasCohesiveZone(int interfaceNum);
-    std :: vector< IntegrationRule * > czIntegrationRulesArray;
+    std :: vector< std :: unique_ptr< IntegrationRule > > czIntegrationRulesArray;
     private:
     void jump(FloatMatrix lambda, FloatArray deltaUnknowns);
+    void Fco(FloatMatrix lambdaN, FloatArray T);
 };
 } // end namespace oofem
 #endif

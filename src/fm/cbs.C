@@ -56,18 +56,31 @@
 namespace oofem {
 REGISTER_EngngModel(CBS);
 
+CBS :: CBS(int i, EngngModel* _master) : FluidModel ( i, _master ),
+    PressureField ( this, 1, FT_Pressure, 1 ),
+    VelocityField ( this, 1, FT_Velocity, 1 ),
+    vnum ( false ), vnumPrescribed ( true ), pnum ( false ), pnumPrescribed ( true )
+{
+    initFlag = 1;
+    ndomains = 1;
+    consistentMassFlag = 0;
+    equationScalingFlag = false;
+    lscale = uscale = dscale = 1.0;
+}
+
+CBS :: ~CBS()
+{
+}
+
 NumericalMethod *CBS :: giveNumericalMethod(MetaStep *mStep)
 {
-    if ( nMethod ) {
-        return nMethod;
+    if ( !nMethod ) {
+        nMethod.reset( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
+        if ( !nMethod ) {
+            OOFEM_ERROR("linear solver creation failed");
+        }
     }
-
-    nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
-    if ( nMethod == NULL ) {
-        OOFEM_ERROR("linear solver creation failed");
-    }
-
-    return nMethod;
+    return nMethod.get();
 }
 
 IRResultType
@@ -75,7 +88,6 @@ CBS :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    EngngModel :: initializeFrom(ir);
     int val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_lstype);
     solverType = ( LinSystSolverType ) val;
@@ -112,7 +124,7 @@ CBS :: initializeFrom(InputRecord *ir)
     val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_CBS_miflag);
     if ( val ) {
-        this->materialInterface = new LEPlic( 1, this->giveDomain(1) );
+        this->materialInterface.reset( new LEPlic( 1, this->giveDomain(1) ) );
         // export velocity field
         FieldManager *fm = this->giveContext()->giveFieldManager();
         IntArray mask = {V_u, V_v, V_w};
@@ -121,10 +133,9 @@ CBS :: initializeFrom(InputRecord *ir)
         std :: shared_ptr< Field > _velocityField( new MaskedPrimaryField ( FT_Velocity, &this->VelocityField, mask ) );
         fm->registerField(_velocityField, FT_Velocity);
     }
-
     //</RESTRICTED_SECTION>
 
-    return IRRT_OK;
+    return EngngModel :: initializeFrom(ir);
 }
 
 
@@ -176,58 +187,41 @@ CBS :: giveTractionPressure(Dof *dof)
 TimeStep *
 CBS :: giveSolutionStepWhenIcApply()
 {
-    if ( stepWhenIcApply == NULL ) {
-        /*
-         * stepWhenIcApply = new TimeStep (giveNumberOfTimeStepWhenIcApply(),this,0,
-         * -deltaT,deltaT,0);
-         */
-        stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0,
-                                       0.0, deltaT, 0);
+    if ( !stepWhenIcApply ) {
+        stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0,
+                                       0.0, deltaT, 0) );
     }
 
-    return stepWhenIcApply;
+    return stepWhenIcApply.get();
 }
 
 TimeStep *
 CBS :: giveNextStep()
 {
-    int istep = this->giveNumberOfFirstStep();
-    double totalTime = 0;
     double dt = deltaT;
-    StateCounterType counter = 1;
-    delete previousStep;
-
-    if ( currentStep == NULL ) {
+    if ( !currentStep ) {
         // first step -> generate initial step
-        currentStep = new TimeStep( *giveSolutionStepWhenIcApply() );
-    } else {
-        istep = currentStep->giveNumber() + 1;
-        counter = currentStep->giveSolutionStateCounter() + 1;
+        currentStep.reset( new TimeStep( *giveSolutionStepWhenIcApply() ) );
     }
 
-    previousStep = currentStep;
+    previousStep = std :: move(currentStep);
 
     Domain *domain = this->giveDomain(1);
-    int nelem = domain->giveNumberOfElements();
     // check for critical time step
-    for ( int i = 1; i <= nelem; i++ ) {
-        dt = min( dt, static_cast< CBSElement * >( domain->giveElement(i) )->computeCriticalTimeStep(previousStep) );
+    for ( auto &elem : domain->giveElements() ) {
+        dt = min( dt, static_cast< CBSElement * >( elem.get() )->computeCriticalTimeStep(previousStep.get()) );
     }
 
     dt *= 0.6;
     dt = max(dt, minDeltaT);
     dt /= this->giveVariableScale(VST_Time);
 
-    if ( currentStep != NULL ) {
-        totalTime = currentStep->giveTargetTime() + dt;
-    }
+    currentStep.reset( new TimeStep(*previousStep, dt) );
 
-    currentStep = new TimeStep(istep, this, 1, totalTime, dt, counter);
-    // time and dt variables are set eq to 0 for staics - has no meaning
+    OOFEM_LOG_INFO( "SolutionStep %d : t = %e, dt = %e\n", currentStep->giveNumber(),
+                    currentStep->giveTargetTime() * this->giveVariableScale(VST_Time), dt * this->giveVariableScale(VST_Time) );
 
-    OOFEM_LOG_INFO( "SolutionStep %d : t = %e, dt = %e\n", istep, totalTime * this->giveVariableScale(VST_Time), dt * this->giveVariableScale(VST_Time) );
-
-    return currentStep;
+    return currentStep.get();
 }
 
 void
@@ -250,25 +244,25 @@ CBS :: solveYourselfAt(TimeStep *tStep)
                                          pnumPrescribed, this->giveDomain(1) );
 
 
-        lhs = classFactory.createSparseMtrx(sparseMtrxType);
-        if ( lhs == NULL ) {
+        lhs.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+        if ( !lhs ) {
             OOFEM_ERROR("sparse matrix creation failed");
         }
 
         lhs->buildInternalStructure(this, 1, pnum);
 
-        this->assemble( lhs, stepWhenIcApply, PressureLhs,
+        this->assemble( *lhs, stepWhenIcApply.get(), PressureLhs,
                        pnum, this->giveDomain(1) );
         lhs->times(deltaT * theta1 * theta2);
 
         if ( consistentMassFlag ) {
-            mss = classFactory.createSparseMtrx(sparseMtrxType);
-            if ( mss == NULL ) {
+            mss.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+            if ( !mss ) {
                 OOFEM_ERROR("sparse matrix creation failed");
             }
 
             mss->buildInternalStructure(this, 1, vnum);
-            this->assemble( mss, stepWhenIcApply, MassMatrix,
+            this->assemble( *mss, stepWhenIcApply.get(), MassMatrix,
                            vnum, this->giveDomain(1) );
         } else {
             mm.resize(momneq);
@@ -289,13 +283,13 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     //<RESTRICTED_SECTION>
     else if ( materialInterface ) {
         lhs->zero();
-        this->assemble( lhs, stepWhenIcApply, PressureLhs,
+        this->assemble( *lhs, stepWhenIcApply.get(), PressureLhs,
                        pnum, this->giveDomain(1) );
         lhs->times(deltaT * theta1 * theta2);
 
         if ( consistentMassFlag ) {
             mss->zero();
-            this->assemble( mss, stepWhenIcApply, MassMatrix,
+            this->assemble( *mss, stepWhenIcApply.get(), MassMatrix,
                            vnum, this->giveDomain(1) );
         } else {
             mm.zero();
@@ -333,9 +327,9 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     if ( consistentMassFlag ) {
         rhs.times(deltaT);
         // Depends on prescribed v
-        this->assembleVectorFromElements( rhs, tStep, PrescribedVelocityRhsVector, VM_Incremental,
+        this->assembleVectorFromElements( rhs, tStep, PrescribedVelocityRhsVector, VM_Total,
                                          vnum, this->giveDomain(1) );
-        nMethod->solve(mss, & rhs, & deltaAuxVelocity);
+        nMethod->solve(*mss, rhs, deltaAuxVelocity);
     } else {
         for ( int i = 1; i <= momneq; i++ ) {
             deltaAuxVelocity.at(i) = deltaT * rhs.at(i) / mm.at(i);
@@ -365,7 +359,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     this->assembleVectorFromElements( rhs, tStep, DensityRhsPressureTerms, VM_Total,
                                      pnum, this->giveDomain(1) );
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
-    nMethod->solve(lhs, & rhs, pressureVector);
+    nMethod->solve(*lhs, rhs, *pressureVector);
     pressureVector->times(this->theta2);
     pressureVector->add(* prevPressureVector);
 
@@ -378,7 +372,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     if ( consistentMassFlag ) {
         rhs.times(deltaT);
         //this->assembleVectorFromElements(rhs, tStep, PrescribedRhsVector, VM_Incremental, vnum, this->giveDomain(1));
-        nMethod->solve(mss, & rhs, velocityVector);
+        nMethod->solve(*mss, rhs, *velocityVector);
         velocityVector->add(deltaAuxVelocity);
         velocityVector->add(* prevVelocityVector);
     } else {
@@ -426,16 +420,14 @@ void
 CBS :: updateInternalState(TimeStep *tStep)
 {
     for ( auto &domain: domainList ) {
-        int nnodes = domain->giveNumberOfDofManagers();
         if ( requiresUnknownsDictionaryUpdate() ) {
-            for ( int j = 1; j <= nnodes; j++ ) {
-                this->updateDofUnknownsDictionary(domain->giveDofManager(j), tStep);
+            for ( auto &dman : domain->giveDofManagers() ) {
+                this->updateDofUnknownsDictionary(dman.get(), tStep);
             }
         }
 
-        int nelem = domain->giveNumberOfElements();
-        for ( int j = 1; j <= nelem; j++ ) {
-            domain->giveElement(j)->updateInternalState(tStep);
+        for ( auto &elem : domain->giveElements() ) {
+            elem->updateInternalState(tStep);
         }
     }
 }
@@ -465,15 +457,15 @@ CBS :: saveContext(DataStream *stream, ContextMode mode, void *obj)
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = PressureField.saveContext(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = PressureField.saveContext(*stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = VelocityField.saveContext(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = VelocityField.saveContext(*stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = prescribedTractionPressure.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = prescribedTractionPressure.storeYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -514,15 +506,15 @@ CBS :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = PressureField.restoreContext(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = PressureField.restoreContext(*stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = VelocityField.restoreContext(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = VelocityField.restoreContext(*stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = prescribedTractionPressure.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = prescribedTractionPressure.restoreYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -544,10 +536,9 @@ CBS :: checkConsistency()
     Domain *domain = this->giveDomain(1);
 
     // check for proper element type
-    int nelem = domain->giveNumberOfElements();
-    for ( int i = 1; i <= nelem; i++ ) {
-        if ( !dynamic_cast< CBSElement * >( domain->giveElement(i) ) ) {
-            OOFEM_WARNING("Element %d has no CBS base", i);
+    for ( auto &elem : domain->giveElements() ) {
+        if ( !dynamic_cast< CBSElement * >( elem.get() ) ) {
+            OOFEM_WARNING("Element %d has no CBS base", elem->giveLabel());
             return 0;
         }
     }
@@ -557,29 +548,27 @@ CBS :: checkConsistency()
 
     // scale boundary and initial conditions
     if ( equationScalingFlag ) {
-        int nbc = domain->giveNumberOfBoundaryConditions();
-        for ( int i = 1; i <= nbc; i++ ) {
-            GeneralBoundaryCondition *bcPtr = domain->giveBc(i);
-            if ( bcPtr->giveBCValType() == VelocityBVT ) {
-                bcPtr->scale(1. / uscale);
-            } else if ( bcPtr->giveBCValType() == PressureBVT ) {
-                bcPtr->scale( 1. / this->giveVariableScale(VST_Pressure) );
-            } else if ( bcPtr->giveBCValType() == ForceLoadBVT ) {
-                bcPtr->scale( 1. / this->giveVariableScale(VST_Force) );
+        for ( auto &bc: domain->giveBcs() ) {
+            if ( bc->giveBCValType() == VelocityBVT ) {
+                bc->scale(1. / uscale);
+            } else if ( bc->giveBCValType() == PressureBVT ) {
+                bc->scale( 1. / this->giveVariableScale(VST_Pressure) );
+            } else if ( bc->giveBCValType() == ForceLoadBVT ) {
+                bc->scale( 1. / this->giveVariableScale(VST_Force) );
             } else {
-                OOFEM_ERROR("unknown bc/ic type");
+                OOFEM_WARNING("unknown bc/ic type");
+                return 0;
             }
         }
 
-        int nic = domain->giveNumberOfInitialConditions();
-        for ( int i = 1; i <= nic; i++ ) {
-            InitialCondition *icPtr = domain->giveIc(i);
-            if ( icPtr->giveICValType() == VelocityBVT ) {
-                icPtr->scale(VM_Total, 1. / uscale);
-            } else if ( icPtr->giveICValType() == PressureBVT ) {
-                icPtr->scale( VM_Total, 1. / this->giveVariableScale(VST_Pressure) );
+        for ( auto &ic : domain->giveIcs() ) {
+            if ( ic->giveICValType() == VelocityBVT ) {
+                ic->scale(VM_Total, 1. / uscale);
+            } else if ( ic->giveICValType() == PressureBVT ) {
+                ic->scale( VM_Total, 1. / this->giveVariableScale(VST_Pressure) );
             } else {
-                OOFEM_ERROR("unknown bc/ic type");
+                OOFEM_WARNING("unknown bc/ic type");
+                return 0;
             }
         }
     }
@@ -634,10 +623,7 @@ CBS :: applyIC(TimeStep *stepWhenIcApply)
     pressureVector->resize(pdneq);
     pressureVector->zero();
 
-    int nman  = domain->giveNumberOfDofManagers();
-    for ( int j = 1; j <= nman; j++ ) {
-        DofManager *node = domain->giveDofManager(j);
-
+    for ( auto &node : domain->giveDofManagers() ) {
         for ( Dof *iDof: *node ) {
             // ask for initial values obtained from
             // bc (boundary conditions) and ic (initial conditions)
@@ -658,9 +644,8 @@ CBS :: applyIC(TimeStep *stepWhenIcApply)
     }
 
     // update element state according to given ic
-    int nelem = domain->giveNumberOfElements();
-    for ( int j = 1; j <= nelem; j++ ) {
-        CBSElement *element = static_cast< CBSElement * >( domain->giveElement(j) );
+    for ( auto &elem : domain->giveElements() ) {
+        CBSElement *element = static_cast< CBSElement * >( elem.get() );
         element->updateInternalState(stepWhenIcApply);
         element->updateYourself(stepWhenIcApply);
     }

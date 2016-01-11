@@ -548,7 +548,7 @@ RCSDEMaterialStatus :: updateYourself(TimeStep *tStep)
 
 
 contextIOResultType
-RCSDEMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+RCSDEMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full information stored in this Status
 // no temp variables stored
@@ -563,28 +563,28 @@ RCSDEMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *o
 
     // write a raw data
 
-    if ( !stream->write(& maxEquivStrain, 1) ) {
+    if ( !stream.write(maxEquivStrain) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& damageCoeff, 1) ) {
+    if ( !stream.write(damageCoeff) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     int _mode = rcsdMode;
-    if ( !stream->write(& _mode, 1) ) {
+    if ( !stream.write(_mode) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& transitionEps, 1) ) {
+    if ( !stream.write(transitionEps) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& epsF2, 1) ) {
+    if ( !stream.write(epsF2) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = Ds0.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = Ds0.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -593,7 +593,7 @@ RCSDEMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *o
 
 
 contextIOResultType
-RCSDEMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+RCSDEMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full information stored in stream to this Status
 //
@@ -606,29 +606,29 @@ RCSDEMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void
     }
 
     // read raw data
-    if ( !stream->read(& maxEquivStrain, 1) ) {
+    if ( !stream.read(maxEquivStrain) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& damageCoeff, 1) ) {
+    if ( !stream.read(damageCoeff) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     int _mode;
-    if ( !stream->read(& _mode, 1) ) {
+    if ( !stream.read(_mode) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     rcsdMode = ( __rcsdModeType ) _mode;
-    if ( !stream->read(& transitionEps, 1) ) {
+    if ( !stream.read(transitionEps) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& epsF2, 1) ) {
+    if ( !stream.read(epsF2) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = Ds0.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = Ds0.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

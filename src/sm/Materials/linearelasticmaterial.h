@@ -72,6 +72,11 @@ public:
     virtual void giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
     virtual void giveRealStressVector_Fiber(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
 
+    virtual void giveEshelbyStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
+    double giveEnergyDensity(GaussPoint *gp, TimeStep *tStep);
+
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+
     virtual double giveShearModulus() { return 1.; }
     virtual int hasNonLinearBehaviour() { return 0; }
     virtual const char *giveClassName() const { return "LinearElasticMaterial"; }

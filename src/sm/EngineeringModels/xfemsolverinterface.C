@@ -64,7 +64,7 @@ XfemSolverInterface::~XfemSolverInterface()
 
 }
 
-void XfemSolverInterface::propagateXfemInterfaces(TimeStep *tStep, StructuralEngngModel &ioEngngModel)
+void XfemSolverInterface::propagateXfemInterfaces(TimeStep *tStep, StructuralEngngModel &ioEngngModel, bool iRecomputeStepAfterCrackProp)
 {
     int domainInd = 1;
     Domain *domain = ioEngngModel.giveDomain(domainInd);
@@ -74,10 +74,23 @@ void XfemSolverInterface::propagateXfemInterfaces(TimeStep *tStep, StructuralEng
 
         if( xMan->hasPropagatingFronts() ) {
             // Propagate crack tips
-            printf("Propagating crack tips...\n");
-            xMan->propagateFronts();
+            bool frontsHavePropagated = false;
+            xMan->propagateFronts(frontsHavePropagated);
 
-            mNeedsVariableMapping = true;
+            if(frontsHavePropagated) {
+                mNeedsVariableMapping = true;
+
+                mapVariables(tStep, ioEngngModel);
+
+                if(iRecomputeStepAfterCrackProp) {
+                    printf("Recomputing time step.\n");
+                    ioEngngModel.forceEquationNumbering();
+                    ioEngngModel.solveYourselfAt(tStep);
+                    ioEngngModel.updateYourself( tStep );
+                    ioEngngModel.terminate( tStep );
+
+                }
+            }
         }
 
     }
@@ -120,7 +133,7 @@ void XfemSolverInterface::mapVariables(TimeStep *tStep, StructuralEngngModel &io
         FloatArray u;
         primMapper.mapPrimaryVariables(u, * domain, * dNew, VM_Total, * tStep);
 
-        updatePrimaryField(ioEngngModel, tStep, u);
+        xfemUpdatePrimaryField(ioEngngModel, tStep, u);
         // ... and write to PrimaryField
 //        field->update(VM_Total, tStep, u);
 
@@ -169,7 +182,11 @@ void XfemSolverInterface::mapVariables(TimeStep *tStep, StructuralEngngModel &io
                                 if ( siMatStat == NULL ) {
                                     OOFEM_ERROR("Failed to cast to StructuralInterfaceMaterialStatus.");
                                 }
-                                interface->MSMI_map_cz(* gp, * domain, elemSet, * tStep, * siMatStat);
+
+                                if(!siMatStat->giveNewlyInserted()) {
+                                    interface->MSMI_map_cz(* gp, * domain, elemSet, * tStep, * siMatStat);
+                                }
+
                             }
                         }
                     }
@@ -325,10 +342,10 @@ void XfemSolverInterface::mapVariables(TimeStep *tStep, StaticStructural &ioEngn
 }
 #endif
 
-void XfemSolverInterface::updatePrimaryField(StaticStructural &ioEngngModel, TimeStep *tStep, const FloatArray &iNewSol)
+void XfemSolverInterface::xfemUpdatePrimaryField(StaticStructural &ioEngngModel, TimeStep *tStep, const FloatArray &iNewSol)
 {
     printf("XfemSolverInterface::updatePrimaryField(StaticStructural &ioEngngModel, TimeStep *tStep, const FloatArray &iNewSol)\n");
-    ioEngngModel.updatePrimaryField(VM_Total, tStep, iNewSol);
+    ioEngngModel.setSolution(tStep, iNewSol);
 }
 
 } /* namespace oofem */

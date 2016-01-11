@@ -47,7 +47,6 @@ namespace oofem {
 class IntArray;
 class FloatMatrix;
 class DataStream;
-class CommunicationBuffer;
 
 /**
  * Class representing vector of real numbers. This array can grow or shrink to
@@ -389,7 +388,7 @@ public:
      * Computes distance between the position represented by the reciever and a line segment represented by it's start
      * point iP1 and it's end point iP2.
      * The local coordinate oXi is in the range [0,1]
-     * Written by Erik Svenning, August 2013.
+     * @author Erik Svenning, August 2013.
      */
     double distance(const FloatArray &iP1, const FloatArray &iP2, double &oXi, double &oXiUnbounded) const;
     double distance_square(const FloatArray &iP1, const FloatArray &iP2, double &oXi, double &oXiUnbounded) const;
@@ -443,6 +442,11 @@ public:
      * @return Sum of receiver.
      */
     double sum() const;
+    /**
+     * Computes the product of receiver values.
+     * @return Product of receiver.
+     */
+    double product() const;
 
     /**
      * Returns the receiver a rotated according the change-of-base matrix r.
@@ -484,14 +488,10 @@ public:
      * Reciever will be set to a given column in a matrix
      */
     void beColumnOf(const FloatMatrix &mat, int col);
-#ifdef __PARALLEL_MODE
-    int packToCommBuffer(CommunicationBuffer &buff) const;
-    int unpackFromCommBuffer(CommunicationBuffer &buff);
-    int givePackSize(CommunicationBuffer &buff) const;
-#endif
 
-    contextIOResultType storeYourself(DataStream *stream, ContextMode mode);
-    contextIOResultType restoreYourself(DataStream *stream, ContextMode mode);
+    contextIOResultType storeYourself(DataStream &stream) const;
+    contextIOResultType restoreYourself(DataStream &stream);
+    int givePackSize(DataStream &buff) const;
 
     friend std :: ostream &operator << ( std :: ostream & out, const FloatArray & x );
 

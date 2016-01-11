@@ -40,6 +40,7 @@ class AbaqusParser:
         oofem_elemProp.append(oofem_elementProperties("tet21stokes", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], [], [[0,1,2,4,5,6],[0,1,3,4,7,8],[1,2,3,5,8,9],[0,2,3,6,7,9]]))
 #        oofem_elemProp.append(oofem_elementProperties("PlaneStress2DXFEM", [0,1,2,3], [], [[0,1],[1,2],[2,3],[3,0]]))
         oofem_elemProp.append(oofem_elementProperties("TrPlaneStress2DXFEM", [0,2,1], [], [[0,2],[2,1],[1,0]]))
+        oofem_elemProp.append(oofem_elementProperties("intelline1", [0,1,2,3], [], []))
         return oofem_elemProp
     
     def setupElements(self):
@@ -49,6 +50,9 @@ class AbaqusParser:
 
         # 3-node triangle
         es.append(ElementProperties("cpe3", 1, [], [[0,1],[1,2],[2,3],[3,0]], 3, 42))
+
+        # 2d interface element  
+        es.append(ElementProperties("coh1d4", 2, [], [], 4))
         return es
         
     def _read_multiple_lines(self):

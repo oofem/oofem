@@ -48,22 +48,29 @@
 namespace oofem {
 REGISTER_BoundaryCondition(UserDefDirichletBC);
 
-UserDefDirichletBC :: UserDefDirichletBC(int i, Domain *d) : BoundaryCondition(i, d)
+UserDefDirichletBC :: UserDefDirichletBC(int i, Domain *d) : BoundaryCondition(i, d), mpModule(NULL)
 { }
 
 
 UserDefDirichletBC :: ~UserDefDirichletBC()
 {
-    Py_DECREF(mpName);
-    Py_DECREF(mpModule);
-    Py_DECREF(mpFunc);
+    if ( mpModule ) Py_DECREF(mpModule);
 }
 
 
 double
-UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
+UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, double time)
 {
-    double factor = this->giveTimeFunction()->evaluate(tStep, mode);
+    double factor = 0.;
+    if ( mode == VM_Total ) {
+        factor = this->giveTimeFunction()->evaluateAtTime(time);
+    } else if ( mode == VM_Velocity ) {
+        factor = this->giveTimeFunction()->evaluateVelocityAtTime(time);
+    } else if ( mode == VM_Acceleration ) {
+        factor = this->giveTimeFunction()->evaluateAccelerationAtTime(time);
+    } else {
+        OOFEM_ERROR("Should not be called for value mode type then total, velocity, or acceleration.");
+    }
     DofManager *dMan = dof->giveDofManager();
 
 
@@ -89,15 +96,11 @@ UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
     // to it -> no DECREF
     PyTuple_SetItem(pArgs, 0, pArgArray);
 
-
     // Dof number
-    PyObject *pValDofNum = PyLong_FromLong( dof->giveDofID() );
-    PyTuple_SetItem(pArgs, 1, pValDofNum);
-
+    PyTuple_SetItem(pArgs, 1, PyLong_FromLong( dof->giveDofID() ));
 
     // Time
-    PyObject *pTargetTime = PyFloat_FromDouble( tStep->giveTargetTime() );
-    PyTuple_SetItem(pArgs, 2, pTargetTime);
+    PyTuple_SetItem(pArgs, 2, PyFloat_FromDouble( time ));
 
     // Value returned from the Python function
     PyObject *pRetVal = NULL;
@@ -136,8 +139,9 @@ UserDefDirichletBC :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, this->mFileName, _IFT_UserDefDirichletBC_filename);
 
     // Import Python file
-    mpName = PyString_FromString( this->mFileName.c_str() );
+    PyObject *mpName = PyString_FromString( this->mFileName.c_str() );
     mpModule = PyImport_Import(mpName);
+    Py_DECREF(mpName);
 
     if ( mpModule != NULL ) {
         // Load and call Python function
@@ -146,10 +150,6 @@ UserDefDirichletBC :: initializeFrom(InputRecord *ir)
         printf( "this->mFileName.c_str(): %s\n", this->mFileName.c_str() );
         OOFEM_ERROR("mpModule == NULL")
     }
-
-    Py_INCREF(mpName);
-    Py_INCREF(mpModule);
-    Py_INCREF(mpFunc);
 
     return IRRT_OK;
 }
@@ -160,14 +160,6 @@ UserDefDirichletBC :: giveInputRecord(DynamicInputRecord &input)
 {
     GeneralBoundaryCondition :: giveInputRecord(input);
     input.setField(this->mFileName, _IFT_UserDefDirichletBC_filename);
-}
-
-
-void
-UserDefDirichletBC :: setPrescribedValue(double s)
-{
-    values.zero();
-    values.add(s);
 }
 
 

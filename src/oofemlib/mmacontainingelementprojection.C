@@ -53,11 +53,9 @@ MMAContainingElementProjection :: __init(Domain *dold, IntArray &type, FloatArra
     Element *srcElem;
 
     if ( ( srcElem = sl->giveElementContainingPoint(coords, elemSet) ) ) {
-        IntegrationRule *iRule = srcElem->giveDefaultIntegrationRulePtr();
-
         this->source = NULL;
-        for ( GaussPoint *jGp: *iRule ) {
-            if ( srcElem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveNaturalCoordinates() ) ) ) {
+        for ( GaussPoint *jGp: *srcElem->giveDefaultIntegrationRulePtr() ) {
+            if ( srcElem->computeGlobalCoordinates( jGpCoords, jGp->giveNaturalCoordinates() ) ) {
                 distance = coords.distance(jGpCoords);
                 if ( distance < minDist ) {
                     minDist = distance;

@@ -63,16 +63,8 @@ QSpaceGrad :: QSpaceGrad(int n, Domain *aDomain) :  QSpace(n, aDomain), GradDpEl
 IRResultType
 QSpaceGrad :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result = this->StructuralElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    if ( ( numberOfGaussPoints != 8 ) && ( numberOfGaussPoints != 14 ) && ( numberOfGaussPoints != 27 ) && ( numberOfGaussPoints != 64 ) ) {
-        numberOfGaussPoints = 27;
-    }
-
-    return IRRT_OK;
+    numberOfGaussPoints = 27;
+    return this->Structural3DElement :: initializeFrom(ir);
 }
 
 
@@ -92,7 +84,7 @@ QSpaceGrad :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
     integrationRulesArray.resize(1);
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 7);
+    integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 7) );
     this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
 }
 
@@ -102,7 +94,7 @@ void
 QSpaceGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatArray n;
-    this->interpolation_lin.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation_lin.evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beNMatrixOf(n, 1);
 }
 
@@ -110,7 +102,7 @@ void
 QSpaceGrad :: computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
-    this->interpolation_lin.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation_lin.evaldNdx( dnx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beTranspositionOf(dnx);
 }
 

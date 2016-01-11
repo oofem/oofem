@@ -35,6 +35,7 @@
 #include "parallelcontext.h"
 #include "engngm.h"
 #include "mathfem.h"
+#include "unknownnumberingscheme.h"
 
 namespace oofem {
 //#define ParallelContext_debug_print
@@ -51,9 +52,9 @@ ParallelContext :: ~ParallelContext()
 { }
 
 void
-ParallelContext :: init(int di)
+ParallelContext :: init(int newDi)
 {
-    this->di = di;
+    di = newDi;
     ///@todo Should we even do this here? The user of the requested ParallelContext will just set this manually instead.
 #ifdef __PARALLEL_MODE
     if ( emodel->isParallel() ) {

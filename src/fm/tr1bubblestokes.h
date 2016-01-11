@@ -39,6 +39,7 @@
 #include "zznodalrecoverymodel.h"
 #include "spatiallocalizer.h"
 #include "eleminterpmapperinterface.h"
+#include "matresponsemode.h"
 
 #define _IFT_Tr1BubbleStokes_Name "tr1bubblestokes"
 
@@ -68,7 +69,7 @@ protected:
     static IntArray edge_ordering [ 3 ];
 
     /// The extra dofs from the bubble
-    ElementDofManager *bubble;
+    std :: unique_ptr< ElementDofManager > bubble;
     // Coordinates associated with the bubble dofs.
     //FloatArray bubbleCoord; // Assumed fixed at 0 for now (i.e. only linear geometry)
 
@@ -84,7 +85,7 @@ public:
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
 
     void computeInternalForcesVector(FloatArray &answer, TimeStep *tStep);
-    void computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep);
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, TimeStep *tStep);
 
     void computeExternalForcesVector(FloatArray &answer, TimeStep *tStep);
     virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
@@ -108,9 +109,6 @@ public:
     virtual void updateYourself(TimeStep *tStep);
 
     virtual Interface *giveInterface(InterfaceType it);
-
-    // Spatial localizer interface:
-    virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
     // Element interpolation interface:
     virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType u,

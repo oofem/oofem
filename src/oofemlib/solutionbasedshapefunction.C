@@ -134,16 +134,15 @@ SolutionbasedShapeFunction :: isCoeff(ActiveDof *dof)
 void
 SolutionbasedShapeFunction :: init()
 {
-    Node *n;
-    n = this->giveDomain()->giveNode(1);
+    Node *n1 = this->giveDomain()->giveNode(1);
 
-    maxCoord = * n->giveCoordinates();
-    minCoord = * n->giveCoordinates();
+    maxCoord = * n1->giveCoordinates();
+    minCoord = * n1->giveCoordinates();
 
-    for ( int i = 1; i <= this->giveDomain()->giveNumberOfDofManagers(); i++ ) {
+    for ( auto &n :this->giveDomain()->giveDofManagers() ) {
         for ( int j = 1; j <= maxCoord.giveSize(); j++ ) {
-            maxCoord.at(j) = max( this->giveDomain()->giveDofManager(i)->giveCoordinate(j), maxCoord.at(j) );
-            minCoord.at(j) = min( this->giveDomain()->giveDofManager(i)->giveCoordinate(j), minCoord.at(j) );
+            maxCoord.at(j) = max( n->giveCoordinate(j), maxCoord.at(j) );
+            minCoord.at(j) = min( n->giveCoordinate(j), minCoord.at(j) );
         }
     }
 }
@@ -157,8 +156,8 @@ SolutionbasedShapeFunction :: computeCorrectionFactors(modeStruct &myMode, IntAr
 
     double A0p = 0.0, App = 0.0, A0m = 0.0, Amm = 0.0, Bp = 0.0, Bm = 0.0, c0 = 0.0, cp = 0.0, cm = 0.0;
 
-    EngngModel *m = myMode.myEngngModel;
-    Set *mySet = m->giveDomain(1)->giveSet(externalSet);
+    EngngModel *model = myMode.myEngngModel;
+    Set *mySet = model->giveDomain(1)->giveSet(externalSet);
 
     IntArray BoundaryList = mySet->giveBoundaryList();
 
@@ -166,7 +165,7 @@ SolutionbasedShapeFunction :: computeCorrectionFactors(modeStruct &myMode, IntAr
         int ElementID = BoundaryList(2 * i);
         int Boundary = BoundaryList(2 * i + 1);
 
-        Element *thisElement = m->giveDomain(1)->giveElement(ElementID);
+        Element *thisElement = model->giveDomain(1)->giveElement(ElementID);
         FEInterpolation *geoInterpolation = thisElement->giveInterpolation();
         IntArray bnodes, zNodes, pNodes, mNodes;
         FloatMatrix nodeValues;
@@ -182,15 +181,15 @@ SolutionbasedShapeFunction :: computeCorrectionFactors(modeStruct &myMode, IntAr
         std :: unique_ptr< IntegrationRule >iRule(geoInterpolation->giveBoundaryIntegrationRule(order, Boundary));
 
         for ( GaussPoint *gp: *iRule ) {
-            FloatArray *lcoords = gp->giveNaturalCoordinates();
+            const FloatArray &lcoords = gp->giveNaturalCoordinates();
             FloatArray gcoords, normal, N;
             FloatArray Phi;
 
-            double detJ = fabs( geoInterpolation->boundaryGiveTransformationJacobian( Boundary, * lcoords, FEIElementGeometryWrapper(thisElement) ) ) * gp->giveWeight();
+            double detJ = fabs( geoInterpolation->boundaryGiveTransformationJacobian( Boundary, lcoords, FEIElementGeometryWrapper(thisElement) ) ) * gp->giveWeight();
 
-            geoInterpolation->boundaryEvalNormal( normal, Boundary, * lcoords, FEIElementGeometryWrapper(thisElement) );
-            geoInterpolation->boundaryEvalN( N, Boundary, * lcoords, FEIElementGeometryWrapper(thisElement) );
-            geoInterpolation->boundaryLocal2Global( gcoords, Boundary, * lcoords, FEIElementGeometryWrapper(thisElement) );
+            geoInterpolation->boundaryEvalNormal( normal, Boundary, lcoords, FEIElementGeometryWrapper(thisElement) );
+            geoInterpolation->boundaryEvalN( N, Boundary, lcoords, FEIElementGeometryWrapper(thisElement) );
+            geoInterpolation->boundaryLocal2Global( gcoords, Boundary, lcoords, FEIElementGeometryWrapper(thisElement) );
 
             FloatArray pPhi, mPhi, zPhi;
             pPhi.resize( Dofs->giveSize() );
@@ -387,15 +386,14 @@ SolutionbasedShapeFunction :: loadProblem()
         this->setLoads(myEngngModel, i + 1);
 
         // Check
-        for ( int j = 1; j <= myEngngModel->giveDomain(1)->giveNumberOfElements(); j++ ) {
-            Element *e = myEngngModel->giveDomain(1)->giveElement(j);
+        for ( auto &elem : myEngngModel->giveDomain(1)->giveElements() ) {
             FloatArray centerCoord;
             int vlockCount = 0;
             centerCoord.resize(3);
             centerCoord.zero();
 
-            for ( int k = 1; k <= e->giveNumberOfDofManagers(); k++ ) {
-                DofManager *dman = e->giveDofManager(k);
+            for ( int k = 1; k <= elem->giveNumberOfDofManagers(); k++ ) {
+                DofManager *dman = elem->giveDofManager(k);
                 centerCoord.add( * dman->giveCoordinates() );
                 for ( Dof *dof: *dman ) {
                     if ( dof->giveBcId() != 0 ) {
@@ -404,7 +402,7 @@ SolutionbasedShapeFunction :: loadProblem()
                 }
             }
             if ( vlockCount == 30 ) {
-                OOFEM_WARNING("Element over-constrained (%u)! Center coordinate: %f, %f, %f\n", e->giveNumber(), centerCoord.at(1) / 10, centerCoord.at(2) / 10, centerCoord.at(3) / 10);
+                OOFEM_WARNING("Element over-constrained (%u)! Center coordinate: %f, %f, %f\n", elem->giveNumber(), centerCoord.at(1) / 10, centerCoord.at(2) / 10, centerCoord.at(3) / 10);
             }
         }
 
@@ -498,9 +496,9 @@ SolutionbasedShapeFunction :: setLoads(EngngModel *myEngngModel, int d)
     myBodyLoad->initializeFrom(& ir);
     myEngngModel->giveDomain(1)->setBoundaryCondition(bcID, myBodyLoad);
 
-    for ( int i = 1; i <= myEngngModel->giveDomain(1)->giveNumberOfElements(); i++ ) {
+    for ( auto &elem : myEngngModel->giveDomain(1)->giveElements() ) {
         IntArray *blArray;
-        blArray = myEngngModel->giveDomain(1)->giveElement(i)->giveBodyLoadArray();
+        blArray = elem->giveBodyLoadArray();
         blArray->resizeWithValues(blArray->giveSize() + 1);
         blArray->at( blArray->giveSize() ) = bcID;
     }

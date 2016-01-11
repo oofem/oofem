@@ -289,7 +289,7 @@ IntMatCoulombContactStatus :: giveTempShearStressShift()
 
 
 contextIOResultType
-IntMatCoulombContactStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+IntMatCoulombContactStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -299,7 +299,7 @@ IntMatCoulombContactStatus :: saveContext(DataStream *stream, ContextMode mode, 
     }
 
     // write a raw data
-    //if ( !stream->write(& kappa, 1) ) {
+    //if ( !stream.write(kappa) ) {
     //THROW_CIOERR(CIO_IOERR);
     //}
 
@@ -308,7 +308,7 @@ IntMatCoulombContactStatus :: saveContext(DataStream *stream, ContextMode mode, 
 
 
 contextIOResultType
-IntMatCoulombContactStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+IntMatCoulombContactStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -318,7 +318,7 @@ IntMatCoulombContactStatus :: restoreContext(DataStream *stream, ContextMode mod
     }
 
     // read raw data
-    //if ( !stream->read(& kappa, 1) ) {
+    //if ( !stream.read(kappa) ) {
     //THROW_CIOERR(CIO_IOERR);
     //}
 

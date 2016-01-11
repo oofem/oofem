@@ -44,6 +44,7 @@
 #include "contextioerr.h"
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
+#include "datastream.h"
 
 namespace oofem {
 REGISTER_Material(MDM);
@@ -1304,33 +1305,31 @@ MDM :: giveInterface(InterfaceType type)
     }
 }
 
-
-#ifdef __PARALLEL_MODE
 int
-MDM :: packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
+MDM :: packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip)
 {
     MDMStatus *status = static_cast< MDMStatus * >( this->giveStatus(ip) );
 
     this->buildNonlocalPointTable(ip);
     this->updateDomainBeforeNonlocAverage(tStep);
 
-    return status->giveLocalDamageTensorForAveragePtr()->packToCommBuffer(buff);
+    return status->giveLocalDamageTensorForAveragePtr()->storeYourself(buff);
 }
 
 int
-MDM :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
+MDM :: unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip)
 {
     int result;
     MDMStatus *status = static_cast< MDMStatus * >( this->giveStatus(ip) );
     FloatMatrix _LocalDamageTensorForAverage;
 
-    result = _LocalDamageTensorForAverage.unpackFromCommBuffer(buff);
+    result = _LocalDamageTensorForAverage.restoreYourself(buff);
     status->setLocalDamageTensorForAverage(_LocalDamageTensorForAverage);
     return result;
 }
 
 int
-MDM :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
+MDM :: estimatePackSize(DataStream &buff, GaussPoint *ip)
 {
     //
     // Note: status localStrainVectorForAverage memeber must be properly sized!
@@ -1342,6 +1341,7 @@ MDM :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
         return 0;
     }
 }
+
 
 double
 MDM :: predictRelativeComputationalCost(GaussPoint *gp)
@@ -1369,15 +1369,13 @@ MDM :: predictRelativeComputationalCost(GaussPoint *gp)
     return cost;
 }
 
-#endif
 
 
 
 
 MDMStatus :: MDMStatus(int n, int nsd, int nmplanes, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g), StructuralNonlocalMaterialStatusExtensionInterface(), Psi(nmplanes), PsiTemp(nmplanes), DamageTensor(nsd, nsd), DamageTensorTemp(nsd, nsd), tempDamageTensorEigenValues(nsd), damageTensorEigenValues(nsd), tempDamageTensorEigenVectors(nsd, nsd), damageTensorEigenVectors(nsd, nsd)
 {
-    int i;
-    for ( i = 1; i <= nsd; i++ ) {
+    for ( int i = 1; i <= nsd; i++ ) {
         damageTensorEigenValues.at(i) = tempDamageTensorEigenValues.at(i) = 1.0;
         tempDamageTensorEigenVectors.at(i, i) = damageTensorEigenVectors.at(i, i) = 1.0;
     }
@@ -1387,13 +1385,8 @@ MDMStatus :: MDMStatus(int n, int nsd, int nmplanes, Domain *d, GaussPoint *g) :
 MDMStatus :: ~MDMStatus() { }
 
 contextIOResultType
-MDMStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+MDMStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
-    //if (stream == NULL) StructuralMaterialStatus::_error("saveContex : can't write into NULL stream");
-    if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
-    }
-
     contextIOResultType iores;
 
     // save parent class status
@@ -1401,19 +1394,19 @@ MDMStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = Psi.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = Psi.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = DamageTensor.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = DamageTensor.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = damageTensorEigenValues.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = damageTensorEigenValues.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = damageTensorEigenVectors.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = damageTensorEigenVectors.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -1422,7 +1415,7 @@ MDMStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 
 
 contextIOResultType
-MDMStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+MDMStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -1431,19 +1424,19 @@ MDMStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = Psi.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = Psi.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = DamageTensor.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = DamageTensor.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = damageTensorEigenValues.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = damageTensorEigenValues.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = damageTensorEigenVectors.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = damageTensorEigenVectors.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

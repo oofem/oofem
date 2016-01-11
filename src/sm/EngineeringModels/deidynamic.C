@@ -40,6 +40,7 @@
 #include "verbose.h"
 #include "mathfem.h"
 #include "classfactory.h"
+#include "unknownnumberingscheme.h"
 
 namespace oofem {
 #define ZERO_MASS  1.E-10   // unit dependent !!!!
@@ -111,18 +112,16 @@ TimeStep *DEIDynamic :: giveNextStep()
     double totalTime = 0.;
     StateCounterType counter = 1;
 
-    delete previousStep;
-    if ( currentStep != NULL ) {
+    if ( currentStep ) {
         totalTime = currentStep->giveTargetTime() + deltaT;
         istep     = currentStep->giveNumber() + 1;
         counter = currentStep->giveSolutionStateCounter() + 1;
     }
 
-    previousStep = currentStep;
-    currentStep = new TimeStep(istep, this, 1, totalTime, deltaT, counter);
-    // time and dt variables are set eq to 0 for staics - has no meaning
+    previousStep = std :: move(currentStep);
+    currentStep.reset( new TimeStep(istep, this, 1, totalTime, deltaT, counter) );
 
-    return currentStep;
+    return currentStep.get();
 }
 
 
@@ -140,10 +139,8 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
     // for first time step we need special start code
     Domain *domain = this->giveDomain(1);
     int nelem = domain->giveNumberOfElements();
-    int nman = domain->giveNumberOfDofManagers();
     IntArray loc;
     Element *element;
-    DofManager *node;
     int neq;
     int i, k, n, j, jj, kk, init = 0;
     double coeff, maxDt, maxOmi, maxOm = 0., maxOmEl, c1, c2, c3;
@@ -170,7 +167,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
             element->giveLocationArray(loc, dn);
             element->giveCharacteristicMatrix(charMtrx,  LumpedMassMatrix, tStep);
             // charMtrx.beLumpedOf(fullCharMtrx);
-            element->giveCharacteristicMatrix(charMtrx2, StiffnessMatrix, tStep);
+            element->giveCharacteristicMatrix(charMtrx2, TangentStiffnessMatrix, tStep);
 
             //
             // assemble it manually
@@ -235,9 +232,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
         accelerationVector.zero();
 
 
-        for ( j = 1; j <= nman; j++ ) {
-            node = domain->giveDofManager(j);
-
+        for ( auto &node : domain->giveDofManagers() ) {
             for ( Dof *iDof: *node ) {
                 // ask for initial values obtained from
                 // bc (boundary conditions) and ic (initial conditions)
@@ -246,7 +241,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
                     continue;
                 }
 
-                jj = iDof->__giveEquationNumber();
+                int jj = iDof->__giveEquationNumber();
                 if ( jj ) {
                     nextDisplacementVector.at(jj) = iDof->giveUnknown(VM_Total, tStep);
                     // become displacementVector after init
@@ -256,9 +251,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
             }
         }
 
-        for ( j = 1; j <= neq; j++ ) {
-            nextDisplacementVector.at(j) -= velocityVector.at(j) * ( deltaT );
-        }
+        nextDisplacementVector.add(-deltaT, velocityVector);
 
         return;
     } // end of init step
@@ -282,9 +275,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
     loadVector.zero();
     this->assembleVector(loadVector, tStep, ExternalForcesVector,
                          VM_Total, EModelDefaultEquationNumbering(), domain);
-#ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(loadVector, EModelDefaultEquationNumbering(), LoadExchangeTag);
-#endif
 
 
     //
@@ -294,7 +285,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
     for ( i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
         element->giveLocationArray(loc, dn);
-        element->giveCharacteristicMatrix(charMtrx, StiffnessMatrix, tStep);
+        element->giveCharacteristicMatrix(charMtrx, TangentStiffnessMatrix, tStep);
         n = loc.giveSize();
         for ( j = 1; j <= n; j++ ) {
             jj = loc.at(j);

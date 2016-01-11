@@ -41,6 +41,7 @@
 #include "transportelement.h"
 #include "classfactory.h"
 #include "mathfem.h"
+#include "unknownnumberingscheme.h"
 
 namespace oofem {
 REGISTER_EngngModel(NLTransientTransportProblem);
@@ -86,7 +87,7 @@ NLTransientTransportProblem :: giveNextStep()
     NonStationaryTransportProblem :: giveNextStep();
     intrinsicTime = previousStep->giveTargetTime() + this->alpha*(currentStep->giveTargetTime()-previousStep->giveTargetTime());
     currentStep->setIntrinsicTime(intrinsicTime);
-    return currentStep;
+    return currentStep.get();
 }
 
 
@@ -122,10 +123,10 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
 
     //create previous solution from IC or from previous tStep
     if ( tStep->isTheFirstStep() ) {
-        if ( stepWhenIcApply == NULL ) {
-            stepWhenIcApply = new TimeStep( *tStep->givePreviousStep() );
+        if ( !stepWhenIcApply ) {
+            stepWhenIcApply.reset( new TimeStep( *tStep->givePreviousStep() ) );
         }
-        this->applyIC(stepWhenIcApply); //insert solution to hash=1(previous), if changes in equation numbering
+        this->applyIC(stepWhenIcApply.get()); //insert solution to hash=1(previous), if changes in equation numbering
     }
 
     double dTTau = tStep->giveTimeIncrement();
@@ -170,13 +171,11 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
         if ( ( nite == 1 ) || ( NR_Mode == nrsolverFullNRM ) || ( ( NR_Mode == nrsolverAccelNRM ) && ( nite % MANRMSteps == 0 ) ) ) {
             conductivityMatrix->zero();
             //Assembling left hand side - start with conductivity matrix
-            this->assemble( conductivityMatrix, & TauStep, LHSBCMatrix,
-                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            this->assemble( conductivityMatrix, & TauStep, IntSourceLHSMatrix,
+            this->assemble( *conductivityMatrix, & TauStep, IntSourceLHSMatrix,
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
             conductivityMatrix->times(alpha);
             //Add capacity matrix
-            this->assemble( conductivityMatrix, & TauStep, NSTP_MidpointLhs,
+            this->assemble( *conductivityMatrix, & TauStep, NSTP_MidpointLhs,
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
 
@@ -205,7 +204,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
         // compute norm of residuals from balance equations
         solutionErr = rhs.computeNorm();
 
-        linSolver->solve(conductivityMatrix, & rhs, & solutionVectorIncrement);
+        linSolver->solve(*conductivityMatrix, rhs, solutionVectorIncrement);
         solutionVector->add(solutionVectorIncrement);
         this->updateInternalState(& TauStep); //insert to hash=0(current), if changes in equation numbering
         // compute error in the solutionvector increment
@@ -282,11 +281,8 @@ NLTransientTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
     NonStationaryTransportProblem :: applyIC(stepWhenIcApply);
 
     // update element state according to given ic
-    int nelem = domain->giveNumberOfElements();
-    TransportElement *element;
-
-    for ( int j = 1; j <= nelem; j++ ) {
-        element = static_cast< TransportElement * >( domain->giveElement(j) );
+    for ( auto &elem : domain->giveElements() ) {
+        TransportElement *element = static_cast< TransportElement * >( elem.get() );
         element->updateInternalState(stepWhenIcApply);
         element->updateYourself(stepWhenIcApply);
     }
@@ -297,10 +293,8 @@ NLTransientTransportProblem :: createPreviousSolutionInDofUnknownsDictionary(Tim
 {
     //Copy the last known temperature to be a previous solution
     for ( auto &domain: domainList ) {
-        int nnodes = domain->giveNumberOfDofManagers();
         if ( requiresUnknownsDictionaryUpdate() ) {
-            for ( int inode = 1; inode <= nnodes; inode++ ) {
-                DofManager *node = domain->giveDofManager(inode);
+            for ( auto &node : domain->giveDofManagers() ) {
                 for ( Dof *dof: *node ) {
                     double val = dof->giveUnknown(VM_Total, tStep); //get number on hash=0(current)
                     dof->updateUnknownsDictionary(tStep->givePreviousStep(), VM_Total, val);
@@ -360,11 +354,9 @@ void
 NLTransientTransportProblem :: copyUnknownsInDictionary(ValueModeType mode, TimeStep *fromTime, TimeStep *toTime)
 {
     Domain *domain = this->giveDomain(1);
-    int nnodes = domain->giveNumberOfDofManagers();
 
-    for ( int j = 1; j <= nnodes; j++ ) {
-        DofManager *inode = domain->giveDofManager(j);
-        for ( Dof *dof: *inode ) {
+    for ( auto &node : domain->giveDofManagers() ) {
+        for ( Dof *dof: *node ) {
             double val = dof->giveUnknown(mode, fromTime);
             dof->updateUnknownsDictionary(toTime, mode, val);
         }
@@ -376,17 +368,15 @@ void
 NLTransientTransportProblem :: updateInternalState(TimeStep *tStep)
 {
     for ( auto &domain: domainList ) {
-        int nnodes = domain->giveNumberOfDofManagers();
         if ( requiresUnknownsDictionaryUpdate() ) {
-            for ( int j = 1; j <= nnodes; j++ ) {
+            for ( auto &dman : domain->giveDofManagers() ) {
                 //update dictionary entry or add a new pair if the position is missing
-                this->updateDofUnknownsDictionary(domain->giveDofManager(j), tStep);
+                this->updateDofUnknownsDictionary(dman.get(), tStep);
             }
         }
 
-        int nelem = domain->giveNumberOfElements();
-        for ( int j = 1; j <= nelem; j++ ) {
-            domain->giveElement(j)->updateInternalState(tStep);
+        for ( auto &elem : domain->giveElements() ) {
+            elem->updateInternalState(tStep);
         }
     }
 }
@@ -400,7 +390,7 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer,
     //
     double t = tStep->giveTargetTime();
     IntArray loc;
-    FloatMatrix charMtrxCond, charMtrxCap, bcMtrx;
+    FloatMatrix charMtrxCond, charMtrxCap;
     FloatArray r, drdt, contrib, help;
     Element *element;
     TimeStep *previousStep = this->givePreviousStep(); //r_t
@@ -411,7 +401,6 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer,
 
     for ( int i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
-#ifdef __PARALLEL_MODE
         // skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. They introduction is necessary to
         // allow local averaging on domains without fine grain communication between domains).
@@ -419,15 +408,13 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer,
             continue;
         }
 
-#endif
         if ( !element->isActivated(tStep) ) {
             continue;
         }
 
         element->giveLocationArray(loc, ns);
 
-        element->giveCharacteristicMatrix(charMtrxCond, ConductivityMatrix, tStep);
-        element->giveCharacteristicMatrix(bcMtrx, LHSBCMatrix, tStep);
+        element->giveCharacteristicMatrix(charMtrxCond, TangentStiffnessMatrix, tStep);
         element->giveCharacteristicMatrix(charMtrxCap, CapacityMatrix, tStep);
 
 
@@ -469,9 +456,6 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer,
         }
 
         help.beProductOf(charMtrxCap, drdt);
-        if ( bcMtrx.isNotEmpty() ) {
-            charMtrxCond.add(bcMtrx);
-        }
 
         contrib.beProductOf(charMtrxCond, r);
         contrib.add(help);

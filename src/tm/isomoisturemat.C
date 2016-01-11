@@ -45,23 +45,6 @@ IsotropicMoistureTransferMaterial :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-/*
- * double
- * IsotropicMoistureTransferMaterial :: give(int aProperty, GaussPoint *gp)
- * //
- * // Returns the value of the property aProperty.
- * //
- * {
- * if ( aProperty == 'c' ) { // moisture permeability [kg/(m s)]
- *    return permeability;
- * } else if ( aProperty == 'k' ) { // moisture capacity [kg / m^3]
- *    return moistureCapacity;
- * }
- *
- * return this->Material :: give(aProperty, gp);
- * }
- */
-
 void
 IsotropicMoistureTransferMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep)
 {

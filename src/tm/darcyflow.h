@@ -14,6 +14,7 @@
 #include "linsystsolvertype.h"
 #include "sparselinsystemnm.h"
 #include "sparsenonlinsystemnm.h"
+#include "primaryfield.h"
 
 #define _IFT_DarcyFlow_Name "darcyflow"
 
@@ -32,11 +33,11 @@ private:
     LinSystSolverType solverType;
 
 protected:
-    PrimaryField *PressureField;
+    std :: unique_ptr< PrimaryField > PressureField;
     SparseMtrxType sparseMtrxType;
-    SparseNonLinearSystemNM *nMethod;
+    std :: unique_ptr< SparseNonLinearSystemNM > nMethod;
 
-    SparseMtrx *stiffnessMatrix;
+    std :: unique_ptr< SparseMtrx > stiffnessMatrix;
     FloatArray internalForces;
     FloatArray externalForces;
     FloatArray incrementOfSolution;
@@ -67,7 +68,6 @@ public:
     virtual double giveUnknownComponent(ValueModeType, TimeStep *, Domain *, Dof *);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
     void DumpMatricesToFile(FloatMatrix *LHS, FloatArray *RHS, FloatArray *SolutionVector);
 
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
@@ -77,11 +77,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_DarcyFlow_Name; }
     virtual const char *giveClassName() const { return "DarcyFlow"; }
-
-#ifdef __PARALLEL_MODE
-    CommunicatorBuff *commBuff; //new CommunicatorBuff(this->giveNumberOfProcesses(), CBT_static);
-    ProblemCommunicator *communicator;
-#endif
 };
 }
 

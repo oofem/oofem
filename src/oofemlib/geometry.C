@@ -41,6 +41,7 @@
 #include "dynamicinputrecord.h"
 #include "xfem/xfemtolerances.h"
 #include "feinterpol.h"
+#include "xfem/tipinfo.h"
 
 
 #include <fstream>
@@ -50,6 +51,7 @@ namespace oofem {
 REGISTER_Geometry(Line)
 REGISTER_Geometry(Circle)
 REGISTER_Geometry(PointSwarm)
+REGISTER_Geometry(PolygonLine)
 
 BasicGeometry :: BasicGeometry()
 { }
@@ -61,12 +63,6 @@ BasicGeometry :: BasicGeometry(const BasicGeometry &iBasicGeometry) :
 BasicGeometry :: ~BasicGeometry()
 { }
 
-// TODO: change to const FloatArray &iVertex
-void BasicGeometry :: setVertex(FloatArray *vertex)
-{
-    mVertices.push_back(* vertex);
-    delete vertex;
-}
 
 void  BasicGeometry :: removeDuplicatePoints(const double &iTolSquare)
 {
@@ -94,9 +90,10 @@ double BasicGeometry :: computeLineDistance(const FloatArray &iP1, const FloatAr
 
 
     // Regularization coefficients (to make it possible to solve when lines are parallel)
-    const double c1 = (1.0e-12)*LengthP*LengthP;
-    const double c2 = (1.0e-12)*LengthQ*LengthQ;
+    const double c1 = (1.0e-14)*LengthP*LengthP;
+    const double c2 = (1.0e-14)*LengthQ*LengthQ;
 
+    const size_t minIter = 2;
     const size_t maxIter = 5;
     const double absTol = 1.0e-12;
 
@@ -150,7 +147,7 @@ double BasicGeometry :: computeLineDistance(const FloatArray &iP1, const FloatAr
         const double res = R.computeNorm();
 //        printf("iter: %lu res: %e\n", iter, res);
 
-        if(res < absTol) {
+        if(res < absTol && iter >= minIter) {
 //            printf("xi: %e eta: %e\n", xi, eta);
             break;
         }
@@ -265,7 +262,7 @@ int Line :: computeNumberOfIntersectionPoints(Element *element)
     const double LineLength = giveLength();
     const double absTol = relTol*std::max(LineLength, XfemTolerances::giveCharacteristicElementLength() );
 
-    const int numEdges = element->giveNumberOfNodes();
+    const int numEdges = element->giveInterpolation()->giveNumberOfEdges();
 
     for ( int edgeIndex = 1; edgeIndex <= numEdges; edgeIndex++ ) {
         IntArray bNodes;
@@ -482,9 +479,9 @@ void Triangle :: changeToAnticlockwise()
 
 bool Triangle :: pointIsInTriangle(const FloatArray &iP) const
 {
-	FloatArray P(iP);
+    FloatArray P(iP);
 
-	const double tol2 = 1.0e-18;
+    const double tol2 = 1.0e-18;
 
     // Compute triangle normal
     FloatArray p1p2;
@@ -623,6 +620,30 @@ bool Triangle :: pointIsInTriangle(const FloatArray &iP) const
     return true;
 }
 
+void Triangle :: refineTriangle(std::vector<Triangle> &oRefinedTri, const Triangle &iTri)
+{
+    const FloatArray &p1 = iTri.giveVertex(1);
+    const FloatArray &p2 = iTri.giveVertex(2);
+    const FloatArray &p3 = iTri.giveVertex(3);
+
+    // Compute edge midpoints
+    FloatArray q1, q2, q3;
+
+    q1.beScaled(0.5, p1);
+    q1.add(0.5, p2);
+
+    q2.beScaled(0.5, p2);
+    q2.add(0.5, p3);
+
+    q3.beScaled(0.5, p3);
+    q3.add(0.5, p1);
+
+    oRefinedTri.push_back( Triangle(p1, q1, q3) );
+    oRefinedTri.push_back( Triangle(q1, q2, q3) );
+    oRefinedTri.push_back( Triangle(q1, p2, q2) );
+    oRefinedTri.push_back( Triangle(q3, q2, p3) );
+}
+
 Circle :: Circle(FloatArray &center, double radius) :
     mTangSignDist(1.0)
 {
@@ -638,8 +659,7 @@ void Circle :: computeNormalSignDist(double &oDist, const FloatArray &iPoint) co
 
 void Circle :: giveGlobalCoordinates(FloatArray &oGlobalCoord, const double &iArcPos) const
 {
-    const double pi = 3.14159265359;
-    double angle = 2.0*pi*iArcPos;
+    double angle = 2.0*M_PI*iArcPos;
 
     oGlobalCoord.resize(2);
     oGlobalCoord = { mVertices[0][0] + radius*cos(angle), mVertices[0][1] + radius*sin(angle) };
@@ -812,6 +832,13 @@ void Circle :: printYourself()
     printf("\n");
 }
 
+void Circle :: giveBoundingSphere(FloatArray &oCenter, double &oRadius)
+{
+    oCenter = mVertices [ 0 ];
+    oRadius = radius;
+}
+
+
 PolygonLine :: PolygonLine() : BasicGeometry()
 {
     mDebugVtk = false;
@@ -844,14 +871,14 @@ void PolygonLine :: computeNormalSignDist(double &oDist, const FloatArray &iPoin
         double dist2 = 0.0;
         if ( segId == 1 ) {
             // Vector from start P1 to point X
-        	FloatArray u = {point.at(1) - crackP1.at(1), point.at(2) - crackP1.at(2)};
+            FloatArray u = {point.at(1) - crackP1.at(1), point.at(2) - crackP1.at(2)};
 
             // Line tangent vector
             FloatArray t = {crackP2.at(1) - crackP1.at(1), crackP2.at(2) - crackP1.at(2)};
             double l2 = t.computeSquaredNorm();
 
             if ( l2 > 0.0 ) {
-            	double l = t.normalize();
+                double l = t.normalize();
                 double s = dot(u, t);
 
                 if ( s > l ) {
@@ -870,14 +897,14 @@ void PolygonLine :: computeNormalSignDist(double &oDist, const FloatArray &iPoin
             }
         } else if ( segId == numSeg ) {
             // Vector from start P1 to point X
-        	FloatArray u = {point.at(1) - crackP1.at(1), point.at(2) - crackP1.at(2)};
+            FloatArray u = {point.at(1) - crackP1.at(1), point.at(2) - crackP1.at(2)};
 
             // Line tangent vector
             FloatArray t = {crackP2.at(1) - crackP1.at(1), crackP2.at(2) - crackP1.at(2)};
             double l2 = t.computeSquaredNorm();
 
             if ( l2 > 0.0 ) {
-            	double l = t.normalize();
+                double l = t.normalize();
                 double s = dot(u, t);
 
                 if ( s < 0.0 ) {
@@ -887,7 +914,6 @@ void PolygonLine :: computeNormalSignDist(double &oDist, const FloatArray &iPoin
                     double xi = s / l;
                     FloatArray q = ( 1.0 - xi ) * crackP1 + xi * crackP2;
                     dist2 = point.distance_square(q);
-                    //					}
                 }
             } else {
                 // If the points P1 and P2 coincide,
@@ -1218,6 +1244,8 @@ IRResultType PolygonLine :: initializeFrom(InputRecord *ir)
 
 void PolygonLine :: giveInputRecord(DynamicInputRecord &input)
 {
+    input.setRecordKeywordField( "PolygonLine", 1 );
+
     FloatArray points;
     int nVert = mVertices.size();
     points.resize(nVert * 2);
@@ -1250,8 +1278,8 @@ bool PolygonLine :: boundingBoxIntersects(Element *element)
         eUC.y( max( eUC.y(), element->giveNode(i)->giveCoordinate(2) ) );
     }
 
-    //	printf("eLC: (%e, %e) eUC: (%e, %e) ", eLC.x(), eLC.y(), eUC.x(), eUC.y() );
-    //	printf(" LC: (%e, %e)  UC: (%e, %e)\n",  LC.x(),  LC.y(),  UC.x(),  UC.y() );
+    //printf("eLC: (%e, %e) eUC: (%e, %e) ", eLC.x(), eLC.y(), eUC.x(), eUC.y() );
+    //printf(" LC: (%e, %e)  UC: (%e, %e)\n",  LC.x(),  LC.y(),  UC.x(),  UC.y() );
 
 
     // Check if there is any chance of overlap
@@ -1608,6 +1636,92 @@ void PolygonLine :: printVTK(int iTStepIndex, int iLineIndex)
 }
 
 
+bool PolygonLine :: giveTips(TipInfo &oStartTipInfo, TipInfo &oEndTipInfo) const
+{
+    int nVert = giveNrVertices();
+    if ( nVert > 1 ) {
+        // Start tip
+        TipInfo info1;
+        const FloatArray &p1S = ( giveVertex(1) );
+        const FloatArray &p2S = ( giveVertex(2) );
+
+        // Tip position
+        info1.mGlobalCoord = p1S;
+
+        // Tip tangent
+        info1.mTangDir.beDifferenceOf(p1S, p2S);
+        info1.mTangDir.normalize();
+
+        // Tip normal
+        info1.mNormalDir = {
+            -info1.mTangDir.at(2), info1.mTangDir.at(1)
+        };
+
+        info1.mTipIndex = 0;
+        info1.mArcPos = 0.0;
+
+        oStartTipInfo = info1;
+
+        // End tip
+        TipInfo info2;
+        const FloatArray &p1E = ( giveVertex(nVert - 1) );
+        const FloatArray &p2E = ( giveVertex(nVert) );
+
+        // Tip position
+        info2.mGlobalCoord = p2E;
+
+        // Tip tangent
+        info2.mTangDir.beDifferenceOf(p2E, p1E);
+        info2.mTangDir.normalize();
+
+        // Tip normal
+        info2.mNormalDir = {
+            -info2.mTangDir.at(2), info2.mTangDir.at(1)
+        };
+
+        info2.mTipIndex = 1;
+        info2.mArcPos = 1.0;
+
+        oEndTipInfo = info2;
+
+        return true;
+    }
+
+    return false;
+}
+
+void PolygonLine :: giveBoundingSphere(FloatArray &oCenter, double &oRadius)
+{
+    int nVert = giveNrVertices();
+    oCenter = {
+        0.0, 0.0
+    };
+    oRadius = 0.0;
+
+    if ( nVert > 0 ) {
+        for ( int i = 1; i <= nVert; i++ ) {
+            oCenter.add( giveVertex(i) );
+        }
+
+        oCenter.times( 1.0 / double( nVert ) );
+
+        for ( int i = 1; i <= nVert; i++ ) {
+            oRadius = std :: max( oRadius, oCenter.distance( giveVertex(i) ) );
+        }
+    }
+
+}
+
+void PolygonLine :: cropPolygon(const double &iArcPosStart, const double &iArcPosEnd)
+{
+    std::vector<FloatArray> points;
+    giveSubPolygon(points, iArcPosStart, iArcPosEnd);
+    setVertices(points);
+
+    const double tol2 = 1.0e-18;
+    removeDuplicatePoints(tol2);
+
+}
 
 IRResultType PointSwarm :: initializeFrom(InputRecord *ir)
 {

@@ -35,6 +35,7 @@
 #include "hexa21stokes.h"
 #include "fmelement.h"
 #include "node.h"
+#include "dof.h"
 #include "domain.h"
 #include "gaussintegrationrule.h"
 #include "gausspoint.h"
@@ -83,7 +84,7 @@ void Hexa21Stokes :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize(1);
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
@@ -119,8 +120,8 @@ void Hexa21Stokes :: giveCharacteristicMatrix(FloatMatrix &answer,
                                               CharType mtrx, TimeStep *tStep)
 {
     // Compute characteristic matrix for this element. The only option is the stiffness matrix...
-    if ( mtrx == StiffnessMatrix ) {
-        this->computeStiffnessMatrix(answer, tStep);
+    if ( mtrx == TangentStiffnessMatrix ) {
+        this->computeStiffnessMatrix(answer, TangentStiffness, tStep);
     } else {
         OOFEM_ERROR("Unknown Type of characteristic mtrx.");
     }
@@ -138,7 +139,7 @@ void Hexa21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *t
 
     B.zero();
     for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
-        const FloatArray &lcoords = * gp->giveNaturalCoordinates();
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
         double detJ = fabs( this->interpolation_quad.evaldNdx( dN, lcoords, FEIElementGeometryWrapper(this) ) );
         this->interpolation_lin.evalN( Nh, lcoords, FEIElementGeometryWrapper(this) );
@@ -207,13 +208,13 @@ void Hexa21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType 
     temparray.zero();
     if ( gVector.giveSize() ) {
         for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
-            FloatArray *lcoords = gp->giveNaturalCoordinates();
+            const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
             double rho = mat->give('d', gp);
-            double detJ = fabs( this->interpolation_quad.giveTransformationJacobian( * lcoords, FEIElementGeometryWrapper(this) ) );
+            double detJ = fabs( this->interpolation_quad.giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(this) ) );
             double dA = detJ * gp->giveWeight();
 
-            this->interpolation_quad.evalN( N, * lcoords, FEIElementGeometryWrapper(this) );
+            this->interpolation_quad.evalN( N, lcoords, FEIElementGeometryWrapper(this) );
             for ( int j = 0; j < N.giveSize(); j++ ) {
                 temparray(3 * j + 0) += N(j) * rho * gVector(0) * dA;
                 temparray(3 * j + 1) += N(j) * rho * gVector(1) * dA;
@@ -246,7 +247,7 @@ void Hexa21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad 
         iRule.SetUpPointsOnTriangle(numberOfSurfaceIPs, _Unknown);
 
         for ( GaussPoint *gp: iRule ) {
-            FloatArray &lcoords = * gp->giveNaturalCoordinates();
+            const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
             this->interpolation_quad.surfaceEvalN( N, iSurf, lcoords, FEIElementGeometryWrapper(this) );
             double dA = gp->giveWeight() * this->interpolation_quad.surfaceGiveTransformationJacobian( iSurf, lcoords, FEIElementGeometryWrapper(this) );
@@ -275,7 +276,7 @@ void Hexa21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad 
     }
 }
 
-void Hexa21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
+void Hexa21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, TimeStep *tStep)
 {
     FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
     FloatMatrix B(6, 81), EdB, K, G, Dp, DvT, C, Ed, dN;
@@ -286,7 +287,7 @@ void Hexa21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep
 
     for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
         // Compute Gauss point and determinant at current element
-        const FloatArray &lcoords = * gp->giveNaturalCoordinates();
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
         double detJ = fabs( this->interpolation_quad.evaldNdx( dN, lcoords, FEIElementGeometryWrapper(this) ) );
         double dV = detJ * gp->giveWeight();
@@ -300,7 +301,7 @@ void Hexa21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep
 
         // Computing the internal forces should have been done first.
         // dsigma_dev/deps_dev  dsigma_dev/dp  deps_vol/deps_dev  deps_vol/dp
-        mat->giveStiffnessMatrices(Ed, Ep, Cd, Cp, TangentStiffness, gp, tStep);
+        mat->giveStiffnessMatrices(Ed, Ep, Cd, Cp, mode, gp, tStep);
 
         EdB.beProductOf(Ed, B);
         K.plusProductSymmUpper(B, EdB, dV);
@@ -388,13 +389,6 @@ void Hexa21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(Value
     }
 }
 
-double Hexa21Stokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
-{
-    FloatArray center;
-    FloatArray lcoords = {0.25, 0.25, 0.25};
-    this->computeGlobalCoordinates(center, lcoords);
-    return center.distance(coords);
-}
 
 void Hexa21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {

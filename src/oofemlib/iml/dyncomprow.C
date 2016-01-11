@@ -217,91 +217,11 @@ void DynCompRow :: times(double x)
 
 int DynCompRow :: buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &s)
 {
-    /*
-     * int neq = eModel -> giveNumberOfDomainEquations (di);
-     *
-     * IntArray  loc;
-     * Domain* domain = eModel->giveDomain(di);
-     * int nelem = domain -> giveNumberOfElements() ;
-     * int i,ii,j,jj,n, indx;
-     * Element* elem;
-     * IntArray rowItems(neq);
-     * // allocation map
-     * char* map = new char[neq*neq]; // row by row storage
-     * if (map == NULL) {
-     * printf ("CompRow::buildInternalStructure - map creation failed");
-     * exit (1);
-     * }
-     *
-     * for (i=0; i<neq*neq; i++)
-     * map[i]=0;
-     *
-     *
-     * for (n=1 ; n<=nelem ; n++) {
-     * elem = domain -> giveElement(n);
-     * elem -> giveLocationArray (loc) ;
-     *
-     * for (i=1 ; i <= loc.giveSize() ; i++) { // row indx
-     * if ((ii = loc.at(i))) {
-     *  for (j=1; j <= loc.giveSize() ; j++) { // col indx
-     *   if ((jj=loc.at(j)))
-     *    if (map[(ii-1)*neq+jj-1] == 0) {
-     *     map[(ii-1)*neq+jj-1] = 1;
-     *     rowItems.at(ii) ++;
-     *    }
-     *  }
-     * }
-     * }
-     * }
-     *
-     * if (colind_) {
-     * for (i=0; i< nRows; i++) delete this->colind_[i];
-     * delete this->colind_;
-     * }
-     * colind_ = (IntArray**) new (IntArray*)[neq];
-     * for (j=0; j<neq; j++) colind_[j] = new IntArray(rowItems(j));
-     *
-     * indx = 1;
-     * for (i=0; i<neq; i++) { // row loop
-     * indx = 1;
-     * for (j=0; j<neq; j++) { // column loop
-     * if (map[i*neq+j]) {
-     *  colind_[i]->at(indx) = j;
-     *  indx++;
-     * }
-     * }
-     * }
-     *
-     * // delete map
-     * delete (map);
-     *
-     * // allocate value array
-     * if (rows_) {
-     * for (i=0; i< nRows; i++) delete this->rows_[i];
-     * delete this->rows_;
-     * }
-     * rows_= (FloatArray**) new (FloatArray*)[neq];
-     * int nz_ = 0;
-     * for (j=0; j<neq; j++) {
-     * rows_[j] = new FloatArray (rowItems(j));
-     * nz_ += rowItems(j);
-     * }
-     *
-     * printf ("\nDynCompRow info: neq is %d, nelem is %d\n",neq,nz_);
-     * nColumns = nRows = neq;
-     *
-     * // increment version
-     * this->version++;
-     * return true;
-     */
-
     int neq = eModel->giveNumberOfDomainEquations(di, s);
 
     IntArray loc;
     Domain *domain = eModel->giveDomain(di);
-    int nelem = domain->giveNumberOfElements();
-    int i, ii, j, jj, n;
-    Element *elem;
+    int i, ii, j, jj;
 
 #ifdef TIME_REPORT
     Timer timer;
@@ -337,8 +257,7 @@ int DynCompRow :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
         rows_ [ j ] = new FloatArray();
     }
 
-    for ( n = 1; n <= nelem; n++ ) {
-        elem = domain->giveElement(n);
+    for ( auto &elem : domain->giveElements() ) {
         elem->giveLocationArray(loc, s);
 
         for ( i = 1; i <= loc.giveSize(); i++ ) { // row indx
@@ -354,12 +273,12 @@ int DynCompRow :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
 
 
     // loop over active boundary conditions
-    int nbc = domain->giveNumberOfBoundaryConditions();
+    //int nbc = domain->giveNumberOfBoundaryConditions();
     std :: vector< IntArray >r_locs;
     std :: vector< IntArray >c_locs;
 
-    for ( int i = 1; i <= nbc; ++i ) {
-        ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
+    for ( auto &gbc : domain->giveBcs() ) {
+        ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( gbc.get() );
         if ( bc != NULL ) {
             bc->giveLocationArrays(r_locs, c_locs, UnknownCharType, s, s);
             for ( std :: size_t k = 0; k < r_locs.size(); k++ ) {

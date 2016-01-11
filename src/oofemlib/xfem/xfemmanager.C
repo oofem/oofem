@@ -38,7 +38,6 @@
 #include "connectivitytable.h"
 #include "floatarray.h"
 #include "domain.h"
-#include "enrichmentdomain.h"
 #include "element.h"
 #include "dofmanager.h"
 #include "cltypes.h"
@@ -61,6 +60,13 @@ XfemManager :: XfemManager(Domain *domain)
     this->domain = domain;
     numberOfEnrichmentItems = -1;
     mNumGpPerTri = 12;
+
+    // Default is no refinement of triangles.
+    mNumTriRef = 0;
+
+    // Default is no scaling of enrichment dofs.
+    mEnrDofScaleFac = 1.0;
+
     doVTKExport = false;
     mDebugVTK = false;
     vtkExportFields.clear();
@@ -71,8 +77,7 @@ XfemManager :: XfemManager(Domain *domain)
 }
 
 XfemManager :: ~XfemManager()
-{
-}
+{}
 
 
 InternalStateValueType
@@ -132,6 +137,10 @@ IRResultType XfemManager :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, numberOfEnrichmentItems, _IFT_XfemManager_numberOfEnrichmentItems);
 
     IR_GIVE_OPTIONAL_FIELD(ir, mNumGpPerTri, _IFT_XfemManager_numberOfGpPerTri);
+    IR_GIVE_OPTIONAL_FIELD(ir, mNumTriRef, _IFT_XfemManager_numberOfTriRefs);
+
+    IR_GIVE_OPTIONAL_FIELD(ir, mEnrDofScaleFac, _IFT_XfemManager_enrDofScaleFac);
+    printf("mEnrDofScaleFac: %e\n", mEnrDofScaleFac );
 
     IR_GIVE_OPTIONAL_FIELD(ir, doVTKExport, _IFT_XfemManager_VTKExport);
     if ( doVTKExport ) {
@@ -145,8 +154,8 @@ IRResultType XfemManager :: initializeFrom(InputRecord *ir)
         mDebugVTK = true;
     }
 
-	// TODO: Read as input.
-    XfemTolerances::setCharacteristicElementLength(0.001);
+    // TODO: Read as input.
+    XfemTolerances :: setCharacteristicElementLength(0.001);
 
     return IRRT_OK;
 }
@@ -157,6 +166,8 @@ void XfemManager :: giveInputRecord(DynamicInputRecord &input)
     input.setRecordKeywordField(giveInputRecordName(), 1);
     input.setField(numberOfEnrichmentItems, _IFT_XfemManager_numberOfEnrichmentItems);
     input.setField(mNumGpPerTri, _IFT_XfemManager_numberOfGpPerTri);
+    input.setField(mNumTriRef, _IFT_XfemManager_numberOfTriRefs);
+    input.setField(mEnrDofScaleFac, _IFT_XfemManager_enrDofScaleFac);
     input.setField(doVTKExport, _IFT_XfemManager_VTKExport);
     input.setField(vtkExportFields, _IFT_XfemManager_VTKExportFields);
 
@@ -179,14 +190,14 @@ int XfemManager :: instanciateYourself(DataReader *dr)
             mir->report_error(this->giveClassName(), __func__, "", result, __FILE__, __LINE__);
         }
 
-        std :: unique_ptr< EnrichmentItem > ei( classFactory.createEnrichmentItem( name.c_str(), i, this, this->giveDomain() ) );
+        std :: unique_ptr< EnrichmentItem >ei( classFactory.createEnrichmentItem( name.c_str(), i, this, this->giveDomain() ) );
         if ( ei.get() == NULL ) {
             OOFEM_ERROR( "unknown enrichment item (%s)", name.c_str() );
         }
 
         ei->initializeFrom(mir);
         ei->instanciateYourself(dr);
-        this->enrichmentItemList[i-1] = std :: move(ei);
+        this->enrichmentItemList [ i - 1 ] = std :: move(ei);
     }
 
     updateNodeEnrichmentItemMap();
@@ -203,25 +214,25 @@ void XfemManager :: setDomain(Domain *ipDomain)
     }
 }
 
-contextIOResultType XfemManager :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType XfemManager :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
     if ( mode & CM_Definition ) {
-        if ( !stream->write(& this->numberOfEnrichmentItems, 1) ) {
+        if ( !stream.write(this->numberOfEnrichmentItems) ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
 
     for ( int i = 1; i <= this->numberOfEnrichmentItems; i++ ) {
-        EnrichmentItem *obj = this->giveEnrichmentItem(i);
+        EnrichmentItem *object = this->giveEnrichmentItem(i);
         if ( ( mode & CM_Definition ) ) {
-            if ( !stream->write( obj->giveInputRecordName() ) ) {
+            if ( !stream.write( object->giveInputRecordName() ) ) {
                 THROW_CIOERR(CIO_IOERR);
             }
         }
 
-        if ( ( iores = obj->saveContext(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = object->saveContext(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
@@ -230,12 +241,12 @@ contextIOResultType XfemManager :: saveContext(DataStream *stream, ContextMode m
 }
 
 
-contextIOResultType XfemManager :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType XfemManager :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
     if ( mode & CM_Definition ) {
-        if ( !stream->read(& this->numberOfEnrichmentItems, 1) ) {
+        if ( !stream.read(this->numberOfEnrichmentItems) ) {
             THROW_CIOERR(CIO_IOERR);
         }
         this->enrichmentItemList.resize(this->numberOfEnrichmentItems);
@@ -245,13 +256,13 @@ contextIOResultType XfemManager :: restoreContext(DataStream *stream, ContextMod
         EnrichmentItem *obj;
         if ( mode & CM_Definition ) {
             std :: string name;
-            if ( !stream->read(name) ) {
+            if ( !stream.read(name) ) {
                 THROW_CIOERR(CIO_IOERR);
             }
 
-            std :: unique_ptr< EnrichmentItem > ei( classFactory.createEnrichmentItem(name.c_str(), i, this, this->domain) );
+            std :: unique_ptr< EnrichmentItem >ei( classFactory.createEnrichmentItem(name.c_str(), i, this, this->domain) );
             obj = ei.get();
-            enrichmentItemList.insert(enrichmentItemList.begin() + i-1, std :: move(ei));
+            enrichmentItemList.insert( enrichmentItemList.begin() + i - 1, std :: move(ei) );
         } else {
             obj = this->giveEnrichmentItem(i);
         }
@@ -264,7 +275,7 @@ contextIOResultType XfemManager :: restoreContext(DataStream *stream, ContextMod
     return CIO_OK;
 }
 
-void XfemManager :: updateYourself()
+void XfemManager :: updateYourself(TimeStep *tStep)
 {
     // Update level sets
     for ( auto &ei: enrichmentItemList ) {
@@ -274,26 +285,38 @@ void XfemManager :: updateYourself()
     updateNodeEnrichmentItemMap();
 }
 
-void XfemManager :: propagateFronts()
+void XfemManager :: propagateFronts(bool &oAnyFronHasPropagated)
 {
+    oAnyFronHasPropagated = false;
+
     for ( auto &ei: enrichmentItemList ) {
-        ei->propagateFronts();
 
-        if ( giveVtkDebug() ) {
-            std :: vector< FloatArray >points;
-            ei->giveSubPolygon(points, -0.1, 1.1);
+        bool eiHasPropagated = false;
+        ei->propagateFronts(eiHasPropagated);
 
-            std :: vector< double >x, y;
-            for ( size_t j = 0; j < points.size(); j++ ) {
-                x.push_back( points [ j ].at(1) );
-                y.push_back( points [ j ].at(2) );
-            }
-
-
-            char fileName [ 200 ];
-            sprintf(fileName, "crack%d.dat", ei->giveNumber());
-            XFEMDebugTools :: WriteArrayToGnuplot(fileName, x, y);
+        if(eiHasPropagated) {
+            oAnyFronHasPropagated = true;
         }
+#if 0
+        if ( giveVtkDebug() ) {
+            GeometryBasedEI *geoEI = dynamic_cast< GeometryBasedEI * >( ei );
+            if ( geoEI != NULL ) {
+                std :: vector< FloatArray >points;
+                geoEI->giveSubPolygon(points, -0.1, 1.1);
+
+                std :: vector< double >x, y;
+                for ( size_t j = 0; j < points.size(); j++ ) {
+                    x.push_back( points [ j ].at(1) );
+                    y.push_back( points [ j ].at(2) );
+                }
+
+
+                char fileName [ 200 ];
+                sprintf( fileName, "crack%d.dat", ei->giveNumber() );
+                XFEMDebugTools :: WriteArrayToGnuplot(fileName, x, y);
+            }
+        }
+#endif
     }
 
     updateNodeEnrichmentItemMap();
@@ -387,9 +410,4 @@ void XfemManager :: giveElementEnrichmentItemIndices(std :: vector< int > &oElem
         oElemEnrInd = res->second;
     }
 }
-
-
-   
-    
-
 } // end namespace oofem

@@ -65,8 +65,10 @@ public:
 
     virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
 
-    virtual void computeInternalForcesVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
-    virtual void computeExternalForcesVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
+    virtual void computeInternalForcesVector(FloatArray &answer, TimeStep *tStep);
+    virtual void computeExternalForcesVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
+    virtual void computeInertiaForcesVector(FloatArray &answer, TimeStep *tStep);
+    virtual void computeLumpedCapacityVector(FloatArray &answer, TimeStep *tStep);
 
     virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
     virtual void computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
@@ -105,7 +107,6 @@ public:
 
     // time step termination
     virtual void updateInternalState(TimeStep *tStep);
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
     virtual int checkConsistency();
 
     virtual int EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryField &pf,
@@ -145,12 +146,11 @@ protected:
      * The result should be multiplied by corresponding coefficient and localized.
      * @todo Is this expression really correct?
      * @param answer Contains the result.
-     * @param nsd Number of spatial dimension.
      * @param iri Index of integration rule to use.
      * @param rmode Determines the constitutive sub matrix to be used.
      * @param tStep Solution step.
      */
-    virtual void computeConductivitySubMatrix(FloatMatrix &answer, int nsd, int iri, MatResponseMode rmode, TimeStep *tStep);
+    virtual void computeConductivitySubMatrix(FloatMatrix &answer, int iri, MatResponseMode rmode, TimeStep *tStep);
     /**
      * Computes the part of RHS due to applied BCs. The part corresponds to unknown identified by indx param.
      * The result should be localized. The part corresponding to Dirichlet BC is not taken into account.
@@ -169,6 +169,7 @@ protected:
      * @param indx Unknown index.
      */
     void computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, ValueModeType mode, int indx);
+    void computeBodyBCSubVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode, int indx);
     /**
      * Computes the part of RHS due to applied BCs on particular edge.
      * The part corresponds to unknown identified by indx param.
@@ -211,7 +212,7 @@ protected:
     /**
      * Computes the gradient matrix corresponding to one unknown.
      */
-    virtual void computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *gp);
+    virtual void computeGradientMatrixAt(FloatMatrix &answer, const FloatArray &lcoords);
     /**
      * Computes the contribution to balance equation(s) due to internal sources
      */

@@ -291,7 +291,7 @@ MMALeastSquareProjection :: __mapVariable(FloatArray &answer, FloatArray &target
                 rhs.resize(neq, nval);
                 rhs.zero();
             }
-            if ( element->computeGlobalCoordinates( coords, * ( srcgp->giveNaturalCoordinates() ) ) ) {
+            if ( element->computeGlobalCoordinates( coords, srcgp->giveNaturalCoordinates() ) ) {
                 coords.subtract(targetCoords);
                 // compute ip contribution
                 this->computePolynomialTerms(P, coords, patchType);
@@ -329,7 +329,7 @@ MMALeastSquareProjection :: __mapVariable(FloatArray &answer, FloatArray &target
 #endif
         // determine the value from patch
         targetCoords.zero();
-        //gp->giveElement()->computeGlobalCoordinates (coords, *(gp->giveNaturalCoordinates()));
+        //gp->giveElement()->computeGlobalCoordinates (coords, gp->giveNaturalCoordinates());
         this->computePolynomialTerms(P, targetCoords, patchType);
 
         answer.resize(nval);

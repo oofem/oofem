@@ -709,7 +709,7 @@ B3SolidMaterial :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *
 
     if ( ( tf = fm->giveField(FT_Temperature) ) ) {
         // temperature field registered
-        gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveNaturalCoordinates() );
+        gp->giveElement()->computeGlobalCoordinates( gcoords, gp->giveNaturalCoordinates() );
         if ( ( err = tf->evaluateAt(et2, gcoords, VM_Incremental, tStep) ) ) {
             OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
         }
@@ -720,7 +720,7 @@ B3SolidMaterial :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *
 
     if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {
         // temperature field registered
-        gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveNaturalCoordinates() );
+        gp->giveElement()->computeGlobalCoordinates( gcoords, gp->giveNaturalCoordinates() );
         if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, tStep) ) ) {
             OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
         }
@@ -925,7 +925,7 @@ B3SolidMaterial :: giveHumidity(GaussPoint *gp, TimeStep *tStep) //computes humi
 
     if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {
         // humidity field registered
-        gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveNaturalCoordinates() );
+        gp->giveElement()->computeGlobalCoordinates( gcoords, gp->giveNaturalCoordinates() );
         if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, tStep) ) ) {
             OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
         }
@@ -956,7 +956,7 @@ B3SolidMaterial :: giveHumidityIncrement(GaussPoint *gp, TimeStep *tStep) //comp
 
     if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {
         // humidity field registered
-        gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveNaturalCoordinates() );
+        gp->giveElement()->computeGlobalCoordinates( gcoords, gp->giveNaturalCoordinates() );
         if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, tStep) ) ) {
             OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
         }
@@ -1019,23 +1019,19 @@ B3SolidMaterialStatus :: updateYourself(TimeStep *tStep)
 
 
 contextIOResultType
-B3SolidMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+B3SolidMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full information stored in this Status
 //
 {
     contextIOResultType iores;
 
-    if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
-    }
-
     if ( ( iores = KelvinChainMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     // write microprestress value
-    if ( !stream->write(& microprestress_old, 1) ) {
+    if ( !stream.write(microprestress_old) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -1043,7 +1039,7 @@ B3SolidMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void 
 }
 
 contextIOResultType
-B3SolidMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+B3SolidMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restore the state variables from a stream
 //
@@ -1054,7 +1050,7 @@ B3SolidMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, vo
     }
 
     // write microprestress value
-    if ( !stream->read(& microprestress_old, 1) ) {
+    if ( !stream.read(microprestress_old) ) {
         return CIO_IOERR;
     }
 

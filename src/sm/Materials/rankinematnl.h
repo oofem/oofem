@@ -77,8 +77,8 @@ public:
     double giveKappa_nl() { return kappa_nl; }
     double giveKappa_hat() { return kappa_hat; }
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 
     virtual Interface *giveInterface(InterfaceType);
 };
@@ -175,11 +175,9 @@ public:
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
-#ifdef __PARALLEL_MODE
-    virtual int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip);
-    virtual int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip);
-    virtual int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip);
-#endif
+    virtual int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip);
+    virtual int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip);
+    virtual int estimatePackSize(DataStream &buff, GaussPoint *ip);
 
 protected:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new RankineMatNlStatus(1, RankineMat :: domain, gp); }

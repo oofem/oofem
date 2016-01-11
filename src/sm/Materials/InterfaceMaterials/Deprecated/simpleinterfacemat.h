@@ -77,12 +77,12 @@ public:
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    FloatArray giveShearStressShift();
-    FloatArray giveTempShearStressShift();
+    const FloatArray &giveShearStressShift();
+    const FloatArray &giveTempShearStressShift();
     void setTempShearStressShift(FloatArray newShearStressShift) { tempShearStressShift = newShearStressShift; };
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 };
 
 

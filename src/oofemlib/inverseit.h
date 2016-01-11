@@ -92,7 +92,7 @@ public:
     InverseIteration(Domain * d, EngngModel * m);
     virtual ~InverseIteration();
 
-    virtual NM_Status solve(SparseMtrx *A, SparseMtrx *B, FloatArray *x, FloatMatrix *v, double rtol, int nroot);
+    virtual NM_Status solve(SparseMtrx &A, SparseMtrx &B, FloatArray &x, FloatMatrix &v, double rtol, int nroot);
     virtual const char *giveClassName() const { return "InverseIteration"; }
 };
 } // end namespace oofem

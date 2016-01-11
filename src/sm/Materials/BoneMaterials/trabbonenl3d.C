@@ -41,10 +41,7 @@
 #include "nonlocalmaterialext.h"
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
-
-#ifdef __PARALLEL_MODE
- #include "combuff.h"
-#endif
+#include "unknownnumberingscheme.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -473,9 +470,8 @@ TrabBoneNL3DStatus :: giveInterface(InterfaceType type)
 }
 
 
-#ifdef __PARALLEL_MODE
 int
-TrabBoneNL3D :: packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
+TrabBoneNL3D :: packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip)
 {
     abort();
     return 0;
@@ -485,13 +481,13 @@ TrabBoneNL3D :: packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPo
     this->buildNonlocalPointTable(ip);
     this->updateDomainBeforeNonlocAverage(tStep);
 
-    return buff.packDouble( nlStatus->giveLocalEquivalentStrainForAverage() );
+    return buff.write( nlStatus->giveLocalEquivalentStrainForAverage() );
 
  #endif
 }
 
 int
-TrabBoneNL3D :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
+TrabBoneNL3D :: unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip)
 {
     abort();
     return 0;
@@ -500,7 +496,7 @@ TrabBoneNL3D :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tSt
     IDNLMaterialStatus *nlStatus = static_cast< IDNLMaterialStatus * >( this->giveStatus(ip) );
     double localEquivalentStrainForAverage;
 
-    result = buff.unpackDouble(localEquivalentStrainForAverage);
+    result = buff.read(localEquivalentStrainForAverage);
     nlStatus->setLocalEquivalentStrainForAverage(localEquivalentStrainForAverage);
     return result;
 
@@ -508,18 +504,17 @@ TrabBoneNL3D :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tSt
 }
 
 int
-TrabBoneNL3D :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
+TrabBoneNL3D :: estimatePackSize(DataStream &buff, GaussPoint *ip)
 {
     abort();
     return 0;
  #if 0
     // Note: nlStatus localStrainVectorForAverage memeber must be properly sized!
     // IDNLMaterialStatus *nlStatus = (IDNLMaterialStatus*) this -> giveStatus (ip);
-    return buff.givePackSize(MPI_DOUBLE, 1);
+    return buff.givePackSizeOfDouble(1);
 
  #endif
 }
-#endif
 
 //
 // END: PARALLEL MODE OPTION

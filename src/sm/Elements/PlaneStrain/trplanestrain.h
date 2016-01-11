@@ -60,7 +60,6 @@ public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterfa
 public SpatialLocalizerInterface,
 public EIPrimaryUnknownMapperInterface,
 public ZZErrorEstimatorInterface,
-public MMAShapeFunctProjectionInterface,
 public HuertaErrorEstimatorInterface
 {
 protected:
@@ -82,8 +81,6 @@ public:
     virtual int SPRNodalRecoveryMI_giveNumberOfIP();
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
 
-    virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
-
     virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
                                                                        TimeStep *tStep, const FloatArray &lcoords,
                                                                        FloatArray &answer);
@@ -96,10 +93,6 @@ public:
                                                                   IntArray &controlNode, IntArray &controlDof,
                                                                   HuertaErrorEstimator :: AnalysisMode aMode);
     virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-
-    virtual void MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &coords,
-                                                                      coordType ct, nodalValContainerType &list,
-                                                                      InternalStateType type, TimeStep *tStep);
 
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);

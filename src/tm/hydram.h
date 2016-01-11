@@ -79,6 +79,8 @@
 #include "interface.h"
 #include "valuemodetype.h"
 
+#include <memory>
+
 ///@name Input fields for HydrationModel
 //@{
 #define _IFT_HydrationModel_Name "hydrationmodel" ///@todo Is this right? double check. And isn't REGISTER_Material() missing?
@@ -134,8 +136,8 @@ public:
     virtual void updateYourself(TimeStep *tStep);
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 
     // --- identification and auxiliary functions ---
     virtual const char *giveClassName() const { return "HydrationModelStatus"; }
@@ -278,21 +280,17 @@ class HydrationModelStatusInterface : public Interface
 {
 protected:
     /// Reference to associated hydration model status
-    HydrationModelStatus *hydrationModelStatus;
+    std :: unique_ptr< HydrationModelStatus > hydrationModelStatus;
 public:
     /// Constructor. Nulls the hydrationModelStatus pointer.
-    HydrationModelStatusInterface() {
-        hydrationModelStatus = NULL;
-    }
+    HydrationModelStatusInterface() {}
     /// Destructor. Deletes the associated hydration model status.
-    virtual ~HydrationModelStatusInterface() {
-        delete hydrationModelStatus;
-    }
+    virtual ~HydrationModelStatusInterface() {}
 
     /// Returns the associated hydration model status.
-    HydrationModelStatus *giveHydrationModelStatus() { return hydrationModelStatus; }
+    HydrationModelStatus *giveHydrationModelStatus() { return hydrationModelStatus.get(); }
     /// Sets the associated hydration model status. Analogue to gp->setMaterialStatus.
-    void setHydrationModelStatus(HydrationModelStatus *s) { hydrationModelStatus = s; }
+    void setHydrationModelStatus(HydrationModelStatus *s) { hydrationModelStatus.reset(s); }
 
     /// Updates the equilibrium variables to temporary values.
     void updateYourself(TimeStep *tStep);
@@ -305,7 +303,7 @@ class HydrationModelInterface : public Interface
     // interface for material access to HydrationModel
 protected:
     /// Reference to the associated hydrationModel instance
-    HydrationModel *hydrationModel;
+    std :: unique_ptr< HydrationModel > hydrationModel;
     /// Material cast time - start of hydration
     double castAt;
     /// Constant hydration degree for analysis without hydration model
@@ -313,18 +311,16 @@ protected:
 
 public:
     /// Returns the associated hydration model.
-    HydrationModel *giveHydrationModel() { return hydrationModel; }
+    HydrationModel *giveHydrationModel() { return hydrationModel.get(); }
     /// Destructor. Deletes the associated hydration model.
-    virtual ~HydrationModelInterface() {
-        delete hydrationModel;
-    }
+    virtual ~HydrationModelInterface() {}
     /**
      * Creates and initializes the hydration model according to object description stored in input record.
      * The parent class instanciateFrom method is not called here.
      */
     IRResultType initializeFrom(InputRecord *ir);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL)
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL)
     {
         if ( hydrationModel ) {
             hydrationModel->saveContext(stream, mode, obj);
@@ -332,7 +328,7 @@ public:
 
         return CIO_OK;
     }
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL)
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL)
     {
         if ( hydrationModel ) {
             hydrationModel->restoreContext(stream, mode, obj);

@@ -64,7 +64,7 @@ LSpaceBB :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
     coord.zero();
 
 
-    LSpace :: interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    LSpace :: interpolation.evaldNdx( dnx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     LSpace :: interpolation.evaldNdx( dnx0, coord, FEIElementGeometryWrapper(this) );
 
     // deviatoric part fully integrated, volumetric part in one point

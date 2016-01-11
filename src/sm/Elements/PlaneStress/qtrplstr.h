@@ -77,8 +77,6 @@ public:
     virtual const char *giveClassName() const { return "QTrPlaneStress2d"; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
-
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
     virtual int SPRNodalRecoveryMI_giveNumberOfIP();

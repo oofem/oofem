@@ -226,42 +226,81 @@ MPIBuffer :: givePackSize(MPI_Comm communicator, MPI_Datatype type, int size)
 void
 MPIBuffer :: dump()
 {
-    int _i;
-    for ( _i = 0; _i < 20; ++_i ) {
+    for ( int _i = 0; _i < 20; ++_i ) {
         fprintf(stderr, "%d ", buff [ _i ]);
     }
 
     fprintf(stderr, "\n");
 }
 
-
-
-/*** CommunicationBuffer CLASS ****/
-
-
-int
-CommunicationBuffer :: packIntArray(const IntArray &arry)
-{ return arry.packToCommBuffer(* this); }
-
-int
-CommunicationBuffer :: packFloatArray(const FloatArray &arry)
-{ return arry.packToCommBuffer(* this); }
-
-int
-CommunicationBuffer :: packFloatMatrix(const FloatMatrix &mtrx)
-{ return mtrx.packToCommBuffer(* this); }
-
-int
-CommunicationBuffer :: unpackIntArray(IntArray &arry)
-{ return arry.unpackFromCommBuffer(* this); }
-
-int
-CommunicationBuffer :: unpackFloatArray(FloatArray &arry)
-{ return arry.unpackFromCommBuffer(* this); }
-
-int
-CommunicationBuffer :: unpackFloatMatrix(FloatMatrix &mtrx)
-{ return mtrx.unpackFromCommBuffer(* this); }
-
 #endif
+
+
+/*
+int CommunicationBuffer :: read(int *data, int count)
+{
+    
+}
+
+int CommunicationBuffer :: read(unsigned long *data, int count)
+int CommunicationBuffer :: read(long *data, int count)
+int CommunicationBuffer :: read(double *data, int count)
+int CommunicationBuffer :: read(char *data, int count)
+
+int CommunicationBuffer :: write(const int *data, int count)
+int CommunicationBuffer :: write(const unsigned long *data, int count)
+int CommunicationBuffer :: write(const long *data, int count)
+int CommunicationBuffer :: write(const double *data, int count)
+int CommunicationBuffer :: write(const char *data, int count)
+*/
+
+int CommunicationBuffer :: read(bool &data)
+{
+    char val;
+    int ret = this->read(& val, 1);
+    data = val != 0;
+    return ret;
+}
+
+int CommunicationBuffer :: write(bool data)
+{
+    char val = data;
+    return this->write(& val, 1);
+}
+
+int CommunicationBuffer :: givePackSizeOfInt(int count)
+{
+    int requiredSpace;
+    MPI_Pack_size(count, MPI_INT, communicator, & requiredSpace);
+    return requiredSpace;
+}
+
+int CommunicationBuffer :: givePackSizeOfDouble(int count)
+{
+    int requiredSpace;
+    MPI_Pack_size(count, MPI_DOUBLE, communicator, & requiredSpace);
+    return requiredSpace;
+}
+
+int CommunicationBuffer :: givePackSizeOfChar(int count)
+{
+    int requiredSpace;
+    MPI_Pack_size(count, MPI_CHAR, communicator, & requiredSpace);
+    return requiredSpace;
+}
+
+int CommunicationBuffer :: givePackSizeOfBool(int count)
+{
+    int requiredSpace;
+    MPI_Pack_size(count, MPI_CHAR, communicator, & requiredSpace);
+    return requiredSpace;
+}
+
+int CommunicationBuffer :: givePackSizeOfLong(int count)
+{
+    int requiredSpace;
+    MPI_Pack_size(count, MPI_LONG, communicator, & requiredSpace);
+    return requiredSpace;
+}
+
 } // end namespace oofem

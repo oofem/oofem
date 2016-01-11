@@ -79,11 +79,6 @@ PolylineNonlocalBarrier :: isActivated(const FloatArray &c1, const FloatArray &c
     double a11, a12, a21, a22, b1, b2, det, t, s;
     Node *A, *B;
 
-    int mci = max(localXCoordIndx, localYCoordIndx);
-    if ( ( c1.giveSize() > mci ) || ( c2.giveSize() > mci ) ) {
-        OOFEM_ERROR("local coordinate index size violation");
-    }
-
     xc1 = c1.at(localXCoordIndx);
     yc1 = c1.at(localYCoordIndx);
     xc2 = c2.at(localXCoordIndx);

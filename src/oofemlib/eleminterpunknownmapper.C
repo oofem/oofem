@@ -41,6 +41,7 @@
 #include "node.h"
 #include "dof.h"
 #include "connectivitytable.h"
+#include "unknownnumberingscheme.h"
 
 namespace oofem {
 EIPrimaryUnknownMapper :: EIPrimaryUnknownMapper() : PrimaryUnknownMapper()
@@ -68,13 +69,9 @@ EIPrimaryUnknownMapper :: mapAndUpdate(FloatArray &answer, ValueModeType mode,
     for ( inode = 1; inode <= nd_nnodes; inode++ ) {
         DofManager *node = newd->giveNode(inode);
         /* HUHU CHEATING */
-#ifdef __PARALLEL_MODE
-        if ( ( node->giveParallelMode() == DofManager_null ) ||
-            ( node->giveParallelMode() == DofManager_remote ) ) {
+        if ( node->giveParallelMode() != DofManager_local ) {
             continue;
         }
-
-#endif
 
 #ifdef OOFEM_MAPPING_CHECK_REGIONS
         // build up region list for node
@@ -117,25 +114,6 @@ EIPrimaryUnknownMapper :: evaluateAt(FloatArray &answer, IntArray &dofMask, Valu
     EIPrimaryUnknownMapperInterface *interface;
     SpatialLocalizer *sl = oldd->giveSpatialLocalizer();
 
-    ///@todo Change to the other version after checking that it works properly. Will render "giveElementCloseToPoint" obsolete (superseeded by giveElementClosestToPoint).
-#if 1
-    if ( regList.isEmpty() ) {
-        oelem = sl->giveElementContainingPoint(coords);
-    } else {
-        oelem = sl->giveElementContainingPoint(coords, & regList);
-    }
-    if ( !oelem ) {
-        if ( regList.isEmpty() ) {
-            oelem = oldd->giveSpatialLocalizer()->giveElementCloseToPoint(coords);
-        } else {
-            oelem = oldd->giveSpatialLocalizer()->giveElementCloseToPoint(coords, & regList);
-        }
-        if ( !oelem ) {
-            OOFEM_WARNING("Couldn't find any element containing point.");
-            return false;
-        }
-    }
-#else
     FloatArray lcoords, closest;
     if ( regList.isEmpty() ) {
         oelem = sl->giveElementClosestToPoint(lcoords, closest, coords, 0);
@@ -162,21 +140,11 @@ EIPrimaryUnknownMapper :: evaluateAt(FloatArray &answer, IntArray &dofMask, Valu
         OOFEM_WARNING("Couldn't find any element containing point.");
         return false;
     }
-#endif
 
     interface = static_cast< EIPrimaryUnknownMapperInterface * >( oelem->giveInterface(EIPrimaryUnknownMapperInterfaceType) );
     if ( interface ) {
         oelem->giveElementDofIDMask(dofMask);
-#if 1
-        FloatArray lcoords;
-        if ( oelem->computeLocalCoordinates(lcoords, coords) ) {
-            interface->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(mode, tStep, lcoords, answer);
-        } else {
-            answer.clear();
-        }
-#else
         interface->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(mode, tStep, lcoords, answer);
-#endif
     } else {
         OOFEM_ERROR("Element does not support EIPrimaryUnknownMapperInterface");
     }

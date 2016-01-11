@@ -178,8 +178,8 @@ TwoFluidMaterial :: giveTempVOF(GaussPoint *gp)
 
 TwoFluidMaterialStatus :: TwoFluidMaterialStatus(int n, Domain *d, GaussPoint *gp, const IntArray &slaveMaterial) :
     FluidDynamicMaterialStatus(n, d, gp),
-    slaveGp0( new GaussPoint(NULL, 0, NULL, 0., gp->giveMaterialMode()) ),
-    slaveGp1( new GaussPoint(NULL, 0, NULL, 0., gp->giveMaterialMode()) )
+    slaveGp0( new GaussPoint(NULL, 0, FloatArray(), 0., gp->giveMaterialMode()) ),
+    slaveGp1( new GaussPoint(NULL, 0, FloatArray(), 0., gp->giveMaterialMode()) )
 {
     this->slaveGp0->setMaterialStatus( domain->giveMaterial( slaveMaterial(0) )->CreateStatus(this->slaveGp0.get()), this->giveNumber() );
     this->slaveGp1->setMaterialStatus( domain->giveMaterial( slaveMaterial(1) )->CreateStatus(this->slaveGp0.get()), this->giveNumber() );
@@ -213,7 +213,7 @@ TwoFluidMaterialStatus :: initTempStatus()
 
 
 contextIOResultType
-TwoFluidMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+TwoFluidMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     this->giveSlaveGaussPoint0()->giveMaterialStatus()->saveContext(stream, mode, obj);
     this->giveSlaveGaussPoint1()->giveMaterialStatus()->saveContext(stream, mode, obj);
@@ -222,7 +222,7 @@ TwoFluidMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void
 
 
 contextIOResultType
-TwoFluidMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+TwoFluidMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     this->giveSlaveGaussPoint0()->giveMaterialStatus()->restoreContext(stream, mode, obj);
     this->giveSlaveGaussPoint1()->giveMaterialStatus()->restoreContext(stream, mode, obj);

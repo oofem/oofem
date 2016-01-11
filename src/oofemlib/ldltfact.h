@@ -74,10 +74,11 @@ public:
      * @param x solution array
      * @return NM_Status value
      */
-    virtual NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
+    virtual NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x);
 
     virtual const char *giveClassName() const { return "LDLTFactorization"; }
     virtual LinSystSolverType giveLinSystSolverType() const { return ST_Direct; }
+    virtual SparseMtrxType giveRecommendedMatrix(bool symmetric) const { return symmetric ? SMT_Skyline : SMT_SkylineU; }
 };
 } // end namespace oofem
 #endif // ldltfact_h

@@ -78,12 +78,12 @@ void Tr1Darcy :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
 
-void Tr1Darcy :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
+void Tr1Darcy :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, TimeStep *tStep)
 {
     /*
      * Return Ke = integrate(B^T K B)
@@ -93,17 +93,14 @@ void Tr1Darcy :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
 
     TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
 
-    IntegrationRule *iRule = integrationRulesArray [ 0 ];
+    answer.clear();
 
-    answer.resize(3, 3);
-    answer.zero();
-
-    for ( GaussPoint *gp: *iRule ) {
-        const FloatArray &lcoords = * gp->giveNaturalCoordinates();
-
+    for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
+        ///@todo Should we make it return the transpose instead?
         double detJ = this->interpolation_lin.evaldNdx( BT, lcoords, FEIElementGeometryWrapper(this) );
 
-        mat->giveCharacteristicMatrix(K, TangentStiffness, gp, tStep);
+        mat->giveCharacteristicMatrix(K, mode, gp, tStep);
 
         B.beTranspositionOf(BT);
         KB.beProductOf(K, B);
@@ -128,19 +125,18 @@ void Tr1Darcy :: computeInternalForcesVector(FloatArray &answer, TimeStep *tStep
     FloatMatrix B, BT;
 
     TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
-    IntegrationRule *iRule = integrationRulesArray [ 0 ];
 
     this->computeVectorOf(VM_Total, tStep, a);
 
     answer.resize(3);
     answer.zero();
 
-    for ( GaussPoint *gp: *iRule ) {
-        FloatArray *lcoords = gp->giveNaturalCoordinates();
+    for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
-        double detJ = this->interpolation_lin.giveTransformationJacobian( * lcoords, FEIElementGeometryWrapper(this) );
-        this->interpolation_lin.evaldNdx( BT, * lcoords, FEIElementGeometryWrapper(this) );
-        this->interpolation_lin.evalN( n, * lcoords, FEIElementGeometryWrapper(this) );
+        double detJ = this->interpolation_lin.giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(this) );
+        this->interpolation_lin.evaldNdx( BT, lcoords, FEIElementGeometryWrapper(this) );
+        this->interpolation_lin.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
         B.beTranspositionOf(BT);
         P.at(1) = n.dotProduct(a); // Evaluates the field at this point.
 
@@ -210,15 +206,15 @@ void Tr1Darcy :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iE
         iRule.SetUpPointsOnLine(numberOfEdgeIPs, _Unknown);
 
         for ( GaussPoint *gp: iRule ) {
-            FloatArray *lcoords = gp->giveNaturalCoordinates();
-            this->interpolation_lin.edgeEvalN( N, iEdge, * lcoords, FEIElementGeometryWrapper(this) );
+            const FloatArray &lcoords = gp->giveNaturalCoordinates();
+            this->interpolation_lin.edgeEvalN( N, iEdge, lcoords, FEIElementGeometryWrapper(this) );
             double dV = this->computeEdgeVolumeAround(gp, iEdge);
 
             if ( boundaryLoad->giveFormulationType() == Load :: FT_Entity ) {                // Edge load in xi-eta system
-                boundaryLoad->computeValueAt(loadValue, tStep, * lcoords, mode);
+                boundaryLoad->computeValueAt(loadValue, tStep, lcoords, mode);
             } else {  // Edge load in x-y system
                 FloatArray gcoords;
-                this->interpolation_lin.edgeLocal2global( gcoords, iEdge, * lcoords, FEIElementGeometryWrapper(this) );
+                this->interpolation_lin.edgeLocal2global( gcoords, iEdge, lcoords, FEIElementGeometryWrapper(this) );
                 boundaryLoad->computeValueAt(loadValue, tStep, gcoords, mode);
             }
 
@@ -232,14 +228,14 @@ void Tr1Darcy :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iE
 
 double Tr1Darcy :: giveThicknessAt(const FloatArray &gcoords)
 {
-    return this->giveCrossSection()->give(CS_Thickness, & gcoords, this, false);
+    return this->giveCrossSection()->give(CS_Thickness, gcoords, this, false);
 }
 
 
 double Tr1Darcy :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double thickness = 1;
-    double detJ = fabs( this->interpolation_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveSubPatchCoordinates(), FEIElementGeometryWrapper(this) ) );
+    double detJ = fabs( this->interpolation_lin.edgeGiveTransformationJacobian( iEdge, gp->giveSubPatchCoordinates(), FEIElementGeometryWrapper(this) ) );
     return detJ *thickness *gp->giveWeight();
 }
 
@@ -248,10 +244,10 @@ void Tr1Darcy :: giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, Ti
     /*
      * Compute characteristic matrix for this element. The only option is the stiffness matrix...
      */
-    if ( mtrx == StiffnessMatrix ) {
-        this->computeStiffnessMatrix(answer, tStep);
+    if ( mtrx == ConductivityMatrix || mtrx == TangentStiffnessMatrix ) {
+        this->computeStiffnessMatrix(answer, TangentStiffness, tStep);
     } else {
-        OOFEM_ERROR("Unknown Type of characteristic mtrx.");
+        OOFEM_ERROR("Unknown Type of characteristic mtrx %d", mtrx);
     }
 }
 
@@ -266,8 +262,7 @@ Tr1Darcy :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int n
 {
     TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
     ///@todo Write support function for getting the closest gp given local c.s. and use that here
-    IntegrationRule *iRule = integrationRulesArray [ 0 ];
-    GaussPoint *gp = iRule->getIntegrationPoint(0);
+    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     mat->giveIPValue(answer, gp, type, tStep);
 }
 

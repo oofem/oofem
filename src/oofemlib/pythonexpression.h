@@ -53,10 +53,7 @@ typedef _object PyObject;
 
 namespace oofem {
 /**
- * Class representing user defined load time function. User input is function expression.
- * Uses Parser class to parse given expression. Slow but useful.
- * Load time function typically belongs to domain and is
- * attribute of one or more loads. Generally load time function is real function of time (@f$ y=f(t) @f$).
+ * Class representing user defined functions as Python expressions
  */
 class OOFEM_EXPORT PythonExpression : public Function
 {

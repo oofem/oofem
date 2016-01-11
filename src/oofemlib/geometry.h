@@ -71,6 +71,7 @@ namespace oofem {
 class Element;
 class DynamicInputRecord;
 class oofegGraphicContext;
+class TipInfo;
 
 /**
  * Abstract representation of Geometry
@@ -118,7 +119,6 @@ public:
 
     inline const FloatArray &giveVertex(int n) const { return mVertices [ n - 1 ]; }
 
-    void setVertex(FloatArray *vertex);
     void setVertices(const std::vector<FloatArray> &iVertices) {mVertices = iVertices;}
 
     void removeDuplicatePoints(const double &iTolSquare);
@@ -147,7 +147,7 @@ public:
      * @return contextIOResultType.
      * @exception ContextIOERR If error encountered.
      */
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL) { return CIO_OK; }
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) { return CIO_OK; }
     /**
      * Restores the state of receiver from output stream.
      * @param stream Context file.
@@ -156,7 +156,7 @@ public:
      * @return contextIOResultType.
      * @exception ContextIOERR exception if error encountered.
      */
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL) { return CIO_OK; }
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) { return CIO_OK; }
 
 #ifdef __OOFEG
     virtual void draw(oofegGraphicContext &gc) { }
@@ -169,6 +169,14 @@ public:
      * Line 2 has start point iQ1 and end point iQ2.
      */
     static double computeLineDistance(const FloatArray &iP1, const FloatArray &iP2, const FloatArray &iQ1, const FloatArray &iQ2);
+
+    /**
+     * Returns start and end tip of the geometry, if applicable.
+     */
+    virtual bool giveTips(TipInfo &oStartTipInfo, TipInfo &oEndTipInfo) const {return false;}
+
+    virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius) {OOFEM_ERROR("Not implemented.")};
+
 };
 
 class OOFEM_EXPORT Line : public BasicGeometry
@@ -229,6 +237,11 @@ public:
      * @author Erik Svenning
      */
     bool pointIsInTriangle(const FloatArray &iP) const;
+
+    /**
+     * Split a triangle in four.
+     */
+    static void refineTriangle(std::vector<Triangle> &oRefinedTri, const Triangle &iTri);
 };
 
 class OOFEM_EXPORT Circle : public BasicGeometry
@@ -265,6 +278,9 @@ public:
     virtual void printYourself();
 
     double giveRadius() const {return radius;}
+
+    virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius);
+
 };
 
 class OOFEM_EXPORT PolygonLine : public BasicGeometry
@@ -320,6 +336,17 @@ public:
     // Upper and lower corner
     bPoint2 LC, UC;
 #endif
+
+    virtual bool giveTips(TipInfo &oStartTipInfo, TipInfo &oEndTipInfo) const;
+
+    virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius);
+
+    /**
+     * Keep only a part of the underlying geometry,
+     * characterized by iArcPosStart and iArcPosEnd.
+     */
+    void cropPolygon(const double &iArcPosStart, const double &iArcPosEnd);
+
 };
 
 

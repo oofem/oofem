@@ -52,8 +52,8 @@ public:
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 
     // definition
     virtual const char *giveClassName() const { return "MaxwellChainMaterialStatus"; }
@@ -73,7 +73,7 @@ public:
 
     // overload thesse function such that computation of hidden vars can be done after the computation of stress
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
-    void computeHiddenVars(GaussPoint *gp, TimeStep *tNow);
+    void computeHiddenVars(GaussPoint *gp, TimeStep *tStep);
 
     // identification and auxiliary functions
     virtual int hasNonLinearBehaviour() { return 0; }

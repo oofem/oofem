@@ -99,11 +99,12 @@ public:
      * @param x Solution array.
      * @return Status value.
      */
-    virtual NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
+    virtual NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual const char *giveClassName() const { return "IMLSolver"; }
     virtual LinSystSolverType giveLinSystSolverType() const { return ST_IML; }
+    virtual SparseMtrxType giveRecommendedMatrix(bool symmetric) const { return symmetric ? SMT_SymCompCol : SMT_CompCol; }
 };
 } // end namespace oofem
 #endif // imlsolver_h

@@ -65,10 +65,9 @@ IMLSolver :: IMLSolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(d, m)
 }
 
 
-IMLSolver :: ~IMLSolver() {
-    if ( M ) {
-        delete M;
-    }
+IMLSolver :: ~IMLSolver()
+{
+    delete M;
 }
 
 IRResultType
@@ -116,41 +115,26 @@ IMLSolver :: initializeFrom(InputRecord *ir)
 
 
 NM_Status
-IMLSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
+IMLSolver :: solve(SparseMtrx &A, FloatArray &b, FloatArray &x)
 {
     int result;
 
-    // first check whether Lhs is defined
-    if ( !A ) {
-        OOFEM_ERROR("unknown Lhs");
-    }
-
-    // and whether Rhs
-    if ( !b ) {
-        OOFEM_ERROR("unknown Rhs");
-    }
-
-    // and whether previous Solution exist
-    if ( !x ) {
-        OOFEM_ERROR("unknown solution array");
-    }
-
-    if ( x->giveSize() != b->giveSize() ) {
+    if ( x.giveSize() != b.giveSize() ) {
         OOFEM_ERROR("size mismatch");
     }
 
 
     // check preconditioner
     if ( M ) {
-        if ( ( precondInit ) || ( Lhs != A ) || ( this->lhsVersion != A->giveVersion() ) ) {
-            M->init(* A);
+        if ( ( precondInit ) || ( Lhs != &A ) || ( this->lhsVersion != A.giveVersion() ) ) {
+            M->init(A);
         }
     } else {
         OOFEM_ERROR("preconditioner creation error");
     }
 
-    Lhs = A;
-    this->lhsVersion = A->giveVersion();
+    Lhs = &A;
+    this->lhsVersion = A.giveVersion();
 
 #ifdef TIME_REPORT
     Timer timer;
@@ -161,13 +145,13 @@ IMLSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
     if ( solverType == IML_ST_CG ) {
         int mi = this->maxite;
         double t = this->tol;
-        result = CG(* Lhs, * x, * b, * M, mi, t);
+        result = CG(* Lhs, x, b, * M, mi, t);
         OOFEM_LOG_INFO("CG(%s): flag=%d, nite %d, achieved tol. %g\n", M->giveClassName(), result, mi, t);
     } else if ( solverType == IML_ST_GMRES ) {
         int mi = this->maxite, restart = 100;
         double t = this->tol;
         FloatMatrix H(restart + 1, restart); // storage for upper Hesenberg
-        result = GMRES(* Lhs, * x, * b, * M, H, restart, mi, t);
+        result = GMRES(* Lhs, x, b, * M, H, restart, mi, t);
         OOFEM_LOG_INFO("GMRES(%s): flag=%d, nite %d, achieved tol. %g\n", M->giveClassName(), result, mi, t);
     } else {
         OOFEM_ERROR("unknown lsover type");

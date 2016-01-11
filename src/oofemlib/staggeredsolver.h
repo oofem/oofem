@@ -32,10 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-
 #ifndef staggeredsolver_h
 #define staggeredsolver_h
-
 
 #include "sparselinsystemnm.h"
 #include "sparsenonlinsystemnm.h"
@@ -43,6 +41,7 @@
 #include "floatarray.h"
 #include "linesearch.h"
 #include "nrsolver.h"
+#include "unknownnumberingscheme.h"
 
 #include <set>
 #include <vector>
@@ -66,28 +65,25 @@ protected:
     bool prescribed;
     int numEqs;
     int numPresEqs;
+    int number;
 
-    int number; 
-    
-     
-    
 public:
     CustomEquationNumbering() : UnknownNumberingScheme(), prescribed(false), numEqs(0), numPresEqs(0) { dofIdArray.resize(0); }
 
     IntArray dofIdArray; // should be private
     virtual bool isDefault() const { return true; }
-    void setDofIdArray(IntArray &array) { this->dofIdArray = array; };
-    void setNumber(int num) { this->number = num; };
-    int getNumber() { return this->number; };
+    void setDofIdArray(IntArray &array) { this->dofIdArray = array; }
+    void setNumber(int num) { this->number = num; }
+    int getNumber() { return this->number; }
     
     virtual int giveDofEquationNumber(Dof *dof) const {
         DofIDItem id = dof->giveDofID();
-	//printf("asking for num %d \n", (int)id);
-         if ( this->dofIdArray.contains( (int)id ) ) {
- 	    return prescribed ? dof->__givePrescribedEquationNumber() : dof->__giveEquationNumber();    
- 	} else {
- 	    return 0;  
- 	}
+        //printf("asking for num %d \n", (int)id);
+            if ( this->dofIdArray.contains( (int)id ) ) {
+            return prescribed ? dof->__givePrescribedEquationNumber() : dof->__giveEquationNumber();    
+        } else {
+            return 0;  
+        }
     }
     
 
@@ -95,45 +91,45 @@ public:
 
     int giveNewEquationNumber() { return ++numEqs; }
     int giveNewPrescribedEquationNumber() { return ++numPresEqs; }
-    int giveNumEquations() { return this->numEqs; };
-    int giveNumPresEquations() { return this->numPresEqs; };
+    int giveNumEquations() { return this->numEqs; }
+    int giveNumPresEquations() { return this->numPresEqs; }
 };
 
 /**
- * This class implements a staggered solver
+ * The staggered solver will perform Newton iterations on subsets of DofIDs, in a staggered manner.
+ * @author Jim Brouzoulis
  */
 class OOFEM_EXPORT StaggeredSolver : public NRSolver
 {
 private:
-  
     IntArray totalIdList;
-    IntArray idPos; 
+    IntArray idPos;
   
     // Lists for each dof group
-    std :: vector< CustomEquationNumbering > UnknownNumberingSchemeList;    
+    std :: vector< CustomEquationNumbering > UnknownNumberingSchemeList;
     std :: vector< SparseMtrx *> stiffnessMatrixList;
     std :: vector< FloatArray > fIntList;
     std :: vector< FloatArray > fExtList;
     
-    std :: vector< IntArray > locArrayList;    
-    std :: vector< FloatArray > ddX;    
-    std :: vector< FloatArray > dX;   
+    std :: vector< IntArray > locArrayList;
+    std :: vector< FloatArray > ddX;
+    std :: vector< FloatArray > dX;
     std :: vector< FloatArray > X;
     
 
     void giveTotalLocationArray(IntArray &locationArray, const UnknownNumberingScheme &s, Domain *d);
     bool checkConvergenceDofIdArray(FloatArray &RT, FloatArray &F, FloatArray &rhs, FloatArray &ddX, FloatArray &X,
-                          double RRT, const FloatArray &internalForcesEBENorm, int nite, bool &errorOutOfRange, TimeStep *tNow, IntArray &dofIdArray);
+                          double RRT, const FloatArray &internalForcesEBENorm, int nite, bool &errorOutOfRange, TimeStep *tStep, IntArray &dofIdArray);
 
     void instanciateYourself();
+
 public:
-    
     StaggeredSolver(Domain * d, EngngModel * m);
-    virtual ~StaggeredSolver(){};
+    virtual ~StaggeredSolver() {}
 
     // Overloaded methods:
-    virtual NM_Status solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
-                            FloatArray *X, FloatArray *dX, FloatArray *F,
+    virtual NM_Status solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
+                            FloatArray &X, FloatArray &dX, FloatArray &F,
                             const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                             int &nite, TimeStep *);
 
@@ -141,9 +137,6 @@ public:
     
     virtual const char *giveClassName() const { return "StaggeredSolver"; }
     virtual const char *giveInputRecordName() const { return _IFT_StaggeredSolver_Name; }
-
-
-
 };
 } // end namespace oofem
-#endif // nrsolver_h
+#endif // staggeredsolver_h

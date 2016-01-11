@@ -74,7 +74,7 @@ public:
      * to a given GP, even though the GP is not located on any
      * of these enrichment items.
      */
-    std :: vector< std::vector<int> > mCZTouchingEnrItemIndices;
+    std :: vector< std :: vector< int > >mCZTouchingEnrItemIndices;
 
     /// Flag that tells if plane stress or plane strain is assumed
     bool mUsePlaneStrain;
@@ -87,6 +87,8 @@ public:
     XfemElementInterface(Element *e);
 
     virtual ~XfemElementInterface();
+	XfemElementInterface (const XfemElementInterface& src) = delete;
+	XfemElementInterface &operator = (const XfemElementInterface &src) = delete;
 
     /// Creates enriched B-matrix.
     void XfemElementInterface_createEnrBmatrixAt(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl);
@@ -130,10 +132,10 @@ public:
      * the boundary. This is a necessary step to evaluate integrals
      * along an edge cut by one or several cracks.
      */
-    void partitionEdgeSegment(int iBndIndex, const double &iTangDistPadding, std :: vector< Line > &oSegments, std::vector<FloatArray> &oIntersectionPoints);
+    void partitionEdgeSegment(int iBndIndex, std :: vector< Line > &oSegments, std :: vector< FloatArray > &oIntersectionPoints, const double &iTangDistPadding = 0.0);
 
     // TODO: Move to XfemStructuralElementInterface
-    std :: vector< IntegrationRule * >mpCZIntegrationRules;
+    std :: vector< std :: unique_ptr< IntegrationRule > >mpCZIntegrationRules;
 
     MaterialMode giveMaterialMode();
 
@@ -144,7 +146,7 @@ public:
     /**
      * Compute N-matrix for cohesive zone.
      */
-    void computeNCohesive(FloatMatrix &oN, GaussPoint &iGP, int iEnrItemIndex, const std::vector<int> &iTouchingEnrItemIndices);
+    void computeNCohesive(FloatMatrix &oN, GaussPoint &iGP, int iEnrItemIndex, const std :: vector< int > &iTouchingEnrItemIndices);
 };
 } // end namespace oofem
 #endif // xfemelementinterface_h

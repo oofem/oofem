@@ -88,9 +88,9 @@ public:
     double giveSlope();
     double giveSigC();
     double giveMatConstC();
-    FloatArray givePlasStrainVector();
-    FloatArray giveTempPlasStrainVector();
-    FloatArray giveTempIncPlasStrainVector();
+    const FloatArray &givePlasStrainVector();
+    const FloatArray &giveTempPlasStrainVector();
+    const FloatArray &giveTempIncPlasStrainVector();
 
     void setTempAlpha(double al) { tempAlpha = al; }
     void setTempDam(double da) { tempDam = da; }
@@ -108,8 +108,8 @@ public:
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 };
 
 

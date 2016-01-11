@@ -83,7 +83,7 @@ StructuralInterfaceCrossSection :: initializeFrom(InputRecord *ir)
     double thickness = 0.0;
     if ( ir->hasField(_IFT_StructuralInterfaceCrossSection_thickness) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, thickness, _IFT_StructuralInterfaceCrossSection_thickness);
-        propertyDictionary->add(CS_Thickness, thickness);
+        propertyDictionary.add(CS_Thickness, thickness);
     }
 
     return IRRT_OK;
@@ -180,25 +180,33 @@ StructuralInterfaceCrossSection :: give3dStiffnessMatrix_dTdj(FloatMatrix &answe
 }
 
 
-
-#ifdef __PARALLEL_MODE
 int
-StructuralInterfaceCrossSection :: packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *gp)
+StructuralInterfaceCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep)
+{
+    if ( type == IST_CrossSectionNumber ) {
+        answer.resize(1);
+        answer.at(1) = this->giveNumber();
+        return 1;
+    }
+    return this->giveInterfaceMaterial()->giveIPValue(answer, ip, type, tStep);
+}
+
+int
+StructuralInterfaceCrossSection :: packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp)
 {
     return this->giveInterfaceMaterial()->packUnknowns(buff, tStep, gp);
 }
 
 int
-StructuralInterfaceCrossSection :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *gp)
+StructuralInterfaceCrossSection :: unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp)
 {
     return this->giveInterfaceMaterial()->unpackAndUpdateUnknowns(buff, tStep, gp);
 }
 
 int
-StructuralInterfaceCrossSection :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *gp)
+StructuralInterfaceCrossSection :: estimatePackSize(DataStream &buff, GaussPoint *gp)
 {
     return this->giveInterfaceMaterial()->estimatePackSize(buff, gp);
 }
-#endif
 
 } // end namespace oofem

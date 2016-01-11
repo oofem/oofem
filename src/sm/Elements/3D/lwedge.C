@@ -55,7 +55,7 @@ REGISTER_Element(LWedge);
 
 FEI3dWedgeLin LWedge :: interpolation;
 
-LWedge :: LWedge(int n, Domain *aDomain) : Structural3DElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
+LWedge :: LWedge(int n, Domain *aDomain) : Structural3DElement(n, aDomain), ZZNodalRecoveryModelInterface(this), SpatialLocalizerInterface(this)
     // Constructor.
 {
     numberOfDofMans = 6;
@@ -66,16 +66,7 @@ IRResultType
 LWedge :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 6;
-    IRResultType result = this->NLStructuralElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    if ( ( numberOfGaussPoints != 6 ) && ( numberOfGaussPoints != 9 ) ) {
-        numberOfGaussPoints = 6;
-    }
-
-    return IRRT_OK;
+    return this->Structural3DElement :: initializeFrom(ir);
 }
 
 
@@ -91,6 +82,8 @@ LWedge :: giveInterface(InterfaceType interface)
         return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
         return static_cast< NodalAveragingRecoveryModelInterface * >(this);
+    } else if ( interface == SpatialLocalizerInterfaceType ) {
+        return static_cast< SpatialLocalizerInterface * >(this);
     }
 
     OOFEM_LOG_INFO("Interface on Lwedge element not supported");
@@ -129,15 +122,6 @@ int
 LWedge :: SPRNodalRecoveryMI_giveNumberOfIP()
 {
     return numberOfGaussPoints;
-}
-
-
-void
-LWedge :: SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp)
-{
-    if ( this->computeGlobalCoordinates( coords, * gp->giveNaturalCoordinates() ) == 0 ) {
-        OOFEM_ERROR("computeGlobalCoordinates failed");
-    }
 }
 
 

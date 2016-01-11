@@ -333,24 +333,22 @@ SimpleInterfaceMaterialStatus :: updateYourself(TimeStep *tStep)
 }
 
 
-FloatArray
+const FloatArray &
 SimpleInterfaceMaterialStatus :: giveShearStressShift()
 {
-    FloatArray answer = shearStressShift;
-    return answer;
+    return shearStressShift;
 }
 
 
-FloatArray
+const FloatArray &
 SimpleInterfaceMaterialStatus :: giveTempShearStressShift()
 {
-    FloatArray answer = tempShearStressShift;
-    return answer;
+    return tempShearStressShift;
 }
 
 
 contextIOResultType
-SimpleInterfaceMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+SimpleInterfaceMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -360,7 +358,7 @@ SimpleInterfaceMaterialStatus :: saveContext(DataStream *stream, ContextMode mod
     }
 
     // write a raw data
-    //if ( !stream->write(& kappa, 1) ) {
+    //if ( !stream.write(kappa) ) {
     //THROW_CIOERR(CIO_IOERR);
     //}
 
@@ -369,7 +367,7 @@ SimpleInterfaceMaterialStatus :: saveContext(DataStream *stream, ContextMode mod
 
 
 contextIOResultType
-SimpleInterfaceMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+SimpleInterfaceMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -379,7 +377,7 @@ SimpleInterfaceMaterialStatus :: restoreContext(DataStream *stream, ContextMode 
     }
 
     // read raw data
-    //if ( !stream->read(& kappa, 1) ) {
+    //if ( !stream.read(kappa) ) {
     //THROW_CIOERR(CIO_IOERR);
     //}
 

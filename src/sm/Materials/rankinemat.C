@@ -789,7 +789,7 @@ RankineMatStatus :: updateYourself(TimeStep *tStep)
 // saves full information stored in this status
 // temporary variables are NOT stored
 contextIOResultType
-RankineMatStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+RankineMatStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -801,26 +801,26 @@ RankineMatStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
     // write raw data
 
     // write plastic strain (vector)
-    if ( ( iores = plasticStrain.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = plasticStrain.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     // write cumulative plastic strain (scalar)
-    if ( !stream->write(& kappa, 1) ) {
+    if ( !stream.write(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     // write damage (scalar)
-    if ( !stream->write(& damage, 1) ) {
+    if ( !stream.write(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
 #ifdef keep_track_of_dissipated_energy
-    if ( !stream->write(& stressWork, 1) ) {
+    if ( !stream.write(stressWork) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& dissWork, 1) ) {
+    if ( !stream.write(dissWork) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -831,7 +831,7 @@ RankineMatStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 
 
 contextIOResultType
-RankineMatStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+RankineMatStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full information stored in stream to this Status
 //
@@ -844,26 +844,26 @@ RankineMatStatus :: restoreContext(DataStream *stream, ContextMode mode, void *o
     }
 
     // read plastic strain (vector)
-    if ( ( iores = plasticStrain.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = plasticStrain.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     // read cumulative plastic strain (scalar)
-    if ( !stream->read(& kappa, 1) ) {
+    if ( !stream.read(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     // read damage (scalar)
-    if ( !stream->read(& damage, 1) ) {
+    if ( !stream.read(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
 #ifdef keep_track_of_dissipated_energy
-    if ( !stream->read(& stressWork, 1) ) {
+    if ( !stream.read(stressWork) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& dissWork, 1) ) {
+    if ( !stream.read(dissWork) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

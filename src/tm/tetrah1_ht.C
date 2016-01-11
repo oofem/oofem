@@ -82,7 +82,7 @@ Tetrah1_ht :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 2) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
@@ -111,7 +111,7 @@ Tetrah1_ht :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(),
+    determinant = fabs( this->interpolation.giveTransformationJacobian( gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) ) );
 
     weight = gp->giveWeight();
@@ -123,7 +123,7 @@ Tetrah1_ht :: computeVolumeAround(GaussPoint *gp)
 double
 Tetrah1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(),
+    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) );
     return result *gp->giveWeight();
 }
@@ -143,7 +143,7 @@ double
 Tetrah1_ht :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
     double detJ, weight;
-    detJ = fabs( interpolation.surfaceGiveTransformationJacobian( iSurf, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    detJ = fabs( interpolation.surfaceGiveTransformationJacobian( iSurf, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
 
     weight = gp->giveWeight();
     return detJ * weight;
@@ -162,33 +162,6 @@ Tetrah1_ht :: giveInterface(InterfaceType interface)
     }
 
     return NULL;
-}
-
-
-double
-Tetrah1_ht :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
-{
-    FloatArray lcoords(3), gcoords;
-    double dist;
-    int size, gsize;
-
-    lcoords.zero();
-    this->computeGlobalCoordinates(gcoords, lcoords);
-
-    if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        OOFEM_ERROR("coordinates size mismatch");
-    }
-
-    if ( size == gsize ) {
-        dist = coords.distance(gcoords);
-    } else {
-        FloatArray helpCoords = coords;
-
-        helpCoords.resizeWithValues(gsize);
-        dist = helpCoords.distance(gcoords);
-    }
-
-    return dist;
 }
 
 

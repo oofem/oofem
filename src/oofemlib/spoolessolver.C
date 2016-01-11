@@ -127,7 +127,7 @@ SpoolesSolver :: initializeFrom(InputRecord *ir)
 
 
 NM_Status
-SpoolesSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
+SpoolesSolver :: solve(SparseMtrx &A, FloatArray &b, FloatArray &x)
 {
     int errorValue, mtxType, symmetryflag;
     int seed = 30145, pivotingflag = 0;
@@ -141,35 +141,19 @@ SpoolesSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
     InpMtx *mtxA;
     DenseMtx *mtxY, *mtxX;
 
-    // first check whether Lhs is defined
-    if ( !A ) {
-        OOFEM_ERROR("unknown Lhs");
-    }
-
-    // and whether Rhs
-    if ( !b ) {
-        OOFEM_ERROR("unknown Rhs");
-    }
-
-    // and whether previous Solution exist
-    if ( !x ) {
-        OOFEM_ERROR("unknown solution array");
-    }
-
-    if ( x->giveSize() != b->giveSize() ) {
-        OOFEM_ERROR("size mismatch");
-    }
+    x.resize(b.giveSize();
 
     Timer timer;
     timer.startTimer();
 
-    if ( A->giveType() != SMT_SpoolesMtrx ) {
+    SpoolesSparseMtrx *As = dynamic_cast< SpoolesSparseMtrx * >(&A);
+    if ( !As ) {
         OOFEM_ERROR("SpoolesSparseMtrx Expected");
     }
 
-    mtxA = ( ( SpoolesSparseMtrx * ) A )->giveInpMtrx();
-    mtxType = ( ( SpoolesSparseMtrx * ) A )->giveValueType();
-    symmetryflag = ( ( SpoolesSparseMtrx * ) A )->giveSymmetryFlag();
+    mtxA = As->giveInpMtrx();
+    mtxType = As->giveValueType();
+    symmetryflag = As->giveSymmetryFlag();
 
     int i;
     int neqns = A->giveNumberOfRows();
@@ -182,13 +166,13 @@ SpoolesSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
         DenseMtx_setRealEntry( mtxY, i, 0, b->at(i + 1) );
     }
 
-    if ( ( Lhs != A ) || ( this->lhsVersion != A->giveVersion() ) ) {
+    if ( ( Lhs != &A ) || ( this->lhsVersion != A.giveVersion() ) ) {
         //
         // lhs has been changed -> new factorization
         //
-
-        Lhs = A;
-        this->lhsVersion = A->giveVersion();
+        ///@todo These factorizations should be kept in the matrix itself, rather than the solver.
+        Lhs = &A;
+        this->lhsVersion = A.giveVersion();
 
         if ( frontmtx ) {
             FrontMtx_free(frontmtx);
@@ -380,7 +364,7 @@ SpoolesSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
     // DenseMtx_writeForMatlab(mtxX, "x", msgFile) ;
     /*--------------------------------------------------------------------*/
     /* fetch data to oofem vectors */
-    double *xptr = x->givePointer();
+    double *xptr = x.givePointer();
     for ( i = 0; i < neqns; i++ ) {
         DenseMtx_realEntry(mtxX, i, 0, xptr + i);
         // printf ("x(%d) = %e\n", i+1, *(xptr+i));

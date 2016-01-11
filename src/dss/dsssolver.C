@@ -48,7 +48,7 @@ DSSSolver :: DSSSolver(Domain *d, EngngModel *m) :
 DSSSolver :: ~DSSSolver() { }
 
 NM_Status
-DSSSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
+DSSSolver :: solve(SparseMtrx &A, FloatArray &b, FloatArray &x)
 {
  #ifdef TIME_REPORT
     Timer timer;
@@ -56,7 +56,7 @@ DSSSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
  #endif
 
 
-    DSSMatrix *_mtrx = dynamic_cast< DSSMatrix * >(A);
+    DSSMatrix *_mtrx = dynamic_cast< DSSMatrix * >(&A);
     if ( _mtrx ) {
         _mtrx->factorized();
         _mtrx->solve(b, x);

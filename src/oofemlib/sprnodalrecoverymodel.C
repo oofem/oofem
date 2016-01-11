@@ -118,25 +118,17 @@ SPRNodalRecoveryModel :: recoverValues(Set elementSet, InternalStateType type, T
     // average  recovered values of active region
     bool abortFlag = false;
     for ( int i = 1; i <= nnodes; i++ ) {
-#ifndef __PARALLEL_MODE
-        if ( regionNodalNumbers.at(i) ) {
-#else
         if ( regionNodalNumbers.at(i) &&
             ( ( domain->giveDofManager(i)->giveParallelMode() == DofManager_local ) ||
              ( domain->giveDofManager(i)->giveParallelMode() == DofManager_shared ) ) ) {
-#endif
             int eq = ( regionNodalNumbers.at(i) - 1 ) * regionValSize;
             if ( dofManPatchCount.at( regionNodalNumbers.at(i) ) ) {
                 for ( int j = 1; j <= regionValSize; j++ ) {
                     dofManValues.at(eq + j) /= dofManPatchCount.at( regionNodalNumbers.at(i) );
                 }
             } else {
-#ifndef __PARALLEL_MODE
                 OOFEM_WARNING("values of %s in dofmanager %d undetermined", __InternalStateTypeToString(type), i);
-#else
-                OOFEM_WARNING("values of %s in dofmanager %d undetermined",
-                               domain->giveEngngModel()->giveRank(), __InternalStateTypeToString(type), i);
-#endif
+
                 for ( int j = 1; j <= regionValSize; j++ ) {
                     dofManValues.at(eq + j) = 0.0;
                 }
@@ -179,12 +171,11 @@ SPRNodalRecoveryModel :: determinePatchAssemblyPoints(IntArray &pap, SPRPatchTyp
     for ( int i = 1; i <= elements.giveSize(); i++ ) {
         ielem = elements.at(i);
         element = domain->giveElement(ielem);
-#ifdef __PARALLEL_MODE
+
         if ( element->giveParallelMode() != Element_local ) {
             continue;
         }
 
-#endif
         if ( ( interface = static_cast< SPRNodalRecoveryModelInterface * >( element->giveInterface(SPRNodalRecoveryModelInterfaceType) ) ) ) {
             interface->SPRNodalRecoveryMI_giveSPRAssemblyPoints(elemPap);
             npap = elemPap.giveSize();
@@ -212,12 +203,11 @@ SPRNodalRecoveryModel :: determinePatchAssemblyPoints(IntArray &pap, SPRPatchTyp
             papDofManConnectivity = domain->giveConnectivityTable()->giveDofManConnectivityArray(idofMan);
             for ( ielem = 1; ielem <= papDofManConnectivity->giveSize(); ielem++ ) {
                 element = domain->giveElement( papDofManConnectivity->at(ielem) );
-#ifdef __PARALLEL_MODE
+
                 if ( element->giveParallelMode() != Element_local ) {
                     continue;
                 }
 
-#endif
                 if ( elementSet.hasElement( element->giveNumber() ) ) {
                     if ( ( interface = static_cast< SPRNodalRecoveryModelInterface * >( element->giveInterface(SPRNodalRecoveryModelInterfaceType) ) ) ) {
                         nip += interface->SPRNodalRecoveryMI_giveNumberOfIP();
@@ -252,12 +242,11 @@ SPRNodalRecoveryModel :: determinePatchAssemblyPoints(IntArray &pap, SPRPatchTyp
             for ( ielem = 1; ielem <= papDofManConnectivity->giveSize(); ielem++ ) {
                 // try to determine if they can be determined from surronuding elements paps
                 element = domain->giveElement( papDofManConnectivity->at(ielem) );
-#ifdef __PARALLEL_MODE
+
                 if ( element->giveParallelMode() != Element_local ) {
                     continue;
                 }
 
-#endif
                 if ( !elementSet.hasElement( element->giveNumber() ) ) {
                     continue;
                 }
@@ -343,7 +332,7 @@ void
 SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDetermine,
                                    IntArray &pap, int papNumber, Set &elementSet)
 {
-    int nelem, ndofman, ielem, count, patchElements, i, j, includes, npap, ipap;
+    int nelem, ndofman, count, patchElements, j, includes, npap, ipap;
     const IntArray *papDofManConnectivity = domain->giveConnectivityTable()->giveDofManConnectivityArray(papNumber);
     std :: list< int >dofManToDetermineList;
     std :: list< int > :: iterator dofManToDetermineListIter;
@@ -358,13 +347,11 @@ SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDeter
     //
     nelem = papDofManConnectivity->giveSize();
     count = 0;
-    for ( ielem = 1; ielem <= nelem; ielem++ ) {
-#ifdef __PARALLEL_MODE
+    for ( int ielem = 1; ielem <= nelem; ielem++ ) {
         if ( domain->giveElement( papDofManConnectivity->at(ielem) )->giveParallelMode() != Element_local ) {
             continue;
         }
 
-#endif
         if ( elementSet.hasElement(papDofManConnectivity->at(ielem)) ) {
             count++;
         }
@@ -373,13 +360,12 @@ SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDeter
     patchElems.resize(count);
     patchElements = 0;
     for ( int i = 1; i <= nelem; i++ ) {
-        ielem = regionelements.at(i);
-#ifdef __PARALLEL_MODE
+        int ielem = regionelements.at(i);
+
         if ( domain->giveElement( papDofManConnectivity->at(ielem) )->giveParallelMode() != Element_local ) {
             continue;
         }
 
-#endif
         if ( elementSet.hasElement(papDofManConnectivity->at(ielem)) ) {
             patchElems.at(++patchElements) = papDofManConnectivity->at(ielem);
         }
@@ -396,19 +382,17 @@ SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDeter
     // determine dofManagers which values will be determined by this patch
     // first add those required by elements participating in patch
     dofManToDetermine.clear();
-    for ( ielem = 1; ielem <= patchElements; ielem++ ) {
+    for (int ielem = 1; ielem <= patchElements; ielem++ ) {
         element = domain->giveElement( patchElems.at(ielem) );
 
-#ifdef __PARALLEL_MODE
         if ( element->giveParallelMode() != Element_local ) {
             continue;
         }
 
-#endif
         if ( ( interface = static_cast< SPRNodalRecoveryModelInterface * >( element->giveInterface(SPRNodalRecoveryModelInterfaceType) ) ) ) {
             // add element reported dofMans for pap dofMan
             interface->SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(toDetermine, papNumber);
-            for ( i = 1; i <= toDetermine.giveSize(); i++ ) {
+            for ( int i = 1; i <= toDetermine.giveSize(); i++ ) {
                 includes = 0;
                 // test if INCLUDED
                 for ( int dman: dofManToDetermineList ) {
@@ -508,7 +492,7 @@ SPRNodalRecoveryModel :: computePatch(FloatMatrix &a, IntArray &patchElems, int 
                     rhs.zero();
                 }
 
-                element->computeGlobalCoordinates( coords, * gp->giveSubPatchCoordinates() );
+                element->computeGlobalCoordinates( coords, gp->giveSubPatchCoordinates() );
                 // compute ip contribution
                 this->computePolynomialTerms(P, coords, regType);
                 for ( int j = 1; j <= neq; j++ ) {
@@ -603,7 +587,6 @@ SPRNodalRecoveryModel :: giveNumberOfUnknownPolynomialCoefficients(SPRPatchType 
     } else {
         return 0;
     }
-    return 0;
 }
 
 
@@ -633,18 +616,12 @@ SPRNodalRecoveryModel :: initCommMaps()
  #ifdef __PARALLEL_MODE
     if ( initCommMap ) {
         EngngModel *emodel = domain->giveEngngModel();
-        ProblemCommunicatorMode commMode = emodel->giveProblemCommMode();
-        if ( commMode == ProblemCommMode__NODE_CUT ) {
-            commBuff = new CommunicatorBuff(emodel->giveNumberOfProcesses(), CBT_dynamic);
-            communicator = new ProblemCommunicator(emodel, commBuff, emodel->giveRank(),
-                                                   emodel->giveNumberOfProcesses(),
-                                                   commMode);
-            communicator->setUpCommunicationMaps(domain->giveEngngModel(), true, true);
-            OOFEM_LOG_INFO("SPRNodalRecoveryModel :: initCommMaps: initialized comm maps");
-            initCommMap = false;
-        } else {
-            OOFEM_ERROR("unsupported comm mode");
-        }
+        commBuff = new CommunicatorBuff(emodel->giveNumberOfProcesses(), CBT_dynamic);
+        communicator = new NodeCommunicator(emodel, commBuff, emodel->giveRank(),
+                                            emodel->giveNumberOfProcesses());
+        communicator->setUpCommunicationMaps(domain->giveEngngModel(), true, true);
+        OOFEM_LOG_INFO("SPRNodalRecoveryModel :: initCommMaps: initialized comm maps");
+        initCommMap = false;
     }
 
  #endif
@@ -654,20 +631,13 @@ void
 SPRNodalRecoveryModel :: exchangeDofManValues(FloatArray &dofManValues, IntArray &dofManPatchCount,
                                               IntArray &regionNodalNumbers, int regionValSize)
 {
-    EngngModel *emodel = domain->giveEngngModel();
-    ProblemCommunicatorMode commMode = emodel->giveProblemCommMode();
+    parallelStruct ls( &dofManValues, &dofManPatchCount, &regionNodalNumbers, regionValSize);
 
-    if ( commMode == ProblemCommMode__NODE_CUT ) {
-        parallelStruct ls( &dofManValues, &dofManPatchCount, &regionNodalNumbers, regionValSize);
-
-        // exchange data for shared nodes
-        communicator->packAllData(this, & ls, & SPRNodalRecoveryModel :: packSharedDofManData);
-        communicator->initExchange(789);
-        communicator->unpackAllData(this, & ls, & SPRNodalRecoveryModel :: unpackSharedDofManData);
-        communicator->finishExchange();
-    } else {
-        OOFEM_ERROR("Unsupported commMode");
-    }
+    // exchange data for shared nodes
+    communicator->packAllData(this, & ls, & SPRNodalRecoveryModel :: packSharedDofManData);
+    communicator->initExchange(789);
+    communicator->unpackAllData(this, & ls, & SPRNodalRecoveryModel :: unpackSharedDofManData);
+    communicator->finishExchange();
 }
 
 int
@@ -684,14 +654,14 @@ SPRNodalRecoveryModel :: packSharedDofManData(parallelStruct *s, ProcessCommunic
         indx = s->regionNodalNumbers->at( toSendMap->at(i) );
         if ( indx && s->dofManPatchCount->at(indx) ) {
             // pack "1" to indicate that for given shared node this is a valid contribution
-            result &= pcbuff->packInt(1);
+            result &= pcbuff->write(1);
             eq = ( indx - 1 ) * s->regionValSize;
             for ( j = 1; j <= s->regionValSize; j++ ) {
-                result &= pcbuff->packDouble( s->dofManValues->at(eq + j) );
+                result &= pcbuff->write( s->dofManValues->at(eq + j) );
             }
         } else {
             // ok shared node is not in active region (determined by s->regionNodalNumbers)
-            result &= pcbuff->packInt(0);
+            result &= pcbuff->write(0);
         }
     }
 
@@ -712,12 +682,12 @@ SPRNodalRecoveryModel :: unpackSharedDofManData(parallelStruct *s, ProcessCommun
         indx = s->regionNodalNumbers->at( toRecvMap->at(i) );
         // toRecvMap contains all shared dofmans with remote partition
         // one has to check, if particular shared node received contribution is available for given region
-        result &= pcbuff->unpackInt(flag);
+        result &= pcbuff->read(flag);
         if ( flag ) {
             // "1" to indicates that for given shared node this is a valid contribution
             eq = ( indx - 1 ) * s->regionValSize;
             for ( j = 1; j <= s->regionValSize; j++ ) {
-                result &= pcbuff->unpackDouble(value);
+                result &= pcbuff->read(value);
                 if ( indx ) {
                     s->dofManValues->at(eq + j) += value;
                 }

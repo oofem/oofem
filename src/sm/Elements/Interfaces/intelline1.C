@@ -60,6 +60,8 @@ IntElLine1 :: IntElLine1(int n, Domain *aDomain) :
 {
     numberOfDofMans = 4;
     axisymmode = false;
+
+    numberOfGaussPoints = 4;
 }
 
 
@@ -70,7 +72,7 @@ IntElLine1 :: computeNmatrixAt(GaussPoint *ip, FloatMatrix &answer)
 
     FloatArray N;
     FEInterpolation *interp = this->giveInterpolation();
-    interp->evalN( N, * ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    interp->evalN( N, ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(2, 8);
     answer.zero();
@@ -88,9 +90,9 @@ IntElLine1 :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );
-        //integrationRulesArray[0] = new LobattoIntegrationRule (1,domain, 1, 2);
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-        integrationRulesArray [ 0 ]->SetUpPointsOnLine(4, _2dInterface); ///@todo - should be a parameter with num of ip
+        //integrationRulesArray[ 0 ].reset( new LobattoIntegrationRule (1,domain, 1, 2) );
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 2) );
+        integrationRulesArray [ 0 ]->SetUpPointsOnLine(this->numberOfGaussPoints, _2dInterface);
     }
 }
 
@@ -99,7 +101,7 @@ IntElLine1 :: computeCovarBaseVectorAt(IntegrationPoint *ip, FloatArray &G)
 {
     FloatMatrix dNdxi;
     FEInterpolation *interp = this->giveInterpolation();
-    interp->evaldNdxi( dNdxi, * ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    interp->evaldNdxi( dNdxi, ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     G.resize(2);
     G.zero();
     int numNodes = this->giveNumberOfNodes();
@@ -119,21 +121,21 @@ IntElLine1 :: computeAreaAround(IntegrationPoint *ip)
 
     double weight  = ip->giveWeight();
     double ds = sqrt( G.dotProduct(G) ) * weight;
-    if (this->axisymmode) {
-	int numNodes = this->giveNumberOfNodes();
-	FloatArray N;
-	this->interp.evalN( N, * ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-	// interpolate radius
-	double r = 0.0;
-	for ( int i = 1; i <= N.giveSize(); i++ ) {
-	    double X_i = 0.5 * ( this->giveNode(i)->giveCoordinate(1) + this->giveNode(i + numNodes / 2)->giveCoordinate(1) ); // X-coord of the fictious mid surface
-	    r += N.at(i) * X_i;
-	}
-	return ds * r;
-	
+    if ( this->axisymmode ) {
+        int numNodes = this->giveNumberOfNodes();
+        FloatArray N;
+        this->interp.evalN( N, ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+        // interpolate radius
+        double r = 0.0;
+        for ( int i = 1; i <= N.giveSize(); i++ ) {
+            double X_i = 0.5 * ( this->giveNode(i)->giveCoordinate(1) + this->giveNode(i + numNodes / 2)->giveCoordinate(1) ); // X-coord of the fictious mid surface
+            r += N.at(i) * X_i;
+        }
+        return ds * r;
+        
     } else { // regular 2d
-	double thickness  = this->giveCrossSection()->give(CS_Thickness, ip);
-	return ds * thickness;
+        double thickness  = this->giveCrossSection()->give(CS_Thickness, ip);
+        return ds * thickness;
     }
 }
 
@@ -164,8 +166,8 @@ IntElLine1 :: computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 
     answer.resize(2, 2);
     answer.at(1, 1) =  G.at(1);
-    answer.at(2, 1) =  G.at(2);
-    answer.at(1, 2) = -G.at(2);
+    answer.at(2, 1) = -G.at(2);
+    answer.at(1, 2) =  G.at(2);
     answer.at(2, 2) =  G.at(1);
 
 }
@@ -178,7 +180,7 @@ IntElLine1 :: giveInterpolation() const
 
 
 #ifdef __OOFEG
-void InterfaceElem2dLin :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
+void IntElLine1 :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     GraphicObj *go;
     //  if (!go) { // create new one
@@ -203,7 +205,7 @@ void InterfaceElem2dLin :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tS
 }
 
 
-void InterfaceElem2dLin :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
+void IntElLine1 :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     GraphicObj *go;
     //  if (!go) { // create new one
@@ -239,10 +241,10 @@ void InterfaceElem2dLin :: drawDeformedGeometry(oofegGraphicContext &gc, TimeSte
 }
 
 
-void InterfaceElem2dLin :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
+void IntElLine1 :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int indx, result = 0;
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
+    IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
     FloatArray gcoord(3), v1;
     WCRec p [ 1 ];
     GraphicObj *go;
@@ -265,7 +267,7 @@ void InterfaceElem2dLin :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 
         indx = gc.giveIntVarIndx();
 
-        result += this->computeGlobalCoordinates( gcoord, * ( gp->giveNaturalCoordinates() ) );
+        result += this->computeGlobalCoordinates( gcoord, gp->giveNaturalCoordinates() );
 
         p [ 0 ].x = ( FPNum ) gcoord.at(1);
         p [ 0 ].y = ( FPNum ) gcoord.at(2);

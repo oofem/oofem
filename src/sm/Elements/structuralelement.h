@@ -40,6 +40,9 @@
 #include "valuemodetype.h"
 #include "integrationdomain.h"
 #include "dofmantransftype.h"
+#include "floatarray.h"
+
+#include <memory>
 
 namespace oofem {
 #define ALL_STRAINS -1
@@ -93,7 +96,7 @@ class StructuralElement : public Element
 {
 protected:
     /// Initial displacement vector, describes the initial nodal displacements when element has been casted.
-    FloatArray *initialDisplacements;
+    std :: unique_ptr< FloatArray >initialDisplacements;
 
 public:
     /**

@@ -120,7 +120,7 @@ void Beam3d :: computeGaussPoints()
         // the gauss point is used only when methods from crosssection and/or material
         // classes are requested
         integrationRulesArray.resize( 1 );
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 2) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], this->numberOfGaussPoints, this);
     }
 }
@@ -288,7 +288,9 @@ Beam3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type
 void
 Beam3d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer = {D_u, D_v, D_w, R_u, R_v, R_w};
+    answer = {
+        D_u, D_v, D_w, R_u, R_v, R_w
+    };
 }
 
 
@@ -321,7 +323,7 @@ Beam3d :: computeKappaCoeffs(TimeStep *tStep)
     FloatMatrix d;
     double l = this->computeLength();
 
-    this->computeConstitutiveMatrixAt( d, ElasticStiffness, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep );
+    this->computeConstitutiveMatrixAt(d, ElasticStiffness, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
 
     //  kappay = 6. * d.at(5, 5) / ( d.at(3, 3) * l * l );
     //  kappaz = 6. * d.at(6, 6) / ( d.at(2, 2) * l * l );
@@ -368,24 +370,58 @@ Beam3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 //
 {
     FloatArray lx(3), ly(3), lz(3), help(3);
-    double length = this->computeLength();
-    Node *nodeA, *nodeB, *refNode;
+    Node *nodeA, *nodeB;
+    nodeA = this->giveNode(1);
+    nodeB = this->giveNode(2);
 
     answer.resize(3, 3);
     answer.zero();
-    nodeA  = this->giveNode(1);
-    nodeB  = this->giveNode(2);
-    refNode = this->giveDomain()->giveNode(this->referenceNode);
+    if ( !this->usingAngle ) {
+        Node *refNode = this->giveDomain()->giveNode(this->referenceNode);
 
-    for ( int i = 1; i <= 3; i++ ) {
-        lx.at(i) = ( nodeB->giveCoordinate(i) - nodeA->giveCoordinate(i) ) / length;
-        help.at(i) = ( refNode->giveCoordinate(i) - nodeA->giveCoordinate(i) );
+        lx.beDifferenceOf(*nodeB->giveCoordinates(), *nodeA->giveCoordinates());
+        lx.normalize();
+        help.beDifferenceOf(*refNode->giveCoordinates(), *nodeA->giveCoordinates());
+
+        lz.beVectorProductOf(lx, help);
+        lz.normalize();
+        ly.beVectorProductOf(lz, lx);
+        ly.normalize();
+    } else {
+        lx.beDifferenceOf(*nodeB->giveCoordinates(), *nodeA->giveCoordinates());
+        lx.normalize();
+
+        FloatMatrix rot(3, 3);
+        double upComp, theta;
+        bool isVert;
+        theta = referenceAngle * asin(1.0) / 90.0;
+
+        rot.at(1, 1) = cos(theta) + pow(lx.at(1), 2) * ( 1 - cos(theta) );
+        rot.at(1, 2) = lx.at(1) * lx.at(2) * ( 1 - cos(theta) ) - lx.at(3) * sin(theta);
+        rot.at(1, 3) = lx.at(1) * lx.at(3) * ( 1 - cos(theta) ) + lx.at(2) * sin(theta);
+
+        rot.at(2, 1) = lx.at(2) * lx.at(1) * ( 1 - cos(theta) ) + lx.at(3) * sin(theta);
+        rot.at(2, 2) = cos(theta) + pow(lx.at(2), 2) * ( 1 - cos(theta) );
+        rot.at(2, 3) = lx.at(2) * lx.at(3) * ( 1 - cos(theta) ) - lx.at(1) * sin(theta);
+
+        rot.at(3, 1) = lx.at(3) * lx.at(1) * ( 1 - cos(theta) ) - lx.at(2) * sin(theta);
+        rot.at(3, 2) = lx.at(3) * lx.at(2) * ( 1 - cos(theta) ) + lx.at(1) * sin(theta);
+        rot.at(3, 3) = cos(theta) + pow(lx.at(3), 2) * ( 1 - cos(theta) );
+
+        help.at(3) = 1.0;         // up-vector
+        upComp = lx.dotProduct(help);
+        isVert = acos(upComp) < 0.001;
+        // here is ly is used as a temp var
+        if ( isVert ) {
+            ly.at(2) = 1.0;
+        } else {
+            ly.beVectorProductOf(lx, help);
+        }
+        lz.beProductOf(rot, ly);
+        ly.beVectorProductOf(lz, lx);
+        lz.normalize();
+        ly.normalize();
     }
-
-    lz.beVectorProductOf(lx, help);
-    lz.normalize();
-    ly.beVectorProductOf(lz, lx);
-    ly.normalize();
 
     for ( int i = 1; i <= 3; i++ ) {
         answer.at(1, i) = lx.at(i);
@@ -400,14 +436,21 @@ Beam3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 IRResultType
 Beam3d :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    IRResultType result;                    // Required by IR_GIVE_FIELD macro
 
     // first call parent
     StructuralElement :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, referenceNode, _IFT_Beam3d_refnode);
-    if ( referenceNode == 0 ) {
-        OOFEM_ERROR("wrong reference node specified");
+    if ( ir->hasField(_IFT_Beam3d_refnode) ) {
+        IR_GIVE_FIELD(ir, referenceNode, _IFT_Beam3d_refnode);
+        if ( referenceNode == 0 ) {
+            OOFEM_WARNING("wrong reference node specified. Using default orientation.");
+        }
+    } else if ( ir->hasField(_IFT_Beam3d_refangle) ) {
+        IR_GIVE_FIELD(ir, referenceAngle, _IFT_Beam3d_refangle);
+        usingAngle = true;
+    } else {
+        OOFEM_ERROR("reference node or reference angle not set")
     }
 
     if ( ir->hasField(_IFT_Beam3d_dofstocondense) ) {
@@ -493,7 +536,7 @@ Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
     // evaluates the receivers edge load vector
     // for clamped beam
     //
-    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >(load);
+    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >( load );
     if ( edgeLoad ) {
         if ( edgeLoad->giveNumberOfDofs() != 6 ) {
             OOFEM_ERROR("load number of dofs mismatch");
@@ -692,7 +735,7 @@ Beam3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tSte
 {
     FloatArray lc(1);
     StructuralElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
-    answer.times( this->giveCrossSection()->give(CS_Area, & lc, NULL, this) );
+    answer.times( this->giveCrossSection()->give(CS_Area, lc, this) );
 }
 
 
@@ -776,9 +819,9 @@ Beam3d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords
     n2  = ( 1. + ksi ) * 0.5;
 
     answer.resize(3);
-    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 *this->giveNode(2)->giveCoordinate(1);
-    answer.at(2) = n1 * this->giveNode(1)->giveCoordinate(2) + n2 *this->giveNode(2)->giveCoordinate(2);
-    answer.at(3) = n1 * this->giveNode(1)->giveCoordinate(3) + n2 *this->giveNode(2)->giveCoordinate(3);
+    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 * this->giveNode(2)->giveCoordinate(1);
+    answer.at(2) = n1 * this->giveNode(1)->giveCoordinate(2) + n2 * this->giveNode(2)->giveCoordinate(2);
+    answer.at(3) = n1 * this->giveNode(1)->giveCoordinate(3) + n2 * this->giveNode(2)->giveCoordinate(3);
 
     return 1;
 }
@@ -883,7 +926,7 @@ Interface *
 Beam3d :: giveInterface(InterfaceType interface)
 {
     if ( interface == FiberedCrossSectionInterfaceType ) {
-        return static_cast< FiberedCrossSectionInterface * >(this);
+        return static_cast< FiberedCrossSectionInterface * >( this );
     }
 
     return NULL;
@@ -893,8 +936,10 @@ Beam3d :: giveInterface(InterfaceType interface)
 void
 Beam3d :: updateLocalNumbering(EntityRenumberingFunctor &f)
 {
-  StructuralElement::updateLocalNumbering(f);
-  this->referenceNode = f(this->referenceNode, ERS_DofManager);
+    StructuralElement :: updateLocalNumbering(f);
+    if ( !this->usingAngle ) {
+        this->referenceNode = f(this->referenceNode, ERS_DofManager);
+    }
 }
 
 

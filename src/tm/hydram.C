@@ -73,10 +73,10 @@ HydrationModelStatus :: updateYourself(TimeStep *tStep)
 
 //modified_zh 25.6.2004 obj = NULL is set in .h
 contextIOResultType
-HydrationModelStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+HydrationModelStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 // saves current context(state) into stream
 {
-    if ( !stream->write(& hydrationDegree, 1) ) {
+    if ( !stream.write(hydrationDegree) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -85,10 +85,10 @@ HydrationModelStatus :: saveContext(DataStream *stream, ContextMode mode, void *
 
 //modified_zh 25.6.2004 obj = NULL is set in .h
 contextIOResultType
-HydrationModelStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+HydrationModelStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 // restores current context(state) from stream
 {
-    if ( !stream->read(& hydrationDegree, 1) ) {
+    if ( !stream.read(hydrationDegree) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -607,7 +607,8 @@ HydrationModelInterface :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_HydrationModelInterface_hydration);
     if ( value >= 0. ) {
         OOFEM_LOG_INFO("HydratingMaterial: creating HydrationModel.");
-        if ( !( hydrationModel = new HydrationModel() ) ) {
+        hydrationModel.reset( new HydrationModel() );
+        if ( !hydrationModel ) {
             OOFEM_ERROR("Could not create HydrationModel instance.");
         }
 
@@ -636,21 +637,19 @@ void
 HydrationModelInterface :: updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *tStep)
 {
     if ( hydrationModel ) {
-        TimeStep *hydraTime = new TimeStep( ( const TimeStep ) *tStep );
+        TimeStep hydraTime( ( const TimeStep ) *tStep );
         int notime = 0;
         if ( tStep->giveTargetTime() - tStep->giveTimeIncrement() < castAt ) {
             if ( tStep->giveTargetTime() >= castAt ) {
-                hydraTime->setTimeIncrement(tStep->giveTargetTime() - castAt);
+                hydraTime.setTimeIncrement(tStep->giveTargetTime() - castAt);
             } else {
                 notime = 1;
             }
         }
 
         if ( !notime ) {
-            hydrationModel->updateInternalState(vec, gp, hydraTime);
+            hydrationModel->updateInternalState(vec, gp, &hydraTime);
         }
-
-        delete hydraTime;
     }
 }
 

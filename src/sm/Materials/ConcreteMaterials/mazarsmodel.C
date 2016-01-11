@@ -513,7 +513,7 @@ MazarsMaterialStatus :: MazarsMaterialStatus(int n, Domain *d, GaussPoint *g) :
 }
 
 contextIOResultType
-MazarsMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+MazarsMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full information stored in this Status
 // no temp variables stored
@@ -526,7 +526,7 @@ MazarsMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *
     }
 
     // write a raw data
-    if ( !stream->write(& lec, 1) ) {
+    if ( !stream.write(lec) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -534,7 +534,7 @@ MazarsMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *
 }
 
 contextIOResultType
-MazarsMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+MazarsMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full information stored in stream to this Status
 //
@@ -546,7 +546,7 @@ MazarsMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, voi
     }
 
     // read raw data
-    if ( !stream->read(& lec, 1) ) {
+    if ( !stream.read(lec) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

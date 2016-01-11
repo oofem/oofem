@@ -220,7 +220,7 @@ public:
      * @param obj Special parameter.
      * @exception ContextIOERR If error encountered.
      */
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj);
     /**
      * Restores receiver's context to stream.
      * Calls restoreContext service for all receiver's integration points.
@@ -231,7 +231,7 @@ public:
      * @param obj Should be a pointer to invoking element, ie., to which the receiver will belong to.
      * @exception ContextIOERR If error encountered.
      */
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj);
     /**
      * Clears the receiver, ie deallocates all integration points
      */

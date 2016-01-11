@@ -36,13 +36,10 @@
 #define combuff_h
 
 #include "oofemcfg.h"
+#include "datastream.h"
 #include "parallel.h"
 
 namespace oofem {
-class IntArray;
-class FloatArray;
-class FloatMatrix;
-
 
  #define __CommunicationBuffer_ALLOC_CHUNK 1024
 /**
@@ -208,7 +205,7 @@ private:
  * send and receive buffer to selected destination.
  *
  */
-class OOFEM_EXPORT CommunicationBuffer
+class OOFEM_EXPORT CommunicationBuffer: public DataStream
 {
 protected:
     MPI_Comm communicator;
@@ -242,118 +239,17 @@ public:
     /// Initialize for Unpacking (data already received)
     virtual void initForUnpacking() = 0;
 
-    /**@name Methods for datatype packing/unpacking to/from buffer */
-    //@{
-    /**
-     *  Packs single integer value into buffer.
-     *  Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and deallocation.
-     *  @param value Integer to pack.
-     *  @return Nonzero if successful.
-     */
-    int packInt(int value) { return packArray(& value, 1); }
-    /**
-     *  Packs single double value into buffer.
-     *  Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and deallocation.
-     *  @param value Double to pack.
-     *  @return Nonzero if successful.
-     */
-    int packDouble(double value) { return packArray(& value, 1); }
-    /**
-     * Packs given IntArray  value into buffer.
-     * Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and deallocation.
-     * @param arry Array to pack.
-     * @return Nonzero if successful.
-     */
-    int packIntArray(const IntArray &arry);
-    /**
-     * Packs given FloatArray  value into buffer.
-     * Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and deallocation.
-     * @param arry Array to pack.
-     * @return Nonzero if successful.
-     */
-    int packFloatArray(const FloatArray &arry);
-    /**
-     * Packs given FloatMatrix  value into buffer.
-     * Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and deallocation.
-     * @param mtrx Matrix to pack.
-     * @return Nonzero if successful.
-     */
-    int packFloatMatrix(const FloatMatrix &mtrx);
+    using DataStream::read;
+    virtual int read(bool &data);
 
-    /** @name Packing routines.
-     * Packs array of values of given type into buffer.
-     * Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and deallocation.
-     * @param src Address of first value in memory.
-     * @param n Number of packed values.
-     * @return Nonzero if successful.
-     */
-    ///@{
-    virtual int packArray(const int *src, int n) = 0;
-    virtual int packArray(const long *src, int n) = 0;
-    virtual int packArray(const unsigned long *src, int n) = 0;
-    virtual int packArray(const double *src, int n) = 0;
-    virtual int packArray(const char *src, int n) = 0;
-    ///@}
-
-    /**
-     * Unpacks single integer value from buffer.
-     * @param value Unpacked integer.
-     * @return Nonzero if successful.
-     */
-    int unpackInt(int &value) { return unpackArray(& value, 1); }
-    /**
-     * Unpacks single double value from buffer.
-     * @param value Unpacked double.
-     * @return Nonzero if successful.
-     */
-    int unpackDouble(double &value) { return unpackArray(& value, 1); }
-    /**
-     * Unpacks given IntArray value from buffer.
-     * @param arry Array to unpack into.
-     * @return Nonzero if successful.
-     */
-    virtual int unpackIntArray(IntArray &arry);
-    /**
-     * Unpacks given FloatArray value from buffer.
-     * @param arry Array to unpack into.
-     * @return Nonzero if successful.
-     */
-    int unpackFloatArray(FloatArray &arry);
-    /**
-     * Unpacks given FloatMatrix value from buffer.
-     * @param mtrx Matrix to unpack into.
-     * @return Nonzero if successful.
-     */
-    int unpackFloatMatrix(FloatMatrix &mtrx);
-    /**
-     * Unpacks array of values of given type from buffer.
-     * @param dest Address of first value in memory, where to store values.
-     * @param n Number of unpacked values.
-     * @return Nonzero if successful.
-     */
-    ///@{
-    virtual int unpackArray(int *dest, int n) = 0;
-    virtual int unpackArray(long *dest, int n) = 0;
-    virtual int unpackArray(unsigned long *dest, int n) = 0;
-    virtual int unpackArray(double *dest, int n) = 0;
-    virtual int unpackArray(char *dest, int n) = 0;
-    ///@}
-
-
-    /**@name Methods for determining pack size of datatype to pack/unpack to/from buffer */
-    //@{
-    /**
-     *  Returns pack size required to pack an array of given type and size(c-style).
-     *  @param size Array size.
-     *  @param type Type id.
-     *  @return Pack size required.
-     */
-    virtual int givePackSize(MPI_Datatype type, int size) {
-        int requredSpace;
-        MPI_Pack_size(size, type, communicator, & requredSpace);
-        return requredSpace;
-    }
-    //@}
+    using DataStream::write;
+    virtual int write(bool data);
+   
+    virtual int givePackSizeOfInt(int count);
+    virtual int givePackSizeOfDouble(int count);
+    virtual int givePackSizeOfChar(int count);
+    virtual int givePackSizeOfBool(int count);
+    virtual int givePackSizeOfLong(int count);
 
     /**@name Services for buffer sending/receiving */
     //@{
@@ -421,30 +317,29 @@ public:
     virtual void initForPacking() { this->init(); }
     virtual void initForUnpacking() { this->init(); }
 
-    virtual int packArray(const int *src, int n)
+    using CommunicationBuffer::write;
+    virtual int write(const int *src, int n)
     { return MPIBuffer :: packArray(this->communicator, src, n, MPI_INT); }
-    virtual int packArray(const long *src, int n)
+    virtual int write(const long *src, int n)
     { return MPIBuffer :: packArray(this->communicator, src, n, MPI_LONG); }
-    virtual int packArray(const unsigned long *src, int n)
+    virtual int write(const unsigned long *src, int n)
     { return MPIBuffer :: packArray(this->communicator, src, n, MPI_UNSIGNED_LONG); }
-    virtual int packArray(const double *src, int n)
+    virtual int write(const double *src, int n)
     { return MPIBuffer :: packArray(this->communicator, src, n, MPI_DOUBLE); }
-    virtual int packArray(const char *src, int n)
+    virtual int write(const char *src, int n)
     { return MPIBuffer :: packArray(this->communicator, src, n, MPI_CHAR); }
 
-    virtual int unpackArray(int *dest, int n)
+    using CommunicationBuffer::read;
+    virtual int read(int *dest, int n)
     { return MPIBuffer :: unpackArray(this->communicator, dest, n, MPI_INT); }
-    virtual int unpackArray(long *dest, int n)
+    virtual int read(long *dest, int n)
     { return MPIBuffer :: unpackArray(this->communicator, dest, n, MPI_LONG); }
-    virtual int unpackArray(unsigned long *dest, int n)
+    virtual int read(unsigned long *dest, int n)
     { return MPIBuffer :: unpackArray(this->communicator, dest, n, MPI_UNSIGNED_LONG); }
-    virtual int unpackArray(double *dest, int n)
+    virtual int read(double *dest, int n)
     { return MPIBuffer :: unpackArray(this->communicator, dest, n, MPI_DOUBLE); }
-    virtual int unpackArray(char *dest, int n)
+    virtual int read(char *dest, int n)
     { return MPIBuffer :: unpackArray(this->communicator, dest, n, MPI_CHAR); }
-
-    virtual int givePackSize(MPI_Datatype type, int size) { return MPIBuffer :: givePackSize(this->communicator, type, size); }
-
 
     virtual int iSend(int dest, int tag) { return MPIBuffer :: iSend(this->communicator, dest, tag); }
 

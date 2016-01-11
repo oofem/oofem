@@ -44,6 +44,7 @@
 #include "contextioerr.h"
 #include "sparsemtrx.h"
 #include "classfactory.h"
+#include "unknownnumberingscheme.h"
 
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"
@@ -57,14 +58,9 @@ REGISTER_EngngModel(NlDEIDynamic);
 
 NlDEIDynamic :: NlDEIDynamic(int i, EngngModel *_master) : StructuralEngngModel(i, _master), massMatrix(), loadVector(),
     previousIncrementOfDisplacementVector(), displacementVector(),
-    velocityVector(), accelerationVector(), internalForces()
+    velocityVector(), accelerationVector(), internalForces(),
+    nMethod(NULL)
 {
-#ifdef __PARALLEL_MODE
-    commMode = ProblemCommMode__UNKNOWN_MODE;
-    nonlocalExt = 0;
-    communicator = nonlocCommunicator = NULL;
-    commBuff = NULL;
-#endif
     ndomains = 1;
     initFlag = 1;
 }
@@ -106,24 +102,14 @@ NlDEIDynamic :: initializeFrom(InputRecord *ir)
     }
 
 #ifdef __PARALLEL_MODE
-    if ( ir->hasField(_IFT_NlDEIDynamic_nodecutmode) ) {
-        commMode = ProblemCommMode__NODE_CUT;
-    } else if ( ir->hasField(_IFT_NlDEIDynamic_elementcutmode) ) {
-        commMode = ProblemCommMode__ELEMENT_CUT;
-    } else {
-        OOFEM_ERROR("NlDEIDynamicCommunicatorMode not specified");
-    }
-
     commBuff = new CommunicatorBuff( this->giveNumberOfProcesses() );
-    communicator = new ProblemCommunicator(this, commBuff, this->giveRank(),
-                                           this->giveNumberOfProcesses(),
-                                           this->commMode);
+    communicator = new NodeCommunicator(this, commBuff, this->giveRank(),
+                                        this->giveNumberOfProcesses());
 
     if ( ir->hasField(_IFT_NlDEIDynamic_nonlocalext) ) {
         nonlocalExt = 1;
-        nonlocCommunicator = new ProblemCommunicator(this, commBuff, this->giveRank(),
-                                                     this->giveNumberOfProcesses(),
-                                                     ProblemCommMode__REMOTE_ELEMENT_MODE);
+        nonlocCommunicator = new ElementCommunicator(this, commBuff, this->giveRank(),
+                                                     this->giveNumberOfProcesses());
     }
 
 #endif
@@ -174,39 +160,31 @@ TimeStep *NlDEIDynamic :: giveNextStep()
     double totalTime = 0;
     StateCounterType counter = 1;
 
-    if ( previousStep != NULL ) {
-        delete previousStep;
-    }
-
-    if ( currentStep != NULL ) {
+    if ( currentStep ) {
         totalTime = currentStep->giveTargetTime() + deltaT;
         istep     = currentStep->giveNumber() + 1;
         counter   = currentStep->giveSolutionStateCounter() + 1;
     }
 
-    previousStep = currentStep;
-    currentStep  = new TimeStep(istep, this, 1, totalTime, deltaT, counter);
+    previousStep = std :: move(currentStep);
+    currentStep.reset( new TimeStep(istep, this, 1, totalTime, deltaT, counter) );
 
-    return currentStep;
+    return currentStep.get();
 }
 
 
 
 void NlDEIDynamic :: solveYourself()
 {
-#ifdef __PARALLEL_MODE
+    if ( this->isParallel() ) {
  #ifdef __VERBOSE_PARALLEL
-    // Force equation numbering before setting up comm maps.
-    int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
-    OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), neq);
+        // Force equation numbering before setting up comm maps.
+        int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
+        OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), neq);
  #endif
 
-    // Set up communication patterns,
-    communicator->setUpCommunicationMaps(this, true);
-    if ( nonlocalExt ) {
-        nonlocCommunicator->setUpCommunicationMaps(this, true);
+        this->initializeCommMaps();
     }
-#endif
 
     StructuralEngngModel :: solveYourself();
 }
@@ -477,7 +455,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_RELEVANT( "\n\nSolving [Step number %8d, Time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
 #endif
 
-    //     NM_Status s = nMethod->solve(massMatrix, & loadVector, & displacementVector);
+    //     NM_Status s = nMethod->solve(*massMatrix, loadVector, displacementVector);
     //    if ( !(s & NM_Success) ) {
     //        OOFEM_ERROR("No success in solving system. Ma=f");
     //    }
@@ -521,9 +499,7 @@ NlDEIDynamic :: computeLoadVector(FloatArray &answer, ValueModeType mode, TimeSt
     //
     // Exchange contributions.
     //
-#ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(answer, EModelDefaultEquationNumbering(), LoadExchangeTag);
-#endif
 }
 
 
@@ -539,9 +515,6 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
     IntArray loc;
     Element *element;
     EModelDefaultEquationNumbering en;
-#ifdef __PARALLEL_MODE
-    int result;
-#endif
 
 #ifndef LOCAL_ZERO_MASS_REPLACEMENT
     FloatArray diagonalStiffMtrx;
@@ -553,20 +526,18 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
     for ( i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
 
-#ifdef __PARALLEL_MODE
         // skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. They introduction is necessary to
         // allow local averaging on domains without fine grain communication between domains).
         if ( element->giveParallelMode() == Element_remote ) {
             continue;
         }
-#endif
 
         element->giveLocationArray(loc, en);
         element->giveCharacteristicMatrix(charMtrx, LumpedMassMatrix, tStep);
 
 #ifdef LOCAL_ZERO_MASS_REPLACEMENT
-        element->giveCharacteristicMatrix(charMtrx2, StiffnessMatrix, tStep);
+        element->giveCharacteristicMatrix(charMtrx2, TangentStiffnessMatrix, tStep);
 #endif
 
 #ifdef DEBUG
@@ -621,7 +592,7 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
     for ( i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
         element->giveLocationArray(loc, en);
-        element->giveCharacteristicMatrix(charMtrx, StiffnessMatrix, tStep);
+        element->giveCharacteristicMatrix(charMtrx, TangentStiffnessMatrix, tStep);
         n = loc.giveSize();
         for ( j = 1; j <= n; j++ ) {
             jj = loc.at(j);
@@ -656,9 +627,9 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
     }
 #endif
 
-#ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(massMatrix, EModelDefaultEquationNumbering(), MassExchangeTag);
 
+#ifdef __PARALLEL_MODE
     // Determine maxOm over all processes.
  #ifdef __USE_MPI
     double globalMaxOm;
@@ -667,7 +638,7 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
     VERBOSEPARALLEL_PRINT( "NlDEIDynamic :: computeMassMtrx", "Reduce of maxOm started", this->giveRank() );
   #endif
 
-    result = MPI_Allreduce(& maxOm, & globalMaxOm, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+    int result = MPI_Allreduce(& maxOm, & globalMaxOm, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
 
   #ifdef __VERBOSE_PARALLEL
     VERBOSEPARALLEL_PRINT( "NlDEIDynamic :: computeMassMtrx", "Reduce of maxOm finished", this->giveRank() );
@@ -685,21 +656,13 @@ WARNING: NOT SUPPORTED MESSAGE PARSING LIBRARY
 #endif
 }
 
-#ifdef __PARALLEL_MODE
 int
-NlDEIDynamic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType)
+NlDEIDynamic :: estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType)
 {
     int count = 0, pcount = 0;
-    IntArray locationArray;
     Domain *domain = this->giveDomain(1);
 
-    if ( packUnpackType == ProblemCommMode__ELEMENT_CUT ) {
-        for ( int inod: commMap ) {
-            count += domain->giveDofManager( inod )->giveNumberOfDofs();
-        }
-
-        return ( buff.givePackSize(MPI_DOUBLE, 1) * count );
-    } else if ( packUnpackType == ProblemCommMode__NODE_CUT ) {
+    if ( packUnpackType == 0 ) { ///@todo Fix this old ProblemCommMode__NODE_CUT value
         for ( int inod: commMap ) {
             DofManager *dman = domain->giveDofManager( inod );
             for ( Dof *dof: *dman ) {
@@ -711,8 +674,8 @@ NlDEIDynamic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff
             }
         }
 
-        return ( buff.givePackSize(MPI_DOUBLE, 1) * max(count, pcount) );
-    } else if ( packUnpackType == ProblemCommMode__REMOTE_ELEMENT_MODE ) {
+        return ( buff.givePackSizeOfDouble(1) * max(count, pcount) );
+    } else if ( packUnpackType == 1 ) {
         for ( int inod: commMap ) {
             count += domain->giveElement( inod )->estimatePackSize(buff);
         }
@@ -722,9 +685,6 @@ NlDEIDynamic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff
 
     return 0;
 }
-
-#endif
-
 
 contextIOResultType NlDEIDynamic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
@@ -746,23 +706,23 @@ contextIOResultType NlDEIDynamic :: saveContext(DataStream *stream, ContextMode 
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = previousIncrementOfDisplacementVector.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = previousIncrementOfDisplacementVector.storeYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = displacementVector.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = displacementVector.storeYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = velocityVector.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = velocityVector.storeYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = accelerationVector.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = accelerationVector.storeYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( !stream->write(& deltaT, 1) ) {
+    if ( !stream->write(deltaT) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -799,23 +759,23 @@ contextIOResultType NlDEIDynamic :: restoreContext(DataStream *stream, ContextMo
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = previousIncrementOfDisplacementVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = previousIncrementOfDisplacementVector.restoreYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = displacementVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = displacementVector.restoreYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = velocityVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = velocityVector.restoreYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = accelerationVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = accelerationVector.restoreYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( !stream->read(& deltaT, 1) ) {
+    if ( !stream->read(deltaT) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

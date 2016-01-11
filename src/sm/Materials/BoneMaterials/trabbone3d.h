@@ -162,8 +162,8 @@ public:
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *);
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 };
 
 
@@ -248,10 +248,8 @@ public:
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
-#ifdef __PARALLEL_MODE
     virtual double predictRelativeComputationalCost(GaussPoint *gp);
     virtual double predictRelativeRedistributionCost(GaussPoint *gp);
-#endif
 };
 } //end namespace oofem
 #endif

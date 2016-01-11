@@ -52,6 +52,7 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "oofem_terminate.h"
+#include "unknownnumberingscheme.h"
 
 #ifdef __PARALLEL_MODE
  #include "parallelcontext.h"
@@ -243,9 +244,9 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
         OOFEM_ERROR("source problem must also be AdaptiveNonlinearStatic.");
     }
 
-    this->currentStep = new TimeStep( * ( sourceProblem->giveCurrentStep() ) );
+    this->currentStep.reset( new TimeStep( * ( sourceProblem->giveCurrentStep() ) ) );
     if ( sourceProblem->givePreviousStep() ) {
-        this->previousStep = new TimeStep( * ( sourceProblem->givePreviousStep() ) );
+        this->previousStep.reset( new TimeStep( * ( sourceProblem->givePreviousStep() ) ) );
     }
 
     // map primary unknowns
@@ -279,12 +280,12 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
 
     // computes the stresses and calls updateYourself to mapped state
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
-        result &= this->giveDomain(1)->giveElement(ielem)->adaptiveUpdate(currentStep);
+        result &= this->giveDomain(1)->giveElement(ielem)->adaptiveUpdate(currentStep.get());
     }
 
     // finish mapping process
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
-        result &= this->giveDomain(1)->giveElement(ielem)->adaptiveFinish(currentStep);
+        result &= this->giveDomain(1)->giveElement(ielem)->adaptiveFinish(currentStep.get());
     }
 
 
@@ -343,8 +344,8 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
 
 
         if ( initFlag ) {
-            stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
-            if ( stiffnessMatrix == NULL ) {
+            stiffnessMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+            if ( !stiffnessMatrix ) {
                 OOFEM_ERROR("sparse matrix creation failed");
             }
 
@@ -356,7 +357,7 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
 
             stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
             stiffnessMatrix->zero(); // zero stiffness matrix
-            this->assemble( stiffnessMatrix, this->giveCurrentStep(), SecantStiffnessMatrix,
+            this->assemble( *stiffnessMatrix, this->giveCurrentStep(), SecantStiffnessMatrix,
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
             initFlag = 0;
         }
@@ -383,12 +384,12 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
         //nMethod -> solveYourselfAt(this->giveCurrentStep()) ;
         nMethod->setStepLength(deltaL / 5.0);
         if ( initialLoadVector.isNotEmpty() ) {
-            numMetStatus = nMethod->solve( stiffnessMatrix, & incrementalLoadVector, & initialLoadVector,
-                                          & totalDisplacement, & incrementOfDisplacement, & internalForces,
+            numMetStatus = nMethod->solve( *stiffnessMatrix, incrementalLoadVector, & initialLoadVector,
+                                          totalDisplacement, incrementOfDisplacement, internalForces,
                                           internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         } else {
-            numMetStatus = nMethod->solve( stiffnessMatrix, & incrementalLoadVector, NULL,
-                                          & totalDisplacement, & incrementOfDisplacement, & internalForces,
+            numMetStatus = nMethod->solve( *stiffnessMatrix, incrementalLoadVector, NULL,
+                                          totalDisplacement, incrementOfDisplacement, internalForces,
                                           internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         }
 
@@ -457,10 +458,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     this->domainNeqs.at(2) = 0;
     this->domainPrescribedNeqs.at(2) = 0;
     this->domainList.emplace(domainList.begin() + 1, dNew);
-
-#ifdef __PARALLEL_MODE
     this->parallelContextList.emplace(parallelContextList.begin() + 1, this);
-#endif
 
     // init equation numbering
     //this->forceEquationNumbering(2);
@@ -494,12 +492,10 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     nelem = this->giveDomain(2)->giveNumberOfElements();
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
         /* HUHU CHEATING */
-#ifdef __PARALLEL_MODE
+
         if ( this->giveDomain(2)->giveElement(ielem)->giveParallelMode() == Element_remote ) {
             continue;
         }
-
-#endif
 
         result &= this->giveDomain(2)->giveElement(ielem)->adaptiveMap( this->giveDomain(1), this->giveCurrentStep() );
     }
@@ -512,10 +508,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     //domainList->put(2, NULL);
     domainList[0] = std :: move(domainList[1]);
     domainList[0]->setNumber(1);
-
-#ifdef __PARALLEL_MODE
     parallelContextList = {parallelContextList[1]};
-#endif
 
     // keep equation numbering of new domain
     this->numberOfEquations = this->domainNeqs.at(1) = this->domainNeqs.at(2);
@@ -548,12 +541,9 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     // computes the stresses and calls updateYourself to mapped state
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
         /* HUHU CHEATING */
-#ifdef __PARALLEL_MODE
         if ( this->giveDomain(1)->giveElement(ielem)->giveParallelMode() == Element_remote ) {
             continue;
         }
-
-#endif
 
         result &= this->giveDomain(1)->giveElement(ielem)->adaptiveUpdate( this->giveCurrentStep() );
     }
@@ -561,12 +551,9 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     // finish mapping process
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
         /* HUHU CHEATING */
-#ifdef __PARALLEL_MODE
         if ( this->giveDomain(1)->giveElement(ielem)->giveParallelMode() == Element_remote ) {
             continue;
         }
-
-#endif
 
         result &= this->giveDomain(1)->giveElement(ielem)->adaptiveFinish( this->giveCurrentStep() );
     }
@@ -674,8 +661,8 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
 
         if ( initFlag ) {
             if ( !stiffnessMatrix ) {
-                stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
-                if ( stiffnessMatrix == NULL ) {
+                stiffnessMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+                if ( !stiffnessMatrix ) {
                     OOFEM_ERROR("sparse matrix creation failed");
                 }
             }
@@ -688,7 +675,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
 
             stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
             stiffnessMatrix->zero(); // zero stiffness matrix
-            this->assemble( stiffnessMatrix, this->giveCurrentStep(), SecantStiffnessMatrix,
+            this->assemble( *stiffnessMatrix, this->giveCurrentStep(), SecantStiffnessMatrix,
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
             initFlag = 0;
         }
@@ -713,12 +700,12 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
         //nMethod -> solveYourselfAt(this->giveCurrentStep()) ;
         nMethod->setStepLength(deltaL / 5.0);
         if ( initialLoadVector.isNotEmpty() ) {
-            numMetStatus = nMethod->solve( stiffnessMatrix, & incrementalLoadVector, & initialLoadVector,
-                                          & totalDisplacement, & incrementOfDisplacement, & internalForces,
+            numMetStatus = nMethod->solve( *stiffnessMatrix, incrementalLoadVector, & initialLoadVector,
+                                          totalDisplacement, incrementOfDisplacement, internalForces,
                                           internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         } else {
-            numMetStatus = nMethod->solve( stiffnessMatrix, & incrementalLoadVector, NULL,
-                                          & totalDisplacement, & incrementOfDisplacement, & internalForces,
+            numMetStatus = nMethod->solve( *stiffnessMatrix, incrementalLoadVector, NULL,
+                                          totalDisplacement, incrementOfDisplacement, internalForces,
                                           internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         }
 
@@ -743,7 +730,8 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
 
 
 contextIOResultType
-AdaptiveNonLinearStatic :: saveContext(DataStream *stream, ContextMode mode, void *obj) {
+AdaptiveNonLinearStatic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+{
     int closeFlag = 0;
     contextIOResultType iores;
     FILE *file = NULL;
@@ -762,7 +750,7 @@ AdaptiveNonLinearStatic :: saveContext(DataStream *stream, ContextMode mode, voi
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = timeStepLoadLevels.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = timeStepLoadLevels.storeYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -776,7 +764,8 @@ AdaptiveNonLinearStatic :: saveContext(DataStream *stream, ContextMode mode, voi
 }
 
 contextIOResultType
-AdaptiveNonLinearStatic :: restoreContext(DataStream *stream, ContextMode mode, void *obj) {
+AdaptiveNonLinearStatic :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+{
     int closeFlag = 0;
     int istep, iversion;
     contextIOResultType iores;
@@ -796,7 +785,7 @@ AdaptiveNonLinearStatic :: restoreContext(DataStream *stream, ContextMode mode, 
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = timeStepLoadLevels.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = timeStepLoadLevels.restoreYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -811,7 +800,8 @@ AdaptiveNonLinearStatic :: restoreContext(DataStream *stream, ContextMode mode, 
 
 
 void
-AdaptiveNonLinearStatic :: updateDomainLinks() {
+AdaptiveNonLinearStatic :: updateDomainLinks()
+{
     NonLinearStatic :: updateDomainLinks();
     this->defaultErrEstimator->setDomain( this->giveDomain(1) );
 }

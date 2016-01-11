@@ -274,7 +274,7 @@ TrabBoneEmbedStatus :: updateYourself(TimeStep *tStep)
 
 
 contextIOResultType
-TrabBoneEmbedStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+TrabBoneEmbedStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -292,7 +292,7 @@ TrabBoneEmbedStatus :: saveContext(DataStream *stream, ContextMode mode, void *o
 
 
 contextIOResultType
-TrabBoneEmbedStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+TrabBoneEmbedStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 

@@ -67,7 +67,7 @@ IntElSurfTr1 :: computeNmatrixAt(GaussPoint *ip, FloatMatrix &answer)
     // Returns the modified N-matrix which multiplied with u give the spatial jump.
 
     FloatArray N;
-    this->interpolation.evalN( N, * ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evalN( N, ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 18);
     answer.zero();
@@ -90,7 +90,7 @@ IntElSurfTr1 :: computeGaussPoints()
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize(1);
         //integrationRulesArray[0] = new LobattoIntegrationRule (1,domain, 1, 2);
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3); 
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3) ); 
         integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, 4, _3dInterface); ///@todo add parameter for ngp
     }
 }
@@ -100,7 +100,7 @@ void
 IntElSurfTr1 :: computeCovarBaseVectorsAt(IntegrationPoint *ip, FloatArray &G1, FloatArray &G2)
 {
     FloatMatrix dNdxi;
-    this->interpolation.evaldNdxi( dNdxi, * ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdxi( dNdxi, ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     G1.resize(3);
     G2.resize(3);
     G1.zero();
@@ -157,7 +157,7 @@ IntElSurfTr1 :: computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answe
 int
 IntElSurfTr1 :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-    FloatArray N(3), meanNode;
+    FloatArray N, meanNode;
     this->interpolation.evalN( N, lcoords, FEIElementGeometryWrapper(this) );
     answer.resize(3);
     answer.zero();
@@ -179,7 +179,7 @@ IntElSurfTr1 :: computeLocalCoordinates(FloatArray &answer, const FloatArray &gc
 
 ///@todo this code not tested, onlu copied from interfaceelem3dtrlin.C //JB
 #ifdef __OOFEG
-void InterfaceElement3dTrLin :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
+void IntElSurfTr1 :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     GraphicObj *go;
     //  if (!go) { // create new one
@@ -210,11 +210,11 @@ void InterfaceElement3dTrLin :: drawRawGeometry(oofegGraphicContext &gc, TimeSte
 }
 
 
-void InterfaceElement3dTrLin :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
+void IntElSurfTr1 :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 { }
 
 
-void InterfaceElement3dTrLin :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
+void IntElSurfTr1 :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 { }
 
 #endif

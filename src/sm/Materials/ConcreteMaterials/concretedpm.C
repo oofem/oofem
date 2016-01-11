@@ -168,7 +168,7 @@ ConcreteDPMStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 }
 
 contextIOResultType
-ConcreteDPMStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+ConcreteDPMStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -179,35 +179,35 @@ ConcreteDPMStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj
 
     // write raw data
 
-    if ( ( iores = plasticStrain.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = plasticStrain.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( !stream->write(& kappaP, 1) ) {
+    if ( !stream.write(kappaP) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& kappaD, 1) ) {
+    if ( !stream.write(kappaD) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& equivStrain, 1) ) {
+    if ( !stream.write(equivStrain) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& damage, 1) ) {
+    if ( !stream.write(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& state_flag, 1) ) {
+    if ( !stream.write(state_flag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& deltaEquivStrain, 1) ) {
+    if ( !stream.write(deltaEquivStrain) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& le, 1) ) {
+    if ( !stream.write(le) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -216,7 +216,7 @@ ConcreteDPMStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj
 
 
 contextIOResultType
-ConcreteDPMStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+ConcreteDPMStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -226,35 +226,35 @@ ConcreteDPMStatus :: restoreContext(DataStream *stream, ContextMode mode, void *
     }
 
     // read raw data
-    if ( ( iores = plasticStrain.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = plasticStrain.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( !stream->read(& kappaP, 1) ) {
+    if ( !stream.read(kappaP) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& kappaD, 1) ) {
+    if ( !stream.read(kappaD) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& equivStrain, 1) ) {
+    if ( !stream.read(equivStrain) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& damage, 1) ) {
+    if ( !stream.read(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& state_flag, 1) ) {
+    if ( !stream.read(state_flag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& deltaEquivStrain, 1) ) {
+    if ( !stream.read(deltaEquivStrain) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& le, 1) ) {
+    if ( !stream.read(le) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -364,11 +364,11 @@ ConcreteDPM :: initializeFrom(InputRecord *ir)
     // elastic parameters
     IR_GIVE_FIELD(ir, eM, _IFT_IsotropicLinearElasticMaterial_e);
     IR_GIVE_FIELD(ir, nu, _IFT_IsotropicLinearElasticMaterial_n);
-    propertyDictionary->add('E', eM);
-    propertyDictionary->add('n', nu);
+    propertyDictionary.add('E', eM);
+    propertyDictionary.add('n', nu);
 
     IR_GIVE_FIELD(ir, value, _IFT_IsotropicLinearElasticMaterial_talpha);
-    propertyDictionary->add(tAlpha, value);
+    propertyDictionary.add(tAlpha, value);
 
     gM = eM / ( 2. * ( 1. + nu ) );
     kM = eM / ( 3. * ( 1. - 2. * nu ) );
@@ -376,8 +376,8 @@ ConcreteDPM :: initializeFrom(InputRecord *ir)
     // instanciate the variables of the plasticity model
     IR_GIVE_FIELD(ir, fc, _IFT_ConcreteDPM_fc);
     IR_GIVE_FIELD(ir, ft, _IFT_ConcreteDPM_ft);
-    propertyDictionary->add(ft_strength, ft);
-    propertyDictionary->add(fc_strength, fc);
+    propertyDictionary.add(ft_strength, ft);
+    propertyDictionary.add(fc_strength, fc);
 
     // damage parameters - only exponential softening
     // [in ef variable the wf (crack opening) is stored]

@@ -160,11 +160,9 @@ public:
     /// Determines the width (radius) of limited support of weighting function.
     virtual void giveSupportRadius(double &radius) { radius = this->R; }
 
-#ifdef __PARALLEL_MODE
-    virtual int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip);
-    virtual int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip);
-    virtual int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip);
-#endif
+    virtual int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip);
+    virtual int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip);
+    virtual int estimatePackSize(DataStream &buff, GaussPoint *ip);
 
 protected:
     MaterialStatus *CreateStatus(GaussPoint *gp) const { return new TrabBoneNL3DStatus(1, TrabBone3D :: domain, gp); }

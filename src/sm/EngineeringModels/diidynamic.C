@@ -34,7 +34,7 @@
 
 #include "../sm/EngineeringModels/diidynamic.h"
 #include "../sm/Elements/structuralelement.h"
-#include "../sm/ElementEvaluators/structuralelementevaluator.h"
+#include "../sm/Elements/structuralelementevaluator.h"
 #include "timestep.h"
 #include "element.h"
 #include "dofmanager.h"
@@ -42,6 +42,7 @@
 #include "contextioerr.h"
 #include "datastream.h"
 #include "verbose.h"
+#include "unknownnumberingscheme.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -57,52 +58,18 @@ DIIDynamic :: DIIDynamic(int i, EngngModel *_master) : StructuralEngngModel(i, _
     nMethod = NULL;
 
     initialTimeDiscretization = TD_ThreePointBackward;
-
-#ifdef __PARALLEL_MODE
-    commMode = ProblemCommMode__NODE_CUT;
-    nonlocalExt = 0;
-    communicator = nonlocCommunicator = NULL;
-    commBuff = NULL;
-#endif
 }
 
 DIIDynamic :: ~DIIDynamic()
 {
-    if ( stiffnessMatrix ) {
-        delete stiffnessMatrix;
-    }
-
-    if ( nMethod ) {
-        delete nMethod;
-    }
+    delete stiffnessMatrix;
+    delete nMethod;
 }
 
 NumericalMethod *DIIDynamic :: giveNumericalMethod(MetaStep *mStep)
 // Only one has reason for DIIDynamic
 // - SolutionOfLinearEquations
 {
-#ifdef __PARALLEL_MODE
-
-    if ( nMethod ) {
-        return nMethod;
-    }
-
-    if ( ( solverType == ST_Petsc ) || ( solverType == ST_Feti ) ) {
-        if ( nMethod ) {
-            return nMethod;
-        }
-
-        nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
-    }
-
-    if ( nMethod == NULL ) {
-        OOFEM_ERROR("linear solver creation failed (unknown type or no parallel support)");
-    }
-
-    return nMethod;
-
-#endif
-
     if ( nMethod ) {
         return nMethod;
     }
@@ -210,8 +177,7 @@ TimeStep *DIIDynamic :: giveNextStep()
     StateCounterType counter = 1;
     TimeDiscretizationType td = initialTimeDiscretization;
 
-    delete previousStep;
-    if ( currentStep != NULL ) {
+    if ( currentStep ) {
         totalTime = currentStep->giveTargetTime() + deltaT;
         istep     = currentStep->giveNumber() + 1;
         counter   = currentStep->giveSolutionStateCounter() + 1;
@@ -222,11 +188,11 @@ TimeStep *DIIDynamic :: giveNextStep()
         }
     }
 
-    previousStep = currentStep;
+    previousStep = std :: move(currentStep);
 
-    currentStep  = new TimeStep(istep, this, 1, totalTime, deltaT, counter, td);
+    currentStep.reset( new TimeStep(istep, this, 1, totalTime, deltaT, counter, td) );
 
-    return currentStep;
+    return currentStep.get();
 }
 
 void DIIDynamic :: solveYourself()
@@ -259,13 +225,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
         previousIncrementOfDisplacement.resize(neq);
         previousIncrementOfDisplacement.zero();
 
-        int j, jj;
-        int nman  = domain->giveNumberOfDofManagers();
-        DofManager *node;
-
-        for ( j = 1; j <= nman; j++ ) {
-            node = domain->giveDofManager(j);
-
+        for ( auto &node : domain->giveDofManagers()) {
             for ( Dof *iDof: *node ) {
                 //
                 // Ask for initial values obtained from boundary conditions and initial conditions.
@@ -274,7 +234,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
                     continue;
                 }
 
-                jj = iDof->__giveEquationNumber();
+                int jj = iDof->__giveEquationNumber();
                 if ( jj ) {
                     displacementVector.at(jj) = iDof->giveUnknown(VM_Total, stepWhenIcApply);
                     velocityVector.at(jj)     = iDof->giveUnknown(VM_Velocity, stepWhenIcApply);
@@ -297,7 +257,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
 
         stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
 
-        this->assemble(stiffnessMatrix, tStep, EffectiveStiffnessMatrix,
+        this->assemble(*stiffnessMatrix, tStep, EffectiveStiffnessMatrix,
                        EModelDefaultEquationNumbering(), domain);
 
         help.resize(neq);
@@ -323,7 +283,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
         OOFEM_LOG_DEBUG("Assembling stiffness matrix\n");
 #endif
         stiffnessMatrix->zero();
-        this->assemble(stiffnessMatrix, tStep, EffectiveStiffnessMatrix,
+        this->assemble(*stiffnessMatrix, tStep, EffectiveStiffnessMatrix,
                        EModelDefaultEquationNumbering(), domain);
     }
 
@@ -357,7 +317,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
                                   + a5 * previousAccelerationVector.at(i)
                                   + a6 * previousIncrementOfDisplacement.at(i) );
         }
-        this->timesMtrx(help, rhs2, StiffnessMatrix, domain, tStep);
+        this->timesMtrx(help, rhs2, TangentStiffnessMatrix, domain, tStep);
         help.zero();
         for ( int i = 1; i <= neq; i++ ) {
             rhs.at(i) += rhs2.at(i);
@@ -382,7 +342,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_RELEVANT( "\n\nSolving [step number %8d, time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
 #endif
 
-    nMethod->solve(stiffnessMatrix, & rhs, & displacementVector);
+    nMethod->solve(*stiffnessMatrix, rhs, displacementVector);
 
     if ( tStep->giveTimeDiscretization() == TD_Wilson ) {
         OOFEM_LOG_INFO("TD_Wilson: Updating acceleration, velocity and displacement.\n");
@@ -434,7 +394,7 @@ DIIDynamic :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
         FloatMatrix charMtrx;
 
         element = domain->giveElement(num);
-        element->giveCharacteristicMatrix(answer, StiffnessMatrix, tStep);
+        element->giveCharacteristicMatrix(answer, TangentStiffnessMatrix, tStep);
         answer.times(1 + this->delta * a1);
 
         element->giveCharacteristicMatrix(charMtrx, MassMatrix, tStep);
@@ -493,13 +453,10 @@ DIIDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type, Doma
 
     for ( i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
-#ifdef __PARALLEL_MODE
         // Skip remote elements.
         if ( element->giveParallelMode() == Element_remote ) {
             continue;
         }
-
-#endif
 
         element->giveLocationArray(loc, en);
         element->giveCharacteristicMatrix(charMtrx, type, tStep);
@@ -535,9 +492,7 @@ DIIDynamic :: assembleLoadVector(FloatArray &_loadVector, Domain *domain, ValueM
 
     this->assembleVector(_loadVector, tStep, ExternalForcesVector, mode,
                          EModelDefaultEquationNumbering(), domain);
-#ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(_loadVector, EModelDefaultEquationNumbering(), LoadExchangeTag);
-#endif
 }
 
 void
@@ -631,23 +586,23 @@ contextIOResultType DIIDynamic :: saveContext(DataStream *stream, ContextMode mo
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = displacementVector.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = displacementVector.storeYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = velocityVector.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = velocityVector.storeYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = accelerationVector.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = accelerationVector.storeYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = loadVector.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = loadVector.storeYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = previousIncrementOfDisplacement.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = previousIncrementOfDisplacement.storeYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -681,23 +636,23 @@ contextIOResultType DIIDynamic :: restoreContext(DataStream *stream, ContextMode
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = displacementVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = displacementVector.restoreYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = velocityVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = velocityVector.restoreYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = accelerationVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = accelerationVector.restoreYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = loadVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = loadVector.restoreYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = previousIncrementOfDisplacement.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = previousIncrementOfDisplacement.restoreYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

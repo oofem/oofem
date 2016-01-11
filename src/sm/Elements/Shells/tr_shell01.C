@@ -50,12 +50,12 @@
 namespace oofem {
 REGISTER_Element(TR_SHELL01);
 
-TR_SHELL01 :: TR_SHELL01(int n, Domain *aDomain) : StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), ZZErrorEstimatorInterface(this), SpatialLocalizerInterface(this)
-{
-    plate    = new CCTPlate3d(-1, aDomain);
-    membrane = new TrPlaneStrRot3d(-1, aDomain);
-    compositeIR = NULL;
+IntArray TR_SHELL01 :: loc_plate = {3, 4, 5, 9, 10, 11, 15, 16, 17};
+IntArray TR_SHELL01 :: loc_membrane = {1, 2, 6, 7, 8, 12, 13, 14, 18};
 
+TR_SHELL01 :: TR_SHELL01(int n, Domain *aDomain) : StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), ZZErrorEstimatorInterface(this), SpatialLocalizerInterface(this),
+    plate(new CCTPlate3d(-1, aDomain)), membrane(new TrPlaneStrRot3d(-1, aDomain))
+{
     numberOfDofMans = 3;
 }
 
@@ -119,19 +119,16 @@ TR_SHELL01 :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueM
 // returns characteristics vector of receiver accordind to mtrx
 //
 {
-    IntArray loc(9);
     FloatArray aux;
 
     answer.resize(18);
     answer.zero();
 
     plate->giveCharacteristicVector(aux, mtrx, mode, tStep);
-    loc = {3, 4, 5, 9, 10, 11, 15, 16, 17};
-    answer.assemble(aux, loc);
+    if ( !aux.isEmpty() ) answer.assemble(aux, loc_plate);
 
     membrane->giveCharacteristicVector(aux, mtrx, mode, tStep);
-    loc = {1, 2, 6, 7, 8, 12, 13, 14, 18};
-    answer.assemble(aux, loc);
+    if ( !aux.isEmpty() ) answer.assemble(aux, loc_membrane);
 }
 
 void
@@ -140,25 +137,21 @@ TR_SHELL01 :: giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeS
 // returns characteristics matrix of receiver accordind to mtrx
 //
 {
-    IntArray loc;
     FloatMatrix aux;
 
     answer.resize(18, 18);
     answer.zero();
 
     plate->giveCharacteristicMatrix(aux, mtrx, tStep);
-    loc = {3, 4, 5, 9, 10, 11, 15, 16, 17};
-    answer.assemble(aux, loc);
+    if ( aux.isNotEmpty() ) answer.assemble(aux, loc_plate);
 
     membrane->giveCharacteristicMatrix(aux, mtrx, tStep);
-    loc = {1, 2, 6, 7, 8, 12, 13, 14, 18};
-    answer.assemble(aux, loc);
+    if ( aux.isNotEmpty() ) answer.assemble(aux, loc_membrane);
 }
 
 bool
 TR_SHELL01 :: giveRotationMatrix(FloatMatrix &answer)
 {
-    IntArray loc(9);
     FloatMatrix aux1, aux2;
     int ncol;
 
@@ -173,17 +166,15 @@ TR_SHELL01 :: giveRotationMatrix(FloatMatrix &answer)
         ncol = aux1.giveNumberOfColumns();
         answer.resize(18, ncol);
 
-        loc = {3, 4, 5, 9, 10, 11, 15, 16, 17};
         for ( int i = 1; i <= 9; i++ ) { // row index
             for ( int j = 1; j <= ncol; j++ ) {
-                answer.at(loc.at(i), j) = aux1.at(i, j);
+                answer.at(loc_plate.at(i), j) = aux1.at(i, j);
             }
         }
 
-        loc = {1, 2, 6, 7, 8, 12, 13, 14, 18};
         for ( int i = 1; i <= 9; i++ ) { // row index
             for ( int j = 1; j <= ncol; j++ ) {
-                answer.at(loc.at(i), j) = aux2.at(i, j);
+                answer.at(loc_membrane.at(i), j) = aux2.at(i, j);
             }
         }
     }
@@ -269,13 +260,12 @@ TR_SHELL01 :: printOutputAt(FILE *file, TimeStep *tStep)
 // Performs end-of-step operations.
 {
     FloatArray v, aux;
-    GaussPoint *membraneGP;
     IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
     fprintf( file, "element %d (%8d) :\n", this->giveLabel(), this->giveNumber() );
 
     for ( GaussPoint *gp: *iRule ) {
         fprintf( file, "  GP %2d.%-2d :", iRule->giveNumber(), gp->giveNumber() );
-        membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
+        GaussPoint *membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
         // Strain - Curvature
         plate->giveIPValue(v, gp, IST_ShellStrainTensor, tStep);
         membrane->giveIPValue(aux, membraneGP, IST_ShellStrainTensor, tStep);
@@ -325,7 +315,7 @@ TR_SHELL01 :: printOutputAt(FILE *file, TimeStep *tStep)
 
 
 contextIOResultType
-TR_SHELL01 :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+TR_SHELL01 :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
     if ( ( iores =  StructuralElement :: saveContext(stream, mode, obj) ) != CIO_OK ) {
@@ -341,19 +331,16 @@ TR_SHELL01 :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 }
 
 contextIOResultType
-TR_SHELL01 :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+TR_SHELL01 :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
     if ( ( iores =  StructuralElement :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        ;
         THROW_CIOERR(iores);
     }
     if ( ( iores =   this->plate->restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        ;
         THROW_CIOERR(iores);
     }
     if ( ( iores =  this->membrane->restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        ;
         THROW_CIOERR(iores);
     }
     return iores;
@@ -362,13 +349,11 @@ TR_SHELL01 :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 IntegrationRule *
 TR_SHELL01 :: ZZErrorEstimatorI_giveIntegrationRule()
 {
-    if ( this->compositeIR ) {
-        return this->compositeIR;
-    } else {
-        this->compositeIR = new GaussIntegrationRule(1, this, 1, 12);
+    if ( !this->compositeIR ) {
+        this->compositeIR.reset( new GaussIntegrationRule(1, this, 1, 12) );
         this->compositeIR->SetUpPointsOnTriangle(plate->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints(), _3dShell);
-        return this->compositeIR;
     }
+    return this->compositeIR.get();
 }
 
 void
@@ -428,38 +413,23 @@ TR_SHELL01 :: ZZErrorEstimatorI_computeLocalStress(FloatArray &answer, FloatArra
 }
 
 
-double
-TR_SHELL01 :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
-{
-    FloatArray c(3);
-    c.zero();
-    // evaluate element center
-    for ( int i = 1; i <= 3; i++ ) {
-        c.add( * plate->giveNode(i)->giveCoordinates() );
-    }
-    c.times(1. / 3.);
-    return c.distance(coords);
-}
-
 void
 TR_SHELL01 :: SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatArray &bb1)
 {
-    FloatArray lt3(3), gt3(3); // global vector in the element thickness direction of lenght thickeness/2
+    FloatArray lt3, gt3; // global vector in the element thickness direction of lenght thickeness/2
     const FloatMatrix *GtoLRotationMatrix = plate->computeGtoLRotationMatrix();
 
     // setup vector in the element local cs. perpendicular to element plane of thickness/2 length
-    lt3.at(1) = 0.0;
-    lt3.at(2) = 0.0;
-    lt3.at(3) = 1.0; //this->giveCrossSection()->give(CS_Thickness)/2.0; // HUHU
+    lt3 = {0., 0., 1.}; //this->giveCrossSection()->give(CS_Thickness)/2.0; // HUHU
     // transform it to globa cs
     gt3.beTProductOf(* GtoLRotationMatrix, lt3);
 
     // use gt3 to construct element bounding box respecting true element volume
 
-    FloatArray *coordinates, _c(3);
+    FloatArray _c;
 
     for ( int i = 1; i <= this->giveNumberOfNodes(); ++i ) {
-        coordinates = this->giveNode(i)->giveCoordinates();
+        FloatArray *coordinates = this->giveNode(i)->giveCoordinates();
 
         _c = * coordinates;
         _c.add(gt3);

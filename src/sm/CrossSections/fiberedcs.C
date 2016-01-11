@@ -476,7 +476,6 @@ FiberedCrossSection :: giveSlaveGaussPoint(GaussPoint *masterGp, int i)
 
         // create new slave record in masterGp
         // (requires that this is friend of gp)
-        FloatArray *coords;
         // resolve slave material mode
         MaterialMode slaveMode, masterMode = masterGp->giveMaterialMode();
         slaveMode = this->giveCorrespondingSlaveMaterialMode(masterMode);
@@ -484,11 +483,9 @@ FiberedCrossSection :: giveSlaveGaussPoint(GaussPoint *masterGp, int i)
         masterGp->gaussPoints.resize( this->numberOfFibers );
 
         for ( int j = 0; j < numberOfFibers; j++ ) {
-            coords = new FloatArray(2);
-            coords->at(1) = fiberYcoords.at(j + 1);
-            coords->at(2) = fiberZcoords.at(j + 1);
             // in gp - is stored isoparametric coordinate (-1,1) of z-coordinate
-            masterGp->gaussPoints [ j ] = new GaussPoint(masterGp->giveIntegrationRule(), j + 1, coords, 0., slaveMode);
+            masterGp->gaussPoints [ j ] = new GaussPoint(masterGp->giveIntegrationRule(), j + 1,
+                                                {fiberYcoords.at(j + 1), fiberZcoords.at(j + 1)}, 0., slaveMode);
         }
 
         slave = masterGp->gaussPoints [ i ];
@@ -503,7 +500,7 @@ FiberedCrossSection :: printYourself()
 // Prints the receiver on screen.
 {
     printf("Cross Section with properties : \n");
-    propertyDictionary->printYourself();
+    propertyDictionary.printYourself();
     printf("Fiber Materials: \n");
     fiberMaterials.printYourself();
     printf("Fiber Thicks   : \n");
@@ -518,7 +515,7 @@ FiberedCrossSection :: printYourself()
 
 
 contextIOResultType
-FiberedCrossSection :: saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *masterGp)
+FiberedCrossSection :: saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *masterGp)
 //
 // saves full material context (saves state variables, that completely describe
 // current state)
@@ -546,7 +543,7 @@ FiberedCrossSection :: saveIPContext(DataStream *stream, ContextMode mode, Gauss
 
 
 contextIOResultType
-FiberedCrossSection :: restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *masterGp)
+FiberedCrossSection :: restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *masterGp)
 //
 // restores full material context (saves state variables, that completely describe
 // current state)

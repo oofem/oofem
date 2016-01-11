@@ -493,7 +493,7 @@ IsoInterfaceDamageMaterialStatus_2 :: updateYourself(TimeStep *tStep)
 
 
 contextIOResultType
-IsoInterfaceDamageMaterialStatus_2 :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+IsoInterfaceDamageMaterialStatus_2 :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -503,11 +503,11 @@ IsoInterfaceDamageMaterialStatus_2 :: saveContext(DataStream *stream, ContextMod
     }
 
     // write a raw data
-    if ( !stream->write(& kappa, 1) ) {
+    if ( !stream.write(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& damage, 1) ) {
+    if ( !stream.write(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -515,7 +515,7 @@ IsoInterfaceDamageMaterialStatus_2 :: saveContext(DataStream *stream, ContextMod
 }
 
 contextIOResultType
-IsoInterfaceDamageMaterialStatus_2 :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+IsoInterfaceDamageMaterialStatus_2 :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -525,11 +525,11 @@ IsoInterfaceDamageMaterialStatus_2 :: restoreContext(DataStream *stream, Context
     }
 
     // read raw data
-    if ( !stream->read(& kappa, 1) ) {
+    if ( !stream.read(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& damage, 1) ) {
+    if ( !stream.read(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

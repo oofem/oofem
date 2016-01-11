@@ -195,17 +195,9 @@ protected:
 
 public:
     /// Constructor
-    OctreeSpatialLocalizer(Domain * d) : SpatialLocalizer(d), octreeMask(3) {
-        rootCell = NULL;
-        elementIPListsInitialized = false;
-        elementListsInitialized.clear();
-    }
+    OctreeSpatialLocalizer(Domain * d);
     /// Destructor - deletes the octree tree
-    virtual ~OctreeSpatialLocalizer() {
-        if ( rootCell ) {
-            delete rootCell;
-        }
-    }
+    virtual ~OctreeSpatialLocalizer();
 
     /**
      * Returns the octreeMask value given by the index
@@ -222,13 +214,15 @@ public:
 
     virtual Element *giveElementContainingPoint(const FloatArray &coords, const IntArray *regionList = NULL);
     virtual Element *giveElementContainingPoint(const FloatArray &coords, const Set &eset);
-    virtual Element *giveElementCloseToPoint(const FloatArray &coords, const IntArray *regionList = NULL);
     virtual Element *giveElementClosestToPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &gcoords, int region);
     virtual GaussPoint *giveClosestIP(const FloatArray &coords, int region, bool iCohesiveZoneGP = false);
     virtual GaussPoint *giveClosestIP(const FloatArray &coords, Set &elemSet, bool iCohesiveZoneGP = false);
+    virtual void giveAllElementsWithIpWithinBox_EvenIfEmpty(elementContainerType &elemSet, const FloatArray &coords, const double radius) { giveAllElementsWithIpWithinBox_EvenIfEmpty(elemSet, coords, radius, false); }
     virtual void giveAllElementsWithIpWithinBox(elementContainerType &elemSet, const FloatArray &coords, const double radius) { giveAllElementsWithIpWithinBox(elemSet, coords, radius, false); }
+    virtual void giveAllElementsWithIpWithinBox_EvenIfEmpty(elementContainerType &elemSet, const FloatArray &coords, const double radius, bool iCohesiveZoneGP);
     virtual void giveAllElementsWithIpWithinBox(elementContainerType &elemSet, const FloatArray &coords, const double radius, bool iCohesiveZoneGP);
     virtual void giveAllNodesWithinBox(nodeContainerType &nodeList, const FloatArray &coords, const double radius);
+    virtual Node * giveNodeClosestToPoint(const FloatArray &coords, double maxDist);
 
     virtual const char *giveClassName() const { return "OctreeSpatialLocalizer"; }
 
@@ -357,20 +351,7 @@ protected:
     Element *giveElementContainingPoint(OctantRec *cell, const FloatArray &coords,
                                         OctantRec *scannedChild = NULL, const Set *elset = NULL);
     /**
-     * Returns the element close to given point as element which center is closest to the given point.
-     * Only elements with IP in given cell are considered.
-     * The search is done only for given cell and its children, skipping the given child from search.
-     * @param cell Top level cell to search.
-     * @param coords Point coordinates.
-     * @param minDist Distance from the center of returned element.
-     * @param answer Requested element.
-     * @param regionList Only elements within given regions are considered, if NULL all regions are considered.
-     */
-    void giveElementCloseToPointWithinOctant(OctantRec *cell, const FloatArray &coords,
-                                             double &minDist, Element **answer,
-                                             const IntArray *regionList);
-    /**
-     * Returns the element closest to the given point within the
+     * Returns the element closest to the given point within the cell.
      * @param currCell Terminal cell to look in.
      * @param gcoords Point coordinates.
      * @param lcoords Local coordinates in closest element.
@@ -381,6 +362,14 @@ protected:
      */
     void giveElementClosestToPointWithinOctant(OctantRec *currCell, const FloatArray &gcoords,
                                                double &minDist, FloatArray &lcoords, FloatArray &closest, Element * &answer, int region);
+    /**
+     * Returns the node closest to the given point within the cell.
+     * @param currCell Terminal cell to look in.
+     * @param gcoords Point coordinates.
+     * @param[in,out] minDist Distance from the center of returned element.
+     * @param answer Requested node.
+     */
+    void giveNodeClosestToPointWithinOctant(OctantRec* cell, const FloatArray &gcoords, double &minDist, Node * &answer);
     /**
      * Determines the max tree depth computed for given tree cell and its children.
      * To obtain total tree depth, root cell should be supplied.

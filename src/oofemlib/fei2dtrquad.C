@@ -162,14 +162,14 @@ FEI2dTrQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const
     convergence_limit = 1e-6 * this->giveCharacteristicLength(cellgeo);
 
     // setup initial guess
-    lcoords_guess.resize( gcoords.giveSize() );
+    lcoords_guess.resize( 2 );
     lcoords_guess.zero();
 
     // apply Newton-Raphson to solve the problem
     for ( int nite = 0; nite < 10; nite++ ) {
         // compute the residual
         this->local2global(guess, lcoords_guess, cellgeo);
-        res.beDifferenceOf(gcoords, guess);
+        res = {gcoords(0) - guess(0), gcoords(1) - guess(1)};
 
         // check for convergence
         error = res.computeNorm();

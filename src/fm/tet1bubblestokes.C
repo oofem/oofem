@@ -66,22 +66,21 @@ Tet1BubbleStokes :: Tet1BubbleStokes(int n, Domain *aDomain) : FMElement(n, aDom
     this->numberOfDofMans = 4;
     this->numberOfGaussPoints = 24;
 
-    this->bubble = new ElementDofManager(1, aDomain, this);
-    this->bubble->appendDof( new MasterDof(this->bubble, V_u) );
-    this->bubble->appendDof( new MasterDof(this->bubble, V_v) );
-    this->bubble->appendDof( new MasterDof(this->bubble, V_w) );
+    this->bubble.reset( new ElementDofManager(1, aDomain, this) );
+    this->bubble->appendDof( new MasterDof(this->bubble.get(), V_u) );
+    this->bubble->appendDof( new MasterDof(this->bubble.get(), V_v) );
+    this->bubble->appendDof( new MasterDof(this->bubble.get(), V_w) );
 }
 
 Tet1BubbleStokes :: ~Tet1BubbleStokes()
 {
-    delete this->bubble;
 }
 
 void Tet1BubbleStokes :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize(1);
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], this->numberOfGaussPoints, this);
     }
 }
@@ -103,7 +102,7 @@ void Tet1BubbleStokes :: giveInternalDofManDofIDMask(int i, IntArray &answer) co
 
 double Tet1BubbleStokes :: computeVolumeAround(GaussPoint *gp)
 {
-    double detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    double detJ = fabs( this->interp.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     return detJ *gp->giveWeight();
 }
 
@@ -124,8 +123,8 @@ void Tet1BubbleStokes :: giveCharacteristicMatrix(FloatMatrix &answer,
                                                   CharType mtrx, TimeStep *tStep)
 {
     // Compute characteristic matrix for this element. The only option is the stiffness matrix...
-    if ( mtrx == StiffnessMatrix ) {
-        this->computeStiffnessMatrix(answer, tStep);
+    if ( mtrx == TangentStiffnessMatrix ) {
+        this->computeStiffnessMatrix(answer, TangentStiffness, tStep);
     } else {
         OOFEM_ERROR("Unknown Type of characteristic mtrx.");
     }
@@ -145,10 +144,10 @@ void Tet1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeSte
     FloatArray momentum, conservation;
 
     for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
-        FloatArray *lcoords = gp->giveNaturalCoordinates();
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
-        double detJ = fabs( this->interp.evaldNdx( dN, * lcoords, FEIElementGeometryWrapper(this) ) );
-        this->interp.evalN( N, * lcoords, FEIElementGeometryWrapper(this) );
+        double detJ = fabs( this->interp.evaldNdx( dN, lcoords, FEIElementGeometryWrapper(this) ) );
+        this->interp.evalN( N, lcoords, FEIElementGeometryWrapper(this) );
         double dV = detJ * gp->giveWeight();
 
         for ( int j = 0, k = 0; j < dN.giveNumberOfRows(); j++, k += 3 ) {
@@ -229,7 +228,7 @@ void Tet1BubbleStokes :: computeLoadVector(FloatArray &answer, Load *load, CharT
     temparray.zero();
     if ( gVector.giveSize() ) {
         for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
-            const FloatArray &lcoords = * gp->giveNaturalCoordinates();
+            const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
             rho = mat->give('d', gp);
             detJ = fabs( this->interp.giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(this) ) );
@@ -274,7 +273,7 @@ void Tet1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryL
         iRule.SetUpPointsOnTriangle(numberOfIPs, _Unknown);
 
         for ( GaussPoint *gp: iRule ) {
-            FloatArray &lcoords = * gp->giveNaturalCoordinates();
+            const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
             this->interp.surfaceEvalN( N, iSurf, lcoords, FEIElementGeometryWrapper(this) );
             double detJ = fabs( this->interp.surfaceGiveTransformationJacobian( iSurf, lcoords, FEIElementGeometryWrapper(this) ) );
@@ -306,7 +305,7 @@ void Tet1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryL
     }
 }
 
-void Tet1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
+void Tet1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, TimeStep *tStep)
 {
     // Note: Working with the components; [K, G+Dp; G^T+Dv^T, C] . [v,p]
     FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
@@ -318,7 +317,7 @@ void Tet1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *t
 
     for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
         // Compute Gauss point and determinant at current element
-        const FloatArray &lcoords = * gp->giveNaturalCoordinates();
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
         double detJ = fabs( this->interp.evaldNdx( dN, lcoords, FEIElementGeometryWrapper(this) ) );
         double dV = detJ * gp->giveWeight();
@@ -337,7 +336,7 @@ void Tet1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *t
 
         // Computing the internal forces should have been done first.
         // dsigma_dev/deps_dev  dsigma_dev/dp  deps_vol/deps_dev  deps_vol/dp
-        mat->giveStiffnessMatrices(Ed, Ep, Cd, Cp, TangentStiffness, gp, tStep);
+        mat->giveStiffnessMatrices(Ed, Ep, Cd, Cp, mode, gp, tStep);
 
         EdB.beProductOf(Ed, B);
         K.plusProductSymmUpper(B, EdB, dV);
@@ -421,12 +420,4 @@ void Tet1BubbleStokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(V
     }
 }
 
-
-double Tet1BubbleStokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
-{
-    FloatArray center;
-    FloatArray lcoords = {0.333333, 0.333333, 0.333333, 0.333333};
-    this->interp.local2global( center, lcoords, FEIElementGeometryWrapper(this) );
-    return center.distance(coords);
-}
 } // end namespace oofem

@@ -110,9 +110,9 @@ public:
      * @param x Solution array
      * @return NM_Status value
      */
-    virtual NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
+    virtual NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x);
 
-    int estimateMaxPackSize(IntArray &, CommunicationBuffer &, int &);
+    int estimateMaxPackSize(IntArray &, DataStream &, int &);
     /// Sets up the communication maps
     void setUpCommunicationMaps();
 
@@ -148,6 +148,7 @@ public:
     int masterMapGammas();
 
     enum { FETISolverZeroTag, NumberOfRBMMsg, RBMMessage, QQMessage, SolutionMessage, ResidualMessage, DirectionVectorMessage, PPVectorMessage, GammasMessage, FETISolverIterationContinue, FETISolverIterationBreak };
+    virtual SparseMtrxType giveRecommendedMatrix(bool symmetric) const { return symmetric ? SMT_Skyline : SMT_SkylineU; }
 };
 } // end namespace oofem
 

@@ -56,6 +56,29 @@ NLStructuralElement :: NLStructuralElement(int n, Domain *aDomain) :
 }
 
 
+double
+NLStructuralElement :: computeCurrentVolume(TimeStep *tStep)
+{
+    double vol=0.0;
+    for ( auto &gp: *this->giveDefaultIntegrationRulePtr() ) {
+        FloatArray F;
+        FloatMatrix Fm;
+
+
+        computeDeformationGradientVector(F, gp, tStep);
+        Fm.beMatrixForm(F);
+        double J=Fm.giveDeterminant();
+
+        FEInterpolation *interpolation = this->giveInterpolation();
+        double detJ = fabs( ( interpolation->giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) ) );
+
+        vol=vol + gp->giveWeight()*detJ*J;
+    }
+
+    return vol;
+}
+
+
 void
 NLStructuralElement :: computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
@@ -65,7 +88,7 @@ NLStructuralElement :: computeDeformationGradientVector(FloatArray &answer, Gaus
 
     // Obtain the current displacement vector of the element and subtract initial displacements (if present)
     FloatArray u;
-    this->computeVectorOf(VM_Total, tStep, u); // solution vector
+    this->computeVectorOf({D_u, D_v, D_w}, VM_Total, tStep, u); // solution vector
     if ( initialDisplacements ) {
         u.subtract(* initialDisplacements);
     }
@@ -185,6 +208,7 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
                 StructuralMaterial :: giveReducedVectorForm( stressTemp, vStress, gp->giveMaterialMode() );
                 answer.plusProduct(B, stressTemp, dV);
             } else   {
+              vStress.printYourself("stress");
                 answer.plusProduct(B, vStress, dV);
             }
         } else   {
@@ -280,7 +304,7 @@ NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray 
             m->plusProduct(B, vStress, dV);
 
             // localize irule contribution into element matrix
-            if ( this->giveIntegrationRuleLocalCodeNumbers(irlocnum, iRule) ) {
+            if ( this->giveIntegrationRuleLocalCodeNumbers(irlocnum, *iRule) ) {
                 answer.assemble(* m, irlocnum);
                 m->clear();
             }
@@ -362,11 +386,11 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
                 jStartIndx = integrationRulesArray [ j ]->getStartIndexOfLocalStrainWhereApply();
                 jEndIndx   = integrationRulesArray [ j ]->getEndIndexOfLocalStrainWhereApply();
                 if ( i == j ) {
-                    iRule = integrationRulesArray [ i ];
+                    iRule = integrationRulesArray [ i ].get();
                 } else if ( integrationRulesArray [ i ]->giveNumberOfIntegrationPoints() < integrationRulesArray [ j ]->giveNumberOfIntegrationPoints() ) {
-                    iRule = integrationRulesArray [ i ];
+                    iRule = integrationRulesArray [ i ].get();
                 } else {
-                    iRule = integrationRulesArray [ j ];
+                    iRule = integrationRulesArray [ j ].get();
                 }
 
                 for ( GaussPoint *gp: *iRule ) {
@@ -466,7 +490,7 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
         }
 
         // localize irule contribution into element matrix
-        if ( this->giveIntegrationRuleLocalCodeNumbers(irlocnum, iRule) ) {
+        if ( this->giveIntegrationRuleLocalCodeNumbers(irlocnum, *iRule) ) {
             answer.assemble(* m, irlocnum);
             m->clear();
         }

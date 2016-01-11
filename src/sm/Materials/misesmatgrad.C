@@ -246,7 +246,7 @@ MisesMatGrad :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mo
     if ( tempDamage > damage ) {
         const FloatArray &effStress = status->giveTempEffectiveStress();
         double nlKappa = status->giveNonlocalCumulatedStrain();
-        double kappa = mParam * nlKappa + ( 1. - mParam ) * tempKappa;
+        kappa = mParam * nlKappa + ( 1. - mParam ) * tempKappa;
         double omegaPrime = computeDamageParamPrime(kappa);
         double scalar = -omegaPrime *sqrt(6.) * G / ( 3. * G + H ) / trialS;
         stiffnessCorrection.beDyadicProductOf(effStress, trialStressDev);
@@ -297,7 +297,7 @@ MisesMatGrad :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMo
         if ( tempDamage > damage ) {
             const FloatArray &effStress = status->giveTempEffectiveStress();
             double nlKappa =  status->giveNonlocalCumulatedStrain();
-            double kappa = mParam * nlKappa + ( 1. - mParam ) * tempKappa;
+            kappa = mParam * nlKappa + ( 1. - mParam ) * tempKappa;
             double omegaPrime = computeDamageParamPrime(kappa);
             double scalar = -omegaPrime *sqrt(6.) * G / ( 3. * G + H ) / trialS;
             stiffnessCorrection.beDyadicProductOf(effStress, trialStressDev);

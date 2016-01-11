@@ -36,6 +36,7 @@
 #define XFEMSTRUCTURALELEMENTINTERFACE_H_
 
 #include "xfem/xfemelementinterface.h"
+#include "internalstatetype.h"
 namespace oofem {
 class StructuralInterfaceMaterial;
 class IntegrationRule;
@@ -72,12 +73,14 @@ public:
 
     virtual void initializeCZMaterial();
 
+    virtual void XfemElementInterface_computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+
+
     /**
      * Identify enrichment items with an intersection enrichment
      * front that touches a given enrichment item.
      */
-    void giveIntersectionsTouchingCrack(std::vector<int> &oTouchingEnrItemIndices, const std::vector<int> &iCandidateIndices, int iEnrItemIndex, XfemManager &iXMan);
-    bool tipIsTouchingEI(const TipInfo &iTipInfo, EnrichmentItem *iEI);
+    void giveIntersectionsTouchingCrack(std :: vector< int > &oTouchingEnrItemIndices, const std :: vector< int > &iCandidateIndices, int iEnrItemIndex, XfemManager &iXMan);
 
     // Cohesive Zone variables
     StructuralInterfaceMaterial *mpCZMat;
@@ -86,10 +89,13 @@ public:
 
 
     // Store element subdivision for postprocessing
-    std :: vector< Triangle > mSubTri;
+    std :: vector< Triangle >mSubTri;
 
     /// VTK Interface
-    void giveSubtriangulationCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep);
+    void giveSubtriangulationCompositeExportData(std :: vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep);
+
+    /// Help functions for VTK export.
+    void computeIPAverageInTriangle(FloatArray &answer, IntegrationRule *iRule, Element *elem, InternalStateType isType, TimeStep *tStep, const Triangle &iTri);
 
 };
 } /* namespace oofem */

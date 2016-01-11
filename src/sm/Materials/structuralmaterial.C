@@ -445,7 +445,7 @@ StructuralMaterial :: convert_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix
       // Conversion expressed in index form. Seems a tiny bit slower than that above but easier to debug.  
       FloatMatrix I(3,3);
       I.beUnitMatrix();
-      	
+
       //I_ik * S_jl + F_im F_kn C_mjnl
       answer.resize(9,9);
       for ( int i = 1; i <= 3; i++) {
@@ -465,7 +465,7 @@ StructuralMaterial :: convert_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix
       }
       
 #endif
-	
+
     } else if ( matMode == _PlaneStress ) {
         // Save terms associated with H = [du/dx dv/dy du/dy dv/dx]
 
@@ -525,6 +525,12 @@ StructuralMaterial :: convert_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix
 }
 
 void
+StructuralMaterial :: giveEshelbyStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep)
+{
+    OOFEM_ERROR("not implemented ")
+}
+
+void
 StructuralMaterial :: give_dPdF_from(const FloatMatrix &dSdE, FloatMatrix &answer, GaussPoint *gp)
 {
     // Default implementation for converting dSdE to dPdF. This includes updating the
@@ -579,7 +585,7 @@ StructuralMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
         break;
     case _Warping:
         answer.resize(2,2);
-	answer.beUnitMatrix();
+        answer.beUnitMatrix();
         break;
     default:
         OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
@@ -1398,7 +1404,13 @@ StructuralMaterial :: computeVonMisesStress(const FloatArray *currentStress)
         return 0.0;
     }
 
-    if ( currentStress->giveSize() == 4 ) {
+    if ( currentStress->giveSize() == 3 ) {
+        // Plane stress
+
+        return sqrt( currentStress->at(1)*currentStress->at(1) + currentStress->at(2)*currentStress->at(2)
+                    -currentStress->at(1)*currentStress->at(2) + 3*currentStress->at(3)*currentStress->at(3) );
+    }
+    else if ( currentStress->giveSize() == 4 ) {
         // Plane strain
         v1 = ( ( currentStress->at(1) - currentStress->at(2) ) * ( currentStress->at(1) - currentStress->at(2) ) );
         v2 = ( ( currentStress->at(2) - currentStress->at(3) ) * ( currentStress->at(2) - currentStress->at(3) ) );
@@ -1802,7 +1814,7 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSt
         if ( ( tf = fm->giveField(FT_Temperature) ) ) {
             // temperature field registered
             FloatArray gcoords, et2;
-            static_cast< StructuralElement * >( gp->giveElement() )->computeGlobalCoordinates( gcoords, * gp->giveNaturalCoordinates() );
+            static_cast< StructuralElement * >( gp->giveElement() )->computeGlobalCoordinates( gcoords, gp->giveNaturalCoordinates() );
             if ( ( err = tf->evaluateAt(answer, gcoords, VM_Total, tStep) ) ) {
                 OOFEM_ERROR("tf->evaluateAt failed, element %d, error code %d", gp->giveElement()->giveNumber(), err);
             }
@@ -1815,7 +1827,7 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSt
     } else if ( type == IST_CylindricalStressTensor || type == IST_CylindricalStrainTensor ) {
         FloatArray gc, val = status->giveStressVector();
         FloatMatrix base(3, 3);
-        static_cast< StructuralElement * >( gp->giveElement() )->computeGlobalCoordinates( gc, * gp->giveNaturalCoordinates() );
+        static_cast< StructuralElement * >( gp->giveElement() )->computeGlobalCoordinates( gc, gp->giveNaturalCoordinates() );
         double l = sqrt( gc.at(1) * gc.at(1) + gc.at(2) * gc.at(2) );
         if ( l > 1.e-4 ) {
             base.at(1, 1) = gc.at(1) / l;
@@ -1856,9 +1868,13 @@ void
 StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
                                                            GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
 {
-    FloatArray et, e0, eigenstrain;
-    FloatMatrix GCS;
+    FloatArray et, eigenstrain;
     MaterialMode matmode = gp->giveMaterialMode();
+    if ( gp->giveIntegrationRule() == NULL ) {
+        ///@todo Hack for loose gausspoints. We shouldn't ask for "gp->giveElement()". FIXME
+        answer.clear();
+        return;
+    }
     Element *elem = gp->giveElement();
     StructuralElement *selem = dynamic_cast< StructuralElement * >( gp->giveElement() );
 
@@ -1892,7 +1908,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
         // temperature field registered
         FloatArray gcoords, et2;
         int err;
-        elem->computeGlobalCoordinates( gcoords, * gp->giveNaturalCoordinates() );
+        elem->computeGlobalCoordinates( gcoords, gp->giveNaturalCoordinates() );
         if ( ( err = tf->evaluateAt(et2, gcoords, mode, tStep) ) ) {
             OOFEM_ERROR("tf->evaluateAt failed, element %d, error code %d", elem->giveNumber(), err);
         }
@@ -1908,7 +1924,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
 
 
     if ( et.giveSize() ) { //found temperature boundary conditions or prescribed field
-        FloatArray fullAnswer;
+        FloatArray fullAnswer, e0;
 
         this->giveThermalDilatationVector(e0, gp, tStep);
 

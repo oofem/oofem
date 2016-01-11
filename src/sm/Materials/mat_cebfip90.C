@@ -297,7 +297,7 @@ CebFipSlip90MaterialStatus :: updateYourself(TimeStep *tStep)
 
 
 contextIOResultType
-CebFipSlip90MaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+CebFipSlip90MaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -307,7 +307,7 @@ CebFipSlip90MaterialStatus :: saveContext(DataStream *stream, ContextMode mode, 
     }
 
     // write a raw data
-    if ( !stream->write(& kappa, 1) ) {
+    if ( !stream.write(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -316,7 +316,7 @@ CebFipSlip90MaterialStatus :: saveContext(DataStream *stream, ContextMode mode, 
 
 
 contextIOResultType
-CebFipSlip90MaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+CebFipSlip90MaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -326,7 +326,7 @@ CebFipSlip90MaterialStatus :: restoreContext(DataStream *stream, ContextMode mod
     }
 
     // read raw data
-    if ( !stream->read(& kappa, 1) ) {
+    if ( !stream.read(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

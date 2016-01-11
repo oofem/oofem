@@ -383,10 +383,9 @@ void CemhydMat :: clearWeightTemperatureProductVolume(Element *element)
 void CemhydMat :: storeWeightTemperatureProductVolume(Element *element, TimeStep *tStep)
 {
     FloatArray vecTemperature;
-    IntegrationRule *iRule = element->giveDefaultIntegrationRulePtr();
 
     if ( !eachGP ) {
-        for ( GaussPoint *gp: *iRule ) {
+        for ( GaussPoint *gp: *element->giveDefaultIntegrationRulePtr() ) {
             //when more GPs are lumped to a master GP
             double dV = element->computeVolumeAround(gp);
             element->giveIPValue(vecTemperature, gp, IST_Temperature, tStep);

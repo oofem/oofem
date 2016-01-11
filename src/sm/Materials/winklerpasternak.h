@@ -83,9 +83,7 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual void giveRealStressVector_2dPlateSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
-    virtual void give2dPlateSubSoilStiffMtrx(FloatMatrix &answer,
-					     MatResponseMode mmode, GaussPoint *gp,
-					     TimeStep *tStep);
+    virtual void give2dPlateSubSoilStiffMtrx(FloatMatrix &answer, MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep);
     virtual MaterialStatus * CreateStatus(GaussPoint *gp) const;
 };
 } // end namespace oofem

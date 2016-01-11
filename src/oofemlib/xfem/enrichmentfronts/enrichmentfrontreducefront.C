@@ -53,7 +53,7 @@ void EnrFrontReduceFront :: MarkNodesAsFront(std :: unordered_map< int, NodeEnri
 
     Element *el = d.giveSpatialLocalizer()->giveElementContainingPoint(iTipInfo.mGlobalCoord);
 
-    if(el != NULL) {
+    if ( el != NULL ) {
         const IntArray &elNodes = el->giveDofManArray();
 
         for ( int i = 1; i <= elNodes.giveSize(); i++ ) {

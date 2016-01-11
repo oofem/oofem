@@ -73,7 +73,7 @@ public:
     /// Destructor.
     virtual ~RotatingBoundary() { }
 
-    virtual double give(Dof *dof, ValueModeType mode, TimeStep *tStep);
+    virtual double give(Dof *dof, ValueModeType mode, double time);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);

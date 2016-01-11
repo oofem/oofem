@@ -81,8 +81,8 @@ public:
     virtual void updateYourself(TimeStep *tStep);
     virtual int checkConsistency();
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 
     virtual double LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep);
     virtual void LS_PCS_computedN(FloatMatrix &answer);
@@ -123,7 +123,6 @@ public:
     //virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) {}
 #endif
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
     virtual double computeCriticalTimeStep(TimeStep *tStep);
 
     // three terms for computing their norms due to computing t_supg

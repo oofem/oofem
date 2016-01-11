@@ -124,6 +124,9 @@ SimpleCrossSection :: giveGeneralizedStress_Beam2d(FloatArray &answer, GaussPoin
   /**Note: (by bp): This assumes that the behaviour is elastic
      there exist a nuumber of nonlinear integral material models for beams defined directly in terms of integral forces and moments and corresponding 
      deformations and curvatures. This would require to implement support at material model level.
+     Mikael: That would not be a continuum material model, but it would highly depend on the cross-section shape, thus, it should be a special cross-section model instead.
+     This cross-section assumes you can split the response into inertia moments and pure material response. This is only possible for a constant, elastic response (i.e. elastic).
+     Therefore, this cross-section may only be allowed to give the elastic response.
   */
     StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
     FloatArray elasticStrain, et, e0;
@@ -152,6 +155,7 @@ SimpleCrossSection :: giveGeneralizedStress_Beam3d(FloatArray &answer, GaussPoin
   /**Note: (by bp): This assumes that the behaviour is elastic
      there exist a nuumber of nonlinear integral material models for beams defined directly in terms of integral forces and moments and corresponding 
      deformations and curvatures. This would require to implement support at material model level.
+     Mikael: See earlier response to comment
   */
     StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
     FloatArray elasticStrain, et, e0;
@@ -185,6 +189,7 @@ SimpleCrossSection :: giveGeneralizedStress_Plate(FloatArray &answer, GaussPoint
      there exist a nuumber of nonlinear integral material models for beams/plates/shells
      defined directly in terms of integral forces and moments and corresponding 
      deformations and curvatures. This would require to implement support at material model level.
+     Mikael: See earlier response to comment
   */
    StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
     FloatArray elasticStrain, et, e0;
@@ -214,6 +219,7 @@ SimpleCrossSection :: giveGeneralizedStress_Shell(FloatArray &answer, GaussPoint
      there exist a nuumber of nonlinear integral material models for beams/plates/shells
      defined directly in terms of integral forces and moments and corresponding 
      deformations and curvatures. This would require to implement support at material model level.
+     Mikael: See earlier response to comment
   */
     StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
     FloatArray elasticStrain, et, e0;
@@ -441,13 +447,13 @@ SimpleCrossSection :: initializeFrom(InputRecord *ir)
     double thick = 0.0;
     if ( ir->hasField(_IFT_SimpleCrossSection_thick) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, thick, _IFT_SimpleCrossSection_thick);
-        propertyDictionary->add(CS_Thickness, thick);
+        propertyDictionary.add(CS_Thickness, thick);
     }
 
     double width = 0.0;
     if ( ir->hasField(_IFT_SimpleCrossSection_width) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, width, _IFT_SimpleCrossSection_width);
-        propertyDictionary->add(CS_Width, width);
+        propertyDictionary.add(CS_Width, width);
     }
 
     double area = 0.0;
@@ -456,41 +462,41 @@ SimpleCrossSection :: initializeFrom(InputRecord *ir)
     } else {
         area = thick * width;
     }
-    propertyDictionary->add(CS_Area, area);
+    propertyDictionary.add(CS_Area, area);
 
     value = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_iy);
-    propertyDictionary->add(CS_InertiaMomentY, value);
+    propertyDictionary.add(CS_InertiaMomentY, value);
 
     value = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_iz);
-    propertyDictionary->add(CS_InertiaMomentZ, value);
+    propertyDictionary.add(CS_InertiaMomentZ, value);
 
     value = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_ik);
-    propertyDictionary->add(CS_TorsionMomentX, value);
+    propertyDictionary.add(CS_TorsionMomentX, value);
 
     double beamshearcoeff = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, beamshearcoeff, _IFT_SimpleCrossSection_shearcoeff);
-    propertyDictionary->add(CS_BeamShearCoeff, beamshearcoeff);
+    propertyDictionary.add(CS_BeamShearCoeff, beamshearcoeff);
 
     value = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_shearareay);
     if ( value == 0.0 ) {
         value = beamshearcoeff * area;
     }
-    propertyDictionary->add(CS_ShearAreaY, value);
+    propertyDictionary.add(CS_ShearAreaY, value);
 
     value = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_shearareaz);
     if ( value == 0.0 ) {
         value = beamshearcoeff * area;
     }
-    propertyDictionary->add(CS_ShearAreaZ, value);
+    propertyDictionary.add(CS_ShearAreaZ, value);
 
     value = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_drillStiffness);
-    propertyDictionary->add(CS_DrillingStiffness, value);
+    propertyDictionary.add(CS_DrillingStiffness, value);
 
     IR_GIVE_OPTIONAL_FIELD(ir, this->materialNumber, _IFT_SimpleCrossSection_MaterialNumber);
 
@@ -503,40 +509,40 @@ SimpleCrossSection :: giveInputRecord(DynamicInputRecord &input)
 {
     StructuralCrossSection :: giveInputRecord(input);
 
-    if ( this->propertyDictionary->includes(CS_Thickness) ) {
-        input.setField(this->propertyDictionary->at(CS_Thickness), _IFT_SimpleCrossSection_thick);
+    if ( this->propertyDictionary.includes(CS_Thickness) ) {
+        input.setField(this->propertyDictionary.at(CS_Thickness), _IFT_SimpleCrossSection_thick);
     }
 
-    if ( this->propertyDictionary->includes(CS_Width) ) {
-        input.setField(this->propertyDictionary->at(CS_Width), _IFT_SimpleCrossSection_width);
+    if ( this->propertyDictionary.includes(CS_Width) ) {
+        input.setField(this->propertyDictionary.at(CS_Width), _IFT_SimpleCrossSection_width);
     }
 
-    if ( this->propertyDictionary->includes(CS_Area) ) {
-        input.setField(this->propertyDictionary->at(CS_Area), _IFT_SimpleCrossSection_area);
+    if ( this->propertyDictionary.includes(CS_Area) ) {
+        input.setField(this->propertyDictionary.at(CS_Area), _IFT_SimpleCrossSection_area);
     }
 
-    if ( this->propertyDictionary->includes(CS_TorsionMomentX) ) {
-        input.setField(this->propertyDictionary->at(CS_TorsionMomentX), _IFT_SimpleCrossSection_ik);
+    if ( this->propertyDictionary.includes(CS_TorsionMomentX) ) {
+        input.setField(this->propertyDictionary.at(CS_TorsionMomentX), _IFT_SimpleCrossSection_ik);
     }
 
-    if ( this->propertyDictionary->includes(CS_InertiaMomentY) ) {
-        input.setField(this->propertyDictionary->at(CS_InertiaMomentY), _IFT_SimpleCrossSection_iy);
+    if ( this->propertyDictionary.includes(CS_InertiaMomentY) ) {
+        input.setField(this->propertyDictionary.at(CS_InertiaMomentY), _IFT_SimpleCrossSection_iy);
     }
 
-    if ( this->propertyDictionary->includes(CS_InertiaMomentZ) ) {
-        input.setField(this->propertyDictionary->at(CS_InertiaMomentZ), _IFT_SimpleCrossSection_iz);
+    if ( this->propertyDictionary.includes(CS_InertiaMomentZ) ) {
+        input.setField(this->propertyDictionary.at(CS_InertiaMomentZ), _IFT_SimpleCrossSection_iz);
     }
 
-    if ( this->propertyDictionary->includes(CS_ShearAreaY) ) {
-        input.setField(this->propertyDictionary->at(CS_ShearAreaY), _IFT_SimpleCrossSection_shearareay);
+    if ( this->propertyDictionary.includes(CS_ShearAreaY) ) {
+        input.setField(this->propertyDictionary.at(CS_ShearAreaY), _IFT_SimpleCrossSection_shearareay);
     }
 
-    if ( this->propertyDictionary->includes(CS_ShearAreaZ) ) {
-        input.setField(this->propertyDictionary->at(CS_ShearAreaZ), _IFT_SimpleCrossSection_shearareaz);
+    if ( this->propertyDictionary.includes(CS_ShearAreaZ) ) {
+        input.setField(this->propertyDictionary.at(CS_ShearAreaZ), _IFT_SimpleCrossSection_shearareaz);
     }
 
-    if ( this->propertyDictionary->includes(CS_BeamShearCoeff) ) {
-        input.setField(this->propertyDictionary->at(CS_BeamShearCoeff), _IFT_SimpleCrossSection_shearcoeff);
+    if ( this->propertyDictionary.includes(CS_BeamShearCoeff) ) {
+        input.setField(this->propertyDictionary.at(CS_BeamShearCoeff), _IFT_SimpleCrossSection_shearcoeff);
     }
 
     input.setField(this->materialNumber, _IFT_SimpleCrossSection_MaterialNumber);
@@ -575,8 +581,6 @@ Material
 
 double
 SimpleCrossSection :: give(int aProperty, GaussPoint *gp)
-// Returns the value of the property aProperty (e.g. the Young's modulus
-// 'E') of the receiver.
 {
     if ( this->giveMaterialNumber() ) {
         return this->giveMaterial(gp)->give(aProperty, gp);
@@ -584,6 +588,19 @@ SimpleCrossSection :: give(int aProperty, GaussPoint *gp)
         return gp->giveMaterial()->give(aProperty, gp);
     }
 }
+
+
+int
+SimpleCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep)
+{
+    if ( type == IST_CrossSectionNumber ) {
+        answer.resize(1);
+        answer.at(1) = this->giveNumber();
+        return 1;
+    }
+    return this->giveMaterial(ip)->giveIPValue(answer, ip, type, tStep);
+}
+
 
 
 int
@@ -663,6 +680,23 @@ SimpleCrossSection :: giveCauchyStresses(FloatArray &answer, GaussPoint *gp, con
     }
 }
 
+void
+SimpleCrossSection :: giveEshelbyStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedvF, TimeStep *tStep)
+{
+    MaterialMode mode = gp->giveMaterialMode();
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+
+    if ( mode == _3dMat ) {
+//        mat->giveCauchyStressVector_3d(answer, gp, reducedvF, tStep);
+    } else if ( mode == _PlaneStrain ) {
+        mat->giveEshelbyStressVector_PlaneStrain(answer, gp, reducedvF, tStep);
+    } else if ( mode == _PlaneStress ) {
+//        mat->giveCauchyStressVector_PlaneStress(answer, gp, reducedvF, tStep);
+    } else if ( mode == _1dMat ) {
+//        mat->giveCauchyStressVector_1d(answer, gp, reducedvF, tStep);
+    }
+}
+
 
 void
 SimpleCrossSection :: giveStiffnessMatrix_dPdF(FloatMatrix &answer,
@@ -725,7 +759,7 @@ SimpleCrossSection :: giveTemperatureVector(FloatArray &answer, GaussPoint *gp, 
         // temperature field registered
         FloatArray gcoords, et2;
         int err;
-        elem->computeGlobalCoordinates( gcoords, * gp->giveNaturalCoordinates() );
+        elem->computeGlobalCoordinates( gcoords, gp->giveNaturalCoordinates() );
         if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, tStep) ) ) {
             OOFEM_ERROR("tf->evaluateAt failed, element %d, error code %d", elem->giveNumber(), err);
         }
@@ -740,24 +774,22 @@ SimpleCrossSection :: giveTemperatureVector(FloatArray &answer, GaussPoint *gp, 
     }
 }
 
-#ifdef __PARALLEL_MODE
 int
-SimpleCrossSection :: packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *gp)
+SimpleCrossSection :: packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp)
 {
     return this->giveMaterial(gp)->packUnknowns(buff, tStep, gp);
 }
 
 int
-SimpleCrossSection :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *gp)
+SimpleCrossSection :: unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp)
 {
     return this->giveMaterial(gp)->unpackAndUpdateUnknowns(buff, tStep, gp);
 }
 
 int
-SimpleCrossSection :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *gp)
+SimpleCrossSection :: estimatePackSize(DataStream &buff, GaussPoint *gp)
 {
     return this->giveMaterial(gp)->estimatePackSize(buff, gp);
 }
-#endif
 
 } // end namespace oofem

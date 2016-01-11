@@ -47,10 +47,6 @@
 #include "strainvector.h"
 #include "classfactory.h"
 
-#ifdef __PARALLEL_MODE
- #include "combuff.h"
-#endif
-
 namespace oofem {
 REGISTER_Material(IDGMaterial);
 
@@ -275,7 +271,7 @@ IDGMaterial :: giveInternalLength(FloatMatrix &answer, MatResponseMode rMode, Ga
     } else if ( averType == 1 ) {
         answer.resize(1, 1);
         FloatArray gpCoords;
-        if ( gp->giveElement()->computeGlobalCoordinates( gpCoords, * ( gp->giveNaturalCoordinates() ) ) == 0 ) {
+        if ( gp->giveElement()->computeGlobalCoordinates( gpCoords, gp->giveNaturalCoordinates() ) == 0 ) {
             OOFEM_ERROR("computeGlobalCoordinates of GP failed");
         }
 
@@ -492,7 +488,7 @@ IDGMaterialStatus :: updateYourself(TimeStep *tStep)
 
 
 contextIOResultType
-IDGMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+IDGMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full information stored in this Status
 // no temp variables stored
@@ -505,7 +501,7 @@ IDGMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj
     }
 
     // write a raw data
-    if ( !stream->write(& le, 1) ) {
+    if ( !stream.write(le) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -513,7 +509,7 @@ IDGMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj
 }
 
 contextIOResultType
-IDGMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+IDGMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full information stored in stream to this Status
 //
@@ -525,7 +521,7 @@ IDGMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *
     }
 
     // read raw data
-    if ( !stream->read(& le, 1) ) {
+    if ( !stream.read(le) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

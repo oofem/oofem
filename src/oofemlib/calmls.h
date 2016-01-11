@@ -37,6 +37,7 @@
 
 #include <set>
 #include <vector>
+#include <memory>
 
 #include "sparselinsystemnm.h"
 #include "sparsenonlinsystemnm.h"
@@ -183,7 +184,7 @@ protected:
     FloatArray calm_HPCDmanWeightSrcArray;
 
     /// Linear system solver.
-    SparseLinearSystemNM *linSolver;
+    std :: unique_ptr< SparseLinearSystemNM > linSolver;
     /// linear system solver ID.
     LinSystSolverType solverType;
 
@@ -205,26 +206,23 @@ protected:
     FloatArray rtolf;
     /// Relative iterative displacement change tolerance for each group.
     FloatArray rtold;
-
-#ifdef __PARALLEL_MODE
     /// Parallel context for computing norms, dot products and such.
     ParallelContext *parallel_context;
-#endif
 
 public:
     CylindricalALM(Domain * d, EngngModel * m);
     virtual ~CylindricalALM();
 
     // Overloaded methods:
-    virtual NM_Status solve(SparseMtrx *K, FloatArray *R, FloatArray *R0,
-                            FloatArray *X, FloatArray *dX, FloatArray *F,
+    virtual NM_Status solve(SparseMtrx &K, FloatArray &R, FloatArray *R0,
+                            FloatArray &X, FloatArray &dX, FloatArray &F,
                             const FloatArray &internalForcesEBENorm, double &ReachedLambda, referenceLoadInputModeType rlm,
                             int &nite, TimeStep *);
     virtual double giveCurrentStepLength() { return deltaL; }
     virtual void setStepLength(double s) { deltaL = s; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
     virtual void setDomain(Domain *d) {
         this->domain = d;
         if ( linSolver ) {
@@ -266,7 +264,7 @@ protected:
                        const FloatArray &dXm1, FloatArray &dX, FloatArray &ddX,
                        const FloatArray &R, const FloatArray *R0, const FloatArray &F,
                        double &DeltaLambda, double &DeltaLambdam1, double &deltaLambda,
-                       double &Lambda, double &ReachedLambda, double RR, double &drProduct, TimeStep *tNow);
+                       double &Lambda, double &ReachedLambda, double RR, double &drProduct, TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // calmls_h

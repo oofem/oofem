@@ -98,8 +98,8 @@ public:
     virtual void updateYourself(TimeStep *tStep);
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 
     virtual const char *giveClassName() const { return "DruckerPragerPlasticitySMStatus"; }
 
@@ -359,10 +359,8 @@ public:
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
-#ifdef __PARALLEL_MODE
     virtual double predictRelativeComputationalCost(GaussPoint *gp);
     virtual double predictRelativeRedistributionCost(GaussPoint *gp) { return 1.0; }
-#endif
 };
 } // end namespace oofem
 #endif // druckerpragerplasticitysm_h

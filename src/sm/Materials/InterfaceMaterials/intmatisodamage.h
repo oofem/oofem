@@ -42,8 +42,8 @@
 ///@name Input fields for IntMatIsoDamage
 //@{
 #define _IFT_IntMatIsoDamage_Name "intmatisodamage"
-#define _IFT_IntMatIsoDamage_kn "kn"
-#define _IFT_IntMatIsoDamage_ks "ks"
+#define _IFT_IntMatIsoDamage_kn "kn" /// Normal stiffness
+#define _IFT_IntMatIsoDamage_ks "ks" /// Tangent stiffness
 #define _IFT_IntMatIsoDamage_ft "ft"
 #define _IFT_IntMatIsoDamage_gf "gf"
 #define _IFT_IntMatIsoDamage_maxOmega "maxomega"
@@ -94,8 +94,8 @@ public:
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 };
 
 
@@ -109,7 +109,6 @@ public:
  * The behaviour of the model is elastic, described by normal and shear stiffness components.
  * Isotropic damage is initiated when the stress reaches the tensile strength. The damage evolution
  * is governed by the normal jump
- *.
  */
 class IntMatIsoDamage : public StructuralInterfaceMaterial
 {
@@ -127,6 +126,8 @@ protected:
     /// Maximum limit on omega. The purpose is elimination of a too compliant material which may cause convergency problems. Set to something like 0.99 if needed.
     double maxOmega;
 
+    bool semiExplicit; // If semi-explicit time integration should be used
+
 public:
     /// Constructor
     IntMatIsoDamage(int n, Domain *d);
@@ -140,13 +141,7 @@ public:
                                       const FloatArray &jump, TimeStep *tStep);
 
     virtual void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
-                                        const FloatMatrix &F, TimeStep *tStep)
-    {
-        giveEngTraction_3d(answer, gp, jump, tStep);
-        IntMatIsoDamageStatus *status = static_cast< IntMatIsoDamageStatus * >( this->giveStatus(gp) );
-        status->letTempFirstPKTractionBe(answer);
-
-    }
+                                        const FloatMatrix &F, TimeStep *tStep);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     

@@ -35,7 +35,6 @@
 #include "xfem/propagationlaws/plhoopstresscirc.h"
 
 #include "xfem/propagationlaw.h"
-#include "xfem/enrichmentdomain.h"
 #include "xfem/tipinfo.h"
 #include "classfactory.h"
 #include "mathfem.h"
@@ -87,9 +86,9 @@ void PLHoopStressCirc :: giveInputRecord(DynamicInputRecord &input)
     }
 }
 
-bool PLHoopStressCirc ::propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp)
+bool PLHoopStressCirc :: propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp)
 {
-    if(!iEnrFront.propagationIsAllowed()) {
+    if ( !iEnrFront.propagationIsAllowed() ) {
         return false;
     }
 
@@ -162,12 +161,11 @@ bool PLHoopStressCirc ::propagateInterface(Domain &iDomain, EnrichmentFront &iEn
                     Element *gpEl = iDomain.giveElement(elIndex);
 
                     for ( GaussPoint *gp_i: *gpEl->giveDefaultIntegrationRulePtr() ) {
-
                         ////////////////////////////////////////
                         // Compute global gp coordinates
                         FloatArray N;
                         FEInterpolation *interp = gpEl->giveInterpolation();
-                        interp->evalN( N, * ( gp_i->giveNaturalCoordinates() ), FEIElementGeometryWrapper(gpEl) );
+                        interp->evalN( N, gp_i->giveNaturalCoordinates(), FEIElementGeometryWrapper(gpEl) );
 
 
                         // Compute global coordinates of Gauss point
@@ -310,7 +308,7 @@ bool PLHoopStressCirc ::propagateInterface(Domain &iDomain, EnrichmentFront &iEn
                 double theta                    = 0.5 * ( 1.0 - xi ) * angles [ segIndex ]         + 0.5 * ( 1.0 + xi ) * angles [ segIndex + 1 ];
                 double sigThetaTheta    = 0.5 * ( 1.0 - xi ) * sigTTArray [ segIndex ] + 0.5 * ( 1.0 + xi ) * sigTTArray [ segIndex + 1 ];
 
-                //					printf("Found candidate: theta: %e sigThetaTheta: %e\n", theta, sigThetaTheta);
+                //printf("Found candidate: theta: %e sigThetaTheta: %e\n", theta, sigThetaTheta);
 
                 if ( sigThetaTheta > maxSigTT ) {
                     foundZeroLevel = true;
@@ -333,7 +331,7 @@ bool PLHoopStressCirc ::propagateInterface(Domain &iDomain, EnrichmentFront &iEn
         }
 
         // Compare with threshold
-        printf("maxSigTT: %e mHoopStressThreshold: %e\n", maxSigTT, mHoopStressThreshold );
+        printf("maxSigTT: %e mHoopStressThreshold: %e\n", maxSigTT, mHoopStressThreshold);
         if ( maxSigTT > mHoopStressThreshold && foundZeroLevel ) {
             // Rotation matrix
             FloatMatrix rot(2, 2);

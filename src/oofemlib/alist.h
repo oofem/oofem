@@ -166,7 +166,6 @@ AList< T > :: clear(bool deleteObjectFlag)
             }
         }
 
-        //      delete [size] values ;}
         delete[]  values;
     }
 
@@ -208,7 +207,6 @@ AList< T > :: growTo(int newSize)
         }
 
         if ( values ) {
-            //      delete [size] values ;
             delete[]  values;
         }
 

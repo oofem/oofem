@@ -50,12 +50,10 @@
 #include "connectivitytable.h"
 #include "errorestimatortype.h"
 #include "classfactory.h"
+#include "engngm.h"
+#include "parallelcontext.h"
 
 #include <vector>
-
-#ifdef __PARALLEL_MODE
- #include "parallel.h"
-#endif
 
 namespace oofem {
 REGISTER_ErrorEstimator(ZZErrorEstimator, EET_ZZEE);
@@ -134,18 +132,12 @@ ZZErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
         this->globalSNorm += sNorm * sNorm;
     }
 
-#ifdef __PARALLEL_MODE
-    // compute global ENorm and SNorm by summing up comtributions on all partitions
-    double lnorms [ 2 ] = {
-        this->globalENorm, this->globalSNorm
-    };
-    double gnorms [ 2 ] = {
-        0.0, 0.0
-    };
-    MPI_Allreduce(lnorms, gnorms, 2, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    FloatArray gnorms;
+    ParallelContext *parallel_context = this->domain->giveEngngModel()->giveParallelContext(this->domain->giveNumber());
+    parallel_context->accumulate({this->globalENorm, this->globalSNorm}, gnorms);
     this->globalENorm = gnorms [ 0 ];
     this->globalSNorm = gnorms [ 1 ];
-#endif
+    
 
     // recover the stored smoother
     this->domain->setSmoother(oldSmoother); //delete old one (the rm)
@@ -212,11 +204,11 @@ ZZErrorEstimator :: giveValue(EE_ValueType type, TimeStep *tStep)
 RemeshingCriteria *
 ZZErrorEstimator :: giveRemeshingCrit()
 {
-    if ( this->rc ) {
-        return this->rc;
+    if ( !this->rc ) {
+        this->rc.reset( new ZZRemeshingCriteria(1, this) );
     }
 
-    return ( this->rc = new ZZRemeshingCriteria(1, this) );
+    return this->rc.get();
 }
 
 
@@ -281,7 +273,7 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
     if ( norm == ZZErrorEstimator :: L2Norm ) {
         for ( GaussPoint *gp: *this->ZZErrorEstimatorI_giveIntegrationRule() ) {
             double dV = element->computeVolumeAround(gp);
-            interpol->evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(element) );
+            interpol->evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(element) );
 
             diff.beTProductOf(nodalRecoveredStreses, n);
 
@@ -299,7 +291,7 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
 
         for ( GaussPoint *gp: *this->ZZErrorEstimatorI_giveIntegrationRule() ) {
             double dV = element->computeVolumeAround(gp);
-            interpol->evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(element) );
+            interpol->evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(element) );
             selem->computeConstitutiveMatrixAt(D, TangentStiffness, gp, tStep);
             DInv.beInverseOf(D);
 
@@ -365,9 +357,8 @@ ZZRemeshingCriteria :: giveRemeshingStrategy(TimeStep *tStep)
 int
 ZZRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
 {
-    int nelem, nnode, jnode, elemPolyOrder, ielemNodes;
+    int nelem, nnode, elemPolyOrder, ielemNodes;
     double globValNorm = 0.0, globValErrorNorm = 0.0, elemErrLimit, eerror, iratio, currDensity, elemSize;
-    Element *ielem;
     EE_ErrorType errorType = indicatorET;
     double pe, coeff = 2.0;
 
@@ -412,14 +403,13 @@ ZZRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
     elemErrLimit = sqrt( ( globValNorm * globValNorm + globValErrorNorm * globValErrorNorm ) / nelem ) *
     this->requiredError * coeff;
 
-    for ( int i = 1; i <= nelem; i++ ) {
-        ielem = domain->giveElement(i);
+    for ( auto &elem : domain->giveElements() ) {
 
-        if ( this->ee->skipRegion( ielem->giveRegionNumber() ) ) {
+        if ( this->ee->skipRegion( elem->giveRegionNumber() ) ) {
             continue;
         }
 
-        eerror = this->ee->giveElementError(errorType, ielem, tStep);
+        eerror = this->ee->giveElementError(errorType, elem.get(), tStep);
         iratio = eerror / elemErrLimit;
         if ( fabs(iratio) < 1.e-3 ) {
             continue;
@@ -435,13 +425,13 @@ ZZRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
 
         //  if (iratio > 5.0)iratio = 5.0;
 
-        currDensity = ielem->computeMeanSize();
-        elemPolyOrder = ielem->giveInterpolation()->giveInterpolationOrder();
+        currDensity = elem->computeMeanSize();
+        elemPolyOrder = elem->giveInterpolation()->giveInterpolationOrder();
         elemSize = currDensity / pow(iratio, 1.0 / elemPolyOrder);
 
-        ielemNodes = ielem->giveNumberOfDofManagers();
+        ielemNodes = elem->giveNumberOfDofManagers();
         for ( int j = 1; j <= ielemNodes; j++ ) {
-            jnode = ielem->giveDofManager(j)->giveNumber();
+            int jnode = elem->giveDofManager(j)->giveNumber();
             if ( dofManInitFlag [ jnode - 1 ] ) {
                 this->nodalDensities.at(jnode) = min(this->nodalDensities.at(jnode), elemSize);
             } else {

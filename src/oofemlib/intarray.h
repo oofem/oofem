@@ -46,7 +46,6 @@
 
 namespace oofem {
 class DataStream;
-class CommunicationBuffer;
 
 /**
  * Class implementing an array of integers.
@@ -242,18 +241,16 @@ public:
      * The size of receiver is changed accordingly.
      * @param value value to insert.
      * @param allocChunk If reallocation needed, an additional space for allocChunk values will be allocated.
-     * @return Index of inserted (or existing) value.
      */
-    int insertSorted(int value, int allocChunk = 0);
+    void insertSorted(int value, int allocChunk = 0);
     /**
      * Inserts given value into a receiver, which is assumed to be sorted.
      * The value is inserted only if it does not exist.
      * The size of receiver is changed accordingly.
      * @param value Value to insert.
      * @param allocChunk If reallocation needed, an additional space for allocChunk values will be allocated.
-     * @return Index of inserted (or existing) value.
      */
-    int insertSortedOnce(int value, int allocChunk = 0);
+	void insertSortedOnce(int value, int allocChunk = 0);
     /**
      * Erase the element of given value.
      * If the value is found receiver will shrink accordingly,
@@ -326,39 +323,20 @@ public:
 
     /**
      * Stores array to output stream.
-     * @see FEMComponent
      */
-    contextIOResultType storeYourself(DataStream *stream, ContextMode mode) const;
+    contextIOResultType storeYourself(DataStream &stream) const;
     /**
      * Restores array from image on stream.
-     * @see FEMComponent
      */
-    contextIOResultType restoreYourself(DataStream *stream, ContextMode mode);
-
-    friend std :: ostream &operator << ( std :: ostream & out, const IntArray & x );
-
-#ifdef __PARALLEL_MODE
-    /**@name Methods for packing/unpacking to/from communication buffer */
-    //@{
-    /**
-     * Packs receiver into communication buffer.
-     * @param buff Buffer to pack itself into.
-     * @return Nonzero if successful.
-     */
-    int packToCommBuffer(CommunicationBuffer &buff) const;
-    /**
-     * Unpacks receiver from communication buffer.
-     * @param buff Buffer from which unpack itself.
-     * @return Nonzero if successful.
-     */
-    int unpackFromCommBuffer(CommunicationBuffer &buff);
+    contextIOResultType restoreYourself(DataStream &stream);
     /**
      * Returns how much space is needed to pack receivers message.
      * @param buff Buffer used for packing.
      */
-    int givePackSize(CommunicationBuffer &buff);
-    //@}
-#endif
+    int givePackSize(DataStream &buff) const;
+
+
+    friend std :: ostream &operator << ( std :: ostream & out, const IntArray & x );
 
 #ifdef BOOST_PYTHON
     void __setitem__(int i, int val) { this->at(i + 1) = val; }

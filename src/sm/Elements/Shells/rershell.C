@@ -60,8 +60,6 @@ REGISTER_Element(RerShell);
 RerShell :: RerShell(int n, Domain *aDomain) :
     CCTPlate3d(n, aDomain)
 {
-    numberOfDofMans  = 3;
-    GtoLRotationMatrix = NULL;
     Rx = 1.e+40;
     Ry = 1.e+40;
     Rxy = 1.e+40;
@@ -168,7 +166,7 @@ RerShell :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 8);
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 8) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
@@ -386,7 +384,7 @@ RerShell :: giveLocalCoordinateSystem(FloatMatrix &answer)
 //
 {
     this->computeGtoLRotationMatrix();
-    answer = * GtoLRotationMatrix;
+    answer = GtoLRotationMatrix;
     return 1;
 }
 
@@ -438,7 +436,7 @@ RerShell :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
 
     //check that the z is within the element
     StructuralCrossSection *cs = this->giveStructuralCrossSection();
-    GaussPoint _gp(NULL, 1, new FloatArray ( answer ), 1.0, _2dPlate);
+    GaussPoint _gp(NULL, 1, answer, 1.0, _2dPlate);
 
     double elthick;
 
@@ -478,10 +476,7 @@ RerShell :: computeGtoLRotationMatrix(FloatMatrix &answer)
 {
     double val;
 
-    // test if pereviously computed
-    if ( GtoLRotationMatrix == NULL ) {
-        this->computeGtoLRotationMatrix();
-    }
+    this->computeGtoLRotationMatrix();
 
 
     answer.resize(18, 18);
@@ -489,7 +484,7 @@ RerShell :: computeGtoLRotationMatrix(FloatMatrix &answer)
 
     for ( int i = 1; i <= 3; i++ ) {
         for ( int j = 1; j <= 3; j++ ) {
-            val = GtoLRotationMatrix->at(i, j);
+            val = GtoLRotationMatrix.at(i, j);
             answer.at(i, j)     = val;
             answer.at(i + 3, j + 3) = val;
             answer.at(i + 6, j + 6) = val;
@@ -521,7 +516,7 @@ RerShell :: giveLocalCoordinates(FloatArray &answer, const FloatArray &global)
     // is defined
 
     this->computeGtoLRotationMatrix();
-    answer.beProductOf(* GtoLRotationMatrix, global);
+    answer.beProductOf(GtoLRotationMatrix, global);
 }
 
 
@@ -581,7 +576,7 @@ RerShell :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gauss
     if ( ( type == GlobalForceTensor ) || ( type == GlobalMomentumTensor ) ||
         ( type == GlobalStrainTensor ) || ( type == GlobalCurvatureTensor ) ) {
         this->computeGtoLRotationMatrix();
-        answer.rotatedWith(* GtoLRotationMatrix);
+        answer.rotatedWith(GtoLRotationMatrix);
     }
 }
 

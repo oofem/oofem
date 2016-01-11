@@ -92,8 +92,8 @@ public:
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 
     // definition
     virtual const char *giveClassName() const { return "RheoChainMaterialStatus"; }
@@ -174,8 +174,8 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     // store & restore context functions
-    virtual contextIOResultType saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
-    virtual contextIOResultType restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
+    virtual contextIOResultType saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
+    virtual contextIOResultType restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode mode,
@@ -221,7 +221,7 @@ public:
      * @param tStep Time step (most models are able to respond only when tStep is the current time step).
      * @param mode Determines response mode.
      */
-    virtual void giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) { };
+    virtual void giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) { }
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 

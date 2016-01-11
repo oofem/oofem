@@ -59,13 +59,17 @@ LatticeTransportMaterial :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, this->thetaS, _IFT_LatticeTransportMaterial_thetas);
 
-    IR_GIVE_FIELD(ir, this->thetaR, _IFT_LatticeTransportMaterial_thetar);
+    this->thetaR = 0.;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->thetaR, _IFT_LatticeTransportMaterial_thetar);
 
+    //Options are 0 = constant conductivity and capacity and 1 = van Genuchten conductivity and capactity
     conType = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->conType, _IFT_LatticeTransportMaterial_contype);
-    //Options are 0 = constant conductivity and capacity and 1 = van Genuchten conductivity and capactity
-
-    if ( conType == 1 ) {
+    this->capacity = 0;
+    if(conType == 0){
+      IR_GIVE_OPTIONAL_FIELD(ir, this->capacity, _IFT_LatticeTransportMaterial_c);  
+    }
+    else if ( conType == 1 ) {
         IR_GIVE_FIELD(ir, this->paramM, _IFT_LatticeTransportMaterial_m);
 
         IR_GIVE_FIELD(ir, this->paramA, _IFT_LatticeTransportMaterial_a);
@@ -96,6 +100,8 @@ LatticeTransportMaterial :: initializeFrom(InputRecord *ir)
     crackTortuosity = 1.;
     IR_GIVE_OPTIONAL_FIELD(ir, this->crackTortuosity, _IFT_LatticeTransportMaterial_ctor);
 
+    crackLimit = -1.;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->crackLimit, _IFT_LatticeTransportMaterial_clim);
 
 
     return IRRT_OK;
@@ -149,33 +155,12 @@ LatticeTransportMaterial :: computeConductivity(double suction,
 {
     LatticeTransportMaterialStatus *status = static_cast< LatticeTransportMaterialStatus * >( this->giveStatus(gp) );
 
+    matMode = gp->giveMaterialMode();
+
     this->density = this->give('d', gp);
 
-    double relativePermeability;
-    double conductivity;
-
-    double crackWidth = 0.;
-
-#ifdef __SM_MODULE
-    IntArray coupledModels;
-    if ( domain->giveEngngModel()->giveMasterEngngModel() ) {
-        ( static_cast< StaggeredProblem * >( domain->giveEngngModel()->giveMasterEngngModel() ) )->giveCoupledModels(coupledModels);
-        int couplingFlag = ( static_cast< LatticeTransportElement * >( gp->giveElement() ) )->giveCouplingFlag();
-
-        if ( couplingFlag == 1 && coupledModels.at(1) != 0 && !tStep->isTheFirstStep() ) {
-            int couplingNumber;
-            couplingNumber = ( static_cast< LatticeTransportElement * >( gp->giveElement() ) )->giveCouplingNumber();
-            LatticeStructuralElement *coupledElement;
-            coupledElement  = static_cast< LatticeStructuralElement * >( domain->giveEngngModel()->giveMasterEngngModel()->giveSlaveProblem( coupledModels.at(1) )->giveDomain(1)->giveElement(couplingNumber) );
-            crackWidth = coupledElement->giveCrackWidth();
-        }
-    }
-#endif
-
-    if ( !domain->giveEngngModel()->giveMasterEngngModel() ) {
-        crackWidth = ( static_cast< LatticeTransportElement * >( gp->giveElement() ) )->giveCrackWidth();
-    }
-
+    double relativePermeability=0.;
+    double conductivity = 0.;
 
     double saturation, partOne, partTwo, numerator, denominator;
     if ( suction < this->suctionAirEntry || conType == 0 ) {
@@ -201,14 +186,64 @@ LatticeTransportMaterial :: computeConductivity(double suction,
 
     conductivity = this->permeability / this->viscosity * relativePermeability;
 
+
+
     //add crack contribution;
+   
+    //Read in crack lengths
+    
+    FloatArray crackLengths;
+    
+    static_cast< LatticeTransportElement * >( gp->giveElement())->giveCrackLengths(crackLengths);
+    
+    FloatArray crackWidths;
+    crackWidths.resize(crackLengths.giveSize());   
+
+#ifdef __SM_MODULE
+    IntArray coupledModels;
+    if ( domain->giveEngngModel()->giveMasterEngngModel() ) {
+        (static_cast< StaggeredProblem *>(domain->giveEngngModel()->giveMasterEngngModel()))->giveCoupledModels(coupledModels);
+        int couplingFlag = ( static_cast< LatticeTransportElement * >( gp->giveElement() ) )->giveCouplingFlag();
+
+        if ( couplingFlag == 1 && coupledModels.at(1) != 0 && !tStep->isTheFirstStep() ) {
+	  IntArray couplingNumbers;
+	  
+	  static_cast< LatticeTransportElement * >( gp->giveElement())->giveCouplingNumbers(couplingNumbers);
+	    for(int i = 1; i <=crackLengths.giveSize();i++){
+	      if(couplingNumbers.at(i) != 0){
+		crackWidths.at(i) = static_cast< LatticeStructuralElement* >( domain->giveEngngModel()->giveMasterEngngModel()->giveSlaveProblem( coupledModels.at(1) )->giveDomain(1)->giveElement(couplingNumbers.at(i)))->giveCrackWidth();
+	      }
+	      else{
+		crackWidths.at(i) = 0.;
+	      }
+	    }	       	    
+	}
+    }
+#endif
+    
+    //Read in crack widths from transport element
+    if (!domain->giveEngngModel()->giveMasterEngngModel()){
+      static_cast< LatticeTransportElement * >( gp->giveElement() )->giveCrackWidths(crackWidths);
+    }
+    
+    //Use crack width and apply cubic law
     double crackContribution = 0.;
-    double width = ( static_cast< LatticeTransportElement * >( gp->giveElement() ) )->giveWidth();
 
-    crackContribution = pow(crackWidth, 3.) / ( width * 12. * this->viscosity ) * this->crackTortuosity * relativePermeability;
+    for(int i = 1; i <=crackLengths.giveSize();i++){
+      if(crackWidths.at(i)<this->crackLimit || this->crackLimit < 0.){
+	crackContribution += pow(crackWidths.at(i), 3.) / crackLengths.at(i) ;
+      }
+      else{
+	printf("Limit is activated\n");
+	crackContribution += pow(crackLimit, 3.) / crackLengths.at(i) ;
+      }
+    }
 
+    crackContribution *=  this->crackTortuosity * relativePermeability/ (12. * this->viscosity );
+  
     conductivity += crackContribution;
 
+    
     return this->density * conductivity;
 }
 
@@ -217,20 +252,25 @@ LatticeTransportMaterial :: computeConductivity(double suction,
 double
 LatticeTransportMaterial :: computeCapacity(double suction, GaussPoint *gp)
 {
-    double capacity = 0.;
+    double cap = 0.;
 
     this->density = this->give('d', gp);
 
-    if ( suction < this->suctionAirEntry || conType == 0 ) {
-        capacity = 0.;
-    } else {
+    if(conType == 0){
+      cap = this->capacity;
+    }
+    else{
+      if ( suction < this->suctionAirEntry) {
+        cap = 0.;
+      } else {
         double partOne = this->paramM / ( this->paramA * ( 1. - this->paramM ) );
         double partTwo = pow( suction / this->paramA, this->paramM / ( 1. - this->paramM ) );
         double partThree = pow(1. + pow( suction / this->paramA, 1. / ( 1. - this->paramM ) ), -this->paramM - 1.);
-        capacity = ( this->thetaM - this->thetaR ) * partOne * partTwo * partThree;
+        cap = ( this->thetaM - this->thetaR ) * partOne * partTwo * partThree;
+      }
     }
 
-    return this->density * capacity;
+    return this->density * cap;
 }
 
 
@@ -243,9 +283,9 @@ LatticeTransportMaterial :: CreateStatus(GaussPoint *gp) const
 
 
 void
-LatticeTransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
+LatticeTransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tStep)
 {
-    MaterialStatus :: printOutputAt(File, tNow);
+    MaterialStatus :: printOutputAt(File, tStep);
 
     fprintf(File, "  state");
 
@@ -268,15 +308,13 @@ void
 LatticeTransportMaterialStatus :: initTempStatus()
 {
     TransportMaterialStatus :: initTempStatus();
+    oldPressure = field.at(1);
 }
 
 
 LatticeTransportMaterialStatus :: LatticeTransportMaterialStatus(int n, Domain *d, GaussPoint *g) :
     TransportMaterialStatus(n, d, g)
 {
-    // stateVector.resize(1);
-    // stateVector.zero();
-    // tempStateVector = stateVector;
     mass = 0.;
 }
 } // end namespace oofem

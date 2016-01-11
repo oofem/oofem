@@ -76,8 +76,8 @@ public:
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 
     /**
      * Interface requesting service.
@@ -135,11 +135,9 @@ public:
      */
     virtual void giveSupportRadius(double &radius) { radius = this->R; }
 
-#ifdef __PARALLEL_MODE
-    int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip);
-    int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip);
-    int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip);
-#endif
+    virtual int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip);
+    virtual int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip);
+    virtual int estimatePackSize(DataStream &buff, GaussPoint *ip);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new MazarsNLMaterialStatus(1, MazarsMaterial :: domain, gp); }
 

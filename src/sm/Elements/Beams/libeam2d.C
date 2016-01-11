@@ -111,7 +111,7 @@ LIBeam2d :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 2) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
 }
@@ -340,7 +340,7 @@ LIBeam2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
      * without regarding particular side
      */
 
-    this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
+    this->computeNmatrixAt(gp->giveSubPatchCoordinates(), answer);
 }
 
 
@@ -381,7 +381,7 @@ LIBeam2d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 LIBeam2d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    computeGlobalCoordinates( answer, * ( gp->giveNaturalCoordinates() ) );
+    computeGlobalCoordinates( answer, gp->giveNaturalCoordinates() );
 }
 
 
@@ -390,7 +390,7 @@ LIBeam2d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tS
 {
     FloatArray lc(1);
     StructuralElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
-    answer.times( this->giveCrossSection()->give(CS_Area, & lc, NULL, this) );
+    answer.times( this->giveCrossSection()->give(CS_Area, lc, this) );
 }
 
 

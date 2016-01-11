@@ -77,7 +77,7 @@ QBrick1_ht :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 2) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
@@ -105,7 +105,7 @@ QBrick1_ht :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(),
+    determinant = fabs( this->interpolation.giveTransformationJacobian( gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) ) );
 
     weight = gp->giveWeight();
@@ -117,7 +117,7 @@ QBrick1_ht :: computeVolumeAround(GaussPoint *gp)
 double
 QBrick1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(),
+    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) );
     return result *gp->giveWeight();
 }
@@ -137,7 +137,7 @@ double
 QBrick1_ht :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
     double determinant, weight, volume;
-    determinant = fabs( interpolation.surfaceGiveTransformationJacobian( iSurf, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    determinant = fabs( interpolation.surfaceGiveTransformationJacobian( iSurf, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     weight = gp->giveWeight();
     volume = determinant * weight;
     return volume;
@@ -201,13 +201,4 @@ QBrick1_ht :: SPRNodalRecoveryMI_givePatchType()
     return SPRPatchType_3dBiQuadratic;
 }
 
-
-double
-QBrick1_ht :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
-{
-    FloatArray lcoords(3), gcoords;
-    lcoords.zero();
-    this->computeGlobalCoordinates(gcoords, lcoords);
-    return gcoords.distance(coords);
-}
 } // end namespace oofem

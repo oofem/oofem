@@ -48,6 +48,7 @@
 #include "vtkxmlexportmodule.h"
 #include "gausspoint.h"
 #include "matstatmapperint.h"
+#include "unknownnumberingscheme.h"
 
 namespace oofem {
 REGISTER_EngngModel(XFEMStatic);
@@ -147,7 +148,8 @@ XFEMStatic :: terminate(TimeStep *tStep)
     // Propagate fronts
     for ( auto &domain: domainList ) {
         XfemManager *xMan = domain->giveXfemManager();
-        xMan->propagateFronts();
+        bool frontsHavePropagated = false;
+        xMan->propagateFronts(frontsHavePropagated);
     }
 
 

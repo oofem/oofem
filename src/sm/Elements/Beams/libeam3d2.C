@@ -119,7 +119,7 @@ LIBeam3d2 :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 2) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
 }
@@ -337,7 +337,7 @@ LIBeam3d2 :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp
      * without regarding particular side
      */
 
-    this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
+    this->computeNmatrixAt(gp->giveSubPatchCoordinates(), answer);
 }
 
 
@@ -375,7 +375,7 @@ LIBeam3d2 :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 LIBeam3d2 :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    computeGlobalCoordinates( answer, * ( gp->giveNaturalCoordinates() ) );
+    computeGlobalCoordinates( answer, gp->giveNaturalCoordinates() );
 }
 
 
@@ -412,7 +412,7 @@ LIBeam3d2 :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *t
 {
     FloatArray lc(1);
     NLStructuralElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
-    answer.times( this->giveCrossSection()->give(CS_Area, & lc, NULL, this) );
+    answer.times( this->giveCrossSection()->give(CS_Area, lc, this) );
 }
 
 
@@ -618,7 +618,7 @@ LIBeam3d2 :: initForNewStep()
 
 
 
-contextIOResultType LIBeam3d2 :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType LIBeam3d2 :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full element context (saves state variables, that completely describe
 // current state)
@@ -629,7 +629,7 @@ contextIOResultType LIBeam3d2 :: saveContext(DataStream *stream, ContextMode mod
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = tc.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = tc.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -637,7 +637,7 @@ contextIOResultType LIBeam3d2 :: saveContext(DataStream *stream, ContextMode mod
 }
 
 
-contextIOResultType LIBeam3d2 :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType LIBeam3d2 :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full element context (saves state variables, that completely describe
 // current state)
@@ -648,7 +648,7 @@ contextIOResultType LIBeam3d2 :: restoreContext(DataStream *stream, ContextMode 
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = tc.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = tc.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

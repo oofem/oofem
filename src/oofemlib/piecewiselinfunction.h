@@ -41,7 +41,6 @@
 ///@name Input fields for PiecewiseLinFunction
 //@{
 #define _IFT_PiecewiseLinFunction_Name "piecewiselinfunction"
-#define _IFT_PiecewiseLinFunction_npoints "npoints"
 #define _IFT_PiecewiseLinFunction_t "t"
 #define _IFT_PiecewiseLinFunction_ft "f(t)"
 #define _IFT_PiecewiseLinFunction_dataFile "datafile"
@@ -68,8 +67,8 @@ public:
     virtual const char *giveClassName() const { return "PiecewiceLinFunction"; }
     virtual const char *giveInputRecordName() const { return _IFT_PiecewiseLinFunction_Name; }
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 
     virtual double evaluateAtTime(double t);
     virtual double evaluateVelocityAtTime(double t);

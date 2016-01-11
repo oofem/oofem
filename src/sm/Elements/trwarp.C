@@ -74,7 +74,7 @@ Tr_Warp :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize(1);
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
@@ -97,7 +97,7 @@ Tr_Warp :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
 // luated at gp.
 {
     FloatMatrix dN;
-    this->interp.evaldNdx( dN, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evaldNdx( dN, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(2, 3);
 
@@ -116,7 +116,7 @@ Tr_Warp :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, volume;
-    determinant = fabs( this->interp.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    determinant = fabs( this->interp.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     weight = gp->giveWeight();
     volume = determinant * weight;
 
@@ -196,7 +196,7 @@ Tr_Warp :: giveThicknessAt(const FloatArray &gcoords)
 double
 Tr_Warp :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double determinant = fabs( this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    double determinant = fabs( this->interp.edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     FloatArray gc;
     return determinant * gp->giveWeight();
 }
@@ -213,8 +213,8 @@ Tr_Warp :: giveInterface(InterfaceType interface)
 {
     if ( interface == SpatialLocalizerInterfaceType ) {
         return static_cast< SpatialLocalizerInterface * >(this);
-	//    } else if ( interface == EIPrimaryFieldInterfaceType ) {
-	//        return static_cast< EIPrimaryFieldInterface * >(this);
+    //} else if ( interface == EIPrimaryFieldInterfaceType ) {
+        //return static_cast< EIPrimaryFieldInterface * >(this);
     } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
         return static_cast< ZZNodalRecoveryModelInterface * >(this);
     }
@@ -222,12 +222,4 @@ Tr_Warp :: giveInterface(InterfaceType interface)
     return NULL;
 }
 
-double
-Tr_Warp :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
-{
-    FloatArray lcoords(3), gcoords;
-    lcoords.at(1) = lcoords.at(2) = lcoords.at(3) = 1. / 3.;
-    this->computeGlobalCoordinates(gcoords, lcoords);
-    return gcoords.distance(coords);
-}
 } // end namespace oofem

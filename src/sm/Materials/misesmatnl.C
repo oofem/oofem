@@ -43,14 +43,7 @@
 #include "contextioerr.h"
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
-
-#ifdef __PARALLEL_MODE
- #include "combuff.h"
-#endif
-
-#ifdef __OOFEG
- #include "oofeggraphiccontext.h"
-#endif
+#include "datastream.h"
 
 namespace oofem {
 REGISTER_Material(MisesMatNl);
@@ -167,7 +160,7 @@ MisesMatNl :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
 
     Element *elem = gp->giveElement();
     FloatArray coords;
-    elem->computeGlobalCoordinates( coords, * ( gp->giveNaturalCoordinates() ) );
+    elem->computeGlobalCoordinates( coords, gp->giveNaturalCoordinates() );
     double xtarget = coords.at(1);
 
     double w, wsum = 0., x, xprev, damage, damageprev = 0.0;
@@ -178,7 +171,7 @@ MisesMatNl :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
     xprev = xtarget;
     for ( pos = postarget; pos != list->end(); ++pos ) {
         nearElem = ( pos->nearGp )->giveElement();
-        nearElem->computeGlobalCoordinates( coords, * ( ( pos->nearGp )->giveNaturalCoordinates() ) );
+        nearElem->computeGlobalCoordinates( coords, pos->nearGp->giveNaturalCoordinates() );
         x = coords.at(1);
         nonlocStatus = static_cast< MisesMatNlStatus * >( this->giveStatus(pos->nearGp) );
         damage = nonlocStatus->giveTempDamage();
@@ -197,7 +190,7 @@ MisesMatNl :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
     distance = 0.;
     for ( pos = postarget; pos != list->begin(); --pos ) {
         nearElem = ( pos->nearGp )->giveElement();
-        nearElem->computeGlobalCoordinates( coords, * ( ( pos->nearGp )->giveNaturalCoordinates() ) );
+        nearElem->computeGlobalCoordinates( coords, pos->nearGp->giveNaturalCoordinates() );
         x = coords.at(1);
         nonlocStatus = static_cast< MisesMatNlStatus * >( this->giveStatus(pos->nearGp) );
         damage = nonlocStatus->giveTempDamage();
@@ -216,7 +209,7 @@ MisesMatNl :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
     pos = list->begin();
     if ( pos != postarget ) {
         nearElem = ( pos->nearGp )->giveElement();
-        nearElem->computeGlobalCoordinates( coords, * ( ( pos->nearGp )->giveNaturalCoordinates() ) );
+        nearElem->computeGlobalCoordinates( coords, pos->nearGp->giveNaturalCoordinates() );
         x = coords.at(1);
         nonlocStatus = static_cast< MisesMatNlStatus * >( this->giveStatus(pos->nearGp) );
         damage = nonlocStatus->giveTempDamage();
@@ -243,7 +236,7 @@ MisesMatNl :: computeDistanceModifier(double damage)
 
     case 4: return 1. / pow(Rf / cl, damage);
 
-    case 5: return ( 2. * cl ) / ( cl + Rf + ( cl - Rf ) * cos(3.1415926 * damage) );
+    case 5: return ( 2. * cl ) / ( cl + Rf + ( cl - Rf ) * cos(M_PI * damage) );
 
     default: return 1.;
     }
@@ -505,7 +498,7 @@ MisesMatNlStatus :: updateYourself(TimeStep *tStep)
 
 
 contextIOResultType
-MisesMatNlStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+MisesMatNlStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full information stored in this Status
 // no temp variables stored
@@ -517,13 +510,13 @@ MisesMatNlStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
         THROW_CIOERR(iores);
     }
 
-    //if (!stream->write(&localEquivalentStrainForAverage,1)) THROW_CIOERR(CIO_IOERR);
+    //if (!stream.write(&localEquivalentStrainForAverage,1)) THROW_CIOERR(CIO_IOERR);
     return CIO_OK;
 }
 
 
 contextIOResultType
-MisesMatNlStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+MisesMatNlStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full information stored in stream to this Status
 //
@@ -535,7 +528,7 @@ MisesMatNlStatus :: restoreContext(DataStream *stream, ContextMode mode, void *o
     }
 
     // read raw data
-    //if (!stream->read (&localEquivalentStrainForAverage,1)) THROW_CIOERR(CIO_IOERR);
+    //if (!stream.read (&localEquivalentStrainForAverage,1)) THROW_CIOERR(CIO_IOERR);
 
     return CIO_OK;
 }
@@ -552,38 +545,37 @@ MisesMatNlStatus :: giveInterface(InterfaceType type)
 }
 
 
-#ifdef __PARALLEL_MODE
 int
-MisesMatNl :: packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
+MisesMatNl :: packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip)
 {
     MisesMatNlStatus *nlStatus = static_cast< MisesMatNlStatus * >( this->giveStatus(ip) );
 
     this->buildNonlocalPointTable(ip);
     this->updateDomainBeforeNonlocAverage(tStep);
 
-    return buff.packDouble( nlStatus->giveLocalCumPlasticStrainForAverage() );
+    return buff.write( nlStatus->giveLocalCumPlasticStrainForAverage() );
 }
 
 
 int
-MisesMatNl :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
+MisesMatNl :: unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip)
 {
     int result;
     MisesMatNlStatus *nlStatus = static_cast< MisesMatNlStatus * >( this->giveStatus(ip) );
     double localCumPlasticStrainForAverage;
 
-    result = buff.unpackDouble(localCumPlasticStrainForAverage);
+    result = buff.read(localCumPlasticStrainForAverage);
     nlStatus->setLocalCumPlasticStrainForAverage(localCumPlasticStrainForAverage);
     return result;
 }
 
 
 int
-MisesMatNl :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
+MisesMatNl :: estimatePackSize(DataStream &buff, GaussPoint *ip)
 {
     // Note: nlStatus localStrainVectorForAverage memeber must be properly sized!
     // IDNLMaterialStatus *nlStatus = (IDNLMaterialStatus*) this -> giveStatus (ip);
-    return buff.givePackSize(MPI_DOUBLE, 1);
+    return buff.givePackSizeOfDouble(1);
 }
-#endif
+
 } // end namespace oofem

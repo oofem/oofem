@@ -72,18 +72,17 @@ protected:
      * Transformation Matrix form GtoL(3,3) is stored
      * at the element level for computation efficiency
      */
-    FloatMatrix *GtoLRotationMatrix;
+    FloatMatrix GtoLRotationMatrix;
 
 public:
     TrPlaneStrRot3d(int n, Domain * d);
-    virtual ~TrPlaneStrRot3d() {
-        delete GtoLRotationMatrix;
-    }
+    virtual ~TrPlaneStrRot3d() { }
 
 protected:
     void giveLocalCoordinates(FloatArray &answer, FloatArray &global);
     virtual void giveNodeCoordinates(FloatArray &x, FloatArray &y);
 
+    virtual double computeVolumeAround(GaussPoint *gp);
     void giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, GaussPoint *gp, TimeStep *tStep);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual int computeLoadGToLRotationMtrx(FloatMatrix &answer);

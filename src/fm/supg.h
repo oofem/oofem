@@ -36,10 +36,13 @@
 #define supg_h
 
 #include "fluidmodel.h"
+#include "sparsemtrxtype.h"
 #include "sparselinsystemnm.h"
-#include "sparsemtrx.h"
 #include "primaryfield.h"
 #include "materialinterface.h"
+#include "assemblercallback.h"
+
+#include <memory>
 
 ///@name Input fields for SUPG
 //@{
@@ -61,6 +64,25 @@
 //@}
 
 namespace oofem {
+class SparseMtrx;
+class SparseNonLinearSystemNM;
+
+/**
+ * Callback class for assembling SUPG tangent matrices
+ * @author Mikael Öhman
+ */
+class SUPGTangentAssembler : public MatrixAssembler
+{
+protected:
+    MatResponseMode rmode;
+    double lscale, dscale, uscale;
+    double alpha;
+
+public:
+    SUPGTangentAssembler(MatResponseMode m, double l, double d, double u, double a);
+    virtual void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const;
+};
+
 /**
  * This class represents transient incompressible flow problem. Solution is based on
  * algorithm with SUPG/PSPG stabilization.
@@ -69,16 +91,19 @@ class SUPG : public FluidModel
 {
 protected:
     /// Numerical method used to solve the problem
-    SparseLinearSystemNM *nMethod;
+    std :: unique_ptr< SparseLinearSystemNM >nMethod;
 
     LinSystSolverType solverType;
     SparseMtrxType sparseMtrxType;
 
-    SparseMtrx *lhs;
-    PrimaryField *VelocityPressureField;
+    std :: unique_ptr< SparseMtrx > lhs;
+    std :: unique_ptr< PrimaryField > VelocityPressureField;
     //PrimaryField VelocityField;
     FloatArray accelerationVector; //, previousAccelerationVector;
     FloatArray incrementalSolutionVector;
+
+    FloatArray internalForces;
+    FloatArray eNorm;
 
     ///@todo Use ScalarFunction here!
     double deltaT;
@@ -105,35 +130,21 @@ protected:
     double Re;
 
     // material interface representation for multicomponent flows
-    MaterialInterface *materialInterface;
+    std :: unique_ptr< MaterialInterface > materialInterface;
     // map of active dofmans for problems with free surface and only one fluid considered
     // IntArray __DofManActivityMask;
     // free surface flag -> we solve free surface problem by single reference fluid
     // int fsflag;
 
 public:
-    SUPG(int i, EngngModel * _master = NULL) : FluidModel(i, _master), accelerationVector() {
-        initFlag = 1;
-        lhs = NULL;
-        ndomains = 1;
-        nMethod = NULL;
-        VelocityPressureField = NULL;
-        consistentMassFlag = 0;
-        equationScalingFlag = false;
-        lscale = uscale = dscale = 1.0;
-        materialInterface = NULL;
-    }
-    virtual ~SUPG() {
-        delete VelocityPressureField;
-        delete materialInterface;
-        delete nMethod;
-        delete lhs;
-    }
+    SUPG(int i, EngngModel * _master = NULL);
+    virtual ~SUPG();
 
     virtual void solveYourselfAt(TimeStep *tStep);
     virtual void updateYourself(TimeStep *tStep);
 
     virtual double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
+    virtual void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d);
     virtual double giveReynoldsNumber();
     virtual void giveElementCharacteristicVector(FloatArray &answer, int num, CharType type, ValueModeType mode, TimeStep *tStep, Domain *domain);
     virtual void giveElementCharacteristicMatrix(FloatMatrix &answer, int num, CharType type, TimeStep *tStep, Domain *domain);
@@ -166,7 +177,7 @@ public:
     virtual void updateDofUnknownsDictionary(DofManager *dman, TimeStep *tStep);
     virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep);
 
-    virtual MaterialInterface *giveMaterialInterface(int n) { return materialInterface; }
+    virtual MaterialInterface *giveMaterialInterface(int n) { return materialInterface.get(); }
 
 
 protected:

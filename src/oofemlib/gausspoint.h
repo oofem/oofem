@@ -45,6 +45,7 @@
 #include "integrationrule.h"
 #include "integrationpointstatus.h"
 #include "element.h"
+#include "floatarray.h"
 #include "materialmode.h"
 
 namespace oofem {
@@ -97,7 +98,7 @@ private:
     /// Reference to parent integration rule.
     IntegrationRule *irule;
     /// Natural Element Coordinates of receiver.
-    FloatArray *naturalCoordinates;
+    FloatArray naturalCoordinates;
     /// Optional local sub-patch (sub-patches form element volume) coordinates of the receiver.
     FloatArray *subPatchCoordinates;
     /// Optional global (Cartesian) coordinates
@@ -124,7 +125,7 @@ public:
      * @param w Integration weight.
      * @param mode Material mode.
      */
-    GaussPoint(IntegrationRule * ir, int n, FloatArray * iNaturalCoord, double w, MaterialMode mode);
+    GaussPoint(IntegrationRule * ir, int n, FloatArray iNaturalCoord, double w, MaterialMode mode);
 
     GaussPoint(IntegrationRule * ir, int n, double w, MaterialMode mode);
 
@@ -132,48 +133,43 @@ public:
     virtual ~GaussPoint();
 
     /// Returns i-th natural element coordinate of receiver
-    double giveNaturalCoordinate(int i) const { return naturalCoordinates->at(i); }
+    double giveNaturalCoordinate(int i) const { return naturalCoordinates.at(i); }
     /// Returns coordinate array of receiver.
-    FloatArray *giveNaturalCoordinates() { return naturalCoordinates; }
-    void setNaturalCoordinates(FloatArray c) {
-        if(naturalCoordinates != NULL) {
-            * naturalCoordinates = std :: move(c);
-        }
-        else {
-            naturalCoordinates = new FloatArray( std :: move(c) );
-        }
+    const FloatArray &giveNaturalCoordinates() { return naturalCoordinates; }
+    void setNaturalCoordinates(const FloatArray &c) {
+        naturalCoordinates = c;
     }
 
     /// Returns local sub-patch coordinates of the receiver
-    FloatArray *giveSubPatchCoordinates() {
+    const FloatArray &giveSubPatchCoordinates() {
         if ( subPatchCoordinates ) {
-            return subPatchCoordinates;
+            return *subPatchCoordinates;
         } else {
             return naturalCoordinates;
         }
     }
-    void setSubPatchCoordinates(FloatArray c)
+    void setSubPatchCoordinates(const FloatArray &c)
     {
         if ( subPatchCoordinates ) {
-            * subPatchCoordinates = std :: move(c);
+            * subPatchCoordinates = c;
         } else {
-            subPatchCoordinates = new FloatArray(std :: move(c));
+            subPatchCoordinates = new FloatArray(c);
         }
     }
 
     inline const FloatArray &giveGlobalCoordinates() {
-        if( globalCoordinates != NULL ) {
+        if( globalCoordinates ) {
             return *globalCoordinates;
         }
         else {
             globalCoordinates = new FloatArray();
-            this->giveElement()->computeGlobalCoordinates(*globalCoordinates, *naturalCoordinates);
+            this->giveElement()->computeGlobalCoordinates(*globalCoordinates, naturalCoordinates);
             return *globalCoordinates;
         }
     }
 
     void setGlobalCoordinates(const FloatArray &iCoord) {
-        if( globalCoordinates != NULL ) {
+        if( globalCoordinates ) {
             *globalCoordinates = iCoord;
         }
         else {

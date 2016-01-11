@@ -70,11 +70,10 @@ ConnectivityTable :: instanciateConnectivityTable()
 
     OOFEM_LOG_INFO("ConnectivityTable: initializing\n");
 
-    for ( int i = 1; i <= nelems; i++ ) {
-        Element *ielem = domain->giveElement(i);
-        int nnodes = ielem->giveNumberOfDofManagers();
+    for ( auto &elem : domain->giveElements() ) {
+        int nnodes = elem->giveNumberOfDofManagers();
         for ( int j = 1; j <= nnodes; j++ ) {
-            int jnode = ielem->giveDofManager(j)->giveNumber();
+            int jnode = elem->giveDofManager(j)->giveNumber();
             dofManConnectivity.at(jnode)++;
         }
     }

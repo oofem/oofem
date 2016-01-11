@@ -65,6 +65,9 @@ public:
     virtual const char *giveClassName() const { return "PlaneStress2dXfem"; }
     virtual int computeNumberOfDofs();
     virtual void computeGaussPoints();
+
+    void increaseNumGP();
+
     virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
                                   int lowerIndx = 1, int upperIndx = ALL_STRAINS);
@@ -73,6 +76,9 @@ public:
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *, TimeStep *tStep);
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
+
+    virtual void computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
 
     virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL) { XfemStructuralElementInterface :: XfemElementInterface_computeConsistentMassMatrix(answer, tStep, mass, ipDensity); }

@@ -43,6 +43,7 @@
 #include "classfactory.h"
 #include "activebc.h"
 #include "DSSolver.h"
+#include "dof.h"
 
 #include <set>
 
@@ -52,10 +53,9 @@ REGISTER_SparseMtrx( DSSMatrixLDL, SMT_DSS_sym_LDL);
 REGISTER_SparseMtrx( DSSMatrixLL, SMT_DSS_sym_LL);
 REGISTER_SparseMtrx( DSSMatrixLU, SMT_DSS_unsym_LU);
 
-DSSMatrix :: DSSMatrix(dssType _t) : SparseMtrx()
+DSSMatrix :: DSSMatrix(dssType _t) : SparseMtrx(), _dss(new DSSolver())
 {
     eDSSolverType _st = eDSSFactorizationLDLT;
-    _dss = new DSSolver();
     _type = _t;
     if ( _t == sym_LDL ) {
         _st = eDSSFactorizationLDLT;
@@ -68,15 +68,13 @@ DSSMatrix :: DSSMatrix(dssType _t) : SparseMtrx()
     }
 
     _dss->Initialize(0, _st);
-    _sm = NULL;
     isFactorized = false;
 }
 
 
-DSSMatrix :: DSSMatrix(dssType _t, int n) : SparseMtrx(n, n)
+DSSMatrix :: DSSMatrix(dssType _t, int n) : SparseMtrx(n, n), _dss(new DSSolver())
 {
     eDSSolverType _st = eDSSFactorizationLDLT;
-    _dss = new DSSolver();
     _type = _t;
     if ( _t == sym_LDL ) {
         _st = eDSSFactorizationLDLT;
@@ -89,14 +87,11 @@ DSSMatrix :: DSSMatrix(dssType _t, int n) : SparseMtrx(n, n)
     }
 
     _dss->Initialize(0, _st);
-    _sm = NULL;
     isFactorized = false;
 }
 
 DSSMatrix :: ~DSSMatrix()
 {
-    delete _dss;
-    delete _sm;
 }
 
 /*****************************/
@@ -129,23 +124,19 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
     IntArray loc;
     Domain *domain = eModel->giveDomain(di);
     int neq = eModel->giveNumberOfDomainEquations(di, s);
-    int nelem = domain->giveNumberOfElements();
-    int i, ii, j, jj, n;
     unsigned long indx;
-    Element *elem;
     // allocation map
     std :: vector< std :: set< int > >columns(neq);
 
     unsigned long nz_ = 0;
 
-    for ( n = 1; n <= nelem; n++ ) {
-        elem = domain->giveElement(n);
+    for ( auto &elem : domain->giveElements() ) {
         elem->giveLocationArray(loc, s);
 
-        for ( i = 1; i <= loc.giveSize(); i++ ) {
-            if ( ( ii = loc.at(i) ) ) {
-                for ( j = 1; j <= loc.giveSize(); j++ ) {
-                    if ( ( jj = loc.at(j) ) ) {
+        for ( int ii : loc ) {
+            if ( ii > 0 ) {
+                for ( int jj : loc ) {
+                    if ( jj > 0 ) {
                         columns [ jj - 1 ].insert(ii - 1);
                     }
                 }
@@ -154,31 +145,30 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
     }
 
     // loop over active boundary conditions
-    int nbc = domain->giveNumberOfBoundaryConditions();
     std::vector<IntArray> r_locs;
     std::vector<IntArray> c_locs;
     
-    for ( i = 1; i <= nbc; ++i ) {
-        ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
+    for ( auto &gbc : domain->giveBcs() ) {
+        ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( gbc.get() );
         if ( bc != NULL ) {
             bc->giveLocationArrays(r_locs, c_locs, UnknownCharType, s, s);
-	    for (std::size_t k = 0; k < r_locs.size(); k++) {
-	      IntArray &krloc = r_locs[k];
-	      IntArray &kcloc = c_locs[k];
-	      for ( int ri = 1; ri <= krloc.giveSize(); ri++ ) {
-		if ( ( ii = krloc.at(ri) ) ) {
-		  for ( j = 1; j <= kcloc.giveSize(); j++ ) {
-		    if ( (jj = kcloc.at(j) ) ) {
-		      columns [ jj - 1 ].insert(ii - 1);
-		    }
-		  }
-		}
-	      }
-	    }
-	}
+            for (std::size_t k = 0; k < r_locs.size(); k++) {
+                IntArray &krloc = r_locs[k];
+                IntArray &kcloc = c_locs[k];
+                for ( int ii : krloc ) {
+                    if ( ii > 0 ) {
+                        for ( int jj : kcloc ) {
+                            if ( jj > 0 ) {
+                                columns [ jj - 1 ].insert(ii - 1);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
     
-    for ( i = 0; i < neq; i++ ) {
+    for ( int i = 0; i < neq; i++ ) {
         nz_ += columns [ i ].size();
     }
 
@@ -190,21 +180,17 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
 
     indx = 0;
 
-    std :: set< int > :: iterator pos;
-    for ( j = 0; j < neq; j++ ) { // column loop
+    for ( int j = 0; j < neq; j++ ) { // column loop
         colptr_ [ j ] = indx;
-        for ( pos = columns [ j ].begin(); pos != columns [ j ].end(); ++pos ) { // row loop
-            rowind_ [ indx++ ] = * pos;
+        for ( auto &val : columns [ j ] ) { // row loop
+            rowind_ [ indx++ ] = val;
         }
     }
 
     colptr_ [ neq ] = indx;
 
-    if ( _sm ) {
-        delete _sm;
-    }
-
-    if ( ( _sm = new SparseMatrixF(neq, NULL, rowind_, colptr_, 0, 0, true) ) == NULL ) {
+    _sm.reset( new SparseMatrixF(neq, NULL, rowind_, colptr_, 0, 0, true) ); 
+    if ( !_sm ) {
         OOFEM_FATAL("free store exhausted, exiting");
     }
 
@@ -217,20 +203,18 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
     int _ndofs, _neq, ndofmans = domain->giveNumberOfDofManagers();
     int ndofmansbc = 0;
     // count number of internal dofmans on active bc
-    for (n=1; n<=nbc; n++) {
-      ndofmansbc+=domain->giveBc(n)->giveNumberOfInternalDofManagers();
+    for ( auto &bc : domain->giveBcs() ) {
+        ndofmansbc += bc->giveNumberOfInternalDofManagers();
     }
 
     long *mcn = new long [ (ndofmans+ndofmansbc) * bsize ];
     long _c = 0;
-    DofManager *dman;
 
     if ( mcn == NULL ) {
         OOFEM_FATAL("free store exhausted, exiting");
     }
 
-    for ( n = 1; n <= ndofmans; n++ ) {
-        dman = domain->giveDofManager(n);
+    for ( auto &dman : domain->giveDofManagers() ) {
         _ndofs = dman->giveNumberOfDofs();
         if ( _ndofs > bsize ) {
             _succ = false;
@@ -248,16 +232,16 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
             }
         }
 
-        for ( i = _ndofs + 1; i <= bsize; i++ ) {
+        for ( int i = _ndofs + 1; i <= bsize; i++ ) {
             mcn [ _c++ ] = -1;                         // no corresponding row in sparse mtrx structure
         }
     }
 
     // loop over internal dofmans of active bc
-    for (int ibc=1; ibc<=nbc; ibc++) {
-      int ndman = domain->giveBc(ibc)->giveNumberOfInternalDofManagers();
+    for ( auto &bc : domain->giveBcs() ) {
+      int ndman = bc->giveNumberOfInternalDofManagers();
       for (int idman = 1; idman <= ndman; idman ++) {
-            dman = domain->giveBc(ibc)->giveInternalDofManager(idman);
+            DofManager *dman = bc->giveInternalDofManager(idman);
             _ndofs = dman->giveNumberOfDofs();
             if ( _ndofs > bsize ) {
                 _succ = false;
@@ -275,18 +259,18 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
                 }
             }
 
-            for ( i = _ndofs + 1; i <= bsize; i++ ) {
+            for ( int i = _ndofs + 1; i <= bsize; i++ ) {
                 mcn [ _c++ ] = -1;                         // no corresponding row in sparse mtrx structure
             }
         }
     }
     
     if ( _succ ) {
-        _dss->SetMatrixPattern(_sm, bsize);
+        _dss->SetMatrixPattern(_sm.get(), bsize);
         _dss->LoadMCN(ndofmans+ndofmansbc, bsize, mcn);
     } else {
         OOFEM_LOG_INFO("DSSMatrix: using assumed block structure");
-        _dss->SetMatrixPattern(_sm, bsize);
+        _dss->SetMatrixPattern(_sm.get(), bsize);
     }
 
     _dss->PreFactorize();
@@ -355,36 +339,36 @@ int DSSMatrix :: assemble(const IntArray &loc, const FloatMatrix &mat)
 
 int DSSMatrix :: assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat)
 {
-    int i, j, ii, jj, dim1, dim2;
+    int dim1, dim2;
 
     // this->checkSizeTowards(rloc, cloc);
 
     dim1 = mat.giveNumberOfRows();
     dim2 = mat.giveNumberOfColumns();
     if ( _type == unsym_LU ) {
-      for ( i = 1; i <= dim1; i++ ) {
-        ii = rloc.at(i);
-        if ( ii ) {
-	  for ( j = 1; j <= dim2; j++ ) {
-	    jj = cloc.at(j);
-	    if ( jj ) {
-	      _dss->ElementAt(ii - 1, jj - 1) += mat.at(i, j);
-	    }
-	  }
+        for ( int i = 1; i <= dim1; i++ ) {
+            int ii = rloc.at(i);
+            if ( ii ) {
+                for ( int j = 1; j <= dim2; j++ ) {
+                    int jj = cloc.at(j);
+                    if ( jj ) {
+                        _dss->ElementAt(ii - 1, jj - 1) += mat.at(i, j);
+                    }
+                }
+            }
         }
-      }
     } else { // symmetric pattern
-      for ( i = 1; i <= dim1; i++ ) {
-        ii = rloc.at(i);
-        if ( ii ) {
-	  for ( j = 1; j <= dim2; j++ ) {
-	    jj = cloc.at(j);
-	    if ( jj && (jj <= ii) ) {
-	      _dss->ElementAt(ii - 1, jj - 1) += mat.at(i, j);
-	    }
-	  }
+        for ( int i = 1; i <= dim1; i++ ) {
+            int ii = rloc.at(i);
+            if ( ii ) {
+                for ( int j = 1; j <= dim2; j++ ) {
+                    int jj = cloc.at(j);
+                    if ( jj && (jj <= ii) ) {
+                        _dss->ElementAt(ii - 1, jj - 1) += mat.at(i, j);
+                    }
+                }
+            }
         }
-      }
     }
 
     // increment version
@@ -413,10 +397,10 @@ SparseMtrx *DSSMatrix :: factorized()
     return this;
 }
 
-void DSSMatrix :: solve(FloatArray *b, FloatArray *x)
+void DSSMatrix :: solve(FloatArray &b, FloatArray &x)
 {
-    x->resize( b->giveSize() );
-    _dss->Solve( x->givePointer(), b->givePointer() );
+    x.resize( b.giveSize() );
+    _dss->Solve( x.givePointer(), b.givePointer() );
 }
 
 /*********************/

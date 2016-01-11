@@ -138,8 +138,8 @@ public:
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 
     /**
      * Interface requesting service.  In the case of nonlocal constitutive models,
@@ -298,13 +298,11 @@ public:
     virtual int MMI_update(GaussPoint *gp, TimeStep *tStep, FloatArray *estrain = NULL);
     virtual int MMI_finish(TimeStep *tStep);
 
-#ifdef __PARALLEL_MODE
-    int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip);
-    int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip);
-    int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip);
+    virtual int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip);
+    virtual int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip);
+    virtual int estimatePackSize(DataStream &buff, GaussPoint *ip);
     virtual double predictRelativeComputationalCost(GaussPoint *gp);
     virtual double predictRelativeRedistributionCost(GaussPoint *gp) { return 1.0; }
-#endif
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 

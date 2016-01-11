@@ -62,14 +62,14 @@ class SparseMtrx;
 class LinearStatic : public StructuralEngngModel
 {
 protected:
-    SparseMtrx *stiffnessMatrix;
+    std :: unique_ptr< SparseMtrx > stiffnessMatrix;
     FloatArray loadVector;
     FloatArray displacementVector;
 
     LinSystSolverType solverType;
     SparseMtrxType sparseMtrxType;
     /// Numerical method used to solve the problem.
-    SparseLinearSystemNM *nMethod;
+    std :: unique_ptr< SparseLinearSystemNM > nMethod;
 
     int initFlag;
 
@@ -92,16 +92,12 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
-
     // identification
     virtual const char *giveInputRecordName() const { return _IFT_LinearStatic_Name; }
     virtual const char *giveClassName() const { return "LinearStatic"; }
     virtual fMode giveFormulation() { return TL; }
 
-#ifdef __PARALLEL_MODE
-    int estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType);
-#endif
+    virtual int estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType);
 };
 } // end namespace oofem
 #endif // linearstatic_h

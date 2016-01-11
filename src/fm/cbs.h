@@ -120,12 +120,12 @@ class CBS : public FluidModel
 {
 protected:
     /// Numerical method used to solve the problem.
-    SparseLinearSystemNM *nMethod;
+    std :: unique_ptr< SparseLinearSystemNM > nMethod;
 
     LinSystSolverType solverType;
     SparseMtrxType sparseMtrxType;
 
-    SparseMtrx *lhs;
+    std :: unique_ptr< SparseMtrx > lhs;
     /// Pressure field.
     PrimaryField PressureField;
     /// Velocity field.
@@ -137,7 +137,7 @@ protected:
     /// Lumped mass matrix.
     FloatArray mm;
     /// Sparse consistent mass.
-    SparseMtrx *mss;
+    std :: unique_ptr< SparseMtrx > mss;
 
     /// Time step and its minimal value.
     double deltaT, minDeltaT;
@@ -165,32 +165,11 @@ protected:
 
     //<RESTRICTED_SECTION>
     // material interface representation for multicomponent flows
-    MaterialInterface *materialInterface;
+    std :: unique_ptr< MaterialInterface > materialInterface;
     //</RESTRICTED_SECTION>
 public:
-    CBS(int i, EngngModel * _master = NULL) : FluidModel(i, _master),
-        PressureField(this, 1, FT_Pressure, 1),
-        VelocityField(this, 1, FT_Velocity, 1),
-        vnum(false), vnumPrescribed(true), pnum(false), pnumPrescribed(true) {
-        initFlag = 1;
-        lhs = NULL;
-        ndomains = 1;
-        nMethod = NULL;
-        consistentMassFlag = 0;
-        equationScalingFlag = false;
-        lscale = uscale = dscale = 1.0;
-        //<RESTRICTED_SECTION>
-        materialInterface = NULL;
-        //</RESTRICTED_SECTION>
-    }
-    virtual ~CBS() {
-        //<RESTRICTED_SECTION>
-        delete materialInterface;
-
-        //</RESTRICTED_SECTION>
-        delete this->nMethod;
-        delete this->lhs;
-    }
+    CBS(int i, EngngModel * _master = NULL);
+    virtual ~CBS();
 
     virtual void solveYourselfAt(TimeStep *tStep);
 

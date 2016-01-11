@@ -108,13 +108,14 @@ public:
      * @return Prescribed value of unknown or zero if not prescribed.
      */
     virtual double give(Dof *dof, ValueModeType mode, TimeStep *tStep);
+    virtual double give(Dof *dof, ValueModeType mode, double time);
 
     /**
      * Set prescribed value at the input record string of receiver
      * @param s prescribed value
      * @todo This function isn't as meaningful anymore. Possibly keep it if we change it to a vector. No inheriting b.c.s can overload this in a meaningful way.
      */
-    virtual void setPrescribedValue(double s);
+    void setPrescribedValue(double s);
 
     // Overloaded methods:
     virtual bcType giveType() const { return DirichletBT; }
@@ -123,6 +124,10 @@ public:
     virtual void scale(double s);
     virtual const char *giveClassName() const { return "BoundaryCondition"; }
     virtual const char *giveInputRecordName() const { return _IFT_BoundaryCondition_Name; }
+
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+
 };
 } // end namespace oofem
 #endif // boudary_h

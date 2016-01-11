@@ -80,26 +80,23 @@ void FE2FluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, Gauss
 
 void FE2FluidMaterial :: computeDeviatoricStressVector(FloatArray &stress_dev, double &r_vol, GaussPoint *gp, const FloatArray &eps, double pressure, TimeStep *tStep)
 {
-    FloatMatrix d, tangent;
     FE2FluidMaterialStatus *ms = static_cast< FE2FluidMaterialStatus * >( this->giveStatus(gp) );
 
     ms->setTimeStep(tStep);
 
     MixedGradientPressureBC *bc = ms->giveBC();
-    StokesFlow *rve = ms->giveRVE();
 
     // Set input
     bc->setPrescribedDeviatoricGradientFromVoigt(eps);
     bc->setPrescribedPressure(pressure);
     // Solve subscale problem
-    rve->solveYourselfAt(tStep);
+    ms->giveRVE()->solveYourselfAt(ms->giveRVE()->giveCurrentStep());
 
     bc->computeFields(stress_dev, r_vol, tStep);
+
     ms->letDeviatoricStressVectorBe(stress_dev);
     ms->letDeviatoricStrainRateVectorBe(eps);
-
     ms->letPressureBe(pressure);
-
     ms->markOldTangents(); // Mark this so that tangents are reevaluated if they are needed.
     // One could also just compute them here, but you don't actually need them if the problem has converged, so this method saves on that iteration.
     // Computing the tangents are often *more* expensive than computeFields, so this is well worth the time it saves
@@ -329,7 +326,6 @@ FE2FluidMaterialStatus :: FE2FluidMaterialStatus(int n, Domain *d, GaussPoint *g
 
 FE2FluidMaterialStatus :: ~FE2FluidMaterialStatus()
 {
-    delete this->rve;
 }
 
 // Uses an input file for now, should eventually create the RVE itself.
@@ -344,19 +340,14 @@ bool FE2FluidMaterialStatus :: createRVE(int n, GaussPoint *gp, const std :: str
     em->giveNextStep(); // Makes sure there is a timestep (which we will modify before solving a step)
     em->init();
 
-    this->rve = dynamic_cast< StokesFlow * >(em);
-    if ( !this->rve ) {
-        return false;
-    }
+    this->rve.reset( em );
 
     std :: ostringstream name;
     name << this->rve->giveOutputBaseFileName() << "-gp" << n;
-#ifdef __PARALLEL_MODE
     if ( this->domain->giveEngngModel()->isParallel() && this->domain->giveEngngModel()->giveNumberOfProcesses() > 1 ) {
         name << "." << this->domain->giveEngngModel()->giveRank();
     }
 
-#endif
     this->rve->letOutputBaseFileNameBe( name.str() );
 
     this->bc = dynamic_cast< MixedGradientPressureBC * >( this->rve->giveDomain(1)->giveBc(1) );
@@ -388,24 +379,25 @@ void FE2FluidMaterialStatus :: initTempStatus()
     FluidDynamicMaterialStatus :: initTempStatus();
 }
 
-contextIOResultType FE2FluidMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType FE2FluidMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
     if ( ( iores = FluidDynamicMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    return CIO_OK;
+    return this->rve->saveContext(&stream, mode, obj);
 }
 
-contextIOResultType FE2FluidMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType FE2FluidMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
     if ( ( iores = FluidDynamicMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
+    this->markOldTangents();
 
-    return CIO_OK;
+    return this->rve->restoreContext(&stream, mode, obj);
 }
 
 void FE2FluidMaterialStatus :: markOldTangents() { this->oldTangents = true; }

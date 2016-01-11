@@ -34,6 +34,7 @@
 
 #include "fluidmodel.h"
 #include "element.h"
+#include "dof.h"
 #include "generalboundarycondition.h"
 #include "dofmanager.h"
 
@@ -50,13 +51,8 @@ FluidModel :: forceEquationNumbering(int id)
     this->domainNeqs.at(id) = 0;
     this->domainPrescribedNeqs.at(id) = 0;
 
-    int nnodes = domain->giveNumberOfDofManagers();
-    int nelem  = domain->giveNumberOfElements();
-    int nbc    = domain->giveNumberOfBoundaryConditions();
-
     // First velocity.
-    for ( int i = 1; i <= nnodes; i++ ) {
-        DofManager *dman = domain->giveDofManager(i);
+    for ( auto &dman : domain->giveDofManagers() ) {
         for ( Dof *dof: *dman ) {
             DofIDItem type = dof->giveDofID();
             if ( type == V_u || type == V_v || type == V_w ) {
@@ -65,8 +61,7 @@ FluidModel :: forceEquationNumbering(int id)
         }
     }
 
-    for ( int i = 1; i <= nelem; ++i ) {
-        Element *elem = domain->giveElement(i);
+    for ( auto &elem : domain->giveElements() ) {
         int innodes = elem->giveNumberOfInternalDofManagers();
         for ( int k = 1; k <= innodes; k++ ) {
             DofManager *dman = elem->giveInternalDofManager(k);
@@ -79,8 +74,7 @@ FluidModel :: forceEquationNumbering(int id)
         }
     }
 
-    for ( int i = 1; i <= nbc; ++i ) {
-        GeneralBoundaryCondition *bc = domain->giveBc(i);
+    for ( auto &bc : domain->giveBcs() ) {
         int innodes = bc->giveNumberOfInternalDofManagers();
         for ( int k = 1; k <= innodes; k++ ) {
             DofManager *dman = bc->giveInternalDofManager(k);
@@ -94,8 +88,7 @@ FluidModel :: forceEquationNumbering(int id)
     }
 
     // Then the rest
-    for ( int i = 1; i <= nnodes; i++ ) {
-        DofManager *dman = domain->giveDofManager(i);
+    for ( auto &dman : domain->giveDofManagers() ) {
         for ( Dof *dof: *dman ) {
             DofIDItem type = dof->giveDofID();
             if ( !( type == V_u || type == V_v || type == V_w ) ) {
@@ -104,8 +97,7 @@ FluidModel :: forceEquationNumbering(int id)
         }
     }
 
-    for ( int i = 1; i <= nelem; ++i ) {
-        Element *elem = domain->giveElement(i);
+    for ( auto &elem : domain->giveElements() ) {
         int innodes = elem->giveNumberOfInternalDofManagers();
         for ( int k = 1; k <= innodes; k++ ) {
             DofManager *dman = elem->giveInternalDofManager(k);
@@ -118,8 +110,7 @@ FluidModel :: forceEquationNumbering(int id)
         }
     }
 
-    for ( int i = 1; i <= nbc; ++i ) {
-        GeneralBoundaryCondition *bc = domain->giveBc(i);
+    for ( auto &bc : domain->giveBcs() ) {
         int innodes = bc->giveNumberOfInternalDofManagers();
         for ( int k = 1; k <= innodes; k++ ) {
             DofManager *dman = bc->giveInternalDofManager(k);

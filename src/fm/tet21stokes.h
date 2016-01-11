@@ -39,6 +39,7 @@
 #include "nodalaveragingrecoverymodel.h"
 #include "spatiallocalizer.h"
 #include "eleminterpmapperinterface.h"
+#include "matresponsemode.h"
 
 #define _IFT_Tet21Stokes_Name "tet21stokes"
 
@@ -77,7 +78,7 @@ public:
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
 
     void computeInternalForcesVector(FloatArray &answer, TimeStep *tStep);
-    void computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep);
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, TimeStep *tStep);
 
     void computeExternalForcesVector(FloatArray &answer, TimeStep *tStep);
     virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
@@ -104,17 +105,12 @@ public:
 
     virtual Interface *giveInterface(InterfaceType it);
 
-    // Spatial localizer interface:
-    virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
-
     // Element interpolation interface:
     virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType u,
                                                                        TimeStep *tStep, const FloatArray &coords, FloatArray &answer);
 
     // Nodal averaging interface:
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
-
-    void giveIntegratedVelocity(FloatArray &answer, TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // tet21stokes_h

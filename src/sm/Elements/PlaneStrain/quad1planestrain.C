@@ -47,7 +47,7 @@
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
  #include "oofegutils.h"
- #include "rcm2.h"
+ #include "Materials/rcm2.h"
 #endif
 
 namespace oofem {
@@ -83,7 +83,7 @@ Quad1PlaneStrain :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li
 {
     FloatMatrix dN;
 
-    this->interp.evaldNdx( dN, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evaldNdx( dN, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     // Reshape
     answer.resize(4, 8);
@@ -135,7 +135,7 @@ Quad1PlaneStrain :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // evaluated at gp.
 {
     FloatMatrix dnx;
-    this->interp.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evaldNdx( dnx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(5, 8);
     answer.zero();
@@ -247,7 +247,7 @@ Quad1PlaneStrain :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElem
 
 void Quad1PlaneStrain :: HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
-    computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
+    computeNmatrixAt(gp->giveSubPatchCoordinates(), answer);
 }
 
 
@@ -569,7 +569,7 @@ Quad1PlaneStrain :: drawSpecial(oofegGraphicContext &gc, TimeStep *tStep)
                                                      n3 * this->giveNode(3)->giveUpdatedCoordinate(2, tStep, defScale) +
                                                      n4 * this->giveNode(4)->giveUpdatedCoordinate(2, tStep, defScale) );
                         } else {
-                            computeGlobalCoordinates( gpglobalcoords, * ( gp->giveNaturalCoordinates() ) );
+                            computeGlobalCoordinates( gpglobalcoords, gp->giveNaturalCoordinates() );
                         }
 
                         xc = gpglobalcoords.at(1);
@@ -646,46 +646,15 @@ Quad1PlaneStrain :: SPRNodalRecoveryMI_givePatchType()
 }
 
 
-double
-Quad1PlaneStrain :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
-{
-    FloatArray lcoords(2), gcoords;
-    double dist;
-    int size, gsize;
-
-    lcoords.at(1) = lcoords.at(2) = 0.0;
-    this->computeGlobalCoordinates(gcoords, lcoords);
-
-    if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        OOFEM_ERROR("coordinates size mismatch");
-    }
-
-    if ( size == gsize ) {
-        dist = coords.distance(gcoords);
-    } else {
-        FloatArray helpCoords = coords;
-
-        helpCoords.resizeWithValues(gsize);
-        dist = helpCoords.distance(gcoords);
-    }
-
-    return dist;
-}
-
-
 void
 Quad1PlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
                                                                      TimeStep *tStep, const FloatArray &lcoords,
                                                                      FloatArray &answer)
 {
-    FloatArray u, nv;
+    FloatArray u;
     FloatMatrix n;
-
-    this->interp.evalN( nv, lcoords, FEIElementGeometryWrapper(this) );
-
-    n.beNMatrixOf(nv, 2);
-
-    this->computeVectorOf({D_u, D_v}, mode, tStep, u);
+    this->computeNmatrixAt(lcoords, n);
+    this->computeVectorOf(mode, tStep, u);
     answer.beProductOf(n, u);
 }
 

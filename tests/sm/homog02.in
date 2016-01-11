@@ -3,7 +3,7 @@ Elastic homogenization of 2x2 quad elements with periodic boudnary conditions us
 LinearStatic nsteps 1 nmodules 2
 errorcheck
 #vtkxml tstep_all domain_all cellvars 1 46 primvars 1 1 vars 2 1 4  stype 2
-hom tstep_all
+hom tstep_all ists 2 4 1
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
 ndofman 9 nelem 4 ncrosssect 1 nmat 2 nbc 4 nic 0 nltf 1
@@ -25,9 +25,9 @@ IsoLE 1 d 0. E 10.0 n 0.25 tAlpha 0.000012
 IsoLE 2 d 0. E 2.0 n 0.25 tAlpha 0.000012
 BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
 #vertical sides
-LinearConstraintBC 2 loadTimeFunction 1 dofmans 2 3 1 dofs 2 1 1 weights 2 1. -1. rhs 0.2 lhstype 1 1 rhsType 1 150
-LinearConstraintBC 3 loadTimeFunction 1 dofmans 2 6 4 dofs 2 1 1 weights 2 1. -1. rhs 0.2 lhstype 1 1 rhsType 1 150
-LinearConstraintBC 4 loadTimeFunction 1 dofmans 2 9 7 dofs 2 1 1 weights 2 1. -1. rhs 0.2 lhstype 1 1 rhsType 1 150
+LinearConstraintBC 2 loadTimeFunction 1 dofmans 2 3 1 dofs 2 1 1 weights 2 1. -1. rhs 0.2 lhstype 4 1 2 3 4 rhsType 1 150
+LinearConstraintBC 3 loadTimeFunction 1 dofmans 2 6 4 dofs 2 1 1 weights 2 1. -1. rhs 0.2 lhstype 4 1 2 3 4 rhsType 1 150
+LinearConstraintBC 4 loadTimeFunction 1 dofmans 2 9 7 dofs 2 1 1 weights 2 1. -1. rhs 0.2 lhstype 4 1 2 3 4 rhsType 1 150
 ConstantFunction 1 f(t) 1.0
 #
 #

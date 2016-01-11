@@ -111,7 +111,7 @@ void Truss2d :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 2) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
 }
@@ -311,7 +311,7 @@ Truss2d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 void
 Truss2d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->computeGlobalCoordinates( answer, * ( gp->giveNaturalCoordinates() ) );
+    this->computeGlobalCoordinates( answer, gp->giveNaturalCoordinates() );
 }
 
 void
@@ -331,7 +331,7 @@ Truss2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
      * without regarding particular side
      */
 
-    this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
+    this->computeNmatrixAt(gp->giveSubPatchCoordinates(), answer);
 }
 
 

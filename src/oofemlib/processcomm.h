@@ -43,8 +43,8 @@
 #include "floatarray.h"
 #include "intarray.h"
 #include "error.h"
+#include "logger.h"
 
-#include <mpi.h>
 #include <string>
 
 namespace oofem {
@@ -61,7 +61,7 @@ namespace oofem {
  * When comBuff will be registered, resize is needed only when maps change, and this will not occur frequently
  * (its even quite rare).
  */
-class OOFEM_EXPORT ProcessCommunicatorBuff
+class OOFEM_EXPORT ProcessCommunicatorBuff: public DataStream
 {
 protected:
     /// Send buffer.
@@ -71,144 +71,29 @@ protected:
 public:
     /// Constructor, creates empty send and receive com buffs in MPI_COMM_WORLD.
     ProcessCommunicatorBuff(CommBuffType t);
-    ~ProcessCommunicatorBuff() {
-        if ( send_buff ) {
-            delete send_buff;
-        }
+    virtual ~ProcessCommunicatorBuff();
 
-        if ( recv_buff ) {
-            delete recv_buff;
-        }
-    }
+    virtual int givePackSizeOfInt(int count) { return send_buff->givePackSizeOfInt(count); }
+    virtual int givePackSizeOfDouble(int count) { return send_buff->givePackSizeOfDouble(count); }
+    virtual int givePackSizeOfChar(int count) { return send_buff->givePackSizeOfChar(count); }
+    virtual int givePackSizeOfBool(int count) { return send_buff->givePackSizeOfBool(count); }
+    virtual int givePackSizeOfLong(int count) { return send_buff->givePackSizeOfLong(count); }
 
-    /**@name Methods for datatype packing/unpacking to/from buffer */
-    //@{
-    /**
-     *  Packs single integer value into buffer.
-     *  Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and deallocation.
-     *  @return Nonzero if successful.
-     */
-    int packInt(int value) { return packArray(& value, 1); }
-    /**
-     *  Packs single double value into buffer.
-     *  Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and deallocation.
-     *  @return Nonzero if successful.
-     */
-    int packDouble(double value)  { return packArray(& value, 1); }
-    /**
-     * Packs array of values of given type into buffer.
-     * Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and deallocation.
-     * @param src Address of first value in memory.
-     * @param n Number of packed integers.
-     * @return Nonzero if successful.
-     */
-    //@{
-    int packArray(const int *src, int n) { return send_buff->packArray(src, n); }
-    int packArray(const long *src, int n) { return send_buff->packArray(src, n); }
-    int packArray(const unsigned long *src, int n) { return send_buff->packArray(src, n); }
-    int packArray(const double *src, int n) { return send_buff->packArray(src, n); }
-    int packArray(const char *src, int n) { return send_buff->packArray(src, n); }
-    //@}
+    using DataStream::write;
+    virtual int write(const int *data, int count) { return send_buff->write(data, count); }
+    virtual int write(const long *data, int count) { return send_buff->write(data, count); }
+    virtual int write(const unsigned long *data, int count) { return send_buff->write(data, count); }
+    virtual int write(const double *data, int count) { return send_buff->write(data, count); }
+    virtual int write(const char *data, int count) { return send_buff->write(data, count); }
+    virtual int write(bool data) { return send_buff->write(data); }
 
-    /**
-     * Packs given IntArray  value into buffer.
-     * Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and deallocation.
-     * @return Nonzero if successful.
-     */
-    int packIntArray(const IntArray &arry) { return arry.packToCommBuffer(* send_buff); }
-    /**
-     * Packs given FloatArray  value into buffer.
-     * Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and deallocation.
-     * @return Nonzero if successful.
-     */
-    int packFloatArray(const FloatArray &arry) { return arry.packToCommBuffer(* send_buff); }
-    /**
-     * Packs given FloatMatrix  value into buffer.
-     * Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and deallocation.
-     * @return Nonzero if successful.
-     */
-    int packFloatMatrix(const FloatMatrix &mtrx) { return mtrx.packToCommBuffer(* send_buff); }
-    /**
-     * Packs given string into buffer.
-     * Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and deallocation.
-     * @return Nonzero if successful.
-     */
-    int packString(const std :: string &str) {
-        this->packInt( str.size() );
-        return this->packArray( str.data(), str.size() );
-    }
-    /**
-     *  Unpacks single integer value from buffer.
-     *  @return Nonzero if successful.
-     */
-    int unpackInt(int &value)  { return unpackArray(& value, 1); }
-    /**
-     *  Unpacks single double value from buffer.
-     *  @return Nonzero if successful.
-     */
-    int unpackDouble(double &value) { return unpackArray(& value, 1); }
-    /**
-     * unpacks array of value of given type from buffer.
-     * @param dest Address of first value in memory, where to store values.
-     * @param n Number of unpacked integers.
-     * @return Nonzero if successful.
-     */
-    //@{
-    int unpackArray(int *dest, int n) { return recv_buff->unpackArray(dest, n); }
-    int unpackArray(long *dest, int n) { return recv_buff->unpackArray(dest, n); }
-    int unpackArray(unsigned long *dest, int n) { return recv_buff->unpackArray(dest, n); }
-    int unpackArray(double *dest, int n) { return recv_buff->unpackArray(dest, n); }
-    int unpackArray(char *dest, int n) { return recv_buff->unpackArray(dest, n); }
-    //@}
-    /**
-     * Unpacks given IntArray  value from buffer.
-     * @return Nonzero if successful.
-     */
-    int unpackIntArray(IntArray &arry) { return arry.unpackFromCommBuffer(* recv_buff); }
-    /**
-     * Unpacks given FloatArray  value from buffer.
-     * @return Nonzero if successful.
-     */
-    int unpackFloatArray(FloatArray &arry) { return arry.unpackFromCommBuffer(* recv_buff); }
-    /**
-     * Unpacks given FloatMatrix  value from buffer.
-     * @return Nonzero if successful.
-     */
-    int unpackFloatMatrix(FloatMatrix &mtrx) { return mtrx.unpackFromCommBuffer(* recv_buff); }
-    /**
-     * Unpacks given string value from buffer.
-     * @return Nonzero if successful.
-     */
-    int unpackString(std :: string &str) {
-        int status;
-        int n;
-        char *tmpstr;
-        status = this->unpackInt(n);
-        tmpstr = new char [ n + 1 ];
-        status = status && this->unpackArray(tmpstr, n);
-        tmpstr [ n ] = '\0';
-        str = tmpstr;
-        delete [] tmpstr;
-        return status;
-    }
-    //@}
-
-
-    /**@name Methods for determining pack size of datatype to pack/unpack to/from buffer */
-    //@{
-    /**
-     *  Returns pack size required to pack an array (c-style).
-     *  @param size Array size.
-     *  @param type Type id.
-     *  @return Pack size required.
-     */
-    int givePackSize(MPI_Datatype type, int size) {
-        int requredSpace;
-        MPI_Pack_size(size, type, MPI_COMM_WORLD, & requredSpace);
-        return requredSpace;
-    }
-    //@}
-
+    using DataStream::read;
+    virtual int read(int *data, int count) { return this->recv_buff->read(data, count); }
+    virtual int read(long *data, int count) { return this->recv_buff->read(data, count); }
+    virtual int read(unsigned long *data, int count) { return this->recv_buff->read(data, count); }
+    virtual int read(double *data, int count) { return this->recv_buff->read(data, count); }
+    virtual int read(char *data, int count) { return this->recv_buff->read(data, count); }
+    virtual int read(bool &data) { return recv_buff->read(data); }
 
     /// Initializes send buffer to empty state. All packed data are lost.
     void initSendBuff() { send_buff->init(); }

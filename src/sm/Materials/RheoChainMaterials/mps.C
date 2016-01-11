@@ -70,27 +70,23 @@ MPSMaterialStatus :: updateYourself(TimeStep *tStep)
 }
 
 contextIOResultType
-MPSMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+MPSMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full information stored in this Status
 //
 {
     contextIOResultType iores;
 
-    if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
-    }
-
     if ( ( iores = KelvinChainSolidMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
 
-    if ( !stream->write(& equivalentTime, 1) ) { // write equivalent time
+    if ( !stream.write(equivalentTime) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& flowTermViscosity, 1) ) { // write viscosity of the aging dashpot
+    if ( !stream.write(flowTermViscosity) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -98,7 +94,7 @@ MPSMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj
 }
 
 contextIOResultType
-MPSMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+MPSMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restore the state variables from a stream
 //
@@ -108,11 +104,11 @@ MPSMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *
         THROW_CIOERR(iores);
     }
 
-    if ( !stream->read(& equivalentTime, 1) ) { // restore equivalentTime
+    if ( !stream.read(equivalentTime) ) {
         return CIO_IOERR;
     }
 
-    if ( !stream->read(& flowTermViscosity, 1) ) {  // restore equivalentTime
+    if ( !stream.read(flowTermViscosity) ) {
         return CIO_IOERR;
     }
 
@@ -767,7 +763,7 @@ MPSMaterial :: giveHumidity(GaussPoint *gp, TimeStep *tStep, int option)
         FloatArray et2, ei2; // total and incremental values of water mass
 
         if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {
-            gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveNaturalCoordinates() );
+            gp->giveElement()->computeGlobalCoordinates( gcoords, gp->giveNaturalCoordinates() );
             if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, tStep) ) ) {
                 OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
             }
@@ -824,7 +820,7 @@ MPSMaterial :: giveTemperature(GaussPoint *gp, TimeStep *tStep, int option)
         FloatArray et1, ei1; // total and incremental values of temperature
 
         if ( ( tf = fm->giveField(FT_Temperature) ) ) {
-            gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveNaturalCoordinates() );
+            gp->giveElement()->computeGlobalCoordinates( gcoords, gp->giveNaturalCoordinates() );
             if ( ( err = tf->evaluateAt(et1, gcoords, VM_Total, tStep) ) ) {
                 OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
             }

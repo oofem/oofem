@@ -54,16 +54,13 @@ Targe2Interface :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNu
 int
 Targe2Interface :: createInput(Domain *d, TimeStep *tStep)
 {
-    int nelem = d->giveNumberOfElements();
     FILE *outputStrem;
-    Element *ielem;
     RemeshingCriteria *rc = d->giveErrorEstimator()->giveRemeshingCrit();
 
     outputStrem = fopen("targe2.bmf", "w");
     // print header for 2D
 
-    for ( int i = 1; i <= nelem; i++ ) {
-        ielem = d->giveElement(i);
+    for ( auto &ielem : domain->giveElements() ) {
         fprintf( outputStrem, "MC-T %e %e %e %e %e %e   %e %e %e\n",
                 ielem->giveNode(1)->giveCoordinate(1), ielem->giveNode(1)->giveCoordinate(2),
                 ielem->giveNode(2)->giveCoordinate(1), ielem->giveNode(2)->giveCoordinate(2),

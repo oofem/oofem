@@ -91,7 +91,7 @@ HTSelement :: computeGaussPoints()
         integrationRulesArray.resize(numberOfEdges);
 
         for ( int i = 0; i < numberOfEdges; i++ ) {
-            integrationRulesArray [ i ] = new GaussIntegrationRule(i + 1, this, 1, 100);
+            integrationRulesArray [ i ].reset( new GaussIntegrationRule(i + 1, this, 1, 100) );
             integrationRulesArray [ i ]->SetUpPointsOnLine(numberOfGaussPoints, _1dMat);
         }
     }
@@ -281,7 +281,7 @@ HTSelement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
     answer.resize(numberOfDofs);
     for ( int i = 0; i < numberOfEdges; i++ ) {
         for ( GaussPoint *gp: *this->giveIntegrationRule(i) ) {
-            edgeLoad->computeValueAt(force, tStep, * ( gp->giveNaturalCoordinates() ), mode);
+            edgeLoad->computeValueAt(force, tStep, gp->giveNaturalCoordinates(), mode);
             dV = this->computeVolumeAroundSide(gp, i + 1);
             this->computePsVectorAt(PsEdge, force, gp);
             PsEdge.times(dV);

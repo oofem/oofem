@@ -41,6 +41,7 @@
 #include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
+#include "feinterpol.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -215,7 +216,7 @@ InterfaceElem1d :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 2) );
         integrationRulesArray [ 0 ]->SetUpPointsOnLine(1, this->giveMaterialMode() );
     }
 }
@@ -257,6 +258,23 @@ InterfaceElem1d :: initializeFrom(InputRecord *ir)
     if ( referenceNode == 0 && normal.at(1) == 0 && normal.at(2) == 0 && normal.at(1) == 0 && normal.at(3) == 0 ) {
         OOFEM_ERROR("wrong reference node or normal specified");
     }
+    if ( ir->hasField(_IFT_InterfaceElem1d_dofIDs) ) {
+        IR_GIVE_FIELD(ir, dofids, _IFT_InterfaceElem1d_refnode);
+    } else {
+        switch ( domain->giveNumberOfSpatialDimensions() ) {
+        case 1:
+            this->dofids = IntArray{D_u};
+            break;
+        case 2:
+            this->dofids = {D_u, D_v};
+            break;
+        case 3:
+            this->dofids = {D_u, D_v, D_w};
+            break;
+        default:
+            OOFEM_ERROR("Unsupported domain type")
+        }
+    }
 
     this->computeLocalSlipDir(normal); ///@todo Move into postInitialize ?
     return IRRT_OK;
@@ -288,25 +306,7 @@ InterfaceElem1d :: computeNumberOfDofs()
 void
 InterfaceElem1d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    switch ( domain->giveDomainType() ) {
-    case _2dPlaneStressMode:
-    case _PlaneStrainMode:
-    case _3dAxisymmMode:
-        answer = {D_u, D_v};
-        break;
-    case _3dMode:
-        answer = {D_u, D_v, D_w};
-        break;
-    case _2dTrussMode:
-    case _2dBeamMode:
-        answer = {D_u, D_w};
-        break;
-    case _1dTrussMode:
-        answer = {D_u};
-        break;
-    default:
-        OOFEM_ERROR("unsupported mode");
-    }
+    answer = this->dofids;
 }
 
 

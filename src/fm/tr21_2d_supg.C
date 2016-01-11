@@ -123,14 +123,14 @@ TR21_2D_SUPG :: computeGaussPoints()
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize(3);
 
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 3, this);
 
         //seven point Gauss integration
-        integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 1, 3);
+        integrationRulesArray [ 1 ].reset( new GaussIntegrationRule(2, this, 1, 3) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 1 ], 7, this);
 
-        integrationRulesArray [ 2 ] = new GaussIntegrationRule(3, this, 1, 3);
+        integrationRulesArray [ 2 ].reset( new GaussIntegrationRule(3, this, 1, 3) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 2 ], 13, this);
 
 
@@ -145,7 +145,7 @@ TR21_2D_SUPG :: computeNuMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatArray n;
 
-    this->velocityInterpolation.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->velocityInterpolation.evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.resize(2, 12);
     answer.zero();
 
@@ -160,7 +160,7 @@ TR21_2D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, Time
 {
     FloatMatrix n, dn;
     FloatArray u, un;
-    this->velocityInterpolation.evaldNdx( dn, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->velocityInterpolation.evaldNdx( dn, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     this->computeNuMatrix(n, gp);
     this->computeVectorOfVelocities(VM_Total, tStep, un);
 
@@ -178,7 +178,7 @@ void
 TR21_2D_SUPG :: computeBMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatMatrix dn(6, 2);
-    this->velocityInterpolation.evaldNdx( dn, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->velocityInterpolation.evaldNdx( dn, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 12);
     answer.zero();
@@ -195,7 +195,7 @@ void
 TR21_2D_SUPG :: computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatMatrix dn;
-    velocityInterpolation.evaldNdx( dn, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    velocityInterpolation.evaldNdx( dn, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(1, 12);
     answer.zero();
@@ -210,7 +210,7 @@ void
 TR21_2D_SUPG :: computeNpMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatArray n;
-    this->pressureInterpolation.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->pressureInterpolation.evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(1, 3);
     answer.zero();
@@ -228,7 +228,7 @@ TR21_2D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep
     FloatMatrix dn, um(2, 6);
     this->computeVectorOfVelocities(VM_Total, tStep, u);
 
-    velocityInterpolation.evaldNdx( dn, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    velocityInterpolation.evaldNdx( dn, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     for ( int i = 1; i <= 6; i++ ) {
         um.at(1, i) = u.at(2 * i - 1);
         um.at(2, i) = u.at(2 * i);
@@ -241,7 +241,7 @@ void
 TR21_2D_SUPG :: computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatMatrix dn(3, 2);
-    pressureInterpolation.evaldNdx( dn, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    pressureInterpolation.evaldNdx( dn, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.beTranspositionOf(dn);
 }
@@ -258,7 +258,7 @@ TR21_2D_SUPG :: computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeSte
     answer.zero();
 
 
-    this->velocityInterpolation.evald2Ndx2( d2n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->velocityInterpolation.evald2Ndx2( d2n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->giveDeviatoricStiffnessMatrix(D, TangentStiffness, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
 
@@ -422,7 +422,7 @@ TR21_2D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep)
 
     for ( GaussPoint *gp: *integrationRulesArray [ 1 ] ) {
         double dV = this->computeVolumeAround(gp);
-        velocityInterpolation.evaldNdx( dn, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+        velocityInterpolation.evaldNdx( dn, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
         this->computeNuMatrix(n, gp);
         u.beProductOf(n, un);
         gfi.beTProductOf(dn, fi);
@@ -443,7 +443,7 @@ TR21_2D_SUPG :: LS_PCS_computedN(FloatMatrix &answer)
 
     for ( GaussPoint *gp: *integrationRulesArray [ 1 ] ) {
 
-        velocityInterpolation.evaldNdx( dn, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+        velocityInterpolation.evaldNdx( dn, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
         answer.add(dn); ///@todo This code makes no sense to me. Without the weight and jacobian this is dependant on the number of gauss points.
     }
@@ -460,7 +460,7 @@ TR21_2D_SUPG :: LS_PCS_computeVolume(double &answer, const FloatArray **coordina
 
         double determinant, weight, volume;
 
-        determinant = fabs( this->velocityInterpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+        determinant = fabs( this->velocityInterpolation.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
 
         weight = gp->giveWeight();
         volume = determinant * weight;
@@ -495,7 +495,7 @@ TR21_2D_SUPG :: LS_PCS_computeS(LevelSetPCS *ls, TimeStep *tStep)
 
     for ( GaussPoint *gp: *integrationRulesArray [ 1 ] ) {
         double dV = this->computeVolumeAround(gp);
-        velocityInterpolation.evalN( n,  * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+        velocityInterpolation.evalN( n,  gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
         vol += dV;
         _fi = n.dotProduct(fi);
         S +=  _fi / ( _fi * _fi + eps * eps ) * dV;
@@ -514,7 +514,7 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 
     answer.resize(2);
 
-    for ( int ifi: fi ) {  //comparing values of fi in vertices
+    for ( double ifi: fi ) {  //comparing values of fi in vertices
         if ( ifi > 0. ) {
             pos++;
         } else if ( ifi < 0.0 ) {
@@ -547,7 +547,7 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 
         int inter_case, negq = 0, posq = 0, zeroq = 0; //inter_case is variable that differs type of which fi crosses the triangle
 
-        for ( int ifi: fi ) { //loop over edge nodes
+        for ( double ifi: fi ) { //loop over edge nodes
             if ( ifi > 0. ) {
                 posq++;
             } else if ( ifi < 0.0 ) {
@@ -597,7 +597,7 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 
 
         int edge1 = 0, edge2 = 0;
-        FloatArray Coeff(3), helplcoords(3);
+        FloatArray helplcoords(3);
 
 
         if ( inter_case > 3 ) { //only one node (vertex in this case) of triangle has diffenert level set value, than others
@@ -1098,7 +1098,7 @@ TR21_2D_SUPG :: computeIntersection(int iedge, FloatArray &intcoords, FloatArray
 
     this->velocityInterpolation.edgeLocal2global( intcoords, 3, helplcoords, FEIElementGeometryWrapper(this) );
 
-    //this->velocityInterpolation.evaldNdx(dn, this->giveDomain(), dofManArray, *gp->giveNaturalCoordinates(),tStep->giveTime());
+    //this->velocityInterpolation.evaldNdx(dn, this->giveDomain(), dofManArray, gp->giveNaturalCoordinates(),tStep->giveTime());
 }
 
 
@@ -1134,7 +1134,7 @@ TR21_2D_SUPG :: computeIntersection(int iedge, FloatArray &intcoords, FloatArray
 
     this->velocityInterpolation.edgeLocal2global( intcoords, iedge, this->giveDomain(), dofManArray, helplcoords, tStep->giveTime() );
 
-    //this->velocityInterpolation.evaldNdx(dn, this->giveDomain(), dofManArray, *gp->giveNaturalCoordinates(),tStep->giveTime());
+    //this->velocityInterpolation.evaldNdx(dn, this->giveDomain(), dofManArray, gp->giveNaturalCoordinates(),tStep->giveTime());
 }
 #endif
 
@@ -1360,7 +1360,7 @@ TR21_2D_SUPG :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateTyp
     return SUPGElement2 :: giveIPValue(answer, gp, type, tStep);
 }
 
-contextIOResultType TR21_2D_SUPG :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType TR21_2D_SUPG :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full element context (saves state variables, that completely describe
 // current state)
@@ -1377,7 +1377,7 @@ contextIOResultType TR21_2D_SUPG :: saveContext(DataStream *stream, ContextMode 
 
 
 
-contextIOResultType TR21_2D_SUPG :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType TR21_2D_SUPG :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full element context (saves state variables, that completely describe
 // current state)
@@ -1399,7 +1399,7 @@ TR21_2D_SUPG :: computeVolumeAround(GaussPoint *gp)
 {
     double determinant, weight, volume;
 
-    determinant = fabs( this->velocityInterpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    determinant = fabs( this->velocityInterpolation.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
 
 
     weight = gp->giveWeight();
@@ -1416,7 +1416,7 @@ TR21_2D_SUPG :: computeVolumeAround(GaussPoint *gp)
 //  double determinant, weight, volume;
 
 //  determinant = fabs( interpol.giveTransformationJacobian(domain, pressureDofManArray,
-//     * gp->giveNaturalCoordinates(), 0.0) );
+//     gp->giveNaturalCoordinates(), 0.0) );
 
 
 //  weight      = gp->giveWeight();

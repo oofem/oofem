@@ -34,6 +34,7 @@
 
 #include "line2boundaryelement.h"
 #include "node.h"
+#include "dof.h"
 #include "fei2dlinequad.h"
 #include "gaussintegrationrule.h"
 #include "crosssection.h"
@@ -75,11 +76,6 @@ Interface *Line2BoundaryElement :: giveInterface(InterfaceType it)
     default:
         return FMElement :: giveInterface(it);
     }
-}
-
-double Line2BoundaryElement :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
-{
-    return this->giveNode(3)->giveCoordinates()->distance(coords);
 }
 
 void Line2BoundaryElement :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,

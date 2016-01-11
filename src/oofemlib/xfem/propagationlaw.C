@@ -35,7 +35,6 @@
 
 
 #include "propagationlaw.h"
-#include "enrichmentdomain.h"
 #include "tipinfo.h"
 #include "classfactory.h"
 #include "mathfem.h"
@@ -86,7 +85,7 @@ void PLCrackPrescribedDir :: giveInputRecord(DynamicInputRecord &input)
 
 bool PLCrackPrescribedDir :: propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp)
 {
-    if(!iEnrFront.propagationIsAllowed()) {
+    if ( !iEnrFront.propagationIsAllowed() ) {
         return false;
     }
 
@@ -94,7 +93,7 @@ bool PLCrackPrescribedDir :: propagateInterface(Domain &iDomain, EnrichmentFront
 
     SpatialLocalizer *localizer = iDomain.giveSpatialLocalizer();
     // It is meaningless to propagate a tip that is not inside any element
-    if(tipInfo.mGlobalCoord.giveSize() == 0) {
+    if ( tipInfo.mGlobalCoord.giveSize() == 0 ) {
         return false;
     }
 
@@ -105,7 +104,9 @@ bool PLCrackPrescribedDir :: propagateInterface(Domain &iDomain, EnrichmentFront
 
 
     double angleRad = mAngle * M_PI / 180.0;
-    FloatArray dir = {cos(angleRad), sin(angleRad)};
+    FloatArray dir = {
+        cos(angleRad), sin(angleRad)
+    };
 
     oTipProp.mTipIndex = tipInfo.mTipIndex;
     oTipProp.mPropagationDir = dir;
@@ -113,5 +114,4 @@ bool PLCrackPrescribedDir :: propagateInterface(Domain &iDomain, EnrichmentFront
 
     return true;
 }
-
 } // end namespace oofem

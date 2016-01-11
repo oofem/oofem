@@ -96,21 +96,22 @@ Elixir version is available at oofem home page
 (http://ksm.fsv.cvut.cz/oofem/oofem.html). The Ckit library can be obtained 
 at the same location.
 
-Parallel version (poofem) requires MPI library to be installed. 
+Parallel support for distributed memory requires MPI library to be installed. 
 If you do not have any, we recommend to use Open MPI. 
 This is a freely available, high-performance, and portable 
 implementation of MPI (http://www.open-mpi.org/).
 
-If you want to use PETSc toolkit, the PETSc version 3.3 or higher is
-required. The toolkit can be downloaded from PETSc project home page 
+For high performance linear solvers, OOFEM uses PETSc.
+Version 3.4 and 3.5 should be working.
+The toolkit can be downloaded from PETSc project home page 
 (http://www-unix.mcs.anl.gov/petsc/petsc-as/index.html). 
 
-If you want to use SLEPc toolkit, the SLEPc version 3.3 or higher is
-required. The toolkit can be downloaded from SLEPc project home page 
+For high performance eigenvalue solvers, oofem uses SLEPc.
+The toolkit can be downloaded from SLEPc project home page 
 (http://www.grycap.upv.es/slepc). 
 
 XML parser is supported through tinyXML2 library. The library is required
-for tm module, particularly for CEMHYD3D model and can be downloaded from 
+for the CEMHYD3D model and can be downloaded from 
 its git repository (https://github.com/leethomason/tinyxml2)
 
 The reference manual can be generated automatically from the sources.

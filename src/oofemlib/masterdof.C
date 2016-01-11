@@ -52,16 +52,18 @@ MasterDof :: MasterDof(DofManager *aNode, int nbc, int nic, DofIDItem id) : Dof(
     equationNumber = 0;                         // means "uninitialized"
     bc             = nbc;
     ic             = nic;
-    unknowns       = new Dictionary();
-    /*   unknowns       = new Dictionary() ;           // unknown size ?
-     * pastUnknowns   = NULL ; */
 }
 
 MasterDof :: MasterDof(DofManager *aNode, DofIDItem id) : Dof(aNode, id)
 {
     ic = bc = equationNumber = 0;                        // means "uninitialized"
-    unknowns = new Dictionary();
 }
+
+
+MasterDof :: ~MasterDof()
+{
+}
+
 
 BoundaryCondition *MasterDof :: giveBc()
 // Returns the boundary condition the receiver is subjected to.
@@ -110,13 +112,11 @@ int MasterDof :: askNewEquationNumber(TimeStep *tStep)
 {
     EngngModel *model = dofManager->giveDomain()->giveEngngModel();
 
-#ifdef __PARALLEL_MODE
     if ( dofManager->giveParallelMode() == DofManager_null ) {
         equationNumber = 0;
         return 0;
     }
 
-#endif
     if ( this->hasBc(tStep) ) {
         equationNumber = -1 * model->giveNewPrescribedEquationNumber(dofManager->giveDomain()->giveNumber(), this->dofID);
     } else {
@@ -146,31 +146,19 @@ double MasterDof :: giveUnknown(ValueModeType mode, TimeStep *tStep)
 // is not a predicted unknown) or initial condition. tStep is not the
 // current time step n, it is assumed to be the previous one (n-1).
 {
-    double value;
-
-#ifdef DEBUG
-    //if (type != this->giveUnknownType ())
-    // OOFEM_ERROR("Noncompatible Request");
-#endif
-
-#ifdef __PARALLEL_MODE
     if ( dofManager->giveParallelMode() == DofManager_null ) {
         return 0.0;
     }
 
-#endif
-
     // first try if IC apply
     if ( tStep->giveNumber() == dofManager->giveDomain()->giveEngngModel()->giveNumberOfTimeStepWhenIcApply() ) { // step when Ic apply
         if ( this->hasIcOn(mode) ) {
-            value = this->giveIc()->give(mode);
+            return this->giveIc()->give(mode);
         } else if ( this->hasBc(tStep) ) {
-            value = this->giveBcValue(mode, tStep);
+            return this->giveBcValue(mode, tStep);
         } else {
-            value = 0.;
+            return 0.;
         }
-
-        return value;
     }
 
     //  if ( dofManager->giveDomain()->giveEngngModel()->requiresUnknownsDictionaryUpdate() ) {
@@ -192,8 +180,7 @@ double MasterDof :: giveUnknown(ValueModeType mode, TimeStep *tStep)
     //  }
 
     if ( !dofManager->giveDomain()->giveEngngModel()->requiresUnknownsDictionaryUpdate() && this->hasBc(tStep) ) {
-        value = this->giveBcValue(mode, tStep);
-        return value;
+        return this->giveBcValue(mode, tStep);
     }
 
     return ( dofManager->giveDomain()->giveEngngModel()->
@@ -204,38 +191,26 @@ double MasterDof :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeSte
 // The key method of class Dof. Returns the value of the unknown field
 // (e.g., the displacement) associated to the receiver, at tStep.
 {
-    double value;
-
-#ifdef DEBUG
-#endif
-
-#ifdef __PARALLEL_MODE
     if ( dofManager->giveParallelMode() == DofManager_null ) {
         return 0.0;
     }
 
-#endif
-
     // first try if IC apply
     if ( tStep->giveNumber() == dofManager->giveDomain()->giveEngngModel()->giveNumberOfTimeStepWhenIcApply() ) { // step when Ic apply
         if ( this->hasIcOn(mode) ) {
-            value = this->giveIc()->give(mode);
+            return this->giveIc()->give(mode);
         } else {
-            value = 0.;
+            return 0.;
         }
-
-        return value;
     }
 
     // then ask bor BC
     if ( this->hasBc(tStep) ) {    // bound . cond.
-        //value = this -> giveBcValue(giveUnknownType(),mode,tStep) ;
-        value = this->giveBcValue(mode, tStep);
-        return value;
+        return this->giveBcValue(mode, tStep);
     }
 
     // try ask field for unknown
-    return ( field.giveUnknownValue(this, mode, tStep) );
+    return field.giveUnknownValue(this, mode, tStep);
 }
 
 
@@ -243,12 +218,9 @@ bool MasterDof :: hasBc(TimeStep *tStep)
 // Returns True if the receiver is subjected to a boundary condition, else
 // returns False. If necessary, reads the answer in the data file.
 {
-#ifdef __PARALLEL_MODE
     if ( dofManager->giveParallelMode() == DofManager_null ) {
         return true;
     }
-
-#endif
 
     if ( bc == -1 ) {
         OOFEM_ERROR("does not know yet if has InitCond or not");
@@ -299,9 +271,6 @@ void MasterDof :: updateYourself(TimeStep *tStep)
 // Updates the receiver at end of step.
 {
     Dof :: updateYourself(tStep);
-    /*   delete pastUnknowns ;
-     * pastUnknowns = unknowns ;
-     * unknowns     = new Dictionary() ; */
 }
 
 void MasterDof :: updateUnknownsDictionary(TimeStep *tStep, ValueModeType mode, double dofValue)
@@ -310,16 +279,13 @@ void MasterDof :: updateUnknownsDictionary(TimeStep *tStep, ValueModeType mode, 
     // to value dofValue.
 
     int hash = dofManager->giveDomain()->giveEngngModel()->giveUnknownDictHashIndx(mode, tStep);
-    unknowns->at(hash) = dofValue;
+    unknowns.at(hash) = dofValue;
 }
 
-void MasterDof :: giveUnknownsDictionaryValue(TimeStep *tStep, ValueModeType mode, double &dofValue)
+double MasterDof :: giveUnknownsDictionaryValue(TimeStep *tStep, ValueModeType mode)
 {
-    // Updates the receiver's unknown dictionary at end of step.
-    // to value dofValue.
-
     int hash = dofManager->giveDomain()->giveEngngModel()->giveUnknownDictHashIndx(mode, tStep);
-    dofValue = unknowns->at(hash);
+    return unknowns.at(hash);
 }
 
 void MasterDof :: printYourself()
@@ -329,38 +295,35 @@ void MasterDof :: printYourself()
 }
 
 
-contextIOResultType MasterDof :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType MasterDof :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full node context (saves state variables, that completely describe
 // current state)
 //
 {
     contextIOResultType iores;
-    if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
-    }
 
     if ( ( iores = Dof :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     if ( mode & CM_Definition ) {
-        if ( !stream->write(& bc, 1) ) {
+        if ( !stream.write(bc) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( !stream->write(& ic, 1) ) {
+        if ( !stream.write(ic) ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
 
     // store equation number of receiver
-    if ( !stream->write(& equationNumber, 1) ) {
+    if ( !stream.write(equationNumber) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     if ( ( mode & CM_UnknownDictState ) || ( dofManager->giveDomain()->giveEngngModel()->requiresUnknownsDictionaryUpdate() ) ) {
-        if ( ( iores = unknowns->saveContext(stream, mode, obj) ) != CIO_OK ) {
+        if ( ( iores = unknowns.saveContext(stream, mode, obj) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
@@ -369,39 +332,36 @@ contextIOResultType MasterDof :: saveContext(DataStream *stream, ContextMode mod
 }
 
 
-contextIOResultType MasterDof :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType MasterDof :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full node context (saves state variables, that completely describe
 // current state)
 //
 {
     contextIOResultType iores;
-    if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
-    }
 
     if ( ( iores = Dof :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     if ( mode & CM_Definition ) {
-        if ( !stream->read(& bc, 1) ) {
+        if ( !stream.read(bc) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( !stream->read(& ic, 1) ) {
+        if ( !stream.read(ic) ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
 
 
     // read equation number of receiver
-    if ( !stream->read(& equationNumber, 1) ) {
+    if ( !stream.read(equationNumber) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     if ( ( mode & CM_UnknownDictState ) || ( dofManager->giveDomain()->giveEngngModel()->requiresUnknownsDictionaryUpdate() ) ) {
-        if ( ( iores = unknowns->restoreContext(stream, mode, obj) ) != CIO_OK ) {
+        if ( ( iores = unknowns.restoreContext(stream, mode, obj) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }

@@ -99,10 +99,6 @@ IntElPoint :: giveMaterialMode()
 }
 
 
-
-
-
-
 void
 IntElPoint :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 //
@@ -184,8 +180,7 @@ IntElPoint :: computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answer)
         ly.normalize();
 
         answer.resize(3, 3);
-        int i;
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             answer.at(1, i) = normal.at(i);
             answer.at(2, i) = ly.at(i);
             answer.at(3, i) = lz.at(i);
@@ -206,7 +201,7 @@ IntElPoint :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize(1);
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 2) );
         integrationRulesArray [ 0 ]->setUpIntegrationPoints( _Line, 1, this->giveMaterialMode() );
     }
 }
@@ -215,11 +210,9 @@ IntElPoint :: computeGaussPoints()
 int
 IntElPoint :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-    answer.resize(3);
-    answer.at(1) = 0.5* ( this->giveNode(1)->giveCoordinate(1) + this->giveNode(2)->giveCoordinate(1) );
-    answer.at(2) = 0.5* ( this->giveNode(1)->giveCoordinate(2) + this->giveNode(2)->giveCoordinate(2) );
-    answer.at(3) = 0.5* ( this->giveNode(1)->giveCoordinate(3) + this->giveNode(2)->giveCoordinate(3) );
-
+    answer = *this->giveNode(1)->giveCoordinates();
+    answer.add(*this->giveNode(2)->giveCoordinates());
+    answer.times(0.5);
     return 1;
 }
 
@@ -240,16 +233,14 @@ IntElPoint :: initializeFrom(InputRecord *ir)
     IRResultType result;  // Required by IR_GIVE_FIELD macro
 
     StructuralInterfaceElement :: initializeFrom(ir);
-    if ( ir->hasField(_IFT_IntElPoint_refnode)  &&  ir->hasField(_IFT_IntElPoint_normal) ) {
-	OOFEM_ERROR("Ambiguous input: 'refnode' and 'normal' cannot both be specified");
-    } else if ( ir->hasField(_IFT_IntElPoint_refnode) ) {
-	IR_GIVE_OPTIONAL_FIELD(ir, referenceNode, _IFT_IntElPoint_refnode);
-    } else if ( ir->hasField(_IFT_IntElPoint_normal) ) {
-	IR_GIVE_OPTIONAL_FIELD(ir, normal, _IFT_IntElPoint_normal);  
+    if ( ir->hasField(_IFT_IntElPoint_refnode) &&  ir->hasField(_IFT_IntElPoint_normal) ) {
+        OOFEM_ERROR("Ambiguous input: 'refnode' and 'normal' cannot both be specified");
     }
+    IR_GIVE_OPTIONAL_FIELD(ir, referenceNode, _IFT_IntElPoint_refnode);
+    IR_GIVE_OPTIONAL_FIELD(ir, normal, _IFT_IntElPoint_normal);  
     
     this->area = 1.0; // Default area ///@todo Make non-optional? /JB
-    IR_GIVE_OPTIONAL_FIELD(ir, normal, _IFT_IntElPoint_area);
+    IR_GIVE_OPTIONAL_FIELD(ir, this->area, _IFT_IntElPoint_area);
     
     this->computeLocalSlipDir(normal); 
     return IRRT_OK;
@@ -305,9 +296,7 @@ IntElPoint :: computeLocalSlipDir(FloatArray &normal)
     normal.resizeWithValues(3);
     if ( this->referenceNode ) {
         // normal
-        normal.at(1) = domain->giveNode(this->referenceNode)->giveCoordinate(1) - this->giveNode(1)->giveCoordinate(1);
-        normal.at(2) = domain->giveNode(this->referenceNode)->giveCoordinate(2) - this->giveNode(1)->giveCoordinate(2);
-        normal.at(3) = domain->giveNode(this->referenceNode)->giveCoordinate(3) - this->giveNode(1)->giveCoordinate(3);
+        normal.beDifferenceOf(*domain->giveNode(this->referenceNode)->giveCoordinates(), *this->giveNode(1)->giveCoordinates());
     } else {
         if ( normal.at(1) == 0 && normal.at(2) == 0 && normal.at(3) == 0 ) {
             OOFEM_ERROR("Normal is not defined (referenceNode=0,normal=(0,0,0))");
@@ -320,7 +309,7 @@ IntElPoint :: computeLocalSlipDir(FloatArray &normal)
 
 
 #ifdef __OOFEG
-void InterfaceElem1d :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
+void IntElPoint :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     GraphicObj *go;
     //  if (!go) { // create new one
@@ -344,7 +333,7 @@ void InterfaceElem1d :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep
 }
 
 
-void InterfaceElem1d :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
+void IntElPoint :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     GraphicObj *go;
     //  if (!go) { // create new one
@@ -372,10 +361,10 @@ void InterfaceElem1d :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *
 }
 
 
-void InterfaceElem1d :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
+void IntElPoint :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int indx, result = 0;
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
+    IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
     FloatArray gcoord(3), v1;
     WCRec p [ 1 ];
     GraphicObj *go;

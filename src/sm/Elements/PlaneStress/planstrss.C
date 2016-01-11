@@ -51,7 +51,7 @@
  #include "oofeggraphiccontext.h"
  #include "oofegutils.h"
  #include "connectivitytable.h"
- #include "rcm2.h"
+ #include "Materials/rcm2.h"
 #endif
 
 namespace oofem {
@@ -84,29 +84,23 @@ PlaneStress2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, i
 // (epsilon_x,epsilon_y,gamma_xy) = B . r
 // r = ( u1,v1,u2,v2,u3,v3,u4,v4)
 {
-    int i;
     FloatMatrix dnx;
-#ifdef  PlaneStress2d_reducedShearIntegration
-    FloatArray coord;
-#endif
 
-    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 8);
     answer.zero();
 
-    for ( i = 1; i <= 4; i++ ) {
+    for ( int i = 1; i <= 4; i++ ) {
         answer.at(1, 2 * i - 1) = dnx.at(i, 1);
         answer.at(2, 2 * i - 0) = dnx.at(i, 2);
     }
 
 #ifdef  PlaneStress2d_reducedShearIntegration
-    coord.resize(2);
-    coord.zero();
-    this->interpolation.evaldNdx( dnx, coord, FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, {0., 0.}, FEIElementGeometryWrapper(this) );
 #endif
 
-    for ( i = 1; i <= 4; i++ ) {
+    for ( int i = 1; i <= 4; i++ ) {
         answer.at(3, 2 * i - 1) = dnx.at(i, 2);
         answer.at(3, 2 * i - 0) = dnx.at(i, 1);
     }
@@ -121,11 +115,8 @@ PlaneStress2d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // @todo not checked if correct
 {
     FloatMatrix dnx;
-#ifdef  PlaneStress2d_reducedShearIntegration
-    FloatArray coord;
-#endif
 
-    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(4, 8);
 
@@ -135,9 +126,7 @@ PlaneStress2d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     }
 
 #ifdef  PlaneStress2d_reducedShearIntegration
-    coord.resize(2);
-    coord.zero();
-    this->interpolation.evaldNdx( dnx, coord, FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, {0., 0.}, FEIElementGeometryWrapper(this) );
 #endif
 
     for ( int i = 1; i <= 4; i++ ) {
@@ -232,7 +221,7 @@ PlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrac
 
         // gradient of function phi at the current GP
         FloatMatrix dnx;
-        this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+        this->interpolation.evaldNdx( dnx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
         FloatArray gradPhi(2);
         gradPhi.zero();
         for ( int i = 1; i <= 4; i++ ) {
@@ -339,7 +328,7 @@ PlaneStress2d :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement
 
 void PlaneStress2d :: HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
-    computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
+    computeNmatrixAt(gp->giveSubPatchCoordinates(), answer);
 }
 
 
@@ -686,7 +675,7 @@ PlaneStress2d :: drawSpecial(oofegGraphicContext &gc, TimeStep *tStep)
                                                     n3 * this->giveNode(3)->giveUpdatedCoordinate(2, tStep, defScale) +
                                                     n4 * this->giveNode(4)->giveUpdatedCoordinate(2, tStep, defScale) );
                         } else {
-                            computeGlobalCoordinates( gpglobalcoords, * ( gp->giveNaturalCoordinates() ) );
+                            computeGlobalCoordinates( gpglobalcoords, gp->giveNaturalCoordinates() );
                         }
 
                         xc = gpglobalcoords.at(1);
@@ -760,46 +749,15 @@ PlaneStress2d :: SPRNodalRecoveryMI_givePatchType()
 }
 
 
-double
-PlaneStress2d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
-{
-    FloatArray lcoords(2), gcoords;
-    double dist;
-    int size, gsize;
-
-    lcoords.at(1) = lcoords.at(2) = 0.0;
-    this->computeGlobalCoordinates(gcoords, lcoords);
-
-    if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        OOFEM_ERROR("coordinates size mismatch");
-    }
-
-    if ( size == gsize ) {
-        dist = coords.distance(gcoords);
-    } else {
-        FloatArray helpCoords = coords;
-
-        helpCoords.resizeWithValues(gsize);
-        dist = helpCoords.distance(gcoords);
-    }
-
-    return dist;
-}
-
-
 void
 PlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
                                                                   TimeStep *tStep, const FloatArray &lcoords,
                                                                   FloatArray &answer)
 {
-    FloatArray u, ni;
+    FloatArray u;
     FloatMatrix n;
-
-    this->interpolation.evalN( ni, lcoords, FEIElementGeometryWrapper(this) );
-
-    n.beNMatrixOf(ni, 2);
-
-    this->computeVectorOf({D_u, D_v}, mode, tStep, u);
+    this->computeNmatrixAt(lcoords, n);
+    this->computeVectorOf(mode, tStep, u);
     answer.beProductOf(n, u);
 }
 

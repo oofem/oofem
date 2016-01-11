@@ -272,24 +272,24 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
         break;
     case 3: 
         this->softType = ST_Hordijk_Cohesive_Crack;
-	c1 = 3.;
+        c1 = 3.;
         IR_GIVE_OPTIONAL_FIELD(ir, c1, _IFT_IsotropicDamageMaterial1_c1);
-	c2 = 6.93;
+        c2 = 6.93;
         IR_GIVE_OPTIONAL_FIELD(ir, c2, _IFT_IsotropicDamageMaterial1_c2);
         if ( ir->hasField(_IFT_IsotropicDamageMaterial1_wf) ) {
-	  IR_GIVE_FIELD(ir, wf, _IFT_IsotropicDamageMaterial1_wf);
-	} else if ( ir->hasField(_IFT_IsotropicDamageMaterial1_gf) ) {
-	  IR_GIVE_FIELD(ir, gf, _IFT_IsotropicDamageMaterial1_gf);
-	  double E;
-	  IR_GIVE_FIELD(ir, E, _IFT_IsotropicLinearElasticMaterial_e);
-	  double aux = c1*c1*c1/(c2*c2*c2*c2);
-	  aux *= (6.-(c2*c2*c2+3.*c2*c2+6.*c2+6.)*exp(-c2));
-	  aux += (1.-exp(-c2))/c2;
-	  aux -= 0.5*(1.+c1*c1*c1)*exp(-c2);
-	  wf = gf/(aux*E*e0);
-	} else {
-	  OOFEM_ERROR("wf or gf must be specified for Hordijk softening law");
-	}
+            IR_GIVE_FIELD(ir, wf, _IFT_IsotropicDamageMaterial1_wf);
+        } else if ( ir->hasField(_IFT_IsotropicDamageMaterial1_gf) ) {
+            IR_GIVE_FIELD(ir, gf, _IFT_IsotropicDamageMaterial1_gf);
+            double E;
+            IR_GIVE_FIELD(ir, E, _IFT_IsotropicLinearElasticMaterial_e);
+            double aux = c1*c1*c1/(c2*c2*c2*c2);
+            aux *= (6.-(c2*c2*c2+3.*c2*c2+6.*c2+6.)*exp(-c2));
+            aux += (1.-exp(-c2))/c2;
+            aux -= 0.5*(1.+c1*c1*c1)*exp(-c2);
+            wf = gf/(aux*E*e0);
+        } else {
+            OOFEM_ERROR("wf or gf must be specified for Hordijk softening law");
+        }
         break;
     case 4:
         this->softType = ST_Mazars;
@@ -320,7 +320,7 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
         break;
     case 8:     // power-exponential softening
         this->softType = ST_PowerExponential;
-	IR_GIVE_FIELD(ir, ef, _IFT_IsotropicDamageMaterial1_ef);
+        IR_GIVE_FIELD(ir, ef, _IFT_IsotropicDamageMaterial1_ef);
         IR_GIVE_FIELD(ir, md, _IFT_IsotropicDamageMaterial1_md);
         break;
     default:
@@ -573,7 +573,7 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
         int dim = 0;
         double posNorm = 0.0;
         double nu = lmat->give(NYxz, gp);
-        FloatArray principalStrains, fullStrain;
+        FloatArray principalStrains;
         FloatMatrix N, m;
 
         if ( gp->giveMaterialMode() == _1dMat ) {
@@ -954,7 +954,7 @@ IsotropicDamageMaterial1 :: damageFunction(double kappa, GaussPoint *gp)
 
     case ST_PowerExponential:
         if ( kappa > e0 ) {
-	  return 1.0 - ( e0 / kappa ) * exp( -pow(( kappa - e0 ) / ( ef - e0 ),md) );
+            return 1.0 - ( e0 / kappa ) * exp( -pow(( kappa - e0 ) / ( ef - e0 ),md) );
         } else {
             return 0.0;
         }
@@ -1047,7 +1047,7 @@ IsotropicDamageMaterial1 :: damageFunctionPrime(double kappa, GaussPoint *gp)
     case ST_Exponential_Cohesive_Crack:
     {
         if ( kappa > e0 ) {
-            double ef = gf / E / e0 / Le;
+            ef = gf / E / e0 / Le;
             double omega = status->giveTempDamage();
             double help = exp(omega * kappa / ef);
             double ret = -( ( omega * ef - ef ) * help - omega * e0 ) / ( ef * kappa * help - e0 * kappa );
@@ -1076,7 +1076,7 @@ IsotropicDamageMaterial1 :: complianceFunction(double kappa, GaussPoint *gp)
 void
 IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, GaussPoint *gp)
 {
-    int i, indx = 1;
+    int indx = 1;
     double le = 0.;
     double E = this->giveLinearElasticMaterial()->give('E', gp);
     FloatArray principalStrains, crackPlaneNormal(3), fullStrain, crackVect(3);
@@ -1110,19 +1110,19 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
     if ( ( kappa > e0 ) && ( status->giveDamage() == 0. ) ) {
         this->computePrincipalValDir(principalStrains, principalDir, fullStrain, principal_strain);
         // find index of max positive principal strain
-        for ( i = 2; i <= 3; i++ ) {
+        for (int i = 2; i <= 3; i++ ) {
             if ( principalStrains.at(i) > principalStrains.at(indx) ) {
                 indx = i;
             }
         }
 
-        for ( i = 1; i <= 3; i++ ) {
+        for (int i = 1; i <= 3; i++ ) {
             crackPlaneNormal.at(i) = principalDir.at(i, indx);
         }
 
         // find index with minimal value but non-zero for plane-stress condition - this is the crack direction
         indx = 1;
-        for ( i = 2; i <= 3; i++ ) {
+        for (int i = 2; i <= 3; i++ ) {
             if ( principalStrains.at(i) < principalStrains.at(indx) && fabs( principalStrains.at(i) ) > 1.e-10 ) {
                 indx = i;
             }
@@ -1190,7 +1190,7 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
         }
 
 
-        for ( i = 1; i <= 3; i++ ) {
+        for (int i = 1; i <= 3; i++ ) {
             crackVect.at(i) = principalDir.at(i, indx);
         }
 
@@ -1203,7 +1203,7 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
         }
 
         // compute and store the crack angle (just for postprocessing)
-        double ca = 3.1415926 / 2.;
+        double ca = M_PI / 2.;
         if ( crackPlaneNormal.at(1) != 0.0 ) {
             ca = atan( crackPlaneNormal.at(2) / crackPlaneNormal.at(1) );
         }
@@ -1412,7 +1412,7 @@ IsotropicDamageMaterial1Status :: giveInterface(InterfaceType type)
 
 
 contextIOResultType
-IsotropicDamageMaterial1Status :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+IsotropicDamageMaterial1Status :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full information stored in this Status
 // no temp variables stored
@@ -1425,7 +1425,7 @@ IsotropicDamageMaterial1Status :: saveContext(DataStream *stream, ContextMode mo
     }
 
     // write a raw data
-    if ( !stream->write(& le, 1) ) {
+    if ( !stream.write(le) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -1433,7 +1433,7 @@ IsotropicDamageMaterial1Status :: saveContext(DataStream *stream, ContextMode mo
 }
 
 contextIOResultType
-IsotropicDamageMaterial1Status :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+IsotropicDamageMaterial1Status :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full information stored in stream to this Status
 //
@@ -1445,7 +1445,7 @@ IsotropicDamageMaterial1Status :: restoreContext(DataStream *stream, ContextMode
     }
 
     // read raw data
-    if ( !stream->read(& le, 1) ) {
+    if ( !stream.read(le) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

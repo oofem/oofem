@@ -47,7 +47,7 @@
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
  #include "oofegutils.h"
- #include "rcm2.h"
+ #include "Materials/rcm2.h"
 #endif
 
 namespace oofem {
@@ -99,43 +99,7 @@ QTrPlaneStress2d :: initializeFrom(InputRecord *ir)
         return result;
     }
 
-    if ( !( ( numberOfGaussPoints == 1 ) ||
-           ( numberOfGaussPoints == 3 ) ||
-           ( numberOfGaussPoints == 4 ) ||
-           ( numberOfGaussPoints == 7 ) ||
-           ( numberOfGaussPoints == 13 ) ) ) {
-        OOFEM_WARNING("number of Gauss points in QTrPlaneStress2d changed to 4");
-        numberOfGaussPoints = 4;
-    }
-
     return IRRT_OK;
-}
-
-
-double
-QTrPlaneStress2d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
-{
-    FloatArray lcoords(3), gcoords;
-    double dist;
-    int size, gsize;
-
-    lcoords.at(1) = lcoords.at(2) = lcoords.at(3) = 1. / 3.;
-    this->computeGlobalCoordinates(gcoords, lcoords);
-
-    if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        OOFEM_ERROR("coordinates size mismatch");
-    }
-
-    if ( size == gsize ) {
-        dist = coords.distance(gcoords);
-    } else {
-        FloatArray helpCoords = coords;
-
-        helpCoords.resizeWithValues(gsize);
-        dist = helpCoords.distance(gcoords);
-    }
-
-    return dist;
 }
 
 
@@ -447,14 +411,10 @@ QTrPlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueM
                                                                      TimeStep *tStep, const FloatArray &lcoords,
                                                                      FloatArray &answer)
 {
-    FloatArray u, ni;
+    FloatArray u;
     FloatMatrix n;
-
-    this->interpolation.evalN( ni, lcoords, FEIElementGeometryWrapper(this) );
-
-    n.beNMatrixOf(ni, 2);
-
-    this->computeVectorOf({D_u, D_v}, mode, tStep, u);
+    this->computeNmatrixAt(lcoords, n);
+    this->computeVectorOf(mode, tStep, u);
     answer.beProductOf(n, u);
 }
 

@@ -46,13 +46,12 @@
 #include "classfactory.h"
 #include "exportmodulemanager.h"
 #include "engngm.h"
+#include "parallelcontext.h"
+#include "unknownnumberingscheme.h"
 
 #ifdef __PETSC_MODULE
  #include "petscsolver.h"
  #include "petscsparsemtrx.h"
-#endif
-#ifdef __PARALLEL_MODE
- #include "parallelordering.h"
 #endif
 
 #include <cstdio>
@@ -66,6 +65,7 @@ namespace oofem {
 
 REGISTER_SparseNonLinearSystemNM(NRSolver)
 
+int nLayers = 5; // Number of layers in layered cross section used for phase field damage
 NRSolver :: NRSolver(Domain *d, EngngModel *m) :
     SparseNonLinearSystemNM(d, m), prescribedDofs(), prescribedDofsValues()
 {
@@ -82,8 +82,6 @@ NRSolver :: NRSolver(Domain *d, EngngModel *m) :
     prescribedDofsFlag = false;
     prescribedEqsInitFlag = false;
     prescribedDisplacementTF = 0;
-    linSolver = NULL;
-    linesearchSolver = NULL;
     lsFlag = 0; // no line-search
     
     constrainedNRFlag = false; 
@@ -93,32 +91,11 @@ NRSolver :: NRSolver(Domain *d, EngngModel *m) :
 
     smConstraintVersion = 0;
     mCalcStiffBeforeRes = true;
-#ifdef __PETSC_MODULE
-    prescribedEgsIS_defined = false;
-#endif
 }
 
 
 NRSolver :: ~NRSolver()
 {
-    //
-    // destructor
-    //
-    if ( linSolver ) {
-        delete linSolver;
-    }
-
-    if ( linesearchSolver ) {
-        delete linesearchSolver;
-    }
-
-#ifdef __PETSC_MODULE
- #ifdef __PARALLEL_MODE
-    if ( prescribedEgsIS_defined ) {
-        ISDestroy(& prescribedEgsIS);
-    }
- #endif
-#endif
 }
 
 
@@ -211,10 +188,10 @@ NRSolver :: initializeFrom(InputRecord *ir)
 
 
 NM_Status
-NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
-                  FloatArray *X, FloatArray *dX, FloatArray *F,
+NRSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
+                  FloatArray &X, FloatArray &dX, FloatArray &F,
                   const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
-                  int &nite, TimeStep *tNow)
+                  int &nite, TimeStep *tStep)
 //
 // this function solve the problem of the unbalanced equilibrium
 // using NR scheme
@@ -224,12 +201,9 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
     // residual, iteration increment of solution, total external force
     FloatArray rhs, ddX, RT;
     double RRT;
-    int neq = X->giveSize();
-    NM_Status status;
+    int neq = X.giveSize();
     bool converged, errorOutOfRangeFlag;
-#ifdef __PARALLEL_MODE
     ParallelContext *parallel_context = engngModel->giveParallelContext( this->domain->giveNumber() );
-#endif
 
     if ( engngModel->giveProblemScale() == macroScale ) {
         OOFEM_LOG_INFO("NRSolver: Iteration");
@@ -244,21 +218,17 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
 
     l = 1.0;
 
-    status = NM_None;
+    NM_Status status = NM_None;
     this->giveLinearSolver();
 
     // compute total load R = R+R0
-    RT = * R;
+    RT = R;
     if ( R0 ) {
         RT.add(* R0);
     }
 
-#ifdef __PARALLEL_MODE
     RRT = parallel_context->localNorm(RT);
     RRT *= RRT;
-#else
-    RRT = RT.computeSquaredNorm();
-#endif
 
     ddX.resize(neq);
     ddX.zero();
@@ -270,7 +240,7 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
     // cause divergence for some nonlinear problems. Therefore a flag is used to determine if
     // the stiffness should be evaluated before the residual (default yes). /ES
 
-    engngModel->updateComponent(tNow, NonLinearLhs, domain);
+    engngModel->updateComponent(tStep, NonLinearLhs, domain);
     if ( this->prescribedDofsFlag ) {
         if ( !prescribedEqsInitFlag ) {
             this->initPrescribedEqs();
@@ -281,15 +251,14 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
     nite = 0;
     do {
         // Compute the residual
-        engngModel->updateComponent(tNow, InternalRhs, domain);
-        rhs.beDifferenceOf(RT, * F);
-
+        engngModel->updateComponent(tStep, InternalRhs, domain);
+        rhs.beDifferenceOf(RT, F);
         if ( this->prescribedDofsFlag ) {
-            this->applyConstraintsToLoadIncrement(nite, k, rhs, rlm, tNow);
+            this->applyConstraintsToLoadIncrement(nite, k, rhs, rlm, tStep);
         }
 
         // convergence check
-        converged = this->checkConvergence(RT, * F, rhs, ddX, * X, RRT, internalForcesEBENorm, nite, errorOutOfRangeFlag, tNow);
+        converged = this->checkConvergence(RT, F, rhs, ddX, X, RRT, internalForcesEBENorm, nite, errorOutOfRangeFlag);
 
         if ( errorOutOfRangeFlag ) {
             status = NM_NoSuccess;
@@ -304,17 +273,17 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
 
         if ( nite > 0 || !mCalcStiffBeforeRes ) {
             if ( ( NR_Mode == nrsolverFullNRM ) || ( ( NR_Mode == nrsolverAccelNRM ) && ( nite % MANRMSteps == 0 ) ) ) {
-                engngModel->updateComponent(tNow, NonLinearLhs, domain);
+                engngModel->updateComponent(tStep, NonLinearLhs, domain);
                 applyConstraintsToStiffness(k);
             }
         }
 
         if ( ( nite == 0 ) && ( deltaL < 1.0 ) ) { // deltaL < 1 means no increment applied, only equilibrate current state
             rhs.zero();
-            R->zero();
+            R.zero();
             ddX = rhs;
         } else {
-            linSolver->solve(k, & rhs, & ddX);
+            linSolver->solve(k, rhs, ddX);
         }
 
         //
@@ -322,23 +291,24 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
         //
         if ( this->lsFlag && ( nite > 0 ) ) { // Why not nite == 0 ?
             // line search
-            LineSearchNM :: LS_status status;
+            LineSearchNM :: LS_status LSstatus;
             double eta;
-            this->giveLineSearchSolver()->solve(X, & ddX, F, R, R0, prescribedEqs, 1.0, eta, status, tNow);
-        } else if ( this->constrainedNRFlag && ( nite > this->constrainedNRminiter ) ) { 
+            this->giveLineSearchSolver()->solve(X, ddX, F, R, R0, prescribedEqs, 1.0, eta, LSstatus, tStep);
+        } else if ( this->constrainedNRFlag && ( nite > this->constrainedNRminiter ) ) {
+            ///@todo This doesn't check units, it is nonsense and must be corrected / Mikael
             if ( this->forceErrVec.computeSquaredNorm() > this->forceErrVecOld.computeSquaredNorm() ) {
                 printf("Constraining increment to be %e times full increment...\n", this->constrainedNRalpha);
                 ddX.times(this->constrainedNRalpha);
             }   
-            //this->giveConstrainedNRSolver()->solve(X, & ddX, this->forceErrVec, this->forceErrVecOld, status, tNow);
+            //this->giveConstrainedNRSolver()->solve(X, & ddX, this->forceErrVec, this->forceErrVecOld, status, tStep);
         }
-        X->add(ddX);
-        dX->add(ddX);
-        tNow->incrementStateCounter(); // update solution state counter
-        tNow->incrementSubStepNumber();
+        X.add(ddX);
+        dX.add(ddX);
+        tStep->incrementStateCounter(); // update solution state counter
+        tStep->incrementSubStepNumber();
         nite++; // iteration increment
 
-        engngModel->giveExportModuleManager()->doOutput(tNow, true);
+        engngModel->giveExportModuleManager()->doOutput(tStep, true);
     } while ( true ); // end of iteration
 
     status |= NM_Success;
@@ -347,11 +317,11 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
     // Modify Load vector to include "quasi reaction"
     if ( R0 ) {
         for ( int i = 1; i <= numberOfPrescribedDofs; i++ ) {
-            R->at( prescribedEqs.at(i) ) = F->at( prescribedEqs.at(i) ) - R0->at( prescribedEqs.at(i) ) - R->at( prescribedEqs.at(i) );
+            R.at( prescribedEqs.at(i) ) = F.at( prescribedEqs.at(i) ) - R0->at( prescribedEqs.at(i) ) - R.at( prescribedEqs.at(i) );
         }
     } else {
         for ( int i = 1; i <= numberOfPrescribedDofs; i++ ) {
-            R->at( prescribedEqs.at(i) ) = F->at( prescribedEqs.at(i) ) - R->at( prescribedEqs.at(i) );
+            R.at( prescribedEqs.at(i) ) = F.at( prescribedEqs.at(i) ) - R.at( prescribedEqs.at(i) );
         }
     }
 
@@ -365,13 +335,13 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
         OOFEM_LOG_INFO("NRSolver:     Node            Dof             Displacement    Force\n");
         double reaction;
         for ( int i = 1; i <= numberOfPrescribedDofs; i++ ) {
-            reaction = R->at( prescribedEqs.at(i) );
+            reaction = R.at( prescribedEqs.at(i) );
             if ( R0 ) {
                 reaction += R0->at( prescribedEqs.at(i) );
             }
             lastReactions.at(i) = reaction;
             OOFEM_LOG_INFO("NRSolver:     %-15d %-15d %-+15.5e %-+15.5e\n", prescribedDofs.at(2 * i - 1), prescribedDofs.at(2 * i),
-                           X->at( prescribedEqs.at(i) ), reaction);
+                           X.at( prescribedEqs.at(i) ), reaction);
         }
         OOFEM_LOG_INFO("\n");
     }
@@ -386,52 +356,47 @@ NRSolver :: giveLinearSolver()
 {
     if ( linSolver ) {
         if ( linSolver->giveLinSystSolverType() == solverType ) {
-            return linSolver;
+            return linSolver.get();
         } else {
-            delete linSolver;
+            linSolver.reset(NULL);
         }
     }
 
-    linSolver = classFactory.createSparseLinSolver(solverType, domain, engngModel);
-    if ( linSolver == NULL ) {
-        OOFEM_ERROR("linear solver creation failed");
+    linSolver.reset( classFactory.createSparseLinSolver(solverType, domain, engngModel) );
+    if ( !linSolver ) {
+        OOFEM_ERROR("linear solver creation failed for type %d", solverType);
     }
 
-    return linSolver;
+    return linSolver.get();
 }
 
 
 LineSearchNM *
 NRSolver :: giveLineSearchSolver()
 {
-    if ( linesearchSolver == NULL ) {
-        linesearchSolver = new LineSearchNM(domain, engngModel);
+    if ( !linesearchSolver ) {
+        linesearchSolver.reset( new LineSearchNM(domain, engngModel) );
     }
 
-    return linesearchSolver;
+    return linesearchSolver.get();
 }
 
 void
 NRSolver :: initPrescribedEqs()
 {
     EModelDefaultEquationNumbering dn;
-#ifdef __PARALLEL_MODE
     ParallelContext *parallel_context = engngModel->giveParallelContext( this->domain->giveNumber() );
-#endif
-    int jglobnum, count = 0, ndofman = domain->giveNumberOfDofManagers();
-    int inode, idofid;
+    int count = 0, ndofman = domain->giveNumberOfDofManagers();
     IntArray localPrescribedEqs(numberOfPrescribedDofs);
 
     for ( int j = 1; j <= ndofman; j++ ) {
-#ifdef __PARALLEL_MODE
         if ( !parallel_context->isLocal( domain->giveNode(j) ) ) {
             continue;
         }
-#endif
-        jglobnum = domain->giveNode(j)->giveGlobalNumber();
+        int jglobnum = domain->giveNode(j)->giveGlobalNumber();
         for ( int i = 1; i <= numberOfPrescribedDofs; i++ ) {
-            inode = prescribedDofs.at(2 * i - 1);
-            idofid = prescribedDofs.at(2 * i);
+            int inode = prescribedDofs.at(2 * i - 1);
+            int idofid = prescribedDofs.at(2 * i);
             if ( inode == jglobnum ) {
                 localPrescribedEqs.at(++count) = domain->giveNode(j)->giveDofWithID(idofid)->giveEquationNumber(dn);
                 continue;
@@ -451,66 +416,15 @@ NRSolver :: initPrescribedEqs()
 
 
 void
-NRSolver :: applyConstraintsToStiffness(SparseMtrx *k)
+NRSolver :: applyConstraintsToStiffness(SparseMtrx &k)
 {
-    if ( this->smConstraintVersion == k->giveVersion() ) {
+    if ( this->smConstraintVersion == k.giveVersion() ) {
         return;
     }
 
-#if 0
- #ifdef __PETSC_MODULE
-    if ( solverType == ST_Petsc ) {
-        PetscScalar diagVal = 1.0;
-        if ( k->giveType() != SMT_PetscMtrx ) {
-            OOFEM_ERROR("PetscSparseMtrx Expected");
-        }
-
-        PetscSparseMtrx *lhs = static_cast< PetscSparseMtrx * >(k);
-
-        if ( !prescribedEgsIS_defined ) {
-            IntArray eqs;
-  #ifdef __PARALLEL_MODE
-            Natural2GlobalOrdering *n2lpm = engngModel->giveParallelContext(1)->giveN2Gmap();
-            int s = prescribedEqs.giveSize();
-            eqs.resize(s);
-            for ( int i = 1; i <= s; i++ ) {
-                eqs.at(i) = n2lpm->giveNewEq( prescribedEqs.at(i) );
-            }
-
-            ISCreateGeneral(PETSC_COMM_WORLD, s, eqs.givePointer(), & prescribedEgsIS);
-            //ISView(prescribedEgsIS,PETSC_VIEWER_STDOUT_WORLD);
-  #else
-            eqs.resize(numberOfPrescribedDofs);
-            for ( int i = 1; i <= numberOfPrescribedDofs; i++ ) {
-                eqs.at(i) = prescribedEqs.at(i) - 1;
-            }
-
-            ISCreateGeneral(PETSC_COMM_SELF, numberOfPrescribedDofs, eqs.givePointer(), & prescribedEgsIS);
-            //ISView(prescribedEgsIS,PETSC_VIEWER_STDOUT_SELF);
-  #endif
-            prescribedEgsIS_defined = true;
-        }
-
-        //MatView(*(lhs->giveMtrx()),PETSC_VIEWER_STDOUT_WORLD);
-        MatZeroRows(* ( lhs->giveMtrx() ), prescribedEgsIS, & diagVal);
-        //MatView(*(lhs->giveMtrx()),PETSC_VIEWER_STDOUT_WORLD);
-        if ( numberOfPrescribedDofs ) {
-            this->smConstraintVersion = k->giveVersion();
-        }
-
-        return;
-    }
-
- #endif // __PETSC_MODULE
-#else
- #ifdef __PETSC_MODULE
-    if ( solverType == ST_Petsc ) {
-        if ( k->giveType() != SMT_PetscMtrx ) {
-            OOFEM_ERROR("PetscSparseMtrx Expected");
-        }
-
-        PetscSparseMtrx *lhs = static_cast< PetscSparseMtrx * >(k);
-
+#ifdef __PETSC_MODULE
+    PetscSparseMtrx *lhs = dynamic_cast< PetscSparseMtrx * >(&k);
+    if ( lhs ) {
         Vec diag;
         PetscScalar *ptr;
         int eq;
@@ -528,26 +442,25 @@ NRSolver :: applyConstraintsToStiffness(SparseMtrx *k)
         VecRestoreArray(diag, & ptr);
         VecDestroy(& diag);
         if ( numberOfPrescribedDofs ) {
-            this->smConstraintVersion = k->giveVersion();
+            this->smConstraintVersion = k.giveVersion();
         }
 
         return;
     }
 
- #endif // __PETSC_MODULE
-#endif
+#endif // __PETSC_MODULE
     for ( int i = 1; i <= numberOfPrescribedDofs; i++ ) {
-        k->at( prescribedEqs.at(i), prescribedEqs.at(i) ) *= 1.e6;
+        k.at( prescribedEqs.at(i), prescribedEqs.at(i) ) *= 1.e6;
     }
 
     if ( numberOfPrescribedDofs ) {
-        this->smConstraintVersion = k->giveVersion();
+        this->smConstraintVersion = k.giveVersion();
     }
 }
 
 
 void
-NRSolver :: applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, FloatArray &R,
+NRSolver :: applyConstraintsToLoadIncrement(int nite, const SparseMtrx &k, FloatArray &R,
                                             referenceLoadInputModeType rlm, TimeStep *tStep)
 {
     double factor = engngModel->giveDomain(1)->giveFunction(prescribedDisplacementTF)->evaluateAtTime( tStep->giveTargetTime() );
@@ -562,7 +475,6 @@ NRSolver :: applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, Float
 #if 0
  #ifdef __PETSC_MODULE
         if ( solverType == ST_Petsc ) {
-  #ifdef __PARALLEL_MODE
             //Natural2LocalOrdering* n2lpm = engngModel->giveParallelContext(1)->giveN2Lmap();
             //IntArray* map = n2lpm->giveN2Lmap();
             for ( i = 1; i <= prescribedEqs.giveSize(); i++ ) {
@@ -571,28 +483,13 @@ NRSolver :: applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, Float
             }
 
             return;
-
-  #else // PETSC_SERIAL
-            for ( i = 1; i <= numberOfPrescribedDofs; i++ ) {
-                eq = prescribedEqs.at(i);
-                R.at(eq) = prescribedDofsValues.at(i) * factor;
-            }
-
-            return;
-
-  #endif
         }
 
  #endif
 #else
  #ifdef __PETSC_MODULE
-        if ( solverType == ST_Petsc ) {
-            if ( k->giveType() != SMT_PetscMtrx ) {
-                OOFEM_ERROR("PetscSparseMtrx Expected");
-            }
-
-            const PetscSparseMtrx *lhs = static_cast< const PetscSparseMtrx * >(k);
-
+        const PetscSparseMtrx *lhs = dynamic_cast< const PetscSparseMtrx * >(&k);
+        if ( lhs ) {
             Vec diag;
             PetscScalar *ptr;
             lhs->createVecGlobal(& diag);
@@ -612,7 +509,7 @@ NRSolver :: applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, Float
 #endif
         for ( int i = 1; i <= numberOfPrescribedDofs; i++ ) {
             int eq = prescribedEqs.at(i);
-            R.at(eq) = k->at(eq, eq) * prescribedDofsValues.at(i) * factor;
+            R.at(eq) = k.at(eq, eq) * prescribedDofsValues.at(i) * factor;
         }
     } else {
         for ( int i = 1; i <= numberOfPrescribedDofs; i++ ) {
@@ -647,16 +544,13 @@ NRSolver :: printState(FILE *outputStream)
 bool
 NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  FloatArray &ddX, FloatArray &X,
                              double RRT, const FloatArray &internalForcesEBENorm,
-                             int nite, bool &errorOutOfRange, TimeStep *tNow)
+                             int nite, bool &errorOutOfRange)
 {
     double forceErr, dispErr;
     FloatArray dg_forceErr, dg_dispErr, dg_totalLoadLevel, dg_totalDisp;
     bool answer;
     EModelDefaultEquationNumbering dn;
-#ifdef __PARALLEL_MODE
     ParallelContext *parallel_context = engngModel->giveParallelContext( this->domain->giveNumber() );
-    Natural2LocalOrdering *n2l = parallel_context->giveN2Lmap();
-#endif
 
     /*
      * The force errors are (if possible) evaluated as relative errors.
@@ -679,7 +573,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
     }
 
     if ( internalForcesEBENorm.giveSize() > 1 ) { // Special treatment when just one norm is given; No grouping
-        int nccdg = this->domain->giveMaxDofID();
+        int nccdg = this->domain->giveMaxDofID()+nLayers;				//number of layers for phase field shell (jim @todo jb layer)
         // Keeps tracks of which dof IDs are actually in use;
         IntArray idsInUse(nccdg);
         idsInUse.zero();
@@ -693,15 +587,10 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
         dg_totalDisp.resize(nccdg);
         dg_totalDisp.zero();
         // loop over dof managers
-        int ndofman = domain->giveNumberOfDofManagers();
-        for ( int idofman = 1; idofman <= ndofman; idofman++ ) {
-            DofManager *dofman = domain->giveDofManager(idofman);
-#ifdef __PARALLEL_MODE
-            if ( !parallel_context->isLocal(dofman) ) {
+        for ( auto &dofman : domain->giveDofManagers() ) {
+            if ( !parallel_context->isLocal(dofman.get()) ) {
                 continue;
             }
-
-#endif
 
             // loop over individual dofs
             for ( Dof *dof: *dofman ) {
@@ -714,8 +603,14 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                     continue;
                 }
 
-                dg_forceErr.at(dofid) += rhs.at(eq) * rhs.at(eq);
-                dg_dispErr.at(dofid) += ddX.at(eq) * ddX.at(eq);
+				//if (dofid >= 23) {
+				//	dg_forceErr.at(dofid) += 0;
+				//	dg_dispErr.at(dofid) += 0;
+				//} else {
+					dg_forceErr.at(dofid) += rhs.at(eq) * rhs.at(eq);
+					dg_dispErr.at(dofid) += ddX.at(eq) * ddX.at(eq);
+				//}
+
                 dg_totalLoadLevel.at(dofid) += RT.at(eq) * RT.at(eq);
                 dg_totalDisp.at(dofid) += X.at(eq) * X.at(eq);
                 idsInUse.at(dofid) = 1;
@@ -723,15 +618,11 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
         } // end loop over dof managers
 
         // loop over elements and their DOFs
-        int nelem = domain->giveNumberOfElements();
-        for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-            Element *elem = domain->giveElement(ielem);
-#ifdef __PARALLEL_MODE
+        for ( auto &elem : domain->giveElements() ) {
             if ( elem->giveParallelMode() != Element_local ) {
                 continue;
             }
 
-#endif
             // loop over element internal Dofs
             for ( int idofman = 1; idofman <= elem->giveNumberOfInternalDofManagers(); idofman++ ) {
                 DofManager *dofman = elem->giveInternalDofManager(idofman);
@@ -746,11 +637,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                     if ( !eq ) {
                         continue;
                     }
-#ifdef __PARALLEL_MODE
-                    if ( engngModel->isParallel() && !n2l->giveNewEq(eq) ) {
-                        continue;
-                    }
-#endif
+
                     dg_forceErr.at(dofid) += rhs.at(eq) * rhs.at(eq);
                     dg_dispErr.at(dofid) += ddX.at(eq) * ddX.at(eq);
                     dg_totalLoadLevel.at(dofid) += RT.at(eq) * RT.at(eq);
@@ -761,9 +648,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
         } // end loop over elements
 
         // loop over boundary conditions and their internal DOFs
-        for ( int ibc = 1; ibc <= domain->giveNumberOfBoundaryConditions(); ibc++ ) {
-            GeneralBoundaryCondition *bc = domain->giveBc(ibc);
-
+        for ( auto &bc : domain->giveBcs() ) {
             // loop over element internal Dofs
             for ( int idofman = 1; idofman <= bc->giveNumberOfInternalDofManagers(); idofman++ ) {
                 DofManager *dofman = bc->giveInternalDofManager(idofman);
@@ -778,11 +663,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                     if ( !eq ) {
                         continue;
                     }
-#ifdef __PARALLEL_MODE
-                    if ( engngModel->isParallel() && !n2l->giveNewEq(eq) ) {
-                        continue;
-                    }
-#endif
+
                     dg_forceErr.at(dofid) += rhs.at(eq) * rhs.at(eq);
                     dg_dispErr.at(dofid) += ddX.at(eq) * ddX.at(eq);
                     dg_totalLoadLevel.at(dofid) += RT.at(eq) * RT.at(eq);
@@ -792,7 +673,6 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
             } // end loop over element internal dofmans
         } // end loop over elements
 
-#ifdef __PARALLEL_MODE
         // exchange individual partition contributions (simultaneously for all groups)
         FloatArray collectiveErr(nccdg);
         parallel_context->accumulate(dg_forceErr,       collectiveErr);
@@ -803,7 +683,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
         dg_totalLoadLevel = collectiveErr;
         parallel_context->accumulate(dg_totalDisp,      collectiveErr);
         dg_totalDisp      = collectiveErr;
-#endif
+
         OOFEM_LOG_INFO("NRSolver: %-5d", nite);
         //bool zeroNorm = false;
         // loop over dof groups and check convergence individually
@@ -819,7 +699,11 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
             if ( rtolf.at(1) > 0.0 ) {
                 //  compute a relative error norm
                 if ( ( dg_totalLoadLevel.at(dg) + internalForcesEBENorm.at(dg) ) > nrsolver_ERROR_NORM_SMALL_NUM ) {
+                    //if (dg>=23) {
+                    //    forceErr = sqrt( dg_forceErr.at(dg) );
+                    //}else{
                     forceErr = sqrt( dg_forceErr.at(dg) / ( dg_totalLoadLevel.at(dg) + internalForcesEBENorm.at(dg) ) );
+                    //}
                 } else {
                     // If both external forces and internal ebe norms are zero, then the residual must be zero.
                     //zeroNorm = true; // Warning about this afterwards.
@@ -871,18 +755,14 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
             OOFEM_LOG_INFO("  NRSolver:     %-15d", nite);
         }
 
-#ifdef __PARALLEL_MODE
+
         forceErr = parallel_context->localNorm(rhs);
         forceErr *= forceErr;
         dXX = parallel_context->localNorm(X);
         dXX *= dXX;                                       // Note: Solutions are always total global values (natural distribution makes little sense for the solution)
         dXdX = parallel_context->localNorm(ddX);
         dXdX *= dXdX;
-#else
-        forceErr = rhs.computeSquaredNorm();
-        dXX = X.computeSquaredNorm();
-        dXdX = ddX.computeSquaredNorm();
-#endif
+
         if ( rtolf.at(1) > 0.0 ) {
             // we compute a relative error norm
             if ( ( RRT + internalForcesEBENorm.at(1) ) > nrsolver_ERROR_NORM_SMALL_NUM ) {

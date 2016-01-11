@@ -33,7 +33,8 @@
  */
 
 #include "supg.h"
-#include "nummet.h"
+#include "sparsemtrx.h"
+#include "nrsolver.h"
 #include "timestep.h"
 #include "element.h"
 #include "dofmanager.h"
@@ -51,6 +52,7 @@
 #include "function.h"
 #include "contextioerr.h"
 #include "timer.h"
+#include "unknownnumberingscheme.h"
 
 namespace oofem {
 /* define if implicit interface update required */
@@ -58,18 +60,94 @@ namespace oofem {
 
 REGISTER_EngngModel(SUPG);
 
+
+SUPGTangentAssembler :: SUPGTangentAssembler(MatResponseMode m, double l, double d, double u, double a) : 
+    MatrixAssembler(), rmode(m), lscale(l), dscale(d), uscale(u), alpha(a)
+{}
+
+
+void SUPGTangentAssembler :: matrixFromElement(FloatMatrix &answer, Element &el, TimeStep *tStep) const
+{
+    SUPGElement *element = static_cast< SUPGElement * >( &el );
+    IntArray vloc, ploc;
+    FloatMatrix h;
+    int size = element->computeNumberOfDofs();
+    element->giveLocalVelocityDofMap(vloc);
+    element->giveLocalPressureDofMap(ploc);
+    answer.resize(size, size);
+    answer.zero();
+
+    element->computeAccelerationTerm_MB(h, tStep);
+    answer.assemble(h, vloc);
+    element->computeAdvectionDerivativeTerm_MB(h, tStep);
+    h.times( alpha * tStep->giveTimeIncrement() );
+    answer.assemble(h, vloc);
+    element->computeDiffusionDerivativeTerm_MB(h, rmode, tStep);
+
+    h.times( alpha * tStep->giveTimeIncrement() );
+    answer.assemble(h, vloc);
+    element->computePressureTerm_MB(h, tStep);
+    answer.assemble(h, vloc, ploc);
+    element->computeLSICStabilizationTerm_MB(h, tStep);
+    h.times( alpha * tStep->giveTimeIncrement() * lscale / ( dscale * uscale * uscale ) );
+    answer.assemble(h, vloc);
+    element->computeBCLhsTerm_MB(h, tStep);
+    if ( h.isNotEmpty() ) {
+        h.times( alpha * tStep->giveTimeIncrement() );
+        answer.assemble(h, vloc);
+    }
+
+    element->computeBCLhsPressureTerm_MB(h, tStep);
+    if ( h.isNotEmpty() ) {
+        answer.assemble(h, vloc, ploc);
+    }
+
+    // conservation eq part
+    element->computeLinearAdvectionTerm_MC(h, tStep);
+    h.times( alpha * tStep->giveTimeIncrement() * 1.0 / ( dscale * uscale ) );
+    answer.assemble(h, ploc, vloc);
+    element->computeAdvectionDerivativeTerm_MC(h, tStep);
+    h.times( alpha * tStep->giveTimeIncrement() );
+    answer.assemble(h, ploc, vloc);
+    element->computeAccelerationTerm_MC(h, tStep);
+    answer.assemble(h, ploc, vloc);
+    element->computeBCLhsPressureTerm_MC(h, tStep);
+    if ( h.isNotEmpty() ) {
+        answer.assemble(h, ploc, vloc);
+    }
+
+    element->computeDiffusionDerivativeTerm_MC(h, tStep);
+    h.times( alpha * tStep->giveTimeIncrement() );
+    answer.assemble(h, ploc, vloc);
+    element->computePressureTerm_MC(h, tStep);
+    answer.assemble(h, ploc);
+}
+
+
+SUPG :: SUPG(int i, EngngModel * _master) : FluidModel(i, _master), accelerationVector()
+{
+    initFlag = 1;
+    ndomains = 1;
+    consistentMassFlag = 0;
+    equationScalingFlag = false;
+    lscale = uscale = dscale = 1.0;
+}
+
+
+SUPG :: ~SUPG()
+{
+}
+
+
 NumericalMethod *SUPG :: giveNumericalMethod(MetaStep *mStep)
 {
-    if ( nMethod ) {
-        return nMethod;
+    if ( !this->nMethod ) {
+        this->nMethod.reset( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) ); 
+        if ( !this->nMethod ) { 
+            OOFEM_ERROR("linear solver creation failed"); 
+        }
     }
-
-    nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
-    if ( nMethod == NULL ) {
-        OOFEM_ERROR("linear solver creation failed");
-    }
-
-    return nMethod;
+    return this->nMethod.get();
 }
 
 IRResultType
@@ -121,29 +199,29 @@ SUPG :: initializeFrom(InputRecord *ir)
     }
 
     if ( requiresUnknownsDictionaryUpdate() ) {
-        VelocityPressureField = new DofDistributedPrimaryField(this, 1, FT_VelocityPressure, 1);
+        VelocityPressureField.reset( new DofDistributedPrimaryField(this, 1, FT_VelocityPressure, 1) );
     } else {
-        VelocityPressureField = new PrimaryField(this, 1, FT_VelocityPressure, 1);
+        VelocityPressureField.reset( new PrimaryField(this, 1, FT_VelocityPressure, 1) );
     }
 
     val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_SUPG_miflag);
     if ( val == 1 ) {
-        this->materialInterface = new LEPlic( 1, this->giveDomain(1) );
+        this->materialInterface.reset( new LEPlic( 1, this->giveDomain(1) ) );
         this->materialInterface->initializeFrom(ir);
         // export velocity field
         FieldManager *fm = this->giveContext()->giveFieldManager();
         IntArray mask;
         mask = {V_u, V_v, V_w};
 
-        std :: shared_ptr< Field > _velocityField( new MaskedPrimaryField ( FT_Velocity, this->VelocityPressureField, mask ) );
+        std :: shared_ptr< Field > _velocityField( new MaskedPrimaryField ( FT_Velocity, this->VelocityPressureField.get(), mask ) );
         fm->registerField(_velocityField, FT_Velocity);
 
         //fsflag = 0;
         //IR_GIVE_OPTIONAL_FIELD (ir, fsflag, _IFT_SUPG_fsflag, "fsflag");
     } else if ( val == 2 ) {
         // positive coefficient scheme level set alg
-        this->materialInterface = new LevelSetPCS( 1, this->giveDomain(1) );
+        this->materialInterface.reset( new LevelSetPCS( 1, this->giveDomain(1) ) );
         this->materialInterface->initializeFrom(ir);
     }
 
@@ -189,6 +267,36 @@ SUPG :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof
 }
 
 
+void
+SUPG :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
+{
+    // update element stabilization
+    for ( auto &elem : d->giveElements() ) {
+        static_cast< FMElement * >( elem.get() )->updateStabilizationCoeffs(tStep);
+    }
+
+    if ( cmpn == InternalRhs ) {
+        this->internalForces.zero();
+        this->assembleVector(this->internalForces, tStep, InternalForcesVector, VM_Total,
+                             EModelDefaultEquationNumbering(), d, & this->eNorm);
+        this->updateSharedDofManagers(this->internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
+        return;
+    } else if ( cmpn == NonLinearLhs ) {
+        this->lhs->zero();
+        //if ( 1 ) { //if ((nite > 5)) // && (rnorm < 1.e4))
+        this->assemble( *lhs, tStep, TangentStiffnessMatrix,
+                        EModelDefaultEquationNumbering(), d );
+       // } else {
+       //     this->assemble( lhs, tStep, SecantStiffnessMatrix,
+       //                     EModelDefaultEquationNumbering(), d );
+       // }
+        return;
+    } else {
+        OOFEM_ERROR("Unknown component");
+    }
+}
+
+
 double
 SUPG :: giveReynoldsNumber()
 {
@@ -203,79 +311,61 @@ SUPG :: giveReynoldsNumber()
 TimeStep *
 SUPG :: giveSolutionStepWhenIcApply()
 {
-    if ( stepWhenIcApply == NULL ) {
+    if ( !stepWhenIcApply ) {
         double dt = deltaT / this->giveVariableScale(VST_Time);
 
-        stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0,
-                                       0.0, dt, 0);
+        stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0,
+                                       0.0, dt, 0) );
     }
 
-    return stepWhenIcApply;
+    return stepWhenIcApply.get();
 }
 
 TimeStep *
 SUPG :: giveNextStep()
 {
-    int istep = this->giveNumberOfFirstStep();
-    double totalTime = 0;
     double dt = deltaT;
-    StateCounterType counter = 1;
-    delete previousStep;
 
     Domain *domain = this->giveDomain(1);
-    int nelem = domain->giveNumberOfElements();
 
-    if ( currentStep == NULL ) {
+    if ( !currentStep ) {
         // first step -> generate initial step
-        currentStep = new TimeStep( *giveSolutionStepWhenIcApply() );
-    } else {
-        istep =  currentStep->giveNumber() + 1;
-        counter = currentStep->giveSolutionStateCounter() + 1;
+        currentStep.reset( new TimeStep( *giveSolutionStepWhenIcApply() ) );
     }
 
-    previousStep = currentStep;
+    previousStep = std :: move(currentStep);
 
     if ( deltaTF ) {
-        dt *= domain->giveFunction(deltaTF)->evaluateAtTime(istep);
+        dt *= domain->giveFunction(deltaTF)->evaluateAtTime(previousStep->giveNumber() + 1);
     }
 
     // check for critical time step
-    for ( int i = 1; i <= nelem; i++ ) {
-        dt = min( dt, static_cast< SUPGElement * >( domain->giveElement(i) )->computeCriticalTimeStep(previousStep) );
+    for ( auto &elem : domain->giveElements() ) {
+        dt = min( dt, static_cast< SUPGElement * >( elem.get() )->computeCriticalTimeStep(previousStep.get()) );
     }
 
     if ( materialInterface ) {
-        dt = min( dt, materialInterface->computeCriticalTimeStep(previousStep) );
+        dt = min( dt, materialInterface->computeCriticalTimeStep(previousStep.get()) );
     }
 
     // dt *= 0.6;
     dt /= this->giveVariableScale(VST_Time);
 
-    if ( currentStep != NULL ) {
-        totalTime = currentStep->giveTargetTime() + dt;
-    }
+    currentStep.reset( new TimeStep(*previousStep, dt) );
 
-    currentStep = new TimeStep(istep, this, 1, totalTime, dt, counter);
-
-    OOFEM_LOG_INFO( "SolutionStep %d : t = %e, dt = %e\n", istep, totalTime * this->giveVariableScale(VST_Time), dt * this->giveVariableScale(VST_Time) );
-    // time and dt variables are set eq to 0 for staics - has no meaning
-    return currentStep;
+    OOFEM_LOG_INFO( "SolutionStep %d : t = %e, dt = %e\n", currentStep->giveNumber(), 
+                    currentStep->giveTargetTime() * this->giveVariableScale(VST_Time), dt * this->giveVariableScale(VST_Time) );
+    return currentStep.get();
 }
 
 
 void
 SUPG :: solveYourselfAt(TimeStep *tStep)
 {
-    int nite = 0;
     int neq =  this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
-    double _absErrResid, err, avn = 0.0, aivn = 0.0, rnorm;
     FloatArray *solutionVector = NULL, *prevSolutionVector = NULL;
-    FloatArray rhs(neq), externalForces(neq), internalForces(neq);
-    int jj, nnodes = this->giveDomain(1)->giveNumberOfDofManagers();
-    double val, rnorm_mb, rnorm_mc;
-    DofManager *inode;
-    DofIDItem type;
-
+    FloatArray externalForces(neq);
+    this->internalForces.resize(neq);
 
     if ( tStep->giveNumber() == giveNumberOfFirstStep() ) {
         TimeStep *stepWhenIcApply = tStep->givePreviousStep();
@@ -303,8 +393,8 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
 
         incrementalSolutionVector.resize(neq);
 
-        lhs = classFactory.createSparseMtrx(sparseMtrxType);
-        if ( lhs == NULL ) {
+        lhs.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+        if ( !lhs ) {
             OOFEM_ERROR("sparse matrix creation failed");
         }
 
@@ -323,9 +413,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
 
 
     if ( !requiresUnknownsDictionaryUpdate() ) {
-        for ( int i = 1; i <= neq; i++ ) {
-            solutionVector->at(i) = prevSolutionVector->at(i);
-        }
+        *solutionVector = *prevSolutionVector;
     }
 
     //previousAccelerationVector=accelerationVector;
@@ -374,17 +462,43 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     externalForces.zero();
     this->assembleVector( externalForces, tStep, ExternalForcesVector, VM_Total,
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
-#ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(externalForces, EModelDefaultEquationNumbering(),  LoadExchangeTag);
-#endif
+
+#if 0
+    this->updateSolutionVectors(* solutionVector, accelerationVector, incrementalSolutionVector, tStep);
+    this->giveNumericalMethod( this->giveCurrentMetaStep() );
+    this->initMetaStepAttributes( this->giveCurrentMetaStep() );
+    double loadLevel;
+    int currentIterations;
+    this->updateComponent( tStep, InternalRhs, this->giveDomain(1) );
+    NM_Status status = this->nMethod->solve(*this->lhs,
+                                            externalForces,
+                                            NULL,
+                                            solutionVector,
+                                            this->incrementalSolutionVector,
+                                            this->internalForces,
+                                            this->eNorm,
+                                            loadLevel, // Only relevant for incrementalBCLoadVector?
+                                            SparseNonLinearSystemNM :: rlm_total,
+                                            currentIterations,
+                                            tStep);
+
+    if ( !( status & NM_Success ) ) {
+        OOFEM_ERROR("No success in solving problem at time step", tStep->giveNumber());
+    }
+    
+#else
+    int nite = 0;
+    double _absErrResid, err, avn = 0.0, aivn = 0.0, rnorm;
+    int jj, nnodes = this->giveDomain(1)->giveNumberOfDofManagers();
+    FloatArray rhs, internalForces(neq);
+
 
     // algoritmic rhs part (assembled by e-model (in giveCharComponent service) from various element contribs)
     internalForces.zero();
     this->assembleVector( internalForces, tStep, InternalForcesVector, VM_Total,
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
-#ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
-#endif
 
     rhs.beDifferenceOf(externalForces, internalForces);
 
@@ -403,22 +517,22 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
             // momentum balance part
             lhs->zero();
             if ( 1 ) { //if ((nite > 5)) // && (rnorm < 1.e4))
-                this->assemble( lhs, tStep, TangentStiffnessMatrix,
+                this->assemble( *lhs, tStep, TangentStiffnessMatrix,
                                EModelDefaultEquationNumbering(), this->giveDomain(1) );
             } else {
-                this->assemble( lhs, tStep, SecantStiffnessMatrix,
+                this->assemble( *lhs, tStep, SecantStiffnessMatrix,
                                EModelDefaultEquationNumbering(), this->giveDomain(1) );
             }
         }
         //if (this->fsflag) this->imposeAmbientPressureInOuterNodes(lhs,&rhs,tStep);
 
 #if 1
-        nMethod->solve(lhs, & rhs, & incrementalSolutionVector);
+        nMethod->solve(*lhs, rhs, incrementalSolutionVector);
 #else
 
         SparseMtrx *__lhs = lhs->GiveCopy();
 
-        nMethod->solve(lhs, & rhs, & incrementalSolutionVector);
+        nMethod->solve(*lhs, rhs, incrementalSolutionVector);
 
         // check solver
         FloatArray __rhs(neq);
@@ -488,19 +602,17 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         internalForces.zero();
         this->assembleVector( internalForces, tStep, InternalForcesVector, VM_Total,
                              EModelDefaultEquationNumbering(), this->giveDomain(1) );
-#ifdef __PARALLEL_MODE
         this->updateSharedDofManagers(internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
-#endif
         rhs.beDifferenceOf(externalForces, internalForces);
 
         // check convergence and repeat iteration if desired
-        rnorm_mb = rnorm_mc = 0.0;
+        double rnorm_mb = 0.0, rnorm_mc = 0.0;
         for ( int i = 1; i <= nnodes; i++ ) {
-            inode = this->giveDomain(1)->giveDofManager(i);
+            DofManager *inode = this->giveDomain(1)->giveDofManager(i);
             for ( Dof *dof: *inode ) {
-                type  =  dof->giveDofID();
                 if ( ( jj = dof->__giveEquationNumber() ) ) {
-                    val = rhs.at(jj);
+                    DofIDItem type = dof->giveDofID();
+                    double val = rhs.at(jj);
                     if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
                         rnorm_mb += val * val;
                     } else {
@@ -535,9 +647,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
             internalForces.zero();
             this->assembleVector( internalForces, tStep, InternalForcesVector, VM_Total,
                                  EModelDefaultEquationNumbering(), this->giveDomain(1) );
-#ifdef __PARALLEL_MODE
             this->updateSharedDofManagers(internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
-#endif
             rhs.beDifferenceOf(externalForces, internalForces);
         }
     } while ( ( rnorm > rtolv ) && ( _absErrResid > atolv ) && ( nite <= maxiter ) );
@@ -550,6 +660,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
             exit(1);
         }
     }
+#endif
 
 #ifndef SUPG_IMPLICIT_INTERFACE
     if ( materialInterface ) {
@@ -586,21 +697,18 @@ SUPG :: updateYourself(TimeStep *tStep)
 }
 
 
-
 void
 SUPG :: updateInternalState(TimeStep *tStep)
 {
     for ( auto &domain: domainList ) {
-        int nnodes = domain->giveNumberOfDofManagers();
         if ( requiresUnknownsDictionaryUpdate() ) {
-            for ( int j = 1; j <= nnodes; j++ ) {
-                this->updateDofUnknownsDictionary(domain->giveDofManager(j), tStep);
+            for ( auto &dman : domain->giveDofManagers() ) {
+                this->updateDofUnknownsDictionary(dman.get(), tStep);
             }
         }
 
-        int nelem = domain->giveNumberOfElements();
-        for ( int j = 1; j <= nelem; j++ ) {
-            domain->giveElement(j)->updateInternalState(tStep);
+        for ( auto &elem : domain->giveElements() ) {
+            elem->updateInternalState(tStep);
         }
     }
 }
@@ -608,9 +716,6 @@ SUPG :: updateInternalState(TimeStep *tStep)
 
 contextIOResultType
 SUPG :: saveContext(DataStream *stream, ContextMode mode, void *obj)
-//
-// saves state variable - displacement vector
-//
 {
     contextIOResultType iores;
     int closeFlag = 0;
@@ -630,16 +735,16 @@ SUPG :: saveContext(DataStream *stream, ContextMode mode, void *obj)
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = VelocityPressureField->saveContext(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = VelocityPressureField->saveContext(*stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = accelerationVector.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = accelerationVector.storeYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     if ( materialInterface ) {
-        if ( ( iores = materialInterface->saveContext(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = materialInterface->saveContext(*stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
@@ -656,9 +761,6 @@ SUPG :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 
 contextIOResultType
 SUPG :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
-//
-// restore state variable - displacement vector
-//
 {
     contextIOResultType iores;
     int closeFlag = 0;
@@ -680,16 +782,16 @@ SUPG :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = VelocityPressureField->restoreContext(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = VelocityPressureField->restoreContext(*stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = accelerationVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = accelerationVector.restoreYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     if ( materialInterface ) {
-        if ( ( iores = materialInterface->restoreContext(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = materialInterface->restoreContext(*stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
@@ -709,47 +811,41 @@ SUPG :: checkConsistency()
 {
     // check internal consistency
     // if success returns nonzero
-    int nelem;
     Domain *domain = this->giveDomain(1);
 
-    nelem = domain->giveNumberOfElements();
     // check for proper element type
-
-    for ( int i = 1; i <= nelem; i++ ) {
-        Element *ePtr = domain->giveElement(i);
-        SUPGElement *sePtr = dynamic_cast< SUPGElement * >(ePtr);
-        if ( sePtr == NULL ) {
-            OOFEM_WARNING("Element %d has no SUPG base", i);
+    for ( auto &elem : domain->giveElements() ) {
+        if ( dynamic_cast< SUPGElement * >( elem.get() ) == NULL ) {
+            OOFEM_WARNING("Element %d has no SUPG base", elem->giveLabel());
             return 0;
         }
     }
 
-    EngngModel :: checkConsistency();
+    int ret = EngngModel :: checkConsistency();
+    if ( ret == 0 ) {
+        return 0;
+    }
 
 
     // scale boundary and initial conditions
     if ( equationScalingFlag ) {
-        int nbc = domain->giveNumberOfBoundaryConditions();
-        for ( int i = 1; i <= nbc; i++ ) {
-            GeneralBoundaryCondition *bcPtr = domain->giveBc(i);
-            if ( bcPtr->giveBCValType() == VelocityBVT ) {
-                bcPtr->scale(1. / uscale);
-            } else if ( bcPtr->giveBCValType() == PressureBVT ) {
-                bcPtr->scale( 1. / this->giveVariableScale(VST_Pressure) );
-            } else if ( bcPtr->giveBCValType() == ForceLoadBVT ) {
-                bcPtr->scale( 1. / this->giveVariableScale(VST_Force) );
+        for ( auto &bc : domain->giveBcs() ) {
+            if ( bc->giveBCValType() == VelocityBVT ) {
+                bc->scale(1. / uscale);
+            } else if ( bc->giveBCValType() == PressureBVT ) {
+                bc->scale( 1. / this->giveVariableScale(VST_Pressure) );
+            } else if ( bc->giveBCValType() == ForceLoadBVT ) {
+                bc->scale( 1. / this->giveVariableScale(VST_Force) );
             } else {
                 OOFEM_ERROR("unknown bc/ic type");
             }
         }
 
-        int nic = domain->giveNumberOfInitialConditions();
-        for ( int i = 1; i <= nic; i++ ) {
-            InitialCondition *icPtr = domain->giveIc(i);
-            if ( icPtr->giveICValType() == VelocityBVT ) {
-                icPtr->scale(VM_Total, 1. / uscale);
-            } else if ( icPtr->giveICValType() == PressureBVT ) {
-                icPtr->scale( VM_Total, 1. / this->giveVariableScale(VST_Pressure) );
+        for ( auto &ic : domain->giveIcs() ) {
+            if ( ic->giveICValType() == VelocityBVT ) {
+                ic->scale(VM_Total, 1. / uscale);
+            } else if ( ic->giveICValType() == PressureBVT ) {
+                ic->scale( VM_Total, 1. / this->giveVariableScale(VST_Pressure) );
             } else {
                 OOFEM_ERROR("unknown bc/ic type");
             }
@@ -837,9 +933,8 @@ SUPG :: applyIC(TimeStep *stepWhenIcApply)
         this->updateElementsForNewInterfacePosition(stepWhenIcApply);
     }
 
-    int nelem = domain->giveNumberOfElements();
-    for ( int j = 1; j <= nelem; j++ ) {
-        SUPGElement *element = static_cast< SUPGElement * >( domain->giveElement(j) );
+    for ( auto &elem : domain->giveElements() ) {
+        SUPGElement *element = static_cast< SUPGElement * >( elem.get() );
         element->updateInternalState(stepWhenIcApply);
         element->updateYourself(stepWhenIcApply);
     }
@@ -873,10 +968,9 @@ void
 SUPG :: evaluateElementStabilizationCoeffs(TimeStep *tStep)
 {
     Domain *domain = this->giveDomain(1);
-    int nelem = domain->giveNumberOfElements();
 
-    for ( int i = 1; i <= nelem; i++ ) {
-        SUPGElement *ePtr = static_cast< SUPGElement * >( domain->giveElement(i) );
+    for ( auto &elem : domain->giveElements() ) {
+        FMElement *ePtr = static_cast< FMElement * >( elem.get() );
         ePtr->updateStabilizationCoeffs(tStep);
     }
 }
@@ -885,13 +979,12 @@ void
 SUPG :: updateElementsForNewInterfacePosition(TimeStep *tStep)
 {
     Domain *domain = this->giveDomain(1);
-    int nelem = domain->giveNumberOfElements();
 
     OOFEM_LOG_DEBUG("SUPG :: updateElements - updating elements for interface position");
 
 
-    for ( int i = 1; i <= nelem; i++ ) {
-        SUPGElement *ePtr = static_cast< SUPGElement * >( domain->giveElement(i) );
+    for ( auto &elem : domain->giveElements() ) {
+        SUPGElement *ePtr = static_cast< SUPGElement * >( elem.get() );
         ePtr->updateElementForNewInterfacePosition(tStep);
     }
 }
@@ -1054,8 +1147,6 @@ SUPG :: giveElementCharacteristicVector(FloatArray &answer, int num, CharType ty
 }
 
 
-
-
 void
 SUPG :: updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep)
 {
@@ -1098,7 +1189,6 @@ SUPG :: updateDofUnknownsDictionary_predictor(TimeStep *tStep)
                 } else {
                     val = dof->giveBcValue(VM_Total, tStep);
                     dof->updateUnknownsDictionary(tStep, VM_Total, val); // velocity
-                    //val = iDof -> giveBcValue (VM_Velocity,tStep) ; //velocity of velocity is acceleration
                     dof->updateUnknownsDictionary(tStep, VM_Acceleration, 0.0); // acceleration
                 }
             }
@@ -1156,11 +1246,8 @@ SUPG :: updateSolutionVectors_predictor(FloatArray &solutionVector, FloatArray &
 {
     double deltaT = tStep->giveTimeIncrement();
     Domain *domain = this->giveDomain(1);
-    int nman =  this->giveDomain(1)->giveNumberOfDofManagers();
 
-    for ( int j = 1; j <= nman; j++ ) {
-        DofManager *node = domain->giveDofManager(j);
-
+    for ( auto &node : domain->giveDofManagers() ) {
         for ( Dof *iDof: *node ) {
             if ( !iDof->isPrimaryDof() ) {
                 continue;
@@ -1177,8 +1264,7 @@ SUPG :: updateSolutionVectors_predictor(FloatArray &solutionVector, FloatArray &
         }
     }
 
-    for ( int j = 1; j <= domain->giveNumberOfElements(); j++ ) {
-        Element *elem = domain->giveElement(j);
+    for ( auto &elem : domain->giveElements() ) {
         int ndofman = elem->giveNumberOfInternalDofManagers();
         for ( int ji = 1; ji <= ndofman; ji++ ) {
             DofManager *dofman = elem->giveInternalDofManager(ji);
@@ -1193,7 +1279,6 @@ SUPG :: updateSolutionVectors_predictor(FloatArray &solutionVector, FloatArray &
                 if ( jj ) {
                     if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) { // v = v + (deltaT*alpha)*da
                         solutionVector.at(jj) += deltaT * accelerationVector.at(jj);
-                        ;
                     }
                 }
             }
@@ -1207,12 +1292,10 @@ SUPG :: updateSolutionVectors(FloatArray &solutionVector, FloatArray &accelerati
 {
     double deltaT = tStep->giveTimeIncrement();
     Domain *domain = this->giveDomain(1);
-    int nman = this->giveDomain(1)->giveNumberOfDofManagers();
 
     accelerationVector.add(incrementalSolutionVector);
 
-    for ( int j = 1; j <= nman; j++ ) {
-        DofManager *node = domain->giveDofManager(j);
+    for ( auto &node : domain->giveDofManagers() ) {
 
         for ( Dof *iDof: *node ) {
             if ( !iDof->isPrimaryDof() ) {
@@ -1232,8 +1315,7 @@ SUPG :: updateSolutionVectors(FloatArray &solutionVector, FloatArray &accelerati
         }
     } // end loop over dnam
 
-    for ( int j = 1; j <= domain->giveNumberOfElements(); j++ ) {
-        Element *elem = domain->giveElement(j);
+    for ( auto &elem : domain->giveElements() ) {
         int ndofman = elem->giveNumberOfInternalDofManagers();
         for ( int ji = 1; ji <= ndofman; ji++ ) {
             DofManager *dofman = elem->giveInternalDofManager(ji);

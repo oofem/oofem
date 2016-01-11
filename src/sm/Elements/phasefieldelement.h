@@ -53,7 +53,7 @@ public:
     PhaseFieldElement( int i, Domain *aDomain );
     virtual ~PhaseFieldElement() {}
 
-    virtual NLStructuralElement *giveElement( ) = 0;
+    virtual Element *giveElement( ) = 0;
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveDofManDofIDMask_u(IntArray &answer) = 0;
@@ -62,7 +62,7 @@ public:
     virtual const char *giveClassName() const { return "PhaseFieldElement"; }
 
     int computeNumberOfDofs();
-    void computeLocationArrayOfDofIDs( const IntArray &dofIdArray, IntArray &answer );
+    virtual void computeLocationArrayOfDofIDs( const IntArray &dofIdArray, IntArray &answer );
 
     double computeFreeEnergy( GaussPoint *gp, TimeStep *tStep );
 
@@ -73,6 +73,10 @@ public:
     double giveCriticalEnergy() { return criticalEnergy; };
     double relaxationTime;
     double giveRelaxationTime( ) { return relaxationTime; };
+    double penaltyParameter;
+    double givePenaltyParameter() { return penaltyParameter; };
+    double psiBar0;
+    double givePsiBar0() { return psiBar0; };
 
 protected:
 
@@ -86,7 +90,7 @@ protected:
     
     double computeG(GaussPoint *gp, ValueModeType valueMode, TimeStep *stepN);
     double computeGPrim(GaussPoint *gp, ValueModeType valueMode, TimeStep *stepN);
-    double computeDamageAt(GaussPoint *gp, ValueModeType valueMode, TimeStep *stepN);
+    virtual double computeDamageAt(GaussPoint *gp, ValueModeType valueMode, TimeStep *stepN);
 
     void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
     void giveInternalForcesVector_u(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);

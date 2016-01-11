@@ -35,6 +35,7 @@
 #define CRACK_H_
 
 #include "xfem/enrichmentitem.h"
+#include "xfem/hybridei.h"
 
 #define _IFT_Crack_Name "crack"
 
@@ -50,7 +51,7 @@ class GnuplotExportModule;
  * @author Erik Svenning
  * @date Feb 14, 2014
  */
-class OOFEM_EXPORT Crack : public EnrichmentItem
+class OOFEM_EXPORT Crack : public HybridEI
 {
 public:
     Crack(int n, XfemManager *xm, Domain *aDomain);
@@ -61,13 +62,15 @@ public:
 
     void AppendCohesiveZoneGaussPoint(GaussPoint *ipGP);
 
-    virtual void callGnuplotExportModule(GnuplotExportModule &iExpMod);
+    virtual void callGnuplotExportModule(GnuplotExportModule &iExpMod, TimeStep *tStep);
 
     const std :: vector< GaussPoint * > &giveCohesiveZoneGaussPoints() const { return mCohesiveZoneGaussPoints; }
     const std :: vector< double > &giveCohesiveZoneArcPositions() const { return mCohesiveZoneArcPositions; }
 
-    void computeCrackIntersectionPoints(Crack &iCrack, std::vector<FloatArray> &oIntersectionPoints, std::vector<double> &oArcPositions);
-    void computeArcPoints(const std::vector<FloatArray> &iIntersectionPoints, std::vector<double> &oArcPositions);
+    void computeCrackIntersectionPoints(Crack &iCrack, std :: vector< FloatArray > &oIntersectionPoints, std :: vector< double > &oArcPositions);
+    void computeArcPoints(const std :: vector< FloatArray > &iIntersectionPoints, std :: vector< double > &oArcPositions);
+    double computeLength();
+    virtual int giveDofPoolSize() const;
 
 protected:
     /**

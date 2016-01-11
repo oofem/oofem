@@ -72,24 +72,17 @@ TR1_2D_SUPG2 :: TR1_2D_SUPG2(int n, Domain *aDomain) :
     TR1_2D_SUPG(n, aDomain)
 {
     numberOfDofMans  = 3;
-    defaultIRule = NULL;
 }
 
 TR1_2D_SUPG2 :: ~TR1_2D_SUPG2()
 {
-    for ( int i = 0; i < 2; i++ ) {
-        myPoly [ i ].clear();
-    }
-    if ( defaultIRule ) {
-        delete defaultIRule;
-    }
 }
 
 
 void
 TR1_2D_SUPG2 :: computeNVector(FloatArray &answer, GaussPoint *gp)
 {
-    this->interp.evalN( answer, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evalN( answer, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -162,11 +155,11 @@ TR1_2D_SUPG2 :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize(2);
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3, true);
-        integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 1, 3, true);
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3, true) );
+        integrationRulesArray [ 1 ].reset( new GaussIntegrationRule(2, this, 1, 3, true) );
     }
     if ( !defaultIRule ) {
-        defaultIRule = new GaussIntegrationRule(1, this, 1, 3, true);
+        defaultIRule.reset( new GaussIntegrationRule(1, this, 1, 3, true) );
         this->giveCrossSection()->setupIntegrationPoints(* defaultIRule, 1, this);
     }
 }
@@ -1202,33 +1195,6 @@ TR1_2D_SUPG2 :: giveInterface(InterfaceType interface)
 }
 
 
-double
-TR1_2D_SUPG2 :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
-{
-    FloatArray lcoords(3), gcoords;
-    double dist;
-    int size, gsize;
-
-    lcoords.at(1) = lcoords.at(2) = lcoords.at(3) = 1. / 3.;
-    this->computeGlobalCoordinates(gcoords, lcoords);
-
-    if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        OOFEM_ERROR("coordinates size mismatch");
-    }
-
-    if ( size == gsize ) {
-        dist = coords.distance(gcoords);
-    } else {
-        FloatArray helpCoords = coords;
-
-        helpCoords.resizeWithValues(gsize);
-        dist = helpCoords.distance(gcoords);
-    }
-
-    return dist;
-}
-
-
 void
 TR1_2D_SUPG2 :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
@@ -1754,10 +1720,10 @@ TR1_2D_SUPG2 :: updateIntegrationRules()
 
         // remap ip coords into area coords of receiver
         for ( GaussPoint *gp: *integrationRulesArray [ i ] ) {
-            approx->local2global( gc, * gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(vcoords [ i ]) );
+            approx->local2global( gc, gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(vcoords [ i ]) );
             triaApprox.global2local( lc, gc, FEIElementGeometryWrapper(this) );
             // modify original ip coords to target ones
-            gp->setSubPatchCoordinates( * gp->giveNaturalCoordinates() );
+            gp->setSubPatchCoordinates( gp->giveNaturalCoordinates() );
             gp->setNaturalCoordinates(lc);
             //gp->setWeight (gp->giveWeight()*a/area);
         }
@@ -1796,10 +1762,10 @@ TR1_2D_SUPG2 :: computeVolumeAroundID(GaussPoint *gp, integrationDomain id, cons
 
     if ( id == _Triangle ) {
         FEI2dTrLin __interpolation(1, 2);
-        return weight *fabs( __interpolation.giveTransformationJacobian ( *gp->giveSubPatchCoordinates(), FEIVertexListGeometryWrapper(idpoly) ) );
+        return weight *fabs( __interpolation.giveTransformationJacobian ( gp->giveSubPatchCoordinates(), FEIVertexListGeometryWrapper(idpoly) ) );
     } else {
         FEI2dQuadLin __interpolation(1, 2);
-        double det = fabs( __interpolation.giveTransformationJacobian( * gp->giveSubPatchCoordinates(), FEIVertexListGeometryWrapper(idpoly) ) );
+        double det = fabs( __interpolation.giveTransformationJacobian( gp->giveSubPatchCoordinates(), FEIVertexListGeometryWrapper(idpoly) ) );
         return det * weight;
     }
 }
@@ -1891,7 +1857,7 @@ TR1_2D_SUPG2 :: printOutputAt(FILE *file, TimeStep *tStep)
 }
 
 
-contextIOResultType TR1_2D_SUPG2 :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType TR1_2D_SUPG2 :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full element context (saves state variables, that completely describe
 // current state)
@@ -1912,7 +1878,7 @@ contextIOResultType TR1_2D_SUPG2 :: saveContext(DataStream *stream, ContextMode 
 
 
 
-contextIOResultType TR1_2D_SUPG2 :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType TR1_2D_SUPG2 :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full element context (saves state variables, that completely describe
 // current state)

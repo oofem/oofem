@@ -52,8 +52,8 @@ public:
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 
     // definition
     virtual const char *giveClassName() const { return "KelvinChainMaterialStatus"; }
@@ -88,7 +88,7 @@ public:
 
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
 
-    void computeHiddenVars(GaussPoint *gp, TimeStep *tNow);
+    void computeHiddenVars(GaussPoint *gp, TimeStep *tStep);
 
 protected:
     virtual int hasIncrementalShrinkageFormulation() { return 0; }

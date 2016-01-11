@@ -33,4 +33,4 @@ endif
 
 clean:
 	rm -fr html
-	rm -f *.aux *.dvi *.lof *.log *.toc
+	rm -f *.aux *.dvi *.lof *.log *.toc *.dpth 

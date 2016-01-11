@@ -55,15 +55,11 @@ REGISTER_ExportModule(POIExportModule)
 
 POIExportModule :: POIExportModule(int n, EngngModel *e) : ExportModule(n, e), internalVarsToExport(), primaryVarsToExport(), POIList()
 {
-    mapper = NULL;
 }
 
 
 POIExportModule :: ~POIExportModule()
 {
-    if ( this->mapper ) {
-        delete this->mapper;
-    }
 }
 
 
@@ -212,19 +208,19 @@ POIExportModule :: exportIntVarAs(InternalStateType valID, FILE *stream, TimeSte
 MaterialMappingAlgorithm *
 POIExportModule :: giveMapper()
 {
-    if ( this->mapper == NULL ) {
+    if ( !this->mapper ) {
         if ( this->mtype == POI_CPT ) {
-            this->mapper  = new MMAClosestIPTransfer();
+            this->mapper.reset( new MMAClosestIPTransfer() );
         } else if ( this->mtype == POI_SFT ) {
-            this->mapper = new MMAShapeFunctProjection();
+            this->mapper.reset( new MMAShapeFunctProjection() );
         } else if ( this->mtype == POI_LST ) {
-            this->mapper = new MMALeastSquareProjection();
+            this->mapper.reset( new MMALeastSquareProjection() );
         } else {
             OOFEM_ERROR("unsupported smoother type ID");
         }
     }
 
-    return this->mapper;
+    return this->mapper.get();
 }
 
 
@@ -262,7 +258,7 @@ POIExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
 
     if ( valID == DisplacementVector ) {
         type = ISVT_VECTOR;
-    } else if ( valID == FluxVector ) {
+    } else if ( valID == FluxVector || valID == Humidity ) {
         type = ISVT_SCALAR;
     } else {
         OOFEM_ERROR("unsupported UnknownType");

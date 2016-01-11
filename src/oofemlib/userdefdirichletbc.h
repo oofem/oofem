@@ -71,7 +71,6 @@ typedef _object PyObject;
  * @author: Erik Svenning
  */
 namespace oofem {
-class PythonInitializer;
 
 class OOFEM_EXPORT UserDefDirichletBC : public BoundaryCondition
 {
@@ -79,7 +78,6 @@ protected:
     /// Prescribed values for each resp. dof
     FloatArray values;
 
-    PyObject *mpName;
     PyObject *mpModule;
     PyObject *mpFunc;
 
@@ -96,9 +94,7 @@ public:
     /// Destructor
     virtual ~UserDefDirichletBC();
 
-    virtual double give(Dof *dof, ValueModeType mode, TimeStep *tStep);
-
-    virtual void setPrescribedValue(double s);
+    virtual double give(Dof *dof, ValueModeType mode, double time);
 
     // Overloaded methods:
     virtual bcType giveType() const { return DirichletBT; }

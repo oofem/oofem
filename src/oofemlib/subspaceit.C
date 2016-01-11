@@ -67,8 +67,7 @@ SubspaceIteration :: ~SubspaceIteration()
 { }
 
 NM_Status
-SubspaceIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatrix *_r, double rtol, int nroot)
-//void  SubspaceIteration :: solveYourselfAt (TimeStep* tNow)
+SubspaceIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, FloatMatrix &_r, double rtol, int nroot)
 //
 // this function solve the generalized eigenproblem using the Generalized
 // jacobi iteration
@@ -88,23 +87,19 @@ SubspaceIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Floa
     //
     // check matrix size
     //
-    if ( ( !a ) || ( !b ) ) {
-        OOFEM_ERROR("matrices are not defined");
-    }
-
-    if ( a->giveNumberOfColumns() != b->giveNumberOfColumns() ) {
+    if ( a.giveNumberOfColumns() != b.giveNumberOfColumns() ) {
         OOFEM_ERROR("matrices size mismatch");
     }
 
     // check matrix for factorization support
-    if ( !a->canBeFactorized() ) {
+    if ( !a.canBeFactorized() ) {
         OOFEM_ERROR("a matrix not support factorization");
     }
 
     //
     // check for wery small problem
     //
-    nn = a->giveNumberOfColumns();
+    nn = a.giveNumberOfColumns();
     if ( nc > nn ) {
         nc = nn;
     }
@@ -129,23 +124,9 @@ SubspaceIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Floa
     rtolv.zero();
     vec.resize(nc, nc);
     vec.zero();                   // eigen vectors of reduced problem
-    // check matrix for storing resulted eigen vectors at the end
-    if ( _r == NULL ) {
-        OOFEM_ERROR("unknown eigen vectors mtrx");
-    }
 
-    if ( ( _r->giveNumberOfRows() != nn ) || ( _r->giveNumberOfColumns() != nroot ) ) {
-        OOFEM_ERROR("_r size mismatch");
-    }
-
-    // check array for storing eigenvalues
-    if ( _eigv == NULL ) {
-        OOFEM_ERROR("unknown eigenvalue array");
-    }
-
-    if ( _eigv->giveSize() != nroot ) {
-        OOFEM_ERROR("eigv size mismatch");
-    }
+    _r.resize(nn, nroot);
+    _eigv.resize(nroot);
 
     //
     // create work arrays
@@ -158,10 +139,10 @@ SubspaceIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Floa
     FloatArray h(nn);
     for ( i = 1; i <= nn; i++ ) {
         h.at(i) = 1.0;
-        w.at(i) = b->at(i, i) / a->at(i, i);
+        w.at(i) = b.at(i, i) / a.at(i, i);
     }
 
-    b->times(h, tt);
+    b.times(h, tt);
     for ( i = 1; i <= nn; i++ ) {
         r.at(i, 1) = tt.at(i);
     }
@@ -185,7 +166,7 @@ SubspaceIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Floa
             }
         }
 
-        b->times(h, tt);
+        b.times(h, tt);
         for ( i = 1; i <= nn; i++ ) {
             r.at(i, j) = tt.at(i);
         }
@@ -199,7 +180,7 @@ SubspaceIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Floa
 # endif
 
     //ish = 0;
-    a->factorized();
+    a.factorized();
     //
     // start of iteration loop
     //
@@ -217,9 +198,9 @@ SubspaceIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Floa
                 tt.at(k) = r.at(k, j);
             }
 
-            //a-> forwardReductionWith(&tt) -> diagonalScalingWith (&tt)
+            //a. forwardReductionWith(&tt) -> diagonalScalingWith (&tt)
             //  -> backSubstitutionWithtt) ;
-            a->backSubstitutionWith(tt);
+            a.backSubstitutionWith(tt);
 
             for ( i = j; i <= nc; i++ ) {
                 art = 0.;
@@ -246,7 +227,7 @@ SubspaceIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Floa
                 tt.at(k) = r.at(k, j);
             }
 
-            b->times(tt, temp);
+            b.times(tt, temp);
             for ( i = j; i <= nc; i++ ) {
                 brt = 0.;
                 for ( k = 1; k <= nn; k++ ) {
@@ -270,7 +251,7 @@ SubspaceIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Floa
         //
         // solution of reduced eigenvalue problem
         //
-        mtd.solve(& ar, & br, & eigv, & vec);
+        mtd.solve(ar, br, eigv, vec);
 
         /// START EXPERIMENTAL
         // solve the reduced problem by Inverse iteration
@@ -441,7 +422,7 @@ label400:
             tt.at(k) = r.at(k, j);
         }
 
-        a->backSubstitutionWith(tt);
+        a.backSubstitutionWith(tt);
         for ( k = 1; k <= nn; k++ ) {
             r.at(k, j) = tt.at(k);                   // (r = xbar)
         }
@@ -450,9 +431,9 @@ label400:
     // one cad add a normalization of eigen-vectors here
 
     for ( i = 1; i <= nroot; i++ ) {
-        _eigv->at(i) = eigv.at(i);
+        _eigv.at(i) = eigv.at(i);
         for ( j = 1; j <= nn; j++ ) {
-            _r->at(j, i) = r.at(j, i);
+            _r.at(j, i) = r.at(j, i);
         }
     }
 

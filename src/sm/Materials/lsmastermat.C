@@ -379,8 +379,6 @@ LargeStrainMasterMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, 
     FloatMatrix stiffness;
     MaterialMode mMode = gp->giveMaterialMode();
     if ( mMode == _3dMat ) {
-        Material *mat;
-        StructuralMaterial *sMat;
         mat = domain->giveMaterial(slaveMat);
         sMat = dynamic_cast< StructuralMaterial * >(mat);
         if ( sMat == NULL ) {
@@ -527,7 +525,7 @@ LargeStrainMasterMaterialStatus :: updateYourself(TimeStep *tStep)
 // saves full information stored in this status
 // temporary variables are NOT stored
 contextIOResultType
-LargeStrainMasterMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+LargeStrainMasterMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
     Material *mat;
@@ -547,7 +545,7 @@ LargeStrainMasterMaterialStatus :: saveContext(DataStream *stream, ContextMode m
 
 
 contextIOResultType
-LargeStrainMasterMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+LargeStrainMasterMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full information stored in stream to this Status
 //

@@ -82,8 +82,7 @@ protected:
      * default integration rule over element volume.
      * the standard integrationRulesArray contains two rules on element subvolumes.
      */
-    IntegrationRule *defaultIRule;
-
+    std :: unique_ptr< IntegrationRule > defaultIRule;
 
 public:
     TR1_2D_SUPG2(int n, Domain * d);
@@ -126,12 +125,10 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input);
     virtual void updateYourself(TimeStep *tStep);
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 
     virtual Interface *giveInterface(InterfaceType);
-
-    virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
     virtual int EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryField &pf,
                                                       FloatArray &coords, IntArray &dofId, ValueModeType mode,
@@ -158,7 +155,7 @@ public:
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual int giveDefaultIntegrationRule() const { return 0; }
-    virtual IntegrationRule *giveDefaultIntegrationRulePtr() { return defaultIRule; }
+    virtual IntegrationRule *giveDefaultIntegrationRulePtr() { return defaultIRule.get(); }
 
 
 

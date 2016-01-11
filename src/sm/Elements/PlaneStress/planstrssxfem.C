@@ -38,7 +38,6 @@
 #include "xfem/xfemelementinterface.h"
 #include "xfem/enrichmentfunction.h"
 #include "xfem/enrichmentitem.h"
-#include "xfem/enrichmentdomain.h"
 #include "vtkxmlexportmodule.h"
 #include "dynamicinputrecord.h"
 #include "feinterpol.h"
@@ -84,6 +83,9 @@ PlaneStress2dXfem :: computeGaussPoints()
 
         if ( xMan->isElementEnriched(this) ) {
             if ( !this->XfemElementInterface_updateIntegrationRule() ) {
+
+                // Blending element
+//                increaseNumGP();
                 PlaneStress2d :: computeGaussPoints();
             }
         } else {
@@ -91,6 +93,22 @@ PlaneStress2dXfem :: computeGaussPoints()
         }
     } else   {
         PlaneStress2d :: computeGaussPoints();
+    }
+}
+
+void PlaneStress2dXfem :: increaseNumGP()
+{
+    switch(numberOfGaussPoints)
+    {
+    case(4):
+        numberOfGaussPoints = 9;
+        break;
+    case(9):
+        numberOfGaussPoints = 16;
+        break;
+    case(16):
+        numberOfGaussPoints = 25;
+        break;
     }
 }
 
@@ -130,20 +148,20 @@ PlaneStress2dXfem :: giveDofManDofIDMask(int inode, IntArray &answer) const
     PlaneStress2d :: giveDofManDofIDMask(inode, answer);
 
     // Discontinuous part
-	if( this->giveDomain()->hasXfemManager() ) {
-		DofManager *dMan = giveDofManager(inode);
-		XfemManager *xMan = giveDomain()->giveXfemManager();
+    if( this->giveDomain()->hasXfemManager() ) {
+        DofManager *dMan = giveDofManager(inode);
+        XfemManager *xMan = giveDomain()->giveXfemManager();
 
         const std::vector<int> &nodeEiIndices = xMan->giveNodeEnrichmentItemIndices( dMan->giveGlobalNumber() );
         for ( size_t i = 0; i < nodeEiIndices.size(); i++ ) {
             EnrichmentItem *ei = xMan->giveEnrichmentItem(nodeEiIndices[i]);
-			if ( ei->isDofManEnriched(* dMan) ) {
-				IntArray eiDofIdArray;
-				ei->computeEnrichedDofManDofIdArray(eiDofIdArray, *dMan);
-				answer.followedBy(eiDofIdArray);
-			}
-		}
-	}
+            if ( ei->isDofManEnriched(* dMan) ) {
+                IntArray eiDofIdArray;
+                ei->computeEnrichedDofManDofIdArray(eiDofIdArray, *dMan);
+                answer.followedBy(eiDofIdArray);
+            }
+        }
+    }
 }
 
 
@@ -168,11 +186,16 @@ void PlaneStress2dXfem :: computeStiffnessMatrix(FloatMatrix &answer, MatRespons
     const double regularizationCoeff = 1.0e-6;
     int numRows = answer.giveNumberOfRows();
     for(int i = 0; i < numRows; i++) {
-    	if( fabs(answer(i,i)) < tol ) {
-    		answer(i,i) += regularizationCoeff;
-//    		printf("Found zero on diagonal.\n");
-    	}
+        if( fabs(answer(i,i)) < tol ) {
+            answer(i,i) += regularizationCoeff;
+            //printf("Found zero on diagonal.\n");
+        }
     }
+}
+
+void PlaneStress2dXfem :: computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+{
+    XfemStructuralElementInterface::XfemElementInterface_computeDeformationGradientVector(answer, gp, tStep);
 }
 
 void
@@ -391,18 +414,30 @@ PlaneStress2dXfem :: giveCompositeExportData(std::vector< VTKPiece > &vtkPieces,
         for ( int i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
             InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);
             FloatArray average;
-            IntegrationRule *iRule = integrationRulesArray [ 0 ];
-            VTKXMLExportModule :: computeIPAverage(average, iRule, this, type, tStep);
+            std :: unique_ptr< IntegrationRule >&iRule = integrationRulesArray [ 0 ];
+            VTKXMLExportModule :: computeIPAverage(average, iRule.get(), this, type, tStep);
 
-            FloatArray averageV9(9);
-            averageV9.at(1) = average.at(1);
-            averageV9.at(5) = average.at(2);
-            averageV9.at(9) = average.at(3);
-            averageV9.at(6) = averageV9.at(8) = average.at(4);
-            averageV9.at(3) = averageV9.at(7) = average.at(5);
-            averageV9.at(2) = averageV9.at(4) = average.at(6);
+            FloatArray averageVoigt;
 
-            vtkPieces[0].setCellVar( i, 1, averageV9 );
+            if( average.giveSize() == 6 ) {
+
+                averageVoigt.resize(9);
+
+                averageVoigt.at(1) = average.at(1);
+                averageVoigt.at(5) = average.at(2);
+                averageVoigt.at(9) = average.at(3);
+                averageVoigt.at(6) = averageVoigt.at(8) = average.at(4);
+                averageVoigt.at(3) = averageVoigt.at(7) = average.at(5);
+                averageVoigt.at(2) = averageVoigt.at(4) = average.at(6);
+            }
+            else {
+                if(average.giveSize() == 1) {
+                    averageVoigt.resize(1);
+                    averageVoigt.at(1) = average.at(1);
+                }
+            }
+
+            vtkPieces[0].setCellVar( i, 1, averageVoigt );
         }
 
 
@@ -437,7 +472,7 @@ PlaneStress2dXfem :: giveCompositeExportData(std::vector< VTKPiece > &vtkPieces,
 
                             for(int elNodeInd = 1; elNodeInd <= nDofMan; elNodeInd++) {
                                 DofManager *dMan = giveDofManager(elNodeInd);
-                                ei->evalLevelSetNormalInNode(levelSetInNode, dMan->giveGlobalNumber() );
+                                ei->evalLevelSetNormalInNode(levelSetInNode, dMan->giveGlobalNumber(), *(dMan->giveCoordinates()) );
 
                                 levelSet += N.at(elNodeInd)*levelSetInNode;
                             }
@@ -451,7 +486,7 @@ PlaneStress2dXfem :: giveCompositeExportData(std::vector< VTKPiece > &vtkPieces,
 
                             for(int elNodeInd = 1; elNodeInd <= nDofMan; elNodeInd++) {
                                 DofManager *dMan = giveDofManager(elNodeInd);
-                                ei->evalLevelSetTangInNode(levelSetInNode, dMan->giveGlobalNumber() );
+                                ei->evalLevelSetTangInNode(levelSetInNode, dMan->giveGlobalNumber(), *(dMan->giveCoordinates()) );
 
                                 levelSet += N.at(elNodeInd)*levelSetInNode;
                             }

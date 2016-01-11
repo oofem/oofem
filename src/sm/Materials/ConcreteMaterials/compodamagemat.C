@@ -48,13 +48,11 @@ REGISTER_Material(CompoDamageMat);
 
 CompoDamageMat :: CompoDamageMat(int n, Domain *d) : StructuralMaterial(n, d)
 {
-    // Constructor
 }
 
 
 CompoDamageMat :: ~CompoDamageMat()
 {
-    // destructor
 }
 
 
@@ -66,25 +64,25 @@ IRResultType CompoDamageMat :: initializeFrom(InputRecord *ir)
     this->Material :: initializeFrom(ir);
     //define transversely othotropic material stiffness parameters
     IR_GIVE_FIELD(ir, value, _IFT_CompoDamageMat_exx);
-    propertyDictionary->add(Ex, value);
+    propertyDictionary.add(Ex, value);
     IR_GIVE_FIELD(ir, value, _IFT_CompoDamageMat_eyyezz);
-    propertyDictionary->add(Ey, value);
-    propertyDictionary->add(Ez, value);
+    propertyDictionary.add(Ey, value);
+    propertyDictionary.add(Ez, value);
     IR_GIVE_FIELD(ir, value, _IFT_CompoDamageMat_nuxynuxz);
-    propertyDictionary->add(NYxy, value);
-    propertyDictionary->add(NYxz, value);
+    propertyDictionary.add(NYxy, value);
+    propertyDictionary.add(NYxz, value);
     IR_GIVE_FIELD(ir, value, _IFT_CompoDamageMat_nuyz);
-    propertyDictionary->add(NYyz, value);
-    propertyDictionary->add(NYzy, value);
+    propertyDictionary.add(NYyz, value);
+    propertyDictionary.add(NYzy, value);
     IR_GIVE_FIELD(ir, value, _IFT_CompoDamageMat_Gxy);
-    propertyDictionary->add(Gxy, value);
-    propertyDictionary->add(Gxz, value);
+    propertyDictionary.add(Gxy, value);
+    propertyDictionary.add(Gxz, value);
 
     //calulate remaining components
-    propertyDictionary->add( Gyz, this->give(Ey, NULL) / ( 1. + this->give(NYxy, NULL) ) );
-    propertyDictionary->add( NYyx, this->give(Ey, NULL) * this->give(NYxy, NULL) / this->give(Ex, NULL) );
+    propertyDictionary.add( Gyz, this->give(Ey, NULL) / ( 1. + this->give(NYxy, NULL) ) );
+    propertyDictionary.add( NYyx, this->give(Ey, NULL) * this->give(NYxy, NULL) / this->give(Ex, NULL) );
     //propertyDictionary -> add(Gzy,this->give(Gyz,NULL));
-    propertyDictionary->add( NYzx, this->give(NYyx, NULL) );
+    propertyDictionary.add( NYzx, this->give(NYyx, NULL) );
 
     IR_GIVE_FIELD(ir, this->inputTension, _IFT_CompoDamageMat_tension_f0_gf);
 
@@ -655,7 +653,7 @@ void CompoDamageMatStatus :: updateYourself(TimeStep *tStep)
 }
 
 
-contextIOResultType CompoDamageMatStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj = NULL)
+contextIOResultType CompoDamageMatStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj = NULL)
 {
     contextIOResultType iores;
     // save parent class status
@@ -666,7 +664,7 @@ contextIOResultType CompoDamageMatStatus :: saveContext(DataStream *stream, Cont
     return CIO_OK;
 }
 
-contextIOResultType CompoDamageMatStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL) {
+contextIOResultType CompoDamageMatStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) {
     contextIOResultType iores;
     // read parent class status
     if ( ( iores = StructuralMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {

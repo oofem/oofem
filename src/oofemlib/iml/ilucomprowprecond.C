@@ -61,7 +61,7 @@ CompRow_ILUPreconditioner :: initializeFrom(InputRecord *ir)
 void
 CompRow_ILUPreconditioner :: init(const SparseMtrx &A)
 {
-    if ( A.giveType() == SMT_DynCompRow ) {
+    if ( dynamic_cast< const DynCompRow *>(& A) ) {
         this->A =  ( * ( ( DynCompRow * ) & A ) );
         ( this->A ).ILUPYourself(part_fill, drop_tol);
     } else {

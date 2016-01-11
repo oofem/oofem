@@ -55,7 +55,7 @@ int DiscontinuousSegmentIntegrationRule :: SetUpPointsOnLine(int iNumPointsPerSe
     // Allocate Gauss point array
     FloatArray coords_xi, weights;
     this->giveLineCoordsAndWeights(iNumPointsPerSeg, coords_xi, weights);
-    this->gaussPoints.resize( numPointsTot );
+    this->gaussPoints.resize(numPointsTot);
     ////////////////////////////////////////////
 
     double totalLength = mXS.distance(mXE);
@@ -70,14 +70,13 @@ int DiscontinuousSegmentIntegrationRule :: SetUpPointsOnLine(int iNumPointsPerSe
             FloatArray global;
             GaussPoint * &gp = this->gaussPoints [ pointsPassed ];
 
-            FloatArray *coord = new FloatArray(1);
-            coord->at(1) = coords_xi.at(j + 1);
-            gp = new GaussPoint(this, pointsPassed + 1, coord, weights.at(j + 1), mode);
+            gp = new GaussPoint(this, pointsPassed + 1, {coords_xi.at(j + 1)}, weights.at(j + 1), mode);
 
+            const FloatArray &coord = gp->giveNaturalCoordinates();
 
             global.resize( mXS.giveSize() );
             for ( int m = 1; m <= mXS.giveSize(); m++ ) {
-                global.at(m) = 0.5 * ( ( 1.0 - coord->at(1) ) * mSegments [ i ].giveVertex(1).at(m) + ( 1.0 + coord->at(1) ) * mSegments [ i ].giveVertex(2).at(m) );
+                global.at(m) = 0.5 * ( ( 1.0 - coord.at(1) ) * mSegments [ i ].giveVertex(1).at(m) + ( 1.0 + coord.at(1) ) * mSegments [ i ].giveVertex(2).at(m) );
             }
 
             newGPCoord.push_back(global);
@@ -85,9 +84,9 @@ int DiscontinuousSegmentIntegrationRule :: SetUpPointsOnLine(int iNumPointsPerSe
 
             // Local coordinate along the line segment
             double xi = 2.0 * ( global.distance(mXS) / totalLength - 0.5 );
-            gp->setNaturalCoordinates({xi});
+            gp->setNaturalCoordinates({ xi });
 
-            gp->setSubPatchCoordinates({xi});
+            gp->setSubPatchCoordinates({ xi });
             gp->setGlobalCoordinates(global);
 
             gp->setWeight(1.0 * gp->giveWeight() * mSegments [ i ].giveLength() / totalLength);  // update integration weight

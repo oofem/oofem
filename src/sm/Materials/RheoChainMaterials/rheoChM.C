@@ -520,16 +520,12 @@ RheoChainMaterial :: giveEndOfTimeOfInterest()
 }
 
 contextIOResultType
-RheoChainMaterial :: saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp)
+RheoChainMaterial :: saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp)
 //
 // saves full status for this material, also invokes saving
 // for sub-objects of this
 {
     contextIOResultType iores;
-
-    if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
-    }
 
     if ( ( iores = Material :: saveIPContext(stream, mode, gp) ) != CIO_OK ) {
         THROW_CIOERR(iores);
@@ -544,7 +540,7 @@ RheoChainMaterial :: saveIPContext(DataStream *stream, ContextMode mode, GaussPo
 
 
 contextIOResultType
-RheoChainMaterial :: restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp)
+RheoChainMaterial :: restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp)
 //
 // reads full status for this material, also invokes reading
 // of sub-objects of this
@@ -651,16 +647,12 @@ RheoChainMaterialStatus :: initTempStatus()
 }
 
 contextIOResultType
-RheoChainMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+RheoChainMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full information stored in this Status
 //
 {
     contextIOResultType iores;
-
-    if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
-    }
 
     if ( ( iores = StructuralMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
@@ -668,12 +660,12 @@ RheoChainMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, voi
 
     // write raw data
     for ( int i = 0; i < nUnits; i++ ) {
-        if ( ( iores = hiddenVars [ i ].storeYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = hiddenVars [ i ].storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
 
-    if ( ( iores = shrinkageStrain.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = shrinkageStrain.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -682,7 +674,7 @@ RheoChainMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, voi
 
 
 contextIOResultType
-RheoChainMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+RheoChainMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restore the state variables from a stream
 //
@@ -695,12 +687,12 @@ RheoChainMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, 
 
     // read raw data
     for ( int i = 0; i < nUnits; i++ ) {
-        if ( ( iores = hiddenVars [ i ].restoreYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = hiddenVars [ i ].restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
 
-    if ( ( iores = shrinkageStrain.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = shrinkageStrain.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

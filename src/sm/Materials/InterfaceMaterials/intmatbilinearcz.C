@@ -63,6 +63,10 @@ IntMatBilinearCZStatus :: IntMatBilinearCZStatus(int n, Domain *d, GaussPoint *g
 
     mDamageOld = 0.0;
     mDamageNew = 0.0;
+
+    mPlastMultIncNew = 0.0;
+    mPlastMultIncOld = 0.0;
+
 }
 
 
@@ -79,6 +83,10 @@ void IntMatBilinearCZStatus :: updateYourself(TimeStep *tStep)
     mDamageOld   = mDamageNew;
 
     jump = mJumpNew;
+
+    mPlastMultIncOld = mPlastMultIncNew;
+
+    StructuralInterfaceMaterialStatus ::updateYourself(tStep);
 }
 
 
@@ -95,6 +103,9 @@ void IntMatBilinearCZStatus :: copyStateVariables(const MaterialStatus &iStatus)
     mTractionNew = structStatus.mTractionNew;
     mJumpOld     = structStatus.mJumpOld;
     mJumpNew     = structStatus.mJumpNew;
+
+    mPlastMultIncNew = structStatus.mPlastMultIncNew;
+    mPlastMultIncOld = structStatus.mPlastMultIncOld;
 }
 
 void IntMatBilinearCZStatus :: addStateVariables(const MaterialStatus &iStatus)
@@ -108,7 +119,8 @@ IntMatBilinearCZ :: IntMatBilinearCZ(int n, Domain *d) : StructuralInterfaceMate
     mGIc(0.0), mGIIc(0.0),
     mSigmaF(0.0),
     mMu(0.0),
-    mGamma(0.0)
+    mGamma(0.0),
+    mSemiExplicit(false)
 { }
 
 IntMatBilinearCZ :: ~IntMatBilinearCZ()
@@ -139,9 +151,15 @@ void IntMatBilinearCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *
     const double damageTol = 1.0e-6;
     if ( status->mDamageOld > ( 1.0 - damageTol ) ) {
         status->mDamageNew = 1.0;
+        status->mPlastMultIncNew = 0.0;
         answer.resize(3);
         answer.zero();
         status->mTractionNew = answer;
+
+        status->letTempJumpBe(jump);
+        status->letTempFirstPKTractionBe(answer);
+        status->letTempTractionBe(answer);
+
         return;
     }
 
@@ -150,16 +168,23 @@ void IntMatBilinearCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *
 
     if ( phiTr < 0.0 ) {
         status->mDamageNew = status->mDamageOld;
+        status->mPlastMultIncNew = 0.0;
         answer.beScaled( ( 1.0 - status->mDamageNew ), answer );
 
         status->mTractionNew = answer;
+
+        status->letTempJumpBe(jump);
+        status->letTempFirstPKTractionBe(answer);
+        status->letTempTractionBe(answer);
+
         return;
     } else {
         // Iterate to find plastic strain increment.
         int maxIter = 50;
+        int minIter = 1;
         double absTol = 1.0e-9; // Absolute error tolerance
         double relTol = 1.0e-9; // Relative error tolerance
-        double eps = 1.0e-9; // Small value for perturbation when computing numerical Jacobian
+        double eps = 1.0e-12; // Small value for perturbation when computing numerical Jacobian
         double plastMultInc = 0.0;
         double initialRes = 0.0;
 
@@ -180,23 +205,33 @@ void IntMatBilinearCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *
                 initialRes = max(initialRes, 1.0e-12);
             }
 
-            if ( fabs(phi) < absTol || ( iter > 0 && ( fabs(phi) / initialRes ) < relTol ) ) {
+            if ( (iter >= minIter && fabs(phi) < absTol) || ( iter >= minIter && ( fabs(phi) / initialRes ) < relTol ) ) {
                 // Add damage evolution
                 double S = mGIc / mSigmaF;
-                double damageInc = plastMultInc / S;
+                status->mPlastMultIncNew = plastMultInc;
+
+                double damageInc = status->mPlastMultIncNew / S;
                 status->mDamageNew = status->mDamageOld + damageInc;
 
                 if ( status->mDamageNew > 1.0 ) {
                     status->mDamageNew = 1.0;
                 }
 
-                answer.beScaled( ( 1.0 - status->mDamageNew ), answer );
+                if(mSemiExplicit) {
+//                    computeTraction(answer, tractionTrial, status->mPlastMultIncOld);
+                    answer.beScaled( ( 1.0 - status->mDamageOld ), answer );
+               }
+                else {
+                    answer.beScaled( ( 1.0 - status->mDamageNew ), answer );
+                }
+
                 status->mTractionNew = answer;
 
                 // Jim
                 status->letTempJumpBe(jump);
                 status->letTempFirstPKTractionBe(answer);
-                
+                status->letTempTractionBe(answer);
+
                 return;
             }
 

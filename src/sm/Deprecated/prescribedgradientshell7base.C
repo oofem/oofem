@@ -54,7 +54,7 @@
 namespace oofem {
 REGISTER_BoundaryCondition(PrescribedGenStrainShell7);
 
-double PrescribedGenStrainShell7 :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
+double PrescribedGenStrainShell7 :: give(Dof *dof, ValueModeType mode, double time)
 {
     DofIDItem id = dof->giveDofID();
     FloatArray *coords = dof->giveDofManager()->giveCoordinates();
@@ -63,13 +63,24 @@ double PrescribedGenStrainShell7 :: give(Dof *dof, ValueModeType mode, TimeStep 
         OOFEM_ERROR("PrescribedGenStrainShell7 :: give - Size of coordinate system different from center coordinate in b.c.");
     }
 
+    double factor = 0;
+    if ( mode == VM_Total ) {
+        factor = this->giveTimeFunction()->evaluateAtTime(time);
+    } else if ( mode == VM_Velocity ) {
+        factor = this->giveTimeFunction()->evaluateVelocityAtTime(time);
+    } else if ( mode == VM_Acceleration ) {
+        factor = this->giveTimeFunction()->evaluateAccelerationAtTime(time);
+    } else {
+        OOFEM_ERROR("Should not be called for value mode type then total, velocity, or acceleration.");
+    }
+
     // Reminder: u_i = F_ij . (x_j - xb_j) = d_ij . dx_j
     FloatArray dx;
     dx.beDifferenceOf(* coords, this->centerCoord);
 
     FloatArray u;
     u.beProductOf(gradient, dx);
-    u.times( this->giveTimeFunction()->evaluate(tStep, mode) );
+    u.times( factor );
 
     switch ( id ) {
     case D_u:
@@ -231,45 +242,38 @@ void PrescribedGenStrainShell7 :: computeTangent(FloatMatrix &tangent, EquationI
     // Fetch some information from the engineering model
     EngngModel *rve = this->giveDomain()->giveEngngModel();
     ///@todo Get this from engineering model
-    SparseLinearSystemNM *solver = classFactory.createSparseLinSolver( ST_Petsc, this->domain, this->domain->giveEngngModel() ); // = rve->giveLinearSolver();
-    SparseMtrxType stype = SMT_PetscMtrx; // = rve->giveSparseMatrixType();
+    std :: unique_ptr< SparseLinearSystemNM > solver( classFactory.createSparseLinSolver( ST_Petsc, this->domain, this->domain->giveEngngModel() ) ); // = rve->giveLinearSolver();
+    SparseMtrxType stype = solver->giveRecommendedMatrix(true);
     EModelDefaultEquationNumbering fnum;
     EModelDefaultPrescribedEquationNumbering pnum;
 
     // Set up and assemble tangent FE-matrix which will make up the sensitivity analysis for the macroscopic material tangent.
-    SparseMtrx *Kff = classFactory.createSparseMtrx(stype);
-    SparseMtrx *Kfp = classFactory.createSparseMtrx(stype);
-    SparseMtrx *Kpf = classFactory.createSparseMtrx(stype);
-    SparseMtrx *Kpp = classFactory.createSparseMtrx(stype);
+    std :: unique_ptr< SparseMtrx > Kff( classFactory.createSparseMtrx(stype) );
+    std :: unique_ptr< SparseMtrx > Kfp( classFactory.createSparseMtrx(stype) );
+    std :: unique_ptr< SparseMtrx > Kpf( classFactory.createSparseMtrx(stype) );
+    std :: unique_ptr< SparseMtrx > Kpp( classFactory.createSparseMtrx(stype) );
     if ( !Kff ) {
-        OOFEM_ERROR2("MixedGradientPressureBC :: computeTangents - Couldn't create sparse matrix of type %d\n", stype);
+        OOFEM_ERROR("MixedGradientPressureBC :: computeTangents - Couldn't create sparse matrix of type %d\n", stype);
     }
     Kff->buildInternalStructure(rve, 1, eid, fnum);
     Kfp->buildInternalStructure(rve, 1, eid, fnum, pnum);
     Kpf->buildInternalStructure(rve, 1, eid, pnum, fnum);
     Kpp->buildInternalStructure(rve, 1, eid, pnum);
-    rve->assemble(Kff, tStep, eid, StiffnessMatrix, fnum, this->domain);
-    rve->assemble(Kfp, tStep, eid, StiffnessMatrix, fnum, pnum, this->domain);
-    rve->assemble(Kpf, tStep, eid, StiffnessMatrix, pnum, fnum, this->domain);
-    rve->assemble(Kpp, tStep, eid, StiffnessMatrix, pnum, this->domain);
+    rve->assemble(*Kff, tStep, eid, TangentStiffnessMatrix, fnum, this->domain);
+    rve->assemble(*Kfp, tStep, eid, TangentStiffnessMatrix, fnum, pnum, this->domain);
+    rve->assemble(*Kpf, tStep, eid, TangentStiffnessMatrix, pnum, fnum, this->domain);
+    rve->assemble(*Kpp, tStep, eid, TangentStiffnessMatrix, pnum, this->domain);
 
     FloatMatrix C, X, Kpfa, KfpC, a;
 
     this->updateCoefficientMatrix(C);
     Kpf->timesT(C, KfpC);
-    solver->solve(Kff, KfpC, a);
+    solver->solve(*Kff, KfpC, a);
     Kpp->times(C, X);
     Kpf->times(a, Kpfa);
     X.subtract(Kpfa);
     tangent.beTProductOf(C, X);
     tangent.times( 1. / this->domainSize() );
-
-    delete Kff;
-    delete Kfp;
-    delete Kpf;
-    delete Kpp;
-
-    delete solver; ///@todo Remove this when solver is taken from engngmodel
 }
 
 

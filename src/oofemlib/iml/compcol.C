@@ -179,99 +179,22 @@ void CompCol :: times(double x)
 
 int CompCol :: buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &s)
 {
-    /*
-     * IntArray  loc;
-     * Domain* domain = eModel->giveDomain(di);
-     * int neq = eModel -> giveNumberOfDomainEquations (di);
-     * int nelem = domain -> giveNumberOfElements() ;
-     * int i,ii,j,jj,n, indx;
-     * Element* elem;
-     * // allocation map
-     * char* map = new char[neq*neq];
-     * if (map == NULL) {
-     * printf ("CompCol::buildInternalStructure - map creation failed");
-     * exit (1);
-     * }
-     *
-     * for (i=0; i<neq*neq; i++)
-     * map[i]=0;
-     *
-     *
-     * this->nz_ = 0;
-     *
-     * for (n=1 ; n<=nelem ; n++) {
-     * elem = domain -> giveElement(n);
-     * elem -> giveLocationArray (loc) ;
-     *
-     * for (i=1 ; i <= loc.giveSize() ; i++) {
-     * if ((ii = loc.at(i))) {
-     *  for (j=1; j <= loc.giveSize() ; j++) {
-     *   if ((jj=loc.at(j))) {
-     *    if (map[(ii-1)*neq+jj-1] == 0) {
-     *     map[(ii-1)*neq+jj-1] = 1;
-     *     this->nz_ ++;
-     *    }
-     *   }
-     *  }
-     * }
-     * }
-     * }
-     *
-     * rowind_.resize (nz_);
-     * colptr_.resize (neq+1);
-     * indx = 0;
-     * for (j=0; j<neq; j++) { // column loop
-     * colptr_(j) = indx;
-     * for (i=0; i<neq; i++) { // row loop
-     *  if (map[i*neq+j]) {
-     *   rowind_(indx) = i;
-     *   indx++;
-     *  }
-     * }
-     * }
-     * colptr_(neq) = indx;
-     *
-     * // delete map
-     * delete (map);
-     *
-     * // allocate value array
-     * val_.resize(nz_);
-     * val_.zero();
-     *
-     * printf ("\nCompCol info: neq is %d, nwk is %d\n",neq,nz_);
-     *
-     * dim_[0] = dim_[1] = nColumns = nRows = neq;
-     *
-     * // increment version
-     * this->version++;
-     *
-     * return true;
-     */
     IntArray loc;
     Domain *domain = eModel->giveDomain(di);
     int neq = eModel->giveNumberOfDomainEquations(di, s);
-    int nelem = domain->giveNumberOfElements();
-    int i, ii, j, jj, n, indx;
-    Element *elem;
+    int indx;
     // allocation map
     std :: vector< std :: set< int > > columns(neq);
-    /*
-     * std::set<int> **columns = new std::set<int>*[neq];
-     * for (j=0; j<neq; j++) {
-     * columns[j] = new std::set<int>;
-     * }
-     */
 
     this->nz_ = 0;
 
-    for ( n = 1; n <= nelem; n++ ) {
-        elem = domain->giveElement(n);
+    for ( auto &elem : domain->giveElements() ) {
         elem->giveLocationArray(loc, s);
 
-        for ( i = 1; i <= loc.giveSize(); i++ ) {
-            if ( ( ii = loc.at(i) ) ) {
-                for ( j = 1; j <= loc.giveSize(); j++ ) {
-                    if ( ( jj = loc.at(j) ) ) {
+        for ( int ii : loc ) {
+            if ( ii > 0 ) {
+                for ( int jj : loc ) {
+                    if ( jj > 0 ) {
                         columns [ jj - 1 ].insert(ii - 1);
                     }
                 }
@@ -281,21 +204,20 @@ int CompCol :: buildInternalStructure(EngngModel *eModel, int di, const UnknownN
 
 
     // loop over active boundary conditions
-    int nbc = domain->giveNumberOfBoundaryConditions();
     std :: vector< IntArray >r_locs;
     std :: vector< IntArray >c_locs;
 
-    for ( int i = 1; i <= nbc; ++i ) {
-        ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
+    for ( auto &gbc : domain->giveBcs() ) {
+        ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( gbc.get() );
         if ( bc != NULL ) {
             bc->giveLocationArrays(r_locs, c_locs, UnknownCharType, s, s);
             for ( std :: size_t k = 0; k < r_locs.size(); k++ ) {
                 IntArray &krloc = r_locs [ k ];
                 IntArray &kcloc = c_locs [ k ];
-                for ( int i = 1; i <= krloc.giveSize(); i++ ) {
-                    if ( ( ii = krloc.at(i) ) ) {
-                        for ( int j = 1; j <= kcloc.giveSize(); j++ ) {
-                            if ( ( jj = kcloc.at(j) ) ) {
+                for ( int ii : krloc ) {
+                    if ( ii ) {
+                        for ( int jj : kcloc ) {
+                            if ( jj ) {
                                 columns [ jj - 1 ].insert(ii - 1);
                             }
                         }
@@ -305,7 +227,7 @@ int CompCol :: buildInternalStructure(EngngModel *eModel, int di, const UnknownN
         }
     }
 
-    for ( i = 0; i < neq; i++ ) {
+    for ( int i = 0; i < neq; i++ ) {
         this->nz_ += columns [ i ].size();
     }
 
@@ -313,7 +235,7 @@ int CompCol :: buildInternalStructure(EngngModel *eModel, int di, const UnknownN
     colptr_.resize(neq + 1);
     indx = 0;
 
-    for ( j = 0; j < neq; j++ ) { // column loop
+    for ( int j = 0; j < neq; j++ ) { // column loop
         colptr_(j) = indx;
         for ( int row: columns [  j ] ) { // row loop
             rowind_(indx++) = row;
@@ -321,12 +243,6 @@ int CompCol :: buildInternalStructure(EngngModel *eModel, int di, const UnknownN
     }
 
     colptr_(neq) = indx;
-
-    /*
-     * // delete map
-     * for (i=0; i< neq; i++) {columns[i]->clear(); delete columns[i];}
-     * delete columns;
-     */
 
     // allocate value array
     val_.resize(nz_);
@@ -345,8 +261,7 @@ int CompCol :: buildInternalStructure(EngngModel *eModel, int di, const UnknownN
 
 int CompCol :: assemble(const IntArray &loc, const FloatMatrix &mat)
 {
-    int i, j, ii, jj, dim;
-    //   RowColumn* rowColumnJJ ; // 13 November 1996 - not needed anymore
+    int dim;
 
 #  ifdef DEBUG
     dim = mat.giveNumberOfRows();
@@ -363,11 +278,11 @@ int CompCol :: assemble(const IntArray &loc, const FloatMatrix &mat)
 
     dim = mat.giveNumberOfRows();
 
-    for ( j = 1; j <= dim; j++ ) {
-        jj = loc.at(j);
+    for ( int j = 1; j <= dim; j++ ) {
+        int jj = loc.at(j);
         if ( jj ) {
-            for ( i = 1; i <= dim; i++ ) {
-                ii = loc.at(i);
+            for ( int i = 1; i <= dim; i++ ) {
+                int ii = loc.at(i);
                 if ( ii ) {
                     this->at(ii, jj) += mat.at(i, j);
                 }
@@ -383,17 +298,17 @@ int CompCol :: assemble(const IntArray &loc, const FloatMatrix &mat)
 
 int CompCol :: assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat)
 {
-    int i, j, ii, jj, dim1, dim2;
+    int dim1, dim2;
 
     // this->checkSizeTowards(rloc, cloc);
 
     dim1 = mat.giveNumberOfRows();
     dim2 = mat.giveNumberOfColumns();
-    for ( i = 1; i <= dim1; i++ ) {
-        ii = rloc.at(i);
+    for ( int i = 1; i <= dim1; i++ ) {
+        int ii = rloc.at(i);
         if ( ii ) {
-            for ( j = 1; j <= dim2; j++ ) {
-                jj = cloc.at(j);
+            for ( int j = 1; j <= dim2; j++ ) {
+                int jj = cloc.at(j);
                 if ( jj ) {
                     this->at(ii, jj) += mat.at(i, j);
                 }

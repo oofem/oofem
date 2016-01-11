@@ -159,7 +159,7 @@ public:
 
     virtual double giveValue(EE_ValueType type, TimeStep *tStep);
 
-    virtual int estimateError(EE_ErrorMode mode, TimeStep *tStep);
+    virtual int estimateError(EE_ErrorMode err_mode, TimeStep *tStep);
 
     virtual RemeshingCriteria *giveRemeshingCrit();
 
@@ -170,8 +170,8 @@ public:
 
     AnalysisMode giveAnalysisMode() { return mode; }
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 
 private:
     /**

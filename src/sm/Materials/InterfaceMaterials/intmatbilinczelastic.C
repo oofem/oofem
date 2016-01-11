@@ -331,7 +331,7 @@ IntMatBilinearCZElasticStatus :: updateYourself(TimeStep *tStep)
 
 #if 0
 contextIOResultType
-IntMatBilinearCZElasticStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+IntMatBilinearCZElasticStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -341,11 +341,11 @@ IntMatBilinearCZElasticStatus :: saveContext(DataStream *stream, ContextMode mod
     }
 
     // write a raw data
-    if ( !stream->write(& kappa, 1) ) {
+    if ( !stream.write(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& damage, 1) ) {
+    if ( !stream.write(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -353,7 +353,7 @@ IntMatBilinearCZElasticStatus :: saveContext(DataStream *stream, ContextMode mod
 }
 
 contextIOResultType
-IntMatBilinearCZElasticStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+IntMatBilinearCZElasticStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -363,11 +363,11 @@ IntMatBilinearCZElasticStatus :: restoreContext(DataStream *stream, ContextMode 
     }
 
     // read raw data
-    if ( !stream->read(& kappa, 1) ) {
+    if ( !stream.read(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& damage, 1) ) {
+    if ( !stream.read(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

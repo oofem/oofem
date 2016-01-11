@@ -213,7 +213,7 @@ NonlocalMaterialWTP :: migrate()
         OOFEM_ERROR("MPI_Allreduce to determine  broadcast buffer size failed");
     }
 
-    commBuff.resize( commBuff.givePackSize(MPI_INT, _globsize) );
+    commBuff.resize( commBuff.givePackSizeOfInt(_globsize) );
     // remote domain wish list
     std :: set< int >remoteWishSet;
 
@@ -223,9 +223,9 @@ NonlocalMaterialWTP :: migrate()
         toSendList [ i ].clear();
         if ( i == myrank ) {
             // current domain has to send its receive wish list to all domains
-            commBuff.packInt(_locsize);
+            commBuff.write(_locsize);
             for ( int eldep: domainElementDepSet ) {
-                commBuff.packInt(eldep);
+                commBuff.write(eldep);
             }
 
             result = commBuff.bcast(i);
@@ -234,9 +234,9 @@ NonlocalMaterialWTP :: migrate()
             remoteWishSet.clear();
             result = commBuff.bcast(i);
             // unpack size
-            commBuff.unpackInt(_size);
+            commBuff.read(_size);
             for ( _i = 1; _i < _size; _i++ ) {
-                commBuff.unpackInt(_val);
+                commBuff.read(_val);
                 remoteWishSet.insert(_val);
             }
 
@@ -309,7 +309,6 @@ int NonlocalMaterialWTP :: packMigratingElementDependencies(Domain *d, ProcessCo
 
     // query process communicator to use
     ProcessCommunicatorBuff *pcbuff = pc.giveProcessCommunicatorBuff();
-    ProcessCommDataStream pcDataStream(pcbuff);
 
     int ielem, nelem = d->giveNumberOfElements();
     int _globnum;
@@ -322,13 +321,13 @@ int NonlocalMaterialWTP :: packMigratingElementDependencies(Domain *d, ProcessCo
             // pack local element (node numbers shuld be global ones!!!)
             // pack type
             _globnum = elem->giveGlobalNumber();
-            pcbuff->packInt(_globnum);
-            pcbuff->packIntArray(nonlocElementDependencyMap [ _globnum ]);
+            pcbuff->write(_globnum);
+            nonlocElementDependencyMap [ _globnum ].storeYourself(*pcbuff);
         }
     } // end loop over elements
 
     // pack end-of-element-record
-    pcbuff->packInt(NonlocalMaterialWTP_END_DATA);
+    pcbuff->write(NonlocalMaterialWTP_END_DATA);
 
     return 1;
 }
@@ -345,16 +344,15 @@ int NonlocalMaterialWTP :: unpackMigratingElementDependencies(Domain *d, Process
 
     // query process communicator to use
     ProcessCommunicatorBuff *pcbuff = pc.giveProcessCommunicatorBuff();
-    ProcessCommDataStream pcDataStream(pcbuff);
 
     // unpack element data
     do {
-        pcbuff->unpackInt(_globnum);
+        pcbuff->read(_globnum);
         if ( _globnum == NonlocalMaterialWTP_END_DATA ) {
             break;
         }
 
-        pcbuff->unpackIntArray(nonlocElementDependencyMap [ _globnum ]);
+        nonlocElementDependencyMap [ _globnum ].restoreYourself(*pcbuff);
     } while ( 1 );
 
     return 1;
@@ -374,7 +372,6 @@ int NonlocalMaterialWTP :: packRemoteElements(Domain *d, ProcessCommunicator &pc
 
     // query process communicator to use
     ProcessCommunicatorBuff *pcbuff = pc.giveProcessCommunicatorBuff();
-    ProcessCommDataStream pcDataStream(pcbuff);
 
     // here we have to pack also nodes that are shared by packed elements !!!
     // assemble set of nodes needed by those elements
@@ -397,22 +394,22 @@ int NonlocalMaterialWTP :: packRemoteElements(Domain *d, ProcessCommunicator &pc
     for ( int in: nodesToSend ) {
         inode = d->dofmanGlobal2Local(in);
         dofman = d->giveDofManager(inode);
-        pcbuff->packString( dofman->giveInputRecordName() );
-        dofman->saveContext(& pcDataStream, CM_Definition | CM_State | CM_UnknownDictState);
+        pcbuff->write( dofman->giveInputRecordName() );
+        dofman->saveContext(*pcbuff, CM_Definition | CM_State | CM_UnknownDictState);
     }
 
-    pcbuff->packString("");
+    pcbuff->write("");
 
     for ( int ie: toSendList [ iproc ] ) {
         //ie = d->elementGlobal2Local(gie);
         elem = d->giveElement(ie);
         // pack local element (node numbers shuld be global ones!!!)
         // pack type
-        pcbuff->packString( elem->giveInputRecordName() );
-        elem->saveContext(& pcDataStream, CM_Definition | CM_DefinitionGlobal | CM_State);
+        pcbuff->write( elem->giveInputRecordName() );
+        elem->saveContext(*pcbuff, CM_Definition | CM_DefinitionGlobal | CM_State);
     }
 
-    pcbuff->packString("");
+    pcbuff->write("");
 
 
     return 1;
@@ -432,16 +429,15 @@ int NonlocalMaterialWTP :: unpackRemoteElements(Domain *d, ProcessCommunicator &
 
     // query process communicator to use
     ProcessCommunicatorBuff *pcbuff = pc.giveProcessCommunicatorBuff();
-    ProcessCommDataStream pcDataStream(pcbuff);
 
     // unpack dofman data
     do {
-        pcbuff->unpackString(_type);
+        pcbuff->read(_type);
         if ( _type.size() == 0 ) {
             break;
         }
         dofman = classFactory.createDofManager(_type.c_str(), 0, d);
-        dofman->restoreContext(& pcDataStream, CM_Definition | CM_State | CM_UnknownDictState);
+        dofman->restoreContext(*pcbuff, CM_Definition | CM_State | CM_UnknownDictState);
         dofman->setParallelMode(DofManager_null);
         if ( d->dofmanGlobal2Local( dofman->giveGlobalNumber() ) ) {
             // record already exist
@@ -459,13 +455,13 @@ int NonlocalMaterialWTP :: unpackRemoteElements(Domain *d, ProcessCommunicator &
     _partitions.resize(1);
     _partitions.at(1) = iproc;
     do {
-        pcbuff->unpackString(_type);
+        pcbuff->read(_type);
         if ( _type.size() == 0 ) {
             break;
         }
 
         elem = classFactory.createElement(_type.c_str(), 0, d);
-        elem->restoreContext(& pcDataStream, CM_Definition | CM_State);
+        elem->restoreContext(*pcbuff, CM_Definition | CM_State);
         elem->setParallelMode(Element_remote);
         elem->setPartitionList(_partitions);
         d->giveTransactionManager()->addElementTransaction(DomainTransactionManager :: DTT_ADD,

@@ -108,8 +108,8 @@ public:
     virtual const char *giveClassName() const { return "LIBeam3d2"; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj);
 
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);

@@ -63,7 +63,7 @@ FETISolver :: ~FETISolver()
 
 
 int
-FETISolver :: estimateMaxPackSize(IntArray &map, CommunicationBuffer &buff, int &packUnpackType)
+FETISolver :: estimateMaxPackSize(IntArray &map, DataStream &buff, int &packUnpackType)
 {
     int rank = domain->giveEngngModel()->giveRank();
     int count = 0;
@@ -84,7 +84,7 @@ FETISolver :: estimateMaxPackSize(IntArray &map, CommunicationBuffer &buff, int 
         }
     }
 
-    return ( buff.givePackSize(MPI_DOUBLE, 1) * count * FETISOLVER_MAX_RBM );
+    return ( buff.givePackSizeOfDouble(1) * count * FETISOLVER_MAX_RBM );
 }
 
 
@@ -131,8 +131,8 @@ void FETISolver :: setUpCommunicationMaps()
     }
 
     if ( domain->giveEngngModel()->giveRank() != 0 ) {
-        commBuff.resize( commBuff.givePackSize(MPI_INT, 1) );
-        commBuff.packInt(boundaryDofManNum);
+        commBuff.resize( commBuff.givePackSizeOfInt(1) );
+        commBuff.write(boundaryDofManNum);
 
 #ifdef __VERBOSE_PARALLEL
         OOFEM_LOG_DEBUG("[process rank %3d]: %-30s: Sending data to partition 0 (send %d)\n",
@@ -154,7 +154,7 @@ void FETISolver :: setUpCommunicationMaps()
 
     commMap.resize(boundaryDofManNum);
 
-    commBuff.resize(commBuff.givePackSize(MPI_INT, 1) * 2 * boundaryDofManNum);
+    commBuff.resize(commBuff.givePackSizeOfInt(1) * 2 * boundaryDofManNum);
     commBuff.init();
     // determine total number of DOFs per each boundary node
     // and build communication map simultaneously
@@ -174,8 +174,8 @@ void FETISolver :: setUpCommunicationMaps()
                     }
                 }
 
-                commBuff.packInt( domain->giveDofManager(i)->giveGlobalNumber() );
-                commBuff.packInt(neq);
+                commBuff.write( domain->giveDofManager(i)->giveGlobalNumber() );
+                commBuff.write(neq);
             }
         }
     } else {
@@ -262,11 +262,11 @@ FETISolver :: packRBM(ProcessCommunicator &processComm)
         for ( j = 1; j <= ndofs; j++ ) {
             if ( ( eqNum = locationArray.at(j) ) ) {
                 for ( ir = 1; ir <= nse; ir++ ) {
-                    result &= send_buff->packDouble( rbm.at(eqNum, ir) );
+                    result &= send_buff->write( rbm.at(eqNum, ir) );
                 }
 
                 if ( nse == 0 ) {
-                    result &= send_buff->packDouble(0.0);
+                    result &= send_buff->write(0.0);
                 }
             }
         }
@@ -298,7 +298,7 @@ FETISolver :: masterUnpackRBM(ProcessCommunicator &processComm)
             for ( int idof = 1; idof <= masterCommunicator->giveDofManager(to)->giveNumberOfDofs(); idof++ ) {
                 for ( int irbm = 1; irbm <= nsem.at(receivedRank + 1); irbm++ ) {
                     // unpack contribution
-                    result &= recv_buff->unpackDouble(value);
+                    result &= recv_buff->read(value);
                     if ( masterCommunicator->giveDofManager(to)->giveReferencePratition() == receivedRank ) { // contribution from reference partition localizes to all
                                                                                                               // corresponding DOFs in boundary node
 
@@ -398,7 +398,7 @@ FETISolver :: packQQProducts(ProcessCommunicator &processComm)
     IntArray locationArray;
 
     for ( int i = 1; i <= nse; i++ ) {
-        result &= send_buff->packDouble( qq.at(i) );
+        result &= send_buff->write( qq.at(i) );
     }
 
     return result;
@@ -419,7 +419,7 @@ FETISolver :: masterUnpackQQProduct(ProcessCommunicator &processComm)
 
     if ( receivedRank != 0 ) {
         for ( int i = 1; i <= nsem.at(receivedRank + 1); i++ ) {
-            result &= recv_buff->unpackDouble( q.at(rbmAddr.at(receivedRank + 1) + i - 1) );
+            result &= recv_buff->read( q.at(rbmAddr.at(receivedRank + 1) + i - 1) );
         }
     }
 
@@ -474,13 +474,13 @@ FETISolver :: packSolution(ProcessCommunicator &processComm)
                     val += w.at(eqNum);
                 }
 
-                result &= send_buff->packDouble(val);
+                result &= send_buff->write(val);
             }
         } else {
             masterCommunicator->giveDofManager(from)->giveCompleteLocationArray(rank, locationArray);
             for ( int j = 1; j <= ndofs; j++ ) {
                 if ( ( eqNum = locationArray.at(j) ) ) {
-                    result &= send_buff->packDouble( ( -1.0 ) * w.at(eqNum) );
+                    result &= send_buff->write( ( -1.0 ) * w.at(eqNum) );
                 }
             }
         }
@@ -510,7 +510,7 @@ FETISolver :: unpackSolution(ProcessCommunicator &processComm)
         ndofs = locationArray.giveSize();
         for ( int j = 1; j <= ndofs; j++ ) {
             if ( ( eqNum = locationArray.at(j) ) ) {
-                result &= recv_buff->unpackDouble(value);
+                result &= recv_buff->read(value);
                 dd.at(eqNum) = value;
 
 #ifdef __VERBOSE_PARALLEL
@@ -603,7 +603,7 @@ FETISolver :: packResiduals(ProcessCommunicator &processComm)
         ndofs = locationArray.giveSize();
         for ( int j = 1; j <= ndofs; j++ ) {
             if ( ( eqNum = locationArray.at(j) ) ) {
-                result &= send_buff->packDouble( pp.at(eqNum) );
+                result &= send_buff->write( pp.at(eqNum) );
             }
         }
     }
@@ -635,7 +635,7 @@ FETISolver :: unpackResiduals(ProcessCommunicator &processComm)
             // loop over all dofs
             for ( int idof = 1; idof <= masterCommunicator->giveDofManager(to)->giveNumberOfDofs(); idof++ ) {
                 // unpack contribution
-                result &= recv_buff->unpackDouble(value);
+                result &= recv_buff->read(value);
                 if ( masterCommunicator->giveDofManager(to)->giveReferencePratition() == receivedRank ) { // contribution from reference partition localizes to all
                                                                                                           // corresponding DOFs in boundary node
 
@@ -758,13 +758,13 @@ FETISolver :: packDirectionVector(ProcessCommunicator &processComm)
                     val += d.at(eqNum);
                 }
 
-                result &= send_buff->packDouble(val);
+                result &= send_buff->write(val);
             }
         } else {
             masterCommunicator->giveDofManager(from)->giveCompleteLocationArray(rank, locationArray);
             for ( int j = 1; j <= ndofs; j++ ) {
                 if ( ( eqNum = locationArray.at(j) ) ) {
-                    result &= send_buff->packDouble( ( -1.0 ) * d.at(eqNum) );
+                    result &= send_buff->write( ( -1.0 ) * d.at(eqNum) );
                 }
             }
         }
@@ -794,7 +794,7 @@ FETISolver :: unpackDirectionVector(ProcessCommunicator &processComm)
         ndofs = locationArray.giveSize();
         for ( int j = 1; j <= ndofs; j++ ) {
             if ( ( eqNum = locationArray.at(j) ) ) {
-                result &= recv_buff->unpackDouble( dd.at(eqNum) );
+                result &= recv_buff->read( dd.at(eqNum) );
             }
         }
     }
@@ -881,7 +881,7 @@ FETISolver :: packPPVector(ProcessCommunicator &processComm)
         ndofs = locationArray.giveSize();
         for ( int j = 1; j <= ndofs; j++ ) {
             if ( ( eqNum = locationArray.at(j) ) ) {
-                result &= send_buff->packDouble( pp.at(eqNum) );
+                result &= send_buff->write( pp.at(eqNum) );
             }
         }
     }
@@ -913,7 +913,7 @@ FETISolver :: unpackPPVector(ProcessCommunicator &processComm)
             // loop over all dofs
             for ( int idof = 1; idof <= masterCommunicator->giveDofManager(to)->giveNumberOfDofs(); idof++ ) {
                 // unpack contribution
-                result &= recv_buff->unpackDouble(value);
+                result &= recv_buff->read(value);
                 if ( masterCommunicator->giveDofManager(to)->giveReferencePratition() == receivedRank ) { // contribution from reference partition localizes to all
                                                                                                           // corresponding DOFs in boundary node
 
@@ -1010,7 +1010,7 @@ FETISolver :: packGammas(ProcessCommunicator &processComm)
     CommunicationBuffer *send_buff = processComm.giveProcessCommunicatorBuff()->giveSendBuff();
 
     for ( int irbm = 1; irbm <= nsem.at(rank + 1); irbm++ ) {
-        result &= send_buff->packDouble( gamma.at(rbmAddr.at(rank + 1) + irbm - 1) );
+        result &= send_buff->write( gamma.at(rbmAddr.at(rank + 1) + irbm - 1) );
     }
 
     return result;
@@ -1026,7 +1026,7 @@ FETISolver :: unpackGammas(ProcessCommunicator &processComm)
 
     localGammas.resize(nse);
     for ( int irbm = 1; irbm <= nse; irbm++ ) {
-        result &= recv_buff->unpackDouble( localGammas.at(irbm) );
+        result &= recv_buff->read( localGammas.at(irbm) );
     }
 
     return result;
@@ -1048,7 +1048,7 @@ FETISolver :: masterMapGammas()
 
 
 NM_Status
-FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partitionSolution)
+FETISolver :: solve(SparseMtrx &A, FloatArray &partitionLoad, FloatArray &partitionSolution)
 {
     int tnse = 0, rank = domain->giveEngngModel()->giveRank();
     int source, tag;
@@ -1056,15 +1056,13 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
     double nom = 0.0, denom, alpha, beta, energyNorm = 0.0;
     FloatMatrix l1;
     StaticCommunicationBuffer commBuff(MPI_COMM_WORLD);
-    Skyline *partitionStiffness;
-
-    if ( A->giveType() != SMT_Skyline ) {
+    Skyline *partitionStiffness = dynamic_cast< Skyline * >(&A);
+    if ( !partitionStiffness ) {
         OOFEM_ERROR("unsuported sparse matrix type");
     }
 
-    partitionStiffness = static_cast< Skyline * >(A);
 
-    if ( ( partitionSolution->giveSize() ) != partitionLoad->giveSize() ) {
+    if ( ( partitionSolution.giveSize() ) != partitionLoad.giveSize() ) {
         OOFEM_ERROR("size mismatch");
     }
 
@@ -1122,7 +1120,7 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
         qq.resize(nse);
         qq.zero();
 
-        qq.beTProductOf(rbm, * partitionLoad);
+        qq.beTProductOf(rbm, partitionLoad);
         qq.negated();
     }
 
@@ -1132,7 +1130,7 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
 
     //  commBuff.init();
     if ( rank == 0 ) {
-        commBuff.resize( commBuff.givePackSize(MPI_INT, 1) );
+        commBuff.resize( commBuff.givePackSizeOfInt(1) );
         //
         // receive data
         //
@@ -1148,7 +1146,7 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
                             rank, "FETICommunicator :: setUpCommunicationMaps : received number of partition rbm", source);
 #endif
             commBuff.init();
-            commBuff.unpackInt( nsem.at(source + 1) );
+            commBuff.read( nsem.at(source + 1) );
             tnse += nsem.at(source + 1);
         }
 
@@ -1174,8 +1172,8 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
                         rank, "FETISolver :: solveYourselfAt", nse);
 #endif
 
-        commBuff.resize( commBuff.givePackSize(MPI_INT, 1) );
-        commBuff.packInt(nse);
+        commBuff.resize( commBuff.givePackSizeOfInt(1) );
+        commBuff.write(nse);
         commBuff.iSend(0, FETISolver :: NumberOfRBMMsg);
     }
 
@@ -1295,7 +1293,7 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
                     rank, "FETISolver :: solveYourselfAt");
 #endif
 
-    dd.subtract(* partitionLoad);
+    dd.subtract(partitionLoad);
     partitionStiffness->ldl_feti_sky(pp, dd, nse, limit, se);
 
     if ( rank == 0 ) {
@@ -1401,9 +1399,9 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
 
             if ( fabs(denom) < FETISOLVER_ZERONUM ) {
                 OOFEM_LOG_RELEVANT("FETISolver::solve :  v modifikovane metode sdruzenych gradientu je nulovy jmenovatel u soucinitele alpha\n");
-                commBuff.resize( commBuff.givePackSize(MPI_INT, 1) );
+                commBuff.resize( commBuff.givePackSizeOfInt(1) );
                 commBuff.init();
-                commBuff.packInt(FETISolverIterationBreak);
+                commBuff.write(FETISolverIterationBreak);
                 commBuff.bcast(0);
                 break;
             }
@@ -1430,9 +1428,9 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
             denom = nom;
             if ( fabs(denom) < FETISOLVER_ZERONUM ) {
                 OOFEM_LOG_RELEVANT("FETISolver::solve : v modifikovane metode sdruzenych gradientu je nulovy jmenovatel u soucinitele beta\n");
-                commBuff.resize( commBuff.givePackSize(MPI_INT, 1) );
+                commBuff.resize( commBuff.givePackSizeOfInt(1) );
                 commBuff.init();
-                commBuff.packInt(FETISolverIterationBreak);
+                commBuff.write(FETISolverIterationBreak);
                 commBuff.bcast(0);
                 break;
             }
@@ -1440,9 +1438,9 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
             nom = g.computeSquaredNorm();
 
             if ( nom < err ) {
-                commBuff.resize( commBuff.givePackSize(MPI_INT, 1) );
+                commBuff.resize( commBuff.givePackSizeOfInt(1) );
                 commBuff.init();
-                commBuff.packInt(FETISolverIterationBreak);
+                commBuff.write(FETISolverIterationBreak);
                 commBuff.bcast(0);
                 break;
             }
@@ -1463,15 +1461,15 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
 
 
         if ( rank == 0 ) {
-            commBuff.resize( commBuff.givePackSize(MPI_INT, 1) );
+            commBuff.resize( commBuff.givePackSizeOfInt(1) );
             commBuff.init();
-            commBuff.packInt(FETISolverIterationContinue);
+            commBuff.write(FETISolverIterationContinue);
             commBuff.bcast(0);
         } else {
-            commBuff.resize( commBuff.givePackSize(MPI_INT, 1) );
+            commBuff.resize( commBuff.givePackSizeOfInt(1) );
             commBuff.init();
             commBuff.bcast(0);
-            commBuff.unpackInt(masterLoopStatus);
+            commBuff.read(masterLoopStatus);
             if ( masterLoopStatus == FETISolverIterationBreak ) {
 #ifdef __VERBOSE_PARALLEL
                 OOFEM_LOG_DEBUG("[process rank %3d]: %-30s: Received Loop break signal from master\n",
@@ -1588,14 +1586,14 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
     //dd.printYourself();
 #endif
 
-    partitionLoad->subtract(dd);
+    partitionLoad.subtract(dd);
 #ifdef __VERBOSE_PARALLEL
     // fprintf(stdout, "\n[process rank %3d]: %-30s: Partition load dump:\n",
     //    rank,"FETISolver :: solveYourselfAt");
-    //partitionLoad->printYourself();
+    //partitionLoad.printYourself();
 #endif
-    partitionStiffness->ldl_feti_sky(* partitionSolution, * partitionLoad, nse, limit, se);
-    pp = * partitionSolution;
+    partitionStiffness->ldl_feti_sky(partitionSolution, partitionLoad, nse, limit, se);
+    pp = partitionSolution;
 
 #ifdef __VERBOSE_PARALLEL
     //fprintf(stdout, "\n[process rank %3d]: %-30s: Partition solution dump:\n",
@@ -1668,9 +1666,7 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
         FloatArray help;
         help.beProductOf(rbm, localGammas);
 
-        for ( int j = 1; j <= neq; j++ ) {
-            partitionSolution->at(j) += help.at(j);
-        }
+        partitionSolution.add(help);
     }
 
     return NM_Success;

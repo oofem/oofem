@@ -203,7 +203,12 @@ public:
      * @param gp Gauss point.
      * @param tStep Time step.
      */
-    void computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+
+    /**
+      * Computes the current volume of element
+      */
+    double computeCurrentVolume(TimeStep *tStep);
 
     // data management
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -213,7 +218,7 @@ public:
     virtual const char *giveClassName() const { return "NLStructuralElement"; }
 
 protected:
-    int checkConsistency();
+    virtual int checkConsistency();
     /**
      * Computes a matrix which, multiplied by the column matrix of nodal displacements,
      * gives the displacement gradient stored by columns.
@@ -229,6 +234,7 @@ protected:
     }
     friend class GradDpElement;
     friend class PhaseFieldElement;
+    friend class XfemStructuralElementInterface;
 };
 } // end namespace oofem
 #endif // nlstructuralelement_h

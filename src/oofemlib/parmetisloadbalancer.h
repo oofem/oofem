@@ -36,6 +36,7 @@
 #define parmetisloadbalancer_h
 
 #include "loadbalancer.h"
+#include "intarray.h"
 
 #include <parmetis.h>
 #include <vector>
@@ -100,6 +101,8 @@ protected:
     int packSharedDmanPartitions(ProcessCommunicator &pc);
     int unpackSharedDmanPartitions(ProcessCommunicator &pc);
     void addSharedDofmanPartitions(int _locnum, IntArray _partitions);
+
+    virtual const char *giveClassName() const { return "ParmetisLoadBalancer"; }
 };
 } // end namespace oofem
 

@@ -297,7 +297,7 @@ void AbaqusUserMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoin
      * nonlinearity is accounted for during the step (see “Procedures: overview,” Section 6.1.1); otherwise,
      * the array contains the original coordinates of the point */
     FloatArray coords;
-    gp->giveElement()->computeGlobalCoordinates( coords, * gp->giveNaturalCoordinates() );
+    gp->giveElement()->computeGlobalCoordinates( coords, gp->giveNaturalCoordinates() );
 
     /* Rotation increment matrix. This matrix represents the increment of rigid body rotation of the basis
      * system in which the components of stress (STRESS) and strain (STRAN) are stored. It is provided so
@@ -462,7 +462,7 @@ void AbaqusUserMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussP
      * nonlinearity is accounted for during the step (see “Procedures: overview,” Section 6.1.1); otherwise,
      * the array contains the original coordinates of the point */
     FloatArray coords;
-    gp->giveElement()->computeGlobalCoordinates( coords, * gp->giveNaturalCoordinates() ); ///@todo Large deformations?
+    gp->giveElement()->computeGlobalCoordinates( coords, gp->giveNaturalCoordinates() ); ///@todo Large deformations?
 
     /* Rotation increment matrix. This matrix represents the increment of rigid body rotation of the basis
      * system in which the components of stress (STRESS) and strain (STRAN) are stored. It is provided so

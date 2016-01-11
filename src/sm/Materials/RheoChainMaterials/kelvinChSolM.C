@@ -166,7 +166,7 @@ KelvinChainSolidMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint 
 
 
 void
-KelvinChainSolidMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tNow)
+KelvinChainSolidMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tStep)
 {
     /*
      * Updates hidden variables used to effectively trace the load history
@@ -183,19 +183,19 @@ KelvinChainSolidMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tNow)
     help.subtract( status->giveStrainVector() ); // strain increment in current time-step
 
     // Subtract the stress-independent part of strain
-    this->computeStressIndependentStrainVector(deltaEps0, gp, tNow, VM_Incremental);
+    this->computeStressIndependentStrainVector(deltaEps0, gp, tStep, VM_Incremental);
     if ( deltaEps0.giveSize() ) {
         help.subtract(deltaEps0); // should be equal to zero if there is no stress change during the time-step
     }
 
-    this->giveUnitStiffnessMatrix(D, gp, tNow);
+    this->giveUnitStiffnessMatrix(D, gp, tStep);
 
-    help.times( this->giveEModulus(gp, tNow) );
+    help.times( this->giveEModulus(gp, tStep) );
     deltaSigma.beProductOf(D, help);
 
     for ( int mu = 1; mu <= nUnits; mu++ ) {
-        betaMu = this->computeBetaMu(gp, tNow, mu);
-        lambdaMu = this->computeLambdaMu(gp, tNow, mu);
+        betaMu = this->computeBetaMu(gp, tStep, mu);
+        lambdaMu = this->computeLambdaMu(gp, tStep, mu);
 
         help = deltaSigma;
         help.times(lambdaMu);
@@ -265,7 +265,7 @@ KelvinChainSolidMaterialStatus :: initTempStatus()
 }
 
 contextIOResultType
-KelvinChainSolidMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+KelvinChainSolidMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -278,7 +278,7 @@ KelvinChainSolidMaterialStatus :: saveContext(DataStream *stream, ContextMode mo
 
 
 contextIOResultType
-KelvinChainSolidMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+KelvinChainSolidMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 

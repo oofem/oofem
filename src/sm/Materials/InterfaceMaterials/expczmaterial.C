@@ -33,9 +33,9 @@
  */
 
 #include "expczmaterial.h"
-#include "gausspnt.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "gausspoint.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "mathfem.h"
 #include "datastream.h"
 #include "contextioerr.h"
@@ -516,7 +516,7 @@ ExpCZMaterialStatus :: updateYourself(TimeStep *tStep)
 
 #if 0
 contextIOResultType
-ExpCZMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+ExpCZMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -526,11 +526,11 @@ ExpCZMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *o
     }
 
     // write a raw data
-    if ( !stream->write(& kappa, 1) ) {
+    if ( !stream.write(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& damage, 1) ) {
+    if ( !stream.write(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -538,7 +538,7 @@ ExpCZMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *o
 }
 
 contextIOResultType
-ExpCZMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+ExpCZMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -548,11 +548,11 @@ ExpCZMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void
     }
 
     // read raw data
-    if ( !stream->read(& kappa, 1) ) {
+    if ( !stream.read(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& damage, 1) ) {
+    if ( !stream.read(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

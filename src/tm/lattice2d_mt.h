@@ -62,13 +62,15 @@ protected:
     double area;
     double length;
 
+    int couplingFlag;
+    IntArray couplingNumbers;
+    FloatArray crackWidths;
+    FloatArray crackLengths;
 
     double dimension, width, thickness;
     FloatArray gpCoords;
 
     double crackWidth;
-
-    int couplingFlag, couplingNumber;
 
 public:
     // constructor
@@ -78,6 +80,15 @@ public:
     /** Computes the contribution to balance equation(s) due to internal sources */
     virtual void computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *, ValueModeType mode);
     virtual double computeVolumeAround(GaussPoint *);
+
+    virtual int giveCouplingFlag(){ return this->couplingFlag;}
+
+    virtual void giveCouplingNumbers(IntArray &numbers){ numbers = this->couplingNumbers;}
+    
+    virtual void giveCrackLengths(FloatArray &lengths){ lengths = this->crackLengths;}
+
+    virtual void giveCrackWidths(FloatArray &widths){ widths = crackWidths;}
+
 
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
@@ -92,6 +103,7 @@ public:
 
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
 
+    virtual double giveWidth() { return width; }
     virtual int computeNumberOfDofs() { return 2; }
     virtual void giveDofManDofIDMask(int inode, IntArray &) const;
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -109,18 +121,15 @@ public:
 protected:
     virtual void computeGaussPoints();
 
-    virtual void  computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *);
+    virtual void  computeGradientMatrixAt(FloatMatrix &answer, const FloatArray &lcoords);
     virtual void  computeNmatrixAt(FloatMatrix &n, const FloatArray &);
-
-    virtual double giveCrackFactor();
 
     virtual double givePressure();
 
+    virtual double giveOldPressure();
+
     virtual double giveMass();
 
-    virtual int giveCouplingFlag() { return couplingFlag; }
-
-    virtual int giveCouplingNumber() { return couplingNumber; }
 
     /* computes the submatrix of interpolation matrix cooresponding to single unknown.
      */
@@ -130,9 +139,6 @@ protected:
 
     virtual double giveArea() { return width * thickness; }
 
-    virtual double giveWidth() { return width; }
-
-    virtual double giveCrackWidth() { return this->crackWidth; }
 
     virtual void  giveGpCoordinates(FloatArray &coords);
 

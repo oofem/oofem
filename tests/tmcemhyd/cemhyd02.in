@@ -17,7 +17,7 @@ node 5 coords 3  0.0   0.0   0.0  ic 1 1 bc 1 1
 node 6 coords 3  0.0   4.0   0.0  ic 1 1 bc 1 1
 node 7 coords 3  4.0   4.0   0.0  ic 1 1
 node 8 coords 3  4.0   0.0   0.0  ic 1 1 
-Brick1ht 1 nodes 8 1 2 3 4 5 6 7 8 crossSect 1 mat 1 NIP 8 boundaryloads 2 2 5
+Brick1ht 1 nodes 8 1 2 3 4 5 6 7 8 crossSect 1 mat 1 boundaryloads 2 2 5
 SimpleCS 1
 #Standard concrete k(conductivity)=1.7 W/m/K   c(capacity)=870 J/kg/K
 CemhydMat 1 d 2400. k 1.7 c 870. file "cemhyd01_XML.src" eachGP 1 densityType 0 conductivityType 0 capacityType 0 castingtime 0.

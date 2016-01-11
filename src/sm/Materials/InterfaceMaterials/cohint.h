@@ -51,9 +51,6 @@ namespace oofem {
 
 /**
  * This class implements associated Material Status to CohesiveInterfaceMaterial.
- * It is attribute of matStatusDictionary at every GaussPoint, for which this material
- * is active.
- *
  * @author Milan Jirasek
  */
 class CohesiveInterfaceMaterialStatus : public StructuralMaterialStatus
@@ -72,8 +69,8 @@ public:
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 };
 
 

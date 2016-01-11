@@ -39,9 +39,16 @@
 #include "contextioerr.h"
 #include "gaussintegrationrule.h"
 
-
-
 namespace oofem {
+    
+CrossSection :: CrossSection(int n, Domain* d) : FEMComponent(n, d), propertyDictionary(), setNumber(0)
+{
+}
+
+CrossSection :: ~CrossSection()
+{
+}
+
 int
 CrossSection :: setupIntegrationPoints(IntegrationRule &irule, int npoints, Element *element)
 {
@@ -80,12 +87,12 @@ CrossSection :: printYourself()
 // Prints the receiver on screen.
 {
     printf("Cross Section with properties : \n");
-    propertyDictionary->printYourself();
+    propertyDictionary.printYourself();
 }
 
 
 contextIOResultType
-CrossSection :: saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp)
+CrossSection :: saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp)
 //
 // saves full material context (saves state variables, that completely describe
 // current state)
@@ -103,7 +110,7 @@ CrossSection :: saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *
 
 
 contextIOResultType
-CrossSection :: restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp)
+CrossSection :: restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp)
 //
 // restores full material context (saves state variables, that completely describe
 // current state)
@@ -124,8 +131,8 @@ double
 CrossSection :: give(CrossSectionProperty aProperty, GaussPoint *gp)
 // Returns the value of the property aProperty of the receiver.
 {
-    if ( propertyDictionary->includes(aProperty) ) {
-        return propertyDictionary->at(aProperty);
+    if ( propertyDictionary.includes(aProperty) ) {
+        return propertyDictionary.at(aProperty);
     } else {
         OOFEM_ERROR("Undefined property ID %d", aProperty);
     }
@@ -134,11 +141,11 @@ CrossSection :: give(CrossSectionProperty aProperty, GaussPoint *gp)
 }
 
 double
-CrossSection :: give(CrossSectionProperty aProperty, const FloatArray *coords, Element *elem, bool local)
+CrossSection :: give(CrossSectionProperty aProperty, const FloatArray &coords, Element *elem, bool local)
 // Returns the value of the property aProperty of the receiver.
 {
-    if ( propertyDictionary->includes(aProperty) ) {
-        return propertyDictionary->at(aProperty);
+    if ( propertyDictionary.includes(aProperty) ) {
+        return propertyDictionary.at(aProperty);
     } else {
         OOFEM_ERROR("Undefined property ID %d", aProperty);
     }
@@ -147,11 +154,10 @@ CrossSection :: give(CrossSectionProperty aProperty, const FloatArray *coords, E
 }
 
 
-#ifdef __PARALLEL_MODE
 double
 CrossSection :: predictRelativeComputationalCost(GaussPoint *gp)
 {
     return this->giveRelativeSelfComputationalCost() * gp->giveMaterial()->predictRelativeComputationalCost(gp);
 }
-#endif
+
 } // end namespace oofem

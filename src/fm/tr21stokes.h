@@ -40,6 +40,7 @@
 #include "zznodalrecoverymodel.h"
 #include "spatiallocalizer.h"
 #include "eleminterpmapperinterface.h"
+#include "matresponsemode.h"
 
 #define _IFT_Tr21Stokes_Name "tr21stokes"
 
@@ -74,12 +75,6 @@ public:
     Tr21Stokes(int n, Domain * d);
     virtual ~Tr21Stokes();
 
-    // ** To be removed
-    void giveGradP(FloatArray &answer, TimeStep *tStep);
-    void giveIntegratedVelocity(FloatArray &answer, TimeStep *tStep);
-    void giveElementFMatrix(FloatMatrix &answer);
-    // **
-
     virtual double computeVolumeAround(GaussPoint *gp);
 
     virtual void computeGaussPoints();
@@ -88,7 +83,7 @@ public:
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
 
     void computeInternalForcesVector(FloatArray &answer, TimeStep *tStep);
-    void computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep);
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, TimeStep *tStep);
 
     void computeExternalForcesVector(FloatArray &answer, TimeStep *tStep);
     virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
@@ -114,9 +109,6 @@ public:
     virtual void updateYourself(TimeStep *tStep);
 
     virtual Interface *giveInterface(InterfaceType it);
-
-    // Spatial localizer interface:
-    virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
     // Element interpolation interface:
     virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType u,

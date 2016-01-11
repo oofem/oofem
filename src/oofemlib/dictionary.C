@@ -172,7 +172,7 @@ Dictionary :: formatAsString(std :: string &str)
 }
 
 
-contextIOResultType Dictionary :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType Dictionary :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full node context (saves state variables, that completely describe
 // current state)
@@ -183,10 +183,6 @@ contextIOResultType Dictionary :: saveContext(DataStream *stream, ContextMode mo
     double value;
     Pair *next;
 
-    if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
-    }
-
     next = first;
     while ( next ) {
         nitems++;
@@ -194,7 +190,7 @@ contextIOResultType Dictionary :: saveContext(DataStream *stream, ContextMode mo
     }
 
     // write size
-    if ( !stream->write(& nitems, 1) ) {
+    if ( !stream.write(nitems) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -203,11 +199,11 @@ contextIOResultType Dictionary :: saveContext(DataStream *stream, ContextMode mo
     while ( next ) {
         key = next->giveKey();
         value = next->giveValue();
-        if ( !stream->write(& key, 1) ) {
+        if ( !stream.write(key) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( !stream->write(& value, 1) ) {
+        if ( !stream.write(value) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
@@ -219,13 +215,13 @@ contextIOResultType Dictionary :: saveContext(DataStream *stream, ContextMode mo
 }
 
 
-contextIOResultType Dictionary :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType Dictionary :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full node context (saves state variables, that completely describe
 // current state)
 //
 {
-    int i, size;
+    int size;
     int key;
     double value;
 
@@ -233,17 +229,17 @@ contextIOResultType Dictionary :: restoreContext(DataStream *stream, ContextMode
     this->clear();
 
     // read size
-    if ( !stream->read(& size, 1) ) {
+    if ( !stream.read(size) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     // read particular pairs
-    for ( i = 1; i <= size; i++ ) {
-        if ( !stream->read(& key, 1) ) {
+    for ( int i = 1; i <= size; i++ ) {
+        if ( !stream.read(key) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( !stream->read(& value, 1) ) {
+        if ( !stream.read(value) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 

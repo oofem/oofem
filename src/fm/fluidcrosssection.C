@@ -97,24 +97,22 @@ FluidCrossSection :: giveFluidMaterial()
 }
 
 
-#ifdef __PARALLEL_MODE
 int
-FluidCrossSection :: packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *gp)
+FluidCrossSection :: packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp)
 {
     return this->domain->giveMaterial(this->matNumber)->packUnknowns(buff, tStep, gp);
 }
 
 int
-FluidCrossSection :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *gp)
+FluidCrossSection :: unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp)
 {
     return this->domain->giveMaterial(this->matNumber)->unpackAndUpdateUnknowns(buff, tStep, gp);
 }
 
 int
-FluidCrossSection :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *gp)
+FluidCrossSection :: estimatePackSize(DataStream &buff, GaussPoint *gp)
 {
     return this->domain->giveMaterial(this->matNumber)->estimatePackSize(buff, gp);
 }
-#endif
 
 } // end namespace oofem

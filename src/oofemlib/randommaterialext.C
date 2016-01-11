@@ -107,7 +107,7 @@ RandomMaterialExtensionInterface :: _generateStatusVariables(GaussPoint *gp) con
 
     for ( int i = 1; i <= size; i++ ) {
         FloatArray globalCoordinates, randomVal;
-        if ( gp->giveElement()->computeGlobalCoordinates( globalCoordinates, * ( gp->giveSubPatchCoordinates() ) ) ) {
+        if ( gp->giveElement()->computeGlobalCoordinates( globalCoordinates, gp->giveSubPatchCoordinates() ) ) {
             Function *f = gp->giveElement()->giveDomain()->giveFunction( randomVariableGenerators.at(i) );
             value = f->evaluate({{"x", globalCoordinates}});
             status->_setProperty(randVariables.at(i), value);

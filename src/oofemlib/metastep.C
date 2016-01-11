@@ -51,6 +51,11 @@ MetaStep :: MetaStep(int n, EngngModel *e, int nsteps, InputRecord &attrib)
     this->attributes = attrib.GiveCopy();
 }
 
+MetaStep :: ~MetaStep()
+{
+    delete attributes;
+}
+
 
 IRResultType
 MetaStep :: initializeFrom(InputRecord *ir)
@@ -76,9 +81,9 @@ MetaStep :: setStepBounds(int startStepNumber)
 }
 
 void
-MetaStep :: setNumberOfSteps(int numberOfSteps)
+MetaStep :: setNumberOfSteps(int newNumberOfSteps)
 {
-    this->numberOfSteps = numberOfSteps;
+    this->numberOfSteps = newNumberOfSteps;
 }
 
 int

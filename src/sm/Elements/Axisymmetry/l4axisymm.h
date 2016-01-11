@@ -54,7 +54,7 @@ public SpatialLocalizerInterface
 {
 protected:
     static FEI2dQuadLin interpolation;
-    int numberOfGaussPoints, numberOfFiAndShGaussPoints;
+    int numberOfFiAndShGaussPoints;
 
 public:
     L4Axisymm(int n, Domain * d);

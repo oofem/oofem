@@ -36,10 +36,10 @@
 #include "floatarray.h"
 
 #ifndef ENRICHMENTFRONTINTERSECTION_H_
-#define ENRICHMENTFRONTINTERSECTION_H_
+ #define ENRICHMENTFRONTINTERSECTION_H_
 
-#define _IFT_EnrFrontIntersection_Name "enrfrontintersection"
-#define _IFT_EnrFrontIntersection_Tangent "tangent"
+ #define _IFT_EnrFrontIntersection_Name "enrfrontintersection"
+ #define _IFT_EnrFrontIntersection_Tangent "tangent"
 
 namespace oofem {
 class XfemManager;
@@ -80,15 +80,13 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual double giveSupportRadius() const { return 0.0; }
-    virtual bool propagationIsAllowed() const {return false;}
+    virtual bool propagationIsAllowed() const { return false; }
 
-    void setTangent(FloatArray iTangent) { mTangent = std::move(iTangent); }
+    void setTangent(FloatArray iTangent) { mTangent = std :: move(iTangent); }
 
 protected:
     FloatArray mTangent;
-
 };
-
 } /* namespace oofem */
 
 #endif /* ENRICHMENTFRONTINTERSECTION_H_ */

@@ -182,7 +182,7 @@ StructuralInterfaceMaterial :: giveEngTraction_1d(FloatArray &answer, GaussPoint
     answer = FloatArray{ traction3D.at(3) };
 
 #ifdef DEBUG
-    if ( ( abs( traction3D.at(1) ) > 1.0e-3 ) || ( abs( traction3D.at(2) ) > 1.0e-3 )  ) {
+    if ( ( fabs( traction3D.at(1) ) > 1.0e-3 ) || ( fabs( traction3D.at(2) ) > 1.0e-3 )  ) {
         OOFEM_ERROR("Traction vector obtained from 3D state contains a nonzero shear stress component")
     }
 #endif
@@ -197,7 +197,7 @@ StructuralInterfaceMaterial :: giveEngTraction_2d(FloatArray &answer, GaussPoint
     answer = { traction3D.at(1), traction3D.at(3) };
 
 #ifdef DEBUG
-    if ( abs( traction3D.at(2) ) > 1.0e-3 ) {
+    if ( fabs( traction3D.at(2) ) > 1.0e-3 ) {
         OOFEM_ERROR("Traction vector obtained from 3D state contains a nonzero thickness stress component")
     }
 #endif

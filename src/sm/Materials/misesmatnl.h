@@ -77,8 +77,8 @@ public:
     virtual void initTempStatus();
 
     virtual void updateYourself(TimeStep *tStep);
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 
     virtual Interface *giveInterface(InterfaceType);
 };
@@ -127,9 +127,6 @@ public:
     //virtual void givePlaneStrainStiffMtrx(FloatMatrix& answer, MatResponseMode, GaussPoint *gp,TimeStep *tStep);
     //virtual void give3dMaterialStiffnessMatrix(FloatMatrix& answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep);
 
-#ifdef __OOFEG
-#endif
-
     virtual void NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &dest, const UnknownNumberingScheme &s,
                                                                       GaussPoint *gp, TimeStep *tStep);
 
@@ -164,11 +161,9 @@ public:
 
     virtual int hasBoundedSupport() { return 1; }
 
-#ifdef __PARALLEL_MODE
-    int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip);
-    int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip);
-    int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip);
-#endif
+    virtual int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip);
+    virtual int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip);
+    virtual int estimatePackSize(DataStream &buff, GaussPoint *ip);
 
 protected:
     // Creates the corresponding material status

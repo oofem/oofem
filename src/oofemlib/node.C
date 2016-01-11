@@ -203,15 +203,12 @@ void
 Node :: printYourself()
 // Prints the receiver on screen.
 {
-    double x, y;
-
-    x = this->giveCoordinate(1);
-    y = this->giveCoordinate(2);
-    printf("Node %d    coord : x %f  y %f\n", number, x, y);
+    printf("Node %d    coord : x %f  y %fz< %f\n", number, this->giveCoordinate(1), this->giveCoordinate(2), this->giveCoordinate(3));
     for ( Dof *dof: *this ) {
         dof->printYourself();
     }
 
+    printf("load array : ");
     loadArray.printYourself();
     printf("\n");
 }
@@ -450,8 +447,8 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                 case D_u:
                 case D_v:
                 case D_w:
-                    for ( Dof *dof: *this ) {
-                        DofIDItem id2 = dof->giveDofID();
+                    for ( Dof *dof2: *this ) {
+                        DofIDItem id2 = dof2->giveDofID();
                         j++;
                         if ( ( id2 == D_u ) || ( id2 == D_v ) || ( id2 == D_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( D_u ) + 1,
@@ -464,8 +461,8 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                 case V_u:
                 case V_v:
                 case V_w:
-                    for ( Dof *dof: *this ) {
-                        DofIDItem id2 = dof->giveDofID();
+                    for ( Dof *dof2: *this ) {
+                        DofIDItem id2 = dof2->giveDofID();
                         j++;
                         if ( ( id2 == V_u ) || ( id2 == V_v ) || ( id2 == V_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( V_u ) + 1,
@@ -478,8 +475,8 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                 case R_u:
                 case R_v:
                 case R_w:
-                    for ( Dof *dof: *this ) {
-                        DofIDItem id2 = dof->giveDofID();
+                    for ( Dof *dof2: *this ) {
+                        DofIDItem id2 = dof2->giveDofID();
                         j++;
                         if ( ( id2 == R_u ) || ( id2 == R_v ) || ( id2 == R_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( R_u ) + 1,
@@ -561,16 +558,13 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
 
 
 contextIOResultType
-Node :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+Node :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full node context (saves state variables, that completely describe
 // current state)
 //
 {
     contextIOResultType iores;
-    if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
-    }
 
     if ( ( iores = DofManager :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
@@ -578,16 +572,16 @@ Node :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 
     if ( mode & CM_Definition ) {
         int _haslcs = hasLocalCS();
-        if ( ( iores = coordinates.storeYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = coordinates.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
 
-        if ( !stream->write(& _haslcs, 1) ) {
+        if ( !stream.write(_haslcs) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
         if ( _haslcs ) {
-            if ( ( iores = localCoordinateSystem->storeYourself(stream, mode) ) != CIO_OK ) {
+            if ( ( iores = localCoordinateSystem->storeYourself(stream) ) != CIO_OK ) {
                 THROW_CIOERR(iores);
             }
         }
@@ -598,16 +592,13 @@ Node :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 
 
 contextIOResultType
-Node :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+Node :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full node context (saves state variables, that completely describe
 // current state)
 //
 {
     contextIOResultType iores;
-    if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
-    }
 
     if ( ( iores = DofManager :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
@@ -615,11 +606,11 @@ Node :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 
     if ( mode & CM_Definition ) {
         int _haslcs;
-        if ( ( iores = coordinates.restoreYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = coordinates.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
 
-        if ( !stream->read(& _haslcs, 1) ) {
+        if ( !stream.read(_haslcs) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
@@ -628,7 +619,7 @@ Node :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
                 localCoordinateSystem = new FloatMatrix();
             }
 
-            if ( ( iores = localCoordinateSystem->restoreYourself(stream, mode) ) != CIO_OK ) {
+            if ( ( iores = localCoordinateSystem->restoreYourself(stream) ) != CIO_OK ) {
                 THROW_CIOERR(iores);
             }
         } else {
@@ -670,7 +661,6 @@ Node :: drawYourself(oofegGraphicContext &gc, TimeStep *tStep)
 
  #endif
 
- #ifdef __PARALLEL_MODE
         if ( this->giveParallelMode() == DofManager_local ) {
             EASValsSetColor( gc.getNodeColor() );
         } else if ( this->giveParallelMode() == DofManager_shared ) {
@@ -678,10 +668,6 @@ Node :: drawYourself(oofegGraphicContext &gc, TimeStep *tStep)
         } else {
             EASValsSetColor( gc.getCrackPatternColor() );
         }
-
- #else
-        EASValsSetColor( gc.getNodeColor() );
- #endif
 
         bool ordinary = true;
 
@@ -710,11 +696,8 @@ Node :: drawYourself(oofegGraphicContext &gc, TimeStep *tStep)
         p [ 0 ].x = ( FPNum ) this->giveCoordinate(1);
         p [ 0 ].y = ( FPNum ) this->giveCoordinate(2);
         p [ 0 ].z = ( FPNum ) this->giveCoordinate(3);
- #ifdef __PARALLEL_MODE
+ 
         sprintf( num, "%d(%d)", this->giveNumber(), this->giveGlobalNumber() );
- #else
-        sprintf( num, "%d", this->giveLabel() );
- #endif
         go = CreateAnnText3D(p, num);
         EGWithMaskChangeAttributes(COLOR_MASK | LAYER_MASK, go);
         EMAddGraphicsToModel(ESIModel(), go);

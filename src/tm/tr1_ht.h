@@ -72,8 +72,6 @@ public:
 
     virtual Interface *giveInterface(InterfaceType t);
 
-    virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
-
     virtual FEInterpolation *giveInterpolation() const;
 
 #ifdef __OOFEG

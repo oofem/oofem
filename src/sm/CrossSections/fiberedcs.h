@@ -176,30 +176,28 @@ public:
     MaterialMode giveCorrespondingSlaveMaterialMode(MaterialMode);
     GaussPoint *giveSlaveGaussPoint(GaussPoint *gp, int);
 
-    virtual contextIOResultType saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
-    virtual contextIOResultType restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
+    virtual contextIOResultType saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
+    virtual contextIOResultType restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
 
     virtual int checkConsistency();
 
-#ifdef __PARALLEL_MODE
-    int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
+    virtual int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip)
     {
         OOFEM_ERROR("not implemented");
         return 0;
     }
 
-    int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
+    virtual int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip)
     {
         OOFEM_ERROR("not implemented");
         return 0;
     }
 
-    int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
+    virtual int estimatePackSize(DataStream &buff, GaussPoint *ip)
     {
         OOFEM_ERROR("not implemented");
         return 0;
     }
-#endif
 
 
     virtual void giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep)

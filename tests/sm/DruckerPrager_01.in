@@ -10,7 +10,7 @@ Node 1 coords 3  0.0   0.0   0.0  bc 2 1 1
 Node 2 coords 3  4.0   0.0   0.0  bc 2 2 1
 Node 3 coords 3  4.0   2.0   0.0  bc 2 2 0
 Node 4 coords 3  0.0   2.0   0.0  bc 2 1 0
-Quad1PlaneStrain 1 nodes 4 1 2 3 4  mat 1 NIP 4 crossSect 1
+Quad1PlaneStrain 1 nodes 4 1 2 3 4  mat 1 crossSect 1
 SimpleCS 1 thick 0.3
 DruckerPrager 1 d 1.0 tAlpha 0.000012  E 30000. n 0.25 alpha 0.3 alphaPsi 0.3 ht 1 iys 8. hm 1.e-6
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0

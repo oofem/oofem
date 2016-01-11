@@ -54,13 +54,24 @@
 namespace oofem {
 REGISTER_BoundaryCondition(PrescribedGenStrainShell7);
 
-double PrescribedGenStrainShell7 :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
+double PrescribedGenStrainShell7 :: give(Dof *dof, ValueModeType mode, double time)
 {
     DofIDItem id = dof->giveDofID();
     FloatArray *coords = dof->giveDofManager()->giveCoordinates();
 
     if ( coords->giveSize() != this->centerCoord.giveSize() ) {
         OOFEM_ERROR("PrescribedGenStrainShell7 :: give - Size of coordinate system different from center coordinate in b.c.");
+    }
+
+    double factor = 0;
+    if ( mode == VM_Total ) {
+        factor = this->giveTimeFunction()->evaluateAtTime(time);
+    } else if ( mode == VM_Velocity ) {
+        factor = this->giveTimeFunction()->evaluateVelocityAtTime(time);
+    } else if ( mode == VM_Acceleration ) {
+        factor = this->giveTimeFunction()->evaluateAccelerationAtTime(time);
+    } else {
+        OOFEM_ERROR("Should not be called for value mode type then total, velocity, or acceleration.");
     }
 
     // Reminder: u_i = F_ij . (x_j - xb_j) = H_ij . dx_j
@@ -77,7 +88,7 @@ double PrescribedGenStrainShell7 :: give(Dof *dof, ValueModeType mode, TimeStep 
     this->evaluateHigherOrderContribution(u2, dx.at(3), dx);
     u.add(u2);
 
-    u.times( this->giveTimeFunction()->evaluate(tStep, mode) );
+    u.times( factor );
 
     switch ( id ) {
     case D_u:

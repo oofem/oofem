@@ -86,6 +86,8 @@ protected:
 
     /// Interface normal direction
     FloatArray mNormalDir;
+
+    bool mNewlyInserted;
 public:
     /// Constructor. Creates new StructuralInterfaceMaterialStatus with number n, belonging to domain d and IntegrationPoint g.
     StructuralInterfaceMaterialStatus(int n, Domain * d, GaussPoint * g);
@@ -97,8 +99,8 @@ public:
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 
     /// Returns the const pointer to receiver's jump.
     const FloatArray &giveJump() const { return jump; }
@@ -142,6 +144,9 @@ public:
     /// Functions for MaterialStatusMapperInterface
     virtual void copyStateVariables(const MaterialStatus &iStatus);
     virtual void addStateVariables(const MaterialStatus &iStatus);
+
+    bool giveNewlyInserted() const {return mNewlyInserted;}
+    void setNewlyInserted(bool iNewlyInserted) {mNewlyInserted = iNewlyInserted;}
 };
 } // end namespace oofem
 #endif // structuralinterfacematerialstatus_h

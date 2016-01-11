@@ -652,8 +652,8 @@ PerfectlyPlasticMaterial :: give(int aProperty, GaussPoint *gp)
 {
     double value = 0.0;
 
-    if ( propertyDictionary->includes(aProperty) ) {
-        value = propertyDictionary->at(aProperty);
+    if ( propertyDictionary.includes(aProperty) ) {
+        value = propertyDictionary.at(aProperty);
     } else {
         if ( linearElasticMaterial ) {
             value = this->linearElasticMaterial->give(aProperty, gp);
@@ -715,7 +715,7 @@ PerfectlyPlasticMaterialStatus :: ~PerfectlyPlasticMaterialStatus()
 
 
 contextIOResultType
-PerfectlyPlasticMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+PerfectlyPlasticMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full information stored in this Status
 //
@@ -727,11 +727,11 @@ PerfectlyPlasticMaterialStatus :: saveContext(DataStream *stream, ContextMode mo
     }
 
     // write a raw data
-    if ( !stream->write(& yield_flag, 1) ) {
+    if ( !stream.write(yield_flag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = plasticStrainVector.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = plasticStrainVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -741,7 +741,7 @@ PerfectlyPlasticMaterialStatus :: saveContext(DataStream *stream, ContextMode mo
 
 
 contextIOResultType
-PerfectlyPlasticMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+PerfectlyPlasticMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restore state variables from stream
 //
@@ -753,11 +753,11 @@ PerfectlyPlasticMaterialStatus :: restoreContext(DataStream *stream, ContextMode
     }
 
     // read raw data
-    if ( !stream->read(& yield_flag, 1) ) {
+    if ( !stream.read(yield_flag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = plasticStrainVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = plasticStrainVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -799,9 +799,9 @@ PerfectlyPlasticMaterialStatus :: initTempStatus()
 
 
 void
-PerfectlyPlasticMaterialStatus :: updateYourself(TimeStep *tNow)
+PerfectlyPlasticMaterialStatus :: updateYourself(TimeStep *tStep)
 {
-    StructuralMaterialStatus :: updateYourself(tNow);
+    StructuralMaterialStatus :: updateYourself(tStep);
 
     plasticStrainVector.add(plasticStrainIncrementVector);
     plasticStrainIncrementVector.zero();

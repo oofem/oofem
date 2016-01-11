@@ -21,7 +21,7 @@ SimpleCS 1
 tutorialmaterial 1 d 0. E 200.0e9 n 0.3 sigy 500.0e6 H 10.0e9 talpha -1.0
 BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
 BoundaryCondition  2 loadTimeFunction 1 prescribedvalue 0.03
-PiecewiseLinFunction 1 npoints 2 t 2 0. 4. f(t) 2 0.1 1.
+PiecewiseLinFunction 1 npoints 2 t 2 1. 5. f(t) 2 0.1 1.
 #
 #%BEGIN_CHECK% tolerance 1.e4
 ## error has the unit Pa => tolerance = 10 kPa

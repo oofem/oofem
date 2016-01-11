@@ -74,35 +74,29 @@ GPExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         return;
     }
 
-    int nc, nv, nvars;
     double weight;
     FloatArray gcoords, intvar;
-    InternalStateType vartype;
-    IntegrationRule *iRule;
 
     Domain *d  = emodel->giveDomain(1);
-    int nelem = d->giveNumberOfElements();
     FILE *stream = this->giveOutputStream(tStep);
 
     // print the header
     fprintf(stream, "%%# gauss point data file\n");
-    fprintf( stream, "%%# output for time %g\n", tStep->giveTargetTime() );
+    fprintf(stream, "%%# output for time %g\n", tStep->giveTargetTime() );
     fprintf(stream, "%%# variables: ");
-    nvars = vartypes.giveSize();
-    fprintf(stream, "%d  ", nvars);
-    for ( int iv = 1; iv <= nvars; iv++ ) {
-        fprintf( stream, "%d ", vartypes.at(iv) );
+    fprintf(stream, "%d  ", vartypes.giveSize());
+    for ( auto &vartype : vartypes ) {
+        fprintf( stream, "%d ", vartype );
     }
 
     fprintf(stream, "\n %%# for interpretation see internalstatetype.h\n");
 
     // loop over elements
-    for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-        Element *elem = d->giveElement(ielem);
+    for ( auto &elem : d->giveElements() ) {
         //iRule = elem->giveDefaultIntegrationRulePtr();
         //int numIntRules = elem->giveNumberOfIntegrationRules();
         for ( int i = 0; i < elem->giveNumberOfIntegrationRules(); i++ ) {
-            iRule = elem->giveIntegrationRule(i);
+            IntegrationRule *iRule = elem->giveIntegrationRule(i);
 
             // loop over Gauss points
             for ( GaussPoint *gp: *iRule ) {
@@ -117,8 +111,8 @@ GPExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
                 // export Gauss point coordinates
                 if ( ncoords ) { // no coordinates exported if ncoords==0
-                    elem->computeGlobalCoordinates( gcoords, * ( gp->giveNaturalCoordinates() ) );
-                    nc = gcoords.giveSize();
+                    elem->computeGlobalCoordinates( gcoords, gp->giveNaturalCoordinates() );
+                    int nc = gcoords.giveSize();
                     if ( ncoords >= 0 ) {
                         fprintf(stream, "%d ", ncoords);
                     } else {
@@ -129,8 +123,8 @@ GPExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
                         nc = ncoords;
                     }
 
-                    for ( int ic = 1; ic <= nc; ic++ ) {
-                        fprintf( stream, "%.6e ", gcoords.at(ic) );
+                    for ( auto &c : gcoords ) {
+                        fprintf( stream, "%.6e ", c );
                     }
 
                     for ( int ic = nc + 1; ic <= ncoords; ic++ ) {
@@ -139,13 +133,11 @@ GPExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
                 }
 
                 // export internal variables
-                for ( int iv = 1; iv <= nvars; iv++ ) {
-                    vartype = ( InternalStateType ) vartypes.at(iv);
-                    elem->giveIPValue(intvar, gp, vartype, tStep);
-                    nv = intvar.giveSize();
-                    fprintf(stream, "%d ", nv);
-                    for ( int ic = 1; ic <= nv; ic++ ) {
-                        fprintf( stream, "%.6e ", intvar.at(ic) );
+                for ( auto vartype : vartypes ) {
+                    elem->giveIPValue(intvar, gp, ( InternalStateType )vartype, tStep);
+                    fprintf(stream, "%d ", intvar.giveSize());
+                    for ( auto &val : intvar ) {
+                        fprintf( stream, "%.6e ", val );
                     }
                 }
 

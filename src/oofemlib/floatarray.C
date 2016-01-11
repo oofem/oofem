@@ -40,10 +40,6 @@
 #include "datastream.h"
 #include "mathfem.h"
 
-#ifdef __PARALLEL_MODE
- #include "combuff.h"
-#endif
-
 #include <cstdarg>
 #include <cstdlib>
 #include <cstring>
@@ -86,7 +82,7 @@ double &
 FloatArray :: operator() (int i)
 {
     if ( i >= this->giveSize() ) {
-        OOFEM_ERROR("array error on index : %d <= 0", i);
+        OOFEM_ERROR("array error on index : %d >= %d", i, this->giveSize());
     }
     return values [ i ];
 }
@@ -95,7 +91,7 @@ const double &
 FloatArray :: operator() (int i) const
 {
     if ( i >= this->giveSize() ) {
-        OOFEM_ERROR("array error on index : %d <= 0", i);
+        OOFEM_ERROR("array error on index : %d >= %d", i, this->giveSize());
     }
     return values [ i ];
 }
@@ -103,7 +99,7 @@ double &
 FloatArray :: operator[] (int i)
 {
     if ( i >= this->giveSize() ) {
-        OOFEM_ERROR("array error on index : %d <= 0", i);
+        OOFEM_ERROR("array error on index : %d >= %d", i, this->giveSize());
     }
     return values [ i ];
 }
@@ -112,7 +108,7 @@ const double &
 FloatArray :: operator[] (int i) const
 {
     if ( i >= this->giveSize() ) {
-        OOFEM_ERROR("array error on index : %d <= 0", i);
+        OOFEM_ERROR("array error on index : %d >= %d", i, this->giveSize());
     }
     return values [ i ];
 }
@@ -290,6 +286,14 @@ void FloatArray :: beMaxOf(const FloatArray &a, const FloatArray &b)
 {
     int n = a.giveSize();
 
+    if ( a.giveSize() == 0 ) {
+        *this = b;
+        return;
+    } else if ( b.giveSize() == 0 ) {
+        *this = a;
+        return;
+    }
+
 #  ifdef DEBUG
     if ( n != b.giveSize() ) {
         OOFEM_ERROR("dimension mismatch in beMaxOf(a[%d],b[%d])", n, b.giveSize());
@@ -308,6 +312,14 @@ void FloatArray :: beMaxOf(const FloatArray &a, const FloatArray &b)
 void FloatArray :: beMinOf(const FloatArray &a, const FloatArray &b)
 {
     int n = a.giveSize();
+
+    if ( a.giveSize() == 0 ) {
+        *this = b;
+        return;
+    } else if ( b.giveSize() == 0 ) {
+        *this = a;
+        return;
+    }
 
 #  ifdef DEBUG
     if ( n != b.giveSize() ) {
@@ -821,6 +833,13 @@ double FloatArray :: sum() const
     return std::accumulate(this->begin(), this->end(), 0.);
 }
 
+
+double FloatArray :: product() const
+{
+    return std::accumulate(this->begin(), this->end(), 1.0, [](double a, double b) { return a*b; });
+}
+
+
 void FloatArray :: copySubVector(const FloatArray &src, int si)
 {
     si--;
@@ -829,7 +848,7 @@ void FloatArray :: copySubVector(const FloatArray &src, int si)
 }
 
 
-contextIOResultType FloatArray :: storeYourself(DataStream *stream, ContextMode mode)
+contextIOResultType FloatArray :: storeYourself(DataStream &stream) const
 // writes receiver's binary image into stream
 // use id to distinguish some instances
 // return value >0 success
@@ -837,13 +856,13 @@ contextIOResultType FloatArray :: storeYourself(DataStream *stream, ContextMode 
 {
     // write size
     int size = this->giveSize();
-    if ( !stream->write(& size, 1) ) {
+    if ( !stream.write(size) ) {
         return CIO_IOERR;
     }
 
     // write raw data
     if ( size ) {
-        if ( !stream->write(this->givePointer(), size) ) {
+        if ( !stream.write(this->givePointer(), size) ) {
             return CIO_IOERR;
         }
     }
@@ -852,7 +871,7 @@ contextIOResultType FloatArray :: storeYourself(DataStream *stream, ContextMode 
     return CIO_OK;
 }
 
-contextIOResultType FloatArray :: restoreYourself(DataStream *stream, ContextMode mode)
+contextIOResultType FloatArray :: restoreYourself(DataStream &stream)
 // reads receiver from stream
 // warning - overwrites existing data!
 // returns 0 if file i/o error
@@ -860,7 +879,7 @@ contextIOResultType FloatArray :: restoreYourself(DataStream *stream, ContextMod
 {
     // read size
     int size;
-    if ( !stream->read(& size, 1) ) {
+    if ( !stream.read(size) ) {
         return CIO_IOERR;
     }
 
@@ -868,7 +887,7 @@ contextIOResultType FloatArray :: restoreYourself(DataStream *stream, ContextMod
 
     // read raw data
     if ( size ) {
-        if ( !stream->read(this->givePointer(), size) ) {
+        if ( !stream.read(this->givePointer(), size) ) {
             return CIO_IOERR;
         }
     }
@@ -878,36 +897,10 @@ contextIOResultType FloatArray :: restoreYourself(DataStream *stream, ContextMod
 }
 
 
-#ifdef __PARALLEL_MODE
-int FloatArray :: packToCommBuffer(CommunicationBuffer &buff) const
+int FloatArray :: givePackSize(DataStream &buff) const
 {
-    int result = 1;
-    // pack size
-    result &= buff.packInt(this->giveSize());
-    // pack data
-    result &= buff.packArray(this->givePointer(), this->giveSize());
-
-    return result;
+    return buff.givePackSizeOfInt(1) + buff.givePackSizeOfDouble(this->giveSize());
 }
-
-int FloatArray :: unpackFromCommBuffer(CommunicationBuffer &buff)
-{
-    int newSize, result = 1;
-    // unpack size
-    result &= buff.unpackInt(newSize);
-    // resize yourself
-    this->values.resize(newSize);
-    result &= buff.unpackArray(this->givePointer(), newSize);
-
-    return result;
-}
-
-int FloatArray :: givePackSize(CommunicationBuffer &buff) const
-{
-    return buff.givePackSize(MPI_INT, 1) + buff.givePackSize(MPI_DOUBLE, this->giveSize());
-}
-
-#endif
 
 // IML compat
 
@@ -1040,14 +1033,14 @@ void FloatArray :: beSymVectorForm(const FloatMatrix &aMatrix)
 
 void FloatArray :: changeComponentOrder()
 {
-    // OOFEM: 			11, 22, 33, 23, 13, 12, 32, 31, 21
-    // UMAT:			11, 22, 33, 12, 13, 23, 32, 21, 31
+    // OOFEM:           11, 22, 33, 23, 13, 12, 32, 31, 21
+    // UMAT:            11, 22, 33, 12, 13, 23, 32, 21, 31
 
     if ( this->giveSize() == 6 ) {
         std :: swap( this->at(4), this->at(6) );
     } else if ( this->giveSize() == 9 )    {
-        // OOFEM: 			11, 22, 33, 23, 13, 12, 32, 31, 21
-        // UMAT:			11, 22, 33, 12, 13, 23, 32, 21, 31
+        // OOFEM:       11, 22, 33, 23, 13, 12, 32, 31, 21
+        // UMAT:        11, 22, 33, 12, 13, 23, 32, 21, 31
         const int abq2oo [ 9 ] = {
             1,  2,  3,  6,  5,  4,  7,  9,  8
         };

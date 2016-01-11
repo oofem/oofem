@@ -67,16 +67,6 @@ LayeredCrossSection :: giveRealStress_3d(FloatArray &answer, GaussPoint *gp, con
             double s = sin(rot * M_PI / 180.);
 
             FloatArray rotStress;
-#if 0
-            FloatArray rotStrain = {
-                c *c * strain.at(1) - c * s * strain.at(6) + s * s * strain.at(2),
-                c * c * strain.at(2) + c * s * strain.at(6) + s * s * strain.at(1),
-                strain.at(3),
-                c * strain.at(4) + s * strain.at(5),
-                c * strain.at(5) - s * strain.at(4),
-                ( c * c - s * s ) * strain.at(6) + 2 * c * s * ( strain.at(1) - strain.at(2) ),
-            };
-#else
             FloatArray rotStrain(6);
             rotStrain.at(1) = c * c * strain.at(1) - c *s *strain.at(6) + s *s *strain.at(2);
             rotStrain.at(2) = c * c * strain.at(2) + c *s *strain.at(6) + s *s *strain.at(1);
@@ -84,11 +74,9 @@ LayeredCrossSection :: giveRealStress_3d(FloatArray &answer, GaussPoint *gp, con
             rotStrain.at(4) = c * strain.at(4) + s *strain.at(5);
             rotStrain.at(5) = c * strain.at(5) - s *strain.at(4);
             rotStrain.at(6) = ( c * c - s * s ) * strain.at(6) + 2 * c * s * ( strain.at(1) - strain.at(2) );
-#endif
 
             static_cast< StructuralMaterial * >(layerMat)->giveRealStressVector_3d(rotStress, gp, rotStrain, tStep);
 
-#if 0
             answer = {
                 c *c * rotStress.at(1) + 2 * c * s * rotStress.at(6) + s * s * rotStress.at(2),
                 c * c * rotStress.at(2) - 2 * c * s * rotStress.at(6) + s * s * rotStress.at(1),
@@ -96,16 +84,7 @@ LayeredCrossSection :: giveRealStress_3d(FloatArray &answer, GaussPoint *gp, con
                 c * rotStress.at(4) - s * rotStress.at(5),
                 c * rotStress.at(5) + s * rotStress.at(4),
                 ( c * c - s * s ) * rotStress.at(6) - c * s * ( rotStress.at(1) - rotStress.at(2) ),
-            }
-#else
-            answer.resize(6);
-            answer.at(1) = c * c * rotStress.at(1) + 2 *c *s *rotStress.at(6) + s *s *rotStress.at(2);
-            answer.at(2) = c * c * rotStress.at(2) - 2 *c *s *rotStress.at(6) + s *s *rotStress.at(1);
-            answer.at(3) = rotStress.at(3);
-            answer.at(4) = c * rotStress.at(4) - s *rotStress.at(5);
-            answer.at(5) = c * rotStress.at(5) + s *rotStress.at(4);
-            answer.at(6) = ( c * c - s * s ) * rotStress.at(6) - c * s * ( rotStress.at(1) - rotStress.at(2) );
-#endif
+            };
         } else {
             static_cast< StructuralMaterial * >(layerMat)->giveRealStressVector_3d(answer, gp, strain, tStep);
         }
@@ -159,7 +138,7 @@ LayeredCrossSection :: giveStiffnessMatrix_3d(FloatMatrix &answer, MatResponseMo
             double rot = this->layerRots.at(layer);
             double c = cos(rot * M_PI / 180.);
             double s = sin(rot * M_PI / 180.);
-#if 0
+
             FloatMatrix rotTangent = {
                 {  c *c,    s *s, 0,  0,  0,    -c *s },
                 {  s *s,    c *c, 0,  0,  0,     c *s },
@@ -168,24 +147,6 @@ LayeredCrossSection :: giveStiffnessMatrix_3d(FloatMatrix &answer, MatResponseMo
                 {    0,      0, 0, -s,  c,       0 },
                 { 2 * c * s, -2 * c * s, 0,  0,  0, c * c - s * s }
             };
-#else
-            FloatMatrix rotTangent(6, 6);
-            rotTangent.zero();
-            rotTangent.at(1, 1) = c * c;
-            rotTangent.at(1, 2) = s * s;
-            rotTangent.at(1, 6) = 2 * c * s;
-            rotTangent.at(2, 1) = s * s;
-            rotTangent.at(2, 2) = c * c;
-            rotTangent.at(2, 6) = -2 * c * s;
-            rotTangent.at(3, 3) = 1;
-            rotTangent.at(4, 4) = c;
-            rotTangent.at(4, 5) = -s;
-            rotTangent.at(5, 4) = s;
-            rotTangent.at(5, 5) = c;
-            rotTangent.at(6, 1) = -c * s;
-            rotTangent.at(6, 2) = c * s;
-            rotTangent.at(6, 6) = c * c - s * s;
-#endif
             answer.rotatedWith(rotTangent, 't');
         }
     } else {
@@ -314,41 +275,22 @@ LayeredCrossSection :: giveGeneralizedStress_Plate(FloatArray &answer, GaussPoin
             double s = sin(rot * M_PI / 180.);
 
             FloatArray rotStress;
-#if 0
-            FloatArray rotStrain = {
-                c *c * strain.at(1) - c * s * strain.at(5) + s * s * strain.at(2),
-                c * c * strain.at(2) + c * s * strain.at(5) + s * s * strain.at(1),
-                c * strain.at(3) + s * strain.at(4),
-                c * strain.at(4) - s * strain.at(3),
-                ( c * c - s * s ) * strain.at(5) + c * s * ( strain.at(1) - strain.at(2) ),
-            };
-#else
             FloatArray rotStrain(5);
             rotStrain.at(1) = c * c * strain.at(1) - c *s *strain.at(5) + s *s *strain.at(2);
             rotStrain.at(2) = c * c * strain.at(2) + c *s *strain.at(5) + s *s *strain.at(1);
             rotStrain.at(3) = c * strain.at(3) + s *strain.at(4);
             rotStrain.at(4) = c * strain.at(4) - s *strain.at(3);
             rotStrain.at(5) = ( c * c - s * s ) * strain.at(5) + c * s * ( strain.at(1) - strain.at(2) );
-#endif
 
             static_cast< StructuralMaterial * >(layerMat)->giveRealStressVector_PlateLayer(rotStress, gp, rotStrain, tStep);
 
-#if 0
             answer = {
                 c *c * rotStress.at(1) + 2 * c * s * rotStress.at(5) + s * s * rotStress.at(2),
                 c * c * rotStress.at(2) - 2 * c * s * rotStress.at(5) + s * s * rotStress.at(1),
                 c * rotStress.at(3) - s * rotStress.at(4),
                 c * rotStress.at(4) + s * rotStress.at(3),
                 ( c * c - s * s ) * rotStress.at(5) - c * s * ( rotStress.at(1) - rotStress.at(2) ),
-            }
-#else
-            answer.resize(5);
-            answer.at(1) = c * c * rotStress.at(1) + 2 *c *s *rotStress.at(5) + s *s *rotStress.at(2);
-            answer.at(2) = c * c * rotStress.at(2) - 2 *c *s *rotStress.at(5) + s *s *rotStress.at(1);
-            answer.at(3) = c * rotStress.at(3) - s *rotStress.at(4);
-            answer.at(4) = c * rotStress.at(4) + s *rotStress.at(3);
-            answer.at(5) = ( c * c - s * s ) * rotStress.at(5) - c * s * ( rotStress.at(1) - rotStress.at(2) );
-#endif
+            };
         } else {
             layerMat->giveRealStressVector_PlateLayer(reducedLayerStress, layerGp, layerStrain, tStep);
         }
@@ -410,7 +352,6 @@ LayeredCrossSection :: giveGeneralizedStress_Shell(FloatArray &answer, GaussPoin
             double s = sin(rot * M_PI / 180.);
 
             FloatArray rotStress;
-#if 0
             FloatArray rotStrain = {
                 c *c * strain.at(1) - c * s * strain.at(5) + s * s * strain.at(2),
                 c * c * strain.at(2) + c * s * strain.at(5) + s * s * strain.at(1),
@@ -418,33 +359,16 @@ LayeredCrossSection :: giveGeneralizedStress_Shell(FloatArray &answer, GaussPoin
                 c * strain.at(4) - s * strain.at(3),
                 ( c * c - s * s ) * strain.at(5) + c * s * ( strain.at(1) - strain.at(2) ),
             };
-#else
-            FloatArray rotStrain(5);
-            rotStrain.at(1) = c * c * strain.at(1) - c *s *strain.at(5) + s *s *strain.at(2);
-            rotStrain.at(2) = c * c * strain.at(2) + c *s *strain.at(5) + s *s *strain.at(1);
-            rotStrain.at(3) = c * strain.at(3) + s *strain.at(4);
-            rotStrain.at(4) = c * strain.at(4) - s *strain.at(3);
-            rotStrain.at(5) = ( c * c - s * s ) * strain.at(5) + c * s * ( strain.at(1) - strain.at(2) );
-#endif
 
             static_cast< StructuralMaterial * >(layerMat)->giveRealStressVector_PlateLayer(rotStress, gp, rotStrain, tStep);
 
-#if 0
             answer = {
                 c *c * rotStress.at(1) + 2 * c * s * rotStress.at(5) + s * s * rotStress.at(2),
                 c * c * rotStress.at(2) - 2 * c * s * rotStress.at(5) + s * s * rotStress.at(1),
                 c * rotStress.at(3) - s * rotStress.at(4),
                 c * rotStress.at(4) + s * rotStress.at(3),
                 ( c * c - s * s ) * rotStress.at(5) - c * s * ( rotStress.at(1) - rotStress.at(2) ),
-            }
-#else
-            answer.resize(5);
-            answer.at(1) = c * c * rotStress.at(1) + 2 *c *s *rotStress.at(5) + s *s *rotStress.at(2);
-            answer.at(2) = c * c * rotStress.at(2) - 2 *c *s *rotStress.at(5) + s *s *rotStress.at(1);
-            answer.at(3) = c * rotStress.at(3) - s *rotStress.at(4);
-            answer.at(4) = c * rotStress.at(4) + s *rotStress.at(3);
-            answer.at(5) = ( c * c - s * s ) * rotStress.at(5) - c * s * ( rotStress.at(1) - rotStress.at(2) );
-#endif
+            };
         } else {
             layerMat->giveRealStressVector_PlateLayer(reducedLayerStress, layerGp, layerStrain, tStep);
         }
@@ -556,7 +480,6 @@ LayeredCrossSection :: give2dPlateStiffMtrx(FloatMatrix &answer,
             double rot = this->layerRots.at(layer);
             double c = cos(rot * M_PI / 180.);
             double s = sin(rot * M_PI / 180.);
-#if 0
             FloatMatrix rotTangent = {
                 {  c *c,    s *s,  0,  0,    -c *s },
                 {  s *s,    c *c,  0,  0,     c *s },
@@ -564,23 +487,6 @@ LayeredCrossSection :: give2dPlateStiffMtrx(FloatMatrix &answer,
                 {    0,      0, -s,  c,       0 },
                 { 2 * c * s, -2 * c * s,  0,  0, c * c - s * s }
             };
-#else
-            FloatMatrix rotTangent(5, 5);
-            rotTangent.zero();
-            rotTangent.at(1, 1) = c * c;
-            rotTangent.at(1, 2) = s * s;
-            rotTangent.at(1, 5) = 2 * c * s;
-            rotTangent.at(2, 1) = s * s;
-            rotTangent.at(2, 2) = c * c;
-            rotTangent.at(2, 5) = -2 * c * s;
-            rotTangent.at(3, 3) = c;
-            rotTangent.at(3, 4) = -s;
-            rotTangent.at(4, 3) = s;
-            rotTangent.at(4, 4) = c;
-            rotTangent.at(5, 1) = -c * s;
-            rotTangent.at(5, 2) = c * s;
-            rotTangent.at(5, 5) = c * c - s * s;
-#endif
             layerMatrix.rotatedWith(rotTangent, 't');
         }
 
@@ -655,7 +561,6 @@ LayeredCrossSection :: give3dShellStiffMtrx(FloatMatrix &answer,
             double rot = this->layerRots.at(layer);
             double c = cos(rot);
             double s = sin(rot);
-#if 0
             FloatMatrix rotTangent = {
                 {  c *c,    s *s,  0,  0,    -c *s },
                 {  s *s,    c *c,  0,  0,     c *s },
@@ -663,23 +568,6 @@ LayeredCrossSection :: give3dShellStiffMtrx(FloatMatrix &answer,
                 {    0,      0, -s,  c,       0 },
                 { 2 * c * s, -2 * c * s,  0,  0, c * c - s * s }
             };
-#else
-            FloatMatrix rotTangent(5, 5);
-            rotTangent.zero();
-            rotTangent.at(1, 1) = c * c;
-            rotTangent.at(1, 2) = s * s;
-            rotTangent.at(1, 5) = 2 * c * s;
-            rotTangent.at(2, 1) = s * s;
-            rotTangent.at(2, 2) = c * c;
-            rotTangent.at(2, 5) = -2 * c * s;
-            rotTangent.at(3, 3) = c;
-            rotTangent.at(3, 4) = -s;
-            rotTangent.at(4, 3) = s;
-            rotTangent.at(4, 4) = c;
-            rotTangent.at(5, 1) = -c * s;
-            rotTangent.at(5, 2) = c * s;
-            rotTangent.at(5, 5) = c * c - s * s;
-#endif
             layerMatrix.rotatedWith(rotTangent, 't');
         }
 
@@ -1026,7 +914,7 @@ LayeredCrossSection :: giveSlaveGaussPoint(GaussPoint *masterGp, int i)
         // create new slave record in masterGp
         // (requires that this is friend of gp)
         double currentZTopCoord, currentZCoord,  bottom, top;
-        FloatArray *zCoord, *masterCoords = masterGp->giveNaturalCoordinates();
+        const FloatArray &masterCoords = masterGp->giveNaturalCoordinates();
         // resolve slave material mode
         MaterialMode slaveMode, masterMode = masterGp->giveMaterialMode();
         slaveMode = this->giveCorrespondingSlaveMaterialMode(masterMode);
@@ -1038,19 +926,18 @@ LayeredCrossSection :: giveSlaveGaussPoint(GaussPoint *masterGp, int i)
         masterGp->gaussPoints.resize( numberOfLayers );
         currentZTopCoord = -midSurfaceZcoordFromBottom;
         for ( int j = 0; j < numberOfLayers; j++ ) {
+            FloatArray zCoord(3);
             currentZTopCoord += this->layerThicks.at(j + 1);
             currentZCoord = currentZTopCoord - this->layerThicks.at(j + 1) / 2.0; // z-coord of layer mid surface
-            zCoord = new FloatArray(3);
-            zCoord->zero();
-            if ( masterCoords->giveSize() > 0 ) {
-                zCoord->at(1) = masterCoords->at(1); // gp x-coord of mid surface
+            if ( masterCoords.giveSize() > 0 ) {
+                zCoord.at(1) = masterCoords.at(1); // gp x-coord of mid surface
             }
 
-            if ( masterCoords->giveSize() > 1 ) {
-                zCoord->at(2) = masterCoords->at(2); // gp y-coord of mid surface
+            if ( masterCoords.giveSize() > 1 ) {
+                zCoord.at(2) = masterCoords.at(2); // gp y-coord of mid surface
             }
 
-            zCoord->at(3) = ( 2.0 * currentZCoord - top - bottom ) / ( top - bottom );
+            zCoord.at(3) = ( 2.0 * currentZCoord - top - bottom ) / ( top - bottom );
             // in gp - is stored isoparametric coordinate (-1,1) of z-coordinate
             //masterGp->gaussPoints [ j ] = new GaussPoint(masterGp->giveIntegrationRule(), j + 1, zCoord, 0., slaveMode);
 
@@ -1088,7 +975,7 @@ LayeredCrossSection :: printYourself()
 // Prints the receiver on screen.
 {
     printf("Cross Section with properties: \n");
-    propertyDictionary->printYourself();
+    propertyDictionary.printYourself();
     printf("Layer Materials: \n");
     layerMaterials.printYourself();
     printf("Thickness of each layer: \n");
@@ -1103,7 +990,7 @@ LayeredCrossSection :: printYourself()
 
 
 contextIOResultType
-LayeredCrossSection :: saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *masterGp)
+LayeredCrossSection :: saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *masterGp)
 //
 // saves full material context (saves state variables, that completely describe
 // current state)
@@ -1132,7 +1019,7 @@ LayeredCrossSection :: saveIPContext(DataStream *stream, ContextMode mode, Gauss
 
 
 contextIOResultType
-LayeredCrossSection :: restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *masterGp)
+LayeredCrossSection :: restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *masterGp)
 //
 // restores full material context (saves state variables, that completely describe
 // current state)
@@ -1196,12 +1083,35 @@ LayeredCrossSection :: give(CrossSectionProperty aProperty, GaussPoint *gp)
         return this->giveArea();
     } else if ( aProperty == CS_NumLayers ) {
         return this->numberOfLayers;
-    }
+    } else if (aProperty == CS_Layer ) {
+		return this->giveLayer(gp);
+	}
 
     return CrossSection :: give(aProperty, gp);
 }
+
+int 
+LayeredCrossSection :: giveLayer(GaussPoint *gp)	//@todo: works only for equal thickness of each layer
+{
+	FloatArray lCoords;
+	int noLayers = this->giveNumberOfLayers();
+	double dh = 2.0/noLayers;
+	lCoords = gp->giveNaturalCoordinates();
+	double lowXi = -1.0;
+
+	for (int i = 1; i <= noLayers; i++)
+	{
+		if (lCoords.at(3) > lowXi && lCoords.at(3) < lowXi+dh)
+		{
+			return i;
+		}
+		lowXi+=dh;
+	}
+	OOFEM_ERROR("LayeredCrossSection :: giveLayer - the actual integration point can not be associated with a layer in the cross section");
+}
+
 double
-LayeredCrossSection :: give(CrossSectionProperty aProperty, const FloatArray *coords, Element *elem, bool local)
+LayeredCrossSection :: give(CrossSectionProperty aProperty, const FloatArray &coords, Element *elem, bool local)
 {
     if ( aProperty == CS_Thickness ) {
         return this->computeIntegralThick();
@@ -1265,24 +1175,25 @@ LayeredCrossSection :: giveInterfaceXiCoords(FloatArray &answer)
 }
 
 void
-LayeredCrossSection :: setupLayeredIntegrationRule(std :: vector< IntegrationRule * > &integrationRulesArray, Element *el, int numInPlanePoints)
+LayeredCrossSection :: setupLayeredIntegrationRule(std :: vector< std :: unique_ptr< IntegrationRule > > &integrationRulesArray, Element *el, int numInPlanePoints)
 {
     // Loop over each layer and set up an integration rule as if each layer was an independent element
     // @todo - only works for wedge integration at the moment
     int numberOfLayers     = this->giveNumberOfLayers();
     int numPointsThickness = this->giveNumIntegrationPointsInLayer();
 
-    integrationRulesArray.resize( numberOfLayers );
+    integrationRulesArray.clear();
+    integrationRulesArray.reserve( numberOfLayers );
     for ( int i = 0; i < numberOfLayers; i++ ) {
-        integrationRulesArray [ i ] = new LayeredIntegrationRule(i + 1, el);
-        integrationRulesArray [ i ]->SetUpPointsOnWedge(numInPlanePoints, numPointsThickness, _3dMat);
+        integrationRulesArray.emplace_back( new LayeredIntegrationRule(i + 1, el) );
+        integrationRulesArray.back()->SetUpPointsOnWedge(numInPlanePoints, numPointsThickness, _3dMat);
     }
     this->mapLayerGpCoordsToShellCoords(integrationRulesArray);
 }
 
 
 void
-LayeredCrossSection :: mapLayerGpCoordsToShellCoords(std :: vector< IntegrationRule * > &layerIntegrationRulesArray)
+LayeredCrossSection :: mapLayerGpCoordsToShellCoords(std :: vector< std :: unique_ptr< IntegrationRule > > &layerIntegrationRulesArray)
 /*
  * Maps the local xi-coord (z-coord) in each layer [-1,1] to the corresponding
  * xi-coord in the cross section coordinate system.
@@ -1306,9 +1217,11 @@ LayeredCrossSection :: mapLayerGpCoordsToShellCoords(std :: vector< IntegrationR
             // Map local layer cs to local shell cs
             double zMid_i = this->giveLayerMidZ(layer); // global z-coord
             double xiMid_i = 1.0 - 2.0 * ( totalThickness - this->midSurfaceZcoordFromBottom - zMid_i ) / totalThickness; // local z-coord
-            double deltaxi = gp->giveNaturalCoordinates()->at(3) * this->giveLayerThickness(layer) / totalThickness; // distance from layer mid
+            double deltaxi = gp->giveNaturalCoordinates().at(3) * this->giveLayerThickness(layer) / totalThickness; // distance from layer mid
             double xinew = xiMid_i + deltaxi * scaleFactor;
-            gp->giveNaturalCoordinates()->at(3) = xinew;
+            FloatArray lcoords = gp->giveNaturalCoordinates();
+            lcoords.at(3) = xinew;
+            gp->setNaturalCoordinates(lcoords);
             gp->number = number;   // fix gp ordering
             number++;
         }
@@ -1351,19 +1264,9 @@ LayeredIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsThicknes
     }
     for ( int i = 1, ind = 0; i <= nPointsThickness; i++ ) {
         for ( int j = 1; j <= nPointsTri; j++ ) {
-            FloatArray *coord = new FloatArray(3);
-            coord->at(1) = coords_xi1.at(j);
-            coord->at(2) = coords_xi2.at(j);
-            coord->at(3) = coords_xi.at(i);
             this->gaussPoints [ ind ] =
-            //coord->printYourself();
-            //weights_tri.printYourself();
-            //weights_thickness.printYourself();
-
-            //GaussPoint *gp = new GaussPoint(this, ind+1, coord, weights_tri.at(j) * weights_thickness.at(i), mode);
-            //this->gaussPointArray [ ind ] = gp;
-
-                new GaussPoint(this, 1, coord, weights_tri.at ( j ) *weights_thickness.at ( i ), mode);
+                new GaussPoint(this, 1, {coords_xi1.at(j), coords_xi2.at(j), coords_xi.at(i)},
+                               weights_tri.at ( j ) *weights_thickness.at ( i ), mode);
 
             // store interface points
             if ( i == 1 && nPointsThickness > 1 ) { //then lower surface
@@ -1423,7 +1326,6 @@ LayeredCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalS
 
             // Determine how to rotate it according to the value type
             if ( valType == ISVT_TENSOR_S3 ) {
-#if 0
                 answer = {
                     c *c * rotVal.at(1) + 2 * c * s * rotVal.at(6) + s * s * rotVal.at(2),
                     c * c * rotVal.at(2) - 2 * c * s * rotVal.at(6) + s * s * rotVal.at(1),
@@ -1432,17 +1334,7 @@ LayeredCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalS
                     c * rotVal.at(5) + s * rotVal.at(4),
                     ( c * c - s * s ) * rotVal.at(6) - c * s * ( rotVal.at(1) - rotVal.at(2) ),
                 };
-#else
-                answer.resize(6);
-                answer.at(1) = c * c * rotVal.at(1) + 2 *c *s *rotVal.at(6) + s *s *rotVal.at(2);
-                answer.at(2) = c * c * rotVal.at(2) - 2 *c *s *rotVal.at(6) + s *s *rotVal.at(1);
-                answer.at(3) = rotVal.at(3);
-                answer.at(4) = c * rotVal.at(4) - s *rotVal.at(5);
-                answer.at(5) = c * rotVal.at(5) + s *rotVal.at(4);
-                answer.at(6) = ( c * c - s * s ) * rotVal.at(6) - c * s * ( rotVal.at(1) - rotVal.at(2) );
-#endif
             } else if ( valType == ISVT_TENSOR_S3E ) {
-#if 0
                 answer = {
                     c *c * rotVal.at(1) + c * s * rotVal.at(6) + s * s * rotVal.at(2),
                     c * c * rotVal.at(2) - c * s * rotVal.at(6) + s * s * rotVal.at(1),
@@ -1451,26 +1343,10 @@ LayeredCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalS
                     c * rotVal.at(5) + s * rotVal.at(4),
                     ( c * c - s * s ) * rotVal.at(6) - 2 * c * s * ( rotVal.at(1) - rotVal.at(2) ),
                 };
-#else
-                answer.resize(6);
-                answer.at(1) = c * c * rotVal.at(1) + c *s *rotVal.at(6) + s *s *rotVal.at(2);
-                answer.at(2) = c * c * rotVal.at(2) - c *s *rotVal.at(6) + s *s *rotVal.at(1);
-                answer.at(3) = rotVal.at(3);
-                answer.at(4) = c * rotVal.at(4) - s *rotVal.at(5);
-                answer.at(5) = c * rotVal.at(5) + s *rotVal.at(4);
-                answer.at(6) = ( c * c - s * s ) * rotVal.at(6) - 2 * c * s * ( rotVal.at(1) - rotVal.at(2) );
-#endif
             } else if ( valType == ISVT_VECTOR ) {
-#if 0
                 answer = {
                     c *rotVal.at(1) - s * rotVal.at(2), s * rotVal.at(1), +c * rotVal.at(2), rotVal.at(3)
                 };
-#else
-                answer.resize(3);
-                answer.at(1) = c * rotVal.at(1) - s *rotVal.at(2);
-                answer.at(2) = s * rotVal.at(1) + c *rotVal.at(2);
-                answer.at(3) = rotVal.at(3);
-#endif
             } else if ( valType == ISVT_SCALAR ) {
                 answer = rotVal;
             } else {

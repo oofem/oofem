@@ -55,17 +55,15 @@
 namespace oofem {
 REGISTER_BoundaryCondition(WeakPeriodicBoundaryCondition);
 
-WeakPeriodicBoundaryCondition :: WeakPeriodicBoundaryCondition(int n, Domain *d) : ActiveBoundaryCondition(n, d)
+WeakPeriodicBoundaryCondition :: WeakPeriodicBoundaryCondition(int n, Domain *d) : ActiveBoundaryCondition(n, d),
+    gammaDman( new Node(0, this->domain) )
 {
     useBasisType = monomial;
     doUpdateSminmax = true;
-    gammaDman = NULL;
 }
 
 WeakPeriodicBoundaryCondition :: ~WeakPeriodicBoundaryCondition()
-{
-    delete gammaDman;
-}
+{}
 
 IRResultType
 WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
@@ -125,15 +123,14 @@ WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
 
     // Create dofs for coefficients
     bcID = this->giveNumber();
-    gammaDman = new Node(0, this->domain);
     gamma_ids.clear();
     for ( int i = 0; i < ndof; i++ ) {
         int dofid = this->domain->giveNextFreeDofID();
         gamma_ids.followedBy(dofid);
-        gammaDman->appendDof( new MasterDof( gammaDman, ( DofIDItem )dofid ) );
+        gammaDman->appendDof( new MasterDof( gammaDman.get(), ( DofIDItem )dofid ) );
     }
 
-    //	computeOrthogonalBasis();
+    //computeOrthogonalBasis();
 
     return IRRT_OK;
 }
@@ -195,11 +192,11 @@ double WeakPeriodicBoundaryCondition :: computeProjectionCoefficient(int vIndex,
 
         for ( GaussPoint *gp: *iRule ) {
 
-            FloatArray *lcoords = gp->giveNaturalCoordinates();
+            const FloatArray &lcoords = gp->giveNaturalCoordinates();
             FloatArray gcoords;
 
-            geoInterpolation->boundaryLocal2Global( gcoords, side [ thisSide ].at(ielement), * lcoords, FEIElementGeometryWrapper(thisElement) );
-            double detJ = fabs( geoInterpolation->boundaryGiveTransformationJacobian( side [ thisSide ].at(ielement), * lcoords, FEIElementGeometryWrapper(thisElement) ) );
+            geoInterpolation->boundaryLocal2Global( gcoords, side [ thisSide ].at(ielement), lcoords, FEIElementGeometryWrapper(thisElement) );
+            double detJ = fabs( geoInterpolation->boundaryGiveTransformationJacobian( side [ thisSide ].at(ielement), lcoords, FEIElementGeometryWrapper(thisElement) ) );
 
             int a, b;
             getExponents(vIndex, a, b);
@@ -349,7 +346,7 @@ void WeakPeriodicBoundaryCondition :: updateSminmax()
 void WeakPeriodicBoundaryCondition :: addElementSide(int newElement, int newSide)
 {
     //printf ("Add element %u, side %u\n", newElement, newSide);
-    //	_error("Not supported");
+    //_error("Not supported");
 
     FloatArray normalNew, normal0;
     int addToList = 0;
@@ -394,16 +391,16 @@ void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Elem
     std :: unique_ptr< IntegrationRule >iRule(geoInterpolation->giveBoundaryIntegrationRule(orderOfPolygon, boundary));
 
     for ( GaussPoint *gp: *iRule ) {
-        FloatArray *lcoords = gp->giveNaturalCoordinates();
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
         FloatArray N;
 
         // Find the value of parameter s which is the vert/horiz distance to 0
-        geoInterpolation->boundaryLocal2Global( gcoords, boundary, * lcoords, FEIElementGeometryWrapper(e) );
+        geoInterpolation->boundaryLocal2Global( gcoords, boundary, lcoords, FEIElementGeometryWrapper(e) );
         // Compute base function values
-        interpolation->boundaryEvalN( N, boundary, * lcoords, FEIElementGeometryWrapper(e) );
+        interpolation->boundaryEvalN( N, boundary, lcoords, FEIElementGeometryWrapper(e) );
         // Compute Jacobian
-        double detJ = fabs( geoInterpolation->boundaryGiveTransformationJacobian( boundary, * lcoords, FEIElementGeometryWrapper(e) ) );
+        double detJ = fabs( geoInterpolation->boundaryGiveTransformationJacobian( boundary, lcoords, FEIElementGeometryWrapper(e) ) );
         double s = gcoords.at( surfaceIndexes.at(1) );
 
         for ( int j = 0; j < B.giveNumberOfColumns(); j++ ) {
@@ -426,9 +423,9 @@ void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Elem
     }
 }
 
-void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tStep, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
+void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx &answer, TimeStep *tStep, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
-    if ( type != StiffnessMatrix ) {
+    if ( type != TangentStiffnessMatrix ) {
         return;
     }
 
@@ -487,10 +484,11 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tSt
 
             BT.beTranspositionOf(B);
 
-            answer->assemble(r_sideLoc, c_loc, B);
-            answer->assemble(r_loc, c_sideLoc, BT);
+            answer.assemble(r_sideLoc, c_loc, B);
+            answer.assemble(r_loc, c_sideLoc, BT);
         }
     }
+
 }
 
 double WeakPeriodicBoundaryCondition :: computeBaseFunctionValue2D(int baseID, FloatArray coordinate)
@@ -634,7 +632,7 @@ int WeakPeriodicBoundaryCondition :: giveNumberOfInternalDofManagers()
 DofManager *WeakPeriodicBoundaryCondition :: giveInternalDofManager(int i)
 {
     if ( i == 1 ) {
-        return gammaDman;
+        return gammaDman.get();
     } else {
         return NULL;
     }

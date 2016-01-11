@@ -183,9 +183,7 @@ void Homogenize :: moriTanaka(FloatMatrix &PhaseMatrix, int refRow)
     double alpha_m, beta_m;
     int numRows = PhaseMatrix.giveNumberOfRows();
     int r;
-    double *k_S, *mu_S;
-    k_S = new double [ numRows ];
-    mu_S = new double [ numRows ];
+    FloatArray k_S(numRows), mu_S(numRows);
 
     checkVolFraction(PhaseMatrix);
 
@@ -238,12 +236,10 @@ void Homogenize :: moriTanaka(FloatMatrix &PhaseMatrix, int refRow)
         E_r = PhaseMatrix(r, 1);
         nu_r = PhaseMatrix(r, 2);
         ENuToKMu(E_r, nu_r, k_r, mu_r);
+        // These are pointless operations, and will not do anything as far as I can see / Mikael
         k_S [ r ] /= k_S_denom;
         mu_S [ r ] /= mu_S_denom;
     }
-
-    delete [] k_S;
-    delete [] mu_S;
 }
 
 // for derivation see Bernard et al.:A multiscale micromechanics-hydration model... CCR,pp. 1293-1309, 2003
@@ -255,26 +251,22 @@ void Homogenize :: selfConsistent(FloatMatrix &PhaseMatrix)
     double alpha_m = 0., beta_m = 0.;
     double k_S_denom = 0., mu_S_denom = 0.;
     int numRows = PhaseMatrix.giveNumberOfRows();
-    double *k_S, *mu_S;
-    int i, r;
+    FloatArray k_S(numRows), mu_S(numRows);
 
     checkVolFraction(PhaseMatrix);
-
-    k_S = new double [ numRows ];
-    mu_S = new double [ numRows ];
 
     /*first estimation*/
     k_SCS = 10.;
     mu_SCS = .3;
 
     /*iteration for nonlinear equations*/
-    for ( i = 1; i < 100; i++ ) {
+    for ( int i = 1; i < 100; i++ ) {
         fr_tot = 0.;
         nom_k_SCS = 0;
         denom_k_SCS = 0;
         nom_mu_SCS = 0;
         denom_mu_SCS = 0;
-        for ( r = 0; r < numRows; r++ ) {
+        for ( int r = 0; r < numRows; r++ ) {
             f_r = PhaseMatrix(r, 0);
             E_r = PhaseMatrix(r, 1);
             nu_r = PhaseMatrix(r, 2);
@@ -303,7 +295,7 @@ void Homogenize :: selfConsistent(FloatMatrix &PhaseMatrix)
     kMuToENu(k_hmg, mu_hmg, E_hmg, nu_hmg);
 
     //calculate nominator and denominator of strain concentration tensor (in terms of k_S and mu_S) and final values
-    for ( r = 0; r < numRows; r++ ) {
+    for ( int r = 0; r < numRows; r++ ) {
         f_r = PhaseMatrix(r, 0);
         E_r = PhaseMatrix(r, 1);
         nu_r = PhaseMatrix(r, 2);
@@ -314,16 +306,13 @@ void Homogenize :: selfConsistent(FloatMatrix &PhaseMatrix)
         mu_S_denom += f_r * 1. / ( 1. + beta_m * ( mu_r / mu_hmg - 1. ) );
     }
 
-    for ( r = 0; r < numRows; r++ ) {
+    for ( int r = 0; r < numRows; r++ ) {
         E_r = PhaseMatrix(r, 1);
         nu_r = PhaseMatrix(r, 2);
         ENuToKMu(E_r, nu_r, k_r, mu_r);
         k_S [ r ] /= k_S_denom;
         mu_S [ r ] /= mu_S_denom;
     }
-
-    delete [] k_S;
-    delete [] mu_S;
 }
 
 /*
@@ -439,7 +428,7 @@ void Homogenize :: herveZaoui(FloatMatrix &PhaseMatrix)
     FloatArray B(NumPhases), C(NumPhases), D(NumPhases), A(NumPhases);
     FloatArray P_v(4), Phelp(4);
     FloatMatrix L(4, 4), Linv(4, 4), M(4, 4), Mhelp(4, 4), Z(4, 4), M_test(4, 4);
-    FloatMatrix *P_arr; //array to store individual P matrices
+    std :: vector< FloatMatrix > P_arr(NumPhases); //array to store individual P matrices, allocate memory for P matrices, store there P11, P12, P21, P22 
     //set gamma for displacement approach - arbitrary value for homogenization
     //variables for homogenized values
     double a, b, c, nu_n, sqr = 0.;
@@ -451,9 +440,6 @@ void Homogenize :: herveZaoui(FloatMatrix &PhaseMatrix)
     //create unit matrix for the first multiplication
     Mhelp.zero();
     Mhelp.beUnitMatrix();
-
-    //allocate memory for P matrices, store there P11, P12, P21, P22
-    P_arr = new FloatMatrix [ NumPhases - 1 ];
 
     //calculate P
     for ( phi = 0; phi < NumPhases - 1; phi++ ) {
@@ -598,8 +584,6 @@ void Homogenize :: herveZaoui(FloatMatrix &PhaseMatrix)
     //printf("Homogenized mu=%f\n", mu_hmg);
 
     kMuToENu(k_hmg, mu_hmg, E_hmg, nu_hmg);
-
-    delete [] P_arr;
 }
 
 /*Hirsh model as a combination of Voigt and Reuss (parameter chi)*/
@@ -618,7 +602,8 @@ void Homogenize :: hirsch(FloatMatrix &PhaseMatrix, double chi)
 }
 
 
-void Homogenize :: hansen(FloatMatrix &PhaseMatrix) {
+void Homogenize :: hansen(FloatMatrix &PhaseMatrix)
+{
     double f_i, E_i, f_m, E_m;
 
     if ( PhaseMatrix.giveNumberOfRows() != 2 ) {

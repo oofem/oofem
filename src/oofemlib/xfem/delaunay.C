@@ -81,42 +81,43 @@ void Delaunay :: triangulate(const std :: vector< FloatArray > &iVertices, std :
 {
     // 4th order algorithm - four loops, only for testing purposes
 
-    if( iVertices.size() == 4 ) {
-
+    if ( iVertices.size() == 4 ) {
         // Check if the points approximately form a rectangle
         // and treat that case separately .
         // The purpose is to avoid annyoing round-off effects for
         // this quite common case. /ES
-        
+
         const double relTol2 = 1.0e-6;
 
-        std::vector<double> dist_square = {iVertices[0].distance_square(iVertices[1]),
-                                           iVertices[0].distance_square(iVertices[2]),
-                                           iVertices[0].distance_square(iVertices[3])};
+        std :: vector< double >dist_square = {
+            iVertices [ 0 ].distance_square(iVertices [ 1 ]),
+            iVertices [ 0 ].distance_square(iVertices [ 2 ]),
+            iVertices [ 0 ].distance_square(iVertices [ 3 ])
+        };
 
-        std::sort(dist_square.begin(), dist_square.end());
+        std :: sort( dist_square.begin(), dist_square.end() );
 
         // This expression is zero for a rectangle according to the Pythagorean theorem
-        if( fabs(dist_square[2] - dist_square[1] - dist_square[0]) < relTol2*dist_square[2] ) {
+        if ( fabs(dist_square [ 2 ] - dist_square [ 1 ] - dist_square [ 0 ]) < relTol2 * dist_square [ 2 ] ) {
             // We found a rectangle
 
-            double maxDist_square = iVertices[0].distance_square(iVertices[1]);
+            double maxDist_square = iVertices [ 0 ].distance_square(iVertices [ 1 ]);
             int maxDistInd = 1;
 
-            if( iVertices[0].distance_square(iVertices[2]) > maxDist_square ) {
-                maxDist_square = iVertices[0].distance_square(iVertices[2]);
+            if ( iVertices [ 0 ].distance_square(iVertices [ 2 ]) > maxDist_square ) {
+                maxDist_square = iVertices [ 0 ].distance_square(iVertices [ 2 ]);
                 maxDistInd = 2;
             }
 
-            if( iVertices[0].distance_square(iVertices[3]) > maxDist_square ) {
-                maxDist_square = iVertices[0].distance_square(iVertices[3]);
+            if ( iVertices [ 0 ].distance_square(iVertices [ 3 ]) > maxDist_square ) {
+                maxDist_square = iVertices [ 0 ].distance_square(iVertices [ 3 ]);
                 maxDistInd = 3;
             }
 
 
             int remainingInd1 = -1, remainingInd2 = -1;
 
-            switch(maxDistInd) {
+            switch ( maxDistInd ) {
             case 1:
                 remainingInd1 = 2;
                 remainingInd2 = 3;
@@ -154,8 +155,6 @@ void Delaunay :: triangulate(const std :: vector< FloatArray > &iVertices, std :
 
             return;
         }
-
-
     }
 
 

@@ -127,7 +127,7 @@ public:
      * @param ir Input record to initialize from.
      * @return IRResultType
      */
-    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_NOTFOUND; };
+    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
     /**
      * Setups the input record string of receiver.
      * @param input Dynamic input record to be filled by receiver.
@@ -141,7 +141,7 @@ public:
      * @return contextIOResultType.
      * @exception throws an ContextIOERR exception if error encountered.
      */
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
     /**
      * Restores the receiver state previously written in stream.
      * @see saveContext
@@ -151,7 +151,7 @@ public:
      * @return contextIOResultType.
      * @exception throws an ContextIOERR exception if error encountered.
      */
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
     /**
      * Allows programmer to test some internal data, before computation begins.
      * For example, one may use this function, to ensure that element has material with
