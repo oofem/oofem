@@ -737,8 +737,14 @@ PetscSparseMtrx :: assemble(const IntArray &rloc, const IntArray &cloc, const Fl
         gcloc.at(i) = cloc.at(i) - 1;
     }
 
+#ifdef DEBUG
+	// I don't know why, but this fix seems to work. /ES
+    MatSetValues(this->mtrx,
+                 csize, gcloc.givePointer(), rsize, grloc.givePointer(), mat.givePointer(), ADD_VALUES);
+#else
     MatSetValues(this->mtrx, rsize, grloc.givePointer(),
                  csize, gcloc.givePointer(), mat.givePointer(), ADD_VALUES);
+#endif
 
 #ifdef __PARALLEL_MODE
 }
