@@ -94,6 +94,8 @@
 namespace oofem {
 EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPrescribedNeqs()
 {
+    suppressOutput = false;
+
     number = i;
     defaultErrEstimator = NULL;
     numberOfSteps = 0;
@@ -220,17 +222,11 @@ int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const cha
         this->dataOutputFileName.append(".oofeg");
     }
 
-    if ( ( outputStream = fopen(this->dataOutputFileName.c_str(), "w") ) == NULL ) {
-        OOFEM_ERROR("Can't open output file %s", this->dataOutputFileName.c_str());
-    }
 
     this->Instanciate_init(); // Must be done after initializeFrom
 
-    fprintf(outputStream, "%s", PRG_HEADER);
-    this->startTime = time(NULL);
-    fprintf( outputStream, "\nStarting analysis on: %s\n", ctime(& this->startTime) );
 
-    fprintf(outputStream, "%s\n", desc);
+    this->startTime = time(NULL);
 
 #  ifdef VERBOSE
     OOFEM_LOG_DEBUG( "Reading all data from input file %s\n", dr->giveDataSourceName() );
@@ -241,6 +237,8 @@ int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const cha
     }
 
 #endif
+
+    simulationDescription = std::string(desc);
 
     // instanciate receiver
     this->initializeFrom(ir);
@@ -323,6 +321,23 @@ EngngModel :: initializeFrom(InputRecord *ir)
     force_load_rebalance_in_first_step = _val;
 
 #endif
+
+    suppressOutput = ir->hasField(_IFT_EngngModel_suppressOutput);
+
+    if(suppressOutput) {
+    	printf("Suppressing output.\n");
+    }
+    else {
+
+		if ( ( outputStream = fopen(this->dataOutputFileName.c_str(), "w") ) == NULL ) {
+			OOFEM_ERROR("Can't open output file %s", this->dataOutputFileName.c_str());
+		}
+
+		fprintf(outputStream, "%s", PRG_HEADER);
+		fprintf( outputStream, "\nStarting analysis on: %s\n", ctime(& this->startTime) );
+		fprintf(outputStream, "%s\n", simulationDescription.c_str());
+	}
+
     return IRRT_OK;
 }
 
@@ -500,7 +515,11 @@ void
 EngngModel :: solveYourself()
 {
     int smstep = 1, sjstep = 1;
-    FILE *out = this->giveOutputStream();
+
+    FILE *out = NULL;
+    if(!suppressOutput) {
+    	out = this->giveOutputStream();
+    }
 
     this->timer.startTimer(EngngModelTimer :: EMTT_AnalysisTimer);
 
@@ -541,8 +560,10 @@ EngngModel :: solveYourself()
             OOFEM_LOG_INFO("EngngModel info: user time consumed by solution step %d: %.2fs\n",
                            this->giveCurrentStep()->giveNumber(), _steptime);
 
-            fprintf(out, "\nUser time consumed by solution step %d: %.3f [s]\n\n",
-                    this->giveCurrentStep()->giveNumber(), _steptime);
+            if(!suppressOutput) {
+            	fprintf(out, "\nUser time consumed by solution step %d: %.3f [s]\n\n",
+            			this->giveCurrentStep()->giveNumber(), _steptime);
+            }
 
 #ifdef __PARALLEL_MODE
             if ( loadBalancingFlag ) {
@@ -633,19 +654,25 @@ EngngModel :: updateYourself(TimeStep *tStep)
 void
 EngngModel :: terminate(TimeStep *tStep)
 {
-    this->doStepOutput(tStep);
-    fflush( this->giveOutputStream() );
-    this->saveStepContext(tStep);
+    if(!suppressOutput) {
+		this->doStepOutput(tStep);
+		fflush( this->giveOutputStream() );
+    }
+
+	this->saveStepContext(tStep);
 }
 
 
 void
 EngngModel :: doStepOutput(TimeStep *tStep)
 {
-    FILE *File = this->giveOutputStream();
+    if(!suppressOutput) {
+		FILE *File = this->giveOutputStream();
 
-    // print output
-    this->printOutputAt(File, tStep);
+		// print output
+		this->printOutputAt(File, tStep);
+    }
+
     // export using export manager
     exportModuleManager->doOutput(tStep);
 }
@@ -1635,8 +1662,11 @@ EngngModel::letOutputBaseFileNameBe(const std :: string &src) {
   this->dataOutputFileName = src;
 
   if ( outputStream) fclose(outputStream);
-  if ( ( outputStream = fopen(this->dataOutputFileName.c_str(), "w") ) == NULL ) {
-    OOFEM_ERROR("Can't open output file %s", this->dataOutputFileName.c_str());
+
+  if(!suppressOutput) {
+	  if ( ( outputStream = fopen(this->dataOutputFileName.c_str(), "w") ) == NULL ) {
+		OOFEM_ERROR("Can't open output file %s", this->dataOutputFileName.c_str());
+	  }
   }
 }
 
@@ -1673,18 +1703,30 @@ EngngModel :: terminateAnalysis()
 {
     int rsec = 0, rmin = 0, rhrs = 0;
     int usec = 0, umin = 0, uhrs = 0;
-    FILE *out = this->giveOutputStream();
     time_t endTime = time(NULL);
     this->timer.stopTimer(EngngModelTimer :: EMTT_AnalysisTimer);
 
+    FILE *out = NULL;
+    if(!suppressOutput) {
+        out = this->giveOutputStream();
+
+        fprintf(out, "\nFinishing analysis on: %s\n", ctime(& endTime) );
+    }
     
-    fprintf(out, "\nFinishing analysis on: %s\n", ctime(& endTime) );
     // compute real time consumed
     this->giveAnalysisTime(rhrs, rmin, rsec, uhrs, umin, usec);
-    fprintf(out, "Real time consumed: %03dh:%02dm:%02ds\n", rhrs, rmin, rsec);
+
+    if(!suppressOutput) {
+    	fprintf(out, "Real time consumed: %03dh:%02dm:%02ds\n", rhrs, rmin, rsec);
+    }
+
     OOFEM_LOG_FORCED("\n\nANALYSIS FINISHED\n\n\n");
     OOFEM_LOG_FORCED("Real time consumed: %03dh:%02dm:%02ds\n", rhrs, rmin, rsec);
-    fprintf(out, "User time consumed: %03dh:%02dm:%02ds\n\n\n", uhrs, umin, usec);
+
+    if(!suppressOutput) {
+    	fprintf(out, "User time consumed: %03dh:%02dm:%02ds\n\n\n", uhrs, umin, usec);
+    }
+
     OOFEM_LOG_FORCED("User time consumed: %03dh:%02dm:%02ds\n", uhrs, umin, usec);
     exportModuleManager->terminate();
 }

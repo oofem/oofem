@@ -81,6 +81,8 @@
 #define _IFT_EngngModel_lstype "lstype"
 #define _IFT_EngngModel_smtype "smtype"
 
+#define _IFT_EngngModel_suppressOutput "suppress_output" // Suppress writing to .out file
+
 //@}
 
 namespace oofem {
@@ -311,6 +313,11 @@ protected:
     /// List where parallel contexts are stored.
     std :: vector< ParallelContext > parallelContextList;
 
+    /// Flag for suppressing output to file.
+    bool suppressOutput;
+
+    std::string simulationDescription;
+
 public:
     /**
      * Constructor. Creates Engng model with number i.
@@ -336,6 +343,8 @@ public:
     void setDomain(int i, Domain *ptr, bool iDeallocateOld = true);
     /// Returns number of domains in problem.
     int giveNumberOfDomains() { return (int)domainList.size(); }
+
+    bool giveSuppressOutput() const {return suppressOutput;}
 
     /** Service for accessing ErrorEstimator corresponding to particular domain */
     virtual ErrorEstimator *giveDomainErrorEstimator(int n) { return defaultErrEstimator; }
