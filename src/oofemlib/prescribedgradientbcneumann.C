@@ -124,7 +124,7 @@ void PrescribedGradientBCNeumann :: assembleVector(FloatArray &answer, TimeStep 
         FloatArray sigmaHom, e_u;
 
         // Fetch the current values of the stress;
-        mpSigmaHom->giveUnknownVector(mSigmaIds, sigmaHom, mode, tStep);
+        mpSigmaHom->giveUnknownVector(sigmaHom, mSigmaIds, mode, tStep);
         // and the master dof ids for sigmadev used for the internal norms
         mpSigmaHom->giveMasterDofIDArray(mSigmaIds, sigmaMasterDofIDs);
 
