@@ -5,7 +5,7 @@ errorcheck filename "dyn_bar03.oofem.in"
 domain 3d
 OutputManager tstep_all dofman_all element_all
 ndofman 1 nelem 0 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1
-node 2 coords 3 1.000000e+00 0.000000e+00 0.000000e+00 ndofs 1 DofIDMask 1 1 load 1 2  Shared partitions 1 0
+node 2 coords 3 1.000000e+00 0.000000e+00 0.000000e+00 DofIDMask 1 1 load 1 2  Shared partitions 1 0
 SimpleCS 1 area 1.0
 #IsoLE 1  E 15. n 0.2  d 1.0 talpha 0.0
 idm1 1 d 1.0 E 15.0 n 0.2 e0 0.02 wf 0.04 tAlpha 0.0 equivstraintype 0 
