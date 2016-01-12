@@ -105,7 +105,7 @@ void PrescribedGradientBCNeumann :: assembleVector(FloatArray &answer, TimeStep 
 
     IntArray loc, sigma_loc;  // For the displacements and stress respectively
     IntArray masterDofIDs, sigmaMasterDofIDs;
-    mpSigmaHom->giveCompleteLocationArray(sigma_loc, s);
+    mpSigmaHom->giveLocationArray(mSigmaIds, sigma_loc, s);
 
     if ( type == ExternalForcesVector ) {
         // The external forces have two contributions. On the additional equations for sigma, the load is simply the prescribed gradient.
@@ -124,9 +124,9 @@ void PrescribedGradientBCNeumann :: assembleVector(FloatArray &answer, TimeStep 
         FloatArray sigmaHom, e_u;
 
         // Fetch the current values of the stress;
-        mpSigmaHom->giveCompleteUnknownVector(sigmaHom, mode, tStep);
+        mpSigmaHom->giveUnknownVector(mSigmaIds, sigmaHom, mode, tStep);
         // and the master dof ids for sigmadev used for the internal norms
-        mpSigmaHom->giveCompleteMasterDofIDArray(sigmaMasterDofIDs);
+        mpSigmaHom->giveMasterDofIDArray(mSigmaIds, sigmaMasterDofIDs);
 
         // Assemble
         for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
@@ -171,8 +171,8 @@ void PrescribedGradientBCNeumann :: assemble(SparseMtrx &answer, TimeStep *tStep
         const IntArray &boundaries = set->giveBoundaryList();
 
         // Fetch the columns/rows for the stress contributions;
-        mpSigmaHom->giveCompleteLocationArray(sigma_loc_r, r_s);
-        mpSigmaHom->giveCompleteLocationArray(sigma_loc_c, c_s);
+        mpSigmaHom->giveLocationArray(mSigmaIds, sigma_loc_r, r_s);
+        mpSigmaHom->giveLocationArray(mSigmaIds, sigma_loc_c, c_s);
 
         for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
             Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
@@ -211,8 +211,8 @@ void PrescribedGradientBCNeumann :: giveLocationArrays(std :: vector< IntArray >
     }
 
     // Fetch the columns/rows for the stress contributions;
-    mpSigmaHom->giveCompleteLocationArray(sigma_loc_r, r_s);
-    mpSigmaHom->giveCompleteLocationArray(sigma_loc_c, c_s);
+    mpSigmaHom->giveLocationArray(mSigmaIds, sigma_loc_r, r_s);
+    mpSigmaHom->giveLocationArray(mSigmaIds, sigma_loc_c, c_s);
 
     Set *set = this->giveDomain()->giveSet(this->set);
     const IntArray &boundaries = set->giveBoundaryList();
@@ -298,7 +298,7 @@ void PrescribedGradientBCNeumann :: computeTangent(FloatMatrix &tangent, TimeSte
 
 void PrescribedGradientBCNeumann :: giveStressLocationArray(IntArray &oCols, const UnknownNumberingScheme &r_s)
 {
-    mpSigmaHom->giveCompleteLocationArray(oCols, r_s);
+    mpSigmaHom->giveLocationArray(mSigmaIds, oCols, r_s);
 }
 
 void PrescribedGradientBCNeumann :: integrateTangent(FloatMatrix &oTangent, Element *e, int iBndIndex)

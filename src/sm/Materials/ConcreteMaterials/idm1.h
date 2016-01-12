@@ -123,13 +123,7 @@ public:
     // definition
     virtual const char *giveClassName() const { return "IsotropicDamageMaterial1Status"; }
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
-
     virtual Interface *giveInterface(InterfaceType it);
-
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 };
 
 /**

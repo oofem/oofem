@@ -137,39 +137,39 @@ template< typename T > ContactDefinition *contactDefCreator(ContactManager *cMan
 
 ///@name Macros for registering new components. Unique dummy variables must be created as a result (design flaw in C++).
 //@{
-#define REGISTER_Element(class) static bool __dummy_ ## class = GiveClassFactory().registerElement(_IFT_ ## class ## _Name, elemCreator< class > );
-#define REGISTER_DofManager(class) static bool __dummy_ ## class = GiveClassFactory().registerDofManager(_IFT_ ## class ## _Name, dofmanCreator< class > );
-#define REGISTER_BoundaryCondition(class) static bool __dummy_ ## class = GiveClassFactory().registerBoundaryCondition(_IFT_ ## class ## _Name, bcCreator< class > );
-#define REGISTER_CrossSection(class) static bool __dummy_ ## class = GiveClassFactory().registerCrossSection(_IFT_ ## class ## _Name, csCreator< class > );
-#define REGISTER_Material(class) static bool __dummy_ ## class = GiveClassFactory().registerMaterial(_IFT_ ## class ## _Name, matCreator< class > );
-#define REGISTER_EngngModel(class) static bool __dummy_ ## class = GiveClassFactory().registerEngngModel(_IFT_ ## class ## _Name, engngCreator< class > );
-#define REGISTER_Function(class) static bool __dummy_ ## class = GiveClassFactory().registerFunction(_IFT_ ## class ## _Name, funcCreator< class > );
-#define REGISTER_NonlocalBarrier(class) static bool __dummy_ ## class = GiveClassFactory().registerNonlocalBarrier(_IFT_ ## class ## _Name, nlbCreator< class > );
-#define REGISTER_ExportModule(class) static bool __dummy_ ## class = GiveClassFactory().registerExportModule(_IFT_ ## class ## _Name, exportCreator< class > );
-#define REGISTER_SparseNonLinearSystemNM(class) static bool __dummy_ ## class = GiveClassFactory().registerSparseNonLinearSystemNM(_IFT_ ## class ## _Name, nonlinCreator< class > );
-#define REGISTER_InitModule(class) static bool __dummy_ ## class = GiveClassFactory().registerInitModule(_IFT_ ## class ## _Name, initCreator< class > );
-#define REGISTER_TopologyDescription(class) static bool __dummy_ ## class = GiveClassFactory().registerTopologyDescription(_IFT_ ## class ## _Name, topologyCreator< class > );
-#define REGISTER_LoadBalancerMonitor(class) static bool __dummy_ ## class = GiveClassFactory().registerLoadBalancerMonitor(_IFT_ ## class ## _Name, loadMonitorCreator< class > );
-#define REGISTER_LoadBalancer(class) static bool __dummy_ ## class = GiveClassFactory().registerLoadBalancer(_IFT_ ## class ## _Name, loadBalancerCreator< class > );
+#define REGISTER_Element(class) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerElement(_IFT_ ## class ## _Name, elemCreator< class > );
+#define REGISTER_DofManager(class) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerDofManager(_IFT_ ## class ## _Name, dofmanCreator< class > );
+#define REGISTER_BoundaryCondition(class) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerBoundaryCondition(_IFT_ ## class ## _Name, bcCreator< class > );
+#define REGISTER_CrossSection(class) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerCrossSection(_IFT_ ## class ## _Name, csCreator< class > );
+#define REGISTER_Material(class) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerMaterial(_IFT_ ## class ## _Name, matCreator< class > );
+#define REGISTER_EngngModel(class) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerEngngModel(_IFT_ ## class ## _Name, engngCreator< class > );
+#define REGISTER_Function(class) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerFunction(_IFT_ ## class ## _Name, funcCreator< class > );
+#define REGISTER_NonlocalBarrier(class) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerNonlocalBarrier(_IFT_ ## class ## _Name, nlbCreator< class > );
+#define REGISTER_ExportModule(class) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerExportModule(_IFT_ ## class ## _Name, exportCreator< class > );
+#define REGISTER_SparseNonLinearSystemNM(class) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerSparseNonLinearSystemNM(_IFT_ ## class ## _Name, nonlinCreator< class > );
+#define REGISTER_InitModule(class) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerInitModule(_IFT_ ## class ## _Name, initCreator< class > );
+#define REGISTER_TopologyDescription(class) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerTopologyDescription(_IFT_ ## class ## _Name, topologyCreator< class > );
+#define REGISTER_LoadBalancerMonitor(class) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerLoadBalancerMonitor(_IFT_ ## class ## _Name, loadMonitorCreator< class > );
+#define REGISTER_LoadBalancer(class) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerLoadBalancer(_IFT_ ## class ## _Name, loadBalancerCreator< class > );
 
 // These should be converted to use strings.
-#define REGISTER_SparseMtrx(class, type) static bool __dummy_ ## class = GiveClassFactory().registerSparseMtrx(type, sparseMtrxCreator< class > );
-#define REGISTER_SparseLinSolver(class, type) static bool __dummy_ ## class = GiveClassFactory().registerSparseLinSolver(type, sparseLinSolCreator< class > );
-#define REGISTER_ErrorEstimator(class, type) static bool __dummy_ ## class = GiveClassFactory().registerErrorEstimator(type, errEstCreator< class > );
+#define REGISTER_SparseMtrx(class, type) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerSparseMtrx(type, sparseMtrxCreator< class > );
+#define REGISTER_SparseLinSolver(class, type) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerSparseLinSolver(type, sparseLinSolCreator< class > );
+#define REGISTER_ErrorEstimator(class, type) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerErrorEstimator(type, errEstCreator< class > );
 
-#define REGISTER_XfemManager(class) static bool __dummy_ ## class = GiveClassFactory().registerXfemManager(_IFT_ ## class ## _Name, xManCreator< class > );
-#define REGISTER_EnrichmentItem(class) static bool __dummy_ ## class = GiveClassFactory().registerEnrichmentItem(_IFT_ ## class ## _Name, enrichItemCreator< class > );
-#define REGISTER_EnrichmentFunction(class) static bool __dummy_ ## class = GiveClassFactory().registerEnrichmentFunction(_IFT_ ## class ## _Name, enrichFuncCreator< class > );
-#define REGISTER_EnrichmentDomain(class) static bool __dummy_ ## class = GiveClassFactory().registerEnrichmentDomain(_IFT_ ## class ## _Name, enrichmentDomainCreator< class > );
-#define REGISTER_Geometry(class) static bool __dummy_ ## class = GiveClassFactory().registerGeometry(_IFT_ ## class ## _Name, geometryCreator< class > );
-#define REGISTER_EnrichmentFront(class) static bool __dummy_ ## class = GiveClassFactory().registerEnrichmentFront(_IFT_ ## class ## _Name, enrichFrontCreator< class > );
-#define REGISTER_PropagationLaw(class) static bool __dummy_ ## class = GiveClassFactory().registerPropagationLaw(_IFT_ ## class ## _Name, propagationLawCreator< class > );
+#define REGISTER_XfemManager(class) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerXfemManager(_IFT_ ## class ## _Name, xManCreator< class > );
+#define REGISTER_EnrichmentItem(class) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerEnrichmentItem(_IFT_ ## class ## _Name, enrichItemCreator< class > );
+#define REGISTER_EnrichmentFunction(class) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerEnrichmentFunction(_IFT_ ## class ## _Name, enrichFuncCreator< class > );
+#define REGISTER_EnrichmentDomain(class) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerEnrichmentDomain(_IFT_ ## class ## _Name, enrichmentDomainCreator< class > );
+#define REGISTER_Geometry(class) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerGeometry(_IFT_ ## class ## _Name, geometryCreator< class > );
+#define REGISTER_EnrichmentFront(class) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerEnrichmentFront(_IFT_ ## class ## _Name, enrichFrontCreator< class > );
+#define REGISTER_PropagationLaw(class) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerPropagationLaw(_IFT_ ## class ## _Name, propagationLawCreator< class > );
 
-#define REGISTER_FailureCriteria(class) static bool __dummy_ ## class = GiveClassFactory().registerFailureCriteria(_IFT_ ## class ## _Name, failureCriteriaCreator< class > );
-#define REGISTER_FailureCriteriaStatus(class) static bool __dummy_ ## class = GiveClassFactory().registerFailureCriteriaStatus(_IFT_ ## class ## _Name, failureCriteriaCreator< class > );
+#define REGISTER_FailureCriteria(class) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerFailureCriteria(_IFT_ ## class ## _Name, failureCriteriaCreator< class > );
+#define REGISTER_FailureCriteriaStatus(class) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerFailureCriteriaStatus(_IFT_ ## class ## _Name, failureCriteriaCreator< class > );
 
-#define REGISTER_ContactManager(class) static bool __dummy_ ## class = GiveClassFactory().registerContactManager(_IFT_ ## class ## _Name, contactManCreator< class > );
-#define REGISTER_ContactDefinition(class) static bool __dummy_ ## class = GiveClassFactory().registerContactDefinition(_IFT_ ## class ## _Name, contactDefCreator< class > );
+#define REGISTER_ContactManager(class) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerContactManager(_IFT_ ## class ## _Name, contactManCreator< class > );
+#define REGISTER_ContactDefinition(class) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerContactDefinition(_IFT_ ## class ## _Name, contactDefCreator< class > );
 //@}
 
 /**

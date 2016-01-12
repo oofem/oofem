@@ -284,7 +284,8 @@ public:
      */
     virtual void computeStressIndependentStrainVector(FloatArray &answer,
                                                       GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
-
+    virtual void computeStressIndependentStrainVector_3d(FloatArray &answer,
+                                                      GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
     /// Common functions for convenience
     //@{
     /**
@@ -437,6 +438,8 @@ public:
      * @param mode Determines value mode.
      */
     void giveStressDependentPartOfStrainVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrainVector,
+                                               TimeStep *tStep, ValueModeType mode);
+    void giveStressDependentPartOfStrainVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrainVector,
                                                TimeStep *tStep, ValueModeType mode);
 
     virtual int setIPValue(const FloatArray &value, GaussPoint *gp, InternalStateType type);

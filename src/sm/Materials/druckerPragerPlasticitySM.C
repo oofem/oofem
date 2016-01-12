@@ -278,7 +278,7 @@ DruckerPragerPlasticitySM :: giveRealStressVector_3d(FloatArray &answer,
     // subtract stress independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
     // therefore it is necessary to subtract always the total eigen strain value
-    this->giveStressDependentPartOfStrainVector(strainVectorR, gp, totalStrain,
+    this->giveStressDependentPartOfStrainVector_3d(strainVectorR, gp, totalStrain,
                                                 tStep, VM_Total);
 
     // perform the local stress return and update the history variables
