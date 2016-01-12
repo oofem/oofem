@@ -68,6 +68,14 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(D_v_edge_lin, 22) /* Linear part of boundary v-displacement used by Trefftz element*/ \
     ENUM_ITEM_WITH_VALUE(Warp_PsiTheta, 23) /* Relative twist times deplanation function, used by Trwarp element*/ \
     ENUM_ITEM_WITH_VALUE(Warp_Theta, 24) /* Relative twist, used by Trwarp element*/ \
+  \
+	ENUM_ITEM_WITH_VALUE(LMP_u, 25) /* Lagrange multiplier in x-direction*/ \
+	ENUM_ITEM_WITH_VALUE(LMP_v, 26) /* Lagrange multiplier in y-direction*/ \
+	ENUM_ITEM_WITH_VALUE(LMP_w, 27) /* Lagrange multiplier in z-direction*/ \
+  \
+	ENUM_ITEM_WITH_VALUE(Trac_u, 28) /* Independent traction field in x-direction*/ \
+	ENUM_ITEM_WITH_VALUE(Trac_v, 29) /* Independent traction field in y-direction*/ \
+	ENUM_ITEM_WITH_VALUE(Trac_w, 30) /* Independent traction field in z-direction*/ \
 
 /**
  * Type representing particular dof type. Values of this type describe the physical meaning of

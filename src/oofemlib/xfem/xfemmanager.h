@@ -153,6 +153,8 @@ protected:
      */
     std::vector< std :: unique_ptr< NucleationCriterion > > mNucleationCriteria;
 
+    // IDs of all potential enriched dofs
+    IntArray mXFEMPotentialDofIDs;
 public:
 
     /**
@@ -179,6 +181,8 @@ public:
     int giveNumberOfEnrichmentItems() const { return ( int ) enrichmentItemList.size(); }
 
     void createEnrichedDofs();
+    const IntArray &giveEnrichedDofIDs() const {return mXFEMPotentialDofIDs;}
+    IntArray giveEnrichedDofIDs(const DofManager &iDMan) const;
 
     /// Initializes receiver according to object description stored in input record.
     virtual IRResultType initializeFrom(InputRecord *ir);

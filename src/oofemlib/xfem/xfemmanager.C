@@ -124,11 +124,28 @@ void
 XfemManager :: createEnrichedDofs()
 {
     // Creates new dofs due to enrichment and appends them to the dof managers
-    IntArray dofIdArray;
+	mXFEMPotentialDofIDs.clear();
 
     for ( auto &ei: enrichmentItemList ) {
+        IntArray dofIdArray;
         ei->createEnrichedDofs();
+        ei->givePotentialEIDofIdArray(dofIdArray);
+//        printf("dofIdArray: "); dofIdArray.printYourself();
+        mXFEMPotentialDofIDs.followedBy(dofIdArray);
     }
+}
+
+IntArray XfemManager :: giveEnrichedDofIDs(const DofManager &iDMan) const
+{
+    IntArray dofIdArray;
+
+    for(int id : mXFEMPotentialDofIDs) {
+    	if(iDMan.hasDofID( DofIDItem(id) )) {
+    		dofIdArray.followedBy(id);
+    	}
+    }
+
+    return dofIdArray;
 }
 
 IRResultType XfemManager :: initializeFrom(InputRecord *ir)
@@ -338,7 +355,7 @@ bool XfemManager :: hasPropagatingFronts()
 
 void XfemManager :: nucleateEnrichmentItems(bool &oNewItemsWereNucleated)
 {
-	printf("Entering XfemManager :: nucleateEnrichmentItems\n");
+//	printf("Entering XfemManager :: nucleateEnrichmentItems\n");
 
 	oNewItemsWereNucleated = false;
 	return;

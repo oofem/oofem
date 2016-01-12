@@ -38,6 +38,7 @@
 #include "prescribedgradienthomogenization.h"
 #include "activebc.h"
 #include "geometry.h"
+#include "dofiditem.h"
 
 #include <unordered_map>
 
@@ -144,7 +145,17 @@ public:
     // TODO: Consider moving this function to Domain.
     void computeDomainBoundingBox(Domain &iDomain, FloatArray &oLC, FloatArray &oUC);
 
+
+    const IntArray &giveTracDofIDs() const {return mTractionDofIDs;}
+    const IntArray &giveDispLockDofIDs() const {return mDispLockDofIDs;}
+    const IntArray &giveRegularDispDofIDs() const {return mRegularDispDofIDs;}
+
 protected:
+
+    const IntArray mTractionDofIDs;
+    const IntArray mDispLockDofIDs;
+    const IntArray mRegularDispDofIDs;
+
 
     // Options
 
