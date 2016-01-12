@@ -103,10 +103,10 @@ public:
     virtual void giveDofManagersToAppendTo(IntArray &answer) { answer.clear(); }
     
     
-    virtual void computeContactForces(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
+    virtual void computeContactForces(FloatArray &answer, TimeStep *tStep, ValueModeType mode,
                                 const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms) = 0;   
     
-    virtual void computeContactTangent(FloatMatrix &answer, CharType type, TimeStep *tStep) = 0;
+    virtual void computeContactTangent(FloatMatrix &answer, TimeStep *tStep) = 0;
     
     
     virtual void giveLocationArray(IntArray &answer, const UnknownNumberingScheme &s) = 0;
