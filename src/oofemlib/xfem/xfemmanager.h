@@ -53,6 +53,7 @@
 //@{
 #define _IFT_XfemManager_Name "xfemmanager"
 #define _IFT_XfemManager_numberOfEnrichmentItems "numberofenrichmentitems"
+#define _IFT_XfemManager_numberOfNucleationCriteria "numberofnucleationcriteria"
 #define _IFT_XfemManager_numberOfGpPerTri "numberofgppertri"
 
 /// How many times a subtriangle should be refined
@@ -113,6 +114,8 @@ protected:
     std :: vector< std :: unique_ptr< EnrichmentItem > >enrichmentItemList;
 
     int numberOfEnrichmentItems;
+
+    int numberOfNucleationCriteria;
 
     /**
      * The number of Gauss points to be used in each sub-triangle when
@@ -179,6 +182,9 @@ public:
 
     inline EnrichmentItem *giveEnrichmentItem(int n) { return enrichmentItemList [ n - 1 ].get(); }
     int giveNumberOfEnrichmentItems() const { return ( int ) enrichmentItemList.size(); }
+
+    inline NucleationCriterion *giveNucleationCriterion(int n) { return mNucleationCriteria [ n - 1 ].get(); }
+    int giveNumberOfNucleationCriteria() const { return ( int ) mNucleationCriteria.size(); }
 
     void createEnrichedDofs();
     const IntArray &giveEnrichedDofIDs() const {return mXFEMPotentialDofIDs;}

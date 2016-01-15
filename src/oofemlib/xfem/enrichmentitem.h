@@ -212,6 +212,7 @@ public:
     static void calcPolarCoord(double &oR, double &oTheta, const FloatArray &iOrigin, const FloatArray &iPos, const FloatArray &iN, const FloatArray &iT, const EfInput &iEfInput, bool iFlipTangent);
 
     PropagationLaw *givePropagationLaw() { return this->mpPropagationLaw; }
+    void setPropagationLaw(PropagationLaw *ipPropagationLaw);
     bool hasPropagationLaw() { return this->mPropLawIndex != 0; }
 
 
@@ -230,6 +231,7 @@ public:
 
     bool tipIsTouchingEI(const TipInfo &iTipInfo);
 
+    void setEnrichmentFunction(EnrichmentFunction *ipEnrichmentFunc) {mpEnrichmentFunc = ipEnrichmentFunc;}
 
 protected:
 

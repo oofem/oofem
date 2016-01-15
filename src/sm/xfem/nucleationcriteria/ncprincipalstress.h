@@ -35,6 +35,10 @@
 #ifndef SRC_SM_XFEM_NUCLEATIONCRITERIA_NCPRINCIPALSTRESS_H_
 #define SRC_SM_XFEM_NUCLEATIONCRITERIA_NCPRINCIPALSTRESS_H_
 
+#define _IFT_NCPrincipalStress_Name "ncprincipalstress"
+#define _IFT_NCPrincipalStress_StressThreshold "stressthreshold"
+#define _IFT_NCPrincipalStress_InitialCrackLength "initialcracklength"
+
 #include "xfem/nucleationcriterion.h"
 
 #include <memory>
@@ -43,10 +47,23 @@ namespace oofem {
 
 class NCPrincipalStress : public NucleationCriterion {
 public:
-	NCPrincipalStress();
+	NCPrincipalStress(Domain *ipDomain);
 	virtual ~NCPrincipalStress();
 
-	virtual std::unique_ptr<EnrichmentItem> nucleateEnrichmentItems();
+	virtual std::vector<std::unique_ptr<EnrichmentItem>> nucleateEnrichmentItems();
+
+    virtual IRResultType initializeFrom(InputRecord *ir);
+
+    virtual void appendInputRecords(DynamicDataReader &oDR);
+
+    /// @return Class name of the receiver.
+    virtual const char *giveClassName() const {return "NCPrincipalStress";}
+    /// @return Input record name of the receiver.
+    virtual const char *giveInputRecordName() const {return _IFT_NCPrincipalStress_Name;};
+
+protected:
+    double mStressThreshold;
+    double mInitialCrackLength;
 };
 
 } /* namespace oofem */

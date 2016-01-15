@@ -35,24 +35,85 @@
 #include "nucleationcriterion.h"
 #include "error.h"
 #include "enrichmentitem.h"
+#include "dynamicinputrecord.h"
+#include "dynamicdatareader.h"
 
 #include <memory>
 
 namespace oofem {
 
-NucleationCriterion::NucleationCriterion() {
-	// TODO Auto-generated constructor stub
+NucleationCriterion::NucleationCriterion(Domain *ipDomain):
+mpDomain(ipDomain)
+{
 
 }
 
 NucleationCriterion::~NucleationCriterion() {
-	// TODO Auto-generated destructor stub
+
 }
 
 std::unique_ptr<EnrichmentItem> NucleationCriterion::nucleateEnrichmentItems() {
 	OOFEM_ERROR("Not implemented.")
 
-	return std::unique_ptr<EnrichmentItem>(nullptr);
+	std::vector<std::unique_ptr<EnrichmentItem>> eiList;
+	return std::move( eiList );
+}
+
+IRResultType NucleationCriterion::initializeFrom(InputRecord *ir) {
+
+    return IRRT_OK;
+}
+
+int NucleationCriterion::instanciateYourself(DataReader *dr) {
+
+    return IRRT_OK;
+}
+
+void NucleationCriterion :: appendInputRecords(DynamicDataReader &oDR)
+{
+    DynamicInputRecord *ir = new DynamicInputRecord();
+
+    ir->setRecordKeywordField( this->giveInputRecordName(), 1 );
+
+
+//    eiRec->setField(mEnrFrontIndex,                     _IFT_EnrichmentItem_front);
+//    eiRec->setField(mPropLawIndex,                      _IFT_EnrichmentItem_propagationlaw);
+//
+//    if ( mInheritBoundaryConditions ) {
+//        eiRec->setField(_IFT_EnrichmentItem_inheritbc);
+//    }
+
+    oDR.insertInputRecord(DataReader :: IR_crackNucleationRec, ir);
+
+
+//    // Enrichment function
+//    DynamicInputRecord *efRec = new DynamicInputRecord();
+//    mpEnrichmentFunc->giveInputRecord(* efRec);
+//    oDR.insertInputRecord(DataReader :: IR_enrichFuncRec, efRec);
+//
+//    // Geometry
+//    DynamicInputRecord *geoRec = new DynamicInputRecord();
+//    mpBasicGeometry->giveInputRecord(* geoRec);
+//    oDR.insertInputRecord(DataReader :: IR_geoRec, geoRec);
+//
+//
+//    // Enrichment front
+//    if ( mEnrFrontIndex != 0 ) {
+//        DynamicInputRecord *efrRecStart = new DynamicInputRecord();
+//        mpEnrichmentFrontStart->giveInputRecord(* efrRecStart);
+//        oDR.insertInputRecord(DataReader :: IR_enrichFrontRec, efrRecStart);
+//
+//        DynamicInputRecord *efrRecEnd = new DynamicInputRecord();
+//        mpEnrichmentFrontEnd->giveInputRecord(* efrRecEnd);
+//        oDR.insertInputRecord(DataReader :: IR_enrichFrontRec, efrRecEnd);
+//    }
+//
+//    // Propagation law
+//    if ( mPropLawIndex != 0 ) {
+//        DynamicInputRecord *plRec = new DynamicInputRecord();
+//        this->mpPropagationLaw->giveInputRecord(* plRec);
+//        oDR.insertInputRecord(DataReader :: IR_propagationLawRec, plRec);
+//    }
 }
 
 } /* namespace oofem */

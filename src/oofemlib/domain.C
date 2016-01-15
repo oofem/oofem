@@ -67,6 +67,7 @@
 #include "initmodulemanager.h"
 #include "exportmodulemanager.h"
 #include "xfem/enrichmentitem.h"
+#include "xfem/nucleationcriterion.h"
 #include "xfem/enrichmentfunction.h"
 #include "xfem/propagationlaw.h"
 #include "contact/contactmanager.h"
@@ -236,6 +237,13 @@ Domain *Domain :: Clone()
         for ( int i = 1; i <= nEI; i++ ) {
             EnrichmentItem *ei = xfemManager->giveEnrichmentItem(i);
             ei->appendInputRecords(dataReader);
+        }
+
+        // Nucleation criteria
+        int nNC = xfemManager->giveNumberOfNucleationCriteria();
+        for ( int i = 1; i <= nNC; i++ ) {
+            NucleationCriterion *nc = xfemManager->giveNucleationCriterion(i);
+            nc->appendInputRecords(dataReader);
         }
     }
 

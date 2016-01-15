@@ -35,18 +35,39 @@
 #ifndef SRC_OOFEMLIB_XFEM_NUCLEATIONCRITERION_H_
 #define SRC_OOFEMLIB_XFEM_NUCLEATIONCRITERION_H_
 
+
+#include "irresulttype.h"
+
 #include <memory>
+#include <vector>
 
 namespace oofem {
 
 class EnrichmentItem;
+class Domain;
+class DataReader;
+class DynamicDataReader;
+class InputRecord;
 
 class NucleationCriterion {
 public:
-	NucleationCriterion();
+	NucleationCriterion(Domain *ipDomain);
 	virtual ~NucleationCriterion();
 
-	virtual std::unique_ptr<EnrichmentItem> nucleateEnrichmentItems();
+	virtual std::vector<std::unique_ptr<EnrichmentItem>> nucleateEnrichmentItems();
+
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual int instanciateYourself(DataReader *dr);
+
+    virtual void appendInputRecords(DynamicDataReader &oDR);
+
+    /// @return Class name of the receiver.
+    virtual const char *giveClassName() const = 0;
+    /// @return Input record name of the receiver.
+    virtual const char *giveInputRecordName() const = 0;
+
+protected:
+	Domain *mpDomain;
 };
 
 } /* namespace oofem */

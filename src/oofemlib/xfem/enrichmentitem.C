@@ -447,6 +447,16 @@ void EnrichmentItem :: calcPolarCoord(double &oR, double &oTheta, const FloatArr
     }
 }
 
+void EnrichmentItem :: setPropagationLaw(PropagationLaw *ipPropagationLaw)
+{
+	if(mpPropagationLaw != NULL) {
+		delete mpPropagationLaw;
+	}
+
+	mpPropagationLaw = ipPropagationLaw;
+	mPropLawIndex = 1;
+}
+
 void EnrichmentItem :: callGnuplotExportModule(GnuplotExportModule &iExpMod, TimeStep *tStep)
 {
     //iExpMod.outputXFEM(*this);

@@ -84,6 +84,7 @@ class LoadBalancer;
 
 class XfemManager;
 class EnrichmentItem;
+class NucleationCriterion;
 class EnrichmentFunction;
 class EnrichmentDomain;
 class BasicGeometry;
@@ -122,6 +123,7 @@ template< typename T > LoadBalancerMonitor *loadMonitorCreator(EngngModel *e) { 
 // XFEM stuff
 template< typename T > XfemManager *xManCreator(Domain *d) { return new T(d); }
 template< typename T > EnrichmentItem *enrichItemCreator(int n, XfemManager *x, Domain *d) { return new T(n, x, d); }
+template< typename T > NucleationCriterion *nucleationCritCreator(Domain *d) { return new T(d); }
 template< typename T > EnrichmentFunction *enrichFuncCreator(int n, Domain *d) { return new T(n, d); }
 template< typename T > EnrichmentDomain *enrichmentDomainCreator() { return new T(); }
 template< typename T > BasicGeometry *geometryCreator() { return new T(); }
@@ -159,6 +161,7 @@ template< typename T > ContactDefinition *contactDefCreator(ContactManager *cMan
 
 #define REGISTER_XfemManager(class) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerXfemManager(_IFT_ ## class ## _Name, xManCreator< class > );
 #define REGISTER_EnrichmentItem(class) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerEnrichmentItem(_IFT_ ## class ## _Name, enrichItemCreator< class > );
+#define REGISTER_NucleationCriterion(class) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerNucleationCriterion(_IFT_ ## class ## _Name, nucleationCritCreator< class > );
 #define REGISTER_EnrichmentFunction(class) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerEnrichmentFunction(_IFT_ ## class ## _Name, enrichFuncCreator< class > );
 #define REGISTER_EnrichmentDomain(class) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerEnrichmentDomain(_IFT_ ## class ## _Name, enrichmentDomainCreator< class > );
 #define REGISTER_Geometry(class) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerGeometry(_IFT_ ## class ## _Name, geometryCreator< class > );
@@ -224,6 +227,8 @@ private:
     // XFEM:
     /// Associative container containing enrichment item creators
     std :: map < std :: string, EnrichmentItem * ( * )(int, XfemManager *, Domain *) > enrichItemList;
+    /// Associative container containing nucleation criterion creators
+    std :: map < std :: string, NucleationCriterion * ( * )(Domain *) > nucleationCritList;
     /// Associative container containing enrichment function creators
     std :: map < std :: string, EnrichmentFunction * ( * )(int, Domain *) > enrichFuncList;
     /// Associative container containing geometry creators
@@ -472,6 +477,9 @@ public:
     // XFEM:
     EnrichmentItem *createEnrichmentItem(const char *name, int num, XfemManager *xm, Domain *domain);
     bool registerEnrichmentItem( const char *name, EnrichmentItem * ( *creator )( int, XfemManager *, Domain * ) );
+
+    NucleationCriterion *createNucleationCriterion(const char *name, Domain *domain);
+    bool registerNucleationCriterion( const char *name, NucleationCriterion * ( *creator )( Domain * ) );
 
     EnrichmentFunction *createEnrichmentFunction(const char *name, int num, Domain *domain);
     bool registerEnrichmentFunction( const char *name, EnrichmentFunction * ( *creator )( int, Domain * ) );
