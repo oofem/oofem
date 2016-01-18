@@ -1084,8 +1084,8 @@ LayeredCrossSection :: give(CrossSectionProperty aProperty, GaussPoint *gp)
     } else if ( aProperty == CS_NumLayers ) {
         return this->numberOfLayers;
     } else if (aProperty == CS_Layer ) {
-		return this->giveLayer(gp);
-	}
+        return this->giveLayer(gp);
+    }
 
     return CrossSection :: give(aProperty, gp);
 }
@@ -1093,21 +1093,21 @@ LayeredCrossSection :: give(CrossSectionProperty aProperty, GaussPoint *gp)
 int 
 LayeredCrossSection :: giveLayer(GaussPoint *gp)	//@todo: works only for equal thickness of each layer
 {
-	FloatArray lCoords;
-	int noLayers = this->giveNumberOfLayers();
-	double dh = 2.0/noLayers;
-	lCoords = gp->giveNaturalCoordinates();
-	double lowXi = -1.0;
+    FloatArray lCoords;
+    int noLayers = this->giveNumberOfLayers();
+    double dh = 2.0/noLayers;
+    lCoords = gp->giveNaturalCoordinates();
+    double lowXi = -1.0;
 
-	for (int i = 1; i <= noLayers; i++)
-	{
-		if (lCoords.at(3) > lowXi && lCoords.at(3) < lowXi+dh)
-		{
-			return i;
-		}
-		lowXi+=dh;
-	}
-	OOFEM_ERROR("LayeredCrossSection :: giveLayer - the actual integration point can not be associated with a layer in the cross section");
+    for (int i = 1; i <= noLayers; i++)
+    {
+        if (lCoords.at(3) > lowXi && lCoords.at(3) < lowXi+dh)
+        {
+            return i;
+        }
+        lowXi+=dh;
+    }
+    OOFEM_ERROR("LayeredCrossSection :: giveLayer - the actual integration point can not be associated with a layer in the cross section");
 }
 
 double
@@ -1345,7 +1345,7 @@ LayeredCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalS
                 };
             } else if ( valType == ISVT_VECTOR ) {
                 answer = {
-                    c *rotVal.at(1) - s * rotVal.at(2), s * rotVal.at(1), +c * rotVal.at(2), rotVal.at(3)
+                    c *rotVal.at(1) - s * rotVal.at(2), s * rotVal.at(1) +c * rotVal.at(2), rotVal.at(3)
                 };
             } else if ( valType == ISVT_SCALAR ) {
                 answer = rotVal;

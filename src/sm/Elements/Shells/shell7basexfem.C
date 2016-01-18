@@ -35,6 +35,7 @@
 #include "Elements/Shells/shell7basexfem.h"
 #include "Elements/Shells/shell7base.h"
 #include "Loads/constantpressureload.h"
+#include "constantsurfaceload.h"
 #include "Materials/InterfaceMaterials/intmatbilinczfagerstrom.h"
 #include "xfem/enrichmentitems/crack.h"
 #include "xfem/enrichmentitems/shellcrack.h"
@@ -60,9 +61,7 @@ Shell7BaseXFEM :: Shell7BaseXFEM(int n, Domain *aDomain) : Shell7Base(n, aDomain
 
 Shell7BaseXFEM :: ~Shell7BaseXFEM()
 {
-    for ( auto &iRule: czIntegrationRulesArray ) {
-        delete iRule;
-    }
+    
 }
 
 int 
@@ -628,7 +627,7 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
         answerTemp.resize(Shell7Base :: giveNumberOfDofs() );
         answerTemp.zero();
 
-        FloatMatrix B, NEnr, BEnr, F;  
+        FloatMatrix B, Ncoh, NEnr, BEnr, F;  
         int delamNum = dei->giveNumber();
 
         StructuralInterfaceMaterial *intMat = static_cast < StructuralInterfaceMaterial * > 
@@ -1203,7 +1202,7 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &KdIJ, IntegrationPoi
     FloatMatrix temp, B1, B2;
     FloatMatrix lambda1 [ 3 ], lambda2 [ 3 ];
 
-    FloatArray lCoords = * ip->giveNaturalCoordinates();
+    FloatArray lCoords = ip->giveNaturalCoordinates();
     this->computeEnrichedBmatrixAt(lCoords, B1, ei1);
     this->computeEnrichedBmatrixAt(lCoords, B2, ei2);
 
@@ -3028,7 +3027,7 @@ Shell7BaseXFEM :: recoverShearStress(TimeStep *tStep)
             interfaceEI.at(delaminationInterfaceNum) = iEI;
         }
     }
-    if (this->giveGlobalNumber() == 48) { delaminationInterface.printYourself("Interface number with delamination"); }
+    //if (this->giveGlobalNumber() == 48) { delaminationInterface.printYourself("Interface number with delamination"); }
     
     if ( hasDelamination ) {
         
@@ -3073,8 +3072,8 @@ Shell7BaseXFEM :: recoverShearStress(TimeStep *tStep)
             if ( this->hasCohesiveZone( interfaceNum ) ) {
 #if 1  
                 // CZ traction 
-                IntegrationRule *iRuleI = czIntegrationRulesArray [ interfaceNum - 1 ];
-                if (iRuleI->giveNumberOfIntegrationPoints() != numInPlaneIP ) {
+                std :: unique_ptr< IntegrationRule > &iRuleI = czIntegrationRulesArray [ interfaceNum - 1 ];
+                if (czIntegrationRulesArray [ interfaceNum - 1 ]->giveNumberOfIntegrationPoints() != numInPlaneIP ) {
                     OOFEM_ERROR("Interface IPs doesn't match the element IPs");
                 }
                 
@@ -3082,17 +3081,14 @@ Shell7BaseXFEM :: recoverShearStress(TimeStep *tStep)
                 CZPKtraction.zero();
                 FloatMatrix Q;
                 int iIGP = 1;
-                for ( GaussPoint *gp: *iRuleI ) {
+                for ( GaussPoint *gp : *iRuleI ) {
                     double xi = dei->giveDelamXiCoord();
                     lCoords.at(1) = gp->giveNaturalCoordinate(1);
                     lCoords.at(2) = gp->giveNaturalCoordinate(2);
                     lCoords.at(3) = xi;
-                    #if 0
-                    FloatArray GPcoords = gp->giveGlobalCoordinates();
-                        if (this->giveGlobalNumber() == 126) {
-                            GPcoords.printYourself("interface GPs");
-                        }
-                    #endif
+                    
+                    //FloatArray GPcoords = gp->giveGlobalCoordinates();
+                    //if (this->giveGlobalNumber() == 126) { GPcoords.printYourself("interface GPs"); }
 //                         this->evalInitialCovarNormalAt(nCov, lCoords); // intial coords
                     
                     // Find PK-traction in current coords.
@@ -3105,6 +3101,7 @@ Shell7BaseXFEM :: recoverShearStress(TimeStep *tStep)
                     this->evalCovarNormalAt(nCov, lCoords, genEpsC, tStep);     // Denna verkar ta hänsyn till hoppet, men hur ser jag till att det är normalen ovanför delamineringen?
                     Q.beLocalCoordSys(nCov);
                     
+                    lCoords.printYourself();
                     StructuralInterfaceMaterialStatus* intMatStatus = static_cast < StructuralInterfaceMaterialStatus* > ( gp->giveMaterialStatus() );
                     if (intMatStatus == 0) {
                         OOFEM_ERROR("NULL pointer to material status");
@@ -3123,8 +3120,8 @@ Shell7BaseXFEM :: recoverShearStress(TimeStep *tStep)
                     tractionBC[iDel].at(2,iIGP) = CZPKtraction.at(2);
                     tractionBC[iDel].at(3,iIGP) = CZPKtraction.at(3);
                     iIGP++;
-#endif
                 }
+#endif
             } else {
                 // Delamination zero traction
                 tractionBC[iDel].zero();
@@ -3197,7 +3194,7 @@ Shell7BaseXFEM :: recoverShearStress(TimeStep *tStep)
                 if ( this->hasCohesiveZone( interfaceNum ) ) {
 #if 1  
                     // CZ traction 
-                    IntegrationRule *iRuleI = czIntegrationRulesArray [ interfaceNum - 1 ];
+                    std :: unique_ptr< IntegrationRule > &iRuleI = czIntegrationRulesArray [ interfaceNum - 1 ];
                     if (iRuleI->giveNumberOfIntegrationPoints() != numInPlaneIP ) {
                         OOFEM_ERROR("Interface IPs doesn't match the element IPs");
                     }

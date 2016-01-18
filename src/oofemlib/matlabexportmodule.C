@@ -655,23 +655,10 @@ FILE *
 MatlabExportModule :: giveOutputStream(TimeStep *tStep)
 {
 	FILE *answer;
-	std :: ostringstream baseFileName;
-	std :: string fileName;
-
-	fileName = this->emodel->giveOutputBaseFileName();
-
-	size_t foundDot;
-	foundDot = fileName.rfind(".");
-
-    // CARL
-    //fileName.replace(foundDot, 1, "_"); 
- 
-    // JIM
-    fileName.replace(foundDot, 1, "_");
 
     char fext[100];
-    sprintf( fext, "_m%d_%d", this->number, tStep->giveNumber() );
-    fileName += fext;
+    //sprintf( fext, "_m%d_%d", this->number, tStep->giveNumber() );
+    //fileName += fext;
 
     if ( this->testSubStepOutput() ) {
         // include tStep version in output file name

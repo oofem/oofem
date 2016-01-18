@@ -86,6 +86,7 @@ set (sm_element
     Elements/PlaneStress/basicelementquad.C
     Elements/structural2delement.C
     Elements/structural3delement.C
+    Elements/phasefieldelement.C
     #qplanstrssphf.C
     )
 

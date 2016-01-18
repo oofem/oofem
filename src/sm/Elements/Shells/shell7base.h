@@ -83,7 +83,7 @@ public:
     virtual int giveNumberOfEdgeDofs() = 0;
     virtual int giveNumberOfEdgeDofManagers() = 0;
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    void evalInitialCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &Gcov);
+    void evalInitialCovarBaseVectorsAt(const FloatArray &lCoords, FloatMatrix &Gcov);
 
     static void giveGeneralizedStrainComponents(FloatArray genEps, FloatArray &dphidxi1, FloatArray &dphidxi2, FloatArray &dmdxi1,
                                          FloatArray &dmdxi2, FloatArray &m, double &dgamdxi1, double &dgamdxi2, double &gam);
@@ -210,7 +210,7 @@ protected:
 
     //void giveInitialSolutionVector(FloatArray &answer);
     void giveUpdatedSolutionVector(FloatArray &answer, TimeStep *tStep);
-    void giveUnknownsAt(const FloatArray &lcoords, FloatArray &solVec, FloatArray &x, FloatArray &m, double gam, TimeStep *tStep);
+    void giveUnknownsAt(const FloatArray &lcoords, FloatArray &solVec, FloatArray &x, FloatArray &m, double &gam, TimeStep *tStep);
 
     // Nodal averaging interface:
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
@@ -251,7 +251,7 @@ protected:
 //    void computeBmatrixForStressRecAt(FloatArray &lcoords, FloatMatrix &answer, int layer, bool intSzz = false);
 //     void givePolynomial2GradientForStressRecAt(FloatArray &answer, FloatArray &coords);
     void giveZintegratedPolynomialGradientForStressRecAt(FloatArray &answer, FloatArray &coords);
-    void giveZintegratedPolynomial2GradientForStressRecAt(FloatArray &answer, FloatArray &coords);
+//    void giveZintegratedPolynomial2GradientForStressRecAt(FloatArray &answer, FloatArray &coords);
     void giveZ2integratedPolynomial2GradientForStressRecAt(FloatArray &answer, FloatArray &coords);
     void giveL2contribution(FloatMatrix &ipValues, FloatMatrix &Nbar, int layer, InternalStateType type, TimeStep *tStep);
     void giveSPRcontribution(FloatMatrix &eltIPvalues, FloatMatrix &eltPolynomialValues, int layer, InternalStateType type, TimeStep *tStep);
