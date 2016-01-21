@@ -42,9 +42,52 @@
 #include "timestep.h"
 #include "outputmanager.h"
 #include "activebc.h"
+#include "assemblercallback.h"
 #include "unknownnumberingscheme.h"
 
+#include "../sm/Materials/structuralmaterial.h"
+#include "../sm/CrossSections/structuralcrosssection.h"
+
 namespace oofem {
+
+void LastEquilibratedInternalForceAssembler :: vectorFromElement(FloatArray& vec, Element& element, TimeStep* tStep, ValueModeType mode) const
+{
+    //static_cast< StructuralElement & >( element ).giveInternalForcesVector(vec, tStep, 1);
+    element.giveCharacteristicVector(vec, LastEquilibratedInternalForcesVector, mode, tStep);
+}
+
+void LinearizedDilationForceAssembler :: vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const
+{
+    StructuralElement &selem = static_cast< StructuralElement & >( element );
+
+    vec.clear();
+    for ( auto &gp : *selem.giveDefaultIntegrationRulePtr() ) {
+        FloatMatrix B;
+        FloatArray epsilonTemperature;
+        
+        double dV = selem.computeVolumeAround(gp);
+        selem.computeBmatrixAt(gp, B);
+
+        /// @todo Problematic: Needs direct access to material model. Should do without (can be easily done by adding lots of code, but I'm searching for a simple, general, implementation) / Mikael
+        static_cast< StructuralMaterial *>( selem.giveStructuralCrossSection()->giveMaterial(gp) )->computeStressIndependentStrainVector(epsilonTemperature, gp, tStep, VM_Incremental);
+
+        if ( epsilonTemperature.giveSize() > 0 ) {
+            FloatArray s;
+            FloatMatrix D;
+            selem.computeConstitutiveMatrixAt(D, ElasticStiffness, gp, tStep);
+            s.beProductOf(D, epsilonTemperature);
+            vec.plusProduct(B, s, dV);
+        }
+    }
+}
+
+void InitialStressMatrixAssembler :: matrixFromElement(FloatMatrix &answer, Element &element, TimeStep *tStep) const
+{
+    static_cast< StructuralElement & >( element ).computeInitialStressMatrix(answer, tStep);
+}
+
+
+
 StructuralEngngModel :: StructuralEngngModel(int i, EngngModel *_master) : EngngModel(i, _master),
     internalVarUpdateStamp(0), internalForcesEBENorm()
 { }
@@ -107,11 +150,11 @@ StructuralEngngModel :: computeReaction(FloatArray &answer, TimeStep *tStep, int
     answer.zero();
 
     // Add internal forces
-    this->assembleVector( answer, tStep, LastEquilibratedInternalForcesVector, VM_Total,
+    this->assembleVector( answer, tStep, LastEquilibratedInternalForceAssembler(), VM_Total,
                          EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di) );
     // Subtract external loading
     ///@todo All engineering models should be using this (for consistency)
-    //this->assembleVector( answer, tStep, ExternalForcesVector, VM_Total,
+    //this->assembleVector( answer, tStep, ExternalForceAssembler(), VM_Total,
     //                    EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di) );
     ///@todo This method is overloaded in some functions, it needs to be generalized.
     this->computeExternalLoadReactionContribution(contribution, tStep, di);
@@ -125,7 +168,7 @@ StructuralEngngModel :: computeExternalLoadReactionContribution(FloatArray &reac
 {
     reactions.resize( this->giveNumberOfDomainEquations( di, EModelDefaultPrescribedEquationNumbering() ) );
     reactions.zero();
-    this->assembleVector( reactions, tStep, ExternalForcesVector, VM_Total,
+    this->assembleVector( reactions, tStep, ExternalForceAssembler(), VM_Total,
                          EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di) );
 }
 
@@ -140,7 +183,7 @@ StructuralEngngModel :: giveInternalForces(FloatArray &answer, bool normFlag, in
 
     answer.resize( this->giveNumberOfDomainEquations( di, EModelDefaultEquationNumbering() ) );
     answer.zero();
-    this->assembleVector(answer, tStep, InternalForcesVector, VM_Total,
+    this->assembleVector(answer, tStep, InternalForceAssembler(), VM_Total,
                          EModelDefaultEquationNumbering(), domain, normFlag ? & this->internalForcesEBENorm : NULL);
 
     // Redistributes answer so that every process have the full values on all shared equations

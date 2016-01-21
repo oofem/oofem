@@ -58,10 +58,8 @@ RankineMatNl :: giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint 
                                                  const FloatArray &totalStrain, TimeStep *tStep)
 {
     RankineMatNlStatus *nlStatus = static_cast< RankineMatNlStatus * >( this->giveStatus(gp) );
-    //mj this->initGpForNewStep(gp);
     
     double tempDam;
-    FloatArray tempEffStress;
     //mj performPlasticityReturn(gp, totalStrain, mode);
     // nonlocal method "computeDamage" performs the plastic return
     // for all Gauss points when it is called for the first time
@@ -82,7 +80,6 @@ RankineMatNl :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp,
                                         const FloatArray &totalStrain, TimeStep *tStep)
 {
     RankineMatNlStatus *nlStatus = static_cast< RankineMatNlStatus * >( this->giveStatus(gp) );
-    //mj this->initGpForNewStep(gp);
 
     double tempDam;
     //mj performPlasticityReturn(gp, totalStrain, mode);
@@ -213,12 +210,12 @@ RankineMatNl :: giveInterface(InterfaceType type)
 IRResultType
 RankineMatNl :: initializeFrom(InputRecord *ir)
 {
-    //IRResultType result;                // Required by IR_GIVE_FIELD macro
+    IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    RankineMat :: initializeFrom(ir);
-    StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
+    result = StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
-    return IRRT_OK;
+    return RankineMat :: initializeFrom(ir);
 }
 
 

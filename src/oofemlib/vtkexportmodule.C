@@ -86,7 +86,6 @@ VTKExportModule :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     int val;
 
-    ExportModule :: initializeFrom(ir);
     IR_GIVE_OPTIONAL_FIELD(ir, cellVarsToExport, _IFT_VTKExportModule_cellvars);
     IR_GIVE_OPTIONAL_FIELD(ir, internalVarsToExport, _IFT_VTKExportModule_vars);
     IR_GIVE_OPTIONAL_FIELD(ir, primaryVarsToExport, _IFT_VTKExportModule_primvars);
@@ -95,7 +94,7 @@ VTKExportModule :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_VTKExportModule_stype);
     stype = ( NodalRecoveryModel :: NodalRecoveryModelType ) val;
 
-    return IRRT_OK;
+    return ExportModule :: initializeFrom(ir);
 }
 
 
@@ -217,6 +216,7 @@ VTKExportModule :: initialize()
         delete this->smoother;
         this->smoother = NULL;
     }
+    ExportModule :: initialize();
 }
 
 
@@ -753,7 +753,6 @@ VTKExportModule :: giveSmoother()
 
     if ( this->smoother == NULL ) {
         this->smoother = classFactory.createNodalRecoveryModel(this->stype, d);
-        IntArray vrmap;
     }
 
     return this->smoother;
@@ -764,22 +763,8 @@ VTKExportModule :: giveSmoother()
 void
 VTKExportModule :: exportPrimaryVars(FILE *stream, TimeStep *tStep)
 {
-    // should be performed over regions
-
-    int i, n = primaryVarsToExport.giveSize();
-    //int nnodes;
-    //Domain *d = emodel->giveDomain(1);
-    UnknownType type;
-
-    if ( n == 0 ) {
-        return;
-    }
-
-    //nnodes = d->giveNumberOfDofManagers();
-    //fprintf(stream,"\n\nPOINT_DATA %d\n", nnodes);
-
-    for ( i = 1; i <= n; i++ ) {
-        type = ( UnknownType ) primaryVarsToExport.at(i);
+    for ( auto &primvar : primaryVarsToExport ) {
+        UnknownType type = ( UnknownType ) primvar;
         this->exportPrimVarAs(type, stream, tStep);
     }
 }
@@ -790,10 +775,9 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
 {
     Domain *d = emodel->giveDomain(1);
     int ireg;
-    int nnodes = d->giveNumberOfDofManagers(), inode;
+    int nnodes = d->giveNumberOfDofManagers();
     int j, jsize;
     FloatArray iVal, iValLCS;
-    FloatMatrix t(3, 3);
     IntArray dofIDMask;
     InternalStateValueType type = ISVT_UNDEFINED;
     int nScalarComp = 1;
@@ -833,7 +817,7 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
     // Used for special nodes/elements with mixed number of dofs.
     this->giveSmoother();
 
-    for ( inode = 1; inode <= regionDofMans; inode++ ) {
+    for ( int inode = 1; inode <= regionDofMans; inode++ ) {
         DofManager *dman = d->giveNode( regionNodalNumbers.at(inode) );
 
         if ( ( valID == DisplacementVector ) || ( valID == EigenVector ) || ( valID == VelocityVector ) ) {

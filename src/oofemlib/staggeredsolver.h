@@ -107,7 +107,7 @@ private:
   
     // Lists for each dof group
     std :: vector< CustomEquationNumbering > UnknownNumberingSchemeList;
-    std :: vector< SparseMtrx *> stiffnessMatrixList;
+    std :: vector< std :: unique_ptr< SparseMtrx > > stiffnessMatrixList;
     std :: vector< FloatArray > fIntList;
     std :: vector< FloatArray > fExtList;
     
@@ -128,7 +128,7 @@ public:
     virtual ~StaggeredSolver() {}
 
     // Overloaded methods:
-    virtual NM_Status solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
+    virtual NM_Status solve(SparseMtrx &k, FloatArray &R, FloatArray *R0, FloatArray *iR,
                             FloatArray &X, FloatArray &dX, FloatArray &F,
                             const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                             int &nite, TimeStep *);

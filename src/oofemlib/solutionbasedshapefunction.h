@@ -135,7 +135,7 @@ public:
     virtual double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep, ActiveDof *dof);
     virtual double giveUnknown(ValueModeType mode, TimeStep *tStep, ActiveDof *dof);
 
-    virtual bool hasBc(ActiveDof *dof, TimeStep *tStep) { return false; }
+    virtual bool hasBc(Dof *dof, TimeStep *tStep) { return false; }
 
     virtual bool isPrimaryDof(ActiveDof *dof) { return false; }
 

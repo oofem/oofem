@@ -34,6 +34,7 @@
 
 #include "../sm/Elements/Bars/qtruss1dgrad.h"
 #include "fei1dlin.h"
+#include "fei1dquad.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
@@ -78,12 +79,7 @@ QTruss1dGrad :: giveDofManDofIDMask(int inode, IntArray &answer) const
 IRResultType
 QTruss1dGrad :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result = this->StructuralElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    return IRRT_OK;
+    return StructuralElement :: initializeFrom(ir);
 }
 
 
@@ -118,11 +114,9 @@ QTruss1dGrad :: computeForceLoadVector(FloatArray &answer, TimeStep *tStep, Valu
 
 
 void
-QTruss1dGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
+QTruss1dGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatArray &answer)
 {
-    FloatArray n;
-    this->interpolation_lin.evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-    answer.beNMatrixOf(n, 1);
+    this->interpolation_lin.evalN( answer, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -133,4 +127,17 @@ QTruss1dGrad :: computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
     this->interpolation_lin.evaldNdx( dnx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beTranspositionOf(dnx);
 }
+
+void QTruss1dGrad :: computeField(ValueModeType mode, TimeStep* tStep, const FloatArray& lcoords, FloatArray& answer)
+{
+    FloatArray n, unknown;
+    this->interpolation_lin.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
+    this->computeVectorOf({D_u}, mode, tStep, unknown);
+    answer.at(1) = n.dotProduct(unknown);
+
+    this->interpolation.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
+    this->computeVectorOf({G_0}, mode, tStep, unknown);
+    answer.at(2) = n.dotProduct(unknown);
+}
+
 }

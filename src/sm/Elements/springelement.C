@@ -152,9 +152,6 @@ SpringElement :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    // first call parent
-    StructuralElement :: initializeFrom(ir);
-
     int _mode;
     IR_GIVE_FIELD(ir, _mode, _IFT_SpringElement_mode);
     IR_GIVE_FIELD(ir, springConstant, _IFT_SpringElement_springConstant);
@@ -164,13 +161,13 @@ SpringElement :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, this->dir, _IFT_SpringElement_orientation);
         this->dir.normalize();
     }
-    return IRRT_OK;
+    return StructuralElement :: initializeFrom(ir);
 }
 
 void SpringElement :: printOutputAt(FILE *File, TimeStep *tStep)
 {
-    fprintf(File, "spring element %d :\n", number);
-    fprintf( File, "  spring force or moment % .4e", this->computeSpringInternalForce(tStep) );
+    fprintf(File, "spring element %d (%8d) :\n", this->giveLabel(), this->giveNumber() );
+    fprintf(File, "  spring force or moment %.4e", this->computeSpringInternalForce(tStep) );
     fprintf(File, "\n");
 }
 } // end namespace oofem

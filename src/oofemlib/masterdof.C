@@ -227,7 +227,7 @@ bool MasterDof :: hasBc(TimeStep *tStep)
     }
 
     if ( bc ) {
-        return this->giveBc()->isImposed(tStep);
+        return this->dofManager->giveDomain()->giveBc(bc)->isImposed(tStep);
     } else {
         return false;
     }

@@ -40,8 +40,6 @@
 #include "materialinterface.h"
 #include "dynamicinputrecord.h"
 #include "classfactory.h"
-#include "matconst.h"
-//#include "leplic.h"
 
 namespace oofem {
 REGISTER_Material(TwoFluidMaterial);
@@ -61,7 +59,8 @@ TwoFluidMaterial :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, this->slaveMaterial, _IFT_TwoFluidMaterial_mat);
     if ( this->slaveMaterial.giveSize() != 2 ) {
-        OOFEM_ERROR("mat array should have two values");
+        OOFEM_WARNING("mat array should have two values");
+        return IRRT_BAD_FORMAT;
     }
 
     return IRRT_OK;
@@ -103,7 +102,7 @@ TwoFluidMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStat
     FloatArray tmp;
     int ret = giveMaterial(0)->giveIPValue(answer, status->giveSlaveGaussPoint0(), type, tStep);
     answer.times(1.0 - vof);
-    ret = ret && giveMaterial(1)->giveIPValue(tmp, status->giveSlaveGaussPoint0(), type, tStep);
+    ret = ret && giveMaterial(1)->giveIPValue(tmp, status->giveSlaveGaussPoint1(), type, tStep);
     answer.add(vof, tmp);
     return ret;
 }

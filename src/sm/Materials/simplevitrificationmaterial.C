@@ -47,8 +47,6 @@ IRResultType SimpleVitrificationMaterial :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;
 
-    StructuralMaterial :: initializeFrom(ir);
-
     IR_GIVE_FIELD(ir, this->vitrTime, _IFT_SimpleVitrificationMaterial_vitrificationTime);
 
     IR_GIVE_FIELD(ir, this->E, _IFT_SimpleVitrificationMaterial_E);
@@ -61,7 +59,7 @@ IRResultType SimpleVitrificationMaterial :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, this->G_r, _IFT_SimpleVitrificationMaterial_G_r);
     IR_GIVE_FIELD(ir, this->alpha_r, _IFT_SimpleVitrificationMaterial_alpha_r);
 
-    return IRRT_OK;
+    return StructuralMaterial :: initializeFrom(ir);
 }
 
 

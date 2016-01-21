@@ -42,6 +42,8 @@
 \newcommand{\dev}{\mathrm{dev}}
 \newcommand{\vol}{\mathrm{vol}}
 
+\newcommand{\pard}[2]{\frac{\partial{#1}}{\partial{#2}}}
+
 \newcommand{\param}[1]{\texttt{#1}} % Use when referring to attributes in text.
 \newcommand{\optional}[1]{[#1]} % Denotes optional parameter
 \newcommand{\field}[2]{\param{#1}~\#{\tiny(#2)}} % Attribute #1 = identifier, #2 = type
@@ -136,7 +138,7 @@ This manual describes in details the format and structure of OOFEM
 text input file. Input file can be prepared in any text editor or can be generated
 by a conversion program or FEM pre-processor.
 
-\Pmode{Some parts of this document are relevant only to the parallel version of the code (POOFEM).
+\Pmode{Some parts of this document are relevant only to the parallel enabled version of the code.
 These parts are distinguished by typing the text in sans serif font family.}
 \Pmode{The parallel model is based on domain decomposition. In this mode a set of input files must be provided, each one corresponding to 
 particular process and related domain partition. The corresponding domain partition input file is referred as partition input file. 
@@ -184,10 +186,10 @@ Relevant=2, Info=3, Debug=4).\\
 \end{tabularx}\\[1em]
 
 \Pmode{
-The parallel version uses the MPI (Message Passing Interface) standard for message-passing communication. Thus, to execute POOFEM program,
+The parallel version uses the MPI (Message Passing Interface) standard for message-passing communication. Thus, to execute OOFEM program for parallel (indicated by the \texttt{-p} flag),
 users must know the procedure for executing/scheduling MPI jobs on the particular system(s).
 For instance, when using the MPICH implementation of MPI and many others, the following command initiates a program that uses eight processors: \\[2mm]
-\texttt{mpirun -np 8 poofem program\_options}
+\texttt{mpirun -np 8 oofem -p program\_options}
 }
 
 
@@ -204,8 +206,9 @@ The order of records in file is compulsory, and it has following structure:
 \item domain record, see section \ref{_DomainRecord},
 \item output manager record, see section \ref{_OutputManagerRecord},
 \item components size record, see section \ref{_ComponentsSizeRecord},
-\item node \& element-side  record(s), see section \ref{_NodeElementSideRecords},
+\item node record(s), see section \ref{_NodeElementSideRecords},
 \item element record(s), see section \ref{_ElementsRecords},
+\item set record(s), see section \ref{_SetRecords},
 \item cross section record(s), see section \ref{_CrossSectionRecords},
 \item material type  record(s), see section \ref{_MaterialTypeRecords},
 \item nonlocal barriers record(s), see section \ref{_NonlocalBarrierRecords},
@@ -230,10 +233,10 @@ Often, some attributes are specific to particular entity keyword. Then the gener
 
 \begin{lstlisting}[style=oofem, language=oofeminput, caption={Example of input records}]
 # nodal records
-Node 1 coords 3 0. 0. 0. bc 2 1 1
-Node 2 coords 3 0. 0. 2. bc 2 1 0 
+Node 1 coords 3 0. 0. 0.
+Node 2 coords 3 0. 0. 2. dofidmask 3 1 2 3
 # element record
-Truss2d 1 nodes 2 1 2 mat 1 crossSect 1
+Truss2d 1 nodes 2 1 2 crossSect 1
 \end{lstlisting}
 
 Each attribute value has a specific type, which describe its size and layout. To describe the type of an attribute, the following notation is used: 
@@ -257,9 +260,9 @@ val3 t
 
 \item \textbf{ia} - integer array. The format of integer array is
 ``size~val(1)~...~val(size)'', where size, val(1),...,val(size) are
-integer numbers. Values are separated by one or more spaces. As an example, consider the integer array attribute called \param{bc}$=\{1,2,3\}$:
-\begin{lstlisting}[style=oofem, language=oofeminput, moreemph={bc}]
-bc 3 1 2 3
+integer numbers. Values are separated by one or more spaces. As an example, consider the integer array attribute called \param{nodes}$=\{1,4,23\}$:
+\begin{lstlisting}[style=oofem, language=oofeminput, moreemph={nodes}]
+nodes 3 1 4 23
 \end{lstlisting}
 \item \textbf{ra} - real array. The format of real array is
 ``size~val(1)~...~val(size)'', where size is integer number and val(1),
@@ -526,27 +529,15 @@ how many time steps will be analyzed.
 
 The parallel version has the following additional syntax:\\ \\
 \begin{record}
-  \recentry{}{\PentKeyword{commode}}
   \recentry{}{\PoptFieldnotype{nonlocalext}}
 \end{record}
 
 \noindent
 \Pmode{
-The \PentKeyword{commode} keyword can be one from following:
-\begin{itemize}
-\item \entKeywordInst{nodecutmode} - indicates the node cut partitioning scheme is
-used. The cut is led along element edges or surfaces (see
-figures \ref{nodecut}, \ref{nodecut-lm}, and \ref{nodecut-nlm}).
-\item \entKeywordInst{elementcutmode} - the element cut partitioning is used. The
-partitioning cut led across the element edges or surfaces (see
-figures \ref{elmentcut} and \ref{elmentcut-lm}).
-\end{itemize}
-\Pmode{
 The \param{nonlocalext} turns on the nonlocal constitutive
 extension. The extension considers a band of remote elements involved
 in computation of nonlocal variables (see fig. \ref{nodecut-nlm} illustrating
 this approach for node-cut partitioning).
-}
 }
 
 \subsection{DEIDynamic}
@@ -987,6 +978,24 @@ to selected error estimator. For description, follow to section
 \end{itemize}
 %
 
+\subsection{Free warping analysis}
+\label{FreeWarping}
+\begin{record}
+\recentry{\entKeywordInst{FreeWarping}}{\field{nsteps}{in}}
+\end{record}
+
+Free warping analysis computes the deplanation function of cross section with arbitrary shape. It is done by solving the Laplace's equation with automatically generated boundary conditions corresponding to the free warping problem.
+
+This type of analysis supports only \param{TrWarp} elements and \param{WarpingCS} cross sections. One external node must be defined for each warping cross section. The coordinates of this node can be arbitrary but this node must be defined with parametr  \param{DofIDMask 1 24} and one boundary condition which represents relative twist acting on corresponding warping cross section. No additional loads make sence in free warping analysis.
+
+Parameter \param{nsteps} indicates the number of loading cases.
+Series of loading cases is maintained as sequence of time-steps.
+For each load case an auxiliary time-step is generated with time
+equal to load case number.
+Load vectors for each load case are formed as load vectors at
+this auxiliary time.
+
+
 \subsection{Stationary transport problem}
 \label{StationaryTransport}
 
@@ -1220,6 +1229,172 @@ non-symmetrical system
 matrix. The scheme should be compatible with solver type. See section
 \ref{sparselinsolver} for further details.
 
+\subsection{Transient incompressible flow\\PFEM Algorithm}
+\label{pfemIncomp}
+\begin{record}
+  \recentry{\entKeywordInst{PFEM}}{\field{nsteps}{in}}
+  \recentry{}{\field{deltaT}{rn}}
+  \recentry{}{\field{material}{in}}
+  \recentry{}{\field{cs}{in}}
+  \recentry{}{\field{pressure}{in}}
+  \recentry{}{\optField{mindeltat}{rn}}
+  \recentry{}{\optField{maxiter}{in}}
+  \recentry{}{\optField{rtolv}{rn}}
+  \recentry{}{\optField{rtolp}{rn}}
+  \recentry{}{\optField{alphashapecoef}{rn}}
+  \recentry{}{\optField{removalratio}{rn}}
+  \recentry{}{\optField{scheme}{in}}
+  \recentry{}{\optField{lstype}{in} \optField{smtype}{in}}
+\end{record}
+
+Solves the transient incompressible flow using particle finite element
+method based on the Lagrangian formulation of Navier-Stokes equations.
+
+Mesh nodes are represented by PFEMParticles~\ref{pfemparticles}, which 
+can freely move and even separate from the main domain. To integrate 
+governing equations in each solution step, a temporary mesh, built from 
+particles, is needed. The mesh is rebuilt from scratch in each solution 
+step to prevent large distortion of elements. Paramters \param{cs} and
+\param{material} assign types from cross section and material record to 
+created elements. Thus, the problem is defined without any elements in
+the input file.
+
+Mesh is generated using Delaunay triangulation and Alpha shape technique
+for the identification of the free surface. The parameter
+\param{alphashapecoef} should reflect initial distribution of PFEMParticles.
+Value approximately equal to 1,5-multiple of shortest distance of two 
+neighboring particles has been found well. On the free surface the zero-pressure
+boundary condition is enforced. This  must be defined in boundary condition
+record under the number defined by \param{pressure}.
+
+Parameter \param{scheme} controls whether the  equation system for the 
+components of the auxiliary velocity is solved explicitly (0) or implicitly
+(1). The last is the default option.
+
+Parameter \param{nsteps} determines number of solution
+steps. Parameter \param{deltaT} is time step length used for
+integration. To ensure numerical stability, step length is adapted upon mesh
+geometry and velocity of paricular nodes. To avoid to short time length a minimal
+size can be defined by \param{mindeltat}. Alternatively prescribing limit
+\param{removalratio} of the element edge length too close particles can be removed
+from solution.
+
+Optional parameters \param{rtolv} and \param{rtolp} allow to
+specify relative norms for velocity and pressure difference of two subsequent iteration
+step. Default values are 1.e-8. By default maximal 50 iterations are performed, if
+not specified by \param{maxiter}.
+
+Parameter \param{lstype} allows to select solver for linear system of
+equations. Parameter \param{smtype} allows to select sparse matrix storage
+scheme. Please note, that the present algorithm leads to a
+non-symmetrical system
+matrix. The scheme should be compatible with solver type. See section
+\ref{sparselinsolver} for further details.
+
+\subsubsection{Lagrangian governing equations of incompressible fluid}
+The Particle finite element method (PFEM) is based on the Lagrangian form of the Navier-Stokes equation for incompressible Newtonian fluids. Assuming the density does not change in time for an incompressible fluid, the continuity equation reduces to zero requirements for the divergence of the velocity. The Navier-Stokes equations take the form
+\begin{eqnarray}
+\rho\pard{\mbf{u}}{t} &=& \rho\mbf{b} + \nabla\cdot\mbf{\sigma} \label{eq:navier-stokes2}\;,\\
+\nabla\cdot\mbf{u} &=& 0\;. \label{eq:navier-stokes2b}
+\end{eqnarray}
+For the deviatoric stress in Newtonian fluids a linear dependency of stress tensor and strain rate tensor is adopted and for the Newtonian fluids. Considering the incompressibility of the fluid, the Cauchy stress reads
+\begin{equation}\label{eq:stokes}
+\mbf{\sigma}=-p\mbf{I} + 2\mu \nabla^s\mbf{u}\;.
+\end{equation}
+This equation is known as \emph{Stokes' law} and its Cartesian form writes
+\begin{equation}
+\sigma_{ij}=-p\delta_{ij}+\mu\left(\pard{u_i}{x_j}+\pard{u_j}{x_i}\right)\;.
+\end{equation}
+\par
+Substituting the expression of Cauchy stress from Stokes' law~(\ref{eq:stokes}) into the momentum equation~(\ref{eq:navier-stokes2}) and rewriting gives
+\begin{equation}
+\rho\pard{\mbf{u}}{t} = \rho\mbf{b} + \mu\nabla^2\mbf{u} - \nabla p\;.\label{eq:momentum}
+\end{equation}
+\par
+The governing equations of the mass~(\ref{eq:navier-stokes2b}) and momentum conservation~(\ref{eq:momentum}) form can be written in the Cartesian form for the individual component $i$ using Einstein summation convention
+\begin{eqnarray}
+\rho \pard{u_i}{t} &=& - \frac{\partial}{\partial x_i}p+\mu\frac{\partial}{\partial x_j}\left(\frac{\partial u_i}{\partial x_j}\right)+\rho b_i \;, \label{eq:mb}\\
+\pard{u_i}{x_i} &=& 0\;.
+\end{eqnarray}
+The equations are accompanied by a set of standard boundary conditions imposed on the complementary parts of the domain boundary
+\begin{eqnarray}
+  \tau_{ij}\nu_j - p\nu_i &=& \bar \sigma_{ni} \qquad \mbox{on } \Gamma_{\sigma}\;, \\
+  u_i\nu_i &=& \bar u_n \qquad\; \mbox{on } \Gamma_n\;, \\
+  u_i\zeta_i &=& \bar u_t \qquad\;\, \mbox{on } \Gamma_t\;,
+\end{eqnarray}
+where $\nu$ or $n$ denotes the normal direction to the boundary and $\zeta$ or $t$ the tangential one. The bar sign over a quantity $\bar x$ stands for its prescribed value.
+
+\subsubsection{Time discretization}
+For the time discretization of the momentum equation, a general trapezoid rule can be adopted. Using this rule, the time derivative of a generic function $\phi$ can be approximated by following equation
+\begin{equation}
+[\phi(x,t)]^{n+\theta} = \theta\phi(x,t^{n+1})+(1-\theta)\phi(x,t^n)=\theta\phi^{n+1}+(1-\theta)\phi^n\;.
+\end{equation}
+Rewriting the time derivative on the left hand side of the momentum balance~(\ref{eq:mb}) as a finite difference in time and applying the trapezoidal rule on the right hand side, we obtain
+\begin{equation}\label{eq:momentum-general}
+  \rho\pard{u_i}{t} \approx \rho\frac{u^{n+1}_i-u^n_i}{\Delta t}= \left[ - \frac{\partial}{\partial x_i}p+\mu\frac{\partial}{\partial x_j}\left(\frac{\partial u_i}{\partial x_j}\right)+\rho b_i\right]^{n+\theta}\;.
+\end{equation}
+The parameter $\theta$ can take values from the interval $[0,1]$.  The approximation is considered as a weighted average of the derivative values in the time step $n$ and $n+1$. Using a specific value of the $\theta$ parameter, well-known methods can be recovered: The explicit Euler method $\theta=0$, the backward Euler for $\theta=1$ or the Crank-Nicolson method $\theta=1/2$. The current implemantation of PFEM allows the use of explicit and backward (implicit) method.
+
+\subsubsection{Fractional step scheme}
+Beside the three velocity components, the discretized momentum balance equations~(\ref{eq:momentum-general}) for a three dimensional case includes pressure as a coupling variable. A possible approach to decouple them is the application of so-called \emph{fractional step method}. The main idea of this method consists in introducing an intermediate velocity as supplementary variable and splitting the momentum equation. The modification introduced by R.Codina~\cite{Codina01} splits the the discretized time step is split into two sub-steps. The implicit part of the pressure is avoided and assigned to the second step.
+\begin{equation}
+  \pard{u_i}{t} \approx \frac{u^{n+1}_i-u^n_i}{\Delta t}=\frac{u^{n+1}_i-u^*_i+u^*_i-u^n_i}{\Delta t}= \left[ - \frac{1}{\rho}\frac{\partial}{\partial x_i}p+\frac{\mu}{\rho}\frac{\partial}{\partial x_j}\left(\frac{\partial u_i}{\partial x_j}\right)+b_i\right]^{n+\theta}\;.
+\end{equation}
+where the intermediate velocity $u^*_i$ is introduced. Splitting the equation in the following manner gives the expression for the unknown velocities
+\begin{subequations}
+  \begin{eqnarray}\label{rce:uistar}
+    \mbox{(A)}\qquad u^*_i &=& u^n_i+b_i\Delta t - \frac{\Delta t}{\rho}\pard{}{x_i}\gamma p^n+\frac{\Delta t\mu}{\rho}\pard{}{x_j}\left(\pard{u^{n+\theta}_i}{x_j}\right)\;,\\
+    \mbox{(C)}\quad u^{n+1}_i &=& u^*_i- \frac{\Delta t}{\rho}\pard{}{x_i}(p^{n+1}-\gamma p^n)\;. \label{eq:uin1}
+  \end{eqnarray}
+\end{subequations}
+The pressure split is here introduced by the new parameter $\gamma$ defining the amount of splitting and can take values from 0 to 1. The body loads are considered to be constant over time step.
+\par
+In a similar way, the fractional step method is applied on the mass conservation equation. Here, the time derivative of density would be approximated. As we examine an incompressible flow, whose density does not change in time, merely the intermediate velocity term is incorporated in the divergence of the velocity.
+\begin{equation}
+  \pard{(u^{n+1}_i-u^*_i+u^*_i)}{x_i} = 0 \;,
+\end{equation}
+which can be decomposed into two sub-equations
+\begin{subequations}
+  \begin{eqnarray}\label{rce:mass}
+	\pard{u^*_i}{x_i} &=& 0 \\
+      \pard{(u^{n+1}_i-u^*_i)}{x_i} &=& 0\;.
+  \end{eqnarray}
+\end{subequations}
+By substituting for the velocity difference into the equation~(\ref{eq:uin1}) we obtain
+\begin{equation}
+\pard{}{x_i}(u^{n+1}_i - u^*_i) = \pard{}{x_i}\left(-\frac{\Delta t}{\rho}\pard{}{x_i}(p^{n+1}-\gamma p^n)\right)\;.
+\end{equation}
+Now we can sum the separated mass equations together. This operation gives the coupled mass-momentum equation
+\begin{equation}
+  \mbox{(B)}\qquad  \pard{u^*_i}{x_i} - \frac{\Delta t}{\rho}\frac{\partial^2}{\partial x^2_i}(p^{n+1}-\gamma p^n) = 0\;.
+\end{equation}
+The final set of equations reads
+\begin{eqnarray}
+\mbox{(A)}\qquad\quad\quad\; u^*_i  &=& u^n_i+b_i\Delta t - \frac{\Delta t}{\rho}\pard{}{x_i}\gamma p^n+\frac{\Delta t\mu}{\rho}\pard{}{x_j}\left(\pard{u^{n+\theta}_i}{x_j}\right)\;,\\
+ \mbox{(B)} \quad \frac{\partial^2}{\partial x^2_i}(p^{n+1}) &=& \frac{\rho}{\Delta t}\pard{u^*_i}{x_i}+\frac{\partial^2}{\partial x^2_i}(\gamma p^n)\;, \\
+ \mbox{(C)} \qquad\quad\;\,u^{n+1}_i &=& u^*_i- \frac{\Delta t}{\rho}\pard{}{x_i}(p^{n+1}-\gamma p^n)\;.
+\end{eqnarray}
+\par
+The above PFEM formulation is based on the paper by Idelsohn, O\~nate and Del Pin~\cite{Idelsohn04}. The authors described an approach using arbitrary time discretization scheme and pressure split factor. Their choice of implicit scheme $\theta = 1$ was motivated by better convergence properties, whereas the decision for $\gamma = 0$ leading to greater pressure split was driven by better pressure stabilization.
+\subsubsection{Spatial discretization}
+The unknown functions of velocity and pressure are approximated using equal order interpolation for all variables in the final configuration
+\begin{eqnarray}
+u_i&=&\mbf{N}^T(X,t)\mbf{U}_i\\
+p&=&\mbf{N}^T(X,t)\mbf{P} \;.
+\end{eqnarray}
+By applying the Galerkin weighted residual method on the splitted governing equations, following system of linear algebraic equations is obtained 
+\begin{eqnarray}
+\mbox{(A)}\quad\quad\mbf{M}\mbf{U}^* &=& \mbf{M}\mbf{U}^n + \Delta t\mbf{F} - \frac{\Delta t\mu}{\rho}\mbf{K}\mbf{U}^{n+\theta}\;,\label{eq:systemA} \\
+\mbox{(B)}\quad\;\; \mbf{L}\mbf{P}^{n+1} &=&\frac{\rho}{\Delta t}\left(\mbf{G}^T\mbf{U}^*-\hat{\mbf{U}}\right) \;, \label{eq:systemB} \\
+\mbox{(C)}\quad \mbf{M}\mbf{U}^{n+1} &=& \mbf{M}\mbf{U}^* - \frac{\rho}{\Delta t}\mbf{G}\mbf{P}^{n+1} \;.\label{eq:systemC}
+\end{eqnarray}
+\par
+The matrix $\mbf{M}$ denotes the mass matrix in a lumped form, whereas the vector $\mbf{F}$ stands for the load vector. The matrix $\mbf{G}$ represents the gradient operator, which is the transposition of the divergence operator denoted simply as $\mbf{G}^T$. Matrices $\mbf{K}$ and $\mbf{L}$ are build in a similar way however noted differently. Both mean the Laplacian operator. Due to its common use in computational mechanics, the classical notation of the stiffness matrix $\mbf{K}$ is used. Prescribed velocity components are enclosed in vector $\hat{\mbf{U}}$.
+\par
+In each computational time step, an iteration is performed until the equilibrium is reached. Depending on the value of $\theta$ used, the equation system for the components of the auxiliary velocity $U^*_i$~(\ref{eq:systemA}) can be solved either explicitly $\theta = 0$ or implicitly $\theta \neq 0$. Then, the calculated values of the auxiliary velocity are used as input for the pressure computation~(\ref{eq:systemB}). The last system of equations~(\ref{eq:systemC}) determines the velocity values at the end of the time step, taking auxiliary velocities and pressure or pressure increments into account.
+\par
+Let us summarize the iterative step. The position of the particles at the end of the previous time step is known, as well as the the value of the velocity $u^n$ and pressure $p^n$. The set of governing equations is build up for the unknowns at the end of the solution step $\theta^{n+1}$, however based on the geometry of the previous step. The changes in the position are neglected. Once the convergence is reached, the final position is computed from the old one modified by the displacement due to obtained velocity. After that, solution can proceed to the next time step.
+
 \subsection{Staggered Problem}
 \label{staggeredproblem}
 \begin{record}
@@ -1267,6 +1442,54 @@ can be used only when this module is configured.
 Note: All material models derived from StructuralMaterial base will
 take into account the external registered temperature field, if
 provided.
+
+\subsection{FluidStructure Problem}
+\label{fluidstructureproblem}
+\begin{record}
+  \recentry{\entKeywordInst{FluidStructureProblem}}{\field{nsteps}{in} \field{deltaT}{rn}}
+  \recentry{}{\field{prob1}{s} \field{prob2}{s}}
+  \recentry{}{\optField{maxiter}{in}}
+  \recentry{}{\optField{rtolv}{rn}}
+  \recentry{}{\optField{rtolp}{rn}}
+\end{record}
+
+Represents a fluid-structure analysis based on StaggeredProblem but providing
+iterative synchronization of sub-problems. The implementation uses the the PFEM
+model~\ref{pfemIncomp} for the fluid part. For the structural part a full dynamic
+analysis using implicit direct integration DIIDynamic\ref{DIIDynamic} is considered.
+
+The coupling of both phases is based on the idea of enforcing compatibility on the 
+interface. Special fluid particle are attached to every structural node on the 
+interface that can be hit by the fluid. These special particles have no degrees of 
+freedom associated, so no equations are solved on them. However, their movement is 
+fully determined by associated structural nodes. Their velocities governed by the 
+solid part affect the fluid equation naturally.
+
+This iterative procedure is based on the so-called Dirichlet-Neumann approach.
+Dirichlet boundary conditions are the prescribed velocities on the fluid side of
+the interface, whereas applied forces on the structural side represent the Neumann
+boundary conditions.
+
+The convergence criterion is based on the difference of the pressure and velocity
+values on the interface from the subsequent iterative steps. Once they are smaller
+than prescribed tolerance, the iteration is terminated and solution can proceed to
+the next step.
+
+The subproblem input files are described using
+\param{prob1} and \param{prob2} parameters, which are strings
+containing a path to sub-problem input files, the \param{prob1}
+contains input file path of the first sub-problem, which runs first
+for each solution step, the \param{prob2} contains input file path of
+the second sub-problem. The time step sequence is controlled by the number of steps
+\param{nsteps} and the time step length \param{deltaT}.
+
+Optional parameters \param{rtolv} and \param{rtolp} allow to
+specify relative norms for velocity and pressure differnce of two subsequent iteration
+step. Default values are 1.e-3. By default maximal 50 iterations are performed, if
+not specified by \param{maxiter}.
+
+Note: This problem type \textbf{is included in PFEM module} and it
+can be used only when this module is configured.
 
 \subsection{Sparse linear solver parameters}
 \label{sparselinsolver}
@@ -1380,12 +1603,9 @@ IML\_ILUPrec  &2& SMT\_CompCol & Incomplete LU Decomposition\\
 IML\_ILUPrec  &3& SMT\_DynCompRow & Incomplete LU (ILUT) with\\
               & &                 &  fillup. \\
               & &                 & The \param{precondattributes} are:\\
-              & &                 & \optField{droptol}{rn}
-\optField{partfill}{in}.\\
-              & &                 & \param{droptol} dropping
-tolerance\\
-              & &                 & \param{partfill} level of
-fill-up\\
+              & &                 & \optField{droptol}{rn} \optField{partfill}{in}.\\
+              & &                 & \param{droptol} dropping tolerance\\
+              & &                 & \param{partfill} level of fill-up\\
 \hline
 IML\_ICPrec   &4& SMT\_SymCompCol&Incomplete Cholesky\\
               & & SMT\_CompCol   &with no fill up\\
@@ -1606,6 +1826,8 @@ MPT\_T3D:  \param{meshpackage} = 0. T3d mesh interface. Default. Supports both 1
 \item
 MPT\_TARGE2:	\param{meshpackage} = 1. Interface to Targe2 2D
 mesh generator.
+\item
+MPT_SUBDIVISION: \param{meshpackage}=3. Built-in subdivision algorithm. Supports triangular 2D and tetrahedral 3D meshes. Can operate in parallel mode.
 \end{itemize}
 %
 \subsection{Initialization modules}
@@ -1938,7 +2160,7 @@ These records describe individual DofManager records (i.e. nodes or element side
 \begin{record}
   \recentry{\entKeyword{DofManagerType}}{\componentNum}
   \recentry{}{[\field{load}{ra}]}
-  \recentry{}{[\field{ndofs}{in} \field{DofIDMask}{ia}]}
+  \recentry{}{[\field{DofIDMask}{ia}]}
   \recentry{}{\optField{bc}{ia}}
   \recentry{}{\optField{ic}{ia}}
   \recentry{}{[\field{doftype}{ia} \field{masterMask}{ia}]}
@@ -1950,6 +2172,10 @@ The numbering of individual dof managers is arbitrary, it could be even non-cont
 \Pmode{In parallel mode, the label represents a global id across all partitions.}
 
 
+By default, the nodal DOFs are determined by asking all the connected elements. Specifying additional dofs can be done using the using the \param{DofIDMask} array which determines their physical interpretation.
+Each item of \param{DofIDMask} array describes the physical meaning of corresponding DOF in dof manager. Currently the following values are supported: \{u-displacement=1, v-displacement=2, w-displacement=3, u-rotation=4, v-ro\-ta\-tion=5, w-rotation=6, u-velocity=7, v-velocity=8, w-velocity=9, temperature=10, pressure=11, special dofs for gradient-type constitutive models=12 and 13, mass concentration=14, special dofs for extended finite elements (XFEM)=15--30\}.
+\textbf{It is not allowed to have two DOFs with the same physical meaning in the same DofManager.}
+
 The applied primary (Dirichlet) boundary conditions are specified using
 "bc" record, while natural boundary conditions using "load" parameter.
 \begin{itemize}
@@ -1957,20 +2183,7 @@ The applied primary (Dirichlet) boundary conditions are specified using
 \item The load "array" contains record numbers of natural boundary conditions that are applied. The required record type for natural condition is "NodalLoad". The actual value is the summation of all contributions, if more than one natural bc is applied. See section on boundary conditions for the syntax. Please note, that the values of natural bc for individual DOFs are specified in its record, not in dofmanager record.
 \end{itemize}
 
-By default, if "bc" and/or "load" parameters are omitted, no primary
-and/or natural bc are applied. Analogously, initial conditions are represented using \param{ic} array. The size of \param{ic} array should be equal to number of DOFs in dof manager. The values of this array are corresponding initial condition record numbers or zero, if no initial condition is applied to corresponding DOF (in this case zero value is assumed as value of initial condition).
-
-By default, the number of DOFs per node or side  and their physical meanings are determined by domain record (\entKeyword{domainType} keyword).
-If it is necessary to have
-different number of DOFs, then the \param{ndofs} attribute
-determines number of DOFs in DofManager, and their physical meaning is
-determined by \param{DofIDMask} array. Size of this array
-should be equal to \param{ndofs} value. Each item of \param{DofIDMask}
-array describes the physical meaning of corresponding DOF in dof manager. Currently
-the following values are supported: \{u-displacement=1, v-displacement=2,
- w-displacement=3, u-rotation=4, v-ro\-ta\-tion=5, w-rotation=6, u-velocity=7, v-velocity=8, w-velocity=9,
-temperature=10, pressure=11, special dofs for gradient-type constitutive models=12 and 13, mass concentration=14, special dofs for extended finite elements (XFEM)=15--30\}.
-\textbf{It is not allowed to have two DOFs with the same physical meaning in the same DofManager.}
+By default, if "bc" and/or "load" parameters are omitted, no primary and/or natural bc are applied. Analogously, initial conditions are represented using \param{ic} array. The size of \param{ic} array should be equal to number of DOFs in dof manager. The values of this array are corresponding initial condition record numbers or zero, if no initial condition is applied to corresponding DOF (in this case zero value is assumed as value of initial condition).
 
 Parameters \param{dofType} and \param{masterMask} allows to connect some dof manager's dofs
 (so-called ``slave'' dofs)
@@ -2141,6 +2354,24 @@ but given explicitly, as well as the connected dof managers (\param{masterDMan})
   \recentry{\entKeywordInst{ElementSide}}{}
 \end{record}
 Represents an abstraction for element side, which holds some unknowns.
+
+\item PFEMParticle \label{pfemparticles}
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{PFEMParticle}}{\field{coords}{ra}}
+\end{record}
+Represent the particle used in PFEM analysis.
+
+\item InteractionPFEMParticle \label{interactionparticle}
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{InteractionPFEMParticle}}{\field{coords}{ra}}
+  \recentry{}{\field{bc}{ia}}
+  \recentry{}{\field{coupledNode}{in}}
+\end{record}
+Represent a special particle used in the PFEM-part of the FluidStructureProblem. The particle is 
+attached to \param{coupledNode} from the structural counter part. InteractionBoundaryCondition~\ref{interactionbc} must be prescribed under \param{bc} to access the velocities from solid nodes.
+
 \end{itemize}
 
 \subsection{Element records}
@@ -2214,6 +2445,31 @@ corresponding element is local (this array should have size equal to one).
 
 Available material models, their outline and
 corresponding parameters are described in separate \textbf{Element Library Manual.}
+
+
+\subsection{Set records}
+\label{_SetRecords}
+
+Sets specify regions of the geometry as a combination of volumes, surfaces, edges, and nodes.
+The main usage of sets are to connect regions of elements to a given cross section or apply a boundary condition, though sets can be used for many other things as well.
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{Set}}{\componentNum}
+  \recentry{}{\optField{elements}{ia} \optField{elementranges}{rl}}
+  \recentry{}{\optField{nodes}{ia} \optField{noderanges}{rl}}
+  \recentry{}{\optField{elementboundaries}{ia} \optField{elementedges}{ia}}
+\end{record}
+
+Volumes (elements) and nodes can be specified using either a list, \param{elements}, \param{nodes}, or with a range list \param{elementranges}, \param{noderanges}.
+Edges \param{elementedges}, and surfaces \param{elementboundaries}, are specified in a interleaved list, every other number specifying the element, and edge/surface number (the total length of the list being twice the number of surfaces/edges).
+The internal numbering of edges/surfaces is available in the \textbf{Element Library Manual}.
+
+Note that edge loads (singular loads given in ``newton per length'' (or equivalent), should be applied to \param{elementedges}, surface loads ``newton per area'' on \param{elementboundaries}, and bulk loads ``newton per volume'' on \param{elements}.
+
+Example 1: A deadweight (gravity) load would be applied to the \param{elements} in a set, while a distributed line load would be applied to the midline ``edge'' of the beam element, thus should be applied to a \param{elementedges} set. In the latter case, the midline of the beam is defined as the first (and only) ``edge'' of the beam.
+
+Example 2: Axisymmetric structural element analysis: A deadweight load would be applied to \param{elements} in a set. A external pressure would be defined as a surface load an be applied to the \param{elementboundaries} in a set. The element integrates the load (analytically) around the axis, so the load would still count as a surface load.
+
 
 \subsection{Cross section records}
 \label{_CrossSectionRecords}
@@ -2297,6 +2553,14 @@ The model requires to specify a material model corresponding to particular fiber
 %%Represents cross section abstraction for heat transfer problems.
 %%The input parameters are: thick - determined using \param{thick} parameter
 %%and width - determined using \param{width} parameter of cross section.
+
+\item
+Warping cross section \\
+\begin{record}[0.9\textwidth]
+\recentry{\entKeywordInst{WarpingCS}}{\field{WarpingNode}{in}}
+\end{record}
+Represents the cross section for Free warping analysis, see section \ref{FreeWarping}. The \param{WarpingNode} parametr defines the number of external node with prescribed boundary condition which corresponds to the relative twist of warping cross section.
+
 \end{itemize}
 
 \subsection{Material type  records}
@@ -2381,7 +2645,7 @@ following:
 \begin{record}
   \recentry{\entKeyword{EntType}}{\componentNum}
   \recentry{}{\field{loadTimeFunction}{in}}
-  \recentry{}{\optField{valType}{in} \optField{defaultDofs}{ia}}
+  \recentry{}{\optField{valType}{in} \optField{dofs}{ia}}
   \recentry{}{\optField{is\-Impo\-sed\-Ti\-me\-Fun\-ction}{in}}
 \end{record}
 
@@ -2391,11 +2655,11 @@ Time function value (given by \param{loadTimeFunction} parameter) is a multiplie
 each  component (value of loading or value of boundary condition)
 describes its time variation.
 The optional parameter \param{valType} allows to determine the
-physical meaning of bc value, which is sometimes requared. Supported
+physical meaning of bc value, which is sometimes required. Supported
 values are (1 - temperature, 2 - force/traction,
 3 - pressure, 4 - humudity, 5 - velocity, 6 - displacement).
-Another optional parameter \param{defaultDofs} is used to determine which dofs the boundary condition should act
-upon when new nodes are created on the boundaries.
+Another optional parameter \param{dofs} is used to determine which dofs the boundary condition should act
+upon. It is not relevant for all BCs..
 
 The nonzero value of \param{isImposedTimeFunction} time function
 indicates that given boundary condition is active, zero value
@@ -2526,6 +2790,15 @@ where $r_i$ are unknowns related to DOFs determined by \param{dofmans} and \para
 
 The individual DOFs are determined using dof manager numbers (\param{dofmans} array) and corresponding DOF indices (\param{dofs}). The weights corresponding to participating DOFs are specified using \param{weights} array. The weights are multiplied by value returned by load time function, associated to individual weight using optional \param{weightsLtf} array. By default, all weights are set to 1. The constant $c$ is determined by \param{rhs} parameter and it is multiplied by the value of load time function, specified using \param{rhsLtf} parameter, or by 1 by default. The characteristic component, to which this boundary condition contributes must be identified using \param{lhstype} and \param{rhsType} parameters, values of which are corresponding to CharType enum. The left hand side contribution is assembled into terms identified by \param{lhstype}. The rhs contribution is assembled into the term identified by \param{rhsType} parameter. Note, that multiple values are allowed, this allows to select all variants of stifness matrix, for example. Note, that the size of \param{dofmans}, \param{dofs}, \param{weights}, \param{weightsLtf} arrays should be equal.
 
+\item InteractionBoundaryCondition \label{interactionbc}
+
+\noindent
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{InteractionBoundaryCondition}}{}
+\end{record}
+
+Is a special boundary condition prescribed on InteractionPFEMParticles~\ref{interactionparticle} in the PFEM part of the FluidStructureProblem. This sort of particles is regarded as it would have prescribed velocities, but the values change dynamically, as the solid part deforms. The velocities are obtained from coupled structural nodes.
+
 \end{itemize}
 \paragraph{Body loads}
 \begin{itemize}
@@ -2533,22 +2806,22 @@ The individual DOFs are determined using dof manager numbers (\param{dofmans} ar
 
 \noindent
 \begin{record}[0.9\textwidth]
-  \recentry{\entKeywordInst{DeadWeight}}{\field{Components}{ra}}
+  \recentry{\entKeywordInst{DeadWeight}}{\field{components}{ra}}
 \end{record}
 Represents dead weight loading applied on element volume (for
 structural elements). For transport problems, it represents the
 internal source, i.e. the rate of (heat) generated per unit volume.
 The magnitude of load for specific i-th DOF is computed as product of material density,
-corresponding volume and i-th member of \param{Components} array.
+corresponding volume and i-th member of \param{components} array.
 \item Structural temperature load
 
 \noindent
 \begin{record}[0.9\textwidth]
-  \recentry{\entKeywordInst{StructTemperatureLoad}~}{\field{Components}{ra}}
+  \recentry{\entKeywordInst{StructTemperatureLoad}~}{\field{components}{ra}}
 \end{record}
 
 Represents temperature loading imposed to some elements. The members of
-\param{Components} array represent the change of temperature (or change
+\param{components} array represent the change of temperature (or change
 of temperature gradient) corresponding to
 specific element strain components. See element library manual for details.
 
@@ -2556,9 +2829,9 @@ specific element strain components. See element library manual for details.
 
 \noindent
 \begin{record}[0.9\textwidth]
-  \recentry{\entKeywordInst{StructEigenstrainLoad}~}{\field{Components}{ra}}
+  \recentry{\entKeywordInst{StructEigenstrainLoad}~}{\field{components}{ra}}
 \end{record}
-Prescribes eigenstrain (or stress-free strain) to a structural element. The array of \param{Components} is defined in the global coordinate system. The number of components corresponds to a material mode, e.g. plane stress has three components and 3D six. Periodic boundary conditions can be imposed using eigenstrains and master-slave nodes. Consider decomposition of strain into average and fluctuating part
+Prescribes eigenstrain (or stress-free strain) to a structural element. The array of \param{components} is defined in the global coordinate system. The number of components corresponds to a material mode, e.g. plane stress has three components and 3D six. Periodic boundary conditions can be imposed using eigenstrains and master-slave nodes. Consider decomposition of strain into average and fluctuating part
 \begin{equation}
 \tens{\strain}(\vect{x}) = \langle \tens{\strain} \rangle + \tens{\strain}^*(\vect{x})
 \end{equation}
@@ -2571,9 +2844,9 @@ where $\langle \tens{\strain} \rangle$ can be imposed as eigenstrain over the do
 \item Constant edge fluxes (load)
 
 \begin{record}[0.9\textwidth]
-  \recentry{\entKeywordInst{ConstantEdgeLoad}}{\field{ndofs}{in}}
+  \recentry{\entKeywordInst{ConstantEdgeLoad}}{}
   \recentry{}{\field{loadType}{in}}
-  \recentry{}{\field{Components}{ra}}
+  \recentry{}{\field{components}{ra}}
   \recentry{}{\optField{dofexcludemask}{ia}}
   \recentry{}{\optField{csType}{in}}
   \recentry{}{\optField{properties}{dc}}
@@ -2582,40 +2855,40 @@ where $\langle \tens{\strain} \rangle$ can be imposed as eigenstrain over the do
 \item Constant surface fluxes (load)
 
 \begin{record}[0.9\textwidth]
-  \recentry{\entKeywordInst{ConstantSurfaceLoad}}{\field{ndofs}{in}}
+  \recentry{\entKeywordInst{ConstantSurfaceLoad}}{}
   \recentry{}{\field{loadType}{in}}
-  \recentry{}{\field{Components}{ra}}
+  \recentry{}{\field{components}{ra}}
   \recentry{}{\optField{dofexcludemask}{ia}}
   \recentry{}{\optField{csType}{in}}
   \recentry{}{\optField{properties}{dc}}
   \recentry{}{\optField{propertytf}{dc}}
 \end{record}
-Represent constant edge/surface loads or boundary conditions. The \param{ndofs} parameter must be set
-equal to element's number of unknowns. Parameter \param{loadType}
-distinguishes the type of boundary condition. Supported values are:
-2 - prescribed flux input (Neumann boundary condition), 3 - uniform distributed load or the convection (Newton) bc. The transfer coefficient is defined by keyword \param{properties}, see later.
-If the boundary condition corresponds to distributed force load, the
-\param{Components} array contains components of distributed load
-corresponding to element unknowns.
+Represent constant edge/surface loads or boundary conditions.
+Parameter \param{loadType} distinguishes the type of boundary condition. Supported values are specified in bctype.h:
+2 - prescribed flux input (Neumann boundary condition), 3 - uniform distributed load or the convection (Newton) bc, 7-Stefan-Bolzmann law for radiation.
+
+If the boundary condition corresponds to distributed force load, the \param{components} array contains components of distributed load corresponding to element unknowns.
 The load is specified for all DOFs of object to which is associated.
-For some types of boundary conditions the zero value of load does not mean
-that the load is not applied (Newton's type of bc, for example). Then
-some mask, which allows to exclude specific dofs is necessary.
+For some types of boundary conditions the zero value of load does not mean that the load is not applied (Newton's type of bc, for example).
+Then some mask, which allows to exclude specific dofs is necessary.
 The \param{dofexcludemask} parameter is introduced to alow this.
-It should have the same size as \param{Components} array, and by
+It should have the same size as \param{components} array, and by
 default is filled with zeroes. If some value of dofExcludeMask is set
 to nonzero, then the corresponding componentArray
 is set to zero and load is not applied for this DOF.
 If the boundary condition corresponds to prescribed flux input, then
-the \param{Components} array contains the components of prescribed
+the \param{components} array contains the components of prescribed
 input flux corresponding to element unknowns.
-If the boundary condition is a convection boundary condition
-(\param{loadType} = 6) then \param{Components} array contains the
+
+\param{loadType} = 3 specifies convection boundary condition then \param{components} array contains the
 environmental values (temperature of the environment) corresponding to
 element unknowns, and \param{properties} dictionary should contain
 value of transfer (convection) coefficient (assumed to be a constant) under the key 'a'.
 
-The properties can vary in time. Each property can have associated time function which determines its time variation. The time functions are set up using optional \param{propertytf} dictionary, containing for selected properties the corresponding time function number. The time function must be registered under the same key as in \param{properties} dictionary. The property value is then computed by product of property value (determined by \param{properties}) and corresponding time finction evaluated at given time. If no time function provided for particula property, a unit constant function is assumed.
+\param{loadType} = 7 specifies radiative boundary condition and requires to specify emmisivity 
+$\varepsilon \in \langle 0,1 \rangle$ and the \param{components} array contains the environmental values (temperature of the environment).
+
+The properties can vary in time. Each property can have associated time function which determines its time variation. The time functions are set up using optional \param{propertytf} dictionary, containing for selected properties the corresponding time function number. The time function must be registered under the same key as in \param{properties} dictionary. The property value is then computed by product of property value (determined by \param{properties}) and corresponding time function evaluated at given time. If no time function provided for particula property, a unit constant function is assumed.
 
 The load can be defined in global coordinate system (\param{csType} =
 0, default) or in entity - specific local coordinate system
@@ -2623,21 +2896,40 @@ The load can be defined in global coordinate system (\param{csType} =
 \item Linear edge flux (load)
 
 \begin{record}[0.9\textwidth]
-  \recentry{\entKeywordInst{LinearEdgeLoad}}{\field{ndofs}{in}}
+  \recentry{\entKeywordInst{LinearEdgeLoad}}{}
   \recentry{}{\field{loadType}{in}}
-  \recentry{}{\field{Components}{ra}}
+  \recentry{}{\field{components}{ra}}
   \recentry{}{\optField{dofexcludemask}{ia}}
   \recentry{}{\optField{csType}{in}}
 \end{record}
 
-Represents linear edge load. The meanings of parameters \param{ndofs},
+Represents linear edge load. The meanings of parameters \param{csType} and \param{loadType} are the same as for
+\entKeywordInst{ConstantEdgeLoad}.
+In \param{components} array are stored load components for corresponding unknowns at the
+beginning of edge, followed by values valid for end of edge.
+The load can be defined in global coordinate system (\param{csType} = 0, default) or in entity - specific local coordinate system
+(\param{csType} = 1).
+\item InteractionLoad
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{InteractionLoad}}{\field{ndofs}{in}}
+  \recentry{}{\field{loadType}{in}}
+  \recentry{}{\field{Components}{ra}}
+  \recentry{}{\optField{csType}{in}}
+  \recentry{}{\field{coupledparticles}{ia}}
+\end{record}
+
+Represents a fluid pressure induced load in the solid part of the FluidStructureProblem. 
+The meanings of parameters \param{ndofs},
 \param{csType}, and \param{loadType} are the same as for
-\entKeywordInst{ConstantEdgeLoad}. In \param{Components}
+\entKeywordInst{LinearEdgeLoad}. In \param{Components}
 array are stored load components for corresponding unknowns at the
 beginning of edge (\param{ndofs} values), followed by values valid for
-end of edge (\param{ndofs} values). The load can be defined in global coordinate system (\param{csType} =
-0, default) or in entity - specific local coordinate system
-(\param{csType} = 1).
+end of edge (\param{ndofs} values). The load should be defined in global 
+coordinate system (\param{csType} = 0) as it acts in normal direction of the edge.
+Array \param{coupledparticles} assign PFEMParticles from the fluid part of the problem 
+providing fluid pressure.
+
 \end{itemize}
 
 
@@ -2813,11 +3105,8 @@ specified on a separate line according to\\
 \section{Examples}
 \subsection {Beam structure}
 The example of input file for simple beam structure is presented.
-Structure geometry and its constitutive and geometrical properties are
-shown in fig. (\ref{ex01}). The linear static analysis is required,
-the influence of shear is neglected. Please note that one input line
-which is too long to fit to page, is separated into two lines using
-backslash '$\backslash$' character, but OOFEM requires that it must be typed as one single line.
+Structure geometry and its constitutive and geometrical properties are shown in fig. (\ref{ex01}).
+The linear static analysis is required, the influence of shear is neglected.
 \begin{figure}[htb]
 \begin{htmlonly}
   \centerline{\includegraphics[width=0.7\textwidth]{ex01}}
@@ -2830,33 +3119,43 @@ backslash '$\backslash$' character, but OOFEM requires that it must be typed as 
 
 \end{figure}
 {\small\begin{verbatim}
-test41.out
+beam_example.out
 Simple Beam Structure - linear analysis
 #only momentum influence to the displacements is taken into account
 #beamShearCoeff is artificially enlarged.
-LinearStatic 1 nsteps 3
+LinearStatic nsteps 3
 domain 2dBeam
 OutputManager tstep_all dofman_all element_all
-ndofman 6 nelem 5 ncrosssect 1 nmat 1 nbc 5 nic 0 nltf 3
-node 1 coords 3 0.  0.  0.  bc 3 0 1 0
-node 2 coords 3 2.4 0.  0.  bc 3 0 0 0
-node 3 coords 3 3.8 0.  0.  bc 3 0 0 1
-node 4 coords 3 5.8 0.  1.5 bc 3 0 0 0 load 1 4
-node 5 coords 3 7.8 0.  3.0 bc 3 0 1 0
-node 6 coords 3 2.4 0.  3.0 bc 3 1 1 2
-Beam2d 1 nodes 2 1 2 mat 1 crossSect 1 boundaryLoads  2 3 1 bodyLoads 1 5
-Beam2d 2 nodes 2 2 3 mat 1 crossSect 1 DofsToCondense 1 6   bodyLoads 1 5
-Beam2d 3 nodes 2 3 4 mat 1 crossSect 1 DofsToCondense 1 3
-Beam2d 4 nodes 2 4 5 mat 1 crossSect 1
-Beam2d 5 nodes 2 6 2 mat 1 crossSect 1 DofsToCondense 1 6
-SimpleCS 1 area 0.162 Iy 0.0039366 beamShearCoeff 1.e18 thick 0.54
+ndofman 8 nelem 5 ncrosssect 1 nmat 1 nbc 5 nic 0 nltf 3 nset 5
+node 1 coords 3 0.  0.  0.
+node 2 coords 3 2.4 0.  0.
+# Create a second "hinged" node at 2
+node 21 coords 3 2.4 0.  0. dofidmask 3 1 3 5 doftype 3 1 1 0 mastermask 3 2 2 0
+node 3 coords 3 3.8 0.  0.
+# Create a second "hinged" node at 3
+node 31 coords 3 3.8 0.  0. dofidmask 3 1 3 5 doftype 3 1 1 0 mastermask 3 3 3 0
+node 4 coords 3 5.8 0.  1.5
+node 5 coords 3 7.8 0.  3.0
+node 6 coords 3 2.4 0.  3.0
+Beam2d 1 nodes 2 1 2 bodyLoads 1 5
+Beam2d 2 nodes 2 2 3 bodyLoads 1 5
+# Connect to the hinged node 31!
+Beam2d 3 nodes 2 31 4
+Beam2d 4 nodes 2 4 5
+# Connect to the hinged node 21!
+Beam2d 5 nodes 2 6 21
+Set 1 elementranges {(1 5)}
+Set 2 nodes 2 1 5
+Set 3 nodes 1 6
+Set 4 nodes 1 4
+Set 5 elementedges 2 1 1
+SimpleCS 1 area 0.162 Iy 0.0039366 beamShearCoeff 1.e18 thick 0.54 material 1 set 1
 IsoLE 1 d 1. E 30.e6 n 0.2 tAlpha 1.2e-5
-BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
-BoundaryCondition  2 loadTimeFunction 2 prescribedvalue -0.006e-3
-ConstantEdgeLoad 3 loadTimeFunction 1 Components 3 0. 10. 0.0\
-                   loadType 3 ndofs 3
-NodalLoad 4 loadTimeFunction 1 Components 3 -18.0 24.0 0.0
-StructTemperatureLoad 5 loadTimeFunction 3 Components 2 30.0 -20.0
+BoundaryCondition 1 loadTimeFunction 1 dofs 3 1 values 1 0.0 set 2
+BoundaryCondition 2 loadTimeFunction 2 dofs 3 1 3 5 values 3 0.0 0.0 -0.006e-3 set 3
+ConstantEdgeLoad 3 loadTimeFunction 1 dofs 1 3 components 1 10. loadType 3 set 5
+NodalLoad 4 loadTimeFunction 1 dofs 2 1 3 components 2 -18. 24. set 4
+StructTemperatureLoad 5 loadTimeFunction 3 components 2 30. -20.
 PeakFunction 1 t 1.0 f(t) 1.
 PeakFunction 2 t 2.0 f(t) 1.
 PeakFunction 3 t 3.0 f(t) 1.
@@ -2878,24 +3177,28 @@ Patch test of PlaneStress2d elements -> pure compression
 LinearStatic nsteps 1
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
-ndofman 8 nelem 5 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1
-node 1 coords 3  0.0   0.0   0.0  bc 2 1 1
-node 2 coords 3  0.0   4.0   0.0  bc 2 1 1
-node 3 coords 3  2.0   2.0   0.0  bc 2 0 0
-node 4 coords 3  3.0   1.0   0.0  bc 2 0 0
-node 5 coords 3  8.0   0.8   0.0  bc 2 0 0
-node 6 coords 3  7.0   3.0   0.0  bc 2 0 0
-node 7 coords 3  9.0   0.0   0.0  bc 2 0 1  load 1 2
-node 8 coords 3  9.0   4.0   0.0  bc 2 0 1  load 1 2
-PlaneStress2d 1 nodes 4 1 4 3 2  crossSect 1 mat 1 NIP 1
-PlaneStress2d 2 nodes 4 1 7 5 4  crossSect 1 mat 1 NIP 1
-PlaneStress2d 3 nodes 4 4 5 6 3  crossSect 1 mat 1 NIP 1
-PlaneStress2d 4 nodes 4 3 6 8 2  crossSect 1 mat 1 NIP 1
-PlaneStress2d 5 nodes 4 5 7 8 6  crossSect 1 mat 1 NIP 1
-SimpleCS 1 thick 1.0 width 1.0
+ndofman 8 nelem 5 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 1 nset 3
+node 1 coords 3  0.0   0.0   0.0
+node 2 coords 3  0.0   4.0   0.0
+node 3 coords 3  2.0   2.0   0.0
+node 4 coords 3  3.0   1.0   0.0
+node 5 coords 3  8.0   0.8   0.0
+node 6 coords 3  7.0   3.0   0.0
+node 7 coords 3  9.0   0.0   0.0
+node 8 coords 3  9.0   4.0   0.0
+PlaneStress2d 1 nodes 4 1 4 3 2  NIP 1
+PlaneStress2d 2 nodes 4 1 7 5 4  NIP 1
+PlaneStress2d 3 nodes 4 4 5 6 3  NIP 1
+PlaneStress2d 4 nodes 4 3 6 8 2  NIP 1
+PlaneStress2d 5 nodes 4 5 7 8 6  NIP 1
+Set 1 elementranges {(1 5)}
+Set 2 nodes 2 1 2
+Set 3 nodes 2 7 8
+SimpleCS 1 thick 1.0 width 1.0 material 1 set 1
 IsoLE 1 d 0. E 15.0 n 0.25 talpha 1.0
-BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
-NodalLoad 2 loadTimeFunction 1 Components 2 2.5 0.0
+BoundaryCondition 1 loadTimeFunction 1 dofs 2 1 2 values 1 0.0 set 2
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 2 values 1 0.0 set 3
+NodalLoad 3 loadTimeFunction 1 dofs 2 1 2 components 2 2.5 0.0 set 3
 ConstantFunction 1 f(t) 1.0
 \end{verbatim}}
 %\vspace*{1.5cm}
@@ -2931,19 +3234,24 @@ fig. \ref{nodecut-ex01}.
 partest.out.0
 Parallel test of explicit oofem computation
 #
-NlDEIDynamic nsteps 3 dumpcoef 0.0 deltaT 1.0 NodeCutMode
+NlDEIDynamic nsteps 3 dumpcoef 0.0 deltaT 1.0
 domain 2dTruss
 #
 OutputManager tstep_all dofman_all element_all
-ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1
+ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 1 nset 4
 #
-Node 1 coords 3 0. 0. 0. bc 2 1 1
-Node 2 coords 3 0. 0. 2. bc 2 1 0 Shared partitions 1 1
-Truss2d 1 nodes 2 1 2 mat 1 crossSect 1
-SimpleCS 1 thick 0.1 width 10.0
-IsoLE 1  tAlpha 0.000012  d 10.0  E 1.0  n 0.2
-BoundaryCondition  1 loadTimeFunction 1 conditions 1 d 0.0
-NodalLoad 2 loadTimeFunction 1 Components 2 0. 1.0
+Node 1 coords 3 0. 0. 0.
+Node 2 coords 3 0. 0. 2. Shared partitions 1 1
+Truss2d 1 nodes 2 1 2
+Set 1 elements 1 1
+Set 2 nodes 2 1 2
+Set 3 nodes 1 1
+Set 4 nodes 0
+SimpleCS 1 thick 0.1 width 10.0 material 1 set 1
+IsoLE 1 tAlpha 0.000012 d 10.0 E 1.0 n 0.2
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 2
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 3 values 1 0.0 set 3
+NodalLoad 3 loadTimeFunction 1 dofs 2 1 3 components 2 0. 1.0 set 4
 ConstantFunction 1 f(t) 1.0
 
 #
@@ -2952,19 +3260,24 @@ ConstantFunction 1 f(t) 1.0
 partest.out.1
 Parallel test of explicit oofem computation
 #
-NlDEIDynamic nsteps 3 dumpcoef 0.0 deltaT 1.0 NodeCutMode
+NlDEIDynamic nsteps 3 dumpcoef 0.0 deltaT 1.0
 domain 2dTruss
 #
 OutputManager tstep_all dofman_all element_all
-ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1
+ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 1 nset 4
 #
-Node 2 coords 3 0. 0. 2. bc 2 1 0 Shared partitions 1 0
-Node 3 coords 3 0. 0. 4. bc 2 1 0 load 1 2
-Truss2d 2 nodes 2 2 3 mat 1 crossSect 1
-SimpleCS 1 thick 0.1 width 10.0
-IsoLE 1  tAlpha 0.000012  d 10.0  E 1.0  n 0.2
-BoundaryCondition  1 loadTimeFunction 1 conditions 1 d 0.0
-NodalLoad 2 loadTimeFunction 1 Components 2 0. 1.0
+Node 2 coords 3 0. 0. 2. Shared partitions 1 0
+Node 3 coords 3 0. 0. 4.
+Truss2d 2 nodes 2 2 3
+Set 1 elements 1 2
+Set 2 nodes 2 2 3
+Set 3 nodes 0
+Set 4 nodes 1 3
+SimpleCS 1 thick 0.1 width 10.0 material 1 set 1
+IsoLE 1 tAlpha 0.000012 d 10.0 E 1.0 n 0.2
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 2
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 3 values 1 0.0 set 3
+NodalLoad 3 loadTimeFunction 1 dofs 2 1 3 components 2 0. 1.0 set 4
 ConstantFunction 1 f(t) 1.0
 \end{verbatim}
 
@@ -2992,22 +3305,26 @@ fig. \ref{nodecut-ex01}.
 partest2.out.0
 Parallel test of explicit oofem computation
 #
-NlDEIDynamic nsteps 5 dumpcoef 0.0 deltaT 1.0 ElementCutMode
+NlDEIDynamic nsteps 5 dumpcoef 0.0 deltaT 1.0
 domain 2dTruss
 #
 OutputManager tstep_all dofman_all element_all
-ndofman 3 nelem 2 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1
+ndofman 3 nelem 2 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 1 nset 4
 #
-Node 1 coords 3 0. 0. 0. bc 2 1 1
-Node 2 coords 3 0. 0. 2. bc 2 1 0
-Node 3 coords 3 0. 0. 4. bc 2 1 0 \
-       Remote partitions 1 1 load 1 2
-Truss2d 1 nodes 2 1 2 mat 1 crossSect 1
-Truss2d 2 nodes 2 2 3 mat 1 crossSect 1
-SimpleCS 1 thick 0.1 width 10.0
-IsoLE 1  tAlpha 0.000012  d 10.0  E 1.0  n 0.2
-BoundaryCondition  1 loadTimeFunction 1 conditions 1 d 0.0
-NodalLoad 2 loadTimeFunction 1 Components 2 0. 1.0
+Node 1 coords 3 0. 0. 0.
+Node 2 coords 3 0. 0. 2.
+Node 3 coords 3 0. 0. 4. Remote partitions 1 1
+Truss2d 1 nodes 2 1 2
+Truss2d 2 nodes 2 2 3
+Set 1 elements 2 1 2
+Set 2 nodes 3 1 2 3
+Set 3 nodes 1 1
+Set 4 nodes 1 3
+SimpleCS 1 thick 0.1 width 10.0 material 1 set 1
+IsoLE 1 tAlpha 0.000012 d 10.0 E 1.0 n 0.2
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 2
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 3 values 1 0.0 set 3
+NodalLoad 3 loadTimeFunction 1 dofs 2 1 3 components 2 0. 1.0 set 4
 ConstantFunction 1 f(t) 1.0
 
 
@@ -3017,21 +3334,34 @@ ConstantFunction 1 f(t) 1.0
 partest2.out.1
 Parallel test of explicit oofem computation
 #
-NlDEIDynamic nsteps 5 dumpcoef 0.0 deltaT 1.0 ElementCutMode
+NlDEIDynamic nsteps 5 dumpcoef 0.0 deltaT 1.0
 domain 2dTruss
 #
 OutputManager tstep_all dofman_all element_all
-ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1
+ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 1 nset 4
 #
-Node 2 coords 3 0. 0. 2. bc 2 1 0 Remote partitions 1 0
-Node 3 coords 3 0. 0. 4. bc 2 1 0 load 1 2
-Truss2d 2 nodes 2 2 3 mat 1 crossSect 1
-SimpleCS 1 thick 0.1 width 10.0
-IsoLE 1  tAlpha 0.000012  d 10.0  E 1.0  n 0.2
-BoundaryCondition  1 loadTimeFunction 1 conditions 1 d 0.0
-NodalLoad 2 loadTimeFunction 1 Components 2 0. 1.0
+Node 2 coords 3 0. 0. 2 Remote partitions 1 0
+Node 3 coords 3 0. 0. 4
+Truss2d 2 nodes 2 2 3
+Set 1 elements 1 2
+Set 2 nodes 2 2 3
+Set 3 nodes 0
+Set 4 nodes 1 3
+SimpleCS 1 thick 0.1 width 10.0 material 1 set 1
+IsoLE 1 tAlpha 0.000012 d 10.0 E 1.0 n 0.2
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 2
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 3 values 1 0.0 set 3
+NodalLoad 3 loadTimeFunction 1 dofs 2 1 3 components 2 0. 1.0 set 4
 ConstantFunction 1 f(t) 1.0
 \end{verbatim}
+
+\addcontentsline{toc}{section}{References}
+\begin{thebibliography}{9}
+\bibitem{Codina01} R. Codina: Pressure Stability in Fractional Step Finite Element Methods for Incompressible Flows. {\em Journal of Computational Physics} 170(1): 112 -- 140, 2001.
+\bibitem{Idelsohn04} S. R. Idelsohn, E. O\~nate, E. and F. Del Pin.
+\newblock The particle finite element method: a powerful tool to solve incompressible flows with free-surfaces and breaking waves.
+\newblock {\em International Journal for Numerical Methods in Engineering}, 61: 964--989, 2004.
+\end{thebibliography}
 
 \section{Figures}
 %\subsection {Node cut mode}

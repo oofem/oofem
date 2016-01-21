@@ -42,7 +42,6 @@
 #include "contextioerr.h"
 #include "classfactory.h"
 
-#include <cstring>
 
 namespace oofem {
 REGISTER_Material(RCSDEMaterial);
@@ -84,7 +83,6 @@ RCSDEMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     RCSDEMaterialStatus *status = static_cast< RCSDEMaterialStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
-    //this->initGpForNewStep(gp);
 
     // subtract stress independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
@@ -206,7 +204,6 @@ RCSDEMaterial :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
 
         if ( ( rMode == TangentStiffness ) || ( rMode == SecantStiffness ) ) {
             FloatMatrix reducedAnswer;
-            IntArray mask;
             double dCoeff;
 
             reducedAnswer = * status->giveDs0Matrix();

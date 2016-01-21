@@ -220,7 +220,6 @@ PrimaryField :: applyInitialCondition(InitialCondition &ic)
         return;
     }
 
-    IntArray loc_s, loc_ps;
     Domain *d = ic.giveDomain();
     Set *set = d->giveSet(ic.giveSetNumber());
     TimeStep *tStep = emodel->giveSolutionStepWhenIcApply();
@@ -371,15 +370,43 @@ PrimaryField :: __evaluateAt(FloatArray &answer, FloatArray &coords,
                              ValueModeType mode, TimeStep *tStep,
                              IntArray *dofId)
 {
-    Element *bgelem;
     Domain *domain = emodel->giveDomain(domainIndx);
     SpatialLocalizer *sl = domain->giveSpatialLocalizer();
+
+#if 0
+    // locate background element
+    FloatArray lcoords, closest;
+    Element *bgelem = sl->giveElementClosestToPoint(lcoords, closest, coords);
+    if ( bgelem == NULL ) {
+        return 1;
+    }
+
+    if ( dofId ) {
+        bgelem->computeField(mode, tStep, lcoords, answer);
+    } else {
+        FloatArray field;
+        IntArray elemDofId;
+        bgelem->giveElementDofIDMask(elemDofId);
+        bgelem->computeField(mode, tStep, lcoords, field);
+        answer.resize( dofId->giveSize() );
+        answer.zero();
+        for ( int i = 1; i <= dofId->giveSize(); ++i ) {
+            int pos = elemDofId.findFirstIndexOf(dofId->at(i));
+            if ( pos > 0 ) {
+                answer.at(pos) = field.at(i);
+            }
+        }
+    }
+
+    return 0;
+#else
+    Element *bgelem;
     // locate background element
     if ( ( bgelem = sl->giveElementContainingPoint(coords) ) == NULL ) {
         //_error("PrimaryField::evaluateAt: point not found in domain\n");
         return 1;
     }
-
+    
     EIPrimaryFieldInterface *interface = static_cast< EIPrimaryFieldInterface * >( bgelem->giveInterface(EIPrimaryFieldInterfaceType) );
     if ( interface ) {
         if ( dofId ) {
@@ -393,6 +420,7 @@ PrimaryField :: __evaluateAt(FloatArray &answer, FloatArray &coords,
         OOFEM_ERROR("background element does not support EIPrimaryFiledInterface");
         return 1; // failed
     }
+#endif
 }
 
 int

@@ -63,8 +63,11 @@ J2Mat :: initializeFrom(InputRecord *ir)
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
     double value;
 
-    MPlasticMaterial2 :: initializeFrom(ir);
-    linearElasticMaterial->initializeFrom(ir);
+    result = MPlasticMaterial2 :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
+    
+    result = linearElasticMaterial->initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     IR_GIVE_FIELD(ir, value, _IFT_J2Mat_ry);
     k = value / sqrt(3.0);
@@ -98,14 +101,8 @@ J2Mat :: initializeFrom(InputRecord *ir)
 
 MaterialStatus *
 J2Mat :: CreateStatus(GaussPoint *gp) const
-/*
- * creates new  material status  corresponding to this class
- */
 {
-    MPlasticMaterial2Status *status;
-
-    status = new MPlasticMaterial2Status(1, this->giveDomain(), gp);
-    return status;
+    return new MPlasticMaterial2Status(1, this->giveDomain(), gp, this->giveSizeOfReducedHardeningVarsVector(gp));
 }
 
 int
@@ -126,7 +123,7 @@ J2Mat :: giveSizeOfFullHardeningVarsVector()
 }
 
 int
-J2Mat :: giveSizeOfReducedHardeningVarsVector(GaussPoint *gp)
+J2Mat :: giveSizeOfReducedHardeningVarsVector(GaussPoint *gp) const
 {
     /* Returns the size of hardening variables vector */
     int size = 0;
@@ -222,9 +219,9 @@ J2Mat :: computeStrainHardeningVarsIncrement(FloatArray &answer, GaussPoint *gp,
     answer.resize(size);
 
     if ( this->kinematicHardeningFlag ) {
-        int i, sizer = dplasticStrain.giveSize();
+        int sizer = dplasticStrain.giveSize();
         double coeff = sqrt(2.) * ( 2. / 3. );
-        for ( i = 1; i <= sizer; i++ ) {
+        for ( int i = 1; i <= sizer; i++ ) {
             answer.at(i) = dplasticStrain.at(i) * coeff;
         }
     }
@@ -239,7 +236,7 @@ void
 J2Mat :: computeKGradientVector(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp, FloatArray &fullStressVector,
                                 const FloatArray &strainSpaceHardeningVariables)
 {
-    int i, kcount = 0, size = this->giveSizeOfReducedHardeningVarsVector(gp);
+    int kcount = 0, size = this->giveSizeOfReducedHardeningVarsVector(gp);
     FloatArray reducedKinematicGrad;
 
     if ( !hasHardening() ) {
@@ -253,7 +250,7 @@ J2Mat :: computeKGradientVector(FloatArray &answer, functType ftype, int isurf, 
     if ( this->kinematicHardeningFlag ) {
         this->computeReducedStressGradientVector(reducedKinematicGrad, ftype, isurf, gp, fullStressVector, strainSpaceHardeningVariables);
         kcount = reducedKinematicGrad.giveSize();
-        for ( i = 1; i <= kcount; i++ ) {
+        for ( int i = 1; i <= kcount; i++ ) {
             answer.at(i) = ( -1.0 ) * this->kinematicModuli * reducedKinematicGrad.at(i);
         }
     }
@@ -274,13 +271,12 @@ J2Mat :: computeReducedHardeningVarsSigmaGradient(FloatMatrix &answer, GaussPoin
     answer.zero();
 
     if ( this->kinematicHardeningFlag ) {
-        int i, j;
         double coeff = sqrt(2.) * ( 2. / 3. ) * gamma.at(1);
         FloatMatrix h;
 
         this->computeReducedSSGradientMatrix(h, 1, gp, fullStressVector, strainSpaceHardeningVars);
-        for ( i = 1; i <= rsize; i++ ) {
-            for ( j = 1; j <= rsize; j++ ) {
+        for ( int i = 1; i <= rsize; i++ ) {
+            for ( int j = 1; j <= rsize; j++ ) {
                 answer.at(i, j) = coeff * h.at(i, j);
             }
         }
@@ -298,12 +294,12 @@ J2Mat :: computeReducedHardeningVarsLamGradient(FloatMatrix &answer, GaussPoint 
     answer.resize(size, 1);
 
     if ( this->kinematicHardeningFlag ) {
-        int i, rsize;
+        int rsize;
         FloatArray loadGradSigVec;
         this->computeReducedStressGradientVector(loadGradSigVec, loadFunction, 1, gp, fullStressVector,
                                                  strainSpaceHardeningVars);
         rsize = loadGradSigVec.giveSize();
-        for ( i = 1; i <= rsize; i++ ) {
+        for ( int i = 1; i <= rsize; i++ ) {
             answer.at(i, 1) = loadGradSigVec.at(i);
         }
 
@@ -320,7 +316,7 @@ void
 J2Mat :: computeReducedSSGradientMatrix(FloatMatrix &gradientMatrix,  int isurf, GaussPoint *gp, const FloatArray &fullStressVector,
                                         const FloatArray &strainSpaceHardeningVars)
 {
-    int i, j, size;
+    int size;
     int imask, jmask;
     FloatArray helpVector, backStress, df(6);
     IntArray mask;
@@ -358,12 +354,12 @@ J2Mat :: computeReducedSSGradientMatrix(FloatMatrix &gradientMatrix,  int isurf,
         df.at(5) = 2. * helpVector.at(5);
         df.at(6) = 2. * helpVector.at(6);
 
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             if ( ( imask = mask.at(i) ) == 0 ) {
                 continue;
             }
 
-            for ( j = i; j <= 3; j++ ) {
+            for ( int j = i; j <= 3; j++ ) {
                 if ( ( jmask = mask.at(j) ) == 0 ) {
                     continue;
                 }
@@ -377,12 +373,12 @@ J2Mat :: computeReducedSSGradientMatrix(FloatMatrix &gradientMatrix,  int isurf,
             }
         }
 
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             if ( ( imask = mask.at(i) ) == 0 ) {
                 continue;
             }
 
-            for ( j = 4; j <= 6; j++ ) {
+            for ( int j = 4; j <= 6; j++ ) {
                 if ( ( jmask = mask.at(j) ) == 0 ) {
                     continue;
                 }
@@ -392,12 +388,12 @@ J2Mat :: computeReducedSSGradientMatrix(FloatMatrix &gradientMatrix,  int isurf,
             }
         }
 
-        for ( i = 4; i <= 6; i++ ) {
+        for ( int i = 4; i <= 6; i++ ) {
             if ( ( imask = mask.at(i) ) == 0 ) {
                 continue;
             }
 
-            for ( j = i; j <= 6; j++ ) {
+            for ( int j = i; j <= 6; j++ ) {
                 if ( ( jmask = mask.at(j) ) == 0 ) {
                     continue;
                 }
@@ -425,12 +421,12 @@ J2Mat :: computeReducedSKGradientMatrix(FloatMatrix &gradientMatrix,  int i, Gau
     gradientMatrix.zero();
 
     if ( this->kinematicHardeningFlag ) {
-        int ii, j, kcount;
+        int kcount;
         this->computeReducedSSGradientMatrix(helpMat, i, gp, fullStressVector, strainSpaceHardeningVariables);
         helpMat.times( ( -1.0 ) * this->kinematicModuli );
         kcount = helpMat.giveNumberOfRows();
-        for ( ii = 1; ii <= kcount; ii++ ) {
-            for ( j = 1; j <= kcount; j++ ) {
+        for ( int ii = 1; ii <= kcount; ii++ ) {
+            for ( int j = 1; j <= kcount; j++ ) {
                 gradientMatrix.at(ii, j) = helpMat.at(ii, j);
             }
         }
@@ -473,7 +469,7 @@ J2Mat :: giveStressBackVector(FloatArray &answer, GaussPoint *gp,
     /* returns part of hardening vector corresponding to kinematic hardening */
     if ( this->kinematicHardeningFlag ) {
         IntArray mask;
-        int isize, i;
+        int isize;
 
         answer.resize(6);
         StructuralMaterial :: giveVoigtSymVectorMask( mask, gp->giveMaterialMode() );
@@ -481,7 +477,7 @@ J2Mat :: giveStressBackVector(FloatArray &answer, GaussPoint *gp,
         //int rSize = this->giveSizeOfReducedHardeningVarsVector(gp);
 
         /* kinematic hardening variables are first */
-        for ( i = 1; i <= isize; i++ ) {
+        for ( int i = 1; i <= isize; i++ ) {
             answer.at( mask.at(i) ) = ( -1.0 ) * this->kinematicModuli * strainSpaceHardeningVars.at(i);
         }
     } else {

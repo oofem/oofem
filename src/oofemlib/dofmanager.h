@@ -36,6 +36,7 @@
 #define dofmanager_h
 
 #include <cstdio>
+#include <map>
 
 #include "femcmpnn.h"
 #include "intarray.h"
@@ -48,7 +49,6 @@
 
 ///@name Input fields for DofManager
 //@{
-#define _IFT_DofManager_ndofs "ndofs"
 #define _IFT_DofManager_dofidmask "dofidmask"
 #define _IFT_DofManager_load "load"
 #define _IFT_DofManager_bc "bc"
@@ -353,13 +353,6 @@ public:
     /**@name Load related functions */
     //@{
     /**
-     * Computes the load vector of receiver in given time.
-     * @param answer Load vector.
-     * @param tStep Time step when answer is computed.
-     * @param mode Determines response mode.
-     */
-    virtual void computeLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
-    /**
      * Computes the load vector for given load.
      * @param answer Load vector for given load.
      * @param load Given load.
@@ -498,7 +491,7 @@ public:
      * @return True if receiver has dof with given id.
      * @see DofIDItem
      */
-    bool hasDofID(DofIDItem id);
+    bool hasDofID(DofIDItem id) const;
 
 #ifdef __OOFEG
     virtual void drawYourself(oofegGraphicContext &gc, TimeStep *tStep) { }

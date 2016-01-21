@@ -84,11 +84,8 @@ PlasticMaterial :: hasMaterialModeCapability(MaterialMode mode)
 
 MaterialStatus *
 PlasticMaterial :: CreateStatus(GaussPoint *gp) const
-/*
- * creates new  material status  corresponding to this class
- */
 {
-    return new PlasticMaterialStatus(1, this->giveDomain(), gp);
+    return new PlasticMaterialStatus(1, this->giveDomain(), gp, this->giveSizeOfReducedHardeningVarsVector(gp));
 }
 
 
@@ -106,7 +103,7 @@ PlasticMaterial :: giveRealStressVector(FloatArray &answer,
 {
     FloatArray strainSpaceHardeningVariables;
     FloatArray fullStressVector, *fullStressSpaceHardeningVars, *residualVectorR;
-    FloatArray strainIncrement, elasticStrainVectorR;
+    FloatArray elasticStrainVectorR;
     FloatArray strainVectorR, plasticStrainVectorR, *gradientVectorR;
     FloatArray helpVec, helpVec2;
     double yieldValue, Gamma, dGamma, helpVal1, helpVal2;
@@ -118,7 +115,6 @@ PlasticMaterial :: giveRealStressVector(FloatArray &answer,
     PlasticMaterialStatus *status = static_cast< PlasticMaterialStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
-    //this->initGpForNewStep(gp);
 
     // subtract stress independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
@@ -404,12 +400,11 @@ PlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     //
 
     FloatMatrix consistentModuli, elasticModuli, hardeningModuli;
-    FloatMatrix consistentModuliInverse, elasticModuliInverse, hardeningModuliInverse;
+    FloatMatrix elasticModuliInverse, hardeningModuliInverse;
     FloatMatrix consistentSubModuli, answerR;
     FloatArray *gradientVector, stressVector, fullStressVector;
     FloatArray *stressSpaceHardeningVars;
     FloatArray strainSpaceHardeningVariables, helpVector;
-    IntArray mask;
     double s, Gamma;
     int sizeR;
     PlasticMaterialStatus *status = static_cast< PlasticMaterialStatus * >( this->giveStatus(gp) );
@@ -709,9 +704,9 @@ PlasticMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalState
 }
 
 
-PlasticMaterialStatus :: PlasticMaterialStatus(int n, Domain *d, GaussPoint *g) :
+PlasticMaterialStatus :: PlasticMaterialStatus(int n, Domain *d, GaussPoint *g, int statusSize) :
     StructuralMaterialStatus(n, d, g), plasticStrainVector(), tempPlasticStrainVector(),
-    strainSpaceHardeningVarsVector(), tempStrainSpaceHardeningVarsVector()
+    strainSpaceHardeningVarsVector(statusSize), tempStrainSpaceHardeningVarsVector(statusSize)
 {
     state_flag = temp_state_flag = PM_Elastic;
     gamma = temp_gamma = 0.;
@@ -725,8 +720,6 @@ PlasticMaterialStatus :: ~PlasticMaterialStatus()
 void
 PlasticMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-    int i, n;
-
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");
     if ( ( state_flag == PM_Yielding ) || ( state_flag == PM_Unloading ) ) {
@@ -736,17 +729,15 @@ PlasticMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
             fprintf(file, " Unloading, ");
         }
 
-        n = plasticStrainVector.giveSize();
         fprintf(file, " plastic strains ");
-        for ( i = 1; i <= n; i++ ) {
-            fprintf( file, " % .4e", plasticStrainVector.at(i) );
+        for ( auto &val : plasticStrainVector ) {
+            fprintf( file, " %.4e", val );
         }
 
         if ( strainSpaceHardeningVarsVector.giveSize() ) {
-            n = strainSpaceHardeningVarsVector.giveSize();
             fprintf(file, ", strain space hardening vars ");
-            for ( i = 1; i <= n; i++ ) {
-                fprintf( file, " % .4e", strainSpaceHardeningVarsVector.at(i) );
+            for ( auto &val : strainSpaceHardeningVarsVector ) {
+                fprintf( file, " %.4e", val );
             }
         }
     }
@@ -768,12 +759,6 @@ void PlasticMaterialStatus :: initTempStatus()
     }
 
     tempPlasticStrainVector = plasticStrainVector;
-
-    if ( strainSpaceHardeningVarsVector.giveSize() == 0 ) {
-        strainSpaceHardeningVarsVector.resize( static_cast< PlasticMaterial * >( gp->giveMaterial() )->
-                                              giveSizeOfReducedHardeningVarsVector(gp) );
-        strainSpaceHardeningVarsVector.zero();
-    }
 
     tempStrainSpaceHardeningVarsVector = strainSpaceHardeningVarsVector;
 

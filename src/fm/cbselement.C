@@ -33,6 +33,7 @@
  */
 
 #include "cbselement.h"
+#include "dof.h"
 #include "node.h"
 #include "integrationrule.h"
 #include "intarray.h"
@@ -85,9 +86,7 @@ CBSElement :: giveCharacteristicMatrix(FloatMatrix &answer,
 // returns characteristics matrix of receiver according to mtrx
 //
 {
-    if ( mtrx == PressureLhs ) {
-        this->computePressureLhs(answer, tStep);
-    } else if ( mtrx == MassMatrix ) {
+    if ( mtrx == MassMatrix ) {
         this->computeConsistentMassMtrx(answer, tStep);
     } else {
         OOFEM_ERROR("Unknown Type of characteristic mtrx.");
@@ -104,41 +103,12 @@ CBSElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueM
 {
     if ( mtrx == LumpedMassMatrix ) {
         this->computeDiagonalMassMtrx(answer, tStep);
-    } else if ( mtrx == IntermediateConvectionTerm ) {
-        this->computeConvectionTermsI(answer, tStep);
-    } else if ( mtrx == IntermediateDiffusionTerm ) {
-        this->computeDiffusionTermsI(answer, tStep);
-    } else if ( mtrx == DensityRhsVelocityTerms ) {
-        this->computeDensityRhsVelocityTerms(answer, tStep);
-    } else if ( mtrx == DensityRhsPressureTerms ) {
-        this->computeDensityRhsPressureTerms(answer, tStep);
-    } else if ( mtrx == DensityPrescribedTractionPressure ) {
-        this->computePrescribedTractionPressure(answer, tStep);
-    } else if ( mtrx == NumberOfNodalPrescribedTractionPressureContributions ) {
-        this->computeNumberOfNodalPrescribedTractionPressureContributions(answer, tStep);
-    } else if ( mtrx == CorrectionRhs ) {
-        this->computeCorrectionRhs(answer, tStep);
-    } else if ( mtrx == PrescribedVelocityRhsVector ) {
-        this->computePrescribedTermsI(answer, tStep);
     }
     //else if (mtrx == PrescribedDensityRhsVector)
     //  this->computePrescribedTermsII (answer, mode, tStep);
     else {
         OOFEM_ERROR("Unknown Type of characteristic mtrx.");
     }
-}
-
-
-double
-CBSElement :: giveCharacteristicValue(CharType mtrx, TimeStep *tStep)
-{
-    if ( mtrx == CriticalTimeStep ) {
-        return this->computeCriticalTimeStep(tStep);
-    } else {
-        OOFEM_ERROR("Unknown Type of characteristic mtrx.");
-    }
-
-    return 0.0;
 }
 
 

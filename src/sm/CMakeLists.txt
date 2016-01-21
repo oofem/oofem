@@ -46,6 +46,7 @@ set (sm_element
     Elements/Shells/tr2shell7.C
     Elements/Shells/shell7basexfem.C
     Elements/Shells/tr2shell7xfem.C
+    Elements/Shells/mitc4.C
     Elements/Axisymmetry/q4axisymm.C
     Elements/Axisymmetry/axisymm3d.C 
     Elements/Axisymmetry/l4axisymm.C
@@ -71,6 +72,7 @@ set (sm_element
     Elements/PlaneStress/trplanestressrotallman.C
     Elements/PlaneStress/basicelement.C
     Elements/PlaneStress/trplanestressrotallman3d.C
+    Elements/PlaneStress/linquad3d_planestress.C
     Elements/AbaqusUserElement.C
     Elements/htselement.C
     Elements/latticestructuralelement.C
@@ -83,7 +85,6 @@ set (sm_element
     Elements/tria1platesubsoil.C
     Elements/trwarp.C
     Elements/PlaneStress/basicelement.C
-    Elements/PlaneStress/basicelementquad.C
     Elements/structural2delement.C
     Elements/structural3delement.C
     Elements/phasefieldelement.C
@@ -93,12 +94,11 @@ set (sm_element
 set (sm_interface_elements
     Elements/Interfaces/cohsur3d.C
     Elements/Interfaces/structuralinterfaceelement.C
-    Elements/Interfaces/structuralinterfaceelementphf.C
     Elements/Interfaces/intelpoint.C
     Elements/Interfaces/intelline1.C
-    Elements/Interfaces/intelline1phf.C
+    Elements/Interfaces/intelline1intpen.C
     Elements/Interfaces/intelline2.C
-    InterfaceElements/intelline1PF.C
+    Elements/Interfaces/intelline2intpen.C
     Elements/Interfaces/intelsurftr1.C
     Elements/Interfaces/Deprecated/interfaceelement1d.C
     Elements/Interfaces/Deprecated/interfaceelem2dlin.C
@@ -117,6 +117,7 @@ set (sm_crosssection
     CrossSections/fiberedcs.C
     CrossSections/structuralinterfacecrosssection.C
     CrossSections/variablecrosssection.C
+    CrossSections/warpingcrosssection.C
     )
 
 set (sm_emodel
@@ -170,29 +171,29 @@ set (sm_material
     Materials/ConcreteMaterials/idmgrad1.C
     Materials/ConcreteMaterials/mazarsmodel.C 
     Materials/ConcreteMaterials/mazarsmodelnl.C
-    Materials/ConcreteMaterials/b3solidmat.C
     Materials/ConcreteMaterials/mplasticmaterial2.C
     Materials/ConcreteMaterials/compodamagemat.C
-    Materials/RheoChainMaterials/cebfip78.C
-    Materials/RheoChainMaterials/doublepowerlaw.C
-    Materials/RheoChainMaterials/mps.C
+    Materials/RheoChainMaterials/b3solidmat.C
     Materials/RheoChainMaterials/rheoChM.C 
     Materials/RheoChainMaterials/maxwellChM.C 
     Materials/RheoChainMaterials/kelvinChM.C
     Materials/RheoChainMaterials/kelvinChSolM.C
+    Materials/RheoChainMaterials/cebfip78.C
+    Materials/RheoChainMaterials/doublepowerlaw.C
+    Materials/RheoChainMaterials/b3mat.C
+    Materials/RheoChainMaterials/b3solidmat.C
+    Materials/RheoChainMaterials/mps.C
+    Materials/RheoChainMaterials/mpsdammat.C
     Materials/structuralfe2material.C
-    Materials/b3mat.C
     Materials/rcsd.C 
     Materials/rcsde.C 
     Materials/rcsdnl.C
-    Materials/RheoChainMaterials/mooneyrivlin.C # TODO This isn't a rheochain material at al
+    Materials/mooneyrivlin.C
     Materials/m4.C
     Materials/microplane_m1.C
     Materials/druckerPragerPlasticitySM.C
     Materials/druckerpragercutmat.C
-    Materials/masonry02.C
     Materials/j2mat.C
-    Materials/mat_cebfip90.C
     Materials/mdm.C
     Materials/micromaterial.C
     Materials/hyperelasticmaterial.C
@@ -238,8 +239,8 @@ set (sm_interface_materials
     Materials/InterfaceMaterials/Deprecated/isointerfacedamage01.C
     Materials/InterfaceMaterials/Deprecated/isointerfacedamage02.C
     Materials/InterfaceMaterials/Deprecated/simpleinterfacemat.C
-    Materials/InterfaceMaterials/structuralinterfacematerialphf.C
-    Materials/InterfaceMaterials/intmatphasefield.C
+    Materials/InterfaceMaterials/masonry02.C
+    Materials/InterfaceMaterials/mat_cebfip90.C
     )
 
 set (sm_error
@@ -278,6 +279,7 @@ set (sm_xfem
     xfem/propagationlaws/plmaterialforce.C
     xfem/xfemstructuremanager.C
     xfem/matforceevaluator.C
+    xfem/nucleationcriteria/ncprincipalstress.C
     EngineeringModels/xfemsolverinterface.C
     )
 

@@ -160,7 +160,7 @@ protected:
 
 
     // post-processing, poi export
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime);
     virtual double giveHumidity(GaussPoint *gp, ValueModeType mode);
 };
 } // end namespace oofem

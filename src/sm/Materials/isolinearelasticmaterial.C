@@ -35,7 +35,6 @@
 #include "linearelasticmaterial.h"
 #include "isolinearelasticmaterial.h"
 #include "../sm/CrossSections/simplecrosssection.h"
-#include "material.h"
 #include "../sm/Materials/structuralms.h"
 #include "floatmatrix.h"
 #include "gausspoint.h"
@@ -62,8 +61,6 @@ IsotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     double value;
-
-    this->LinearElasticMaterial :: initializeFrom(ir);
     // we use rather object's member data than to store data into slow
     // key-val dictionary with lot of memory allocations
 
@@ -74,7 +71,7 @@ IsotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
     // compute  value of shear modulus
     G = E / ( 2.0 * ( 1. + nu ) );
 
-    return IRRT_OK;
+    return LinearElasticMaterial :: initializeFrom(ir);;
 }
 
 

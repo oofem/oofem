@@ -47,18 +47,12 @@ REGISTER_Material(J2plasticMaterial);
 
 J2plasticMaterial :: J2plasticMaterial(int n, Domain *d) : PlasticMaterial(n, d)
 {
-    //
-    // constructor
-    //
     kinematicHardeningFlag = isotropicHardeningFlag = 0;
     linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
 }
 
 J2plasticMaterial :: ~J2plasticMaterial()
 {
-    //
-    // destructor
-    //
 }
 
 IRResultType
@@ -67,14 +61,14 @@ J2plasticMaterial :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     double value;
 
-    PlasticMaterial :: initializeFrom(ir);
-    linearElasticMaterial->initializeFrom(ir);
+    result = PlasticMaterial :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
+    result = linearElasticMaterial->initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     IR_GIVE_FIELD(ir, value, _IFT_J2plasticMaterial_ry);
     k = value / sqrt(3.0);
 
-    //  E = readDouble (initString,"e");
-    // nu = readDouble (initString,"nu");
     kinematicModuli = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, kinematicModuli, _IFT_J2plasticMaterial_khm);
 
@@ -110,14 +104,8 @@ void J2plasticMaterial :: giveInputRecord(DynamicInputRecord &input)
 
 MaterialStatus *
 J2plasticMaterial :: CreateStatus(GaussPoint *gp) const
-/*
- * creates new  material status  corresponding to this class
- */
 {
-    PlasticMaterialStatus *status;
-
-    status = new PlasticMaterialStatus(1, this->giveDomain(), gp);
-    return status;
+    return new PlasticMaterialStatus(1, this->giveDomain(), gp, this->giveSizeOfReducedHardeningVarsVector(gp));
 }
 
 
@@ -321,7 +309,7 @@ J2plasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer,
                                                   const FloatArray &stressVector,
                                                   const FloatArray &stressSpaceHardeningVars)
 {
-    int i, j, size;
+    int size;
     int imask, jmask;
     FloatArray helpVector, backStress, df(6);
     IntArray mask;
@@ -360,12 +348,12 @@ J2plasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer,
         df.at(5) = 2. * helpVector.at(5);
         df.at(6) = 2. * helpVector.at(6);
 
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             if ( ( imask = mask.at(i) ) == 0 ) {
                 continue;
             }
 
-            for ( j = i; j <= 3; j++ ) {
+            for ( int j = i; j <= 3; j++ ) {
                 if ( ( jmask = mask.at(j) ) == 0 ) {
                     continue;
                 }
@@ -379,12 +367,12 @@ J2plasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer,
             }
         }
 
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             if ( ( imask = mask.at(i) ) == 0 ) {
                 continue;
             }
 
-            for ( j = 4; j <= 6; j++ ) {
+            for ( int j = 4; j <= 6; j++ ) {
                 if ( ( jmask = mask.at(j) ) == 0 ) {
                     continue;
                 }
@@ -394,12 +382,12 @@ J2plasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer,
             }
         }
 
-        for ( i = 4; i <= 6; i++ ) {
+        for ( int i = 4; i <= 6; i++ ) {
             if ( ( imask = mask.at(i) ) == 0 ) {
                 continue;
             }
 
-            for ( j = i; j <= 6; j++ ) {
+            for ( int j = i; j <= 6; j++ ) {
                 if ( ( jmask = mask.at(j) ) == 0 ) {
                     continue;
                 }
@@ -483,7 +471,7 @@ J2plasticMaterial :: giveSizeOfFullHardeningVarsVector()
 }
 
 int
-J2plasticMaterial :: giveSizeOfReducedHardeningVarsVector(GaussPoint *gp)
+J2plasticMaterial :: giveSizeOfReducedHardeningVarsVector(GaussPoint *gp) const
 {
     /* Returns the size of hardening variables vector */
     int size = 0;

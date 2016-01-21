@@ -68,14 +68,14 @@ protected:
 
 public:
     CohesiveSurface3d(int n, Domain * d);
-    virtual ~CohesiveSurface3d() { };
+    virtual ~CohesiveSurface3d() { }
 
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui);
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual int computeNumberOfDofs() { return 6 * giveNumberOfNodes(); }
     virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
     double giveLength();
-    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) { };
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) { }
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
     // definition & identification
@@ -95,7 +95,9 @@ protected:
     virtual void computeGaussPoints();
     void evaluateCenter();
     void evaluateLocalCoordinateSystem();
-public:
+
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     virtual MaterialMode giveMaterialMode() { return _3dInterface; }
 };
 } // namespace oofem

@@ -74,7 +74,7 @@ class DIIDynamic : public StructuralEngngModel
 {
 protected:
     bool initFlag;
-    SparseMtrx *stiffnessMatrix;
+    std :: unique_ptr< SparseMtrx > stiffnessMatrix;
     FloatArray loadVector, previousLoadVector, rhs, rhs2;
     FloatArray displacementVector, velocityVector, accelerationVector;
     FloatArray previousDisplacementVector, previousVelocityVector, previousAccelerationVector;
@@ -92,7 +92,7 @@ protected:
     TimeDiscretizationType initialTimeDiscretization;
 
     /// Numerical method used to solve the problem
-    SparseLinearSystemNM *nMethod;
+    std :: unique_ptr< SparseLinearSystemNM > nMethod;
 
 public:
     DIIDynamic(int i, EngngModel * _master = NULL);
@@ -105,15 +105,12 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual TimeStep *giveNextStep();
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
+	virtual void initializeYourself(TimeStep *tStep);
 
     // identification
     virtual const char *giveClassName() const { return "DIIDynamic"; }
     virtual const char *giveInputRecordName() const { return _IFT_DIIDynamic_Name; }
     virtual fMode giveFormulation() { return TL; }
-    virtual int giveNumberOfTimeStepWhenIcApply() { return 0; }
-
-    virtual void giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
-                                                 CharType type, TimeStep *tStep, Domain *domain);
 
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
 
@@ -122,6 +119,8 @@ public:
     void determineConstants(TimeStep *tStep);
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+
+	TimeDiscretizationType giveInitialTimeDiscretization() { return initialTimeDiscretization; }
 };
 } // end namespace oofem
 #endif // diidynamic_h

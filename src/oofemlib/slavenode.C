@@ -36,6 +36,7 @@
 #include "slavedof.h"
 #include "floatarray.h"
 #include "intarray.h"
+#include "entityrenumberingscheme.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -45,8 +46,6 @@ IRResultType SlaveNode :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-    Node :: initializeFrom(ir);
-
     IR_GIVE_FIELD(ir, masterDofManagers, _IFT_SlaveNode_masterDofManagers);
     IR_GIVE_OPTIONAL_FIELD(ir, masterWeights, _IFT_SlaveNode_weights);
 
@@ -54,9 +53,10 @@ IRResultType SlaveNode :: initializeFrom(InputRecord *ir)
         masterWeights.resize( masterDofManagers.giveSize() );
         masterWeights.add( 1 / ( double ) masterDofManagers.giveSize() );
     } else if ( masterDofManagers.giveSize() != masterWeights.giveSize() ) {
-        OOFEM_ERROR("master dof managers and weights size mismatch.");
+        OOFEM_WARNING("master dof managers and weights size mismatch.");
+        return IRRT_BAD_FORMAT;
     }
-    return IRRT_OK;
+    return Node :: initializeFrom(ir);
 }
 
 

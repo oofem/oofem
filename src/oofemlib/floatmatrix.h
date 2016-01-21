@@ -143,7 +143,7 @@ public:
         return * this;
     }
     /// Destructor.
-    ~FloatMatrix() {};
+    ~FloatMatrix() {}
 
     /**
      * Checks size of receiver towards requested bounds.
@@ -405,8 +405,9 @@ public:
      * @param b RHS of linear system.
      * @param answer Solution of linear equations.
      * @param transpose Solves for the transpose of K.
+     * @return False if K is singular, otherwise true.
      */
-    void solveForRhs(const FloatArray &b, FloatArray &answer, bool transpose = false);
+    bool solveForRhs(const FloatArray &b, FloatArray &answer, bool transpose = false);
     /**
      * Solves the  system of linear equations @f$ K\cdot A = B @f$ . Uses Gaussian elimination with pivoting directly on receiver.
      * @param B RHS of linear system.
@@ -531,11 +532,17 @@ public:
     /**
      * Print receiver on stdout with custom name.
      * @param name Display name of reciever.
-     */    
-    void printYourself(const std::string name) const;
-    
+     */
+    void printYourself(const std::string &name) const;
+
     /// Higher accuracy than printYourself.
     void pY() const;
+
+    /**
+     * Writes receiver as CSV (comma seperated values)
+     * @param name Filename
+     */
+    void writeCSV(const std :: string &name) const;
 
     /**
      * Exposes the internal values of the matrix. Should typically not be used outside of matrix classes.

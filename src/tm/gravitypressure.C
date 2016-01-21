@@ -46,8 +46,6 @@ GravityPressure :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    Load :: initializeFrom(ir);
-
     normalVector.resize(3);
     normalVector.zero();
     normalVector.at(3) = -1.;
@@ -55,7 +53,8 @@ GravityPressure :: initializeFrom(InputRecord *ir)
 
     zeroLevel = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, zeroLevel, _IFT_GravityPressure_zerolevel);
-    return IRRT_OK;
+
+    return Load :: initializeFrom(ir);
 }
 
 void

@@ -62,7 +62,8 @@ HydratingConcreteMat :: initializeFrom(InputRecord *ir)
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     // set conductivity k and capacity c
-    IsotropicHeatTransferMaterial :: initializeFrom(ir);
+    result = IsotropicHeatTransferMaterial :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     referenceTemperature = 25.;
     IR_GIVE_OPTIONAL_FIELD(ir, referenceTemperature, _IFT_HydratingConcreteMat_referenceTemperature);
@@ -86,7 +87,8 @@ HydratingConcreteMat :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, DoH1, _IFT_HydratingConcreteMat_DoH1);
         IR_GIVE_OPTIONAL_FIELD(ir, P1, _IFT_HydratingConcreteMat_P1);
     } else {
-        OOFEM_ERROR("Unknown hdyration model type %d", hydrationModelType);
+        OOFEM_WARNING("Unknown hdyration model type %d", hydrationModelType);
+        return IRRT_BAD_FORMAT;
     }
 
     IR_GIVE_FIELD(ir, Qpot, _IFT_HydratingConcreteMat_qpot); // [1/s]
@@ -379,7 +381,7 @@ HydratingConcreteMatStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     HydratingConcreteMat *mat = static_cast< HydratingConcreteMat * >( this->gp->giveMaterial() );
     TransportMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "   status {");
-    fprintf( file, "EvaluatingTime %e  DoH %f HeatPower %f [W/m3 of concrete] conductivity %f  capacity %f  density %f", tStep->giveIntrinsicTime(), this->giveDoHActual(), this->power, mat->giveIsotropicConductivity(this->gp), mat->giveConcreteCapacity(this->gp), mat->giveConcreteDensity(this->gp) );
+    fprintf( file, "EvaluatingTime %e  DoH %f HeatPower %f [W/m3 of concrete] Temperature %f conductivity %f  capacity %f  density %f", tStep->giveIntrinsicTime(), this->giveDoHActual(), this->power, this->giveTempField().at(1), mat->giveIsotropicConductivity(this->gp), mat->giveConcreteCapacity(this->gp), mat->giveConcreteDensity(this->gp) );
     fprintf(file, "}\n");
 }
 } // end namespace oofem

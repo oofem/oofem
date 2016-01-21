@@ -51,33 +51,30 @@ ContactDefinition :: ContactDefinition(ContactManager *cMan)
     this->cMan = cMan;
     this->numberOfConstraintEq = 0;
 }
-    /// Destructor.
+
+
 ContactDefinition :: ~ContactDefinition()
 {
 }
 
 
-
-
 int
 ContactDefinition :: instanciateYourself(DataReader *dr)
 {
-  
-    for ( ContactElement *cEl : this->masterElementList ) { 
+    for ( ContactElement *cEl : this->masterElementList ) {
         cEl->instanciateYourself(dr);
         cEl->setupIntegrationPoints();
     }
     
-  return 1;
+    return 1;
 }
-
 
 
 void 
 ContactDefinition :: createContactDofs()
 {
     // Creates new dofs due associated with the contact (Lagrange multipliers) and appends them to the dof managers
-// Creates new dofs due associated with the contact (Lagrange multipliers) and appends them to the dof managers
+    // Creates new dofs due associated with the contact (Lagrange multipliers) and appends them to the dof managers
 
     //TODO This is a bit ugly, find a better solution than asking the contact el
     if ( int numDofs = this->giveNumberOfConstraintEqToAdd() ) {
@@ -87,9 +84,7 @@ ContactDefinition :: createContactDofs()
         for ( int i = 1; i <= numDofs; i++ ) {
             dofIdArray.at(i) = this->cMan->giveDomain()->giveNextFreeDofID();
         }
-        
-        
-        
+
         for ( ContactElement *cEl : this->masterElementList ) { 
             
             cEl->giveDofManagersToAppendTo(dofMans);
@@ -105,7 +100,6 @@ ContactDefinition :: createContactDofs()
                         dMan->appendDof( new MasterDof( dMan, ( DofIDItem ) dofid ) );
                     }
                 }
-              
             }
         }  
     }
@@ -136,9 +130,8 @@ ContactDefinition :: computeContactForces(FloatArray &answer, TimeStep *tStep, C
             }
         }
     }
-  
-  
 }
+
 
 void
 ContactDefinition :: computeContactTangent(SparseMtrx &answer, TimeStep *tStep,
@@ -162,13 +155,7 @@ ContactDefinition :: computeContactTangent(SparseMtrx &answer, TimeStep *tStep,
             answer.assemble(locArrayR, locArrayC, Kc);
         //}
     }
-    
-  
 }
-
-
-
-
 
 
 }

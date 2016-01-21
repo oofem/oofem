@@ -32,16 +32,7 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-/*
- * intmatelastic.C
- *
- *  Created on: Jan 10, 2015
- *      Author: erik
- */
-
 #include "intmatelastic.h"
-
 #include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
@@ -54,59 +45,30 @@
 namespace oofem {
 REGISTER_Material(IntMatElastic);
 
-IntMatElastic::IntMatElastic(int n, Domain *d) : StructuralInterfaceMaterial(n, d) {
+IntMatElastic :: IntMatElastic(int n, Domain *d) : StructuralInterfaceMaterial(n, d) { }
 
-}
+IntMatElastic :: ~IntMatElastic() { }
 
-IntMatElastic::~IntMatElastic() {
-
-}
-
-int
-IntMatElastic :: hasMaterialModeCapability(MaterialMode mode)
-{
-    // returns whether receiver supports given mode
-    if ( mode == _3dInterface ) {
-        return 1;
-    } else {
-        return 0;
-    }
-}
 
 void
 IntMatElastic :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jumpVector,
                                                   const FloatMatrix &F, TimeStep *tStep)
 {
-	StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus(gp) );
+    StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus(gp) );
 
-    this->initTempStatus(gp);
-
-    answer.resize( jumpVector.giveSize() );
-
-    answer.at(1) = k*jumpVector.at(1);
-    answer.at(2) = k*jumpVector.at(2);
-    answer.at(3) = k*jumpVector.at(3);
+    answer.beScaled(k, jumpVector);
 
     status->letTempJumpBe(jumpVector);
     status->letTempFirstPKTractionBe(answer);
-
+    status->letTempTractionBe(answer);
 }
 
 void
 IntMatElastic :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-	StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus(gp) );
-
-    FloatArray jumpVector;
-
-    jumpVector = status->giveTempJump();
-
     answer.resize(3, 3);
-    answer.zero();
-
-    answer.at(1, 1) = k;
-    answer.at(2, 2) = k;
-    answer.at(3, 3) = k;
+    answer.beUnitMatrix();
+    answer.times(k);
 }
 
 IRResultType
@@ -116,8 +78,7 @@ IntMatElastic :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, k, _IFT_IntMatElastic_kn);
 
-    StructuralInterfaceMaterial :: initializeFrom(ir);
-    return IRRT_OK;
+    return StructuralInterfaceMaterial :: initializeFrom(ir);
 }
 
 void IntMatElastic :: giveInputRecord(DynamicInputRecord &input)

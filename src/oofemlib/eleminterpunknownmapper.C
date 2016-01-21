@@ -33,7 +33,6 @@
  */
 
 #include "eleminterpunknownmapper.h"
-#include "eleminterpmapperinterface.h"
 #include "element.h"
 #include "domain.h"
 #include "engngm.h"
@@ -56,7 +55,7 @@ EIPrimaryUnknownMapper :: mapAndUpdate(FloatArray &answer, ValueModeType mode,
     int inode, nd_nnodes = newd->giveNumberOfDofManagers();
     int nsize = newd->giveEngngModel()->giveNumberOfDomainEquations( newd->giveNumber(), EModelDefaultEquationNumbering() );
     FloatArray unknownValues;
-    IntArray dofidMask, locationArray;
+    IntArray dofidMask;
     IntArray reglist;
 #ifdef OOFEM_MAPPING_CHECK_REGIONS
     ConnectivityTable *conTable = newd->giveConnectivityTable();
@@ -93,7 +92,8 @@ EIPrimaryUnknownMapper :: mapAndUpdate(FloatArray &answer, ValueModeType mode,
                     Dof *dof = *it;
                     if ( dof->isPrimaryDof() ) {
                         int eq = dof->giveEquationNumber(EModelDefaultEquationNumbering());
-                        answer.at( eq ) += unknownValues.at(ii);
+                        if (eq)
+                          answer.at( eq ) += unknownValues.at(ii);
                     }
                 }
             }
@@ -111,7 +111,6 @@ EIPrimaryUnknownMapper :: evaluateAt(FloatArray &answer, IntArray &dofMask, Valu
                                      Domain *oldd, FloatArray &coords, IntArray &regList, TimeStep *tStep)
 {
     Element *oelem;
-    EIPrimaryUnknownMapperInterface *interface;
     SpatialLocalizer *sl = oldd->giveSpatialLocalizer();
 
     FloatArray lcoords, closest;
@@ -121,9 +120,8 @@ EIPrimaryUnknownMapper :: evaluateAt(FloatArray &answer, IntArray &dofMask, Valu
         // Take the minimum of any region
         double mindist = 0.0, distance;
         oelem = NULL;
-        for ( int i = 1; i < regList.giveSize(); ++i ) {
+        for ( int i = 1; i <= regList.giveSize(); ++i ) {
             Element *tmpelem = sl->giveElementClosestToPoint( lcoords, closest, coords, regList.at(i) );
-            distance = closest.distance_square(coords);
             if ( tmpelem != NULL ) {
                 distance = closest.distance_square(coords);
                 if ( distance < mindist || i == 1 ) {
@@ -141,13 +139,8 @@ EIPrimaryUnknownMapper :: evaluateAt(FloatArray &answer, IntArray &dofMask, Valu
         return false;
     }
 
-    interface = static_cast< EIPrimaryUnknownMapperInterface * >( oelem->giveInterface(EIPrimaryUnknownMapperInterfaceType) );
-    if ( interface ) {
-        oelem->giveElementDofIDMask(dofMask);
-        interface->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(mode, tStep, lcoords, answer);
-    } else {
-        OOFEM_ERROR("Element does not support EIPrimaryUnknownMapperInterface");
-    }
+    oelem->giveElementDofIDMask(dofMask);
+    oelem->computeField(mode, tStep, lcoords, answer);
 
     return true;
 }

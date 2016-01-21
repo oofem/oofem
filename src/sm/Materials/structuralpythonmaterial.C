@@ -59,7 +59,8 @@ IRResultType StructuralPythonMaterial :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;
 
-    StructuralMaterial :: initializeFrom(ir);
+    result = StructuralMaterial :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     IR_GIVE_FIELD(ir, this->moduleName, _IFT_StructuralPythonMaterial_moduleName);
 
@@ -70,10 +71,10 @@ IRResultType StructuralPythonMaterial :: initializeFrom(InputRecord *ir)
 
     if ( mpModule != NULL ) {
         // Load and call Python function
-        smallDef = PyObject_GetAttrString(mpModule, "giveStress");
-        largeDef = PyObject_GetAttrString(mpModule, "givePK1Stress");
-        smallDefTangent = PyObject_GetAttrString(mpModule, "giveStressTangent");
-        largeDefTangent = PyObject_GetAttrString(mpModule, "givePK1StressTangent");
+        smallDef = PyObject_GetAttrString(mpModule, "computeStress");
+        largeDef = PyObject_GetAttrString(mpModule, "computePK1Stress");
+        smallDefTangent = PyObject_GetAttrString(mpModule, "computeStressTangent");
+        largeDefTangent = PyObject_GetAttrString(mpModule, "computePK1StressTangent");
         if ( smallDefTangent == NULL && smallDef != NULL) {
             OOFEM_WARNING("Using numerical tangent for small deformations");
         }
@@ -81,10 +82,12 @@ IRResultType StructuralPythonMaterial :: initializeFrom(InputRecord *ir)
             OOFEM_WARNING("Using numerical tangent for large deformations");
         }
         if ( smallDef == NULL && largeDef == NULL ) {
-            OOFEM_ERROR("No functions for either small or large deformations supplied. Are you sure the functions are named correctly?");
+            OOFEM_WARNING("No functions for either small or large deformations supplied. Are you sure the functions are named correctly?");
+            return IRRT_BAD_FORMAT;
         }
-    } else   {
-        OOFEM_ERROR("mpModule == NULL for module name %s", this->moduleName.c_str())
+    } else {
+        OOFEM_WARNING("mpModule == NULL for module name %s", this->moduleName.c_str());
+        return IRRT_BAD_FORMAT;
     }
     pert = 1e-12;
 
@@ -103,7 +106,7 @@ MaterialStatus *StructuralPythonMaterial :: CreateStatus(GaussPoint *gp) const
     return new StructuralPythonMaterialStatus(this->giveDomain(), gp);
 }
 
-void StructuralPythonMaterial :: callStressFunction(PyObject *func, const FloatArray &oldStrain, const FloatArray &oldStress, const FloatArray &strain, FloatArray &stress, PyObject *stateDict, TimeStep *tStep) const
+void StructuralPythonMaterial :: callStressFunction(PyObject *func, const FloatArray &oldStrain, const FloatArray &oldStress, const FloatArray &strain, FloatArray &stress, PyObject *stateDict, PyObject *tempStateDict, TimeStep *tStep) const
 {
     if ( !PyCallable_Check(func) ) {
         OOFEM_ERROR("Python function is not callable.");
@@ -129,9 +132,11 @@ void StructuralPythonMaterial :: callStressFunction(PyObject *func, const FloatA
     PyTuple_SetItem(pArgs, 2, pArgStrain);
     // Internal state variables
     Py_INCREF(stateDict); ///@todo Verify this; we don't want pArgs to take over ownership, so is this the right thing to do? / Mikael
-    PyTuple_SetItem(pArgs, 3, stateDict);  
+    PyTuple_SetItem(pArgs, 3, stateDict);
+    Py_INCREF(tempStateDict);
+    PyTuple_SetItem(pArgs, 4, tempStateDict);
     // Time
-    PyTuple_SetItem(pArgs, 4, PyFloat_FromDouble( tStep->giveTargetTime() ));
+    PyTuple_SetItem(pArgs, 5, PyFloat_FromDouble( tStep->giveTargetTime() ));
     // Call the function;
     PyObject *retVal = PyObject_CallObject(func, pArgs);
 
@@ -147,7 +152,7 @@ void StructuralPythonMaterial :: callStressFunction(PyObject *func, const FloatA
     Py_DECREF(pArgs);
 }
 
-void StructuralPythonMaterial :: callTangentFunction(FloatMatrix &answer, PyObject *func, const FloatArray &strain, const FloatArray &stress, PyObject *stateDict, TimeStep *tStep) const
+void StructuralPythonMaterial :: callTangentFunction(FloatMatrix &answer, PyObject *func, const FloatArray &strain, const FloatArray &stress, PyObject *stateDict, PyObject *tempStateDict, TimeStep *tStep) const
 {
     if ( !PyCallable_Check(func) ) {
         OOFEM_ERROR("Python function is not callable.");
@@ -170,11 +175,16 @@ void StructuralPythonMaterial :: callTangentFunction(FloatMatrix &answer, PyObje
     // Internal state variables
     Py_INCREF(stateDict); ///@todo Verify this; we don't want pArgs to take over ownership, so is this the right thing to do? / Mikael
     PyTuple_SetItem(pArgs, 2, stateDict);
+    Py_INCREF(tempStateDict); ///@todo Verify this; we don't want pArgs to take over ownership, so is this the right thing to do? / Mikael
+    PyTuple_SetItem(pArgs, 3, tempStateDict);
     // Time
-    PyTuple_SetItem(pArgs, 3, PyFloat_FromDouble( tStep->giveTargetTime() ));
+    PyTuple_SetItem(pArgs, 4, PyFloat_FromDouble( tStep->giveTargetTime() ));
     // Call the function;
     PyObject *retVal = PyObject_CallObject(func, pArgs);
 
+    if ( retVal == NULL ) {
+        OOFEM_ERROR("bad return value (null) from PyObject_CallObject");
+    }
     // Convert function output back to C++ form:
     answer.resize(size, size);
     for ( int i = 0; i < size; i++ ) {
@@ -194,7 +204,7 @@ void StructuralPythonMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answ
     StructuralPythonMaterialStatus *ms = dynamic_cast< StructuralPythonMaterialStatus * >( this->giveStatus(gp) );
 
     if ( this->smallDefTangent ) {
-        this->callTangentFunction(answer, this->smallDefTangent, ms->giveTempStrainVector(), ms->giveTempStressVector(), ms->giveTempStateDictionary(), tStep);
+        this->callTangentFunction(answer, this->smallDefTangent, ms->giveTempStrainVector(), ms->giveTempStressVector(), ms->giveStateDictionary(), ms->giveTempStateDictionary(), tStep);
     } else {
         FloatArray vE, vE_h, stress, stressh;
         vE = ms->giveTempStrainVector();
@@ -210,7 +220,7 @@ void StructuralPythonMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answ
         }
 
         // Reset the stress internal variables
-        this->giveRealStressVector(stress, gp, vE, tStep);
+        this->giveRealStressVector_3d(stress, gp, vE, tStep);
     }
 }
 
@@ -220,7 +230,7 @@ void StructuralPythonMaterial :: give3dMaterialStiffnessMatrix_dPdF(FloatMatrix 
     StructuralPythonMaterialStatus *ms = dynamic_cast< StructuralPythonMaterialStatus * >( this->giveStatus(gp) );
 
     if ( this->largeDefTangent ) {
-        this->callTangentFunction(answer, this->largeDefTangent, ms->giveTempFVector(), ms->giveTempPVector(), ms->giveTempStateDictionary(), tStep);
+        this->callTangentFunction(answer, this->largeDefTangent, ms->giveTempFVector(), ms->giveTempPVector(), ms->giveStateDictionary(), ms->giveTempStateDictionary(), tStep);
     } else {
         FloatArray vF, vF_h, stress, stressh;
         vF = ms->giveTempFVector();
@@ -251,7 +261,7 @@ void StructuralPythonMaterial :: giveRealStressVector_3d(FloatArray &answer, Gau
     this->callStressFunction(this->smallDef, 
                               ms->giveStrainVector(), ms->giveStressVector(),
                               strain, answer,
-                              ms->giveTempStateDictionary(), tStep);
+                              ms->giveStateDictionary(), ms->giveTempStateDictionary(), tStep);
 
     ms->letTempStrainVectorBe(strain);
     ms->letTempStressVectorBe(answer);
@@ -268,7 +278,7 @@ void StructuralPythonMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, 
     this->callStressFunction(this->smallDef, 
                             ms->giveFVector(), ms->givePVector(),
                             vF, answer,
-                            ms->giveTempStateDictionary(), tStep);
+                            ms->giveStateDictionary(), ms->giveTempStateDictionary(), tStep);
 
     FloatArray vE, vS;
     FloatMatrix F, Finv, E, S;
@@ -294,15 +304,29 @@ void StructuralPythonMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, 
 
 int StructuralPythonMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    //StructuralPythonMaterialStatus *ms = static_cast< StructuralPythonMaterialStatus * >( this->giveStatus(gp) );
-    ///@todo This should be possible to support if we move away from the enum IST values and use strings.
-    PyObject *val = NULL; //PyDict_GetItemString(this->stateDict, type.c_str());
-    if ( val != NULL ) {
-        OOFEM_ERROR("Not implemented yet"); ///@todo Implement conversion from dictionary to "answer"
-        return 1;
-    } else {
-        return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
+    StructuralPythonMaterialStatus *ms = static_cast< StructuralPythonMaterialStatus * >( this->giveStatus(gp) );
+    std :: string s = std :: to_string( type );
+    PyObject *val = PyDict_GetItemString(ms->giveStateDictionary(), s.c_str());
+    if ( val ) {
+        
+        if ( PyFloat_Check(val) != 0 ) {
+            answer = FloatArray{PyFloat_AS_DOUBLE(val)};
+        } else if ( PyList_Check(val) != 0 ) {
+            // Convert function output back to C++ form:
+            int size = PyList_Size(val);
+            answer.resize(size);
+            for ( int i = 0; i < size; i++ ) {
+                PyObject *val = PyList_GET_ITEM(val, i);
+                answer[i] = PyFloat_AS_DOUBLE(val);
+                //Py_DECREF(val);
+            }
+            return 1;
+        } else {
+            OOFEM_WARNING("Dictionary entry of material state is not a list (only lists supported for now)");
+            return 0;
+        }
     }
+    return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
 }
 
 
@@ -321,7 +345,6 @@ StructuralPythonMaterialStatus :: StructuralPythonMaterialStatus(Domain *d, Gaus
 {
     this->stateDict = PyDict_New();
     this->tempStateDict = PyDict_New();
-    this->initTempStatus();
 }
 
 StructuralPythonMaterialStatus :: ~StructuralPythonMaterialStatus()
@@ -334,8 +357,9 @@ void StructuralPythonMaterialStatus :: updateYourself(TimeStep *tStep)
 {
     StructuralMaterialStatus :: updateYourself(tStep);
     // Copy the temp dict to the equilibrated one
-    Py_DECREF(this->stateDict);
+    auto oldDict = this->stateDict;
     this->stateDict = PyDict_Copy(this->tempStateDict); ///@todo Does this suffice? I'm not sure about what happens to references into the dictionary itself. I want a deep copy. / Mikael
+    Py_DECREF(oldDict);
 }
 
 

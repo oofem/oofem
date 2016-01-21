@@ -226,13 +226,6 @@ public:
     virtual contextIOResultType restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
 
     /**
-     * Initialize integration point (must be inside  material region associated to receiver)
-     * when new time step begins. Simply calls initTempStatus function with integration point
-     * as parameter.
-     * @param gp Integration point to initialize.
-     */
-    virtual void initGpForNewStep(GaussPoint *gp);
-    /**
      * Optional function to call specific procedures when initializing a material.
      * For example, multiscale simulations need to create master and slave material statuses on specific integration points before the computation.
      * @param element Pointer to element.
@@ -305,7 +298,6 @@ public:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const
     { return NULL; }
 
-protected:
     /**
      * Initializes temporary variables stored in integration point status
      * at the beginning of new time step.

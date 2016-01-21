@@ -427,7 +427,10 @@ IRResultType XFEMStatic :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    NonLinearStatic :: initializeFrom(ir);
+    result = NonLinearStatic :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     int remapFlag = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, remapFlag, _IFT_XFEMStatic_ForceRemap);

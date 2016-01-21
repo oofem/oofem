@@ -35,7 +35,7 @@
 #include "rvestokesflow.h"
 #include "util.h"
 #include "oofemtxtdatareader.h"
-#include "stokesflowvelocityhomogenization.h"
+#include "../fm/stokesflowvelocityhomogenization.h"
 #include "engngm.h"
 #include "contextioerr.h"
 #include "gausspoint.h"
@@ -54,7 +54,6 @@ int RVEStokesFlow :: n = 1;
 RVEStokesFlowMaterialStatus :: RVEStokesFlowMaterialStatus(int n, Domain *d, GaussPoint *g, const std :: string &inputfile) :
     TransportMaterialStatus(n, d, g), oldTangent(true)
 {
-    
     OOFEM_LOG_INFO( "************************** Instanciating microproblem from file %s\n", inputfile.c_str() );
     OOFEMTXTDataReader dr( inputfile.c_str() );
 
@@ -145,8 +144,6 @@ RVEStokesFlow :: RVEStokesFlow(int n, Domain *d) : TransportMaterial(n, d)
 IRResultType RVEStokesFlow :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;
-
-    // this->TransportMaterial :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, this->rveFilename, _IFT_RVEStokesFlow_fileName);
 

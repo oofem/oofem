@@ -47,6 +47,7 @@
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
 #include "datastream.h"
+#include "unknownnumberingscheme.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -82,12 +83,11 @@ IDNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussP
      * computation. It is therefore necessary only to store local strain in corresponding status.
      * This service is declared at StructuralNonlocalMaterial level.
      */
-    FloatArray SDstrainVector, fullSDStrainVector;
+    FloatArray SDstrainVector;
     double equivStrain;
     IDNLMaterialStatus *nlstatus = static_cast< IDNLMaterialStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
-    //this->initGpForNewStep(gp);
 
     // subtract stress-independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
@@ -513,8 +513,14 @@ IDNLMaterial :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    IsotropicDamageMaterial1 :: initializeFrom(ir);
-    StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
+    result = IsotropicDamageMaterial1 :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+    result = StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     averType = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, averType, _IFT_IDNLMaterial_averagingtype);
@@ -834,7 +840,7 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
     double coeff = 0.0, sum;
     IDNLMaterialStatus *status = static_cast< IDNLMaterialStatus * >( this->giveStatus(gp) );
     StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
-    FloatMatrix b, de, den, princDir(3, 3), t;
+    FloatMatrix b, de, princDir(3, 3), t;
     FloatArray stress, fullStress, strain, principalStress, help, nu;
 
     elem->giveLocationArray(rloc, s);
@@ -842,7 +848,7 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
     elem->computeBmatrixAt(gp, b);
 
     if ( this->equivStrainType == EST_Rankine_Standard ) {
-        FloatArray fullHelp, fullNu;
+        FloatArray fullHelp;
         LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
 
         lmat->giveStiffnessMatrix(de, SecantStiffness, gp, tStep);
@@ -989,7 +995,7 @@ IDNLMaterial :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
     //
     // return Elastic Stiffness matrix for normal Stresses
     LinearElasticMaterial *lMat = this->giveLinearElasticMaterial();
-    FloatMatrix deRed, de;
+    FloatMatrix de;
 
     lMat->give3dMaterialStiffnessMatrix(de, rMode, gp, tStep);
     // This isn't used? Do we need one with zeroed entries (below) or the general 3d stiffness (above)?

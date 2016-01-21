@@ -46,10 +46,17 @@
 #define _IFT_StaggeredProblem_dtf "dtf"
 #define _IFT_StaggeredProblem_timeDefinedByProb "timedefinedbyprob"
 #define _IFT_StaggeredProblem_stepmultiplier "stepmultiplier"
+//#define _IFT_StaggeredProblem_timeLag "timelag"
 #define _IFT_StaggeredProblem_prescribedtimes "prescribedtimes"
 #define _IFT_StaggeredProblem_prob1 "prob1"
 #define _IFT_StaggeredProblem_prob2 "prob2"
 #define _IFT_StaggeredProblem_coupling "coupling"
+#define _IFT_StaggeredProblem_adaptiveStepLength "adaptivesteplength"
+#define _IFT_StaggeredProblem_minsteplength "minsteplength"
+#define _IFT_StaggeredProblem_maxsteplength "maxsteplength"
+#define _IFT_StaggeredProblem_reqiterations "reqiterations"
+#define _IFT_StaggeredProblem_endoftimeofinterest "endoftimeofinterest"
+#define _IFT_StaggeredProblem_adaptivestepsince "adaptivestepsince"
 //@}
 
 namespace oofem {
@@ -94,6 +101,13 @@ protected:
      */
     double stepMultiplier;
 
+    /**
+     * Time lag specifying how much is the second sub-problem delayed after the first one
+     * during this period the second subproblem isn't solved at all.
+     * Efficient tool for coupling structural problem with hydration.
+     */
+    //    double timeLag;
+
     /// Specified times where the problem is solved
     FloatArray discreteTimes;
 
@@ -102,6 +116,24 @@ protected:
 
     /// List of slave models to which this model is coupled
     IntArray coupledModels;
+    bool adaptiveStepLength;
+    /// adaptive time step length - minimum
+    double minStepLength;
+    /// adaptive time step length - maximum
+    double maxStepLength;
+    /// adaptive time step length - required (=optimum) number of iterations 
+    double reqIterations;
+    /// adaptive time step length applies after prescribed time
+    double adaptiveStepSince;
+    /**
+     * alternative overriding the number of steps "nsteps" - necessary for time-driven analyses when
+     * the appropriate number of steps is apriori unknow. If used, set "nsteps" to a high number e.g. 100000000
+     */
+    double endOfTimeOfInterest;
+
+    double prevStepLength;
+    double currentStepLength;
+    
 
 public:
     /**
@@ -136,8 +168,13 @@ public:
 
     void printYourself();
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
+
+    virtual TimeStep *giveCurrentStep(bool force = false);
+    virtual TimeStep *givePreviousStep(bool force = false);
+    virtual TimeStep *giveSolutionStepWhenIcApply(bool force = false);
+    virtual int giveNumberOfFirstStep(bool force = false);
+
     virtual TimeStep *giveNextStep();
-    virtual TimeStep *giveSolutionStepWhenIcApply();
 
     // identification
     virtual const char *giveClassName() const { return "StaggeredProblem"; }
@@ -176,21 +213,6 @@ public:
 
     virtual EngngModel *giveSlaveProblem(int i);
     virtual int giveNumberOfSlaveProblems() { return (int)inputStreamNames.size(); }
-
-    virtual int giveNumberOfFirstStep() {
-        if ( master ) {
-            return master->giveNumberOfFirstStep();
-        } else {
-            return 1;
-        }
-    }
-    virtual int giveNumberOfTimeStepWhenIcApply() {
-        if ( master ) {
-            return master->giveNumberOfTimeStepWhenIcApply();
-        } else {
-            return 0;
-        }
-    }
     virtual int instanciateDefaultMetaStep(InputRecord *ir);
 
 protected:

@@ -93,7 +93,7 @@ IRResultType
 L4Axisymm :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 4;
-    IRResultType result = this->NLStructuralElement :: initializeFrom(ir);
+    IRResultType result = NLStructuralElement :: initializeFrom(ir);
     if ( result != IRRT_OK ) {
         return result;
     }
@@ -355,7 +355,6 @@ void L4Axisymm :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
         }
 
         IntArray ind(4);
-        FloatArray *gpCoords;
         WCRec pp [ 9 ];
 
         for ( i = 0; i < 4; i++ ) {
@@ -387,18 +386,18 @@ void L4Axisymm :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
         pp [ 8 ].z = 0.25 * ( pp [ 0 ].z + pp [ 1 ].z + pp [ 2 ].z + pp [ 3 ].z );
 
         for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
-            gpCoords = gp->giveNaturalCoordinates();
-            if ( ( gpCoords->at(1) > 0. ) && ( gpCoords->at(2) > 0. ) ) {
+            const FloatArray &gpCoords = gp->giveNaturalCoordinates();
+            if ( ( gpCoords.at(1) > 0. ) && ( gpCoords.at(2) > 0. ) ) {
                 ind.at(1) = 0;
                 ind.at(2) = 4;
                 ind.at(3) = 8;
                 ind.at(4) = 7;
-            } else if ( ( gpCoords->at(1) < 0. ) && ( gpCoords->at(2) > 0. ) ) {
+            } else if ( ( gpCoords.at(1) < 0. ) && ( gpCoords.at(2) > 0. ) ) {
                 ind.at(1) = 4;
                 ind.at(2) = 1;
                 ind.at(3) = 5;
                 ind.at(4) = 8;
-            } else if ( ( gpCoords->at(1) < 0. ) && ( gpCoords->at(2) < 0. ) ) {
+            } else if ( ( gpCoords.at(1) < 0. ) && ( gpCoords.at(2) < 0. ) ) {
                 ind.at(1) = 5;
                 ind.at(2) = 2;
                 ind.at(3) = 6;

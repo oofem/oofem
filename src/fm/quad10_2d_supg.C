@@ -40,6 +40,7 @@
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "fluiddynamicmaterial.h"
+#include "fluidcrosssection.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
@@ -119,10 +120,9 @@ Quad10_2D_SUPG :: giveInternalDofManDofIDMask(int i, IntArray &answer) const
 IRResultType
 Quad10_2D_SUPG :: initializeFrom(InputRecord *ir)
 {
-    SUPGElement2 :: initializeFrom(ir);
     this->pressureNode.initializeFrom(ir);
 
-    return IRRT_OK;
+    return SUPGElement2 :: initializeFrom(ir);
 }
 
 
@@ -281,9 +281,9 @@ Quad10_2D_SUPG :: updateStabilizationCoeffs(TimeStep *tStep)
     FloatArray u;
 
     mu_min = 1;
-    rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+    rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     for ( GaussPoint *gp: *integrationRulesArray [ 1 ] ) {
-        mu = static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->giveEffectiveViscosity(gp, tStep);
+        mu = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial()->giveEffectiveViscosity(gp, tStep);
         if ( mu_min > mu ) {
             mu_min = mu;
         }
@@ -367,7 +367,7 @@ Quad10_2D_SUPG :: computeAdvectionTerm(FloatMatrix &answer, TimeStep *tStep)
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, tStep);
         double dV  = this->computeVolumeAround(gp);
-        double rho = this->giveMaterial()->give('d', gp);
+        double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity(gp);
         answer.plusProductUnsym(n, b, rho * dV);
     }
 }
@@ -385,7 +385,7 @@ Quad10_2D_SUPG :: computeAdvectionDeltaTerm(FloatMatrix &answer, TimeStep *tStep
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, tStep);
         double dV  = this->computeVolumeAround(gp);
-        double rho = this->giveMaterial()->give('d', gp);
+        double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity(gp);
 
         answer.plusProductUnsym(b, b, rho * dV);
     }
@@ -404,7 +404,7 @@ Quad10_2D_SUPG :: computeMassDeltaTerm(FloatMatrix &answer, TimeStep *tStep)
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, tStep);
         double dV  = this->computeVolumeAround(gp);
-        double rho = this->giveMaterial()->give('d', gp);
+        double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity(gp);
 
         answer.plusProductUnsym(b, n, rho * dV);
     }
@@ -419,7 +419,7 @@ Quad10_2D_SUPG :: computeLSICTerm(FloatMatrix &answer, TimeStep *tStep)
 
     for ( GaussPoint *gp: *this->integrationRulesArray [ 1 ] ) {
         double dV  = this->computeVolumeAround(gp);
-        double rho = this->giveMaterial()->give('d', gp);
+        double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity(gp);
         this->computeDivUMatrix(b, gp);
 
         answer.plusProductSymmUpper(b, b, dV * rho);
@@ -552,10 +552,6 @@ Quad10_2D_SUPG :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateT
             answer = FloatArray{1.0};
             return 1;
         }
-    } else if ( type == IST_Density ) {
-        answer.resize(1);
-        answer.at(1) = this->giveMaterial()->give('d', gp);
-        return 1;
     } else {
         return SUPGElement :: giveIPValue(answer, gp, type, tStep);
     }

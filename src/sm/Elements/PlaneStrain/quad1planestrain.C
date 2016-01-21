@@ -58,7 +58,6 @@ FEI2dQuadLin Quad1PlaneStrain :: interp(1, 2);
 Quad1PlaneStrain :: Quad1PlaneStrain(int n, Domain *aDomain) :
     PlaneStrainElement(n, aDomain), ZZNodalRecoveryModelInterface(this), SPRNodalRecoveryModelInterface(),
     SpatialLocalizerInterface(this),
-    EIPrimaryUnknownMapperInterface(),
     HuertaErrorEstimatorInterface()
 {
     numberOfDofMans  = 4;
@@ -153,7 +152,7 @@ IRResultType
 Quad1PlaneStrain :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 4;
-    IRResultType result = this->NLStructuralElement :: initializeFrom(ir);
+    IRResultType result = PlaneStrainElement :: initializeFrom(ir);
     if ( result != IRRT_OK ) {
         return result;
     }
@@ -179,8 +178,6 @@ Quad1PlaneStrain :: giveInterface(InterfaceType interface)
         return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
         return static_cast< SpatialLocalizerInterface * >(this);
-    } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
         return static_cast< HuertaErrorEstimatorInterface * >(this);
     }
@@ -415,7 +412,6 @@ void Quad1PlaneStrain :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
         }
 
         IntArray ind(4);
-        FloatArray *gpCoords;
         WCRec pp [ 9 ];
 
         for ( i = 0; i < 4; i++ ) {
@@ -447,18 +443,18 @@ void Quad1PlaneStrain :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
         pp [ 8 ].z = 0.25 * ( pp [ 0 ].z + pp [ 1 ].z + pp [ 2 ].z + pp [ 3 ].z );
 
         for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
-            gpCoords = gp->giveNaturalCoordinates();
-            if ( ( gpCoords->at(1) > 0. ) && ( gpCoords->at(2) > 0. ) ) {
+            const FloatArray& gpCoords = gp->giveNaturalCoordinates();
+            if ( ( gpCoords.at(1) > 0. ) && ( gpCoords.at(2) > 0. ) ) {
                 ind.at(1) = 0;
                 ind.at(2) = 4;
                 ind.at(3) = 8;
                 ind.at(4) = 7;
-            } else if ( ( gpCoords->at(1) < 0. ) && ( gpCoords->at(2) > 0. ) ) {
+            } else if ( ( gpCoords.at(1) < 0. ) && ( gpCoords.at(2) > 0. ) ) {
                 ind.at(1) = 4;
                 ind.at(2) = 1;
                 ind.at(3) = 5;
                 ind.at(4) = 8;
-            } else if ( ( gpCoords->at(1) < 0. ) && ( gpCoords->at(2) < 0. ) ) {
+            } else if ( ( gpCoords.at(1) < 0. ) && ( gpCoords.at(2) < 0. ) ) {
                 ind.at(1) = 5;
                 ind.at(2) = 2;
                 ind.at(3) = 6;
@@ -643,19 +639,6 @@ SPRPatchType
 Quad1PlaneStrain :: SPRNodalRecoveryMI_givePatchType()
 {
     return SPRPatchType_2dxy;
-}
-
-
-void
-Quad1PlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-                                                                     TimeStep *tStep, const FloatArray &lcoords,
-                                                                     FloatArray &answer)
-{
-    FloatArray u;
-    FloatMatrix n;
-    this->computeNmatrixAt(lcoords, n);
-    this->computeVectorOf(mode, tStep, u);
-    answer.beProductOf(n, u);
 }
 
 } // end namespace oofem

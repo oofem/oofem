@@ -54,11 +54,12 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     double value;
-    int j, size;
+    int size;
     FloatArray triplets;
 
 
-    this->LinearElasticMaterial :: initializeFrom(ir);
+    result = LinearElasticMaterial :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     IR_GIVE_FIELD(ir, value, _IFT_OrthotropicLinearElasticMaterial_ex);
     propertyDictionary.add(Ex, value);
@@ -132,7 +133,7 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
         double n1 = 0.0, n2 = 0.0;
 
         localCoordinateSystem = new FloatMatrix(3, 3);
-        for ( j = 1; j <= 3; j++ ) {
+        for ( int j = 1; j <= 3; j++ ) {
             localCoordinateSystem->at(j, 1) = triplets.at(j);
             n1 += triplets.at(j) * triplets.at(j);
             localCoordinateSystem->at(j, 2) = triplets.at(j + 3);
@@ -141,7 +142,7 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
 
         n1 = sqrt(n1);
         n2 = sqrt(n2);
-        for ( j = 1; j <= 3; j++ ) { // normalize e1' e2'
+        for ( int j = 1; j <= 3; j++ ) { // normalize e1' e2'
             localCoordinateSystem->at(j, 1) /= n1;
             localCoordinateSystem->at(j, 2) /= n2;
         }
@@ -180,10 +181,7 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
         if ( size == 3 ) {
             cs_type = shellCS;
             triplets.normalize();
-            helpPlaneNormal = new FloatArray(3);
-            for ( j = 1; j < 4; j++ ) {
-                helpPlaneNormal->at(j) = triplets.at(j);
-            }
+            helpPlaneNormal = new FloatArray(triplets);
 
             //
             // store normal defining help plane into row matrix
@@ -198,9 +196,7 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
         //
         cs_type = localCS;
         localCoordinateSystem = new FloatMatrix(3, 3);
-        for ( j = 1; j < 4; j++ ) {
-            localCoordinateSystem->at(j, j) = 1.0;
-        }
+        localCoordinateSystem->beUnitMatrix();
     }
 
     return IRRT_OK;
@@ -214,38 +210,19 @@ OrthotropicLinearElasticMaterial :: giveInputRecord(DynamicInputRecord &input)
 
 
     input.setField(propertyDictionary.at(Ex), _IFT_OrthotropicLinearElasticMaterial_ex);
-
-
     input.setField(propertyDictionary.at(Ey), _IFT_OrthotropicLinearElasticMaterial_ey);
-
-
     input.setField(propertyDictionary.at(Ez), _IFT_OrthotropicLinearElasticMaterial_ez);
 
-
     input.setField(propertyDictionary.at(NYyz), _IFT_OrthotropicLinearElasticMaterial_nyyz);
-
-
     input.setField(propertyDictionary.at(NYxz), _IFT_OrthotropicLinearElasticMaterial_nyxz);
-
-
     input.setField(propertyDictionary.at(NYxy), _IFT_OrthotropicLinearElasticMaterial_nyxy);
 
-
     input.setField(propertyDictionary.at(Gyz), _IFT_OrthotropicLinearElasticMaterial_gyz);
-
-
     input.setField(propertyDictionary.at(Gxz), _IFT_OrthotropicLinearElasticMaterial_gxz);
-
-
     input.setField(propertyDictionary.at(Gxy), _IFT_OrthotropicLinearElasticMaterial_gxy);
 
-
     input.setField(propertyDictionary.at(tAlphax), _IFT_OrthotropicLinearElasticMaterial_talphax);
-
-
     input.setField(propertyDictionary.at(tAlphay), _IFT_OrthotropicLinearElasticMaterial_talphay);
-
-
     input.setField(propertyDictionary.at(tAlphaz), _IFT_OrthotropicLinearElasticMaterial_talphaz);
 
 
@@ -256,10 +233,6 @@ OrthotropicLinearElasticMaterial :: giveInputRecord(DynamicInputRecord &input)
 
 double
 OrthotropicLinearElasticMaterial :: give(int aProperty, GaussPoint *gp)
-//
-// Returns the value of the property aProperty (e.g. the Young's modulus
-// 'E') of the receiver.
-//
 {
     if ( aProperty == NYzx ) {
         return this->give(NYxz, gp) * this->give(Ez, gp) / this->give(Ex, gp);
@@ -282,9 +255,6 @@ OrthotropicLinearElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &a
                                                                   MatResponseMode mode,
                                                                   GaussPoint *gp,
                                                                   TimeStep *tStep)
-//
-// forceElasticResponse ignored - always elastic
-//
 {
     FloatMatrix rotationMatrix;
 
@@ -302,7 +272,6 @@ OrthotropicLinearElasticMaterial :: give3dLocalMaterialStiffnessMatrix(FloatMatr
                                                                        TimeStep *tStep)
 {
     double eksi, nxz, nyz, nxy, nzx, nzy, nyx;
-    int i, j;
 
     nxz = this->give(NYxz, gp);
     nyz = this->give(NYyz, gp);
@@ -324,8 +293,8 @@ OrthotropicLinearElasticMaterial :: give3dLocalMaterialStiffnessMatrix(FloatMatr
     answer.at(3, 3) =  this->give(Ez, gp) * ( 1. - nyx * nxy ) / eksi;
 
     // define the lower triangle
-    for ( i = 1; i < 4; i++ ) {
-        for ( j = 1; j < i; j++ ) {
+    for ( int i = 1; i < 4; i++ ) {
+        for ( int j = 1; j < i; j++ ) {
             answer.at(i, j) = answer.at(j, i);
         }
     }

@@ -129,7 +129,7 @@ void SurfaceTensionBoundaryCondition :: assembleVector(FloatArray &answer, TimeS
     }
 
     FloatArray fe;
-    IntArray loc, dofids, masterdofids, bNodes;
+    IntArray loc, masterdofids, bNodes;
 
     Set *set = this->giveDomain()->giveSet(this->set);
     const IntArray &boundaries = set->giveBoundaryList();
@@ -239,7 +239,7 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
 
         OOFEM_ERROR("3D tangents not implemented yet.");
 
-        FloatMatrix tmp(3 *nodes, 3 *nodes);
+        //FloatMatrix tmp(3 *nodes, 3 *nodes);
         FloatMatrix dNdx;
         FloatArray n;
         for ( GaussPoint *gp: *iRule ) {

@@ -179,15 +179,6 @@ FEI3dTrQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const
 }
 
 
-double
-FEI3dTrQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-{
-    FloatMatrix jacobianMatrix;
-    this->giveJacobianMatrixAt(jacobianMatrix, lcoords, cellgeo);
-    return jacobianMatrix.giveDeterminant();
-}
-
-
 void
 FEI3dTrQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
@@ -325,7 +316,6 @@ FEI3dTrQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
                                    const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     //Note: This gives the coordinate in the reference system
-    IntArray nodes;
     FloatArray N;
     this->surfaceEvalN(N, isurf, lcoords, cellgeo);
 

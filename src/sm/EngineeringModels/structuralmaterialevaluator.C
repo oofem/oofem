@@ -68,8 +68,8 @@ IRResultType StructuralMaterialEvaluator :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, this->cmpntFunctions, _IFT_StructuralMaterialEvaluator_componentFunctions);
     IR_GIVE_FIELD(ir, this->sControl, _IFT_StructuralMaterialEvaluator_stressControl);
 
+    tolerance = 1.0;
     if ( this->sControl.giveSize() > 0 ) {
-        tolerance = 1.0;
         IR_GIVE_FIELD(ir, this->tolerance, _IFT_StructuralMaterialEvaluator_tolerance);
     }
 
@@ -81,6 +81,22 @@ IRResultType StructuralMaterialEvaluator :: initializeFrom(InputRecord *ir)
             eControl.followedBy(i);
         }
     }
+
+    suppressOutput = ir->hasField(_IFT_EngngModel_suppressOutput);
+
+    if(suppressOutput) {
+    	printf("Suppressing output.\n");
+    }
+    else {
+
+		if ( ( outputStream = fopen(this->dataOutputFileName.c_str(), "w") ) == NULL ) {
+			OOFEM_ERROR("Can't open output file %s", this->dataOutputFileName.c_str());
+		}
+
+		fprintf(outputStream, "%s", PRG_HEADER);
+		fprintf( outputStream, "\nStarting analysis on: %s\n", ctime(& this->startTime) );
+		fprintf(outputStream, "%s\n", simulationDescription.c_str());
+	}
 
     return IRRT_OK;
 }
@@ -136,18 +152,27 @@ void StructuralMaterialEvaluator :: solveYourself()
             }
 
             for ( int iter = 1; iter < maxiter; iter++ ) {
+#if 0
+                // Debugging:
+                mat->give3dMaterialStiffnessMatrix(tangent, TangentStiffness, gp, tStep);
+                tangent.printYourself("tangent");
+                break;
+#endif
+
+                strain.printYourself("Macro strain guess");
                 mat->giveRealStressVector_3d(stress, gp, strain, tStep);
                 for ( int j = 1; j <= sControl.giveSize(); ++j ) {
                     res.at(j) = stressC.at(j) - stress.at( sControl.at(j) );
                 }
 
-                OOFEM_LOG_RELEVANT( "Time step: %d, Material %d, Iteration: %d,  Residual = %e\n", istep, imat, iter, res.computeNorm() );
+                OOFEM_LOG_INFO("*** Time step: %d (t = %.2e), Material %d, Iteration: %d,  Residual = %e (tolerance %.2e)\n", 
+                              istep, tStep->giveIntrinsicTime(), imat, iter, res.computeNorm(), tolerance);
+
                 if ( res.computeNorm() <= tolerance ) {
                     break;
-                }
+                } else {
+                    mat->give3dMaterialStiffnessMatrix(tangent, TangentStiffness, gp, tStep);
 
-                mat->give3dMaterialStiffnessMatrix(tangent, TangentStiffness, gp, tStep);
-                if ( res.giveSize() > 0 ) {
                     // Pick out the stress-controlled part;
                     reducedTangent.beSubMatrixOf(tangent, sControl, sControl);
 

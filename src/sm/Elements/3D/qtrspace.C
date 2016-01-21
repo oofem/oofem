@@ -66,7 +66,7 @@ IRResultType
 QTRSpace :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 4;
-    return this->Structural3DElement :: initializeFrom(ir);
+    return Structural3DElement :: initializeFrom(ir);
 }
 
 

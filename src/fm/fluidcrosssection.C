@@ -51,11 +51,9 @@ FluidCrossSection :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    this->CrossSection :: initializeFrom(ir);
-
     IR_GIVE_FIELD(ir, this->matNumber, _IFT_FluidCrossSection_material);
 
-    return IRRT_OK;
+    return CrossSection :: initializeFrom(ir);
 }
 
 
@@ -73,6 +71,13 @@ FluidCrossSection :: checkConsistency()
 {
     CrossSection :: checkConsistency();
     return dynamic_cast< FluidDynamicMaterial * >( this->domain->giveMaterial(this->matNumber) ) != NULL;
+}
+
+
+double
+FluidCrossSection :: giveDensity(GaussPoint *gp)
+{
+    return this->domain->giveMaterial(this->matNumber)->give('d', gp);
 }
 
 

@@ -273,7 +273,7 @@ public:
      * Returns DofID value of receiver, which determines type of
      * of unknown connected to receiver (e.g., u-displacement, v-displacement, ...).
      */
-    DofIDItem giveDofID() { return dofID; }
+    DofIDItem giveDofID() const { return dofID; }
     /**
      * Sets the ID of receiver.
      */
@@ -326,7 +326,7 @@ public:
      * Called from corresponding e-model.
      */
     virtual void printMultipleOutputAt(FILE *File, TimeStep *tStep, char *ch, ValueModeType *mode, int nite);
-
+    void printSingleOutputWithAdditionAt(FILE *File, TimeStep *tStep, char ch, ValueModeType mode, double addend);
     /// Prints the receiver state on stdout.
     virtual void printYourself();
     /**
@@ -387,13 +387,13 @@ public:
      * Sets a specific equation number to receiver.
      * @param equationNumber New equation number.
      */
-    virtual void setEquationNumber(int equationNumber) { };
+    virtual void setEquationNumber(int equationNumber) { }
 
     /**
      * Sets the dictionary of unknowns for receiver.
      * @param unknowns New dictionary of unknowns.
      */
-    virtual void setUnknowns(Dictionary *unknowns) { };
+    virtual void setUnknowns(Dictionary *unknowns) { }
     /**
      * Receives the dictionary of unknowns in receiver.
      * @return Dictionary of unknowns for DOF.

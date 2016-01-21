@@ -51,8 +51,6 @@
 #define _IFT_NlDEIDynamic_drflag "drflag"
 #define _IFT_NlDEIDynamic_tau "tau"
 #define _IFT_NlDEIDynamic_py "py"
-#define _IFT_NlDEIDynamic_nodecutmode "nodecutmode"
-#define _IFT_NlDEIDynamic_elementcutmode "elementcutmode"
 #define _IFT_NlDEIDynamic_nonlocalext "nonlocalext"
 //@}
 
@@ -157,8 +155,7 @@ public:
     virtual const char *giveClassName() const { return "NlDEIDynamic"; }
     virtual fMode giveFormulation() { return TL; }
 
-    virtual int giveNumberOfFirstStep() { return 0; }
-    virtual int giveNumberOfTimeStepWhenIcApply() { return 0; }
+    virtual int giveNumberOfFirstStep(bool force = false) { return 0; }
 
 protected:
     /**

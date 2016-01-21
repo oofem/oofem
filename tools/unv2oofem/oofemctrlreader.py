@@ -242,9 +242,10 @@ class CTRLParser:
         self.nic=int(dataline[7])
         self.nltf=int(dataline[9])
         
-        xmanInd = dataline.index("nxfemman")
-        if xmanInd != -1:
-            self.nxfemman = int(dataline[xmanInd+1])
+        if dataline.count("nxfemman"):
+            xmanInd = dataline.index("nxfemman")
+            if xmanInd != -1:
+                self.nxfemman = int(dataline[xmanInd+1])
 
         #read crossSect, material, bc, ic, and lft records into footer
         count = 0
@@ -260,10 +261,14 @@ class CTRLParser:
         #attach all following lines until empty line is hit. This is the end of OOFEM section
         while True:
             line=self.file.readline()
+            dataline=line.split()
+            
             if line.strip() == '':
                 break
+            
+            if dataline[0].lower() == 'set':
+                self.nset=self.nset + 1;
             self.footer+= line
-        print "Number of sets = %d\n"%self.nset
 
         #look, whether the next line contains extractor data
         #pos = self.file.tell()
@@ -315,3 +320,4 @@ class CTRLParser:
                 #resolve elemtype
                 if elemmap[ielem].type in igroup.oofem_etypemap:
                     elemmap[ielem].oofem_elemtype = igroup.oofem_etypemap[elemmap[ielem].type]
+                    

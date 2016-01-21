@@ -46,7 +46,6 @@ IRResultType
 AnisotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
-    this->LinearElasticMaterial :: initializeFrom(ir);
 
     // read the stiffness coefficients arranged by rows from the diagonal to the right (21 values)
     FloatArray stiffness;
@@ -67,13 +66,13 @@ AnisotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
     // read the thermal expansion coefficients (3 values)
     IR_GIVE_FIELD(ir, alpha, _IFT_AnisotropicLinearElasticMaterial_talpha);
     if ( alpha.giveSize() == 0 ) {
-        alpha.resize(3);
+        alpha.resize(6);
         alpha.zero();
     } else if ( alpha.giveSize() != 6 )     {
         OOFEM_ERROR( "Incorrect size of talpha - should be 0 or 6, is %d\n", alpha.giveSize() );
     }
 
-    return IRRT_OK;
+    return LinearElasticMaterial :: initializeFrom(ir);
 }
 
 

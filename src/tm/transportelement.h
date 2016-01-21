@@ -41,12 +41,12 @@
 #include "matresponsemode.h"
 
 namespace oofem {
+class TransportCrossSection;
+
 /**
  * This abstract class represent a general base element class for transport problems.
  * In actual implementation, the same approximation order of all unknowns is assumed,
  * but this can be easily implemented.
- * @todo A lot of missing documentation.
- * @todo Nonlinear problems.
  */
 class TransportElement : public Element, public EIPrimaryFieldInterface
 {
@@ -55,6 +55,8 @@ public:
 
 protected:
     ElementMode emode;
+    /// Stefan–Boltzmann constant W/m2/K4
+    static const double stefanBoltzmann;
 
 public:
     TransportElement(int n, Domain * d, ElementMode em = HeatTransferEM);
@@ -72,7 +74,16 @@ public:
 
     virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
     virtual void computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void computeTangentFromBoundaryLoad(FloatMatrix &answer, BoundaryLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep);
     virtual void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep);
+
+    //Compute radiative heat tranfer coefficient as 4*eps*sigma*T_infty^3
+    virtual double getRadiativeHeatTranferCoef(BoundaryLoad *bLoad, TimeStep *tStep);
+    
+    virtual void computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer);
+
+    TransportCrossSection * giveTransportCrossSection();
+    virtual Material * giveMaterial();
 
     /**
      * Gives the thickness at some global coordinate.
@@ -209,6 +220,7 @@ protected:
      * In the default implementation the same approximation order is assumed, but it can be extended.
      */
     virtual void computeNmatrixAt(FloatMatrix &answer, const FloatArray &lcoords);
+    virtual void computeBmatrixAt(FloatMatrix &answer, const FloatArray &lcoords);
     /**
      * Computes the gradient matrix corresponding to one unknown.
      */

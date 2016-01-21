@@ -55,7 +55,6 @@ protected:
 
 
 public:
-
     TrPlaneStress2dXFEM(int n, Domain * d) : TrPlaneStress2d(n, d), XfemStructuralElementInterface(this), VTKXMLExportModuleElementInterface() { numberOfDofMans = 3; }
 
     virtual ~TrPlaneStress2dXFEM();
@@ -101,10 +100,7 @@ public:
     virtual MaterialMode giveMaterialMode();
     virtual void giveInputRecord(DynamicInputRecord &input);
 
-    // For mapping of primary unknowns
-    virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-                                                                       TimeStep *tStep, const FloatArray &lcoords,
-                                                                       FloatArray &answer);
+    virtual void computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer);
     virtual void giveElementDofIDMask(IntArray &answer) const;
 
     /// VTK Interface

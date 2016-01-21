@@ -40,7 +40,6 @@
 #include "domain.h"
 #include "dofmanager.h"
 #include "element.h"
-#include "generalboundarycondition.h"
 #include "unknownnumberingscheme.h"
 
 namespace oofem {
@@ -58,13 +57,12 @@ DynamicRelaxationSolver :: DynamicRelaxationSolver(Domain *d, EngngModel *m) : N
 IRResultType
 DynamicRelaxationSolver :: initializeFrom(InputRecord *ir)
 {
-    NRSolver :: initializeFrom(ir);
-    return IRRT_OK;
+    return NRSolver :: initializeFrom(ir);
 }
 
 
 NM_Status
-DynamicRelaxationSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
+DynamicRelaxationSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0, FloatArray *iR,
                   FloatArray &X, FloatArray &dX, FloatArray &F,
                   const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                   int &nite, TimeStep *tStep)
@@ -109,7 +107,7 @@ DynamicRelaxationSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
     // Compute the mass "matrix" (lumped, only storing the diagonal)
     M.resize(neq);
     M.zero();
-    engngModel->assembleVector(M, tStep, LumpedMassMatrix, VM_Total, EModelDefaultEquationNumbering(), domain);
+    engngModel->assembleVector(M, tStep, LumpedMassVectorAssembler(), VM_Total, EModelDefaultEquationNumbering(), domain);
 
     double Le = -1.0;
     for ( auto &elem : domain->giveElements() ) {
@@ -118,9 +116,8 @@ DynamicRelaxationSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
             Le = size;
         }
     }
-    
-    nite = 0;
-    do {
+
+    for ( nite = 0; ; ++nite ) {
         // Compute the residual
         engngModel->updateComponent(tStep, InternalRhs, domain);
         rhs.beDifferenceOf(RT, F);
@@ -156,8 +153,7 @@ DynamicRelaxationSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
         dX.beDifferenceOf(X, X_0);
         tStep->incrementStateCounter(); // update solution state counter
         tStep->incrementSubStepNumber();
-        nite++; // iteration increment
-    } while ( true ); // end of iteration
+    }
 
     status |= NM_Success;
     solved = 1;

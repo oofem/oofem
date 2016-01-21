@@ -127,7 +127,7 @@ protected:
     virtual void giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep );
 
     virtual void vtkEvalUpdatedGlobalCoordinateAt(const FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep);
-    void giveDisUnknownsAt(const FloatArray &lCoords, EnrichmentItem *ei, FloatArray &solVec, FloatArray &x, FloatArray &m, double gam, TimeStep *tStep);
+    void giveDisUnknownsAt(const FloatArray &lCoords, EnrichmentItem *ei, FloatArray &solVec, FloatArray &x, FloatArray &m, double &gam, TimeStep *tStep);
     IntArray DelaminatedInterfaceList;
     void computeFailureCriteriaQuantities(FailureCriteriaStatus *fc, TimeStep *tStep);
 
@@ -177,7 +177,6 @@ public:
     std :: vector< std :: unique_ptr< IntegrationRule > > czIntegrationRulesArray;
     private:
     void jump(FloatMatrix lambda, FloatArray deltaUnknowns);
-    void Fco(FloatMatrix lambdaN, FloatArray T);
 };
 } // end namespace oofem
 #endif

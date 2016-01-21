@@ -45,6 +45,7 @@
 #include "fei3dtetlin.h"
 #include "masterdof.h"
 #include "fluidcrosssection.h"
+#include "assemblercallback.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -219,7 +220,6 @@ void Tet1BubbleStokes :: computeLoadVector(FloatArray &answer, Load *load, CharT
         return;
     }
 
-    FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
     FloatArray N, gVector, temparray(15);
     double dV, detJ, rho;
 
@@ -230,7 +230,7 @@ void Tet1BubbleStokes :: computeLoadVector(FloatArray &answer, Load *load, CharT
         for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
             const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
-            rho = mat->give('d', gp);
+            rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity(gp);
             detJ = fabs( this->interp.giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(this) ) );
             dV = detJ * gp->giveWeight() * rho;
 
@@ -261,13 +261,10 @@ void Tet1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryL
     }
 
     if ( load->giveType() == TransmissionBC ) { // Neumann boundary conditions (traction)
-        BoundaryLoad *boundaryLoad = static_cast< BoundaryLoad * >(load);
-
-        int numberOfIPs = ( int ) ceil( ( boundaryLoad->giveApproxOrder() + 2. ) / 2. );
+        int numberOfIPs = ( int ) ceil( ( load->giveApproxOrder() + 2. ) / 2. );
 
         GaussIntegrationRule iRule(1, this, 1, 1);
         FloatArray N, t, f(9);
-        IntArray edge_mapping;
 
         f.zero();
         iRule.SetUpPointsOnTriangle(numberOfIPs, _Unknown);
@@ -279,12 +276,12 @@ void Tet1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryL
             double detJ = fabs( this->interp.surfaceGiveTransformationJacobian( iSurf, lcoords, FEIElementGeometryWrapper(this) ) );
             double dA = gp->giveWeight() * detJ;
 
-            if ( boundaryLoad->giveFormulationType() == Load :: FT_Entity ) { // Edge load in xi-eta system
-                boundaryLoad->computeValueAt(t, tStep, lcoords, VM_Total);
+            if ( load->giveFormulationType() == Load :: FT_Entity ) { // Edge load in xi-eta system
+                load->computeValueAt(t, tStep, lcoords, VM_Total);
             } else { // Edge load in x-y system
                 FloatArray gcoords;
                 this->interp.boundaryLocal2Global( gcoords, iSurf, lcoords, FEIElementGeometryWrapper(this) );
-                boundaryLoad->computeValueAt(t, tStep, gcoords, VM_Total);
+                load->computeValueAt(t, tStep, gcoords, VM_Total);
             }
 
             // Reshape the vector
@@ -392,31 +389,33 @@ Interface *Tet1BubbleStokes :: giveInterface(InterfaceType it)
     case SpatialLocalizerInterfaceType:
         return static_cast< SpatialLocalizerInterface * >(this);
 
-    case EIPrimaryUnknownMapperInterfaceType:
-        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
-
     default:
         return FMElement :: giveInterface(it);
     }
 }
 
 
-void Tet1BubbleStokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-                                                                               TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
+void Tet1BubbleStokes :: computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {
-    FloatArray n, n_lin;
+    FloatArray n, n_lin, pressures, velocities;
     this->interp.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
     this->interp.evalN( n_lin, lcoords, FEIElementGeometryWrapper(this) );
+    this->computeVectorOf({P_f}, mode, tStep, pressures);
+    this->computeVectorOf({V_u, V_v, V_w}, mode, tStep, velocities);
+
     answer.resize(4);
     answer.zero();
     for ( int i = 1; i <= n.giveSize(); i++ ) {
-        answer(0) += n.at(i) * this->giveNode(i)->giveDofWithID(V_u)->giveUnknown(mode, tStep);
-        answer(1) += n.at(i) * this->giveNode(i)->giveDofWithID(V_v)->giveUnknown(mode, tStep);
-        answer(2) += n.at(i) * this->giveNode(i)->giveDofWithID(V_w)->giveUnknown(mode, tStep);
+        answer(0) += n.at(i) * velocities.at(i*3-2);
+        answer(1) += n.at(i) * velocities.at(i*3-1);
+        answer(2) += n.at(i) * velocities.at(i*3);
     }
+    answer(0) += n.at(1) * n.at(2) * n.at(3) * n.at(4) * velocities.at(13);
+    answer(1) += n.at(1) * n.at(2) * n.at(3) * n.at(4) * velocities.at(14);
+    answer(2) += n.at(1) * n.at(2) * n.at(3) * n.at(4) * velocities.at(15);
 
     for ( int i = 1; i <= n_lin.giveSize(); i++ ) {
-        answer(3) += n_lin.at(i) * this->giveNode(i)->giveDofWithID(P_f)->giveUnknown(mode, tStep);
+        answer(3) += n_lin.at(i) * pressures.at(i);
     }
 }
 

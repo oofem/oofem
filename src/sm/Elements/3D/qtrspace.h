@@ -39,7 +39,6 @@
 #include "ErrorEstimators/huertaerrorestimator.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
-#include "eleminterpmapperinterface.h"
 #include "sprnodalrecoverymodel.h"
 
 #define _IFT_QTRSpace_Name "qtrspace"

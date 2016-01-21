@@ -40,6 +40,7 @@
 #include "dofmanager.h"
 #include "engngm.h"
 #include "domain.h"
+#include "unknownnumberingscheme.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -1534,15 +1535,14 @@ FETISolver :: solve(SparseMtrx &A, FloatArray &partitionLoad, FloatArray &partit
                 OOFEM_LOG_DEBUG("%-9d%15e\n", i, nom);
             }
         }
+#ifdef __VERBOSE_PARALLEL        
+        if ( rank == 0 ) {
+          OOFEM_LOG_DEBUG("Konec metody sdruzenych gradientu, nite %d, err %e\n", i, nom);
+        }
+#endif
 
-        //#endif
     } // end iterative loop
 
-    if ( rank == 0 ) {
-#ifdef __VERBOSE_PARALLEL
-        OOFEM_LOG_DEBUG("Konec metody sdruzenych gradientu, nite %d, err %e\n", i, nom);
-#endif
-    }
 
     /*  prelom (break) */
 

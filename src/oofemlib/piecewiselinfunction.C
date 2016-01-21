@@ -38,7 +38,6 @@
 #include "dynamicinputrecord.h"
 
 #include <fstream>
-#include <ios>
 #include <sstream>
 
 namespace oofem {

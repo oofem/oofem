@@ -143,7 +143,7 @@ public:
     virtual double at(int i, int j) const;
     /// Returns 0 if the memory is not allocated at position (i,j).
     virtual bool isAllocatedAt(int i, int j) const;
-    int giveNumberOfNonZeros() const { return this->nwk; };
+    int giveNumberOfNonZeros() const { return this->nwk; }
     virtual void toFloatMatrix(FloatMatrix &answer) const;
     /// Prints receiver to stdout.
     virtual void printYourself() const;

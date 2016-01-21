@@ -3,7 +3,7 @@
  *
  *  Created on: Jun 5, 2013
  *
- *  @author: Erik Svenning
+ *  @author Erik Svenning
  *
  *  Description: Interface to some useful Boost functions.
  *  Boost is subject to the Boost license:

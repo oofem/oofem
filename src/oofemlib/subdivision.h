@@ -38,21 +38,16 @@
 #include "mesherinterface.h"
 #include "floatarray.h"
 #include "intarray.h"
-#include "alist.h"
 #include "element.h"
 #include "dofmanager.h"
 #include "connectivitytable.h"
 
+#include <memory>
+#include <vector>
 #include <queue>
 #include <list>
 
 namespace oofem {
-// increase the number of at once allocated fields if the fine (multilevel) subdivision
-// with many new nodes and elements is too slow
-
-#define RS_ARRAY_CHUNK   20
-
-
 
 #define SHARED_IRREGULAR_DATA_TAG 7654
 #define SUBDIVISION_SHARED_IRREGULAR_REC_TAG 7655
@@ -88,8 +83,8 @@ protected:
         // if it is on boundary of 3D region and incident to edge subjected to bisection
         // (in such a case the list is built on the fly)
         IntArray connectedElements;
-#ifdef __PARALLEL_MODE
         int globalNumber;
+#ifdef __PARALLEL_MODE
         dofManagerParallelMode parallel_mode;
         /**
          * List of partition sharing the shared dof manager or
@@ -105,9 +100,9 @@ public:
             this->requiredDensity = rd;
             this->boundary = boundary;
             this->parent = parent;
+            this->globalNumber  = 0;
 #ifdef __PARALLEL_MODE
             this->parallel_mode = DofManager_local;
-            this->globalNumber  = 0;
 #endif
         }
         virtual ~RS_Node() { }
@@ -125,15 +120,16 @@ public:
         void insertConnectedElement(int num) { connectedElements.insertSorted(num, 10); }
         void eraseConnectedElement(int num) { connectedElements.eraseSorted(num); }
         void preallocateConnectedElements(int size) { connectedElements.preallocate(size); }
+        int giveGlobalNumber() { return globalNumber; }
+        void setGlobalNumber(int gn) { this->globalNumber = gn; }
+        virtual bool isIrregular() { return false; }
+
 #ifdef __PARALLEL_MODE
         void numberSharedEdges();
         dofManagerParallelMode giveParallelMode() const { return parallel_mode; }
         void setParallelMode(dofManagerParallelMode _mode) { parallel_mode = _mode; }
         const IntArray *givePartitions()  { return & partitions; }
         void setPartitions(IntArray _p) { partitions = std :: move(_p); }
-        int giveGlobalNumber() { return globalNumber; }
-        void setGlobalNumber(int gn) { this->globalNumber = gn; }
-        virtual bool isIrregular() { return false; }
         int importConnectivity(ConnectivityTable *ct);
 #endif
 #ifdef __OOFEG
@@ -178,8 +174,8 @@ protected:
         RS_Mesh *mesh;
         // flag whether element is in bisection queue
         bool queue_flag;
-#ifdef __PARALLEL_MODE
         int globalNumber;
+#ifdef __PARALLEL_MODE
         elementParallelMode parallel_mode;
         // numbers of shared edges
         IntArray shared_edges;
@@ -192,8 +188,8 @@ public:
             this->mesh = m;
             this->parent = parent;
             this->queue_flag = false;
-#ifdef __PARALLEL_MODE
             this->globalNumber = -1;
+#ifdef __PARALLEL_MODE
             this->parallel_mode = Element_local;
 #endif
         }
@@ -239,6 +235,8 @@ public:
 #ifdef __OOFEG
         virtual void  drawGeometry() { }
 #endif
+        int giveGlobalNumber() { return globalNumber; }
+        void setGlobalNumber(int gn) { this->globalNumber = gn; }
 
 #ifdef __PARALLEL_MODE
         virtual void numberSharedEdges(int iNode, IntArray &connNodes) = 0;
@@ -249,8 +247,6 @@ public:
         elementParallelMode giveParallelMode() const { return parallel_mode; }
         // Sets parallel mode of element
         void setParallelMode(elementParallelMode _mode) { parallel_mode = _mode; }
-        int giveGlobalNumber() { return globalNumber; }
-        void setGlobalNumber(int gn) { this->globalNumber = gn; }
 #endif
     };
 
@@ -339,10 +335,10 @@ public:
     class RS_Mesh
     {
         // HUHU protected? private?
-        AList< Subdivision :: RS_Node >nodes;
-        AList< Subdivision :: RS_Element >elements;
+        std :: vector< std :: unique_ptr< Subdivision :: RS_Node > >nodes;
+        std :: vector< std :: unique_ptr< Subdivision :: RS_Element > >elements;
 #ifdef __PARALLEL_MODE
-        AList< Subdivision :: RS_SharedEdge >edges;
+        std :: vector< std :: unique_ptr< Subdivision :: RS_SharedEdge > >edges;
 #endif
         Subdivision *subdivision;
 
@@ -355,35 +351,27 @@ public:
 
 public:
 #ifdef __PARALLEL_MODE
-        RS_Mesh(Subdivision * s) : nodes(0, RS_ARRAY_CHUNK), elements(0, RS_ARRAY_CHUNK), edges(0, RS_ARRAY_CHUNK) {
+        RS_Mesh(Subdivision * s) : nodes(), elements(), edges() {
             this->subdivision = s;
             sharedNodeMapInitialized = false;
         }
-        ~RS_Mesh() {
-            nodes.clear();
-            elements.clear();
-            edges.clear();
-        }
 #else
-        RS_Mesh(Subdivision * s) : nodes(0, RS_ARRAY_CHUNK), elements(0, RS_ARRAY_CHUNK) {
+        RS_Mesh(Subdivision * s) : nodes(), elements() {
             this->subdivision = s;
         }
-        ~RS_Mesh() {
-            nodes.clear();
-            elements.clear();
-        }
 #endif
+        ~RS_Mesh() {}
 
-        Subdivision :: RS_Node *giveNode(int i) { return nodes.at(i); }
-        Subdivision :: RS_Element *giveElement(int i) { return elements.at(i); }
-        int giveNumberOfNodes() { return nodes.giveSize(); }
-        int giveNumberOfElements() { return elements.giveSize(); }
-        void addNode(int num, Subdivision :: RS_Node *obj) { nodes.put(num, obj); }
-        void addElement(int num, Subdivision :: RS_Element *obj) { elements.put(num, obj); }
+        Subdivision :: RS_Node *giveNode(int i) { return nodes[i-1].get(); }
+        Subdivision :: RS_Element *giveElement(int i) { return elements[i-1].get(); }
+        int giveNumberOfNodes() { return (int)nodes.size(); }
+        int giveNumberOfElements() { return (int)elements.size(); }
+        void addNode(Subdivision :: RS_Node *obj) { nodes.emplace_back(obj); }
+        void addElement(Subdivision :: RS_Element *obj) { elements.emplace_back(obj); }
 #ifdef __PARALLEL_MODE
-        Subdivision :: RS_SharedEdge *giveEdge(int i) { return edges.at(i); }
-        int giveNumberOfEdges() { return edges.giveSize(); }
-        void addEdge(int num, Subdivision :: RS_SharedEdge *obj) { edges.put(num, obj); }
+        Subdivision :: RS_SharedEdge *giveEdge(int i) { return edges[i-1].get(); }
+        int giveNumberOfEdges() { return (int)edges.size(); }
+        void addEdge(Subdivision :: RS_SharedEdge *obj) { edges.emplace_back(obj); }
         void initGlobalSharedNodeMap() { sharedNodeMap.clear(); }
         void insertGlobalSharedNodeMap(Subdivision :: RS_Node *node);
         int sharedNodeGlobal2Local(int _globnum);
@@ -436,6 +424,10 @@ protected:
     Subdivision :: RS_Mesh *giveMesh() { return mesh; }
     void bisectMesh();
     void smoothMesh();
+
+    bool isNodeLocalIrregular(Subdivision :: RS_Node *node, int myrank);
+    void assignGlobalNumbersToElements(Domain *d);
+
 #ifdef __PARALLEL_MODE
     /**
      * Exchanges the shared irregulars between partitions. Returns true if any shared irregular has been
@@ -451,7 +443,6 @@ protected:
     int packSharedEdges(Subdivision *s, ProcessCommunicator &pc);
     int unpackSharedEdges(Subdivision *s, ProcessCommunicator &pc);
 
-    bool isNodeLocalIrregular(Subdivision :: RS_Node *node, int myrank);
     /// Returns true if receiver is irregular, shared node locally maintatined
     bool isNodeLocalSharedIrregular(Subdivision :: RS_Node *node, int myrank);
 
@@ -462,7 +453,6 @@ protected:
     int packRemoteElements(RS_packRemoteElemsStruct *s, ProcessCommunicator &pc);
     int unpackRemoteElements(Domain *d, ProcessCommunicator &pc);
 
-    void assignGlobalNumbersToElements(Domain *d);
 #endif
 };
 } // end namespace oofem

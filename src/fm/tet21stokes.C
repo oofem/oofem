@@ -33,7 +33,6 @@
  */
 
 #include "tet21stokes.h"
-#include "fmelement.h"
 #include "node.h"
 #include "dof.h"
 #include "domain.h"
@@ -48,6 +47,7 @@
 #include "fei3dtetlin.h"
 #include "fei3dtetquad.h"
 #include "fluidcrosssection.h"
+#include "assemblercallback.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -202,7 +202,6 @@ void Tet21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType t
         return;
     }
 
-    FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
     FloatArray N, gVector, temparray(30);
 
     load->computeComponentArrayAt(gVector, tStep, VM_Total);
@@ -211,7 +210,7 @@ void Tet21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType t
         for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
             const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
-            double rho = mat->give('d', gp);
+            double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity(gp);
             double detJ = fabs( this->interpolation_quad.giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(this) ) );
             double dA = detJ * gp->giveWeight();
 
@@ -240,9 +239,8 @@ void Tet21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *
     answer.zero();
 
     if ( load->giveType() == TransmissionBC ) { // Neumann boundary conditions (traction)
-        BoundaryLoad *boundaryLoad = static_cast< BoundaryLoad * >(load);
 
-        int numberOfSurfaceIPs = ( int ) ceil( ( boundaryLoad->giveApproxOrder() + 1. ) / 2. ) * 2; ///@todo Check this.
+        int numberOfSurfaceIPs = ( int ) ceil( ( load->giveApproxOrder() + 1. ) / 2. ) * 2; ///@todo Check this.
 
         GaussIntegrationRule iRule(1, this, 1, 1);
         FloatArray N, t, f(18);
@@ -256,12 +254,12 @@ void Tet21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *
             this->interpolation_quad.surfaceEvalN( N, iSurf, lcoords, FEIElementGeometryWrapper(this) );
             double dA = gp->giveWeight() * this->interpolation_quad.surfaceGiveTransformationJacobian( iSurf, lcoords, FEIElementGeometryWrapper(this) );
 
-            if ( boundaryLoad->giveFormulationType() == Load :: FT_Entity ) { // load in xi-eta system
-                boundaryLoad->computeValueAt(t, tStep, lcoords, VM_Total);
+            if ( load->giveFormulationType() == Load :: FT_Entity ) { // load in xi-eta system
+                load->computeValueAt(t, tStep, lcoords, VM_Total);
             } else { // Edge load in x-y system
                 FloatArray gcoords;
                 this->interpolation_quad.surfaceLocal2global( gcoords, iSurf, lcoords, FEIElementGeometryWrapper(this) );
-                boundaryLoad->computeValueAt(t, tStep, gcoords, VM_Total);
+                load->computeValueAt(t, tStep, gcoords, VM_Total);
             }
 
             // Reshape the vector

@@ -61,7 +61,7 @@ Shell7BaseXFEM :: Shell7BaseXFEM(int n, Domain *aDomain) : Shell7Base(n, aDomain
 
 Shell7BaseXFEM :: ~Shell7BaseXFEM()
 {
-    
+
 }
 
 int 
@@ -77,7 +77,7 @@ Shell7BaseXFEM :: postInitialize()
     Shell7Base :: postInitialize();
     this->xMan =  this->giveDomain()->giveXfemManager();
     
-    ///TODO This needs to be updated dymically and not only initialized
+    ///@todo This needs to be updated dymically and not only initialized
     // Set up ordering arrays and arrays with the actived dofs
     int numEI = xMan->giveNumberOfEnrichmentItems();
     this->orderingArrays.resize(numEI);
@@ -98,7 +98,7 @@ Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteriaStatus *fcStat
 {
     
     // Compute necessary quantities for evaluation of failure criterias
-    ///TODO Ugly code and not tested in a while so probably broken
+    ///@todo Ugly code and not tested in a while so probably broken
 
     if ( DamagedNeighborLayeredStatus * status = dynamic_cast< DamagedNeighborLayeredStatus * >(fcStatus) ) {
         /*
@@ -467,7 +467,6 @@ Shell7BaseXFEM :: computeSectionalForcesAt(FloatArray &sectionalForces, Integrat
     // f = \Lambda_i * P * G^I
     FloatArray PG1(3), PG2(3), PG3(3);
     FloatMatrix lambda[3], Gcon, P, PG;
-    FloatArray PVector;
     this->computeStressMatrix(P, genEps, ip, mat, tStep);
 
     const FloatArray &lCoords = ip->giveNaturalCoordinates();
@@ -622,7 +621,7 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
     //Computes the cohesive nodal forces for a given delamination interface
 
     Delamination *dei =  dynamic_cast< Delamination * >( ei );
-    if ( dei ) { // Only add cz for delaminations
+    if ( dei ) { // For now only add cz for delaminations
         FloatArray answerTemp, lCoords(3);
         answerTemp.resize(Shell7Base :: giveNumberOfDofs() );
         answerTemp.zero();
@@ -660,6 +659,8 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
             // Compute cohesive traction based on jump
             intMat->giveFirstPKTraction_3d(T, gp, jump, F, tStep);
             
+            //zzjump.printYourself("spatial jump");
+            //T.printYourself("Traction");
             T.rotatedWith(Q,'t'); // transform back to global coord system
 
             double zeta = xi * this->layeredCS->computeIntegralThick() * 0.5;       
@@ -676,11 +677,6 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
         answer.assemble(answerTemp, ordering);
     }
 }
-
-
-
-
-
 
 void
 Shell7BaseXFEM :: updateYourself(TimeStep *tStep)
@@ -744,11 +740,8 @@ Shell7BaseXFEM :: computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep)
                   }
                 }
             }
-            
-            
         }
     }
-   
 }
 
 
@@ -836,7 +829,7 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
     
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();
     FloatMatrix tempRed, tempRedT;
-    FloatMatrix KCC, KDC, KDD, Bc;
+    FloatMatrix KCC, KDC, KDD;
     FloatMatrix LCC, LDD, LDC;
     FloatMatrix B, BenrM, BenrK;
     
@@ -923,6 +916,7 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
 #if 1
     FloatMatrix Kcoh;
     this->computeCohesiveTangent(Kcoh, tStep);
+    //Kcoh.times(DISC_DOF_SCALE_FAC*DISC_DOF_SCALE_FAC);
     answer.add(Kcoh);
 
 #endif
@@ -1008,7 +1002,7 @@ Shell7BaseXFEM :: discComputeStiffness(FloatMatrix &LCC, FloatMatrix &LDD, Float
     // L_CC = lambdaC_i^T * A_ij * lambdaC_j  
     // L_DD = lambdaD_i^T * A_ij * lambdaD_j
     // L_CD = lambdaC_i^T * A_ij * lambdaD_j
-    FloatMatrix temp, B;
+    FloatMatrix B;
     FloatMatrix lambdaC [ 3 ], lambdaD [ 3 ];
 
     const FloatArray &lCoords = ip->giveNaturalCoordinates();
@@ -1202,7 +1196,7 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &KdIJ, IntegrationPoi
     FloatMatrix temp, B1, B2;
     FloatMatrix lambda1 [ 3 ], lambda2 [ 3 ];
 
-    FloatArray lCoords = ip->giveNaturalCoordinates();
+    const FloatArray &lCoords = ip->giveNaturalCoordinates();
     this->computeEnrichedBmatrixAt(lCoords, B1, ei1);
     this->computeEnrichedBmatrixAt(lCoords, B2, ei2);
 
@@ -1319,8 +1313,8 @@ Shell7BaseXFEM :: computePressureTangentMatrixDis(FloatMatrix &KCC, FloatMatrix 
     // Computes tangent matrix associated with the linearization of pressure loading. Assumes constant pressure.
     ConstantPressureLoad* pLoad = dynamic_cast< ConstantPressureLoad * >( load );
     
-    FloatMatrix N, B, L(7, 18), gcov, W1, W2;
-    FloatArray lCoords(3), solVec, pressure;
+    FloatMatrix N, B, gcov, W1, W2;
+    FloatArray lCoords, solVec, pressure;
     FloatArray g1, g2, genEps;
     FloatMatrix lambdaGC [ 3 ], lambdaNC, lambdaGD [ 3 ], lambdaND;
     double xi = pLoad->giveLoadOffset();
@@ -1619,7 +1613,6 @@ Shell7BaseXFEM :: computeEnrTractionForce(FloatArray &answer, const int iEdge, B
     answer.printYourself("f_ext old");
 #else
 
-    if(1) {
     int approxOrder = edgeLoad->giveApproxOrder() + this->giveInterpolation()->giveInterpolationOrder();
     int numberOfGaussPoints = ( int ) ceil( ( approxOrder + 1. ) / 2. );
     GaussIntegrationRule iRule(1, this, 1, 1);
@@ -1677,7 +1670,6 @@ Shell7BaseXFEM :: computeEnrTractionForce(FloatArray &answer, const int iEdge, B
         Nf.plusProduct(N, fT, dL);
     }
     answer.assemble(Nf, this->giveOrderingDofTypes() );
-    }
 #endif
 }
 
@@ -1831,7 +1823,6 @@ Shell7BaseXFEM :: computeEnrichedBmatrixAt(const FloatArray &lCoords, FloatMatri
 
 
             double factor = efGP [ 0 ] - EvaluateEnrFuncInDofMan(i, ei);
-            //printf("enr func in dofman %d = %e \n", i, EvaluateEnrFuncInDofMan(i, ei));
 
             // First column
             answer.at(1, 1 + j) = dNdxi.at(i, 1) * factor;
@@ -1913,7 +1904,7 @@ void
 Shell7BaseXFEM :: computeEnrichedNmatrixAt(const FloatArray &lCoords, FloatMatrix &answer, EnrichmentItem *ei)
 {
     // Returns the displacement interpolation matrix {N} of the receiver,
-    // evaluated at aGaussPoint.
+    // evaluated at gp.
 
     int ndofs = Shell7Base :: giveNumberOfDofs();
     int ndofs_xm  = 3 * this->giveNumberOfDofManagers();
@@ -2044,7 +2035,7 @@ Shell7BaseXFEM :: edgeComputeEnrichedNmatrixAt(const FloatArray &lCoords, FloatM
 void
 Shell7BaseXFEM :: edgeComputeEnrichedBmatrixAt(const FloatArray &lCoords, FloatMatrix &answer, EnrichmentItem *ei, const int edge)
 {
-/* Returns the  matrix {B} of the receiver, evaluated at aGaussPoint. Such that
+/* Returns the  matrix {B} of the receiver, evaluated at gp. Such that
  * B*a = [dxbar_dxi, dwdxi, w, dgamdxi, gam]^T, where a is the vector of unknowns
  */
 
@@ -2162,8 +2153,8 @@ Shell7BaseXFEM :: vtkEvalUpdatedGlobalCoordinateAt(const FloatArray &localCoords
 
 #if 1
     // Discontinuous part
-    std :: vector< double > ef;
-    FloatArray solVecD, xd, md, xtemp(3), N; double gamd=0;
+    FloatArray solVecD, xd, md, xtemp(3);
+    double gamd = 0;
     for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) {
         EnrichmentItem *ei = this->xMan->giveEnrichmentItem(i);
 
@@ -2184,7 +2175,7 @@ Shell7BaseXFEM :: vtkEvalUpdatedGlobalCoordinateAt(const FloatArray &localCoords
 
 
 void
-Shell7BaseXFEM :: giveDisUnknownsAt(const FloatArray &lcoords, EnrichmentItem *ei, FloatArray &solVec, FloatArray &x, FloatArray &m, double gam, TimeStep *tStep)
+Shell7BaseXFEM :: giveDisUnknownsAt(const FloatArray &lcoords, EnrichmentItem *ei, FloatArray &solVec, FloatArray &x, FloatArray &m, double &gam, TimeStep *tStep)
 {
     // returns the unknowns evaluated at a point (xi1, xi2, xi3)
     FloatArray vec;
@@ -2338,7 +2329,7 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
         InternalStateType type = ( InternalStateType ) internalVarsToExport.at(fieldNum);
         nodeNum = 1;
         
-        if ( 1 ) {
+        if ( 0 ) {
         // Recover shear stresses
         this->recoverShearStress(tStep);
         }
@@ -2493,7 +2484,7 @@ Shell7BaseXFEM :: giveFictiousCZNodeCoordsForExport(std::vector<FloatArray> &nod
 
     nodes.resize(localNodeCoords.giveNumberOfColumns());
     for ( int i = 1; i <= localNodeCoords.giveNumberOfColumns(); i++ ){
-        FloatArray coords, localCoords(3);
+        FloatArray localCoords(3);
         localCoords.beColumnOf(localNodeCoords,i);
 
         this->vtkEvalInitialGlobalCZCoordinateAt(localCoords, layer, nodes[i-1]);

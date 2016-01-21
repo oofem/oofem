@@ -4,22 +4,28 @@ LinearStatic nsteps 1 nmodules 1
 errorcheck
 domain 3dshell
 OutputManager tstep_all dofman_all element_all
-ndofman 4 nelem 3 ncrosssect  1 nmat 2 nbc 3 nic 0 nltf  1
-node 1 coords 3 0.  0.  0.  bc 6 1 1 1 1 1 1
-node 2 coords 3 0.  0.  0.  bc 6 1 1 1 1 0 0
-node 3 coords 3 3.  0.  0.  bc 6 0 1 1 1 0 0 
-#reference node
-node 4 coords 3 0.  1.  0.  bc 6 1 1 1 1 1 1
-beam3d 1 nodes 2 2 3 mat 1 crossSect 1 boundaryLoads 2 3 1 refnode 4
-Spring 2 nodes 2 1 2 mat 2 crossSect 1 mode 5 orientation 3 0 1 0 k 5.0
-Spring 3 nodes 2 1 2 mat 2 crossSect 1 mode 5 orientation 3 0 0 1 k 4.0
-SimpleCS 1 area 2.0 Iy 15.0 Iz 12.0 beamShearCoeff 1.e18
+ndofman 4 nelem 3 ncrosssect 2 nmat 2 nbc 4 nic 0 nltf 1 nset 4
+node 1 coords 3 0.  0.  0.
+node 2 coords 3 0.  0.  0.
+node 3 coords 3 3.  0.  0.
+#reference node (has no DOFs)
+node 4 coords 3 0.  1.  0.
+beam3d 1 nodes 2 2 3 crossSect 1 refnode 4
+Spring 2 nodes 2 1 2 crossSect 2 mode 5 orientation 3 0 1 0 k 5.0
+Spring 3 nodes 2 1 2 crossSect 2 mode 5 orientation 3 0 0 1 k 4.0
+SimpleCS 1 area 2.0 Iy 15.0 Iz 12.0 beamShearCoeff 1.e18 material 1
+SimpleCS 2 material 2
 IsoLE 1 d 1. E 1.0 n 0.2 tAlpha 1.2e-5
 DummyMat 2
-BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
-NodalLoad 2 loadTimeFunction 1 Components 2 1.0 0.0
-ConstantEdgeLoad 3 loadTimeFunction 1 Components 6 0.0 0.0 10.0 0.0 0.0 0.0 loadType 3 ndofs 6
+BoundaryCondition 1 loadTimeFunction 1 dofs 6 1 2 3 4 5 6 values 6 0 0 0 0 0 0 set 1
+BoundaryCondition 2 loadTimeFunction 1 dofs 4 1 2 3 4 values 4 0 0 0 0 set 2
+BoundaryCondition 3 loadTimeFunction 1 dofs 3 2 3 4 values 3 0 0 0 set 3
+ConstantEdgeLoad 4 loadTimeFunction 1 dofs 3 1 2 3 Components 3 0 0 10 loadType 3 set 4
 ConstantFunction 1 f(t) 1.0
+Set 1 nodes 1 1
+Set 2 nodes 1 2
+Set 3 nodes 1 3
+Set 4 elementedges 2 1 1
 ##
 ## Solution:
 ## Stiffness matrix of the system (dofs: rotation_at_node_1, rotation_at_node_2)
@@ -35,8 +41,8 @@ ConstantFunction 1 f(t) 1.0
 #NODE tStep 1 number 2 dof 5 unknown d value -0.56250
 #NODE tStep 1 number 3 dof 5 unknown d value  0.65625
 ## element stresses and strains
-#ELEMENT tStep 1 number 1 gp 1 keyword 7 component 3  value 3.12500000e-01
-#ELEMENT tStep 1 number 1 gp 1 keyword 7 component 5  value 5.00447343e+00
+#BEAM_ELEMENT tStep 1 number 1 keyword 1 component 3  value -9.3750e-01
+#BEAM_ELEMENT tStep 1 number 1 keyword 1 component 5  value -4.6875e+00
 ##ELEMENT tStep 1 number 2 keyword "moment" component 1  value  -2.8125
 #REACTION tStep 1 number 1 dof 5 value 2.8125e+00
 #REACTION tStep 1 number 2 dof 3 value -1.59375000e+01

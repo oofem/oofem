@@ -215,9 +215,9 @@ void PrescribedGenStrainShell7 :: computeField(FloatArray &sigma, EquationID eid
 
     R_c.zero();
     R_ext.zero();
-    emodel->assembleVector( R_c, tStep, eid, InternalForcesVector, VM_Total,
+    emodel->assembleVector( R_c, tStep, eid, InternalForceAssembler(), VM_Total,
                             EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
-    emodel->assembleVector( R_ext, tStep, eid, ExternalForcesVector, VM_Total,
+    emodel->assembleVector( R_ext, tStep, eid, ExternalForceAssembler(), VM_Total,
                             EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
     R_c.subtract(R_ext);
 
@@ -279,10 +279,7 @@ void PrescribedGenStrainShell7 :: computeTangent(FloatMatrix &tangent, EquationI
 
 IRResultType PrescribedGenStrainShell7 :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
-    GeneralBoundaryCondition :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, this->gradient, _IFT_PrescribedGenStrainShell7_gradient);
 
@@ -290,7 +287,7 @@ IRResultType PrescribedGenStrainShell7 :: initializeFrom(InputRecord *ir)
     this->centerCoord.zero();
     IR_GIVE_OPTIONAL_FIELD(ir, this->centerCoord, _IFT_PrescribedGenStrainShell7_centercoords)
 
-    return IRRT_OK;
+    return GeneralBoundaryCondition :: initializeFrom(ir);
 }
 
 

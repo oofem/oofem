@@ -38,6 +38,7 @@
 #include "element.h"
 #include "dof.h"
 #include "maskedprimaryfield.h"
+#include "intvarfield.h"
 #include "verbose.h"
 #include "transportelement.h"
 #include "classfactory.h"
@@ -51,17 +52,13 @@ REGISTER_EngngModel(StationaryTransportProblem);
 
 StationaryTransportProblem :: StationaryTransportProblem(int i, EngngModel *_master = NULL) : EngngModel(i, _master)
 {
-    UnknownsField = NULL;
-    conductivityMatrix = NULL;
     ndomains = 1;
     nMethod = NULL;
 }
 
 StationaryTransportProblem :: ~StationaryTransportProblem()
 {
-    delete conductivityMatrix;
     delete nMethod;
-    delete UnknownsField;
 }
 
 NumericalMethod *StationaryTransportProblem :: giveNumericalMethod(MetaStep *mStep)
@@ -79,7 +76,8 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    EngngModel :: initializeFrom(ir);
+    result = EngngModel :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     int val = SMT_Skyline;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
@@ -95,17 +93,17 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
         FieldManager *fm = this->giveContext()->giveFieldManager();
         for ( int i = 1; i <= exportFields.giveSize(); i++ ) {
             if ( exportFields.at(i) == FT_Temperature ) {
-                std :: shared_ptr< Field > _temperatureField( new MaskedPrimaryField ( FT_Temperature, this->UnknownsField, {T_f} ) );
+                FM_FieldPtr _temperatureField( new MaskedPrimaryField ( ( FieldType ) exportFields.at(i), this->UnknownsField.get(), {T_f} ) );
                 fm->registerField( _temperatureField, ( FieldType ) exportFields.at(i) );
             } else if ( exportFields.at(i) == FT_HumidityConcentration ) {
-                std :: shared_ptr< Field > _concentrationField( new MaskedPrimaryField ( FT_HumidityConcentration, this->UnknownsField, {C_1} ) );
+                FM_FieldPtr _concentrationField( new MaskedPrimaryField ( ( FieldType ) exportFields.at(i), this->UnknownsField.get(), {C_1} ) );
                 fm->registerField( _concentrationField, ( FieldType ) exportFields.at(i) );
             }
         }
     }
 
-    if ( UnknownsField == NULL ) { // can exist from nonstationary transport problem
-        UnknownsField = new PrimaryField(this, 1, FT_TransportProblemUnknowns, 0);
+    if ( !UnknownsField ) { // can exist from nonstationary transport problem
+        UnknownsField.reset( new PrimaryField(this, 1, FT_TransportProblemUnknowns, 0) );
     }
 
     return IRRT_OK;
@@ -122,6 +120,28 @@ double StationaryTransportProblem :: giveUnknownComponent(ValueModeType mode, Ti
 #endif
     return UnknownsField->giveUnknownValue(dof, mode, tStep);
 }
+
+
+EModelFieldPtr StationaryTransportProblem::giveField (FieldType key, TimeStep *tStep)
+{
+  /* Note: the current implementation uses MaskedPrimaryField, that is automatically updated with the model progress, 
+     so the returned field always refers to active solution step. 
+  */
+
+  if ( tStep != this->giveCurrentStep()) {
+    OOFEM_ERROR("Unable to return field representation for non-current time step");
+  }
+  if ( key == FT_Temperature ) {
+    FM_FieldPtr _ptr ( new MaskedPrimaryField ( key, this->UnknownsField.get(), {T_f} ) );
+    return _ptr;
+  } else if ( key == FT_HumidityConcentration ) {
+    FM_FieldPtr _ptr ( new MaskedPrimaryField ( key, this->UnknownsField.get(), {C_1} ) );
+    return _ptr;
+  } else {
+    return FM_FieldPtr();
+  }
+}
+
 
 
 TimeStep *StationaryTransportProblem :: giveNextStep()
@@ -155,7 +175,7 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
         solutionVector->resize(neq);
         solutionVector->zero();
 
-        conductivityMatrix = classFactory.createSparseMtrx(sparseMtrxType);
+        conductivityMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
         if ( conductivityMatrix == NULL ) {
             OOFEM_ERROR("sparse matrix creation failed");
         }
@@ -163,7 +183,7 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
         conductivityMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
         if ( this->keepTangent ) {
             this->conductivityMatrix->zero();
-            this->assemble( *conductivityMatrix, tStep, TangentStiffnessMatrix,
+            this->assemble( *conductivityMatrix, tStep, TangentAssembler(TangentStiffness),
                             EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
     }
@@ -175,7 +195,7 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 #endif
     FloatArray externalForces(neq);
     externalForces.zero();
-    this->assembleVector( externalForces, tStep, ExternalForcesVector, VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVector( externalForces, tStep, ExternalForceAssembler(), VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
     this->updateSharedDofManagers(externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
 
     // set-up numerical method
@@ -189,6 +209,7 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     int currentIterations;
     this->nMethod->solve(*this->conductivityMatrix,
                          externalForces,
+                         NULL,
                          NULL,
                          *UnknownsField->giveSolutionVector(tStep),
                          incrementOfSolution,
@@ -214,7 +235,7 @@ StationaryTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmp
 {
     if ( cmpn == InternalRhs ) {
         this->internalForces.zero();
-        this->assembleVector(this->internalForces, tStep, InternalForcesVector, VM_Total,
+        this->assembleVector(this->internalForces, tStep, InternalForceAssembler(), VM_Total,
                              EModelDefaultEquationNumbering(), this->giveDomain(1), & this->eNorm);
         this->updateSharedDofManagers(this->internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
         return;
@@ -222,7 +243,7 @@ StationaryTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmp
         if ( !this->keepTangent ) {
             // Optimization for linear problems, we can keep the old matrix (which could save its factorization)
             this->conductivityMatrix->zero();
-            this->assemble( *conductivityMatrix, tStep, TangentStiffnessMatrix,
+            this->assemble( *conductivityMatrix, tStep, TangentAssembler(TangentStiffness),
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
         return;

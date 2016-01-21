@@ -92,12 +92,7 @@ IRResultType
 Quad1_ht :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 4;
-    IRResultType result = this->TransportElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    return IRRT_OK;
+    return TransportElement :: initializeFrom(ir);
 }
 
 
@@ -181,7 +176,7 @@ void Quad1_ht :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
     p [ 3 ].y = ( FPNum ) this->giveNode(4)->giveCoordinate(2);
     p [ 3 ].z = 0.;
 
-    go =  CreateQuad3D(p);
+    go = CreateQuad3D(p);
     EGWithMaskChangeAttributes(WIDTH_MASK | FILL_MASK | COLOR_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK | LAYER_MASK, go);
     EGAttachObject(go, ( EObjectP ) this);
     EMAddGraphicsToModel(ESIModel(), go);
@@ -189,11 +184,9 @@ void Quad1_ht :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 
 void Quad1_ht :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
-    int i, indx, result = 0;
+    int result = 0;
     WCRec p [ 4 ];
-    GraphicObj *tr;
     double s [ 4 ];
-    FloatArray v [ 4 ];
     InternalStateType itype = gc.giveIntVarType();
 
     if ( !gc.testElementGraphicActivity(this) ) {
@@ -203,6 +196,7 @@ void Quad1_ht :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
 
     if ( itype == IST_HydrationDegree ) {
+        FloatArray v [ 4 ];
         for ( i = 1; i <= 4; i++ ) {
             result += this->giveInternalStateAtNode(v [ i - 1 ], gc.giveIntVarType(), gc.giveIntVarMode(), i, tStep);
         }
@@ -211,9 +205,9 @@ void Quad1_ht :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
             return;
         }
 
-        indx = gc.giveIntVarIndx();
+        int indx = gc.giveIntVarIndx();
 
-        for ( i = 1; i <= 4; i++ ) {
+        for ( int i = 1; i <= 4; i++ ) {
             s [ i - 1 ] = v [ i - 1 ].at(indx);
         }
 
@@ -225,7 +219,7 @@ void Quad1_ht :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
             }
 
             gc.updateFringeTableMinMax(s, 4);
-            tr =  CreateQuadWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ], s [ 3 ]);
+            GraphicObj *tr = CreateQuadWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ], s [ 3 ]);
             EGWithMaskChangeAttributes(LAYER_MASK, tr);
             EMAddGraphicsToModel(ESIModel(), tr);
         }
@@ -239,7 +233,7 @@ void Quad1_ht :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
         }
 
         FloatArray r;
-        for ( i = 0; i < 4; i++ ) {
+        for ( int i = 0; i < 4; i++ ) {
             this->giveNode(i + 1)->giveUnknownVector(r, dofMask, VM_Total, tStep);
             s [ i ] = r.at(1);
 
@@ -249,7 +243,7 @@ void Quad1_ht :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
         }
 
         gc.updateFringeTableMinMax(s, 4);
-        tr =  CreateQuadWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ], s [ 3 ]);
+        GraphicObj *tr = CreateQuadWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ], s [ 3 ]);
         EGWithMaskChangeAttributes(LAYER_MASK, tr);
         EMAddGraphicsToModel(ESIModel(), tr);
     }

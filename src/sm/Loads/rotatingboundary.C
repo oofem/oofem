@@ -130,14 +130,12 @@ RotatingBoundary :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    GeneralBoundaryCondition :: initializeFrom(ir);
-
     IR_GIVE_FIELD(ir, axis, _IFT_RotatingBoundary_axis);
     axis.normalize();
 
     IR_GIVE_OPTIONAL_FIELD(ir, center, _IFT_RotatingBoundary_center);
 
-    return IRRT_OK;
+    return GeneralBoundaryCondition :: initializeFrom(ir);
 }
 
 void

@@ -82,7 +82,7 @@ public:
     virtual void computeGap(FloatArray &answer, TimeStep *tStep);
     virtual void computeContactTractionAt(GaussPoint *gp, FloatArray &t, FloatArray &gap, TimeStep *tStep);
     virtual void computeCmatrixAt(GaussPoint *gp, FloatArray &answer, TimeStep *TimeStep);
-    FloatArray &giveNormal() { return this->normal; };
+    FloatArray &giveNormal() { return this->normal; }
     
     
     // Necessary methods - pure virtual in base class

@@ -38,6 +38,7 @@
 #include "Elements/nlstructuralelement.h"
 
 
+#define _IFT_Structural3DElement_materialCoordinateSystem "matcs" ///< [optional] Support for material directions based on element orientation.
 
 namespace oofem {
 class GaussPoint;
@@ -49,9 +50,12 @@ class IntArray;
  * Base class 3D elements.
  *
  * @author Jim Brouzoulis
+ * @author Mikael Öhman
  */
 class Structural3DElement : public NLStructuralElement
 {
+protected:
+    bool matRotation;
 
 public:
     /**
@@ -63,48 +67,46 @@ public:
     /// Destructor.
     virtual ~Structural3DElement() { }
 
+    virtual IRResultType initializeFrom(InputRecord *ir);
+
     virtual MaterialMode giveMaterialMode();
     virtual int computeNumberOfDofs();
     virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
     virtual double computeVolumeAround(GaussPoint *gp);
     
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    
     virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane);
 
+    void giveMaterialOrientationAt(FloatArray &x, FloatArray &y, FloatArray &z, const FloatArray &lcoords);
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     
 protected:
-     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx = 1, int upperIndx = ALL_STRAINS);
-     virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-     virtual void computeGaussPoints();
-//     
-//     
-//     
-//     // Edge support
-     virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
-     virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
-     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-     virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
-     virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
-//     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
-//    
+    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx = 1, int upperIndx = ALL_STRAINS);
+    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeGaussPoints();
+
+     // Edge support
+    virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
+    virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
+    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
+    virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
+    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
+
     virtual int testElementExtension(ElementExtension ext)
     { return ( ( ( ext == Element_EdgeLoadSupport ) || ( ext == Element_SurfaceLoadSupport ) ) ? 1 : 0 ); }     
      
      
-      //virtual IntegrationRule *GetSurfaceIntegrationRule(int); // old
-      virtual IntegrationRule *giveSurfaceIntegrationRule(int order, int isurf);
-      virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *gp);
-      virtual void giveSurfaceDofMapping(IntArray &answer, int) const;
-      virtual double computeSurfaceVolumeAround(GaussPoint *gp, int);
-      virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int);
-      virtual int computeLoadLSToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *gp);
+    //virtual IntegrationRule *GetSurfaceIntegrationRule(int); // old
+    virtual IntegrationRule *giveSurfaceIntegrationRule(int order, int isurf);
+    virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *gp);
+    virtual void giveSurfaceDofMapping(IntArray &answer, int) const;
+    virtual double computeSurfaceVolumeAround(GaussPoint *gp, int);
+    virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int);
+    virtual int computeLoadLSToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *gp);
     
-    private:
+private:
     double dnx(int i, int arg2);
 };
-
 
 
 } // end namespace oofem

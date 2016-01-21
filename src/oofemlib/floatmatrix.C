@@ -44,6 +44,7 @@
 #include "error.h"
 #include "datastream.h"
 
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <ostream>
@@ -164,11 +165,11 @@ FloatMatrix &FloatMatrix :: operator = ( std :: initializer_list< std :: initial
 
 FloatMatrix &FloatMatrix :: operator = ( std :: initializer_list< FloatArray >mat )
 {
-    RESIZE( ( int ) mat.begin()->giveSize(), ( int ) mat.size() );
+    RESIZE( mat.begin()->giveSize(), ( int ) mat.size() );
     auto p = this->values.begin();
     for ( auto col : mat ) {
 #if DEBUG
-        if ( this->nRows != ( int ) col.giveSize() ) {
+        if ( this->nRows != col.giveSize() ) {
                 OOFEM_ERROR("Initializer list has inconsistent column sizes.");
         }
 #endif
@@ -202,10 +203,10 @@ void FloatMatrix :: checkBounds(int i, int j) const
     }
 }
 
-bool FloatMatrix ::isFinite() const
+bool FloatMatrix :: isFinite() const
 {
-    for(double val : values) {
-        if(!std::isfinite(val)) {
+    for (double val : values) {
+        if ( !std::isfinite(val) ) {
             return false;
         }
     }
@@ -1105,7 +1106,7 @@ void FloatMatrix :: subtract(const FloatMatrix &aMatrix)
 }
 
 
-void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer, bool transpose)
+bool FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer, bool transpose)
 // solves equation b = this * x
 {
 #  ifdef DEBUG
@@ -1128,7 +1129,7 @@ void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer, bool tr
         dgetrs_(transpose ? "Transpose" : "No transpose", & this->nRows, & nrhs, this->givePointer(), & this->nRows, ipiv.givePointer(), answer.givePointer(), & this->nRows, & info);
     }
     if ( info != 0 ) {
-        OOFEM_ERROR("error %d", info);
+        return false;
     }
 #else
     int pivRow;
@@ -1157,7 +1158,7 @@ void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer, bool tr
         }
 
         if ( piv < 1.e-20 ) {
-            OOFEM_ERROR("cannot solve, seems to be singular at row %d", pivRow);
+            return false;
         }
 
         // exchange rows
@@ -1192,6 +1193,8 @@ void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer, bool tr
         answer.at(i) = ( answer.at(i) - help ) / mtrx->at(i, i);
     }
 #endif
+
+    return true;
 }
 
 
@@ -1468,7 +1471,7 @@ void FloatMatrix :: printYourself() const
 }
 
 
-void FloatMatrix :: printYourself(const std::string name) const
+void FloatMatrix :: printYourself(const std::string &name) const
 // Prints the receiver on screen.
 {
     printf("%s (%d x %d): \n", name.c_str(), nRows, nColumns);
@@ -1502,6 +1505,20 @@ void FloatMatrix :: pY() const
     }
 
     printf("];\n");
+}
+
+
+void FloatMatrix :: writeCSV(const std :: string &name) const
+{
+    FILE *file = fopen(name.c_str(), "w");
+    for ( int i = 1; i <= nRows; ++i ) {
+        for ( int j = 1; j <= nColumns; ++j ) {
+            fprintf(file, "%10.3e, ", this->at(i, j) );
+        }
+
+        fprintf(file, "\n");
+    }
+    fclose(file);
 }
 
 

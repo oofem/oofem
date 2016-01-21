@@ -51,9 +51,13 @@ REGISTER_Material(DustMaterial);
 
 DustMaterialStatus :: DustMaterialStatus(int n, Domain *d, GaussPoint *gp, double q0) :
     StructuralMaterialStatus(n, d, gp),
-    plasticStrain( gp->giveMaterialMode() ),
-    tempPlasticStrain( gp->giveMaterialMode() )
+    plasticStrain( 6 ),
+    tempPlasticStrain( 6 )
 {
+    stressVector.resize(6);
+    strainVector.resize(6);
+    tempStressVector.resize(6);
+    tempStrainVector.resize(6);
     q = q0;
 }
 
@@ -107,16 +111,12 @@ DustMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
         break;
     }
 
-    // print plastic strain vector
-    const StrainVector &plasticStrain = this->givePlasticStrain();
-
     fprintf(file, ", plasticStrains ");
-    int n = plasticStrain.giveSize();
-    for ( int i = 1; i <= n; i++ ) {
-        fprintf( file, " % .4e", plasticStrain.at(i) );
+    for ( auto &val : this->givePlasticStrain() ) {
+        fprintf( file, " %.4e", val );
     }
 
-    fprintf(file, ", q  % .4e", q);
+    fprintf(file, ", q  %.4e", q);
 
     fprintf(file, "}\n");
 }
@@ -171,10 +171,12 @@ DustMaterial :: initializeFrom(InputRecord *ir)
     // Required by IR_GIVE_FIELD macro
     IRResultType result;
     // call the corresponding service of structural material
-    StructuralMaterial :: initializeFrom(ir);
+    result = StructuralMaterial :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     // call the corresponding service for the linear elastic material
-    this->LEMaterial->initializeFrom(ir);
+    result = this->LEMaterial->initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     // instanciate the variables defined in DustMaterial
     ft = 3e6;
@@ -205,31 +207,38 @@ DustMaterial :: initializeFrom(InputRecord *ir)
 
     // check parameters admissibility
     if ( ft < 0 ) {
-        OOFEM_ERROR("parameter 'ft' must be positive")
+        OOFEM_WARNING("parameter 'ft' must be positive");
+        return IRRT_BAD_FORMAT;
     }
 
     if ( x0 < 0 ) {
-        OOFEM_ERROR("parameter 'x0' must be positive")
+        OOFEM_WARNING("parameter 'x0' must be positive");
+        return IRRT_BAD_FORMAT;
     }
 
     if ( rEll < 0 ) {
-        OOFEM_ERROR("parameter 'rEll' must be positive")
+        OOFEM_WARNING("parameter 'rEll' must be positive");
+        return IRRT_BAD_FORMAT;
     }
 
     if ( theta < 0 ) {
-        OOFEM_ERROR("parameter 'theta' must be positive")
+        OOFEM_WARNING("parameter 'theta' must be positive");
+        return IRRT_BAD_FORMAT;
     }
 
     if ( beta < 0 ) {
-        OOFEM_ERROR("parameter 'beta' must be positive")
+        OOFEM_WARNING("parameter 'beta' must be positive");
+        return IRRT_BAD_FORMAT;
     }
 
     if ( lambda < 0 ) {
-        OOFEM_ERROR("parameter 'lambda' must be positive")
+        OOFEM_WARNING("parameter 'lambda' must be positive");
+        return IRRT_BAD_FORMAT;
     }
 
     if ( alpha < lambda ) {
-        OOFEM_ERROR("parameter 'alpha' must be greater than parameter 'lambda'")
+        OOFEM_WARNING("parameter 'alpha' must be greater than parameter 'lambda'");
+        return IRRT_BAD_FORMAT;
     }
 
     x0 = -x0; // compressive strength is negative, although on input it is a positive number
@@ -243,14 +252,8 @@ DustMaterial :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-int
-DustMaterial :: hasMaterialModeCapability(MaterialMode mMode)
-{
-    return mMode == _3dMat || mMode == _PlaneStrain;
-}
-
 void
-DustMaterial :: giveRealStressVector(FloatArray &answer,
+DustMaterial :: giveRealStressVector_3d(FloatArray &answer,
                                      GaussPoint *gp,
                                      const FloatArray &totalStrain,
                                      TimeStep *tStep)
@@ -263,11 +266,10 @@ DustMaterial :: giveRealStressVector(FloatArray &answer,
     this->initTempStatus(gp);
 
     // subtract stress-independent part of strain
-    this->giveStressDependentPartOfStrainVector(strainVectorR, gp, totalStrain, tStep, VM_Total);
+    this->giveStressDependentPartOfStrainVector_3d(strainVectorR, gp, totalStrain, tStep, VM_Total);
 
     // perform the local stress return and update the history variables
-    StrainVector strain( strainVectorR, gp->giveMaterialMode() );
-    performStressReturn(gp, strain);
+    performStressReturn(gp, strainVectorR);
 
     // copy total strain vector to the temp status
     status->letTempStrainVectorBe(totalStrain);
@@ -277,34 +279,34 @@ DustMaterial :: giveRealStressVector(FloatArray &answer,
 }
 
 void
-DustMaterial :: performStressReturn(GaussPoint *gp, StrainVector strain)
+DustMaterial :: performStressReturn(GaussPoint *gp, const FloatArray &strain)
 {
     DustMaterialStatus *status = static_cast< DustMaterialStatus * >( giveStatus(gp) );
-    MaterialMode mode = gp->giveMaterialMode();
 
     // compute total strain components
-    StrainVector strainDeviator(mode);
+    FloatArray strainDeviator;
     double volumetricStrain;
-    strain.computeDeviatoricVolumetricSplit(strainDeviator, volumetricStrain);
+    volumetricStrain = computeDeviatoricVolumetricSplit(strainDeviator, strain);
 
     // compute trial elastic strains
-    StrainVector plasticStrain = status->givePlasticStrain();
+    FloatArray plasticStrain = status->givePlasticStrain();
     double volumetricPlasticStrain;
-    StrainVector plasticStrainDeviator(mode);
-    plasticStrain.computeDeviatoricVolumetricSplit(plasticStrainDeviator, volumetricPlasticStrain);
+    FloatArray plasticStrainDeviator;
+    volumetricPlasticStrain = computeDeviatoricVolumetricSplit(plasticStrainDeviator, plasticStrain);
     double volumetricElasticStrain = volumetricStrain - volumetricPlasticStrain;
-    StrainVector elasticStrainDeviator = strainDeviator;
+    FloatArray elasticStrainDeviator = strainDeviator;
     elasticStrainDeviator.subtract(plasticStrainDeviator);
 
     // compute trial stresses
     double bulkModulus, shearModulus;
     computeAndSetBulkAndShearModuli(bulkModulus, shearModulus, gp);
     double volumetricStress = 3. * bulkModulus * volumetricElasticStrain;
-    StressVector stressDeviator(mode);
-    elasticStrainDeviator.applyDeviatoricElasticStiffness(stressDeviator, shearModulus);
+    FloatArray stressDeviator = {2 * elasticStrainDeviator[0], 2 * elasticStrainDeviator[1], 2 * elasticStrainDeviator[2], 
+                                elasticStrainDeviator[3], elasticStrainDeviator[4], elasticStrainDeviator[5]};
+    stressDeviator.times(shearModulus);
 
     // norm of trial stress deviator
-    double rho = stressDeviator.computeSecondCoordinate();
+    double rho = computeSecondCoordinate(stressDeviator);
     double i1 = 3 * volumetricStress;
     double f1, f2, f3, q, tempQ;
     q = tempQ = status->giveQ();
@@ -314,8 +316,7 @@ DustMaterial :: performStressReturn(GaussPoint *gp, StrainVector strain)
 
     // actual stress return
     double lambda = 0.;
-    StrainVector m(mode);
-    m.zero();
+    FloatArray m(6);
     double feft = functionFe(ft);
     double auxModulus = 2 * shearModulus / ( 9 * bulkModulus );
     double temp = feft - auxModulus * ( i1 - ft ) / functionFeDI1(ft);
@@ -367,16 +368,18 @@ DustMaterial :: performStressReturn(GaussPoint *gp, StrainVector strain)
     m.times(lambda);
     plasticStrain.add(m);
     double mVol;
-    StrainVector mDeviator(mode);
-    m.computeDeviatoricVolumetricSplit(mDeviator, mVol);
+    FloatArray mDeviator;
+    mVol = computeDeviatoricVolumetricSplit(mDeviator, m);
     i1 -= 3 * bulkModulus * mVol;
     volumetricStress = i1 / 3.;
     mDeviator.times(-2 * shearModulus);
     stressDeviator.add(mDeviator);
 
     // compute full stresses from deviatoric and volumetric part and store them
-    StressVector stress(mode);
-    stressDeviator.computeDeviatoricVolumetricSum(stress, volumetricStress);
+    FloatArray stress = stressDeviator;
+    stress.at(1) += volumetricStress;
+    stress.at(2) += volumetricStress;
+    stress.at(3) += volumetricStress;
     status->letTempStressVectorBe(stress);
 
     // compute and update plastic strain and q
@@ -392,12 +395,11 @@ DustMaterial :: performF1return(double i1, double rho, GaussPoint *gp)
     double q = status->giveQ();
     double tempQ = status->giveTempQ();
     double fx, dfx;
-    int i;
     double m = 9 * bulkModulus / ( 2 * shearModulus );
     double vfI1, vfI1DQ, a, b, c, d, da, db, dc;
     int positiveFlag = 0;
 
-    for ( i = 0; i < newtonIter; i++ ) {
+    for ( int i = 0; i < newtonIter; i++ ) {
         vfI1 = functionI1(q, tempQ, i1, bulkModulus);
         vfI1DQ = functionI1DQ(tempQ, bulkModulus);
         a = ( vfI1 - tempQ ) / ( ft - tempQ );
@@ -508,7 +510,6 @@ DustMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     double coeff = status->giveVolumetricPlasticStrain() < 0 ? ym / ym0 : 1.0;
     if ( mode == ElasticStiffness ) {
         LEMaterial->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
-        answer.times(coeff);
     } else if ( mode == SecantStiffness || mode == TangentStiffness ) {
         LEMaterial->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
         answer.times(coeff);
@@ -522,8 +523,7 @@ DustMaterial :: setIPValue(const FloatArray &value, GaussPoint *gp, InternalStat
 {
     DustMaterialStatus *status = static_cast< DustMaterialStatus * >( giveStatus(gp) );
     if ( type == IST_PlasticStrainTensor ) {
-        StrainVector plasticStrain = StrainVector( value, gp->giveMaterialMode() );
-        status->letPlasticStrainBe(plasticStrain);
+        status->letPlasticStrainBe(value);
         return 1;
     } else if ( type == IST_StressCapPos ) {
         status->letQBe( value.at(1) );
@@ -540,30 +540,16 @@ DustMaterial :: giveIPValue(FloatArray &answer,
                             TimeStep *tStep)
 {
     const DustMaterialStatus *status = static_cast< DustMaterialStatus * >( giveStatus(gp) );
-    if ( type == IST_PlasticStrainTensor ||
-         type == IST_VolumetricPlasticStrain ||
-         type == IST_PrincipalPlasticStrainTensor ) {
-        StrainVector plasticStrain(_Unknown);
-        ///@todo Fill in correct full form values here! This just adds zeros!
-        status->givePlasticStrain().convertToFullForm(plasticStrain);
-        if ( type == IST_PlasticStrainTensor ) {
-            answer = plasticStrain;
-            return 1;
-        }
-
-        if ( type == IST_PrincipalPlasticStrainTensor ) {
-            plasticStrain.computePrincipalValues(answer);
-            return 1;
-        }
-
-        StrainVector plasticStrainDeviator( gp->giveMaterialMode() );
-        double volumetricPlasticStrain;
-        plasticStrain.computeDeviatoricVolumetricSplit(plasticStrainDeviator, volumetricPlasticStrain);
-        if ( type == IST_VolumetricPlasticStrain ) {
-            answer.resize(1);
-            answer.at(1) = volumetricPlasticStrain;
-            return 1;
-        }
+    if ( type == IST_PlasticStrainTensor ) {
+        answer = status->givePlasticStrain();
+        return 1;
+    } else if ( type == IST_PrincipalPlasticStrainTensor ) {
+        computePrincipalValues(answer, status->givePlasticStrain(), principal_strain);
+        return 1;
+    } else if ( type == IST_VolumetricPlasticStrain ) {
+        answer.resize(1);
+        answer.at(1) = status->giveVolumetricPlasticStrain(); ///@todo This is actually the mean, not the volumetric part. / Mikael
+        return 1;
     } else if ( type == IST_StressCapPos ) {
         answer.resize(1);
         answer.at(1) = status->giveQ();
@@ -606,7 +592,8 @@ DustMaterial :: functionFc(double rho, double i1, double q)
 }
 
 double
-DustMaterial :: yieldFunction1(double rho, double i1) {
+DustMaterial :: yieldFunction1(double rho, double i1)
+{
     return rho - functionFe(i1);
 }
 
@@ -660,8 +647,7 @@ DustMaterial :: computeAndSetBulkAndShearModuli(double &bulkModulus, double &she
     DustMaterialStatus *status = static_cast< DustMaterialStatus * >( giveStatus(gp) );
     double ym = LEMaterial->giveYoungsModulus();
     double nu = LEMaterial->givePoissonsRatio();
-    StrainVector plasticStrain = status->givePlasticStrain();
-    double volumetricPlasticStrain = plasticStrain.computeVolumetricPart();
+    double volumetricPlasticStrain = status->giveVolumetricPlasticStrain();
     if ( volumetricPlasticStrain < 0. ) {
         ym -= mStiff * volumetricPlasticStrain;
     }
@@ -674,57 +660,39 @@ DustMaterial :: computeAndSetBulkAndShearModuli(double &bulkModulus, double &she
 }
 
 void
-DustMaterial :: computePlastStrainDirM1(StrainVector &answer, const StressVector &stressDeviator, double rho, double i1, double q)
+DustMaterial :: computePlastStrainDirM1(FloatArray &answer, const FloatArray &stressDeviator, double rho, double i1, double q)
 {
-    if ( ( answer.giveStressStrainMode() == _3dMat ) && ( stressDeviator.giveStressStrainMode() == _3dMat ) ) {
-        for ( int i = 1; i <= 6; i++ ) {
-            answer.at(i) = stressDeviator.at(i) / rho;
-        }
+    answer.beScaled(1./rho, stressDeviator);
 
-        double temp = ( lambda * beta * exp(beta * i1) + theta ) * ( i1 - q ) / ( ft - q );
-        answer.at(1) += temp;
-        answer.at(2) += temp;
-        answer.at(3) += temp;
-    } else {
-        OOFEM_ERROR("Incorrect mode of stressstrainvector");
-    }
+    double temp = ( lambda * beta * exp(beta * i1) + theta ) * ( i1 - q ) / ( ft - q );
+    answer.at(1) += temp;
+    answer.at(2) += temp;
+    answer.at(3) += temp;
 }
 
 void
-DustMaterial :: computePlastStrainDirM2(StrainVector &answer, const StressVector &stressDeviator, double rho, double i1, double q)
+DustMaterial :: computePlastStrainDirM2(FloatArray &answer, const FloatArray &stressDeviator, double rho, double i1, double q)
 {
-    if ( ( answer.giveStressStrainMode() == _3dMat ) && ( stressDeviator.giveStressStrainMode() == _3dMat ) ) {
-        double fc = functionFc(rho, i1, q);
-        for ( int i = 1; i <= 6; i++ ) {
-            answer.at(i) = stressDeviator.at(i) / fc;
-        }
+    double fc = functionFc(rho, i1, q);
+    answer.beScaled(1./fc, stressDeviator);
 
-        double temp = ( q - i1 ) / ( rEll * rEll * fc );
-        answer.at(1) -= temp;
-        answer.at(2) -= temp;
-        answer.at(3) -= temp;
-    } else {
-        OOFEM_ERROR("Incorrect mode of stressstrainvector");
-    }
+    double temp = ( q - i1 ) / ( rEll * rEll * fc );
+    answer.at(1) -= temp;
+    answer.at(2) -= temp;
+    answer.at(3) -= temp;
 }
 
 void
-DustMaterial :: computePlastStrainDirM3(StrainVector &answer, const StressVector &stressDeviator, double rho, double i1, double q)
+DustMaterial :: computePlastStrainDirM3(FloatArray &answer, const FloatArray &stressDeviator, double rho, double i1, double q)
 {
-    if ( ( answer.giveStressStrainMode() == _3dMat ) && ( stressDeviator.giveStressStrainMode() == _3dMat ) ) {
-        double feft = functionFe(ft);
-        for ( int i = 1; i <= 6; i++ ) {
-            answer.at(i) = stressDeviator.at(i) / feft;
-        }
+    double feft = functionFe(ft);
+    answer.beScaled(1./feft, stressDeviator);
 
-        double dfeft = functionFeDI1(ft);
-        double temp = 1 - ( 1 + dfeft ) * rho / feft;
-        answer.at(1) += temp;
-        answer.at(2) += temp;
-        answer.at(3) += temp;
-    } else {
-        OOFEM_ERROR("Incorrect mode of stressstrainvector");
-    }
+    double dfeft = functionFeDI1(ft);
+    double temp = 1 - ( 1 + dfeft ) * rho / feft;
+    answer.at(1) += temp;
+    answer.at(2) += temp;
+    answer.at(3) += temp;
 }
 
 double

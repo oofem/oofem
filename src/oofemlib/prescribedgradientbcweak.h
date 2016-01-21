@@ -38,6 +38,7 @@
 #include "prescribedgradienthomogenization.h"
 #include "activebc.h"
 #include "geometry.h"
+#include "dofiditem.h"
 
 #include <unordered_map>
 
@@ -62,6 +63,15 @@ public:
 
     void computeN_Constant(FloatArray &oN, const double &iXi) const { oN = FloatArray { 1.0 }; }
     void computeN_Linear(FloatArray &oN, const double &iXi) const { oN = { 0.5 * ( 1.0 - iXi ), 0.5 * ( 1.0 + iXi ) }; }
+    void computeN_PiecewiseConst(FloatArray &oN, const double &iXi) const
+    {
+    	if(iXi < 0.0) {
+    		oN = { 1.0, 0.0 };
+    	}
+    	else {
+    		oN = { 0.0, 1.0 };
+    	}
+    }
 
     std :: vector< int >mTractionNodeInd;
 
@@ -135,7 +145,17 @@ public:
     // TODO: Consider moving this function to Domain.
     void computeDomainBoundingBox(Domain &iDomain, FloatArray &oLC, FloatArray &oUC);
 
+
+    const IntArray &giveTracDofIDs() const {return mTractionDofIDs;}
+    const IntArray &giveDispLockDofIDs() const {return mDispLockDofIDs;}
+    const IntArray &giveRegularDispDofIDs() const {return mRegularDispDofIDs;}
+
 protected:
+
+    const IntArray mTractionDofIDs;
+    const IntArray mDispLockDofIDs;
+    const IntArray mRegularDispDofIDs;
+
 
     // Options
 

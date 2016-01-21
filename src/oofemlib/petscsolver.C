@@ -213,8 +213,8 @@ NM_Status PetscSolver :: solve(SparseMtrx &A, FloatMatrix &B, FloatMatrix &X)
         }
         VecRestoreArray(globSolVec, & ptr);
     }
-    VecDestroy(globSolVec);
-    VecDestroy(globRhsVec);
+    VecDestroy(& globSolVec);
+    VecDestroy(& globRhsVec);
     return s;
 }
 #endif

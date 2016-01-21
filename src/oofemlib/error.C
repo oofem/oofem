@@ -33,19 +33,10 @@
  */
 
 #include "error.h"
-#include "logger.h"
 
-#include <cstdio>
-#include <cstdlib>
-
+#include <string>
 
 namespace oofem {
-void oofem_exit(int code)
-{
-    oofem_logger.printStatistics();
-    fprintf(stderr, "oofem exit code %d\n", code);
-    exit(code);
-}
 
 std::string errorInfo(const char *func)
 {

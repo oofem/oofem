@@ -154,7 +154,14 @@ void SparseGridMtx :: WriteStatistics(long no_init_blocks, long no_nonzeros)
 }
 
 void SparseGridMtx :: MultiplyByVector(const LargeVectorAttach &x, LargeVectorAttach &y)
-{}
+{
+    printf("SparseGridMtx::MultiplyByVector not implemented, file %s, line %d\n", __FILE__, __LINE__);
+    exit(1);
+}
 
+void SparseGridMtx :: times(double x){
+    printf("SparseGridMtx::times not implemented, file %s, line %d\n", __FILE__, __LINE__);
+    exit(1);
+}
 
 DSS_NAMESPASE_END

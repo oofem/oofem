@@ -54,15 +54,12 @@ IRResultType
 IsotropicHeatTransferMaterial :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
-    // double value ;
-
-    this->Material :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, conductivity, _IFT_IsotropicHeatTransferMaterial_k);
     IR_GIVE_FIELD(ir, capacity, _IFT_IsotropicHeatTransferMaterial_c);
     IR_GIVE_OPTIONAL_FIELD(ir, maturityT0, _IFT_IsotropicHeatTransferMaterial_maturityT0);
 
-    return IRRT_OK;
+    return Material :: initializeFrom(ir);
 }
 
 double
@@ -71,11 +68,11 @@ IsotropicHeatTransferMaterial :: give(int aProperty, GaussPoint *gp)
 // Returns the value of the property aProperty (e.g. 'k' the conductivity of the receiver).
 //
 {
-    if ( aProperty == 'k' ) { //thermal conductivity [J/m/K]
+    if ( aProperty == 'k' ) { //thermal conductivity [W/m/K]
         return conductivity;
-    } else if ( aProperty == 'c' ) { //mass-specific heat capacity [J/kg]
+    } else if ( aProperty == 'c' ) { //mass-specific heat capacity [J/kg/K]
         return capacity;
-    } else if ( aProperty == HeatCapaCoeff ) { //volume-specific heat capacity [J/m3]
+    } else if ( aProperty == HeatCapaCoeff ) { //volume-specific heat capacity [J/m3/K]
         return ( capacity * this->give('d', gp) );
     }
 
@@ -88,11 +85,12 @@ IsotropicHeatTransferMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *
 {
     TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
 
+    ms->setTempField(field);
+    ms->setTempGradient(grad);
+
     ///@todo Shouldn't the conductivity typically depend on the primary field and/or its gradient?
     answer.beScaled(-this->giveIsotropicConductivity(gp), grad);
 
-    ms->setTempField(field);
-    ms->setTempGradient(grad);
     ms->setTempFlux(answer);
 }
 

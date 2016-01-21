@@ -33,7 +33,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if 1
 #include "../sm/Elements/phasefieldelement.h"
 #include "../sm/CrossSections/structuralcrosssection.h"
 #include "../sm/Materials/structuralms.h"
@@ -47,21 +46,15 @@
 #include "dof.h"
 #include "unknownnumberingscheme.h"
 
-#include <cstdio>
-
-
 
 namespace oofem {
 
-PhaseFieldElement::PhaseFieldElement( int i, Domain *aDomain ) 
+PhaseFieldElement :: PhaseFieldElement( int i, Domain *aDomain ) 
 {  
     ///@todo will be set by the cross section later
-    internalLength = 0.001; //6.0
-    criticalEnergy = 0.01; //1.0e3
-    // G =? gc/l = 10
-    relaxationTime = 1.0; // 1.0
-    penaltyParameter = 1.0e0;
-    psiBar0 = 0.0;
+    internalLength = 6.0;
+    criticalEnergy = 1.0e0;
+    relaxationTime = 1.0;
 };
 
 void
@@ -69,12 +62,10 @@ PhaseFieldElement :: computeLocationArrayOfDofIDs( const IntArray &dofIdArray, I
 {
     IntArray ids = dofIdArray;
     const EModelDefaultEquationNumbering s = EModelDefaultEquationNumbering();
-    //Element :: giveLocationArray(answer, s, ids);
     /*
     // Routine to extract compute the location array an element given an dofid array.
     answer.clear();
-    //NLStructuralElement *el = this->giveElement();
-    Element *el = this->giveElement();
+    NLStructuralElement *el = this->giveElement();
     int k = 0;
     for(int i = 1; i <= el->giveNumberOfDofManagers(); i++) {
         DofManager *dMan = el->giveDofManager( i );
@@ -136,9 +127,9 @@ PhaseFieldElement :: giveInternalForcesVector_u(FloatArray &answer, TimeStep *tS
     // computes int_V ( B_u^t * BSgima_u ) * dV
     FloatArray NStress, BStress, vGenStress, NS;
     FloatMatrix N, B;
-    NLStructuralElement *el = static_cast< NLStructuralElement* >(this->giveElement( ) );
+    NLStructuralElement *el = this->giveElement( );
 
-    answer.clear();
+    answer.clear(); 
 //     for ( auto &gp: el->giveIntegrationRule(0) ) {
 //         double dV = el->computeVolumeAround(gp);
 //             
@@ -183,16 +174,14 @@ void
 PhaseFieldElement :: computeBStress_u(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, int useUpdatedGpRecord)
 {
     // computes G(d)*sig(u)
-    NLStructuralElement *el = static_cast< NLStructuralElement* >(this->giveElement( ) );
-    StructuralCrossSection *cs = dynamic_cast< StructuralCrossSection *> ( el->giveCrossSection() );
-    FloatArray reducedStrain, a_u;
+    NLStructuralElement *el = this->giveElement( );
+    FloatArray strain, a_u;
     FloatMatrix B_u;
 
     el->computeBmatrixAt(gp, B_u);
-
     this->computeDisplacementUnknowns(a_u, VM_Total, tStep);
-    reducedStrain.beProductOf(B_u, a_u);
-    cs->giveRealStresses(answer, gp, reducedStrain, tStep);
+    strain.beProductOf(B_u, a_u);
+    el->computeStressVector(answer, strain, gp, tStep);
     answer.times( this->computeG(gp, VM_Total, tStep) );
 
 }
@@ -204,8 +193,6 @@ PhaseFieldElement :: computeFreeEnergy(GaussPoint *gp, TimeStep *tStep)
     FloatArray strain, stress;
     stress = matStat->giveTempStressVector();
     strain = matStat->giveTempStrainVector();
-	//stress = matStat->giveStressVector();
-	//strain = matStat->giveStrainVector();
     return 0.5 * stress.dotProduct( strain );
 }
 
@@ -232,7 +219,7 @@ double
 PhaseFieldElement :: computeDamageAt(GaussPoint *gp, ValueModeType valueMode, TimeStep *stepN)
 {
     // d = N_d * a_d
-    NLStructuralElement *el = static_cast< NLStructuralElement* >(this->giveElement( ) );
+    NLStructuralElement *el = this->giveElement( );
     FloatArray dVec;
     computeDamageUnknowns(dVec, valueMode, stepN);
     FloatArray Nvec;
@@ -260,23 +247,23 @@ PhaseFieldElement :: computeGPrim(GaussPoint *gp, ValueModeType valueMode, TimeS
 void
 PhaseFieldElement :: computeNd_matrixAt(const FloatArray &lCoords, FloatMatrix &N)
 {
-    NLStructuralElement *el = static_cast< NLStructuralElement* >(this->giveElement( ) );
+    NLStructuralElement *el = this->giveElement( );
     FloatArray Nvec;
-    //el->giveInterpolation( )->evalN( Nvec, lCoords, FEIElementGeometryWrapper( el ) );
+    el->giveInterpolation( )->evalN( Nvec, lCoords, FEIElementGeometryWrapper( el ) );
     N.resize(1, Nvec.giveSize());
     N.beNMatrixOf(Nvec,1);
 
 }
 
 void
-PhaseFieldElement :: computeBd_matrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+PhaseFieldElement :: computeBd_matrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 {
     // Returns the [numSpaceDim x nDofs] gradient matrix {B_d} of the receiver,
     // evaluated at gp.
 
-    NLStructuralElement *el = static_cast< NLStructuralElement* >(this->giveElement( ) );
+    NLStructuralElement *el = this->giveElement( );
     FloatMatrix dNdx;
-    //el->giveInterpolation( )->evaldNdx( dNdx, *aGaussPoint->giveCoordinates( ), FEIElementGeometryWrapper( el ) );
+    //el->giveInterpolation( )->evaldNdx( dNdx, *gp->giveCoordinates( ), FEIElementGeometryWrapper( el ) );
     answer.beTranspositionOf( dNdx );
 }
 
@@ -284,7 +271,7 @@ int
 PhaseFieldElement :: computeNumberOfDofs()
 {
     ///@todo This is NOT correct procedure. This function may absolutely not ask the dof managers _anything_.
-    NLStructuralElement *el = static_cast< NLStructuralElement* >(this->giveElement( ) );
+    NLStructuralElement *el = this->giveElement( );
     int nDofs = 0;
     for( int i = 1; i <= el->giveNumberOfDofManagers(); i++)
     {
@@ -326,7 +313,7 @@ PhaseFieldElement :: computeStiffnessMatrix_uu(FloatMatrix &answer, MatResponseM
 {
     // This is the regular stiffness matrix times G
     FloatMatrix B, DB, N, D_B;
-    NLStructuralElement *el = static_cast< NLStructuralElement* >(this->giveElement( ) );
+    NLStructuralElement *el = this->giveElement( );
     StructuralCrossSection *cs = dynamic_cast<StructuralCrossSection* > (el->giveCrossSection() );
 
     bool matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric(rMode);
@@ -359,7 +346,7 @@ PhaseFieldElement :: computeStiffnessMatrix_ud(FloatMatrix &answer, MatResponseM
 {
     FloatMatrix B, DB, N_d, DN, S(3,1);
     FloatArray stress;
-    NLStructuralElement *el = static_cast< NLStructuralElement* >(this->giveElement( ) );
+    NLStructuralElement *el = this->giveElement( );
     StructuralCrossSection *cs = dynamic_cast<StructuralCrossSection* > (el->giveCrossSection() );
 
     answer.clear();
@@ -397,7 +384,7 @@ PhaseFieldElement :: computeStiffnessMatrix_dd(FloatMatrix &answer, MatResponseM
 
     FloatMatrix B_d, N_d;
     //StructuralCrossSection *cs = dynamic_cast<StructuralCrossSection* > (this->giveCrossSection() );
-    NLStructuralElement *el = static_cast< NLStructuralElement* >(this->giveElement( ) );
+    NLStructuralElement *el = this->giveElement( );
     answer.clear();
 
 //     for ( auto &gp: el->giveIntegrationRule(0) ) {
@@ -406,7 +393,7 @@ PhaseFieldElement :: computeStiffnessMatrix_dd(FloatMatrix &answer, MatResponseM
 //         this->computeNd_matrixAt(*gp->giveCoordinates(), N_d);
 //         this->computeBd_matrixAt(gp, B_d, 1, 3);
 //         
-//         //double Gprim = this->computeGPrim(gp, VM_Total, tStep);
+//         double Gprim = this->computeGPrim(gp, VM_Total, tStep);
 //         
 //         double psiBar = this->computeFreeEnergy( gp, tStep );
 //         //double factorN = t_star/Delta_t + g_c/l + psiBar*Gbis;
@@ -424,7 +411,6 @@ PhaseFieldElement :: computeStiffnessMatrix_dd(FloatMatrix &answer, MatResponseM
 IRResultType
 PhaseFieldElement :: initializeFrom(InputRecord *ir)
 {
-    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     //IRResultType result;                // Required by IR_GIVE_FIELD macro
     //nlGeo = 0;
 
@@ -446,23 +432,12 @@ PhaseFieldElement :: initializeFrom(InputRecord *ir)
 //    if ( nlGeo == 0 ) {
 //        FloatArray Epsilon;
 //        this->computeLocalStrainVector(Epsilon, gp, stepN);
-//        
-//        if(cs->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
-//            //dpmat->giveRealStressVector(answer, gp, Epsilon, nlCumulatedStrain, stepN);
-//            return;
-//        } else {
-//            OOFEM_ERROR("giveRealStresses : unsupported mode");
-//        }
+//        dpmat->giveRealStressVector(answer, gp, Epsilon, nlCumulatedStrain, stepN);
 //    } else if ( nlGeo == 1 ) {
 //        if ( elem->giveDomain()->giveEngngModel()->giveFormulation() == TL ) {
 //            FloatArray vF;
 //            this->computeDeformationGradientVector(vF, gp, stepN);
-//            if( cs->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
-//              //  dpmat->giveFirstPKStressVector(answer, gp, vF, nlCumulatedStrain, stepN);
-//                return;
-//            } else {
-//                OOFEM_ERROR("giveRealStresses : unsupported mode");
-//            }
+//            dpmat->giveFirstPKStressVector(answer, gp, vF, nlCumulatedStrain, stepN);
 //        }
 //
 //    }
@@ -559,5 +534,3 @@ PhaseFieldElement :: initializeFrom(InputRecord *ir)
 
 
 } // end namespace oofem
-
-#endif

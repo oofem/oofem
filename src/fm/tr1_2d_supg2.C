@@ -45,6 +45,7 @@
 #include "mathfem.h"
 #include "engngm.h"
 #include "fluiddynamicmaterial.h"
+#include "fluidcrosssection.h"
 #include "load.h"
 #include "timestep.h"
 #include "boundaryload.h"
@@ -103,7 +104,11 @@ TR1_2D_SUPG2 :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;               // Required by IR_GIVE_FIELD macro
 
-    SUPGElement :: initializeFrom(ir);
+    result = SUPGElement :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+
 
     this->vof = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, vof, _IFT_Tr1SUPG_pvof);
@@ -444,7 +449,7 @@ TR1_2D_SUPG2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep)
 {
     answer.resize(6);
     answer.zero();
-    FloatArray u, un, eps(3), stress;
+    FloatArray u, eps(3), stress;
     double dV, Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
     //double dudx,dudy,dvdx,dvdy;
 
@@ -509,7 +514,7 @@ TR1_2D_SUPG2 :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRespon
     //double dudx, dudy, dvdx, dvdy;
     answer.resize(6, 6);
     answer.zero();
-    FloatMatrix _db, _d, _b(3, 6), _bs(3, 6);
+    FloatMatrix _db, _d, _b(3, 6);
     //FloatArray un;
     double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
 
@@ -719,7 +724,6 @@ TR1_2D_SUPG2 :: computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep 
     answer.resize(3, 6);
     answer.zero();
     int w_dof_addr, u_dof_addr, d1j, d2j, km1, mm1;
-    //double rho = this->giveMaterial()->giveCharacteristicValue(Density, integrationRulesArray[0]->getIntegrationPoint(0), tStep);
     FloatArray u, un;
 
     this->computeVectorOfVelocities(VM_Total, tStep, u);
@@ -1599,7 +1603,7 @@ TR1_2D_SUPG2 :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, Primar
 {
     int indx, es;
     double sum;
-    FloatArray elemvector, f, lc;
+    FloatArray elemvector, lc;
     //FloatMatrix n;
     IntArray elemdofs;
     // determine element dof ids
@@ -1852,8 +1856,11 @@ TR1_2D_SUPG2 :: printOutputAt(FILE *file, TimeStep *tStep)
         gp = integrationRulesArray [ 1 ]->getIntegrationPoint(0);
     }
 
-    double rho = this->giveMaterial()->give('d', gp);
-    fprintf(file, "VOF %e, density %e\n\n", this->giveVolumeFraction(), rho);
+    double rho0 = this->_giveMaterial(0)->give('d', gp);
+    double rho1 = this->_giveMaterial(1)->give('d', gp);
+    double vof = this->giveVolumeFraction();
+    
+    fprintf(file, "VOF %e, density %e\n\n", vof, rho0*vof + rho1*(1-vof));
 }
 
 
@@ -1913,7 +1920,7 @@ TR1_2D_SUPG2 :: giveInternalStateAtNode(FloatArray &answer, InternalStateType ty
      * return 1;
      * } else if (type == IST_Density) {
      * answer.resize(1);
-     * answer.at(1) = this->giveMaterial()->give('d', integrationRulesArray[0]-> getIntegrationPoint(0));
+     * answer.at(1) = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity( integrationRulesArray[0]-> getIntegrationPoint(0) );
      * return 1;
      *
      * } else

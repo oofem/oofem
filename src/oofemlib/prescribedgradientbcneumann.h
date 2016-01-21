@@ -50,7 +50,7 @@ class Element;
  * with a Neumann boundary condition.
  *
  * @author Erik Svenning
- * @date Mar 5, 2014
+ * @author Mikael Öhman
  */
 class OOFEM_EXPORT PrescribedGradientBCNeumann : public ActiveBoundaryCondition, public PrescribedGradientHomogenization
 {

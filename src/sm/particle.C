@@ -34,6 +34,7 @@
 
 #include "particle.h"
 #include "classfactory.h"
+#include "error.h"
 
 namespace oofem {
 REGISTER_DofManager(Particle);
@@ -42,19 +43,18 @@ REGISTER_DofManager(Particle);
 Particle :: Particle(int n, Domain *aDomain) : Node(n, aDomain)
 { }
 
-// Gets all the data of the receiver from the source line of the data file.
+
 IRResultType
 Particle :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;
 
-    Node :: initializeFrom(ir);
-
     IR_GIVE_FIELD(ir, radius, _IFT_Particle_rad);
     if ( radius < 0.0 ) {
-        OOFEM_ERROR("negative radius");
+        OOFEM_WARNING("negative radius");
+        return IRRT_BAD_FORMAT;
     }
 
-    return IRRT_OK;
+    return Node :: initializeFrom(ir);
 }
 } // namespace oofem

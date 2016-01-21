@@ -192,10 +192,19 @@ NonLinearStatic :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    LinearStatic :: initializeFrom(ir);
+    result = LinearStatic :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+
     nonlocalStiffnessFlag = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, nonlocalStiffnessFlag, _IFT_NonLinearStatic_nonlocstiff);
 
+    updateElasticStiffnessFlag = false;
+    if ( ir->hasField(_IFT_NonLinearStatic_updateElasticStiffnessFlag) ) {
+      updateElasticStiffnessFlag = true;
+    }
+    
 #ifdef __PARALLEL_MODE
     if ( isParallel() ) {
         //commBuff = new CommunicatorBuff (this->giveNumberOfProcesses(), CBT_dynamic);
@@ -263,6 +272,21 @@ double NonLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeStep *tSt
     return 0.0;
 }
 
+TimeStep *NonLinearStatic :: giveSolutionStepWhenIcApply(bool force)
+{
+  if ( master && (!force)) {
+    return master->giveSolutionStepWhenIcApply();
+  } else {
+    if ( !stepWhenIcApply ) {
+        int inin = giveNumberOfTimeStepWhenIcApply();
+	//        int nFirst = giveNumberOfFirstStep();
+        stepWhenIcApply.reset(new TimeStep(inin, this, 0, -deltaT, deltaT, 0));
+    }
+
+    return stepWhenIcApply.get();
+  }
+}
+
 
 TimeStep *NonLinearStatic :: giveNextStep()
 {
@@ -289,6 +313,10 @@ TimeStep *NonLinearStatic :: giveNextStep()
                 OOFEM_ERROR("no next step available, mStepNum=%d > nMetaSteps=%d", mStepNum, nMetaSteps);
             }
         }
+    } else {
+        // first step -> generate initial step
+        TimeStep *newStep = giveSolutionStepWhenIcApply();
+        currentStep.reset(new TimeStep(*newStep));
     }
 
     previousStep = std :: move(currentStep);
@@ -474,11 +502,12 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
     OOFEM_LOG_RELEVANT( "\n\nSolving       [step number %5d.%d, time = %e]\n\n", tStep->giveNumber(), tStep->giveVersion(), tStep->giveIntrinsicTime() );
 #endif
 
+    FloatArray extrapolatedForces;
+    FloatArray *extrapolatedForcesPtr = &extrapolatedForces;
     if ( this->initialGuessType == IG_Tangent ) {
 #ifdef VERBOSE
         OOFEM_LOG_RELEVANT("Computing initial guess\n");
 #endif
-        FloatArray extrapolatedForces;
         this->assembleExtrapolatedForces( extrapolatedForces, tStep, TangentStiffnessMatrix, this->giveDomain(di) );
         extrapolatedForces.negated();
 
@@ -488,25 +517,30 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
         linSolver->solve(*stiffnessMatrix, extrapolatedForces, incrementOfDisplacement);
         OOFEM_LOG_RELEVANT("initial guess found\n");
         totalDisplacement.add(incrementOfDisplacement);
+    } else if ( this->initialGuessType == IG_Original ) {
+        incrementOfDisplacement.zero();
+        this->assembleExtrapolatedForces( extrapolatedForces, tStep, ElasticStiffnessMatrix, this->giveDomain(di) );
+        extrapolatedForces.negated();
+        
     } else if ( this->initialGuessType != IG_None ) {
         OOFEM_ERROR("Initial guess type: %d not supported", initialGuessType);
     } else {
         incrementOfDisplacement.zero();
+        extrapolatedForcesPtr = NULL;
     }
 
     //totalDisplacement.printYourself();
     if ( initialLoadVector.isNotEmpty() ) {
-        numMetStatus = nMethod->solve(*stiffnessMatrix, incrementalLoadVector, & initialLoadVector,
+      numMetStatus = nMethod->solve(*stiffnessMatrix, incrementalLoadVector, & initialLoadVector, extrapolatedForcesPtr,
                                       totalDisplacement, incrementOfDisplacement, internalForces,
                                       internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, tStep);
     } else {
-        numMetStatus = nMethod->solve(*stiffnessMatrix, incrementalLoadVector, NULL,
+      numMetStatus = nMethod->solve(*stiffnessMatrix, incrementalLoadVector, NULL, extrapolatedForcesPtr,
                                       totalDisplacement, incrementOfDisplacement, internalForces,
                                       internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, tStep);
     }
     ///@todo Martin: ta bort!!!
     //this->updateComponent(tStep, NonLinearLhs, this->giveDomain(di));
-
     ///@todo Use temporary variables. updateYourself() should set the final values, while proceedStep should be callable multiple times for each step (if necessary). / Mikael
     OOFEM_LOG_RELEVANT("Equilibrium reached at load level = %f in %d iterations\n", cumulatedLoadLevel + loadLevel, currentIterations);
     prevStepLength =  currentStepLength;
@@ -528,23 +562,23 @@ NonLinearStatic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
 #ifdef VERBOSE
             OOFEM_LOG_DEBUG("Assembling tangent stiffness matrix\n");
 #endif
-            this->assemble(*stiffnessMatrix, tStep, TangentStiffnessMatrix,
+            this->assemble(*stiffnessMatrix, tStep, TangentAssembler(TangentStiffness),
                            EModelDefaultEquationNumbering(), d);
         } else if ( ( stiffMode == nls_secantStiffness ) || ( stiffMode == nls_secantInitialStiffness && initFlag ) ) {
 #ifdef VERBOSE
             OOFEM_LOG_DEBUG("Assembling secant stiffness matrix\n");
 #endif
             stiffnessMatrix->zero(); // zero stiffness matrix
-            this->assemble(*stiffnessMatrix, tStep, SecantStiffnessMatrix,
+            this->assemble(*stiffnessMatrix, tStep, TangentAssembler(SecantStiffness),
                            EModelDefaultEquationNumbering(), d);
             initFlag = 0;
         } else if ( ( stiffMode == nls_elasticStiffness ) && ( initFlag ||
-                                                              ( this->giveMetaStep( tStep->giveMetaStepNumber() )->giveFirstStepNumber() == tStep->giveNumber() ) ) ) {
+                                                              ( this->giveMetaStep( tStep->giveMetaStepNumber() )->giveFirstStepNumber() == tStep->giveNumber() ) || (updateElasticStiffnessFlag) ) ) {
 #ifdef VERBOSE
             OOFEM_LOG_DEBUG("Assembling elastic stiffness matrix\n");
 #endif
             stiffnessMatrix->zero(); // zero stiffness matrix
-            this->assemble(*stiffnessMatrix, tStep, ElasticStiffnessMatrix,
+            this->assemble(*stiffnessMatrix, tStep, TangentAssembler(ElasticStiffness),
                            EModelDefaultEquationNumbering(), d);
             initFlag = 0;
         } else {
@@ -576,7 +610,7 @@ NonLinearStatic :: printOutputAt(FILE *File, TimeStep *tStep)
         return;                                                                      // do not print even Solution step header
     }
 
-    fprintf( File, "\n\nOutput for time % .3e, solution step number %d\n", tStep->giveTargetTime(), tStep->giveNumber() );
+    fprintf( File, "\n\nOutput for time %.3e, solution step number %d\n", tStep->giveTargetTime(), tStep->giveNumber() );
     fprintf(File, "Reached load level : %20.6f in %d iterations\n\n",
             cumulatedLoadLevel + loadLevel, currentIterations);
 
@@ -740,7 +774,7 @@ NonLinearStatic :: updateDomainLinks()
 
 
 void
-NonLinearStatic :: assemble(SparseMtrx &answer, TimeStep *tStep, CharType type,
+NonLinearStatic :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAssembler &ma,
                             const UnknownNumberingScheme &s, Domain *domain)
 {
 #ifdef TIME_REPORT
@@ -748,9 +782,9 @@ NonLinearStatic :: assemble(SparseMtrx &answer, TimeStep *tStep, CharType type,
     timer.startTimer();
 #endif
 
-    LinearStatic :: assemble(answer, tStep, type, s, domain);
+    LinearStatic :: assemble(answer, tStep, ma, s, domain);
 
-    if ( ( nonlocalStiffnessFlag ) && ( type == TangentStiffnessMatrix ) ) {
+    if ( ( nonlocalStiffnessFlag ) && dynamic_cast< const TangentAssembler* >(&ma) ) {
         // add nonlocal contribution
         for ( auto &elem : domain->giveElements() ) {
             static_cast< StructuralElement * >( elem.get() )->addNonlocalStiffnessContributions(answer, s, tStep);
@@ -822,16 +856,16 @@ NonLinearStatic :: assembleIncrementalReferenceLoadVectors(FloatArray &_incremen
 
     if ( _refMode == SparseNonLinearSystemNM :: rlm_incremental ) {
         ///@todo This was almost definitely wrong before. It never seems to be used. Is this code even relevant?
-        this->assembleVector(_incrementalLoadVector, tStep, ExternalForcesVector,
+        this->assembleVector(_incrementalLoadVector, tStep, ExternalForceAssembler(),
                              VM_Incremental, EModelDefaultEquationNumbering(), sourceDomain);
 
-        this->assembleVector(_incrementalLoadVectorOfPrescribed, tStep, ExternalForcesVector,
+        this->assembleVector(_incrementalLoadVectorOfPrescribed, tStep, ExternalForceAssembler(),
                              VM_Incremental, EModelDefaultPrescribedEquationNumbering(), sourceDomain);
     } else {
-        this->assembleVector(_incrementalLoadVector, tStep, ExternalForcesVector,
+        this->assembleVector(_incrementalLoadVector, tStep, ExternalForceAssembler(),
                              VM_Total, EModelDefaultEquationNumbering(), sourceDomain);
 
-        this->assembleVector(_incrementalLoadVectorOfPrescribed, tStep, ExternalForcesVector,
+        this->assembleVector(_incrementalLoadVectorOfPrescribed, tStep, ExternalForceAssembler(),
                              VM_Total, EModelDefaultPrescribedEquationNumbering(), sourceDomain);
     }
 

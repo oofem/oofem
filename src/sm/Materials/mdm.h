@@ -278,7 +278,7 @@ public:
     virtual const char *giveClassName() const { return "MDM"; }
 
     virtual void giveRealMicroplaneStressVector(FloatArray &answer, Microplane *mplane,
-                                                const FloatArray &strain, TimeStep *tStep) { };
+                                                const FloatArray &strain, TimeStep *tStep) { }
 
     virtual void initializeData(int numberOfMicroplanes);
 

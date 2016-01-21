@@ -174,7 +174,6 @@ TrabBoneGrad3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponse
             if ( tempDam > status->giveDam() ) {
                 double nlKappa =  status->giveNonlocalCumulatedStrain();
                 kappa = mParam * nlKappa + ( 1. - mParam ) * tempKappa;
-                FloatArray tempEffStress =  status->giveTempEffectiveStress();
                 double gPrime = TrabBone3D :: computeDamageParamPrime(kappa);
                 // Construction of the tangent stiffness third term
                 thirdTerm.beDyadicProductOf(tempEffectiveStress, prodTensor);
@@ -285,7 +284,7 @@ void
 TrabBoneGrad3D :: giveRealStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *tStep)
 {
     TrabBoneGrad3DStatus *status = static_cast< TrabBoneGrad3DStatus * >( this->giveStatus(gp) );
-    //this->initGpForNewStep(gp);
+
     this->initTempStatus(gp);
 
     TrabBone3D :: performPlasticityReturn(gp, totalStrain, tStep);
@@ -327,8 +326,6 @@ TrabBoneGrad3D :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                             // Required by IR_GIVE_FIELD macro
 
-    TrabBone3D :: initializeFrom(ir);
-
     IR_GIVE_OPTIONAL_FIELD(ir, L, _IFT_TrabBoneGrad3D_L);
     if ( L < 0.0 ) {
         L = 0.0;
@@ -337,7 +334,7 @@ TrabBoneGrad3D :: initializeFrom(InputRecord *ir)
     mParam = 2.;
     IR_GIVE_OPTIONAL_FIELD(ir, mParam, _IFT_TrabBoneGrad3D_m);
 
-    return IRRT_OK;
+    return TrabBone3D :: initializeFrom(ir);
 }
 
 

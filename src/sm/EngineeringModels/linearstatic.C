@@ -92,7 +92,11 @@ LinearStatic :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    StructuralEngngModel :: initializeFrom(ir);
+    result = StructuralEngngModel :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+
     int val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_lstype);
     solverType = ( LinSystSolverType ) val;
@@ -150,16 +154,14 @@ double LinearStatic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep,
 
 TimeStep *LinearStatic :: giveNextStep()
 {
-    int istep = this->giveNumberOfFirstStep();
-    StateCounterType counter = 1;
-
-    if ( currentStep ) {
-        istep = currentStep->giveNumber() + 1;
-        counter = currentStep->giveSolutionStateCounter() + 1;
+    if ( !currentStep ) {
+        // first step -> generate initial step
+        //currentStep.reset( new TimeStep(*giveSolutionStepWhenIcApply()) );
+        currentStep.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 1, 0., 1., 0) );
     }
-
     previousStep = std :: move(currentStep);
-    currentStep.reset( new TimeStep(istep, this, 1, ( double ) istep, 0., counter) );
+    currentStep.reset( new TimeStep(*previousStep, 1.) );
+
     return currentStep.get();
 }
 
@@ -203,7 +205,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
 
         stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
 
-        this->assemble( *stiffnessMatrix, tStep, TangentStiffnessMatrix,
+        this->assemble( *stiffnessMatrix, tStep, TangentAssembler(TangentStiffness),
                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
         initFlag = 0;
@@ -224,7 +226,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
     //
     loadVector.resize( this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ) );
     loadVector.zero();
-    this->assembleVector( loadVector, tStep, ExternalForcesVector, VM_Total,
+    this->assembleVector( loadVector, tStep, ExternalForceAssembler(), VM_Total,
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
@@ -232,7 +234,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
     //
     FloatArray internalForces( this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ) );
     internalForces.zero();
-    this->assembleVector( internalForces, tStep, InternalForcesVector, VM_Total,
+    this->assembleVector( internalForces, tStep, InternalForceAssembler(), VM_Total,
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     loadVector.subtract(internalForces);

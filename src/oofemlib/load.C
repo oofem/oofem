@@ -41,18 +41,40 @@
 namespace oofem {
 Load :: Load(int i, Domain *aDomain) :
     GeneralBoundaryCondition(i, aDomain), componentArray(), dofExcludeMask()
-    // Constructor. Creates a load with number i, belonging to aDomain.
 {
     timeFunction = 0;
 }
 
 
-FloatArray &Load :: giveComponentArray()
-// Returns the array that contains the components of the receiver. If
-// this array does not exist yet, forms it by reading its values in the
-// data file.
+const FloatArray &
+Load :: giveComponentArray() const
 {
     return componentArray;
+}
+
+
+void
+Load :: computeValues(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, const IntArray &dofids, ValueModeType mode)
+{
+    ///@note Backwards compatibility with input files that don't specify dofs.
+#if 1
+    if ( this->dofs.giveSize() == 0 ) {
+        this->computeValueAt(answer, tStep, coords, mode);
+        return;
+    }
+#endif
+
+    FloatArray loaded_dofs;
+    this->computeValueAt(loaded_dofs, tStep, coords, mode);
+
+    answer.resize(dofids.giveSize());
+    answer.zero();
+    for ( int i = 0; i < dofids.giveSize(); ++i ) {
+        int index = this->dofs.findFirstIndexOf(dofids[i]);
+        if ( index > 0 ) {
+            answer[i] = loaded_dofs.at(index);
+        }
+    }
 }
 
 
@@ -63,7 +85,7 @@ Load :: computeComponentArrayAt(FloatArray &answer, TimeStep *tStep, ValueModeTy
     double factor;
 
     factor = this->giveTimeFunction()->evaluate(tStep, mode);
-    answer  = this->giveComponentArray();
+    answer = componentArray;
     answer.times(factor);
 
     if ( !isImposed(tStep) ) {
@@ -80,7 +102,7 @@ Load :: initializeFrom(InputRecord *ir)
 #  ifdef VERBOSE
     // VERBOSE_PRINT1 ("Instanciating load ",number)
 #  endif
-    GeneralBoundaryCondition :: initializeFrom(ir);
+
     IR_GIVE_FIELD(ir, componentArray, _IFT_Load_components);
 
     int size = componentArray.giveSize();
@@ -88,7 +110,8 @@ Load :: initializeFrom(InputRecord *ir)
     dofExcludeMask.zero();
     IR_GIVE_OPTIONAL_FIELD(ir, dofExcludeMask, _IFT_Load_dofexcludemask);
     if ( dofExcludeMask.giveSize() != size ) {
-        OOFEM_ERROR("dofExcludeMask and componentArray size mismatch");
+        OOFEM_WARNING("dofExcludeMask and componentArray size mismatch");
+        return IRRT_BAD_FORMAT;
     } else {
         for ( int i = 1; i <= size; i++ ) {
             if ( dofExcludeMask.at(i) ) {
@@ -97,7 +120,7 @@ Load :: initializeFrom(InputRecord *ir)
         }
     }
 
-    return IRRT_OK;
+    return GeneralBoundaryCondition :: initializeFrom(ir);
 }
 
 

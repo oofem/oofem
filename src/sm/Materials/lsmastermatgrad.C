@@ -43,8 +43,12 @@
 #include "mathfem.h"
 #include "contextioerr.h"
 #include "datastream.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material(LargeStrainMasterMaterial);
+
 // constructor
 LargeStrainMasterMaterialGrad :: LargeStrainMasterMaterialGrad(int n, Domain *d) : LargeStrainMasterMaterial(n, d), GradDpMaterialExtensionInterface(d)
 {
@@ -66,9 +70,7 @@ LargeStrainMasterMaterialGrad :: hasMaterialModeCapability(MaterialMode mode)
 MaterialStatus *
 LargeStrainMasterMaterialGrad :: CreateStatus(GaussPoint *gp) const
 {
-    LargeStrainMasterMaterialGradStatus *status;
-    status = new LargeStrainMasterMaterialGradStatus(1, this->giveDomain(), gp, slaveMat);
-    return status;
+    return new LargeStrainMasterMaterialStatus(1, this->giveDomain(), gp, slaveMat);
 }
 
 
@@ -158,7 +160,7 @@ LargeStrainMasterMaterialGrad :: giveInternalLength(FloatMatrix &answer, MatResp
 void
 LargeStrainMasterMaterialGrad :: give3dGprime(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
-    LargeStrainMasterMaterialGradStatus *status = static_cast< LargeStrainMasterMaterialGradStatus * >( this->giveStatus(gp) );
+    LargeStrainMasterMaterialStatus *status = static_cast< LargeStrainMasterMaterialStatus * >( this->giveStatus(gp) );
     this->initTempStatus(gp);
     FloatMatrix gPrime;
     GradDpMaterialExtensionInterface *graddpmat = dynamic_cast< GradDpMaterialExtensionInterface * >( domain->giveMaterial(slaveMat)->giveInterface(GradDpMaterialExtensionInterfaceType) );
@@ -178,7 +180,7 @@ LargeStrainMasterMaterialGrad :: give3dGprime(FloatMatrix &answer, MatResponseMo
 void
 LargeStrainMasterMaterialGrad :: give3dKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
-    LargeStrainMasterMaterialGradStatus *status = static_cast< LargeStrainMasterMaterialGradStatus * >( this->giveStatus(gp) );
+    LargeStrainMasterMaterialStatus *status = static_cast< LargeStrainMasterMaterialStatus * >( this->giveStatus(gp) );
     this->initTempStatus(gp);
     FloatMatrix kappaMatrix;
     GradDpMaterialExtensionInterface *graddpmat = dynamic_cast< GradDpMaterialExtensionInterface * >( domain->giveMaterial(slaveMat)->giveInterface(GradDpMaterialExtensionInterfaceType) );
@@ -199,7 +201,7 @@ LargeStrainMasterMaterialGrad :: give3dKappaMatrix(FloatMatrix &answer, MatRespo
 void
 LargeStrainMasterMaterialGrad :: giveFirstPKStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &vF, double nonlocalCumulatedStrain, TimeStep *tStep)
 {
-    LargeStrainMasterMaterialGradStatus *status = static_cast< LargeStrainMasterMaterialGradStatus * >( this->giveStatus(gp) );
+    LargeStrainMasterMaterialStatus *status = static_cast< LargeStrainMasterMaterialStatus * >( this->giveStatus(gp) );
     this->initTempStatus(gp);
     MaterialMode mode = gp->giveMaterialMode();
     if  ( mode == _3dMat ) {
@@ -220,13 +222,12 @@ LargeStrainMasterMaterialGrad :: giveFirstPKStressVectorGrad(FloatArray &answer1
 
         double lambda1, lambda2, lambda3, E1, E2, E3;
         FloatArray eVals, SethHillStrainVector, stressVector, stressM;
-        FloatMatrix F, Ft, C, eVecs, SethHillStrain, stress(3, 3);
-        FloatMatrix L1, L2, T, tT;
+        FloatMatrix F, C, eVecs, SethHillStrain;
+        FloatMatrix L1, L2, T;
         //store of deformation gradient into 3x3 matrix
         F.beMatrixForm(vF);
         //compute right Cauchy-Green tensor(C), its eigenvalues and eigenvectors
-        Ft.beTranspositionOf(F);
-        C.beProductOf(Ft, F);
+        C.beTProductOf(F, F);
         // compute eigen values and eigen vectors of C
         C.jaco_(eVals, eVecs, 40);
         // compute Seth - Hill's strain measure, it depends on mParameter
@@ -255,7 +256,6 @@ LargeStrainMasterMaterialGrad :: giveFirstPKStressVectorGrad(FloatArray &answer1
         SethHillStrainVector.beSymVectorFormOfStrain(SethHillStrain);
         dpmat->giveRealStressVectorGrad(stressVector, answer2, gp, SethHillStrainVector, nonlocalCumulatedStrain, tStep);
         this->constructTransformationMatrix(T, eVecs);
-        tT.beTranspositionOf(T);
 
         stressVector.at(4) = 2 * stressVector.at(4);
         stressVector.at(5) = 2 * stressVector.at(5);
@@ -272,16 +272,16 @@ LargeStrainMasterMaterialGrad :: giveFirstPKStressVectorGrad(FloatArray &answer1
         FloatMatrix junk, P, TL;
         FloatArray secondPK;
         junk.beProductOf(L1, T);
-        P.beProductOf(tT, junk);
+        P.beTProductOf(T, junk);
         //transformation of the stress to the 2PK stress and then to 1PK
         stressVector.at(4) = 0.5 * stressVector.at(4);
         stressVector.at(5) = 0.5 * stressVector.at(5);
         stressVector.at(6) = 0.5 * stressVector.at(6);
         secondPK.beProductOf(P, stressVector);
-        this->convert_S_2_P( answer1, secondPK, vF, gp->giveMaterialMode() );
+        answer1.beProductOf(F, secondPK); // P = F*S
         junk.zero();
         junk.beProductOf(L2, T);
-        TL.beProductOf(tT, junk);
+        TL.beTProductOf(T, junk);
 
         status->setPmatrix(P);
         status->setTLmatrix(TL);
@@ -292,81 +292,10 @@ LargeStrainMasterMaterialGrad :: giveFirstPKStressVectorGrad(FloatArray &answer1
 }
 
 
-
-
-
-
-
-
 IRResultType
 LargeStrainMasterMaterialGrad :: initializeFrom(InputRecord *ir)
 {
-    LargeStrainMasterMaterial :: initializeFrom(ir);
-    return IRRT_OK;
+    return LargeStrainMasterMaterial :: initializeFrom(ir);
 }
 
-//=============================================================================
-
-LargeStrainMasterMaterialGradStatus :: LargeStrainMasterMaterialGradStatus(int n, Domain *d, GaussPoint *g, int s) : LargeStrainMasterMaterialStatus(n, d, g, s)
-{ }
-
-LargeStrainMasterMaterialGradStatus :: ~LargeStrainMasterMaterialGradStatus()
-{ }
-
-
-void
-LargeStrainMasterMaterialGradStatus :: printOutputAt(FILE *file, TimeStep *tStep)
-{
-    LargeStrainMasterMaterialStatus :: printOutputAt(file, tStep);
-}
-
-// initializes temporary variables based on their values at the previous equlibrium state
-void LargeStrainMasterMaterialGradStatus :: initTempStatus()
-{
-    LargeStrainMasterMaterialStatus :: initTempStatus();
-}
-
-
-// updates internal variables when equilibrium is reached
-void
-LargeStrainMasterMaterialGradStatus :: updateYourself(TimeStep *tStep)
-{
-    LargeStrainMasterMaterialStatus :: updateYourself(tStep);
-}
-
-
-// saves full information stored in this status
-// temporary variables are NOT stored
-contextIOResultType
-LargeStrainMasterMaterialGradStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
-{
-    contextIOResultType iores;
-
-    // save parent class status
-    if ( ( iores = LargeStrainMasterMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // write raw data
-
-    return CIO_OK;
-}
-
-
-contextIOResultType
-LargeStrainMasterMaterialGradStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// restores full information stored in stream to this Status
-//
-{
-    contextIOResultType iores;
-
-    // read parent class status
-    if ( ( iores = LargeStrainMasterMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-
-    return CIO_OK; // return succes
-}
 } // end namespace oofem

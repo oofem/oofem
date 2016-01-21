@@ -47,26 +47,9 @@
 
 namespace oofem {
 /**
- * This class implements associated MaterialStatus for HyperElasticMaterial.
+ * Saint Venant–Kirchhoff model defined by shear and bulk modulus.
+ * @todo Should we even have this? Isn't this identical to the isotropic linear elastic model? / Mikael
  */
-class HyperElasticMaterialStatus : public StructuralMaterialStatus
-{
-public:
-    /// Constructor
-    HyperElasticMaterialStatus(int n, Domain * d, GaussPoint * g);
-    /// Destructor
-    virtual ~HyperElasticMaterialStatus();
-
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
-
-    // definition
-    virtual const char *giveClassName() const { return "HyperElasticMaterialStatus"; }
-
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
-};
-
-
 class HyperElasticMaterial : public StructuralMaterial
 {
 protected:

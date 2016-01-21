@@ -62,6 +62,11 @@ KelvinChainSolidMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
     double lambdaMu, Emu;
     double sum = 0.0;
 
+    if ( this->EparVal.isEmpty() ) {
+      this->updateEparModuli(0.); // stiffnesses are time independent (evaluated at time t = 0.)
+    }
+
+
     for ( mu = 1; mu <= nUnits; mu++ ) {
         lambdaMu = this->computeLambdaMu(gp, tStep, mu);
         Emu = this->giveEparModulus(mu);
@@ -86,12 +91,18 @@ KelvinChainSolidMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint
     FloatMatrix C;
     KelvinChainSolidMaterialStatus *status = static_cast< KelvinChainSolidMaterialStatus * >( this->giveStatus(gp) );
 
+
+    if ( this->EparVal.isEmpty() ) {
+      this->updateEparModuli(0.); // stiffnesses are time independent (evaluated at time t = 0.)
+    }
+
+
     if ( mode == VM_Incremental ) {
         for ( mu = 1; mu <= nUnits; mu++ ) {
             betaMu = this->computeBetaMu(gp, tStep, mu);
             sigmaVMu =  & status->giveHiddenVarsVector(mu); // JB
 
-            if ( sigmaVMu ) {
+            if ( sigmaVMu->isNotEmpty() ) {
                 help.zero();
                 help.add(* sigmaVMu);
                 help.times( ( 1.0 - betaMu ) / this->giveEparModulus(mu) );
@@ -99,7 +110,7 @@ KelvinChainSolidMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint
             }
         }
 
-        if ( sigmaVMu ) {
+        if ( sigmaVMu->isNotEmpty() ) {
             help = reducedAnswer;
             this->giveUnitComplianceMatrix(C, gp, tStep);
             reducedAnswer.beProductOf(C, help);
@@ -179,6 +190,16 @@ KelvinChainSolidMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tStep)
     FloatMatrix D;
     KelvinChainSolidMaterialStatus *status = static_cast< KelvinChainSolidMaterialStatus * >( this->giveStatus(gp) );
 
+
+    if ( !this->isActivated(tStep) ) {
+      help.resize(StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
+      help.zero();
+      for ( int mu = 1; mu <= nUnits; mu++ ) {
+	status->letTempHiddenVarsVectorBe(mu, help);
+      }
+      return;
+    }
+    
     help = status->giveTempStrainVector(); // gives updated strain vector (at the end of time-step)
     help.subtract( status->giveStrainVector() ); // strain increment in current time-step
 
@@ -225,9 +246,7 @@ KelvinChainSolidMaterial :: CreateStatus(GaussPoint *gp) const
 IRResultType
 KelvinChainSolidMaterial :: initializeFrom(InputRecord *ir)
 {
-    RheoChainMaterial :: initializeFrom(ir);
-
-    return IRRT_OK;
+    return RheoChainMaterial :: initializeFrom(ir);
 }
 
 // useless here

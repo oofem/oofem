@@ -62,12 +62,11 @@ TrabBoneNLEmbed :: ~TrabBoneNLEmbed()
 void
 TrabBoneNLEmbed :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep)
 {
-    FloatArray SDstrainVector, fullSDStrainVector;
+    FloatArray SDstrainVector;
     double cumPlastStrain;
     TrabBoneNLEmbedStatus *nlstatus = static_cast< TrabBoneNLEmbedStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
-    //this->initGpForNewStep(gp);
     this->giveStressDependentPartOfStrainVector(SDstrainVector, gp, strainVector, tStep, VM_Total);
 
     nlstatus->letTempStrainVectorBe(strainVector);
@@ -128,7 +127,7 @@ TrabBoneNLEmbed :: computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep
         nonlocalCumPlastStrain += nonlocalContribution;
     }
 
-    nonlocalCumPlastStrain /= status->giveIntegrationScale();
+    nonlocalCumPlastStrain /= status->giveIntegrationScale(); ///@todo This is never used.
 
     //  double localCumPlastStrain = status->giveLocalCumPlastStrainForAverage();
     //  alpha = mParam*nonlocalCumPlastStrain +(1-mParam)*localCumPlastStrain ;
@@ -150,8 +149,15 @@ TrabBoneNLEmbed :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                             // Required by IR_GIVE_FIELD macro
 
-    TrabBoneEmbed :: initializeFrom(ir);
-    StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
+    result = TrabBoneEmbed :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+
+    result = StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     IR_GIVE_FIELD(ir, R, _IFT_TrabBoneNLEmbed_r);
     if ( R < 0.0 ) {
@@ -202,17 +208,16 @@ TrabBoneNLEmbedStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status {");
     fprintf(file, " plastrains ");
-    int n = plasDef.giveSize();
-    for ( int i = 1; i <= n; i++ ) {
-        fprintf( file, " % .4e", plasDef.at(i) );
+    for ( auto &val : plasDef ) {
+        fprintf( file, " %.4e", val );
     }
 
     fprintf(file, " ,");
-    fprintf(file, " alpha % .4e ,", alpha);
-    fprintf(file, " dam  % .4e ,", dam);
-    fprintf(file, " esed  % .4e ,", this->tempTSED);
+    fprintf(file, " alpha %.4e ,", alpha);
+    fprintf(file, " dam  %.4e ,", dam);
+    fprintf(file, " esed  %.4e ,", this->tempTSED);
     fprintf(file, " psed  0. ,");
-    fprintf(file, " tsed  % .4e ,", this->tempTSED);
+    fprintf(file, " tsed  %.4e ,", this->tempTSED);
     fprintf(file, "}\n");
 }
 

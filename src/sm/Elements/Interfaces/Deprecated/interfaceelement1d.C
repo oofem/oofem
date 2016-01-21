@@ -35,13 +35,13 @@
 #include "interfaceelement1d.h"
 #include "domain.h"
 #include "node.h"
-#include "crosssection.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
 #include "feinterpol.h"
+#include "../sm/CrossSections/structuralinterfacecrosssection.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -80,6 +80,31 @@ InterfaceElem1d :: setCoordMode()
         OOFEM_ERROR("Unsupported domain type")
     }
 }
+
+
+void
+InterfaceElem1d :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+{
+    setCoordMode();
+    switch ( mode ) {
+    case ie1d_1d: static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->giveEngTraction_1d(answer, gp, strain, tStep); return;
+    case ie1d_2d: static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->giveEngTraction_2d(answer, gp, strain, tStep); return;
+    case ie1d_3d: static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->giveEngTraction_3d(answer, gp, strain, tStep); return;
+    }
+}
+
+
+void
+InterfaceElem1d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    setCoordMode();
+    switch ( mode ) {
+    case ie1d_1d: static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->give1dStiffnessMatrix_Eng(answer, rMode, gp, tStep); return;
+    case ie1d_2d: static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->give2dStiffnessMatrix_Eng(answer, rMode, gp, tStep); return;
+    case ie1d_3d: static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->give3dStiffnessMatrix_Eng(answer, rMode, gp, tStep); return;
+    }
+}
+
 
 
 MaterialMode
@@ -252,7 +277,11 @@ InterfaceElem1d :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    this->StructuralElement :: initializeFrom(ir);
+    result = StructuralElement :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+
     IR_GIVE_OPTIONAL_FIELD(ir, referenceNode, _IFT_InterfaceElem1d_refnode);
     IR_GIVE_OPTIONAL_FIELD(ir, normal, _IFT_InterfaceElem1d_normal);
     if ( referenceNode == 0 && normal.at(1) == 0 && normal.at(2) == 0 && normal.at(1) == 0 && normal.at(3) == 0 ) {

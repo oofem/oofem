@@ -128,7 +128,8 @@ HydrationModel :: initializeFrom(InputRecord *ir)
     if ( initialHydrationDegree >= 0. ) {
         OOFEM_LOG_INFO("HydrationModel: Hydration from %.2f.", initialHydrationDegree);
     } else {
-        OOFEM_ERROR("Hydration degree input incorrect, use 0..1 to set initial material hydration degree.");
+        OOFEM_WARNING("Hydration degree input incorrect, use 0..1 to set initial material hydration degree.");
+        return IRRT_BAD_FORMAT;
     }
 
     if ( ir->hasField(_IFT_HydrationModel_c60mix) ) {
@@ -297,7 +298,7 @@ HydrationModel :: giveStatus(GaussPoint *gp) const
     HydrationModelStatus *status = NULL;
     if ( hmi ) {
         status = hmi->giveHydrationModelStatus();
-        if ( status == NULL ) {
+        if ( !status ) {
             status = static_cast< HydrationModelStatus * >( this->CreateStatus(gp) );
             hmi->setHydrationModelStatus(status);
         }
@@ -609,7 +610,8 @@ HydrationModelInterface :: initializeFrom(InputRecord *ir)
         OOFEM_LOG_INFO("HydratingMaterial: creating HydrationModel.");
         hydrationModel.reset( new HydrationModel() );
         if ( !hydrationModel ) {
-            OOFEM_ERROR("Could not create HydrationModel instance.");
+            OOFEM_WARNING("Could not create HydrationModel instance.");
+            return IRRT_BAD_FORMAT;
         }
 
         hydrationModel->initializeFrom(ir);
@@ -619,7 +621,8 @@ HydrationModelInterface :: initializeFrom(InputRecord *ir)
         constantHydrationDegree = -value;
         OOFEM_LOG_INFO("HydratingMaterial: Hydration degree set to %.2f.", -value);
     } else {
-        OOFEM_ERROR("Hydration degree input incorrect, use -1..<0 for constant hydration degree, 0..1 to set initial material hydration degree.");
+        OOFEM_WARNING("Hydration degree input incorrect, use -1..<0 for constant hydration degree, 0..1 to set initial material hydration degree.");
+        return IRRT_BAD_FORMAT;
     }
 
     // Material cast time - start of hydration

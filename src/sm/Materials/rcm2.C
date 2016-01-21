@@ -129,7 +129,6 @@ RCM2Material :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     RCM2MaterialStatus *status = static_cast< RCM2MaterialStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
-    //this->initGpForNewStep(gp);
 
     // subtract stress independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
@@ -174,7 +173,7 @@ RCM2Material :: giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint *
 {
     int ind;
     double maxErr;
-    FloatArray crackStrainVector, reducedTotalStrainVector;
+    FloatArray crackStrainVector;
     FloatArray strainIncrement, crackStrainIterativeIncrement;
     FloatArray prevPrincipalStrain;
     FloatArray dSigma;
@@ -183,15 +182,6 @@ RCM2Material :: giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint *
     IntArray activatedCracks, crackMapping;
     FloatMatrix dcr, de, decr, fullDecr, crackDirs;
     RCM2MaterialStatus *status = static_cast< RCM2MaterialStatus * >( this->giveStatus(gp) );
-
-    /*
-     * if (status -> giveStressVector() == NULL) status->letStressVectorBe(new FloatArray(this->giveSizeOfReducedStressStrainVector(gp->giveMaterialMode())));
-     * if (status -> giveStrainVector() == NULL) status->letStrainVectorBe(new FloatArray(this->giveSizeOfReducedStressStrainVector(gp->giveMaterialMode())));
-     * // if (status -> givePlasticStrainVector() == NULL) status->letPlasticStrainVectorBe(new FloatArray(6));
-     * if (status -> giveStressIncrementVector() == NULL) status->letStressIncrementVectorBe(new FloatArray(this->giveSizeOfReducedStressStrainVector(gp->giveMaterialMode())));
-     * if (status -> giveStrainIncrementVector() == NULL) status->letStrainIncrementVectorBe(new FloatArray(this->giveSizeOfReducedStressStrainVector(gp->giveMaterialMode())));
-     * // if (status -> givePlasticStrainIncrementVector() == NULL) status->letPlasticStrainIncrementVectorBe(new FloatArray(6));
-     */
 
     /*
      * // totalStressVector = gp -> giveStressVector()->GiveCopy();
@@ -348,19 +338,6 @@ RCM2Material :: giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint *
 
     // convergence not reached
     OOFEM_ERROR("convergence not reached");
-}
-
-
-void
-RCM2Material :: initTempStatus(GaussPoint *gp)
-//
-// Initialize MatStatus (respective it's temporary variables at the begining
-// of integrating incremental constitutive relations) to correct values
-//
-{
-    RCM2MaterialStatus *status = static_cast< RCM2MaterialStatus * >( this->giveStatus(gp) );
-
-    status->initTempStatus();
 }
 
 
@@ -640,7 +617,7 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
     int numberOfActiveCracks = status->giveNumberOfTempActiveCracks();
     int indi, indj, ii, jj;
     double G, princStressDis, princStrainDis;
-    FloatMatrix de, invDe, compliance, dcr, d, df, t, tt, tempCrackDirs;
+    FloatMatrix de, invDe, compliance, dcr, d, df, t, tempCrackDirs;
     FloatArray principalStressVector, principalStrainVector;
     IntArray mask;
 
@@ -732,8 +709,7 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
     //
 
     this->giveStressVectorTranformationMtrx(t, tempCrackDirs, 1);
-    tt.beTranspositionOf(t);
-    df.rotatedWith(tt);
+    df.rotatedWith(t, 't');
 
     StructuralMaterial :: giveReducedSymMatrixForm( answer, df, gp->giveMaterialMode() );
 }
@@ -824,9 +800,7 @@ RCM2Material :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, Gf, _IFT_RCM2Material_gf);
     IR_GIVE_FIELD(ir, Ft, _IFT_RCM2Material_ft);
 
-    this->giveLinearElasticMaterial()->initializeFrom(ir);
-
-    return IRRT_OK;
+    return this->giveLinearElasticMaterial()->initializeFrom(ir);
 }
 
 double

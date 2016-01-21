@@ -66,7 +66,7 @@ extern "C" {
 
 namespace oofem {
 
-bool FloatArray ::isFinite() const
+bool FloatArray :: isFinite() const
 {
     for(double val : values) {
         if(!std::isfinite(val)) {
@@ -680,7 +680,8 @@ void FloatArray :: beProductOf(const FloatMatrix &aMatrix, const FloatArray &anA
 
 #  ifdef DEBUG
     if ( aMatrix.giveNumberOfColumns() != anArray.giveSize() ) {
-        OOFEM_ERROR("dimension mismatch");
+        OOFEM_ERROR("dimension mismatch (%d, %d) . (%d)", 
+                    aMatrix.giveNumberOfRows(), aMatrix.giveNumberOfColumns(), anArray.giveSize());
     }
 #  endif
 
@@ -752,7 +753,7 @@ void FloatArray :: printYourself() const
 }
 
 
-void FloatArray :: printYourself(const std::string name) const
+void FloatArray :: printYourself(const std::string &name) const
 // Prints the receiver on screen.
 {
     printf("%s (%d): \n", name.c_str(), this->giveSize());

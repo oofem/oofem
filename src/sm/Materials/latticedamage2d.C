@@ -71,8 +71,11 @@ LatticeDamage2d :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                             // Required by IR_GIVE_FIELD macro
 
-    StructuralMaterial :: initializeFrom(ir);
-    RandomMaterialExtensionInterface :: initializeFrom(ir);
+    result = StructuralMaterial :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
+    
+    result = RandomMaterialExtensionInterface :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     double value = 0.;
     IR_GIVE_FIELD(ir, value, _IFT_IsotropicLinearElasticMaterial_talpha);
@@ -120,7 +123,8 @@ LatticeDamage2d :: initializeFrom(InputRecord *ir)
         e0OneMean = 0.3 * e0Mean;
         IR_GIVE_OPTIONAL_FIELD(ir, e0OneMean, _IFT_LatticeDamage2d_e0OneMean);
     } else {
-        OOFEM_ERROR("Unknown softening type");
+        OOFEM_WARNING("Unknown softening type");
+        return IRRT_BAD_FORMAT;
     }
 
     this->biotCoefficient = 0.;
@@ -270,10 +274,9 @@ LatticeDamage2d :: computeStressIndependentStrainVector(FloatArray &answer,
         exit(1);
     }
 
-    double deltaTemperature = 0.;
     if ( mode == VM_Total ) {
         // compute temperature difference
-        deltaTemperature = et.at(1) - this->referenceTemperature;
+        double deltaTemperature = et.at(1) - this->referenceTemperature;
         answer.at(1) = this->give(tAlpha, gp) * deltaTemperature;
     } else {
         answer.at(1) = this->give(tAlpha, gp) * et.at(1);
@@ -288,8 +291,7 @@ LatticeDamage2d :: computeStressIndependentStrainVector(FloatArray &answer,
 MaterialStatus *
 LatticeDamage2d :: CreateStatus(GaussPoint *gp) const
 {
-    LatticeDamage2dStatus *answer = new LatticeDamage2dStatus(1, LatticeDamage2d :: domain, gp);
-    return answer;
+    return new LatticeDamage2dStatus(1, LatticeDamage2d :: domain, gp);
 }
 
 MaterialStatus *
@@ -326,15 +328,12 @@ LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
     const double e0 = this->give(e0_ID, gp) * this->e0Mean;
     status->setE0(e0);
 
-    FloatArray strainVector, reducedStrain;
+    FloatArray reducedStrain;
 
     double f, equivStrain, tempKappa, omega = 0.;
 
-    //this->initGpForNewStep(gp);
     this->initTempStatus(gp);
     reducedStrain = totalStrain;
-
-    FloatArray testStrainOld( status->giveStrainVector() );
 
     // subtract stress independent part
     this->giveStressDependentPartOfStrainVector(reducedStrain, gp, totalStrain, tStep, VM_Total);
@@ -396,8 +395,7 @@ LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
     
     //Compute dissipation
     double tempDissipation = status->giveDissipation();
-    double tempDeltaDissipation = 0.;
-    tempDeltaDissipation = computeDeltaDissipation(omega, reducedStrain, gp, tStep);
+    double tempDeltaDissipation = computeDeltaDissipation(omega, reducedStrain, gp, tStep);
 
     tempDissipation += tempDeltaDissipation;
 
@@ -407,13 +405,11 @@ LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
 
     //Calculate the the bio coefficient;
     double biot = 0.;
-    if(this->biotType == 0){
-      biot = this->biotCoefficient;
-    }
-    else if(this->biotType == 1){
-      biot = computeBiot(omega, tempKappa, le);
-    }
-    else{
+    if ( this->biotType == 0 ) {
+        biot = this->biotCoefficient;
+    } else if ( this->biotType == 1 ) {
+        biot = computeBiot(omega, tempKappa, le);
+    } else {
       OOFEM_ERROR("Unknown biot type\n");
     }
     
@@ -435,8 +431,6 @@ LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
     status->setTempCrackWidth(crackWidth);
     
     status->setBiotCoefficientInStatus(biot);
-
-    return;
 }
 
 double
@@ -482,7 +476,6 @@ LatticeDamage2d :: computeDeltaDissipation(double omega,
     FloatArray crackOpeningOld(3);
     crackOpeningOld.times(omegaOld);
     crackOpeningOld.times(length);
-    FloatArray stressOld( status->giveStressVector() );
     FloatArray intermediateStrain(3);
 
     double tempDeltaDissipation = 0.;
@@ -652,7 +645,7 @@ double
 LatticeDamage2d :: give(int aProperty, GaussPoint *gp)
 {
     double answer;
-    if ( RandomMaterialExtensionInterface :: give(aProperty, gp, answer) ) {
+    if ( static_cast< LatticeDamage2dStatus * >( this->giveStatus(gp) )->_giveProperty(aProperty, answer) ) {
         return answer;
     } else if ( aProperty == e0_ID ) {
         return 1.;
@@ -743,12 +736,11 @@ LatticeDamage2dStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");
     fprintf(file, "reduced strains ");
-    int rSize = reducedStrain.giveSize();
-    for ( int k = 1; k <= rSize; k++ ) {
-        fprintf( file, "% .4e ", reducedStrain.at(k) );
+    for ( auto &val : reducedStrain ) {
+        fprintf( file, "%.4e ", val );
     }
 
-    fprintf(file, "kappa %f, equivStrain %f, damage %f, dissipation %f, deltaDissipation %f, e0 %f, crack_flag %d, crackWidth % .8e, biotCoeff %f", this->kappa, this->equivStrain, this->damage, this->dissipation, this->deltaDissipation, this->e0, this->crack_flag, this->crackWidth, this->biot);
+    fprintf(file, "kappa %f, equivStrain %f, damage %f, dissipation %f, deltaDissipation %f, e0 %f, crack_flag %d, crackWidth %.8e, biotCoeff %f", this->kappa, this->equivStrain, this->damage, this->dissipation, this->deltaDissipation, this->e0, this->crack_flag, this->crackWidth, this->biot);
     fprintf(file, "}\n");
 }
 
@@ -877,7 +869,8 @@ LatticeDamage2dStatus :: setTempCrackWidth(double val)
 
 
 void
-LatticeDamage2dStatus :: setVariableInStatus(double variable) {
+LatticeDamage2dStatus :: setVariableInStatus(double variable)
+{
     e0 = variable;
 }
 

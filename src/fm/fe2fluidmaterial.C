@@ -37,7 +37,6 @@
 #include "oofemtxtdatareader.h"
 #include "domain.h"
 #include "gausspoint.h"
-#include "engngm.h"
 #include "contextioerr.h"
 #include "util.h"
 #include "classfactory.h"
@@ -250,7 +249,7 @@ IRResultType FE2FluidMaterial :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;
     IR_GIVE_FIELD(ir, this->inputfile, _IFT_FE2FluidMaterial_fileName);
-    return this->FluidDynamicMaterial :: initializeFrom(ir);
+    return FluidDynamicMaterial :: initializeFrom(ir);
 }
 
 void FE2FluidMaterial :: giveInputRecord(DynamicInputRecord &input)

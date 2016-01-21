@@ -42,6 +42,34 @@
 namespace oofem {
 class StructuralElement;
 
+/// Assembles the internal forces, without updating the strain.
+///@todo The need for this is just due to some other design choices. 
+class LastEquilibratedInternalForceAssembler : public InternalForceAssembler
+{
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+};
+
+/**
+ * Callback class for assembling linearized thermal "loads", useful for computing initial guesses.
+ * @author Mikael Öhman
+ */
+class LinearizedDilationForceAssembler : public VectorAssembler
+{
+public:
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+};
+
+/**
+ * Callback class for assembling initial stress matrices
+ * @author Mikael Öhman
+ */
+class InitialStressMatrixAssembler : public MatrixAssembler
+{
+public:
+    virtual void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const;
+};
+
+
 /**
  * This class implements extension of EngngModel for structural models.
  * Its purpose is to declare and implement general methods for computing reaction forces.

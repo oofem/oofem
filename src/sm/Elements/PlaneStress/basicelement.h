@@ -52,35 +52,34 @@ class FEI2dTrLin;
  * This element is a simplified version of the more general element TrPlaneStress2d,
  * which contains many additional (and optional) features. See 'trplanstrss.h' for
  * more info.
+ * 
+ * The Elements essentially only provides the interpolator, which is used by the 
+ * base class PlaneStressElement for constructing the N- and B-matrices.
  *
- * /@author Jim Brouzoulis 
+ * @author Jim Brouzoulis 
  */
 class BasicElement : public PlaneStressElement
 {
-    /**
-     * All of the following methods need to be implemented by the element 
-     * (if not stated otherwise).
-     */
-    
 protected:
-    static FEI2dTrLin interp;           
+    static FEI2dTrLin interp;
 
 public:
     /// Constructor
-    BasicElement(int n, Domain * d);    
+    BasicElement(int n, Domain * d);
     /// Destructor.
-    virtual ~BasicElement() { }         
+    virtual ~BasicElement() { }
 
-    virtual FEInterpolation *giveInterpolation() const;    
+    virtual FEInterpolation *giveInterpolation() const;
+
+    // Necessary for reading input files:
     virtual const char *giveInputRecordName() const { return _IFT_BasicElement_Name; }
+    // Necessary for debug messages:
     virtual const char *giveClassName() const { return "BasicElement"; }
 
 protected:
-    
-    // - Support for computing the mass matrix needed for dynamic simulations
-    virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }    
 
-
+    // Support for computing the mass matrix needed for dynamic simulations
+    virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }
 };
 } // end namespace oofem
 #endif // basicelement_h

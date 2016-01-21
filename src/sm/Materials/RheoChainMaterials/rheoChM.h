@@ -35,6 +35,9 @@
 #ifndef rheochm_h
 #define rheochm_h
 
+/// thermal, shrinkage (drying & autogenous) and creep strains are stored for export
+#define keep_track_of_strains
+
 #include "../sm/Materials/structuralmaterial.h"
 #include "Materials/linearelasticmaterial.h"
 #include "floatarray.h"
@@ -47,6 +50,9 @@
 ///@name Input fields for RheoChainMaterial
 //@{
 #define _IFT_RheoChainMaterial_n "n"
+#define _IFT_RheoChainMaterial_alphaOne "a1"
+#define _IFT_RheoChainMaterial_alphaTwo "a2"
+#define _IFT_RheoChainMaterial_lattice "lattice"
 #define _IFT_RheoChainMaterial_relmatage "relmatage"
 #define _IFT_RheoChainMaterial_begoftimeofinterest "begoftimeofinterest"
 #define _IFT_RheoChainMaterial_endoftimeofinterest "endoftimeofinterest"
@@ -75,11 +81,18 @@ protected:
      */
     FloatArray shrinkageStrain;
 
+#ifdef keep_track_of_strains
+    double thermalStrain;
+    double tempThermalStrain;
+#endif
+
 public:
-    RheoChainMaterialStatus(int n, Domain * d, GaussPoint * g, int nunits);
+    RheoChainMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits);
     virtual ~RheoChainMaterialStatus();
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
+
+    virtual const FloatArray &giveViscoelasticStressVector() const { return stressVector; }
 
     FloatArray &giveHiddenVarsVector(int i) { return hiddenVars [ i - 1 ]; }
     FloatArray &giveTempHiddenVarsVector(int i) { return tempHiddenVars [ i - 1 ]; }
@@ -94,6 +107,13 @@ public:
 
     virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+
+
+#ifdef keep_track_of_strains
+    void setTempThermalStrain(double src) { tempThermalStrain = src; }
+    double giveTempThermalStrain(void) { return tempThermalStrain; }
+    double giveThermalStrain(void) { return thermalStrain; }
+#endif
 
     // definition
     virtual const char *giveClassName() const { return "RheoChainMaterialStatus"; }
@@ -112,8 +132,12 @@ protected:
     int nUnits;
     /// Physical age of the material at simulation time = 0.
     double relMatAge;
+
+    bool lattice;
     /// Poisson's ratio (assumed to be constant, unaffected by creep).
     double nu;
+    /// Parameters for the lattice model
+    double alphaOne, alphaTwo;
     /// Time for which the partial moduli of individual units have been evaluated.
     double EparValTime;
 
@@ -139,7 +163,7 @@ protected:
     double timeFactor;
 
 public:
-    RheoChainMaterial(int n, Domain * d);
+    RheoChainMaterial(int n, Domain *d);
     virtual ~RheoChainMaterial();
 
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
@@ -173,6 +197,8 @@ public:
     virtual const char *giveClassName() const { return "RheoChainMaterial"; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+
     // store & restore context functions
     virtual contextIOResultType saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
     virtual contextIOResultType restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
@@ -194,6 +220,16 @@ public:
                                        MatResponseMode mmode,
                                        GaussPoint *gp,
                                        TimeStep *tStep);
+
+    virtual void give2dLatticeStiffMtrx(FloatMatrix &answer,
+                                        MatResponseMode mmode,
+                                        GaussPoint *gp,
+                                        TimeStep *tStep);
+
+    virtual void give3dLatticeStiffMtrx(FloatMatrix &answer,
+                                        MatResponseMode mmode,
+                                        GaussPoint *gp,
+                                        TimeStep *tStep);
 
     virtual void computeStressIndependentStrainVector(FloatArray &answer,
                                                       GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
@@ -225,6 +261,12 @@ public:
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
+    double giveAlphaOne() const { return this->alphaOne; }
+    double giveAlphaTwo() const { return this->alphaTwo; }
+
+    /// Evaluation of the creep compliance function at time t when loading is acting from time t_prime
+    virtual double computeCreepFunction(double t, double t_prime) = 0;
+
 protected:
     /**
      * If only incremental shrinkage strain formulation is provided, then total shrinkage strain must be tracked
@@ -244,8 +286,6 @@ protected:
      */
     static void generateLogTimeScale(FloatArray &answer, double from, double to, int nsteps);
     const FloatArray &giveDiscreteTimes();
-    /// Evaluation of the creep compliance function.
-    virtual double computeCreepFunction(double ofAge, double tStep) = 0;
 
     /**
      * Evaluation of the relaxation function at given times.
@@ -270,7 +310,7 @@ protected:
     void giveUnitStiffnessMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
 
     /// Update of partial moduli of individual chain units
-    void updateEparModuli(double tStep);
+    virtual void updateEparModuli(double tStep);
 
     /// Access to partial modulus of a given unit
     double giveEparModulus(int iChain);

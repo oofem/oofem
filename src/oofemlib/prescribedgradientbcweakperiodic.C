@@ -20,16 +20,16 @@ PrescribedGradientBCWeakPeriodic :: ~PrescribedGradientBCWeakPeriodic() {}
 
 IRResultType PrescribedGradientBCWeakPeriodic :: initializeFrom(InputRecord *ir)
 {
-    PrescribedGradientBCWeak :: initializeFrom(ir);
     mMeshIsPeriodic = true;
 
-    return IRRT_OK;
+    return PrescribedGradientBCWeak :: initializeFrom(ir);
 }
 
 void PrescribedGradientBCWeakPeriodic :: postInitialize()
 {
     bool enforceCornerPeriodicity = true;
     int numSides = 2;
+    clear();
     createTractionMesh(enforceCornerPeriodicity, numSides);
 }
 

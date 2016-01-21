@@ -81,7 +81,6 @@ protected:
     /// Initial displacement vector, describes the initial nodal displacements when element has been casted.
     FloatArray initialDisplacements;
     FEInterpolation *interpolation;
-    
     /// Flag indicating if geometrical nonlinearities apply.
     int nlGeometry;
 
@@ -95,11 +94,12 @@ public:
     /// Destructor.
     virtual ~StructuralInterfaceElement();
 
-    virtual FEInterpolation *giveInterpolation() const { return interpolation; };
+    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType, TimeStep *tStep);
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
 
+    virtual FEInterpolation *giveInterpolation() const { return interpolation; }
     /**
      * Computes the stiffness/tangent matrix of receiver. Default implementation computes element stiffness using
      * @f$ K=\int_{\Gamma} N^{\mathrm{T}} D N \mathrm{d}V @f$ formulae, where @f$ N @f$ is the element geometric matrix such
@@ -134,11 +134,11 @@ public:
      * (fast, but engineering model must ensure valid status data in each integration point).
      */
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
-    virtual void computeTraction(FloatArray &traction, IntegrationPoint *ip, FloatArray &jump, TimeStep *tStep);
+    virtual void computeTraction(FloatArray &traction, IntegrationPoint *ip, const FloatArray &jump, TimeStep *tStep);
     virtual void computeSpatialJump(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
-    virtual Interface *giveInterface(InterfaceType) { return NULL; };
+    virtual Interface *giveInterface(InterfaceType) { return NULL; }
 
     //@}
 
@@ -148,12 +148,12 @@ public:
     virtual int checkConsistency();
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
-    virtual const char *giveClassName() const { return "StructuralInterfaceElement"; };
+    virtual const char *giveClassName() const { return "StructuralInterfaceElement"; }
 
     StructuralInterfaceCrossSection *giveInterfaceCrossSection();
     virtual double computeAreaAround(GaussPoint *gp) = 0;
 
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_unknown; };
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_unknown; }
 
     //virtual methods that should be overloaded by the elements
     virtual void giveEngTraction(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep);

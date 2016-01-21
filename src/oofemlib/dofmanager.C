@@ -34,9 +34,7 @@
 
 #include "dofmanager.h"
 #include "masterdof.h"
-#include "slavedof.h"
 #include "simpleslavedof.h"
-#include "activedof.h"
 #include "timestep.h"
 #include "load.h"
 #include "floatarray.h"
@@ -49,6 +47,7 @@
 #include "dynamicinputrecord.h"
 #include "domain.h"
 #include "unknownnumberingscheme.h"
+#include "entityrenumberingscheme.h"
 #include "engngm.h"
 
 namespace oofem {
@@ -95,36 +94,25 @@ void DofManager :: setLoadArray(IntArray &la)
 }
 
 
-void DofManager :: computeLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
-// Computes the vector of the nodal loads of the receiver.
-{
-    answer.clear();
-
-    if ( this->giveLoadArray()->isEmpty() ) {
-        return;
-    } else {
-        FloatArray contribution;
-        int nLoads = loadArray.giveSize();     // the node may be subjected
-        for ( int i = 1; i <= nLoads; i++ ) {   // to more than one load
-            int n = loadArray.at(i);
-            Load *loadN = domain->giveLoad(n);
-            computeLoadVector(contribution, loadN, ExternalForcesVector, tStep, mode);
-            answer.add(contribution);
-        }
-    }
-}
-
-
 void DofManager :: computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeStep *tStep, ValueModeType mode)
 {
     if ( load->giveBCGeoType() != NodalLoadBGT ) {
         OOFEM_ERROR("incompatible load type applied");
     }
+
+    answer.clear();
     if ( type != ExternalForcesVector ) {
-        answer.clear();
         return;
     }
-    load->computeComponentArrayAt(answer, tStep, mode);
+
+    if ( load->giveDofIDs().giveSize() == 0 ) {
+        load->computeComponentArrayAt(answer, tStep, mode);
+    } else {
+        answer.resize(this->giveNumberOfDofs());
+        FloatArray tmp;
+        load->computeComponentArrayAt(tmp, tStep, mode);
+        answer.assemble(tmp, load->giveDofIDs());
+    }
 }
 
 
@@ -175,7 +163,7 @@ void DofManager :: removeDof(DofIDItem id)
 }
 
 
-bool DofManager :: hasDofID(DofIDItem id)
+bool DofManager :: hasDofID(DofIDItem id) const
 {
     for ( Dof *dof: *this ) {
         if ( dof->giveDofID() == id ) {
@@ -249,6 +237,7 @@ void DofManager :: giveCompleteLocationArray(IntArray &locationArray, const Unkn
         }
     } else {
         IntArray temp;
+        locationArray.resize(0);
         for ( Dof *dof: *this ) {
             dof->giveEquationNumbers(temp, s);
             locationArray.followedBy(temp);
@@ -357,7 +346,7 @@ DofManager :: initializeFrom(InputRecord *ir)
 
     ///@todo This is unnecessary, we should just check if user has supplied a dofidmask field or not and just drop "numberOfDofs"). It is left for now because it will give lots of warnings otherwise, but it is effectively ignored.
     int dummy;
-    IR_GIVE_OPTIONAL_FIELD(ir, dummy, _IFT_DofManager_ndofs);
+    IR_GIVE_OPTIONAL_FIELD(ir, dummy, "ndofs");
 
     if ( ir->hasField(_IFT_DofManager_dofidmask) ) {
         IR_GIVE_FIELD(ir, dofIDArry, _IFT_DofManager_dofidmask);
@@ -403,9 +392,9 @@ DofManager :: initializeFrom(InputRecord *ir)
     // masters have to be in same partition as slaves. They can be again Remote copies.
 
 
-    bool hasIc = !( ic.giveSize() == 0 );
-    bool hasBc = !( mBC.giveSize() == 0 );
-    bool hasTypeinfo = !( dofTypeMask.giveSize() == 0 );
+    bool hasIc = ic.giveSize() != 0;
+    bool hasBc = mBC.giveSize() != 0;
+    bool hasTypeinfo = dofTypeMask.giveSize() != 0;
 
     ///@todo This should eventually be removed, still here to preserve backwards compatibility:
     if ( ( hasIc || hasBc || hasTypeinfo ) && !this->dofidmask ) {
@@ -698,8 +687,6 @@ contextIOResultType DofManager :: restoreContext(DataStream &stream, ContextMode
 
 void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDArry, ValueModeType mode, TimeStep *tStep, bool padding)
 {
-    IntArray dofArray;
-
     answer.resize( dofIDArry.giveSize() );
     if ( dofIDArry.giveSize() == 0 ) return;
 
@@ -729,8 +716,6 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
 void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDArry,
                                      PrimaryField &field, ValueModeType mode, TimeStep *tStep, bool padding)
 {
-    IntArray dofArray;
-
     answer.resize( dofIDArry.giveSize() );
 
     int k = 0;
@@ -973,10 +958,11 @@ void DofManager :: updateLocalNumbering(EntityRenumberingFunctor &f)
 {
     //update masterNode numbering
     if ( this->dofMastermap ) {
-        for ( auto mapper: *this->dofMastermap ) {
+        for ( auto & mapper: *this->dofMastermap ) {
             mapper.second = f( mapper.second, ERS_DofManager );
         }
     }
+
     for ( Dof *dof: *this ) {
         dof->updateLocalNumbering(f);
     }

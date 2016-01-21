@@ -1,0 +1,118 @@
+patch303.out
+Patch test of PlaneStress2d elements -> pure compression in x direction
+#
+# three tests in onex
+#
+LinearStatic nsteps 1 nmodules 1
+errorcheck
+domain 3d
+OutputManager tstep_all dofman_all element_all
+ndofman 16 nelem 10 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 1 nset 3
+node 1 coords 3  0.0   0.0   0.0
+node 2 coords 3  0.0   4.0   0.0
+node 3 coords 3  2.0   2.0   0.0
+node 4 coords 3  3.0   1.0   0.0
+node 5 coords 3  8.0   0.8   0.0
+node 6 coords 3  7.0   3.0   0.0
+node 7 coords 3  9.0   0.0   0.0
+node 8 coords 3  9.0   4.0   0.0
+#
+node 11 coords 3  0.0   0.0   0.0
+node 12 coords 3  0.0   0.0   4.0
+node 13 coords 3  2.0   0.0   2.0
+node 14 coords 3  3.0   0.0   1.0
+node 15 coords 3  8.0   0.0   0.8
+node 16 coords 3  7.0   0.0   3.0
+node 17 coords 3  9.0   0.0   0.0
+node 18 coords 3  9.0   0.0   4.0
+##
+linquad3dplanestress 1 nodes 4 1 4 3 2
+linquad3dplanestress 2 nodes 4 1 7 5 4
+linquad3dplanestress 3 nodes 4 4 5 6 3
+linquad3dplanestress 4 nodes 4 3 6 8 2
+linquad3dplanestress 5 nodes 4 5 7 8 6
+#
+linquad3dplanestress 11 nodes 4 11 14 13 12
+linquad3dplanestress 12 nodes 4 11 17 15 14
+linquad3dplanestress 13 nodes 4 14 15 16 13
+linquad3dplanestress 14 nodes 4 13 16 18 12
+linquad3dplanestress 15 nodes 4 15 17 18 16
+##
+SimpleCS 1 thick 0.15 material 1 set 1
+IsoLE 1 d 0. E 15.0 n 0.25 tAlpha 0.000012
+BoundaryCondition 1 loadTimeFunction 1 dofs 2 2 3 values 2 0 0 set 1
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 2
+NodalLoad 3 loadTimeFunction 1 dofs 3 1 2 3 Components 3 -2.5 0.0 0.0 set 3
+ConstantFunction 1 f(t) 1.0
+Set 1 elementranges {(1 5) (11 15)}
+Set 2 nodes 4 1 2 11 12
+Set 3 nodes 4 7 8 17 18
+#
+#
+#
+#%BEGIN_CHECK% tolerance 1.e-4
+## check reactions 
+#REACTION tStep 1 number 1 dof 1 value 2.5
+#REACTION tStep 1 number 1 dof 2 value 1.40625
+#REACTION tStep 1 number 2 dof 1 value 2.5
+#REACTION tStep 1 number 2 dof 2 value -1.40625
+#REACTION tStep 1 number 7 dof 2 value 1.40625
+#REACTION tStep 1 number 8 dof 2 value -1.40625
+## check all nodes
+#NODE tStep 1 number 3 dof 1 unknown d value -1.041666666
+#NODE tStep 1 number 4 dof 1 unknown d value -1.5625
+#NODE tStep 1 number 5 dof 1 unknown d value -4.166666666
+#NODE tStep 1 number 6 dof 1 unknown d value -3.645833333
+#NODE tStep 1 number 7 dof 1 unknown d value -4.6875
+#NODE tStep 1 number 8 dof 1 unknown d value -4.6875
+## check element no. 1 strain vector
+#ELEMENT tStep 1 number 1 gp 1 keyword 104 component 1  value -0.520833333
+#ELEMENT tStep 1 number 1 gp 1 keyword 104 component 2  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 104 component 6  value 0.0
+## check element no. 1 stress vector
+##
+#ELEMENT tStep 1 number 2 gp 2 keyword 104 component 1  value -0.520833333
+#ELEMENT tStep 1 number 2 gp 2 keyword 104 component 2  value 0.0
+#ELEMENT tStep 1 number 2 gp 2 keyword 104 component 6  value 0.0
+##
+#ELEMENT tStep 1 number 3 gp 3 keyword 104 component 1  value -0.520833333
+#ELEMENT tStep 1 number 3 gp 3 keyword 104 component 2  value 0.0
+#ELEMENT tStep 1 number 3 gp 3 keyword 104 component 6  value 0.0
+##
+#ELEMENT tStep 1 number 4 gp 4 keyword 104 component 1  value -0.520833333
+#ELEMENT tStep 1 number 4 gp 4 keyword 104 component 2  value 0.0
+#ELEMENT tStep 1 number 4 gp 4 keyword 104 component 6  value 0.0
+##
+## quick check of rotated case
+##
+#NODE tStep 1 number 13 dof 1 unknown d value -1.041666666
+#NODE tStep 1 number 14 dof 1 unknown d value -1.5625
+#NODE tStep 1 number 15 dof 1 unknown d value -4.166666666
+#NODE tStep 1 number 16 dof 1 unknown d value -3.645833333
+#NODE tStep 1 number 17 dof 1 unknown d value -4.6875
+#NODE tStep 1 number 18 dof 1 unknown d value -4.6875
+##
+## check element no. 1 strain vector
+#ELEMENT tStep 1 number 11 gp 1 keyword 104 component 1  value -0.520833333
+#ELEMENT tStep 1 number 11 gp 1 keyword 104 component 2  value 0.0
+#ELEMENT tStep 1 number 11 gp 1 keyword 104 component 6  value 0.0
+##
+#%END_CHECK%
+#
+#
+#  exact solution
+#
+#  DISPLACEMENT                   STRAIN                     STRESS
+#
+#  node 1   0.0                epsilon_x = -0.520833333   sigma_x = -8.333333333
+#  node 2   0.0                epsilon_y =  0.0           sigma_y = -2.083333333
+#  node 3  -1.041666666        gama_xy   =  0.0           tau_xy  =  0.0
+#  node 4  -1.5625
+#  node 5  -4.166666666
+#  node 6  -3.645833333           REACTION
+#  node 7  -4.6875             node 1   R_u = 2.5   R_v =  1.40625
+#  node 8  -4.6875             node 2   R_u = 2.5   R_v = -1.40625
+#                              node 7   R_u = 0.0   R_v =  1.40625
+#                              node 8   R_u = 0.0   R_v = -1.40625
+#
+#

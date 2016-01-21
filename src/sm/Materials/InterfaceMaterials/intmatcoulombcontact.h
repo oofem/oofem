@@ -48,14 +48,13 @@
 #define _IFT_IntMatCoulombContact_stiffCoeff "stiffcoeff"
 #define _IFT_IntMatCoulombContact_normalClearance "normalclearance"
 //@}
-//
-///@author Milan Jir�sek
-///@author V�t �milauer
-///@author Jim Brouzoulis
-//
+
 namespace oofem {
 /**
  * This class implements associated Material Status to IntMatCoulombContact.
+ * @author Milan Jirisek
+ * @author Vit Smilauer
+ * @author Jim Brouzoulis
  */
 class IntMatCoulombContactStatus : public StructuralInterfaceMaterialStatus
 {
@@ -73,8 +72,8 @@ public:
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    FloatArray giveTempShearStressShift();
-    void setTempShearStressShift(FloatArray newShearStressShift) { tempShearStressShift = newShearStressShift; };
+    FloatArray giveShearStressShift();
+    void setTempShearStressShift(FloatArray newShearStressShift) { tempShearStressShift = newShearStressShift; }
 
     virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
@@ -86,6 +85,10 @@ public:
  * the normal direction. It is similar to a Coulomb contact model in the sense that 
  * the maximum shear stress is bounded by the normal stress times the coefficient 
  * of friction.
+ * 
+ * @author Milan Jirisek
+ * @author Vit Smilauer
+ * @author Jim Brouzoulis
  */
 class IntMatCoulombContact : public StructuralInterfaceMaterial
 {
@@ -106,36 +109,36 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_IntMatCoulombContact_Name; }
 
     virtual void giveEngTraction_3d( FloatArray &answer, GaussPoint *gp,
-                                      const FloatArray &jump, TimeStep *);
+                                      const FloatArray &jump, TimeStep *tStep);
 
     virtual void giveEngTraction_2d( FloatArray &answer, GaussPoint *gp,
-                                     const FloatArray &jump, TimeStep * );
+                                     const FloatArray &jump, TimeStep *tStep);
 
     virtual void giveEngTraction_1d( FloatArray &answer, GaussPoint *gp,
-                                     const FloatArray &jump, TimeStep * );
+                                     const FloatArray &jump, TimeStep *tStep);
 
-    virtual void give3dStiffnessMatrix_Eng( FloatMatrix &answer, MatResponseMode rMode,
-                                            GaussPoint *gp, TimeStep *tStep )
-    { this->giveGeneralStiffnessMatrix( answer, rMode, gp, tStep, 1 ); }
+    virtual void give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode,
+                                           GaussPoint *gp, TimeStep *tStep)
+    { this->giveGeneralStiffnessMatrix(answer, rMode, gp, tStep, 1); }
 
-    virtual void give2dStiffnessMatrix_Eng( FloatMatrix &answer, MatResponseMode rMode,
-                                            GaussPoint *gp, TimeStep *tStep )
-    { this->giveGeneralStiffnessMatrix( answer, rMode, gp, tStep, 2 ); }
+    virtual void give2dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode,
+                                           GaussPoint *gp, TimeStep *tStep)
+    { this->giveGeneralStiffnessMatrix(answer, rMode, gp, tStep, 2); }
 
-    virtual void give1dStiffnessMatrix_Eng( FloatMatrix &answer, MatResponseMode rMode,
-                                            GaussPoint *gp, TimeStep *tStep )
-    { this->giveGeneralStiffnessMatrix( answer, rMode, gp, tStep, 3 ); }
+    virtual void give1dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode,
+                                           GaussPoint *gp, TimeStep *tStep)
+    { this->giveGeneralStiffnessMatrix(answer, rMode, gp, tStep, 3); }
     
     // This method returns the stiffness matrix according to the size of 
     // the spatial jump.
-    virtual void  giveGeneralStiffnessMatrix(FloatMatrix &answer,
+    void giveGeneralStiffnessMatrix(FloatMatrix &answer,
                                       MatResponseMode rMode,
                                       GaussPoint *gp,
                                       TimeStep *tStep, int numSpaceDim);
 
     void computeEngTraction(double &normalStress, FloatArray &shearStress, 
                              FloatArray &tempShearStressShift,
-                             const double normalJump, const FloatArray &shearJump );
+                             double normalJump, const FloatArray &shearJump );
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);

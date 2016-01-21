@@ -275,11 +275,11 @@ MisesMatGrad :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMo
         double damage = status->giveDamage();
         double sigmaY = sig0 + H * kappa;
         // trial deviatoric stress and its norm
-        StressVector trialStressDev(status->giveTrialStressDev(), _3dMat);
+        const FloatArray &trialStressDev = status->giveTrialStressDev();
         /*****************************************************/
         //double trialStressVol = status->giveTrialStressVol();
         /****************************************************/
-        double trialS = trialStressDev.computeStressNorm();
+        double trialS = computeStressNorm(trialStressDev);
         // one correction term
         FloatMatrix stiffnessCorrection(6, 6);
         stiffnessCorrection.beDyadicProductOf(trialStressDev, trialStressDev);
@@ -332,11 +332,11 @@ void
 MisesMatGrad :: givePlaneStrainKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MisesMatGradStatus *status = static_cast< MisesMatGradStatus * >( this->giveStatus(gp) );
-    answer.resize(1, 4);
-    answer.zero();
     StressVector trialStressDev(status->giveTrialStressDev(), _PlaneStrain);
     double tempKappa = status->giveTempCumulativePlasticStrain();
     double dKappa = tempKappa - status->giveCumulativePlasticStrain();
+    answer.resize(1, 4);
+    answer.zero();
     if ( dKappa > 0 ) {
         double trialS = trialStressDev.computeStressNorm();
         answer.at(1, 1) = trialStressDev.at(1);
@@ -353,12 +353,13 @@ void
 MisesMatGrad :: give3dKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MisesMatGradStatus *status = static_cast< MisesMatGradStatus * >( this->giveStatus(gp) );
-    answer.resize(1, 6);
-    StressVector trialStressDev(status->giveTrialStressDev(), _3dMat);
+    const FloatArray &trialStressDev = status->giveTrialStressDev();
     double tempKappa = status->giveTempCumulativePlasticStrain();
     double dKappa = tempKappa - status->giveCumulativePlasticStrain();
+    answer.resize(1, 6);
+    answer.zero();
     if ( dKappa > 0 ) {
-        double trialS = trialStressDev.computeStressNorm();
+        double trialS = computeStressNorm(trialStressDev);
         for ( int i = 1; i <= 6; i++ ) {
             answer.at(1, i) = trialStressDev.at(i);
         }
@@ -458,7 +459,7 @@ void
 MisesMatGrad :: giveRealStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *tStep)
 {
     MisesMatGradStatus *status = static_cast< MisesMatGradStatus * >( this->giveStatus(gp) );
-    //this->initGpForNewStep(gp);
+
     this->initTempStatus(gp);
 
     double tempDamage;
@@ -493,8 +494,6 @@ MisesMatGrad :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                             // Required by IR_GIVE_FIELD macro
 
-    MisesMat :: initializeFrom(ir);
-
     IR_GIVE_FIELD(ir, L, _IFT_MisesMatGrad_l);
     if ( L < 0.0 ) {
         L = 0.0;
@@ -503,7 +502,7 @@ MisesMatGrad :: initializeFrom(InputRecord *ir)
     mParam = 2.;
     IR_GIVE_OPTIONAL_FIELD(ir, mParam, _IFT_MisesMatGrad_m);
 
-    return IRRT_OK;
+    return MisesMat :: initializeFrom(ir);
 }
 
 

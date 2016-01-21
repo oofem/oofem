@@ -70,15 +70,12 @@ IntMatBilinearCZFagerstromRate :: giveFirstPKTraction_3d(FloatArray &answer, Gau
     
     IntMatBilinearCZFagerstromStatus *status = static_cast< IntMatBilinearCZFagerstromStatus * >( this->giveStatus(gp) );
 
-    //this->initGpForNewStep(gp);
-    this->initTempStatus(gp);
-
-    FloatMatrix Finv(3,3);
+    FloatMatrix Finv;
 
     Finv.beInverseOf(F);
     status->letTempInverseDefGradBe(Finv);
 
-    FloatArray dJ(3);
+    FloatArray dJ;
     dJ.beProductOf(Finv,d);
     status->letTempMaterialJumpBe(dJ);
 
@@ -92,27 +89,12 @@ IntMatBilinearCZFagerstromRate :: giveFirstPKTraction_3d(FloatArray &answer, Gau
 
     if ( dJ.at(3) < 0 ) {
         Qtemp_comp.at(3) = this->knc*dJ.at(3);
-    } 
+    }
 
 
     // SUBROUTINE stress_damage_XFEM_direct_Mandel(dJ,N,Qold,old_alpha,Fci,Q,Ea,new_alpha,adtim,dalpha_new,dalpha_old,diss,sig_f,fall);
     if (oldDamage < 0.99) {
-        
         FloatArray Qtrial = status->giveEffectiveMandelTraction(); 
-
-        double Qn = Qtrial.at(3);
-        FloatArray QN(3);
-        QN.zero();
-        QN.at(3) = Qn;
-
-        FloatArray QtrialShear;
-                        
-        QtrialShear = Qtrial;
-        QtrialShear.subtract(QN);
-
-        double Qt = QtrialShear.computeNorm();
-
-        double Qn_M = 0.5*(Qn + fabs(Qn));
 
         FloatMatrix Kstiff(3,3);
         FloatArray help;
@@ -122,7 +104,7 @@ IntMatBilinearCZFagerstromRate :: giveFirstPKTraction_3d(FloatArray &answer, Gau
         Kstiff.at(2,2) = this->ks0;
         Kstiff.at(3,3) = this->kn0;
 
-#if 0        
+#if 0
         if (dJ.at(3)>=0) {
             Kstiff.at(3,3) = this->kn0;
         } else {
@@ -134,18 +116,19 @@ IntMatBilinearCZFagerstromRate :: giveFirstPKTraction_3d(FloatArray &answer, Gau
         //dJ.rotatedWith(Rot,'n');
         //dJ.printYourself();
 
-        help.beProductOf(Kstiff,dJ);
-        Qtrial.add(help); 
+        help.beProductOf(Kstiff, dJ);
+        Qtrial.add(help);
 
-        Qn = Qtrial.at(3);
+        double Qn = Qtrial.at(3);
+        FloatArray QN(3);
         QN.zero();
         QN.at(3) = Qn;
 
-                        
-        QtrialShear = Qtrial;
+
+        FloatArray QtrialShear = Qtrial;
         QtrialShear.subtract(QN);
 
-        Qt = QtrialShear.computeNorm();
+        double Qt = QtrialShear.computeNorm();
 
 
         //double S = this->GIc/this->sigf;
@@ -156,12 +139,12 @@ IntMatBilinearCZFagerstromRate :: giveFirstPKTraction_3d(FloatArray &answer, Gau
         double c_star = this->c_star;
         double m = this->m;
         //double S = this->GIc/this->sigf;
-        double S = (this->GIc - pow(sigf,2)/this->kn0)/sigf;
-        double gammaGf = gamma*(this->GIIc - pow(gamma*sigf,2)/this->ks0)/(this->GIc - pow(sigf,2)/this->kn0);
+        double S = (this->GIc - pow(sigf,2)/(2*this->kn0))/sigf;
+        double gammaGf = gamma*(this->GIIc - pow(gamma*sigf,2)/(2*this->ks0))/(this->GIc - pow(sigf,2)/(2*this->kn0));
 
 
 
-        Qn_M = 0.5*(Qn + fabs(Qn));
+        double Qn_M = 0.5*(Qn + fabs(Qn));
 
 
         //double loadFun = sigf*pow(Qt/(gamma*sigf),2) + sigf*pow((Qn_M/sigf),2) - sigf;    ///@todo Martin: no use of parameter mu!!!
@@ -237,7 +220,7 @@ IntMatBilinearCZFagerstromRate :: giveFirstPKTraction_3d(FloatArray &answer, Gau
                 // ELSE
                 // dMdJtn_e(2,1:2) = (/0.d0,0.d0/)
                 // END IF
-                                
+
                 // dMdJtn_e = MATMUL(dMdJtn_e,Keye3(1:2,1:2))
 
                 Smat.at(1,1) = 1.0 + gammaGf*dAlpha*S*2*Kstiff.at(1,1)/(pow(gamma,2)*sigf);  // S_mat(1:2,1:2) = eye3(1:2,1:2)+ dalpha*S*dMdJtn_e(1:2,1:2)
@@ -252,7 +235,7 @@ IntMatBilinearCZFagerstromRate :: giveFirstPKTraction_3d(FloatArray &answer, Gau
                 Smat.at(1,4) = gammaGf*S*M.at(1);   // S_mat(1:2,3) = S*M(1:2)
                 Smat.at(2,4) = gammaGf*S*M.at(2);
                 Smat.at(3,4) = S*M.at(3);
-                    
+
                 double fac1;
                 if (sqrt(dJp.computeSquaredNorm())>0) {
                     fac1 = c_star*m/(pow(dt,m))*pow(sqrt(dJp.computeSquaredNorm()),m-2);
@@ -322,12 +305,12 @@ IntMatBilinearCZFagerstromRate :: giveFirstPKTraction_3d(FloatArray &answer, Gau
 
             Iep.beSubMatrixOf(Smati,Indx,Indx);
             status->letTempIepBe(Iep);
-                                                                
+
             FloatArray alpha_v(3);
             alpha_v.at(1) = Smati.at(4,1);  // alpha_v(1:2) = S_mati(3,1:2)
             alpha_v.at(2) = Smati.at(4,2);
             alpha_v.at(3) = Smati.at(4,3);
-            
+
             status->letTempAlphavBe(alpha_v);
             status->letTempEffectiveMandelTractionBe(Qtemp);
             Qtemp.times(1-oldDamage-dAlpha);
@@ -353,7 +336,7 @@ IntMatBilinearCZFagerstromRate :: giveFirstPKTraction_3d(FloatArray &answer, Gau
     answer.beTProductOf(Finv,Qtemp);            // t_1_hat = MATMUL(TRANSPOSE(Fci),Q)
 //    answer.times(1-oldDamage-dAlpha);         // t1_s = (1-al)*t_1_hat
 
-        
+
     status->letTempDamageBe(oldDamage + dAlpha);
 //    status->letTempEffectiveMandelTractionBe(Qtemp);  // NEW!
 
@@ -367,8 +350,6 @@ const double tolerance = 1.0e-12; // small number
 IRResultType
 IntMatBilinearCZFagerstromRate :: initializeFrom(InputRecord *ir)
 {
-
-    //const char *__proc = "initializeFrom";  // Required by IR_GIVE_FIELD macro
     IRResultType result;                    // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, kn0, _IFT_IntMatBilinearCZFagerstrom_kn);

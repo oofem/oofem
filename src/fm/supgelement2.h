@@ -66,7 +66,6 @@ public:
     // characteristic  matrix
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType, TimeStep *tStep);
     virtual void giveCharacteristicVector(FloatArray &answer, CharType, ValueModeType, TimeStep *tStep);
-    virtual double giveCharacteristicValue(CharType, TimeStep *tStep);
     virtual void updateElementForNewInterfacePosition(TimeStep *tStep) { }
 
     virtual void computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *tStep);
@@ -85,6 +84,7 @@ public:
     virtual void computePressureTerm_MC(FloatMatrix &answer, TimeStep *tStep);
     virtual void computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep);
     virtual void computeBCRhsTerm_MC(FloatArray &answer, TimeStep *tStep);
+    virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
 
     virtual double computeCriticalTimeStep(TimeStep *tStep) = 0;
 

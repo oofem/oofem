@@ -84,6 +84,7 @@ public:
     void setDescription(const std :: string &description) { this->description = description; }
 
     virtual InputRecord *giveInputRecord(InputRecordType, int recordId);
+    virtual bool peakNext(const std :: string &keyword);
     virtual void finish();
     virtual const char *giveDataSourceName() const { return ""; }
 

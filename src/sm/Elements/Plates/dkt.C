@@ -141,8 +141,8 @@ DKTPlate :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
 // evaluated at gp.
 {
     // get node coordinates
-  double x1, x2, x3, y1, y2, y3, z1, z2, z3;
-  this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z1, z2, z3);
+    double x1, x2, x3, y1, y2, y3, z1, z2, z3;
+    this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z1, z2, z3);
 
 
     double ksi = gp->giveNaturalCoordinate(1);
@@ -349,7 +349,7 @@ DKTPlate :: giveNodeCoordinates(double &x1, double &x2, double &x3,
 IRResultType
 DKTPlate :: initializeFrom(InputRecord *ir)
 {
-    return this->NLStructuralElement :: initializeFrom(ir);
+    return NLStructuralElement :: initializeFrom(ir);
 }
 
 
@@ -448,8 +448,8 @@ DKTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
 //does check that the point is in the element thickness
 {
     // get node coordinates
-  double x1, x2, x3, y1, y2, y3, z1, z2, z3;
-  this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z1, z2, z3);
+    double x1, x2, x3, y1, y2, y3, z1, z2, z3;
+    this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z1, z2, z3);
 
     // Fetch local coordinates.
     bool ok = this->interp_lin.global2local( answer, coords, FEIElementGeometryWrapper(this) ) > 0;
@@ -487,55 +487,32 @@ int
 DKTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     FloatArray help;
-    answer.resize(9);
-    if ( ( type == IST_ShellForceTensor ) || ( type == IST_ShellMomentumTensor ) ) {
-        help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
-        this->computeShearForces(help, gp, tStep); // postprocess shear forces
+    answer.resize(6);
+    if ( type == IST_ShellForceTensor || type == IST_ShellStrainTensor ) {
         if ( type == IST_ShellForceTensor ) {
-            answer.at(1) = 0.0; // n_x
-            answer.at(2) = 0.0; // v_xy
-            answer.at(3) = help.at(4); // v_xz
-            answer.at(4) = 0.0; // v_yx
-            answer.at(5) = 0.0; // n_y
-            answer.at(6) = help.at(5); // v_yz
-            answer.at(7) = help.at(4); // v_zx
-            answer.at(8) = help.at(5); // v_zy
-            answer.at(9) = 0.0; // n_z
+            help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         } else {
-            answer.at(1) = help.at(1); // m_x
-            answer.at(2) = help.at(3); // m_xy
-            answer.at(3) = 0.0;      // m_xz
-            answer.at(4) = help.at(3); // m_xy
-            answer.at(5) = help.at(2); // m_y
-            answer.at(6) = 0.0;      // m_yz
-            answer.at(7) = 0.0;      // m_zx
-            answer.at(8) = 0.0;      // m_zy
-            answer.at(9) = 0.0;      // m_z
+            help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
         }
+        answer.at(1) = 0.0; // nx
+        answer.at(2) = 0.0; // ny
+        answer.at(3) = 0.0; // nz
+        answer.at(4) = help.at(5); // vyz
+        answer.at(5) = help.at(4); // vxz
+        answer.at(6) = 0.0; // vxy
         return 1;
-    } else if ( ( type == IST_ShellStrainTensor )  || ( type == IST_ShellCurvatureTensor ) ) {
-        help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
-        if ( type == IST_ShellStrainTensor ) {
-            answer.at(1) = 0.0; // n_x
-            answer.at(2) = 0.0; // v_xy
-            answer.at(3) = help.at(4); // v_xz
-            answer.at(4) = 0.0; // v_yx
-            answer.at(5) = 0.0; // n_y
-            answer.at(6) = help.at(5); // v_yz
-            answer.at(7) = help.at(4); // v_zx
-            answer.at(8) = help.at(5); // v_zy
-            answer.at(9) = 0.0; // n_z
+    } else if ( type == IST_ShellMomentumTensor || type == IST_ShellCurvatureTensor ) {
+        if ( type == IST_ShellMomentumTensor ) {
+            help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         } else {
-            answer.at(1) = help.at(1); // k_x
-            answer.at(2) = help.at(3); // k_xy
-            answer.at(3) = 0.0;      // k_xz
-            answer.at(4) = help.at(3); // k_xy
-            answer.at(5) = help.at(2); // k_y
-            answer.at(6) = 0.0;      // k_yz
-            answer.at(7) = 0.0;      // k_zx
-            answer.at(8) = 0.0;      // k_zy
-            answer.at(9) = 0.0;      // k_z
+            help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
         }
+        answer.at(1) = help.at(1); // mx
+        answer.at(2) = help.at(2); // my
+        answer.at(3) = 0.0;        // mz
+        answer.at(4) = 0.0;        // myz
+        answer.at(5) = 0.0;        // mxz
+        answer.at(6) = help.at(3); // mxy
         return 1;
     } else {
         return NLStructuralElement :: giveIPValue(answer, gp, type, tStep);
@@ -783,10 +760,8 @@ DKTPlate :: computeVertexBendingMoments(FloatMatrix &answer, TimeStep *tStep)
 
     // the results should be cached somehow, as computing on the fly is highly inefficient
     // due to multiple requests
-    FloatMatrix dndx;
     answer.resize(5, 3);
 
-    FloatMatrix b;
     FloatArray eps, m;
     FloatArray coords [ 3 ]; // vertex local coordinates
     coords [ 0 ] = {

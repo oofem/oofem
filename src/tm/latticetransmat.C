@@ -36,7 +36,7 @@
 #include "domain.h"
 #include "gausspoint.h"
 #include "latticetransportelement.h"
-#include "math.h"
+#include "mathfem.h"
 #include "staggeredproblem.h"
 #include "classfactory.h"
 #ifdef __SM_MODULE
@@ -50,8 +50,6 @@ IRResultType
 LatticeTransportMaterial :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    this->Material :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, this->viscosity, _IFT_LatticeTransportMaterial_vis);
 
@@ -103,15 +101,18 @@ LatticeTransportMaterial :: initializeFrom(InputRecord *ir)
     crackLimit = -1.;
     IR_GIVE_OPTIONAL_FIELD(ir, this->crackLimit, _IFT_LatticeTransportMaterial_clim);
 
-
-    return IRRT_OK;
+    return Material :: initializeFrom(ir);
 }
 
 
 void
 LatticeTransportMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep)
 {
-    ///@todo Is there anything meaningful to do here for lattice models?
+    LatticeTransportMaterialStatus *status = static_cast< LatticeTransportMaterialStatus * >( this->giveStatus(gp) );
+    status->setTempField(field);
+    double suction = field.at(1);
+    double c = this->computeConductivity(suction, gp, tStep);
+    answer.beScaled(-c, grad);
 }
 
 
@@ -159,7 +160,7 @@ LatticeTransportMaterial :: computeConductivity(double suction,
 
     this->density = this->give('d', gp);
 
-    double relativePermeability=0.;
+    double relativePermeability = 0.;
     double conductivity = 0.;
 
     double saturation, partOne, partTwo, numerator, denominator;
@@ -206,43 +207,40 @@ LatticeTransportMaterial :: computeConductivity(double suction,
         int couplingFlag = ( static_cast< LatticeTransportElement * >( gp->giveElement() ) )->giveCouplingFlag();
 
         if ( couplingFlag == 1 && coupledModels.at(1) != 0 && !tStep->isTheFirstStep() ) {
-	  IntArray couplingNumbers;
-	  
-	  static_cast< LatticeTransportElement * >( gp->giveElement())->giveCouplingNumbers(couplingNumbers);
-	    for(int i = 1; i <=crackLengths.giveSize();i++){
-	      if(couplingNumbers.at(i) != 0){
-		crackWidths.at(i) = static_cast< LatticeStructuralElement* >( domain->giveEngngModel()->giveMasterEngngModel()->giveSlaveProblem( coupledModels.at(1) )->giveDomain(1)->giveElement(couplingNumbers.at(i)))->giveCrackWidth();
-	      }
-	      else{
-		crackWidths.at(i) = 0.;
-	      }
-	    }	       	    
-	}
+            IntArray couplingNumbers;
+            
+            static_cast< LatticeTransportElement * >( gp->giveElement())->giveCouplingNumbers(couplingNumbers);
+            for (int i = 1; i <= crackLengths.giveSize(); i++) {
+                if ( couplingNumbers.at(i) != 0 ) {
+                    crackWidths.at(i) = static_cast< LatticeStructuralElement* >( domain->giveEngngModel()->giveMasterEngngModel()->giveSlaveProblem( coupledModels.at(1) )->giveDomain(1)->giveElement(couplingNumbers.at(i)))->giveCrackWidth();
+                } else {
+                    crackWidths.at(i) = 0.;
+                }
+            }
+        }
     }
 #endif
     
     //Read in crack widths from transport element
-    if (!domain->giveEngngModel()->giveMasterEngngModel()){
-      static_cast< LatticeTransportElement * >( gp->giveElement() )->giveCrackWidths(crackWidths);
+    if ( !domain->giveEngngModel()->giveMasterEngngModel() ) {
+        static_cast< LatticeTransportElement * >( gp->giveElement() )->giveCrackWidths(crackWidths);
     }
     
     //Use crack width and apply cubic law
     double crackContribution = 0.;
 
-    for(int i = 1; i <=crackLengths.giveSize();i++){
-      if(crackWidths.at(i)<this->crackLimit || this->crackLimit < 0.){
-	crackContribution += pow(crackWidths.at(i), 3.) / crackLengths.at(i) ;
-      }
-      else{
-	printf("Limit is activated\n");
-	crackContribution += pow(crackLimit, 3.) / crackLengths.at(i) ;
-      }
+    for (int i = 1; i <= crackLengths.giveSize(); i++) {
+        if ( crackWidths.at(i) < this->crackLimit || this->crackLimit < 0. ) {
+            crackContribution += pow(crackWidths.at(i), 3.) / crackLengths.at(i);
+        } else {
+            printf("Limit is activated\n");
+            crackContribution += pow(crackLimit, 3.) / crackLengths.at(i);
+        }
     }
 
     crackContribution *=  this->crackTortuosity * relativePermeability/ (12. * this->viscosity );
   
     conductivity += crackContribution;
-
     
     return this->density * conductivity;
 }
@@ -256,18 +254,17 @@ LatticeTransportMaterial :: computeCapacity(double suction, GaussPoint *gp)
 
     this->density = this->give('d', gp);
 
-    if(conType == 0){
-      cap = this->capacity;
-    }
-    else{
-      if ( suction < this->suctionAirEntry) {
-        cap = 0.;
-      } else {
-        double partOne = this->paramM / ( this->paramA * ( 1. - this->paramM ) );
-        double partTwo = pow( suction / this->paramA, this->paramM / ( 1. - this->paramM ) );
-        double partThree = pow(1. + pow( suction / this->paramA, 1. / ( 1. - this->paramM ) ), -this->paramM - 1.);
-        cap = ( this->thetaM - this->thetaR ) * partOne * partTwo * partThree;
-      }
+    if ( conType == 0 ) {
+        cap = this->capacity;
+    } else {
+        if ( suction < this->suctionAirEntry) {
+            cap = 0.;
+        } else {
+            double partOne = this->paramM / ( this->paramA * ( 1. - this->paramM ) );
+            double partTwo = pow( suction / this->paramA, this->paramM / ( 1. - this->paramM ) );
+            double partThree = pow(1. + pow( suction / this->paramA, 1. / ( 1. - this->paramM ) ), -this->paramM - 1.);
+            cap = ( this->thetaM - this->thetaR ) * partOne * partTwo * partThree;
+        }
     }
 
     return this->density * cap;
@@ -277,8 +274,7 @@ LatticeTransportMaterial :: computeCapacity(double suction, GaussPoint *gp)
 MaterialStatus *
 LatticeTransportMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    LatticeTransportMaterialStatus *answer = new LatticeTransportMaterialStatus(1, LatticeTransportMaterial :: domain, gp);
-    return answer;
+    return new LatticeTransportMaterialStatus(1, LatticeTransportMaterial :: domain, gp);
 }
 
 
@@ -289,8 +285,8 @@ LatticeTransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tStep)
 
     fprintf(File, "  state");
 
-    for ( int i = 1; i <= field.giveSize(); i++ ) {
-        fprintf( File, " % .4e", field.at(i) );
+    for ( auto &val : field ) {
+        fprintf( File, " %.4e", val );
     }
 
     fprintf(File, "  mass %.8e", mass);

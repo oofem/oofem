@@ -41,6 +41,7 @@
 #include "transportelement.h"
 #include "classfactory.h"
 #include "mathfem.h"
+#include "assemblercallback.h"
 #include "unknownnumberingscheme.h"
 
 namespace oofem {
@@ -61,7 +62,9 @@ NLTransientTransportProblem :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-    NonStationaryTransportProblem :: initializeFrom(ir);
+    result = NonStationaryTransportProblem :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
+
     int val = 30;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_NLTransientTransportProblem_nsmax);
     nsmax = val;
@@ -106,12 +109,9 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
 #endif
     //Delete lhs matrix and create a new one. This is necessary due to growing/decreasing number of equations.
     if ( tStep->isTheFirstStep() || this->changingProblemSize ) {
-        if ( conductivityMatrix ) {
-            delete conductivityMatrix;
-        }
 
-        conductivityMatrix = classFactory.createSparseMtrx(sparseMtrxType);
-        if ( conductivityMatrix == NULL ) {
+        conductivityMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+        if ( !conductivityMatrix ) {
             OOFEM_ERROR("sparse matrix creation failed");
         }
 
@@ -171,24 +171,22 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
         if ( ( nite == 1 ) || ( NR_Mode == nrsolverFullNRM ) || ( ( NR_Mode == nrsolverAccelNRM ) && ( nite % MANRMSteps == 0 ) ) ) {
             conductivityMatrix->zero();
             //Assembling left hand side - start with conductivity matrix
-            this->assemble( *conductivityMatrix, & TauStep, IntSourceLHSMatrix,
+            this->assemble( *conductivityMatrix, & TauStep, IntSourceLHSAssembler(),
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
             conductivityMatrix->times(alpha);
             //Add capacity matrix
-            this->assemble( *conductivityMatrix, & TauStep, NSTP_MidpointLhs,
+            this->assemble( *conductivityMatrix, & TauStep, MidpointLhsAssembler(lumpedCapacityStab, alpha),
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
 
         rhs.resize(neq);
         rhs.zero();
         //edge or surface load on element
-        this->assembleVectorFromElements( rhs, & TauStep, ElementBCTransportVector, VM_Total,
-                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //add internal source vector on elements
-        this->assembleVectorFromElements( rhs, & TauStep, ElementInternalSourceVector, VM_Total,
+        this->assembleVectorFromElements( rhs, & TauStep, TransportExternalForceAssembler(), VM_Total,
                                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //add nodal load
-        this->assembleVectorFromDofManagers( rhs, & TauStep, ExternalForcesVector, VM_Total,
+        this->assembleVectorFromDofManagers( rhs, & TauStep, ExternalForceAssembler(), VM_Total,
                                             EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
         // subtract the rhs part depending on previous solution
@@ -215,6 +213,8 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
         tStep->incrementStateCounter();
 
         OOFEM_LOG_INFO("%-15e %-10d %-15e %-15e\n", tStep->giveTargetTime(), nite, solutionErr, incrementErr);
+
+        currentIterations = nite;
 
         if ( nite >= nsmax ) {
             OOFEM_ERROR("convergence not reached after %d iterations", nsmax);
@@ -309,7 +309,13 @@ void
 NLTransientTransportProblem :: updateYourself(TimeStep *tStep)
 {
     //this->updateInternalState(tStep);
+    //Set intrinsic time for a staggered problem here. This is important for materials such as hydratingconcretemat, who keep history of intrinsic times.
+    double intrinsicTime = tStep->giveIntrinsicTime();
+    double Tau = tStep->giveTargetTime() - ( 1. - alpha ) * tStep->giveTimeIncrement();
+    tStep->setIntrinsicTime(Tau);
     NonStationaryTransportProblem :: updateYourself(tStep);
+    //return back to original intrinsic time
+    tStep->setIntrinsicTime(intrinsicTime);
 }
 
 int
@@ -346,20 +352,6 @@ NLTransientTransportProblem :: updateDofUnknownsDictionary(DofManager *inode, Ti
 
         //update temperature, which is present in every node
         dof->updateUnknownsDictionary(tStep, VM_Total, val);
-    }
-}
-
-
-void
-NLTransientTransportProblem :: copyUnknownsInDictionary(ValueModeType mode, TimeStep *fromTime, TimeStep *toTime)
-{
-    Domain *domain = this->giveDomain(1);
-
-    for ( auto &node : domain->giveDofManagers() ) {
-        for ( Dof *dof: *node ) {
-            double val = dof->giveUnknown(mode, fromTime);
-            dof->updateUnknownsDictionary(toTime, mode, val);
-        }
     }
 }
 

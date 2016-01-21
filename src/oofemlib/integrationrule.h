@@ -189,11 +189,6 @@ public:
      * Calls updateYourself service of all receiver's integration points.
      */
     void updateYourself(TimeStep *tStep);
-    /**
-     * Initializes receiver.
-     * Calls initForNewStep service of all receiver's integration points.
-     */
-    void initForNewStep();
 
     /** Returns reference to element containing receiver */
     Element *giveElement() { return elem; }

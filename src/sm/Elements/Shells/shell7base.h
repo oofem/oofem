@@ -138,7 +138,6 @@ protected:
     virtual void setupInitialNodeDirectors();
     void evalInitialDirectorAt(const FloatArray &lCoords, FloatArray &answer);
 
-    void computeInitialGeneralizedStrainVector(FloatArray &lcoords, FloatArray &genStrain);
 
 
     void evalInitialContravarBaseVectorsAt(const FloatArray &lCoords, FloatMatrix &Gcon);
@@ -258,7 +257,7 @@ protected:
 
 
     // N and B matrices
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS){};
+    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS) { answer.clear(); }
 
     virtual void computeBmatrixAt(const FloatArray &lCoords, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS);
     virtual void computeNmatrixAt(const FloatArray &iLocCoords, FloatMatrix &answer);
@@ -267,7 +266,7 @@ protected:
     virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep)
     {
         OOFEM_ERROR("ComputeStrainVectorInLayer - Should not be called! Not meaningful for this element.");
-    };
+    }
     virtual void edgeComputeBmatrixAt(const FloatArray &lCoords, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS);
 
     FloatArray convV6ToV9Stress(const FloatArray &V6);

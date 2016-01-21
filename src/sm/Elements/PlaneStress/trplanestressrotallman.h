@@ -37,7 +37,7 @@
 
 #include "../sm/Elements/PlaneStress/trplanstrss.h"
 
-///@name Input fields for TrPlaneStrRot
+///@name Input fields for TrPlaneStrRotAllman
 //@{
 #define _IFT_TrPlanestressRotAllman_Name "trplanestressrotallman"
 //@}

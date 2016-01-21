@@ -66,9 +66,7 @@ MetaStep :: initializeFrom(InputRecord *ir)
 
     delete attributes;
     this->attributes = ir->GiveCopy();
-    /*
-     * this->readQuotedString (initString, "attributes", this->attributes, MetaStepAttrRecLenght);
-     */
+
     return IRRT_OK;
 }
 

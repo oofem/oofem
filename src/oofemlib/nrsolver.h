@@ -65,6 +65,7 @@
 #define _IFT_NRSolver_calcstiffbeforeres "calcstiffbeforeres"
 #define _IFT_NRSolver_constrainedNRalpha "constrainednralpha"
 #define _IFT_NRSolver_constrainedNRminiter "constrainednrminiter"
+#define _IFT_NRSolver_maxinc "maxinc"
 //@}
 
 namespace oofem {
@@ -149,12 +150,15 @@ protected:
     ///@todo This doesn't check units, it is nonsense and must be corrected / Mikael
     FloatArray forceErrVec;
     FloatArray forceErrVecOld;
+
+
+    double maxIncAllowed;
 public:
     NRSolver(Domain * d, EngngModel * m);
     virtual ~NRSolver();
 
     // Overloaded methods:
-    virtual NM_Status solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
+    virtual NM_Status solve(SparseMtrx &k, FloatArray &R, FloatArray *R0, FloatArray *iR,
                             FloatArray &X, FloatArray &dX, FloatArray &F,
                             const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                             int &nite, TimeStep *);

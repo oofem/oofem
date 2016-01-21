@@ -46,15 +46,12 @@ HyperElasticMaterial :: HyperElasticMaterial(int n, Domain *d) : StructuralMater
 
 void
 HyperElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep)
-
-// returns the 6x6 tangent stiffness matrix - dS/dE
-
 {
     double J2, c11, c22, c33, c12, c13, c23, A, B;
     FloatMatrix C(3, 3);
-    FloatMatrix invC(3, 3);
+    FloatMatrix invC;
 
-    HyperElasticMaterialStatus *status = static_cast< HyperElasticMaterialStatus * >( this->giveStatus(gp) );
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
     C.at(1, 1) = 1. + 2. * status->giveTempStrainVector().at(1);
     C.at(2, 2) = 1. + 2. * status->giveTempStrainVector().at(2);
@@ -104,17 +101,14 @@ HyperElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRe
 
 void
 HyperElasticMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep)
-
-// returns 6 components of the stress corresponding to the given total strain
-
 {
     double J2;
     FloatMatrix C(3, 3);
-    FloatMatrix invC(3, 3);
+    FloatMatrix invC;
     FloatArray strainVector;
 
-    HyperElasticMaterialStatus *status = static_cast< HyperElasticMaterialStatus * >( this->giveStatus(gp) );
-    this->giveStressDependentPartOfStrainVector(strainVector, gp,
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+    this->giveStressDependentPartOfStrainVector_3d(strainVector, gp,
                                                 totalStrain,
                                                 tStep, VM_Total);
 
@@ -145,10 +139,7 @@ HyperElasticMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *
 MaterialStatus *
 HyperElasticMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    StructuralMaterialStatus *status;
-
-    status = new StructuralMaterialStatus(1, this->giveDomain(), gp);
-    return status;
+    return new StructuralMaterialStatus(1, this->giveDomain(), gp);
 }
 
 
@@ -157,50 +148,10 @@ HyperElasticMaterial :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-
-    StructuralMaterial :: initializeFrom(ir);
-
-    // Read material properties here
-
     IR_GIVE_FIELD(ir, K, _IFT_HyperElasticMaterial_k);
     IR_GIVE_FIELD(ir, G, _IFT_HyperElasticMaterial_g);
 
-    return IRRT_OK;
+    return StructuralMaterial :: initializeFrom(ir);
 }
 
-
-HyperElasticMaterialStatus :: HyperElasticMaterialStatus(int n, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g)
-{
-    // init state variables
-}
-
-
-HyperElasticMaterialStatus :: ~HyperElasticMaterialStatus()
-{ }
-
-
-void
-HyperElasticMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
-{
-    // print state to output stream
-
-    StructuralMaterialStatus :: printOutputAt(file, tStep);
-    fprintf(file, "status { ");
-    fprintf(file, "}\n");
-}
-
-// initialize temporary state variables according to equilibrated state vars
-void
-HyperElasticMaterialStatus :: initTempStatus()
-{
-    StructuralMaterialStatus :: initTempStatus();
-}
-
-
-// Called when equilibrium reached, set equilibrated vars according to temporary (working) ones.
-void
-HyperElasticMaterialStatus :: updateYourself(TimeStep *tStep)
-{
-    StructuralMaterialStatus :: updateYourself(tStep);
-}
 } // end namespace oofem

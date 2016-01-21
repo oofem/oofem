@@ -34,7 +34,6 @@
 
 #include "tr1_ht.h"
 #include "fei2dtrlin.h"
-#include "node.h"
 #include "crosssection.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
@@ -87,16 +86,8 @@ Tr1_ht :: computeGaussPoints()
 IRResultType
 Tr1_ht :: initializeFrom(InputRecord *ir)
 {
-    //const char *__keyword, *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    //IRResultType result;                               // Required by IR_GIVE_FIELD macro
-
     numberOfGaussPoints = 1;
-    this->TransportElement :: initializeFrom(ir);
-
-    //IR_GIVE_OPTIONAL_FIELD (ir, numberOfGaussPoints, _IFT_Element_nip);
-    //if ( numberOfGaussPoints != 1) numberOfGaussPoints = 1;
-
-    return IRRT_OK;
+    return TransportElement :: initializeFrom(ir);
 }
 
 

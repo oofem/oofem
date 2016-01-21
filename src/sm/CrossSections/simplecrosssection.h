@@ -54,6 +54,9 @@
 #define _IFT_SimpleCrossSection_shearareaz "shearareaz" ///< Shear area z direction
 #define _IFT_SimpleCrossSection_drillStiffness "drillstiffness" ///< Penalty term for drilling stiffness.
 #define _IFT_SimpleCrossSection_MaterialNumber "material" ///< Material number for the bulk material
+#define _IFT_SimpleCrossSection_directorx "directorx"
+#define _IFT_SimpleCrossSection_directory "directory"
+#define _IFT_SimpleCrossSection_directorz "directorz"
 //@}
 
 namespace oofem {
@@ -86,12 +89,13 @@ public:
      * @param n Cross section number.
      * @param d Associated domain.
      */
-    SimpleCrossSection(int n, Domain * d) : StructuralCrossSection(n, d) {
+    SimpleCrossSection(int n, Domain *d) : StructuralCrossSection(n, d) {
         materialNumber = 0;
         czMaterialNumber = 0;
     }
 
     virtual void giveRealStress_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
+    virtual void giveRealStress_3dDegeneratedShell(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
     virtual void giveRealStress_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
     virtual void giveRealStress_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
     virtual void giveRealStress_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
@@ -115,6 +119,7 @@ public:
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode mode);
 
 
+    virtual void give3dDegeneratedShellStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     virtual void give2dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void give2dPlateStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
@@ -151,8 +156,8 @@ public:
     virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep);
     virtual Material *giveMaterial(IntegrationPoint *ip);
 
-    int giveMaterialNumber() const { return this->materialNumber; };
-    void setMaterialNumber(int matNum) { this->materialNumber = matNum; };
+    int giveMaterialNumber() const { return this->materialNumber; }
+    void setMaterialNumber(int matNum) { this->materialNumber = matNum; }
     virtual int checkConsistency();
     virtual Interface *giveMaterialInterface(InterfaceType t, IntegrationPoint *ip);
 

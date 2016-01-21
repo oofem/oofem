@@ -99,8 +99,7 @@ public:
     virtual const char *giveClassName() const { return "DEIDynamic"; }
     virtual const char *giveInputRecordName() const { return _IFT_DEIDynamic_Name; }
     virtual fMode giveFormulation() { return TL; }
-    virtual int giveNumberOfFirstStep() { return 0; }
-    virtual int giveNumberOfTimeStepWhenIcApply() { return 0; }
+    virtual int giveNumberOfFirstStep(bool force = false) { return 0; }
 };
 } // end namespace oofem
 #endif // deidynamic_h

@@ -32,8 +32,6 @@
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#if 1
-
 
 #ifndef phasefieldelement_h
 #define phasefieldelement_h
@@ -53,7 +51,7 @@ public:
     PhaseFieldElement( int i, Domain *aDomain );
     virtual ~PhaseFieldElement() {}
 
-    virtual Element *giveElement( ) = 0;
+    virtual NLStructuralElement *giveElement( ) = 0;
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveDofManDofIDMask_u(IntArray &answer) = 0;
@@ -62,21 +60,17 @@ public:
     virtual const char *giveClassName() const { return "PhaseFieldElement"; }
 
     int computeNumberOfDofs();
-    virtual void computeLocationArrayOfDofIDs( const IntArray &dofIdArray, IntArray &answer );
+    void computeLocationArrayOfDofIDs(const IntArray &dofIdArray, IntArray &answer);
 
     double computeFreeEnergy( GaussPoint *gp, TimeStep *tStep );
 
     ///@todo move these to a cross section model later
     double internalLength;
-    double giveInternalLength( ) { return internalLength; };
+    double giveInternalLength( ) { return internalLength; }
     double criticalEnergy;
-    double giveCriticalEnergy() { return criticalEnergy; };
+    double giveCriticalEnergy() { return criticalEnergy; }
     double relaxationTime;
-    double giveRelaxationTime( ) { return relaxationTime; };
-    double penaltyParameter;
-    double givePenaltyParameter() { return penaltyParameter; };
-    double psiBar0;
-    double givePsiBar0() { return psiBar0; };
+    double giveRelaxationTime( ) { return relaxationTime; }
 
 protected:
 
@@ -90,7 +84,7 @@ protected:
     
     double computeG(GaussPoint *gp, ValueModeType valueMode, TimeStep *stepN);
     double computeGPrim(GaussPoint *gp, ValueModeType valueMode, TimeStep *stepN);
-    virtual double computeDamageAt(GaussPoint *gp, ValueModeType valueMode, TimeStep *stepN);
+    double computeDamageAt(GaussPoint *gp, ValueModeType valueMode, TimeStep *stepN);
 
     void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
     void giveInternalForcesVector_u(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
@@ -108,5 +102,4 @@ protected:
 };
 } // end namespace oofem
 
-#endif
 #endif

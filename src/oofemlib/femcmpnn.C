@@ -39,7 +39,6 @@
  */
 
 #include "femcmpnn.h"
-#include "error.h"
 #include "datastream.h"
 #include "contextioerr.h"
 #include "dynamicinputrecord.h"
@@ -85,6 +84,16 @@ std :: string
 FEMComponent :: errorInfo(const char *func) const
 {
     return std :: string(this->giveClassName()) + "::" + func + ", number: " + std::to_string(this->giveNumber());
+}
+
+IRResultType FEMComponent :: initializeFrom(InputRecord* ir)
+{
+    return IRRT_OK;
+}
+
+int FEMComponent :: checkConsistency()
+{
+    return 1;
 }
 
 } // end namespace oofem

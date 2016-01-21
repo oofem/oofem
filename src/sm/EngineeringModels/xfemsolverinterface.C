@@ -71,28 +71,33 @@ void XfemSolverInterface::propagateXfemInterfaces(TimeStep *tStep, StructuralEng
 
     if(domain->hasXfemManager()) {
         XfemManager *xMan = domain->giveXfemManager();
+        bool frontsHavePropagated = false;
 
         if( xMan->hasPropagatingFronts() ) {
             // Propagate crack tips
-            bool frontsHavePropagated = false;
             xMan->propagateFronts(frontsHavePropagated);
 
-            if(frontsHavePropagated) {
-                mNeedsVariableMapping = true;
-
-                mapVariables(tStep, ioEngngModel);
-
-                if(iRecomputeStepAfterCrackProp) {
-                    printf("Recomputing time step.\n");
-                    ioEngngModel.forceEquationNumbering();
-                    ioEngngModel.solveYourselfAt(tStep);
-                    ioEngngModel.updateYourself( tStep );
-                    ioEngngModel.terminate( tStep );
-
-                }
-            }
         }
 
+        bool eiWereNucleated = false;
+        if( xMan->hasNucleationCriteria() ) {
+        	xMan->nucleateEnrichmentItems(eiWereNucleated);
+       }
+
+        if(frontsHavePropagated || eiWereNucleated) {
+            mNeedsVariableMapping = true;
+
+            mapVariables(tStep, ioEngngModel);
+
+            if(iRecomputeStepAfterCrackProp) {
+                printf("Recomputing time step.\n");
+                ioEngngModel.forceEquationNumbering();
+                ioEngngModel.solveYourselfAt(tStep);
+                ioEngngModel.updateYourself( tStep );
+                ioEngngModel.terminate( tStep );
+
+            }
+        }
     }
 
 }

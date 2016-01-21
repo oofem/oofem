@@ -115,33 +115,22 @@ public:
     /// Destructor
     virtual ~IntMatBilinearCZElastic();
 
-    virtual int hasNonLinearBehaviour()   { return 1; }
+    virtual int hasNonLinearBehaviour() { return 1; }
 
-    virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "IntMatBilinearCZElastic"; }
     virtual const char *giveInputRecordName() const { return _IFT_IntMatBilinearCZElastic_Name; }
 
-
-    //virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-    //                          const FloatArray &reducedStrain, TimeStep *tStep);
     virtual void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jumpVector,
                                         const FloatMatrix &F, TimeStep *tStep);
-
-    //virtual void giveStiffnessMatrix(FloatMatrix &answer,
-    //                                      MatResponseMode mode,
-    //                                      GaussPoint *gp,
-    //                                      TimeStep *tStep);
 
     virtual void give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new IntMatBilinearCZElasticStatus(1, domain, gp); }
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new StructuralInterfaceMaterialStatus(1, domain, gp); }
     void printYourself();
-    virtual bool hasAnalyticalTangentStiffness() const { return true; };
-
-protected:
+    virtual bool hasAnalyticalTangentStiffness() const { return true; }
 };
 } // end namespace oofem
 #endif // isointerfacedamage01_h

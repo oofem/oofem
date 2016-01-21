@@ -84,7 +84,6 @@ RCSDMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     RCSDMaterialStatus *status = static_cast< RCSDMaterialStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
-    //this->initGpForNewStep(gp);
 
     // subtract stress independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
@@ -200,7 +199,6 @@ RCSDMaterial :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
 
         if ( ( rMode == TangentStiffness ) || ( rMode == SecantStiffness ) ) {
             FloatMatrix reducedAnswer;
-            IntArray mask;
             double dCoeff;
 
             reducedAnswer = * status->giveDs0Matrix();
@@ -389,7 +387,7 @@ RCSDMaterial :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
     Ft = this->give(pscm_Ft, gp);
     Le = status->giveCharLength(i);
 
-    Ft = this->computeStrength(gp, Le);
+    Ft = this->computeStrength(gp, Le); ///@todo This overwrites the previous (untouched) value of Ft above. Is this right?
     minEffStrainForFullyOpenCrack = this->giveMinCrackStrainsForFullyOpenCrack(gp, i);
 
     if ( rMode == TangentStiffness ) {

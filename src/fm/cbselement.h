@@ -70,7 +70,6 @@ public:
 
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
-    virtual double giveCharacteristicValue(CharType type, TimeStep *tStep);
 
     /** Calculates consistent mass matrix. */
     virtual void computeConsistentMassMtrx(FloatMatrix &answer, TimeStep *tStep) = 0;

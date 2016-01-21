@@ -81,7 +81,6 @@ RCSDNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, Gaus
     RCSDNLMaterialStatus *status = static_cast< RCSDNLMaterialStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
-    //this->initGpForNewStep(gp);
 
     status->setLocalStrainVectorForAverage(strainVector);
 }
@@ -109,7 +108,6 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     FloatArray reducedLocalStrainVector, localStrain;
 
     this->initTempStatus(gp);
-    //this->initGpForNewStep(gp);
     this->buildNonlocalPointTable(gp);
     this->updateDomainBeforeNonlocAverage(tStep);
 
@@ -354,10 +352,13 @@ RCSDNLMaterial :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     //RCSDEMaterial::instanciateFrom (ir);
-    this->giveLinearElasticMaterial()->initializeFrom(ir);
-    IR_GIVE_FIELD(ir, Ft, _IFT_RCSDNLMaterial_ft);
-    StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
+    result = this->giveLinearElasticMaterial()->initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;    
 
+    result = StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
+
+    IR_GIVE_FIELD(ir, Ft, _IFT_RCSDNLMaterial_ft);
     IR_GIVE_FIELD(ir, SDTransitionCoeff, _IFT_RCSDNLMaterial_sdtransitioncoeff);
     IR_GIVE_FIELD(ir, SDTransitionCoeff2, _IFT_RCSDNLMaterial_sdtransitioncoeff2);
     if ( SDTransitionCoeff2 > 1.0 ) {
@@ -380,7 +381,8 @@ RCSDNLMaterial :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, this->Gf, _IFT_RCSDNLMaterial_gf);
         this->ef = this->Gf / this->Ft;
     } else {
-        OOFEM_ERROR("cannot determine Gf and ef from input data");
+        OOFEM_WARNING("cannot determine Gf and ef from input data");
+        return IRRT_BAD_FORMAT;
     }
 
     return IRRT_OK;
@@ -458,8 +460,8 @@ RCSDNLMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     fprintf(file, "nonlocstatus { ");
     fprintf(file, "  nonloc strains ");
     StructuralMaterial :: giveFullSymVectorForm( helpVec, nonlocalStrainVector, gp->giveMaterialMode() );
-    for ( int i = 1; i <= helpVec.giveSize(); i++ ) {
-        fprintf( file, " % .4e", helpVec.at(i) );
+    for ( auto &val : helpVec ) {
+        fprintf( file, " %.4e", val );
     }
 
     fprintf(file, "}\n");
@@ -565,7 +567,7 @@ RCSDNLMaterial :: packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip
     this->buildNonlocalPointTable(ip);
     this->updateDomainBeforeNonlocAverage(tStep);
 
-    return status->giveLocalStrainVectorForAverage().storeYourself(buff);
+    return (status->giveLocalStrainVectorForAverage().storeYourself(buff) == CIO_OK);
 }
 
 int
@@ -575,7 +577,7 @@ RCSDNLMaterial :: unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, Gau
     RCSDNLMaterialStatus *status = static_cast< RCSDNLMaterialStatus * >( this->giveStatus(ip) );
     FloatArray localStrainVectorForAverage;
 
-    result = localStrainVectorForAverage.restoreYourself(buff);
+    result = (localStrainVectorForAverage.restoreYourself(buff) == CIO_OK);
     status->setLocalStrainVectorForAverage(localStrainVectorForAverage);
     return result;
 }

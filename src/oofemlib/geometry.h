@@ -98,6 +98,10 @@ public:
     /// Computes normal signed distance between this object and a point.
     virtual double computeDistanceTo(const FloatArray *point) { return 0; }
 
+
+    // For debugging
+    virtual void printVTK(int iTStepIndex, int iIndex) {};
+
     /// Functions for computing signed distance in normal and tangential direction.
     /// Used by XFEM level set functions.
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const = 0;
@@ -191,7 +195,7 @@ public:
     virtual double computeDistanceTo(const FloatArray *point);
     /// Computes tangential distance to a point
 
-    virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("not implemented"); };
+    virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("not implemented"); }
 
     double computeTangentialDistanceToEnd(FloatArray *point);
 
@@ -219,8 +223,8 @@ public:
 
     virtual BasicGeometry *Clone() { return new Triangle(*this); }
 
-    virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("not implemented"); };
-    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { OOFEM_ERROR("not implemented"); };
+    virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("not implemented"); }
+    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { OOFEM_ERROR("not implemented"); }
 
     double getArea();
     void computeBarycentrCoor(FloatArray &answer) const;
@@ -260,7 +264,7 @@ public:
 
     // Irrelevant for a closed interface: we can always consider ourselves to be "inside" a closed interface in
     // tangential direction. Therefore, we may return any positive number.
-    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { oDist = mTangSignDist; };
+    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { oDist = mTangSignDist; }
 
     virtual void giveGlobalCoordinates(FloatArray &oGlobalCoord, const double &iArcPos) const;
 
@@ -361,8 +365,8 @@ public:
 
     virtual BasicGeometry *Clone() { return new PointSwarm(*this); }
 
-    virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("not implemented"); };
-    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { OOFEM_ERROR("not implemented"); };
+    virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("not implemented"); }
+    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { OOFEM_ERROR("not implemented"); }
 
     /// Computes the normal distance to the surface not to the center.
     // virtual double computeDistanceTo(FloatArray *point);

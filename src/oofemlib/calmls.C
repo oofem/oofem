@@ -78,7 +78,6 @@ CylindricalALM :: CylindricalALM(Domain *d, EngngModel *m) :
 
     // Variables for Hyper Plane Control
     calm_Control = calm_hpc_off; // HPControl is not default
-    linSolver = NULL;
     // linesearch default off
     lsFlag = 0;
 
@@ -107,7 +106,7 @@ CylindricalALM :: ~CylindricalALM()
 
 
 NM_Status
-CylindricalALM :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
+CylindricalALM :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0, FloatArray *iR,
                         FloatArray &X, FloatArray &dX, FloatArray &F,
                         const FloatArray &internalForcesEBENorm, double &ReachedLambda, referenceLoadInputModeType rlm,
                         int &nite, TimeStep *tStep)
@@ -680,16 +679,12 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
     double oldPsi =  Psi; // default from constructor
     double initialStepLength, forcedInitialStepLength;
     int hpcMode;
-    IRResultType val;
 
     IR_GIVE_OPTIONAL_FIELD(ir, Psi, _IFT_CylindricalALM_psi);
     if ( Psi < 0. ) {
         Psi = oldPsi;
     }
 
-    // double oldTangenStiffnessTreshold = TangenStiffnessTreshold;
-    // TangenStiffnessTreshold = readDouble (initString,"tstiffnesstreshold");
-    // if (TangenStiffnessTreshold < 0.01) TangenStiffnessTreshold  = oldTangenStiffnessTreshold;
     nsmax = 30;
     IR_GIVE_OPTIONAL_FIELD(ir, nsmax, _IFT_CylindricalALM_maxiter);
     if ( nsmax < 30 ) {
@@ -730,8 +725,8 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
         numberOfRequiredIterations = 1000;
     }
 
-    val = IR_GIVE_OPTIONAL_FIELD(ir, minIterations, _IFT_CylindricalALM_miniterations);
-    if ( val == IRRT_OK ) {
+    IR_GIVE_OPTIONAL_FIELD(ir, minIterations, _IFT_CylindricalALM_miniterations);
+    if ( result == IRRT_OK ) {
         if ( minIterations > 3 && minIterations < 1000 ) {
             numberOfRequiredIterations = minIterations;
         }
@@ -768,7 +763,7 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
     // solveYourselfAt() subroutine. The need for converting is indicated by
     // calm_HPControl = hpc_init
     if ( calm_HPCDmanDofSrcArray.giveSize() != 0 ) {
-        int i, nsize;
+        int nsize;
         if ( hpcMode == 1 ) {
             calm_Control = calm_hpc_on;
         } else if ( hpcMode == 2 ) {
@@ -785,7 +780,7 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
         if ( calm_HPCWeights.giveSize() == 0 ) {
             // no weights -> set to 1.0 by default
             calm_HPCWeights.resize(nsize);
-            for ( i = 1; i <= nsize; i++ ) {
+            for ( int i = 1; i <= nsize; i++ ) {
                 calm_HPCWeights.at(i) = 1.0;
             }
         } else if ( nsize != calm_HPCWeights.giveSize() ) {
@@ -881,7 +876,6 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
     }
 
     this->giveLinearSolver()->initializeFrom(ir);
-    //refLoadInputMode = (calm_referenceLoadInputModeType) readInteger  (initString, "refloadmode");
 
     SparseNonLinearSystemNM :: initializeFrom(ir);
 

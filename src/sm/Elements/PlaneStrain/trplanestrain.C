@@ -57,7 +57,7 @@ FEI2dTrLin TrPlaneStrain :: interp(1, 2);
 TrPlaneStrain :: TrPlaneStrain(int n, Domain *aDomain) :
     PlaneStrainElement(n, aDomain), ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface(),
     SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(this),
-    EIPrimaryUnknownMapperInterface(), ZZErrorEstimatorInterface(this),
+    ZZErrorEstimatorInterface(this),
     HuertaErrorEstimatorInterface()
     // Constructor.
 {
@@ -81,8 +81,6 @@ TrPlaneStrain :: giveInterface(InterfaceType interface)
         return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
         return static_cast< SpatialLocalizerInterface * >(this);
-    } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
         return static_cast< ZZErrorEstimatorInterface * >(this);
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
@@ -97,7 +95,7 @@ IRResultType
 TrPlaneStrain :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 1;
-    IRResultType result = this->StructuralElement :: initializeFrom(ir);
+    IRResultType result = PlaneStrainElement :: initializeFrom(ir);
     if ( result != IRRT_OK ) {
         return result;
     }
@@ -156,19 +154,6 @@ SPRPatchType
 TrPlaneStrain :: SPRNodalRecoveryMI_givePatchType()
 {
     return SPRPatchType_2dxy;
-}
-
-
-void
-TrPlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-                                                                  TimeStep *tStep, const FloatArray &lcoords,
-                                                                  FloatArray &answer)
-{
-    FloatArray u;
-    FloatMatrix n;
-    this->computeNmatrixAt(lcoords, n);
-    this->computeVectorOf(mode, tStep, u);
-    answer.beProductOf(n, u);
 }
 
 

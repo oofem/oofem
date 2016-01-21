@@ -46,6 +46,7 @@
 #include "mathfem.h"
 #include "engngm.h"
 #include "fluiddynamicmaterial.h"
+#include "fluidcrosssection.h"
 #include "load.h"
 #include "timestep.h"
 #include "boundaryload.h"
@@ -103,11 +104,7 @@ TR1_2D_CBS :: initializeFrom(InputRecord *ir)
 {
     //<RESTRICTED_SECTION>
     IRResultType result;                // Required by IR_GIVE_FIELD macro
-    //</RESTRICTED_SECTION>
 
-    CBSElement :: initializeFrom(ir);
-
-    //<RESTRICTED_SECTION>
     this->vof = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, vof, _IFT_Tr1CBS_pvof);
     if ( vof > 0.0 ) {
@@ -121,7 +118,7 @@ TR1_2D_CBS :: initializeFrom(InputRecord *ir)
 
     //</RESTRICTED_SECTION>
 
-    return IRRT_OK;
+    return CBSElement :: initializeFrom(ir);
 }
 
 
@@ -153,7 +150,7 @@ TR1_2D_CBS :: computeConsistentMassMtrx(FloatMatrix &answer, TimeStep *tStep)
 {
     answer.resize(9, 9);
     answer.zero();
-    double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+    double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
 
     double ar6 = rho * area / 6.0;
     double ar12 = rho * area / 12.0;
@@ -178,7 +175,7 @@ TR1_2D_CBS :: computeDiagonalMassMtrx(FloatArray &answer, TimeStep *tStep)
     answer.resize(9);
     answer.zero();
 
-    double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+    double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     double mm = rho * this->area / 3.0;
     for ( int i = 0; i < 3; i++ ) {
         answer.at(i * 3 + 1) = mm;
@@ -196,8 +193,8 @@ TR1_2D_CBS :: computeConvectionTermsI(FloatArray &answer, TimeStep *tStep)
     double adu11, adu21, adu31, adv11, adv21, adv31;
     double adu12, adu22, adu32, adv12, adv22, adv32;
     double dt = tStep->giveTimeIncrement();
-    //double rho = this->giveMaterial()->give('d');
-    double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+    //double rho =static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity(gp);
+    double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     int nLoads;
     bcGeomType ltype;
     Load *load;
@@ -277,11 +274,9 @@ void
 TR1_2D_CBS :: computeDiffusionTermsI(FloatArray &answer, TimeStep *tStep)
 {
     FloatArray stress;
-    FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
     double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
-    double coeff, rho = mat->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    bcGeomType ltype;
+    double coeff, rho = static_cast< FluidCrossSection* >(this->giveCrossSection())->giveDensity( gp );
     FloatArray gVector;
     double ar3 = area / 3.0;
 
@@ -302,8 +297,8 @@ TR1_2D_CBS :: computeDiffusionTermsI(FloatArray &answer, TimeStep *tStep)
     int nLoads = this->giveBodyLoadArray()->giveSize();
     for ( int i = 1; i <= nLoads; i++ ) {
         auto load = domain->giveLoad( bodyLoadArray.at(i) );
-        ltype = load->giveBCGeoType();
-        if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ForceLoadBVT ) ) {
+        bcGeomType ltype = load->giveBCGeoType();
+        if ( ltype == BodyLoadBGT && load->giveBCValType() == ForceLoadBVT ) {
             load->computeComponentArrayAt(gVector, tStep, VM_Total);
             if ( gVector.giveSize() ) {
                 answer.at(1) += coeff * gVector.at(1);
@@ -318,11 +313,11 @@ TR1_2D_CBS :: computeDiffusionTermsI(FloatArray &answer, TimeStep *tStep)
 
     // terms now computed even for boundary nodes that have prescribed velocities! (but they will not be localized)
     // loop over sides
-    int n1, n2, code;
+    int n1, n2;
     double tx, ty, l, nx, ny;
     nLoads = boundarySides.giveSize();
     for ( int j = 1; j <= nLoads; j++ ) {
-        code = boundaryCodes.at(j);
+        int code = boundaryCodes.at(j);
         if ( ( code & FMElement_PrescribedTractionBC ) ) {
             //printf ("TR1_2D_CBS :: computeDiffusionTermsI tractions detected\n");
 
@@ -386,9 +381,9 @@ TR1_2D_CBS :: computeDensityRhsVelocityTerms(FloatArray &answer, TimeStep *tStep
 {
     // computes velocity terms on RHS for density equation
     double velu = 0.0, velv = 0.0; // dudx=0.0, dvdy=0.0;
-    //double rho = this->giveMaterial()->give('d');
+    //double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity(gp);
     double theta1 = static_cast< CBS * >( domain->giveEngngModel() )->giveTheta1();
-    double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+    double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     FloatArray u, ustar;
 
     answer.resize(9);
@@ -476,7 +471,7 @@ TR1_2D_CBS :: computePrescribedTractionPressure(FloatArray &answer, TimeStep *tS
     FloatArray stress;
     double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    stress = static_cast< FluidDynamicMaterialStatus * >( this->giveMaterial()->giveStatus(gp) )->giveDeviatoricStressVector();
+    stress = static_cast< FluidDynamicMaterialStatus * >( gp->giveMaterialStatus() )->giveDeviatoricStressVector();
     stress.times(1. / Re);
 
     answer.resize(9);
@@ -595,16 +590,15 @@ TR1_2D_CBS :: computePressureLhs(FloatMatrix &answer, TimeStep *tStep)
 {
     // calculates the pressure LHS
 
-    answer.resize(9, 9);
-    answer.zero();
+    answer.resize(3, 3);
 
-    answer.at(3, 3) = area * ( b [ 0 ] * b [ 0 ] + c [ 0 ] * c [ 0 ] );
-    answer.at(6, 6) = area * ( b [ 1 ] * b [ 1 ] + c [ 1 ] * c [ 1 ] );
-    answer.at(9, 9) = area * ( b [ 2 ] * b [ 2 ] + c [ 2 ] * c [ 2 ] );
+    answer.at(1, 1) = area * ( b [ 0 ] * b [ 0 ] + c [ 0 ] * c [ 0 ] );
+    answer.at(2, 2) = area * ( b [ 1 ] * b [ 1 ] + c [ 1 ] * c [ 1 ] );
+    answer.at(3, 3) = area * ( b [ 2 ] * b [ 2 ] + c [ 2 ] * c [ 2 ] );
 
-    answer.at(3, 6) = answer.at(6, 3) = area * ( b [ 0 ] * b [ 1 ] + c [ 0 ] * c [ 1 ] );
-    answer.at(3, 9) = answer.at(9, 3) = area * ( b [ 0 ] * b [ 2 ] + c [ 0 ] * c [ 2 ] );
-    answer.at(6, 9) = answer.at(9, 6) = area * ( b [ 1 ] * b [ 2 ] + c [ 1 ] * c [ 2 ] );
+    answer.at(1, 2) = answer.at(2, 1) = area * ( b [ 0 ] * b [ 1 ] + c [ 0 ] * c [ 1 ] );
+    answer.at(1, 3) = answer.at(3, 1) = area * ( b [ 0 ] * b [ 2 ] + c [ 0 ] * c [ 2 ] );
+    answer.at(2, 3) = answer.at(3, 2) = area * ( b [ 1 ] * b [ 2 ] + c [ 1 ] * c [ 2 ] );
 }
 
 
@@ -691,7 +685,7 @@ TR1_2D_CBS :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeSt
     eps.at(1) = ( b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5) );
     eps.at(2) = ( c [ 0 ] * u.at(2) + c [ 1 ] * u.at(4) + c [ 2 ] * u.at(6) );
     eps.at(3) = ( b [ 0 ] * u.at(2) + b [ 1 ] * u.at(4) + b [ 2 ] * u.at(6) + c [ 0 ] * u.at(1) + c [ 1 ] * u.at(3) + c [ 2 ] * u.at(5) );
-    static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->computeDeviatoricStressVector(answer, gp, eps, tStep);
+    static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial()->computeDeviatoricStressVector(answer, gp, eps, tStep);
 }
 
 int
@@ -1121,7 +1115,7 @@ TR1_2D_CBS :: printOutputAt(FILE *file, TimeStep *tStep)
 {
     CBSElement :: printOutputAt(file, tStep);
     //<RESTRICTED_SECTION>
-    double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+    double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     fprintf(file, "VOF %e, density %e\n\n", this->giveVolumeFraction(), rho);
     //</RESTRICTED_SECTION>
 }
@@ -1190,7 +1184,7 @@ TR1_2D_CBS :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type
     //</RESTRICTED_SECTION>
     if ( type == IST_Density ) {
         answer.resize(1);
-        answer.at(1) = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+        answer.at(1) = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
         return 1;
     } else {
         return CBSElement :: giveInternalStateAtNode(answer, type, mode, node, tStep);

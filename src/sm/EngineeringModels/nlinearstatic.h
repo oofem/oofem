@@ -51,6 +51,7 @@
 #define _IFT_NonLinearStatic_nonlocalext "nonlocalext"
 #define _IFT_NonLinearStatic_loadBalancingFlag "loadbalancingflag"
 #define _IFT_NonLinearStatic_forceloadBalancingFlag "forceloadbalancingflag"
+#define _IFT_NonLinearStatic_updateElasticStiffnessFlag "updateelasticstiffnessflag"
 //@}
 
 namespace oofem {
@@ -109,6 +110,7 @@ protected:
     NonLinearStatic_stiffnessMode stiffMode;
     int loadInitFlag;
     int nonlocalStiffnessFlag;
+    bool updateElasticStiffnessFlag;
     NM_Status numMetStatus;
     /// Numerical method used to solve the problem.
     SparseNonLinearSystemNM *nMethod;
@@ -146,6 +148,7 @@ public:
 
     virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual TimeStep *giveSolutionStepWhenIcApply(bool force = false);
     virtual TimeStep *giveNextStep();
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
 
@@ -162,6 +165,7 @@ public:
     virtual int useNonlocalStiffnessOption() { return this->nonlocalStiffnessFlag; }
     /// For load balancing purposes we store all values so hash is computed from mode value only
     virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) { return ( int ) mode; }
+    virtual int giveCurrentNumberOfIterations() {return currentIterations;}
 
 #ifdef __OOFEG
     void showSparseMtrxStructure(int type, oofegGraphicContext &gc, TimeStep *tStep);
@@ -175,7 +179,7 @@ public:
 #endif
 
 protected:
-    virtual void assemble(SparseMtrx &answer, TimeStep *tStep, CharType type,
+    virtual void assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAssembler &ma,
                           const UnknownNumberingScheme &, Domain *domain);
     void proceedStep(int di, TimeStep *tStep);
     virtual void updateLoadVectors(TimeStep *tStep);

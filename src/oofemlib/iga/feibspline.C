@@ -84,7 +84,8 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, degree_tmp, _IFT_BSplineInterpolation_degree);
     if ( degree_tmp.giveSize() != nsd ) {
-        OOFEM_ERROR("degree size mismatch");
+        OOFEM_WARNING("degree size mismatch");
+        return IRRT_BAD_FORMAT;
     }
 
     for ( int i = 0; i < nsd; i++ ) {
@@ -95,14 +96,16 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, knotValues [ n ], IFT_knotVector [ n ]);
         size = knotValues [ n ].giveSize();
         if ( size < 2 ) {
-            OOFEM_ERROR("invalid size of knot vector %s", IFT_knotVector [ n ]);
+            OOFEM_WARNING("invalid size of knot vector %s", IFT_knotVector [ n ]);
+            return IRRT_BAD_FORMAT;
         }
 
         // check for monotonicity of knot vector without multiplicity
         knotVal = knotValues [ n ].at(1);
         for ( int i = 1; i < size; i++ ) {
             if ( knotValues [ n ].at(i + 1) <= knotVal ) {
-                OOFEM_ERROR("knot vector %s is not monotonic", IFT_knotVector [ n ]);
+                OOFEM_WARNING("knot vector %s is not monotonic", IFT_knotVector [ n ]);
+                return IRRT_BAD_FORMAT;
             }
 
             knotVal = knotValues [ n ].at(i + 1);
@@ -124,14 +127,16 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
             }
         } else {
             if ( knotMultiplicity [ n ].giveSize() != size ) {
-                OOFEM_ERROR("knot multiplicity %s size mismatch", IFT_knotMultiplicity [ n ]);
+                OOFEM_WARNING("knot multiplicity %s size mismatch", IFT_knotMultiplicity [ n ]);
+                return IRRT_BAD_FORMAT;
             }
 
             // check for multiplicity range (skip the first and last one)
             for ( int i = 1; i < size - 1; i++ ) {
                 if ( knotMultiplicity [ n ].at(i + 1) < 1 || knotMultiplicity [ n ].at(i + 1) > degree [ n ] ) {
-                    OOFEM_ERROR("knot multiplicity %s out of range - value %d",
+                    OOFEM_WARNING("knot multiplicity %s out of range - value %d",
                                  IFT_knotMultiplicity [ n ], knotMultiplicity [ n ].at(i + 1) );
+                    return IRRT_BAD_FORMAT;
                 }
             }
 
@@ -176,19 +181,19 @@ void BSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords
 {
     FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
     IntArray span(nsd);
-    int i, l, k, m, c = 1, count;
+    int c = 1, count;
     std :: vector< FloatArray > N(nsd);
 
 
     if ( gw->knotSpan ) {
         span = * gw->knotSpan;
     } else {
-        for ( i = 0; i < nsd; i++ ) {
+        for ( int i = 0; i < nsd; i++ ) {
             span(i) = this->findSpan(numberOfControlPoints [ i ], degree [ i ], lcoords(i), knotVector [ i ]);
         }
     }
 
-    for ( i = 0; i < nsd; i++ ) {
+    for ( int i = 0; i < nsd; i++ ) {
         this->basisFuns(N [ i ], span(i), lcoords(i), degree [ i ], knotVector [ i ]);
     }
 
@@ -196,19 +201,19 @@ void BSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords
     answer.resize(count);
 
     if ( nsd == 1 ) {
-        for ( k = 0; k <= degree [ 0 ]; k++ ) {
+        for ( int k = 0; k <= degree [ 0 ]; k++ ) {
             answer.at(c++) = N [ 0 ](k);
         }
     } else if ( nsd == 2 ) {
-        for ( l = 0; l <= degree [ 1 ]; l++ ) {
-            for ( k = 0; k <= degree [ 0 ]; k++ ) {
+        for ( int l = 0; l <= degree [ 1 ]; l++ ) {
+            for ( int k = 0; k <= degree [ 0 ]; k++ ) {
                 answer.at(c++) = N [ 0 ](k) * N [ 1 ](l);
             }
         }
     } else if ( nsd == 3 ) {
-        for ( m = 0; m <= degree [ 2 ]; m++ ) {
-            for ( l = 0; l <= degree [ 1 ]; l++ ) {
-                for ( k = 0; k <= degree [ 0 ]; k++ ) {
+        for ( int m = 0; m <= degree [ 2 ]; m++ ) {
+            for ( int l = 0; l <= degree [ 1 ]; l++ ) {
+                for ( int k = 0; k <= degree [ 0 ]; k++ ) {
                     answer.at(c++) = N [ 0 ](k) * N [ 1 ](l) * N [ 2 ](m);
                 }
             }
@@ -226,7 +231,7 @@ double BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
     FloatMatrix jacobian(nsd, nsd);
     IntArray span(nsd);
     double Jacob = 0.;
-    int count, cnt, i, l, k, m, ind, indx, uind, vind, tind;
+    int count, cnt, ind, indx, uind, vind, tind;
     std :: vector< FloatMatrix > ders(nsd);
 
 
@@ -234,12 +239,12 @@ double BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
     if ( gw->knotSpan ) {
         span = * gw->knotSpan;
     } else {
-        for ( i = 0; i < nsd; i++ ) {
+        for ( int i = 0; i < nsd; i++ ) {
             span(i) = this->findSpan(numberOfControlPoints [ i ], degree [ i ], lcoords(i), knotVector [ i ]);
         }
     }
 
-    for ( i = 0; i < nsd; i++ ) {
+    for ( int i = 0; i < nsd; i++ ) {
         this->dersBasisFuns(1, lcoords(i), span(i), degree [ i ], knotVector [ i ], ders [ i ]);
     }
 
@@ -250,7 +255,7 @@ double BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
     if ( nsd == 1 ) {
         uind = span(0) - degree [ 0 ];
         ind = uind + 1;
-        for ( k = 0; k <= degree [ 0 ]; k++ ) {
+        for ( int k = 0; k <= degree [ 0 ]; k++ ) {
             vertexCoordsPtr = cellgeo.giveVertexCoordinates(ind + k);
             jacobian(0, 0) += ders [ 0 ](1, k) * vertexCoordsPtr->at(1);       // dx/du=sum(dNu/du*x)
         }
@@ -262,7 +267,7 @@ double BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
         }
 
         cnt = 0;
-        for ( k = 0; k <= degree [ 0 ]; k++ ) {
+        for ( int k = 0; k <= degree [ 0 ]; k++ ) {
             answer(cnt, 0) = ders [ 0 ](1, k) / Jacob;         // dN/dx=dN/du / dx/du
             cnt++;
         }
@@ -272,10 +277,10 @@ double BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
         uind = span(0) - degree [ 0 ];
         vind = span(1) - degree [ 1 ];
         ind = vind * numberOfControlPoints [ 0 ] + uind + 1;
-        for ( l = 0; l <= degree [ 1 ]; l++ ) {
+        for ( int l = 0; l <= degree [ 1 ]; l++ ) {
             tmp1.zero();
             tmp2.zero();
-            for ( k = 0; k <= degree [ 0 ]; k++ ) {
+            for ( int k = 0; k <= degree [ 0 ]; k++ ) {
                 vertexCoordsPtr = cellgeo.giveVertexCoordinates(ind + k);
 
                 tmp1(0) += ders [ 0 ](1, k) * vertexCoordsPtr->at(1);            // sum(dNu/du*x)
@@ -301,8 +306,8 @@ double BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
         }
 
         cnt = 0;
-        for ( l = 0; l <= degree [ 1 ]; l++ ) {
-            for ( k = 0; k <= degree [ 0 ]; k++ ) {
+        for ( int l = 0; l <= degree [ 1 ]; l++ ) {
+            for ( int k = 0; k <= degree [ 0 ]; k++ ) {
                 tmp1(0) = ders [ 0 ](1, k) * ders [ 1 ](0, l); // dN/du=dNu/du*Nv
                 tmp1(1) = ders [ 0 ](0, k) * ders [ 1 ](1, l); // dN/dv=Nu*dNv/dv
                 answer(cnt, 0) = ( +jacobian(1, 1) * tmp1(0) - jacobian(0, 1) * tmp1(1) ) / Jacob; // dN/dx
@@ -318,15 +323,15 @@ double BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
         vind = span(1) - degree [ 1 ];
         tind = span(2) - degree [ 2 ];
         ind = tind * numberOfControlPoints [ 0 ] * numberOfControlPoints [ 1 ] + vind * numberOfControlPoints [ 0 ] + uind + 1;
-        for ( m = 0; m <= degree [ 2 ]; m++ ) {
+        for ( int m = 0; m <= degree [ 2 ]; m++ ) {
             temp1.zero();
             temp2.zero();
             temp3.zero();
             indx = ind;
-            for ( l = 0; l <= degree [ 1 ]; l++ ) {
+            for ( int l = 0; l <= degree [ 1 ]; l++ ) {
                 tmp1.zero();
                 tmp2.zero();
-                for ( k = 0; k <= degree [ 0 ]; k++ ) {
+                for ( int k = 0; k <= degree [ 0 ]; k++ ) {
                     vertexCoordsPtr = cellgeo.giveVertexCoordinates(ind + k);
 
                     tmp1(0) += ders [ 0 ](1, k) * vertexCoordsPtr->at(1);                // sum(dNu/du*x)
@@ -375,9 +380,9 @@ double BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
         }
 
         cnt = 0;
-        for ( m = 0; m <= degree [ 2 ]; m++ ) {
-            for ( l = 0; l <= degree [ 1 ]; l++ ) {
-                for ( k = 0; k <= degree [ 0 ]; k++ ) {
+        for ( int m = 0; m <= degree [ 2 ]; m++ ) {
+            for ( int l = 0; l <= degree [ 1 ]; l++ ) {
+                for ( int k = 0; k <= degree [ 0 ]; k++ ) {
                     tmp1(0) = ders [ 0 ](1, k) * ders [ 1 ](0, l) * ders [ 2 ](0, m);       // dN/du=dNu/du*Nv*Nt
                     tmp1(1) = ders [ 0 ](0, k) * ders [ 1 ](1, l) * ders [ 2 ](0, m);       // dN/dv=Nu*dNv/dv*Nt
                     tmp1(2) = ders [ 0 ](0, k) * ders [ 1 ](0, l) * ders [ 2 ](1, m);       // dN/dt=Nu*Nv*dNt/dt
@@ -408,19 +413,19 @@ void BSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &
     FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
     const FloatArray *vertexCoordsPtr;
     IntArray span(nsd);
-    int i, l, k, m, ind, indx, uind, vind, tind;
+    int ind, indx, uind, vind, tind;
     std :: vector< FloatArray > N(nsd);
 
 
     if ( gw->knotSpan ) {
         span = * gw->knotSpan;
     } else {
-        for ( i = 0; i < nsd; i++ ) {
+        for ( int i = 0; i < nsd; i++ ) {
             span(i) = this->findSpan(numberOfControlPoints [ i ], degree [ i ], lcoords(i), knotVector [ i ]);
         }
     }
 
-    for ( i = 0; i < nsd; i++ ) {
+    for ( int i = 0; i < nsd; i++ ) {
         this->basisFuns(N [ i ], span(i), lcoords(i), degree [ i ], knotVector [ i ]);
     }
 
@@ -430,7 +435,7 @@ void BSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &
     if ( nsd == 1 ) {
         uind = span(0) - degree [ 0 ];
         ind = uind + 1;
-        for ( k = 0; k <= degree [ 0 ]; k++ ) {
+        for ( int k = 0; k <= degree [ 0 ]; k++ ) {
             vertexCoordsPtr = cellgeo.giveVertexCoordinates(ind + k);
             answer(0) += N [ 0 ](k) * vertexCoordsPtr->at(1);
         }
@@ -440,9 +445,9 @@ void BSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &
         uind = span(0) - degree [ 0 ];
         vind = span(1) - degree [ 1 ];
         ind = vind * numberOfControlPoints [ 0 ] + uind + 1;
-        for ( l = 0; l <= degree [ 1 ]; l++ ) {
+        for ( int l = 0; l <= degree [ 1 ]; l++ ) {
             tmp.zero();
-            for ( k = 0; k <= degree [ 0 ]; k++ ) {
+            for ( int k = 0; k <= degree [ 0 ]; k++ ) {
                 vertexCoordsPtr = cellgeo.giveVertexCoordinates(ind + k);
 
                 tmp(0) += N [ 0 ](k) * vertexCoordsPtr->at(1);
@@ -461,30 +466,24 @@ void BSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &
         vind = span(1) - degree [ 1 ];
         tind = span(2) - degree [ 2 ];
         ind = tind * numberOfControlPoints [ 0 ] * numberOfControlPoints [ 1 ] + vind * numberOfControlPoints [ 0 ] + uind + 1;
-        for ( m = 0; m <= degree [ 2 ]; m++ ) {
+        for ( int m = 0; m <= degree [ 2 ]; m++ ) {
             temp.zero();
             indx = ind;
-            for ( l = 0; l <= degree [ 1 ]; l++ ) {
+            for ( int l = 0; l <= degree [ 1 ]; l++ ) {
                 tmp.zero();
-                for ( k = 0; k <= degree [ 0 ]; k++ ) {
+                for ( int k = 0; k <= degree [ 0 ]; k++ ) {
                     vertexCoordsPtr = cellgeo.giveVertexCoordinates(ind + k);
-                    tmp(0) += N [ 0 ](k) * vertexCoordsPtr->at(1);
-                    tmp(1) += N [ 0 ](k) * vertexCoordsPtr->at(2);
-                    tmp(2) += N [ 0 ](k) * vertexCoordsPtr->at(3);
+                    tmp.add(N [ 0 ](k), *vertexCoordsPtr);
                 }
 
                 ind += numberOfControlPoints [ 0 ];
 
-                temp(0) += N [ 1 ](l) * tmp(0);
-                temp(1) += N [ 1 ](l) * tmp(1);
-                temp(2) += N [ 1 ](l) * tmp(2);
+                temp.add(N [ 1 ](l), tmp);
             }
 
             ind = indx + numberOfControlPoints [ 0 ] * numberOfControlPoints [ 1 ];
 
-            answer(0) += N [ 2 ](m) * temp(0);
-            answer(1) += N [ 2 ](m) * temp(1);
-            answer(2) += N [ 2 ](m) * temp(2);
+            answer.add(N [ 2 ](m), temp);
         }
     } else {
         OOFEM_ERROR("local2global not implemented for nsd = %d", nsd);
@@ -492,26 +491,24 @@ void BSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &
 }
 
 
-double BSplineInterpolation :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+void BSplineInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
     const FloatArray *vertexCoordsPtr;
-    FloatMatrix jacobian(nsd, nsd);
     IntArray span(nsd);
-    double Jacob;
-    int i, l, k, m, indx, ind, uind, vind, tind;
+    int indx, ind, uind, vind, tind;
     std :: vector< FloatMatrix > ders(nsd);
-
+    jacobian.resize(nsd, nsd);
 
     if ( gw->knotSpan ) {
         span = * gw->knotSpan;
     } else {
-        for ( i = 0; i < nsd; i++ ) {
+        for ( int i = 0; i < nsd; i++ ) {
             span(i) = this->findSpan(numberOfControlPoints [ i ], degree [ i ], lcoords(i), knotVector [ i ]);
         }
     }
 
-    for ( i = 0; i < nsd; i++ ) {
+    for ( int i = 0; i < nsd; i++ ) {
         this->dersBasisFuns(1, lcoords(i), span(i), degree [ i ], knotVector [ i ], ders [ i ]);
     }
 
@@ -520,7 +517,7 @@ double BSplineInterpolation :: giveTransformationJacobian(const FloatArray &lcoo
     if ( nsd == 1 ) {
         uind = span(0) - degree [ 0 ];
         ind = uind + 1;
-        for ( k = 0; k <= degree [ 0 ]; k++ ) {
+        for ( int k = 0; k <= degree [ 0 ]; k++ ) {
             vertexCoordsPtr = cellgeo.giveVertexCoordinates(ind + k);
             jacobian(0, 0) += ders [ 0 ](1, k) * vertexCoordsPtr->at(1);       // dx/du=sum(dNu/du*x)
         }
@@ -530,10 +527,10 @@ double BSplineInterpolation :: giveTransformationJacobian(const FloatArray &lcoo
         uind = span(0) - degree [ 0 ];
         vind = span(1) - degree [ 1 ];
         ind = vind * numberOfControlPoints [ 0 ] + uind + 1;
-        for ( l = 0; l <= degree [ 1 ]; l++ ) {
+        for ( int l = 0; l <= degree [ 1 ]; l++ ) {
             tmp1.zero();
             tmp2.zero();
-            for ( k = 0; k <= degree [ 0 ]; k++ ) {
+            for ( int k = 0; k <= degree [ 0 ]; k++ ) {
                 vertexCoordsPtr = cellgeo.giveVertexCoordinates(ind + k);
 
                 tmp1(0) += ders [ 0 ](1, k) * vertexCoordsPtr->at(1); // sum(dNu/du*x)
@@ -559,39 +556,26 @@ double BSplineInterpolation :: giveTransformationJacobian(const FloatArray &lcoo
         vind = span(1) - degree [ 1 ];
         tind = span(2) - degree [ 2 ];
         ind = tind * numberOfControlPoints [ 0 ] * numberOfControlPoints [ 1 ] + vind * numberOfControlPoints [ 0 ] + uind + 1;
-        for ( m = 0; m <= degree [ 2 ]; m++ ) {
+        for ( int m = 0; m <= degree [ 2 ]; m++ ) {
             temp1.zero();
             temp2.zero();
             temp3.zero();
             indx = ind;
-            for ( l = 0; l <= degree [ 1 ]; l++ ) {
+            for ( int l = 0; l <= degree [ 1 ]; l++ ) {
                 tmp1.zero();
                 tmp2.zero();
-                for ( k = 0; k <= degree [ 0 ]; k++ ) {
+                for ( int k = 0; k <= degree [ 0 ]; k++ ) {
                     vertexCoordsPtr = cellgeo.giveVertexCoordinates(ind + k);
 
-                    tmp1(0) += ders [ 0 ](1, k) * vertexCoordsPtr->at(1);                // sum(dNu/du*x)
-                    tmp1(1) += ders [ 0 ](1, k) * vertexCoordsPtr->at(2);                // sum(dNu/du*y)
-                    tmp1(2) += ders [ 0 ](1, k) * vertexCoordsPtr->at(3);                // sum(dNu/du*z)
-
-                    tmp2(0) += ders [ 0 ](0, k) * vertexCoordsPtr->at(1);                // sum(Nu*x)
-                    tmp2(1) += ders [ 0 ](0, k) * vertexCoordsPtr->at(2);                // sum(Nu*y)
-                    tmp2(2) += ders [ 0 ](0, k) * vertexCoordsPtr->at(3);                // sum(Nu*y)
+                    tmp1.add(ders [ 0 ](1, k), *vertexCoordsPtr); // sum(dNu/du*x)
+                    tmp2.add(ders [ 0 ](0, k), *vertexCoordsPtr); // sum(Nu*x)
                 }
 
                 ind += numberOfControlPoints [ 0 ];
 
-                temp1(0) += ders [ 1 ](0, l) * tmp1(0);            // sum(Nv*sum(dNu/du*x)
-                temp1(1) += ders [ 1 ](0, l) * tmp1(1);            // sum(Nv*sum(dNu/du*y)
-                temp1(2) += ders [ 1 ](0, l) * tmp1(2);            // sum(Nv*sum(dNu/du*z)
-
-                temp2(0) += ders [ 1 ](1, l) * tmp2(0);            // sum(dNv/dv*sum(Nu*x)
-                temp2(1) += ders [ 1 ](1, l) * tmp2(1);            // sum(dNv/dv*sum(Nu*y)
-                temp2(2) += ders [ 1 ](1, l) * tmp2(1);            // sum(dNv/dv*sum(Nu*z)
-
-                temp3(0) += ders [ 1 ](0, l) * tmp2(0);            // sum(Nv*sum(Nu*x)
-                temp3(1) += ders [ 1 ](0, l) * tmp2(1);            // sum(Nv*sum(Nu*y)
-                temp3(2) += ders [ 1 ](0, l) * tmp2(1);            // sum(Nv*sum(Nu*z)
+                temp1.add(ders [ 1 ](0, l), tmp1); // sum(Nv*sum(dNu/du*x)
+                temp2.add(ders [ 1 ](1, l), tmp2); // sum(dNv/dv*sum(Nu*x)
+                temp3.add(ders [ 1 ](0, l), tmp2); // sum(Nv*sum(Nu*x)
             }
 
             ind = indx + numberOfControlPoints [ 0 ] * numberOfControlPoints [ 1 ];
@@ -611,43 +595,35 @@ double BSplineInterpolation :: giveTransformationJacobian(const FloatArray &lcoo
     } else {
         OOFEM_ERROR("giveTransformationJacobian not implemented for nsd = %d", nsd);
     }
-
-    Jacob = jacobian.giveDeterminant();
-
-    if ( fabs(Jacob) < 1.0e-10 ) {
-        OOFEM_ERROR("giveTransformationJacobian - zero Jacobian");
-    }
-
-    return Jacob;
 }
 
 
 int BSplineInterpolation :: giveKnotSpanBasisFuncMask(const IntArray &knotSpan, IntArray &mask)
 {
-    int size, c = 1, i, j, k, iindx, jindx, kindx;
+    int size, c = 1, iindx, jindx, kindx;
 
     size = giveNumberOfKnotSpanBasisFunctions(knotSpan);
     mask.resize(size);
 
     if ( nsd == 1 ) {
-        for ( i = 0; i <= degree [ 0 ]; i++ ) {
+        for ( int i = 0; i <= degree [ 0 ]; i++ ) {
             iindx = ( i + knotSpan(0) - degree [ 0 ] );
             mask.at(c++) = iindx + 1;
         }
     } else if ( nsd == 2 ) {
-        for ( j = 0; j <= degree [ 1 ]; j++ ) {
+        for ( int j = 0; j <= degree [ 1 ]; j++ ) {
             jindx = ( j + knotSpan(1) - degree [ 1 ] );
-            for ( i = 0; i <= degree [ 0 ]; i++ ) {
+            for ( int i = 0; i <= degree [ 0 ]; i++ ) {
                 iindx = ( i + knotSpan(0) - degree [ 0 ] );
                 mask.at(c++) = jindx * numberOfControlPoints [ 0 ] + iindx + 1;
             }
         }
     } else if ( nsd == 3 ) {
-        for ( k = 0; k <= degree [ 2 ]; k++ ) {
+        for ( int k = 0; k <= degree [ 2 ]; k++ ) {
             kindx = ( k + knotSpan(2) - degree [ 2 ] );
-            for ( j = 0; j <= degree [ 1 ]; j++ ) {
+            for ( int j = 0; j <= degree [ 1 ]; j++ ) {
                 jindx = ( j + knotSpan(1) - degree [ 1 ] );
-                for ( i = 0; i <= degree [ 0 ]; i++ ) {
+                for ( int i = 0; i <= degree [ 0 ]; i++ ) {
                     iindx = ( i + knotSpan(0) - degree [ 0 ] );
                     mask.at(c++) = kindx * numberOfControlPoints [ 0 ] * numberOfControlPoints [ 1 ] + jindx * numberOfControlPoints [ 0 ] + iindx + 1;
                 }
@@ -663,10 +639,10 @@ int BSplineInterpolation :: giveKnotSpanBasisFuncMask(const IntArray &knotSpan, 
 // for pure Bspline the number of nonzero basis functions is the same for each knot span
 int BSplineInterpolation :: giveNumberOfKnotSpanBasisFunctions(const IntArray &knotSpan)
 {
-    int i, answer = 1;
+    int answer = 1;
     // there are always degree+1 nonzero basis functions on each knot span
     ///@todo This loop seems meaningless. It just returns degree[nsd-1]+1 in the end ?
-    for ( i = 0; i < nsd; i++ ) {
+    for ( int i = 0; i < nsd; i++ ) {
         answer *= ( degree [ i ] + 1 );
     }
 
@@ -688,15 +664,14 @@ void BSplineInterpolation :: basisFuns(FloatArray &N, int span, double u, int p,
     FloatArray right(p + 1);
     FloatArray left(p + 1);
     double saved, temp;
-    int j, r;
 
     N.resize(p + 1);
     N(0) = 1.0;
-    for ( j = 1; j <= p; j++ ) {
+    for ( int j = 1; j <= p; j++ ) {
         left(j) = u - U [ span + 1 - j ];
         right(j) = U [ span + j ] - u;
         saved = 0.0;
-        for ( r = 0; r < j; r++ ) {
+        for ( int r = 0; r < j; r++ ) {
             temp = N(r) / ( right(r + 1) + left(j - r) );
             N(r) = saved + right(r + 1) * temp;
             saved = left(j - r) * temp;
@@ -722,17 +697,16 @@ void BSplineInterpolation :: dersBasisFuns(int n, double u, int span, int p, dou
     FloatArray right(p + 1);
     FloatMatrix ndu(p + 1, p + 1);
     double saved, temp;
-    int j, r;
 
     ders.resize(n + 1, p + 1);
 
     ndu(0, 0) = 1.0;
-    for ( j = 1; j <= p; j++ ) {
+    for ( int j = 1; j <= p; j++ ) {
         left(j) = u - U [ span + 1 - j ];
         right(j) = U [ span + j ] - u;
         saved = 0.0;
 
-        for ( r = 0; r < j; r++ ) {
+        for ( int r = 0; r < j; r++ ) {
             // Lower triangle
             ndu(j, r) = right(r + 1) + left(j - r);
             temp = ndu(r, j - 1) / ndu(j, r);
@@ -744,13 +718,13 @@ void BSplineInterpolation :: dersBasisFuns(int n, double u, int span, int p, dou
         ndu(j, j) = saved;
     }
 
-    for ( j = 0; j <= p; j++ ) {
+    for ( int j = 0; j <= p; j++ ) {
         ders(0, j) = ndu(j, p);
     }
 
     // Compute the derivatives
     FloatMatrix a(2, p + 1);
-    for ( r = 0; r <= p; r++ ) {
+    for ( int r = 0; r <= p; r++ ) {
         int s1, s2;
         s1 = 0;
         s2 = 1;       // alternate rows in array a
@@ -780,7 +754,7 @@ void BSplineInterpolation :: dersBasisFuns(int n, double u, int span, int p, dou
                 j2 = p - r;
             }
 
-            for ( j = j1; j <= j2; j++ ) {
+            for ( int j = j1; j <= j2; j++ ) {
                 a(s2, j) = ( a(s1, j) - a(s1, j - 1) ) / ndu(pk + 1, rk + j);
                 d += a(s2, j) * ndu(rk + j, pk);
             }
@@ -791,16 +765,14 @@ void BSplineInterpolation :: dersBasisFuns(int n, double u, int span, int p, dou
             }
 
             ders(k, r) = d;
-            j = s1;
-            s1 = s2;
-            s2 = j;               // Switch rows
+            std :: swap(s1, s2); // Switch rows
         }
     }
 
     // Multiply through by the correct factors
-    r = p;
+    int r = p;
     for ( int k = 1; k <= n; k++ ) {
-        for ( j = 0; j <= p; j++ ) {
+        for ( int j = 0; j <= p; j++ ) {
             ders(k, j) *= r;
         }
 

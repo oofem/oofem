@@ -36,17 +36,15 @@
 #define enrichmentitem_h
 
 #include "femcmpnn.h"
-#include "floatmatrix.h"
 #include "dofiditem.h"
 #include "tipinfo.h"
-
-#include <memory>
-
+#include "intarray.h"
 #include "dofmanager.h"
-#include <algorithm>
-#include <unordered_map>
-
 #include "xfem/enrichmentfronts/enrichmentfront.h"
+#include "error.h"
+
+#include <vector>
+#include <unordered_map>
 
 ///@name Input fields for XFEM
 //@{
@@ -80,7 +78,9 @@ class GaussPoint;
 class Element;
 class CrossSection;
 class Node;
-
+class FloatMatrix;
+class DofManager;
+class DataReader;
 
 enum NodeEnrichmentType : int {
     NodeEnr_NONE = 0,
@@ -143,22 +143,23 @@ public:
 
 
     // Should update receiver geometry to the state reached at given time step.
-    virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep) { };
+    virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep) { }
     virtual void updateGeometry() = 0;
     virtual void propagateFronts(bool &oFrontsHavePropagated) = 0;
 
     virtual bool hasPropagatingFronts() const;
 
 
-    int giveStartOfDofIdPool() const { return this->startOfDofIdPool; };
-    int giveEndOfDofIdPool() const { return this->endOfDofIdPool; };
+    int giveStartOfDofIdPool() const { return this->startOfDofIdPool; }
+    int giveEndOfDofIdPool() const { return this->endOfDofIdPool; }
     virtual int giveDofPoolSize() const;
     /**
      * Compute Id's of enriched dofs for a given DofManager.
      */
     virtual void computeEnrichedDofManDofIdArray(IntArray &oDofIdArray, DofManager &iDMan);
 
-    void giveEIDofIdArray(IntArray &answer) const; // list of id's for the enrichment dofs
+    virtual void giveEIDofIdArray(IntArray &answer) const; // list of id's for the enrichment dofs
+    virtual void givePotentialEIDofIdArray(IntArray &answer) const; // List of potential IDs for enrichment
 
     virtual void evaluateEnrFuncInNode(std :: vector< double > &oEnrFunc, const Node &iNode) const = 0;
 
@@ -210,8 +211,9 @@ public:
     static double calcXiZeroLevel(const double &iQ1, const double &iQ2);
     static void calcPolarCoord(double &oR, double &oTheta, const FloatArray &iOrigin, const FloatArray &iPos, const FloatArray &iN, const FloatArray &iT, const EfInput &iEfInput, bool iFlipTangent);
 
-    PropagationLaw *givePropagationLaw() { return this->mpPropagationLaw; };
-    bool hasPropagationLaw() { return this->mPropLawIndex != 0; };
+    PropagationLaw *givePropagationLaw() { return this->mpPropagationLaw; }
+    void setPropagationLaw(PropagationLaw *ipPropagationLaw);
+    bool hasPropagationLaw() { return this->mPropLawIndex != 0; }
 
 
     virtual void callGnuplotExportModule(GnuplotExportModule &iExpMod, TimeStep *tStep);
@@ -229,6 +231,7 @@ public:
 
     bool tipIsTouchingEI(const TipInfo &iTipInfo);
 
+    void setEnrichmentFunction(EnrichmentFunction *ipEnrichmentFunc) {mpEnrichmentFunc = ipEnrichmentFunc;}
 
 protected:
 
@@ -272,6 +275,9 @@ protected:
 
     // Field with desired node enrichment types
     std :: unordered_map< int, NodeEnrichmentType >mNodeEnrMarkerMap;
+
+    // Enrichment dof IDs used by the enrichment item.
+    IntArray mEIDofIdArray;
 
     bool mLevelSetsNeedUpdate;
 

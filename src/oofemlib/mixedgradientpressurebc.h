@@ -66,7 +66,7 @@ public:
     MixedGradientPressureBC(int n, Domain * d) : ActiveBoundaryCondition(n, d) { }
 
     /// Destructor
-    virtual ~MixedGradientPressureBC() { };
+    virtual ~MixedGradientPressureBC() { }
 
     /// Not relevant for this boundary condition.
     virtual bcType giveType() const { return UnknownBT; }

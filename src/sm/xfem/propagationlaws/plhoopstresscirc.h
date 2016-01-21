@@ -38,16 +38,11 @@
 #include "xfem/propagationlaw.h"
 
 #define _IFT_PLHoopStressCirc_Name "propagationlawhoopstresscirc"
-// Radius of circle used for stress sampling points
-#define _IFT_PLHoopStressCirc_Radius "radius"
-// Angle between sampling points on the circle
-#define _IFT_PLHoopStressCirc_AngleInc "angleinc"
-// Increment length per time step
-#define _IFT_PLHoopStressCirc_IncLength "incrementlength"
-// Threshold for crack propagation
-#define _IFT_PLHoopStressCirc_HoopStressThreshold "hoopstressthreshold"
-// If radial basis functions should be used for stress interpolation
-#define _IFT_PLHoopStressCirc_RadialBasisFunc "useradialbasisfunc"
+#define _IFT_PLHoopStressCirc_Radius "radius" ///< Radius of circle used for stress sampling points
+#define _IFT_PLHoopStressCirc_AngleInc "angleinc" ///< Angle between sampling points on the circle
+#define _IFT_PLHoopStressCirc_IncLength "incrementlength" ///< Increment length per time step
+#define _IFT_PLHoopStressCirc_HoopStressThreshold "hoopstressthreshold" ///< Threshold for crack propagation
+#define _IFT_PLHoopStressCirc_RadialBasisFunc "useradialbasisfunc" ///< If radial basis functions should be used for stress interpolation
 
 namespace oofem {
 class Domain;
@@ -57,7 +52,7 @@ class DynamicInputRecord;
 
 /**
  * Propagation law that propagates the crack in the direction
- * that gives \sigma_{r\theta} = 0.
+ * that gives @f$ \sigma_{r\theta} = 0 @f$.
  * Based on
  * T.P. Fries and M. Baydoun:
  * "Crack propagation with the extended finite element method
@@ -80,8 +75,8 @@ class DynamicInputRecord;
 class OOFEM_EXPORT PLHoopStressCirc : public PropagationLaw
 {
 public:
-    PLHoopStressCirc() : mRadius(0.0), mAngleInc(0.0), mIncrementLength(0.0), mHoopStressThreshold(0.0), mUseRadialBasisFunc(false) { };
-    virtual ~PLHoopStressCirc() { };
+    PLHoopStressCirc() : mRadius(0.0), mAngleInc(0.0), mIncrementLength(0.0), mHoopStressThreshold(0.0), mUseRadialBasisFunc(false) { }
+    virtual ~PLHoopStressCirc() { }
 
     virtual const char *giveClassName() const { return "PLHoopStressCirc"; }
     virtual const char *giveInputRecordName() const { return _IFT_PLHoopStressCirc_Name; }
@@ -91,6 +86,12 @@ public:
 
     virtual bool hasPropagation() const { return mIncrementLength > 0.; } ///@todo Could this be done smarter? / Mikael
     virtual bool propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp);
+
+    void setRadius(double iRadius) {mRadius = std::move(iRadius);}
+    void setAngleInc(double iAngleInc) {mAngleInc = std::move(iAngleInc);}
+    void setIncrementLength(double iIncrementLength) {mIncrementLength = std::move(iIncrementLength);}
+    void setHoopStressThreshold(double iHoopStressThreshold) {mHoopStressThreshold = std::move(iHoopStressThreshold);}
+    void setUseRadialBasisFunc(bool iUseRadialBasisFunc) {mUseRadialBasisFunc = std::move(iUseRadialBasisFunc);}
 
 protected:
     double mRadius, mAngleInc, mIncrementLength, mHoopStressThreshold;

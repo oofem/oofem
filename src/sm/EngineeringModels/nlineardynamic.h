@@ -111,9 +111,6 @@ protected:
     /// Intrinsic time increment.
     double deltaT;
 
-    virtual void giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
-                                                 CharType type, TimeStep *tStep, Domain *domain);
-
 public:
     NonLinearDynamic(int i, EngngModel * _master = NULL);
     virtual ~NonLinearDynamic();
@@ -128,6 +125,7 @@ public:
     virtual void updateYourself(TimeStep *tStep);
     virtual void updateComponent(TimeStep *tStep, NumericalCmpn, Domain *d);
     virtual void updateAttributes(MetaStep *mStep);
+	virtual void initializeYourself(TimeStep *tStep);
 
     virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
 
@@ -148,6 +146,8 @@ public:
     virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) { return ( int ) mode; }
     void timesMtrx(FloatArray &answer, FloatArray &vec, CharType type, Domain *domain, TimeStep *tStep);
 
+	TimeDiscretizationType giveInitialTimeDiscretization() { return initialTimeDiscretization; }
+
 #ifdef __OOFEG
     void showSparseMtrxStructure(int type, oofegGraphicContext &gc, TimeStep *tStep);
 #endif
@@ -159,7 +159,7 @@ public:
 #endif
 
 protected:
-    void assemble(SparseMtrx &answer, TimeStep *tStep, CharType type,
+    void assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAssembler &ma,
                   const UnknownNumberingScheme &, Domain *domain);
 
     void proceedStep(int di, TimeStep *tStep);

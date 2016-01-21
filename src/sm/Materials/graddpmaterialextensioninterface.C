@@ -32,11 +32,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-
-
 #include "domain.h"
 #include "nonlocalbarrier.h"
 #include "graddpmaterialextensioninterface.h"
+#include "inputrecord.h"
 
 #include <list>
 

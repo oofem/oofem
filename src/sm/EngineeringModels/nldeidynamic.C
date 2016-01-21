@@ -89,7 +89,10 @@ NlDEIDynamic :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-    StructuralEngngModel :: initializeFrom(ir);
+    result = StructuralEngngModel :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     IR_GIVE_FIELD(ir, dumpingCoef, _IFT_NlDEIDynamic_dumpcoef); // C = dumpingCoef * M
     IR_GIVE_FIELD(ir, deltaT, _IFT_NlDEIDynamic_deltat);
@@ -270,7 +273,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
     }
 
 
-    if ( tStep->giveNumber() == giveNumberOfFirstStep() ) {
+    if ( tStep->isTheFirstStep() ) {
         //
         // Special init step - Compute displacements at tstep 0.
         //
@@ -493,7 +496,7 @@ NlDEIDynamic :: computeLoadVector(FloatArray &answer, ValueModeType mode, TimeSt
     //
     // Assemble the nodal part of load vector.
     //
-    this->assembleVector( answer, tStep, ExternalForcesVector, mode,
+    this->assembleVector( answer, tStep, ExternalForceAssembler(), mode,
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
@@ -541,7 +544,7 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
 #endif
 
 #ifdef DEBUG
-        if ( ( n = loc.giveSize() ) != charMtrx.giveNumberOfRows() ) {
+        if ( loc.giveSize() != charMtrx.giveNumberOfRows() ) {
             OOFEM_ERROR("dimension mismatch");
         }
 #endif
@@ -816,7 +819,7 @@ NlDEIDynamic :: printOutputAt(FILE *File, TimeStep *tStep)
         return;                                                                      // do not print even Solution step header
     }
 
-    fprintf( File, "\n\nOutput for time % .3e, solution step number %d\n", tStep->giveTargetTime(), tStep->giveNumber() );
+    fprintf( File, "\n\nOutput for time %.3e, solution step number %d\n", tStep->giveTargetTime(), tStep->giveNumber() );
     if ( drFlag ) {
         fprintf(File, "Reached load level : %e\n\n", this->pt);
     }

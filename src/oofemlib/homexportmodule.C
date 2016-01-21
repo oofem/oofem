@@ -54,8 +54,8 @@ HOMExportModule :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, this->ists, _IFT_HOMExportModule_ISTs);
     this->scale = 1.;
     IR_GIVE_OPTIONAL_FIELD(ir, this->scale, _IFT_HOMExportModule_scale);
-    this->matnum.clear();
-    IR_GIVE_OPTIONAL_FIELD(ir, this->matnum, _IFT_HOMExportModule_matnum);
+    //this->matnum.clear();
+    //IR_GIVE_OPTIONAL_FIELD(ir, this->matnum, _IFT_HOMExportModule_matnum);
     return ExportModule :: initializeFrom(ir);
 }
 
@@ -67,13 +67,21 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     }
 
     bool volExported = false;
-    fprintf(this->stream, "%.3e  ", tStep->giveTargetTime());
+    fprintf(this->stream, "%.3e  ", tStep->giveIntrinsicTime()*this->timeScale);
+    IntArray elements;
+    //assemble list of eligible elements. Elements can be present more times in a list but averaging goes just once over each element.
+    elements.resize(0);
+    for ( int ireg = 1; ireg <= this->giveNumberOfRegions(); ireg++ ) {
+        elements.followedBy(this->giveRegionSet(ireg)->giveElementList());
+    }
+//     elements.printYourself();
+
     for ( int ist: ists ) {
         FloatArray ipState, avgState;
         double VolTot = 0.;
         Domain *d = emodel->giveDomain(1);
         for ( auto &elem : d->giveElements() ) {
-            if ( this->matnum.giveSize() == 0 || this->matnum.contains( elem->giveMaterial()->giveNumber() ) ) { ///@todo We shouldn't rely on element->giveMaterial, won't work for layered cross-sections
+            if ( elements.contains(elem -> giveGlobalNumber()) ){
                 for ( GaussPoint *gp: *elem->giveDefaultIntegrationRulePtr() ) {
                     double dV = elem->computeVolumeAround(gp);
                     VolTot += dV;
@@ -112,6 +120,11 @@ HOMExportModule :: initialize()
     }
     fprintf(this->stream, "\n" );
     fflush(this->stream);
+
+
+    initializeElementSet();
+
+    ExportModule :: initialize();
 }
 
 void

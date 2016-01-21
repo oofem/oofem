@@ -44,7 +44,7 @@ namespace oofem {
 class OOFEM_EXPORT FEI3dLineLin : public FEInterpolation3d
 {
 public:
-    FEI3dLineLin() : FEInterpolation3d(1) { };
+    FEI3dLineLin() : FEInterpolation3d(1) { }
 
     virtual integrationDomain giveIntegrationDomain() const { return _Line; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
@@ -72,6 +72,8 @@ public:
     virtual void computeLocalSurfaceMapping(IntArray &surfNodes, int isurf);
 
     virtual void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+
+    virtual int giveNumberOfNodes() const { return 2; }
 
     virtual IntegrationRule *giveIntegrationRule(int order);
     virtual IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary);

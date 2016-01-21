@@ -101,6 +101,23 @@ IRResultType IncrementalLinearStatic :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
     sparseMtrxType = ( SparseMtrxType ) val;
 
+
+    suppressOutput = ir->hasField(_IFT_EngngModel_suppressOutput);
+
+    if(suppressOutput) {
+    	printf("Suppressing output.\n");
+    }
+    else {
+
+		if ( ( outputStream = fopen(this->dataOutputFileName.c_str(), "w") ) == NULL ) {
+			OOFEM_ERROR("Can't open output file %s", this->dataOutputFileName.c_str());
+		}
+
+		fprintf(outputStream, "%s", PRG_HEADER);
+		fprintf( outputStream, "\nStarting analysis on: %s\n", ctime(& this->startTime) );
+		fprintf(outputStream, "%s\n", simulationDescription.c_str());
+	}
+
     //StructuralEngngModel::initializeFrom (ir);
     return IRRT_OK;
 }
@@ -201,12 +218,12 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
     // Assembling the element part of load vector
     internalLoadVector.resize(neq);
     internalLoadVector.zero();
-    this->assembleVector( internalLoadVector, tStep, InternalForcesVector,
+    this->assembleVector( internalLoadVector, tStep, InternalForceAssembler(),
                          VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     loadVector.resize(neq);
     loadVector.zero();
-    this->assembleVector( loadVector, tStep, ExternalForcesVector,
+    this->assembleVector( loadVector, tStep, ExternalForceAssembler(),
                          VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     loadVector.subtract(internalLoadVector);
@@ -223,7 +240,7 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
 
     stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
     stiffnessMatrix->zero();
-    this->assemble( *stiffnessMatrix, tStep, TangentStiffnessMatrix,
+    this->assemble( *stiffnessMatrix, tStep, TangentAssembler(TangentStiffness),
                    EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
 #ifdef VERBOSE
@@ -256,7 +273,7 @@ double IncrementalLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeS
 
 int IncrementalLinearStatic :: giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep)
 {
-    return ( int ) tStep->giveNumber() % 2;
+    return tStep->giveNumber() % 2;
 }
 
 

@@ -67,12 +67,12 @@ NLStructuralElement :: computeCurrentVolume(TimeStep *tStep)
 
         computeDeformationGradientVector(F, gp, tStep);
         Fm.beMatrixForm(F);
-        double J=Fm.giveDeterminant();
+        double J = Fm.giveDeterminant();
 
         FEInterpolation *interpolation = this->giveInterpolation();
         double detJ = fabs( ( interpolation->giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) ) );
 
-        vol=vol + gp->giveWeight()*detJ*J;
+        vol += gp->giveWeight() * detJ * J;
     }
 
     return vol;
@@ -157,7 +157,7 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
     // zero answer will resize accordingly when adding first contribution
     answer.clear();
 
-    for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
+    for ( auto &gp: *this->giveDefaultIntegrationRulePtr() ) {
         StructuralMaterialStatus *matStat = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() );
 
         // Engineering (small strain) stress
@@ -208,7 +208,6 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
                 StructuralMaterial :: giveReducedVectorForm( stressTemp, vStress, gp->giveMaterialMode() );
                 answer.plusProduct(B, stressTemp, dV);
             } else   {
-              vStress.printYourself("stress");
                 answer.plusProduct(B, vStress, dV);
             }
         } else   {
@@ -339,7 +338,7 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
     // Compute matrix from material stiffness (total stiffness for small def.) - B^T * dS/dE * B
     if ( integrationRulesArray.size() == 1 ) {
         FloatMatrix B, D, DB;
-        for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
+        for ( auto &gp : *this->giveDefaultIntegrationRulePtr() ) {
 
             // Engineering (small strain) stiffness
             if ( nlGeometry == 0 ) {
@@ -465,7 +464,7 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
     FloatMatrix B, D, DB;
     IntArray irlocnum;
     for ( auto &iRule: integrationRulesArray ) {
-        for ( GaussPoint *gp: *iRule ) {
+        for ( auto &gp : *iRule ) {
 
             if ( nlGeometry == 0 ) {
                 this->computeBmatrixAt(gp, B);
@@ -505,14 +504,14 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
 void
 NLStructuralElement :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
-    FloatArray stress, stressFull(6);
+    FloatArray stress;
     FloatMatrix B, stress_ident, stress_identFull;
     IntArray indx;
 
     answer.clear();
 
     // assemble initial stress matrix
-    for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
+    for ( auto &gp : *this->giveDefaultIntegrationRulePtr() ) {
         // This function fetches the full form of the tensor
         this->giveIPValue(stress, gp, IST_StressTensor, tStep);
         if ( stress.giveSize() ) {
@@ -557,12 +556,11 @@ IRResultType
 NLStructuralElement :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
-    this->StructuralElement :: initializeFrom(ir);
 
     nlGeometry = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, nlGeometry, _IFT_NLStructuralElement_nlgeoflag);
 
-    return IRRT_OK;
+    return StructuralElement :: initializeFrom(ir);
 }
 
 void NLStructuralElement :: giveInputRecord(DynamicInputRecord &input)

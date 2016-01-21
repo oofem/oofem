@@ -65,7 +65,6 @@ namespace oofem {
 
 REGISTER_SparseNonLinearSystemNM(NRSolver)
 
-int nLayers = 5; // Number of layers in layered cross section used for phase field damage
 NRSolver :: NRSolver(Domain *d, EngngModel *m) :
     SparseNonLinearSystemNM(d, m), prescribedDofs(), prescribedDofsValues()
 {
@@ -91,6 +90,8 @@ NRSolver :: NRSolver(Domain *d, EngngModel *m) :
 
     smConstraintVersion = 0;
     mCalcStiffBeforeRes = true;
+
+    maxIncAllowed = 1.0e10;
 }
 
 
@@ -175,20 +176,20 @@ NRSolver :: initializeFrom(InputRecord *ir)
         mCalcStiffBeforeRes = false;
     }
 
-    SparseNonLinearSystemNM :: initializeFrom(ir);
  
+    this->constrainedNRminiter = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->constrainedNRminiter, _IFT_NRSolver_constrainedNRminiter);
-
-    #define _IFT_NRSolver_constrainedNRalpha "constrainednralpha"
-#define _IFT_NRSolver_constrainedNRminiter "constrainednrminiter"
+    this->constrainedNRFlag = this->constrainedNRminiter != 0;
 
 
-    return IRRT_OK;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->maxIncAllowed, _IFT_NRSolver_maxinc);
+
+    return SparseNonLinearSystemNM :: initializeFrom(ir);
 }
 
 
 NM_Status
-NRSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
+NRSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0, FloatArray *iR,
                   FloatArray &X, FloatArray &dX, FloatArray &F,
                   const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                   int &nite, TimeStep *tStep)
@@ -249,10 +250,17 @@ NRSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
     }
 
     nite = 0;
-    do {
+    for ( nite = 0; ; ++nite ) {
         // Compute the residual
         engngModel->updateComponent(tStep, InternalRhs, domain);
-        rhs.beDifferenceOf(RT, F);
+        if (nite || iR == NULL) {
+            rhs.beDifferenceOf(RT, F);
+        } else {
+            rhs = R;
+            if (iR) {
+                rhs.add(*iR); // add initial guess
+            }
+        }
         if ( this->prescribedDofsFlag ) {
             this->applyConstraintsToLoadIncrement(nite, k, rhs, rlm, tStep);
         }
@@ -297,19 +305,37 @@ NRSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
         } else if ( this->constrainedNRFlag && ( nite > this->constrainedNRminiter ) ) {
             ///@todo This doesn't check units, it is nonsense and must be corrected / Mikael
             if ( this->forceErrVec.computeSquaredNorm() > this->forceErrVecOld.computeSquaredNorm() ) {
-                printf("Constraining increment to be %e times full increment...\n", this->constrainedNRalpha);
+                OOFEM_LOG_INFO("Constraining increment to be %e times full increment...\n", this->constrainedNRalpha);
                 ddX.times(this->constrainedNRalpha);
-            }   
+            }
             //this->giveConstrainedNRSolver()->solve(X, & ddX, this->forceErrVec, this->forceErrVecOld, status, tStep);
         }
+
+
+        /////////////////////////////////////////
+
+        double maxInc = 0.0;
+        for(double inc : ddX) {
+        	if(fabs(inc) > maxInc) {
+        		maxInc = fabs(inc);
+        	}
+        }
+
+        if(maxInc > maxIncAllowed) {
+        	printf("Restricting increment.\n");
+        	ddX.times(maxIncAllowed/maxInc);
+        }
+
+        /////////////////////////////////////////
+
+
         X.add(ddX);
         dX.add(ddX);
         tStep->incrementStateCounter(); // update solution state counter
         tStep->incrementSubStepNumber();
-        nite++; // iteration increment
 
         engngModel->giveExportModuleManager()->doOutput(tStep, true);
-    } while ( true ); // end of iteration
+    }
 
     status |= NM_Success;
     solved = 1;
@@ -573,7 +599,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
     }
 
     if ( internalForcesEBENorm.giveSize() > 1 ) { // Special treatment when just one norm is given; No grouping
-        int nccdg = this->domain->giveMaxDofID()+nLayers;				//number of layers for phase field shell (jim @todo jb layer)
+        int nccdg = this->domain->giveMaxDofID();
         // Keeps tracks of which dof IDs are actually in use;
         IntArray idsInUse(nccdg);
         idsInUse.zero();
@@ -603,14 +629,8 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                     continue;
                 }
 
-				//if (dofid >= 23) {
-				//	dg_forceErr.at(dofid) += 0;
-				//	dg_dispErr.at(dofid) += 0;
-				//} else {
-					dg_forceErr.at(dofid) += rhs.at(eq) * rhs.at(eq);
-					dg_dispErr.at(dofid) += ddX.at(eq) * ddX.at(eq);
-				//}
-
+                dg_forceErr.at(dofid) += rhs.at(eq) * rhs.at(eq);
+                dg_dispErr.at(dofid) += ddX.at(eq) * ddX.at(eq);
                 dg_totalLoadLevel.at(dofid) += RT.at(eq) * RT.at(eq);
                 dg_totalDisp.at(dofid) += X.at(eq) * X.at(eq);
                 idsInUse.at(dofid) = 1;
@@ -699,11 +719,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
             if ( rtolf.at(1) > 0.0 ) {
                 //  compute a relative error norm
                 if ( ( dg_totalLoadLevel.at(dg) + internalForcesEBENorm.at(dg) ) > nrsolver_ERROR_NORM_SMALL_NUM ) {
-                    //if (dg>=23) {
-                    //    forceErr = sqrt( dg_forceErr.at(dg) );
-                    //}else{
                     forceErr = sqrt( dg_forceErr.at(dg) / ( dg_totalLoadLevel.at(dg) + internalForcesEBENorm.at(dg) ) );
-                    //}
                 } else {
                     // If both external forces and internal ebe norms are zero, then the residual must be zero.
                     //zeroNorm = true; // Warning about this afterwards.
@@ -781,7 +797,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
             if ( this->constrainedNRFlag ) {
                 // store the errors from the current iteration for use in the next
                 forceErrVec.at(1) = forceErr;
-            }       
+            }
         }
 
         if ( rtold.at(1) > 0.0 ) {

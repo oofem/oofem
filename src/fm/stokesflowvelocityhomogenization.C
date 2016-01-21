@@ -126,7 +126,7 @@ StokesFlowVelocityHomogenization :: computeTangent(FloatMatrix &answer, TimeStep
     SparseMtrxType stype = solver->giveRecommendedMatrix(true);
     std :: unique_ptr< SparseMtrx > Kff( classFactory.createSparseMtrx( stype ) );
     Kff->buildInternalStructure(this, domain->giveNumber(), EModelDefaultEquationNumbering() );
-    this->assemble(*Kff, tStep, TangentStiffnessMatrix, EModelDefaultEquationNumbering(), domain);
+    this->assemble(*Kff, tStep, TangentAssembler(TangentStiffness), EModelDefaultEquationNumbering(), domain);
     solver->solve(*Kff, F, H);
 
     answer.beTProductOf(H, F);
@@ -144,7 +144,7 @@ StokesFlowVelocityHomogenization :: integrateNMatrix(FloatMatrix &N, Element &el
 
         ///@todo Ask the element for the N-matrix instead
         elem.giveInterpolation()->evalN( n, lcoords, FEIElementGeometryWrapper(&elem) );
-        double detJ = elem.giveInterpolation()->giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(&elem) );
+        double detJ = fabs( elem.giveInterpolation()->giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(&elem) ) );
         n2.add(gp->giveWeight() * detJ, n);
     }
 

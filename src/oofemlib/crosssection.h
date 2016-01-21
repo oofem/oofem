@@ -43,6 +43,7 @@
 #include "internalstatevaluetype.h"
 #include "dictionary.h"
 #include "crosssectextension.h"
+#include "gausspoint.h"
 
 ///@name Input fields for CrossSection
 //@{
@@ -51,6 +52,7 @@
 
 namespace oofem {
 class IntegrationRule;
+class Material;
 
 /// List of properties possibly stored in a cross section.
 enum CrossSectionProperty {
@@ -67,7 +69,9 @@ enum CrossSectionProperty {
     CS_TopZCoord,      ///< Top z coordinate
     CS_BottomZCoord,   ///< Bottom z coordinate
     CS_NumLayers,      ///< Number of layers that makes up the cross section
-    CS_Layer,          ///< layer identification number where a certain integration point is placed
+    CS_DirectorVectorX, ///< Director vector component in x-axis
+    CS_DirectorVectorY, ///< Director vector component in y-axis
+    CS_DirectorVectorZ, ///< Director vector component in z-axis
 };
 
 /**
@@ -116,11 +120,11 @@ public:
      * @param n Cross section number.
      * @param d Domain.
      */
-    CrossSection(int n, Domain * d);
+    CrossSection(int n, Domain *d);
     /// Destructor.
     virtual ~CrossSection();
 
-    int giveSetNumber() const { return this->setNumber; };
+    int giveSetNumber() const { return this->setNumber; }
 
     /**
      * Returns the value of cross section property at given point.
@@ -149,7 +153,7 @@ public:
      * @param gp Integration point.
      * @return Property value.
      */
-    virtual double give(int aProperty, GaussPoint *gp) { return 0.0; };
+    virtual double give(int aProperty, GaussPoint *gp) { return 0.0; }
 
     /**
      * Check for symmetry of stiffness matrix.
@@ -158,7 +162,7 @@ public:
      * @param rMode Response mode of material.
      * @return True if stiffness matrix of receiver is symmetric.
      */
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; };
+    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
     virtual void printYourself();
 
     /**
@@ -244,6 +248,12 @@ public:
     virtual double predictRelativeRedistributionCost(GaussPoint *gp) { return 1.0; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+
+    /**
+     * Returns the material associated with the GP.
+     * Default implementation uses gp->giveMaterial() for backwards compatibility, but it should be overloaded in each specialized cross-section.
+     */
+    virtual Material *giveMaterial(IntegrationPoint *ip) { return ip->giveMaterial(); }
 
     /**
      * Stores integration point state to output stream.

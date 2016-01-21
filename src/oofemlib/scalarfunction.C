@@ -44,10 +44,16 @@
 #include <sstream>
 
 namespace oofem {
+
+ScalarFunction :: ScalarFunction()
+{
+    this->dvType = DV_Undefined;
+}
+
 ScalarFunction :: ScalarFunction(double val)
 {
-    this->dvType = DV_ValueType;
-    this->setValue(val);
+        this->dvType = DV_ValueType;
+        this->setValue(val);
 }
 
 
@@ -58,14 +64,12 @@ ScalarFunction :: ScalarFunction(std :: string &val)
     this->setSimpleExpression(val);
 }
 
-
 ScalarFunction :: ScalarFunction(int val)
 {
     // initialize type to DV_ValueType to prevent clear() method to clear unitialized memory. will be set correctly by set method.
     this->dvType = DV_ValueType;
     this->setReference(val);
 }
-
 
 ScalarFunction :: ~ScalarFunction() { }
 
@@ -74,7 +78,7 @@ void
 ScalarFunction :: setValue(double val)
 {
     this->dvType = DV_ValueType;
-    this->dValue = 0.0;
+    this->dValue = val;
 }
 
 
@@ -104,7 +108,7 @@ ScalarFunction :: eval(std :: map< std :: string, FunctionArgument >valDict, Dom
         Parser p;
         int err;
         // process valDict and call internal parser
-        for ( const auto &named_arg: valDict ) {
+        for ( const auto &named_arg : valDict ) {
             const FunctionArgument &arg = named_arg.second;
             if ( arg.type == FunctionArgument :: FAT_double ) {
                 buff << named_arg.first << "=" << arg.val0 << ";";
@@ -152,6 +156,14 @@ ScalarFunction :: eval(double time, Domain *d) const
     }
 }
 
+bool
+ScalarFunction :: isDefined() const
+{
+    if ( this->dvType == DV_Undefined ){
+        return 0;
+    }
+    return 1;
+}
 
 std :: ostream &operator << ( std :: ostream & out, const ScalarFunction & s )
 {

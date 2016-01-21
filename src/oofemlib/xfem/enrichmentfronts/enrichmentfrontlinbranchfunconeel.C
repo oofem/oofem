@@ -37,7 +37,6 @@
 #include "classfactory.h"
 #include "xfem/xfemmanager.h"
 #include "domain.h"
-#include "connectivitytable.h"
 #include "spatiallocalizer.h"
 #include "element.h"
 #include "gausspoint.h"

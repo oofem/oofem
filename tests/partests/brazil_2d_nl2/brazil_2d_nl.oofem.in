@@ -2,47 +2,47 @@ brazil_2d_nl.oofem.out
 2D brazilian splitting test
 #linearstatic nsteps 1 renumber 1
 #
-#nonlinearstatic nsteps 100 renumber 1 contextOutputStep 1 stiffMode 2 controlmode 0 psi 0.0 steplength 0.0001 initialsteplength 0.0002 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1
+#nonlinearstatic nsteps 100 renumber 1 contextOutputStep 1 stiffMode 2 controlmode 0 psi 0.0 steplength 0.0001 initialsteplength 0.0002 rtolf 1e-4 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1
 #
 nonlinearstatic nsteps 1 nmsteps 5 nmodules 1
 #
 #metastep 1
-nsteps 4 stiffMode 2 controlmode 0 psi 0.0 steplength 0.0001 initialsteplength 0.0002 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll
+nsteps 4 stiffMode 2 controlmode 0 psi 0.0 steplength 0.0001 initialsteplength 0.0002 rtolf 1e-4 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll
 #metastep 2
-nsteps 3 stiffMode 2 controlmode 0 psi 0.0 steplength 0.00002 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll
+nsteps 3 stiffMode 2 controlmode 0 psi 0.0 steplength 0.00002 rtolf 1e-4 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll
 #metastep 3
-nsteps 4 stiffMode 2 controlmode 0 psi 0.0 steplength 0.00001 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll
+nsteps 4 stiffMode 2 controlmode 0 psi 0.0 steplength 0.00001 rtolf 1e-4 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll
 #metastep 4
-nsteps 9 stiffMode 2 controlmode 0 psi 0.0 steplength 0.0001 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll
+nsteps 9 stiffMode 2 controlmode 0 psi 0.0 steplength 0.0001 rtolf 1e-4 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll
 #metastep 5
-nsteps 10 stiffMode 2 controlmode 0 psi 0.0 steplength 0.001 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll
+nsteps 10 stiffMode 2 controlmode 0 psi 0.0 steplength 0.001 rtolf 1e-4 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll
 #
 errorcheck "brazil_2d_nl.oofem.in"
 domain PlaneStrain
 OutputManager tstep_all dofman_all element_all
-ndofman 427 nelem 386 ncrosssect 2 nmat 2 nbc 2 nltf 1 nic 0
-node 1 coords 3 0.000000e+00 0.000000e+00 0.000000e+00 bc 2 1 1
-node 2 coords 3 4.000000e+01 0.000000e+00 0.000000e+00 bc 2 0 1
-node 3 coords 3 5.000000e+00 0.000000e+00 0.000000e+00 bc 2 0 1
+ndofman 427 nelem 386 ncrosssect 2 nmat 2 nbc 3 nltf 1 nic 0 nset 5
+node 1 coords 3 0.000000e+00 0.000000e+00 0.000000e+00
+node 2 coords 3 4.000000e+01 0.000000e+00 0.000000e+00
+node 3 coords 3 5.000000e+00 0.000000e+00 0.000000e+00
 node 4 coords 3 5.000000e+00 3.968627e+01 0.000000e+00
-node 5 coords 3 0.000000e+00 3.968627e+01 0.000000e+00 bc 2 1 0
+node 5 coords 3 0.000000e+00 3.968627e+01 0.000000e+00
 node 6 coords 3 5.000000e+00 4.268627e+01 0.000000e+00
-node 7 coords 3 0.000000e+00 4.268627e+01 0.000000e+00 bc 2 1 0
+node 7 coords 3 0.000000e+00 4.268627e+01 0.000000e+00
 node 8 coords 3 1.000000e+00 4.268627e+01 0.000000e+00
-node 9 coords 3 1.000000e+00 0.000000e+00 0.000000e+00 bc 2 0 1
-node 10 coords 3 2.000000e+00 0.000000e+00 0.000000e+00 bc 2 0 1
-node 11 coords 3 3.000000e+00 0.000000e+00 0.000000e+00 bc 2 0 1
-node 12 coords 3 4.000000e+00 0.000000e+00 0.000000e+00 bc 2 0 1
-node 13 coords 3 6.048352e+00 0.000000e+00 0.000000e+00 bc 2 0 1
-node 14 coords 3 7.242394e+00 0.000000e+00 0.000000e+00 bc 2 0 1
-node 15 coords 3 8.919308e+00 0.000000e+00 0.000000e+00 bc 2 0 1
-node 16 coords 3 1.112819e+01 0.000000e+00 0.000000e+00 bc 2 0 1
-node 17 coords 3 1.351373e+01 0.000000e+00 0.000000e+00 bc 2 0 1
-node 18 coords 3 1.622269e+01 0.000000e+00 0.000000e+00 bc 2 0 1
-node 19 coords 3 2.007507e+01 0.000000e+00 0.000000e+00 bc 2 0 1
-node 20 coords 3 2.481590e+01 0.000000e+00 0.000000e+00 bc 2 0 1
-node 21 coords 3 2.978099e+01 0.000000e+00 0.000000e+00 bc 2 0 1
-node 22 coords 3 3.488623e+01 0.000000e+00 0.000000e+00 bc 2 0 1
+node 9 coords 3 1.000000e+00 0.000000e+00 0.000000e+00
+node 10 coords 3 2.000000e+00 0.000000e+00 0.000000e+00
+node 11 coords 3 3.000000e+00 0.000000e+00 0.000000e+00
+node 12 coords 3 4.000000e+00 0.000000e+00 0.000000e+00
+node 13 coords 3 6.048352e+00 0.000000e+00 0.000000e+00
+node 14 coords 3 7.242394e+00 0.000000e+00 0.000000e+00
+node 15 coords 3 8.919308e+00 0.000000e+00 0.000000e+00
+node 16 coords 3 1.112819e+01 0.000000e+00 0.000000e+00
+node 17 coords 3 1.351373e+01 0.000000e+00 0.000000e+00
+node 18 coords 3 1.622269e+01 0.000000e+00 0.000000e+00
+node 19 coords 3 2.007507e+01 0.000000e+00 0.000000e+00
+node 20 coords 3 2.481590e+01 0.000000e+00 0.000000e+00
+node 21 coords 3 2.978099e+01 0.000000e+00 0.000000e+00
+node 22 coords 3 3.488623e+01 0.000000e+00 0.000000e+00
 node 23 coords 3 3.968902e+01 4.978097e+00 0.000000e+00
 node 24 coords 3 3.876105e+01 9.878295e+00 0.000000e+00
 node 25 coords 3 3.723059e+01 1.462476e+01 0.000000e+00
@@ -62,51 +62,51 @@ node 38 coords 3 3.999929e+00 3.968627e+01 0.000000e+00
 node 39 coords 3 2.999839e+00 3.968627e+01 0.000000e+00
 node 40 coords 3 1.999778e+00 3.968627e+01 0.000000e+00
 node 41 coords 3 9.998060e-01 3.968627e+01 0.000000e+00
-node 42 coords 3 0.000000e+00 3.866867e+01 0.000000e+00 bc 2 1 0
-node 43 coords 3 0.000000e+00 3.765108e+01 0.000000e+00 bc 2 1 0
-node 44 coords 3 0.000000e+00 3.663348e+01 0.000000e+00 bc 2 1 0
-node 45 coords 3 0.000000e+00 3.561588e+01 0.000000e+00 bc 2 1 0
-node 46 coords 3 0.000000e+00 3.459829e+01 0.000000e+00 bc 2 1 0
-node 47 coords 3 0.000000e+00 3.358069e+01 0.000000e+00 bc 2 1 0
-node 48 coords 3 0.000000e+00 3.256309e+01 0.000000e+00 bc 2 1 0
-node 49 coords 3 0.000000e+00 3.154550e+01 0.000000e+00 bc 2 1 0
-node 50 coords 3 0.000000e+00 3.052790e+01 0.000000e+00 bc 2 1 0
-node 51 coords 3 0.000000e+00 2.951030e+01 0.000000e+00 bc 2 1 0
-node 52 coords 3 0.000000e+00 2.849271e+01 0.000000e+00 bc 2 1 0
-node 53 coords 3 0.000000e+00 2.747511e+01 0.000000e+00 bc 2 1 0
-node 54 coords 3 0.000000e+00 2.645751e+01 0.000000e+00 bc 2 1 0
-node 55 coords 3 0.000000e+00 2.543992e+01 0.000000e+00 bc 2 1 0
-node 56 coords 3 0.000000e+00 2.442232e+01 0.000000e+00 bc 2 1 0
-node 57 coords 3 0.000000e+00 2.340472e+01 0.000000e+00 bc 2 1 0
-node 58 coords 3 0.000000e+00 2.238713e+01 0.000000e+00 bc 2 1 0
-node 59 coords 3 0.000000e+00 2.136953e+01 0.000000e+00 bc 2 1 0
-node 60 coords 3 0.000000e+00 2.035193e+01 0.000000e+00 bc 2 1 0
-node 61 coords 3 0.000000e+00 1.933434e+01 0.000000e+00 bc 2 1 0
-node 62 coords 3 0.000000e+00 1.831674e+01 0.000000e+00 bc 2 1 0
-node 63 coords 3 0.000000e+00 1.729914e+01 0.000000e+00 bc 2 1 0
-node 64 coords 3 0.000000e+00 1.628155e+01 0.000000e+00 bc 2 1 0
-node 65 coords 3 0.000000e+00 1.526395e+01 0.000000e+00 bc 2 1 0
-node 66 coords 3 0.000000e+00 1.424635e+01 0.000000e+00 bc 2 1 0
-node 67 coords 3 0.000000e+00 1.322876e+01 0.000000e+00 bc 2 1 0
-node 68 coords 3 0.000000e+00 1.221116e+01 0.000000e+00 bc 2 1 0
-node 69 coords 3 0.000000e+00 1.119356e+01 0.000000e+00 bc 2 1 0
-node 70 coords 3 0.000000e+00 1.017597e+01 0.000000e+00 bc 2 1 0
-node 71 coords 3 0.000000e+00 9.158370e+00 0.000000e+00 bc 2 1 0
-node 72 coords 3 0.000000e+00 8.140773e+00 0.000000e+00 bc 2 1 0
-node 73 coords 3 0.000000e+00 7.123177e+00 0.000000e+00 bc 2 1 0
-node 74 coords 3 0.000000e+00 6.105580e+00 0.000000e+00 bc 2 1 0
-node 75 coords 3 0.000000e+00 5.087983e+00 0.000000e+00 bc 2 1 0
-node 76 coords 3 0.000000e+00 4.070387e+00 0.000000e+00 bc 2 1 0
-node 77 coords 3 0.000000e+00 3.052790e+00 0.000000e+00 bc 2 1 0
-node 78 coords 3 0.000000e+00 2.035193e+00 0.000000e+00 bc 2 1 0
-node 79 coords 3 0.000000e+00 1.017597e+00 0.000000e+00 bc 2 1 0
+node 42 coords 3 0.000000e+00 3.866867e+01 0.000000e+00
+node 43 coords 3 0.000000e+00 3.765108e+01 0.000000e+00
+node 44 coords 3 0.000000e+00 3.663348e+01 0.000000e+00
+node 45 coords 3 0.000000e+00 3.561588e+01 0.000000e+00
+node 46 coords 3 0.000000e+00 3.459829e+01 0.000000e+00
+node 47 coords 3 0.000000e+00 3.358069e+01 0.000000e+00
+node 48 coords 3 0.000000e+00 3.256309e+01 0.000000e+00
+node 49 coords 3 0.000000e+00 3.154550e+01 0.000000e+00
+node 50 coords 3 0.000000e+00 3.052790e+01 0.000000e+00
+node 51 coords 3 0.000000e+00 2.951030e+01 0.000000e+00
+node 52 coords 3 0.000000e+00 2.849271e+01 0.000000e+00
+node 53 coords 3 0.000000e+00 2.747511e+01 0.000000e+00
+node 54 coords 3 0.000000e+00 2.645751e+01 0.000000e+00
+node 55 coords 3 0.000000e+00 2.543992e+01 0.000000e+00
+node 56 coords 3 0.000000e+00 2.442232e+01 0.000000e+00
+node 57 coords 3 0.000000e+00 2.340472e+01 0.000000e+00
+node 58 coords 3 0.000000e+00 2.238713e+01 0.000000e+00
+node 59 coords 3 0.000000e+00 2.136953e+01 0.000000e+00
+node 60 coords 3 0.000000e+00 2.035193e+01 0.000000e+00
+node 61 coords 3 0.000000e+00 1.933434e+01 0.000000e+00
+node 62 coords 3 0.000000e+00 1.831674e+01 0.000000e+00
+node 63 coords 3 0.000000e+00 1.729914e+01 0.000000e+00
+node 64 coords 3 0.000000e+00 1.628155e+01 0.000000e+00
+node 65 coords 3 0.000000e+00 1.526395e+01 0.000000e+00
+node 66 coords 3 0.000000e+00 1.424635e+01 0.000000e+00
+node 67 coords 3 0.000000e+00 1.322876e+01 0.000000e+00
+node 68 coords 3 0.000000e+00 1.221116e+01 0.000000e+00
+node 69 coords 3 0.000000e+00 1.119356e+01 0.000000e+00
+node 70 coords 3 0.000000e+00 1.017597e+01 0.000000e+00
+node 71 coords 3 0.000000e+00 9.158370e+00 0.000000e+00
+node 72 coords 3 0.000000e+00 8.140773e+00 0.000000e+00
+node 73 coords 3 0.000000e+00 7.123177e+00 0.000000e+00
+node 74 coords 3 0.000000e+00 6.105580e+00 0.000000e+00
+node 75 coords 3 0.000000e+00 5.087983e+00 0.000000e+00
+node 76 coords 3 0.000000e+00 4.070387e+00 0.000000e+00
+node 77 coords 3 0.000000e+00 3.052790e+00 0.000000e+00
+node 78 coords 3 0.000000e+00 2.035193e+00 0.000000e+00
+node 79 coords 3 0.000000e+00 1.017597e+00 0.000000e+00
 node 80 coords 3 5.000000e+00 4.068682e+01 0.000000e+00
 node 81 coords 3 5.000000e+00 4.168668e+01 0.000000e+00
 node 82 coords 3 4.000000e+00 4.268627e+01 0.000000e+00
 node 83 coords 3 3.000000e+00 4.268627e+01 0.000000e+00
 node 84 coords 3 2.000000e+00 4.268627e+01 0.000000e+00
-node 85 coords 3 0.000000e+00 4.168627e+01 0.000000e+00 bc 2 1 0
-node 86 coords 3 0.000000e+00 4.068627e+01 0.000000e+00 bc 2 1 0
+node 85 coords 3 0.000000e+00 4.168627e+01 0.000000e+00
+node 86 coords 3 0.000000e+00 4.068627e+01 0.000000e+00
 node 87 coords 3 1.006589e+00 1.013939e+00 0.000000e+00
 node 88 coords 3 2.013556e+00 1.009611e+00 0.000000e+00
 node 89 coords 3 3.019452e+00 1.004713e+00 0.000000e+00
@@ -448,400 +448,406 @@ node 424 coords 3 9.999670e-01 4.168628e+01 0.000000e+00
 node 425 coords 3 9.999150e-01 4.068628e+01 0.000000e+00
 node 426 coords 3 1.999889e+00 4.068630e+01 0.000000e+00
 node 427 coords 3 2.999910e+00 4.068634e+01 0.000000e+00
-TrPlaneStrain 1 nodes 3 160 161 221 mat 1 crossSect 1
-TrPlaneStrain 2 nodes 3 387 388 412 mat 1 crossSect 1
-Quad1PlaneStrain 3 nodes 4 1 9 87 79 mat 1 crossSect 1
-Quad1PlaneStrain 4 nodes 4 9 10 88 87 mat 1 crossSect 1
-Quad1PlaneStrain 5 nodes 4 10 11 89 88 mat 1 crossSect 1
-Quad1PlaneStrain 6 nodes 4 11 12 90 89 mat 1 crossSect 1
-Quad1PlaneStrain 7 nodes 4 12 3 91 90 mat 1 crossSect 1
-Quad1PlaneStrain 8 nodes 4 3 13 92 91 mat 1 crossSect 1
-Quad1PlaneStrain 9 nodes 4 13 14 93 92 mat 1 crossSect 1
-Quad1PlaneStrain 10 nodes 4 14 15 94 93 mat 1 crossSect 1
-Quad1PlaneStrain 11 nodes 4 15 16 95 94 mat 1 crossSect 1
-Quad1PlaneStrain 12 nodes 4 16 17 96 95 mat 1 crossSect 1
-Quad1PlaneStrain 13 nodes 4 17 18 97 96 mat 1 crossSect 1
-Quad1PlaneStrain 14 nodes 4 18 19 98 97 mat 1 crossSect 1
-Quad1PlaneStrain 15 nodes 4 19 20 99 98 mat 1 crossSect 1
-Quad1PlaneStrain 16 nodes 4 20 21 100 99 mat 1 crossSect 1
-Quad1PlaneStrain 17 nodes 4 21 22 101 100 mat 1 crossSect 1
-Quad1PlaneStrain 18 nodes 4 22 2 23 101 mat 1 crossSect 1
-Quad1PlaneStrain 19 nodes 4 23 24 102 101 mat 1 crossSect 1
-Quad1PlaneStrain 20 nodes 4 24 25 103 102 mat 1 crossSect 1
-Quad1PlaneStrain 21 nodes 4 25 26 104 103 mat 1 crossSect 1
-Quad1PlaneStrain 22 nodes 4 26 27 105 104 mat 1 crossSect 1
-Quad1PlaneStrain 23 nodes 4 27 28 106 105 mat 1 crossSect 1
-Quad1PlaneStrain 24 nodes 4 28 29 107 106 mat 1 crossSect 1
-Quad1PlaneStrain 25 nodes 4 29 30 108 107 mat 1 crossSect 1
-Quad1PlaneStrain 26 nodes 4 30 31 109 108 mat 1 crossSect 1
-Quad1PlaneStrain 27 nodes 4 31 32 110 109 mat 1 crossSect 1
-Quad1PlaneStrain 28 nodes 4 32 33 111 110 mat 1 crossSect 1
-Quad1PlaneStrain 29 nodes 4 33 34 112 111 mat 1 crossSect 1
-Quad1PlaneStrain 30 nodes 4 34 35 113 112 mat 1 crossSect 1
-Quad1PlaneStrain 31 nodes 4 35 36 114 113 mat 1 crossSect 1
-Quad1PlaneStrain 32 nodes 4 36 37 115 114 mat 1 crossSect 1
-Quad1PlaneStrain 33 nodes 4 37 4 116 115 mat 1 crossSect 1
-Quad1PlaneStrain 34 nodes 4 4 38 117 116 mat 1 crossSect 1
-Quad1PlaneStrain 35 nodes 4 38 39 118 117 mat 1 crossSect 1
-Quad1PlaneStrain 36 nodes 4 39 40 119 118 mat 1 crossSect 1
-Quad1PlaneStrain 37 nodes 4 40 41 120 119 mat 1 crossSect 1
-Quad1PlaneStrain 38 nodes 4 41 5 42 120 mat 1 crossSect 1
-Quad1PlaneStrain 39 nodes 4 42 43 121 120 mat 1 crossSect 1
-Quad1PlaneStrain 40 nodes 4 43 44 122 121 mat 1 crossSect 1
-Quad1PlaneStrain 41 nodes 4 44 45 123 122 mat 1 crossSect 1
-Quad1PlaneStrain 42 nodes 4 45 46 124 123 mat 1 crossSect 1
-Quad1PlaneStrain 43 nodes 4 46 47 125 124 mat 1 crossSect 1
-Quad1PlaneStrain 44 nodes 4 47 48 126 125 mat 1 crossSect 1
-Quad1PlaneStrain 45 nodes 4 48 49 127 126 mat 1 crossSect 1
-Quad1PlaneStrain 46 nodes 4 49 50 128 127 mat 1 crossSect 1
-Quad1PlaneStrain 47 nodes 4 50 51 129 128 mat 1 crossSect 1
-Quad1PlaneStrain 48 nodes 4 51 52 130 129 mat 1 crossSect 1
-Quad1PlaneStrain 49 nodes 4 52 53 131 130 mat 1 crossSect 1
-Quad1PlaneStrain 50 nodes 4 53 54 132 131 mat 1 crossSect 1
-Quad1PlaneStrain 51 nodes 4 54 55 133 132 mat 1 crossSect 1
-Quad1PlaneStrain 52 nodes 4 55 56 134 133 mat 1 crossSect 1
-Quad1PlaneStrain 53 nodes 4 56 57 135 134 mat 1 crossSect 1
-Quad1PlaneStrain 54 nodes 4 57 58 136 135 mat 1 crossSect 1
-Quad1PlaneStrain 55 nodes 4 58 59 137 136 mat 1 crossSect 1
-Quad1PlaneStrain 56 nodes 4 59 60 138 137 mat 1 crossSect 1
-Quad1PlaneStrain 57 nodes 4 60 61 139 138 mat 1 crossSect 1
-Quad1PlaneStrain 58 nodes 4 61 62 140 139 mat 1 crossSect 1
-Quad1PlaneStrain 59 nodes 4 62 63 141 140 mat 1 crossSect 1
-Quad1PlaneStrain 60 nodes 4 63 64 142 141 mat 1 crossSect 1
-Quad1PlaneStrain 61 nodes 4 64 65 143 142 mat 1 crossSect 1
-Quad1PlaneStrain 62 nodes 4 65 66 144 143 mat 1 crossSect 1
-Quad1PlaneStrain 63 nodes 4 66 67 145 144 mat 1 crossSect 1
-Quad1PlaneStrain 64 nodes 4 67 68 146 145 mat 1 crossSect 1
-Quad1PlaneStrain 65 nodes 4 68 69 147 146 mat 1 crossSect 1
-Quad1PlaneStrain 66 nodes 4 69 70 148 147 mat 1 crossSect 1
-Quad1PlaneStrain 67 nodes 4 70 71 149 148 mat 1 crossSect 1
-Quad1PlaneStrain 68 nodes 4 71 72 150 149 mat 1 crossSect 1
-Quad1PlaneStrain 69 nodes 4 72 73 151 150 mat 1 crossSect 1
-Quad1PlaneStrain 70 nodes 4 73 74 152 151 mat 1 crossSect 1
-Quad1PlaneStrain 71 nodes 4 74 75 153 152 mat 1 crossSect 1
-Quad1PlaneStrain 72 nodes 4 75 76 154 153 mat 1 crossSect 1
-Quad1PlaneStrain 73 nodes 4 76 77 155 154 mat 1 crossSect 1
-Quad1PlaneStrain 74 nodes 4 77 78 156 155 mat 1 crossSect 1
-Quad1PlaneStrain 75 nodes 4 78 79 87 156 mat 1 crossSect 1
-Quad1PlaneStrain 76 nodes 4 87 88 157 156 mat 1 crossSect 1
-Quad1PlaneStrain 77 nodes 4 88 89 158 157 mat 1 crossSect 1
-Quad1PlaneStrain 78 nodes 4 89 90 159 158 mat 1 crossSect 1
-Quad1PlaneStrain 79 nodes 4 90 91 160 159 mat 1 crossSect 1
-Quad1PlaneStrain 80 nodes 4 91 92 161 160 mat 1 crossSect 1
-Quad1PlaneStrain 81 nodes 4 92 93 162 161 mat 1 crossSect 1
-Quad1PlaneStrain 82 nodes 4 93 94 163 162 mat 1 crossSect 1
-Quad1PlaneStrain 83 nodes 4 94 95 164 163 mat 1 crossSect 1
-Quad1PlaneStrain 84 nodes 4 95 96 165 164 mat 1 crossSect 1
-Quad1PlaneStrain 85 nodes 4 96 97 166 165 mat 1 crossSect 1
-Quad1PlaneStrain 86 nodes 4 97 98 167 166 mat 1 crossSect 1
-Quad1PlaneStrain 87 nodes 4 98 99 168 167 mat 1 crossSect 1
-Quad1PlaneStrain 88 nodes 4 99 100 169 168 mat 1 crossSect 1
-Quad1PlaneStrain 89 nodes 4 100 101 102 169 mat 1 crossSect 1
-Quad1PlaneStrain 90 nodes 4 103 104 169 102 mat 1 crossSect 1
-Quad1PlaneStrain 91 nodes 4 169 104 105 170 mat 1 crossSect 1
-Quad1PlaneStrain 92 nodes 4 105 106 171 170 mat 1 crossSect 1
-Quad1PlaneStrain 93 nodes 4 106 107 172 171 mat 1 crossSect 1
-Quad1PlaneStrain 94 nodes 4 107 108 173 172 mat 1 crossSect 1
-Quad1PlaneStrain 95 nodes 4 108 109 174 173 mat 1 crossSect 1
-Quad1PlaneStrain 96 nodes 4 109 110 175 174 mat 1 crossSect 1
-Quad1PlaneStrain 97 nodes 4 110 111 176 175 mat 1 crossSect 1
-Quad1PlaneStrain 98 nodes 4 111 112 177 176 mat 1 crossSect 1
-Quad1PlaneStrain 99 nodes 4 112 113 178 177 mat 1 crossSect 1
-Quad1PlaneStrain 100 nodes 4 113 114 179 178 mat 1 crossSect 1
-Quad1PlaneStrain 101 nodes 4 114 115 180 179 mat 1 crossSect 1
-Quad1PlaneStrain 102 nodes 4 115 116 181 180 mat 1 crossSect 1
-Quad1PlaneStrain 103 nodes 4 116 117 182 181 mat 1 crossSect 1
-Quad1PlaneStrain 104 nodes 4 117 118 183 182 mat 1 crossSect 1
-Quad1PlaneStrain 105 nodes 4 118 119 184 183 mat 1 crossSect 1
-Quad1PlaneStrain 106 nodes 4 119 120 121 184 mat 1 crossSect 1
-Quad1PlaneStrain 107 nodes 4 121 122 185 184 mat 1 crossSect 1
-Quad1PlaneStrain 108 nodes 4 122 123 186 185 mat 1 crossSect 1
-Quad1PlaneStrain 109 nodes 4 123 124 187 186 mat 1 crossSect 1
-Quad1PlaneStrain 110 nodes 4 124 125 188 187 mat 1 crossSect 1
-Quad1PlaneStrain 111 nodes 4 125 126 189 188 mat 1 crossSect 1
-Quad1PlaneStrain 112 nodes 4 126 127 190 189 mat 1 crossSect 1
-Quad1PlaneStrain 113 nodes 4 127 128 191 190 mat 1 crossSect 1
-Quad1PlaneStrain 114 nodes 4 128 129 192 191 mat 1 crossSect 1
-Quad1PlaneStrain 115 nodes 4 129 130 193 192 mat 1 crossSect 1
-Quad1PlaneStrain 116 nodes 4 130 131 194 193 mat 1 crossSect 1
-Quad1PlaneStrain 117 nodes 4 131 132 195 194 mat 1 crossSect 1
-Quad1PlaneStrain 118 nodes 4 132 133 196 195 mat 1 crossSect 1
-Quad1PlaneStrain 119 nodes 4 133 134 197 196 mat 1 crossSect 1
-Quad1PlaneStrain 120 nodes 4 134 135 198 197 mat 1 crossSect 1
-Quad1PlaneStrain 121 nodes 4 135 136 199 198 mat 1 crossSect 1
-Quad1PlaneStrain 122 nodes 4 136 137 200 199 mat 1 crossSect 1
-Quad1PlaneStrain 123 nodes 4 137 138 201 200 mat 1 crossSect 1
-Quad1PlaneStrain 124 nodes 4 138 139 202 201 mat 1 crossSect 1
-Quad1PlaneStrain 125 nodes 4 139 140 203 202 mat 1 crossSect 1
-Quad1PlaneStrain 126 nodes 4 140 141 204 203 mat 1 crossSect 1
-Quad1PlaneStrain 127 nodes 4 141 142 205 204 mat 1 crossSect 1
-Quad1PlaneStrain 128 nodes 4 142 143 206 205 mat 1 crossSect 1
-Quad1PlaneStrain 129 nodes 4 143 144 207 206 mat 1 crossSect 1
-Quad1PlaneStrain 130 nodes 4 144 145 208 207 mat 1 crossSect 1
-Quad1PlaneStrain 131 nodes 4 145 146 209 208 mat 1 crossSect 1
-Quad1PlaneStrain 132 nodes 4 146 147 210 209 mat 1 crossSect 1
-Quad1PlaneStrain 133 nodes 4 147 148 211 210 mat 1 crossSect 1
-Quad1PlaneStrain 134 nodes 4 148 149 212 211 mat 1 crossSect 1
-Quad1PlaneStrain 135 nodes 4 149 150 213 212 mat 1 crossSect 1
-Quad1PlaneStrain 136 nodes 4 150 151 214 213 mat 1 crossSect 1
-Quad1PlaneStrain 137 nodes 4 151 152 215 214 mat 1 crossSect 1
-Quad1PlaneStrain 138 nodes 4 152 153 216 215 mat 1 crossSect 1
-Quad1PlaneStrain 139 nodes 4 153 154 217 216 mat 1 crossSect 1
-Quad1PlaneStrain 140 nodes 4 154 155 218 217 mat 1 crossSect 1
-Quad1PlaneStrain 141 nodes 4 155 156 157 218 mat 1 crossSect 1
-Quad1PlaneStrain 142 nodes 4 157 158 219 218 mat 1 crossSect 1
-Quad1PlaneStrain 143 nodes 4 158 159 220 219 mat 1 crossSect 1
-Quad1PlaneStrain 144 nodes 4 159 160 221 220 mat 1 crossSect 1
-Quad1PlaneStrain 145 nodes 4 161 162 222 221 mat 1 crossSect 1
-Quad1PlaneStrain 146 nodes 4 162 163 223 222 mat 1 crossSect 1
-Quad1PlaneStrain 147 nodes 4 163 164 224 223 mat 1 crossSect 1
-Quad1PlaneStrain 148 nodes 4 164 165 225 224 mat 1 crossSect 1
-Quad1PlaneStrain 149 nodes 4 165 166 226 225 mat 1 crossSect 1
-Quad1PlaneStrain 150 nodes 4 166 167 227 226 mat 1 crossSect 1
-Quad1PlaneStrain 151 nodes 4 167 168 228 227 mat 1 crossSect 1
-Quad1PlaneStrain 152 nodes 4 168 169 170 228 mat 1 crossSect 1
-Quad1PlaneStrain 153 nodes 4 170 171 229 228 mat 1 crossSect 1
-Quad1PlaneStrain 154 nodes 4 171 172 230 229 mat 1 crossSect 1
-Quad1PlaneStrain 155 nodes 4 172 173 231 230 mat 1 crossSect 1
-Quad1PlaneStrain 156 nodes 4 173 174 232 231 mat 1 crossSect 1
-Quad1PlaneStrain 157 nodes 4 174 175 233 232 mat 1 crossSect 1
-Quad1PlaneStrain 158 nodes 4 175 176 234 233 mat 1 crossSect 1
-Quad1PlaneStrain 159 nodes 4 176 177 235 234 mat 1 crossSect 1
-Quad1PlaneStrain 160 nodes 4 177 178 236 235 mat 1 crossSect 1
-Quad1PlaneStrain 161 nodes 4 178 179 237 236 mat 1 crossSect 1
-Quad1PlaneStrain 162 nodes 4 179 180 238 237 mat 1 crossSect 1
-Quad1PlaneStrain 163 nodes 4 180 181 182 238 mat 1 crossSect 1
-Quad1PlaneStrain 164 nodes 4 238 182 183 239 mat 1 crossSect 1
-Quad1PlaneStrain 165 nodes 4 183 184 185 239 mat 1 crossSect 1
-Quad1PlaneStrain 166 nodes 4 185 186 240 239 mat 1 crossSect 1
-Quad1PlaneStrain 167 nodes 4 186 187 241 240 mat 1 crossSect 1
-Quad1PlaneStrain 168 nodes 4 187 188 242 241 mat 1 crossSect 1
-Quad1PlaneStrain 169 nodes 4 188 189 243 242 mat 1 crossSect 1
-Quad1PlaneStrain 170 nodes 4 189 190 244 243 mat 1 crossSect 1
-Quad1PlaneStrain 171 nodes 4 190 191 245 244 mat 1 crossSect 1
-Quad1PlaneStrain 172 nodes 4 191 192 246 245 mat 1 crossSect 1
-Quad1PlaneStrain 173 nodes 4 192 193 247 246 mat 1 crossSect 1
-Quad1PlaneStrain 174 nodes 4 193 194 248 247 mat 1 crossSect 1
-Quad1PlaneStrain 175 nodes 4 194 195 249 248 mat 1 crossSect 1
-Quad1PlaneStrain 176 nodes 4 195 196 250 249 mat 1 crossSect 1
-Quad1PlaneStrain 177 nodes 4 196 197 251 250 mat 1 crossSect 1
-Quad1PlaneStrain 178 nodes 4 197 198 252 251 mat 1 crossSect 1
-Quad1PlaneStrain 179 nodes 4 198 199 253 252 mat 1 crossSect 1
-Quad1PlaneStrain 180 nodes 4 199 200 254 253 mat 1 crossSect 1
-Quad1PlaneStrain 181 nodes 4 200 201 255 254 mat 1 crossSect 1
-Quad1PlaneStrain 182 nodes 4 201 202 256 255 mat 1 crossSect 1
-Quad1PlaneStrain 183 nodes 4 202 203 257 256 mat 1 crossSect 1
-Quad1PlaneStrain 184 nodes 4 203 204 258 257 mat 1 crossSect 1
-Quad1PlaneStrain 185 nodes 4 204 205 259 258 mat 1 crossSect 1
-Quad1PlaneStrain 186 nodes 4 205 206 260 259 mat 1 crossSect 1
-Quad1PlaneStrain 187 nodes 4 206 207 261 260 mat 1 crossSect 1
-Quad1PlaneStrain 188 nodes 4 207 208 262 261 mat 1 crossSect 1
-Quad1PlaneStrain 189 nodes 4 208 209 263 262 mat 1 crossSect 1
-Quad1PlaneStrain 190 nodes 4 209 210 264 263 mat 1 crossSect 1
-Quad1PlaneStrain 191 nodes 4 210 211 265 264 mat 1 crossSect 1
-Quad1PlaneStrain 192 nodes 4 211 212 266 265 mat 1 crossSect 1
-Quad1PlaneStrain 193 nodes 4 212 213 267 266 mat 1 crossSect 1
-Quad1PlaneStrain 194 nodes 4 213 214 268 267 mat 1 crossSect 1
-Quad1PlaneStrain 195 nodes 4 214 215 269 268 mat 1 crossSect 1
-Quad1PlaneStrain 196 nodes 4 215 216 270 269 mat 1 crossSect 1
-Quad1PlaneStrain 197 nodes 4 216 217 271 270 mat 1 crossSect 1
-Quad1PlaneStrain 198 nodes 4 217 218 219 271 mat 1 crossSect 1
-Quad1PlaneStrain 199 nodes 4 219 220 272 271 mat 1 crossSect 1
-Quad1PlaneStrain 200 nodes 4 272 220 221 222 mat 1 crossSect 1
-Quad1PlaneStrain 201 nodes 4 222 223 274 273 mat 1 crossSect 1
-Quad1PlaneStrain 202 nodes 4 275 224 225 276 mat 1 crossSect 1
-Quad1PlaneStrain 203 nodes 4 225 226 277 276 mat 1 crossSect 1
-Quad1PlaneStrain 204 nodes 4 226 227 279 277 mat 1 crossSect 1
-Quad1PlaneStrain 205 nodes 4 227 228 278 279 mat 1 crossSect 1
-Quad1PlaneStrain 206 nodes 4 280 281 230 283 mat 1 crossSect 1
-Quad1PlaneStrain 207 nodes 4 230 231 282 283 mat 1 crossSect 1
-Quad1PlaneStrain 208 nodes 4 231 232 284 282 mat 1 crossSect 1
-Quad1PlaneStrain 209 nodes 4 232 233 285 284 mat 1 crossSect 1
-Quad1PlaneStrain 210 nodes 4 233 234 286 285 mat 1 crossSect 1
-Quad1PlaneStrain 211 nodes 4 234 235 287 286 mat 1 crossSect 1
-Quad1PlaneStrain 212 nodes 4 236 237 289 288 mat 1 crossSect 1
-Quad1PlaneStrain 213 nodes 4 237 238 290 289 mat 1 crossSect 1
-Quad1PlaneStrain 214 nodes 4 238 239 240 290 mat 1 crossSect 1
-Quad1PlaneStrain 215 nodes 4 240 241 291 290 mat 1 crossSect 1
-Quad1PlaneStrain 216 nodes 4 241 242 292 291 mat 1 crossSect 1
-Quad1PlaneStrain 217 nodes 4 242 243 293 292 mat 1 crossSect 1
-Quad1PlaneStrain 218 nodes 4 243 244 294 293 mat 1 crossSect 1
-Quad1PlaneStrain 219 nodes 4 244 245 295 294 mat 1 crossSect 1
-Quad1PlaneStrain 220 nodes 4 245 246 296 295 mat 1 crossSect 1
-Quad1PlaneStrain 221 nodes 4 246 247 297 296 mat 1 crossSect 1
-Quad1PlaneStrain 222 nodes 4 247 248 298 297 mat 1 crossSect 1
-Quad1PlaneStrain 223 nodes 4 248 249 299 298 mat 1 crossSect 1
-Quad1PlaneStrain 224 nodes 4 249 250 300 299 mat 1 crossSect 1
-Quad1PlaneStrain 225 nodes 4 250 251 301 300 mat 1 crossSect 1
-Quad1PlaneStrain 226 nodes 4 251 252 302 301 mat 1 crossSect 1
-Quad1PlaneStrain 227 nodes 4 252 253 303 302 mat 1 crossSect 1
-Quad1PlaneStrain 228 nodes 4 253 254 304 303 mat 1 crossSect 1
-Quad1PlaneStrain 229 nodes 4 254 255 305 304 mat 1 crossSect 1
-Quad1PlaneStrain 230 nodes 4 255 256 306 305 mat 1 crossSect 1
-Quad1PlaneStrain 231 nodes 4 256 257 307 306 mat 1 crossSect 1
-Quad1PlaneStrain 232 nodes 4 257 258 308 307 mat 1 crossSect 1
-Quad1PlaneStrain 233 nodes 4 258 259 309 308 mat 1 crossSect 1
-Quad1PlaneStrain 234 nodes 4 259 260 310 309 mat 1 crossSect 1
-Quad1PlaneStrain 235 nodes 4 260 261 311 310 mat 1 crossSect 1
-Quad1PlaneStrain 236 nodes 4 261 262 312 311 mat 1 crossSect 1
-Quad1PlaneStrain 237 nodes 4 262 263 313 312 mat 1 crossSect 1
-Quad1PlaneStrain 238 nodes 4 263 264 314 313 mat 1 crossSect 1
-Quad1PlaneStrain 239 nodes 4 264 265 315 314 mat 1 crossSect 1
-Quad1PlaneStrain 240 nodes 4 265 266 316 315 mat 1 crossSect 1
-Quad1PlaneStrain 241 nodes 4 266 267 317 316 mat 1 crossSect 1
-Quad1PlaneStrain 242 nodes 4 267 268 318 317 mat 1 crossSect 1
-Quad1PlaneStrain 243 nodes 4 268 269 319 318 mat 1 crossSect 1
-Quad1PlaneStrain 244 nodes 4 269 270 320 319 mat 1 crossSect 1
-Quad1PlaneStrain 245 nodes 4 270 271 272 320 mat 1 crossSect 1
-Quad1PlaneStrain 246 nodes 4 320 272 222 273 mat 1 crossSect 1
-Quad1PlaneStrain 247 nodes 4 273 274 322 321 mat 1 crossSect 1
-Quad1PlaneStrain 248 nodes 4 274 223 224 323 mat 1 crossSect 1
-Quad1PlaneStrain 249 nodes 4 323 224 275 324 mat 1 crossSect 1
-Quad1PlaneStrain 250 nodes 4 275 276 326 325 mat 1 crossSect 1
-Quad1PlaneStrain 251 nodes 4 276 277 327 326 mat 1 crossSect 1
-Quad1PlaneStrain 252 nodes 4 277 279 328 327 mat 1 crossSect 1
-Quad1PlaneStrain 253 nodes 4 279 278 329 328 mat 1 crossSect 1
-Quad1PlaneStrain 254 nodes 4 281 280 330 331 mat 1 crossSect 1
-Quad1PlaneStrain 255 nodes 4 280 283 332 330 mat 1 crossSect 1
-Quad1PlaneStrain 256 nodes 4 283 282 333 332 mat 1 crossSect 1
-Quad1PlaneStrain 257 nodes 4 282 284 334 333 mat 1 crossSect 1
-Quad1PlaneStrain 258 nodes 4 284 285 335 334 mat 1 crossSect 1
-Quad1PlaneStrain 259 nodes 4 285 286 336 335 mat 1 crossSect 1
-Quad1PlaneStrain 260 nodes 4 286 287 338 336 mat 1 crossSect 1
-Quad1PlaneStrain 261 nodes 4 287 235 236 339 mat 1 crossSect 1
-Quad1PlaneStrain 262 nodes 4 339 236 288 340 mat 1 crossSect 1
-Quad1PlaneStrain 263 nodes 4 291 288 289 290 mat 1 crossSect 1
-Quad1PlaneStrain 264 nodes 4 292 340 288 291 mat 1 crossSect 1
-Quad1PlaneStrain 265 nodes 4 292 293 341 340 mat 1 crossSect 1
-Quad1PlaneStrain 266 nodes 4 293 294 342 341 mat 1 crossSect 1
-Quad1PlaneStrain 267 nodes 4 294 295 343 342 mat 1 crossSect 1
-Quad1PlaneStrain 268 nodes 4 295 296 344 343 mat 1 crossSect 1
-Quad1PlaneStrain 269 nodes 4 296 297 345 344 mat 1 crossSect 1
-Quad1PlaneStrain 270 nodes 4 297 298 346 345 mat 1 crossSect 1
-Quad1PlaneStrain 271 nodes 4 298 299 347 346 mat 1 crossSect 1
-Quad1PlaneStrain 272 nodes 4 299 300 348 347 mat 1 crossSect 1
-Quad1PlaneStrain 273 nodes 4 300 301 349 348 mat 1 crossSect 1
-Quad1PlaneStrain 274 nodes 4 301 302 350 349 mat 1 crossSect 1
-Quad1PlaneStrain 275 nodes 4 302 303 351 350 mat 1 crossSect 1
-Quad1PlaneStrain 276 nodes 4 303 304 352 351 mat 1 crossSect 1
-Quad1PlaneStrain 277 nodes 4 304 305 353 352 mat 1 crossSect 1
-Quad1PlaneStrain 278 nodes 4 305 306 354 353 mat 1 crossSect 1
-Quad1PlaneStrain 279 nodes 4 306 307 355 354 mat 1 crossSect 1
-Quad1PlaneStrain 280 nodes 4 307 308 356 355 mat 1 crossSect 1
-Quad1PlaneStrain 281 nodes 4 308 309 357 356 mat 1 crossSect 1
-Quad1PlaneStrain 282 nodes 4 309 310 358 357 mat 1 crossSect 1
-Quad1PlaneStrain 283 nodes 4 310 311 359 358 mat 1 crossSect 1
-Quad1PlaneStrain 284 nodes 4 311 312 360 359 mat 1 crossSect 1
-Quad1PlaneStrain 285 nodes 4 312 313 361 360 mat 1 crossSect 1
-Quad1PlaneStrain 286 nodes 4 313 314 362 361 mat 1 crossSect 1
-Quad1PlaneStrain 287 nodes 4 314 315 363 362 mat 1 crossSect 1
-Quad1PlaneStrain 288 nodes 4 315 316 364 363 mat 1 crossSect 1
-Quad1PlaneStrain 289 nodes 4 316 317 365 364 mat 1 crossSect 1
-Quad1PlaneStrain 290 nodes 4 317 318 366 365 mat 1 crossSect 1
-Quad1PlaneStrain 291 nodes 4 318 319 321 366 mat 1 crossSect 1
-Quad1PlaneStrain 292 nodes 4 321 322 367 366 mat 1 crossSect 1
-Quad1PlaneStrain 293 nodes 4 323 324 368 367 mat 1 crossSect 1
-Quad1PlaneStrain 294 nodes 4 275 325 370 324 mat 1 crossSect 1
-Quad1PlaneStrain 295 nodes 4 325 326 371 372 mat 1 crossSect 1
-Quad1PlaneStrain 296 nodes 4 326 327 373 371 mat 1 crossSect 1
-Quad1PlaneStrain 297 nodes 4 327 328 374 373 mat 1 crossSect 1
-Quad1PlaneStrain 298 nodes 4 281 331 328 329 mat 1 crossSect 1
-Quad1PlaneStrain 299 nodes 4 331 330 375 376 mat 1 crossSect 1
-Quad1PlaneStrain 300 nodes 4 330 332 377 375 mat 1 crossSect 1
-Quad1PlaneStrain 301 nodes 4 332 333 378 377 mat 1 crossSect 1
-Quad1PlaneStrain 302 nodes 4 333 334 379 378 mat 1 crossSect 1
-Quad1PlaneStrain 303 nodes 4 334 335 380 379 mat 1 crossSect 1
-Quad1PlaneStrain 304 nodes 4 335 336 381 385 mat 1 crossSect 1
-Quad1PlaneStrain 305 nodes 4 336 338 382 381 mat 1 crossSect 1
-Quad1PlaneStrain 306 nodes 4 338 337 383 382 mat 1 crossSect 1
-Quad1PlaneStrain 307 nodes 4 340 341 337 339 mat 1 crossSect 1
-Quad1PlaneStrain 308 nodes 4 342 343 382 383 mat 1 crossSect 1
-Quad1PlaneStrain 309 nodes 4 343 344 381 382 mat 1 crossSect 1
-Quad1PlaneStrain 310 nodes 4 345 346 384 385 mat 1 crossSect 1
-Quad1PlaneStrain 311 nodes 4 346 347 386 384 mat 1 crossSect 1
-Quad1PlaneStrain 312 nodes 4 347 348 387 386 mat 1 crossSect 1
-Quad1PlaneStrain 313 nodes 4 348 349 388 387 mat 1 crossSect 1
-Quad1PlaneStrain 314 nodes 4 349 350 389 388 mat 1 crossSect 1
-Quad1PlaneStrain 315 nodes 4 350 351 390 389 mat 1 crossSect 1
-Quad1PlaneStrain 316 nodes 4 390 351 352 418 mat 1 crossSect 1
-Quad1PlaneStrain 317 nodes 4 418 352 353 392 mat 1 crossSect 1
-Quad1PlaneStrain 318 nodes 4 353 354 393 392 mat 1 crossSect 1
-Quad1PlaneStrain 319 nodes 4 354 355 394 393 mat 1 crossSect 1
-Quad1PlaneStrain 320 nodes 4 355 356 395 394 mat 1 crossSect 1
-Quad1PlaneStrain 321 nodes 4 356 357 396 395 mat 1 crossSect 1
-Quad1PlaneStrain 322 nodes 4 357 358 397 396 mat 1 crossSect 1
-Quad1PlaneStrain 323 nodes 4 358 359 398 397 mat 1 crossSect 1
-Quad1PlaneStrain 324 nodes 4 359 360 399 398 mat 1 crossSect 1
-Quad1PlaneStrain 325 nodes 4 360 361 400 399 mat 1 crossSect 1
-Quad1PlaneStrain 326 nodes 4 361 362 401 400 mat 1 crossSect 1
-Quad1PlaneStrain 327 nodes 4 362 363 402 401 mat 1 crossSect 1
-Quad1PlaneStrain 328 nodes 4 363 364 403 402 mat 1 crossSect 1
-Quad1PlaneStrain 329 nodes 4 364 365 368 403 mat 1 crossSect 1
-Quad1PlaneStrain 330 nodes 4 365 366 367 368 mat 1 crossSect 1
-Quad1PlaneStrain 331 nodes 4 370 369 402 403 mat 1 crossSect 1
-Quad1PlaneStrain 332 nodes 4 369 372 404 419 mat 1 crossSect 1
-Quad1PlaneStrain 333 nodes 4 372 371 405 404 mat 1 crossSect 1
-Quad1PlaneStrain 334 nodes 4 371 373 407 405 mat 1 crossSect 1
-Quad1PlaneStrain 335 nodes 4 409 406 374 376 mat 1 crossSect 1
-Quad1PlaneStrain 336 nodes 4 376 375 408 409 mat 1 crossSect 1
-Quad1PlaneStrain 337 nodes 4 375 377 410 408 mat 1 crossSect 1
-Quad1PlaneStrain 338 nodes 4 377 378 411 410 mat 1 crossSect 1
-Quad1PlaneStrain 339 nodes 4 378 379 412 411 mat 1 crossSect 1
-Quad1PlaneStrain 340 nodes 4 379 380 387 412 mat 1 crossSect 1
-Quad1PlaneStrain 341 nodes 4 380 335 385 384 mat 1 crossSect 1
-Quad1PlaneStrain 342 nodes 4 388 389 411 412 mat 1 crossSect 1
-Quad1PlaneStrain 343 nodes 4 413 391 392 393 mat 1 crossSect 1
-Quad1PlaneStrain 344 nodes 4 393 394 414 413 mat 1 crossSect 1
-Quad1PlaneStrain 345 nodes 4 394 395 415 414 mat 1 crossSect 1
-Quad1PlaneStrain 346 nodes 4 395 396 416 415 mat 1 crossSect 1
-Quad1PlaneStrain 347 nodes 4 396 397 417 416 mat 1 crossSect 1
-Quad1PlaneStrain 348 nodes 4 397 398 407 417 mat 1 crossSect 1
-Quad1PlaneStrain 349 nodes 4 398 399 405 407 mat 1 crossSect 1
-Quad1PlaneStrain 350 nodes 4 399 400 404 405 mat 1 crossSect 1
-Quad1PlaneStrain 351 nodes 4 409 408 414 415 mat 1 crossSect 1
-Quad1PlaneStrain 352 nodes 4 408 410 413 414 mat 1 crossSect 1
-Quad1PlaneStrain 353 nodes 4 410 411 391 413 mat 1 crossSect 1
-Quad1PlaneStrain 354 nodes 4 228 229 329 278 mat 1 crossSect 1
-Quad1PlaneStrain 355 nodes 4 325 372 369 370 mat 1 crossSect 1
-Quad1PlaneStrain 356 nodes 4 345 385 381 344 mat 1 crossSect 1
-Quad1PlaneStrain 357 nodes 4 416 417 407 406 mat 1 crossSect 1
-Quad1PlaneStrain 358 nodes 4 409 415 416 406 mat 1 crossSect 1
-Quad1PlaneStrain 359 nodes 4 390 391 411 389 mat 1 crossSect 1
-Quad1PlaneStrain 360 nodes 4 320 273 321 319 mat 1 crossSect 1
-Quad1PlaneStrain 361 nodes 4 331 376 374 328 mat 1 crossSect 1
-Quad1PlaneStrain 362 nodes 4 380 384 386 387 mat 1 crossSect 1
-Quad1PlaneStrain 363 nodes 4 341 342 383 337 mat 1 crossSect 1
-Quad1PlaneStrain 364 nodes 4 274 323 367 322 mat 1 crossSect 1
-Quad1PlaneStrain 365 nodes 4 324 370 403 368 mat 1 crossSect 1
-Quad1PlaneStrain 366 nodes 4 287 339 337 338 mat 1 crossSect 1
-Quad1PlaneStrain 367 nodes 4 406 407 373 374 mat 1 crossSect 1
-Quad1PlaneStrain 368 nodes 4 419 404 400 401 mat 1 crossSect 1
-Quad1PlaneStrain 369 nodes 4 390 418 392 391 mat 1 crossSect 1
-Quad1PlaneStrain 370 nodes 4 369 419 401 402 mat 1 crossSect 1
-Quad1PlaneStrain 371 nodes 4 229 230 281 329 mat 1 crossSect 1
-Quad1PlaneStrain 372 nodes 4 4 80 420 38 mat 2 crossSect 2
-Quad1PlaneStrain 373 nodes 4 80 81 421 420 mat 2 crossSect 2
-Quad1PlaneStrain 374 nodes 4 81 6 82 421 mat 2 crossSect 2
-Quad1PlaneStrain 375 nodes 4 82 83 422 421 mat 2 crossSect 2
-Quad1PlaneStrain 376 nodes 4 83 84 423 422 mat 2 crossSect 2
-Quad1PlaneStrain 377 nodes 4 84 8 424 423 mat 2 crossSect 2
-Quad1PlaneStrain 378 nodes 4 8 7 85 424 mat 2 crossSect 2 boundaryLoads 2 2 1
-Quad1PlaneStrain 379 nodes 4 85 86 425 424 mat 2 crossSect 2
-Quad1PlaneStrain 380 nodes 4 86 5 41 425 mat 2 crossSect 2
-Quad1PlaneStrain 381 nodes 4 41 40 426 425 mat 2 crossSect 2
-Quad1PlaneStrain 382 nodes 4 40 39 427 426 mat 2 crossSect 2
-Quad1PlaneStrain 383 nodes 4 39 38 420 427 mat 2 crossSect 2
-Quad1PlaneStrain 384 nodes 4 420 421 422 427 mat 2 crossSect 2
-Quad1PlaneStrain 385 nodes 4 422 423 426 427 mat 2 crossSect 2
-Quad1PlaneStrain 386 nodes 4 423 424 425 426 mat 2 crossSect 2
-SimpleCS 1 thick 1.0
-SimpleCS 2 thick 1.0
+TrPlaneStrain 1 nodes 3 160 161 221 mat 1
+TrPlaneStrain 2 nodes 3 387 388 412 mat 1
+Quad1PlaneStrain 3 nodes 4 1 9 87 79 mat 1
+Quad1PlaneStrain 4 nodes 4 9 10 88 87 mat 1
+Quad1PlaneStrain 5 nodes 4 10 11 89 88 mat 1
+Quad1PlaneStrain 6 nodes 4 11 12 90 89 mat 1
+Quad1PlaneStrain 7 nodes 4 12 3 91 90 mat 1
+Quad1PlaneStrain 8 nodes 4 3 13 92 91 mat 1
+Quad1PlaneStrain 9 nodes 4 13 14 93 92 mat 1
+Quad1PlaneStrain 10 nodes 4 14 15 94 93 mat 1
+Quad1PlaneStrain 11 nodes 4 15 16 95 94 mat 1
+Quad1PlaneStrain 12 nodes 4 16 17 96 95 mat 1
+Quad1PlaneStrain 13 nodes 4 17 18 97 96 mat 1
+Quad1PlaneStrain 14 nodes 4 18 19 98 97 mat 1
+Quad1PlaneStrain 15 nodes 4 19 20 99 98 mat 1
+Quad1PlaneStrain 16 nodes 4 20 21 100 99 mat 1
+Quad1PlaneStrain 17 nodes 4 21 22 101 100 mat 1
+Quad1PlaneStrain 18 nodes 4 22 2 23 101 mat 1
+Quad1PlaneStrain 19 nodes 4 23 24 102 101 mat 1
+Quad1PlaneStrain 20 nodes 4 24 25 103 102 mat 1
+Quad1PlaneStrain 21 nodes 4 25 26 104 103 mat 1
+Quad1PlaneStrain 22 nodes 4 26 27 105 104 mat 1
+Quad1PlaneStrain 23 nodes 4 27 28 106 105 mat 1
+Quad1PlaneStrain 24 nodes 4 28 29 107 106 mat 1
+Quad1PlaneStrain 25 nodes 4 29 30 108 107 mat 1
+Quad1PlaneStrain 26 nodes 4 30 31 109 108 mat 1
+Quad1PlaneStrain 27 nodes 4 31 32 110 109 mat 1
+Quad1PlaneStrain 28 nodes 4 32 33 111 110 mat 1
+Quad1PlaneStrain 29 nodes 4 33 34 112 111 mat 1
+Quad1PlaneStrain 30 nodes 4 34 35 113 112 mat 1
+Quad1PlaneStrain 31 nodes 4 35 36 114 113 mat 1
+Quad1PlaneStrain 32 nodes 4 36 37 115 114 mat 1
+Quad1PlaneStrain 33 nodes 4 37 4 116 115 mat 1
+Quad1PlaneStrain 34 nodes 4 4 38 117 116 mat 1
+Quad1PlaneStrain 35 nodes 4 38 39 118 117 mat 1
+Quad1PlaneStrain 36 nodes 4 39 40 119 118 mat 1
+Quad1PlaneStrain 37 nodes 4 40 41 120 119 mat 1
+Quad1PlaneStrain 38 nodes 4 41 5 42 120 mat 1
+Quad1PlaneStrain 39 nodes 4 42 43 121 120 mat 1
+Quad1PlaneStrain 40 nodes 4 43 44 122 121 mat 1
+Quad1PlaneStrain 41 nodes 4 44 45 123 122 mat 1
+Quad1PlaneStrain 42 nodes 4 45 46 124 123 mat 1
+Quad1PlaneStrain 43 nodes 4 46 47 125 124 mat 1
+Quad1PlaneStrain 44 nodes 4 47 48 126 125 mat 1
+Quad1PlaneStrain 45 nodes 4 48 49 127 126 mat 1
+Quad1PlaneStrain 46 nodes 4 49 50 128 127 mat 1
+Quad1PlaneStrain 47 nodes 4 50 51 129 128 mat 1
+Quad1PlaneStrain 48 nodes 4 51 52 130 129 mat 1
+Quad1PlaneStrain 49 nodes 4 52 53 131 130 mat 1
+Quad1PlaneStrain 50 nodes 4 53 54 132 131 mat 1
+Quad1PlaneStrain 51 nodes 4 54 55 133 132 mat 1
+Quad1PlaneStrain 52 nodes 4 55 56 134 133 mat 1
+Quad1PlaneStrain 53 nodes 4 56 57 135 134 mat 1
+Quad1PlaneStrain 54 nodes 4 57 58 136 135 mat 1
+Quad1PlaneStrain 55 nodes 4 58 59 137 136 mat 1
+Quad1PlaneStrain 56 nodes 4 59 60 138 137 mat 1
+Quad1PlaneStrain 57 nodes 4 60 61 139 138 mat 1
+Quad1PlaneStrain 58 nodes 4 61 62 140 139 mat 1
+Quad1PlaneStrain 59 nodes 4 62 63 141 140 mat 1
+Quad1PlaneStrain 60 nodes 4 63 64 142 141 mat 1
+Quad1PlaneStrain 61 nodes 4 64 65 143 142 mat 1
+Quad1PlaneStrain 62 nodes 4 65 66 144 143 mat 1
+Quad1PlaneStrain 63 nodes 4 66 67 145 144 mat 1
+Quad1PlaneStrain 64 nodes 4 67 68 146 145 mat 1
+Quad1PlaneStrain 65 nodes 4 68 69 147 146 mat 1
+Quad1PlaneStrain 66 nodes 4 69 70 148 147 mat 1
+Quad1PlaneStrain 67 nodes 4 70 71 149 148 mat 1
+Quad1PlaneStrain 68 nodes 4 71 72 150 149 mat 1
+Quad1PlaneStrain 69 nodes 4 72 73 151 150 mat 1
+Quad1PlaneStrain 70 nodes 4 73 74 152 151 mat 1
+Quad1PlaneStrain 71 nodes 4 74 75 153 152 mat 1
+Quad1PlaneStrain 72 nodes 4 75 76 154 153 mat 1
+Quad1PlaneStrain 73 nodes 4 76 77 155 154 mat 1
+Quad1PlaneStrain 74 nodes 4 77 78 156 155 mat 1
+Quad1PlaneStrain 75 nodes 4 78 79 87 156 mat 1
+Quad1PlaneStrain 76 nodes 4 87 88 157 156 mat 1
+Quad1PlaneStrain 77 nodes 4 88 89 158 157 mat 1
+Quad1PlaneStrain 78 nodes 4 89 90 159 158 mat 1
+Quad1PlaneStrain 79 nodes 4 90 91 160 159 mat 1
+Quad1PlaneStrain 80 nodes 4 91 92 161 160 mat 1
+Quad1PlaneStrain 81 nodes 4 92 93 162 161 mat 1
+Quad1PlaneStrain 82 nodes 4 93 94 163 162 mat 1
+Quad1PlaneStrain 83 nodes 4 94 95 164 163 mat 1
+Quad1PlaneStrain 84 nodes 4 95 96 165 164 mat 1
+Quad1PlaneStrain 85 nodes 4 96 97 166 165 mat 1
+Quad1PlaneStrain 86 nodes 4 97 98 167 166 mat 1
+Quad1PlaneStrain 87 nodes 4 98 99 168 167 mat 1
+Quad1PlaneStrain 88 nodes 4 99 100 169 168 mat 1
+Quad1PlaneStrain 89 nodes 4 100 101 102 169 mat 1
+Quad1PlaneStrain 90 nodes 4 103 104 169 102 mat 1
+Quad1PlaneStrain 91 nodes 4 169 104 105 170 mat 1
+Quad1PlaneStrain 92 nodes 4 105 106 171 170 mat 1
+Quad1PlaneStrain 93 nodes 4 106 107 172 171 mat 1
+Quad1PlaneStrain 94 nodes 4 107 108 173 172 mat 1
+Quad1PlaneStrain 95 nodes 4 108 109 174 173 mat 1
+Quad1PlaneStrain 96 nodes 4 109 110 175 174 mat 1
+Quad1PlaneStrain 97 nodes 4 110 111 176 175 mat 1
+Quad1PlaneStrain 98 nodes 4 111 112 177 176 mat 1
+Quad1PlaneStrain 99 nodes 4 112 113 178 177 mat 1
+Quad1PlaneStrain 100 nodes 4 113 114 179 178 mat 1
+Quad1PlaneStrain 101 nodes 4 114 115 180 179 mat 1
+Quad1PlaneStrain 102 nodes 4 115 116 181 180 mat 1
+Quad1PlaneStrain 103 nodes 4 116 117 182 181 mat 1
+Quad1PlaneStrain 104 nodes 4 117 118 183 182 mat 1
+Quad1PlaneStrain 105 nodes 4 118 119 184 183 mat 1
+Quad1PlaneStrain 106 nodes 4 119 120 121 184 mat 1
+Quad1PlaneStrain 107 nodes 4 121 122 185 184 mat 1
+Quad1PlaneStrain 108 nodes 4 122 123 186 185 mat 1
+Quad1PlaneStrain 109 nodes 4 123 124 187 186 mat 1
+Quad1PlaneStrain 110 nodes 4 124 125 188 187 mat 1
+Quad1PlaneStrain 111 nodes 4 125 126 189 188 mat 1
+Quad1PlaneStrain 112 nodes 4 126 127 190 189 mat 1
+Quad1PlaneStrain 113 nodes 4 127 128 191 190 mat 1
+Quad1PlaneStrain 114 nodes 4 128 129 192 191 mat 1
+Quad1PlaneStrain 115 nodes 4 129 130 193 192 mat 1
+Quad1PlaneStrain 116 nodes 4 130 131 194 193 mat 1
+Quad1PlaneStrain 117 nodes 4 131 132 195 194 mat 1
+Quad1PlaneStrain 118 nodes 4 132 133 196 195 mat 1
+Quad1PlaneStrain 119 nodes 4 133 134 197 196 mat 1
+Quad1PlaneStrain 120 nodes 4 134 135 198 197 mat 1
+Quad1PlaneStrain 121 nodes 4 135 136 199 198 mat 1
+Quad1PlaneStrain 122 nodes 4 136 137 200 199 mat 1
+Quad1PlaneStrain 123 nodes 4 137 138 201 200 mat 1
+Quad1PlaneStrain 124 nodes 4 138 139 202 201 mat 1
+Quad1PlaneStrain 125 nodes 4 139 140 203 202 mat 1
+Quad1PlaneStrain 126 nodes 4 140 141 204 203 mat 1
+Quad1PlaneStrain 127 nodes 4 141 142 205 204 mat 1
+Quad1PlaneStrain 128 nodes 4 142 143 206 205 mat 1
+Quad1PlaneStrain 129 nodes 4 143 144 207 206 mat 1
+Quad1PlaneStrain 130 nodes 4 144 145 208 207 mat 1
+Quad1PlaneStrain 131 nodes 4 145 146 209 208 mat 1
+Quad1PlaneStrain 132 nodes 4 146 147 210 209 mat 1
+Quad1PlaneStrain 133 nodes 4 147 148 211 210 mat 1
+Quad1PlaneStrain 134 nodes 4 148 149 212 211 mat 1
+Quad1PlaneStrain 135 nodes 4 149 150 213 212 mat 1
+Quad1PlaneStrain 136 nodes 4 150 151 214 213 mat 1
+Quad1PlaneStrain 137 nodes 4 151 152 215 214 mat 1
+Quad1PlaneStrain 138 nodes 4 152 153 216 215 mat 1
+Quad1PlaneStrain 139 nodes 4 153 154 217 216 mat 1
+Quad1PlaneStrain 140 nodes 4 154 155 218 217 mat 1
+Quad1PlaneStrain 141 nodes 4 155 156 157 218 mat 1
+Quad1PlaneStrain 142 nodes 4 157 158 219 218 mat 1
+Quad1PlaneStrain 143 nodes 4 158 159 220 219 mat 1
+Quad1PlaneStrain 144 nodes 4 159 160 221 220 mat 1
+Quad1PlaneStrain 145 nodes 4 161 162 222 221 mat 1
+Quad1PlaneStrain 146 nodes 4 162 163 223 222 mat 1
+Quad1PlaneStrain 147 nodes 4 163 164 224 223 mat 1
+Quad1PlaneStrain 148 nodes 4 164 165 225 224 mat 1
+Quad1PlaneStrain 149 nodes 4 165 166 226 225 mat 1
+Quad1PlaneStrain 150 nodes 4 166 167 227 226 mat 1
+Quad1PlaneStrain 151 nodes 4 167 168 228 227 mat 1
+Quad1PlaneStrain 152 nodes 4 168 169 170 228 mat 1
+Quad1PlaneStrain 153 nodes 4 170 171 229 228 mat 1
+Quad1PlaneStrain 154 nodes 4 171 172 230 229 mat 1
+Quad1PlaneStrain 155 nodes 4 172 173 231 230 mat 1
+Quad1PlaneStrain 156 nodes 4 173 174 232 231 mat 1
+Quad1PlaneStrain 157 nodes 4 174 175 233 232 mat 1
+Quad1PlaneStrain 158 nodes 4 175 176 234 233 mat 1
+Quad1PlaneStrain 159 nodes 4 176 177 235 234 mat 1
+Quad1PlaneStrain 160 nodes 4 177 178 236 235 mat 1
+Quad1PlaneStrain 161 nodes 4 178 179 237 236 mat 1
+Quad1PlaneStrain 162 nodes 4 179 180 238 237 mat 1
+Quad1PlaneStrain 163 nodes 4 180 181 182 238 mat 1
+Quad1PlaneStrain 164 nodes 4 238 182 183 239 mat 1
+Quad1PlaneStrain 165 nodes 4 183 184 185 239 mat 1
+Quad1PlaneStrain 166 nodes 4 185 186 240 239 mat 1
+Quad1PlaneStrain 167 nodes 4 186 187 241 240 mat 1
+Quad1PlaneStrain 168 nodes 4 187 188 242 241 mat 1
+Quad1PlaneStrain 169 nodes 4 188 189 243 242 mat 1
+Quad1PlaneStrain 170 nodes 4 189 190 244 243 mat 1
+Quad1PlaneStrain 171 nodes 4 190 191 245 244 mat 1
+Quad1PlaneStrain 172 nodes 4 191 192 246 245 mat 1
+Quad1PlaneStrain 173 nodes 4 192 193 247 246 mat 1
+Quad1PlaneStrain 174 nodes 4 193 194 248 247 mat 1
+Quad1PlaneStrain 175 nodes 4 194 195 249 248 mat 1
+Quad1PlaneStrain 176 nodes 4 195 196 250 249 mat 1
+Quad1PlaneStrain 177 nodes 4 196 197 251 250 mat 1
+Quad1PlaneStrain 178 nodes 4 197 198 252 251 mat 1
+Quad1PlaneStrain 179 nodes 4 198 199 253 252 mat 1
+Quad1PlaneStrain 180 nodes 4 199 200 254 253 mat 1
+Quad1PlaneStrain 181 nodes 4 200 201 255 254 mat 1
+Quad1PlaneStrain 182 nodes 4 201 202 256 255 mat 1
+Quad1PlaneStrain 183 nodes 4 202 203 257 256 mat 1
+Quad1PlaneStrain 184 nodes 4 203 204 258 257 mat 1
+Quad1PlaneStrain 185 nodes 4 204 205 259 258 mat 1
+Quad1PlaneStrain 186 nodes 4 205 206 260 259 mat 1
+Quad1PlaneStrain 187 nodes 4 206 207 261 260 mat 1
+Quad1PlaneStrain 188 nodes 4 207 208 262 261 mat 1
+Quad1PlaneStrain 189 nodes 4 208 209 263 262 mat 1
+Quad1PlaneStrain 190 nodes 4 209 210 264 263 mat 1
+Quad1PlaneStrain 191 nodes 4 210 211 265 264 mat 1
+Quad1PlaneStrain 192 nodes 4 211 212 266 265 mat 1
+Quad1PlaneStrain 193 nodes 4 212 213 267 266 mat 1
+Quad1PlaneStrain 194 nodes 4 213 214 268 267 mat 1
+Quad1PlaneStrain 195 nodes 4 214 215 269 268 mat 1
+Quad1PlaneStrain 196 nodes 4 215 216 270 269 mat 1
+Quad1PlaneStrain 197 nodes 4 216 217 271 270 mat 1
+Quad1PlaneStrain 198 nodes 4 217 218 219 271 mat 1
+Quad1PlaneStrain 199 nodes 4 219 220 272 271 mat 1
+Quad1PlaneStrain 200 nodes 4 272 220 221 222 mat 1
+Quad1PlaneStrain 201 nodes 4 222 223 274 273 mat 1
+Quad1PlaneStrain 202 nodes 4 275 224 225 276 mat 1
+Quad1PlaneStrain 203 nodes 4 225 226 277 276 mat 1
+Quad1PlaneStrain 204 nodes 4 226 227 279 277 mat 1
+Quad1PlaneStrain 205 nodes 4 227 228 278 279 mat 1
+Quad1PlaneStrain 206 nodes 4 280 281 230 283 mat 1
+Quad1PlaneStrain 207 nodes 4 230 231 282 283 mat 1
+Quad1PlaneStrain 208 nodes 4 231 232 284 282 mat 1
+Quad1PlaneStrain 209 nodes 4 232 233 285 284 mat 1
+Quad1PlaneStrain 210 nodes 4 233 234 286 285 mat 1
+Quad1PlaneStrain 211 nodes 4 234 235 287 286 mat 1
+Quad1PlaneStrain 212 nodes 4 236 237 289 288 mat 1
+Quad1PlaneStrain 213 nodes 4 237 238 290 289 mat 1
+Quad1PlaneStrain 214 nodes 4 238 239 240 290 mat 1
+Quad1PlaneStrain 215 nodes 4 240 241 291 290 mat 1
+Quad1PlaneStrain 216 nodes 4 241 242 292 291 mat 1
+Quad1PlaneStrain 217 nodes 4 242 243 293 292 mat 1
+Quad1PlaneStrain 218 nodes 4 243 244 294 293 mat 1
+Quad1PlaneStrain 219 nodes 4 244 245 295 294 mat 1
+Quad1PlaneStrain 220 nodes 4 245 246 296 295 mat 1
+Quad1PlaneStrain 221 nodes 4 246 247 297 296 mat 1
+Quad1PlaneStrain 222 nodes 4 247 248 298 297 mat 1
+Quad1PlaneStrain 223 nodes 4 248 249 299 298 mat 1
+Quad1PlaneStrain 224 nodes 4 249 250 300 299 mat 1
+Quad1PlaneStrain 225 nodes 4 250 251 301 300 mat 1
+Quad1PlaneStrain 226 nodes 4 251 252 302 301 mat 1
+Quad1PlaneStrain 227 nodes 4 252 253 303 302 mat 1
+Quad1PlaneStrain 228 nodes 4 253 254 304 303 mat 1
+Quad1PlaneStrain 229 nodes 4 254 255 305 304 mat 1
+Quad1PlaneStrain 230 nodes 4 255 256 306 305 mat 1
+Quad1PlaneStrain 231 nodes 4 256 257 307 306 mat 1
+Quad1PlaneStrain 232 nodes 4 257 258 308 307 mat 1
+Quad1PlaneStrain 233 nodes 4 258 259 309 308 mat 1
+Quad1PlaneStrain 234 nodes 4 259 260 310 309 mat 1
+Quad1PlaneStrain 235 nodes 4 260 261 311 310 mat 1
+Quad1PlaneStrain 236 nodes 4 261 262 312 311 mat 1
+Quad1PlaneStrain 237 nodes 4 262 263 313 312 mat 1
+Quad1PlaneStrain 238 nodes 4 263 264 314 313 mat 1
+Quad1PlaneStrain 239 nodes 4 264 265 315 314 mat 1
+Quad1PlaneStrain 240 nodes 4 265 266 316 315 mat 1
+Quad1PlaneStrain 241 nodes 4 266 267 317 316 mat 1
+Quad1PlaneStrain 242 nodes 4 267 268 318 317 mat 1
+Quad1PlaneStrain 243 nodes 4 268 269 319 318 mat 1
+Quad1PlaneStrain 244 nodes 4 269 270 320 319 mat 1
+Quad1PlaneStrain 245 nodes 4 270 271 272 320 mat 1
+Quad1PlaneStrain 246 nodes 4 320 272 222 273 mat 1
+Quad1PlaneStrain 247 nodes 4 273 274 322 321 mat 1
+Quad1PlaneStrain 248 nodes 4 274 223 224 323 mat 1
+Quad1PlaneStrain 249 nodes 4 323 224 275 324 mat 1
+Quad1PlaneStrain 250 nodes 4 275 276 326 325 mat 1
+Quad1PlaneStrain 251 nodes 4 276 277 327 326 mat 1
+Quad1PlaneStrain 252 nodes 4 277 279 328 327 mat 1
+Quad1PlaneStrain 253 nodes 4 279 278 329 328 mat 1
+Quad1PlaneStrain 254 nodes 4 281 280 330 331 mat 1
+Quad1PlaneStrain 255 nodes 4 280 283 332 330 mat 1
+Quad1PlaneStrain 256 nodes 4 283 282 333 332 mat 1
+Quad1PlaneStrain 257 nodes 4 282 284 334 333 mat 1
+Quad1PlaneStrain 258 nodes 4 284 285 335 334 mat 1
+Quad1PlaneStrain 259 nodes 4 285 286 336 335 mat 1
+Quad1PlaneStrain 260 nodes 4 286 287 338 336 mat 1
+Quad1PlaneStrain 261 nodes 4 287 235 236 339 mat 1
+Quad1PlaneStrain 262 nodes 4 339 236 288 340 mat 1
+Quad1PlaneStrain 263 nodes 4 291 288 289 290 mat 1
+Quad1PlaneStrain 264 nodes 4 292 340 288 291 mat 1
+Quad1PlaneStrain 265 nodes 4 292 293 341 340 mat 1
+Quad1PlaneStrain 266 nodes 4 293 294 342 341 mat 1
+Quad1PlaneStrain 267 nodes 4 294 295 343 342 mat 1
+Quad1PlaneStrain 268 nodes 4 295 296 344 343 mat 1
+Quad1PlaneStrain 269 nodes 4 296 297 345 344 mat 1
+Quad1PlaneStrain 270 nodes 4 297 298 346 345 mat 1
+Quad1PlaneStrain 271 nodes 4 298 299 347 346 mat 1
+Quad1PlaneStrain 272 nodes 4 299 300 348 347 mat 1
+Quad1PlaneStrain 273 nodes 4 300 301 349 348 mat 1
+Quad1PlaneStrain 274 nodes 4 301 302 350 349 mat 1
+Quad1PlaneStrain 275 nodes 4 302 303 351 350 mat 1
+Quad1PlaneStrain 276 nodes 4 303 304 352 351 mat 1
+Quad1PlaneStrain 277 nodes 4 304 305 353 352 mat 1
+Quad1PlaneStrain 278 nodes 4 305 306 354 353 mat 1
+Quad1PlaneStrain 279 nodes 4 306 307 355 354 mat 1
+Quad1PlaneStrain 280 nodes 4 307 308 356 355 mat 1
+Quad1PlaneStrain 281 nodes 4 308 309 357 356 mat 1
+Quad1PlaneStrain 282 nodes 4 309 310 358 357 mat 1
+Quad1PlaneStrain 283 nodes 4 310 311 359 358 mat 1
+Quad1PlaneStrain 284 nodes 4 311 312 360 359 mat 1
+Quad1PlaneStrain 285 nodes 4 312 313 361 360 mat 1
+Quad1PlaneStrain 286 nodes 4 313 314 362 361 mat 1
+Quad1PlaneStrain 287 nodes 4 314 315 363 362 mat 1
+Quad1PlaneStrain 288 nodes 4 315 316 364 363 mat 1
+Quad1PlaneStrain 289 nodes 4 316 317 365 364 mat 1
+Quad1PlaneStrain 290 nodes 4 317 318 366 365 mat 1
+Quad1PlaneStrain 291 nodes 4 318 319 321 366 mat 1
+Quad1PlaneStrain 292 nodes 4 321 322 367 366 mat 1
+Quad1PlaneStrain 293 nodes 4 323 324 368 367 mat 1
+Quad1PlaneStrain 294 nodes 4 275 325 370 324 mat 1
+Quad1PlaneStrain 295 nodes 4 325 326 371 372 mat 1
+Quad1PlaneStrain 296 nodes 4 326 327 373 371 mat 1
+Quad1PlaneStrain 297 nodes 4 327 328 374 373 mat 1
+Quad1PlaneStrain 298 nodes 4 281 331 328 329 mat 1
+Quad1PlaneStrain 299 nodes 4 331 330 375 376 mat 1
+Quad1PlaneStrain 300 nodes 4 330 332 377 375 mat 1
+Quad1PlaneStrain 301 nodes 4 332 333 378 377 mat 1
+Quad1PlaneStrain 302 nodes 4 333 334 379 378 mat 1
+Quad1PlaneStrain 303 nodes 4 334 335 380 379 mat 1
+Quad1PlaneStrain 304 nodes 4 335 336 381 385 mat 1
+Quad1PlaneStrain 305 nodes 4 336 338 382 381 mat 1
+Quad1PlaneStrain 306 nodes 4 338 337 383 382 mat 1
+Quad1PlaneStrain 307 nodes 4 340 341 337 339 mat 1
+Quad1PlaneStrain 308 nodes 4 342 343 382 383 mat 1
+Quad1PlaneStrain 309 nodes 4 343 344 381 382 mat 1
+Quad1PlaneStrain 310 nodes 4 345 346 384 385 mat 1
+Quad1PlaneStrain 311 nodes 4 346 347 386 384 mat 1
+Quad1PlaneStrain 312 nodes 4 347 348 387 386 mat 1
+Quad1PlaneStrain 313 nodes 4 348 349 388 387 mat 1
+Quad1PlaneStrain 314 nodes 4 349 350 389 388 mat 1
+Quad1PlaneStrain 315 nodes 4 350 351 390 389 mat 1
+Quad1PlaneStrain 316 nodes 4 390 351 352 418 mat 1
+Quad1PlaneStrain 317 nodes 4 418 352 353 392 mat 1
+Quad1PlaneStrain 318 nodes 4 353 354 393 392 mat 1
+Quad1PlaneStrain 319 nodes 4 354 355 394 393 mat 1
+Quad1PlaneStrain 320 nodes 4 355 356 395 394 mat 1
+Quad1PlaneStrain 321 nodes 4 356 357 396 395 mat 1
+Quad1PlaneStrain 322 nodes 4 357 358 397 396 mat 1
+Quad1PlaneStrain 323 nodes 4 358 359 398 397 mat 1
+Quad1PlaneStrain 324 nodes 4 359 360 399 398 mat 1
+Quad1PlaneStrain 325 nodes 4 360 361 400 399 mat 1
+Quad1PlaneStrain 326 nodes 4 361 362 401 400 mat 1
+Quad1PlaneStrain 327 nodes 4 362 363 402 401 mat 1
+Quad1PlaneStrain 328 nodes 4 363 364 403 402 mat 1
+Quad1PlaneStrain 329 nodes 4 364 365 368 403 mat 1
+Quad1PlaneStrain 330 nodes 4 365 366 367 368 mat 1
+Quad1PlaneStrain 331 nodes 4 370 369 402 403 mat 1
+Quad1PlaneStrain 332 nodes 4 369 372 404 419 mat 1
+Quad1PlaneStrain 333 nodes 4 372 371 405 404 mat 1
+Quad1PlaneStrain 334 nodes 4 371 373 407 405 mat 1
+Quad1PlaneStrain 335 nodes 4 409 406 374 376 mat 1
+Quad1PlaneStrain 336 nodes 4 376 375 408 409 mat 1
+Quad1PlaneStrain 337 nodes 4 375 377 410 408 mat 1
+Quad1PlaneStrain 338 nodes 4 377 378 411 410 mat 1
+Quad1PlaneStrain 339 nodes 4 378 379 412 411 mat 1
+Quad1PlaneStrain 340 nodes 4 379 380 387 412 mat 1
+Quad1PlaneStrain 341 nodes 4 380 335 385 384 mat 1
+Quad1PlaneStrain 342 nodes 4 388 389 411 412 mat 1
+Quad1PlaneStrain 343 nodes 4 413 391 392 393 mat 1
+Quad1PlaneStrain 344 nodes 4 393 394 414 413 mat 1
+Quad1PlaneStrain 345 nodes 4 394 395 415 414 mat 1
+Quad1PlaneStrain 346 nodes 4 395 396 416 415 mat 1
+Quad1PlaneStrain 347 nodes 4 396 397 417 416 mat 1
+Quad1PlaneStrain 348 nodes 4 397 398 407 417 mat 1
+Quad1PlaneStrain 349 nodes 4 398 399 405 407 mat 1
+Quad1PlaneStrain 350 nodes 4 399 400 404 405 mat 1
+Quad1PlaneStrain 351 nodes 4 409 408 414 415 mat 1
+Quad1PlaneStrain 352 nodes 4 408 410 413 414 mat 1
+Quad1PlaneStrain 353 nodes 4 410 411 391 413 mat 1
+Quad1PlaneStrain 354 nodes 4 228 229 329 278 mat 1
+Quad1PlaneStrain 355 nodes 4 325 372 369 370 mat 1
+Quad1PlaneStrain 356 nodes 4 345 385 381 344 mat 1
+Quad1PlaneStrain 357 nodes 4 416 417 407 406 mat 1
+Quad1PlaneStrain 358 nodes 4 409 415 416 406 mat 1
+Quad1PlaneStrain 359 nodes 4 390 391 411 389 mat 1
+Quad1PlaneStrain 360 nodes 4 320 273 321 319 mat 1
+Quad1PlaneStrain 361 nodes 4 331 376 374 328 mat 1
+Quad1PlaneStrain 362 nodes 4 380 384 386 387 mat 1
+Quad1PlaneStrain 363 nodes 4 341 342 383 337 mat 1
+Quad1PlaneStrain 364 nodes 4 274 323 367 322 mat 1
+Quad1PlaneStrain 365 nodes 4 324 370 403 368 mat 1
+Quad1PlaneStrain 366 nodes 4 287 339 337 338 mat 1
+Quad1PlaneStrain 367 nodes 4 406 407 373 374 mat 1
+Quad1PlaneStrain 368 nodes 4 419 404 400 401 mat 1
+Quad1PlaneStrain 369 nodes 4 390 418 392 391 mat 1
+Quad1PlaneStrain 370 nodes 4 369 419 401 402 mat 1
+Quad1PlaneStrain 371 nodes 4 229 230 281 329 mat 1
+Quad1PlaneStrain 372 nodes 4 4 80 420 38 mat 2
+Quad1PlaneStrain 373 nodes 4 80 81 421 420 mat 2
+Quad1PlaneStrain 374 nodes 4 81 6 82 421 mat 2
+Quad1PlaneStrain 375 nodes 4 82 83 422 421 mat 2
+Quad1PlaneStrain 376 nodes 4 83 84 423 422 mat 2
+Quad1PlaneStrain 377 nodes 4 84 8 424 423 mat 2
+Quad1PlaneStrain 378 nodes 4 8 7 85 424 mat 2 boundaryLoads 2 3 1
+Quad1PlaneStrain 379 nodes 4 85 86 425 424 mat 2
+Quad1PlaneStrain 380 nodes 4 86 5 41 425 mat 2
+Quad1PlaneStrain 381 nodes 4 41 40 426 425 mat 2
+Quad1PlaneStrain 382 nodes 4 40 39 427 426 mat 2
+Quad1PlaneStrain 383 nodes 4 39 38 420 427 mat 2
+Quad1PlaneStrain 384 nodes 4 420 421 422 427 mat 2
+Quad1PlaneStrain 385 nodes 4 422 423 426 427 mat 2
+Quad1PlaneStrain 386 nodes 4 423 424 425 426 mat 2
+Set 1 elementranges {(1 371)}
+Set 2 elementranges {(372 386)}
+Set 3 noderanges {1 5 7 (42 79) 85 86}
+Set 4 noderanges {(1 3) (9 22)}
+Set 5 elementboundaries 2 378 1
+SimpleCS 1 thick 1.0 set 1
+SimpleCS 2 thick 1.0 set 2
 idmnl1 1 d 1.0 E 37.7e3 n 0.2 talpha 0.0 e0 6.75e-5 ef 3.0e-4 R 5.0 equivstraintype 1 regionMap 2 0 1
 IsoLE  2 d 1.0 E 300.e3 n 0.2 talpha 0.0
 ##idmnl1 1 d 1.0 E 30.e3 n 0.18 talpha 0.0 e0 0.00011666666667 ef 0.0059953333333 R 5.0 equivstraintype 1 regionMap 2 0 1
 ##IsoLE  2 d 1.0 E 210.e3 n 0.3 talpha 0.0
-BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0 
-ConstantEdgeLoad 2 loadTimeFunction 1 components 2 0 -1.0 loadType 3 ndofs 2
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 3
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 2 values 1 0.0 set 4
+ConstantEdgeLoad 3 loadTimeFunction 1 components 2 0 -1.0 loadType 3 ndofs 2
 ConstantFunction 1 f(t) 1.0
 
 #%BEGIN_CHECK% tolerance 1.e-5

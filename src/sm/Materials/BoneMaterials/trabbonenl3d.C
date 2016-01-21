@@ -66,12 +66,11 @@ TrabBoneNL3D :: ~TrabBoneNL3D()
 void
 TrabBoneNL3D :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep)
 {
-    FloatArray SDstrainVector, fullSDStrainVector;
+    FloatArray SDstrainVector;
     double cumPlastStrain;
     TrabBoneNL3DStatus *nlStatus = static_cast< TrabBoneNL3DStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
-    //this->initGpForNewStep(gp);
     this->giveStressDependentPartOfStrainVector(SDstrainVector, gp, strainVector, tStep, VM_Total);
 
     nlStatus->letTempStrainVectorBe(strainVector);
@@ -246,17 +245,10 @@ TrabBoneNL3D :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
     TrabBoneNL3DStatus *nlStatus = static_cast< TrabBoneNL3DStatus * >( this->giveStatus(gp) );
     StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
 
-    int ncols, nsize;
-    double sum, beta;
-    FloatArray remoteNu, plasFlowDirec, prodTensor;
-    FloatMatrix b, SSaTensor;
+    FloatMatrix b;
 
     elem->giveLocationArray(rloc, s);
     elem->computeBmatrixAt(gp, b);
-
-    ncols = b.giveNumberOfColumns();
-    rcontrib.resize(ncols);
-
 
     double kappa = nlStatus->giveKappa();
     double tempKappa = nlStatus->giveTempKappa();
@@ -266,26 +258,17 @@ TrabBoneNL3D :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
     }
 
     if ( dKappa > 0.0 ) {
-        plasFlowDirec = nlStatus->givePlasFlowDirec();
-        SSaTensor = nlStatus->giveSSaTensor();
-        beta = nlStatus->giveBeta();
+        FloatArray remoteNu, prodTensor;
+        const FloatArray &plasFlowDirec = nlStatus->givePlasFlowDirec();
+        const FloatMatrix &SSaTensor = nlStatus->giveSSaTensor();
+        double beta = nlStatus->giveBeta();
 
         prodTensor.beTProductOf(SSaTensor, plasFlowDirec);
         remoteNu = 1 / beta * prodTensor;
-        nsize = remoteNu.giveSize();
-
-        for ( int i = 1; i <= ncols; i++ ) {
-            sum = 0.0;
-            for ( int j = 1; j <= nsize; j++ ) {
-                sum += remoteNu.at(j) * b.at(j, i);
-            }
-
-            rcontrib.at(i) = sum;
-        }
+        rcontrib.beTProductOf(b, remoteNu);
     } else {
-        for ( int i = 1; i <= ncols; i++ ) {
-            rcontrib.at(i) = 0.;
-        }
+        rcontrib.resize(b.giveNumberOfColumns());
+        rcontrib.zero();
     }
 }
 
@@ -295,9 +278,9 @@ TrabBoneNL3D :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
                                         const FloatArray &totalStrain, TimeStep *tStep)
 {
     TrabBoneNL3DStatus *nlStatus = static_cast< TrabBoneNL3DStatus * >( this->giveStatus(gp) );
-    //this->initGpForNewStep(gp);
+
     this->initTempStatus(gp);
-    
+
     double tempDam;
     FloatArray effStress, totalStress, densStress;
 
@@ -370,8 +353,15 @@ TrabBoneNL3D :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                             // Required by IR_GIVE_FIELD macro
 
-    TrabBone3D :: initializeFrom(ir);
-    StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
+    result = TrabBone3D :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+
+    result = StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     IR_GIVE_FIELD(ir, R, _IFT_TrabBoneNL3D_r);
     if ( R < 0.0 ) {
@@ -430,17 +420,16 @@ TrabBoneNL3DStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status {");
     fprintf(file, " plastrains ");
-    int n = plasDef.giveSize();
-    for ( int i = 1; i <= n; i++ ) {
-        fprintf( file, " % .4e", plasDef.at(i) );
+    for ( auto &val : plasDef ) {
+        fprintf( file, " %.4e", val );
     }
 
     fprintf(file, " ,");
-    fprintf(file, " kappa % .4e ,", kappa);
-    fprintf(file, " dam  % .4e ,", tempDam);
-    fprintf(file, " esed  % .4e ,", this->tempTSED - this->tempPSED);
-    fprintf(file, " psed  % .4e ,", this->tempPSED);
-    fprintf(file, " tsed  % .4e", this->tempTSED);
+    fprintf(file, " kappa %.4e ,", kappa);
+    fprintf(file, " dam  %.4e ,", tempDam);
+    fprintf(file, " esed  %.4e ,", this->tempTSED - this->tempPSED);
+    fprintf(file, " psed  %.4e ,", this->tempPSED);
+    fprintf(file, " tsed  %.4e", this->tempTSED);
     fprintf(file, "}\n");
 }
 

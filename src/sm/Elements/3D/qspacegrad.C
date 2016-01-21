@@ -64,7 +64,7 @@ IRResultType
 QSpaceGrad :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 27;
-    return this->Structural3DElement :: initializeFrom(ir);
+    return Structural3DElement :: initializeFrom(ir);
 }
 
 
@@ -91,11 +91,9 @@ QSpaceGrad :: computeGaussPoints()
 
 
 void
-QSpaceGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
+QSpaceGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatArray &answer)
 {
-    FloatArray n;
-    this->interpolation_lin.evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-    answer.beNMatrixOf(n, 1);
+    this->interpolation_lin.evalN( answer, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 void

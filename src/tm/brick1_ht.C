@@ -95,12 +95,7 @@ IRResultType
 Brick1_ht :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 8;
-    IRResultType result = this->TransportElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    return IRRT_OK;
+    return TransportElement :: initializeFrom(ir);
 }
 
 

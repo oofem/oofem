@@ -85,7 +85,7 @@ HeMoTKMaterial :: give(int aProperty, GaussPoint *gp)
 // 'E') of the receiver.
 //
 {
-    return this->Material :: give(aProperty, gp);
+    return Material :: give(aProperty, gp);
 }
 
 
@@ -344,7 +344,7 @@ HeMoTKMaterial :: giveHumidity(GaussPoint *gp, ValueModeType mode)
         OOFEM_ERROR("undefined moisture status!");
     }
 
-    FloatArray state = ms->giveField();
+    const FloatArray &state = ms->giveField();
 
     if ( mode == VM_Total ) {
         return inverse_sorption_isotherm( tempState.at(2) );

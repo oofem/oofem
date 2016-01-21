@@ -59,7 +59,6 @@ class TR21_2D_SUPG : public SUPGElement2, public LevelSetPCSElementInterface, pu
 protected:
     static FEI2dTrQuad velocityInterpolation;
     static FEI2dTrLin pressureInterpolation;
-    IntArray pressureDofManArray;
 
 public:
     TR21_2D_SUPG(int n, Domain * aDomain);
@@ -75,7 +74,6 @@ public:
 
     virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
     virtual int computeNumberOfDofs();
-    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void updateYourself(TimeStep *tStep);
     /// Used to check consistency and initialize some element geometry data (area,b,c).
     virtual int checkConsistency();

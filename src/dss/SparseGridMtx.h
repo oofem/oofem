@@ -117,6 +117,7 @@ public:
     virtual void SolveLV(const LargeVector &b, LargeVector &x) = 0;
     virtual void Solve(double *b, double *x) = 0;
     virtual void MultiplyByVector(const LargeVectorAttach &x, LargeVectorAttach &y);
+    virtual void times(double x);
     virtual void Factorize() = 0;
 
 public:

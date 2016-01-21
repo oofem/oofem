@@ -62,7 +62,6 @@ FEI2dQuadLin PlaneStress2d :: interpolation(1, 2);
 PlaneStress2d :: PlaneStress2d(int n, Domain *aDomain) :
     PlaneStressElement(n, aDomain), ZZNodalRecoveryModelInterface(this),
     SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(this),
-    EIPrimaryUnknownMapperInterface(),
     HuertaErrorEstimatorInterface()
     // Constructor.
 {
@@ -86,7 +85,7 @@ PlaneStress2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, i
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
 
     answer.resize(3, 8);
     answer.zero();
@@ -97,7 +96,7 @@ PlaneStress2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, i
     }
 
 #ifdef  PlaneStress2d_reducedShearIntegration
-    this->interpolation.evaldNdx( dnx, {0., 0.}, FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, {0., 0.}, *this->giveCellGeometryWrapper() );
 #endif
 
     for ( int i = 1; i <= 4; i++ ) {
@@ -116,7 +115,7 @@ PlaneStress2d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
 
     answer.resize(4, 8);
 
@@ -126,7 +125,7 @@ PlaneStress2d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     }
 
 #ifdef  PlaneStress2d_reducedShearIntegration
-    this->interpolation.evaldNdx( dnx, {0., 0.}, FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, {0., 0.}, *this->giveCellGeometryWrapper() );
 #endif
 
     for ( int i = 1; i <= 4; i++ ) {
@@ -140,7 +139,7 @@ IRResultType
 PlaneStress2d :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 4;
-    IRResultType result = this->NLStructuralElement :: initializeFrom(ir);
+    IRResultType result = PlaneStressElement :: initializeFrom(ir);
     if ( result != IRRT_OK ) {
         return result;
     }
@@ -221,7 +220,7 @@ PlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrac
 
         // gradient of function phi at the current GP
         FloatMatrix dnx;
-        this->interpolation.evaldNdx( dnx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+        this->interpolation.evaldNdx( dnx, gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
         FloatArray gradPhi(2);
         gradPhi.zero();
         for ( int i = 1; i <= 4; i++ ) {
@@ -261,8 +260,6 @@ PlaneStress2d :: giveInterface(InterfaceType interface)
         return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
         return static_cast< SpatialLocalizerInterface * >(this);
-    } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
         return static_cast< HuertaErrorEstimatorInterface * >(this);
     }
@@ -352,16 +349,16 @@ void PlaneStress2d :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
     EASValsSetFillStyle(FILL_HOLLOW);
     p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveCoordinate(1);
     p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveCoordinate(2);
-    p [ 0 ].z = 0.;
+    p [ 0 ].z = ( FPNum ) this->giveNode(1)->giveCoordinate(3);
     p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveCoordinate(1);
     p [ 1 ].y = ( FPNum ) this->giveNode(2)->giveCoordinate(2);
-    p [ 1 ].z = 0.;
+    p [ 1 ].z = ( FPNum ) this->giveNode(2)->giveCoordinate(3);
     p [ 2 ].x = ( FPNum ) this->giveNode(3)->giveCoordinate(1);
     p [ 2 ].y = ( FPNum ) this->giveNode(3)->giveCoordinate(2);
-    p [ 2 ].z = 0.;
+    p [ 2 ].z = ( FPNum ) this->giveNode(3)->giveCoordinate(3);
     p [ 3 ].x = ( FPNum ) this->giveNode(4)->giveCoordinate(1);
     p [ 3 ].y = ( FPNum ) this->giveNode(4)->giveCoordinate(2);
-    p [ 3 ].z = 0.;
+    p [ 3 ].z = ( FPNum ) this->giveNode(4)->giveCoordinate(3); 
 
     go =  CreateQuad3D(p);
     EGWithMaskChangeAttributes(WIDTH_MASK | FILL_MASK | COLOR_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK | LAYER_MASK, go);
@@ -388,16 +385,16 @@ void PlaneStress2d :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tS
     EASValsSetFillStyle(FILL_HOLLOW);
     p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(1, tStep, defScale);
     p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(2, tStep, defScale);
-    p [ 0 ].z = 0.;
+    p [ 0 ].z = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(3, tStep, defScale);
     p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveUpdatedCoordinate(1, tStep, defScale);
     p [ 1 ].y = ( FPNum ) this->giveNode(2)->giveUpdatedCoordinate(2, tStep, defScale);
-    p [ 1 ].z = 0.;
+    p [ 1 ].z = ( FPNum ) this->giveNode(2)->giveUpdatedCoordinate(3, tStep, defScale);
     p [ 2 ].x = ( FPNum ) this->giveNode(3)->giveUpdatedCoordinate(1, tStep, defScale);
     p [ 2 ].y = ( FPNum ) this->giveNode(3)->giveUpdatedCoordinate(2, tStep, defScale);
-    p [ 2 ].z = 0.;
+    p [ 2 ].z = ( FPNum ) this->giveNode(3)->giveUpdatedCoordinate(3, tStep, defScale);
     p [ 3 ].x = ( FPNum ) this->giveNode(4)->giveUpdatedCoordinate(1, tStep, defScale);
     p [ 3 ].y = ( FPNum ) this->giveNode(4)->giveUpdatedCoordinate(2, tStep, defScale);
-    p [ 3 ].z = 0.;
+    p [ 3 ].z = ( FPNum ) this->giveNode(4)->giveUpdatedCoordinate(3, tStep, defScale);
 
     go =  CreateQuad3D(p);
     EGWithMaskChangeAttributes(WIDTH_MASK | FILL_MASK | COLOR_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK | LAYER_MASK, go);
@@ -519,7 +516,6 @@ void PlaneStress2d :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
         }
 
         IntArray ind(4);
-        FloatArray *gpCoords;
         WCRec pp [ 9 ];
 
         for ( i = 0; i < 4; i++ ) {
@@ -528,11 +524,11 @@ void PlaneStress2d :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
                 defScale = gc.getDefScale();
                 pp [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, defScale);
                 pp [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, defScale);
-                pp [ i ].z = 0.;
+                pp [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(3, tStep, defScale);
             } else {
                 pp [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
                 pp [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
-                pp [ i ].z = 0.;
+                pp [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(3);
             }
         }
 
@@ -551,18 +547,18 @@ void PlaneStress2d :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
         pp [ 8 ].z = 0.25 * ( pp [ 0 ].z + pp [ 1 ].z + pp [ 2 ].z + pp [ 3 ].z );
 
         for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
-            gpCoords = gp->giveNaturalCoordinates();
-            if ( ( gpCoords->at(1) > 0. ) && ( gpCoords->at(2) > 0. ) ) {
+            const FloatArray& gpCoords = gp->giveNaturalCoordinates();
+            if ( ( gpCoords.at(1) > 0. ) && ( gpCoords.at(2) > 0. ) ) {
                 ind.at(1) = 0;
                 ind.at(2) = 4;
                 ind.at(3) = 8;
                 ind.at(4) = 7;
-            } else if ( ( gpCoords->at(1) < 0. ) && ( gpCoords->at(2) > 0. ) ) {
+            } else if ( ( gpCoords.at(1) < 0. ) && ( gpCoords.at(2) > 0. ) ) {
                 ind.at(1) = 4;
                 ind.at(2) = 1;
                 ind.at(3) = 5;
                 ind.at(4) = 8;
-            } else if ( ( gpCoords->at(1) < 0. ) && ( gpCoords->at(2) < 0. ) ) {
+            } else if ( ( gpCoords.at(1) < 0. ) && ( gpCoords.at(2) < 0. ) ) {
                 ind.at(1) = 5;
                 ind.at(2) = 2;
                 ind.at(3) = 6;
@@ -746,19 +742,6 @@ SPRPatchType
 PlaneStress2d :: SPRNodalRecoveryMI_givePatchType()
 {
     return SPRPatchType_2dxy;
-}
-
-
-void
-PlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-                                                                  TimeStep *tStep, const FloatArray &lcoords,
-                                                                  FloatArray &answer)
-{
-    FloatArray u;
-    FloatMatrix n;
-    this->computeNmatrixAt(lcoords, n);
-    this->computeVectorOf(mode, tStep, u);
-    answer.beProductOf(n, u);
 }
 
 } // end namespace oofem

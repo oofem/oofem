@@ -53,6 +53,7 @@ namespace oofem {
     ENUM_ITEM(_2dBeam) \
     ENUM_ITEM(_3dBeam) \
     ENUM_ITEM(_3dShell) \
+    ENUM_ITEM(_3dDegeneratedShell) \
   \
     ENUM_ITEM(_PlateLayer) \
     ENUM_ITEM(_2dBeamLayer) \
@@ -76,11 +77,14 @@ namespace oofem {
     ENUM_ITEM(_3dFlow) \
 \
     ENUM_ITEM(_2dLattice) \
+    ENUM_ITEM(_3dLattice) \
     ENUM_ITEM(_2dMTLattice) \
+    ENUM_ITEM(_3dMTLattice) \
     ENUM_ITEM(_Warping) \
-    /**
-     * Type representing material mode of integration point.
-     */
+
+/**
+ * Type representing material mode of integration point.
+ */
 enum MaterialMode {
     MaterialMode_DEF
 };

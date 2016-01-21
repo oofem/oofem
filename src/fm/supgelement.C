@@ -40,9 +40,11 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "fluiddynamicmaterial.h"
+#include "fluidcrosssection.h"
 #include "dynamicinputrecord.h"
 #include "engngm.h"
 #include "node.h"
+#include "dof.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -64,14 +66,13 @@ SUPGElement :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-    FMElement :: initializeFrom(ir);
 
     IR_GIVE_OPTIONAL_FIELD(ir, boundarySides, _IFT_SUPGElement_bsides);
     if ( !boundarySides.isEmpty() ) {
         IR_GIVE_FIELD(ir, boundaryCodes, _IFT_SUPGElement_bcodes);
     }
 
-    return IRRT_OK;
+    return FMElement :: initializeFrom(ir);
 }
 
 
@@ -187,7 +188,7 @@ SUPGElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Value
         answer.assemble(h, ploc);
 
         FloatMatrix m1;
-        FloatArray v, p;
+        FloatArray v;
         // add lsic stabilization term
         //this->giveCharacteristicMatrix(m1, LSICStabilizationTerm_MB, tStep);
         //m1.times( lscale / ( dscale * uscale * uscale ) );
@@ -229,7 +230,7 @@ SUPGElement :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeS
     // compute deviatoric strain
     this->computeDeviatoricStrain(eps, gp, tStep);
     // call material to compute stress
-    static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->computeDeviatoricStressVector(answer, gp, eps, tStep);
+    static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial()->computeDeviatoricStressVector(answer, gp, eps, tStep);
 }
 
 
@@ -330,20 +331,6 @@ SUPGElement :: computeBCLhsPressureTerm_MC(FloatMatrix &answer, TimeStep *tStep)
 }
 
 
-double
-SUPGElement :: giveCharacteristicValue(CharType mtrx, TimeStep *tStep)
-{
-    if ( mtrx == CriticalTimeStep ) {
-        return this->computeCriticalTimeStep(tStep);
-    } else {
-        OOFEM_ERROR("Unknown Type of characteristic mtrx.");
-    }
-
-    return 0.0;
-}
-
-
-
 int
 SUPGElement :: checkConsistency()
 //
@@ -353,12 +340,6 @@ SUPGElement :: checkConsistency()
 //
 {
     int result = 1;
-    /*
-     * if (!this->giveMaterial()->testMaterialExtension(Material_TransportCapability)) {
-     * OOFEM_WARNING("material without support for transport problems");
-     * result =0;
-     * }
-     */
     return result;
 }
 

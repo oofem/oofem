@@ -75,7 +75,7 @@ double PrescribedGenStrainShell7 :: give(Dof *dof, ValueModeType mode, double ti
     }
 
     // Reminder: u_i = F_ij . (x_j - xb_j) = H_ij . dx_j
-    FloatArray dx, temp;
+    FloatArray dx;
     dx.beDifferenceOf(* coords, this->centerCoord);
 
     // Assuming the coordinate system to be local, dx(3) = z
@@ -182,7 +182,7 @@ PrescribedGenStrainShell7 :: evaluateHigherOrderContribution(FloatArray &answer,
     this->evalInitialCovarBaseVectorsAt(Gcov, this->initialGenEps, zeta);
     Shell7Base :: giveDualBase(Gcov, Gcon);
 
-    FloatArray G3(3), u(3), g3prime(3), m(3);
+    FloatArray G3(3), g3prime(3), m(3);
     G3.at(1) = Gcon.at(1,3);
     G3.at(2) = Gcon.at(2,3);
     G3.at(3) = Gcon.at(3,3);
@@ -291,8 +291,6 @@ IRResultType PrescribedGenStrainShell7 :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-    GeneralBoundaryCondition :: initializeFrom(ir);
-
     IR_GIVE_FIELD(ir, this->initialGenEps, _IFT_PrescribedGenStrainShell7_initialgeneralizedstrain);
     IR_GIVE_FIELD(ir, this->genEps, _IFT_PrescribedGenStrainShell7_generalizedstrain);
 
@@ -300,7 +298,7 @@ IRResultType PrescribedGenStrainShell7 :: initializeFrom(InputRecord *ir)
     this->centerCoord.zero();
     IR_GIVE_OPTIONAL_FIELD(ir, this->centerCoord, _IFT_PrescribedGenStrainShell7_centercoords)
 
-    return IRRT_OK;
+    return GeneralBoundaryCondition :: initializeFrom(ir);
 }
 
 

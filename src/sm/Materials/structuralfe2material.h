@@ -44,6 +44,7 @@
 //@{
 #define _IFT_StructuralFE2Material_Name "structfe2material"
 #define _IFT_StructuralFE2Material_fileName "filename"
+#define _IFT_StructuralFE2Material_useNumericalTangent "use_num_tangent"
 //@}
 
 namespace oofem {
@@ -105,6 +106,7 @@ class StructuralFE2Material : public StructuralMaterial
 protected:
     std :: string inputfile;
     static int n;
+    bool useNumTangent;
 
 public:
     StructuralFE2Material(int n, Domain * d);

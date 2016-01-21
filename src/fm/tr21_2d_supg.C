@@ -44,6 +44,7 @@
 #include "intarray.h"
 #include "mathfem.h"
 #include "fluiddynamicmaterial.h"
+#include "fluidcrosssection.h"
 #include "timestep.h"
 #include "contextioerr.h"
 #include "crosssection.h"
@@ -105,17 +106,6 @@ TR21_2D_SUPG :: giveDofManDofIDMask(int inode, IntArray &answer) const
     }
 }
 
-IRResultType
-TR21_2D_SUPG :: initializeFrom(InputRecord *ir)
-{
-    SUPGElement2 :: initializeFrom(ir);
-    pressureDofManArray.resize(3);
-    pressureDofManArray.at(1) = dofManArray.at(1);
-    pressureDofManArray.at(2) = dofManArray.at(2);
-    pressureDofManArray.at(3) = dofManArray.at(3);
-    return IRRT_OK;
-}
-
 void
 TR21_2D_SUPG :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
@@ -146,13 +136,8 @@ TR21_2D_SUPG :: computeNuMatrix(FloatMatrix &answer, GaussPoint *gp)
     FloatArray n;
 
     this->velocityInterpolation.evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-    answer.resize(2, 12);
-    answer.zero();
-
-    for ( int i = 1; i <= 6; i++ ) {
-        answer.at(1, 2 * i - 1)  = n.at(i);
-        answer.at(2, 2 * i - 0)  = n.at(i);
-    }
+    
+    answer.beNMatrixOf(n, 2);
 }
 
 void
@@ -177,7 +162,7 @@ TR21_2D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, Time
 void
 TR21_2D_SUPG :: computeBMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
-    FloatMatrix dn(6, 2);
+    FloatMatrix dn;
     this->velocityInterpolation.evaldNdx( dn, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 12);
@@ -240,7 +225,7 @@ TR21_2D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep
 void
 TR21_2D_SUPG :: computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
-    FloatMatrix dn(3, 2);
+    FloatMatrix dn;
     pressureInterpolation.evaldNdx( dn, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.beTranspositionOf(dn);
@@ -251,7 +236,6 @@ TR21_2D_SUPG :: computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp)
 void
 TR21_2D_SUPG :: computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep)
 {
-    FloatArray n, u, un;
     FloatMatrix D, d2n;
 
     answer.resize(2, 12);
@@ -260,7 +244,7 @@ TR21_2D_SUPG :: computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeSte
 
     this->velocityInterpolation.evald2Ndx2( d2n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
-    static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->giveDeviatoricStiffnessMatrix(D, TangentStiffness, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
+    static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial()->giveDeviatoricStiffnessMatrix(D, TangentStiffness, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
 
     for ( int i = 1; i <= 6; i++ ) {
         answer.at(1, 2 * i - 1) = D.at(1, 1) * d2n.at(i, 1) + D.at(1, 3) * d2n.at(i, 3) + D.at(3, 1) * d2n.at(i, 3) + D.at(3, 3) * d2n.at(i, 2);
@@ -279,7 +263,7 @@ TR21_2D_SUPG :: updateStabilizationCoeffs(TimeStep *tStep)
     FloatArray u;
     mu_min = 1;
     for ( GaussPoint *gp: *integrationRulesArray [ 1 ] ) {
-        double mu = static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->giveEffectiveViscosity(gp, tStep);
+        double mu = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial()->giveEffectiveViscosity(gp, tStep);
         if ( mu_min > mu ) {
             mu_min = mu;
         }
@@ -330,7 +314,7 @@ TR21_2D_SUPG :: computeAdvectionTerm(FloatMatrix &answer, TimeStep *tStep)
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, tStep);
         double dV  = this->computeVolumeAround(gp);
-        double rho = this->giveMaterial()->give('d', gp);
+        double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity(gp);
         answer.plusProductUnsym(n, b, rho * dV);
     }
 }
@@ -348,7 +332,7 @@ TR21_2D_SUPG :: computeAdvectionDeltaTerm(FloatMatrix &answer, TimeStep *tStep)
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, tStep);
         double dV  = this->computeVolumeAround(gp);
-        double rho = this->giveMaterial()->give('d', gp);
+        double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity(gp);
 
         answer.plusProductUnsym(b, b, rho * dV);
     }
@@ -368,7 +352,7 @@ TR21_2D_SUPG :: computeMassDeltaTerm(FloatMatrix &answer, TimeStep *tStep)
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, tStep);
         double dV  = this->computeVolumeAround(gp);
-        double rho = this->giveMaterial()->give('d', gp);
+        double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity(gp);
 
         answer.plusProductUnsym(b, n, rho * dV);
     }
@@ -383,7 +367,7 @@ TR21_2D_SUPG :: computeLSICTerm(FloatMatrix &answer, TimeStep *tStep)
 
     for ( GaussPoint *gp: *integrationRulesArray [ 1 ] ) {
         double dV  = this->computeVolumeAround(gp);
-        double rho = this->giveMaterial()->give('d', gp);
+        double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity(gp);
         this->computeDivUMatrix(b, gp);
 
         answer.plusProductSymmUpper(b, b, dV * rho);
@@ -411,7 +395,7 @@ double
 TR21_2D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep)
 {
     double answer = 0.0, vol = 0.0;
-    FloatMatrix n(2, 12), dn(6, 2);
+    FloatMatrix n, dn;
     FloatArray fi(6), u, un, gfi;
 
     this->computeVectorOfVelocities(VM_Total, tStep, un);
@@ -1254,7 +1238,6 @@ TR21_2D_SUPG :: computeQuadraticFunct(FloatArray &answer, int iedge)
     A.at(3, 3) = 1.0;
 
     FloatArray b(3);
-    int i, j, k;
 
     detA = A.giveDeterminant();
 
@@ -1262,9 +1245,9 @@ TR21_2D_SUPG :: computeQuadraticFunct(FloatArray &answer, int iedge)
     b.at(2) = y2;
     b.at(3) = y3;
 
-    for ( k = 1; k <= 3; k++ ) {
-        for ( i = 1; i <= 3; i++ ) {
-            for ( j = 1; j <= 3; j++ ) {
+    for ( int k = 1; k <= 3; k++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
+            for ( int j = 1; j <= 3; j++ ) {
                 A1.at(i, j) = A.at(i, j);
             }
 
@@ -1408,22 +1391,6 @@ TR21_2D_SUPG :: computeVolumeAround(GaussPoint *gp)
     return volume;
 }
 
-
-//double
-//TR21_2D_SUPG :: computeVolumeAroundPressure(FEInterpolation2d& interpol, GaussPoint *gp)
-// Returns the portion of the receiver which is attached to gp.
-//{
-//  double determinant, weight, volume;
-
-//  determinant = fabs( interpol.giveTransformationJacobian(domain, pressureDofManArray,
-//     gp->giveNaturalCoordinates(), 0.0) );
-
-
-//  weight      = gp->giveWeight();
-//  volume      = determinant * weight;
-
-//  return volume;
-//}
 
 Interface *
 TR21_2D_SUPG :: giveInterface(InterfaceType interface)

@@ -63,7 +63,7 @@ public:
     virtual double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual double giveArea(const FEICellGeometry &cellgeo) { return 0.0; };
+    virtual double giveArea(const FEICellGeometry &cellgeo) { return 0.0; }
 
     // Edge (same as bulk for this type, so they are all ignored) (perhaps do it the other way around?).
     virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge);
@@ -73,6 +73,8 @@ public:
     virtual void edgeLocal2global(FloatArray &answer, int iedge,
                                   const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo);
+
+    virtual int giveNumberOfNodes() const { return 3; }
 
     virtual IntegrationRule *giveIntegrationRule(int order);
 

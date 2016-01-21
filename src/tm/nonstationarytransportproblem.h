@@ -56,6 +56,48 @@
 //@}
 
 namespace oofem {
+
+
+/**
+ * Callback class for assembling element external forces:
+ * - edge or surface load on elements
+ * - add internal source vector on elements
+ * @author Mikael Öhman
+ */
+class TransportExternalForceAssembler : public VectorAssembler
+{
+public:
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+};
+
+    
+/**
+ * Callback class for assembling mid point effective tangents
+ * @author Mikael Öhman
+ */
+class MidpointLhsAssembler : public MatrixAssembler
+{
+protected:
+    double lumped;
+    double alpha;
+
+public:
+    MidpointLhsAssembler(bool lumped, double alpha);
+    virtual void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const;
+};
+
+
+/**
+ * Callback class for assembling CBS pressure matrices
+ * @author Mikael Öhman
+ */
+class IntSourceLHSAssembler : public MatrixAssembler
+{
+public:
+    virtual void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const;
+};
+
+
 /**
  * This class represents linear nonstationary transport problem.
  */
@@ -70,7 +112,7 @@ protected:
     StateCounterType internalVarUpdateStamp;
 
     LinSystSolverType solverType; ///@todo Remove this and use nonlinear methods.
-    SparseLinearSystemNM *linSolver; ///@todo Remove this and use nonlinear methods.
+    std :: unique_ptr< SparseLinearSystemNM > linSolver; ///@todo Remove this and use nonlinear methods.
 
     /// Right hand side vector from boundary conditions.
     FloatArray bcRhs;
@@ -108,7 +150,7 @@ public:
     virtual void updateDomainLinks();
 
     virtual TimeStep *giveNextStep();
-    virtual TimeStep *giveSolutionStepWhenIcApply();
+    virtual TimeStep *giveSolutionStepWhenIcApply(bool force = false);
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -126,9 +168,6 @@ public:
     //virtual void updateDofUnknownsDictionary(DofManager *dman, TimeStep *tStep);
 
     virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep);
-
-    virtual void giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
-                                                 CharType type, TimeStep *tStep, Domain *domain);
 
     /**
      * Returns time function for time step increment.
@@ -166,13 +205,18 @@ protected:
      * @param answer Global vector where the contribution will be added.
      * @param tStep Solution step.
      * @param mode Mode of result.
-     * @param lhsType Type of element matrix to be multiplied by vector of prescribed.
-     * The giveElementCharacteristicMatrix service is used to get/compute element matrix.
      * @param s A map of non-default equation numbering if required.
      * @param d Domain.
      */
     virtual void assembleDirichletBcRhsVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode,
-                                              CharType lhsType, const UnknownNumberingScheme &s, Domain *d);
+                                              const UnknownNumberingScheme &s, Domain *d);
+    /**
+     * Copy unknowns in DOF's from previous to current position.
+     * @param mode What the unknown describes (increment, total value etc.).
+     * @param fromTime From which time step to obtain value.
+     * @param toTime To which time to copy.
+     */
+    virtual void copyUnknownsInDictionary(ValueModeType mode, TimeStep *fromTime, TimeStep *toTime);
 
     /**
      * Updates IP values on elements.

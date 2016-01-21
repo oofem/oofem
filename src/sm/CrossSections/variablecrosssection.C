@@ -57,10 +57,6 @@ VariableCrossSection :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    // will read density and other inheritted parameters as constants
-    // NOTE: do not call SimpleCrossSection here (as the parameter names are same, but different type is used here!!!!)
-    this->CrossSection :: initializeFrom(ir);
-
     if ( ir->hasField(_IFT_SimpleCrossSection_thick) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, thicknessExpr, _IFT_SimpleCrossSection_thick);
     }
@@ -99,7 +95,26 @@ VariableCrossSection :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_OPTIONAL_FIELD(ir, this->materialNumber, _IFT_SimpleCrossSection_MaterialNumber);
 
-    return IRRT_OK;
+    directorxExpr.setValue(0.0);
+    if ( ir->hasField(_IFT_SimpleCrossSection_directorx) ) {
+        IR_GIVE_OPTIONAL_FIELD(ir, directorxExpr, _IFT_SimpleCrossSection_directorx);
+    }
+
+
+    directoryExpr.setValue(0.0);
+    if ( ir->hasField(_IFT_SimpleCrossSection_directory) ) {
+        IR_GIVE_OPTIONAL_FIELD(ir, directoryExpr, _IFT_SimpleCrossSection_directory);
+    }
+
+    directorzExpr.setValue(1.0);
+    if ( ir->hasField(_IFT_SimpleCrossSection_directorz) ) {
+        IR_GIVE_OPTIONAL_FIELD(ir, directorzExpr, _IFT_SimpleCrossSection_directorz);
+    }
+
+    // will read density and other inheritted parameters as constants
+    // NOTE: do not call SimpleCrossSection here (as the parameter names are same, but different type is used here!!!!)
+    return CrossSection :: initializeFrom(ir);
+
 }
 
 
@@ -117,6 +132,9 @@ void VariableCrossSection :: giveInputRecord(DynamicInputRecord &input)
     input.setField(this->shearAreazExpr, _IFT_SimpleCrossSection_shearareaz);
     input.setField(this->drillingStiffnessExpr, _IFT_SimpleCrossSection_drillStiffness);
     input.setField(this->materialNumber, _IFT_SimpleCrossSection_MaterialNumber);
+    input.setField(this->directorxExpr, _IFT_SimpleCrossSection_directorx);
+    input.setField(this->directoryExpr, _IFT_SimpleCrossSection_directory);
+    input.setField(this->directorzExpr, _IFT_SimpleCrossSection_directorz);
 }
 
 void
@@ -140,6 +158,12 @@ VariableCrossSection :: giveExpression(const ScalarFunction **expr, CrossSection
         * expr = & shearAreazExpr;
     } else if ( aProperty == CS_DrillingStiffness ) {
         * expr = & drillingStiffnessExpr;
+    } else if ( aProperty == CS_DirectorVectorX ) {
+        * expr = & directorxExpr;
+    } else if ( aProperty == CS_DirectorVectorY ) {
+        * expr = & directoryExpr;
+    } else if ( aProperty == CS_DirectorVectorZ ) {
+        * expr = & directorzExpr;
     } else {
         OOFEM_ERROR("called with unknown ID %d", this->giveNumber(), aProperty);
     }
@@ -172,21 +196,21 @@ VariableCrossSection :: give(CrossSectionProperty aProperty, const FloatArray &c
             } else {
                 // convert given coords into local cs
                 if ( !elem->computeLocalCoordinates(c, coords) ) {
-                    OOFEM_ERROR("computeLocalCoordinates failed (element %d)", elem->giveNumber() );
+                    OOFEM_ERROR( "computeLocalCoordinates failed (element %d)", elem->giveNumber() );
                 }
             }
         } else { // global coordinates needed
             if ( local ) {
                 // convert given coords into global cs
                 if ( !elem->computeGlobalCoordinates(c, coords) ) {
-                    OOFEM_ERROR("computeGlobalCoordinates failed (element %d)", elem->giveNumber() );
+                    OOFEM_ERROR( "computeGlobalCoordinates failed (element %d)", elem->giveNumber() );
                 }
             } else {
                 c = coords;
             }
         }
         // evaluate the expression
-        value = expr->eval({{"x", c}}, this->giveDomain());
+        value = expr->eval( { { "x", c } }, this->giveDomain() );
     }
 
     return value;

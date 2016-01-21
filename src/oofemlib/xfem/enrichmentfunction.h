@@ -67,7 +67,7 @@ public:
      */
     EnrichmentFunction(int n, Domain *aDomain) : FEMComponent(n, aDomain) { }
     /// Destructor
-    virtual ~EnrichmentFunction() { };
+    virtual ~EnrichmentFunction() { }
 
     // New interface
     virtual void evaluateEnrFuncAt(double &oEnrFunc, const FloatArray &iPos, const double &iLevelSet) const = 0;

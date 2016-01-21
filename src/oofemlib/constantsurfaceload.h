@@ -79,7 +79,7 @@ public:
      * Sets a new load vector.
      * @param newValue New load.
      */
-    void updateLoad(const FloatArray &newValue) { componentArray = newValue; };
+    void updateLoad(const FloatArray &newValue) { componentArray = newValue; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual bcGeomType giveBCGeoType() const { return SurfaceLoadBGT; }

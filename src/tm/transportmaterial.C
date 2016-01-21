@@ -79,15 +79,15 @@ void TransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tStep)
 
     fprintf(File, "  state");
 
-    for ( int i = 1; i <= field.giveSize(); i++ ) {
-        fprintf( File, " % .4e", field.at(i) );
+    for ( auto &val : field ) {
+        fprintf( File, " %.4e", val );
     }
 
     transpElem->computeFlow(flowVec, gp, tStep);
 
     fprintf(File, "   flow");
-    for ( int i = 1; i <= flowVec.giveSize(); i++ ) {
-        fprintf( File, " % .4e", flowVec.at(i) );
+    for ( auto &flow : flowVec ) {
+        fprintf( File, " %.4e", flow );
     }
 
     fprintf(File, "\n");
@@ -179,8 +179,9 @@ TransportMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSta
 {
     TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
     if ( type == IST_Temperature || type == IST_MassConcentration_1 || type == IST_Humidity ) {
-        FloatArray vec = ms->giveField();
-        answer = FloatArray{vec.at( ( type == IST_Temperature ) ? 1 : 2 ) };
+        const FloatArray &vec = ms->giveField();
+//         answer = FloatArray{vec.at( ( type == IST_Temperature ) ? 1 : 2 ) };
+        answer = FloatArray{vec.at( 1 ) };
         return 1;
     } else if ( type == IST_TemperatureFlow ) {
         TransportElement *transpElem = static_cast< TransportElement * >( gp->giveElement() );

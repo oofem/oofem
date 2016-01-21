@@ -94,7 +94,6 @@ IRResultType MixedGradientPressureWeakPeriodic :: initializeFrom(InputRecord *ir
 {
     IRResultType result;
 
-    MixedGradientPressureBC :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, this->order, _IFT_MixedGradientPressureWeakPeriodic_order);
     if ( this->order < 0 ) {
@@ -113,7 +112,7 @@ IRResultType MixedGradientPressureWeakPeriodic :: initializeFrom(InputRecord *ir
         this->tractionsdman->appendDof( new MasterDof( tractionsdman.get(), ( DofIDItem ) dofid ) );
     }
 
-    return IRRT_OK;
+    return MixedGradientPressureBC :: initializeFrom(ir);
 }
 
 
@@ -561,7 +560,7 @@ void MixedGradientPressureWeakPeriodic :: computeTangents(FloatMatrix &Ed, Float
         OOFEM_ERROR("Couldn't create sparse matrix of type %d\n", stype);
     }
     Kff->buildInternalStructure(rve, this->domain->giveNumber(), fnum);
-    rve->assemble(*Kff, tStep,TangentStiffnessMatrix, fnum, fnum, this->domain);
+    rve->assemble(*Kff, tStep, TangentAssembler(TangentStiffness), fnum, fnum, this->domain);
 
     // Setup up indices and locations
     int neq = Kff->giveNumberOfRows();

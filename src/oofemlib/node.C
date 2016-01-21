@@ -101,7 +101,11 @@ IRResultType Node :: initializeFrom(InputRecord *ir)
     // VERBOSE_PRINT1("Instanciating node ",number)
 #  endif
 
-    DofManager :: initializeFrom(ir);
+    result = DofManager :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+
     IR_GIVE_FIELD(ir, coordinates, _IFT_Node_coords);
 
     //
@@ -173,8 +177,8 @@ void Node :: giveInputRecord(DynamicInputRecord &input)
 void
 Node :: computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeStep *tStep, ValueModeType mode)
 {
+    answer.clear();
     if ( type != ExternalForcesVector ) {
-        answer.clear();
         return;
     }
 
@@ -187,12 +191,12 @@ Node :: computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeSte
         OOFEM_ERROR("incompatible load type applied");
     }
 
-    loadN->computeComponentArrayAt(answer, tStep, mode); // can be NULL
+    load->computeComponentArrayAt(answer, tStep, mode);
+
     // Transform from Global to Local c.s.
     if ( loadN->giveCoordSystMode() == NodalLoad :: CST_Global ) {
-        IntArray dofIDarry(0);
         FloatMatrix L2G;
-        if ( this->computeL2GTransformation(L2G, dofIDarry) ) {
+        if ( this->computeL2GTransformation(L2G, loadN->giveDofIDs()) ) {
             answer.rotatedWith(L2G, 't');
         }
     }
@@ -804,10 +808,16 @@ Node :: drawYourself(oofegGraphicContext &gc, TimeStep *tStep)
             pp [ 0 ].z = ( FPNum ) this->giveCoordinate(3);
             pp [ 1 ].x = pp [ 1 ].y = pp [ 1 ].z = 0.0;
 
-            FloatArray load;
+            FloatArray load, f;
             FloatMatrix t;
             IntArray dofIDArry(0);
-            computeLoadVectorAt(load, tStep, VM_Total);
+            
+            load.clear();
+            for ( int iload : *this->giveLoadArray() ) {   // to more than one load
+                Load *loadN = domain->giveLoad(iload);
+                this->computeLoadVector(f, loadN, ExternalForcesVector, tStep, VM_Total);
+                load.add(f);
+            }
             if ( computeL2GTransformation(t, dofIDArry) ) {
                 load.rotatedWith(t, 'n');
             }

@@ -61,6 +61,58 @@
 //@}
 
 namespace oofem {
+
+/// Implementation for assembling external forces vectors in standard monolithic FE-problems
+class NumberOfNodalPrescribedTractionPressureAssembler : public VectorAssembler
+{
+public:
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+};
+
+/// Implementation for assembling external forces vectors in standard monolithic FE-problems
+class IntermediateConvectionDiffusionAssembler : public VectorAssembler
+{
+public:
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+};
+
+/// Implementation for assembling external forces vectors in standard monolithic FE-problems
+class PrescribedVelocityRhsAssembler : public VectorAssembler
+{
+public:
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+};
+
+/// Implementation for assembling external forces vectors in standard monolithic FE-problems
+class DensityPrescribedTractionPressureAssembler : public VectorAssembler
+{
+public:
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+};
+
+/// Implementation for assembling external forces vectors in standard monolithic FE-problems
+class DensityRhsAssembler : public VectorAssembler
+{
+public:
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+};
+
+/// Implementation for assembling external forces vectors in standard monolithic FE-problems
+class CorrectionRhsAssembler : public VectorAssembler
+{
+public:
+    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+};
+
+/// Callback class for assembling CBS pressure matrices
+class PressureLhsAssembler : public MatrixAssembler
+{
+public:
+    virtual void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const;
+    virtual void locationFromElement(IntArray &loc, Element &element, const UnknownNumberingScheme &s, IntArray *dofIds = nullptr) const;
+};
+
+
 /**
  * Specialized numbering scheme for CBS algorithm, since it needs velocities separately.
  */
@@ -187,7 +239,7 @@ public:
     virtual void updateDomainLinks();
 
     virtual TimeStep *giveNextStep();
-    virtual TimeStep *giveSolutionStepWhenIcApply();
+    virtual TimeStep *giveSolutionStepWhenIcApply(bool force = false);
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
 
     virtual IRResultType initializeFrom(InputRecord *ir);

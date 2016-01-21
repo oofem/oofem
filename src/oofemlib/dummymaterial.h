@@ -51,7 +51,7 @@ class InputRecord;
 class OOFEM_EXPORT DummyMaterial : public Material
 {
 public:
-    DummyMaterial(int n, Domain * d) : Material(n, d) { };
+    DummyMaterial(int n, Domain * d) : Material(n, d) { }
     virtual int hasMaterialModeCapability(MaterialMode mode) { return 0; }
 
     virtual const char *giveClassName() const { return "DummyMaterial"; }

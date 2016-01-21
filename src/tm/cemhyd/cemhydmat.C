@@ -406,7 +406,9 @@ IRResultType CemhydMat :: initializeFrom(InputRecord *ir)
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
     castingTime = 0.;
 
-    this->IsotropicHeatTransferMaterial :: initializeFrom(ir); //read d,k,c
+    result = IsotropicHeatTransferMaterial :: initializeFrom(ir); //read d,k,c
+    if ( result != IRRT_OK ) return result;
+
     conductivityType = 0;
     capacityType = 0;
     densityType = 0;

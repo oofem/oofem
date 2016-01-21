@@ -64,6 +64,9 @@ class Domain;
  * by implementation - here we use the radial return, which
  * is the most efficient algorithm for this specific model.
  * Also, an extension to large strain will be available.
+ * 
+ * The model also exemplifies how to implement non-3d material modes, in this case 1D, 
+ * by overloading the default implementations that iterates over the 3D method.
  */
 class MisesMat : public StructuralMaterial
 {
@@ -96,8 +99,6 @@ public:
     double computeDamageParamPrime(double tempKappa);
     virtual void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep);
 
-    virtual int hasMaterialModeCapability(MaterialMode mode);
-
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual int hasNonLinearBehaviour() { return 1; }
@@ -109,9 +110,6 @@ public:
     /// Returns a reference to the basic elastic material.
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
-    //virtual int giveSizeOfFullHardeningVarsVector();
-    //virtual int giveSizeOfReducedHardeningVarsVector(GaussPoint *gp);
-
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
@@ -119,34 +117,20 @@ public:
                                                GaussPoint *gp,
                                                TimeStep *tStep);
 
+    virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep); 
     virtual void give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer,
                                                     MatResponseMode mode,
                                                     GaussPoint *gp,
                                                     TimeStep *tStep);
 
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                                      const FloatArray &reducedStrain, TimeStep *tStep);
-
-    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    virtual void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    virtual void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    virtual void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
+    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
+    virtual void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
 
     virtual void giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &vF, TimeStep *tStep);
 
 protected:
     void computeGLPlasticStrain(const FloatMatrix &F, FloatMatrix &Ep, FloatMatrix b, double J);
 
-    void give3dSSMaterialStiffnessMatrix(FloatMatrix &answer,
-                                         MatResponseMode mode,
-                                         GaussPoint *gp,
-                                         TimeStep *tStep);
-    virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void give3dLSMaterialStiffnessMatrix(FloatMatrix &answer,
                                                  MatResponseMode mode,
                                                  GaussPoint *gp,
@@ -215,13 +199,14 @@ public:
     const FloatArray & giveTempEffectiveStress() { return tempEffStress; }
     const FloatArray & giveEffectiveStress() { return effStress; }
 
-    void letTempPlasticStrainBe(FloatArray values) { tempPlasticStrain = std :: move(values); }
+    void letTempPlasticStrainBe(const FloatArray &values) { tempPlasticStrain = values; }
+    const FloatArray &getTempPlasticStrain() const { return tempPlasticStrain; }
 
-    void letTrialStressDevBe(FloatArray values) { trialStressD = std :: move(values); }
+    void letTrialStressDevBe(const FloatArray &values) { trialStressD = values; }
 
-    void letEffectiveStressBe(FloatArray values) { effStress = std :: move(values); }
+    void letEffectiveStressBe(const FloatArray &values) { effStress = values; }
 
-    void letTempEffectiveStressBe(FloatArray values) { tempEffStress = std :: move(values); }
+    void letTempEffectiveStressBe(const FloatArray &values) { tempEffStress = values; }
 
 
     void setTrialStressVol(double value) { trialStressV = value; }
@@ -231,8 +216,8 @@ public:
     void setTempDamage(double value) { tempDamage = value; }
     /************************************************/
 
-    void letTempLeftCauchyGreenBe(FloatMatrix values) { tempLeftCauchyGreen = std :: move(values); }
-    void letLeftCauchyGreenBe(FloatMatrix values) { leftCauchyGreen = std :: move(values); }
+    void letTempLeftCauchyGreenBe(const FloatMatrix &values) { tempLeftCauchyGreen = values; }
+    void letLeftCauchyGreenBe(const FloatMatrix &values) { leftCauchyGreen = values; }
 
     const FloatArray &givePlasDef() { return plasticStrain; }
 

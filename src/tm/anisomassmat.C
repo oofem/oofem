@@ -33,7 +33,6 @@
  */
 
 #include "anisomassmat.h"
-#include "domain.h"
 #include "floatmatrix.h"
 #include "gausspoint.h"
 #include "classfactory.h"
@@ -48,8 +47,6 @@ AnisotropicMassTransferMaterial :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                          // Required by IR_GIVE_FIELD macro
 
-    this->Material :: initializeFrom(ir);
-
     ///@todo Why hardcode this for 2d ? Just take the whole matrix as the input instead and not worry about it.
 #if 0
     IR_GIVE_FIELD(ir, k, _IFT_AnisotropicMassTransferMaterial_c);     // Read permeability matrix c from input file
@@ -62,7 +59,8 @@ AnisotropicMassTransferMaterial :: initializeFrom(InputRecord *ir)
     k.at(2, 1) = temp.at(3);
     k.at(2, 2) = temp.at(4);
 #endif
-    return IRRT_OK;
+
+    return Material :: initializeFrom(ir);
 }
 
 

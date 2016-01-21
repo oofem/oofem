@@ -38,6 +38,8 @@
 #include "femcmpnn.h"
 #include "intarray.h"
 
+#include <list>
+
 namespace oofem {
 ///@name Input fields for Set
 //@{
@@ -52,6 +54,7 @@ namespace oofem {
 //@}
 
 class EntityRenumberingFunction;
+class Range;
 
 /**
  * Set of elements, boundaries, edges and/or nodes.

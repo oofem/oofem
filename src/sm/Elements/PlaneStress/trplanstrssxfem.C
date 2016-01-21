@@ -295,9 +295,7 @@ void TrPlaneStress2dXFEM :: giveInputRecord(DynamicInputRecord &input)
 
 
 void
-TrPlaneStress2dXFEM :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-                                                                        TimeStep *tStep, const FloatArray &lcoords,
-                                                                        FloatArray &answer)
+TrPlaneStress2dXFEM :: computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {
     // TODO: Validate implementation.
 
@@ -325,9 +323,9 @@ TrPlaneStress2dXFEM :: giveCompositeExportData(std::vector< VTKPiece > &vtkPiece
 
     const int numCells = mSubTri.size();
 
-    if(numCells == 0) {
+    if(numCells == 0 || true) {
         // Enriched but uncut element
-        // Visualize as a quad
+        // Visualize as a triangle
         vtkPieces[0].setNumberOfCells(1);
 
         int numTotalNodes = 3;
@@ -415,6 +413,10 @@ TrPlaneStress2dXFEM :: giveCompositeExportData(std::vector< VTKPiece > &vtkPiece
             FloatArray average;
             std :: unique_ptr< IntegrationRule > &iRule = integrationRulesArray [ 0 ];
             VTKXMLExportModule :: computeIPAverage(average, iRule.get(), this, type, tStep);
+
+            if(average.giveSize() == 0) {
+            	average = {0., 0., 0., 0., 0., 0.};
+            }
 
             FloatArray averageV9(9);
             averageV9.at(1) = average.at(1);

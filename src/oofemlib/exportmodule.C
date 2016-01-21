@@ -35,16 +35,18 @@
 #include "exportmodule.h"
 #include "timestep.h"
 #include "engngm.h"
-#include "range.h"
+#include "domain.h"
 
 #include <cstdarg>
 
 
 namespace oofem {
-ExportModule :: ExportModule(int n, EngngModel *e) : tsteps_out(), domainMask()
+ExportModule :: ExportModule(int n, EngngModel *e) : tsteps_out(), domainMask(), regionSets(), defaultElementSet( 0, e->giveDomain(1) )
 {
     this->number = n;
     emodel = e;
+    regionSets.resize(0);
+    timeScale = 1.;
 }
 
 
@@ -74,7 +76,49 @@ ExportModule :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, domainMask, _IFT_ExportModule_domainmask);
     }
 
+    IR_GIVE_OPTIONAL_FIELD(ir, regionSets, _IFT_ExportModule_regionsets); // Macro
+
+    IR_GIVE_OPTIONAL_FIELD(ir, timeScale, _IFT_ExportModule_timescale); // Macro
+
     return IRRT_OK;
+}
+
+void ExportModule :: initialize(){
+  initializeElementSet();
+}
+
+void ExportModule :: initializeElementSet(){
+    if ( regionSets.isEmpty() ){
+        // default: whole domain region
+        defaultElementSet.clear();
+        defaultElementSet.setDomain(emodel->giveDomain(1));
+        defaultElementSet.addAllElements();
+    }
+}
+
+
+int ExportModule :: giveNumberOfRegions()
+{
+    // Returns number of regions (aka sets)
+  if (regionSets.isEmpty())
+    return 1; // defaultElementSet
+  else 
+    return this->regionSets.giveSize();
+}
+
+Set *ExportModule :: giveRegionSet(int i)
+{
+  if (regionSets.isEmpty()) {
+    return & this->defaultElementSet;
+  }  else {
+    int setid = regionSets.at(i);
+    if ( setid > 0 ) {
+        return emodel->giveDomain(1)->giveSet(setid);
+    } else {
+        OOFEM_ERROR ("Bad set index");
+        return & this->defaultElementSet;
+    }
+  }
 }
 
 std :: string

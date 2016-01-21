@@ -176,7 +176,7 @@ LIBeam3d2 :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, 
 // Returns the stiffness matrix of the receiver, expressed in the global
 // axes.
 {
-    this->StructuralElement :: computeStiffnessMatrix(answer, rMode, tStep);
+    StructuralElement :: computeStiffnessMatrix(answer, rMode, tStep);
 }
 
 
@@ -297,7 +297,10 @@ LIBeam3d2 :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     // first call parent
-    NLStructuralElement :: initializeFrom(ir);
+   result =  NLStructuralElement :: initializeFrom(ir);
+   if ( result != IRRT_OK ) {
+       return result;
+   }
 
     IR_GIVE_FIELD(ir, referenceNode, _IFT_LIBeam3d2_refnode);
     if ( referenceNode == 0 ) {
@@ -608,9 +611,6 @@ void
 LIBeam3d2 :: initForNewStep()
 // initializes receiver to new time step or can be used
 // if current time step must be restarted
-//
-// call material->initGpForNewStep() for all GPs.
-//
 {
     NLStructuralElement :: initForNewStep();
     tempTc = tc;

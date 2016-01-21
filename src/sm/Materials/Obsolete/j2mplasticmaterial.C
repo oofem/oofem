@@ -67,14 +67,14 @@ J2MPlasticMaterial :: initializeFrom(InputRecord *ir)
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
     double value;
 
-    MPlasticMaterial :: initializeFrom(ir);
-    linearElasticMaterial->initializeFrom(ir);
+    result = MPlasticMaterial :: initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
+    result = linearElasticMaterial->initializeFrom(ir);
+    if ( result != IRRT_OK ) return result;
 
     IR_GIVE_FIELD(ir, value, _IFT_J2MPlasticMaterial_ry);
     k = value / sqrt(3.0);
 
-    //  E = readDouble (initString,"e");
-    // nu = readDouble (initString,"nu");
     kinematicModuli = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, kinematicModuli, _IFT_J2MPlasticMaterial_khm);
 
@@ -97,21 +97,14 @@ J2MPlasticMaterial :: initializeFrom(InputRecord *ir)
         this->rmType = mpm_CuttingPlane;
     }
 
-
     return IRRT_OK;
 }
 
 
 MaterialStatus *
 J2MPlasticMaterial :: CreateStatus(GaussPoint *gp) const
-/*
- * creates new  material status  corresponding to this class
- */
 {
-    MPlasticMaterialStatus *status;
-
-    status = new MPlasticMaterialStatus(1, this->giveDomain(), gp);
-    return status;
+    return new MPlasticMaterialStatus(1, this->giveDomain(), gp, this->giveSizeOfReducedHardeningVarsVector(gp));
 }
 
 void
@@ -119,8 +112,6 @@ J2MPlasticMaterial :: computeStressSpaceHardeningVars(FloatArray &answer, GaussP
                                                       const FloatArray &strainSpaceHardeningVariables)
 {
     // in full stress strain space
-
-    int i;
     int count = 0, size = this->giveSizeOfFullHardeningVarsVector(), isize, rSize;
     IntArray mask;
 
@@ -136,7 +127,7 @@ J2MPlasticMaterial :: computeStressSpaceHardeningVars(FloatArray &answer, GaussP
 
     /* kinematic hardening variables are first */
     if ( this->kinematicHardeningFlag ) {
-        for ( i = 1; i <= isize; i++ ) {
+        for ( int i = 1; i <= isize; i++ ) {
             // to be consistent with equivalent plastic strain formulation
             // we multiply by (sqrt(2.)*2./3.)
             answer.at( mask.at(i) ) = ( sqrt(2.) * 2. / 3. ) * this->kinematicModuli * strainSpaceHardeningVariables.at(i);
@@ -189,7 +180,6 @@ J2MPlasticMaterial :: computeHardeningReducedModuli(FloatMatrix &answer, GaussPo
 {
     /* computes hardening moduli in reduced stress strain space (for kinematic back-stress)*/
 
-    int i;
     int size = this->giveSizeOfReducedHardeningVarsVector(gp);
 
     if ( !hasHardening() ) {
@@ -203,7 +193,7 @@ J2MPlasticMaterial :: computeHardeningReducedModuli(FloatMatrix &answer, GaussPo
     /* kinematic hardening variables are first */
     if ( this->kinematicHardeningFlag ) {
         int ksize = StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() );
-        for ( i = 1; i <= ksize; i++ ) {
+        for ( int i = 1; i <= ksize; i++ ) {
             answer.at(i, i) = this->kinematicModuli;
         }
     }
@@ -310,7 +300,7 @@ J2MPlasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer, int isur
                                                    const FloatArray &stressVector,
                                                    const FloatArray &stressSpaceHardeningVars)
 {
-    int i, j, size;
+    int size;
     int imask, jmask;
     FloatArray helpVector, backStress, df(6);
     IntArray mask;
@@ -349,12 +339,12 @@ J2MPlasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer, int isur
         df.at(5) = 2. * helpVector.at(5);
         df.at(6) = 2. * helpVector.at(6);
 
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             if ( ( imask = mask.at(i) ) == 0 ) {
                 continue;
             }
 
-            for ( j = i; j <= 3; j++ ) {
+            for ( int j = i; j <= 3; j++ ) {
                 if ( ( jmask = mask.at(j) ) == 0 ) {
                     continue;
                 }
@@ -368,12 +358,12 @@ J2MPlasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer, int isur
             }
         }
 
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             if ( ( imask = mask.at(i) ) == 0 ) {
                 continue;
             }
 
-            for ( j = 4; j <= 6; j++ ) {
+            for ( int j = 4; j <= 6; j++ ) {
                 if ( ( jmask = mask.at(j) ) == 0 ) {
                     continue;
                 }
@@ -383,12 +373,12 @@ J2MPlasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer, int isur
             }
         }
 
-        for ( i = 4; i <= 6; i++ ) {
+        for ( int i = 4; i <= 6; i++ ) {
             if ( ( imask = mask.at(i) ) == 0 ) {
                 continue;
             }
 
-            for ( j = i; j <= 6; j++ ) {
+            for ( int j = i; j <= 6; j++ ) {
                 if ( ( jmask = mask.at(j) ) == 0 ) {
                     continue;
                 }
@@ -456,7 +446,7 @@ J2MPlasticMaterial :: giveSizeOfFullHardeningVarsVector()
 }
 
 int
-J2MPlasticMaterial :: giveSizeOfReducedHardeningVarsVector(GaussPoint *gp)
+J2MPlasticMaterial :: giveSizeOfReducedHardeningVarsVector(GaussPoint *gp) const
 {
     /* Returns the size of hardening variables vector */
     int size = 0;

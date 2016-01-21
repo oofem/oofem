@@ -38,7 +38,6 @@
 #include "fmelement.h"
 #include "zznodalrecoverymodel.h"
 #include "spatiallocalizer.h"
-#include "eleminterpmapperinterface.h"
 #include "elementinternaldofman.h"
 #include "matresponsemode.h"
 
@@ -59,8 +58,7 @@ class FEI3dTetLin;
  */
 class Tet1BubbleStokes : public FMElement,
 public ZZNodalRecoveryModelInterface,
-public SpatialLocalizerInterface,
-public EIPrimaryUnknownMapperInterface
+public SpatialLocalizerInterface
 {
 protected:
     /// Interpolation for pressure
@@ -114,9 +112,7 @@ public:
 
     virtual Interface *giveInterface(InterfaceType it);
 
-    // Element interpolation interface:
-    virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType u,
-                                                                       TimeStep *tStep, const FloatArray &coords, FloatArray &answer);
+    virtual void computeField(ValueModeType u, TimeStep *tStep, const FloatArray &coords, FloatArray &answer);
 };
 } // end namespace oofem
 #endif // tet1bubblestokes_h

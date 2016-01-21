@@ -39,11 +39,9 @@
 #include "ErrorEstimators/huertaerrorestimator.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
-#include "eleminterpmapperinterface.h"
 #include "sprnodalrecoverymodel.h"
 
 #define _IFT_QSpace_Name "qspace"
-#define _IFT_QSpace_materialCoordinateSystem "matcs" ///< [optional] Experimental support for material directions
 
 namespace oofem {
 class FEI3dHexaQuad;
@@ -68,17 +66,6 @@ public:
     virtual FEInterpolation *giveInterpolation() const;
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    /**
-     * Function determines the 3 basis vectors for the local coordinate system that should be used by materials.
-     * @param x First base vector of the local c.s.
-     * @param y Second base vector
-     * @param z Third base vector
-     * @param lcoords Local coordinates to evaluate the local c.s. for.
-     */
-    void giveMaterialOrientationAt(FloatArray &x, FloatArray &y, FloatArray &z, const FloatArray &lcoords);
-
-    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
-    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
     virtual Interface *giveInterface(InterfaceType);
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_SurfaceLoadSupport ) ? 1 : 0 ); }
