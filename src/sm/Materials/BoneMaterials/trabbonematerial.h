@@ -41,7 +41,6 @@
 #include "cltypes.h"
 #include "matconst.h"
 #include "matstatus.h"
-#include "strainvector.h"
 #include "../sm/Materials/structuralms.h"
 #include "cltypes.h"
 

@@ -222,7 +222,6 @@ TrabBoneMaterial :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp,
 
     TrabBoneMaterialStatus *status = static_cast< TrabBoneMaterialStatus * >( this->giveStatus(gp) );
     this->initTempStatus(gp);
-    //this->initGpForNewStep(gp);
 
     performPlasticityReturn(gp, totalStrain);
 

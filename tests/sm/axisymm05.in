@@ -3,30 +3,35 @@ Test of linear axisymmetric triangular elements, thick ring with internal overpr
 #Exact solution for radial displacement u_r = (100+r^2)/(525*r)
 #Exact solution for radial stress sig_r = 40./21.*(1-100./r^2)
 #Exact solution for hoop stress sig_theta = 40./21.*(1+100./r^2)
-LinearStatic nsteps 1 nmodules 1
+#LinearStatic nsteps 1 nmodules 1
+StaticStructural nsteps 1 nmodules 1
 errorcheck
 #vtkxml tstep_step 1 cellvars 1 46 vars 3 1 2 4 primvars 1 1 stype 2
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
-ndofman 6 nelem 4 ncrosssect 1 nmat 1 nbc 4 nic 0 nltf 1
-Node 1 coords 2 4.0  0.0 bc 2 0 1 load 1 2
-Node 2 coords 2 4.0  2.0 bc 2 0 1 load 1 2
-Node 3 coords 2 7.0  0.0 bc 2 0 1
-Node 4 coords 2 7.0  2.0 bc 2 0 1
-Node 5 coords 2 10.0 0.0 bc 2 0 1
-Node 6 coords 2 10.0 2.0 bc 2 0 1
-Axisymm3d 1 nodes 3 1 4 2 crossSect 1 mat 1 BoundaryLoads 2 3 3
-Axisymm3d 2 nodes 3 1 3 4 crossSect 1 mat 1
-Axisymm3d 3 nodes 3 3 6 4 crossSect 1 mat 1
-Axisymm3d 4 nodes 3 3 5 6 crossSect 1 mat 1 bodyloads 1 4
-SimpleCS 1
+ndofman 6 nelem 4 ncrosssect 1 nmat 1 nbc 4 nic 0 nltf 1 nset 4
+Node 1 coords 2 4.0  0.0
+Node 2 coords 2 4.0  2.0
+Node 3 coords 2 7.0  0.0
+Node 4 coords 2 7.0  2.0
+Node 5 coords 2 10.0 0.0
+Node 6 coords 2 10.0 2.0
+Axisymm3d 1 nodes 3 1 4 2 BoundaryLoads 2 3 3
+Axisymm3d 2 nodes 3 1 3 4
+Axisymm3d 3 nodes 3 3 6 4
+Axisymm3d 4 nodes 3 3 5 6
+SimpleCS 1 material 1 set 1
 IsoLE 1 d 1.0 E 1000. n 0.0 tAlpha 0.000012
-BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
-#NodalLoad 2 loadTimeFunction 1 Components 2  40. 0.
-NodalLoad 2 loadTimeFunction 1 Components 2 0. 0.
-ConstantEdgeLoad 3 loadTimeFunction 1 components 2 10.0 0.0 loadType 3 ndofs 2
-DeadWeight 4 loadTimeFunction 1 Components 2 0. 0.
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 2 values 1 0.0 set 1
+NodalLoad 2 loadTimeFunction 1 dofs 2 1 2 Components 2 0. 0. set 2
+ConstantEdgeLoad 3 loadTimeFunction 1 dofs 2 1 2 components 2 10.0 0.0 loadType 3
+DeadWeight 4 loadTimeFunction 1 Components 2 0. 0. set 4
 ConstantFunction 1 f(t) 1.0
+Set 1 elementranges {(1 4)}
+Set 2 nodes 2 1 2
+Set 3 elementboundaries 2 1 3
+Set 4 elements 1 4
+
 #%BEGIN_CHECK% tolerance 1.e-6
 ##Exact solution is 5.523809523809524e-2
 #NODE tStep 1 number 1 dof 1 unknown d value 5.37490912e-02

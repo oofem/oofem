@@ -54,6 +54,7 @@
 #include "nonlocmatstiffinterface.h"
 #include "mathfem.h"
 #include "materialmapperinterface.h"
+#include "unknownnumberingscheme.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -616,7 +617,7 @@ StructuralElement :: computeResultingIPTemperatureAt(FloatArray &answer, TimeSte
         n = bodyLoadArray.at(i);
         load = domain->giveLoad(n);
         if ( load->giveBCValType() == TemperatureBVT ) {
-            static_cast< StructuralTemperatureLoad * >(load)->computeValueAt(temperature, tStep, gCoords, mode);
+            load->computeValueAt(temperature, tStep, gCoords, mode);
             answer.add(temperature);
         }
     }
@@ -640,7 +641,7 @@ StructuralElement :: computeResultingIPEigenstrainAt(FloatArray &answer, TimeSte
         n = bodyLoadArray.at(i);
         load = domain->giveLoad(n);
         if ( load->giveBCValType() == EigenstrainBVT ) {
-            static_cast< StructuralEigenstrainLoad * >(load)->computeValueAt(eigenstrain, tStep, gCoords, mode);
+            load->computeValueAt(eigenstrain, tStep, gCoords, mode);
             answer.add(eigenstrain);
         }
     }
@@ -1442,12 +1443,6 @@ StructuralElement :: showExtendedSparseMtrxStructure(CharType mtrx, oofegGraphic
 {
     NonlocalMaterialStiffnessInterface *interface;
     if ( mtrx == TangentStiffnessMatrix ) {
-        //interface = static_cast< NonlocalMaterialStiffnessInterface * >
-        //            ( this->giveMaterial()->giveInterface(NonlocalMaterialStiffnessInterfaceType) );
-        //if ( interface == NULL ) {
-        //    return;
-        //}
-
         // loop over element IP
         for ( IntegrationPoint *ip: *this->giveDefaultIntegrationRulePtr() ) {
             interface = static_cast< NonlocalMaterialStiffnessInterface * >( this->giveStructuralCrossSection()->

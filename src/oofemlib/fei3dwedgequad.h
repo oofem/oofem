@@ -87,6 +87,8 @@ public:
     virtual IntegrationRule *giveSurfaceIntegrationRule(int order, int isurf)
         { return giveBoundaryIntegrationRule(order, isurf); }
 
+    virtual int giveNumberOfNodes() const { return 15; }
+
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
     void giveLocalDerivative(FloatMatrix &dN, const FloatArray &lcoords);

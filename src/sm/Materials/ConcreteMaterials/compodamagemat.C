@@ -414,7 +414,7 @@ void CompoDamageMat :: giveUnrotated3dMaterialStiffnessMatrix(FloatMatrix &answe
 //returns material rotation stiffness matrix [6x6]
 int CompoDamageMat :: giveMatStiffRotationMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
-    FloatMatrix t(3, 3);
+    FloatMatrix Lt(3, 3);
     StructuralElement *element = static_cast< StructuralElement * >( gp->giveElement() );
     MaterialMode mMode = gp->giveMaterialMode();
 
@@ -422,12 +422,12 @@ int CompoDamageMat :: giveMatStiffRotationMatrix(FloatMatrix &answer, GaussPoint
     case _1dMat:    //do not rotate 1D materials on trusses and beams
         break;
     case _3dMat:
-        if ( !element->giveLocalCoordinateSystem(t) ) {    //lcs not defined on element
+        if ( !element->giveLocalCoordinateSystem(Lt) ) {    //lcs not defined on element
             return 0;
         }
 
         //rotate from unrotated (base) c.s. to local material c.s.
-        this->giveStrainVectorTranformationMtrx(answer, t);
+        this->giveStrainVectorTranformationMtrx(answer, Lt);
         return 1;
 
         break;

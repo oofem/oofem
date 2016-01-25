@@ -255,6 +255,10 @@ void IntArray :: printYourself(const std::string name) const
     printf("\n");
 }
 
+void IntArray :: pY() const {
+    printYourself();
+}
+
 void IntArray :: printYourselfToFile(const std::string filename, const bool showDimensions) const
 // Prints the receiver to file.
 {
@@ -392,13 +396,11 @@ int IntArray :: findCommonValuesSorted(const IntArray &iarray, IntArray &common,
 }
 
 
-int IntArray :: insertOnce(int _p)
+void IntArray :: insertOnce(int _p)
 {
     if ( !this->findFirstIndexOf(_p) ) {
         this->followedBy(_p, 2);
     }
-
-    return this->giveSize();
 }
 
 

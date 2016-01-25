@@ -104,15 +104,12 @@ NonlocalMaterialExtensionInterface :: updateDomainBeforeNonlocAverage(TimeStep *
 void
 NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
 {
-    double weight, elemVolume, integrationVolume = 0.;
+    double elemVolume, integrationVolume = 0.;
 
     NonlocalMaterialStatusExtensionInterface *statusExt =
         static_cast< NonlocalMaterialStatusExtensionInterface * >( gp->giveMaterialStatus()->
                                                                   giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
     std :: list< localIntegrationRecord > *iList;
-
-    Element *ielem;
-    IntegrationRule *iRule;
 
     if ( !statusExt ) {
         OOFEM_ERROR("local material status encountered");
@@ -143,83 +140,56 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
     // instead of shifting the potential neighbors, we shift the receiver point gp. In the non-periodic case (typical),
     // px=0 and the following loop is executed only once.  
 
-    int ix, nx = 0; // typical case
+    int nx = 0; // typical case
     if ( px > 0. ) nx = 1; // periodicity taken into account
 
-    for (ix=-nx; ix<=nx; ix++) { // loop over periodic images shifted in x-direction
+    for ( int ix = -nx; ix <= nx; ix++ ) { // loop over periodic images shifted in x-direction
 
-      shiftedGpCoords = gpCoords;
-      shiftedGpCoords.at(1) += ix*px;
+        shiftedGpCoords = gpCoords;
+        shiftedGpCoords.at(1) += ix*px;
 
     // ask domain spatial localizer for list of elements with IP within this zone
 #ifdef NMEI_USE_ALL_ELEMENTS_IN_SUPPORT
-    this->giveDomain()->giveSpatialLocalizer()->giveAllElementsWithNodesWithinBox(elemSet, shiftedGpCoords, suprad);
-    // insert element containing given gp
-    elemSet.insert( gp->giveElement()->giveNumber() );
+        this->giveDomain()->giveSpatialLocalizer()->giveAllElementsWithNodesWithinBox(elemSet, shiftedGpCoords, suprad);
+        // insert element containing given gp
+        elemSet.insert( gp->giveElement()->giveNumber() );
 #else
-    this->giveDomain()->giveSpatialLocalizer()->giveAllElementsWithIpWithinBox_EvenIfEmpty(elemSet, shiftedGpCoords, suprad);
+        this->giveDomain()->giveSpatialLocalizer()->giveAllElementsWithIpWithinBox_EvenIfEmpty(elemSet, shiftedGpCoords, suprad);
 #endif
-    // initialize iList
+        // initialize iList
 
-    for ( auto elindx: elemSet ) {
-        ielem = this->giveDomain()->giveElement(elindx);
-        if ( regionMap.at( ielem->giveRegionNumber() ) == 0 ) {
-            iRule = ielem->giveDefaultIntegrationRulePtr();
-            for ( GaussPoint *jGp: *iRule ) {
-                if ( ielem->computeGlobalCoordinates( jGpCoords, jGp->giveNaturalCoordinates() ) ) {
-                    weight = this->computeWeightFunction(shiftedGpCoords, jGpCoords);
+        for ( auto elindx: elemSet ) {
+            Element *ielem = this->giveDomain()->giveElement(elindx);
+            if ( regionMap.at( ielem->giveRegionNumber() ) == 0 ) {
+                for ( auto &jGp: *ielem->giveDefaultIntegrationRulePtr() ) {
+                    if ( ielem->computeGlobalCoordinates( jGpCoords, jGp->giveNaturalCoordinates() ) ) {
+                        double weight = this->computeWeightFunction(shiftedGpCoords, jGpCoords);
 
-                    //manipulate weights for a special averaging of strain (OFF by default)
-                    this->manipulateWeight(weight, gp, jGp);
+                        //manipulate weights for a special averaging of strain (OFF by default)
+                        this->manipulateWeight(weight, gp, jGp);
 
-                    this->applyBarrierConstraints(shiftedGpCoords, jGpCoords, weight);
+                        this->applyBarrierConstraints(shiftedGpCoords, jGpCoords, weight);
 #ifdef NMEI_USE_ALL_ELEMENTS_IN_SUPPORT
-                    if ( 1 ) {
+                        if ( 1 ) {
 #else
-                    if ( weight > 0. ) {
+                        if ( weight > 0. ) {
 #endif
-                        localIntegrationRecord ir;
-                        ir.nearGp = jGp;  // store gp
-                        elemVolume = weight * jGp->giveElement()->computeVolumeAround(jGp);
-                        ir.weight = elemVolume; // store gp weight
-                        iList->push_back(ir); // store own copy in list
-                        integrationVolume += elemVolume;
+                            localIntegrationRecord ir;
+                            ir.nearGp = jGp;  // store gp
+                            elemVolume = weight * jGp->giveElement()->computeVolumeAround(jGp);
+                            ir.weight = elemVolume; // store gp weight
+                            iList->push_back(ir); // store own copy in list
+                            integrationVolume += elemVolume;
+                        }
+                    } else {
+                        OOFEM_ERROR("computeGlobalCoordinates of target failed");
                     }
-                } else {
-                    OOFEM_ERROR("computeGlobalCoordinates of target failed");
                 }
             }
-        }
-    } // loop over elements
+        } // loop over elements
     }
 
     statusExt->setIntegrationScale(integrationVolume); // store scaling factor
-
-    /*
-     * // Old implementation without spatial localizer
-     *
-     * FloatArray jGpCoords;
-     * for (i=1; i<=nelem; i++) {
-     * ielem = this->giveDomain()->giveElement(i);
-     * if (regionMap.at(ielem->giveRegionNumber()) == 0) {
-     * iRule = ielem->giveDefaultIntegrationRulePtr ();
-     * for (GaussPoint *jGp: *iRule ) {
-     * if (ielem->computeGlobalCoordinates (jGpCoords, *(jGp->giveCoordinates()))) {
-     *   weight = this->computeWeightFunction (gpCoords, jGpCoords);
-     *   if (weight > NonlocalMaterialZeroWeight) {
-     *    localIntegrationRecord ir;
-     *    ir.nearGp = jGp;                   // store gp
-     *    elemVolume = weight * jGp->giveElement()->computeVolumeAround (jGp);
-     *    ir.weight = elemVolume;            // store gp weight
-     *    iList->append(ir); // store own copy in list
-     *    integrationVolume += elemVolume;
-     *   }
-     * } else OOFEM_ERROR("computeGlobalCoordinates failed");
-     * }
-     * }
-     * } // loop over elements
-     * statusExt->setIntegrationScale (integrationVolume); // remember scaling factor
-     */
 }
 
 void
@@ -231,9 +201,6 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
         static_cast< NonlocalMaterialStatusExtensionInterface * >( gp->giveMaterialStatus()->
                                                                   giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
     std :: list< localIntegrationRecord > *iList;
-
-    Element *ielem;
-    IntegrationRule *iRule;
 
     if ( !statusExt ) {
         OOFEM_ERROR("local material status encountered");
@@ -262,10 +229,9 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
 
         // initialize iList
         for ( int _e = 1; _e <= _size; _e++ ) {
-            ielem = this->giveDomain()->giveElement( contributingElems->at(_e) );
+            Element *ielem = this->giveDomain()->giveElement( contributingElems->at(_e) );
             if ( regionMap.at( ielem->giveRegionNumber() ) == 0 ) {
-                iRule = ielem->giveDefaultIntegrationRulePtr();
-                for ( GaussPoint *jGp: *iRule ) {
+                for ( auto &jGp:* ielem->giveDefaultIntegrationRulePtr() ) {
                     if ( ielem->computeGlobalCoordinates( jGpCoords, jGp->giveNaturalCoordinates() ) ) {
                         weight = this->computeWeightFunction(gpCoords, jGpCoords);
 
@@ -296,7 +262,7 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
 #ifdef __PARALLEL_MODE
  #ifdef __VERBOSE_PARALLEL
         fprintf( stderr, "%d(%d):", gp->giveElement()->giveGlobalNumber(), gp->giveNumber() );
-        for ( auto &lir: iList ) {
+        for ( auto &lir: *iList ) {
             fprintf(stderr, "%d,%d(%e)", lir.nearGp->giveElement()->giveGlobalNumber(), lir.nearGp->giveNumber(), lir.weight);
         }
 
@@ -438,7 +404,7 @@ NonlocalMaterialExtensionInterface :: giveIntegralOfWeightFunction(const int spa
 
         case 2: return cl * cl * 2. * pi;
 
-        case 3: return cl * cl * cl * 2. * pi;
+        case 3: return cl * cl * cl * 8. * pi;
 
         default: return 1.;
         }

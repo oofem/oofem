@@ -683,7 +683,8 @@ void FloatArray :: beProductOf(const FloatMatrix &aMatrix, const FloatArray &anA
 
 #  ifdef DEBUG
     if ( aMatrix.giveNumberOfColumns() != anArray.giveSize() ) {
-        OOFEM_ERROR("dimension mismatch");
+        OOFEM_ERROR("dimension mismatch (%d, %d) . (%d)", 
+                    aMatrix.giveNumberOfRows(), aMatrix.giveNumberOfColumns(), anArray.giveSize());
     }
 #  endif
 

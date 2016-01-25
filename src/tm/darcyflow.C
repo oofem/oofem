@@ -103,6 +103,7 @@ void DarcyFlow :: solveYourselfAt(TimeStep *tStep)
     NM_Status status = this->nMethod->solve(*this->stiffnessMatrix,
                                             this->externalForces,
                                             NULL,
+                                            NULL,
                                             * solutionVector,
                                             this->incrementOfSolution,
                                             this->internalForces,
@@ -174,7 +175,7 @@ void DarcyFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d
         this->internalForces.zero();
         this->assembleVector(this->internalForces, tStep, InternalForceAssembler(), VM_Total,
                              EModelDefaultEquationNumbering(), d, & this->ebeNorm);
-        this->updateSharedDofManagers(this->externalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
+        this->updateSharedDofManagers(this->internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
         break;
 
     case NonLinearLhs:

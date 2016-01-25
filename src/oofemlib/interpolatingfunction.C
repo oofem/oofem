@@ -35,6 +35,7 @@
 #include "interpolatingfunction.h"
 #include "floatarray.h"
 #include "classfactory.h"
+#include "error.h"
 
 #include <iostream>
 #include <fstream>

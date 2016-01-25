@@ -55,7 +55,7 @@ void
 SimpleInterfaceMaterial :: giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
 {
     SimpleInterfaceMaterialStatus *status = static_cast< SimpleInterfaceMaterialStatus * >( this->giveStatus(gp) );
-
+    bool shearYieldingFlag = false;
     FloatArray shearJump(2), shearTraction;
     FloatArray tempShearStressShift = status->giveShearStressShift();
     double normalStrain = jump.at(1);
@@ -73,14 +73,15 @@ SimpleInterfaceMaterial :: giveEngTraction_3d(FloatArray &answer, GaussPoint *gp
 
     shearJump.at(1) = jump.at(2);
     shearJump.at(2) = jump.at(3);
-    shearTraction.beScaled(this->kn, shearJump);
+    shearTraction.beScaled(this->ks, shearJump);
     shearTraction.subtract(tempShearStressShift);
     dp = shearTraction.dotProduct(shearTraction, 2);
     if ( dp > maxShearStress * maxShearStress ) {
+        shearYieldingFlag = true;
         shearTraction.times( maxShearStress / sqrt(dp) );
     }
 
-    tempShearStressShift.beScaled(this->kn, shearJump);
+    tempShearStressShift.beScaled(this->ks, shearJump);
     tempShearStressShift.subtract(shearTraction);
 
     double lim = 1.e+50;
@@ -90,6 +91,7 @@ SimpleInterfaceMaterial :: giveEngTraction_3d(FloatArray &answer, GaussPoint *gp
     answer.at(3) = shearTraction.at(2);
 
     // update gp
+    status->setShearYieldingFlag(shearYieldingFlag);
     status->setTempShearStressShift(tempShearStressShift);
     status->letTempJumpBe(jump);
     status->letTempTractionBe(answer);
@@ -105,12 +107,18 @@ SimpleInterfaceMaterial :: give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatRes
     answer.resize(3, 3);
     if ( rMode == SecantStiffness || rMode == TangentStiffness ) {
         if ( normalJump + normalClearance <= 0. ) {
-            answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = this->kn; //in compression and after the clearance gap closed
+	      answer.at(1, 1) = kn;
+	      if ( status->giveShearYieldingFlag() )
+		answer.at(2, 2) = answer.at(3, 3) = 0;
+	      else
+		answer.at(2, 2) = answer.at(3, 3) = ks;//this->kn; //in compression and after the clearance gap closed
         } else {
-            answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = this->kn * this->stiffCoeff;
+            answer.at(1, 1) = this->kn * this->stiffCoeff;
+            answer.at(2, 2) = answer.at(3, 3) = 0;
         }
     } else {
-        answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = this->kn;
+        answer.at(1, 1) = kn;
+        answer.at(2, 2) = answer.at(3, 3) = this->ks;
     }
 }
 
@@ -131,6 +139,8 @@ SimpleInterfaceMaterial :: initializeFrom(InputRecord *ir)
     stiffCoeff = 0.;
     normalClearance = 0.;
     IR_GIVE_FIELD(ir, kn, _IFT_SimpleInterfaceMaterial_kn);
+    ks = kn;
+    IR_GIVE_OPTIONAL_FIELD(ir, ks, _IFT_SimpleInterfaceMaterial_ks);
     IR_GIVE_OPTIONAL_FIELD(ir, frictCoeff, _IFT_SimpleInterfaceMaterial_frictCoeff);
     IR_GIVE_OPTIONAL_FIELD(ir, stiffCoeff, _IFT_SimpleInterfaceMaterial_stiffCoeff);
     IR_GIVE_OPTIONAL_FIELD(ir, normalClearance, _IFT_SimpleInterfaceMaterial_normalClearance);
@@ -156,6 +166,7 @@ SimpleInterfaceMaterialStatus :: SimpleInterfaceMaterialStatus(int n, Domain *d,
     tempShearStressShift.resize(2);
     shearStressShift.zero();
     tempShearStressShift.zero();
+    shearYieldingFlag = false;
 }
 
 

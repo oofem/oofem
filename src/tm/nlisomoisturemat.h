@@ -43,8 +43,12 @@
 #define _IFT_NlIsoMoistureMaterial_Name "nlisomoisturemat"
 #define _IFT_NlIsoMoistureMaterial_isothermtype "isothermtype"
 #define _IFT_NlIsoMoistureMaterial_permeabilitytype "permeabilitytype"
+#define _IFT_NlIsoMoistureMaterial_capillarytransporttype "capillarytransporttype"
 #define _IFT_NlIsoMoistureMaterial_rhodry "rhodry"
 #define _IFT_NlIsoMoistureMaterial_capa "capa"
+#define _IFT_NlIsoMoistureMaterial_hx "hx"
+#define _IFT_NlIsoMoistureMaterial_dx "dx"
+#define _IFT_NlIsoMoistureMaterial_iso_offset "isoOffset"
 #define _IFT_NlIsoMoistureMaterial_iso_h "iso_h"
 #define _IFT_NlIsoMoistureMaterial_iso_wh "iso_w(h)"
 #define _IFT_NlIsoMoistureMaterial_dd "dd"
@@ -65,6 +69,18 @@
 #define _IFT_NlIsoMoistureMaterial_alphah "alphah"
 #define _IFT_NlIsoMoistureMaterial_betah "betah"
 #define _IFT_NlIsoMoistureMaterial_gammah "gammah"
+#define _IFT_NlIsoMoistureMaterial_rhoh2o "rhoh2o"
+#define _IFT_NlIsoMoistureMaterial_capperm_h "capperm_h"
+#define _IFT_NlIsoMoistureMaterial_capperm_dwh "capperm_dw(h)"
+#define _IFT_NlIsoMoistureMaterial_capperm_wv "capperm_wv"
+#define _IFT_NlIsoMoistureMaterial_capperm_dwwv "capperm_dw(wv)"
+#define _IFT_NlIsoMoistureMaterial_abs "abs"
+#define _IFT_NlIsoMoistureMaterial_pl "pl"
+#define _IFT_NlIsoMoistureMaterial_mu "mu"
+#define _IFT_NlIsoMoistureMaterial_t "t"
+#define _IFT_NlIsoMoistureMaterial_timescale "timescale"
+
+
 //@}
 
 namespace oofem {
@@ -74,7 +90,7 @@ namespace oofem {
 class NlIsoMoistureMaterial : public IsotropicMoistureTransferMaterial
 {
 protected:
-    enum isothermType { linear, multilinear, Ricken, Kuenzel, Hansen, BSB } Isotherm;
+  enum isothermType { linear, multilinear, Ricken, Kuenzel, Hansen, BSB, bilinear } Isotherm;
 
     /// density of the dry solid phase
     double rhodry;
@@ -98,8 +114,13 @@ protected:
     /// parameters of the BSB isotherm
     double c, k, Vm;
 
+    /// values of the bilinear isotherm
+    double hx, dx;
+    double iso_offset;
+    double c1, c2, capa2;
 
-    enum permeabilityType { multilin, Bazant, Xi } Permeability;
+
+    enum permeabilityType { multilin, Bazant, Xi, KunzelPerm } Permeability;
 
     /// values of the multilinear permeability
     FloatArray perm_h;
@@ -111,6 +132,17 @@ protected:
     /// permeability parameters according to Xi, Bazant & Jennings
     double alphah, betah, gammah;
 
+    /// permeability parameters according to Kunzel
+    double deltap, p_sat; // permation
+    enum capillaryTransportType {Multilin_h, Multilin_wV, KunzelCT} CapillaryTransport;
+    double Abs;            ///< water absorption coefficient [kg m^-2 s^-0.5]
+
+    /// values of the multilinear capillary transport function
+    FloatArray capPerm_h;
+    FloatArray capPerm_Dwh;
+    FloatArray capPerm_wV;
+    FloatArray capPerm_DwwV;
+    double rhoH2O;
 
 public:
     NlIsoMoistureMaterial(int n, Domain * d) : IsotropicMoistureTransferMaterial(n, d) { }
@@ -118,7 +150,9 @@ public:
 
     /// evaluates slope of the sorption isotherm
     virtual double giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep);
+    virtual double sorptionIsotherm(double humidity);
     virtual double givePermeability(GaussPoint *gp, TimeStep *tStep);
+    virtual double computeCapTranspCoeff(double humidity);
 
     virtual const char *giveInputRecordName() const { return _IFT_NlIsoMoistureMaterial_Name; }
     virtual const char *giveClassName() const { return "NlIsoMoistureMaterial"; }

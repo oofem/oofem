@@ -34,7 +34,6 @@
 
 #include "dssmatrix.h"
 #include "error.h"
-#include "floatarray.h"
 #include "engngm.h"
 #include "domain.h"
 #include "element.h"
@@ -116,7 +115,7 @@ void DSSMatrix :: times(const FloatArray &x, FloatArray &answer) const
 
 void DSSMatrix :: times(double x)
 {
-    OOFEM_ERROR("not implemented");
+    _dss->times(x);
 }
 
 int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &s)
@@ -194,7 +193,7 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
         OOFEM_FATAL("free store exhausted, exiting");
     }
 
-    int bsize = eModel->giveDomain(1)->giveDefaultNodeDofIDArry().giveSize();
+
     /*
      *  Assemble block to equation mapping information
      */
@@ -202,9 +201,16 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
     bool _succ = true;
     int _ndofs, _neq, ndofmans = domain->giveNumberOfDofManagers();
     int ndofmansbc = 0;
+
+    ///@todo This still misses element internal dofs.
     // count number of internal dofmans on active bc
     for ( auto &bc : domain->giveBcs() ) {
         ndofmansbc += bc->giveNumberOfInternalDofManagers();
+    }
+
+    int bsize = 0;
+    if ( ndofmans > 0 ) {
+        bsize = domain->giveDofManager(1)->giveNumberOfDofs();
     }
 
     long *mcn = new long [ (ndofmans+ndofmansbc) * bsize ];
@@ -229,6 +235,8 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
                 } else {
                     mcn [ _c++ ] = -1; // no corresponding row in sparse mtrx structure
                 }
+            } else {
+                    mcn [ _c++ ] = -1; // no corresponding row in sparse mtrx structure
             }
         }
 

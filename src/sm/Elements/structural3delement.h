@@ -38,6 +38,8 @@
 #include "Elements/nlstructuralelement.h"
 
 
+#define _IFT_Structural3DElement_materialCoordinateSystem "matcs" ///< [optional] Support for material directions based on element orientation.
+
 namespace oofem {
 class GaussPoint;
 class FloatMatrix;
@@ -48,9 +50,12 @@ class IntArray;
  * Base class 3D elements.
  *
  * @author Jim Brouzoulis
+ * @author Mikael Öhman
  */
 class Structural3DElement : public NLStructuralElement
 {
+protected:
+    bool matRotation;
 
 public:
     /**
@@ -62,6 +67,8 @@ public:
     /// Destructor.
     virtual ~Structural3DElement() { }
 
+    virtual IRResultType initializeFrom(InputRecord *ir);
+
     virtual MaterialMode giveMaterialMode();
     virtual int computeNumberOfDofs();
     virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
@@ -69,6 +76,7 @@ public:
     
     virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane);
 
+    void giveMaterialOrientationAt(FloatArray &x, FloatArray &y, FloatArray &z, const FloatArray &lcoords);
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     

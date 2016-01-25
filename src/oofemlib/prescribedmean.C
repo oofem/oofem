@@ -89,7 +89,7 @@ PrescribedMean :: assemble(SparseMtrx &answer, TimeStep *tStep, CharType type,
     lambdaDman->giveLocationArray(lambdaIDs, r_loc, r_s);
     lambdaDman->giveLocationArray(lambdaIDs, c_loc, c_s);
 
-    for ( int i=1; i<=elements.giveSize(); i++ ) {
+    for ( int i = 1; i <= elements.giveSize(); i++ ) {
         int elementID = elements.at(i);
         Element *thisElement = this->giveDomain()->giveElement(elementID);
         FEInterpolation *interpolator = thisElement->giveInterpolation(DofIDItem(dofid));
@@ -123,9 +123,9 @@ PrescribedMean :: assemble(SparseMtrx &answer, TimeStep *tStep, CharType type,
                 r_Sideloc.clear();
                 c_Sideloc.clear();
                 for (int j=1; j<=DofIDStemp.giveSize(); j++) {
-                    if (DofIDStemp.at(j)==dofids.at(1)) {
-                        r_Sideloc.followedBy({rloc.at(j)});
-                        c_Sideloc.followedBy({cloc.at(j)});
+                    if ( DofIDStemp.at(j) == dofids.at(1) ) {
+                        r_Sideloc.followedBy(rloc.at(j));
+                        c_Sideloc.followedBy(cloc.at(j));
                     }
                 }
             }
@@ -170,7 +170,7 @@ PrescribedMean :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
     lambdaDman->giveUnknownVector(lambda, lambdaIDs, mode, tStep);
     lambdaDman->giveLocationArray(lambdaIDs, lambdaLoc, s);
 
-    for ( int i=1; i<=elements.giveSize(); i++ ) {
+    for ( int i = 1; i <= elements.giveSize(); i++ ) {
         int elementID = elements.at(i);
         Element *thisElement = this->giveDomain()->giveElement(elementID);
         FEInterpolation *interpolator = thisElement->giveInterpolation(DofIDItem(dofid));
@@ -178,11 +178,11 @@ PrescribedMean :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
         IntegrationRule *iRule = (elementEdges) ? (interpolator->giveBoundaryIntegrationRule(3, sides.at(i))) :
                                                   (interpolator->giveIntegrationRule(3));
 
-        for ( GaussPoint * gp: * iRule ) {
+        for ( auto &gp: * iRule ) {
             FloatArray lcoords = gp->giveNaturalCoordinates();
             FloatArray a, N, pressureEqns, lambdaEqns;
             IntArray boundaryNodes, dofids={(DofIDItem) this->dofid}, locationArray;
-            double detJ=0.0;
+            double detJ = 0.0;
 
             if (elementEdges) {
                 // Compute integral
@@ -204,8 +204,8 @@ PrescribedMean :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
 
                 locationArray.clear();
                 for (int j=1; j<=DofIDStemp.giveSize(); j++) {
-                    if (DofIDStemp.at(j)==dofids.at(1)) {
-                        locationArray.followedBy({loc.at(j)});
+                    if ( DofIDStemp.at(j) == dofids.at(1) ) {
+                        locationArray.followedBy(loc.at(j));
                     }
                 }
             }
@@ -256,16 +256,16 @@ PrescribedMean :: giveExternalForcesVector(FloatArray &answer, TimeStep *tStep,
 void
 PrescribedMean :: computeDomainSize()
 {
-    if (domainSize > 0.0) return;
+    if ( domainSize > 0.0 ) return;
 
 
-    if (elementEdges) {
+    if ( elementEdges ) {
         IntArray setList = ((GeneralBoundaryCondition *)this)->giveDomain()->giveSet(set)->giveBoundaryList();
 
         elements.resize(setList.giveSize() / 2);
         sides.resize(setList.giveSize() / 2);
 
-        for (int i=1; i<=setList.giveSize(); i=i+2) {
+        for (int i = 1; i <= setList.giveSize(); i += 2) {
             elements.at(i/2+1) = setList.at(i);
             sides.at(i/2+1) = setList.at(i+1);
         }
@@ -276,14 +276,14 @@ PrescribedMean :: computeDomainSize()
 
     domainSize = 0.0;
 
-    for ( int i=1; i<=elements.giveSize(); i++ ) {
+    for ( int i = 1; i <= elements.giveSize(); i++ ) {
         int elementID = elements.at(i);
         Element *thisElement = this->giveDomain()->giveElement(elementID);
         FEInterpolation *interpolator = thisElement->giveInterpolation(DofIDItem(dofid));
 
         IntegrationRule *iRule;
 
-        if (elementEdges) {
+        if ( elementEdges ) {
             iRule = interpolator->giveBoundaryIntegrationRule(3, sides.at(i));
         } else {
             iRule = interpolator->giveIntegrationRule(3);
@@ -293,7 +293,7 @@ PrescribedMean :: computeDomainSize()
             FloatArray lcoords = gp->giveNaturalCoordinates();
 
             double detJ;
-            if (elementEdges) {
+            if ( elementEdges ) {
                 detJ = fabs ( interpolator->boundaryGiveTransformationJacobian(sides.at(i), lcoords, FEIElementGeometryWrapper(thisElement)) );
             } else {
                 detJ = fabs ( interpolator->giveTransformationJacobian(lcoords, FEIElementGeometryWrapper(thisElement)) );

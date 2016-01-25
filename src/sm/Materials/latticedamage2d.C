@@ -291,8 +291,7 @@ LatticeDamage2d :: computeStressIndependentStrainVector(FloatArray &answer,
 MaterialStatus *
 LatticeDamage2d :: CreateStatus(GaussPoint *gp) const
 {
-    LatticeDamage2dStatus *answer = new LatticeDamage2dStatus(1, LatticeDamage2d :: domain, gp);
-    return answer;
+    return new LatticeDamage2dStatus(1, LatticeDamage2d :: domain, gp);
 }
 
 MaterialStatus *
@@ -333,7 +332,6 @@ LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
 
     double f, equivStrain, tempKappa, omega = 0.;
 
-    //this->initGpForNewStep(gp);
     this->initTempStatus(gp);
     reducedStrain = totalStrain;
 
@@ -407,13 +405,11 @@ LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
 
     //Calculate the the bio coefficient;
     double biot = 0.;
-    if(this->biotType == 0){
-      biot = this->biotCoefficient;
-    }
-    else if(this->biotType == 1){
-      biot = computeBiot(omega, tempKappa, le);
-    }
-    else{
+    if ( this->biotType == 0 ) {
+        biot = this->biotCoefficient;
+    } else if ( this->biotType == 1 ) {
+        biot = computeBiot(omega, tempKappa, le);
+    } else {
       OOFEM_ERROR("Unknown biot type\n");
     }
     
@@ -435,8 +431,6 @@ LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
     status->setTempCrackWidth(crackWidth);
     
     status->setBiotCoefficientInStatus(biot);
-
-    return;
 }
 
 double
@@ -651,7 +645,7 @@ double
 LatticeDamage2d :: give(int aProperty, GaussPoint *gp)
 {
     double answer;
-    if ( RandomMaterialExtensionInterface :: give(aProperty, gp, answer) ) {
+    if ( static_cast< LatticeDamage2dStatus * >( this->giveStatus(gp) )->_giveProperty(aProperty, answer) ) {
         return answer;
     } else if ( aProperty == e0_ID ) {
         return 1.;

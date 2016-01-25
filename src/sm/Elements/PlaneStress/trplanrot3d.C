@@ -246,48 +246,41 @@ TrPlaneStrRot3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalState
     FloatMatrix globTensor;
     CharTensor cht;
 
-    answer.resize(9);
+    answer.resize(6);
 
-    if ( ( type == IST_ShellForceTensor ) || ( type == IST_ShellStrainTensor ) ) {
-        if ( type == IST_ShellForceTensor ) {
-            cht = GlobalForceTensor;
+    if (  type == IST_ShellCurvatureTensor || type == IST_ShellStrainTensor ) {
+        if ( type == IST_ShellCurvatureTensor ) {
+            cht = GlobalCurvatureTensor;
         } else {
             cht = GlobalStrainTensor;
         }
 
         this->giveCharacteristicTensor(globTensor, cht, gp, tStep);
 
-        answer.at(1) = globTensor.at(1, 1); //sxForce
-        answer.at(2) = globTensor.at(1, 2); //qxyForce
-        answer.at(3) = globTensor.at(1, 3); //qxzForce
-        answer.at(4) = globTensor.at(1, 2); //qxyForce
-        answer.at(5) = globTensor.at(2, 2); //syForce
-        answer.at(6) = globTensor.at(2, 3); //syzForce
-        answer.at(7) = globTensor.at(1, 3); //qxzForce
-        answer.at(8) = globTensor.at(2, 3); //syzForce
-        answer.at(9) = 0.0;
-        // mutiply stresses by thickness to get forces
-        answer.times( this->giveCrossSection()->give(CS_Thickness, gp) );
+        answer.at(1) = globTensor.at(1, 1); //xx
+        answer.at(2) = globTensor.at(2, 2); //yy
+        answer.at(3) = globTensor.at(3, 3); //zz
+        answer.at(4) = 2 * globTensor.at(2, 3); //yz
+        answer.at(5) = 2 * globTensor.at(1, 3); //xz
+        answer.at(6) = 2 * globTensor.at(2, 3); //yz
 
         return 1;
-    } else if ( ( type == IST_ShellMomentumTensor ) || ( type == IST_ShellCurvatureTensor ) ) {
+    } else if ( type == IST_ShellMomentumTensor || type == IST_ShellForceTensor ) {
         if ( type == IST_ShellMomentumTensor ) {
             cht = GlobalMomentumTensor;
         } else {
-            cht = GlobalCurvatureTensor;
+            cht = GlobalForceTensor;
         }
 
         this->giveCharacteristicTensor(globTensor, cht, gp, tStep);
 
-        answer.at(1)  = globTensor.at(1, 1); //mxForce
-        answer.at(2)  = globTensor.at(1, 2); //mxyForce
-        answer.at(3)  = 0.0;
-        answer.at(4)  = globTensor.at(1, 2); //mxyForce
-        answer.at(5)  = globTensor.at(2, 2); //myForce
-        answer.at(6)  = 0.0;
-        answer.at(7)  = 0.0;
-        answer.at(8)  = 0.0;
-        answer.at(9)  = globTensor.at(3, 3); //mzForce
+        answer.at(1) = globTensor.at(1, 1); //xx
+        answer.at(2) = globTensor.at(2, 2); //yy
+        answer.at(3) = globTensor.at(3, 3); //zz
+        answer.at(4) = globTensor.at(2, 3); //yz
+        answer.at(5) = globTensor.at(1, 3); //xz
+        answer.at(6) = globTensor.at(2, 3); //yz
+
         return 1;
     } else {
         answer.clear();
@@ -327,7 +320,6 @@ TrPlaneStrRot3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, Ti
 //  different coordinate system in each node)
 {
     double dens, dV, load;
-    GaussPoint *gp = NULL;
     FloatArray force;
     FloatMatrix T;
 
@@ -339,7 +331,7 @@ TrPlaneStrRot3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, Ti
     forLoad->computeComponentArrayAt(force, tStep, mode);
 
     if ( force.giveSize() ) {
-        gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+        GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
         dens = this->giveStructuralCrossSection()->give('d', gp);
         dV   = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness, gp);
@@ -460,32 +452,20 @@ TrPlaneStrRot3d :: printOutputAt(FILE *file, TimeStep *tStep)
 
             this->giveIPValue(v, gp, IST_ShellStrainTensor, tStep);
             fprintf(file, "  strains    ");
-            // eps_x, eps_y, eps_z, eps_yz, eps_xz, eps_xy (global)
-            fprintf( file,
-                    " %.4e %.4e %.4e %.4e %.4e %.4e ",
-                    v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
+            for ( auto &val : v ) fprintf(file, " %.4e", val);
 
             this->giveIPValue(v, gp, IST_ShellCurvatureTensor, tStep);
             fprintf(file, "\n              curvatures ");
-            // k_x, k_y, k_z, k_yz, k_xz, k_xy (global)
-            fprintf( file,
-                    " %.4e %.4e %.4e %.4e %.4e %.4e ",
-                    v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
+            for ( auto &val : v ) fprintf(file, " %.4e", val);
 
             // Forces - Moments
             this->giveIPValue(v, gp, IST_ShellForceTensor, tStep);
             fprintf(file, "\n              stresses   ");
-            // n_x, n_y, n_z, v_yz, v_xz, v_xy (global)
-            fprintf( file,
-                    " %.4e %.4e %.4e %.4e %.4e %.4e ",
-                    v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
+            for ( auto &val : v ) fprintf(file, " %.4e", val);
 
             this->giveIPValue(v, gp, IST_ShellMomentumTensor, tStep);
             fprintf(file, "\n              moments    ");
-            // m_x, m_y, m_z, m_yz, m_xz, m_xy (global)
-            fprintf( file,
-                    " %.4e %.4e %.4e %.4e %.4e %.4e ",
-                    v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
+            for ( auto &val : v ) fprintf(file, " %.4e", val);
 
             fprintf(file, "\n");
         }

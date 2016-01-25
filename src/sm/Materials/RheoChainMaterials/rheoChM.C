@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2015   Borek Patzak
  *
  *
  *
@@ -36,6 +36,7 @@
 #include "rheoChM.h"
 #include "material.h"
 #include "Materials/isolinearelasticmaterial.h"
+//#include "Materials/latticelinearelastic.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "gausspoint.h"
@@ -70,7 +71,8 @@ RheoChainMaterial :: hasMaterialModeCapability(MaterialMode mode)
 {
     return mode == _3dMat || mode == _PlaneStress ||
            mode == _PlaneStrain || mode == _1dMat ||
-           mode == _PlateLayer || mode == _2dBeamLayer;
+           mode == _PlateLayer || mode == _2dBeamLayer ||
+           mode == _2dLattice || mode == _3dLattice;
 }
 
 
@@ -93,12 +95,21 @@ RheoChainMaterial :: giveRealStressVector(FloatArray &answer,
 
     // initialize the temporary material status and the Gauss point
     this->initTempStatus(gp);
-    //this->initGpForNewStep(gp);
+
+    if ( !this->isActivated(tStep) ) {
+        FloatArray zeros;
+        zeros.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
+        zeros.zero();
+        status->letTempStrainVectorBe(zeros);
+        status->letTempStressVectorBe(zeros);
+        answer = zeros;
+        return;
+    }
 
     // subtract the part of strain which does not depend on the stress increment from the final strain
     // note: it is somewhat confusing to say "stress-dependent" part of strain
     // because here we subtract not only the part of strain that does not depend
-    // on stress (i.g., thermal and shrinkage strain) but also the creep strain,
+    // on stress (e.g., thermal and shrinkage strain) but also the creep strain,
     // which depends on the previous stress history but not on the stress increment
     //
     this->giveStressDependentPartOfStrainVector(reducedStrain, gp, totalStrain,
@@ -109,8 +120,10 @@ RheoChainMaterial :: giveRealStressVector(FloatArray &answer,
     strainIncrement.beDifferenceOf( reducedStrain, status->giveStrainVector() );
 
     // get the initial stress, or set it to zero if not available (first step)
-    if ( status->giveStressVector().giveSize() ) {
-        stressVector = status->giveStressVector();
+    //if ( status->giveStressVector().giveSize() ) {
+    //  stressVector = status->giveStressVector();
+    if ( status->giveViscoelasticStressVector().giveSize() ) {
+        stressVector = status->giveViscoelasticStressVector();
     } else {
         stressVector.resize( strainIncrement.giveSize() );
         stressVector.zero();
@@ -304,9 +317,17 @@ RheoChainMaterial :: computeTrueStressIndependentStrainVector(FloatArray &answer
 
     // shrinkage strain
     this->giveShrinkageStrainVector(answer, gp, tStep, mode);
+
     // thermally induced strain
     StructuralMaterial :: computeStressIndependentStrainVector(e0, gp, tStep, mode);
     answer.add(e0);
+
+    if ( e0.giveSize() ) {
+#ifdef keep_track_of_strains
+        RheoChainMaterialStatus *status = static_cast< RheoChainMaterialStatus * >( this->giveStatus(gp) );
+        status->setTempThermalStrain( status->giveThermalStrain()  + e0.at(1) );
+#endif
+    }
 }
 
 
@@ -354,13 +375,15 @@ RheoChainMaterial :: computeCharTimes()
      * The second largest time Tau(n-1) is chosen as 0.75 tmax
      * where tmax is the lifetime of structure or the end of the time of interest.
      * Times  Tau(2) .. Tau(n-2) are defined by uniform division to n-2 steps in the
-     * log scale. It is necessary to check the condition a <= 10, where Tau(k) = a Tau(k-1)
+     * log scale. It is necessary to check the condition stepMultiplier <= 10, where Tau(k) = stepMultiplier Tau(k-1)
      *
      *
      */
 
     int size, nsteps;
     double endTime, Taun1, Tau1, help;
+
+    double stepMultiplier = 10.;
 
     endTime = this->giveEndOfTimeOfInterest() + relMatAge;
     Taun1 = 0.75 * endTime;
@@ -375,7 +398,7 @@ RheoChainMaterial :: computeCharTimes()
         OOFEM_ERROR("begOfTimeOfInterest must be a positive number");
     }
 
-    nsteps = ( int ) ( ( log(Taun1) - log(Tau1) ) / log(10.) + 1. );
+    nsteps = ( int ) ( ( log(Taun1) - log(Tau1) ) / log(stepMultiplier) + 1. );
     if ( nsteps < 8 ) {
         nsteps = 8;
     }
@@ -383,6 +406,7 @@ RheoChainMaterial :: computeCharTimes()
     this->nUnits = size = nsteps + 2;
 
     this->charTimes.resize(size);
+    this->charTimes.zero();
 
     charTimes.at(1) = Tau1;
     charTimes.at(size) = 1.0e10;
@@ -401,12 +425,20 @@ RheoChainMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 {
     //
     // Returns the incremental material stiffness matrix of the receiver
+    // PH: the "giveEModulus must be called before any method on elastic material
+    // otherwise the status would refer to the elastic material and not to the
+    // viscoelastic one
+    // in my opinion ElasticStiffness should return incremental stiffness and not unit stiffness
+    // for this purpose use giveUnitStiffnessMatrix
     //
+    double incrStiffness = this->giveEModulus(gp, tStep);
+
     this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
-    if ( mode == ElasticStiffness ) {
-        return;
-    }
-    answer.times( this->giveEModulus(gp, tStep) );
+    //if ( mode == ElasticStiffness ) {
+    //  return;
+    //}
+    //	answer.times( this->giveEModulus(gp, tStep) );
+    answer.times(incrStiffness);
 }
 
 
@@ -419,11 +451,13 @@ RheoChainMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
     //
     // Returns the incremental material stiffness matrix of the receiver
     //
+    double incrStiffness = this->giveEModulus(gp, tStep);
     this->giveLinearElasticMaterial()->givePlaneStressStiffMtrx(answer, mode, gp, tStep);
-    if ( mode == ElasticStiffness ) {
-        return;
-    }
-    answer.times( this->giveEModulus(gp, tStep) );
+    //if ( mode == ElasticStiffness ) {
+    //  return;
+    //}
+    //answer.times( this->giveEModulus(gp, tStep) );
+    answer.times(incrStiffness);
 }
 
 void
@@ -435,11 +469,13 @@ RheoChainMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
     //
     // Returns the incremental material stiffness matrix of the receiver
     //
+    double incrStiffness = this->giveEModulus(gp, tStep);
     this->giveLinearElasticMaterial()->givePlaneStrainStiffMtrx(answer, mode, gp, tStep);
-    if ( mode == ElasticStiffness ) {
-        return;
-    }
-    answer.times( this->giveEModulus(gp, tStep) );
+    //if ( mode == ElasticStiffness ) {
+    //  return;
+    //}
+    //  answer.times( this->giveEModulus(gp, tStep) );
+    answer.times(incrStiffness);
 }
 
 
@@ -452,12 +488,38 @@ RheoChainMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
     //
     // Returns the incremental material stiffness matrix of the receiver
     //
+    double incrStiffness = this->giveEModulus(gp, tStep);
     this->giveLinearElasticMaterial()->give1dStressStiffMtrx(answer, mode, gp, tStep);
-    if ( mode == ElasticStiffness ) {
-        return;
-    }
-    answer.times( this->giveEModulus(gp, tStep) );
+    //if ( mode == ElasticStiffness ) {
+    //  return;
+    //}
+    // answer.times( this->giveEModulus(gp, tStep) );
+    answer.times(incrStiffness);
 }
+
+void
+RheoChainMaterial :: give2dLatticeStiffMtrx(FloatMatrix &answer,
+                                            MatResponseMode mode,
+                                            GaussPoint *gp,
+                                            TimeStep *tStep)
+{
+    double incrStiffness = this->giveEModulus(gp, tStep);
+    this->giveLinearElasticMaterial()->give2dLatticeStiffMtrx(answer, mode, gp, tStep);
+    answer.times(incrStiffness);
+}
+
+
+void
+RheoChainMaterial :: give3dLatticeStiffMtrx(FloatMatrix &answer,
+                                            MatResponseMode mode,
+                                            GaussPoint *gp,
+                                            TimeStep *tStep)
+{
+    double incrStiffness = this->giveEModulus(gp, tStep);
+    this->giveLinearElasticMaterial()->give3dLatticeStiffMtrx(answer, mode, gp, tStep);
+    answer.times(incrStiffness);
+}
+
 
 
 MaterialStatus *
@@ -478,7 +540,18 @@ RheoChainMaterial :: initializeFrom(InputRecord *ir)
     result = StructuralMaterial :: initializeFrom(ir);
     if ( result != IRRT_OK ) return result;
 
-    IR_GIVE_FIELD(ir, nu, _IFT_RheoChainMaterial_n);
+
+    if ( ir->hasField(_IFT_RheoChainMaterial_lattice) ) {
+        lattice = true;
+        this->alphaOne = 1.;
+        this->alphaTwo = 1.;
+        IR_GIVE_OPTIONAL_FIELD(ir, alphaOne, _IFT_RheoChainMaterial_alphaOne);
+        IR_GIVE_OPTIONAL_FIELD(ir, alphaTwo, _IFT_RheoChainMaterial_alphaTwo);
+    } else {
+        lattice = false;
+        IR_GIVE_FIELD(ir, nu, _IFT_RheoChainMaterial_n);
+    }
+
     IR_GIVE_FIELD(ir, relMatAge, _IFT_RheoChainMaterial_relmatage);
     this->begOfTimeOfInterest = -1.0;
     IR_GIVE_OPTIONAL_FIELD(ir, begOfTimeOfInterest, _IFT_RheoChainMaterial_begoftimeofinterest);
@@ -486,13 +559,16 @@ RheoChainMaterial :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, endOfTimeOfInterest, _IFT_RheoChainMaterial_endoftimeofinterest);
     IR_GIVE_FIELD(ir, timeFactor, _IFT_RheoChainMaterial_timefactor); // solution time/timeFactor should give time in days
 
-    // sets up nUnits variable
+    // sets up nUnits variable and characteristic times array (retardation/relaxation times)
     this->computeCharTimes();
+
     // sets up discrete times
     double endTime = this->giveEndOfTimeOfInterest();
     this->generateLogTimeScale(discreteTimeScale, this->begOfTimeOfInterest, endTime, MNC_NPOINTS - 1);
+
     ///@warning Stiffness is time dependant, so the variable changes with time.
-    this->updateEparModuli(0.); // stiffnesses are time independent (evaluated at time t = 0.)
+    //ph !!! why was it put here?
+    //this->updateEparModuli(0.); // stiffnesses are time independent (evaluated at time t = 0.)
 
     return IRRT_OK;
 }
@@ -501,9 +577,15 @@ LinearElasticMaterial *
 RheoChainMaterial :: giveLinearElasticMaterial()
 {
     if ( linearElasticMaterial == NULL ) {
-        linearElasticMaterial = new IsotropicLinearElasticMaterial(this->giveNumber(),
-                                                                   this->giveDomain(),
-                                                                   1.0, this->nu);
+        if ( this->lattice ) {
+	  /*            linearElasticMaterial = new LatticeLinearElastic(this->giveNumber(),
+                                                             this->giveDomain(),
+                                                             1.0, this->alphaOne, this->alphaTwo);*/
+        } else {
+            linearElasticMaterial = new IsotropicLinearElasticMaterial(this->giveNumber(),
+                                                                       this->giveDomain(),
+                                                                       1.0, this->nu);
+        }
     }
 
     return linearElasticMaterial;
@@ -563,6 +645,21 @@ RheoChainMaterial :: restoreIPContext(DataStream &stream, ContextMode mode, Gaus
 }
 
 
+int
+RheoChainMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
+{
+    if ( type == IST_ThermalStrainTensor ) {
+        RheoChainMaterialStatus *status = static_cast< RheoChainMaterialStatus * >( this->giveStatus(gp) );
+        answer.resize(6);
+        answer.zero();
+        answer.at(1) = answer.at(2) = answer.at(3) = status->giveThermalStrain();
+        return 1;
+    } else {
+        return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
+    }
+
+    return 1; // to make the compiler happy
+}
 
 /****************************************************************************************/
 
@@ -574,6 +671,12 @@ RheoChainMaterialStatus :: RheoChainMaterialStatus(int n, Domain *d,
     tempHiddenVars(nUnits),
     shrinkageStrain()
 {
+
+
+#ifdef keep_track_of_strains
+    thermalStrain = 0.;
+    tempThermalStrain = 0.;
+#endif
 }
 
 
@@ -630,6 +733,11 @@ RheoChainMaterialStatus :: updateYourself(TimeStep *tStep)
     for ( int i = 0; i < nUnits; i++ ) {
         this->hiddenVars [ i ] = this->tempHiddenVars [ i ];
     }
+
+#ifdef keep_track_of_strains
+    thermalStrain = tempThermalStrain;
+    tempThermalStrain = 0.;
+#endif
 }
 
 void

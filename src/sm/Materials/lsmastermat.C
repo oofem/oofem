@@ -89,12 +89,11 @@ LargeStrainMasterMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, Gaus
     double lambda1, lambda2, lambda3, E1, E2, E3;
     FloatArray eVals, SethHillStrainVector, stressVector, stressM;
     FloatMatrix F, Ft, C, eVecs, SethHillStrain;
-    FloatMatrix L1, L2, T, tT;
+    FloatMatrix L1, L2, T;
     //store of deformation gradient into 3x3 matrix
     F.beMatrixForm(vF);
     //compute right Cauchy-Green tensor(C), its eigenvalues and eigenvectors
-    Ft.beTranspositionOf(F);
-    C.beProductOf(Ft, F);
+    C.beTProductOf(F, F);
     // compute eigen values and eigen vectors of C
     C.jaco_(eVals, eVecs, 40);
     // compute Seth - Hill's strain measure, it depends on mParameter
@@ -121,7 +120,6 @@ LargeStrainMasterMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, Gaus
     SethHillStrainVector.beSymVectorFormOfStrain(SethHillStrain);
     sMat->giveRealStressVector_3d(stressVector, gp, SethHillStrainVector, tStep);
     this->constructTransformationMatrix(T, eVecs);
-    tT.beTranspositionOf(T);
 
     stressVector.at(4) = 2 * stressVector.at(4);
     stressVector.at(5) = 2 * stressVector.at(5);
@@ -138,16 +136,16 @@ LargeStrainMasterMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, Gaus
     FloatMatrix junk, P, TL;
     FloatArray secondPK;
     junk.beProductOf(L1, T);
-    P.beProductOf(tT, junk);
+    P.beTProductOf(T, junk);
     //transformation of the stress to the 2PK stress and then to 1PK
     stressVector.at(4) = 0.5 * stressVector.at(4);
     stressVector.at(5) = 0.5 * stressVector.at(5);
     stressVector.at(6) = 0.5 * stressVector.at(6);
     secondPK.beProductOf(P, stressVector);
-    this->convert_S_2_P( answer, secondPK, vF, gp->giveMaterialMode() );
+    answer.beProductOf(F, secondPK); // P = F*S
     junk.zero();
     junk.beProductOf(L2, T);
-    TL.beProductOf(tT, junk);
+    TL.beTProductOf(T, junk);
     status->setPmatrix(P);
     status->setTLmatrix(TL);
     status->letTempStressVectorBe(answer);
@@ -231,9 +229,7 @@ LargeStrainMasterMaterial :: constructL1L2TransformationMatrices(FloatMatrix &an
 
         answer2.at(4, 5) = answer2.at(5, 4) =  1. / 2. * stressM.at(6) * ( m - 1 ) * pow(lambda1, m - 2);
         answer2.at(4, 6) = answer2.at(6, 4) = 1. / 2. * stressM.at(5) * ( m - 1 ) * pow(lambda1, m - 2);
-        ;
         answer2.at(5, 6) = answer2.at(6, 5) = 1. / 2. * stressM.at(4) * ( m - 1 ) * pow(lambda1, m - 2);
-        ;
     } else if ( lambda1 == lambda2 ) {     //two equal eigenvalues
         gamma12  = 1. / 2. * lambda1P;
         gamma13 = ( E1 - E3 ) / ( lambda1 - lambda3 );
@@ -342,7 +338,6 @@ LargeStrainMasterMaterial :: constructL1L2TransformationMatrices(FloatMatrix &an
 
 
     answer1.at(1, 1) = lambda1P;
-
     answer1.at(2, 2) = lambda2P;
     answer1.at(3, 3) = lambda3P;
     answer1.at(4, 4) = gamma23;

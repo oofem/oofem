@@ -57,17 +57,18 @@ CebFip78Material :: initializeFrom(InputRecord *ir)
 
 
 double
-CebFip78Material :: computeCreepFunction(double tStep, double ofAge)
+CebFip78Material :: computeCreepFunction(double t, double t_prime)
 {
-    // computes the value of creep function at time ofAge
-    // when load is acting from tStep
+    // computes the value of creep function at time t
+    // when load is acting from time t_prime
+    // t-t_prime = duration of loading
 
     double e0;
     double fi, fi0, firv, fiir, hd, alpha, beta;
-    double t, t0;
+    double tt, t0;
 
-    t0 = this->kap_tt * this->kap_c * ofAge;
-    t  = this->kap_tt * this->kap_c * tStep;
+    t0 = this->kap_tt * this->kap_c * t_prime;
+    tt  = this->kap_tt * this->kap_c * t;
 
     e0 = E28 * sqrt( 1.36 * t0 / ( t0 + 10. ) );
 
@@ -76,7 +77,7 @@ CebFip78Material :: computeCreepFunction(double tStep, double ofAge)
         fi0 = 0.;
     }
 
-    firv = 0.11 + 0.2 * atan( 0.05 * pow( ( t - t0 ), 2. / 3. ) );
+    firv = 0.11 + 0.2 * atan( 0.05 * pow( ( tt - t0 ), 2. / 3. ) );
     if ( firv < 0.4 ) {
         firv = 0.4;
     }
@@ -93,7 +94,7 @@ CebFip78Material :: computeCreepFunction(double tStep, double ofAge)
     alpha = 0.078 * exp( -1.20 * log10(hd) );
     beta  = 0.530 * exp( -0.13 * log10(hd) );
 
-    fiir = 0.25 * ( 5.4 - log10(hd) ) * ( exp( -pow(alpha * t0, beta) ) - exp( -pow(alpha * t, beta) ) );
+    fiir = 0.25 * ( 5.4 - log10(hd) ) * ( exp( -pow(alpha * t0, beta) ) - exp( -pow(alpha * tt, beta) ) );
     fiir = fibf * fiir;
 
     fi = fi0 + firv + fiir;

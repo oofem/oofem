@@ -533,8 +533,8 @@ public:
      * Print receiver on stdout with custom name.
      * @param name Display name of reciever.
      */
-    void printYourself(const std::string name) const;
-
+    void printYourself(const std::string &name) const;
+    
     /**
      * Print matrix to file.
      * @param filename Output filename
@@ -544,6 +544,12 @@ public:
     
     /// Higher accuracy than printYourself.
     void pY() const;
+
+    /**
+     * Writes receiver as CSV (comma seperated values)
+     * @param name Filename
+     */
+    void writeCSV(const std :: string &name) const;
 
     /**
      * Exposes the internal values of the matrix. Should typically not be used outside of matrix classes.

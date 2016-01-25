@@ -96,7 +96,7 @@ public:
     
     
     ContactElement *giveSlave(const int num) { return slaveObjectList[num-1]; }
-    int giveNumberOfSlaves() { return slaveObjectList.size(); }
+    int giveNumberOfSlaves() { return (int)slaveObjectList.size(); }
     virtual int instanciateYourself(DataReader *dr){ return 1; }
     //virtual const char *giveClassName() const { return "ContactDefinition"; }
     bool isInContact() { return inContact; }

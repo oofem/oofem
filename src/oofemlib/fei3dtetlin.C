@@ -198,10 +198,6 @@ FEI3dTetLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICe
             ( x3 - x1 ) * ( y4 - y1 ) * ( z2 - z1 ) - ( x2 - x1 ) * ( y4 - y1 ) * ( z3 - z1 ) +
             ( x2 - x1 ) * ( y3 - y1 ) * ( z4 - z1 ) - ( x3 - x1 ) * ( y2 - y1 ) * ( z4 - z1 ) );
 
-    if ( detJ <= 0.0 ) {
-        OOFEM_ERROR("negative volume encountered");
-    }
-
     return detJ;
 }
 

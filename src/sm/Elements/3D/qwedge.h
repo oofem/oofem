@@ -42,7 +42,6 @@
 #include "sprnodalrecoverymodel.h"
 
 #define _IFT_QWedge_Name "qwedge"
-#define _IFT_QWedge_materialCoordinateSystem "matcs" ///< [optional] Experimental support for material directions
 
 namespace oofem {
 class FEI3dWedgeQuad;
@@ -59,8 +58,6 @@ class QWedge : public Structural3DElement, public SPRNodalRecoveryModelInterface
 protected:
     static FEI3dWedgeQuad interpolation;
 
-    bool matRotation;
-
 public:
     QWedge(int, Domain *);
     virtual ~QWedge() { }
@@ -72,18 +69,6 @@ public:
 
     virtual Interface *giveInterface(InterfaceType);
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_SurfaceLoadSupport ) ? 1 : 0 ); }
-
-    /**
-     * Function determines the 3 basis vectors for the local coordinate system that should be used by materials.
-     * @param x First base vector of the local c.s.
-     * @param y Second base vector
-     * @param z Third base vector
-     * @param lcoords Local coordinates to evaluate the local c.s. for.
-     */
-    void giveMaterialOrientationAt(FloatArray &x, FloatArray &y, FloatArray &z, const FloatArray &lcoords);
-
-    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
-    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);

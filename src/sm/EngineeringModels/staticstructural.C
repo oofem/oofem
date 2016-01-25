@@ -199,6 +199,7 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
         this->field->initialize(VM_Total, tStep->givePreviousStep(), this->solution, EModelDefaultEquationNumbering() );
         this->field->update(VM_Total, tStep, this->solution, EModelDefaultEquationNumbering() );
     }
+    this->field->applyBoundaryCondition(tStep); ///@todo Temporary hack to override the incorrect values that is set by "update" above. Remove this when that is fixed.
 
     FloatArray incrementOfSolution(neq), externalForces(neq);
 
@@ -230,16 +231,18 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
         this->assembleVectorFromElements(this->internalForces, tStep, InternalForceAssembler(), VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(di));
         this->internalForces.printYourself("internal forces");
 #endif
-        OOFEM_LOG_RELEVANT("Computing old tangent\n");
-        this->updateComponent( tStep, NonLinearLhs, this->giveDomain(di) );
-        SparseLinearSystemNM *linSolver = nMethod->giveLinearSolver();
-        OOFEM_LOG_RELEVANT("Solving for increment\n");
-        linSolver->solve(*stiffnessMatrix, extrapolatedForces, incrementOfSolution);
-        OOFEM_LOG_RELEVANT("Initial guess found\n");
-        this->solution.add(incrementOfSolution);
-        
-        this->field->update(VM_Total, tStep, this->solution, EModelDefaultEquationNumbering());
-        this->field->applyBoundaryCondition(tStep); ///@todo Temporary hack to override the incorrect values that is set by "update" above. Remove this when that is fixed.
+        if ( extrapolatedForces.computeNorm() > 0. ) {
+            OOFEM_LOG_RELEVANT("Computing old tangent\n");
+            this->updateComponent( tStep, NonLinearLhs, this->giveDomain(di) );
+            SparseLinearSystemNM *linSolver = nMethod->giveLinearSolver();
+            OOFEM_LOG_RELEVANT("Solving for increment\n");
+            linSolver->solve(*stiffnessMatrix, extrapolatedForces, incrementOfSolution);
+            OOFEM_LOG_RELEVANT("Initial guess found\n");
+            this->solution.add(incrementOfSolution);
+            
+            this->field->update(VM_Total, tStep, this->solution, EModelDefaultEquationNumbering());
+            this->field->applyBoundaryCondition(tStep); ///@todo Temporary hack to override the incorrect values that is set by "update" above. Remove this when that is fixed.
+        }
     } else if ( this->initialGuessType != IG_None ) {
         OOFEM_ERROR("Initial guess type: %d not supported", initialGuessType);
     } else {
@@ -260,6 +263,7 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
     int currentIterations;
     NM_Status status = this->nMethod->solve(*this->stiffnessMatrix,
                                             externalForces,
+                                            NULL,
                                             NULL,
                                             this->solution,
                                             incrementOfSolution,
@@ -430,7 +434,7 @@ StaticStructural :: requiresEquationRenumbering(TimeStep *tStep)
         ActiveBoundaryCondition *active_bc = dynamic_cast< ActiveBoundaryCondition * >(gbc.get());
         BoundaryCondition *bc = dynamic_cast< BoundaryCondition * >(gbc.get());
         // We only need to consider Dirichlet b.c.s
-        if ( bc || ( active_bc && active_bc->requiresActiveDofs() ) ) {
+        if ( bc || ( active_bc && ( active_bc->requiresActiveDofs() || active_bc->giveNumberOfInternalDofManagers() ) ) ) {
             // Check of the dirichlet b.c. has changed in the last step (if so we need to renumber)
             if ( gbc->isImposed(tStep) != gbc->isImposed(tStep->givePreviousStep()) ) {
                 return true;

@@ -705,7 +705,7 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeConsistentMas
 
     for ( GaussPoint *gp: *element->giveIntegrationRule(0) ) {
         structEl->computeNmatrixAt(gp->giveNaturalCoordinates(), n);
-        density = structEl->giveMaterial()->give('d', gp);
+        density = structEl->giveStructuralCrossSection()->give('d', gp);
 
         if ( ipDensity != NULL ) {
             // Override density if desired
@@ -972,6 +972,7 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
                     FloatArray N;
                     FEInterpolation *interp = element->giveInterpolation();
                     interp->evalN( N, locCoordNode, FEIElementGeometryWrapper(element) );
+//                    interp->evalN( N, locCoord, FEIElementGeometryWrapper(element) );
                     const int nDofMan = element->giveNumberOfDofManagers();
 
                     XfemManager *xMan = element->giveDomain()->giveXfemManager();
@@ -1009,11 +1010,16 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
                         }
 
 
+//                        if(!evaluationSucceeded) {
+//                            printf("!evaluationSucceeded.\n");
+//                        }
+
 //                        if ( ( tangSignDist > ( 1.0e-3 ) * meanEdgeLength && fabs(levelSetNormal) < ( 1.0e-2 ) * meanEdgeLength ) && evaluationSucceeded ) {
 //                            joinNodes = false;
 //                        }
 
-                        if ( ( tangSignDist < ( 1.0e-3 ) * meanEdgeLength || fabs(levelSetNormal) > ( 1.0e-2 ) * meanEdgeLength ) || !evaluationSucceeded ) {
+//                        if ( ( tangSignDist < ( 1.0e-3 ) * meanEdgeLength || fabs(levelSetNormal) > ( 1.0e-2 ) * meanEdgeLength ) || !evaluationSucceeded ) {
+                        if ( ( tangSignDist < ( 1.0e-3 ) * meanEdgeLength || fabs(levelSetNormal) > ( 1.0e-2 ) * meanEdgeLength ) && false ) {
                             joinNodes = false;
                         }
                     }

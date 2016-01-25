@@ -257,10 +257,10 @@ void
 Tr1Darcy :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                        InternalStateType type, TimeStep *tStep)
 {
-    TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
+    CrossSection *cs = this->giveCrossSection();
     ///@todo Write support function for getting the closest gp given local c.s. and use that here
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    mat->giveIPValue(answer, gp, type, tStep);
+    cs->giveIPValue(answer, gp, type, tStep);
 }
 
 Interface *

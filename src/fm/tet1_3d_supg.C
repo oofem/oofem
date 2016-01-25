@@ -40,6 +40,7 @@
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "fluiddynamicmaterial.h"
+#include "fluidcrosssection.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
@@ -263,7 +264,7 @@ Tet1_3D_SUPG :: updateStabilizationCoeffs(TimeStep *tStep)
 
     std :: unique_ptr< IntegrationRule > &iRule = this->integrationRulesArray [ 1 ];
     GaussPoint *gp_first = iRule->getIntegrationPoint(0);
-    nu = static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->giveEffectiveViscosity(gp_first, tStep->givePreviousStep() );
+    nu = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial()->giveEffectiveViscosity(gp_first, tStep->givePreviousStep() );
     nu *= domain->giveEngngModel()->giveVariableScale(VST_Viscosity);
 
     for ( auto *gp: *iRule ) {

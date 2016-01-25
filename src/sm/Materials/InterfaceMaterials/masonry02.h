@@ -117,7 +117,7 @@ public:
                                      TimeStep *tStep);
 
     virtual int giveSizeOfFullHardeningVarsVector() { return 3; }
-    virtual int giveSizeOfReducedHardeningVarsVector(GaussPoint *) { return 3; }
+    virtual int giveSizeOfReducedHardeningVarsVector(GaussPoint *) const { return 3; }
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 

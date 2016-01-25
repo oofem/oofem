@@ -303,6 +303,16 @@ bool ClassFactory :: registerEnrichmentItem( const char *name, EnrichmentItem * 
     CF_STORE(enrichItemList)
 }
 
+NucleationCriterion *ClassFactory :: createNucleationCriterion(const char *name, Domain *domain)
+{
+    CF_CREATE(nucleationCritList, domain)
+}
+
+bool ClassFactory :: registerNucleationCriterion( const char *name, NucleationCriterion * ( *creator )( Domain * ) )
+{
+    CF_STORE(nucleationCritList)
+}
+
 EnrichmentFunction *ClassFactory :: createEnrichmentFunction(const char *name, int number, Domain *domain)
 {
     CF_CREATE(enrichFuncList, number, domain)

@@ -680,33 +680,6 @@ LIBeam3dNL2 :: giveLocalCoordinateSystem(FloatMatrix &answer)
 }
 
 
-/*
- * int
- * LIBeam3dNL2 :: computeGtoLRotationMatrix (FloatMatrix& answer) // giveRotationMatrix ()
- * // Returns the rotation matrix of the receiver.
- * // rotation matrix is computed for original configuration only
- * {
- * FloatMatrix lcs;
- * int i,j;
- *
- * answer.resize(12,12);
- * answer.zero();
- *
- * this->giveLocalCoordinateSystem (lcs);
- *
- * for (i=1; i <= 3; i++)
- * for (j=1; j <= 3; j++) {
- * answer.at(i,j) = lcs.at(i,j);
- * answer.at(i+3, j+3) = lcs.at(i,j);
- * answer.at(i+6, j+6) = lcs.at(i,j);
- * answer.at(i+9, j+9) = lcs.at(i,j);
- * }
- *
- * //delete lcs;
- * return 1 ;
- * }
- */
-
 int
 LIBeam3dNL2 :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
 {
@@ -780,9 +753,6 @@ void
 LIBeam3dNL2 :: initForNewStep()
 // initializes receiver to new time step or can be used
 // if current time step must be restarted
-//
-// call material->initGpForNewStep() for all GPs.
-//
 {
     NLStructuralElement :: initForNewStep();
     tempQ = q;

@@ -251,14 +251,14 @@ PhaseFieldElement :: computeNd_matrixAt(const FloatArray &lCoords, FloatMatrix &
 }
 
 void
-PhaseFieldElement :: computeBd_matrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+PhaseFieldElement :: computeBd_matrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 {
     // Returns the [numSpaceDim x nDofs] gradient matrix {B_d} of the receiver,
     // evaluated at gp.
 
     NLStructuralElement *el = this->giveElement( );
     FloatMatrix dNdx;
-    el->giveInterpolation( )->evaldNdx( dNdx, *aGaussPoint->giveCoordinates( ), FEIElementGeometryWrapper( el ) );
+    el->giveInterpolation( )->evaldNdx( dNdx, *gp->giveCoordinates( ), FEIElementGeometryWrapper( el ) );
     answer.beTranspositionOf( dNdx );
 }
 

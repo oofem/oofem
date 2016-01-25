@@ -36,6 +36,7 @@
 #include "slavedof.h"
 #include "floatarray.h"
 #include "intarray.h"
+#include "entityrenumberingscheme.h"
 #include "classfactory.h"
 
 namespace oofem {

@@ -82,11 +82,8 @@ MPlasticMaterial :: hasMaterialModeCapability(MaterialMode mode)
 
 MaterialStatus *
 MPlasticMaterial :: CreateStatus(GaussPoint *gp) const
-/*
- * creates new  material status  corresponding to this class
- */
 {
-    return new MPlasticMaterialStatus(1, this->giveDomain(), gp);
+    return new MPlasticMaterialStatus(1, this->giveDomain(), gp, this->giveSizeOfReducedHardeningVarsVector(gp));
 }
 
 
@@ -112,7 +109,6 @@ MPlasticMaterial :: giveRealStressVector(FloatArray &answer,
     MPlasticMaterialStatus *status = static_cast< MPlasticMaterialStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
-    //this->initGpForNewStep(gp);
 
     // subtract stress independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
@@ -1360,9 +1356,9 @@ MPlasticMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStat
 }
 
 
-MPlasticMaterialStatus :: MPlasticMaterialStatus(int n, Domain *d, GaussPoint *g) :
+MPlasticMaterialStatus :: MPlasticMaterialStatus(int n, Domain *d, GaussPoint *g, int statusSize) :
     StructuralMaterialStatus(n, d, g), plasticStrainVector(), tempPlasticStrainVector(),
-    strainSpaceHardeningVarsVector(), tempStrainSpaceHardeningVarsVector(),
+    strainSpaceHardeningVarsVector(statusSize), tempStrainSpaceHardeningVarsVector(statusSize),
     gamma(),
     tempGamma()
 {
@@ -1417,15 +1413,8 @@ void MPlasticMaterialStatus :: initTempStatus()
 
     tempPlasticStrainVector = plasticStrainVector;
 
-    if ( strainSpaceHardeningVarsVector.giveSize() == 0 ) {
-        strainSpaceHardeningVarsVector.resize( static_cast< MPlasticMaterial * >( gp->giveMaterial() )->
-                                              giveSizeOfReducedHardeningVarsVector(gp) );
-        strainSpaceHardeningVarsVector.zero();
-    }
-
     tempStrainSpaceHardeningVarsVector = strainSpaceHardeningVarsVector;
 
-    temp_state_flag = state_flag;
 
     tempGamma = gamma;
     tempActiveConditionMap = activeConditionMap;

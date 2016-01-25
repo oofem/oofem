@@ -51,6 +51,7 @@
 #include "internalstatevaluetype.h"
 #include "XFEMDebugTools.h"
 #include "xfemtolerances.h"
+#include "nucleationcriterion.h"
 
 namespace oofem {
 REGISTER_XfemManager(XfemManager)
@@ -59,6 +60,7 @@ XfemManager :: XfemManager(Domain *domain)
 {
     this->domain = domain;
     numberOfEnrichmentItems = -1;
+    numberOfNucleationCriteria = 0;
     mNumGpPerTri = 12;
 
     // Default is no refinement of triangles.
@@ -123,11 +125,28 @@ void
 XfemManager :: createEnrichedDofs()
 {
     // Creates new dofs due to enrichment and appends them to the dof managers
-    IntArray dofIdArray;
+	mXFEMPotentialDofIDs.clear();
 
     for ( auto &ei: enrichmentItemList ) {
+        IntArray dofIdArray;
         ei->createEnrichedDofs();
+        ei->givePotentialEIDofIdArray(dofIdArray);
+//        printf("dofIdArray: "); dofIdArray.printYourself();
+        mXFEMPotentialDofIDs.followedBy(dofIdArray);
     }
+}
+
+IntArray XfemManager :: giveEnrichedDofIDs(const DofManager &iDMan) const
+{
+    IntArray dofIdArray;
+
+    for(int id : mXFEMPotentialDofIDs) {
+    	if(iDMan.hasDofID( DofIDItem(id) )) {
+    		dofIdArray.followedBy(id);
+    	}
+    }
+
+    return dofIdArray;
 }
 
 IRResultType XfemManager :: initializeFrom(InputRecord *ir)
@@ -135,6 +154,9 @@ IRResultType XfemManager :: initializeFrom(InputRecord *ir)
     IRResultType result; // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, numberOfEnrichmentItems, _IFT_XfemManager_numberOfEnrichmentItems);
+
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfNucleationCriteria, _IFT_XfemManager_numberOfNucleationCriteria);
+    printf("numberOfNucleationCriteria: %d\n", numberOfNucleationCriteria);
 
     IR_GIVE_OPTIONAL_FIELD(ir, mNumGpPerTri, _IFT_XfemManager_numberOfGpPerTri);
     IR_GIVE_OPTIONAL_FIELD(ir, mNumTriRef, _IFT_XfemManager_numberOfTriRefs);
@@ -165,6 +187,7 @@ void XfemManager :: giveInputRecord(DynamicInputRecord &input)
 {
     input.setRecordKeywordField(giveInputRecordName(), 1);
     input.setField(numberOfEnrichmentItems, _IFT_XfemManager_numberOfEnrichmentItems);
+    input.setField(numberOfNucleationCriteria, _IFT_XfemManager_numberOfNucleationCriteria);
     input.setField(mNumGpPerTri, _IFT_XfemManager_numberOfGpPerTri);
     input.setField(mNumTriRef, _IFT_XfemManager_numberOfTriRefs);
     input.setField(mEnrDofScaleFac, _IFT_XfemManager_enrDofScaleFac);
@@ -199,6 +222,26 @@ int XfemManager :: instanciateYourself(DataReader *dr)
         ei->instanciateYourself(dr);
         this->enrichmentItemList [ i - 1 ] = std :: move(ei);
     }
+
+    mNucleationCriteria.resize(numberOfNucleationCriteria);
+    for ( int i = 1; i <= numberOfNucleationCriteria; i++ ) {
+        InputRecord *mir = dr->giveInputRecord(DataReader :: IR_crackNucleationRec, i);
+        result = mir->giveRecordKeywordField(name);
+
+        if ( result != IRRT_OK ) {
+            mir->report_error(this->giveClassName(), __func__, "", result, __FILE__, __LINE__);
+        }
+
+        std :: unique_ptr< NucleationCriterion >nc( classFactory.createNucleationCriterion( name.c_str(), this->giveDomain() ) );
+        if ( nc.get() == NULL ) {
+            OOFEM_ERROR( "Unknown nucleation criterion: (%s)", name.c_str() );
+        }
+
+        nc->initializeFrom(mir);
+        nc->instanciateYourself(dr);
+        this->mNucleationCriteria [ i - 1 ] = std :: move(nc);
+    }
+
 
     updateNodeEnrichmentItemMap();
 
@@ -331,6 +374,42 @@ bool XfemManager :: hasPropagatingFronts()
     }
 
     return false;
+}
+
+void XfemManager :: nucleateEnrichmentItems(bool &oNewItemsWereNucleated)
+{
+	printf("Entering XfemManager :: nucleateEnrichmentItems\n");
+
+	for(auto &nucCrit : mNucleationCriteria) {
+		std::vector<std::unique_ptr<EnrichmentItem>> eiList = std::move(nucCrit->nucleateEnrichmentItems());
+
+		if(eiList.size() > 0) {
+			printf("eiList.size(): %lu\n", eiList.size() );
+
+			if(giveNumberOfEnrichmentItems() == 0) {
+				printf("giveNumberOfEnrichmentItems() == 0\n");
+
+				for(auto &ei : eiList) {
+					enrichmentItemList.push_back(std::move(ei));
+				}
+
+				//				enrichmentItemList.push_back(std::move(ei));
+				numberOfEnrichmentItems = enrichmentItemList.size();
+				oNewItemsWereNucleated = true;
+			    updateNodeEnrichmentItemMap();
+
+				return;
+			}
+		}
+	}
+
+	oNewItemsWereNucleated = false;
+	return;
+}
+
+bool XfemManager :: hasNucleationCriteria()
+{
+	return ( mNucleationCriteria.size() > 0 );
 }
 
 void XfemManager :: updateNodeEnrichmentItemMap()

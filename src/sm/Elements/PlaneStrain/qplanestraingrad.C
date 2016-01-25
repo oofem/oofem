@@ -79,7 +79,7 @@ QPlaneStrainGrad :: giveDofManDofIDMask(int inode, IntArray &answer) const
 IRResultType
 QPlaneStrainGrad :: initializeFrom(InputRecord *ir)
 {
-    return StructuralElement :: initializeFrom(ir);
+    return QPlaneStrain :: initializeFrom(ir);
 }
 
 void

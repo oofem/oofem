@@ -48,7 +48,7 @@
 namespace oofem {
 REGISTER_Material(ConcreteDPM);
 ///@todo Eventually remove this old input string (replacing the name in input files is easy anyway).
-static bool __dummy_ConcreteDPM_alt = GiveClassFactory().registerMaterial("concreteidp", matCreator< ConcreteDPM > );
+static bool __dummy_ConcreteDPM_alt __attribute__((unused)) = GiveClassFactory().registerMaterial("concreteidp", matCreator< ConcreteDPM > );
 
 ConcreteDPMStatus :: ConcreteDPMStatus(int n, Domain *d, GaussPoint *gp) :
     StructuralMaterialStatus(n, d, gp),
@@ -425,18 +425,13 @@ ConcreteDPM :: giveRealStressVector_3d(FloatArray &answer,
     FloatArray strain;
     ConcreteDPMStatus *status = giveStatus(gp);
 
-    // only for debugging
-    //if (gp->giveElement()->giveNumber()==146){
-    //  double a = 1.;
-    //}
-
     // Initialize temp variables for this gauss point
     status->initTempStatus();
 
 
     // subtract stress-independent part of strain
     // (due to temperature changes, shrinkage, etc.)
-    this->giveStressDependentPartOfStrainVector(strain, gp, strainVector, tStep, VM_Total);
+    this->giveStressDependentPartOfStrainVector_3d(strain, gp, strainVector, tStep, VM_Total);
 
     // perform plasticity return
     performPlasticityReturn(gp, strain);
@@ -475,8 +470,8 @@ ConcreteDPM :: giveRealStressVector_3d(FloatArray &answer,
         double work = strainIncrement.dotProduct(stressIncrement, n);
         //printf(" work : %g\n", work);
         if ( work < 0. ) {
-            double E = gp->giveMaterial()->give('E', gp);
-            double ft = gp->giveMaterial()->give(ft_strength, gp);
+            double E = this->give('E', gp);
+            double ft = this->give(ft_strength, gp);
             double tmpEpsloc = kappaD + damage * ft / E;
             status->letTempEpslocBe(tmpEpsloc);
         }

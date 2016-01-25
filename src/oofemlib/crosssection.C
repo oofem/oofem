@@ -65,6 +65,7 @@ CrossSection :: initializeFrom(InputRecord *ir)
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     // Read set number the cross section is applied to
+    this->setNumber = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->setNumber, _IFT_CrossSection_SetNumber);
 
     return IRRT_OK;
@@ -99,7 +100,7 @@ CrossSection :: saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *
 //
 {
     contextIOResultType iores;
-    Material *mat = gp->giveMaterial();
+    Material *mat = this->giveMaterial(gp);
 
     if ( ( iores = mat->saveIPContext(stream, mode, gp) ) != CIO_OK ) {
         THROW_CIOERR(iores);
@@ -117,7 +118,7 @@ CrossSection :: restoreIPContext(DataStream &stream, ContextMode mode, GaussPoin
 //
 {
     contextIOResultType iores;
-    Material *mat = gp->giveMaterial();
+    Material *mat = this->giveMaterial(gp);
 
     if ( ( iores = mat->restoreIPContext(stream, mode, gp) ) != CIO_OK ) {
         THROW_CIOERR(iores);
@@ -157,7 +158,7 @@ CrossSection :: give(CrossSectionProperty aProperty, const FloatArray &coords, E
 double
 CrossSection :: predictRelativeComputationalCost(GaussPoint *gp)
 {
-    return this->giveRelativeSelfComputationalCost() * gp->giveMaterial()->predictRelativeComputationalCost(gp);
+    return this->giveRelativeSelfComputationalCost() * this->giveMaterial(gp)->predictRelativeComputationalCost(gp);
 }
 
 } // end namespace oofem

@@ -65,6 +65,7 @@ public:
     virtual ~OOFEMTXTDataReader();
 
     virtual InputRecord *giveInputRecord(InputRecordType, int recordId);
+    virtual bool peakNext(const std :: string &keyword);
     virtual void finish();
     virtual const char *giveDataSourceName() const { return dataSourceName.c_str(); }
 

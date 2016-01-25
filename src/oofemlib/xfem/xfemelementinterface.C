@@ -169,7 +169,7 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
                 EnrichmentItem *ei = xMan->giveEnrichmentItem(nodeEiIndices [ i ]);
 
                 if ( ei->isDofManEnriched(* dMan) ) {
-                    int numEnr = ei->giveNumDofManEnrichments(* dMan);
+//                    int numEnr = ei->giveNumDofManEnrichments(* dMan);
 
                     // Enrichment function derivative in Gauss point
                     std :: vector< FloatArray >efgpD;
@@ -189,6 +189,7 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
                     iEl.computeLocalCoordinates(nodeNaturalCoord, nodePos);
                     ei->evaluateEnrFuncInNode(efNode, * node);
 
+                    int numEnr = efGP.size();
                     for ( int k = 0; k < numEnr; k++ ) {
                         // matrix to be added anytime a node is enriched
                         // Creates nabla*(ef*N)
@@ -295,7 +296,7 @@ void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix
             EnrichmentItem *ei = xMan->giveEnrichmentItem(nodeEiIndices [ i ]);
 
             if ( ei->isDofManEnriched(* dMan) ) {
-                int numEnr = ei->giveNumDofManEnrichments(* dMan);
+//                int numEnr = ei->giveNumDofManEnrichments(* dMan);
 
 
                 // Enrichment function in Gauss Point
@@ -312,6 +313,7 @@ void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix
                 ei->evaluateEnrFuncInNode(efNode, * node);
 
 
+                int numEnr = efGP.size();
                 for ( int k = 0; k < numEnr; k++ ) {
                     if ( iSetDiscontContribToZero ) {
                         NdNode [ nodeCounter ] = 0.0;

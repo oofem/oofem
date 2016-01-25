@@ -123,13 +123,7 @@ public:
     // definition
     virtual const char *giveClassName() const { return "IsotropicDamageMaterial1Status"; }
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
-
     virtual Interface *giveInterface(InterfaceType it);
-
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 };
 
 /**
@@ -204,6 +198,9 @@ protected:
     double e1, e2, s1, nd;
     /// Check possible snap back flag
     int checkSnapBack;
+
+    /// auxiliary input variablesfor softType == ST_SmoothExtended
+    double ep, ft;
 
     /// Method used for evaluation of characteristic element size
     ElementCharSizeMethod ecsMethod;

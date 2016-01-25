@@ -83,17 +83,13 @@ MPlasticMaterial2 :: hasMaterialModeCapability(MaterialMode mode)
            mode == _PlaneStrain;
 }
 
+
 MaterialStatus *
 MPlasticMaterial2 :: CreateStatus(GaussPoint *gp) const
-/*
- * creates new  material status  corresponding to this class
- */
 {
-    MPlasticMaterial2Status *status;
-
-    status = new MPlasticMaterial2Status(1, this->giveDomain(), gp);
-    return status;
+    return new MPlasticMaterial2Status(1, this->giveDomain(), gp, this->giveSizeOfReducedHardeningVarsVector(gp));
 }
+
 
 void
 MPlasticMaterial2 :: giveRealStressVector(FloatArray &answer,
@@ -117,7 +113,6 @@ MPlasticMaterial2 :: giveRealStressVector(FloatArray &answer,
     MPlasticMaterial2Status *status = static_cast< MPlasticMaterial2Status * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
-    //this->initGpForNewStep(gp);
 
     // subtract stress independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
@@ -2076,9 +2071,9 @@ MPlasticMaterial2 :: getNewPopulation(IntArray &result, IntArray &candidateMask,
 // SmearedCrackingMaterialStatus Class
 //
 
-MPlasticMaterial2Status :: MPlasticMaterial2Status(int n, Domain *d, GaussPoint *g) :
+MPlasticMaterial2Status :: MPlasticMaterial2Status(int n, Domain *d, GaussPoint *g, int statusSize) :
     StructuralMaterialStatus(n, d, g), plasticStrainVector(), tempPlasticStrainVector(),
-    strainSpaceHardeningVarsVector(), tempStrainSpaceHardeningVarsVector(),
+    strainSpaceHardeningVarsVector(statusSize), tempStrainSpaceHardeningVarsVector(statusSize),
     state_flag(MPlasticMaterial2Status :: PM_Elastic),
     temp_state_flag(MPlasticMaterial2Status :: PM_Elastic),
     damage(0.),
@@ -2138,15 +2133,8 @@ void MPlasticMaterial2Status :: initTempStatus()
 
     tempPlasticStrainVector = plasticStrainVector;
 
-    if ( strainSpaceHardeningVarsVector.giveSize() == 0 ) {
-        strainSpaceHardeningVarsVector.resize( static_cast< MPlasticMaterial2 * >( gp->giveMaterial() )->
-                                              giveSizeOfReducedHardeningVarsVector(gp) );
-        strainSpaceHardeningVarsVector.zero();
-    }
-
     tempStrainSpaceHardeningVarsVector = strainSpaceHardeningVarsVector;
 
-    temp_state_flag = state_flag;
 
     tempGamma = gamma;
     tempActiveConditionMap = activeConditionMap;

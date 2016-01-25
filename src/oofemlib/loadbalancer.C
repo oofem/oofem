@@ -51,7 +51,8 @@
 #include "nonlocalmatwtp.h"
 
 namespace oofem {
-#define LoadBalancer_debug_print 0
+  //#define __VERBOSE_PARALLEL
+  //#define LoadBalancer_debug_print
 
 LoadBalancer :: LoadBalancer(Domain *d)  : wtpList()
 {
@@ -130,7 +131,7 @@ LoadBalancer :: migrateLoad(Domain *d)
     d->commitTransactions( d->giveTransactionManager() );
 
 
-#if LoadBalancer_debug_print
+#ifdef LoadBalancer_debug_print
     // debug print
     int nnodes = d->giveNumberOfDofManagers(), nelems = d->giveNumberOfElements();
     fprintf(stderr, "\n[%d] Nodal Table\n", myrank);
@@ -168,6 +169,40 @@ LoadBalancer :: migrateLoad(Domain *d)
     for ( auto &wtp: wtpList ) {
         wtp->update();
     }
+
+
+#ifdef LoadBalancer_debug_print
+    // debug print
+    nnodes = d->giveNumberOfDofManagers();
+    nelems = d->giveNumberOfElements();
+    fprintf(stderr, "LB Debug print (after wtp update):\n");
+    fprintf(stderr, "\n[%d] Nodal Table\n", myrank);
+    for ( int i = 1; i <= nnodes; i++ ) {
+        if ( d->giveDofManager(i)->giveParallelMode() == DofManager_local ) {
+            fprintf( stderr, "[%d]: %5d[%d] local\n", myrank, i, d->giveDofManager(i)->giveGlobalNumber() );
+        } else if ( d->giveDofManager(i)->giveParallelMode() == DofManager_shared ) {
+            fprintf( stderr, "[%d]: %5d[%d] shared ", myrank, i, d->giveDofManager(i)->giveGlobalNumber() );
+            for ( int j = 1; j <= d->giveDofManager(i)->givePartitionList()->giveSize(); j++ ) {
+                fprintf( stderr, "%d ", d->giveDofManager(i)->givePartitionList()->at(j) );
+            }
+
+            fprintf(stderr, "\n");
+        }
+    }
+
+    fprintf(stderr, "\n[%d] Element Table\n", myrank);
+    for ( int i = 1; i <= nelems; i++ ) {
+      fprintf(stderr, "[%d] %5d [%d]{", myrank, i, d->giveElement(i)->giveGlobalNumber());
+        for ( int j = 1; j <= d->giveElement(i)->giveNumberOfDofManagers(); j++ ) {
+          fprintf( stderr, "%d[%d] ", d->giveElement(i)->giveDofManager(j)->giveNumber(),  d->giveElement(i)->giveDofManager(j)->giveGlobalNumber());
+        }
+
+        fprintf(stderr, "}\n");
+    }
+
+#endif
+
+
 
     // print some local statistics
     int nelem = domain->giveNumberOfElements();

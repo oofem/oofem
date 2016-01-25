@@ -1955,9 +1955,9 @@ AnisotropicDamageMaterial :: computeSecantOperator(FloatMatrix &answer, FloatMat
 }
 
 int
-AnisotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+AnisotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
 {
-    AnisotropicDamageMaterialStatus *status = static_cast< AnisotropicDamageMaterialStatus * >( this->giveStatus(aGaussPoint) );
+    AnisotropicDamageMaterialStatus *status = static_cast< AnisotropicDamageMaterialStatus * >( this->giveStatus(gp) );
     if ( type == IST_DamageScalar ) { // returning the trace of the damage tensor
         answer.resize(1);
         answer.at(1) = status->giveDamage().at(1, 1) + status->giveDamage().at(2, 2) + status->giveDamage().at(3, 3);
@@ -2014,7 +2014,7 @@ AnisotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussP
 
 #endif
     } else {
-        return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+        return StructuralMaterial :: giveIPValue(answer, gp, type, atTime);
     }
 
     return 1; // to make the compiler happy

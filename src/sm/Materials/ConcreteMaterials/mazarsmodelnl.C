@@ -85,7 +85,6 @@ MazarsNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, Ga
     MazarsNLMaterialStatus *nlstatus = static_cast< MazarsNLMaterialStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
-    //this->initGpForNewStep(gp);
 
     // subtract stress independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp

@@ -58,7 +58,8 @@ class LinElBranchFunction;
  * @author Erik Svenning
  * @date Nov 28, 2014
  */
-class OOFEM_EXPORT EnrFrontCohesiveBranchFuncOneEl : public EnrichmentFront {
+class OOFEM_EXPORT EnrFrontCohesiveBranchFuncOneEl : public EnrichmentFront
+{
 public:
     EnrFrontCohesiveBranchFuncOneEl();
     virtual ~EnrFrontCohesiveBranchFuncOneEl();

@@ -88,12 +88,11 @@ public:
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
+    /// Evaluation of the creep compliance function - function useless here
+    virtual double computeCreepFunction(double ofAge, double tStep);
 
 protected:
     virtual int hasIncrementalShrinkageFormulation() { return 0; }
-
-    /// Evaluation of the creep compliance function - function useless here
-    virtual double computeCreepFunction(double ofAge, double tStep);
 
     virtual double giveEModulus(GaussPoint *gp, TimeStep *tStep);
 
@@ -104,7 +103,6 @@ protected:
     virtual double computeBetaMu(GaussPoint *gp, TimeStep *tStep, int Mu);
     virtual double computeLambdaMu(GaussPoint *gp, TimeStep *tStep, int Mu);
 
-    LinearElasticMaterial *giveLinearElasticMaterial();
 };
 } // end namespace oofem
 #endif // kelvinchsol_h

@@ -202,7 +202,6 @@ void Tet21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType t
         return;
     }
 
-    FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
     FloatArray N, gVector, temparray(30);
 
     load->computeComponentArrayAt(gVector, tStep, VM_Total);
@@ -211,7 +210,7 @@ void Tet21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType t
         for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
             const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
-            double rho = mat->give('d', gp);
+            double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity(gp);
             double detJ = fabs( this->interpolation_quad.giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(this) ) );
             double dA = detJ * gp->giveWeight();
 

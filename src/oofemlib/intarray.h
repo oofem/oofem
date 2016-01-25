@@ -250,7 +250,7 @@ public:
      * @param value Value to insert.
      * @param allocChunk If reallocation needed, an additional space for allocChunk values will be allocated.
      */
-	void insertSortedOnce(int value, int allocChunk = 0);
+    void insertSortedOnce(int value, int allocChunk = 0);
     /**
      * Erase the element of given value.
      * If the value is found receiver will shrink accordingly,
@@ -283,9 +283,8 @@ public:
      * Insert once (does not make any assumption about receiver state or ordering, quite
      * inefficient). More efficient version insertSortedOnce exist.
      * @param p Value to insert.
-     * @return Index of sorted value.
      */
-    int insertOnce(int p);
+    void insertOnce(int p);
     /**
      * Sorts array.
      */
@@ -308,6 +307,9 @@ public:
 
     /// Prints receiver on stdout.
     void printYourself() const;
+
+    /// Abbreviation for printYourself().
+    void pY() const;
 
     /**
      * Prints receiver on stdout with custom name.  

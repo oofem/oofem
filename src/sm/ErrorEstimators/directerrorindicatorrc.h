@@ -40,6 +40,8 @@
 #include "floatarray.h"
 #include "statecountertype.h"
 
+#include <map>
+
 ///@name Input fields for DirectErrorIndicatorRC
 //@{
 #define _IFT_DirectErrorIndicatorRC_minlim "minlim"

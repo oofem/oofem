@@ -416,15 +416,13 @@ TrabBone3D :: projectOnYieldSurface(double &tempKappa, FloatArray &tempEffective
                 max_num_iter = 4000;
                 double eta = 0.1;
                 beta = 25.e-4;
-                int j = 0;
                 int jMax = 10;
                 double alfa = 1;
                 double M = ( errorR * errorR + errorF * errorF ) / 2;
                 double dM = -2 * M;
                 double newDeltaKappa;
                 FloatArray tempStress;
-                while ( true ) {
-                    j++;
+                for ( int j = 0;; ++j ) {
                     tempStress = incTempEffectiveStress;
                     tempStress.times(-alfa);
                     tempStress.add(tempEffectiveStress);
@@ -538,10 +536,8 @@ TrabBone3D :: constructPlasFlowDirec(FloatArray &answer, double  &norm, FloatMat
     // scaling matrix
     this->constructNormAdjustTensor(normAdjust);
     //direction of Np
-    answer.zero();
-    answer.add(FFS);
-    answer.times(1. / SFS);
-    answer.add(F);
+    answer = F;
+    answer.add(1. / SFS, FFS);
     tempTensor2.beProductOf(normAdjust, answer);
     //norm Np
     norm = sqrt( answer.dotProduct(tempTensor2) );
@@ -716,7 +712,7 @@ TrabBone3D :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
     double tempDam;
     FloatArray effStress, densStress;
     TrabBone3DStatus *status = static_cast< TrabBone3DStatus * >( this->giveStatus(gp) );
-    //this->initGpForNewStep(gp);
+
     this->initTempStatus(gp);
     // compute effective stress using the plasticity model
     performPlasticityReturn(gp, totalStrain, tStep);
@@ -749,10 +745,8 @@ TrabBone3D :: constructAnisoComplTensor(FloatMatrix &answer)
     FloatMatrix D(6, 6);
     FloatMatrix DT(6, 6);
     FloatMatrix T;
-    FloatMatrix Tt;
 
     this->constructFabricTransformationMatrix(T);
-    Tt.beTranspositionOf(T);
 
     double m3 = 3. - m1 - m2;
     double eps0k = eps0 * pow(rho, expk);
@@ -776,16 +770,15 @@ TrabBone3D :: constructAnisoComplTensor(FloatMatrix &answer)
     D.at(5, 5) = 1 / ( mu0k * m3l * m1l );
     D.at(6, 6) = 1 / ( mu0k * m1l * m2l );
 
-    FloatMatrix stiffness, t, tT;
+    FloatMatrix stiffness, t;
     this->constructStiffnessTransformationMatrix(t);
-    tT.beTranspositionOf(t);
     stiffness.beInverseOf(D);
     FloatMatrix ST, TST;
     ST.beProductOf(stiffness, t);
-    TST.beProductOf(tT, ST);
+    TST.beTProductOf(t, ST);
 
     DT.beProductOf(D, T);
-    answer.beProductOf(Tt, DT);
+    answer.beTProductOf(T, DT);
 }
 
 
@@ -841,12 +834,11 @@ TrabBone3D :: constructAnisoStiffnessTensor(FloatMatrix &answer)
     D.at(5, 5) =  G13;
     D.at(6, 6) =  G12;
 
-    FloatMatrix t, tT;
+    FloatMatrix t;
     this->constructStiffnessTransformationMatrix(t);
-    tT.beTranspositionOf(t);
     FloatMatrix DT;
     DT.beProductOf(D, t);
-    answer.beProductOf(tT, DT);
+    answer.beTProductOf(t, DT);
 }
 
 
@@ -855,7 +847,6 @@ void
 TrabBone3D :: constructAnisoFabricTensor(FloatMatrix &answer)
 {
     FloatMatrix T;
-    FloatMatrix Tt;
     double S0 = ( sig0Pos + sig0Neg ) / ( 2. * sig0Pos * sig0Neg );
     double rhoP = pow(rho, 2. * expp);
     double m3 = 3. - m1 - m2;
@@ -865,11 +856,9 @@ TrabBone3D :: constructAnisoFabricTensor(FloatMatrix &answer)
 
 
     this->constructFabricTransformationMatrix(T);
-    Tt.beTranspositionOf(T);
 
-    answer.resize(6, 6);
     FloatMatrix F(6, 6);
-    FloatMatrix FT(6, 6);
+    FloatMatrix FT;
 
     F.at(1, 1) = S0 * S0 / ( rhoP * m1q * m1q );
     F.at(2, 2) = S0 * S0 / ( rhoP * m2q * m2q );
@@ -886,14 +875,14 @@ TrabBone3D :: constructAnisoFabricTensor(FloatMatrix &answer)
 
 
     FT.beProductOf(F, T);
-    answer.beProductOf(Tt, FT);
+    answer.beTProductOf(T, FT);
 }
 
 
 void
 TrabBone3D :: constructAnisoFtensor(FloatArray &answer)
 {
-    FloatMatrix T, tT;
+    FloatMatrix T;
 
     double rhoP = pow(rho, expp);
     double m3 = 3. - m1 - m2;
@@ -903,8 +892,6 @@ TrabBone3D :: constructAnisoFtensor(FloatArray &answer)
 
 
     this->constructFabricTransformationMatrix(T);
-    tT.beTranspositionOf(T);
-    answer.resize(6);
     FloatArray F(6);
     F.zero();
 
@@ -912,7 +899,7 @@ TrabBone3D :: constructAnisoFtensor(FloatArray &answer)
     F.at(2) = -( sig0Pos - sig0Neg ) / ( 2. * sig0Pos * sig0Neg * rhoP * m2q );
     F.at(3) = -( sig0Pos - sig0Neg ) / ( 2. * sig0Pos * sig0Neg * rhoP * m3q );
 
-    answer.beProductOf(tT, F);
+    answer.beTProductOf(T, F);
 }
 
 

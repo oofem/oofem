@@ -92,7 +92,8 @@ EIPrimaryUnknownMapper :: mapAndUpdate(FloatArray &answer, ValueModeType mode,
                     Dof *dof = *it;
                     if ( dof->isPrimaryDof() ) {
                         int eq = dof->giveEquationNumber(EModelDefaultEquationNumbering());
-                        answer.at( eq ) += unknownValues.at(ii);
+                        if (eq)
+                          answer.at( eq ) += unknownValues.at(ii);
                     }
                 }
             }
@@ -119,7 +120,7 @@ EIPrimaryUnknownMapper :: evaluateAt(FloatArray &answer, IntArray &dofMask, Valu
         // Take the minimum of any region
         double mindist = 0.0, distance;
         oelem = NULL;
-        for ( int i = 1; i < regList.giveSize(); ++i ) {
+        for ( int i = 1; i <= regList.giveSize(); ++i ) {
             Element *tmpelem = sl->giveElementClosestToPoint( lcoords, closest, coords, regList.at(i) );
             if ( tmpelem != NULL ) {
                 distance = closest.distance_square(coords);

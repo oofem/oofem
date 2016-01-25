@@ -220,7 +220,6 @@ void Tet1BubbleStokes :: computeLoadVector(FloatArray &answer, Load *load, CharT
         return;
     }
 
-    FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
     FloatArray N, gVector, temparray(15);
     double dV, detJ, rho;
 
@@ -231,7 +230,7 @@ void Tet1BubbleStokes :: computeLoadVector(FloatArray &answer, Load *load, CharT
         for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
             const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
-            rho = mat->give('d', gp);
+            rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity(gp);
             detJ = fabs( this->interp.giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(this) ) );
             dV = detJ * gp->giveWeight() * rho;
 

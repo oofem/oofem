@@ -61,6 +61,7 @@
 #endif
 
 #include <string>
+#include <memory>
 
 ///@name Input fields for general Engineering models.
 //@{
@@ -79,6 +80,8 @@
 
 #define _IFT_EngngModel_lstype "lstype"
 #define _IFT_EngngModel_smtype "smtype"
+
+#define _IFT_EngngModel_suppressOutput "suppress_output" // Suppress writing to .out file
 
 //@}
 
@@ -106,6 +109,8 @@ class ProcessCommunicatorBuff;
 class CommunicatorBuff;
 class ProcessCommunicator;
 class UnknownNumberingScheme;
+
+typedef std :: shared_ptr< Field > EModelFieldPtr;
 
 
 /**
@@ -195,6 +200,7 @@ public:
         IG_None = 0, ///< No special treatment for new iterations. Probably means ending up using @f$ {}^{n+1}x = {}^{n}x @f$ for all free dofs.
         IG_Tangent = 1, ///< Solves an approximated tangent problem from the last iteration. Useful for changing Dirichlet boundary conditions.
         //IG_Extrapolated = 2, ///< Assumes constant increment extrapolating @f$ {}^{n+1}x = {}^{n}x + \Delta t\delta{x}'@f$, where @f$ \delta x' = ({}^{n}x - {}^{n-1}x)/{}^{n}Delta t@f$.
+        IG_Original = 3
     };
 
 protected:
@@ -307,6 +313,11 @@ protected:
     /// List where parallel contexts are stored.
     std :: vector< ParallelContext > parallelContextList;
 
+    /// Flag for suppressing output to file.
+    bool suppressOutput;
+
+    std::string simulationDescription;
+
 public:
     /**
      * Constructor. Creates Engng model with number i.
@@ -332,6 +343,8 @@ public:
     void setDomain(int i, Domain *ptr, bool iDeallocateOld = true);
     /// Returns number of domains in problem.
     int giveNumberOfDomains() { return (int)domainList.size(); }
+
+    bool giveSuppressOutput() const {return suppressOutput;}
 
     /** Service for accessing ErrorEstimator corresponding to particular domain */
     virtual ErrorEstimator *giveDomainErrorEstimator(int n) { return defaultErrEstimator; }
@@ -490,6 +503,16 @@ public:
      */
     virtual double giveUnknownComponent(ValueModeType, TimeStep *, Domain *, Dof *) { return 0.0; }
 
+    /**
+     * Returns the smart pointer to requested field, Null otherwise. 
+     * The return value uses shared_ptr, as some registered fields may be
+     * owned (and maintained) by emodel, while some may be created on demand 
+     * and thus reliable reference counting mechanism is essential. 
+     *
+     */
+    virtual EModelFieldPtr giveField (FieldType key, TimeStep *) { return EModelFieldPtr();}
+
+
     ///Returns the master engnmodel
     EngngModel *giveMasterEngngModel() { return this->master; }
 
@@ -515,6 +538,11 @@ public:
      * @return Nonzero if successful.
      */
     int exchangeRemoteElementData(int ExchangeTag);
+    /**
+     * Returns number of iterations that was required to reach equilibrium - used for adaptive step length in 
+     * staggered problem
+     */
+    virtual int giveCurrentNumberOfIterations() {return 1;}
 
 #ifdef __PARALLEL_MODE
     /// Returns the communication object of reciever.
@@ -660,17 +688,21 @@ public:
     void resolveCorrespondingStepNumber(int &, int &, void *obj);
     /// Returns current meta step.
     MetaStep *giveCurrentMetaStep();
-    /// Returns current time step.
-    TimeStep *giveCurrentStep() {
-        if ( master ) {
+    /** Returns current time step. 
+     *  @param force when set to true then current step of receiver is returned instead of master (default)
+     */ 
+    virtual TimeStep *giveCurrentStep(bool force = false) {
+      if ( master && (!force)) {
             return master->giveCurrentStep();
         } else {
             return currentStep.get();
         }
     }
-    /// Returns previous time step.
-    TimeStep *givePreviousStep() {
-        if ( master ) {
+    /** Returns previous time step.
+     *  @param force when set to true then previous step of receiver is returned instead of master (default)
+     */ 
+    virtual TimeStep *givePreviousStep(bool force = false) {
+        if ( master && (!force)) {
             return master->givePreviousStep();
         } else {
             return previousStep.get();
@@ -678,17 +710,23 @@ public:
     }
     /// Returns next time step (next to current step) of receiver.
     virtual TimeStep *giveNextStep() { return NULL; }
-    /// Returns the solution step when Initial Conditions (IC) apply.
-    virtual TimeStep *giveSolutionStepWhenIcApply() {
-        if ( master ) {
-            return master->giveCurrentStep();
+    /// Does a pre-initialization of the next time step (implement if necessarry)
+    virtual void preInitializeNextStep() {}
+    /** Returns the solution step when Initial Conditions (IC) apply.
+     *  @param force when set to true then receiver reply is returned instead of master (default)
+     */ 
+    virtual TimeStep *giveSolutionStepWhenIcApply(bool force = false) {
+        if ( master && (!force)) {
+            return master->giveSolutionStepWhenIcApply();
         } else {
             return stepWhenIcApply.get();
         }
     }
-    /// Returns number of first time step used by receiver.
-    virtual int giveNumberOfFirstStep() {
-        if ( master ) {
+    /** Returns number of first time step used by receiver.
+     *  @param force when set to true then receiver reply is returned instead of master (default)
+     */ 
+    virtual int giveNumberOfFirstStep(bool force = false) {
+        if ( master && (!force)) {
             return master->giveNumberOfFirstStep();
         } else {
             return 1;
@@ -698,9 +736,11 @@ public:
     int giveNumberOfMetaSteps() { return nMetaSteps; }
     /// Returns the i-th meta step.
     MetaStep *giveMetaStep(int i);
-    /// Returns total number of steps.
-    int giveNumberOfSteps() {
-        if ( master ) {
+    /** Returns total number of steps.
+     *  @param force when set to true then receiver reply is returned instead of master (default)
+     */  
+    int giveNumberOfSteps(bool force = false) {
+        if ( master && (!force)) {
             return master->giveNumberOfSteps();
         } else {
             return numberOfSteps;

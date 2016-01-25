@@ -236,14 +236,18 @@ CBS :: giveTractionPressure(Dof *dof)
 
 
 TimeStep *
-CBS :: giveSolutionStepWhenIcApply()
+CBS :: giveSolutionStepWhenIcApply(bool force)
 {
+  if ( master && (!force)) {
+    return master->giveSolutionStepWhenIcApply();
+  } else {
     if ( !stepWhenIcApply ) {
         stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0,
                                        0.0, deltaT, 0) );
     }
 
     return stepWhenIcApply.get();
+  }
 }
 
 TimeStep *

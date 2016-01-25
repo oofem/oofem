@@ -4,14 +4,14 @@ linearstatic nsteps 1 nmodules 1
 errorcheck filename "planestress.oofem.in"
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
-ndofman 15 nelem 8 ncrosssect 1 nmat 1 nbc 2 nltf 1 nic 0
-node 1 coords 3 0.000000e+00 0.000000e+00 0.000000e+00 bc 2 1 1
+ndofman 15 nelem 8 ncrosssect 1 nmat 1 nbc 3 nltf 1 nic 0 nset 4
+node 1 coords 3 0.000000e+00 0.000000e+00 0.000000e+00
 node 2 coords 3 5.000000e+00 0.000000e+00 0.000000e+00
 node 3 coords 3 1.000000e+01 0.000000e+00 0.000000e+00
-node 4 coords 3 0.000000e+00 1.000000e+00 0.000000e+00 bc 2 1 0
+node 4 coords 3 0.000000e+00 1.000000e+00 0.000000e+00
 node 5 coords 3 5.000000e+00 1.000000e+00 0.000000e+00
 node 6 coords 3 1.000000e+01 1.000000e+00 0.000000e+00
-node 7 coords 3 0.000000e+00 2.000000e+00 0.000000e+00 bc 2 1 0
+node 7 coords 3 0.000000e+00 2.000000e+00 0.000000e+00
 node 8 coords 3 5.000000e+00 2.000000e+00 0.000000e+00
 node 9 coords 3 1.000000e+01 2.000000e+00 0.000000e+00
 node 10 coords 3 2.500000e+00 0.000000e+00 0.000000e+00
@@ -20,18 +20,23 @@ node 12 coords 3 7.500000e+00 2.000000e+00 0.000000e+00
 node 13 coords 3 2.500000e+00 2.000000e+00 0.000000e+00
 node 14 coords 3 2.500000e+00 1.000000e+00 0.000000e+00
 node 15 coords 3 7.500000e+00 1.000000e+00 0.000000e+00
-Planestress2D 1 nodes 4 1 10 14 4 crossSect 1 mat 1
-Planestress2D 2 nodes 4 10 2 5 14 crossSect 1 mat 1
-Planestress2D 3 nodes 4 2 11 15 5 crossSect 1 mat 1
-Planestress2D 4 nodes 4 11 3 6 15 crossSect 1 mat 1 boundaryLoads 2 2 2
-Planestress2D 5 nodes 4 5 15 12 8 crossSect 1 mat 1
-Planestress2D 6 nodes 4 15 6 9 12 crossSect 1 mat 1 boundaryLoads 2 2 2
-Planestress2D 7 nodes 4 4 14 13 7 crossSect 1 mat 1
-Planestress2D 8 nodes 4 14 5 8 13 crossSect 1 mat 1
-SimpleCS 1 thick 1.0
-IsoLE  1 d 1.0 E 300.e3 n 0.2 talpha 0.0
-BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0 
-ConstantEdgeLoad 2 loadTimeFunction 1 components 2 1.0 0.0 ndofs 2 loadtype 3
+Planestress2D 1 nodes 4 1 10 14 4
+Planestress2D 2 nodes 4 10 2 5 14
+Planestress2D 3 nodes 4 2 11 15 5
+Planestress2D 4 nodes 4 11 3 6 15
+Planestress2D 5 nodes 4 5 15 12 8
+Planestress2D 6 nodes 4 15 6 9 12
+Planestress2D 7 nodes 4 4 14 13 7
+Planestress2D 8 nodes 4 14 5 8 13
+Set 1 elementranges {(1 8)}
+Set 2 nodes 3 1 4 7
+Set 3 nodes 1 1
+Set 4 elementboundaries 4 4 2  6 2
+SimpleCS 1 thick 1.0 material 1 set 1
+IsoLE 1 d 1.0 E 300.e3 n 0.2 talpha 0.0
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 2
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 2 values 1 0.0 set 3
+ConstantEdgeLoad 3 loadTimeFunction 1 dofs 2 1 2 components 2 1.0 0.0 loadtype 3 set 4
 ConstantFunction 1 f(t) 1.0
 #%BEGIN_CHECK% tolerance 5.e-5
 ## check reactions 

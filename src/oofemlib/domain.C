@@ -67,6 +67,7 @@
 #include "initmodulemanager.h"
 #include "exportmodulemanager.h"
 #include "xfem/enrichmentitem.h"
+#include "xfem/nucleationcriterion.h"
 #include "xfem/enrichmentfunction.h"
 #include "xfem/propagationlaw.h"
 #include "contact/contactmanager.h"
@@ -90,10 +91,16 @@
 #include <set>
 
 namespace oofem {
-Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry(),
-    outputManager( new OutputManager(this) )
+Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry()
     // Constructor. Creates a new domain.
 {
+	if(!e->giveSuppressOutput()) {
+	    outputManager = std::unique_ptr<OutputManager> (new OutputManager(this) );
+	}
+	else {
+		outputManager = NULL;
+	}
+
     this->engineeringModel = e;
     this->number = n;
     this->serialNumber = serNum;
@@ -230,6 +237,13 @@ Domain *Domain :: Clone()
         for ( int i = 1; i <= nEI; i++ ) {
             EnrichmentItem *ei = xfemManager->giveEnrichmentItem(i);
             ei->appendInputRecords(dataReader);
+        }
+
+        // Nucleation criteria
+        int nNC = xfemManager->giveNumberOfNucleationCriteria();
+        for ( int i = 1; i <= nNC; i++ ) {
+            NucleationCriterion *nc = xfemManager->giveNucleationCriterion(i);
+            nc->appendInputRecords(dataReader);
         }
     }
 
@@ -578,7 +592,7 @@ void Domain :: setSet(int i, Set *obj) { setList[i-1].reset(obj); }
 void Domain :: setXfemManager(XfemManager *ipXfemManager) { xfemManager.reset(ipXfemManager); }
 
 void Domain :: clearBoundaryConditions() { bcList.clear(); }
-
+void Domain :: clearElements() { elementList.clear(); }
 int
 Domain :: instanciateYourself(DataReader *dr)
 // Creates all objects mentioned in the data file.
@@ -595,7 +609,10 @@ Domain :: instanciateYourself(DataReader *dr)
     // mapping from label to local numbers for dofmans and elements
     std :: map< int, int >dofManLabelMap, elemLabelMap;
 
-    FILE *outputStream = this->giveEngngModel()->giveOutputStream();
+	FILE *outputStream = NULL;
+    if(!giveEngngModel()->giveSuppressOutput()) {
+    	outputStream = this->giveEngngModel()->giveOutputStream();
+    }
 
     // read type of Domain to be solved
     InputRecord *ir = dr->giveInputRecord(DataReader :: IR_domainRec, 1);
@@ -610,14 +627,21 @@ Domain :: instanciateYourself(DataReader *dr)
 #  endif
 
     resolveDomainDofsDefaults( name.c_str() );
-    fprintf( outputStream, "Domain type: %s, default ndofs per node is %d\n\n\n",
-            name.c_str(), giveDefaultNodeDofIDArry().giveSize() );
+
+    if(!giveEngngModel()->giveSuppressOutput()) {
+    	fprintf( outputStream, "Domain type: %s, default ndofs per node is %d\n\n\n",
+    			name.c_str(), giveDefaultNodeDofIDArry().giveSize() );
+    }
 
     // read output manager record
     std :: string tmp;
     ir = dr->giveInputRecord(DataReader :: IR_outManRec, 1);
     ir->giveRecordKeywordField(tmp);
-    outputManager->initializeFrom(ir);
+
+    if(!giveEngngModel()->giveSuppressOutput()) {
+    	outputManager->initializeFrom(ir);
+    }
+
     ir->finish();
 
     // read domain description
@@ -717,6 +741,37 @@ Domain :: instanciateYourself(DataReader *dr)
     BuildElementPlaceInArrayMap();
     BuildDofManPlaceInArrayMap();
 
+    // Support sets defined directly after the elements (special hack for backwards compatibility).
+    setList.clear();
+    if ( dr->peakNext("set") ) {
+        setList.resize(nset);
+        for ( int i = 1; i <= nset; i++ ) {
+            ir = dr->giveInputRecord(DataReader :: IR_setRec, i);
+            // read type of set
+            IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
+            // Only one set for now (i don't see any need to ever introduce any other version)
+            std :: unique_ptr< Set > set(new Set(num, this)); //classFactory.createSet(name.c_str(), num, this)
+            if ( !set ) {
+                OOFEM_ERROR("Couldn't create set: %s", name.c_str());
+            }
+
+            set->initializeFrom(ir);
+
+            // check number
+            if ( num < 1 || num > nset ) {
+                OOFEM_ERROR("Invalid set number (num=%d)", num);
+            }
+
+            if ( !setList[num - 1] ) {
+                setList[num - 1] = std :: move(set);
+            } else {
+                OOFEM_ERROR("Set entry already exist (num=%d)", num);
+            }
+
+            ir->finish();
+        }
+    }
+    
 #  ifdef VERBOSE
     VERBOSE_PRINT0("Instanciated elements ", nelem);
 #  endif
@@ -921,33 +976,34 @@ Domain :: instanciateYourself(DataReader *dr)
     VERBOSE_PRINT0("Instanciated load-time fncts ", nloadtimefunc)
 #  endif
 
-    // read load time functions
-    setList.clear();
-    setList.resize(nset);
-    for ( int i = 1; i <= nset; i++ ) {
-        ir = dr->giveInputRecord(DataReader :: IR_setRec, i);
-        // read type of set
-        IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
-        // Only one set for now (i don't see any need to ever introduce any other version)
-        std :: unique_ptr< Set > set(new Set(num, this)); //classFactory.createSet(name.c_str(), num, this)
-        if ( !set ) {
-            OOFEM_ERROR("Couldn't create set: %s", name.c_str());
+    // read sets
+    if ( setList.size() == 0 ) {
+        setList.resize(nset);
+        for ( int i = 1; i <= nset; i++ ) {
+            ir = dr->giveInputRecord(DataReader :: IR_setRec, i);
+            // read type of set
+            IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
+            // Only one set for now (i don't see any need to ever introduce any other version)
+            std :: unique_ptr< Set > set(new Set(num, this)); //classFactory.createSet(name.c_str(), num, this)
+            if ( !set ) {
+                OOFEM_ERROR("Couldn't create set: %s", name.c_str());
+            }
+
+            set->initializeFrom(ir);
+
+            // check number
+            if ( ( num < 1 ) || ( num > nset ) ) {
+                OOFEM_ERROR("Invalid set number (num=%d)", num);
+            }
+
+            if ( !setList[num - 1] ) {
+                setList[num - 1] = std :: move(set);
+            } else {
+                OOFEM_ERROR("Set entry already exist (num=%d)", num);
+            }
+
+            ir->finish();
         }
-
-        set->initializeFrom(ir);
-
-        // check number
-        if ( ( num < 1 ) || ( num > nset ) ) {
-            OOFEM_ERROR("Invalid set number (num=%d)", num);
-        }
-
-        if ( !setList[num - 1] ) {
-            setList[num - 1] = std :: move(set);
-        } else {
-            OOFEM_ERROR("Set entry already exist (num=%d)", num);
-        }
-
-        ir->finish();
     }
 
 #  ifdef VERBOSE
@@ -961,6 +1017,10 @@ Domain :: instanciateYourself(DataReader *dr)
 
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
         xfemManager.reset( classFactory.createXfemManager(name.c_str(), this) );
+        if ( !xfemManager ) {
+            OOFEM_ERROR("Couldn't create xfemmanager: %s", name.c_str());
+        }
+
         xfemManager->initializeFrom(ir);
         xfemManager->instanciateYourself(dr);
 #  ifdef VERBOSE
@@ -975,6 +1035,10 @@ Domain :: instanciateYourself(DataReader *dr)
 
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
         contactManager.reset( classFactory.createContactManager(name.c_str(), this) );
+        if ( !contactManager ) {
+            OOFEM_ERROR("Couldn't create contact manager: %s", name.c_str());
+        }
+
         contactManager->initializeFrom(ir);
         contactManager->instanciateYourself(dr);
     }
@@ -1033,13 +1097,6 @@ Domain :: instanciateYourself(DataReader *dr)
 void
 Domain :: postInitialize()
 {
-    // Dofs must be created before dof managers due their post-initialization:
-    this->createDofs();
-
-    for ( auto &dman: dofManagerList ) {
-        dman->postInitialize();
-    }
-
     // New  - in development /JB
     // set element cross sections based on element set definition and set the corresponding
     // material based on the cs
@@ -1053,6 +1110,12 @@ Domain :: postInitialize()
         }
     }
 
+    // Dofs must be created before dof managers due their post-initialization:
+    this->createDofs();
+
+    for ( auto &dman: dofManagerList ) {
+        dman->postInitialize();
+    }
 
     if ( this->hasXfemManager() ) {
         //this->giveXfemManager()->postInitialize();
@@ -1120,6 +1183,14 @@ Domain :: giveDefaultNodeDofIDArry()
         defaultNodeDofIDArry = {D_u, D_v, D_w, W_u, W_v, W_w, Gamma};
     }  else if ( dType == _2dLatticeMassTransportMode ) {
         defaultNodeDofIDArry = {P_f};
+    }  else if ( dType == _3dLatticeMassTransportMode ) {
+        defaultNodeDofIDArry = {P_f};
+    }  else if ( dType == _3dLatticeMode ) {
+        defaultNodeDofIDArry = {D_u, D_v, D_w, R_u, R_v, R_w};
+    }  else if ( dType == _2dLatticeHeatTransferMode ) {
+        defaultNodeDofIDArry = {T_f};
+    }  else if ( dType == _3dLatticeHeatTransferMode ) {
+        defaultNodeDofIDArry = {T_f};
     }  else if ( dType == _WarpingMode ) {
         defaultNodeDofIDArry = {D_w};
     } else {
@@ -1185,6 +1256,14 @@ Domain :: resolveDomainDofsDefaults(const char *typeName)
         dType = _3dDirShellMode;
     } else if  ( !strncmp(typeName, "2dmasslatticetransport", 22) ) {
         dType = _2dLatticeMassTransportMode;
+    } else if  ( !strncmp(typeName, "3dlattice", 9) ) {
+        dType = _3dLatticeMode;
+    } else if  ( !strncmp(typeName, "3dmasslatticetransport", 22) ) {
+        dType = _3dLatticeMassTransportMode;
+    } else if  ( !strncmp(typeName, "2dheatlattice", 13) ) {
+        dType = _3dLatticeMassTransportMode;
+    } else if  ( !strncmp(typeName, "3dheatlattice", 13) ) {
+        dType = _3dLatticeMassTransportMode;
     } else if  ( !strncmp(typeName, "3d", 2) ) {
         dType = _3dMode;
     } else if  ( !strncmp(typeName, "warping", 7) ) {
@@ -1263,7 +1342,7 @@ Domain :: createDofs()
     /////////////////// Step 1. Scan all required nodal dofs.
     std :: vector< std :: set< int > > node_dofs( this->giveNumberOfDofManagers() );
     for ( auto &element: this->elementList ) {
-		IntArray dofids;
+        IntArray dofids;
         // Scan for all dofs needed by element.
         for ( int j = 1; j <= element->giveNumberOfNodes(); ++j ) {
             element->giveDofManDofIDMask(j, dofids);
@@ -1347,7 +1426,10 @@ Domain :: createDofs()
     for ( int i = 1; i <= this->giveNumberOfDofManagers(); ++i ) {
         DofManager *dman = this->giveDofManager(i);
         //printf("Dofs in node %d (of %d) = %d\n", i, this->giveNumberOfDofManagers(), node_dofs[i-1].size());
-        dman->setNumberOfDofs(0);
+
+        /* do not delete existing DOFs; that may be created during adaptive solution scheme (mesh generator applies DOFs) */
+        if (0) dman->setNumberOfDofs(0);
+
         for ( int id: node_dofs [ i - 1 ] ) {
             // Find bc and ic if there are any, otherwise zero.
             int bcid = dof_bc [ i - 1 ].find(id) != dof_bc [ i - 1 ].end() ? dof_bc [ i - 1 ] [ id ] : 0;
@@ -1377,16 +1459,21 @@ Domain :: createDofs()
                 OOFEM_ERROR("Incompatible dof type (%d) in node %d", dtype, i);
             }
 
-            // Finally create the new DOF:
+
+
+            // Finally create the new DOF: 
             //printf("Creating: node %d, id = %d, dofType = %d, bc = %d, ic = %d\n", i, id, dtype, bcid, icid);
-            Dof *dof = classFactory.createDof(dtype, (DofIDItem)id, dman);
-            dof->setBcId(bcid); // Note: slave dofs and such will simple ignore this.
-            dof->setIcId(icid);
-            // Slave dofs obtain their weights post-initialization, simple slave dofs must have their master node specified.
-            if ( dtype == DT_simpleSlave ) {
+            if (!dman->hasDofID((DofIDItem)id)) {
+
+              Dof *dof = classFactory.createDof(dtype, (DofIDItem)id, dman);
+              dof->setBcId(bcid); // Note: slave dofs and such will simple ignore this.
+              dof->setIcId(icid);
+              // Slave dofs obtain their weights post-initialization, simple slave dofs must have their master node specified.
+              if ( dtype == DT_simpleSlave ) {
                 static_cast< SimpleSlaveDof * >(dof)->setMasterDofManagerNum( ( * dman->giveMasterMap() ) [ id ] );
+              }
+              dman->appendDof(dof);
             }
-            dman->appendDof(dof);
         }
     }
 
@@ -1870,6 +1957,7 @@ Domain :: renumberDofManData(DomainTransactionManager *tm)
 {
     SpecificEntityRenumberingFunctor< Domain > domainGToLFunctor(this, &Domain :: LB_giveUpdatedGlobalNumber);
     SpecificEntityRenumberingFunctor< Domain > domainLToLFunctor(this, &Domain :: LB_giveUpdatedLocalNumber);
+
 
     for ( auto &map: dmanMap ) {
         if ( tm->dofmanTransactions.find(map.first) != tm->dofmanTransactions.end() ) {

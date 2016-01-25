@@ -42,7 +42,7 @@
 //@{
 #define _IFT_SimpleInterfaceMaterial_Name "simpleintermat"
 #define _IFT_SimpleInterfaceMaterial_kn "kn"
-#define _IFT_SimpleInterfaceMaterial_knt "knt"
+#define _IFT_SimpleInterfaceMaterial_ks "ks"
 #define _IFT_SimpleInterfaceMaterial_frictCoeff "fc"
 #define _IFT_SimpleInterfaceMaterial_stiffCoeff "stiffcoeff"
 #define _IFT_SimpleInterfaceMaterial_normalClearance "normalclearance"
@@ -55,7 +55,9 @@ namespace oofem {
 class SimpleInterfaceMaterialStatus : public StructuralInterfaceMaterialStatus
 {
 protected:
+    bool shearYieldingFlag;
     FloatArray shearStressShift, tempShearStressShift;
+
 
 public:
     /// Constructor
@@ -73,6 +75,8 @@ public:
 
     const FloatArray &giveShearStressShift();
     void setTempShearStressShift(FloatArray newShearStressShift) { tempShearStressShift = newShearStressShift; }
+    bool giveShearYieldingFlag(){return shearYieldingFlag;}
+    void setShearYieldingFlag(bool sY){ shearYieldingFlag = sY;}
 
     virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
@@ -88,7 +92,7 @@ public:
 class SimpleInterfaceMaterial : public StructuralInterfaceMaterial
 {
 protected:
-    double kn;
+  double kn, ks;
     double stiffCoeff;
     double frictCoeff;
     /// Normal distance which needs to be closed when interface element should act in compression (distance is 0 by default).

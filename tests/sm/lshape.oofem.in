@@ -4,20 +4,20 @@ adaptlinearstatic nsteps 1 meshpackage 3 eetype 1 normtype 1 requiredError 0.1 m
 errorcheck
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
-ndofman 29 nelem 39 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1
-node 1 coords 3 1.000000e+00 0.000000e+00 0.000000e+00 bc 2 0 1
-node 2 coords 3 1.500000e+00 0.000000e+00 0.000000e+00 bc 2 0 1
+ndofman 29 nelem 39 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 1 nset 4
+node 1 coords 3 1.000000e+00 0.000000e+00 0.000000e+00
+node 2 coords 3 1.500000e+00 0.000000e+00 0.000000e+00
 node 3 coords 3 1.500000e+00 1.500000e+00 0.000000e+00
-node 4 coords 3 0.000000e+00 1.500000e+00 0.000000e+00 bc 2 1 0
-node 5 coords 3 0.000000e+00 1.000000e+00 0.000000e+00 bc 2 1 0
-node 6 coords 3 1.250000e+00 0.000000e+00 0.000000e+00 bc 2 0 1
+node 4 coords 3 0.000000e+00 1.500000e+00 0.000000e+00
+node 5 coords 3 0.000000e+00 1.000000e+00 0.000000e+00
+node 6 coords 3 1.250000e+00 0.000000e+00 0.000000e+00
 node 7 coords 3 1.500000e+00 3.360080e-01 0.000000e+00
 node 8 coords 3 1.500000e+00 6.720159e-01 0.000000e+00
 node 9 coords 3 1.500000e+00 1.037634e+00 0.000000e+00
 node 10 coords 3 1.037634e+00 1.500000e+00 0.000000e+00
 node 11 coords 3 6.720159e-01 1.500000e+00 0.000000e+00
 node 12 coords 3 3.360080e-01 1.500000e+00 0.000000e+00
-node 13 coords 3 0.000000e+00 1.250000e+00 0.000000e+00 bc 2 1 0
+node 13 coords 3 0.000000e+00 1.250000e+00 0.000000e+00
 node 14 coords 3 3.120260e-01 9.500736e-01 0.000000e+00
 node 15 coords 3 5.884672e-01 8.085211e-01 0.000000e+00
 node 16 coords 3 8.085211e-01 5.884672e-01 0.000000e+00
@@ -34,50 +34,55 @@ node 26 coords 3 4.714681e-01 1.295353e+00 0.000000e+00
 node 27 coords 3 5.519953e-01 1.053103e+00 0.000000e+00
 node 28 coords 3 8.844667e-01 8.842802e-01 0.000000e+00
 node 29 coords 3 1.053431e+00 5.520322e-01 0.000000e+00
-TrPlaneStress2d 1 nodes 3 1 6 18 crossSect 1 mat 1
-TrPlaneStress2d 2 nodes 3 6 2 19 crossSect 1 mat 1
-TrPlaneStress2d 3 nodes 3 4 13 20 crossSect 1 mat 1
-TrPlaneStress2d 4 nodes 3 13 5 21 crossSect 1 mat 1
-TrPlaneStress2d 5 nodes 3 2 7 19 crossSect 1 mat 1 boundaryLoads 2 2 1
-TrPlaneStress2d 6 nodes 3 7 8 22 crossSect 1 mat 1 boundaryLoads 2 2 1
-TrPlaneStress2d 7 nodes 3 8 9 23 crossSect 1 mat 1 boundaryLoads 2 2 1
-TrPlaneStress2d 8 nodes 3 9 3 24 crossSect 1 mat 1 boundaryLoads 2 2 1
-TrPlaneStress2d 9 nodes 3 3 10 24 crossSect 1 mat 1
-TrPlaneStress2d 10 nodes 3 10 11 25 crossSect 1 mat 1
-TrPlaneStress2d 11 nodes 3 11 12 26 crossSect 1 mat 1
-TrPlaneStress2d 12 nodes 3 12 4 20 crossSect 1 mat 1
-TrPlaneStress2d 13 nodes 3 5 14 21 crossSect 1 mat 1
-TrPlaneStress2d 14 nodes 3 14 15 27 crossSect 1 mat 1
-TrPlaneStress2d 15 nodes 3 15 16 28 crossSect 1 mat 1
-TrPlaneStress2d 16 nodes 3 16 17 29 crossSect 1 mat 1
-TrPlaneStress2d 17 nodes 3 17 1 18 crossSect 1 mat 1
-TrPlaneStress2d 18 nodes 3 18 6 19 crossSect 1 mat 1
-TrPlaneStress2d 19 nodes 3 20 13 21 crossSect 1 mat 1
-TrPlaneStress2d 20 nodes 3 19 7 22 crossSect 1 mat 1
-TrPlaneStress2d 21 nodes 3 22 8 23 crossSect 1 mat 1
-TrPlaneStress2d 22 nodes 3 23 9 24 crossSect 1 mat 1
-TrPlaneStress2d 23 nodes 3 24 10 25 crossSect 1 mat 1
-TrPlaneStress2d 24 nodes 3 25 11 26 crossSect 1 mat 1
-TrPlaneStress2d 25 nodes 3 26 12 20 crossSect 1 mat 1
-TrPlaneStress2d 26 nodes 3 21 14 27 crossSect 1 mat 1
-TrPlaneStress2d 27 nodes 3 27 15 28 crossSect 1 mat 1
-TrPlaneStress2d 28 nodes 3 28 16 29 crossSect 1 mat 1
-TrPlaneStress2d 29 nodes 3 29 17 18 crossSect 1 mat 1
-TrPlaneStress2d 30 nodes 3 18 19 22 crossSect 1 mat 1
-TrPlaneStress2d 31 nodes 3 20 21 26 crossSect 1 mat 1
-TrPlaneStress2d 32 nodes 3 22 23 29 crossSect 1 mat 1
-TrPlaneStress2d 33 nodes 3 23 24 28 crossSect 1 mat 1
-TrPlaneStress2d 34 nodes 3 24 25 28 crossSect 1 mat 1
-TrPlaneStress2d 35 nodes 3 25 26 27 crossSect 1 mat 1
-TrPlaneStress2d 36 nodes 3 21 27 26 crossSect 1 mat 1
-TrPlaneStress2d 37 nodes 3 27 28 25 crossSect 1 mat 1
-TrPlaneStress2d 38 nodes 3 28 29 23 crossSect 1 mat 1
-TrPlaneStress2d 39 nodes 3 29 18 22 crossSect 1 mat 1
-SimpleCS 1 thick 1.0
+TrPlaneStress2d 1 nodes 3 1 6 18
+TrPlaneStress2d 2 nodes 3 6 2 19
+TrPlaneStress2d 3 nodes 3 4 13 20
+TrPlaneStress2d 4 nodes 3 13 5 21
+TrPlaneStress2d 5 nodes 3 2 7 19
+TrPlaneStress2d 6 nodes 3 7 8 22
+TrPlaneStress2d 7 nodes 3 8 9 23
+TrPlaneStress2d 8 nodes 3 9 3 24
+TrPlaneStress2d 9 nodes 3 3 10 24
+TrPlaneStress2d 10 nodes 3 10 11 25
+TrPlaneStress2d 11 nodes 3 11 12 26
+TrPlaneStress2d 12 nodes 3 12 4 20
+TrPlaneStress2d 13 nodes 3 5 14 21
+TrPlaneStress2d 14 nodes 3 14 15 27
+TrPlaneStress2d 15 nodes 3 15 16 28
+TrPlaneStress2d 16 nodes 3 16 17 29
+TrPlaneStress2d 17 nodes 3 17 1 18
+TrPlaneStress2d 18 nodes 3 18 6 19
+TrPlaneStress2d 19 nodes 3 20 13 21
+TrPlaneStress2d 20 nodes 3 19 7 22
+TrPlaneStress2d 21 nodes 3 22 8 23
+TrPlaneStress2d 22 nodes 3 23 9 24
+TrPlaneStress2d 23 nodes 3 24 10 25
+TrPlaneStress2d 24 nodes 3 25 11 26
+TrPlaneStress2d 25 nodes 3 26 12 20
+TrPlaneStress2d 26 nodes 3 21 14 27
+TrPlaneStress2d 27 nodes 3 27 15 28
+TrPlaneStress2d 28 nodes 3 28 16 29
+TrPlaneStress2d 29 nodes 3 29 17 18
+TrPlaneStress2d 30 nodes 3 18 19 22
+TrPlaneStress2d 31 nodes 3 20 21 26
+TrPlaneStress2d 32 nodes 3 22 23 29
+TrPlaneStress2d 33 nodes 3 23 24 28
+TrPlaneStress2d 34 nodes 3 24 25 28
+TrPlaneStress2d 35 nodes 3 25 26 27
+TrPlaneStress2d 36 nodes 3 21 27 26
+TrPlaneStress2d 37 nodes 3 27 28 25
+TrPlaneStress2d 38 nodes 3 28 29 23
+TrPlaneStress2d 39 nodes 3 29 18 22
+SimpleCS 1 thick 1.0 material 1 set 1
 IsoLE 1  E 210.e3  n 0.3  d 1.0 talpha 1.0
-BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
-Constantedgeload 2 loadTimeFunction 1 ndofs 2 loadtype 2 Components 2 1.0 0.0
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 2
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 2 values 1 0.0 set 3
+Constantsurfaceload 3 loadTimeFunction 1 loadtype 2 dofs 2 1 2 Components 2 1.0 0.0 set 4
 ConstantFunction 1 f(t) 1.0
+Set 1 elementranges {(1 39)}
+Set 2 nodes 3 4 5 13
+Set 3 nodes 3 1 2 6
+Set 4 elementboundaries 8 5 1  6 1  7 1  8 1
 
 #%BEGIN_CHECK% tolerance 1.e-4
 ##ERRORESTIMATE tStep 1 value 38.63

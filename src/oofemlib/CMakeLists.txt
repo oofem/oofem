@@ -34,6 +34,8 @@ set (core_unsorted
     rowcol.C skyline.C skylineu.C
     ldltfact.C
     inverseit.C subspaceit.C gjacobi.C
+    #
+    symcompcol.C compcol.C
     )
 
 #oofegutils
@@ -44,7 +46,7 @@ endif ()
 
 if (USE_IML)
     list (APPEND core_unsorted
-        iml/dyncomprow.C iml/dyncompcol.C iml/symcompcol.C iml/compcol.C
+        iml/dyncomprow.C iml/dyncompcol.C
         iml/precond.C iml/voidprecond.C iml/icprecond.C iml/iluprecond.C iml/ilucomprowprecond.C iml/diagpre.C
         iml/imlsolver.C
         )
@@ -84,6 +86,10 @@ set (core_nm
 
 if (USE_PETSC)
     list (APPEND core_nm petscsolver.C petscsparsemtrx.C)
+endif ()
+
+if (USE_MKLPARDISO)
+    list (APPEND core_nm mklpardisosolver.C)
 endif ()
 
 set (core_fields
@@ -220,6 +226,7 @@ set (core_xfem
     xfem/enrichmentfronts/enrichmentfrontintersection.C
     xfem/integrationrules/discsegintegrationrule.C
     xfem/xfemtolerances.C
+    xfem/nucleationcriterion.C
     )
 
 set (core_parallel

@@ -68,7 +68,7 @@ protected:
     double gamma, temp_gamma;
 
 public:
-    PlasticMaterialStatus(int n, Domain * d, GaussPoint * g);
+    PlasticMaterialStatus(int n, Domain * d, GaussPoint * g, int statusSize);
     virtual ~PlasticMaterialStatus();
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
@@ -216,7 +216,7 @@ protected:
 
     // auxiliary functions
     virtual int giveSizeOfFullHardeningVarsVector() { return 0; }
-    virtual int giveSizeOfReducedHardeningVarsVector(GaussPoint *)  { return 0; }
+    virtual int giveSizeOfReducedHardeningVarsVector(GaussPoint *) const { return 0; }
 
     friend class PlasticMaterialStatus;
 

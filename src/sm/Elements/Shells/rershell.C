@@ -88,7 +88,6 @@ RerShell :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
 // Returns the [8x18] strain-displacement matrix {B} of the receiver,
 // evaluated at gp.
 {
-    int i, j, k, ii, ki;
     FloatArray b(3), c(3), nodeCoords;
     double x1, x2, x3, y1, y2, y3, area;
 
@@ -118,12 +117,12 @@ RerShell :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
     answer.resize(8, 18);
     answer.zero();
 
-    for ( i = 1; i <= 3; i++ ) {
-        j = i + 1 - i / 3 * 3;
-        k = j + 1 - j / 3 * 3;
+    for ( int i = 1; i <= 3; i++ ) {
+        int j = i + 1 - i / 3 * 3;
+        int k = j + 1 - j / 3 * 3;
 
-        ii = 6 * ( i - 1 );
-        ki = 6 * ( k - 1 );
+        int ii = 6 * ( i - 1 );
+        int ki = 6 * ( k - 1 );
 
         answer.at(1, ii + 1) = b.at(i); // Eps_X
         answer.at(1, ki + 4) = -( b.at(i) - b.at(j) ) / Rx * area / 12.;
@@ -298,8 +297,7 @@ RerShell :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMo
 void
 RerShell :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-
-this->giveStructuralCrossSection()->giveGeneralizedStress_Shell(answer, gp, strain, tStep);
+    this->giveStructuralCrossSection()->giveGeneralizedStress_Shell(answer, gp, strain, tStep);
 }
 
 void
@@ -608,11 +606,10 @@ RerShell :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &mas
 
 void
 RerShell :: printOutputAt(FILE *file, TimeStep *tStep)
-// Performs end-of-step operations.
 {
     FloatArray v;
 
-    fprintf(file, "element %d ( %d):\n", this->giveLabel(), number);
+    fprintf(file, "element %d (%8d):\n", this->giveLabel(), number);
 
     for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
 
@@ -622,14 +619,14 @@ RerShell :: printOutputAt(FILE *file, TimeStep *tStep)
         // eps_x, eps_y, eps_z, eps_yz, eps_xz, eps_xy (global)
         fprintf( file,
                 " %.4e %.4e %.4e %.4e %.4e %.4e ",
-                v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
+                v.at(1), v.at(2), v.at(3), v.at(4), v.at(5), v.at(6) );
 
         this->giveIPValue(v, gp, IST_ShellCurvatureTensor, tStep);
         fprintf(file, "\n              curvatures ");
         // k_x, k_y, k_z, k_yz, k_xz, k_xy (global)
         fprintf( file,
                 " %.4e %.4e %.4e %.4e %.4e %.4e ",
-                v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
+                v.at(1), v.at(2), v.at(3), v.at(4), v.at(5), v.at(6) );
 
         // Forces - Moments
         this->giveIPValue(v, gp, IST_ShellForceTensor, tStep);
@@ -637,14 +634,14 @@ RerShell :: printOutputAt(FILE *file, TimeStep *tStep)
         // n_x, n_y, n_z, v_yz, v_xz, v_xy (global)
         fprintf( file,
                 " %.4e %.4e %.4e %.4e %.4e %.4e ",
-                v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
+                v.at(1), v.at(2), v.at(3), v.at(4), v.at(5), v.at(6) );
 
         this->giveIPValue(v, gp, IST_ShellMomentumTensor, tStep);
         fprintf(file, "\n              moments    ");
         // m_x, m_y, m_z, m_yz, m_xz, m_xy (global)
         fprintf( file,
                 " %.4e %.4e %.4e %.4e %.4e %.4e ",
-                v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
+                v.at(1), v.at(2), v.at(3), v.at(4), v.at(5), v.at(6) );
 
         fprintf(file, "\n");
     }
@@ -672,45 +669,40 @@ RerShell :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
     FloatMatrix globTensor;
     CharTensor cht;
 
-    answer.resize(12);
+    answer.resize(6);
 
-    if ( ( type == IST_ShellForceTensor ) || ( type == IST_ShellStrainTensor ) ) {
-        if ( type == IST_ShellForceTensor ) {
-            cht = GlobalForceTensor;
+    if (  type == IST_ShellCurvatureTensor || type == IST_ShellStrainTensor ) {
+        if ( type == IST_ShellCurvatureTensor ) {
+            cht = GlobalCurvatureTensor;
         } else {
             cht = GlobalStrainTensor;
         }
 
         this->giveCharacteristicTensor(globTensor, cht, gp, tStep);
 
-        answer.at(1) = globTensor.at(1, 1); //sxForce
-        answer.at(2) = globTensor.at(1, 2); //qxyForce
-        answer.at(3) = globTensor.at(1, 3); //qxzForce
-        answer.at(4) = globTensor.at(1, 2); //qxyForce
-        answer.at(5) = globTensor.at(2, 2); //syForce
-        answer.at(6) = globTensor.at(2, 3); //syzForce
-        answer.at(7) = globTensor.at(1, 3); //qxzForce
-        answer.at(8) = globTensor.at(2, 3); //syzForce
-        answer.at(9) = globTensor.at(3, 3); //szForce
+        answer.at(1) = globTensor.at(1, 1); //xx
+        answer.at(2) = globTensor.at(2, 2); //yy
+        answer.at(3) = globTensor.at(3, 3); //zz
+        answer.at(4) = 2*globTensor.at(2, 3); //yz
+        answer.at(5) = 2*globTensor.at(1, 3); //xz
+        answer.at(6) = 2*globTensor.at(2, 3); //yz
 
         return 1;
-    } else if ( ( type == IST_ShellMomentumTensor ) || ( type == IST_ShellCurvatureTensor ) ) {
+    } else if ( type == IST_ShellMomentumTensor || type == IST_ShellForceTensor ) {
         if ( type == IST_ShellMomentumTensor ) {
             cht = GlobalMomentumTensor;
         } else {
-            cht = GlobalCurvatureTensor;
+            cht = GlobalForceTensor;
         }
+
         this->giveCharacteristicTensor(globTensor, cht, gp, tStep);
 
-        answer.at(1)  = globTensor.at(1, 1); //mxForce
-        answer.at(2)  = globTensor.at(1, 2); //mxyForce
-        answer.at(3)  = globTensor.at(1, 3); //mxzForce
-        answer.at(4)  = globTensor.at(1, 2); //mxyForce
-        answer.at(5)  = globTensor.at(2, 2); //myForce
-        answer.at(6)  = globTensor.at(2, 3); //myzForce
-        answer.at(7)  = globTensor.at(1, 3); //mxzForce
-        answer.at(8)  = globTensor.at(2, 3); //myzForce
-        answer.at(9)  = globTensor.at(3, 3); //mzForce
+        answer.at(1) = globTensor.at(1, 1); //xx
+        answer.at(2) = globTensor.at(2, 2); //yy
+        answer.at(3) = globTensor.at(3, 3); //zz
+        answer.at(4) = globTensor.at(2, 3); //yz
+        answer.at(5) = globTensor.at(1, 3); //xz
+        answer.at(6) = globTensor.at(2, 3); //yz
 
         return 1;
     } else {

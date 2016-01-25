@@ -116,8 +116,8 @@ ConnectivityTable :: giveElementNeighbourList(IntArray &answer, IntArray &elemLi
         int nnode = ielem->giveNumberOfDofManagers();
         for ( int j = 1; j <= nnode; j++ ) {
             int jnode = ielem->giveDofManager(j)->giveNumber();
-            for ( int k = 1; k <= this->nodalConnectivity[jnode-1].giveSize(); k++ ) {
-                answer.insertSortedOnce( this->nodalConnectivity[jnode-1].at(k) );
+            for ( auto &val : this->nodalConnectivity[jnode-1] ) {
+                answer.insertSortedOnce( val );
             }
         }
     }
@@ -136,8 +136,8 @@ ConnectivityTable :: giveNodeNeighbourList(IntArray &answer, IntArray &nodeList)
 
     for ( int i = 1; i <= nnodes; i++ ) {
         int inode = nodeList.at(i);
-        for ( int k = 1; k <= this->nodalConnectivity[inode-1].giveSize(); k++ ) {
-            answer.insertSortedOnce( this->nodalConnectivity[inode-1].at(k) );
+        for ( auto &val : this->nodalConnectivity[inode-1] ) {
+            answer.insertSortedOnce( val );
         }
     }
 }

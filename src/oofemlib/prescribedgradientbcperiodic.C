@@ -53,6 +53,8 @@
 #include "spatiallocalizer.h"
 #include "feinterpol.h"
 #include "unknownnumberingscheme.h"
+#include "function.h"
+#include "timestep.h"
 
 namespace oofem {
 REGISTER_BoundaryCondition(PrescribedGradientBCPeriodic);
@@ -70,7 +72,8 @@ PrescribedGradientBCPeriodic :: PrescribedGradientBCPeriodic(int n, Domain *d) :
         // Just putting in X_i id-items since they don't matter.
         // These don't actually need to be active, they are masterdofs with prescribed values, its
         // easier to just have them here rather than trying to make another Dirichlet boundary condition.
-        strain->appendDof( new ActiveDof( strain.get(), (DofIDItem)dofid, this->giveNumber() ) );
+        //strain->appendDof( new ActiveDof( strain.get(), (DofIDItem)dofid, this->giveNumber() ) );
+        strain->appendDof( new MasterDof(strain.get(), this->giveNumber(), 0, (DofIDItem)dofid ) );
     }
 }
 
@@ -197,8 +200,6 @@ void PrescribedGradientBCPeriodic :: computeField(FloatArray &sigma, TimeStep *t
     } else {
         sigma = sig_tmp;
     }
-    //sigma.printYourself("sigma after assembling = ");
-    //OOFEM_WARNING("why is this called?");
 }
 
 
@@ -281,7 +282,6 @@ double PrescribedGradientBCPeriodic :: giveUnknown(double val, ValueModeType mod
     FloatArray *masterCoords = master->giveCoordinates();
     FloatArray dx, uM;
     dx.beDifferenceOf(* coords, * masterCoords );
-    uM.beProductOf(this->mGradient, dx); // The "jump" part of the unknown ( u^+ = [[u^M]] + u^- )
 
     int ind;
     if ( id == D_u || id == V_u || id == P_f || id == T_f ) {
@@ -291,6 +291,14 @@ double PrescribedGradientBCPeriodic :: giveUnknown(double val, ValueModeType mod
     } else { /*if ( id == D_w || id == V_w )*/   // 3D only:
         ind = 3;
     }
+
+    FloatMatrix grad(3, 3);
+    for ( int i = 0; i < this->strain_id.giveSize(); ++i ) {
+        Dof *dof = this->strain->giveDofWithID(strain_id[i]);
+        grad(i % 3, i / 3) = dof->giveUnknown(mode, tStep);
+    }
+    uM.beProductOf(grad, dx); // The "jump" part of the unknown ( u^+ = [[u^M]] + u^- )
+
     return val + uM.at(ind);
 }
 
@@ -298,8 +306,8 @@ double PrescribedGradientBCPeriodic :: giveUnknown(double val, ValueModeType mod
 double PrescribedGradientBCPeriodic :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep, ActiveDof *dof)
 {
     if ( this->isStrainDof(dof) ) {
-        int ind = strain_id.findFirstIndexOf(dof->giveDofID());
-        return this->mGradient(ind % 3, ind / 3);
+        int ind = strain_id.findFirstIndexOf(dof->giveDofID()) - 1;
+        return this->mGradient(ind % 3, ind / 3) * this->giveTimeFunction()->evaluateAtTime(tStep->giveTargetTime());
     }
 
     DofManager *master = this->domain->giveDofManager(this->slavemap[dof->giveDofManager()->giveNumber()]);
@@ -311,11 +319,16 @@ double PrescribedGradientBCPeriodic :: giveUnknown(PrimaryField &field, ValueMod
 double PrescribedGradientBCPeriodic :: giveUnknown(ValueModeType mode, TimeStep *tStep, ActiveDof *dof)
 {
     if ( this->isStrainDof(dof) ) {
-        int ind = strain_id.findFirstIndexOf(dof->giveDofID());
-        return this->mGradient(ind % 3, ind / 3);
+        int ind = strain_id.findFirstIndexOf(dof->giveDofID()) - 1;
+        return this->mGradient(ind % 3, ind / 3) * this->giveTimeFunction()->evaluateAtTime(tStep->giveTargetTime());
     }
 
     DofManager *master = this->domain->giveDofManager(this->slavemap[dof->giveDofManager()->giveNumber()]);
+
+    if ( mode == VM_Incremental ) {
+        double val = master->giveDofWithID(dof->giveDofID())->giveUnknown(mode, tStep);
+        return this->giveUnknown(val, mode, tStep, dof);
+    }
     double val = master->giveDofWithID(dof->giveDofID())->giveUnknown(mode, tStep);
     return this->giveUnknown(val, mode, tStep, dof);
 }
@@ -327,24 +340,24 @@ bool PrescribedGradientBCPeriodic :: isPrimaryDof(ActiveDof *dof)
 }
 
 
-double PrescribedGradientBCPeriodic :: giveBcValue(ActiveDof *dof, ValueModeType mode, TimeStep *tStep)
+double PrescribedGradientBCPeriodic :: giveBcValue(Dof *dof, ValueModeType mode, TimeStep *tStep)
 {
     if ( this->isStrainDof(dof) ) {
-        int index = strain_id.findFirstIndexOf(dof->giveDofID());
-        return this->mGradient( index % 3, index / 3 );
+        int index = strain_id.findFirstIndexOf(dof->giveDofID()) - 1;
+        return this->mGradient( index % 3, index / 3 ) * this->giveTimeFunction()->evaluateAtTime(tStep->giveTargetTime());;
     }
     OOFEM_ERROR("Has no prescribed value from bc.");
     return 0.0;
 }
 
 
-bool PrescribedGradientBCPeriodic :: hasBc(ActiveDof *dof, TimeStep *tStep)
+bool PrescribedGradientBCPeriodic :: hasBc(Dof *dof, TimeStep *tStep)
 {
     return this->isStrainDof(dof);
 }
 
 
-bool PrescribedGradientBCPeriodic :: isStrainDof(ActiveDof *dof)
+bool PrescribedGradientBCPeriodic :: isStrainDof(Dof *dof)
 {
     return this->strain.get() == dof->giveDofManager();
 }

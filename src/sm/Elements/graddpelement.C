@@ -254,6 +254,76 @@ GradDpElement :: giveLocalInternalForcesVector(FloatArray &answer, TimeStep *tSt
     }
 }
 
+#if 0
+void
+GradDpElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
+{
+    NLStructuralElement *elem = this->giveNLStructuralElement();
+    StructuralCrossSection *cs = elem->giveStructuralCrossSection();
+    FloatArray answerU, answerK;
+
+    double localCumulatedStrain = 0.;
+    FloatMatrix stiffKappa, B;
+    FloatArray Nk, aux, dKappa, stress;
+    FloatMatrix lStiff;
+    FloatMatrix Bk;
+    FloatArray gKappa, L_gKappa;
+
+    //set displacement and nonlocal location array
+    this->setDisplacementLocationArray();
+    this->setNonlocalLocationArray();
+
+    this->computeNonlocalDegreesOfFreedom(dKappa, tStep);
+
+    int nlGeo = elem->giveGeometryMode();
+    for ( auto &gp: *elem->giveIntegrationRule(0) ) {
+        GradDpMaterialExtensionInterface *dpmat = dynamic_cast< GradDpMaterialExtensionInterface * >(
+            cs->giveMaterialInterface(GradDpMaterialExtensionInterfaceType, gp) );
+        if ( !dpmat ) {
+            OOFEM_ERROR("Material doesn't implement the required DpGrad interface!");
+        }
+
+        double dV = elem->computeVolumeAround(gp);
+
+        if ( nlGeo == 0 || elem->domain->giveEngngModel()->giveFormulation() == AL ) {
+            elem->computeBmatrixAt(gp, B);
+        } else if ( nlGeo == 1 ) {
+            elem->computeBHmatrixAt(gp, B);
+        }
+        this->computeStressVectorAndLocalCumulatedStrain(stress, localCumulatedStrain, gp, tStep);
+
+        answerU.plusProduct(B, stress, dV);
+
+        // Gradient part:
+        this->computeNkappaMatrixAt(gp, Nk);
+        this->computeBkappaMatrixAt(gp, Bk);
+
+        dpmat->givePDGradMatrix_kk(lStiff, TangentStiffness, gp, tStep);
+        double kappa = Nk.dotProduct(dKappa);
+        gKappa.beProductOf(Bk, dKappa);
+
+        answerK.add(-dV * localCumulatedStrain, Nk);
+        answerK.add(kappa * dV, Nk);
+
+        if ( dpmat->giveAveragingType() == 0 || dpmat->giveAveragingType() == 1 ) {
+            double l = lStiff.at(1, 1);
+            answerK.plusProduct(Bk, gKappa, l * l * dV);
+        } else if ( dpmat->giveAveragingType() == 2 ) {
+            L_gKappa.beProductOf(lStiff, gKappa);
+            answerK.plusProduct(Bk, L_gKappa, dV);
+        }
+    }
+
+    //this->computeStiffnessMatrix_kk(stiffKappa, TangentStiffness, tStep);
+    //answerK.beProductOf(stiffKappa, dKappa);
+    answerK.add(aux);
+
+    answer.resize(totalSize);
+    answer.zero();
+    answer.assemble(answerU, locU);
+    answer.assemble(answerK, locK);
+}
+#else
 void
 GradDpElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
@@ -274,6 +344,7 @@ GradDpElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, i
     answer.assemble(answerU, locU);
     answer.assemble(answerK, locK);
 }
+#endif
 
 void
 GradDpElement :: computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
@@ -319,6 +390,144 @@ GradDpElement :: computeLocForceLoadVector(FloatArray &answer, TimeStep *tStep, 
     }
 }
 
+#if 0
+void
+GradDpElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
+{
+    //set displacement and nonlocal location array
+    this->setDisplacementLocationArray();
+    this->setNonlocalLocationArray();
+
+    NLStructuralElement *elem = this->giveNLStructuralElement();
+    StructuralCrossSection *cs = elem->giveStructuralCrossSection();
+    FloatMatrix B, D, DB;
+    FloatMatrix DkuB, Dku;
+    FloatArray Nk;
+    FloatMatrix SNk, gPSigma;
+    FloatMatrix lStiff;
+    FloatMatrix Bk, LBk;
+    FloatMatrix answer_uu, answer_ku, answer_uk, answer_kk;
+
+    int nlGeo = elem->giveGeometryMode();
+    bool matStiffSymmFlag = elem->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode);
+
+    for ( auto &gp : *elem->giveIntegrationRule(0) ) {
+        GradDpMaterialExtensionInterface *dpmat = dynamic_cast< GradDpMaterialExtensionInterface * >(
+            cs->giveMaterialInterface(GradDpMaterialExtensionInterfaceType, gp) );
+        if ( !dpmat ) {
+            OOFEM_ERROR("Material doesn't implement the required DpGrad interface!");
+        }
+
+        double dV = elem->computeVolumeAround(gp);
+
+        if ( nlGeo == 0 ) {
+            elem->computeBmatrixAt(gp, B);
+        } else if ( nlGeo == 1 ) {
+            if ( elem->domain->giveEngngModel()->giveFormulation() == AL ) {
+                elem->computeBmatrixAt(gp, B);
+            } else {
+                elem->computeBHmatrixAt(gp, B);
+            }
+        }
+        this->computeNkappaMatrixAt(gp, Nk);
+        this->computeBkappaMatrixAt(gp, Bk);
+
+        dpmat->givePDGradMatrix_uu(D, rMode, gp, tStep);
+        dpmat->givePDGradMatrix_ku(Dku, rMode, gp, tStep);
+        dpmat->givePDGradMatrix_uk(gPSigma, rMode, gp, tStep);
+        dpmat->givePDGradMatrix_kk(lStiff, rMode, gp, tStep);
+
+        /////////////////////////////////////////////////////////////////// uu:
+        DB.beProductOf(D, B);
+        if ( matStiffSymmFlag ) {
+            answer_uu.plusProductSymmUpper(B, DB, dV);
+        } else {
+            answer_uu.plusProductUnsym(B, DB, dV);
+        }
+
+        //////////////////////////////////////////////////////////////////////// ku:
+        DkuB.beProductOf(Dku, B);
+        answer_ku.plusProductUnsym(Nk, DkuB, -dV);
+
+        if ( dpmat->giveAveragingType() == 2 ) {
+            double dl1, dl2, dl3;
+            FloatMatrix LDB;
+            FloatMatrix GkLDB, MGkLDB;
+            FloatMatrix M22, M12;
+            FloatMatrix dL1(1, 3), dL2(1, 3), dLdS;
+            FloatArray Gk, n1, n2;
+
+
+            dpmat->givePDGradMatrix_LD(dLdS, rMode, gp, tStep);
+            this->computeNonlocalGradient(Gk, gp, tStep);
+
+            dl1 = dLdS.at(3, 3);
+            dl2 = dLdS.at(4, 4);
+            dl3 = dLdS.at(5, 5);
+            n1 = {dLdS.at(1, 1), dLdS.at(2, 1)};
+            n2 = {dLdS.at(1, 2), dLdS.at(2, 2)};
+
+            // first term Bk^T M22 G L1 D B
+            // M22 = n2 \otimes n2
+            M22.plusDyadUnsym(n2, n2, 1.);
+            // dL1
+            dL1.at(1, 1) = dl1 * n1.at(1) * n1.at(1) + dl2 * n2.at(1) * n2.at(1);
+            dL1.at(1, 2) = dl1 * n1.at(2) * n1.at(2) + dl2 * n2.at(2) * n2.at(2);
+            dL1.at(1, 3) = dl1 * n1.at(1) * n1.at(2) + dl2 * n2.at(1) * n2.at(2);
+
+            LDB.beProductOf(dL1, DB);
+            GkLDB.beProductOf(Gk, LDB);
+            MGkLDB.beProductOf(M22, GkLDB);
+            answer.plusProductUnsym(Bk, MGkLDB, dV);
+
+            // M12 + M21  = n1 \otimes n2 + n2 \otimes n1
+            M12.plusDyadUnsym(n1, n2, 1.);
+            M12.plusDyadUnsym(n2, n1, 1.);
+            //dL2
+            dL2.at(1, 1) = dl3 * ( n1.at(1) * n2.at(1) + n1.at(1) * n2.at(1) );
+            dL2.at(1, 2) = dl3 * ( n1.at(2) * n2.at(2) + n1.at(2) * n2.at(2) );
+            dL2.at(1, 3) = dl3 * ( n1.at(2) * n2.at(1) + n1.at(1) * n2.at(2) );
+
+            // Bk * ((M12 * L2 + M22 * L1) * DB)
+            LDB.beProductOf(dL2, DB);
+            GkLDB.beProductOf(Gk, LDB);
+            MGkLDB.beProductOf(M12, GkLDB);
+            answer.plusProductUnsym(Bk, MGkLDB, dV);
+        }
+
+        //////////////////////////////////////////////////////////////////////// uk:
+        SNk.beProductOf(gPSigma, Nk);
+        answer_uk.plusProductUnsym(B, SNk, -dV); // uk
+
+        /////////////////////////////////////////////////////////////////////// kk:
+        answer_kk.plusProductUnsym(Nk, Nk, dV);
+        if ( dpmat->giveAveragingType() == 0 || dpmat->giveAveragingType() == 1 ) {
+            double l = lStiff.at(1, 1);
+            answer_kk.plusProductUnsym(Bk, Bk, l * l * dV);
+        } else if ( dpmat->giveAveragingType() == 2 ) {
+            LBk.beProductOf(lStiff, Bk);
+            answer_kk.plusProductUnsym(Bk, LBk, dV);
+        }
+    }
+
+    if ( elem->domain->giveEngngModel()->giveFormulation() == AL ) {
+        FloatMatrix initialStressMatrix;
+        elem->computeInitialStressMatrix(initialStressMatrix, tStep);
+        answer_uu.add(initialStressMatrix);
+    }
+
+    if ( matStiffSymmFlag ) {
+        answer_uu.symmetrized();
+    }
+
+    answer.resize(totalSize, totalSize);
+    answer.zero();
+    answer.assemble(answer_uu, locU);
+    answer.assemble(answer_uk, locU, locK);
+    answer.assemble(answer_ku, locK, locU);
+    answer.assemble(answer_kk,locK);
+}
+#else
 
 void
 GradDpElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
@@ -340,7 +549,7 @@ GradDpElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMo
     answer.assemble(answer3, locK, locU);
     answer.assemble(answer4, locK);
 }
-
+#endif
 
 void
 GradDpElement :: computeStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
@@ -567,6 +776,7 @@ GradDpElement :: computeStiffnessMatrix_uk(FloatMatrix &answer, MatResponseMode 
         answer.plusProductUnsym(B, SNk, -dV);
     }
 }
+
 
 IRResultType
 GradDpElement :: initializeFrom(InputRecord *ir)

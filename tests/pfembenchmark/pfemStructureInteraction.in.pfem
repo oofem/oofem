@@ -1,0 +1,255 @@
+pfemStructureInteraction.out.pfem
+simple hydrostatic example, implicit scheme
+PFEM nsteps 3 nmodules 1 lstype 0 smtype 1 renumber 1 deltaT 1.e-4 alphashapecoef 0.8 scheme 1 material 1 cs 1 pressure 2 rtolv 1.e-8 rtolp 1.e-8
+errorcheck
+domain 2dIncompFlow
+OutputManager tstep_all dofman_all element_all
+ndofman 231 nelem 0 ncrosssect 1 nmat 1 nbc 4 nic 1 nltf 1
+PFEMParticle 1 coords 3 0.0 0.0 0.0 bc 3 1 1 0
+PFEMParticle 2 coords 3 1.0 0.0 0.0 bc 3 1 1 0
+PFEMParticle 3 coords 3 2.0 0.0 0.0 bc 3 1 1 0
+PFEMParticle 4 coords 3 3.0 0.0 0.0 bc 3 1 1 0
+PFEMParticle 5 coords 3 4.0 0.0 0.0 bc 3 1 1 0
+PFEMParticle 6 coords 3 5.0 0.0 0.0 bc 3 1 1 0
+PFEMParticle 7 coords 3 6.0 0.0 0.0 bc 3 1 1 0
+PFEMParticle 8 coords 3 7.0 0.0 0.0 bc 3 1 1 0
+PFEMParticle 9 coords 3 8.0 0.0 0.0 bc 3 1 1 0
+PFEMParticle 10 coords 3 9.0 0.0 0.0 bc 3 1 1 0
+PFEMParticle 11 coords 3 10.0 0.0 0.0 bc 3 1 1 0
+PFEMParticle 12 coords 3 11.0 0.0 0.0 bc 3 1 1 0
+PFEMParticle 13 coords 3 12.0 0.0 0.0 bc 3 1 1 0
+PFEMParticle 14 coords 3 13.0 0.0 0.0 bc 3 1 1 0
+PFEMParticle 15 coords 3 14.0 0.0 0.0 bc 3 1 1 0
+PFEMParticle 16 coords 3 15.0 0.0 0.0 bc 3 1 1 0
+PFEMParticle 17 coords 3 16.0 0.0 0.0 bc 3 1 1 0
+PFEMParticle 18 coords 3 17.0 0.0 0.0 bc 3 1 1 0
+PFEMParticle 19 coords 3 18.0 0.0 0.0 bc 3 1 1 0
+PFEMParticle 20 coords 3 19.0 0.0 0.0 bc 3 1 1 0
+InteractionPFEMParticle 21 coords 3 20.0 0.0 0.0 bc 3 4 4 0 coupledNode 1
+PFEMParticle 22 coords 3 0.0 1.0 0.0 bc 3 1 1 0
+PFEMParticle 23 coords 3 1.0 1.0 0.0 bc 3 0 0 0
+PFEMParticle 24 coords 3 2.0 1.0 0.0 bc 3 0 0 0
+PFEMParticle 25 coords 3 3.0 1.0 0.0 bc 3 0 0 0
+PFEMParticle 26 coords 3 4.0 1.0 0.0 bc 3 0 0 0
+PFEMParticle 27 coords 3 5.0 1.0 0.0 bc 3 0 0 0
+PFEMParticle 28 coords 3 6.0 1.0 0.0 bc 3 0 0 0
+PFEMParticle 29 coords 3 7.0 1.0 0.0 bc 3 0 0 0
+PFEMParticle 30 coords 3 8.0 1.0 0.0 bc 3 0 0 0
+PFEMParticle 31 coords 3 9.0 1.0 0.0 bc 3 0 0 0
+PFEMParticle 32 coords 3 10.0 1.0 0.0 bc 3 0 0 0
+PFEMParticle 33 coords 3 11.0 1.0 0.0 bc 3 0 0 0
+PFEMParticle 34 coords 3 12.0 1.0 0.0 bc 3 0 0 0
+PFEMParticle 35 coords 3 13.0 1.0 0.0 bc 3 0 0 0
+PFEMParticle 36 coords 3 14.0 1.0 0.0 bc 3 0 0 0
+PFEMParticle 37 coords 3 15.0 1.0 0.0 bc 3 0 0 0
+PFEMParticle 38 coords 3 16.0 1.0 0.0 bc 3 0 0 0
+PFEMParticle 39 coords 3 17.0 1.0 0.0 bc 3 0 0 0
+PFEMParticle 40 coords 3 18.0 1.0 0.0 bc 3 0 0 0
+PFEMParticle 41 coords 3 19.0 1.0 0.0 bc 3 0 0 0
+InteractionPFEMParticle 42 coords 3 20.0 1.0 0.0 bc 3 4 4 0 coupledNode 3
+PFEMParticle 43 coords 3 0.0 2.0 0.0 bc 3 1 1 0
+PFEMParticle 44 coords 3 1.0 2.0 0.0 bc 3 0 0 0
+PFEMParticle 45 coords 3 2.0 2.0 0.0 bc 3 0 0 0
+PFEMParticle 46 coords 3 3.0 2.0 0.0 bc 3 0 0 0
+PFEMParticle 47 coords 3 4.0 2.0 0.0 bc 3 0 0 0
+PFEMParticle 48 coords 3 5.0 2.0 0.0 bc 3 0 0 0
+PFEMParticle 49 coords 3 6.0 2.0 0.0 bc 3 0 0 0
+PFEMParticle 50 coords 3 7.0 2.0 0.0 bc 3 0 0 0
+PFEMParticle 51 coords 3 8.0 2.0 0.0 bc 3 0 0 0
+PFEMParticle 52 coords 3 9.0 2.0 0.0 bc 3 0 0 0
+PFEMParticle 53 coords 3 10.0 2.0 0.0 bc 3 0 0 0
+PFEMParticle 54 coords 3 11.0 2.0 0.0 bc 3 0 0 0
+PFEMParticle 55 coords 3 12.0 2.0 0.0 bc 3 0 0 0
+PFEMParticle 56 coords 3 13.0 2.0 0.0 bc 3 0 0 0
+PFEMParticle 57 coords 3 14.0 2.0 0.0 bc 3 0 0 0
+PFEMParticle 58 coords 3 15.0 2.0 0.0 bc 3 0 0 0
+PFEMParticle 59 coords 3 16.0 2.0 0.0 bc 3 0 0 0
+PFEMParticle 60 coords 3 17.0 2.0 0.0 bc 3 0 0 0
+PFEMParticle 61 coords 3 18.0 2.0 0.0 bc 3 0 0 0
+PFEMParticle 62 coords 3 19.0 2.0 0.0 bc 3 0 0 0
+InteractionPFEMParticle 63 coords 3 20.0 2.0 0.0 bc 3 4 4 0 coupledNode 5
+PFEMParticle 64 coords 3 0.0 3.0 0.0 bc 3 1 1 0
+PFEMParticle 65 coords 3 1.0 3.0 0.0 bc 3 0 0 0
+PFEMParticle 66 coords 3 2.0 3.0 0.0 bc 3 0 0 0
+PFEMParticle 67 coords 3 3.0 3.0 0.0 bc 3 0 0 0
+PFEMParticle 68 coords 3 4.0 3.0 0.0 bc 3 0 0 0
+PFEMParticle 69 coords 3 5.0 3.0 0.0 bc 3 0 0 0
+PFEMParticle 70 coords 3 6.0 3.0 0.0 bc 3 0 0 0
+PFEMParticle 71 coords 3 7.0 3.0 0.0 bc 3 0 0 0
+PFEMParticle 72 coords 3 8.0 3.0 0.0 bc 3 0 0 0
+PFEMParticle 73 coords 3 9.0 3.0 0.0 bc 3 0 0 0
+PFEMParticle 74 coords 3 10.0 3.0 0.0 bc 3 0 0 0
+PFEMParticle 75 coords 3 11.0 3.0 0.0 bc 3 0 0 0
+PFEMParticle 76 coords 3 12.0 3.0 0.0 bc 3 0 0 0
+PFEMParticle 77 coords 3 13.0 3.0 0.0 bc 3 0 0 0
+PFEMParticle 78 coords 3 14.0 3.0 0.0 bc 3 0 0 0
+PFEMParticle 79 coords 3 15.0 3.0 0.0 bc 3 0 0 0
+PFEMParticle 80 coords 3 16.0 3.0 0.0 bc 3 0 0 0
+PFEMParticle 81 coords 3 17.0 3.0 0.0 bc 3 0 0 0
+PFEMParticle 82 coords 3 18.0 3.0 0.0 bc 3 0 0 0
+PFEMParticle 83 coords 3 19.0 3.0 0.0 bc 3 0 0 0
+InteractionPFEMParticle 84 coords 3 20.0 3.0 0.0 bc 3 4 4 0 coupledNode 7
+PFEMParticle 85 coords 3 0.0 4.0 0.0 bc 3 1 1 0
+PFEMParticle 86 coords 3 1.0 4.0 0.0 bc 3 0 0 0
+PFEMParticle 87 coords 3 2.0 4.0 0.0 bc 3 0 0 0
+PFEMParticle 88 coords 3 3.0 4.0 0.0 bc 3 0 0 0
+PFEMParticle 89 coords 3 4.0 4.0 0.0 bc 3 0 0 0
+PFEMParticle 90 coords 3 5.0 4.0 0.0 bc 3 0 0 0
+PFEMParticle 91 coords 3 6.0 4.0 0.0 bc 3 0 0 0
+PFEMParticle 92 coords 3 7.0 4.0 0.0 bc 3 0 0 0
+PFEMParticle 93 coords 3 8.0 4.0 0.0 bc 3 0 0 0
+PFEMParticle 94 coords 3 9.0 4.0 0.0 bc 3 0 0 0
+PFEMParticle 95 coords 3 10.0 4.0 0.0 bc 3 0 0 0
+PFEMParticle 96 coords 3 11.0 4.0 0.0 bc 3 0 0 0
+PFEMParticle 97 coords 3 12.0 4.0 0.0 bc 3 0 0 0
+PFEMParticle 98 coords 3 13.0 4.0 0.0 bc 3 0 0 0
+PFEMParticle 99 coords 3 14.0 4.0 0.0 bc 3 0 0 0
+PFEMParticle 100 coords 3 15.0 4.0 0.0 bc 3 0 0 0
+PFEMParticle 101 coords 3 16.0 4.0 0.0 bc 3 0 0 0
+PFEMParticle 102 coords 3 17.0 4.0 0.0 bc 3 0 0 0
+PFEMParticle 103 coords 3 18.0 4.0 0.0 bc 3 0 0 0
+PFEMParticle 104 coords 3 19.0 4.0 0.0 bc 3 0 0 0
+InteractionPFEMParticle 105 coords 3 20.0 4.0 0.0 bc 3 4 4 0 coupledNode 9
+PFEMParticle 106 coords 3 0.0 5.0 0.0 bc 3 1 1 0
+PFEMParticle 107 coords 3 1.0 5.0 0.0 bc 3 0 0 0
+PFEMParticle 108 coords 3 2.0 5.0 0.0 bc 3 0 0 0
+PFEMParticle 109 coords 3 3.0 5.0 0.0 bc 3 0 0 0
+PFEMParticle 110 coords 3 4.0 5.0 0.0 bc 3 0 0 0
+PFEMParticle 111 coords 3 5.0 5.0 0.0 bc 3 0 0 0
+PFEMParticle 112 coords 3 6.0 5.0 0.0 bc 3 0 0 0
+PFEMParticle 113 coords 3 7.0 5.0 0.0 bc 3 0 0 0
+PFEMParticle 114 coords 3 8.0 5.0 0.0 bc 3 0 0 0
+PFEMParticle 115 coords 3 9.0 5.0 0.0 bc 3 0 0 0
+PFEMParticle 116 coords 3 10.0 5.0 0.0 bc 3 0 0 0
+PFEMParticle 117 coords 3 11.0 5.0 0.0 bc 3 0 0 0
+PFEMParticle 118 coords 3 12.0 5.0 0.0 bc 3 0 0 0
+PFEMParticle 119 coords 3 13.0 5.0 0.0 bc 3 0 0 0
+PFEMParticle 120 coords 3 14.0 5.0 0.0 bc 3 0 0 0
+PFEMParticle 121 coords 3 15.0 5.0 0.0 bc 3 0 0 0
+PFEMParticle 122 coords 3 16.0 5.0 0.0 bc 3 0 0 0
+PFEMParticle 123 coords 3 17.0 5.0 0.0 bc 3 0 0 0
+PFEMParticle 124 coords 3 18.0 5.0 0.0 bc 3 0 0 0
+PFEMParticle 125 coords 3 19.0 5.0 0.0 bc 3 0 0 0
+InteractionPFEMParticle 126 coords 3 20.0 5.0 0.0 bc 3 4 4 0 coupledNode 11
+PFEMParticle 127 coords 3 0.0 6.0 0.0 bc 3 1 1 0
+PFEMParticle 128 coords 3 1.0 6.0 0.0 bc 3 0 0 0
+PFEMParticle 129 coords 3 2.0 6.0 0.0 bc 3 0 0 0
+PFEMParticle 130 coords 3 3.0 6.0 0.0 bc 3 0 0 0
+PFEMParticle 131 coords 3 4.0 6.0 0.0 bc 3 0 0 0
+PFEMParticle 132 coords 3 5.0 6.0 0.0 bc 3 0 0 0
+PFEMParticle 133 coords 3 6.0 6.0 0.0 bc 3 0 0 0
+PFEMParticle 134 coords 3 7.0 6.0 0.0 bc 3 0 0 0
+PFEMParticle 135 coords 3 8.0 6.0 0.0 bc 3 0 0 0
+PFEMParticle 136 coords 3 9.0 6.0 0.0 bc 3 0 0 0
+PFEMParticle 137 coords 3 10.0 6.0 0.0 bc 3 0 0 0
+PFEMParticle 138 coords 3 11.0 6.0 0.0 bc 3 0 0 0
+PFEMParticle 139 coords 3 12.0 6.0 0.0 bc 3 0 0 0
+PFEMParticle 140 coords 3 13.0 6.0 0.0 bc 3 0 0 0
+PFEMParticle 141 coords 3 14.0 6.0 0.0 bc 3 0 0 0
+PFEMParticle 142 coords 3 15.0 6.0 0.0 bc 3 0 0 0
+PFEMParticle 143 coords 3 16.0 6.0 0.0 bc 3 0 0 0
+PFEMParticle 144 coords 3 17.0 6.0 0.0 bc 3 0 0 0
+PFEMParticle 145 coords 3 18.0 6.0 0.0 bc 3 0 0 0
+PFEMParticle 146 coords 3 19.0 6.0 0.0 bc 3 0 0 0
+InteractionPFEMParticle 147 coords 3 20.0 6.0 0.0 bc 3 4 4 0 coupledNode 13
+PFEMParticle 148 coords 3 0.0 7.0 0.0 bc 3 1 1 0
+PFEMParticle 149 coords 3 1.0 7.0 0.0 bc 3 0 0 0
+PFEMParticle 150 coords 3 2.0 7.0 0.0 bc 3 0 0 0
+PFEMParticle 151 coords 3 3.0 7.0 0.0 bc 3 0 0 0
+PFEMParticle 152 coords 3 4.0 7.0 0.0 bc 3 0 0 0
+PFEMParticle 153 coords 3 5.0 7.0 0.0 bc 3 0 0 0
+PFEMParticle 154 coords 3 6.0 7.0 0.0 bc 3 0 0 0
+PFEMParticle 155 coords 3 7.0 7.0 0.0 bc 3 0 0 0
+PFEMParticle 156 coords 3 8.0 7.0 0.0 bc 3 0 0 0
+PFEMParticle 157 coords 3 9.0 7.0 0.0 bc 3 0 0 0
+PFEMParticle 158 coords 3 10.0 7.0 0.0 bc 3 0 0 0
+PFEMParticle 159 coords 3 11.0 7.0 0.0 bc 3 0 0 0
+PFEMParticle 160 coords 3 12.0 7.0 0.0 bc 3 0 0 0
+PFEMParticle 161 coords 3 13.0 7.0 0.0 bc 3 0 0 0
+PFEMParticle 162 coords 3 14.0 7.0 0.0 bc 3 0 0 0
+PFEMParticle 163 coords 3 15.0 7.0 0.0 bc 3 0 0 0
+PFEMParticle 164 coords 3 16.0 7.0 0.0 bc 3 0 0 0
+PFEMParticle 165 coords 3 17.0 7.0 0.0 bc 3 0 0 0
+PFEMParticle 166 coords 3 18.0 7.0 0.0 bc 3 0 0 0
+PFEMParticle 167 coords 3 19.0 7.0 0.0 bc 3 0 0 0
+InteractionPFEMParticle 168 coords 3 20.0 7.0 0.0 bc 3 4 4 0 coupledNode 15
+PFEMParticle 169 coords 3 0.0 8.0 0.0 bc 3 1 1 0
+PFEMParticle 170 coords 3 1.0 8.0 0.0 bc 3 0 0 0
+PFEMParticle 171 coords 3 2.0 8.0 0.0 bc 3 0 0 0
+PFEMParticle 172 coords 3 3.0 8.0 0.0 bc 3 0 0 0
+PFEMParticle 173 coords 3 4.0 8.0 0.0 bc 3 0 0 0
+PFEMParticle 174 coords 3 5.0 8.0 0.0 bc 3 0 0 0
+PFEMParticle 175 coords 3 6.0 8.0 0.0 bc 3 0 0 0
+PFEMParticle 176 coords 3 7.0 8.0 0.0 bc 3 0 0 0
+PFEMParticle 177 coords 3 8.0 8.0 0.0 bc 3 0 0 0
+PFEMParticle 178 coords 3 9.0 8.0 0.0 bc 3 0 0 0
+PFEMParticle 179 coords 3 10.0 8.0 0.0 bc 3 0 0 0
+PFEMParticle 180 coords 3 11.0 8.0 0.0 bc 3 0 0 0
+PFEMParticle 181 coords 3 12.0 8.0 0.0 bc 3 0 0 0
+PFEMParticle 182 coords 3 13.0 8.0 0.0 bc 3 0 0 0
+PFEMParticle 183 coords 3 14.0 8.0 0.0 bc 3 0 0 0
+PFEMParticle 184 coords 3 15.0 8.0 0.0 bc 3 0 0 0
+PFEMParticle 185 coords 3 16.0 8.0 0.0 bc 3 0 0 0
+PFEMParticle 186 coords 3 17.0 8.0 0.0 bc 3 0 0 0
+PFEMParticle 187 coords 3 18.0 8.0 0.0 bc 3 0 0 0
+PFEMParticle 188 coords 3 19.0 8.0 0.0 bc 3 0 0 0
+InteractionPFEMParticle 189 coords 3 20.0 8.0 0.0 bc 3 4 4 0 coupledNode 17
+PFEMParticle 190 coords 3 0.0 9.0 0.0 bc 3 1 1 0
+PFEMParticle 191 coords 3 1.0 9.0 0.0 bc 3 0 0 0
+PFEMParticle 192 coords 3 2.0 9.0 0.0 bc 3 0 0 0
+PFEMParticle 193 coords 3 3.0 9.0 0.0 bc 3 0 0 0
+PFEMParticle 194 coords 3 4.0 9.0 0.0 bc 3 0 0 0
+PFEMParticle 195 coords 3 5.0 9.0 0.0 bc 3 0 0 0
+PFEMParticle 196 coords 3 6.0 9.0 0.0 bc 3 0 0 0
+PFEMParticle 197 coords 3 7.0 9.0 0.0 bc 3 0 0 0
+PFEMParticle 198 coords 3 8.0 9.0 0.0 bc 3 0 0 0
+PFEMParticle 199 coords 3 9.0 9.0 0.0 bc 3 0 0 0
+PFEMParticle 200 coords 3 10.0 9.0 0.0 bc 3 0 0 0
+PFEMParticle 201 coords 3 11.0 9.0 0.0 bc 3 0 0 0
+PFEMParticle 202 coords 3 12.0 9.0 0.0 bc 3 0 0 0
+PFEMParticle 203 coords 3 13.0 9.0 0.0 bc 3 0 0 0
+PFEMParticle 204 coords 3 14.0 9.0 0.0 bc 3 0 0 0
+PFEMParticle 205 coords 3 15.0 9.0 0.0 bc 3 0 0 0
+PFEMParticle 206 coords 3 16.0 9.0 0.0 bc 3 0 0 0
+PFEMParticle 207 coords 3 17.0 9.0 0.0 bc 3 0 0 0
+PFEMParticle 208 coords 3 18.0 9.0 0.0 bc 3 0 0 0
+PFEMParticle 209 coords 3 19.0 9.0 0.0 bc 3 0 0 0
+InteractionPFEMParticle 210 coords 3 20.0 9.0 0.0 bc 3 4 4 0 coupledNode 19
+PFEMParticle 211 coords 3 0.0 10.0 0.0 bc 3 1 1 0
+PFEMParticle 212 coords 3 1.0 10.0 0.0 bc 3 0 0 0
+PFEMParticle 213 coords 3 2.0 10.0 0.0 bc 3 0 0 0
+PFEMParticle 214 coords 3 3.0 10.0 0.0 bc 3 0 0 0
+PFEMParticle 215 coords 3 4.0 10.0 0.0 bc 3 0 0 0
+PFEMParticle 216 coords 3 5.0 10.0 0.0 bc 3 0 0 0
+PFEMParticle 217 coords 3 6.0 10.0 0.0 bc 3 0 0 0
+PFEMParticle 218 coords 3 7.0 10.0 0.0 bc 3 0 0 0
+PFEMParticle 219 coords 3 8.0 10.0 0.0 bc 3 0 0 0
+PFEMParticle 220 coords 3 9.0 10.0 0.0 bc 3 0 0 0
+PFEMParticle 221 coords 3 10.0 10.0 0.0 bc 3 0 0 0
+PFEMParticle 222 coords 3 11.0 10.0 0.0 bc 3 0 0 0
+PFEMParticle 223 coords 3 12.0 10.0 0.0 bc 3 0 0 0
+PFEMParticle 224 coords 3 13.0 10.0 0.0 bc 3 0 0 0
+PFEMParticle 225 coords 3 14.0 10.0 0.0 bc 3 0 0 0
+PFEMParticle 226 coords 3 15.0 10.0 0.0 bc 3 0 0 0
+PFEMParticle 227 coords 3 16.0 10.0 0.0 bc 3 0 0 0
+PFEMParticle 228 coords 3 17.0 10.0 0.0 bc 3 0 0 0
+PFEMParticle 229 coords 3 18.0 10.0 0.0 bc 3 0 0 0
+PFEMParticle 230 coords 3 19.0 10.0 0.0 bc 3 0 0 0
+InteractionPFEMParticle 231 coords 3 20.0 10.0 0.0 bc 3 4 4 0 coupledNode 21
+fluidcs 1 mat 1
+newtonianfluid 1 d 1.e3 mu 1.e-3
+#prescribed zero velocity - wall condition
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0 valtype 5
+#pressure 
+BoundaryCondition 2 loadTimeFunction 1 prescribedvalue 0.0 valtype 3
+#gravity 
+deadweight 3 components 2 0.0 -9.81 loadTimeFunction 1 valtype 2
+#interaction condition - takes the velocity from coupled node
+InteractionBoundaryCondition 4 loadTimeFunction 1 prescribedvalue 0.0 valtype 5
+#ic for velocity
+InitialCondition 1 conditions 1 u 1.0 valtype 5
+ConstantFunction 1 f(t) 1.0
+
+#%BEGIN_CHECK%
+#NODE tStep 10 number 1 dof 11 unknown d value 9.8934e+04 tolerance 25
+#%END_CHECK%

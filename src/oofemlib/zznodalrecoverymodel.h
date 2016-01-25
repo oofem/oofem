@@ -112,8 +112,9 @@ public:
      * @param answer Contains the result.
      * @param type Determines the type of internal variable to be recovered.
      * @param tStep Time step.
+     * @return true if ok, false if type not supported
      */
-    virtual void ZZNodalRecoveryMI_computeNValProduct(FloatMatrix &answer, InternalStateType type, TimeStep *tStep);
+    virtual bool ZZNodalRecoveryMI_computeNValProduct(FloatMatrix &answer, InternalStateType type, TimeStep *tStep);
     /**
      * Computes the element contribution to @f$\int_\Omega N^{\mathrm{T}} \cdot N\;\mathrm{d}\Omega @f$ term.
      * The size of answer should be [recordSize*numberofDofManagers].

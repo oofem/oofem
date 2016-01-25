@@ -167,7 +167,7 @@ IntMatBilinearCZJansson :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint
             
             double beta = pow(Qt,2)*Kstiff.at(3,3)/(pow(Qn_M,2)*Kstiff.at(1,1) + pow(Qt,2)*Kstiff.at(3,3));
 
-            double G_beta = beta*(this->GIIc - pow(gamma*sigf,2)/this->ks0) + (1-beta)*(this->GIc - pow(sigf,2)/this->kn0); // assuming linear interpolation between mode I and II
+            double G_beta = beta*(this->GIIc - pow(gamma*sigf,2)/(2*this->ks0)) + (1-beta)*(this->GIc - pow(sigf,2)/(2*this->kn0)); // assuming linear interpolation between mode I and II
             
             
             double eta = (pow(Qn_M,2) + pow(Qt,2)*Kstiff.at(3,3)/Kstiff.at(1,1))/(G_beta*sigf);
@@ -398,15 +398,15 @@ IntMatBilinearCZJansson :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatRe
 
 
 int
-IntMatBilinearCZJansson :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+IntMatBilinearCZJansson :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
 {
-    IntMatBilinearCZJanssonStatus *status = static_cast< IntMatBilinearCZJanssonStatus * >( this->giveStatus(aGaussPoint) );
+    IntMatBilinearCZJanssonStatus *status = static_cast< IntMatBilinearCZJanssonStatus * >( this->giveStatus(gp) );
     if ( type == IST_DamageScalar ) {     
         answer.resize(1);
         answer.at(1) = status->giveTempDamage();
         return 1;
     } else {
-        return StructuralInterfaceMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+        return StructuralInterfaceMaterial :: giveIPValue(answer, gp, type, atTime);
     }
 
 }

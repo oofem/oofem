@@ -174,7 +174,7 @@ Material :: saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp)
     }
 
     // write raw data - we save status there for this
-    MaterialStatus *status =  this->giveStatus(gp);
+    MaterialStatus *status = this->giveStatus(gp);
 
     if ( status ) {
         if ( ( iores = status->saveContext(stream, mode, gp) ) != CIO_OK ) {
@@ -252,20 +252,6 @@ Material :: initTempStatus(GaussPoint *gp)
     }
 }
 
-
-void
-Material :: initGpForNewStep(GaussPoint *gp)
-//
-// initialize gp record at the beginning of new load Increment
-// initialize gp status using this->initTempStatus(gp);
-//
-// this means: keeping Stress, Strain PlasticStrain Vectors.
-// zeroing Stress, Strain PlasticStrain Increment Vectors.
-//
-{
-    // initialize status
-    this->initTempStatus(gp);
-}
 
 int
 Material :: initMaterial(Element *element)

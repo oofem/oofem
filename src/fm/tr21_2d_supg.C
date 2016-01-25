@@ -44,6 +44,7 @@
 #include "intarray.h"
 #include "mathfem.h"
 #include "fluiddynamicmaterial.h"
+#include "fluidcrosssection.h"
 #include "timestep.h"
 #include "contextioerr.h"
 #include "crosssection.h"
@@ -243,7 +244,7 @@ TR21_2D_SUPG :: computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeSte
 
     this->velocityInterpolation.evald2Ndx2( d2n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
-    static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->giveDeviatoricStiffnessMatrix(D, TangentStiffness, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
+    static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial()->giveDeviatoricStiffnessMatrix(D, TangentStiffness, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
 
     for ( int i = 1; i <= 6; i++ ) {
         answer.at(1, 2 * i - 1) = D.at(1, 1) * d2n.at(i, 1) + D.at(1, 3) * d2n.at(i, 3) + D.at(3, 1) * d2n.at(i, 3) + D.at(3, 3) * d2n.at(i, 2);
@@ -262,7 +263,7 @@ TR21_2D_SUPG :: updateStabilizationCoeffs(TimeStep *tStep)
     FloatArray u;
     mu_min = 1;
     for ( GaussPoint *gp: *integrationRulesArray [ 1 ] ) {
-        double mu = static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->giveEffectiveViscosity(gp, tStep);
+        double mu = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial()->giveEffectiveViscosity(gp, tStep);
         if ( mu_min > mu ) {
             mu_min = mu;
         }
@@ -313,7 +314,7 @@ TR21_2D_SUPG :: computeAdvectionTerm(FloatMatrix &answer, TimeStep *tStep)
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, tStep);
         double dV  = this->computeVolumeAround(gp);
-        double rho = this->giveMaterial()->give('d', gp);
+        double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity(gp);
         answer.plusProductUnsym(n, b, rho * dV);
     }
 }
@@ -331,7 +332,7 @@ TR21_2D_SUPG :: computeAdvectionDeltaTerm(FloatMatrix &answer, TimeStep *tStep)
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, tStep);
         double dV  = this->computeVolumeAround(gp);
-        double rho = this->giveMaterial()->give('d', gp);
+        double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity(gp);
 
         answer.plusProductUnsym(b, b, rho * dV);
     }
@@ -351,7 +352,7 @@ TR21_2D_SUPG :: computeMassDeltaTerm(FloatMatrix &answer, TimeStep *tStep)
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, tStep);
         double dV  = this->computeVolumeAround(gp);
-        double rho = this->giveMaterial()->give('d', gp);
+        double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity(gp);
 
         answer.plusProductUnsym(b, n, rho * dV);
     }
@@ -366,7 +367,7 @@ TR21_2D_SUPG :: computeLSICTerm(FloatMatrix &answer, TimeStep *tStep)
 
     for ( GaussPoint *gp: *integrationRulesArray [ 1 ] ) {
         double dV  = this->computeVolumeAround(gp);
-        double rho = this->giveMaterial()->give('d', gp);
+        double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity(gp);
         this->computeDivUMatrix(b, gp);
 
         answer.plusProductSymmUpper(b, b, dV * rho);

@@ -71,6 +71,7 @@ public:
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep);
 
+    virtual double giveDensity(GaussPoint *gp);
     FluidDynamicMaterial *giveFluidMaterial();
 
     virtual int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp);

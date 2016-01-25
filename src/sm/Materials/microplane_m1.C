@@ -41,6 +41,238 @@
 namespace oofem {
 REGISTER_Material(M1Material);
 
+#ifdef microplane_m1_new_implementation
+// ========================= new implementation =========================
+M1Material :: M1Material(int n, Domain *d) : MicroplaneMaterial(n, d)
+{ E = 0.; nu = 0.; EN = 0.; s0 = 0.; HN = 0.; }
+
+IRResultType
+M1Material :: initializeFrom(InputRecord *ir)
+{
+    MicroplaneMaterial :: initializeFrom(ir);
+
+    IRResultType result;                // Required by IR_GIVE_FIELD macro
+
+    if ( nu != 0.25 ) {
+        OOFEM_WARNING("Poisson ratio of microplane model M1 must be set to 0.25");
+    }
+    nu = 0.25; // read by MicroplaneMaterial, but overwritten here
+    EN = E / ( 1. - 2. * nu );
+    IR_GIVE_FIELD(ir, s0, _IFT_M1Material_s0);
+    HN = 0.;
+    IR_GIVE_OPTIONAL_FIELD(ir, HN, _IFT_M1Material_hn);
+    ENtan = EN * HN / ( EN + HN );
+
+    return IRRT_OK;
+}
+
+void
+M1Material :: giveRealStressVector_3d(FloatArray &answer,
+                                      GaussPoint *gp,
+                                      const FloatArray &totalStrain,
+                                      TimeStep *tStep)
+{
+    answer.resize(6);
+    answer.zero();
+
+    // get the status at the beginning
+    M1MaterialStatus *status = static_cast< M1MaterialStatus * >( this->giveStatus(gp) );
+    // prepare status at the end
+    this->initTempStatus(gp);
+    // get the initial values of plastic strains on microplanes (set to zero in the first step)
+    FloatArray epspN = status->giveNormalMplanePlasticStrains();
+    if ( epspN.giveSize() < numberOfMicroplanes ) {
+        epspN.resize(numberOfMicroplanes);
+        epspN.zero();
+    }
+
+    // loop over microplanes
+    FloatArray sigN(numberOfMicroplanes);
+    IntArray plState(numberOfMicroplanes);
+    for ( int imp = 1; imp <= numberOfMicroplanes; imp++ ) {
+        Microplane *mPlane = this->giveMicroplane(imp - 1, gp);
+        //IntegrationPointStatus *mPlaneStatus =  this->giveMicroplaneStatus(mPlane);
+        double epsN = computeNormalStrainComponent(mPlane, totalStrain);
+        // evaluate trial stress on the microplane
+        double sigTrial = EN * ( epsN - epspN.at(imp) );
+        // evaluate the yield stress (from total microplane strain, not from its plastic part)
+        double sigYield = EN * ( s0 + HN * epsN ) / ( EN + HN );
+        if ( sigYield < 0. ) {
+            sigYield = 0.;
+        }
+        // check whether the yield stress is exceeded and set the microplane stress
+        if ( sigTrial > sigYield ) { //plastic yielding
+            sigN.at(imp) = sigYield;
+            epspN.at(imp) = epsN - sigYield / EN;
+            plState.at(imp) = 1;
+        } else {
+            sigN.at(imp) = sigTrial;
+            plState.at(imp) = 0;
+        }
+        // add the contribution of the microplane to macroscopic stresses
+        for ( int i = 1; i <= 6; i++ ) {
+            answer.at(i) += N [ imp - 1 ] [ i - 1 ] * sigN.at(imp) * microplaneWeights [ imp - 1 ];
+        }
+    }
+    // multiply the integral over unit hemisphere by 6
+    answer.times(6);
+
+    // update status
+    status->letTempStrainVectorBe(totalStrain);
+    status->letTempStressVectorBe(answer);
+    status->letTempNormalMplaneStressesBe(sigN);
+    status->letTempNormalMplanePlasticStrainsBe(epspN);
+    status->letPlasticStateIndicatorsBe(plState);
+}
+
+void
+M1Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+                                            MatResponseMode mode,
+                                            GaussPoint *gp,
+                                            TimeStep *tStep)
+{
+    answer.resize(6, 6);
+    answer.zero();
+    // elastic stiffness matrix
+    if ( mode == ElasticStiffness ) {
+        MicroplaneMaterial :: give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
+        return;
+    }
+
+    M1MaterialStatus *status = static_cast< M1MaterialStatus * >( this->giveStatus(gp) );
+    IntArray plasticState = status->givePlasticStateIndicators();
+    if ( plasticState.giveSize() != numberOfMicroplanes ) {
+        MicroplaneMaterial :: give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
+        return;
+    }
+    // tangent stiffness matrix
+    double aux, D11 = 0., D12 = 0., D13 = 0., D14 = 0., D15 = 0., D16 = 0., D22 = 0., D23 = 0., D24 = 0., D25 = 0., D26 = 0., D33 = 0., D34 = 0., D35 = 0., D36 = 0.;
+    // loop over microplanes
+    for ( int im = 0; im < numberOfMicroplanes; im++ ) {
+        if ( plasticState.at(im + 1) ) {
+            aux = ENtan * microplaneWeights [ im ];
+        } else {
+            aux = EN * microplaneWeights [ im ];
+        }
+        D11 += aux * N [ im ] [ 0 ] * N [ im ] [ 0 ];
+        D12 += aux * N [ im ] [ 0 ] * N [ im ] [ 1 ];
+        D13 += aux * N [ im ] [ 0 ] * N [ im ] [ 2 ];
+        D14 += aux * N [ im ] [ 0 ] * N [ im ] [ 3 ];
+        D15 += aux * N [ im ] [ 0 ] * N [ im ] [ 4 ];
+        D16 += aux * N [ im ] [ 0 ] * N [ im ] [ 5 ];
+
+        D22 += aux * N [ im ] [ 1 ] * N [ im ] [ 1 ];
+        D23 += aux * N [ im ] [ 1 ] * N [ im ] [ 2 ];
+        D24 += aux * N [ im ] [ 1 ] * N [ im ] [ 3 ];
+        D25 += aux * N [ im ] [ 1 ] * N [ im ] [ 4 ];
+        D26 += aux * N [ im ] [ 1 ] * N [ im ] [ 5 ];
+
+        D33 += aux * N [ im ] [ 2 ] * N [ im ] [ 2 ];
+        D34 += aux * N [ im ] [ 2 ] * N [ im ] [ 3 ];
+        D35 += aux * N [ im ] [ 2 ] * N [ im ] [ 4 ];
+        D36 += aux * N [ im ] [ 2 ] * N [ im ] [ 5 ];
+    }
+    answer.at(1, 1) = D11;
+    answer.at(1, 2) = answer.at(2, 1) = answer.at(6, 6) = D12;
+    answer.at(1, 3) = answer.at(3, 1) = answer.at(5, 5) = D13;
+    answer.at(1, 4) = answer.at(4, 1) = answer.at(5, 6) = answer.at(6, 5) = D14;
+    answer.at(1, 5) = answer.at(5, 1) = D15;
+    answer.at(1, 6) = answer.at(6, 1) = D16;
+
+    answer.at(2, 2) = D22;
+    answer.at(2, 3) = answer.at(3, 2) = answer.at(4, 4) = D23;
+    answer.at(2, 4) = answer.at(4, 2) = D24;
+    answer.at(2, 5) = answer.at(5, 2) = answer.at(4, 6) = answer.at(6, 4) = D25;
+    answer.at(2, 6) = answer.at(6, 2) = D26;
+
+    answer.at(3, 3) = answer.at(3, 3) = D33;
+    answer.at(3, 4) = answer.at(4, 3) = D34;
+    answer.at(3, 5) = answer.at(5, 3) = D35;
+    answer.at(3, 6) = answer.at(6, 3) = answer.at(4, 5)  = answer.at(5, 4) = D36;
+
+    answer.times(6.);
+}
+
+int
+M1Material :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
+{
+    M1MaterialStatus *status = static_cast< M1MaterialStatus * >( this->giveStatus(gp) );
+    if ( type == IST_PlasticStrainTensor ) {
+        // plastic strain is computed as total strain minus elastic strain
+        // (note that integration of microplane plastic strains would give a different result)
+        answer = status->giveStrainVector();
+        FloatArray sig = status->giveStressVector();
+        double aux = nu * ( sig.at(1) + sig.at(2) + sig.at(3) );
+        double G = E / ( 2. * ( 1. + nu ) );
+        answer.at(1) -= ( ( 1. + nu ) * sig.at(1) - aux ) / E;
+        answer.at(2) -= ( ( 1. + nu ) * sig.at(2) - aux ) / E;
+        answer.at(3) -= ( ( 1. + nu ) * sig.at(3) - aux ) / E;
+        answer.at(4) -= sig.at(4) / G;
+        answer.at(5) -= sig.at(5) / G;
+        answer.at(6) -= sig.at(6) / G;
+        return 1;
+    } else {
+        return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
+    }
+}
+////////////////////////////////////////////////////////////////////////////
+
+M1MaterialStatus :: M1MaterialStatus(int n, Domain *d, GaussPoint *g) :
+    StructuralMaterialStatus(n, d, g), sigN(0), epspN(0), plasticState(0)
+{}
+
+
+M1MaterialStatus :: ~M1MaterialStatus()
+{ }
+
+void
+M1MaterialStatus :: initTempStatus()
+{
+    StructuralMaterialStatus :: initTempStatus();
+}
+
+void
+M1MaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+{
+    StructuralMaterialStatus :: printOutputAt(file, tStep);
+    fprintf(file, "status { sigN ");
+    int nm = sigN.giveSize();
+    for ( int imp = 1; imp <= nm; imp++ ) {
+        fprintf( file, " %g ", sigN.at(imp) );
+    }
+    fprintf(file, " epspN ");
+    for ( int imp = 1; imp <= nm; imp++ ) {
+        fprintf( file, " %g ", epspN.at(imp) );
+    }
+    fprintf(file, " plast ");
+    for ( int imp = 1; imp <= nm; imp++ ) {
+        fprintf( file, " %d ", plasticState.at(imp) );
+    }
+    fprintf(file, "}\n");
+}
+
+void
+M1MaterialStatus :: updateYourself(TimeStep *tStep)
+{
+    sigN = tempSigN;
+    epspN = tempEpspN;
+    StructuralMaterialStatus :: updateYourself(tStep);
+}
+
+contextIOResultType
+M1MaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+{
+    return StructuralMaterialStatus :: saveContext(stream, mode, obj);
+}
+
+contextIOResultType
+M1MaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+{
+    return StructuralMaterialStatus :: restoreContext(stream, mode, obj);
+}
+
+#else
+// ========================= old implementation =========================
 M1Material :: M1Material(int n, Domain *d) : StructuralMaterial(n, d)
 { E = 0.; nu = 0.; EN = 0.; s0 = 0.; HN = 0.; }
 
@@ -50,7 +282,6 @@ M1Material :: giveRealStressVector_PlaneStress(FloatArray &answer,
                                                const FloatArray &totalStrain,
                                                TimeStep *tStep)
 {
-    int i, imp;
     FloatArray sigmaN, deps, sigmaNyield;
     double depsN, epsN;
 
@@ -68,7 +299,7 @@ M1Material :: giveRealStressVector_PlaneStress(FloatArray &answer,
     }
     deps.beDifferenceOf( totalStrain, status->giveStrainVector() );
 
-    for ( imp = 1; imp <= nmp; imp++ ) {
+    for ( int imp = 1; imp <= nmp; imp++ ) {
         depsN = N.at(imp, 1) * deps.at(1) + N.at(imp, 2) * deps.at(2) + N.at(imp, 3) * deps.at(3);
         epsN = N.at(imp, 1) * totalStrain.at(1) + N.at(imp, 2) * totalStrain.at(2) + N.at(imp, 3) * totalStrain.at(3);
         sigmaN.at(imp) += EN * depsN;
@@ -80,7 +311,7 @@ M1Material :: giveRealStressVector_PlaneStress(FloatArray &answer,
             sigmaN.at(imp) = sy;
         }
         sigmaNyield.at(imp) = sy;
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             answer.at(i) += N.at(imp, i) * sigmaN.at(imp) * mw.at(imp);
         }
     }
@@ -273,4 +504,6 @@ M1MaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *o
 {
     return StructuralMaterialStatus :: restoreContext(stream, mode, obj);
 }
+
+#endif // end of old implementation
 } // end namespace oofem

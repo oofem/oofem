@@ -36,6 +36,7 @@
 #define dofmanager_h
 
 #include <cstdio>
+#include <map>
 
 #include "femcmpnn.h"
 #include "intarray.h"
@@ -48,7 +49,6 @@
 
 ///@name Input fields for DofManager
 //@{
-#define _IFT_DofManager_ndofs "ndofs"
 #define _IFT_DofManager_dofidmask "dofidmask"
 #define _IFT_DofManager_load "load"
 #define _IFT_DofManager_bc "bc"
@@ -491,7 +491,7 @@ public:
      * @return True if receiver has dof with given id.
      * @see DofIDItem
      */
-    bool hasDofID(DofIDItem id);
+    bool hasDofID(DofIDItem id) const;
 
 #ifdef __OOFEG
     virtual void drawYourself(oofegGraphicContext &gc, TimeStep *tStep) { }

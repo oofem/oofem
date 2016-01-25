@@ -4,25 +4,30 @@ LinearStatic nsteps 1 nmodules 1
 errorcheck
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
-ndofman 9 nelem 1 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1
-node 1 coords 3 0   0   0   bc 2 1 1
-node 2 coords 3 5.  0.  0.  bc 2 0 1
-node 3 coords 3 10. 0.  0.  bc 2 2 1
-node 4 coords 3 0.  1.  0.  bc 2 1 0
-node 5 coords 3 5   1   0   bc 2 0 0
-node 6 coords 3 10. 1.  0.  bc 2 2 0
-node 7 coords 3 0.  2.  0.  bc 2 1 0
-node 8 coords 3 5.  2.  0.  bc 2 0 0
-node 9 coords 3 10  2   0   bc 2 2 0
+ndofman 9 nelem 1 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 1 nset 4
+node 1 coords 3 0.  0.  0.
+node 2 coords 3 5.  0.  0.
+node 3 coords 3 10. 0.  0.
+node 4 coords 3 0.  1.  0.
+node 5 coords 3 5.  1.  0.
+node 6 coords 3 10. 1.  0.
+node 7 coords 3 0.  2.  0.
+node 8 coords 3 5.  2.  0.
+node 9 coords 3 10. 2.  0.
 #
-bsplineplanestresselement 1 nodes 9 1 2 3 4 5 6 7 8 9 crossSect 1 mat 1 knotvectoru 2 0 3 knotvectorv 2 0 2 knotmultiplicityv 2 3 3 degree 2 2 2 nip 16
+bsplineplanestresselement 1 nodes 9 1 2 3 4 5 6 7 8 9 knotvectoru 2 0 3 knotvectorv 2 0 2 knotmultiplicityv 2 3 3 degree 2 2 2 nip 16
 #
-SimpleCS 1 thick 0.15
+SimpleCS 1 thick 0.15 material 1 set 1
 #
 IsoLE 1 d 0. E 15.0 n 0.25 tAlpha 0.000012
-BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
-BoundaryCondition  2 loadTimeFunction 1 prescribedvalue 1.0 
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 2
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 2 values 1 0.0 set 3
+BoundaryCondition 3 loadTimeFunction 1 dofs 1 1 values 1 1.0 set 4
 ConstantFunction 1 f(t) 1.0
+Set 1 elementranges {1}
+Set 2 nodes 3 1 4 7
+Set 3 nodes 3 1 2 3
+Set 4 nodes 3 3 6 9
 #
 #%BEGIN_CHECK% tolerance 1.e-8
 ## check reactions 

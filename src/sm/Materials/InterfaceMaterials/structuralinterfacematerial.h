@@ -146,29 +146,6 @@ public:
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
     bool useNumericalTangent; ///@todo make private
-
-protected:
-    /**
-     * Transforms traction vector into another coordinate system.
-     * @param answer Transformed traction vector
-     * @param base Transformation matrix. The columns in the matrix corresponds to the base vectors of the new
-     * coordinate system to which we do transformation. These vectors must
-     * be expressed in the same coordinate system as source strainVector.
-     * @param strainVector 3d traction.
-     * @param transpose Determines if we transpose matrix before transforming.
-     */
-    static void transformTractionTo(FloatArray &answer, const FloatMatrix &base,
-                                    const FloatArray &strainVector, bool transpose = false);
-
-    /**
-     * Computes jump vector transformation matrix from standard vector transformation matrix.
-     * @param answer Transformation matrix for strain vector.
-     * @param base A (3,3) matrix, where on each column are stored unit direction vectors of
-     * local coordinate axes to which we do transformation.
-     * @param transpose Determines if we transpose matrix before transforming.
-     */
-    static void giveJumpTranformationMtrx(FloatMatrix &answer, const FloatMatrix &base,
-                                          bool transpose = false);
 };
 } // end namespace oofem
-#endif // StructuralInterfaceMaterial_h
+#endif // structuralinterfacematerial_h
