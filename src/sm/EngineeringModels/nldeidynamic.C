@@ -514,7 +514,7 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
     int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
     int i, j, jj, n;
     double maxOmi, maxOmEl;
-    FloatMatrix charMtrx, charMtrx2;
+    FloatMatrix charMtrx, charMtrx2, R;
     IntArray loc;
     Element *element;
     EModelDefaultEquationNumbering en;
@@ -538,9 +538,21 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
 
         element->giveLocationArray(loc, en);
         element->giveCharacteristicMatrix(charMtrx, LumpedMassMatrix, tStep);
+        if ( charMtrx.isNotEmpty() ) {
+          ///@todo This rotation matrix is not flexible enough.. it can only work with full size matrices and doesn't allow for flexibility in the matrixassembler.
+          if ( element->giveRotationMatrix(R) ) {
+            charMtrx.rotatedWith(R);
+          }
+        }
 
 #ifdef LOCAL_ZERO_MASS_REPLACEMENT
         element->giveCharacteristicMatrix(charMtrx2, TangentStiffnessMatrix, tStep);
+        if ( charMtrx2.isNotEmpty() ) {
+          ///@todo This rotation matrix is not flexible enough.. it can only work with full size matrices and doesn't allow for flexibility in the matrixassembler.
+          if ( R.isNotEmpty() ) {
+            charMtrx2.rotatedWith(R);
+          }
+        }       
 #endif
 
 #ifdef DEBUG
@@ -596,6 +608,13 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
         element = domain->giveElement(i);
         element->giveLocationArray(loc, en);
         element->giveCharacteristicMatrix(charMtrx, TangentStiffnessMatrix, tStep);
+        if ( charMtrx.isNotEmpty() ) {
+          ///@todo This rotation matrix is not flexible enough.. it can only work with full size matrices and doesn't allow for flexibility in the matrixassembler.
+          if ( element->giveRotationMatrix(R) ) {
+            charMtrx.rotatedWith(R);
+          }
+        }
+
         n = loc.giveSize();
         for ( j = 1; j <= n; j++ ) {
             jj = loc.at(j);
