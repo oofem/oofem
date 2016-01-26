@@ -1463,10 +1463,11 @@ A different mass and rotary inertia may be assigned to each coordinate direction
 This element represent longitudial or torsional spring element. It is defined by two nodes, orientation and a spring constant.
 The spring element has no mass associated, the mass can be added using LumpedMass element. The spring is linear and works the same way in tension or in compression. The element features are summarized in Table~\ref{Springsummary}.
 
-\begin{elementsummary}{Spring}{Spring element}{\field{mode}{in} \field{k}{rn} \field{orientation}{ra}}{Spring element summary}{Springsummary}
+\begin{elementsummary}{Spring}{Spring element}{\field{mode}{in} \field{k}{rn} \optField{m}{rn} \field{orientation}{ra}}{Spring element summary}{Springsummary}
 \elementParam{\param{mode}: defines the type of spring element (see Table~\ref{spring_mode_table}).}
 \elementParam{\param{k}:  determines the spring constant, corresponding units are [Force/Length] for longitudinal spring and [Force*Length/Radian] for torsional spring.}
 \elementParam{\param{orientation}:defines orientation vector of spring element (of size 3) - for longitudinal spring it defines the direction of spring, for torsional spring it defines the axis of rotation.}
+\elementParam{\param{m}: determines optional mass of the element, zero value assumed by default. 
 \elementDescription{Note}{the spring element nodes doesn't need to be coincident, but the spring orientation is always determined by \param{orientation} vector.}
 \end{elementsummary}
 
