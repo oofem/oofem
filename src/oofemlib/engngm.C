@@ -231,12 +231,6 @@ int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const cha
 #  ifdef VERBOSE
     OOFEM_LOG_DEBUG( "Reading all data from input file %s\n", dr->giveDataSourceName() );
 #  endif
-#ifdef __PARALLEL_MODE
-    if ( this->isParallel() ) {
-        fprintf(outputStream, "Problem rank is %d/%d on %s\n\n", this->rank, this->numProcs, this->processor_name);
-    }
-
-#endif
 
     simulationDescription = std::string(desc);
 
@@ -324,19 +318,25 @@ EngngModel :: initializeFrom(InputRecord *ir)
 
     suppressOutput = ir->hasField(_IFT_EngngModel_suppressOutput);
 
-    if(suppressOutput) {
-    	printf("Suppressing output.\n");
+    if ( suppressOutput ) {
+        printf("Suppressing output.\n");
     }
     else {
 
-		if ( ( outputStream = fopen(this->dataOutputFileName.c_str(), "w") ) == NULL ) {
-			OOFEM_ERROR("Can't open output file %s", this->dataOutputFileName.c_str());
-		}
+        if ( ( outputStream = fopen(this->dataOutputFileName.c_str(), "w") ) == NULL ) {
+            OOFEM_ERROR("Can't open output file %s", this->dataOutputFileName.c_str());
+        }
 
-		fprintf(outputStream, "%s", PRG_HEADER);
-		fprintf( outputStream, "\nStarting analysis on: %s\n", ctime(& this->startTime) );
-		fprintf(outputStream, "%s\n", simulationDescription.c_str());
-	}
+        fprintf(outputStream, "%s", PRG_HEADER);
+        fprintf(outputStream, "\nStarting analysis on: %s\n", ctime(& this->startTime) );
+        fprintf(outputStream, "%s\n", simulationDescription.c_str());
+
+#ifdef __PARALLEL_MODE
+        if ( this->isParallel() ) {
+            fprintf(outputStream, "Problem rank is %d/%d on %s\n\n", this->rank, this->numProcs, this->processor_name);
+        }
+#endif
+    }
 
     return IRRT_OK;
 }
@@ -1658,16 +1658,17 @@ EngngModel :: giveMetaStep(int i)
 }
 
 void 
-EngngModel::letOutputBaseFileNameBe(const std :: string &src) {
-  this->dataOutputFileName = src;
+EngngModel::letOutputBaseFileNameBe(const std :: string &src)
+{
+    this->dataOutputFileName = src;
 
-  if ( outputStream) fclose(outputStream);
+    if ( outputStream) fclose(outputStream);
 
-  if(!suppressOutput) {
-	  if ( ( outputStream = fopen(this->dataOutputFileName.c_str(), "w") ) == NULL ) {
-		OOFEM_ERROR("Can't open output file %s", this->dataOutputFileName.c_str());
-	  }
-  }
+    if ( !suppressOutput ) {
+        if ( ( outputStream = fopen(this->dataOutputFileName.c_str(), "w") ) == NULL ) {
+            OOFEM_ERROR("Can't open output file %s", this->dataOutputFileName.c_str());
+        }
+    }
 }
 
 FILE *
@@ -1712,19 +1713,19 @@ EngngModel :: terminateAnalysis()
 
         fprintf(out, "\nFinishing analysis on: %s\n", ctime(& endTime) );
     }
-    
+
     // compute real time consumed
     this->giveAnalysisTime(rhrs, rmin, rsec, uhrs, umin, usec);
 
-    if(!suppressOutput) {
-    	fprintf(out, "Real time consumed: %03dh:%02dm:%02ds\n", rhrs, rmin, rsec);
+    if ( !suppressOutput ) {
+        fprintf(out, "Real time consumed: %03dh:%02dm:%02ds\n", rhrs, rmin, rsec);
     }
 
     OOFEM_LOG_FORCED("\n\nANALYSIS FINISHED\n\n\n");
     OOFEM_LOG_FORCED("Real time consumed: %03dh:%02dm:%02ds\n", rhrs, rmin, rsec);
 
-    if(!suppressOutput) {
-    	fprintf(out, "User time consumed: %03dh:%02dm:%02ds\n\n\n", uhrs, umin, usec);
+    if ( !suppressOutput ) {
+        fprintf(out, "User time consumed: %03dh:%02dm:%02ds\n\n\n", uhrs, umin, usec);
     }
 
     OOFEM_LOG_FORCED("User time consumed: %03dh:%02dm:%02ds\n", uhrs, umin, usec);
@@ -1759,13 +1760,11 @@ EngngModel :: checkProblemConsistency()
 void
 EngngModel :: postInitialize()
 {
-
     // set meta step bounds
     int istep = this->giveNumberOfFirstStep(true);
     for ( auto &metaStep: metaStepList ) {
         istep = metaStep.setStepBounds(istep);
     }
-
 
     for ( auto &domain: domainList ) {
         domain->postInitialize();
