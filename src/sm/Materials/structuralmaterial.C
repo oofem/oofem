@@ -2411,10 +2411,7 @@ StructuralMaterial :: giveReducedVectorForm(FloatArray &answer, const FloatArray
 {
     IntArray indx;
     StructuralMaterial :: giveVoigtVectorMask(indx, matMode);
-    answer.resize( indx.giveSize() );
-    for ( int i = 1; i <= indx.giveSize(); i++ ) {
-        answer.at(i) = vec.at( indx.at(i) );
-    }
+    answer.beSubArrayOf(vec, indx);
 }
 
 
@@ -2427,10 +2424,7 @@ StructuralMaterial :: giveReducedSymVectorForm(FloatArray &answer, const FloatAr
     if ( indx.giveSize() == vec.giveSize() ) {
         answer = vec;
     } else {
-        answer.resize( indx.giveSize() );
-        for ( int i = 1; i <= indx.giveSize(); i++ ) {
-            answer.at(i) = vec.at( indx.at(i) );
-        }
+        answer.beSubArrayOf(vec, indx);
     }
 }
 
