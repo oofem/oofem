@@ -47,7 +47,7 @@
 #include "dynamicinputrecord.h"
 
 namespace oofem {
-    
+
 std::vector< std::vector<int> > StructuralMaterial :: vIindex = {
     { 1, 6, 5 },
     { 9, 2, 4 },
@@ -775,6 +775,20 @@ StructuralMaterial :: giveStressDependentPartOfStrainVector(FloatArray &answer, 
     }
 }
 
+void
+StructuralMaterial :: giveStressDependentPartOfStrainVector_3d(FloatArray &answer, GaussPoint *gp,
+                                                            const FloatArray &reducedStrainVector,
+                                                            TimeStep *tStep, ValueModeType mode)
+{
+    FloatArray epsilonTemperature;
+
+    answer = reducedStrainVector;
+    this->computeStressIndependentStrainVector_3d(epsilonTemperature, gp, tStep, mode);
+    if ( epsilonTemperature.giveSize() ) {
+        answer.subtract(epsilonTemperature);
+    }
+}
+
 
 int
 StructuralMaterial :: giveSizeOfVoigtSymVector(MaterialMode mode)
@@ -1245,14 +1259,18 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
 //
 {
     int size = s.giveSize();
-    if ( !( ( size == 3 ) || ( size == 4 ) || ( size == 6 ) ) ) {
+    if ( !( size == 1 || size == 3 || size == 4 || size == 6 ) ) {
         OOFEM_SERROR("Vector size mismatch");
     }
 
     double swap;
     int nonzeroFlag = 0;
     bool solve = true;
-    if ( ( size == 3 ) || ( size == 4 ) ) {
+    if ( size == 1 ) {
+        answer.resize(1);
+        answer.at(1) = s.at(1);
+        return;
+    } else if ( size == 3 || size == 4 ) {
         // 2D problem
         double ast, dst, D = 0.0;
         answer.resize(size - 1);
@@ -1427,11 +1445,17 @@ StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &di
     int nonzeroFlag = 0;
 
     // printf ("size is %d\n",size);
-    if ( !( ( size == 3 ) || ( size == 4 ) || ( size == 6 ) ) ) {
+    if ( !( size == 1 || size == 3 || size == 4 || size == 6 ) ) {
         OOFEM_SERROR("Vector size mismatch");
     }
 
-    if ( ( size == 3 ) || ( size == 4 ) ) {
+    if ( size == 1 ) {
+        answer.resize(1);
+        answer.at(1) = s.at(1);
+        dir.resize(1, 1);
+        dir.at(1, 1) = 1.0;
+        return;
+    } else if ( size == 3 || size == 4 ) {
         // 2D problem
         ss.resize(2, 2);
         answer.resize(2);
@@ -2257,6 +2281,93 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
 
 
 void
+StructuralMaterial :: computeStressIndependentStrainVector_3d(FloatArray &answer,
+                                                           GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
+{
+    FloatArray et, eigenstrain;
+    if ( gp->giveIntegrationRule() == NULL ) {
+        ///@todo Hack for loose gausspoints. We shouldn't ask for "gp->giveElement()". FIXME
+        answer.clear();
+        return;
+    }
+    Element *elem = gp->giveElement();
+    StructuralElement *selem = dynamic_cast< StructuralElement * >( gp->giveElement() );
+
+    answer.clear();
+
+    if ( tStep->giveIntrinsicTime() < this->castingTime ) {
+        return;
+    }
+
+    //sum up all prescribed temperatures over an element
+    //elem->computeResultingIPTemperatureAt(et, tStep, gp, mode);
+    if ( selem ) {
+        selem->computeResultingIPTemperatureAt(et, tStep, gp, mode);
+    }
+
+    //sum up all prescribed eigenstrain over an element
+    if ( selem ) {
+        selem->computeResultingIPEigenstrainAt(eigenstrain, tStep, gp, mode);
+    }
+
+    /* add external source, if provided */
+    FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
+    FM_FieldPtr tf = fm->giveField(FT_Temperature);
+
+    if ( tf ) {
+        // temperature field registered
+        FloatArray gcoords, et2;
+        int err;
+        elem->computeGlobalCoordinates( gcoords, gp->giveNaturalCoordinates() );
+        if ( ( err = tf->evaluateAt(et2, gcoords, mode, tStep) ) ) {
+            OOFEM_ERROR("tf->evaluateAt failed, element %d, error code %d", elem->giveNumber(), err);
+        }
+
+        if ( et2.isNotEmpty() ) {
+            if ( et.isEmpty() ) {
+                et = et2;
+            } else {
+                et.at(1) += et2.at(1);
+            }
+        }
+    }
+
+
+    if ( et.giveSize() ) { //found temperature boundary conditions or prescribed field
+        FloatArray fullAnswer, e0;
+
+        this->giveThermalDilatationVector(e0, gp, tStep);
+
+        if ( e0.giveSize() ) {
+            fullAnswer = e0;
+            if ( mode == VM_Total ) {
+                fullAnswer.times(et.at(1) - this->referenceTemperature);
+            } else {
+                fullAnswer.times( et.at(1) );
+            }
+
+            answer = fullAnswer;
+        }
+    }
+
+    //join temperature and eigenstrain vectors, compare vector sizes
+    if ( answer.giveSize() ) {
+        if ( eigenstrain.giveSize() ) {
+            if ( answer.giveSize() != eigenstrain.giveSize() ) {
+                OOFEM_ERROR( "Vector of temperature strains has the size %d which is different with the size of eigenstrain vector %d, element %d", answer.giveSize(), eigenstrain.giveSize(), elem->giveNumber() );
+            }
+
+            answer.add(eigenstrain);
+        }
+    } else {
+        if ( eigenstrain.giveSize() ) {
+            answer = eigenstrain;
+        }
+    }
+}
+
+
+void
 StructuralMaterial :: giveFullSymVectorForm(FloatArray &answer, const FloatArray &vec, MaterialMode matMode)
 {
     if ( vec.giveSize() == 6 ) {
@@ -2300,10 +2411,7 @@ StructuralMaterial :: giveReducedVectorForm(FloatArray &answer, const FloatArray
 {
     IntArray indx;
     StructuralMaterial :: giveVoigtVectorMask(indx, matMode);
-    answer.resize( indx.giveSize() );
-    for ( int i = 1; i <= indx.giveSize(); i++ ) {
-        answer.at(i) = vec.at( indx.at(i) );
-    }
+    answer.beSubArrayOf(vec, indx);
 }
 
 
@@ -2316,10 +2424,7 @@ StructuralMaterial :: giveReducedSymVectorForm(FloatArray &answer, const FloatAr
     if ( indx.giveSize() == vec.giveSize() ) {
         answer = vec;
     } else {
-        answer.resize( indx.giveSize() );
-        for ( int i = 1; i <= indx.giveSize(); i++ ) {
-            answer.at(i) = vec.at( indx.at(i) );
-        }
+        answer.beSubArrayOf(vec, indx);
     }
 }
 

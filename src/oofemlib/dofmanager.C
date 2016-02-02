@@ -163,7 +163,7 @@ void DofManager :: removeDof(DofIDItem id)
 }
 
 
-bool DofManager :: hasDofID(DofIDItem id)
+bool DofManager :: hasDofID(DofIDItem id) const
 {
     for ( Dof *dof: *this ) {
         if ( dof->giveDofID() == id ) {

@@ -87,6 +87,12 @@ public:
     virtual bool hasPropagation() const { return mIncrementLength > 0.; } ///@todo Could this be done smarter? / Mikael
     virtual bool propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp);
 
+    void setRadius(double iRadius) {mRadius = std::move(iRadius);}
+    void setAngleInc(double iAngleInc) {mAngleInc = std::move(iAngleInc);}
+    void setIncrementLength(double iIncrementLength) {mIncrementLength = std::move(iIncrementLength);}
+    void setHoopStressThreshold(double iHoopStressThreshold) {mHoopStressThreshold = std::move(iHoopStressThreshold);}
+    void setUseRadialBasisFunc(bool iUseRadialBasisFunc) {mUseRadialBasisFunc = std::move(iUseRadialBasisFunc);}
+
 protected:
     double mRadius, mAngleInc, mIncrementLength, mHoopStressThreshold;
     bool mUseRadialBasisFunc;

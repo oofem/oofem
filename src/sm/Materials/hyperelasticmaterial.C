@@ -46,13 +46,10 @@ HyperElasticMaterial :: HyperElasticMaterial(int n, Domain *d) : StructuralMater
 
 void
 HyperElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep)
-
-// returns the 6x6 tangent stiffness matrix - dS/dE
-
 {
     double J2, c11, c22, c33, c12, c13, c23, A, B;
     FloatMatrix C(3, 3);
-    FloatMatrix invC(3, 3);
+    FloatMatrix invC;
 
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
@@ -104,17 +101,14 @@ HyperElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRe
 
 void
 HyperElasticMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep)
-
-// returns 6 components of the stress corresponding to the given total strain
-
 {
     double J2;
     FloatMatrix C(3, 3);
-    FloatMatrix invC(3, 3);
+    FloatMatrix invC;
     FloatArray strainVector;
 
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-    this->giveStressDependentPartOfStrainVector(strainVector, gp,
+    this->giveStressDependentPartOfStrainVector_3d(strainVector, gp,
                                                 totalStrain,
                                                 tStep, VM_Total);
 

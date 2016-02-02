@@ -116,8 +116,8 @@ IntMatBilinearCZFagerstrom :: giveFirstPKTraction_3d(FloatArray &answer, GaussPo
         double gamma = this->gamma;
         double mu = this->mu;
 
-        double S = (this->GIc - pow(sigf,2)/this->kn0)/sigf;
-        double gammaGf = gamma*(this->GIIc - pow(gamma*sigf,2)/this->ks0)/(this->GIc - pow(sigf,2)/this->kn0);
+        double S = (this->GIc - pow(sigf,2)/(2*this->kn0))/sigf;
+        double gammaGf = gamma*(this->GIIc - pow(gamma*sigf,2)/(2*this->ks0))/(this->GIc - pow(sigf,2)/(2*this->kn0));
 
         double Qn_M = 0.5*(Qn + fabs(Qn));
         double loadFun = sigf*pow(Qt/(gamma*sigf),2) + (sigf/gamma)*(gamma-mu)*pow((Qn_M/sigf),2) - 1/gamma*(gamma*sigf-mu*Qn); // Added support for parameter mu

@@ -491,7 +491,7 @@ public:
      * @return True if receiver has dof with given id.
      * @see DofIDItem
      */
-    bool hasDofID(DofIDItem id);
+    bool hasDofID(DofIDItem id) const;
 
 #ifdef __OOFEG
     virtual void drawYourself(oofegGraphicContext &gc, TimeStep *tStep) { }

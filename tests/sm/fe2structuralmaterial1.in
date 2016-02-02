@@ -26,7 +26,7 @@ quad1planestrain 17    nodes 4   8   2   3   9   crosssect 1
 SimpleCS 1 thick 1.0 material 1
 #
 # Linear elasticity
-fe2structuralmaterial 1 d 1.0 inputfile fe2structuralmaterial1.in.rve
+structfe2material 1 d 1.0 filename fe2structuralmaterial1.in.rve use_num_tangent
 #
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
 NodalLoad 2 loadTimeFunction 1 Components 2 0.0 -0.5e6

@@ -57,9 +57,14 @@
 #include <sstream>
 
 namespace oofem {
+
+
 PrescribedGradientBCWeak :: PrescribedGradientBCWeak(int n, Domain *d) :
     ActiveBoundaryCondition(n, d),
     PrescribedGradientHomogenization(),
+	mTractionDofIDs( {Trac_u, Trac_v} ),
+	mDispLockDofIDs( {LMP_u, LMP_v} ),
+	mRegularDispDofIDs( {D_u, D_v} ),
     mTractionInterpOrder(0),
     mNumTractionNodesAtIntersections(1),
     mTractionNodeSpacing(1),
@@ -326,13 +331,13 @@ void PrescribedGradientBCWeak :: assembleVector(FloatArray &answer, TimeStep *tS
 
         if ( mpDisplacementLock != NULL ) {
             IntArray dispLockRows;
-            mpDisplacementLock->giveCompleteLocationArray(dispLockRows, s);
+            mpDisplacementLock->giveLocationArray(giveDispLockDofIDs(), dispLockRows, s);
 
             FloatArray fe_dispLock;
 
             int lockNodePlaceInArray = domain->giveDofManPlaceInArray(mLockNodeInd);
             FloatArray nodeUnknowns;
-            domain->giveDofManager(lockNodePlaceInArray)->giveCompleteUnknownVector(nodeUnknowns, mode, tStep);
+            domain->giveDofManager(lockNodePlaceInArray)->giveUnknownVector(nodeUnknowns,this->giveRegularDispDofIDs(), mode, tStep);
 
             for ( int i = 0; i < domain->giveNumberOfSpatialDimensions(); i++ ) {
                 fe_dispLock.push_back(nodeUnknowns [ i ]);
@@ -385,25 +390,14 @@ void PrescribedGradientBCWeak :: assemble(SparseMtrx &answer, TimeStep *tStep,
             DofManager *node = domain->giveDofManager(placeInArray);
 
             IntArray lockRows, lockCols, nodeRows, nodeCols;
-            mpDisplacementLock->giveCompleteLocationArray(lockRows, r_s);
-            node->giveCompleteLocationArray(nodeRows, r_s);
+            mpDisplacementLock->giveLocationArray(giveDispLockDofIDs(), lockRows, r_s);
+            node->giveLocationArray(giveRegularDispDofIDs(), nodeRows, r_s);
 
-            // TODO: Can be done nicer by prescribing which dof IDs to lock.
-            IntArray nodeRowsRed;
-            for ( int m = 0; m < nsd; m++ ) {
-                nodeRowsRed.followedBy(nodeRows [ m ]);
-            }
+            mpDisplacementLock->giveLocationArray(giveDispLockDofIDs(), lockCols, c_s);
+            node->giveLocationArray(giveRegularDispDofIDs(), nodeCols, c_s);
 
-            mpDisplacementLock->giveCompleteLocationArray(lockCols, c_s);
-            node->giveCompleteLocationArray(nodeCols, c_s);
-
-            IntArray nodeColsRed;
-            for ( int m = 0; m < nsd; m++ ) {
-                nodeColsRed.followedBy(nodeCols [ m ]);
-            }
-
-            answer.assemble(lockRows, nodeColsRed, KeDispLock);
-            answer.assemble(nodeRowsRed, lockCols, KeDispLock);
+            answer.assemble(lockRows, nodeCols, KeDispLock);
+            answer.assemble(nodeRows, lockCols, KeDispLock);
 
             FloatMatrix KZero( lockRows.giveSize(), lockCols.giveSize() );
             KZero.zero();
@@ -427,10 +421,11 @@ void PrescribedGradientBCWeak :: giveLocationArrays(std :: vector< IntArray > &r
         const TractionElement &tEl = * ( mpTractionElements [ tracElInd ] );
         for ( int tracNodeInd : tEl.mTractionNodeInd ) {
             Node *tNode = mpTractionNodes [ tracNodeInd ];
-            tNode->giveCompleteLocationArray(trac_loc_r, r_s);
+
+            tNode->giveLocationArray(giveTracDofIDs(), trac_loc_r, r_s);
             tracElRows.followedBy(trac_loc_r);
 
-            tNode->giveCompleteLocationArray(trac_loc_c, c_s);
+            tNode->giveLocationArray(giveTracDofIDs(), trac_loc_c, c_s);
             tracElCols.followedBy(trac_loc_c);
         }
 
@@ -460,14 +455,14 @@ void PrescribedGradientBCWeak :: giveLocationArrays(std :: vector< IntArray > &r
 
     if ( mpDisplacementLock != NULL ) {
         IntArray dispLock_r, dispLock_c;
-        mpDisplacementLock->giveCompleteLocationArray(dispLock_r, r_s);
-        mpDisplacementLock->giveCompleteLocationArray(dispLock_c, c_s);
+        mpDisplacementLock->giveLocationArray(giveDispLockDofIDs(), dispLock_r, r_s);
+        mpDisplacementLock->giveLocationArray(giveDispLockDofIDs(), dispLock_c, c_s);
 
         int nodeInd = 1;
         DofManager *node = domain->giveDofManager(nodeInd);
         IntArray node_r, node_c;
-        node->giveCompleteLocationArray(node_r, r_s);
-        node->giveCompleteLocationArray(node_c, c_s);
+        node->giveLocationArray(giveRegularDispDofIDs(), node_r, r_s);
+        node->giveLocationArray(giveRegularDispDofIDs(), node_c, c_s);
 
         rows.push_back(dispLock_r);
         cols.push_back(node_c);
@@ -489,7 +484,7 @@ void PrescribedGradientBCWeak :: giveTractionLocationArray(IntArray &rows,
         const TractionElement &tEl = * ( mpTractionElements [ tracElInd ] );
         for ( int tracNodeInd : tEl.mTractionNodeInd ) {
             Node *tNode = mpTractionNodes [ tracNodeInd ];
-            tNode->giveCompleteLocationArray(trac_loc_r, s);
+            tNode->giveLocationArray(giveTracDofIDs(), trac_loc_r, s);
             tracElRows.followedBy(trac_loc_r);
         }
 
@@ -499,7 +494,7 @@ void PrescribedGradientBCWeak :: giveTractionLocationArray(IntArray &rows,
 
     if ( mpDisplacementLock != NULL ) {
         IntArray dispLock_r;
-        mpDisplacementLock->giveCompleteLocationArray(dispLock_r, s);
+        mpDisplacementLock->giveLocationArray(giveDispLockDofIDs(), dispLock_r, s);
 
         rows.followedBy(dispLock_r);
     }
@@ -515,7 +510,7 @@ void PrescribedGradientBCWeak :: giveTractionLocationArrays(int iTracElInd, IntA
     const TractionElement &tEl = * ( mpTractionElements [ iTracElInd ] );
     for ( int tracNodeInd : tEl.mTractionNodeInd ) {
         Node *tNode = mpTractionNodes [ tracNodeInd ];
-        tNode->giveCompleteLocationArray(trac_loc_r, s);
+        tNode->giveLocationArray(giveTracDofIDs(), trac_loc_r, s);
         tracElRows.followedBy(trac_loc_r);
     }
 
@@ -528,8 +523,18 @@ void PrescribedGradientBCWeak :: giveDisplacementLocationArrays(int iTracElInd, 
     rows.clear();
 
     for ( int nodeInd : mTracElDispNodes [ iTracElInd ] ) {
+
+    	IntArray dispIDs = giveRegularDispDofIDs();
+
+    	DofManager *dMan = domain->giveDofManager(nodeInd);
+
+        if(domain->hasXfemManager()) {
+        	XfemManager *xMan = domain->giveXfemManager();
+        	dispIDs.followedBy(xMan->giveEnrichedDofIDs(*dMan));
+        }
+
         IntArray nodeLocationArray;
-        domain->giveDofManager(nodeInd)->giveCompleteLocationArray(nodeLocationArray, s);
+        dMan->giveLocationArray(dispIDs, nodeLocationArray, s);
         rows.followedBy(nodeLocationArray);
     }
 }
@@ -604,10 +609,11 @@ void PrescribedGradientBCWeak :: computeField(FloatArray &sigma, TimeStep *tStep
     sigma.times(1.0 / dSize);
 
 #if 0
+    const IntArray tracIDs = giveTracDofIDs();
     FloatArray tx, ty;
     for ( Node *node : mpTractionNodes ) {
         FloatArray tNode;
-        node->giveCompleteUnknownVector(tNode, VM_Total, tStep);
+        node->giveUnknownVector(tracIDs, tNode, VM_Total, tStep);
         tx.push_back(tNode [ 0 ]);
         ty.push_back(tNode [ 1 ]);
     }
@@ -664,12 +670,12 @@ void PrescribedGradientBCWeak :: giveBoundaries(IntArray &oBoundaries)
 
 void PrescribedGradientBCWeak :: giveTraction(size_t iElInd, FloatArray &oStartTraction, FloatArray &oEndTraction, ValueModeType mode, TimeStep *tStep)
 {
-    mpTractionNodes [ mpTractionElements [ iElInd ]->mTractionNodeInd [ 0 ] ]->giveCompleteUnknownVector(oStartTraction, mode, tStep);
+    mpTractionNodes [ mpTractionElements [ iElInd ]->mTractionNodeInd [ 0 ] ]->giveUnknownVector(oStartTraction, giveTracDofIDs(), mode, tStep);
 
     if ( mpTractionElements [ iElInd ]->mTractionNodeInd.size() < 2 ) {
-        mpTractionNodes [ mpTractionElements [ iElInd ]->mTractionNodeInd [ 0 ] ]->giveCompleteUnknownVector(oEndTraction, mode, tStep);
+        mpTractionNodes [ mpTractionElements [ iElInd ]->mTractionNodeInd [ 0 ] ]->giveUnknownVector(oEndTraction, giveTracDofIDs(), mode, tStep);
     } else   {
-        mpTractionNodes [ mpTractionElements [ iElInd ]->mTractionNodeInd [ 1 ] ]->giveCompleteUnknownVector(oEndTraction, mode, tStep);
+        mpTractionNodes [ mpTractionElements [ iElInd ]->mTractionNodeInd [ 1 ] ]->giveUnknownVector(oEndTraction, giveTracDofIDs(), mode, tStep);
     }
 }
 
@@ -1037,12 +1043,6 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
 
 
     // Create traction dofs
-    int nsd = domain->giveNumberOfSpatialDimensions();
-    std :: vector< int >dofIds;
-    for ( int j = 0; j < nsd; j++ ) {
-        dofIds.push_back( this->domain->giveNextFreeDofID() );
-    }
-
     std :: vector< FloatArray >tractionNodeCoord;
     int numNodes = domain->giveNumberOfDofManagers();
     int numPointsPassed = 0;
@@ -1057,7 +1057,7 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
         numPointsPassed++;
         Node *firstNode = new Node(numNodes + 1, domain);
         firstNode->setGlobalNumber(numNodes + 1);
-        for ( auto &dofId: dofIds ) {
+        for ( auto &dofId: giveTracDofIDs() ) {
             firstNode->appendDof( new MasterDof(firstNode, ( DofIDItem ) dofId) );
         }
 
@@ -1120,7 +1120,7 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
                 } else   {
                     Node *node = new Node(numNodes + 1, domain);
                     node->setGlobalNumber(numNodes + 1);
-                    for ( auto &dofid: dofIds ) {
+                    for ( auto &dofid: giveTracDofIDs() ) {
                         node->appendDof( new MasterDof(node, ( DofIDItem ) dofid) );
                     }
 
@@ -1216,13 +1216,7 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
         mLockNodeInd = domain->giveElement(1)->giveNode(1)->giveGlobalNumber();
 
 
-        int nsd = domain->giveNumberOfSpatialDimensions();
-        std :: vector< int >dofIds;
-        for ( int j = 0; j < nsd; j++ ) {
-            dofIds.push_back( this->domain->giveNextFreeDofID() );
-        }
-
-        for ( auto &dofid: dofIds ) {
+        for ( auto &dofid: giveDispLockDofIDs() ) {
             mpDisplacementLock->appendDof( new MasterDof(mpDisplacementLock, ( DofIDItem ) dofid) );
         }
     }
@@ -1609,7 +1603,7 @@ void PrescribedGradientBCWeak :: giveTractionUnknows(FloatArray &oTracUnknowns, 
 
     for ( int nodeInd : tNodeInd ) {
         FloatArray nodeUnknowns;
-        mpTractionNodes [ nodeInd ]->giveCompleteUnknownVector(nodeUnknowns, mode, tStep);
+        mpTractionNodes [ nodeInd ]->giveUnknownVector(nodeUnknowns, giveTracDofIDs(), mode, tStep);
         oTracUnknowns.append(nodeUnknowns);
     }
 }
@@ -1620,7 +1614,17 @@ void PrescribedGradientBCWeak :: giveDisplacementUnknows(FloatArray &oDispUnknow
 
     for ( int nodeInd : mTracElDispNodes [ iTracElInd ] ) {
         FloatArray nodeUnknowns;
-        domain->giveDofManager(nodeInd)->giveCompleteUnknownVector(nodeUnknowns, mode, tStep);
+
+    	IntArray dispIDs = giveRegularDispDofIDs();
+
+    	DofManager *dMan = domain->giveDofManager(nodeInd);
+
+        if(domain->hasXfemManager()) {
+        	XfemManager *xMan = domain->giveXfemManager();
+        	dispIDs.followedBy(xMan->giveEnrichedDofIDs(*dMan));
+        }
+
+        domain->giveDofManager(nodeInd)->giveUnknownVector(nodeUnknowns, dispIDs,mode, tStep);
         oDispUnknowns.append(nodeUnknowns);
     }
 }

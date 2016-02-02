@@ -38,6 +38,7 @@
 #define _IFT_GeometryBasedEI_Name "geometrybasedei"
 
 #include "enrichmentitem.h"
+#include "geometry.h"
 
 #include <memory>
 
@@ -94,6 +95,7 @@ public:
     virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius);
 
     BasicGeometry *giveGeometry() { return mpBasicGeometry.get(); }
+    void setGeometry(std :: unique_ptr< BasicGeometry > &&ipBasicGeometry) {mpBasicGeometry = std::move(ipBasicGeometry);}
 
 protected:
     std :: unique_ptr< BasicGeometry > mpBasicGeometry;

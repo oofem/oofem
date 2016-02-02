@@ -235,6 +235,12 @@ public:
      */    
     virtual void printYourself(const std::string &name) const;
     /**
+     * Print receiver to file
+     * @param filename Name of recieving file.
+     * @param showDimensions Determins if dimesions should be included in output
+     */
+    virtual void printYourselfToFile(const std::string filename, const bool showDimensions=true) const;
+    /**
      * Print receiver on stdout with high accuracy.
      */
     virtual void pY() const;

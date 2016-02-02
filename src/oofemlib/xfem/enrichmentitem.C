@@ -228,11 +228,18 @@ EnrichmentItem :: giveEIDofIdArray(IntArray &answer) const
     // Returns an array containing the dof Id's of the new enrichment dofs pertinent to the ei.
     // Note: the dof managers may not support these dofs/all potential dof id's
     const IntArray *enrichesDofsWithIdArray = this->giveEnrichesDofsWithIdArray();
-    int eiEnrSize = enrichesDofsWithIdArray->giveSize();
+    int eiEnrSize = enrichesDofsWithIdArray->giveSize(); // Not necessarily true: for example, we may add 8 enrichments (4 in x and 4 in y) at a crack tip where we enrich D_u and D_v. /ES
 
     answer.resize(eiEnrSize);
     for ( int i = 1; i <= eiEnrSize; i++ ) {
         answer.at(i) = this->giveStartOfDofIdPool() + i - 1;
+    }
+}
+
+void EnrichmentItem :: givePotentialEIDofIdArray(IntArray &answer) const {
+    answer.clear();
+    for ( int i = this->giveStartOfDofIdPool(); i <= this->giveEndOfDofIdPool(); i++ ) {
+        answer.followedBy(i);
     }
 }
 
@@ -278,6 +285,8 @@ void EnrichmentItem :: createEnrichedDofs()
 
     int nrDofMan = this->giveDomain()->giveNumberOfDofManagers();
     IntArray dofIdArray;
+
+    mEIDofIdArray.clear();
 
     int bcIndex = -1;
     int icIndex = -1;
@@ -343,6 +352,11 @@ void EnrichmentItem :: createEnrichedDofs()
 
                 if ( !dofIsInIdArray ) {
                     dofsToRemove.push_back(dofID);
+                }
+
+
+                if(mEIDofIdArray.findFirstIndexOf(dofID) == 0 && dofIsInIdArray) {
+                	mEIDofIdArray.followedBy(dofID);
                 }
             }
         }
@@ -431,6 +445,16 @@ void EnrichmentItem :: calcPolarCoord(double &oR, double &oTheta, const FloatArr
             oTheta = -pi + asin( fabs(phi_r) );
         }
     }
+}
+
+void EnrichmentItem :: setPropagationLaw(PropagationLaw *ipPropagationLaw)
+{
+	if(mpPropagationLaw != NULL) {
+		delete mpPropagationLaw;
+	}
+
+	mpPropagationLaw = ipPropagationLaw;
+	mPropLawIndex = 1;
 }
 
 void EnrichmentItem :: callGnuplotExportModule(GnuplotExportModule &iExpMod, TimeStep *tStep)

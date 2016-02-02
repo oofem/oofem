@@ -923,27 +923,9 @@ void GeometryBasedEI :: computeIntersectionPoints(std :: vector< FloatArray > &o
 
 void GeometryBasedEI :: writeVtkDebug() const
 {
-#if 0
     // For debugging only
-    if ( mpEnrichmentDomain->getVtkDebug() ) {
-        int tStepInd = 0; //this->domain->giveEngngModel()->giveCurrentStep()->giveNumber();
-
-        EnrichmentDomain_BG *enrDomBG = dynamic_cast< EnrichmentDomain_BG * >( mpEnrichmentDomain );
-
-        if ( enrDomBG != NULL ) {
-            PolygonLine *pl = dynamic_cast< PolygonLine * >( enrDomBG->bg );
-            if ( pl != NULL ) {
-                pl->printVTK(tStepInd, number);
-            }
-        }
-    }
-#endif
-
-    //    PolygonLine *pl = dynamic_cast< PolygonLine * >( this->mpBasicGeometry );
-    //    if(pl != NULL) {
-    //        int tStepInd = 0;
-    //        pl->printVTK(tStepInd, number);
-    //    }
+    int tStepInd = 0;
+    this->mpBasicGeometry->printVTK(tStepInd, number);
 }
 
 void GeometryBasedEI :: giveSubPolygon(std :: vector< FloatArray > &oPoints, const double &iXiStart, const double &iXiEnd) const
