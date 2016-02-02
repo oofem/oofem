@@ -898,7 +898,7 @@ void DSSolver :: StoreFixedLastPermutation_dom_order()
     }
 
     Array :: Copy(lncn->Items, dom_order->Items + neq - lncn->Count, lncn->Count);
-    delete dmap;
+    delete[] dmap;
     dmap = NULL;
 }
 
