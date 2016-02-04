@@ -251,5 +251,5 @@ InitialCondition 1 conditions 1 u 1.0 valtype 5
 ConstantFunction 1 f(t) 1.0
 
 #%BEGIN_CHECK%
-#NODE tStep 10 number 1 dof 11 unknown d value 9.8934e+04 tolerance 25
+#NODE tStep 10 number 1 dof 11 unknown d value 9.8934e+04 tolerance 30.
 #%END_CHECK%
