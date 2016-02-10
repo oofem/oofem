@@ -66,16 +66,20 @@
 \newcommand{\Pfieldnotype}[1]{\oofemParallel{\fieldnotype{#1}}}
 \newcommand{\PoptField}[2]{\oofemParallel{\optField{#1}{#2}}}
 \newcommand{\PoptFieldnotype}[1]{\oofemParallel{\optFieldnotype{#1}}}
+\definecolor{lightgray}{gray}{0.9}
+\newcolumntype{R}{>{\raggedleft\arraybackslash}X}%
 
 \begin{htmlonly}
-\newenvironment{record}[1][]{\begin{tabular}{|ll}}{\end{tabular}\\}
+\newenvironment{record}[1][]{\rowcolors{1}{lightgray}{lightgray}\begin{tabular}{|ll}}{\end{tabular}\\}
 \newcommand{\recentry}[2]{{#1}&{#2}\\}
 \end{htmlonly}
 %begin{latexonly}
 \newcounter{rcc}
-\newenvironment{record}[1][\textwidth]{\setcounter{rcc}{0}\begin{tabular*}{#1}{|ll@{\extracolsep{\fill}}r}}{\end{tabular*}\\}
-%\newenvironment{record}{\begin{tabular}{|llr}}{\end{tabular*}\\}
-\newcommand{\recentry}[2]{\ifthenelse{\value{rcc}>0}{&$\backslash$ \\}{\setcounter{rcc}{1}}{#1}&{#2}}
+%\newenvironment{record}[1][\textwidth]{\setcounter{rcc}{0}\rowcolors{1}{lightgray}{lightgray}\begin{tabular*}{#1}{|ll@{\extracolsep{\fill}}r}}{\end{tabular*}\\}
+%\newenvironment{record}[1][\textwidth]{\begin{tabular*}{#1}{|llr}}{\end{tabular*}\\}
+\newenvironment{record}[1][\textwidth]{\setcounter{rcc}{0}\rowcolors{1}{lightgray}{lightgray}\tabularx{#1}{llR} \hline}
+               {\endtabularx}
+\newcommand{\recentry}[2]{\ifthenelse{\value{rcc}>0}{$\backslash$ \\}{\setcounter{rcc}{1}}{#1}&{#2}&}
 %end{latexonly}
 
 \lstdefinelanguage{oofeminput}
@@ -1827,7 +1831,7 @@ MPT\_T3D:  \param{meshpackage} = 0. T3d mesh interface. Default. Supports both 1
 MPT\_TARGE2:	\param{meshpackage} = 1. Interface to Targe2 2D
 mesh generator.
 \item
-MPT_SUBDIVISION: \param{meshpackage}=3. Built-in subdivision algorithm. Supports triangular 2D and tetrahedral 3D meshes. Can operate in parallel mode.
+MPT\_SUBDIVISION: \param{meshpackage}=3. Built-in subdivision algorithm. Supports triangular 2D and tetrahedral 3D meshes. Can operate in parallel mode.
 \end{itemize}
 %
 \subsection{Initialization modules}
