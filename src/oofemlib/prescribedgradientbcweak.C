@@ -541,7 +541,7 @@ void PrescribedGradientBCWeak :: giveDisplacementLocationArrays(int iTracElInd, 
 
 void PrescribedGradientBCWeak :: computeField(FloatArray &sigma, TimeStep *tStep)
 {
-    double dSize = domainSize(this->giveDomain(), this->giveSetNumber());
+    double dSize = PrescribedGradientHomogenization::domainSize(this->giveDomain(), this->giveSetNumber());
 
     const int dim = domain->giveNumberOfSpatialDimensions();
     FloatMatrix stressMatrix(dim, dim);

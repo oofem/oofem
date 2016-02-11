@@ -156,7 +156,7 @@ IRResultType XfemManager :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, numberOfEnrichmentItems, _IFT_XfemManager_numberOfEnrichmentItems);
 
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfNucleationCriteria, _IFT_XfemManager_numberOfNucleationCriteria);
-    printf("numberOfNucleationCriteria: %d\n", numberOfNucleationCriteria);
+//    printf("numberOfNucleationCriteria: %d\n", numberOfNucleationCriteria);
 
     IR_GIVE_OPTIONAL_FIELD(ir, mNumGpPerTri, _IFT_XfemManager_numberOfGpPerTri);
     IR_GIVE_OPTIONAL_FIELD(ir, mNumTriRef, _IFT_XfemManager_numberOfTriRefs);
@@ -386,7 +386,7 @@ void XfemManager :: nucleateEnrichmentItems(bool &oNewItemsWereNucleated)
 		if(eiList.size() > 0) {
 			printf("eiList.size(): %lu\n", eiList.size() );
 
-			if(giveNumberOfEnrichmentItems() == 0) {
+//			if(giveNumberOfEnrichmentItems() == 0) {
 				printf("giveNumberOfEnrichmentItems() == 0\n");
 
 				for(auto &ei : eiList) {
@@ -399,7 +399,7 @@ void XfemManager :: nucleateEnrichmentItems(bool &oNewItemsWereNucleated)
 			    updateNodeEnrichmentItemMap();
 
 				return;
-			}
+//			}
 		}
 	}
 

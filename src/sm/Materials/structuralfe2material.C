@@ -53,7 +53,7 @@ REGISTER_Material(StructuralFE2Material);
 int StructuralFE2Material :: n = 1;
 
 StructuralFE2Material :: StructuralFE2Material(int n, Domain *d) : StructuralMaterial(n, d),
-useNumTangent(false)
+useNumTangent(true)
 {}
 
 StructuralFE2Material :: ~StructuralFE2Material()
@@ -330,6 +330,12 @@ StructuralFE2MaterialStatus :: restoreContext(DataStream &stream, ContextMode mo
     }
 
     return this->rve->restoreContext(&stream, mode, obj);
+}
+
+double StructuralFE2MaterialStatus :: giveRveLength()
+{
+	double rveLength = sqrt( bc->domainSize() );
+	return rveLength;
 }
 
 } // end namespace oofem

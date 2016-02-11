@@ -51,6 +51,7 @@ REGISTER_XfemManager(XfemStructureManager)
 XfemStructureManager :: XfemStructureManager(Domain *domain) :
     XfemManager(domain),
     mSplitCracks(false),
+	mNonstandardCz(false),
     mpMatForceEvaluator( new MaterialForceEvaluator() )
 {}
 
@@ -64,6 +65,12 @@ IRResultType XfemStructureManager :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, splitCracks, _IFT_XfemStructureManager_splitCracks);
     if ( splitCracks == 1 ) {
         mSplitCracks = true;
+    }
+
+    int nonStdCz = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, nonStdCz, _IFT_XfemStructureManager_nonstandardCZ);
+    if ( nonStdCz == 1 ) {
+    	mNonstandardCz = true;
     }
 
     return XfemManager :: initializeFrom(ir);

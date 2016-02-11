@@ -39,6 +39,8 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 
+#include "error.h"
+
 ///@name Input fields for PrescribedGradientHomogenization
 //@{
 #define _IFT_PrescribedGradientHomogenization_Name "prescribedgradient"
@@ -71,6 +73,8 @@ protected:
 public:
     PrescribedGradientHomogenization() { }
     virtual ~PrescribedGradientHomogenization() { }
+
+    virtual double domainSize() {OOFEM_ERROR("Not implemented."); return 0.0;}
 
     /**
      * Initializes receiver according to object description stored in input record.
