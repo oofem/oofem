@@ -1,3 +1,20 @@
+2016-02-15  Borek Patzak  <Borek.Patzak@fsv.cvut.cz>
+	* OOFEM 2.4 released.
+	* Added new StaticStructural, TransientTransport, and Warping analyses.
+	* Added new Particle FEM CFD submodule.
+	* MKL Pardiso solver support with optimized CSC implementation.
+	* Added support for block matrices in PETSc.
+	* Added support for global condensation (fixes many issues on beam elements).
+	* FE^2 support for structural problems (Neumann, Dirichlet, strong and weak periodicity).
+	* Added Matlab export module.
+	* Added new concrete creep model based on microprestress solidification, taking into account temperature and humidity effects.
+	* New Material testing solver.
+	* New structural elements: MITC4 and trshell02 shells, 3D plane stress Almann element
+	* Fixing parallel adaptive bug in subdivision algorithm.
+	* XFEM support for delaminations in plates.
+	* Many bug fixes, small enhancements and documentation updates.
+
+
 2014-02-12  Borek Patzak  <Borek.Patzak@fsv.cvut.cz>
 
 	* OOFEM 2.3 released.
