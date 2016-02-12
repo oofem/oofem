@@ -77,8 +77,8 @@
 \newcounter{rcc}
 %\newenvironment{record}[1][\textwidth]{\setcounter{rcc}{0}\rowcolors{1}{lightgray}{lightgray}\begin{tabular*}{#1}{|ll@{\extracolsep{\fill}}r}}{\end{tabular*}\\}
 %\newenvironment{record}[1][\textwidth]{\begin{tabular*}{#1}{|llr}}{\end{tabular*}\\}
-\newenvironment{record}[1][\textwidth]{\setcounter{rcc}{0}\rowcolors{1}{lightgray}{lightgray}\tabularx{#1}{llR} \hline}
-               {\endtabularx}
+\newenvironment{record}[1][0.9\textwidth]{\setcounter{rcc}{0}\rowcolors{1}{lightgray}{lightgray}\tabularx{#1}{llR} \hline}
+               {\endtabularx\\}
 \newcommand{\recentry}[2]{\ifthenelse{\value{rcc}>0}{$\backslash$ \\}{\setcounter{rcc}{1}}{#1}&{#2}&}
 %end{latexonly}
 
@@ -1861,7 +1861,7 @@ The Gauss points should be given in a specific order, based on the element numbe
 \item
 Each line referring to a Gauss point should contain the following data:
 
-\begin{record}
+\begin{record}[0.9\textwidth]
   \recentry{}{\field{elnum}{in} \field{gpnum}{in} \field{coords}{ra} \field{ng}{in}}
   \recentry{}{\field{var\_1\_id}{in} \field{values\_1}{ra}}
   \recentry{}{ ...}
