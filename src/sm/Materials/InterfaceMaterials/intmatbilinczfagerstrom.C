@@ -446,7 +446,7 @@ IntMatBilinearCZFagerstrom :: checkConsistency()
 void
 IntMatBilinearCZFagerstrom  :: printYourself()
 {
-    printf("Paramters for BilinearCZMaterial: \n");
+    printf("Parameters for BilinearCZMaterial: \n");
 
     printf("-Strength paramters \n");
     printf("  sigf  = %e \n", this->sigf);

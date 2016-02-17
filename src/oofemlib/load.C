@@ -104,6 +104,7 @@ Load :: initializeFrom(InputRecord *ir)
 #  endif
 
     IR_GIVE_FIELD(ir, componentArray, _IFT_Load_components);
+    componentArray.printYourself("components");
 
     int size = componentArray.giveSize();
     dofExcludeMask.resize(size);
@@ -121,6 +122,7 @@ Load :: initializeFrom(InputRecord *ir)
     }
 
     return GeneralBoundaryCondition :: initializeFrom(ir);
+    dofs.printYourself("dofs");
 }
 
 

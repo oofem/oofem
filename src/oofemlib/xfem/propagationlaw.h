@@ -45,6 +45,9 @@
 #define _IFT_PLCrackPrescribedDir_Dir "angle" // Angle in degrees
 #define _IFT_PLCrackPrescribedDir_IncLength "incrementlength" // Increment per time step
 
+#define _IFT_PLnodeRadius_Name "propagationlawnoderadius"
+#define _IFT_PLnodeRadius_Radius "radius" 
+
 
 namespace oofem {
 class Domain;
@@ -115,6 +118,29 @@ public:
 
 protected:
     double mAngle, mIncrementLength;
+};
+
+/**
+ * Propagation law that propagates a delamination in a predefined radius from an element.
+ * @author Johannes Främby
+ */
+class OOFEM_EXPORT PLnodeRadius : public PropagationLaw
+{
+public:
+    PLnodeRadius() : mRadius(0.0) { }
+    virtual ~PLnodeRadius() { }
+
+    virtual const char *giveClassName() const { return "PLnodeRadius"; }
+    virtual const char *giveInputRecordName() const { return _IFT_PLnodeRadius_Name; }
+
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
+
+    virtual bool hasPropagation() const { return mRadius > 0.; }
+    virtual bool propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp);
+
+protected:
+    double mRadius;
 };
 } // end namespace oofem
 

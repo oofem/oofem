@@ -5,8 +5,9 @@
 # ignore all files under targets dir
 targets/
 
-# ignore all files under release dir
+# ignore all files under release and debug dir
 release/
+debug/
 
 # test results
 *.out

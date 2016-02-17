@@ -144,7 +144,7 @@ protected:
     void giveFictiousUpdatedCZNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, TimeStep *tStep, int subCell);
     void giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords, int subCell, int layer, FloatMatrix &localNodeCoords);
     void giveLocalCZNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords, int subCell, FloatMatrix &localNodeCoords);
-        void mapXi3FromLocalToShell(FloatArray &answer, FloatArray &local, int layer);
+    void mapXi3FromLocalToShell(FloatArray &answer, FloatArray &local, int layer);
     void recoverValuesFromCZIP(std::vector<FloatArray> &recoveredValues, int interfce, InternalStateType type, TimeStep *tStep);
 
     FEI3dTrQuad interpolationForCZExport;
@@ -172,6 +172,9 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
     virtual int giveNumberOfDofs();
+    
+    // Recovery of through thickness stresses by momentum balance
+    virtual void giveRecoveredTransverseInterfaceStress(std::vector<FloatMatrix> &transverseStress, TimeStep *tStep);
 
     bool hasCohesiveZone(int interfaceNum);
     std :: vector< std :: unique_ptr< IntegrationRule > > czIntegrationRulesArray;

@@ -53,7 +53,7 @@ class Material;
 class LayeredCrossSection;
 class MicroplaneMaterial;
 class FiberedCrossSection;
-class CrossSction;
+class CrossSection;
 class IntegrationRule;
 
 /**

@@ -53,7 +53,7 @@ namespace oofem {
 /* Scale factor fo the discontinuous dofs. Implies that the corresponding 
    dofs must be scaled with 1/factor in the input file
 */
-const double DISC_DOF_SCALE_FAC = 1.0e-3;
+const double DISC_DOF_SCALE_FAC = 1.0;
 
 Shell7BaseXFEM :: Shell7BaseXFEM(int n, Domain *aDomain) : Shell7Base(n, aDomain), XfemElementInterface(this) 
 {
@@ -1738,10 +1738,11 @@ Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
         if ( ConstantPressureLoad * pLoad = dynamic_cast< ConstantPressureLoad * >(load) ) {
             xi = pLoad->giveLoadOffset();
         } 
-        else if ( ConstantSurfaceLoad * sLoad = dynamic_cast< ConstantSurfaceLoad * >( surfLoad ) ) {
+        else if ( ConstantSurfaceLoad * sLoad = dynamic_cast< ConstantSurfaceLoad * >( load ) ) {
             xi = sLoad->giveLoadOffset();
             //printf("sLoad xi = %e \n",xi);
         }
+        //xi = -1.0; 
         std :: vector< double > ef;
         FloatArray temp, tempRed, lCoords(2);
         for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) {
@@ -1749,6 +1750,7 @@ Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
             if ( dei != NULL && dei->isElementEnriched(this) ) {
                 double levelSet = xi - dei->giveDelamXiCoord();
                 dei->evaluateEnrFuncAt(ef, lCoords, levelSet);
+                if (this->giveGlobalNumber() == 10) {printf("xi= %f, levelSet= %f, ef= %f \n",xi,levelSet,ef[0]); }
                 if ( ef[0] > 0.1 ) {
                     dei->giveEIDofIdArray(eiDofIdArray);
                     this->computeDiscSolutionVector(eiDofIdArray, tStep, solVecD);
@@ -1757,6 +1759,10 @@ Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
                     // Assemble
                     this->computeOrderingArray(ordering, activeDofs, dei);
                     tempRed.beSubArrayOf(temp, activeDofs);
+//                     if (this->giveGlobalNumber() == 10) {
+//                         ordering.printYourself("ordering");
+//                         activeDofs.printYourself("activeDofs");
+//                     }
                     answer.assemble(tempRed, ordering);
                 }
             }
@@ -2284,6 +2290,12 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
     FloatArray u(3);
     std::vector<FloatArray> values;
     for ( int fieldNum = 1; fieldNum <= primaryVarsToExport.giveSize(); fieldNum++ ) {
+        
+        if ( 0 ) {
+        // Recover shear stresses
+        this->recoverShearStress(tStep);
+        }
+        
         UnknownType type = ( UnknownType ) primaryVarsToExport.at(fieldNum);
         nodeNum = 1;
         currentCell = 1;
@@ -2328,11 +2340,6 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
     for ( int fieldNum = 1; fieldNum <= internalVarsToExport.giveSize(); fieldNum++ ) {
         InternalStateType type = ( InternalStateType ) internalVarsToExport.at(fieldNum);
         nodeNum = 1;
-        
-        if ( 0 ) {
-        // Recover shear stresses
-        this->recoverShearStress(tStep);
-        }
         
         //int currentCell = 1;
         for ( int layer = 1; layer <= numLayers; layer++ ) {
@@ -2993,7 +3000,6 @@ void
 Shell7BaseXFEM :: recoverShearStress(TimeStep *tStep)
 {
     // Recover shear stresses at ip by numerical integration of the momentum balance through the thickness (overloaded from shell7base)
-    // Kalla på SR-metod för lager i basklassen. om randvillkor eller annat behöver tas i beaktining kan det göras därefter. 
     
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();         
     
@@ -3018,7 +3024,6 @@ Shell7BaseXFEM :: recoverShearStress(TimeStep *tStep)
             interfaceEI.at(delaminationInterfaceNum) = iEI;
         }
     }
-    //if (this->giveGlobalNumber() == 48) { delaminationInterface.printYourself("Interface number with delamination"); }
     
     if ( hasDelamination ) {
         
@@ -3037,7 +3042,7 @@ Shell7BaseXFEM :: recoverShearStress(TimeStep *tStep)
         tractionBC[numDel+1].resize(3,numInPlaneIP);
         tractionBC[0].resize(3,numInPlaneIP);
         giveTractionBC(tractionBC[numDel+1],tractionBC[0], tStep); 
-        if (this->giveGlobalNumber() == 48) {tractionBC[numDel+1].printYourself("tractionTop"); tractionBC[0].printYourself("tractionBtm");}
+        if (this->giveGlobalNumber() == 8 || this->giveGlobalNumber() == 50) {tractionBC[numDel+1].printYourself("tractionTop"); tractionBC[0].printYourself("tractionBtm");}
         
 #if 0
         FloatArray tractionTop, tractionBtm; 
@@ -3051,7 +3056,7 @@ Shell7BaseXFEM :: recoverShearStress(TimeStep *tStep)
             tractionBC[numDel+1].at(3,i) = tractionTop.at(3);
         }
 #endif
-        
+        // Find delamination traction BC
         for (int iDel = 1 ; iDel <= numDel ; iDel++) {
             
             tractionBC[iDel].resize(3,numInPlaneIP);
@@ -3063,11 +3068,13 @@ Shell7BaseXFEM :: recoverShearStress(TimeStep *tStep)
             if ( this->hasCohesiveZone( interfaceNum ) ) {
 #if 1  
                 // CZ traction 
-                std :: unique_ptr< IntegrationRule > &iRuleI = czIntegrationRulesArray [ interfaceNum - 1 ];
+                std :: unique_ptr< IntegrationRule > &iRuleI = this->czIntegrationRulesArray [ interfaceNum - 1 ];
                 if (czIntegrationRulesArray [ interfaceNum - 1 ]->giveNumberOfIntegrationPoints() != numInPlaneIP ) {
                     OOFEM_ERROR("Interface IPs doesn't match the element IPs");
                 }
-                
+                StructuralInterfaceMaterial *intMat = dynamic_cast < StructuralInterfaceMaterial * > 
+                    (this->layeredCS->giveInterfaceMaterial(interfaceNum) );
+                    
                 FloatArray lCoords(3), nCov, CZPKtraction(3);
                 CZPKtraction.zero();
                 FloatMatrix Q;
@@ -3092,20 +3099,54 @@ Shell7BaseXFEM :: recoverShearStress(TimeStep *tStep)
                     this->evalCovarNormalAt(nCov, lCoords, genEpsC, tStep);     // Denna verkar ta hänsyn till hoppet, men hur ser jag till att det är normalen ovanför delamineringen?
                     Q.beLocalCoordSys(nCov);
                     
-                    lCoords.printYourself();
-                    StructuralInterfaceMaterialStatus* intMatStatus = static_cast < StructuralInterfaceMaterialStatus* > ( gp->giveMaterialStatus() );
-                    if (intMatStatus == 0) {
-                        OOFEM_ERROR("NULL pointer to material status");
-                    }
+#if 1
+                    // Compute jump vector
+                    FloatArray jump;
+                    this->computeInterfaceJumpAt(dei->giveDelamInterfaceNum(), lCoords, tStep, jump); // -> numerical tol. issue -> normal jump = 1e-10  
+            
+                    genEpsC.beProductOf(B, solVecC);
+                    FloatMatrix F;
+                    this->computeFAt(lCoords, F, genEpsC, tStep);
+
+                    // Transform xd and F to a local coord system
+                    this->evalInitialCovarNormalAt(nCov, lCoords); 
+                    Q.beLocalCoordSys(nCov);
+                    jump.rotatedWith(Q,'n');
+                    F.rotatedWith(Q,'n');
+
+                    // Compute cohesive traction based on jump
+                    intMat->giveFirstPKTraction_3d(CZPKtraction, gp, jump, F, tStep);
+#else
                     
+                    
+                    StructuralInterfaceMaterialStatus *intMatStatus = dynamic_cast < StructuralInterfaceMaterialStatus * >( intMat->giveStatus(gp) );
+                    //StructuralInterfaceMaterialStatus *intMatStatus = dynamic_cast < StructuralInterfaceMaterialStatus * >( gp->giveMaterialStatus() );
+                    if (this->giveGlobalNumber() == 8 || this->giveGlobalNumber() == 50 ) { 
+                        printf(intMatStatus->giveClassName()); printf("\n"); 
+                        intMatStatus->giveInputRecordName();
+                        
+                    }
                     CZPKtraction = intMatStatus->giveFirstPKTraction(); // 3 components in local coords
+                    FloatArray tempCZPKtraction = intMatStatus->giveTempFirstPKTraction();
+//                     FloatArray jump = intMatStatus->giveJump();
+//                     FloatArray tempjump = intMatStatus->giveTempJump();
+//                     FloatArray traction = intMatStatus->giveTraction();
+//                     FloatArray tempTraction = intMatStatus->giveTempTraction();
+#endif
+                    
+//                     if (intMatStatus == 0) {
+//                         OOFEM_ERROR("NULL pointer to material status");
+//                     }
+//                     
 
                     CZPKtraction.rotatedWith(Q,'t'); // transform back to global coord system
-                    #if 0
-                        if (this->giveGlobalNumber() == 126) {
-                            CZPKtraction.printYourself();
-                        }
-                    #endif
+                    if (this->giveGlobalNumber() == 8 || this->giveGlobalNumber() == 50) {
+                        CZPKtraction.printYourself("CZPKtraction"); 
+//                         tempCZPKtraction.printYourself("tempCZPKtraction"); 
+//                         jump.printYourself("jump"); tempjump.printYourself("tempJump");
+//                         traction.printYourself("traction"); tempTraction.printYourself("temptraction");
+                    }
+                    
                     // Set BC stresses
                     tractionBC[iDel].at(1,iIGP) = CZPKtraction.at(1);
                     tractionBC[iDel].at(2,iIGP) = CZPKtraction.at(2);
@@ -3117,11 +3158,10 @@ Shell7BaseXFEM :: recoverShearStress(TimeStep *tStep)
                 // Delamination zero traction
                 tractionBC[iDel].zero();
             }
-            if (this->giveGlobalNumber() == 48) {tractionBC[iDel].printYourself("tractionDel");}
+            if (this->giveGlobalNumber() == 50) {tractionBC[iDel].printYourself("tractionDel");}
         } 
         
         FloatMatrix SmatOld(3,numInPlaneIP); // 3 stress components (S_xz, S_yz, S_zz) * num of in plane ip 
-        FloatArray ddSmatOld(numInPlaneIP); // dSzz/dz of previous layer
         double totalThickness = this->layeredCS->computeIntegralThick(); 
         double zeroThicknessLevel = - 0.5 * totalThickness;         // assumes midplane is the geometric midplane of layered structure.
         FloatMatrix dSmat(3,numInPlaneIP);                          // 3 stress components (S_xz, S_yz, S_zz) * num of in plane ip 
@@ -3129,29 +3169,31 @@ Shell7BaseXFEM :: recoverShearStress(TimeStep *tStep)
                 
         int layerOld = 0;
         int iInt = 0;
-        delaminationInterface.followedBy(numberOfLayers);
+        delaminationInterface.followedBy(numberOfLayers);       // creates an array of the layer index of the top layer in a delamination (NB: index = numberOfLayers will allways be the last)
         for ( int topLayer : delaminationInterface) {  
-            SmatOld = tractionBC[iInt];
-            int numDelLayers = topLayer-layerOld;
+            SmatOld = tractionBC[iInt];                         // bottom traction BC of delamination
+            int numDelLayers = topLayer-layerOld;               // number of layers in delamination
             std::vector <FloatMatrix> dSmatIP; dSmatIP.resize(numDelLayers);              //recovered stress values in wedge IPs
-            std::vector <FloatMatrix> dSmat; dSmat.resize(numDelLayers);              //recovered stress values at layer top
-            std::vector <FloatMatrix> dSmatIPupd; dSmatIPupd.resize(numDelLayers);     //recovered stress values in wedge IPs fitted to  top and btm traction BC. 
+            std::vector <FloatMatrix> dSmat; dSmat.resize(numDelLayers);              //recovered stress values at delamination top
+            std::vector <FloatMatrix> dSmatIPupd; dSmatIPupd.resize(numDelLayers);     //recovered stress values in wedge IPs adjusted for top and btm traction BC. 
+            std::vector <FloatMatrix> dSmatupd; dSmatupd.resize(numDelLayers);              //recovered stress values at delamination top, adjusted for top and btm traction BC
             
+            // Recovered stresses in delaminated layers
             double dz = 0.0;
-            for ( int layer = 1 ; layer <= numDelLayers; layer++ ) {
+            for ( int delLayer = 1 ; delLayer <= numDelLayers; delLayer++ ) {
                         
-                this->giveLayerContributionToSR(dSmat[layer-1], dSmatIP[layer-1], layer+layerOld, zeroThicknessLevel + dz, tStep);
-                SmatOld.add(dSmat[layer-1]); // Integrated stress over laminate
-                dz += this->layeredCS->giveLayerThickness(layer);   
+                this->giveLayerContributionToSR(dSmat[delLayer-1], dSmatIP[delLayer-1], delLayer+layerOld, zeroThicknessLevel + dz, tStep);
+                SmatOld.add(dSmat[delLayer-1]); // Integrated stress over laminate
+                dz += this->layeredCS->giveLayerThickness(delLayer+layerOld);   
                 
             }
-            // All transverse stress components
-            this->fitRecoveredStress2BC(dSmatIPupd, dSmat, dSmatIP, SmatOld, tractionBC[iInt], tractionBC[iInt+1], zeroThicknessLevel, {0.0,0.0,1.0}, layerOld+1, topLayer);
             
-            FloatMatrix zeros(3,numInPlaneIP); zeros.zero();
+            // Adjust recovered stresses to traction BC (divide integration error 50/50 at top and btm of delamination)
+            this->fitRecoveredStress2BC(dSmatIPupd, dSmatupd, dSmat, dSmatIP, SmatOld, tractionBC[iInt], tractionBC[iInt+1], zeroThicknessLevel, {0.0,0.0,1.0}, layerOld+1, topLayer);
+            
             for ( int layer = 1 ; layer <= numDelLayers; layer++ ) {
                 //if (this->giveGlobalNumber() == 48 ) { dSmatIPupd[layer-1].printYourself(); }
-                this->updateLayerTransvStressesSR( dSmatIPupd[layer-1], zeros, layer+layerOld); // traction on bottom already taken into account in the integration. 
+                this->updateLayerTransvStressesSR( dSmatIPupd[layer-1], layer+layerOld); 
             }
             zeroThicknessLevel += dz;
             layerOld = topLayer;
@@ -3254,6 +3296,179 @@ Shell7BaseXFEM :: recoverShearStress(TimeStep *tStep)
         Shell7Base :: recoverShearStress(tStep); 
     }
 
+}
+
+void 
+Shell7BaseXFEM :: giveRecoveredTransverseInterfaceStress(std::vector<FloatMatrix> &transverseStress, TimeStep *tStep)
+{
+    transverseStress.clear();
+    // Recover shear stresses at ip by numerical integration of the momentum balance through the thickness (overloaded from shell7base)
+    
+    int numberOfLayers = this->layeredCS->giveNumberOfLayers();       
+    
+    IntArray delaminationInterface; delaminationInterface.clear(); // interface (starting from 1) which contains delamination
+    IntArray interfaceEI(numberOfLayers-1);
+    
+    bool hasDelamination = false;
+    int numEI = this->xMan->giveNumberOfEnrichmentItems();
+    for ( int iEI = 1; iEI <= numEI; iEI++ ) {
+
+        EnrichmentItem *ei = this->xMan->giveEnrichmentItem(iEI);
+        if ( ei->isElementEnriched(this) ) {
+            hasDelamination = true;
+            // Find cohesive material (for delamination)
+            Delamination *dei =  dynamic_cast< Delamination * >( ei );
+            int delaminationInterfaceNum = dei->giveDelamInterfaceNum();
+            delaminationInterface.followedBy(delaminationInterfaceNum);
+            interfaceEI.at(delaminationInterfaceNum) = iEI;
+        }
+    }
+    
+    if ( hasDelamination ) {
+        transverseStress.resize(numberOfLayers-1);
+        
+        int numInPlaneIP = 6; ///TODO generalise this 
+        int numThicknessIP = this->layeredCS->giveNumIntegrationPointsInLayer();        
+        if (numThicknessIP < 2) {
+            // Polynomial fit involves linear z-component at the moment
+            OOFEM_ERROR("To few thickness IP per layer to do polynomial fit");
+        }  
+        
+        int numDel = delaminationInterface.giveSize();
+        
+        // Find top and bottom BC NB: assumes constant over element surface.
+        // traction BC added to vector of BC.
+        std::vector <FloatMatrix> tractionBC; tractionBC.resize(numDel+2);
+        tractionBC[numDel+1].resize(3,numInPlaneIP);
+        tractionBC[0].resize(3,numInPlaneIP);
+        giveTractionBC(tractionBC[numDel+1],tractionBC[0], tStep); 
+        
+        // Find delamination traction BC
+        for (int iDel = 1 ; iDel <= numDel ; iDel++) {
+            
+            tractionBC[iDel].resize(3,numInPlaneIP);
+            
+            int interfaceNum = delaminationInterface.at(iDel);
+            EnrichmentItem *ei = this->xMan->giveEnrichmentItem(interfaceEI.at(interfaceNum));
+            Delamination *dei =  dynamic_cast< Delamination * >( ei );
+            
+            if ( this->hasCohesiveZone( interfaceNum ) ) {
+                // CZ traction 
+                std :: unique_ptr< IntegrationRule > &iRuleI = this->czIntegrationRulesArray [ interfaceNum - 1 ];
+                if (czIntegrationRulesArray [ interfaceNum - 1 ]->giveNumberOfIntegrationPoints() != numInPlaneIP ) {
+                    OOFEM_ERROR("Interface IPs doesn't match the element IPs");
+                }
+                StructuralInterfaceMaterial *intMat = dynamic_cast < StructuralInterfaceMaterial * > 
+                    (this->layeredCS->giveInterfaceMaterial(interfaceNum) );
+                    
+                FloatArray lCoords(3), nCov, CZPKtraction(3);
+                CZPKtraction.zero();
+                FloatMatrix Q;
+                int iIGP = 1;
+                for ( GaussPoint *gp : *iRuleI ) {
+                    double xi = dei->giveDelamXiCoord();
+                    lCoords.at(1) = gp->giveNaturalCoordinate(1);
+                    lCoords.at(2) = gp->giveNaturalCoordinate(2);
+                    lCoords.at(3) = xi;
+                    
+                    // Find PK-traction in current coords.
+                    FloatArray solVecC;
+                    this->giveUpdatedSolutionVector(solVecC, tStep);
+                    FloatMatrix B;
+                    this->computeEnrichedBmatrixAt(lCoords, B, NULL);   // NULL => Shell7base :: computeBmatrixAt, otherwise include dei
+                    FloatArray genEpsC;                        
+                    genEpsC.beProductOf(B, solVecC);
+                    this->evalCovarNormalAt(nCov, lCoords, genEpsC, tStep);     // Denna verkar ta hänsyn till hoppet, men hur ser jag till att det är normalen ovanför delamineringen?
+                    Q.beLocalCoordSys(nCov);
+                    
+#if 1
+                    // Compute jump vector
+                    FloatArray jump;
+                    this->computeInterfaceJumpAt(dei->giveDelamInterfaceNum(), lCoords, tStep, jump); // -> numerical tol. issue -> normal jump = 1e-10  
+            
+                    genEpsC.beProductOf(B, solVecC);
+                    FloatMatrix F;
+                    this->computeFAt(lCoords, F, genEpsC, tStep);
+
+                    // Transform xd and F to a local coord system
+                    this->evalInitialCovarNormalAt(nCov, lCoords); 
+                    Q.beLocalCoordSys(nCov);
+                    jump.rotatedWith(Q,'n');
+                    F.rotatedWith(Q,'n');
+
+                    // Compute cohesive traction based on jump
+                    intMat->giveFirstPKTraction_3d(CZPKtraction, gp, jump, F, tStep);
+#else
+                    StructuralInterfaceMaterialStatus *intMatStatus = dynamic_cast < StructuralInterfaceMaterialStatus * >( intMat->giveStatus(gp) );
+                    //StructuralInterfaceMaterialStatus *intMatStatus = dynamic_cast < StructuralInterfaceMaterialStatus * >( gp->giveMaterialStatus() );
+                    if (intMatStatus == 0) {
+                        OOFEM_ERROR("NULL pointer to material status");
+                    }
+                    CZPKtraction = intMatStatus->giveFirstPKTraction(); // 3 components in local coords
+                    FloatArray tempCZPKtraction = intMatStatus->giveTempFirstPKTraction();
+#endif
+                    
+                    CZPKtraction.rotatedWith(Q,'t'); // transform back to global coord system
+                    
+                    // Set BC stresses
+                    tractionBC[iDel].at(1,iIGP) = CZPKtraction.at(1);
+                    tractionBC[iDel].at(2,iIGP) = CZPKtraction.at(2);
+                    tractionBC[iDel].at(3,iIGP) = CZPKtraction.at(3);
+                    iIGP++;
+                }
+                
+            } else {
+                // Delamination zero traction
+                tractionBC[iDel].zero();
+            }
+        } 
+        
+        FloatMatrix SmatOld(3,numInPlaneIP); // 3 stress components (S_xz, S_yz, S_zz) * num of in plane ip 
+        double totalThickness = this->layeredCS->computeIntegralThick(); 
+        double zeroThicknessLevel = - 0.5 * totalThickness;         // assumes midplane is the geometric midplane of layered structure.
+        FloatMatrix dSmat(3,numInPlaneIP);                          // 3 stress components (S_xz, S_yz, S_zz) * num of in plane ip 
+        FloatMatrix dSmatLayerIP(3,numInPlaneIP*numThicknessIP);    // 3 stress components (S_xz, S_yz, S_zz) * num of wedge ip 
+                
+        int layerOld = 0;
+        int iInt = 0;
+        delaminationInterface.followedBy(numberOfLayers);       // creates an array of the layer index of the top layer in a delamination (NB: index = numberOfLayers will allways be the last)
+        for ( int topLayer : delaminationInterface) {  
+            SmatOld = tractionBC[iInt];                         // bottom traction BC of delamination
+            int numDelLayers = topLayer-layerOld;               // number of layers in delamination
+            std::vector <FloatMatrix> dSmatIP; dSmatIP.resize(numDelLayers);              //recovered stress values in wedge IPs
+            std::vector <FloatMatrix> dSmat; dSmat.resize(numDelLayers);              //recovered stress values at delamination top
+            std::vector <FloatMatrix> dSmatIPupd; dSmatIPupd.resize(numDelLayers);     //recovered stress values in wedge IPs adjusted for top and btm traction BC. 
+            std::vector <FloatMatrix> dSmatupd; dSmatupd.resize(numDelLayers);              //recovered stress values at delamination top, adjusted for top and btm traction BC
+            
+            // Recovered stresses in delaminated layers
+            double dz = 0.0;
+            for ( int delLayer = 1 ; delLayer <= numDelLayers; delLayer++ ) {
+                        
+                this->giveLayerContributionToSR(dSmat[delLayer-1], dSmatIP[delLayer-1], delLayer+layerOld, zeroThicknessLevel + dz, tStep);
+                SmatOld.add(dSmat[delLayer-1]); // Integrated stress over laminate
+                dz += this->layeredCS->giveLayerThickness(delLayer+layerOld);   
+                
+            }
+            
+            // Adjust recovered stresses to traction BC (divide integration error 50/50 at top and btm of delamination)
+            
+            this->fitRecoveredStress2BC(dSmatIPupd, dSmatupd, dSmat, dSmatIP, SmatOld, tractionBC[iInt], tractionBC[iInt+1], zeroThicknessLevel, {0.0,0.0,1.0}, layerOld+1, topLayer);
+            
+            for ( int delLayer = 1 ; delLayer <= numDelLayers; delLayer++ ) {
+                if ( (delLayer + layerOld) < numberOfLayers ) {
+                    transverseStress[delLayer+layerOld-1] = dSmatupd[delLayer-1];                
+                }
+            }
+            
+            zeroThicknessLevel += dz;
+            layerOld = topLayer;
+            iInt++;
+        }
+        
+    } else {
+        Shell7Base :: giveRecoveredTransverseInterfaceStress(transverseStress, tStep); 
+    }
+    
 }
 
 

@@ -130,6 +130,7 @@ public:
     virtual bool propagationIsAllowed() const { return true; }
 
     const TipInfo &giveTipInfo() const { return mTipInfo; }
+    virtual void setTipInfo(const TipInfo &iTipInfo) { mTipInfo = iTipInfo; }
 
     void computeCrackTangent(FloatArray &oTangent, FloatArray &oNormal, bool &oFlipTangent, const EfInput &iEfInput) const;
 

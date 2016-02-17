@@ -77,7 +77,10 @@ public:
     double giveDelamXiCoord() const { return xiBottom; }     // coord where the delamination is defined
     double giveBoundingDelamXiCoord() const { return xiTop; } // coord where the delamination enrichment should stop, default is the shell surface
     int giveDelamInterfaceNum() const { return interfaceNum.at(1); }
+    int giveDelamCrossSectionNum() const { return crossSectionNum; }
     virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep);
+    virtual bool hasPropagatingFronts() const { return true; }
+    //virtual void initiateDelaminationNodes();
 
     virtual void evaluateEnrFuncInNode(std :: vector< double > &oEnrFunc, const Node &iNode) const { OOFEM_ERROR("Not implemented.") }
 

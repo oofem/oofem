@@ -114,6 +114,7 @@ int Delamination :: instanciateYourself(DataReader *dr)
         mpEnrichmentFrontStart = classFactory.createEnrichmentFront( enrFrontNameStart.c_str() );
         if ( mpEnrichmentFrontStart != NULL ) {
             mpEnrichmentFrontStart->initializeFrom(enrFrontStartIr);
+            //printf("EnrichmentFrontStart : %s \n", mpEnrichmentFrontStart->giveClassName()); 
         } else {
             OOFEM_ERROR( "Failed to create enrichment front (%s)", enrFrontNameStart.c_str() );
         }
@@ -124,6 +125,7 @@ int Delamination :: instanciateYourself(DataReader *dr)
         mpEnrichmentFrontEnd = classFactory.createEnrichmentFront( enrFrontNameEnd.c_str() );
         if ( mpEnrichmentFrontEnd != NULL ) {
             mpEnrichmentFrontEnd->initializeFrom(enrFrontEndIr);
+            //printf("EnrichmentFrontEnd   : %s \n", mpEnrichmentFrontEnd->giveClassName()); 
         } else {
             OOFEM_ERROR( "Failed to create enrichment front (%s)", enrFrontNameEnd.c_str() );
         }
@@ -166,6 +168,9 @@ int Delamination :: instanciateYourself(DataReader *dr)
 void
 Delamination :: updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep)
 {
+    OOFEM_ERROR( "UpdateGeometry in Delamination not used" );
+    return;
+    
     if ( fc->hasFailed( this->giveNumber() ) ) { // interface has failed
         //printf( "...fails in interface %d \n", this->giveNumber() );
         IntArray dofManNumbers, elDofMans;

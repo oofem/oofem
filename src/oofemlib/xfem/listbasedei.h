@@ -62,6 +62,7 @@ public:
 
     virtual void updateGeometry();
     virtual void propagateFronts(bool &oFrontsHavePropagated);
+    virtual void initiateFronts(bool &oFrontsHavePropagated, IntArray &initiateDofMans);
     virtual void updateNodeEnrMarker(XfemManager &ixFemMan);
 
     virtual bool giveElementTipCoord(FloatArray &oCoord, double &oArcPos,  Element &iEl, const FloatArray &iElCenter) const;
