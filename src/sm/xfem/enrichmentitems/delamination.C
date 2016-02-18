@@ -44,6 +44,7 @@
 #include "xfem/propagationlaw.h"
 #include "xfem/xfemmanager.h"
 #include "xfem/enrichmentfronts/enrichmentfrontdonothing.h"
+#include "Elements/Shells/shell7basexfem.h"
 
 namespace oofem {
 REGISTER_EnrichmentItem(Delamination)
@@ -165,6 +166,7 @@ int Delamination :: instanciateYourself(DataReader *dr)
     return 1;
 }
 
+#if 0
 void
 Delamination :: updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep)
 {
@@ -208,6 +210,88 @@ Delamination :: updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep)
         std :: sort( dofManList.begin(), this->dofManList.end() );
     }
 }
+#endif
+
+void 
+Delamination :: propagateFronts(bool &oFrontsHavePropagated)
+{
+    oFrontsHavePropagated = false;
+    
+    Domain *d = this->giveDomain();
+    TipPropagation tipProp;
+    if ( mpPropagationLaw->propagateInterface(* giveDomain(), * mpEnrichmentFrontStart, tipProp) ) {
+        // Propagate front
+        
+        // Check if nodes are viable for enrichment
+        ///TODO: this should actually not inlcude the nodes at the boundary of the delamination, since this will propagate the delamination outside.
+        IntArray delamNodes, propNodes;
+        Set *elSet = d->giveSet(d->giveCrossSection(this->giveDelamCrossSectionNum())->giveSetNumber());
+        for (int elID : elSet->giveElementList() ) {
+            delamNodes.followedBy(d->giveElement(elID)->giveDofManArray());
+        }
+        delamNodes.sort();
+        
+        delamNodes.findCommonValuesSorted(tipProp.mPropagationDofManNumbers, propNodes);
+        
+        printf("\n Enrichment %i - The following nodes will be propagated to:",this->giveNumber());
+        for ( int inode : propNodes ) {
+            //std::list< int > :: iterator p;
+            std :: vector< int > :: iterator p;
+            p = std :: find( this->dofManList.begin(), this->dofManList.end(), inode );
+            if ( p == this->dofManList.end() ) {          // if new node
+                printf(" %i", inode );
+                this->dofManList.push_back( inode );
+            }
+        }
+        printf(" \n");
+
+        std :: sort( dofManList.begin(), this->dofManList.end() );
+
+        oFrontsHavePropagated = true;
+    }
+    
+    this->updateGeometry();
+    
+}
+
+void
+Delamination :: findInitiationFronts(bool &failureChecked, const IntArray &CSnumbers, std :: vector< IntArray > &CSinterfaceNumbers, std :: vector< IntArray > &CSDofManNumbers, TimeStep *tStep)
+{           
+    if ( !failureChecked ) {
+        // Loop through all cross sections associated with delaminations 
+        IntArray failedElementInterfaces;  
+        IntArray elementNumbers; 
+        
+        // NB: Assumes that elements can only be included in one cross section. 
+        
+        for ( int iCS = 1 ; iCS <= CSnumbers.giveSize() ; iCS++ ) {
+            
+            int eltSetNumber = this->giveDomain()->giveCrossSection(CSnumbers.at(iCS))->giveSetNumber();
+            //printf("Cross section No. %i, set No. %i \n",CSnumbers.at(iCS),eltSetNumber);
+            IntArray elementNumbers = this->giveDomain()->giveSet(eltSetNumber)->giveElementList();
+            
+            for ( auto eltNumber : elementNumbers ) {
+                Element *elt = this->giveDomain()->giveGlobalElement(eltNumber);
+                if ( Shell7BaseXFEM *shellElt = dynamic_cast < Shell7BaseXFEM * > (elt) ) {
+                    FloatArray initValues = shellElt->giveLayeredCS()->giveIntitiationLimits();
+                    shellElt->giveFailedInterfaceNumber(failedElementInterfaces, initValues, tStep);
+                    //failedElementInterfaces.printYourself("failedElementInterfaces");
+                    for (int eltInt : failedElementInterfaces ) {
+                        CSinterfaceNumbers[iCS-1].insertSortedOnce(eltInt);
+                    }
+                    if ( !failedElementInterfaces.isEmpty() ) {
+                        for (int iDF : shellElt->giveDofManArray() ) {
+                            CSDofManNumbers[iCS-1].insertSortedOnce(iDF);
+                        }
+                    }
+                }
+            }
+        } 
+        
+        failureChecked = true;
+    }
+}
+
 
 void Delamination :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iGlobalCoord, const FloatArray &iLocalCoord, int iNodeInd, const Element &iEl) const
 {
@@ -249,7 +333,7 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
     }
 
     // check that interface numbers are valid
-    interfaceNum.printYourself("interface num");
+    //interfaceNum.printYourself("interface num");
     for ( int i = 1; i <= this->interfaceNum.giveSize(); i++ ) {
         if ( this->interfaceNum.at(i) < 1 || this->interfaceNum.at(i) >= layeredCS->giveNumberOfLayers() ) {
             OOFEM_WARNING( "Cross section does not contain the interface number (%d) specified in the record '%s' since number of layers is %d.", this->interfaceNum.at(i), _IFT_Delamination_interfacenum, layeredCS->giveNumberOfLayers() );
@@ -282,6 +366,7 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
     if ( this->matNum > 0 ) {
         this->mat = this->giveDomain()->giveMaterial(this->matNum);
     }
+    
 
     return IRRT_OK;
 }

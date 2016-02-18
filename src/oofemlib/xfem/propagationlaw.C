@@ -170,7 +170,7 @@ bool PLnodeRadius :: propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFr
         }
         
     }
-    oTipProp.mPropagationDofManNumbers.printYourself(" The following noded will be propagated to:");
+    //oTipProp.mPropagationDofManNumbers.printYourself(" The following noded will be propagated to:");
     
     return true;
 }

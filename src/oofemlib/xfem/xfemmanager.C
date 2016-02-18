@@ -372,17 +372,16 @@ void XfemManager :: initiateFronts(bool &oAnyFronHasPropagated, TimeStep *tStep)
     oAnyFronHasPropagated = false;
         
     // Loop over EI:s an cross sections which have delaminaion EI:s
-    IntArray CSnumbers; CSnumbers.clear();
+    IntArray CSnumbers; 
     for ( auto &ei: enrichmentItemList ) {
         if ( Delamination *dei =  dynamic_cast< Delamination * >( ei.get() ) ) {
             CSnumbers.insertSortedOnce(dei->giveDelamCrossSectionNum());
         }
     }
-    //CSnumbers.printYourself("CSnumbers");
-
     
-    bool stressCollected = false;
-//     std :: vector < std :: vector < FloatMatrix > > transverseStresses;
+    bool failureChecked = false;
+    std :: vector < IntArray > CSinterfaceNumbers; CSinterfaceNumbers.resize(CSnumbers.giveSize());
+    std :: vector < IntArray > CSDofManNumbers; CSDofManNumbers.resize(CSnumbers.giveSize());
     
     for ( auto &ei: enrichmentItemList ) {
 
@@ -390,59 +389,13 @@ void XfemManager :: initiateFronts(bool &oAnyFronHasPropagated, TimeStep *tStep)
         
         if ( Delamination *dei =  dynamic_cast< Delamination * >( ei.get() ) ) {         
             
-            IntArray initiationDofMans; initiationDofMans.clear();
+            dei->findInitiationFronts(failureChecked, CSnumbers, CSinterfaceNumbers, CSDofManNumbers, tStep);
             
-            if ( !stressCollected ) {
-                IntArray elementNumbers; elementNumbers.clear();
-                
-                //TODO: fix this!
-//                 for ( auto iCS : CSnumbers ) {
-//                     int eltSetNumber = this->giveDomain()->giveCrossSection(iCS)->giveSetNumber();
-//                     CrossSection *tempCS = this->giveDomain()->giveCrossSection(iCS);
-//                     printf("Cross section No. %i, set No. %i \n",tempCS->giveNumber(),eltSetNumber);
-//                 }
-#if 1
-                for ( auto iCS : CSnumbers ) {
-                    int eltSetNumber = this->giveDomain()->giveCrossSection(iCS)->giveSetNumber();
-                    printf("Cross section No. %i, set No. %i \n",iCS,eltSetNumber);
-                    Set *eltSet = domain->giveSet(eltSetNumber);
-                    IntArray tempEltNumbers = eltSet->giveElementList();
-                    for ( auto eltNumber : tempEltNumbers ) {
-                        elementNumbers.insertSortedOnce(eltNumber); 
-                    }
-                }
-#else 
-                for ( int iElt = 1 ; iElt <= domain->giveNumberOfElements() ; iElt++ ) {
-                    int eltNumber = this->giveDomain()->giveElement(iElt)->giveGlobalNumber() ;
-                    elementNumbers.insertSortedOnce(eltNumber); 
-                }
-#endif               
-                elementNumbers.printYourself("Potential initiation elements");
-                
-//                 transverseInterfaceStresses.resize(elementNumbers.giveSize()); 
-                
-                for ( auto eltNumber : elementNumbers ) {
-                    Element *elt = domain->giveGlobalElement(eltNumber);
-                    if ( Shell7BaseXFEM *shellElt = dynamic_cast < Shell7BaseXFEM * > (elt) ) {
-                        std :: vector < FloatMatrix > transverseInterfaceStresses;
-                        shellElt->giveRecoveredTransverseInterfaceStress(transverseInterfaceStresses, tStep);
-                        
-                        for ( int iInterface = 1 ; iInterface <= (int)transverseInterfaceStresses.size() ; iInterface++ ) {
-                            if (shellElt->giveGlobalNumber() == 9) {transverseInterfaceStresses[iInterface-1].printYourself("Interface stresses elt 9");}
-                            for ( int iGP = 1 ; iGP <= transverseInterfaceStresses[iInterface-1].giveNumberOfRows() ; iGP++ ) {
-                                if (transverseInterfaceStresses[iInterface-1].at(3,iGP) > 1.5e+08) {
-                                    IntArray eltDofMans = shellElt->giveDofManArray();
-                                    for ( auto DFnum : eltDofMans ) {
-                                        initiationDofMans.insertSortedOnce(DFnum);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+            int iCS = CSnumbers.findSorted(dei->giveDelamCrossSectionNum());
+            int iInt = CSinterfaceNumbers[iCS-1].findSorted(dei->giveDelamInterfaceNum());
+            if ( iInt ) {
+                dei->initiateFronts(eiHasPropagated,CSDofManNumbers[iCS-1]);
             }
-            //initiationDofMans.printYourself("initiationDofMans");
-            dei->initiateFronts(eiHasPropagated,initiationDofMans);
         }
 
         if(eiHasPropagated) {

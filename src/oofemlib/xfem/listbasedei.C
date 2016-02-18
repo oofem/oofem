@@ -97,7 +97,7 @@ ListBasedEI :: initiateFronts(bool &oFrontsHavePropagated, IntArray &initiateDof
 {    
     oFrontsHavePropagated = false;
     
-    printf("\n The following nodes have been initiated in enrichment No. %i: ",this->giveNumber());
+    printf("\n Enrichment %i - The following nodes have been initiated: ",this->giveNumber());
     for ( int i = 1; i <= initiateDofMans.giveSize(); i++ ) {
         //std::list< int > :: iterator p;
         std :: vector< int > :: iterator p;
@@ -128,7 +128,7 @@ void ListBasedEI :: updateNodeEnrMarker(XfemManager &ixFemMan)
     // Update the dofManList and the enrichment boundaries.
     // For now let all nodes in dofManList be the boundary
     
-    printf("\n The following nodes are enriched in erichment No. %i:",this->giveNumber());
+    printf("\n Enrichment %i - The following nodes are enriched:",this->giveNumber());
     // Loop over nodes in the DofManList and mark nodes as enriched.
     for ( auto &dman : dofManList ) {
         mNodeEnrMarkerMap [ dman ] = NodeEnr_BULK;

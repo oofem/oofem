@@ -1750,7 +1750,7 @@ Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
             if ( dei != NULL && dei->isElementEnriched(this) ) {
                 double levelSet = xi - dei->giveDelamXiCoord();
                 dei->evaluateEnrFuncAt(ef, lCoords, levelSet);
-                if (this->giveGlobalNumber() == 10) {printf("xi= %f, levelSet= %f, ef= %f \n",xi,levelSet,ef[0]); }
+                //if (this->giveGlobalNumber() == 10) {printf("xi= %f, levelSet= %f, ef= %f \n",xi,levelSet,ef[0]); }
                 if ( ef[0] > 0.1 ) {
                     dei->giveEIDofIdArray(eiDofIdArray);
                     this->computeDiscSolutionVector(eiDofIdArray, tStep, solVecD);
@@ -2291,7 +2291,7 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
     std::vector<FloatArray> values;
     for ( int fieldNum = 1; fieldNum <= primaryVarsToExport.giveSize(); fieldNum++ ) {
         
-        if ( 0 ) {
+        if ( 1 ) {
         // Recover shear stresses
         this->recoverShearStress(tStep);
         }
@@ -3296,6 +3296,51 @@ Shell7BaseXFEM :: recoverShearStress(TimeStep *tStep)
         Shell7Base :: recoverShearStress(tStep); 
     }
 
+}
+
+
+void 
+Shell7BaseXFEM :: giveFailedInterfaceNumber(IntArray &failedInterfaces, const FloatArray &initiationStress, TimeStep *tStep)
+{
+    // Compares recovered interface stresses to initiation stress (atm just max stress criterion). 
+    // Assumes three stress components in initiationStress: (Sxz, Syz, Szz)
+    ///TODO: add failure method. 
+    
+    failedInterfaces.clear();
+    std :: vector < FloatMatrix > transverseInterfaceStresses;
+    this->giveRecoveredTransverseInterfaceStress(transverseInterfaceStresses, tStep);
+    int numSC = initiationStress.giveSize()/3;
+    
+    for ( int iInterface = 1 ; iInterface < this->layeredCS->giveNumberOfLayers() ; iInterface++ ) {
+        bool initiateElt = false;
+        
+        //if (this->giveGlobalNumber() == 9) {transverseInterfaceStresses[iInterface-1].printYourself("Interface stresses elt 9"); initiationStress.printYourself("initiationStress");}
+        
+        for ( int iGP = 1 ; iGP <= transverseInterfaceStresses[iInterface-1].giveNumberOfColumns() ; iGP++ ) {
+            if ( transverseInterfaceStresses[iInterface-1].giveNumberOfRows() != numSC ) {
+                OOFEM_ERROR( "Wrong number of stress components" );
+            }
+            for ( int iSC = 1 ; iSC <= numSC ; iSC++ ) {
+                if ( transverseInterfaceStresses[iInterface-1].at(iSC,iGP) > initiationStress.at(numSC*(iInterface-1) + iSC) || (-transverseInterfaceStresses[iInterface-1].at(iSC,iGP)) > initiationStress.at(iSC)) { 
+                    printf("SC%i = %1.0f, limit = %1.0f \n", iSC, transverseInterfaceStresses[iInterface-1].at(iSC,iGP), initiationStress.at(iSC));
+                    initiateElt = true;
+                    ///TODO: add break/continue;
+                }
+            }
+        }
+        if (initiateElt) {
+            failedInterfaces.followedBy( iInterface );
+        }
+    }
+    //this->DelaminatedInterfaceList.printYourself("DelaminatedInterfaceList");
+    //failedInterfaces.printYourself("failedInterfaces");
+    if (!failedInterfaces.isEmpty()) {
+        for ( int alreadyFailedInterface : this->DelaminatedInterfaceList ) {
+            failedInterfaces.eraseSorted(alreadyFailedInterface);
+        }
+    }
+    this->DelaminatedInterfaceList.followedBy(failedInterfaces);
+    this->DelaminatedInterfaceList.sort();
 }
 
 void 

@@ -819,6 +819,28 @@ LayeredCrossSection :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, midSurfaceZcoordFromBottom, _IFT_LayeredCrossSection_midsurf);
 
     this->setupLayerMidPlanes();
+    
+    IR_GIVE_OPTIONAL_FIELD(ir, this->initiationLimits, _IFT_LayeredCrossSection_initiationlimits); 
+    if (!initiationLimits.isEmpty()) {
+        if ( this->initiationLimits.giveSize() == 1 ) {
+            double tempLimit = initiationLimits.at(1);
+            initiationLimits.resize(3*(numberOfLayers-1));
+            initiationLimits.zero();
+            initiationLimits.add(tempLimit);
+            OOFEM_WARNING( "Same inititiation value is assumed for all interfaces and components in cross section %i", this->giveNumber() );
+        } else if ( this->initiationLimits.giveSize() == 3 ) {
+            FloatArray tempLimits = initiationLimits;
+            initiationLimits.clear();
+            for ( int i = 1 ; i <= 3 ; i++ ) {
+                initiationLimits.append(tempLimits);
+            } 
+            OOFEM_WARNING( "Same inititiation values are assumed for all interfaces in cross section %i", this->giveNumber() );
+        } 
+        if ( this->initiationLimits.giveSize() != 3*(numberOfLayers-1)) {
+            OOFEM_ERROR( "Wrong input of initiation limits in cross section %i", this->giveNumber());
+            return IRRT_BAD_FORMAT;
+        }
+    }
 
     return IRRT_OK;
 }
@@ -835,6 +857,7 @@ void LayeredCrossSection :: giveInputRecord(DynamicInputRecord &input)
     input.setField(this->interfacerMaterials, _IFT_LayeredCrossSection_interfacematerials);
     input.setField(this->numberOfIntegrationPoints, _IFT_LayeredCrossSection_nintegrationpoints);
     input.setField(this->midSurfaceZcoordFromBottom, _IFT_LayeredCrossSection_midsurf);
+    input.setField(this->initiationLimits, _IFT_LayeredCrossSection_initiationlimits);
 }
 
 void LayeredCrossSection :: createMaterialStatus(GaussPoint &iGP)

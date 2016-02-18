@@ -89,6 +89,7 @@ public:
     static void giveGeneralizedStrainComponents(FloatArray genEps, FloatArray &dphidxi1, FloatArray &dphidxi2, FloatArray &dmdxi1,
                                          FloatArray &dmdxi2, FloatArray &m, double &dgamdxi1, double &dgamdxi2, double &gam);
     static void giveDualBase(FloatMatrix &base1, FloatMatrix &base2);
+    LayeredCrossSection *giveLayeredCS() {return this->layeredCS; }
 
 protected:
     virtual Interface *giveInterface(InterfaceType it);

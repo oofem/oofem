@@ -174,11 +174,12 @@ public:
     virtual int giveNumberOfDofs();
     
     // Recovery of through thickness stresses by momentum balance
+    virtual void giveFailedInterfaceNumber(IntArray &failedInterfaces, const FloatArray &initiationStress, TimeStep *tStep);
     virtual void giveRecoveredTransverseInterfaceStress(std::vector<FloatMatrix> &transverseStress, TimeStep *tStep);
 
     bool hasCohesiveZone(int interfaceNum);
     std :: vector< std :: unique_ptr< IntegrationRule > > czIntegrationRulesArray;
-    private:
+private:
     void jump(FloatMatrix lambda, FloatArray deltaUnknowns);
 };
 } // end namespace oofem
