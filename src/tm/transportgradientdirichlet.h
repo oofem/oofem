@@ -32,10 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef prescribedgradient_h
-#define prescribedgradient_h
+#pragma once
 
-#include "prescribedgradienthomogenization.h"
 #include "boundarycondition.h"
 #include "dof.h"
 #include "bctype.h"
@@ -43,49 +41,65 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 
-///@name Input fields for PrescribedGradient
+#include <map>
+
+///@name Input fields for TransportGradientDirichlet
 //@{
-#define _IFT_PrescribedGradient_Name "prescribedgradient"
+#define _IFT_TransportGradientDirichlet_Name "prescribedgradient"
+#define _IFT_TransportGradientDirichlet_gradient "gradient"
+#define _IFT_TransportGradientDirichlet_centerCoords "centercoords"
+#define _IFT_TransportGradientDirichlet_surfSets "surfsets"
+#define _IFT_TransportGradientDirichlet_edgeSets "edgesets"
+#define _IFT_TransportGradientDirichlet_usePsi "usepsi"
 //@}
 
 namespace oofem {
+
 /**
- * Prescribes @f$ v_i = d_{ij}(x_j-\bar{x}_j) @f$ or @f$ s = d_{1j}(x_j - \bar{x}_j) @f$
- * where @f$ v_i @f$ are primary unknowns for the subscale.
- * This is typical boundary condition in multiscale analysis where @f$ d = \partial_x s@f$
- * would a macroscopic gradient at the integration point, i.e. this is a boundary condition for prolongation.
- * It is also convenient to use when one wants to test a arbitrary specimen for shear.
+ * Prescribes @f$ t = g_{i}(x_i-\bar{x}_i) @f$ where @f$ t @f$ are primary unknown.
+ * This is typical boundary condition in multiscale analysis where @f$ g = \partial_x t@f$
+ * would be a macroscopic gradient at the integration point, i.e. this is a boundary condition for prolongation.
+ * It is also convenient to use when one wants to test a arbitrary specimen for a given average gradient.
+ * 
+ * @note This class has optional support for the "psi" parameter, which is computed to improve the 
+ * bounds for high permeable inclusions in a matrix.
+ * Using this parameter requires additional inputs, edgeSets and surfSets, which should be defined in the particular order.
+ * The numbering of the surface should be the same as for the hex cube interpolator as defined in the element reference manual.
+ * 
+ * @note Experimental code
+ * 
  * @author Mikael Öhman
- * @author Erik Svenning
  */
-class OOFEM_EXPORT PrescribedGradient : public BoundaryCondition, public PrescribedGradientHomogenization
+class OOFEM_EXPORT TransportGradientDirichlet : public BoundaryCondition
 {
+protected:
+    FloatArray mGradient;
+    FloatArray mCenterCoord;
+
+    // One psi for each node.
+    std :: map< int, FloatArray > psis;
+    IntArray surfSets;
+    IntArray edgeSets;
+
 public:
     /**
      * Creates boundary condition with given number, belonging to given domain.
      * @param n Boundary condition number.
      * @param d Domain to which new object will belongs.
      */
-    PrescribedGradient(int n, Domain *d) : BoundaryCondition(n, d) { }
+    TransportGradientDirichlet(int n, Domain *d) : BoundaryCondition(n, d) { }
 
     /// Destructor
-    virtual ~PrescribedGradient() { }
+    virtual ~TransportGradientDirichlet() { }
+
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual double give(Dof *dof, ValueModeType mode, double time);
 
     virtual bcType giveType() const { return DirichletBT; }
 
-    /**
-     * Initializes receiver according to object description stored in input record.
-     * The input record contains two fields;
-     * - gradient \#rows \#columns { d_11 d_12 ... ; d_21 ... } (required)
-     * - cCoords \#columns x_1 x_2 ... (optional, default 0)
-     * The prescribed tensor's columns must be equal to the size of the center coordinates.
-     * The size of the center coordinates must be equal to the size of the coordinates in the applied nodes.
-     */
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
-
+    double domainSize();
     /**
      * Constructs a coefficient matrix for all prescribed unknowns.
      * Helper routine for computational homogenization.
@@ -107,12 +121,13 @@ public:
      * @param tStep Active time step.
      */
     virtual void computeTangent(FloatMatrix &tangent, TimeStep *tStep);
+    
+    /// Computes the offset values for "improved" Dirichlet. See class description.
+    void computePsi();
 
     virtual void scale(double s) { mGradient.times(s); }
 
-    virtual const char *giveClassName() const { return "PrescribedGradient"; }
-    virtual const char *giveInputRecordName() const { return _IFT_PrescribedGradient_Name; }
+    virtual const char *giveClassName() const { return "TransportGradientDirichlet"; }
+    virtual const char *giveInputRecordName() const { return _IFT_TransportGradientDirichlet_Name; }
 };
 } // end namespace oofem
-
-#endif // prescribedgradient_h

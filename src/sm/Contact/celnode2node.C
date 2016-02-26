@@ -129,7 +129,7 @@ Node2NodeContact :: computeContactTractionAt(GaussPoint *gp, FloatArray &t, Floa
 
 
 void
-Node2NodeContact :: computeContactForces(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
+Node2NodeContact :: computeContactForces(FloatArray &answer, TimeStep *tStep, ValueModeType mode,
                                 const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
 {
     answer.clear();
@@ -153,7 +153,7 @@ Node2NodeContact :: computeContactForces(FloatArray &answer, TimeStep *tStep, Ch
 
   
 void
-Node2NodeContact :: computeContactTangent(FloatMatrix &answer, CharType type, TimeStep *tStep)
+Node2NodeContact :: computeContactTangent(FloatMatrix &answer, TimeStep *tStep)
 {
    // Need to set up an integration rule 
     GaussPoint *gp = NULL;
@@ -263,7 +263,7 @@ Node2NodeContactL :: giveLocationArray(IntArray &answer, const UnknownNumberingS
 
 
 void
-Node2NodeContactL :: computeContactForces(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
+Node2NodeContactL :: computeContactForces(FloatArray &answer, TimeStep *tStep, ValueModeType mode,
                                 const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
 {
   
@@ -291,7 +291,7 @@ Node2NodeContactL :: computeContactForces(FloatArray &answer, TimeStep *tStep, C
 
 
 void
-Node2NodeContactL :: computeContactTangent(FloatMatrix &answer, CharType type, TimeStep *tStep)
+Node2NodeContactL :: computeContactTangent(FloatMatrix &answer, TimeStep *tStep)
 {
     answer.resize(7,7);
     answer.zero();

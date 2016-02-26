@@ -156,6 +156,13 @@ void StructuralMaterialEvaluator :: solveYourself()
                 // Debugging:
                 mat->give3dMaterialStiffnessMatrix(tangent, TangentStiffness, gp, tStep);
                 tangent.printYourself("tangent");
+                
+                strain.zero();
+                mat->giveRealStressVector_3d(stress, gp, strain, tStep);
+                stress.printYourself("stress");
+                FloatArray strain2;
+                tangent.solveForRhs(stress, strain2);
+                strain2.printYourself("thermal expansion");
                 break;
 #endif
 

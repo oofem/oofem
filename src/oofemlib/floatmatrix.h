@@ -534,7 +534,14 @@ public:
      * @param name Display name of reciever.
      */
     void printYourself(const std::string &name) const;
-
+    
+    /**
+     * Print matrix to file.
+     * @param filename Output filename
+     * @parap showDimensions Determines if dimensions should be included in output. Default is true.
+     */
+    void printYourselfToFile(const std::string filename, const bool showDimensions=true) const;
+    
     /// Higher accuracy than printYourself.
     void pY() const;
 

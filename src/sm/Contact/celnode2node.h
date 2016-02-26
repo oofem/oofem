@@ -86,10 +86,10 @@ public:
     
     
     // Necessary methods - pure virtual in base class
-    virtual void computeContactForces(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
+    virtual void computeContactForces(FloatArray &answer, TimeStep *tStep, ValueModeType mode,
                                 const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms);    
     
-    virtual void computeContactTangent(FloatMatrix &answer, CharType type, TimeStep *tStep);
+    virtual void computeContactTangent(FloatMatrix &answer, TimeStep *tStep);
     
     virtual void giveLocationArray(IntArray &answer, const UnknownNumberingScheme &s);
 };
@@ -121,10 +121,10 @@ public:
     virtual void computeContactTractionAt(GaussPoint *gp, FloatArray &t, FloatArray &gap, TimeStep *tStep);
     
     // Necessary methods - pure virtual in base class
-    virtual void computeContactForces(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
+    virtual void computeContactForces(FloatArray &answer, TimeStep *tStep, ValueModeType mode,
                                 const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms);    
     
-    virtual void computeContactTangent(FloatMatrix &answer, CharType type, TimeStep *tStep);
+    virtual void computeContactTangent(FloatMatrix &answer, TimeStep *tStep);
     
     virtual void giveLocationArray(IntArray &answer, const UnknownNumberingScheme &s);
 };

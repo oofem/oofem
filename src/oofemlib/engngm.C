@@ -231,12 +231,6 @@ int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const cha
 #  ifdef VERBOSE
     OOFEM_LOG_DEBUG( "Reading all data from input file %s\n", dr->giveDataSourceName() );
 #  endif
-#ifdef __PARALLEL_MODE
-    if ( this->isParallel() ) {
-        fprintf(outputStream, "Problem rank is %d/%d on %s\n\n", this->rank, this->numProcs, this->processor_name);
-    }
-
-#endif
 
     simulationDescription = std::string(desc);
 
@@ -324,19 +318,25 @@ EngngModel :: initializeFrom(InputRecord *ir)
 
     suppressOutput = ir->hasField(_IFT_EngngModel_suppressOutput);
 
-    if(suppressOutput) {
-    	printf("Suppressing output.\n");
+    if ( suppressOutput ) {
+        printf("Suppressing output.\n");
     }
     else {
 
-		if ( ( outputStream = fopen(this->dataOutputFileName.c_str(), "w") ) == NULL ) {
-			OOFEM_ERROR("Can't open output file %s", this->dataOutputFileName.c_str());
-		}
+        if ( ( outputStream = fopen(this->dataOutputFileName.c_str(), "w") ) == NULL ) {
+            OOFEM_ERROR("Can't open output file %s", this->dataOutputFileName.c_str());
+        }
 
-		fprintf(outputStream, "%s", PRG_HEADER);
-		fprintf( outputStream, "\nStarting analysis on: %s\n", ctime(& this->startTime) );
-		fprintf(outputStream, "%s\n", simulationDescription.c_str());
-	}
+        fprintf(outputStream, "%s", PRG_HEADER);
+        fprintf(outputStream, "\nStarting analysis on: %s\n", ctime(& this->startTime) );
+        fprintf(outputStream, "%s\n", simulationDescription.c_str());
+
+#ifdef __PARALLEL_MODE
+        if ( this->isParallel() ) {
+            fprintf(outputStream, "Problem rank is %d/%d on %s\n\n", this->rank, this->numProcs, this->processor_name);
+        }
+#endif
+    }
 
     return IRRT_OK;
 }
@@ -1218,18 +1218,25 @@ EngngModel :: assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, Ch
         ///@todo This is not perfect. It is probably no good for viscoelastic materials, and possibly other scenarios that are rate dependent
         ///(tangent will be computed for the previous step, with whatever deltaT it had)
         element->giveCharacteristicMatrix(charMatrix, type, tStep);
-        element->computeVectorOf(VM_Incremental, tStep, delta_u);
-        charVec.beProductOf(charMatrix, delta_u);
-        if ( element->giveRotationMatrix(R) ) {
-            charVec.rotatedWith(R, 't');
-        }
+        if ( charMatrix.isNotEmpty() ) {
+            ///@note Temporary work-around for active b.c. used in multiscale (it can't support VM_Incremental easily).
+            //element->computeVectorOf(VM_Incremental, tStep, delta_u);
+            element->computeVectorOf(VM_Total, tStep, delta_u);
+            FloatArray tmp;
+            element->computeVectorOf(VM_Total, tStep->givePreviousStep(), tmp);
+            delta_u.subtract(tmp);
+            charVec.beProductOf(charMatrix, delta_u);
+            if ( element->giveRotationMatrix(R) ) {
+                charVec.rotatedWith(R, 't');
+            }
 
-        ///@todo Deal with element deactivation and reactivation properly.
-#ifdef _OPENMP
- #pragma omp critical
-#endif
-        {
-            answer.assemble(charVec, loc);
+            ///@todo Deal with element deactivation and reactivation properly.
+    #ifdef _OPENMP
+    #pragma omp critical
+    #endif
+            {
+                answer.assemble(charVec, loc);
+            }
         }
     }
 
@@ -1658,16 +1665,17 @@ EngngModel :: giveMetaStep(int i)
 }
 
 void 
-EngngModel::letOutputBaseFileNameBe(const std :: string &src) {
-  this->dataOutputFileName = src;
+EngngModel::letOutputBaseFileNameBe(const std :: string &src)
+{
+    this->dataOutputFileName = src;
 
-  if ( outputStream) fclose(outputStream);
+    if ( outputStream) fclose(outputStream);
 
-  if(!suppressOutput) {
-	  if ( ( outputStream = fopen(this->dataOutputFileName.c_str(), "w") ) == NULL ) {
-		OOFEM_ERROR("Can't open output file %s", this->dataOutputFileName.c_str());
-	  }
-  }
+    if ( !suppressOutput ) {
+        if ( ( outputStream = fopen(this->dataOutputFileName.c_str(), "w") ) == NULL ) {
+            OOFEM_ERROR("Can't open output file %s", this->dataOutputFileName.c_str());
+        }
+    }
 }
 
 FILE *
@@ -1712,19 +1720,19 @@ EngngModel :: terminateAnalysis()
 
         fprintf(out, "\nFinishing analysis on: %s\n", ctime(& endTime) );
     }
-    
+
     // compute real time consumed
     this->giveAnalysisTime(rhrs, rmin, rsec, uhrs, umin, usec);
 
-    if(!suppressOutput) {
-    	fprintf(out, "Real time consumed: %03dh:%02dm:%02ds\n", rhrs, rmin, rsec);
+    if ( !suppressOutput ) {
+        fprintf(out, "Real time consumed: %03dh:%02dm:%02ds\n", rhrs, rmin, rsec);
     }
 
     OOFEM_LOG_FORCED("\n\nANALYSIS FINISHED\n\n\n");
     OOFEM_LOG_FORCED("Real time consumed: %03dh:%02dm:%02ds\n", rhrs, rmin, rsec);
 
-    if(!suppressOutput) {
-    	fprintf(out, "User time consumed: %03dh:%02dm:%02ds\n\n\n", uhrs, umin, usec);
+    if ( !suppressOutput ) {
+        fprintf(out, "User time consumed: %03dh:%02dm:%02ds\n\n\n", uhrs, umin, usec);
     }
 
     OOFEM_LOG_FORCED("User time consumed: %03dh:%02dm:%02ds\n", uhrs, umin, usec);
@@ -1759,13 +1767,11 @@ EngngModel :: checkProblemConsistency()
 void
 EngngModel :: postInitialize()
 {
-
     // set meta step bounds
     int istep = this->giveNumberOfFirstStep(true);
     for ( auto &metaStep: metaStepList ) {
         istep = metaStep.setStepBounds(istep);
     }
-
 
     for ( auto &domain: domainList ) {
         domain->postInitialize();
