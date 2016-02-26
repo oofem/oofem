@@ -249,7 +249,9 @@ void PrescribedGradientBCWeak :: assembleVector(FloatArray &answer, TimeStep *tS
                 giveBoundaryCoordVector(temp, x);
 
                 FloatArray Hx;
-                Hx.beProductOf(mGradient, temp);
+                FloatMatrix grad2D = mGradient;
+                grad2D.resizeWithData(2,2);
+                Hx.beProductOf(grad2D, temp);
 
 
                 // N-matrix

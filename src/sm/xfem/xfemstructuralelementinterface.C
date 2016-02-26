@@ -61,6 +61,9 @@
 #include <string>
 #include <sstream>
 
+#define include_bulk_jump
+//#define cz_bulk_corr
+
 namespace oofem {
 XfemStructuralElementInterface :: XfemStructuralElementInterface(Element *e) :
     XfemElementInterface(e),
@@ -309,6 +312,8 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
         // Therefore, we can set up integration
         // points on each triangle.
 
+//        printf("totalCrackLengthInEl: %e\n", totalCrackLengthInEl);
+
         if ( xMan->giveVtkDebug() ) {
             std :: stringstream str3;
             int elIndex = this->element->giveGlobalNumber();
@@ -364,6 +369,82 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
             XFEMDebugTools :: WritePointsToVTK(name, czGPCoord);
             ////////////////////////////////////////////////////////////////////////
         }
+
+
+#ifdef cz_bulk_corr
+        if(useNonStdCz() && partitionSucceeded) {
+        	// If the non-standard FE2 cohesive zone model is used, we need to scale the bulk Gauss weights.
+
+        	// Start by computing the element area
+            double totalElArea = 0.0, sumGW = 0.0;
+            IntegrationRule *ir = element->giveIntegrationRule(0);
+            if(ir == NULL) {
+            	printf("ir == NULL\n");
+            }
+            int numGP = ir->giveNumberOfIntegrationPoints();
+//            printf("numGP: %d\n", numGP);
+//
+//            for(int i = 0; i < numGP; i++) {
+//            	GaussPoint *gp = ir->getIntegrationPoint(i);
+//            	totalElArea += gp->giveWeight();
+//            }
+            for ( auto &gp : *element->giveIntegrationRule(0) ) {
+            	double dA = element->computeVolumeAround(gp);
+            	totalElArea += dA;
+            	sumGW += gp->giveWeight();
+            }
+
+
+//            printf("element->computeArea(): %e\n", element->computeArea());
+//            printf("\n\ntotalElArea: %e\n", totalElArea );
+
+            double areaToReduce = 0.0;
+
+			size_t numSeg = mpCZIntegrationRules.size();
+			for ( size_t segIndex = 0; segIndex < numSeg; segIndex++ ) {
+				for ( GaussPoint *gp: *mpCZIntegrationRules [ segIndex ] ) {
+
+			    	StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*> ( gp->giveMaterialStatus() );
+
+			    	if(fe2ms == NULL) {
+			    		OOFEM_ERROR("The material status is not of an allowed type.")
+			    	}
+
+					// Fetch L_s
+					double l_s = 2.0*sqrt( fe2ms->giveBC()->domainSize() );
+
+					CrossSection *cs  = element->giveCrossSection();
+					double thickness = cs->give(CS_Thickness, gp);
+					double dA = thickness * gp->giveWeight();
+
+					areaToReduce += l_s*dA;
+
+				}
+			}
+
+			printf("\n\ntotalElArea: %e\n", totalElArea );
+			printf("areaToReduce: %e\n", areaToReduce);
+			double reduceFraction = areaToReduce/totalElArea;
+//			if(reduceFraction >= 1.0) {
+//				reduceFraction = 1.0;
+//			}
+			printf("reduceFraction: %e\n", reduceFraction);
+
+			double remainingFraction = 1.0 - reduceFraction;
+//			if(remainingFraction < 1.0e-6) {
+//				remainingFraction = 1.0e-6;
+//			}
+			printf("remainingFraction: %e\n", remainingFraction);
+
+
+			// Scale bulk Gauss weights
+            for ( auto &gp : *element->giveIntegrationRule(0) ) {
+            	gp->setWeight( remainingFraction*gp->giveWeight() );
+            }
+
+
+        }
+#endif
     }
 
     return partitionSucceeded;
@@ -511,6 +592,11 @@ void XfemStructuralElementInterface :: computeCohesiveForces(FloatArray &answer,
 			FloatArray solVec;
 			element->computeVectorOf(VM_Total, tStep, solVec);
 
+		    StructuralFE2Material *fe2Mat = dynamic_cast<StructuralFE2Material*>(mpCZMat);
+		    if(!fe2Mat) {
+		    	OOFEM_ERROR("Failed to cast StructuralFE2Material*.")
+		    }
+
 			size_t numSeg = mpCZIntegrationRules.size();
 			for ( size_t segIndex = 0; segIndex < numSeg; segIndex++ ) {
 				for ( GaussPoint *gp: *mpCZIntegrationRules [ segIndex ] ) {
@@ -539,17 +625,67 @@ void XfemStructuralElementInterface :: computeCohesiveForces(FloatArray &answer,
 
 					////////////////////////////////////////////////////////
 					// Fetch L_s
-					double l_s = sqrt( fe2ms->giveBC()->domainSize() );
+					double l_s = 2.0*sqrt( fe2ms->giveBC()->domainSize() );
 //					printf("l_s: %e\n", l_s);
 
 
 					////////////////////////////////////////////////////////
 					// Construct strain (only consider the smeared jump for now)
-					FloatArray smearedJumpStrain = {jump2D(0)*crackNormal(0)/l_s, jump2D(1)*crackNormal(1)/l_s, (1.0/l_s)*( jump2D(0)*crackNormal(1) + jump2D(1)*crackNormal(0) )};
+					FloatArray smearedJumpStrain = {jump2D(0)*crackNormal(0)/l_s, jump2D(1)*crackNormal(1)/l_s, 0.0, 0.0, 0.0, (1.0/l_s)*( jump2D(0)*crackNormal(1) + jump2D(1)*crackNormal(0) )};
 //					printf("smearedJumpStrain: "); smearedJumpStrain.printYourself();
 
+#ifdef include_bulk_jump
+					////////////////////////////////////////////////////////
+					// Bulk contribution to SVE strain
+
+					// Crack gp coordinates
+					const FloatArray &xC = gp->giveGlobalCoordinates();
+
+					// For now, we will just perturb the coordinates of the GP to compute B^- and B^+ numerically.
+					double eps = 1.0e-6;
+					FloatArray xPert = xC;
+
+					xPert.add(eps, crackNormal);
+					FloatArray locCoordPert;
+					element->computeLocalCoordinates(locCoordPert, xPert);
+
+					FloatMatrix BPlus;
+					this->ComputeBOrBHMatrix(BPlus, *gp, *element, false, locCoordPert);
+//					printf("\n\n\n\nBPlus: "); BPlus.printYourself();
+
+					xPert = xC;
+					xPert.add(-eps, crackNormal);
+					element->computeLocalCoordinates(locCoordPert, xPert);
+
+					FloatMatrix BMinus;
+					this->ComputeBOrBHMatrix(BMinus, *gp, *element, false, locCoordPert);
+//					printf("BMinus: "); BMinus.printYourself();
+
+//					FloatMatrix BDiff = BPlus;
+//					BDiff.add(-1.0, BMinus);
+//					printf("BDiff: "); BDiff.printYourself();
+
+					FloatMatrix BAvg = BPlus;
+					BAvg.add(1.0, BMinus);
+					BAvg.times(0.5);
+//					printf("BAvg: "); BAvg.printYourself();
 
 
+					FloatArray smearedBulkStrain;
+					smearedBulkStrain.beProductOf(BAvg, solVec);
+
+					if( smearedBulkStrain.giveSize() == 4 ) {
+						smearedBulkStrain = {smearedBulkStrain(0), smearedBulkStrain(1), smearedBulkStrain(2), 0.0, 0.0, smearedBulkStrain(3)};
+					}
+
+//					printf("\n\n\n\n\nsmearedJumpStrain: "); smearedJumpStrain.printYourself();
+//					printf("smearedBulkStrain: "); smearedBulkStrain.printYourself();
+
+
+					FloatArray smearedJumpStrainTemp = smearedJumpStrain;
+
+					smearedJumpStrain.add(smearedBulkStrain);
+#endif
 					////////////////////////////////////////////////////////
 					// Compute homogenized stress
 					StructuralElement *se = dynamic_cast<StructuralElement*>(this->element);
@@ -558,12 +694,25 @@ void XfemStructuralElementInterface :: computeCohesiveForces(FloatArray &answer,
 					}
 
 					FloatArray stressVec;
-					se->computeStressVector(stressVec, smearedJumpStrain, gp, tStep);
+//					se->computeStressVector(stressVec, smearedJumpStrain, gp, tStep);
+
+
+					fe2Mat->giveRealStressVector_3d(stressVec, gp, smearedJumpStrain, tStep);
 //					printf("stressVec: "); stressVec.printYourself();
+					FloatArray trac = {stressVec(0)*crackNormal(0)+stressVec(5)*crackNormal(1), stressVec(5)*crackNormal(0)+stressVec(1)*crackNormal(1)};
 
 
-					// Traction
-					FloatArray trac = {stressVec(0)*crackNormal(0)+stressVec(2)*crackNormal(1), stressVec(2)*crackNormal(0)+stressVec(1)*crackNormal(1)};
+//					// Traction
+//					FloatArray trac;
+//					if(stressVec.giveSize() == 3) {
+//						trac = {stressVec(0)*crackNormal(0)+stressVec(2)*crackNormal(1), stressVec(2)*crackNormal(0)+stressVec(1)*crackNormal(1)};
+//					}
+//					else if(stressVec.giveSize() == 4) {
+//						trac = {stressVec(0)*crackNormal(0)+stressVec(3)*crackNormal(1), stressVec(3)*crackNormal(0)+stressVec(1)*crackNormal(1)};
+//					}
+//					else {
+//						OOFEM_ERROR("Unexpected format of stress vector.")
+//					}
 //					printf("trac: "); trac.printYourself();
 
 					////////////////////////////////////////////////////////
@@ -579,13 +728,24 @@ void XfemStructuralElementInterface :: computeCohesiveForces(FloatArray &answer,
 					answer.add(dA, NTimesT);
 
 
+#ifdef cz_bulk_corr
 					////////////////////////////////////////////////////////
 					// Non-standard part
+//					fe2Mat->giveRealStressVector_3d(stressVec, gp, smearedBulkStrain, tStep);
+
+					FloatArray stressV4 = {stressVec(0), stressVec(1), stressVec(2), stressVec(5)};
+					FloatArray BTimesT;
+					BTimesT.beTProductOf(BAvg, stressV4);
+					answer.add(dA*l_s, BTimesT);
+
+//					fe2Mat->giveRealStressVector_3d(stressVec, gp, smearedJumpStrain, tStep);
+#endif
 
 
 				}
 			}
 		}
+
 	}
 }
 
@@ -797,6 +957,7 @@ void XfemStructuralElementInterface :: computeCohesiveTangent(FloatMatrix &answe
 	else {
 		// Non-standard cz formulation.
 
+
 		FloatArray solVec;
 		element->computeVectorOf(VM_Total, tStep, solVec);
 
@@ -828,25 +989,53 @@ void XfemStructuralElementInterface :: computeCohesiveTangent(FloatMatrix &answe
 				computeNCohesive(NMatrix, * gp, mCZEnrItemIndices [ segIndex ], mCZTouchingEnrItemIndices [ segIndex ]);
 
 
+
 				// Traction part of tangent
 				FloatMatrix C;
 				fe2Mat->give3dMaterialStiffnessMatrix(C, TangentStiffness, gp, tStep);
 //				printf("dSigdEps: "); C.printYourself();
+//				printf("C(0,0): %e\n", C(0,0) );
+
+//				printf("C.giveNumberOfRows(): %d\n", C.giveNumberOfRows());
+//				printf("C.giveNumberOfColumns(): %d\n", C.giveNumberOfColumns());
 
 				////////////////////////////////////////////////////////
 				// Fetch normal
 				FloatArray n( fe2ms->giveNormal() );
+//				n(1) = 0.0;
+//				n.times(-1.0);
+
+//				printf("n: "); n.printYourself();
 
 				////////////////////////////////////////////////////////
 				// Fetch L_s
-				double l_s = sqrt( fe2ms->giveBC()->domainSize() );
+				double l_s = 2.0*sqrt( fe2ms->giveBC()->domainSize() );
 
 				FloatMatrix Ka(2,2);
-				Ka(0,0) = (1.0/l_s)*( C(0,0)*n(0)*n(0) + C(0,5)*n(0)*n(1) + C(5,0)*n(1)*n(0) + C(5,5)*n(1)*n(1) );
-				Ka(0,1) = (1.0/l_s)*( C(0,5)*n(0)*n(0) + C(0,1)*n(0)*n(1) + C(5,5)*n(1)*n(0) + C(5,1)*n(1)*n(1) );
-				Ka(1,0) = (1.0/l_s)*( C(5,0)*n(0)*n(0) + C(5,5)*n(0)*n(1) + C(1,0)*n(1)*n(0) + C(1,5)*n(1)*n(1) );
-				Ka(1,1) = (1.0/l_s)*( C(5,5)*n(0)*n(0) + C(5,1)*n(0)*n(1) + C(1,5)*n(1)*n(0) + C(1,1)*n(1)*n(1) );
+				double a1 = 1.0;
+				double a2 = 1.0;
+				double a3 = 1.0;
+				Ka(0,0) = (0.5/l_s)*(    C(0,0)*n(0)*n(0) + a2*C(0,5)*n(0)*n(1) + a1*C(5,0)*n(1)*n(0) + a3*C(5,5)*n(1)*n(1) ) +
+						  (0.5/l_s)*(    C(0,0)*n(0)*n(0) + a2*C(0,5)*n(0)*n(1) + a1*C(5,0)*n(1)*n(0) + a3*C(5,5)*n(1)*n(1) );
 
+				Ka(0,1) = (0.5/l_s)*( a2*C(0,5)*n(0)*n(0) +    C(0,1)*n(0)*n(1) + a3*C(5,5)*n(1)*n(0) + a1*C(5,1)*n(1)*n(1) ) +
+						  (0.5/l_s)*( a2*C(0,5)*n(0)*n(0) +    C(0,1)*n(0)*n(1) + a3*C(5,5)*n(1)*n(0) + a1*C(5,1)*n(1)*n(1) );
+
+
+				Ka(1,0) = (0.5/l_s)*( a1*C(5,0)*n(0)*n(0) + a3*C(5,5)*n(0)*n(1) +    C(1,0)*n(1)*n(0) + a2*C(1,5)*n(1)*n(1) ) +
+						  (0.5/l_s)*( a1*C(5,0)*n(0)*n(0) + a3*C(5,5)*n(0)*n(1) +    C(1,0)*n(1)*n(0) + a2*C(1,5)*n(1)*n(1) );
+
+
+				Ka(1,1) = (0.5/l_s)*( a3*C(5,5)*n(0)*n(0) + a1*C(5,1)*n(0)*n(1) + a2*C(1,5)*n(1)*n(0) +    C(1,1)*n(1)*n(1) ) +
+						  (0.5/l_s)*( a3*C(5,5)*n(0)*n(0) + a1*C(5,1)*n(0)*n(1) + a2*C(1,5)*n(1)*n(0) +    C(1,1)*n(1)*n(1) );
+
+//				Ka.times(1.5);
+//				Ka.times(6.0);
+
+//				Ka.times( 1.0/sqrt(2.0) );
+//				Ka.times( 0.25 );
+
+//				printf("Ka: "); Ka.printYourself();
 
 				FloatMatrix tmp, tmp2;
 				tmp.beProductOf(Ka, NMatrix);
@@ -857,8 +1046,114 @@ void XfemStructuralElementInterface :: computeCohesiveTangent(FloatMatrix &answe
 				double dA = thickness * gp->giveWeight();
 				answer.add(dA, tmp2);
 
+
+
+#ifdef include_bulk_jump
+				////////////////////////////////////////////////////////
+				// Bulk contribution to SVE strain
+
+				// Crack gp coordinates
+				const FloatArray &xC = gp->giveGlobalCoordinates();
+
+				// For now, we will just perturb the coordinates of the GP to compute B^- and B^+ numerically.
+				double eps = 1.0e-6;
+				FloatArray xPert = xC;
+
+				xPert.add(eps, n);
+				FloatArray locCoordPert;
+				element->computeLocalCoordinates(locCoordPert, xPert);
+
+				FloatMatrix BPlus;
+				this->ComputeBOrBHMatrix(BPlus, *gp, *element, false, locCoordPert);
+//					printf("\n\n\n\nBPlus: "); BPlus.printYourself();
+
+				xPert = xC;
+				xPert.add(-eps, n);
+				element->computeLocalCoordinates(locCoordPert, xPert);
+
+				FloatMatrix BMinus;
+				this->ComputeBOrBHMatrix(BMinus, *gp, *element, false, locCoordPert);
+//					printf("BMinus: "); BMinus.printYourself();
+
+//					FloatMatrix BDiff = BPlus;
+//					BDiff.add(-1.0, BMinus);
+//					printf("BDiff: "); BDiff.printYourself();
+
+				FloatMatrix BAvg = BPlus;
+				BAvg.add(1.0, BMinus);
+				BAvg.times(0.5);
+//					printf("BAvg: "); BAvg.printYourself();
+
+
+				FloatMatrix Kb(2,4); // Implicitly assumes plane strain. Fix later.
+
+				Kb(0,0) = C(0,0)*n(0) + C(5,0)*n(1);
+				Kb(0,1) = C(0,1)*n(0) + C(5,1)*n(1);
+				Kb(0,3) = C(0,5)*n(0) + C(5,5)*n(1);
+
+				Kb(1,0) = C(5,0)*n(0) + C(1,0)*n(1);
+				Kb(1,1) = C(5,1)*n(0) + C(1,1)*n(1);
+				Kb(1,3) = C(5,5)*n(0) + C(1,5)*n(1);
+
+				tmp.beProductOf(Kb, BAvg);
+				tmp2.beTProductOf(NMatrix, tmp);
+				answer.add(dA, tmp2);
+#endif
+
+				////////////////////////////////////////////////////////
+				// Non-standard bulk contribution
+#ifdef cz_bulk_corr
+				tmp.beTranspositionOf(tmp2);
+				answer.add(dA, tmp);
+
+
+				FloatMatrix C4(4,4);
+				C4(0,0) = C(0,0);
+				C4(0,1) = C(0,1);
+				C4(0,2) = C(0,2);
+				C4(0,3) = C(0,5);
+
+				C4(1,0) = C(1,0);
+				C4(1,1) = C(1,1);
+				C4(1,2) = C(1,2);
+				C4(1,3) = C(1,5);
+
+				C4(2,0) = C(2,0);
+				C4(2,1) = C(2,1);
+				C4(2,2) = C(2,2);
+				C4(2,3) = C(2,5);
+
+				C4(3,0) = C(5,0);
+				C4(3,1) = C(5,1);
+				C4(3,2) = C(5,2);
+				C4(3,3) = C(5,5);
+
+				tmp.beProductOf(C4, BAvg);
+				tmp2.beTProductOf(BAvg, tmp);
+				answer.add(dA*l_s, tmp2);
+
+//				tmp.beProductOf(C4, BPlus);
+//				tmp2.beTProductOf(BPlus, tmp);
+//				answer.add(0.25*dA*l_s, tmp2);
+//
+//				tmp.beProductOf(C4, BPlus);
+//				tmp2.beTProductOf(BMinus, tmp);
+//				answer.add(0.25*dA*l_s, tmp2);
+//
+//				tmp.beProductOf(C4, BMinus);
+//				tmp2.beTProductOf(BMinus, tmp);
+//				answer.add(0.25*dA*l_s, tmp2);
+//
+//				tmp.beProductOf(C4, BMinus);
+//				tmp2.beTProductOf(BPlus, tmp);
+//				answer.add(0.25*dA*l_s, tmp2);
+
+
+#endif
+
 			}
 		}
+
 	}
 }
 
