@@ -45,7 +45,7 @@
 
 ///@name Input fields for TransportGradientDirichlet
 //@{
-#define _IFT_TransportGradientDirichlet_Name "prescribedgradient"
+#define _IFT_TransportGradientDirichlet_Name "prescribedgradienttransport"
 #define _IFT_TransportGradientDirichlet_gradient "gradient"
 #define _IFT_TransportGradientDirichlet_centerCoords "centercoords"
 #define _IFT_TransportGradientDirichlet_surfSets "surfsets"

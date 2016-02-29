@@ -1,6 +1,6 @@
 InterfaceEL_Line1.out
 Test of interface element - linear line element: Written by Jim Brouzoulis, Chalmers University of Technology.
-staticstructural nsteps 5 deltat 1.0 rtolf 1.e-6 MaxIter 10 minIter 2 nmodules 1 manrmsteps 1
+staticstructural nsteps 5 deltat 1.0 rtolf 1.e-6 MaxIter 20 minIter 2 nmodules 1 manrmsteps 1
 #vtkxml tstep_all dofman_all element_all primvars 1 1 vars 1 1
 errorcheck
 Domain 2dPlaneStress
