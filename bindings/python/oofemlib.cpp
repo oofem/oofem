@@ -875,12 +875,15 @@ struct PyLoad : Load , wrapper<Load>
         if (override f = this->get_override("computeValueAt")) { f(answer,tStep,coords,mode);}
         this->get_override("computeValueAt")(answer,tStep,coords,mode);
     }
+    FloatArray* GiveComponentArray_copy() { return new FloatArray(giveComponentArray()); }
 };
+
+
 void pyclass_Load()
 {
     class_<PyLoad, bases<GeneralBoundaryCondition>, boost::noncopyable >("Load", no_init)
         .def("setComponentArray", &Load::setComponentArray)
-        .def("giveComponentArray", &Load::GiveCopyOfComponentArray,return_value_policy<manage_new_object>())
+        .def("giveComponentArray", &PyLoad::GiveComponentArray_copy,return_value_policy<manage_new_object>())
         .def("computeValueAt", pure_virtual( &Load::computeValueAt))
         ;
 }
