@@ -64,6 +64,9 @@ public:
 protected:
     double mStressThreshold;
     double mInitialCrackLength;
+
+    /// If the initiated crack should cut exactly one element.
+    bool mCutOneEl;
 };
 
 } /* namespace oofem */

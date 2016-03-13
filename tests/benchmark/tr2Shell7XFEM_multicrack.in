@@ -1,6 +1,6 @@
 Tr2Shell7XFEM_multicrack.out
 Test case with 2 interlaminar and 2 intralaminar cracks
-StaticStructural nsteps 1 maxiter 3 rtolf 1.0e-5 manrmsteps 1 nmodules 1
+StaticStructural nsteps 1 maxiter 5 rtolf 1.0e-5 manrmsteps 1 nmodules 1
 #vtkxml tstep_all dofman_all element_all primvars 1 1 
 errorcheck 1
 domain 3dDirShell

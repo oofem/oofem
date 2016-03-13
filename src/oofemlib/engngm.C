@@ -1223,7 +1223,15 @@ EngngModel :: assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, Ch
             //element->computeVectorOf(VM_Incremental, tStep, delta_u);
             element->computeVectorOf(VM_Total, tStep, delta_u);
             FloatArray tmp;
-            element->computeVectorOf(VM_Total, tStep->givePreviousStep(), tmp);
+
+            if(tStep->isTheFirstStep() ) {
+            	tmp = delta_u;
+            	tmp.zero();
+            }
+            else {
+            	element->computeVectorOf(VM_Total, tStep->givePreviousStep(), tmp);
+            }
+
             delta_u.subtract(tmp);
             charVec.beProductOf(charMatrix, delta_u);
             if ( element->giveRotationMatrix(R) ) {
