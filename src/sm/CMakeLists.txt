@@ -167,7 +167,6 @@ set (sm_material
     Materials/ConcreteMaterials/mazarsmodelnl.C
     Materials/ConcreteMaterials/mplasticmaterial2.C
     Materials/ConcreteMaterials/compodamagemat.C
-    Materials/RheoChainMaterials/b3solidmat.C
     Materials/RheoChainMaterials/rheoChM.C 
     Materials/RheoChainMaterials/maxwellChM.C 
     Materials/RheoChainMaterials/kelvinChM.C
@@ -178,6 +177,7 @@ set (sm_material
     Materials/RheoChainMaterials/b3solidmat.C
     Materials/RheoChainMaterials/mps.C
     Materials/RheoChainMaterials/mpsdammat.C
+    Materials/RheoChainMaterials/eurocode2creep.C
     Materials/structuralfe2material.C
     Materials/rcsd.C 
     Materials/rcsde.C 
@@ -210,6 +210,7 @@ set (sm_material
     Materials/graddpmaterialextensioninterface.C
     Materials/rcm2.C
     Materials/isodamagemodel.C
+    Materials/steelrelaxmat.C 
     )
 
 if (USE_PYTHON)

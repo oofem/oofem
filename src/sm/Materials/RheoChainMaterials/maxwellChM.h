@@ -107,7 +107,7 @@ protected:
      * @param[out] answer Array with coefficients
      * @param tStep Age of material when load is applied ???
      */
-    virtual void computeCharCoefficients(FloatArray &answer, double tStep);
+    virtual void computeCharCoefficients(FloatArray &answer, double tPrime, GaussPoint *gp, TimeStep *tStep);
 
     virtual double giveEModulus(GaussPoint *gp, TimeStep *tStep);
     LinearElasticMaterial *giveLinearElasticMaterial();

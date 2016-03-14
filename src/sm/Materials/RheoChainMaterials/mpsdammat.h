@@ -195,7 +195,10 @@ protected:
     double maxOmega;
 
     /// Equivalent strain at stress peak (or a similar parameter).
-    double const_e0;
+    //double const_e0;
+
+    /// constant tensile strength
+    double ft;
 
     /**
      * Determines the softening -> corresponds to the initial fracture energy. For a linear law, it is the area

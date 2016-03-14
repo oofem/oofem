@@ -226,9 +226,12 @@ MPSDamMaterial :: MPSDamMaterial(int n, Domain *d) : MPSMaterial(n, d)
 
     softType = ST_Exponential_Cohesive_Crack;
     ecsMethod = ECSM_Projection;
-    const_e0 = 0.;
+    //    const_e0 = 0.;
     const_gf = 0.;
     checkSnapBack = 1; //snapback check by default
+
+    E = -1.;
+
 }
 
 
@@ -254,10 +257,6 @@ MPSDamMaterial :: initializeFrom(InputRecord *ir)
     if ( ir->hasField(_IFT_MPSDamMaterial_isotropic) ) {
         this->isotropic = true;
     }
-
-    // initialize dummy elastic modulus E
-    //E = 20.e9 / MPSMaterial::stiffnessFactor;
-    E = 1. / MPSMaterial :: computeCreepFunction(28.01, 28);
 
     int damageLaw = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, damageLaw, _IFT_MPSDamMaterial_damageLaw);
@@ -292,22 +291,20 @@ MPSDamMaterial :: initializeFrom(InputRecord *ir)
           }
 
     } else {
-        double ft;
 
         //applies only in this class
         switch ( damageLaw ) {
+
         case 0:   // exponential softening - default
-            IR_GIVE_FIELD(ir, ft, _IFT_MPSDamMaterial_ft);
-            this->softType = ST_Exponential_Cohesive_Crack;
+	    IR_GIVE_FIELD(ir, ft, _IFT_MPSDamMaterial_ft);
+	    this->softType = ST_Exponential_Cohesive_Crack;
             IR_GIVE_FIELD(ir, const_gf, _IFT_MPSDamMaterial_gf);
-            this->const_e0 = ft / E;
             break;
 
         case 1:   // linear softening law
             IR_GIVE_FIELD(ir, ft, _IFT_MPSDamMaterial_ft);
             this->softType = ST_Linear_Cohesive_Crack;
             IR_GIVE_FIELD(ir, const_gf, _IFT_MPSDamMaterial_gf);
-            this->const_e0 = ft / E;
             break;
 
         case 6:
@@ -328,7 +325,12 @@ MPSDamMaterial :: initializeFrom(InputRecord *ir)
 void
 MPSDamMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep)
 {
-    MPSDamMaterialStatus *status = static_cast< MPSDamMaterialStatus * >( this->giveStatus(gp) );
+    
+  if (this->E < 0.) {   // initialize dummy elastic modulus E
+    this->E = 1. / MPSMaterial :: computeCreepFunction(28.01, 28., gp, tStep);
+  }
+
+  MPSDamMaterialStatus *status = static_cast< MPSDamMaterialStatus * >( this->giveStatus(gp) );
 
     MaterialMode mode = gp->giveMaterialMode();
 
@@ -534,7 +536,7 @@ MPSDamMaterial :: givee0(GaussPoint *gp)
         MPSDamMaterialStatus *status = ( MPSDamMaterialStatus * ) this->giveStatus(gp);
         return status->givee0();
     } else {
-        return this->const_e0;
+        return this->ft / this->E;
     }
 }
 

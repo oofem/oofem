@@ -150,11 +150,11 @@ MPSMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj
 
 
     if ( !stream.write(equivalentTime) ) {
-        THROW_CIOERR(CIO_IOERR);
+        return CIO_IOERR;
     }
 
     if ( !stream.write(flowTermViscosity) ) {
-        THROW_CIOERR(CIO_IOERR);
+        return CIO_IOERR;
     }
 
     return CIO_OK;
@@ -246,7 +246,6 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, q4, _IFT_MPSMaterial_q4);
     }
 
-    IR_GIVE_FIELD(ir, talpha, _IFT_MPSMaterial_talpha);
     IR_GIVE_FIELD(ir, lambda0, _IFT_MPSMaterial_lambda0);
 
     int type = 1;
@@ -444,31 +443,6 @@ MPSMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const Fl
 }
 
 
-
-void
-MPSMaterial :: giveThermalDilatationVector(FloatArray &answer,
-                                           GaussPoint *gp,  TimeStep *tStep)
-//
-// returns a FloatArray(6) of initial strain vector
-// eps_0 = {exx_0, eyy_0, ezz_0, gyz_0, gxz_0, gxy_0}^T
-// caused by unit temperature in direction of
-// gp (element) local axes
-//
-{
-    MaterialMode mMode =  gp->giveMaterialMode();
-
-    answer.resize(6);
-    answer.zero();
-
-    if ( ( mMode ==  _2dLattice ) || ( mMode ==  _3dLattice ) ) {
-        answer.at(1) = ( talpha );
-    } else {
-        answer.at(1) = ( talpha );
-        answer.at(2) = ( talpha );
-        answer.at(3) = ( talpha );
-    }
-}
-
 void
 MPSMaterial :: giveShrinkageStrainVector(FloatArray &answer,
                                          GaussPoint *gp,
@@ -605,7 +579,7 @@ MPSMaterial :: predictParametersFrom(double fc, double c, double wc, double ac)
 
 
 double
-MPSMaterial :: computeCreepFunction(double t, double t_prime)
+MPSMaterial :: computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep)
 {
     // computes the value of creep function at time t
     // when load is acting from time t_prime
@@ -676,7 +650,7 @@ MPSMaterial :: computeCharTimes()
 
 
 void
-MPSMaterial :: computeCharCoefficients(FloatArray &answer, double tStep)
+MPSMaterial :: computeCharCoefficients(FloatArray &answer, double tPrime, GaussPoint *gp, TimeStep *tStep)
 {
     int mu;
     double tau0, tauMu;
@@ -733,7 +707,7 @@ MPSMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
         Emodulus = status->giveStoredEmodulus();
     } else {
         if ( EparVal.giveSize() == 0 ) {
-            this->updateEparModuli(0.); // stiffnesses are time independent (evaluated at time t = 0.)
+	  this->updateEparModuli(0., gp, tStep); // stiffnesses are time independent (evaluated at time t = 0.)
         }
 
         // contribution of the solidifying Kelving chain

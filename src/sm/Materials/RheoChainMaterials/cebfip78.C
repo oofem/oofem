@@ -57,7 +57,7 @@ CebFip78Material :: initializeFrom(InputRecord *ir)
 
 
 double
-CebFip78Material :: computeCreepFunction(double t, double t_prime)
+CebFip78Material :: computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep)
 {
     // computes the value of creep function at time t
     // when load is acting from time t_prime

@@ -155,9 +155,34 @@ RheoChainMaterial :: giveRealStressVector(FloatArray &answer,
 
 
 void
+RheoChainMaterial :: giveThermalDilatationVector(FloatArray &answer,
+                                           GaussPoint *gp,  TimeStep *tStep)
+//
+// returns a FloatArray(6) of initial strain vector
+// eps_0 = {exx_0, eyy_0, ezz_0, gyz_0, gxz_0, gxy_0}^T
+// caused by unit temperature in direction of
+// gp (element) local axes
+//
+{
+    MaterialMode mMode =  gp->giveMaterialMode();
+
+    answer.resize(6);
+    answer.zero();
+
+    if ( ( mMode ==  _2dLattice ) || ( mMode ==  _3dLattice ) ) {
+        answer.at(1) = ( this->talpha );
+    } else {
+        answer.at(1) = ( this->talpha );
+        answer.at(2) = ( this->talpha );
+        answer.at(3) = ( this->talpha );
+    }
+}
+
+void
 RheoChainMaterial :: computeDiscreteRelaxationFunction(FloatArray &answer,
                                                        const FloatArray &tSteps,
-                                                       double t0, double tr)
+                                                       double t0, double tr, 
+						       GaussPoint *gp, TimeStep *tStep)
 {
     int size, nsteps, si;
     double taui, tauk, Jtrt0, totalDeltaSigma;
@@ -170,7 +195,7 @@ RheoChainMaterial :: computeDiscreteRelaxationFunction(FloatArray &answer,
     answer.resize(size);
     answer.zero();
 
-    Jtrt0 = this->computeCreepFunction(t0 + tSteps.at(1), t0);
+    Jtrt0 = this->computeCreepFunction(t0 + tSteps.at(1), t0, gp, tStep);
     sig0  = 1. / Jtrt0;
     answer.at(1) = sig0;
     si = 2;
@@ -187,7 +212,7 @@ RheoChainMaterial :: computeDiscreteRelaxationFunction(FloatArray &answer,
                 taui = t0 + 0.5 * ( tSteps.at(i) + tSteps.at(i - 1) );
             }
 
-            sum += deltaSigma.at(i) * this->computeCreepFunction(t0 + tSteps.at(k), taui);
+            sum += deltaSigma.at(i) * this->computeCreepFunction(t0 + tSteps.at(k), taui, gp, tStep);
         }
 
         if ( k == 1 ) {
@@ -198,8 +223,8 @@ RheoChainMaterial :: computeDiscreteRelaxationFunction(FloatArray &answer,
             tauk = t0 + 0.5 * ( tSteps.at(k) + tSteps.at(k - 1) );
         }
 
-        deltaSigma.at(k) = ( sig0 * ( this->computeCreepFunction(t0 + tSteps.at(k), t0) - Jtrt0 )
-                             - sum ) / this->computeCreepFunction(t0 + tSteps.at(k), tauk);
+        deltaSigma.at(k) = ( sig0 * ( this->computeCreepFunction(t0 + tSteps.at(k), t0, gp, tStep) - Jtrt0 )
+                             - sum ) / this->computeCreepFunction(t0 + tSteps.at(k), tauk, gp, tStep);
 
         totalDeltaSigma += deltaSigma.at(k);
         answer.at(k) = sig0 - totalDeltaSigma;
@@ -274,7 +299,7 @@ RheoChainMaterial :: giveEparModulus(int iChain)
 
 
 void
-RheoChainMaterial :: updateEparModuli(double tStep)
+RheoChainMaterial :: updateEparModuli(double tPrime, GaussPoint *gp, TimeStep *tStep)
 {
     /*
      * Computes moduli of individual units in the chain that provide
@@ -293,13 +318,13 @@ RheoChainMaterial :: updateEparModuli(double tStep)
      *
      */
     // compute new values and store them in a temporary array for further use
-    if ( fabs(tStep - EparValTime) > TIME_DIFF ) {
-        if ( tStep < 0 ) {
-            this->computeCharCoefficients(EparVal, 1.e-3);
+    if ( fabs(tPrime - EparValTime) > TIME_DIFF ) {
+        if ( tPrime < 0 ) {
+	  this->computeCharCoefficients(EparVal, 1.e-3, gp, tStep);
         } else {
-            this->computeCharCoefficients(EparVal, tStep);
+	  this->computeCharCoefficients(EparVal, tPrime, gp, tStep);
         }
-        EparValTime = tStep;
+        EparValTime = tPrime;
     }
 }
 
@@ -540,6 +565,8 @@ RheoChainMaterial :: initializeFrom(InputRecord *ir)
     result = StructuralMaterial :: initializeFrom(ir);
     if ( result != IRRT_OK ) return result;
 
+    this->talpha = 0.;
+    IR_GIVE_OPTIONAL_FIELD(ir, talpha, _IFT_RheoChainMaterial_talpha);
 
     if ( ir->hasField(_IFT_RheoChainMaterial_lattice) ) {
         lattice = true;
