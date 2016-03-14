@@ -1,4 +1,4 @@
-/home/pedro/Programs/oofem_EC2/oofem.git/tests/sm/trussb3_relax.out
+trussb3_relax.out
 Test of 1D relaxation behaviour using Truss2d elements and B3 material model
 #
 # example from dissertation
