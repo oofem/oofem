@@ -137,6 +137,9 @@ public:
     // TODO: Move to XfemStructuralElementInterface
     std :: vector< std :: unique_ptr< IntegrationRule > >mpCZIntegrationRules;
 
+    // For non-standard CZ formulation
+    std :: vector< std :: unique_ptr< IntegrationRule > >mpCZExtraIntegrationRules;
+
     MaterialMode giveMaterialMode();
 
     void updateYourselfCZ(TimeStep *tStep);

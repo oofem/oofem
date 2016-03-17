@@ -58,6 +58,7 @@ XfemElementInterface :: XfemElementInterface(Element *e) :
     mUsePlaneStrain(false)
 {
     mpCZIntegrationRules.clear();
+    mpCZExtraIntegrationRules.clear();
 }
 
 XfemElementInterface :: ~XfemElementInterface()
@@ -185,8 +186,8 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
 
                     const FloatArray &nodePos = node->giveNodeCoordinates();
 
-                    double levelSetNode  = 0.0;
-                    ei->evalLevelSetNormalInNode(levelSetNode, globalNodeInd, nodePos);
+//                    double levelSetNode  = 0.0;
+//                    ei->evalLevelSetNormalInNode(levelSetNode, globalNodeInd, nodePos);
 
                     std :: vector< double >efNode;
                     FloatArray nodeNaturalCoord;
@@ -898,6 +899,13 @@ void XfemElementInterface :: updateYourselfCZ(TimeStep *tStep)
             mpCZIntegrationRules [ i ]->updateYourself(tStep);
         }
     }
+
+    for ( size_t i = 0; i < numSeg; i++ ) {
+        if ( mpCZExtraIntegrationRules [ i ] != NULL ) {
+            mpCZExtraIntegrationRules [ i ]->updateYourself(tStep);
+        }
+    }
+
 }
 
 void XfemElementInterface :: computeDisplacementJump(oofem :: GaussPoint &iGP, oofem :: FloatArray &oJump, const oofem :: FloatArray &iSolVec, const oofem :: FloatMatrix &iNMatrix)
