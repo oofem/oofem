@@ -92,72 +92,72 @@ class Eurocode2CreepMaterial : public KelvinChainMaterial
 {
 protected:
 
-  /// fixed retardation time of the first unit
-  // the reason it is introduced is the application of the correction factors
-  // to achieve a better approximation of the compliance function by the retardation spectrum
-  double tau1;
+    /// fixed retardation time of the first unit
+    // the reason it is introduced is the application of the correction factors
+    // to achieve a better approximation of the compliance function by the retardation spectrum
+    double tau1;
 
-  /// stiffness of the zeroth Kelvin unit
-  double EspringVal;
+    /// stiffness of the zeroth Kelvin unit
+    double EspringVal;
 
-  // ELASTICITY + SHORT TERM + STRENGTH
-  /// mean compressive strength at 28 days default - to be specified in units of the analysis (e.g. 30.e6 + stiffnessFacotr 1. or 30. + stiffnessFactor 1.e6)
-  double fcm28;
+    // ELASTICITY + SHORT TERM + STRENGTH
+    /// mean compressive strength at 28 days default - to be specified in units of the analysis (e.g. 30.e6 + stiffnessFacotr 1. or 30. + stiffnessFactor 1.e6)
+    double fcm28;
 
-  /// Young's modulus at 28 days default [MPa]
-  double Ecm28;
+    /// Young's modulus at 28 days default [MPa]
+    double Ecm28;
 
-  /// factor unifying stiffnesses (Ecm is predicted from fcm...)
-  double stiffnessFactor; 
+    /// factor unifying stiffnesses (Ecm is predicted from fcm...)
+    double stiffnessFactor;
 
-  /// parameter determined by cement type
-  double s;
+    /// parameter determined by cement type
+    double s;
 
-  // CREEP
-  /// onset of drying [day, sec, ...]
-  double t0;
+    // CREEP
+    /// onset of drying [day, sec, ...]
+    double t0;
 
-  /// drying creep coefficient
-  double phi_RH;
+    /// drying creep coefficient
+    double phi_RH;
 
-  /// drying creep coefficient
-  double beta_fcm;
+    /// drying creep coefficient
+    double beta_fcm;
 
-  /// drying creep coefficient
-  double beta_H;
+    /// drying creep coefficient
+    double beta_H;
 
-  /// effective thickness [mm]
-  double h0;
+    /// effective thickness [mm]
+    double h0;
 
-  /// influence of cement type on concrete equivalent age, B.9 in EC2
-  double alpha_T_cement;
-
-
-  // DRYING SHRINKAGE
-  /// age (absolute) when concrete started drying, must be in days!
-  double begOfDrying;
-
-  /// drying shrinkage coefficient
-  double kh;
-  
-  /// asymptotic value of drying shrinkage at zero relative humidity, B.11 in EC2
-  double eps_cd_0;
-
-  
-  // AUTEGENOUS SHRINKAGE
-  /// asymptotic value of autogenous shrinakge, 3.12 in EC2
-  double eps_ca_infty;
+    /// influence of cement type on concrete equivalent age, B.9 in EC2
+    double alpha_T_cement;
 
 
-  enum ec2ShrinkageType { EC2_NoShrinkage, EC2_TotalShrinkage, EC2_DryingShrinkage, EC2_AutogenousShrinkage } shType;
+    // DRYING SHRINKAGE
+    /// age (absolute) when concrete started drying, must be in days!
+    double begOfDrying;
 
-  /**
-   * If true, analysis of retardation spectrum is used for evaluation of Kelvin units moduli
-   * If false, least-squares method is used for evaluation of Kelvin units moduli (default)
-   */
-  bool retardationSpectrumApproximation;
+    /// drying shrinkage coefficient
+    double kh;
 
-  bool temperatureDependent;
+    /// asymptotic value of drying shrinkage at zero relative humidity, B.11 in EC2
+    double eps_cd_0;
+
+
+    // AUTEGENOUS SHRINKAGE
+    /// asymptotic value of autogenous shrinakge, 3.12 in EC2
+    double eps_ca_infty;
+
+
+    enum ec2ShrinkageType { EC2_NoShrinkage, EC2_TotalShrinkage, EC2_DryingShrinkage, EC2_AutogenousShrinkage } shType;
+
+    /**
+     * If true, analysis of retardation spectrum is used for evaluation of Kelvin units moduli
+     * If false, least-squares method is used for evaluation of Kelvin units moduli (default)
+     */
+    bool retardationSpectrumApproximation;
+
+    bool temperatureDependent;
 
 
 public:
@@ -226,8 +226,6 @@ protected:
     void computeIncrementOfDryingShrinkageVector(FloatArray &answer, GaussPoint *gp, double tNow, double tThen);
 
     void computeIncrementOfAutogenousShrinkageVector(FloatArray &answer, GaussPoint *gp, double tNow, double tThen);
-
-
 };
 } // end namespace oofem
 #endif // eurocode2creep_h

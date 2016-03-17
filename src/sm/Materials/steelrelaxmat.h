@@ -49,7 +49,7 @@
 #define _IFT_SteelRelaxMat_k1 "k1"
 #define _IFT_SteelRelaxMat_k2 "k2"
 #define _IFT_SteelRelaxMat_rho1000 "rho1000"
-#define _IFT_SteelRelaxMat_stiffnessFactor "stiffnessfactor"
+//#define _IFT_SteelRelaxMat_stiffnessFactor "stiffnessfactor"
 #define _IFT_SteelRelaxMat_timeFactor "timefactor"
 //#define _IFT_SteelRelaxMat_prestress "prestress"
 #define _IFT_SteelRelaxMat_charStrength "charstrength"
@@ -69,24 +69,24 @@ class SteelRelaxMat : public StructuralMaterial
 {
 protected:
 
-  double E;
-  double k1;
-  double k2;
-  double rho1000;
-  double mu;
-  double timeFactor;
-  double stiffnessFactor;
-  //  double prestress;
-  double charStrength;
-  double tolerance;
-  double relRelaxBound;
+    double E;
+    double k1;
+    double k2;
+    double rho1000;
+    double mu;
+    double timeFactor;
+    double stiffnessFactor;
+    //  double prestress;
+    double charStrength;
+    double tolerance;
+    double relRelaxBound;
 
-  enum approachType { Bazant_EC2, EquivTime_EC2} Approach;
+    enum approachType { Bazant_EC2, EquivTime_EC2 } Approach;
 
-  
+
 
 public:
-    SteelRelaxMat(int n, Domain * d);
+    SteelRelaxMat(int n, Domain *d);
     virtual ~SteelRelaxMat();
 
     virtual void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
@@ -95,13 +95,13 @@ public:
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                       const FloatArray &reducedStrain, TimeStep *tStep);
 
-    virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep); 
+    virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
     virtual void giveStressDependentPartOfStrainVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain,
-                                               TimeStep *tStep, ValueModeType mode);
+                                                       TimeStep *tStep, ValueModeType mode);
 
-    void computeStressRelaxationStrainVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, 
-						     TimeStep *tStep, ValueModeType mode);
+    void computeStressRelaxationStrainVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain,
+                                             TimeStep *tStep, ValueModeType mode);
 
     void evalStressRelaxationAtConstStrain(double &answer, GaussPoint *gp, double dt);
 
@@ -132,16 +132,16 @@ class SteelRelaxMatStatus : public StructuralMaterialStatus
 {
 protected:
 
-  // for Bazant this internal variable is a cumulative viscous strain
-  // while for eurocode it is a cumulative prestress loss
+    // for Bazant this internal variable is a cumulative viscous strain
+    // while for eurocode it is a cumulative prestress loss
 
-  double relaxIntVariable;
-  double tempRelaxIntVariable;
+    double relaxIntVariable;
+    double tempRelaxIntVariable;
 
-  double prestress;
+    double prestress;
 
 public:
-    SteelRelaxMatStatus(int n, Domain * d, GaussPoint * g);
+    SteelRelaxMatStatus(int n, Domain *d, GaussPoint *g);
     virtual ~SteelRelaxMatStatus();
 
 

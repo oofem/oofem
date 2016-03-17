@@ -2697,6 +2697,160 @@ Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 %\end{center}
 \end{table}
 
+
+\subsubsection{Eurocode 2 model for concrete creep and shrinkage - EC2CreepMat}
+Implementation of aging viscoelastic model for concrete creep
+according to Eurocode 2 for concrete structures
+The model parameters are summarized
+in Tab.~\ref{ec2creep_table}.
+
+
+According to EC2, the compliance function is defined using the creep
+coefficient $\varphi$ as
+\begin{eqnarray}
+J(t,t') = \frac{1}{E(t')} + \frac{\varphi(t,t')}{ 1.05 E_{cm}}
+\end{eqnarray}
+where $E_{cm}$ is the mean elastic modulus at the age of 28 days and
+$E(t')$ is the elastic modulus at the age of loading, $t'$.
+
+Current implementation supports only linear creep which is valid only for
+stresses below 0.45 of the characteristic compressive strength at the time of
+loading.
+
+The elastic modulus at age $t$ (in days) is defined as
+\begin{eqnarray}
+E(t) = \left[ \exp \left( s \left(1-\sqrt{28/t} \right) \right)
+  \right]^{0.3} E_{cm}
+\end{eqnarray}
+where $s$ is a cement-type dependent constant (0.2 for class R, 0.25
+for class N and finally 0.38 for type S), and the mean secant elastic
+modulus at 28 days can be estimated from the mean compressive strength
+\begin{eqnarray}
+E_{cm} = 22 \: \left(0.1 f_{cm,28} \right)^{0.3} 
+\end{eqnarray}
+where $f_{cm,28}$ is in MPa and the resulting modulus is in GPa.
+
+
+The creep coefficient is given by the expression from Annex B of the standard.
+\begin{eqnarray}
+\varphi(t,t') = \varphi_{RH} \times \frac{16.8}{f_{cm}} \times \frac{1}{0.1 + t'^{0.2}}  \left( \frac{t-t'}{\beta_H + t - t'_T} \right)^{0.3}
+\end{eqnarray}
+with 
+\begin{eqnarray}
+\varphi_{RH} = \left( 1 + \alpha_1 \frac{1-h_{env}}{0.1 \: (h_0)^{1/3}} 
+\right) \times \alpha_2\\
+\beta_H = 1.5 \left(1 + \left( 1.2 h_{env} \right)^{18} \right) h_0 +
+250 \: \alpha_3 \leq 1500 \: \alpha_3
+\end{eqnarray}
+and 
+\begin{eqnarray}
+\alpha_1 = \alpha_2 = \alpha_3  = 1 \quad \mathrm{for} \: f_{cm} \leq
+35 \: \mathrm{MPa}
+\end{eqnarray}
+else 
+\begin{eqnarray}
+\alpha_1 = \left( \frac{35}{f_{cm}} \right)^{0.7}\\
+\alpha_2 = \left( \frac{35}{f_{cm}} \right)^{0.2}\\
+\alpha_3 = \left( \frac{35}{f_{cm}} \right)^{0.5}
+\end{eqnarray}
+and $t'_T$ is the temperature-adusted age according to B.9 in the
+code. It is computed automatically if string
+\param{temperatureDependent} appears in the input record.
+
+
+The shrinkage deformation is additively split into two parts: drying
+shrinkage $\varepsilon_{sh,d}$ and autogenous shrinkage
+$\varepsilon_{sh,a}$. Drying shrinkage strain at time $t$ is computed from
+\begin{eqnarray}
+\varepsilon_{sh,d} = \frac{t-t_0}{t-t_0 + 0.04 \: h^{3/2}} \: k_h \: \varepsilon_{sh,d,0}
+\end{eqnarray}
+where $t_0$ is the duration of curing, $k_h$ is a thickness-dependent
+parameter and 
+\begin{eqnarray}
+\varepsilon_{sh,d,0} = 1.3175 \times 10^{-6} \left[ (220 + 110
+  \alpha_{ds1} ) \exp \left( -0.1 \alpha_{ds2} \: f_{cm} \right) \right] \left(
+1- h_{env}^3\right)
+\end{eqnarray}
+with 
+$\alpha_{ds1} = 3$ for cement class {\sl{S}}, 4 for class {\sl{N}},
+and 6 for class {\sl{R}}, and $\alpha_{ds2} = 0.13$ for cement class {\sl{S}}, 0.12 for class {\sl{N}},
+and 0.11 for class {\sl{R}}.
+
+Autogenous shrinkage strain can be comptued as
+\begin{eqnarray}
+\varepsilon_{sh,a} = 2.5 \: (f_{cm} - 18) \left[ 1- \exp \left( -0.2 \sqrt{t} \right)  \right] \times 10^{-6}
+\end{eqnarray}
+
+
+\begin{table}[!htb]
+%\begin{center}
+\begin{mmt}
+\hline
+Description & EC2CreepMat model  for concrete creep and shrinkage\\
+\hline
+Record Format & \descitem{EC2CreepMat}  
+\elemparam{n}{rn}
+\optelemparam{begOfTimeOfInterest}{rn}
+\optelemparam{endOfTimeOfInterest}{rn}
+\elemparam{relMatAge}{rn} 
+\optelemparam{timeFactor}{rn}
+\elemparam{stiffnessFactor}{rn}
+\optelemparam{tAlpha}{rn}
+\elemparam{fcm28}{rn}
+\elemparam{t0}{rn}
+\elemparam{cemType}{in}
+\optelemparam{henv}{rn}
+\elemparam{h0}{rn}
+\elemparam{shType}{in}
+\optelemstring{spectrum}
+\optelemstring{temperatureDependent}\\
+Parameters &- \param{num} material model number\\
+&- \param{n} Poisson's ratio\\
+&- \param{begOfTimeOfInterest} determines the shortest time which is
+reasonably well captured by the approximated compliance function (default
+value is 0.1); the units are the time units of the analysis\\
+&- \param{endOfTimeOfInterest} determines the longest time which is
+reasonably well captured by the approximated compliance function (if not
+provided it is read from the engineering model); the units are the time units of the analysis\\
+&- \param{relMatAge} time shift used to specify the age of material on
+the begging of the analysis, the meaning is the material age at time t =
+0;\\
+&- \param{timeFactor} scaling factor transforming the actual time into
+appropriate units needed by the formulae of the eurocode. For analysis
+in days timeFactor = 1, for analysis in seconds timeFactor = 86,400.\\
+&- \param{stiffnessFactor} scaling factor transforming predicted
+stiffness into appropriate units of the analysis, for analysis in MPa
+stiffnessFactor = 1.e6 (default), for Pa stiffnessFactor = 1\\
+&- \param{fcm28} mean compressive strength measured on cylinders at
+the age of 28 days in MPa\\
+&- \param{t0} duration of curing [day] (this is relevant only for
+drying shrinkage, not for creep)\\
+&- \param{cemType} type of cement, 1 = class {\sl{R}}, 2 = class {\sl{N}}, 3 = class
+{\sl{S}}\\
+&- \param{henv} ambient relative humidity expressed as decimal\\
+&- \param{h0} effective member thickness in [mm] calculated according
+to EC2 as 2$\times$A/u where A is the cross-section are and u is the
+cross-section perimeter exposed to drying\\
+&- \param{shType} shrinkage type; 0 = no shrinkage, 1 = both drying
+and autogenous shrinkage, 2 = drying shrinkage only, 3 = autogenous
+shrinkage only\\
+&- \param{spectrum} this string switches on evaluation of the moduli
+of the aging
+Kelvin chain using the retardation spectrum of the compliance
+function, otherwise (default option) the least-squares method is used\\
+&- \param{temperatureDependent} turns on the influence of temperature
+on concrete maturity (equivalent age concept) by default this option is not activated.\\
+Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
+2dPlateLayer,2dBeamLayer, 3dShellLayer\\
+\hline
+\end{mmt}
+\caption{EC2Creep material model -- summary.}
+\label{ec2creep_table}
+%\end{center}
+\end{table}
+
+
+
 \subsubsection{B3 and MPS models for concrete creep with aging}
 
 Model B3 is an aging viscoelastic model for concrete creep and shrinkage, developed by Prof. Ba\v{z}ant and coworkers. In OOFEM it is implemented in three different ways. 
@@ -4455,6 +4609,119 @@ Supported modes& 2dlattice\\
 \label{latticedamage2d_table}
 %\end{center}
 \end{table}
+
+
+\subsection{Material models for steel relaxation}
+
+\subsubsection{Model for relaxation of prestressing steel - SteelRelaxMat}
+This section describes the implementation of the material model for
+steel relaxation given in Eurocode 2 (the same as in Model Code 2010)
+and in Ba\v{z}ant and Yu (J. of Eng. Mech, 2013) which reduces to the first model under
+constant strain. At variable strain history the first model uses the
+approach employing the so-called {\sl{equivalent time}} approach
+described in Annex D in the Eurocode 2.
+
+The current implementation takes into account only prestress losses
+due to steel relaxation, other losses (e.g. slip at anchorage,
+thermal dilation, friction, etc.) need to be treated separately. The same holds
+for the stress transfer from prestressing reinforcement to concrete in
+the region called {\sl{transmission length}}. On the other hand,
+losses due to sequential prestressing, elastic deformation and both
+short-time and long-time creep and shrinkage are taken into account
+automatically provided that a suitable material model is chosen for
+concrete. 
+
+In the first approach the stress on the end of the time step is
+explicitly given by the current stress, prestressing level and the
+cumulative value of prestress losses. On the other hand, in
+Ba\v{z}ant's approach it is necessary to iterate on the material point
+level in order to reach equilibrium.
+
+As a simplification the stress-strain diagram is in the current
+implementation assumed to be
+linear (no yielding), this should be sufficient for most cases.
+
+Under a constant strain, the evolution of prestress loss is defined as
+\begin{eqnarray}
+\Delta \sigma = \sigma_{init} k_1 \rho_{1000} \exp(k_2 \mu)
+(t/1000)^{0.75(1-\mu)} \times 10^{-5}
+\end{eqnarray}
+where 
+$\sigma_{init}$ is the initial value of prestress reduced for 
+losses during prestressing, $t$ is time after prestressing in
+\textbf{hours}, $\mu = \sigma_{init} / f_{pk}$, $f_{pk}$ is the
+characteristic strength of prestressing steel in tension, and finally
+$k_1$, $k_2$, and $\rho_{1000}$ are material parameters determined by
+the relaxation properties of the reinforcement.
+For wires or cables with \textbf{normal relaxation} (class 1) $k_1 = 5.39$,
+$k_2 = 6.7$ and $\rho_{1000} = 8.0$, for cables or wires with
+\textbf{reduced relaxation} (class 2) $k_1 = 0.66$,
+$k_2 = 9.1$ and $\rho_{1000} = 2.5$, and for \textbf{hot-rolled}
+and modified rods (class 3) $k_1 = 1.98$, $k_2 = 8.0$ and $\rho_{1000}
+= 4.0$.
+
+The prestress $\sigma_{init}$ is not specified in the input record. It
+is initialized automatically at the time instant when stress differs
+from zero.
+
+The material model has one internal variable which has a meaning of
+cumulative prestress loss when {\sl{equivalent time}} approach is
+employed; otherwise its meaning is a cumulative strain caused by
+relaxation.
+
+\begin{table}[!htb]
+%\begin{center}
+\begin{mmt}
+\hline
+Description & SteelRelaxMat model for relaxation of prestressing reinforcement\\
+\hline
+Record Format & \descitem{SteelRelaxMat}  
+\elemparam{d}{rn}
+\elemparam{E}{rn}
+\elemparam{reinfClass}{in}
+\optelemparam{timeFactor}{rn}
+\elemparam{charStrength}{rn} 
+\elemparam{approach}{in} 
+\optelemparam{k1}{rn}
+\optelemparam{k2}{rn}
+\optelemparam{rho1000}{rn}
+\optelemparam{tolerance}{rn}
+\optelemparam{relRelaxBound}{rn}\\
+Parameters &- \param{num} material model number\\
+&- \param{d} specific weight\\
+&- \param{E} Young's modulus \\
+&- \param{reinfClass} class of prestressing reinforcement (1, 2, 3) \\
+&- \param{timeFactor} scaling factor transforming the actual time into
+appropriate units needed by the formulae of the eurocode. For analysis
+in days timeFactor = 1, for analysis in seconds timeFactor = 86,400.\\
+&- \param{charStrength} characteristic strength of prestressing steel
+in appropriate units (not necessarily MPa)\\
+&- \param{approach} 0 = approach according to Ba\v{z}ant and Yu, 1 =
+equivalent time approach according to Eurocode 2 and {\sl{fib}} Model Code 2010 \\
+&- \param{k1} possibility to overwrite default value given by the
+reinforcement class\\
+&- \param{k2} possibility to overwrite default value given by the
+reinforcement class\\
+&- \param{rho1000} possibility to overwrite default value given by the
+reinforcement class\\
+&- \param{tolerance} applicable only for $approach = 0$; tolerance
+specifying the residual in the stress evaluation algorithm, default
+value is $10^{-6}$\\
+&- \param{relRelaxBound} ratio of stress to characteristic strength
+under which the relaxation is zero (typically 0.4--0.5); default
+value is zero\\
+
+
+Supported modes& 1dMat\\
+\hline
+\end{mmt}
+\caption{SteelRelaxMat material model -- summary.}
+\label{steelRelax_table}
+%\end{center}
+\end{table}
+
+
+
 
 \clearpage
 
