@@ -109,6 +109,33 @@ MPSMaterialStatus :: updateYourself(TimeStep *tStep)
     KelvinChainSolidMaterialStatus :: updateYourself(tStep);
 }
 
+
+void
+MPSMaterialStatus :: initTempStatus()
+{
+    KelvinChainSolidMaterialStatus :: initTempStatus();
+
+    equivalentTimeTemp = 0.;
+
+    flowTermViscosityTemp = -1.;
+
+    storedEmodulusFlag = false;
+    storedEmodulus = -1.;
+
+    hum = -1.;
+    hum_increment = -1.;
+
+    T = -1.;
+    T_increment = -1.;
+
+#ifdef keep_track_of_strains
+    tempDryingShrinkageStrain = 0.;
+    creepStrainIncrement.zero();
+    tempAutogenousShrinkageStrain = 0.;
+#endif
+
+}
+
 contextIOResultType
 MPSMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
@@ -123,11 +150,11 @@ MPSMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj
 
 
     if ( !stream.write(equivalentTime) ) {
-        THROW_CIOERR(CIO_IOERR);
+        return CIO_IOERR;
     }
 
     if ( !stream.write(flowTermViscosity) ) {
-        THROW_CIOERR(CIO_IOERR);
+        return CIO_IOERR;
     }
 
     return CIO_OK;
@@ -219,7 +246,6 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, q4, _IFT_MPSMaterial_q4);
     }
 
-    IR_GIVE_FIELD(ir, talpha, _IFT_MPSMaterial_talpha);
     IR_GIVE_FIELD(ir, lambda0, _IFT_MPSMaterial_lambda0);
 
     int type = 1;
@@ -330,11 +356,7 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
     b4_tau_au = 0.;
     b4_alpha = 0.;
     b4_r_t = 0.;
-    IR_GIVE_OPTIONAL_FIELD(ir, b4_eps_au_infty, _IFT_MPSMaterial_B4_eps_au_infty);
-    IR_GIVE_OPTIONAL_FIELD(ir, b4_tau_au, _IFT_MPSMaterial_B4_tau_au);
-    IR_GIVE_OPTIONAL_FIELD(ir, b4_alpha, _IFT_MPSMaterial_B4_alpha);
-    IR_GIVE_OPTIONAL_FIELD(ir, b4_r_t, _IFT_MPSMaterial_B4_r_t);
-
+  
     if ( ir->hasField(_IFT_MPSMaterial_B4_cem_type) ) {
         /// auxiliary parameters for autogenous shrinkage according to B4 model
         double b4_r_alpha = 0., b4_eps_au_cem = 0., b4_tau_au_cem = 0., b4_r_ea, b4_r_ew, b4_r_tw;
@@ -373,12 +395,28 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, wc, _IFT_MPSMaterial_wc);
         IR_GIVE_FIELD(ir, ac, _IFT_MPSMaterial_ac);
 
-        b4_eps_au_infty = -b4_eps_au_cem *pow(ac / 6., b4_r_ea) *  pow(wc / 0.38, b4_r_ew);
-        b4_tau_au = b4_tau_au_cem * pow(wc / 0.38, b4_r_tw);
-        b4_tau_au *= lambda0; // converted to desired time unit
-        b4_alpha = b4_r_alpha * wc / 0.38;
-    }
+        if ( ir->hasField( _IFT_MPSMaterial_B4_eps_au_infty) ) { 
+          IR_GIVE_FIELD(ir, b4_eps_au_infty, _IFT_MPSMaterial_B4_eps_au_infty);
+        } else { 
+          b4_eps_au_infty = -b4_eps_au_cem *pow(ac / 6., b4_r_ea) *  pow(wc / 0.38, b4_r_ew);
+        }
 
+        if ( ir->hasField( _IFT_MPSMaterial_B4_tau_au) ) { 
+          IR_GIVE_FIELD(ir, b4_tau_au, _IFT_MPSMaterial_B4_tau_au); // must be in units of the analysis
+        } else {
+          b4_tau_au = b4_tau_au_cem * pow(wc / 0.38, b4_r_tw);
+          b4_tau_au *= lambda0; // converted to desired time unit
+        }
+
+        if ( ir->hasField( _IFT_MPSMaterial_B4_alpha) ) {
+          IR_GIVE_FIELD(ir, b4_alpha, _IFT_MPSMaterial_B4_alpha);
+        } else {
+          b4_alpha = b4_r_alpha * wc / 0.38;
+        }
+
+        // possibility to overwrite default value of exponent r_t
+        IR_GIVE_OPTIONAL_FIELD(ir, b4_r_t, _IFT_MPSMaterial_B4_r_t);
+    }
 
     if ( ( eps_cas0 != 0. ) && ( b4_eps_au_infty != 0. ) ) {
         OOFEM_ERROR("autogenous shrinkage cannot be described according to fib and B4 simultaneously");
@@ -404,31 +442,6 @@ MPSMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const Fl
     }
 }
 
-
-
-void
-MPSMaterial :: giveThermalDilatationVector(FloatArray &answer,
-                                           GaussPoint *gp,  TimeStep *tStep)
-//
-// returns a FloatArray(6) of initial strain vector
-// eps_0 = {exx_0, eyy_0, ezz_0, gyz_0, gxz_0, gxy_0}^T
-// caused by unit temperature in direction of
-// gp (element) local axes
-//
-{
-    MaterialMode mMode =  gp->giveMaterialMode();
-
-    answer.resize(6);
-    answer.zero();
-
-    if ( ( mMode ==  _2dLattice ) || ( mMode ==  _3dLattice ) ) {
-        answer.at(1) = ( talpha );
-    } else {
-        answer.at(1) = ( talpha );
-        answer.at(2) = ( talpha );
-        answer.at(3) = ( talpha );
-    }
-}
 
 void
 MPSMaterial :: giveShrinkageStrainVector(FloatArray &answer,
@@ -505,7 +518,7 @@ MPSMaterial :: giveShrinkageStrainVector(FloatArray &answer,
         }
 
         fullAnswer.resize(size);
-	fullAnswer.zero();
+        fullAnswer.zero();
 
         if ( ( mMode ==  _2dLattice ) || ( mMode ==  _3dLattice ) ) {
             fullAnswer.at(1) = status->giveAutogenousShrinkageStrain() + autoShrIncr + status->giveDryingShrinkageStrain() + dryShrIncr;
@@ -566,7 +579,7 @@ MPSMaterial :: predictParametersFrom(double fc, double c, double wc, double ac)
 
 
 double
-MPSMaterial :: computeCreepFunction(double t, double t_prime)
+MPSMaterial :: computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep)
 {
     // computes the value of creep function at time t
     // when load is acting from time t_prime
@@ -637,7 +650,7 @@ MPSMaterial :: computeCharTimes()
 
 
 void
-MPSMaterial :: computeCharCoefficients(FloatArray &answer, double tStep)
+MPSMaterial :: computeCharCoefficients(FloatArray &answer, double tPrime, GaussPoint *gp, TimeStep *tStep)
 {
     int mu;
     double tau0, tauMu;
@@ -694,7 +707,7 @@ MPSMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
         Emodulus = status->giveStoredEmodulus();
     } else {
         if ( EparVal.giveSize() == 0 ) {
-            this->updateEparModuli(0.); // stiffnesses are time independent (evaluated at time t = 0.)
+	  this->updateEparModuli(0., gp, tStep); // stiffnesses are time independent (evaluated at time t = 0.)
         }
 
         // contribution of the solidifying Kelving chain
@@ -960,7 +973,7 @@ MPSMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep)
 
                 eta = prevEta + deltaEta;
             } else if  ( p < 0. ) { // SOLUTION FOR NEGATIVE "p"
-                //	    } else if  (p < 0.)  { // SOLUTION FOR NEGATIVE "p"
+                //            } else if  (p < 0.)  { // SOLUTION FOR NEGATIVE "p"
                 double iterTol = 1.e-6;
                 double deltaEta;
                 double deltaDeltaEta;
@@ -1071,7 +1084,7 @@ double
 MPSMaterial :: giveInitViscosity(TimeStep *tStep)
 {
     if ( ( t0 - tStep->giveTimeIncrement() ) <= 0. ) {
-        OOFEM_ERROR("length of the first time step must be bigger than t0");
+        OOFEM_ERROR("length of the first time step increment %e must be smaller than t0 %e", tStep->giveTimeIncrement(), t0);
     }
 
     return ( t0 - tStep->giveTimeIncrement() ) / q4;
@@ -1230,9 +1243,11 @@ MPSMaterial :: computeFibAutogenousShrinkageStrainVector(FloatArray &answer, Gau
         MPSMaterialStatus *status = static_cast< MPSMaterialStatus * >( this->giveStatus(gp) );
         t_equiv_beg = status->giveEquivalentTime();
     }
+    // time must be converted into days
     t_equiv_beg /= this->lambda0;
 
     t_equiv_end = this->computeEquivalentTime(gp, tStep, 1);
+    // time must be converted into days
     t_equiv_end /= this->lambda0;
 
     eps_cas = eps_cas0 * ( -exp( -0.2 * sqrt(t_equiv_end) ) + exp( -0.2 * sqrt(t_equiv_beg) ) );
@@ -1284,11 +1299,9 @@ MPSMaterial :: computeB4AutogenousShrinkageStrainVector(FloatArray &answer, Gaus
         MPSMaterialStatus *status = static_cast< MPSMaterialStatus * >( this->giveStatus(gp) );
         t_equiv_beg = status->giveEquivalentTime();
     }
-    t_equiv_beg /= this->lambda0;
 
     t_equiv_end = this->computeEquivalentTime(gp, tStep, 1);
-    t_equiv_end /= this->lambda0;
-
+    //  t_equiv_beg, t_equiv_end and b4_tau_au are in time-units of the analysis
     eps_au = b4_eps_au_infty * ( pow(1. + pow(b4_tau_au / t_equiv_end, b4_alpha), b4_r_t) -  pow(1. + pow(b4_tau_au / t_equiv_beg, b4_alpha), b4_r_t) );
 
     fullAnswer.resize(size);
@@ -1537,7 +1550,7 @@ MPSMaterial :: computeEquivalentTime(GaussPoint *gp, TimeStep *tStep, int option
     if ( tStep->isTheFirstStep() || ( tStep->giveIntrinsicTime() - tStep->giveTimeIncrement() - this->castingTime < 0. ) ) {
         if ( option == 0 ) { // gives time in the middle of the timestep
             return relMatAge - tStep->giveTimeIncrement() + PsiE * ( 0.5 * tStep->giveTimeIncrement() );
-        } else if ( option == 1 ) { // gives time in the middle of the timestep - for UPDATING
+        } else if ( option == 1 ) { // gives time in the end of the timestep - for UPDATING
             return relMatAge - tStep->giveTimeIncrement() + PsiE *tStep->giveTimeIncrement();
         } else {
             OOFEM_ERROR("mode is not supported")

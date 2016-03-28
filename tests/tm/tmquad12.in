@@ -1,12 +1,13 @@
 tmquad12.out
 Test of Quad1_ht elements with the change of problem size
 NonStationaryProblem nsteps 20 deltat 600.0 alpha 0.5 changingProblemSize nmodules 1
-#nltransienttransportproblem nsteps 20 deltat 600.0 rtol 0.001 alpha 0.5 nsmax 30 changingProblemSize nmodules 0
+#nltransienttransportproblem nsteps 20 deltat 600.0 rtol 0.001 alpha 0.5 nsmax 30 changingProblemSize nmodules 1
+#transienttransport nsteps 20 deltat 600.0 alpha 0.5 nmodules 1
 errorcheck
 #vtkxml tstep_all domain_all primvars 1 6 vars 1 56 stype 1
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all
-ndofman 6 nelem 2 ncrosssect 1 nmat 1 nbc 2 nic 1 nltf 2 nset 4
+ndofman 6 nelem 2 ncrosssect 1 nmat 1 nbc 2 nic 3 nltf 2 nset 4
 node 1 coords 3  0.0   0.0   0.0
 node 2 coords 3  0.0   4.0   0.0
 node 3 coords 3  2.0   0.0   0.0
@@ -20,6 +21,8 @@ IsoHeat 1 d 2400. k 1.0 c 2.0
 BoundaryCondition  1 loadTimeFunction 1 dofs 1 10 values 1 15.0 set 2
 BoundaryCondition  2 loadTimeFunction 1 dofs 1 10 values 1 25.0 isImposedTimeFunction 2 set 3
 InitialCondition 1 Conditions 1 u 3.0 dofs 1 10 set 4
+InitialCondition 2 Conditions 1 u 15.0 dofs 1 10 set 2
+InitialCondition 3 Conditions 1 u 25.0 dofs 1 10 set 3
 ConstantFunction 1 f(t) 1.0
 UsrDefLTF 2 f(t) 1-h(1202)
 Set 1 elementranges {(1 2)}

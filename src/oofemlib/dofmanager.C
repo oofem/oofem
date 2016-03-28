@@ -99,11 +99,20 @@ void DofManager :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
     if ( load->giveBCGeoType() != NodalLoadBGT ) {
         OOFEM_ERROR("incompatible load type applied");
     }
+
+    answer.clear();
     if ( type != ExternalForcesVector ) {
-        answer.clear();
         return;
     }
-    load->computeComponentArrayAt(answer, tStep, mode);
+
+    if ( load->giveDofIDs().giveSize() == 0 ) {
+        load->computeComponentArrayAt(answer, tStep, mode);
+    } else {
+        answer.resize(this->giveNumberOfDofs());
+        FloatArray tmp;
+        load->computeComponentArrayAt(tmp, tStep, mode);
+        answer.assemble(tmp, load->giveDofIDs());
+    }
 }
 
 
@@ -449,13 +458,19 @@ DofManager :: initializeFrom(InputRecord *ir)
 void DofManager :: giveInputRecord(DynamicInputRecord &input)
 {
     FEMComponent :: giveInputRecord(input);
-    if ( this->dofidmask ) {
-        input.setField(* this->dofidmask, _IFT_DofManager_dofidmask);
-    }
 
-    if ( mBC.giveSize() > 0 ) {
-        input.setField(mBC, _IFT_DofManager_bc);
+    IntArray mbc, dofids;
+    // Ignore here mBC and dofidmask as they may not correspod to actual state.
+    // They just decribe the state at init, but after some dofs may have been
+    // added dynamically (xfem, subdivision, etc).
+    for ( Dof *dof: *this ) {
+      dofids.followedBy(dof->giveDofID(),3);
+      if (dof->giveBcId()) mbc.followedBy(dof->giveBcId(),3);
+      else mbc.followedBy(0,3);
     }
+    input.setField(mbc, _IFT_DofManager_bc);
+    input.setField(dofids, _IFT_DofManager_dofidmask);
+
 
     if ( this->dofTypemap ) {
         IntArray typeMask( this->dofidmask->giveSize() );
@@ -949,10 +964,11 @@ void DofManager :: updateLocalNumbering(EntityRenumberingFunctor &f)
 {
     //update masterNode numbering
     if ( this->dofMastermap ) {
-        for ( auto mapper: *this->dofMastermap ) {
+        for ( auto & mapper: *this->dofMastermap ) {
             mapper.second = f( mapper.second, ERS_DofManager );
         }
     }
+
     for ( Dof *dof: *this ) {
         dof->updateLocalNumbering(f);
     }

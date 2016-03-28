@@ -778,7 +778,9 @@ Element :: initForNewStep()
 // if current time step must be restarted
 {
     for ( auto &iRule: integrationRulesArray ) {
-        iRule->initForNewStep();
+        for ( auto &gp: *iRule ) {
+            this->giveCrossSection()->giveMaterial(gp)->initTempStatus(gp);
+        }
     }
 }
 

@@ -1,0 +1,116 @@
+patch100_mitc4_02.out
+Patch test of mitc4shell elements -> pure compression in x direction
+LinearStatic nsteps 1 nmodules 1
+errorcheck
+domain 3dshell
+OutputManager tstep_all dofman_all element_all
+ndofman 6 nelem 5 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 1 nset 4
+node 1 coords 3  0.0   0.0   0.0
+node 2 coords 3  0.0   4.0   0.0
+node 3 coords 3  3.0   1.0   0.0
+node 4 coords 3  7.0   3.0   0.0
+node 5 coords 3  9.0   0.0   0.0
+node 6 coords 3  9.0   4.0   0.0
+mitc4shell 1 nodes 4 1 3 2 2
+mitc4shell 2 nodes 4 1 5 5 3
+mitc4shell 3 nodes 4 3 3 5 4
+mitc4shell 4 nodes 4 2 3 4 6
+mitc4shell 5 nodes 4 4 5 6 6
+SimpleCS 1 thick 0.15 material 1 set 1
+IsoLE 1 d 0. E 15.0 n 0.25 tAlpha 0.000012
+BoundaryCondition  1 loadTimeFunction 1 dofs 6 1 2 3 4 5 6 values 6 0.0 0.0 0.0 0.0 0.0 0.0 set 2
+BoundaryCondition  2 loadTimeFunction 1 dofs 5 2 3 4 5 6 values 5 0.0 0.0 0.0 0.0 0.0 set 3
+NodalLoad 3 loadTimeFunction 1 dofs 6 1 2 3 4 5 6 Components 6 -2.5 0.0 0.0 0.0 0.0 0.0 set 4
+ConstantFunction 1 f(t) 1.0
+Set 1 elementranges {(1 5)}
+Set 2 nodes 2 1 2
+Set 3 nodes 4 3 4 5 6 
+Set 4 nodes 2 5 6
+#
+#
+#
+#
+#%BEGIN_CHECK% tolerance 1.e-4
+## check reactions 
+#REACTION tStep 1 number 1 dof 1 value 2.5
+#REACTION tStep 1 number 1 dof 2 value 1.40625
+#REACTION tStep 1 number 2 dof 1 value 2.5
+#REACTION tStep 1 number 2 dof 2 value -1.40625
+#REACTION tStep 1 number 5 dof 2 value 1.40625
+#REACTION tStep 1 number 6 dof 2 value -1.40625
+## check all nodes
+#NODE tStep 1 number 3 dof 1 unknown d value -1.5625
+#NODE tStep 1 number 4 dof 1 unknown d value -3.645833333
+#NODE tStep 1 number 5 dof 1 unknown d value -4.6875
+#NODE tStep 1 number 6 dof 1 unknown d value -4.6875
+## check element no. 1 strain vector
+#ELEMENT tStep 1 number 1 gp 1 keyword 104 component 1  value -0.520833333
+#ELEMENT tStep 1 number 1 gp 1 keyword 104 component 2  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 104 component 3  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 104 component 4  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 104 component 5  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 104 component 6  value 0.0
+## check element no. 1 stress vector
+#ELEMENT tStep 1 number 1 gp 1 keyword 10 component 1  value -8.333333333
+#ELEMENT tStep 1 number 1 gp 1 keyword 10 component 2  value -2.083333333
+#ELEMENT tStep 1 number 1 gp 1 keyword 10 component 3  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 10 component 4  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 10 component 5  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 10 component 6  value 0.0
+##
+#ELEMENT tStep 1 number 2 gp 2 keyword 104 component 1  value -0.520833333
+#ELEMENT tStep 1 number 2 gp 2 keyword 104 component 3  value 0.0
+#ELEMENT tStep 1 number 2 gp 2 keyword 104 component 4  value 0.0
+#ELEMENT tStep 1 number 2 gp 2 keyword 104 component 5  value 0.0
+#ELEMENT tStep 1 number 2 gp 2 keyword 104 component 2  value 0.0
+#ELEMENT tStep 1 number 2 gp 2 keyword 104 component 6  value 0.0
+#ELEMENT tStep 1 number 2 gp 2 keyword 10 component 1  value -8.333333333
+#ELEMENT tStep 1 number 2 gp 2 keyword 10 component 2  value -2.083333333
+#ELEMENT tStep 1 number 2 gp 2 keyword 10 component 3  value 0.0
+#ELEMENT tStep 1 number 2 gp 2 keyword 10 component 4  value 0.0
+#ELEMENT tStep 1 number 2 gp 2 keyword 10 component 5  value 0.0
+#ELEMENT tStep 1 number 2 gp 2 keyword 10 component 6  value 0.0
+##
+#ELEMENT tStep 1 number 3 gp 3 keyword 104 component 1  value -0.520833333
+#ELEMENT tStep 1 number 3 gp 3 keyword 104 component 3  value 0.0
+#ELEMENT tStep 1 number 3 gp 3 keyword 104 component 4  value 0.0
+#ELEMENT tStep 1 number 3 gp 3 keyword 104 component 5  value 0.0
+#ELEMENT tStep 1 number 3 gp 3 keyword 104 component 2  value 0.0
+#ELEMENT tStep 1 number 3 gp 3 keyword 104 component 6  value 0.0
+#ELEMENT tStep 1 number 3 gp 3 keyword 10 component 1  value -8.333333333
+#ELEMENT tStep 1 number 3 gp 3 keyword 10 component 2  value -2.083333333
+#ELEMENT tStep 1 number 3 gp 3 keyword 10 component 3  value 0.0
+#ELEMENT tStep 1 number 3 gp 3 keyword 10 component 4  value 0.0
+#ELEMENT tStep 1 number 3 gp 3 keyword 10 component 5  value 0.0
+#ELEMENT tStep 1 number 3 gp 3 keyword 10 component 6  value 0.0
+##
+#ELEMENT tStep 1 number 4 gp 4 keyword 104 component 1  value -0.520833333
+#ELEMENT tStep 1 number 1 gp 1 keyword 104 component 3  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 104 component 4  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 104 component 5  value 0.0
+#ELEMENT tStep 1 number 4 gp 4 keyword 104 component 2  value 0.0
+#ELEMENT tStep 1 number 4 gp 4 keyword 104 component 6  value 0.0
+#ELEMENT tStep 1 number 4 gp 4 keyword 10 component 1  value -8.333333333
+#ELEMENT tStep 1 number 4 gp 4 keyword 10 component 2  value -2.083333333
+#ELEMENT tStep 1 number 4 gp 4 keyword 10 component 3  value 0.0
+#ELEMENT tStep 1 number 4 gp 4 keyword 10 component 4  value 0.0
+#ELEMENT tStep 1 number 4 gp 4 keyword 10 component 5  value 0.0
+#ELEMENT tStep 1 number 4 gp 4 keyword 10 component 6  value 0.0
+#%END_CHECK%
+#
+#
+#  exact solution
+#
+#  DISPLACEMENT                   STRAIN                     STRESS
+#
+#  node 1   0.0                epsilon_x = -0.520833333   sigma_x = -8.333333333
+#  node 2   0.0                epsilon_y =  0.0           sigma_y = -2.083333333
+#  node 3  -1.5625             gama_xy   =  0.0           tau_xy  =  0.0
+#  node 5  -4.6875 
+#  node 6  -4.6875           REACTION
+#                              node 1   R_u = 2.5   R_v =  1.40625
+#                              node 2   R_u = 2.5   R_v = -1.40625
+#                              node 7   R_u = 0.0   R_v =  1.40625
+#                              node 8   R_u = 0.0   R_v = -1.40625
+#
+#

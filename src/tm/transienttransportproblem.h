@@ -44,15 +44,19 @@
 ///@name Input fields for TransientTransportProblem
 //@{
 #define _IFT_TransientTransportProblem_Name "transienttransport"
-#define _IFT_TransientTransportProblem_alpha "alpha"
-#define _IFT_TransientTransportProblem_deltaT "deltat"
-#define _IFT_TransientTransportProblem_keepTangent "keeptangent"
-#define _IFT_TransientTransportProblem_lumped "lumped"
+#define _IFT_TransientTransportProblem_alpha "alpha" ///< Defines the time discretization of the value: @f$ u = u_n (1-\alpha) + u_{n+1} \alpha @f$.
+#define _IFT_TransientTransportProblem_deltaT "deltat" ///< Fixed timestep.
+#define _IFT_TransientTransportProblem_dtFunction "dtfunction" ///< Function that determines size of time step.
+#define _IFT_TransientTransportProblem_prescribedTimes "prescribedtimes" ///< Discrete times for each time step.
+#define _IFT_TransientTransportProblem_keepTangent "keeptangent" ///< Fixes the tangent to be reused on each step.
+#define _IFT_TransientTransportProblem_lumped "lumped" ///< Use of lumped "mass" matrix
+#define _IFT_TransientTransportProblem_exportFields "exportfields" ///< Fields to export for staggered problems.
 //@}
 
 namespace oofem {
 class SparseNonLinearSystemNM;
 class PrimaryField;
+class Function;
 
 /**
  * Solves general nonlinear transient transport problems.
@@ -76,9 +80,13 @@ protected:
     std :: unique_ptr< SparseNonLinearSystemNM > nMethod;
 
     double alpha;
+    int dtFunction;
+    FloatArray prescribedTimes;
     double deltaT;
     bool keepTangent;
     bool lumped;
+
+    IntArray exportFields;
 
 public:
     /// Constructor.
@@ -98,12 +106,17 @@ public:
     virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep);
     virtual void updateDomainLinks();
 
+    Function *giveDtFunction();
+    double giveDeltaT(int n);
+    double giveDiscreteTime(int iStep);
+
     virtual TimeStep *giveNextStep();
     virtual TimeStep *giveSolutionStepWhenIcApply(bool force = false);
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
+    virtual bool requiresEquationRenumbering(TimeStep *tStep);
     virtual int forceEquationNumbering();
 
     virtual int checkConsistency();

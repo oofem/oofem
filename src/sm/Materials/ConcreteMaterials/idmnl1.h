@@ -166,6 +166,8 @@ public:
     void modifyNonlocalWeightFunctionAround(GaussPoint *gp);
     double computeDistanceModifier(double damage);
 
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+
 #ifdef __OOFEG
     /// Plots the sparse structure of stiffness contribution.
     virtual void NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(GaussPoint *gp, oofegGraphicContext &gc, TimeStep *tStep);

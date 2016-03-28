@@ -134,7 +134,10 @@ protected:
     static EFringeTable ft;
 
     static EPixel meshFillColor;
+    static EPixel remoteMeshFillColor;
     static EPixel edgeColor;
+    static EPixel remoteEdgeColor;
+
     static EPixel nodeColor;
     static EPixel bcicColor;
     static EPixel bcForceColor;
@@ -204,6 +207,8 @@ public:
 
     EPixel getElementColor() { return meshFillColor; }
     EPixel getElementEdgeColor() { return edgeColor; }
+    EPixel getRemoteElementColor() { return remoteMeshFillColor; }
+    EPixel getRemoteElementEdgeColor() { return remoteEdgeColor; }
     EPixel getNodeColor()    { return nodeColor; }
     EPixel getBcIcColor()    { return bcicColor; }
     EPixel getBcForceColor()    { return bcForceColor; }

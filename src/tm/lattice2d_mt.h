@@ -121,6 +121,7 @@ public:
 protected:
     virtual void computeGaussPoints();
 
+    virtual void computeBmatrixAt(FloatMatrix &answer, const FloatArray &lcoords) { this->computeGradientMatrixAt(answer, lcoords); }
     virtual void  computeGradientMatrixAt(FloatMatrix &answer, const FloatArray &lcoords);
     virtual void  computeNmatrixAt(FloatMatrix &n, const FloatArray &);
 

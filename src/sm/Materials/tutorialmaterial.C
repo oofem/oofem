@@ -108,8 +108,8 @@ TutorialMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
     double effectiveTrialStress = sqrt(3 * J2);
     
     // evaluate the yield surface
-    double kappa = status->giveKappa();
-    double phiTrial = effectiveTrialStress - ( this->sig0 + kappa );
+    double k = status->giveK();
+    double phiTrial = effectiveTrialStress - ( this->sig0 +  H * k );
     
     if ( phiTrial < 0.0 ) { // elastic
         answer = trialStress;
@@ -120,7 +120,7 @@ TutorialMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
         double mu = phiTrial / ( 3.0 * G + H ); // plastic multiplier
         answer = devTrialStress * ( 1.0 - 3.0*G*mu/effectiveTrialStress); // radial return
         answer.add(sphTrialStress);
-        kappa += H*mu;
+        k += mu;
 
         FloatArray plasticStrain = status->givePlasticStrain();
         FloatArray dPlStrain;
@@ -132,7 +132,7 @@ TutorialMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
     // Store the temporary values for the given iteration
     status->letTempStrainVectorBe(totalStrain);
     status->letTempStressVectorBe(answer);
-    status->letTempKappaBe(kappa);
+    status->letTempKBe(k);
     status->letTempDevTrialStressBe(devTrialStress);
 }
 
@@ -168,8 +168,8 @@ TutorialMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRespon
     double effectiveTrialStress = sqrt(3 * J2);
     
     // evaluate the yield surface
-    double kappa = status->giveKappa();
-    double phiTrial = effectiveTrialStress - ( this->sig0 + kappa );
+    double k = status->giveK();
+    double phiTrial = effectiveTrialStress - ( this->sig0 + H * k );
     
     FloatMatrix elasticStiffness;
     D.give3dMaterialStiffnessMatrix(elasticStiffness, mode, gp, tStep);
@@ -187,7 +187,7 @@ TutorialMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRespon
         FloatMatrix Idev, correction;
         giveDeviatoricProjectionMatrix(Idev);
         
-        correction.plusDyadUnsym(nu, nu, 2.0 * G / h * ( this->sig0 + kappa ));
+        correction.plusDyadUnsym(nu, nu, 2.0 * G / h * ( this->sig0 + H * k ));
         correction.add(mu * 3.0 * G, Idev);
         correction.times(2.0 * G / effectiveTrialStress);
         answer = elasticStiffness;
@@ -224,7 +224,7 @@ TutorialMaterialStatus :: TutorialMaterialStatus(int n, Domain * d, GaussPoint *
     StructuralMaterialStatus(n, d, g),
     tempPlasticStrain(6), plasticStrain(6),
     tempDevTrialStress(6),
-    tempKappa(0.), kappa(0.)
+    tempK(0.), k(0.)
 {
     strainVector.resize(6);
     stressVector.resize(6);
@@ -245,7 +245,7 @@ TutorialMaterialStatus :: initTempStatus()
 
 
     tempPlasticStrain = plasticStrain;
-    tempKappa = kappa;
+    tempK = k;
     tempDevTrialStress.resize(6);
     tempDevTrialStress.zero();
 }
@@ -260,7 +260,7 @@ TutorialMaterialStatus :: updateYourself(TimeStep *tStep)
     StructuralMaterialStatus :: updateYourself(tStep);
 
     plasticStrain = tempPlasticStrain;
-    kappa = tempKappa;
+    k = tempK;
     // deviatoric trial stress is not really a state variable and was used not to repeat some code...
 }
 

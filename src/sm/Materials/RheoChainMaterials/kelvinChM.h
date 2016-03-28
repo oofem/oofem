@@ -93,7 +93,7 @@ public:
 protected:
     virtual int hasIncrementalShrinkageFormulation() { return 0; }
 
-    virtual void computeCharCoefficients(FloatArray &answer, double tStep);
+    virtual void computeCharCoefficients(FloatArray &answer, double tPrime, GaussPoint *gp, TimeStep *tStep);
 
     virtual double giveEModulus(GaussPoint *gp, TimeStep *tStep);
 

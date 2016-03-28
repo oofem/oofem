@@ -497,7 +497,7 @@ public:
     /**
      * Returns the smart pointer to requested field, Null otherwise. 
      * The return value uses shared_ptr, as some registered fields may be
-     * owned (and maintained) by emodel, while some may be cretead on demand 
+     * owned (and maintained) by emodel, while some may be created on demand 
      * and thus reliable reference counting mechanism is essential. 
      *
      */

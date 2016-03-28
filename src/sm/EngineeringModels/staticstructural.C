@@ -432,7 +432,7 @@ StaticStructural :: requiresEquationRenumbering(TimeStep *tStep)
         ActiveBoundaryCondition *active_bc = dynamic_cast< ActiveBoundaryCondition * >(gbc.get());
         BoundaryCondition *bc = dynamic_cast< BoundaryCondition * >(gbc.get());
         // We only need to consider Dirichlet b.c.s
-        if ( bc || ( active_bc && active_bc->requiresActiveDofs() ) ) {
+        if ( bc || ( active_bc && ( active_bc->requiresActiveDofs() || active_bc->giveNumberOfInternalDofManagers() ) ) ) {
             // Check of the dirichlet b.c. has changed in the last step (if so we need to renumber)
             if ( gbc->isImposed(tStep) != gbc->isImposed(tStep->givePreviousStep()) ) {
                 return true;

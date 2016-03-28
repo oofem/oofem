@@ -63,7 +63,7 @@ KelvinChainSolidMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
     double sum = 0.0;
 
     if ( this->EparVal.isEmpty() ) {
-      this->updateEparModuli(0.); // stiffnesses are time independent (evaluated at time t = 0.)
+      this->updateEparModuli(0., gp, tStep); // stiffnesses are time independent (evaluated at time t = 0.)
     }
 
 
@@ -93,7 +93,7 @@ KelvinChainSolidMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint
 
 
     if ( this->EparVal.isEmpty() ) {
-      this->updateEparModuli(0.); // stiffnesses are time independent (evaluated at time t = 0.)
+      this->updateEparModuli(0., gp, tStep); // stiffnesses are time independent (evaluated at time t = 0.)
     }
 
 
@@ -132,7 +132,7 @@ KelvinChainSolidMaterial :: computeBetaMu(GaussPoint *gp, TimeStep *tStep, int M
     double deltaT;
     double tauMu;
 
-    deltaT = tStep->giveTimeIncrement() / timeFactor;
+    deltaT = tStep->giveTimeIncrement();
     tauMu = this->giveCharTime(Mu);
 
     if ( deltaT / tauMu > 30 ) {
@@ -151,7 +151,7 @@ KelvinChainSolidMaterial :: computeLambdaMu(GaussPoint *gp, TimeStep *tStep, int
     double deltaT;
     double tauMu;
 
-    deltaT = tStep->giveTimeIncrement() / timeFactor;
+    deltaT = tStep->giveTimeIncrement();
     tauMu = this->giveCharTime(Mu);
 
     if ( deltaT / tauMu < 1.e-5 ) {
@@ -251,7 +251,7 @@ KelvinChainSolidMaterial :: initializeFrom(InputRecord *ir)
 
 // useless here
 double
-KelvinChainSolidMaterial :: computeCreepFunction(double tStep, double ofAge)
+KelvinChainSolidMaterial :: computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep)
 {
     OOFEM_ERROR("function has not been yet implemented to KelvinChainSolidMaterialStatus.C");
     return 0.;

@@ -44,7 +44,6 @@
 ///@name Input fields for MPSMaterial
 //@{
 #define _IFT_MPSMaterial_Name "mps"
-#define _IFT_MPSMaterial_talpha "talpha"
 #define _IFT_MPSMaterial_mode "mode"
 #define _IFT_MPSMaterial_coupledanalysistype "coupledanalysistype"
 #define _IFT_MPSMaterial_fc "fc"
@@ -127,6 +126,7 @@ public:
     MPSMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits);
     virtual ~MPSMaterialStatus() { }
 
+    virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
     virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
@@ -205,8 +205,7 @@ class MPSMaterial : public KelvinChainSolidMaterial
 {
 protected:
 
-    /// thermal dilatation coeff.
-    double talpha;
+
     /// age when temperature or humidity starts to change
     double t0;
     /// compliances of the B3 model
@@ -269,12 +268,12 @@ public:
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
     //virtual void updateYourself(GaussPoint *gp, TimeStep *tStep);
 
-    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+
 
     virtual void giveShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
     /// Evaluation of the basic creep compliance function - can be used to compute elastic modulus in derived damage material
-    virtual double computeCreepFunction(double t, double t_prime);
+    virtual double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
@@ -284,7 +283,7 @@ protected:
     virtual void computeCharTimes();
 
     /// Evaluation of characteristic moduli of the non-aging Kelvin chain
-    virtual void computeCharCoefficients(FloatArray &answer, double);
+    virtual void computeCharCoefficients(FloatArray &answer, double, GaussPoint *gp, TimeStep *tStep);
 
     virtual double giveEModulus(GaussPoint *gp, TimeStep *tStep);
 

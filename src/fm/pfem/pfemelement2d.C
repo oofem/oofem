@@ -107,11 +107,12 @@ void
 PFEMElement2d :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, TimeStep *atTime)
 {
     FloatMatrix B, D, DB;
+    FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
 
     answer.clear();
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ].get();
     for ( auto &gp : *iRule ) {
-        ( ( FluidDynamicMaterial * ) this->giveMaterial() )->giveDeviatoricStiffnessMatrix(D, mode, gp, atTime);
+        mat->giveDeviatoricStiffnessMatrix(D, mode, gp, atTime);
         this->computeBMatrix(B, gp);
         DB.beProductOf(D, B);
         double dV = this->computeVolumeAround(gp);

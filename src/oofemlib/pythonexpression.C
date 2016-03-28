@@ -37,6 +37,7 @@
 #include "pythonexpression.h"
 #include "dynamicinputrecord.h"
 #include "classfactory.h"
+#include "error.h"
 
 #include <sstream>
 

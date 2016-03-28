@@ -47,7 +47,7 @@
 //@{
 #define _IFT_MPSDamMaterial_Name "mpsdammat"
 //prediction of tensile strength and fracture energy accroding to fib MC2010
-#define _IFT_MPSDamMaterial_fib "fib"
+#define _IFT_MPSDamMaterial_timedepfracturing "timedepfracturing"
 #define _IFT_MPSDamMaterial_fib_s "fib_s"
 
 #define _IFT_MPSDamMaterial_isotropic "isotropic"
@@ -58,6 +58,9 @@
 #define _IFT_MPSDamMaterial_checkSnapBack "checksnapback"
 #define _IFT_MPSDamMaterial_ft "ft"
 #define _IFT_MPSDamMaterial_gf "gf"
+
+#define _IFT_MPSDamMaterial_ft28 "ft28"
+#define _IFT_MPSDamMaterial_gf28 "gf28"
 
 //@}
 
@@ -104,7 +107,7 @@ public:
     virtual const FloatArray &giveViscoelasticStressVector() const { return effectiveStressVector; }
     /// Assigns tempStressVector to given vector v.
     void letTempViscoelasticStressVectorBe(FloatArray v) { tempEffectiveStressVector = std :: move(v); }
-
+    virtual const FloatArray &giveTempViscoelasticStressVector() const { return tempEffectiveStressVector; }
 
     /// Returns the last equilibrated scalar measure of the largest strain level.
     double giveKappa() { return kappa; }
@@ -134,7 +137,7 @@ public:
     double givegf() { return var_gf; }
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
-
+    virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
 #ifdef supplementary_info
@@ -180,7 +183,7 @@ class MPSDamMaterial : public MPSMaterial
 {
 protected:
 
-    bool fib;
+    bool timeDepFracturing;
     double fib_s;
     double fib_fcm28;
     bool isotropic;
@@ -192,7 +195,10 @@ protected:
     double maxOmega;
 
     /// Equivalent strain at stress peak (or a similar parameter).
-    double const_e0;
+    //double const_e0;
+
+    /// constant tensile strength
+    double ft;
 
     /**
      * Determines the softening -> corresponds to the initial fracture energy. For a linear law, it is the area
@@ -215,6 +221,11 @@ protected:
 
     /// Method used for evaluation of characteristic element size
     ElementCharSizeMethod ecsMethod;
+
+    /// 28-day value of tensile strength. Used only with "timedepfracturing"
+    double ft28;
+    /// 28-day value of fracture energy. Used only with "timedepfracturing"
+    double gf28;
 
 public:
     MPSDamMaterial(int n, Domain *d);

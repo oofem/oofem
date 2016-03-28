@@ -75,6 +75,21 @@ MPSDamMaterialStatus :: MPSDamMaterialStatus(int n, Domain *d, GaussPoint *g, in
 
 
 void
+MPSDamMaterialStatus :: initTempStatus()
+{
+    MPSMaterialStatus :: initTempStatus();
+
+    this->tempKappa = this->kappa;
+    this->tempDamage = this->damage;
+
+    this->tempEffectiveStressVector = this->effectiveStressVector;
+
+    if ( !damage ) {
+        var_e0 = var_gf = 0.;
+    }
+}
+
+void
 MPSDamMaterialStatus :: updateYourself(TimeStep *tStep)
 {
     MPSMaterialStatus :: updateYourself(tStep);
@@ -211,9 +226,12 @@ MPSDamMaterial :: MPSDamMaterial(int n, Domain *d) : MPSMaterial(n, d)
 
     softType = ST_Exponential_Cohesive_Crack;
     ecsMethod = ECSM_Projection;
-    const_e0 = 0.;
+    //    const_e0 = 0.;
     const_gf = 0.;
     checkSnapBack = 1; //snapback check by default
+
+    E = -1.;
+
 }
 
 
@@ -240,38 +258,53 @@ MPSDamMaterial :: initializeFrom(InputRecord *ir)
         this->isotropic = true;
     }
 
-    // initialize dummy elastic modulus E
-    //E = 20.e9 / MPSMaterial::stiffnessFactor;
-    E = 1. / MPSMaterial :: computeCreepFunction(28.01, 28);
-
     int damageLaw = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, damageLaw, _IFT_MPSDamMaterial_damageLaw);
 
-    this->fib = false;
+    this->timeDepFracturing = false;
 
-    if ( ir->hasField(_IFT_MPSDamMaterial_fib) ) {
-        this->fib = true;
+    if ( ir->hasField(_IFT_MPSDamMaterial_timedepfracturing) ) {
+        this->timeDepFracturing = true;
         //
         IR_GIVE_FIELD(ir, fib_s, _IFT_MPSDamMaterial_fib_s);
         // the same compressive strength as for the prediction using the B3 formulas
-        IR_GIVE_FIELD(ir, fib_fcm28, _IFT_MPSMaterial_fc);
+
+        this->gf28 = 0.;
+        this->ft28 = 0.;
+        
+        if (  ( ir->hasField(_IFT_MPSDamMaterial_ft28) ) && ( ir->hasField(_IFT_MPSDamMaterial_gf28) ) )  {
+            
+            IR_GIVE_FIELD(ir, gf28, _IFT_MPSDamMaterial_gf28);
+            if (gf28 < 0.) {
+              OOFEM_ERROR("Fracture energy at 28 days must be positive");
+            }
+            IR_GIVE_FIELD(ir, ft28, _IFT_MPSDamMaterial_ft28);
+            
+            if (ft28 < 0.) {
+              OOFEM_ERROR("Tensile strength at 28 days must be positive");
+            }
+            
+          } else {
+            IR_GIVE_OPTIONAL_FIELD(ir, gf28, _IFT_MPSDamMaterial_gf28);
+            IR_GIVE_OPTIONAL_FIELD(ir, ft28, _IFT_MPSDamMaterial_ft28);
+            IR_GIVE_FIELD(ir, fib_fcm28, _IFT_MPSMaterial_fc);
+          }
+
     } else {
-        double ft;
 
         //applies only in this class
         switch ( damageLaw ) {
+
         case 0:   // exponential softening - default
-            IR_GIVE_FIELD(ir, ft, _IFT_MPSDamMaterial_ft);
-            this->softType = ST_Exponential_Cohesive_Crack;
+	    IR_GIVE_FIELD(ir, ft, _IFT_MPSDamMaterial_ft);
+	    this->softType = ST_Exponential_Cohesive_Crack;
             IR_GIVE_FIELD(ir, const_gf, _IFT_MPSDamMaterial_gf);
-            this->const_e0 = ft / E;
             break;
 
         case 1:   // linear softening law
             IR_GIVE_FIELD(ir, ft, _IFT_MPSDamMaterial_ft);
             this->softType = ST_Linear_Cohesive_Crack;
             IR_GIVE_FIELD(ir, const_gf, _IFT_MPSDamMaterial_gf);
-            this->const_e0 = ft / E;
             break;
 
         case 6:
@@ -292,7 +325,12 @@ MPSDamMaterial :: initializeFrom(InputRecord *ir)
 void
 MPSDamMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep)
 {
-    MPSDamMaterialStatus *status = static_cast< MPSDamMaterialStatus * >( this->giveStatus(gp) );
+    
+  if (this->E < 0.) {   // initialize dummy elastic modulus E
+    this->E = 1. / MPSMaterial :: computeCreepFunction(28.01, 28., gp, tStep);
+  }
+
+  MPSDamMaterialStatus *status = static_cast< MPSDamMaterialStatus * >( this->giveStatus(gp) );
 
     MaterialMode mode = gp->giveMaterialMode();
 
@@ -345,7 +383,7 @@ MPSDamMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const
         double residualStrength = 0.;
         double e0;
 
-        if ( ( this->fib ) && ( this->givee0(gp) == 0. ) ) {
+        if ( ( this->timeDepFracturing ) && ( this->givee0(gp) == 0. ) ) {
             this->initDamagedFib(gp, tStep);
         }
 
@@ -494,18 +532,18 @@ MPSDamMaterial :: initDamagedFib(GaussPoint *gp, TimeStep *tStep)
 double
 MPSDamMaterial :: givee0(GaussPoint *gp)
 {
-    if ( this->fib ) {
+    if ( this->timeDepFracturing ) {
         MPSDamMaterialStatus *status = ( MPSDamMaterialStatus * ) this->giveStatus(gp);
         return status->givee0();
     } else {
-        return this->const_e0;
+        return this->ft / this->E;
     }
 }
 
 double
 MPSDamMaterial :: givegf(GaussPoint *gp)
 {
-    if ( this->fib ) {
+    if ( this->timeDepFracturing ) {
         MPSDamMaterialStatus *status = ( MPSDamMaterialStatus * ) this->giveStatus(gp);
         return status->givegf();
     } else {
@@ -517,12 +555,47 @@ MPSDamMaterial :: givegf(GaussPoint *gp)
 double
 MPSDamMaterial :: computeFractureEnergy(double equivalentTime)
 {
-    double fcm;
-    double fractureEnergy;
+
+    double fractureEnergy, fractureEnergy28;
+    double ftm, ftm28;
+
+    // the fracture energy has the same time evolution as the tensile strength, 
+    // the direct relation to the mean value of compressive strength according to Model Code 
+    // highly overestimates the initial (early age) value of the fracture energy 
+    //( fractureEnergy = 73. * fcm(t)^0.18 )
+
     // evolution of the mean compressive strength with respect to equivalent time/age/maturity
     // returns fcm in MPa
-    fcm = exp( fib_s * ( 1. - sqrt(28. * MPSMaterial :: lambda0 / equivalentTime) ) ) * fib_fcm28;
+
+    /*    if (this->gf28 > 0.) {
+      double fcm28mod;
+      fcm28mod =  pow ( this->gf28 * MPSMaterial :: stiffnessFactor / 73. , 1. / 0.18 );
+      fcm = exp( fib_s * ( 1. - sqrt(28. * MPSMaterial :: lambda0 / equivalentTime) ) ) * fcm28mod;
+
+    } else {
+      fcm = exp( fib_s * ( 1. - sqrt(28. * MPSMaterial :: lambda0 / equivalentTime) ) ) * fib_fcm28;
+    }
+
     fractureEnergy = 73. * pow(fcm, 0.18) / MPSMaterial :: stiffnessFactor;
+    */
+
+    // 1) read or estimate the 28-day value of fracture energy
+
+    if (this->gf28 > 0.) {
+      fractureEnergy28 = this->gf28;
+    } else {
+      fractureEnergy28 = 73. * pow(fib_fcm28, 0.18) / MPSMaterial :: stiffnessFactor;
+    }
+
+    // 2) compute the tensile strengh according to provided equivalent time
+
+    ftm = this->computeTensileStrength(equivalentTime);
+    ftm28 = this->computeTensileStrength(28. * MPSMaterial :: lambda0);
+
+    // 3) calculate the resulting fracture energy as gf28 * ft/ft28
+
+    fractureEnergy = fractureEnergy28 * ftm / ftm28;
+
     return fractureEnergy;
 }
 
@@ -530,9 +603,29 @@ double
 MPSDamMaterial :: computeTensileStrength(double equivalentTime)
 {
     double fcm, ftm;
-    // returns fcm in MPa - formula 5.1-51, Table 5.1-9
-    fcm = exp( fib_s * ( 1. - sqrt(28. * MPSMaterial :: lambda0 / equivalentTime) ) ) * fib_fcm28;
+
+
+    if (this->ft28 > 0.) {
+      double fcm28mod;
+      fcm28mod = pow ( this->ft28 * MPSMaterial :: stiffnessFactor / 0.3e6, 3./2. ) + 8.;
+      fcm = exp( fib_s * ( 1. - sqrt(28. * MPSMaterial :: lambda0 / equivalentTime) ) ) * fcm28mod;
+
+    } else {
+      // returns fcm in MPa - formula 5.1-51, Table 5.1-9
+      fcm = exp( fib_s * ( 1. - sqrt(28. * MPSMaterial :: lambda0 / equivalentTime) ) ) * fib_fcm28;
+    }
+
+
     // ftm adjusted according to the stiffnessFactor (MPa by default)
+    if ( fcm >= 58. ) {
+      ftm = 2.12 * log ( 1. + 0.1 * fcm ) * 1.e6 / MPSMaterial :: stiffnessFactor;
+    } else if ( fcm <= 20. ) {
+      ftm = 0.07862 * fcm * 1.e6 / MPSMaterial :: stiffnessFactor; // 12^(2/3) * 0.3 / 20 = 0.07862
+    } else {
+      ftm = 0.3 * pow(fcm - 8., 2. / 3.) * 1.e6 / MPSMaterial :: stiffnessFactor; //5.1-3a
+    }
+
+    /*
     if ( fcm >= 20. ) {
         ftm = 0.3 * pow(fcm - 8., 2. / 3.) * 1.e6 / MPSMaterial :: stiffnessFactor; //5.1-3a
     } else if ( fcm < 8. ) {
@@ -541,7 +634,8 @@ MPSDamMaterial :: computeTensileStrength(double equivalentTime)
     } else {
         // smooth transition
         ftm = 0.3 * pow(fcm - ( 8. * ( fcm - 8. ) / ( 20. - 8. ) ), 2. / 3.) * 1.e6 / MPSMaterial :: stiffnessFactor;
-    }
+        }*/
+
     return ftm;
 }
 
@@ -674,7 +768,7 @@ MPSDamMaterial :: initDamaged(double kappa, FloatArray &principalDirection, Gaus
 
     MPSDamMaterialStatus *status = static_cast< MPSDamMaterialStatus * >( this->giveStatus(gp) );
 
-    if ( this->fib ) {
+    if ( this->timeDepFracturing ) {
         this->initDamagedFib(gp, tStep);
     }
 
@@ -699,7 +793,7 @@ MPSDamMaterial :: initDamaged(double kappa, FloatArray &principalDirection, Gaus
         status->setCharLength(le);
 
         if ( gf != 0. && e0 >= ( wf / le ) ) { // case for a given fracture energy
-            OOFEM_WARNING("Fracturing strain %e is lower than the elastic strain e0=%e, possible snap-back. Element number %d, wf %e, le %e", wf / le, e0, gp->giveElement()->giveLabel(), wf, le);
+            OOFEM_WARNING("Fracturing strain %e is lower than the elastic strain e0=%e, possible snap-back. Element number %d, wf %e, le %e. Increase fracturing strain or decrease element size by at least %f", wf / le, e0, gp->giveElement()->giveLabel(), wf, le, e0/(wf/le) );
             if ( checkSnapBack ) {
                 OOFEM_ERROR("");
             }
@@ -838,10 +932,40 @@ MPSDamMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateT
         answer.zero();
         answer.at(1) = status->giveCrackWidth();
         return 1;
-    } else if ( type == IST_TensileStrength ) {
+    } else if ( type == IST_ResidualTensileStrength ) {
         answer.resize(1);
         answer.zero();
         answer.at(1) =  status->giveResidualTensileStrength();
+        return 1;
+    } else if ( type == IST_TensileStrength ) {
+        MPSDamMaterialStatus *status = static_cast< MPSDamMaterialStatus * >( this->giveStatus(gp) );
+        double tequiv = status->giveEquivalentTime();
+        answer.resize(1);
+        answer.zero();
+            if (tequiv >= this->castingTime) {
+              answer.at(1) =  this->computeTensileStrength(tequiv);
+            }
+        return 1;
+    } else if ( type == IST_CrackIndex ) {
+        //ratio of real principal stress / strength. 1 if damage already occured.
+        FloatArray principalStress;
+        MPSDamMaterialStatus *status = static_cast< MPSDamMaterialStatus * >( this->giveStatus(gp) );
+        answer.resize(1);
+        answer.zero();
+        if ( status->giveDamage()>0. ){
+            answer.at(1)=1.;
+            return 1;
+        }
+        //FloatArray effectiveStress = status->giveTempViscoelasticStressVector();
+        //StructuralMaterial :: computePrincipalValues(principalStress, effectiveStress, principal_stress);
+        StructuralMaterial :: giveIPValue(principalStress, gp, IST_PrincipalStressTensor, tStep);
+        double tequiv = status->giveEquivalentTime();
+            if (tequiv >= this->castingTime) {
+                double ft = this->computeTensileStrength(tequiv);
+                if (ft > 1.e-20 && principalStress.at(1)>1.e-20){
+                answer.at(1) = principalStress.at(1)/ft;
+                } 
+        }
         return 1;
     } else {
         return MPSMaterial :: giveIPValue(answer, gp, type, tStep);

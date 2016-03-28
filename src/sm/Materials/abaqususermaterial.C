@@ -637,18 +637,14 @@ int AbaqusUserMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Intern
 
 void AbaqusUserMaterialStatus :: initTempStatus()
 {
-    stateVector.resize(numState);
-    stateVector.zero();
-    tempStateVector.resize(numState);
-    stateVector.zero();
+    StructuralMaterialStatus :: initTempStatus();
+    tempStateVector = stateVector;
 }
 
 AbaqusUserMaterialStatus :: AbaqusUserMaterialStatus(int n, Domain *d, GaussPoint *gp, int numState) :
     StructuralMaterialStatus(n, d, gp),
-    numState(numState), stateVector(numState), hasTangentFlag(false)
+    numState(numState), stateVector(numState), tempStateVector(numState), hasTangentFlag(false)
 {
-    this->initTempStatus();
-
     strainVector.resize(6);
     strainVector.zero();
 }

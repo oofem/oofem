@@ -1,0 +1,75 @@
+EC2shrinkage.out
+# 
+test on drying and autogenous shrinkage prolonged by casting time of the material
+#
+IncrLinearStatic endOfTimeOfInterest 10000.00000 prescribedTimes 40 0.0001 0.0002 0.0005 0.001 0.002 0.005 0.01 0.02 0.05 0.1 0.2 0.5 1. 2. 5. 10. 10.0001 10.0002 10.0005 10.001 10.002 10.005 10.01 10.02 10.05 10.1 10.2 10.5 11. 12. 15. 20. 50. 100. 200. 500. 1000. 2000. 5000. 10000. nmodules 1
+#
+errorcheck
+# vtkxml tstep_step 1 domain_all vars 2 1 4 primvars 1 1 
+#
+domain 2dPlaneStress
+#
+OutputManager tstep_all dofman_all element_all
+ndofman 8 nelem 2 ncrosssect 1 nmat 2 nbc 1 nic 0 nltf 1
+#
+#
+# NODES
+#
+node   1   coords 3  0.0  0.0  0.0 bc 2   1   1 
+node   2   coords 3  0.1  0.0  0.0 
+node   3   coords 3  0.0  0.1  0.0 bc 2   1   0 
+node   4   coords 3  0.1  0.1  0.0 
+#
+node   5   coords 3  0.0  0.2  0.0 bc 2   1   1 
+node   6   coords 3  0.1  0.2  0.0 
+node   7   coords 3  0.0  0.3  0.0 bc 2   1   0 
+node   8   coords 3  0.1  0.3  0.0 
+#
+#
+#
+# ELEMENTS
+#
+planestress2d   1   nodes 4   1 2 4 3 crossSect 1 mat 1 
+#
+planestress2d   2   nodes 4   5 6 8 7 crossSect 1 mat 2 
+#
+#
+#
+#
+# CROSSECTION
+#
+SimpleCS 1 thick 1.0 width 1.0
+#
+#
+# MATERIAL
+#
+# autogenous shrinkage only
+EC2CreepMat 1 d 0. n 0.2 fcm28 30 stiffnessFactor 1.e6 relMatAge -10. t0 2. timeFactor 1. cemType 2 henv 0.5 h0 100. shType 3 begOfTimeOfInterest 10. endOfTimeOfInterest 1000. castingTime 10.
+#
+# drying shrinkage only
+EC2CreepMat 2 d 0. n 0.2 fcm28 30 stiffnessFactor 1.e6 relMatAge -10. t0 2. timeFactor 1. cemType 2 henv 0.5 h0 100. shType 2 begOfTimeOfInterest 10. endOfTimeOfInterest 1000. castingTime 10.
+#
+#
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.
+#
+#
+# TIME FUNCTION
+#
+ConstantFunction 1 f(t) 1.0
+#
+#NODE  number 4 dof 1 unknown d 
+#NODE  number 8 dof 1 unknown d 
+#TIME
+#
+#%BEGIN_CHECK% tolerance 5.e-12
+#NODE tStep 10 number 4 dof 1 unknown d value 0.
+#NODE tStep 10 number 8 dof 1 unknown d value 0.
+#NODE tStep 20 number 4 dof 1 unknown d value -1.891379e-08
+#NODE tStep 20 number 8 dof 1 unknown d value 0.
+#NODE tStep 30 number 4 dof 1 unknown d value -7.390851e-07
+#NODE tStep 30 number 8 dof 1 unknown d value 0.
+#NODE tStep 35 number 4 dof 1 unknown d value -2.809518e-06
+#NODE tStep 35 number 8 dof 1 unknown d value -4.377031e-05
+#NODE tStep 40 number 4 dof 1 unknown d value -3.000000e-06
+#NODE tStep 40 number 8 dof 1 unknown d value -5.287140e-05
+#%END_CHECK%

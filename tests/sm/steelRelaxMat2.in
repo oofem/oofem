@@ -1,0 +1,59 @@
+steelRelaxMat2.out
+# 
+relaxation of prestressing reinforcement, all dofs fixed
+#
+IncrLinearStatic endOfTimeOfInterest 10000.00000 prescribedTimes 25 0.0001 0.0002 0.0005 0.001 0.002 0.005 0.01 0.02 0.05 0.1 0.2 0.5 1. 2. 5. 10. 20. 50. 100. 200. 500. 1000. 2000. 5000. 10000.  nmodules 1
+#
+errorcheck
+#
+# vtkxml tstep_step 1 domain_all vars 2 1 4 primvars 1 1 
+#
+domain 2dPlaneStress
+#
+OutputManager tstep_all dofman_all element_all
+ndofman 4 nelem 2 ncrosssect 1 nmat 2 nbc 2 nic 0 nltf 2
+#
+#
+# NODES
+#
+node   1   coords 2  0.0  0.0  bc 2   1   1 
+node   2   coords 2  0.1  0.0  bc 2   1   1 
+node   3   coords 2  0.0  0.1  bc 2   1   1 
+node   4   coords 2  0.1  0.1  bc 2   1   1 
+#
+#
+# ELEMENTS
+#
+Truss2d   1   nodes 2   1 2    crossSect 1 mat 1  cs 1 bodyLoads 1 2
+#
+Truss2d   2   nodes 2   3 4    crossSect 1 mat 2  cs 1 bodyLoads 1 2
+#
+#
+# CROSSECTION
+#
+SimpleCS 1 thick 1.0 area 0.001
+#
+#
+# MATERIAL
+#
+SteelRelaxMat 1 d 0. E 200.e3 ReinfClass 1 timeFactor 1. charStrength 1000. approach 0
+SteelRelaxMat 2 d 0. E 200.e3 ReinfClass 1 timeFactor 1. charStrength 1000. approach 1
+#
+#
+BoundaryCondition 1     loadTimeFunction 1 prescribedvalue 0.
+#
+StructEigenstrainLoad 2 loadTimeFunction 2 Components 1 -4.e-3
+#
+#
+# TIME FUNCTION
+#
+ConstantFunction 1 f(t) 1.0
+HeavisideLTF 2 origin 0.0 value 1.0
+#
+#TIME
+#%BEGIN_CHECK% tolerance 5.e-3
+#ELEMENT tStep 10 number 1 gp 1 keyword 1 component 1 value 7.702400e+02
+#ELEMENT tStep 10 number 2 gp 1 keyword 1 component 1 value 7.703100e+02
+#ELEMENT tStep 25 number 1 gp 1 keyword 1 component 1 value 6.326700e+02
+#ELEMENT tStep 25 number 2 gp 1 keyword 1 component 1 value 6.330400e+02
+#%END_CHECK%

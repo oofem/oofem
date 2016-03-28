@@ -43,6 +43,8 @@
  #include <mpi.h>
 #endif
 
+#define  __VERBOSE_PARALLEL
+
 namespace oofem {
 ProblemCommunicator :: ProblemCommunicator(EngngModel *emodel, CommunicatorBuff *b, int rank, int size) :
     Communicator(emodel, b, rank, size)
@@ -141,6 +143,8 @@ ElementCommunicator :: setUpCommunicationMaps(EngngModel *pm,  bool excludeSelfC
         return;
     }
 
+    OOFEM_LOG_RELEVANT("[%d] ElementCommunicator :: Setting up communication maps\n", rank);
+
     Domain *domain = pm->giveDomain(1);
 
     /*
@@ -215,15 +219,15 @@ ElementCommunicator :: setUpCommunicationMaps(EngngModel *pm,  bool excludeSelfC
         //this->giveDomainCommunicator(i)->setToRecvArry(this->engngModel, maps [ i ]);
     }
 
-    /*
-        * #ifdef __VERBOSE_PARALLEL
-        * for (i=0; i<size; i++) {
-        * fprintf (stderr, "domain %d-%d: domainCommRecvsize is %d\n",rank,i,this->giveDomainCommunicator(i)->giveRecvBuff()->giveSize() );
-        * printf ("domain %d-%d: reecv map:",rank,i);
-        * this->giveDomainCommunicator(i)->giveToRecvMap()->printYourself();
-        * }
-        ****#endif
-        */
+
+#ifdef __VERBOSE_PARALLEL
+    for (int i=0; i<size; i++) {
+      fprintf (stderr, "domain %d-%d: domainCommRecvsize is %d\n",rank,i,this->giveProcessCommunicator(i)->giveToRecvMap()->giveSize() );
+      printf ("domain %d-%d: reecv map:",rank,i);
+      this->giveProcessCommunicator(i)->giveToRecvMap()->printYourself();
+    }
+#endif
+        
 
     // to assemble send maps, we must analyze broadcasted remote domain send lists
     // and we must also broadcast our send list.
@@ -342,14 +346,13 @@ WARNING: NOT SUPPORTED MESSAGE PARSING LIBRARY
             // set send map to i-th process communicator
             this->setProcessCommunicatorToSendArry(this->giveProcessCommunicator(i), toSendMap);
 
-            /*
-                * #ifdef __VERBOSE_PARALLEL
-                *  fprintf (stderr, "domain %d-%d: domainCommSendsize is %d\n",rank,i,this->giveDomainCommunicator(i)->giveSendBuff()->giveSize() );
-                *  printf ("domain %d-%d: send map:",rank,i);
-                *  this->giveDomainCommunicator(i)->giveToSendMap()->printYourself();
-                *
-                ****#endif
-                */
+#ifdef __VERBOSE_PARALLEL
+            fprintf (stderr, "domain %d-%d: domainCommSendsize is %d\n",rank,i,this->giveProcessCommunicator(i)->giveToSendMap()->giveSize() );
+            printf ("domain %d-%d: send map:",rank,i);
+            this->giveProcessCommunicator(i)->giveToSendMap()->printYourself();
+            
+#endif
+                
 
             //this->giveDomainCommunicator(i)->setToSendArry (this->engngModel, toSendMap);
         } // end receiving broadcasted lists

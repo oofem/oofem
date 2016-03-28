@@ -3,7 +3,7 @@ Patch test of Quad1_ht elements
 #StationaryProblem nsteps 1
 #NonStationaryProblem nsteps 200 deltat 600000.0 alpha 0.5
 nltransienttransportproblem nsteps 200 deltat 600000.0 rtol 0.001 alpha 0.5 nmodules 1
-#transienttransport nsteps 200 deltat 600000.0 rtolf 1e-6 alpha 0.5 nmodules 1
+#transienttransport nsteps 200 deltat 600000.0 alpha 0.5 nmodules 1
 errorcheck
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all
@@ -35,5 +35,4 @@ Set 3 elementboundaries 2 2 2
 #NODE tStep 200 number 6 dof 10 unknown d value 10.212765957
 #%END_CHECK%
 
-1.27659465e+00
-1.27659574e+00
+

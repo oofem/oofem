@@ -57,6 +57,7 @@
 #define _IFT_RheoChainMaterial_begoftimeofinterest "begoftimeofinterest"
 #define _IFT_RheoChainMaterial_endoftimeofinterest "endoftimeofinterest"
 #define _IFT_RheoChainMaterial_timefactor "timefactor"
+#define _IFT_RheoChainMaterial_talpha "talpha"
 //@}
 
 namespace oofem {
@@ -128,6 +129,8 @@ public:
 class RheoChainMaterial : public StructuralMaterial
 {
 protected:
+    /// thermal dilatation coeff.
+    double talpha;
     /// Number of (Maxwell or Kelvin) units in the rheologic chain.
     int nUnits;
     /// Physical age of the material at simulation time = 0.
@@ -182,14 +185,16 @@ public:
     virtual void giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
 
-    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
-    { answer.clear(); }
+    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+
+    /*    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+	  { answer.clear(); }*/
 
     /// Evaluation of the incremental modulus.
     virtual double giveEModulus(GaussPoint *gp, TimeStep *tStep) = 0;
 
     /// Evaluation of the moduli of individual units.
-    virtual void computeCharCoefficients(FloatArray &answer, double tStep) = 0;
+    virtual void computeCharCoefficients(FloatArray &answer, double tPrime, GaussPoint *gp, TimeStep *tStep) = 0;
 
     // identification and auxiliary functions
     virtual int hasNonLinearBehaviour() { return 0; }
@@ -265,7 +270,7 @@ public:
     double giveAlphaTwo() const { return this->alphaTwo; }
 
     /// Evaluation of the creep compliance function at time t when loading is acting from time t_prime
-    virtual double computeCreepFunction(double t, double t_prime) = 0;
+    virtual double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) = 0;
 
 protected:
     /**
@@ -302,7 +307,7 @@ protected:
      * @param tSteps At which times the relaxation function will be evaluated.
      * @warning tSteps should be uniformly distributed in log time scale and relatively dense (100 intervals) in order to achieve a reasonable accuracy.
      */
-    void computeDiscreteRelaxationFunction(FloatArray &answer, const FloatArray &tSteps, double t0, double tr);
+    void computeDiscreteRelaxationFunction(FloatArray &answer, const FloatArray &tSteps, double t0, double tr, GaussPoint *gp, TimeStep *tSte);
 
     /// Evaluation of elastic compliance matrix for unit Young's modulus.
     void giveUnitComplianceMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
@@ -310,7 +315,7 @@ protected:
     void giveUnitStiffnessMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
 
     /// Update of partial moduli of individual chain units
-    virtual void updateEparModuli(double tStep);
+    virtual void updateEparModuli(double tPrime, GaussPoint *gp, TimeStep *tStep);
 
     /// Access to partial modulus of a given unit
     double giveEparModulus(int iChain);

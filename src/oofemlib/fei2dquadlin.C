@@ -241,15 +241,6 @@ FEI2dQuadLin :: global2local(FloatArray &answer, const FloatArray &coords, const
     return inside;
 }
 
-double
-FEI2dQuadLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-{
-    FloatMatrix jacobianMatrix;
-
-    this->giveJacobianMatrixAt(jacobianMatrix, lcoords, cellgeo);
-    return jacobianMatrix.giveDeterminant();
-}
-
 void
 FEI2dQuadLin :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords,  const FEICellGeometry &cellgeo)
 {

@@ -1304,15 +1304,6 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
             return;
         }
 
-        //Problem with numerical stability for hydrostatic case, handle directly-TODO
-//         if (fabs( s.at(4) ) < 1.e-20 && fabs( s.at(5)) < 1.e-20 && fabs( s.at(6)) < 1.e-20 ){
-//             solve = false;
-//             s1 = s.at(1);
-//             s2 = s.at(2);
-//             s3 = s.at(3);
-//         }
-
-
         if ( mode == principal_stress ) {
             I1 = s.at(1) + s.at(2) + s.at(3);
             I2 = s.at(1) * s.at(2) + s.at(2) * s.at(3) + s.at(3) * s.at(1) -
@@ -1435,6 +1426,7 @@ StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &di
         // 2D problem
         ss.resize(2, 2);
         answer.resize(2);
+        dir.resize(2, 2);
 
         for ( int i = 1; i <= size; i++ ) {
             if ( fabs( s.at(i) ) > 1.e-20 ) {
@@ -1444,6 +1436,7 @@ StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &di
 
         if ( nonzeroFlag == 0 ) {
             answer.zero();
+            dir.zero();
             ss.zero();
             return;
         }
@@ -1463,6 +1456,7 @@ StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &di
         double help;
         ss.resize(3, 3);
         answer.resize(3);
+        dir.resize(3, 3);
 
         for ( int i = 1; i <= size; i++ ) {
             if ( fabs( s.at(i) ) > 1.e-20 ) {
@@ -1472,6 +1466,7 @@ StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &di
 
         if ( nonzeroFlag == 0 ) {
             answer.zero();
+            dir.zero();
             ss.zero();
             return;
         }

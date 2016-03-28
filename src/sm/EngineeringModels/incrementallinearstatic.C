@@ -46,6 +46,17 @@
 #include "activebc.h"
 #include "unknownnumberingscheme.h"
 
+/*
+#include "set.h"
+#include "element.h"
+#include "node.h"
+*/
+
+#include "boundarycondition.h"
+
+#include <vector>
+#include <set>
+
 namespace oofem {
 REGISTER_EngngModel(IncrementalLinearStatic);
 
@@ -67,7 +78,7 @@ NumericalMethod *IncrementalLinearStatic :: giveNumericalMethod(MetaStep *mStep)
     if ( !nMethod ) {
         nMethod.reset( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
         if ( !nMethod ) {
-            OOFEM_ERROR("linear solver creation failed");
+            OOFEM_ERROR("linear solver creation failed for lstype %d", solverType);
         }
     }
 
@@ -144,6 +155,58 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
     Domain *d = this->giveDomain(1);
     // Creates system of governing eq's and solves them at given time step
 
+
+    // >>> beginning PH    
+    // The following piece of code updates assignment of boundary conditions to dofs
+    // (this allows to have multiple boundary conditions assigned to one dof
+    // which can be arbitrarily turned on and off in time)
+    // Almost the entire section has been copied from domain.C
+    std :: vector< std :: map< int, int > > dof_bc( d->giveNumberOfDofManagers() );
+
+    for ( int i = 1; i <= d->giveNumberOfBoundaryConditions(); ++i ) {
+      GeneralBoundaryCondition *gbc = d->giveBc(i);
+      
+      if ( gbc->isImposed(tStep) ){
+
+	if ( gbc->giveSetNumber() > 0 ) { ///@todo This will eventually not be optional.
+	  // Loop over nodes in set and store the bc number in each dof.
+	  Set *set = d->giveSet( gbc->giveSetNumber() );
+	  ActiveBoundaryCondition *active_bc = dynamic_cast< ActiveBoundaryCondition * >(gbc);
+	  BoundaryCondition *bc = dynamic_cast< BoundaryCondition * >(gbc);
+	  if ( bc || ( active_bc && active_bc->requiresActiveDofs() ) ) {
+	    const IntArray &appliedDofs = gbc->giveDofIDs();
+	    const IntArray &nodes = set->giveNodeList();
+	    for ( int inode = 1; inode <= nodes.giveSize(); ++inode ) {
+	      for ( int idof = 1; idof <= appliedDofs.giveSize(); ++idof ) {
+		
+		if  ( dof_bc [ nodes.at(inode) - 1 ].find( appliedDofs.at(idof) ) == dof_bc [ nodes.at(inode) - 1 ].end() ) {
+		  // is empty
+		  dof_bc [ nodes.at(inode) - 1 ] [ appliedDofs.at(idof) ] = i;
+
+		  DofManager * dofman = d->giveDofManager( nodes.at(inode) );
+		  Dof * dof = dofman->giveDofWithID( appliedDofs.at(idof) );
+
+		  dof->setBcId(i);
+
+		} else {
+		  // another bc has been already prescribed at this time step to this dof
+		  OOFEM_WARNING("More than one boundary condition assigned at time %f to node %d dof %d. Considering boundary condition %d", tStep->giveTargetTime(),  nodes.at(inode), appliedDofs.at(idof), dof_bc [ nodes.at(inode) - 1 ] [appliedDofs.at(idof)] );
+		  
+		  
+		}
+	      }
+	    }
+	  }
+	}
+      }
+    }
+    
+    // to get proper number of equations
+    this->forceEquationNumbering();
+    // <<< end PH
+
+
+
     // Initiates the total displacement to zero.
     if ( tStep->isTheFirstStep() ) {
         for ( auto &dofman : d->giveDofManagers() ) {
@@ -180,7 +243,6 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
             dof->updateUnknownsDictionary(tStep, VM_Total, tot);
         }
     }
-
 
     int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
 

@@ -93,6 +93,7 @@ NonlocalMaterialExtensionInterface :: updateDomainBeforeNonlocAverage(TimeStep *
         return; // already updated
     }
 
+    OOFEM_LOG_DEBUG ("Updating Before NonlocAverage\n");
     for ( auto &elem : d->giveElements() ) {
         elem->updateBeforeNonlocalAverage(tStep);
     }

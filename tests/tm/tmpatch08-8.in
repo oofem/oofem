@@ -1,7 +1,7 @@
 tmpatch08-8.out
 Test of Quad1_ht elements; nonstationary case
 NonStationaryProblem nsteps 100 deltat 600000.0 alpha 0.5 lumpedcapa nmodules 1
-#TransientTransport nsteps 101 deltat 600000.0 alpha 0.5 lumped rtolf 1e-6 nmodules 1
+#TransientTransport nsteps 100 deltat 600000.0 alpha 0.5 lumped nmodules 1 miniter 1
 errorcheck
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all

@@ -555,7 +555,7 @@ void TR1_2D_SUPG2_AXI :: computeDiffusionTerm_MC(FloatArray &answer, TimeStep *t
     double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
     FloatArray eps, stress, u;
     FloatMatrix _b;
-    FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
+    FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
 
     // stabilization term K_eps
     this->computeVectorOfVelocities(VM_Total, tStep, u);

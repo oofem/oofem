@@ -664,6 +664,24 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(Gau
 }
 
 
+
+int
+IDNLMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
+{
+  IDNLMaterialStatus *status = static_cast< IDNLMaterialStatus * >( this->giveStatus(gp) );
+  if ( type == IST_LocalEquivalentStrain ) {
+    answer.resize(1);
+    answer.zero();
+    answer.at(1) = status->giveLocalEquivalentStrainForAverage();
+  } else {
+    return IsotropicDamageMaterial1 :: giveIPValue(answer, gp, type, tStep);
+  }
+
+  return 1; // to make the compiler happy
+
+}
+
+
 #ifdef __OOFEG
 void
 IDNLMaterial :: NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(GaussPoint *gp, oofegGraphicContext &gc, TimeStep *tStep)

@@ -425,11 +425,6 @@ ConcreteDPM :: giveRealStressVector_3d(FloatArray &answer,
     FloatArray strain;
     ConcreteDPMStatus *status = giveStatus(gp);
 
-    // only for debugging
-    //if (gp->giveElement()->giveNumber()==146){
-    //  double a = 1.;
-    //}
-
     // Initialize temp variables for this gauss point
     status->initTempStatus();
 
@@ -475,8 +470,8 @@ ConcreteDPM :: giveRealStressVector_3d(FloatArray &answer,
         double work = strainIncrement.dotProduct(stressIncrement, n);
         //printf(" work : %g\n", work);
         if ( work < 0. ) {
-            double E = gp->giveMaterial()->give('E', gp);
-            double ft = gp->giveMaterial()->give(ft_strength, gp);
+            double E = this->give('E', gp);
+            double ft = this->give(ft_strength, gp);
             double tmpEpsloc = kappaD + damage * ft / E;
             status->letTempEpslocBe(tmpEpsloc);
         }

@@ -14,11 +14,12 @@ set (dss
     SparseGridMtxLU.cpp
     SparseGridMtxPD.cpp
     SparseMatrixF.cpp
+    # OOFEM binding:
+    dssmatrix.C
+    dsssolver.C
     )
 
 add_library (dss
     ${LIB_TYPE}
     ${dss}
-    dssmatrix.C
-    dsssolver.C
     )

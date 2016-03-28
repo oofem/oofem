@@ -274,6 +274,12 @@ void LTRSpace :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
     EASValsSetEdgeFlag(true);
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
     EASValsSetFillStyle(FILL_SOLID);
+#ifdef __PARALLEL_MODE
+    if (this->giveParallelMode() == Element_remote) {
+      EASValsSetColor( gc.getRemoteElementColor() );
+      EASValsSetEdgeColor( gc.getRemoteElementEdgeColor() );
+    }
+#endif
     p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveCoordinate(1);
     p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveCoordinate(2);
     p [ 0 ].z = ( FPNum ) this->giveNode(1)->giveCoordinate(3);
@@ -350,7 +356,14 @@ void LTRSpace :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
             return;
         }
     } else if ( gc.giveIntVarMode() == ISM_local ) {
+      if ( integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() != 1 ) return;
+      GaussPoint *gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0);
+      if ( giveIPValue(v [ 0 ], gp, gc.giveIntVarType(), tStep) == 0 ) {
         return;
+      }
+      v[1]=v[0];
+      v[2]=v[0];
+      v[3]=v[0];
     }
 
     indx = gc.giveIntVarIndx();

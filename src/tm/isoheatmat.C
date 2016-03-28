@@ -85,11 +85,12 @@ IsotropicHeatTransferMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *
 {
     TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
 
+    ms->setTempField(field);
+    ms->setTempGradient(grad);
+
     ///@todo Shouldn't the conductivity typically depend on the primary field and/or its gradient?
     answer.beScaled(-this->giveIsotropicConductivity(gp), grad);
 
-    ms->setTempField(field);
-    ms->setTempGradient(grad);
     ms->setTempFlux(answer);
 }
 

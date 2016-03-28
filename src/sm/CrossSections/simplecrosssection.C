@@ -635,11 +635,7 @@ Material
 double
 SimpleCrossSection :: give(int aProperty, GaussPoint *gp)
 {
-    if ( this->giveMaterialNumber() ) {
-        return this->giveMaterial(gp)->give(aProperty, gp);
-    } else {
-        return gp->giveMaterial()->give(aProperty, gp);
-    }
+    return this->giveMaterial(gp)->give(aProperty, gp);
 }
 
 
@@ -678,11 +674,7 @@ SimpleCrossSection :: checkConsistency()
 Interface
 *SimpleCrossSection :: giveMaterialInterface(InterfaceType t, IntegrationPoint *ip)
 {
-    if ( this->giveMaterialNumber() ) {
-        return this->giveDomain()->giveMaterial( this->giveMaterialNumber() )->giveInterface(t);
-    } else {
-        return ip->giveMaterial()->giveInterface(t);
-    }
+    return this->giveMaterial(ip)->giveInterface(t);
 }
 
 

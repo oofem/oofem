@@ -106,16 +106,18 @@ namespace oofem {
 /*****************************************************
 * FloatArray
 *****************************************************/
+#if 0
 struct PyFloatArray : FloatArray, wrapper<FloatArray>
 {
     PyFloatArray(int n=0) : FloatArray(n) {}
     PyFloatArray(FloatArray &src): FloatArray(src) {}
 
-    void printYourseelf() const {
+    void printYourself() const {
         if (override f = this->get_override("printYourself")) {f();}
         this->get_override("printYourself")();
     }
 };
+#endif
 
 
 void (FloatArray::*floatarray_add_1)(const FloatArray&) = &FloatArray::add;
@@ -125,11 +127,17 @@ double (FloatArray::*dotProduct_1)(const FloatArray&) const = &FloatArray::dotPr
 double (FloatArray::*dotProduct_2)(const FloatArray&, int) const = &FloatArray::dotProduct;
 void (FloatArray::*beDifferenceOf_1)(const FloatArray&, const FloatArray&) = &FloatArray::beDifferenceOf;
 void (FloatArray::*beDifferenceOf_2)(const FloatArray&, const FloatArray&, int) = &FloatArray::beDifferenceOf;
-void (PyFloatArray::*floatarray_printYourself_1)() const  = &PyFloatArray::printYourself;
+void (FloatArray::*floatarray_printYourself_1)() const  = &FloatArray::printYourself;
+
+std::string FloatArray_str(const FloatArray& a){
+	std::string ret("[");
+	for(size_t i=0; i<a.giveSize(); i++){ ret+=(i>0?", ":"")+std::to_string(a[i]); }
+	return ret+"]";
+}
 
 void pyclass_FloatArray()
 {
-    class_<PyFloatArray, boost::noncopyable>("FloatArray")
+    class_<FloatArray, boost::noncopyable>("FloatArray")
         .def(init< optional<int> >())
         .def(init< FloatArray& >())
         .def("resize", &FloatArray::resize, "Checks size of receiver towards requested bounds. If dimension mismatch, size is adjusted accordingly")
@@ -159,6 +167,8 @@ void pyclass_FloatArray()
         .def("computeNorm", &FloatArray::computeNorm, "Computes the norm (or length) of the vector")
         .def("computeSquaredNorm", &FloatArray::computeSquaredNorm, "Computes the square of the norm")
         .def("sum", &FloatArray::sum, "Computes the sum of receiver values")
+
+		  .def("__str__", &FloatArray_str,"Return printable representation.")
 
         .def("__len__", &FloatArray::giveSize, "Returns the size of receiver")
         .def("__getitem__", &FloatArray::__getitem__, "Coefficient access function. Provides 0-based indexing access")
@@ -755,6 +765,7 @@ void pyclass_Element()
         .def("giveDofManagerNumber", &Element::giveDofManagerNumber)
         .def("giveDofManager", &Element::giveDofManager, return_internal_reference<>())
         .def("giveNode", &Element::giveNode, return_internal_reference<>())
+		  .def("giveClassName",&Element::giveClassName)
         // TODO return type (copy rather than pointer?)
         .def("giveDofManArray", &Element::giveDofManager, return_value_policy<reference_existing_object>())
         .def("giveNumberOfIntegrationRules", &Element::giveNumberOfIntegrationRules)
@@ -864,12 +875,15 @@ struct PyLoad : Load , wrapper<Load>
         if (override f = this->get_override("computeValueAt")) { f(answer,tStep,coords,mode);}
         this->get_override("computeValueAt")(answer,tStep,coords,mode);
     }
+    FloatArray* GiveComponentArray_copy() { return new FloatArray(giveComponentArray()); }
 };
+
+
 void pyclass_Load()
 {
     class_<PyLoad, bases<GeneralBoundaryCondition>, boost::noncopyable >("Load", no_init)
         .def("setComponentArray", &Load::setComponentArray)
-        .def("giveComponentArray", &Load::GiveCopyOfComponentArray,return_value_policy<manage_new_object>())
+        .def("giveComponentArray", &PyLoad::GiveComponentArray_copy,return_value_policy<manage_new_object>())
         .def("computeValueAt", pure_virtual( &Load::computeValueAt))
         ;
 }
@@ -959,9 +973,36 @@ public:
 	#endif
 };
 
+#if 0
 
-int (Field::*Field_evaluateAtPos)(FloatArray &answer, FloatArray &coords, ValueModeType mode, TimeStep *atTime) = &Field::evaluateAt;
-int (Field::*Field_evaluateAtDman)(FloatArray &answer, DofManager* dman, ValueModeType mode, TimeStep *atTime) = &Field::evaluateAt;
+// these two need to copy the FloatArray object, which is noncopyable and no by-value converter is found
+FloatArray Field_evaluateAtDman(Field* field, DofManager* dman, ValueModeType mode, TimeStep* atTime){
+	FloatArray ret;
+	int err=field->evaluateAt(ret,dman,mode,atTime);
+	if(err) throw std::runtime_error("Error evaluating field at given DofManager.");
+	return ret;
+}
+FloatArray Field_evaluateAtPos(Field* field, FloatArray& coords, ValueModeType mode, TimeStep* atTime){
+	FloatArray ret;
+	int err=field->evaluateAt(ret,coords,mode,atTime);
+	if(err) throw std::runtime_error("Error evaluating field at given position.");
+	return ret;
+}
+#elif 0
+	// these force Python user to check error code, which is very unpythonic
+	int (Field::*Field_evaluateAtPos)(FloatArray &answer, FloatArray &coords, ValueModeType mode, TimeStep *atTime) = &Field::evaluateAt;
+	int (Field::*Field_evaluateAtDman)(FloatArray &answer, DofManager* dman, ValueModeType mode, TimeStep *atTime) = &Field::evaluateAt;
+#else
+	// raise exception if there is a problem
+	void Field_evaluateAtDman(Field* field, FloatArray& answer, DofManager* dman, ValueModeType mode, TimeStep* atTime){
+		int err=field->evaluateAt(answer,dman,mode,atTime);
+		if(err) throw std::runtime_error("Error evaluating field at given DofManager.");
+	}
+	void Field_evaluateAtPos(Field* field, FloatArray& answer, FloatArray& coords, ValueModeType mode, TimeStep* atTime){
+		int err=field->evaluateAt(answer,coords,mode,atTime);
+		if(err) throw std::runtime_error("Error evaluating field at given position.");
+	}
+#endif
 
 std::auto_ptr<Field> DofManValueField_create (FieldType t, Domain* d) { return std::auto_ptr<Field> ( new DofManValueField(t, d) ); }
 
@@ -971,8 +1012,8 @@ void pyclass_Field()
     //see http://www.boost.org/doc/libs/1_47_0/libs/python/doc/v2/faq.html#ownership for detail
     // also see http://stackoverflow.com/questions/4112561/boost-python-ownership-of-pointer-variables
     class_<PyField, EModelFieldPtr, boost::noncopyable>("Field", no_init)
-        .def("evaluateAtPos", pure_virtual(Field_evaluateAtPos))
-        .def("evaluateAtDman", pure_virtual(Field_evaluateAtDman))
+        .def("evaluateAtPos",Field_evaluateAtPos)
+        .def("evaluateAtDman",Field_evaluateAtDman)
         .def("giveType", &Field::giveType)
         ;
 }
@@ -1036,7 +1077,7 @@ void pyclass_FieldManager()
 void pyclass_DofManValueField()
 {
     class_<DofManValueField, bases<Field>, boost::noncopyable >("DofManValueField", no_init)
-        .def("evaluateAt", Field_evaluateAtPos)
+        .def("evaluateAt", Field_evaluateAtPos) //??
         .def("setDofManValue",&DofManValueField::setDofManValue)
         ;
 }

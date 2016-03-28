@@ -862,6 +862,14 @@ LayeredCrossSection :: setupLayerMidPlanes()
 }
 
 
+Material *
+LayeredCrossSection :: giveMaterial(IntegrationPoint *ip)
+{
+    return this->domain->giveMaterial( this->giveLayerMaterial(ip->giveNumber()) );
+
+}
+
+
 int
 LayeredCrossSection :: setupIntegrationPoints(IntegrationRule &irule, int npoints, Element *element)
 {
