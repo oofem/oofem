@@ -245,7 +245,11 @@ void PrescribedGradientBCPeriodic :: computeTangent(FloatMatrix &E, TimeStep *tS
     
     E.resize(E_tmp.giveNumberOfRows(), E_tmp.giveNumberOfColumns());
     if ( nsd == 3 ) {
-        E.assemble(E_tmp, {1, 9, 8, 6, 2, 7, 5, 4, 3});
+        if ( E_tmp.giveNumberOfRows() == 6 ) {
+            E.assemble(E_tmp, {1, 6, 5, 6, 2, 4, 5, 4, 3});
+        } else {
+            E.assemble(E_tmp, {1, 9, 8, 6, 2, 7, 5, 4, 3});
+        }
     } else if ( nsd == 2 ) {
         E.assemble(E_tmp, {1, 4, 3, 2});
     } else {
