@@ -900,19 +900,18 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
 
         double radius = xS.distance(xE)*1.0e-2;
 
-        std :: set< int >elListS;
+        IntArray elListS;
         localizer->giveAllElementsWithNodesWithinBox(elListS, xS, radius);
 
-        std :: vector< FloatArray >intersecPoints;
+        std :: vector< FloatArray > intersecPoints;
 
 
         // Also add traction nodes where cohesive zone elements intersect the boundary
-        for(int elInd : elListS) {
+        for (int elInd : elListS) {
 
             Element *el = domain->giveElement(elInd);
 
-            if( strcmp(el->giveClassName(),"IntElLine1" ) == 0 || strcmp(el->giveClassName(),"IntElLine2" ) == 0 )
-            {
+            if( strcmp(el->giveClassName(),"IntElLine1" ) == 0 || strcmp(el->giveClassName(),"IntElLine2" ) == 0 ) {
 #ifdef DAMAGE_TEST
                 if(damageExceedsTolerance(el)) {
 //                    OOFEM_ERROR("Damage exceeds tolerance.")
@@ -931,17 +930,16 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
         }
 
 
-        std :: set< int >elListE;
+        IntArray elListE;
         localizer->giveAllElementsWithNodesWithinBox(elListE, xE, radius);
 
 
 
-        for(int elInd : elListE) {
+        for (int elInd : elListE) {
 
             Element *el = domain->giveElement(elInd);
 
-            if( strcmp(el->giveClassName(),"IntElLine1" ) == 0 || strcmp(el->giveClassName(),"IntElLine2" ) == 0 )
-            {
+            if( strcmp(el->giveClassName(),"IntElLine1" ) == 0 || strcmp(el->giveClassName(),"IntElLine2" ) == 0 ) {
 
 #ifdef DAMAGE_TEST
                 if(damageExceedsTolerance(el)) {
@@ -1256,18 +1254,18 @@ void PrescribedGradientBCWeak :: buildMaps(const std :: vector< std :: pair< Flo
         xC_plus.add(0.5, xE_plus);
 
         double elLength_plus = xS_plus.distance(xE_plus);
-        std :: set< int >elList_plus;
+        IntArray elList_plus;
         // TODO: What if an element is cut by two cracks, so that the
         // traction element becomes shorter than the displacement element?
         // Make sure that the search radius is never smaller than the
         // largest displacement element length along the boundary.
         localizer->giveAllElementsWithNodesWithinBox(elList_plus, xC_plus, 0.51 * elLength_plus);
 
-        if ( elList_plus.empty() ) {
+        if ( elList_plus.isEmpty() ) {
             FloatArray lCoords, closestPoint;
             Element *el = localizer->giveElementClosestToPoint(lCoords, closestPoint, xC_plus);
             int elPlaceInArray = domain->giveElementPlaceInArray( el->giveGlobalNumber() );
-            elList_plus.insert(elPlaceInArray);
+            elList_plus.insertSortedOnce(elPlaceInArray);
         }
 
         std :: vector< int >displacementElements, displacementElements_plus;
@@ -1313,18 +1311,18 @@ void PrescribedGradientBCWeak :: buildMaps(const std :: vector< std :: pair< Flo
             xC_minus.add(0.5, xE_minus);
 
             double elLength_minus = xS_minus.distance(xE_minus);
-            std :: set< int >elList_minus;
+            IntArray elList_minus;
             // TODO: What if an element is cut by two cracks, so that the
             // traction element becomes shorter than the displacement element?
             // Make sure that the search radius is never smaller than the
             // largest displacement element length along the boundary.
             localizer->giveAllElementsWithNodesWithinBox(elList_minus, xC_minus, 0.51 * elLength_minus);
 
-            if ( elList_minus.empty() ) {
+            if ( elList_minus.isEmpty() ) {
                 FloatArray lCoords, closestPoint;
                 Element *el = localizer->giveElementClosestToPoint(lCoords, closestPoint, xC_minus);
                 int elPlaceInArray = domain->giveElementPlaceInArray( el->giveGlobalNumber() );
-                elList_minus.insert(elPlaceInArray);
+                elList_minus.insertSortedOnce(elPlaceInArray);
             }
 
 

@@ -80,7 +80,7 @@ protected:
     /// Octant node list.
     std :: list< int > nodeList;
     /// Element list, containing all elements having IP in cell.
-    std :: set< int > elementIPList;
+    IntArray elementIPList;
     /// Element list of all elements close to the cell.
     std :: vector< std :: list< int > >elementList;
 
@@ -128,7 +128,7 @@ public:
     /// @return Reference to node List.
     std :: list< int > &giveNodeList();
     /// @return Reference to IPelement set.
-    std :: set< int > &giveIPElementList();
+    IntArray &giveIPElementList();
     /// @return Reference to closeElement list.
     std :: list< int > &giveElementList(int region);
 
@@ -149,7 +149,7 @@ public:
      * Adds given element to cell list of elements having IP within this cell.
      * @param elementNum Element number to add.
      */
-    void addElementIP(int elementNum) { this->giveIPElementList().insert(elementNum); }
+    void addElementIP(int elementNum) { this->giveIPElementList().insertSortedOnce(elementNum); }
     /**
      * Adds given element to cell list of elements having IP within this cell.
      * @param region Element region number (0 for global).
