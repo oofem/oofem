@@ -222,6 +222,7 @@ Line :: Line(const FloatArray &iPointA, const FloatArray &iPointB) : BasicGeomet
 
 double Line :: computeDistanceTo(const FloatArray *point)
 {
+	// TODO: Is this function correct?! /ES
     const FloatArray &pointA = mVertices [ 0 ];
     const FloatArray &pointB = mVertices [ 1 ];
     double a = pointA.at(2) - pointB.at(2);
@@ -258,7 +259,7 @@ int Line :: computeNumberOfIntersectionPoints(Element *element)
 {
 
     int numIntersec = 0;
-    const double relTol = 1.0e-6;
+    const double relTol = 1.0e-3;
     const double LineLength = giveLength();
     const double absTol = relTol*std::max(LineLength, XfemTolerances::giveCharacteristicElementLength() );
 
@@ -271,8 +272,10 @@ int Line :: computeNumberOfIntersectionPoints(Element *element)
         const int nsLoc = bNodes.at(1);
         const int neLoc = bNodes.at( bNodes.giveSize() );
 
-        const FloatArray &xS = *(element->giveNode(nsLoc)->giveCoordinates() );
-        const FloatArray &xE = *(element->giveNode(neLoc)->giveCoordinates() );
+        FloatArray xS = *(element->giveNode(nsLoc)->giveCoordinates() );
+        xS.resizeWithValues(2);
+        FloatArray xE = *(element->giveNode(neLoc)->giveCoordinates() );
+        xE.resizeWithValues(2);
 
         const double dist = BasicGeometry :: computeLineDistance(xS, xE, mVertices[0], mVertices[1]);
 
@@ -942,14 +945,19 @@ void PolygonLine :: computeNormalSignDist(double &oDist, const FloatArray &iPoin
 
 void PolygonLine :: computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinArcDist) const
 {
+	FloatArray point = iPoint;
+	point.resizeWithValues(2);
+
     const int numSeg = this->giveNrVertices() - 1;
 
     double xi = 0.0, xiUnbounded = 0.0;
 
     if(numSeg == 1) {
-        const FloatArray &crackP1 = giveVertex ( 1 );
-        const FloatArray &crackP2 = giveVertex ( 2 );
-        iPoint.distance(crackP1, crackP2, xi, xiUnbounded);
+    	FloatArray crackP1 = giveVertex ( 1 );
+    	crackP1.resizeWithValues(2);
+    	FloatArray crackP2 = giveVertex ( 2 );
+    	crackP2.resizeWithValues(2);
+        point.distance(crackP1, crackP2, xi, xiUnbounded);
 
         if( xiUnbounded < 0.0 ) {
             oDist = xiUnbounded*crackP1.distance(crackP2);
@@ -976,9 +984,11 @@ void PolygonLine :: computeTangentialSignDist(double &oDist, const FloatArray &i
 
     ///////////////////////////////////////////////////////////////////
     // Check first segment
-    const FloatArray &crackP1_start = giveVertex ( 1 );
-    const FloatArray &crackP2_start = giveVertex ( 2 );
-    const double distSeg_start = iPoint.distance(crackP1_start, crackP2_start, xi, xiUnbounded);
+    FloatArray crackP1_start = giveVertex ( 1 );
+    crackP1_start.resizeWithValues(2);
+    FloatArray crackP2_start = giveVertex ( 2 );
+    crackP2_start.resizeWithValues(2);
+    const double distSeg_start = point.distance(crackP1_start, crackP2_start, xi, xiUnbounded);
 
     if( xiUnbounded < 0.0 ) {
         isBeforeStart = true;
@@ -996,10 +1006,12 @@ void PolygonLine :: computeTangentialSignDist(double &oDist, const FloatArray &i
     ///////////////////////////////////////////////////////////////////
     // Check interior segments
     for ( int segId = 2; segId <= numSeg-1; segId++ ) {
-        const FloatArray &crackP1 = giveVertex ( segId      );
-        const FloatArray &crackP2 = giveVertex ( segId+1    );
+    	FloatArray crackP1 = giveVertex ( segId      );
+    	crackP1.resizeWithValues(2);
+        FloatArray crackP2 = giveVertex ( segId+1    );
+        crackP2.resizeWithValues(2);
 
-        const double distSeg = iPoint.distance(crackP1, crackP2, xi, xiUnbounded);
+        const double distSeg = point.distance(crackP1, crackP2, xi, xiUnbounded);
 
         if(distSeg < minGeomDist) {
             isBeforeStart = false;
@@ -1015,9 +1027,11 @@ void PolygonLine :: computeTangentialSignDist(double &oDist, const FloatArray &i
 
     ///////////////////////////////////////////////////////////////////
     // Check last segment
-    const FloatArray &crackP1_end = giveVertex ( numSeg );
-    const FloatArray &crackP2_end = giveVertex ( numSeg+1 );
-    const double distSeg_end = iPoint.distance(crackP1_end, crackP2_end, xi, xiUnbounded);
+    FloatArray crackP1_end = giveVertex ( numSeg );
+    crackP1_end.resizeWithValues(2);
+    FloatArray crackP2_end = giveVertex ( numSeg+1 );
+    crackP2_end.resizeWithValues(2);
+    const double distSeg_end = point.distance(crackP1_end, crackP2_end, xi, xiUnbounded);
 
     if(numSeg > 1) {
         if( xiUnbounded > 1.0 ) {
@@ -1388,6 +1402,51 @@ void PolygonLine :: calcBoundingBox(bPoint2 &oLC, bPoint2 &oUC)
 
 void PolygonLine :: computeIntersectionPoints(Element *element, std :: vector< FloatArray > &oIntersectionPoints)
 {
+
+    for ( int i = 1; i <= element->giveNumberOfBoundarySides(); i++ ) {
+        std :: vector< FloatArray > oneLineIntersects;
+        ///@todo Move semantics or something would be useful here to avoid multiple copies.
+        FloatArray xStart = * element->giveDofManager ( i )->giveCoordinates();
+        FloatArray xEnd;
+        if ( i != element->giveNumberOfBoundarySides() ) {
+        	xEnd = * element->giveDofManager ( i + 1 )->giveCoordinates();
+        } else {
+        	xEnd = * element->giveDofManager ( 1 )->giveCoordinates();
+        }
+
+
+        computeIntersectionPoints(xStart, xEnd, oneLineIntersects);
+
+        for ( FloatArray &interSect: oneLineIntersects ) {
+            // Check that the intersection point has not already been identified.
+            // This may happen if the crack intersects the element exactly at a node,
+            // so that intersection is detected for both element edges in that node.
+
+            // TODO: Set tolerance in a more transparent way.
+            double distTol = 1.0e-9;
+
+            bool alreadyFound = false;
+
+            FloatArray pNew = interSect;
+
+            for ( FloatArray &pInterSect: oIntersectionPoints ) {
+            	FloatArray pOld = pInterSect;
+
+                if ( pOld.distance(pNew) < distTol ) {
+                    alreadyFound = true;
+                    break;
+                }
+            }
+
+            if ( !alreadyFound ) {
+                oIntersectionPoints.push_back(interSect);
+            }
+        }
+
+
+    }
+
+#if 0
     printf("Warning: entering  PolygonLine :: computeIntersectionPoints(Element *element, std::vector< FloatArray > &oIntersectionPoints).\n");
 #ifdef __BOOST_MODULE
 
@@ -1436,6 +1495,8 @@ void PolygonLine :: computeIntersectionPoints(Element *element, std :: vector< F
             }
         }
     }
+#endif
+
 #endif
 }
 

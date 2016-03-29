@@ -58,15 +58,22 @@
 
 #include "vtkxmlexportmodule.h"
 
+#include "prescribedgradientbcweak.h"
+
 #include <string>
 #include <sstream>
 
-#define include_bulk_jump
 //#define cz_bulk_corr
 
 //#define rotate_sve
 
 //#define modify_bulk_stress
+
+#define use_ppabc
+
+#define include_bulk_jump
+
+#define include_bulk_corr
 
 namespace oofem {
 XfemStructuralElementInterface :: XfemStructuralElementInterface(Element *e) :
@@ -198,6 +205,23 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
                                 	if(fe2ms) {
                                 		fe2ms->letNormalBe(crackNormal);
+
+#ifdef use_ppabc
+                                		PrescribedGradientBCWeak *bc = dynamic_cast<PrescribedGradientBCWeak*>( fe2ms->giveBC() );
+
+                                		if(bc) {
+//                                			printf("Fetched PrescribedGradientBCWeak.\n");
+                                			FloatArray periodicityNormal = crackNormal;
+//                                			FloatArray periodicityNormal = {-1.736e-01,  9.848e-01};
+                                			periodicityNormal.normalize();
+//                                			printf("periodicityNormal: "); periodicityNormal.printYourself();
+//                                			printf("periodicityNormal: %.12e, %.12e\n", periodicityNormal(0), periodicityNormal(1) );
+//                                			OOFEM_ERROR("Breaking.")
+
+                                			bc->setPeriodicityNormal(periodicityNormal);
+                                			bc->recomputeTractionMesh();
+                                		}
+#endif
                                 	}
                                 	else {
                                 		OOFEM_ERROR("Failed to fetch material status.");
@@ -208,6 +232,53 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                                 // Give Gauss point reference to the enrichment item
                                 // to simplify post processing.
                                 crack->AppendCohesiveZoneGaussPoint(gp);
+                            }
+
+
+
+                            for ( GaussPoint *gp: *mpCZExtraIntegrationRules [ segIndex ] ) {
+                                double gw = gp->giveWeight();
+                                double segLength = crackPolygon [ segIndex ].distance(crackPolygon [ segIndex + 1 ]);
+                                gw *= 0.5 * segLength;
+                                gp->setWeight(gw);
+
+                                // Fetch material status and set normal
+                                StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( mpCZMat->giveStatus(gp) );
+                                if ( ms ) {
+                                    ms->letNormalBe(crackNormal);
+                                }
+                                else {
+                                	StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*>( mpCZMat->giveStatus(gp) );
+
+                                	if(fe2ms) {
+                                		fe2ms->letNormalBe(crackNormal);
+
+#ifdef use_ppabc
+                                		PrescribedGradientBCWeak *bc = dynamic_cast<PrescribedGradientBCWeak*>( fe2ms->giveBC() );
+
+                                		if(bc) {
+//                                			printf("Fetched PrescribedGradientBCWeak.\n");
+//                                			FloatArray periodicityNormal = crackNormal;
+                                			FloatArray periodicityNormal = crackNormal;
+//                                			FloatArray periodicityNormal = {-1.736e-01,  9.848e-01};
+                                			periodicityNormal.normalize();
+//                                			printf("periodicityNormal: "); periodicityNormal.printYourself();
+//                                			OOFEM_ERROR("Breaking.")
+                                			bc->setPeriodicityNormal(periodicityNormal);
+                                			bc->recomputeTractionMesh();
+
+                                		}
+#endif
+                                	}
+                                	else {
+                                		OOFEM_ERROR("Failed to fetch material status.");
+                                	}
+                                }
+
+
+                                // Give Gauss point reference to the enrichment item
+                                // to simplify post processing.
+//                                crack->AppendCohesiveZoneGaussPoint(gp);
                             }
 
                         }
@@ -467,8 +538,13 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 double XfemStructuralElementInterface :: computeEffectiveSveSize(StructuralFE2MaterialStatus *iFe2Ms)
 {
 	const FloatArray &n = iFe2Ms->giveNormal();
-//	double c = pow( 1.0/std::max( fabs(n(0)), fabs(n(1)) ) ,1);
 //	printf("c: %e\n", c);
+
+//	return (1.0/c)*2.0*sqrt( iFe2Ms->giveBC()->domainSize() );
+
+
+//	double c = pow( std::max( fabs(n(0)), fabs(n(1)) ) ,4);
+//	return c*2.0*sqrt( iFe2Ms->giveBC()->domainSize() );
 
 	return 2.0*sqrt( iFe2Ms->giveBC()->domainSize() );
 }
@@ -775,9 +851,6 @@ void XfemStructuralElementInterface :: computeCohesiveForces(FloatArray &answer,
 //					printf("stressVec: "); stressVec.printYourself();
 
 
-					FloatArray stressVecBulk;
-					bulkMat->giveRealStressVector_3d(stressVecBulk, bulk_gp, smearedBulkStrain, tStep);
-//					printf("stressVecBulk: "); stressVecBulk.printYourself();
 
 
 #ifdef rotate_sve
@@ -844,6 +917,11 @@ void XfemStructuralElementInterface :: computeCohesiveForces(FloatArray &answer,
 					double dA = thickness * gp->giveWeight();
 					answer.add(dA, NTimesT);
 
+#ifdef include_bulk_corr
+
+					FloatArray stressVecBulk;
+					bulkMat->giveRealStressVector_3d(stressVecBulk, bulk_gp, smearedBulkStrain, tStep);
+//					printf("stressVecBulk: "); stressVecBulk.printYourself();
 
 //#ifdef cz_bulk_corr
 					////////////////////////////////////////////////////////
@@ -859,7 +937,7 @@ void XfemStructuralElementInterface :: computeCohesiveForces(FloatArray &answer,
 
 //					fe2Mat->giveRealStressVector_3d(stressVec, gp, smearedJumpStrain, tStep);
 //#endif
-
+#endif
 
 				}
 			}
@@ -1351,6 +1429,7 @@ void XfemStructuralElementInterface :: computeCohesiveTangent(FloatMatrix &answe
 
 				////////////////////////////////////////////////////////
 				// Non-standard bulk contribution
+#ifdef include_bulk_corr
 //#ifdef cz_bulk_corr
 				tmp.beTranspositionOf(tmp2);
 				answer.add(1.0*dA, tmp);
@@ -1425,7 +1504,7 @@ void XfemStructuralElementInterface :: computeCohesiveTangent(FloatMatrix &answe
 
 
 //#endif
-
+#endif
 			}
 		}
 

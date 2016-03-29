@@ -49,6 +49,7 @@
 #define _IFT_PrescribedGradientBCWeak_DuplicateCornerNodes   "duplicatecornernodes"
 #define _IFT_PrescribedGradientBCWeak_TangDistPadding   "tangdistpadding"
 #define _IFT_PrescribedGradientBCWeak_TracDofScaling   "tracdofscaling"
+#define _IFT_PrescribedGradientBCWeak_PeriodicityNormal   "periodicitynormal"
 
 namespace oofem {
 class IntegrationRule;
@@ -152,6 +153,13 @@ public:
     const IntArray &giveDispLockDofIDs() const {return mDispLockDofIDs;}
     const IntArray &giveRegularDispDofIDs() const {return mRegularDispDofIDs;}
 
+
+    // Functions mainly for testing
+    void setPeriodicityNormal(const FloatArray &iPeriodicityNormal) {mPeriodicityNormal = iPeriodicityNormal; };
+    void setDomainSize(double iDomainSize) {mDomainSize = std::move(iDomainSize);};
+    void setLowerCorner(FloatArray iLC) {mLC = std::move(iLC);};
+    void setUpperCorner(FloatArray iUC) {mUC = std::move(iUC);};
+
 protected:
 
     const IntArray mTractionDofIDs;
@@ -237,8 +245,19 @@ protected:
 
     std :: unordered_map< int, std :: vector< int > >mTracElDispNodes;
 
+
+    /**
+     * Periodicity direction.
+     */
+    FloatArray mPeriodicityNormal;
+
+    double mDomainSize;
+
 public:
     void recomputeTractionMesh();
+
+    void giveMirroredPointOnGammaMinus(FloatArray &oPosMinus, const FloatArray &iPosPlus) const;
+    void giveMirroredPointOnGammaPlus(FloatArray &oPosPlus, const FloatArray &iPosMinus) const;
 
 protected:
     void createTractionMesh(bool iEnforceCornerPeriodicity, int iNumSides);
@@ -258,8 +277,6 @@ protected:
     void giveDisplacementUnknows(FloatArray &oDispUnknowns, ValueModeType mode, TimeStep *tStep, int iTracElInd);
 
     bool pointIsOnGammaPlus(const FloatArray &iPos) const;
-    void giveMirroredPointOnGammaMinus(FloatArray &oPosMinus, const FloatArray &iPosPlus) const;
-    void giveMirroredPointOnGammaPlus(FloatArray &oPosPlus, const FloatArray &iPosMinus) const;
     bool pointIsMapapble(const FloatArray &iPos) const;
 
     virtual void giveBoundaryCoordVector(FloatArray &oX, const FloatArray &iPos) const = 0;

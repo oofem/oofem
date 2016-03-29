@@ -74,10 +74,17 @@ PrescribedGradientBCWeak :: PrescribedGradientBCWeak(int n, Domain *d) :
     mTracDofScaling(1.0e0),
     mpDisplacementLock(NULL),
     mLockNodeInd(0),
-    mDispLockScaling(1.0)
+    mDispLockScaling(1.0),
+	mPeriodicityNormal({0.0, 1.0}),
+	mDomainSize(0.0)
 {
-    // Compute bounding box of the domain
-    computeDomainBoundingBox(* d, mLC, mUC);
+
+	if(d) {
+		// Compute bounding box of the domain
+		computeDomainBoundingBox(* d, mLC, mUC);
+
+	}
+
 }
 
 PrescribedGradientBCWeak :: ~PrescribedGradientBCWeak()
@@ -178,6 +185,10 @@ IRResultType PrescribedGradientBCWeak :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_OPTIONAL_FIELD(ir, mTracDofScaling, _IFT_PrescribedGradientBCWeak_TracDofScaling);
 //    printf("mTracDofScaling: %e\n", mTracDofScaling );
+
+    IR_GIVE_OPTIONAL_FIELD(ir, mPeriodicityNormal, _IFT_PrescribedGradientBCWeak_PeriodicityNormal);
+    mPeriodicityNormal.normalize();
+    printf("mPeriodicityNormal: "); mPeriodicityNormal.printYourself();
 
     return IRRT_OK;
 }
@@ -683,15 +694,16 @@ void PrescribedGradientBCWeak :: giveTraction(size_t iElInd, FloatArray &oStartT
 
 void PrescribedGradientBCWeak :: recomputeTractionMesh()
 {
-    printf("Recomputing traction mesh.\n");
+//    printf("Recomputing traction mesh.\n");
     clear();
     postInitialize();
 }
 
 void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodicity, int iNumSides)
 {
-    const double nodeDistTol = 1.0e-15;
-    const double meshTol = 1.0e-8; // Minimum distance between traction nodes
+    const double nodeDistTol = 1.0e-14;
+    const double l_s = mUC[0] - mLC[0];
+    const double meshTol = 1.0e-3*l_s; // Minimum distance between traction nodes
 
     /**
      * first:   coordinates
@@ -750,8 +762,8 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
             }
         } // if pointIsOnGammaPlus
         else {
-            if ( pointIsMapapble(xS) ) {
-                if ( pointIsMapapble(xS) ) {
+//            if ( pointIsMapapble(xS) ) {
+                if ( pointIsMapapble(xS) || true ) {
                     FloatArray xSPlus;
                     giveMirroredPointOnGammaPlus(xSPlus, xS);
 
@@ -764,10 +776,13 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
                         bndNodeCoords [ sideIndS ].push_back(nodeCoord);
                     }
                 }
+                else {
+                	OOFEM_ERROR("xS is not mappable.")
+                }
 
 
 
-                if ( pointIsMapapble(xE) ) {
+                if ( pointIsMapapble(xE) || true ) {
                     FloatArray xEPlus;
                     giveMirroredPointOnGammaPlus(xEPlus, xE);
 
@@ -780,7 +795,11 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
                         bndNodeCoords [ sideIndE ].push_back(nodeCoord);
                     }
                 }
-            }
+                else {
+                	OOFEM_ERROR("xE is not mappable.")
+                }
+
+//            }
         }
     }
 
@@ -813,6 +832,172 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
             std :: vector< FloatArray >intersecPoints;
             xfemElInt->partitionEdgeSegment(boundary, segments, intersecPoints, mTangDistPadding);
 
+//            printf("mLC: "); mLC.printYourself();
+//            printf("mUC: "); mUC.printYourself();
+
+            FloatArray n = mPeriodicityNormal;
+            FloatArray t = {n(1),-n(0)};
+//            double l_s = mUC[0] - mLC[0];
+
+
+        	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            XfemManager *xMan = e->giveDomain()->giveXfemManager();
+
+            FEInterpolation *interp = e->giveInterpolation(); // Geometry interpolation
+            IntArray edgeNodes;
+            FEInterpolation2d *interp2d = dynamic_cast< FEInterpolation2d * >( interp );
+            if ( interp2d == NULL ) {
+                OOFEM_ERROR("In XfemElementInterface :: partitionEdgeSegment: failed to cast to FEInterpolation2d.\n")
+            }
+            interp2d->computeLocalEdgeMapping(edgeNodes, boundary);
+
+            // Fetch start and end points.
+            FloatArray el_seg_S = * ( e->giveDofManager( edgeNodes.at(1) )->giveCoordinates() );
+            el_seg_S.resizeWithValues(2);
+            FloatArray el_seg_E = * ( e->giveDofManager( edgeNodes.at(2) )->giveCoordinates() );
+            el_seg_E.resizeWithValues(2);
+
+            // The point of departure is the original edge segment.
+            // This segment will be subdivided as many times as necessary.
+            Line seg1(el_seg_S, el_seg_E);
+
+
+//        	printf("mPeriodicityNormal: "); mPeriodicityNormal.printYourself();
+
+            const double periodicity_axes_tol = 1.0e-4;
+            double xiLim = 0.0, xiUnlim = 0.0;
+//            FloatArray p1 = {l_s-c, 0.0};
+//            if(p1.distance(el_seg_S, el_seg_E, xiLim, xiUnlim) < periodicity_axes_tol) {
+////            	printf("\nseg1.computeDistanceTo( &p1 ): %e p1.distance(el_seg_S, el_seg_E): %e\n", seg1.computeDistanceTo( &p1 ), p1.distance(el_seg_S, el_seg_E, xiLim, xiUnlim) );
+//
+//            	intersecPoints.push_back(p1);
+//            }
+
+            if( fabs(n(1)) <= fabs(n(0)) ) {
+            	// a <= l_s/2
+            	double a = 0.5*l_s*( 1.0 +  n(1)/n(0) );
+//            	printf("a: %.12e\n", a);
+
+				std::vector<FloatArray> periodicityPoints;
+				periodicityPoints.push_back({l_s, a});
+				periodicityPoints.push_back({l_s, 2.0*a});
+
+				periodicityPoints.push_back({l_s-a, l_s});
+				periodicityPoints.push_back({l_s-2.0*a, l_s});
+
+				periodicityPoints.push_back({0.0, l_s-a});
+				periodicityPoints.push_back({0.0, l_s-2.0*a});
+
+				periodicityPoints.push_back({a, 0.0});
+				periodicityPoints.push_back({2.0*a, 0.0});
+
+				for(auto p : periodicityPoints) {
+					if(p.distance(el_seg_S, el_seg_E, xiLim, xiUnlim) < periodicity_axes_tol*l_s) {
+						intersecPoints.push_back(p);
+					}
+				}
+
+            }
+            else {
+
+            	// a > l_s/2
+
+            	double c = l_s - 0.5*l_s*( 1.0 + t(1)/t(0) );
+//            	printf("c: %e\n", c);
+
+				std::vector<FloatArray> periodicityPoints;
+				periodicityPoints.push_back({l_s, l_s-c});
+				periodicityPoints.push_back({c, l_s});
+				periodicityPoints.push_back({0, c});
+				periodicityPoints.push_back({l_s-c, 0.0});
+				periodicityPoints.push_back({l_s, l_s-2.0*c});
+				periodicityPoints.push_back({2.0*c, l_s});
+				periodicityPoints.push_back({0, 2.0*c});
+				periodicityPoints.push_back({l_s-2.0*c,0.0});
+
+				for(auto p : periodicityPoints) {
+					if(p.distance(el_seg_S, el_seg_E, xiLim, xiUnlim) < periodicity_axes_tol) {
+						intersecPoints.push_back(p);
+					}
+				}
+            }
+
+#if 0
+            p1 = {l_s, l_s-c};
+            if(p1.distance(el_seg_S, el_seg_E, xiLim, xiUnlim) < periodicity_axes_tol) {
+            	intersecPoints.push_back(p1);
+            }
+
+            p1 = {c, l_s};
+            if(p1.distance(el_seg_S, el_seg_E, xiLim, xiUnlim) < periodicity_axes_tol) {
+            	intersecPoints.push_back(p1);
+            }
+
+            p1 = {0, c};
+            if(p1.distance(el_seg_S, el_seg_E, xiLim, xiUnlim) < periodicity_axes_tol) {
+            	intersecPoints.push_back(p1);
+            }
+
+            ///
+            p1 = {l_s-2.0*c,0.0};
+            if(p1.distance(el_seg_S, el_seg_E, xiLim, xiUnlim) < periodicity_axes_tol) {
+            	intersecPoints.push_back(p1);
+            }
+
+            p1 = {l_s, l_s-2.0*c};
+            if(p1.distance(el_seg_S, el_seg_E, xiLim, xiUnlim) < periodicity_axes_tol) {
+            	intersecPoints.push_back(p1);
+            }
+
+            p1 = {2.0*c, l_s};
+            if(p1.distance(el_seg_S, el_seg_E, xiLim, xiUnlim) < periodicity_axes_tol) {
+            	intersecPoints.push_back(p1);
+            }
+
+            p1 = {0, 2.0*c};
+            if(p1.distance(el_seg_S, el_seg_E, xiLim, xiUnlim) < periodicity_axes_tol) {
+            	intersecPoints.push_back(p1);
+            }
+#endif
+        	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+        	///////////////////////////////////////////////////////////////
+        	// Remove duplicate intersection points
+        	// For now, do a stupid double loop
+            std :: vector< FloatArray >intersecPointsUnique;
+            for( const FloatArray &x: intersecPoints ) {
+            	double minDist2 = 1.0e20;
+
+                for( const FloatArray &y: intersecPointsUnique ) {
+                	double dist2 = x.distance_square(y);
+                	if(dist2 < minDist2) {
+                		minDist2 = dist2;
+                	}
+                }
+
+                if(minDist2 > meshTol*meshTol) {
+                	intersecPointsUnique.push_back(x);
+                }
+
+            }
+
+//            printf("intersecPoints: ");
+//            for(auto x: intersecPoints) {
+//            	x.printYourself();
+//            }
+//
+//            printf("intersecPointsUnique: ");
+//            for(auto x: intersecPointsUnique) {
+//            	x.printYourself();
+//            }
+
+            intersecPoints = intersecPointsUnique;
+        	///////////////////////////////////////////////////////////////
+
+
             for ( size_t i = 0; i < intersecPoints.size(); i++ ) {
                 if ( boundaryPointIsOnActiveBoundary(intersecPoints [ i ]) ) {
                     int sideInd = giveSideIndex(intersecPoints [ i ]);
@@ -841,7 +1026,7 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
                 } else   {
                     if ( mMeshIsPeriodic ) {
 
-                        if ( pointIsMapapble(intersecPoints [ i ]) ) {
+                        if ( pointIsMapapble(intersecPoints [ i ]) || true ) {
                             FloatArray xPlus;
                             giveMirroredPointOnGammaPlus(xPlus, intersecPoints [ i ]);
 
@@ -868,6 +1053,10 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
                                     bndNodeCoords [ sideInd ].push_back(nodeCoord);
                                 }
                             }
+                        }
+                        else {
+                        	printf("intersecPoints [ i ]: "); intersecPoints[i].printYourself();
+                        	OOFEM_ERROR("Point is not mappable.")
                         }
 
                     }
@@ -1019,6 +1208,10 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
                             }
                         }
                     }
+                    else {
+                    	printf("intersecPoints[i]: "); intersecPoints[i].printYourself();
+                    	OOFEM_ERROR("Point is not mappable.")
+                    }
 
                 }
             }
@@ -1153,25 +1346,31 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
 
                     tractionEl->mTractionNodeInd.push_back(mpTractionNodes.size() - 1);
                     tractionEl->mStartCoord = tractionNodeCoord [ mpTractionNodes.size() - 1 ];
+                    tractionEl->mStartCoord.resizeWithValues(2);
 
                     tractionEl->mEndCoord = coordsToKeep [ i ];
+                    tractionEl->mEndCoord.resizeWithValues(2);
                     mpTractionElements.push_back(tractionEl);
                 } else   {
                     TractionElement *tractionEl = new TractionElement();
 
                     tractionEl->mTractionNodeInd.push_back(mpTractionNodes.size() - 2);
                     tractionEl->mStartCoord = tractionNodeCoord [ mpTractionNodes.size() - 2 ];
+                    tractionEl->mStartCoord.resizeWithValues(2);
 
                     tractionEl->mEndCoord = tractionNodeCoord [ mpTractionNodes.size() - 1 ];
+                    tractionEl->mEndCoord.resizeWithValues(2);
                     mpTractionElements.push_back(tractionEl);
                 }
             } else if ( mTractionInterpOrder == 1 )      {
                 // Piecewise linear traction
                 TractionElement *tractionEl = new TractionElement();
                 tractionEl->mStartCoord = tractionNodeCoord [ mpTractionNodes.size() - 2 ];
+                tractionEl->mStartCoord.resizeWithValues(2);
                 tractionEl->mTractionNodeInd.push_back(mpTractionNodes.size() - 2);
 
                 tractionEl->mEndCoord = tractionNodeCoord [ mpTractionNodes.size() - 1 ];
+                tractionEl->mEndCoord.resizeWithValues(2);
                 tractionEl->mTractionNodeInd.push_back(mpTractionNodes.size() - 1);
 
                 if ( tractionEl->mStartCoord.distance(tractionEl->mEndCoord) > nodeDistTol ) {
@@ -1200,15 +1399,16 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
 
     buildMaps(allBndNodeCoords);
 
-//    // Write traction nodes to debug vtk
-//    std :: vector< FloatArray >nodeCoord;
-//    for ( Node *node : mpTractionNodes ) {
-//        nodeCoord.push_back( * ( node->giveCoordinates() ) );
-//    }
+#if 1
+    // Write traction nodes to debug vtk
+    std :: vector< FloatArray >nodeCoord;
+    for ( Node *node : mpTractionNodes ) {
+        nodeCoord.push_back( * ( node->giveCoordinates() ) );
+    }
 
-//    std :: string fileName("TractionNodeCoord.vtk");
-//    XFEMDebugTools :: WritePointsToVTK(fileName, nodeCoord);
-
+    std :: string fileName("TractionNodeCoord.vtk");
+    XFEMDebugTools :: WritePointsToVTK(fileName, nodeCoord);
+#endif
 
     if ( mMeshIsPeriodic ) {
         // Lock displacement in one node if we use periodic BCs
@@ -1243,6 +1443,7 @@ bool PrescribedGradientBCWeak :: damageExceedsTolerance(Element *el)
 
 void PrescribedGradientBCWeak :: buildMaps(const std :: vector< std :: pair< FloatArray, bool > > &iBndNodeCoordsFull)
 {
+
     // Create map from a traction element to displacement elements it
     // interacts with everywhere on gamma.
     SpatialLocalizer *localizer = domain->giveSpatialLocalizer();
@@ -1250,10 +1451,13 @@ void PrescribedGradientBCWeak :: buildMaps(const std :: vector< std :: pair< Flo
     for ( size_t i = 0; i < mpTractionElements.size(); i++ ) {
         // Elements interacting on Gamma plus
         FloatArray xS_plus = mpTractionElements [ i ]->mStartCoord;
+        xS_plus.resizeWithValues(2);
         FloatArray xE_plus = mpTractionElements [ i ]->mEndCoord;
+        xE_plus.resizeWithValues(2);
         FloatArray xC_plus;
         xC_plus.beScaled(0.5, xS_plus);
         xC_plus.add(0.5, xE_plus);
+
 
         double elLength_plus = xS_plus.distance(xE_plus);
         std :: set< int >elList_plus;
@@ -1261,7 +1465,8 @@ void PrescribedGradientBCWeak :: buildMaps(const std :: vector< std :: pair< Flo
         // traction element becomes shorter than the displacement element?
         // Make sure that the search radius is never smaller than the
         // largest displacement element length along the boundary.
-        localizer->giveAllElementsWithNodesWithinBox(elList_plus, xC_plus, 0.51 * elLength_plus);
+//        localizer->giveAllElementsWithNodesWithinBox(elList_plus, xC_plus, 0.51 * elLength_plus);
+        localizer->giveAllElementsWithNodesWithinBox(elList_plus, xC_plus, 100000.0 * elLength_plus);
 
         if ( elList_plus.empty() ) {
             FloatArray lCoords, closestPoint;
@@ -1270,12 +1475,19 @@ void PrescribedGradientBCWeak :: buildMaps(const std :: vector< std :: pair< Flo
             elList_plus.insert(elPlaceInArray);
         }
 
+        const double diff_tol = 1.0e-12;
+
+
         std :: vector< int >displacementElements, displacementElements_plus;
         for ( int elNum: elList_plus ) {
             // Check if the traction element and the displacement element intersect
             // Intersection occurs if at least one displacement element node is
             // on the traction element.
             Element *el = domain->giveElement(elNum);
+
+//            if( !(fabs(xS_plus[0] - xE_plus[0]) < diff_tol || fabs(xS_plus[1] - xE_plus[1]) < diff_tol) ) {
+//            	OOFEM_ERROR("Problem on Gamma_plus.\n")
+//            }
 
             Line line_plus(xS_plus, xE_plus);
             if ( line_plus.intersects(el) ) {
@@ -1284,24 +1496,28 @@ void PrescribedGradientBCWeak :: buildMaps(const std :: vector< std :: pair< Flo
             }
         }
 
+
         if ( mMeshIsPeriodic ) {
             //mMapTractionElDispElGamma[i] = displacementElements;
 
-            if ( xS_plus.distance(mUC) < 1.0e-12 ) {
+            if ( xS_plus.distance(mUC) < 1.0e-12 || true ) {
                 // Perturb in direction of xE
                 FloatArray t;
                 t.beDifferenceOf(xE_plus, xS_plus);
-                xS_plus.add(1.0e-6, t);
-                //printf("xS_plus: %.12e %.12e\n", xS_plus[0], xS_plus[1]);
+//                printf("t: %.12e %.12e\n", t[0], t[1]);
+                xS_plus.add(1.0e-4, t);
+//                printf("xS_plus: %.12e %.12e\n", xS_plus[0], xS_plus[1]);
             }
 
-            if ( xE_plus.distance(mUC) < 1.0e-12 ) {
+            if ( xE_plus.distance(mUC) < 1.0e-12 || true ) {
                 // Perturb in direction of xS
                 FloatArray t;
                 t.beDifferenceOf(xS_plus, xE_plus);
-                xE_plus.add(1.0e-6, t);
-                //printf("xE_plus: %.12e %.12e\n", xE_plus[0], xE_plus[1]);
+//                printf("t: %.12e %.12e\n", t[0], t[1]);
+                xE_plus.add(1.0e-4, t);
+//                printf("xE_plus: %.12e %.12e\n", xE_plus[0], xE_plus[1]);
             }
+
 
             // Elements interacting on Gamma minus
             FloatArray xS_minus;
@@ -1309,8 +1525,23 @@ void PrescribedGradientBCWeak :: buildMaps(const std :: vector< std :: pair< Flo
             FloatArray xE_minus;
             giveMirroredPointOnGammaMinus(xE_minus, xE_plus);
             FloatArray xC_minus;
-            xC_minus.beScaled(0.5, xS_minus);
-            xC_minus.add(0.5, xE_minus);
+
+//            FloatArray t;
+//            t.beDifferenceOf(xE_minus, xS_minus);
+//            xE_minus.add(1.0e-9,t);
+//            xE_plus.add(-1.0e-9,t);
+
+            if( fabs(xS_minus[0] - xE_minus[0]) < diff_tol || fabs(xS_minus[1] - xE_minus[1]) < diff_tol ) {
+
+				xC_minus.beScaled(0.5, xS_minus);
+				xC_minus.add(0.5, xE_minus);
+            }
+            else {
+				xC_minus.beScaled(0.5, xS_minus);
+				xC_minus.add(0.5, xE_minus);
+
+            }
+
 
             double elLength_minus = xS_minus.distance(xE_minus);
             std :: set< int >elList_minus;
@@ -1318,9 +1549,16 @@ void PrescribedGradientBCWeak :: buildMaps(const std :: vector< std :: pair< Flo
             // traction element becomes shorter than the displacement element?
             // Make sure that the search radius is never smaller than the
             // largest displacement element length along the boundary.
-            localizer->giveAllElementsWithNodesWithinBox(elList_minus, xC_minus, 0.51 * elLength_minus);
+//            printf("elLength_minus: %e\n", elLength_minus );
+//            localizer->giveAllElementsWithNodesWithinBox(elList_minus, xC_minus, 0.51 * elLength_minus);
+//            printf("elLength_minus: %e\n", elLength_minus );
+            localizer->giveAllElementsWithNodesWithinBox(elList_minus, xC_minus, 100000.0 * elLength_minus);
 
             if ( elList_minus.empty() ) {
+//                if( !(fabs(xS_minus[0] - xE_minus[0]) < diff_tol || fabs(xS_minus[1] - xE_minus[1]) < diff_tol) ) {
+            		printf("elLength_minus: %e\n", elLength_minus );
+                	OOFEM_ERROR("Empty element list.\n")
+//                }
                 FloatArray lCoords, closestPoint;
                 Element *el = localizer->giveElementClosestToPoint(lCoords, closestPoint, xC_minus);
                 int elPlaceInArray = domain->giveElementPlaceInArray( el->giveGlobalNumber() );
@@ -1334,9 +1572,32 @@ void PrescribedGradientBCWeak :: buildMaps(const std :: vector< std :: pair< Flo
                 // on the traction element.
                 Element *el = domain->giveElement(elNum);
 
-                Line line_minus(xS_minus, xE_minus);
-                if ( line_minus.intersects(el) ) {
-                    displacementElements.push_back(elNum);
+
+                // We need to capture the case when xS_minus and xE_minus have a corner between them.
+                if( fabs(xS_minus[0] - xE_minus[0]) < diff_tol || fabs(xS_minus[1] - xE_minus[1]) < diff_tol ) {
+                	// Ok, the standard case
+					Line line_minus(xS_minus, xE_minus);
+					if ( line_minus.intersects(el) ) {
+						displacementElements.push_back(elNum);
+					}
+                }
+                else {
+                	printf("\n\nSpecial treatment needed.\n");
+
+                    printf("xS_minus: "); xS_minus.printYourself();
+                    printf("xE_minus: "); xE_minus.printYourself();
+                    OOFEM_ERROR("Breaking.")
+
+					Line line_minus_1({0.0,0.0}, xE_minus);
+					if ( line_minus_1.intersects(el) ) {
+						displacementElements.push_back(elNum);
+					}
+
+					Line line_minus_2(xS_minus, {0.0,0.0});
+					if ( line_minus_2.intersects(el) ) {
+						displacementElements.push_back(elNum);
+					}
+
                 }
             }
         }
@@ -1353,8 +1614,10 @@ void PrescribedGradientBCWeak :: buildMaps(const std :: vector< std :: pair< Flo
     const double distTol = 1.0e-12;
 
     for ( size_t i = 0; i < mpTractionElements.size(); i++ ) {
-        const FloatArray &xS = mpTractionElements [ i ]->mStartCoord;
-        const FloatArray &xE = mpTractionElements [ i ]->mEndCoord;
+        FloatArray xS = mpTractionElements [ i ]->mStartCoord;
+        xS.resizeWithValues(2);
+        FloatArray xE = mpTractionElements [ i ]->mEndCoord;
+        xE.resizeWithValues(2);
 
         PolygonLine pl;
         pl.insertVertexBack(xS);
@@ -1534,10 +1797,26 @@ void PrescribedGradientBCWeak :: assembleTangentGPContribution(FloatMatrix &oTan
         oTangent.assemble(contrib, rows, cols);
     }
     else {
+        printf("\nWarning in PrescribedGradientBCWeak :: assembleTangentGPContribution: rows.giveSize(): %d cols.giveSize(): %d\n", rows.giveSize(), cols.giveSize() );
+        printf("contrib.giveNumberOfRows(): %d contrib.giveNumberOfColumns(): %d\n", contrib.giveNumberOfRows(), contrib.giveNumberOfColumns() );
+
         contrib.resize(rows.giveSize(), cols.giveSize());
         contrib.zero();
         oTangent.assemble(contrib, rows, cols);
-        printf("Warning in PrescribedGradientBCWeak :: assembleTangentGPContribution: rows.giveSize(): %d cols.giveSize(): %d\n", rows.giveSize(), cols.giveSize() );
+
+        printf("iBndCoord: "); iBndCoord.printYourself();
+        printf("closestPoint_minus: "); closestPoint_minus.printYourself();
+
+        printf("dispElNodes_minus: ");
+        for ( int nodeInd : dispElNodes_minus ) {
+        	printf("%d ", nodeInd);
+        }
+        printf("\n");
+
+        printf("tEl.mStartCoord.distance(tEl.mEndCoord): %e\n", tEl.mStartCoord.distance(tEl.mEndCoord) );
+
+//        printf("mPeriodicityNormal: "); mPeriodicityNormal.printYourself();
+        printf("mPeriodicityNormal: %.12e, %.12e\n", mPeriodicityNormal(0), mPeriodicityNormal(1) );
     }
 }
 
@@ -1561,8 +1840,10 @@ IntegrationRule *PrescribedGradientBCWeak :: createNewIntegrationRule(int iTracE
     }
 
     Element *dummyEl = NULL;
-    const FloatArray &xS = mTractionElInteriorCoordinates [ iTracElInd ] [ 0 ];
-    const FloatArray &xE = mTractionElInteriorCoordinates [ iTracElInd ].back();
+    FloatArray xS = mTractionElInteriorCoordinates [ iTracElInd ] [ 0 ];
+    xS.resizeWithValues(2);
+    FloatArray xE = mTractionElInteriorCoordinates [ iTracElInd ].back();
+    xE.resizeWithValues(2);
 
     IntegrationRule *ir = new DiscontinuousSegmentIntegrationRule(1, dummyEl, segments, xS, xE);
 
@@ -1648,6 +1929,7 @@ bool PrescribedGradientBCWeak :: pointIsOnGammaPlus(const FloatArray &iPos) cons
 
 void PrescribedGradientBCWeak :: giveMirroredPointOnGammaMinus(FloatArray &oPosMinus, const FloatArray &iPosPlus) const
 {
+#if 0
     oPosMinus = iPosPlus;
     const double distTol = 1.0e-12;
 
@@ -1656,7 +1938,7 @@ void PrescribedGradientBCWeak :: giveMirroredPointOnGammaMinus(FloatArray &oPosM
         OOFEM_ERROR("Unmappable point.")
     }
 
-    double mappingPerformed = false;
+    bool mappingPerformed = false;
 
     if ( iPosPlus [ 0 ] > mUC [ 0 ] - distTol ) {
         oPosMinus [ 0 ] = mLC [ 0 ];
@@ -1675,10 +1957,97 @@ void PrescribedGradientBCWeak :: giveMirroredPointOnGammaMinus(FloatArray &oPosM
 
     //    printf("iPosPlus: "); iPosPlus.printYourself();
     //    printf("oPosMinus: "); oPosMinus.printYourself();
+#else
+    const double distTol = 1.0e-12;
+    bool mappingPerformed = false;
+
+    FloatArray n = mPeriodicityNormal;
+    FloatArray t = {n(1),-n(0)};
+
+    double l_s = mUC[0] - mLC[0];
+
+    if( fabs(n(1)) <= fabs(n(0)) ) {
+    	// a <= l_s/2
+    	double a = 0.5*l_s*( 1.0 +  n(1)/n(0) );
+
+        if ( iPosPlus [ 0 ] > mUC [ 0 ] - distTol ) {
+        	// Gamma_1_plus
+
+        	if(iPosPlus[1] < 2.0*a) {
+        		oPosMinus = {0.0, l_s - 2.0*a + iPosPlus[1]};
+        		return;
+        	}
+        	else {
+        		oPosMinus = { l_s - iPosPlus[1] + 2.0*a, 0.0};
+        		return;
+        	}
+
+        }
+
+
+        if ( iPosPlus [ 1 ] > mUC [ 1 ] - distTol ) {
+        	// Gamma_2_plus
+
+//        	printf("Gamma_2_plus\n");
+
+        	if(iPosPlus[0] < l_s - 2.0*a) {
+        		oPosMinus = {0.0, l_s - 2.0*a - iPosPlus[0]};
+        		return;
+        	}
+        	else {
+        		oPosMinus = {iPosPlus[0] + 2.0*a - l_s, 0.0};
+        		return;
+        	}
+
+        }
+
+        iPosPlus.printYourself();
+        OOFEM_ERROR("Mapping failed.")
+
+    }
+    else {
+
+    	// a > l_s/2
+    	double c = l_s - 0.5*l_s*( 1.0 + t(1)/t(0) );
+
+        if ( iPosPlus [ 0 ] > mUC [ 0 ] - distTol ) {
+        	// Gamma_1_plus
+
+        	if(iPosPlus[1] < l_s - 2.0*c) {
+        		oPosMinus = {l_s - 2.0*c - iPosPlus[1], 0.0};
+        		return;
+        	}
+        	else {
+        		oPosMinus = {0.0, iPosPlus[1] - l_s + 2.0*c};
+        		return;
+        	}
+
+        }
+
+        if ( iPosPlus [ 1 ] > mUC [ 1 ] - distTol ) {
+        	// Gamma_2_plus
+
+        	if(iPosPlus[0] < 2.0*c) {
+        		oPosMinus = {l_s - 2.0*c + iPosPlus[0], 0.0};
+        		return;
+        	}
+        	else {
+        		oPosMinus = {0.0, l_s - iPosPlus[0] + 2.0*c};
+        		return;
+        	}
+
+        }
+
+        iPosPlus.printYourself();
+        OOFEM_ERROR("Mapping failed.")
+    }
+
+#endif
 }
 
 void PrescribedGradientBCWeak :: giveMirroredPointOnGammaPlus(FloatArray &oPosPlus, const FloatArray &iPosMinus) const
 {
+#if 0
     oPosPlus = iPosMinus;
     const double distTol = 1.0e-16;
 
@@ -1703,6 +2072,88 @@ void PrescribedGradientBCWeak :: giveMirroredPointOnGammaPlus(FloatArray &oPosPl
         iPosMinus.printYourself();
         OOFEM_ERROR("Mapping failed.")
     }
+#else
+
+    const double distTol = 1.0e-12;
+    bool mappingPerformed = false;
+
+    FloatArray n = mPeriodicityNormal;
+    FloatArray t = {n(1),-n(0)};
+
+    double l_s = mUC[0] - mLC[0];
+
+    if( fabs(n(1)) <= fabs(n(0)) ) {
+    	// a <= l_s/2
+    	double a = 0.5*l_s*( 1.0 +  n(1)/n(0) );
+
+        if ( iPosMinus [ 0 ] < mLC [ 0 ] + distTol ) {
+        	// Gamma_1_minus
+
+        	if( iPosMinus[1] >= l_s-2.0*a ) {
+        		oPosPlus = {l_s, iPosMinus[1] - l_s + 2.0*a};
+        		return;
+        	}
+        	else {
+        		oPosPlus = {l_s - 2.0*a - iPosMinus[1], l_s};
+        		return;
+        	}
+        }
+
+        if ( iPosMinus [ 1 ] < mLC [ 1 ] + distTol ) {
+        	// Gamma_2_minus
+
+        	if(iPosMinus[0] < 2.0*a  ) {
+        		oPosPlus = {l_s - 2.0*a + iPosMinus[0], l_s};
+        		return;
+        	}
+        	else {
+        		oPosPlus = {l_s, l_s - iPosMinus[0] + 2.0*a};
+        		return;
+        	}
+
+        }
+
+
+        iPosMinus.printYourself();
+        OOFEM_ERROR("Mapping failed.")
+    }
+    else {
+    	// a > l_s/2
+    	double c = l_s - 0.5*l_s*( 1.0 + t(1)/t(0) );
+
+        if ( iPosMinus [ 0 ] < mLC [ 0 ] + distTol ) {
+        	// Gamma_1_minus
+
+        	if( iPosMinus[1] < 2.0*c ) {
+        		oPosPlus = {l_s, l_s - 2.0*c + iPosMinus[1]};
+        		return;
+        	}
+        	else {
+        		oPosPlus = {l_s - iPosMinus[1] + 2.0*c, l_s};
+        		return;
+        	}
+
+        }
+
+        if ( iPosMinus [ 1 ] < mLC [ 1 ] + distTol ) {
+        	// Gamma_2_minus
+
+        	if( iPosMinus[0] < (l_s - 2.0*c) ) {
+        		oPosPlus = {l_s, l_s - 2.0*c - iPosMinus[0]};
+        		return;
+        	}
+        	else {
+        		oPosPlus = {iPosMinus[0] - l_s + 2.0*c, l_s};
+        		return;
+        	}
+        }
+
+
+        iPosMinus.printYourself();
+        OOFEM_ERROR("Mapping failed.")
+    }
+
+#endif
 }
 
 bool PrescribedGradientBCWeak :: pointIsMapapble(const FloatArray &iPos) const
