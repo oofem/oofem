@@ -281,8 +281,9 @@ void TransportGradientNeumann :: computeTangent(FloatMatrix &tangent, TimeStep *
     std :: unique_ptr< SparseLinearSystemNM > solver( 
         classFactory.createSparseLinSolver( ST_Petsc, this->domain, this->domain->giveEngngModel() ) ); // = rve->giveLinearSolver();
     SparseMtrxType stype = solver->giveRecommendedMatrix(true);
-    EModelDefaultEquationNumbering fnum;
     double rve_size = this->domainSize();
+#if 0
+    EModelDefaultEquationNumbering fnum;
 
     // Set up and assemble tangent FE-matrix which will make up the sensitivity analysis for the macroscopic material tangent.
     std :: unique_ptr< SparseMtrx > Kff( classFactory.createSparseMtrx(stype) );
@@ -290,7 +291,7 @@ void TransportGradientNeumann :: computeTangent(FloatMatrix &tangent, TimeStep *
         OOFEM_ERROR("Couldn't create sparse matrix of type %d\n", stype);
     }
     Kff->buildInternalStructure(rve, this->domain->giveNumber(), fnum);
-    rve->assemble(*Kff, tStep, TangentAssembler(TangentStiffness), fnum, fnum, this->domain);
+    rve->assemble(*Kff, tStep, TangentAssembler(TangentStiffness), fnum, this->domain);
 
     // Setup up indices and locations
     int neq = Kff->giveNumberOfRows();
@@ -319,6 +320,59 @@ void TransportGradientNeumann :: computeTangent(FloatMatrix &tangent, TimeStep *
             tangent.at(i, j) = s_d.at(eqn, j);
         }
     }
+#else
+    // 1. Kuu*us = -Kus*s   =>  us = -Kuu\Ku  where u = us*s
+    // 2. Ks = Kus'*us
+    // 3. Ks*lambda = I
+    
+    // 1.
+    // This is not very good. We have to keep Kuu and Kff in memory at the same time. Not optimal
+    // Consider changing this approach.
+    EModelDefaultEquationNumbering fnum;
+    std :: unique_ptr< SparseMtrx > Kff( classFactory.createSparseMtrx(stype) );
+    if ( !Kff ) {
+        OOFEM_ERROR("Couldn't create sparse matrix of type %d\n", stype);
+    }
+    Kff->buildInternalStructure(rve, this->domain->giveNumber(), fnum);
+
+    rve->assemble(*Kff, tStep, TangentAssembler(TangentStiffness), fnum, this->domain);
+    
+    IntArray loc_u, loc_s;
+    this->mpFluxHom->giveLocationArray(this->mFluxIds, loc_s, fnum);
+    int neq = Kff->giveNumberOfRows();
+    loc_u.resize(neq - loc_s.giveSize());
+    int k = 0;
+    for ( int i = 1; i <= neq; ++i ) {
+        if ( !loc_s.contains(i) ) {
+            loc_u.at(k++) = i;
+        }
+    }
+
+    std :: unique_ptr< SparseMtrx > Kuu(Kff->giveSubMatrix(loc_u, loc_u));
+    // NOTE: Kus is actually a dense matrix, but we have to make it a dense matrix first
+    std :: unique_ptr< SparseMtrx > Kus(Kff->giveSubMatrix(loc_u, loc_s));
+    FloatMatrix eye(Kus->giveNumberOfColumns(), Kus->giveNumberOfColumns());
+    eye.beUnitMatrix();
+    FloatMatrix KusD;
+    Kus->times(KusD, eye);
+
+    // Release a large chunk of redundant memory early.
+    Kus.reset();
+    Kff.reset();
+
+    // 1.
+    FloatMatrix us;
+    solver->solve(*Kuu, KusD, us);
+
+    // 2.
+    FloatMatrix Ks;
+    Ks.beTProductOf(KusD, us);
+    Kus->times(Ks, us);
+
+    // 3.
+    Ks.solveForRhs(eye, tangent);
+    tangent.times(1./rve_size);
+#endif
 }
 
 
