@@ -64,6 +64,7 @@ class StructuralMaterialEvaluator : public EngngModel
 {
 protected:
     double deltaT; ///< Time increment.
+    double keepTangent;
 
     IntArray cmpntFunctions; /// Time functions controlling each component of the deviatoric part of the stress.
     IntArray sControl, eControl;

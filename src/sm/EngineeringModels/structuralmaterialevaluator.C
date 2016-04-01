@@ -67,6 +67,7 @@ IRResultType StructuralMaterialEvaluator :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, this->cmpntFunctions, _IFT_StructuralMaterialEvaluator_componentFunctions);
     IR_GIVE_FIELD(ir, this->sControl, _IFT_StructuralMaterialEvaluator_stressControl);
+    this->keepTangent = ir->hasField(_IFT_StructuralMaterialEvaluator_stressControl);
 
     tolerance = 1.0;
     if ( this->sControl.giveSize() > 0 ) {
@@ -151,6 +152,7 @@ void StructuralMaterialEvaluator :: solveYourself()
                 stressC.at(j) = d->giveFunction( cmpntFunctions.at(p) )->evaluateAtTime( tStep->giveIntrinsicTime() );
             }
 
+            //strain.add(-100, {6.8775e-06 ,  6.9525e-06  , 6.9550e-06 , -4.7275e-08 , -3.3187e-09 , -8.6962e-08});
             for ( int iter = 1; iter < maxiter; iter++ ) {
 #if 0
                 // Debugging:
@@ -178,13 +180,16 @@ void StructuralMaterialEvaluator :: solveYourself()
                 if ( res.computeNorm() <= tolerance ) {
                     break;
                 } else {
-                    mat->give3dMaterialStiffnessMatrix(tangent, TangentStiffness, gp, tStep);
+                    if ( tangent.giveNumberOfRows() == 0 || !keepTangent ) {
+                        mat->give3dMaterialStiffnessMatrix(tangent, TangentStiffness, gp, tStep);
+                    }
 
                     // Pick out the stress-controlled part;
                     reducedTangent.beSubMatrixOf(tangent, sControl, sControl);
 
                     // Update stress-controlled part of the strain
                     reducedTangent.solveForRhs(res, deltaStrain);
+                    //deltaStrain.printYourself("deltaStrain");
                     for ( int j = 1; j <= sControl.giveSize(); ++j ) {
                         strain.at( sControl.at(j) ) += deltaStrain.at(j);
                     }
