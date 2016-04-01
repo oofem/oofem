@@ -336,6 +336,7 @@ void PrescribedGradientBCNeumann :: computeTangent(FloatMatrix &tangent, TimeSte
     // 1.
     FloatMatrix us;
     solver->solve(*Kuu, KusD, us);
+    us.negated();
 
     // 2.
     FloatMatrix Ks;
@@ -343,7 +344,7 @@ void PrescribedGradientBCNeumann :: computeTangent(FloatMatrix &tangent, TimeSte
     Kus->times(Ks, us);
 
     // 3.
-    Ks.solveForRhs(eye, tangent);
+    tangent.beInverseOf(Ks);
     tangent.times(1./rve_size);
 #endif
 }

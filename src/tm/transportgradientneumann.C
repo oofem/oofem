@@ -363,6 +363,7 @@ void TransportGradientNeumann :: computeTangent(FloatMatrix &tangent, TimeStep *
     // 1.
     FloatMatrix us;
     solver->solve(*Kuu, KusD, us);
+    us.negated();
 
     // 2.
     FloatMatrix Ks;
@@ -370,7 +371,7 @@ void TransportGradientNeumann :: computeTangent(FloatMatrix &tangent, TimeStep *
     Kus->times(Ks, us);
 
     // 3.
-    Ks.solveForRhs(eye, tangent);
+    tangent.beInverseOf(Ks);
     tangent.times(1./rve_size);
 #endif
 }
