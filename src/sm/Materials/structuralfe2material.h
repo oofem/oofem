@@ -62,6 +62,9 @@ protected:
     FloatMatrix tangent;
     bool oldTangent;
 
+    /// Interface normal direction
+    FloatArray mNormalDir;
+
 public:
     StructuralFE2MaterialStatus(int n, Domain * d, GaussPoint * g,  const std :: string & inputfile);
     virtual ~StructuralFE2MaterialStatus() {}
@@ -88,6 +91,11 @@ public:
 
     virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+
+    const FloatArray &giveNormal() const { return mNormalDir; }
+    void letNormalBe(FloatArray iN) { mNormalDir = std :: move(iN); }
+
+    double giveRveLength();
 };
 
     

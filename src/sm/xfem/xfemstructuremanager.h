@@ -43,6 +43,7 @@
 //@{
 #define _IFT_XfemStructureManager_Name "xfemstructuremanager"
 #define _IFT_XfemStructureManager_splitCracks "splitcracks"
+#define _IFT_XfemStructureManager_nonstandardCZ "nonstandardcz"
 //@}
 
 namespace oofem {
@@ -77,12 +78,19 @@ public:
 
     void splitCracks();
 
+    bool giveUseNonStdCz() const {return mNonstandardCz;}
+
 protected:
 
     /**
      * If cracks should be splitted at intersections as a pre-processing step.
      */
     bool mSplitCracks;
+
+    /**
+     * If a non-standard cohesive zone formulation should be used.
+     */
+    bool mNonstandardCz;
 
     /**
      * Evaluator for material forces.

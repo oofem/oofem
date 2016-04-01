@@ -100,11 +100,7 @@ void PrescribedGradientBCNeumann :: assembleVector(FloatArray &answer, TimeStep 
                                                    CharType type, ValueModeType mode,
                                                    const UnknownNumberingScheme &s, FloatArray *eNorm)
 {
-    Set *setPointer = this->giveDomain()->giveSet(this->set);
-    const IntArray &boundaries = setPointer->giveBoundaryList();
-
-    IntArray loc, sigma_loc;  // For the displacements and stress respectively
-    IntArray masterDofIDs, sigmaMasterDofIDs;
+    IntArray sigma_loc;  // For the displacements and stress respectively
     mpSigmaHom->giveLocationArray(mSigmaIds, sigma_loc, s);
 
     if ( type == ExternalForcesVector ) {
@@ -122,6 +118,7 @@ void PrescribedGradientBCNeumann :: assembleVector(FloatArray &answer, TimeStep 
         FloatMatrix Ke;
         FloatArray fe_v, fe_s;
         FloatArray sigmaHom, e_u;
+        IntArray loc, masterDofIDs, sigmaMasterDofIDs;
 
         // Fetch the current values of the stress;
         mpSigmaHom->giveUnknownVector(sigmaHom, mSigmaIds, mode, tStep);
@@ -129,6 +126,8 @@ void PrescribedGradientBCNeumann :: assembleVector(FloatArray &answer, TimeStep 
         mpSigmaHom->giveMasterDofIDArray(mSigmaIds, sigmaMasterDofIDs);
 
         // Assemble
+        Set *setPointer = this->giveDomain()->giveSet(this->set);
+        const IntArray &boundaries = setPointer->giveBoundaryList();
         for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
             Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
             int boundary = boundaries.at(pos * 2);
@@ -194,7 +193,7 @@ void PrescribedGradientBCNeumann :: assemble(SparseMtrx &answer, TimeStep *tStep
             answer.assemble(loc_r, sigma_loc_c, KeT); // Contributions to delta_v equations
         }
     } else   {
-        printf("Skipping assembly in PrescribedGradientBCNeumann::assemble().\n");
+        OOFEM_LOG_DEBUG("Skipping assembly in PrescribedGradientBCNeumann::assemble().");
     }
 }
 
@@ -342,7 +341,7 @@ void PrescribedGradientBCNeumann :: integrateTangent(FloatMatrix &oTangent, Elem
 
     oTangent.clear();
 
-    for ( GaussPoint *gp: *ir ) {
+    for ( auto &gp: *ir ) {
         const FloatArray &lcoords = gp->giveNaturalCoordinates();
         FEIElementGeometryWrapper cellgeo(e);
 

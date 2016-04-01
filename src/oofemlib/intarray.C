@@ -346,7 +346,7 @@ void IntArray :: insertSorted(int val, int allocChunk)
 }
 
 
-void IntArray :: insertSortedOnce(int val, int allocChunk)
+bool IntArray :: insertSortedOnce(int val, int allocChunk)
 {
     if ( allocChunk > 0 && values.size() + 1 >= values.capacity() ) {
         values.reserve(allocChunk + values.capacity());
@@ -354,7 +354,9 @@ void IntArray :: insertSortedOnce(int val, int allocChunk)
     auto low = std::lower_bound(values.begin(), values.end(), val);
     if ( low == values.end() || *low != val ) {
         values.insert(low, val);
+        return true;
     }
+    return false;
 }
 
 

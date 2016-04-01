@@ -249,8 +249,9 @@ public:
      * The size of receiver is changed accordingly.
      * @param value Value to insert.
      * @param allocChunk If reallocation needed, an additional space for allocChunk values will be allocated.
+     * @return True if value is inserted, false if value is already in array.
      */
-    void insertSortedOnce(int value, int allocChunk = 0);
+    bool insertSortedOnce(int value, int allocChunk = 0);
     /**
      * Erase the element of given value.
      * If the value is found receiver will shrink accordingly,

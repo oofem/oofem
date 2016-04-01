@@ -193,7 +193,7 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
     this->field->applyBoundaryCondition(tStep); ///@todo Temporary hack, advanceSolution should apply the boundary conditions directly.
 
     neq = this->giveNumberOfDomainEquations( di, EModelDefaultEquationNumbering() );
-    if (tStep->giveNumber()==1) {
+    if ( tStep->giveNumber() == 1 ) {
         this->field->initialize(VM_Total, tStep, this->solution, EModelDefaultEquationNumbering() );
     } else {
         this->field->initialize(VM_Total, tStep->givePreviousStep(), this->solution, EModelDefaultEquationNumbering() );
@@ -220,7 +220,15 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
     if ( this->initialGuessType == IG_Tangent ) {
         OOFEM_LOG_RELEVANT("Computing initial guess\n");
         FloatArray extrapolatedForces(neq);
+#if 1
         this->assembleExtrapolatedForces( extrapolatedForces, tStep, TangentStiffnessMatrix, this->giveDomain(di) );
+#else
+        ///@todo This should replace "assembleExtrapolatedForces" after the last bugs have been corrected.
+        FloatArray incrementOfPrescribed;
+        this->field->initialize(VM_Incremental, tStep, incrementOfPrescribed, EModelDefaultEquationNumbering() );
+        this->assembleVector(extrapolatedForces, tStep, MatrixProductAssembler(TangentAssembler(TangentStiffness), incrementOfPrescribed),
+                             VM_Unknown, EModelDefaultEquationNumbering(), this->giveDomain(di) );
+#endif
         extrapolatedForces.negated();
         ///@todo Need to find a general way to support this before enabling it by default.
         //this->assembleVector(extrapolatedForces, tStep, LinearizedDilationForceAssembler(), VM_Incremental, EModelDefaultEquationNumbering(), this->giveDomain(di) );

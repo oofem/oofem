@@ -98,6 +98,8 @@ public:
 
     void clear();
 
+    virtual double domainSize() {return PrescribedGradientHomogenization::domainSize(this->giveDomain(), this->giveSetNumber());}
+
     virtual int giveNumberOfInternalDofManagers();
     virtual DofManager *giveInternalDofManager(int i);
 

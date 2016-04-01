@@ -48,6 +48,7 @@ class Domain;
 class DataReader;
 class DynamicDataReader;
 class InputRecord;
+class EnrichmentFunction;
 
 class NucleationCriterion {
 public:
@@ -68,6 +69,8 @@ public:
 
 protected:
 	Domain *mpDomain;
+    EnrichmentFunction *mpEnrichmentFunc;
+
 };
 
 } /* namespace oofem */

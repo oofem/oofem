@@ -825,7 +825,7 @@ Quad1PlaneStrain 374 nodes 4 81 6 82 421 mat 2
 Quad1PlaneStrain 375 nodes 4 82 83 422 421 mat 2
 Quad1PlaneStrain 376 nodes 4 83 84 423 422 mat 2
 Quad1PlaneStrain 377 nodes 4 84 8 424 423 mat 2
-Quad1PlaneStrain 378 nodes 4 8 7 85 424 mat 2 boundaryLoads 2 3 1
+Quad1PlaneStrain 378 nodes 4 8 7 85 424 mat 2
 Quad1PlaneStrain 379 nodes 4 85 86 425 424 mat 2
 Quad1PlaneStrain 380 nodes 4 86 5 41 425 mat 2
 Quad1PlaneStrain 381 nodes 4 41 40 426 425 mat 2
@@ -847,7 +847,7 @@ IsoLE  2 d 1.0 E 300.e3 n 0.2 talpha 0.0
 ##IsoLE  2 d 1.0 E 210.e3 n 0.3 talpha 0.0
 BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 3
 BoundaryCondition 2 loadTimeFunction 1 dofs 1 2 values 1 0.0 set 4
-ConstantEdgeLoad 3 loadTimeFunction 1 components 2 0 -1.0 loadType 3 ndofs 2
+ConstantEdgeLoad 3 loadTimeFunction 1 dofs 2 1 2 components 2 0 -1.0 loadType 3 set 5
 ConstantFunction 1 f(t) 1.0
 
 #%BEGIN_CHECK% tolerance 1.e-5

@@ -12,10 +12,10 @@ node 7 coords 3 0.000000e+00 2.000000e+00 0.000000e+00 bc 2 1 0
 node 10 coords 3 2.500000e+00 0.000000e+00 0.000000e+00 Shared partitions 1 1
 node 13 coords 3 2.500000e+00 2.000000e+00 0.000000e+00 Shared partitions 1 1
 node 14 coords 3 2.500000e+00 1.000000e+00 0.000000e+00 Shared partitions 1 1
-Planestress2D 1 nodes 4 1 10 14 4 crossSect 1 mat 1
-Planestress2D 7 nodes 4 4 14 13 7 crossSect 1 mat 1
-SimpleCS 1 thick 1.0
+Planestress2D 1 nodes 4 1 10 14 4 crossSect 1
+Planestress2D 7 nodes 4 4 14 13 7 crossSect 1
+SimpleCS 1 thick 1.0 material 1
 IsoLE  1 d 1.0 E 300.e3 n 0.2 talpha 0.0
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
-ConstantEdgeLoad 2 loadTimeFunction 1 components 2 1.0 0.0 ndofs 2 loadtype 3
+ConstantEdgeLoad 2 loadTimeFunction 1 components 2 1.0 0.0 loadtype 3
 ConstantFunction 1 f(t) 1.0
