@@ -52,7 +52,6 @@ REGISTER_SparseMtrx(PetscSparseMtrx, SMT_PetscMtrx);
 PetscSparseMtrx :: PetscSparseMtrx(int n, int m) : SparseMtrx(n, m),
     mtrx(NULL), symmFlag(false), leqs(0), geqs(0), blocksize(1), di(0), kspInit(false), newValues(true), localIS(NULL), globalIS(NULL) { }
 
-
 PetscSparseMtrx :: PetscSparseMtrx() : SparseMtrx(),
     mtrx(NULL), symmFlag(false), leqs(0), geqs(0), blocksize(1), di(0), kspInit(false), newValues(true), localIS(NULL), globalIS(NULL){ }
 
@@ -802,10 +801,44 @@ PetscSparseMtrx :: at(int i, int j) const
     //return value;
 }
 
+SparseMtrx *
+PetscSparseMtrx :: giveSubMatrix(const IntArray &rows, const IntArray &cols)
+{
+#ifdef __PARALLEL_MODE
+    auto comm = this->emodel->giveParallelComm();
+#else
+    auto comm = PETSC_COMM_SELF;
+#endif
+    IntArray prows = rows, pcols = cols;
+    prows.add(-1);
+    pcols.add(-1);
+
+    PetscSparseMtrx *answer = new PetscSparseMtrx(prows.giveSize(), pcols.giveSize());
+    answer->emodel = this->emodel;
+    IS is_rows;
+    IS is_cols;
+
+    ISCreateGeneral(comm, prows.giveSize(), prows.givePointer(), PETSC_USE_POINTER, & is_rows);
+    ISCreateGeneral(comm, pcols.giveSize(), pcols.givePointer(), PETSC_USE_POINTER, & is_cols);
+    MatGetSubMatrix(this->mtrx, is_rows, is_cols, MAT_INITIAL_MATRIX, & answer->mtrx);
+    ISDestroy(& is_rows);
+    ISDestroy(& is_cols);
+
+    return answer;
+}
+
 void
 PetscSparseMtrx :: toFloatMatrix(FloatMatrix &answer) const
 {
-    OOFEM_ERROR("unsupported");
+    IntArray rows, cols;
+    rows.enumerate(this->giveNumberOfRows());
+    rows.add(-1);
+    cols.enumerate(this->giveNumberOfColumns());
+    cols.add(-1);
+    
+    FloatMatrix ansT(this->giveNumberOfColumns(), this->giveNumberOfRows());
+    MatGetValues(this->mtrx, rows.giveSize(), rows.givePointer(), cols.giveSize(), cols.givePointer(), ansT.givePointer());
+    answer.beTranspositionOf(ansT);
 }
 
 void

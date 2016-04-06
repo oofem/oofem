@@ -85,6 +85,7 @@ public:
     virtual int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat);
     virtual int assembleBegin();
     virtual int assembleEnd();
+    virtual SparseMtrx *giveSubMatrix(const IntArray &rows, const IntArray &cols);
     virtual bool canBeFactorized() const { return false; }
     virtual SparseMtrx *factorized() { return NULL; }
     virtual FloatArray *backSubstitutionWith(FloatArray &y) const { return NULL; }
