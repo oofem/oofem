@@ -42,7 +42,8 @@
 
 #define _IFT_TransportGradientNeumann_Name   "tmgradneumann"
 #define _IFT_TransportGradientNeumann_gradient "gradient"
-#define _IFT_TransportGradientNeumann_surfSets "surfsets"
+#define _IFT_TransportGradientNeumann_centerCoords "centercoords"
+#define _IFT_TransportGradientNeumann_surfSets "surfsets" /// Numered x+, y+, z+, x-, y-, z-
 #define _IFT_TransportGradientNeumann_usePhi "usephi"
 
 namespace oofem {
@@ -68,6 +69,7 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
+    virtual void postInitialize();
 
     virtual bcType giveType() const { return UnknownBT; }
 
@@ -98,6 +100,8 @@ protected:
     std :: unique_ptr< Node > mpFluxHom;
     IntArray mFluxIds;
     FloatArray mGradient;
+    FloatArray mCenterCoord;
+    double usePhi;
 
     IntArray surfSets;
 

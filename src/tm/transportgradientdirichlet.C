@@ -69,7 +69,8 @@ IRResultType TransportGradientDirichlet :: initializeFrom(InputRecord *ir)
     mCenterCoord.resize(3);
     IR_GIVE_OPTIONAL_FIELD(ir, mCenterCoord, _IFT_TransportGradientDirichlet_centerCoords);
 
-    if ( ir->hasField(_IFT_TransportGradientDirichlet_usePsi) ) {
+    this->usePsi = ir->hasField(_IFT_TransportGradientDirichlet_usePsi);
+    if ( this->usePsi ) {
         IR_GIVE_FIELD(ir, surfSets, _IFT_TransportGradientDirichlet_surfSets);
         IR_GIVE_FIELD(ir, edgeSets, _IFT_TransportGradientDirichlet_edgeSets);
     }
@@ -82,13 +83,21 @@ void TransportGradientDirichlet :: giveInputRecord(DynamicInputRecord &input)
 {
     input.setField(mGradient, _IFT_TransportGradientDirichlet_gradient);
     input.setField(mCenterCoord, _IFT_TransportGradientDirichlet_centerCoords);
-    if ( this->surfSets.giveSize() > 0 ) {
-        input.setField(_IFT_TransportGradientDirichlet_usePsi);
+    input.setField(surfSets, _IFT_TransportGradientDirichlet_surfSets);
+    input.setField(edgeSets, _IFT_TransportGradientDirichlet_edgeSets);
+    if ( this->usePsi ) {
         input.setField(surfSets, _IFT_TransportGradientDirichlet_surfSets);
-        input.setField(edgeSets, _IFT_TransportGradientDirichlet_edgeSets);
     }
 
     return GeneralBoundaryCondition :: giveInputRecord(input);
+}
+
+
+void TransportGradientDirichlet :: postInitialize()
+{
+    BoundaryCondition :: postInitialize();
+    
+    if ( this->usePsi ) this->computePsi();
 }
 
 
@@ -128,15 +137,26 @@ double TransportGradientDirichlet :: domainSize()
     Domain *domain = this->giveDomain();
     int nsd = domain->giveNumberOfSpatialDimensions();
     double domain_size = 0.0;
-    // This requires the boundary to be consistent and ordered correctly.
-    Set *set = domain->giveSet(this->set);
-    const IntArray &boundaries = set->giveBoundaryList();
+    if ( this->usePsi ) {
+        for ( auto &surf : this->surfSets ) {
+            const IntArray &boundaries = domain->giveSet(surf)->giveBoundaryList();
 
-    for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
-        Element *e = domain->giveElement( boundaries.at(pos * 2 - 1) );
-        int boundary = boundaries.at(pos * 2);
-        FEInterpolation *fei = e->giveInterpolation();
-        domain_size += fei->evalNXIntegral( boundary, FEIElementGeometryWrapper(e) );
+            for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
+                Element *e = domain->giveElement( boundaries.at(pos * 2 - 1) );
+                int boundary = boundaries.at(pos * 2);
+                FEInterpolation *fei = e->giveInterpolation();
+                domain_size += fei->evalNXIntegral( boundary, FEIElementGeometryWrapper(e) );
+            }
+        }
+    } else {
+        const IntArray &boundaries = domain->giveSet(this->set)->giveBoundaryList();
+
+        for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
+            Element *e = domain->giveElement( boundaries.at(pos * 2 - 1) );
+            int boundary = boundaries.at(pos * 2);
+            FEInterpolation *fei = e->giveInterpolation();
+            domain_size += fei->evalNXIntegral( boundary, FEIElementGeometryWrapper(e) );
+        }
     }
     return fabs(domain_size / nsd);
 }
@@ -258,10 +278,15 @@ void TransportGradientDirichlet :: computePsi()
 
     // One "psi" per node on the boundary. Initially all to zero.
     this->psis.clear();
-    const IntArray &totalNodes = domain->giveSet(this->giveSetNumber())->giveNodeList();
-    for ( int node : totalNodes ) {
+    for ( int node : domain->giveSet(this->giveSetNumber())->giveNodeList() ) {
         this->psis.emplace(node, FloatArray(3));
     }
+    for ( auto &surf : this->surfSets ) {
+        for ( int node : domain->giveSet(surf)->giveNodeList() ) {
+            this->psis.emplace(node, FloatArray(3));
+        }
+    }
+
 
     // Identify corner nodes and all the total edge nodes (needed for equation numbering)
     IntArray totalCornerNodes;

@@ -77,6 +77,7 @@ protected:
     FloatArray mCenterCoord;
 
     // One psi for each node.
+    bool usePsi;
     std :: map< int, FloatArray > psis;
     IntArray surfSets;
     IntArray edgeSets;
@@ -94,6 +95,7 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
+    virtual void postInitialize();
 
     virtual double give(Dof *dof, ValueModeType mode, double time);
 
