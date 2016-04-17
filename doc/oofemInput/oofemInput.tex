@@ -70,7 +70,8 @@
 \newcolumntype{R}{>{\raggedleft\arraybackslash}X}%
 
 \begin{htmlonly}
-\newenvironment{record}[1][]{\rowcolors{1}{lightgray}{lightgray}\begin{tabular}{|ll}}{\end{tabular}\\}
+%\newenvironment{record}[1][]{\rowcolors{1}{lightgray}{lightgray}\begin{tabular}{|ll}}{\end{tabular}\\}
+\newenvironment{record}[1][]{\begin{tabular}{|ll}}{\end{tabular}\\}
 \newcommand{\recentry}[2]{{#1}&{#2}\\}
 \end{htmlonly}
 %begin{latexonly}

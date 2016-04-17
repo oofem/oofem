@@ -137,6 +137,14 @@ public:
             OOFEM_ERROR("No such DOF available on Element %d", number);
         }
     }
+    virtual void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const UnknownNumberingScheme &s, IntArray *dofIds = NULL) {
+      giveLocationArray (locationArray, s, dofIds);
+    }
+     
+    virtual void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const IntArray &dofIDMask, const UnknownNumberingScheme &s, IntArray *dofIds = NULL) {
+      giveLocationArray (locationArray, dofIDMask, s, dofIds);
+    }
+
     virtual double computeVolumeAround(GaussPoint *gp);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
