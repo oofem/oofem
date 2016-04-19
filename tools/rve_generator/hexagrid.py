@@ -19,7 +19,7 @@ def printRVE(rveSampleNumber, rveSize, rvePosition):
     # elname, w = 'QBrick1HT', 3
     elname, w = 'Brick1HT', 2
 
-    nelem = 2*rveSize
+    nelem = 6*rveSize
 
     rveInclusions = rveToolbox.getInclusionsInBox(rvePosition, rveSize, inclusions)
     print('%d inclusions in RVE'%len(rveInclusions))
@@ -186,17 +186,16 @@ def printRVE(rveSampleNumber, rveSize, rvePosition):
         print('SimpleTransportCS 1 mat 1', file=f)
         print('SimpleTransportCS 2 mat 2', file=f)
         print('IsoHeat 1 d 1 k 1 c 0', file=f)
-        print('IsoHeat 2 d 1 k 5 c 0', file=f)
+        print('IsoHeat 2 d 1 k 1e3 c 0', file=f)
 
     # print('MixedGradientPressureNeumann 1 loadTimeFunction 1 set 1 devgradient 6 0 0 0 1 1 1 pressure 0', file=f)
     # print('MixedGradientPressureDirichlet 1 loadTimeFunction 1 set 1 dofs 6 1 2 3 7 8 9 devgradient 6 0 0 0 1 1 1 pressure 0', file=f)
     # print('PrescribedGradient 1 loadTimeFunction 1 set 1 dofs 6 1 2 3 7 8 9 gradient 3 3 {0 0 1; 0 0 0; 1 0 0}', file=f)
     # print('BoundaryCondition 2 loadTimeFunction 1 values 3 0 0 0 dofs 3 1 2 3 set 7', file=f)
 
-    print('PrescribedGradientTransport 1 loadTimeFunction 1 gradient 3 0 0 0.1 dofs 1 10 set 1 8 surfsets 6 1 2 3 4 5 6 usepsi', file=f)
-    #print('PrescribedGradientTransport 1 loadTimeFunction 1 gradient 3 0 0 0.1 dofs 1 10 surfsets 6 1 2 3 4 5 6 ' +
-    #  'edgesets 12 7 8 9 10 11 12 13 14 15 16 17 18 usepsi', file=f)
-    #print('BoundaryCondition 2 loadTimeFunction 1 values 1 0 dofs 1 10 set 0', file=f)
+    #print('PrescribedGradientTransport 1 loadTimeFunction 1 gradient 3 0 0 0.1 dofs 1 10 set 8 surfsets 6 1 2 3 4 5 6 usepsi', file=f)
+    print('PrescribedGradientTransport 1 loadTimeFunction 1 gradient 3 0 0 0.1 dofs 1 10 set 8', file=f)
+    print('BoundaryCondition 2 loadTimeFunction 1 values 1 0 dofs 1 10 set 0', file=f)
     #print('TMGradNeumann 1 loadTimeFunction 1 centercoords 3 0 0 0 gradient 3 0 0 0.1 dofs 1 10 surfsets 6 1 2 3 4 5 6 usephi', file=f)
     #print('BoundaryCondition 1 loadTimeFunction 1 values 1 0 dofs 1 10 set 0', file=f)
     #print('BoundaryCondition 2 loadTimeFunction 1 values 1 0 dofs 1 10 set 7', file=f)
@@ -219,21 +218,23 @@ def printRVE(rveSampleNumber, rveSize, rvePosition):
 
     print('Set 7 nodes 1', nC[nelem][nelem][nelem], file=f)
 
-    print('Set 8 elementRanges {(', 1, nelem*nelem*nelem,')}', file=f)
+    # print('Set 8 elementRanges {(', 1, nelem*nelem*nelem,')}', file=f)
+    tot = np.concatenate([xm, ym, zm, xp, yp, zp])
+    print('Set 8 elementboundaries', 6*2*nelem*nelem, ' '.join([str(a) + ' ' + str(b) for a, b in tot]), file=f)
 
     f.close()
 
 
 seed = 0  # Controlled randomness
 # Generate inclusions:
-density = 0.2  # Minimum density
+density = 0.1  # Minimum density
 averageRadius = 1  # Average inclusion radius
-boxSize = 10  # Max size of the domain with randomized particles. Computationally expensive to set it high.
+boxSize = 100  # Max size of the domain with randomized particles. Computationally expensive to set it high.
 inclusions = rveToolbox.generateSphericalInclusions(density, boxSize, averageRadius, averageRadius,
-                                                    averageRadius*0.05, 3, seed)
+                                                    averageRadius*0.2, 3, seed)
 
-totalSamples = 1
-rveSize = 2
+totalSamples = 10
+rveSize = 10
 
 for rveSampleNumber in range(totalSamples):
     print('Generating RVE', rveSampleNumber)
