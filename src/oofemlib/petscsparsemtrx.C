@@ -290,6 +290,77 @@ PetscSparseMtrx :: addDiagonal(double x, FloatArray &m)
     VecDestroy(& globM);
 }
 
+int
+PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int n, int m, const IntArray &I, const IntArray &J)
+{
+    if ( mtrx ) {
+        MatDestroy(& mtrx);
+    }
+
+    if ( this->kspInit ) {
+        KSPDestroy(& ksp);
+        this->kspInit = false; // force ksp to be initialized
+    }
+
+    this->emodel = eModel;
+    this->di = 0;
+
+    if ( emodel->isParallel() ) {
+        OOFEM_ERROR("Parallel is not supported in manual matrix creation");
+    }
+
+    nRows = geqs = leqs = n;
+    nColumns = m;
+    blocksize = 1;
+
+    int total_nnz;
+    IntArray d_nnz(leqs), d_nnz_sym(leqs);
+    {
+        //determine nonzero structure of matrix
+        std :: vector< IntArray > rows_upper(nRows), rows_lower(nRows);
+
+        for ( int ii : I ) {
+            if ( ii > 0 ) {
+                for ( int jj : J ) {
+                    if ( jj > 0 ) {
+                        if ( jj >= ii ) {
+                            rows_upper [ ii - 1 ].insertSortedOnce(jj - 1);
+                        } else {
+                            rows_lower [ ii - 1 ].insertSortedOnce(jj - 1);
+                        }
+                    }
+                }
+            }
+        }
+
+        total_nnz = 0;
+        for ( int i = 0; i < leqs; i++ ) {
+            d_nnz(i) = rows_upper [ i ].giveSize() + rows_lower [ i ].giveSize();
+        }
+    }
+
+    // create PETSc mat
+    MatCreate(PETSC_COMM_SELF, & mtrx);
+    MatSetSizes(mtrx, nRows, nColumns, nRows, nColumns);
+    MatSetFromOptions(mtrx);
+
+    if ( total_nnz / nColumns > nRows / 10 ) { // More than 10% nnz, then we just force the dense matrix.
+        MatSetType(mtrx, MATDENSE);
+    } else {
+        MatSetType(mtrx, MATSEQAIJ);
+    }
+
+    //The incompatible preallocations are ignored automatically.
+    MatSetUp(mtrx);
+    MatSeqAIJSetPreallocation( mtrx, 0, d_nnz.givePointer() );
+
+    MatSetOption(mtrx, MAT_ROW_ORIENTED, PETSC_FALSE); // To allow the insertion of values using MatSetValues in column major order
+    MatSetOption(mtrx, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
+
+    this->newValues = true;
+    return true;
+}
+
 ///@todo I haven't looked at the parallel code yet (lack of time right now, and i want to see it work first). / Mikael
 int
 PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
@@ -381,7 +452,8 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, const Unkn
     MatSetSizes(mtrx, nRows, nColumns, nRows, nColumns);
     MatSetFromOptions(mtrx);
 
-    if ( total_nnz > nRows * nColumns / 10 ) { // More than 10% nnz, then we just force the dense matrix.
+    //printf("total_nnz = %d, nRows = %d, nColumns = %d, num = %d\n", total_nnz, nRows, nColumns, nRows*nColumns);
+    if ( total_nnz / nColumns > nRows / 10 ) { // More than 10% nnz, then we just force the dense matrix.
         MatSetType(mtrx, MATDENSE);
     } else {
         MatSetType(mtrx, MATSEQAIJ);
