@@ -80,7 +80,6 @@ protected:
     bool usePsi;
     std :: map< int, FloatArray > psis;
     IntArray surfSets;
-    IntArray edgeSets;
 
 public:
     /**
@@ -108,7 +107,7 @@ public:
      * @todo Perhaps this routine should only give results for the dof it prescribes?
      * @param C Coefficient matrix to fill.
      */
-    void updateCoefficientMatrix(FloatMatrix &C);
+    void computeCoefficientMatrix(FloatMatrix &C);
 
     /**
      * Computes the homogenized, macroscopic, field (stress).

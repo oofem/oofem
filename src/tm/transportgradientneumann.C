@@ -337,6 +337,7 @@ void TransportGradientNeumann :: computeTangent(FloatMatrix &tangent, TimeStep *
     // 3.
     tangent.beInverseOf(Ks);
     tangent.times(rve_size);
+    tangent.negated();
 }
 
 
