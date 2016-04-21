@@ -99,7 +99,7 @@ double UniformGridField::nodeValue3d(int i, int j, int k){
 
 // see https://github.com/woodem/woo/blob/master/pkg/dem/FlowAnalysis.cpp
 // and https://woodem.org/user/flow-analysis.html for explanation about the interpolation routine
-int UniformGridField::evaluateAt(FloatArray &answer, FloatArray &coords,
+int UniformGridField::evaluateAt(FloatArray &answer, const FloatArray &coords,
                            ValueModeType mode, TimeStep *tStep){
     // scalar value
     answer.resize(1);

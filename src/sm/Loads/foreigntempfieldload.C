@@ -51,11 +51,7 @@ ForeignTemperatureFieldLoad :: computeValueAt(FloatArray &answer, TimeStep *tSte
         OOFEM_ERROR("unknown mode (%s)", __ValueModeTypeToString(mode) );
     }
 
-	 // FIXME: copy coords, since evaluateAt need non-const coords
-	 // should be changed in Field (and all derived classes)
-	 FloatArray coords2(coords);
-
-    if(foreignField->evaluateAt(answer, coords2, mode, tStep)){
+    if(foreignField->evaluateAt(answer, coords, mode, tStep)){
         OOFEM_ERROR("ForeignTemperatureFieldLoad::foreignField.evaluateAt(...) failed.");
     }
 }

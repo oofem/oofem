@@ -79,7 +79,7 @@ public:
      * @return Zero if ok, nonzero when error encountered.
      */
     virtual int EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryField &pf,
-                                                      FloatArray &coords, IntArray &dofId, ValueModeType mode, TimeStep *tStep) = 0;
+                                                      const FloatArray &coords, IntArray &dofId, ValueModeType mode, TimeStep *tStep) = 0;
     //@}
 };
 
@@ -178,7 +178,7 @@ public:
      * @param tStep Time step of interest.
      * @return Error code (0-ok, 1-point not found in domain).
      */
-    virtual int evaluateAt(FloatArray &answer, FloatArray &coords,
+    virtual int evaluateAt(FloatArray &answer, const FloatArray &coords,
                            ValueModeType mode, TimeStep *tStep);
     /**
      * Evaluates the field at given DofManager
@@ -212,7 +212,7 @@ public:
      * @param dofId Dof mask, id set to NULL, all Dofs evaluated.
      * @return Error code (0=ok, 1=point not found in domain)
      */
-    virtual int __evaluateAt(FloatArray &answer, FloatArray &coords,
+    virtual int __evaluateAt(FloatArray &answer, const FloatArray &coords,
                              ValueModeType mode, TimeStep *tStep, IntArray *dofId);
     /**
      * @param tStep Time step to take solution for.

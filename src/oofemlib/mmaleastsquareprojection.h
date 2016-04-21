@@ -93,11 +93,11 @@ public:
     /// Destructor
     virtual ~MMALeastSquareProjection();
 
-    virtual void __init(Domain *dold, IntArray &type, FloatArray &coords, Set &sourceElemSet, TimeStep *tStep, bool iCohesiveZoneGP = false);
+    virtual void __init(Domain *dold, IntArray &type, const FloatArray &coords, Set &sourceElemSet, TimeStep *tStep, bool iCohesiveZoneGP = false);
 
     virtual void finish(TimeStep *tStep);
 
-    virtual int __mapVariable(FloatArray &answer, FloatArray &coords, InternalStateType type, TimeStep *tStep);
+    virtual int __mapVariable(FloatArray &answer, const FloatArray &coords, InternalStateType type, TimeStep *tStep);
 
     virtual int mapStatus(MaterialStatus &oStatus) const;
 
@@ -107,7 +107,7 @@ public:
     virtual const char *giveClassName() const { return "MMALeastSquareProjectionPatchType"; }
 
 protected:
-    void computePolynomialTerms(FloatArray &P, FloatArray &coords, MMALeastSquareProjectionPatchType type);
+    void computePolynomialTerms(FloatArray &P, const FloatArray &coords, MMALeastSquareProjectionPatchType type);
     int giveNumberOfUnknownPolynomialCoefficients(MMALeastSquareProjectionPatchType regType);
 };
 } // end namespace oofem

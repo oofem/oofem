@@ -69,13 +69,15 @@ public:
     UniformGridField() : Field(FieldType::FT_Unknown) { }
     virtual ~UniformGridField() { }
 
+    /** Shorthand for defining geometry, with consistency checks. Used primarily from python */
     void setGeometry(const FloatArray& lo_, const FloatArray& hi_, const IntArray& div_);
+    /** Accessor for setting nodal values; checks size of the array for correctness. */
     void setValues(const FloatArray& vv);
 
     /**
         Implementation of Field::evaluateAt for coordinates.
      */
-    int evaluateAt(FloatArray &answer, FloatArray &coords,
+    int evaluateAt(FloatArray &answer, const FloatArray &coords,
                            ValueModeType mode, TimeStep *tStep) override;
 
     /**
