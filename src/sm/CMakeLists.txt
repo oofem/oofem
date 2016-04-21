@@ -136,7 +136,7 @@ set (sm_emodel
 set (sm_loads
     Loads/tf1.C
     Loads/usrdeftempfield.C
-    Loads/foreigntempfield.C
+    Loads/foreigntempfieldload.C
     Loads/rotatingboundary.C
     Loads/constantpressureload.C
     Loads/structtemperatureload.C

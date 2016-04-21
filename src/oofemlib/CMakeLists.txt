@@ -99,6 +99,7 @@ set (core_fields
     intvarfield.C
     maskedprimaryfield.C
     dofdistributedprimaryfield.C
+    uniformgridfield.C
     )
 
 set (core_ltf
