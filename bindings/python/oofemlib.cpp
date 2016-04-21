@@ -75,12 +75,14 @@ namespace bp = boost::python;
 #include "dofmanager.h"
 #include "elementgeometrytype.h"
 #include "field.h"
+#include "uniformgridfield.h"
 #include "datastream.h"
 #include "dofmanvalfield.h"
 #include "dofmantransftype.h"
 #include "fieldmanager.h"
 #include "generalboundarycondition.h"
 #include "boundarycondition.h"
+#include "Loads/foreigntempfieldload.h"
 #include "integrationrule.h"
 #include "gausspoint.h"
 #include "internalstatetype.h"
@@ -93,6 +95,8 @@ namespace bp = boost::python;
 #include "classfactory.h"
 
 #include "Materials/structmatsettable.h"
+
+#include<iostream>
 
 namespace oofem {
 
@@ -119,6 +123,40 @@ struct PyFloatArray : FloatArray, wrapper<FloatArray>
 };
 #endif
 
+// not using auto_ptr avoids many warnings, but potentially causes crashes?
+// #define OOFEM_USE_DEPRECATED_AUTOPTR
+
+// copied from https://github.com/eudoxos/minieigen/blob/master/src/converters.hpp
+
+template<typename T>
+bool pySeqItemCheck(PyObject* o, int i){ return bp::extract<T>(bp::object(bp::handle<>(PySequence_GetItem(o,i)))).check(); }
+template<typename T>
+T pySeqItemExtract(PyObject* o, int i){ return bp::extract<T>(bp::object(bp::handle<>(PySequence_GetItem(o,i))))(); }
+
+// AnyArray will be FloatArray or IntArray, Scalar is double or int
+template<typename AnyArray, typename Scalar>
+struct custom_AnyArray_from_sequence{
+	custom_AnyArray_from_sequence(){ bp::converter::registry::push_back(&convertible,&construct,bp::type_id<AnyArray>()); }
+	static void* convertible(PyObject* obj_ptr){
+        // dont check size, since FloatArray/IntArray are always dynamic-sized
+        if(!PySequence_Check(obj_ptr)) return 0;
+		// check that sequence items are convertible to scalars (should be done in other converters as well?!); otherwise Matrix3 is convertible to Vector3, but then we fail in *construct* very unclearly (TypeError: No registered converter was able to produce a C++ rvalue of type double from this Python object of type Vector3)
+		size_t len=PySequence_Size(obj_ptr);
+		for(size_t i=0; i<len; i++) if(!pySeqItemCheck<Scalar>(obj_ptr,i)) return 0;
+		return obj_ptr;
+	}
+	static void construct(PyObject* obj_ptr, bp::converter::rvalue_from_python_stage1_data* data){
+		void* storage=((bp::converter::rvalue_from_python_storage<AnyArray>*)(data))->storage.bytes;
+		new (storage) AnyArray;
+        size_t len;
+		len=PySequence_Size(obj_ptr);
+        ((AnyArray*)storage)->resize(len);
+		for(size_t i=0; i<len; i++) (*((AnyArray*)storage))[i]=pySeqItemExtract<Scalar>(obj_ptr,i);
+		data->convertible=storage;
+	}
+};
+
+
 
 void (FloatArray::*floatarray_add_1)(const FloatArray&) = &FloatArray::add;
 void (FloatArray::*floatarray_add_2)(double, const FloatArray&) = &FloatArray::add;
@@ -131,13 +169,13 @@ void (FloatArray::*floatarray_printYourself_1)() const  = &FloatArray::printYour
 
 std::string FloatArray_str(const FloatArray& a){
 	std::string ret("[");
-	for(size_t i=0; i<a.giveSize(); i++){ ret+=(i>0?", ":"")+std::to_string(a[i]); }
+	for(int i=0; i<a.giveSize(); i++){ ret+=(i>0?", ":"")+std::to_string(a[i]); }
 	return ret+"]";
 }
 
 void pyclass_FloatArray()
 {
-    class_<FloatArray, boost::noncopyable>("FloatArray")
+    class_<FloatArray>("FloatArray") // should not have boost::noncopyable so that it can be returned from c++ funcs
         .def(init< optional<int> >())
         .def(init< FloatArray& >())
         .def("resize", &FloatArray::resize, "Checks size of receiver towards requested bounds. If dimension mismatch, size is adjusted accordingly")
@@ -886,6 +924,10 @@ void pyclass_Load()
         .def("giveComponentArray", &PyLoad::GiveComponentArray_copy,return_value_policy<manage_new_object>())
         .def("computeValueAt", pure_virtual( &Load::computeValueAt))
         ;
+
+    class_<ForeignTemperatureFieldLoad,bases<PyLoad>>("ForeignTemperatureFieldLoad",no_init)
+        .def_readwrite("foreignField",&ForeignTemperatureFieldLoad::foreignField)
+        ;
 }
 
 
@@ -925,7 +967,7 @@ void pyclass_StructuralMaterialStatus()
 *****************************************************/
 void pyclass_TimeStep()
 {
-    class_<TimeStep, boost::noncopyable>("TimeStep", no_init)
+    class_<TimeStep, boost::noncopyable>("TimeStep",no_init)
         .def("giveTargetTime", &TimeStep::giveTargetTime)
         .def("setTargetTime", &TimeStep::setTargetTime)
         .add_property("targetTime",&TimeStep::giveTargetTime, &TimeStep::setTargetTime)
@@ -994,17 +1036,26 @@ FloatArray Field_evaluateAtPos(Field* field, FloatArray& coords, ValueModeType m
 	int (Field::*Field_evaluateAtDman)(FloatArray &answer, DofManager* dman, ValueModeType mode, TimeStep *atTime) = &Field::evaluateAt;
 #else
 	// raise exception if there is a problem
-	void Field_evaluateAtDman(Field* field, FloatArray& answer, DofManager* dman, ValueModeType mode, TimeStep* atTime){
+	FloatArray Field_evaluateAtDman(Field* field, DofManager* dman, ValueModeType mode, TimeStep* atTime){
+        FloatArray answer;
 		int err=field->evaluateAt(answer,dman,mode,atTime);
 		if(err) throw std::runtime_error("Error evaluating field at given DofManager.");
+        return answer;
 	}
-	void Field_evaluateAtPos(Field* field, FloatArray& answer, FloatArray& coords, ValueModeType mode, TimeStep* atTime){
+	FloatArray Field_evaluateAtPos(Field* field, FloatArray coords, ValueModeType mode, TimeStep* atTime){
+        FloatArray answer;
 		int err=field->evaluateAt(answer,coords,mode,atTime);
 		if(err) throw std::runtime_error("Error evaluating field at given position.");
+        return answer;
 	}
 #endif
 
-std::auto_ptr<Field> DofManValueField_create (FieldType t, Domain* d) { return std::auto_ptr<Field> ( new DofManValueField(t, d) ); }
+
+#ifndef OOFEM_USE_DEPRECATED_AUTOPTR
+    std::shared_ptr<Field> DofManValueField_create (FieldType t, Domain* d) { return std::make_shared<DofManValueField>(t, d); }
+#else
+    std::auto_ptr<Field> DofManValueField_create (FieldType t, Domain* d) { return std::auto_ptr<Field>( new DofManValueField(t, d)); }
+#endif
 
 void pyclass_Field()
 {
@@ -1012,9 +1063,14 @@ void pyclass_Field()
     //see http://www.boost.org/doc/libs/1_47_0/libs/python/doc/v2/faq.html#ownership for detail
     // also see http://stackoverflow.com/questions/4112561/boost-python-ownership-of-pointer-variables
     class_<PyField, EModelFieldPtr, boost::noncopyable>("Field", no_init)
-        .def("evaluateAtPos",Field_evaluateAtPos)
+        .def("evaluateAtPos",Field_evaluateAtPos,(bp::arg("coords"),bp::arg("mode")=VM_Unknown,bp::arg("atTime")=bp::object()))
         .def("evaluateAtDman",Field_evaluateAtDman)
         .def("giveType", &Field::giveType)
+        ;
+
+    class_<UniformGridField,bases<Field>>("UniformGridField")
+        .def("setGeometry",&UniformGridField::setGeometry,(bp::arg("lo"),bp::arg("hi"),bp::arg("div")))
+        .def("setValues",&UniformGridField::setValues,(bp::arg("values")))
         ;
 }
 
@@ -1653,9 +1709,25 @@ BOOST_PYTHON_MODULE (liboofem)
     pyclass_FloatMatrix();
     pyclass_IntArray();
     pyclass_SparseMtrx();
+    // from-python converters for python tuples/arrays
+    custom_AnyArray_from_sequence<FloatArray,double>();
+    custom_AnyArray_from_sequence<IntArray,int>();
+
+    // enumerations first, so that they can be used as default values when exposing class methods below
+    pyenum_problemMode();
+    pyenum_Element_Geometry_Type();
+    pyenum_ValueModeType();
+    pyenum_DofManTransfType();
+    pyenum_DofIDItem();
+    pyenum_FieldType();
+    pyenum_InternalStateType();
+    pyenum_MatResponseMode();
+    pyenum_domainType();
+
+
     pyclass_SpatialLocalizer();
     pyclass_EngngModelContext();
-	 pyclass_UnknownNumberingScheme();
+	pyclass_UnknownNumberingScheme();
     pyclass_EngngModel();
     pyclass_ExportModuleManager();
     pyclass_ExportModule();
@@ -1685,23 +1757,16 @@ BOOST_PYTHON_MODULE (liboofem)
     pyclass_OutputManager();
     pyclass_ClassFactory();
 
-    pyenum_problemMode();
-    pyenum_Element_Geometry_Type();
-    pyenum_ValueModeType();
-    pyenum_DofManTransfType();
-    pyenum_DofIDItem();
-    pyenum_FieldType();
-    pyenum_InternalStateType();
-    pyenum_MatResponseMode();
-    pyenum_domainType();
 
 
     def("InstanciateProblem", InstanciateProblem_1, return_value_policy<manage_new_object>());
     def("createDofManValueFieldPtr", &DofManValueField_create, with_custodian_and_ward_postcall<0,2>());
     def("FieldManager_registerField", &FieldManager_registerField);
 
-	 implicitly_convertible<std::auto_ptr<DofManValueField>, std::auto_ptr<Field> >();
-    register_ptr_to_python< std::auto_ptr<Field> >();
+    #ifdef OOFEM_USE_DEPRECATED_AUTOPTR
+	    implicitly_convertible<std::auto_ptr<DofManValueField>, std::auto_ptr<Field> >();
+        register_ptr_to_python< std::auto_ptr<Field> >();
+    #endif
 
     def("material2structuralMaterial", &material2structuralMaterial, return_internal_reference<>());
     def("material2structMatSettable", &material2structMatSettable, return_internal_reference<>());

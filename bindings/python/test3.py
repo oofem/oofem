@@ -10,7 +10,7 @@ ts=pb.giveCurrentStep()
 
 for t in liboofem.FieldType.FT_Temperature,liboofem.FieldType.FT_HumidityConcentration:
     f=pb.giveField(liboofem.FieldType(t),ts)
-    print ts.targetTime,t,str(f)
+    print(ts.targetTime,t,str(f))
 
 #fm=pb.giveContext().giveFieldManager()
 #print fm
@@ -52,5 +52,3 @@ for ei in range(1,ne+1):
     for n in range(1,nn+1):
         dmn=e.giveDofManager(n)
         print('Element %d, DOF #%d -> node %d'%(ei-1,n-1,dmn.giveNumber()))
-
->>>>>>> 1de6121b8cfa54782c66aae2e180bdb33c0b4029
