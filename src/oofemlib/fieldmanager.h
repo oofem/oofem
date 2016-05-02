@@ -43,7 +43,6 @@
 #include <memory>
 
 namespace oofem {
-typedef std :: shared_ptr< Field > FM_FieldPtr;
 
 class OOFEM_EXPORT FieldManager
 {
@@ -66,12 +65,12 @@ public:
      * Registers the given field (the receiver is not assumed to own given field).
      * The field is registered under given key. Using this key, it can be later accessed.
      */
-    void registerField(FM_FieldPtr eField, FieldType key);
+    void registerField(FieldPtr eField, FieldType key);
 
     /**
      * Returns the previously registered field under given key; NULL otherwise
      */
-    FM_FieldPtr giveField(FieldType key);
+    FieldPtr giveField(FieldType key);
 
     /** Returns true if field is registered under key */
     bool isFieldRegistered(FieldType key);

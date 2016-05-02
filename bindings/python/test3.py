@@ -40,8 +40,7 @@ for d in range(1,nd+1):
     print('DofManager #%d at '%(d-1),[cc[i] for i in range(len(cc))])
     # for vmt in liboofem.ValueModeType.VM_Total,liboofem.ValueModeType.VM_Unknown,liboofem.ValueModeType.VM_Velocity,liboofem.ValueModeType.VM_Acceleration,liboofem.ValueModeType.VM_Incremental:
     vmt=liboofem.ValueModeType.VM_Total
-    val=liboofem.FloatArray()
-    f.evaluateAtDman(val,dof,vmt,ts)
+    val=f.evaluateAtDman(dof,mode=vmt,atTime=ts)
     if len(val): print('   value',vmt,len(val),val)
     else: print ('   (zero-length array read from this DoF manager)')
 # elements

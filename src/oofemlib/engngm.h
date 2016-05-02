@@ -108,8 +108,6 @@ class CommunicatorBuff;
 class ProcessCommunicator;
 class UnknownNumberingScheme;
 
-typedef std :: shared_ptr< Field > EModelFieldPtr;
-
 
 /**
  * Class EngngModelContext represents a context, which is shared by all problem engng sub-models.
@@ -501,7 +499,7 @@ public:
      * and thus reliable reference counting mechanism is essential. 
      *
      */
-    virtual EModelFieldPtr giveField (FieldType key, TimeStep *) { return EModelFieldPtr();}
+    virtual FieldPtr giveField (FieldType key, TimeStep *) { return FieldPtr();}
 
 
     ///Returns the master engnmodel

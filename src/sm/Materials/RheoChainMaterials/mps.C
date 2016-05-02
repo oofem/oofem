@@ -1351,7 +1351,7 @@ MPSMaterial :: giveHumidity(GaussPoint *gp, TimeStep *tStep, int option)
     if ( ( status->giveHum() == -1. ) && ( status->giveHumIncrement() == -1. ) ) {
         FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
 
-        FM_FieldPtr tf;
+        FieldPtr tf;
         int err, wflag = 0;
         FloatArray gcoords;
         FloatArray et2, ei2; // total and incremental values of water mass
@@ -1411,7 +1411,7 @@ MPSMaterial :: giveTemperature(GaussPoint *gp, TimeStep *tStep, int option)
     if ( ( status->giveT() == -1. ) && ( status->giveTIncrement() == -1. ) ) {
         FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
 
-        FM_FieldPtr tf;
+        FieldPtr tf;
         int err, tflag = 0;
         FloatArray gcoords;
         FloatArray et1, ei1; // total and incremental values of temperature
