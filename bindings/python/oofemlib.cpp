@@ -1118,7 +1118,7 @@ void pyclass_Field()
         .def("giveType", &Field::giveType)
         ;
 
-    class_<UniformGridField,bases<Field>>("UniformGridField")
+    class_<UniformGridField,std::shared_ptr<UniformGridField>,bases<Field>>("UniformGridField")
         .def("setGeometry",&UniformGridField::setGeometry,(bp::arg("lo"),bp::arg("hi"),bp::arg("div")))
         .def("setValues",&UniformGridField::setValues,(bp::arg("values")))
         ;
@@ -1731,6 +1731,8 @@ BOOST_PYTHON_MODULE (liboofem)
 
     converters_cxxVector_pyList_2way<int>();
     converters_cxxVector_pyList_2way<double>();
+    // enums are separate types from ints
+    converters_cxxVector_pyList_2way<FieldType>();
 
     // enumerations first, so that they can be used as default values when exposing class methods below
     pyenum_problemMode();
@@ -1775,6 +1777,16 @@ BOOST_PYTHON_MODULE (liboofem)
     pyclass_GaussPoint();
     pyclass_OutputManager();
     pyclass_ClassFactory();
+
+    /*
+    Upcast converters which make boost::python accept shared_ptr<Derived> where shared_ptr<Base> is expected.
+    Upcasting is automatic with boost::shared_ptr but don't work with std::shared_ptr unfortunately.
+    See my post https://mail.python.org/pipermail/cplusplus-sig/2012-April/016521.html
+    and the reply https://mail.python.org/pipermail/cplusplus-sig/2012-April/016533.html, and also
+    boost issue https://github.com/boostorg/python/issues/29. This is a workaround which could be removed once
+    boost is fixed (unlikely?).
+    */
+    bp::implicitly_convertible<std::shared_ptr<UniformGridField>,std::shared_ptr<Field>>();
 
 
 

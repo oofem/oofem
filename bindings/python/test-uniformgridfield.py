@@ -2,25 +2,27 @@ from __future__ import print_function
 import liboofem
 import numpy as np
 # instantiate uniform field
-f=liboofem.UniformGridField()
+ugrid=liboofem.UniformGridField()
 # set 2d geometry
-f.setGeometry(lo=(0,0),hi=(1,1),div=(2,2))
+ugrid.setGeometry(lo=(0,0),hi=(1,1),div=(2,2))
 # set data: div is 2x2, hence 3x3=9 node grid with 9 values
-f.setValues([0,.5,0, .5,1,.5, 0,.5,.5])
-# grid which is larger and denser than field domain
-# closest-point values are returned for out-of-domain points
-X,Y=np.meshgrid(np.arange(-.5,1.5,.1),np.arange(-.5,1.5,.1))
-@np.vectorize
-def fEval(x,y):
-    return f.evaluateAtPos((x,y))[0]
-# evaluate field in all meshgrid points
-Z=fEval(X,Y)
+ugrid.setValues([0,.5,0, .5,1,.5, 0,.5,.5])
 
+dr = liboofem.OOFEMTXTDataReader("tmpatch42.in")
+transpModel = liboofem.InstanciateProblem(dr,liboofem.problemMode._processor,0)
+transpModel.checkProblemConsistency()
+transpModel.solveYourself()
 
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib import cm
-fig = plt.figure()
-ax = fig.gca(projection='3d')
-surf = ax.plot_surface(X, Y, Z, linewidth=1, rstride=1, cstride=1,cmap=cm.coolwarm, shade=True)
-plt.show()
+fieldMan = transpModel.giveContext().giveFieldManager()
+timeStep = transpModel.giveCurrentStep()
+eField = transpModel.giveField(liboofem.FieldType.FT_Temperature,timeStep)
+
+fieldMan.registerField(eField,liboofem.FieldType.FT_Velocity)
+fieldMan.registerField(ugrid,liboofem.FieldType.FT_Unknown)
+
+print(fieldMan.giveRegisteredKeys())
+print(fieldMan.giveField(liboofem.FieldType.FT_Velocity))
+print(fieldMan.giveField(liboofem.FieldType.FT_Unknown))
+
+transpModel.terminateAnalysis()
+timeStep = transpModel.giveCurrentStep()
