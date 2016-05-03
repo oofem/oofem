@@ -43,16 +43,18 @@ namespace oofem {
 REGISTER_Material(StructuralPythonMaterial);
 
 StructuralPythonMaterial :: StructuralPythonMaterial(int n, Domain *d) :
-    StructuralMaterial(n, d),
+    StructuralMaterial(n, d)
+#if 0
     smallDef(NULL),
     smallDefTangent(NULL),
     largeDef(NULL),
     largeDefTangent(NULL)
+#endif
 {}
 
 StructuralPythonMaterial :: ~StructuralPythonMaterial()
 {
-    if ( mpModule ) Py_DECREF(mpModule);
+///    if ( mpModule ) Py_DECREF(mpModule);
 }
 
 IRResultType StructuralPythonMaterial :: initializeFrom(InputRecord *ir)
@@ -64,6 +66,28 @@ IRResultType StructuralPythonMaterial :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, this->moduleName, _IFT_StructuralPythonMaterial_moduleName);
 
+    module=bp::import(moduleName.c_str());
+    if(!module){ OOFEM_WARNING("Module %s not importable.",moduleName.c_str()); return IRRT_BAD_FORMAT; }
+    // lambda for finding function and checking that it is callable
+    // returns true (OK) if the function was not found, or was found and it callable
+    // returns false (not OK) if the function was found but is not callable
+    auto tryDef=[&](const std::string& attr, bp::object& callable)->bool{
+        if(PyObject_HasAttrString(module.ptr(),attr.c_str())){
+            callable=module.attr(attr.c_str());
+            if(!PyCallable_Check(callable.ptr())){ OOFEM_WARNING("Object %s is not callable",attr.c_str()); return false; }
+        } else callable=bp::object();
+        return true;
+    };
+    // try to find all necessary functions; false means the function is not callable, in which case warning was already printed above
+    if(!(tryDef("computeStress",smallDef) && tryDef("computePK1Stress",largeDef) && tryDef("computeStressTangent",smallDefTangent) && tryDef("computePK1StressTangent",largeDefTangent))){ return IRRT_BAD_FORMAT; }
+    if(!smallDefTangent && !!smallDef){ OOFEM_WARNING("Using numerical tangent for small deformations."); }
+    if(!largeDefTangent && !!largeDef){ OOFEM_WARNING("Using numerical tangent for large deformations."); }
+    if(!smallDef && !largeDef){ OOFEM_WARNING("No functions for small/large deformations found."); return IRRT_BAD_FORMAT; }
+
+
+
+
+#if 0
     // Import Python file
     PyObject *mpName = PyString_FromString( this->moduleName.c_str() );
     this->mpModule = PyImport_Import(mpName);
@@ -89,6 +113,7 @@ IRResultType StructuralPythonMaterial :: initializeFrom(InputRecord *ir)
         OOFEM_WARNING("mpModule == NULL for module name %s", this->moduleName.c_str());
         return IRRT_BAD_FORMAT;
     }
+#endif
     pert = 1e-12;
 
     return IRRT_OK;
@@ -106,8 +131,13 @@ MaterialStatus *StructuralPythonMaterial :: CreateStatus(GaussPoint *gp) const
     return new StructuralPythonMaterialStatus(this->giveDomain(), gp);
 }
 
-void StructuralPythonMaterial :: callStressFunction(PyObject *func, const FloatArray &oldStrain, const FloatArray &oldStress, const FloatArray &strain, FloatArray &stress, PyObject *stateDict, PyObject *tempStateDict, TimeStep *tStep) const
+void StructuralPythonMaterial :: callStressFunction(bp::object func, const FloatArray &oldStrain, const FloatArray &oldStress, const FloatArray &strain, FloatArray &stress, bp::object stateDict, bp::object tempStateDict, TimeStep *tStep) const
 {
+    // pass mutable args via bp::ref
+    // pass "const" args without, which by default results in a new copy, ensuring the original won't be modified
+    func(oldStrain,oldStress,strain,stress,stateDict,tempStateDict,tStep->giveTargetTime());
+
+#if 0
     if ( !PyCallable_Check(func) ) {
         OOFEM_ERROR("Python function is not callable.");
     }
@@ -150,10 +180,13 @@ void StructuralPythonMaterial :: callStressFunction(PyObject *func, const FloatA
 
     Py_DECREF(retVal);
     Py_DECREF(pArgs);
+#endif
 }
 
-void StructuralPythonMaterial :: callTangentFunction(FloatMatrix &answer, PyObject *func, const FloatArray &strain, const FloatArray &stress, PyObject *stateDict, PyObject *tempStateDict, TimeStep *tStep) const
+void StructuralPythonMaterial :: callTangentFunction(FloatMatrix &answer, bp::object func, const FloatArray &strain, const FloatArray &stress, bp::object stateDict, bp::object tempStateDict, TimeStep *tStep) const
 {
+    answer=bp::extract<FloatMatrix>(func(strain,stress,stateDict,tempStateDict,tStep->giveTargetTime()));
+#if 0
     if ( !PyCallable_Check(func) ) {
         OOFEM_ERROR("Python function is not callable.");
     }
@@ -197,6 +230,7 @@ void StructuralPythonMaterial :: callTangentFunction(FloatMatrix &answer, PyObje
 
     Py_DECREF(retVal);
     Py_DECREF(pArgs);
+#endif
 }
 
 void StructuralPythonMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
@@ -305,6 +339,16 @@ void StructuralPythonMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, 
 int StructuralPythonMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     StructuralPythonMaterialStatus *ms = static_cast< StructuralPythonMaterialStatus * >( this->giveStatus(gp) );
+    bp::object val=ms->giveStateDictionary()[std::to_string(type).c_str()];
+    // call parent if we don't have this type in our records
+    if(!val) return StructuralMaterial::giveIPValue(answer,gp,type,tStep);
+    bp::extract<double> exNum(val);
+    bp::extract<FloatArray> exMat(val);
+    if(exNum.check()){ answer=FloatArray{exNum()}; return 1; }
+    else if(exMat.check()){ answer=exMat(); return 1;} 
+    OOFEM_WARNING("Dictionary entry of material state not float or something convertible to FloatArray");
+    return 0;
+#if 0
     std :: string s = std :: to_string( type );
     PyObject *val = PyDict_GetItemString(ms->giveStateDictionary(), s.c_str());
     if ( val ) {
@@ -327,6 +371,7 @@ int StructuralPythonMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, 
         }
     }
     return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
+#endif
 }
 
 
@@ -343,30 +388,36 @@ void StructuralPythonMaterialStatus :: initTempStatus()
 StructuralPythonMaterialStatus :: StructuralPythonMaterialStatus(Domain *d, GaussPoint *gp) :
     StructuralMaterialStatus(0, d, gp)
 {
+#if 0
     this->stateDict = PyDict_New();
     this->tempStateDict = PyDict_New();
+#endif
 }
 
 StructuralPythonMaterialStatus :: ~StructuralPythonMaterialStatus()
 {
+#if 0
     Py_DECREF(this->stateDict);
     Py_DECREF(this->tempStateDict);
+#endif
 }
 
 void StructuralPythonMaterialStatus :: updateYourself(TimeStep *tStep)
 {
     StructuralMaterialStatus :: updateYourself(tStep);
     // Copy the temp dict to the equilibrated one
-    auto oldDict = this->stateDict;
-    this->stateDict = PyDict_Copy(this->tempStateDict); ///@todo Does this suffice? I'm not sure about what happens to references into the dictionary itself. I want a deep copy. / Mikael
+    this->stateDict = this->tempStateDict.copy(); ///@todo Does this suffice? I'm not sure about what happens to references into the dictionary itself. I want a deep copy. / Mikael
+#if 0
     Py_DECREF(oldDict);
+#endif
 }
 
 
 void StructuralPythonMaterialStatus :: reinitTempStateDictionary()
 {
-    Py_DECREF(this->tempStateDict);
-    this->tempStateDict = PyDict_Copy(this->stateDict);
+    //Py_DECREF(this->tempStateDict);
+    //this->tempStateDict = PyDict_Copy(this->stateDict);
+    tempStateDict=stateDict.copy();
 }
 
 
