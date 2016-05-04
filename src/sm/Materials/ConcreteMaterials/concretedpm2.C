@@ -1805,7 +1805,7 @@ ConcreteDPM2 :: performRegularReturn(FloatArray &effectiveStress,
 
         normOfResiduals = residualsNorm.computeNorm();
 
-        if ( isnan(normOfResiduals) ) {
+        if ( std::isnan(normOfResiduals) ) {
             returnResult = RR_NotConverged;
             return kappaP;
         }

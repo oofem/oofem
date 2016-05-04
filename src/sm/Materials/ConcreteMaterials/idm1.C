@@ -1074,7 +1074,7 @@ IsotropicDamageMaterial1 :: damageFunctionPrime(double kappa, GaussPoint *gp)
             double omega = status->giveTempDamage();
             double help = exp(omega * kappa / ef);
             double ret = -( ( omega * ef - ef ) * help - omega * e0 ) / ( ef * kappa * help - e0 * kappa );
-            if ( isnan(ret) ) {
+            if ( std::isnan(ret) ) {
                 return 0.;
             }
             return ret;

@@ -41,6 +41,7 @@
 #include "contextmode.h"
 #include "enumitem.h"
 #include <string>
+#include <memory>
 
 namespace oofem {
 ///@todo FieldType and UnknownType basically determine the same thing. Should be possible to stick to one. Combinations of fields should be possible with logical bitfields.
@@ -67,6 +68,9 @@ class FloatArray;
 class DofManager;
 class DataStream;
 
+class Field;
+typedef std::shared_ptr<Field> FieldPtr;
+
 /**
  * Abstract class representing field. Field represent the spatial distribution of certain variable.
  * Field is able to evaluate its value at any point of interest. The field is usually associated to
@@ -91,7 +95,7 @@ public:
      * @param mode Mode of value (total, velocity,...).
      * @return Zero if ok, otherwise nonzero.
      */
-    virtual int evaluateAt(FloatArray &answer, FloatArray &coords,
+    virtual int evaluateAt(FloatArray &answer, const FloatArray &coords,
                            ValueModeType mode, TimeStep *tStep) = 0;
 
     /**

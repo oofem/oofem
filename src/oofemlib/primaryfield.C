@@ -366,7 +366,7 @@ PrimaryField :: __evaluateAt(FloatArray &answer, DofManager *dman,
 
 
 int
-PrimaryField :: __evaluateAt(FloatArray &answer, FloatArray &coords,
+PrimaryField :: __evaluateAt(FloatArray &answer, const FloatArray &coords,
                              ValueModeType mode, TimeStep *tStep,
                              IntArray *dofId)
 {
@@ -424,7 +424,7 @@ PrimaryField :: __evaluateAt(FloatArray &answer, FloatArray &coords,
 }
 
 int
-PrimaryField :: evaluateAt(FloatArray &answer, FloatArray &coords,
+PrimaryField :: evaluateAt(FloatArray &answer, const FloatArray &coords,
                            ValueModeType mode, TimeStep *tStep)
 {
     return this->__evaluateAt(answer, coords, mode, tStep, NULL);

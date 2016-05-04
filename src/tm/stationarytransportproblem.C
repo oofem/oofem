@@ -93,10 +93,10 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
         FieldManager *fm = this->giveContext()->giveFieldManager();
         for ( int i = 1; i <= exportFields.giveSize(); i++ ) {
             if ( exportFields.at(i) == FT_Temperature ) {
-                FM_FieldPtr _temperatureField( new MaskedPrimaryField ( ( FieldType ) exportFields.at(i), this->UnknownsField.get(), {T_f} ) );
+                FieldPtr _temperatureField( new MaskedPrimaryField ( ( FieldType ) exportFields.at(i), this->UnknownsField.get(), {T_f} ) );
                 fm->registerField( _temperatureField, ( FieldType ) exportFields.at(i) );
             } else if ( exportFields.at(i) == FT_HumidityConcentration ) {
-                FM_FieldPtr _concentrationField( new MaskedPrimaryField ( ( FieldType ) exportFields.at(i), this->UnknownsField.get(), {C_1} ) );
+                FieldPtr _concentrationField( new MaskedPrimaryField ( ( FieldType ) exportFields.at(i), this->UnknownsField.get(), {C_1} ) );
                 fm->registerField( _concentrationField, ( FieldType ) exportFields.at(i) );
             }
         }
@@ -122,7 +122,7 @@ double StationaryTransportProblem :: giveUnknownComponent(ValueModeType mode, Ti
 }
 
 
-EModelFieldPtr StationaryTransportProblem::giveField (FieldType key, TimeStep *tStep)
+FieldPtr StationaryTransportProblem::giveField (FieldType key, TimeStep *tStep)
 {
   /* Note: the current implementation uses MaskedPrimaryField, that is automatically updated with the model progress, 
      so the returned field always refers to active solution step. 
@@ -132,13 +132,13 @@ EModelFieldPtr StationaryTransportProblem::giveField (FieldType key, TimeStep *t
     OOFEM_ERROR("Unable to return field representation for non-current time step");
   }
   if ( key == FT_Temperature ) {
-    FM_FieldPtr _ptr ( new MaskedPrimaryField ( key, this->UnknownsField.get(), {T_f} ) );
+    FieldPtr _ptr ( new MaskedPrimaryField ( key, this->UnknownsField.get(), {T_f} ) );
     return _ptr;
   } else if ( key == FT_HumidityConcentration ) {
-    FM_FieldPtr _ptr ( new MaskedPrimaryField ( key, this->UnknownsField.get(), {C_1} ) );
+    FieldPtr _ptr ( new MaskedPrimaryField ( key, this->UnknownsField.get(), {C_1} ) );
     return _ptr;
   } else {
-    return FM_FieldPtr();
+    return FieldPtr();
   }
 }
 

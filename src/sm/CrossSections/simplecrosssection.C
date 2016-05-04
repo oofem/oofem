@@ -798,7 +798,7 @@ SimpleCrossSection :: giveTemperatureVector(FloatArray &answer, GaussPoint *gp, 
 
     /* add external source, if provided */
     FieldManager *fm = this->domain->giveEngngModel()->giveContext()->giveFieldManager();
-    FM_FieldPtr tf;
+    FieldPtr tf;
 
     if ( ( tf = fm->giveField(FT_Temperature) ) ) {
         // temperature field registered

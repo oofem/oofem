@@ -725,7 +725,7 @@ B3SolidMaterial :: giveHumidity(GaussPoint *gp, TimeStep *tStep) //computes humi
 
     /* ask for humidity from external sources, if provided */
     FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
-    FM_FieldPtr tf;
+    FieldPtr tf;
     FloatArray gcoords, et2;
 
     if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {
@@ -756,7 +756,7 @@ B3SolidMaterial :: giveHumidityIncrement(GaussPoint *gp, TimeStep *tStep) //comp
 
     /* ask for humidity from external sources, if provided */
     FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
-    FM_FieldPtr tf;
+    FieldPtr tf;
     FloatArray gcoords, et2, ei2;
 
     if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {

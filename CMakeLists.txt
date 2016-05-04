@@ -441,12 +441,13 @@ if (USE_PYTHON_BINDINGS OR USE_PYTHON)
     list (APPEND MODULE_LIST "Python")
     add_definitions(-D__PYTHON_MODULE)
 
-    if (USE_PYTHON_BINDINGS)
+    #if (USE_PYTHON_BINDINGS)
+    # require boost_python also for python stuff by itself
         find_package(Boost COMPONENTS "python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}" REQUIRED)
         include_directories (${Boost_INCLUDE_DIRS})
         list (APPEND EXT_LIBS ${Boost_LIBRARIES})
         add_definitions(-DBOOST_PYTHON)
-    endif ()
+    #endif ()
 endif ()
 
 

@@ -57,7 +57,7 @@ SmoothedNodalInternalVariableField :: ~SmoothedNodalInternalVariableField()
 }
 
 int
-SmoothedNodalInternalVariableField :: evaluateAt(FloatArray &answer, FloatArray &coords, ValueModeType mode, TimeStep *tStep)
+SmoothedNodalInternalVariableField :: evaluateAt(FloatArray &answer, const FloatArray &coords, ValueModeType mode, TimeStep *tStep)
 {
     int result = 0; // assume ok
     FloatArray lc, n;

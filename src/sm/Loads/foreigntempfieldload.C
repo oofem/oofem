@@ -32,60 +32,33 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "intvarfield.h"
+#include "foreigntempfieldload.h"
+#include "timestep.h"
 #include "classfactory.h"
-#include "dofmanager.h"
-#include "materialmappingalgorithm.h"
+#include "field.h"
 
 namespace oofem {
-InternalVariableField :: InternalVariableField(InternalStateType ist, FieldType ft, MaterialMappingAlgorithmType mma_type, Domain *d) :
-    Field(ft)
-{
-    this->type = ist;
-    this->mma = classFactory.createMaterialMappingAlgorithm(mma_type);
-    this->domain = d;
-}
+REGISTER_BoundaryCondition(ForeignTemperatureFieldLoad);
 
-InternalVariableField :: ~InternalVariableField()
+void
+ForeignTemperatureFieldLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode)
+// Returns the value of the receiver at time and given position respecting the mode.
 {
-    if ( mma ) {
-        delete mma;
+    if(!foreignField){
+        OOFEM_ERROR("ForeignTemperatureFieldLoad: foreignField must be assigned from python (is NULL).")  }
+
+    if ( ( mode != VM_Incremental ) && ( mode != VM_Total ) ) {
+        OOFEM_ERROR("unknown mode (%s)", __ValueModeTypeToString(mode) );
+    }
+
+    if(foreignField->evaluateAt(answer, coords, mode, tStep)){
+        OOFEM_ERROR("ForeignTemperatureFieldLoad::foreignField.evaluateAt(...) failed.");
     }
 }
 
-int
-InternalVariableField :: evaluateAt(FloatArray &answer, const FloatArray &coords, ValueModeType mode, TimeStep *tStep)
+IRResultType
+ForeignTemperatureFieldLoad :: initializeFrom(InputRecord *ir)
 {
-    IntArray types(1);
-    types.at(1) = this->type;
-    /// Use MaterialMappingAlgorithm classes to do the job
-    Set eset(0, domain);
-    eset.addAllElements();
-    this->mma->__init(domain, types, coords, eset, tStep);
-    this->mma->__mapVariable(answer, coords, this->type, tStep);
-
-    return 0; // ok
-}
-
-int
-InternalVariableField :: evaluateAt(FloatArray &answer, DofManager *dman, ValueModeType mode, TimeStep *tStep)
-{
-    if ( dman->hasCoordinates() ) {
-        return this->evaluateAt(answer, * ( dman->giveCoordinates() ), mode, tStep);
-    } else {
-        return 1; // failed -> dman without coordinates
-    }
-}
-
-contextIOResultType
-InternalVariableField :: saveContext(DataStream &stream, ContextMode mode)
-{
-    return CIO_OK;
-}
-
-contextIOResultType
-InternalVariableField :: restoreContext(DataStream &stream, ContextMode mode)
-{
-    return CIO_OK;
+    return IRRT_OK;
 }
 } // end namespace oofem

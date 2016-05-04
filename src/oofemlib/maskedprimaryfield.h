@@ -62,7 +62,7 @@ public:
         master = m;
     }
 
-    virtual int evaluateAt(FloatArray &answer, FloatArray &coords,
+    virtual int evaluateAt(FloatArray &answer, const FloatArray &coords,
                            ValueModeType mode, TimeStep *tStep);
     virtual int evaluateAt(FloatArray &answer, DofManager *dman,
                            ValueModeType mode, TimeStep *tStep);

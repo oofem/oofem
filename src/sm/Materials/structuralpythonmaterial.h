@@ -35,12 +35,17 @@
 #ifndef structuralpythonmaterial_h
 #define structuralpythonmaterial_h
 
+#include<boost/python.hpp>
+namespace bp=boost::python;
+
 #include "../sm/Materials/structuralmaterial.h"
 #include "../sm/Materials/structuralms.h"
 
+#if 0
 #ifndef PyObject_HEAD
 struct _object;
 typedef _object PyObject;
+#endif
 #endif
 
 ///@name Input fields for StructuralPythonMaterial
@@ -72,9 +77,13 @@ class StructuralPythonMaterial : public StructuralMaterial
 private:
     /// Name of the file that contains the python function
     std :: string moduleName;
-    /// The module containing the functions
-    PyObject *mpModule;
-
+    /// module containing functions (created from moduleName)
+    bp::object module;
+    /// callable for small deformations
+    bp::object smallDef, smallDefTangent;
+    // callables for large deformations
+    bp::object largeDef, largeDefTangent;
+#if 0
     /// Compiled function for small deformations
     PyObject *smallDef;
     PyObject *smallDefTangent;
@@ -82,6 +91,7 @@ private:
     /// Compiled function for large deformations
     PyObject *largeDef;
     PyObject *largeDefTangent;
+#endif
 
     /// Numerical pertubation for numerical tangents
     double pert;
@@ -96,8 +106,8 @@ public:
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
-    void callStressFunction(PyObject *func, const FloatArray &oldStrain, const FloatArray &oldStress, const FloatArray &strain, FloatArray &stress, PyObject *stateDict, PyObject *tempStateDict, TimeStep *tStep) const;
-    void callTangentFunction(FloatMatrix &answer, PyObject *func, const FloatArray &strain, const FloatArray &stress, PyObject *stateDict, PyObject *tempStateDict, TimeStep *tStep) const;
+    void callStressFunction(bp::object func, const FloatArray &oldStrain, const FloatArray &oldStress, const FloatArray &strain, FloatArray &stress, bp::object stateDict, bp::object tempStateDict, TimeStep *tStep) const;
+    void callTangentFunction(FloatMatrix &answer, bp::object func, const FloatArray &strain, const FloatArray &stress, bp::object stateDict, bp::object tempStateDict, TimeStep *tStep) const;
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
@@ -124,8 +134,11 @@ class StructuralPythonMaterialStatus : public StructuralMaterialStatus
 {
 protected:
     /// Internal state variables
+    bp::dict stateDict, tempStateDict;
+#if 0
     PyObject *stateDict;
     PyObject *tempStateDict;
+#endif
 
 public:
     /// Constructor.
@@ -137,8 +150,8 @@ public:
     virtual void updateYourself(TimeStep *tStep);
     void reinitTempStateDictionary();
 
-    PyObject *giveStateDictionary() { return stateDict; }
-    PyObject *giveTempStateDictionary() { return tempStateDict; }
+    bp::object giveStateDictionary() { return stateDict; }
+    bp::object giveTempStateDictionary() { return tempStateDict; }
 
     virtual const char *giveClassName() const { return "StructuralPythonMaterialStatus"; }
 };
