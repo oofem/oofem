@@ -74,7 +74,6 @@ Element :: Element(int n, Domain *aDomain) :
     material           = 0;
     numberOfDofMans    = 0;
     activityTimeFunction = 0;
-    //    visibilityTimeFunction = 0;
 }
 
 
@@ -669,9 +668,6 @@ Element :: initializeFrom(InputRecord *ir)
     activityTimeFunction = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, activityTimeFunction, _IFT_Element_activityTimeFunction);
 
-    //    visibilityTimeFunction = 0;
-    //    IR_GIVE_OPTIONAL_FIELD(ir, visibilityTimeFunction, _IFT_Element_visibilityTimeFunction);
-
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, _IFT_Element_nip);
 
     return IRRT_OK;
@@ -719,11 +715,6 @@ Element :: giveInputRecord(DynamicInputRecord &input)
     if ( activityTimeFunction > 0 ) {
         input.setField(activityTimeFunction, _IFT_Element_activityTimeFunction);
     }
-
-    //    if ( visibilityTimeFunction > 0 ) {
-    //      input.setField(visibilityTimeFunction, _IFT_Element_visibilityTimeFunction);
-    //    }
-
 
     input.setField(numberOfGaussPoints, _IFT_Element_nip);
 }
