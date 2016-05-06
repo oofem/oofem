@@ -53,7 +53,8 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(FT_Pressure, 4) \
     ENUM_ITEM_WITH_VALUE(FT_Temperature, 5) \
     ENUM_ITEM_WITH_VALUE(FT_HumidityConcentration, 6) \
-    ENUM_ITEM_WITH_VALUE(FT_TransportProblemUnknowns, 7)
+    ENUM_ITEM_WITH_VALUE(FT_TransportProblemUnknowns, 7) \
+    ENUM_ITEM_WITH_VALUE(FT_TemperatureAmbient, 8)
 
 /// Physical type of field.
 enum FieldType {

@@ -1311,6 +1311,7 @@ void pyenum_FieldType()
         .value("FT_Temperature", FT_Temperature)
         .value("FT_HumidityConcentration", FT_HumidityConcentration)
         .value("FT_TransportProblemUnknowns", FT_TransportProblemUnknowns)
+        .value("FT_TemperatureAmbient", FT_TemperatureAmbient)
         ;
 }
 

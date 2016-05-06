@@ -611,7 +611,8 @@ TransportElement :: computeLoadVector(FloatArray &answer, Load *load, CharType t
 void
 TransportElement :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep)
 {
-    answer.clear();
+    
+answer.clear();
 
     if ( !( load->giveType() == TransmissionBC && type == ExternalForcesVector ) &&
         !( load->giveType() == ConvectionBC && type == InternalForcesVector ) &&
@@ -646,7 +647,11 @@ TransportElement :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *
         double detJ = interp->boundaryGiveTransformationJacobian( boundary, lcoords, FEIElementGeometryWrapper(this) );
         double dA = this->giveThicknessAt(gcoords) * gp->giveWeight() * detJ;
 
-        if ( load->giveFormulationType() == Load :: FT_Entity ) {
+        //Check external ambient temperature field first
+        FieldPtr tf;
+        if (tf = domain->giveEngngModel()->giveContext()->giveFieldManager()->giveField(FT_TemperatureAmbient)){
+            tf->evaluateAt(val, gcoords, VM_Total, tStep);
+        } else if ( load->giveFormulationType() == Load :: FT_Entity ) {
             load->computeValueAt(val, tStep, lcoords, mode);
         } else {
             load->computeValueAt(val, tStep, gcoords, mode);
@@ -708,6 +713,7 @@ TransportElement :: computeTangentFromBoundaryLoad(FloatMatrix &answer, Boundary
 void
 TransportElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep)
 {
+    ///@todo Very similar to function computeBoundaryLoadVector and computeEdgeBCSubVectorAt. They should be all merged together.
     answer.clear();
 
     if ( !( load->giveType() == TransmissionBC && type == ExternalForcesVector ) &&
@@ -746,7 +752,10 @@ TransportElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLo
         interp->boundaryEdgeLocal2Global( gcoords, boundary, lcoords, FEIElementGeometryWrapper(this) );
         double dL = this->giveThicknessAt(gcoords) * gp->giveWeight() * detJ;
 
-        if ( load->giveFormulationType() == Load :: FT_Entity ) {
+        FieldPtr tf;
+        if (tf = domain->giveEngngModel()->giveContext()->giveFieldManager()->giveField(FT_TemperatureAmbient)){
+            tf->evaluateAt(val, gcoords, VM_Total, tStep);
+        } else if ( load->giveFormulationType() == Load :: FT_Entity ) {
             load->computeValueAt(val, tStep, lcoords, mode);
         } else {
             load->computeValueAt(val, tStep, gcoords, mode);
@@ -923,12 +932,16 @@ TransportElement :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int
             this->computeEgdeNAt(n, iEdge, lcoords);
             dV = this->computeEdgeVolumeAround(gp, iEdge);
 
-            if ( edgeLoad->giveFormulationType() == Load :: FT_Entity ) {
+            FieldPtr tf;
+            FloatArray gcoords;
+            if (tf = domain->giveEngngModel()->giveContext()->giveFieldManager()->giveField(FT_TemperatureAmbient)){
+                this->computeEdgeIpGlobalCoords(gcoords, lcoords, iEdge);
+                tf->evaluateAt(val, gcoords, VM_Total, tStep);
+            } else if ( edgeLoad->giveFormulationType() == Load :: FT_Entity ) {
                 edgeLoad->computeValueAt(val, tStep, lcoords, mode);
             } else {
-                FloatArray globalIPcoords;
-                this->computeEdgeIpGlobalCoords(globalIPcoords, lcoords, iEdge);
-                edgeLoad->computeValueAt(val, tStep, globalIPcoords, mode);
+                this->computeEdgeIpGlobalCoords(gcoords, lcoords, iEdge);
+                edgeLoad->computeValueAt(val, tStep, gcoords, mode);
             }
 
             reducedAnswer.add(val.at(indx) * coeff * dV, n);
@@ -952,7 +965,7 @@ TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
 
     BoundaryLoad *surfLoad = dynamic_cast< BoundaryLoad * >(load);
     if ( surfLoad ) {
-        FloatArray reducedAnswer, val, globalIPcoords, n;
+        FloatArray reducedAnswer, val, gcoords, n;
         IntArray mask;
 
         answer.resize( this->giveNumberOfDofManagers() );
@@ -990,11 +1003,15 @@ TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
             this->computeSurfaceNAt( n, iSurf, gp->giveNaturalCoordinates() );
             double dV = this->computeSurfaceVolumeAround(gp, iSurf);
 
-            if ( surfLoad->giveFormulationType() == Load :: FT_Entity ) {
+            FieldPtr tf;
+            if (tf = domain->giveEngngModel()->giveContext()->giveFieldManager()->giveField(FT_TemperatureAmbient)){
+                this->computeSurfIpGlobalCoords(gcoords, gp->giveNaturalCoordinates(), iSurf);
+                tf->evaluateAt(val, gcoords, VM_Total, tStep);
+            } else if ( surfLoad->giveFormulationType() == Load :: FT_Entity ) {
                 surfLoad->computeValueAt(val, tStep, gp->giveNaturalCoordinates(), mode);
             } else {
-                this->computeSurfIpGlobalCoords(globalIPcoords, gp->giveNaturalCoordinates(), iSurf);
-                surfLoad->computeValueAt(val, tStep, globalIPcoords, mode);
+                this->computeSurfIpGlobalCoords(gcoords, gp->giveNaturalCoordinates(), iSurf);
+                surfLoad->computeValueAt(val, tStep, gcoords, mode);
             }
 
             reducedAnswer.add(val.at(indx) * coeff * dV, n);
@@ -1153,7 +1170,7 @@ TransportElement :: getRadiativeHeatTranferCoef(BoundaryLoad *bLoad, TimeStep *t
     double answer = 0;
     ///@todo Why aren't this code using the standard approach of calling computeComponentArrayAt(...) to get the time function scaling and all?
     const FloatArray &components = bLoad->giveComponentArray();
-    
+
     answer = components.at(1);//T_infty
     answer += 273.15;
     answer = answer*answer*answer;

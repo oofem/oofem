@@ -921,7 +921,7 @@ void EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep,
 void EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, const VectorAssembler &va, ValueModeType mode,
                                                  const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
 {
-    ///@todo This should be removed when it loads are given through sets.
+    ///@todo This should be removed when loads are given through sets.
     IntArray loc, dofids;
     FloatArray charVec;
     FloatMatrix R;
