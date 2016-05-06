@@ -1002,65 +1002,72 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
                 const IntArray &elements = set->giveElementList();
                 for ( int ielem = 1; ielem <= elements.giveSize(); ++ielem ) {
                     Element *element = domain->giveElement( elements.at(ielem) );
-                    charVec.clear();
-                    va.vectorFromLoad(charVec, *element, bodyLoad, tStep, mode);
-
-                    if ( charVec.isNotEmpty() ) {
+		    if ( element->isActivated(tStep) ) {
+		      charVec.clear();
+		      va.vectorFromLoad(charVec, *element, bodyLoad, tStep, mode);
+		      
+		      if ( charVec.isNotEmpty() ) {
                         if ( element->giveRotationMatrix(R) ) {
-                            charVec.rotatedWith(R, 't');
+			  charVec.rotatedWith(R, 't');
                         }
-
+			
                         va.locationFromElement(loc, *element, s, & dofids);
                         answer.assemble(charVec, loc);
-
+			
                         if ( eNorms ) {
-                            eNorms->assembleSquared(charVec, dofids);
+			  eNorms->assembleSquared(charVec, dofids);
                         }
-                    }
+		      }
+		    }
                 }
             } else if ( ( bLoad = dynamic_cast< BoundaryLoad * >(load) ) ) { // Boundary load:
                 const IntArray &boundaries = set->giveBoundaryList();
                 for ( int ibnd = 1; ibnd <= boundaries.giveSize() / 2; ++ibnd ) {
                     Element *element = domain->giveElement( boundaries.at(ibnd * 2 - 1) );
-                    int boundary = boundaries.at(ibnd * 2);
-                    charVec.clear();
-                    va.vectorFromBoundaryLoad(charVec, *element, bLoad, boundary, tStep, mode);
+		    if ( element->isActivated(tStep) ) {
 
-                    if ( charVec.isNotEmpty() ) {
+		      int boundary = boundaries.at(ibnd * 2);
+		      charVec.clear();
+		      va.vectorFromBoundaryLoad(charVec, *element, bLoad, boundary, tStep, mode);
+		      
+		      if ( charVec.isNotEmpty() ) {
                         element->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
                         if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
-                            charVec.rotatedWith(R, 't');
+			  charVec.rotatedWith(R, 't');
                         }
-
+			
                         va.locationFromElementNodes(loc, *element, bNodes, s, & dofids);
                         answer.assemble(charVec, loc);
-
+			
                         if ( eNorms ) {
-                            eNorms->assembleSquared(charVec, dofids);
+			  eNorms->assembleSquared(charVec, dofids);
                         }
-                    }
+		      }
+		    }
                 }
                 ///@todo Should we have a seperate entry for edge loads? Just sticking to the general "boundaryload" for now.
                 const IntArray &edgeBoundaries = set->giveEdgeList();
                 for ( int ibnd = 1; ibnd <= edgeBoundaries.giveSize() / 2; ++ibnd ) {
-                    Element *element = domain->giveElement( edgeBoundaries.at(ibnd * 2 - 1) );
-                    int boundary = edgeBoundaries.at(ibnd * 2);
-                    charVec.clear();
-                    va.vectorFromEdgeLoad(charVec, *element, bLoad, boundary, tStep, mode);
-
-                    if ( charVec.isNotEmpty() ) {
-                        element->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
-                        if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
-                            charVec.rotatedWith(R, 't');
-                        }
-
-                        va.locationFromElementNodes(loc, *element, bNodes, s, & dofids);
-                        answer.assemble(charVec, loc);
-
-                        if ( eNorms ) {
-                            eNorms->assembleSquared(charVec, dofids);
-                        }
-                    }
+		  Element *element = domain->giveElement( edgeBoundaries.at(ibnd * 2 - 1) );
+		  if ( element->isActivated(tStep) ) {
+		    int boundary = edgeBoundaries.at(ibnd * 2);
+		    charVec.clear();
+		    va.vectorFromEdgeLoad(charVec, *element, bLoad, boundary, tStep, mode);
+		    
+		    if ( charVec.isNotEmpty() ) {
+		      element->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
+		      if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
+			charVec.rotatedWith(R, 't');
+		      }
+		      
+		      va.locationFromElementNodes(loc, *element, bNodes, s, & dofids);
+		      answer.assemble(charVec, loc);
+		      
+		      if ( eNorms ) {
+			eNorms->assembleSquared(charVec, dofids);
+		      }
+		    }
+		  }
                 }
             } else if ( ( nLoad = dynamic_cast< NodalLoad * >(load) ) ) { // Nodal load:
                 const IntArray &nodes = set->giveNodeList();

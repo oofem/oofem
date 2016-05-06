@@ -158,7 +158,7 @@ public:
      * @param tStep Time step to check activity for.
      * @return True if material is activated for given solution step.
      */
-    bool isActivated(TimeStep *tStep) {
+    virtual bool isActivated(TimeStep *tStep) {
         if ( tStep ) {
             return ( tStep->giveIntrinsicTime() >= this->castingTime );
         } else {

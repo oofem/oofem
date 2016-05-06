@@ -58,6 +58,7 @@
 #define _IFT_RheoChainMaterial_endoftimeofinterest "endoftimeofinterest"
 #define _IFT_RheoChainMaterial_timefactor "timefactor"
 #define _IFT_RheoChainMaterial_talpha "talpha"
+#define _IFT_RheoChainMaterial_preCastingTimeMat "precastingtimemat"
 //@}
 
 namespace oofem {
@@ -165,6 +166,11 @@ protected:
      */
     double timeFactor;
 
+    /// Stiffness at time less than casting time - optional parameter, negative by default
+    //double zeroStiffness;
+
+    int preCastingTimeMat;
+
 public:
     RheoChainMaterial(int n, Domain *d);
     virtual ~RheoChainMaterial();
@@ -192,6 +198,14 @@ public:
 
     /// Evaluation of the incremental modulus.
     virtual double giveEModulus(GaussPoint *gp, TimeStep *tStep) = 0;
+
+    /*    virtual double giveIncrementalModulus(GaussPoint *gp, TimeStep *tStep) {
+      if ( (tStep->giveIntrinsicTime() < this->castingTime) && ( this->zeroStiffness > 0. ) ) {
+	return this->zeroStiffness;
+      } else {
+	return this->giveEModulus(gp, tStep);
+      }
+      }*/
 
     /// Evaluation of the moduli of individual units.
     virtual void computeCharCoefficients(FloatArray &answer, double tPrime, GaussPoint *gp, TimeStep *tStep) = 0;
@@ -271,6 +285,15 @@ public:
 
     /// Evaluation of the creep compliance function at time t when loading is acting from time t_prime
     virtual double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) = 0;
+
+    virtual bool isActivated(TimeStep *tStep) {
+      if (this->preCastingTimeMat > 0) {
+	return true;
+      } else {
+	return Material :: isActivated( tStep);
+      }
+    }
+
 
 protected:
     /**

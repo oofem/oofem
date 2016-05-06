@@ -605,15 +605,28 @@ Eurocode2CreepMaterial :: giveShrinkageStrainVector(FloatArray &answer,
             }
         }
     } else { // total
+      if ( dryingTimeNow > 0. ) {
         if ( ( this->shType == EC2_TotalShrinkage ) || ( this->shType == EC2_DryingShrinkage ) ) {
-            this->computeIncrementOfDryingShrinkageVector( eps_sh, gp, dryingTimeNow, max(0., ( this->relMatAge - this->t0 ) / this->timeFactor) );
-            answer.add(eps_sh);
+	  this->computeIncrementOfDryingShrinkageVector( eps_sh, gp, dryingTimeNow, max(0., ( this->relMatAge - this->t0 ) / this->timeFactor) );
+	  answer.add(eps_sh);
         }
+      }
+	
+      if ( autoShrTimeNow > ( this->castingTime + this->relMatAge ) ) {
+	if ( ( this->shType == EC2_TotalShrinkage ) || ( this->shType == EC2_AutogenousShrinkage ) ) {
+	  if (this->castingTime > 0.) {
+	    this->computeIncrementOfAutogenousShrinkageVector(eps_sh, gp, autoShrTimeNow, (this->relMatAge+this->castingTime) / this->timeFactor);
+	  } else {
+	    this->computeIncrementOfAutogenousShrinkageVector(eps_sh, gp, autoShrTimeNow, (this->relMatAge) / this->timeFactor);
+	  }
+	  answer.add(eps_sh);
+	}
+      }
+    }
 
-        if ( ( this->shType == EC2_TotalShrinkage ) || ( this->shType == EC2_AutogenousShrinkage ) ) {
-            this->computeIncrementOfAutogenousShrinkageVector(eps_sh, gp, autoShrTimeNow, this->relMatAge / this->timeFactor);
-            answer.add(eps_sh);
-        }
+    
+    if ( answer.at(1) != answer.at(1) ) {
+      OOFEM_ERROR("shrinkage is NaN: %f", answer.at(1));
     }
 
     return;

@@ -711,7 +711,7 @@ MPSMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
         }
 
         // contribution of the solidifying Kelving chain
-        sum = KelvinChainSolidMaterial :: giveEModulus(gp, tStep);
+	sum = KelvinChainSolidMaterial :: giveEModulus(gp, tStep);
 
         v = computeSolidifiedVolume(gp, tStep);
 
@@ -760,7 +760,7 @@ MPSMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
         status->setEmodulusFlag(true);
     }
 
-    if ( Emodulus < 1. ) {
+    if ( Emodulus < 0. ) {
         OOFEM_ERROR("Incremental modulus is negative %f", Emodulus);
     }
 

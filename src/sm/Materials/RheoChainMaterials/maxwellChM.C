@@ -114,6 +114,10 @@ MaxwellChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
 
     ///@warning THREAD UNSAFE!
 
+    if (  (tStep->giveIntrinsicTime() < this->castingTime)  ) {
+      OOFEM_ERROR("Attempted to evaluate E modulus at time lower than casting time");
+    }
+
     double tPrime = relMatAge + ( tStep->giveTargetTime() - 0.5 * tStep->giveTimeIncrement() ) / timeFactor;
     this->updateEparModuli(tPrime, gp, tStep);
 
@@ -153,6 +157,10 @@ MaxwellChainMaterial :: giveEigenStrainVector(FloatArray &answer,
     FloatMatrix B;
     MaxwellChainMaterialStatus *status = static_cast< MaxwellChainMaterialStatus * >( this->giveStatus(gp) );
 
+    if (  (tStep->giveIntrinsicTime() < this->castingTime)  ) {
+      OOFEM_ERROR("Attempted to evaluate creep strain for time lower than casting time");
+    }
+
     if ( mode == VM_Incremental ) {
         this->giveUnitComplianceMatrix(B, gp, tStep);
         reducedAnswer.resize( B.giveNumberOfRows() );
@@ -171,7 +179,8 @@ MaxwellChainMaterial :: giveEigenStrainVector(FloatArray &answer,
             }
         }
 
-        E = this->giveEModulus(gp, tStep);
+	E = this->giveEModulus(gp, tStep);
+        // E = this->giveIncrementalModulus(gp, tStep);
         reducedAnswer.times(1.0 / E);
 
         answer =  reducedAnswer;

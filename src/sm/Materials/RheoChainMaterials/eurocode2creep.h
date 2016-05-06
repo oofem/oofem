@@ -58,9 +58,13 @@ namespace oofem {
 class Eurocode2CreepMaterialStatus : public KelvinChainMaterialStatus
 {
 protected:
+    /// temperature-dependent equivalent age, maturity (equilibrated value)
     double maturity;
+    /// temperature-dependent equivalent age, maturity (temporary value)
     double tempMaturity;
+    /// temperature (equilibrated value)
     double temperature;
+    /// temperature (temporary value)
     double tempTemperature;
 
 public:
@@ -86,7 +90,12 @@ public:
 
 /**
  * This class implements a model for concrete creep and shrinkage according to EuroCode 2
- * The creep is assumed to be linear (formula from section 3.7 is not considered here)
+ * The creep is assumed to be linear (formula from section 3.7 is not considered here) with aging.
+ * The linearity assumption is considered OK for stresses below 0.45 of the compressive strength.
+ * The shrinkage deformation is additively split into two parts: drying shrinkage $\varepsilon_{sh,d}$ and 
+ * autogenous shrinkage $\varepsilon_{sh,a}$.
+ * A detailed description of the material model is given in the material manual. 
+ * See the tests "/sm/EC2creep.in" and "/sm/EC2shrinkage.in" for examples.
  */
 class Eurocode2CreepMaterial : public KelvinChainMaterial
 {
@@ -114,9 +123,6 @@ protected:
     double s;
 
     // CREEP
-    /// onset of drying [day, sec, ...]
-    double t0;
-
     /// drying creep coefficient
     double phi_RH;
 
@@ -134,6 +140,9 @@ protected:
 
 
     // DRYING SHRINKAGE
+    /// duration of curing [day, sec, ...]
+    double t0;
+
     /// age (absolute) when concrete started drying, must be in days!
     double begOfDrying;
 
@@ -148,7 +157,7 @@ protected:
     /// asymptotic value of autogenous shrinakge, 3.12 in EC2
     double eps_ca_infty;
 
-
+    /// shrinkage option
     enum ec2ShrinkageType { EC2_NoShrinkage, EC2_TotalShrinkage, EC2_DryingShrinkage, EC2_AutogenousShrinkage } shType;
 
     /**
@@ -157,6 +166,7 @@ protected:
      */
     bool retardationSpectrumApproximation;
 
+    /// switch for temperature dependence of concrete maturity (default option is off)
     bool temperatureDependent;
 
 
@@ -177,22 +187,22 @@ public:
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
+    /// evaluates concrete strength at given age 
     virtual double computeConcreteStrengthAtAge(double age);
 
+    /// evaluates concrete mean elastic modulus at given age
     virtual double computeMeanElasticModulusAtAge(double age);
 
 
     /// Evaluation of the compliance function
     virtual double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep);
 
-    /// Evaluation of the compliance function
+    /// Evaluation of the compliance function (according to appendix B from the EC)
     virtual double computeCreepCoefficient(double t, double t_prime, GaussPoint *gp, TimeStep *tStep);
 
 
 protected:
     virtual int hasIncrementalShrinkageFormulation() { return 1; }
-
-    //    virtual void giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
     virtual double giveEModulus(GaussPoint *gp, TimeStep *tStep);
 
@@ -212,6 +222,7 @@ protected:
     /// sets parameters for creep according to formulas from EC
     void computeCreepParams(int, double);
 
+    /// computes retardation times of the aging Kelvin chain
     virtual void computeCharTimes();
 
     /// computes correction factor which multiplies the retardation times
@@ -223,8 +234,10 @@ protected:
     /// Evaluation of characteristic moduli of the Kelvin chain.
     virtual void computeCharCoefficients(FloatArray &answer, double tPrime, GaussPoint *gp, TimeStep *tStep);
 
+    /// computes increment of drying shrinkage - the shrinkage strain is isotropic
     void computeIncrementOfDryingShrinkageVector(FloatArray &answer, GaussPoint *gp, double tNow, double tThen);
 
+    /// computes increment of autogenous shrinkage - the shrinkage strain is isotropic
     void computeIncrementOfAutogenousShrinkageVector(FloatArray &answer, GaussPoint *gp, double tNow, double tThen);
 };
 } // end namespace oofem

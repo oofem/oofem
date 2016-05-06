@@ -69,6 +69,7 @@
 #define _IFT_Element_partitions "partitions"
 #define _IFT_Element_remote "remote"
 #define _IFT_Element_activityTimeFunction "activityltf"
+//#define _IFT_Element_visibilityTimeFunction "visibilityltf"
 #define _IFT_Element_nip "nip"
 //@}
 
@@ -171,6 +172,9 @@ protected:
 
     /// Element activity time function. If defined, nonzero value indicates active receiver, zero value inactive element.
     int activityTimeFunction;
+
+    /// Element visibility time function. If defined, nonzero value indicates active receiver, zero value inactive element. Used only for vtk export. This function needed to be introduced because activityTimeFunction controlled both assembling of stiffness matrix and export. This feature was implemented for TDA (time dependent analysis) where the certain elements have very small stiffness before their birth - at that period they contribute to the stiffness matrix yet they are not drawn.
+    //    int visibilityTimeFunction;
 
     /**
      * In parallel mode, globalNumber contains globally unique DoFManager number.
@@ -690,6 +694,12 @@ public:
      * @return True, if receiver is activated for given solution step, otherwise false.
      */
     virtual bool isActivated(TimeStep *tStep);
+
+    /**
+     * @return True, if the current time is higher than the casting time of the material, otherwise false.
+     * Used from e.g. vtkxml export module to display only active elements
+     */
+    virtual bool isCast(TimeStep *tStep);
 
     // time step initialization (required for some non-linear solvers)
     /**

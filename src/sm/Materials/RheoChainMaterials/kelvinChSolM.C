@@ -62,6 +62,10 @@ KelvinChainSolidMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
     double lambdaMu, Emu;
     double sum = 0.0;
 
+    if (  (tStep->giveIntrinsicTime() < this->castingTime)  ) {
+      OOFEM_ERROR("Attempted to evaluate E modulus at time lower than casting time");
+    }
+
     if ( this->EparVal.isEmpty() ) {
       this->updateEparModuli(0., gp, tStep); // stiffnesses are time independent (evaluated at time t = 0.)
     }
@@ -91,6 +95,9 @@ KelvinChainSolidMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint
     FloatMatrix C;
     KelvinChainSolidMaterialStatus *status = static_cast< KelvinChainSolidMaterialStatus * >( this->giveStatus(gp) );
 
+   if (  (tStep->giveIntrinsicTime() < this->castingTime)  ) {
+      OOFEM_ERROR("Attempted to evaluate creep strain for time lower than casting time");
+    }
 
     if ( this->EparVal.isEmpty() ) {
       this->updateEparModuli(0., gp, tStep); // stiffnesses are time independent (evaluated at time t = 0.)
@@ -190,8 +197,7 @@ KelvinChainSolidMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tStep)
     FloatMatrix D;
     KelvinChainSolidMaterialStatus *status = static_cast< KelvinChainSolidMaterialStatus * >( this->giveStatus(gp) );
 
-
-    if ( !this->isActivated(tStep) ) {
+    if ( ( !this->isActivated(tStep) ) || ( tStep->giveIntrinsicTime() < this->castingTime ) ) {
       help.resize(StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
       help.zero();
       for ( int mu = 1; mu <= nUnits; mu++ ) {
@@ -212,6 +218,7 @@ KelvinChainSolidMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tStep)
     this->giveUnitStiffnessMatrix(D, gp, tStep);
 
     help.times( this->giveEModulus(gp, tStep) );
+    // help.times( this->giveIncrementalModulus(gp, tStep) );
     deltaSigma.beProductOf(D, help);
 
     for ( int mu = 1; mu <= nUnits; mu++ ) {

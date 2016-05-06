@@ -125,6 +125,10 @@ KelvinChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
     double deltaT, tauMu, lambdaMu, Dmu;
     double sum = 0.0; // return value
 
+    if (  (tStep->giveIntrinsicTime() < this->castingTime)  ) {
+      OOFEM_ERROR("Attempted to evaluate E modulus at time lower than casting time");
+    }
+
     ///@warning THREAD UNSAFE!
     double tPrime = relMatAge + ( tStep->giveTargetTime() - 0.5 * tStep->giveTimeIncrement() );
     this->updateEparModuli(tPrime, gp, tStep);
@@ -164,8 +168,14 @@ KelvinChainMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp,
     KelvinChainMaterialStatus *status = static_cast< KelvinChainMaterialStatus * >( this->giveStatus(gp) );
 
     // !!! chartime exponents are assumed to be equal to 1 !!!
-
+   
+    if (  (tStep->giveIntrinsicTime() < this->castingTime)  ) {
+      OOFEM_ERROR("Attempted to evaluate creep strain for time lower than casting time");
+    }
+    
     if ( mode == VM_Incremental ) {
+      reducedAnswer.zero();
+
         for ( int mu = 1; mu <= nUnits; mu++ ) {
             if ( ( tStep->giveTimeIncrement() ) / this->giveCharTime(mu) > 30 ) {
                 beta = 0;
@@ -217,7 +227,8 @@ KelvinChainMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tStep)
     KelvinChainMaterialStatus *status = static_cast< KelvinChainMaterialStatus * >( this->giveStatus(gp) );
 
 
-   if ( !this->isActivated(tStep) ) {
+    //   if ( !this->isActivated(tStep) ) {
+   if (  (tStep->giveIntrinsicTime() < this->castingTime)  ) {
       help.resize(StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
       help.zero();
       for ( int mu = 1; mu <= nUnits; mu++ ) {
@@ -235,6 +246,7 @@ KelvinChainMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tStep)
         delta_sigma.subtract(deltaEps0); // should be equal to zero if there is no stress change during the time-step
     }
 
+    // no need to worry about "zero-stiffness" for time < castingTime - this is done above
     delta_sigma.times( this->giveEModulus(gp, tStep) ); // = delta_sigma
 
     deltaT = tStep->giveTimeIncrement();

@@ -718,6 +718,11 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
                 continue;
             }
 
+	    //skip materials with casting time > current time
+	    if ( !elem->isCast(tStep) ) {
+	      continue;
+	    }
+	    
             if ( elem->giveParallelMode() != Element_local ) {
                 continue;
             }
@@ -1353,6 +1358,11 @@ VTKXMLExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNumbers,
         if ( !element->isActivated(tStep) ) {                    //skip inactivated elements
             continue;
         }
+
+	//skip materials with casting time > current time
+	if ( !element->isCast(tStep) ) {                    
+	  continue;
+	}
 
         if ( element->giveParallelMode() != Element_local ) {
             continue;

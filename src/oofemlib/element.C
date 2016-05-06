@@ -74,6 +74,7 @@ Element :: Element(int n, Domain *aDomain) :
     material           = 0;
     numberOfDofMans    = 0;
     activityTimeFunction = 0;
+    //    visibilityTimeFunction = 0;
 }
 
 
@@ -668,6 +669,9 @@ Element :: initializeFrom(InputRecord *ir)
     activityTimeFunction = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, activityTimeFunction, _IFT_Element_activityTimeFunction);
 
+    //    visibilityTimeFunction = 0;
+    //    IR_GIVE_OPTIONAL_FIELD(ir, visibilityTimeFunction, _IFT_Element_visibilityTimeFunction);
+
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, _IFT_Element_nip);
 
     return IRRT_OK;
@@ -715,6 +719,11 @@ Element :: giveInputRecord(DynamicInputRecord &input)
     if ( activityTimeFunction > 0 ) {
         input.setField(activityTimeFunction, _IFT_Element_activityTimeFunction);
     }
+
+    //    if ( visibilityTimeFunction > 0 ) {
+    //      input.setField(visibilityTimeFunction, _IFT_Element_visibilityTimeFunction);
+    //    }
+
 
     input.setField(numberOfGaussPoints, _IFT_Element_nip);
 }
@@ -770,6 +779,54 @@ Element :: isActivated(TimeStep *tStep)
     } else {
         return true;
     }
+}
+
+
+
+bool
+Element :: isCast(TimeStep *tStep)
+{
+
+	 // this approach used to work when material was assigned to element
+	  //    if ( tStep->giveIntrinsicTime() >= this->giveMaterial()->giveCastingTime() )  
+
+  
+  if ( tStep ) {
+
+    double castingTime;    
+    double tNow = tStep->giveIntrinsicTime();
+    
+    if ( integrationRulesArray.size() > 1 ) {
+      
+      for ( int i = 0; i < (int)integrationRulesArray.size(); i++ ) {
+	IntegrationRule *iRule;
+	iRule = integrationRulesArray [ i ].get();
+	
+	for ( GaussPoint *gp: *iRule ) {
+	  castingTime =  this->giveCrossSection()->giveMaterial(gp)->giveCastingTime();
+
+	  if (tNow < castingTime ) {
+	    return false;
+	  }	  
+	}
+      }
+    } else {
+      
+      for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
+	castingTime =  this->giveCrossSection()->giveMaterial(gp)->giveCastingTime();
+	
+	 if (tNow < castingTime ) {
+	   return false;
+	 }
+      }
+    }
+    
+    return true;
+    
+  } else {
+    return false;
+  }
+  
 }
 
 void
