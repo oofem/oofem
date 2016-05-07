@@ -40,7 +40,7 @@
 
 #include <memory>
 
-#define _IFT_TransportGradientNeumann_Name   "tmgradneumann"
+#define _IFT_TransportGradientNeumann_Name "tmgradneumann"
 #define _IFT_TransportGradientNeumann_gradient "gradient"
 #define _IFT_TransportGradientNeumann_centerCoords "centercoords"
 #define _IFT_TransportGradientNeumann_surfSets "surfsets" /// Numered x+, y+, z+, x-, y-, z-

@@ -45,7 +45,7 @@
 
 ///@name Input fields for TransportGradientDirichlet
 //@{
-#define _IFT_TransportGradientDirichlet_Name "prescribedgradienttransport"
+#define _IFT_TransportGradientDirichlet_Name "tmgraddirichlet"
 #define _IFT_TransportGradientDirichlet_gradient "gradient"
 #define _IFT_TransportGradientDirichlet_centerCoords "centercoords"
 #define _IFT_TransportGradientDirichlet_surfSets "surfsets"
@@ -56,8 +56,8 @@
 namespace oofem {
 
 /**
- * Prescribes @f$ t = g_{i}(x_i-\bar{x}_i) @f$ where @f$ t @f$ are primary unknown.
- * This is typical boundary condition in multiscale analysis where @f$ g = \partial_x t@f$
+ * Prescribes @f$ T = g_{i}(x_i-\bar{x}_i) @f$ where @f$ T @f$ are primary unknown.
+ * This is typical boundary condition in multiscale analysis where @f$ g = \partial_x T @f$
  * would be a macroscopic gradient at the integration point, i.e. this is a boundary condition for prolongation.
  * It is also convenient to use when one wants to test a arbitrary specimen for a given average gradient.
  * 
@@ -76,8 +76,8 @@ protected:
     FloatArray mGradient;
     FloatArray mCenterCoord;
 
-    // One psi for each node.
     bool usePsi;
+    /// Stores one "psi" value for each node
     std :: map< int, FloatArray > psis;
     IntArray surfSets;
 

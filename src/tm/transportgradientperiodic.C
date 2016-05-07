@@ -59,8 +59,8 @@
 namespace oofem {
 REGISTER_BoundaryCondition(TransportGradientPeriodic);
 
-TransportGradientPeriodic :: TransportGradientPeriodic(int n, Domain *d) : ActiveBoundaryCondition(n, d)//, PrescribedGradientHomogenization(),
-    mGradient( new Node(1, d) )
+TransportGradientPeriodic :: TransportGradientPeriodic(int n, Domain *d) : ActiveBoundaryCondition(n, d), //PrescribedGradientHomogenization(),
+    grad( new Node(1, d) )
 {
     int nsd = d->giveNumberOfSpatialDimensions();
     // The prescribed strains.
@@ -70,8 +70,8 @@ TransportGradientPeriodic :: TransportGradientPeriodic(int n, Domain *d) : Activ
         // Just putting in X_i id-items since they don't matter.
         // These don't actually need to be active, they are masterdofs with prescribed values, its
         // easier to just have them here rather than trying to make another Dirichlet boundary condition.
-        //strain->appendDof( new ActiveDof( mGradient.get(), (DofIDItem)dofid, this->giveNumber() ) );
-        mGradient->appendDof( new MasterDof(mGradient.get(), this->giveNumber(), 0, (DofIDItem)dofid ) );
+        //strain->appendDof( new ActiveDof( grad.get(), (DofIDItem)dofid, this->giveNumber() ) );
+        grad->appendDof( new MasterDof(grad.get(), this->giveNumber(), 0, (DofIDItem)dofid ) );
     }
 }
 
@@ -89,7 +89,7 @@ int TransportGradientPeriodic :: giveNumberOfInternalDofManagers()
 
 DofManager *TransportGradientPeriodic :: giveInternalDofManager(int i)
 {
-    return this->mGradient.get();
+    return this->grad.get();
 }
 
 
@@ -139,6 +139,24 @@ void TransportGradientPeriodic :: findSlaveToMasterMap()
 }
 
 
+double TransportGradientPeriodic :: domainSize(Domain *d, int setNum)
+{
+    int nsd = d->giveNumberOfSpatialDimensions();
+    double domain_size = 0.0;
+    // This requires the boundary to be consistent and ordered correctly.
+    Set *set = d->giveSet(setNum);
+    const IntArray &boundaries = set->giveBoundaryList();
+
+    for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
+        Element *e = d->giveElement( boundaries.at(pos * 2 - 1) );
+        int boundary = boundaries.at(pos * 2);
+        FEInterpolation *fei = e->giveInterpolation();
+        domain_size += fei->evalNXIntegral( boundary, FEIElementGeometryWrapper(e) );
+    }
+    return fabs(domain_size / nsd);
+}
+
+
 int TransportGradientPeriodic :: giveNumberOfMasterDofs(ActiveDof *dof)
 {
     if ( this->isGradDof(dof) ) {
@@ -157,7 +175,7 @@ Dof *TransportGradientPeriodic :: giveMasterDof(ActiveDof *dof, int mdof)
         int node = this->slavemap[dof->giveDofManager()->giveNumber()];
         return this->domain->giveDofManager(node)->giveDofWithID(dof->giveDofID());
     } else {
-        return this->mGradient->giveDofWithID(this->grad_ids[mdof-2]);
+        return this->grad->giveDofWithID(this->grad_ids[mdof-2]);
     }
 }
 
@@ -242,10 +260,10 @@ void TransportGradientPeriodic :: computeDofTransformation(ActiveDof *dof, Float
 double TransportGradientPeriodic :: giveUnknown(double val, ValueModeType mode, TimeStep *tStep, ActiveDof *dof)
 {
     DofManager *master = this->domain->giveDofManager(this->slavemap[dof->giveDofManager()->giveNumber()]);
-    FloatArray dx, grad;
+    FloatArray dx, g;
     dx.beDifferenceOf(* dof->giveDofManager()->giveCoordinates(), * master->giveCoordinates());
-    this->mGradient->giveUnknownVector(grad, mode, this->grad_ids, tStep);
-    return val + grad.dotProduct(dx);
+    this->grad->giveUnknownVector(g, this->grad_ids, mode, tStep);
+    return val + g.dotProduct(dx);
 }
 
 
@@ -301,7 +319,7 @@ bool TransportGradientPeriodic :: hasBc(Dof *dof, TimeStep *tStep)
 
 bool TransportGradientPeriodic :: isGradDof(Dof *dof)
 {
-    return this->mGradient.get() == dof->giveDofManager();
+    return this->grad.get() == dof->giveDofManager();
 }
 
 
@@ -310,13 +328,13 @@ IRResultType TransportGradientPeriodic :: initializeFrom(InputRecord *ir)
     IRResultType result;
 
     IR_GIVE_FIELD(ir, this->mGradient, _IFT_TransportGradientPeriodic_gradient)
-    IR_GIVE_FIELD(ir, this->mCenterCoords, _IFT_TransportGradientPeriodic_centerCoords)
+    IR_GIVE_FIELD(ir, this->mCenterCoord, _IFT_TransportGradientPeriodic_centerCoords)
 
     IR_GIVE_FIELD(ir, this->masterSet, _IFT_TransportGradientPeriodic_masterSet)
     IR_GIVE_FIELD(ir, this->jump, _IFT_TransportGradientPeriodic_jump)
 
-    //ActiveBoundaryCondition :: initializeFrom(ir);
-    return PrescribedGradientHomogenization::initializeFrom(ir);
+    return ActiveBoundaryCondition :: initializeFrom(ir);
+    //return PrescribedGradientHomogenization::initializeFrom(ir);
 }
 
 
@@ -325,7 +343,7 @@ void TransportGradientPeriodic :: giveInputRecord(DynamicInputRecord &input)
     ActiveBoundaryCondition :: giveInputRecord(input);
     //PrescribedGradientHomogenization :: giveInputRecord(input);
     input.setField(this->mGradient, _IFT_TransportGradientPeriodic_gradient);
-    input.setField(this->mCenterCoords, _IFT_TransportGradientPeriodic_centerCoords);
+    input.setField(this->mCenterCoord, _IFT_TransportGradientPeriodic_centerCoords);
     
     input.setField(this->masterSet, _IFT_TransportGradientPeriodic_masterSet);
     input.setField(this->jump, _IFT_TransportGradientPeriodic_jump);

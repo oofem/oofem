@@ -152,7 +152,7 @@ def printRVE(rveSampleNumber, rveSize, rvePosition):
         print('VTKXML tstep_all domain_all primvars 1 6 cellvars 2 103 56', file=f)
     print('Domain 3d', file=f)
     print('OutputManager', file=f)
-    print('ndofman', n*n*n, 'nelem', nelem*nelem*nelem, 'ncrosssect 2 nmat 2 nbc 2 nic 0 nltf 1 nset 8 nsd 3', file=f)
+    print('ndofman', n*n*n, 'nelem', nelem*nelem*nelem, 'ncrosssect 2 nmat 2 nbc 2 nic 0 nltf 1 nset 10 nsd 3', file=f)
 
     # Nodes:
     X = X - rvePosition[0] - rveSize*0.5
@@ -188,26 +188,25 @@ def printRVE(rveSampleNumber, rveSize, rvePosition):
         print('IsoHeat 1 d 1 k 1 c 0', file=f)
         print('IsoHeat 2 d 1 k 1e3 c 0', file=f)
 
-    # print('MixedGradientPressureNeumann 1 loadTimeFunction 1 set 1 devgradient 6 0 0 0 1 1 1 pressure 0', file=f)
-    # print('MixedGradientPressureDirichlet 1 loadTimeFunction 1 set 1 dofs 6 1 2 3 7 8 9 devgradient 6 0 0 0 1 1 1 pressure 0', file=f)
-    # print('PrescribedGradient 1 loadTimeFunction 1 set 1 dofs 6 1 2 3 7 8 9 gradient 3 3 {0 0 1; 0 0 0; 1 0 0}', file=f)
-    # print('BoundaryCondition 2 loadTimeFunction 1 values 3 0 0 0 dofs 3 1 2 3 set 7', file=f)
-
-    #print('PrescribedGradientTransport 1 loadTimeFunction 1 gradient 3 0 0 0.1 dofs 1 10 set 8 surfsets 6 1 2 3 4 5 6 usepsi', file=f)
-    print('PrescribedGradientTransport 1 loadTimeFunction 1 gradient 3 0 0 0.1 dofs 1 10 set 8', file=f)
-    print('BoundaryCondition 2 loadTimeFunction 1 values 1 0 dofs 1 10 set 0', file=f)
-    #print('TMGradNeumann 1 loadTimeFunction 1 centercoords 3 0 0 0 gradient 3 0 0 0.1 dofs 1 10 surfsets 6 1 2 3 4 5 6 usephi', file=f)
-    #print('BoundaryCondition 1 loadTimeFunction 1 values 1 0 dofs 1 10 set 0', file=f)
-    #print('BoundaryCondition 2 loadTimeFunction 1 values 1 0 dofs 1 10 set 7', file=f)
-
-    #print('BoundaryCondition 1 loadTimeFunction 1 values 1 0 dofs 1 10 set 1', file=f)
-    #print('BoundaryCondition 2 loadTimeFunction 1 values 1 1 dofs 1 10 set 4', file=f)
+    bctype = 1
+    if bctype == 1:
+        # print('PrescribedGradient 1 loadTimeFunction 1 set 1 dofs 6 1 2 3 7 8 9 gradient 3 3 {0 0 1; 0 0 0; 1 0 0}', file=f)
+        # print('MixedGradientPressureDirichlet 1 loadTimeFunction 1 set 1 dofs 6 1 2 3 7 8 9 devgradient 6 0 0 0 1 1 1 pressure 0', file=f)
+        #print('TMGradDirichlet 1 loadTimeFunction 1 gradient 3 0 0 0.1 dofs 1 10 set 8 surfsets 6 1 2 3 4 5 6 usepsi', file=f)
+        print('TMGradDirichlet 1 loadTimeFunction 1 gradient 3 0 0 0.1 dofs 1 10 set 8', file=f)
+        print('BoundaryCondition 2 loadTimeFunction 1 values 1 0 dofs 1 10 set 0', file=f)
+    elif bctype == 2:
+        # print('MixedGradientPressureNeumann 1 loadTimeFunction 1 set 1 devgradient 6 0 0 0 1 1 1 pressure 0', file=f)
+        print('TMGradNeumann 1 loadTimeFunction 1 centercoords 3 0 0 0 gradient 3 0 0 0.1 dofs 1 10 surfsets 6 1 2 3 4 5 6 usephi', file=f)
+        print('BoundaryCondition 2 loadTimeFunction 1 values 1 0 dofs 1 10 set 7', file=f)
+    elif bctype == 3:
+        print('TMGradPeriodic 1 loadTimeFunction 1 centercoords 3 0 0 0 gradient 3 0 0 0.1 jump 3 {0} {0} {0} dofs 1 10 set 9 masterset 10'.format(rveSize), file=f)
+        print('BoundaryCondition 2 loadTimeFunction 1 values 1 0 dofs 1 10 set 0', file=f)
+    else:
+        print('BoundaryCondition 1 loadTimeFunction 1 values 1 0 dofs 1 10 set 1', file=f)
+        print('BoundaryCondition 2 loadTimeFunction 1 values 1 1 dofs 1 10 set 4', file=f)
 
     print('ConstantFunction 1 f(t) 1.0', file=f)
-
-    # print('Set 1 elementboundaries', 2*6*nelem*nelem, ' '.join([str(a) + ' ' + str(b) for a, b in xm+ym+zm+xp+yp+zp]), file=f)
-    # print('Set 1 elementboundaries', 2*3*nelem*nelem, ' '.join([str(a) + ' ' + str(b) for a, b in xp+yp+zp]), file=f)
-    # print('Set 2 elementboundaries', 2*3*nelem*nelem, ' '.join([str(a) + ' ' + str(b) for a, b in xm+ym+zm]), file=f)
 
     print('Set 1 elementboundaries', 2*nelem*nelem, ' '.join([str(a) + ' ' + str(b) for a, b in xm]), file=f)
     print('Set 2 elementboundaries', 2*nelem*nelem, ' '.join([str(a) + ' ' + str(b) for a, b in ym]), file=f)
@@ -221,6 +220,11 @@ def printRVE(rveSampleNumber, rveSize, rvePosition):
     # print('Set 8 elementRanges {(', 1, nelem*nelem*nelem,')}', file=f)
     tot = np.concatenate([xm, ym, zm, xp, yp, zp])
     print('Set 8 elementboundaries', 6*2*nelem*nelem, ' '.join([str(a) + ' ' + str(b) for a, b in tot]), file=f)
+    
+    tot = np.concatenate([xp, yp, zp])
+    print('Set 9 elementboundaries', 3*2*nelem*nelem, ' '.join([str(a) + ' ' + str(b) for a, b in tot]), file=f)
+    tot = np.concatenate([xm, ym, zm])
+    print('Set 10 elementboundaries', 3*2*nelem*nelem, ' '.join([str(a) + ' ' + str(b) for a, b in tot]), file=f)
 
     f.close()
 
@@ -229,12 +233,12 @@ seed = 0  # Controlled randomness
 # Generate inclusions:
 density = 0.1  # Minimum density
 averageRadius = 1  # Average inclusion radius
-boxSize = 100  # Max size of the domain with randomized particles. Computationally expensive to set it high.
+boxSize = 20  # Max size of the domain with randomized particles. Computationally expensive to set it high.
 inclusions = rveToolbox.generateSphericalInclusions(density, boxSize, averageRadius, averageRadius,
                                                     averageRadius*0.2, 3, seed)
 
-totalSamples = 10
-rveSize = 10
+totalSamples = 1
+rveSize = 3
 
 for rveSampleNumber in range(totalSamples):
     print('Generating RVE', rveSampleNumber)

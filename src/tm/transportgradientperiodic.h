@@ -36,7 +36,7 @@
 #ifndef transportgradientperiodic_h_
 #define transportgradientperiodic_h_
 
-#include "prescribedgradienthomogenization.h"
+//#include "prescribedgradienthomogenization.h"
 #include "activebc.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
@@ -44,7 +44,7 @@
 #include <memory>
 #include <map>
 
-#define _IFT_TransportGradientPeriodic_Name "prescribedgradienttransportperiodic"
+#define _IFT_TransportGradientPeriodic_Name "tmgradperiodic"
 #define _IFT_TransportGradientPeriodic_centerCoords "centercoords"
 #define _IFT_TransportGradientPeriodic_gradient "gradient"
 #define _IFT_TransportGradientPeriodic_masterSet "masterset"
@@ -59,14 +59,14 @@ class Node;
  *
  * @author Mikael Öhman
  */
-class OOFEM_EXPORT TransportGradientPeriodic : public ActiveBoundaryCondition, public PrescribedGradientHomogenization
+class OOFEM_EXPORT TransportGradientPeriodic : public ActiveBoundaryCondition //, public PrescribedGradientHomogenization
 {
 protected:
     FloatArray mGradient;
     FloatArray mCenterCoord;
 
     std :: unique_ptr< Node > grad;
-    IntArray grad_id;
+    IntArray grad_ids;
 
     std :: map< int, int > slavemap;
     FloatArray jump;
@@ -77,6 +77,8 @@ protected:
      * This is the central support function, which finds the corresponding slave nodes for each master node.
      */
     void findSlaveToMasterMap();
+    
+    virtual double domainSize(Domain *d, int setNum);
 
 public:
     TransportGradientPeriodic(int n, Domain *d);
