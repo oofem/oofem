@@ -694,6 +694,12 @@ public:
     /**
      * @return True, if the current time is higher than the casting time of the material, otherwise false.
      * Used from e.g. vtkxml export module to display only active elements
+     * @note: The element can be activated (isActivated method) before its 
+     * material is actually casted. This case has to be supported by 
+     * the material and can be used to simulate the casting on deformed 
+     * configuration, for example. 
+     * In this case, the material has to define a small stifness 
+     * for solution steps before is actually casted.
      */
     virtual bool isCast(TimeStep *tStep);
 
