@@ -57,6 +57,10 @@
 #include "gausspoint.h"
 #include "sparselinsystemnm.h"
 
+#include <tuple>
+#include <vector>
+#include <algorithm>
+
 namespace oofem {
 REGISTER_BoundaryCondition(TransportGradientDirichlet);
 
@@ -69,9 +73,10 @@ IRResultType TransportGradientDirichlet :: initializeFrom(InputRecord *ir)
     mCenterCoord.resize(3);
     IR_GIVE_OPTIONAL_FIELD(ir, mCenterCoord, _IFT_TransportGradientDirichlet_centerCoords);
 
-    if ( ir->hasField(_IFT_TransportGradientDirichlet_usePsi) ) {
+    this->usePsi = ir->hasField(_IFT_TransportGradientDirichlet_usePsi);
+    if ( this->usePsi ) {
         IR_GIVE_FIELD(ir, surfSets, _IFT_TransportGradientDirichlet_surfSets);
-        IR_GIVE_FIELD(ir, edgeSets, _IFT_TransportGradientDirichlet_edgeSets);
+        //IR_GIVE_FIELD(ir, edgeSets, _IFT_TransportGradientDirichlet_edgeSets);
     }
 
     return GeneralBoundaryCondition :: initializeFrom(ir);
@@ -82,13 +87,21 @@ void TransportGradientDirichlet :: giveInputRecord(DynamicInputRecord &input)
 {
     input.setField(mGradient, _IFT_TransportGradientDirichlet_gradient);
     input.setField(mCenterCoord, _IFT_TransportGradientDirichlet_centerCoords);
-    if ( this->surfSets.giveSize() > 0 ) {
+    input.setField(surfSets, _IFT_TransportGradientDirichlet_surfSets);
+    //input.setField(edgeSets, _IFT_TransportGradientDirichlet_edgeSets);
+    if ( this->usePsi ) {
         input.setField(_IFT_TransportGradientDirichlet_usePsi);
-        input.setField(surfSets, _IFT_TransportGradientDirichlet_surfSets);
-        input.setField(edgeSets, _IFT_TransportGradientDirichlet_edgeSets);
     }
 
     return GeneralBoundaryCondition :: giveInputRecord(input);
+}
+
+
+void TransportGradientDirichlet :: postInitialize()
+{
+    BoundaryCondition :: postInitialize();
+    
+    if ( this->usePsi ) this->computePsi();
 }
 
 
@@ -128,26 +141,35 @@ double TransportGradientDirichlet :: domainSize()
     Domain *domain = this->giveDomain();
     int nsd = domain->giveNumberOfSpatialDimensions();
     double domain_size = 0.0;
-    // This requires the boundary to be consistent and ordered correctly.
-    Set *set = domain->giveSet(this->set);
-    const IntArray &boundaries = set->giveBoundaryList();
+    if ( this->usePsi ) {
+        for ( auto &surf : this->surfSets ) {
+            const IntArray &boundaries = domain->giveSet(surf)->giveBoundaryList();
 
-    for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
-        Element *e = domain->giveElement( boundaries.at(pos * 2 - 1) );
-        int boundary = boundaries.at(pos * 2);
-        FEInterpolation *fei = e->giveInterpolation();
-        domain_size += fei->evalNXIntegral( boundary, FEIElementGeometryWrapper(e) );
+            for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
+                Element *e = domain->giveElement( boundaries.at(pos * 2 - 1) );
+                int boundary = boundaries.at(pos * 2);
+                FEInterpolation *fei = e->giveInterpolation();
+                domain_size += fei->evalNXIntegral( boundary, FEIElementGeometryWrapper(e) );
+            }
+        }
+    } else {
+        const IntArray &boundaries = domain->giveSet(this->set)->giveBoundaryList();
+
+        for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
+            Element *e = domain->giveElement( boundaries.at(pos * 2 - 1) );
+            int boundary = boundaries.at(pos * 2);
+            FEInterpolation *fei = e->giveInterpolation();
+            domain_size += fei->evalNXIntegral( boundary, FEIElementGeometryWrapper(e) );
+        }
     }
     return fabs(domain_size / nsd);
 }
 
 
-void TransportGradientDirichlet :: updateCoefficientMatrix(FloatMatrix &C)
+void TransportGradientDirichlet :: computeCoefficientMatrix(FloatMatrix &C)
 // v_prescribed = C.g = (x-xbar + psi).g;
 // C = [x-psi_x y-psi_y]
-//     [ .. ] in 2D, voigt form [g_1, g_2]
 // C = [x-psi_x y-psi_y z-psi_z]
-//     [ ....] in 3D, voigt form [g_1, g_2, g_3]
 {
     Domain *domain = this->giveDomain();
 
@@ -157,18 +179,19 @@ void TransportGradientDirichlet :: updateCoefficientMatrix(FloatMatrix &C)
     C.zero();
 
     for ( auto &n : domain->giveDofManagers() ) {
-        // Add "psi" if it is defined. Classical Dirichlet b.c. is retained if this isn't defined (or set to zero).
-        FloatArray psi(nsd);
-        if ( !psis.empty() ) {
-            psi = psis[n->giveNumber()];
-        }
         FloatArray *coords = n->giveCoordinates();
         Dof *d1 = n->giveDofWithID( this->dofs(0) );
         int k1 = d1->__givePrescribedEquationNumber();
         if ( k1 ) {
+            // Add "psi" if it is defined. Classical Dirichlet b.c. is retained if this isn't defined (or set to zero).
+            FloatArray psi(nsd);
+            if ( this->usePsi ) {
+                psi = psis[n->giveNumber()];
+            }
             for ( int i = 1; i <= nsd; ++i ) {
                 C.at(k1, i) = coords->at(i) - mCenterCoord.at(i) + psi.at(i);
             }
+            //printf("C.at(%d, :) = %e, %e, %e\n", k1, C.at(k1, 1), C.at(k1, 2), C.at(k1, 3));
         }
     }
 }
@@ -190,9 +213,9 @@ void TransportGradientDirichlet :: computeField(FloatArray &sigma, TimeStep *tSt
 
     // Condense it;
     FloatMatrix C;
-    this->updateCoefficientMatrix(C);
+    this->computeCoefficientMatrix(C);
     sigma.beTProductOf(C, R_c);
-    sigma.times( 1. / this->domainSize() );
+    sigma.times( -1. / this->domainSize() );
 }
 
 
@@ -216,24 +239,24 @@ void TransportGradientDirichlet :: computeTangent(FloatMatrix &tangent, TimeStep
 
     // Set up and assemble tangent FE-matrix which will make up the sensitivity analysis for the macroscopic material tangent.
     std :: unique_ptr< SparseMtrx >Kff( classFactory.createSparseMtrx(stype) );
-    std :: unique_ptr< SparseMtrx >Kfp( classFactory.createSparseMtrx(stype) );
+    //std :: unique_ptr< SparseMtrx >Kfp( classFactory.createSparseMtrx(stype) );
     std :: unique_ptr< SparseMtrx >Kpf( classFactory.createSparseMtrx(stype) );
     std :: unique_ptr< SparseMtrx >Kpp( classFactory.createSparseMtrx(stype) );
     if ( !Kff ) {
         OOFEM_ERROR("Couldn't create sparse matrix of type %d\n", stype);
     }
     Kff->buildInternalStructure(rve, 1, fnum);
-    Kfp->buildInternalStructure(rve, 1, fnum, pnum);
+    //Kfp->buildInternalStructure(rve, 1, fnum, pnum);
     Kpf->buildInternalStructure(rve, 1, pnum, fnum);
     Kpp->buildInternalStructure(rve, 1, pnum);
     rve->assemble(*Kff, tStep, TangentAssembler(TangentStiffness), fnum, this->domain);
-    rve->assemble(*Kfp, tStep, TangentAssembler(TangentStiffness), fnum, pnum, this->domain);
+    //rve->assemble(*Kfp, tStep, TangentAssembler(TangentStiffness), fnum, pnum, this->domain);
     rve->assemble(*Kpf, tStep, TangentAssembler(TangentStiffness), pnum, fnum, this->domain);
     rve->assemble(*Kpp, tStep, TangentAssembler(TangentStiffness), pnum, this->domain);
 
     FloatMatrix C, X, Kpfa, KfpC, a;
 
-    this->updateCoefficientMatrix(C);
+    this->computeCoefficientMatrix(C);
     Kpf->timesT(C, KfpC);
     solver->solve(*Kff, KfpC, a);
     Kpp->times(C, X);
@@ -246,29 +269,70 @@ void TransportGradientDirichlet :: computeTangent(FloatMatrix &tangent, TimeStep
 void TransportGradientDirichlet :: computePsi()
 {
     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
-    FloatMatrix D, Dred, B, Bred, DB, Ke;
-    FloatArray f, q, fx, qx, x;
-    FloatArray n, b, fe, Ne, cvec;
-    IntArray loc;
-    // As defined for the hex element:
-    IntArray surfaceOrder{3, 3, 1, 2, 1, 2};
-    IntArray edgeOrder{2, 1, 2, 1, 3, 3, 3, 3, 2, 1, 2, 1};
 
     std :: unique_ptr< SparseLinearSystemNM > solver( classFactory.createSparseLinSolver(ST_Petsc, this->giveDomain(), this->giveDomain()->giveEngngModel()) );
 
     // One "psi" per node on the boundary. Initially all to zero.
     this->psis.clear();
-    const IntArray &totalNodes = domain->giveSet(this->giveSetNumber())->giveNodeList();
-    for ( int node : totalNodes ) {
+    for ( int node : domain->giveSet(this->giveSetNumber())->giveNodeList() ) {
         this->psis.emplace(node, FloatArray(3));
     }
+    for ( auto &surf : this->surfSets ) {
+        for ( int node : domain->giveSet(surf)->giveNodeList() ) {
+            this->psis.emplace(node, FloatArray(3));
+        }
+    }
+
+    OOFEM_LOG_INFO("Computing edge sets from surfaces\n");
+    // Instead of requiring the input file to specify the edges, this code will automatically detect them
+    std :: vector< std :: vector< int > > surf2edges = {{1, 2, 3, 4},
+        {9, 10, 11, 12},
+        {1, 5, 6, 9},
+        {2, 6, 7, 10},
+        {3, 7, 8, 11},
+        {4, 5, 8, 12}};
+
+    // Edge sets generated from surface sets:
+    // 1-2, 1-3, 1-4, .. 2-3, 2-4, ..., 5-6 (skipping the empty sets)
+    // In case we ever want to use more arbitrary RVE "cutouts", this could be used.
+    std :: vector< Set > edgeSets;
+    std :: vector< std :: vector< std :: tuple< int, int > > > surfedges( this->surfSets.giveSize() );
+    for ( int i = 0; i < this->surfSets.giveSize(); ++i ) {
+        const IntArray &surfs = this->giveDomain()->giveSet(surfSets[i])->giveBoundaryList();
+        surfedges[i].reserve( 4 * surfs.giveSize() / 2 );
+        for ( int pos = 0; pos < surfs.giveSize() / 2; ++pos ) {
+            for ( int edgenum : surf2edges[surfs[pos * 2 + 1]-1] ) {
+                surfedges[i].emplace_back( std :: make_tuple(surfs[pos * 2], edgenum) );
+            }
+        }
+    }
+
+    for ( int i = 0; i < this->surfSets.giveSize() - 1; ++i ) {
+        for ( int j = i+1; j < this->surfSets.giveSize(); ++j ) {
+            std :: vector< std :: tuple< int, int > > ijEdgeSet;
+            std :: set_intersection(surfedges[i].begin(), surfedges[i].end(), 
+                                    surfedges[j].begin(), surfedges[j].end(), back_inserter(ijEdgeSet));
+            IntArray edgelist;
+            edgelist.preallocate(ijEdgeSet.size() * 2);
+            for ( auto &edge : ijEdgeSet ) {
+                edgelist.followedBy( std :: get<0>(edge) );
+                edgelist.followedBy( std :: get<1>(edge) );
+            }
+
+            if ( edgelist.giveSize() > 0 ) {
+                Set s(0, this->giveDomain());
+                s.setEdgeList(edgelist);
+                edgeSets.emplace_back(std :: move(s));
+            }
+        }
+    }
+    // END OF EDGE-SET GENERATION
 
     // Identify corner nodes and all the total edge nodes (needed for equation numbering)
     IntArray totalCornerNodes;
     IntArray totalEdgeNodes;
-    for ( int i = 0; i < this->edgeSets.giveSize(); ++i ) {
-        Set *setPointer = this->giveDomain()->giveSet(edgeSets[i]);
-        const IntArray &nodes = setPointer->giveNodeList();
+    for ( auto &setPointer : edgeSets ) {
+        const IntArray &nodes = setPointer.giveNodeList();
         for ( int n : nodes ) {
             if ( !totalEdgeNodes.insertSortedOnce(n, 10) ) {
                 totalCornerNodes.insertSortedOnce(n);
@@ -276,48 +340,50 @@ void TransportGradientDirichlet :: computePsi()
         }
     }
 
+#if 1
+    //IntArray edgeOrder{2, 1, 2, 1, 3, 3, 3, 3, 2, 1, 2, 1};
     // First we must determine the values along the edges, which become boundary conditions for the surfaces
-    for ( int i = 0; i < this->edgeSets.giveSize(); ++i ) {
-        Set *setPointer = this->giveDomain()->giveSet(edgeSets[i]);
-        const IntArray &edges = setPointer->giveEdgeList();
-        int t_index = edgeOrder[i];
-        
+    OOFEM_LOG_INFO("Computing psi on edges\n");
+    for ( auto &setPointer : edgeSets ) {
+        const IntArray &edges = setPointer.giveEdgeList();
+
         // Number the equations along this edge set
-        const IntArray &edgeNodes = setPointer->giveNodeList();
-        IntArray eqs(edgeNodes.giveSize());
+        std :: map< int, int > eqs;
         int eq_count = 0;
-        for ( int n : edgeNodes ) {
+        for ( int n : setPointer.giveNodeList() ) {
             if ( totalCornerNodes.containsSorted(n) ) {
-                eqs[n] = eq_count++;
+                eqs[n] = 0;
+            } else {
+                eqs[n] = ++eq_count;
             }
         }
-
+        
+        FloatMatrix f;
+        FloatArray q;
+        ///@todo Preallocation(?)
         std :: unique_ptr< SparseMtrx > K( classFactory.createSparseMtrx(solver->giveRecommendedMatrix(true)) );
-        ///@todo Preallocation
+        K->buildInternalStructure(domain->giveEngngModel(), eq_count, eq_count, {}, {});
+        f.resize(eq_count, 3);
+
+        K->assembleBegin();
         for ( int pos = 0; pos < edges.giveSize() / 2; ++pos ) {
             Element *e = this->giveDomain()->giveElement( edges[pos * 2] );
             int edge = edges[pos * 2 + 1];
+
+            FloatMatrix D, Ke, fe;
+            FloatArray b;
             
             FEInterpolation3d *interp = static_cast< FEInterpolation3d* >( e->giveInterpolation() );
-            int order = interp->giveInterpolationOrder();
-            std :: unique_ptr< IntegrationRule > ir( interp->giveBoundaryEdgeIntegrationRule(order, edge) );
-
-            // Need the coordinates arranged as [x1, y1, z1, x2, y2, z2, ...] for the RHS.
             IntArray bNodes;
             interp->boundaryEdgeGiveNodes(bNodes, edge);
-            cvec.resize(bNodes.giveSize());
-            int count = 0;
-            for ( auto &node : bNodes ) {
-                Node *n = e->giveNode(node);
-                cvec[count++] = n->giveCoordinate(t_index);
-                loc.followedBy(eqs[n->giveNumber()]);
-            }
+            int order = interp->giveInterpolationOrder();
+            std :: unique_ptr< IntegrationRule > ir( interp->giveBoundaryEdgeIntegrationRule(order, edge) );
+            static_cast< TransportElement* >(e)->computeConstitutiveMatrixAt(D, Capacity, e->giveDefaultIntegrationRulePtr()->getIntegrationPoint(1), tStep);
 
+            // Compute integral of B'*D*B and N:
             for ( auto &gp: *ir ) {
                 const FloatArray &lcoords = gp->giveNaturalCoordinates();
                 FEIElementGeometryWrapper cellgeo(e);
-
-                interp->boundaryEdgeEvalN(n, edge, lcoords, cellgeo);
 
                 double detJ = interp->boundaryEdgeGiveTransformationJacobian(edge, lcoords, cellgeo);
                 interp->edgeEvaldNdxi(b, edge, lcoords, cellgeo);
@@ -325,69 +391,96 @@ void TransportGradientDirichlet :: computePsi()
                 double dL = detJ * gp->giveWeight();
                 
                 // Compute material property
-                static_cast< TransportElement* >(e)->computeConstitutiveMatrixAt(D, Capacity, gp, tStep);
-                double k = D.at(t_index, t_index);
+                ///@todo Can't do this yet, problem with material model interface (doesn't know the GP material mode). This should be changed.
+                //static_cast< TransportElement* >(e)->computeConstitutiveMatrixAt(D, Capacity, gp, tStep);
+#if 1
+                FloatArray t;
+                for ( int i = 1; i <= b.giveSize(); ++i ) {
+                    t.add(b.at(i), *e->giveNode(bNodes.at(i))->giveCoordinates());
+                }
+                t.normalize();
+                FloatArray tmp;
+                tmp.beProductOf(D, t);
+                double k = tmp.dotProduct(t);
+#else
+                double k = D.at(1,1);
+#endif
 
-                Ke.plusDyadSymmUpper(b, - k * dL);
-                Ne.add(dL, n);
+                Ke.plusDyadSymmUpper(b, k * dL);
             }
             Ke.symmetrized();
+            
+            // Need the element-nodal coordinates for the RHS, as the associated location array:
+            IntArray loc(bNodes.giveSize());
+            FloatMatrix cvec(bNodes.giveSize(), 3);
+            for ( int i = 1; i <= bNodes.giveSize(); ++i ) {
+                int enode = bNodes.at(i);
+                Node *n = e->giveNode(enode);
+                const FloatArray &x = *n->giveCoordinates();
+                cvec.at(i, 1) = x.at(1);
+                cvec.at(i, 2) = x.at(2);
+                cvec.at(i, 3) = x.at(3);
+                loc.at(i) = eqs[n->giveNumber()];
+            }
+            
             fe.beProductOf(Ke, cvec);
-
+            fe.negated();
+            f.assemble(fe, loc, {1, 2, 3});
             K->assemble(loc, Ke);
-            f.assemble(fe, loc);
-            q.assemble(Ne, loc);
         }
+        K->assembleEnd();
 
-        solver->solve(*K, q, qx);
-        solver->solve(*K, f, fx);
-        double lambda = (q.dotProduct(fx)) / (q.dotProduct(qx));
-        x = fx;
-        x.add(-lambda, q);
+        FloatMatrix x;
+        solver->solve(*K, f, x);
 
-        for ( int n : edgeNodes ) {
-            if ( eqs[n] > 0 ) {
-                this->psis[n].at(t_index) = x.at(eqs[n]);
+        for ( int n : setPointer.giveNodeList() ) {
+            int eq = eqs[n];
+            if ( eq > 0 ) {
+                this->psis[n] = {x.at(eq, 1), x.at(eq, 2), x.at(eq, 3)};
             }
         }
     }
-    
+#endif
+
+    OOFEM_LOG_INFO("Computing psi on surface sets\n");
+#if 1
     // Surfaces use the edge solutions are boundary conditions:
-    for ( int i = 0; i < this->surfSets.giveSize(); ++i ) {
-        Set *setPointer = this->giveDomain()->giveSet(surfSets[i]);
+    for ( auto &setNum : surfSets ) {
+        Set *setPointer = this->giveDomain()->giveSet(setNum);
         const IntArray &surfs = setPointer->giveBoundaryList();
-        int t_index = surfaceOrder[i];
-        
+
         // Number the equations along this surface set
-        const IntArray &surfNodes = setPointer->giveNodeList();
-        IntArray eqs(surfNodes.giveSize());
+        std :: map< int, int > eqs;
         int eq_count = 0;
-        for ( int n : surfNodes ) {
+        for ( int n : setPointer->giveNodeList() ) {
             if ( totalEdgeNodes.containsSorted(n) ) {
-                eqs[n] = eq_count++;
+                eqs[n] = 0;
+            } else {
+                eqs[n] = ++eq_count;
             }
         }
 
+        FloatMatrix f;
+        ///@note We can use the single constraint, but this assumes flat surfaces
+        FloatArray q;
         std :: unique_ptr< SparseMtrx > K( classFactory.createSparseMtrx(solver->giveRecommendedMatrix(true)) );
+        K->buildInternalStructure(domain->giveEngngModel(), eq_count, eq_count, {}, {});
+        f.resize(eq_count, 3);
+        q.resize(eq_count);
+
+        K->assembleBegin();
         ///@todo Preallocation
         for ( int pos = 0; pos < surfs.giveSize() / 2; ++pos ) {
             Element *e = this->giveDomain()->giveElement( surfs[pos * 2] );
             int surf = surfs[pos * 2 + 1];
 
+            FloatMatrix D, B, dNdx, DB, Ke, fe;
+            FloatArray n, qe, normal;
+
             FEInterpolation3d *interp = static_cast< FEInterpolation3d* >( e->giveInterpolation() );
             int order = interp->giveInterpolationOrder();
             std :: unique_ptr< IntegrationRule > ir( interp->giveBoundaryIntegrationRule(order, surf) );
-
-            // Need [x1 + psi1, x2 + psi2, x3 + psi3, ...] for the RHS.
-            IntArray bNodes;
-            interp->boundaryGiveNodes(bNodes, surf);
-            cvec.resize(bNodes.giveSize());
-            int count = 0;
-            for ( auto &node : bNodes ) {
-                Node  *n = e->giveNode(node);
-                cvec[count++] = n->giveCoordinate(t_index) + this->psis[node].at(t_index);
-                loc.followedBy(eqs[n->giveNumber()]);
-            }
+            static_cast< TransportElement* >(e)->computeConstitutiveMatrixAt(D, Capacity, e->giveDefaultIntegrationRulePtr()->getIntegrationPoint(1), tStep);
 
             for ( auto &gp: *ir ) {
                 const FloatArray &lcoords = gp->giveNaturalCoordinates();
@@ -395,49 +488,84 @@ void TransportGradientDirichlet :: computePsi()
 
                 interp->boundaryEvalN(n, surf, lcoords, cellgeo);
 
-                double detJ = interp->boundaryGiveTransformationJacobian(surf, lcoords, cellgeo);
-                interp->surfaceEvaldNdx(B, surf, lcoords, cellgeo);
+                double detJ = interp->boundaryEvalNormal(normal, surf, lcoords, cellgeo);
+                interp->surfaceEvaldNdx(dNdx, surf, lcoords, cellgeo);
+                B.beTranspositionOf(dNdx);
                 double dA = detJ * gp->giveWeight();
                 
-                // Compute material property
-                static_cast< TransportElement* >(e)->computeConstitutiveMatrixAt(D, Capacity, gp, tStep);
-
-                IntArray subindx, allindx;
-                if ( t_index == 1 ) {
-                    subindx = {2, 3};
-                } else if ( t_index == 2 ) {
-                    subindx = {1, 3};
-                } else {
-                    subindx = {1, 2};
+                for (int i = 1; i <= B.giveNumberOfRows(); ++i ) {
+                    for (int j = 1; j <= B.giveNumberOfColumns(); ++j ) {
+                        double tmp = 0;
+                        for (int k = 1; k <= 3; ++k ) {
+                            tmp += normal.at(k) * B.at(k,j);
+                        }
+                        B.at(i,j) -= normal.at(i) * tmp;
+                    }
                 }
-                allindx.enumerate(Bred.giveNumberOfColumns());
-                Bred.beSubMatrixOf(B, subindx, allindx);
-                Dred.beSubMatrixOf(D, subindx, subindx);
 
+                // Compute material property
+                ///@todo Can't do this yet, problem with material model interface (doesn't know the GP material mode). This should be changed.
+                //static_cast< TransportElement* >(e)->computeConstitutiveMatrixAt(D, Capacity, gp, tStep);
 
-                DB.beProductOf(Dred, Bred);
-                Ke.plusProductSymmUpper(Bred, DB, - dA);
-                Ne.add(dA, n);
+                // Vector:
+                DB.beProductOf(D, B);
+                Ke.plusProductSymmUpper(B, DB, dA);
+                qe.add(dA, n);
             }
             Ke.symmetrized();
+
+            IntArray bNodes;
+            interp->boundaryGiveNodes(bNodes, surf);
+            IntArray loc(bNodes.giveSize());
+            FloatMatrix cvec(bNodes.giveSize(), 3);
+            for ( int i = 1; i <= bNodes.giveSize(); ++i ) {
+                int enode = bNodes.at(i);
+                Node *n = e->giveNode(enode);
+                FloatArray x = *n->giveCoordinates() + this->psis[n->giveNumber()];
+                cvec.at(i, 1) = x.at(1);
+                cvec.at(i, 2) = x.at(2);
+                cvec.at(i, 3) = x.at(3);
+                loc.at(i) = eqs[n->giveNumber()];
+            }
             fe.beProductOf(Ke, cvec);
+            fe.negated();
 
             K->assemble(loc, Ke);
-            f.assemble(fe, loc);
-            q.assemble(Ne, loc);
+            f.assemble(fe, loc, {1, 2, 3});
+            q.assemble(qe, loc);
         }
+        K->assembleEnd();
+
+        // Solve with constraints:
+        // [K   Q] [psi    ] = [f]
+        // [Q^T 0] [lambda ]   [0]
+        // ==>
+        // [Q^T . K^(-1) . Q] . lamda = Q^T . K^(-1) . f
+        // psi = K^(-1) . f - K^(-1) . Q . lambda
+        // alternatively:
+        // [Q^T . Qx] . lamda = Q^T . fx
+        // psi = fx - Qx . lambda
+
+        double qTKiq;
+        FloatMatrix x;
+        FloatArray qx, lambda, tmp, qTKif;
         solver->solve(*K, q, qx);
-        solver->solve(*K, f, fx);
-        double lambda = (q.dotProduct(fx)) / (q.dotProduct(qx));
-        x = fx;
-        x.add(-lambda, q);
+        solver->solve(*K, f, x);
         
-        for ( int n : surfNodes ) {
-            if ( eqs[n] > 0 ) {
-                this->psis[n].at(t_index) = x.at(eqs[n]);
+        qTKif.beTProductOf(x, q);
+        qTKiq = q.dotProduct(qx);
+        lambda.beScaled(1./qTKiq, qTKif);
+        x.plusDyadUnsym(qx, lambda, -1.0);
+
+        for ( int n : setPointer->giveNodeList() ) {
+            int eq = eqs[n];
+            if ( eq > 0 ) {
+                this->psis[n] = {x.at(eq, 1), x.at(eq, 2), x.at(eq, 3)};
             }
         }
+
     }
+#endif
 }
 
 } // end namespace oofem

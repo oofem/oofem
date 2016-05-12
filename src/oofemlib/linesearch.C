@@ -55,8 +55,8 @@ NM_Status
 LineSearchNM :: solve(FloatArray &r, FloatArray &dr, FloatArray &F, FloatArray &R, FloatArray *R0,
                       IntArray &eqnmask, double lambda, double &etaValue, LS_status &status, TimeStep *tStep)
 {
-    int ico, ii, ils, neq = r.giveSize();
-    double s0, si;
+    int ico, ils, neq = r.giveSize();
+    double s0;
 
     FloatArray g(neq), rb(neq);
     // Compute inner product at start and stop if positive
@@ -68,8 +68,8 @@ LineSearchNM :: solve(FloatArray &r, FloatArray &dr, FloatArray &F, FloatArray &
 
     g.subtract(F);
 
-    for ( ii = 1; ii <= eqnmask.giveSize(); ii++ ) {
-        g.at( eqnmask.at(ii) ) = 0.0;
+    for ( auto eq : eqnmask ) {
+        g.at( eq ) = 0.0;
     }
 
     s0 = ( -1.0 ) * g.dotProduct(dr);
@@ -99,9 +99,8 @@ LineSearchNM :: solve(FloatArray &r, FloatArray &dr, FloatArray &F, FloatArray &
     // begin line search loop
     for ( ils = 2; ils <= this->max_iter; ils++ ) {
         // update displacements
-        for ( ii = 1; ii <= neq; ii++ ) {
-            r.at(ii) = rb.at(ii) + this->eta.at(ils) * dr.at(ii);
-        }
+        r = rb;
+        r.add(this->eta.at(ils), dr);
 
         tStep->incrementStateCounter();        // update solution state counter
         // update internal forces according to new state
@@ -115,12 +114,12 @@ LineSearchNM :: solve(FloatArray &r, FloatArray &dr, FloatArray &F, FloatArray &
 
         g.subtract(F);
 
-        for ( ii = 1; ii <= eqnmask.giveSize(); ii++ ) {
-            g.at( eqnmask.at(ii) ) = 0.0;
+        for ( auto eq : eqnmask ) {
+            g.at( eq ) = 0.0;
         }
 
         // compute current inner-product ratio
-        si = ( -1.0 ) * g.dotProduct(dr) / s0;
+        double si = ( -1.0 ) * g.dotProduct(dr) / s0;
         prod.at(ils) = si;
 
         // check if line-search tolerance is satisfied
@@ -146,9 +145,8 @@ LineSearchNM :: solve(FloatArray &r, FloatArray &dr, FloatArray &F, FloatArray &
     //else printf("\nLineSearchNM::solve reached max number of ls searches");
     OOFEM_LOG_DEBUG( "LS: ils=%d, ico=%d, eta=%e\n", ils, ico, eta.at(ils) );
     /* update F before */
-    for ( ii = 1; ii <= neq; ii++ ) {
-        r.at(ii) = rb.at(ii) + dr.at(ii);
-    }
+    r = rb;
+    r.add(dr);
 
     tStep->incrementStateCounter();           // update solution state counter
     engngModel->updateComponent(tStep, InternalRhs, domain);
@@ -162,7 +160,7 @@ void
 LineSearchNM :: search(int istep, FloatArray &prod, FloatArray &eta, double amp,
                        double maxetalim, double minetalim, int &ico)
 {
-    int i, ipos, ineg = 0;
+    int ineg = 0;
     double etaneg = 1.0;
     double etamax = 0.0;
 
@@ -170,7 +168,7 @@ LineSearchNM :: search(int istep, FloatArray &prod, FloatArray &eta, double amp,
     // obtain ineg (number of previous line search iteration with negative ratio nearest to origin)
     // as well as max previous step length, etamax
 
-    for ( i = 1; i <= istep; i++ ) {
+    for ( int i = 1; i <= istep; i++ ) {
         etamax = max( etamax, eta.at(i) );
         if ( prod.at(i) >= 0.0 ) {
             continue;
@@ -188,8 +186,8 @@ LineSearchNM :: search(int istep, FloatArray &prod, FloatArray &eta, double amp,
         // allow interpolation
         // first find ipos (position of previous s-l with positive ratio that is
         // closest to ineg (but with smaller s-l)
-        ipos = 1;
-        for ( i = 1; i <= istep; i++ ) {
+        int ipos = 1;
+        for ( int i = 1; i <= istep; i++ ) {
             if ( prod.at(i) <= 0.0 ) {
                 continue;
             }

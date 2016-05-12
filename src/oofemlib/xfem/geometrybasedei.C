@@ -230,7 +230,7 @@ void GeometryBasedEI :: updateNodeEnrMarker(XfemManager &ixFemMan)
     giveBoundingSphere(center, radius);
 
 
-    std :: set< int >elList;
+    IntArray elList;
     localizer->giveAllElementsWithNodesWithinBox(elList, center, radius);
 
     // Loop over elements and use the level sets to mark nodes belonging to completely cut elements.

@@ -34,7 +34,8 @@
 
 #include "../sm/EngineeringModels/staticstructural.h"
 #include "../sm/Elements/structuralelement.h"
-#include "../sm/Elements/structuralelementevaluator.h"
+#include "dofmanager.h"
+#include "set.h"
 #include "timestep.h"
 #include "sparsemtrx.h"
 #include "nummet.h"
@@ -137,6 +138,12 @@ StaticStructural :: initializeFrom(InputRecord *ir)
         commBuff = new CommunicatorBuff( this->giveNumberOfProcesses() );
         communicator = new NodeCommunicator(this, commBuff, this->giveRank(),
                                             this->giveNumberOfProcesses());
+
+        if ( ir->hasField(_IFT_StaticStructural_nonlocalExtension) ) {
+            nonlocalExt = 1;
+            nonlocCommunicator = new ElementCommunicator(this, commBuff, this->giveRank(),
+                                                         this->giveNumberOfProcesses());
+        }
     }
 
 #endif

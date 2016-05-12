@@ -48,6 +48,7 @@
 #define _IFT_StructuralMaterialEvaluator_stressControl "stresscontrol" ///< Integer list of the stress components which are controlled
 #define _IFT_StructuralMaterialEvaluator_outputVariables "vars" ///< Variables (from integration point) to be written.
 #define _IFT_StructuralMaterialEvaluator_tolerance "tolerance" ///< Tolerance for stress control
+#define _IFT_StructuralMaterialEvaluator_keepTangent "keeptangent"
 //@}
 
 namespace oofem {
@@ -64,6 +65,7 @@ class StructuralMaterialEvaluator : public EngngModel
 {
 protected:
     double deltaT; ///< Time increment.
+    double keepTangent;
 
     IntArray cmpntFunctions; /// Time functions controlling each component of the deviatoric part of the stress.
     IntArray sControl, eControl;

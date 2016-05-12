@@ -115,7 +115,7 @@ protected:
 
 public:
     /// Typedefs to introduce the container type for element numbers, returned by some services.
-    typedef std :: set< int > elementContainerType;
+    typedef IntArray elementContainerType;
     /// Typedefs to introduce the container type for nodal numbers, returned by some services.
     typedef std :: list< int > nodeContainerType;
 

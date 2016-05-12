@@ -60,20 +60,6 @@ class FEInterpolation;
  * some general services are implemented here (but they can be overload by more efficient
  * element implementations).
  * The general implementation provided here is intended for both linear and nonlinear computations.
- *
- * Tasks:
- * - Obtaining its basic data, the element reads in the data file the number
- *   of these objects, then obtains the data from the domain (methods
- *   'giveNode', 'giveMaterial',etc).
- * - Calculating its contribution to the problem :
- *   Calculating its mass matrix M, its stiffness matrix K, its load vector
- *   f, its location array.
- *   Calculating its contribution to the LHS and RHS of the linear system,
- *   using Static,Newmark,etc, formula. These contributions are usually
- *   combinations of M,K,f.
- * - Performing end-of-step operations;
- *   Calculating the strains and stresses at its Gauss points.
- * - Printing its output in the data file and updating itself.
  */
 class StructuralInterfaceElement : public Element
 {

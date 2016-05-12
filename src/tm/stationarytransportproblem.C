@@ -122,24 +122,24 @@ double StationaryTransportProblem :: giveUnknownComponent(ValueModeType mode, Ti
 }
 
 
-EModelFieldPtr StationaryTransportProblem::giveField (FieldType key, TimeStep *tStep)
+EModelFieldPtr StationaryTransportProblem :: giveField(FieldType key, TimeStep *tStep)
 {
-  /* Note: the current implementation uses MaskedPrimaryField, that is automatically updated with the model progress, 
-     so the returned field always refers to active solution step. 
-  */
+    /* Note: the current implementation uses MaskedPrimaryField, that is automatically updated with the model progress, 
+        so the returned field always refers to active solution step. 
+    */
 
-  if ( tStep != this->giveCurrentStep()) {
-    OOFEM_ERROR("Unable to return field representation for non-current time step");
-  }
-  if ( key == FT_Temperature ) {
-    FM_FieldPtr _ptr ( new MaskedPrimaryField ( key, this->UnknownsField.get(), {T_f} ) );
-    return _ptr;
-  } else if ( key == FT_HumidityConcentration ) {
-    FM_FieldPtr _ptr ( new MaskedPrimaryField ( key, this->UnknownsField.get(), {C_1} ) );
-    return _ptr;
-  } else {
-    return FM_FieldPtr();
-  }
+    if ( tStep != this->giveCurrentStep() ) {
+        OOFEM_ERROR("Unable to return field representation for non-current time step");
+    }
+    if ( key == FT_Temperature ) {
+        FM_FieldPtr _ptr ( new MaskedPrimaryField ( key, this->UnknownsField.get(), {T_f} ) );
+        return _ptr;
+    } else if ( key == FT_HumidityConcentration ) {
+        FM_FieldPtr _ptr ( new MaskedPrimaryField ( key, this->UnknownsField.get(), {C_1} ) );
+        return _ptr;
+    } else {
+        return FM_FieldPtr();
+    }
 }
 
 

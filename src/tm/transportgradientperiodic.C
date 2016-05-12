@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "prescribedgradientbcperiodic.h"
+#include "transportgradientperiodic.h"
 #include "dofiditem.h"
 #include "node.h"
 #include "dofmanager.h"
@@ -57,45 +57,43 @@
 #include "timestep.h"
 
 namespace oofem {
-REGISTER_BoundaryCondition(PrescribedGradientBCPeriodic);
+REGISTER_BoundaryCondition(TransportGradientPeriodic);
 
-PrescribedGradientBCPeriodic :: PrescribedGradientBCPeriodic(int n, Domain *d) : ActiveBoundaryCondition(n, d), PrescribedGradientHomogenization(),
-    strain( new Node(1, d) )
+TransportGradientPeriodic :: TransportGradientPeriodic(int n, Domain *d) : ActiveBoundaryCondition(n, d), //PrescribedGradientHomogenization(),
+    grad( new Node(1, d) )
 {
-    // The unknown volumetric strain
     int nsd = d->giveNumberOfSpatialDimensions();
-    int components = nsd * nsd;
     // The prescribed strains.
-    for ( int i = 0; i < components; i++ ) {
+    for ( int i = 0; i < nsd; i++ ) {
         int dofid = d->giveNextFreeDofID();
-        strain_id.followedBy(dofid);
+        grad_ids.followedBy(dofid);
         // Just putting in X_i id-items since they don't matter.
         // These don't actually need to be active, they are masterdofs with prescribed values, its
         // easier to just have them here rather than trying to make another Dirichlet boundary condition.
-        //strain->appendDof( new ActiveDof( strain.get(), (DofIDItem)dofid, this->giveNumber() ) );
-        strain->appendDof( new MasterDof(strain.get(), this->giveNumber(), 0, (DofIDItem)dofid ) );
+        //strain->appendDof( new ActiveDof( grad.get(), (DofIDItem)dofid, this->giveNumber() ) );
+        grad->appendDof( new MasterDof(grad.get(), this->giveNumber(), 0, (DofIDItem)dofid ) );
     }
 }
 
 
-PrescribedGradientBCPeriodic :: ~PrescribedGradientBCPeriodic()
+TransportGradientPeriodic :: ~TransportGradientPeriodic()
 {
 }
 
 
-int PrescribedGradientBCPeriodic :: giveNumberOfInternalDofManagers()
+int TransportGradientPeriodic :: giveNumberOfInternalDofManagers()
 {
     return 1;
 }
 
 
-DofManager *PrescribedGradientBCPeriodic :: giveInternalDofManager(int i)
+DofManager *TransportGradientPeriodic :: giveInternalDofManager(int i)
 {
-    return this->strain.get();
+    return this->grad.get();
 }
 
 
-void PrescribedGradientBCPeriodic :: findSlaveToMasterMap()
+void TransportGradientPeriodic :: findSlaveToMasterMap()
 {
     FloatArray coord;
     SpatialLocalizer *sl = this->domain->giveSpatialLocalizer();
@@ -141,72 +139,70 @@ void PrescribedGradientBCPeriodic :: findSlaveToMasterMap()
 }
 
 
-int PrescribedGradientBCPeriodic :: giveNumberOfMasterDofs(ActiveDof *dof)
+double TransportGradientPeriodic :: domainSize(Domain *d, int setNum)
 {
-    if ( this->isStrainDof(dof) ) {
+    int nsd = d->giveNumberOfSpatialDimensions();
+    double domain_size = 0.0;
+    // This requires the boundary to be consistent and ordered correctly.
+    Set *set = d->giveSet(setNum);
+    const IntArray &boundaries = set->giveBoundaryList();
+
+    for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
+        Element *e = d->giveElement( boundaries.at(pos * 2 - 1) );
+        int boundary = boundaries.at(pos * 2);
+        FEInterpolation *fei = e->giveInterpolation();
+        domain_size += fei->evalNXIntegral( boundary, FEIElementGeometryWrapper(e) );
+    }
+    return fabs(domain_size / nsd);
+}
+
+
+int TransportGradientPeriodic :: giveNumberOfMasterDofs(ActiveDof *dof)
+{
+    if ( this->isGradDof(dof) ) {
         return 1;
     }
     return this->giveDomain()->giveNumberOfSpatialDimensions() + 1;
 }
 
 
-Dof *PrescribedGradientBCPeriodic :: giveMasterDof(ActiveDof *dof, int mdof)
+Dof *TransportGradientPeriodic :: giveMasterDof(ActiveDof *dof, int mdof)
 {
-    if ( this->isStrainDof(dof) ) {
+    if ( this->isGradDof(dof) ) {
         return NULL;
     }
     if ( mdof == 1 ) {
         int node = this->slavemap[dof->giveDofManager()->giveNumber()];
-        //printf("dofid = %d, slave node = %d, master node = %d\n", dof->giveDofID(),dof->giveDofManager()->giveNumber(), node );
-        //this->domain->giveDofManager(node)->printYourself();
         return this->domain->giveDofManager(node)->giveDofWithID(dof->giveDofID());
     } else {
-        DofIDItem dofid = dof->giveDofID();
-        FloatArray *coords = dof->giveDofManager()->giveCoordinates();
-        int nsd = coords->giveSize();
-        if ( dofid == D_u || dofid == V_u ) {
-            return this->strain->giveDofWithID(strain_id[nsd*(mdof-2)]);
-        } else if ( dofid == D_v || dofid == V_v ) {
-            return this->strain->giveDofWithID(strain_id[nsd*(mdof-2)+1]);
-        } else /* if ( dofid == D_u || dofid == V_u ) */ {
-            return this->strain->giveDofWithID(strain_id[nsd*(mdof-2)+2]);
-        }
+        return this->grad->giveDofWithID(this->grad_ids[mdof-2]);
     }
 }
 
 
-void PrescribedGradientBCPeriodic :: computeField(FloatArray &sigma, TimeStep *tStep)
+void TransportGradientPeriodic :: computeField(FloatArray &flux, TimeStep *tStep)
 {
-    DofIDEquationNumbering pnum(true, strain_id);
+    DofIDEquationNumbering pnum(true, grad_ids);
     EngngModel *emodel = this->giveDomain()->giveEngngModel();
-    FloatArray tmp, sig_tmp;
-    int npeq = strain_id.giveSize();
+    FloatArray tmp;
+    int npeq = grad_ids.giveSize();
     // sigma = residual (since we use the slave dofs) = f_ext - f_int
-    sig_tmp.resize(npeq);
-    sig_tmp.zero();
-    emodel->assembleVector(sig_tmp, tStep, InternalForceAssembler(), VM_Total, pnum, this->domain);
+    flux.resize(npeq);
+    flux.zero();
+    emodel->assembleVector(flux, tStep, InternalForceAssembler(), VM_Total, pnum, this->domain);
     tmp.resize(npeq);
     tmp.zero();
     emodel->assembleVector(tmp, tStep, ExternalForceAssembler(), VM_Total, pnum, this->domain);
-    sig_tmp.subtract(tmp);
+    flux.subtract(tmp);
     // Divide by the RVE-volume
-    sig_tmp.times(1.0 / ( this->domainSize(this->giveDomain(), this->set) + this->domainSize(this->giveDomain(), this->masterSet) ));
-
-    sigma.resize(sig_tmp.giveSize());
-    if ( sig_tmp.giveSize() == 9 ) {
-        sigma.assemble(sig_tmp, {1, 9, 8, 6, 2, 7, 5, 4, 3});
-    } else if ( sig_tmp.giveSize() == 4 ) {
-        sigma.assemble(sig_tmp, {1, 4, 3, 2});
-    } else {
-        sigma = sig_tmp;
-    }
+    flux.times(1.0 / ( this->domainSize(this->giveDomain(), this->set) + this->domainSize(this->giveDomain(), this->masterSet) ));
 }
 
 
-void PrescribedGradientBCPeriodic :: computeTangent(FloatMatrix &E, TimeStep *tStep)
+void TransportGradientPeriodic :: computeTangent(FloatMatrix &k, TimeStep *tStep)
 {
     EModelDefaultEquationNumbering fnum;
-    DofIDEquationNumbering pnum(true, strain_id);
+    DofIDEquationNumbering pnum(true, this->grad_ids);
     EngngModel *rve = this->giveDomain()->giveEngngModel();
     ///@todo Get this from engineering model
     std :: unique_ptr< SparseLinearSystemNM > solver( classFactory.createSparseLinSolver( ST_Petsc, this->domain, this->domain->giveEngngModel() ) ); // = rve->giveLinearSolver();
@@ -224,10 +220,9 @@ void PrescribedGradientBCPeriodic :: computeTangent(FloatMatrix &E, TimeStep *tS
 
     int neq = Kfp->giveNumberOfRows();
     int nsd = this->domain->giveNumberOfSpatialDimensions();
-    int ncomp = nsd * nsd;
 
-    FloatMatrix grad_pert(ncomp, ncomp), rhs, sol(neq, ncomp);
-    grad_pert.resize(ncomp, ncomp); // In fact, npeq should most likely equal ndev
+    FloatMatrix grad_pert(nsd, nsd), rhs, sol(neq, nsd);
+    grad_pert.resize(nsd, nsd);
     grad_pert.beUnitMatrix();
 
     // Compute the solution to each of the pertubation of eps
@@ -235,30 +230,16 @@ void PrescribedGradientBCPeriodic :: computeTangent(FloatMatrix &E, TimeStep *tS
     solver->solve(*Kff, rhs, sol);
 
     // Compute the solution to each of the pertubation of eps
-    FloatMatrix E_tmp;
-    Kfp->timesT(sol, E_tmp); // Assuming symmetry of stiffness matrix
+    Kfp->timesT(sol, k); // Assuming symmetry of stiffness matrix
     // This is probably always zero, but for generality
     FloatMatrix tmpMat;
     Kpp->times(grad_pert, tmpMat);
-    E_tmp.subtract(tmpMat);
-    E_tmp.times( - 1.0 / ( this->domainSize(this->giveDomain(), this->set) + this->domainSize(this->giveDomain(), this->masterSet) ));
-    
-    E.resize(E_tmp.giveNumberOfRows(), E_tmp.giveNumberOfColumns());
-    if ( nsd == 3 ) {
-        if ( E_tmp.giveNumberOfRows() == 6 ) {
-            E.assemble(E_tmp, {1, 6, 5, 6, 2, 4, 5, 4, 3});
-        } else {
-            E.assemble(E_tmp, {1, 9, 8, 6, 2, 7, 5, 4, 3});
-        }
-    } else if ( nsd == 2 ) {
-        E.assemble(E_tmp, {1, 4, 3, 2});
-    } else {
-        E = E_tmp;
-    }
+    k.subtract(tmpMat);
+    k.times( - 1.0 / ( this->domainSize(this->giveDomain(), this->set) + this->domainSize(this->giveDomain(), this->masterSet) ));
 }
 
 
-void PrescribedGradientBCPeriodic :: computeDofTransformation(ActiveDof *dof, FloatArray &masterContribs)
+void TransportGradientPeriodic :: computeDofTransformation(ActiveDof *dof, FloatArray &masterContribs)
 {
     DofManager *master = this->domain->giveDofManager(this->slavemap[dof->giveDofManager()->giveNumber()]);
     FloatArray *coords = dof->giveDofManager()->giveCoordinates();
@@ -267,9 +248,7 @@ void PrescribedGradientBCPeriodic :: computeDofTransformation(ActiveDof *dof, Fl
     FloatArray dx;
     dx.beDifferenceOf(* coords, * masterCoords );
 
-    int nsd = dx.giveSize(); // Number of spatial dimensions
-
-    masterContribs.resize(nsd + 1);
+    masterContribs.resize(dx.giveSize() + 1);
 
     masterContribs.at(1) = 1.; // Master dof is always weight 1.0
     for ( int i = 1; i <= dx.giveSize(); ++i ) {
@@ -278,40 +257,21 @@ void PrescribedGradientBCPeriodic :: computeDofTransformation(ActiveDof *dof, Fl
 }
 
 
-double PrescribedGradientBCPeriodic :: giveUnknown(double val, ValueModeType mode, TimeStep *tStep, ActiveDof *dof)
+double TransportGradientPeriodic :: giveUnknown(double val, ValueModeType mode, TimeStep *tStep, ActiveDof *dof)
 {
     DofManager *master = this->domain->giveDofManager(this->slavemap[dof->giveDofManager()->giveNumber()]);
-    DofIDItem id = dof->giveDofID();
-    FloatArray *coords = dof->giveDofManager()->giveCoordinates();
-    FloatArray *masterCoords = master->giveCoordinates();
-    FloatArray dx, uM;
-    dx.beDifferenceOf(* coords, * masterCoords );
-
-    int ind;
-    if ( id == D_u || id == V_u || id == P_f || id == T_f ) {
-        ind = 1;
-    } else if ( id == D_v || id == V_v ) {
-        ind = 2;
-    } else { /*if ( id == D_w || id == V_w )*/   // 3D only:
-        ind = 3;
-    }
-
-    FloatMatrix grad(3, 3);
-    for ( int i = 0; i < this->strain_id.giveSize(); ++i ) {
-        Dof *dof = this->strain->giveDofWithID(strain_id[i]);
-        grad(i % 3, i / 3) = dof->giveUnknown(mode, tStep);
-    }
-    uM.beProductOf(grad, dx); // The "jump" part of the unknown ( u^+ = [[u^M]] + u^- )
-
-    return val + uM.at(ind);
+    FloatArray dx, g;
+    dx.beDifferenceOf(* dof->giveDofManager()->giveCoordinates(), * master->giveCoordinates());
+    this->grad->giveUnknownVector(g, this->grad_ids, mode, tStep);
+    return val + g.dotProduct(dx);
 }
 
 
-double PrescribedGradientBCPeriodic :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep, ActiveDof *dof)
+double TransportGradientPeriodic :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep, ActiveDof *dof)
 {
-    if ( this->isStrainDof(dof) ) {
-        int ind = strain_id.findFirstIndexOf(dof->giveDofID()) - 1;
-        return this->mGradient(ind % 3, ind / 3) * this->giveTimeFunction()->evaluateAtTime(tStep->giveTargetTime());
+    if ( this->isGradDof(dof) ) {
+        int ind = grad_ids.findFirstIndexOf(dof->giveDofID()) - 1;
+        return this->mGradient(ind) * this->giveTimeFunction()->evaluateAtTime(tStep->giveTargetTime());
     }
 
     DofManager *master = this->domain->giveDofManager(this->slavemap[dof->giveDofManager()->giveNumber()]);
@@ -320,11 +280,11 @@ double PrescribedGradientBCPeriodic :: giveUnknown(PrimaryField &field, ValueMod
 }
 
 
-double PrescribedGradientBCPeriodic :: giveUnknown(ValueModeType mode, TimeStep *tStep, ActiveDof *dof)
+double TransportGradientPeriodic :: giveUnknown(ValueModeType mode, TimeStep *tStep, ActiveDof *dof)
 {
-    if ( this->isStrainDof(dof) ) {
-        int ind = strain_id.findFirstIndexOf(dof->giveDofID()) - 1;
-        return this->mGradient(ind % 3, ind / 3) * this->giveTimeFunction()->evaluateAtTime(tStep->giveTargetTime());
+    if ( this->isGradDof(dof) ) {
+        int ind = grad_ids.findFirstIndexOf(dof->giveDofID()) - 1;
+        return this->mGradient(ind) * this->giveTimeFunction()->evaluateAtTime(tStep->giveTargetTime());
     }
 
     DofManager *master = this->domain->giveDofManager(this->slavemap[dof->giveDofManager()->giveNumber()]);
@@ -338,57 +298,59 @@ double PrescribedGradientBCPeriodic :: giveUnknown(ValueModeType mode, TimeStep 
 }
 
 
-bool PrescribedGradientBCPeriodic :: isPrimaryDof(ActiveDof *dof)
+bool TransportGradientPeriodic :: isPrimaryDof(ActiveDof *dof)
 {
-    return this->isStrainDof(dof);
+    return this->isGradDof(dof);
 }
 
 
-double PrescribedGradientBCPeriodic :: giveBcValue(Dof *dof, ValueModeType mode, TimeStep *tStep)
+double TransportGradientPeriodic :: giveBcValue(Dof *dof, ValueModeType mode, TimeStep *tStep)
 {
-    if ( this->isStrainDof(dof) ) {
-        int index = strain_id.findFirstIndexOf(dof->giveDofID()) - 1;
-        return this->mGradient( index % 3, index / 3 ) * this->giveTimeFunction()->evaluateAtTime(tStep->giveTargetTime());;
-    }
-    OOFEM_ERROR("Has no prescribed value from bc.");
-    return 0.0;
+    int index = grad_ids.findFirstIndexOf(dof->giveDofID()) - 1;
+    return this->mGradient(index) * this->giveTimeFunction()->evaluateAtTime(tStep->giveTargetTime());
 }
 
 
-bool PrescribedGradientBCPeriodic :: hasBc(Dof *dof, TimeStep *tStep)
+bool TransportGradientPeriodic :: hasBc(Dof *dof, TimeStep *tStep)
 {
-    return this->isStrainDof(dof);
+    return this->isGradDof(dof);
 }
 
 
-bool PrescribedGradientBCPeriodic :: isStrainDof(Dof *dof)
+bool TransportGradientPeriodic :: isGradDof(Dof *dof)
 {
-    return this->strain.get() == dof->giveDofManager();
+    return this->grad.get() == dof->giveDofManager();
 }
 
 
-IRResultType PrescribedGradientBCPeriodic :: initializeFrom(InputRecord *ir)
+IRResultType TransportGradientPeriodic :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;
 
-    IR_GIVE_FIELD(ir, this->masterSet, _IFT_PrescribedGradientBCPeriodic_masterSet)
-    IR_GIVE_FIELD(ir, this->jump, _IFT_PrescribedGradientBCPeriodic_jump)
+    IR_GIVE_FIELD(ir, this->mGradient, _IFT_TransportGradientPeriodic_gradient)
+    IR_GIVE_FIELD(ir, this->mCenterCoord, _IFT_TransportGradientPeriodic_centerCoords)
 
-    ActiveBoundaryCondition :: initializeFrom(ir);
-    return PrescribedGradientHomogenization::initializeFrom(ir);
+    IR_GIVE_FIELD(ir, this->masterSet, _IFT_TransportGradientPeriodic_masterSet)
+    IR_GIVE_FIELD(ir, this->jump, _IFT_TransportGradientPeriodic_jump)
+
+    return ActiveBoundaryCondition :: initializeFrom(ir);
+    //return PrescribedGradientHomogenization::initializeFrom(ir);
 }
 
 
-void PrescribedGradientBCPeriodic :: giveInputRecord(DynamicInputRecord &input)
+void TransportGradientPeriodic :: giveInputRecord(DynamicInputRecord &input)
 {
     ActiveBoundaryCondition :: giveInputRecord(input);
-    PrescribedGradientHomogenization :: giveInputRecord(input);
-    input.setField(this->masterSet, _IFT_PrescribedGradientBCPeriodic_masterSet);
-    input.setField(this->jump, _IFT_PrescribedGradientBCPeriodic_jump);
+    //PrescribedGradientHomogenization :: giveInputRecord(input);
+    input.setField(this->mGradient, _IFT_TransportGradientPeriodic_gradient);
+    input.setField(this->mCenterCoord, _IFT_TransportGradientPeriodic_centerCoords);
+    
+    input.setField(this->masterSet, _IFT_TransportGradientPeriodic_masterSet);
+    input.setField(this->jump, _IFT_TransportGradientPeriodic_jump);
 }
 
 
-void PrescribedGradientBCPeriodic :: postInitialize()
+void TransportGradientPeriodic :: postInitialize()
 {
     this->findSlaveToMasterMap();
 }

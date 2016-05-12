@@ -77,8 +77,8 @@ SubspaceIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, Floa
     FILE *outStream;
     FloatArray temp, w, d, tt, rtolv, eigv;
     FloatMatrix r;
-    int nn, nc1, i, j, k, ij = 0, nite, is;
-    double rt, art, brt, eigvt, dif;
+    int nn, nc1, ij = 0, is;
+    double rt, art, brt, eigvt;
     FloatMatrix ar, br, vec;
 
     GJacobi mtd(domain, engngModel);
@@ -125,6 +125,12 @@ SubspaceIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, Floa
     vec.resize(nc, nc);
     vec.zero();                   // eigen vectors of reduced problem
 
+    FloatMatrix tmp;
+    a.toFloatMatrix(tmp);
+    tmp.writeCSV("tmp.txt");
+    b.toFloatMatrix(tmp);
+    tmp.writeCSV("tmpb.txt");
+
     _r.resize(nn, nroot);
     _eigv.resize(nroot);
 
@@ -137,19 +143,17 @@ SubspaceIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, Floa
     eigv.zero();
 
     FloatArray h(nn);
-    for ( i = 1; i <= nn; i++ ) {
+    for ( int i = 1; i <= nn; i++ ) {
         h.at(i) = 1.0;
         w.at(i) = b.at(i, i) / a.at(i, i);
     }
 
     b.times(h, tt);
-    for ( i = 1; i <= nn; i++ ) {
-        r.at(i, 1) = tt.at(i);
-    }
+    r.setColumn(tt, 1);
 
-    for ( j = 2; j <= nc; j++ ) {
+    for ( int j = 2; j <= nc; j++ ) {
         rt = 0.0;
-        for ( i = 1; i <= nn; i++ ) {
+        for ( int i = 1; i <= nn; i++ ) {
             if ( fabs( w.at(i) ) >= rt ) {
                 rt = fabs( w.at(i) );
                 ij = i;
@@ -158,7 +162,7 @@ SubspaceIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, Floa
 
         tt.at(j) = ij;
         w.at(ij) = 0.;
-        for ( i = 1; i <= nn; i++ ) {
+        for ( int i = 1; i <= nn; i++ ) {
             if ( i == ij ) {
                 h.at(i) = 1.0;
             } else {
@@ -167,9 +171,7 @@ SubspaceIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, Floa
         }
 
         b.times(h, tt);
-        for ( i = 1; i <= nn; i++ ) {
-            r.at(i, j) = tt.at(i);
-        }
+        r.setColumn(tt, j);
     } // (r = z)
 
 # ifdef DETAILED_REPORT
@@ -184,34 +186,28 @@ SubspaceIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, Floa
     //
     // start of iteration loop
     //
-    for ( nite = 0; ; ++nite ) {               // label 100
+    for ( int nite = 0; ; ++nite ) {               // label 100
 # ifdef DETAILED_REPORT
         printf("SubspaceIteration :: solveYourselfAt: Iteration loop no. %d\n", nite);
 # endif
         //
         // compute projection ar and br of matrices a , b
         //
-        for ( j = 1; j <= nc; j++ ) {
-            for ( k = 1; k <= nn; k++ ) {
-                tt.at(k) = r.at(k, j);
-            }
+        for ( int j = 1; j <= nc; j++ ) {
+            tt.beColumnOf(r, j);
 
-            //a. forwardReductionWith(&tt) -> diagonalScalingWith (&tt)
-            //  -> backSubstitutionWithtt) ;
             a.backSubstitutionWith(tt);
 
-            for ( i = j; i <= nc; i++ ) {
+            for ( int i = j; i <= nc; i++ ) {
                 art = 0.;
-                for ( k = 1; k <= nn; k++ ) {
+                for ( int k = 1; k <= nn; k++ ) {
                     art += r.at(k, i) * tt.at(k);
                 }
 
                 ar.at(j, i) = art;
             }
 
-            for ( k = 1; k <= nn; k++ ) {
-                r.at(k, j) = tt.at(k);                 // (r = xbar)
-            }
+            r.setColumn(tt, j);            // (r = xbar)
         }
 
         ar.symmetrized();        // label 110
@@ -220,24 +216,20 @@ SubspaceIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, Floa
         ar.printYourself();
 #endif
         //
-        for ( j = 1; j <= nc; j++ ) {
-            for ( k = 1; k <= nn; k++ ) {
-                tt.at(k) = r.at(k, j);
-            }
+        for ( int j = 1; j <= nc; j++ ) {
+            tt.beColumnOf(r, j);
 
             b.times(tt, temp);
-            for ( i = j; i <= nc; i++ ) {
+            for ( int i = j; i <= nc; i++ ) {
                 brt = 0.;
-                for ( k = 1; k <= nn; k++ ) {
+                for ( int k = 1; k <= nn; k++ ) {
                     brt += r.at(k, i) * temp.at(k);
                 }
 
                 br.at(j, i) = brt;
             }                   // label 180
 
-            for ( k = 1; k <= nn; k++ ) {
-                r.at(k, j) = temp.at(k);             // (r=zbar)
-            }
+            r.setColumn(temp, j);        // (r=zbar)
         }                       // label 160
 
         br.symmetrized();
@@ -252,86 +244,83 @@ SubspaceIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, Floa
         mtd.solve(ar, br, eigv, vec);
 
         /// START EXPERIMENTAL
+#if 0
         // solve the reduced problem by Inverse iteration
-        /*
-         * {
-         * FloatMatrix x(nc,nc), z(nc,nc), zz(nc,nc), arinv;
-         * FloatArray  w(nc), ww(nc), tt(nc), t(nc);
-         * double c;
-         * int ii, i,j,k,ac;
-         *
-         *
-         * //  initial setting
-         * for (i=1;i<=nc;i++){
-         * ww.at(i)=1.0;
-         * }
-         *
-         * for (i=1;i<=nc;i++)
-         * for (j=1; j<=nc;j++)
-         *   z.at(i,j)=1.0;
-         *
-         * arinv.beInverseOf (ar);
-         *
-         * for (i=0;i<nitem;i++) {
-         *
-         * //  copy zz=z
-         * zz = z;
-         *
-         * // solve matrix equation K.X = M.X
-         * x.beProductOf (arinv, z);
-         * //  evaluation of Rayleigh quotients
-         * for (j=1;j<=nc;j++){
-         *   w.at(j) = 0.0;
-         *   for (k = 1; k<= nc; k++) w.at(j) += zz.at(k,j)*x.at(k,j);
-         * }
-         *
-         * z.beProductOf (br, x);
-         *
-         * for (j=1;j<=nc;j++){
-         *   c = 0;
-         *   for (k = 1; k<= nc; k++) c+= z.at(k,j)*x.at(k,j);
-         *   w.at(j) /= c;
-         * }
-         *
-         * //  check convergence
-         * ac=0;
-         * for (j=1;j<=nc;j++){
-         *   if (fabs((ww.at(j)-w.at(j))/w.at(j))< rtol)  ac++;
-         *   ww.at(j)=w.at(j);
-         * }
-         *
-         * printf ("\n iterace cislo  %d   %d",i,ac);
-         * w.printYourself();
-         *
-         * //  Gramm-Schmidt ortogonalization
-         * for (j=1;j<=nc;j++) {
-         *   for (k = 1; k<= nc; k++) tt.at(k) = x.at(k,j) ;
-         *   t.beProductOf(br,tt) ;
-         *   for (ii=1;ii<j;ii++) {
-         *     c = 0.0;
-         *     for (k = 1; k<= nc; k++) c += x.at(k,ii)*t.at(k);
-         *     for (k = 1; k<= nc; k++) x.at(k,j) -= x.at(k,ii)*c;
-         *   }
-         *   for (k = 1; k<= nc; k++) tt.at(k) = x.at(k,j) ;
-         *   t.beProductOf (br,tt) ;
-         *   c = 0.0;
-         *   for (k = 1; k<= nc; k++) c += x.at(k,j)*t.at(k);
-         *   for (k = 1; k<= nc; k++) x.at(k,j) /= sqrt(c);
-         * }
-         *
-         * if (ac>nroot){
-         *   break;
-         * }
-         *
-         * //  compute new approximation of Z
-         * z.beProductOf (br,x);
-         * }
-         *
-         * eigv = w;
-         * vec = x;
-         * }
-         * /// END EXPERIMANTAL
-         */
+        {
+            FloatMatrix x(nc,nc), z(nc,nc), zz(nc,nc), arinv;
+            FloatArray  w(nc), ww(nc), tt(nc), t(nc);
+            double c;
+
+            //  initial setting
+            for ( int i = 1;i <= nc; i++ ) {
+                ww.at(i)=1.0;
+            }
+            
+            
+            for ( int i = 1;i <= nc; i++ )
+                for ( int j = 1; j <= nc;j++ )
+                    z.at(i,j)=1.0;
+            
+            arinv.beInverseOf (ar);
+            
+            for ( int i = 0;i < nitem; i++ ) {
+                //  copy zz=z
+                zz = z;
+                
+                // solve matrix equation K.X = M.X
+                x.beProductOf(arinv, z);
+                //  evaluation of Rayleigh quotients
+                for ( int j = 1;j <= nc; j++ ) {
+                    w.at(j) = 0.0;
+                    for (k = 1; k<= nc; k++) w.at(j) += zz.at(k,j) * x.at(k,j);
+                }
+
+                z.beProductOf (br, x);
+
+                for ( int j = 1;j <= nc; j++ ) {
+                    c = 0;
+                    for ( int k = 1; k<= nc; k++ ) c += z.at(k,j) * x.at(k,j);
+                    w.at(j) /= c;
+                }
+
+                //  check convergence
+                int ac = 0;
+                for ( int j = 1;j <= nc; j++ ) {
+                    if (fabs((ww.at(j)-w.at(j))/w.at(j))< rtol)  ac++;
+                    ww.at(j) = w.at(j);
+                }
+
+                //printf ("\n iterace cislo  %d   %d",i,ac);
+                //w.printYourself();
+
+                //  Gramm-Schmidt ortogonalization
+                for ( int j = 1;j <= nc;j++ ) {
+                    for ( int k = 1; k<= nc; k++ ) tt.at(k) = x.at(k,j);
+                    t.beProductOf(br,tt) ;
+                    for ( int ii = 1;ii < j; ii++ ) {
+                        c = 0.0;
+                        for ( int k = 1; k<= nc; k++ ) c += x.at(k,ii) * t.at(k);
+                        for ( int k = 1; k<= nc; k++ ) x.at(k,j) -= x.at(k,ii) * c;
+                    }
+                    for ( int k = 1; k<= nc; k++) tt.at(k) = x.at(k,j);
+                    t.beProductOf(br, tt);
+                    c = 0.0;
+                    for ( int k = 1; k<= nc; k++) c += x.at(k,j)*t.at(k);
+                    for ( int k = 1; k<= nc; k++) x.at(k,j) /= sqrt(c);
+                }
+
+                if ( ac > nroot ) {
+                    break;
+                }
+
+                //  compute new approximation of Z
+                z.beProductOf(br,x);
+            }
+            
+            eigv = w;
+            vec = x;
+        }
+#endif // END EXPERIMANTAL
 
 
         //
@@ -339,13 +328,13 @@ SubspaceIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, Floa
         //
         do {
             is = 0; // label 350
-            for ( i = 1; i <= nc1; i++ ) {
+            for ( int i = 1; i <= nc1; i++ ) {
                 if ( fabs( eigv.at(i + 1) ) < fabs( eigv.at(i) ) ) {
                     is++;
                     eigvt = eigv.at(i + 1);
                     eigv.at(i + 1) = eigv.at(i);
                     eigv.at(i)   = eigvt;
-                    for ( k = 1; k <= nc; k++ ) {
+                    for ( int k = 1; k <= nc; k++ ) {
                         rt = vec.at(k, i + 1);
                         vec.at(k, i + 1) = vec.at(k, i);
                         vec.at(k, i)   = rt;
@@ -363,14 +352,14 @@ SubspaceIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, Floa
         //
         // compute eigenvectors
         //
-        for ( i = 1; i <= nn; i++ ) { // label 375
-            for ( j = 1; j <= nc; j++ ) {
+        for ( int i = 1; i <= nn; i++ ) { // label 375
+            for ( int j = 1; j <= nc; j++ ) {
                 tt.at(j) = r.at(i, j);
             }
 
-            for ( k = 1; k <= nc; k++ ) {
+            for ( int k = 1; k <= nc; k++ ) {
                 rt = 0.;
-                for ( j = 1; j <= nc; j++ ) {
+                for ( int j = 1; j <= nc; j++ ) {
                     rt += tt.at(j) * vec.at(j, k);
                 }
 
@@ -381,8 +370,8 @@ SubspaceIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, Floa
         //
         // convergency check
         //
-        for ( i = 1; i <= nc; i++ ) {
-            dif = ( eigv.at(i) - d.at(i) );
+        for ( int i = 1; i <= nc; i++ ) {
+            double dif = ( eigv.at(i) - d.at(i) );
             rtolv.at(i) = fabs( dif / eigv.at(i) );
         }
 
@@ -390,7 +379,7 @@ SubspaceIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, Floa
         printf("SubspaceIteration :: solveYourselfAt: Reached precision of eigenvalues:\n");
         rtolv.printYourself();
 # endif
-        for ( i = 1; i <= nroot; i++ ) {
+        for ( int i = 1; i <= nroot; i++ ) {
             if ( rtolv.at(i) > rtol ) {
                 goto label400;
             }
@@ -406,31 +395,25 @@ label400:
             break;
         }
 
-        for ( i = 1; i <= nc; i++ ) {
-            d.at(i) = eigv.at(i);                     // label 410 and 440
-        }
+        d = eigv;                     // label 410 and 440
 
         continue;
     }
 
 
     // compute eigenvectors
-    for ( j = 1; j <= nc; j++ ) {
-        for ( k = 1; k <= nn; k++ ) {
-            tt.at(k) = r.at(k, j);
-        }
+    for ( int j = 1; j <= nc; j++ ) {
+        tt.beColumnOf(r, j);
 
         a.backSubstitutionWith(tt);
-        for ( k = 1; k <= nn; k++ ) {
-            r.at(k, j) = tt.at(k);                   // (r = xbar)
-        }
+        r.setColumn(tt, j);                          // r = xbar
     }
 
     // one cad add a normalization of eigen-vectors here
 
-    for ( i = 1; i <= nroot; i++ ) {
+    for ( int i = 1; i <= nroot; i++ ) {
         _eigv.at(i) = eigv.at(i);
-        for ( j = 1; j <= nn; j++ ) {
+        for ( int j = 1; j <= nn; j++ ) {
             _r.at(j, i) = r.at(j, i);
         }
     }

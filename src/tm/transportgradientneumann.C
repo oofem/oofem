@@ -61,7 +61,7 @@ TransportGradientNeumann :: TransportGradientNeumann(int n, Domain *d) :
     mpFluxHom( new Node(0, d) )
 {
     int nsd = d->giveNumberOfSpatialDimensions();
-    for ( int i = 0; i < nsd * nsd; i++ ) {
+    for ( int i = 0; i < nsd; i++ ) {
         // Just putting in X_i id-items since they don't matter.
         int dofId = d->giveNextFreeDofID();
         mFluxIds.followedBy(dofId);
@@ -81,13 +81,12 @@ IRResultType TransportGradientNeumann :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, mGradient, _IFT_TransportGradientNeumann_gradient);
 
     IR_GIVE_FIELD(ir, surfSets, _IFT_TransportGradientNeumann_surfSets);
-    //IR_GIVE_OPTIONAL_FIELD(ir, mCenterCoord, _IFT_TransportGradientNeumann_centerCoords)
+    this->mCenterCoord.clear();
+    IR_GIVE_OPTIONAL_FIELD(ir, mCenterCoord, _IFT_TransportGradientNeumann_centerCoords)
     
-    if ( ir->hasField(_IFT_TransportGradientNeumann_usePhi) ) {
-        this->computePhi();
-    }
+    this->usePhi = ir->hasField(_IFT_TransportGradientNeumann_usePhi);
     
-    return IRRT_OK;
+    return ActiveBoundaryCondition :: initializeFrom(ir);
 }
 
 
@@ -96,6 +95,14 @@ void TransportGradientNeumann :: giveInputRecord(DynamicInputRecord &input)
     //ActiveBoundaryCondition :: giveInputRecord(input);
     //PrescribedGradientHomogenization :: giveInputRecord(input);
     input.setField(mGradient, _IFT_TransportGradientNeumann_gradient);
+}
+
+
+void TransportGradientNeumann :: postInitialize()
+{
+    ActiveBoundaryCondition :: postInitialize();
+    
+    if ( this->usePhi ) this->computePhi();
 }
 
 
@@ -119,9 +126,9 @@ double TransportGradientNeumann :: domainSize()
         Set *set = domain->giveSet(setNum);
         const IntArray &boundaries = set->giveBoundaryList();
 
-        for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
-            Element *e = domain->giveElement( boundaries.at(pos * 2 - 1) );
-            int boundary = boundaries.at(pos * 2);
+        for ( int pos = 0; pos < boundaries.giveSize() / 2; ++pos ) {
+            Element *e = domain->giveElement( boundaries[pos * 2] );
+            int boundary = boundaries[pos * 2 + 1];
             FEInterpolation *fei = e->giveInterpolation();
             domain_size += fei->evalNXIntegral( boundary, FEIElementGeometryWrapper(e) );
         }
@@ -157,18 +164,19 @@ void TransportGradientNeumann :: assembleVector(FloatArray &answer, TimeStep *tS
         mpFluxHom->giveMasterDofIDArray(mFluxIds, fluxMasterDofIDs);
 
         // Assemble
-        for ( auto surfSet : this->surfSets ) {
+        for ( int i = 0; i < this->surfSets.giveSize(); ++i ) {
+            int surfSet = this->surfSets[i];
             Set *setPointer = this->giveDomain()->giveSet(surfSet);
             const IntArray &boundaries = setPointer->giveBoundaryList();
-            for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
-                Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
-                int boundary = boundaries.at(pos * 2);
+            for ( int pos = 0; pos < boundaries.giveSize() / 2; ++pos ) {
+                Element *e = this->giveDomain()->giveElement( boundaries[pos * 2] );
+                int boundary = boundaries[pos * 2 + 1];
 
                 // Fetch the element information;
                 e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
                 e->giveBoundaryLocationArray(loc, bNodes, this->dofs, s, & masterDofIDs);
                 e->computeBoundaryVectorOf(bNodes, this->dofs, mode, tStep, e_u);
-                this->integrateTangent(Ke, e, boundary, surfSet, pos);
+                this->integrateTangent(Ke, e, boundary, i, pos);
 
                 // We just use the tangent, less duplicated code (the addition of flux is linear).
                 fe_v.beProductOf(Ke, e_u);
@@ -200,18 +208,19 @@ void TransportGradientNeumann :: assemble(SparseMtrx &answer, TimeStep *tStep,
         mpFluxHom->giveLocationArray(mFluxIds, flux_loc_r, r_s);
         mpFluxHom->giveLocationArray(mFluxIds, flux_loc_c, c_s);
 
-        for ( auto &surfSet : this->surfSets ) {
-            Set *set = this->giveDomain()->giveSet(this->set);
+        for ( int i = 0; i < this->surfSets.giveSize(); ++i ) {
+            int surfSet = this->surfSets[i];
+            Set *set = this->giveDomain()->giveSet(surfSet);
             const IntArray &boundaries = set->giveBoundaryList();
-            for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
-                Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
-                int boundary = boundaries.at(pos * 2);
+            for ( int pos = 0; pos < boundaries.giveSize() / 2; ++pos ) {
+                Element *e = this->giveDomain()->giveElement( boundaries[pos * 2] );
+                int boundary = boundaries[pos * 2 + 1];
 
                 e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
                 e->giveBoundaryLocationArray(loc_r, bNodes, this->dofs, r_s);
                 e->giveBoundaryLocationArray(loc_c, bNodes, this->dofs, c_s);
 
-                this->integrateTangent(Ke, e, boundary, surfSet, pos);
+                this->integrateTangent(Ke, e, boundary, i, pos);
                 Ke.negated();
                 KeT.beTranspositionOf(Ke);
 
@@ -227,44 +236,39 @@ void TransportGradientNeumann :: assemble(SparseMtrx &answer, TimeStep *tStep,
 void TransportGradientNeumann :: giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,
                                                        const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
-    IntArray dofids;
-    IntArray loc_r, loc_c, flux_loc_r, flux_loc_c;
-    int nsd = this->domain->giveNumberOfSpatialDimensions();
-    DofIDItem id0 = this->domain->giveDofManager(1)->hasDofID(V_u) ? V_u : D_u; // Just check the first node if it has V_u or D_u.
-    dofids.resize(nsd);
-    for ( int i = 0; i < nsd; ++i ) {
-        dofids(i) = id0 + i;
-    }
+    IntArray loc_r, loc_c, flux_loc_r, flux_loc_c, bNodes;
 
     // Fetch the columns/rows for the flux contributions;
     mpFluxHom->giveLocationArray(mFluxIds, flux_loc_r, r_s);
     mpFluxHom->giveLocationArray(mFluxIds, flux_loc_c, c_s);
 
-    Set *set = this->giveDomain()->giveSet(this->set);
-    const IntArray &boundaries = set->giveBoundaryList();
+    rows.clear();
+    cols.clear();
+    
+    int i = 0;    
+    for ( auto &surfSet : this->surfSets ) {
+        Set *set = this->giveDomain()->giveSet(surfSet);
+        const IntArray &boundaries = set->giveBoundaryList();
 
-    rows.resize( boundaries.giveSize() );
-    cols.resize( boundaries.giveSize() );
-    int i = 0;
-    for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
-        Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
+        rows.resize( rows.size() + boundaries.giveSize() );
+        cols.resize( cols.size() + boundaries.giveSize() );
+        for ( int pos = 0; pos < boundaries.giveSize() / 2; ++pos ) {
+            Element *e = this->giveDomain()->giveElement( boundaries[pos * 2] );
+            int boundary = boundaries[pos * 2 + 1];
 
-        // Here, we could use only the nodes actually located on the boundary, but we don't.
-        // Instead, we use all nodes belonging to the element, which is allowed because the
-        // basis functions related to the interior nodes will be zero on the boundary.
-        // Obviously, this is less efficient, so why do we want to do it this way?
-        // Because it is easier when XFEM enrichments are present. /ES
-        e->giveLocationArray(loc_r, r_s);
-        e->giveLocationArray(loc_c, c_s);
+            e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+            e->giveBoundaryLocationArray(loc_r, bNodes, this->dofs, r_s);
+            e->giveBoundaryLocationArray(loc_c, bNodes, this->dofs, c_s);
 
-        // For most uses, loc_r == loc_c, and flux_loc_r == flux_loc_c.
-        rows [ i ] = loc_r;
-        cols [ i ] = flux_loc_c;
-        i++;
-        // and the symmetric part (usually the transpose of above)
-        rows [ i ] = flux_loc_r;
-        cols [ i ] = loc_c;
-        i++;
+            // For most uses, loc_r == loc_c, and flux_loc_r == flux_loc_c.
+            rows [ i ] = loc_r;
+            cols [ i ] = flux_loc_c;
+            i++;
+            // and the symmetric part (usually the transpose of above)
+            rows [ i ] = flux_loc_r;
+            cols [ i ] = loc_c;
+            i++;
+        }
     }
 }
 
@@ -281,44 +285,59 @@ void TransportGradientNeumann :: computeTangent(FloatMatrix &tangent, TimeStep *
     std :: unique_ptr< SparseLinearSystemNM > solver( 
         classFactory.createSparseLinSolver( ST_Petsc, this->domain, this->domain->giveEngngModel() ) ); // = rve->giveLinearSolver();
     SparseMtrxType stype = solver->giveRecommendedMatrix(true);
-    EModelDefaultEquationNumbering fnum;
     double rve_size = this->domainSize();
 
-    // Set up and assemble tangent FE-matrix which will make up the sensitivity analysis for the macroscopic material tangent.
+    // 1. Kuu*us = -Kus*s   =>  us = -Kuu\Ku  where u = us*s
+    // 2. Ks = Kus'*us
+    // 3. Ks*lambda = I
+    
+    // 1.
+    // This is not very good. We have to keep Kuu and Kff in memory at the same time. Not optimal
+    // Consider changing this approach.
+    EModelDefaultEquationNumbering fnum;
     std :: unique_ptr< SparseMtrx > Kff( classFactory.createSparseMtrx(stype) );
     if ( !Kff ) {
-        OOFEM_ERROR("Couldn't create sparse matrix of type %d\n", stype);
+        OOFEM_ERROR("Couldn't create sparse matrix of type  %d\n", stype);
     }
     Kff->buildInternalStructure(rve, this->domain->giveNumber(), fnum);
-    rve->assemble(*Kff, tStep, TangentAssembler(TangentStiffness), fnum, fnum, this->domain);
 
-    // Setup up indices and locations
+    rve->assemble(*Kff, tStep, TangentAssembler(TangentStiffness), fnum, this->domain);
+    
+    IntArray loc_u, loc_s;
+    this->mpFluxHom->giveLocationArray(this->mFluxIds, loc_s, fnum);
     int neq = Kff->giveNumberOfRows();
-
-    // Indices and such of internal dofs
-    int n = this->mpFluxHom->giveNumberOfDofs();
-
-    // Matrices and arrays for sensitivities
-    FloatMatrix grad_pert(neq, n), s_d(neq, n);
-
-    // Unit pertubations for d_dev
-    grad_pert.zero();
-    for ( int i = 1; i <= n; ++i ) {
-        int eqn = this->mpFluxHom->giveDofWithID(this->mFluxIds.at(i))->giveEquationNumber(fnum);
-        grad_pert.at(eqn, i) = -1.0 * rve_size;
-    }
-
-    // Solve all sensitivities
-    solver->solve(*Kff, grad_pert, s_d);
-
-    // Extract the flux response from the solutions
-    tangent.resize(n, n);
-    for ( int i = 1; i <= n; ++i ) {
-        int eqn = this->mpFluxHom->giveDofWithID(this->mFluxIds.at(i))->giveEquationNumber(fnum);
-        for ( int j = 1; j <= n; ++j ) {
-            tangent.at(i, j) = s_d.at(eqn, j);
+    loc_u.resize(neq - loc_s.giveSize());
+    int k = 0;
+    for ( int i = 1; i <= neq; ++i ) {
+        if ( !loc_s.contains(i) ) {
+            loc_u.at(++k) = i;
         }
     }
+
+    std :: unique_ptr< SparseMtrx > Kuu(Kff->giveSubMatrix(loc_u, loc_u));
+    // NOTE: Kus is actually a dense matrix, but we have to make it a dense matrix first
+    std :: unique_ptr< SparseMtrx > Kus(Kff->giveSubMatrix(loc_u, loc_s));
+
+    FloatMatrix KusD;
+    Kus->toFloatMatrix(KusD);
+
+    // Release a large chunk of redundant memory early.
+    Kus.reset();
+    Kff.reset();
+
+    // 1.
+    FloatMatrix us;
+    solver->solve(*Kuu, KusD, us);
+    us.negated();
+
+    // 2.
+    FloatMatrix Ks;
+    Ks.beTProductOf(KusD, us);
+
+    // 3.
+    tangent.beInverseOf(Ks);
+    tangent.times(rve_size);
+    tangent.negated();
 }
 
 
@@ -334,8 +353,8 @@ void TransportGradientNeumann :: computePhi()
     phi.resize(this->surfSets.giveSize());
     for ( int i = 0; i < this->surfSets.giveSize(); ++i ) {
         // Compute the coordinate indices based on what surface we're on.
-        double i_r;
-        double i_t;
+        int i_r;
+        int i_t;
         if ( i % 3 == 0 ) { // Plane facing +- x
             i_r = 1;
             i_t = 2;
@@ -353,11 +372,15 @@ void TransportGradientNeumann :: computePhi()
 
         phi[i].resize(boundaries.giveSize() / 2);
 
-        // Set up and solve: c * phi = f
+        // Set up and solve: c * phi_c = f
         // which represents the equations:
         // int (phi - 1) dA = 0
         // int (phi - 1) r dA = 0
         // int (phi - 1) t dA = 0
+        //
+        // int phi_0 + phi_r * r + phi_t * t dA = A
+        // int (phi_0 + phi_r * r + phi_t * t) r dA = int r dA
+        // int (phi_0 + phi_r * r + phi_t * t) t dA = int t dA
         FloatArray f(3), phi_c;
         FloatMatrix c(3, 3);
         for ( int pos = 0; pos < boundaries.giveSize() / 2; ++pos ) {
@@ -367,6 +390,7 @@ void TransportGradientNeumann :: computePhi()
             FEInterpolation *interp = e->giveInterpolation(); // Geometry interpolation
             int order = interp->giveInterpolationOrder();
             std :: unique_ptr< IntegrationRule > ir( interp->giveBoundaryIntegrationRule(order, boundary) );
+            static_cast< TransportElement* >(e)->computeConstitutiveMatrixAt(d, Capacity, e->giveDefaultIntegrationRulePtr()->getIntegrationPoint(1), tStep);
 
             for ( auto &gp: *ir ) {
                 const FloatArray &lcoords = gp->giveNaturalCoordinates();
@@ -375,26 +399,28 @@ void TransportGradientNeumann :: computePhi()
                 double detJ = interp->boundaryEvalNormal(normal, boundary, lcoords, cellgeo);
                 double dA = detJ * gp->giveWeight();
                 interp->boundaryLocal2Global(coords, boundary, lcoords, cellgeo);
+                coords.subtract(this->mCenterCoord);
                 double r = coords[i_r], t = coords[i_t];
                 
                 // Compute material property
-                static_cast< TransportElement* >(e)->computeConstitutiveMatrixAt(d, Capacity, gp, tStep);
+                ///@todo Can't do this yet, problem with material model interface (doesn't know the GP material mode). This should be changed.
+                //static_cast< TransportElement* >(e)->computeConstitutiveMatrixAt(d, Capacity, gp, tStep);
                 tmp.beProductOf(d, normal);
                 double k = tmp.dotProduct(normal);
 
                 f[0] += dA;
-                f[1] += r * dA;
-                f[2] += t * dA;
+                f[1] += dA * r;
+                f[2] += dA * t;
 
-                c(0, 0) += k;
-                c(0, 1) += k * r;
-                c(0, 1) += k * t;
-                c(1, 0) += k * r;
-                c(1, 1) += k * r * r;
-                c(1, 1) += k * t * r;
-                c(2, 0) += k * t;
-                c(2, 1) += k * r * t;
-                c(2, 1) += k * t * t;
+                c(0, 0) += dA * k;
+                c(0, 1) += dA * k * r;
+                c(0, 2) += dA * k * t;
+                c(1, 0) += dA * k * r;
+                c(1, 1) += dA * k * r * r;
+                c(1, 2) += dA * k * t * r;
+                c(2, 0) += dA * k * t;
+                c(2, 1) += dA * k * r * t;
+                c(2, 2) += dA * k * t * t;
             }
         }
         c.solveForRhs(f, phi_c);
@@ -406,6 +432,7 @@ void TransportGradientNeumann :: computePhi()
             FEInterpolation *interp = e->giveInterpolation(); // Geometry interpolation
             int order = interp->giveInterpolationOrder();
             std :: unique_ptr< IntegrationRule > ir( interp->giveBoundaryIntegrationRule(order, boundary) );
+            static_cast< TransportElement* >(e)->computeConstitutiveMatrixAt(d, Capacity, e->giveDefaultIntegrationRulePtr()->getIntegrationPoint(1), tStep);
 
             phi[i][pos].resize(ir->giveNumberOfIntegrationPoints());
             for ( auto &gp: *ir ) {
@@ -414,10 +441,11 @@ void TransportGradientNeumann :: computePhi()
 
                 interp->boundaryEvalNormal(normal, boundary, lcoords, cellgeo);
                 interp->boundaryLocal2Global(coords, boundary, lcoords, cellgeo);
+                coords.subtract(this->mCenterCoord);
                 double r = coords[i_r], t = coords[i_t];
                 
                 // Compute material property
-                static_cast< TransportElement* >(e)->computeConstitutiveMatrixAt(d, Capacity, gp, tStep);
+                //static_cast< TransportElement* >(e)->computeConstitutiveMatrixAt(d, Capacity, gp, tStep);
                 tmp.beProductOf(d, normal);
                 double k = tmp.dotProduct(normal);
 
@@ -446,12 +474,13 @@ void TransportGradientNeumann :: integrateTangent(FloatMatrix &oTangent, Element
         // If phi isn't set, assume that classical Neumann b.c. is used (phi = 1)
         double scale = 1.0;
         if ( !phi.empty() ) {
+            //printf(" surfset %d / %d, pos %d, number %d\n", surfSet, pos, gp->giveNumber(), phi.size());
             scale = phi[surfSet][pos].at(gp->giveNumber());
         }
 
         double detJ = interp->boundaryEvalNormal(normal, boundary, lcoords, cellgeo);
         interp->boundaryEvalN(n, boundary, lcoords, cellgeo);
-        oTangent.plusDyadUnsym(n, normal, scale * detJ * gp->giveWeight());
+        oTangent.plusDyadUnsym(normal, n, scale * detJ * gp->giveWeight());
     }
 }
 } /* namespace oofem */
