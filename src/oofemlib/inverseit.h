@@ -84,9 +84,7 @@ class EngngModel;
 class OOFEM_EXPORT InverseIteration : public SparseGeneralEigenValueSystemNM
 {
 private:
-    int n, nc, nitem;
-    double rtol;
-    int solved;
+    int nitem;
 
 public:
     InverseIteration(Domain * d, EngngModel * m);

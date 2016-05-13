@@ -256,7 +256,7 @@ void EigenValueDynamic :: terminate(TimeStep *tStep)
         }
     }
 
-    for ( int i = 1; i <=  numberOfRequiredEigenValues; i++ ) {
+    for ( int i = 1; i <= numberOfRequiredEigenValues; i++ ) {
         // export using export manager
         tStep->setTime( ( double ) i ); // we use time as intrinsic eigen value index
         tStep->setNumber(i);

@@ -41,25 +41,14 @@
 #include "floatarray.h"
 #include "mathfem.h"
 #include "gjacobi.h"
+#include "sparselinsystemnm.h"
+#include "classfactory.h"
 
 namespace oofem {
 SubspaceIteration :: SubspaceIteration(Domain *d, EngngModel *m) :
     SparseGeneralEigenValueSystemNM(d, m)
 {
-    //
-    // constructor
-    //
-    //a      = NULL ;
-    //b      = NULL ;
-    //_eigv  = NULL ;   // not ownership
-    //_r     = NULL ;   // not ownership
-
-    //nroot  = 0 ;
-    nc     = 0;
-    //rtol   = 10.E-6 ;   // convergence tolerance
-    n = 0;
     nitem = 40; // max number of iterations
-    solved = 0;
 }
 
 
@@ -72,33 +61,20 @@ SubspaceIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, Floa
 // this function solve the generalized eigenproblem using the Generalized
 // jacobi iteration
 //
-//
 {
-    FILE *outStream;
-    FloatArray temp, w, d, tt, rtolv, eigv;
-    FloatMatrix r;
-    int nn, nc1, ij = 0, is;
-    double rt, art, brt, eigvt;
-    FloatMatrix ar, br, vec;
-
-    GJacobi mtd(domain, engngModel);
-    outStream = domain->giveEngngModel()->giveOutputStream();
-    nc = min(2 * nroot, nroot + 8);
-    //
-    // check matrix size
-    //
     if ( a.giveNumberOfColumns() != b.giveNumberOfColumns() ) {
         OOFEM_ERROR("matrices size mismatch");
     }
 
-    // check matrix for factorization support
-    if ( !a.canBeFactorized() ) {
-        OOFEM_ERROR("a matrix not support factorization");
-    }
+    FloatArray temp, w, d, tt, f, rtolv, eigv;
+    FloatMatrix r;
+    int nn, nc1, ij = 0, is;
+    double rt, art, brt, eigvt;
+    FloatMatrix ar, br, vec;
+    SparseLinearSystemNM *solver = GiveClassFactory().createSparseLinSolver(ST_Direct, domain, engngModel);
 
-    //
-    // check for wery small problem
-    //
+    GJacobi mtd(domain, engngModel);
+    int nc = min(2 * nroot, nroot + 8);
     nn = a.giveNumberOfColumns();
     if ( nc > nn ) {
         nc = nn;
@@ -175,9 +151,9 @@ SubspaceIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, Floa
     } // (r = z)
 
 # ifdef DETAILED_REPORT
-    printf("SubspaceIteration :: solveYourselfAt: Degrees of freedom invoked by initial vectors :\n");
+    OOFEM_LOG_INFO("SubspaceIteration :: solveYourselfAt: Degrees of freedom invoked by initial vectors :\n");
     tt.printYourself();
-    printf("SubspaceIteration :: solveYourselfAt: initial vectors for iteration:\n");
+    OOFEM_LOG_INFO("SubspaceIteration :: solveYourselfAt: initial vectors for iteration:\n");
     r.printYourself();
 # endif
 
@@ -194,9 +170,9 @@ SubspaceIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, Floa
         // compute projection ar and br of matrices a , b
         //
         for ( int j = 1; j <= nc; j++ ) {
-            tt.beColumnOf(r, j);
+            f.beColumnOf(r, j);
 
-            a.backSubstitutionWith(tt);
+            solver->solve(a, f, tt);
 
             for ( int i = j; i <= nc; i++ ) {
                 art = 0.;
@@ -212,7 +188,7 @@ SubspaceIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, Floa
 
         ar.symmetrized();        // label 110
 #ifdef DETAILED_REPORT
-        printf("SubspaceIteration :: solveYourselfAt: Printing projection matrix ar\n");
+        OOFEM_LOG_INFO("SubspaceIteration :: solveYourselfAt: Printing projection matrix ar\n");
         ar.printYourself();
 #endif
         //
@@ -234,7 +210,7 @@ SubspaceIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, Floa
 
         br.symmetrized();
 #ifdef DETAILED_REPORT
-        printf("SubspaceIteration :: solveYourselfAt: Printing projection matrix br\n");
+        OOFEM_LOG_INFO("SubspaceIteration :: solveYourselfAt: Printing projection matrix br\n");
         br.printYourself();
 #endif
 
@@ -243,7 +219,7 @@ SubspaceIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, Floa
         //
         mtd.solve(ar, br, eigv, vec);
 
-        /// START EXPERIMENTAL
+        // START EXPERIMENTAL
 #if 0
         // solve the reduced problem by Inverse iteration
         {
@@ -320,7 +296,7 @@ SubspaceIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, Floa
             eigv = w;
             vec = x;
         }
-#endif // END EXPERIMANTAL
+#endif
 
 
         //
@@ -344,9 +320,9 @@ SubspaceIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, Floa
         } while ( is != 0 );
 
 # ifdef DETAILED_REPORT
-        printf("SubspaceIteration :: solveYourselfAt: current eigen values of reduced problem \n");
+        OOFEM_LOG_INFO("SubspaceIteration :: solveYourselfAt: current eigen values of reduced problem \n");
         eigv.printYourself();
-        printf("SubspaceIteration :: solveYourselfAt: current eigen vectors of reduced problem \n");
+        OOFEM_LOG_INFO("SubspaceIteration :: solveYourselfAt: current eigen vectors of reduced problem \n");
         vec.printYourself();
 # endif
         //
@@ -376,7 +352,7 @@ SubspaceIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, Floa
         }
 
 # ifdef DETAILED_REPORT
-        printf("SubspaceIteration :: solveYourselfAt: Reached precision of eigenvalues:\n");
+        OOFEM_LOG_INFO("SubspaceIteration :: solveYourselfAt: Reached precision of eigenvalues:\n");
         rtolv.printYourself();
 # endif
         for ( int i = 1; i <= nroot; i++ ) {
@@ -385,13 +361,11 @@ SubspaceIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, Floa
             }
         }
 
-        fprintf(outStream,
-                "SubspaceIteration :: solveYourselfAt: Convergence reached for RTOL=%20.15f",
-                rtol);
+        OOFEM_LOG_INFO("SubspaceIteration :: solveYourselfAt: Convergence reached for RTOL=%20.15f", rtol);
         break;
 label400:
         if ( nite >= nitem ) {
-            fprintf(outStream, " SubspaceIteration :: solveYourselfAt: Convergence not reached in %d iteration - using current values", nitem);
+            OOFEM_WARNING("SubspaceIteration :: solveYourselfAt: Convergence not reached in %d iteration - using current values", nitem);
             break;
         }
 
@@ -418,7 +392,6 @@ label400:
         }
     }
 
-    solved = 1;
     return NM_Success;
 }
 } // end namespace oofem
