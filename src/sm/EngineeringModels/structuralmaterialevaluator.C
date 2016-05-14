@@ -83,22 +83,6 @@ IRResultType StructuralMaterialEvaluator :: initializeFrom(InputRecord *ir)
         }
     }
 
-    suppressOutput = ir->hasField(_IFT_EngngModel_suppressOutput);
-
-    if(suppressOutput) {
-    	printf("Suppressing output.\n");
-    }
-    else {
-
-		if ( ( outputStream = fopen(this->dataOutputFileName.c_str(), "w") ) == NULL ) {
-			OOFEM_ERROR("Can't open output file %s", this->dataOutputFileName.c_str());
-		}
-
-		fprintf(outputStream, "%s", PRG_HEADER);
-		fprintf( outputStream, "\nStarting analysis on: %s\n", ctime(& this->startTime) );
-		fprintf(outputStream, "%s\n", simulationDescription.c_str());
-	}
-
     return IRRT_OK;
 }
 
@@ -214,7 +198,7 @@ void StructuralMaterialEvaluator :: solveYourself()
 
 int StructuralMaterialEvaluator :: checkConsistency()
 {
-    Domain *d =  this->giveDomain(1);
+    Domain *d = this->giveDomain(1);
     for ( auto &mat : d->giveMaterials() ) {
         if ( !dynamic_cast< StructuralMaterial * >( mat.get() ) ) {
             OOFEM_LOG_ERROR("Material %d is not a StructuralMaterial", mat->giveNumber());

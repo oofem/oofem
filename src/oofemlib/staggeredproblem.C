@@ -457,7 +457,7 @@ void
 StaggeredProblem :: solveYourselfAt(TimeStep *tStep)
 {
 #ifdef VERBOSE
-    OOFEM_LOG_RELEVANT( "Solving [step number %5d, time %e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
+    OOFEM_LOG_RELEVANT("Solving [step number %5d, time %e]\n", tStep->giveNumber(), tStep->giveTargetTime());
 #endif
     for ( auto &emodel: emodelList ) {
         emodel->solveYourselfAt(tStep);
@@ -500,18 +500,11 @@ StaggeredProblem :: terminate(TimeStep *tStep)
     for ( auto &emodel: emodelList ) {
         emodel->terminate(tStep);
     }
-
-    fflush( this->giveOutputStream() );
 }
 
 void
 StaggeredProblem :: doStepOutput(TimeStep *tStep)
 {
-    FILE *File = this->giveOutputStream();
-
-    // print output
-    this->printOutputAt(File, tStep);
-    // export using export manager
     for ( auto &emodel: emodelList ) {
         emodel->giveExportModuleManager()->doOutput(tStep);
     }
@@ -519,13 +512,9 @@ StaggeredProblem :: doStepOutput(TimeStep *tStep)
 
 
 void
-StaggeredProblem :: printOutputAt(FILE *File, TimeStep *tStep)
+StaggeredProblem :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-    FILE *slaveFile;
-    for ( auto &emodel: emodelList ) {
-        slaveFile = emodel->giveOutputStream();
-        emodel->printOutputAt(slaveFile, tStep);
-    }
+    // Subproblems handle the output themselves.
 }
 
 

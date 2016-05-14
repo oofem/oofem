@@ -46,7 +46,7 @@
 namespace oofem {
 REGISTER_ExportModule(OutputExportModule)
 
-OutputExportModule :: OutputExportModule(int n, EngngModel *e) : ExportModule(n, e)
+OutputExportModule :: OutputExportModule(int n, EngngModel *e) : ExportModule(n, e), outputStream(NULL)
 {
 }
 
@@ -60,13 +60,26 @@ OutputExportModule :: initializeFrom(InputRecord *ir)
     elementSets.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, elementSets, _IFT_OutputExportModule_elementSets);
 
-    return ExportModule :: initializeFrom(ir);
+    result = ExportModule :: initializeFrom(ir);
+
+    auto *file = giveOutputStream();
+
+    fprintf(file, "%s", PRG_HEADER);
+    fprintf(file, "\nStarting analysis on: %s\n", ctime(& emodel->giveStartTime()) );
+    fprintf(file, "%s\n", emodel->giveDescription().c_str());
+
+    return result;
 }
 
 FILE *
 OutputExportModule :: giveOutputStream()
 {
-    return emodel->giveOutputStream();
+    if ( this->outputStream ) return this->outputStream;
+    this->outputStream = fopen(emodel->giveOutputBaseFileName().c_str(), "w");
+    if ( !this->outputStream ) {
+        OOFEM_ERROR("Can't open output file %s", emodel->giveOutputBaseFileName().c_str());
+    }
+    return this->outputStream;
 }
 
 void
@@ -85,7 +98,7 @@ OutputExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     fprintf(file, "\n==============================================================");
     fprintf(file, "\nOutput for time %.8e ", tStep->giveTargetTime() * emodel->giveVariableScale(VST_Time) );
     fprintf(file, "\n==============================================================\n");
-
+#if 0
     for ( int idomain = 1; idomain <= emodel->giveNumberOfDomains(); idomain++ ) {
         if ( domainMask.giveSize() > 0 && domainMask.at(idomain) == 0 ) {
             continue;
@@ -98,7 +111,11 @@ OutputExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         ///@todo This module should handle printing reaction forces, we need more information from the domain/engineering model though.
         //emodel->printReactionForces(tStep, idomain);
     }
-
+#else
+    ///@todo Should we even support the domain mask? I'd say, just let the emodel decide this.
+    //emodel->printOutputAt(file, tStep, domainMask); 
+    emodel->printOutputAt(file, tStep);
+#endif
     fprintf(file, "\nUser time consumed by solution step %d: %.3f [s]\n\n", tStep->giveNumber(), emodel->giveSolutionStepTime());
 }
 

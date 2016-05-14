@@ -301,15 +301,6 @@ NonLinearDynamic :: solveYourselfAt(TimeStep *tStep)
     proceedStep(1, tStep);
 }
 
-void
-NonLinearDynamic :: terminate(TimeStep *tStep)
-{
-    this->doStepOutput(tStep);
-    this->printReactionForces(tStep, 1);
-    fflush( this->giveOutputStream() );
-    this->saveStepContext(tStep);
-}
-
 void 
 NonLinearDynamic :: initializeYourself(TimeStep *tStep)
 {
@@ -645,22 +636,20 @@ void NonLinearDynamic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
 }
 
 void
-NonLinearDynamic :: printOutputAt(FILE *File, TimeStep *tStep)
+NonLinearDynamic :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-    //FILE* File = this -> giveDomain() -> giveOutputStream() ;
-
     if ( !this->giveDomain(1)->giveOutputManager()->testTimeStepOutput(tStep) ) {
         return; // Do not print even Solution step header
     }
 
-    fprintf( File, "\n\nOutput for time %.3e, solution step number %d\n", tStep->giveTargetTime(), tStep->giveNumber() );
-    fprintf(File, "Equilibrium reached in %d iterations\n\n", currentIterations);
+    fprintf(file, "\n\nOutput for time %.3e, solution step number %d\n", tStep->giveTargetTime(), tStep->giveNumber() );
+    fprintf(file, "Equilibrium reached in %d iterations\n\n", currentIterations);
 
+    nMethod->printState(file);
 
-    nMethod->printState(File);
-
-    this->giveDomain(1)->giveOutputManager()->doDofManOutput(File, tStep);
-    this->giveDomain(1)->giveOutputManager()->doElementOutput(File, tStep);
+    this->giveDomain(1)->giveOutputManager()->doDofManOutput(file, tStep);
+    this->giveDomain(1)->giveOutputManager()->doElementOutput(file, tStep);
+    this->printReactionForces(tStep, 1, file);
 }
 
 void
@@ -718,7 +707,6 @@ contextIOResultType NonLinearDynamic :: saveContext(DataStream *stream, ContextM
 
     return CIO_OK;
 }
-
 
 
 contextIOResultType NonLinearDynamic :: restoreContext(DataStream *stream, ContextMode mode, void *obj)

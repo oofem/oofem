@@ -70,7 +70,7 @@ public:
      * generated domain(s) and by mapping procedure.
      */
     virtual int initializeAdaptive(int tStepNumber);
-    virtual void terminate(TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 

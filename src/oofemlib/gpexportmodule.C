@@ -75,7 +75,7 @@ GPExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     double weight;
     FloatArray gcoords, intvar;
 
-    Domain *d  = emodel->giveDomain(1);
+    Domain *d = emodel->giveDomain(1);
     FILE *stream = this->giveOutputStream(tStep);
 
     // print the header

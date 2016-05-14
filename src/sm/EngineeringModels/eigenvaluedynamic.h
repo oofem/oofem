@@ -88,7 +88,8 @@ public:
     virtual ~EigenValueDynamic() { }
 
     virtual void solveYourselfAt(TimeStep *tStep);
-    virtual void terminate(TimeStep *tStep);
+    virtual void doStepOutput(TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
     virtual void updateYourself(TimeStep *tStep);
 
     virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);

@@ -63,12 +63,9 @@ SLEPcSolver :: ~SLEPcSolver()
 NM_Status
 SLEPcSolver :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, FloatMatrix &_r, double rtol, int nroot)
 {
-    FILE *outStream;
     PetscErrorCode ierr;
     int size;
     ST st;
-
-    outStream = domain->giveEngngModel()->giveOutputStream();
 
     // first check whether Lhs is defined
 
@@ -161,7 +158,7 @@ SLEPcSolver :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, FloatMatri
     CHKERRQ(ierr);
 
     if ( nconv > 0 ) {
-        fprintf(outStream, "SLEPcSolver :: solveYourselfAt: Convergence reached for RTOL=%20.15f", rtol);
+        OOFEM_LOG_INFO("SLEPcSolver :: solveYourselfAt: Convergence reached for RTOL=%20.15f", rtol);
         PetscScalar kr;
         Vec Vr;
 

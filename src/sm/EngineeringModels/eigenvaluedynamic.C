@@ -110,7 +110,7 @@ EigenValueDynamic :: initializeFrom(InputRecord *ir)
 		}
 
 		fprintf(outputStream, "%s", PRG_HEADER);
-		fprintf( outputStream, "\nStarting analysis on: %s\n", ctime(& this->startTime) );
+		fprintf(outputStream, "\nStarting analysis on: %s\n", ctime(& this->startTime) );
 		fprintf(outputStream, "%s\n", simulationDescription.c_str());
 	}
 
@@ -217,29 +217,43 @@ void EigenValueDynamic :: updateYourself(TimeStep *tStep)
 { }
 
 
-void EigenValueDynamic :: terminate(TimeStep *tStep)
+void EigenValueDynamic :: doStepOutput(TimeStep *tStep)
 {
-    Domain *domain = this->giveDomain(1);
-    FILE *outputStream = this->giveOutputStream();
-
-    // print loadcase header
-    fprintf(outputStream, "\nOutput for time %.3e \n\n", 1.0);
-    // print eigen values on output
-    fprintf(outputStream, "\n\nEigen Values (Omega^2) are:\n-----------------\n");
+    if ( !suppressOutput ) {
+        this->printOutputAt(this->giveOutputStream(), tStep);
+        fflush( this->giveOutputStream() );
+    }
 
     for ( int i = 1; i <= numberOfRequiredEigenValues; i++ ) {
-        fprintf( outputStream, "%15.8e ", eigVal.at(i) );
+        // export using export manager
+        tStep->setTime( ( double ) i ); // we use time as intrinsic eigen value index
+        tStep->setNumber(i);
+        exportModuleManager->doOutput(tStep);
+    }
+}
+
+
+void EigenValueDynamic :: printOutputAt(FILE *file, TimeStep *tStep)
+{
+    Domain *domain = this->giveDomain(1);
+
+    // print loadcase header
+    fprintf(file, "\nOutput for time %.3e \n\n", 1.0);
+    // print eigen values on output
+    fprintf(file, "\n\nEigen Values (Omega^2) are:\n-----------------\n");
+
+    for ( int i = 1; i <= numberOfRequiredEigenValues; i++ ) {
+        fprintf(file, "%15.8e ", eigVal.at(i) );
         if ( ( i % 5 ) == 0 ) {
-            fprintf(outputStream, "\n");
+            fprintf(file, "\n");
         }
     }
 
-    fprintf(outputStream, "\n\n");
+    fprintf(file, "\n\n");
 
     for ( int i = 1; i <=  numberOfRequiredEigenValues; i++ ) {
-        fprintf(outputStream, "\nOutput for eigen value no.  %.3e \n", ( double ) i);
-        fprintf( outputStream,
-                "Printing eigen vector no. %d, corresponding eigen value is %15.8e\n\n",
+        fprintf(file, "\nOutput for eigen value no.  %.3e \n", ( double ) i);
+        fprintf(file, "Printing eigen vector no. %d, corresponding eigen value is %15.8e\n\n",
                 i, eigVal.at(i) );
         tStep->setTime( ( double ) i ); // we use time as intrinsic eigen value index
 
@@ -252,18 +266,9 @@ void EigenValueDynamic :: terminate(TimeStep *tStep)
 
         for ( auto &dman : domain->giveDofManagers() ) {
             dman->updateYourself(tStep);
-            dman->printOutputAt(outputStream, tStep);
+            dman->printOutputAt(file, tStep);
         }
     }
-
-    for ( int i = 1; i <= numberOfRequiredEigenValues; i++ ) {
-        // export using export manager
-        tStep->setTime( ( double ) i ); // we use time as intrinsic eigen value index
-        tStep->setNumber(i);
-        exportModuleManager->doOutput(tStep);
-    }
-    fflush( this->giveOutputStream() );
-    this->saveStepContext(tStep);
 }
 
 

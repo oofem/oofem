@@ -39,6 +39,7 @@
 #include "domain.h"
 #include "classfactory.h"
 #include "contextioerr.h"
+#include "outputmanager.h"
 
 namespace oofem {
 REGISTER_EngngModel(AdaptiveLinearStatic);
@@ -74,17 +75,17 @@ AdaptiveLinearStatic :: updateYourself(TimeStep *tStep)
     }
 }
 
+
 void
-AdaptiveLinearStatic :: terminate(TimeStep *tStep)
+AdaptiveLinearStatic :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-    LinearStatic :: terminate(tStep);
-    //
-    // print estimated error
-    //
-    fprintf(outputStream, "\nRelative error estimate: %5.2f%%\n", this->defaultErrEstimator->giveValue(relativeErrorEstimateEEV, tStep) * 100.0);
+    if ( !this->giveDomain(1)->giveOutputManager()->testTimeStepOutput(tStep) ) {
+        return;
+    }
+
+    LinearStatic :: printOutputAt(file, tStep);
+    fprintf(file, "\nRelative error estimate: %5.2f%%\n", this->defaultErrEstimator->giveValue(relativeErrorEstimateEEV, tStep) * 100.0);
 }
-
-
 
 
 int
