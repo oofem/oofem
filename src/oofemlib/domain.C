@@ -623,11 +623,6 @@ Domain :: instanciateYourself(DataReader *dr)
 
     resolveDomainDofsDefaults( name.c_str() );
 
-    if(!giveEngngModel()->giveSuppressOutput()) {
-    	fprintf( this->giveEngngModel()->giveOutputStream(), "Domain type: %s, default ndofs per node is %d\n\n\n",
-    			name.c_str(), giveDefaultNodeDofIDArry().giveSize() );
-    }
-
     // read output manager record
     std :: string tmp;
     ir = dr->giveInputRecord(DataReader :: IR_outManRec, 1);
