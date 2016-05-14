@@ -44,8 +44,6 @@ GJacobi :: GJacobi(Domain *d, EngngModel *m) :
 {
     nsmax  = 15;     // default maximum number of sweeps allowed
     rtol   = 10.E-12; // convergence tolerance
-    n = 0;
-    solved = 0;
 }
 
 GJacobi :: ~GJacobi() { }
@@ -293,7 +291,6 @@ label280:
         }
     }                                  // label 270
 
-    solved = 1;
     return NM_Success;
 }
 } // end namespace oofem

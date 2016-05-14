@@ -101,12 +101,6 @@ SubspaceIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, Floa
     vec.resize(nc, nc);
     vec.zero();                   // eigen vectors of reduced problem
 
-    FloatMatrix tmp;
-    a.toFloatMatrix(tmp);
-    tmp.writeCSV("tmp.txt");
-    b.toFloatMatrix(tmp);
-    tmp.writeCSV("tmpb.txt");
-
     _r.resize(nn, nroot);
     _eigv.resize(nroot);
 
@@ -361,7 +355,7 @@ SubspaceIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, Floa
             }
         }
 
-        OOFEM_LOG_INFO("SubspaceIteration :: solveYourselfAt: Convergence reached for RTOL=%20.15f", rtol);
+        OOFEM_LOG_INFO("SubspaceIteration :: solveYourselfAt: Convergence reached for RTOL=%20.15f\n", rtol);
         break;
 label400:
         if ( nite >= nitem ) {
