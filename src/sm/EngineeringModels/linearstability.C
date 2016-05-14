@@ -299,11 +299,7 @@ void
 LinearStability :: terminateLinStatic(TimeStep *tStep)
 {
     Domain *domain = this->giveDomain(1);
-    FILE *File = this->giveOutputStream();
     tStep->setTime(0.);
-
-    fprintf(File, "\nOutput for time %.3e \n\n", tStep->giveTargetTime() );
-    fprintf(File, "Linear static:\n\n");
 
     if ( requiresUnknownsDictionaryUpdate() ) {
         for ( auto &dman : domain->giveDofManagers() ) {
@@ -313,7 +309,6 @@ LinearStability :: terminateLinStatic(TimeStep *tStep)
 
     for ( auto &dman : domain->giveDofManagers() ) {
         dman->updateYourself(tStep);
-        dman->printOutputAt(File, tStep);
     }
 
 #  ifdef VERBOSE
@@ -324,13 +319,11 @@ LinearStability :: terminateLinStatic(TimeStep *tStep)
     for ( auto &elem : domain->giveElements() ) {
         elem->updateInternalState(tStep);
         elem->updateYourself(tStep);
-        elem->printOutputAt(File, tStep);
     }
 
 #  ifdef VERBOSE
     VERBOSE_PRINT0("Updated Elements ", domain->giveNumberOfElements())
 #  endif
-    fprintf(File, "\n");
 
 #if 0
     // save context if required
@@ -344,8 +337,6 @@ LinearStability :: terminateLinStatic(TimeStep *tStep)
             this->saveContext(NULL);
     }
 #endif
-
-    this->printReactionForces(tStep, 1., this->giveOutputStream());
 }
 
 
@@ -357,7 +348,8 @@ void LinearStability :: doStepOutput(TimeStep *tStep)
     }
 
     Domain *domain = this->giveDomain(1);
-    for ( int i = 1; i <= numberOfRequiredEigenValues; i++ ) {
+    // i = 0  represents the linear solution, which is followed by the eigen vectors starting at i = 1
+    for ( int i = 0; i <= numberOfRequiredEigenValues; i++ ) {
         tStep->setTime( ( double ) i );
 
         if ( this->requiresUnknownsDictionaryUpdate() ) {
@@ -365,7 +357,6 @@ void LinearStability :: doStepOutput(TimeStep *tStep)
                 this->updateDofUnknownsDictionary(dman.get(), tStep);
             }
         }
-
 
         for ( auto &dman : domain->giveDofManagers() ) {
             dman->updateYourself(tStep);
@@ -396,10 +387,12 @@ void LinearStability :: printOutputAt(FILE *file, TimeStep *tStep)
 
     fprintf(file, "\n\n");
 
-    for ( int i = 1; i <= numberOfRequiredEigenValues; i++ ) {
-        fprintf(file, "\nOutput for eigen value no.  %.3e \n", ( double ) i);
-        fprintf(file, "Printing eigen vector no. %d, corresponding eigen value is %15.8e\n\n",
-                i, eigVal.at(i) );
+    for ( int i = 0; i <= numberOfRequiredEigenValues; i++ ) {
+        if ( i == 0 ) {
+            fprintf(file, "\nLinear solution\n\n");
+        } else {
+            fprintf(file, "\nEigen vector no. %d, correposnding eigen value is %15.8e\n\n", i, eigVal.at(i));
+        }
         tStep->setTime( ( double ) i );
 
         if ( this->requiresUnknownsDictionaryUpdate() ) {
@@ -414,6 +407,13 @@ void LinearStability :: printOutputAt(FILE *file, TimeStep *tStep)
         }
 
         tStep->setNumber(i);
+
+        if ( i == 0 ) {
+            for ( auto &elem : domain->giveElements() ) {
+                elem->printOutputAt(file, tStep);
+            }
+            this->printReactionForces(tStep, 1., file);
+        }
     }
 }
 
