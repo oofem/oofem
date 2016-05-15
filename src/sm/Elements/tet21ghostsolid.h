@@ -71,6 +71,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_tet21ghostsolid_Name; }
     virtual int computeNumberOfDofs() { return 70; }
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     virtual MaterialMode giveMaterialMode() { return _3dMat; }
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual void computeNumericStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
@@ -93,9 +94,6 @@ public:
     virtual void giveInternalForcesVectorGivenSolutionDebug(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord, FloatArray &SolutionVector, bool ExtraLogging);
 
     virtual Interface *giveInterface(InterfaceType it);
-
-    // Spatial localizer interface:
-    virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
     // Element interpolation interface:
     virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType u,

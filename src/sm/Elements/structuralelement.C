@@ -73,7 +73,7 @@ StructuralElement :: ~StructuralElement()
 {
 }
 
-
+#if 0
 void
 StructuralElement :: computeConstitutiveMatrixAt(FloatMatrix &answer,
                                                  MatResponseMode rMode, GaussPoint *gp,
@@ -85,7 +85,7 @@ StructuralElement :: computeConstitutiveMatrixAt(FloatMatrix &answer,
 {
     this->giveStructuralCrossSection()->giveCharMaterialStiffnessMatrix(answer, rMode, gp, tStep);
 }
-
+#endif
 
 void StructuralElement :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
 {
@@ -799,13 +799,13 @@ StructuralElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, Tim
     answer.beProductOf(b, u);
 }
 
-
+#if 0
 void
 StructuralElement :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
     this->giveStructuralCrossSection()->giveRealStresses(answer, gp, strain, tStep);
 }
-
+#endif
 
 void
 StructuralElement :: giveInternalForcesVector(FloatArray &answer,

@@ -46,6 +46,7 @@
 #include "EngineeringModels/freewarping.h"
 #include "engngm.h"
 #include "dof.h"
+#include "CrossSections/structuralcrosssection.h"
 
 
 
@@ -56,14 +57,12 @@ FEI2dTrLin Tr_Warp :: interp(1, 2);
 
 Tr_Warp :: Tr_Warp(int n, Domain *aDomain) :
     StructuralElement(n, aDomain), SpatialLocalizerInterface(this),  ZZNodalRecoveryModelInterface(this)
-    // Constructor.
 {
     numberOfDofMans  = 3;
     numberOfGaussPoints = 1;
 }
 
 Tr_Warp :: ~Tr_Warp()
-// Destructor
 { }
 
 
@@ -92,6 +91,14 @@ Tr_Warp :: computeStressVector(FloatArray &answer, const FloatArray &strain, Gau
 {
     this->giveStructuralCrossSection()->giveRealStress_Warping(answer, gp, strain, tStep);
 }
+
+
+void
+Tr_Warp :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveCharMaterialStiffnessMatrix(answer, rMode, gp, tStep);
+}
+
 
 void
 Tr_Warp :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
@@ -139,7 +146,8 @@ Tr_Warp :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
 
 
 void
-Tr_Warp :: transformCoordinates(FloatArray &answer, FloatArray &c, const int CGnumber) {
+Tr_Warp :: transformCoordinates(FloatArray &answer, FloatArray &c, const int CGnumber)
+{
     answer.resize(2);
     FreeWarping *em = dynamic_cast< FreeWarping * >( this->giveDomain()->giveEngngModel() );
     if ( em ) {
@@ -204,7 +212,6 @@ Tr_Warp :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 void
 Tr_Warp :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
 // computes the part of load vector, which is imposed by force loads acting
-
 {
     this->computeEdgeLoadVectorAt(answer, NULL, tStep, mode);
 }
@@ -330,16 +337,6 @@ Tr_Warp :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
 {
     FloatArray lcoords;
     return this->computeLocalCoordinates(lcoords, coords);
-}
-
-
-double
-Tr_Warp :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
-{
-    FloatArray lcoords(3), gcoords;
-    lcoords.at(1) = lcoords.at(2) = lcoords.at(3) = 1. / 3.;
-    this->computeGlobalCoordinates(gcoords, lcoords);
-    return gcoords.distance(coords);
 }
 
 

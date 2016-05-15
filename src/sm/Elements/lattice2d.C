@@ -35,6 +35,7 @@
 #include "../sm/Elements/lattice2d.h"
 #include "../sm/Materials/latticematstatus.h"
 #include "../sm/Elements/latticestructuralelement.h"
+#include "CrossSections/structuralcrosssection.h"
 #include "domain.h"
 #include "node.h"
 #include "material.h"
@@ -74,10 +75,7 @@ Lattice2d :: giveCrackFlag()
 {
     GaussPoint *gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0);
     LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
-    int crackFlag = 0;
-    crackFlag = status->giveCrackFlag();
-
-    return crackFlag;
+    return status->giveCrackFlag();
 }
 
 
@@ -86,10 +84,7 @@ Lattice2d :: giveCrackWidth()
 {
     GaussPoint *gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0);
     LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
-    double crackWidth = 0;
-    crackWidth = status->giveCrackWidth();
-
-    return crackWidth;
+    return status->giveCrackWidth();
 }
 
 double
@@ -100,12 +95,8 @@ Lattice2d :: giveOldCrackWidth()
     IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
     GaussPoint *gp = iRule->getIntegrationPoint(0);
     status = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
-    double crackWidth = 0;
-    crackWidth = status->giveOldCrackWidth();
-
-    return crackWidth;
+    return status->giveOldCrackWidth();
 }
-
 
 
 double
@@ -113,10 +104,7 @@ Lattice2d :: giveDissipation()
 {
     GaussPoint *gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0);
     LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
-    double dissipation = 0;
-    dissipation = status->giveDissipation();
-
-    return dissipation;
+    return status->giveDissipation();
 }
 
 
@@ -125,10 +113,7 @@ Lattice2d :: giveDeltaDissipation()
 {
     GaussPoint *gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0);
     LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
-    double deltaDissipation = 0;
-    deltaDissipation = status->giveDeltaDissipation();
-
-    return deltaDissipation;
+    return status->giveDeltaDissipation();
 }
 
 void
@@ -180,6 +165,19 @@ Lattice2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
     answer.times(1. / l);
 }
 
+void
+Lattice2d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveCharMaterialStiffnessMatrix(answer, rMode, gp, tStep);
+    //this->giveStructuralCrossSection()->give2dLatticeStiffMtrx(answer, rMode, gp, tStep);
+}
+
+void
+Lattice2d :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveRealStresses(answer, gp, strain, tStep);
+    //this->giveStructuralCrossSection()->giveLatticeStress(answer, rMode, gp, tStep);
+}
 
 void
 Lattice2d :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
@@ -328,7 +326,6 @@ Lattice2d :: hasBeenUpdated()
 }
 
 
-
 int
 Lattice2d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 //
@@ -395,8 +392,6 @@ Lattice2d :: giveGpCoordinates(FloatArray &answer)
     answer.resize(3);
     answer.at(1) = this->gpCoords.at(1);
     answer.at(2) = this->gpCoords.at(2);
-
-    return;
 }
 
 
@@ -445,7 +440,7 @@ contextIOResultType Lattice2d :: restoreContext(DataStream &stream, ContextMode 
     }
 
     if ( mode & CM_Definition ) {
-     
+
         if ( !stream.read(width) ) {
             THROW_CIOERR(CIO_IOERR);
         }
@@ -567,15 +562,15 @@ Lattice2d :: drawSpecial(oofegGraphicContext &gc, TimeStep *tStep)
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
         this->giveIPValue(crackStatuses, gp, IST_CrackStatuses, tStep);
         if ( crackStatuses(0) == 1. || crackStatuses(0) == 2. || crackStatuses(0) == 3 || crackStatuses(0) == 4 ) {
-	  FloatArray coords;
-	  this->giveCrossSectionCoordinates(coords);
+            FloatArray coords;
+            this->giveCrossSectionCoordinates(coords);
 
-	    p [ 0 ].x = ( FPNum ) coords.at(1);
-	    p [ 0 ].y = ( FPNum ) coords.at(2);
-	    p [ 0 ].z = ( FPNum ) coords.at(3);
-	    p [ 1 ].x = ( FPNum ) coords.at(4);
-	    p [ 1 ].y = ( FPNum ) coords.at(5);
-	    p [ 1 ].z = ( FPNum ) coords.at(6);
+            p [ 0 ].x = ( FPNum ) coords.at(1);
+            p [ 0 ].y = ( FPNum ) coords.at(2);
+            p [ 0 ].z = ( FPNum ) coords.at(3);
+            p [ 1 ].x = ( FPNum ) coords.at(4);
+            p [ 1 ].y = ( FPNum ) coords.at(5);
+            p [ 1 ].z = ( FPNum ) coords.at(6);
 
 
             EASValsSetLayer(OOFEG_CRACK_PATTERN_LAYER);
@@ -593,7 +588,7 @@ Lattice2d :: drawSpecial(oofegGraphicContext &gc, TimeStep *tStep)
 
             tr = CreateLine3D(p);
             EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, tr);
-	    EGAttachObject(tr, ( EObjectP ) this);
+            EGAttachObject(tr, ( EObjectP ) this);
             EMAddGraphicsToModel(ESIModel(), tr);
         }
     }
@@ -667,8 +662,6 @@ Lattice2d :: giveCrossSectionCoordinates(FloatArray &coords)
     coords.at(4) = this->gpCoords.at(1) + shearDirection.at(1) * this->width / 2.;
     coords.at(5) = this->gpCoords.at(2) + shearDirection.at(2) * this->width / 2.;
     coords.at(6) = 0.;
-
-    return;
 }
 
 #endif

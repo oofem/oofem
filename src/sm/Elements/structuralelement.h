@@ -321,7 +321,7 @@ public:
     virtual int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
                                         int node, TimeStep *tStep);
     /// Shows sparse structure
-    void showSparseMtrxStructure(CharType mtrx, oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void showSparseMtrxStructure(CharType mtrx, oofegGraphicContext &gc, TimeStep *tStep);
     /// Shows extended sparse structure (for example, due to nonlocal interactions for tangent stiffness)
     virtual void showExtendedSparseMtrxStructure(CharType mtrx, oofegGraphicContext &gc, TimeStep *tStep);
 
@@ -341,7 +341,7 @@ public:
      */
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer,
                                              MatResponseMode rMode, GaussPoint *gp,
-                                             TimeStep *tStep);
+                                             TimeStep *tStep) = 0;
     /// Helper function which returns the structural cross-section for the element.
     StructuralCrossSection *giveStructuralCrossSection();
 
@@ -551,7 +551,7 @@ public:
      * @param gp Integration point.
      * @param tStep Time step.
      */
-    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) = 0;
 
     /**
      * Computes the geometrical matrix of receiver in given integration point.

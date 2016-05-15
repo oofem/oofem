@@ -52,17 +52,14 @@ class Tr_Warp : public StructuralElement, public SpatialLocalizerInterface, publ
 protected:
     static FEI2dTrLin interp;
 
-
 public:
     Tr_Warp(int n, Domain *d);
     virtual ~Tr_Warp();
     virtual void computeFirstMomentOfArea(FloatArray &answer);
     virtual double computeVolumeAround(GaussPoint *gp);
-    void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
+    virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
     virtual void computeLocalForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     virtual void computeEdgeLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
-
-
 
     // definition
     virtual const char *giveInputRecordName() const { return _IFT_Tr_Warp_Name; }
@@ -73,28 +70,23 @@ public:
     virtual MaterialMode giveMaterialMode() { return _Warping; }
     virtual double giveThicknessAt(const FloatArray &gcoords);
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui);
-    void giveDofManDofIDMask(int inode, IntArray &answer) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
 
     virtual Interface *giveInterface(InterfaceType t);
 
     virtual void giveInternalDofManDofIDMask(int inode, IntArray &answer) const;
     virtual DofManager *giveInternalDofManager(int i) const;
 
-
-
     virtual int giveNumberOfInternalDofManagers() const { return 1; }
 
-
-
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    void ZZNodalRecoveryMI_computeNNMatrix(FloatArray &answer, InternalStateType type);
-    bool ZZNodalRecoveryMI_computeNValProduct(FloatMatrix &answer, InternalStateType type,
+    virtual void ZZNodalRecoveryMI_computeNNMatrix(FloatArray &answer, InternalStateType type);
+    virtual bool ZZNodalRecoveryMI_computeNValProduct(FloatMatrix &answer, InternalStateType type,
                                               TimeStep *tStep);
-    virtual Element *SpatialLocalizerI_giveElement() { return this; }
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
-    virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
     virtual FEInterpolation *giveInterpolation() const { return & this->interp; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
@@ -109,7 +101,7 @@ protected:
     virtual void computeGaussPoints();
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
     void transformCoordinates(FloatArray &answer, FloatArray &c, const int CGnumber);
-    virtual void  postInitialize();
+    virtual void postInitialize();
 };
 } // end namespace oofem
 #endif // tr_warp_h

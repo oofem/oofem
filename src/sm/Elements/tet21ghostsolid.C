@@ -208,6 +208,12 @@ tet21ghostsolid :: computeStressVector(FloatArray &answer, const FloatArray &str
 }
 
 void
+tet21ghostsolid :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveStiffnessMatrix_3d(answer, rMode, gp, tStep);
+}
+
+void
 tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
 #if USENUMTAN == 1
@@ -1342,16 +1348,6 @@ void tet21ghostsolid :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(Va
     for ( int i = 1; i <= n_lin.giveSize(); i++ ) {
         answer(3) += n_lin.at(i) * this->giveNode(i)->giveDofWithID(P_f)->giveUnknown(mode, tStep);
     }
-}
-
-double tet21ghostsolid :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
-{
-    FloatArray center;
-    FloatArray lcoords = {
-        0.3333333, 0.3333333, 0.3333333
-    };
-    this->computeGlobalCoordinates(center, lcoords);
-    return center.distance(coords);
 }
 
 void
