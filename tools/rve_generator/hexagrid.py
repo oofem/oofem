@@ -192,8 +192,8 @@ def printRVE(rveSampleNumber, rveSize, rvePosition):
     if bctype == 1:
         # print('PrescribedGradient 1 loadTimeFunction 1 set 1 dofs 6 1 2 3 7 8 9 gradient 3 3 {0 0 1; 0 0 0; 1 0 0}', file=f)
         # print('MixedGradientPressureDirichlet 1 loadTimeFunction 1 set 1 dofs 6 1 2 3 7 8 9 devgradient 6 0 0 0 1 1 1 pressure 0', file=f)
-        #print('TMGradDirichlet 1 loadTimeFunction 1 gradient 3 0 0 0.1 dofs 1 10 set 8 surfsets 6 1 2 3 4 5 6 usepsi', file=f)
-        print('TMGradDirichlet 1 loadTimeFunction 1 gradient 3 0 0 0.1 dofs 1 10 set 8', file=f)
+        #print('TMGradDirichlet 1 loadTimeFunction 1 centercoords 3 0 0 0 gradient 3 0 0 0.1 dofs 1 10 set 8 surfsets 6 1 2 3 4 5 6 usepsi', file=f)
+        print('TMGradDirichlet 1 loadTimeFunction 1 centercoords 3 0 0 0 gradient 3 0 0 0.1 dofs 1 10 set 8', file=f)
         print('BoundaryCondition 2 loadTimeFunction 1 values 1 0 dofs 1 10 set 0', file=f)
     elif bctype == 2:
         # print('MixedGradientPressureNeumann 1 loadTimeFunction 1 set 1 devgradient 6 0 0 0 1 1 1 pressure 0', file=f)
