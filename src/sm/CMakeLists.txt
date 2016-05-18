@@ -121,7 +121,6 @@ set (sm_emodel
     EngineeringModels/staticstructural.C
     EngineeringModels/linearstatic.C
     EngineeringModels/nlinearstatic.C
-    EngineeringModels/xfemstatic.C
     EngineeringModels/nlineardynamic.C
     EngineeringModels/eigenvaluedynamic.C
     EngineeringModels/linearstability.C
