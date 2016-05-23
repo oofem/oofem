@@ -44,6 +44,7 @@
 #define _IFT_MatlabExportModule_Name "matlab"
 #define _IFT_MatlabExportModule_mesh "mesh"
 #define _IFT_MatlabExportModule_data "data"
+#define _IFT_MatlabExportModule_DataNodeSet "datanodeset"   // dofmanager set from which data should be exported //JF 
 #define _IFT_MatlabExportModule_area "area"
 #define _IFT_MatlabExportModule_specials "specials"
 #define _IFT_MatlabExportModule_homogenizeInternalVars "homogenizeivars"
@@ -96,6 +97,7 @@ protected:
     bool exportHomogenizeIST;
 
     int reactionForcesNodeSet;
+    int dataNodeSet;
     int IPFieldsElSet;
 
     bool noscaling;
@@ -105,6 +107,7 @@ private:
 
     // Export reaction forces
     IntArray reactionForcesDofManList; // Holds which dof managers reaction forces should be exported from.
+    IntArray dataDofManList;           // Holds which dof managers data should be exported from.
 
 public:
     MatlabExportModule(int n, EngngModel * e);

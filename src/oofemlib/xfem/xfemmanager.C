@@ -371,11 +371,19 @@ void XfemManager :: initiateFronts(bool &oAnyFronHasPropagated, TimeStep *tStep)
 {
     oAnyFronHasPropagated = false;
         
-    // Loop over EI:s an cross sections which have delaminaion EI:s
-    IntArray CSnumbers; 
+    // Loop over EI:s and collect cross sections which have delaminaion EI:s
+    IntArray CSnumbers;
+    std :: vector < FloatArray > initiationFactors; initiationFactors.resize(this->domain->giveNumberOfCrossSectionModels());
     for ( auto &ei: enrichmentItemList ) {
         if ( Delamination *dei =  dynamic_cast< Delamination * >( ei.get() ) ) {
-            CSnumbers.insertSortedOnce(dei->giveDelamCrossSectionNum());
+            int CSinterfaceNumber = dei->giveDelamInterfaceNum();
+            for (int CSnumber : dei->giveDelamCrossSectionNum()) {
+                CSnumbers.insertSortedOnce(CSnumber);
+                if (initiationFactors[CSnumber-1].giveSize() < CSinterfaceNumber) {
+                    initiationFactors[CSnumber-1].resizeWithValues(CSinterfaceNumber);
+                }
+                initiationFactors[CSnumber-1].at(CSinterfaceNumber) = dei->giveInitiationFactor();
+            }
         }
     }
     
@@ -389,13 +397,29 @@ void XfemManager :: initiateFronts(bool &oAnyFronHasPropagated, TimeStep *tStep)
         
         if ( Delamination *dei =  dynamic_cast< Delamination * >( ei.get() ) ) {         
             
-            dei->findInitiationFronts(failureChecked, CSnumbers, CSinterfaceNumbers, CSDofManNumbers, tStep);
-            
-            int iCS = CSnumbers.findSorted(dei->giveDelamCrossSectionNum());
-            int iInt = CSinterfaceNumbers[iCS-1].findSorted(dei->giveDelamInterfaceNum());
-            if ( iInt ) {
-                dei->initiateFronts(eiHasPropagated,CSDofManNumbers[iCS-1]);
+            if ( !failureChecked ) {
+                dei->findInitiationFronts(failureChecked, CSnumbers, CSinterfaceNumbers, CSDofManNumbers, initiationFactors, tStep);
             }
+            
+            for (int CSnum : dei->giveDelamCrossSectionNum()) {
+                                
+                int iCS = CSnumbers.findSorted(CSnum);
+                int iInt = CSinterfaceNumbers[iCS-1].findSorted(dei->giveDelamInterfaceNum());
+                if ( iInt ) {
+                    // Check if nodes are viable for enrichment
+                    ///TODO: this should actually not inlcude the nodes at the boundary of the delamination, since this will propagate the delamination outside.
+                    IntArray delamNodes, propNodes;
+                    Set *elSet = this->giveDomain()->giveSet(this->giveDomain()->giveCrossSection(CSnum)->giveSetNumber());
+                    for (int elID : elSet->giveElementList() ) {
+                        delamNodes.followedBy(this->giveDomain()->giveElement(elID)->giveDofManArray());
+                    } 
+                    delamNodes.sort();
+                    delamNodes.findCommonValuesSorted(CSDofManNumbers[iCS-1], propNodes);
+                    dei->initiateFronts(eiHasPropagated,propNodes);
+                }
+            }
+        } else {
+            OOFEM_ERROR(" XfemManager :: initiateFronts not implemented for other than Delamination.")
         }
 
         if(eiHasPropagated) {
@@ -410,6 +434,17 @@ bool XfemManager :: hasPropagatingFronts()
 {
     for ( auto &ei: enrichmentItemList ) {
         if ( ei->hasPropagatingFronts() ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool XfemManager :: hasInitiationCriteria()
+{
+    for ( auto &ei: enrichmentItemList ) {
+        if ( ei->hasInitiationCriteria() ) {
             return true;
         }
     }

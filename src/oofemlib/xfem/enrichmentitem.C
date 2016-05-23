@@ -74,6 +74,7 @@ EnrichmentItem :: EnrichmentItem(int n, XfemManager *xMan, Domain *aDomain) : FE
     mpPropagationLaw(NULL),
     mPropLawIndex(0),
     mInheritBoundaryConditions(false),
+    mInheritOrderedBoundaryConditions(false),
     startOfDofIdPool(-1),
     endOfDofIdPool(-1),
     mpEnrichesDofsWithIdArray(),
@@ -102,6 +103,9 @@ IRResultType EnrichmentItem :: initializeFrom(InputRecord *ir)
 
     if ( ir->hasField(_IFT_EnrichmentItem_inheritbc) ) {
         mInheritBoundaryConditions = true;
+    }
+    if ( ir->hasField(_IFT_EnrichmentItem_inheritorderedbc) ) {
+        mInheritOrderedBoundaryConditions = true;
     }
 
     return IRRT_OK;
@@ -284,11 +288,11 @@ void EnrichmentItem :: createEnrichedDofs()
     // Creates new dofs due to the enrichment and appends them to the dof managers
 
     int nrDofMan = this->giveDomain()->giveNumberOfDofManagers();
-    IntArray dofIdArray;
+    IntArray EnrDofIdArray;
 
     mEIDofIdArray.clear();
 
-    int bcIndex = -1;
+    //int bcIndex = -1;
     int icIndex = -1;
 
     // Create new dofs
@@ -297,25 +301,37 @@ void EnrichmentItem :: createEnrichedDofs()
 
         if ( isDofManEnriched(* dMan) ) {
             //printf("dofMan %i is enriched \n", dMan->giveNumber());
-            computeEnrichedDofManDofIdArray(dofIdArray, * dMan);
-            for ( auto &dofid: dofIdArray ) {
+            computeEnrichedDofManDofIdArray(EnrDofIdArray, * dMan);
+            
+            // Collect boundary condition ID of existing dofs
+            IntArray bcIndexArray;
+            for ( Dof *dof: *dMan ) {
+                bcIndexArray.followedBy(dof->giveBcId());
+            }    
+            
+            bool foundBC = false;
+            IntArray nonZeroBC;
+            if ( !bcIndexArray.containsOnlyZeroes() ) {
+                // BC is found on dofs  
+                foundBC = true;
+                nonZeroBC.findNonzeros(bcIndexArray);
+            }             
+            
+            int iDof(1);
+            for ( auto &dofid: EnrDofIdArray ) {
                 if ( !dMan->hasDofID( ( DofIDItem ) ( dofid ) ) ) {
-                    if ( mInheritBoundaryConditions ) {
-                        // Check if the other dofs in the dof manager have
-                        // Dirichlet BCs. If so, let the new enriched dof
-                        // inherit the same BC.
-                        bool foundBC = false;
-                        for ( Dof *dof: *dMan ) {
-                            if ( dof->giveBcId() > 0 ) {
-                                foundBC = true;
-                                bcIndex = dof->giveBcId();
-                                break;
-                            }
-                        }
+                    if ( mInheritBoundaryConditions || mInheritOrderedBoundaryConditions ) {
 
                         if ( foundBC ) {
                             // Append dof with BC
-                            dMan->appendDof( new MasterDof(dMan, bcIndex, icIndex, ( DofIDItem ) dofid) );
+                            if ( mInheritOrderedBoundaryConditions ) {
+                                ///TODO: add choise of inheriting only specific BC. 
+                                // Assume order type of new dofs are the same as original 
+                                dMan->appendDof( new MasterDof(dMan, bcIndexArray.at(iDof), icIndex, ( DofIDItem ) dofid) );
+                            } else {
+                                // Append enriched dofs with same BC 
+                                dMan->appendDof( new MasterDof(dMan, bcIndexArray.at(nonZeroBC.at(1)), icIndex, ( DofIDItem ) dofid) );
+                            }
                         } else {
                             // No BC found, append enriched dof without BC
                             dMan->appendDof( new MasterDof(dMan, ( DofIDItem ) dofid) );
@@ -325,6 +341,7 @@ void EnrichmentItem :: createEnrichedDofs()
                         dMan->appendDof( new MasterDof(dMan, ( DofIDItem ) dofid) );
                     }
                 }
+                iDof++;
             }
         }
     }
@@ -336,15 +353,15 @@ void EnrichmentItem :: createEnrichedDofs()
     for ( int i = 1; i <= nrDofMan; i++ ) {
         DofManager *dMan = this->giveDomain()->giveDofManager(i);
 
-        computeEnrichedDofManDofIdArray(dofIdArray, * dMan);
+        computeEnrichedDofManDofIdArray(EnrDofIdArray, * dMan);
         std :: vector< DofIDItem >dofsToRemove;
         for ( Dof *dof: *dMan ) {
             DofIDItem dofID = dof->giveDofID();
 
             if ( dofID >= DofIDItem(poolStart) && dofID <= DofIDItem(poolEnd) ) {
                 bool dofIsInIdArray = false;
-                for ( int k = 1; k <= dofIdArray.giveSize(); k++ ) {
-                    if ( dofID == DofIDItem( dofIdArray.at(k) ) ) {
+                for ( int k = 1; k <= EnrDofIdArray.giveSize(); k++ ) {
+                    if ( dofID == DofIDItem( EnrDofIdArray.at(k) ) ) {
                         dofIsInIdArray = true;
                         break;
                     }

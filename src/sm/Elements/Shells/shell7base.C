@@ -2378,7 +2378,7 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
     fitRecoveredStress2BC(dSmatIPupd, dSmatupd, dSmat, dSmatIP, SmatOld, tractionBtm, tractionTop, zeroThicknessLevel, {0.0,0.0,1.0}, 1, numberOfLayers);    // {0.0,0.0,1.0}: only Szz fulfills BC, shear stress integration error is only distributed to top and btm
     
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
-//         if (this->giveGlobalNumber() == 48 ) { dSzzmatIP[layer -1].printYourself(); }
+        //if (this->giveGlobalNumber() == 84 ) { dSmatIPupd[layer -1].printYourself(); }
         updateLayerTransvStressesSR( dSmatIPupd[layer -1], layer); 
     }
     
@@ -2575,10 +2575,11 @@ Shell7Base :: giveLayerContributionToSR(FloatMatrix &dSmatLayer, FloatMatrix &dS
     FloatMatrix A, invA, Abar, a;
     // A = P^T*P
     A.beTProductOf(P,P);
+    //A.writeCSV("Amatrix");
     invA.beInverseOf(A);
     // Abar = inv(A)*P^T
     Abar.beProductTOf(invA,P);
-    // a = Abar*ipValues, a.size = 9 x StressComponents (9 = number of coefficients)
+    // a = Abar*ipValues, a.size = 11 x StressComponents (11 = number of coefficients)
     a.beProductOf(Abar,patchIpValues);
     
     

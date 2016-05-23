@@ -174,7 +174,8 @@ public:
     virtual int giveNumberOfDofs();
     
     // Recovery of through thickness stresses by momentum balance
-    virtual void giveFailedInterfaceNumber(IntArray &failedInterfaces, const FloatArray &initiationStress, TimeStep *tStep);
+    virtual void giveFailedInterfaceNumber(IntArray &failedInterfaces, FloatArray &initiationFactor, TimeStep *tStep, bool recoverStresses = true);
+    virtual void giveAverageTransverseInterfaceStress(std::vector<FloatMatrix> &transverseStress, TimeStep *tStep);
     virtual void giveRecoveredTransverseInterfaceStress(std::vector<FloatMatrix> &transverseStress, TimeStep *tStep);
 
     bool hasCohesiveZone(int interfaceNum);

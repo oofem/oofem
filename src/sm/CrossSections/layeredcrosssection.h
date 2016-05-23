@@ -103,7 +103,6 @@ protected:
     double midSurfaceXiCoordFromBottom;
     double totalThick;
     double area;
-    FloatArray initiationLimits; // Limits used to initiate new delaminations (treated as propagation) /JF
 
 public:
     LayeredCrossSection(int n, Domain * d) : StructuralCrossSection(n, d), layerMaterials(), layerThicks(), layerWidths()
@@ -182,8 +181,6 @@ public:
             return NULL;
         }
     }
-    
-    FloatArray giveIntitiationLimits() { return this->initiationLimits; }
 
     virtual int checkConsistency();
 

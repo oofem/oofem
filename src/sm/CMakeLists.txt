@@ -277,6 +277,7 @@ set (sm_xfem
     xfem/enrichmentitems/shellcrack.C
     xfem/propagationlaws/plhoopstresscirc.C
     xfem/propagationlaws/plmaterialforce.C
+    xfem/propagationlaws/plczdamageradius.C
     xfem/xfemstructuremanager.C
     xfem/matforceevaluator.C
     xfem/nucleationcriteria/ncprincipalstress.C

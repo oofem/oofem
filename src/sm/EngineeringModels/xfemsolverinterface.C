@@ -72,7 +72,7 @@ void XfemSolverInterface::propagateXfemInterfaces(TimeStep *tStep, StructuralEng
     if(domain->hasXfemManager()) {
         XfemManager *xMan = domain->giveXfemManager();
         bool frontsHavePropagated = false;
-        if (1) {
+        if ( xMan->hasInitiationCriteria() ) {
             // TODO: generalise this?
             // Intitiate delaminations (only implemented for listbasedEI/delamination. Treated the same way as propagation)
             xMan->initiateFronts(frontsHavePropagated,tStep);
@@ -143,7 +143,7 @@ void XfemSolverInterface::mapVariables(TimeStep *tStep, StructuralEngngModel &io
 
 
 
-#if 0
+#if 1
         // Map primary variables ...
         LSPrimaryVariableMapper primMapper;
         FloatArray u;

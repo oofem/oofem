@@ -793,11 +793,33 @@ LayeredCrossSection :: initializeFrom(InputRecord *ir)
     layerRots.zero();
     IR_GIVE_OPTIONAL_FIELD(ir, layerRots, _IFT_LayeredCrossSection_layerRotations);
 
-    if ( numberOfLayers != layerMaterials.giveSize() ||
-        numberOfLayers != layerThicks.giveSize()  ||
-        numberOfLayers != layerRots.giveSize() ) {  //|| ( numberOfLayers != layerWidths.giveSize() ) )
-        OOFEM_WARNING("numberOfLayers does not equal given number of thicknesses. ");
+    if ( numberOfLayers != layerRots.giveSize() ) {  //|| ( numberOfLayers != layerWidths.giveSize() ) ) || numberOfLayers != layerThicks.giveSize() || numberOfLayers != layerMaterials.giveSize()
+        OOFEM_WARNING("numberOfLayers does not equal given number of layer rotations. ");
         return IRRT_BAD_FORMAT;
+    }
+
+    if ( numberOfLayers != layerThicks.giveSize() ) {  
+        if ( layerThicks.giveSize() == 1 ) {
+            OOFEM_WARNING("Assuming same thickness in all layers");
+            double temp = layerThicks.at(1);
+            layerThicks.resize(numberOfLayers); layerThicks.zero();
+            layerThicks.add(temp);
+        } else {
+            OOFEM_WARNING("numberOfLayers does not equal given number of thicknesses. ");
+            return IRRT_BAD_FORMAT;
+        }
+    }
+
+    if ( numberOfLayers != layerMaterials.giveSize() ) {  
+        if ( layerMaterials.giveSize() == 1 ) {
+            OOFEM_WARNING("Assuming same material in all layers");
+            double temp = layerMaterials.at(1);
+            layerMaterials.resize(numberOfLayers); layerMaterials.zero();
+            layerMaterials.add(temp);
+        } else {
+            OOFEM_WARNING("numberOfLayers does not equal given number of materials. ");
+            return IRRT_BAD_FORMAT;
+        }
     }
 
     if ( numberOfLayers <= 0 ) {
@@ -819,28 +841,6 @@ LayeredCrossSection :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, midSurfaceZcoordFromBottom, _IFT_LayeredCrossSection_midsurf);
 
     this->setupLayerMidPlanes();
-    
-    IR_GIVE_OPTIONAL_FIELD(ir, this->initiationLimits, _IFT_LayeredCrossSection_initiationlimits); 
-    if (!initiationLimits.isEmpty()) {
-        if ( this->initiationLimits.giveSize() == 1 ) {
-            double tempLimit = initiationLimits.at(1);
-            initiationLimits.resize(3*(numberOfLayers-1));
-            initiationLimits.zero();
-            initiationLimits.add(tempLimit);
-            OOFEM_WARNING( "Same inititiation value is assumed for all interfaces and components in cross section %i", this->giveNumber() );
-        } else if ( this->initiationLimits.giveSize() == 3 ) {
-            FloatArray tempLimits = initiationLimits;
-            initiationLimits.clear();
-            for ( int i = 1 ; i <= 3 ; i++ ) {
-                initiationLimits.append(tempLimits);
-            } 
-            OOFEM_WARNING( "Same inititiation values are assumed for all interfaces in cross section %i", this->giveNumber() );
-        } 
-        if ( this->initiationLimits.giveSize() != 3*(numberOfLayers-1)) {
-            OOFEM_ERROR( "Wrong input of initiation limits in cross section %i", this->giveNumber());
-            return IRRT_BAD_FORMAT;
-        }
-    }
 
     return IRRT_OK;
 }
@@ -857,7 +857,6 @@ void LayeredCrossSection :: giveInputRecord(DynamicInputRecord &input)
     input.setField(this->interfacerMaterials, _IFT_LayeredCrossSection_interfacematerials);
     input.setField(this->numberOfIntegrationPoints, _IFT_LayeredCrossSection_nintegrationpoints);
     input.setField(this->midSurfaceZcoordFromBottom, _IFT_LayeredCrossSection_midsurf);
-    input.setField(this->initiationLimits, _IFT_LayeredCrossSection_initiationlimits);
 }
 
 void LayeredCrossSection :: createMaterialStatus(GaussPoint &iGP)

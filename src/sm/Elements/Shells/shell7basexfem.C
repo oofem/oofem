@@ -37,6 +37,7 @@
 #include "Loads/constantpressureload.h"
 #include "constantsurfaceload.h"
 #include "Materials/InterfaceMaterials/intmatbilinczfagerstrom.h"
+#include "Materials/InterfaceMaterials/intmatbilinczjansson.h"
 #include "xfem/enrichmentitems/crack.h"
 #include "xfem/enrichmentitems/shellcrack.h"
 #include "feinterpol3d.h"
@@ -51,7 +52,7 @@
 namespace oofem {
 
 /* Scale factor fo the discontinuous dofs. Implies that the corresponding 
-   dofs must be scaled with 1/factor in the input file
+    must be scaled with 1/factor in the input file
 */
 const double DISC_DOF_SCALE_FAC = 1.0;
 
@@ -77,7 +78,6 @@ Shell7BaseXFEM :: postInitialize()
     Shell7Base :: postInitialize();
     this->xMan =  this->giveDomain()->giveXfemManager();
     
-    ///@todo This needs to be updated dymically and not only initialized
     // Set up ordering arrays and arrays with the actived dofs
     int numEI = xMan->giveNumberOfEnrichmentItems();
     this->orderingArrays.resize(numEI);
@@ -411,11 +411,12 @@ Shell7BaseXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, 
                 // Therefore we must go through them all and check.
                 
                 for ( int j = 1; j <= this->xMan->giveNumberOfEnrichmentItems(); j++ ) { 
-                    this->computeCohesiveForces( fCZ, tStep, solVec, solVecD, ei, this->xMan->giveEnrichmentItem(j));
-                    
-                    tempRed.beSubArrayOf(fCZ, this->activeDofsArrays[j-1]);
-                    answer.assemble(tempRed, this->orderingArrays[j-1]);
-                    
+                    if ( this->xMan->giveEnrichmentItem(j)->isElementEnriched(this) ) {
+                        this->computeCohesiveForces( fCZ, tStep, solVec, solVecD, ei, this->xMan->giveEnrichmentItem(j));
+                        
+                        tempRed.beSubArrayOf(fCZ, this->activeDofsArrays[j-1]);
+                        answer.assemble(tempRed, this->orderingArrays[j-1]);
+                    }
                 }
             }
         }
@@ -627,7 +628,7 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
         answerTemp.zero();
 
         FloatMatrix B, Ncoh, NEnr, BEnr, F;  
-        int delamNum = dei->giveNumber();
+        int delamNum = dei->giveDelamInterfaceNum();
 
         StructuralInterfaceMaterial *intMat = static_cast < StructuralInterfaceMaterial * > 
             (this->layeredCS->giveInterfaceMaterial(delamNum) );
@@ -635,7 +636,7 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
         FloatMatrix lambdaD, lambdaN, Q;
         FloatArray Fcoh, T, nCov, jump, unknowns, genEpsC, genEpsD;
         
-        for ( GaussPoint *gp: *czIntegrationRulesArray [ delamNum - 1 ] ) { ///@todo switch to giveIntefaceNum?
+        for ( GaussPoint *gp: *czIntegrationRulesArray [ delamNum - 1 ] ) { 
             double xi = dei->giveDelamXiCoord();
             lCoords.at(1) = gp->giveNaturalCoordinate(1);
             lCoords.at(2) = gp->giveNaturalCoordinate(2);
@@ -725,19 +726,24 @@ Shell7BaseXFEM :: computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep)
           
             for ( int j = 1; j <= this->xMan->giveNumberOfEnrichmentItems(); j++ ) {
                 for ( int k = j; k <= this->xMan->giveNumberOfEnrichmentItems(); k++ ) { // upper triangular part
-                  // Coupling enrichments
-                  EnrichmentItem *ei_j = this->xMan->giveEnrichmentItem(j); 
-                  EnrichmentItem *ei_k = this->xMan->giveEnrichmentItem(k);
-                  this->computeCohesiveTangentAt(temp, tStep, dei, ei_j, ei_k);
+                    // Coupling enrichments
+                    //EnrichmentItem *ei_j = this->xMan->giveEnrichmentItem(j);
+                    Delamination *dei_j = dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(j) );
+                    //EnrichmentItem *ei_k = this->xMan->giveEnrichmentItem(k); 
+                    Delamination *dei_k = dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(k) );
+                    if ( dei_j && dei_j->isElementEnriched(this) && dei_k && dei_k->isElementEnriched(this) ) {
+                    
+                        this->computeCohesiveTangentAt(temp, tStep, dei, dei_j, dei_k);
 
-                  // Assemble part correpsonding to active dofs
-                  tempRed.beSubMatrixOf(temp, this->activeDofsArrays[ei_j->giveNumber()-1], this->activeDofsArrays[ei_k->giveNumber()-1]);
-                  answer.assemble(tempRed, this->orderingArrays[ei_j->giveNumber()-1], this->orderingArrays[ei_k->giveNumber()-1]);	
-                  
-                  if( j != k ) { // add off diagonal contributions
-                    tempRedT.beTranspositionOf(tempRed);
-                    answer.assemble(tempRedT, this->orderingArrays[ei_k->giveNumber()-1], this->orderingArrays[ei_j->giveNumber()-1]);       
-                  }
+                        // Assemble part correpsonding to active dofs
+                        tempRed.beSubMatrixOf(temp, this->activeDofsArrays[dei_j->giveNumber()-1], this->activeDofsArrays[dei_k->giveNumber()-1]);
+                        answer.assemble(tempRed, this->orderingArrays[dei_j->giveNumber()-1], this->orderingArrays[dei_k->giveNumber()-1]);	
+                        
+                        if( j != k ) { // add off diagonal contributions
+                            tempRedT.beTranspositionOf(tempRed);
+                            answer.assemble(tempRedT, this->orderingArrays[dei_k->giveNumber()-1], this->orderingArrays[dei_j->giveNumber()-1]);       
+                        }
+                    }
                 }
             }
         }
@@ -760,8 +766,8 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
     answerTemp.resize(nDofs, nDofs);
     answerTemp.zero();
     
-    int delamNum = dei->giveNumber();
-    std :: unique_ptr< IntegrationRule > &iRuleL = czIntegrationRulesArray [ dei->giveNumber() - 1 ];
+    int delamNum = dei->giveDelamInterfaceNum();
+    std :: unique_ptr< IntegrationRule > &iRuleL = czIntegrationRulesArray [ dei->giveDelamInterfaceNum() - 1 ];
     StructuralInterfaceMaterial *intMat = static_cast < StructuralInterfaceMaterial * > 
         (this->layeredCS->giveInterfaceMaterial(delamNum) );
 
@@ -773,6 +779,12 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
         lCoords = { gp->giveNaturalCoordinate(1), gp->giveNaturalCoordinate(2), xi};
 
         intMat->give3dStiffnessMatrix_dTdj(D, TangentStiffness, gp, tStep);
+        
+        //IntMatBilinearCZJanssonStatus *status = static_cast< IntMatBilinearCZJanssonStatus * >( intMat->giveStatus(gp) );
+        //double damage = status->giveTempDamage();
+        //if ( damage >= 1 ) { printf("Full damage in elt %i \n",damage,this->giveNumber()); }
+        
+        
         this->evalInitialCovarNormalAt(nCov, lCoords);
         Q.beLocalCoordSys(nCov);
         D.rotatedWith(Q,'t');   // rotate back to global coord system
@@ -2291,7 +2303,7 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
     std::vector<FloatArray> values;
     for ( int fieldNum = 1; fieldNum <= primaryVarsToExport.giveSize(); fieldNum++ ) {
         
-        if ( 1 ) {
+        if ( 0 ) {
         // Recover shear stresses
         this->recoverShearStress(tStep);
         }
@@ -2866,9 +2878,9 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
     XfemManager *xFemMan =  this->xMan;
     int nEnrIt = xFemMan->giveNumberOfEnrichmentItems();
 
-    IntArray wedgeToTriMap;
+    IntArray wedgeToTriMap({15, 1, 2, 3, 1, 2, 3, 4, 5, 6, 4, 5, 6, 1, 2, 3} );
     // For each node in the wedge take the value from the triangle node given by the map below
-    wedgeToTriMap.setValues(15, 1, 2, 3, 1, 2, 3, 4, 5, 6, 4, 5, 6, 1, 2, 3 );
+    // wedgeToTriMap.setValues;
 
     vtkPiece.setNumberOfInternalXFEMVarsToExport(xFemMan->vtkExportFields.giveSize(), nEnrIt, numTotalNodes);
     for ( int field = 1; field <= xFemMan->vtkExportFields.giveSize(); field++ ) {
@@ -2885,7 +2897,7 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
                     if ( numSubCells == 1) {
                         this->interpolationForExport.giveLocalNodeCoords(localNodeCoords);
                     } else {
-                        giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, subCell, localNodeCoords);
+                        giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, subCell, layer, localNodeCoords);
                     }
                     mapXi3FromLocalToShell(nodeLocalXi3CoordsMapped, nodeLocalXi3Coords, layer);
                     for ( int nodeIndx = 1; nodeIndx <= numCellNodes; nodeIndx++ ) {
@@ -2904,7 +2916,7 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
                         } else if ( xfemstype == XFEMST_LevelSetGamma ) {
                             valueArray.resize(1);
                             val = & valueArray;
-                            ei->evalLevelSetTangInNode( valueArray.at(1), node->giveNumber() );
+                            ei->evalLevelSetTangInNode( valueArray.at(1), node->giveNumber() , node->giveNodeCoordinates());
                         } else if ( xfemstype == XFEMST_NodeEnrMarker ) {
                             valueArray.resize(1);
                             val = & valueArray;
@@ -3042,7 +3054,7 @@ Shell7BaseXFEM :: recoverShearStress(TimeStep *tStep)
         tractionBC[numDel+1].resize(3,numInPlaneIP);
         tractionBC[0].resize(3,numInPlaneIP);
         giveTractionBC(tractionBC[numDel+1],tractionBC[0], tStep); 
-        if (this->giveGlobalNumber() == 8 || this->giveGlobalNumber() == 50) {tractionBC[numDel+1].printYourself("tractionTop"); tractionBC[0].printYourself("tractionBtm");}
+        //if (this->giveGlobalNumber() == 8 || this->giveGlobalNumber() == 50) {tractionBC[numDel+1].printYourself("tractionTop"); tractionBC[0].printYourself("tractionBtm");}
         
 #if 0
         FloatArray tractionTop, tractionBtm; 
@@ -3072,11 +3084,12 @@ Shell7BaseXFEM :: recoverShearStress(TimeStep *tStep)
                 if (czIntegrationRulesArray [ interfaceNum - 1 ]->giveNumberOfIntegrationPoints() != numInPlaneIP ) {
                     OOFEM_ERROR("Interface IPs doesn't match the element IPs");
                 }
-                StructuralInterfaceMaterial *intMat = dynamic_cast < StructuralInterfaceMaterial * > 
-                    (this->layeredCS->giveInterfaceMaterial(interfaceNum) );
+                StructuralInterfaceMaterial *intMat = dynamic_cast < StructuralInterfaceMaterial * > (this->layeredCS->giveInterfaceMaterial(interfaceNum) );
+                if (intMat == 0) {
+                    OOFEM_ERROR("NULL pointer to material, shell element %i",this->giveGlobalNumber());
+                }
                     
                 FloatArray lCoords(3), nCov, CZPKtraction(3);
-                CZPKtraction.zero();
                 FloatMatrix Q;
                 int iIGP = 1;
                 for ( GaussPoint *gp : *iRuleI ) {
@@ -3099,8 +3112,8 @@ Shell7BaseXFEM :: recoverShearStress(TimeStep *tStep)
                     this->evalCovarNormalAt(nCov, lCoords, genEpsC, tStep);     // Denna verkar ta hänsyn till hoppet, men hur ser jag till att det är normalen ovanför delamineringen?
                     Q.beLocalCoordSys(nCov);
                     
-#if 1
-                    // Compute jump vector
+#if 0
+                    // Compute 1PK traction from jump vector
                     FloatArray jump;
                     this->computeInterfaceJumpAt(dei->giveDelamInterfaceNum(), lCoords, tStep, jump); // -> numerical tol. issue -> normal jump = 1e-10  
             
@@ -3117,34 +3130,17 @@ Shell7BaseXFEM :: recoverShearStress(TimeStep *tStep)
                     // Compute cohesive traction based on jump
                     intMat->giveFirstPKTraction_3d(CZPKtraction, gp, jump, F, tStep);
 #else
-                    
-                    
+                    // Get 1PK traction directly from interface material status.
                     StructuralInterfaceMaterialStatus *intMatStatus = dynamic_cast < StructuralInterfaceMaterialStatus * >( intMat->giveStatus(gp) );
-                    //StructuralInterfaceMaterialStatus *intMatStatus = dynamic_cast < StructuralInterfaceMaterialStatus * >( gp->giveMaterialStatus() );
-                    if (this->giveGlobalNumber() == 8 || this->giveGlobalNumber() == 50 ) { 
-                        printf(intMatStatus->giveClassName()); printf("\n"); 
-                        intMatStatus->giveInputRecordName();
-                        
+                    if (intMatStatus == 0) {
+                        OOFEM_ERROR("NULL pointer to interface material, shell element %i",this->giveGlobalNumber());
                     }
-                    CZPKtraction = intMatStatus->giveFirstPKTraction(); // 3 components in local coords
-                    FloatArray tempCZPKtraction = intMatStatus->giveTempFirstPKTraction();
-//                     FloatArray jump = intMatStatus->giveJump();
-//                     FloatArray tempjump = intMatStatus->giveTempJump();
-//                     FloatArray traction = intMatStatus->giveTraction();
-//                     FloatArray tempTraction = intMatStatus->giveTempTraction();
+                    CZPKtraction = intMatStatus->giveTempFirstPKTraction(); // 3 components in local coords
 #endif
-                    
-//                     if (intMatStatus == 0) {
-//                         OOFEM_ERROR("NULL pointer to material status");
-//                     }
-//                     
 
                     CZPKtraction.rotatedWith(Q,'t'); // transform back to global coord system
-                    if (this->giveGlobalNumber() == 8 || this->giveGlobalNumber() == 50) {
+                    if (this->giveGlobalNumber() == 9 ) {
                         CZPKtraction.printYourself("CZPKtraction"); 
-//                         tempCZPKtraction.printYourself("tempCZPKtraction"); 
-//                         jump.printYourself("jump"); tempjump.printYourself("tempJump");
-//                         traction.printYourself("traction"); tempTraction.printYourself("temptraction");
                     }
                     
                     // Set BC stresses
@@ -3300,36 +3296,119 @@ Shell7BaseXFEM :: recoverShearStress(TimeStep *tStep)
 
 
 void 
-Shell7BaseXFEM :: giveFailedInterfaceNumber(IntArray &failedInterfaces, const FloatArray &initiationStress, TimeStep *tStep)
+Shell7BaseXFEM :: giveFailedInterfaceNumber(IntArray &failedInterfaces, FloatArray &initiationFactors, TimeStep *tStep, bool recoverStresses)
 {
     // Compares recovered interface stresses to initiation stress (atm just max stress criterion). 
     // Assumes three stress components in initiationStress: (Sxz, Syz, Szz)
-    ///TODO: add failure method. 
+    // Returns any new interface that needs to be enriched.
+    ///TODO: add general failure criterion. 
     
     failedInterfaces.clear();
     std :: vector < FloatMatrix > transverseInterfaceStresses;
-    this->giveRecoveredTransverseInterfaceStress(transverseInterfaceStresses, tStep);
-    int numSC = initiationStress.giveSize()/3;
+    if (recoverStresses) {
+        // Find interface stresses using stress recovery
+        this->giveRecoveredTransverseInterfaceStress(transverseInterfaceStresses, tStep);
+    } else {
+        // Take average stresses of adjacent layers.
+        this->giveAverageTransverseInterfaceStress(transverseInterfaceStresses, tStep);
+    }
+    int numSC = 3;
+    //initiationFactors.resizeWithValues(this->layeredCS->giveNumberOfLayers());
+    FloatArray interfaceXiCoords; 
+    this->giveLayeredCS()->giveInterfaceXiCoords(interfaceXiCoords);
+    FloatMatrix failurestresses(2,this->layeredCS->giveNumberOfLayers());
     
     for ( int iInterface = 1 ; iInterface < this->layeredCS->giveNumberOfLayers() ; iInterface++ ) {
+        
         bool initiateElt = false;
+        int interfaceMatNumber(this->giveLayeredCS()->giveInterfaceMaterialNum(iInterface));
         
-        //if (this->giveGlobalNumber() == 9) {transverseInterfaceStresses[iInterface-1].printYourself("Interface stresses elt 9"); initiationStress.printYourself("initiationStress");}
-        
-        for ( int iGP = 1 ; iGP <= transverseInterfaceStresses[iInterface-1].giveNumberOfColumns() ; iGP++ ) {
-            if ( transverseInterfaceStresses[iInterface-1].giveNumberOfRows() != numSC ) {
-                OOFEM_ERROR( "Wrong number of stress components" );
+        if (interfaceMatNumber) {
+            
+            std :: unique_ptr< IntegrationRule > &iRuleI = this->czIntegrationRulesArray [ iInterface - 1 ];
+            
+            IntArray failedSC;
+            StructuralInterfaceMaterial *intMat = dynamic_cast < StructuralInterfaceMaterial * > (this->layeredCS->giveInterfaceMaterial(iInterface) );
+            if (intMat == 0) {
+                OOFEM_ERROR("NULL pointer to material, shell %i interface %i",this->giveGlobalNumber(),iInterface);
             }
-            for ( int iSC = 1 ; iSC <= numSC ; iSC++ ) {
-                if ( transverseInterfaceStresses[iInterface-1].at(iSC,iGP) > initiationStress.at(numSC*(iInterface-1) + iSC) || (-transverseInterfaceStresses[iInterface-1].at(iSC,iGP)) > initiationStress.at(iSC)) { 
-                    printf("SC%i = %1.0f, limit = %1.0f \n", iSC, transverseInterfaceStresses[iInterface-1].at(iSC,iGP), initiationStress.at(iSC));
-                    initiateElt = true;
-                    ///TODO: add break/continue;
+            
+            FloatArray sigF = {1,1,1};
+            FloatArray temp = intMat->giveInterfaceStrength();
+            if (temp.giveSize() == 1 && temp.at(1) > 0) {
+                // Same strength in all directions
+                //sigF.times(temp.at(1)*initiationFactors.at(iInterface));
+                sigF.times(temp.at(1));
+            } else if (temp.giveSize() == 3) {
+                // Assume S1,S1,N
+                // sigF.beScaled(initiationFactors.at(iInterface),temp);
+                sigF = temp;
+            } else {
+                OOFEM_ERROR( "Intitiation stress for delaminations not found or incorrect on CZ-material" );
+            }
+            
+            //if (this->giveGlobalNumber() == 9) {transverseInterfaceStresses[iInterface-1].printYourself("Interface stresses elt 9"); initiationStress.printYourself("initiationStress");}
+            
+            for ( int iGP = 1 ; iGP <= transverseInterfaceStresses[iInterface-1].giveNumberOfColumns() ; iGP++ ) {
+                if ( transverseInterfaceStresses[iInterface-1].giveNumberOfRows() != numSC ) {
+                    OOFEM_ERROR( "Wrong number of stress components" );
                 }
+                
+                // Collect interface stresses
+                FloatArray interfaceStresses; 
+                interfaceStresses.beColumnOf(transverseInterfaceStresses[iInterface-1],iGP);        // global coords
+                
+                //Rotate to element coord.
+                FloatArray lCoords; lCoords.resize(3);
+                GaussPoint *gp = iRuleI->getIntegrationPoint(iGP-1);
+                lCoords.at(1) = gp->giveNaturalCoordinate(1);
+                lCoords.at(2) = gp->giveNaturalCoordinate(2);
+                lCoords.at(3) = interfaceXiCoords.at(iInterface);
+                
+                FloatArray solVecC, nCov;
+                this->giveUpdatedSolutionVector(solVecC, tStep);
+                FloatMatrix Q,B;
+                this->computeEnrichedBmatrixAt(lCoords, B, NULL);   // NULL => Shell7base :: computeBmatrixAt, otherwise include dei
+                FloatArray genEpsC;                        
+                genEpsC.beProductOf(B, solVecC);
+                this->evalCovarNormalAt(nCov, lCoords, genEpsC, tStep);  
+                Q.beLocalCoordSys(nCov);
+                
+                //if (this->giveGlobalNumber() == 9) {interfaceStresses.printYourself("interfaceStresses global"); lCoords.printYourself("lCoords"); }
+                    
+                interfaceStresses.rotatedWith(Q,'n');                                               // local coords
+                double S1(interfaceStresses.at(1));    //Shear x
+                double S2(interfaceStresses.at(2));    //Shear y
+                double N(interfaceStresses.at(3));    //normal
+                //if (this->giveGlobalNumber() == 9) {Q.printYourself("Q"); interfaceStresses.printYourself("interfaceStresses local");}
+                                
+                // polynom law
+                double NM = 0.5*(N + fabs(N)); 
+                double failCrit = NM*NM/(sigF.at(3)*sigF.at(3)) + (S1*S1 + S2*S2)/(sigF.at(1)*sigF.at(1));
+                if (failCrit > (initiationFactors.at(iInterface)*initiationFactors.at(iInterface))) {
+                    initiateElt = true;
+                    failurestresses.at(1,iInterface) = NM;
+                    failurestresses.at(2,iInterface) = sqrt(S1*S1 + S2*S2);
+                }
+                
+                // Max stress criterion
+//                 for ( int iSC = 1 ; iSC <= numSC ; iSC++ ) {
+//                     if ( transverseInterfaceStresses[iInterface-1].at(iSC,iGP) > sigF.at(iSC) || (-transverseInterfaceStresses[iInterface-1].at(iSC,iGP)) > sigF.at(iSC)) { 
+//                         printf("SC%i = %1.0f, limit = %1.0f \n", iSC, transverseInterfaceStresses[iInterface-1].at(iSC,iGP), sigF.at(iSC));
+//                         initiateElt = true;
+//                         failedSC.followedBy(iSC);
+//                         ///TODO: add break/continue;
+//                     }
+//                 }
             }
-        }
-        if (initiateElt) {
-            failedInterfaces.followedBy( iInterface );
+            if (initiateElt) {
+                failedInterfaces.followedBy( iInterface );
+//                 printf(" Element %i failed in interface %i. \n",this->giveGlobalNumber(),iInterface);
+//                 for (auto iSC : failedSC) {
+//                     printf(" %i ",iSC);
+//                 }
+//                 printf("\n");
+            }
         }
     }
     //this->DelaminatedInterfaceList.printYourself("DelaminatedInterfaceList");
@@ -3340,8 +3419,54 @@ Shell7BaseXFEM :: giveFailedInterfaceNumber(IntArray &failedInterfaces, const Fl
         }
     }
     this->DelaminatedInterfaceList.followedBy(failedInterfaces);
-    this->DelaminatedInterfaceList.sort();
+    this->DelaminatedInterfaceList.sort();            
+    if (failedInterfaces.giveSize() > 0) {
+        printf(" Element %i failed in interface:",this->giveGlobalNumber() );//                 
+        for (auto iInterface : failedInterfaces) {
+            printf(" %i - NM = %f, S = %f \n",iInterface,failurestresses.at(1,iInterface),failurestresses.at(2,iInterface));
+        }
+        printf("\n");
+    }
 }
+
+void
+Shell7BaseXFEM::giveAverageTransverseInterfaceStress(std::vector< FloatMatrix >& transverseStress, TimeStep* tStep)
+{
+    transverseStress.clear();
+    int numberOfLayers = this->layeredCS->giveNumberOfLayers(); 
+    transverseStress.resize(numberOfLayers-1); 
+    int numThicknessIP = this->layeredCS->giveNumIntegrationPointsInLayer();  
+    int numInPlaneIP = 6; ///TODO generalise this; 
+    
+    for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
+        std :: unique_ptr< IntegrationRule > &iRule = this->integrationRulesArray[layer-1];
+        if (layer < numberOfLayers) {
+            transverseStress[layer-1].resize(3,numInPlaneIP);
+        }
+        
+        for ( int j = 0; j < numInPlaneIP; j++ ) { 
+            
+            // thickness GPs
+            for ( int i = 0; i < numThicknessIP; i++ ) {
+
+                int point = i*numInPlaneIP + j; // wedge integration point number 
+                IntegrationPoint *ip = iRule->getIntegrationPoint(point); 
+                // Collect IP-value
+                FloatArray tempIPvalues;
+                this->giveIPValue(tempIPvalues, ip, IST_StressTensor, tStep);
+                
+                for ( int iInt = layer-1 ; iInt <= layer ; iInt++ ) {
+                    if ( iInt > 0 && iInt < numberOfLayers ) {
+                        transverseStress[iInt-1].at(1,j+1) += (0.5/numThicknessIP)*tempIPvalues.at(5);
+                        transverseStress[iInt-1].at(2,j+1) += (0.5/numThicknessIP)*tempIPvalues.at(4);
+                        transverseStress[iInt-1].at(3,j+1) += (0.5/numThicknessIP)*tempIPvalues.at(3);
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 void 
 Shell7BaseXFEM :: giveRecoveredTransverseInterfaceStress(std::vector<FloatMatrix> &transverseStress, TimeStep *tStep)
@@ -3426,8 +3551,8 @@ Shell7BaseXFEM :: giveRecoveredTransverseInterfaceStress(std::vector<FloatMatrix
                     this->evalCovarNormalAt(nCov, lCoords, genEpsC, tStep);     // Denna verkar ta hänsyn till hoppet, men hur ser jag till att det är normalen ovanför delamineringen?
                     Q.beLocalCoordSys(nCov);
                     
-#if 1
-                    // Compute jump vector
+#if 0
+                    // Compute 1PK traction from jump vector
                     FloatArray jump;
                     this->computeInterfaceJumpAt(dei->giveDelamInterfaceNum(), lCoords, tStep, jump); // -> numerical tol. issue -> normal jump = 1e-10  
             
@@ -3444,13 +3569,12 @@ Shell7BaseXFEM :: giveRecoveredTransverseInterfaceStress(std::vector<FloatMatrix
                     // Compute cohesive traction based on jump
                     intMat->giveFirstPKTraction_3d(CZPKtraction, gp, jump, F, tStep);
 #else
+                    // Get 1PK traction directly from interface material status.
                     StructuralInterfaceMaterialStatus *intMatStatus = dynamic_cast < StructuralInterfaceMaterialStatus * >( intMat->giveStatus(gp) );
-                    //StructuralInterfaceMaterialStatus *intMatStatus = dynamic_cast < StructuralInterfaceMaterialStatus * >( gp->giveMaterialStatus() );
                     if (intMatStatus == 0) {
-                        OOFEM_ERROR("NULL pointer to material status");
+                        OOFEM_ERROR("NULL pointer to interface material, shell element %i",this->giveGlobalNumber());
                     }
-                    CZPKtraction = intMatStatus->giveFirstPKTraction(); // 3 components in local coords
-                    FloatArray tempCZPKtraction = intMatStatus->giveTempFirstPKTraction();
+                    CZPKtraction = intMatStatus->giveTempFirstPKTraction(); // 3 components in local coords
 #endif
                     
                     CZPKtraction.rotatedWith(Q,'t'); // transform back to global coord system

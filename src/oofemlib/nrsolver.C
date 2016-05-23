@@ -184,6 +184,18 @@ NRSolver :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_OPTIONAL_FIELD(ir, this->maxIncAllowed, _IFT_NRSolver_maxinc);
 
+    dg_forceScale.clear();
+    if ( ir->hasField(_IFT_NRSolver_forceScale) ) {
+        IntArray dofs;
+        FloatArray forces;
+        IR_GIVE_FIELD(ir, forces, _IFT_NRSolver_forceScale);
+        IR_GIVE_FIELD(ir, dofs, _IFT_NRSolver_forceScaleDofs);
+        for ( int i = 0; i < dofs.giveSize(); ++i ) {
+            dg_forceScale[dofs[i]] = forces[i];
+            printf(" dof %i, force tolerance scale %5.2e \n",dofs[i],dg_forceScale[dofs[i]]);
+        }
+    }
+
     return SparseNonLinearSystemNM :: initializeFrom(ir);
 }
 
@@ -633,7 +645,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                 dg_dispErr.at(dofid) += ddX.at(eq) * ddX.at(eq);
                 dg_totalLoadLevel.at(dofid) += RT.at(eq) * RT.at(eq);
                 dg_totalDisp.at(dofid) += X.at(eq) * X.at(eq);
-                idsInUse.at(dofid) = 1;
+                idsInUse.at(dofid)++;
             } // end loop over DOFs
         } // end loop over dof managers
 
@@ -662,7 +674,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                     dg_dispErr.at(dofid) += ddX.at(eq) * ddX.at(eq);
                     dg_totalLoadLevel.at(dofid) += RT.at(eq) * RT.at(eq);
                     dg_totalDisp.at(dofid) += X.at(eq) * X.at(eq);
-                    idsInUse.at(dofid) = 1;
+                    idsInUse.at(dofid)++;
                 } // end loop over DOFs
             } // end loop over element internal dofmans
         } // end loop over elements
@@ -688,7 +700,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                     dg_dispErr.at(dofid) += ddX.at(eq) * ddX.at(eq);
                     dg_totalLoadLevel.at(dofid) += RT.at(eq) * RT.at(eq);
                     dg_totalDisp.at(dofid) += X.at(eq) * X.at(eq);
-                    idsInUse.at(dofid) = 1;
+                    idsInUse.at(dofid)++;
                 } // end loop over DOFs
             } // end loop over element internal dofmans
         } // end loop over elements
@@ -718,7 +730,10 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
 
             if ( rtolf.at(1) > 0.0 ) {
                 //  compute a relative error norm
-                if ( ( dg_totalLoadLevel.at(dg) + internalForcesEBENorm.at(dg) ) > nrsolver_ERROR_NORM_SMALL_NUM ) {
+                if ( dg_forceScale.find(dg) != dg_forceScale.end() ) {
+                    forceErr = sqrt( dg_forceErr.at(dg) / ( dg_totalLoadLevel.at(dg) + internalForcesEBENorm.at(dg) + 
+                        idsInUse.at(dg)*dg_forceScale[dg]*dg_forceScale[dg] ) );
+                } else if ( ( dg_totalLoadLevel.at(dg) + internalForcesEBENorm.at(dg) ) >= nrsolver_ERROR_NORM_SMALL_NUM ) {
                     forceErr = sqrt( dg_forceErr.at(dg) / ( dg_totalLoadLevel.at(dg) + internalForcesEBENorm.at(dg) ) );
                 } else {
                     // If both external forces and internal ebe norms are zero, then the residual must be zero.
