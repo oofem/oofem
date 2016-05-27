@@ -754,7 +754,7 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
         if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >(bc) ) ) {
             ma.assembleFromActiveBC(answer, *abc, tStep, s, s);
         } else if ( bc->giveSetNumber() && ( load = dynamic_cast< Load * >(bc) ) && bc->isImposed(tStep) ) {
-            // Now we assemble the corresponding load type fo the respective components in the set:
+            // Now we assemble the corresponding load type for the respective components in the set:
             IntArray loc, bNodes;
             FloatMatrix mat, R;
             BodyLoad *bodyLoad;
@@ -988,7 +988,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
         if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >(bc) ) ) {
             va.assembleFromActiveBC(answer, *abc, tStep, mode, s, eNorms);
         } else if ( bc->giveSetNumber() && ( load = dynamic_cast< Load * >(bc) ) && bc->isImposed(tStep) ) {
-            // Now we assemble the corresponding load type fo the respective components in the set:
+            // Now we assemble the corresponding load type for the respective components in the set:
             IntArray dofids, loc, bNodes;
             FloatArray charVec;
             FloatMatrix R;

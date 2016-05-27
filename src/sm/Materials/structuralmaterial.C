@@ -2177,7 +2177,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
     //sum up all prescribed temperatures over an element
     //elem->computeResultingIPTemperatureAt(et, tStep, gp, mode);
     if ( selem ) {
-        selem->computeResultingIPTemperatureAt(et, tStep, gp, mode);        // HUHU
+        selem->computeResultingIPTemperatureAt(et, tStep, gp, mode);
     }
 
     //sum up all prescribed eigenstrain over an element

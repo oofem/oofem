@@ -44,8 +44,8 @@ Set 2 nodes 2 1 2
 Set 3 elementboundaries 2 8 2
 
 #%BEGIN_CHECK% tolerance 1.e-5
-#NODE tStep 100 number 17 dof 10 unknown d value 11.08688 // 11.086956522
-#NODE tStep 100 number 18 dof 10 unknown d value 11.08688 // 11.086956522
+#NODE tStep 100 number 17 dof 10 unknown d value 1.10868344e+01
+#NODE tStep 100 number 18 dof 10 unknown d value 1.10868344e+01
 #%END_CHECK%
 
 

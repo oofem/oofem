@@ -1,9 +1,9 @@
-MPS_bench01_in.out.sm
+MPS_bench01_out.sm
 OOFEM input file for structural analysis, automatically generated, test for ConTemp, a brick with size x=3 y=0.5 z=0.5. Damage happens at time step 9 due to temperature profile. Mesh is slightly distorted to localize damage.
 #
-nonlinearstatic nsteps 10 deltaT 1. rtolv 1.e-3 MaxIter 1000 controllmode 1 stiffMode 2 renumber 1 updateelasticstiffnessflag lstype 4 smtype 8 miniter 3 nmodules 4
-vtkxml tstep_step 1 domain_all vars 11 1 2 112 111 4 106 109 110 52 90 114 primvars 1 1 cellvars 2 90 82 stype 1 regionsets 1 1 timescale 2.77777e-4
-vtkxml tstep_step 1 domain_all vars 5 1 2 4 27 28 primvars 1 1 stype 1 regionsets 2 2 3 timescale 2.77777e-4
+nonlinearstatic nsteps 10 deltaT 1. rtolv 1.e-3 MaxIter 1000 controllmode 1 stiffMode 2 renumber 1 updateelasticstiffnessflag lstype 4 smtype 8 miniter 3 nmodules 2
+#vtkxml tstep_step 1 domain_all vars 11 1 2 112 111 4 106 109 110 52 90 114 primvars 1 1 cellvars 2 90 82 stype 1 regionsets 1 1 timescale 2.77777e-4
+#vtkxml tstep_step 1 domain_all vars 5 1 2 4 27 28 primvars 1 1 stype 1 regionsets 2 2 3 timescale 2.77777e-4
 hom tstep_all ists 1 52 regionsets 1 1 timescale 2.77777e-4
 errorcheck
 #
@@ -254,17 +254,17 @@ set 3 elementranges { }
 #
 #
 #%BEGIN_CHECK% tolerance 1e-7
-#NODE tStep 3  number 39 dof 1 unknown d value 0.0000000
-#NODE tStep 5  number 39 dof 1 unknown d value 3.95752383e-05
-#NODE tStep 10  number 39 dof 1 unknown d value 2.54309424e-04
-#NODE tStep 15  number 39 dof 1 unknown d value 3.35112601e-04
-#NODE tStep 20  number 39 dof 1 unknown d value 3.20745589e-04
+#NODE tStep 2  number 39 dof 1 unknown d value 0.0000000
+#NODE tStep 4  number 39 dof 1 unknown d value 3.92140275e-05
+#NODE tStep 9  number 39 dof 1 unknown d value 2.55020049e-04
+#NODE tStep 14  number 39 dof 1 unknown d value 3.31379893e-04
+#NODE tStep 19  number 39 dof 1 unknown d value 3.16734022e-04
 ##Check element's stress vector
-#ELEMENT tStep 3 number 30 gp 1 keyword 1 component 2  value 0.0000000
-#ELEMENT tStep 5 number 30 gp 1 keyword 1 component 2  value 5.04242356e-03
-#ELEMENT tStep 10 number 30 gp 1 keyword 1 component 2  value 8.42788709e-02
-#ELEMENT tStep 15 number 30 gp 1 keyword 1 component 2  value 1.38108978e-01
-#ELEMENT tStep 20 number 30 gp 1 keyword 1 component 2  value 1.30320548e-01
+#ELEMENT tStep 2 number 30 gp 1 keyword 1 component 2  value 0.0000000
+#ELEMENT tStep 4 number 30 gp 1 keyword 1 component 2  value 5.46197817e-03
+#ELEMENT tStep 9 number 30 gp 1 keyword 1 component 2  value 8.46230379e-02
+#ELEMENT tStep 14 number 30 gp 1 keyword 1 component 2  value 1.33771470e-01
+#ELEMENT tStep 19 number 30 gp 1 keyword 1 component 2  value 1.25860683e-01
 #%END_CHECK%
 
 

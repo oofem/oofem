@@ -808,7 +808,6 @@ SimpleCrossSection :: giveTemperatureVector(FloatArray &answer, GaussPoint *gp, 
         if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, tStep) ) ) {
             OOFEM_ERROR("tf->evaluateAt failed, element %d, error code %d", elem->giveNumber(), err);
         }
-
         if ( et2.isNotEmpty() ) {
             if ( answer.isEmpty() ) {
                 answer = et2;

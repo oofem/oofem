@@ -43,6 +43,7 @@
 #include "nrsolver.h"
 #include "unknownnumberingscheme.h"
 #include "function.h"
+#include "dofmanager.h"
 // Temporary:
 #include "generalboundarycondition.h"
 #include "boundarycondition.h"
@@ -127,7 +128,8 @@ double TransientTransportProblem :: giveUnknownComponent(ValueModeType mode, Tim
     double val1 = field->giveUnknownValue(dof, VM_Total, tStep);
     double val0 = field->giveUnknownValue(dof, VM_Total, tStep->givePreviousStep());
     if ( mode == VM_Total ) {
-        return this->alpha * val1 + (1.-this->alpha) * val0;
+        //return this->alpha * val1 + (1.-this->alpha) * val0;
+        return val1;//The output should be given always at the end of the time step, regardless of alpha
     } else if ( mode == VM_Velocity ) {
         return (val1 - val0) / tStep->giveTimeIncrement();
     } else if ( mode == VM_Incremental ) {
@@ -171,7 +173,7 @@ TimeStep *TransientTransportProblem :: giveNextStep()
         // first step -> generate initial step
         currentStep.reset( new TimeStep( *giveSolutionStepWhenIcApply() ) );
     }
-    
+
     double dt = this->giveDeltaT(currentStep->giveNumber()+1);
     previousStep = std :: move(currentStep);
     currentStep.reset( new TimeStep(*previousStep, dt) );
@@ -213,7 +215,7 @@ void TransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
     // (backwards compatibility issues due to inconsistencies in other solvers).
     TimeStep *prev = tStep->givePreviousStep();
     for ( auto &dman : d->giveDofManagers() ) {
-        static_cast< DofDistributedPrimaryField* >(field.get())->setInitialGuess(*dman, tStep, prev);
+        static_cast< DofDistributedPrimaryField* >(field.get())->setInitialGuess(*dman, tStep, prev);//copy total values into new tStep
     }
 
     for ( auto &elem : d->giveElements() ) {
@@ -247,7 +249,7 @@ void TransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
             capacityMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
             this->assemble( *capacityMatrix, tStep, MassMatrixAssembler(), EModelDefaultEquationNumbering(), d );
         }
-        
+
         if ( this->keepTangent ) {
             this->assemble( *effectiveMatrix, tStep, TangentAssembler(TangentStiffness),
                            EModelDefaultEquationNumbering(), d );
@@ -302,10 +304,10 @@ TransientTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn
     // K_eff        * dT_1 = Q - F_eff
     // Update:
     // T_1 += dT_1
-    
+
     ///@todo NRSolver should report when the solution changes instead of doing it this way.
     this->field->update(VM_Total, tStep, solution, EModelDefaultEquationNumbering());
-    ///@todo Need to reset the boundary conditions properly since some "update" is doing strange 
+    ///@todo Need to reset the boundary conditions properly since some "update" is doing strange
     /// things such as applying the (wrong) boundary conditions. This call will be removed when that code can be removed.
     this->field->applyBoundaryCondition(tStep);
 
@@ -402,6 +404,11 @@ TransientTransportProblem :: forceEquationNumbering()
     return EngngModel :: forceEquationNumbering();
 }
 
+void
+TransientTransportProblem :: updateYourself(TimeStep *tStep)
+{
+    EngngModel :: updateYourself(tStep);
+}
 
 contextIOResultType
 TransientTransportProblem :: saveContext(DataStream *stream, ContextMode mode, void *obj)

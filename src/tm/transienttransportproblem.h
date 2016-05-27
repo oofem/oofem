@@ -119,6 +119,8 @@ public:
     virtual bool requiresEquationRenumbering(TimeStep *tStep);
     virtual int forceEquationNumbering();
 
+    virtual void updateYourself(TimeStep *tStep);
+    
     virtual int checkConsistency();
 
     // identification
