@@ -129,20 +129,20 @@ set 1 elementranges {(1   8)}
 set 2 elementranges {(  9  10)}
 #
 #%BEGIN_CHECK% tolerance 1e-7
-#NODE tStep 3  number 9 dof 1 unknown d value 0.0000000
-#NODE tStep 5  number 9 dof 1 unknown d value 1.68779847e-05
-#NODE tStep 10  number 9 dof 1 unknown d value 6.05332391e-05
-#NODE tStep 15  number 9 dof 1 unknown d value 5.29994039e-05
+#NODE tStep 2  number 9 dof 1 unknown d value 0.0000000
+#NODE tStep 5  number 9 dof 1 unknown d value 2.79317071e-05
+#NODE tStep 10  number 9 dof 1 unknown d value 5.51437225e-05
+#NODE tStep 15  number 9 dof 1 unknown d value 4.53444068e-05
 ##Check element's strain vector
-#ELEMENT tStep 3 number 4 gp 1 keyword 4 component 1 value 0.0000000
-#ELEMENT tStep 5 number 4 gp 1 keyword 4 component 1 value 2.66775183e-05
-#ELEMENT tStep 10 number 4 gp 1 keyword 4 component 1 value 9.05106263e-05
-#ELEMENT tStep 15 number 4 gp 1 keyword 4 component 1 value 7.74786679e-05
+#ELEMENT tStep 2 number 4 gp 1 keyword 4 component 1 value 0.0000000
+#ELEMENT tStep 5 number 4 gp 1 keyword 4 component 1 value 4.33842544e-05
+#ELEMENT tStep 10 number 4 gp 1 keyword 4 component 1 value 8.27669851e-05
+#ELEMENT tStep 15 number 4 gp 1 keyword 4 component 1 value 6.64673010e-05
 ##Check element's stress vector
-#ELEMENT tStep 3 number 4 gp 1 keyword 1 component 1 value 0.0000000
-#ELEMENT tStep 5 number 4 gp 1 keyword 1 component 1 value -2.57485783e-02
-#ELEMENT tStep 10 number 4 gp 1 keyword 1 component 1 value -1.57214403e-01
-#ELEMENT tStep 15 number 4 gp 1 keyword 1 component 1 value -1.24838427e-01
+#ELEMENT tStep 2 number 4 gp 1 keyword 1 component 1 value 0.0000000
+#ELEMENT tStep 5 number 4 gp 1 keyword 1 component 1 value -4.80117300e-02
+#ELEMENT tStep 10 number 4 gp 1 keyword 1 component 1 value -1.41087908e-01
+#ELEMENT tStep 15 number 4 gp 1 keyword 1 component 1 value -1.09120497e-01
 #%END_CHECK%
 
 

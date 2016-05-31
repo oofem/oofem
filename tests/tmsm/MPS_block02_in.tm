@@ -1,6 +1,7 @@
 MPS_block02_in.out.tm
 OOFEM input file for thermal analysis, automatically generated, test for ConTemp, a brick with size x=0.6 y=0.5 z=0.5
-NlTransientTransportProblem nsteps 36 deltat 7200 rtol 1.e-4 alpha 0.6 nsmax 200 lstype 0 smtype 0 lstol 1e-5 lsiter 200 lsprecond 1 renumber 1 exportfields 1 5 nmodules 1
+TransientTransport nsteps 36 deltat 7200 rtolv 1.e-4 alpha 0.6 lumped exportfields 1 5 nmodules 1
+#NlTransientTransportProblem nsteps 36 deltat 7200 rtol 1.e-4 alpha 0.6 nsmax 200 lstype 0 smtype 0 lstol 1e-5 lsiter 200 lsprecond 1 renumber 1 exportfields 1 5 nmodules 1
 #vtkxml tstep_all domain_all primvars 1 6 vars 3 39 56 95 stype 2 timescale 2.77777e-4
 errorcheck
 domain HeatTransfer
@@ -65,8 +66,8 @@ UsrDefLTF 6 f(t) 0+(0)*sin(2*3.14159*(t+28800-28800)/86400.)+h(-1.e+30*sin(2*3.1
 UsrDefLTF 7 f(t) 20+(0)*sin(2*3.14159*(t+28800-28800)/86400.)+h(-1.e+30*sin(2*3.14159*(t+28800-28800)/86400.))*(0)*sin(2*3.14159*(t+28800-28800)/86400.)
 #
 #%BEGIN_CHECK% tolerance 1e-6
-#NODE tStep 2  number 8 dof 10 unknown d value 2.01402530e+01
-#NODE tStep 5  number 8 dof 10 unknown d value 2.34921031e+01
-#NODE tStep 10  number 8 dof 10 unknown d value 3.24861775e+01
-#NODE tStep 15  number 8 dof 10 unknown d value 3.23901068e+01
+#NODE tStep 2  number 8 dof 10 unknown d value 2.05545489e+01
+#NODE tStep 5  number 8 dof 10 unknown d value 2.56775201e+01
+#NODE tStep 10  number 8 dof 10 unknown d value 3.13943940e+01
+#NODE tStep 15  number 8 dof 10 unknown d value 3.09979920e+01
 #%END_CHECK%
