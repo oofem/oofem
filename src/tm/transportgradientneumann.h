@@ -44,7 +44,7 @@
 #define _IFT_TransportGradientNeumann_gradient "gradient"
 #define _IFT_TransportGradientNeumann_centerCoords "centercoords"
 #define _IFT_TransportGradientNeumann_surfSets "surfsets" /// Numered x+, y+, z+, x-, y-, z-
-#define _IFT_TransportGradientNeumann_usePhi "usephi"
+#define _IFT_TransportGradientNeumann_useVoigt "useVoigt" /// For activating Voigt-Neumann b.c.
 
 namespace oofem {
 class Node;
@@ -101,15 +101,15 @@ protected:
     IntArray mFluxIds;
     FloatArray mGradient;
     FloatArray mCenterCoord;
-    double usePhi;
+    bool useVoigt;
 
     IntArray surfSets;
 
     /// Scaling factor (one array per edge with one scaling factor per GP)
-    std :: vector< std :: vector< FloatArray > > phi;
+    std :: vector< std :: vector< FloatArray > > eta;
 
     /// Help function computes phi by solving a diffusion problem on the RVE-surface.
-    void computePhi();
+    void computeEta();
 
     /// Help function that integrates the tangent contribution from a single element boundary.
     void integrateTangent(FloatMatrix &oTangent, Element *e, int iBndIndex, int surfSet, int pos);

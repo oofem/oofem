@@ -84,7 +84,7 @@ IRResultType TransportGradientNeumann :: initializeFrom(InputRecord *ir)
     this->mCenterCoord.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, mCenterCoord, _IFT_TransportGradientNeumann_centerCoords)
     
-    this->usePhi = ir->hasField(_IFT_TransportGradientNeumann_usePhi);
+    this->useVoigt = ir->hasField(_IFT_TransportGradientNeumann_useVoigt);
     
     return ActiveBoundaryCondition :: initializeFrom(ir);
 }
@@ -102,7 +102,7 @@ void TransportGradientNeumann :: postInitialize()
 {
     ActiveBoundaryCondition :: postInitialize();
     
-    if ( this->usePhi ) this->computePhi();
+    if ( this->useVoigt ) this->computeEta();
 }
 
 
@@ -347,10 +347,10 @@ void TransportGradientNeumann :: giveFluxLocationArray(IntArray &oCols, const Un
 }
 
 
-void TransportGradientNeumann :: computePhi()
+void TransportGradientNeumann :: computeEta()
 {
     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
-    phi.resize(this->surfSets.giveSize());
+    eta.resize(this->surfSets.giveSize());
     for ( int i = 0; i < this->surfSets.giveSize(); ++i ) {
         // Compute the coordinate indices based on what surface we're on.
         int i_r;
@@ -370,18 +370,18 @@ void TransportGradientNeumann :: computePhi()
         Set *setPointer = this->giveDomain()->giveSet(surfSets[i]);
         const IntArray &boundaries = setPointer->giveBoundaryList();
 
-        phi[i].resize(boundaries.giveSize() / 2);
+        eta[i].resize(boundaries.giveSize() / 2);
 
-        // Set up and solve: c * phi_c = f
+        // Set up and solve: c * eta_c = f
         // which represents the equations:
-        // int (phi - 1) dA = 0
-        // int (phi - 1) r dA = 0
-        // int (phi - 1) t dA = 0
+        // int (eta - 1) dA = 0
+        // int (eta - 1) r dA = 0
+        // int (eta - 1) t dA = 0
         //
-        // int phi_0 + phi_r * r + phi_t * t dA = A
-        // int (phi_0 + phi_r * r + phi_t * t) r dA = int r dA
-        // int (phi_0 + phi_r * r + phi_t * t) t dA = int t dA
-        FloatArray f(3), phi_c;
+        // int eta_0 + eta_r * r + eta_t * t dA = A
+        // int (eta_0 + eta_r * r + eta_t * t) r dA = int r dA
+        // int (eta_0 + eta_r * r + eta_t * t) t dA = int t dA
+        FloatArray f(3), eta_c;
         FloatMatrix c(3, 3);
         for ( int pos = 0; pos < boundaries.giveSize() / 2; ++pos ) {
             Element *e = this->giveDomain()->giveElement( boundaries[pos * 2] );
@@ -423,7 +423,7 @@ void TransportGradientNeumann :: computePhi()
                 c(2, 2) += dA * k * t * t;
             }
         }
-        c.solveForRhs(f, phi_c);
+        c.solveForRhs(f, eta_c);
 
         for ( int pos = 0; pos < boundaries.giveSize() / 2; ++pos ) {
             Element *e = this->giveDomain()->giveElement( boundaries[pos * 2] );
@@ -434,7 +434,7 @@ void TransportGradientNeumann :: computePhi()
             std :: unique_ptr< IntegrationRule > ir( interp->giveBoundaryIntegrationRule(order, boundary) );
             static_cast< TransportElement* >(e)->computeConstitutiveMatrixAt(d, Capacity, e->giveDefaultIntegrationRulePtr()->getIntegrationPoint(1), tStep);
 
-            phi[i][pos].resize(ir->giveNumberOfIntegrationPoints());
+            eta[i][pos].resize(ir->giveNumberOfIntegrationPoints());
             for ( auto &gp: *ir ) {
                 const FloatArray &lcoords = gp->giveNaturalCoordinates();
                 FEIElementGeometryWrapper cellgeo(e);
@@ -449,7 +449,7 @@ void TransportGradientNeumann :: computePhi()
                 tmp.beProductOf(d, normal);
                 double k = tmp.dotProduct(normal);
 
-                phi[i][pos].at(gp->giveNumber()) = (phi_c[0] + phi_c[1] * r + phi_c[2] * t) * k;
+                eta[i][pos].at(gp->giveNumber()) = (eta_c[0] + eta_c[1] * r + eta_c[2] * t) * k;
             }
         }
     }
@@ -471,11 +471,11 @@ void TransportGradientNeumann :: integrateTangent(FloatMatrix &oTangent, Element
     for ( auto &gp: *ir ) {
         const FloatArray &lcoords = gp->giveNaturalCoordinates();
         FEIElementGeometryWrapper cellgeo(e);
-        // If phi isn't set, assume that classical Neumann b.c. is used (phi = 1)
+        // If eta isn't set, assume that classical Neumann b.c. is used (eta = 1)
         double scale = 1.0;
-        if ( !phi.empty() ) {
-            //printf(" surfset %d / %d, pos %d, number %d\n", surfSet, pos, gp->giveNumber(), phi.size());
-            scale = phi[surfSet][pos].at(gp->giveNumber());
+        if ( !eta.empty() ) {
+            //printf(" surfset %d / %d, pos %d, number %d\n", surfSet, pos, gp->giveNumber(), eta.size());
+            scale = eta[surfSet][pos].at(gp->giveNumber());
         }
 
         double detJ = interp->boundaryEvalNormal(normal, boundary, lcoords, cellgeo);

@@ -50,7 +50,7 @@
 #define _IFT_TransportGradientDirichlet_centerCoords "centercoords"
 #define _IFT_TransportGradientDirichlet_surfSets "surfsets"
 #define _IFT_TransportGradientDirichlet_edgeSets "edgesets"
-#define _IFT_TransportGradientDirichlet_usePsi "usepsi"
+#define _IFT_TransportGradientDirichlet_useReuss "usereuss"
 //@}
 
 namespace oofem {
@@ -76,9 +76,9 @@ protected:
     FloatArray mGradient;
     FloatArray mCenterCoord;
 
-    bool usePsi;
+    bool useReuss;
     /// Stores one "psi" value for each node
-    std :: map< int, FloatArray > psis;
+    std :: map< int, FloatArray > xis;
     IntArray surfSets;
 
 public:
@@ -124,7 +124,7 @@ public:
     virtual void computeTangent(FloatMatrix &tangent, TimeStep *tStep);
     
     /// Computes the offset values for "improved" Dirichlet. See class description.
-    void computePsi();
+    void computeXi();
 
     virtual void scale(double s) { mGradient.times(s); }
 

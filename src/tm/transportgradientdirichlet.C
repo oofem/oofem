@@ -73,8 +73,8 @@ IRResultType TransportGradientDirichlet :: initializeFrom(InputRecord *ir)
     mCenterCoord.resize(3);
     IR_GIVE_OPTIONAL_FIELD(ir, mCenterCoord, _IFT_TransportGradientDirichlet_centerCoords);
 
-    this->usePsi = ir->hasField(_IFT_TransportGradientDirichlet_usePsi);
-    if ( this->usePsi ) {
+    this->useReuss = ir->hasField(_IFT_TransportGradientDirichlet_useReuss);
+    if ( this->useReuss ) {
         IR_GIVE_FIELD(ir, surfSets, _IFT_TransportGradientDirichlet_surfSets);
         //IR_GIVE_FIELD(ir, edgeSets, _IFT_TransportGradientDirichlet_edgeSets);
     }
@@ -89,8 +89,8 @@ void TransportGradientDirichlet :: giveInputRecord(DynamicInputRecord &input)
     input.setField(mCenterCoord, _IFT_TransportGradientDirichlet_centerCoords);
     input.setField(surfSets, _IFT_TransportGradientDirichlet_surfSets);
     //input.setField(edgeSets, _IFT_TransportGradientDirichlet_edgeSets);
-    if ( this->usePsi ) {
-        input.setField(_IFT_TransportGradientDirichlet_usePsi);
+    if ( this->useReuss ) {
+        input.setField(_IFT_TransportGradientDirichlet_useReuss);
     }
 
     return GeneralBoundaryCondition :: giveInputRecord(input);
@@ -101,7 +101,7 @@ void TransportGradientDirichlet :: postInitialize()
 {
     BoundaryCondition :: postInitialize();
     
-    if ( this->usePsi ) this->computePsi();
+    if ( this->useReuss ) this->computeXi();
 }
 
 
@@ -124,12 +124,12 @@ double TransportGradientDirichlet :: give(Dof *dof, ValueModeType mode, double t
         OOFEM_ERROR("Should not be called for value mode type then total, velocity, or acceleration.");
     }
 
-    // Reminder: u_i = g_i . (x_i - xc_i + psi_i)
+    // Reminder: u_i = g_i . (x_i - xc_i + xi_i)
     FloatArray dx;
     dx.beDifferenceOf(* coords, this->mCenterCoord);
-    // Add "psi" if it is defined. Classical Dirichlet b.c. is retained if this isn't defined (or set to zero).
-    if ( !psis.empty() ) {
-        dx.add(psis[dof->giveDofManager()->giveNumber()]);
+    // Add "xi" if it is defined. Classical Dirichlet b.c. is retained if this isn't defined (or set to zero).
+    if ( !xis.empty() ) {
+        dx.add(xis[dof->giveDofManager()->giveNumber()]);
     }
 
     return mGradient.dotProduct(dx) * factor;
@@ -141,7 +141,7 @@ double TransportGradientDirichlet :: domainSize()
     Domain *domain = this->giveDomain();
     int nsd = domain->giveNumberOfSpatialDimensions();
     double domain_size = 0.0;
-    if ( this->usePsi ) {
+    if ( this->useReuss ) {
         for ( auto &surf : this->surfSets ) {
             const IntArray &boundaries = domain->giveSet(surf)->giveBoundaryList();
 
@@ -167,9 +167,9 @@ double TransportGradientDirichlet :: domainSize()
 
 
 void TransportGradientDirichlet :: computeCoefficientMatrix(FloatMatrix &C)
-// v_prescribed = C.g = (x-xbar + psi).g;
-// C = [x-psi_x y-psi_y]
-// C = [x-psi_x y-psi_y z-psi_z]
+// v_prescribed = C.g = (x-xbar + xi).g;
+// C = [x-xi_x y-xi_y]
+// C = [x-xi_x y-xi_y z-xi_z]
 {
     Domain *domain = this->giveDomain();
 
@@ -183,13 +183,13 @@ void TransportGradientDirichlet :: computeCoefficientMatrix(FloatMatrix &C)
         Dof *d1 = n->giveDofWithID( this->dofs(0) );
         int k1 = d1->__givePrescribedEquationNumber();
         if ( k1 ) {
-            // Add "psi" if it is defined. Classical Dirichlet b.c. is retained if this isn't defined (or set to zero).
-            FloatArray psi(nsd);
-            if ( this->usePsi ) {
-                psi = psis[n->giveNumber()];
+            // Add "xi" if it is defined. Classical Dirichlet b.c. is retained if this isn't defined (or set to zero).
+            FloatArray xi(nsd);
+            if ( this->useReuss ) {
+                xi = xis[n->giveNumber()];
             }
             for ( int i = 1; i <= nsd; ++i ) {
-                C.at(k1, i) = coords->at(i) - mCenterCoord.at(i) + psi.at(i);
+                C.at(k1, i) = coords->at(i) - mCenterCoord.at(i) + xi.at(i);
             }
             //printf("C.at(%d, :) = %e, %e, %e\n", k1, C.at(k1, 1), C.at(k1, 2), C.at(k1, 3));
         }
@@ -266,20 +266,20 @@ void TransportGradientDirichlet :: computeTangent(FloatMatrix &tangent, TimeStep
     tangent.times( 1. / this->domainSize() );
 }
 
-void TransportGradientDirichlet :: computePsi()
+void TransportGradientDirichlet :: computeXi()
 {
     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
 
     std :: unique_ptr< SparseLinearSystemNM > solver( classFactory.createSparseLinSolver(ST_Petsc, this->giveDomain(), this->giveDomain()->giveEngngModel()) );
 
-    // One "psi" per node on the boundary. Initially all to zero.
-    this->psis.clear();
+    // One "xi" per node on the boundary. Initially all to zero.
+    this->xis.clear();
     for ( int node : domain->giveSet(this->giveSetNumber())->giveNodeList() ) {
-        this->psis.emplace(node, FloatArray(3));
+        this->xis.emplace(node, FloatArray(3));
     }
     for ( auto &surf : this->surfSets ) {
         for ( int node : domain->giveSet(surf)->giveNodeList() ) {
-            this->psis.emplace(node, FloatArray(3));
+            this->xis.emplace(node, FloatArray(3));
         }
     }
 
@@ -343,7 +343,7 @@ void TransportGradientDirichlet :: computePsi()
 #if 1
     //IntArray edgeOrder{2, 1, 2, 1, 3, 3, 3, 3, 2, 1, 2, 1};
     // First we must determine the values along the edges, which become boundary conditions for the surfaces
-    OOFEM_LOG_INFO("Computing psi on edges\n");
+    OOFEM_LOG_INFO("Computing xi on edges\n");
     for ( auto &setPointer : edgeSets ) {
         const IntArray &edges = setPointer.giveEdgeList();
 
@@ -436,13 +436,13 @@ void TransportGradientDirichlet :: computePsi()
         for ( int n : setPointer.giveNodeList() ) {
             int eq = eqs[n];
             if ( eq > 0 ) {
-                this->psis[n] = {x.at(eq, 1), x.at(eq, 2), x.at(eq, 3)};
+                this->xis[n] = {x.at(eq, 1), x.at(eq, 2), x.at(eq, 3)};
             }
         }
     }
 #endif
 
-    OOFEM_LOG_INFO("Computing psi on surface sets\n");
+    OOFEM_LOG_INFO("Computing xi on surface sets\n");
 #if 1
     // Surfaces use the edge solutions are boundary conditions:
     for ( auto &setNum : surfSets ) {
@@ -521,7 +521,7 @@ void TransportGradientDirichlet :: computePsi()
             for ( int i = 1; i <= bNodes.giveSize(); ++i ) {
                 int enode = bNodes.at(i);
                 Node *n = e->giveNode(enode);
-                FloatArray x = *n->giveCoordinates() + this->psis[n->giveNumber()];
+                FloatArray x = *n->giveCoordinates() + this->xis[n->giveNumber()];
                 cvec.at(i, 1) = x.at(1);
                 cvec.at(i, 2) = x.at(2);
                 cvec.at(i, 3) = x.at(3);
@@ -537,14 +537,14 @@ void TransportGradientDirichlet :: computePsi()
         K->assembleEnd();
 
         // Solve with constraints:
-        // [K   Q] [psi    ] = [f]
+        // [K   Q] [xi    ] = [f]
         // [Q^T 0] [lambda ]   [0]
         // ==>
         // [Q^T . K^(-1) . Q] . lamda = Q^T . K^(-1) . f
-        // psi = K^(-1) . f - K^(-1) . Q . lambda
+        // xi = K^(-1) . f - K^(-1) . Q . lambda
         // alternatively:
         // [Q^T . Qx] . lamda = Q^T . fx
-        // psi = fx - Qx . lambda
+        // xi = fx - Qx . lambda
 
         double qTKiq;
         FloatMatrix x;
@@ -560,7 +560,7 @@ void TransportGradientDirichlet :: computePsi()
         for ( int n : setPointer->giveNodeList() ) {
             int eq = eqs[n];
             if ( eq > 0 ) {
-                this->psis[n] = {x.at(eq, 1), x.at(eq, 2), x.at(eq, 3)};
+                this->xis[n] = {x.at(eq, 1), x.at(eq, 2), x.at(eq, 3)};
             }
         }
 
