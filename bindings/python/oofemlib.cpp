@@ -566,6 +566,7 @@ void pyclass_EngngModel()
         .def("giveMetaStep", &EngngModel::giveMetaStep, &PyEngngModel::default_giveMetaStep, return_internal_reference<>())
         .def("initMetaStepAttributes", &EngngModel::initMetaStepAttributes)
         .def("preInitializeNextStep", &EngngModel::preInitializeNextStep)
+        .def("giveClassName", &EngngModel::giveClassName)
         ;
 }
 
