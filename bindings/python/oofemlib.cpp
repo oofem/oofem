@@ -524,6 +524,7 @@ public:
     void default_terminate(TimeStep* t) {return this->EngngModel::terminate(t);}
     void default_updateYourself(TimeStep* t) {return this->EngngModel::updateYourself(t);}
     TimeStep* default_giveNextStep() {return this->EngngModel::giveNextStep();}
+    MetaStep* default_giveMetaStep(int i) {return this->EngngModel::giveMetaStep(i);}
 };
 
 void pyclass_EngngModel()
@@ -554,13 +555,17 @@ void pyclass_EngngModel()
         .def("giveNumberOfSteps", &EngngModel::giveNumberOfSteps)
         .add_property("numberOfSteps",&PyEngngModel::giveNumberOfSteps)
         .def("giveCurrentStep", &EngngModel::giveCurrentStep,(boost::python::arg("force")=false), return_internal_reference<>())
+        .def("givePreviousStep", &EngngModel::givePreviousStep,(boost::python::arg("force")=false), return_internal_reference<>())
         // .add_property("currentStep",make_function(&PyEngngModel::giveCurrentStep, return_internal_reference<>()))
         .def("giveNextStep",&EngngModel::giveNextStep, &PyEngngModel::default_giveNextStep, return_internal_reference<>())
         .def("giveExportModuleManager",&EngngModel::giveExportModuleManager, return_internal_reference<>())
         .add_property("exportModuleManager",make_function(&PyEngngModel::giveExportModuleManager, return_internal_reference<>()))
         .def("giveContext", &PyEngngModel::giveContext, return_internal_reference<>())
-          .def("giveField",&EngngModel::giveField)
+        .def("giveField",&EngngModel::giveField)
         .add_property("context", make_function(&PyEngngModel::giveContext, return_internal_reference<>()))
+        .def("giveMetaStep", &EngngModel::giveMetaStep, &PyEngngModel::default_giveMetaStep, return_internal_reference<>())
+        .def("initMetaStepAttributes", &EngngModel::initMetaStepAttributes)
+        .def("preInitializeNextStep", &EngngModel::preInitializeNextStep)
         ;
 }
 
@@ -1026,6 +1031,20 @@ void pyclass_TimeStep()
         .def("giveTimeIncrement", &TimeStep::giveTimeIncrement)
         .def("setTimeIncrement", &TimeStep::setTimeIncrement)
         .add_property("timeIncrement",&TimeStep::giveTimeIncrement, &TimeStep::setTimeIncrement)
+        .def("giveNumber", &TimeStep::giveNumber)
+        .def("setNumber", &TimeStep::setNumber)
+        .add_property("number",&TimeStep::giveNumber, &TimeStep::setNumber)
+        ;
+}
+
+/*****************************************************
+* MetaStep
+*****************************************************/
+void pyclass_MetaStep()
+{
+    class_<MetaStep, boost::noncopyable>("MetaStep",no_init)
+        .def("giveNumber", &MetaStep::giveNumber)
+        .add_property("number", &MetaStep::giveNumber)
         ;
 }
 
@@ -1770,6 +1789,7 @@ BOOST_PYTHON_MODULE (liboofem)
     pyclass_MaterialStatus();
     pyclass_StructuralMaterialStatus();
     pyclass_TimeStep();
+    pyclass_MetaStep();
     pyclass_DataStream();
     pyclass_Field();
     pyclass_FieldManager();
