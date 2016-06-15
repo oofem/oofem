@@ -56,11 +56,16 @@ FEI3dWedgeQuad Shell7Base :: interpolationForExport;
 
 
 Shell7Base :: Shell7Base(int n, Domain *aDomain) : NLStructuralElement(n, aDomain),  LayeredCrossSectionInterface(), 
-    VTKXMLExportModuleElementInterface(), ZZNodalRecoveryModelInterface(this), FailureModuleElementInterface(){}
+    VTKXMLExportModuleElementInterface(), ZZNodalRecoveryModelInterface(this), FailureModuleElementInterface()
+    {
+        this->recoverStress = 0;
+    }
 
 IRResultType Shell7Base :: initializeFrom(InputRecord *ir)
 {
-    return NLStructuralElement :: initializeFrom(ir);
+    IRResultType result = NLStructuralElement :: initializeFrom(ir);
+    IR_GIVE_OPTIONAL_FIELD(ir, this->recoverStress, _IFT_Shell7base_recoverStress);
+    return result;
 
 }
 
@@ -1954,7 +1959,8 @@ Shell7Base :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExp
         InternalStateType type = ( InternalStateType ) internalVarsToExport.at(fieldNum);
         nodeNum = 1;
         
-        if ( 0 ) {
+        // if ( recoverStress ) {
+        if ( 1 ) {
         // Recover shear stresses
         this->recoverShearStress(tStep);
         }
@@ -2462,6 +2468,9 @@ Shell7Base :: giveRecoveredTransverseInterfaceStress(std::vector<FloatMatrix> &t
     
     for ( int layer = 1 ; layer < numberOfLayers ; layer++ ) {
         transverseStress[layer-1] = dSmatupd[layer-1];
+//         if ( this->giveGlobalNumber() == 61 ) {
+//             transverseStress[layer-1].printYourself();
+//         }
     }
 }
 

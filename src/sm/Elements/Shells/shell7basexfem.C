@@ -2303,6 +2303,7 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
     std::vector<FloatArray> values;
     for ( int fieldNum = 1; fieldNum <= primaryVarsToExport.giveSize(); fieldNum++ ) {
         
+        //if ( recoverStress ) {
         if ( 0 ) {
         // Recover shear stresses
         this->recoverShearStress(tStep);
@@ -3036,6 +3037,7 @@ Shell7BaseXFEM :: recoverShearStress(TimeStep *tStep)
             interfaceEI.at(delaminationInterfaceNum) = iEI;
         }
     }
+    delaminationInterface.sort();
     
     if ( hasDelamination ) {
         
@@ -3374,13 +3376,13 @@ Shell7BaseXFEM :: giveFailedInterfaceNumber(IntArray &failedInterfaces, FloatArr
                 this->evalCovarNormalAt(nCov, lCoords, genEpsC, tStep);  
                 Q.beLocalCoordSys(nCov);
                 
-                //if (this->giveGlobalNumber() == 9) {interfaceStresses.printYourself("interfaceStresses global"); lCoords.printYourself("lCoords"); }
+                //if (this->giveGlobalNumber() == 61) {interfaceStresses.printYourself("interfaceStresses global"); lCoords.printYourself("lCoords"); }
                     
                 interfaceStresses.rotatedWith(Q,'n');                                               // local coords
                 double S1(interfaceStresses.at(1));    //Shear x
                 double S2(interfaceStresses.at(2));    //Shear y
                 double N(interfaceStresses.at(3));    //normal
-                //if (this->giveGlobalNumber() == 9) {Q.printYourself("Q"); interfaceStresses.printYourself("interfaceStresses local");}
+                //if (this->giveGlobalNumber() == 61) {Q.printYourself("Q"); interfaceStresses.printYourself("interfaceStresses local");}
                                 
                 // polynom law
                 double NM = 0.5*(N + fabs(N)); 
@@ -3493,6 +3495,7 @@ Shell7BaseXFEM :: giveRecoveredTransverseInterfaceStress(std::vector<FloatMatrix
             interfaceEI.at(delaminationInterfaceNum) = iEI;
         }
     }
+    delaminationInterface.sort();
     
     if ( hasDelamination ) {
         transverseStress.resize(numberOfLayers-1);

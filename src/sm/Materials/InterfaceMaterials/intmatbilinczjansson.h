@@ -49,6 +49,7 @@
 #define _IFT_IntMatBilinearCZJansson_mu "mu"
 #define _IFT_IntMatBilinearCZJansson_gamma "gamma"
 #define _IFT_IntMatBilinearCZJansson_sigf "sigf"
+#define _IFT_IntMatBilinearCZJansson_semiexplicit "semiexplicit"
 //@}
 
 namespace oofem {
@@ -170,6 +171,8 @@ protected:
 
     double mu;    // loading function parameter
     double gamma; // loading function parameter
+    
+    bool mSemiExplicit; // If semi-explicit time integration should be used
 
 
     virtual int checkConsistency();

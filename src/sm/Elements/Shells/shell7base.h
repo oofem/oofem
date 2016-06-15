@@ -48,6 +48,11 @@
 #include <vector>
 #include "EngineeringModels/structengngmodel.h"
 
+///@name Input fields for shell7base
+//@{
+#define _IFT_Shell7base_recoverStress "recoverstress"
+//@}
+
 namespace oofem {
 class BoundaryLoad;
 
@@ -92,6 +97,8 @@ public:
     LayeredCrossSection *giveLayeredCS() {return this->layeredCS; }
 
 protected:
+    int recoverStress;
+    
     virtual Interface *giveInterface(InterfaceType it);
     LayeredCrossSection *layeredCS;
 

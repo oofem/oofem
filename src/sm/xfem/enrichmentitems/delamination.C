@@ -250,12 +250,16 @@ Delamination :: propagateFronts(bool &oFrontsHavePropagated)
         delamNodes.findCommonValuesSorted(tipProp.mPropagationDofManNumbers, propNodes);
         //propNodes.printYourself("propNodes");
         
-        printf("\n Enrichment %i - The following nodes will be propagated to:",this->giveNumber());
+        bool printed = false;
         for ( int inode : propNodes ) {
             //std::list< int > :: iterator p;
             std :: vector< int > :: iterator p;
             p = std :: find( this->dofManList.begin(), this->dofManList.end(), inode );
             if ( p == this->dofManList.end() ) {          // if new node
+                if ( !printed ) {
+                    printf("\n Enrichment %i - The following nodes will be propagated to:",this->giveNumber());
+                    printed = true;
+                }
                 printf(" %i", inode );
                 this->dofManList.push_back( inode );
             }

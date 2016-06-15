@@ -107,7 +107,6 @@ bool PLCZdamageRadius :: propagateInterface(Domain &iDomain, EnrichmentFront &iE
         for (int CSnum : dei->giveDelamCrossSectionNum()) {
             CrossSection *CS = iDomain.giveCrossSection(CSnum);
             if (this->mPropCS.contains(CS->giveNumber()) || this->mPropCS.containsOnlyZeroes() ) {
-                printf("blajja\n");
                 CSelements.followedBy(iDomain.giveSet(CS->giveSetNumber())->giveElementList()); 
             }
         }
@@ -145,7 +144,7 @@ bool PLCZdamageRadius :: propagateInterface(Domain &iDomain, EnrichmentFront &iE
                             break;
                         }
                     }
-                    printf(" Max damage in element %i: %f \n",shellElt->giveNumber(),maxDamage);
+                    //printf(" Max damage in element %i: %f \n",shellElt->giveNumber(),maxDamage);
                 } else {
                     // No interface material. Treat interface as fully damaged.
                     CZdamageThresholdMet = true;
@@ -159,9 +158,9 @@ bool PLCZdamageRadius :: propagateInterface(Domain &iDomain, EnrichmentFront &iE
                             propagationDF.insertSortedOnce(iDF);
                         //}
                     }
-                    if (CZdamage < 1.1) {
-                        printf(" Damage threshold (%f) met in element %i \n",CZdamage,shellElt->giveNumber());
-                    }
+//                     if (CZdamage < 1.1) {
+//                         printf(" Damage threshold (%f) met in element %i \n",CZdamage,shellElt->giveNumber());
+//                     }
                 }
                 
             } else {

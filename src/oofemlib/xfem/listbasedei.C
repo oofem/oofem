@@ -128,10 +128,14 @@ void ListBasedEI :: updateNodeEnrMarker(XfemManager &ixFemMan)
     // Update the dofManList and the enrichment boundaries.
     // For now let all nodes in dofManList be the boundary
     
-    printf("\n Enrichment %i - The following nodes are enriched:",this->giveNumber());
     // Loop over nodes in the DofManList and mark nodes as enriched.
+    bool printed = false;
     for ( auto &dman : dofManList ) {
         mNodeEnrMarkerMap [ dman ] = NodeEnr_BULK;
+        if ( !printed ) {
+            printf("\n Enrichment %i - The following nodes are enriched:",this->giveNumber());
+            printed = true;
+        }
         printf(" %i", dman ); 
         //TODO change this so only the boundaries are added to tipInfo, now all nodes are added   
         tipInfo.mTipDofManNumbers.insertSorted(dman);
