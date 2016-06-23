@@ -75,13 +75,14 @@ InverseIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, Float
     }
 #else
     {
-        FloatArray d(nn);
+        FloatArray ad(nn), bd(nn);
         for ( int i = 1; i <= nn; i++ ) {
-            d.at(i) = fabs(b.at(i, i) / a.at(i, i));
+            ad.at(i) = fabs(a.at(i, i));
+            bd.at(i) = fabs(b.at(i, i));
         }
         IntArray order;
-        order.enumerate(d.giveSize());
-        std :: sort(order.begin(), order.end(), [&d](int a, int b) { return d.at(a) > d.at(b); });
+        order.enumerate(nn);
+        std :: sort(order.begin(), order.end(), [&ad, &bd](int a, int b) { return bd.at(a) * ad.at(b) > bd.at(b) * ad.at(a); });
         for ( int i = 0; i < nc; i++ ) {
             x[i].at(order[i]) = 1.0;
             b.times(x[i], z[i]);
