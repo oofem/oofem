@@ -1,5 +1,6 @@
 nonstat_nonlin_01.out.tm
 Quadrilateral element subjected to heat flux (Newton b.c)
+#TransientTransport nsteps 3 deltat 3600 alpha 0.5 exportfields 1 5 nmodules 1
 NonStationaryProblem nsteps 3 deltat 3600 alpha 0.5 lumpedcapa exportfields 1 5 nmodules 1
 #TransientTransport nsteps 3 deltat 3600 alpha 0.5 lumped exportfields 1 5 nmodules 1
 errorcheck

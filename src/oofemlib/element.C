@@ -778,8 +778,8 @@ bool
 Element :: isCast(TimeStep *tStep)
 {
 
-	 // this approach used to work when material was assigned to element
-	  //    if ( tStep->giveIntrinsicTime() >= this->giveMaterial()->giveCastingTime() )  
+         // this approach used to work when material was assigned to element
+          //    if ( tStep->giveIntrinsicTime() >= this->giveMaterial()->giveCastingTime() )  
 
   
   if ( tStep ) {
@@ -790,25 +790,25 @@ Element :: isCast(TimeStep *tStep)
     if ( integrationRulesArray.size() > 1 ) {
       
       for ( int i = 0; i < (int)integrationRulesArray.size(); i++ ) {
-	IntegrationRule *iRule;
-	iRule = integrationRulesArray [ i ].get();
-	
-	for ( GaussPoint *gp: *iRule ) {
-	  castingTime =  this->giveCrossSection()->giveMaterial(gp)->giveCastingTime();
+        IntegrationRule *iRule;
+        iRule = integrationRulesArray [ i ].get();
+        
+        for ( GaussPoint *gp: *iRule ) {
+          castingTime =  this->giveCrossSection()->giveMaterial(gp)->giveCastingTime();
 
-	  if (tNow < castingTime ) {
-	    return false;
-	  }	  
-	}
+          if (tNow < castingTime ) {
+            return false;
+          }          
+        }
       }
     } else {
       
       for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
-	castingTime =  this->giveCrossSection()->giveMaterial(gp)->giveCastingTime();
-	
-	 if (tNow < castingTime ) {
-	   return false;
-	 }
+        castingTime =  this->giveCrossSection()->giveMaterial(gp)->giveCastingTime();
+        
+         if (tNow < castingTime ) {
+           return false;
+         }
       }
     }
     

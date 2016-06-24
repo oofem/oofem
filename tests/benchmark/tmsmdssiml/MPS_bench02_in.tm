@@ -1,7 +1,8 @@
-MPS_bench02_in.out.tm
+MPS_bench02_out.tm
 OOFEM input file for thermal analysis, automatically generated, test for ConTemp, a brick with size x=3 y=0.5 z=0.5
-NlTransientTransportProblem nsteps 10 deltat 7200 rtol 1.e-4 alpha 0.6  nsmax 200 lstype 1 smtype 4 lstol 1e-5 lsiter 200 lsprecond 1 renumber 1 exportfields 1 5 nmodules 2
-vtkxml tstep_all domain_all primvars 1 6 vars 3 39 56 95 stype 2 timescale 2.77777e-4
+#NlTransientTransportProblem nsteps 10 deltat 7200 rtol 1.e-4 alpha 0.6  nsmax 200 lstype 1 smtype 4 lstol 1e-5 lsiter 200 lsprecond 1 renumber 1 exportfields 1 5 nmodules 1
+TransientTransport nsteps 10 deltat 7200 rtolv 1.e-4 alpha 0.6 lstype 1 lstol 1e-5 lsiter 200 lsprecond 1 renumber 1 exportfields 1 5 nmodules 1
+#vtkxml tstep_all domain_all primvars 1 6 vars 3 39 56 95 stype 2 timescale 2.77777e-4
 errorcheck
 domain HeatTransfer
 OutputManager tstep_all dofman_output { 21 }
@@ -129,9 +130,9 @@ UsrDefLTF 5 f(t) 0+(0)*sin(2*3.14159*(t+28800-28800)/86400.)+h(-1.e+30*sin(2*3.1
 UsrDefLTF 6 f(t) 0+(0)*sin(2*3.14159*(t+28800-28800)/86400.)+h(-1.e+30*sin(2*3.14159*(t+28800-28800)/86400.))*(0)*sin(2*3.14159*(t+28800-28800)/86400.)
 UsrDefLTF 7 f(t) 20+(0)*sin(2*3.14159*(t+28800-28800)/86400.)+h(-1.e+30*sin(2*3.14159*(t+28800-28800)/86400.))*(0)*sin(2*3.14159*(t+28800-28800)/86400.)
 #%BEGIN_CHECK% tolerance 1e-5
-#NODE tStep 2  number 21 dof 10 unknown d value 2.01041384e+01
-#NODE tStep 5  number 21 dof 10 unknown d value 2.16197923e+01
-#NODE tStep 10  number 21 dof 10 unknown d value 3.25685833e+01
-#NODE tStep 15  number 21 dof 10 unknown d value 3.95458813e+01
-#NODE tStep 20  number 21 dof 10 unknown d value 3.99947517e+01
+#NODE tStep 2  number 21 dof 10 unknown d value 2.03303050e+01
+#NODE tStep 4  number 21 dof 10 unknown d value 2.16715728e+01
+#NODE tStep 9  number 21 dof 10 unknown d value 3.28918179e+01
+#NODE tStep 14  number 21 dof 10 unknown d value 3.92652294e+01
+#NODE tStep 19  number 21 dof 10 unknown d value 3.96015242e+01
 #%END_CHECK%

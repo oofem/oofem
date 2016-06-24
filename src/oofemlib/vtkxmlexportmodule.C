@@ -546,7 +546,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
             if ( tstep_substeps_out_flag ) {
                 subStep << "." << tStep->giveSubStepNumber();
             }
-            pvdEntry << "<DataSet timestep=\"" << tStep->giveIntrinsicTime() * this->timeScale << subStep.str() << "\" group=\"\" part=\"" << i << "\" file=\"" << this->emodel->giveOutputBaseFileName() << fext << ".vtu\"/>";
+            pvdEntry << "<DataSet timestep=\"" << tStep->giveTargetTime() * this->timeScale << subStep.str() << "\" group=\"\" part=\"" << i << "\" file=\"" << this->emodel->giveOutputBaseFileName() << fext << ".vtu\"/>";
             this->pvdBuffer.push_back( pvdEntry.str() );
         }
 
@@ -557,7 +557,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         if ( tstep_substeps_out_flag ) {
             subStep << "." << tStep->giveSubStepNumber();
         }
-        pvdEntry << "<DataSet timestep=\"" << tStep->giveIntrinsicTime() * this->timeScale << subStep.str() << "\" group=\"\" part=\"\" file=\"" << fname << "\"/>";
+        pvdEntry << "<DataSet timestep=\"" << tStep->giveTargetTime() * this->timeScale << subStep.str() << "\" group=\"\" part=\"\" file=\"" << fname << "\"/>";
         this->pvdBuffer.push_back( pvdEntry.str() );
         this->writeVTKCollection();
     }
