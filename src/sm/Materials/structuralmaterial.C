@@ -2149,7 +2149,13 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSt
     } else if ( type == IST_FirstPKStressTensor ) {
         answer = status->givePVector();
         return 1;
-    } else {
+    } else if ( type == IST_EigenStrainTensor ) {
+        FloatArray eigenstrain;
+        StructuralElement *selem = dynamic_cast< StructuralElement * >( gp->giveElement() );
+        selem->computeResultingIPEigenstrainAt(eigenstrain, tStep, gp, VM_Total );
+        StructuralMaterial :: giveFullSymVectorForm( answer, eigenstrain, gp->giveMaterialMode() );
+        return 1;
+    }else {
         return Material :: giveIPValue(answer, gp, type, tStep);
     }
 }
