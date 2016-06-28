@@ -76,6 +76,8 @@ IRResultType StructuralMaterialEvaluator :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, this->vars, _IFT_StructuralMaterialEvaluator_outputVariables);
 
+    this->suppressOutput = true;
+
     // Compute the strain control (everything not controlled by stress)
     for ( int i = 1; i <= 6; ++i ) {
         if ( !sControl.contains(i) ) {
