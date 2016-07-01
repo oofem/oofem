@@ -56,9 +56,9 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_PrincipalStrainTempTensor, 6) \
     ENUM_ITEM_WITH_VALUE(IST_BeamForceMomentumTensor, 7) \
     ENUM_ITEM_WITH_VALUE(IST_BeamStrainCurvatureTensor, 8) \
-    ENUM_ITEM_WITH_VALUE(IST_ShellMomentumTensor, 9)  \
+    ENUM_ITEM_WITH_VALUE(IST_ShellMomentTensor, 9)  \
     ENUM_ITEM_WITH_VALUE(IST_ShellForceTensor, 10) \
-    ENUM_ITEM_WITH_VALUE(IST_ShellCurvatureTensor, 11) \
+    ENUM_ITEM_WITH_VALUE(IST_CurvatureTensor, 11) \
     ENUM_ITEM_WITH_VALUE(IST_DisplacementVector, 12) \
     ENUM_ITEM_WITH_VALUE(IST_DamageTensor, 13) \
     ENUM_ITEM_WITH_VALUE(IST_DamageInvTensor, 14) \
@@ -67,7 +67,7 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_CrackState, 17) \
     ENUM_ITEM_WITH_VALUE(IST_StressTensorTemp, 18) \
     ENUM_ITEM_WITH_VALUE(IST_StrainTensorTemp, 19) \
-    ENUM_ITEM_WITH_VALUE(IST_ForceTensorTemp, 20) \
+    ENUM_ITEM_WITH_VALUE(IST_ShellForceTensorTemp, 20) \
     ENUM_ITEM_WITH_VALUE(IST_MomentumTensorTemp, 21) \
     ENUM_ITEM_WITH_VALUE(IST_CurvatureTensorTemp, 22) \
     ENUM_ITEM_WITH_VALUE(IST_DisplacementVectorTemp, 23) \

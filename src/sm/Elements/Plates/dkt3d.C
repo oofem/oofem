@@ -235,8 +235,8 @@ DKTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
 
     answer.resize(6);
 
-    if (  type == IST_ShellCurvatureTensor || type == IST_ShellStrainTensor ) {
-        if ( type == IST_ShellCurvatureTensor ) {
+    if (  type == IST_CurvatureTensor || type == IST_ShellStrainTensor ) {
+        if ( type == IST_CurvatureTensor ) {
             cht = GlobalCurvatureTensor;
         } else {
             cht = GlobalStrainTensor;
@@ -252,8 +252,8 @@ DKTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
         answer.at(6) = 2*globTensor.at(2, 3); //yz
 
         return 1;
-    } else if ( type == IST_ShellMomentumTensor || type == IST_ShellForceTensor ) {
-        if ( type == IST_ShellMomentumTensor ) {
+    } else if ( type == IST_ShellMomentTensor || type == IST_ShellForceTensor ) {
+        if ( type == IST_ShellMomentTensor ) {
             cht = GlobalMomentumTensor;
         } else {
             cht = GlobalForceTensor;
@@ -384,7 +384,7 @@ DKTPlate3d :: printOutputAt(FILE *file, TimeStep *tStep)
             // eps_x, eps_y, eps_z, eps_yz, eps_xz, eps_xy (global)
             for ( auto &val : v ) fprintf(file, " %.4e", val);
 
-            this->giveIPValue(v, gp, IST_ShellCurvatureTensor, tStep);
+            this->giveIPValue(v, gp, IST_CurvatureTensor, tStep);
             fprintf(file, "\n              curvatures ");
             for ( auto &val : v ) fprintf(file, " %.4e", val);
 
@@ -393,7 +393,7 @@ DKTPlate3d :: printOutputAt(FILE *file, TimeStep *tStep)
             fprintf(file, "\n              stresses   ");
             for ( auto &val : v ) fprintf(file, " %.4e", val);
 
-            this->giveIPValue(v, gp, IST_ShellMomentumTensor, tStep);
+            this->giveIPValue(v, gp, IST_ShellMomentTensor, tStep);
             fprintf(file, "\n              moments    ");
             for ( auto &val : v ) fprintf(file, " %.4e", val);
 

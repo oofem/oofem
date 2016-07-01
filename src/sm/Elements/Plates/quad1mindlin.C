@@ -266,8 +266,8 @@ Quad1Mindlin :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateTyp
         answer.at(5) = help.at(4); // vxz
         answer.at(6) = 0.0; // vxy
         return 1;
-    } else if ( type == IST_ShellMomentumTensor || type == IST_ShellCurvatureTensor ) {
-        if ( type == IST_ShellMomentumTensor ) {
+    } else if ( type == IST_ShellMomentTensor || type == IST_CurvatureTensor ) {
+        if ( type == IST_ShellMomentTensor ) {
             help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         } else {
             help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();

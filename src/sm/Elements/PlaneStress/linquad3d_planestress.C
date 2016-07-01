@@ -273,12 +273,11 @@ LinQuad3DPlaneStress :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
         answer.at(6) = c * globTensor.at(2, 3); //yz
 
         return 1;
-    } else if ( type == IST_ShellMomentumTensor || type == IST_ShellCurvatureTensor ) {
+    } else if ( type == IST_ShellMomentTensor || type == IST_CurvatureTensor ) {
         answer.clear();
         return 1;
     } else {
-        answer.clear();
-        return 0;
+        return PlaneStress2d :: giveIPValue(answer, gp, type, tStep);
     }
 }
 
@@ -301,7 +300,7 @@ LinQuad3DPlaneStress :: printOutputAt(FILE *file, TimeStep *tStep)
             for ( auto &val : v ) fprintf(file, " %.4e", val);
 
             /*
-            this->giveIPValue(v, gp, IST_ShellCurvatureTensor, tStep);
+            this->giveIPValue(v, gp, IST_CurvatureTensor, tStep);
             fprintf(file, "\n              curvatures ");
             for ( auto &val : v ) fprintf(file, " %.4e", val);
             */
@@ -310,7 +309,7 @@ LinQuad3DPlaneStress :: printOutputAt(FILE *file, TimeStep *tStep)
             fprintf(file, "\n              forces     ");
             for ( auto &val : v ) fprintf(file, " %.4e", val);
             /*
-            this->giveIPValue(v, gp, IST_ShellMomentumTensor, tStep);
+            this->giveIPValue(v, gp, IST_ShellMomentTensor, tStep);
             fprintf(file, "\n              moments    ");
             for ( auto &val : v ) fprintf(file, " %.4e", val);
             */

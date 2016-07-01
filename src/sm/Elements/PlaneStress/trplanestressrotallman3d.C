@@ -219,8 +219,6 @@ TrPlanestressRotAllman3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, Inte
     FloatMatrix globTensor;
     CharTensor cht;
 
-    answer.resize(6);
-
     if ( type == IST_ShellForceTensor || type == IST_ShellStrainTensor ) {
         double c = 1.0;
         if ( type == IST_ShellForceTensor ) {
@@ -232,6 +230,7 @@ TrPlanestressRotAllman3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, Inte
 
         this->giveCharacteristicTensor(globTensor, cht, gp, tStep);
 
+        answer.resize(6);
         answer.at(1) = globTensor.at(1, 1); //xx
         answer.at(2) = globTensor.at(2, 2); //yy
         answer.at(3) = globTensor.at(3, 3); //zz
@@ -241,12 +240,11 @@ TrPlanestressRotAllman3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, Inte
         // mutiply stresses by thickness to get forces
 
         return 1;
-    } else if ( ( type == IST_ShellMomentumTensor ) || ( type == IST_ShellCurvatureTensor ) ) {
+    } else if ( type == IST_ShellMomentTensor || type == IST_CurvatureTensor ) {
         answer.clear();
         return 1;
     } else {
-        answer.clear();
-        return 0;
+        return TrPlanestressRotAllman :: giveIPValue(answer, gp, type, tStep);
     }
 }
 
@@ -347,7 +345,7 @@ TrPlanestressRotAllman3d :: printOutputAt(FILE *file, TimeStep *tStep)
                 fprintf(file, " %.4e", val);
             }
 
-            this->giveIPValue(v, gp, IST_ShellCurvatureTensor, tStep);
+            this->giveIPValue(v, gp, IST_CurvatureTensor, tStep);
             fprintf(file, "\n              curvatures ");
             for ( auto &val : v ) {
                 fprintf(file, " %.4e", val);
@@ -360,7 +358,7 @@ TrPlanestressRotAllman3d :: printOutputAt(FILE *file, TimeStep *tStep)
                 fprintf(file, " %.4e", val);
             }
 
-            this->giveIPValue(v, gp, IST_ShellMomentumTensor, tStep);
+            this->giveIPValue(v, gp, IST_ShellMomentTensor, tStep);
             fprintf(file, "\n              moments    ");
             for ( auto &val : v ) {
                 fprintf(file, " %.4e", val);

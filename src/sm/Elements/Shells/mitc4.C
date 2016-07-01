@@ -32,15 +32,14 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Elements/Shells/mitc4.h"
-#include "../sm/Materials/structuralms.h"
-#include "../sm/CrossSections/structuralcrosssection.h"
+#include "mitc4.h"
+#include "Materials/structuralms.h"
+#include "CrossSections/structuralcrosssection.h"
+#include "CrossSections/simplecrosssection.h"
 #include "fei2dquadlin.h"
 #include "node.h"
 #include "material.h"
-#include "crosssection.h"
 #include "gausspoint.h"
-#include "../sm/CrossSections/variablecrosssection.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
@@ -182,7 +181,6 @@ MITC4Shell ::  giveDirectorVectors(FloatArray &V1, FloatArray &V2, FloatArray &V
 }
 
 
-
 void
 MITC4Shell ::  giveLocalDirectorVectors(FloatArray &V1, FloatArray &V2, FloatArray &V3, FloatArray &V4)
 {
@@ -195,6 +193,7 @@ MITC4Shell ::  giveLocalDirectorVectors(FloatArray &V1, FloatArray &V2, FloatArr
     V3.beProductOf(GtoLRotationMatrix, V3g);
     V4.beProductOf(GtoLRotationMatrix, V4g);
 }
+
 
 void
 MITC4Shell :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
@@ -304,6 +303,7 @@ MITC4Shell :: giveNodeCoordinates(double &x1, double &x2, double &x3, double &x4
     z4 = nc4.at(3);
 }
 
+
 void
 MITC4Shell :: giveLocalCoordinates(FloatArray &answer, FloatArray &global)
 // Returns global coordinates given in global vector
@@ -311,18 +311,13 @@ MITC4Shell :: giveLocalCoordinates(FloatArray &answer, FloatArray &global)
 // receiver
 {
     FloatArray offset;
-    // test the parametr
-    if ( global.giveSize() != 3 ) {
-        OOFEM_ERROR("cannot transform coordinates - size mismatch");
-        exit(1);
-    }
 
     this->computeGtoLRotationMatrix();
 
-    offset = global;
-    offset.subtract( * this->giveNode(1)->giveCoordinates() );
+    offset.beDifferenceOf(global, *this->giveNode(1)->giveCoordinates() );
     answer.beProductOf(GtoLRotationMatrix, offset);
 }
+
 
 IRResultType
 MITC4Shell :: initializeFrom(InputRecord *ir)
@@ -338,6 +333,7 @@ MITC4Shell :: giveDofManDofIDMask(int inode, IntArray &answer) const
         D_u, D_v, D_w, R_u, R_v, R_w
     };
 }
+
 
 double
 MITC4Shell :: computeVolumeAround(GaussPoint *gp)
@@ -460,21 +456,6 @@ MITC4Shell :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int 
 
     interp_lin.evalN( h, lcoords,  FEIElementGeometryWrapper(this) );
     interp_lin.giveDerivatives(dn, lcoords);
-
-    FloatArray hk1(4);
-    // derivatives of interpolation functions
-    // dh(r1,r2)/dr1
-    hk1.at(1) =  dn.at(1, 1);
-    hk1.at(2) =  dn.at(2, 1);
-    hk1.at(3) =  dn.at(3, 1);
-    hk1.at(4) =  dn.at(4, 1);
-
-    FloatArray hk2(4);
-    // dh(r1,r2)/dr2
-    hk2.at(1) =  dn.at(1, 2);
-    hk2.at(2) =  dn.at(2, 2);
-    hk2.at(3) =  dn.at(3, 2);
-    hk2.at(4) =  dn.at(4, 2);
 
     FloatArray hkx(4), hky(4);
 
@@ -623,6 +604,7 @@ MITC4Shell :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int 
     answer.at(6, 23) = r3 / 2. * a4 * ( hky.at(4) * V14.at(1) + hky.at(4) * V14.at(2) );
 }
 
+
 void
 MITC4Shell :: giveThickness(double &a1, double &a2, double &a3, double &a4)
 {
@@ -669,6 +651,7 @@ MITC4Shell :: computeGtoLRotationMatrix()
     return & GtoLRotationMatrix;
 }
 
+
 void
 MITC4Shell :: computeLocalBaseVectors(FloatArray &e1, FloatArray &e2, FloatArray &e3)
 {
@@ -688,6 +671,7 @@ MITC4Shell :: computeLocalBaseVectors(FloatArray &e1, FloatArray &e2, FloatArray
     // now from e3' x e1' compute e2'
     e2.beVectorProductOf(e3, e1);
 }
+
 
 void
 MITC4Shell :: computeLToDirectorRotationMatrix(FloatMatrix &answer1, FloatMatrix &answer2, FloatMatrix &answer3, FloatMatrix &answer4)
@@ -772,6 +756,7 @@ MITC4Shell :: computeLToDirectorRotationMatrix(FloatMatrix &answer1, FloatMatrix
     answer4.at(3, 3) = V4.dotProduct(e3);
 }
 
+
 bool
 MITC4Shell :: computeGtoLRotationMatrix(FloatMatrix &answer)
 // Returns the rotation matrix of the receiver of the size [20,24]
@@ -822,7 +807,7 @@ MITC4Shell :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gau
 {
     answer.resize(3, 3);
     answer.zero();
-    if ( ( type == GlobalForceTensor ) ) {
+    if ( type == GlobalForceTensor ) {
         FloatArray stress, stress2, strain;
         FloatMatrix GtoLmatrix2, GtoLmatrix;
         this->computeIFGToLRotationMtrx(GtoLmatrix);
@@ -839,7 +824,7 @@ MITC4Shell :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gau
         answer.at(3, 2) = stress.at(5);
         answer.at(1, 3) = stress.at(6);
         answer.at(3, 1) = stress.at(6);
-    } else if ( ( type == GlobalStrainTensor ) ) {
+    } else if ( type == GlobalStrainTensor ) {
         FloatArray strain, strain2;
         this->computeStrainVector(strain2, gp, tStep);
         FloatMatrix GtoLmatrix;
@@ -857,9 +842,9 @@ MITC4Shell :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gau
         answer.at(3, 1) = strain.at(6) / 2.;
     } else {
         OOFEM_ERROR("unsupported tensor mode");
-        exit(1);
     }
 }
+
 
 void
 MITC4Shell :: printOutputAt(FILE *file, TimeStep *tStep)
@@ -869,7 +854,7 @@ MITC4Shell :: printOutputAt(FILE *file, TimeStep *tStep)
 
     fprintf(file, "element %d (%8d):\n", this->giveLabel(), number);
 
-    for ( GaussPoint *gp : *integrationRulesArray [ 0 ] ) {
+    for ( auto &gp : *integrationRulesArray [ 0 ] ) {
         fprintf( file, "  GP 1.%d :", gp->giveNumber() );
         this->giveIPValue(v, gp, IST_ShellStrainTensor, tStep);
         fprintf(file, "  strains    ");
@@ -889,14 +874,12 @@ int
 MITC4Shell :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     FloatMatrix globTensor;
-    CharTensor cht;
 
     answer.resize(6);
 
     if (  type == IST_ShellStrainTensor ) {
-        cht = GlobalStrainTensor;
 
-        this->giveCharacteristicTensor(globTensor, cht, gp, tStep);
+        this->giveCharacteristicTensor(globTensor, GlobalStrainTensor, gp, tStep);
 
         answer.at(1) = globTensor.at(1, 1); //xx
         answer.at(2) = globTensor.at(2, 2); //yy
@@ -907,9 +890,8 @@ MITC4Shell :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
 
         return 1;
     } else if ( type == IST_ShellForceTensor ) {
-        cht = GlobalForceTensor;
 
-        this->giveCharacteristicTensor(globTensor, cht, gp, tStep);
+        this->giveCharacteristicTensor(globTensor, GlobalForceTensor, gp, tStep);
 
         answer.at(1) = globTensor.at(1, 1); //xx
         answer.at(2) = globTensor.at(2, 2); //yy
@@ -951,7 +933,6 @@ MITC4Shell :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coor
 }
 
 
-
 int
 MITC4Shell :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
@@ -986,6 +967,7 @@ MITC4Shell :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
     return 1;
 }
 
+
 int
 MITC4Shell :: computeIFGToLRotationMtrx(FloatMatrix &answer)
 // Returns the rotation matrix of the receiver of the size [6,6]
@@ -1018,7 +1000,7 @@ MITC4Shell :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int
 
     int size = 0;
 
-    for ( GaussPoint *gp : *integrationRulesArray [ 0 ] ) {
+    for ( auto &gp : *integrationRulesArray [ 0 ] ) {
         giveIPValue(val, gp, type, tStep);
         if ( size == 0 ) {
             size = val.giveSize();
@@ -1146,24 +1128,24 @@ MITC4Shell :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
     return detJ * gp->giveWeight();
 }
 
-/*
- * void
- * MITC4Shell :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
- * {
- * std :: vector< FloatArray > lc = {FloatArray(3), FloatArray(3), FloatArray(3), FloatArray(3)};
- * this->giveNodeCoordinates(lc[0].at(1), lc[1].at(1), lc[2].at(1), lc[3].at(1),
- *                          lc[0].at(2), lc[1].at(2), lc[2].at(2), lc[3].at(2),
- *                          lc[0].at(3), lc[1].at(3), lc[2].at(3), lc[3].at(3));
- *
- * FloatArray local;
- * this->interp_lin.edgeLocal2global( local, iEdge, gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc)  );
- * local.resize(3);
- * local.at(3) = 0.;
- *
- * answer = local; // MITC4 - todo
- * // answer.beProductOf(this->lcsMatrix, local);
- * }
- */
+#if 0
+void
+MITC4Shell :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
+{
+    std :: vector< FloatArray > lc = {FloatArray(3), FloatArray(3), FloatArray(3), FloatArray(3)};
+    this->giveNodeCoordinates(lc[0].at(1), lc[1].at(1), lc[2].at(1), lc[3].at(1),
+                            lc[0].at(2), lc[1].at(2), lc[2].at(2), lc[3].at(2),
+                            lc[0].at(3), lc[1].at(3), lc[2].at(3), lc[3].at(3));
+
+    FloatArray local;
+    this->interp_lin.edgeLocal2global( local, iEdge, gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc)  );
+    local.resize(3);
+    local.at(3) = 0.;
+
+    answer = local; // MITC4 - todo
+    // answer.beProductOf(this->lcsMatrix, local);
+}
+#endif
 
 int
 MITC4Shell :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
@@ -1197,7 +1179,6 @@ MITC4Shell :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gau
 }
 
 
-
 void
 MITC4Shell :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
@@ -1209,20 +1190,17 @@ MITC4Shell :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint
     this->computeNmatrixAt(coords, answer);
 }
 
+
 void
 MITC4Shell :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
 {
-    int i;
-    answer.resize(24);
-    answer.zero();
     if ( iSurf == 1 ) {
-        for ( i = 1; i <= 24; i++ ) {
-            answer.at(i) = i;
-        }
+        answer.enumerate(24);
     } else {
         OOFEM_ERROR("wrong surface number");
     }
 }
+
 
 IntegrationRule *
 MITC4Shell :: GetSurfaceIntegrationRule(int approxOrder)
@@ -1232,7 +1210,6 @@ MITC4Shell :: GetSurfaceIntegrationRule(int approxOrder)
     iRule->SetUpPointsOnSquare(npoints, _Unknown);
     return iRule;
 }
-
 
 
 double

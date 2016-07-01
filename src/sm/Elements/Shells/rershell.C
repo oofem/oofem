@@ -621,7 +621,7 @@ RerShell :: printOutputAt(FILE *file, TimeStep *tStep)
                 " %.4e %.4e %.4e %.4e %.4e %.4e ",
                 v.at(1), v.at(2), v.at(3), v.at(4), v.at(5), v.at(6) );
 
-        this->giveIPValue(v, gp, IST_ShellCurvatureTensor, tStep);
+        this->giveIPValue(v, gp, IST_CurvatureTensor, tStep);
         fprintf(file, "\n              curvatures ");
         // k_x, k_y, k_z, k_yz, k_xz, k_xy (global)
         fprintf( file,
@@ -636,7 +636,7 @@ RerShell :: printOutputAt(FILE *file, TimeStep *tStep)
                 " %.4e %.4e %.4e %.4e %.4e %.4e ",
                 v.at(1), v.at(2), v.at(3), v.at(4), v.at(5), v.at(6) );
 
-        this->giveIPValue(v, gp, IST_ShellMomentumTensor, tStep);
+        this->giveIPValue(v, gp, IST_ShellMomentTensor, tStep);
         fprintf(file, "\n              moments    ");
         // m_x, m_y, m_z, m_yz, m_xz, m_xy (global)
         fprintf( file,
@@ -671,8 +671,8 @@ RerShell :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
 
     answer.resize(6);
 
-    if (  type == IST_ShellCurvatureTensor || type == IST_ShellStrainTensor ) {
-        if ( type == IST_ShellCurvatureTensor ) {
+    if (  type == IST_CurvatureTensor || type == IST_ShellStrainTensor ) {
+        if ( type == IST_CurvatureTensor ) {
             cht = GlobalCurvatureTensor;
         } else {
             cht = GlobalStrainTensor;
@@ -688,8 +688,8 @@ RerShell :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
         answer.at(6) = 2*globTensor.at(2, 3); //yz
 
         return 1;
-    } else if ( type == IST_ShellMomentumTensor || type == IST_ShellForceTensor ) {
-        if ( type == IST_ShellMomentumTensor ) {
+    } else if ( type == IST_ShellMomentTensor || type == IST_ShellForceTensor ) {
+        if ( type == IST_ShellMomentTensor ) {
             cht = GlobalMomentumTensor;
         } else {
             cht = GlobalForceTensor;
