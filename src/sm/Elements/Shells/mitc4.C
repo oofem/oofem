@@ -886,7 +886,7 @@ MITC4Shell :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
         answer.at(3) = globTensor.at(3, 3); //zz
         answer.at(4) = 2 * globTensor.at(2, 3); //yz
         answer.at(5) = 2 * globTensor.at(1, 3); //xz
-        answer.at(6) = 2 * globTensor.at(2, 3); //yz
+        answer.at(6) = 2 * globTensor.at(1, 2); //xy
 
         return 1;
     } else if ( type == IST_ShellForceTensor ) {
@@ -898,7 +898,7 @@ MITC4Shell :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
         answer.at(3) = globTensor.at(3, 3); //zz
         answer.at(4) = globTensor.at(2, 3); //yz
         answer.at(5) = globTensor.at(1, 3); //xz
-        answer.at(6) = globTensor.at(2, 3); //yz
+        answer.at(6) = globTensor.at(1, 2); //xy
 
         return 1;
     } else {

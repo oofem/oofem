@@ -76,7 +76,6 @@ Quad1Mindlin :: giveInterpolation(DofIDItem id) const
 
 void
 Quad1Mindlin :: computeGaussPoints()
-// Sets up the array containing the four Gauss points of the receiver.
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );

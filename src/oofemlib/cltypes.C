@@ -76,13 +76,14 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
 {
     switch ( type ) {
     case IST_StrainTensor:
+    case IST_StrainTensorTemp:
     case IST_DeviatoricStrain:
     case IST_PlasticStrainTensor:
     case IST_ThermalStrainTensor:
     case IST_CylindricalStrainTensor:
     case IST_CreepStrainTensor:
-    case IST_StrainTensorTemp:
-    case IST_ShellForceTensor:
+    case IST_ShellStrainTensor:
+    case IST_CurvatureTensor:
     case IST_CurvatureTensorTemp:
         return ISVT_TENSOR_S3E;
 
@@ -91,17 +92,17 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_CylindricalStressTensor:
     case IST_DeviatoricStress:
     case IST_CauchyStressTensor:
-    ///@todo Remove "Shell" from these. They are general;
-    case IST_ShellStrainTensor: ///@todo Are shell strains S3E as well?
-    case IST_CurvatureTensor:
+
+    case IST_ShellForceTensor:
     case IST_ShellForceTensorTemp:
-    ///@todo "Momentum" should be renamed "Moment"
     case IST_ShellMomentTensor:
-    case IST_MomentumTensorTemp:
+    case IST_ShellMomentTensorTemp:
+
     ///@todo Should be have these are S3E or just S3?
     case IST_AutogenousShrinkageTensor:
     case IST_DryingShrinkageTensor:
     case IST_TotalShrinkageTensor:
+
     // Damage tensors
     case IST_DamageTensor:
     case IST_DamageTensorTemp:

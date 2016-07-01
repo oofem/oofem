@@ -68,7 +68,7 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_StressTensorTemp, 18) \
     ENUM_ITEM_WITH_VALUE(IST_StrainTensorTemp, 19) \
     ENUM_ITEM_WITH_VALUE(IST_ShellForceTensorTemp, 20) \
-    ENUM_ITEM_WITH_VALUE(IST_MomentumTensorTemp, 21) \
+    ENUM_ITEM_WITH_VALUE(IST_ShellMomentTensorTemp, 21) \
     ENUM_ITEM_WITH_VALUE(IST_CurvatureTensorTemp, 22) \
     ENUM_ITEM_WITH_VALUE(IST_DisplacementVectorTemp, 23) \
     ENUM_ITEM_WITH_VALUE(IST_DamageTensorTemp, 24) \

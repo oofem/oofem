@@ -236,7 +236,7 @@ TrPlanestressRotAllman3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, Inte
         answer.at(3) = globTensor.at(3, 3); //zz
         answer.at(4) = c * globTensor.at(2, 3); //yz
         answer.at(5) = c * globTensor.at(1, 3); //xz
-        answer.at(6) = c * globTensor.at(2, 3); //yz
+        answer.at(6) = c * globTensor.at(1, 2); //xy
         // mutiply stresses by thickness to get forces
 
         return 1;

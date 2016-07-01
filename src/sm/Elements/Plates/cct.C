@@ -483,11 +483,6 @@ CCTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
     }
 }
 
-
-
-//
-// The element interface required by NodalAveragingRecoveryModel
-//
 void
 CCTPlate :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                        InternalStateType type, TimeStep *tStep)
@@ -503,9 +498,6 @@ CCTPlate :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int n
 }
 
 
-//
-// The element interface required by SPRNodalRecoveryModelInterface
-//
 void
 CCTPlate :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 {
