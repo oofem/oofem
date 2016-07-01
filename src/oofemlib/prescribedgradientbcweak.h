@@ -50,6 +50,7 @@
 #define _IFT_PrescribedGradientBCWeak_TangDistPadding   "tangdistpadding"
 #define _IFT_PrescribedGradientBCWeak_TracDofScaling   "tracdofscaling"
 #define _IFT_PrescribedGradientBCWeak_PeriodicityNormal   "periodicitynormal"
+#define _IFT_PrescribedGradientBCWeak_MirrorFunction   "mirrorfunction"
 
 namespace oofem {
 class IntegrationRule;
@@ -160,6 +161,8 @@ public:
     void setLowerCorner(FloatArray iLC) {mLC = std::move(iLC);};
     void setUpperCorner(FloatArray iUC) {mUC = std::move(iUC);};
 
+    void setMirrorFunction(int iMirrorFunction) {mMirrorFunction = iMirrorFunction;};
+
 protected:
 
     const IntArray mTractionDofIDs;
@@ -252,6 +255,12 @@ protected:
     FloatArray mPeriodicityNormal;
 
     double mDomainSize;
+
+    /**
+     * Mirror function (i.e. mapping between gamma^+ and gamma^-).
+     * 0 -> Standard periodicity, 1 -> Shifted stacking, 2 -> Rotation
+     */
+    int mMirrorFunction;
 
 public:
     void recomputeTractionMesh();

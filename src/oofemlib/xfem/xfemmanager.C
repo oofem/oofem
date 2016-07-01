@@ -378,16 +378,16 @@ bool XfemManager :: hasPropagatingFronts()
 
 void XfemManager :: nucleateEnrichmentItems(bool &oNewItemsWereNucleated)
 {
-	printf("Entering XfemManager :: nucleateEnrichmentItems\n");
+//	printf("Entering XfemManager :: nucleateEnrichmentItems\n");
 
 	for(auto &nucCrit : mNucleationCriteria) {
 		std::vector<std::unique_ptr<EnrichmentItem>> eiList = std::move(nucCrit->nucleateEnrichmentItems());
 
 		if(eiList.size() > 0) {
-			printf("eiList.size(): %lu\n", eiList.size() );
+//			printf("eiList.size(): %lu\n", eiList.size() );
 
 //			if(giveNumberOfEnrichmentItems() == 0) {
-				printf("giveNumberOfEnrichmentItems() == 0\n");
+//				printf("giveNumberOfEnrichmentItems() == 0\n");
 
 				for(auto &ei : eiList) {
 					enrichmentItemList.push_back(std::move(ei));

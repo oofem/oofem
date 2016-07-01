@@ -47,10 +47,12 @@
 #include "xfem/enrichmentfunction.h"
 #include "xfem/enrichmentfronts/enrichmentfrontlinbranchfunconeel.h"
 #include "xfem/propagationlaws/plhoopstresscirc.h"
+#include "xfem/propagationlaws/plmaterialforce.h"
 #include "dynamicdatareader.h"
 #include "dynamicinputrecord.h"
 #include "geometry.h"
 #include "classfactory.h"
+#include "spatiallocalizer.h"
 
 #include <memory>
 
@@ -62,7 +64,7 @@ NCPrincipalStress::NCPrincipalStress(Domain *ipDomain):
 NucleationCriterion(ipDomain),
 mStressThreshold(0.0),
 mInitialCrackLength(0.0),
-mCutOneEl(true)
+mCutOneEl(false)
 {
 
 }
@@ -74,7 +76,13 @@ NCPrincipalStress::~NCPrincipalStress() {
 std::vector<std::unique_ptr<EnrichmentItem>> NCPrincipalStress::nucleateEnrichmentItems() {
 
 
+	SpatialLocalizer *octree = this->mpDomain->giveSpatialLocalizer();
+	XfemManager *xMan = mpDomain->giveXfemManager();
+
 	std::vector<std::unique_ptr<EnrichmentItem>> eiList;
+
+	// Center coordinates of newly inserted cracks
+	std::vector<FloatArray> center_coord_inserted_cracks;
 
 	// Loop over all elements and all bulk GP.
 	for(auto &el : mpDomain->giveElements() ) {
@@ -103,12 +111,14 @@ std::vector<std::unique_ptr<EnrichmentItem>> NCPrincipalStress::nucleateEnrichme
 
 					if(principalVals[0] > mStressThreshold) {
 
-						printf("\nFound GP with stress above threshold.\n");
+
+
+//						printf("\nFound GP with stress above threshold.\n");
 //						printf("principalVals: "); principalVals.printYourself();
 
 						FloatArray crackNormal;
 						crackNormal.beColumnOf(principalDirs, 1);
-						printf("crackNormal: "); crackNormal.printYourself();
+//						printf("crackNormal: "); crackNormal.printYourself();
 
 						FloatArray crackTangent = {-crackNormal(1), crackNormal(0)};
 						crackTangent.normalize();
@@ -148,7 +158,7 @@ std::vector<std::unique_ptr<EnrichmentItem>> NCPrincipalStress::nucleateEnrichme
 
 						    }
 
-							printf("intersecPoints.size(): %lu\n", intersecPoints.size());
+//							printf("intersecPoints.size(): %lu\n", intersecPoints.size());
 
 							if(intersecPoints.size() == 2) {
 								ps = std::move(intersecPoints[0]);
@@ -162,56 +172,99 @@ std::vector<std::unique_ptr<EnrichmentItem>> NCPrincipalStress::nucleateEnrichme
 						FloatArray points = {ps(0), ps(1), pc(0), pc(1), pe(0), pe(1)};
 
 						double diffX = 0.5*(ps(0) + pe(0)) - pc(0);
-						printf("diffX: %e\n", diffX);
+//						printf("diffX: %e\n", diffX);
 
 						double diffY = 0.5*(ps(1) + pe(1)) - pc(1);
-						printf("diffY: %e\n", diffY);
-
-						XfemManager *xMan = mpDomain->giveXfemManager();
-						int n = xMan->giveNumberOfEnrichmentItems() + 1;
-						std::unique_ptr<Crack> crack(new Crack(n, xMan, mpDomain));
+//						printf("diffY: %e\n", diffY);
 
 
-						// Geometry
-						std::unique_ptr<BasicGeometry> geom = std::unique_ptr<BasicGeometry>(new PolygonLine());
-						geom->insertVertexBack(ps);
-						geom->insertVertexBack(pc);
-						geom->insertVertexBack(pe);
-						crack->setGeometry(std::move(geom));
+						// TODO: Check if nucleation is allowed, by checking for already existing cracks close to the GP.
+						// Idea: Nucleation is not allowed if we are within an enriched element. In this way, branching is not
+						// completely prohibited, but we avoid initiating multiple similar cracks.
+						bool insertionAllowed = true;
 
-						// Enrichment function
-						EnrichmentFunction *ef = new HeavisideFunction(1, mpDomain);
-						crack->setEnrichmentFunction(ef);
+						Element *el_s = octree->giveElementContainingPoint(ps);
+						if(el_s) {
+							if( xMan->isElementEnriched(el_s) ) {
+								insertionAllowed = false;
+							}
+						}
 
-						// Enrichment fronts
-						EnrichmentFront *efStart = new EnrFrontLinearBranchFuncOneEl();
-						crack->setEnrichmentFrontStart(efStart);
+						Element *el_c = octree->giveElementContainingPoint(pc);
+						if(el_c) {
+							if( xMan->isElementEnriched(el_c) ) {
+								insertionAllowed = false;
+							}
+						}
 
-						EnrichmentFront *efEnd = new EnrFrontLinearBranchFuncOneEl();
-						crack->setEnrichmentFrontEnd(efEnd);
+						Element *el_e = octree->giveElementContainingPoint(pe);
+						if(el_e) {
+							if( xMan->isElementEnriched(el_e) ) {
+								insertionAllowed = false;
+							}
+						}
+
+						for(const auto &x: center_coord_inserted_cracks) {
+							if( x.distance(pc) <  2.0*mInitialCrackLength) {
+								insertionAllowed = false;
+								break;
+								printf("Preventing insertion.\n");
+							}
+						}
+
+						if(insertionAllowed) {
+							int n = xMan->giveNumberOfEnrichmentItems() + 1;
+							std::unique_ptr<Crack> crack(new Crack(n, xMan, mpDomain));
 
 
-						///////////////////////////////////////
-						// Propagation law
+							// Geometry
+							std::unique_ptr<BasicGeometry> geom = std::unique_ptr<BasicGeometry>(new PolygonLine());
+							geom->insertVertexBack(ps);
+							geom->insertVertexBack(pc);
+							geom->insertVertexBack(pe);
+							crack->setGeometry(std::move(geom));
 
-						// Options
-//					    double radius = 0.5*mInitialCrackLength, angleInc = 10.0, incrementLength = 0.5*mInitialCrackLength, hoopStressThreshold = 0.0;
-//					    bool useRadialBasisFunc = true;
+							// Enrichment function
+							EnrichmentFunction *ef = new HeavisideFunction(1, mpDomain);
+							crack->setEnrichmentFunction(ef);
 
-//						PLHoopStressCirc *pl = new PLHoopStressCirc();
-//						pl->setRadius(radius);
-//						pl->setAngleInc(angleInc);
-//						pl->setIncrementLength(incrementLength);
-//						pl->setHoopStressThreshold(hoopStressThreshold);
-//						pl->setUseRadialBasisFunc(useRadialBasisFunc);
+							// Enrichment fronts
+							EnrichmentFront *efStart = new EnrFrontLinearBranchFuncOneEl();
+							crack->setEnrichmentFrontStart(efStart);
 
-					    PLDoNothing *pl = new PLDoNothing();
-						crack->setPropagationLaw(pl);
+							EnrichmentFront *efEnd = new EnrFrontLinearBranchFuncOneEl();
+							crack->setEnrichmentFrontEnd(efEnd);
 
-						eiList.push_back( std::unique_ptr<EnrichmentItem>(std::move(crack)) );
 
-						// We only introduce one crack per element in a single time step.
-						break;
+							///////////////////////////////////////
+							// Propagation law
+
+							// Options
+	//					    double radius = 0.5*mInitialCrackLength, angleInc = 10.0, incrementLength = 0.5*mInitialCrackLength, hoopStressThreshold = 0.0;
+	//					    bool useRadialBasisFunc = true;
+
+	//						PLHoopStressCirc *pl = new PLHoopStressCirc();
+	//						pl->setRadius(radius);
+	//						pl->setAngleInc(angleInc);
+	//						pl->setIncrementLength(incrementLength);
+	//						pl->setHoopStressThreshold(hoopStressThreshold);
+	//						pl->setUseRadialBasisFunc(useRadialBasisFunc);
+
+	//					    PLDoNothing *pl = new PLDoNothing();
+
+							PLMaterialForce *pl = new PLMaterialForce();
+							pl->setRadius(0.25);
+							pl->setIncrementLength(0.25);
+							pl->setCrackPropThreshold(0.25);
+
+							crack->setPropagationLaw(pl);
+
+							center_coord_inserted_cracks.push_back(pc);
+							eiList.push_back( std::unique_ptr<EnrichmentItem>(std::move(crack)) );
+
+							// We only introduce one crack per element in a single time step.
+							break;
+						}
 					}
 				}
 			}
@@ -228,10 +281,10 @@ IRResultType NCPrincipalStress::initializeFrom(InputRecord *ir) {
     IRResultType result; // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, mStressThreshold, _IFT_NCPrincipalStress_StressThreshold);
-    printf("mStressThreshold: %e\n", mStressThreshold);
+//    printf("mStressThreshold: %e\n", mStressThreshold);
 
     IR_GIVE_FIELD(ir, mInitialCrackLength, _IFT_NCPrincipalStress_InitialCrackLength);
-    printf("mInitialCrackLength: %e\n", mInitialCrackLength);
+//    printf("mInitialCrackLength: %e\n", mInitialCrackLength);
 
     return NucleationCriterion::initializeFrom(ir);
 }

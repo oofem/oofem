@@ -49,6 +49,7 @@
 #include "timestep.h"
 #include "function.h"
 #include "engngm.h"
+#include "mathfem.h"
 
 #include "xfem/XFEMDebugTools.h"
 
@@ -76,7 +77,8 @@ PrescribedGradientBCWeak :: PrescribedGradientBCWeak(int n, Domain *d) :
     mLockNodeInd(0),
     mDispLockScaling(1.0),
 	mPeriodicityNormal({0.0, 1.0}),
-	mDomainSize(0.0)
+	mDomainSize(0.0),
+	mMirrorFunction(0)
 {
 
 	if(d) {
@@ -188,7 +190,15 @@ IRResultType PrescribedGradientBCWeak :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_OPTIONAL_FIELD(ir, mPeriodicityNormal, _IFT_PrescribedGradientBCWeak_PeriodicityNormal);
     mPeriodicityNormal.normalize();
-    printf("mPeriodicityNormal: "); mPeriodicityNormal.printYourself();
+//    printf("mPeriodicityNormal: "); mPeriodicityNormal.printYourself();
+
+
+    IR_GIVE_OPTIONAL_FIELD(ir, mMirrorFunction, _IFT_PrescribedGradientBCWeak_MirrorFunction);
+//    printf("mMirrorFunction: %d\n", mMirrorFunction );
+
+    if(mMirrorFunction == 0) {
+    	mPeriodicityNormal = {0.0, 1.0};
+    }
 
     return IRRT_OK;
 }
@@ -471,8 +481,13 @@ void PrescribedGradientBCWeak :: giveLocationArrays(std :: vector< IntArray > &r
         mpDisplacementLock->giveLocationArray(giveDispLockDofIDs(), dispLock_r, r_s);
         mpDisplacementLock->giveLocationArray(giveDispLockDofIDs(), dispLock_c, c_s);
 
-        int nodeInd = 1;
-        DofManager *node = domain->giveDofManager(nodeInd);
+//        int nodeInd = 1;
+//        DofManager *node = domain->giveDofManager(nodeInd);
+        DofManager *node = domain->giveElement(1)->giveDofManager(1);
+
+        IntArray dofIdArray;
+        node->giveCompleteMasterDofIDArray(dofIdArray);
+
         IntArray node_r, node_c;
         node->giveLocationArray(giveRegularDispDofIDs(), node_r, r_s);
         node->giveLocationArray(giveRegularDispDofIDs(), node_c, c_s);
@@ -701,8 +716,9 @@ void PrescribedGradientBCWeak :: recomputeTractionMesh()
 
 void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodicity, int iNumSides)
 {
-    const double nodeDistTol = 1.0e-14;
     const double l_s = mUC[0] - mLC[0];
+//    const double nodeDistTol = 1.0e-14;
+    const double nodeDistTol = 1.0e-3*l_s;
     const double meshTol = 1.0e-3*l_s; // Minimum distance between traction nodes
 
     /**
@@ -719,14 +735,18 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
         bndNodeCoords.push_back(emptyVec);
     }
 
+//    printf("set: %d\n", set);
     Set *setPointer = this->giveDomain()->giveSet(this->set);
     const IntArray &boundaries = setPointer->giveBoundaryList();
+//    printf("boundaries: "); boundaries.printYourself();
     IntArray bNodes;
 
     // Loop over all boundary segments twice:
     // first add mesh points...
     for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
-        Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
+    	int elIndex = boundaries.at(pos * 2 - 1);
+//    	printf("elIndex: %d\n", elIndex );
+        Element *e = this->giveDomain()->giveElement( elIndex );
         int boundary = boundaries.at(pos * 2);
 
         e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
@@ -873,90 +893,124 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
 //            	intersecPoints.push_back(p1);
 //            }
 
-            if( fabs(n(1)) <= fabs(n(0)) ) {
-            	// a <= l_s/2
-            	double a = 0.5*l_s*( 1.0 +  n(1)/n(0) );
-//            	printf("a: %.12e\n", a);
+            if(mMirrorFunction == 1 || mMirrorFunction == 2) {
 
-				std::vector<FloatArray> periodicityPoints;
-				periodicityPoints.push_back({l_s, a});
-				periodicityPoints.push_back({l_s, 2.0*a});
 
-				periodicityPoints.push_back({l_s-a, l_s});
-				periodicityPoints.push_back({l_s-2.0*a, l_s});
+				if( fabs(n(1)) <= fabs(n(0)) ) {
+					// a <= l_s/2
+					double a = 0.5*l_s*( 1.0 +  n(1)/n(0) );
+//					if( this->giveDomain()->giveEngngModel()->giveProblemScale() == microScale ) {
+//						printf("a: %.12e\n", a);
+//					}
 
-				periodicityPoints.push_back({0.0, l_s-a});
-				periodicityPoints.push_back({0.0, l_s-2.0*a});
 
-				periodicityPoints.push_back({a, 0.0});
-				periodicityPoints.push_back({2.0*a, 0.0});
+					std::vector<FloatArray> periodicityPoints;
 
-				for(auto p : periodicityPoints) {
-					if(p.distance(el_seg_S, el_seg_E, xiLim, xiUnlim) < periodicity_axes_tol*l_s) {
-						intersecPoints.push_back(p);
+					if( mMirrorFunction == 2) {
+						periodicityPoints.push_back({l_s, a});
+						periodicityPoints.push_back({l_s, 2.0*a});
+					}
+
+					if( mMirrorFunction == 2) {
+						periodicityPoints.push_back({l_s-a, l_s});
+					}
+
+					if( fabs(l_s-2.0*a) > periodicity_axes_tol*l_s && fabs(l_s-2.0*a) < l_s - periodicity_axes_tol*l_s) {
+						periodicityPoints.push_back({l_s-2.0*a, l_s});
+					}
+
+					if( mMirrorFunction == 2) {
+						periodicityPoints.push_back({0.0, l_s-a});
+						periodicityPoints.push_back({0.0, l_s-2.0*a});
+					}
+
+					if( mMirrorFunction == 2) {
+						periodicityPoints.push_back({a, 0.0});
+					}
+
+					if( fabs(2.0*a) > periodicity_axes_tol*l_s && fabs(2.0*a) < l_s - periodicity_axes_tol*l_s ) {
+						periodicityPoints.push_back({2.0*a, 0.0});
+					}
+
+					for(auto p : periodicityPoints) {
+						if(p.distance(el_seg_S, el_seg_E, xiLim, xiUnlim) < periodicity_axes_tol*l_s) {
+							intersecPoints.push_back(p);
+						}
+					}
+
+				}
+				else {
+
+					// a > l_s/2
+
+					double c = l_s - 0.5*l_s*( 1.0 + t(1)/t(0) );
+//					if( this->giveDomain()->giveEngngModel()->giveProblemScale() == microScale ) {
+//						printf("c: %e\n", c);
+//					}
+
+					std::vector<FloatArray> periodicityPoints;
+	//				periodicityPoints.push_back({l_s, l_s-c});
+	//				periodicityPoints.push_back({c, l_s});
+	//				periodicityPoints.push_back({0, c});
+	//				periodicityPoints.push_back({l_s-c, 0.0});
+
+					if( fabs(l_s-2.0*c) > periodicity_axes_tol*l_s && fabs(l_s-2.0*c) < l_s - periodicity_axes_tol*l_s) {
+						periodicityPoints.push_back({l_s, l_s-2.0*c});
+					}
+	//				periodicityPoints.push_back({2.0*c, l_s});
+
+					if( fabs(2.0*c) > periodicity_axes_tol*l_s && fabs(2.0*c) < l_s - periodicity_axes_tol*l_s ) {
+						periodicityPoints.push_back({0, 2.0*c});
+					}
+	//				periodicityPoints.push_back({l_s-2.0*c,0.0});
+
+					for(auto p : periodicityPoints) {
+						if(p.distance(el_seg_S, el_seg_E, xiLim, xiUnlim) < periodicity_axes_tol*l_s) {
+							intersecPoints.push_back(p);
+						}
 					}
 				}
 
             }
-            else {
-
-            	// a > l_s/2
-
-            	double c = l_s - 0.5*l_s*( 1.0 + t(1)/t(0) );
-//            	printf("c: %e\n", c);
-
-				std::vector<FloatArray> periodicityPoints;
-				periodicityPoints.push_back({l_s, l_s-c});
-				periodicityPoints.push_back({c, l_s});
-				periodicityPoints.push_back({0, c});
-				periodicityPoints.push_back({l_s-c, 0.0});
-				periodicityPoints.push_back({l_s, l_s-2.0*c});
-				periodicityPoints.push_back({2.0*c, l_s});
-				periodicityPoints.push_back({0, 2.0*c});
-				periodicityPoints.push_back({l_s-2.0*c,0.0});
-
-				for(auto p : periodicityPoints) {
-					if(p.distance(el_seg_S, el_seg_E, xiLim, xiUnlim) < periodicity_axes_tol) {
-						intersecPoints.push_back(p);
-					}
-				}
-            }
-
 #if 0
-            p1 = {l_s, l_s-c};
-            if(p1.distance(el_seg_S, el_seg_E, xiLim, xiUnlim) < periodicity_axes_tol) {
-            	intersecPoints.push_back(p1);
-            }
+            if(mMirrorFunction == 2) {
+				double c = l_s - 0.5*l_s*( 1.0 + t(1)/t(0) );
 
-            p1 = {c, l_s};
-            if(p1.distance(el_seg_S, el_seg_E, xiLim, xiUnlim) < periodicity_axes_tol) {
-            	intersecPoints.push_back(p1);
-            }
+				FloatArray p1 = {l_s, l_s-c};
+				if(p1.distance(el_seg_S, el_seg_E, xiLim, xiUnlim) < periodicity_axes_tol) {
+					intersecPoints.push_back(p1);
+				}
 
-            p1 = {0, c};
-            if(p1.distance(el_seg_S, el_seg_E, xiLim, xiUnlim) < periodicity_axes_tol) {
-            	intersecPoints.push_back(p1);
-            }
+				p1 = {c, l_s};
+				if(p1.distance(el_seg_S, el_seg_E, xiLim, xiUnlim) < periodicity_axes_tol) {
+					intersecPoints.push_back(p1);
+				}
 
-            ///
-            p1 = {l_s-2.0*c,0.0};
-            if(p1.distance(el_seg_S, el_seg_E, xiLim, xiUnlim) < periodicity_axes_tol) {
-            	intersecPoints.push_back(p1);
-            }
+				p1 = {0, c};
+				if(p1.distance(el_seg_S, el_seg_E, xiLim, xiUnlim) < periodicity_axes_tol) {
+					intersecPoints.push_back(p1);
+				}
 
-            p1 = {l_s, l_s-2.0*c};
-            if(p1.distance(el_seg_S, el_seg_E, xiLim, xiUnlim) < periodicity_axes_tol) {
-            	intersecPoints.push_back(p1);
-            }
+				///
+				p1 = {l_s-2.0*c,0.0};
+				if(p1.distance(el_seg_S, el_seg_E, xiLim, xiUnlim) < periodicity_axes_tol) {
+					intersecPoints.push_back(p1);
+				}
 
-            p1 = {2.0*c, l_s};
-            if(p1.distance(el_seg_S, el_seg_E, xiLim, xiUnlim) < periodicity_axes_tol) {
-            	intersecPoints.push_back(p1);
-            }
+				p1 = {l_s, l_s-2.0*c};
+				if(p1.distance(el_seg_S, el_seg_E, xiLim, xiUnlim) < periodicity_axes_tol) {
+					intersecPoints.push_back(p1);
+				}
 
-            p1 = {0, 2.0*c};
-            if(p1.distance(el_seg_S, el_seg_E, xiLim, xiUnlim) < periodicity_axes_tol) {
-            	intersecPoints.push_back(p1);
+				p1 = {2.0*c, l_s};
+				if(p1.distance(el_seg_S, el_seg_E, xiLim, xiUnlim) < periodicity_axes_tol) {
+					intersecPoints.push_back(p1);
+				}
+
+				p1 = {0, 2.0*c};
+				if(p1.distance(el_seg_S, el_seg_E, xiLim, xiUnlim) < periodicity_axes_tol) {
+					intersecPoints.push_back(p1);
+				}
             }
 #endif
         	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1406,8 +1460,8 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
         nodeCoord.push_back( * ( node->giveCoordinates() ) );
     }
 
-    std :: string fileName("TractionNodeCoord.vtk");
-    XFEMDebugTools :: WritePointsToVTK(fileName, nodeCoord);
+//    std :: string fileName("TractionNodeCoord.vtk");
+//    XFEMDebugTools :: WritePointsToVTK(fileName, nodeCoord);
 #endif
 
     if ( mMeshIsPeriodic ) {
@@ -1929,151 +1983,389 @@ bool PrescribedGradientBCWeak :: pointIsOnGammaPlus(const FloatArray &iPos) cons
 
 void PrescribedGradientBCWeak :: giveMirroredPointOnGammaMinus(FloatArray &oPosMinus, const FloatArray &iPosPlus) const
 {
-#if 0
-    oPosMinus = iPosPlus;
-    const double distTol = 1.0e-12;
+//#if 0
+	if(mMirrorFunction == 0) {
+		oPosMinus = iPosPlus;
+		const double distTol = 1.0e-12;
 
-    if ( iPosPlus.distance(mUC) < distTol ) {
-        printf("iPosPlus: %.12e %.12e\n", iPosPlus [ 0 ], iPosPlus [ 1 ]);
-        OOFEM_ERROR("Unmappable point.")
-    }
+//		if ( iPosPlus.distance(mUC) < distTol ) {
+//			printf("iPosPlus: %.12e %.12e\n", iPosPlus [ 0 ], iPosPlus [ 1 ]);
+//			OOFEM_ERROR("Unmappable point.")
+//		}
 
-    bool mappingPerformed = false;
+		bool mappingPerformed = false;
 
-    if ( iPosPlus [ 0 ] > mUC [ 0 ] - distTol ) {
-        oPosMinus [ 0 ] = mLC [ 0 ];
-        mappingPerformed = true;
-    }
+		if ( iPosPlus [ 0 ] > mUC [ 0 ] - distTol ) {
+			oPosMinus [ 0 ] = mLC [ 0 ];
+			mappingPerformed = true;
+			return;
+		}
 
-    if ( iPosPlus [ 1 ] > mUC [ 1 ] - distTol ) {
-        oPosMinus [ 1 ] = mLC [ 1 ];
-        mappingPerformed = true;
-    }
+		if ( iPosPlus [ 1 ] > mUC [ 1 ] - distTol ) {
+			oPosMinus [ 1 ] = mLC [ 1 ];
+			mappingPerformed = true;
+			return;
+		}
 
-    if ( !mappingPerformed ) {
-        iPosPlus.printYourself();
-        OOFEM_ERROR("Mapping failed.")
-    }
+		if ( !mappingPerformed ) {
+			iPosPlus.printYourself();
+			OOFEM_ERROR("Mapping failed.")
+		}
 
-    //    printf("iPosPlus: "); iPosPlus.printYourself();
-    //    printf("oPosMinus: "); oPosMinus.printYourself();
+		//    printf("iPosPlus: "); iPosPlus.printYourself();
+		//    printf("oPosMinus: "); oPosMinus.printYourself();
+	//#else
+	}
+	else {
+
+#if 1
+
+		const double distTol = 1.0e-12;
+		bool mappingPerformed = false;
+
+		FloatArray n = mPeriodicityNormal;
+		FloatArray t = {n(1),-n(0)};
+		t.normalize();
+
+		double l_s = mUC[0] - mLC[0];
+
+		// Compute angle
+		double alpha = 0.0, a = 0.0;
+		if( fabs(t(0)) > 1.0e-6 && fabs(t(1)) > 1.0e-6 ) {
+			alpha = atan(t(1)/t(0));
+
+			if( alpha > 45.0*M_PI/180.0 ) {
+				a = l_s/tan(alpha);
+			}
+			else {
+				a = l_s*tan(alpha);
+			}
+		}
+		else {
+			// 90 degrees or 0 degrees
+//			alpha = 1.57079632679490e+00;
+			a = 0.0;
+		}
+
+		if( alpha > 45.0*M_PI/180.0 ) {
+
+			// alpha > 45 degrees
+
+			if ( iPosPlus [ 0 ] > mUC [ 0 ] - distTol ) {
+				// Gamma_1_plus
+				oPosMinus = {0.0, iPosPlus[1]};
+				return;
+			}
+
+			if ( iPosPlus [ 1 ] > mUC [ 1 ] - distTol ) {
+				// Gamma_2_plus
+
+				if(iPosPlus[0] < a) {
+					oPosMinus = {l_s - a + iPosPlus[0], 0.0};
+					return;
+				}
+				else {
+					oPosMinus = {iPosPlus[0] - a, 0.0};
+					return;
+				}
+
+			}
+
+		}
+		else {
+
+			// alpha <= 45 degrees
+
+			if ( iPosPlus [ 0 ] > mUC [ 0 ] - distTol ) {
+				// Gamma_1_plus
+				if(iPosPlus[1] < a) {
+					oPosMinus = {0.0, l_s - a + iPosPlus[1]};
+					return;
+				}
+				else {
+					oPosMinus = {0.0, iPosPlus[1] - a};
+					return;
+				}
+
+			}
+
+			if ( iPosPlus [ 1 ] > mUC [ 1 ] - distTol ) {
+				// Gamma_2_plus
+
+				oPosMinus = {iPosPlus[0], 0.0};
+				return;
+			}
+
+		}
+
 #else
-    const double distTol = 1.0e-12;
-    bool mappingPerformed = false;
+		const double distTol = 1.0e-12;
+		bool mappingPerformed = false;
 
-    FloatArray n = mPeriodicityNormal;
-    FloatArray t = {n(1),-n(0)};
+		FloatArray n = mPeriodicityNormal;
+		FloatArray t = {n(1),-n(0)};
 
-    double l_s = mUC[0] - mLC[0];
+		double l_s = mUC[0] - mLC[0];
 
-    if( fabs(n(1)) <= fabs(n(0)) ) {
-    	// a <= l_s/2
-    	double a = 0.5*l_s*( 1.0 +  n(1)/n(0) );
+		if( fabs(n(1)) <= fabs(n(0)) ) {
+			// a <= l_s/2
+			double a = 0.5*l_s*( 1.0 +  n(1)/n(0) );
 
-        if ( iPosPlus [ 0 ] > mUC [ 0 ] - distTol ) {
-        	// Gamma_1_plus
+			if ( iPosPlus [ 0 ] > mUC [ 0 ] - distTol ) {
+				// Gamma_1_plus
 
-        	if(iPosPlus[1] < 2.0*a) {
-        		oPosMinus = {0.0, l_s - 2.0*a + iPosPlus[1]};
-        		return;
-        	}
-        	else {
-        		oPosMinus = { l_s - iPosPlus[1] + 2.0*a, 0.0};
-        		return;
-        	}
+	//#if 0
+				if(mMirrorFunction == 2) {
 
-        }
+						if(iPosPlus[1] < 2.0*a) {
+							oPosMinus = {0.0, l_s - 2.0*a + iPosPlus[1]};
+							return;
+						}
+						else {
+							oPosMinus = { l_s - iPosPlus[1] + 2.0*a, 0.0};
+							return;
+						}
+			//#else
+				}
+				else {
+						oPosMinus = {0.0, iPosPlus[1]};
+						return;
+				}
+	//#endif
+			}
 
 
-        if ( iPosPlus [ 1 ] > mUC [ 1 ] - distTol ) {
-        	// Gamma_2_plus
+			if ( iPosPlus [ 1 ] > mUC [ 1 ] - distTol ) {
+				// Gamma_2_plus
 
-//        	printf("Gamma_2_plus\n");
+	//        	printf("Gamma_2_plus\n");
+	//#if 0
+				if(mMirrorFunction == 2) {
 
-        	if(iPosPlus[0] < l_s - 2.0*a) {
-        		oPosMinus = {0.0, l_s - 2.0*a - iPosPlus[0]};
-        		return;
-        	}
-        	else {
-        		oPosMinus = {iPosPlus[0] + 2.0*a - l_s, 0.0};
-        		return;
-        	}
+					if(iPosPlus[0] < l_s - 2.0*a) {
+						oPosMinus = {0.0, l_s - 2.0*a - iPosPlus[0]};
+						return;
+					}
+					else {
+						oPosMinus = {iPosPlus[0] + 2.0*a - l_s, 0.0};
+						return;
+					}
+		//#else
+				}
+				else {
+					if(iPosPlus[0] < l_s - 2.0*a) {
+						oPosMinus = {2.0*a + iPosPlus[0], 0.0};
+						return;
+					}
+					else {
+						oPosMinus = {iPosPlus[0] + 2.0*a - l_s, 0.0};
+						return;
+					}
 
-        }
+				}
+		//#endif
 
-        iPosPlus.printYourself();
-        OOFEM_ERROR("Mapping failed.")
+			}
 
-    }
-    else {
+			iPosPlus.printYourself();
+			OOFEM_ERROR("Mapping failed.")
 
-    	// a > l_s/2
-    	double c = l_s - 0.5*l_s*( 1.0 + t(1)/t(0) );
+		}
+		else {
 
-        if ( iPosPlus [ 0 ] > mUC [ 0 ] - distTol ) {
-        	// Gamma_1_plus
+			// a > l_s/2
+			double c = l_s - 0.5*l_s*( 1.0 + t(1)/t(0) );
 
-        	if(iPosPlus[1] < l_s - 2.0*c) {
-        		oPosMinus = {l_s - 2.0*c - iPosPlus[1], 0.0};
-        		return;
-        	}
-        	else {
-        		oPosMinus = {0.0, iPosPlus[1] - l_s + 2.0*c};
-        		return;
-        	}
+			if ( iPosPlus [ 0 ] > mUC [ 0 ] - distTol ) {
+				// Gamma_1_plus
 
-        }
+	//#if 0
+				if(mMirrorFunction == 2) {
 
-        if ( iPosPlus [ 1 ] > mUC [ 1 ] - distTol ) {
-        	// Gamma_2_plus
+					if(iPosPlus[1] < l_s - 2.0*c) {
+						oPosMinus = {l_s - 2.0*c - iPosPlus[1], 0.0};
+						return;
+					}
+					else {
+						oPosMinus = {0.0, iPosPlus[1] - l_s + 2.0*c};
+						return;
+					}
+		//#else
+				}
+				else {
 
-        	if(iPosPlus[0] < 2.0*c) {
-        		oPosMinus = {l_s - 2.0*c + iPosPlus[0], 0.0};
-        		return;
-        	}
-        	else {
-        		oPosMinus = {0.0, l_s - iPosPlus[0] + 2.0*c};
-        		return;
-        	}
+					if(iPosPlus[1] < l_s - 2.0*c) {
+						oPosMinus = {0.0, 2.0*c + iPosPlus[1]};
+						return;
+					}
+					else {
+						oPosMinus = {0.0, iPosPlus[1] - l_s + 2.0*c};
+						return;
+					}
 
-        }
 
-        iPosPlus.printYourself();
-        OOFEM_ERROR("Mapping failed.")
-    }
+		//#endif
+				}
 
+			}
+
+			if ( iPosPlus [ 1 ] > mUC [ 1 ] - distTol ) {
+				// Gamma_2_plus
+
+	//#if 0
+				if(mMirrorFunction == 2) {
+
+					if(iPosPlus[0] < 2.0*c) {
+						oPosMinus = {l_s - 2.0*c + iPosPlus[0], 0.0};
+						return;
+					}
+					else {
+						oPosMinus = {0.0, l_s - iPosPlus[0] + 2.0*c};
+						return;
+					}
+				}
+				else {
+		//#else
+
+					oPosMinus = {iPosPlus[0], 0.0};
+					return;
+
+
+		//#endif
+				}
+
+			}
+
+			iPosPlus.printYourself();
+			OOFEM_ERROR("Mapping failed.")
+		}
 #endif
+	}
+	//#endif
 }
 
 void PrescribedGradientBCWeak :: giveMirroredPointOnGammaPlus(FloatArray &oPosPlus, const FloatArray &iPosMinus) const
 {
-#if 0
-    oPosPlus = iPosMinus;
-    const double distTol = 1.0e-16;
+//#if 0
+if(mMirrorFunction == 0) {
 
-    if ( iPosMinus.distance(mLC) < distTol ) {
-        printf("iPosMinus: %.12e %.12e\n", iPosMinus [ 0 ], iPosMinus [ 1 ]);
-        OOFEM_ERROR("Unmappable point.")
-    }
+	const double l_box = mUC(0) - mLC(0);
+
+    oPosPlus = iPosMinus;
+//    const double distTol = 1.0e-16;
+    const double distTol = l_box*1.0e-10;
+
+//    if ( iPosMinus.distance(mLC) < distTol ) {
+//        printf("iPosMinus: %.12e %.12e\n", iPosMinus [ 0 ], iPosMinus [ 1 ]);
+//        OOFEM_ERROR("Unmappable point.")
+//    }
 
     double mappingPerformed = false;
 
     if ( iPosMinus [ 0 ] < mLC [ 0 ] + distTol ) {
         oPosPlus [ 0 ] = mUC [ 0 ];
         mappingPerformed = true;
+		return;
     }
 
     if ( iPosMinus [ 1 ] < mLC [ 1 ] + distTol ) {
         oPosPlus [ 1 ] = mUC [ 1 ];
         mappingPerformed = true;
+		return;
     }
 
     if ( !mappingPerformed ) {
         iPosMinus.printYourself();
         OOFEM_ERROR("Mapping failed.")
     }
-#else
+//#else
+}
+else {
 
+#if 1
+
+	const double distTol = 1.0e-12;
+	bool mappingPerformed = false;
+
+	FloatArray n = mPeriodicityNormal;
+	FloatArray t = {n(1),-n(0)};
+	t.normalize();
+
+	double l_s = mUC[0] - mLC[0];
+
+	// Compute angle
+	double alpha = 0.0, a = 0.0;
+	if( fabs(t(0)) > 1.0e-6 && fabs(t(1)) > 1.0e-6 ) {
+		alpha = atan(t(1)/t(0));
+
+		if( alpha > 45.0*M_PI/180.0 ) {
+			a = l_s/tan(alpha);
+		}
+		else {
+			a = l_s*tan(alpha);
+		}
+	}
+	else {
+		// 90 degrees
+		a = 0.0;
+	}
+
+//	printf("t(1)/t(0): %e\n", t(1)/t(0));
+//	printf("a: %e\n", a);
+
+	if( alpha > 45.0*M_PI/180.0 ) {
+
+		// alpha > 45 degrees
+
+		if ( iPosMinus [ 0 ] < mLC [ 0 ] + distTol ) {
+			// Gamma_1_minus
+			oPosPlus = {l_s, iPosMinus[1]};
+			return;
+		}
+
+		if ( iPosMinus [ 1 ] < mLC [ 1 ] + distTol ) {
+			// Gamma_2_minus
+
+			if(iPosMinus[0] < l_s - a) {
+				oPosPlus = {iPosMinus[0] + a, l_s};
+				return;
+			}
+			else {
+				oPosPlus = {iPosMinus[0] - (l_s - a), l_s};
+				return;
+			}
+
+		}
+
+	}
+	else {
+		// alpha <= 45 degrees
+
+		if ( iPosMinus [ 0 ] < mLC [ 0 ] + distTol ) {
+			// Gamma_1_minus
+
+			if(iPosMinus[1] < l_s - a) {
+				oPosPlus = {l_s, iPosMinus[1] + a};
+				return;
+			}
+			else {
+				oPosPlus = {l_s, iPosMinus[1] - (l_s - a) };
+				return;
+			}
+		}
+
+		if ( iPosMinus [ 1 ] < mLC [ 1 ] + distTol ) {
+			// Gamma_2_minus
+
+			oPosPlus = {iPosMinus[0], l_s};
+			return;
+
+		}
+
+	}
+
+
+#else
     const double distTol = 1.0e-12;
     bool mappingPerformed = false;
 
@@ -2089,28 +2381,55 @@ void PrescribedGradientBCWeak :: giveMirroredPointOnGammaPlus(FloatArray &oPosPl
         if ( iPosMinus [ 0 ] < mLC [ 0 ] + distTol ) {
         	// Gamma_1_minus
 
-        	if( iPosMinus[1] >= l_s-2.0*a ) {
-        		oPosPlus = {l_s, iPosMinus[1] - l_s + 2.0*a};
-        		return;
-        	}
-        	else {
-        		oPosPlus = {l_s - 2.0*a - iPosMinus[1], l_s};
-        		return;
-        	}
+//#if 0
+			if(mMirrorFunction == 2) {
+
+				if( iPosMinus[1] >= l_s-2.0*a ) {
+					oPosPlus = {l_s, iPosMinus[1] - l_s + 2.0*a};
+					return;
+				}
+				else {
+					oPosPlus = {l_s - 2.0*a - iPosMinus[1], l_s};
+					return;
+				}
+			}
+			else {
+	//#else
+				oPosPlus = {l_s, iPosMinus[1]};
+				return;
+			}
+//#endif
         }
 
         if ( iPosMinus [ 1 ] < mLC [ 1 ] + distTol ) {
         	// Gamma_2_minus
 
-        	if(iPosMinus[0] < 2.0*a  ) {
-        		oPosPlus = {l_s - 2.0*a + iPosMinus[0], l_s};
-        		return;
-        	}
-        	else {
-        		oPosPlus = {l_s, l_s - iPosMinus[0] + 2.0*a};
-        		return;
-        	}
+//#if 0
+			if(mMirrorFunction == 2) {
 
+				if(iPosMinus[0] < 2.0*a  ) {
+					oPosPlus = {l_s - 2.0*a + iPosMinus[0], l_s};
+					return;
+				}
+				else {
+					oPosPlus = {l_s, l_s - iPosMinus[0] + 2.0*a};
+					return;
+				}
+			}
+			else {
+	//#else
+
+				if(iPosMinus[0] < 2.0*a  ) {
+					oPosPlus = {l_s - 2.0*a + iPosMinus[0], l_s};
+					return;
+				}
+				else {
+					oPosPlus = {iPosMinus[0] - 2.0*a, l_s};
+					return;
+				}
+
+			}
+//#endif
         }
 
 
@@ -2124,28 +2443,53 @@ void PrescribedGradientBCWeak :: giveMirroredPointOnGammaPlus(FloatArray &oPosPl
         if ( iPosMinus [ 0 ] < mLC [ 0 ] + distTol ) {
         	// Gamma_1_minus
 
-        	if( iPosMinus[1] < 2.0*c ) {
-        		oPosPlus = {l_s, l_s - 2.0*c + iPosMinus[1]};
-        		return;
-        	}
-        	else {
-        		oPosPlus = {l_s - iPosMinus[1] + 2.0*c, l_s};
-        		return;
-        	}
+			if(mMirrorFunction == 2) {
 
+	//#if 0
+				if( iPosMinus[1] < 2.0*c ) {
+					oPosPlus = {l_s, l_s - 2.0*c + iPosMinus[1]};
+					return;
+				}
+				else {
+					oPosPlus = {l_s - iPosMinus[1] + 2.0*c, l_s};
+					return;
+				}
+			}
+			else {
+	//#else
+				if( iPosMinus[1] < 2.0*c ) {
+					oPosPlus = {l_s, l_s - 2.0*c + iPosMinus[1]};
+					return;
+				}
+				else {
+					oPosPlus = {l_s,  iPosMinus[1] - 2.0*c};
+					return;
+				}
+
+			}
+//#endif
         }
 
         if ( iPosMinus [ 1 ] < mLC [ 1 ] + distTol ) {
         	// Gamma_2_minus
+//#if 0
+			if(mMirrorFunction == 2) {
 
-        	if( iPosMinus[0] < (l_s - 2.0*c) ) {
-        		oPosPlus = {l_s, l_s - 2.0*c - iPosMinus[0]};
-        		return;
-        	}
-        	else {
-        		oPosPlus = {iPosMinus[0] - l_s + 2.0*c, l_s};
-        		return;
-        	}
+				if( iPosMinus[0] < (l_s - 2.0*c) ) {
+					oPosPlus = {l_s, l_s - 2.0*c - iPosMinus[0]};
+					return;
+				}
+				else {
+					oPosPlus = {iPosMinus[0] - l_s + 2.0*c, l_s};
+					return;
+				}
+			}
+			else {
+	//#else
+				oPosPlus = {iPosMinus[0], l_s};
+				return;
+	//#endif
+			}
         }
 
 
@@ -2154,6 +2498,9 @@ void PrescribedGradientBCWeak :: giveMirroredPointOnGammaPlus(FloatArray &oPosPl
     }
 
 #endif
+
+}
+//#endif
 }
 
 bool PrescribedGradientBCWeak :: pointIsMapapble(const FloatArray &iPos) const

@@ -269,7 +269,7 @@ void XfemStructureManager :: splitCracks()
 
     for ( size_t i = 0; i < enrichmentItemList.size(); i++ ) {
         enrichmentItemList [ i ]->setNumber(i + 1);
-        enrichmentItemList [ i ]->writeVtkDebug();
+//        enrichmentItemList [ i ]->writeVtkDebug();
         enrichmentItemList [ i ]->updateGeometry();
     }
 }

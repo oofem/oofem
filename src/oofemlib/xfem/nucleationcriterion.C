@@ -70,7 +70,7 @@ IRResultType NucleationCriterion::initializeFrom(InputRecord *ir) {
 
 int NucleationCriterion::instanciateYourself(DataReader *dr) {
 
-	printf("Entering NucleationCriterion::instanciateYourself(DataReader *dr)\n");
+//	printf("Entering NucleationCriterion::instanciateYourself(DataReader *dr)\n");
 
     IRResultType result; // Required by IR_GIVE_FIELD macro
     std :: string name;

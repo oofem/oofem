@@ -153,7 +153,7 @@ int GeometryBasedEI :: instanciateYourself(DataReader *dr)
     this->updateNodeEnrMarker(* xMan);
 
 
-    writeVtkDebug();
+//    writeVtkDebug();
 
     return 1;
 }

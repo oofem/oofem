@@ -307,7 +307,8 @@ void GnuplotExportModule::outputXFEM(Crack &iCrack, TimeStep *tStep)
 
     const BasicGeometry *bg = iCrack.giveGeometry();
 
-    for( GaussPoint *gp: czGaussPoints ) {
+#if 0
+    for( auto *gp: czGaussPoints ) {
 
         StructuralInterfaceMaterialStatus *matStat = dynamic_cast<StructuralInterfaceMaterialStatus*> ( gp->giveMaterialStatus() );
         if(matStat != NULL) {
@@ -333,6 +334,7 @@ void GnuplotExportModule::outputXFEM(Crack &iCrack, TimeStep *tStep)
             normalTractions.push_back(trac.at(3));
         }
     }
+#endif
 
 
 
@@ -518,6 +520,7 @@ void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCWeak &iBC,
     iBC.computeField(stress, tStep);
 
     printf("Mean stress computed in Gnuplot export module: "); stress.printYourself();
+    printf("sigXX: %.12e\n", stress(0) );
 
     double time = 0.0;
 
@@ -835,7 +838,7 @@ void GnuplotExportModule :: outputInterfaceEl(Domain &d, TimeStep *tStep) {
 		StructuralInterfaceElement *intEl = dynamic_cast<StructuralInterfaceElement*>(el);
 
 		if(intEl) {
-//			printf("Found StructuralInterfaceElement.\n");
+			printf("Found StructuralInterfaceElement.\n");
 
 			IntegrationRule *ir = intEl->giveDefaultIntegrationRulePtr();
 

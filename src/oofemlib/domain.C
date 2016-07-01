@@ -710,6 +710,8 @@ Domain :: instanciateYourself(DataReader *dr)
     VERBOSE_PRINT0("Instanciated nodes & sides ", nnode)
 #  endif
 
+    BuildDofManPlaceInArrayMap();
+
     // read elements
     elementList.clear();
     elementList.resize(nelem);
@@ -739,7 +741,6 @@ Domain :: instanciateYourself(DataReader *dr)
     }
 
     BuildElementPlaceInArrayMap();
-    BuildDofManPlaceInArrayMap();
 
     // Support sets defined directly after the elements (special hack for backwards compatibility).
     setList.clear();
