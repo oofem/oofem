@@ -136,7 +136,6 @@ MITC4Shell :: SPRNodalRecoveryMI_givePatchType()
 
 void
 MITC4Shell :: computeGaussPoints()
-// Sets up the array containing the eight Gauss points of the receiver.
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize(1);
@@ -149,35 +148,54 @@ MITC4Shell :: computeGaussPoints()
 void
 MITC4Shell ::  giveDirectorVectors(FloatArray &V1, FloatArray &V2, FloatArray &V3, FloatArray &V4)
 {
-    FloatArray *c1, *c2, *c3, *c4;
-    V1.resize(3);
-    V2.resize(3);
-    V3.resize(3);
-    V4.resize(3);
-    c1 = this->giveNode(1)->giveCoordinates();
-    c2 = this->giveNode(2)->giveCoordinates();
-    c3 = this->giveNode(3)->giveCoordinates();
-    c4 = this->giveNode(4)->giveCoordinates();
-    V1.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, *c1, this, false);
-    V1.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, *c1, this, false);
-    V1.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, *c1, this, false);
+    if ( this->giveCrossSection()->hasProperty(CS_DirectorVectorX) ) {
+        FloatArray *c1, *c2, *c3, *c4;
+        V1.resize(3);
+        V2.resize(3);
+        V3.resize(3);
+        V4.resize(3);
+        c1 = this->giveNode(1)->giveCoordinates();
+        c2 = this->giveNode(2)->giveCoordinates();
+        c3 = this->giveNode(3)->giveCoordinates();
+        c4 = this->giveNode(4)->giveCoordinates();
+        V1.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, *c1, this, false);
+        V1.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, *c1, this, false);
+        V1.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, *c1, this, false);
 
-    V2.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, *c2, this, false);
-    V2.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, *c2, this, false);
-    V2.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, *c2, this, false);
+        V2.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, *c2, this, false);
+        V2.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, *c2, this, false);
+        V2.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, *c2, this, false);
 
-    V3.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, *c3, this, false);
-    V3.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, *c3, this, false);
-    V3.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, *c3, this, false);
+        V3.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, *c3, this, false);
+        V3.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, *c3, this, false);
+        V3.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, *c3, this, false);
 
-    V4.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, *c4, this, false);
-    V4.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, *c4, this, false);
-    V4.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, *c4, this, false);
+        V4.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, *c4, this, false);
+        V4.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, *c4, this, false);
+        V4.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, *c4, this, false);
 
-    V1.normalize();
-    V2.normalize();
-    V3.normalize();
-    V4.normalize();
+        V1.normalize();
+        V2.normalize();
+        V3.normalize();
+        V4.normalize();
+    } else {
+        FloatArray a, b;
+        a.add( * this->giveNode(1)->giveCoordinates() );
+        a.add( * this->giveNode(4)->giveCoordinates() );
+        a.subtract( * this->giveNode(2)->giveCoordinates() );
+        a.subtract( * this->giveNode(3)->giveCoordinates() );
+        
+        b.add( * this->giveNode(1)->giveCoordinates() );
+        b.add( * this->giveNode(2)->giveCoordinates() );
+        b.subtract( * this->giveNode(3)->giveCoordinates() );
+        b.subtract( * this->giveNode(4)->giveCoordinates() );
+
+        V1.beVectorProductOf(a, b);
+        V1.normalize();
+        V2 = V1;
+        V3 = V1;
+        V4 = V1;
+    }
 }
 
 
@@ -848,7 +866,6 @@ MITC4Shell :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gau
 
 void
 MITC4Shell :: printOutputAt(FILE *file, TimeStep *tStep)
-// Performs end-of-step operations.
 {
     FloatArray v;
 
@@ -867,7 +884,6 @@ MITC4Shell :: printOutputAt(FILE *file, TimeStep *tStep)
         fprintf(file, "\n");
     }
 }
-
 
 
 int
