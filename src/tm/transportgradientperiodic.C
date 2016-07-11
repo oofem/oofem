@@ -70,8 +70,8 @@ TransportGradientPeriodic :: TransportGradientPeriodic(int n, Domain *d) : Activ
         // Just putting in X_i id-items since they don't matter.
         // These don't actually need to be active, they are masterdofs with prescribed values, its
         // easier to just have them here rather than trying to make another Dirichlet boundary condition.
-        //strain->appendDof( new ActiveDof( grad.get(), (DofIDItem)dofid, this->giveNumber() ) );
-        grad->appendDof( new MasterDof(grad.get(), this->giveNumber(), 0, (DofIDItem)dofid ) );
+        grad->appendDof( new ActiveDof( grad.get(), (DofIDItem)dofid, this->giveNumber() ) );
+        //grad->appendDof( new MasterDof(grad.get(), this->giveNumber(), 0, (DofIDItem)dofid ) );
     }
 }
 
@@ -202,7 +202,10 @@ void TransportGradientPeriodic :: computeField(FloatArray &flux, TimeStep *tStep
 void TransportGradientPeriodic :: computeTangent(FloatMatrix &k, TimeStep *tStep)
 {
     EModelDefaultEquationNumbering fnum;
-    DofIDEquationNumbering pnum(true, this->grad_ids);
+    //DofIDEquationNumbering pnum(true, this->grad_ids);
+    EModelDefaultPrescribedEquationNumbering pnum;
+    int nsd = this->domain->giveNumberOfSpatialDimensions();
+
     EngngModel *rve = this->giveDomain()->giveEngngModel();
     ///@todo Get this from engineering model
     std :: unique_ptr< SparseLinearSystemNM > solver( classFactory.createSparseLinSolver( ST_Petsc, this->domain, this->domain->giveEngngModel() ) ); // = rve->giveLinearSolver();
@@ -212,30 +215,50 @@ void TransportGradientPeriodic :: computeTangent(FloatMatrix &k, TimeStep *tStep
     std :: unique_ptr< SparseMtrx > Kpp( classFactory.createSparseMtrx( stype ) );
 
     Kff->buildInternalStructure(rve, this->domain->giveNumber(), fnum);
+    int neq = Kff->giveNumberOfRows();
     Kfp->buildInternalStructure(rve, this->domain->giveNumber(), fnum, pnum);
     Kpp->buildInternalStructure(rve, this->domain->giveNumber(), pnum);
+    //Kfp->buildInternalStructure(rve, neq, nsd, {}, {});
+    //Kpp->buildInternalStructure(rve, nsd, nsd, {}, {});
     rve->assemble(*Kff, tStep, TangentAssembler(TangentStiffness), fnum, this->domain);
     rve->assemble(*Kfp, tStep, TangentAssembler(TangentStiffness), fnum, pnum, this->domain);
     rve->assemble(*Kpp, tStep, TangentAssembler(TangentStiffness), pnum, this->domain);
 
-    int neq = Kfp->giveNumberOfRows();
-    int nsd = this->domain->giveNumberOfSpatialDimensions();
-
     FloatMatrix grad_pert(nsd, nsd), rhs, sol(neq, nsd);
     grad_pert.resize(nsd, nsd);
     grad_pert.beUnitMatrix();
+    // Workaround since the matrix size is inflexible with custom dof numbering (so far, planned to be fixed).
+    IntArray grad_loc;
+    this->grad->giveLocationArray(this->grad_ids, grad_loc, pnum);
+    FloatMatrix pert(Kpp->giveNumberOfRows(), nsd);
+    pert.assemble(grad_pert, grad_loc, {1,2,3});
+    //pert.printYourself("pert");
+
+    //printf("Kfp = %d x %d\n", Kfp->giveNumberOfRows(), Kfp->giveNumberOfColumns());
+    //printf("Kff = %d x %d\n", Kff->giveNumberOfRows(), Kff->giveNumberOfColumns());
+    //printf("Kpp = %d x %d\n", Kpp->giveNumberOfRows(), Kpp->giveNumberOfColumns());
 
     // Compute the solution to each of the pertubation of eps
-    Kfp->times(grad_pert, rhs);
-    solver->solve(*Kff, rhs, sol);
-
+    Kfp->times(pert, rhs);
+    //rhs.printYourself("rhs");
+    if ( solver->solve(*Kff, rhs, sol) & NM_NoSuccess ) {
+        OOFEM_ERROR("Failed to solve Kff");
+    }
+    //FloatMatrix tmp;
+    //Kff->toFloatMatrix(tmp);
+    //tmp.printYourself("Kff");
+    //tmp.printYourselfToFile("Kff.txt");
     // Compute the solution to each of the pertubation of eps
     Kfp->timesT(sol, k); // Assuming symmetry of stiffness matrix
     // This is probably always zero, but for generality
     FloatMatrix tmpMat;
-    Kpp->times(grad_pert, tmpMat);
+    Kpp->times(pert, tmpMat);
     k.subtract(tmpMat);
     k.times( - 1.0 / ( this->domainSize(this->giveDomain(), this->set) + this->domainSize(this->giveDomain(), this->masterSet) ));
+    
+    // Temp workaround on sizing issue mentioned above:
+    FloatMatrix k2 = k;
+    k.beSubMatrixOf(k2, grad_loc, {1,2,3});
 }
 
 
@@ -328,7 +351,8 @@ IRResultType TransportGradientPeriodic :: initializeFrom(InputRecord *ir)
     IRResultType result;
 
     IR_GIVE_FIELD(ir, this->mGradient, _IFT_TransportGradientPeriodic_gradient)
-    IR_GIVE_FIELD(ir, this->mCenterCoord, _IFT_TransportGradientPeriodic_centerCoords)
+    this->mCenterCoord = {0., 0., 0.};
+    IR_GIVE_OPTIONAL_FIELD(ir, this->mCenterCoord, _IFT_TransportGradientPeriodic_centerCoords)
 
     IR_GIVE_FIELD(ir, this->masterSet, _IFT_TransportGradientPeriodic_masterSet)
     IR_GIVE_FIELD(ir, this->jump, _IFT_TransportGradientPeriodic_jump)
