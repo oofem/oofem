@@ -3325,7 +3325,7 @@ Shell7BaseXFEM :: giveFailedInterfaceNumber(IntArray &failedInterfaces, FloatArr
         bool initiateElt = false;
         int interfaceMatNumber(this->giveLayeredCS()->giveInterfaceMaterialNum(iInterface));
         
-        if (interfaceMatNumber) {
+        if (interfaceMatNumber && !this->DelaminatedInterfaceList.findSorted(iInterface)) {
             
             std :: unique_ptr< IntegrationRule > &iRuleI = this->czIntegrationRulesArray [ iInterface - 1 ];
             
@@ -3413,13 +3413,11 @@ Shell7BaseXFEM :: giveFailedInterfaceNumber(IntArray &failedInterfaces, FloatArr
             }
         }
     }
-    //this->DelaminatedInterfaceList.printYourself("DelaminatedInterfaceList");
-    //failedInterfaces.printYourself("failedInterfaces");
-    if (!failedInterfaces.isEmpty()) {
-        for ( int alreadyFailedInterface : this->DelaminatedInterfaceList ) {
-            failedInterfaces.eraseSorted(alreadyFailedInterface);
-        }
-    }
+//     if (!failedInterfaces.isEmpty()) {
+//         for ( int alreadyFailedInterface : this->DelaminatedInterfaceList ) {
+//             failedInterfaces.eraseSorted(alreadyFailedInterface);
+//         }
+//     }
     this->DelaminatedInterfaceList.followedBy(failedInterfaces);
     this->DelaminatedInterfaceList.sort();            
     if (failedInterfaces.giveSize() > 0) {
