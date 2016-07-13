@@ -44,7 +44,7 @@
 #define _IFT_TransportGradientNeumann_gradient "gradient"
 #define _IFT_TransportGradientNeumann_centerCoords "centercoords"
 #define _IFT_TransportGradientNeumann_surfSets "surfsets" /// Numered x+, y+, z+, x-, y-, z-
-#define _IFT_TransportGradientNeumann_useVoigt "useVoigt" /// For activating Voigt-Neumann b.c.
+#define _IFT_TransportGradientNeumann_dispControl "useeta" /// For activating Voigt-Neumann b.c.
 
 namespace oofem {
 class Node;
@@ -101,7 +101,7 @@ protected:
     IntArray mFluxIds;
     FloatArray mGradient;
     FloatArray mCenterCoord;
-    bool useVoigt;
+    bool dispControl;
 
     IntArray surfSets;
 

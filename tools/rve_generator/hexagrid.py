@@ -11,15 +11,13 @@ import rveToolbox
 import numpy as np
 
 
-def printRVE(rveSampleNumber, rveSize, rvePosition):
+def printRVE(name, rveSampleNumber, rveSize, rvePosition, nelem, bctype):
     # 3 nodes along each element axis
     # elname, w = 'Hex21Stokes', 3
     # elname, w = 'Q27Space', 3
     # elname, w = 'LSpace', 2
     # elname, w = 'QBrick1HT', 3
     elname, w = 'Brick1HT', 2
-
-    nelem = 6*rveSize
 
     rveInclusions = rveToolbox.getInclusionsInBox(rvePosition, rveSize, inclusions)
     print('%d inclusions in RVE'%len(rveInclusions))
@@ -137,9 +135,8 @@ def printRVE(rveSampleNumber, rveSize, rvePosition):
 
     print("Starting printing to file")
     # Write the input file
-    fname = 'hex_size{}_sample{}'.format(rveSize, rveSampleNumber)
-    f = open(fname+'.in', 'w')
-    print(fname+'.out', file=f)
+    f = open(name+'.in', 'w')
+    print(name+'.out', file=f)
     print('Hex grid RVE', file=f)
     if elname == 'Hexa21Stokes':
         print('StokesFlow nsteps 1 rtolf 1e-6 lstype 3 smtype 7 nonlinform 1 nmodules 0', file=f)
@@ -188,19 +185,19 @@ def printRVE(rveSampleNumber, rveSize, rvePosition):
         print('IsoHeat 1 d 1 k 1 c 0', file=f)
         print('IsoHeat 2 d 1 k 1e3 c 0', file=f)
 
-    bctype = 1
     if bctype == 1:
         # print('PrescribedGradient 1 loadTimeFunction 1 set 1 dofs 6 1 2 3 7 8 9 gradient 3 3 {0 0 1; 0 0 0; 1 0 0}', file=f)
         # print('MixedGradientPressureDirichlet 1 loadTimeFunction 1 set 1 dofs 6 1 2 3 7 8 9 devgradient 6 0 0 0 1 1 1 pressure 0', file=f)
-        #print('TMGradDirichlet 1 loadTimeFunction 1 centercoords 3 0 0 0 gradient 3 0 0 0.1 dofs 1 10 set 8 surfsets 6 1 2 3 4 5 6 usepsi', file=f)
-        print('TMGradDirichlet 1 loadTimeFunction 1 centercoords 3 0 0 0 gradient 3 0 0 0.1 dofs 1 10 set 8', file=f)
+        print('#TMGradDirichlet 1 loadTimeFunction 1 centercoords 3 0 0 0 gradient 3 0 0 1 dofs 1 10 set 8 surfsets 6 1 2 3 4 5 6 usexi', file=f)
+        print('TMGradDirichlet 1 loadTimeFunction 1 centercoords 3 0 0 0 gradient 3 0 0 1 dofs 1 10 set 8', file=f)
         print('BoundaryCondition 2 loadTimeFunction 1 values 1 0 dofs 1 10 set 0', file=f)
     elif bctype == 2:
         # print('MixedGradientPressureNeumann 1 loadTimeFunction 1 set 1 devgradient 6 0 0 0 1 1 1 pressure 0', file=f)
-        print('TMGradNeumann 1 loadTimeFunction 1 centercoords 3 0 0 0 gradient 3 0 0 0.1 dofs 1 10 surfsets 6 1 2 3 4 5 6 usephi', file=f)
+        print('#TMGradNeumann 1 loadTimeFunction 1 centercoords 3 0 0 0 gradient 3 0 0 1 dofs 1 10 surfsets 6 1 2 3 4 5 6 useeta', file=f)
+        print('TMGradNeumann 1 loadTimeFunction 1 centercoords 3 0 0 0 gradient 3 0 0 1 dofs 1 10 surfsets 6 1 2 3 4 5 6', file=f)
         print('BoundaryCondition 2 loadTimeFunction 1 values 1 0 dofs 1 10 set 7', file=f)
     elif bctype == 3:
-        print('TMGradPeriodic 1 loadTimeFunction 1 centercoords 3 0 0 0 gradient 3 0 0 0.1 jump 3 {0} {0} {0} dofs 1 10 set 9 masterset 10'.format(rveSize), file=f)
+        print('TMGradPeriodic 1 loadTimeFunction 1 centercoords 3 0 0 0 gradient 3 0 0 1 jump 3 {0} {0} {0} dofs 1 10 set 9 masterset 10'.format(rveSize), file=f)
         print('BoundaryCondition 2 loadTimeFunction 1 values 1 0 dofs 1 10 set 0', file=f)
     else:
         print('BoundaryCondition 1 loadTimeFunction 1 values 1 0 dofs 1 10 set 1', file=f)
@@ -233,14 +230,17 @@ seed = 0  # Controlled randomness
 # Generate inclusions:
 density = 0.1  # Minimum density
 averageRadius = 1  # Average inclusion radius
-boxSize = 20  # Max size of the domain with randomized particles. Computationally expensive to set it high.
+boxSize = 100  # Max size of the domain with randomized particles. Computationally expensive to set it high.
 inclusions = rveToolbox.generateSphericalInclusions(density, boxSize, averageRadius, averageRadius,
                                                     averageRadius*0.2, 3, seed)
 
 totalSamples = 1
-rveSize = 3
+rveSize = 10
+nelem = 7*rveSize
+bctype = 2
 
 for rveSampleNumber in range(totalSamples):
     print('Generating RVE', rveSampleNumber)
     rvePosition = np.random.random(3) * (boxSize - rveSize)
-    printRVE(rveSampleNumber, rveSize, rvePosition)
+    name = 'hex_size{}_sample{}_neumann'.format(rveSize, rveSampleNumber)
+    printRVE(name, rveSampleNumber, rveSize, rvePosition, nelem, bctype)

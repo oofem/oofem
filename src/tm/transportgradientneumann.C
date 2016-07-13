@@ -84,7 +84,7 @@ IRResultType TransportGradientNeumann :: initializeFrom(InputRecord *ir)
     this->mCenterCoord.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, mCenterCoord, _IFT_TransportGradientNeumann_centerCoords)
     
-    this->useVoigt = ir->hasField(_IFT_TransportGradientNeumann_useVoigt);
+    this->dispControl = ir->hasField(_IFT_TransportGradientNeumann_dispControl);
     
     return ActiveBoundaryCondition :: initializeFrom(ir);
 }
@@ -102,7 +102,7 @@ void TransportGradientNeumann :: postInitialize()
 {
     ActiveBoundaryCondition :: postInitialize();
     
-    if ( this->useVoigt ) this->computeEta();
+    if ( this->dispControl ) this->computeEta();
 }
 
 

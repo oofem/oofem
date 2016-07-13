@@ -50,7 +50,7 @@
 #define _IFT_TransportGradientDirichlet_centerCoords "centercoords"
 #define _IFT_TransportGradientDirichlet_surfSets "surfsets"
 #define _IFT_TransportGradientDirichlet_edgeSets "edgesets"
-#define _IFT_TransportGradientDirichlet_useReuss "usereuss"
+#define _IFT_TransportGradientDirichlet_tractionControl "usexi"
 //@}
 
 namespace oofem {
@@ -76,7 +76,7 @@ protected:
     FloatArray mGradient;
     FloatArray mCenterCoord;
 
-    bool useReuss;
+    bool tractionControl;
     /// Stores one "psi" value for each node
     std :: map< int, FloatArray > xis;
     IntArray surfSets;

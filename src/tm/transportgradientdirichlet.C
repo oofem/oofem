@@ -73,8 +73,8 @@ IRResultType TransportGradientDirichlet :: initializeFrom(InputRecord *ir)
     mCenterCoord.resize(3);
     IR_GIVE_OPTIONAL_FIELD(ir, mCenterCoord, _IFT_TransportGradientDirichlet_centerCoords);
 
-    this->useReuss = ir->hasField(_IFT_TransportGradientDirichlet_useReuss);
-    if ( this->useReuss ) {
+    this->tractionControl = ir->hasField(_IFT_TransportGradientDirichlet_tractionControl);
+    if ( this->tractionControl ) {
         IR_GIVE_FIELD(ir, surfSets, _IFT_TransportGradientDirichlet_surfSets);
         //IR_GIVE_FIELD(ir, edgeSets, _IFT_TransportGradientDirichlet_edgeSets);
     }
@@ -89,8 +89,8 @@ void TransportGradientDirichlet :: giveInputRecord(DynamicInputRecord &input)
     input.setField(mCenterCoord, _IFT_TransportGradientDirichlet_centerCoords);
     input.setField(surfSets, _IFT_TransportGradientDirichlet_surfSets);
     //input.setField(edgeSets, _IFT_TransportGradientDirichlet_edgeSets);
-    if ( this->useReuss ) {
-        input.setField(_IFT_TransportGradientDirichlet_useReuss);
+    if ( this->tractionControl ) {
+        input.setField(_IFT_TransportGradientDirichlet_tractionControl);
     }
 
     return GeneralBoundaryCondition :: giveInputRecord(input);
@@ -101,7 +101,7 @@ void TransportGradientDirichlet :: postInitialize()
 {
     BoundaryCondition :: postInitialize();
     
-    if ( this->useReuss ) this->computeXi();
+    if ( this->tractionControl ) this->computeXi();
 }
 
 
@@ -141,7 +141,7 @@ double TransportGradientDirichlet :: domainSize()
     Domain *domain = this->giveDomain();
     int nsd = domain->giveNumberOfSpatialDimensions();
     double domain_size = 0.0;
-    if ( this->useReuss ) {
+    if ( this->tractionControl ) {
         for ( auto &surf : this->surfSets ) {
             const IntArray &boundaries = domain->giveSet(surf)->giveBoundaryList();
 
@@ -185,7 +185,7 @@ void TransportGradientDirichlet :: computeCoefficientMatrix(FloatMatrix &C)
         if ( k1 ) {
             // Add "xi" if it is defined. Classical Dirichlet b.c. is retained if this isn't defined (or set to zero).
             FloatArray xi(nsd);
-            if ( this->useReuss ) {
+            if ( this->tractionControl ) {
                 xi = xis[n->giveNumber()];
             }
             for ( int i = 1; i <= nsd; ++i ) {
