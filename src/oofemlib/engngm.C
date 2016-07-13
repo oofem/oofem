@@ -1360,7 +1360,7 @@ contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mo
 
 
     for ( auto &domain: domainList ) {
-        domain->saveContext(*stream, mode, obj);
+        domain->saveContext(*stream, mode);
     }
 
 
@@ -1467,7 +1467,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
     }
 
     for ( auto &domain: domainList ) {
-        domain->restoreContext(*stream, mode, obj);
+        domain->restoreContext(*stream, mode);
     }
 
     // restore nMethod

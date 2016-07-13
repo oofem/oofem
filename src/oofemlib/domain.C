@@ -1618,7 +1618,7 @@ Domain :: giveTopology()
 #define DOMAIN_NCOMP 8
 
 contextIOResultType
-Domain :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+Domain :: saveContext(DataStream &stream, ContextMode mode)
 {
     contextIOResultType iores;
     int serNum;
@@ -1674,7 +1674,7 @@ Domain :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 
 
 contextIOResultType
-Domain :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+Domain :: restoreContext(DataStream &stream, ContextMode mode)
 {
     contextIOResultType iores;
     int serNum;
