@@ -444,6 +444,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, const Unkn
         total_nnz = 0;
         for ( int i = 0; i < leqs; i++ ) {
             d_nnz(i) = rows_upper [ i ].giveSize() + rows_lower [ i ].giveSize();
+            total_nnz += d_nnz(i);
         }
     }
 
@@ -452,8 +453,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, const Unkn
     MatSetSizes(mtrx, nRows, nColumns, nRows, nColumns);
     MatSetFromOptions(mtrx);
 
-    //printf("total_nnz = %d, nRows = %d, nColumns = %d, num = %d\n", total_nnz, nRows, nColumns, nRows*nColumns);
-    if ( total_nnz / nColumns > nRows / 10 ) { // More than 10% nnz, then we just force the dense matrix.
+    if ( total_nnz > (double)nRows * (double)nColumns / 10.0 ) { // More than 10% nnz, then we just force the dense matrix.
         MatSetType(mtrx, MATDENSE);
     } else {
         MatSetType(mtrx, MATSEQAIJ);
@@ -830,7 +830,9 @@ int
 PetscSparseMtrx :: assembleEnd()
 {
     this->newValues = true;
-    return MatAssemblyEnd(this->mtrx, MAT_FINAL_ASSEMBLY);
+    int val = MatAssemblyEnd(this->mtrx, MAT_FINAL_ASSEMBLY);
+    //MatShift(mtrx, 0);
+    return val;
 }
 
 
