@@ -57,6 +57,8 @@
 #include "gausspoint.h"
 #include "sparselinsystemnm.h"
 
+#include "timer.h" // Benchmarking
+
 #include <tuple>
 #include <vector>
 #include <algorithm>
@@ -249,21 +251,92 @@ void TransportGradientDirichlet :: computeTangent(FloatMatrix &tangent, TimeStep
     //Kfp->buildInternalStructure(rve, 1, fnum, pnum);
     Kpf->buildInternalStructure(rve, 1, pnum, fnum);
     Kpp->buildInternalStructure(rve, 1, pnum);
+
+    Timer t;
+    t.startTimer();
+#if 0
     rve->assemble(*Kff, tStep, TangentAssembler(TangentStiffness), fnum, this->domain);
     //rve->assemble(*Kfp, tStep, TangentAssembler(TangentStiffness), fnum, pnum, this->domain);
     rve->assemble(*Kpf, tStep, TangentAssembler(TangentStiffness), pnum, fnum, this->domain);
     rve->assemble(*Kpp, tStep, TangentAssembler(TangentStiffness), pnum, this->domain);
+#else
+    auto ma = TangentAssembler(TangentStiffness);
+    IntArray floc, ploc;
+    FloatMatrix mat, R;
 
-    FloatMatrix C, X, Kpfa, KfpC, a;
+    int nelem = domain->giveNumberOfElements();
+#ifdef _OPENMP
+ #pragma omp parallel for shared(Kff, Kpf, Kpp) private(mat, R, floc, ploc)
+#endif
+    for ( int ielem = 1; ielem <= nelem; ielem++ ) {
+        Element *element = domain->giveElement(ielem);
+        // skip remote elements (these are used as mirrors of remote elements on other domains
+        // when nonlocal constitutive models are used. They introduction is necessary to
+        // allow local averaging on domains without fine grain communication between domains).
+        if ( element->giveParallelMode() == Element_remote || !element->isActivated(tStep) ) {
+            continue;
+        }
+
+        ma.matrixFromElement(mat, *element, tStep);
+
+        if ( mat.isNotEmpty() ) {
+            ma.locationFromElement(floc, *element, fnum);
+            ma.locationFromElement(ploc, *element, pnum);
+            ///@todo This rotation matrix is not flexible enough.. it can only work with full size matrices and doesn't allow for flexibility in the matrixassembler.
+            if ( element->giveRotationMatrix(R) ) {
+                mat.rotatedWith(R);
+            }
+
+#ifdef _OPENMP
+ #pragma omp critical
+#endif
+            {
+                Kff->assemble(floc, mat);
+                Kpf->assemble(ploc, floc, mat);
+                Kpp->assemble(ploc, mat);
+            }
+        }
+    }
+    Kff->assembleBegin();
+    Kpf->assembleBegin();
+    Kpp->assembleBegin();
+
+    Kff->assembleEnd();
+    Kpf->assembleEnd();
+    Kpp->assembleEnd();
+#endif
+    t.stopTimer();
+    OOFEM_LOG_INFO("Assembly time %.3f s\n", t.getUtime());
+
+    FloatMatrix C, X, Kpfa, KfpC, sol;
 
     this->computeCoefficientMatrix(C);
     Kpf->timesT(C, KfpC);
-    solver->solve(*Kff, KfpC, a);
+    
+    // Initial guess (Taylor assumption) helps KSP-iterations
+    sol.resize(KfpC.giveNumberOfRows(), KfpC.giveNumberOfColumns());
+    int nsd = domain->giveNumberOfSpatialDimensions();
+    for ( auto &n : domain->giveDofManagers() ) {
+        int k1 = n->giveDofWithID( this->dofs(0) )->__giveEquationNumber();
+        if ( k1 ) {
+            FloatArray *coords = n->giveCoordinates();
+            for ( int i = 1; i <= nsd; ++i ) {
+                sol.at(k1, i) = -(coords->at(i) - mCenterCoord.at(i));
+            }
+        }
+    }
+
+    t.startTimer();
+    if ( solver->solve(*Kff, KfpC, sol) & NM_NoSuccess ) {
+        OOFEM_ERROR("Failed to solve Kff");
+    }
+    t.stopTimer();
     Kpp->times(C, X);
-    Kpf->times(a, Kpfa);
+    Kpf->times(sol, Kpfa);
     X.subtract(Kpfa);
     tangent.beTProductOf(C, X);
     tangent.times( 1. / this->domainSize() );
+    OOFEM_LOG_INFO("Tangent problem solve time %.3f s\n", t.getUtime());
 }
 
 void TransportGradientDirichlet :: computeXi()

@@ -220,9 +220,56 @@ void TransportGradientPeriodic :: computeTangent(FloatMatrix &k, TimeStep *tStep
     Kpp->buildInternalStructure(rve, this->domain->giveNumber(), pnum);
     //Kfp->buildInternalStructure(rve, neq, nsd, {}, {});
     //Kpp->buildInternalStructure(rve, nsd, nsd, {}, {});
+#if 0
     rve->assemble(*Kff, tStep, TangentAssembler(TangentStiffness), fnum, this->domain);
     rve->assemble(*Kfp, tStep, TangentAssembler(TangentStiffness), fnum, pnum, this->domain);
     rve->assemble(*Kpp, tStep, TangentAssembler(TangentStiffness), pnum, this->domain);
+#else
+    auto ma = TangentAssembler(TangentStiffness);
+    IntArray floc, ploc;
+    FloatMatrix mat, R;
+
+    int nelem = domain->giveNumberOfElements();
+#ifdef _OPENMP
+ #pragma omp parallel for shared(Kff, Kfp, Kpp) private(mat, R, floc, ploc)
+#endif
+    for ( int ielem = 1; ielem <= nelem; ielem++ ) {
+        Element *element = domain->giveElement(ielem);
+        // skip remote elements (these are used as mirrors of remote elements on other domains
+        // when nonlocal constitutive models are used. They introduction is necessary to
+        // allow local averaging on domains without fine grain communication between domains).
+        if ( element->giveParallelMode() == Element_remote || !element->isActivated(tStep) ) {
+            continue;
+        }
+
+        ma.matrixFromElement(mat, *element, tStep);
+
+        if ( mat.isNotEmpty() ) {
+            ma.locationFromElement(floc, *element, fnum);
+            ma.locationFromElement(ploc, *element, pnum);
+            ///@todo This rotation matrix is not flexible enough.. it can only work with full size matrices and doesn't allow for flexibility in the matrixassembler.
+            if ( element->giveRotationMatrix(R) ) {
+                mat.rotatedWith(R);
+            }
+
+#ifdef _OPENMP
+ #pragma omp critical
+#endif
+            {
+                Kff->assemble(floc, mat);
+                Kfp->assemble(floc, ploc, mat);
+                Kpp->assemble(ploc, mat);
+            }
+        }
+    }
+    Kff->assembleBegin();
+    Kfp->assembleBegin();
+    Kpp->assembleBegin();
+
+    Kff->assembleEnd();
+    Kfp->assembleEnd();
+    Kpp->assembleEnd();
+#endif
 
     FloatMatrix grad_pert(nsd, nsd), rhs, sol(neq, nsd);
     grad_pert.resize(nsd, nsd);
@@ -241,13 +288,21 @@ void TransportGradientPeriodic :: computeTangent(FloatMatrix &k, TimeStep *tStep
     // Compute the solution to each of the pertubation of eps
     Kfp->times(pert, rhs);
     //rhs.printYourself("rhs");
+
+    // Initial guess (Taylor assumption) helps KSP-iterations
+    for ( auto &n : domain->giveDofManagers() ) {
+        int k1 = n->giveDofWithID( this->dofs(0) )->__giveEquationNumber();
+        if ( k1 ) {
+            FloatArray *coords = n->giveCoordinates();
+            for ( int i = 1; i <= nsd; ++i ) {
+                sol.at(k1, i) = -(coords->at(i) - mCenterCoord.at(i));
+            }
+        }
+    }
+    
     if ( solver->solve(*Kff, rhs, sol) & NM_NoSuccess ) {
         OOFEM_ERROR("Failed to solve Kff");
     }
-    //FloatMatrix tmp;
-    //Kff->toFloatMatrix(tmp);
-    //tmp.printYourself("Kff");
-    //tmp.printYourselfToFile("Kff.txt");
     // Compute the solution to each of the pertubation of eps
     Kfp->timesT(sol, k); // Assuming symmetry of stiffness matrix
     // This is probably always zero, but for generality
