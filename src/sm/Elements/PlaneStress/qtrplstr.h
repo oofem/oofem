@@ -62,6 +62,7 @@ public:
 
     virtual Interface *giveInterface(InterfaceType it);
     virtual FEInterpolation *giveInterpolation() const;
+    virtual double giveParentElSize() const { return 0.5; }
 
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);

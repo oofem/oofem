@@ -25,6 +25,7 @@
 #include "intarray.h"
 #include "mathfem.h"
 #include "classfactory.h"
+#include "dynamicinputrecord.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -160,8 +161,9 @@ void TrPlaneStress2dXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatRespo
     TrPlaneStress2d :: computeStiffnessMatrix(answer, rMode, tStep);
     XfemStructuralElementInterface :: computeCohesiveTangent(answer, tStep);
 
-    const double tol = 1.0e-6;
-    const double regularizationCoeff = 1.0e-6;
+
+    const double tol = mRegCoeffTol;
+    const double regularizationCoeff = mRegCoeff;
     int numRows = answer.giveNumberOfRows();
     for(int i = 0; i < numRows; i++) {
         if( fabs(answer(i,i)) < tol ) {
@@ -181,6 +183,31 @@ TrPlaneStress2dXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
 {
     TrPlaneStress2d :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord);
     XfemStructuralElementInterface :: computeCohesiveForces(answer, tStep);
+
+
+#if 0
+    ////////////////////////////////////////////
+    // Contribution from regularization
+    FloatMatrix K;
+	computeStiffnessMatrix(K, TangentStiffness, tStep);
+
+    FloatArray u;
+    this->computeVectorOf(VM_Total, tStep, u);
+    // subtract initial displacements, if defined
+    if ( initialDisplacements ) {
+        u.subtract(* initialDisplacements);
+    }
+
+    const double tol = mRegCoeffTol+mRegCoeff;
+    const double regularizationCoeff = mRegCoeff;
+    int numRows = K.giveNumberOfRows();
+    for(int i = 0; i < numRows; i++) {
+        if( fabs(K(i,i)) < tol ) {
+            answer(i) += regularizationCoeff*u(i);
+//          printf("Found zero on diagonal.\n");
+        }
+    }
+#endif
 }
 
 
@@ -279,6 +306,18 @@ TrPlaneStress2dXFEM :: initializeFrom(InputRecord *ir)
     }
 
     result = XfemStructuralElementInterface :: initializeCZFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+
+    if(ir->hasField(_IFT_TrPlaneStress2dXFEM_RegCoeff) ) {
+		ir->giveOptionalField(mRegCoeff, _IFT_TrPlaneStress2dXFEM_RegCoeff);
+    }
+
+    if(ir->hasField(_IFT_TrPlaneStress2dXFEM_RegCoeffTol) ) {
+		ir->giveOptionalField(mRegCoeffTol, _IFT_TrPlaneStress2dXFEM_RegCoeffTol);
+    }
+
     return result;
 }
 
@@ -291,6 +330,10 @@ void TrPlaneStress2dXFEM :: giveInputRecord(DynamicInputRecord &input)
 {
     TrPlaneStress2d :: giveInputRecord(input);
     XfemStructuralElementInterface :: giveCZInputRecord(input);
+
+    input.setField(mRegCoeff, _IFT_TrPlaneStress2dXFEM_RegCoeff);
+    input.setField(mRegCoeffTol, _IFT_TrPlaneStress2dXFEM_RegCoeffTol);
+
 }
 
 
