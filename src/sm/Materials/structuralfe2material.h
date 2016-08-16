@@ -70,7 +70,7 @@ public:
     virtual ~StructuralFE2MaterialStatus() {}
 
     EngngModel *giveRVE() { return this->rve.get(); }
-    PrescribedGradientHomogenization *giveBC() { return this->bc; }
+    PrescribedGradientHomogenization *giveBC();// { return this->bc; }
 
     void markOldTangent();
     void computeTangent(TimeStep *tStep);

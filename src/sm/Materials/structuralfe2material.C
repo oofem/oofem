@@ -234,6 +234,12 @@ StructuralMaterialStatus(n, d, g)
     }
 }
 
+PrescribedGradientHomogenization* StructuralFE2MaterialStatus::giveBC()
+{
+	this->bc = dynamic_cast< PrescribedGradientHomogenization * >( this->rve->giveDomain(1)->giveBc(1) );
+	return this->bc;
+}
+
 
 bool
 StructuralFE2MaterialStatus :: createRVE(int n, GaussPoint *gp, const std :: string &inputfile)
