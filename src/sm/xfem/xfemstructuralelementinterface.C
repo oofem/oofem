@@ -65,7 +65,7 @@
 #include <string>
 #include <sstream>
 
-#define cz_bulk_corr
+//#define cz_bulk_corr
 
 //#define rotate_sve
 
@@ -178,6 +178,8 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                             mpCZIntegrationRules.emplace_back( new GaussIntegrationRule(czRuleNum, element) );
                             mpCZExtraIntegrationRules.emplace_back( new GaussIntegrationRule(czRuleNum, element) );
 
+                            size_t cz_rule_ind = mpCZIntegrationRules.size() - 1;
+
                             // Add index of current ei
                             mCZEnrItemIndices.push_back(eiIndex);
 
@@ -207,13 +209,13 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                                 -crackTang.at(2), crackTang.at(1)
                             };
 
-                            mpCZIntegrationRules [ segIndex ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode,
+                            mpCZIntegrationRules [ cz_rule_ind ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode,
                                                                                            crackPolygon [ segIndex ], crackPolygon [ segIndex + 1 ]);
 
-                            mpCZExtraIntegrationRules [ segIndex ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode,
+                            mpCZExtraIntegrationRules [ cz_rule_ind ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode,
                                                                                            crackPolygon [ segIndex ], crackPolygon [ segIndex + 1 ]);
 
-                            for ( GaussPoint *gp: *mpCZIntegrationRules [ segIndex ] ) {
+                            for ( GaussPoint *gp: *mpCZIntegrationRules [ cz_rule_ind ] ) {
                                 double gw = gp->giveWeight();
                                 double segLength = crackPolygon [ segIndex ].distance(crackPolygon [ segIndex + 1 ]);
                                 gw *= 0.5 * segLength;
@@ -268,7 +270,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
 
 
-                            for ( GaussPoint *gp: *mpCZExtraIntegrationRules [ segIndex ] ) {
+                            for ( GaussPoint *gp: *mpCZExtraIntegrationRules [ cz_rule_ind ] ) {
                                 double gw = gp->giveWeight();
                                 double segLength = crackPolygon [ segIndex ].distance(crackPolygon [ segIndex + 1 ]);
                                 gw *= 0.5 * segLength;
