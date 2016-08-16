@@ -684,7 +684,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
 double XfemStructuralElementInterface :: computeEffectiveSveSize(StructuralFE2MaterialStatus *iFe2Ms)
 {
-	const FloatArray &n = iFe2Ms->giveNormal();
+//	const FloatArray &n = iFe2Ms->giveNormal();
 //	printf("c: %e\n", c);
 
 //	return (1.0/c)*2.0*sqrt( iFe2Ms->giveBC()->domainSize() );
@@ -842,7 +842,7 @@ void XfemStructuralElementInterface :: computeCohesiveForces(FloatArray &answer,
 
 					FloatArray crackNormal( ms->giveNormal() );
 //					printf("crackNormal: "); crackNormal.printYourself();
-					double cnL = crackNormal.computeNorm();
+//					double cnL = crackNormal.computeNorm();
 //					if( fabs(cnL - 1.0) > 0.01 ) {
 //						printf("crackNormal: "); crackNormal.printYourself();
 //

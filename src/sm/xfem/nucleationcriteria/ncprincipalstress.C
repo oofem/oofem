@@ -152,8 +152,8 @@ std::vector<std::unique_ptr<EnrichmentItem>> NCPrincipalStress::nucleateEnrichme
 						            n2 = 1;
 						        }
 
-						        const FloatArray &p1 = *(el->giveDofManager(n1)->giveCoordinates());
-						        const FloatArray &p2 = *(el->giveDofManager(n2)->giveCoordinates());
+//						        const FloatArray &p1 = *(el->giveDofManager(n1)->giveCoordinates());
+//						        const FloatArray &p2 = *(el->giveDofManager(n2)->giveCoordinates());
 
 
 						    }
@@ -171,10 +171,10 @@ std::vector<std::unique_ptr<EnrichmentItem>> NCPrincipalStress::nucleateEnrichme
 
 						FloatArray points = {ps(0), ps(1), pc(0), pc(1), pe(0), pe(1)};
 
-						double diffX = 0.5*(ps(0) + pe(0)) - pc(0);
+//						double diffX = 0.5*(ps(0) + pe(0)) - pc(0);
 //						printf("diffX: %e\n", diffX);
 
-						double diffY = 0.5*(ps(1) + pe(1)) - pc(1);
+//						double diffY = 0.5*(ps(1) + pe(1)) - pc(1);
 //						printf("diffY: %e\n", diffY);
 
 
@@ -261,6 +261,8 @@ std::vector<std::unique_ptr<EnrichmentItem>> NCPrincipalStress::nucleateEnrichme
 
 							center_coord_inserted_cracks.push_back(pc);
 							eiList.push_back( std::unique_ptr<EnrichmentItem>(std::move(crack)) );
+
+							printf("Nucleating a crack.\n");
 
 							// We only introduce one crack per element in a single time step.
 							break;

@@ -64,16 +64,16 @@ IntElLine2IntPen :: initializeFrom(InputRecord *ir)
 
     // Check if node numbering is ok
 //    printf("this->dofManArray: "); this->dofManArray.printYourself();
-    DofManager *node1 = this->giveDofManager(1);
-    const FloatArray &x1 = *(node1->giveCoordinates());
+//    DofManager *node1 = this->giveDofManager(1);
+//    const FloatArray &x1 = *(node1->giveCoordinates());
 //    printf("x1: "); x1.printYourself();
 
-    DofManager *node2 = this->giveDofManager(2);
-    const FloatArray &x2 = *(node2->giveCoordinates());
+//    DofManager *node2 = this->giveDofManager(2);
+//    const FloatArray &x2 = *(node2->giveCoordinates());
 //    printf("x2: "); x2.printYourself();
 
-    DofManager *node3 = this->giveDofManager(3);
-    const FloatArray &x3 = *(node3->giveCoordinates());
+//    DofManager *node3 = this->giveDofManager(3);
+//    const FloatArray &x3 = *(node3->giveCoordinates());
 //    printf("x3: "); x3.printYourself();
 
 //    DofManager *node4 = this->giveDofManager(4);
@@ -82,10 +82,10 @@ IntElLine2IntPen :: initializeFrom(InputRecord *ir)
 
 //    IntArray nodeInd = {dofManArray.at(2), dofManArray.at(3), dofManArray.at(4)};
 
-    double L2 = x1.distance_square(x2);
+//    double L2 = x1.distance_square(x2);
 //    printf("L2: %e\n", L2);
 
-    double L3 = x1.distance_square(x3);
+//    double L3 = x1.distance_square(x3);
 //    printf("L3: %e\n", L3);
 
 //    double L4 = x1.distance_square(x4);

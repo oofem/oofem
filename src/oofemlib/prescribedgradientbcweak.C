@@ -861,7 +861,7 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
 
 
         	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            XfemManager *xMan = e->giveDomain()->giveXfemManager();
+//            XfemManager *xMan = e->giveDomain()->giveXfemManager();
 
             FEInterpolation *interp = e->giveInterpolation(); // Geometry interpolation
             IntArray edgeNodes;
@@ -2021,7 +2021,7 @@ void PrescribedGradientBCWeak :: giveMirroredPointOnGammaMinus(FloatArray &oPosM
 #if 1
 
 		const double distTol = 1.0e-12;
-		bool mappingPerformed = false;
+//		bool mappingPerformed = false;
 
 		FloatArray n = mPeriodicityNormal;
 		FloatArray t = {n(1),-n(0)};
@@ -2285,7 +2285,7 @@ else {
 #if 1
 
 	const double distTol = 1.0e-12;
-	bool mappingPerformed = false;
+//	bool mappingPerformed = false;
 
 	FloatArray n = mPeriodicityNormal;
 	FloatArray t = {n(1),-n(0)};
