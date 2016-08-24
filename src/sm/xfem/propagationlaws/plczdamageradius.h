@@ -53,6 +53,7 @@ class DynamicInputRecord;
  * Propagation law that propagates the (delamination) crack in a radius distance from element nodes
  * when the damage level in the associated cohesive zone reaces a defined value
  * Cracks w/o interface material as treated as fully damaged, thus will lead to propagation. 
+ * cf. Främby, Fagerström & Bouzoulis, 'Adaptive modelling of delamination initiation and propagation using an equivalent single-layer shell approach', IJNME, 2016  
  *
  * @author Johannes Främby
  */

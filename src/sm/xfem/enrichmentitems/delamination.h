@@ -46,6 +46,7 @@
 #define _IFT_Delamination_CohesiveZoneMaterial "czmaterial"
 #define _IFT_Delamination_initiationFactor "initiationfactor"
 #define _IFT_Delamination_initiationRadius "initiationradius"
+#define _IFT_Delamination_averageStresses "averageStresses"
 //@}
 
 namespace oofem {
@@ -66,9 +67,12 @@ protected:
     // New 110814 JB defines between what local xi-coords the delamination is defined
     double xiBottom;
     double xiTop;
-   
+    
+    // Adaptive enrichment, 
+    // cf. Främby, Fagerström & Bouzoulis, 'Adaptive modelling of delamination initiation and propagation using an equivalent single-layer shell approach', IJNME, 2016 
     double initiationFactor;   // knock-down factor on initiation values, (0,1] //JF
     double initiationRadius;   // radius around around newlye initiated element nodes to be included //JF
+    bool recoverStresses;      // recover tranverse stresses using momentum balance (default). //JF
 public:
     Delamination(int n, XfemManager *xm, Domain *aDomain);
 

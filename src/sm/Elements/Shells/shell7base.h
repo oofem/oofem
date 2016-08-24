@@ -98,7 +98,7 @@ public:
     LayeredCrossSection *giveLayeredCS() {return this->layeredCS; }
 
 protected:
-    // Recover transverse stresses using momentum balance, cf. Främby, Fagerström & Bouzoulis, 'Adaptive modelling of delamination initiation and propagation using an equivalent single-layer shell approach', 2016
+    // Recover transverse stresses using momentum balance, cf. Främby, Fagerström & Bouzoulis, 'Adaptive modelling of delamination initiation and propagation using an equivalent single-layer shell approach', IJNME, 2016
     bool recoverStress;
     
     virtual Interface *giveInterface(InterfaceType it);

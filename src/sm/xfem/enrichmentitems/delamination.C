@@ -66,6 +66,7 @@ Delamination :: Delamination(int n, XfemManager *xm, Domain *aDomain) : ListBase
     this->xiTop = -1.0;
     this->initiationFactor = 1e6; // a high number
     this->initiationRadius = 0.0;
+    this->recoverStresses = true; // default is to recover transverse stresses
 }
 
 int Delamination :: instanciateYourself(DataReader *dr)
@@ -299,8 +300,8 @@ Delamination :: findInitiationFronts(bool &failureChecked, const IntArray &CSnum
             
             if ( Shell7BaseXFEM *shellElt = dynamic_cast < Shell7BaseXFEM * > (elt) ) {
                 
-                bool recoverStresses = true;
-                shellElt->giveFailedInterfaceNumber(failedElementInterfaces, initiationFactors[iCS-1], tStep, recoverStresses);
+                //bool recoverStresses = true;
+                shellElt->giveFailedInterfaceNumber(failedElementInterfaces, initiationFactors[iCS-1], tStep, this->recoverStresses);
                 //failedElementInterfaces.printYourself("failedElementInterfaces");
                 for (int eltInt : failedElementInterfaces ) {
                     CSinterfaceNumbers[iCS-1].insertSortedOnce(eltInt);
@@ -359,6 +360,10 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
     // Compute the delamination xi-coord
     IR_GIVE_FIELD(ir, this->interfaceNum, _IFT_Delamination_interfacenum); // interface number from the bottom
     IR_GIVE_FIELD(ir, this->crossSectionNum, _IFT_Delamination_csnum);
+    if ( ir->hasField(_IFT_Delamination_averageStresses) ) {
+        this->recoverStresses = false;
+        printf("averageStresses");
+    }
     
 #if 1
     // update: csnum is now an IntArray of cross sections viable for delamination
@@ -514,7 +519,10 @@ Delamination :: appendInputRecords(DynamicDataReader &oDR)
     eiRec->setField(this->crossSectionNum, _IFT_Delamination_csnum);
     eiRec->setField(this->matNum, _IFT_Delamination_CohesiveZoneMaterial);
     eiRec->setField(this->initiationFactor, _IFT_Delamination_initiationFactor);
-    eiRec->setField(this->initiationRadius, _IFT_Delamination_initiationRadius);
+    eiRec->setField(this->initiationRadius, _IFT_Delamination_initiationRadius);    
+    if ( !eiRec->hasField(_IFT_Delamination_averageStresses) ) {
+        recoverStresses = false;
+    }
 
 
     oDR.insertInputRecord(DataReader :: IR_enrichItemRec, eiRec);
