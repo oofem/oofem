@@ -56,15 +56,17 @@ FEI3dWedgeQuad Shell7Base :: interpolationForExport;
 
 
 Shell7Base :: Shell7Base(int n, Domain *aDomain) : NLStructuralElement(n, aDomain),  LayeredCrossSectionInterface(), 
-    VTKXMLExportModuleElementInterface(), ZZNodalRecoveryModelInterface(this), FailureModuleElementInterface()
-    {
-        this->recoverStress = 0;
-    }
+    VTKXMLExportModuleElementInterface(), ZZNodalRecoveryModelInterface(this), FailureModuleElementInterface(),
+    recoverStress(false) 
+    {}
 
 IRResultType Shell7Base :: initializeFrom(InputRecord *ir)
 {
     IRResultType result = NLStructuralElement :: initializeFrom(ir);
-    IR_GIVE_OPTIONAL_FIELD(ir, this->recoverStress, _IFT_Shell7base_recoverStress);
+    //IR_GIVE_OPTIONAL_FIELD(ir, this->recoverStress, _IFT_Shell7base_recoverStress);
+    if ( ir->hasField(_IFT_Shell7base_recoverStress) ) {
+        this->recoverStress = true;
+    }
     return result;
 
 }
@@ -104,6 +106,17 @@ Shell7Base :: postInitialize()
     
     this->nlGeometry = 1;
 }
+
+void 
+Shell7Base::printOutputAt(FILE* file, TimeStep* tStep)
+{
+    if ( recoverStress ) {
+        // Recover shear stresses
+        this->recoverShearStress(tStep);
+    }
+    oofem::Element::printOutputAt(file, tStep);
+}
+
 
 
 Interface *Shell7Base :: giveInterface(InterfaceType it)
@@ -804,25 +817,25 @@ Shell7Base :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatA
             const FloatArray &lCoords = gp->giveNaturalCoordinates();
             this->computeBmatrixAt(lCoords, B);
             genEps.beProductOf(B, solVec);
-            if (0 && this->giveNumber() == 50 && (gp->giveNumber() % 6 == 4) ) {
-                printf("gp num %d, layer %d\n", gp->giveNumber(), layer);
-                //lCoords.printYourself("GP-coords");
-                //genEps.printYourself("eps");
-                tempgenEps -= genEps;
-                tempgenEps.printYourself("diff genEps");
-                
-                FloatMatrix P, F, E;
-                
-                this->computeFAt(gp->giveNaturalCoordinates(), F, genEps, tStep);E.beTProductOf(F, F);
-                E.at(1, 1) -= 1.0;
-                E.at(2, 2) -= 1.0;
-                E.at(3, 3) -= 1.0;
-                E.times(0.5);
-                E.printYourself("E");
-                this->computeStressMatrix(P, genEps, gp, mat, tStep);
-                P.printYourself("P");
-                tempgenEps = genEps;
-            }
+//             if (0 && this->giveNumber() == 50 && (gp->giveNumber() % 6 == 4) ) {
+//                 printf("gp num %d, layer %d\n", gp->giveNumber(), layer);
+//                 //lCoords.printYourself("GP-coords");
+//                 //genEps.printYourself("eps");
+//                 tempgenEps -= genEps;
+//                 tempgenEps.printYourself("diff genEps");
+//                 
+//                 FloatMatrix P, F, E;
+//                 
+//                 this->computeFAt(gp->giveNaturalCoordinates(), F, genEps, tStep);E.beTProductOf(F, F);
+//                 E.at(1, 1) -= 1.0;
+//                 E.at(2, 2) -= 1.0;
+//                 E.at(3, 3) -= 1.0;
+//                 E.times(0.5);
+//                 E.printYourself("E");
+//                 this->computeStressMatrix(P, genEps, gp, mat, tStep);
+//                 P.printYourself("P");
+//                 tempgenEps = genEps;
+//             }
 
             double zeta = giveGlobalZcoord(lCoords);
             this->computeSectionalForcesAt(N, gp, mat, tStep, genEps, zeta); // these are per unit volume
@@ -1959,11 +1972,10 @@ Shell7Base :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExp
         InternalStateType type = ( InternalStateType ) internalVarsToExport.at(fieldNum);
         nodeNum = 1;
         
-        // if ( recoverStress ) {
-        if ( 1 ) {
-        // Recover shear stresses
-        this->recoverShearStress(tStep);
-        }
+//         if ( recoverStress ) {
+//         // Recover shear stresses
+//         this->recoverShearStress(tStep);
+//         }
         
         for ( int layer = 1; layer <= numCells; layer++ ) {            
             recoverValuesFromIP(values, layer, type, tStep);        

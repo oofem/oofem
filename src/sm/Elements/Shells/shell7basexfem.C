@@ -2303,9 +2303,9 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
     std::vector<FloatArray> values;
     for ( int fieldNum = 1; fieldNum <= primaryVarsToExport.giveSize(); fieldNum++ ) {
         
-        //if ( recoverStress ) {
-        if ( 0 ) {
+        if ( recoverStress ) {
         // Recover shear stresses
+        //printf("Shell7BaseXFEM: recover shear stress function \n");
         this->recoverShearStress(tStep);
         }
         

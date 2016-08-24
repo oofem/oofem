@@ -77,6 +77,7 @@ public:
     virtual int computeNumberOfDofs() { return this->giveNumberOfDofs(); }
     virtual int checkConsistency();
     virtual void postInitialize();
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     // Definition & identification
     virtual const char *giveClassName() const { return "Shell7Base"; }
@@ -97,7 +98,8 @@ public:
     LayeredCrossSection *giveLayeredCS() {return this->layeredCS; }
 
 protected:
-    int recoverStress;
+    // Recover transverse stresses using momentum balance, cf. Främby, Fagerström & Bouzoulis, 'Adaptive modelling of delamination initiation and propagation using an equivalent single-layer shell approach', 2016
+    bool recoverStress;
     
     virtual Interface *giveInterface(InterfaceType it);
     LayeredCrossSection *layeredCS;
