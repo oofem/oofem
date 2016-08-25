@@ -258,7 +258,7 @@ Delamination :: propagateFronts(bool &oFrontsHavePropagated)
             p = std :: find( this->dofManList.begin(), this->dofManList.end(), inode );
             if ( p == this->dofManList.end() ) {          // if new node
                 if ( !printed ) {
-                    printf("\n Enrichment %i - The following nodes will be propagated to:",this->giveNumber());
+                    printf("\n Enrichment %i - The following nodes will be expanded to:",this->giveNumber());
                     printed = true;
                 }
                 printf(" %i", inode );
@@ -362,7 +362,7 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, this->crossSectionNum, _IFT_Delamination_csnum);
     if ( ir->hasField(_IFT_Delamination_averageStresses) ) {
         this->recoverStresses = false;
-        printf("averageStresses");
+        //printf("averageStresses");
     }
     
 #if 1

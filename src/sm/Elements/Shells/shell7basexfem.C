@@ -2303,11 +2303,11 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
     std::vector<FloatArray> values;
     for ( int fieldNum = 1; fieldNum <= primaryVarsToExport.giveSize(); fieldNum++ ) {
         
-        if ( recoverStress ) {
-        // Recover shear stresses
-        //printf("Shell7BaseXFEM: recover shear stress function \n");
-        this->recoverShearStress(tStep);
-        }
+//         if ( recoverStress ) {
+//         // Recover shear stresses
+//         //printf("Shell7BaseXFEM: recover shear stress function \n");
+//         this->recoverShearStress(tStep);
+//         }
         
         UnknownType type = ( UnknownType ) primaryVarsToExport.at(fieldNum);
         nodeNum = 1;
@@ -3141,9 +3141,7 @@ Shell7BaseXFEM :: recoverShearStress(TimeStep *tStep)
 #endif
 
                     CZPKtraction.rotatedWith(Q,'t'); // transform back to global coord system
-                    if (this->giveGlobalNumber() == 9 ) {
-                        CZPKtraction.printYourself("CZPKtraction"); 
-                    }
+                    //if (this->giveGlobalNumber() == 9 ) { CZPKtraction.printYourself("CZPKtraction");}
                     
                     // Set BC stresses
                     tractionBC[iDel].at(1,iIGP) = CZPKtraction.at(1);
@@ -3156,7 +3154,7 @@ Shell7BaseXFEM :: recoverShearStress(TimeStep *tStep)
                 // Delamination zero traction
                 tractionBC[iDel].zero();
             }
-            if (this->giveGlobalNumber() == 50) {tractionBC[iDel].printYourself("tractionDel");}
+            //if (this->giveGlobalNumber() == 50) {tractionBC[iDel].printYourself("tractionDel");}
         } 
         
         FloatMatrix SmatOld(3,numInPlaneIP); // 3 stress components (S_xz, S_yz, S_zz) * num of in plane ip 
@@ -3421,9 +3419,9 @@ Shell7BaseXFEM :: giveFailedInterfaceNumber(IntArray &failedInterfaces, FloatArr
     this->DelaminatedInterfaceList.followedBy(failedInterfaces);
     this->DelaminatedInterfaceList.sort();            
     if (failedInterfaces.giveSize() > 0) {
-        printf(" Element %i failed in interface:",this->giveGlobalNumber() );//                 
+        printf(" Delamination criterion was activated in element %i : \n",this->giveGlobalNumber() );//                 
         for (auto iInterface : failedInterfaces) {
-            printf(" %i - NM = %f, S = %f \n",iInterface,failurestresses.at(1,iInterface),failurestresses.at(2,iInterface));
+            printf(" Interface %i - NM = %f, S = %f \n",iInterface,failurestresses.at(1,iInterface),failurestresses.at(2,iInterface));
         }
         printf("\n");
     }
