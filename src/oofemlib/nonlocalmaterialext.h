@@ -183,7 +183,7 @@ protected:
     ScalingType scaling;
 
     /// Type characterizing the averaged (nonlocal) variable.
-    enum AveragedVarType { AVT_Unknown, AVT_EqStrain, AVT_Compliance };
+    enum AveragedVarType { AVT_Unknown, AVT_EqStrain, AVT_Compliance, AVT_Damage };
     /// Parameter specifying the type of averaged (nonlocal) variable.
     AveragedVarType averagedVar;
 
@@ -219,7 +219,7 @@ protected:
      * if the distance between the receiver and the source is smaller than the interaction radius
      * but also if the source point shifted by -px or +px satisfies this condition.
      * This is useful if the mesh represents a periodic cell.
-     */ 
+     */
     double px;
 
 public:
@@ -227,7 +227,7 @@ public:
      * Constructor. Creates material with given number, belonging to given domain.
      * @param d Domain to which new material will belong.
      */
-    NonlocalMaterialExtensionInterface(Domain * d);
+    NonlocalMaterialExtensionInterface(Domain *d);
     /// Destructor.
     virtual ~NonlocalMaterialExtensionInterface() { }
 
