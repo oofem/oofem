@@ -52,11 +52,11 @@ Set 5 nodes 1 9
 ## XFEM 
 XfemManager 1 numberofenrichmentitems 4 debugvtk 0  
 #
-delamination 1 interfacenum 2 1 2 csnum 1 
+delamination 1 interfacenum 2 1 2 csnum 1 1
 DiscontinuousFunction 1 
 DofManList 1 list 9  1 2 3 4 5 6 7 8 9
 #
-delamination 2 interfacenum 1 2 csnum 1 
+delamination 2 interfacenum 1 2 csnum 1 1
 DiscontinuousFunction 1 
 DofManList 1 list 9  1 2 3 4 5 6 7 8 9
 #
