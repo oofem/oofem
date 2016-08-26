@@ -121,8 +121,8 @@ void
 IDNLMaterial :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
 {
     IDNLMaterialStatus *nonlocStatus, *status = static_cast< IDNLMaterialStatus * >( this->giveStatus(gp) );
-    std :: list< localIntegrationRecord > *list = this->giveIPIntegrationList(gp);
-    std :: list< localIntegrationRecord > :: iterator pos, postarget;
+    auto list = this->giveIPIntegrationList(gp);
+    std :: vector< localIntegrationRecord > :: iterator pos, postarget;
 
     // find the current Gauss point (target) in the list of it neighbors
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
@@ -429,7 +429,7 @@ IDNLMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain,
     // compute nonlocal equivalent strain
     // or nonlocal compliance variable gamma (depending on averagedVar)
 
-    std :: list< localIntegrationRecord > *list = this->giveIPIntegrationList(gp); // !
+    auto list = this->giveIPIntegrationList(gp); // !
 
     double sigmaRatio = 0.; //ratio sigma2/sigma1 used for stress-based averaging
     double nx, ny; //components of the first principal stress direction (for stress-based averaging)
@@ -616,7 +616,7 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx 
 {
     double coeff;
     IDNLMaterialStatus *status = static_cast< IDNLMaterialStatus * >( this->giveStatus(gp) );
-    std :: list< localIntegrationRecord > *list = status->giveIntegrationDomainList();
+    auto list = status->giveIntegrationDomainList();
     IDNLMaterial *rmat;
     FloatArray rcontrib, lcontrib;
     IntArray loc, rloc;
@@ -655,7 +655,7 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx 
     }
 }
 
-std :: list< localIntegrationRecord > *
+std :: vector< localIntegrationRecord > *
 IDNLMaterial :: NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(GaussPoint *gp)
 {
     IDNLMaterialStatus *status = static_cast< IDNLMaterialStatus * >( this->giveStatus(gp) );
@@ -697,7 +697,7 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(Gauss
     gp->giveElement()->giveLocationArray( loc, EModelDefaultEquationNumbering() );
 
     int n, m;
-    std :: list< localIntegrationRecord > *list = status->giveIntegrationDomainList();
+    auto list = status->giveIntegrationDomainList();
     for ( auto &lir : *list ) {
         rmat = dynamic_cast< IDNLMaterial * >( lir.nearGp->giveMaterial() );
         if ( rmat ) {

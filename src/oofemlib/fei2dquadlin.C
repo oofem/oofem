@@ -95,13 +95,13 @@ FEI2dQuadLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const F
 void
 FEI2dQuadLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    const double &ksi = lcoords.at(1);
-    const double &eta = lcoords.at(2);
+    double ksi = lcoords.at(1);
+    double eta = lcoords.at(2);
 
-    const double n1 = ( 1. + ksi ) * ( 1. + eta ) * 0.25;
-    const double n2 = ( 1. - ksi ) * ( 1. + eta ) * 0.25;
-    const double n3 = ( 1. - ksi ) * ( 1. - eta ) * 0.25;
-    const double n4 = ( 1. + ksi ) * ( 1. - eta ) * 0.25;
+    double n1 = ( 1. + ksi ) * ( 1. + eta ) * 0.25;
+    double n2 = ( 1. - ksi ) * ( 1. + eta ) * 0.25;
+    double n3 = ( 1. - ksi ) * ( 1. - eta ) * 0.25;
+    double n4 = ( 1. + ksi ) * ( 1. - eta ) * 0.25;
 
     const FloatArray* const p1 = cellgeo.giveVertexCoordinates(1);
     const FloatArray* const p2 = cellgeo.giveVertexCoordinates(2);

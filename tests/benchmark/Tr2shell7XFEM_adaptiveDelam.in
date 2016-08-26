@@ -1,5 +1,5 @@
 ## 1. Output file
-FEM21.out
+Tr2shell7XFEM_adaptiveDelam.out
 ## 2. Job description
 Adaptive XFEM delamination in shell7. cf Främby, Fagerström & Bouzoulis, 'Adaptive modelling of delamination initiation and propagation using an equivalent single-layer shell approach', IJNME, 2016
 #

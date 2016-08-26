@@ -166,7 +166,7 @@ RankineMatNl :: computeCumPlasticStrain(double &kappa, GaussPoint *gp, TimeStep 
     this->updateDomainBeforeNonlocAverage(tStep);
     double localCumPlasticStrain = status->giveLocalCumPlasticStrainForAverage();
     // compute nonlocal cumulative plastic strain
-    std :: list< localIntegrationRecord > *list = this->giveIPIntegrationList(gp);
+    auto list = this->giveIPIntegrationList(gp);
 
     for ( auto &lir: *list ) {
         nonlocStatus = static_cast< RankineMatNlStatus * >( this->giveStatus(lir.nearGp) );
@@ -259,7 +259,7 @@ RankineMatNl :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx 
 {
     double coeff;
     RankineMatNlStatus *status = static_cast< RankineMatNlStatus * >( this->giveStatus(gp) );
-    std :: list< localIntegrationRecord > *list = status->giveIntegrationDomainList();
+    auto list = status->giveIntegrationDomainList();
     RankineMatNl *rmat;
     FloatArray rcontrib, lcontrib;
     IntArray loc, rloc;
@@ -283,7 +283,7 @@ RankineMatNl :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx 
     }
 }
 
-std :: list< localIntegrationRecord > *
+std :: vector< localIntegrationRecord > *
 RankineMatNl :: NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(GaussPoint *gp)
 {
     RankineMatNlStatus *status = static_cast< RankineMatNlStatus * >( this->giveStatus(gp) );

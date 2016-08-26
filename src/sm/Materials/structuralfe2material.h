@@ -32,8 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef tutorialmaterial_h
-#define tutorialmaterial_h
+#ifndef structuralfe2material_h
+#define structuralfe2material_h
 
 #include "Materials/structuralmaterial.h"
 #include "Materials/structuralms.h"
@@ -62,6 +62,9 @@ protected:
     FloatMatrix tangent;
     bool oldTangent;
 
+    /// Interface normal direction
+    FloatArray mNormalDir;
+
 public:
     StructuralFE2MaterialStatus(int n, Domain * d, GaussPoint * g,  const std :: string & inputfile);
     virtual ~StructuralFE2MaterialStatus() {}
@@ -88,6 +91,11 @@ public:
 
     virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+
+    const FloatArray &giveNormal() const { return mNormalDir; }
+    void letNormalBe(FloatArray iN) { mNormalDir = std :: move(iN); }
+
+    double giveRveLength();
 };
 
     
@@ -119,7 +127,6 @@ public:
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return true; }
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
-    const void giveDeviatoricProjectionMatrix(FloatMatrix &answer);
     // stress computation methods
     virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
     
@@ -127,4 +134,4 @@ public:
 };
 
 } // end namespace oofem
-#endif // structuralfe2material
+#endif // structuralfe2material_h

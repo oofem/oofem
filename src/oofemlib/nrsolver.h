@@ -99,7 +99,6 @@ protected:
 
     int nsmax, minIterations;
     double minStepLength;
-    int solved;
     nrsolver_ModeType NR_Mode, NR_OldMode;
     int NR_ModeTick;
     int MANRMSteps;

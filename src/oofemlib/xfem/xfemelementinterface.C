@@ -65,20 +65,24 @@ XfemElementInterface :: ~XfemElementInterface()
 
 void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl)
 {
-    ComputeBOrBHMatrix(oAnswer, iGP, iEl, false);
+    ComputeBOrBHMatrix(oAnswer, iGP, iEl, false, iGP.giveNaturalCoordinates());
 }
 
 void XfemElementInterface :: XfemElementInterface_createEnrBHmatrixAt(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl)
 {
-    ComputeBOrBHMatrix(oAnswer, iGP, iEl, true);
+    ComputeBOrBHMatrix(oAnswer, iGP, iEl, true, iGP.giveNaturalCoordinates());
 }
 
-void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl, bool iComputeBH)
+void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl, bool iComputeBH, const FloatArray &iNaturalGpCoord)
 {
     /*
      * Computes the B or BH matrix.
      * iComputeBH = true implies that BH is computed,
      * while B is computed if iComputeBH = false.
+     *
+     * We could take the natural coordinates directly from the Gauss point instead of entering them separately.
+     * However, there are situations where one wants to add a small perturbation to the coordinates and hence
+     * it is easier to enter them separately.
      */
     const int dim = 2;
     const int nDofMan = iEl.giveNumberOfDofManagers();
@@ -97,8 +101,8 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
     FloatArray N;
     FEInterpolation *interp = iEl.giveInterpolation();
     const FEIElementGeometryWrapper geomWrapper(& iEl);
-    interp->evaldNdx(dNdx, iGP.giveNaturalCoordinates(), geomWrapper);
-    interp->evalN(N, iGP.giveNaturalCoordinates(), geomWrapper);
+    interp->evaldNdx(dNdx, iNaturalGpCoord, geomWrapper);
+    interp->evalN(N, iNaturalGpCoord, geomWrapper);
 
     const IntArray &elNodes = iEl.giveDofManArray();
 
@@ -173,10 +177,10 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
 
                     // Enrichment function derivative in Gauss point
                     std :: vector< FloatArray >efgpD;
-                    ei->evaluateEnrFuncDerivAt(efgpD, globalCoord, iGP.giveNaturalCoordinates(), globalNodeInd, * element, N, dNdx, elNodes);
+                    ei->evaluateEnrFuncDerivAt(efgpD, globalCoord, iNaturalGpCoord, globalNodeInd, * element, N, dNdx, elNodes);
                     // Enrichment function in Gauss Point
                     std :: vector< double >efGP;
-                    ei->evaluateEnrFuncAt(efGP, globalCoord, iGP.giveNaturalCoordinates(), globalNodeInd, * element, N, elNodes);
+                    ei->evaluateEnrFuncAt(efGP, globalCoord, iNaturalGpCoord, globalNodeInd, * element, N, elNodes);
 
 
                     const FloatArray &nodePos = node->giveNodeCoordinates();

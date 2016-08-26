@@ -146,8 +146,8 @@ void
 MisesMatNl :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
 {
     MisesMatNlStatus *nonlocStatus, *status = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
-    std :: list< localIntegrationRecord > *list = this->giveIPIntegrationList(gp);
-    std :: list< localIntegrationRecord > :: iterator pos, postarget;
+    auto list = this->giveIPIntegrationList(gp);
+    std :: vector< localIntegrationRecord > :: iterator pos, postarget;
 
     // find the current Gauss point (target) in the list of it neighbors
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
@@ -250,7 +250,7 @@ MisesMatNl :: computeCumPlasticStrain(double &kappa, GaussPoint *gp, TimeStep *t
     this->updateDomainBeforeNonlocAverage(tStep);
     double localCumPlasticStrain = status->giveLocalCumPlasticStrainForAverage();
     // compute nonlocal cumulative plastic strain
-    std :: list< localIntegrationRecord > *list = this->giveIPIntegrationList(gp);
+    auto list = this->giveIPIntegrationList(gp);
 
     for ( auto &lir: *list ) {
         nonlocStatus = static_cast< MisesMatNlStatus * >( this->giveStatus(lir.nearGp) );
@@ -362,7 +362,7 @@ MisesMatNl :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &d
 {
     double coeff;
     MisesMatNlStatus *status = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
-    std :: list< localIntegrationRecord > *list = status->giveIntegrationDomainList();
+    auto list = status->giveIntegrationDomainList();
     MisesMatNl *rmat;
     FloatArray rcontrib, lcontrib;
     IntArray loc, rloc;
@@ -387,7 +387,7 @@ MisesMatNl :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &d
 }
 
 
-std :: list< localIntegrationRecord > *
+std :: vector< localIntegrationRecord > *
 MisesMatNl :: NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(GaussPoint *gp)
 {
     MisesMatNlStatus *status = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );

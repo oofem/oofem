@@ -764,9 +764,8 @@ double CBS :: giveVariableScale(VarScaleType varID)
 }
 
 #if 0
-void CBS :: printOutputAt(FILE *File, TimeStep *tStep)
+void CBS :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-    //FILE* File = this->giveDomain()->giveOutputStream();
     int domCount = 0;
     // fprintf (File,"\nOutput for time step number %d \n\n",tStep->giveNumber());
     for ( auto &domain: this->domainList ) {
@@ -779,9 +778,9 @@ void CBS :: printOutputAt(FILE *File, TimeStep *tStep)
 
     fprintf( File, "\nOutput for time % .8e \n\n", tStep->giveTime() / this->giveVariableScale(VST_Time) );
     for ( auto &domain: this->domainList ) {
-        fprintf( File, "\nOutput for domain %3d\n", domain->giveNumber() );
-        domain->giveOutputManager()->doDofManOutput(File, tStep);
-        domain->giveOutputManager()->doElementOutput(File, tStep);
+        fprintf(file, "\nOutput for domain %3d\n", domain->giveNumber() );
+        domain->giveOutputManager()->doDofManOutput(file, tStep);
+        domain->giveOutputManager()->doElementOutput(file, tStep);
     }
 }
 #endif

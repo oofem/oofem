@@ -44,12 +44,10 @@ namespace oofem {
 /**
  * This class implements an Quadratic isoparametric eight-node quadrilateral plane-
  * stress phase field finite element. Each node has 3 degrees of freedom.
- * TODO in development
+ * @todo in development
  */
 class QPlaneStressPhF2d : public QPlaneStress2d, public PhaseFieldElement
 {
-protected:
-
 public:
     QPlaneStressPhF2d(int n, Domain *d);
     virtual ~QPlaneStressPhF2d() { }
@@ -74,9 +72,6 @@ public:
     {
         PhaseFieldElement :: giveInternalForcesVector( answer, tStep, useUpdatedGpRecord );
     }
-protected:
-
-    
 };
 } // end namespace oofem
 #endif // qplanstrss_h

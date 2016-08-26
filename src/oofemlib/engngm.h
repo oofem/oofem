@@ -344,7 +344,9 @@ public:
     /// Returns number of domains in problem.
     int giveNumberOfDomains() { return (int)domainList.size(); }
 
-    bool giveSuppressOutput() const {return suppressOutput;}
+    const std :: string &giveDescription() const { return simulationDescription; }
+    const time_t &giveStartTime() { return startTime; }
+    bool giveSuppressOutput() const { return suppressOutput; }
 
     /** Service for accessing ErrorEstimator corresponding to particular domain */
     virtual ErrorEstimator *giveDomainErrorEstimator(int n) { return defaultErrEstimator; }

@@ -209,7 +209,6 @@ StructuralMaterial :: giveRealStressVector_ShellStressControl(FloatArray &answer
     // step 0: vE = {., ., 0, ., ., .}
     // step n: vE = {., ., sum(ve(n)), ., ., .}
 
-
     // Iterate to find full vE.
     for ( int k = 0; k < 100; k++ ) { // Allow for a generous 100 iterations.
         this->giveRealStressVector_3d(answer, gp, vE, tStep);
@@ -1365,34 +1364,29 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
         int n;
         if ( solve ){
             cubic3r( ( double ) -1., I1, -I2, I3, & s1, & s2, & s3, & n );
-        }
+            if ( n > 0 ) {
+                answer.at(1) = s1;
+            }
 
-        if ( n > 0 ) {
-            answer.at(1) = s1;
-        }
+            if ( n > 1 ) {
+                answer.at(2) = s2;
+            }
 
-        if ( n > 1 ) {
-            answer.at(2) = s2;
-        }
+            if ( n > 2 ) {
+                answer.at(3) = s3;
+            }
 
-        if ( n > 2 ) {
-            answer.at(3) = s3;
+#if 0
+            //Check NaN
+            if (answer.at(1) != answer.at(1)) {
+                s.pY();
+                printf("%.10e %.10e %.10e\n", I1, I2, I3);
+                exit(0);
+            }
+#endif
         }
-    
-         //Check NaN
-//     if (answer.at(1)  != answer.at(1)) {
-//         s.pY();
-//         printf("%.10e %.10e %.10e\n", I1, I2, I3);
-//         exit(0);
-//     }
-//         
-        
         
     }
-
-   
-    
-    
     
     //sort the results
     for ( int i = 1; i < answer.giveSize(); i++ ) {
@@ -2411,10 +2405,7 @@ StructuralMaterial :: giveReducedVectorForm(FloatArray &answer, const FloatArray
 {
     IntArray indx;
     StructuralMaterial :: giveVoigtVectorMask(indx, matMode);
-    answer.resize( indx.giveSize() );
-    for ( int i = 1; i <= indx.giveSize(); i++ ) {
-        answer.at(i) = vec.at( indx.at(i) );
-    }
+    answer.beSubArrayOf(vec, indx);
 }
 
 
@@ -2427,10 +2418,7 @@ StructuralMaterial :: giveReducedSymVectorForm(FloatArray &answer, const FloatAr
     if ( indx.giveSize() == vec.giveSize() ) {
         answer = vec;
     } else {
-        answer.resize( indx.giveSize() );
-        for ( int i = 1; i <= indx.giveSize(); i++ ) {
-            answer.at(i) = vec.at( indx.at(i) );
-        }
+        answer.beSubArrayOf(vec, indx);
     }
 }
 

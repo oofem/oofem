@@ -39,6 +39,7 @@
 #include "engngm.h"
 #include "floatarray.h"
 #include "verbose.h"
+#include "domain.h"
 
 #ifdef TIME_REPORT
  #include "timer.h"
@@ -62,18 +63,15 @@ SLEPcSolver :: ~SLEPcSolver()
 NM_Status
 SLEPcSolver :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, FloatMatrix &_r, double rtol, int nroot)
 {
-    FILE *outStream;
     PetscErrorCode ierr;
     int size;
     ST st;
 
-    outStream = domain->giveEngngModel()->giveOutputStream();
-
     // first check whether Lhs is defined
 
-    if ( a->giveNumberOfRows() != a->giveNumberOfColumns() ||
-        b->giveNumberOfRows() != b->giveNumberOfRows() ||
-        a->giveNumberOfColumns() != b->giveNumberOfColumns() ) {
+    if ( a.giveNumberOfRows() != a.giveNumberOfColumns() ||
+        b.giveNumberOfRows() != b.giveNumberOfRows() ||
+        a.giveNumberOfColumns() != b.giveNumberOfColumns() ) {
         OOFEM_ERROR("matrices size mismatch");
     }
 
@@ -160,7 +158,7 @@ SLEPcSolver :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, FloatMatri
     CHKERRQ(ierr);
 
     if ( nconv > 0 ) {
-        fprintf(outStream, "SLEPcSolver :: solveYourselfAt: Convergence reached for RTOL=%20.15f", rtol);
+        OOFEM_LOG_INFO("SLEPcSolver :: solveYourselfAt: Convergence reached for RTOL=%20.15f", rtol);
         PetscScalar kr;
         Vec Vr;
 
@@ -174,12 +172,12 @@ SLEPcSolver :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, FloatMatri
             CHKERRQ(ierr);
 
             //Store the eigenvalue
-            _eigv->at(i + 1) = kr;
+            _eigv.at(i + 1) = kr;
 
             //Store the eigenvector
             A->scatterG2L(Vr, Vr_loc);
             for ( int j = 0; j < size; j++ ) {
-                _r->at(j + 1, i + 1) = Vr_loc.at(j + 1);
+                _r.at(j + 1, i + 1) = Vr_loc.at(j + 1);
             }
         }
 

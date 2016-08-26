@@ -73,7 +73,6 @@ NRSolver :: NRSolver(Domain *d, EngngModel *m) :
     //
     nsmax = 60;     // default maximum number of sweeps allowed
     deltaL = 1.0;
-    solved = 0;
     NR_Mode = NR_OldMode = nrsolverModifiedNRM;
     NR_ModeTick = -1; // do not switch to calm_NR_OldMode
     MANRMSteps = 0;
@@ -190,9 +189,8 @@ NRSolver :: initializeFrom(InputRecord *ir)
         FloatArray forces;
         IR_GIVE_FIELD(ir, forces, _IFT_NRSolver_forceScale);
         IR_GIVE_FIELD(ir, dofs, _IFT_NRSolver_forceScaleDofs);
-        for ( int i = 0; i < dofs.giveSize(); ++i ) {
+        for ( int i = 0; i <= dofs.giveSize(); ++i ) {
             dg_forceScale[dofs[i]] = forces[i];
-            printf(" dof %i, force tolerance scale %5.2e \n",dofs[i],dg_forceScale[dofs[i]]);
         }
     }
 
@@ -285,6 +283,7 @@ NRSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0, FloatArray *iR,
             OOFEM_WARNING("Divergence reached after %d iterations", nite);
             break;
         } else if ( converged && ( nite >= minIterations ) ) {
+            status |= NM_Success;
             break;
         } else if ( nite >= nsmax ) {
             OOFEM_LOG_DEBUG("Maximum number of iterations reached\n");
@@ -348,9 +347,6 @@ NRSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0, FloatArray *iR,
 
         engngModel->giveExportModuleManager()->doOutput(tStep, true);
     }
-
-    status |= NM_Success;
-    solved = 1;
 
     // Modify Load vector to include "quasi reaction"
     if ( R0 ) {
@@ -731,7 +727,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
             if ( rtolf.at(1) > 0.0 ) {
                 //  compute a relative error norm
                 if ( dg_forceScale.find(dg) != dg_forceScale.end() ) {
-                    forceErr = sqrt( dg_forceErr.at(dg) / ( dg_totalLoadLevel.at(dg) + internalForcesEBENorm.at(dg) + 
+                    forceErr = sqrt( dg_forceErr.at(dg) / ( dg_totalLoadLevel.at(dg) + internalForcesEBENorm.at(dg) +
                         idsInUse.at(dg)*dg_forceScale[dg]*dg_forceScale[dg] ) );
                 } else if ( ( dg_totalLoadLevel.at(dg) + internalForcesEBENorm.at(dg) ) >= nrsolver_ERROR_NORM_SMALL_NUM ) {
                     forceErr = sqrt( dg_forceErr.at(dg) / ( dg_totalLoadLevel.at(dg) + internalForcesEBENorm.at(dg) ) );

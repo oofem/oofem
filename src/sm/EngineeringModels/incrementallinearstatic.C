@@ -114,7 +114,7 @@ IRResultType IncrementalLinearStatic :: initializeFrom(InputRecord *ir)
 		}
 
 		fprintf(outputStream, "%s", PRG_HEADER);
-		fprintf( outputStream, "\nStarting analysis on: %s\n", ctime(& this->startTime) );
+		fprintf(outputStream, "\nStarting analysis on: %s\n", ctime(& this->startTime) );
 		fprintf(outputStream, "%s\n", simulationDescription.c_str());
 	}
 
@@ -300,14 +300,6 @@ void IncrementalLinearStatic :: updateDofUnknownsDictionary(DofManager *inode, T
         dof->updateUnknownsDictionary(tStep->givePreviousStep(), VM_Total, val);
         dof->updateUnknownsDictionary(tStep, VM_Total, val);
     }
-}
-
-
-void IncrementalLinearStatic :: terminate(TimeStep *tStep)
-{
-    StructuralEngngModel :: terminate(tStep);
-    this->printReactionForces(tStep, 1);
-    fflush( this->giveOutputStream() );
 }
 
 

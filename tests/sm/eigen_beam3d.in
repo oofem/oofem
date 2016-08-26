@@ -1,6 +1,6 @@
 eigen_beam3d.out
 eigen vibration analysis of simple suported beam
-EigenValueDynamic nroot 4 rtolv 1.e-6 nmodules 1
+EigenValueDynamic nroot 4 rtolv 1.e-6 nmodules 1 stype 0
 errorcheck
 domain 3dShell
 OutputManager tstep_all dofman_all element_all
@@ -24,7 +24,7 @@ node 16 coords 3 0.0  0.0   3.75
 node 17 coords 3 0.   0.0   4.00
 node 18 coords 3 1.0  0.0   0.00
 #
-Beam3d 1 nodes 2 1 2 refNode 18 DofsToCondense 2 5 6
+Beam3d 1 nodes 2 1 2 refNode 18
 Beam3d 2 nodes 2 2 3 refNode 18
 Beam3d 3 nodes 2 3 4 refNode 18
 Beam3d 4 nodes 2 4 5 refNode 18
@@ -39,15 +39,15 @@ Beam3d 12 nodes 2 12 13 refNode 18
 Beam3d 13 nodes 2 13 14 refNode 18
 Beam3d 14 nodes 2 14 15 refNode 18
 Beam3d 15 nodes 2 15 16 refNode 18
-Beam3d 16 nodes 2 16 17 refNode 18 DofsToCondense 2 11 12
+Beam3d 16 nodes 2 16 17 refNode 18
 #
 #
 SimpleCS 1 area 0.06 Iy 0.00045 Iz 0.0002 Ik 0.000498461  beamShearCoeff 1.e60 material 1 set 1
 IsoLE 1 d 25.0 E 25.e6 n 0.15 tAlpha 1.2e-5
-BoundaryCondition  1 loadTimeFunction 1 dofs 6 1 2 3 4 5 6 values 6 0. 0. 0. 0. 0. 0. set 2
+BoundaryCondition 1 loadTimeFunction 1 dofs 4 1 2 3 6 values 4 0. 0. 0. 0. set 2
 ConstantFunction 1 f(t) 1.
 Set 1 elementranges {(1 16)}
-Set 2 nodes 3 1 17 18
+Set 2 nodes 2 1 17
 #
 #
 #%BEGIN_CHECK% tolerance 1.e-2

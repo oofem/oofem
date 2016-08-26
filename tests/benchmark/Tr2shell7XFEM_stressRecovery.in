@@ -1,5 +1,5 @@
 ## 1. Output file
-stressRecXfemTest17.out
+Tr2shell7XFEM_stressRecovery.out
 ## 2. Job description
 Stress recovery in shell7xfem-triangles, cf. Adaptive XFEM delamination in shell7. cf Främby, Fagerström & Bouzoulis, 'Adaptive modelling of delamination initiation and propagation using an equivalent single-layer shell approach', IJNME, 2016
 #

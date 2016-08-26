@@ -80,6 +80,10 @@ protected:
 
     virtual double computeVolumeAroundLayer(GaussPoint *mastergp, int layer);
     virtual double computeAreaAround(GaussPoint *gp, double xi);
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+    { OOFEM_ERROR("calling of this function is not allowed"); }
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+    { OOFEM_ERROR("calling of this funciton is not allowed"); }
 
     virtual void computeGaussPoints();
     //only used for debuging

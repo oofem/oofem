@@ -233,7 +233,7 @@ int
 TR_SHELL01 :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     if ( type == IST_ShellForceTensor || type == IST_ShellStrainTensor ||
-        type == IST_ShellMomentumTensor || type == IST_ShellCurvatureTensor ) {
+        type == IST_ShellMomentTensor || type == IST_CurvatureTensor ) {
         FloatArray aux;
         GaussPoint *membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
         GaussPoint *plateGP = plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
@@ -273,7 +273,7 @@ TR_SHELL01 :: printOutputAt(FILE *file, TimeStep *tStep)
         fprintf(file, " %.4e %.4e %.4e %.4e %.4e %.4e ",
                 v.at(1), v.at(2), v.at(3), v.at(4), v.at(5), v.at(6) );
 
-        this->giveIPValue(v, gp, IST_ShellCurvatureTensor, tStep);
+        this->giveIPValue(v, gp, IST_CurvatureTensor, tStep);
 
         fprintf(file, "\n              curvatures ");
         // k_x, k_y, k_z, k_yz, k_xz, k_xy
@@ -288,7 +288,7 @@ TR_SHELL01 :: printOutputAt(FILE *file, TimeStep *tStep)
         fprintf(file, " %.4e %.4e %.4e %.4e %.4e %.4e ",
                 v.at(1), v.at(2), v.at(3), v.at(4), v.at(5), v.at(6) );
 
-        this->giveIPValue(v, gp, IST_ShellMomentumTensor, tStep);
+        this->giveIPValue(v, gp, IST_ShellMomentTensor, tStep);
 
         fprintf(file, "\n              moments    ");
         // m_x, m_y, m_z, m_yz, m_xz, m_xy
@@ -530,7 +530,7 @@ TR_SHELL01 :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
         double tot_w = 0.;
         FloatArray a, v;
         for ( GaussPoint *gp: *plate->giveDefaultIntegrationRulePtr() ) {
-            this->giveIPValue(a, gp, IST_ShellMomentumTensor, tStep);
+            this->giveIPValue(a, gp, IST_ShellMomentTensor, tStep);
             v.add(gp->giveWeight(), a);
             tot_w += gp->giveWeight();
         }

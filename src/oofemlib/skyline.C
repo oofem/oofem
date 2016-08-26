@@ -263,8 +263,6 @@ int Skyline :: assemble(const IntArray &loc, const FloatMatrix &mat)
 }
 
 
-
-
 int Skyline :: assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat)
 {
     int dim1 = mat.giveNumberOfRows();
@@ -294,20 +292,19 @@ FloatArray *Skyline :: backSubstitutionWith(FloatArray &y) const
 {
     // allocation of answer
     FloatArray solution( y.giveSize() );
-    int i, k, ack, ack1, acs, n;
+    int ack, ack1, acs, n;
     int size = this->giveNumberOfRows();
-    double s;
 
     /************************************/
     /*  modification of right hand side */
     /************************************/
     n = size;
-    for ( k = 2; k <= n; k++ ) {
+    for ( int k = 2; k <= n; k++ ) {
         ack = adr.at(k);
         ack1 = adr.at(k + 1);
-        s = 0.0;
+        double s = 0.0;
         acs = k - ( ack1 - ack ) + 1;
-        for ( i = ack1 - 1; i > ack; i-- ) {
+        for ( int i = ack1 - 1; i > ack; i-- ) {
             s += mtrx [ i ] * y.at(acs);
             acs++;
         }
@@ -318,17 +315,17 @@ FloatArray *Skyline :: backSubstitutionWith(FloatArray &y) const
     /*****************/
     /*  zpetny chod  */
     /*****************/
-    for ( k = 1; k <= n; k++ ) {
+    for ( int k = 1; k <= n; k++ ) {
         acs = adr.at(k);
         y.at(k) /= mtrx [ acs ];
     }
 
-    for ( k = n; k > 0; k-- ) {
+    for ( int k = n; k > 0; k-- ) {
         ack = adr.at(k);
         ack1 = adr.at(k + 1);
         solution.at(k) = y.at(k);
         acs = k - ( ack1 - ack ) + 1;
-        for ( i = ack1 - 1; i > ack; i-- ) {
+        for ( int i = ack1 - 1; i > ack; i-- ) {
             y.at(acs) -= mtrx [ i ] * solution.at(k);
             acs++;
         }
@@ -360,6 +357,7 @@ int Skyline :: setInternalStructure(IntArray &a)
     this->version++;
     return true;
 }
+
 
 int Skyline :: buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &s)
 {
@@ -498,18 +496,12 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, const UnknownN
 }
 
 
-
 SparseMtrx *Skyline :: factorized()
 {
     // Returns the receiver in  U(transp).D.U  Crout factorization form.
 
     int aci, aci1, acj, acj1, ack, ack1, ac, acs, acri, acrk, n;
     double s, g;
-#ifdef TIME_REPORT
-    Timer timer;
-    timer.startTimer();
-#endif
-
 
     /************************/
     /*  matrix elimination  */
@@ -517,6 +509,11 @@ SparseMtrx *Skyline :: factorized()
     if ( isFactorized ) {
         return this;
     }
+
+#ifdef TIME_REPORT
+    Timer timer;
+    timer.startTimer();
+#endif
 
     n = this->giveNumberOfRows();
 

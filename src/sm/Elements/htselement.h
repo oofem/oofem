@@ -71,7 +71,7 @@ protected:
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     double computeVolumeAroundSide(GaussPoint *gp, int elemSideNumber);
     Node *giveSideNode(int elementSideNumber, int nodeNumber);
-    double  giveSideLength(int sideNumber);
+    double giveSideLength(int sideNumber);
     virtual int computeNumberOfDofs() { return 4 * numberOfEdges; }
     virtual void computeGaussPoints();
     virtual void giveDofManDofIDMask(int inode, IntArray &) const;
@@ -80,6 +80,9 @@ protected:
     virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) { answer.resize(numberOfStressDofs); }
     //dodelat vypocet napeti!!!
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) { answer.resize(numberOfStressDofs); }
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) {
+        OOFEM_ERROR("Function not defined for this element and should never be called. This is a bug.");
+    }
     //dodelat internal forces, budou potreba pro nelinearni vypocet
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord) { answer.resize(numberOfDofs); }
     virtual void computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);

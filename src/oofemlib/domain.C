@@ -609,11 +609,6 @@ Domain :: instanciateYourself(DataReader *dr)
     // mapping from label to local numbers for dofmans and elements
     std :: map< int, int >dofManLabelMap, elemLabelMap;
 
-	FILE *outputStream = NULL;
-    if(!giveEngngModel()->giveSuppressOutput()) {
-    	outputStream = this->giveEngngModel()->giveOutputStream();
-    }
-
     // read type of Domain to be solved
     InputRecord *ir = dr->giveInputRecord(DataReader :: IR_domainRec, 1);
     IR_GIVE_FIELD(ir, name, _IFT_Domain_type); // This is inconsistent, "domain" isn't  exactly a field, but the actual record keyword.
@@ -627,11 +622,6 @@ Domain :: instanciateYourself(DataReader *dr)
 #  endif
 
     resolveDomainDofsDefaults( name.c_str() );
-
-    if(!giveEngngModel()->giveSuppressOutput()) {
-    	fprintf( outputStream, "Domain type: %s, default ndofs per node is %d\n\n\n",
-    			name.c_str(), giveDefaultNodeDofIDArry().giveSize() );
-    }
 
     // read output manager record
     std :: string tmp;
@@ -1628,7 +1618,7 @@ Domain :: giveTopology()
 #define DOMAIN_NCOMP 8
 
 contextIOResultType
-Domain :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+Domain :: saveContext(DataStream &stream, ContextMode mode)
 {
     contextIOResultType iores;
     int serNum;
@@ -1684,7 +1674,7 @@ Domain :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 
 
 contextIOResultType
-Domain :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+Domain :: restoreContext(DataStream &stream, ContextMode mode)
 {
     contextIOResultType iores;
     int serNum;

@@ -87,7 +87,7 @@ set (sm_element
     Elements/PlaneStress/basicelement.C
     Elements/structural2delement.C
     Elements/structural3delement.C
-    Elements/phasefieldelement.C
+    #Elements/phasefieldelement.C
     #qplanstrssphf.C
     )
 
@@ -125,7 +125,6 @@ set (sm_emodel
     EngineeringModels/staticstructural.C
     EngineeringModels/linearstatic.C
     EngineeringModels/nlinearstatic.C
-    EngineeringModels/xfemstatic.C
     EngineeringModels/nlineardynamic.C
     EngineeringModels/eigenvaluedynamic.C
     EngineeringModels/linearstability.C

@@ -84,6 +84,12 @@ QTruss1d :: computeStressVector(FloatArray &answer, const FloatArray &strain, Ga
     this->giveStructuralCrossSection()->giveRealStress_1d(answer, gp, strain, tStep);
 }
 
+void
+QTruss1d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveStiffnessMatrix_1d(answer, rMode, gp, tStep);
+}
+
 double
 QTruss1d :: computeVolumeAround(GaussPoint *gp)
 // Returns the length of the receiver. This method is valid only if 1

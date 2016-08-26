@@ -322,8 +322,7 @@ TrPlaneStress2dXFEM :: giveCompositeExportData(std::vector< VTKPiece > &vtkPiece
     vtkPieces.resize(1);
 
     const int numCells = mSubTri.size();
-
-    if(numCells == 0 || true) {
+    if(numCells == 0) {
         // Enriched but uncut element
         // Visualize as a triangle
         vtkPieces[0].setNumberOfCells(1);
@@ -413,20 +412,25 @@ TrPlaneStress2dXFEM :: giveCompositeExportData(std::vector< VTKPiece > &vtkPiece
             FloatArray average;
             std :: unique_ptr< IntegrationRule > &iRule = integrationRulesArray [ 0 ];
             VTKXMLExportModule :: computeIPAverage(average, iRule.get(), this, type, tStep);
-
             if(average.giveSize() == 0) {
             	average = {0., 0., 0., 0., 0., 0.};
             }
 
-            FloatArray averageV9(9);
-            averageV9.at(1) = average.at(1);
-            averageV9.at(5) = average.at(2);
-            averageV9.at(9) = average.at(3);
-            averageV9.at(6) = averageV9.at(8) = average.at(4);
-            averageV9.at(3) = averageV9.at(7) = average.at(5);
-            averageV9.at(2) = averageV9.at(4) = average.at(6);
+            if(average.giveSize() == 1) {
+				vtkPieces[0].setCellVar( i, 1, average );
+            }
 
-            vtkPieces[0].setCellVar( i, 1, averageV9 );
+            if(average.giveSize() == 6) {
+				FloatArray averageV9(9);
+				averageV9.at(1) = average.at(1);
+				averageV9.at(5) = average.at(2);
+				averageV9.at(9) = average.at(3);
+				averageV9.at(6) = averageV9.at(8) = average.at(4);
+				averageV9.at(3) = averageV9.at(7) = average.at(5);
+				averageV9.at(2) = averageV9.at(4) = average.at(6);
+
+				vtkPieces[0].setCellVar( i, 1, averageV9 );
+            }
         }
 
 

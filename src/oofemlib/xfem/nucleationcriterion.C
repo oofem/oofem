@@ -37,19 +37,23 @@
 #include "enrichmentitem.h"
 #include "dynamicinputrecord.h"
 #include "dynamicdatareader.h"
+#include "xfem/enrichmentfunction.h"
+#include "classfactory.h"
 
 #include <memory>
 
 namespace oofem {
 
 NucleationCriterion::NucleationCriterion(Domain *ipDomain):
-mpDomain(ipDomain)
+mpDomain(ipDomain),
+mpEnrichmentFunc(NULL)
 {
 
 }
 
-NucleationCriterion::~NucleationCriterion() {
-
+NucleationCriterion::~NucleationCriterion()
+{
+	delete mpEnrichmentFunc;
 }
 
 std::vector<std::unique_ptr<EnrichmentItem>> NucleationCriterion::nucleateEnrichmentItems() {
@@ -65,6 +69,26 @@ IRResultType NucleationCriterion::initializeFrom(InputRecord *ir) {
 }
 
 int NucleationCriterion::instanciateYourself(DataReader *dr) {
+
+	printf("Entering NucleationCriterion::instanciateYourself(DataReader *dr)\n");
+
+    IRResultType result; // Required by IR_GIVE_FIELD macro
+    std :: string name;
+
+    // Instantiate enrichment function
+    InputRecord *mir = dr->giveInputRecord(DataReader :: IR_crackNucleationRec, 1);
+    result = mir->giveRecordKeywordField(name);
+
+    if ( result != IRRT_OK ) {
+        mir->report_error(this->giveClassName(), __func__, "", result, __FILE__, __LINE__);
+    }
+
+    mpEnrichmentFunc = classFactory.createEnrichmentFunction( name.c_str(), 1, mpDomain );
+    if ( mpEnrichmentFunc != NULL ) {
+        mpEnrichmentFunc->initializeFrom(mir);
+    } else {
+        OOFEM_ERROR( "failed to create enrichment function (%s)", name.c_str() );
+    }
 
     return IRRT_OK;
 }

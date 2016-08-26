@@ -136,6 +136,7 @@ DofDistributedPrimaryField :: update(ValueModeType mode, TimeStep *tStep, const 
     Domain *d = emodel->giveDomain(domainIndx);
 
     for ( auto &node : d->giveDofManagers() ) {
+        if ( !node->isLocal() ) continue;
         for ( Dof *dof: *node ) {
             if ( !dof->isPrimaryDof() ) continue;
             int eqNum = dof->giveEquationNumber(s);
@@ -152,6 +153,7 @@ DofDistributedPrimaryField :: update(ValueModeType mode, TimeStep *tStep, const 
     }
     
     for ( auto &elem : d->giveElements() ) {
+        if ( elem->giveParallelMode() == Element_remote ) continue;
         int ndman = elem->giveNumberOfInternalDofManagers();
         for ( int i = 1; i <= ndman; i++ ) {
             for ( auto &dof : *elem->giveInternalDofManager(i) ) {
@@ -167,6 +169,7 @@ DofDistributedPrimaryField :: update(ValueModeType mode, TimeStep *tStep, const 
     for ( auto &bc : d->giveBcs() ) {
         int ndman = bc->giveNumberOfInternalDofManagers();
         for ( int i = 1; i <= ndman; i++ ) {
+            if ( !bc->giveInternalDofManager(i)->isLocal() ) continue;
             for ( auto &dof : *bc->giveInternalDofManager(i) ) {
                 if ( !dof->isPrimaryDof() ) continue;
                 int eqNum = dof->giveEquationNumber(s);
@@ -186,6 +189,7 @@ DofDistributedPrimaryField :: applyDefaultInitialCondition()
     TimeStep *tStep = emodel->giveSolutionStepWhenIcApply();
     // Copy over the old dictionary values to the new step as the initial guess:
     for ( auto &dman : d->giveDofManagers() ) {
+        if ( !dman->isLocal() ) continue;
         for ( auto &dof : *dman ) {
             dof->updateUnknownsDictionary(tStep, VM_Total, 0.);
             int icid = dof->giveIcId();
@@ -200,6 +204,7 @@ DofDistributedPrimaryField :: applyDefaultInitialCondition()
     }
 
     for ( auto &elem : d->giveElements() ) {
+        if ( elem->giveParallelMode() == Element_remote ) continue;
         int ndman = elem->giveNumberOfInternalDofManagers();
         for ( int i = 1; i <= ndman; i++ ) {
             for ( auto &dof : *elem->giveInternalDofManager(i) ) {
@@ -211,6 +216,7 @@ DofDistributedPrimaryField :: applyDefaultInitialCondition()
     for ( auto &bc : d->giveBcs() ) {
         int ndman = bc->giveNumberOfInternalDofManagers();
         for ( int i = 1; i <= ndman; i++ ) {
+            if ( !bc->giveInternalDofManager(i)->isLocal() ) continue;
             for ( auto &dof : *bc->giveInternalDofManager(i) ) {
                 dof->updateUnknownsDictionary(tStep, VM_Total, 0.);
             }
@@ -238,6 +244,7 @@ DofDistributedPrimaryField :: applyInitialCondition(InitialCondition &ic)
     // We have to set initial value, and velocity, for this particular primary field.
     for ( int inode : set->giveNodeList() ) {
         DofManager *dman = d->giveDofManager(inode);
+        if ( !dman->isLocal() ) continue;
         double tot0 = 0;
         if ( ic.hasConditionOn(VM_Total) ) {
             tot0 = ic.give(VM_Total);
@@ -269,6 +276,7 @@ DofDistributedPrimaryField :: applyBoundaryCondition(TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(domainIndx);
     for ( auto &dman : d->giveDofManagers() ) {
+        if ( !dman->isLocal() ) continue;
         for ( auto &dof : *dman ) {
             if ( dof->hasBc(tStep) && dof->isPrimaryDof() ) {
                 int bcid = dof->giveBcId();
@@ -285,6 +293,7 @@ DofDistributedPrimaryField :: applyBoundaryCondition(TimeStep *tStep)
             if ( dbc && dbc->isImposed(tStep) ) {
                 this->applyBoundaryCondition(*dbc, tStep);
             } else if ( abc ) {
+                if ( !abc->giveInternalDofManager(1)->isLocal() ) continue;
                 for ( auto &dof : *abc->giveInternalDofManager(1) ) {
                     if ( dof->isPrimaryDof() && abc->hasBc(dof, tStep) ) {
                         dof->updateUnknownsDictionary( tStep, VM_Total, abc->giveBcValue(dof, VM_Total, tStep) );
@@ -307,6 +316,7 @@ DofDistributedPrimaryField :: applyBoundaryCondition(BoundaryCondition &bc, Time
     Set *set = d->giveSet(bc.giveSetNumber());
     for ( int inode : set->giveNodeList() ) {
         DofManager *dman = d->giveDofManager(inode);
+        if ( dman->isLocal() ) continue;
         for ( auto &dofid : bc.giveDofIDs() ) {
             if ( !dman->hasDofID((DofIDItem)dofid) ) { ///@todo It's unfortunate that we have to search for the dofid twice.
                 continue;
@@ -338,10 +348,12 @@ DofDistributedPrimaryField :: advanceSolution(TimeStep *tStep)
     Domain *d = emodel->giveDomain(1);
     TimeStep *prev = tStep->givePreviousStep();
     for ( auto &dman : d->giveDofManagers() ) {
+        if ( !dman->isLocal() ) continue;
         this->setInitialGuess(*dman, tStep, prev);
     }
 
     for ( auto &elem : d->giveElements() ) {
+        if ( elem->giveParallelMode() == Element_remote ) continue;
         int ndman = elem->giveNumberOfInternalDofManagers();
         for ( int i = 1; i <= ndman; i++ ) {
             this->setInitialGuess(*elem->giveInternalDofManager(i), tStep, prev);
@@ -351,6 +363,7 @@ DofDistributedPrimaryField :: advanceSolution(TimeStep *tStep)
     for ( auto &bc : d->giveBcs() ) {
         int ndman = bc->giveNumberOfInternalDofManagers();
         for ( int i = 1; i <= ndman; i++ ) {
+            if ( !abc->giveInternalDofManager(i)->isLocal() ) continue;
             this->setInitialGuess(*bc->giveInternalDofManager(i), tStep, prev);
         }
     }

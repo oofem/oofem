@@ -30,6 +30,7 @@ perf.data*
 *.blg
 
 
+*.idea
 __pycache__
 *.pyc
 *.swp

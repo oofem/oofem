@@ -65,8 +65,8 @@ protected:
     virtual const IntArray &giveOrderingDofTypes() const;
     virtual const IntArray &giveOrderingNodes() const;
     virtual const IntArray &giveOrderingEdgeNodes() const;
-    void giveSurfaceDofMapping(IntArray &answer, int iSurf) const;
-    void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
+    virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const;
+    virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
 
 
     virtual double computeVolumeAroundLayer(GaussPoint *mastergp, int layer);
@@ -74,6 +74,10 @@ protected:
 
     virtual void computeGaussPoints();
     bool updateIntegrationRuleMultiCrack();
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+    { OOFEM_ERROR("calling of this function is not allowed"); }
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+    { OOFEM_ERROR("calling of this funciton is not allowed"); }
 
     virtual void giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray &nodeLocalEtaCoords);
 
@@ -86,14 +90,13 @@ public:
     Tr2Shell7XFEM(int n, Domain * d);
     virtual ~Tr2Shell7XFEM() { }     // destructor -> declaring as virtual will make each subclass call their respective destr.
     // definition & identification
-    virtual int giveNumberOfEdgeDofs()       { return 21; }
+    virtual int giveNumberOfEdgeDofs() { return 21; }
     virtual int giveNumberOfEdgeDofManagers() { return 3;  }
     virtual const char *giveInputRecordName() const { return _IFT_Tr2Shell7XFEM_Name; }
     virtual const char *giveClassName() const { return "Tr2Shell7XFEM"; }
 
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_Composite; }
     virtual integrationDomain giveIntegrationDomain() const { return _Triangle; } // write new wedge-like type 'layeredWedge'
-
 };
 } // end namespace oofem
 #endif

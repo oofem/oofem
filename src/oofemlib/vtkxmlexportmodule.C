@@ -1530,7 +1530,7 @@ VTKXMLExportModule :: getNodalVariableFromPrimaryField(FloatArray &answer, DofMa
             if ( size == recoveredVal->giveSize() ) {
                 answer.at(j) = recoveredVal->at(j);
             } else {
-                OOFEM_WARNING("recovered variable size mismatch for %d", type);
+                OOFEM_WARNING("Recovered variable size mismatch for %d for id %d", type, id);
                 answer.at(j) = 0.0;
             }
         } else if ( dman->hasDofID(id) ) {
@@ -1551,7 +1551,7 @@ VTKXMLExportModule :: getNodalVariableFromPrimaryField(FloatArray &answer, DofMa
             if ( size == recoveredVal->giveSize() ) {
                 answer.at(j) = recoveredVal->at(j);
             } else {
-                OOFEM_WARNING("recovered variable size mismatch for %d", type);
+                OOFEM_WARNING("Recovered variable size mismatch for \"%s\" for dof id %d. Size is %d, should be %d", __UnknownTypeToString(type), id, recoveredVal->giveSize(), size);
                 answer.at(j) = 0.0;
             }
         }

@@ -250,6 +250,7 @@ StaggeredSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0, FloatArra
                     OOFEM_WARNING("Divergence reached after %d iterations", nite);
                     break;
                 } else if ( converged && ( nite >= minIterations ) ) {
+                    status = NM_Success;
                     break;
                 } else if ( nite >= nsmax ) {
                     OOFEM_LOG_DEBUG("Maximum number of iterations reached\n");
@@ -313,9 +314,6 @@ StaggeredSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0, FloatArra
             break;
         }
    }
-
-    status |= NM_Success;
-    solved = 1;
 
     // Modify Load vector to include "quasi reaction"
     if ( R0 ) {

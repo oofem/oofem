@@ -96,7 +96,7 @@ IRResultType GnuplotExportModule::initializeFrom(InputRecord *ir)
     ir->giveOptionalField(mMonitorNodeIndex, _IFT_GnuplotExportModule_monitornode);
 
     ir->giveOptionalField(mMatForceRadii, _IFT_GnuplotExportModule_materialforceradii);
-    printf("mMatForceRadii: "); mMatForceRadii.printYourself();
+//    printf("mMatForceRadii: "); mMatForceRadii.printYourself();
 
     return ExportModule::initializeFrom(ir);
 }

@@ -132,7 +132,6 @@ public:
     //virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) {}
 #endif
 
-protected:
     /**
      * Computes constitutive matrix of receiver.
      * @param answer Computed answer.
@@ -143,6 +142,8 @@ protected:
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer,
                                              MatResponseMode rMode, GaussPoint *gp,
                                              TimeStep *tStep);
+
+protected:
     /**
      * Computes the matrix @f$ P=\int_\Omega N^{\mathrm{T}} N\;\mathrm{d}\Omega @f$.
      * The result should be multiplied by corresponding coefficient and localized.

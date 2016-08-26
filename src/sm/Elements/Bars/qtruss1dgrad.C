@@ -40,7 +40,7 @@
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
-#include "crosssection.h"
+#include "../sm/CrossSections/structuralcrosssection.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -80,6 +80,13 @@ IRResultType
 QTruss1dGrad :: initializeFrom(InputRecord *ir)
 {
     return StructuralElement :: initializeFrom(ir);
+}
+
+
+void
+QTruss1dGrad :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveStiffnessMatrix_1d(answer, rMode, gp, tStep);
 }
 
 
