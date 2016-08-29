@@ -73,7 +73,7 @@ protected:
 
 
 public:
-    LargeStrainMasterMaterial(int n, Domain * d);
+    LargeStrainMasterMaterial(int n, Domain *d);
     virtual ~LargeStrainMasterMaterial();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -88,10 +88,10 @@ public:
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
-    virtual void give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer,
-                                               MatResponseMode,
-                                               GaussPoint *gp,
-                                               TimeStep *tStep);
+    virtual void give3dMaterialStiffnessMatrix_dPdF(FloatMatrix & answer,
+                                                    MatResponseMode,
+                                                    GaussPoint * gp,
+                                                    TimeStep * tStep);
 
     virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *, const FloatArray &, TimeStep *)
     { OOFEM_ERROR("not implemented, this material is designed for large strains only"); }
@@ -99,7 +99,7 @@ public:
 
     /// transformation matrices
     void constructTransformationMatrix(FloatMatrix &answer, const FloatMatrix &eigenVectors);
-    void constructL1L2TransformationMatrices(FloatMatrix &answer1, FloatMatrix &answer2, const FloatMatrix &eigenVectors, FloatArray &stress, double E1, double E2, double E3);
+    void constructL1L2TransformationMatrices(FloatMatrix &answer1, FloatMatrix &answer2, const FloatArray &eigenValues, FloatArray &stress, double E1, double E2, double E3);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 };
@@ -114,7 +114,7 @@ protected:
     int slaveMat;
 
 public:
-    LargeStrainMasterMaterialStatus(int n, Domain * d, GaussPoint * g, int s);
+    LargeStrainMasterMaterialStatus(int n, Domain *d, GaussPoint *g, int s);
     virtual ~LargeStrainMasterMaterialStatus();
 
 
