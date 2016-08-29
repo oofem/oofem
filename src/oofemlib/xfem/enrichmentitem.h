@@ -56,6 +56,7 @@
 #define _IFT_EnrichmentItem_propagationlaw "propagationlaw"
 
 #define _IFT_EnrichmentItem_inheritbc "inheritbc"
+#define _IFT_EnrichmentItem_inheritorderedbc "inheritorderedbc"
 
 //@}
 
@@ -144,10 +145,13 @@ public:
 
     // Should update receiver geometry to the state reached at given time step.
     virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep) { }
+    virtual void updateGeometry(TimeStep *tStep) { }
     virtual void updateGeometry() = 0;
     virtual void propagateFronts(bool &oFrontsHavePropagated) = 0;
 
     virtual bool hasPropagatingFronts() const;
+    virtual bool hasInitiationCriteria() { return false; }
+
 
 
     int giveStartOfDofIdPool() const { return this->startOfDofIdPool; }
@@ -250,11 +254,19 @@ protected:
     /**
      * If newly created enriched dofs should inherit boundary conditions
      * from the node they are introduced in. Default is false, i.e.
-     * XFEM dofs are free by default. Note: the routine takes the first
-     * Dirichlet BC it finds in the node. Therefore, we may get in trouble
-     * if the node has different Dirichlet BCs for different dofs.
+     * XFEM dofs are free by default. Two alternatives exists:
+     * mInheritBoundaryConditions takes the first Dirichlet BC it finds in the 
+     * node. Therefore, we may get in trouble if the node has different Dirichlet 
+     * BCs for different dofs.
+     * mInheritOrderedBoundaryConditions assumes that the enriched dofs are of the
+     * same type and in the same order as the original dofs and uses the same BC
+     * on the enriched dofs
+     * NB: These routines basically only works for zero Dirichlet BC, since enriched
+     * dofs often are related to the existing dofs. If nonzero BC are prescibed this 
+     * will be a problem.
      */
     bool mInheritBoundaryConditions;
+    bool mInheritOrderedBoundaryConditions;
 
     int startOfDofIdPool; // points to the first available dofId number associated with the ei
     int endOfDofIdPool;

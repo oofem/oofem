@@ -80,8 +80,8 @@ protected:
     
     double evaluateLevelSet(const FloatArray &lCoords, EnrichmentItem *ei);
 //    double edgeEvaluateLevelSet(const FloatArray &lCoords, EnrichmentItem *ei, const int edge);
-    double evaluateHeavisideGamma(double xi, ShellCrack *ei);
-    double evaluateHeavisideGamma(double xi, Delamination *ei);
+    double evaluateHeavisideXi(double xi, ShellCrack *ei);
+    double evaluateHeavisideXi(double xi, Delamination *ei);
     double evaluateCutHeaviside(const double xi, const double xiBottom, const double xiTop) const;
     void computeCohesiveForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, EnrichmentItem *ei, EnrichmentItem *coupledToEi);
     
@@ -96,15 +96,18 @@ protected:
     
     double EvaluateEnrFuncInDofMan(int dofManNum, EnrichmentItem *ei);
     void computeEnrichedBmatrixAt(const FloatArray &lCoords, FloatMatrix &answer, EnrichmentItem *ei);
-    void computeEnrichedNmatrixAt(const FloatArray &iLocCoords, FloatMatrix &answer, EnrichmentItem *ei);
-    void edgeComputeEnrichedNmatrixAt(const FloatArray &lCoords, FloatMatrix &answer, EnrichmentItem *ei, const int edge);
-    void edgeComputeEnrichedBmatrixAt(const FloatArray &lcoords, FloatMatrix &answer, EnrichmentItem *ei, const int edge);
+    void computeEnrichedNmatrixAt(const FloatArray &lCoords, FloatMatrix &answer, EnrichmentItem *ei);
+    void computeCohesiveNmatrixAt(const FloatArray &lCoords, FloatMatrix &answer, EnrichmentItem *ei);
+    
     virtual void edgeGiveUpdatedSolutionVector(FloatArray &answer, const int iedge, TimeStep *tStep);
 
     void edgeEvalEnrCovarBaseVectorsAt(const FloatArray &lCoords, const int iedge, FloatMatrix &gcov, TimeStep *tStep, EnrichmentItem *ei);
     void computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep);
-    void computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep, Delamination *dei, EnrichmentItem *couplesToEi);
+    void computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep, Delamination *dei, EnrichmentItem *ei_j, EnrichmentItem *ei_k);
 
+    void edgeComputeEnrichedNmatrixAt(const FloatArray &lCoords, FloatMatrix &answer, EnrichmentItem *ei, const int edge);
+    void edgeComputeEnrichedBmatrixAt(const FloatArray &lCoords, FloatMatrix &answer, EnrichmentItem *ei, const int edge);
+    
     void computePressureTangentMatrixDis(FloatMatrix &KCC, FloatMatrix &KCD, FloatMatrix &KDD, IntegrationPoint *ip, Load *load, const int iSurf, TimeStep *tStep);
 
     // External loads
@@ -141,7 +144,7 @@ protected:
     void giveFictiousUpdatedCZNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, TimeStep *tStep, int subCell);
     void giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords, int subCell, int layer, FloatMatrix &localNodeCoords);
     void giveLocalCZNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords, int subCell, FloatMatrix &localNodeCoords);
-        void mapXi3FromLocalToShell(FloatArray &answer, FloatArray &local, int layer);
+    void mapXi3FromLocalToShell(FloatArray &answer, FloatArray &local, int layer);
     void recoverValuesFromCZIP(std::vector<FloatArray> &recoveredValues, int interfce, InternalStateType type, TimeStep *tStep);
 
     FEI3dTrQuad interpolationForCZExport;
@@ -151,6 +154,9 @@ protected:
     std::vector< IntArray > activeDofsArrays;
     
     void computeTripleProduct(FloatMatrix &answer, const FloatMatrix &a, const FloatMatrix &b, const FloatMatrix &c);
+    
+    // Recovery of through thickness stresses by momentum balance
+    void recoverShearStress(TimeStep *tStep);
     
 
 public:
@@ -166,10 +172,15 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
     virtual int giveNumberOfDofs();
+    
+    // Recovery of through thickness stresses by momentum balance
+    virtual void giveFailedInterfaceNumber(IntArray &failedInterfaces, FloatArray &initiationFactor, TimeStep *tStep, bool recoverStresses = true);
+    virtual void giveAverageTransverseInterfaceStress(std::vector<FloatMatrix> &transverseStress, TimeStep *tStep);
+    virtual void giveRecoveredTransverseInterfaceStress(std::vector<FloatMatrix> &transverseStress, TimeStep *tStep);
 
     bool hasCohesiveZone(int interfaceNum);
     std :: vector< std :: unique_ptr< IntegrationRule > > czIntegrationRulesArray;
-    private:
+private:
     void jump(FloatMatrix lambda, FloatArray deltaUnknowns);
 };
 } // end namespace oofem

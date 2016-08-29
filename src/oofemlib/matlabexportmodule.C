@@ -77,9 +77,11 @@ MatlabExportModule :: MatlabExportModule(int n, EngngModel *e) : ExportModule(n,
     exportSpecials = false;
     exportReactionForces = false;
     reactionForcesDofManList.clear();
+    dataDofManList.clear();
     exportIntegrationPointFields = false;
     elList.clear();
     reactionForcesNodeSet = 0;
+    dataNodeSet = 0;
     IPFieldsElSet = 0;
     noscaling = false;
 }
@@ -97,7 +99,12 @@ MatlabExportModule :: initializeFrom(InputRecord *ir)
     ExportModule :: initializeFrom(ir);
 
     exportMesh = ir->hasField(_IFT_MatlabExportModule_mesh);
+    
     exportData = ir->hasField(_IFT_MatlabExportModule_data);
+    if ( exportData ) {
+        IR_GIVE_OPTIONAL_FIELD(ir, this->dataNodeSet, _IFT_MatlabExportModule_DataNodeSet);
+    }
+    
     exportArea = ir->hasField(_IFT_MatlabExportModule_area);
     exportSpecials = ir->hasField(_IFT_MatlabExportModule_specials);
     exportHomogenizeIST = ir->hasField(_IFT_MatlabExportModule_homogenizeInternalVars);
@@ -334,21 +341,45 @@ MatlabExportModule :: doOutputData(TimeStep *tStep, FILE *FID)
     std :: vector< int >DofIDList;
     std :: vector< int > :: iterator it;
     std :: vector< std :: vector< double > >valuesList;
+    
+    if ( this->dataNodeSet > 0 ) {
+        // Export data based on node set
+        Set *set = domain->giveSet( this->dataNodeSet );
+        dataDofManList = set->giveNodeList();
+        for (auto iDM : dataDofManList) {
+            DofManager *dman = domain->giveDofManager(iDM);
+            for ( Dof *thisDof: *dman ) {
+                it = std :: find( DofIDList.begin(), DofIDList.end(), thisDof->giveDofID() );
 
-    for ( auto &dman : domain->giveDofManagers() ) {
-        for ( Dof *thisDof: *dman ) {
-            it = std :: find( DofIDList.begin(), DofIDList.end(), thisDof->giveDofID() );
+                double value = thisDof->giveUnknown(VM_Total, tStep);
+                if ( it == DofIDList.end() ) {
+                    DofIDList.push_back( thisDof->giveDofID() );
+                    valuesList.push_back({value});
+                } else {
+                    std::size_t pos = it - DofIDList.begin();
+                    valuesList[pos].push_back(value);
+                }
+            }
+        }
+    } else {
+        // Export data from all dofmanagers
+        for ( auto &dman : domain->giveDofManagers() ) {
+            for ( Dof *thisDof: *dman ) {
+                it = std :: find( DofIDList.begin(), DofIDList.end(), thisDof->giveDofID() );
 
-            double value = thisDof->giveUnknown(VM_Total, tStep);
-            if ( it == DofIDList.end() ) {
-                DofIDList.push_back( thisDof->giveDofID() );
-                valuesList.push_back({value});
-            } else {
-                std::size_t pos = it - DofIDList.begin();
-                valuesList[pos].push_back(value);
+                double value = thisDof->giveUnknown(VM_Total, tStep);
+                if ( it == DofIDList.end() ) {
+                    DofIDList.push_back( thisDof->giveDofID() );
+                    valuesList.push_back({value});
+                } else {
+                    std::size_t pos = it - DofIDList.begin();
+                    valuesList[pos].push_back(value);
+                }
             }
         }
     }
+
+
 
     fprintf(FID, "\tdata.DofIDs=[");
     for ( auto &dofid : DofIDList ) {

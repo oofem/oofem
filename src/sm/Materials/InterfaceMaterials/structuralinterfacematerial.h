@@ -140,6 +140,8 @@ public:
     virtual const char *giveClassName() const { return "StructuralInterfaceMaterial"; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
+    
+    virtual FloatArray giveInterfaceStrength() { return {0};}
 
 
     //virtual int setIPValue(const FloatArray &value, GaussPoint *gp, InternalStateType type);

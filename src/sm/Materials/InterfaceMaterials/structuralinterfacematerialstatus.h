@@ -154,6 +154,9 @@ public:
 
     bool giveNewlyInserted() const {return mNewlyInserted;}
     void setNewlyInserted(bool iNewlyInserted) {mNewlyInserted = iNewlyInserted;}
+    
+    virtual double giveDamage() { return 0.0; }     // no default damage
+    virtual double giveTempDamage() { return 0.0; } // no default damage
 };
 } // end namespace oofem
 #endif // structuralinterfacematerialstatus_h

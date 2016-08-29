@@ -58,7 +58,7 @@ class DynamicInputRecord;
 class OOFEM_EXPORT EnrFrontDoNothing : public EnrichmentFront
 {
 public:
-    EnrFrontDoNothing() { }
+    EnrFrontDoNothing(int iEIindex = 0) : EnrichmentFront(iEIindex) { }
     virtual ~EnrFrontDoNothing() { }
 
     virtual void MarkNodesAsFront(std :: unordered_map< int, NodeEnrichmentType > &ioNodeEnrMarkerMap, XfemManager &ixFemMan, const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const TipInfo &iTipInfo) { mTipInfo = iTipInfo; }

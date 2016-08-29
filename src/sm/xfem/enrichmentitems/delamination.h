@@ -44,6 +44,9 @@
 #define _IFT_Delamination_interfacenum "interfacenum"
 #define _IFT_Delamination_csnum "csnum"
 #define _IFT_Delamination_CohesiveZoneMaterial "czmaterial"
+#define _IFT_Delamination_initiationFactor "initiationfactor"
+#define _IFT_Delamination_initiationRadius "initiationradius"
+#define _IFT_Delamination_averageStresses "averageStresses"
 //@}
 
 namespace oofem {
@@ -57,13 +60,19 @@ class OOFEM_EXPORT Delamination : public ListBasedEI
 protected:
     Material *mat;  // Material for cohesive zone model
     IntArray interfaceNum; // starting and ending interfaceNum for the delamination
-    int crossSectionNum;     // use this to keep track of the interface coordinates
+    IntArray crossSectionNum;     // use this to keep track of the interface coordinates
     int matNum; // still used??
     double delamXiCoord;    // defines at what local xi-coord the delamination is defined
 
     // New 110814 JB defines between what local xi-coords the delamination is defined
     double xiBottom;
     double xiTop;
+    
+    // Adaptive enrichment, 
+    // cf. Främby, Fagerström & Bouzoulis, 'Adaptive modelling of delamination initiation and propagation using an equivalent single-layer shell approach', IJNME, 2016 
+    double initiationFactor;   // knock-down factor on initiation values, (0,1] //JF
+    double initiationRadius;   // radius around around newlye initiated element nodes to be included //JF
+    bool recoverStresses;      // recover tranverse stresses using momentum balance (default). //JF
 public:
     Delamination(int n, XfemManager *xm, Domain *aDomain);
 
@@ -77,7 +86,14 @@ public:
     double giveDelamXiCoord() const { return xiBottom; }     // coord where the delamination is defined
     double giveBoundingDelamXiCoord() const { return xiTop; } // coord where the delamination enrichment should stop, default is the shell surface
     int giveDelamInterfaceNum() const { return interfaceNum.at(1); }
-    virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep);
+    IntArray giveDelamCrossSectionNum() const { return crossSectionNum; }
+    double giveInitiationFactor() const { return initiationFactor; }
+    //virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep);
+    virtual bool hasPropagatingFronts() const { return true; }
+    virtual bool hasInitiationCriteria();
+    
+    virtual void propagateFronts(bool &oFrontsHavePropagated);
+    virtual void findInitiationFronts(bool &failureChecked, const IntArray &CSnumbers, std :: vector< IntArray > &CSinterfaceNumbers, std :: vector< IntArray > &CSDofManNumbers, std :: vector< FloatArray > &initiationFactors, TimeStep *tStep);
 
     virtual void evaluateEnrFuncInNode(std :: vector< double > &oEnrFunc, const Node &iNode) const { OOFEM_ERROR("Not implemented.") }
 

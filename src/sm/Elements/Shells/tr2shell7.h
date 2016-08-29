@@ -49,6 +49,14 @@ class BoundaryLoad;
 /**
  * This class represent a 7 parameter shell element.
  * Each node has 7 degrees of freedom (displ. vec., director vec., inhomogeneous thickness strain ).
+ * Nodal numbering:
+ *           (3)
+ *          / |
+ *        /   |
+ *      (6)  (5)
+ *     /      |
+ *   /        |
+ * (1)--(4)--(2)
  * Add ref. to paper!
  * @author Jim Brouzoulis
  * @date 2012-11-01
@@ -72,6 +80,10 @@ protected:
 
     virtual double computeVolumeAroundLayer(GaussPoint *mastergp, int layer);
     virtual double computeAreaAround(GaussPoint *gp, double xi);
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+    { OOFEM_ERROR("calling of this function is not allowed"); }
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+    { OOFEM_ERROR("calling of this funciton is not allowed"); }
 
     virtual void computeGaussPoints();
     //only used for debuging

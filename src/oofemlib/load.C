@@ -121,6 +121,7 @@ Load :: initializeFrom(InputRecord *ir)
     }
 
     return GeneralBoundaryCondition :: initializeFrom(ir);
+    dofs.printYourself("dofs");
 }
 
 

@@ -173,8 +173,8 @@ protected:
     /**
      * Variable controlling type of loading/unloading law, default set to idm_strainLevel
      * defines the two two possibilities:
-     * - idm_strainLevelCR the unloaing takes place, when strain level is smaller than the largest level ever reached;
-     * - idm_damageLevelCR the unloaing takes place, when damage level is smaller than the largest damage ever  reached;
+     * - idm_strainLevelCR the unloading takes place, when strain level is smaller than the largest level ever reached;
+     * - idm_damageLevelCR the unloading takes place, when damage level is smaller than the largest damage ever  reached;
      */
     enum loaUnloCriterium { idm_strainLevelCR, idm_damageLevelCR } llcriteria;
 

@@ -41,6 +41,8 @@
 
 #include <memory>
 
+#include <memory>
+
 /* DSS module lives in global namespace, not in oofem namespace */
 class DSSolver;
 struct SparseMatrixF;

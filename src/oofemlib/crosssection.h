@@ -253,6 +253,7 @@ public:
     virtual double predictRelativeRedistributionCost(GaussPoint *gp) { return 1.0; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     /**
      * Returns the material associated with the GP.

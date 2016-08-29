@@ -592,6 +592,8 @@ public:
      */
     int giveMaxDofID() { return this->freeDofID - 1; }
 
+    void setNextFreeDofID(int dofid){ this->freeDofID = dofid;}
+
     /**
      * Returns receiver's associated connectivity table.
      */

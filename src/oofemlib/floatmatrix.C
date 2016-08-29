@@ -201,6 +201,7 @@ void FloatMatrix :: checkBounds(int i, int j) const
     }
 
     if ( j > nColumns ) {
+		printf("APA \n");
         OOFEM_ERROR("matrix error on columns : %d > %d", j, nColumns);
     }
 }
@@ -915,8 +916,8 @@ void FloatMatrix :: beInverseOf(const FloatMatrix &src)
         // lower triangle elimination by columns
         for ( int i = 1; i < nRows; i++ ) {
             piv = tmp.at(i, i);
-            if ( fabs(piv) < 1.e-20 ) {
-                OOFEM_ERROR("cannot inverse a %d by %d matrix", nRows, nColumns);
+            if ( fabs(piv) < 1.e-24 ) {
+                OOFEM_ERROR("pivot (%d,%d) to close to small (< 1.e-24)", i, i);
             }
 
             for ( int j = i + 1; j <= nRows; j++ ) {

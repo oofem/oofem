@@ -84,6 +84,10 @@ set (sm_element
     Elements/quad1platesubsoil.C 
     Elements/tria1platesubsoil.C
     Elements/trwarp.C
+    Elements/PlaneStress/basicelement.C
+    Elements/structural2delement.C
+    Elements/structural3delement.C
+    #Elements/phasefieldelement.C
     #qplanstrssphf.C
     )
 
@@ -272,6 +276,7 @@ set (sm_xfem
     xfem/enrichmentitems/shellcrack.C
     xfem/propagationlaws/plhoopstresscirc.C
     xfem/propagationlaws/plmaterialforce.C
+    xfem/propagationlaws/plczdamageradius.C
     xfem/xfemstructuremanager.C
     xfem/matforceevaluator.C
     xfem/nucleationcriteria/ncprincipalstress.C

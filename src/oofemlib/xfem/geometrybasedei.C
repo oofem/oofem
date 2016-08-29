@@ -169,6 +169,9 @@ void GeometryBasedEI :: appendInputRecords(DynamicDataReader &oDR)
     if ( mInheritBoundaryConditions ) {
         eiRec->setField(_IFT_EnrichmentItem_inheritbc);
     }
+    if ( mInheritOrderedBoundaryConditions ) {
+        eiRec->setField(_IFT_EnrichmentItem_inheritorderedbc);
+    }
 
     oDR.insertInputRecord(DataReader :: IR_enrichItemRec, eiRec);
 
