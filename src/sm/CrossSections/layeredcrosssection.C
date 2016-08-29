@@ -1333,7 +1333,7 @@ LayeredCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalS
                 };
             } else if ( valType == ISVT_VECTOR ) {
                 answer = {
-                    c *rotVal.at(1) - s * rotVal.at(2), s * rotVal.at(1), +c * rotVal.at(2), rotVal.at(3)
+                    c *rotVal.at(1) - s * rotVal.at(2), s * rotVal.at(1) +c * rotVal.at(2), rotVal.at(3)
                 };
             } else if ( valType == ISVT_SCALAR ) {
                 answer = rotVal;

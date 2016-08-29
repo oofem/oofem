@@ -186,8 +186,14 @@ IRResultType XfemManager :: initializeFrom(InputRecord *ir)
 void XfemManager :: giveInputRecord(DynamicInputRecord &input)
 {
     input.setRecordKeywordField(giveInputRecordName(), 1);
+
+    numberOfEnrichmentItems = giveNumberOfEnrichmentItems();
     input.setField(numberOfEnrichmentItems, _IFT_XfemManager_numberOfEnrichmentItems);
+
+    numberOfNucleationCriteria = giveNumberOfNucleationCriteria();
     input.setField(numberOfNucleationCriteria, _IFT_XfemManager_numberOfNucleationCriteria);
+
+
     input.setField(mNumGpPerTri, _IFT_XfemManager_numberOfGpPerTri);
     input.setField(mNumTriRef, _IFT_XfemManager_numberOfTriRefs);
     input.setField(mEnrDofScaleFac, _IFT_XfemManager_enrDofScaleFac);

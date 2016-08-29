@@ -67,6 +67,9 @@ protected:
 
     /// If the initiated crack should cut exactly one element.
     bool mCutOneEl;
+
+    /// Index of the cross section that the nucleation criterion applies to.
+    int mCrossSectionInd;
 };
 
 } /* namespace oofem */

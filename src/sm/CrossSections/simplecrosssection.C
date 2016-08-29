@@ -613,6 +613,7 @@ SimpleCrossSection :: createMaterialStatus(GaussPoint &iGP)
 bool
 SimpleCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode)
 {
+	return false;
     if ( this->giveMaterialNumber() ) {
         return this->domain->giveMaterial( this->giveMaterialNumber() )->isCharacteristicMtrxSymmetric(rMode);
     } else {

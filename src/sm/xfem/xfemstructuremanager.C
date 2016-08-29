@@ -52,6 +52,7 @@ XfemStructureManager :: XfemStructureManager(Domain *domain) :
     XfemManager(domain),
     mSplitCracks(false),
 	mNonstandardCz(false),
+	mMinCrackLength(0.0),
     mpMatForceEvaluator( new MaterialForceEvaluator() )
 {}
 
@@ -73,6 +74,12 @@ IRResultType XfemStructureManager :: initializeFrom(InputRecord *ir)
     	mNonstandardCz = true;
     }
 
+    IR_GIVE_OPTIONAL_FIELD(ir, mMinCrackLength, _IFT_XfemStructureManager_minCrackLength);
+
+    if(mMinCrackLength < 1.0e-12) {
+    	printf("mMinCrackLength: %e\n", mMinCrackLength);
+    }
+
     return XfemManager :: initializeFrom(ir);
 }
 
@@ -83,6 +90,9 @@ void XfemStructureManager :: giveInputRecord(DynamicInputRecord &input)
     if ( mSplitCracks ) {
         input.setField(1, _IFT_XfemStructureManager_splitCracks);
     }
+
+    input.setField(mMinCrackLength, _IFT_XfemStructureManager_minCrackLength);
+
 }
 
 int XfemStructureManager :: instanciateYourself(DataReader *dr)
@@ -267,10 +277,47 @@ void XfemStructureManager :: splitCracks()
 
     numberOfEnrichmentItems = giveNumberOfEnrichmentItems();
 
+//	printf("After splitting: Number of ei: %d\n", giveNumberOfEnrichmentItems() );
+
+
+    removeShortCracks();
+
     for ( size_t i = 0; i < enrichmentItemList.size(); i++ ) {
         enrichmentItemList [ i ]->setNumber(i + 1);
-//        enrichmentItemList [ i ]->writeVtkDebug();
+    }
+
+
+    for ( size_t i = 0; i < enrichmentItemList.size(); i++ ) {
         enrichmentItemList [ i ]->updateGeometry();
     }
+
 }
+
+void XfemStructureManager :: removeShortCracks()
+{
+//	printf("Entering XfemStructureManager :: removeShortCracks()\n");
+
+//	printf("Number of ei before removal: %d\n", giveNumberOfEnrichmentItems());
+
+	double l_tol = mMinCrackLength;
+
+    for ( int i = 1; i <= giveNumberOfEnrichmentItems(); i++ ) {
+        Crack *crack = dynamic_cast< Crack * >( this->giveEnrichmentItem(i) );
+        if ( crack ) {
+        	double l = crack->computeLength();
+
+        	if(l < l_tol) {
+        		printf("Removing short crack with l: %e\n", l);
+
+                enrichmentItemList.erase(enrichmentItemList.begin() + i - 1);
+                i--;
+        	}
+        }
+    }
+
+//	printf("Number of ei after removal: %d\n", giveNumberOfEnrichmentItems());
+
+}
+
+
 } /* namespace oofem */

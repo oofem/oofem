@@ -720,6 +720,7 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
 //    const double nodeDistTol = 1.0e-14;
     const double nodeDistTol = 1.0e-3*l_s;
     const double meshTol = 1.0e-3*l_s; // Minimum distance between traction nodes
+    const double meshTol2 = meshTol * meshTol;
 
     /**
      * first:   coordinates
@@ -741,6 +742,87 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
 //    printf("boundaries: "); boundaries.printYourself();
     IntArray bNodes;
 
+
+
+
+
+#if 0
+    // Loop over boundary nodes and check how many times they occur:
+    // 1 -> at the edge of an inclusion, therefore must be retained
+    // 2 -> connected to two segments, optional to keep
+
+    std::unordered_map<int,int> map_bnd_node_ind_to_num_occurences;
+    for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
+
+    	int elIndex = boundaries.at(pos * 2 - 1);
+        Element *e = this->giveDomain()->giveElement( elIndex );
+        int boundary = boundaries.at(pos * 2);
+        e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+        DofManager *startNode   = e->giveDofManager(bNodes [ 0 ]);
+        int startNodeInd = startNode->giveNumber();
+        DofManager *endNode     = e->giveDofManager(bNodes [ 1 ]);
+        int endNodeInd = endNode->giveNumber();
+
+
+        auto res = map_bnd_node_ind_to_num_occurences.find(startNodeInd);
+        if ( res != map_bnd_node_ind_to_num_occurences.end() ) {
+        	map_bnd_node_ind_to_num_occurences[startNodeInd]++;
+        } else {
+        	map_bnd_node_ind_to_num_occurences[startNodeInd] = 1;
+        }
+
+        res = map_bnd_node_ind_to_num_occurences.find(endNodeInd);
+        if ( res != map_bnd_node_ind_to_num_occurences.end() ) {
+        	map_bnd_node_ind_to_num_occurences[endNodeInd]++;
+        } else {
+        	map_bnd_node_ind_to_num_occurences[endNodeInd] = 1;
+        }
+
+    }
+
+
+    for ( auto it = map_bnd_node_ind_to_num_occurences.begin(); it != map_bnd_node_ind_to_num_occurences.end(); ++it ) {
+
+    	bool mandatory_to_keep = false;
+    	if( it->second == 1 ) {
+    		mandatory_to_keep = true;
+    	}
+
+        DofManager *bndNode   = domain->giveDofManager(it->first);
+        const FloatArray &x    = * ( bndNode->giveCoordinates() );
+        FloatArray xPlus = x;
+
+        if ( !boundaryPointIsOnActiveBoundary(x) ) {
+            giveMirroredPointOnGammaPlus(xPlus, x);
+        }
+
+//    	if(it->second != 2) {
+//    		printf("\n\nit->second: %d\n", it->second );
+//    		printf("it->first: %d\n", it->first );
+//    		printf("x: "); x.printYourself();
+//    		printf("xPlus: "); xPlus.printYourself();
+//
+//    		printf("l_box: %e\n", mUC(0) - mLC(0) );
+//    		printf("mLC: "); mLC.printYourself();
+//    		printf("mUC: "); mUC.printYourself();
+//
+//    	}
+
+        auto sideInd = giveSideIndices(xPlus);
+
+        for(auto ind : sideInd) {
+//            if ( !closePointExists(bndNodeCoords [ ind ], xPlus, meshTol2) ) {
+                std :: pair< FloatArray, bool >nodeCoord = {
+                    xPlus, mandatory_to_keep
+                };
+                bndNodeCoords [ ind ].push_back(nodeCoord);
+//            }
+        }
+
+    }
+#endif
+
+#if 1
     // Loop over all boundary segments twice:
     // first add mesh points...
     for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
@@ -762,7 +844,6 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
         xC.beScaled(0.5, xS);
         xC.add(0.5, xE);
 
-        const double meshTol2 = meshTol * meshTol;
 
         if ( boundaryPointIsOnActiveBoundary(xC) ) {
             int sideInd = giveSideIndex(xC);
@@ -822,6 +903,9 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
 //            }
         }
     }
+#endif
+
+
 
     // ...and then add points where cracks intersect the boundary
     // (by doing this in two steps with two loops, we avoid getting
@@ -1205,6 +1289,7 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
 
 
 
+
         for ( size_t i = 0; i < intersecPoints.size(); i++ ) {
             if ( boundaryPointIsOnActiveBoundary(intersecPoints [ i ]) ) {
                 int sideInd = giveSideIndex(intersecPoints [ i ]);
@@ -1391,8 +1476,6 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
             // Create traction elements
             if ( mTractionInterpOrder == 0 ) {
                 // Piecewise constant traction
-                // (Not stable in terms of the LBB condition,
-                //  but interesting for comparison.)
 
 
                 if ( i == coordsToKeep.size() - 1 ) {
@@ -1851,6 +1934,9 @@ void PrescribedGradientBCWeak :: assembleTangentGPContribution(FloatMatrix &oTan
         oTangent.assemble(contrib, rows, cols);
     }
     else {
+
+
+#if 1
         printf("\nWarning in PrescribedGradientBCWeak :: assembleTangentGPContribution: rows.giveSize(): %d cols.giveSize(): %d\n", rows.giveSize(), cols.giveSize() );
         printf("contrib.giveNumberOfRows(): %d contrib.giveNumberOfColumns(): %d\n", contrib.giveNumberOfRows(), contrib.giveNumberOfColumns() );
 
@@ -1871,6 +1957,7 @@ void PrescribedGradientBCWeak :: assembleTangentGPContribution(FloatMatrix &oTan
 
 //        printf("mPeriodicityNormal: "); mPeriodicityNormal.printYourself();
         printf("mPeriodicityNormal: %.12e, %.12e\n", mPeriodicityNormal(0), mPeriodicityNormal(1) );
+#endif
     }
 }
 
@@ -2515,32 +2602,26 @@ void PrescribedGradientBCWeak :: computeDomainBoundingBox(Domain &iDomain, Float
     int numNodes = iDomain.giveNumberOfDofManagers();
     int nsd = iDomain.giveNumberOfSpatialDimensions();
 
-    oLC = * ( iDomain.giveDofManager(1)->giveCoordinates() );
-    oUC = * ( iDomain.giveDofManager(1)->giveCoordinates() );
+    FloatArray lc = * ( iDomain.giveDofManager(1)->giveCoordinates() );
+    FloatArray uc = * ( iDomain.giveDofManager(1)->giveCoordinates() );
 
     for ( int i = 1; i <= numNodes; i++ ) {
         DofManager *dMan = iDomain.giveDofManager(i);
         const FloatArray &coord = * ( dMan->giveCoordinates() );
-        bool nodeIsLC = true;
-        bool nodeIsUC = true;
+
         for ( int j = 0; j < nsd; j++ ) {
-            if ( coord [ j ] > oLC [ j ] ) {
-                nodeIsLC = false;
+            if ( coord [ j ] < lc [ j ] ) {
+            	lc [ j ] = coord [ j ];
             }
 
-            if ( coord [ j ] < oUC [ j ] ) {
-                nodeIsUC = false;
+            if ( coord [ j ] > uc [ j ] ) {
+            	uc [ j ] = coord [ j ];
             }
-        }
-
-        if ( nodeIsLC ) {
-            oLC = coord;
-        }
-
-        if ( nodeIsUC ) {
-            oUC = coord;
         }
     }
+
+    oLC = std::move(lc);
+    oUC = std::move(uc);
 }
 
 int PrescribedGradientBCWeak :: giveSideIndex(const FloatArray &iPos) const
@@ -2568,6 +2649,35 @@ int PrescribedGradientBCWeak :: giveSideIndex(const FloatArray &iPos) const
     OOFEM_ERROR("Could not identify side index.")
 
     return -1;
+}
+
+std::vector<int> PrescribedGradientBCWeak :: giveSideIndices(const FloatArray &iPos) const
+{
+    const double distTol = 1.0e-12;
+
+    // Need to treat the upper right corner separately
+    if(iPos.distance(mUC) < distTol) {
+    	return {0,1};
+    }
+
+
+    if ( iPos [ 0 ] > mUC [ 0 ] - distTol ) {
+        return {0};
+    }
+
+    if ( iPos [ 1 ] > mUC [ 1 ] - distTol ) {
+        return {1};
+    }
+
+    if ( iPos [ 0 ] < mLC [ 0 ] + distTol ) {
+        return {2};
+    }
+
+    if ( iPos [ 1 ] < mLC [ 1 ] + distTol ) {
+        return {3};
+    }
+
+    return {-1};
 }
 
 bool PrescribedGradientBCWeak :: closePointExists(const std :: vector< std :: pair< FloatArray, bool > > &iCoordArray, const FloatArray &iPos, const double &iMeshTol2) const

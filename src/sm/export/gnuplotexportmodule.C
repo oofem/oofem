@@ -61,6 +61,7 @@
 #include "xfem/matforceevaluator.h"
 #include "function.h"
 #include "Elements/Interfaces/structuralinterfaceelement.h"
+#include "Materials/structuralfe2material.h"
 
 #include <sstream>
 
@@ -303,36 +304,114 @@ void GnuplotExportModule::outputXFEM(Crack &iCrack, TimeStep *tStep)
 {
     const std::vector<GaussPoint*> &czGaussPoints = iCrack.giveCohesiveZoneGaussPoints();
 
-    std::vector<double> arcLengthPositions, normalJumps, tangJumps, normalTractions;
+    std::vector<double> arcLengthPositions, normalJumps, tangJumps, normalTractions, tangTractions;
+
+    std::vector<double> arcLengthPositionsB = iCrack.giveCohesiveZoneArcPositions();
 
     const BasicGeometry *bg = iCrack.giveGeometry();
 
-#if 0
-    for( auto *gp: czGaussPoints ) {
+//    for( auto *gp: czGaussPoints ) {
+//
+//        StructuralInterfaceMaterialStatus *matStat = dynamic_cast<StructuralInterfaceMaterialStatus*> ( gp->giveMaterialStatus() );
+//        if(matStat != NULL) {
+//
+//            // Compute arc length position of the Gauss point
+//            const FloatArray &coord = (gp->giveGlobalCoordinates());
+//            printf("coord: "); coord.printYourself();
+//            double tangDist = 0.0, arcPos = 0.0;
+//            bg->computeTangentialSignDist(tangDist, coord, arcPos);
+//            arcLengthPositions.push_back(arcPos);
+//
+////            // Compute displacement jump in normal and tangential direction
+////            // Local numbering: (tang_z, tang, normal)
+////            const FloatArray &jumpLoc = matStat->giveJump();
+////
+////            double normalJump = jumpLoc.at(3);
+////            normalJumps.push_back(normalJump);
+////
+////
+////            tangJumps.push_back( jumpLoc.at(2) );
+////
+////
+////            const FloatArray &trac = matStat->giveFirstPKTraction();
+////            normalTractions.push_back(trac.at(3));
+//        }
+//    }
 
-        StructuralInterfaceMaterialStatus *matStat = dynamic_cast<StructuralInterfaceMaterialStatus*> ( gp->giveMaterialStatus() );
-        if(matStat != NULL) {
+#if 1
+    size_t num_cz_gp = czGaussPoints.size();
 
-            // Compute arc length position of the Gauss point
-            const FloatArray &coord = (gp->giveGlobalCoordinates());
-            double tangDist = 0.0, arcPos = 0.0;
-            bg->computeTangentialSignDist(tangDist, coord, arcPos);
-            arcLengthPositions.push_back(arcPos);
+//    for( auto *gp: czGaussPoints ) {
+    for(size_t gp_ind = 0; gp_ind < num_cz_gp; gp_ind++) {
+//    	printf("gp_ind: %lu\n", gp_ind );
+    	GaussPoint *gp = czGaussPoints[gp_ind];
 
-            // Compute displacement jump in normal and tangential direction
-            // Local numbering: (tang_z, tang, normal)
-            const FloatArray &jumpLoc = matStat->giveJump();
+    	if( gp != NULL ) {
 
-            double normalJump = jumpLoc.at(3);
-            normalJumps.push_back(normalJump);
+			StructuralInterfaceMaterialStatus *matStat = dynamic_cast<StructuralInterfaceMaterialStatus*> ( gp->giveMaterialStatus() );
+			if(matStat != NULL) {
+
+				// Compute arc length position of the Gauss point
+				const FloatArray &coord = (gp->giveGlobalCoordinates());
+				double tangDist = 0.0, arcPos = 0.0;
+				bg->computeTangentialSignDist(tangDist, coord, arcPos);
+//				printf("arcPos: %e\n", arcPos );
+				arcLengthPositions.push_back(arcPos);
+
+				// Compute displacement jump in normal and tangential direction
+				// Local numbering: (tang_z, tang, normal)
+				const FloatArray &jumpLoc = matStat->giveJump();
+
+				double normalJump = jumpLoc.at(3);
+				normalJumps.push_back(normalJump);
 
 
-            tangJumps.push_back( jumpLoc.at(2) );
+				tangJumps.push_back( jumpLoc.at(2) );
 
 
-            const FloatArray &trac = matStat->giveFirstPKTraction();
-            normalTractions.push_back(trac.at(3));
-        }
+				const FloatArray &trac = matStat->giveFirstPKTraction();
+				normalTractions.push_back(trac.at(3));
+
+				tangTractions.push_back(trac.at(2));
+			}
+			else {
+			    StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*>(gp->giveMaterialStatus());
+
+			    if(fe2ms != NULL) {
+			    	printf("Casted to StructuralFE2MaterialStatus.\n");
+
+					const FloatArray &coord = (gp->giveGlobalCoordinates());
+					double tangDist = 0.0, arcPos = 0.0;
+					bg->computeTangentialSignDist(tangDist, coord, arcPos);
+	//				printf("arcPos: %e\n", arcPos );
+					arcLengthPositions.push_back(arcPos);
+
+			    	const FloatArray &n = fe2ms->giveNormal();
+			    	printf("n: "); n.printYourself();
+
+			    	const FloatArray &sig_v = fe2ms->giveStressVector();
+			    	printf("sig_v: "); sig_v.printYourself();
+
+			    	FloatMatrix sig_m(2,2);
+			    	sig_m(0,0) = sig_v(0);
+			    	sig_m(1,1) = sig_v(1);
+			    	sig_m(0,1) = sig_m(1,0) = sig_v( sig_v.giveSize()-1 );
+
+			    	FloatArray trac(2);
+			    	trac(0) = sig_m(0,0)*n(0) + sig_m(0,1)*n(1);
+			    	trac(1) = sig_m(1,0)*n(0) + sig_m(1,1)*n(1);
+			    	double trac_n = trac(0)*n(0) + trac(1)*n(1);
+					normalTractions.push_back(trac_n);
+
+					const FloatArray t = {-n(1), n(0)};
+			    	double trac_t = trac(0)*t(0) + trac(1)*t(1);
+					tangTractions.push_back(trac_t);
+
+
+			    }
+
+			}
+    	}
     }
 #endif
 
@@ -364,6 +443,11 @@ void GnuplotExportModule::outputXFEM(Crack &iCrack, TimeStep *tStep)
         strNormalTrac << "NormalTracGnuplotEI" << eiIndex << "Time" << time << ".dat";
         std :: string nameNormalTrac = strNormalTrac.str();
         XFEMDebugTools::WriteArrayToGnuplot(nameNormalTrac, arcLengthPositions, normalTractions);
+
+        std :: stringstream strTangTrac;
+        strTangTrac << "TangTracGnuplotEI" << eiIndex << "Time" << time << ".dat";
+        std :: string nameTangTrac = strTangTrac.str();
+        XFEMDebugTools::WriteArrayToGnuplot(nameTangTrac, arcLengthPositions, tangTractions);
 
 
         std::vector<FloatArray> matForcesStart, matForcesEnd;

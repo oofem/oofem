@@ -222,7 +222,7 @@ void GeometryBasedEI :: updateNodeEnrMarker(XfemManager &ixFemMan)
 
     mNodeEnrMarkerMap.clear();
     TipInfo tipInfoStart, tipInfoEnd;
-    mpBasicGeometry->giveTips(tipInfoStart, tipInfoEnd);
+    bool foundTips = mpBasicGeometry->giveTips(tipInfoStart, tipInfoEnd);
 
 
     FloatArray center;
@@ -323,9 +323,11 @@ void GeometryBasedEI :: updateNodeEnrMarker(XfemManager &ixFemMan)
     }
 
     // Mark tip nodes for special treatment.
-    XfemManager *xMan = this->giveDomain()->giveXfemManager();
-    mpEnrichmentFrontStart->MarkNodesAsFront(mNodeEnrMarkerMap, * xMan, mLevelSetNormalDirMap, mLevelSetTangDirMap, tipInfoStart);
-    mpEnrichmentFrontEnd->MarkNodesAsFront(mNodeEnrMarkerMap, * xMan, mLevelSetNormalDirMap, mLevelSetTangDirMap, tipInfoEnd);
+    if(foundTips) {
+		XfemManager *xMan = this->giveDomain()->giveXfemManager();
+		mpEnrichmentFrontStart->MarkNodesAsFront(mNodeEnrMarkerMap, * xMan, mLevelSetNormalDirMap, mLevelSetTangDirMap, tipInfoStart);
+		mpEnrichmentFrontEnd->MarkNodesAsFront(mNodeEnrMarkerMap, * xMan, mLevelSetNormalDirMap, mLevelSetTangDirMap, tipInfoEnd);
+    }
 }
 
 void GeometryBasedEI :: updateLevelSets(XfemManager &ixFemMan)

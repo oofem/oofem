@@ -952,6 +952,13 @@ void PolygonLine :: computeTangentialSignDist(double &oDist, const FloatArray &i
 
     double xi = 0.0, xiUnbounded = 0.0;
 
+    if(numSeg == 0) {
+    	FloatArray crackP1 = giveVertex ( 1 );
+    	oDist = crackP1.distance(iPoint);
+    	oMinArcDist = 0.0;
+    	return;
+    }
+
     if(numSeg == 1) {
     	FloatArray crackP1 = giveVertex ( 1 );
     	crackP1.resizeWithValues(2);
@@ -1082,6 +1089,11 @@ double PolygonLine :: computeLength() const
     double L = 0.0;
 
     size_t numSeg = mVertices.size() - 1;
+
+    if(numSeg == 0) {
+    	return 0.0;
+    }
+
     for ( size_t i = 0; i < numSeg; i++ ) {
         L += mVertices [ i ].distance(mVertices [ i + 1 ]);
     }

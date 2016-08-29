@@ -1140,7 +1140,7 @@ Shell7Base :: computePressureForce(FloatArray &answer, FloatArray solVec, const 
     for ( auto *ip: *iRule ) { // rule #2 for surface integration
         lCoords.at(1) = ip->giveNaturalCoordinate(1);
         lCoords.at(2) = ip->giveNaturalCoordinate(2);
-        lCoords.at(1) = pLoad->giveLoadOffset( );
+        lCoords.at(3) = pLoad->giveLoadOffset( );
         double zeta = giveGlobalZcoord( lCoords );
         this->computeBmatrixAt(lCoords, B);
         this->computeNmatrixAt(lCoords, N);

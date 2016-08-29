@@ -293,6 +293,7 @@ protected:
     virtual bool boundaryPointIsOnActiveBoundary(const FloatArray &iPos) const = 0;
 
     int giveSideIndex(const FloatArray &iPos) const;
+    std::vector<int> giveSideIndices(const FloatArray &iPos) const;
     bool closePointExists(const std :: vector< std :: pair< FloatArray, bool > > &iCoordArray, const FloatArray &iPos, const double &iMeshTol2) const;
 };
 
