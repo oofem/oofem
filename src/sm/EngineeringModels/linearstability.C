@@ -48,6 +48,7 @@
 #include "dofmanager.h"
 #include "dof.h"
 #include "unknownnumberingscheme.h"
+#include "outputmanager.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -120,7 +121,7 @@ LinearStability :: initializeFrom(InputRecord *ir)
 		}
 
 		fprintf(outputStream, "%s", PRG_HEADER);
-		fprintf( outputStream, "\nStarting analysis on: %s\n", ctime(& this->startTime) );
+		fprintf(outputStream, "\nStarting analysis on: %s\n", ctime(& this->startTime) );
 		fprintf(outputStream, "%s\n", simulationDescription.c_str());
 	}
 
@@ -298,11 +299,7 @@ void
 LinearStability :: terminateLinStatic(TimeStep *tStep)
 {
     Domain *domain = this->giveDomain(1);
-    FILE *File = this->giveOutputStream();
     tStep->setTime(0.);
-
-    fprintf(File, "\nOutput for time %.3e \n\n", tStep->giveTargetTime() );
-    fprintf(File, "Linear static:\n\n");
 
     if ( requiresUnknownsDictionaryUpdate() ) {
         for ( auto &dman : domain->giveDofManagers() ) {
@@ -312,7 +309,6 @@ LinearStability :: terminateLinStatic(TimeStep *tStep)
 
     for ( auto &dman : domain->giveDofManagers() ) {
         dman->updateYourself(tStep);
-        dman->printOutputAt(File, tStep);
     }
 
 #  ifdef VERBOSE
@@ -323,56 +319,37 @@ LinearStability :: terminateLinStatic(TimeStep *tStep)
     for ( auto &elem : domain->giveElements() ) {
         elem->updateInternalState(tStep);
         elem->updateYourself(tStep);
-        elem->printOutputAt(File, tStep);
     }
 
 #  ifdef VERBOSE
     VERBOSE_PRINT0("Updated Elements ", domain->giveNumberOfElements())
 #  endif
-    fprintf(File, "\n");
-    /*
-     * // save context if required
-     * // default - save only if ALWAYS is set ( see cltypes.h )
-     *
-     * if ((domain->giveContextOutputMode() == COM_Always ) ||
-     * (domain->giveContextOutputMode() == COM_Required )) {
-     * this->saveContext(NULL);
-     * }
-     * else if (domain->giveContextOutputMode() == COM_UserDefined ) {
-     * if (tStep->giveNumber()%domain->giveContextOutputStep() == 0)
-     * this->saveContext(NULL);
-     * }
-     */
 
-    this->printReactionForces(tStep, 1);
+#if 0
+    // save context if required
+    // default - save only if ALWAYS is set ( see cltypes.h )
+
+    if ((domain->giveContextOutputMode() == COM_Always ) ||
+        (domain->giveContextOutputMode() == COM_Required )) {
+        this->saveContext(NULL);
+    } else if (domain->giveContextOutputMode() == COM_UserDefined ) {
+        if (tStep->giveNumber()%domain->giveContextOutputStep() == 0)
+            this->saveContext(NULL);
+    }
+#endif
 }
 
 
-void LinearStability :: terminate(TimeStep *tStep)
+void LinearStability :: doStepOutput(TimeStep *tStep)
 {
-    Domain *domain = this->giveDomain(1);
-    FILE *outputStream = this->giveOutputStream();
-
-    // print eigen values on output
-    fprintf(outputStream, "\nLinear Stability:");
-    fprintf(outputStream, "\nEigen Values are:\n-----------------\n");
-
-    for ( int i = 1; i <= numberOfRequiredEigenValues; i++ ) {
-        fprintf( outputStream, "%15.8e ", eigVal.at(i) );
-        if ( ( i % 5 ) == 0 ) {
-            fprintf(outputStream, "\n");
-        }
+    if ( !suppressOutput ) {
+        this->printOutputAt(this->giveOutputStream(), tStep);
+        fflush( this->giveOutputStream() );
     }
 
-    fprintf(outputStream, "\n\n");
-
-    int nnodes = domain->giveNumberOfDofManagers();
-
-    for ( int i = 1; i <= numberOfRequiredEigenValues; i++ ) {
-        fprintf(outputStream, "\nOutput for eigen value no.  %.3e \n", ( double ) i);
-        fprintf( outputStream,
-                "Printing eigen vector no. %d, corresponding eigen value is %15.8e\n\n",
-                i, eigVal.at(i) );
+    Domain *domain = this->giveDomain(1);
+    // i = 0  represents the linear solution, which is followed by the eigen vectors starting at i = 1
+    for ( int i = 0; i <= numberOfRequiredEigenValues; i++ ) {
         tStep->setTime( ( double ) i );
 
         if ( this->requiresUnknownsDictionaryUpdate() ) {
@@ -381,29 +358,67 @@ void LinearStability :: terminate(TimeStep *tStep)
             }
         }
 
-
         for ( auto &dman : domain->giveDofManagers() ) {
             dman->updateYourself(tStep);
-            dman->printOutputAt(outputStream, tStep);
         }
 
         tStep->setNumber(i);
         exportModuleManager->doOutput(tStep);
     }
+}
 
-#  ifdef VERBOSE
-    VERBOSE_PRINT0("Updated nodes & sides ", nnodes)
-#  endif
-    fflush( this->giveOutputStream() );
-    // save context if required
-    this->saveStepContext(tStep);
+
+void LinearStability :: printOutputAt(FILE *file, TimeStep *tStep)
+{
+    Domain *domain = this->giveDomain(1);
+    if ( !domain->giveOutputManager()->testTimeStepOutput(tStep) ) {
+        return;
+    }
+
+    fprintf(file, "\nLinear Stability:");
+    fprintf(file, "\nEigen Values are:\n-----------------\n");
+
+    for ( int i = 1; i <= numberOfRequiredEigenValues; i++ ) {
+        fprintf(file, "%15.8e ", eigVal.at(i) );
+        if ( ( i % 5 ) == 0 ) {
+            fprintf(file, "\n");
+        }
+    }
+
+    fprintf(file, "\n\n");
+
+    for ( int i = 0; i <= numberOfRequiredEigenValues; i++ ) {
+        if ( i == 0 ) {
+            fprintf(file, "\nLinear solution\n\n");
+        } else {
+            fprintf(file, "\nEigen vector no. %d, correposnding eigen value is %15.8e\n\n", i, eigVal.at(i));
+        }
+        tStep->setTime( ( double ) i );
+
+        if ( this->requiresUnknownsDictionaryUpdate() ) {
+            for ( auto &dman : domain->giveDofManagers() ) {
+                this->updateDofUnknownsDictionary(dman.get(), tStep);
+            }
+        }
+
+        for ( auto &dman : domain->giveDofManagers() ) {
+            dman->updateYourself(tStep);
+            dman->printOutputAt(file, tStep);
+        }
+
+        tStep->setNumber(i);
+
+        if ( i == 0 ) {
+            for ( auto &elem : domain->giveElements() ) {
+                elem->printOutputAt(file, tStep);
+            }
+            this->printReactionForces(tStep, 1., file);
+        }
+    }
 }
 
 
 contextIOResultType LinearStability :: saveContext(DataStream *stream, ContextMode mode, void *obj)
-//
-// saves state variable - displacement vector
-//
 {
     contextIOResultType iores;
     int closeFlag = 0;
@@ -446,11 +461,7 @@ contextIOResultType LinearStability :: saveContext(DataStream *stream, ContextMo
 }
 
 
-
 contextIOResultType LinearStability :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
-//
-// restore state variable - displacement vector
-//
 {
     int activeVector, version;
     int istep = 1, iversion = 1;

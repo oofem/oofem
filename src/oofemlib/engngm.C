@@ -516,11 +516,6 @@ EngngModel :: solveYourself()
 {
     int smstep = 1, sjstep = 1;
 
-    FILE *out = NULL;
-    if(!suppressOutput) {
-    	out = this->giveOutputStream();
-    }
-
     this->timer.startTimer(EngngModelTimer :: EMTT_AnalysisTimer);
 
     if ( this->currentStep ) {
@@ -561,7 +556,7 @@ EngngModel :: solveYourself()
                            this->giveCurrentStep()->giveNumber(), _steptime);
 
             if(!suppressOutput) {
-            	fprintf(out, "\nUser time consumed by solution step %d: %.3f [s]\n\n",
+            	fprintf(this->giveOutputStream(), "\nUser time consumed by solution step %d: %.3f [s]\n\n",
             			this->giveCurrentStep()->giveNumber(), _steptime);
             }
 
@@ -654,12 +649,8 @@ EngngModel :: updateYourself(TimeStep *tStep)
 void
 EngngModel :: terminate(TimeStep *tStep)
 {
-    if(!suppressOutput) {
-		this->doStepOutput(tStep);
-		fflush( this->giveOutputStream() );
-    }
-
-	this->saveStepContext(tStep);
+    this->doStepOutput(tStep);
+    this->saveStepContext(tStep);
 }
 
 
@@ -667,10 +658,8 @@ void
 EngngModel :: doStepOutput(TimeStep *tStep)
 {
     if(!suppressOutput) {
-		FILE *File = this->giveOutputStream();
-
-		// print output
-		this->printOutputAt(File, tStep);
+        this->printOutputAt(this->giveOutputStream(), tStep);
+        fflush( this->giveOutputStream() );
     }
 
     // export using export manager
@@ -695,11 +684,10 @@ EngngModel :: saveStepContext(TimeStep *tStep)
 
 
 void
-EngngModel :: printOutputAt(FILE *File, TimeStep *tStep)
+EngngModel :: printOutputAt(FILE *file, TimeStep *tStep)
 {
     int domCount = 0;
 
-    // fprintf (File,"\nOutput for time step number %d \n\n",tStep->giveNumber());
     for ( auto &domain: domainList ) {
         domCount += domain->giveOutputManager()->testTimeStepOutput(tStep);
     }
@@ -708,14 +696,14 @@ EngngModel :: printOutputAt(FILE *File, TimeStep *tStep)
         return;              // do not print even Solution step header
     }
 
-    fprintf(File, "\n==============================================================");
-    fprintf(File, "\nOutput for time %.8e ", tStep->giveTargetTime() * this->giveVariableScale(VST_Time) );
-    fprintf(File, "\n==============================================================\n");
+    fprintf(file, "\n==============================================================");
+    fprintf(file, "\nOutput for time %.8e ", tStep->giveTargetTime() * this->giveVariableScale(VST_Time) );
+    fprintf(file, "\n==============================================================\n");
     for ( auto &domain: domainList ) {
-        fprintf( File, "Output for domain %3d\n", domain->giveNumber() );
+        fprintf( file, "Output for domain %3d\n", domain->giveNumber() );
 
-        domain->giveOutputManager()->doDofManOutput(File, tStep);
-        domain->giveOutputManager()->doElementOutput(File, tStep);
+        domain->giveOutputManager()->doDofManOutput(file, tStep);
+        domain->giveOutputManager()->doElementOutput(file, tStep);
     }
 }
 
@@ -1029,6 +1017,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
                 const IntArray &elements = set->giveElementList();
                 for ( int ielem = 1; ielem <= elements.giveSize(); ++ielem ) {
                     Element *element = domain->giveElement( elements.at(ielem) );
+                    if ( !element->isActivated(tStep) ) continue;
                     charVec.clear();
                     va.vectorFromLoad(charVec, *element, bodyLoad, tStep, mode);
 
@@ -1049,6 +1038,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
                 const IntArray &boundaries = set->giveBoundaryList();
                 for ( int ibnd = 1; ibnd <= boundaries.giveSize() / 2; ++ibnd ) {
                     Element *element = domain->giveElement( boundaries.at(ibnd * 2 - 1) );
+                    if ( !element->isActivated(tStep) ) continue;
                     int boundary = boundaries.at(ibnd * 2);
                     charVec.clear();
                     va.vectorFromBoundaryLoad(charVec, *element, bLoad, boundary, tStep, mode);
@@ -1071,6 +1061,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
                 const IntArray &edgeBoundaries = set->giveEdgeList();
                 for ( int ibnd = 1; ibnd <= edgeBoundaries.giveSize() / 2; ++ibnd ) {
                     Element *element = domain->giveElement( edgeBoundaries.at(ibnd * 2 - 1) );
+                    if ( !element->isActivated(tStep) ) continue;
                     int boundary = edgeBoundaries.at(ibnd * 2);
                     charVec.clear();
                     va.vectorFromEdgeLoad(charVec, *element, bLoad, boundary, tStep, mode);
@@ -1369,7 +1360,7 @@ contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mo
 
 
     for ( auto &domain: domainList ) {
-        domain->saveContext(*stream, mode, obj);
+        domain->saveContext(*stream, mode);
     }
 
 
@@ -1476,7 +1467,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
     }
 
     for ( auto &domain: domainList ) {
-        domain->restoreContext(*stream, mode, obj);
+        domain->restoreContext(*stream, mode);
     }
 
     // restore nMethod
@@ -1677,7 +1668,7 @@ EngngModel::letOutputBaseFileNameBe(const std :: string &src)
 {
     this->dataOutputFileName = src;
 
-    if ( outputStream) fclose(outputStream);
+    if ( outputStream ) fclose(outputStream);
 
     if ( !suppressOutput ) {
         if ( ( outputStream = fopen(this->dataOutputFileName.c_str(), "w") ) == NULL ) {
@@ -1722,27 +1713,18 @@ EngngModel :: terminateAnalysis()
     time_t endTime = time(NULL);
     this->timer.stopTimer(EngngModelTimer :: EMTT_AnalysisTimer);
 
-    FILE *out = NULL;
-    if(!suppressOutput) {
-        out = this->giveOutputStream();
-
-        fprintf(out, "\nFinishing analysis on: %s\n", ctime(& endTime) );
-    }
-
     // compute real time consumed
     this->giveAnalysisTime(rhrs, rmin, rsec, uhrs, umin, usec);
 
-    if ( !suppressOutput ) {
+    if(!suppressOutput) {
+        FILE *out = this->giveOutputStream();
+        fprintf(out, "\nFinishing analysis on: %s\n", ctime(& endTime) );
         fprintf(out, "Real time consumed: %03dh:%02dm:%02ds\n", rhrs, rmin, rsec);
+        fprintf(out, "User time consumed: %03dh:%02dm:%02ds\n\n\n", uhrs, umin, usec);
     }
 
     OOFEM_LOG_FORCED("\n\nANALYSIS FINISHED\n\n\n");
     OOFEM_LOG_FORCED("Real time consumed: %03dh:%02dm:%02ds\n", rhrs, rmin, rsec);
-
-    if ( !suppressOutput ) {
-        fprintf(out, "User time consumed: %03dh:%02dm:%02ds\n\n\n", uhrs, umin, usec);
-    }
-
     OOFEM_LOG_FORCED("User time consumed: %03dh:%02dm:%02ds\n", uhrs, umin, usec);
     exportModuleManager->terminate();
 }

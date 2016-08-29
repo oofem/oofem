@@ -127,6 +127,11 @@ CrossSection :: restoreIPContext(DataStream &stream, ContextMode mode, GaussPoin
     return CIO_OK;
 }
 
+bool
+CrossSection :: hasProperty(CrossSectionProperty aProperty)
+{
+    return propertyDictionary.includes(aProperty);
+}
 
 double
 CrossSection :: give(CrossSectionProperty aProperty, GaussPoint *gp)

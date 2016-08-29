@@ -44,8 +44,6 @@ GJacobi :: GJacobi(Domain *d, EngngModel *m) :
 {
     nsmax  = 15;     // default maximum number of sweeps allowed
     rtol   = 10.E-12; // convergence tolerance
-    n = 0;
-    solved = 0;
 }
 
 GJacobi :: ~GJacobi() { }
@@ -61,9 +59,9 @@ GJacobi :: solve(FloatMatrix &a, FloatMatrix &b, FloatArray &eigv, FloatMatrix &
 //
 //
 {
-    int i, j, k, nsweep, nr, jj;
+    int nsweep, nr;
     double eps, eptola, eptolb, akk, ajj, ab, check, sqch, d1, d2, den, ca, cg, ak, bk, xj, xk;
-    double aj, bj, tol, dif, epsa, epsb, bb;
+    double aj, bj;
     int jm1, kp1, km1, jp1;
 
     if ( a.giveNumberOfRows() != b.giveNumberOfRows() ||
@@ -72,17 +70,8 @@ GJacobi :: solve(FloatMatrix &a, FloatMatrix &b, FloatArray &eigv, FloatMatrix &
     }
 
     int n = a.giveNumberOfRows();
-    //
-    // Check output  arrays
-    //
-
-    if ( eigv.giveSize() != n ) {
-        OOFEM_ERROR("eigv size mismatch");
-    }
-
-    if ( ( !x.isSquare() ) || ( x.giveNumberOfRows() != n ) ) {
-        OOFEM_ERROR("x size mismatch");
-    }
+    eigv.resize(n);
+    x.resize(n, n);
 
     //
     // Create temporary arrays
@@ -91,20 +80,14 @@ GJacobi :: solve(FloatMatrix &a, FloatMatrix &b, FloatArray &eigv, FloatMatrix &
     //
     // Initialize EigenValue and EigenVector Matrices
     //
-    for ( i = 1; i <= n; i++ ) {
+    for ( int i = 1; i <= n; i++ ) {
         //      if((a.at(i,i) <= 0. ) && (b.at(i,i) <= 0.))
         //        OOFEM_ERROR("Matrices are not positive definite");
         d.at(i) = a.at(i, i) / b.at(i, i);
         eigv.at(i) = d.at(i);
     }
 
-    for ( i = 1; i <= n; i++ ) {
-        for ( j = 1; j <= n; j++ ) {
-            x.at(i, j) = 0.0;
-        }
-
-        x.at(i, i) = 1.0;
-    }
+    x.beUnitMatrix();
 
     if ( n == 1 ) {
         return NM_Success;
@@ -126,9 +109,9 @@ GJacobi :: solve(FloatMatrix &a, FloatMatrix &b, FloatArray &eigv, FloatMatrix &
         //
         eps = pow(0.01, ( double ) nsweep);
         eps *= eps;
-        for ( j = 1; j <= nr; j++ ) {
-            jj = j + 1;
-            for ( k = jj; k <= n; k++ ) {
+        for ( int j = 1; j <= nr; j++ ) {
+            int jj = j + 1;
+            for ( int k = jj; k <= n; k++ ) {
                 eptola = ( a.at(j, k) * a.at(j, k) ) / ( a.at(j, j) * a.at(k, k) );
                 eptolb = ( b.at(j, k) * b.at(j, k) ) / ( b.at(j, j) * b.at(k, k) );
                 if ( ( eptola  < eps ) && ( eptolb < eps ) ) {
@@ -173,7 +156,7 @@ GJacobi :: solve(FloatMatrix &a, FloatMatrix &b, FloatArray &eigv, FloatMatrix &
                     kp1 = k + 1;
                     km1 = k - 1;
                     if ( ( jm1 - 1 ) >= 0 ) {
-                        for ( i = 1; i <= jm1; i++ ) {
+                        for ( int i = 1; i <= jm1; i++ ) {
                             aj = a.at(i, j);
                             bj = b.at(i, j);
                             ak = a.at(i, k);
@@ -186,7 +169,7 @@ GJacobi :: solve(FloatMatrix &a, FloatMatrix &b, FloatArray &eigv, FloatMatrix &
                     }
 
                     if ( ( kp1 - n ) <= 0 ) {
-                        for ( i = kp1; i <= n; i++ ) { // label 140
+                        for ( int i = kp1; i <= n; i++ ) { // label 140
                             aj = a.at(j, i);
                             bj = b.at(j, i);
                             ak = a.at(k, i);
@@ -199,7 +182,7 @@ GJacobi :: solve(FloatMatrix &a, FloatMatrix &b, FloatArray &eigv, FloatMatrix &
                     }
 
                     if ( ( jp1 - km1 ) <= 0 ) { // label 160
-                        for ( i = jp1; i <= km1; i++ ) {
+                        for ( int i = jp1; i <= km1; i++ ) {
                             aj = a.at(j, i);
                             bj = b.at(j, i);
                             ak = a.at(i, k);
@@ -223,7 +206,7 @@ GJacobi :: solve(FloatMatrix &a, FloatMatrix &b, FloatArray &eigv, FloatMatrix &
                 //
                 // update the eigenvector matrix after each rotation
                 //
-                for ( i = 1; i <= n; i++ ) {
+                for ( int i = 1; i <= n; i++ ) {
                     xj = x.at(i, j);
                     xk = x.at(i, k);
                     x.at(i, j) = xj + cg * xk;
@@ -240,7 +223,7 @@ GJacobi :: solve(FloatMatrix &a, FloatMatrix &b, FloatArray &eigv, FloatMatrix &
         a.printYourself();
         b.printYourself();
 #endif
-        for ( i = 1; i <= n; i++ ) {
+        for ( int i = 1; i <= n; i++ ) {
             // in original uncommented
             //      if ((a.at(i,i) <= 0.) || (b.at(i,i) <= 0.))
             //        error ("solveYourselfAt: Matrices are not positive definite");
@@ -256,9 +239,9 @@ GJacobi :: solve(FloatMatrix &a, FloatMatrix &b, FloatArray &eigv, FloatMatrix &
         //
         // check for convergence
         //
-        for ( i = 1; i <= n; i++ ) {       // label 230
-            tol = rtol * d.at(i);
-            dif = ( eigv.at(i) - d.at(i) );
+        for ( int i = 1; i <= n; i++ ) {       // label 230
+            double tol = rtol * d.at(i);
+            double dif = ( eigv.at(i) - d.at(i) );
             if ( fabs(dif) > tol ) {
                 goto label280;
             }
@@ -268,11 +251,11 @@ GJacobi :: solve(FloatMatrix &a, FloatMatrix &b, FloatArray &eigv, FloatMatrix &
         // check all off-diagonal elements to see if another sweep is required
         //
         eps = rtol * rtol;
-        for ( j = 1; j <= nr; j++ ) {
-            jj = j + 1;
-            for ( k = jj; k <= n; k++ ) {
-                epsa = ( a.at(j, k) * a.at(j, k) ) / ( a.at(j, j) * a.at(k, k) );
-                epsb = ( b.at(j, k) * b.at(j, k) ) / ( b.at(j, j) * b.at(k, k) );
+        for ( int j = 1; j <= nr; j++ ) {
+            int jj = j + 1;
+            for ( int k = jj; k <= n; k++ ) {
+                double epsa = ( a.at(j, k) * a.at(j, k) ) / ( a.at(j, j) * a.at(k, k) );
+                double epsb = ( b.at(j, k) * b.at(j, k) ) / ( b.at(j, j) * b.at(k, k) );
                 if ( ( epsa < eps ) && ( epsb < eps ) ) {
                     continue;
                 }
@@ -290,27 +273,24 @@ GJacobi :: solve(FloatMatrix &a, FloatMatrix &b, FloatArray &eigv, FloatMatrix &
         // update d matrix and start new sweep, if allowed
         //
 label280:
-        for ( i = 1; i <= n; i++ ) {
-            d.at(i) = eigv.at(i);
-        }
+        d = eigv;
     } while ( nsweep < nsmax );
 
     // label255:
-    for ( i = 1; i <= n; i++ ) {
-        for ( j = 1; j <= n; j++ ) {
+    for ( int i = 1; i <= n; i++ ) {
+        for ( int j = 1; j <= n; j++ ) {
             a.at(j, i) = a.at(i, j);
             b.at(j, i) = b.at(i, j);
         }                               // label 260
     }
 
-    for ( j = 1; j <= n; j++ ) {
-        bb = sqrt( fabs( b.at(j, j) ) );
-        for ( k = 1; k <= n; k++ ) {
+    for ( int j = 1; j <= n; j++ ) {
+        double bb = sqrt( fabs( b.at(j, j) ) );
+        for ( int k = 1; k <= n; k++ ) {
             x.at(k, j) /= bb;
         }
     }                                  // label 270
 
-    solved = 1;
     return NM_Success;
 }
 } // end namespace oofem

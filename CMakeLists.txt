@@ -575,6 +575,9 @@ add_executable(beam01 ${oofem_SOURCE_DIR}/bindings/oofemlib/beam01.C)
 set_target_properties(beam01 PROPERTIES EXCLUDE_FROM_ALL TRUE)
 target_link_libraries (beam01 liboofem)
 
+add_executable(hexgrid ${oofem_SOURCE_DIR}/bindings/oofemlib/hexgrid.C)
+set_target_properties(hexgrid PROPERTIES EXCLUDE_FROM_ALL TRUE)
+target_link_libraries (hexgrid liboofem)
 
 
 # CppCheck target (not built by default)

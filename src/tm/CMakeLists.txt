@@ -30,6 +30,7 @@ set (tm_boundary
     gravitypressure.C
     transportgradientneumann.C
     transportgradientdirichlet.C
+    transportgradientperiodic.C
     )
 
 set (tm_cs

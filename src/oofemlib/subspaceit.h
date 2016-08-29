@@ -90,8 +90,7 @@ class EngngModel;
 class OOFEM_EXPORT SubspaceIteration : public SparseGeneralEigenValueSystemNM
 {
 private:
-    int n, nc, nitem;
-    int solved;
+    int nitem;
 
 public:
     SubspaceIteration(Domain * d, EngngModel * m);

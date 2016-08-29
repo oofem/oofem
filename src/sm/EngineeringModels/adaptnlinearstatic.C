@@ -86,7 +86,6 @@ AdaptiveNonLinearStatic :: ~AdaptiveNonLinearStatic()
 
 IRResultType
 AdaptiveNonLinearStatic :: initializeFrom(InputRecord *ir)
-// input from inputString
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     int _val;
@@ -193,12 +192,7 @@ AdaptiveNonLinearStatic :: updateYourself(TimeStep *tStep)
 }
 
 
-
-
-
 double AdaptiveNonLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
-// returns unknown quantity like displacement, velocity of equation eq
-// This function translates this request to numerical method language
 {
     int eq = dof->__giveEquationNumber();
 #ifdef DEBUG
@@ -242,7 +236,7 @@ double AdaptiveNonLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeS
 int
 AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
 {
-    int ielem, nelem, result = 1;
+    int result = 1;
 
     // measure time consumed by mapping
     Timer timer;
@@ -277,10 +271,8 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
     timer.startTimer();
 
     // map internal ip state
-    nelem = this->giveDomain(1)->giveNumberOfElements();
-    for ( ielem = 1; ielem <= nelem; ielem++ ) {
-        result &= this->giveDomain(1)->giveElement(ielem)->adaptiveMap( sourceProblem->giveDomain(1),
-                                                                       sourceProblem->giveCurrentStep() );
+    for ( auto &e : this->giveDomain(1)->giveElements() ) {
+        result &= e->adaptiveMap( sourceProblem->giveDomain(1), sourceProblem->giveCurrentStep() );
     }
 
     timer.stopTimer();
@@ -288,13 +280,13 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
     timer.startTimer();
 
     // computes the stresses and calls updateYourself to mapped state
-    for ( ielem = 1; ielem <= nelem; ielem++ ) {
-        result &= this->giveDomain(1)->giveElement(ielem)->adaptiveUpdate(currentStep.get());
+    for ( auto &e : this->giveDomain(1)->giveElements() ) {
+        result &= e->adaptiveUpdate(currentStep.get());
     }
 
     // finish mapping process
-    for ( ielem = 1; ielem <= nelem; ielem++ ) {
-        result &= this->giveDomain(1)->giveElement(ielem)->adaptiveFinish(currentStep.get());
+    for ( auto &e : this->giveDomain(1)->giveElements() ) {
+        result &= e->adaptiveFinish(currentStep.get());
     }
 
 
@@ -457,7 +449,7 @@ AdaptiveNonLinearStatic :: initializeAdaptive(int tStepNumber)
 int
 AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
 {
-    int ielem, nelem, result = 1;
+    int result = 1;
 
     this->initStepIncrements();
 
@@ -498,15 +490,14 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     timer.startTimer();
 
     // map internal ip state
-    nelem = this->giveDomain(2)->giveNumberOfElements();
-    for ( ielem = 1; ielem <= nelem; ielem++ ) {
+    for ( auto &e : this->giveDomain(2)->giveElements() ) {
         /* HUHU CHEATING */
 
-        if ( this->giveDomain(2)->giveElement(ielem)->giveParallelMode() == Element_remote ) {
+        if ( e->giveParallelMode() == Element_remote ) {
             continue;
         }
 
-        result &= this->giveDomain(2)->giveElement(ielem)->adaptiveMap( this->giveDomain(1), this->giveCurrentStep() );
+        result &= e->adaptiveMap( this->giveDomain(1), this->giveCurrentStep() );
     }
 
     /* replace domains */
@@ -551,23 +542,23 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     timer.startTimer();
 
     // computes the stresses and calls updateYourself to mapped state
-    for ( ielem = 1; ielem <= nelem; ielem++ ) {
+    for ( auto &e : this->giveDomain(1)->giveElements() ) {
         /* HUHU CHEATING */
-        if ( this->giveDomain(1)->giveElement(ielem)->giveParallelMode() == Element_remote ) {
+        if ( e->giveParallelMode() == Element_remote ) {
             continue;
         }
 
-        result &= this->giveDomain(1)->giveElement(ielem)->adaptiveUpdate( this->giveCurrentStep() );
+        result &= e->adaptiveUpdate( this->giveCurrentStep() );
     }
 
     // finish mapping process
-    for ( ielem = 1; ielem <= nelem; ielem++ ) {
+    for ( auto &e : this->giveDomain(1)->giveElements() ) {
         /* HUHU CHEATING */
-        if ( this->giveDomain(1)->giveElement(ielem)->giveParallelMode() == Element_remote ) {
+        if ( e->giveParallelMode() == Element_remote ) {
             continue;
         }
 
-        result &= this->giveDomain(1)->giveElement(ielem)->adaptiveFinish( this->giveCurrentStep() );
+        result &= e->adaptiveFinish( this->giveCurrentStep() );
     }
 
     nMethod->reinitialize();

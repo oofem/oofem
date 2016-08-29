@@ -174,7 +174,15 @@ public:
             this->at(i, i) += x * m.at(i);
         }
     }
-
+    /**
+     * Builds internal structure of receiver based on I and J.
+     * This call is for special purpose uses. Normal problems should use the other prealloation methods.
+     * @param eModel Pointer to corresponding engineering model.
+     * @param I Row indices
+     * @param J Column indices
+     * @return Zero iff successful.
+     */
+    virtual int buildInternalStructure(EngngModel *eModel, int n, int m, const IntArray &I, const IntArray &J) { OOFEM_ERROR("Not implemented"); }
     /**
      * Builds internal structure of receiver. This method determines the internal profile
      * of sparse matrix, allocates necessary space for storing nonzero coefficients and

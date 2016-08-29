@@ -113,7 +113,7 @@ SpatialLocalizer :: giveAllElementsWithNodesWithinBox(elementContainerType &elem
     for ( int node: nodesWithinBox ) {
         dofmanConnectivity = ct->giveDofManConnectivityArray(node);
         for ( int i = 1; i <= dofmanConnectivity->giveSize(); i++ ) {
-            elemSet.insert( dofmanConnectivity->at(i) );
+            elemSet.insertSortedOnce( dofmanConnectivity->at(i) );
         }
     }
 }

@@ -59,7 +59,6 @@
 #include <memory>
 
 namespace oofem {
-
 REGISTER_NucleationCriterion(NCPrincipalStress)
 
 NCPrincipalStress::NCPrincipalStress(Domain *ipDomain):

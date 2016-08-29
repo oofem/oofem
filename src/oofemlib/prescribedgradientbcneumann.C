@@ -200,14 +200,7 @@ void PrescribedGradientBCNeumann :: assemble(SparseMtrx &answer, TimeStep *tStep
 void PrescribedGradientBCNeumann :: giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,
                                                        const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
-    IntArray dofids;
     IntArray loc_r, loc_c, sigma_loc_r, sigma_loc_c;
-    int nsd = this->domain->giveNumberOfSpatialDimensions();
-    DofIDItem id0 = this->domain->giveDofManager(1)->hasDofID(V_u) ? V_u : D_u; // Just check the first node if it has V_u or D_u.
-    dofids.resize(nsd);
-    for ( int i = 0; i < nsd; ++i ) {
-        dofids(i) = id0 + i;
-    }
 
     // Fetch the columns/rows for the stress contributions;
     mpSigmaHom->giveLocationArray(mSigmaIds, sigma_loc_r, r_s);
@@ -254,44 +247,60 @@ void PrescribedGradientBCNeumann :: computeTangent(FloatMatrix &tangent, TimeSte
     std :: unique_ptr< SparseLinearSystemNM > solver( 
         classFactory.createSparseLinSolver( ST_Petsc, this->domain, this->domain->giveEngngModel() ) ); // = rve->giveLinearSolver();
     SparseMtrxType stype = solver->giveRecommendedMatrix(true);
-    EModelDefaultEquationNumbering fnum;
     double rve_size = this->domainSize(this->giveDomain(), this->giveSetNumber());
 
-    // Set up and assemble tangent FE-matrix which will make up the sensitivity analysis for the macroscopic material tangent.
+    // 1. Kuu*us = -Kus*s   =>  us = -Kuu\Ku  where u = us*s
+    // 2. Ks = Kus'*us
+    // 3. Ks*lambda = I
+    
+    // 1.
+    // This is not very good. We have to keep Kuu and Kff in memory at the same time. Not optimal
+    // Consider changing this approach.
+    EModelDefaultEquationNumbering fnum;
     std :: unique_ptr< SparseMtrx > Kff( classFactory.createSparseMtrx(stype) );
     if ( !Kff ) {
         OOFEM_ERROR("Couldn't create sparse matrix of type %d\n", stype);
     }
     Kff->buildInternalStructure(rve, this->domain->giveNumber(), fnum);
-    rve->assemble(*Kff, tStep, TangentAssembler(TangentStiffness), fnum, fnum, this->domain);
 
-    // Setup up indices and locations
+    rve->assemble(*Kff, tStep, TangentAssembler(TangentStiffness), fnum, this->domain);
+    
+    IntArray loc_u, loc_s;
+    this->mpSigmaHom->giveLocationArray(this->mSigmaIds, loc_s, fnum);
     int neq = Kff->giveNumberOfRows();
-
-    // Indices and such of internal dofs
-    int n = this->mpSigmaHom->giveNumberOfDofs();
-
-    // Matrices and arrays for sensitivities
-    FloatMatrix grad_pert(neq, n), s_d(neq, n);
-
-    // Unit pertubations for d_dev
-    grad_pert.zero();
-    for ( int i = 1; i <= n; ++i ) {
-        int eqn = this->mpSigmaHom->giveDofWithID(this->mSigmaIds.at(i))->giveEquationNumber(fnum);
-        grad_pert.at(eqn, i) = -1.0 * rve_size;
-    }
-
-    // Solve all sensitivities
-    solver->solve(*Kff, grad_pert, s_d);
-
-    // Extract the stress response from the solutions
-    tangent.resize(n, n);
-    for ( int i = 1; i <= n; ++i ) {
-        int eqn = this->mpSigmaHom->giveDofWithID(this->mSigmaIds.at(i))->giveEquationNumber(fnum);
-        for ( int j = 1; j <= n; ++j ) {
-            tangent.at(i, j) = s_d.at(eqn, j);
+    loc_u.resize(neq - loc_s.giveSize());
+    int k = 0;
+    for ( int i = 1; i <= neq; ++i ) {
+        if ( !loc_s.contains(i) ) {
+            loc_u.at(k++) = i;
         }
     }
+
+    std :: unique_ptr< SparseMtrx > Kuu(Kff->giveSubMatrix(loc_u, loc_u));
+    // NOTE: Kus is actually a dense matrix, but we have to make it a dense matrix first
+    std :: unique_ptr< SparseMtrx > Kus(Kff->giveSubMatrix(loc_u, loc_s));
+    FloatMatrix eye(Kus->giveNumberOfColumns(), Kus->giveNumberOfColumns());
+    eye.beUnitMatrix();
+    FloatMatrix KusD;
+    Kus->times(KusD, eye);
+
+    // Release a large chunk of redundant memory early.
+    Kus.reset();
+    Kff.reset();
+
+    // 1.
+    FloatMatrix us;
+    solver->solve(*Kuu, KusD, us);
+    us.negated();
+
+    // 2.
+    FloatMatrix Ks;
+    Ks.beTProductOf(KusD, us);
+    Kus->times(Ks, us);
+
+    // 3.
+    tangent.beInverseOf(Ks);
+    tangent.times(rve_size);
 }
 
 
@@ -372,29 +381,18 @@ void PrescribedGradientBCNeumann :: integrateTangent(FloatMatrix &oTangent, Elem
 
         if ( nsd == 3 ) {
             E_n.at(1, 1) = normal.at(1);
-
             E_n.at(2, 2) = normal.at(2);
-
             E_n.at(3, 3) = normal.at(3);
-            
             E_n.at(4, 1) = normal.at(2);
-
             E_n.at(5, 1) = normal.at(3);
-
             E_n.at(6, 2) = normal.at(3);
-
             E_n.at(7, 2) = normal.at(1);
-
             E_n.at(8, 3) = normal.at(1);
-
             E_n.at(9, 3) = normal.at(2);
         } else if ( nsd == 2 ) {
             E_n.at(1, 1) = normal.at(1);
-
             E_n.at(2, 2) = normal.at(2);
-
             E_n.at(3, 1) = normal.at(2);
-
             E_n.at(4, 2) = normal.at(1);
         } else {
             E_n.at(1, 1) = normal.at(1);

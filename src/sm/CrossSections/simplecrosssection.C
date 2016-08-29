@@ -527,19 +527,21 @@ SimpleCrossSection :: initializeFrom(InputRecord *ir)
     propertyDictionary.add(CS_DrillingStiffness, value);
 
     this->materialNumber = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, this->materialNumber, _IFT_SimpleCrossSection_MaterialNumber);
+    IR_GIVE_OPTIONAL_FIELD(ir, this->materialNumber, _IFT_SimpleCrossSection_material);
 
-    value = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_directorx);
-    propertyDictionary.add(CS_DirectorVectorX, value);
+    if ( ir->hasField(_IFT_SimpleCrossSection_directorx) ) {
+        value = 0.0;
+        IR_GIVE_FIELD(ir, value, _IFT_SimpleCrossSection_directorx);
+        propertyDictionary.add(CS_DirectorVectorX, value);
 
-    value = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_directory);
-    propertyDictionary.add(CS_DirectorVectorY, value);
+        value = 0.0;
+        IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_directory);
+        propertyDictionary.add(CS_DirectorVectorY, value);
 
-    value = 1.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_directorz);
-    propertyDictionary.add(CS_DirectorVectorZ, value);
+        value = 1.0;
+        IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_directorz);
+        propertyDictionary.add(CS_DirectorVectorZ, value);
+    }
 
     return CrossSection :: initializeFrom(ir);
 }
@@ -586,7 +588,7 @@ SimpleCrossSection :: giveInputRecord(DynamicInputRecord &input)
         input.setField(this->propertyDictionary.at(CS_BeamShearCoeff), _IFT_SimpleCrossSection_shearcoeff);
     }
 
-    input.setField(this->materialNumber, _IFT_SimpleCrossSection_MaterialNumber);
+    input.setField(this->materialNumber, _IFT_SimpleCrossSection_material);
 
     if ( this->propertyDictionary.includes(CS_DirectorVectorX) ) {
         input.setField(this->propertyDictionary.at(CS_DirectorVectorX), _IFT_SimpleCrossSection_directorx);

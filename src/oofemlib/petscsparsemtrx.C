@@ -52,7 +52,6 @@ REGISTER_SparseMtrx(PetscSparseMtrx, SMT_PetscMtrx);
 PetscSparseMtrx :: PetscSparseMtrx(int n, int m) : SparseMtrx(n, m),
     mtrx(NULL), symmFlag(false), leqs(0), geqs(0), blocksize(1), di(0), kspInit(false), newValues(true), localIS(NULL), globalIS(NULL) { }
 
-
 PetscSparseMtrx :: PetscSparseMtrx() : SparseMtrx(),
     mtrx(NULL), symmFlag(false), leqs(0), geqs(0), blocksize(1), di(0), kspInit(false), newValues(true), localIS(NULL), globalIS(NULL){ }
 
@@ -291,6 +290,77 @@ PetscSparseMtrx :: addDiagonal(double x, FloatArray &m)
     VecDestroy(& globM);
 }
 
+int
+PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int n, int m, const IntArray &I, const IntArray &J)
+{
+    if ( mtrx ) {
+        MatDestroy(& mtrx);
+    }
+
+    if ( this->kspInit ) {
+        KSPDestroy(& ksp);
+        this->kspInit = false; // force ksp to be initialized
+    }
+
+    this->emodel = eModel;
+    this->di = 0;
+
+    if ( emodel->isParallel() ) {
+        OOFEM_ERROR("Parallel is not supported in manual matrix creation");
+    }
+
+    nRows = geqs = leqs = n;
+    nColumns = m;
+    blocksize = 1;
+
+    int total_nnz;
+    IntArray d_nnz(leqs), d_nnz_sym(leqs);
+    {
+        //determine nonzero structure of matrix
+        std :: vector< IntArray > rows_upper(nRows), rows_lower(nRows);
+
+        for ( int ii : I ) {
+            if ( ii > 0 ) {
+                for ( int jj : J ) {
+                    if ( jj > 0 ) {
+                        if ( jj >= ii ) {
+                            rows_upper [ ii - 1 ].insertSortedOnce(jj - 1);
+                        } else {
+                            rows_lower [ ii - 1 ].insertSortedOnce(jj - 1);
+                        }
+                    }
+                }
+            }
+        }
+
+        total_nnz = 0;
+        for ( int i = 0; i < leqs; i++ ) {
+            d_nnz(i) = rows_upper [ i ].giveSize() + rows_lower [ i ].giveSize();
+        }
+    }
+
+    // create PETSc mat
+    MatCreate(PETSC_COMM_SELF, & mtrx);
+    MatSetSizes(mtrx, nRows, nColumns, nRows, nColumns);
+    MatSetFromOptions(mtrx);
+
+    if ( total_nnz / nColumns > nRows / 10 ) { // More than 10% nnz, then we just force the dense matrix.
+        MatSetType(mtrx, MATDENSE);
+    } else {
+        MatSetType(mtrx, MATSEQAIJ);
+    }
+
+    //The incompatible preallocations are ignored automatically.
+    MatSetUp(mtrx);
+    MatSeqAIJSetPreallocation( mtrx, 0, d_nnz.givePointer() );
+
+    MatSetOption(mtrx, MAT_ROW_ORIENTED, PETSC_FALSE); // To allow the insertion of values using MatSetValues in column major order
+    MatSetOption(mtrx, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
+
+    this->newValues = true;
+    return true;
+}
+
 ///@todo I haven't looked at the parallel code yet (lack of time right now, and i want to see it work first). / Mikael
 int
 PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
@@ -374,6 +444,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, const Unkn
         total_nnz = 0;
         for ( int i = 0; i < leqs; i++ ) {
             d_nnz(i) = rows_upper [ i ].giveSize() + rows_lower [ i ].giveSize();
+            total_nnz += d_nnz(i);
         }
     }
 
@@ -382,7 +453,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, const Unkn
     MatSetSizes(mtrx, nRows, nColumns, nRows, nColumns);
     MatSetFromOptions(mtrx);
 
-    if ( total_nnz > nRows * nColumns / 10 ) { // More than 10% nnz, then we just force the dense matrix.
+    if ( total_nnz > (double)nRows * (double)nColumns / 10.0 ) { // More than 10% nnz, then we just force the dense matrix.
         MatSetType(mtrx, MATDENSE);
     } else {
         MatSetType(mtrx, MATSEQAIJ);
@@ -759,7 +830,9 @@ int
 PetscSparseMtrx :: assembleEnd()
 {
     this->newValues = true;
-    return MatAssemblyEnd(this->mtrx, MAT_FINAL_ASSEMBLY);
+    int val = MatAssemblyEnd(this->mtrx, MAT_FINAL_ASSEMBLY);
+    //MatShift(mtrx, 0);
+    return val;
 }
 
 
@@ -802,10 +875,44 @@ PetscSparseMtrx :: at(int i, int j) const
     //return value;
 }
 
+SparseMtrx *
+PetscSparseMtrx :: giveSubMatrix(const IntArray &rows, const IntArray &cols)
+{
+#ifdef __PARALLEL_MODE
+    auto comm = this->emodel->giveParallelComm();
+#else
+    auto comm = PETSC_COMM_SELF;
+#endif
+    IntArray prows = rows, pcols = cols;
+    prows.add(-1);
+    pcols.add(-1);
+
+    PetscSparseMtrx *answer = new PetscSparseMtrx(prows.giveSize(), pcols.giveSize());
+    answer->emodel = this->emodel;
+    IS is_rows;
+    IS is_cols;
+
+    ISCreateGeneral(comm, prows.giveSize(), prows.givePointer(), PETSC_USE_POINTER, & is_rows);
+    ISCreateGeneral(comm, pcols.giveSize(), pcols.givePointer(), PETSC_USE_POINTER, & is_cols);
+    MatGetSubMatrix(this->mtrx, is_rows, is_cols, MAT_INITIAL_MATRIX, & answer->mtrx);
+    ISDestroy(& is_rows);
+    ISDestroy(& is_cols);
+
+    return answer;
+}
+
 void
 PetscSparseMtrx :: toFloatMatrix(FloatMatrix &answer) const
 {
-    OOFEM_ERROR("unsupported");
+    IntArray rows, cols;
+    rows.enumerate(this->giveNumberOfRows());
+    rows.add(-1);
+    cols.enumerate(this->giveNumberOfColumns());
+    cols.add(-1);
+    
+    FloatMatrix ansT(this->giveNumberOfColumns(), this->giveNumberOfRows());
+    MatGetValues(this->mtrx, rows.giveSize(), rows.givePointer(), cols.giveSize(), cols.givePointer(), ansT.givePointer());
+    answer.beTranspositionOf(ansT);
 }
 
 void

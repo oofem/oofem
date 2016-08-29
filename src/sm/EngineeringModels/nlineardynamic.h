@@ -56,6 +56,7 @@
 //@}
 
 namespace oofem {
+
 /**
  * This class implements nonlinear dynamic engineering problem.
  * Solution of this problem is performed  as a series of increments (loading or displacement).
@@ -81,7 +82,6 @@ namespace oofem {
  * @author Andreas Feymark
  * @author Alper Cesur
  */
-
 class NonLinearDynamic : public StructuralEngngModel
 {
 protected:
@@ -117,7 +117,6 @@ public:
 
     virtual void solveYourself();
     virtual void solveYourselfAt(TimeStep *tStep);
-    virtual void terminate(TimeStep *tStep);
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
@@ -125,7 +124,7 @@ public:
     virtual void updateYourself(TimeStep *tStep);
     virtual void updateComponent(TimeStep *tStep, NumericalCmpn, Domain *d);
     virtual void updateAttributes(MetaStep *mStep);
-	virtual void initializeYourself(TimeStep *tStep);
+    virtual void initializeYourself(TimeStep *tStep);
 
     virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
 
@@ -146,10 +145,10 @@ public:
     virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) { return ( int ) mode; }
     void timesMtrx(FloatArray &answer, FloatArray &vec, CharType type, Domain *domain, TimeStep *tStep);
 
-	TimeDiscretizationType giveInitialTimeDiscretization() { return initialTimeDiscretization; }
+    TimeDiscretizationType giveInitialTimeDiscretization() { return initialTimeDiscretization; }
 
 #ifdef __OOFEG
-    void showSparseMtrxStructure(int type, oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void showSparseMtrxStructure(int type, oofegGraphicContext &gc, TimeStep *tStep);
 #endif
 
     virtual int estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType);

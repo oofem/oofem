@@ -93,13 +93,12 @@ VariableCrossSection :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, drillingStiffnessExpr, _IFT_SimpleCrossSection_drillStiffness);
     }
 
-    IR_GIVE_OPTIONAL_FIELD(ir, this->materialNumber, _IFT_SimpleCrossSection_MaterialNumber);
+    IR_GIVE_OPTIONAL_FIELD(ir, this->materialNumber, _IFT_SimpleCrossSection_material);
 
     directorxExpr.setValue(0.0);
     if ( ir->hasField(_IFT_SimpleCrossSection_directorx) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, directorxExpr, _IFT_SimpleCrossSection_directorx);
     }
-
 
     directoryExpr.setValue(0.0);
     if ( ir->hasField(_IFT_SimpleCrossSection_directory) ) {
@@ -131,7 +130,7 @@ void VariableCrossSection :: giveInputRecord(DynamicInputRecord &input)
     input.setField(this->shearAreayExpr, _IFT_SimpleCrossSection_shearareay);
     input.setField(this->shearAreazExpr, _IFT_SimpleCrossSection_shearareaz);
     input.setField(this->drillingStiffnessExpr, _IFT_SimpleCrossSection_drillStiffness);
-    input.setField(this->materialNumber, _IFT_SimpleCrossSection_MaterialNumber);
+    input.setField(this->materialNumber, _IFT_SimpleCrossSection_material);
     input.setField(this->directorxExpr, _IFT_SimpleCrossSection_directorx);
     input.setField(this->directoryExpr, _IFT_SimpleCrossSection_directory);
     input.setField(this->directorzExpr, _IFT_SimpleCrossSection_directorz);

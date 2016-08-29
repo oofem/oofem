@@ -277,8 +277,8 @@ CCTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
 
     answer.resize(6);
 
-    if (  type == IST_ShellCurvatureTensor || type == IST_ShellStrainTensor ) {
-        if ( type == IST_ShellCurvatureTensor ) {
+    if (  type == IST_CurvatureTensor || type == IST_ShellStrainTensor ) {
+        if ( type == IST_CurvatureTensor ) {
             cht = GlobalCurvatureTensor;
         } else {
             cht = GlobalStrainTensor;
@@ -291,11 +291,11 @@ CCTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
         answer.at(3) = globTensor.at(3, 3); //zz
         answer.at(4) = 2 * globTensor.at(2, 3); //yz
         answer.at(5) = 2 * globTensor.at(1, 3); //xz
-        answer.at(6) = 2 * globTensor.at(2, 3); //yz
+        answer.at(6) = 2 * globTensor.at(1, 2); //xy
 
         return 1;
-    } else if ( type == IST_ShellMomentumTensor || type == IST_ShellForceTensor ) {
-        if ( type == IST_ShellMomentumTensor ) {
+    } else if ( type == IST_ShellMomentTensor || type == IST_ShellForceTensor ) {
+        if ( type == IST_ShellMomentTensor ) {
             cht = GlobalMomentumTensor;
         } else {
             cht = GlobalForceTensor;
@@ -308,7 +308,7 @@ CCTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
         answer.at(3) = globTensor.at(3, 3); //zz
         answer.at(4) = globTensor.at(2, 3); //yz
         answer.at(5) = globTensor.at(1, 3); //xz
-        answer.at(6) = globTensor.at(2, 3); //yz
+        answer.at(6) = globTensor.at(1, 2); //xy
 
         return 1;
     } else {
@@ -480,7 +480,7 @@ CCTPlate3d :: printOutputAt(FILE *file, TimeStep *tStep)
             fprintf(file, "  strains    ");
             for ( auto &val : v ) fprintf(file, " %.4e", val);
 
-            this->giveIPValue(v, gp, IST_ShellCurvatureTensor, tStep);
+            this->giveIPValue(v, gp, IST_CurvatureTensor, tStep);
             fprintf(file, "\n              curvatures ");
             for ( auto &val : v ) fprintf(file, " %.4e", val);
 
@@ -489,7 +489,7 @@ CCTPlate3d :: printOutputAt(FILE *file, TimeStep *tStep)
             fprintf(file, "\n              stresses   ");
             for ( auto &val : v ) fprintf(file, " %.4e", val);
 
-            this->giveIPValue(v, gp, IST_ShellMomentumTensor, tStep);
+            this->giveIPValue(v, gp, IST_ShellMomentTensor, tStep);
             fprintf(file, "\n              moments    ");
             for ( auto &val : v ) fprintf(file, " %.4e", val);
 

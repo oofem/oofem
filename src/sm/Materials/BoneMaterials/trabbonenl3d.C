@@ -161,7 +161,7 @@ void
 TrabBoneNL3D :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &dest, const UnknownNumberingScheme &s, GaussPoint *gp, TimeStep *tStep)
 {
     TrabBoneNL3DStatus *nlStatus = static_cast< TrabBoneNL3DStatus * >( this->giveStatus(gp) );
-    std :: list< localIntegrationRecord > *list = nlStatus->giveIntegrationDomainList();
+    auto list = nlStatus->giveIntegrationDomainList();
     TrabBoneNL3D *rmat;
 
     double coeff;
@@ -187,7 +187,7 @@ TrabBoneNL3D :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx 
     }
 }
 
-std :: list< localIntegrationRecord > *
+std :: vector< localIntegrationRecord > *
 TrabBoneNL3D :: NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(GaussPoint *gp)
 {
     TrabBoneNL3DStatus *nlStatus = static_cast< TrabBoneNL3DStatus * >( this->giveStatus(gp) );
@@ -319,7 +319,7 @@ TrabBoneNL3D :: computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *t
     this->buildNonlocalPointTable(gp);
     this->updateDomainBeforeNonlocAverage(tStep);
 
-    std :: list< localIntegrationRecord > *list = nlStatus->giveIntegrationDomainList();
+    auto list = nlStatus->giveIntegrationDomainList();
 
     for ( auto &lir: *list ) {
         nonlocStatus = static_cast< TrabBoneNL3DStatus * >( this->giveStatus(lir.nearGp) );

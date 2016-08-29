@@ -242,6 +242,16 @@ FEI3dHexaLin :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
     answer.at(2, 1) =  1.0 / l;
 }
 
+
+void
+FEI3dHexaLin :: edgeEvaldNdxi(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+{
+    answer.resize(2);
+    answer(0) = -0.5;
+    answer(1) =  0.5;
+}
+
+
 void
 FEI3dHexaLin :: edgeLocal2global(FloatArray &answer, int iedge,
                                  const FloatArray &lcoords, const FEICellGeometry &cellgeo)

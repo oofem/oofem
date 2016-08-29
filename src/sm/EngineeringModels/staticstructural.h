@@ -44,6 +44,7 @@
 #define _IFT_StaticStructural_Name "staticstructural"
 #define _IFT_StaticStructural_deltat "deltat"
 #define _IFT_StaticStructural_solvertype "solvertype"
+#define _IFT_StaticStructural_nonlocalExtension "nonlocalext"
 
 #define _IFT_StaticStructural_recomputeaftercrackpropagation "recomputeaftercrackprop"
 namespace oofem {

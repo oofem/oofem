@@ -1508,7 +1508,14 @@ void FloatMatrix :: printYourself(const std::string &name) const
             printf("\n");
         }
     } else {
-        printf("   large matrix : coefficients not printed \n");
+        for ( int i = 1; i <= nRows && i <= 20; ++i ) {
+            for ( int j = 1; j <= nColumns && j <= 10; ++j ) {
+                printf( "%10.3e  ", this->at(i, j) );
+            }
+            if ( nColumns > 10 ) printf(" ...");
+            printf("\n");
+        }
+        if ( nRows > 20 )  printf(" ...\n");
     }
 }
 

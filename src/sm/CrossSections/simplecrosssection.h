@@ -53,7 +53,7 @@
 #define _IFT_SimpleCrossSection_shearareay "shearareay" ///< Shear area y direction
 #define _IFT_SimpleCrossSection_shearareaz "shearareaz" ///< Shear area z direction
 #define _IFT_SimpleCrossSection_drillStiffness "drillstiffness" ///< Penalty term for drilling stiffness.
-#define _IFT_SimpleCrossSection_MaterialNumber "material" ///< Material number for the bulk material
+#define _IFT_SimpleCrossSection_material "material" ///< Material number for the bulk material
 #define _IFT_SimpleCrossSection_directorx "directorx"
 #define _IFT_SimpleCrossSection_directory "directory"
 #define _IFT_SimpleCrossSection_directorz "directorz"
@@ -73,9 +73,6 @@ namespace oofem {
  * corresponding services for characteristic components and stress evaluation.
  * For description, how to incorporate more elaborate models of cross section, please read
  * base CrossSection documentation.
- *
- * The overloaded methods giveFullCharacteristicVector and giveFullCharacteristicVector add some additional support
- * for integrated cross section models - _3dShell, _3dBeam, _2dPlate and _2dBeam.
  *
  * This class also reads into its property dictionary necessary geometric cross section characteristics,
  * which are requested by particular material models. These parameters can be requested using get service and

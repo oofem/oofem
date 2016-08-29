@@ -149,7 +149,7 @@ bool PLHoopStressCirc :: propagateInterface(Domain &iDomain, EnrichmentFront &iE
                 // Use the octree to get all elements that have
                 // at least one Gauss point in a certain region around the tip.
                 const double searchRadius = 3.0 * l;
-                std :: set< int >elIndices;
+                IntArray elIndices;
                 localizer->giveAllElementsWithIpWithinBox(elIndices, circPoints [ pointIndex ], searchRadius);
 
 

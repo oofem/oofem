@@ -35,6 +35,8 @@
 #include "../sm/EngineeringModels/staticstructural.h"
 #include "../sm/Elements/structuralelement.h"
 #include "../sm/Elements/structuralelementevaluator.h"
+#include "dofmanager.h"
+#include "set.h"
 #include "timestep.h"
 #include "sparsemtrx.h"
 #include "nummet.h"
@@ -137,6 +139,12 @@ StaticStructural :: initializeFrom(InputRecord *ir)
         commBuff = new CommunicatorBuff( this->giveNumberOfProcesses() );
         communicator = new NodeCommunicator(this, commBuff, this->giveRank(),
                                             this->giveNumberOfProcesses());
+
+        if ( ir->hasField(_IFT_StaticStructural_nonlocalExtension) ) {
+            nonlocalExt = 1;
+            nonlocCommunicator = new ElementCommunicator(this, commBuff, this->giveRank(),
+                                                         this->giveNumberOfProcesses());
+        }
     }
 
 #endif
@@ -218,11 +226,7 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
     this->initMetaStepAttributes( this->giveCurrentMetaStep() );
 
     if ( this->initialGuessType == IG_Tangent ) {
-
-        if ( this->giveProblemScale() == macroScale ) {
-        	OOFEM_LOG_RELEVANT("Computing initial guess\n");
-        }
-
+        OOFEM_LOG_RELEVANT("Computing initial guess\n");
         FloatArray extrapolatedForces(neq);
 #if 1
         this->assembleExtrapolatedForces( extrapolatedForces, tStep, TangentStiffnessMatrix, this->giveDomain(di) );
@@ -244,20 +248,12 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
         this->internalForces.printYourself("internal forces");
 #endif
         if ( extrapolatedForces.computeNorm() > 0. ) {
-            if ( this->giveProblemScale() == macroScale ) {
-            	OOFEM_LOG_RELEVANT("Computing old tangent\n");
-            }
+            OOFEM_LOG_RELEVANT("Computing old tangent\n");
             this->updateComponent( tStep, NonLinearLhs, this->giveDomain(di) );
             SparseLinearSystemNM *linSolver = nMethod->giveLinearSolver();
-            if ( this->giveProblemScale() == macroScale ) {
-            	OOFEM_LOG_RELEVANT("Solving for increment\n");
-            }
-
+            OOFEM_LOG_RELEVANT("Solving for increment\n");
             linSolver->solve(*stiffnessMatrix, extrapolatedForces, incrementOfSolution);
-
-            if ( this->giveProblemScale() == macroScale ) {
-            	OOFEM_LOG_RELEVANT("Initial guess found\n");
-            }
+            OOFEM_LOG_RELEVANT("Initial guess found\n");
             this->solution.add(incrementOfSolution);
             
             this->field->update(VM_Total, tStep, this->solution, EModelDefaultEquationNumbering());

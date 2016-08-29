@@ -76,9 +76,9 @@ PrescribedGradientBCWeak :: PrescribedGradientBCWeak(int n, Domain *d) :
     mpDisplacementLock(NULL),
     mLockNodeInd(0),
     mDispLockScaling(1.0),
-	mPeriodicityNormal({0.0, 1.0}),
-	mDomainSize(0.0),
-	mMirrorFunction(0)
+    mPeriodicityNormal({0.0, 1.0}),
+    mDomainSize(0.0),
+    mMirrorFunction(0)
 {
 
 	if(d) {
@@ -481,13 +481,8 @@ void PrescribedGradientBCWeak :: giveLocationArrays(std :: vector< IntArray > &r
         mpDisplacementLock->giveLocationArray(giveDispLockDofIDs(), dispLock_r, r_s);
         mpDisplacementLock->giveLocationArray(giveDispLockDofIDs(), dispLock_c, c_s);
 
-//        int nodeInd = 1;
-//        DofManager *node = domain->giveDofManager(nodeInd);
-        DofManager *node = domain->giveElement(1)->giveDofManager(1);
-
-        IntArray dofIdArray;
-        node->giveCompleteMasterDofIDArray(dofIdArray);
-
+        int nodeInd = 1;
+        DofManager *node = domain->giveDofManager(nodeInd);
         IntArray node_r, node_c;
         node->giveLocationArray(giveRegularDispDofIDs(), node_r, r_s);
         node->giveLocationArray(giveRegularDispDofIDs(), node_c, c_s);
@@ -736,10 +731,8 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
         bndNodeCoords.push_back(emptyVec);
     }
 
-//    printf("set: %d\n", set);
     Set *setPointer = this->giveDomain()->giveSet(this->set);
     const IntArray &boundaries = setPointer->giveBoundaryList();
-//    printf("boundaries: "); boundaries.printYourself();
     IntArray bNodes;
 
 
@@ -826,9 +819,7 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
     // Loop over all boundary segments twice:
     // first add mesh points...
     for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
-    	int elIndex = boundaries.at(pos * 2 - 1);
-//    	printf("elIndex: %d\n", elIndex );
-        Element *e = this->giveDomain()->giveElement( elIndex );
+        Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
         int boundary = boundaries.at(pos * 2);
 
         e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
@@ -1289,7 +1280,6 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
 
 
 
-
         for ( size_t i = 0; i < intersecPoints.size(); i++ ) {
             if ( boundaryPointIsOnActiveBoundary(intersecPoints [ i ]) ) {
                 int sideInd = giveSideIndex(intersecPoints [ i ]);
@@ -1536,16 +1526,15 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
 
     buildMaps(allBndNodeCoords);
 
-#if 1
-    // Write traction nodes to debug vtk
-    std :: vector< FloatArray >nodeCoord;
-    for ( Node *node : mpTractionNodes ) {
-        nodeCoord.push_back( * ( node->giveCoordinates() ) );
-    }
+//    // Write traction nodes to debug vtk
+//    std :: vector< FloatArray >nodeCoord;
+//    for ( Node *node : mpTractionNodes ) {
+//        nodeCoord.push_back( * ( node->giveCoordinates() ) );
+//    }
 
 //    std :: string fileName("TractionNodeCoord.vtk");
 //    XFEMDebugTools :: WritePointsToVTK(fileName, nodeCoord);
-#endif
+
 
     if ( mMeshIsPeriodic ) {
         // Lock displacement in one node if we use periodic BCs
@@ -1580,7 +1569,6 @@ bool PrescribedGradientBCWeak :: damageExceedsTolerance(Element *el)
 
 void PrescribedGradientBCWeak :: buildMaps(const std :: vector< std :: pair< FloatArray, bool > > &iBndNodeCoordsFull)
 {
-
     // Create map from a traction element to displacement elements it
     // interacts with everywhere on gamma.
     SpatialLocalizer *localizer = domain->giveSpatialLocalizer();
@@ -1595,15 +1583,13 @@ void PrescribedGradientBCWeak :: buildMaps(const std :: vector< std :: pair< Flo
         xC_plus.beScaled(0.5, xS_plus);
         xC_plus.add(0.5, xE_plus);
 
-
         double elLength_plus = xS_plus.distance(xE_plus);
         std :: set< int >elList_plus;
         // TODO: What if an element is cut by two cracks, so that the
         // traction element becomes shorter than the displacement element?
         // Make sure that the search radius is never smaller than the
         // largest displacement element length along the boundary.
-//        localizer->giveAllElementsWithNodesWithinBox(elList_plus, xC_plus, 0.51 * elLength_plus);
-        localizer->giveAllElementsWithNodesWithinBox(elList_plus, xC_plus, 100000.0 * elLength_plus);
+        localizer->giveAllElementsWithNodesWithinBox(elList_plus, xC_plus, 0.51 * elLength_plus);
 
         if ( elList_plus.empty() ) {
             FloatArray lCoords, closestPoint;
@@ -1612,19 +1598,12 @@ void PrescribedGradientBCWeak :: buildMaps(const std :: vector< std :: pair< Flo
             elList_plus.insert(elPlaceInArray);
         }
 
-        const double diff_tol = 1.0e-12;
-
-
         std :: vector< int >displacementElements, displacementElements_plus;
         for ( int elNum: elList_plus ) {
             // Check if the traction element and the displacement element intersect
             // Intersection occurs if at least one displacement element node is
             // on the traction element.
             Element *el = domain->giveElement(elNum);
-
-//            if( !(fabs(xS_plus[0] - xE_plus[0]) < diff_tol || fabs(xS_plus[1] - xE_plus[1]) < diff_tol) ) {
-//            	OOFEM_ERROR("Problem on Gamma_plus.\n")
-//            }
 
             Line line_plus(xS_plus, xE_plus);
             if ( line_plus.intersects(el) ) {
@@ -1633,28 +1612,24 @@ void PrescribedGradientBCWeak :: buildMaps(const std :: vector< std :: pair< Flo
             }
         }
 
-
         if ( mMeshIsPeriodic ) {
             //mMapTractionElDispElGamma[i] = displacementElements;
 
-            if ( xS_plus.distance(mUC) < 1.0e-12 || true ) {
+            if ( xS_plus.distance(mUC) < 1.0e-12 ) {
                 // Perturb in direction of xE
                 FloatArray t;
                 t.beDifferenceOf(xE_plus, xS_plus);
-//                printf("t: %.12e %.12e\n", t[0], t[1]);
-                xS_plus.add(1.0e-4, t);
-//                printf("xS_plus: %.12e %.12e\n", xS_plus[0], xS_plus[1]);
+                xS_plus.add(1.0e-6, t);
+                //printf("xS_plus: %.12e %.12e\n", xS_plus[0], xS_plus[1]);
             }
 
-            if ( xE_plus.distance(mUC) < 1.0e-12 || true ) {
+            if ( xE_plus.distance(mUC) < 1.0e-12 ) {
                 // Perturb in direction of xS
                 FloatArray t;
                 t.beDifferenceOf(xS_plus, xE_plus);
-//                printf("t: %.12e %.12e\n", t[0], t[1]);
-                xE_plus.add(1.0e-4, t);
-//                printf("xE_plus: %.12e %.12e\n", xE_plus[0], xE_plus[1]);
+                xE_plus.add(1.0e-6, t);
+                //printf("xE_plus: %.12e %.12e\n", xE_plus[0], xE_plus[1]);
             }
-
 
             // Elements interacting on Gamma minus
             FloatArray xS_minus;
@@ -1662,23 +1637,8 @@ void PrescribedGradientBCWeak :: buildMaps(const std :: vector< std :: pair< Flo
             FloatArray xE_minus;
             giveMirroredPointOnGammaMinus(xE_minus, xE_plus);
             FloatArray xC_minus;
-
-//            FloatArray t;
-//            t.beDifferenceOf(xE_minus, xS_minus);
-//            xE_minus.add(1.0e-9,t);
-//            xE_plus.add(-1.0e-9,t);
-
-            if( fabs(xS_minus[0] - xE_minus[0]) < diff_tol || fabs(xS_minus[1] - xE_minus[1]) < diff_tol ) {
-
-				xC_minus.beScaled(0.5, xS_minus);
-				xC_minus.add(0.5, xE_minus);
-            }
-            else {
-				xC_minus.beScaled(0.5, xS_minus);
-				xC_minus.add(0.5, xE_minus);
-
-            }
-
+            xC_minus.beScaled(0.5, xS_minus);
+            xC_minus.add(0.5, xE_minus);
 
             double elLength_minus = xS_minus.distance(xE_minus);
             std :: set< int >elList_minus;
@@ -1686,16 +1646,9 @@ void PrescribedGradientBCWeak :: buildMaps(const std :: vector< std :: pair< Flo
             // traction element becomes shorter than the displacement element?
             // Make sure that the search radius is never smaller than the
             // largest displacement element length along the boundary.
-//            printf("elLength_minus: %e\n", elLength_minus );
-//            localizer->giveAllElementsWithNodesWithinBox(elList_minus, xC_minus, 0.51 * elLength_minus);
-//            printf("elLength_minus: %e\n", elLength_minus );
-            localizer->giveAllElementsWithNodesWithinBox(elList_minus, xC_minus, 100000.0 * elLength_minus);
+            localizer->giveAllElementsWithNodesWithinBox(elList_minus, xC_minus, 0.51 * elLength_minus);
 
             if ( elList_minus.empty() ) {
-//                if( !(fabs(xS_minus[0] - xE_minus[0]) < diff_tol || fabs(xS_minus[1] - xE_minus[1]) < diff_tol) ) {
-            		printf("elLength_minus: %e\n", elLength_minus );
-                	OOFEM_ERROR("Empty element list.\n")
-//                }
                 FloatArray lCoords, closestPoint;
                 Element *el = localizer->giveElementClosestToPoint(lCoords, closestPoint, xC_minus);
                 int elPlaceInArray = domain->giveElementPlaceInArray( el->giveGlobalNumber() );
@@ -1934,30 +1887,10 @@ void PrescribedGradientBCWeak :: assembleTangentGPContribution(FloatMatrix &oTan
         oTangent.assemble(contrib, rows, cols);
     }
     else {
-
-
-#if 1
-        printf("\nWarning in PrescribedGradientBCWeak :: assembleTangentGPContribution: rows.giveSize(): %d cols.giveSize(): %d\n", rows.giveSize(), cols.giveSize() );
-        printf("contrib.giveNumberOfRows(): %d contrib.giveNumberOfColumns(): %d\n", contrib.giveNumberOfRows(), contrib.giveNumberOfColumns() );
-
         contrib.resize(rows.giveSize(), cols.giveSize());
         contrib.zero();
         oTangent.assemble(contrib, rows, cols);
-
-        printf("iBndCoord: "); iBndCoord.printYourself();
-        printf("closestPoint_minus: "); closestPoint_minus.printYourself();
-
-        printf("dispElNodes_minus: ");
-        for ( int nodeInd : dispElNodes_minus ) {
-        	printf("%d ", nodeInd);
-        }
-        printf("\n");
-
-        printf("tEl.mStartCoord.distance(tEl.mEndCoord): %e\n", tEl.mStartCoord.distance(tEl.mEndCoord) );
-
-//        printf("mPeriodicityNormal: "); mPeriodicityNormal.printYourself();
-        printf("mPeriodicityNormal: %.12e, %.12e\n", mPeriodicityNormal(0), mPeriodicityNormal(1) );
-#endif
+        printf("Warning in PrescribedGradientBCWeak :: assembleTangentGPContribution: rows.giveSize(): %d cols.giveSize(): %d\n", rows.giveSize(), cols.giveSize() );
     }
 }
 

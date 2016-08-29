@@ -144,8 +144,6 @@ public:
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    virtual void terminate(TimeStep *tStep);
-
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);

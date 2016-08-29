@@ -732,7 +732,7 @@ TransportElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLo
 
     if ( load->giveType() == ConvectionBC || load->giveType() == RadiationBC ) {
         IntArray bNodes;
-        interp->boundaryGiveNodes(bNodes, boundary);
+        interp->boundaryEdgeGiveNodes(bNodes, boundary);
         this->computeBoundaryVectorOf(bNodes, dofid, VM_Total, tStep, unknowns);
     }
 
@@ -744,7 +744,7 @@ TransportElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLo
 
         double detJ = interp->boundaryEdgeGiveTransformationJacobian( boundary, lcoords, FEIElementGeometryWrapper(this) );
         interp->boundaryEdgeLocal2Global( gcoords, boundary, lcoords, FEIElementGeometryWrapper(this) );
-        double dL = this->giveThicknessAt(gcoords) * gp->giveWeight() * detJ;
+        double dL = gp->giveWeight() * detJ;
 
         if ( load->giveFormulationType() == Load :: FT_Entity ) {
             load->computeValueAt(val, tStep, lcoords, mode);
@@ -1039,7 +1039,7 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
                 IntArray mask;
                 FloatMatrix subAnswer;
 
-                for ( GaussPoint *gp: iRule ) {
+                for ( auto &gp: iRule ) {
                     this->computeEgdeNAt( n, id, gp->giveNaturalCoordinates() );
                     double dV = this->computeEdgeVolumeAround(gp, id);
                     if( edgeLoad->propertyMultExpr.isDefined()) {//dependence on state variable
@@ -1079,7 +1079,7 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
                 int approxOrder = 2 * this->giveApproxOrder(indx);
                 std :: unique_ptr< IntegrationRule > iRule( this->GetSurfaceIntegrationRule(approxOrder) );
 
-                for ( GaussPoint *gp: *iRule ) {
+                for ( auto &gp: *iRule ) {
                     this->computeSurfaceNAt( n, id, gp->giveNaturalCoordinates() );
                     double dV = this->computeSurfaceVolumeAround(gp, id);
                     if( surfLoad->propertyMultExpr.isDefined()) {//dependence on state variable
