@@ -1218,7 +1218,7 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
 
         double radius = xS.distance(xE)*1.0e-2;
 
-        std :: set< int >elListS;
+        IntArray elListS;
         localizer->giveAllElementsWithNodesWithinBox(elListS, xS, radius);
 
         std :: vector< FloatArray >intersecPoints;
@@ -1249,7 +1249,7 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
         }
 
 
-        std :: set< int >elListE;
+        IntArray elListE;
         localizer->giveAllElementsWithNodesWithinBox(elListE, xE, radius);
 
 
@@ -1584,18 +1584,18 @@ void PrescribedGradientBCWeak :: buildMaps(const std :: vector< std :: pair< Flo
         xC_plus.add(0.5, xE_plus);
 
         double elLength_plus = xS_plus.distance(xE_plus);
-        std :: set< int >elList_plus;
+        IntArray elList_plus;
         // TODO: What if an element is cut by two cracks, so that the
         // traction element becomes shorter than the displacement element?
         // Make sure that the search radius is never smaller than the
         // largest displacement element length along the boundary.
         localizer->giveAllElementsWithNodesWithinBox(elList_plus, xC_plus, 0.51 * elLength_plus);
 
-        if ( elList_plus.empty() ) {
+        if ( elList_plus.giveSize() == 0 ) {
             FloatArray lCoords, closestPoint;
             Element *el = localizer->giveElementClosestToPoint(lCoords, closestPoint, xC_plus);
             int elPlaceInArray = domain->giveElementPlaceInArray( el->giveGlobalNumber() );
-            elList_plus.insert(elPlaceInArray);
+            elList_plus.followedBy(elPlaceInArray);
         }
 
         std :: vector< int >displacementElements, displacementElements_plus;
@@ -1641,18 +1641,18 @@ void PrescribedGradientBCWeak :: buildMaps(const std :: vector< std :: pair< Flo
             xC_minus.add(0.5, xE_minus);
 
             double elLength_minus = xS_minus.distance(xE_minus);
-            std :: set< int >elList_minus;
+            IntArray elList_minus;
             // TODO: What if an element is cut by two cracks, so that the
             // traction element becomes shorter than the displacement element?
             // Make sure that the search radius is never smaller than the
             // largest displacement element length along the boundary.
             localizer->giveAllElementsWithNodesWithinBox(elList_minus, xC_minus, 0.51 * elLength_minus);
 
-            if ( elList_minus.empty() ) {
+            if ( elList_minus.giveSize() == 0 ) {
                 FloatArray lCoords, closestPoint;
                 Element *el = localizer->giveElementClosestToPoint(lCoords, closestPoint, xC_minus);
                 int elPlaceInArray = domain->giveElementPlaceInArray( el->giveGlobalNumber() );
-                elList_minus.insert(elPlaceInArray);
+                elList_minus.followedBy(elPlaceInArray);
             }
 
 
@@ -1664,6 +1664,7 @@ void PrescribedGradientBCWeak :: buildMaps(const std :: vector< std :: pair< Flo
 
 
                 // We need to capture the case when xS_minus and xE_minus have a corner between them.
+                const double diff_tol = 1.0e-12;
                 if( fabs(xS_minus[0] - xE_minus[0]) < diff_tol || fabs(xS_minus[1] - xE_minus[1]) < diff_tol ) {
                 	// Ok, the standard case
 					Line line_minus(xS_minus, xE_minus);
