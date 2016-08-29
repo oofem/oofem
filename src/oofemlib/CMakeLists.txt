@@ -2,7 +2,7 @@
 set (core_unsorted
     classfactory.C
     femcmpnn.C domain.C timestep.C metastep.C gausspoint.C
-    cltypes.C timer.C dictionary.C
+    cltypes.C timer.C dictionary.C heap.C grid.C
     connectivitytable.C error.C mathfem.C logger.C util.C
     initmodulemanager.C initmodule.C initialcondition.C
     assemblercallback.C
