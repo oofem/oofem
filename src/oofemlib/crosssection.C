@@ -75,6 +75,7 @@ CrossSection :: initializeFrom(InputRecord *ir)
 void
 CrossSection :: giveInputRecord(DynamicInputRecord &input)
 {
+	FEMComponent :: giveInputRecord(input);
     input.setField(this->setNumber, _IFT_CrossSection_SetNumber);
 }
 

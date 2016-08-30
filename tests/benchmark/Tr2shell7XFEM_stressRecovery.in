@@ -4,7 +4,7 @@ Tr2shell7XFEM_stressRecovery.out
 Stress recovery in shell7xfem-triangles, cf. Adaptive XFEM delamination in shell7. cf Främby, Fagerström & Bouzoulis, 'Adaptive modelling of delamination initiation and propagation using an equivalent single-layer shell approach', IJNME, 2016
 #
 ## 3. Analysis type with export modules
-StaticStructural nsteps 1 rtolf 1.0e-6 rtold -1.0 manrmsteps 1 nmodules 1 lstype 4 smtype 8 
+StaticStructural nsteps 1 rtolf 1.0e-6 rtold -1.0 manrmsteps 1 nmodules 1
 # forcescaledofs 1 18 forcescale 1 10
 errorcheck
 # StaticStructural nsteps 2 rtolf 2.0e-5 rtold -1.0 manrmsteps 1 nmodules 2 lstype 4 smtype 8

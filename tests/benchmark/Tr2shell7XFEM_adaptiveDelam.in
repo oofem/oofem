@@ -4,7 +4,7 @@ Tr2shell7XFEM_adaptiveDelam.out
 Adaptive XFEM delamination in shell7. cf Främby, Fagerström & Bouzoulis, 'Adaptive modelling of delamination initiation and propagation using an equivalent single-layer shell approach', IJNME, 2016
 #
 ## 3. Analysis type with export modules
-StaticStructural nsteps 3 rtolf 1.0e-5 rtold -1.0 manrmsteps 1 nmodules 1 lstype 4 smtype 8  forcescaledofs 18 500 501 502 503 504 505  506 507 508 509 510 511  512 513 514 515 516 517  forcescale 18  1 1 1 1 1 1  1 1 1 1 1 1  1 1 1 1 1 1
+StaticStructural nsteps 3 rtolf 1.0e-5 rtold -1.0 manrmsteps 1 nmodules 1 forcescaledofs 18 500 501 502 503 504 505  506 507 508 509 510 511  512 513 514 515 516 517  forcescale 18  1 1 1 1 1 1  1 1 1 1 1 1  1 1 1 1 1 1
 #initialguess 0
 errorcheck
 #vtkxml 1 tstep_all dofman_all element_all primvars 1 1  vars 1 92
@@ -745,7 +745,7 @@ propagationlawczdamageradius 3 incrementradius 2.7 damagethreshold 0.000001
 #
 #
 #
-#%BEGIN_CHECK% tolerance 1.e-10
+#%BEGIN_CHECK% tolerance 1.e-6
 #NODE tStep 1 number 427 dof 3 unknown d value 2.57746092e-02
 #NODE tStep 2 number 427 dof 3 unknown d value 3.73968304e-02
 #NODE tStep 3 number 427 dof 3 unknown d value 6.46258628e-02

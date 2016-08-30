@@ -189,7 +189,7 @@ NRSolver :: initializeFrom(InputRecord *ir)
         FloatArray forces;
         IR_GIVE_FIELD(ir, forces, _IFT_NRSolver_forceScale);
         IR_GIVE_FIELD(ir, dofs, _IFT_NRSolver_forceScaleDofs);
-        for ( int i = 0; i <= dofs.giveSize(); ++i ) {
+        for ( int i = 0; i < dofs.giveSize(); ++i ) {
             dg_forceScale[dofs[i]] = forces[i];
         }
     }

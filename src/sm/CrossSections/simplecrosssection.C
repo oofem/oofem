@@ -527,7 +527,7 @@ SimpleCrossSection :: initializeFrom(InputRecord *ir)
     propertyDictionary.add(CS_DrillingStiffness, value);
 
     this->materialNumber = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, this->materialNumber, _IFT_SimpleCrossSection_material);
+    IR_GIVE_OPTIONAL_FIELD(ir, this->materialNumber, _IFT_SimpleCrossSection_MaterialNumber);
 
     if ( ir->hasField(_IFT_SimpleCrossSection_directorx) ) {
         value = 0.0;
@@ -588,7 +588,7 @@ SimpleCrossSection :: giveInputRecord(DynamicInputRecord &input)
         input.setField(this->propertyDictionary.at(CS_BeamShearCoeff), _IFT_SimpleCrossSection_shearcoeff);
     }
 
-    input.setField(this->materialNumber, _IFT_SimpleCrossSection_material);
+    input.setField(this->materialNumber, _IFT_SimpleCrossSection_MaterialNumber);
 
     if ( this->propertyDictionary.includes(CS_DirectorVectorX) ) {
         input.setField(this->propertyDictionary.at(CS_DirectorVectorX), _IFT_SimpleCrossSection_directorx);
@@ -615,7 +615,6 @@ SimpleCrossSection :: createMaterialStatus(GaussPoint &iGP)
 bool
 SimpleCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode)
 {
-	return false;
     if ( this->giveMaterialNumber() ) {
         return this->domain->giveMaterial( this->giveMaterialNumber() )->isCharacteristicMtrxSymmetric(rMode);
     } else {
