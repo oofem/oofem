@@ -99,6 +99,13 @@ $FIGURE_SCALE_FACTOR = 1.5;
 #  Caution: Intermediate files can be *enormous*.
 $DEBUG = 0;
 
+# When $DISCARD_PS is set, the PostScript file created for each generated image
+# is discarded immediately after its image has been rendered and saved in the
+# required graphics format. This can lead to significant savings in disk-space,
+# when there are a lot of images, since otherwise these files are not discarded 
+# until the end of all processing.
+$DISCARD_PS = 1;
+
 #  If both of the following two variables are set then the "Up" button
 #  of the navigation panel in the first node/page of a converted document
 #  will point to $EXTERNAL_UP_LINK. $EXTERNAL_UP_TITLE should be set
