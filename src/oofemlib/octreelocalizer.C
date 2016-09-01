@@ -270,7 +270,7 @@ OctreeSpatialLocalizer :: findTerminalContaining(OctantRec *startCell, const Flo
 bool
 OctreeSpatialLocalizer :: buildOctreeDataStructure()
 {
-    OOFEM_LOG_INFO("Initializing Octree structure\n");
+//    OOFEM_LOG_INFO("Initializing Octree structure\n");
     int init = 1, nnode = this->domain->giveNumberOfDofManagers();
     double rootSize, resolutionLimit;
     FloatArray minc(3), maxc(3), * coords;

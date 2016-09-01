@@ -378,7 +378,7 @@ void GnuplotExportModule::outputXFEM(Crack &iCrack, TimeStep *tStep)
 			    StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*>(gp->giveMaterialStatus());
 
 			    if(fe2ms != NULL) {
-			    	printf("Casted to StructuralFE2MaterialStatus.\n");
+//			    	printf("Casted to StructuralFE2MaterialStatus.\n");
 
 					const FloatArray &coord = (gp->giveGlobalCoordinates());
 					double tangDist = 0.0, arcPos = 0.0;
@@ -387,10 +387,10 @@ void GnuplotExportModule::outputXFEM(Crack &iCrack, TimeStep *tStep)
 					arcLengthPositions.push_back(arcPos);
 
 			    	const FloatArray &n = fe2ms->giveNormal();
-			    	printf("n: "); n.printYourself();
+//			    	printf("n: "); n.printYourself();
 
 			    	const FloatArray &sig_v = fe2ms->giveStressVector();
-			    	printf("sig_v: "); sig_v.printYourself();
+//			    	printf("sig_v: "); sig_v.printYourself();
 
 			    	FloatMatrix sig_m(2,2);
 			    	sig_m(0,0) = sig_v(0);

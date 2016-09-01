@@ -53,10 +53,10 @@ protected:
     std :: vector< Line >mSegments;
 
     /// Start and end points of the boundary segment.
-    FloatArray mXS, mXE;
+//    FloatArray mXS, mXE;
 
 public:
-    DiscontinuousSegmentIntegrationRule(int n, Element *e, const std :: vector< Line > &iSegments, const FloatArray &iXS, const FloatArray &iXE);
+    DiscontinuousSegmentIntegrationRule(int n, Element *e, const std :: vector< Line > &iSegments);
     virtual ~DiscontinuousSegmentIntegrationRule();
 
     virtual int SetUpPointsOnLine(int iNumPointsPerSeg, MaterialMode mode);

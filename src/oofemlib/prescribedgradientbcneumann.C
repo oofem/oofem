@@ -341,7 +341,7 @@ void PrescribedGradientBCNeumann :: integrateTangent(FloatMatrix &oTangent, Elem
         std :: vector< FloatArray >intersecPoints;
         xfemElInt->partitionEdgeSegment(iBndIndex, segments, intersecPoints);
         MaterialMode matMode = e->giveMaterialMode();
-        ir.reset( new DiscontinuousSegmentIntegrationRule(1, e, segments, xS, xE) );
+        ir.reset( new DiscontinuousSegmentIntegrationRule(1, e, segments) );
         int numPointsPerSeg = 1;
         ir->SetUpPointsOnLine(numPointsPerSeg, matMode);
     } else {
