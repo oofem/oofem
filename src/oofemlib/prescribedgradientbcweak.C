@@ -503,6 +503,14 @@ void PrescribedGradientBCWeak :: assembleGPContrib(SparseMtrx &answer, TimeStep 
     contribT.clear();
     contribT.beTranspositionOf(contrib);
     answer.assemble(disp_cols, trac_rows, contribT);
+
+
+    // Assemble zeros on diagonal (required by PETSc solver)
+	FloatMatrix KZero(1,1);
+	KZero.zero();
+    for( int i :  trac_rows) {
+        answer.assemble(IntArray({i}), IntArray({i}), KZero);
+    }
 }
 
 void PrescribedGradientBCWeak :: giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,
