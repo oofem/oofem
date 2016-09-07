@@ -234,6 +234,11 @@ void PrescribedGradientBCWeak :: giveInputRecord(DynamicInputRecord &input)
 
     input.setField(mTangDistPadding, _IFT_PrescribedGradientBCWeak_TangDistPadding);
     input.setField(mTracDofScaling, _IFT_PrescribedGradientBCWeak_TracDofScaling);
+
+    if(mMirrorFunction > 0) {
+        input.setField(mMirrorFunction, _IFT_PrescribedGradientBCWeak_MirrorFunction);
+        input.setField(mPeriodicityNormal, _IFT_PrescribedGradientBCWeak_PeriodicityNormal);
+    }
 }
 
 void PrescribedGradientBCWeak :: postInitialize()
@@ -706,6 +711,26 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
     std :: sort( allCoordUnsorted.begin(), allCoordUnsorted.end(), ArcPosSortFunction4( mLC, mUC, 1.0e-4 ) );
 
 
+    // Add refinement points
+    int pointsPassed = 0;
+    for( const auto &x : allCoordUnsorted ) {
+
+    	if( pointsPassed >= mTractionNodeSpacing ) {
+    		holeCoordUnsorted.push_back(x);
+    		pointsPassed = 0;
+    	}
+
+
+    	pointsPassed++;
+    }
+
+
+    // Sort again
+    std :: sort( holeCoordUnsorted.begin(), holeCoordUnsorted.end(), ArcPosSortFunction4( mLC, mUC, 1.0e-4 ) );
+    std :: sort( allCoordUnsorted.begin(), allCoordUnsorted.end(), ArcPosSortFunction4( mLC, mUC, 1.0e-4 ) );
+
+
+
     // Remove points that are too close to each other
     removeClosePoints(holeCoordUnsorted, minPointDist);
 
@@ -739,9 +764,6 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
     // Remove segments located in holes
     removeSegOverHoles(*(tracElNew0[0]), 1.0e-4);
     removeSegOverHoles(*(tracElNew1[0]), 1.0e-4);
-
-    // TODO: Refinement.
-
 
     if(split_at_holes) {
     	splitSegments(tracElNew0);
