@@ -1464,7 +1464,15 @@ void PrescribedGradientBCWeak :: findCrackBndIntersecCoord(std::vector<FloatArra
             xfemElInt->partitionEdgeSegment(boundary, segments, intersecPoints, mTangDistPadding);
 
             for(auto x : intersecPoints) {
-            	oHoleCoordUnsorted.push_back(x);
+
+            	if(pointIsOnGammaPlus(x)) {
+            		oHoleCoordUnsorted.push_back(x);
+            	}
+            	else {
+            		FloatArray xPlus;
+            		giveMirroredPointOnGammaPlus(xPlus, x);
+            		oHoleCoordUnsorted.push_back( std::move(xPlus) );
+            	}
             }
 
         }
