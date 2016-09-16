@@ -75,6 +75,7 @@ QTrPlaneStrain :: giveInterface(InterfaceType interface)
     return NULL;
 }
 
+FEInterpolation *QTrPlaneStrain :: giveInterpolation() const { return & interpolation; }
 
 #ifdef __OOFEG
  #define TR_LENGHT_REDUCT 0.3333
