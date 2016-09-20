@@ -524,5 +524,27 @@ TransientTransportProblem :: updateDomainLinks()
     this->giveNumericalMethod( this->giveCurrentMetaStep() )->setDomain( this->giveDomain(1) );
 }
 
+FieldPtr TransientTransportProblem::giveField (FieldType key, TimeStep *tStep)
+{
+  /* Note: the current implementation uses MaskedPrimaryField, that is automatically updated with the model progress, 
+     so the returned field always refers to active solution step. 
+  */
 
+  if ( tStep != this->giveCurrentStep()) {
+    OOFEM_ERROR("Unable to return field representation for non-current time step");
+  }
+  if ( key == FT_Temperature ) {
+    FieldPtr _ptr ( new MaskedPrimaryField ( key, this->field.get(), {T_f} ) );
+    return _ptr;
+  } else if ( key == FT_HumidityConcentration ) {
+    FieldPtr _ptr ( new MaskedPrimaryField ( key, this->field.get(), {C_1} ) );
+    return _ptr;
+  } else {
+    return FieldPtr();
+  }
+}
+
+
+
+  
 } // end namespace oofem

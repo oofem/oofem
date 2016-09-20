@@ -554,6 +554,28 @@ EngngModel :: solveYourself()
     }
 }
 
+TimeStep* EngngModel :: generateNextStep(/* arguments */) {
+  /* code */
+  int smstep = 1, sjstep = 1;
+  if ( this->currentStep ) {
+      smstep = this->currentStep->giveMetaStepNumber();
+      sjstep = this->giveMetaStep(smstep)->giveStepRelativeNumber( this->currentStep->giveNumber() ) + 1;
+  }
+
+  // test if sjstep still valid for MetaStep
+  if (sjstep > this->giveMetaStep(smstep)->giveNumberOfSteps())
+    smstep++;
+  if (smstep > nMetaSteps) return NULL; // no more metasteps
+
+  this->initMetaStepAttributes(this->giveMetaStep(smstep));
+
+  this->preInitializeNextStep();
+  return this->giveNextStep();
+}
+
+
+
+
 void
 EngngModel :: initMetaStepAttributes(MetaStep *mStep)
 {
@@ -816,12 +838,12 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
             }
         }
     }
-    
+
     if ( domain->hasContactManager() ) {
         OOFEM_ERROR("Contant problems temporarily deactivated");
         //domain->giveContactManager()->assembleTangentFromContacts(answer, tStep, type, s, s);
     }
-    
+
     this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
 
     answer.assembleBegin();
@@ -1005,15 +1027,15 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
 		    if ( element->isActivated(tStep) ) {
 		      charVec.clear();
 		      va.vectorFromLoad(charVec, *element, bodyLoad, tStep, mode);
-		      
+
 		      if ( charVec.isNotEmpty() ) {
                         if ( element->giveRotationMatrix(R) ) {
 			  charVec.rotatedWith(R, 't');
                         }
-			
+
                         va.locationFromElement(loc, *element, s, & dofids);
                         answer.assemble(charVec, loc);
-			
+
                         if ( eNorms ) {
 			  eNorms->assembleSquared(charVec, dofids);
                         }
@@ -1029,16 +1051,16 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
 		      int boundary = boundaries.at(ibnd * 2);
 		      charVec.clear();
 		      va.vectorFromBoundaryLoad(charVec, *element, bLoad, boundary, tStep, mode);
-		      
+
 		      if ( charVec.isNotEmpty() ) {
                         element->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
                         if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
 			  charVec.rotatedWith(R, 't');
                         }
-			
+
                         va.locationFromElementNodes(loc, *element, bNodes, s, & dofids);
                         answer.assemble(charVec, loc);
-			
+
                         if ( eNorms ) {
 			  eNorms->assembleSquared(charVec, dofids);
                         }
@@ -1053,16 +1075,16 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
 		    int boundary = edgeBoundaries.at(ibnd * 2);
 		    charVec.clear();
 		    va.vectorFromEdgeLoad(charVec, *element, bLoad, boundary, tStep, mode);
-		    
+
 		    if ( charVec.isNotEmpty() ) {
 		      element->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
 		      if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
 			charVec.rotatedWith(R, 't');
 		      }
-		      
+
 		      va.locationFromElementNodes(loc, *element, bNodes, s, & dofids);
 		      answer.assemble(charVec, loc);
-		      
+
 		      if ( eNorms ) {
 			eNorms->assembleSquared(charVec, dofids);
 		      }
@@ -1222,7 +1244,7 @@ EngngModel :: assembleVectorFromContacts(FloatArray &answer, TimeStep *tStep, Ch
 {
     if( domain->hasContactManager()) {
         domain->giveContactManager()->assembleVectorFromContacts(answer, tStep, type, mode, s, domain, eNorms);
-    } 
+    }
 }
 
 
@@ -1637,7 +1659,7 @@ EngngModel :: giveMetaStep(int i)
     return NULL;
 }
 
-void 
+void
 EngngModel::letOutputBaseFileNameBe(const std :: string &src) {
   this->dataOutputFileName = src;
 
@@ -1684,7 +1706,7 @@ EngngModel :: terminateAnalysis()
     time_t endTime = time(NULL);
     this->timer.stopTimer(EngngModelTimer :: EMTT_AnalysisTimer);
 
-    
+
     fprintf(out, "\nFinishing analysis on: %s\n", ctime(& endTime) );
     // compute real time consumed
     this->giveAnalysisTime(rhrs, rmin, rsec, uhrs, umin, usec);
