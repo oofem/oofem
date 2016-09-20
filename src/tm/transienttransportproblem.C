@@ -201,6 +201,8 @@ TimeStep *TransientTransportProblem :: giveSolutionStepWhenIcApply(bool force)
 
 void TransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
 {
+    OOFEM_LOG_INFO( "Solving [step number %5d, time %e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
+    
     Domain *d = this->giveDomain(1);
     int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
 

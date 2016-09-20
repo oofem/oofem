@@ -266,8 +266,9 @@ class CTRLParser:
             if line.strip() == '':
                 break
             
-            if dataline[0].lower() == 'set':
-                self.nset=self.nset + 1;
+            #No need to increase nset
+            #if dataline[0].lower() == 'set':
+            #    self.nset=self.nset + 1;
             self.footer+= line
 
         #look, whether the next line contains extractor data
