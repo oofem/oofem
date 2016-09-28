@@ -76,6 +76,7 @@ namespace bp = boost::python;
 #include "elementgeometrytype.h"
 #include "field.h"
 #include "uniformgridfield.h"
+#include "unstructuredgridfield.h"
 #include "datastream.h"
 #include "dofmanvalfield.h"
 #include "dofmantransftype.h"
@@ -1143,6 +1144,12 @@ void pyclass_Field()
         .def("setGeometry",&UniformGridField::setGeometry,(bp::arg("lo"),bp::arg("hi"),bp::arg("div")))
         .def("setValues",&UniformGridField::setValues,(bp::arg("values")))
         ;
+
+    class_<UnstructuredGridField, std::shared_ptr<UnstructuredGridField>, bases<Field>>("UnstructuredGridField", init<int, int>())
+      .def("addVertex",&UnstructuredGridField::addVertex,(bp::arg("num"), bp::arg("coords")))
+      .def("setVertexValue", &UnstructuredGridField::setVertexValue, (bp::arg("num"), bp::arg("vv")))
+      .def("addCell", &UnstructuredGridField::addCell, (bp::arg("num"), bp::arg("type"), bp::arg("vertices")))
+      ;
 }
 
 /*****************************************************
@@ -1810,6 +1817,7 @@ BOOST_PYTHON_MODULE (liboofem)
     boost is fixed (unlikely?).
     */
     bp::implicitly_convertible<std::shared_ptr<UniformGridField>,std::shared_ptr<Field>>();
+    bp::implicitly_convertible<std::shared_ptr<UnstructuredGridField>,std::shared_ptr<Field>>();
 
 
 
