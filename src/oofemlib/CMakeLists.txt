@@ -36,6 +36,7 @@ set (core_unsorted
     inverseit.C subspaceit.C gjacobi.C
     #
     symcompcol.C compcol.C
+    unstructuredgridfield.C
     )
 
 #oofegutils
