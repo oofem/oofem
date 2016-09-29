@@ -329,9 +329,7 @@ protected:
     cellList[num]=Cell(type, vertices, this);
     this->timeStamp ++;
   }
-  /**
-     Implementation of Field::evaluateAt for coordinates.
-  */
+
   int evaluateAt(FloatArray &answer, const FloatArray &coords,
 		 ValueModeType mode, TimeStep *tStep) override {
     std::list<Cell> elist;
@@ -348,9 +346,9 @@ protected:
 	  vertexValues[i]=&(this->valueList[c.getVertexNum(i+1)]);
 	}
 	c.interpolate (answer, coords, *vertexValues);
-	return 1;
-      } else {
 	return 0;
+      } else {
+	return 1;
       }
     } else {
       OOFEM_ERROR("Unsupported ValueModeType");
