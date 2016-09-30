@@ -115,7 +115,7 @@ protected:
       }
       inline const FloatArray *giveVertexCoordinates(int i) const
       {
-        return ((cell->getVertex(i))->getCoordinates());
+        return ((cell->getVertex(i-1))->getCoordinates());
       }
     };
 
@@ -152,9 +152,9 @@ protected:
     void giveBoundingBox(BoundingBox& bb) const  {
       double size;
       FloatArray bb0, bb1;
-      bb1 = bb0 = *(this->getVertex(1)->getCoordinates());
+      bb1 = bb0 = *(this->getVertex(0)->getCoordinates());
 
-      for ( int i = 2; i <= this->giveNumberOfVertices(); ++i ) {
+      for ( int i = 1; i < this->giveNumberOfVertices(); ++i ) {
         const FloatArray *coordinates = this->getVertex(i)->getCoordinates();
         bb0.beMinOf(bb0, * coordinates);
         bb1.beMaxOf(bb1, * coordinates);
@@ -194,7 +194,7 @@ protected:
       }
       
     }
-    const Vertex* getVertex (int i) const {return mesh->getVertex(vertices.at(i));}
+    const Vertex* getVertex (int i) const {return mesh->getVertex(vertices(i));}
     int interpolate (FloatArray& answer, const FloatArray& pos, FloatArray* vertexVals) {
       int i,j, size = vertexVals[0].giveSize();
       FloatArray N, lcoords;
@@ -214,7 +214,7 @@ protected:
       return 1;
     }
     int getVertexNum (int i) {
-      return this->vertices.at(i);
+      return this->vertices(i);
     }
   };
 
@@ -343,7 +343,7 @@ protected:
 	int size = c.giveNumberOfVertices();
 	FloatArray** vertexValues = new FloatArray*[size]; 
 	for (int i=0; i<size; i++) {
-	  vertexValues[i]=&(this->valueList[c.getVertexNum(i+1)]);
+	  vertexValues[i]=&(this->valueList[c.getVertexNum(i)]);
 	}
 	c.interpolate (answer, coords, *vertexValues);
 	return 0;
