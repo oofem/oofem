@@ -195,8 +195,8 @@ protected:
       
     }
     const Vertex* getVertex (int i) const {return mesh->getVertex(vertices(i));}
-    int interpolate (FloatArray& answer, const FloatArray& pos, FloatArray* vertexVals) {
-      int i,j, size = vertexVals[0].giveSize();
+    int interpolate (FloatArray& answer, const FloatArray& pos, FloatArray** vertexVals) {
+      int i,j, size = vertexVals[0]->giveSize();
       FloatArray N, lcoords;
       
       FEInterpolation* it = this->getInterpolation();
@@ -208,7 +208,7 @@ protected:
       answer.zero();
       for (i=0; i<giveNumberOfVertices(); i++) {
 	for (j=0; j<size; j++) {
-	  answer(j)+=N(i)*vertexVals[i](j);
+	  answer(j)+=N(i)*vertexVals[i]->at(j+1);
 	}
       }
       return 1;
@@ -345,7 +345,7 @@ protected:
 	for (int i=0; i<size; i++) {
 	  vertexValues[i]=&(this->valueList[c.getVertexNum(i)]);
 	}
-	c.interpolate (answer, coords, *vertexValues);
+	c.interpolate (answer, coords, vertexValues);
 	return 0;
       } else {
 	return 1;
