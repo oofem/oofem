@@ -73,6 +73,7 @@ public:
 
     virtual double giveDensity(GaussPoint *gp);
     FluidDynamicMaterial *giveFluidMaterial();
+    Material *giveMaterial(IntegrationPoint *ip);
 
     virtual int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp);
     virtual int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp);
