@@ -59,6 +59,7 @@ public:
 
     virtual int instanciateYourself(DataReader *dr);
 
+    virtual void updateDofIdPool();
 
     virtual void appendInputRecords(DynamicDataReader &oDR);
 

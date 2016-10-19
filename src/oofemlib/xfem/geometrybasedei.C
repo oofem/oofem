@@ -50,6 +50,9 @@
 #include "xfem/propagationlaw.h"
 #include "xfem/enrichmentfronts/enrichmentfrontdonothing.h"
 
+#include "engngm.h"
+#include "timestep.h"
+
 #include <string>
 #include <algorithm>
 #include <set>
@@ -156,6 +159,21 @@ int GeometryBasedEI :: instanciateYourself(DataReader *dr)
 //    writeVtkDebug();
 
     return 1;
+}
+
+void GeometryBasedEI :: updateDofIdPool()
+{
+    // Set start of the enrichment dof pool for the given EI
+    int xDofPoolAllocSize = this->giveDofPoolSize();
+    this->startOfDofIdPool = this->giveDomain()->giveNextFreeDofID(xDofPoolAllocSize);
+    this->endOfDofIdPool = this->startOfDofIdPool + xDofPoolAllocSize - 1;
+
+//    printf("startOfDofIdPool: %d\n", startOfDofIdPool);
+//    printf("endOfDofIdPool: %d\n", endOfDofIdPool);
+
+    XfemManager *xMan = this->giveDomain()->giveXfemManager();
+    //    mpEnrichmentDomain->CallNodeEnrMarkerUpdate(* this, * xMan);
+    this->updateNodeEnrMarker(* xMan);
 }
 
 void GeometryBasedEI :: appendInputRecords(DynamicDataReader &oDR)
@@ -929,7 +947,7 @@ void GeometryBasedEI :: computeIntersectionPoints(std :: vector< FloatArray > &o
 void GeometryBasedEI :: writeVtkDebug() const
 {
     // For debugging only
-    int tStepInd = 0;
+    int tStepInd = domain->giveEngngModel()->giveCurrentStep(false)->giveNumber();
     this->mpBasicGeometry->printVTK(tStepInd, number);
 }
 
@@ -982,6 +1000,10 @@ void GeometryBasedEI :: propagateFronts(bool &oFrontsHavePropagated)
     }
 #endif
     updateGeometry();
+
+//    if( domain->giveEngngModel()->giveProblemScale() == macroScale ) {
+//   	writeVtkDebug();
+//    }
 }
 
 bool GeometryBasedEI :: giveElementTipCoord(FloatArray &oCoord, double &oArcPos,  Element &iEl, const FloatArray &iElCenter) const
