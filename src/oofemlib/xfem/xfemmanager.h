@@ -232,6 +232,11 @@ public:
     bool hasPropagatingFronts();
     bool hasInitiationCriteria();
 
+    /// Remove all enrichment items
+    void clearEnrichmentItems();
+
+    void appendEnrichmentItems(std :: vector< std :: unique_ptr< EnrichmentItem > > &iEIlist);
+
     void nucleateEnrichmentItems(bool &oNewItemsWereNucleated);
     bool hasNucleationCriteria();
 

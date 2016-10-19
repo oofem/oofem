@@ -458,6 +458,22 @@ bool XfemManager :: hasInitiationCriteria()
     return false;
 }
 
+void XfemManager :: clearEnrichmentItems()
+{
+	enrichmentItemList.clear();
+    updateNodeEnrichmentItemMap();
+}
+
+void XfemManager :: appendEnrichmentItems(std :: vector< std :: unique_ptr< EnrichmentItem > > &iEIlist)
+{
+	for( auto &ei : iEIlist ) {
+		enrichmentItemList.push_back(std::move(ei));
+	}
+
+	numberOfEnrichmentItems = enrichmentItemList.size();
+    updateNodeEnrichmentItemMap();
+}
+
 void XfemManager :: nucleateEnrichmentItems(bool &oNewItemsWereNucleated)
 {
 //	printf("Entering XfemManager :: nucleateEnrichmentItems\n");
