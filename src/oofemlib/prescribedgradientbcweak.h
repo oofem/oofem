@@ -142,6 +142,9 @@ public:
     virtual void assemble(SparseMtrx &answer, TimeStep *tStep,
                           CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
+    virtual void assembleExtraDisplock(SparseMtrx &answer, TimeStep *tStep,
+                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
+
     virtual void assembleGPContrib(SparseMtrx &answer, TimeStep *tStep,
                           CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, TracSegArray &iEl, GaussPoint &iGP);
 
@@ -150,6 +153,13 @@ public:
 
     virtual void giveTractionLocationArray(IntArray &rows,
                                            const UnknownNumberingScheme &s);
+
+    virtual void giveDisplacementLocationArray(IntArray &rows,
+                                           const UnknownNumberingScheme &s);
+
+    void compute_x_times_N_1(FloatMatrix &o_x_times_N);
+    void compute_x_times_N_2(FloatMatrix &o_x_times_N);
+
 
 //    virtual void giveTractionLocationArrays(int iTracElInd, IntArray &rows, CharType type,
 //                                            const UnknownNumberingScheme &s);
@@ -246,6 +256,12 @@ protected:
     Node *mpDisplacementLock;
     int mLockNodeInd;
     double mDispLockScaling;
+
+    int mSpringNodeInd1;
+    int mSpringNodeInd2;
+    int mSpringNodeInd3;
+    double mSpringPenaltyStiffness;
+
 
     /// Elements for the independent traction discretization
     std :: vector< TracSegArray * > mpTracElNew;

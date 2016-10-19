@@ -50,6 +50,12 @@
 #include "function.h"
 #include "engngm.h"
 #include "mathfem.h"
+#include "sparselinsystemnm.h"
+#include "unknownnumberingscheme.h"
+#include "../sm/Materials/structuralmaterial.h"
+#include "../sm/EngineeringModels/staticstructural.h"
+
+#include "timer.h"
 
 #include "xfem/XFEMDebugTools.h"
 
@@ -104,7 +110,10 @@ PrescribedGradientBCWeak :: PrescribedGradientBCWeak(int n, Domain *d) :
     mDispLockScaling(1.0),
     mPeriodicityNormal({0.0, 1.0}),
     mDomainSize(0.0),
-    mMirrorFunction(0)
+    mMirrorFunction(0),
+	mSpringNodeInd1(-1),
+	mSpringNodeInd2(-1),
+	mSpringPenaltyStiffness(1.0e-3)
 {
 
 	if(d) {
@@ -156,6 +165,7 @@ DofManager *PrescribedGradientBCWeak :: giveInternalDofManager(int i)
     if ( i - 1 < int( mpTracElNew.size() ) ) {
         return mpTracElNew [ i - 1 ]->mFirstNode.get();
     } else   {
+    	OOFEM_ERROR("return mpDisplacementLock")
         return mpDisplacementLock;
     }
 }
@@ -441,12 +451,101 @@ void PrescribedGradientBCWeak :: assemble(SparseMtrx &answer, TimeStep *tStep,
             answer.assemble(lockRows, lockCols, KZero);
         }
 
+
+        int nsd = domain->giveNumberOfSpatialDimensions();
+        FloatMatrix KeDispLock(nsd, nsd);
+        KeDispLock.beUnitMatrix();
+        KeDispLock.times(mSpringPenaltyStiffness);
+
+//        printf("mSpringNodeInd1: %d\n", mSpringNodeInd1);
+        int placeInArray = domain->giveDofManPlaceInArray(mSpringNodeInd1);
+        DofManager *node1 = domain->giveDofManager(placeInArray);
+
+        IntArray nodeRows, nodeCols;
+        node1->giveLocationArray(giveRegularDispDofIDs(), nodeRows, r_s);
+        node1->giveLocationArray(giveRegularDispDofIDs(), nodeCols, c_s);
+
+        answer.assemble(nodeRows, nodeCols, KeDispLock);
+
+
     } else {
         printf("Skipping assembly in PrescribedGradientBCWeak::assemble().\n");
     }
 
 //    std :: string fileName("TracGpCoord.vtk");
 //    XFEMDebugTools :: WritePointsToVTK(fileName, gpCoordArray);
+}
+
+void PrescribedGradientBCWeak :: assembleExtraDisplock(SparseMtrx &answer, TimeStep *tStep,
+                      CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
+
+{
+//	printf("Entering PrescribedGradientBCWeak :: assembleExtraDisplock.\n");
+
+#if 1
+
+    int nsd = domain->giveNumberOfSpatialDimensions();
+    FloatMatrix KeDispLock(nsd, nsd);
+    KeDispLock.zero();
+
+    // Lock in y-direction to get rid of rigid body rotation.
+    double scaling = 1.0e0;
+    KeDispLock.at(2,2) 			=  mSpringPenaltyStiffness*scaling;
+
+    IntArray nodeRows, nodeCols;
+
+//    printf("mSpringNodeInd2: %d\n", mSpringNodeInd2);
+    int placeInArray = domain->giveDofManPlaceInArray(mSpringNodeInd2);
+    DofManager *node1 = domain->giveDofManager(placeInArray);
+
+    node1->giveLocationArray(giveRegularDispDofIDs(), nodeRows, r_s);
+    node1->giveLocationArray(giveRegularDispDofIDs(), nodeCols, c_s);
+
+    answer.assemble(nodeRows, nodeCols, KeDispLock);
+
+
+#else
+    int nsd = domain->giveNumberOfSpatialDimensions();
+    FloatMatrix KeDispLock(2*nsd, 2*nsd);
+    KeDispLock.zero();
+
+    // Lock in y-direction to get rid of rigid body rotation.
+    double scaling = 1.0e0;
+    KeDispLock.at(2,2) 			=  mSpringPenaltyStiffness*scaling;
+    KeDispLock.at(2,nsd+1) 		= -mSpringPenaltyStiffness*scaling;
+    KeDispLock.at(nsd+1,2) 		= -mSpringPenaltyStiffness*scaling;
+    KeDispLock.at(nsd+1,nsd+1) 	=  mSpringPenaltyStiffness*scaling;
+//    KeDispLock.times(mSpringPenaltyStiffness);
+
+    IntArray nodeRows, nodeCols;
+
+
+    int placeInArray = domain->giveDofManPlaceInArray(mSpringNodeInd2);
+    DofManager *node1 = domain->giveDofManager(placeInArray);
+
+    IntArray nodeRows1, nodeCols1;
+    node1->giveLocationArray(giveRegularDispDofIDs(), nodeRows1, r_s);
+    node1->giveLocationArray(giveRegularDispDofIDs(), nodeCols1, c_s);
+
+    nodeRows.followedBy(nodeRows1);
+    nodeCols.followedBy(nodeCols1);
+
+
+    placeInArray = domain->giveDofManPlaceInArray(mSpringNodeInd3);
+    DofManager *node2 = domain->giveDofManager(placeInArray);
+
+    IntArray nodeRows2, nodeCols2;
+    node2->giveLocationArray(giveRegularDispDofIDs(), nodeRows2, r_s);
+    node2->giveLocationArray(giveRegularDispDofIDs(), nodeCols2, c_s);
+
+    nodeRows.followedBy(nodeRows2);
+    nodeCols.followedBy(nodeCols2);
+
+
+
+    answer.assemble(nodeRows, nodeCols, KeDispLock);
+#endif
+
 }
 
 void PrescribedGradientBCWeak :: assembleGPContrib(SparseMtrx &answer, TimeStep *tStep,
@@ -527,7 +626,20 @@ void PrescribedGradientBCWeak :: giveLocationArrays(std :: vector< IntArray > &r
 void PrescribedGradientBCWeak :: giveTractionLocationArray(IntArray &rows,
                                                            const UnknownNumberingScheme &s)
 {
-	OOFEM_ERROR("Not implemented.")
+	// Used for the condensation when computing the macroscopic tangent.
+
+
+    rows.clear();
+
+    // Loop over traction elements
+	for( TracSegArray* el : mpTracElNew ) {
+
+		IntArray trac_loc_r;
+		el->mFirstNode->giveLocationArray(giveTracDofIDs(), trac_loc_r, s);
+
+		rows.followedBy(trac_loc_r);
+	}
+
 #if 0
     rows.clear();
 
@@ -554,6 +666,188 @@ void PrescribedGradientBCWeak :: giveTractionLocationArray(IntArray &rows,
     }
 #endif
 }
+
+void PrescribedGradientBCWeak :: giveDisplacementLocationArray(IntArray &rows,
+                                       const UnknownNumberingScheme &s)
+{
+	// Used for the condensation when computing the macroscopic tangent.
+
+}
+
+void PrescribedGradientBCWeak :: compute_x_times_N_1(FloatMatrix &o_x_times_N)
+{
+    double rve_size = this->domainSize();
+    const int dim = domain->giveNumberOfSpatialDimensions();
+
+    IntArray loc_t;
+    EModelDefaultEquationNumbering fnum;
+    giveTractionLocationArray(loc_t, fnum);
+
+    int num_t_eq = loc_t.giveSize();
+
+//    o_x_times_N.resize(3, num_t_eq);
+    o_x_times_N.resize(num_t_eq,3);
+
+    IntArray cols = {1,2,3};
+
+    int trac_el_ind = 1;
+
+    for( auto *el: mpTracElNew ) {
+
+    	IntArray rows = {trac_el_ind*2-1,trac_el_ind*2};
+
+        for ( GaussPoint *gp: *(el->mIntRule.get()) ) {
+
+        	FloatMatrix contrib(2,3);
+
+            // For now, assume piecewise constant approx
+            FloatArray Ntrac = FloatArray { 1.0 };
+
+            // N-matrix
+            FloatMatrix Nmat;
+            Nmat.beNMatrixOf(Ntrac, dim);
+//            printf("Nmat: "); Nmat.printYourself();
+
+        	// Fetch global coordinate x
+        	const FloatArray &x = gp->giveGlobalCoordinates();
+
+//            // Compute vector of traction unknowns
+//            FloatArray tracUnknowns;
+//            el->mFirstNode->giveUnknownVector(tracUnknowns, giveTracDofIDs(), VM_Total, tStep);
+
+
+//            FloatArray traction;
+//            traction.beProductOf(Nmat, tracUnknowns);
+
+            FloatArray tmp;
+            giveBoundaryCoordVector(tmp, x);
+
+            FloatMatrix coord_mat(2,3);
+            coord_mat.at(1,1) = tmp.at(1);
+            coord_mat.at(2,2) = tmp.at(2);
+
+//            coord_mat.at(3,2) = tmp.at(1);
+
+//            coord_mat.at(3,1) = tmp.at(2);
+//            coord_mat.at(4,2) = tmp.at(1);
+
+//            coord_mat.at(4,1) = tmp.at(2);
+//            coord_mat.at(3,2) = tmp.at(1);
+
+            coord_mat.at(1,3) = 0.5*tmp.at(2);
+            coord_mat.at(2,3) = 0.5*tmp.at(1);
+
+//            coord_mat.at(4,2) = 0.5*tmp.at(2);
+//            coord_mat.at(4,1) = 0.5*tmp.at(1);
+
+
+//            FloatMatrix contrib;
+//            contrib.beDyadicProductOf(traction, tmp);
+
+            contrib.beProductOf(Nmat, coord_mat);
+
+//            contrib = coord_mat;
+
+            double detJ = 0.5 * el->giveLength();
+            contrib.times( detJ * gp->giveWeight() );
+
+//            printf("\n\ncontrib: "); contrib.printYourself();
+//            printf("rows: "); rows.printYourself();
+//            printf("cols: "); cols.printYourself();
+
+            o_x_times_N.assemble(contrib, rows, cols);
+        }
+
+        trac_el_ind++;
+    }
+}
+
+void PrescribedGradientBCWeak :: compute_x_times_N_2(FloatMatrix &o_x_times_N)
+{
+    double rve_size = this->domainSize();
+    const int dim = domain->giveNumberOfSpatialDimensions();
+
+    IntArray loc_t;
+    EModelDefaultEquationNumbering fnum;
+    giveTractionLocationArray(loc_t, fnum);
+
+    int num_t_eq = loc_t.giveSize();
+
+//    o_x_times_N.resize(4, num_t_eq);
+    o_x_times_N.resize(3, num_t_eq);
+
+    IntArray rows = {1,2,3};
+
+    int trac_el_ind = 1;
+
+    for( auto *el: mpTracElNew ) {
+
+    	IntArray cols = {trac_el_ind*2-1,trac_el_ind*2};
+
+        for ( GaussPoint *gp: *(el->mIntRule.get()) ) {
+
+        	FloatMatrix contrib(4,2);
+
+            // For now, assume piecewise constant approx
+            FloatArray Ntrac = FloatArray { 1.0 };
+
+            // N-matrix
+            FloatMatrix Nmat;
+            Nmat.beNMatrixOf(Ntrac, dim);
+//            printf("Nmat: "); Nmat.printYourself();
+
+        	// Fetch global coordinate x
+        	const FloatArray &x = gp->giveGlobalCoordinates();
+
+//            // Compute vector of traction unknowns
+//            FloatArray tracUnknowns;
+//            el->mFirstNode->giveUnknownVector(tracUnknowns, giveTracDofIDs(), VM_Total, tStep);
+
+
+//            FloatArray traction;
+//            traction.beProductOf(Nmat, tracUnknowns);
+
+            FloatArray tmp;
+            giveBoundaryCoordVector(tmp, x);
+
+            FloatMatrix coord_mat(4,2);
+            coord_mat.at(1,1) = tmp.at(1);
+            coord_mat.at(2,2) = tmp.at(2);
+
+//            coord_mat.at(3,2) = tmp.at(1);
+//            coord_mat.at(3,1) = tmp.at(2);
+
+//            coord_mat.at(3,1) = tmp.at(2);
+//            coord_mat.at(4,2) = tmp.at(1);
+
+            coord_mat.at(3,1) = 0.5*tmp.at(2);
+            coord_mat.at(3,2) = 0.5*tmp.at(1);
+//
+//            coord_mat.at(4,2) = 0.5*tmp.at(2);
+//            coord_mat.at(4,1) = 0.5*tmp.at(1);
+
+
+//            FloatMatrix contrib;
+//            contrib.beDyadicProductOf(traction, tmp);
+
+            contrib.beProductOf(coord_mat, Nmat);
+
+//            contrib = coord_mat;
+
+            double detJ = 0.5 * el->giveLength();
+            contrib.times( detJ * gp->giveWeight() );
+
+//            printf("\n\ncontrib: "); contrib.printYourself();
+//            printf("rows: "); rows.printYourself();
+//            printf("cols: "); cols.printYourself();
+
+            o_x_times_N.assemble(contrib, rows, cols);
+        }
+
+        trac_el_ind++;
+    }
+}
+
 
 void PrescribedGradientBCWeak :: computeField(FloatArray &sigma, TimeStep *tStep)
 {
@@ -618,9 +912,179 @@ void PrescribedGradientBCWeak :: computeField(FloatArray &sigma, TimeStep *tStep
 
 }
 
+//#define TIME_INFO
+
 void PrescribedGradientBCWeak :: computeTangent(FloatMatrix& E, TimeStep* tStep)
 {
-    OOFEM_ERROR("Not implemented yet.");
+#ifdef TIME_INFO
+	static double tot_time = 0.0;
+    Timer timer;
+    timer.startTimer();
+
+	static double assemble_time = 0.0;
+    Timer assemble_timer;
+
+#endif
+
+	E.resize(9,9);
+
+
+	// Extract the relevant submatrices from the RVE problem.
+	// At equilibrium, the RVE problem has the structure
+	//
+	// [ S C; C^T 0 ]*[a_u a_t] = [0; f]
+	//
+	// where a_u and a_t denote displacement and traction dofs, respectively.
+	// We need to extract S and C.
+
+    EngngModel *rve = this->giveDomain()->giveEngngModel();
+    ///@todo Get this from engineering model
+    std :: unique_ptr< SparseLinearSystemNM > solver(
+        classFactory.createSparseLinSolver( ST_Petsc, this->domain, this->domain->giveEngngModel() ) ); // = rve->giveLinearSolver();
+    bool symmetric_matrix = false;
+    SparseMtrxType stype = solver->giveRecommendedMatrix(symmetric_matrix);
+//    double rve_size = this->domainSize();
+	double Lx = mUC[0] - mLC[0];
+	double Ly = mUC[1] - mLC[1];
+	double rve_size = Lx*Ly;
+
+
+    EModelDefaultEquationNumbering fnum;
+    std :: unique_ptr< SparseMtrx > Kmicro( classFactory.createSparseMtrx(stype) );
+    if ( !Kmicro ) {
+        OOFEM_ERROR("Couldn't create sparse matrix of type %d\n", stype);
+    }
+
+    StaticStructural *rveStatStruct = dynamic_cast<StaticStructural*>(rve);
+    if(rveStatStruct != NULL) {
+//    	printf("Successfully casted rve to StaticStructural.\n");
+
+    	if( rveStatStruct->stiffnessMatrix != NULL ) {
+    		Kmicro.reset( rveStatStruct->stiffnessMatrix->GiveCopy() );
+    	}
+    }
+
+
+#ifdef TIME_INFO
+    assemble_timer.startTimer();
+#endif
+
+    if( Kmicro->giveNumberOfColumns() == 0 ) {
+//    	printf("Rebuilding stiffness matrix.\n");
+		Kmicro->buildInternalStructure(rve, this->domain->giveNumber(), fnum);
+		rve->assemble(*Kmicro, tStep, TangentAssembler(TangentStiffness), fnum, this->domain);
+    }
+//    else {
+//    	printf("Using existing stiffness matrix.\n");
+//    }
+
+    assembleExtraDisplock(*Kmicro, tStep, TangentStiffnessMatrix, fnum, fnum);
+#ifdef TIME_INFO
+    assemble_timer.stopTimer();
+    assemble_time += assemble_timer.getUtime();
+    printf("Assembly time for RVE tangent: %e\n", assemble_time);
+#endif
+
+
+    // Fetch displacement and traction location arrays
+    IntArray loc_u, loc_t;
+
+    giveTractionLocationArray(loc_t, fnum);
+
+    int neq = Kmicro->giveNumberOfRows();
+    loc_u.resize(neq - loc_t.giveSize());
+    int k = 1;
+    for ( int i = 1; i <= neq; i++ ) {
+        if ( !loc_t.contains(i) ) {
+            loc_u.at(k) = i;
+            k++;
+        }
+    }
+
+
+    // Fetch the submatrices
+    std :: unique_ptr< SparseMtrx > S(Kmicro->giveSubMatrix(loc_u, loc_u));
+    // NOTE: Kus is actually a dense matrix, but we have to make it a dense matrix first
+    std :: unique_ptr< SparseMtrx > C(Kmicro->giveSubMatrix(loc_u, loc_t));
+    FloatMatrix Cd;
+    C->toFloatMatrix(Cd);
+
+
+	// Let Sm = C. Solve for m.
+    FloatMatrix m;
+    solver->solve(*S, Cd, m);
+
+
+	// Compute G := C^T m. (Which could, formally, be written as G = C^T S^-1 C.)
+    FloatMatrix G;
+    G.beTProductOf(Cd, m);
+
+
+	// Compute D := \int x \otimes N
+    FloatMatrix D;
+    compute_x_times_N_1(D);
+//    FloatMatrix D;
+//    compute_x_times_N_1(DT2);
+//    D.beTranspositionOf(DT);
+
+
+	// Let Gp = D. Solve for p. (Which could, formally, be written as p = G^-1 D = (C^T S^-1 C)^-1 D.)
+    // Need to make G sparse;
+    std :: unique_ptr< SparseMtrx > Gs( classFactory.createSparseMtrx(stype) );
+    if ( !Gs ) {
+        OOFEM_ERROR("Couldn't create sparse matrix of type %d\n", stype);
+    }
+
+    int num_eq_G = G.giveNumberOfRows();
+    IntArray loc_G(num_eq_G);
+
+    for(int i = 1; i <= num_eq_G; i++) {
+    	loc_G.at(i) = i;
+    }
+
+    Gs->buildInternalStructure(rve, num_eq_G, num_eq_G, loc_G, loc_G);
+    Gs->assemble(loc_G, loc_G, G);
+
+    Gs->assembleBegin();
+    Gs->assembleEnd();
+
+//    Gs->writeToFile("Gs.txt");
+
+
+    FloatMatrix p;
+    solver->solve(*Gs, D, p);
+
+
+	// Compute d_sigma_depsilon = D^T p.
+    FloatMatrix Ered;
+    Ered.beTProductOf(D,p);
+//    rve_size = 25.0;
+    Ered.times(1.0/rve_size);
+//    printf("rve_size: %e\n", rve_size);
+//    Ered.printYourself();
+
+    IntArray indx;
+    int size = StructuralMaterial :: giveVoigtVectorMask(indx, _PlaneStress);
+
+//    FloatMatrix EredT;
+//    EredT.beTranspositionOf(Ered);
+//    Ered.add(EredT);
+//    Ered.times(0.5);
+
+//    Ered.at(1,3) = 0.0;
+//    Ered.at(2,3) = 0.0;
+//    Ered.at(3,1) = 0.0;
+//    Ered.at(3,2) = 0.0;
+
+    E.assemble(Ered, indx, indx);
+//    E.printYourself();
+
+#ifdef TIME_INFO
+    timer.stopTimer();
+    tot_time += timer.getUtime();
+//    printf("Total time for RVE tangent: %e\n", tot_time);
+#endif
+
 }
 
 void PrescribedGradientBCWeak :: giveTractionElNormal(size_t iElInd, FloatArray &oNormal, FloatArray &oTangent) const
@@ -828,7 +1292,7 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
         numNodes++;
     }
 
-    if ( mMeshIsPeriodic ) {
+    if ( mMeshIsPeriodic && false ) {
         // Lock displacement in one node if we use periodic BCs
 
         int numNodes = domain->giveNumberOfDofManagers();
@@ -840,6 +1304,32 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
             mpDisplacementLock->appendDof( new MasterDof(mpDisplacementLock, ( DofIDItem ) dofid) );
         }
     }
+
+
+    // Nodes to lock in order to prevent rigid body motion
+    SpatialLocalizer *localizer = domain->giveSpatialLocalizer();
+    FloatArray x1 = mLC;
+//    printf("x1: "); x1.printYourself();
+    double maxDist = 1.0e10;
+    Node *node1 = localizer->giveNodeClosestToPoint(x1, maxDist);
+    mSpringNodeInd1 = node1->giveGlobalNumber();
+//    printf("mSpringNodeInd1: %d\n", mSpringNodeInd1 );
+
+    FloatArray x2 = {mUC.at(1), mLC.at(2)};
+//    FloatArray x2 = {mUC.at(1), mUC.at(2)};
+//    printf("x2: "); x2.printYourself();
+    Node *node2 = localizer->giveNodeClosestToPoint(x2, maxDist);
+    mSpringNodeInd2 = node2->giveGlobalNumber();
+//    printf("mSpringNodeInd2: %d\n", mSpringNodeInd2 );
+
+
+    FloatArray x3 = {mLC.at(1), mUC.at(2)};
+//    FloatArray x2 = {mUC.at(1), mUC.at(2)};
+//    printf("x3: "); x3.printYourself();
+    Node *node3 = localizer->giveNodeClosestToPoint(x3, maxDist);
+    mSpringNodeInd3 = node3->giveGlobalNumber();
+//    printf("mSpringNodeInd3: %d\n", mSpringNodeInd3 );
+
 
     mpTracElNew.reserve(tracElNew0.size() + tracElNew1.size());
     std::move(tracElNew0.begin(), tracElNew0.end(), std::inserter(mpTracElNew, mpTracElNew.end()));
