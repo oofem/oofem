@@ -60,7 +60,10 @@ protected:
     FloatArray solution;
     FloatArray internalForces;
     FloatArray eNorm;
+
+public:
     std :: unique_ptr< SparseMtrx >stiffnessMatrix;
+protected:
 
     std :: unique_ptr< PrimaryField >field;
 

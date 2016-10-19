@@ -83,6 +83,9 @@ public:
 
     bool giveUseNonStdCz() const {return mNonstandardCz;}
 
+    /// Compute the total length of all cracks in the domain.
+    double computeTotalCrackLength();
+
 protected:
 
     /**

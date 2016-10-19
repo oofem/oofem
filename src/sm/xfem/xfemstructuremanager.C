@@ -76,9 +76,9 @@ IRResultType XfemStructureManager :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_OPTIONAL_FIELD(ir, mMinCrackLength, _IFT_XfemStructureManager_minCrackLength);
 
-    if(mMinCrackLength < 1.0e-12) {
-    	printf("mMinCrackLength: %e\n", mMinCrackLength);
-    }
+//    if(mMinCrackLength < 1.0e-12) {
+//    	printf("mMinCrackLength: %e\n", mMinCrackLength);
+//    }
 
     return XfemManager :: initializeFrom(ir);
 }
@@ -93,6 +93,9 @@ void XfemStructureManager :: giveInputRecord(DynamicInputRecord &input)
 
     input.setField(mMinCrackLength, _IFT_XfemStructureManager_minCrackLength);
 
+    if( mNonstandardCz ) {
+        input.setField(1, _IFT_XfemStructureManager_nonstandardCZ);
+    }
 }
 
 int XfemStructureManager :: instanciateYourself(DataReader *dr)
@@ -317,6 +320,20 @@ void XfemStructureManager :: removeShortCracks()
 
 //	printf("Number of ei after removal: %d\n", giveNumberOfEnrichmentItems());
 
+}
+
+double XfemStructureManager :: computeTotalCrackLength()
+{
+	double l_tot = 0.0;
+
+    for ( int i = 1; i <= giveNumberOfEnrichmentItems(); i++ ) {
+        Crack *crack = dynamic_cast< Crack * >( this->giveEnrichmentItem(i) );
+        if ( crack ) {
+        	l_tot += crack->computeLength();
+        }
+    }
+
+    return l_tot;
 }
 
 
