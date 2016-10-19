@@ -55,6 +55,7 @@ class DataStream;
  * 
  * @author Mikael Öhman
  * @author Jim Brouzoulis 
+ * @author Erik Svenning
  * @author many others (please add yourselves)
  */
 class OOFEM_EXPORT IntArray
@@ -324,6 +325,9 @@ public:
      * @param showDimensions Determins if dimesions should be included in output
      */
     void printYourselfToFile(const std::string filename, const bool showDimensions=true) const;
+
+    /// Returns true if no element is NAN or infinite
+    bool isFinite() const;
 
     /**
      * Breaks encapsulation. Avoid using this unless absolutely necessary.

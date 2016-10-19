@@ -255,6 +255,17 @@ void IntArray :: printYourself(const std::string name) const
     printf("\n");
 }
 
+bool IntArray :: isFinite() const
+{
+    for(int val : values) {
+        if(!std::isfinite(val)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 void IntArray :: pY() const {
     printYourself();
 }
