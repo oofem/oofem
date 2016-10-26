@@ -49,6 +49,7 @@ IsotropicDamageMaterial :: IsotropicDamageMaterial(int n, Domain *d) : Structura
     linearElasticMaterial = NULL;
     llcriteria = idm_strainLevelCR;
     maxOmega = 0.999999;
+    permStrain = 0;
 }
 
 
@@ -112,8 +113,8 @@ IsotropicDamageMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *
     double f, equivStrain, tempKappa = 0.0, omega = 0.0;
 
     this->initTempStatus(gp);
-    
-    // subtract stress independent part
+
+    // subtract stress-independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
     // therefore it is necessary to subtract always the total eigen strain value
     this->giveStressDependentPartOfStrainVector(reducedTotalStrainVector, gp, totalStrain, tStep, VM_Total);
@@ -132,7 +133,7 @@ IsotropicDamageMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *
             tempKappa = status->giveKappa();
             omega     = status->giveDamage();
         } else {
-            // damage grow
+            // damage grows
             tempKappa = equivStrain;
             this->initDamaged(tempKappa, reducedTotalStrainVector, gp);
             // evaluate damage parameter
@@ -146,15 +147,19 @@ IsotropicDamageMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *
         if ( omega < status->giveDamage() ) {
             // unloading takes place
             omega = status->giveDamage();
-            //printf (".");
         }
     } else {
-        OOFEM_ERROR("unsupported loading/uloading criteria");
+        OOFEM_ERROR("unsupported loading/unloading criterion");
     }
 
 
     lmat->giveStiffnessMatrix(de, SecantStiffness, gp, tStep);
     //mj
+    // permanent strain - so far implemented only in 1D
+    if ( permStrain && reducedTotalStrainVector.giveSize() == 1 ) {
+        double epsp = evaluatePermanentStrain(tempKappa, omega);
+        reducedTotalStrainVector.at(1) -= epsp;
+    }
     // damage deactivation in compression for 1D model
     if ( ( reducedTotalStrainVector.giveSize() > 1 ) || ( reducedTotalStrainVector.at(1) > 0. ) ) {
         //emj
@@ -351,6 +356,9 @@ IsotropicDamageMaterial :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, maxOmega, _IFT_IsotropicDamageMaterial_maxOmega);
     maxOmega = min(maxOmega, 0.999999);
     maxOmega = max(maxOmega, 0.0);
+
+    permStrain = 0; // default - no permanent strain used
+    IR_GIVE_OPTIONAL_FIELD(ir, permStrain, _IFT_IsotropicDamageMaterial_permstrain);
 
     IR_GIVE_FIELD(ir, tempDillatCoeff, _IFT_IsotropicDamageMaterial_talpha);
     return StructuralMaterial :: initializeFrom(ir);

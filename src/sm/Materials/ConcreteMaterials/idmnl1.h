@@ -163,8 +163,11 @@ public:
 
     virtual void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep);
 
+    double computeModifiedLength(double length, double dam1, double dam2);
     void modifyNonlocalWeightFunctionAround(GaussPoint *gp);
     double computeDistanceModifier(double damage);
+
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
 #ifdef __OOFEG
     /// Plots the sparse structure of stiffness contribution.

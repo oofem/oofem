@@ -34,6 +34,8 @@
 
 #include "xfemtolerances.h"
 
+namespace oofem {
+
 double XfemTolerances :: sCharElLength = 0.0;
 
 void XfemTolerances :: setCharacteristicElementLength(double iCharElLength)
@@ -50,3 +52,5 @@ double XfemTolerances :: giveRelLengthTolTight()
 {
     return sRelLengthTolTight;
 }
+
+} // end namespace oofem

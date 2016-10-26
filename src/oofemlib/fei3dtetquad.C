@@ -248,7 +248,7 @@ FEI3dTetQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, cons
 
         // compute the corrections
         this->giveJacobianMatrixAt(jac, lcoords_guess, cellgeo);
-        jac.solveForRhs(res, delta, true);
+        jac.solveForRhs(res, delta);
 
         // update guess
         lcoords_guess.add(delta);

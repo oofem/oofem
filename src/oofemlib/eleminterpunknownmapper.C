@@ -67,8 +67,9 @@ EIPrimaryUnknownMapper :: mapAndUpdate(FloatArray &answer, ValueModeType mode,
 
     for ( inode = 1; inode <= nd_nnodes; inode++ ) {
         DofManager *node = newd->giveNode(inode);
-        /* HUHU CHEATING */
-        if ( node->giveParallelMode() != DofManager_local ) {
+        /* Process local and shared nodes only */
+        if ( (node->giveParallelMode() != DofManager_local ) &&
+             (node->giveParallelMode() != DofManager_shared)) {
             continue;
         }
 

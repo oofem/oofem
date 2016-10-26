@@ -112,7 +112,7 @@ NumericalMethod *NonStationaryTransportProblem :: giveNumericalMethod(MetaStep *
     if (!linSolver) 
         linSolver.reset( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
         if ( !linSolver ) {
-            OOFEM_ERROR("linear solver creation failed");
+            OOFEM_ERROR("linear solver creation failed for lstype %d", solverType);
         }
     return linSolver.get();
 }
@@ -299,7 +299,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 
         //project initial conditions to have temporary temperature in integration points
 
-        //edge or surface load on elements
+        //edge or surface loads on elements
         //add internal source vector on elements
         this->assembleVectorFromElements( bcRhs, icStep, TransportExternalForceAssembler(),
                                          VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
@@ -325,7 +325,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
         OOFEM_LOG_INFO("Assembling conductivity and capacity matrices\n");
 #endif
 
-        //Add contribution of alpha*K+C/dt (where K has contributions from conductivity and neumann b.c.s)
+        //Add contribution of alpha*K+C/dt (where K has contributions from conductivity and Neumann b.c.s)
         this->assemble( *conductivityMatrix, icStep, MidpointLhsAssembler(lumpedCapacityStab, alpha),
                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
     }

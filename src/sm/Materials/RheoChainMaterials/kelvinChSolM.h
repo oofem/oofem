@@ -89,7 +89,7 @@ public:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
     /// Evaluation of the creep compliance function - function useless here
-    virtual double computeCreepFunction(double ofAge, double tStep);
+    virtual double computeCreepFunction(double ofAge, double tPrime, GaussPoint *gp, TimeStep *tStep);
 
 protected:
     virtual int hasIncrementalShrinkageFormulation() { return 0; }

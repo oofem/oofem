@@ -55,7 +55,7 @@ DoublePowerLawMaterial :: initializeFrom(InputRecord *ir)
 
 
 double
-DoublePowerLawMaterial :: computeCreepFunction(double t, double t_prime)
+DoublePowerLawMaterial :: computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep)
 {
 
     // computes the value of creep function at time t

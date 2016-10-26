@@ -218,6 +218,8 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
         sl=CTRL.footer.splitlines()
         for s in sl:
             words=s.split()
+            #if len(words)==0:#skip empty lines
+                #continue
             if (words[0].lower()=='set'):
                 setID=int(words[1])
 
@@ -232,7 +234,7 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
                 elif (words[2].lower()=='elements'):
                     ellist=[]
                     for elemset in FEM.elemsets:
-
+                        #print elemset.id
                         if setID == elemset.id:
                             ellist.extend(elemset.items)
 

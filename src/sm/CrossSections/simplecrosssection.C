@@ -800,7 +800,7 @@ SimpleCrossSection :: giveTemperatureVector(FloatArray &answer, GaussPoint *gp, 
 
     /* add external source, if provided */
     FieldManager *fm = this->domain->giveEngngModel()->giveContext()->giveFieldManager();
-    FM_FieldPtr tf;
+    FieldPtr tf;
 
     if ( ( tf = fm->giveField(FT_Temperature) ) ) {
         // temperature field registered
@@ -810,7 +810,6 @@ SimpleCrossSection :: giveTemperatureVector(FloatArray &answer, GaussPoint *gp, 
         if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, tStep) ) ) {
             OOFEM_ERROR("tf->evaluateAt failed, element %d, error code %d", elem->giveNumber(), err);
         }
-
         if ( et2.isNotEmpty() ) {
             if ( answer.isEmpty() ) {
                 answer = et2;

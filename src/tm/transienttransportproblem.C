@@ -43,6 +43,7 @@
 #include "nrsolver.h"
 #include "unknownnumberingscheme.h"
 #include "function.h"
+#include "dofmanager.h"
 // Temporary:
 #include "generalboundarycondition.h"
 #include "boundarycondition.h"
@@ -108,10 +109,10 @@ TransientTransportProblem :: initializeFrom(InputRecord *ir)
         FieldManager *fm = this->giveContext()->giveFieldManager();
         for ( int i = 1; i <= exportFields.giveSize(); i++ ) {
             if ( exportFields.at(i) == FT_Temperature ) {
-                FM_FieldPtr _temperatureField( new MaskedPrimaryField ( ( FieldType ) exportFields.at(i), this->field.get(), {T_f} ) );
+                FieldPtr _temperatureField( new MaskedPrimaryField ( ( FieldType ) exportFields.at(i), this->field.get(), {T_f} ) );
                 fm->registerField( _temperatureField, ( FieldType ) exportFields.at(i) );
             } else if ( exportFields.at(i) == FT_HumidityConcentration ) {
-                FM_FieldPtr _concentrationField( new MaskedPrimaryField ( ( FieldType ) exportFields.at(i), this->field.get(), {C_1} ) );
+                FieldPtr _concentrationField( new MaskedPrimaryField ( ( FieldType ) exportFields.at(i), this->field.get(), {C_1} ) );
                 fm->registerField( _concentrationField, ( FieldType ) exportFields.at(i) );
             }
         }
@@ -127,7 +128,8 @@ double TransientTransportProblem :: giveUnknownComponent(ValueModeType mode, Tim
     double val1 = field->giveUnknownValue(dof, VM_Total, tStep);
     double val0 = field->giveUnknownValue(dof, VM_Total, tStep->givePreviousStep());
     if ( mode == VM_Total ) {
-        return this->alpha * val1 + (1.-this->alpha) * val0;
+        //return this->alpha * val1 + (1.-this->alpha) * val0;
+        return val1;//The output should be given always at the end of the time step, regardless of alpha
     } else if ( mode == VM_Velocity ) {
         return (val1 - val0) / tStep->giveTimeIncrement();
     } else if ( mode == VM_Incremental ) {
@@ -171,7 +173,7 @@ TimeStep *TransientTransportProblem :: giveNextStep()
         // first step -> generate initial step
         currentStep.reset( new TimeStep( *giveSolutionStepWhenIcApply() ) );
     }
-    
+
     double dt = this->giveDeltaT(currentStep->giveNumber()+1);
     previousStep = std :: move(currentStep);
     currentStep.reset( new TimeStep(*previousStep, dt) );
@@ -199,6 +201,8 @@ TimeStep *TransientTransportProblem :: giveSolutionStepWhenIcApply(bool force)
 
 void TransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
 {
+    OOFEM_LOG_INFO( "Solving [step number %5d, time %e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
+    
     Domain *d = this->giveDomain(1);
     int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
 
@@ -213,7 +217,7 @@ void TransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
     // (backwards compatibility issues due to inconsistencies in other solvers).
     TimeStep *prev = tStep->givePreviousStep();
     for ( auto &dman : d->giveDofManagers() ) {
-        static_cast< DofDistributedPrimaryField* >(field.get())->setInitialGuess(*dman, tStep, prev);
+        static_cast< DofDistributedPrimaryField* >(field.get())->setInitialGuess(*dman, tStep, prev);//copy total values into new tStep
     }
 
     for ( auto &elem : d->giveElements() ) {
@@ -247,7 +251,7 @@ void TransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
             capacityMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
             this->assemble( *capacityMatrix, tStep, MassMatrixAssembler(), EModelDefaultEquationNumbering(), d );
         }
-        
+
         if ( this->keepTangent ) {
             this->assemble( *effectiveMatrix, tStep, TangentAssembler(TangentStiffness),
                            EModelDefaultEquationNumbering(), d );
@@ -302,10 +306,10 @@ TransientTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn
     // K_eff        * dT_1 = Q - F_eff
     // Update:
     // T_1 += dT_1
-    
+
     ///@todo NRSolver should report when the solution changes instead of doing it this way.
     this->field->update(VM_Total, tStep, solution, EModelDefaultEquationNumbering());
-    ///@todo Need to reset the boundary conditions properly since some "update" is doing strange 
+    ///@todo Need to reset the boundary conditions properly since some "update" is doing strange
     /// things such as applying the (wrong) boundary conditions. This call will be removed when that code can be removed.
     this->field->applyBoundaryCondition(tStep);
 
@@ -402,6 +406,11 @@ TransientTransportProblem :: forceEquationNumbering()
     return EngngModel :: forceEquationNumbering();
 }
 
+void
+TransientTransportProblem :: updateYourself(TimeStep *tStep)
+{
+    EngngModel :: updateYourself(tStep);
+}
 
 contextIOResultType
 TransientTransportProblem :: saveContext(DataStream *stream, ContextMode mode, void *obj)
@@ -515,5 +524,27 @@ TransientTransportProblem :: updateDomainLinks()
     this->giveNumericalMethod( this->giveCurrentMetaStep() )->setDomain( this->giveDomain(1) );
 }
 
+FieldPtr TransientTransportProblem::giveField (FieldType key, TimeStep *tStep)
+{
+  /* Note: the current implementation uses MaskedPrimaryField, that is automatically updated with the model progress, 
+     so the returned field always refers to active solution step. 
+  */
 
+  if ( tStep != this->giveCurrentStep()) {
+    OOFEM_ERROR("Unable to return field representation for non-current time step");
+  }
+  if ( key == FT_Temperature ) {
+    FieldPtr _ptr ( new MaskedPrimaryField ( key, this->field.get(), {T_f} ) );
+    return _ptr;
+  } else if ( key == FT_HumidityConcentration ) {
+    FieldPtr _ptr ( new MaskedPrimaryField ( key, this->field.get(), {C_1} ) );
+    return _ptr;
+  } else {
+    return FieldPtr();
+  }
+}
+
+
+
+  
 } // end namespace oofem

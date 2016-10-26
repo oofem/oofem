@@ -1,0 +1,3 @@
+set expandtab shiftwidth=4 tabstop=4 softtabstop=4
+map <F12> :e %:p:s,.h$,.X123X,:s,.C$,.h,:s,.X123X$,.C,<CR>
+set makeprg=make\ -j6\ -C\ ../build

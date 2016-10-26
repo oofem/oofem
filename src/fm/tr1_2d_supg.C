@@ -1857,7 +1857,7 @@ TR1_2D_SUPG :: giveElementCenter(LEPlic *mat_interface, FloatArray &center, bool
 
 int
 TR1_2D_SUPG :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryField &pf,
-                                                     FloatArray &coords, IntArray &dofId, ValueModeType mode,
+                                                     const FloatArray &coords, IntArray &dofId, ValueModeType mode,
                                                      TimeStep *tStep)
 {
     int indx, es;

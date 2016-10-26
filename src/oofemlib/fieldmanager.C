@@ -41,7 +41,13 @@ FieldManager :: ~FieldManager()
 void
 FieldManager :: registerField(std :: shared_ptr< Field >eField, FieldType key)
 {
+  if (this->externalFields.find(key) == this->externalFields.end()) {
     this->externalFields.insert({key, eField});
+  } else {
+    this->externalFields.at(key)=eField;
+  }
+  /// could be replaced in future by 
+  /// this->externalFields.insert_or_assign({key, eField});
 }
 
 

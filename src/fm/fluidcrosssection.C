@@ -98,9 +98,19 @@ FluidCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode)
 FluidDynamicMaterial *
 FluidCrossSection :: giveFluidMaterial()
 {
-    return static_cast< FluidDynamicMaterial * >( this->domain->giveMaterial(this->matNumber) );
+  return static_cast< FluidDynamicMaterial * >( this->domain->giveMaterial(this->matNumber) );
 }
 
+Material*
+FluidCrossSection :: giveMaterial(IntegrationPoint *ip)
+{
+    if ( this->matNumber ) {
+        return this->giveDomain()->giveMaterial( this->matNumber );
+    } else {
+        return ip->giveElement()->giveMaterial();
+    }
+}
+  
 
 int
 FluidCrossSection :: packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp)

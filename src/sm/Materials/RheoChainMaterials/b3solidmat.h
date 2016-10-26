@@ -101,7 +101,6 @@ protected:
     double w_h;    ///< Constant water content (obtained from experiments) w_h [Pedersen, 1990]
     double n;      ///< Constant-exponent (obtained from experiments) n [Pedersen, 1990]
     double a;      ///< Constant (obtained from experiments) A [Pedersen, 1990]
-    double talpha; ///< Thermal dilatation coeff.
     double EspringVal; ///< elastic modulus of the aging spring (first member of Kelvin chain if retardation spectrum is used)
     /**
      * If 0, analysis of retardation spectrum is used for evaluation of Kelvin units moduli (default).
@@ -135,12 +134,10 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_B3SolidMaterial_Name; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *, TimeStep *);
-
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
     /// Evaluation of the compliance function of the non-aging solidifying constituent.
-    virtual double computeCreepFunction(double t, double t_prime);
+    virtual double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep);
 
 protected:
     virtual int hasIncrementalShrinkageFormulation() { return 1; }
@@ -161,10 +158,10 @@ protected:
     double inverse_sorption_isotherm(double w);
 
     /// Evaluation of characteristic moduli of the non-aging Kelvin chain.
-    virtual void computeCharCoefficients(FloatArray &answer, double tStep);
+    virtual void computeCharCoefficients(FloatArray &answer, double tPrime, GaussPoint *gp, TimeStep *tStep);
 
     /// Update of partial moduli of individual chain units
-    virtual void updateEparModuli(double tStep);
+    virtual void updateEparModuli(double tPrime, GaussPoint *gp, TimeStep *tStep);
 
     virtual void computeCharTimes();
 

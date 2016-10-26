@@ -142,7 +142,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
     int neq;
     int n, init = 0;
     double coeff, maxDt, maxOmi, maxOm = 0., maxOmEl, c1, c2, c3;
-    FloatMatrix charMtrx, charMtrx2;
+    FloatMatrix charMtrx, charMtrx2, R;
     FloatArray previousDisplacementVector;
 
 
@@ -166,6 +166,13 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
             element->giveCharacteristicMatrix(charMtrx,  LumpedMassMatrix, tStep);
             // charMtrx.beLumpedOf(fullCharMtrx);
             element->giveCharacteristicMatrix(charMtrx2, TangentStiffnessMatrix, tStep);
+            if ( charMtrx2.isNotEmpty() ) {
+              ///@todo This rotation matrix is not flexible enough.. it can only work with full size matrices and doesn't allow for flexibility in the matrixassembler.
+              if ( element->giveRotationMatrix(R) ) {
+                charMtrx2.rotatedWith(R);
+                charMtrx.rotatedWith(R);
+              }
+            }
 
             //
             // assemble it manually
@@ -191,11 +198,14 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
 
             maxOm = ( maxOm > maxOmEl ) ? ( maxOm ) : ( maxOmEl );
 
-            for ( int j = 1; j <= n; j++ ) {
+            if (maxOmEl > ZERO_MASS) {
+              // update zero mass diagonal entries ; but skip massless elements
+              for ( int j = 1; j <= n; j++ ) {
                 int jj = loc.at(j);
                 if ( ( jj ) && ( charMtrx.at(j, j) <= ZERO_MASS ) ) {
-                    charMtrx.at(j, j) = charMtrx2.at(j, j) / maxOmEl;
+                  charMtrx.at(j, j) = charMtrx2.at(j, j) / maxOmEl;
                 }
+              }
             }
 
             for ( int j = 1; j <= n; j++ ) {
@@ -284,6 +294,13 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
         element = domain->giveElement(i);
         element->giveLocationArray(loc, dn);
         element->giveCharacteristicMatrix(charMtrx, TangentStiffnessMatrix, tStep);
+        if ( charMtrx.isNotEmpty() ) {
+          ///@todo This rotation matrix is not flexible enough.. it can only work with full size matrices and doesn't allow for flexibility in the matrixassembler.
+          if ( element->giveRotationMatrix(R) ) {
+            charMtrx.rotatedWith(R);
+          }
+        }
+
         n = loc.giveSize();
         for ( int j = 1; j <= n; j++ ) {
             int jj = loc.at(j);

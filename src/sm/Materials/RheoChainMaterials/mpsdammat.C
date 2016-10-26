@@ -226,9 +226,12 @@ MPSDamMaterial :: MPSDamMaterial(int n, Domain *d) : MPSMaterial(n, d)
 
     softType = ST_Exponential_Cohesive_Crack;
     ecsMethod = ECSM_Projection;
-    const_e0 = 0.;
+    //    const_e0 = 0.;
     const_gf = 0.;
     checkSnapBack = 1; //snapback check by default
+
+    E = -1.;
+
 }
 
 
@@ -254,10 +257,6 @@ MPSDamMaterial :: initializeFrom(InputRecord *ir)
     if ( ir->hasField(_IFT_MPSDamMaterial_isotropic) ) {
         this->isotropic = true;
     }
-
-    // initialize dummy elastic modulus E
-    //E = 20.e9 / MPSMaterial::stiffnessFactor;
-    E = 1. / MPSMaterial :: computeCreepFunction(28.01, 28);
 
     int damageLaw = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, damageLaw, _IFT_MPSDamMaterial_damageLaw);
@@ -292,22 +291,20 @@ MPSDamMaterial :: initializeFrom(InputRecord *ir)
           }
 
     } else {
-        double ft;
 
         //applies only in this class
         switch ( damageLaw ) {
+
         case 0:   // exponential softening - default
-            IR_GIVE_FIELD(ir, ft, _IFT_MPSDamMaterial_ft);
-            this->softType = ST_Exponential_Cohesive_Crack;
+	    IR_GIVE_FIELD(ir, ft, _IFT_MPSDamMaterial_ft);
+	    this->softType = ST_Exponential_Cohesive_Crack;
             IR_GIVE_FIELD(ir, const_gf, _IFT_MPSDamMaterial_gf);
-            this->const_e0 = ft / E;
             break;
 
         case 1:   // linear softening law
             IR_GIVE_FIELD(ir, ft, _IFT_MPSDamMaterial_ft);
             this->softType = ST_Linear_Cohesive_Crack;
             IR_GIVE_FIELD(ir, const_gf, _IFT_MPSDamMaterial_gf);
-            this->const_e0 = ft / E;
             break;
 
         case 6:
@@ -328,7 +325,12 @@ MPSDamMaterial :: initializeFrom(InputRecord *ir)
 void
 MPSDamMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep)
 {
-    MPSDamMaterialStatus *status = static_cast< MPSDamMaterialStatus * >( this->giveStatus(gp) );
+    
+  if (this->E < 0.) {   // initialize dummy elastic modulus E
+    this->E = 1. / MPSMaterial :: computeCreepFunction(28.01, 28., gp, tStep);
+  }
+
+  MPSDamMaterialStatus *status = static_cast< MPSDamMaterialStatus * >( this->giveStatus(gp) );
 
     MaterialMode mode = gp->giveMaterialMode();
 
@@ -534,7 +536,7 @@ MPSDamMaterial :: givee0(GaussPoint *gp)
         MPSDamMaterialStatus *status = ( MPSDamMaterialStatus * ) this->giveStatus(gp);
         return status->givee0();
     } else {
-        return this->const_e0;
+        return this->ft / this->E;
     }
 }
 
@@ -553,12 +555,19 @@ MPSDamMaterial :: givegf(GaussPoint *gp)
 double
 MPSDamMaterial :: computeFractureEnergy(double equivalentTime)
 {
-    double fcm;
-    double fractureEnergy;
+
+    double fractureEnergy, fractureEnergy28;
+    double ftm, ftm28;
+
+    // the fracture energy has the same time evolution as the tensile strength, 
+    // the direct relation to the mean value of compressive strength according to Model Code 
+    // highly overestimates the initial (early age) value of the fracture energy 
+    //( fractureEnergy = 73. * fcm(t)^0.18 )
+
     // evolution of the mean compressive strength with respect to equivalent time/age/maturity
     // returns fcm in MPa
 
-    if (this->gf28 > 0.) {
+    /*    if (this->gf28 > 0.) {
       double fcm28mod;
       fcm28mod =  pow ( this->gf28 * MPSMaterial :: stiffnessFactor / 73. , 1. / 0.18 );
       fcm = exp( fib_s * ( 1. - sqrt(28. * MPSMaterial :: lambda0 / equivalentTime) ) ) * fcm28mod;
@@ -568,6 +577,24 @@ MPSDamMaterial :: computeFractureEnergy(double equivalentTime)
     }
 
     fractureEnergy = 73. * pow(fcm, 0.18) / MPSMaterial :: stiffnessFactor;
+    */
+
+    // 1) read or estimate the 28-day value of fracture energy
+
+    if (this->gf28 > 0.) {
+      fractureEnergy28 = this->gf28;
+    } else {
+      fractureEnergy28 = 73. * pow(fib_fcm28, 0.18) / MPSMaterial :: stiffnessFactor;
+    }
+
+    // 2) compute the tensile strengh according to provided equivalent time
+
+    ftm = this->computeTensileStrength(equivalentTime);
+    ftm28 = this->computeTensileStrength(28. * MPSMaterial :: lambda0);
+
+    // 3) calculate the resulting fracture energy as gf28 * ft/ft28
+
+    fractureEnergy = fractureEnergy28 * ftm / ftm28;
 
     return fractureEnergy;
 }

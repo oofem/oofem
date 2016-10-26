@@ -67,7 +67,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_DoublePowerLawMaterial_Name; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual double computeCreepFunction(double t, double t_prime);
+    virtual double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep);
 
 protected:
 };

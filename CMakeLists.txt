@@ -441,12 +441,13 @@ if (USE_PYTHON_BINDINGS OR USE_PYTHON)
     list (APPEND MODULE_LIST "Python")
     add_definitions(-D__PYTHON_MODULE)
 
-    if (USE_PYTHON_BINDINGS)
+    #if (USE_PYTHON_BINDINGS)
+    # require boost_python also for python stuff by itself
         find_package(Boost COMPONENTS "python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}" REQUIRED)
         include_directories (${Boost_INCLUDE_DIRS})
         list (APPEND EXT_LIBS ${Boost_LIBRARIES})
         add_definitions(-DBOOST_PYTHON)
-    endif ()
+    #endif ()
 endif ()
 
 
@@ -712,20 +713,46 @@ if (USE_FM AND USE_PFEM)
     endforeach (case)
 endif()
 
-# Benchmarks
-file (GLOB benchmarks RELATIVE "${oofem_TEST_DIR}/benchmark" "${oofem_TEST_DIR}/benchmark/*.in")
-foreach (case ${benchmarks})
-    add_test (NAME "benchmark_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/benchmark COMMAND ${oofem_cmd} "-f" ${case})
-endforeach (case)
 
-# PFEM Benchmarks
-if (USE_SM AND USE_FM AND USE_PFEM)
-    file (GLOB pfembenchmarks RELATIVE "${oofem_TEST_DIR}/pfembenchmark" "${oofem_TEST_DIR}/pfembenchmark/*.in")
-    foreach (case ${pfembenchmarks})
-        add_test (NAME "benchmark_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/pfembenchmark COMMAND ${oofem_cmd} "-f" ${case})
+######################## Benchmarks ########################################
+
+set (oofem_BENCHMARK_DIR "${oofem_SOURCE_DIR}/tests/benchmark")
+
+if (USE_TM AND USE_SM AND USE_DSS AND USE_IML)
+    file (GLOB tmsmdssiml_benchmark RELATIVE "${oofem_BENCHMARK_DIR}/tmsmdssiml" "${oofem_BENCHMARK_DIR}/tmsmdssiml/*.in")
+    foreach (case ${tmsmdssiml_benchmark})
+        add_test (NAME "benchmark_${case}" WORKING_DIRECTORY ${oofem_BENCHMARK_DIR}/tmsmdssiml COMMAND ${oofem_cmd} "-f" ${case})
     endforeach (case)
 endif()
 
+if (USE_FM)
+    file (GLOB fm_benchmark RELATIVE "${oofem_BENCHMARK_DIR}/fm" "${oofem_BENCHMARK_DIR}/fm/*.in")
+    foreach (case ${fm_benchmark})
+        add_test (NAME "benchmark_${case}" WORKING_DIRECTORY ${oofem_BENCHMARK_DIR}/fm COMMAND ${oofem_cmd} "-f" ${case})
+    endforeach (case)
+endif()
+
+if (USE_SM)
+    file (GLOB sm_benchmark RELATIVE "${oofem_BENCHMARK_DIR}/sm" "${oofem_BENCHMARK_DIR}/sm/*.in")
+    foreach (case ${sm_benchmark})
+        add_test (NAME "benchmark_${case}" WORKING_DIRECTORY ${oofem_BENCHMARK_DIR}/sm COMMAND ${oofem_cmd} "-f" ${case})
+    endforeach (case)
+endif()
+
+if (USE_TM)
+    file (GLOB tm_benchmark RELATIVE "${oofem_BENCHMARK_DIR}/tm" "${oofem_BENCHMARK_DIR}/tm/*.in")
+    foreach (case ${tm_benchmark})
+        add_test (NAME "benchmark_${case}" WORKING_DIRECTORY ${oofem_BENCHMARK_DIR}/tm COMMAND ${oofem_cmd} "-f" ${case})
+    endforeach (case)
+endif()
+
+if (USE_FM AND USE_SM AND USE_PFEM)
+    file (GLOB fmpfem_benchmark RELATIVE "${oofem_BENCHMARK_DIR}/fmpfem" "${oofem_BENCHMARK_DIR}/fmpfem/*.in")
+    foreach (case ${fmpfem_benchmark})
+        add_test (NAME "benchmark_${case}" WORKING_DIRECTORY ${oofem_BENCHMARK_DIR}/fmpfem COMMAND ${oofem_cmd} "-f" ${case})
+    endforeach (case)
+endif()   
+  
 # Custom targets for test and benchmarks (which can conveniently be accessed from IDEs)
 
 ProcessorCount(N)

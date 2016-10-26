@@ -570,6 +570,28 @@ EngngModel :: solveYourself()
     }
 }
 
+TimeStep* EngngModel :: generateNextStep(/* arguments */) {
+  /* code */
+  int smstep = 1, sjstep = 1;
+  if ( this->currentStep ) {
+      smstep = this->currentStep->giveMetaStepNumber();
+      sjstep = this->giveMetaStep(smstep)->giveStepRelativeNumber( this->currentStep->giveNumber() ) + 1;
+  }
+
+  // test if sjstep still valid for MetaStep
+  if (sjstep > this->giveMetaStep(smstep)->giveNumberOfSteps())
+    smstep++;
+  if (smstep > nMetaSteps) return NULL; // no more metasteps
+
+  this->initMetaStepAttributes(this->giveMetaStep(smstep));
+
+  this->preInitializeNextStep();
+  return this->giveNextStep();
+}
+
+
+
+
 void
 EngngModel :: initMetaStepAttributes(MetaStep *mStep)
 {
@@ -769,7 +791,7 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
         if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >(bc) ) ) {
             ma.assembleFromActiveBC(answer, *abc, tStep, s, s);
         } else if ( bc->giveSetNumber() && ( load = dynamic_cast< Load * >(bc) ) && bc->isImposed(tStep) ) {
-            // Now we assemble the corresponding load type fo the respective components in the set:
+            // Now we assemble the corresponding load type for the respective components in the set:
             IntArray loc, bNodes;
             FloatMatrix mat, R;
             BodyLoad *bodyLoad;
@@ -831,12 +853,12 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
             }
         }
     }
-    
+
     if ( domain->hasContactManager() ) {
         OOFEM_ERROR("Contant problems temporarily deactivated");
         //domain->giveContactManager()->assembleTangentFromContacts(answer, tStep, type, s, s);
     }
-    
+
     this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
 
     answer.assembleBegin();
@@ -936,7 +958,7 @@ void EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep,
 void EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, const VectorAssembler &va, ValueModeType mode,
                                                  const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
 {
-    ///@todo This should be removed when it loads are given through sets.
+    ///@todo This should be removed when loads are given through sets.
     IntArray loc, dofids;
     FloatArray charVec;
     FloatMatrix R;
@@ -1003,7 +1025,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
         if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >(bc) ) ) {
             va.assembleFromActiveBC(answer, *abc, tStep, mode, s, eNorms);
         } else if ( bc->giveSetNumber() && ( load = dynamic_cast< Load * >(bc) ) && bc->isImposed(tStep) ) {
-            // Now we assemble the corresponding load type fo the respective components in the set:
+            // Now we assemble the corresponding load type for the respective components in the set:
             IntArray dofids, loc, bNodes;
             FloatArray charVec;
             FloatMatrix R;
@@ -1017,68 +1039,72 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
                 const IntArray &elements = set->giveElementList();
                 for ( int ielem = 1; ielem <= elements.giveSize(); ++ielem ) {
                     Element *element = domain->giveElement( elements.at(ielem) );
-                    if ( !element->isActivated(tStep) ) continue;
-                    charVec.clear();
-                    va.vectorFromLoad(charVec, *element, bodyLoad, tStep, mode);
+		    if ( element->isActivated(tStep) ) {
+		      charVec.clear();
+		      va.vectorFromLoad(charVec, *element, bodyLoad, tStep, mode);
 
-                    if ( charVec.isNotEmpty() ) {
+		      if ( charVec.isNotEmpty() ) {
                         if ( element->giveRotationMatrix(R) ) {
-                            charVec.rotatedWith(R, 't');
+			  charVec.rotatedWith(R, 't');
                         }
 
                         va.locationFromElement(loc, *element, s, & dofids);
                         answer.assemble(charVec, loc);
 
                         if ( eNorms ) {
-                            eNorms->assembleSquared(charVec, dofids);
+			  eNorms->assembleSquared(charVec, dofids);
                         }
-                    }
+		      }
+		    }
                 }
             } else if ( ( bLoad = dynamic_cast< BoundaryLoad * >(load) ) ) { // Boundary load:
                 const IntArray &boundaries = set->giveBoundaryList();
                 for ( int ibnd = 1; ibnd <= boundaries.giveSize() / 2; ++ibnd ) {
                     Element *element = domain->giveElement( boundaries.at(ibnd * 2 - 1) );
-                    if ( !element->isActivated(tStep) ) continue;
-                    int boundary = boundaries.at(ibnd * 2);
-                    charVec.clear();
-                    va.vectorFromBoundaryLoad(charVec, *element, bLoad, boundary, tStep, mode);
+		    if ( element->isActivated(tStep) ) {
 
-                    if ( charVec.isNotEmpty() ) {
+		      int boundary = boundaries.at(ibnd * 2);
+		      charVec.clear();
+		      va.vectorFromBoundaryLoad(charVec, *element, bLoad, boundary, tStep, mode);
+
+		      if ( charVec.isNotEmpty() ) {
                         element->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
                         if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
-                            charVec.rotatedWith(R, 't');
+			  charVec.rotatedWith(R, 't');
                         }
 
                         va.locationFromElementNodes(loc, *element, bNodes, s, & dofids);
                         answer.assemble(charVec, loc);
 
                         if ( eNorms ) {
-                            eNorms->assembleSquared(charVec, dofids);
+			  eNorms->assembleSquared(charVec, dofids);
                         }
-                    }
+		      }
+		    }
                 }
                 ///@todo Should we have a seperate entry for edge loads? Just sticking to the general "boundaryload" for now.
                 const IntArray &edgeBoundaries = set->giveEdgeList();
                 for ( int ibnd = 1; ibnd <= edgeBoundaries.giveSize() / 2; ++ibnd ) {
-                    Element *element = domain->giveElement( edgeBoundaries.at(ibnd * 2 - 1) );
-                    if ( !element->isActivated(tStep) ) continue;
-                    int boundary = edgeBoundaries.at(ibnd * 2);
-                    charVec.clear();
-                    va.vectorFromEdgeLoad(charVec, *element, bLoad, boundary, tStep, mode);
+		  Element *element = domain->giveElement( edgeBoundaries.at(ibnd * 2 - 1) );
+		  if ( element->isActivated(tStep) ) {
+		    int boundary = edgeBoundaries.at(ibnd * 2);
+		    charVec.clear();
+		    va.vectorFromEdgeLoad(charVec, *element, bLoad, boundary, tStep, mode);
 
-                    if ( charVec.isNotEmpty() ) {
-                        element->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
-                        if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
-                            charVec.rotatedWith(R, 't');
-                        }
+		    if ( charVec.isNotEmpty() ) {
+		      element->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
+		      if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
+			charVec.rotatedWith(R, 't');
+		      }
 
-                        va.locationFromElementNodes(loc, *element, bNodes, s, & dofids);
-                        answer.assemble(charVec, loc);
+		      va.locationFromElementNodes(loc, *element, bNodes, s, & dofids);
+		      answer.assemble(charVec, loc);
 
-                        if ( eNorms ) {
-                            eNorms->assembleSquared(charVec, dofids);
-                        }
-                    }
+		      if ( eNorms ) {
+			eNorms->assembleSquared(charVec, dofids);
+		      }
+		    }
+		  }
                 }
             } else if ( ( nLoad = dynamic_cast< NodalLoad * >(load) ) ) { // Nodal load:
                 const IntArray &nodes = set->giveNodeList();
@@ -1248,7 +1274,7 @@ EngngModel :: assembleVectorFromContacts(FloatArray &answer, TimeStep *tStep, Ch
 {
     if( domain->hasContactManager()) {
         domain->giveContactManager()->assembleVectorFromContacts(answer, tStep, type, mode, s, domain, eNorms);
-    } 
+    }
 }
 
 
@@ -1663,7 +1689,7 @@ EngngModel :: giveMetaStep(int i)
     return NULL;
 }
 
-void 
+void
 EngngModel::letOutputBaseFileNameBe(const std :: string &src)
 {
     this->dataOutputFileName = src;
@@ -1712,6 +1738,7 @@ EngngModel :: terminateAnalysis()
     int usec = 0, umin = 0, uhrs = 0;
     time_t endTime = time(NULL);
     this->timer.stopTimer(EngngModelTimer :: EMTT_AnalysisTimer);
+
 
     // compute real time consumed
     this->giveAnalysisTime(rhrs, rmin, rsec, uhrs, umin, usec);

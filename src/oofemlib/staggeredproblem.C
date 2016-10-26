@@ -335,9 +335,9 @@ StaggeredProblem :: giveSolutionStepWhenIcApply(bool force)
         return emodelList [ timeDefinedByProb - 1 ].get()->giveSolutionStepWhenIcApply(true);
     } else {
         if ( !stepWhenIcApply ) {
-            int inin = giveNumberOfTimeStepWhenIcApply();
             int nFirst = giveNumberOfFirstStep();
-            stepWhenIcApply.reset( new TimeStep(inin, this, 0, -giveDeltaT(nFirst), giveDeltaT(nFirst), 0) );
+            //stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -giveDeltaT(nFirst), giveDeltaT(nFirst), 0) );//previous version for [-dt, 0]
+            stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, 0., giveDeltaT(nFirst), 0) );//now go from [0, dt]
         }
 
         return stepWhenIcApply.get();
@@ -361,16 +361,17 @@ StaggeredProblem :: giveNextStep()
     double totalTime = 0;
     StateCounterType counter = 1;
 
-    if ( currentStep ) {
-        istep =  currentStep->giveNumber() + 1;
-        totalTime = currentStep->giveTargetTime() + this->giveDeltaT(istep);
-        counter = currentStep->giveSolutionStateCounter() + 1;
-    } else {
+    if ( !currentStep ) {
         // first step -> generate initial step
-        currentStep.reset( new TimeStep( * giveSolutionStepWhenIcApply() ) );
+        currentStep.reset( new TimeStep( *giveSolutionStepWhenIcApply() ) );
     }
 
+    double dt = this->giveDeltaT(currentStep->giveNumber()+1);
+    istep =  currentStep->giveNumber() + 1;
+    totalTime = currentStep->giveTargetTime() + this->giveDeltaT(istep);
+    counter = currentStep->giveSolutionStateCounter() + 1;
     previousStep = std :: move(currentStep);
+    currentStep.reset( new TimeStep(*previousStep, dt) );
 
     if ( ( totalTime >= this->endOfTimeOfInterest ) && this->adaptiveStepLength ) {
         totalTime = this->endOfTimeOfInterest;

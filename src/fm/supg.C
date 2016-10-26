@@ -227,7 +227,7 @@ NumericalMethod *SUPG :: giveNumericalMethod(MetaStep *mStep)
     if ( !this->nMethod ) {
         this->nMethod.reset( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) ); 
         if ( !this->nMethod ) { 
-            OOFEM_ERROR("linear solver creation failed"); 
+            OOFEM_ERROR("linear solver creation failed for lstype %d", solverType);
         }
     }
     return this->nMethod.get();

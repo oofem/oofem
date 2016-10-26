@@ -224,6 +224,8 @@ public:
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new RCM2MaterialStatus(1, domain, gp); }
 
+    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) { linearElasticMaterial->giveThermalDilatationVector(answer, gp, tStep); }
+
 protected:
 
     virtual void checkForNewActiveCracks(IntArray &answer, GaussPoint *gp, const FloatArray &,

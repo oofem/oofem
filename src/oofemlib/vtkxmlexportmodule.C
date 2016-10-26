@@ -546,7 +546,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
             if ( tstep_substeps_out_flag ) {
                 subStep << "." << tStep->giveSubStepNumber();
             }
-            pvdEntry << "<DataSet timestep=\"" << tStep->giveIntrinsicTime() * this->timeScale << subStep.str() << "\" group=\"\" part=\"" << i << "\" file=\"" << this->emodel->giveOutputBaseFileName() << fext << ".vtu\"/>";
+            pvdEntry << "<DataSet timestep=\"" << tStep->giveTargetTime() * this->timeScale << subStep.str() << "\" group=\"\" part=\"" << i << "\" file=\"" << this->emodel->giveOutputBaseFileName() << fext << ".vtu\"/>";
             this->pvdBuffer.push_back( pvdEntry.str() );
         }
 
@@ -557,7 +557,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         if ( tstep_substeps_out_flag ) {
             subStep << "." << tStep->giveSubStepNumber();
         }
-        pvdEntry << "<DataSet timestep=\"" << tStep->giveIntrinsicTime() * this->timeScale << subStep.str() << "\" group=\"\" part=\"\" file=\"" << fname << "\"/>";
+        pvdEntry << "<DataSet timestep=\"" << tStep->giveTargetTime() * this->timeScale << subStep.str() << "\" group=\"\" part=\"\" file=\"" << fname << "\"/>";
         this->pvdBuffer.push_back( pvdEntry.str() );
         this->writeVTKCollection();
     }
@@ -719,6 +719,11 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
                 continue;
             }
 
+	    //skip materials with casting time > current time
+	    if ( !elem->isCast(tStep) ) {
+	      continue;
+	    }
+	    
             if ( elem->giveParallelMode() != Element_local ) {
                 continue;
             }
@@ -1356,6 +1361,11 @@ VTKXMLExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNumbers,
         if ( !element->isActivated(tStep) ) {                    //skip inactivated elements
             continue;
         }
+
+	//skip materials with casting time > current time
+	if ( !element->isCast(tStep) ) {                    
+	  continue;
+	}
 
         if ( element->giveParallelMode() != Element_local ) {
             continue;
