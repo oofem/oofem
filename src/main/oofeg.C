@@ -945,23 +945,29 @@ void OOFEGSimpleCmd(char *buf)
 {
     char cmd [ 20 ];
     char *remain;
-    int stepinfo [ 2 ];
     int istep, pstep, iversion = 0;
 
     readSimpleString(buf, cmd, & remain); // read command
     if ( !strncmp(cmd, "active_step", 11) ) {
         pstep = gc [ 0 ].getActiveStep();
         istep = atoi(remain);
-        stepinfo [ 0 ] = istep;
-        stepinfo [ 1 ] = iversion;
+        FILE *file;
         try {
-            problem->restoreContext(NULL, CM_State | CM_Definition, ( void * ) stepinfo);
+            if ( !this->giveContextFile(& file, istep, iversion, contextMode_write) ) {
+                THROW_CIOERR(CIO_IOERR);
+            }
+            FileDataStream stream(file);
+            problem->restoreContext(& stream, CM_State | CM_Definition);
+            fclose(file);
         } catch(ContextIOERR & m) {
             m.print();
-            stepinfo [ 0 ] = pstep;
-            stepinfo [ 1 ] = iversion;
             try {
-                problem->restoreContext(NULL, CM_State | CM_Definition, ( void * ) stepinfo);
+                if ( !this->giveContextFile(& file, pstep, iversion, contextMode_write) ) {
+                    THROW_CIOERR(CIO_IOERR);
+                }
+                FileDataStream stream(file);
+                problem->restoreContext(NULL, CM_State | CM_Definition);
+                fclose(file);
             } catch(ContextIOERR & m2) {
                 m2.print();
                 exit(1);

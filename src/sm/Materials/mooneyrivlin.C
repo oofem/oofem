@@ -36,6 +36,7 @@
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "classfactory.h"
+#include "mathfem.h"
 
 namespace oofem {
 REGISTER_Material(MooneyRivlinMaterial);

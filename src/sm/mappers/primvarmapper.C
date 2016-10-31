@@ -49,6 +49,7 @@
 #include "prescribedgradientbcweak.h"
 #include "prescribedgradientbcneumann.h"
 #include "unknownnumberingscheme.h"
+#include "mathfem.h"
 
 #include <fstream>
 

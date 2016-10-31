@@ -38,6 +38,7 @@
 #include "set.h"
 #include "feinterpol.h"
 #include "element.h"
+#include "mathfem.h"
 
 namespace oofem {
 

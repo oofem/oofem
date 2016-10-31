@@ -2303,7 +2303,7 @@ StructuralMaterial :: computeStressIndependentStrainVector_3d(FloatArray &answer
 
     /* add external source, if provided */
     FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
-    FM_FieldPtr tf = fm->giveField(FT_Temperature);
+    FieldPtr tf = fm->giveField(FT_Temperature);
 
     if ( tf ) {
         // temperature field registered

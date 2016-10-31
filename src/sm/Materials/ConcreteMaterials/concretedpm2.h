@@ -42,6 +42,7 @@
 #include "../sm/Materials/structuralms.h"
 #include "Materials/isolinearelasticmaterial.h"
 #include "gausspoint.h"
+#include "mathfem.h"
 
 #define DYNCON_TOL 1.e-6
 #define keep_track_of_dissipated_energy

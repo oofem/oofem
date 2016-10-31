@@ -46,6 +46,7 @@
 #include "contextioerr.h"
 #include "nrsolver.h"
 #include "unknownnumberingscheme.h"
+#include "dofdistributedprimaryfield.h"
 
 namespace oofem {
 REGISTER_EngngModel(StationaryTransportProblem);
@@ -103,6 +104,7 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
     }
 
     if ( !UnknownsField ) { // can exist from nonstationary transport problem
+        //UnknownsField.reset( new DofDistributedPrimaryField(this, 1, FT_TransportProblemUnknowns, 0) );
         UnknownsField.reset( new PrimaryField(this, 1, FT_TransportProblemUnknowns, 0) );
     }
 
@@ -201,7 +203,7 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     // set-up numerical method
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
 #ifdef VERBOSE
-    OOFEM_LOG_INFO("Solving ...\n");
+    OOFEM_LOG_INFO("Solving for %d unknowns\n", neq);
 #endif
 
     FloatArray incrementOfSolution;

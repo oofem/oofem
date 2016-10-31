@@ -36,6 +36,7 @@
 #include "floatmatrix.h"
 #include "iga.h"
 #include "feibspline.h"
+#include "mathfem.h"
 
 namespace oofem {
 BSplineInterpolation :: ~BSplineInterpolation()

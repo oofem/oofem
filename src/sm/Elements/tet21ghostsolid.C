@@ -47,6 +47,7 @@
 #include "boundaryload.h"
 #include "neumannmomentload.h"
 #include "dof.h"
+#include "mathfem.h"
 
 #include <iostream>
 

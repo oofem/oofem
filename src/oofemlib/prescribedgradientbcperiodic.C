@@ -55,6 +55,7 @@
 #include "unknownnumberingscheme.h"
 #include "function.h"
 #include "timestep.h"
+#include "mathfem.h"
 
 namespace oofem {
 REGISTER_BoundaryCondition(PrescribedGradientBCPeriodic);

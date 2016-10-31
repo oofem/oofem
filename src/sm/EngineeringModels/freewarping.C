@@ -48,6 +48,7 @@
 #include "contextioerr.h"
 #include "classfactory.h"
 #include "outputmanager.h"
+#include "mathfem.h"
 
 //#define THROW_CIOERR(e) throw ContextIOERR(e, __FILE__, __LINE__); // km???
 
