@@ -45,7 +45,7 @@ KelvinChainMaterial :: KelvinChainMaterial(int n, Domain *d) : RheoChainMaterial
 { }
 
 void
-KelvinChainMaterial :: computeCharCoefficients(FloatArray &answer, double tStep)
+KelvinChainMaterial :: computeCharCoefficients(FloatArray &answer, double tPrime, GaussPoint *gp, TimeStep *tStep )
 {
     /*
      * This function computes the moduli of individual Kelvin units
@@ -55,7 +55,7 @@ KelvinChainMaterial :: computeCharCoefficients(FloatArray &answer, double tStep)
      * The optimal moduli are obtained using the least-square method.
      *
      * INPUTS:
-     * tStep = age of material when load is applied
+     * tPrime = age of material when load is applied
      */
 
     int rSize;
@@ -71,7 +71,7 @@ KelvinChainMaterial :: computeCharCoefficients(FloatArray &answer, double tStep)
     // (can be done directly, since the compliance function is available)
 
     for ( int i = 1; i <= rSize; i++ ) {
-        discreteComplianceFunctionVal.at(i) = this->computeCreepFunction(tStep + rTimes.at(i), tStep);
+      discreteComplianceFunctionVal.at(i) = this->computeCreepFunction(tPrime + rTimes.at(i), tPrime, gp, tStep);
     }
 
     // assemble the matrix of the set of linear equations
@@ -125,10 +125,15 @@ KelvinChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
     double deltaT, tauMu, lambdaMu, Dmu;
     double sum = 0.0; // return value
 
-    ///@warning THREAD UNSAFE!
-    this->updateEparModuli(relMatAge + ( tStep->giveTargetTime() - 0.5 * tStep->giveTimeIncrement() ) / timeFactor);
+    if (  (tStep->giveIntrinsicTime() < this->castingTime)  ) {
+      OOFEM_ERROR("Attempted to evaluate E modulus at time lower than casting time");
+    }
 
-    deltaT = tStep->giveTimeIncrement() / timeFactor;
+    ///@warning THREAD UNSAFE!
+    double tPrime = relMatAge + ( tStep->giveTargetTime() - 0.5 * tStep->giveTimeIncrement() );
+    this->updateEparModuli(tPrime, gp, tStep);
+
+    deltaT = tStep->giveTimeIncrement();
 
     // EparVal values were determined using the least-square method
     for ( int mu = 1; mu <= nUnits; mu++ ) {
@@ -145,7 +150,10 @@ KelvinChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
         sum += ( 1 - lambdaMu ) / Dmu;
     }
 
-    return sum;
+    //    return sum;
+    // changed formulation to return stiffness instead of compliance
+    return 1. / sum;
+
 }
 
 void
@@ -160,13 +168,19 @@ KelvinChainMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp,
     KelvinChainMaterialStatus *status = static_cast< KelvinChainMaterialStatus * >( this->giveStatus(gp) );
 
     // !!! chartime exponents are assumed to be equal to 1 !!!
-
+   
+    if (  (tStep->giveIntrinsicTime() < this->castingTime)  ) {
+      OOFEM_ERROR("Attempted to evaluate creep strain for time lower than casting time");
+    }
+    
     if ( mode == VM_Incremental ) {
+      reducedAnswer.zero();
+
         for ( int mu = 1; mu <= nUnits; mu++ ) {
-            if ( ( tStep->giveTimeIncrement() / timeFactor ) / this->giveCharTime(mu) > 30 ) {
+            if ( ( tStep->giveTimeIncrement() ) / this->giveCharTime(mu) > 30 ) {
                 beta = 0;
             } else {
-                beta = exp( -( tStep->giveTimeIncrement() / timeFactor ) / ( this->giveCharTime(mu) ) );
+                beta = exp( -( tStep->giveTimeIncrement() ) / ( this->giveCharTime(mu) ) );
             }
 
             gamma = & status->giveHiddenVarsVector(mu); // JB
@@ -212,6 +226,17 @@ KelvinChainMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tStep)
     FloatArray muthHiddenVarsVector;
     KelvinChainMaterialStatus *status = static_cast< KelvinChainMaterialStatus * >( this->giveStatus(gp) );
 
+
+    //   if ( !this->isActivated(tStep) ) {
+   if (  (tStep->giveIntrinsicTime() < this->castingTime)  ) {
+      help.resize(StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
+      help.zero();
+      for ( int mu = 1; mu <= nUnits; mu++ ) {
+	status->letTempHiddenVarsVectorBe(mu, help);
+      }
+      return;
+    }
+
     delta_sigma = status->giveTempStrainVector(); // gives updated strain vector (at the end of time-step)
     delta_sigma.subtract( status->giveStrainVector() ); // strain increment in current time-step
 
@@ -221,9 +246,10 @@ KelvinChainMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tStep)
         delta_sigma.subtract(deltaEps0); // should be equal to zero if there is no stress change during the time-step
     }
 
+    // no need to worry about "zero-stiffness" for time < castingTime - this is done above
     delta_sigma.times( this->giveEModulus(gp, tStep) ); // = delta_sigma
 
-    deltaT = tStep->giveTimeIncrement() / timeFactor;
+    deltaT = tStep->giveTimeIncrement();
 
     for ( int mu = 1; mu <= nUnits; mu++ ) {
         help = delta_sigma;

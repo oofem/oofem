@@ -49,7 +49,7 @@ DofManValueField :: DofManValueField(FieldType ft, Domain *d) : Field(ft), dmanv
 }
 
 int
-DofManValueField :: evaluateAt(FloatArray &answer, FloatArray &coords, ValueModeType mode, TimeStep *tStep)
+DofManValueField :: evaluateAt(FloatArray &answer, const FloatArray &coords, ValueModeType mode, TimeStep *tStep)
 {
     int result = 0; // assume ok
     FloatArray lc, n;

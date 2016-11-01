@@ -24,6 +24,10 @@
 #include "boundarycondition.h"
 #include "set.h"
 
+#include "../tm/transportgradientneumann.h"
+#include "../tm/transportgradientdirichlet.h"
+#include "../tm/transportgradientperiodic.h"
+
 #include <random>
 #include <fstream>
 
@@ -71,19 +75,21 @@ int main(int argc, char *argv[])
 #endif
 
     Timer timer;
-    std :: string name = argv[1];
-    std :: string bc = argv[2];
-    double k = atof(argv[3]);
-    double rveSize = atof(argv[4]);
-    int nelem = atoi(argv[5]) * rveSize;
-    int sample = atoi(argv[6]);
+    std :: string inclusion_file = argv[1];
+    std :: string name = argv[2];
+    std :: string bc = argv[3];
+    double k = atof(argv[4]);
+    double rveSize = atof(argv[5]);
+    int nelem = atoi(argv[6]) * rveSize;
+    int sample = atoi(argv[7]);
+    int tangentProblem = atoi(argv[8]);
     FloatArray rvePosition;
     
     DynamicDataReader myData;
     DynamicInputRecord *myInput;
 
     // Read the file with all inclusions:
-    std :: ifstream datafile("inclusions.data", std :: ios :: binary);
+    std :: ifstream datafile(inclusion_file, std :: ios :: binary);
     double boxSize;
     FloatArray coord(3);
     double radius;
@@ -101,7 +107,7 @@ int main(int argc, char *argv[])
     }
     printf("inclusions.data:  boxSize = %e, %d inclusions\n", boxSize, num_inclusions);
 
-    std :: default_random_engine rd(sample);
+    std :: default_random_engine rd(rveSize * (sample+1));
     std :: uniform_real_distribution<> dis(0, boxSize - rveSize);
     rvePosition = {dis(rd), dis(rd), dis(rd)};
     
@@ -118,7 +124,7 @@ int main(int argc, char *argv[])
     
     timer.startTimer();
     //Output File
-    myData.setOutputFileName(name + ".out");
+    myData.setOutputFileName(name + "." + std :: to_string(sample) + ".out");
 
     //Description
     myData.setDescription("Internally generated hex grid");
@@ -130,6 +136,8 @@ int main(int argc, char *argv[])
     myInput->setField(3, _IFT_EngngModel_lstype);
     myInput->setField(7, _IFT_EngngModel_smtype);
     myInput->setField(1, _IFT_ModuleManager_nmodules);
+    myInput->setField(_IFT_EngngModel_suppressOutput);
+    myInput->setField(_IFT_StationaryTransportProblem_keepTangent);
     myData.insertInputRecord(DataReader::IR_emodelRec, myInput);
 
     // VTKXML tstep_all domain_all primvars 1 6 cellvars 3 103 56 41'
@@ -369,6 +377,7 @@ int main(int argc, char *argv[])
                     emat1.followedBy(e);
             }
 
+    printf("Final inclusion fraction: %.3f\n", (double)emat2.giveSize() / (nelem * nelem * nelem));
     myInput = new DynamicInputRecord(_IFT_Set_Name, 11);
     myInput->setField(emat1, _IFT_Set_elements);
     myData.insertInputRecord(DataReader::IR_setRec, myInput);
@@ -453,7 +462,7 @@ int main(int argc, char *argv[])
     timer.stopTimer();
     printf("Mesh generation time %.3f s\n", timer.getUtime());
     // Writing to file (to verify, and for backups)
-    //myData.writeToFile((name + ".in").c_str());
+    //myData.writeToFile((name + "." + std :: to_string(sample) + ".in").c_str());
 
     printf("Initializing problem\n");
     timer.startTimer();
@@ -461,7 +470,38 @@ int main(int argc, char *argv[])
     timer.stopTimer();
     printf("Instanciation time %.3f s\n", timer.getUtime());
     printf("Starting analysis\n");
-    em->solveYourself();
+
+    if ( !tangentProblem ) {
+        em->solveYourself();
+    } else {
+        printf("Solving tangent problem\n");
+        TimeStep *tStep = em->giveNextStep();
+        FloatMatrix tangent;
+        if ( dynamic_cast< TransportGradientNeumann* >( em->giveDomain(1)->giveBc(1) ) ) {
+            dynamic_cast< TransportGradientNeumann* >( em->giveDomain(1)->giveBc(1) )->computeTangent(tangent, tStep);
+        } else if ( dynamic_cast< TransportGradientDirichlet* >( em->giveDomain(1)->giveBc(1) ) ) {
+            dynamic_cast< TransportGradientDirichlet* >( em->giveDomain(1)->giveBc(1) )->computeTangent(tangent, tStep);
+        } else if ( dynamic_cast< TransportGradientPeriodic* >( em->giveDomain(1)->giveBc(1) ) ) {
+            dynamic_cast< TransportGradientPeriodic* >( em->giveDomain(1)->giveBc(1) )->computeTangent(tangent, tStep);
+        }
+        tangent.printYourself("tangent");
+
+        std :: ofstream fout(em->giveOutputBaseFileName() + ".data", std :: ios :: out);
+        fout.setf(std::ios::scientific);
+        fout.precision(6);
+        //FILE *file = fopen((this->dataOutputFileName + ".data").c_str(), "w");
+        for ( int i = 0; i < tangent.giveNumberOfRows(); ++i ) {
+            for ( int j = 0; j < tangent.giveNumberOfColumns(); ++j ) {
+                //fprintf(file, "%.9e ", tangent(i, j) );
+                fout << tangent(i, j) << " ";
+            }
+            fout << "\n";
+            //fprintf(file, "\n");
+        }
+        fout.close();
+        //fclose(file);
+    }
+    
     myData.finish();
 
 #ifdef __PETSC_MODULE

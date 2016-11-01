@@ -113,9 +113,6 @@ B3Material :: initializeFrom(InputRecord *ir)
         }
     }
 
-    IR_GIVE_FIELD(ir, talpha, _IFT_B3Material_talpha);
-
-
     w = wc * c;
     E28 = 4734. * sqrt(fc); // or 4733. ?
     if ( mode == 0 ) {
@@ -124,24 +121,6 @@ B3Material :: initializeFrom(InputRecord *ir)
 
     return IRRT_OK;
 }
-
-void
-B3Material :: giveThermalDilatationVector(FloatArray &answer,
-                                          GaussPoint *gp,  TimeStep *tStep)
-//
-// returns strain vector
-// eps_0 = {exx_0, eyy_0, ezz_0, gyz_0, gxz_0, gxy_0}^T
-// caused by unit temperature in direction of
-// gp (element) local axes
-//
-{
-    answer.resize(6);
-    answer.zero();
-    answer.at(1) = ( talpha );
-    answer.at(2) = ( talpha );
-    answer.at(3) = ( talpha );
-}
-
 
 void
 B3Material :: predictParametersFrom(double fc, double c, double wc, double ac,
@@ -208,7 +187,7 @@ B3Material :: predictParametersFrom(double fc, double c, double wc, double ac,
 
 
 double
-B3Material :: computeCreepFunction(double t, double t_prime)
+B3Material :: computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep)
 {
     // computes the value of creep function at time t
     // when load is acting from time t_prime
@@ -364,7 +343,7 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, T
 
     /* ask for humidity and temperature from external sources, if provided */
     FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
-    FM_FieldPtr tf;
+    FieldPtr tf;
     FloatArray gcoords, et2, ei2, stressVector, fullStressVector;
 
     if ( ( tf = fm->giveField(FT_Temperature) ) ) {
@@ -414,8 +393,8 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, T
         sv += stressVector.at(i);
     }
 
-    et = 1. / this->computeCreepFunction(time + 0.01, time);
-    et0 = 1. / this->computeCreepFunction(t0 + 0.01, t0);
+    et = 1. / this->computeCreepFunction(time + 0.01, time, gp, tStep);
+    et0 = 1. / this->computeCreepFunction(t0 + 0.01, t0, gp, tStep);
 
     h1 = es0 * ( et0 / et );
     sn = sgn(wrate + at * trate);

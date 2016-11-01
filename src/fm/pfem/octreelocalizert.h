@@ -116,6 +116,31 @@ public:
      * @param answer the mask of the bounding box
      */
     void giveMask(IntArray &answer) { answer = this->spatialMask; }
+    /**
+     * Sets all BBOx parameters in ince
+     */
+    void init (FloatArray& origin, double size, IntArray &mask)
+    {
+      this->origin = origin;
+      this->size   = size;
+      this->spatialMask = mask;
+    }
+    bool contains(const FloatArray& coords) const
+    {
+      for ( int i = 1; i <= coords.giveSize(); i++ ) {
+	if ( spatialMask.at(i) ) {
+	  if ( coords.at(i) < this->origin.at(i) ) {
+	    return 0;
+	  }
+	  
+	  if ( coords.at(i) > ( this->origin.at(i) + this->size ) ) {
+	    return 0;
+	  }
+	}
+      }
+
+      return 1;
+    }
 };
 
 /**
@@ -357,6 +382,7 @@ public:
                 }
             }
         }
+	return OctantRec :: BBS_OutsideCell;
     }
 
     /**
@@ -792,14 +818,13 @@ protected:
     typedef typename std :: list< T > :: const_iterator listConstIteratorType;
     IntArray octreeMask;
     CellPtrType rootCell;
-    Domain *domain;
+    //Domain *domain;
     int maxDepthReached;
 
 public:
     /// Constructor
-    OctreeSpatialLocalizerT(int n, Domain *d) {
+    OctreeSpatialLocalizerT() {
         rootCell = NULL;
-        domain = d;
         maxDepthReached = 0;
     }
     /// Destructor
@@ -809,6 +834,11 @@ public:
         }
     }
 
+    void clear () {
+      if (rootCell) delete rootCell;
+      rootCell = NULL;
+      octreeMask.zero();
+    }
     /// Initilizes the octree structure
     int init(BoundingBox &BBX, int initialDivision = 0) {
         if ( !rootCell ) {
@@ -824,78 +854,6 @@ public:
         } else {
             return 0;
         }
-    }
-
-    /// Calculates the bounding box base on the domain's nodes
-    void computeBBXBasedOnNodeData(BoundingBox &BBX)
-    {
-        int i, j, init = 1, nnode = this->domain->giveNumberOfDofManagers();
-        double rootSize, resolutionLimit;
-        FloatArray minc(3), maxc(3), * coords;
-        DofManager *dman;
-
-        // first determine domain extends (bounding box), and check for degenerated domain type
-        for ( i = 1; i <= nnode; i++ ) {
-            dman = domain->giveDofManager(i);
-            coords = static_cast< Node * >( dman )->giveCoordinates();
-            if ( init ) {
-                init = 0;
-                for ( j = 1; j <= coords->giveSize(); j++ ) {
-                    minc.at(j) = maxc.at(j) = coords->at(j);
-                }
-            } else {
-                for ( j = 1; j <= coords->giveSize(); j++ ) {
-                    if ( coords->at(j) < minc.at(j) ) {
-                        minc.at(j) = coords->at(j);
-                    }
-
-                    if ( coords->at(j) > maxc.at(j) ) {
-                        maxc.at(j) = coords->at(j);
-                    }
-                }
-            }
-        }                 // end loop over nodes
-
-        BBX.setOrigin(minc);
-
-        // determine root size
-        rootSize = 0.0;
-        for ( i = 1; i <= 3; i++ ) {
-            rootSize = 1.000001 * max( rootSize, maxc.at(i) - minc.at(i) );
-        }
-
-        BBX.setSize(rootSize);
-
-        // check for degenerated domain
-        resolutionLimit = min(1.e-3, rootSize / 1.e6);
-        for ( i = 1; i <= 3; i++ ) {
-            if ( ( maxc.at(i) - minc.at(i) ) > resolutionLimit ) {
-                BBX.setMask(i, 1);
-            } else {
-                BBX.setMask(i, 0);
-            }
-        }
-    }
-
-    /// Builds the octree from domain's nodes - NOT IN USE
-    int buildOctreeDataStructureFromNodes() {
-        int i, j, init = 1, nnode = this->domain->giveNumberOfDofManagers();
-        DofManager *dman;
-
-        // measure time consumed by octree build phase
-        clock_t sc = :: clock();
-        clock_t ec;
-
-        ec = :: clock();
-
-        // compute max. tree depth
-        int treeDepth = 0;
-        this->giveMaxTreeDepthFrom(this->rootCell, treeDepth);
-        // compute processor time used by the program
-        long nsec = ( ec - sc ) / CLOCKS_PER_SEC;
-        OOFEM_LOG_INFO("Octree init [depth %d in %lds]\n", treeDepth, nsec);
-
-        return 1;
     }
 
     /// Inserts member into the octree using functor for the evaluation
@@ -925,7 +883,7 @@ public:
 
         listIteratorType pos;
         BoundingBox BBS1, BBS2;
-        typename std :: list< CellPtrType > *cellListPostSearch;
+        typename std :: list< CellPtrType > *cellListPostSearch = NULL;
         typename std :: list< CellPtrType > :: iterator cellListPos;
 
 

@@ -66,16 +66,21 @@
 \newcommand{\Pfieldnotype}[1]{\oofemParallel{\fieldnotype{#1}}}
 \newcommand{\PoptField}[2]{\oofemParallel{\optField{#1}{#2}}}
 \newcommand{\PoptFieldnotype}[1]{\oofemParallel{\optFieldnotype{#1}}}
+\definecolor{lightgray}{gray}{0.9}
+\newcolumntype{R}{>{\raggedleft\arraybackslash}X}%
 
 \begin{htmlonly}
+%\newenvironment{record}[1][]{\rowcolors{1}{lightgray}{lightgray}\begin{tabular}{|ll}}{\end{tabular}\\}
 \newenvironment{record}[1][]{\begin{tabular}{|ll}}{\end{tabular}\\}
 \newcommand{\recentry}[2]{{#1}&{#2}\\}
 \end{htmlonly}
 %begin{latexonly}
 \newcounter{rcc}
-\newenvironment{record}[1][\textwidth]{\setcounter{rcc}{0}\begin{tabular*}{#1}{|ll@{\extracolsep{\fill}}r}}{\end{tabular*}\\}
-%\newenvironment{record}{\begin{tabular}{|llr}}{\end{tabular*}\\}
-\newcommand{\recentry}[2]{\ifthenelse{\value{rcc}>0}{&$\backslash$ \\}{\setcounter{rcc}{1}}{#1}&{#2}}
+%\newenvironment{record}[1][\textwidth]{\setcounter{rcc}{0}\rowcolors{1}{lightgray}{lightgray}\begin{tabular*}{#1}{|ll@{\extracolsep{\fill}}r}}{\end{tabular*}\\}
+%\newenvironment{record}[1][\textwidth]{\begin{tabular*}{#1}{|llr}}{\end{tabular*}\\}
+\newenvironment{record}[1][\textwidth]{\setcounter{rcc}{0}\rowcolors{1}{lightgray}{lightgray}\tabularx{#1}{llR} \hline}
+               {\endtabularx}
+\newcommand{\recentry}[2]{\ifthenelse{\value{rcc}>0}{$\backslash$ \\}{\setcounter{rcc}{1}}{#1}&{#2}&}
 %end{latexonly}
 
 \lstdefinelanguage{oofeminput}
@@ -1341,12 +1346,11 @@ Beside the three velocity components, the discretized momentum balance equations
   \pard{u_i}{t} \approx \frac{u^{n+1}_i-u^n_i}{\Delta t}=\frac{u^{n+1}_i-u^*_i+u^*_i-u^n_i}{\Delta t}= \left[ - \frac{1}{\rho}\frac{\partial}{\partial x_i}p+\frac{\mu}{\rho}\frac{\partial}{\partial x_j}\left(\frac{\partial u_i}{\partial x_j}\right)+b_i\right]^{n+\theta}\;.
 \end{equation}
 where the intermediate velocity $u^*_i$ is introduced. Splitting the equation in the following manner gives the expression for the unknown velocities
-\begin{subequations}
-  \begin{eqnarray}\label{rce:uistar}
-    \mbox{(A)}\qquad u^*_i &=& u^n_i+b_i\Delta t - \frac{\Delta t}{\rho}\pard{}{x_i}\gamma p^n+\frac{\Delta t\mu}{\rho}\pard{}{x_j}\left(\pard{u^{n+\theta}_i}{x_j}\right)\;,\\
-    \mbox{(C)}\quad u^{n+1}_i &=& u^*_i- \frac{\Delta t}{\rho}\pard{}{x_i}(p^{n+1}-\gamma p^n)\;. \label{eq:uin1}
-  \end{eqnarray}
-\end{subequations}
+\begin{eqnarray}\label{rce:uistar}
+    u^*_i &=& u^n_i+b_i\Delta t - \frac{\Delta t}{\rho}\pard{}{x_i}\gamma p^n+\frac{\Delta t\mu}{\rho}\pard{}{x_j}\left(\pard{u^{n+\theta}_i}{x_j}\right)\;,\\
+    u^{n+1}_i &=& u^*_i- \frac{\Delta t}{\rho}\pard{}{x_i}(p^{n+1}-\gamma p^n)\;. \label{eq:uin1}
+\end{eqnarray}
+
 The pressure split is here introduced by the new parameter $\gamma$ defining the amount of splitting and can take values from 0 to 1. The body loads are considered to be constant over time step.
 \par
 In a similar way, the fractional step method is applied on the mass conservation equation. Here, the time derivative of density would be approximated. As we examine an incompressible flow, whose density does not change in time, merely the intermediate velocity term is incorporated in the divergence of the velocity.
@@ -1354,25 +1358,25 @@ In a similar way, the fractional step method is applied on the mass conservation
   \pard{(u^{n+1}_i-u^*_i+u^*_i)}{x_i} = 0 \;,
 \end{equation}
 which can be decomposed into two sub-equations
-\begin{subequations}
-  \begin{eqnarray}\label{rce:mass}
+
+\begin{eqnarray}\label{rce:mass}
 	\pard{u^*_i}{x_i} &=& 0 \\
       \pard{(u^{n+1}_i-u^*_i)}{x_i} &=& 0\;.
-  \end{eqnarray}
-\end{subequations}
+\end{eqnarray}
+
 By substituting for the velocity difference into the equation~(\ref{eq:uin1}) we obtain
 \begin{equation}
 \pard{}{x_i}(u^{n+1}_i - u^*_i) = \pard{}{x_i}\left(-\frac{\Delta t}{\rho}\pard{}{x_i}(p^{n+1}-\gamma p^n)\right)\;.
 \end{equation}
 Now we can sum the separated mass equations together. This operation gives the coupled mass-momentum equation
 \begin{equation}
-  \mbox{(B)}\qquad  \pard{u^*_i}{x_i} - \frac{\Delta t}{\rho}\frac{\partial^2}{\partial x^2_i}(p^{n+1}-\gamma p^n) = 0\;.
+  \pard{u^*_i}{x_i} - \frac{\Delta t}{\rho}\frac{\partial^2}{\partial x^2_i}(p^{n+1}-\gamma p^n) = 0\;.
 \end{equation}
 The final set of equations reads
 \begin{eqnarray}
-\mbox{(A)}\qquad\quad\quad\; u^*_i  &=& u^n_i+b_i\Delta t - \frac{\Delta t}{\rho}\pard{}{x_i}\gamma p^n+\frac{\Delta t\mu}{\rho}\pard{}{x_j}\left(\pard{u^{n+\theta}_i}{x_j}\right)\;,\\
- \mbox{(B)} \quad \frac{\partial^2}{\partial x^2_i}(p^{n+1}) &=& \frac{\rho}{\Delta t}\pard{u^*_i}{x_i}+\frac{\partial^2}{\partial x^2_i}(\gamma p^n)\;, \\
- \mbox{(C)} \qquad\quad\;\,u^{n+1}_i &=& u^*_i- \frac{\Delta t}{\rho}\pard{}{x_i}(p^{n+1}-\gamma p^n)\;.
+u^*_i  &=& u^n_i+b_i\Delta t - \frac{\Delta t}{\rho}\pard{}{x_i}\gamma p^n+\frac{\Delta t\mu}{\rho}\pard{}{x_j}\left(\pard{u^{n+\theta}_i}{x_j}\right)\;,\\
+\frac{\partial^2}{\partial x^2_i}(p^{n+1}) &=& \frac{\rho}{\Delta t}\pard{u^*_i}{x_i}+\frac{\partial^2}{\partial x^2_i}(\gamma p^n)\;, \\
+u^{n+1}_i &=& u^*_i- \frac{\Delta t}{\rho}\pard{}{x_i}(p^{n+1}-\gamma p^n)\;.
 \end{eqnarray}
 \par
 The above PFEM formulation is based on the paper by Idelsohn, O\~nate and Del Pin~\cite{Idelsohn04}. The authors described an approach using arbitrary time discretization scheme and pressure split factor. Their choice of implicit scheme $\theta = 1$ was motivated by better convergence properties, whereas the decision for $\gamma = 0$ leading to greater pressure split was driven by better pressure stabilization.
@@ -1384,9 +1388,9 @@ p&=&\mbf{N}^T(X,t)\mbf{P} \;.
 \end{eqnarray}
 By applying the Galerkin weighted residual method on the splitted governing equations, following system of linear algebraic equations is obtained 
 \begin{eqnarray}
-\mbox{(A)}\quad\quad\mbf{M}\mbf{U}^* &=& \mbf{M}\mbf{U}^n + \Delta t\mbf{F} - \frac{\Delta t\mu}{\rho}\mbf{K}\mbf{U}^{n+\theta}\;,\label{eq:systemA} \\
-\mbox{(B)}\quad\;\; \mbf{L}\mbf{P}^{n+1} &=&\frac{\rho}{\Delta t}\left(\mbf{G}^T\mbf{U}^*-\hat{\mbf{U}}\right) \;, \label{eq:systemB} \\
-\mbox{(C)}\quad \mbf{M}\mbf{U}^{n+1} &=& \mbf{M}\mbf{U}^* - \frac{\rho}{\Delta t}\mbf{G}\mbf{P}^{n+1} \;.\label{eq:systemC}
+\mbf{M}\mbf{U}^* &=& \mbf{M}\mbf{U}^n + \Delta t\mbf{F} - \frac{\Delta t\mu}{\rho}\mbf{K}\mbf{U}^{n+\theta}\;,\label{eq:systemA} \\
+\mbf{L}\mbf{P}^{n+1} &=&\frac{\rho}{\Delta t}\left(\mbf{G}^T\mbf{U}^*-\hat{\mbf{U}}\right) \;, \label{eq:systemB} \\
+\mbf{M}\mbf{U}^{n+1} &=& \mbf{M}\mbf{U}^* - \frac{\rho}{\Delta t}\mbf{G}\mbf{P}^{n+1} \;.\label{eq:systemC}
 \end{eqnarray}
 \par
 The matrix $\mbf{M}$ denotes the mass matrix in a lumped form, whereas the vector $\mbf{F}$ stands for the load vector. The matrix $\mbf{G}$ represents the gradient operator, which is the transposition of the divergence operator denoted simply as $\mbf{G}^T$. Matrices $\mbf{K}$ and $\mbf{L}$ are build in a similar way however noted differently. Both mean the Laplacian operator. Due to its common use in computational mechanics, the classical notation of the stiffness matrix $\mbf{K}$ is used. Prescribed velocity components are enclosed in vector $\hat{\mbf{U}}$.
@@ -1827,7 +1831,7 @@ MPT\_T3D:  \param{meshpackage} = 0. T3d mesh interface. Default. Supports both 1
 MPT\_TARGE2:	\param{meshpackage} = 1. Interface to Targe2 2D
 mesh generator.
 \item
-MPT_SUBDIVISION: \param{meshpackage}=3. Built-in subdivision algorithm. Supports triangular 2D and tetrahedral 3D meshes. Can operate in parallel mode.
+MPT\_SUBDIVISION: \param{meshpackage}=3. Built-in subdivision algorithm. Supports triangular 2D and tetrahedral 3D meshes. Can operate in parallel mode.
 \end{itemize}
 %
 \subsection{Initialization modules}
@@ -2406,7 +2410,7 @@ have the proper type (body load type), otherwise error will be generated.
 Boundary load acting on element boundary is specified using
 \param{boundaryLoads} array. The format of this array is
 \begin{displaymath}
-2\cdot size \quad lnum(1)~id(1)~\dots~lnum(size)~id(size),
+2\cdot size \; lnum(1)~id(1)~\dots~lnum(size)~id(size),
 \end{displaymath}
 where $size$ is total number of loadings applied to element,
 $lnum(i)$ is the applied load number, and $id(i)$
@@ -2455,8 +2459,8 @@ The main usage of sets are to connect regions of elements to a given cross secti
 
 \begin{record}[0.9\textwidth]
   \recentry{\entKeywordInst{Set}}{\componentNum}
-  \recentry{}{\optField{elements}{ia} \optField{elementranges}{rl}}
-  \recentry{}{\optField{nodes}{ia} \optField{noderanges}{rl}}
+  \recentry{}{\optField{elements}{ia} \optField{elementranges}{rl} \optional{allElements}}
+  \recentry{}{\optField{nodes}{ia} \optField{noderanges}{rl} \optional{allNodes}}
   \recentry{}{\optField{elementboundaries}{ia} \optField{elementedges}{ia}}
 \end{record}
 
@@ -2863,9 +2867,17 @@ where $\langle \tens{\strain} \rangle$ can be imposed as eigenstrain over the do
   \recentry{}{\optField{properties}{dc}}
   \recentry{}{\optField{propertytf}{dc}}
 \end{record}
+
 Represent constant edge/surface loads or boundary conditions.
 Parameter \param{loadType} distinguishes the type of boundary condition. Supported values are specified in bctype.h:
-2 - prescribed flux input (Neumann boundary condition), 3 - uniform distributed load or the convection (Newton) bc, 7-Stefan-Bolzmann law for radiation.
+\begin{itemize}
+\item \param{loadType} = 2 prescribed flux input (Neumann boundary condition),
+\item \param{loadType} = 3 uniform distributed load or the convection (Newton) BC. Parameter \param{components} contains the
+environmental values (temperature of the environment) corresponding to
+element unknowns, and \param{properties} dictionary should contain
+value of transfer (convection) coefficient (assumed to be a constant) under the key 'a',
+\item \param{loadType} = 7 specifies radiative boundary condition. It requires to specify emmisivity $\varepsilon\in\langle 0,1\rangle$ and the \param{components} array contains the environmental values (temperature of the environment).
+\end{itemize}
 
 If the boundary condition corresponds to distributed force load, the \param{components} array contains components of distributed load corresponding to element unknowns.
 The load is specified for all DOFs of object to which is associated.
@@ -2879,14 +2891,6 @@ is set to zero and load is not applied for this DOF.
 If the boundary condition corresponds to prescribed flux input, then
 the \param{components} array contains the components of prescribed
 input flux corresponding to element unknowns.
-
-\param{loadType} = 3 specifies convection boundary condition then \param{components} array contains the
-environmental values (temperature of the environment) corresponding to
-element unknowns, and \param{properties} dictionary should contain
-value of transfer (convection) coefficient (assumed to be a constant) under the key 'a'.
-
-\param{loadType} = 7 specifies radiative boundary condition and requires to specify emmisivity 
-$\varepsilon \in \langle 0,1 \rangle$ and the \param{components} array contains the environmental values (temperature of the environment).
 
 The properties can vary in time. Each property can have associated time function which determines its time variation. The time functions are set up using optional \param{propertytf} dictionary, containing for selected properties the corresponding time function number. The time function must be registered under the same key as in \param{properties} dictionary. The property value is then computed by product of property value (determined by \param{properties}) and corresponding time function evaluated at given time. If no time function provided for particula property, a unit constant function is assumed.
 
@@ -3101,11 +3105,11 @@ specified on a separate line according to\\
   \recentry{\entKeyword{EntType}}{\componentNum \ extra attributes}
 \end{record}
 
-
+\clearpage
 \section{Examples}
 \subsection {Beam structure}
 The example of input file for simple beam structure is presented.
-Structure geometry and its constitutive and geometrical properties are shown in fig. (\ref{ex01}).
+Structure geometry and its constitutive and geometrical properties are shown in Fig. (\ref{ex01}).
 The linear static analysis is required, the influence of shear is neglected.
 \begin{figure}[htb]
 \begin{htmlonly}

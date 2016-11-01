@@ -106,14 +106,31 @@ IDNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussP
         double gamma = complianceFunction(equivStrain, gp);
         nlstatus->setLocalEquivalentStrainForAverage(gamma);
     }
+    // nonstandard formulation based on averaging of damage variable omega
+    // note: omega is stored in a variable named localEquivalentStrainForAverage, which can be misleading
+    //       perhaps this variable should later be renamed
+    else if ( averagedVar == AVT_Damage ) {
+        double omega = damageFunction(equivStrain, gp);
+        nlstatus->setLocalEquivalentStrainForAverage(omega);
+    }
     // standard formulation based on averaging of equivalent strain
     else {
         nlstatus->setLocalEquivalentStrainForAverage(equivStrain);
     }
 
     // influence of damage on weight function
-    if ( averType >= 2 && averType <= 5 ) {
+    if ( averType >= 2 && averType <= 6 ) {
         this->modifyNonlocalWeightFunctionAround(gp);
+    }
+}
+
+double
+IDNLMaterial :: computeModifiedLength(double length, double dam1, double dam2)
+{
+    if ( averType == 6 ) { // different (improved) integration scheme
+        return length * 2. / ( 1. / computeDistanceModifier(dam1) + 1. / computeDistanceModifier(dam2) );
+    } else { // standard integration scheme
+        return length * 0.5 * ( computeDistanceModifier(dam1) + computeDistanceModifier(dam2) );
     }
 }
 
@@ -153,7 +170,8 @@ IDNLMaterial :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
         }
 
         if ( pos != postarget ) {
-            distance += ( x - xprev ) * 0.5 * ( computeDistanceModifier(damage) + computeDistanceModifier(damageprev) );
+            distance += computeModifiedLength(x - xprev, damage, damageprev);
+            //( x - xprev ) * 0.5 * ( computeDistanceModifier(damage) + computeDistanceModifier(damageprev) );
         }
 
         w = computeWeightFunction(distance) * nearElem->computeVolumeAround(pos->nearGp);
@@ -176,7 +194,8 @@ IDNLMaterial :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
         }
 
         if ( pos != postarget ) {
-            distance += ( xprev - x ) * 0.5 * ( computeDistanceModifier(damage) + computeDistanceModifier(damageprev) );
+            distance += computeModifiedLength(xprev - x, damage, damageprev);
+            //distance += ( xprev - x ) * 0.5 * ( computeDistanceModifier(damage) + computeDistanceModifier(damageprev) );
             w = computeWeightFunction(distance) * nearElem->computeVolumeAround(pos->nearGp);
             pos->weight = w;
             wsum += w;
@@ -198,7 +217,8 @@ IDNLMaterial :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
             damage = nonlocStatus->giveDamage();
         }
 
-        distance += ( xprev - x ) * 0.5 * ( computeDistanceModifier(damage) + computeDistanceModifier(damageprev) );
+        distance += computeModifiedLength(xprev - x, damage, damageprev);
+        //distance += ( xprev - x ) * 0.5 * ( computeDistanceModifier(damage) + computeDistanceModifier(damageprev) );
         w = computeWeightFunction(distance) * nearElem->computeVolumeAround(pos->nearGp);
         pos->weight = w;
         wsum += w;
@@ -256,6 +276,8 @@ IDNLMaterial :: computeDistanceModifier(double damage)
     case 4: return 1. / pow(Rf / cl, damage);
 
     case 5: return ( 2. * cl ) / ( cl + Rf + ( cl - Rf ) * cos(M_PI * damage) );
+
+    case 6: return 1. / sqrt(1. - damage);
 
     default: return 1.;
     }
@@ -356,9 +378,9 @@ double
 IDNLMaterial :: computeStressBasedWeight(double &nx, double &ny, double &ratio, GaussPoint *gp, GaussPoint *jGp, double weight)
 {
     // Take into account periodicity, if required
-  if ( this->px > 0. ){
-    return computeStressBasedWeightForPeriodicCell(nx, ny, ratio, gp, jGp);
-  }
+    if ( this->px > 0. ) {
+        return computeStressBasedWeightForPeriodicCell(nx, ny, ratio, gp, jGp);
+    }
 
     //Check if source and receiver point coincide
     if ( gp == jGp ) {
@@ -384,35 +406,35 @@ IDNLMaterial :: computeStressBasedWeight(double &nx, double &ny, double &ratio, 
     return updatedWeight;
 }
 
-  // This method is a slight modification of IDNLMaterial :: computeStressBasedWeight but is implemented separately,
-  // to keep the basic method as simple (and efficient) as possible
+// This method is a slight modification of IDNLMaterial :: computeStressBasedWeight but is implemented separately,
+// to keep the basic method as simple (and efficient) as possible
 double
 IDNLMaterial :: computeStressBasedWeightForPeriodicCell(double &nx, double &ny, double &ratio, GaussPoint *gp, GaussPoint *jGp)
-{     
+{
     double updatedWeight = 0.;
     FloatArray gpCoords, distance;
     gp->giveElement()->computeGlobalCoordinates( gpCoords, gp->giveNaturalCoordinates() );
     int ix, nper = 1; // could be increased in the future, if needed
 
-    for (ix=-nper; ix<=nper; ix++) { // loop over periodic images shifted in x-direction
-      jGp->giveElement()->computeGlobalCoordinates( distance, jGp->giveNaturalCoordinates() );
-      distance.at(1) += ix*px; // shift the x-coordinate
-      distance.subtract(gpCoords); // Vector connecting the two Gauss points
+    for ( ix = -nper; ix <= nper; ix++ ) { // loop over periodic images shifted in x-direction
+        jGp->giveElement()->computeGlobalCoordinates( distance, jGp->giveNaturalCoordinates() );
+        distance.at(1) += ix * px; // shift the x-coordinate
+        distance.subtract(gpCoords); // Vector connecting the two Gauss points
 
-      //Compute modified distance
-      double x1 = nx * distance.at(1) + ny *distance.at(2);
-      double x2 = -ny *distance.at(1) + nx *distance.at(2);
-      // Compute axis of ellipse and scale/stretch weak axis so that ellipse is converted to circle
-      double gamma = this->beta + ( 1. - beta ) * ratio * ratio;
-      x2 /= gamma;
-      double modDistance = sqrt(x1 * x1 + x2 * x2);
+        //Compute modified distance
+        double x1 = nx * distance.at(1) + ny *distance.at(2);
+        double x2 = -ny *distance.at(1) + nx *distance.at(2);
+        // Compute axis of ellipse and scale/stretch weak axis so that ellipse is converted to circle
+        double gamma = this->beta + ( 1. - beta ) * ratio * ratio;
+        x2 /= gamma;
+        double modDistance = sqrt(x1 * x1 + x2 * x2);
 
-      //Get new weight
-      double updatedWeightContribution = this->computeWeightFunction(modDistance);
-      if ( updatedWeightContribution > 0. ){
-	updatedWeightContribution *= jGp->giveElement()->computeVolumeAround(jGp); //weight * (Volume where the weight is applied)
-	updatedWeight += updatedWeightContribution;
-      }
+        //Get new weight
+        double updatedWeightContribution = this->computeWeightFunction(modDistance);
+        if ( updatedWeightContribution > 0. ) {
+            updatedWeightContribution *= jGp->giveElement()->computeVolumeAround(jGp); //weight * (Volume where the weight is applied)
+            updatedWeight += updatedWeightContribution;
+        }
     }
     return updatedWeight;
 }
@@ -560,50 +582,15 @@ IDNLMaterial :: giveInputRecord(DynamicInputRecord &input)
     }
 }
 
-
-/*
- * // old implementation - now implemented in local model
- * void
- * IDNLMaterial :: computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp)
- * {
- * const double e0 = this->give(e0_ID, gp);
- * if ( kappa <= e0 ) {
- *  omega = 0.0;
- *  return;
- * }
- *
- * double ef;
- * switch(this->softType){
- * case ST_Linear:
- *  ef = this->give(ef_ID, gp);
- *  if ( kappa >= ef ) {
- *    omega = 1.0;
- *  } else {
- *    omega = (ef/kappa) * (kappa-e0) / (ef-e0);
- *  }
- *  return;
- * case ST_Exponential:
- *  ef = this->give(ef_ID, gp);
- *  omega = 1.0 - ( e0 / kappa ) * exp( -( kappa - e0 ) / ( ef - e0 ) );
- *  return;
- * case ST_Mazars:
- *  //At = this->give(At_ID, gp);
- *  //Bt = this->give(Bt_ID, gp);
- *  omega = 1.0 - (1.0-At)*e0/kappa - At*exp(-Bt*(kappa-e0));
- *  return;
- * default:
- *  omega = 0.0;
- *  return;
- * }
- * }
- */
-
 void
 IDNLMaterial :: computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *g)
 {
     if ( averagedVar == AVT_Compliance ) {
         // formulation based on nonlocal gamma (here formally called kappa)
         omega = kappa / ( 1. + kappa );
+    } else if ( averagedVar == AVT_Damage ) {
+        // formulation based on nonlocal damage (here formally called kappa)
+        omega = kappa;
     } else {
         // formulation based on nonlocal equivalent strain
         omega = damageFunction(kappa, g);
@@ -661,6 +648,23 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(Gau
     IDNLMaterialStatus *status = static_cast< IDNLMaterialStatus * >( this->giveStatus(gp) );
     this->buildNonlocalPointTable(gp);
     return status->giveIntegrationDomainList();
+}
+
+
+
+int
+IDNLMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
+{
+    IDNLMaterialStatus *status = static_cast< IDNLMaterialStatus * >( this->giveStatus(gp) );
+    if ( type == IST_LocalEquivalentStrain ) {
+        answer.resize(1);
+        answer.zero();
+        answer.at(1) = status->giveLocalEquivalentStrainForAverage();
+    } else {
+        return IsotropicDamageMaterial1 :: giveIPValue(answer, gp, type, tStep);
+    }
+
+    return 1; // to make the compiler happy
 }
 
 

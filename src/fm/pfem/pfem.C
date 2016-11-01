@@ -167,7 +167,7 @@ NumericalMethod *PFEM :: giveNumericalMethod(MetaStep *mStep)
 
     nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
     if ( nMethod == NULL ) {
-        OOFEM_ERROR("giveNumericalMethod: linear solver creation failed");
+        OOFEM_ERROR("linear solver creation failed for lstype %d", solverType);
     }
 
     return nMethod;

@@ -42,6 +42,7 @@
 #include "element.h"
 #include "generalboundarycondition.h"
 #include "dof.h"
+#include "mathfem.h"
 
 namespace oofem {
 

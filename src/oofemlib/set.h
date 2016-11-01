@@ -45,6 +45,7 @@ namespace oofem {
 //@{
 #define _IFT_Set_Name "set"
 #define _IFT_Set_nodes "nodes" ///< List of specific node indices.
+#define _IFT_Set_allNodes "allnodes" ///< List of specific node indices.
 #define _IFT_Set_nodeRanges "noderanges" ///< List of node index ranges.
 #define _IFT_Set_elements "elements" ///< List of specific element indices.
 #define _IFT_Set_allElements "allelements" ///< Will generate a list of att the elements in the domain)

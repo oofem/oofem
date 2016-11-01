@@ -129,31 +129,33 @@ PiecewiseLinFunction :: initializeFrom(InputRecord *ir)
         // Open the file;
         std :: string fname;
         IR_GIVE_FIELD(ir, fname, _IFT_PiecewiseLinFunction_dataFile);
-        std :: ifstream file(fname.c_str(), std :: ios :: in);
-        if ( !file.is_open() ) {
-            OOFEM_ERROR("Failed to open data file: %s\n", fname.c_str());
-        }
-        // Data should be stored in two columns (or just interleaved)
-        double temp_t, temp_ft;
-        std :: string sLine = "";
-        while ( !file.eof() ) {
-            getline(file, sLine);
-            if ( sLine [ 0 ] == '#' ) {
-                continue;
+        if (fname != ""){ //allows empty filename when the function will not be used intentionally
+            std :: ifstream file(fname.c_str(), std :: ios :: in);
+            if ( !file.is_open() ) {
+                OOFEM_ERROR("Failed to open data file: %s\n", fname.c_str());
             }
-            std :: stringstream ss1(sLine);
-            ss1 >> temp_t >> temp_ft;
-            t.push_back(temp_t);
-            ft.push_back(temp_ft);
-        }
-
-        // Copy data over the float arrays
-        dates.resize( t.size() );
-        values.resize( ft.size() );
-        std :: list< double > :: iterator it_t = t.begin(), it_ft = ft.begin();
-        for ( int i = 1; i <= ( int ) t.size(); ++i, ++it_t, ++it_ft ) {
-            dates.at(i) = * it_t;
-            values.at(i) = * it_ft;
+            // Data should be stored in two columns (or just interleaved)
+            double temp_t, temp_ft;
+            std :: string sLine = "";
+            while ( !file.eof() ) {
+                getline(file, sLine);
+                if ( sLine [ 0 ] == '#' ) {
+                    continue;
+                }
+                std :: stringstream ss1(sLine);
+                ss1 >> temp_t >> temp_ft;
+                t.push_back(temp_t);
+                ft.push_back(temp_ft);
+            }
+            file.close();
+            // Copy data over the float arrays
+            dates.resize( t.size() );
+            values.resize( ft.size() );
+            std :: list< double > :: iterator it_t = t.begin(), it_ft = ft.begin();
+            for ( int i = 1; i <= ( int ) t.size(); ++i, ++it_t, ++it_ft ) {
+                dates.at(i) = * it_t;
+                values.at(i) = * it_ft;
+            }
         }
     } else {
         int numberOfPoints;

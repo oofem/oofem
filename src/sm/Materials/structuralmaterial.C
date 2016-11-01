@@ -1321,15 +1321,6 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
             return;
         }
 
-        //Problem with numerical stability for hydrostatic case, handle directly-TODO
-//         if (fabs( s.at(4) ) < 1.e-20 && fabs( s.at(5)) < 1.e-20 && fabs( s.at(6)) < 1.e-20 ){
-//             solve = false;
-//             s1 = s.at(1);
-//             s2 = s.at(2);
-//             s3 = s.at(3);
-//         }
-
-
         if ( mode == principal_stress ) {
             I1 = s.at(1) + s.at(2) + s.at(3);
             I2 = s.at(1) * s.at(2) + s.at(2) * s.at(3) + s.at(3) * s.at(1) -
@@ -2127,7 +2118,7 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSt
     } else if ( type == IST_Temperature ) {
         /* add external source, if provided, such as staggered analysis */
         FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
-        FM_FieldPtr tf;
+        FieldPtr tf;
         int err;
         if ( ( tf = fm->giveField(FT_Temperature) ) ) {
             // temperature field registered
@@ -2176,7 +2167,13 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSt
     } else if ( type == IST_FirstPKStressTensor ) {
         answer = status->givePVector();
         return 1;
-    } else {
+    } else if ( type == IST_EigenStrainTensor ) {
+        FloatArray eigenstrain;
+        StructuralElement *selem = dynamic_cast< StructuralElement * >( gp->giveElement() );
+        selem->computeResultingIPEigenstrainAt(eigenstrain, tStep, gp, VM_Total );
+        StructuralMaterial :: giveFullSymVectorForm( answer, eigenstrain, gp->giveMaterialMode() );
+        return 1;
+    }else {
         return Material :: giveIPValue(answer, gp, type, tStep);
     }
 }
@@ -2204,7 +2201,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
     //sum up all prescribed temperatures over an element
     //elem->computeResultingIPTemperatureAt(et, tStep, gp, mode);
     if ( selem ) {
-        selem->computeResultingIPTemperatureAt(et, tStep, gp, mode);        // HUHU
+        selem->computeResultingIPTemperatureAt(et, tStep, gp, mode);
     }
 
     //sum up all prescribed eigenstrain over an element
@@ -2218,7 +2215,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
 
     /* add external source, if provided */
     FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
-    FM_FieldPtr tf;
+    FieldPtr tf;
 
     if ( ( tf = fm->giveField(FT_Temperature) ) ) {
         // temperature field registered
@@ -2306,7 +2303,7 @@ StructuralMaterial :: computeStressIndependentStrainVector_3d(FloatArray &answer
 
     /* add external source, if provided */
     FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
-    FM_FieldPtr tf = fm->giveField(FT_Temperature);
+    FieldPtr tf = fm->giveField(FT_Temperature);
 
     if ( tf ) {
         // temperature field registered

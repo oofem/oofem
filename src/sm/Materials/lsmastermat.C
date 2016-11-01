@@ -95,7 +95,7 @@ LargeStrainMasterMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, Gaus
     //compute right Cauchy-Green tensor(C), its eigenvalues and eigenvectors
     C.beTProductOf(F, F);
     // compute eigen values and eigen vectors of C
-    C.jaco_(eVals, eVecs, 40);
+    C.jaco_(eVals, eVecs, 15);
     // compute Seth - Hill's strain measure, it depends on mParameter
     lambda1 = eVals.at(1);
     lambda2 = eVals.at(2);
@@ -131,7 +131,7 @@ LargeStrainMasterMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, Gaus
     stressM.at(5) = 1. / 2. *  stressM.at(5);
     stressM.at(6) = 1. / 2. *  stressM.at(6);
 
-    this->constructL1L2TransformationMatrices(L1, L2, eVecs, stressM, E1, E2, E3);
+    this->constructL1L2TransformationMatrices(L1, L2, eVals, stressM, E1, E2, E3);
 
     FloatMatrix junk, P, TL;
     FloatArray secondPK;
@@ -201,12 +201,12 @@ LargeStrainMasterMaterial :: constructTransformationMatrix(FloatMatrix &answer, 
 
 
 void
-LargeStrainMasterMaterial :: constructL1L2TransformationMatrices(FloatMatrix &answer1, FloatMatrix &answer2, const FloatMatrix &eigenVectors, FloatArray &stressM, double E1, double E2, double E3)
+LargeStrainMasterMaterial :: constructL1L2TransformationMatrices(FloatMatrix &answer1, FloatMatrix &answer2, const FloatArray &eigenValues, FloatArray &stressM, double E1, double E2, double E3)
 {
     double gamma12, gamma13, gamma23, gamma112, gamma221, gamma113, gamma331, gamma223, gamma332, gamma;
-    double lambda1 = eigenVectors.at(1, 1);
-    double lambda2 = eigenVectors.at(2, 2);
-    double lambda3 = eigenVectors.at(3, 3);
+    double lambda1 = eigenValues.at(1);
+    double lambda2 = eigenValues.at(2);
+    double lambda3 = eigenValues.at(3);
     double lambda1P =  pow(lambda1, m - 1);
     double lambda2P =  pow(lambda2, m - 1);
     double lambda3P =  pow(lambda3, m - 1);
@@ -383,11 +383,11 @@ LargeStrainMasterMaterial :: give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &ans
     stiffness.at(6, 5) = 4. * stiffness.at(6, 5);
     stiffness.at(6, 6) = 4. * stiffness.at(6, 6);
     /////////////////////////////////////////////////////////////
-    junk.beProductOf(stiffness, status->givePmatrix());
+    junk.beProductOf( stiffness, status->givePmatrix() );
     stiffness.beProductOf(status->givePmatrix(), junk);
-    stiffness.add(status->giveTLmatrix());
+    stiffness.add( status->giveTLmatrix() );
 
-    this->convert_dSdE_2_dPdF( answer, stiffness, status->giveTempStressVector(), status->giveTempFVector(), _3dMat );
+    this->convert_dSdE_2_dPdF(answer, stiffness, status->giveTempStressVector(), status->giveTempFVector(), _3dMat);
 }
 
 

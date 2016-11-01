@@ -48,6 +48,7 @@
 #include "contextioerr.h"
 #include "classfactory.h"
 #include "outputmanager.h"
+#include "mathfem.h"
 
 //#define THROW_CIOERR(e) throw ContextIOERR(e, __FILE__, __LINE__); // km???
 
@@ -85,7 +86,7 @@ NumericalMethod *FreeWarping :: giveNumericalMethod(MetaStep *mStep)
     }
 
     if ( !nMethod ) {
-        OOFEM_ERROR("linear solver creation failed");
+        OOFEM_ERROR("linear solver creation failed for lstype %d", solverType);
     }
 
     return nMethod.get();

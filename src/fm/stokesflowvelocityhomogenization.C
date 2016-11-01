@@ -39,6 +39,7 @@
 #include "unknownnumberingscheme.h"
 #include "sparsemtrx.h"
 #include "deadweight.h"
+#include "mathfem.h"
 
 namespace oofem {
 REGISTER_EngngModel(StokesFlowVelocityHomogenization);

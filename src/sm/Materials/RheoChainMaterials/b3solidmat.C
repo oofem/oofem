@@ -167,8 +167,6 @@ B3SolidMaterial :: initializeFrom(InputRecord *ir)
         }
     }
 
-    IR_GIVE_FIELD(ir, talpha, _IFT_B3Material_talpha);
-
     // evaluate the total water content [kg/m^3]
     w = wc * c;
     // estimate the conventional modulus ??? what if fc is not given ???
@@ -221,10 +219,10 @@ B3SolidMaterial :: predictParametersFrom(double fc, double c, double wc, double 
     // Basic creep parameters
 
     // q1  = 0.6e6 / E28; // replaced by the formula dependent on fc
-    q1  = 126.74271 / sqrt(fc);
-    q2  = 185.4 * pow(c, 0.5) * pow(fc, -0.9); // [1/TPa]
+    q1  = 126.74271 / sqrt(fc) * 1e-6;
+    q2  = 185.4 * pow(c, 0.5) * pow(fc, -0.9) * 1.e-6; 
     q3  = 0.29 * pow(wc, 4.) * q2;
-    q4  = 20.3 * pow(ac, -0.7);
+    q4  = 20.3 * pow(ac, -0.7) * 1.e-6;
 
     // Shrinkage parameters
 
@@ -241,22 +239,6 @@ B3SolidMaterial :: predictParametersFrom(double fc, double c, double wc, double 
     OOFEM_LOG_DEBUG("B3mat[%d]: estimated params: %s\n", this->number, buff);
 }
 
-void
-B3SolidMaterial :: giveThermalDilatationVector(FloatArray &answer,
-                                               GaussPoint *gp,  TimeStep *tStep)
-//
-// returns a FloatArray(6) of initial strain vector
-// eps_0 = {exx_0, eyy_0, ezz_0, gyz_0, gxz_0, gxy_0}^T
-// caused by unit temperature in direction of
-// gp (element) local axes
-//
-{
-    answer.resize(6);
-    answer.zero();
-    answer.at(1) = ( talpha );
-    answer.at(2) = ( talpha );
-    answer.at(3) = ( talpha );
-}
 
 double
 B3SolidMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
@@ -273,38 +255,42 @@ B3SolidMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
     // !!! chartime exponents are assumed to be equal to 1 !!!
 
     double v, eta;
-    double sum = 0.0;
     double t_halfstep;
+    double chainStiffness = 0.;
 
     v = computeSolidifiedVolume(tStep);
     eta = this->computeFlowTermViscosity(gp, tStep);     //evaluated in the middle of the time-step
 
     ///@todo THREAD UNSAFE!
     t_halfstep = relMatAge + ( tStep->giveTargetTime() - 0.5 * tStep->giveTimeIncrement() ) / timeFactor;
-    this->updateEparModuli( t_halfstep );
+    this->updateEparModuli( t_halfstep, gp, tStep );
 
     if ( this->EmoduliMode == 0 ) { //retardation spectrum used
-        // first Kelvin units of the Kelvin chain will be computed
-        sum = KelvinChainMaterial :: giveEModulus(gp, tStep);
-        // the first aging elastic spring must be added
-        sum += 1 / EspringVal;
+        double sum;
+        //  compute compliance of the Kelvin chain
+        sum = 1. / KelvinChainMaterial :: giveEModulus(gp, tStep);
+        // add compliance of non-aging spring
+        sum += 1. / EspringVal;
+	// convert to stiffness
+	chainStiffness = 1. / sum;
+
     } else {   //least-squares method used
-        sum = KelvinChainMaterial :: giveEModulus(gp, tStep);
+        chainStiffness = KelvinChainMaterial :: giveEModulus(gp, tStep);
     }
 
-    return 1. / ( q1 * 1.e-6 + sum / v  + 0.5 * ( tStep->giveTimeIncrement() / timeFactor ) / eta );
+    return 1. / ( q1 +  1. / (chainStiffness * v)  + 0.5 * ( tStep->giveTimeIncrement() / timeFactor ) / eta );
 }
 
 
 void
-B3SolidMaterial :: updateEparModuli(double tStep)
+B3SolidMaterial :: updateEparModuli(double tPrime, GaussPoint *gp, TimeStep *tStep)
 {
     /*
      * Since the elastic moduli are constant in time it is necessary to update them only once
      * on the beginning of the computation
      */
   if (this->EparVal.isEmpty()) {
-    RheoChainMaterial :: updateEparModuli(tStep);
+    RheoChainMaterial :: updateEparModuli(tPrime, gp, tStep);
   }
 }
 
@@ -356,7 +342,7 @@ B3SolidMaterial :: computeCharTimes()
 
 
 void
-B3SolidMaterial :: computeCharCoefficients(FloatArray &answer, double tStep)
+B3SolidMaterial :: computeCharCoefficients(FloatArray &answer, double tPrime, GaussPoint *gp, TimeStep *tStep)
 {
     /*
      * If EmoduliMode == 0 then analysis of continuous retardation spectrum is used for
@@ -374,7 +360,7 @@ B3SolidMaterial :: computeCharCoefficients(FloatArray &answer, double tStep)
       // (aging elastic spring with retardation time = 0)
       double lambda0ToPowN = pow(lambda0, 0.1);
       tau0 = pow(2 * this->giveCharTime(1) / sqrt(10.0), 0.1);
-      EspringVal = 1.e6 / ( q2 * log(1.0 + tau0 / lambda0ToPowN) - q2 * tau0 / ( 10.0 * lambda0ToPowN + 10.0 * tau0 ) );
+      EspringVal = 1. / ( q2 * log(1.0 + tau0 / lambda0ToPowN) - q2 * tau0 / ( 10.0 * lambda0ToPowN + 10.0 * tau0 ) );
       
       // evaluation of moduli of elasticity for the remaining units
       // (Solidifying kelvin units with retardation times tauMu)
@@ -382,69 +368,21 @@ B3SolidMaterial :: computeCharCoefficients(FloatArray &answer, double tStep)
       answer.zero();
       for ( mu = 1; mu <= this->nUnits; mu++ ) {
 	tauMu = pow(2 * this->giveCharTime(mu), 0.1);
-        answer.at(mu) = 10.e6 * pow(1 + tauMu / lambda0ToPowN, 2) / ( log(10.0) * q2 * ( tauMu / lambda0ToPowN ) * ( 0.9 + tauMu / lambda0ToPowN ) );
+        answer.at(mu) = 10. * pow(1 + tauMu / lambda0ToPowN, 2) / ( log(10.0) * q2 * ( tauMu / lambda0ToPowN ) * ( 0.9 + tauMu / lambda0ToPowN ) );
         this->charTimes.at(mu) *= 1.35;
       }
       
       answer.at(nUnits) /= 1.2;   // modulus of the last unit is reduced
 
     } else {   // moduli computed using the least-squares method
-        int rSize;
-        double taui, tauj, tti, ttj;
-        FloatArray rhs(this->nUnits);
-        FloatMatrix A(this->nUnits, this->nUnits);
-
-        const FloatArray &rTimes = this->giveDiscreteTimes();
-        rSize = rTimes.giveSize();
-        FloatArray discreteComplianceFunctionVal(rSize);
-
-        // compute values of the compliance function at specified times rTimes
-        // (can be done directly, since the compliance function is available)
-
-        for ( int i = 1; i <= rSize; i++ ) {
-	  discreteComplianceFunctionVal.at(i) = this->computeCreepFunction( rTimes.at(i), 0. );
-        }
-
-        // assemble the matrix of the set of linear equations
-        // for computing the optimal compliances
-        // !!! chartime exponents are assumed to be equal to 1 !!!
-        for ( int i = 1; i <= this->nUnits; i++ ) {
-            taui = this->giveCharTime(i);
-            for ( int j = 1; j <= this->nUnits; j++ ) {
-                tauj = this->giveCharTime(j);
-                double sum = 0.;
-                for ( int r = 1; r <= rSize; r++ ) {
-                    tti = rTimes.at(r) / taui;
-                    ttj = rTimes.at(r) / tauj;
-                    sum += ( 1. - exp(-tti) ) * ( 1. - exp(-ttj) );
-                }
-
-                A.at(i, j) = sum;
-            }
-
-            // assemble rhs
-            // !!! chartime exponents are assumed to be equal to 1 !!!
-            double sumRhs = 0.;
-            for ( int r = 1; r <= rSize; r++ ) {
-                tti = rTimes.at(r) / taui;
-                sumRhs += ( 1. - exp(-tti) ) * discreteComplianceFunctionVal.at(r);
-            }
-
-            rhs.at(i) = sumRhs;
-        }
-
-        // solve the linear system
-        A.solveForRhs(rhs, answer);
-
-        // convert compliances into moduli
-        for ( int i = 1; i <= this->nUnits; i++ ) {
-            answer.at(i) = 1.e6 / answer.at(i);
-        }
+    
+      KelvinChainMaterial :: computeCharCoefficients(answer, tPrime, gp, tStep);
+   
     }
 }
 
 double
-B3SolidMaterial :: computeCreepFunction(double t, double t_prime)
+B3SolidMaterial :: computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep)
 // compute the value of the creep function of the non-aging solidifying constituent
 // corresponding to the given load duration (in days)
 // t-t_prime = duration of loading
@@ -597,11 +535,11 @@ B3SolidMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep)
 
     if ( this->MicroPrestress == 1 ) {
         S = this->computeMicroPrestress(gp, tStep, 0); //microprestress in the middle of the time-step
-        eta = 1.e6 / ( q4 * c0 * S );
+        eta = 1. / ( q4 * c0 * S );
         //static_cast< B3SolidMaterialStatus* >( gp->giveMaterialStatus() )->setMPS(S);
     } else if ( this->MicroPrestress == 0 ) {
         tHalfStep = relMatAge + ( tStep->giveTargetTime() - 0.5 * tStep->giveTimeIncrement() ) / timeFactor;
-        eta = 1.e6 * tHalfStep / q4;
+        eta = 1. * tHalfStep / q4;
     } else {
         OOFEM_ERROR("mode is not supported");
         eta = 0.;
@@ -787,7 +725,7 @@ B3SolidMaterial :: giveHumidity(GaussPoint *gp, TimeStep *tStep) //computes humi
 
     /* ask for humidity from external sources, if provided */
     FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
-    FM_FieldPtr tf;
+    FieldPtr tf;
     FloatArray gcoords, et2;
 
     if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {
@@ -818,7 +756,7 @@ B3SolidMaterial :: giveHumidityIncrement(GaussPoint *gp, TimeStep *tStep) //comp
 
     /* ask for humidity from external sources, if provided */
     FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
-    FM_FieldPtr tf;
+    FieldPtr tf;
     FloatArray gcoords, et2, ei2;
 
     if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {

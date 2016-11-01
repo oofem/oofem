@@ -59,7 +59,6 @@
 #define _IFT_B3Material_ks "ks"
 #define _IFT_B3Material_hum "hum"
 #define _IFT_B3Material_vs "vs"
-#define _IFT_B3Material_talpha "talpha"
 #define _IFT_B3Material_q1 "q1"
 #define _IFT_B3Material_q2 "q2"
 #define _IFT_B3Material_q3 "q3"
@@ -94,7 +93,6 @@ protected:
     double w_h;      ///< Constant water content (obtained from experiments) w_h [Pedersen, 1990]
     double n;        ///< Constant-exponent (obtained from experiments) n [Pedersen, 1990]
     double a;        ///< Constant (obtained from experiments) A [Pedersen, 1990]
-    double talpha;   ///< Thermal dilatation coeff.
     //@}
 public:
     B3Material(int n, Domain *d) : MaxwellChainMaterial(n, d) {
@@ -108,9 +106,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_B3Material_Name; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
-
-    virtual double computeCreepFunction(double t, double t_prime);
+    virtual double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep);
 
 protected:
     virtual int hasIncrementalShrinkageFormulation() { return 1; }

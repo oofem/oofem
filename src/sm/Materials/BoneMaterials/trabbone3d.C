@@ -93,7 +93,6 @@ TrabBone3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 
     if ( mode == ElasticStiffness ) {
         this->constructAnisoComplTensor(compliance);
-        //this->constructAnisoStiffnessTensor(elasticity);
         elasticity.beInverseOf(compliance);
         answer = elasticity;
     } else if ( mode == SecantStiffness ) {
@@ -136,14 +135,11 @@ TrabBone3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
             tangentMatrix.add(secondTerm);
             tangentMatrix.add(thirdTerm);
             answer = tangentMatrix;
-            //answer.beTranspositionOf(tangentMatrix);
         } else {
             // elastic behavior with damage
             // Construction of the secant stiffness
             this->constructAnisoComplTensor(compliance);
             elasticity.beInverseOf(compliance);
-
-            //this->constructAnisoStiffnessTensor(elasticity);
             answer = elasticity;
             answer.times(1.0 - tempDam);
         }
@@ -169,72 +165,21 @@ TrabBone3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 double
 TrabBone3D :: evaluateCurrentYieldStress(const double kappa)
 {
-    if ( formulation == 0 ) {
-        return hardFactor * ( 1. + plasHardFactor * ( 1.0 - exp(-kappa * expPlasHard) ) );
-    }
-
-#if 0
-    else {
-        //Hadi post-yield function
-        double damage = this->computeDamageParam(kappa);
-        if ( kappa < kappaMax ) {
-            return ( yR + ( 1. - yR ) * ( 1 - pow( ( kappaMax - kappa ) / kappaMax, kappaSlope * kappaMax ) ) ) / ( 1. - damage );
-        } else if ( kappa < ( kappaMin + kappaMax ) / 2. ) {
-            return ( yR + ( 1. - yR ) * ( 1 - ( 1 - gMin ) / 2 * pow(2 * ( kappa - kappaMax ) / ( kappaMin - kappaMax ), N) ) ) / ( 1. - damage );
-        } else if ( kappa < kappaMin ) {
-            return ( yR + ( 1. - yR ) * ( gMin + ( 1 - gMin ) / 2. * pow(2 * ( kappaMin - kappa ) / ( kappaMin - kappaMax ), N) ) ) / ( 1. - damage );
-        } else {
-            return ( yR + ( 1. - yR ) * gMin ) / ( 1. - damage );
-        }
-    }
-#endif
-    else {
-        double a = ( yR + ( pR - yR ) * ( 1. - exp(-expPlasHard * kappa) ) );
-        return a;
-    }
+    return  ( 1. + plasHardFactor * ( 1.0 - exp(-kappa * expPlasHard) ) );
 }
 
 double
 TrabBone3D :: evaluateCurrentPlasticModulus(const double kappa)
 {
-    if ( formulation == 0 ) {
-        return hardFactor * ( plasHardFactor * expPlasHard * exp(-kappa * expPlasHard) );
-    }
-
-#if 0
-    else {
-        double damage = this->computeDamageParam(kappa);
-        double gPrime;
-        double damagePrime =  critDam * expDam * exp(-expDam * kappa);
-        double g = evaluateCurrentYieldStress(kappa);
-
-        if ( kappa < kappaMax ) {
-            gPrime = kappaSlope * pow( ( kappaMax - kappa ) / kappaMax, kappaSlope * kappaMax - 1. );
-        } else if ( kappa < ( ( kappaMin + kappaMax ) / 2. ) ) {
-            gPrime   = ( ( gMin - 1. ) / ( kappaMin - kappaMax ) * N * pow(2. * ( kappa - kappaMax ) / ( kappaMin - kappaMax ), N - 1.) );
-        } else if ( kappa < kappaMin ) {
-            gPrime =  ( ( 1. - gMin ) / ( kappaMin - kappaMax ) * N * pow(2. * ( kappaMin - kappa ) / ( kappaMin - kappaMax ), N - 1.) );
-        } else {
-            gPrime = 0.;
-        }
-
-        return ( ( 1. - yR ) * gPrime / ( 1. - damage ) + damagePrime * ( yR + ( 1. - yR ) * g ) / ( 1. - damage ) / ( 1. - damage ) );
-    }
-#endif
-    else {
-        double a = ( ( pR - yR ) * expPlasHard * exp(-expPlasHard * kappa) );
-        return a;
-    }
+    return ( plasHardFactor * expPlasHard * exp(-kappa * expPlasHard) );
 }
 
 
 double
 TrabBone3D :: evaluateCurrentViscousStress(const double deltaKappa, TimeStep *tStep)
 {
-    //  double deltaT = 0.01;
     double deltaT =  tStep->giveTimeIncrement();
     double answer;
-    //return answer;
     if ( deltaT == 0 ) {
         answer = 0;
     } else {
@@ -295,8 +240,7 @@ TrabBone3D :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStr
         tempPlasDef = status->givePlasDef();
         convergence = projectOnYieldSurface(tempKappa, tempEffectiveStress, tempPlasDef, trialEffectiveStress, elasticity, compliance, status, tStep, gp, 1);
         if ( !convergence ) {
-            //printf("No convergence %d",gp->giveNumber());
-            //_error("No convergence of the stress return algorithm in TrabBone3D :: performPlasticityReturn\n");
+            OOFEM_ERROR("No convergence of the stress return algorithm in TrabBone3D :: performPlasticityReturn\n");
         }
 
         status->setTempPlasDef(tempPlasDef);
@@ -422,7 +366,7 @@ TrabBone3D :: projectOnYieldSurface(double &tempKappa, FloatArray &tempEffective
                 double dM = -2 * M;
                 double newDeltaKappa;
                 FloatArray tempStress;
-                for ( int j = 0;; ++j ) {
+                for ( int j = 0; ; ++j ) {
                     tempStress = incTempEffectiveStress;
                     tempStress.times(-alfa);
                     tempStress.add(tempEffectiveStress);
@@ -468,7 +412,6 @@ TrabBone3D :: projectOnYieldSurface(double &tempKappa, FloatArray &tempEffective
                     }
                 }
             } else {
-                max_num_iter = 100;
                 //////////////////////////////////////////////////////////
                 deltaKappa += incKappa;
                 tempEffectiveStress -= incTempEffectiveStress;
@@ -1029,9 +972,6 @@ TrabBone3D :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, expk, _IFT_TrabBone3D_expk);
     IR_GIVE_FIELD(ir, expl, _IFT_TrabBone3D_expl);
 
-    eps0 = eps0 * 0.1069;
-    mu0 = mu0 * 0.1069;
-
 
     IR_GIVE_FIELD(ir, m1, _IFT_TrabBone3D_m1);
     IR_GIVE_FIELD(ir, m2, _IFT_TrabBone3D_m2);
@@ -1041,9 +981,7 @@ TrabBone3D :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, sig0Neg, _IFT_TrabBone3D_sig0Neg);
     IR_GIVE_FIELD(ir, chi0Pos, _IFT_TrabBone3D_chi0Pos);
     IR_GIVE_FIELD(ir, tau0, _IFT_TrabBone3D_tau0);
-    sig0Pos = sig0Pos * 0.15;
-    sig0Neg = sig0Neg * 0.15;
-    tau0 = tau0 * 0.15;
+
 
 
     IR_GIVE_FIELD(ir, expq, _IFT_TrabBone3D_expq);
@@ -1097,102 +1035,24 @@ TrabBone3D :: initializeFrom(InputRecord *ir)
     y1 = y1 / normY;
     y2 = y2 / normY;
     y3 = y3 / normY;
-    /////////////////////////////////////////////
-    /*
-     * x1 = 1;
-     * x2 = 0;
-     * x3 = 0;
-     * y1 = 0;
-     * y2 = 1;
-     * y3 = 0;
-     */
-    //////////////////////////////////////////////
     //z'
     z1 = x2 * y3 - x3 * y2;
     z2 = x3 * y1 - x1 * y3;
     z3 = x1 * y2 - x2 * y1;
     //viscosity parameter
-    viscosity = 0.05;
-    //    viscosity = 0.01;
-    //    viscosity = 0.015;
+    viscosity = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, viscosity, _IFT_TrabBone3D_viscosity);
-    // Hadi post-yield function parameters
-    yR = 0.7;
-    kappaMax = 0.01;
-    kappaMin = 0.1;
-    kappaSlope = 300;
-    N = 2.;
-    gMin = -2.;
-    formulation  = 10;
-
-
-
-    IR_GIVE_OPTIONAL_FIELD(ir, yR, _IFT_TrabBone3D_yR);
-    IR_GIVE_OPTIONAL_FIELD(ir, kappaMax, _IFT_TrabBone3D_kappaMax);
-    IR_GIVE_OPTIONAL_FIELD(ir, kappaMin, _IFT_TrabBone3D_kappaMin);
-    IR_GIVE_OPTIONAL_FIELD(ir, kappaSlope, _IFT_TrabBone3D_kappaSlope);
-    IR_GIVE_OPTIONAL_FIELD(ir, N, _IFT_TrabBone3D_N);
-    IR_GIVE_OPTIONAL_FIELD(ir, gMin, _IFT_TrabBone3D_gMin);
-    IR_GIVE_OPTIONAL_FIELD(ir, formulation, _IFT_TrabBone3D_formulation);
-
-
-    // optional densificator parameters
-    gammaL0 = 550;
-    // gammaL0 = 1100;
-    // gammaP0 = 1300;
-    gammaP0 = 39.;
-    tDens = 6.;
-    // densCrit = -0.55;
-    densCrit = -0.3;
-    rL = 2.928;
-    rP = 2.77;
-
-
-    IR_GIVE_OPTIONAL_FIELD(ir, gammaL0, _IFT_TrabBone3D_gammaL);
-    IR_GIVE_OPTIONAL_FIELD(ir, gammaP0, _IFT_TrabBone3D_gammaP);
-    IR_GIVE_OPTIONAL_FIELD(ir, tDens, _IFT_TrabBone3D_tDens);
-    IR_GIVE_OPTIONAL_FIELD(ir, densCrit, _IFT_TrabBone3D_densCrit);
-
-
-
-
 
     // optional control parameters for printing and convergence
     printflag = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, printflag, _IFT_TrabBone3D_printflag);
     max_num_iter = 100;
     IR_GIVE_OPTIONAL_FIELD(ir, max_num_iter, _IFT_TrabBone3D_max_num_iter);
-    max_num_substeps = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, max_num_substeps, _IFT_TrabBone3D_max_num_substeps);
     rel_yield_tol = 1.e-9;
     IR_GIVE_OPTIONAL_FIELD(ir, rel_yield_tol, _IFT_TrabBone3D_rel_yield_tol);
     strain_tol = 1.e-9;
     IR_GIVE_OPTIONAL_FIELD(ir, strain_tol, _IFT_TrabBone3D_strain_tol);
-    abaqus = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, abaqus, _IFT_TrabBone3D_abaqus);
 
-
-    ////////////////////////////////
-    double oM, oPM, s;
-    s = expPlasHard;
-
-    /*  P1 = exp(-expDam* kappaMax);
-     * P2 = exp(-2*expDam*kappaMax);
-     * P3 = exp(expPlasHard*kappaMax);
-     * P4 = P3/(1-critDam*(1-P1));
-     * citatel = (critDam*expDam*P1 + expPlasHard -expPlasHard*critDam + expPlasHard*critDam *P1);
-     * jmenovatel = expPlasHard*(-1+2*critDam-2*critDam*P1-pow(critDam,2) + 2*pow(critDam,2)*P1-pow(critDam,2)*P2);
-     */
-
-    oM = this->computeDamageParam(kappaMax);
-    oPM = this->computeDamageParamPrime(kappaMax);
-
-    pR = ( s + oPM / ( 1 - oM ) ) / ( 1 - oM ) / s;
-    //pR = pR;
-    //hardFactor = 0.75;
-    //    pR = -citatel/jmenovatel;
-    yR = exp(expPlasHard * kappaMax) / ( 1 - oM ) - pR * ( exp(expPlasHard * kappaMax) - 1 );
-    pR = 0.98 * pR;
 
     return StructuralMaterial :: initializeFrom(ir);
 }
@@ -1272,8 +1132,7 @@ TrabBone3DStatus :: TrabBone3DStatus(int n, Domain *d, GaussPoint *g) : Structur
     smtrx.resize(6, 6);
     tangentMatrix.resize(6, 6);
     SSaTensor.resize(6, 6);
-    nss = 1;
-    densG = 200;
+    densG = 1;
 }
 
 
@@ -1376,12 +1235,11 @@ void
 TrabBone3DStatus :: initTempStatus()
 {
     StructuralMaterialStatus :: initTempStatus();
-    densG = 200;
+    densG = 1;
     this->tempKappa = this->kappa;
     this->tempDam = this->dam;
     this->tempTSED = this->tsed;
     this->tempPlasDef = this->plasDef;
-    nss = 1;
 }
 
 
@@ -1393,7 +1251,6 @@ TrabBone3DStatus :: updateYourself(TimeStep *tStep)
     this->dam = this->tempDam;
     this->tsed = this->tempTSED;
     this->plasDef = this->tempPlasDef;
-    nss = 1;
 }
 
 

@@ -70,7 +70,7 @@ public:
      * @param mode Mode of value (total, velocity,...).
      * @return Zero if ok, otherwise nonzero.
      */
-    virtual int evaluateAt(FloatArray &answer, FloatArray &coords,
+    virtual int evaluateAt(FloatArray &answer, const FloatArray &coords,
                            ValueModeType mode, TimeStep *tStep);
 
     /**

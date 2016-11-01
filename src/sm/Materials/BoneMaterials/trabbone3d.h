@@ -75,24 +75,21 @@
 #define _IFT_TrabBone3D_y1 "y1"
 #define _IFT_TrabBone3D_y2 "y2"
 #define _IFT_TrabBone3D_y3 "y3"
+
 #define _IFT_TrabBone3D_viscosity "viscosity"
-#define _IFT_TrabBone3D_yR "yr"
-#define _IFT_TrabBone3D_kappaMax "kappamax"
-#define _IFT_TrabBone3D_kappaMin "kappamin"
-#define _IFT_TrabBone3D_kappaSlope "kappaslope"
-#define _IFT_TrabBone3D_N "n"
+
+
 #define _IFT_TrabBone3D_gMin "gmin"
-#define _IFT_TrabBone3D_formulation "formulation"
 #define _IFT_TrabBone3D_gammaL "gammal"
 #define _IFT_TrabBone3D_gammaP "gammap"
 #define _IFT_TrabBone3D_tDens "tdens"
 #define _IFT_TrabBone3D_densCrit "denscrit"
+
 #define _IFT_TrabBone3D_printflag "printflag"
 #define _IFT_TrabBone3D_max_num_iter "max_num_iter"
 #define _IFT_TrabBone3D_max_num_substeps "max_num_substeps"
 #define _IFT_TrabBone3D_rel_yield_tol "rel_yield_tol"
 #define _IFT_TrabBone3D_strain_tol "strain_tol"
-#define _IFT_TrabBone3D_abaqus "abaqus"
 //@}
 
 namespace oofem {
@@ -106,16 +103,14 @@ class TrabBone3DStatus : public StructuralMaterialStatus
 protected:
     double kappa, tempKappa, dam, tempDam, tempPSED, tempTSED, tsed, beta;
     FloatArray tempPlasDef, plasDef, effectiveStress, tempEffectiveStress, plasFlowDirec, tempStrain;
-    ;
     FloatMatrix smtrx, tangentMatrix, SSaTensor;
-    /// Number of substeps in the last iteration.
-    int nss;
+
     /// Densificator criterion
     double densG;
 
 
 public:
-    TrabBone3DStatus(int n, Domain * d, GaussPoint * g);
+    TrabBone3DStatus(int n, Domain *d, GaussPoint *g);
 
     virtual ~TrabBone3DStatus();
 
@@ -129,7 +124,6 @@ public:
     double giveTSED();
     double giveTempTSED();
     double giveBeta();
-    int giveNsubsteps() { return nss; }
     double giveDensG() { return densG; }
 
     const FloatArray &givePlasDef() const;
@@ -152,7 +146,6 @@ public:
     void setSmtrx(FloatMatrix &smt) { smtrx = smt; }
     void setTangentMatrix(FloatMatrix &tmm) { tangentMatrix = tmm; }
     void setSSaTensor(FloatMatrix &ssa) { SSaTensor = ssa; }
-    void setNsubsteps(int n)  { nss = n; }
 
     void setDensG(double g) { densG = g; }
 
@@ -175,8 +168,8 @@ class TrabBone3D : public StructuralMaterial
 {
 protected:
     double m1, m2, rho, eps0, nu0, mu0, expk, expl, sig0Pos, sig0Neg, chi0Pos, chi0, chi0Neg, tau0, expq, expp;
-    double plasHardFactor, expPlasHard, expDam, critDam, pR;
-    int printflag, abaqus, max_num_iter, max_num_substeps;
+    double plasHardFactor, expPlasHard, expDam, critDam;
+    int printflag, max_num_iter;
     double rel_yield_tol, strain_tol;
     /// Local coordinate system
     double x1, x2, x3, y1, y2, y3, z1, z2, z3;
@@ -184,12 +177,9 @@ protected:
     double gammaL0, gammaP0, tDens, densCrit, rL, rP, gammaL, gammaP;
     /// Viscosity parameter
     double viscosity;
-    /// Hadi post-yield function
-    double yR, kappaMax, kappaMin, kappaSlope, N, gMin, formulation;
-    double hardFactor;
 
 public:
-    TrabBone3D(int n, Domain * d);
+    TrabBone3D(int n, Domain *d);
 
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
     double evaluateCurrentYieldStress(const double kappa);
@@ -231,9 +221,9 @@ public:
     void constructNormAdjustTensor(FloatMatrix &answer);
 
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseMode, GaussPoint *gp,
-                                               TimeStep *tStep);
+    virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
+                                               MatResponseMode, GaussPoint * gp,
+                                               TimeStep * tStep);
 
     virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *,
                                          const FloatArray &, TimeStep *);

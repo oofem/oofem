@@ -10,7 +10,7 @@ nltransienttransportproblem nsteps 26 alpha 0.5 rtol 1.e-10 lumpedcapa nsmax 100
 domain mass1transfer
 #
 OutputManager tstep_all dofman_all element_all
-ndofman 12 nelem 3 ncrosssect 1 nmat 1 nbc 1 nic 1 nltf 1 nset 1
+ndofman 16 nelem 4 ncrosssect 1 nmat 1 nbc 1 nic 1 nltf 1 nset 1
 #
 #
 # NODES
@@ -30,6 +30,11 @@ node   10  coords 3  0.1  0.4  0.0
 node   11  coords 3  0.0  0.5  0.0
 node   12  coords 3  0.1  0.5  0.0
 #
+node   13  coords 3  0.0  0.5  0.0
+node   14  coords 3  0.1  0.5  0.0
+node   15  coords 3  0.0  0.6  0.0
+node   16  coords 3  0.1  0.6  0.0
+#
 #
 #
 # ELEMENTS
@@ -40,7 +45,9 @@ quad1mt   2   nodes 4   5 6 8 7
 #
 quad1mt   3   nodes 4   9 10 12 11
 #
-Set 1 elementranges {(1 3)}
+quad1mt   4   nodes 4   13 14 16 15
+#
+Set 1 elementranges {(1 4)}
 #
 # CROSSECTION
 #

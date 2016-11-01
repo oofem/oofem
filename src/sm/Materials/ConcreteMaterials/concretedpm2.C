@@ -726,6 +726,8 @@ ConcreteDPM2 :: giveRealStressVector_3d(FloatArray &answer,
     // Initialize temp variables for this gauss point
     status->initTempStatus();
 
+    status->letTempStrainVectorBe(strainVector);
+	
     //Calculate strain rate
     //Time step
     double deltaTime = 1.;
@@ -1803,7 +1805,7 @@ ConcreteDPM2 :: performRegularReturn(FloatArray &effectiveStress,
 
         normOfResiduals = residualsNorm.computeNorm();
 
-        if ( isnan(normOfResiduals) ) {
+        if ( std :: isnan(normOfResiduals) ) {
             returnResult = RR_NotConverged;
             return kappaP;
         }
@@ -2430,8 +2432,9 @@ ConcreteDPM2 :: computeDDGDInvDKappa(FloatArray &answer,
     //Derivative of BGParam
     double BGParamTop = yieldHardTwo / 3. * ( 1. + this->ft / this->fc );
     double BGParamBottom = ( log(AGParam) + log(this->dilationConst + 1.) - log(2 * this->dilationConst - 1.) - log(3. * yieldHardTwo + this->m / 2) );
-    double dBGParamTopDKappa = dYieldHardTwoDKappa / 3.;
-    double dBGParamBottomDKappa = -3. * dYieldHardTwoDKappa / ( 3 * yieldHardTwo + m / 2. );
+
+    double dBGParamTopDKappa = dYieldHardTwoDKappa / 3. * ( 1. + this->ft / this->fc );
+    double dBGParamBottomDKappa = 1./AGParam*dAGParamDKappa - 3. * dYieldHardTwoDKappa / ( 3 * yieldHardTwo + m / 2. );
     double dBGParamDKappa = ( dBGParamTopDKappa * BGParamBottom - BGParamTop * dBGParamBottomDKappa ) / pow(BGParamBottom, 2.);
 
     //Derivative of R
@@ -2449,13 +2452,13 @@ ConcreteDPM2 :: computeDDGDInvDKappa(FloatArray &answer,
 
     double dAlDYieldHard = -pow(Bl, 2.);
 
-    double dDGDSigDKappa =
+    const double dDGDSigDKappa =
         ( -4. * Al * Bl / fc + 4. * ( 1 - yieldHardOne ) / fc * dAlDYieldHard * Bl ) * dYieldHardOneDKappa +
-        dYieldHardOneDKappa * 2 * yieldHardOne * mQ / fc + yieldHardOne * dMQDKappa / fc;
+      dYieldHardOneDKappa * 2 * yieldHardOne * mQ / fc + pow(yieldHardOne,2.) * dMQDKappa / fc;
 
-    double dDGDRhoDKappa =
+    const double dDGDRhoDKappa =
         ( dAlDYieldHard / ( sqrt(6.) * fc ) * ( 4. * ( 1. - yieldHardOne ) * Bl + 6. ) -
-          4. * Al / ( sqrt(6.) * fc ) * Bl + m / ( sqrt(6.) * fc ) ) * 2 * yieldHardOne * dYieldHardOneDKappa;
+          4. * Al / ( sqrt(6.) * fc ) * Bl + m / ( sqrt(6.) * fc ) * 2 * yieldHardOne) * dYieldHardOneDKappa;
 
     answer = {dDGDSigDKappa, dDGDRhoDKappa};
 }

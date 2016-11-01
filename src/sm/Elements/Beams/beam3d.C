@@ -487,7 +487,7 @@ Beam3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 
         help.at(3) = 1.0;         // up-vector
         // here is ly is used as a temp var
-        if ( acos(fabs(lx.dotProduct(help))) < 0.001 ) { // Check if it is vertical
+        if ( fabs(lx.dotProduct(help)) > 0.999 ) { // Check if it is vertical
             ly = {0., 1., 0.};
         } else {
             ly.beVectorProductOf(lx, help);

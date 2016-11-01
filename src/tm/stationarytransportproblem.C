@@ -46,6 +46,7 @@
 #include "contextioerr.h"
 #include "nrsolver.h"
 #include "unknownnumberingscheme.h"
+#include "dofdistributedprimaryfield.h"
 
 namespace oofem {
 REGISTER_EngngModel(StationaryTransportProblem);
@@ -93,16 +94,17 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
         FieldManager *fm = this->giveContext()->giveFieldManager();
         for ( int i = 1; i <= exportFields.giveSize(); i++ ) {
             if ( exportFields.at(i) == FT_Temperature ) {
-                FM_FieldPtr _temperatureField( new MaskedPrimaryField ( ( FieldType ) exportFields.at(i), this->UnknownsField.get(), {T_f} ) );
+                FieldPtr _temperatureField( new MaskedPrimaryField ( ( FieldType ) exportFields.at(i), this->UnknownsField.get(), {T_f} ) );
                 fm->registerField( _temperatureField, ( FieldType ) exportFields.at(i) );
             } else if ( exportFields.at(i) == FT_HumidityConcentration ) {
-                FM_FieldPtr _concentrationField( new MaskedPrimaryField ( ( FieldType ) exportFields.at(i), this->UnknownsField.get(), {C_1} ) );
+                FieldPtr _concentrationField( new MaskedPrimaryField ( ( FieldType ) exportFields.at(i), this->UnknownsField.get(), {C_1} ) );
                 fm->registerField( _concentrationField, ( FieldType ) exportFields.at(i) );
             }
         }
     }
 
     if ( !UnknownsField ) { // can exist from nonstationary transport problem
+        //UnknownsField.reset( new DofDistributedPrimaryField(this, 1, FT_TransportProblemUnknowns, 0) );
         UnknownsField.reset( new PrimaryField(this, 1, FT_TransportProblemUnknowns, 0) );
     }
 
@@ -122,7 +124,7 @@ double StationaryTransportProblem :: giveUnknownComponent(ValueModeType mode, Ti
 }
 
 
-EModelFieldPtr StationaryTransportProblem :: giveField(FieldType key, TimeStep *tStep)
+FieldPtr StationaryTransportProblem::giveField (FieldType key, TimeStep *tStep)
 {
     /* Note: the current implementation uses MaskedPrimaryField, that is automatically updated with the model progress, 
         so the returned field always refers to active solution step. 
@@ -132,13 +134,13 @@ EModelFieldPtr StationaryTransportProblem :: giveField(FieldType key, TimeStep *
         OOFEM_ERROR("Unable to return field representation for non-current time step");
     }
     if ( key == FT_Temperature ) {
-        FM_FieldPtr _ptr ( new MaskedPrimaryField ( key, this->UnknownsField.get(), {T_f} ) );
+        FieldPtr _ptr ( new MaskedPrimaryField ( key, this->UnknownsField.get(), {T_f} ) );
         return _ptr;
     } else if ( key == FT_HumidityConcentration ) {
-        FM_FieldPtr _ptr ( new MaskedPrimaryField ( key, this->UnknownsField.get(), {C_1} ) );
+        FieldPtr _ptr ( new MaskedPrimaryField ( key, this->UnknownsField.get(), {C_1} ) );
         return _ptr;
     } else {
-        return FM_FieldPtr();
+        return FieldPtr();
     }
 }
 
@@ -201,7 +203,7 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     // set-up numerical method
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
 #ifdef VERBOSE
-    OOFEM_LOG_INFO("Solving ...\n");
+    OOFEM_LOG_INFO("Solving for %d unknowns\n", neq);
 #endif
 
     FloatArray incrementOfSolution;

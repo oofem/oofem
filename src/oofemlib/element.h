@@ -217,8 +217,8 @@ public:
      * Returns the location array for the boundary of the element.
      * Only takes into account nodes in the bNodes vector.
      */
-    void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const UnknownNumberingScheme &s, IntArray *dofIds = NULL);
-    void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const IntArray &dofIDMask, const UnknownNumberingScheme &s, IntArray *dofIds = NULL);
+    virtual void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const UnknownNumberingScheme &s, IntArray *dofIds = NULL);
+    virtual void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const IntArray &dofIDMask, const UnknownNumberingScheme &s, IntArray *dofIds = NULL);
     /**
      * @return Number of DOFs in element.
      */
@@ -690,6 +690,18 @@ public:
      * @return True, if receiver is activated for given solution step, otherwise false.
      */
     virtual bool isActivated(TimeStep *tStep);
+
+    /**
+     * @return True, if the current time is higher than the casting time of the material, otherwise false.
+     * Used from e.g. vtkxml export module to display only active elements
+     * @note: The element can be activated (isActivated method) before its 
+     * material is actually casted. This case has to be supported by 
+     * the material and can be used to simulate the casting on deformed 
+     * configuration, for example. 
+     * In this case, the material has to define a small stifness 
+     * for solution steps before is actually casted.
+     */
+    virtual bool isCast(TimeStep *tStep);
 
     // time step initialization (required for some non-linear solvers)
     /**

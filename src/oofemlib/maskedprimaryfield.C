@@ -36,7 +36,7 @@
 
 namespace oofem {
 int
-MaskedPrimaryField :: evaluateAt(FloatArray &answer, FloatArray &coords,
+MaskedPrimaryField :: evaluateAt(FloatArray &answer, const FloatArray &coords,
                                  ValueModeType mode, TimeStep *tStep)
 {
     return this->master->__evaluateAt(answer, coords, mode, tStep, & mask);

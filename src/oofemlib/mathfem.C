@@ -214,6 +214,15 @@ void cubic3r(double a, double b, double c, double d, double *r1, double *r2, dou
         q = ( a * a - 3.0 * b ) / 9.0;
         r = ( 2.0 * a * a * a - 9.0 * a * b + 27.0 * c ) / 54.0;
 
+        //Hydrostatic case, in such a case q=r=0
+        if ( (fabs(q) < CUBIC_ZERO) && ( fabs(r) < CUBIC_ZERO ) ) {
+            *r1 = - a / 3.0;
+            *r2 = *r1;
+            *r3 = *r1;
+            *num = 3;
+            return;
+        }
+      
         //D = q * q * q - r * r;
         //  if (D > 0.) {
         // three real roots

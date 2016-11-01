@@ -44,6 +44,7 @@
 #include "spatiallocalizer.h"
 #include "engngm.h"
 #include "Elements/nlstructuralelement.h"
+#include "mathfem.h"
 
 #include "Materials/structuralfe2material.h"
 #include "prescribedgradienthomogenization.h"

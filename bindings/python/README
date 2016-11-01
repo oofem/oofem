@@ -34,6 +34,16 @@
 This directory contains sources to generate OOFEM bindings to Python programming language.
 The boost.python library is required to be installed.
 
-To compile oofem python module, set "USE_PYTHON_BINDINGS" to "ON" when configuring
+To compile oofem python module, set "USE_PYTHON_BINDINGS" to "ON" when configuring 
 oofem target using cmake.
 
+For testing the bindings, the liboofem.so file must be somewhere where python looks for
+modules. This can be done e.g. by symlinking to the .so in the build directory by 
+running something like
+
+    ln -s /usr/local/lib/python2.7/dist-packages/liboofem.so /home/user/oofem-build/liboofem.so
+
+This will make sure the module is always up-to-date with the build tree. Running
+``python test3.py`` in the bindings/python directory will run a simple test which
+runs an oofem simulation (heat transfer) and then iterates over DoFs and reads out
+some temperature values.

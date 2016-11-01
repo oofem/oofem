@@ -56,11 +56,11 @@ public:
     /// Constructor
     MMAClosestIPTransfer();
 
-    virtual void __init(Domain *dold, IntArray &type, FloatArray &coords, Set &sourceElemSet, TimeStep *tStep, bool iCohesiveZoneGP = false);
+    virtual void __init(Domain *dold, IntArray &type, const FloatArray &coords, Set &sourceElemSet, TimeStep *tStep, bool iCohesiveZoneGP = false);
 
     virtual void finish(TimeStep *tStep) { }
 
-    virtual int __mapVariable(FloatArray &answer, FloatArray &coords, InternalStateType type, TimeStep *tStep);
+    virtual int __mapVariable(FloatArray &answer, const FloatArray &coords, InternalStateType type, TimeStep *tStep);
 
     virtual int mapStatus(MaterialStatus &oStatus) const;
 

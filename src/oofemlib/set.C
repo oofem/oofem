@@ -54,10 +54,13 @@ IRResultType Set :: initializeFrom(InputRecord *ir)
 
     IntArray inputNodes;
     std :: list< Range >inputNodeRanges;
-    IR_GIVE_OPTIONAL_FIELD(ir, inputNodes, _IFT_Set_nodes);
-    IR_GIVE_OPTIONAL_FIELD(ir, inputNodeRanges, _IFT_Set_nodeRanges);
-    this->computeIntArray(this->nodes, inputNodes, inputNodeRanges);
-
+    if ( ir->hasField(_IFT_Set_allNodes) ) { // generate a list with all the node numbers
+       this->nodes.enumerate(this->giveDomain()->giveNumberOfDofManagers()); 
+    } else {
+        IR_GIVE_OPTIONAL_FIELD(ir, inputNodes, _IFT_Set_nodes);
+        IR_GIVE_OPTIONAL_FIELD(ir, inputNodeRanges, _IFT_Set_nodeRanges);
+        this->computeIntArray(this->nodes, inputNodes, inputNodeRanges);
+    }
 
     if ( ir->hasField(_IFT_Set_allElements) ) { // generate a list with all the element numbers
         this->elements.enumerate(this->giveDomain()->giveNumberOfElements());
@@ -70,7 +73,6 @@ IRResultType Set :: initializeFrom(InputRecord *ir)
         this->computeIntArray(this->elements, inputElements, inputElementRanges);
         mElementListIsSorted = false;
     }
-
 
 
     this->elementBoundaries.clear();

@@ -1,0 +1,14 @@
+language: cpp
+script:
+   - CXX=g++-4.8 cmake -DUSE_PYTHON_BINDINGS=ON .
+   - make
+   - make test
+sudo: false
+addons:
+   apt:
+      sources:
+         - ubuntu-toolchain-r-test
+      packages:
+         - libboost-python-dev
+         - g++-4.8
+         - binutils-gold

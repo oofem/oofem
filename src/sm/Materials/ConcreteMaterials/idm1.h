@@ -47,7 +47,7 @@
 /*
  * Selects the use of mapped strain or projected strain from element.
  */
-//#define IDM_USE_MAPPEDSTRAIN
+#define IDM_USE_MAPPEDSTRAIN
 
 #include "material.h"
 #include "Materials/linearelasticmaterial.h"
@@ -103,6 +103,8 @@
 #define _IFT_IsotropicDamageMaterial1_n "griff_n"
 #define _IFT_IsotropicDamageMaterial1_c1 "c1"
 #define _IFT_IsotropicDamageMaterial1_c2 "c2"
+#define _IFT_IsotropicDamageMaterial1_alphaps "alphaps"
+#define _IFT_IsotropicDamageMaterial1_h "h"
 //@}
 
 namespace oofem {
@@ -116,7 +118,7 @@ class IsotropicDamageMaterial1Status : public IsotropicDamageMaterialStatus, pub
 {
 public:
     /// Constructor
-    IsotropicDamageMaterial1Status(int n, Domain * d, GaussPoint * g);
+    IsotropicDamageMaterial1Status(int n, Domain *d, GaussPoint *g);
     /// Destructor
     virtual ~IsotropicDamageMaterial1Status() { }
 
@@ -133,8 +135,8 @@ public:
  * of the largest strain level ever reached in material (kappa).
  */
 class IsotropicDamageMaterial1 : public IsotropicDamageMaterial,
-public RandomMaterialExtensionInterface,
-public MaterialModelMapperInterface
+    public RandomMaterialExtensionInterface,
+    public MaterialModelMapperInterface
 {
 protected:
     /// Equivalent strain at stress peak (or a similar parameter).
@@ -167,8 +169,22 @@ protected:
     /// Parameters used in Hordijk's softening law
     double c1, c2;
 
-    /// Type characterizing the algorithm used to compute equivalent strain measure.
-    enum EquivStrainType { EST_Unknown, EST_Mazars, EST_Rankine_Smooth, EST_Rankine_Standard, EST_ElasticEnergy, EST_ElasticEnergyPositiveStress, EST_ElasticEnergyPositiveStrain, EST_Mises, EST_Griffith };
+    /** Type characterizing the algorithm used to compute equivalent strain measure.
+     *  Note that the assigned numbers to enum values have to correspond to values
+     *  used in initializeFrom to resolve EquivStrainType. If not, the consistency
+     *  between initializeFrom and giveInputRecord methods is lost.
+     */
+    enum EquivStrainType {
+        EST_Mazars=0,
+        EST_Rankine_Smooth=1,
+        EST_ElasticEnergy=2,
+        EST_Mises=3,
+        EST_Rankine_Standard=4,
+        EST_ElasticEnergyPositiveStress=5,
+        EST_ElasticEnergyPositiveStrain=6,
+        EST_Griffith=7,
+        EST_Unknown = 100
+    };
     /// Parameter specifying the definition of equivalent strain.
     EquivStrainType equivStrainType;
 
@@ -178,13 +194,13 @@ protected:
     /// Parameter used in Griffith's criterion
     double griff_n;
 
-    /// Remporary parameter reading type of softening law, used in other isotropic damage material models.
+    /// Temporary parameter reading type of softening law, used in other isotropic damage material models.
     int damageLaw;
 
     /** Type characterizing the formula for the damage law. For example, linear softening can be specified
      *   with fracturing strain or crack opening.
      */
-    enum SofteningType { ST_Unknown, ST_Exponential, ST_Linear, ST_Mazars, ST_Smooth, ST_SmoothExtended, ST_Exponential_Cohesive_Crack, ST_Linear_Cohesive_Crack, ST_BiLinear_Cohesive_Crack, ST_Disable_Damage, ST_PowerExponential, ST_Hordijk_Cohesive_Crack };
+    enum SofteningType { ST_Unknown, ST_Exponential, ST_Linear, ST_Mazars, ST_Smooth, ST_SmoothExtended, ST_Exponential_Cohesive_Crack, ST_Linear_Cohesive_Crack, ST_BiLinear_Cohesive_Crack, ST_Disable_Damage, ST_PowerExponential, ST_DoubleExponential, ST_Hordijk_Cohesive_Crack };
 
     /// Parameter specifying the type of softening (damage law).
     SofteningType softType;
@@ -202,10 +218,13 @@ protected:
     /// auxiliary input variablesfor softType == ST_SmoothExtended
     double ep, ft;
 
+    /// Parameters used by the model with permanent strain
+    double ps_alpha, ps_H;
+
     /// Method used for evaluation of characteristic element size
     ElementCharSizeMethod ecsMethod;
 
-    ///cached source element set used to map internal variables (adaptivity), created on demand
+    /// Cached source element set used to map internal variables (adaptivity), created on demand
     Set *sourceElemSet;
 
 #ifdef IDM_USE_MMAClosestIPTransfer
@@ -228,7 +247,7 @@ protected:
 public:
 
     /// Constructor
-    IsotropicDamageMaterial1(int n, Domain * d);
+    IsotropicDamageMaterial1(int n, Domain *d);
     /// Destructor
     virtual ~IsotropicDamageMaterial1();
 
@@ -305,6 +324,8 @@ public:
      * @param gp Integration point.
      */
     double complianceFunction(double kappa, GaussPoint *gp);
+
+    double evaluatePermanentStrain(double kappa, double omega);
 
     virtual Interface *giveInterface(InterfaceType it);
 

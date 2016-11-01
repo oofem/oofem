@@ -44,6 +44,7 @@
 #include "contextioerr.h"
 #include "generalboundarycondition.h"
 #include "prescribedgradienthomogenization.h"
+#include "mathfem.h"
 
 #include <sstream>
 

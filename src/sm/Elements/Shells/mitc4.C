@@ -34,6 +34,7 @@
 
 #include "mitc4.h"
 #include "Materials/structuralms.h"
+#include "Materials/structuralmaterial.h"
 #include "CrossSections/structuralcrosssection.h"
 #include "CrossSections/simplecrosssection.h"
 #include "fei2dquadlin.h"
@@ -572,6 +573,8 @@ MITC4Shell :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int 
     answer.at(5, 22) = -a1 / 32. * ( ( V21.dotProduct({ x4 - x3, y4 - y3, z4 - z3 }) * ( sb * ( 1. - r2 ) ) ) + ( V21.dotProduct({ x1 - x4, y1 - y4, z1 - z4 }) * ( sa * ( 1. + r1 ) ) ) );
     answer.at(5, 23) = a1 / 32. * ( ( V11.dotProduct({ x4 - x3, y4 - y3, z4 - z3 }) * ( sb * ( 1. - r2 ) ) ) + ( V11.dotProduct({ x1 - x4, y1 - y4, z1 - z4 }) * ( sa * ( 1. + r1 ) ) ) );
 
+
+
     answer.at(1, 1) = hkx.at(1);
     answer.at(1, 4) = -r3 / 2. *a1 *hkx.at(1) * V21.at(1);
     answer.at(1, 5) = r3 / 2. *a1 *hkx.at(1) * V11.at(1);
@@ -632,10 +635,10 @@ MITC4Shell :: giveThickness(double &a1, double &a2, double &a3, double &a4)
     c3 = this->giveNode(3)->giveCoordinates();
     c4 = this->giveNode(4)->giveCoordinates();
 
-    a1 = this->giveCrossSection()->give(CS_Thickness, *c1, this, false);
-    a2 = this->giveCrossSection()->give(CS_Thickness, *c2, this, false);
-    a3 = this->giveCrossSection()->give(CS_Thickness, *c3, this, false);
-    a4 = this->giveCrossSection()->give(CS_Thickness, *c4, this, false);
+    a1 = this->giveCrossSection()->give(CS_Thickness, * c1, this, false);
+    a2 = this->giveCrossSection()->give(CS_Thickness, * c2, this, false);
+    a3 = this->giveCrossSection()->give(CS_Thickness, * c3, this, false);
+    a4 = this->giveCrossSection()->give(CS_Thickness, * c4, this, false);
 }
 
 
@@ -675,9 +678,35 @@ MITC4Shell :: computeLocalBaseVectors(FloatArray &e1, FloatArray &e2, FloatArray
 {
     FloatArray help;
 
-    // compute e1' = [N4-N3]  and  help = [N2-N3]
-    e1.beDifferenceOf( * this->giveNode(4)->giveCoordinates(), * this->giveNode(3)->giveCoordinates() );
-    help.beDifferenceOf( * this->giveNode(2)->giveCoordinates(), * this->giveNode(3)->giveCoordinates() );
+    FloatArray coordA, coordB;
+
+    // compute A - (node1+node4)/2
+    coordB.beDifferenceOf( * this->giveNode(1)->giveCoordinates(), * this->giveNode(4)->giveCoordinates() );
+    coordB.times(0.5);
+    coordB.add( * this->giveNode(4)->giveCoordinates() );
+
+    // compute B - (node2+node3)/2
+    coordA.beDifferenceOf( * this->giveNode(2)->giveCoordinates(), * this->giveNode(3)->giveCoordinates() );
+    coordA.times(0.5);
+    coordA.add( * this->giveNode(3)->giveCoordinates() );
+
+    // compute e1' = [B-A]
+    e1.beDifferenceOf(coordB, coordA);
+
+
+
+    // compute A - (node2+node1)/2
+    coordB.beDifferenceOf( * this->giveNode(1)->giveCoordinates(), * this->giveNode(2)->giveCoordinates() );
+    coordB.times(0.5);
+    coordB.add( * this->giveNode(2)->giveCoordinates() );
+
+    // compute B - (node3+node4)/2
+    coordA.beDifferenceOf( * this->giveNode(4)->giveCoordinates(), * this->giveNode(3)->giveCoordinates() );
+    coordA.times(0.5);
+    coordA.add( * this->giveNode(3)->giveCoordinates() );
+
+    // compute e1' = [B-A]
+    help.beDifferenceOf(coordB, coordA);
 
     // let us normalize e1'
     e1.normalize();
@@ -825,14 +854,15 @@ MITC4Shell :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gau
 {
     answer.resize(3, 3);
     answer.zero();
-    if ( type == GlobalForceTensor ) {
-        FloatArray stress, stress2, strain;
-        FloatMatrix GtoLmatrix2, GtoLmatrix;
-        this->computeIFGToLRotationMtrx(GtoLmatrix);
+    this->computeGtoLRotationMatrix();
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveStructuralCrossSection()->giveMaterial(gp) );
 
-        this->computeStrainVector(strain, gp, tStep);
-        this->computeStressVector(stress2, strain, gp, tStep);
-        stress.beProductOf(GtoLmatrix, stress2);
+    if ( ( type == GlobalForceTensor ) ) {
+        FloatArray stress, localStress, localStrain;
+        this->computeStrainVector(localStrain, gp, tStep);
+        this->computeStressVector(localStress, localStrain, gp, tStep);
+        mat->transformStressVectorTo(stress,  GtoLRotationMatrix, localStress, false);
+
         answer.at(1, 1) = stress.at(1);
         answer.at(2, 2) = stress.at(2);
         answer.at(3, 3) = stress.at(3);
@@ -843,21 +873,19 @@ MITC4Shell :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gau
         answer.at(1, 3) = stress.at(6);
         answer.at(3, 1) = stress.at(6);
     } else if ( type == GlobalStrainTensor ) {
-        FloatArray strain, strain2;
-        this->computeStrainVector(strain2, gp, tStep);
-        FloatMatrix GtoLmatrix;
-        this->computeIFGToLRotationMtrx(GtoLmatrix);
-        strain.beProductOf(GtoLmatrix, strain2);
+        FloatArray strain, localStrain;
+        this->computeStrainVector(localStrain, gp, tStep);
+        mat->transformStrainVectorTo(strain,  GtoLRotationMatrix, localStrain, false);
 
         answer.at(1, 1) = strain.at(1);
         answer.at(2, 2) = strain.at(2);
         answer.at(3, 3) = strain.at(3);
-        answer.at(1, 2) = strain.at(4) / 2.;
-        answer.at(2, 1) = strain.at(4) / 2.;
-        answer.at(2, 3) = strain.at(5) / 2.;
-        answer.at(3, 2) = strain.at(5) / 2.;
-        answer.at(1, 3) = strain.at(6) / 2.;
-        answer.at(3, 1) = strain.at(6) / 2.;
+        answer.at(2, 3) = strain.at(4) / 2.;
+        answer.at(3, 2) = strain.at(4) / 2.;
+        answer.at(1, 3) = strain.at(5) / 2.;
+        answer.at(3, 1) = strain.at(5) / 2.;
+        answer.at(1, 2) = strain.at(6) / 2.;
+        answer.at(2, 1) = strain.at(6) / 2.;
     } else {
         OOFEM_ERROR("unsupported tensor mode");
     }
@@ -875,11 +903,15 @@ MITC4Shell :: printOutputAt(FILE *file, TimeStep *tStep)
         fprintf( file, "  GP 1.%d :", gp->giveNumber() );
         this->giveIPValue(v, gp, IST_ShellStrainTensor, tStep);
         fprintf(file, "  strains    ");
-        for ( auto &val : v ) fprintf(file, " %.4e", val);
+        for ( auto &val : v ) {
+            fprintf(file, " %.4e", val);
+        }
 
         this->giveIPValue(v, gp, IST_ShellForceTensor, tStep);
         fprintf(file, "\n              stresses   ");
-        for ( auto &val : v ) fprintf(file, " %.4e", val);
+        for ( auto &val : v ) {
+            fprintf(file, " %.4e", val);
+        }
 
         fprintf(file, "\n");
     }
@@ -983,25 +1015,6 @@ MITC4Shell :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
     return 1;
 }
 
-
-int
-MITC4Shell :: computeIFGToLRotationMtrx(FloatMatrix &answer)
-// Returns the rotation matrix of the receiver of the size [6,6]
-// f(local) = T * f(global)
-{
-    this->computeGtoLRotationMatrix();
-
-    answer.resize(6, 6);
-    answer.zero();
-
-    for ( int i = 1; i <= 3; i++ ) {
-        answer.at(1, i) = answer.at(4, i + 3) = GtoLRotationMatrix.at(1, i);
-        answer.at(2, i) = answer.at(5, i + 3) = GtoLRotationMatrix.at(2, i);
-        answer.at(3, i) = answer.at(6, i + 3) = GtoLRotationMatrix.at(3, i);
-    }
-
-    return 1;
-}
 
 
 void

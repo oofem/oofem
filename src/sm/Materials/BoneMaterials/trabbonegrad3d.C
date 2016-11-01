@@ -90,7 +90,7 @@ TrabBoneGrad3D :: givePDGradMatrix_ku(FloatMatrix &answer, MatResponseMode mode,
         give3dKappaMatrix(answer, mode, gp, tStep);
         break;
     default:
-        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR( "unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -103,7 +103,7 @@ TrabBoneGrad3D :: givePDGradMatrix_uk(FloatMatrix &answer, MatResponseMode mode,
         give3dGprime(answer, mode, gp, tStep);
         break;
     default:
-        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR( "unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -116,7 +116,7 @@ TrabBoneGrad3D :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseMode mode,
         giveInternalLength(answer, mode, gp, tStep);
         break;
     default:
-        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR( "unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -124,7 +124,7 @@ void
 TrabBoneGrad3D :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
-    OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
+    OOFEM_ERROR( "unknown mode (%s)", __MaterialModeToString(mMode) );
 }
 
 
@@ -140,7 +140,7 @@ TrabBoneGrad3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponse
         this->constructAnisoComplTensor(compliance);
         elasticity.beInverseOf(compliance);
         answer = elasticity;
-    } else if ( mode == SecantStiffness || ( ( mode == TangentStiffness ) && ( status->giveNsubsteps() > 1 ) ) ) {
+    } else if ( mode == SecantStiffness ) {
         if ( printflag ) {
             printf("secant\n");
         }
@@ -371,7 +371,6 @@ TrabBoneGrad3DStatus :: updateYourself(TimeStep *tStep)
     this->dam = this->tempDam;
     this->tsed = this->tempTSED;
     this->plasDef = this->tempPlasDef;
-    nss = 1;
     //TrabBone3DStatus :: updateYourself(tStep);
 }
 } // end namespace oofem

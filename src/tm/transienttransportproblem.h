@@ -119,8 +119,10 @@ public:
     virtual bool requiresEquationRenumbering(TimeStep *tStep);
     virtual int forceEquationNumbering();
 
+    virtual void updateYourself(TimeStep *tStep);
+    
     virtual int checkConsistency();
-
+    virtual FieldPtr giveField (FieldType key, TimeStep *);
     // identification
     virtual const char *giveInputRecordName() const { return _IFT_TransientTransportProblem_Name; }
     virtual const char *giveClassName() const { return "TransientTransportProblem"; }

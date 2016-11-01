@@ -46,6 +46,7 @@
 #include "dof.h"
 #include "oofemtxtinputrecord.h"
 #include "irresulttype.h"
+#include "mathfem.h"
 #ifdef __SM_MODULE
  #include "../sm/EngineeringModels/structengngmodel.h"
  #include "../sm/Elements/Beams/beam2d.h"
@@ -133,9 +134,9 @@ NodeErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
     double dmanValue = dof->giveUnknown(mode, tStep);
     bool check = checkValue(dmanValue);
     if ( !check ) {
-        OOFEM_WARNING("Check failed in: tstep %d, node %d, dof %d, mode %d:\n"
+        OOFEM_WARNING("Check failed in %s: tstep %d, node %d, dof %d, mode %d:\n"
                       "value is %.8e, but should be %.8e ( error is %e but tolerance is %e )",
-                      tstep, number, dofid, mode,
+                      domain->giveEngngModel()->giveOutputBaseFileName().c_str(), tstep, number, dofid, mode,
                       dmanValue, value, fabs(dmanValue-value), tolerance );
     }
     return check;
@@ -192,9 +193,9 @@ ElementErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
     element->giveIPValue(ipval, gp, ist, tStep);
 
     if ( component > ipval.giveSize() || component < 1 ) {
-        OOFEM_WARNING("Check failed in: element %d, gpnum %d, ist %d, component %d:\n"
-                      "Component not found!",
-                      number, gpnum, ist, component);
+        OOFEM_WARNING("Check failed in %s: element %d, gpnum %d, ist %d, component %d:\n"
+                      "Component not found!", 
+                      domain->giveEngngModel()->giveOutputBaseFileName().c_str(), number, gpnum, ist, component);
         ipval.printYourself();
         return false;
     }
@@ -202,9 +203,8 @@ ElementErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
     double elementValue = ipval.at(component);
     bool check = checkValue(elementValue);
     if ( !check ) {
-        OOFEM_WARNING("Check failed in: tstep %d, element %d, gpnum %d, ist %d, component %d:\n"
-                      "value is %.8e, but should be %.8e ( error is %e but tolerance is %e )",
-                      tstep, number, gpnum, ist, component,
+        OOFEM_WARNING("Check failed in %s: tstep %d, element %d, gpnum %d, ist %d, component %d:\n"                      "value is %.8e, but should be %.8e ( error is %e but tolerance is %e )",
+                      domain->giveEngngModel()->giveOutputBaseFileName().c_str(), tstep, number, gpnum, ist, component,
                       elementValue, value, fabs(elementValue-value), tolerance );
         ipval.printYourself();
     }
@@ -261,9 +261,9 @@ BeamElementErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
     }
 
     if ( component > val.giveSize() || component < 1 ) {
-        OOFEM_WARNING("Check failed in: beam_element %d, ist %d, component %d:\n"
+        OOFEM_WARNING("Check failed in %s: beam_element %d, ist %d, component %d:\n"
                       "Component not found!",
-                      number, ist, component);
+                      domain->giveEngngModel()->giveOutputBaseFileName().c_str(), number, ist, component);
         val.printYourself();
         return false;
     }
@@ -271,9 +271,9 @@ BeamElementErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
     double elementValue = val.at(component);
     bool check = checkValue(elementValue);
     if ( !check ) {
-        OOFEM_WARNING("Check failed in: tstep %d, beam_element %d, ist %d, component %d:\n"
+        OOFEM_WARNING("Check failed in %s: tstep %d, beam_element %d, ist %d, component %d:\n"
                       "value is %.8e, but should be %.8e ( error is %e but tolerance is %e )",
-                      tstep, number, ist, component,
+                      domain->giveEngngModel()->giveOutputBaseFileName().c_str(), tstep, number, ist, component,
                       elementValue, value, fabs(elementValue-value), tolerance );
         val.printYourself();
     }
@@ -335,9 +335,9 @@ ReactionErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
     double reactionForce = reactionForces.at(index);
     bool check = checkValue(reactionForce);
     if ( !check ) {
-        OOFEM_WARNING("Check failed in: tstep %d, reaction forces number %d, dof %d:\n"
+        OOFEM_WARNING("Check failed in %s: tstep %d, reaction forces number %d, dof %d:\n"
                       "value is %.8e, but should be %.8e ( error is %e but tolerance is %e )",
-                      tstep, number, dofid,
+                      domain->giveEngngModel()->giveOutputBaseFileName().c_str(), tstep, number, dofid,
                       reactionForce, value, fabs(reactionForce-value), tolerance );
     }
     return check;
@@ -370,9 +370,9 @@ LoadLevelErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
     double loadLevel = domain->giveEngngModel()->giveLoadLevel();
     bool check = checkValue(loadLevel);
     if ( !check ) {
-        OOFEM_WARNING("Check failed in: tstep %d, load level:\n"
+        OOFEM_WARNING("Check failed in %s: tstep %d, load level:\n"
                       "value is %.8e, but should be %.8e ( error is %e but tolerance is %e )",
-                      tstep,
+                      domain->giveEngngModel()->giveOutputBaseFileName().c_str(), tstep,
                       loadLevel, value, fabs(loadLevel-value), tolerance );
     }
     return check;
@@ -400,9 +400,9 @@ EigenValueErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
     double eig = domain->giveEngngModel()->giveEigenValue(number);
     bool check = checkValue(eig);
     if ( !check ) {
-        OOFEM_WARNING("Check failed in: tstep %d, eigen value %d:\n"
+        OOFEM_WARNING("Check failed in %s: tstep %d, eigen value %d:\n"
                       "value is %.8e, but should be %.8e ( error is %e but tolerance is %e )",
-                      tstep, number,
+                      domain->giveEngngModel()->giveOutputBaseFileName().c_str(), tstep, number,
                       eig, value, fabs(eig-value), tolerance );
     }
     return check;

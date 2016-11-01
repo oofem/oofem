@@ -46,7 +46,6 @@
 #include "classfactory.h"
 
 namespace oofem {
-
 REGISTER_Material(LargeStrainMasterMaterial);
 
 // constructor
@@ -93,7 +92,7 @@ LargeStrainMasterMaterialGrad :: givePDGradMatrix_uu(FloatMatrix &answer, MatRes
         LargeStrainMasterMaterial :: give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
         break;
     default:
-        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR( "unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -106,7 +105,7 @@ LargeStrainMasterMaterialGrad :: givePDGradMatrix_ku(FloatMatrix &answer, MatRes
         give3dKappaMatrix(answer, mode, gp, tStep);
         break;
     default:
-        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR( "unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -119,7 +118,7 @@ LargeStrainMasterMaterialGrad :: givePDGradMatrix_uk(FloatMatrix &answer, MatRes
         give3dGprime(answer, mode, gp, tStep);
         break;
     default:
-        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR( "unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -132,7 +131,7 @@ LargeStrainMasterMaterialGrad :: givePDGradMatrix_kk(FloatMatrix &answer, MatRes
         giveInternalLength(answer, mode, gp, tStep);
         break;
     default:
-        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR( "unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -140,7 +139,7 @@ void
 LargeStrainMasterMaterialGrad :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
-    OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
+    OOFEM_ERROR( "unknown mode (%s)", __MaterialModeToString(mMode) );
 }
 
 
@@ -193,7 +192,7 @@ LargeStrainMasterMaterialGrad :: give3dKappaMatrix(FloatMatrix &answer, MatRespo
     kappaMatrix.at(1, 4) = 2. * kappaMatrix.at(1, 4);
     kappaMatrix.at(1, 5) = 2. * kappaMatrix.at(1, 5);
     kappaMatrix.at(1, 6) = 2. * kappaMatrix.at(1, 6);
-    answer.beProductTOf(kappaMatrix, status->givePmatrix());
+    answer.beProductTOf( kappaMatrix, status->givePmatrix() );
 }
 
 
@@ -267,7 +266,7 @@ LargeStrainMasterMaterialGrad :: giveFirstPKStressVectorGrad(FloatArray &answer1
         stressM.at(5) = 1. / 2. *  stressM.at(5);
         stressM.at(6) = 1. / 2. *  stressM.at(6);
 
-        this->constructL1L2TransformationMatrices(L1, L2, eVecs, stressM, E1, E2, E3);
+        this->constructL1L2TransformationMatrices(L1, L2, eVals, stressM, E1, E2, E3);
 
         FloatMatrix junk, P, TL;
         FloatArray secondPK;
@@ -297,5 +296,4 @@ LargeStrainMasterMaterialGrad :: initializeFrom(InputRecord *ir)
 {
     return LargeStrainMasterMaterial :: initializeFrom(ir);
 }
-
 } // end namespace oofem

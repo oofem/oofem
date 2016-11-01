@@ -22,7 +22,7 @@
 \usepackage{tikz}
 \usepackage{hyperref}
 \usepackage[top=0.1\paperheight, bottom=0.1\paperheight, left=0.1\paperwidth, right=0.1\paperwidth]{geometry}
-\usepackage{biblatex}
+\usepackage[backend=biber]{biblatex}
 \usepackage{ifthen}
 
 \usetikzlibrary{external} 
@@ -50,6 +50,12 @@
 
 \input{../include/include.tex}
 
+%% fix for \blx@shorthands as this was removed from current biblatex version
+%\makeatletter
+%\@ifpackageloaded{tex4ht}{
+%  \def\blx@shorthands{}
+%}
+%\makeatother
 
 \renewcommand{\topfraction}{0.99}	% 99% of page top can be a float
 \renewcommand{\bottomfraction}{0.99}	% 99% of page bottom can be a float
@@ -943,7 +949,7 @@ Although element requires generally six DOFs per node, no stiffness to local rot
 \elementDescription{Loads}{Body and boundary loads are supported.}
 \elementDescription{Output}{On output, the shell strain ($s_s$), and shell force ($s_f$) tensors in \textbf{global coordinate system} are printed as vector form with 6 components, with the following meaning:
 \begin{align*}
-s_s &= \{\varepsilon_x, \varepsilon_y, \varepsilon_z, \varepsilon_{yz}, \varepsilon_{xz}, \varepsilon_{xy}\},\\
+s_s &= \{\varepsilon_x, \varepsilon_y, \varepsilon_z, \gamma_{yz}, \gamma_{zx}, \gamma_{xy}\},\\
 s_f &= \{\sigma_x, \sigma_y, \sigma_z, \sigma_{yz}, \sigma_{xz}, \sigma_{xy}\}.
 \end{align*}
 }
@@ -1482,10 +1488,11 @@ A different mass and rotary inertia may be assigned to each coordinate direction
 This element represent longitudial or torsional spring element. It is defined by two nodes, orientation and a spring constant.
 The spring element has no mass associated, the mass can be added using LumpedMass element. The spring is linear and works the same way in tension or in compression. The element features are summarized in Table~\ref{Springsummary}.
 
-\begin{elementsummary}{Spring}{Spring element}{\field{mode}{in} \field{k}{rn} \field{orientation}{ra}}{Spring element summary}{Springsummary}
+\begin{elementsummary}{Spring}{Spring element}{\field{mode}{in} \field{k}{rn} \optField{m}{rn} \field{orientation}{ra}}{Spring element summary}{Springsummary}
 \elementParam{\param{mode}: defines the type of spring element (see Table~\ref{spring_mode_table}).}
 \elementParam{\param{k}:  determines the spring constant, corresponding units are [Force/Length] for longitudinal spring and [Force*Length/Radian] for torsional spring.}
 \elementParam{\param{orientation}:defines orientation vector of spring element (of size 3) - for longitudinal spring it defines the direction of spring, for torsional spring it defines the axis of rotation.}
+\elementParam{\param{m}: determines optional mass of the element, zero value assumed by default.}
 \elementDescription{Note}{the spring element nodes doesn't need to be coincident, but the spring orientation is always determined by \param{orientation} vector.}
 \end{elementsummary}
 

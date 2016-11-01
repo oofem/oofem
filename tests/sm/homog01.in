@@ -3,8 +3,8 @@ Elastic homogenization of 2x2 quad elements with periodic boundary conditions an
 LinearStatic nsteps 1 nmodules 2
 errorcheck
 #vtkxml tstep_all domain_all cellvars 1 46 primvars 1 1 vars 2 1 4 stype 1
-hom tstep_all ists 2 4 1
-#hom tstep_all ists 2 4 1 regionsets 3 1 2 1
+#hom tstep_all ists 2 4 1
+hom tstep_all ists 3 4 1 115 regionsets 2 1 2
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
 ndofman 9 nelem 4 ncrosssect 2 nmat 2 nbc 3 nic 0 nltf 1 nset 4

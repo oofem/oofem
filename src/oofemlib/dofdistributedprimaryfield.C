@@ -58,22 +58,22 @@ DofDistributedPrimaryField :: ~DofDistributedPrimaryField()
 double
 DofDistributedPrimaryField :: giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *tStep)
 {
-#if 0
-    double val1 = dof->giveUnknownsDictionaryValue(tStep, VM_Total);
-    double val0 = dof->giveUnknownsDictionaryValue(tStep->givePreviousStep(), VM_Total);
     if ( mode == VM_Total ) {
-        return this->alpha * val1 + (1.-this->alpha) * val0;
-    } else if ( mode == VM_Velocity ) {
-        return (val1 - val0) / tStep->giveTimeIncrement();
-    } else if ( mode == VM_Incremental ) {
-        return val1 - val0;
+        return dof->giveUnknownsDictionaryValue(tStep, mode);
     } else {
-        OOFEM_ERROR("Unknown value mode requested");
-        return 0;
+        double val1 = dof->giveUnknownsDictionaryValue(tStep, VM_Total);
+        double val0 = dof->giveUnknownsDictionaryValue(tStep->givePreviousStep(), VM_Total);
+        if ( mode == VM_Velocity ) {
+            return (val1 - val0) / tStep->giveTimeIncrement();
+        } else if ( mode == VM_Incremental ) {
+            return val1 - val0;
+        } else {
+            OOFEM_ERROR("Unknown value mode requested");
+            return 0;
+        }
     }
-#else
-    return dof->giveUnknownsDictionaryValue(tStep, mode);
-#endif
+
+    return 0.;
 }
 
 FloatArray *

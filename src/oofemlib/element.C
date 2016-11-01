@@ -765,6 +765,54 @@ Element :: isActivated(TimeStep *tStep)
     }
 }
 
+
+
+bool
+Element :: isCast(TimeStep *tStep)
+{
+
+         // this approach used to work when material was assigned to element
+          //    if ( tStep->giveIntrinsicTime() >= this->giveMaterial()->giveCastingTime() )  
+
+  
+  if ( tStep ) {
+
+    double castingTime;    
+    double tNow = tStep->giveIntrinsicTime();
+    
+    if ( integrationRulesArray.size() > 1 ) {
+      
+      for ( int i = 0; i < (int)integrationRulesArray.size(); i++ ) {
+        IntegrationRule *iRule;
+        iRule = integrationRulesArray [ i ].get();
+        
+        for ( GaussPoint *gp: *iRule ) {
+          castingTime =  this->giveCrossSection()->giveMaterial(gp)->giveCastingTime();
+
+          if (tNow < castingTime ) {
+            return false;
+          }          
+        }
+      }
+    } else {
+      
+      for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
+        castingTime =  this->giveCrossSection()->giveMaterial(gp)->giveCastingTime();
+        
+         if (tNow < castingTime ) {
+           return false;
+         }
+      }
+    }
+    
+    return true;
+    
+  } else {
+    return false;
+  }
+  
+}
+
 void
 Element :: initForNewStep()
 // initializes receiver to new time step or can be used
