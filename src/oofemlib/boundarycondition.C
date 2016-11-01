@@ -58,7 +58,7 @@ double BoundaryCondition :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
 double BoundaryCondition :: give(Dof *dof, ValueModeType mode, double time)
 {
     double factor = 0;
-    if ( mode == VM_Total ) {
+    if ( (mode == VM_Total) || (mode == VM_TotalIntrinsic)) {
         factor = this->giveTimeFunction()->evaluateAtTime(time);
     } else if ( mode == VM_Velocity ) {
         factor = this->giveTimeFunction()->evaluateVelocityAtTime(time);

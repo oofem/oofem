@@ -130,6 +130,8 @@ double TransientTransportProblem :: giveUnknownComponent(ValueModeType mode, Tim
     if ( mode == VM_Total ) {
         //return this->alpha * val1 + (1.-this->alpha) * val0;
         return val1;//The output should be given always at the end of the time step, regardless of alpha
+    } else if ( mode == VM_TotalIntrinsic) {
+        return this->alpha * val1 + (1.-this->alpha) * val0;
     } else if ( mode == VM_Velocity ) {
         return (val1 - val0) / tStep->giveTimeIncrement();
     } else if ( mode == VM_Incremental ) {

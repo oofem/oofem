@@ -174,6 +174,7 @@ double NonStationaryTransportProblem :: giveUnknownComponent(ValueModeType mode,
 // This function translates this request to numerical method language
 {
     if ( this->requiresUnknownsDictionaryUpdate() ) {
+        if (mode == VM_TotalIntrinsic) mode = VM_Total;
         int hash = this->giveUnknownDictHashIndx(mode, tStep);
         if ( dof->giveUnknowns()->includes(hash) ) {
             return dof->giveUnknowns()->at(hash);
@@ -186,6 +187,18 @@ double NonStationaryTransportProblem :: giveUnknownComponent(ValueModeType mode,
         OOFEM_ERROR("invalid equation number on DoF %d", dof->giveDofID());
     }
 
+    if (mode == VM_TotalIntrinsic) {
+      /*
+      if (tStep == this->giveCurrentStep()) {
+	double rt = UnknownsField->giveUnknownValue(dof, VM_Total, tStep);
+	double rtm1 = UnknownsField->giveUnknownValue(dof, VM_Total, tStep);
+	return (1.-alpha)*rtm1+alpha*rt;
+      } else {
+	OOFEM_ERROR ("mode only supported for current step");
+      }
+      */
+      mode = VM_Total;
+    } 
     return UnknownsField->giveUnknownValue(dof, mode, tStep);
 }
 
