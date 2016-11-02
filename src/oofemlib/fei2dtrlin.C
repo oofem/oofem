@@ -159,6 +159,26 @@ FEI2dTrLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICel
     return ( x1 * ( y2 - y3 ) + x2 * ( -y1 + y3 ) + x3 * ( y1 - y2 ) );
 }
 
+bool FEI2dTrLin :: inside(const FloatArray &lcoords) const
+{
+	const double point_tol = 1.0e-3;
+    bool inside = true;
+    for ( int i = 1; i <= 2; i++ ) {
+        if ( lcoords.at(i) < ( -1. - point_tol ) ) {
+            inside = false;
+        } else if ( lcoords.at(i) > ( 1. + point_tol ) ) {
+            inside = false;
+        }
+    }
+
+    if ( 1. - lcoords.at(1) - lcoords.at(2) < ( -1. - point_tol ) ) {
+        inside = false;
+    } else if ( 1. - lcoords.at(1) - lcoords.at(2) > ( 1. + point_tol ) ) {
+        inside = false;
+    }
+
+    return inside;
+}
 
 void
 FEI2dTrLin :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)

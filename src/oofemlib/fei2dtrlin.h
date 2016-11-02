@@ -58,6 +58,8 @@ public:
     virtual double giveArea(const FEICellGeometry &cellgeo) const;
     virtual int giveNumberOfNodes() const { return 3; }
  
+    virtual bool inside(const FloatArray &lcoords) const;
+
     // Edge
     virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge);
     virtual int giveNumberOfEdges() const { return 3; }

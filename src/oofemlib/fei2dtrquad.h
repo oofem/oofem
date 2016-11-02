@@ -54,16 +54,10 @@ public:
     virtual double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual int  global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo);
     virtual double giveArea(const FEICellGeometry &cellgeo) const;
-    virtual void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual int giveNumberOfNodes() const { return 6; }    
-    /**
-     * Returns a characteristic length of the geometry, typically a diagonal or edge length.
-     * @param cellgeo Underlying cell geometry.
-     * @return Square root of area.
-     */
-    virtual double giveCharacteristicLength(const FEICellGeometry &cellgeo) const;
+
+    virtual bool inside(const FloatArray &lcoords) const;
 
     // Edge
     virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge);
@@ -78,9 +72,10 @@ public:
 
     virtual IntegrationRule *giveIntegrationRule(int order);
 
+    virtual void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
-    void giveDerivatives(FloatMatrix &dn, const FloatArray &lc);
 };
 } // end namespace oofem
 #endif // fei2dtrquad_h
