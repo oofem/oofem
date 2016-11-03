@@ -132,6 +132,7 @@ double TransientTransportProblem :: giveUnknownComponent(ValueModeType mode, Tim
         return val1;//The output should be given always at the end of the time step, regardless of alpha
     } else if ( mode == VM_TotalIntrinsic) {
         return this->alpha * val1 + (1.-this->alpha) * val0;
+        //return val1;
     } else if ( mode == VM_Velocity ) {
         return (val1 - val0) / tStep->giveTimeIncrement();
     } else if ( mode == VM_Incremental ) {
@@ -300,7 +301,7 @@ void TransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
 void
 TransientTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
 {
-    // F(T) + C*dT/dt = Q
+    // F(T) + C*dT/dt = Q, F(T)=(K_c+K_h)*T-R_q-R_h
     // Linearized:
     // F(T^(k)) + K*a*dT_1 = Q - C * dT/dt^(k) - C/dt * dT_1
     // Rearranged

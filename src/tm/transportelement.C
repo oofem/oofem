@@ -51,6 +51,10 @@
 #include "feinterpol3d.h"
 #include "dof.h"
 #include "stationarytransportproblem.h"
+#ifdef __CEMHYD_MODULE
+ #include "cemhyd/cemhydmat.h"
+#endif
+
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -1254,6 +1258,13 @@ TransportElement :: updateInternalState(TimeStep *tStep)
     IntArray dofid;
     TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
 
+#ifdef __CEMHYD_MODULE //not very efficient here, looping over all GPs in each call
+    if (dynamic_cast< CemhydMat * >( mat ) &&  tStep->isIcApply()){
+        CemhydMat *cem = dynamic_cast< CemhydMat * >( mat );
+        cem->initMaterial(this); //create microstructures and statuses on specific GPs
+    }
+#endif //__CEMHYD_MODULE    
+    
     this->giveElementDofIDMask(dofid);
     this->computeVectorOf(dofid, VM_TotalIntrinsic, tStep, r);
     // force updating ip values
@@ -1273,6 +1284,7 @@ TransportElement :: updateInternalState(TimeStep *tStep)
 #endif
         }
     }
+    
 }
 
 int

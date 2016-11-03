@@ -110,7 +110,7 @@ CemhydMat :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeSt
 
     if ( eachGP || ms == MasterCemhydMatStatus ) {
         averageTemperature = ms->giveAverageTemperature();
-        if ( mode == VM_Total ) {
+        if ( mode == VM_Total || mode == VM_TotalIntrinsic ) {
             //for nonlinear solver, return the last value even no time has elapsed
             if ( tStep->giveTargetTime() != ms->LastCallTime ) {
                 val.at(1) = ms->GivePower( averageTemperature, tStep->giveTargetTime() );
@@ -121,7 +121,7 @@ CemhydMat :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeSt
             OOFEM_ERROR( "Undefined mode %s\n", __ValueModeTypeToString(mode) );
         }
     } else { //return released heat from the master
-        if ( mode == VM_Total ) {
+        if ( mode == VM_Total || mode == VM_TotalIntrinsic ) {
             val.at(1) = MasterCemhydMatStatus->PartHeat;
         } else {
             OOFEM_ERROR( "Undefined mode %s\n", __ValueModeTypeToString(mode) );
@@ -364,7 +364,9 @@ CemhydMat :: initMaterial(Element *element)
             ms = new CemhydMatStatus(1, domain, gp, NULL, this, 0);
         }
 
-        gp->setMaterialStatus( ms, this->giveNumber() );
+//         if(!gp->giveMaterialStatus()){
+            gp->setMaterialStatus( ms, this->giveNumber() );
+//         }
     }
 
     return 1;
@@ -396,6 +398,7 @@ void CemhydMat :: storeWeightTemperatureProductVolume(Element *element, TimeStep
 
 void CemhydMat :: averageTemperature()
 {
+    //printf("%f ", MasterCemhydMatStatus->giveAverageTemperature());
     if ( !eachGP ) {
         MasterCemhydMatStatus->setAverageTemperatureVolume( MasterCemhydMatStatus->giveAverageTemperature() / MasterCemhydMatStatus->giveTotalVolume(), MasterCemhydMatStatus->giveTotalVolume() );
     }
@@ -446,9 +449,8 @@ IRResultType CemhydMat :: initializeFrom(InputRecord *ir)
 MaterialStatus *
 CemhydMat :: CreateStatus(GaussPoint *gp) const
 {
-    OOFEM_ERROR("Use function CemhydMat :: initMaterial instead");
-
-    return NULL;
+     OOFEM_ERROR("Use function CemhydMat :: initMaterial instead");
+     return NULL;
 }
 
 
@@ -14374,6 +14376,12 @@ void
 CemhydMatStatus :: updateYourself(TimeStep *tStep)
 {
     TransportMaterialStatus :: updateYourself(tStep);
+    if(!tStep->isIcApply()){//not very efficient here due to averaging in each call
+        CemhydMat *cemhydmat = static_cast< CemhydMat * >( this->gp->giveMaterial() );
+        cemhydmat->clearWeightTemperatureProductVolume(this->gp->giveElement());
+        cemhydmat->storeWeightTemperatureProductVolume(this->gp->giveElement(), tStep);
+        cemhydmat->averageTemperature();
+    }
 };
 
 double CemhydMatStatus :: giveAverageTemperature()
