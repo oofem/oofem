@@ -164,14 +164,14 @@ bool FEI2dTrLin :: inside(const FloatArray &lcoords) const
 	const double point_tol = 1.0e-3;
     bool inside = true;
     for ( int i = 1; i <= 2; i++ ) {
-        if ( lcoords.at(i) < ( -1. - point_tol ) ) {
+        if ( lcoords.at(i) < - point_tol ) {
             inside = false;
         } else if ( lcoords.at(i) > ( 1. + point_tol ) ) {
             inside = false;
         }
     }
 
-    if ( 1. - lcoords.at(1) - lcoords.at(2) < ( -1. - point_tol ) ) {
+    if ( 1. - lcoords.at(1) - lcoords.at(2) < - point_tol ) {
         inside = false;
     } else if ( 1. - lcoords.at(1) - lcoords.at(2) > ( 1. + point_tol ) ) {
         inside = false;
