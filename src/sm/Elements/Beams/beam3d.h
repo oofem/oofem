@@ -37,6 +37,7 @@
 
 #include "../sm/Elements/structuralelement.h"
 #include "../sm/CrossSections/fiberedcs.h"
+#include "../sm/Elements/beam3dsubsoil.h"
 #include "dofmanager.h"
 
 ///@name Input fields for Beam3d
@@ -66,7 +67,7 @@ class FEI3dLineLin;
  * @author Mikael Öhman
  * @author (several other authors)
  */
-class Beam3d : public StructuralElement, public FiberedCrossSectionInterface
+ class Beam3d : public StructuralElement, public FiberedCrossSectionInterface, public Beam3dSubsoilElementInterface
 {
 protected:
     /// Geometry interpolator only.
@@ -168,6 +169,20 @@ public:
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
     virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
 
+
+    virtual void B3SSI_getNMatrix (FloatMatrix &answer, GaussPoint *gp) {
+      this->computeNmatrixAt(gp->giveNaturalCoordinates(), answer);
+    }
+    virtual void B3SSI_getGtoLRotationMatrix (FloatMatrix &answer) {
+      this->computeGtoLRotationMatrix(answer);
+    }
+    virtual double B3SSI_computeVolumeAround (GaussPoint* gp) {
+      return this->computeVolumeAround(gp);
+    }
+    virtual void B3SSI_getNodalGtoLRotationMatrix(FloatMatrix& answer);
+
+
+    
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
     virtual void drawDeformedGeometry(oofegGraphicContext & gc, TimeStep * tStep, UnknownType);

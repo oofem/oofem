@@ -352,6 +352,24 @@ Beam3d :: computeGtoLRotationMatrix(FloatMatrix &answer)
     return true;
 }
 
+void
+Beam3d :: B3SSI_getNodalGtoLRotationMatrix(FloatMatrix &answer)
+// Returns the rotation matrix for element unknowns
+{
+    FloatMatrix lcs;
+    
+    answer.resize(6, 6);
+    answer.zero();
+
+    this->giveLocalCoordinateSystem(lcs);
+    for ( int i = 1; i <= 3; i++ ) {
+        for ( int j = 1; j <= 3; j++ ) {
+            answer.at(i, j) = lcs.at(i, j);
+            answer.at(i + 3, j + 3) = lcs.at(i, j);
+        }
+    }
+
+}
 
 double
 Beam3d :: computeVolumeAround(GaussPoint *gp)
@@ -991,7 +1009,9 @@ Beam3d :: giveInterface(InterfaceType interface)
 {
     if ( interface == FiberedCrossSectionInterfaceType ) {
         return static_cast< FiberedCrossSectionInterface * >( this );
-    }
+    } else if (interface == Beam3dSubsoilElementInterfaceType ) {
+        return static_cast< Beam3dSubsoilElementInterface * >( this );
+    }      
 
     return NULL;
 }
