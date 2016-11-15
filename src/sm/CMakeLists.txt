@@ -83,6 +83,7 @@ set (sm_element
     Elements/tet21ghostsolid.C
     Elements/quad1platesubsoil.C 
     Elements/tria1platesubsoil.C
+    Elements/beam3dsubsoil.C
     Elements/trwarp.C
     #qplanstrssphf.C
     )
