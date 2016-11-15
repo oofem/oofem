@@ -34,10 +34,10 @@ Set 2 nodes 3 1 2 3
 Set 3 nodes 3 4 5 6
 Set 4 elementboundaries 4 3 3  4 3
 #%BEGIN_CHECK%
-#NODE tStep 1 number 5 dof 10 unknown d value 1.89337006e+00
-#NODE tStep 1 number 9 dof 10 unknown d value 7.11067547e+01
+#NODE tStep 1 number 5 dof 10 unknown d value 9.98146959e-01
+#NODE tStep 1 number 9 dof 10 unknown d value 7.29756332e+01
 #NODE tStep 2 number 5 dof 10 unknown d value 1.50000000e+02
-#NODE tStep 2 number 9 dof 10 unknown d value 1.46314088e+02
+#NODE tStep 2 number 9 dof 10 unknown d value 1.46062022e+02
 #NODE tStep 3 number 5 dof 10 unknown d value 1.50000000e+02
-#NODE tStep 3 number 9 dof 10 unknown d value 2.17516257e+02
+#NODE tStep 3 number 9 dof 10 unknown d value 2.19225802e+02
 #%END_CHECK%
