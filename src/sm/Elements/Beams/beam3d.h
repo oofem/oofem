@@ -37,7 +37,7 @@
 
 #include "../sm/Elements/structuralelement.h"
 #include "../sm/CrossSections/fiberedcs.h"
-#include "../sm/Elements/beam3dsubsoil.h"
+#include "../sm/Materials/winklermodel.h"
 #include "dofmanager.h"
 
 ///@name Input fields for Beam3d
@@ -47,6 +47,7 @@
 #define _IFT_Beam3d_refnode "refnode"
 #define _IFT_Beam3d_refangle "refangle"
 #define _IFT_Beam3d_zaxis "zaxis"
+#define _IFT_Beam3d_subsoilmat "subsoilmat"
 //@}
 
 namespace oofem {
@@ -67,7 +68,7 @@ class FEI3dLineLin;
  * @author Mikael Öhman
  * @author (several other authors)
  */
- class Beam3d : public StructuralElement, public FiberedCrossSectionInterface, public Beam3dSubsoilElementInterface
+ class Beam3d : public StructuralElement, public FiberedCrossSectionInterface, public Beam3dSubsoilMaterialInterface
 {
 protected:
     /// Geometry interpolator only.
@@ -87,6 +88,9 @@ protected:
     DofManager *ghostNodes [ 2 ];
     /// number of condensed DOFs
     int numberOfCondensedDofs;
+
+    /// Subsoil material
+    int subsoilMat;
     
 
 public:
@@ -169,6 +173,8 @@ public:
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
     virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
 
+    /*
+    /// Subsoil support implemented directly enabling the postprocessing of end-forces
 
     virtual void B3SSI_getNMatrix (FloatMatrix &answer, GaussPoint *gp) {
       this->computeNmatrixAt(gp->giveNaturalCoordinates(), answer);
@@ -179,7 +185,8 @@ public:
     virtual double B3SSI_computeVolumeAround (GaussPoint* gp) {
       return this->computeVolumeAround(gp);
     }
-    virtual void B3SSI_getNodalGtoLRotationMatrix(FloatMatrix& answer);
+    */
+    virtual void B3SSMI_getUnknownsGtoLRotationMatrix(FloatMatrix& answer);
 
 
     
@@ -213,6 +220,11 @@ protected:
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }
 
     bool hasDofs2Condense() { return ( ghostNodes [ 0 ] || ghostNodes [ 1 ] ); }
+
+
+    void computeSubSoilNMatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    void computeSubSoilStiffnessMatrix(FloatMatrix &answer,
+				       MatResponseMode rMode, TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // beam3d_h

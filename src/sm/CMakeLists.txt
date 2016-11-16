@@ -83,7 +83,6 @@ set (sm_element
     Elements/tet21ghostsolid.C
     Elements/quad1platesubsoil.C 
     Elements/tria1platesubsoil.C
-    Elements/beam3dsubsoil.C
     Elements/trwarp.C
     #qplanstrssphf.C
     )
@@ -207,6 +206,7 @@ set (sm_material
     Materials/simplevitrificationmaterial.C
     Materials/anisodamagemodel.C
     Materials/winklerpasternak.C
+    Materials/winklermodel.C
     Materials/structmatsettable.C
     Materials/tutorialmaterial.C
     Materials/graddpmaterialextensioninterface.C
