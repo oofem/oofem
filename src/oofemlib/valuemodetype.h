@@ -48,6 +48,12 @@ namespace oofem {
 //
 // see also isUnknownModeIncrementalMode() function (cltypes.C)
 // when adding new ValueModeType mode.
+/*
+  Note:
+  VM_Total:   total value evaluated at the end of solution (time) step
+  VM_TotalIntrinsic: total value evaluated at intrinsic time 
+*/
+
 
 #define ValueModeType_DEF \
     ENUM_ITEM_WITH_VALUE(VM_Unknown, 0) \
@@ -58,7 +64,9 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(VM_RhsTotal, 5)           \
     ENUM_ITEM_WITH_VALUE(VM_RhsIncremental, 6)     \
     ENUM_ITEM_WITH_VALUE(VM_RhsInitial, 7)         \
-    ENUM_ITEM_WITH_VALUE(VM_Intermediate, 8)
+    ENUM_ITEM_WITH_VALUE(VM_Intermediate, 8)       \
+    ENUM_ITEM_WITH_VALUE(VM_TotalIntrinsic, 9)
+      
 
 /**
  * Type representing the mode of UnknownType or CharType, or similar types.

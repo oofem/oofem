@@ -206,6 +206,7 @@ set (sm_material
     Materials/simplevitrificationmaterial.C
     Materials/anisodamagemodel.C
     Materials/winklerpasternak.C
+    Materials/winklermodel.C
     Materials/structmatsettable.C
     Materials/tutorialmaterial.C
     Materials/graddpmaterialextensioninterface.C

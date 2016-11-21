@@ -3,8 +3,8 @@ Test of CEMHYD3D hydration model, Q_pot = 534 J/g_cem, 300 kg cem/m3_con, i.e. m
 #side YZ is kept at 20C and later released. Heat transport coefficient is assigned to opposite YZ side. The setup corresponds to 1D case.
 #8 independent CEMHYD3D models are used, for each integration point one instance.
 #NonStationaryProblem nsteps 21 deltat 3600.0 alpha 0.5 nmodules 1
-NlTransientTransportProblem nsteps 10 deltat 3600.0 rtol 1.e-5 alpha 0.5 nsmax 30 changingProblemSize nmodules 1
-#TransientTransport nsteps 10 deltat 3600.0 alpha 0.5 nmodules 1
+#NlTransientTransportProblem nsteps 10 deltat 3600.0 rtol 1.e-5 alpha 0.5 nsmax 30 changingProblemSize nmodules 1
+TransientTransport nsteps 10 deltat 3600.0 alpha 0.5 nmodules 1
 errorcheck
 #vtkxml tstep_all domain_all vars 11 37 39 44 56 67 68 69 70 71 72 73 stype 1
 domain HeatTransfer
@@ -35,14 +35,14 @@ Set 3 elementboundaries 2 1 5
 ## TIME
 ## Check temperature
 #NODE tStep 2 number 1 dof 10 unknown d value 2.00000000e+01
-#NODE tStep 2 number 3 dof 10 unknown d value 2.12548479e+01
-#NODE tStep 10 number 1 dof 10 unknown d value 5.25429658e+01
-#NODE tStep 10 number 3 dof 10 unknown d value 5.28935338e+01
+#NODE tStep 2 number 3 dof 10 unknown d value 2.02000723e+01
+#NODE tStep 10 number 1 dof 10 unknown d value 5.40281630e+01
+#NODE tStep 10 number 3 dof 10 unknown d value 4.12759083e+01
 ## Check degree of hydration
-#ELEMENT tStep 2 number 1 gp 1 keyword 39 component 1 value 0.011853
-#ELEMENT tStep 2 number 1 gp 5 keyword 39 component 1 value 0.011853
-#ELEMENT tStep 10 number 1 gp 1 keyword 39 component 1 value 0.522685
-#ELEMENT tStep 10 number 1 gp 5 keyword 39 component 1 value 0.594808
+#ELEMENT tStep 2 number 1 gp 1 keyword 39 component 1 value 2.28292097e-02
+#ELEMENT tStep 2 number 1 gp 5 keyword 39 component 1 value 2.85766881e-02
+#ELEMENT tStep 10 number 1 gp 1 keyword 39 component 1 value 4.66584656e-01
+#ELEMENT tStep 10 number 1 gp 5 keyword 39 component 1 value 3.91491384e-01
 #%END_CHECK%
 
 

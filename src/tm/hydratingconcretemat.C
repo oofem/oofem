@@ -123,7 +123,7 @@ void
 HydratingConcreteMat :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
 {
     val.resize(1);
-    if ( mode == VM_Total ) {
+    if (( mode == VM_Total) || (mode == VM_TotalIntrinsic)) {
         val.at(1) = this->GivePower(tStep, gp, mode);
     } else {
         OOFEM_ERROR("Undefined mode %s\n", __ValueModeTypeToString(mode) );
