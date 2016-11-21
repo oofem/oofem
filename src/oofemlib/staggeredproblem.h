@@ -50,6 +50,7 @@
 #define _IFT_StaggeredProblem_prescribedtimes "prescribedtimes"
 #define _IFT_StaggeredProblem_prob1 "prob1"
 #define _IFT_StaggeredProblem_prob2 "prob2"
+#define _IFT_StaggeredProblem_prob3 "prob3"
 #define _IFT_StaggeredProblem_coupling "coupling"
 #define _IFT_StaggeredProblem_adaptiveStepLength "adaptivesteplength"
 #define _IFT_StaggeredProblem_minsteplength "minsteplength"
