@@ -49,6 +49,10 @@
 #include "classfactory.h"
 #include "elementinternaldofman.h"
 #include "masterdof.h"
+#include "bctracker.h"
+
+#include "bodyload.h"
+#include "boundaryload.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -616,9 +620,28 @@ Beam3d :: giveEndForcesVector(FloatArray &answer, TimeStep *tStep)
     this->giveInternalForcesVector(answer, tStep);
 
     // add exact end forces due to nonnodal loading
-    this->computeForceLoadVector(loadEndForces, tStep, VM_Total);
+    this->computeForceLoadVector(loadEndForces, tStep, VM_Total); // will compute only contribution of loads applied directly on receiver (not using sets)
     if ( loadEndForces.giveSize() ) {
         answer.subtract(loadEndForces);
+    }
+    // add exact end forces due to nonnodal loading applied indirectly (via sets)
+    BCTracker *bct = this->domain->giveBCTracker();
+    BCTracker::entryListType bcList = bct->getElementRecords(this->number);
+    FloatArray help;
+    for (BCTracker::entryListType::iterator it = bcList.begin(); it != bcList.end(); ++it) {
+      GeneralBoundaryCondition *bc = this->domain->giveBc((*it).bcNumber);
+      BodyLoad *bodyLoad;
+      BoundaryLoad *boundaryLoad;
+      if (bc->isImposed(tStep)) {
+        if ((bodyLoad = dynamic_cast<BodyLoad*>(bc))) { // body load
+          this->computeBodyLoadVectorAt(help,bodyLoad, tStep, VM_Total);
+          answer.subtract(help);
+        } else if ((boundaryLoad = dynamic_cast<BoundaryLoad*>(bc))) {
+          this->computeBoundaryEdgeLoadVector(help, boundaryLoad, (*it).boundaryId,
+                                              ExternalForcesVector, VM_Total, tStep);
+          answer.subtract(help);
+        }
+      }
     }
 }
 
