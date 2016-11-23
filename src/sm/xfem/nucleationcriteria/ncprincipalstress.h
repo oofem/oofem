@@ -38,6 +38,9 @@
 #define _IFT_NCPrincipalStress_Name "ncprincipalstress"
 #define _IFT_NCPrincipalStress_StressThreshold "stressthreshold"
 #define _IFT_NCPrincipalStress_InitialCrackLength "initialcracklength"
+#define _IFT_NCPrincipalStress_MatForceRadius "matforceradius"
+#define _IFT_NCPrincipalStress_IncrementLength "incrementlength"
+#define _IFT_NCPrincipalStress_CrackPropThreshold "crackpropthreshold"
 
 #include "xfem/nucleationcriterion.h"
 
@@ -64,6 +67,9 @@ public:
 protected:
     double mStressThreshold;
     double mInitialCrackLength;
+    double mMatForceRadius;
+    double mIncrementLength;
+    double mCrackPropThreshold;
 
     /// If the initiated crack should cut exactly one element.
     bool mCutOneEl;

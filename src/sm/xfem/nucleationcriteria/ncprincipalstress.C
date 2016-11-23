@@ -65,6 +65,9 @@ NCPrincipalStress::NCPrincipalStress(Domain *ipDomain):
 NucleationCriterion(ipDomain),
 mStressThreshold(0.0),
 mInitialCrackLength(0.0),
+mMatForceRadius(0.0),
+mIncrementLength(0.0),
+mCrackPropThreshold(0.0),
 mCutOneEl(false),
 mCrossSectionInd(2)
 {
@@ -267,18 +270,21 @@ std::vector<std::unique_ptr<EnrichmentItem>> NCPrincipalStress::nucleateEnrichme
 			//					    PLDoNothing *pl = new PLDoNothing();
 
 									PLMaterialForce *pl = new PLMaterialForce();
-									pl->setRadius(0.25);
-									pl->setIncrementLength(0.50);
+									pl->setRadius(mMatForceRadius);
+									pl->setIncrementLength(mIncrementLength);
 //									pl->setIncrementLength(0.25);
 //									pl->setCrackPropThreshold(0.25);
-									pl->setCrackPropThreshold(0.1);
+									pl->setCrackPropThreshold(mCrackPropThreshold);
 
 									crack->setPropagationLaw(pl);
+
+									crack->updateDofIdPool();
 
 									center_coord_inserted_cracks.push_back(pc);
 									eiList.push_back( std::unique_ptr<EnrichmentItem>(std::move(crack)) );
 
-									printf("Nucleating a crack.\n");
+//									printf("Nucleating a crack in NCPrincipalStress::nucleateEnrichmentItems.\n");
+//									printf("el->giveGlobalNumber(): %d\n", el->giveGlobalNumber() );
 
 									// We only introduce one crack per element in a single time step.
 									break;
@@ -306,6 +312,16 @@ IRResultType NCPrincipalStress::initializeFrom(InputRecord *ir) {
     IR_GIVE_FIELD(ir, mInitialCrackLength, _IFT_NCPrincipalStress_InitialCrackLength);
 //    printf("mInitialCrackLength: %e\n", mInitialCrackLength);
 
+    IR_GIVE_FIELD(ir, mMatForceRadius, _IFT_NCPrincipalStress_MatForceRadius);
+//    printf("mMatForceRadius: %e\n", mMatForceRadius);
+
+    IR_GIVE_FIELD(ir, mIncrementLength, _IFT_NCPrincipalStress_IncrementLength);
+//    printf("mIncrementLength: %e\n", mIncrementLength);
+
+    IR_GIVE_FIELD(ir, mCrackPropThreshold, _IFT_NCPrincipalStress_CrackPropThreshold);
+//    printf("mCrackPropThreshold: %e\n", mCrackPropThreshold);
+
+
     return NucleationCriterion::initializeFrom(ir);
 }
 
@@ -317,6 +333,9 @@ void NCPrincipalStress :: appendInputRecords(DynamicDataReader &oDR)
 
     ir->setField(mStressThreshold, _IFT_NCPrincipalStress_StressThreshold);
     ir->setField(mInitialCrackLength, _IFT_NCPrincipalStress_InitialCrackLength);
+    ir->setField(mMatForceRadius, _IFT_NCPrincipalStress_MatForceRadius);
+    ir->setField(mIncrementLength, _IFT_NCPrincipalStress_IncrementLength);
+    ir->setField(mCrackPropThreshold, _IFT_NCPrincipalStress_CrackPropThreshold);
 
     oDR.insertInputRecord(DataReader :: IR_crackNucleationRec, ir);
 

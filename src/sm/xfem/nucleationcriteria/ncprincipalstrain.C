@@ -66,9 +66,10 @@ NCPrincipalStrain::NCPrincipalStrain(Domain *ipDomain):
 NucleationCriterion(ipDomain),
 mStrainThreshold(0.0),
 mInitialCrackLength(0.0),
+mIncrementLength(1.0),
+mPropStrainThreshold(0.0),
 mCutOneEl(false),
-mCrossSectionInd(1),
-mIncrementLength(1.0)
+mCrossSectionInd(1)
 {
 
 }
@@ -145,15 +146,6 @@ std::vector<std::unique_ptr<EnrichmentItem>> NCPrincipalStrain::nucleateEnrichme
 									std::vector<FloatArray> intersecPoints;
 		//							line.computeIntersectionPoints(el.get(), intersecPoints);
 
-									for ( int i = 1; i <= el->giveNumberOfDofManagers(); i++ ) {
-										int n1 = i;
-										int n2 = 0;
-										if ( i < el->giveNumberOfDofManagers() ) {
-											n2 = i + 1;
-										} else {
-											n2 = 1;
-										}
-									}
 
 									if(intersecPoints.size() == 2) {
 										ps = std::move(intersecPoints[0]);
@@ -234,9 +226,9 @@ std::vector<std::unique_ptr<EnrichmentItem>> NCPrincipalStrain::nucleateEnrichme
 
 									// Options
 									PLPrincipalStrain *pl = new PLPrincipalStrain();
-									pl->setRadius(1.0);
+									pl->setRadius(0.1*mIncrementLength);
 									pl->setIncrementLength(mIncrementLength);
-									pl->setStrainThreshold(mStrainThreshold);
+									pl->setStrainThreshold(mPropStrainThreshold);
 
 									crack->setPropagationLaw(pl);
 
@@ -276,6 +268,9 @@ IRResultType NCPrincipalStrain::initializeFrom(InputRecord *ir) {
     IR_GIVE_FIELD(ir, mIncrementLength, _IFT_NCPrincipalStrain_IncrementLength);
     printf("mIncrementLength: %e\n", mIncrementLength);
 
+    IR_GIVE_FIELD(ir, mPropStrainThreshold, _IFT_NCPrincipalStrain_PropStrainThreshold);
+    printf("mPropStrainThreshold: %e\n", mPropStrainThreshold);
+
     return NucleationCriterion::initializeFrom(ir);
 }
 
@@ -288,6 +283,7 @@ void NCPrincipalStrain :: appendInputRecords(DynamicDataReader &oDR)
     ir->setField(mStrainThreshold, _IFT_NCPrincipalStrain_StrainThreshold);
     ir->setField(mInitialCrackLength, _IFT_NCPrincipalStrain_InitialCrackLength);
     ir->setField(mIncrementLength, _IFT_NCPrincipalStrain_IncrementLength);
+    ir->setField(mPropStrainThreshold, _IFT_NCPrincipalStrain_PropStrainThreshold);
 
     oDR.insertInputRecord(DataReader :: IR_crackNucleationRec, ir);
 

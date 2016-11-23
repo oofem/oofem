@@ -38,6 +38,7 @@
 #define _IFT_NCPrincipalStrain_Name "ncprincipalstrain"
 #define _IFT_NCPrincipalStrain_StrainThreshold "strainthreshold"
 #define _IFT_NCPrincipalStrain_IncrementLength "incrementlength"
+#define _IFT_NCPrincipalStrain_PropStrainThreshold "propagationstrainthreshold"
 #define _IFT_NCPrincipalStrain_InitialCrackLength "initialcracklength"
 #define _IFT_NCPrincipalStrain_CrossSectionIndex "csindex"
 
@@ -66,6 +67,7 @@ protected:
     double mStrainThreshold;
     double mInitialCrackLength;
     double mIncrementLength;
+    double mPropStrainThreshold;
 
     /// If the initiated crack should cut exactly one element.
     bool mCutOneEl;
