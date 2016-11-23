@@ -74,9 +74,9 @@ Set 5 nodes 1 1
 ##
 #BEAM_ELEMENT tStep 1 number 3  keyword 1 component 1  value 0. 
 #BEAM_ELEMENT tStep 1 number 3  keyword 1 component 2  value 0. 
-#BEAM_ELEMENT tStep 1 number 3  keyword 1 component 3  value -1.30444584e+01 
+#BEAM_ELEMENT tStep 1 number 3  keyword 1 component 3  value -1.82944584e+01
 #BEAM_ELEMENT tStep 1 number 3  keyword 1 component 4  value 4.22010102e+00 
-#BEAM_ELEMENT tStep 1 number 3  keyword 1 component 5  value 2.48959829e+01 
+#BEAM_ELEMENT tStep 1 number 3  keyword 1 component 5  value 2.79584829e+01
 #BEAM_ELEMENT tStep 1 number 3  keyword 1 component 6  value 0. 
 ##
 #BEAM_ELEMENT tStep 1 number 4  keyword 1 component 1  value 0. 

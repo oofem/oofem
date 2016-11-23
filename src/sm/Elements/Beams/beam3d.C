@@ -312,7 +312,6 @@ Beam3d :: computeGtoLRotationMatrix(FloatMatrix &answer)
 // Returns the rotation matrix of the receiver.
 {
     FloatMatrix lcs;
-    
     int ndofs = computeNumberOfGlobalDofs();
     answer.resize(ndofs, ndofs);
     answer.zero();
@@ -361,6 +360,8 @@ Beam3d :: computeGtoLRotationMatrix(FloatMatrix &answer)
     return true;
 }
 
+
+  
 void
 Beam3d :: B3SSMI_getUnknownsGtoLRotationMatrix(FloatMatrix &answer)
 // Returns the rotation matrix for element unknowns
@@ -655,21 +656,28 @@ Beam3d :: giveEndForcesVector(FloatArray &answer, TimeStep *tStep)
     BCTracker *bct = this->domain->giveBCTracker();
     BCTracker::entryListType bcList = bct->getElementRecords(this->number);
     FloatArray help;
+    FloatMatrix t;
+
     for (BCTracker::entryListType::iterator it = bcList.begin(); it != bcList.end(); ++it) {
       GeneralBoundaryCondition *bc = this->domain->giveBc((*it).bcNumber);
       BodyLoad *bodyLoad;
       BoundaryLoad *boundaryLoad;
       if (bc->isImposed(tStep)) {
         if ((bodyLoad = dynamic_cast<BodyLoad*>(bc))) { // body load
-          this->computeBodyLoadVectorAt(help,bodyLoad, tStep, VM_Total);
+          this->computeBodyLoadVectorAt(help,bodyLoad, tStep, VM_Total); // this one is local
           answer.subtract(help);
         } else if ((boundaryLoad = dynamic_cast<BoundaryLoad*>(bc))) {
+          // compute Boundary Edge load vector in GLOBAL CS !!!!!!!
           this->computeBoundaryEdgeLoadVector(help, boundaryLoad, (*it).boundaryId,
                                               ExternalForcesVector, VM_Total, tStep);
+          // get it transformed back to local c.s.
+          this->computeGtoLRotationMatrix(t);
+          help.rotatedWith(t, 'n');
           answer.subtract(help);
         }
       }
-
+    }
+    
     if (subsoilMat) {
       // @todo: linear subsoil assumed here; more general approach should integrate internal forces
       FloatMatrix k;
