@@ -98,7 +98,7 @@ ConstantFunction 1 f(t) 1.0
 ConstantFunction 2 f(t) 1.0
 #
 #
-#%BEGIN_CHECK% tolerance 1e-11
+#%BEGIN_CHECK% tolerance 2e-11
 #NODE tStep 5  number 2 dof 1 unknown d value 4.934415e-06
 #NODE tStep 11 number 2 dof 1 unknown d value 6.088938e-06
 #NODE tStep 17 number 2 dof 1 unknown d value 7.905037e-06

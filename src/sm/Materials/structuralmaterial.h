@@ -192,6 +192,7 @@ public:
     virtual void giveRealStressVector_Lattice3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
     /// Default implementation is not provided
     virtual void giveRealStressVector_2dPlateSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
+    virtual void giveRealStressVector_3dBeamSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
 
     /**
      * @name Methods associated with the First PK stress tensor.
@@ -607,6 +608,17 @@ public:
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     virtual void give2dPlateSubSoilStiffMtrx(FloatMatrix &answer,
+                                             MatResponseMode mmode, GaussPoint *gp,
+                                             TimeStep *tStep);
+    /**
+     * Method for computing stiffness matrix of beam3d subsoil model.
+     * Default method is emty; the implementation should be provided by the particular model.
+     * @param answer Stiffness matrix.
+     * @param mmode Material response mode.
+     * @param gp Integration point, which load history is used.
+     * @param tStep Time step (most models are able to respond only when tStep is current time step).
+     */
+    virtual void give3dBeamSubSoilStiffMtrx(FloatMatrix &answer,
                                              MatResponseMode mmode, GaussPoint *gp,
                                              TimeStep *tStep);
     /**

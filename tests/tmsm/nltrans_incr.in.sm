@@ -32,22 +32,22 @@ Set 3 nodes 3 1 2 3
 Set 4 nodes 3 7 8 9
 #
 #%BEGIN_CHECK% tolerance 1.e-8
-#NODE tStep 1 number 4 dof 1 unknown d value 2.14447354e-06
-#NODE tStep 1 number 4 dof 2 unknown d value 1.26168651e-05
-#NODE tStep 1 number 8 dof 1 unknown d value 1.39399126e-06
-#NODE tStep 1 number 8 dof 2 unknown d value 4.53896843e-04
-#ELEMENT tStep 1 number 1 gp 1 keyword 4  component 1  value -2.97301703e-06
-#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 1  value -2.21951198e-01
-#NODE tStep 2 number 4 dof 1 unknown d value -1.95274222e-04
-#NODE tStep 2 number 4 dof 2 unknown d value -2.14039109e-04
+#NODE tStep 1 number 4 dof 1 unknown d value 3.50423014e-06
+#NODE tStep 1 number 4 dof 2 unknown d value 7.34035089e-06
+#NODE tStep 1 number 8 dof 1 unknown d value 1.51530288e-06
+#NODE tStep 1 number 8 dof 2 unknown d value 4.54612108e-04
+#ELEMENT tStep 1 number 1 gp 1 keyword 4  component 1  value -1.24839630e-05
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 1  value -2.27822271e-01
+#NODE tStep 2 number 4 dof 1 unknown d value -1.95258274e-04
+#NODE tStep 2 number 4 dof 2 unknown d value -2.12923629e-04
 #NODE tStep 2 number 8 dof 1 unknown d value 7.40253375e-06
-#NODE tStep 2 number 8 dof 2 unknown d value 4.53896843e-04
-#ELEMENT tStep 2 number 1 gp 1 keyword 4  component 1  value 1.61410457e-03
-#ELEMENT tStep 2 number 1 gp 1 keyword 1 component 1  value -5.11685907e-01
-#NODE tStep 3 number 4 dof 1 unknown d value -1.91112971e-04
-#NODE tStep 3 number 4 dof 2 unknown d value -4.28624523e-04
-#NODE tStep 3 number 8 dof 1 unknown d value 1.18730430e-05
-#NODE tStep 3 number 8 dof 2 unknown d value 4.53896843e-04
-#ELEMENT tStep 3 number 1 gp 1 keyword 4  component 1  value 1.62599091e-03
-#ELEMENT tStep 3 number 1 gp 1 keyword 1 component 1  value -7.14048029e-01
+#NODE tStep 2 number 8 dof 2 unknown d value 4.54612108e-04
+#ELEMENT tStep 2 number 1 gp 1 keyword 4  component 1  value 1.61393802e-03
+#ELEMENT tStep 2 number 1 gp 1 keyword 1 component 1  value -5.11988405e-01
+#NODE tStep 3 number 4 dof 1 unknown d value -1.90982381e-04
+#NODE tStep 3 number 4 dof 2 unknown d value -4.33420846e-04
+#NODE tStep 3 number 8 dof 1 unknown d value 1.19921273e-05
+#NODE tStep 3 number 8 dof 2 unknown d value 4.54612108e-04
+#ELEMENT tStep 3 number 1 gp 1 keyword 4  component 1  value 1.62615182e-03
+#ELEMENT tStep 3 number 1 gp 1 keyword 1 component 1  value -7.19925580e-01
 #%END_CHECK%

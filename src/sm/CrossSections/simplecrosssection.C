@@ -462,7 +462,6 @@ SimpleCrossSection :: give2dPlateSubSoilStiffMtrx(FloatMatrix &answer, MatRespon
 }
 
 
-
 IRResultType
 SimpleCrossSection :: initializeFrom(InputRecord *ir)
 //
