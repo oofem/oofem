@@ -183,14 +183,14 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
         rhs.zero();
         //edge or surface load on element
         //add internal source vector on elements
-        this->assembleVectorFromElements( rhs, & TauStep, TransportExternalForceAssembler(), VM_Total,
+        this->assembleVectorFromElements( rhs, tStep, TransportExternalForceAssembler(), VM_Total,
                                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //add nodal load
-        this->assembleVectorFromDofManagers( rhs, & TauStep, ExternalForceAssembler(), VM_Total,
+        this->assembleVectorFromDofManagers( rhs, tStep, ExternalForceAssembler(), VM_Total,
                                             EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
         // subtract the rhs part depending on previous solution
-        assembleAlgorithmicPartOfRhs(rhs, EModelDefaultEquationNumbering(), & TauStep);
+        assembleAlgorithmicPartOfRhs(rhs, EModelDefaultEquationNumbering(), tStep);
         // set-up numerical model
         this->giveNumericalMethod( this->giveCurrentMetaStep() );
 
@@ -204,7 +204,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
 
         linSolver->solve(*conductivityMatrix, rhs, solutionVectorIncrement);
         solutionVector->add(solutionVectorIncrement);
-        this->updateInternalState(& TauStep); //insert to hash=0(current), if changes in equation numbering
+        this->updateInternalState(tStep); //insert to hash=0(current), if changes in equation numbering
         // compute error in the solutionvector increment
         incrementErr = solutionVectorIncrement.computeNorm();
 
@@ -230,7 +230,9 @@ double NLTransientTransportProblem :: giveUnknownComponent(ValueModeType mode, T
     if ( this->requiresUnknownsDictionaryUpdate() ) {
         if ( mode == VM_Incremental ) { //get difference between current and previous time variable
             return dof->giveUnknowns()->at(0) - dof->giveUnknowns()->at(1);
-        }
+        } else if ( mode == VM_TotalIntrinsic ) { // intrinsic value only for current step
+	    return this->alpha * dof->giveUnknowns()->at(0) + (1.-this->alpha) * dof->giveUnknowns()->at(1);
+	}
         int hash = this->giveUnknownDictHashIndx(mode, tStep);
         if ( dof->giveUnknowns()->includes(hash) ) {
             return dof->giveUnknowns()->at(hash);
@@ -254,8 +256,11 @@ double NLTransientTransportProblem :: giveUnknownComponent(ValueModeType mode, T
         double psi = ( t - previousStep->giveTargetTime() ) / currentStep->giveTimeIncrement();
         if ( mode == VM_Velocity ) {
             return ( rtdt - rt ) / currentStep->giveTimeIncrement();
-        } else if ( mode == VM_Total ) {
-            return psi * rtdt + ( 1. - psi ) * rt;
+        } else if ( mode == VM_TotalIntrinsic ) {
+	  // only supported for current step
+	    return this->alpha * rtdt + ( 1. - this->alpha ) * rt; 
+	} else if ( mode == VM_Total ) {
+	    return psi * rtdt + ( 1. - psi ) * rt;
         } else if ( mode == VM_Incremental ) {
             if ( previousStep->isIcApply() ) {
                 return 0;
@@ -431,7 +436,7 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer,
         } else {
             OOFEM_ERROR("unsupported time value");
         }
-
+	// bp: r can be computed simply as element->computeVectorOf(VM_TotalIntrinsic, currentStep, r);
 
         if ( lumpedCapacityStab ) {
             int size = charMtrxCap.giveNumberOfRows();

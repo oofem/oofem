@@ -12,8 +12,6 @@ Test of Quad1_ht elements, heat transfer coefficient depending on temperature
 #
 #StationaryProblem nsteps 1
 NonStationaryProblem nsteps 5 deltat 60000.0 alpha 0.5 nmodules 1
-#nltransienttransportproblem nsteps 5 deltat 60000.0 rtol 0.001 alpha 0.5 nsmax 20 nmodules 1
-#TransientTransport nsteps 5 deltat 60000.0 alpha 0.5 nmodules 1
 errorcheck
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all
@@ -38,9 +36,9 @@ Set 2 nodes 2 1 2
 #Set 3 elementboundaries 2 2 2
 
 #%BEGIN_CHECK%
-#NODE tStep 5 number 3 dof 10 unknown d value 1.86751477e+00
-#NODE tStep 5 number 4 dof 10 unknown d value 1.86751477e+00
-#NODE tStep 5 number 5 dof 10 unknown d value 1.20795606e+01
-#NODE tStep 5 number 6 dof 10 unknown d value 1.20795606e+01
+#NODE tStep 5 number 3 dof 10 unknown d value 9.24916606e-01
+#NODE tStep 5 number 4 dof 10 unknown d value 9.24916606e-01
+#NODE tStep 5 number 5 dof 10 unknown d value 1.43700024e+01
+#NODE tStep 5 number 6 dof 10 unknown d value 1.43700024e+01
 #%END_CHECK%
 

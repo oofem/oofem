@@ -1,7 +1,6 @@
 hydratingConcreteMat05.out
 Test of hydrating concrete material, two linear triangluar element with two heat sources, transient nonlinear solver, isothermal conditions, affinity hydration model with ordinary and slag cement
-NlTransientTransportProblem nsteps 30 deltat 10800. rtol 1.e-5 alpha 0.5 nsmax 30 nmodules 1
-#TransientTransport nsteps 30 deltat 10800. alpha 0.5 nmodules 1
+TransientTransport nsteps 30 deltat 7200. alpha 0.5 nmodules 1
 errorcheck
 #vtkxml tstep_step 1 domain_all primvars 1 6 vars 4 37 39 56 95 stype 1
 domain HeatTransfer
@@ -26,8 +25,8 @@ ConstantFunction 1 f(t) 1.0
 Set 1 elements 2 1 2
 
 #%BEGIN_CHECK% tolerance 1.e-3
-#ELEMENT tStep 6 number 1 gp 1 keyword 39 component 1 value 1.799370e-01
-#ELEMENT tStep 30 number 1 gp 1 keyword 39 component 1 value 5.678670e-01
-#ELEMENT tStep 6 number 2 gp 1 keyword 39 component 1 value 1.799370e-01
-#ELEMENT tStep 30 number 2 gp 1 keyword 39 component 1 value 7.003010e-01
+#ELEMENT tStep 6 number 1 gp 1 keyword 39 component 1 value 1.07180394e-01
+#ELEMENT tStep 30 number 1 gp 1 keyword 39 component 1 value 5.20334463e-01
+#ELEMENT tStep 6 number 2 gp 1 keyword 39 component 1 value 1.07180394e-01
+#ELEMENT tStep 30 number 2 gp 1 keyword 39 component 1 value 6.48537723e-01
 #%END_CHECK%

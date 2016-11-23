@@ -76,7 +76,10 @@ enum InterfaceType {
 
     XfemElementInterfaceType,
     VTKXMLExportModuleElementInterfaceType,
-    FailureModuleElementInterfaceType
+    FailureModuleElementInterfaceType,
+
+    Beam3dSubsoilElementInterfaceType,
+    Beam3dSubsoilMaterialInterfaceType
 };
 } // end namespace oofem
 #endif // interfacetype_h

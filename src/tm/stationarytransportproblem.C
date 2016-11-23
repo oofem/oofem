@@ -118,6 +118,7 @@ double StationaryTransportProblem :: giveUnknownComponent(ValueModeType mode, Ti
         OOFEM_ERROR("invalid equation number");
     }
 #endif
+    if (mode == VM_TotalIntrinsic) mode = VM_Total;
     return UnknownsField->giveUnknownValue(dof, mode, tStep);
 }
 
