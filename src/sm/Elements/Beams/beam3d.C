@@ -245,7 +245,7 @@ Beam3d :: computeClampedStiffnessMatrix(FloatMatrix &answer,
 
 
 void
-Beam3d :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep)
+Beam3d :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
 {
     answer.clear();
 
@@ -281,10 +281,11 @@ Beam3d :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, 
         answer.plusProduct(N, t, dl);
     }
 
-    // Loads from sets expects global c.s.
-    this->computeGtoLRotationMatrix(T);
-    answer.rotatedWith(T, 't');
-    ///@todo Decide if we want local or global c.s. for loads over sets.
+    if (global) {
+      // Loads from sets expects global c.s.
+      this->computeGtoLRotationMatrix(T);
+      answer.rotatedWith(T, 't');
+    }
 }
 
 
@@ -669,10 +670,10 @@ Beam3d :: giveEndForcesVector(FloatArray &answer, TimeStep *tStep)
         } else if ((boundaryLoad = dynamic_cast<BoundaryLoad*>(bc))) {
           // compute Boundary Edge load vector in GLOBAL CS !!!!!!!
           this->computeBoundaryEdgeLoadVector(help, boundaryLoad, (*it).boundaryId,
-                                              ExternalForcesVector, VM_Total, tStep);
+					      ExternalForcesVector, VM_Total, tStep, false);
           // get it transformed back to local c.s.
-          this->computeGtoLRotationMatrix(t);
-          help.rotatedWith(t, 'n');
+          // this->computeGtoLRotationMatrix(t);
+          // help.rotatedWith(t, 'n');
           answer.subtract(help);
         }
       }

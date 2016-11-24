@@ -484,7 +484,7 @@ Beam2d :: giveEndForcesVector(FloatArray &answer, TimeStep *tStep)
 
 
 void
-Beam2d :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep)
+Beam2d :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
 {
     answer.clear();
 
@@ -521,10 +521,11 @@ Beam2d :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, 
         answer.plusProduct(N, t, dl);
     }
 
-    // Loads from sets expects global c.s.
-    this->computeGtoLRotationMatrix(T);
-    answer.rotatedWith(T, 't');
-    ///@todo Decide if we want local or global c.s. for loads over sets.
+    if (global) {
+      // Loads from sets expects global c.s.
+      this->computeGtoLRotationMatrix(T);
+      answer.rotatedWith(T, 't');
+    }
 }
 
 
