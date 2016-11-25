@@ -45,6 +45,7 @@
 #include "intarray.h"
 #include "floatarray.h"
 #include "engngm.h"
+#include "bodyload.h"
 #include "boundaryload.h"
 #include "mathfem.h"
 #include "classfactory.h"
@@ -480,6 +481,33 @@ Beam2d :: giveEndForcesVector(FloatArray &answer, TimeStep *tStep)
     if ( load.isNotEmpty() ) {
         answer.subtract(load);
     }
+
+    // add exact end forces due to nonnodal loading applied indirectly (via sets)
+    BCTracker *bct = this->domain->giveBCTracker();
+    BCTracker::entryListType bcList = bct->getElementRecords(this->number);
+    FloatArray help;
+
+    for (BCTracker::entryListType::iterator it = bcList.begin(); it != bcList.end(); ++it) {
+      GeneralBoundaryCondition *bc = this->domain->giveBc((*it).bcNumber);
+      BodyLoad *bodyLoad;
+      BoundaryLoad *boundaryLoad;
+      if (bc->isImposed(tStep)) {
+        if ((bodyLoad = dynamic_cast<BodyLoad*>(bc))) { // body load
+          this->computeBodyLoadVectorAt(help,bodyLoad, tStep, VM_Total); // this one is local
+          answer.subtract(help);
+        } else if ((boundaryLoad = dynamic_cast<BoundaryLoad*>(bc))) {
+          // compute Boundary Edge load vector in GLOBAL CS !!!!!!!
+          this->computeBoundaryEdgeLoadVector(help, boundaryLoad, (*it).boundaryId,
+					      ExternalForcesVector, VM_Total, tStep, false);
+          // get it transformed back to local c.s.
+          // this->computeGtoLRotationMatrix(t);
+          // help.rotatedWith(t, 'n');
+          answer.subtract(help);
+        }
+      }
+    }
+
+
 }
 
 

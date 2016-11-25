@@ -657,7 +657,6 @@ Beam3d :: giveEndForcesVector(FloatArray &answer, TimeStep *tStep)
     BCTracker *bct = this->domain->giveBCTracker();
     BCTracker::entryListType bcList = bct->getElementRecords(this->number);
     FloatArray help;
-    FloatMatrix t;
 
     for (BCTracker::entryListType::iterator it = bcList.begin(); it != bcList.end(); ++it) {
       GeneralBoundaryCondition *bc = this->domain->giveBc((*it).bcNumber);
