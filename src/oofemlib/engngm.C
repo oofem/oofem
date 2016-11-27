@@ -1952,6 +1952,10 @@ EngngModel :: balanceLoad(TimeStep *tStep)
 {
     this->giveLoadBalancerMonitor();
     this->giveLoadBalancer();
+    if ( !lb ) {
+        OOFEM_WARNING("No load balancer found, skipping load balancing step");
+        return;
+    }
 
     //print statistics for current step
     lb->printStatistics();
