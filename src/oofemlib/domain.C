@@ -70,6 +70,7 @@
 #include "xfem/enrichmentfunction.h"
 #include "xfem/propagationlaw.h"
 #include "contact/contactmanager.h"
+#include "bctracker.h"
 
 #include "boundarycondition.h"
 #include "activebc.h"
@@ -91,7 +92,8 @@
 
 namespace oofem {
 Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry(),
-    outputManager( new OutputManager(this) )
+                                                     outputManager( new OutputManager(this) ),
+                                                     bcTracker(this)
     // Constructor. Creates a new domain.
 {
     this->engineeringModel = e;
@@ -544,6 +546,12 @@ Domain :: giveFractureManager()
     return fracManager.get();
 }
 
+BCTracker*
+Domain::giveBCTracker()
+{
+  return &bcTracker;
+}
+  
 EngngModel *
 Domain :: giveEngngModel()
 {

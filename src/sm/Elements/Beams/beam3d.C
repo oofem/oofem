@@ -49,6 +49,10 @@
 #include "classfactory.h"
 #include "elementinternaldofman.h"
 #include "masterdof.h"
+#include "bctracker.h"
+
+#include "bodyload.h"
+#include "boundaryload.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -241,7 +245,7 @@ Beam3d :: computeClampedStiffnessMatrix(FloatMatrix &answer,
 
 
 void
-Beam3d :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep)
+Beam3d :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
 {
     answer.clear();
 
@@ -277,10 +281,11 @@ Beam3d :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, 
         answer.plusProduct(N, t, dl);
     }
 
-    // Loads from sets expects global c.s.
-    this->computeGtoLRotationMatrix(T);
-    answer.rotatedWith(T, 't');
-    ///@todo Decide if we want local or global c.s. for loads over sets.
+    if (global) {
+      // Loads from sets expects global c.s.
+      this->computeGtoLRotationMatrix(T);
+      answer.rotatedWith(T, 't');
+    }
 }
 
 
@@ -308,7 +313,6 @@ Beam3d :: computeGtoLRotationMatrix(FloatMatrix &answer)
 // Returns the rotation matrix of the receiver.
 {
     FloatMatrix lcs;
-    
     int ndofs = computeNumberOfGlobalDofs();
     answer.resize(ndofs, ndofs);
     answer.zero();
@@ -357,6 +361,8 @@ Beam3d :: computeGtoLRotationMatrix(FloatMatrix &answer)
     return true;
 }
 
+
+  
 void
 Beam3d :: B3SSMI_getUnknownsGtoLRotationMatrix(FloatMatrix &answer)
 // Returns the rotation matrix for element unknowns
@@ -642,11 +648,36 @@ Beam3d :: giveEndForcesVector(FloatArray &answer, TimeStep *tStep)
     this->giveInternalForcesVector(answer, tStep);
 
     // add exact end forces due to nonnodal loading
-    this->computeForceLoadVector(loadEndForces, tStep, VM_Total);
+    this->computeForceLoadVector(loadEndForces, tStep, VM_Total); // will compute only contribution of loads applied directly on receiver (not using sets)
     if ( loadEndForces.giveSize() ) {
         answer.subtract(loadEndForces);
     }
 
+    // add exact end forces due to nonnodal loading applied indirectly (via sets)
+    BCTracker *bct = this->domain->giveBCTracker();
+    BCTracker::entryListType bcList = bct->getElementRecords(this->number);
+    FloatArray help;
+
+    for (BCTracker::entryListType::iterator it = bcList.begin(); it != bcList.end(); ++it) {
+      GeneralBoundaryCondition *bc = this->domain->giveBc((*it).bcNumber);
+      BodyLoad *bodyLoad;
+      BoundaryLoad *boundaryLoad;
+      if (bc->isImposed(tStep)) {
+        if ((bodyLoad = dynamic_cast<BodyLoad*>(bc))) { // body load
+          this->computeBodyLoadVectorAt(help,bodyLoad, tStep, VM_Total); // this one is local
+          answer.subtract(help);
+        } else if ((boundaryLoad = dynamic_cast<BoundaryLoad*>(bc))) {
+          // compute Boundary Edge load vector in GLOBAL CS !!!!!!!
+          this->computeBoundaryEdgeLoadVector(help, boundaryLoad, (*it).boundaryId,
+					      ExternalForcesVector, VM_Total, tStep, false);
+          // get it transformed back to local c.s.
+          // this->computeGtoLRotationMatrix(t);
+          // help.rotatedWith(t, 'n');
+          answer.subtract(help);
+        }
+      }
+    }
+    
     if (subsoilMat) {
       // @todo: linear subsoil assumed here; more general approach should integrate internal forces
       FloatMatrix k;

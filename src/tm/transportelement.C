@@ -613,7 +613,7 @@ TransportElement :: computeLoadVector(FloatArray &answer, Load *load, CharType t
 
 
 void
-TransportElement :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep)
+TransportElement :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
 {
     
 answer.clear();
@@ -715,7 +715,7 @@ TransportElement :: computeTangentFromBoundaryLoad(FloatMatrix &answer, Boundary
 
 
 void
-TransportElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep)
+TransportElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
 {
     ///@todo Very similar to function computeBoundaryLoadVector and computeEdgeBCSubVectorAt. They should be all merged together.
     answer.clear();
