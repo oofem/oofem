@@ -1,0 +1,35 @@
+linedistributedspring01.out
+Test of linedistributedspring element
+LinearStatic nsteps 1 nmodules 1
+errorcheck
+domain 3d
+OutputManager tstep_all dofman_all element_all
+ndofman 2 nelem 1 ncrosssect 1 nmat 0 nbc 2 nic 0 nltf 1 nset 3
+node 1 coords 3 0. 0. 0.
+node 2 coords 3 0. 3. 0.
+linedistributedspring 1 nodes 2 1 2 dofs 3 1 2 3 k 3 1 2 3
+simplecs 1 set 3
+BoundaryCondition 1 loadTimeFunction 1 dofs 3 1 2 3 values 3 0 0 0 set 1
+#BoundaryCondition 2 loadTimeFunction 1 dofs 3 1 2 3 values 3 0 1 2 set 2
+NodalLoad 2 loadTimeFunction 1 dofs 3 1 2 3 Components 3 0.0 1.0 2.0 set 2
+ConstantFunction 1 f(t) 1.0
+Set 1 nodes 1 1
+Set 2 nodes 1 2
+Set 3 elements  1 1
+#
+#
+#
+#%BEGIN_CHECK% tolerance 1.e-5
+##
+## Note: this is the exact solution
+##
+## check reactions 
+#REACTION tStep 1 number 1 dof 1 value 0.0
+#REACTION tStep 1 number 1 dof 2 value 0.5
+#REACTION tStep 1 number 1 dof 3 value 1.0
+## check all nodes
+#NODE tStep 1 number 2 dof 1 unknown d value 0.0
+#NODE tStep 1 number 2 dof 2 unknown d value 0.5
+#NODE tStep 1 number 2 dof 3 unknown d value 0.66666666667
+##
+#%END_CHECK%
