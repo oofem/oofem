@@ -228,7 +228,7 @@ void Tet21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType t
     answer.assemble(temparray, this->momentum_ordering);
 }
 
-void Tet21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int iSurf, CharType type, ValueModeType mode, TimeStep *tStep)
+  void Tet21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int iSurf, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
 {
     if ( type != ExternalForcesVector ) {
         answer.clear();

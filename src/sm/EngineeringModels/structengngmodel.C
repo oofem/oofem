@@ -140,6 +140,9 @@ StructuralEngngModel :: printReactionForces(TimeStep *tStep, int di)
     }
 }
 
+void StructuralEngngModel :: terminate(TimeStep *tStep){
+    EngngModel :: terminate(tStep);
+}
 
 void
 StructuralEngngModel :: computeReaction(FloatArray &answer, TimeStep *tStep, int di)

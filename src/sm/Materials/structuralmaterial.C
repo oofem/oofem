@@ -2171,6 +2171,14 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSt
         }
 
         return 1;
+    } else if (type == IST_PlasticStrainTensor ) {
+        StructuralMaterial :: giveFullSymVectorForm( answer, status->giveStrainVector(), gp->giveMaterialMode() );
+        answer.zero();
+        return 1;
+    } else if (type == IST_MaxEquivalentStrainLevel ) {
+        answer.resize(1);
+        answer.at(1)=0.;
+        return 1;
     } else if ( type == IST_DeformationGradientTensor ) {
         answer = status->giveFVector();
         return 1;

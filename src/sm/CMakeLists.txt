@@ -85,6 +85,7 @@ set (sm_element
     Elements/tria1platesubsoil.C
     Elements/linedistributedspring.C
     Elements/trwarp.C
+    Elements/nodalspringelement.C
     #qplanstrssphf.C
     )
 

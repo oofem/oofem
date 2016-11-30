@@ -227,7 +227,7 @@ void Hexa21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType 
     answer.assemble(temparray, this->momentum_ordering);
 }
 
-void Hexa21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int iSurf, CharType type, ValueModeType mode, TimeStep *tStep)
+  void Hexa21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int iSurf, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
 {
     if ( type != ExternalForcesVector ) {
         answer.clear();

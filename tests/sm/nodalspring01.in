@@ -1,0 +1,23 @@
+nodalspring01.out
+Test of nodal spring element
+LinearStatic nsteps 1 nmodules 1
+errorcheck
+domain 3d
+OutputManager tstep_all dofman_all element_all
+ndofman 1 nelem 1 ncrosssect 0 nmat 0 nbc 1 nic 0 nltf 1 nset 1
+node 1 coords 3 0.  0.  0.
+NodalSpring 1 nodes 1 1 dofmask 3 1 2 3 k 3 1. 2. 0.5 
+NodalLoad 1 loadTimeFunction 1 dofs 3 1 2 3 Components 3 1.0 1.0 1.0 set 1
+ConstantFunction 1 f(t) 1.0
+Set 1 nodes 1 1
+#
+#%BEGIN_CHECK% tolerance 1.e-4
+## check nodal displacements
+#NODE tStep 1 number 1 dof 1 unknown d value 1.0
+#NODE tStep 1 number 1 dof 2 unknown d value 0.5
+#NODE tStep 1 number 1 dof 3 unknown d value 2.0 
+## element stresses and strains
+##ELEMENT tStep 1 number 1 keyword "force/moment" component 1  value 1.0
+##ELEMENT tStep 1 number 1 keyword "force/moment" component 2  value 1.0
+##ELEMENT tStep 1 number 1 keyword "force/moment" component 3  value 1.0
+#%END_CHECK%

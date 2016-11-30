@@ -573,7 +573,7 @@ Element :: computeLoadVector(FloatArray &answer, Load *load, CharType type, Valu
 
 
 void
-Element :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep)
+Element :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
 {
     answer.clear();
     OOFEM_ERROR("Unknown load type.");
@@ -587,7 +587,7 @@ Element :: computeTangentFromBoundaryLoad(FloatMatrix &answer, BoundaryLoad *loa
 }
 
 void
-Element :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep)
+Element :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
 {
     ///@todo Change the load type to "BoundaryEdgeLoad" maybe?
     answer.clear();

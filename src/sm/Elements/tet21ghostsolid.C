@@ -902,7 +902,7 @@ tet21ghostsolid :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer
 }
 
 void
-tet21ghostsolid :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep)
+tet21ghostsolid :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
 {
     answer.clear();
     if ( type != ExternalForcesVector ) {

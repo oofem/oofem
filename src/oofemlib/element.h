@@ -296,8 +296,9 @@ public:
      * @param type Type of the contribution.
      * @param mode Determines mode of answer.
      * @param tStep Time step when answer is computed.
+     * @param global if true (default) then contribution is in global c.s., when false then contribution is in element local c.s.
      */
-    virtual void computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true);
     /**
      * Computes the tangent contribution of the given load at the given boundary.
      * @note Elements which do not have an contribution should resize the vector to be empty.
@@ -317,8 +318,9 @@ public:
      * @param type Type of the contribution.
      * @param mode Determines mode of answer.
      * @param tStep Time step when answer is computed.
+     * @param global if true (default) then contribution is in global c.s., when false then contribution is in element local c.s.
      */
-    virtual void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true);
     //@}
 
     /**@name General element functions */
