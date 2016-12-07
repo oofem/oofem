@@ -805,7 +805,7 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
                     Element *element = domain->giveElement( boundaries.at(ibnd * 2 - 1) );
                     int boundary = boundaries.at(ibnd * 2);
                     mat.clear();
-                    ma.matrixFromBoundaryLoad(mat, *element, bLoad, boundary, tStep);
+                    ma.matrixFromSurfaceLoad(mat, *element, bLoad, boundary, tStep);
 
                     if ( mat.isNotEmpty() ) {
                         element->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
