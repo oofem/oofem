@@ -19,7 +19,7 @@ IsoHeat 1 d 0. k 3.0 c 1.0
 BoundaryCondition  1 loadTimeFunction 1 dofs 1 10 values 1 0.0 set 2
 #BoundaryCondition  1 loadTimeFunction 1 dofs 1 10 values 1 15.0 set 3
 #Newton bc
-constantedgeload 2 loadTimeFunction 1 components 1 15.0 properties 1 a 0.8 loadtype 3 set 3
+constantsurfaceload 2 loadTimeFunction 1 components 1 15.0 properties 1 a 0.8 loadtype 3 set 3
 ConstantFunction 1 f(t) 1.0
 Set 1 elementranges {(1 2)}
 Set 2 nodes 2 1 2
