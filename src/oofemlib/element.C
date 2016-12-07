@@ -581,7 +581,13 @@ Element :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int
 
 
 void
-Element :: computeTangentFromBoundaryLoad(FloatMatrix &answer, BoundaryLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep)
+Element :: computeTangentFromSurfaceLoad(FloatMatrix &answer, SurfaceLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep)
+{
+    answer.clear();
+}
+
+  void
+Element :: computeTangentFromEdgeLoad(FloatMatrix &answer, EdgeLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep)
 {
     answer.clear();
 }

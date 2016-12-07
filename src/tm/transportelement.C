@@ -679,7 +679,43 @@ answer.clear();
 
 
 void
-TransportElement :: computeTangentFromBoundaryLoad(FloatMatrix &answer, BoundaryLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep)
+TransportElement :: computeTangentFromSurfaceLoad(FloatMatrix &answer, SurfaceLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep)
+{
+    answer.clear();
+
+    if ( load->giveType() != ConvectionBC && load->giveType() != RadiationBC ) {
+        return;
+    }
+
+    FloatArray gcoords, n;
+    FloatMatrix N;
+    int unknownsPerNode = this->emode == HeatMass1TransferEM ? 2 : 1;
+
+    ///@todo Deal with coupled fields (I think they should be another class of problems completely).
+    FEInterpolation *interp = this->giveInterpolation();
+    std :: unique_ptr< IntegrationRule > iRule( interp->giveBoundaryIntegrationRule(load->giveApproxOrder() + 1 + interp->giveInterpolationOrder(), boundary) );
+
+    for ( auto &gp : *iRule ) {
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
+
+        interp->boundaryEvalN( n, boundary, lcoords, FEIElementGeometryWrapper(this) );
+        interp->boundaryLocal2Global( gcoords, boundary, lcoords, FEIElementGeometryWrapper(this) );
+        double detJ = interp->boundaryGiveTransformationJacobian( boundary, lcoords, FEIElementGeometryWrapper(this) );
+        double dA = this->giveThicknessAt(gcoords) * gp->giveWeight() * detJ;
+        N.beNMatrixOf(n, unknownsPerNode);
+
+        if ( load->giveType() == ConvectionBC ){
+            answer.plusProductSymmUpper(N, N, load->giveProperty('a', tStep) * dA);
+        } else if ( load->giveType() == RadiationBC ){
+            answer.plusProductSymmUpper(N, N, getRadiativeHeatTranferCoef(load, tStep) * dA);
+        }
+    }
+    answer.symmetrized();
+}
+
+
+void
+TransportElement :: computeTangentFromEdgeLoad(FloatMatrix &answer, EdgeLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep)
 {
     answer.clear();
 

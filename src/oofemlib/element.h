@@ -85,6 +85,8 @@ class ElementSide;
 class FEInterpolation;
 class Load;
 class BoundaryLoad;
+class SurfaceLoad;
+class EdgeLoad;
 class PrimaryField;
 class UnknownNumberingScheme;
 
@@ -304,11 +306,21 @@ public:
      * @note Elements which do not have an contribution should resize the vector to be empty.
      * @param answer Requested contribution of load.
      * @param load Load to compute contribution from.
-     * @param boundary Boundary number.
+     * @param boundary Surface number.
      * @param rmode Mode of the contribution.
      * @param tStep Time step when answer is computed.
      */
-    virtual void computeTangentFromBoundaryLoad(FloatMatrix &answer, BoundaryLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep);
+    virtual void computeTangentFromSurfaceLoad(FloatMatrix &answer, SurfaceLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep);
+    /**
+     * Computes the tangent contribution of the given load at the given boundary.
+     * @note Elements which do not have an contribution should resize the vector to be empty.
+     * @param answer Requested contribution of load.
+     * @param load Load to compute contribution from.
+     * @param boundary Surface number.
+     * @param rmode Mode of the contribution.
+     * @param tStep Time step when answer is computed.
+     */
+    virtual void computeTangentFromEdgeLoad(FloatMatrix &answer, EdgeLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep);
     /**
      * Computes the contribution of the given load at the given boundary edge.
      * @note Elements which do not have an contribution should resize the vector to be empty.
