@@ -199,5 +199,47 @@ protected:
      */
     virtual void computeComponentArrayAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
 };
+
+
+/**
+ * Abstract base class representing an edge load (force, momentum, ...) that acts
+ * directly on a edge boundary of some finite element (on element side, face,  ...).
+ * Boundary load is usually attribute of one or more finite elements.
+ * The units of edge load should be N/m in case of distributed forces, 
+ * Nm/m in case of distributed moments.
+ */
+class OOFEM_EXPORT EdgeLoad: public BoundaryLoad 
+{
+public:
+    /**
+     * Constructor. Creates an edge  load object with given number, belonging to given domain.
+     * @param i Load number.
+     * @param d Domain to which new object will belongs.
+     */
+     EdgeLoad(int i, Domain * d) : BoundaryLoad (i, d) {}
+};
+
+/**
+ * Abstract base class representing a surface load (force, momentum, ...) that acts
+ * directly on a surface boundary of some finite element (on element side, face,  ...).
+ * Boundary load is usually attribute of one or more finite elements.
+ * The units of surface load should be N/m^2 in case of distributed forces, 
+ * Nm/m^2 in case of distributed moments.
+ */
+class OOFEM_EXPORT SurfaceLoad: public BoundaryLoad 
+{
+public:
+    /**
+     * Constructor. Creates a surface load object with given number, belonging to given domain.
+     * @param i Load number.
+     * @param d Domain to which new object will belongs.
+     */
+     SurfaceLoad(int i, Domain * d) : BoundaryLoad (i, d) {}
+};
+
+
+
+
+
 } // end namespace oofem
 #endif // boundaryload_h
