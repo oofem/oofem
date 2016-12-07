@@ -49,7 +49,7 @@ void VectorAssembler :: vectorFromElement(FloatArray& vec, Element& element, Tim
 
 void VectorAssembler :: vectorFromLoad(FloatArray& vec, Element& element, BodyLoad* load, TimeStep* tStep, ValueModeType mode) const { vec.clear(); }
 
-void VectorAssembler :: vectorFromBoundaryLoad(FloatArray& vec, Element& element, BoundaryLoad* load, int boundary, TimeStep* tStep, ValueModeType mode) const { vec.clear(); }
+void VectorAssembler :: vectorFromSurfaceLoad(FloatArray& vec, Element& element, BoundaryLoad* load, int boundary, TimeStep* tStep, ValueModeType mode) const { vec.clear(); }
 
 void VectorAssembler :: vectorFromEdgeLoad(FloatArray& vec, Element& element, BoundaryLoad* load, int edge, TimeStep* tStep, ValueModeType mode) const { vec.clear(); }
 
@@ -102,7 +102,7 @@ void MatrixProductAssembler :: vectorFromLoad(FloatArray& vec, Element& element,
     vec.beProductOf(mat, this->vec);
 }
 
-void MatrixProductAssembler :: vectorFromBoundaryLoad(FloatArray& vec, Element& element, BoundaryLoad* load, int boundary, TimeStep* tStep, ValueModeType mode) const
+void MatrixProductAssembler :: vectorFromSurfaceLoad(FloatArray& vec, Element& element, BoundaryLoad* load, int boundary, TimeStep* tStep, ValueModeType mode) const
 {
     FloatMatrix mat;
     this->mAssem.matrixFromBoundaryLoad(mat, element, load, boundary, tStep);
@@ -129,7 +129,7 @@ void InternalForceAssembler :: vectorFromLoad(FloatArray& vec, Element& element,
     //element.computeInternalForcesFromLoad(vec, load, tStep);
 }
 
-void InternalForceAssembler :: vectorFromBoundaryLoad(FloatArray& vec, Element& element, BoundaryLoad* load, int boundary, TimeStep* tStep, ValueModeType mode) const
+void InternalForceAssembler :: vectorFromSurfaceLoad(FloatArray& vec, Element& element, BoundaryLoad* load, int boundary, TimeStep* tStep, ValueModeType mode) const
 {
     element.computeBoundaryLoadVector(vec, load, boundary, InternalForcesVector, mode, tStep);
     //element.computeInternalForcesFromBoundaryLoad(vec, load, boundary, tStep);
@@ -160,7 +160,7 @@ void ExternalForceAssembler :: vectorFromLoad(FloatArray& vec, Element& element,
     //element.computeExternalForcesFromLoad(vec, load, tStep);
 }
 
-void ExternalForceAssembler :: vectorFromBoundaryLoad(FloatArray& vec, Element& element, BoundaryLoad* load, int boundary, TimeStep* tStep, ValueModeType mode) const
+void ExternalForceAssembler :: vectorFromSurfaceLoad(FloatArray& vec, Element& element, BoundaryLoad* load, int boundary, TimeStep* tStep, ValueModeType mode) const
 {
     element.computeBoundaryLoadVector(vec, load, boundary, ExternalForcesVector, mode, tStep);
     //element.computeExternalForcesFromBoundaryLoad(vec, load, boundary, tStep);

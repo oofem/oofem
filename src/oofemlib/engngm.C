@@ -1050,7 +1050,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
 
 		      int boundary = boundaries.at(ibnd * 2);
 		      charVec.clear();
-		      va.vectorFromBoundaryLoad(charVec, *element, bLoad, boundary, tStep, mode);
+		      va.vectorFromSurfaceLoad(charVec, *element, bLoad, boundary, tStep, mode);
 
 		      if ( charVec.isNotEmpty() ) {
                         element->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
