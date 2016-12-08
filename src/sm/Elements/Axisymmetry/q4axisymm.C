@@ -54,7 +54,7 @@
 namespace oofem {
 REGISTER_Element(Q4Axisymm);
 
-FEI2dQuadQuad Q4Axisymm :: interp(1, 2);
+FEI2dQuadQuadAxi Q4Axisymm :: interp(1, 2);
 
 Q4Axisymm :: Q4Axisymm(int n, Domain *aDomain) :
     AxisymElement(n, aDomain), ZZNodalRecoveryModelInterface(this)

@@ -163,6 +163,61 @@ void StructuralElement :: computeLoadVector(FloatArray &answer, Load *load, Char
     }
 }
 
+void StructuralElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
+{
+    answer.clear();
+    if ( type != ExternalForcesVector ) {
+        return;
+    }
+
+    FEInterpolation *fei = this->giveInterpolation();
+    if ( !fei ) {
+        OOFEM_ERROR("No interpolator available");
+    }
+
+    FloatArray n_vec;
+    FloatMatrix n, T;
+    FloatArray force, globalIPcoords;
+    int nsd = fei->giveNsd();
+
+    std :: unique_ptr< IntegrationRule >iRule( fei->giveBoundaryEdgeIntegrationRule(load->giveApproxOrder(), boundary) );
+
+    for ( GaussPoint *gp: *iRule ) {
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
+
+        if ( load->giveFormulationType() == Load :: FT_Entity ) {
+            load->computeValueAt(force, tStep, lcoords, mode);
+        } else {
+            fei->boundaryEdgeLocal2Global( globalIPcoords, boundary, lcoords, FEIElementGeometryWrapper(this) );
+            load->computeValueAt(force, tStep, globalIPcoords, mode);
+        }
+
+        ///@todo Make sure this part is correct.
+        // We always want the global values in the end, so we might as well compute them here directly:
+        // transform force
+        if ( load->giveCoordSystMode() == Load :: CST_Global ) {
+            // then just keep it in global c.s
+        } else {
+            ///@todo Support this...
+            // transform from local boundary to element local c.s
+            if ( this->computeLoadLEToLRotationMatrix(T, boundary, gp) ) {
+               force.rotatedWith(T, 'n');
+            }
+            // then to global c.s
+            if ( this->computeLoadGToLRotationMtrx(T) ) {
+                force.rotatedWith(T, 't');
+            }
+        }
+
+        // Construct n-matrix
+        fei->boundaryEdgeEvalN( n_vec, boundary, lcoords, FEIElementGeometryWrapper(this) );
+        n.beNMatrixOf(n_vec, nsd);
+
+        double dV = gp->giveWeight() * fei->boundaryEdgeGiveTransformationJacobian( boundary, lcoords, FEIElementGeometryWrapper(this) );
+        answer.plusProduct(n, force, dV);
+    }
+}
+
 
 void
 StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode)
@@ -993,7 +1048,8 @@ StructuralElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx,
 //
 {
     if ( mtrx == ExternalForcesVector ) {
-        this->computeForceLoadVector(answer, tStep, mode);
+      //this->computeForceLoadVector(answer, tStep, mode); // bp: assembled by emodel 
+      answer.resize(0);
     } else if ( ( mtrx == InternalForcesVector ) && ( mode == VM_Total ) ) {
         this->giveInternalForcesVector(answer, tStep);
     } else if ( ( mtrx == LastEquilibratedInternalForcesVector ) && ( mode == VM_Total ) ) {

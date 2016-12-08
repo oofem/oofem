@@ -330,6 +330,8 @@ public:
     // Interface for b.c.s applied by Sets:
     virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
     virtual void computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true);
+    virtual void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true);
+    
 
     /**
      * Computes constitutive matrix of receiver. Default implementation uses element cross section

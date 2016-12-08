@@ -39,27 +39,22 @@
 namespace oofem {
 void FEInterpolation2d :: boundaryEdgeGiveNodes(IntArray &answer, int boundary)
 {
-    ///@todo What is this?! ...Doesn't seem to be used anyway / JB
-    answer.resize(1);
-    answer.at(1) = boundary;
+  this->computeLocalEdgeMapping(answer, boundary);
 }
 
 void FEInterpolation2d :: boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    answer.resize(1);
-    answer.at(1) = 1.;
+  this->edgeEvalN(answer, boundary, lcoords, cellgeo);
 }
 
 double FEInterpolation2d :: boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    return 1.;
+    return this->edgeGiveTransformationJacobian(boundary, lcoords, cellgeo);
 }
 
 void FEInterpolation2d :: boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    answer.resize(2);
-    answer.at(1) = cellgeo.giveVertexCoordinates(boundary)->at(xind);
-    answer.at(2) = cellgeo.giveVertexCoordinates(boundary)->at(yind);
+    this->edgeLocal2global(answer, boundary, lcoords, cellgeo);
 }
 
 double FEInterpolation2d :: giveArea(const FEICellGeometry &cellgeo) const
@@ -121,7 +116,8 @@ IntegrationRule *FEInterpolation2d :: giveBoundaryIntegrationRule(int order, int
 IntegrationRule *FEInterpolation2d :: giveBoundaryEdgeIntegrationRule(int order, int boundary)
 {
     IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
-    iRule->SetUpPoint(_Unknown);
+    int points = iRule->getRequiredNumberOfIntegrationPoints(_Line, order + this->order);
+    iRule->SetUpPointsOnLine(points, _Unknown);
     return iRule;
 }
 } // end namespace oofem

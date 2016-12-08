@@ -489,21 +489,13 @@ double
 AxisymElement :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
-    FloatArray N;
-    static_cast< FEInterpolation2d * >( this->giveInterpolation() )->
-    evalN( N, gp->giveNaturalCoordinates(), * this->giveCellGeometryWrapper() );
+  // note: radius is accounted by interpolation (of Fei2d*Axi type)
+  double determinant = fabs( static_cast< FEInterpolation2d * >( this->giveInterpolation() )->
+                             giveTransformationJacobian( gp->giveNaturalCoordinates(), * this->giveCellGeometryWrapper() ) );
 
-    double r = 0.0;
-    for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
-        double x  = this->giveNode(i)->giveCoordinate(1);
-        r += x * N.at(i);
-    }
-
-    double determinant = fabs( static_cast< FEInterpolation2d * >( this->giveInterpolation() )->
-                               giveTransformationJacobian( gp->giveNaturalCoordinates(), * this->giveCellGeometryWrapper() ) );
-
-    double weight = gp->giveWeight();
-    return determinant * weight * r;
+  double weight = gp->giveWeight();
+  return determinant * weight;
+  
 }
 
 
@@ -584,12 +576,12 @@ double
 AxisymElement :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     FloatArray c(2);
-    this->computeEdgeIpGlobalCoords(c, gp, iEdge);
     double result = static_cast< FEInterpolation2d * >( this->giveInterpolation() )->
                     edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(), * this->giveCellGeometryWrapper() );
 
 
-    return c.at(1) * result * gp->giveWeight();
+    return result * gp->giveWeight();
+    // note: radius taken into account by Fei*Axi interpolation
 }
 
 

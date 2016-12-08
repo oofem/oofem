@@ -88,5 +88,27 @@ public:
 protected:
     virtual void giveDerivatives(FloatMatrix &dn, const FloatArray &lc);
 };
+
+
+
+/**
+ * Class representing a 2d isoparametric quadratic interpolation based on natural coordinates
+ * for quadrilateral elements in axisymmetric setting.
+ */
+class OOFEM_EXPORT FEI2dQuadQuadAxi : public FEI2dQuadQuad
+{
+public:
+ FEI2dQuadQuadAxi(int ind1, int ind2) : FEI2dQuadQuad(ind1, ind2) { }
+  
+  virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+  virtual double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+  virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+  virtual double edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords,
+                                                const FEICellGeometry &cellgeo);
+  
+};
+
+
+
 } // end namespace oofem
 #endif // fei2dquadquad_h

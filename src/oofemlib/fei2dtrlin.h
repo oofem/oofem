@@ -74,5 +74,25 @@ public:
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
 };
+
+/**
+ * Class representing a 2d isoparametric linear interpolation based on natural coordinates
+ * for triangular elements in axisymmetric setting.
+ */
+class OOFEM_EXPORT FEI2dTrLinAxi : public FEI2dTrLin
+{
+public:
+  FEI2dTrLinAxi(int ind1, int ind2) : FEI2dTrLin(ind1, ind2) { }
+  
+  virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+  virtual double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+  virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+  virtual double edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords,
+                                                const FEICellGeometry &cellgeo);
+  
+};
+
+
+
 } // end namespace oofem
 #endif // fei2dtrlin_h

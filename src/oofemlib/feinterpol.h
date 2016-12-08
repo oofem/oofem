@@ -127,8 +127,7 @@ public:
 
 /**
  * Class representing a general abstraction for finite element interpolation class.
- * The boundary functions denote the (numbered) region that is 1 spatial dimension less (i.e. edges for 2D interpolators, surfaces for 3D).
- * The boundaryEdge functions denote the (numbered) regions that is 2 spatial dimensions less (i.e. corners for 2D interpolators, edges for 3D).
+ * The boundary functions denote the (numbered) region that have 1 spatial dimension (i.e. edges) or 2 spatial dimensions.
  */
 class OOFEM_EXPORT FEInterpolation
 {

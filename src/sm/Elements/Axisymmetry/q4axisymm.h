@@ -46,7 +46,7 @@
 //@}
 
 namespace oofem {
-class FEI2dQuadQuad;
+class FEI2dQuadQuadAxi;
 
 /**
  * This class implements an Quadratic isoparametric eight-node quadrilateral -
@@ -56,7 +56,7 @@ class FEI2dQuadQuad;
 class Q4Axisymm : public AxisymElement, public ZZNodalRecoveryModelInterface
 {
 protected:
-    static FEI2dQuadQuad interp;
+    static FEI2dQuadQuadAxi interp;
     int numberOfFiAndShGaussPoints;
 
 public:

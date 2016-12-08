@@ -1161,6 +1161,7 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
             continue;
         }
 
+
         va.vectorFromElement(charVec, *element, tStep, mode);
         if ( charVec.isNotEmpty() ) {
             if ( element->giveRotationMatrix(R) ) {
@@ -1178,7 +1179,84 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
                 }
             }
         }
-    }
+
+
+        // obtain form element its body, surface, edge, and point loads
+        const IntArray& list = element->giveBodyLoadList();
+        if (!list.isEmpty()) {
+          for (int iload=1; iload<=list.giveSize(); iload++) { // loop over body loads
+            BodyLoad *bodyLoad;
+            if ((bodyLoad = dynamic_cast< BodyLoad * >(domain->giveLoad(list.at(iload))))) {
+              charVec.clear();
+              va.vectorFromLoad(charVec, *element, bodyLoad, tStep, mode);
+
+              if ( charVec.isNotEmpty() ) {
+                if ( element->giveRotationMatrix(R) ) {
+                  charVec.rotatedWith(R, 't');
+                }
+
+                va.locationFromElement(loc, *element, s, & dofids);
+                answer.assemble(charVec, loc);
+                
+                if ( eNorms ) {
+                  eNorms->assembleSquared(charVec, dofids);
+                }
+              }
+            }
+            
+          } // loop over body load list
+        } // if (!(list = element->giveBodyLoadList()).isEmpty())
+
+        // obtain from element its boundaryloads (surface+edge)
+        const IntArray& list2 = element->giveBoundaryLoadList();
+        IntArray bNodes;
+        if (!list2.isEmpty()) {
+          for (int j=1; j<=list2.giveSize()/2; j++) { // loop over boundary loads
+            int iload = list2.at(j * 2 - 1) ;
+            int boundary = list2.at(j * 2);
+            SurfaceLoad *sLoad;
+            EdgeLoad *eLoad;
+            if ((eLoad = dynamic_cast< EdgeLoad * >(domain->giveLoad(iload)))) {
+              charVec.clear();
+              va.vectorFromEdgeLoad(charVec, *element, eLoad, boundary, tStep, mode);
+              
+              if ( charVec.isNotEmpty() ) {
+                element->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
+                if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
+                  charVec.rotatedWith(R, 't');
+                }
+                
+                va.locationFromElementNodes(loc, *element, bNodes, s, & dofids);
+                answer.assemble(charVec, loc);
+                
+                if ( eNorms ) {
+                  eNorms->assembleSquared(charVec, dofids);
+                }
+              }
+            } else if ((sLoad = dynamic_cast< SurfaceLoad * >(domain->giveLoad(list.at(iload))))) {
+              charVec.clear();
+              va.vectorFromSurfaceLoad(charVec, *element, sLoad, boundary, tStep, mode);
+              
+              if ( charVec.isNotEmpty() ) {
+                element->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+                if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
+                  charVec.rotatedWith(R, 't');
+                }
+                
+                va.locationFromElementNodes(loc, *element, bNodes, s, & dofids);
+                answer.assemble(charVec, loc);
+                
+                if ( eNorms ) {
+                  eNorms->assembleSquared(charVec, dofids);
+                }
+              }
+            } else {
+              OOFEM_ERROR ("Unsupported element boundary load type");
+            }
+          }
+        } // end loop over lement boundary loads
+
+    } // end loop over elements
 
     this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
 }

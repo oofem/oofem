@@ -131,7 +131,8 @@ TransportElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, 
     if ( mtrx == InternalForcesVector ) {
         this->computeInternalForcesVector(answer, tStep);
     } else if ( mtrx == ExternalForcesVector ) {
-        this->computeExternalForcesVector(answer, tStep, mode);
+      //this->computeExternalForcesVector(answer, tStep, mode); // bp: assembled by emodel 
+      answer.resize(0);
     } else if ( mtrx == InertiaForcesVector ) {
         this->computeInertiaForcesVector(answer, tStep);
     } else if ( mtrx == LumpedMassMatrix ) {

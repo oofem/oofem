@@ -333,6 +333,17 @@ public:
      * @param global if true (default) then contribution is in global c.s., when false then contribution is in element local c.s.
      */
     virtual void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true);
+
+    /**
+     * Returns receiver list of bodyloads
+     *
+     */
+    const IntArray& giveBodyLoadList() const {return this->bodyLoadArray;}
+    /**
+     * Returns receiver list of boundary loads
+     */
+    const IntArray& giveBoundaryLoadList() const {return this->boundaryLoadArray;}
+
     //@}
 
     /**@name General element functions */
