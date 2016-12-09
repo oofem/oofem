@@ -1233,7 +1233,7 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
                   eNorms->assembleSquared(charVec, dofids);
                 }
               }
-            } else if ((sLoad = dynamic_cast< SurfaceLoad * >(domain->giveLoad(list.at(iload))))) {
+            } else if ((sLoad = dynamic_cast< SurfaceLoad * >(domain->giveLoad(iload)))) {
               charVec.clear();
               va.vectorFromSurfaceLoad(charVec, *element, sLoad, boundary, tStep, mode);
               
