@@ -87,6 +87,8 @@ public:
                                          FloatArray &dmdxi2, FloatArray &m, double &dgamdxi1, double &dgamdxi2, double &gam);
     static void giveDualBase(FloatMatrix &base1, FloatMatrix &base2);
 
+    // Overloaded, as the element is using enhanced approximation 
+    void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global);
 protected:
     virtual Interface *giveInterface(InterfaceType it);
     LayeredCrossSection *layeredCS;

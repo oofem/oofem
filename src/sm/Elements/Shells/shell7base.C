@@ -1087,6 +1087,16 @@ Shell7Base :: computeConvectiveMassForce(FloatArray &answer, TimeStep *tStep)
 // External forces
 
 #if 1
+void Shell7Base :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
+{
+  answer.clear();
+  if ( type != ExternalForcesVector ) {
+    return;
+  }
+  this->computeTractionForce(answer, boundary, load, tStep, mode);
+}
+
+
 void
 Shell7Base :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep, ValueModeType mode)
 {
@@ -1267,12 +1277,14 @@ Shell7Base :: computeTractionForce(FloatArray &answer, const int iEdge, Boundary
         
         Nf.plusProduct(N, fT, dL);
     }
-
+    /* Note: now used from computeBoundaryEdgeLoadVector, so result should be in global cs for edge dofs
     IntArray mask;
     this->giveEdgeDofMapping(mask, iEdge);
     answer.resize( Shell7Base :: giveNumberOfDofs()  );
     answer.zero();
     answer.assemble(Nf, mask);
+    */
+    answer = Nf;
 
 }
 
