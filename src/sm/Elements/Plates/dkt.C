@@ -572,6 +572,22 @@ DKTPlate :: SPRNodalRecoveryMI_givePatchType()
 }
 
 
+void
+DKTPlate::computeEdgeNMatrix(FloatMatrix &answer, int boundaryID, const FloatArray& lcoords)
+{
+    FloatArray n;
+
+    this->interp_lin.edgeEvalN( n, boundaryID, lcoords, FEIElementGeometryWrapper(this) );
+
+    answer.resize(3, 6);
+    answer.at(1, 1) = n.at(1);
+    answer.at(1, 4) = n.at(2);
+    answer.at(2, 2) = answer.at(3, 3) = n.at(1);
+    answer.at(2, 5) = answer.at(3, 6) = n.at(2);
+}
+
+
+  
 //
 // layered cross section support functions
 //

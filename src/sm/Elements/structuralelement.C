@@ -175,10 +175,8 @@ void StructuralElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, Boun
         OOFEM_ERROR("No interpolator available");
     }
 
-    FloatArray n_vec;
     FloatMatrix n, T;
     FloatArray force, globalIPcoords;
-    int nsd = fei->giveNsd();
 
     std :: unique_ptr< IntegrationRule >iRule( fei->giveBoundaryEdgeIntegrationRule(load->giveApproxOrder(), boundary) );
 
@@ -210,15 +208,26 @@ void StructuralElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, Boun
         }
 
         // Construct n-matrix
-        fei->boundaryEdgeEvalN( n_vec, boundary, lcoords, FEIElementGeometryWrapper(this) );
-        n.beNMatrixOf(n_vec, nsd);
+        //fei->boundaryEdgeEvalN( n_vec, boundary, lcoords, FEIElementGeometryWrapper(this) );
+	//n.beNMatrixOf(n_vec, nsd);
+	this->computeEdgeNMatrix(n, boundary, lcoords); // to allow adapttation on element level
 
         double dV = gp->giveWeight() * fei->boundaryEdgeGiveTransformationJacobian( boundary, lcoords, FEIElementGeometryWrapper(this) );
         answer.plusProduct(n, force, dV);
     }
 }
 
+void
+StructuralElement::computeEdgeNMatrix (FloatMatrix &answer, int boundaryID, const FloatArray& lcoords)
+{
+  FloatArray n_vec;
+  this->giveInterpolation()->boundaryEdgeEvalN (n_vec, boundaryID, lcoords, FEIElementGeometryWrapper(this) );
+  answer.beNMatrixOf(n_vec, this->giveInterpolation()->giveNsd());
+}
 
+				       
+
+  
 void
 StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode)
 // Computes numerically the load vector of the receiver due to the body
