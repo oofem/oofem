@@ -61,7 +61,8 @@ public:
     void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
     virtual void computeLocalForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     virtual void computeEdgeLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
-
+    virtual void giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode,
+					  TimeStep *tStep);
 
 
     // definition

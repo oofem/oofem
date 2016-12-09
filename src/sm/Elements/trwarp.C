@@ -66,7 +66,23 @@ Tr_Warp :: ~Tr_Warp()
 // Destructor
 { }
 
+void
+Tr_Warp :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode,
+				    TimeStep *tStep)
+//
+// returns characteristics vector of receiver according to mtrx
+//
+{
+    if ( mtrx == ExternalForcesVector ) {
+      // include implicit edge contribution 
+      this->computeEdgeLoadVectorAt(answer, NULL, tStep, mode);
+    } else {
+      StructuralElement::giveCharacteristicVector(answer, mtrx, mode, tStep);
+    }
+}
 
+
+  
 void
 Tr_Warp :: computeGaussPoints()
 // Sets up the array containing the Gauss point of the receiver.
