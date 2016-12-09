@@ -49,18 +49,6 @@ public:
 
     //virtual FloatArray giveParametricCenter() const { return {0.}; }
 
-    virtual void boundaryEdgeGiveNodes(IntArray &answer, int boundary)
-    { OOFEM_ERROR("Functions not supported for this interpolator."); }
-    virtual void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-    { OOFEM_ERROR("Functions not supported for this interpolator."); }
-    virtual double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-    {
-        OOFEM_ERROR("Functions not supported for this interpolator.");
-        return 0.;
-    }
-    virtual void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-    { OOFEM_ERROR("Functions not supported for this interpolator."); }
-
     virtual void boundaryGiveNodes(IntArray &answer, int boundary);
     virtual void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);

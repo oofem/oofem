@@ -234,7 +234,7 @@ public:
      * @param answer Array to be filled with the boundary nodes.
      * @param boundary Boundary number.
      */
-    virtual void boundaryEdgeGiveNodes(IntArray &answer, int boundary) = 0;
+    virtual void boundaryEdgeGiveNodes(IntArray &answer, int boundary)=0;
     /**
      * Evaluates the basis functions on the requested boundary.
      * Only basis functions that are nonzero anywhere on the boundary are given. Ordering can be obtained from giveBoundaryNodes.
@@ -245,7 +245,7 @@ public:
      * @param cellgeo Underlying cell geometry.
      * @todo
      */
-    virtual void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
+    virtual void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)=0;
     /**
      * Evaluates the determinant of the transformation Jacobian on the requested boundary.
      * Boundaries are defined as the corner nodes for 1D geometries, edges for 2D geometries and surfaces for 3D geometries.
@@ -254,7 +254,7 @@ public:
      * @param cellgeo Underlying cell geometry.
      * @return The determinant of the boundary transformation Jacobian.
      */
-    virtual double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
+    virtual double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)=0;
     /**
      * Maps the local boundary coordinates to global.
      * Boundaries are defined as the corner nodes for 1D geometries, edges for 2D geometries and surfaces for 3D geometries.
@@ -263,7 +263,7 @@ public:
      * @param lcoords The local coordinates (on the boundary local coordinate system).
      * @param cellgeo Underlying cell geometry.
      */
-    virtual void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
+    virtual void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)=0;
     //@}
 
     /** @name General boundary functions.

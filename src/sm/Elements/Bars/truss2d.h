@@ -44,7 +44,7 @@
 //@}
 
 namespace oofem {
-class FEI1dLin;
+class FEI2dLineLin;
 /**
  * This class implements a two-node truss bar element for two-dimensional
  * analysis.
@@ -63,8 +63,8 @@ protected:
     double length;
     double pitch;
     int cs_mode;
-    ///@todo Use interpolator class for lines in 2D
-    static FEI1dLin interp;  // only defined it so far...
+    // array for diffrent cs_modes
+    static FEI2dLineLin interp[3];  // only defined it so far...
     
 public:
     Truss2d(int n, Domain * d);

@@ -43,7 +43,7 @@
 #include "intarray.h"
 #include "mathfem.h"
 #include "classfactory.h"
-#include "fei1dlin.h"
+#include "fei2dlinelin.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -52,7 +52,9 @@
 namespace oofem {
 REGISTER_Element(Truss2d);
 
-FEI1dLin Truss2d :: interp(1);  
+  FEI2dLineLin Truss2d :: interp[3] = {FEI2dLineLin(1,3),
+                                       FEI2dLineLin(1,2),
+                                       FEI2dLineLin(2,3)};  
 
 Truss2d :: Truss2d(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain)
@@ -412,7 +414,7 @@ Truss2d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussP
 FEInterpolation *Truss2d :: giveInterpolation() const 
 {
     // return interpolator
-    return & interp; 
+    return & interp[cs_mode]; 
 }
 
 
