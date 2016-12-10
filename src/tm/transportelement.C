@@ -129,7 +129,7 @@ TransportElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, 
 //
 {
     if ( mtrx == InternalForcesVector ) {
-        this->computeInternalForcesVector(answer, tStep);
+      this->computeInternalForcesVector(answer, tStep);
     } else if ( mtrx == ExternalForcesVector ) {
       //this->computeExternalForcesVector(answer, tStep, mode); // bp: assembled by emodel 
       answer.resize(0);
@@ -518,9 +518,9 @@ TransportElement :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
             FloatArray val;
             mat->computeInternalSourceVector(val, gp, tStep, VM_TotalIntrinsic);
             answer.plusProduct(N, val, -dV);
-        }
+	}
     }
-
+    /*
     ///@todo With sets, we can make this much nicer than to add it here, though it works for now. / Mikael
     // Neumann b.c.s
     FloatMatrix bc_tangent;
@@ -528,6 +528,7 @@ TransportElement :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
     if ( bc_tangent.isNotEmpty() ) {
         answer.plusProduct(bc_tangent, unknowns, 1.0);
     }
+    */
 }
 
 
@@ -645,6 +646,7 @@ answer.clear();
     for ( GaussPoint *gp: *iRule ) {
         const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
+	//this->computeEgdeNAt(n, iEdge, lcoords);
         interp->boundaryEvalN( n, boundary, lcoords, FEIElementGeometryWrapper(this) );
         N.beNMatrixOf(n, unknownsPerNode);
 
@@ -730,7 +732,7 @@ TransportElement :: computeTangentFromEdgeLoad(FloatMatrix &answer, EdgeLoad *lo
 
     ///@todo Deal with coupled fields (I think they should be another class of problems completely).
     FEInterpolation *interp = this->giveInterpolation();
-    std :: unique_ptr< IntegrationRule > iRule( interp->giveBoundaryIntegrationRule(load->giveApproxOrder() + 1 + interp->giveInterpolationOrder(), boundary) );
+    std :: unique_ptr< IntegrationRule > iRule( interp->giveBoundaryIntegrationRule(load->giveApproxOrder() + interp->giveInterpolationOrder(), boundary) );
 
     for ( auto &gp : *iRule ) {
         const FloatArray &lcoords = gp->giveNaturalCoordinates();
@@ -763,61 +765,89 @@ TransportElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLo
         return;
     }
 
+    if (!load->isImposed(tStep) ) {
+      return;
+    }
+    
     FloatArray gcoords, val, n, unknowns, field;
     FloatMatrix N;
     IntArray dofid;
-    int unknownsPerNode = 1;
-    if ( this->emode == HeatMass1TransferEM ) {
-        unknownsPerNode = 2;
-    }
-
+    double coeff;
+    int unknownsPerNode = this->emode == HeatMass1TransferEM ? 2 : 1;
+    
     this->giveElementDofIDMask(dofid);
 
     ///@todo Deal with coupled fields (I think they should be another class of problems completely).
     FEInterpolation *interp = this->giveInterpolation();
-    std :: unique_ptr< IntegrationRule > iRule( interp->giveBoundaryEdgeIntegrationRule(load->giveApproxOrder() + 1 + interp->giveInterpolationOrder(), boundary) );
+    std :: unique_ptr< IntegrationRule > iRule( interp->giveBoundaryEdgeIntegrationRule(load->giveApproxOrder() + interp->giveInterpolationOrder(), boundary) );
 
-    if ( load->giveType() == ConvectionBC || load->giveType() == RadiationBC ) {
+    // get solution vector for InternalForcesVector (Convention or radiation)
+    if ( (type == InternalForcesVector) &&
+	 (load->giveType() == ConvectionBC || load->giveType() == RadiationBC )) {
         IntArray bNodes;
         interp->boundaryGiveNodes(bNodes, boundary);
         this->computeBoundaryVectorOf(bNodes, dofid, VM_TotalIntrinsic, tStep, unknowns);
     }
 
     for ( GaussPoint *gp: *iRule ) {
-        const FloatArray &lcoords = gp->giveNaturalCoordinates();
+      if( load->propertyMultExpr.isDefined()) {//dependence on state variable
+	///@todo Deal with coupled fields
+	if ( emode!=HeatTransferEM && emode!=Mass1TransferEM ){
+	  OOFEM_ERROR("Not implemented for >=2 coupled fields");
+	}
+	FloatArray unknowns;
+	IntArray dofid, mask;
+	this->computeEgdeNAt( n, boundary, gp->giveNaturalCoordinates() );
+	this->giveElementDofIDMask(dofid);
+	this->giveEdgeDofMapping(mask, boundary);
+	this->computeBoundaryVectorOf(mask, dofid, VM_TotalIntrinsic, tStep, unknowns);
+	double value = n.dotProduct(unknowns);//unknown in IP
+	load->setVariableState('x', value);
+      }
 
-        interp->boundaryEdgeEvalN( n, boundary, lcoords, FEIElementGeometryWrapper(this) );
-        N.beNMatrixOf(n, unknownsPerNode);
+      if ( load->giveType() == TransmissionBC ) {
+	coeff = -1.0;
+      } else if ( load->giveType() == ConvectionBC ) {
+	coeff = -load->giveProperty('a', tStep);
+      } else if ( load->giveType() == RadiationBC ){
+	coeff = -getRadiativeHeatTranferCoef(load, tStep);
+      }
+      
 
-        double detJ = interp->boundaryEdgeGiveTransformationJacobian( boundary, lcoords, FEIElementGeometryWrapper(this) );
-        interp->boundaryEdgeLocal2Global( gcoords, boundary, lcoords, FEIElementGeometryWrapper(this) );
-        double dL = this->giveThicknessAt(gcoords) * gp->giveWeight() * detJ;
+      const FloatArray &lcoords = gp->giveNaturalCoordinates();
+      //this->computeEgdeNAt(n, boundary, lcoords);
+      interp->boundaryEdgeEvalN( n, boundary, lcoords, FEIElementGeometryWrapper(this) );
+      N.beNMatrixOf(n, unknownsPerNode);
 
-        FieldPtr tf;
-        if (tf = domain->giveEngngModel()->giveContext()->giveFieldManager()->giveField(FT_TemperatureAmbient)){
-            tf->evaluateAt(val, gcoords, VM_TotalIntrinsic, tStep);
-        } else if ( load->giveFormulationType() == Load :: FT_Entity ) {
-            load->computeValueAt(val, tStep, lcoords, mode);
-        } else {
-            load->computeValueAt(val, tStep, gcoords, mode);
-        }
 
-        if ( load->giveType() == TransmissionBC ) {
-            val.negated();
-        } else if ( load->giveType() == ConvectionBC ) {
-            field.beProductOf(N, unknowns);
-            val.subtract(field);
-            val.times( -1.0 * load->giveProperty('a', tStep) );
-        } else if ( load->giveType() == RadiationBC  ) {
-            //actual Temperature in C in field
-            field.beProductOf(N, unknowns);
-            val.subtract(field);
-            val.times( -1.0 * getRadiativeHeatTranferCoef(load, tStep) );
-        }
-        answer.plusProduct(N, val, dL);
+      double detJ = interp->boundaryEdgeGiveTransformationJacobian( boundary, lcoords, FEIElementGeometryWrapper(this) );
+      double dL = this->giveThicknessAt(gcoords) * gp->giveWeight() * detJ;
+
+      FieldPtr tf;
+      if (tf = domain->giveEngngModel()->giveContext()->giveFieldManager()->giveField(FT_TemperatureAmbient)){
+	interp->boundaryEdgeLocal2Global( gcoords, boundary, lcoords, FEIElementGeometryWrapper(this) );
+	tf->evaluateAt(val, gcoords, VM_TotalIntrinsic, tStep);
+      } else if ( load->giveFormulationType() == Load :: FT_Entity ) {
+	load->computeValueAt(val, tStep, lcoords, mode);
+      } else {
+	interp->boundaryEdgeLocal2Global( gcoords, boundary, lcoords, FEIElementGeometryWrapper(this) );
+	load->computeValueAt(val, tStep, gcoords, mode);
+      }
+
+
+      if ( (load->giveType() == TransmissionBC)) {
+	answer.plusProduct(N, val, dL*coeff);
+      } else if ((load->giveType() == ConvectionBC ) || (load->giveType() == RadiationBC  )) {
+	if (type == InternalForcesVector) {
+	  field.beProductOf(N, unknowns);	
+	  val.subtract(field);
+	}
+	answer.plusProduct(N, val, dL*coeff);
+      }
+
+
     }
 }
-
 
 void
 TransportElement :: computeExternalForcesVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
