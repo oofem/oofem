@@ -201,16 +201,6 @@ public:
 
     virtual void computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer);
 
-    /**
-     * Computes force dependent part of load vector. It is load vector induced by applied force loading.
-     * Element body load and element boundary load (edge and surface load) is included.
-     * (precisely result is summation of computeBodyLoadVectorAt, computeEdgeLoadVectorAt and
-     * computeSurfaceLoadVectorAt service results contributions)
-     * @param answer Computed load vector.
-     * @param tStep Time step.
-     * @param mode Determines the response.
-     */
-    virtual void computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     virtual void computeLocalForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     // stress equivalent vector in nodes (vector of internal forces)
     // - mainly for nonLinear Analysis.

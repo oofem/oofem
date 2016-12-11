@@ -294,35 +294,6 @@ HTSelement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
 }
 
 
-void
-HTSelement :: computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
-{
-    int nLoads;
-    bcGeomType ltype;
-    Load *load;
-    FloatArray helpLoadVector;
-
-    answer.clear();
-
-    // loop over boundary load array
-    nLoads = this->giveBoundaryLoadArray()->giveSize() / 2;
-    for ( int i = 1; i <= nLoads; i++ ) {
-        int n = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
-        int id = boundaryLoadArray.at(i * 2);
-        load = domain->giveLoad(n);
-        ltype = load->giveBCGeoType();
-        if ( ltype == EdgeLoadBGT ) {
-            this->computeEdgeLoadVectorAt(helpLoadVector, load, id, tStep, mode);
-            if ( helpLoadVector.giveSize() ) {
-                answer.add(helpLoadVector);
-            }
-        } else {
-            OOFEM_ERROR("boundary load %d is of unsupported type (%d)", id, ltype);
-        }
-    }
-    this->computePrescribedDisplacementLoadVectorAt(helpLoadVector, tStep, mode);
-    answer.add(helpLoadVector);
-}
 /*Public functions*/
 
 //element stifness matrix

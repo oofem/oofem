@@ -580,19 +580,6 @@ StructuralElement :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *t
 
 
 void
-StructuralElement :: computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
-// computes the part of load vector, which is imposed by force loads acting
-// on element volume (surface).
-// Why is this function taken separately ?
-// When reactions forces are computed, they are computed from element::GiveRealStressVector
-// in this vector a real forces are stored (temperature part is subtracted).
-// so we need further sobstract part corresponding to non-nodeal loading.
-{
-    this->computeLocalForceLoadVector(answer, tStep, mode);
-}
-
-
-void
 StructuralElement :: computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 // Returns the lumped mass matrix of the receiver.
 {

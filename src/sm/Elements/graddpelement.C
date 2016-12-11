@@ -346,25 +346,6 @@ GradDpElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, i
 }
 #endif
 
-void
-GradDpElement :: computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
-{
-    //set displacement and nonlocal location array
-    this->setDisplacementLocationArray();
-    this->setNonlocalLocationArray();
-
-
-    FloatArray localForces(locSize);
-    FloatArray nlForces(nlSize);
-    answer.resize(totalSize);
-
-    this->computeLocForceLoadVector(localForces, tStep, mode);
-
-    answer.assemble(localForces, locU);
-    answer.assemble(nlForces, locK);
-}
-
-
 /************************************************************************/
 void
 GradDpElement :: computeLocForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)

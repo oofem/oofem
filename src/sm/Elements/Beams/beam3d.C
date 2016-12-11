@@ -648,7 +648,7 @@ Beam3d :: giveEndForcesVector(FloatArray &answer, TimeStep *tStep)
     this->giveInternalForcesVector(answer, tStep);
 
     // add exact end forces due to nonnodal loading
-    this->computeForceLoadVector(loadEndForces, tStep, VM_Total); // will compute only contribution of loads applied directly on receiver (not using sets)
+    this->computeLocalForceLoadVector(loadEndForces, tStep, VM_Total); // will compute only contribution of loads applied directly on receiver (not using sets)
     if ( loadEndForces.giveSize() ) {
         answer.subtract(loadEndForces);
     }

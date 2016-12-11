@@ -84,9 +84,6 @@ protected:
         double (*volumeAround)(GaussPoint*)
         );
 
-    //void computeForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
-
-    
 };
 } // end namespace oofem
 
