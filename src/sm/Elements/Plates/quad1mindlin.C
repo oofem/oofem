@@ -309,13 +309,6 @@ Quad1Mindlin :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 }
 
 
-void
-Quad1Mindlin :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
-{
-    this->interp_lin.edgeLocal2global( answer, iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-}
-
-
 int
 Quad1Mindlin :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
 {

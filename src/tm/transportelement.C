@@ -293,17 +293,6 @@ TransportElement :: giveEdgeDofMapping(IntArray &answer, int iEdge)
 
 
 void
-TransportElement :: computeEdgeIpGlobalCoords(FloatArray &answer, const FloatArray &lcoords, int iEdge)
-{
-    FEInterpolation *interp = this->giveInterpolation();
-    if ( dynamic_cast< FEInterpolation2d * >(interp) ) {
-        dynamic_cast< FEInterpolation2d * >(interp)->edgeLocal2global( answer, iEdge, lcoords, FEIElementGeometryWrapper(this) );
-    } else if ( dynamic_cast< FEInterpolation3d * >(interp) ) {
-        dynamic_cast< FEInterpolation3d * >(interp)->edgeLocal2global( answer, iEdge, lcoords, FEIElementGeometryWrapper(this) );
-    }
-}
-
-void
 TransportElement :: computeSurfaceNAt(FloatArray &answer, int iSurf, const FloatArray &lcoord)
 {
     FEInterpolation *interp = this->giveInterpolation();
@@ -318,15 +307,6 @@ TransportElement :: giveSurfaceDofMapping(IntArray &answer, int iSurf)
     FEInterpolation *interp = this->giveInterpolation();
     if ( dynamic_cast< FEInterpolation3d * >(interp) ) {
         dynamic_cast< FEInterpolation3d * >(interp)->computeLocalSurfaceMapping(answer, iSurf);
-    }
-}
-
-void
-TransportElement :: computeSurfIpGlobalCoords(FloatArray &answer, const FloatArray &lcoord, int iSurf)
-{
-    FEInterpolation *interp = this->giveInterpolation();
-    if ( dynamic_cast< FEInterpolation3d * >(interp) ) {
-        dynamic_cast< FEInterpolation3d * >(interp)->surfaceLocal2global( answer, iSurf, lcoord, FEIElementGeometryWrapper(this) );
     }
 }
 
@@ -1006,12 +986,15 @@ TransportElement :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int
             FieldPtr tf;
             FloatArray gcoords;
             if (tf = domain->giveEngngModel()->giveContext()->giveFieldManager()->giveField(FT_TemperatureAmbient)){
-                this->computeEdgeIpGlobalCoords(gcoords, lcoords, iEdge);
+	        //this->computeEdgeIpGlobalCoords(gcoords, lcoords, iEdge);
+	        this->giveInterpolation()->boundaryEdgeLocal2Global( gcoords, iEdge, lcoords, FEIElementGeometryWrapper(this) );
+                
                 tf->evaluateAt(val, gcoords, VM_TotalIntrinsic, tStep);
             } else if ( edgeLoad->giveFormulationType() == Load :: FT_Entity ) {
                 edgeLoad->computeValueAt(val, tStep, lcoords, mode);
             } else {
-                this->computeEdgeIpGlobalCoords(gcoords, lcoords, iEdge);
+	        //this->computeEdgeIpGlobalCoords(gcoords, lcoords, iEdge);
+	        this->giveInterpolation()->boundaryEdgeLocal2Global( gcoords, iEdge, lcoords, FEIElementGeometryWrapper(this) );
                 edgeLoad->computeValueAt(val, tStep, gcoords, mode);
             }
 
@@ -1076,12 +1059,15 @@ TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
 
             FieldPtr tf;
             if (tf = domain->giveEngngModel()->giveContext()->giveFieldManager()->giveField(FT_TemperatureAmbient)){
-                this->computeSurfIpGlobalCoords(gcoords, gp->giveNaturalCoordinates(), iSurf);
+	      //this->computeSurfIpGlobalCoords(gcoords, gp->giveNaturalCoordinates(), iSurf);
+	      this->giveInterpolation()->boundarySurfaceLocal2global(gcoords, iSurf, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));
                 tf->evaluateAt(val, gcoords, VM_TotalIntrinsic, tStep);
             } else if ( surfLoad->giveFormulationType() == Load :: FT_Entity ) {
                 surfLoad->computeValueAt(val, tStep, gp->giveNaturalCoordinates(), mode);
             } else {
-                this->computeSurfIpGlobalCoords(gcoords, gp->giveNaturalCoordinates(), iSurf);
+	      //this->computeSurfIpGlobalCoords(gcoords, gp->giveNaturalCoordinates(), iSurf);
+	      this->giveInterpolation()->boundarySurfaceLocal2global(gcoords, iSurf, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));
+
                 surfLoad->computeValueAt(val, tStep, gcoords, mode);
             }
 

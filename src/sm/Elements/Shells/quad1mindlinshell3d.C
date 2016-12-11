@@ -582,7 +582,7 @@ Quad1MindlinShell3D :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
     return detJ *gp->giveWeight();
 }
 
-
+/*
 void
 Quad1MindlinShell3D :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
@@ -592,7 +592,7 @@ Quad1MindlinShell3D :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint 
     local.at(3) = 0.;
     answer.beProductOf(this->lcsMatrix, local);
 }
-
+*/
 
 int
 Quad1MindlinShell3D :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)

@@ -338,7 +338,8 @@ void TrPlanestressRotAllman :: computeBoundaryEdgeLoadVector(FloatArray &answer,
             if ( edgeLoad->giveFormulationType() == Load :: FT_Entity ) {
                 edgeLoad->computeValueAt(force, tStep, gp->giveNaturalCoordinates(), mode);
             } else {
-                this->computeEdgeIpGlobalCoords(globalIPcoords, gp, boundary);
+	        //this->computeEdgeIpGlobalCoords(globalIPcoords, gp, boundary);
+	        this->giveInterpolation()->boundaryEdgeLocal2Global( globalIPcoords, boundary, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
                 edgeLoad->computeValueAt(force, tStep, globalIPcoords, mode);
             }
 

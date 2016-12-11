@@ -326,12 +326,6 @@ Truss2d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMod
 
 
 void
-Truss2d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
-{
-    this->computeGlobalCoordinates( answer, gp->giveNaturalCoordinates() );
-}
-
-void
 Truss2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 {
     /*

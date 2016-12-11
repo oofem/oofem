@@ -294,14 +294,6 @@ Structural3DElement :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
     return volume;
 }
 
-void
-Structural3DElement :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf)
-{
-    static_cast< FEInterpolation3d* > ( this->giveInterpolation() )-> 
-        surfaceLocal2global( answer, iSurf, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-}
-
-
 
 
 int
@@ -334,15 +326,6 @@ Structural3DElement :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
         answer.at(i * 3 - 1) = eNodes.at(i) * 3 - 1;
         answer.at(i * 3)     = eNodes.at(i) * 3;
     }
-}
-
-
-
-void
-Structural3DElement :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
-{
-    static_cast< FEInterpolation3d* > ( this->giveInterpolation() )->
-        edgeLocal2global( answer, iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 

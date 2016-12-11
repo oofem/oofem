@@ -263,13 +263,6 @@ Truss3d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 }
 
 
-void
-Truss3d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
-{
-    computeGlobalCoordinates( answer, gp->giveNaturalCoordinates() );
-}
-
-
 int
 Truss3d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
 {

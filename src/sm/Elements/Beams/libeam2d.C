@@ -359,13 +359,6 @@ LIBeam2d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 
 
 void
-LIBeam2d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
-{
-    computeGlobalCoordinates( answer, gp->giveNaturalCoordinates() );
-}
-
-
-void
 LIBeam2d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
     FloatArray lc(1);

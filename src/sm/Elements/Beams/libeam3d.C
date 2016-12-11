@@ -333,12 +333,6 @@ LIBeam3d ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
     return 0.5 * this->computeLength() * weight;
 }
 
-void
-LIBeam3d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
-{
-    computeGlobalCoordinates( answer, gp->giveNaturalCoordinates() );
-}
-
 int
 LIBeam3d :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
 {

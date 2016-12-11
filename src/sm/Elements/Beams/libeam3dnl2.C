@@ -615,13 +615,6 @@ LIBeam3dNL2 :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 }
 
 
-void
-LIBeam3dNL2 :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
-{
-    computeGlobalCoordinates( answer, gp->giveNaturalCoordinates() );
-}
-
-
 int
 LIBeam3dNL2 :: giveLocalCoordinateSystem(FloatMatrix &answer)
 //

@@ -635,13 +635,6 @@ CCTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 }
 
 
-void
-CCTPlate :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
-{
-    this->interp_lin.edgeLocal2global( answer, iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-}
-
-
 int
 CCTPlate :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
 {

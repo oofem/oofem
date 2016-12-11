@@ -148,7 +148,6 @@ private:
     virtual IntegrationRule *GetSurfaceIntegrationRule(int approxOrder);
     virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp);
     virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const;
-    //    void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
 };
 } // end namespace oofem
 #endif // mitc4_h

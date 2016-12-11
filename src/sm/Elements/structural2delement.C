@@ -191,14 +191,6 @@ Structural2DElement :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 }
 
 
-void
-Structural2DElement :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
-{
-    static_cast< FEInterpolation2d * >( this->giveInterpolation() )->
-    edgeLocal2global( answer, iEdge, gp->giveNaturalCoordinates(), * this->giveCellGeometryWrapper() );
-}
-
-
 double
 Structural2DElement :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {

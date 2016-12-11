@@ -409,20 +409,6 @@ protected:
      * @param iSurf Surface number.
      */
     virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf) { return 0.; }
-    /**
-     * Computes global coordinates of integration point on local edge.
-     * @param answer Global coordinates.
-     * @param gp Edge integration point.
-     * @param iEdge Edge number.
-     */
-    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge) { answer.clear(); }
-    /**
-     * Computes global coordinates of integration point on  local surface.
-     * @param answer Global coordinates.
-     * @param gp Surface integration point.
-     * @param iSurf Surface number.
-     */
-    virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf) { answer.clear(); }
 
     // Global to local element c.s transformation for load vector dofs
     /**
