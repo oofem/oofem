@@ -268,7 +268,7 @@ StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, 
 }
 
 void
-StructuralElement :: computePointLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
+StructuralElement :: computePointLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode, bool global)
 {
     FloatArray force, lcoords;
     FloatMatrix T, n;
@@ -515,67 +515,6 @@ StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *
     }
 
     answer.symmetrized();
-}
-
-
-void
-StructuralElement :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
-// computes the part of load vector, which is imposed by force loads acting
-// on element volume (surface).
-// Why is this function taken separately ?
-// When reactions forces are computed, they are computed from element::GiveRealStressVector
-// in this vector a real forces are stored (temperature part is subtracted).
-// so we need further subtract part corresponding to non-nodal loading.
-{
-    FloatArray helpLoadVector(1);
-    answer.clear();
-
-    // loop over body load array first
-    int nBodyLoads = this->giveBodyLoadArray()->giveSize();
-    for ( int i = 1; i <= nBodyLoads; i++ ) {
-        int id = bodyLoadArray.at(i);
-        Load *load = domain->giveLoad(id);
-        bcGeomType ltype = load->giveBCGeoType();
-        if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ForceLoadBVT ) ) {
-            this->computeBodyLoadVectorAt(helpLoadVector, load, tStep, mode);
-            if ( helpLoadVector.giveSize() ) {
-                answer.add(helpLoadVector);
-            }
-        } else {
-            if ( load->giveBCValType() != TemperatureBVT && load->giveBCValType() != EigenstrainBVT ) {
-                // temperature and eigenstrain is handled separately at computeLoadVectorAt subroutine
-                OOFEM_ERROR("body load %d is of unsupported type (%d)", id, ltype);
-            }
-        }
-    }
-
-    // loop over boundary load array
-    int nBoundaryLoads = this->giveBoundaryLoadArray()->giveSize() / 2;
-    for ( int i = 1; i <= nBoundaryLoads; i++ ) {
-        int n = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
-        int id = boundaryLoadArray.at(i * 2);
-        Load *load = domain->giveLoad(n);
-        bcGeomType ltype = load->giveBCGeoType();
-        if ( ltype == EdgeLoadBGT ) {
-            this->computeEdgeLoadVectorAt(helpLoadVector, load, id, tStep, mode);
-            if ( helpLoadVector.giveSize() ) {
-                answer.add(helpLoadVector);
-            }
-        } else if ( ltype == SurfaceLoadBGT ) {
-            this->computeSurfaceLoadVectorAt(helpLoadVector, load, id, tStep, mode);
-            if ( helpLoadVector.giveSize() ) {
-                answer.add(helpLoadVector);
-            }
-        } else if ( ltype == PointLoadBGT ) {
-            // id not used
-            this->computePointLoadVectorAt(helpLoadVector, load, tStep, mode);
-            if ( helpLoadVector.giveSize() ) {
-                answer.add(helpLoadVector);
-            }
-        } else {
-            OOFEM_ERROR("boundary load %d is of unsupported type (%d)", id, ltype);
-        }
-    }
 }
 
 

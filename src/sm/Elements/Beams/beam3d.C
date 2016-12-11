@@ -63,7 +63,7 @@ REGISTER_Element(Beam3d);
 
 FEI3dLineLin Beam3d :: interp;
 
-Beam3d :: Beam3d(int n, Domain *aDomain) : StructuralElement(n, aDomain)
+Beam3d :: Beam3d(int n, Domain *aDomain) : BeamBaseElement(n, aDomain)
 {
     numberOfDofMans = 2;
     referenceNode = 0;
@@ -400,7 +400,7 @@ Beam3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type
         answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
         return 1;
     } else {
-        return StructuralElement :: giveIPValue(answer, gp, type, tStep);
+        return BeamBaseElement :: giveIPValue(answer, gp, type, tStep);
     }
 }
 
@@ -605,7 +605,7 @@ Beam3d :: initializeFrom(InputRecord *ir)
     this->subsoilMat = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->subsoilMat, _IFT_Beam3d_subsoilmat);
     
-    return StructuralElement :: initializeFrom(ir);
+    return BeamBaseElement :: initializeFrom(ir);
 }
 
 
@@ -620,7 +620,7 @@ Beam3d :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useU
     this->computeVectorOf(VM_Total, tStep, u);
     answer.beProductOf(stiffness, u);
 #else
-    StructuralElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord);
+    BeamBaseElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord);
 #endif
 }
 
@@ -653,31 +653,6 @@ Beam3d :: giveEndForcesVector(FloatArray &answer, TimeStep *tStep)
         answer.subtract(loadEndForces);
     }
 
-    // add exact end forces due to nonnodal loading applied indirectly (via sets)
-    BCTracker *bct = this->domain->giveBCTracker();
-    BCTracker::entryListType bcList = bct->getElementRecords(this->number);
-    FloatArray help;
-
-    for (BCTracker::entryListType::iterator it = bcList.begin(); it != bcList.end(); ++it) {
-      GeneralBoundaryCondition *bc = this->domain->giveBc((*it).bcNumber);
-      BodyLoad *bodyLoad;
-      BoundaryLoad *boundaryLoad;
-      if (bc->isImposed(tStep)) {
-        if ((bodyLoad = dynamic_cast<BodyLoad*>(bc))) { // body load
-          this->computeBodyLoadVectorAt(help,bodyLoad, tStep, VM_Total); // this one is local
-          answer.subtract(help);
-        } else if ((boundaryLoad = dynamic_cast<BoundaryLoad*>(bc))) {
-          // compute Boundary Edge load vector in GLOBAL CS !!!!!!!
-          this->computeBoundaryEdgeLoadVector(help, boundaryLoad, (*it).boundaryId,
-					      ExternalForcesVector, VM_Total, tStep, false);
-          // get it transformed back to local c.s.
-          // this->computeGtoLRotationMatrix(t);
-          // help.rotatedWith(t, 'n');
-          answer.subtract(help);
-        }
-      }
-    }
-    
     if (subsoilMat) {
       // @todo: linear subsoil assumed here; more general approach should integrate internal forces
       FloatMatrix k;
@@ -864,20 +839,10 @@ Beam3d :: printOutputAt(FILE *File, TimeStep *tStep)
 
 
 void
-Beam3d :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
-// Computes the load vector of the receiver, at tStep.
-{
-    FloatMatrix stiff;
-
-    StructuralElement :: computeLocalForceLoadVector(answer, tStep, mode); // in global c.s
-}
-
-
-void
 Beam3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
     FloatArray lc(1);
-    StructuralElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
+    BeamBaseElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
     answer.times( this->giveCrossSection()->give(CS_Area, lc, this) );
 }
 
@@ -891,7 +856,7 @@ Beam3d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, doub
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
     /*
-     * StructuralElement::computeMassMatrix(answer, tStep);
+     * SructuralElement::computeMassMatrix(answer, tStep);
      * answer.times(this->giveCrossSection()->give('A'));
      */
     double l = this->computeLength();
@@ -1069,7 +1034,7 @@ Beam3d :: giveInterface(InterfaceType interface)
 void
 Beam3d :: updateLocalNumbering(EntityRenumberingFunctor &f)
 {
-    StructuralElement :: updateLocalNumbering(f);
+    BeamBaseElement :: updateLocalNumbering(f);
     if ( this->referenceNode ) {
         this->referenceNode = f(this->referenceNode, ERS_DofManager);
     }

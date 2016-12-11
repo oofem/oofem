@@ -218,15 +218,6 @@ Tr_Warp :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 
 
 void
-Tr_Warp :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
-// computes the part of load vector, which is imposed by force loads acting
-
-{
-    this->computeEdgeLoadVectorAt(answer, NULL, tStep, mode);
-}
-
-
-void
 Tr_Warp :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
     // computes the edge load vector of the receiver corresponding to the inhomogeneous Neumann condition

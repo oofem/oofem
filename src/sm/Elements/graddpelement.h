@@ -87,7 +87,6 @@ protected:
 
     void computeStressVectorAndLocalCumulatedStrain(FloatArray &answer, double localCumulatedPlasticStrain, GaussPoint *gp, TimeStep *tStep);
 
-    void computeLocForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     void computeDistanceToBoundary();
 };
 } // end namespace oofem

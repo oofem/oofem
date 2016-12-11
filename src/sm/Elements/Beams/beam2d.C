@@ -63,7 +63,7 @@ REGISTER_Element(Beam2d);
 FEI2dLineLin Beam2d :: interp_geom(1, 3);
 FEI2dLineHermite Beam2d :: interp_beam(1, 3);
 
-Beam2d :: Beam2d(int n, Domain *aDomain) : StructuralElement(n, aDomain), LayeredCrossSectionInterface()
+Beam2d :: Beam2d(int n, Domain *aDomain) : BeamBaseElement(n, aDomain), LayeredCrossSectionInterface()
 {
     numberOfDofMans = 2;
 
@@ -418,7 +418,7 @@ Beam2d :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     // first call parent
-    StructuralElement :: initializeFrom(ir);
+    BeamBaseElement :: initializeFrom(ir);
 
     if ( ir->hasField(_IFT_Beam2d_dofstocondense) ) {
         IntArray val;
@@ -455,7 +455,7 @@ Beam2d :: initializeFrom(InputRecord *ir)
 void
 Beam2d :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
-    StructuralElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord);
+    BeamBaseElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord);
 
     ///@todo Pretty sure this won't work for nonlinear problems. I think dofsToCondense should just be replaced by an extra slave node.
     /*
@@ -481,32 +481,6 @@ Beam2d :: giveEndForcesVector(FloatArray &answer, TimeStep *tStep)
     if ( load.isNotEmpty() ) {
         answer.subtract(load);
     }
-
-    // add exact end forces due to nonnodal loading applied indirectly (via sets)
-    BCTracker *bct = this->domain->giveBCTracker();
-    BCTracker::entryListType bcList = bct->getElementRecords(this->number);
-    FloatArray help;
-
-    for (BCTracker::entryListType::iterator it = bcList.begin(); it != bcList.end(); ++it) {
-      GeneralBoundaryCondition *bc = this->domain->giveBc((*it).bcNumber);
-      BodyLoad *bodyLoad;
-      BoundaryLoad *boundaryLoad;
-      if (bc->isImposed(tStep)) {
-        if ((bodyLoad = dynamic_cast<BodyLoad*>(bc))) { // body load
-          this->computeBodyLoadVectorAt(help,bodyLoad, tStep, VM_Total); // this one is local
-          answer.subtract(help);
-        } else if ((boundaryLoad = dynamic_cast<BoundaryLoad*>(bc))) {
-          // compute Boundary Edge load vector in GLOBAL CS !!!!!!!
-          this->computeBoundaryEdgeLoadVector(help, boundaryLoad, (*it).boundaryId,
-					      ExternalForcesVector, VM_Total, tStep, false);
-          // get it transformed back to local c.s.
-          // this->computeGtoLRotationMatrix(t);
-          // help.rotatedWith(t, 'n');
-          answer.subtract(help);
-        }
-      }
-    }
-
 
 }
 
@@ -660,7 +634,7 @@ void
 Beam2d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
     FloatArray lc(1);
-    StructuralElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
+    BeamBaseElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
     answer.times( this->giveCrossSection()->give(CS_Area, lc, this) );
 }
 
@@ -675,7 +649,7 @@ Beam2d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type
         answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
         return 1;
     } else {
-        return StructuralElement :: giveIPValue(answer, gp, type, tStep);
+        return BeamBaseElement :: giveIPValue(answer, gp, type, tStep);
     }
 }
 
@@ -708,14 +682,6 @@ Beam2d :: printOutputAt(FILE *File, TimeStep *tStep)
     for ( auto &iRule : integrationRulesArray ) {
         iRule->printOutputAt(File, tStep);
     }
-}
-
-
-void
-Beam2d :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
-// Computes the load vector of the receiver, at tStep.
-{
-    StructuralElement :: computeLocalForceLoadVector(answer, tStep, mode);
 }
 
 

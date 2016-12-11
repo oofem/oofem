@@ -35,7 +35,7 @@
 #ifndef beam2d_h
 #define beam2d_h
 
-#include "../sm/Elements/structuralelement.h"
+#include "../sm/Elements/Beams/beambaseelement.h"
 #include "../sm/CrossSections/layeredcrosssection.h"
 #include "dofmanager.h"
 
@@ -59,7 +59,7 @@ class FEI2dLineHermite;
  * This class is not derived from linear beam or truss element, because it does not support
  * any material nonlinearities (if should, stiffness must be integrated)
  */
-class Beam2d : public StructuralElement, public LayeredCrossSectionInterface
+class Beam2d : public BeamBaseElement, public LayeredCrossSectionInterface
 {
 protected:
     double kappa, pitch, length;
@@ -84,7 +84,6 @@ public:
     virtual void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep);
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual int giveLocalCoordinateSystem(FloatMatrix &answer);
-    virtual void computeLocalForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
     virtual void giveEndForcesVector(FloatArray &answer, TimeStep *tStep);
 

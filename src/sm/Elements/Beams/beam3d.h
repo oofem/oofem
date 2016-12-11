@@ -35,7 +35,7 @@
 #ifndef beam3d_h
 #define beam3d_h
 
-#include "../sm/Elements/structuralelement.h"
+#include "../sm/Elements/Beams/beambaseelement.h"
 #include "../sm/CrossSections/fiberedcs.h"
 #include "../sm/Materials/winklermodel.h"
 #include "dofmanager.h"
@@ -68,7 +68,7 @@ class FEI3dLineLin;
  * @author Mikael Öhman
  * @author (several other authors)
  */
- class Beam3d : public StructuralElement, public FiberedCrossSectionInterface, public Beam3dSubsoilMaterialInterface
+ class Beam3d : public BeamBaseElement, public FiberedCrossSectionInterface, public Beam3dSubsoilMaterialInterface
 {
 protected:
     /// Geometry interpolator only.
@@ -103,7 +103,6 @@ public:
     virtual void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep);
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual int giveLocalCoordinateSystem(FloatMatrix &answer);
-    virtual void computeLocalForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *, int useUpdatedGpRecord = 0);
     void giveEndForcesVector(FloatArray &answer, TimeStep *tStep);
 

@@ -201,7 +201,6 @@ public:
 
     virtual void computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer);
 
-    virtual void computeLocalForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     // stress equivalent vector in nodes (vector of internal forces)
     // - mainly for nonLinear Analysis.
     /**
@@ -365,7 +364,7 @@ protected:
      * @param tStep Time step.
      * @param mode determines response mode
      */
-    virtual void computePointLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
+    virtual void computePointLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode, bool global=true);
     /**
      * Computes edge load vector contribution of receiver for given load (should has BoundaryLoad Base).
      * Each edge should have unique number assigned to identify it.
