@@ -573,7 +573,7 @@ Element :: computeLoadVector(FloatArray &answer, Load *load, CharType type, Valu
 
 
 void
-Element :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
+Element :: computeBoundarySurfaceLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
 {
     answer.clear();
     OOFEM_ERROR("Unknown load type.");

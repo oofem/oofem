@@ -615,7 +615,7 @@ TransportElement :: computeLoadVector(FloatArray &answer, Load *load, CharType t
 
 
 void
-TransportElement :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
+TransportElement :: computeBoundarySurfaceLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
 {
     
 answer.clear();

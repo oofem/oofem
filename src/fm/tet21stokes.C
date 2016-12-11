@@ -179,7 +179,7 @@ void Tet21Stokes :: computeExternalForcesVector(FloatArray &answer, TimeStep *tS
         ltype = load->giveBCGeoType();
 
         if ( ltype == SurfaceLoadBGT ) {
-            this->computeBoundaryLoadVector(vec, static_cast< BoundaryLoad * >(load), load_id, ExternalForcesVector, VM_Total, tStep);
+            this->computeBoundarySurfaceLoadVector(vec, static_cast< BoundaryLoad * >(load), load_id, ExternalForcesVector, VM_Total, tStep);
             answer.add(vec);
         }
     }
@@ -228,7 +228,7 @@ void Tet21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType t
     answer.assemble(temparray, this->momentum_ordering);
 }
 
-  void Tet21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int iSurf, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
+  void Tet21Stokes :: computeBoundarySurfaceLoadVector(FloatArray &answer, BoundaryLoad *load, int iSurf, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
 {
     if ( type != ExternalForcesVector ) {
         answer.clear();

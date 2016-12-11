@@ -131,7 +131,7 @@ void InternalForceAssembler :: vectorFromLoad(FloatArray& vec, Element& element,
 
 void InternalForceAssembler :: vectorFromSurfaceLoad(FloatArray& vec, Element& element, SurfaceLoad* load, int boundary, TimeStep* tStep, ValueModeType mode) const
 {
-    element.computeBoundaryLoadVector(vec, load, boundary, InternalForcesVector, mode, tStep);
+    element.computeBoundarySurfaceLoadVector(vec, load, boundary, InternalForcesVector, mode, tStep);
     //element.computeInternalForcesFromBoundaryLoad(vec, load, boundary, tStep);
 }
 
@@ -162,7 +162,7 @@ void ExternalForceAssembler :: vectorFromLoad(FloatArray& vec, Element& element,
 
 void ExternalForceAssembler :: vectorFromSurfaceLoad(FloatArray& vec, Element& element, SurfaceLoad* load, int boundary, TimeStep* tStep, ValueModeType mode) const
 {
-    element.computeBoundaryLoadVector(vec, load, boundary, ExternalForcesVector, mode, tStep);
+    element.computeBoundarySurfaceLoadVector(vec, load, boundary, ExternalForcesVector, mode, tStep);
     //element.computeExternalForcesFromBoundaryLoad(vec, load, boundary, tStep);
 }
 

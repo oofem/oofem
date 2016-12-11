@@ -191,7 +191,7 @@ void Tet1BubbleStokes :: computeExternalForcesVector(FloatArray &answer, TimeSte
         bcGeomType ltype = load->giveBCGeoType();
 
         if ( ltype == SurfaceLoadBGT ) {
-            this->computeBoundaryLoadVector(vec, static_cast< BoundaryLoad * >(load), load_id, ExternalForcesVector, VM_Total, tStep);
+            this->computeBoundarySurfaceLoadVector(vec, static_cast< BoundaryLoad * >(load), load_id, ExternalForcesVector, VM_Total, tStep);
         } else {
             OOFEM_ERROR("Unsupported boundary condition: %d", load_id);
         }
@@ -253,7 +253,7 @@ void Tet1BubbleStokes :: computeLoadVector(FloatArray &answer, Load *load, CharT
 }
 
 
-  void Tet1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int iSurf, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
+  void Tet1BubbleStokes :: computeBoundarySurfaceLoadVector(FloatArray &answer, BoundaryLoad *load, int iSurf, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
 {
     if ( type != ExternalForcesVector ) {
         answer.clear();

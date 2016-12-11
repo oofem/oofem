@@ -75,7 +75,7 @@ public:
     //Compute volumetric load from element
     virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
     //Boundary load by prescribed flux, convection, or radiation over surface
-    virtual void computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true);
+    virtual void computeBoundarySurfaceLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true);
     //Contribution to conductivity matrix from convection
     virtual void computeTangentFromSurfaceLoad(FloatMatrix &answer, SurfaceLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep);
     virtual void computeTangentFromEdgeLoad(FloatMatrix &answer, EdgeLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep);
