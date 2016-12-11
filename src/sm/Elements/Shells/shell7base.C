@@ -1097,20 +1097,6 @@ void Shell7Base :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoa
 }
 
 
-void
-Shell7Base :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep, ValueModeType mode)
-{
-    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >( load );
-    if ( edgeLoad ) {
-        this->computeTractionForce(answer, iEdge, edgeLoad, tStep, mode);
-        return;
-    } else {
-        OOFEM_ERROR("Load type not supported");
-        return;
-    }
-}
-
-
 // Surface
 void
 Shell7Base :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,

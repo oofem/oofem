@@ -316,7 +316,7 @@ public:
 
 #endif
 
-    // Interface for b.c.s applied by Sets:
+    // Interface for body loads applied by Sets:
     virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
     virtual void computeBoundarySurfaceLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true);
     virtual void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true);
@@ -365,29 +365,7 @@ protected:
      * @param mode determines response mode
      */
     virtual void computePointLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode, bool global=true);
-    /**
-     * Computes edge load vector contribution of receiver for given load (should has BoundaryLoad Base).
-     * Each edge should have unique number assigned to identify it.
-     * The default implementation does integration of load vector in local edge space
-     * (i.e. one dimensional integration is performed on line). This general implementation requires
-     * that element must provide following services:
-     * - computeEgdeNMatrixAt - returns interpolation matrix of local edge DOFs in the local edge space.
-     * - computeEdgeVolumeAround - returns volume corresponding to integration point at local edge.
-     * - giveEdgeDofMapping - returns integer array specifying local dof edge mapping to "global" element dofs.
-     *
-     * Integration rule is set up automatically, based on element interpolation order and load approximation.
-     * Integration points are set-up using standard integration rule services (setUpIntegrationPoints method).
-     * Gauss integration rule is used.
-     * If derived class overrides this default implementation somehow, the above services
-     * must not be implemented.
-     *
-     * @param answer Computed load vector.
-     * @param load Edge load which contribution is computed.
-     * @param iEdge Edge number where load applies.
-     * @param tStep Time step.
-     * @param mode Determines response mode.
-     */
-    virtual void computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep, ValueModeType mode);
+
     /**
      * Computes surface load vector contribution of receiver for given load (should has BoundaryLoad Base).
      * Each surface should have unique number assigned to identify it.

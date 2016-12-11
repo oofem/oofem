@@ -1533,51 +1533,6 @@ void Shell7BaseXFEM :: computeBoundaryEdgeLoadVector(FloatArray &answer, Boundar
 
 
 void
-Shell7BaseXFEM :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep, ValueModeType mode)
-{
-    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >(load);
-    if ( edgeLoad ) {
-        answer.resize( this->computeNumberOfDofs() );
-        answer.zero();
-
-        // Continuous part
-        FloatArray fT;
-        Shell7Base :: computeTractionForce(fT, iEdge, edgeLoad, tStep, mode);
-
-        IntArray activeDofs, ordering;
-        this->computeOrderingArray(ordering, activeDofs, NULL);
-        answer.assemble(fT, ordering);
-
-        FloatArray componentsTemp, coordsTemp(1);
-        coordsTemp.at(1) = 0.0;
-        edgeLoad->computeValueAt(componentsTemp, tStep, coordsTemp, VM_Total);
-        ///@todo Add support for load defined over certain area
-        //double xi = 0.0; // defaults to geometric midplane
-        //if ( componentsTemp.giveSize() == 8 ) {
-        //    xi = componentsTemp.at(8);   // use the 8th component to store the-xi coord where the load acts
-        //}
-
-        // Disccontinuous part
-        FloatArray temp, tempRed;
-        for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
-
-            EnrichmentItem *ei = this->xMan->giveEnrichmentItem(i);
-            if ( ei->isElementEnriched(this) ) {
-                this->computeEnrTractionForce(temp, iEdge, edgeLoad, tStep, mode, ei);
-                this->computeOrderingArray(ordering, activeDofs, ei);
-                tempRed.beSubArrayOf(temp, activeDofs);
-                answer.assemble(tempRed, ordering);
-            }
-        }
-        return;
-    } else {
-        OOFEM_ERROR("load type not supported");
-        return;
-    }
-}
-
-
-void
 Shell7BaseXFEM :: computeEnrTractionForce(FloatArray &answer, const int iEdge, BoundaryLoad *edgeLoad, TimeStep *tStep, ValueModeType mode, EnrichmentItem *ei)
 {
 #if 0

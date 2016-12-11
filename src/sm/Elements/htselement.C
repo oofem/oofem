@@ -269,30 +269,6 @@ HTSelement :: computePrescribedDisplacementLoadVectorAt(FloatArray &answer, Time
 }
 
 
-void
-HTSelement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
-                                      int iEdge, TimeStep *tStep, ValueModeType mode)
-{
-    double dV;
-    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >(load);
-    FloatArray force, PsEdge, Ps(numberOfDofs);
-
-    Ps.zero();
-    answer.resize(numberOfDofs);
-    for ( int i = 0; i < numberOfEdges; i++ ) {
-        for ( GaussPoint *gp: *this->giveIntegrationRule(i) ) {
-            edgeLoad->computeValueAt(force, tStep, gp->giveNaturalCoordinates(), mode);
-            dV = this->computeVolumeAroundSide(gp, i + 1);
-            this->computePsVectorAt(PsEdge, force, gp);
-            PsEdge.times(dV);
-            Ps.add(PsEdge);
-        }
-        for ( int k = 0; k < numberOfDofs; k++ ) {
-            answer(k + i * 4) = Ps(k);
-        }
-    }
-}
-
 
 /*Public functions*/
 
