@@ -59,6 +59,22 @@ public:
     virtual double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 
+
+    virtual void boundarySurfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) {this->surfaceEvalN(answer, isurf, lcoords, cellgeo);}
+    virtual void boundarySurfaceEvaldNdx(FloatMatrix &answer, int isurf,
+					 const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    {this->surfaceEvaldNdx(answer, isurf, lcoords, cellgeo);}
+    virtual double boundarySurfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords,
+					     const FEICellGeometry &cellgeo)
+    {return surfaceEvalNormal(answer, isurf, lcoords, cellgeo);}
+    virtual void boundarySurfaceLocal2global(FloatArray &answer, int isurf,
+					      const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    {this->surfaceLocal2global(answer, isurf, lcoords, cellgeo);}
+    virtual double boundarySurfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
+							     const FEICellGeometry &cellgeo)
+    {return this->surfaceGiveTransformationJacobian(isurf, lcoords, cellgeo);}
+
+    
     virtual void boundaryGiveNodes(IntArray &answer, int boundary);
     virtual void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);

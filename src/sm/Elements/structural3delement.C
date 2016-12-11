@@ -263,14 +263,6 @@ Structural3DElement :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, G
     answer.beNMatrixOf(N, 3);
 }
 
-#if 1
-IntegrationRule *
-Structural3DElement :: giveSurfaceIntegrationRule(int order, int isurf)
-{
-    return static_cast< FEInterpolation3d* > ( this->giveInterpolation() )->giveBoundaryIntegrationRule(order, isurf);   
-}
-#endif
-
 void
 Structural3DElement :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
 {

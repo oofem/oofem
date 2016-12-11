@@ -54,6 +54,27 @@ public:
     virtual double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void boundaryLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+
+    /**@name Surface interpolation services */
+    //@{
+    virtual void boundarySurfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) {OOFEM_ERROR("Functions not supported for this interpolator."); }
+    virtual void boundarySurfaceEvaldNdx(FloatMatrix &answer, int isurf,
+					 const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    { OOFEM_ERROR("Functions not supported for this interpolator."); }
+    virtual double boundarySurfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords,
+					     const FEICellGeometry &cellgeo)
+    { OOFEM_ERROR("Functions not supported for this interpolator."); }
+    virtual void boundarySurfaceLocal2global(FloatArray &answer, int isurf,
+					      const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    { OOFEM_ERROR("Functions not supported for this interpolator."); }
+    virtual double boundarySurfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
+							     const FEICellGeometry &cellgeo)
+    { OOFEM_ERROR("Functions not supported for this interpolator."); }
+
+    //@}
+
+
+    
     /**
      * Computes the exact length.
      * @param cellgeo Cell geometry for the element.

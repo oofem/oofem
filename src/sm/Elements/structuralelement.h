@@ -322,6 +322,18 @@ public:
     virtual void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true);
     /// computes edge interpolation matrix
     virtual void computeEdgeNMatrix (FloatMatrix &answer, int boundaryID, const FloatArray& lcoords);
+    /**
+     * Computes surface interpolation matrix. Interpolation matrix provide way, how to compute
+     * local surface unknowns (nonzero element unknowns on surface) at any integration 
+     * point of surface, based on local unknowns in surface nodes.
+     * Local coordinate system of surface edge and element surface numbering is element dependent.
+     * The integration point is specified using two-dimensional iso coordinates, or using area coordinates
+     * for triangular surface.
+     * @param answer Interpolation matrix of surface.
+     * @param boundaryID Surface number.
+     * @param local coordinates
+     */
+    virtual void computeSurfaceNMatrix (FloatMatrix &answer, int boundaryID, const FloatArray& lcoords);
 
 
     /**
@@ -367,18 +379,6 @@ protected:
     virtual void computePointLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode, bool global=true);
 
     /**
-     * Computes surface interpolation matrix. Interpolation matrix provide way, how to compute
-     * local surface unknowns (nonzero element unknowns on surface) at any integration point of surface, based on
-     * local unknowns in surface nodes.
-     * Local coordinate system of surface edge and element surface numbering is element dependent.
-     * The integration point is specified using two-dimensional iso coordinates, or using area coordinates
-     * for triangular surface.
-     * @param answer Interpolation matrix of surface.
-     * @param iSurf Surface number.
-     * @param gp Integration point.
-     */
-    virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *gp) { answer.clear(); }
-    /**
      * Assembles edge dof mapping mask, which provides mapping between edge local DOFs and "global" element
      * DOFs. Mask can be imagined as local edge code numbers used to localize local edge DOFs to
      * element DOFs.
@@ -394,13 +394,6 @@ protected:
      * @param iSurf Surface number
      */
     virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const { answer.clear(); }
-    /**
-     * Returns integration rule for integration over element surface.
-     * @param order order of integrated polynomial
-     * @param isurf which surface to return integration rule for
-     * @return Best integration rule to integrate polynomial of order i over element surface.
-     */
-    virtual IntegrationRule *giveSurfaceIntegrationRule(int order, int isurf) { return NULL; }
     
     ///@todo Old, only kept until all el have changed to the above
     virtual IntegrationRule *GetSurfaceIntegrationRule(int order) { return NULL; }

@@ -121,7 +121,7 @@ void StructuralElement :: computeLoadVector(FloatArray &answer, Load *load, Char
     FloatArray n_vec;
     FloatMatrix n, T;
     FloatArray force, globalIPcoords;
-    int nsd = fei->giveNsd();
+    //int nsd = fei->giveNsd();
 
     std :: unique_ptr< IntegrationRule >iRule( fei->giveBoundaryIntegrationRule(load->giveApproxOrder(), boundary) );
 
@@ -153,8 +153,7 @@ void StructuralElement :: computeLoadVector(FloatArray &answer, Load *load, Char
         }
 
         // Construct n-matrix
-        fei->boundaryEvalN( n_vec, boundary, lcoords, FEIElementGeometryWrapper(this) );
-        n.beNMatrixOf(n_vec, nsd);
+        this->computeSurfaceNMatrix(n, boundary, lcoords); // to allow adapttation on element level
 
         ///@todo Some way to ask for the thickness at a global coordinate maybe?
         double thickness = 1.0; // Should be the circumference for axisymm-elements.
@@ -163,6 +162,16 @@ void StructuralElement :: computeLoadVector(FloatArray &answer, Load *load, Char
     }
 }
 
+
+void
+StructuralElement::computeSurfaceNMatrix (FloatMatrix &answer, int boundaryID, const FloatArray& lcoords)
+{
+  FloatArray n_vec;
+  this->giveInterpolation()->boundarySurfaceEvalN(n_vec, boundaryID, lcoords, FEIElementGeometryWrapper(this) );
+  answer.beNMatrixOf(n_vec, this->giveInterpolation()->giveNsd());
+}
+
+  
 void StructuralElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
 {
     answer.clear();

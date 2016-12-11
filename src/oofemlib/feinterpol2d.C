@@ -120,4 +120,35 @@ IntegrationRule *FEInterpolation2d :: giveBoundaryEdgeIntegrationRule(int order,
     iRule->SetUpPointsOnLine(points, _Unknown);
     return iRule;
 }
+
+void FEInterpolation2d::boundarySurfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+{
+  this->evalN(answer, lcoords, cellgeo);
+}
+
+void FEInterpolation2d::boundarySurfaceEvaldNdx(FloatMatrix &answer, int isurf,
+					const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+{
+  this->evaldNdx(answer, lcoords, cellgeo);
+}
+
+double FEInterpolation2d::boundarySurfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords,
+					    const FEICellGeometry &cellgeo)
+{
+  answer = {0,0,1};
+  return this->giveTransformationJacobian(lcoords, cellgeo);
+}
+
+void FEInterpolation2d::boundarySurfaceLocal2global(FloatArray &answer, int isurf,
+					    const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+{
+  this->local2global(answer, lcoords, cellgeo);
+}
+
+double FEInterpolation2d::boundarySurfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
+							    const FEICellGeometry &cellgeo)
+{
+  return this->giveTransformationJacobian(lcoords, cellgeo);
+}
+
 } // end namespace oofem

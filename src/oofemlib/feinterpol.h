@@ -266,8 +266,65 @@ public:
     virtual void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)=0;
     //@}
 
+    /**@name Surface interpolation services */
+    //@{
+    /**
+     * Evaluates the array of edge interpolation functions (shape functions) at given point.
+     * @param answer Contains resulting array of evaluated interpolation functions.
+     * @param isurf Surface number.
+     * @param lcoords Array containing (local) coordinates.
+     * @param cellgeo Underlying cell geometry.
+     */
+    virtual void boundarySurfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
+    /**
+     * Evaluates the matrix of derivatives of edge interpolation functions (shape functions) at given point.
+     * These derivatives are in global coordinate system (where the nodal coordinates are defined).
+     * @param answer Contains resulting matrix of derivatives, the member at i,j position contains value of dNj/dxi.
+     * @param isurf Determines the surface number.
+     * @param lcoords Array containing (local) coordinates.
+     * @param cellgeo Underlying cell geometry.
+     */
+    virtual void boundarySurfaceEvaldNdx(FloatMatrix &answer, int isurf,
+					 const FloatArray &lcoords, const FEICellGeometry &cellgeo)=0;
+    /**
+     * Evaluates the normal out of the surface at given point.
+     * @param answer Contains resulting normal vector.
+     * @param isurf Determines the surface number.
+     * @param lcoords Array containing (local) coordinates.
+     * @param cellgeo Underlying cell geometry.
+     * @return Surface mapping jacobian.
+     */
+    virtual double boundarySurfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords,
+					     const FEICellGeometry &cellgeo)=0;
+
+    /**
+     * Evaluates edge global coordinates from given local ones.
+     * These derivatives are in global coordinate system (where the nodal coordinates are defined).
+     * @param answer Contains resulting global coordinates.
+     * @param isurf Determines the surface number.
+     * @param lcoords Array containing (local) coordinates.
+     * @param cellgeo Underlying cell geometry.
+     */
+    virtual void boundarySurfaceLocal2global(FloatArray &answer, int isurf,
+					     const FloatArray &lcoords, const FEICellGeometry &cellgeo)=0;
+    /**
+     * Evaluates the edge jacobian of transformation between local and global coordinates.
+     * @param isurf Determines the surface number.
+     * @param lcoords Array containing (local) coordinates.
+     * @param cellgeo Underlying cell geometry.
+     * @return Determinant of the transformation.
+     */
+    virtual double boundarySurfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
+							     const FEICellGeometry &cellgeo)=0;
+
+    //@}
+
+
+    
+
     /** @name General boundary functions.
      * Boundaries are corner nodes for 1D geometries, edges for 2D geometries and surfaces for 3D geometries.
+     *
      */
     //@{
     /**

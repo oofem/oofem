@@ -96,7 +96,6 @@ protected:
      
      
     //virtual IntegrationRule *GetSurfaceIntegrationRule(int); // old
-    virtual IntegrationRule *giveSurfaceIntegrationRule(int order, int isurf);
     virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *gp);
     virtual void giveSurfaceDofMapping(IntArray &answer, int) const;
     virtual double computeSurfaceVolumeAround(GaussPoint *gp, int);
