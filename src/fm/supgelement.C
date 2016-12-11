@@ -155,6 +155,7 @@ SUPGElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Value
 //
 {
     if ( mtrx == ExternalForcesVector ) {
+      answer.clear();
 #if 0
       // assembled from assembler from loads directly
       // stokes flow
