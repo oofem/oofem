@@ -46,7 +46,7 @@
 #include "fei2dtrquad.h"
 #include "fei2dquadlin.h"
 #include "fei2dquadquad.h"
-#include "fei3dtrlin.h"
+#include "fei3dtetlin.h"
 
 #include "pfem/octreelocalizert.h"
 #include "error.h"
@@ -93,7 +93,7 @@ protected:
     static FEI2dTrQuad i4;
     static FEI2dQuadLin i5;
     static FEI2dQuadQuad i6;
-    static FEI3dTrLin i7;
+    static FEI3dTetLin i7;
     
     static FEInterpolation* interpTable[] ;
 
@@ -333,7 +333,7 @@ protected:
   int evaluateAt(FloatArray &answer, const FloatArray &coords,
 		 ValueModeType mode, TimeStep *tStep) override {
     std::list<Cell> elist;
-    if (mode == VM_Total) {
+    if ((mode == VM_Total) || (mode == VM_TotalIntrinsic)) {
       this->initOctree();
       CellContainingPointFunctor f(coords);
       this->spatialLocalizer.giveDataOnFilter(elist, f);
