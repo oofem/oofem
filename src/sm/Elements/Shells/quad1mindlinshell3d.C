@@ -151,7 +151,7 @@ Quad1MindlinShell3D :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad
     }
 }
 
-
+/*
 void
 Quad1MindlinShell3D :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
                                                   int iSurf, TimeStep *tStep, ValueModeType mode)
@@ -183,7 +183,7 @@ Quad1MindlinShell3D :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load
         OOFEM_ERROR("only supports constant pressure boundary load.");
     }
 }
-
+*/
 
 void
 Quad1MindlinShell3D :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)

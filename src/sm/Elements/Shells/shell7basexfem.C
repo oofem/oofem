@@ -1694,7 +1694,9 @@ Shell7BaseXFEM :: edgeEvalEnrCovarBaseVectorsAt(const FloatArray &lcoords, const
     gcov = {g1, g2, g3};
 }
 
+  
 // Surface
+/*
 void
 Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
                                          int iSurf, TimeStep *tStep, ValueModeType mode)
@@ -1747,7 +1749,7 @@ Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
         return;
     }
 }
-
+*/
 
 
 // Shifted N and B matrices

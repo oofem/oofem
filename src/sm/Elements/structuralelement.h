@@ -367,31 +367,6 @@ protected:
     virtual void computePointLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode, bool global=true);
 
     /**
-     * Computes surface load vector contribution of receiver for given load (should has BoundaryLoad Base).
-     * Each surface should have unique number assigned to identify it.
-     * The default implementation does integration of load vector in local surface space
-     * (i.e. two dimensional integration is performed on triangle or square).
-     * This general implementation requires
-     * that element must provide following services:
-     * - getSurfaceIntegrationRule - returns integration rule for surface for given polynomial order.
-     * - computeSurfaceNMatrixAt - returns interpolation matrix of local surface DOFs in the local edge space.
-     * - computeSurfaceVolumeAround - returns volume corresponding to integration point of local surface.
-     * - giveSurfaceDofMapping - returns integer array specifying local dof surface mapping to "global" element dofs.
-     *
-     * Integration rule is set up automatically, based on element interpolation order and load approximation.
-     * Integration points are set-up using standard integration rule services (setUpIntegrationPoints method).
-     * Gauss integration rule is used.
-     * If derived class overrides this default implementation somehow, the above services
-     * must not be implemented.
-     *
-     * @param answer Computed load vector.
-     * @param load Surface load which contribution is computed.
-     * @param iSurf Surface number where load applies.
-     * @param tStep Time step.
-     * @param mode Determines response mode.
-     */
-    virtual void computeSurfaceLoadVectorAt(FloatArray &answer, Load *load, int iSurf, TimeStep *tStep, ValueModeType mode);
-    /**
      * Computes Edge interpolation matrix. Interpolation matrix provide way, how to compute
      * local edge unknowns (nonzero element unknowns on edge) at any integration point of edge, based on
      * local edge unknowns in edge nodes.

@@ -1097,7 +1097,7 @@ void Shell7Base :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoa
 }
 
 
-// Surface
+/*
 void
 Shell7Base :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
                                          int iSurf, TimeStep *tStep, ValueModeType mode)
@@ -1119,7 +1119,8 @@ Shell7Base :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
         return;
     }
 }
-
+*/
+  
 void
 Shell7Base :: computePressureForce(FloatArray &answer, FloatArray solVec, const int iSurf, BoundaryLoad *surfLoad, TimeStep *tStep, ValueModeType mode)
 {

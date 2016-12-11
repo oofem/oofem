@@ -115,8 +115,6 @@ protected:
     { this->giveLocationArray (locationArray, s, dofIdArray);}
 
     
-    virtual void computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
-                                            int iSurf, TimeStep *tStep, ValueModeType mode);
     void computeEnrTractionForce(FloatArray &answer, const int iedge, BoundaryLoad *edgeLoad, TimeStep *tStep, 
         ValueModeType mode, EnrichmentItem *ei);
 

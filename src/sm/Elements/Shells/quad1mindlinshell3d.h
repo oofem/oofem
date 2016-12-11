@@ -132,7 +132,6 @@ public:
 protected:
     virtual void computeGaussPoints();
     virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
-    virtual void computeSurfaceLoadVectorAt(FloatArray &answer, Load *load, int iSurf, TimeStep *tStep, ValueModeType mode);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
 
     virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
