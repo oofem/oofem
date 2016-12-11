@@ -1230,7 +1230,7 @@ Shell7Base :: evalInitialCovarNormalAt(FloatArray &nCov, const FloatArray &lCoor
 }
 
 void
-Shell7Base :: computeTractionForce(FloatArray &answer, const int iEdge, BoundaryLoad *edgeLoad, TimeStep *tStep, ValueModeType mode)
+Shell7Base :: computeTractionForce(FloatArray &answer, const int iEdge, BoundaryLoad *edgeLoad, TimeStep *tStep, ValueModeType mode, bool map2elementDOFs)
 {
 
     int approxOrder = edgeLoad->giveApproxOrder() + this->giveInterpolation()->giveInterpolationOrder();
@@ -1277,14 +1277,16 @@ Shell7Base :: computeTractionForce(FloatArray &answer, const int iEdge, Boundary
         
         Nf.plusProduct(N, fT, dL);
     }
-    /* Note: now used from computeBoundaryEdgeLoadVector, so result should be in global cs for edge dofs
-    IntArray mask;
-    this->giveEdgeDofMapping(mask, iEdge);
-    answer.resize( Shell7Base :: giveNumberOfDofs()  );
-    answer.zero();
-    answer.assemble(Nf, mask);
-    */
-    answer = Nf;
+    /* Note: now used from computeBoundaryEdgeLoadVector, so result should be in global cs for edge dofs */
+    if (map2elementDOFs) {
+      IntArray mask;
+      this->giveEdgeDofMapping(mask, iEdge);
+      answer.resize( Shell7Base :: giveNumberOfDofs()  );
+      answer.zero();
+      answer.assemble(Nf, mask);
+    } else {
+      answer = Nf;
+    }
 
 }
 
