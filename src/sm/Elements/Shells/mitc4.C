@@ -1107,19 +1107,6 @@ MITC4Shell :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int
 
 
 void
-MITC4Shell :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
-{
-    IntArray edgeNodes;
-    FloatArray n;
-
-    this->interp_lin.edgeEvalN( n, iedge, gp->giveNaturalCoordinates(), FEIVoidCellGeometry() );
-    this->interp_lin.computeLocalEdgeMapping(edgeNodes, iedge);
-
-    answer.beNMatrixOf(n, 6);
-}
-
-
-void
 MITC4Shell :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 {
     if ( iEdge == 1 ) { // edge between nodes 1 2

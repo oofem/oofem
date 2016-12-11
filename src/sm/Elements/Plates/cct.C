@@ -563,6 +563,7 @@ CCTPlate :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &mas
 }
 
 // Edge load support
+/*
 void
 CCTPlate :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
@@ -589,6 +590,7 @@ CCTPlate :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
     answer.at(2, 2) = answer.at(3, 3) = n.at(1);
     answer.at(2, 5) = answer.at(3, 6) = n.at(2);
 }
+*/
 
 void
 CCTPlate :: giveEdgeDofMapping(IntArray &answer, int iEdge) const

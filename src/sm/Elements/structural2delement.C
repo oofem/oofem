@@ -174,22 +174,6 @@ Structural2DElement :: giveCharacteristicLength(const FloatArray &normalToCrackP
 // Edge support
 
 void
-Structural2DElement :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
-{
-    /* Returns the [2xn] shape function matrix {N} of the receiver,
-     * evaluated at the given gp.
-     * {u} = {N}*{a} gives the displacements at the integration point.
-     */
-
-    // Evaluate the shape functions at the position of the gp.
-    FloatArray N;
-    static_cast< FEInterpolation2d * >( this->giveInterpolation() )->
-    edgeEvalN( N, iedge, gp->giveNaturalCoordinates(), * this->giveCellGeometryWrapper() );
-    answer.beNMatrixOf(N, 2);
-}
-
-
-void
 Structural2DElement :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 {
     /*

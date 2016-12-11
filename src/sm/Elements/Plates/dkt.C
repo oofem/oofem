@@ -613,21 +613,6 @@ DKTPlate :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &mas
     answer.at(4) = masterGpStrain.at(4);
 }
 
-// Edge load support
-void
-DKTPlate :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
-{
-    FloatArray n;
-
-    this->interp_lin.edgeEvalN( n, iedge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(3, 6);
-    answer.at(1, 1) = n.at(1);
-    answer.at(1, 4) = n.at(2);
-    answer.at(2, 2) = answer.at(3, 3) = n.at(1);
-    answer.at(2, 5) = answer.at(3, 6) = n.at(2);
-}
-
 void
 DKTPlate :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 {

@@ -86,7 +86,6 @@ protected:
     virtual void computeGaussPoints();
 
      // Edge support
-    virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
     virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
     virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);

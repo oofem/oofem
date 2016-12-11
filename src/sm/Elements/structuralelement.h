@@ -367,18 +367,6 @@ protected:
     virtual void computePointLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode, bool global=true);
 
     /**
-     * Computes Edge interpolation matrix. Interpolation matrix provide way, how to compute
-     * local edge unknowns (nonzero element unknowns on edge) at any integration point of edge, based on
-     * local edge unknowns in edge nodes.
-     * The edge numbering and local edge coordinate system is element dependent.
-     * The integration point is specified using one-dimensional iso coordinates.
-     * @param answer Interpolation matrix of edge.
-     * @param iedge Edge number.
-     * @param gp Integration point.
-     * @todo Should be a FlotArray instead
-     */
-    virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp) { answer.clear(); }
-    /**
      * Computes surface interpolation matrix. Interpolation matrix provide way, how to compute
      * local surface unknowns (nonzero element unknowns on surface) at any integration point of surface, based on
      * local unknowns in surface nodes.

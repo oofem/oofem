@@ -327,24 +327,6 @@ Structural3DElement :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int, 
 // Edge support
 
 void
-Structural3DElement :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
-{
-    /* Returns the [ 3 x (nno*3)] shape function matrix {N} of the receiver, 
-     * evaluated at the given gp.
-     * {u} = {N}*{a} gives the displacements at the integration point.
-     */ 
-    ///@todo move up in hiearchy
-          
-    // Evaluate the shape functions at the position of the gp. 
-    FloatArray N;
-    static_cast< FEInterpolation3d* > ( this->giveInterpolation() )->
-        edgeEvalN( N, iedge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );  
-    answer.beNMatrixOf(N, 3);
-}
-
-
-
-void
 Structural3DElement :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 {
     /*

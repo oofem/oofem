@@ -143,7 +143,6 @@ private:
     // edge & body load
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
     virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
-    virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
     virtual void giveDofManDofIDMask(int inode, IntArray &) const;
     virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf);
     virtual IntegrationRule *GetSurfaceIntegrationRule(int approxOrder);

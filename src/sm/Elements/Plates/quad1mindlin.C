@@ -285,19 +285,6 @@ Quad1Mindlin :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateTyp
 }
 
 void
-Quad1Mindlin :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
-{
-    IntArray edgeNodes;
-    FloatArray n;
-
-    this->interp_lin.edgeEvalN( n, iedge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-    this->interp_lin.computeLocalEdgeMapping(edgeNodes, iedge);
-
-    answer.beNMatrixOf(n, 3);
-}
-
-
-void
 Quad1Mindlin :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 {
     if ( iEdge == 1 ) { // edge between nodes 1 2

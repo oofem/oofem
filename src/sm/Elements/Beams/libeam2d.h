@@ -90,7 +90,6 @@ public:
 
 protected:
     // edge load support
-    virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *);
     virtual void giveEdgeDofMapping(IntArray &answer, int) const;
     virtual double computeEdgeVolumeAround(GaussPoint *, int);
     virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
