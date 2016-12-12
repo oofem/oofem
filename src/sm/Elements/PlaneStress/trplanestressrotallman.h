@@ -92,6 +92,7 @@ public:
 
     Interface *giveInterface(InterfaceType interface);
 
+    void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global);
     void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
     void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
     int SPRNodalRecoveryMI_giveNumberOfIP();

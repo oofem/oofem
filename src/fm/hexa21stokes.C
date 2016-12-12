@@ -41,6 +41,7 @@
 #include "bcgeomtype.h"
 #include "generalboundarycondition.h"
 #include "load.h"
+#include "bodyload.h"
 #include "boundaryload.h"
 #include "mathfem.h"
 #include "fluiddynamicmaterial.h"
@@ -179,22 +180,24 @@ void Hexa21Stokes :: computeExternalForcesVector(FloatArray &answer, TimeStep *t
         Load *load = this->domain->giveLoad(load_number);
 
         if ( load->giveBCGeoType() == SurfaceLoadBGT ) {
-            this->computeBoundaryLoadVector(vec, static_cast< BoundaryLoad * >(load), load_id, ExternalForcesVector, VM_Total, tStep);
+            this->computeBoundarySurfaceLoadVector(vec, static_cast< BoundaryLoad * >(load), load_id, ExternalForcesVector, VM_Total, tStep);
             answer.add(vec);
         }
     }
 
     nLoads = this->giveBodyLoadArray()->giveSize();
     for ( int i = 1; i <= nLoads; i++ ) {
-        Load *load = domain->giveLoad( bodyLoadArray.at(i) );
+      BodyLoad *load;
+      if ((load = dynamic_cast<BodyLoad*>(domain->giveLoad( bodyLoadArray.at(i))))) {
         if ( load->giveBCGeoType() == BodyLoadBGT && load->giveBCValType() == ForceLoadBVT ) {
             this->computeLoadVector(vec, load, ExternalForcesVector, VM_Total, tStep);
             answer.add(vec);
-        }
+	}
+      }
     }
 }
 
-void Hexa21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
+void Hexa21Stokes :: computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     if ( type != ExternalForcesVector ) {
         answer.clear();
@@ -227,7 +230,7 @@ void Hexa21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType 
     answer.assemble(temparray, this->momentum_ordering);
 }
 
-  void Hexa21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int iSurf, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
+  void Hexa21Stokes :: computeBoundarySurfaceLoadVector(FloatArray &answer, BoundaryLoad *load, int iSurf, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
 {
     if ( type != ExternalForcesVector ) {
         answer.clear();

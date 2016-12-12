@@ -110,6 +110,28 @@ public:
     virtual void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
 
+
+    /**@name Surface interpolation services */
+    //@{
+    virtual void boundarySurfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) {OOFEM_ERROR("Functions not supported for this interpolator."); }
+    virtual void boundarySurfaceEvaldNdx(FloatMatrix &answer, int isurf,
+					 const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    { OOFEM_ERROR("Functions not supported for this interpolator."); }
+    virtual double boundarySurfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords,
+					     const FEICellGeometry &cellgeo)
+    { OOFEM_ERROR("Functions not supported for this interpolator."); }
+    virtual void boundarySurfaceLocal2global(FloatArray &answer, int isurf,
+					      const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    { OOFEM_ERROR("Functions not supported for this interpolator."); }
+    virtual double boundarySurfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
+							     const FEICellGeometry &cellgeo)
+    { OOFEM_ERROR("Functions not supported for this interpolator."); }
+
+    //@}
+
+
+
+    
     virtual void boundaryGiveNodes(IntArray &answer, int boundary)
     { OOFEM_ERROR("Not implemented"); }
     virtual void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)

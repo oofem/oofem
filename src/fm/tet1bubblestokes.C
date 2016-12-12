@@ -39,6 +39,7 @@
 #include "gausspoint.h"
 #include "bcgeomtype.h"
 #include "load.h"
+#include "bodyload.h"
 #include "boundaryload.h"
 #include "mathfem.h"
 #include "fluiddynamicmaterial.h"
@@ -191,7 +192,7 @@ void Tet1BubbleStokes :: computeExternalForcesVector(FloatArray &answer, TimeSte
         bcGeomType ltype = load->giveBCGeoType();
 
         if ( ltype == SurfaceLoadBGT ) {
-            this->computeBoundaryLoadVector(vec, static_cast< BoundaryLoad * >(load), load_id, ExternalForcesVector, VM_Total, tStep);
+            this->computeBoundarySurfaceLoadVector(vec, static_cast< BoundaryLoad * >(load), load_id, ExternalForcesVector, VM_Total, tStep);
         } else {
             OOFEM_ERROR("Unsupported boundary condition: %d", load_id);
         }
@@ -199,13 +200,16 @@ void Tet1BubbleStokes :: computeExternalForcesVector(FloatArray &answer, TimeSte
         answer.add(vec);
     }
 
+    BodyLoad *bload;
     nLoads = this->giveBodyLoadArray()->giveSize();
     for ( int i = 1; i <= nLoads; i++ ) {
         Load *load  = domain->giveLoad( bodyLoadArray.at(i) );
-        bcGeomType ltype = load->giveBCGeoType();
-        if ( ltype == BodyLoadBGT && load->giveBCValType() == ForceLoadBVT ) {
-            this->computeLoadVector(vec, load, ExternalForcesVector, VM_Total, tStep);
+	if ((bload = dynamic_cast<BodyLoad*>(load))) {
+	  bcGeomType ltype = load->giveBCGeoType();
+	  if ( ltype == BodyLoadBGT && load->giveBCValType() == ForceLoadBVT ) {
+            this->computeLoadVector(vec, bload, ExternalForcesVector, VM_Total, tStep);
             answer.add(vec);
+	  }
         } else {
             OOFEM_ERROR("Unsupported body load: %d", load);
         }
@@ -213,7 +217,7 @@ void Tet1BubbleStokes :: computeExternalForcesVector(FloatArray &answer, TimeSte
 }
 
 
-void Tet1BubbleStokes :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
+void Tet1BubbleStokes :: computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     if ( type != ExternalForcesVector ) {
         answer.clear();
@@ -253,7 +257,7 @@ void Tet1BubbleStokes :: computeLoadVector(FloatArray &answer, Load *load, CharT
 }
 
 
-  void Tet1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int iSurf, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
+  void Tet1BubbleStokes :: computeBoundarySurfaceLoadVector(FloatArray &answer, BoundaryLoad *load, int iSurf, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
 {
     if ( type != ExternalForcesVector ) {
         answer.clear();

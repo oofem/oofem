@@ -77,12 +77,12 @@ SimpleCS 1 thick 1.0 material 1 set 1
 IsoLE 1  E 210.e3  n 0.3  d 1.0 talpha 1.0
 BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 2
 BoundaryCondition 2 loadTimeFunction 1 dofs 1 2 values 1 0.0 set 3
-Constantsurfaceload 3 loadTimeFunction 1 loadtype 2 dofs 2 1 2 Components 2 1.0 0.0 set 4
+Constantedgeload 3 loadTimeFunction 1 loadtype 2 dofs 2 1 2 Components 2 1.0 0.0 set 4
 ConstantFunction 1 f(t) 1.0
 Set 1 elementranges {(1 39)}
 Set 2 nodes 3 4 5 13
 Set 3 nodes 3 1 2 6
-Set 4 elementboundaries 8 5 1  6 1  7 1  8 1
+Set 4 elementedges 8 5 1  6 1  7 1  8 1
 
 #%BEGIN_CHECK% tolerance 1.e-4
 ##ERRORESTIMATE tStep 1 value 38.63

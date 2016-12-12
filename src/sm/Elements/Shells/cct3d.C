@@ -450,13 +450,6 @@ CCTPlate3d :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 }
 
 
-void
-CCTPlate3d :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
-{
-    this->computeGlobalCoordinates( answer, gp->giveNaturalCoordinates() );
-}
-
-
 int
 CCTPlate3d :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int isurf, GaussPoint *gp)
 {

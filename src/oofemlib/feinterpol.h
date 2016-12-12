@@ -127,8 +127,7 @@ public:
 
 /**
  * Class representing a general abstraction for finite element interpolation class.
- * The boundary functions denote the (numbered) region that is 1 spatial dimension less (i.e. edges for 2D interpolators, surfaces for 3D).
- * The boundaryEdge functions denote the (numbered) regions that is 2 spatial dimensions less (i.e. corners for 2D interpolators, edges for 3D).
+ * The boundary functions denote the (numbered) region that have 1 spatial dimension (i.e. edges) or 2 spatial dimensions.
  */
 class OOFEM_EXPORT FEInterpolation
 {
@@ -225,8 +224,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 
     /** @name Edge boundary functions.
-     * Boundary edges are defined as corners for 2D geometries and surfaces for 3D geometries.
-     * This is the
+     * Provide interpolation services for boundary edges (entity of dimension 1)
      */
     //@{
     /**
@@ -235,7 +233,7 @@ public:
      * @param answer Array to be filled with the boundary nodes.
      * @param boundary Boundary number.
      */
-    virtual void boundaryEdgeGiveNodes(IntArray &answer, int boundary) = 0;
+    virtual void boundaryEdgeGiveNodes(IntArray &answer, int boundary)=0;
     /**
      * Evaluates the basis functions on the requested boundary.
      * Only basis functions that are nonzero anywhere on the boundary are given. Ordering can be obtained from giveBoundaryNodes.
@@ -246,7 +244,7 @@ public:
      * @param cellgeo Underlying cell geometry.
      * @todo
      */
-    virtual void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
+    virtual void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)=0;
     /**
      * Evaluates the determinant of the transformation Jacobian on the requested boundary.
      * Boundaries are defined as the corner nodes for 1D geometries, edges for 2D geometries and surfaces for 3D geometries.
@@ -255,7 +253,7 @@ public:
      * @param cellgeo Underlying cell geometry.
      * @return The determinant of the boundary transformation Jacobian.
      */
-    virtual double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
+    virtual double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)=0;
     /**
      * Maps the local boundary coordinates to global.
      * Boundaries are defined as the corner nodes for 1D geometries, edges for 2D geometries and surfaces for 3D geometries.
@@ -264,11 +262,68 @@ public:
      * @param lcoords The local coordinates (on the boundary local coordinate system).
      * @param cellgeo Underlying cell geometry.
      */
-    virtual void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
+    virtual void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)=0;
     //@}
 
-    /** @name General boundary functions.
-     * Boundaries are corner nodes for 1D geometries, edges for 2D geometries and surfaces for 3D geometries.
+    /**@name Surface interpolation services 
+     * Provide interpolation services for boundary edges (entities of dimension 2)
+     */
+    //@{
+    /**
+     * Evaluates the array of edge interpolation functions (shape functions) at given point.
+     * @param answer Contains resulting array of evaluated interpolation functions.
+     * @param isurf Surface number.
+     * @param lcoords Array containing (local) coordinates.
+     * @param cellgeo Underlying cell geometry.
+     */
+    virtual void boundarySurfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
+    /**
+     * Evaluates the matrix of derivatives of edge interpolation functions (shape functions) at given point.
+     * These derivatives are in global coordinate system (where the nodal coordinates are defined).
+     * @param answer Contains resulting matrix of derivatives, the member at i,j position contains value of dNj/dxi.
+     * @param isurf Determines the surface number.
+     * @param lcoords Array containing (local) coordinates.
+     * @param cellgeo Underlying cell geometry.
+     */
+    virtual void boundarySurfaceEvaldNdx(FloatMatrix &answer, int isurf,
+					 const FloatArray &lcoords, const FEICellGeometry &cellgeo)=0;
+    /**
+     * Evaluates the normal out of the surface at given point.
+     * @param answer Contains resulting normal vector.
+     * @param isurf Determines the surface number.
+     * @param lcoords Array containing (local) coordinates.
+     * @param cellgeo Underlying cell geometry.
+     * @return Surface mapping jacobian.
+     */
+    virtual double boundarySurfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords,
+					     const FEICellGeometry &cellgeo)=0;
+
+    /**
+     * Evaluates edge global coordinates from given local ones.
+     * These derivatives are in global coordinate system (where the nodal coordinates are defined).
+     * @param answer Contains resulting global coordinates.
+     * @param isurf Determines the surface number.
+     * @param lcoords Array containing (local) coordinates.
+     * @param cellgeo Underlying cell geometry.
+     */
+    virtual void boundarySurfaceLocal2global(FloatArray &answer, int isurf,
+					     const FloatArray &lcoords, const FEICellGeometry &cellgeo)=0;
+    /**
+     * Evaluates the edge jacobian of transformation between local and global coordinates.
+     * @param isurf Determines the surface number.
+     * @param lcoords Array containing (local) coordinates.
+     * @param cellgeo Underlying cell geometry.
+     * @return Determinant of the transformation.
+     */
+    virtual double boundarySurfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
+							     const FEICellGeometry &cellgeo)=0;
+
+    //@}
+
+    /** @name General boundary interpolation functions.
+     * Provide interpolation servises for boundary entities with one dimension lower than the receiver interpolation.
+     * Typically these are mapped to boundaryEdge and boundarySurface methods depending on dimension.
+     *
      */
     //@{
     /**

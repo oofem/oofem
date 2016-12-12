@@ -346,49 +346,7 @@ GradDpElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, i
 }
 #endif
 
-void
-GradDpElement :: computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
-{
-    //set displacement and nonlocal location array
-    this->setDisplacementLocationArray();
-    this->setNonlocalLocationArray();
-
-
-    FloatArray localForces(locSize);
-    FloatArray nlForces(nlSize);
-    answer.resize(totalSize);
-
-    this->computeLocForceLoadVector(localForces, tStep, mode);
-
-    answer.assemble(localForces, locU);
-    answer.assemble(nlForces, locK);
-}
-
-
 /************************************************************************/
-void
-GradDpElement :: computeLocForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
-// computes the part of load vector, which is imposed by force loads acting
-// on element volume (surface).
-// When reactions forces are computed, they are computed from element::GiveRealStressVector
-// in this vector a real forces are stored (temperature part is subtracted).
-// so we need further sobstract part corresponding to non-nodeal loading.
-{
-    FloatMatrix T;
-    NLStructuralElement *elem = this->giveNLStructuralElement();
-    elem->computeLocalForceLoadVector(answer, tStep, mode);
-
-    // transform result from global cs to nodal cs. if necessary
-    if ( answer.isNotEmpty() ) {
-        if ( elem->computeGtoLRotationMatrix(T) ) {
-            // first back to global cs from element local
-            answer.rotatedWith(T, 't');
-        }
-    } else {
-        answer.resize(locSize);
-        answer.zero();
-    }
-}
 
 #if 0
 void

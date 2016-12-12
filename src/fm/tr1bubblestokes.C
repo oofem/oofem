@@ -40,6 +40,7 @@
 #include "gausspoint.h"
 #include "bcgeomtype.h"
 #include "load.h"
+#include "bodyload.h"
 #include "boundaryload.h"
 #include "mathfem.h"
 #include "fluiddynamicmaterial.h"
@@ -189,6 +190,7 @@ void Tr1BubbleStokes :: computeExternalForcesVector(FloatArray &answer, TimeStep
 {
     int load_number, load_id;
     Load *load;
+    BodyLoad *bLoad;
     bcGeomType ltype;
     FloatArray vec;
 
@@ -202,7 +204,7 @@ void Tr1BubbleStokes :: computeExternalForcesVector(FloatArray &answer, TimeStep
         ltype = load->giveBCGeoType();
 
         if ( ltype == EdgeLoadBGT ) {
-            this->computeBoundaryLoadVector(vec, static_cast< BoundaryLoad * >(load), load_id, ExternalForcesVector, VM_Total, tStep);
+            this->computeBoundarySurfaceLoadVector(vec, static_cast< BoundaryLoad * >(load), load_id, ExternalForcesVector, VM_Total, tStep);
             answer.add(vec);
         }
     }
@@ -210,16 +212,18 @@ void Tr1BubbleStokes :: computeExternalForcesVector(FloatArray &answer, TimeStep
     nLoads = this->giveBodyLoadArray()->giveSize();
     for ( int i = 1; i <= nLoads; i++ ) {
         load  = domain->giveLoad( bodyLoadArray.at(i) );
-        ltype = load->giveBCGeoType();
-        if ( ltype == BodyLoadBGT && load->giveBCValType() == ForceLoadBVT ) {
-            this->computeLoadVector(vec, load, ExternalForcesVector, VM_Total, tStep);
+	if ((bLoad = dynamic_cast<BodyLoad*>(load))) {
+	  ltype = load->giveBCGeoType();
+	  if ( ltype == BodyLoadBGT && load->giveBCValType() == ForceLoadBVT ) {
+            this->computeLoadVector(vec, bLoad, ExternalForcesVector, VM_Total, tStep);
             answer.add(vec);
+	  }
         }
     }
 }
 
 
-void Tr1BubbleStokes :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
+void Tr1BubbleStokes :: computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     if ( type != ExternalForcesVector ) {
         answer.clear();
@@ -254,7 +258,7 @@ void Tr1BubbleStokes :: computeLoadVector(FloatArray &answer, Load *load, CharTy
     answer.assemble(temparray, this->momentum_ordering);
 }
 
-  void Tr1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int iEdge, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
+  void Tr1BubbleStokes :: computeBoundarySurfaceLoadVector(FloatArray &answer, BoundaryLoad *load, int iEdge, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
 {
     if ( type != ExternalForcesVector ) {
         answer.clear();

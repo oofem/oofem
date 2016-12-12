@@ -79,5 +79,25 @@ public:
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
 };
+
+/**
+ * Class representing a 2d isoparametric linear interpolation based on natural coordinates
+ * for quadrilateral elements in axisymmetric setting.
+ */
+class OOFEM_EXPORT FEI2dQuadLinAxi : public FEI2dQuadLin
+{
+public:
+    FEI2dQuadLinAxi(int ind1, int ind2) : FEI2dQuadLin(ind1, ind2) { }
+  
+  virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+  virtual double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+  virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+  virtual double edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords,
+                                                const FEICellGeometry &cellgeo);
+  
+};
+
+
+ 
 } // end namespace oofem
 #endif // fei2dquadlin_h

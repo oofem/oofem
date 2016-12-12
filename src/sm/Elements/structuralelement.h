@@ -201,17 +201,6 @@ public:
 
     virtual void computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer);
 
-    /**
-     * Computes force dependent part of load vector. It is load vector induced by applied force loading.
-     * Element body load and element boundary load (edge and surface load) is included.
-     * (precisely result is summation of computeBodyLoadVectorAt, computeEdgeLoadVectorAt and
-     * computeSurfaceLoadVectorAt service results contributions)
-     * @param answer Computed load vector.
-     * @param tStep Time step.
-     * @param mode Determines the response.
-     */
-    virtual void computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
-    virtual void computeLocalForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     // stress equivalent vector in nodes (vector of internal forces)
     // - mainly for nonLinear Analysis.
     /**
@@ -327,9 +316,25 @@ public:
 
 #endif
 
-    // Interface for b.c.s applied by Sets:
-    virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
-    virtual void computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true);
+    // Interface for body loads applied by Sets:
+    virtual void computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void computeBoundarySurfaceLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true);
+    virtual void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true);
+    /// computes edge interpolation matrix
+    virtual void computeEdgeNMatrix (FloatMatrix &answer, int boundaryID, const FloatArray& lcoords);
+    /**
+     * Computes surface interpolation matrix. Interpolation matrix provide way, how to compute
+     * local surface unknowns (nonzero element unknowns on surface) at any integration 
+     * point of surface, based on local unknowns in surface nodes.
+     * Local coordinate system of surface edge and element surface numbering is element dependent.
+     * The integration point is specified using two-dimensional iso coordinates, or using area coordinates
+     * for triangular surface.
+     * @param answer Interpolation matrix of surface.
+     * @param boundaryID Surface number.
+     * @param local coordinates
+     */
+    virtual void computeSurfaceNMatrix (FloatMatrix &answer, int boundaryID, const FloatArray& lcoords);
+
 
     /**
      * Computes constitutive matrix of receiver. Default implementation uses element cross section
@@ -371,79 +376,8 @@ protected:
      * @param tStep Time step.
      * @param mode determines response mode
      */
-    virtual void computePointLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
-    /**
-     * Computes edge load vector contribution of receiver for given load (should has BoundaryLoad Base).
-     * Each edge should have unique number assigned to identify it.
-     * The default implementation does integration of load vector in local edge space
-     * (i.e. one dimensional integration is performed on line). This general implementation requires
-     * that element must provide following services:
-     * - computeEgdeNMatrixAt - returns interpolation matrix of local edge DOFs in the local edge space.
-     * - computeEdgeVolumeAround - returns volume corresponding to integration point at local edge.
-     * - giveEdgeDofMapping - returns integer array specifying local dof edge mapping to "global" element dofs.
-     *
-     * Integration rule is set up automatically, based on element interpolation order and load approximation.
-     * Integration points are set-up using standard integration rule services (setUpIntegrationPoints method).
-     * Gauss integration rule is used.
-     * If derived class overrides this default implementation somehow, the above services
-     * must not be implemented.
-     *
-     * @param answer Computed load vector.
-     * @param load Edge load which contribution is computed.
-     * @param iEdge Edge number where load applies.
-     * @param tStep Time step.
-     * @param mode Determines response mode.
-     */
-    virtual void computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep, ValueModeType mode);
-    /**
-     * Computes surface load vector contribution of receiver for given load (should has BoundaryLoad Base).
-     * Each surface should have unique number assigned to identify it.
-     * The default implementation does integration of load vector in local surface space
-     * (i.e. two dimensional integration is performed on triangle or square).
-     * This general implementation requires
-     * that element must provide following services:
-     * - getSurfaceIntegrationRule - returns integration rule for surface for given polynomial order.
-     * - computeSurfaceNMatrixAt - returns interpolation matrix of local surface DOFs in the local edge space.
-     * - computeSurfaceVolumeAround - returns volume corresponding to integration point of local surface.
-     * - giveSurfaceDofMapping - returns integer array specifying local dof surface mapping to "global" element dofs.
-     *
-     * Integration rule is set up automatically, based on element interpolation order and load approximation.
-     * Integration points are set-up using standard integration rule services (setUpIntegrationPoints method).
-     * Gauss integration rule is used.
-     * If derived class overrides this default implementation somehow, the above services
-     * must not be implemented.
-     *
-     * @param answer Computed load vector.
-     * @param load Surface load which contribution is computed.
-     * @param iSurf Surface number where load applies.
-     * @param tStep Time step.
-     * @param mode Determines response mode.
-     */
-    virtual void computeSurfaceLoadVectorAt(FloatArray &answer, Load *load, int iSurf, TimeStep *tStep, ValueModeType mode);
-    /**
-     * Computes Edge interpolation matrix. Interpolation matrix provide way, how to compute
-     * local edge unknowns (nonzero element unknowns on edge) at any integration point of edge, based on
-     * local edge unknowns in edge nodes.
-     * The edge numbering and local edge coordinate system is element dependent.
-     * The integration point is specified using one-dimensional iso coordinates.
-     * @param answer Interpolation matrix of edge.
-     * @param iedge Edge number.
-     * @param gp Integration point.
-     * @todo Should be a FlotArray instead
-     */
-    virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp) { answer.clear(); }
-    /**
-     * Computes surface interpolation matrix. Interpolation matrix provide way, how to compute
-     * local surface unknowns (nonzero element unknowns on surface) at any integration point of surface, based on
-     * local unknowns in surface nodes.
-     * Local coordinate system of surface edge and element surface numbering is element dependent.
-     * The integration point is specified using two-dimensional iso coordinates, or using area coordinates
-     * for triangular surface.
-     * @param answer Interpolation matrix of surface.
-     * @param iSurf Surface number.
-     * @param gp Integration point.
-     */
-    virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *gp) { answer.clear(); }
+    virtual void computePointLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode, bool global=true);
+
     /**
      * Assembles edge dof mapping mask, which provides mapping between edge local DOFs and "global" element
      * DOFs. Mask can be imagined as local edge code numbers used to localize local edge DOFs to
@@ -460,13 +394,6 @@ protected:
      * @param iSurf Surface number
      */
     virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const { answer.clear(); }
-    /**
-     * Returns integration rule for integration over element surface.
-     * @param order order of integrated polynomial
-     * @param isurf which surface to return integration rule for
-     * @return Best integration rule to integrate polynomial of order i over element surface.
-     */
-    virtual IntegrationRule *giveSurfaceIntegrationRule(int order, int isurf) { return NULL; }
     
     ///@todo Old, only kept until all el have changed to the above
     virtual IntegrationRule *GetSurfaceIntegrationRule(int order) { return NULL; }
@@ -482,20 +409,6 @@ protected:
      * @param iSurf Surface number.
      */
     virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf) { return 0.; }
-    /**
-     * Computes global coordinates of integration point on local edge.
-     * @param answer Global coordinates.
-     * @param gp Edge integration point.
-     * @param iEdge Edge number.
-     */
-    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge) { answer.clear(); }
-    /**
-     * Computes global coordinates of integration point on  local surface.
-     * @param answer Global coordinates.
-     * @param gp Surface integration point.
-     * @param iSurf Surface number.
-     */
-    virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf) { answer.clear(); }
 
     // Global to local element c.s transformation for load vector dofs
     /**

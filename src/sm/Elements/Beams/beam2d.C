@@ -63,7 +63,7 @@ REGISTER_Element(Beam2d);
 FEI2dLineLin Beam2d :: interp_geom(1, 3);
 FEI2dLineHermite Beam2d :: interp_beam(1, 3);
 
-Beam2d :: Beam2d(int n, Domain *aDomain) : StructuralElement(n, aDomain), LayeredCrossSectionInterface()
+Beam2d :: Beam2d(int n, Domain *aDomain) : BeamBaseElement(n, aDomain), LayeredCrossSectionInterface()
 {
     numberOfDofMans = 2;
 
@@ -418,7 +418,7 @@ Beam2d :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     // first call parent
-    StructuralElement :: initializeFrom(ir);
+    BeamBaseElement :: initializeFrom(ir);
 
     if ( ir->hasField(_IFT_Beam2d_dofstocondense) ) {
         IntArray val;
@@ -455,7 +455,7 @@ Beam2d :: initializeFrom(InputRecord *ir)
 void
 Beam2d :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
-    StructuralElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord);
+    BeamBaseElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord);
 
     ///@todo Pretty sure this won't work for nonlinear problems. I think dofsToCondense should just be replaced by an extra slave node.
     /*
@@ -481,32 +481,6 @@ Beam2d :: giveEndForcesVector(FloatArray &answer, TimeStep *tStep)
     if ( load.isNotEmpty() ) {
         answer.subtract(load);
     }
-
-    // add exact end forces due to nonnodal loading applied indirectly (via sets)
-    BCTracker *bct = this->domain->giveBCTracker();
-    BCTracker::entryListType bcList = bct->getElementRecords(this->number);
-    FloatArray help;
-
-    for (BCTracker::entryListType::iterator it = bcList.begin(); it != bcList.end(); ++it) {
-      GeneralBoundaryCondition *bc = this->domain->giveBc((*it).bcNumber);
-      BodyLoad *bodyLoad;
-      BoundaryLoad *boundaryLoad;
-      if (bc->isImposed(tStep)) {
-        if ((bodyLoad = dynamic_cast<BodyLoad*>(bc))) { // body load
-          this->computeBodyLoadVectorAt(help,bodyLoad, tStep, VM_Total); // this one is local
-          answer.subtract(help);
-        } else if ((boundaryLoad = dynamic_cast<BoundaryLoad*>(bc))) {
-          // compute Boundary Edge load vector in GLOBAL CS !!!!!!!
-          this->computeBoundaryEdgeLoadVector(help, boundaryLoad, (*it).boundaryId,
-					      ExternalForcesVector, VM_Total, tStep, false);
-          // get it transformed back to local c.s.
-          // this->computeGtoLRotationMatrix(t);
-          // help.rotatedWith(t, 'n');
-          answer.subtract(help);
-        }
-      }
-    }
-
 
 }
 
@@ -558,109 +532,10 @@ Beam2d :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, 
 
 
 void
-Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, TimeStep *tStep, ValueModeType mode)
-{
-    FloatArray coords, components, components2;
-    double l = this->computeLength();
-    double kappa = this->giveKappaCoeff(tStep);
-    double fx, fz, fm, dfx, dfz, dfm;
-    double cosine, sine;
-
-    // evaluates the receivers edge load vector
-    // for clamped beam
-    //
-    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >(load);
-    if ( edgeLoad ) {
-        answer.resize(6);
-        answer.zero();
-
-        // prepare transformation coeffs
-        sine = sin( this->givePitch() );
-        cosine = cos(pitch);
-
-
-        switch ( edgeLoad->giveApproxOrder() ) {
-        case 0:
-            coords.resize(1);
-            if ( edgeLoad->giveFormulationType() == Load :: FT_Entity ) {
-                coords.at(1) = 0.0;
-            } else {
-                coords = * ( this->giveNode(1)->giveCoordinates() );
-            }
-
-            edgeLoad->computeValues(components, tStep, coords, { D_u, D_w, R_v }, mode);
-
-            if ( edgeLoad->giveCoordSystMode() == Load :: CST_Global ) {
-                fx = cosine * components.at(1) + sine *components.at(2);
-                fz = -sine *components.at(1) + cosine *components.at(2);
-                fm = components.at(3);
-            } else {
-                fx = components.at(1);
-                fz = components.at(2);
-                fm = components.at(3);
-            }
-
-            answer.at(1) = fx * l / 2.;
-            answer.at(2) = fz * l / 2. + fm / ( 1. + 2. * kappa );
-            answer.at(3) = ( -1. ) * fz * l * l / 12. + fm * l * kappa / ( 1. + 2. * kappa );
-            answer.at(4) = fx * l / 2.;
-            answer.at(5) = fz * l / 2. - fm / ( 1. + 2. * kappa );
-            answer.at(6) = fz * l * l / 12. + fm * l * kappa / ( 1. + 2. * kappa );
-            break;
-
-        case 1:
-            components.resize(6);
-
-            if ( edgeLoad->giveFormulationType() == Load :: FT_Entity ) {
-                edgeLoad->computeValues(components, tStep, { -1.0 }, { D_u, D_w, R_v }, mode);
-                edgeLoad->computeValues(components2, tStep, { 1.0 }, { D_u, D_w, R_v }, mode);
-            } else {
-                edgeLoad->computeValues(components, tStep, * this->giveNode(1)->giveCoordinates(), { D_u, D_w, R_v }, mode);
-                edgeLoad->computeValues(components2, tStep, * this->giveNode(2)->giveCoordinates(), { D_u, D_w, R_v }, mode);
-            }
-
-
-            if ( edgeLoad->giveCoordSystMode() == Load :: CST_Global ) {
-                fx = cosine * components.at(1) + sine *components.at(2);
-                fz = -sine *components.at(1) + cosine *components.at(2);
-                fm = components.at(3);
-
-                dfx = cosine * ( components2.at(1) - components.at(1) ) + sine * ( components2.at(2) - components.at(2) );
-                dfz = -sine * ( components2.at(1) - components.at(1) ) + cosine * ( components2.at(2) - components.at(2) );
-                dfm = components2.at(3) - components.at(3);
-            } else {
-                fx = components.at(1);
-                fz = components.at(2);
-                fm = components.at(3);
-                dfx = components2.at(1) - components.at(1);
-                dfz = components2.at(2) - components.at(2);
-                dfm = components2.at(3) - components.at(3);
-            }
-
-            answer.at(1) = fx * l / 2. + dfx * l / 6.;
-            answer.at(2) = fz * l / 2. + dfz * l * ( 20. * kappa + 9 ) / ( 60. * ( 1. + 2. * kappa ) ) +
-                           fm / ( 1. + 2. * kappa ) + dfm * ( 1. / 2. ) / ( 1. + 2. * kappa );
-            answer.at(3) = ( -1. ) * fz * l * l / 12. - dfz * l * l * ( 5. * kappa + 2. ) / ( 60. * ( 1. + 2. * kappa ) ) +
-                           fm * l * kappa / ( 1. + 2. * kappa ) + dfm * l * ( 4. * kappa - 1. ) / ( 12. * ( 1. + 2. * kappa ) );
-            answer.at(4) = fx * l / 2. + dfx * l / 3.;
-            answer.at(5) = fz * l / 2. + dfz * l * ( 40. * kappa + 21 ) / ( 60. * ( 1. + 2. * kappa ) ) -
-                           fm / ( 1. + 2. * kappa ) - dfm * ( 1. / 2. ) / ( ( 1. + 2. * kappa ) );
-            answer.at(6) = fz * l * l / 12. + dfz * l * l * ( 5. * kappa + 3. ) / ( 60. * ( 1. + 2. * kappa ) ) +
-                           fm * l * kappa / ( 1. + 2. * kappa ) + dfm * l * ( 8. * kappa + 1. ) / ( 12. * ( 1. + 2. * kappa ) );
-            break;
-
-        default:
-            OOFEM_ERROR("unsupported load type");
-        }
-    }
-}
-
-
-void
 Beam2d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
     FloatArray lc(1);
-    StructuralElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
+    BeamBaseElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
     answer.times( this->giveCrossSection()->give(CS_Area, lc, this) );
 }
 
@@ -675,7 +550,7 @@ Beam2d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type
         answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
         return 1;
     } else {
-        return StructuralElement :: giveIPValue(answer, gp, type, tStep);
+        return BeamBaseElement :: giveIPValue(answer, gp, type, tStep);
     }
 }
 
@@ -708,14 +583,6 @@ Beam2d :: printOutputAt(FILE *File, TimeStep *tStep)
     for ( auto &iRule : integrationRulesArray ) {
         iRule->printOutputAt(File, tStep);
     }
-}
-
-
-void
-Beam2d :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
-// Computes the load vector of the receiver, at tStep.
-{
-    StructuralElement :: computeLocalForceLoadVector(answer, tStep, mode);
 }
 
 

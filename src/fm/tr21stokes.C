@@ -40,6 +40,7 @@
 #include "gausspoint.h"
 #include "bcgeomtype.h"
 #include "load.h"
+#include "bodyload.h"
 #include "boundaryload.h"
 #include "mathfem.h"
 #include "fluiddynamicmaterial.h"
@@ -186,23 +187,26 @@ void Tr21Stokes :: computeExternalForcesVector(FloatArray &answer, TimeStep *tSt
         bcGeomType ltype = load->giveBCGeoType();
 
         if ( ltype == EdgeLoadBGT ) {
-            this->computeBoundaryLoadVector(vec, static_cast< BoundaryLoad * >(load), load_id, ExternalForcesVector, VM_Total, tStep);
+            this->computeBoundarySurfaceLoadVector(vec, static_cast< BoundaryLoad * >(load), load_id, ExternalForcesVector, VM_Total, tStep);
             answer.add(vec);
         }
     }
 
+    BodyLoad *bload;
     nLoads = this->giveBodyLoadArray()->giveSize();
     for ( int i = 1; i <= nLoads; i++ ) {
         Load *load = domain->giveLoad( bodyLoadArray.at(i) );
-        bcGeomType ltype = load->giveBCGeoType();
-        if ( ltype == BodyLoadBGT && load->giveBCValType() == ForceLoadBVT ) {
-            this->computeLoadVector(vec, load, ExternalForcesVector, VM_Total, tStep);
+	if ((bload = dynamic_cast<BodyLoad*>(load))) {
+	  bcGeomType ltype = load->giveBCGeoType();
+	  if ( ltype == BodyLoadBGT && load->giveBCValType() == ForceLoadBVT ) {
+            this->computeLoadVector(vec, bload, ExternalForcesVector, VM_Total, tStep);
             answer.add(vec);
+	  }
         }
     }
 }
 
-void Tr21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
+void Tr21Stokes :: computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     if ( type != ExternalForcesVector ) {
         answer.clear();
@@ -235,7 +239,7 @@ void Tr21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
     answer.assemble(temparray, this->momentum_ordering);
 }
 
-  void Tr21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
+  void Tr21Stokes :: computeBoundarySurfaceLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
 {
     if ( type != ExternalForcesVector ) {
         answer.clear();

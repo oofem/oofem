@@ -35,7 +35,7 @@
 #include "supgelement2.h"
 #include "domain.h"
 #include "timestep.h"
-#include "load.h"
+#include "bodyload.h"
 #include "intarray.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
@@ -708,7 +708,7 @@ SUPGElement2 :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *tStep)
 
 
 void
-SUPGElement2 :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
+SUPGElement2 :: computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     if ( type != ExternalForcesVector ) {
         answer.clear();

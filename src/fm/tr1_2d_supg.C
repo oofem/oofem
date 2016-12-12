@@ -1008,7 +1008,7 @@ TR1_2D_SUPG :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *tStep)
 }
 
 void
-TR1_2D_SUPG :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
+TR1_2D_SUPG :: computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     if ( type != ExternalForcesVector ) {
         answer.clear();
@@ -1018,8 +1018,16 @@ TR1_2D_SUPG :: computeLoadVector(FloatArray &answer, Load *load, CharType type, 
     FloatArray un;
     double coeff;
 
+    // compute averaged viscosity based on rule of mixture
+    GaussPoint *gp;
+    if ( integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() ) {
+        gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+    } else {
+        gp = integrationRulesArray [ 1 ]->getIntegrationPoint(0);
+    }
+
     double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->
-                    giveDensity( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+                    giveDensity( gp );
 
     this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
 
@@ -1055,7 +1063,7 @@ TR1_2D_SUPG :: computeLoadVector(FloatArray &answer, Load *load, CharType type, 
         double kx = rload->givePermeability()->at(1);
         double ky = rload->givePermeability()->at(2);
         double tau_0 = static_cast< FluidCrossSection * >( this->giveCrossSection() )->
-                            giveFluidMaterial()->give( YieldStress, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+                            giveFluidMaterial()->give( YieldStress, gp );
 
         t.resize(2);
         t.at(1) = tau_0 * sqrt(kx * phi) / ( kx * alpha );

@@ -32,53 +32,37 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef q4axisymm_h
-#define q4axisymm_h
+#ifndef beambaseelement_h
+#define beambaseelement_h
 
-#include "Elements/structuralelement.h"
-#include "Elements/structural2delement.h"
-#include "zznodalrecoverymodel.h"
-
-///@name Input fields for Q4Axisymm
-//@{
-#define _IFT_Q4Axisymm_Name "q4axisymm"
-#define _IFT_Q4Axisymm_nipfish "nipfish"
-//@}
+#include "../sm/Elements/structuralelement.h"
+#include "../sm/CrossSections/fiberedcs.h"
+#include "../sm/Materials/winklermodel.h"
+#include "dofmanager.h"
 
 namespace oofem {
-class FEI2dQuadQuadAxi;
 
 /**
- * This class implements an Quadratic isoparametric eight-node quadrilateral -
- * elasticity finite element for axisymmetric 3d continuum.
- * Each node has 2 degrees of freedom.
+ * This class implements a base beam intented to be a base class for
+ * beams based on lagrangian interpolation, where exact end forces can
+ * be recovered.
  */
-class Q4Axisymm : public AxisymElement, public ZZNodalRecoveryModelInterface
+ class BeamBaseElement : public StructuralElement
 {
 protected:
-    static FEI2dQuadQuadAxi interp;
-    int numberOfFiAndShGaussPoints;
 
-public:
-    Q4Axisymm(int n, Domain * d);
-    virtual ~Q4Axisymm();
+ public:
+    BeamBaseElement (int n, Domain *d);
+    virtual ~BeamBaseElement();
 
-    virtual FEInterpolation *giveInterpolation() const;
-
-    // definition & identification
-    virtual Interface *giveInterface(InterfaceType);
-    virtual const char *giveInputRecordName() const { return _IFT_Q4Axisymm_Name; }
-    virtual const char *giveClassName() const { return "Q4axisymm"; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    
 protected:
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx = 1, int upperIndx = ALL_STRAINS) ;
-    
-    
-#ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type);
-#endif
+    /** Computes element end force vector from applied loading in local coordinate system
+     * @param answer computed end force vector due to non-nodal loading
+     * @param tStep solution step
+     * @param mode determines response mode
+     */
+    virtual void computeLocalForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
+
 };
 } // end namespace oofem
-#endif // q4axisymm_h
+#endif // beambaseelement_h

@@ -85,6 +85,9 @@ class ElementSide;
 class FEInterpolation;
 class Load;
 class BoundaryLoad;
+class BodyLoad;
+class SurfaceLoad;
+class EdgeLoad;
 class PrimaryField;
 class UnknownNumberingScheme;
 
@@ -279,16 +282,20 @@ public:
      */
     //@{
     /**
-     * Computes the contribution of the given load.
+     * Computes the contribution of the given body load (volumetric).
      * @param answer Requested contribution of load.
      * @param load   Load to compute contribution from.
      * @param type   Type of the contribution.
      * @param mode   Determines mode of answer.
      * @param tStep  Time step when answer is computed.
      */
-    virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep);
     /**
-     * Computes the contribution of the given load at the given boundary.
+     * Computes the contribution of the given load at the given boundary surface in global 
+     * coordinate system. 
+     * In general, the answer should include only relevant DOFs at the edge.
+     * The related is giveBoundaryLocationArray method, which should return 
+     * corresponding code numbers.
      * @note Elements which do not have an contribution should resize the vector to be empty.
      * @param answer Requested contribution of load.
      * @param load Load to compute contribution from.
@@ -298,19 +305,32 @@ public:
      * @param tStep Time step when answer is computed.
      * @param global if true (default) then contribution is in global c.s., when false then contribution is in element local c.s.
      */
-    virtual void computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true);
+    virtual void computeBoundarySurfaceLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true);
     /**
      * Computes the tangent contribution of the given load at the given boundary.
      * @note Elements which do not have an contribution should resize the vector to be empty.
      * @param answer Requested contribution of load.
      * @param load Load to compute contribution from.
-     * @param boundary Boundary number.
+     * @param boundary Surface number.
      * @param rmode Mode of the contribution.
      * @param tStep Time step when answer is computed.
      */
-    virtual void computeTangentFromBoundaryLoad(FloatMatrix &answer, BoundaryLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep);
+    virtual void computeTangentFromSurfaceLoad(FloatMatrix &answer, SurfaceLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep);
     /**
-     * Computes the contribution of the given load at the given boundary edge.
+     * Computes the tangent contribution of the given load at the given boundary.
+     * @note Elements which do not have an contribution should resize the vector to be empty.
+     * @param answer Requested contribution of load.
+     * @param load Load to compute contribution from.
+     * @param boundary Surface number.
+     * @param rmode Mode of the contribution.
+     * @param tStep Time step when answer is computed.
+     */
+    virtual void computeTangentFromEdgeLoad(FloatMatrix &answer, EdgeLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep);
+    /**
+     * Computes the contribution of the given load at the given boundary edge. 
+     * In general, the answer should include only relevant DOFs at the edge.
+     * The related is giveBoundaryLocationArray method, which should return 
+     * corresponding code numbers..
      * @note Elements which do not have an contribution should resize the vector to be empty.
      * @param answer Requested contribution of load (in Global c.s.).
      * @param load Load to compute contribution from.
@@ -321,6 +341,17 @@ public:
      * @param global if true (default) then contribution is in global c.s., when false then contribution is in element local c.s.
      */
     virtual void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true);
+
+    /**
+     * Returns receiver list of bodyloads
+     *
+     */
+    const IntArray& giveBodyLoadList() const {return this->bodyLoadArray;}
+    /**
+     * Returns receiver list of boundary loads
+     */
+    const IntArray& giveBoundaryLoadList() const {return this->boundaryLoadArray;}
+
     //@}
 
     /**@name General element functions */

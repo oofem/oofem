@@ -780,7 +780,8 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
             IntArray loc, bNodes;
             FloatMatrix mat, R;
             BodyLoad *bodyLoad;
-            BoundaryLoad *bLoad;
+            SurfaceLoad* sLoad;
+            EdgeLoad* eLoad;
             Set *set = domain->giveSet( bc->giveSetNumber() );
 
             if ( ( bodyLoad = dynamic_cast< BodyLoad * >(load) ) ) { // Body load:
@@ -799,13 +800,13 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
                         answer.assemble(loc, mat);
                     }
                 }
-            } else if ( ( bLoad = dynamic_cast< BoundaryLoad * >(load) ) ) { // Boundary load:
+            } else if ( ( sLoad = dynamic_cast< SurfaceLoad * >(load) ) ) { // Surface load:
                 const IntArray &boundaries = set->giveBoundaryList();
                 for ( int ibnd = 1; ibnd <= boundaries.giveSize() / 2; ++ibnd ) {
                     Element *element = domain->giveElement( boundaries.at(ibnd * 2 - 1) );
                     int boundary = boundaries.at(ibnd * 2);
                     mat.clear();
-                    ma.matrixFromBoundaryLoad(mat, *element, bLoad, boundary, tStep);
+                    ma.matrixFromSurfaceLoad(mat, *element, sLoad, boundary, tStep);
 
                     if ( mat.isNotEmpty() ) {
                         element->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
@@ -817,13 +818,13 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
                         answer.assemble(loc, mat);
                     }
                 }
-                ///@todo Should we have a seperate entry for edge loads? Just sticking to the general "boundaryload" for now.
+            } else if ( ( eLoad = dynamic_cast< EdgeLoad * >(load) ) ) { // Edge load:
                 const IntArray &edgeBoundaries = set->giveEdgeList();
                 for ( int ibnd = 1; ibnd <= edgeBoundaries.giveSize() / 2; ++ibnd ) {
                     Element *element = domain->giveElement( edgeBoundaries.at(ibnd * 2 - 1) );
                     int boundary = edgeBoundaries.at(ibnd * 2);
                     mat.clear();
-                    ma.matrixFromEdgeLoad(mat, *element, bLoad, boundary, tStep);
+                    ma.matrixFromEdgeLoad(mat, *element, eLoad, boundary, tStep);
 
                     if ( mat.isNotEmpty() ) {
                         element->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
@@ -1015,7 +1016,8 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
             FloatArray charVec;
             FloatMatrix R;
             BodyLoad *bodyLoad;
-            BoundaryLoad *bLoad;
+            SurfaceLoad *sLoad;
+            EdgeLoad *eLoad;
             //BoundaryEdgeLoad *eLoad;
             NodalLoad *nLoad;
             Set *set = domain->giveSet( bc->giveSetNumber() );
@@ -1042,7 +1044,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
 		      }
 		    }
                 }
-            } else if ( ( bLoad = dynamic_cast< BoundaryLoad * >(load) ) ) { // Boundary load:
+            } else if ( ( sLoad = dynamic_cast< SurfaceLoad * >(load) ) ) { // Surface load:
                 const IntArray &boundaries = set->giveBoundaryList();
                 for ( int ibnd = 1; ibnd <= boundaries.giveSize() / 2; ++ibnd ) {
                     Element *element = domain->giveElement( boundaries.at(ibnd * 2 - 1) );
@@ -1050,7 +1052,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
 
 		      int boundary = boundaries.at(ibnd * 2);
 		      charVec.clear();
-		      va.vectorFromBoundaryLoad(charVec, *element, bLoad, boundary, tStep, mode);
+		      va.vectorFromSurfaceLoad(charVec, *element, sLoad, boundary, tStep, mode);
 
 		      if ( charVec.isNotEmpty() ) {
                         element->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
@@ -1067,14 +1069,14 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
 		      }
 		    }
                 }
-                ///@todo Should we have a seperate entry for edge loads? Just sticking to the general "boundaryload" for now.
+            } else if ( ( eLoad = dynamic_cast< EdgeLoad * >(load) ) ) { // Edge load:
                 const IntArray &edgeBoundaries = set->giveEdgeList();
                 for ( int ibnd = 1; ibnd <= edgeBoundaries.giveSize() / 2; ++ibnd ) {
 		  Element *element = domain->giveElement( edgeBoundaries.at(ibnd * 2 - 1) );
 		  if ( element->isActivated(tStep) ) {
 		    int boundary = edgeBoundaries.at(ibnd * 2);
 		    charVec.clear();
-		    va.vectorFromEdgeLoad(charVec, *element, bLoad, boundary, tStep, mode);
+		    va.vectorFromEdgeLoad(charVec, *element, eLoad, boundary, tStep, mode);
 
 		    if ( charVec.isNotEmpty() ) {
 		      element->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
@@ -1159,6 +1161,7 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
             continue;
         }
 
+
         va.vectorFromElement(charVec, *element, tStep, mode);
         if ( charVec.isNotEmpty() ) {
             if ( element->giveRotationMatrix(R) ) {
@@ -1176,7 +1179,84 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
                 }
             }
         }
-    }
+
+
+        // obtain form element its body, surface, edge, and point loads
+        const IntArray& list = element->giveBodyLoadList();
+        if (!list.isEmpty()) {
+          for (int iload=1; iload<=list.giveSize(); iload++) { // loop over body loads
+            BodyLoad *bodyLoad;
+            if ((bodyLoad = dynamic_cast< BodyLoad * >(domain->giveLoad(list.at(iload))))) {
+              charVec.clear();
+              va.vectorFromLoad(charVec, *element, bodyLoad, tStep, mode);
+
+              if ( charVec.isNotEmpty() ) {
+                if ( element->giveRotationMatrix(R) ) {
+                  charVec.rotatedWith(R, 't');
+                }
+
+                va.locationFromElement(loc, *element, s, & dofids);
+                answer.assemble(charVec, loc);
+                
+                if ( eNorms ) {
+                  eNorms->assembleSquared(charVec, dofids);
+                }
+              }
+            }
+            
+          } // loop over body load list
+        } // if (!(list = element->giveBodyLoadList()).isEmpty())
+
+        // obtain from element its boundaryloads (surface+edge)
+        const IntArray& list2 = element->giveBoundaryLoadList();
+        IntArray bNodes;
+        if (!list2.isEmpty()) {
+          for (int j=1; j<=list2.giveSize()/2; j++) { // loop over boundary loads
+            int iload = list2.at(j * 2 - 1) ;
+            int boundary = list2.at(j * 2);
+            SurfaceLoad *sLoad;
+            EdgeLoad *eLoad;
+            if ((eLoad = dynamic_cast< EdgeLoad * >(domain->giveLoad(iload)))) {
+              charVec.clear();
+              va.vectorFromEdgeLoad(charVec, *element, eLoad, boundary, tStep, mode);
+              
+              if ( charVec.isNotEmpty() ) {
+                element->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
+                if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
+                  charVec.rotatedWith(R, 't');
+                }
+                
+                va.locationFromElementNodes(loc, *element, bNodes, s, & dofids);
+                answer.assemble(charVec, loc);
+                
+                if ( eNorms ) {
+                  eNorms->assembleSquared(charVec, dofids);
+                }
+              }
+            } else if ((sLoad = dynamic_cast< SurfaceLoad * >(domain->giveLoad(iload)))) {
+              charVec.clear();
+              va.vectorFromSurfaceLoad(charVec, *element, sLoad, boundary, tStep, mode);
+              
+              if ( charVec.isNotEmpty() ) {
+                element->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+                if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
+                  charVec.rotatedWith(R, 't');
+                }
+                
+                va.locationFromElementNodes(loc, *element, bNodes, s, & dofids);
+                answer.assemble(charVec, loc);
+                
+                if ( eNorms ) {
+                  eNorms->assembleSquared(charVec, dofids);
+                }
+              }
+            } else {
+              OOFEM_ERROR ("Unsupported element boundary load type");
+            }
+          }
+        } // end loop over lement boundary loads
+
+    } // end loop over elements
 
     this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
 }

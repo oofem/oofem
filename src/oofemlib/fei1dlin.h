@@ -63,6 +63,14 @@ public:
     virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 
     virtual int giveNumberOfNodes() const { return 2; }
+
+    virtual void boundaryEdgeGiveNodes(IntArray &answer, int boundary);
+    virtual void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+
+
+    
 };
 } // end namespace oofem
 #endif // fei1dlin_h

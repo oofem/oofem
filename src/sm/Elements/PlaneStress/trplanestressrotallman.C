@@ -43,6 +43,7 @@
 #include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
+#include "boundaryload.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -308,6 +309,68 @@ TrPlanestressRotAllman :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
         OOFEM_ERROR("wrong edge number");
     }
 }
+
+void TrPlanestressRotAllman :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
+{
+    answer.clear();
+    if ( type != ExternalForcesVector ) {
+        return;
+    }
+
+    double dV;
+    FloatMatrix T;
+    FloatArray globalIPcoords;
+
+    EdgeLoad *edgeLoad = dynamic_cast< EdgeLoad * >(load);
+    if ( edgeLoad ) {
+        int approxOrder = edgeLoad->giveApproxOrder() + this->giveInterpolation()->giveInterpolationOrder();
+        int numberOfGaussPoints = ( int ) ceil( ( approxOrder + 1. ) / 2. );
+        GaussIntegrationRule iRule(1, this, 1, 1);
+        iRule.SetUpPointsOnLine(numberOfGaussPoints, _Unknown);
+        FloatArray reducedAnswer, force, ntf;
+        IntArray mask;
+        FloatMatrix n;
+
+        for ( GaussPoint *gp: iRule ) {
+            this->computeEgdeNMatrixAt(n, boundary, gp);
+            dV  = this->computeEdgeVolumeAround(gp, boundary);
+
+            if ( edgeLoad->giveFormulationType() == Load :: FT_Entity ) {
+                edgeLoad->computeValueAt(force, tStep, gp->giveNaturalCoordinates(), mode);
+            } else {
+	        //this->computeEdgeIpGlobalCoords(globalIPcoords, gp, boundary);
+	        this->giveInterpolation()->boundaryEdgeLocal2Global( globalIPcoords, boundary, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+                edgeLoad->computeValueAt(force, tStep, globalIPcoords, mode);
+            }
+
+            // transform force
+            if ( edgeLoad->giveCoordSystMode() == Load :: CST_Global ) {
+            } else {
+              // transform from local boundary to element local c.s
+              if ( this->computeLoadLEToLRotationMatrix(T, boundary, gp) ) {
+                force.rotatedWith(T, 'n');
+              }
+              // then to global c.s
+              if ( this->computeLoadGToLRotationMtrx(T) ) {
+                force.rotatedWith(T, 't');
+              }
+            }
+
+            ntf.beTProductOf(n, force);
+            answer.add(dV, ntf);
+        }
+
+
+        return;
+    } else {
+        OOFEM_ERROR("incompatible load");
+        return;
+    }
+
+
+}
+
+
 
 /*
  * double

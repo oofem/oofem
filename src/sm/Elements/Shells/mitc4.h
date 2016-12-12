@@ -143,13 +143,11 @@ private:
     // edge & body load
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
     virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
-    virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
     virtual void giveDofManDofIDMask(int inode, IntArray &) const;
     virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf);
     virtual IntegrationRule *GetSurfaceIntegrationRule(int approxOrder);
     virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp);
     virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const;
-    //    void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
 };
 } // end namespace oofem
 #endif // mitc4_h

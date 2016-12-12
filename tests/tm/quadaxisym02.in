@@ -20,7 +20,7 @@ BoundaryCondition 2 loadTimeFunction 1 dofs 1 10 values 1 20.0
 # Newton bc
 #constantedgeload 3 loadTimeFunction 1 components 1 15.0 properties 1 a 0.85 loadtype 3
 # Neumann bc
-constantedgeload 3 loadTimeFunction 1 components 1 -15.0 loadtype 2 set 3
+constantsurfaceload 3 loadTimeFunction 1 components 1 -15.0 loadtype 2 set 3
 ConstantFunction 1 f(t) 1.0
 Set 1 elements 1 1
 Set 2 elementboundaries 2 1 4

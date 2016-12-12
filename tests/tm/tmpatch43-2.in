@@ -20,7 +20,7 @@ SimpleTransportCS 1 mat 1 set 1 thickness 0.15
 IsoHeat 1 d 0. k 3.0 c 0.0
 BoundaryCondition  1 loadTimeFunction 1 dofs 1 10 values 1 10.0 set 2
 # Neumann bc
-constantedgeload 2 loadTimeFunction 1 components 1 -15. loadtype 2 set 3
+constantsurfaceload 2 loadTimeFunction 1 components 1 -15. loadtype 2 set 3
 ConstantFunction 1 f(t) 1.0
 Set 1 elementranges {(1 4)}
 Set 2 nodes 2 1 4

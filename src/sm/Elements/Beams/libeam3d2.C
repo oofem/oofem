@@ -324,27 +324,6 @@ LIBeam3d2 :: initializeFrom(InputRecord *ir)
 
 
 void
-LIBeam3d2 :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
-{
-    /*
-     *
-     * computes interpolation matrix for element edge.
-     * we assemble locally this matrix for only nonzero
-     * shape functions.
-     * (for example only two nonzero shape functions for 2 dofs are
-     * necessary for linear plane stress tringle edge).
-     * These nonzero shape functions are then mapped to
-     * global element functions.
-     *
-     * Using mapping technique will allow to assemble shape functions
-     * without regarding particular side
-     */
-
-    this->computeNmatrixAt(gp->giveSubPatchCoordinates(), answer);
-}
-
-
-void
 LIBeam3d2 :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 {
     /*
@@ -372,13 +351,6 @@ LIBeam3d2 :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 
     double weight  = gp->giveWeight();
     return 0.5 * this->computeLength() * weight;
-}
-
-
-void
-LIBeam3d2 :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
-{
-    computeGlobalCoordinates( answer, gp->giveNaturalCoordinates() );
 }
 
 

@@ -230,13 +230,6 @@ Truss3d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 
 
 void
-Truss3d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
-{
-    this->computeNmatrixAt(gp->giveSubPatchCoordinates(), answer);
-}
-
-
-void
 Truss3d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 {
     /*
@@ -267,13 +260,6 @@ Truss3d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 
     double weight = gp->giveWeight();
     return this->interp.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) * weight;
-}
-
-
-void
-Truss3d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
-{
-    computeGlobalCoordinates( answer, gp->giveNaturalCoordinates() );
 }
 
 

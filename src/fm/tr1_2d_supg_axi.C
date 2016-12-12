@@ -45,7 +45,7 @@
 #include "mathfem.h"
 #include "engngm.h"
 #include "timestep.h"
-#include "load.h"
+#include "bodyload.h"
 #include "boundaryload.h"
 #include "fluiddynamicmaterial.h"
 #include "fluidcrosssection.h"
@@ -708,7 +708,7 @@ TR1_2D_SUPG_AXI :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *tStep)
 
 
 void
-TR1_2D_SUPG_AXI :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
+TR1_2D_SUPG_AXI :: computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     if ( type != ExternalForcesVector ) {
         answer.clear();

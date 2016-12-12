@@ -90,10 +90,8 @@ public:
 
 protected:
     // edge load support
-    virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *);
     virtual void giveEdgeDofMapping(IntArray &answer, int) const;
     virtual double computeEdgeVolumeAround(GaussPoint *, int);
-    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
     virtual int computeLoadLEToLRotationMatrix(FloatMatrix &, int, GaussPoint *);
     virtual int computeLoadGToLRotationMtrx(FloatMatrix &answer);
     virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);

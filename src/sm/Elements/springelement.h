@@ -89,8 +89,7 @@ public:
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
     { answer.clear(); }
-    virtual void computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType)
-    { answer.clear(); }
+
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
 
     virtual int computeNumberOfDofs() { return 2; }
