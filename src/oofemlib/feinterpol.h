@@ -224,8 +224,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 
     /** @name Edge boundary functions.
-     * Boundary edges are defined as corners for 2D geometries and surfaces for 3D geometries.
-     * This is the
+     * Provide interpolation services for boundary edges (entity of dimension 1)
      */
     //@{
     /**
@@ -266,7 +265,9 @@ public:
     virtual void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)=0;
     //@}
 
-    /**@name Surface interpolation services */
+    /**@name Surface interpolation services 
+     * Provide interpolation services for boundary edges (entities of dimension 2)
+     */
     //@{
     /**
      * Evaluates the array of edge interpolation functions (shape functions) at given point.
@@ -319,11 +320,9 @@ public:
 
     //@}
 
-
-    
-
-    /** @name General boundary functions.
-     * Boundaries are corner nodes for 1D geometries, edges for 2D geometries and surfaces for 3D geometries.
+    /** @name General boundary interpolation functions.
+     * Provide interpolation servises for boundary entities with one dimension lower than the receiver interpolation.
+     * Typically these are mapped to boundaryEdge and boundarySurface methods depending on dimension.
      *
      */
     //@{
