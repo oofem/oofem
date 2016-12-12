@@ -85,6 +85,7 @@ class ElementSide;
 class FEInterpolation;
 class Load;
 class BoundaryLoad;
+class BodyLoad;
 class SurfaceLoad;
 class EdgeLoad;
 class PrimaryField;
@@ -281,14 +282,14 @@ public:
      */
     //@{
     /**
-     * Computes the contribution of the given load.
+     * Computes the contribution of the given body load (volumetric).
      * @param answer Requested contribution of load.
      * @param load   Load to compute contribution from.
      * @param type   Type of the contribution.
      * @param mode   Determines mode of answer.
      * @param tStep  Time step when answer is computed.
      */
-    virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep);
     /**
      * Computes the contribution of the given load at the given boundary surface in global 
      * coordinate system. 

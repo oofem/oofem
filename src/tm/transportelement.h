@@ -73,7 +73,7 @@ public:
     virtual void computeLumpedCapacityVector(FloatArray &answer, TimeStep *tStep);
 
     //Compute volumetric load from element
-    virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep);
     //Boundary load by prescribed flux, convection, or radiation over surface
     virtual void computeBoundarySurfaceLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true);
     //Contribution to conductivity matrix from convection

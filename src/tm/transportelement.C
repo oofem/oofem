@@ -36,6 +36,7 @@
 #include "domain.h"
 #include "transportmaterial.h"
 #include "load.h"
+#include "bodyload.h"
 #include "boundaryload.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
@@ -541,7 +542,7 @@ TransportElement :: computeLumpedCapacityVector(FloatArray &answer, TimeStep *tS
 
 
 void
-TransportElement :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
+TransportElement :: computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     answer.clear();
 

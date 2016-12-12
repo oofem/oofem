@@ -41,6 +41,7 @@
 #include "bcgeomtype.h"
 #include "generalboundarycondition.h"
 #include "load.h"
+#include "bodyload.h"
 #include "boundaryload.h"
 #include "mathfem.h"
 #include "fluiddynamicmaterial.h"
@@ -166,6 +167,7 @@ void Tet21Stokes :: computeExternalForcesVector(FloatArray &answer, TimeStep *tS
 {
     int load_number, load_id;
     Load *load;
+    BodyLoad *bLoad;
     bcGeomType ltype;
     FloatArray vec;
 
@@ -187,15 +189,17 @@ void Tet21Stokes :: computeExternalForcesVector(FloatArray &answer, TimeStep *tS
     nLoads = this->giveBodyLoadArray()->giveSize();
     for ( int i = 1; i <= nLoads; i++ ) {
         load  = domain->giveLoad( bodyLoadArray.at(i) );
-        ltype = load->giveBCGeoType();
-        if ( ltype == BodyLoadBGT && load->giveBCValType() == ForceLoadBVT ) {
-            this->computeLoadVector(vec, load, ExternalForcesVector, VM_Total, tStep);
+	if ((bLoad=dynamic_cast<BodyLoad*>(load))) {
+	  ltype = load->giveBCGeoType();
+	  if ( ltype == BodyLoadBGT && load->giveBCValType() == ForceLoadBVT ) {
+            this->computeLoadVector(vec, bLoad, ExternalForcesVector, VM_Total, tStep);
             answer.add(vec);
+	  }
         }
     }
 }
 
-void Tet21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
+void Tet21Stokes :: computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     if ( type != ExternalForcesVector ) {
         answer.clear();

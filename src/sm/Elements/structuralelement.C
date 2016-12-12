@@ -87,7 +87,7 @@ StructuralElement :: computeConstitutiveMatrixAt(FloatMatrix &answer,
 }
 
 
-void StructuralElement :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
+void StructuralElement :: computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     if ( type != ExternalForcesVector ) {
         answer.clear();

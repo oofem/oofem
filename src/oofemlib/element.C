@@ -565,7 +565,7 @@ Element :: giveCharacteristicVector(FloatArray &answer, CharType type, ValueMode
 
 
 void
-Element :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
+Element :: computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     answer.clear();
     OOFEM_ERROR("Unknown load type.");

@@ -1008,7 +1008,7 @@ TR1_2D_SUPG :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *tStep)
 }
 
 void
-TR1_2D_SUPG :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
+TR1_2D_SUPG :: computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     if ( type != ExternalForcesVector ) {
         answer.clear();
