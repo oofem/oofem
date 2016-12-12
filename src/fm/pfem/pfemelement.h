@@ -94,6 +94,9 @@ public:
     /// Returns the interpolation for the pressure
     virtual FEInterpolation *givePressureInterpolation() = 0;
 
+    void computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep);
+    
+    
     // definition
     virtual const char *giveClassName() const { return "PFEMElement"; }
 
@@ -113,6 +116,18 @@ public:
     //virtual void drawDeformedGeometry(oofegGraphicContext&, UnknownType) {}
 #endif
 
+    /**
+     * Computes the load vector due to body load acting on receiver, at given time step.
+     * Default implementation computes body load vector numerically as @f$ l=\int_V N^{\mathrm{T}} f \rho\;\mathrm{d}V @f$
+     * using default integration rule. Result is transformed to global c.s.
+     * @param answer Computed load vector due to body load
+     * @param load Body load which contribution is computed.
+     * @param tStep Time step.
+     * @param mode determines the response mode
+     */
+    virtual void computeBodyLoadVectorAt(FloatArray &answer, BodyLoad *load, TimeStep *tStep, ValueModeType mode) = 0;
+
+    
     /// Computes deviatoric stress vector in given integration point and solution step from given total strain vector
     virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *) = 0;
     /// Calculates the divergence of the deviatoric stress
@@ -127,8 +142,6 @@ public:
     virtual void computeGradientMatrix(FloatMatrix &answer, TimeStep *atTime) = 0; //G
     /// Calculates the velocity divergence matrix
     virtual void computeDivergenceMatrix(FloatMatrix &answer, TimeStep *atTime) = 0; //D
-    /// Calculates the force vector
-    virtual void computeForceVector(FloatArray &answer, TimeStep *atTime) = 0; //F
     /// Calculates the prescribed velocity vector for the right hand side of the pressure equation
     virtual void computePrescribedRhsVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode) = 0;
 };

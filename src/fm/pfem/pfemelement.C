@@ -126,8 +126,8 @@ PFEMElement ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx, Valu
     answer.zero();
 
     if ( mtrx == ExternalForcesVector ) {
-        this->computeForceVector(reducedVector, tStep);
-        answer.assemble(reducedVector, this->giveVelocityDofMask()); 
+      //this->computeForceVector(reducedVector, tStep);
+      //answer.assemble(reducedVector, this->giveVelocityDofMask()); 
     } else if ( mtrx == PressureGradientVector ) {
         FloatMatrix g;
         this->giveCharacteristicMatrix(g, PressureGradientMatrix, tStep);
@@ -178,6 +178,22 @@ PFEMElement ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx, Valu
     }
 }
 
+
+void PFEMElement :: computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep)
+{
+    if ( type != ExternalForcesVector ) {
+        answer.clear();
+        return;
+    }
+    answer.resize(this->computeNumberOfDofs());
+    answer.zero();
+    FloatArray reducedVector;
+    this->computeBodyLoadVectorAt(reducedVector, load, tStep, mode);
+    answer.assemble(reducedVector, this->giveVelocityDofMask());
+}
+
+
+  
 int
 PFEMElement :: checkConsistency()
 // no check at the moment
