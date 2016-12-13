@@ -105,22 +105,6 @@ double FEInterpolation2d :: edgeGiveTransformationJacobian(int iedge, const Floa
     return this->edgeEvalNormal(normal, iedge, lcoords, cellgeo);
 }
 
-IntegrationRule *FEInterpolation2d :: giveBoundaryIntegrationRule(int order, int boundary)
-{
-    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
-    int points = iRule->getRequiredNumberOfIntegrationPoints(_Line, order + this->order);
-    iRule->SetUpPointsOnLine(points, _Unknown);
-    return iRule;
-}
-
-IntegrationRule *FEInterpolation2d :: giveBoundaryEdgeIntegrationRule(int order, int boundary)
-{
-    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
-    int points = iRule->getRequiredNumberOfIntegrationPoints(_Line, order + this->order);
-    iRule->SetUpPointsOnLine(points, _Unknown);
-    return iRule;
-}
-
 void FEInterpolation2d::boundarySurfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
   this->evalN(answer, lcoords, cellgeo);

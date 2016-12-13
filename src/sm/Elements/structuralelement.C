@@ -123,7 +123,7 @@ void StructuralElement :: computeLoadVector(FloatArray &answer, BodyLoad *load, 
     FloatArray force, globalIPcoords;
     //int nsd = fei->giveNsd();
 
-    std :: unique_ptr< IntegrationRule >iRule( fei->giveBoundaryIntegrationRule(load->giveApproxOrder(), boundary) );
+    std :: unique_ptr< IntegrationRule >iRule( fei->giveBoundarySurfaceIntegrationRule(load->giveApproxOrder(), boundary) );
 
     for ( GaussPoint *gp: *iRule ) {
         const FloatArray &lcoords = gp->giveNaturalCoordinates();

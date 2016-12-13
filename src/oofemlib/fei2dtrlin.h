@@ -47,6 +47,11 @@ public:
     FEI2dTrLin(int ind1, int ind2) : FEInterpolation2d(1, ind1, ind2) { }
 
     virtual integrationDomain giveIntegrationDomain() const { return _Triangle; }
+    virtual integrationDomain giveBoundaryIntegrationDomain(int ib) const { return _Line; }
+    virtual integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf) const { return _Triangle; }
+    virtual integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge) const { return _Line; }
+
+    
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
 
     // Bulk

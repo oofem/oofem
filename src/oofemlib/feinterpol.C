@@ -34,6 +34,7 @@
 
 #include "feinterpol.h"
 #include "element.h"
+#include "gaussintegrationrule.h"
 
 namespace oofem {
 int FEIElementGeometryWrapper :: giveNumberOfVertices() const { return elem->giveNumberOfNodes(); }
@@ -46,4 +47,51 @@ FEInterpolation :: giveTransformationJacobian(const FloatArray &lcoords, const F
     return jacobianMatrix.giveDeterminant();
 }
 
+
+IntegrationRule*
+FEInterpolation:: giveIntegrationRule(int order)
+{
+  integrationDomain id = this->giveIntegrationDomain();
+  IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+
+  int points = iRule->getRequiredNumberOfIntegrationPoints(id, order + this->order);
+  iRule->SetUpPointsOnLine(points, _Unknown);
+  return iRule;
+}
+
+IntegrationRule*
+FEInterpolation::giveBoundaryIntegrationRule(int order, int boundary)
+{
+  integrationDomain id = this->giveBoundaryIntegrationDomain(boundary);
+  IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+
+  int points = iRule->getRequiredNumberOfIntegrationPoints(id, order + this->order);
+  iRule->setUpIntegrationPoints(id, points, _Unknown);
+  return iRule;
+}
+
+IntegrationRule*
+FEInterpolation::giveBoundaryEdgeIntegrationRule(int order, int boundary)
+{
+  integrationDomain id = this->giveBoundaryEdgeIntegrationDomain(boundary);
+  IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+
+  int points = iRule->getRequiredNumberOfIntegrationPoints(id, order + this->order);
+  iRule->setUpIntegrationPoints(id, points, _Unknown);
+  return iRule;
+}
+
+IntegrationRule*
+FEInterpolation::giveBoundarySurfaceIntegrationRule(int order, int boundary)
+{
+  integrationDomain id = this->giveBoundarySurfaceIntegrationDomain(boundary);
+  IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+
+  int points = iRule->getRequiredNumberOfIntegrationPoints(id, order + this->order);
+  iRule->setUpIntegrationPoints(id, points, _Unknown);
+  return iRule;
+}
+
+  
+  
 } // end namespace oofem

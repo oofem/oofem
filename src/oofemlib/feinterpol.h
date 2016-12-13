@@ -139,7 +139,12 @@ public:
         order = o;
     }
     virtual ~FEInterpolation() { }
+    /// Initializes receiver according to object description stored in input record.
+    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 
+
+    /* @name basic interpolation services */
+    //@{
     /**
      * Returns the integration domain of the interpolator.
      */
@@ -219,10 +224,24 @@ public:
      * @return Determinant of the transformation.
      */
     virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    /**
+     * Gives the jacobian matrix at the local coordinates.
+     * @param jacobianMatrix The requested matrix.
+     * @param lcoords Local coordinates.
+     * @param cellgeo Element geometry.
+     */
+    virtual void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    { OOFEM_ERROR("Not overloaded."); }
 
-    /// Initializes receiver according to object description stored in input record.
-    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+    /**
+     * Sets up a suitable integration rule for numerical integrating over volume.
+     * The required polynomial order for the determinant of the jacobian is added automatically.
+     * @param order Polynomial order of integrand (should NOT including determinant of jacobian).
+     */
+    virtual IntegrationRule *giveIntegrationRule(int order);
+    //@}
 
+    
     /** @name Edge boundary functions.
      * Provide interpolation services for boundary edges (entity of dimension 1)
      */
@@ -263,6 +282,15 @@ public:
      * @param cellgeo Underlying cell geometry.
      */
     virtual void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)=0;
+    /// Returns boundary integration domain
+    virtual integrationDomain giveBoundaryEdgeIntegrationDomain(int boundary) const = 0;
+    /**
+     * Sets up a suitable integration rule for integrating over the requested boundary.
+     * The required polynomial order for the determinant of the jacobian is added automatically.
+     * @param order Polynomial order of the integrand (should NOT including determinant of jacobian).
+     * @param boundary Boundary number.
+     */
+    virtual IntegrationRule *giveBoundaryEdgeIntegrationRule(int order, int boundary);
     //@}
 
     /**@name Surface interpolation services 
@@ -317,7 +345,15 @@ public:
      */
     virtual double boundarySurfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
 							     const FEICellGeometry &cellgeo)=0;
-
+    /// Returns boundary integration domain
+    virtual integrationDomain giveBoundarySurfaceIntegrationDomain(int boundary) const = 0;
+    /**
+     * Sets up a suitable integration rule for integrating over the requested boundary.
+     * The required polynomial order for the determinant of the jacobian is added automatically.
+     * @param order Polynomial order of the integrand (should NOT including determinant of jacobian).
+     * @param boundary Boundary number.
+     */
+    virtual IntegrationRule *giveBoundarySurfaceIntegrationRule(int order, int boundary);
     //@}
 
     /** @name General boundary interpolation functions.
@@ -380,6 +416,16 @@ public:
         OOFEM_ERROR("Not implemented");
         return 0.;
     }
+    /// Returns boundary integration domain
+    virtual integrationDomain giveBoundaryIntegrationDomain(int boundary) const = 0;
+    /**
+     * Sets up a suitable integration rule for integrating over the requested boundary.
+     * The required polynomial order for the determinant of the jacobian is added automatically.
+     * @param order Polynomial order of the integrand (should NOT including determinant of jacobian).
+     * @param boundary Boundary number.
+     */
+    virtual IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary) ;
+
     //@}
 
     /**@name Methods to support interpolation defined on patch by patch basis. */
@@ -429,35 +475,6 @@ public:
     { OOFEM_ERROR("FEInterpolation :: giveNumberOfEdges : Not overloaded."); return -1;}
     //@}
 
-    /**
-     * Gives the jacobian matrix at the local coordinates.
-     * @param jacobianMatrix The requested matrix.
-     * @param lcoords Local coordinates.
-     * @param cellgeo Element geometry.
-     */
-    virtual void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-    { OOFEM_ERROR("Not overloaded."); }
-
-    /**
-     * Sets up a suitable integration rule for numerical integrating over volume.
-     * The required polynomial order for the determinant of the jacobian is added automatically.
-     * @param order Polynomial order of integrand (should NOT including determinant of jacobian).
-     */
-    virtual IntegrationRule *giveIntegrationRule(int order) = 0;
-    /**
-     * Sets up a suitable integration rule for integrating over the requested boundary.
-     * The required polynomial order for the determinant of the jacobian is added automatically.
-     * @param order Polynomial order of the integrand (should NOT including determinant of jacobian).
-     * @param boundary Boundary number.
-     */
-    virtual IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary) = 0;
-    /**
-     * Sets up a suitable integration rule for integrating over the requested boundary.
-     * The required polynomial order for the determinant of the jacobian is added automatically.
-     * @param order Polynomial order of the integrand (should NOT including determinant of jacobian).
-     * @param boundary Boundary number.
-     */
-    virtual IntegrationRule *giveBoundaryEdgeIntegrationRule(int order, int boundary) = 0;
     /**
      * Returns the number of geometric nodes of the receiver.
      */

@@ -53,7 +53,12 @@ public:
 
     virtual integrationDomain giveIntegrationDomain() const { return _Line; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
+    virtual integrationDomain giveBoundaryIntegrationDomain(int ib) const { return _Point; }
+    virtual integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf) const { return _UnknownIntegrationDomain; }
+    virtual integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge) const { return _UnknownIntegrationDomain; }
 
+
+    
     virtual double giveLength(const FEICellGeometry &cellgeo) const;
 
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);

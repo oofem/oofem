@@ -42,7 +42,7 @@ namespace oofem {
  * integrated (Area,Volume and its shape)
  */
 enum integrationDomain {
-    _Unknown_integrationDomain,
+    _UnknownIntegrationDomain,
     _Point,
     _Line,
     _Triangle,

@@ -1483,7 +1483,7 @@ integrationDomain
 Element :: giveIntegrationDomain() const
 {
     FEInterpolation *fei = this->giveInterpolation();
-    return fei ? fei->giveIntegrationDomain() : _Unknown_integrationDomain;
+    return fei ? fei->giveIntegrationDomain() : _UnknownIntegrationDomain;
 }
 
 

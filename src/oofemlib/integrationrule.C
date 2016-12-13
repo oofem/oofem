@@ -48,7 +48,7 @@ IntegrationRule :: IntegrationRule(int n, Element *e, int startIndx, int endIndx
     firstLocalStrainIndx = startIndx;
     lastLocalStrainIndx  = endIndx;
     isDynamic = dynamic;
-    intdomain = _Unknown_integrationDomain;
+    intdomain = _UnknownIntegrationDomain;
 }
 
 IntegrationRule :: IntegrationRule(int n, Element *e)
@@ -57,7 +57,7 @@ IntegrationRule :: IntegrationRule(int n, Element *e)
     elem = e;
     firstLocalStrainIndx = lastLocalStrainIndx = 0;
     isDynamic = false;
-    intdomain = _Unknown_integrationDomain;
+    intdomain = _UnknownIntegrationDomain;
 }
 
 

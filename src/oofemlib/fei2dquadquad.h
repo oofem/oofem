@@ -56,6 +56,9 @@ public:
 
     virtual integrationDomain giveIntegrationDomain() const { return _Square; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_quad_2; }
+    virtual integrationDomain giveBoundaryIntegrationDomain(int ib) const { return _Line; }
+    virtual integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf) const { return _Square; }
+    virtual integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge) const { return _Line; }
 
     virtual double giveArea(const FEICellGeometry &cellgeo) const;
 

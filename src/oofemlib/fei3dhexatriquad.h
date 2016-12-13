@@ -49,6 +49,9 @@ public:
 
     virtual integrationDomain giveIntegrationDomain() const { return _Cube; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_hexa_27; }
+    virtual integrationDomain giveBoundaryIntegrationDomain(int ib) const { return _Square; }
+    virtual integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf) const { return _Square; }
+    virtual integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge) const { return _Line; }
 
     // Bulk
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);

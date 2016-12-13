@@ -210,7 +210,7 @@ public:
     virtual const char *giveClassName() const { return "AbaqusUserElement"; }
     virtual const char *giveInputRecordName() const { return _IFT_AbaqusUserElement_Name; }
     virtual integrationDomain giveIntegrationDomain() const {
-        return _Unknown_integrationDomain;
+        return _UnknownIntegrationDomain;
     }
     virtual Element_Geometry_Type giveGeometryType() const {
         return EGT_line_1;
