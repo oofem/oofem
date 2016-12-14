@@ -54,7 +54,14 @@ WinklerPasternakMaterial :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, c1, _IFT_WinklerPasternakMaterial_C1);
-    IR_GIVE_FIELD(ir, c2, _IFT_WinklerPasternakMaterial_C2);
+    if (ir->hasField(_IFT_WinklerPasternakMaterial_C2)) {
+      // isotropic case
+      IR_GIVE_FIELD(ir, c2x, _IFT_WinklerPasternakMaterial_C2);
+      c2y = c2x;
+    } else {
+      IR_GIVE_FIELD(ir, c2x, _IFT_WinklerPasternakMaterial_C2X);
+      IR_GIVE_FIELD(ir, c2y, _IFT_WinklerPasternakMaterial_C2Y);
+    }
 
     return StructuralMaterial :: initializeFrom(ir);
 }
@@ -66,7 +73,8 @@ WinklerPasternakMaterial :: giveInputRecord(DynamicInputRecord &input)
     StructuralMaterial :: giveInputRecord(input);
 
     input.setField(this->c1, _IFT_WinklerPasternakMaterial_C1);
-    input.setField(this->c2, _IFT_WinklerPasternakMaterial_C2);
+    input.setField(this->c2x, _IFT_WinklerPasternakMaterial_C2X);
+    input.setField(this->c2y, _IFT_WinklerPasternakMaterial_C2Y);
 }
 
 
@@ -90,8 +98,8 @@ WinklerPasternakMaterial :: give2dPlateSubSoilStiffMtrx(FloatMatrix &answer, Mat
     answer.zero();
 
     answer.at(1, 1) = c1;
-    answer.at(2, 2) = c2;
-    answer.at(3, 3) = c2;
+    answer.at(2, 2) = c2x;
+    answer.at(3, 3) = c2y;
 }
 
 

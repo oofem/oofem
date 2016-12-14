@@ -47,6 +47,8 @@
 #define _IFT_WinklerPasternakMaterial_Name "winklerpasternak"
 #define _IFT_WinklerPasternakMaterial_C1 "c1"
 #define _IFT_WinklerPasternakMaterial_C2 "c2"
+#define _IFT_WinklerPasternakMaterial_C2X "c2x"
+#define _IFT_WinklerPasternakMaterial_C2Y "c2y"
 //@}
 
 namespace oofem {
@@ -60,8 +62,8 @@ class WinklerPasternakMaterial : public StructuralMaterial
 protected:
     /// C1 constant, defined as $\int_0^hE_{oed}(z)\left\(d\Psi(z)\over dz\right\)^2\ dz$
     double c1;
-    /// C2 constant, defined as $\int_0^hG(z)Psi^2(z)\ dz$
-    double c2;
+    /// C2 constants in x and y directions, defined as $\int_0^hG_{x,y}(z)Psi^2(z)\ dz$
+    double c2x, c2y;
 
 public:
     /**
