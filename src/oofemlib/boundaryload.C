@@ -129,22 +129,9 @@ BoundaryLoad :: giveInputRecord(DynamicInputRecord &input)
     input.setField(this->propertyMultExpr, _IFT_BoundaryLoad_propertyMultExpr);
 }
 
-void
-BoundaryLoad :: setVariableState(int aVariable, double val)
-{
-    variableState.at(aVariable) = val;
-}
 
 double
-BoundaryLoad :: giveVariableState(int aVariable)
-{
-    return variableState.at(aVariable);
-}
-
-double
-BoundaryLoad :: giveProperty(int aProperty, TimeStep *tStep)
-// Returns the value of the property aProperty (e.g. the area
-// 'A') of the receiver.
+BoundaryLoad :: giveProperty(int aProperty, TimeStep *tStep, const std :: map< std :: string, FunctionArgument > &valDict)
 {
     double answer;
     if ( propertyDictionary.includes(aProperty) ) {
@@ -158,10 +145,15 @@ BoundaryLoad :: giveProperty(int aProperty, TimeStep *tStep)
         OOFEM_ERROR("Property '%c' not defined", (char)aProperty);
     }
 
-    if ( propertyMultExpr.isDefined() ){
-        double x = giveVariableState('x');
-        answer *= propertyMultExpr.eval( { { "x", x } }, this->giveDomain() );
+    if ( propertyMultExpr.isDefined() ) {
+        answer *= propertyMultExpr.eval( valDict, this->giveDomain() );
     }
     return answer;
+}
+
+double
+BoundaryLoad :: giveProperty(int aProperty, TimeStep *tStep)
+{
+    return this->giveProperty(aProperty, tStep, {{}});
 }
 } // end namespace oofem
