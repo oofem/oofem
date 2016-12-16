@@ -86,6 +86,7 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_StrainTensorTemp:
     case IST_ShellForceTensor:
     case IST_CurvatureTensorTemp:
+    case IST_EigenStrainTensor:
         return ISVT_TENSOR_S3E;
 
     case IST_StressTensor:

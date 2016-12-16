@@ -83,6 +83,7 @@ set (sm_element
     Elements/lattice2d.C
     Elements/tet21ghostsolid.C
     Elements/quad1platesubsoil.C 
+    Elements/quad2platesubsoil.C
     Elements/tria1platesubsoil.C
     Elements/linedistributedspring.C
     Elements/trwarp.C
