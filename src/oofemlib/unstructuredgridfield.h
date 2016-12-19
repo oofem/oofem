@@ -418,7 +418,9 @@ protected:
       for (cit=this->cellList.begin(); cit != this->cellList.end(); ++cit) {
 	this->spatialLocalizer.insertMemberIntoOctree(*cit, cf);
       }
-      
+
+      // update timestamp
+      this->octreeTimeStamp = this->timeStamp;
     }
   }
 };
