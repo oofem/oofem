@@ -69,7 +69,9 @@ TrPlaneStrRot3d :: giveLocalCoordinates(FloatArray &answer, FloatArray &global)
         this->computeGtoLRotationMatrix();
     }
 
-    answer.beProductOf(GtoLRotationMatrix, global);
+    FloatArray offset = global;
+    offset.subtract( * this->giveNode(1)->giveCoordinates() );
+    answer.beProductOf(GtoLRotationMatrix, offset);
 }
 
 
@@ -327,37 +329,42 @@ TrPlaneStrRot3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, Ti
         OOFEM_ERROR("unknown load type");
     }
 
-    // note: force is assumed to be in global coordinate system.
+    // note: force is assumed to be in global coordinate system; 6 components
     forLoad->computeComponentArrayAt(force, tStep, mode);
+    // get it in local c.s.
+    this->computeLoadGToLRotationMtrx(T);
+    force.rotatedWith(T, 'n');
 
     if ( force.giveSize() ) {
-        GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+      GaussIntegrationRule iRule (1, this, 1, 1);
+      iRule.SetUpPointsOnTriangle(1, _Unknown);
+      GaussPoint *gp = iRule.getIntegrationPoint(0);
 
         dens = this->giveStructuralCrossSection()->give('d', gp);
-        dV   = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness, gp);
+        dV   = this->computeVolumeAround(gp);// * this->giveCrossSection()->give(CS_Thickness, gp);
 
-        answer.resize(18);
+        answer.resize(9);
         answer.zero();
 
         load = force.at(1) * dens * dV / 3.0;
         answer.at(1) = load;
+        answer.at(4) = load;
         answer.at(7) = load;
-        answer.at(13) = load;
 
         load = force.at(2) * dens * dV / 3.0;
         answer.at(2) = load;
+        answer.at(5) = load;
         answer.at(8) = load;
-        answer.at(14) = load;
 
-        load = force.at(3) * dens * dV / 3.0;
+        load = force.at(6) * dens * dV / 3.0;
         answer.at(3) = load;
+        answer.at(6) = load;
         answer.at(9) = load;
-        answer.at(15) = load;
 
         // transform result from global cs to local element cs.
-        if ( this->computeGtoLRotationMatrix(T) ) {
-            answer.rotatedWith(T, 'n');
-        }
+        //if ( this->computeGtoLRotationMatrix(T) ) {
+        //    answer.rotatedWith(T, 'n');
+        //}
     } else {
         answer.clear();          // nil resultant
     }
