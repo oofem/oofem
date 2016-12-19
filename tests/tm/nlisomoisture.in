@@ -1,8 +1,8 @@
 nlisomoisture.out
 test of nonlinear isotropic material for moisture transport
 #
-nltransienttransportproblem nsteps 5 alpha 0.5 rtol 1.e-10 lumpedcapa nsmax 1000 prescribedtimes 5 0.01 0.1 0.2 0.3 0.4 nmodules 1
-#TransientTransport nsteps 5 alpha 0.5 lumped rtolf 1e-10 prescribedtimes 5 0.01 0.1 0.2 0.3 0.4 nmodules 1
+#nltransienttransportproblem nsteps 5 alpha 0.5 rtol 1.e-10 lumpedcapa nsmax 1000 prescribedtimes 5 0.01 0.1 0.2 0.3 0.4 nmodules 1
+TransientTransport nsteps 5 alpha 0.5 lumped rtolf 1e-10 prescribedtimes 5 0.01 0.1 0.2 0.3 0.4 nmodules 1
 errorcheck
 # nmodules 1
 # vtkxml tstep_all domain_all primvars 1 3

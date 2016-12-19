@@ -398,11 +398,11 @@ GaussIntegrationRule :: getRequiredNumberOfIntegrationPoints(integrationDomain d
         }
 
         break;
-    
+
     ///@todo Assuming same approximation order for triangle as line. Not totally sure about these /JB
     case _Wedge:
         if ( approxOrder <= 1 ) { // (lin tri) x (lin line) = 1 x 1 = 1
-            return 1;        
+            return 1;
         }
 
         if ( approxOrder <= 2 ) { // (quad tri) x (quad line) = 3 x 2 = 6
@@ -411,11 +411,11 @@ GaussIntegrationRule :: getRequiredNumberOfIntegrationPoints(integrationDomain d
 
         if ( approxOrder <= 3 ) { // (cubic tri) x (cubic line) = 4 x 2 = 8
             return 8;
-        }                
-        
+        }
+
         if ( approxOrder <= 4 ) { // (quartic tri) x (quartic line) = 6 x 3 = 18
             return 18;
-        }        
+        }
     default:
         OOFEM_ERROR("unknown integrationDomain");
     }

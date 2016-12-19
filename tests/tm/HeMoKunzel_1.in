@@ -1,7 +1,7 @@
 HeMoKunzel_1.out
 Heat and moisture transport - Kunzel's model. Direct solver and unsymmetric skyline.
 nltransienttransportproblem nsteps 9 deltat 36000. alpha 0.5 rtol 1.e-10 nsmax 150 lumpedcapa lstype 0 smtype 1 nmodules 1
-#transienttransport nsteps 9 deltat 36000. alpha 0.5 lumped rtolf 1e-10 lstype 0 smtype 1 nmodules 1
+#transienttransport nsteps 9 deltat 36000. alpha 0.5 lumped rtolf 1e-10 miniter 7 lstype 0 smtype 1 nmodules 1
 Errorcheck
 #vtkxml tstep_all domain_all primvars 2 6 7 vars 2 37 40 stype 1
 domain HeMa1
