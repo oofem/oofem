@@ -157,7 +157,7 @@ void StructuralElement :: computeLoadVector(FloatArray &answer, BodyLoad *load, 
 
         ///@todo Some way to ask for the thickness at a global coordinate maybe?
         double thickness = 1.0; // Should be the circumference for axisymm-elements.
-        double dV = thickness * gp->giveWeight() * fei->boundaryGiveTransformationJacobian( boundary, lcoords, FEIElementGeometryWrapper(this) );
+        double dV = thickness * gp->giveWeight() * fei->boundarySurfaceGiveTransformationJacobian( boundary, lcoords, FEIElementGeometryWrapper(this) );
         answer.plusProduct(n, force, dV);
     }
 }
