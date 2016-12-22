@@ -660,6 +660,14 @@ QDKTPlate :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint 
 }
 
 void
+QDKTPlate::computeSurfaceNMatrix (FloatMatrix &answer, int boundaryID, const FloatArray& lcoords)
+{
+  FloatArray n_vec;
+  this->giveInterpolation()->boundarySurfaceEvalN(n_vec, boundaryID, lcoords, FEIElementGeometryWrapper(this) );
+  answer.beNMatrixOf(n_vec, 3);
+}
+
+void
 QDKTPlate :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
 {
     answer.resize(12);
