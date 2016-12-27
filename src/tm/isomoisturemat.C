@@ -101,7 +101,7 @@ IsotropicMoistureTransferMaterial :: giveCharacteristicValue(MatResponseMode mod
                                                              TimeStep *tStep)
 {
     if ( mode == Capacity ) {
-        return ( this->giveMoistureCapacity(gp, tStep) );
+        return this->giveMoistureCapacity(gp, tStep);
     } else {
         OOFEM_ERROR("unknown mode (%s)", __MatResponseModeToString(mode) );
     }

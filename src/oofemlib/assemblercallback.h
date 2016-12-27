@@ -202,11 +202,12 @@ public:
 class EffectiveTangentAssembler : public MatrixAssembler
 {
 protected:
+    MatResponseMode rmode;
     double lumped;
     double k, m;
 
 public:
-    EffectiveTangentAssembler(bool lumped, double k, double m);
+    EffectiveTangentAssembler(MatResponseMode mode, bool lumped, double k, double m);
     virtual void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const;
 };
 

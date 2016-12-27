@@ -243,15 +243,24 @@ void MassMatrixAssembler :: matrixFromElement(FloatMatrix& mat, Element& element
 
 
 
-EffectiveTangentAssembler :: EffectiveTangentAssembler(bool lumped, double k, double m) :
-    MatrixAssembler(), lumped(lumped), k(k), m(m)
+EffectiveTangentAssembler :: EffectiveTangentAssembler(MatResponseMode mode, bool lumped, double k, double m) :
+    MatrixAssembler(), rmode(mode), lumped(lumped), k(k), m(m)
 {}
 
 void EffectiveTangentAssembler :: matrixFromElement(FloatMatrix &answer, Element &el, TimeStep *tStep) const
 {
     FloatMatrix massMatrix;
-    el.giveCharacteristicMatrix(answer, TangentStiffnessMatrix, tStep);
+
+    if ( this->rmode == TangentStiffness ) {
+        el.giveCharacteristicMatrix(answer, TangentStiffnessMatrix, tStep);
+    } else if ( this->rmode == ElasticStiffness ) {
+        el.giveCharacteristicMatrix(answer, ElasticStiffnessMatrix, tStep);
+    } else if ( this->rmode == SecantStiffness ) {
+        el.giveCharacteristicMatrix(answer, SecantStiffnessMatrix, tStep);
+    }
+    //element.computeTangentMatrix(answer, this->rmode, tStep);
     answer.times(this->k);
+
     el.giveCharacteristicMatrix(massMatrix, this->lumped ? LumpedMassMatrix : MassMatrix, tStep);
     answer.add(this->m, massMatrix);
 }

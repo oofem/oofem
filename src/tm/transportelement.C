@@ -357,7 +357,6 @@ TransportElement :: computeCapacitySubMatrix(FloatMatrix &answer, MatResponseMod
 void
 TransportElement :: computeConductivitySubMatrix(FloatMatrix &answer, int iri, MatResponseMode rmode, TimeStep *tStep)
 {
-    double dV;
     FloatMatrix b, d, db;
 
     answer.resize( this->giveNumberOfDofManagers(), this->giveNumberOfDofManagers() );
@@ -365,7 +364,7 @@ TransportElement :: computeConductivitySubMatrix(FloatMatrix &answer, int iri, M
     for ( auto &gp: *integrationRulesArray [ iri ] ) {
         this->computeConstitutiveMatrixAt(d, rmode, gp, tStep);
         this->computeGradientMatrixAt(b, gp->giveNaturalCoordinates());
-        dV = this->computeVolumeAround(gp);
+        double dV = this->computeVolumeAround(gp);
 
         db.beProductOf(d, b);
         answer.plusProductSymmUpper(b, db, dV);

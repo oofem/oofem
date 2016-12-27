@@ -1,5 +1,5 @@
 tmpatch07-8.out
-Test of Quad1_ht elements; nonstationary case
+Test of Quad1_ht elements; transient case
 TransientTransport nsteps 100 deltat 600000.0 alpha 0.5 rtolf 1e-6 nmodules 1
 errorcheck
 domain HeatTransfer
