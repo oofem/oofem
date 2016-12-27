@@ -107,7 +107,7 @@ PrescribedGradientBCWeak :: PrescribedGradientBCWeak(int n, Domain *d) :
     mTracDofScaling(1.0e0),
     mpDisplacementLock(NULL),
     mLockNodeInd(0),
-    mDispLockScaling(1.0),
+    mDispLockScaling(1.0e0),
     mPeriodicityNormal({0.0, 1.0}),
     mDomainSize(0.0),
     mMirrorFunction(0),
@@ -348,7 +348,7 @@ void PrescribedGradientBCWeak :: computeExtForceElContrib(FloatArray &oContrib, 
 
 
         // For now, assume piecewise constant approx
-        FloatArray Ntrac = FloatArray { 1.0 };
+        FloatArray Ntrac = FloatArray { 1.0*mTracDofScaling };
 
         // N-matrix
         FloatMatrix Nmat;
@@ -701,7 +701,7 @@ void PrescribedGradientBCWeak :: compute_x_times_N_1(FloatMatrix &o_x_times_N)
         	FloatMatrix contrib(2,3);
 
             // For now, assume piecewise constant approx
-            FloatArray Ntrac = FloatArray { 1.0 };
+            FloatArray Ntrac = FloatArray { 1.0*mTracDofScaling };
 
             // N-matrix
             FloatMatrix Nmat;
@@ -789,7 +789,7 @@ void PrescribedGradientBCWeak :: compute_x_times_N_2(FloatMatrix &o_x_times_N)
         	FloatMatrix contrib(4,2);
 
             // For now, assume piecewise constant approx
-            FloatArray Ntrac = FloatArray { 1.0 };
+            FloatArray Ntrac = FloatArray { 1.0*mTracDofScaling };
 
             // N-matrix
             FloatMatrix Nmat;
@@ -864,7 +864,7 @@ void PrescribedGradientBCWeak :: computeField(FloatArray &sigma, TimeStep *tStep
         for ( GaussPoint *gp: *(el->mIntRule.get()) ) {
 
             // For now, assume piecewise constant approx
-            FloatArray Ntrac = FloatArray { 1.0 };
+            FloatArray Ntrac = FloatArray { 1.0*mTracDofScaling };
 
             // N-matrix
             FloatMatrix Nmat;
@@ -1127,8 +1127,9 @@ void PrescribedGradientBCWeak :: giveTraction(size_t iElInd, FloatArray &oStartT
 {
 	// For now, assuming piecewise constant traction
 	mpTracElNew[iElInd]->mFirstNode->giveUnknownVector(oStartTraction, giveTracDofIDs(), mode, tStep);
+	oStartTraction.times(mTracDofScaling);
 	mpTracElNew[iElInd]->mFirstNode->giveUnknownVector(oEndTraction, giveTracDofIDs(), mode, tStep);
-
+	oEndTraction.times(mTracDofScaling);
 }
 
 void PrescribedGradientBCWeak :: recomputeTractionMesh()
@@ -1487,7 +1488,7 @@ void PrescribedGradientBCWeak :: assembleTangentGPContributionNew(FloatMatrix &o
     //////////////////////////////////
     // Compute traction N-matrix
     // For now, assume piecewise constant approx
-    FloatArray Ntrac = FloatArray { 1.0 };
+    FloatArray Ntrac = FloatArray { 1.0*mTracDofScaling };
     FloatMatrix NtracMat;
     NtracMat.beNMatrixOf(Ntrac, dim);
 
