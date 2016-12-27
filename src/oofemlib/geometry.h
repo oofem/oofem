@@ -130,6 +130,9 @@ public:
     void insertVertexFront(const FloatArray &iP) { mVertices.insert(mVertices.begin(), iP); }
     void insertVertexBack(const FloatArray &iP) { mVertices.push_back(iP); }
 
+    void clear() {mVertices.clear();}
+
+    void translate(const FloatArray &iTrans);
 
     /// Initializes the Geometry from the InputRecord.
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }

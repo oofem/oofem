@@ -227,7 +227,7 @@ public:
      */
     virtual void updateYourself(TimeStep *tStep);
 
-    void propagateFronts(bool &oAnyFronHasPropagated);
+    virtual void propagateFronts(bool &oAnyFronHasPropagated);
     void initiateFronts(bool &oAnyFronHasPropagated, TimeStep *tStep);
     bool hasPropagatingFronts();
     bool hasInitiationCriteria();

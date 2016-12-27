@@ -228,10 +228,10 @@ public:
     virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius) = 0;
 
     EnrichmentFront *giveEnrichmentFrontStart() { return mpEnrichmentFrontStart; }
-    void setEnrichmentFrontStart(EnrichmentFront *ipEnrichmentFrontStart);
+    void setEnrichmentFrontStart(EnrichmentFront *ipEnrichmentFrontStart, bool iDeleteOld = true);
 
     EnrichmentFront *giveEnrichmentFrontEnd() { return mpEnrichmentFrontEnd; }
-    void setEnrichmentFrontEnd(EnrichmentFront *ipEnrichmentFrontEnd);
+    void setEnrichmentFrontEnd(EnrichmentFront *ipEnrichmentFrontEnd, bool iDeleteOld = true);
 
     bool tipIsTouchingEI(const TipInfo &iTipInfo);
 

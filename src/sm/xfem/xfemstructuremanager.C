@@ -80,6 +80,12 @@ IRResultType XfemStructureManager :: initializeFrom(InputRecord *ir)
 //    	printf("mMinCrackLength: %e\n", mMinCrackLength);
 //    }
 
+    IR_GIVE_OPTIONAL_FIELD(ir, mCrackMergeTol, _IFT_XfemStructureManager_crackMergeTol);
+
+    if(mCrackMergeTol > 1.0e-12) {
+    	printf("mCrackMergeTol: %e\n", mCrackMergeTol);
+    }
+
     return XfemManager :: initializeFrom(ir);
 }
 
@@ -92,6 +98,8 @@ void XfemStructureManager :: giveInputRecord(DynamicInputRecord &input)
     }
 
     input.setField(mMinCrackLength, _IFT_XfemStructureManager_minCrackLength);
+
+    input.setField(mCrackMergeTol, _IFT_XfemStructureManager_crackMergeTol);
 
     if( mNonstandardCz ) {
         input.setField(1, _IFT_XfemStructureManager_nonstandardCZ);
@@ -106,10 +114,30 @@ int XfemStructureManager :: instanciateYourself(DataReader *dr)
         splitCracks();
     }
 
+    mergeCloseCracks();
+
     updateNodeEnrichmentItemMap();
 
     return result;
 }
+
+void XfemStructureManager :: propagateFronts(bool &oAnyFronHasPropagated)
+{
+    oAnyFronHasPropagated = false;
+
+    for ( auto &ei: enrichmentItemList ) {
+
+        bool eiHasPropagated = false;
+        ei->propagateFronts(eiHasPropagated);
+
+        if(eiHasPropagated) {
+            oAnyFronHasPropagated = true;
+        }
+    }
+
+    updateNodeEnrichmentItemMap();
+}
+
 
 void XfemStructureManager :: updateYourself(TimeStep *tStep)
 {
@@ -294,6 +322,7 @@ void XfemStructureManager :: splitCracks()
         enrichmentItemList [ i ]->updateGeometry();
     }
 
+
 }
 
 void XfemStructureManager :: removeShortCracks()
@@ -312,8 +341,17 @@ void XfemStructureManager :: removeShortCracks()
         	if(l < l_tol) {
         		printf("Removing short crack with l: %e\n", l);
 
-                enrichmentItemList.erase(enrichmentItemList.begin() + i - 1);
-                i--;
+        		// Explicitly erasing things is a mess...
+//        		crack->removeEnrichedDofs();
+//                enrichmentItemList.erase(enrichmentItemList.begin() + i - 1);
+//                i--;
+
+        		// ...therefore, just remove the geometry.
+                PolygonLine *polygonLine = dynamic_cast< PolygonLine * >( crack->giveGeometry() );
+                polygonLine->clear();
+        		FloatArray tmp = {0.0, 0.0, 0.0};
+        		polygonLine->insertVertexBack(tmp);
+
         	}
         }
     }
@@ -321,6 +359,197 @@ void XfemStructureManager :: removeShortCracks()
 //	printf("Number of ei after removal: %d\n", giveNumberOfEnrichmentItems());
 
 }
+
+void XfemStructureManager :: mergeCloseCracks()
+{
+	printf("Entering XfemStructureManager :: mergeCloseCracks().\n");
+
+	const double &dist_tol = mCrackMergeTol;
+
+	// Loop over cracks and check if two crack tips are closer to
+	// each other than a predefined distance. If so, merge the cracks.
+    // Loop over cracks
+	for ( int i = 1; i <= giveNumberOfEnrichmentItems(); i++ ) {
+        Crack *crack_i = dynamic_cast< Crack * >( this->giveEnrichmentItem(i) );
+        if ( crack_i ) {
+
+
+        	BasicGeometry *bg_i = crack_i->giveGeometry();
+        	TipInfo startTip_i, endTip_i;
+        	bg_i->giveTips(startTip_i, endTip_i) ;
+
+        	const FloatArray &ps_i =startTip_i.mGlobalCoord;
+        	const FloatArray &pe_i =endTip_i.mGlobalCoord;
+
+            PolygonLine *polygonLine_i = dynamic_cast< PolygonLine * >( crack_i->giveGeometry() );
+
+             if ( polygonLine_i == NULL ) {
+                 OOFEM_ERROR("Failed to cast PolygonLine *polygonLine_i.")
+             }
+
+            for ( int j = i+1; j <= giveNumberOfEnrichmentItems(); j++ ) {
+                // TODO: To improve performance, we may wish to use
+                //       a tree structure here.
+                bool mergedCrack = false;
+
+                Crack *crack_j = dynamic_cast< Crack * >( this->giveEnrichmentItem(j) );
+                if ( crack_j ) {
+                	BasicGeometry *bg_j = crack_j->giveGeometry();
+                	TipInfo startTip_j, endTip_j;
+                	bg_j->giveTips(startTip_j, endTip_j) ;
+
+                	const FloatArray &ps_j =startTip_j.mGlobalCoord;
+                	const FloatArray &pe_j =endTip_j.mGlobalCoord;
+
+                    PolygonLine *polygonLine_j = dynamic_cast< PolygonLine * >( crack_j->giveGeometry() );
+
+                     if ( polygonLine_j == NULL ) {
+                         OOFEM_ERROR("Failed to cast PolygonLine *polygonLine_j.")
+                     }
+
+
+
+                    ////////////////////////////////////////////////////////////////
+                	if(ps_i.distance(ps_j) < dist_tol) {
+                		printf("ps_i.distance(ps_j) < dist_tol\n");
+
+                		// Append points to the start of polygonLine_i
+                		int n = polygonLine_j->giveNrVertices();
+                		for(int k = 1; k <= n; k++) {
+                			polygonLine_i->insertVertexFront( polygonLine_j->giveVertex(k) );
+                		}
+
+                		polygonLine_i->removeDuplicatePoints(1.0e-18);
+
+
+                		polygonLine_j->clear();
+                		FloatArray tmp = {0.0, 0.0, 0.0};
+                		polygonLine_j->insertVertexBack(tmp);
+
+                		// Fix tips
+                		EnrichmentFront *ef_tmp = crack_i->giveEnrichmentFrontStart();
+                		crack_i->setEnrichmentFrontStart( crack_j->giveEnrichmentFrontEnd(), false );
+                		crack_j->setEnrichmentFrontEnd(ef_tmp, false);
+
+
+                		mergedCrack = true;
+                		break;
+
+
+                	}
+
+                    ////////////////////////////////////////////////////////////////
+                	if(ps_i.distance(pe_j) < dist_tol) {
+                		printf("ps_i.distance(pe_j) < dist_tol\n");
+
+#if 1
+                		// Append points to the start of polygonLine_i
+                		int n = polygonLine_j->giveNrVertices();
+                		for(int k = n; k > 0; k--) {
+                			polygonLine_i->insertVertexFront( polygonLine_j->giveVertex(k) );
+                		}
+
+                		polygonLine_i->removeDuplicatePoints(1.0e-18);
+
+
+                		polygonLine_j->clear();
+                		FloatArray tmp = {0.0, 0.0, 0.0};
+                		polygonLine_j->insertVertexBack(tmp);
+
+
+                		// Fix tips
+                		EnrichmentFront *ef_tmp = crack_i->giveEnrichmentFrontStart();
+                		crack_i->setEnrichmentFrontStart( crack_j->giveEnrichmentFrontStart(), false );
+                		crack_j->setEnrichmentFrontStart(ef_tmp, false);
+
+
+                		mergedCrack = true;
+                		break;
+
+#endif
+                	}
+
+
+                    ////////////////////////////////////////////////////////////////
+                	if(pe_i.distance(ps_j) < dist_tol) {
+                		printf("pe_i.distance(ps_j) < dist_tol\n");
+
+
+                		// Append points to the end of polygonLine_i
+                		int n = polygonLine_j->giveNrVertices();
+                		for(int k = 1; k <= n; k++) {
+                			polygonLine_i->insertVertexBack( polygonLine_j->giveVertex(k) );
+                		}
+
+                		polygonLine_i->removeDuplicatePoints(1.0e-18);
+
+
+                		polygonLine_j->clear();
+                		FloatArray tmp = {0.0, 0.0, 0.0};
+                		polygonLine_j->insertVertexBack(tmp);
+
+
+                		// Fix tips
+                		EnrichmentFront *ef_tmp = crack_i->giveEnrichmentFrontEnd();
+                		crack_i->setEnrichmentFrontEnd( crack_j->giveEnrichmentFrontEnd(), false );
+                		crack_j->setEnrichmentFrontEnd(ef_tmp, false);
+
+
+                		mergedCrack = true;
+                		break;
+
+                	}
+
+                    ////////////////////////////////////////////////////////////////
+                	if(pe_i.distance(pe_j) < dist_tol) {
+                		printf("pe_i.distance(pe_j) < dist_tol\n");
+
+                		// Append points to the end of polygonLine_i
+                		int n = polygonLine_j->giveNrVertices();
+                		for(int k = n; k > 0; k--) {
+                			polygonLine_i->insertVertexBack( polygonLine_j->giveVertex(k) );
+                		}
+
+                		polygonLine_i->removeDuplicatePoints(1.0e-18);
+
+
+                		polygonLine_j->clear();
+                		FloatArray tmp = {0.0, 0.0, 0.0};
+                		polygonLine_j->insertVertexBack(tmp);
+
+
+                		// Fix tips
+                		EnrichmentFront *ef_tmp = crack_i->giveEnrichmentFrontEnd();
+                		crack_i->setEnrichmentFrontEnd( crack_j->giveEnrichmentFrontStart(), false );
+                		crack_j->setEnrichmentFrontStart(ef_tmp, false);
+
+
+                		mergedCrack = true;
+                		break;
+
+                	}
+
+                }
+            }
+        }
+	}
+
+
+    removeShortCracks();
+
+    for ( size_t i = 0; i < enrichmentItemList.size(); i++ ) {
+        enrichmentItemList [ i ]->setNumber(i + 1);
+    }
+
+
+    for ( size_t i = 0; i < enrichmentItemList.size(); i++ ) {
+        enrichmentItemList [ i ]->updateGeometry();
+    }
+
+    numberOfEnrichmentItems = giveNumberOfEnrichmentItems();
+
+}
+
 
 double XfemStructureManager :: computeTotalCrackLength()
 {

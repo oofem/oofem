@@ -77,6 +77,14 @@ void  BasicGeometry :: removeDuplicatePoints(const double &iTolSquare)
     }
 }
 
+void BasicGeometry :: translate(const FloatArray &iTrans)
+{
+	for(size_t i = 0; i < mVertices.size(); i++) {
+		mVertices[i].add(iTrans);
+	}
+}
+
+
 double BasicGeometry :: computeLineDistance(const FloatArray &iP1, const FloatArray &iP2, const FloatArray &iQ1, const FloatArray &iQ2)
 {
     FloatArray u;
@@ -1086,6 +1094,10 @@ void PolygonLine :: computeLocalCoordinates(FloatArray &oLocCoord, const FloatAr
 
 double PolygonLine :: computeLength() const
 {
+	if( mVertices.size() == 0 ) {
+		return 0.0;
+	}
+
     double L = 0.0;
 
     size_t numSeg = mVertices.size() - 1;

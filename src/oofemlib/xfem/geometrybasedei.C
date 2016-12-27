@@ -947,7 +947,11 @@ void GeometryBasedEI :: computeIntersectionPoints(std :: vector< FloatArray > &o
 void GeometryBasedEI :: writeVtkDebug() const
 {
     // For debugging only
-    int tStepInd = domain->giveEngngModel()->giveCurrentStep(false)->giveNumber();
+	int tStepInd = 0;
+	TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep(false);
+	if(tStep != NULL) {
+		tStepInd = tStep->giveNumber();
+	}
     this->mpBasicGeometry->printVTK(tStepInd, number);
 }
 

@@ -479,15 +479,21 @@ void EnrichmentItem :: callGnuplotExportModule(GnuplotExportModule &iExpMod, Tim
     //iExpMod.outputXFEM(*this);
 }
 
-void EnrichmentItem :: setEnrichmentFrontStart(EnrichmentFront *ipEnrichmentFrontStart)
+void EnrichmentItem :: setEnrichmentFrontStart(EnrichmentFront *ipEnrichmentFrontStart, bool iDeleteOld)
 {
-    delete mpEnrichmentFrontStart;
+	if(iDeleteOld) {
+		delete mpEnrichmentFrontStart;
+	}
+
     mpEnrichmentFrontStart = ipEnrichmentFrontStart;
 }
 
-void EnrichmentItem :: setEnrichmentFrontEnd(EnrichmentFront *ipEnrichmentFrontEnd)
+void EnrichmentItem :: setEnrichmentFrontEnd(EnrichmentFront *ipEnrichmentFrontEnd, bool iDeleteOld)
 {
-    delete mpEnrichmentFrontEnd;
+	if(iDeleteOld) {
+		delete mpEnrichmentFrontEnd;
+	}
+
     mpEnrichmentFrontEnd = ipEnrichmentFrontEnd;
 }
 
