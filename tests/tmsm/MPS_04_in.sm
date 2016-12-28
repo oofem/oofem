@@ -7,7 +7,7 @@ tests on creep with damage
 # element 3: drying creep, staggered problem, p = infinity (zero size effect) or equivalently \tilde{p} = 1, zero shrinkage, (constant) specified ft and gf
 # element 4: drying creep, staggered problem, p = infinity (zero size effect) or equivalently \tilde{p} = 1, zero shrinkage, specified 28-day values of ft and gf, evolution
 #
-nonlinearstatic nsteps 500  deltaT 1. rtolv 1.e-8 MaxIter 5000 controllmode 1 stiffMode 1 renumber 1 miniter 3 updateelasticstiffnessflag manrmsteps 5 nmodules 1
+staticstructural nsteps 500 deltaT 1 rtolf 1.e-5 manrmsteps 5 nmodules 1
 #
 errorcheck
 # vtkxml tstep_step 1 domain_all vars 2 1 4 primvars 1 1 
