@@ -2281,12 +2281,11 @@ same as on master.
   \recentry{}{\optField{masterMask}{ia}}
 \end{record}
 Represent node connected to other node (called master) using rigid
-arm. Rigid arm node posses no degrees of freedom - all dofs are mapped to master
-dofs. The introduction of rigid arm connected nodes allows to avoid very
+arm. Rigid arm node DOFs can be linked to master (via rigid arm transformation) or can be independent. The rigid arm node allows to avoid very
 stiff elements used for modelling the rigid-arm connection.
 The rigid arm node maps its dofs to master dofs using simple transformations
 (small rotations are assumed). Therefore, the contribution to rigid
-arm node are localized directly to master related equations.
+arm node can be localized directly to master related equations.
 {\em The rigid arm node can not have its own boundary or initial conditions, they are
 determined completely from master dof conditions. Currently it is
 possible to map only certain dofs - see \param{dofType}. Linked DOFs
@@ -2298,7 +2297,8 @@ global coordinate system) are described using \param{coords}
 field. This array contains x, y and possibly z (depends on problem
 under consideration) coordinate of node. The \param{master} parameter is the
 master node number, to which rigid arm node dofs are mapped.
-{\em The current implementation allows chaining of rigid arm nodes.}
+The rigid arm node and master can have arbvitrary local coordinate systems (if not specified, global one is assumed).
+
 The optional parameter \param{masterMask} allows to specify how
 particular mapped DOF depends on master DOFs. The size of \param{masterMask} array
 should be equal to number of DOFs. For all linked DOFs (with
