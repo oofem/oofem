@@ -71,6 +71,8 @@ void SlaveNode :: postInitialize()
             sdof->initialize(masterDofManagers, IntArray(), masterWeights);
         }
     }
+    // clean up
+    this->masterWeights.clear();
 }
 
 

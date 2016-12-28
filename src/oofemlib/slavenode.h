@@ -59,7 +59,7 @@ class OOFEM_EXPORT SlaveNode : public Node
 protected:
     /// Master nodes for all dofs.
     IntArray masterDofManagers;
-    /// Weights for each master node.
+    /// Common dof weights for each master node.
     FloatArray masterWeights;
 
 public:
