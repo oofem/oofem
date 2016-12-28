@@ -402,13 +402,13 @@ protected:
      * @param gp edge integration point
      * @param iEdge edge number
      */
-    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge) { return 0.; }
+    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
     /**
      * Computes volume related to integration point on local surface.
      * @param gp Surface integration point.
      * @param iSurf Surface number.
      */
-    virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf) { return 0.; }
+    virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf);
 
     // Global to local element c.s transformation for load vector dofs
     /**

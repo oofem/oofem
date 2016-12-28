@@ -157,11 +157,20 @@ void StructuralElement :: computeLoadVector(FloatArray &answer, BodyLoad *load, 
 
         ///@todo Some way to ask for the thickness at a global coordinate maybe?
         double thickness = 1.0; // Should be the circumference for axisymm-elements.
-        double dV = thickness * gp->giveWeight() * fei->boundarySurfaceGiveTransformationJacobian( boundary, lcoords, FEIElementGeometryWrapper(this) );
+        double dV = thickness * this->computeSurfaceVolumeAround( gp, boundary );
         answer.plusProduct(n, force, dV);
     }
 }
 
+double
+StructuralElement::computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
+{
+    FEInterpolation *fei = this->giveInterpolation();
+    const FloatArray &lcoords = gp->giveNaturalCoordinates();
+    double J = fei->boundarySurfaceGiveTransformationJacobian( iSurf, lcoords, FEIElementGeometryWrapper(this) );
+
+    return ( gp->giveWeight() * J );
+}
 
 void
 StructuralElement::computeSurfaceNMatrix (FloatMatrix &answer, int boundaryID, const FloatArray& lcoords)
@@ -221,9 +230,19 @@ void StructuralElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, Boun
 	//n.beNMatrixOf(n_vec, nsd);
 	this->computeEdgeNMatrix(n, boundary, lcoords); // to allow adapttation on element level
 
-        double dV = gp->giveWeight() * fei->boundaryEdgeGiveTransformationJacobian( boundary, lcoords, FEIElementGeometryWrapper(this) );
+        double dV = this->computeEdgeVolumeAround( gp, boundary );
         answer.plusProduct(n, force, dV);
     }
+}
+
+double
+StructuralElement::computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
+{
+    FEInterpolation *fei = this->giveInterpolation();
+    const FloatArray &lcoords = gp->giveNaturalCoordinates();
+    double J = fei->boundaryEdgeGiveTransformationJacobian( iEdge, lcoords, FEIElementGeometryWrapper(this) );
+
+    return ( gp->giveWeight() * J );
 }
 
 void
