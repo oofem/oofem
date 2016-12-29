@@ -228,7 +228,6 @@ RigidArmNode :: computeMasterContribution(std::map< DofIDItem, IntArray > &maste
     FloatMatrix TR(6,6); // rigid arm transformation between receiver global DOFs and Master global DOFs
     FloatMatrix TMG2L(6,6); // master global to local
     FloatMatrix T(6,6); // full transformation for all dofs
-    FloatMatrix h; // help
     IntArray fullDofMask = {D_u, D_v, D_w, R_u, R_v, R_w};
     bool hasg2l = this->computeL2GTransformation(TG2L, fullDofMask);
     bool mhasg2l = masterNode->computeL2GTransformation(TMG2L, fullDofMask);
@@ -243,18 +242,17 @@ RigidArmNode :: computeMasterContribution(std::map< DofIDItem, IntArray > &maste
     TR.at(3,4) =  xyz.at(2);
     TR.at(3,5) = -xyz.at(1);
 
-    if (hasg2l) {
-      h.beTProductOf(TG2L, TR);  // T transforms global master DOfs to local dofs; 
+    if (hasg2l && mhasg2l) {
+      FloatMatrix h; 
+      h.beTProductOf(TG2L, TR);  // T transforms global master DOfs to local dofs;
+      T.beProductOf(h,TMG2L);    // Add transformation to master local c.s.
+    } else if (hasg2l) {
+      T.beTProductOf(TG2L, TR);  // T transforms global master DOfs to local dofs;
+    } else if (mhasg2l) {
+      T.beProductOf(TR,TMG2L);   // Add transformation to master local c.s.
     } else {
-      h = TR;
+      T = TR;
     }
-    // now add transformation to master local c.s.
-    if (mhasg2l) {
-      T.beProductOf(h,TMG2L);
-    } else {
-      T = h;
-    }
-    
     
     // assemble DOF weights for relevant dofs
     for ( int i = 1; i <= this->dofidmask->giveSize(); i++ ) {
