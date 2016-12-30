@@ -197,6 +197,7 @@ public:
       OOFEM_ERROR("Not overloaded"); 
       return NULL;
     };
+    virtual void boundarySurfaceGiveNodes(IntArray &answer, int boundary);
 };
 } // end namespace oofem
 #endif // feinterpol3d_h

@@ -135,4 +135,14 @@ double FEInterpolation2d::boundarySurfaceGiveTransformationJacobian(int isurf, c
   return this->giveTransformationJacobian(lcoords, cellgeo);
 }
 
+void FEInterpolation2d::boundarySurfaceGiveNodes(IntArray &answer, int boundary)
+{
+  int nnode = this->giveNumberOfNodes();
+  answer.resize(nnode);
+  for (int i =1; i<=nnode; i++) {
+    answer.at(i)=i;
+  }
+}
+
+  
 } // end namespace oofem

@@ -839,6 +839,33 @@ Element :: initForNewStep()
 }
 
 
+
+void
+Element::giveBoundaryEdgeNodes (IntArray& bNodes, int boundary)
+{
+  this->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
+}
+
+void
+Element::giveBoundarySurfaceNodes (IntArray& bNodes, int boundary)
+{
+  this->giveInterpolation()->boundarySurfaceGiveNodes(bNodes, boundary);
+}
+
+IntegrationRule*
+Element::giveBoundaryEdgeIntegrationRule (int order, int boundary)
+{
+  return this->giveInterpolation()->giveBoundaryEdgeIntegrationRule(order, boundary);
+}
+
+IntegrationRule*
+Element::giveBoundarySurfaceIntegrationRule (int order, int boundary)
+{
+  return this->giveInterpolation()->giveBoundarySurfaceIntegrationRule(order, boundary);
+}
+
+  
+
 contextIOResultType Element :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full element context (saves state variables, that completely describe

@@ -70,6 +70,8 @@ public:
     virtual double boundarySurfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
 							     const FEICellGeometry &cellgeo)
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
+    virtual void boundarySurfaceGiveNodes(IntArray &answer, int boundary)
+    { OOFEM_ERROR("Functions not supported for this interpolator."); }
 
     //@}
 

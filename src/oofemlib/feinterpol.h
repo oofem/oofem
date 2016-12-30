@@ -153,7 +153,6 @@ public:
      * Returns the geometry type fo the interpolator.
      */
     virtual Element_Geometry_Type giveGeometryType() const = 0;
-
     /**
      * Returns the interpolation order.
      */
@@ -354,6 +353,13 @@ public:
      * @param boundary Boundary number.
      */
     virtual IntegrationRule *giveBoundarySurfaceIntegrationRule(int order, int boundary);
+    /**
+     * Gives the boundary nodes for requested boundary number.
+     * @param answer Array to be filled with the boundary nodes.
+     * @param boundary Boundary number.
+     */
+    virtual void boundarySurfaceGiveNodes(IntArray &answer, int boundary)=0;
+
     //@}
 
     /** @name General boundary interpolation functions.

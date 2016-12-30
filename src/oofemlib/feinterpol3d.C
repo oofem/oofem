@@ -135,4 +135,10 @@ double FEInterpolation3d :: surfaceEvalNormal(FloatArray &answer, int isurf, con
     OOFEM_ERROR("Not implemented");
     return -1.0;
 }
+
+void FEInterpolation3d::boundarySurfaceGiveNodes(IntArray &answer, int boundary)
+{
+  this->computeLocalSurfaceMapping(answer, boundary);
+}
+  
 } // end namespace oofem

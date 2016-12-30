@@ -20,11 +20,11 @@ SimpleTransportCS 1 mat 1 set 1 thickness 0.15
 IsoHeat 1 d 0. k 3.0 c 0.0
 BoundaryCondition  1 loadTimeFunction 1 dofs 1 10 values 1 10.0 set 2
 # Neumann bc
-constantsurfaceload 2 loadTimeFunction 1 components 1 -15. loadtype 2 set 3
+constantedgeload 2 loadTimeFunction 1 components 1 -15. loadtype 2 set 3
 ConstantFunction 1 f(t) 1.0
 Set 1 elementranges {(1 4)}
 Set 2 nodes 2 1 4
-Set 3 elementboundaries 2 4 1
+Set 3 elementedges 2 4 1
 
 #exact solution for this case is 20*log(x)+10, T(2.2)=25.7691, T(4.)=37.72588
 #%BEGIN_CHECK%

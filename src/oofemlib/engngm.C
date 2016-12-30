@@ -1055,7 +1055,8 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
 		      va.vectorFromSurfaceLoad(charVec, *element, sLoad, boundary, tStep, mode);
 
 		      if ( charVec.isNotEmpty() ) {
-                        element->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+                        //element->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+                        element->giveBoundarySurfaceNodes(bNodes, boundary);
                         if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
 			  charVec.rotatedWith(R, 't');
                         }
@@ -1079,7 +1080,8 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
 		    va.vectorFromEdgeLoad(charVec, *element, eLoad, boundary, tStep, mode);
 
 		    if ( charVec.isNotEmpty() ) {
-		      element->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
+		      //element->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
+                      element->giveBoundaryEdgeNodes(bNodes, boundary);
 		      if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
 			charVec.rotatedWith(R, 't');
 		      }
@@ -1221,7 +1223,8 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
               va.vectorFromEdgeLoad(charVec, *element, eLoad, boundary, tStep, mode);
               
               if ( charVec.isNotEmpty() ) {
-                element->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
+                //element->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
+                element->giveBoundaryEdgeNodes(bNodes, boundary);
                 if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
                   charVec.rotatedWith(R, 't');
                 }
@@ -1238,7 +1241,8 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
               va.vectorFromSurfaceLoad(charVec, *element, sLoad, boundary, tStep, mode);
               
               if ( charVec.isNotEmpty() ) {
-                element->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+                //element->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+                element->giveBoundarySurfaceNodes(bNodes, boundary);
                 if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
                   charVec.rotatedWith(R, 't');
                 }

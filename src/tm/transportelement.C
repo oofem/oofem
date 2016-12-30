@@ -616,7 +616,7 @@ answer.clear();
 
     ///@todo Deal with coupled fields (I think they should be another class of problems completely).
     FEInterpolation *interp = this->giveInterpolation();
-    std :: unique_ptr< IntegrationRule > iRule( interp->giveBoundaryIntegrationRule(load->giveApproxOrder() + 1 + interp->giveInterpolationOrder(), boundary) );
+    std :: unique_ptr< IntegrationRule > iRule( this->giveBoundarySurfaceIntegrationRule(load->giveApproxOrder() + interp->giveInterpolationOrder(), boundary) );
 
     if ( load->giveType() == ConvectionBC || load->giveType() == RadiationBC ) {
         IntArray bNodes;
@@ -677,7 +677,7 @@ TransportElement :: computeTangentFromSurfaceLoad(FloatMatrix &answer, SurfaceLo
 
     ///@todo Deal with coupled fields (I think they should be another class of problems completely).
     FEInterpolation *interp = this->giveInterpolation();
-    std :: unique_ptr< IntegrationRule > iRule( interp->giveBoundaryIntegrationRule(load->giveApproxOrder() + 1 + interp->giveInterpolationOrder(), boundary) );
+    std :: unique_ptr< IntegrationRule > iRule( this->giveBoundarySurfaceIntegrationRule(load->giveApproxOrder() + interp->giveInterpolationOrder(), boundary) );
 
     for ( auto &gp : *iRule ) {
         const FloatArray &lcoords = gp->giveNaturalCoordinates();
@@ -713,7 +713,7 @@ TransportElement :: computeTangentFromEdgeLoad(FloatMatrix &answer, EdgeLoad *lo
 
     ///@todo Deal with coupled fields (I think they should be another class of problems completely).
     FEInterpolation *interp = this->giveInterpolation();
-    std :: unique_ptr< IntegrationRule > iRule( interp->giveBoundaryIntegrationRule(load->giveApproxOrder() + interp->giveInterpolationOrder(), boundary) );
+    std :: unique_ptr< IntegrationRule > iRule( this->giveBoundaryEdgeIntegrationRule(load->giveApproxOrder() + interp->giveInterpolationOrder(), boundary) );
 
     for ( auto &gp : *iRule ) {
         const FloatArray &lcoords = gp->giveNaturalCoordinates();
@@ -760,7 +760,7 @@ TransportElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLo
 
     ///@todo Deal with coupled fields (I think they should be another class of problems completely).
     FEInterpolation *interp = this->giveInterpolation();
-    std :: unique_ptr< IntegrationRule > iRule( interp->giveBoundaryEdgeIntegrationRule(load->giveApproxOrder() + interp->giveInterpolationOrder(), boundary) );
+    std :: unique_ptr< IntegrationRule > iRule( this->giveBoundaryEdgeIntegrationRule(load->giveApproxOrder() + interp->giveInterpolationOrder(), boundary) );
 
     // get solution vector for InternalForcesVector (Convention or radiation)
     if ( (type == InternalForcesVector) &&
@@ -801,9 +801,9 @@ TransportElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLo
       N.beNMatrixOf(n, unknownsPerNode);
 
 
-      double detJ = interp->boundaryEdgeGiveTransformationJacobian( boundary, lcoords, FEIElementGeometryWrapper(this) );
-      double dL = this->giveThicknessAt(gcoords) * gp->giveWeight() * detJ;
-
+      //double detJ = interp->boundaryEdgeGiveTransformationJacobian( boundary, lcoords, FEIElementGeometryWrapper(this) );
+      //double dL = this->giveThicknessAt(gcoords) * gp->giveWeight() * detJ;
+      double dV = this->computeEdgeVolumeAround(gp, boundary);
       FieldPtr tf;
       if (tf = domain->giveEngngModel()->giveContext()->giveFieldManager()->giveField(FT_TemperatureAmbient)){
 	interp->boundaryEdgeLocal2Global( gcoords, boundary, lcoords, FEIElementGeometryWrapper(this) );
@@ -817,13 +817,13 @@ TransportElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLo
 
 
       if ( (load->giveType() == TransmissionBC)) {
-	answer.plusProduct(N, val, dL*coeff);
+	answer.plusProduct(N, val, dV*coeff);
       } else if ((load->giveType() == ConvectionBC ) || (load->giveType() == RadiationBC  )) {
 	if (type == InternalForcesVector) {
 	  field.beProductOf(N, unknowns);	
 	  val.subtract(field);
 	}
-	answer.plusProduct(N, val, dL*coeff);
+	answer.plusProduct(N, val, dV*coeff);
       }
 
 

@@ -543,7 +543,36 @@ public:
      * @param Surface area.
      */
     //virtual double computeSurfaceArea(int isurf) { return 0.0; }
+    /**
+     * Returns list of receiver boundary nodes for given edge
+     * @param bNodes list of boundary edge nodes 
+     * @param boundary edge id
+     */
+    virtual void giveBoundaryEdgeNodes (IntArray& bNodes, int boundary);
+    /**
+     * Returns list of receiver boundary nodes for given surface
+     * @param bNodes list of boundary surface nodes 
+     * @param boundary surface id
+     */
+    virtual void giveBoundarySurfaceNodes (IntArray& bNodes, int boundary);
+    /**
+     * Returns boundary edge integration rule
+     * @param order approximation order to integrate 
+     * @param boundary boundary edge id
+     * @note some elements may increase the order (like axusymmetric elements)
+     */
+    virtual IntegrationRule* giveBoundaryEdgeIntegrationRule (int order, int boundary);
+    /**
+     * Returns boundary surface integration rule
+     * @param order approximation order to integrate 
+     * @param boundary boundary surface id
+     * @note some elements may increase the order (like axusymmetric elements)
+      */
+    virtual IntegrationRule* giveBoundarySurfaceIntegrationRule (int order, int boundary);
 
+
+
+    
     // data management
     /**
      * Translates local to global indices for dof managers.

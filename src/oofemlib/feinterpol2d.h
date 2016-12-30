@@ -88,6 +88,7 @@ public:
 					      const FloatArray &lcoords, const FEICellGeometry &cellgeo) ;
     virtual double boundarySurfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
 							     const FEICellGeometry &cellgeo) ;
+    virtual void boundarySurfaceGiveNodes(IntArray &answer, int boundary);
     //@}
 
     /**@name Edge interpolation services. */
