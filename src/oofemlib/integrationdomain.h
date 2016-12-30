@@ -51,6 +51,7 @@ enum integrationDomain {
     _Tetrahedra,
     _Wedge,
     _Embedded2dLine,
+    _3dDegShell,
 };
 } // end namespace oofem
 #endif // integrationdomain_h

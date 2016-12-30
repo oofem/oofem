@@ -310,6 +310,23 @@ IntegrationRule :: setUpIntegrationPoints(integrationDomain mode, int nPoints,
 }
 
 int
+IntegrationRule :: setUpIntegrationPoints(integrationDomain mode, int nPointsXY, int nPointsZ,
+                                          MaterialMode matMode)
+{
+    intdomain = mode;
+
+    switch ( mode ) {
+    case _3dDegShell:
+        return  this->SetUpPointsOn3dDegShell(nPointsXY, nPointsZ, matMode);
+
+    default:
+        OOFEM_ERROR("unknown mode (%d)", mode);
+    }
+
+    return 0;
+}
+
+int
 IntegrationRule :: setUpEmbeddedIntegrationPoints(integrationDomain mode, int nPoints, MaterialMode matMode,
                                                   const std :: vector< FloatArray > &coords)
 {

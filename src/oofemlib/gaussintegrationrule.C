@@ -121,6 +121,34 @@ GaussIntegrationRule :: SetUpPointsOnSquare(int nPoints, MaterialMode mode)
     return this->giveNumberOfIntegrationPoints();
 }
 
+int
+GaussIntegrationRule :: SetUpPointsOn3dDegShell(int nPointsXY, int nPointsZ, MaterialMode mode)
+//GaussIntegrationRule :: SetUpPointsOnCube(int nPoints_xi1, int nPoints_xi2, int nPoints_xi3, MaterialMode mode)
+{
+    int nPoints_xi1 = ( int ) floor(sqrt( double ( nPointsXY ) ) );
+    int nPoints_xi2 = nPoints_xi1;
+    int nPoints_xi3 = nPointsZ;
+    FloatArray coords_xi1, weights1, coords_xi2, weights2, coords_xi3, weights3;
+    this->giveLineCoordsAndWeights(nPoints_xi1, coords_xi1, weights1);
+    this->giveLineCoordsAndWeights(nPoints_xi2, coords_xi2, weights2);
+    this->giveLineCoordsAndWeights(nPoints_xi3, coords_xi3, weights3);
+    this->gaussPoints.resize( nPoints_xi1 * nPoints_xi2 * nPoints_xi3 );
+    int count = 0;
+    // the order of cycles cannot be changed due to  MITC4Shell::giveMomentsAt(...)  
+    for ( int i = 1; i <= nPoints_xi1; i++ ) {
+        for ( int j = 1; j <= nPoints_xi2; j++ ) {
+            for ( int k = 1; k <= nPoints_xi3; k++ ) {
+                this->gaussPoints [ count ] = new GaussPoint(this, count + 1, {coords_xi1.at(i), coords_xi2.at(j), coords_xi3.at(k)},
+                                                             weights1.at ( i ) *weights2.at ( j ) *weights3.at ( k ), mode);
+                count++;
+            }
+        }
+    }
+
+    this->intdomain = _3dDegShell;
+    return this->giveNumberOfIntegrationPoints();
+}
+
 
 int
 GaussIntegrationRule :: SetUpPointsOnCube(int nPoints, MaterialMode mode)
