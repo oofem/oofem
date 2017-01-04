@@ -621,6 +621,16 @@ Beam3d :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useU
     answer.beProductOf(stiffness, u);
 #else
     BeamBaseElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord);
+    if (subsoilMat) {
+      // add internal forces due to subsoil interaction
+      // @todo: linear subsoil assumed here; more general approach should integrate internal forces
+      FloatMatrix k;
+      FloatArray u, F;
+      this->computeSubSoilStiffnessMatrix(k, TangentStiffness, tStep);
+      this->computeVectorOf(VM_Total, tStep, u);
+      F.beProductOf(k, u);
+      answer.add(F);
+    }
 #endif
 }
 
@@ -652,7 +662,7 @@ Beam3d :: giveEndForcesVector(FloatArray &answer, TimeStep *tStep)
     if ( loadEndForces.giveSize() ) {
         answer.subtract(loadEndForces);
     }
-
+    /*
     if (subsoilMat) {
       // @todo: linear subsoil assumed here; more general approach should integrate internal forces
       FloatMatrix k;
@@ -662,6 +672,7 @@ Beam3d :: giveEndForcesVector(FloatArray &answer, TimeStep *tStep)
       F.beProductOf(k, u);
       answer.add(F);
     }
+    */
 }
 
 
