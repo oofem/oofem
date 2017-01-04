@@ -401,6 +401,7 @@ StaggeredProblem :: giveNextStep()
         OOFEM_LOG_INFO("\n==================================================================\n");
         OOFEM_LOG_INFO( "\nAdjusting time step length to: %lf \n\n", totalTime - previousStep->giveTargetTime() );
         currentStep.reset( new TimeStep(istep, this, 1, totalTime, totalTime - previousStep->giveTargetTime(), counter) );
+        this->numberOfSteps = istep;
     } else {
         if ( this->adaptiveStepLength ) {
             OOFEM_LOG_INFO("\n==================================================================\n");
