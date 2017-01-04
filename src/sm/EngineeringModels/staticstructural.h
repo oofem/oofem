@@ -43,6 +43,7 @@
 
 #define _IFT_StaticStructural_Name "staticstructural"
 #define _IFT_StaticStructural_deltat "deltat"
+#define _IFT_StaticStructural_prescribedTimes "prescribedtimes"
 #define _IFT_StaticStructural_solvertype "solvertype"
 #define _IFT_StaticStructural_nonlocalExtension "nonlocalext"
 
@@ -71,8 +72,9 @@ protected:
 
     std :: unique_ptr< SparseNonLinearSystemNM >nMethod;
     int solverType;
-    
+
     double deltaT;
+    FloatArray prescribedTimes;
 
     InitialGuess initialGuessType;
 
