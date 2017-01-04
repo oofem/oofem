@@ -6,7 +6,7 @@
 patch104.out
 PATCH TEST OF TrPlaneStress2d ELEMENTS
 #domain section
-LinearStatic nsteps 1 nmodules 1
+StaticStructural nsteps 1 nmodules 1
 errorcheck
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all

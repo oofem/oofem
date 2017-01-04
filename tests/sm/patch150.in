@@ -1,6 +1,6 @@
 patch150.out
 Patch test of PlaneStrRot elements -> pure compression
-LinearStatic nsteps 1 nmodules 1
+StaticStructural nsteps 1 nmodules 1
 errorcheck
 domain 2dPlaneStressRot
 OutputManager tstep_all dofman_all element_all

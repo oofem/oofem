@@ -1,6 +1,6 @@
 patch140.out
 Patch test of QTrPlStr elements -> pure compression
-LinearStatic nsteps 1 nmodules 1
+StaticStructural nsteps 1 nmodules 1
 errorcheck
 #vtkxml tstep_all domain_all primvars 1 1 vars 2 1 4 stype 2
 domain 2dPlaneStress2D

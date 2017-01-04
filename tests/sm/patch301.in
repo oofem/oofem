@@ -1,6 +1,6 @@
 patch301.out
 compression patch test of LTRSpace elements
-LinearStatic nsteps 1 nmodules 1
+StaticStructural nsteps 1 nmodules 1
 errorcheck
 domain 3d
 OutputManager tstep_all dofman_all element_all

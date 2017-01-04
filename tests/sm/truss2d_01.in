@@ -2,7 +2,7 @@ truss2d_01.out
 bar with linear variation of area; loaded in tension
 #only momentum influence to the displacements is taken into account
 #beamShearCoeff is artificially enlarged.
-LinearStatic nsteps 1 nmodules 1
+StaticStructural nsteps 1 nmodules 1
 errorcheck
 domain 2dtruss
 OutputManager tstep_all dofman_all element_all

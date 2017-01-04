@@ -1,6 +1,6 @@
 patch101.out
 Patch test of PlaneStress2d elements -> pure compression in y direction
-LinearStatic nsteps 1 nmodules 1
+StaticStructural nsteps 1 nmodules 1
 errorcheck
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all

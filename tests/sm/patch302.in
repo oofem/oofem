@@ -1,6 +1,6 @@
 patch302.out
 test of b-bar lspace element, cantilever, plane strain, incompressible
-linearstatic nsteps 1 nmodules 1
+StaticStructural nsteps 1 nmodules 1
 errorcheck
 domain 3d
 outputmanager tstep_all dofman_all element_all

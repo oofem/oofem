@@ -2,7 +2,7 @@ beam2d_4.out
 Test of nodal coordinate system
 #only momentum influence to the displacements is taken into account
 #beamShearCoeff is artificially enlarged.
-LinearStatic nsteps 1 nmodules 1
+StaticStructural nsteps 1 nmodules 1
 errorcheck
 domain 2dBeam
 OutputManager tstep_all dofman_all element_all
