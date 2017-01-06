@@ -86,6 +86,7 @@ WinklerPasternakMaterial::giveRealStressVector_2dPlateSubSoil(FloatArray &answer
     answer.beProductOf(tangent, reducedE);
 
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+    
     status->letTempStrainVectorBe(reducedE);
     status->letTempStressVectorBe(answer);
 }

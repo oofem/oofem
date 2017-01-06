@@ -43,8 +43,7 @@
 //@{
 #define _IFT_IntMatCoulombContact_Name "intmatcoulombcontact"
 #define _IFT_IntMatCoulombContact_kn "kn"
-#define _IFT_IntMatCoulombContact_knt "knt"
-#define _IFT_IntMatCoulombContact_frictCoeff "fc"
+#define _IFT_IntMatCoulombContact_frictCoeff "frictcoeff"
 #define _IFT_IntMatCoulombContact_stiffCoeff "stiffcoeff"
 #define _IFT_IntMatCoulombContact_normalClearance "normalclearance"
 //@}
@@ -119,7 +118,7 @@ public:
 
     virtual void give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode,
                                            GaussPoint *gp, TimeStep *tStep)
-    { this->giveGeneralStiffnessMatrix(answer, rMode, gp, tStep, 1); }
+    { this->giveGeneralStiffnessMatrix(answer, rMode, gp, tStep, 3); }
 
     virtual void give2dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode,
                                            GaussPoint *gp, TimeStep *tStep)
@@ -127,7 +126,7 @@ public:
 
     virtual void give1dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode,
                                            GaussPoint *gp, TimeStep *tStep)
-    { this->giveGeneralStiffnessMatrix(answer, rMode, gp, tStep, 3); }
+    { this->giveGeneralStiffnessMatrix(answer, rMode, gp, tStep, 1); }
     
     // This method returns the stiffness matrix according to the size of 
     // the spatial jump.

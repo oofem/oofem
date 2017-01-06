@@ -189,7 +189,19 @@ Quad1PlateSubSoil :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
 int
 Quad1PlateSubSoil :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-  return StructuralElement :: giveIPValue(answer, gp, type, tStep);
+    if ( type == IST_ShellForceTensor ){
+        FloatArray help;
+        answer.resize(6);
+        help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
+        answer.at(1) = 0.0; // nx
+        answer.at(2) = 0.0; // ny
+        answer.at(3) = help.at(1); // nz
+        answer.at(4) = help.at(3); // vyz
+        answer.at(5) = help.at(2); // vxz
+        answer.at(6) = 0.0; // vxy
+        return 1;
+    }
+    return StructuralElement :: giveIPValue(answer, gp, type, tStep);
 }
 
 Interface *

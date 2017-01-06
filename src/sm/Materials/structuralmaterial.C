@@ -2191,7 +2191,11 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSt
         selem->computeResultingIPEigenstrainAt(eigenstrain, tStep, gp, VM_Total );
         StructuralMaterial :: giveFullSymVectorForm( answer, eigenstrain, gp->giveMaterialMode() );
         return 1;
-    }else {
+    } else if ( type == IST_ShellForceTensor ) {
+        answer.resize(6);
+        answer.zero();
+        return 1;
+    } else {
         return Material :: giveIPValue(answer, gp, type, tStep);
     }
 }

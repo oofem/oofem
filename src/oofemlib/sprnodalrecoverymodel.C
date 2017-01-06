@@ -155,7 +155,8 @@ SPRNodalRecoveryModel :: determinePatchAssemblyPoints(IntArray &pap, SPRPatchTyp
     int idofMan, ndofMan = domain->giveNumberOfDofManagers();
     int ielem;
     int npap, ipap, count, neq, nip;
-    IntArray dofManFlags(ndofMan), elemPap;
+    IntArray dofManFlags(ndofMan);
+    IntArray elemPap;
     SPRNodalRecoveryModelInterface *interface;
     Element *element;
     const IntArray *papDofManConnectivity;
@@ -341,7 +342,7 @@ SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDeter
 
     IntArray regionelements = elementSet.giveElementList();
 
-    // looop over elements sharing dofManager with papNumber and
+    // loop over elements sharing dofManager with papNumber and
     // determine those in region in ireg
     //
     nelem = papDofManConnectivity->giveSize();
@@ -358,8 +359,9 @@ SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDeter
 
     patchElems.resize(count);
     patchElements = 0;
-    for ( int i = 1; i <= nelem; i++ ) {
-        int ielem = regionelements.at(i);
+    //for ( int i = 1; i <= nelem; i++ ) {
+    for ( int ielem = 1; ielem <= nelem; ielem++ ) {
+        //int ielem = regionelements.at(i);
 
         if ( domain->giveElement( papDofManConnectivity->at(ielem) )->giveParallelMode() != Element_local ) {
             continue;
