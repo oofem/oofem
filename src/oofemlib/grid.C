@@ -255,8 +255,9 @@ Grid :: calcTime(int i, int j, double Fij, int order, int &eFlag) {
     // NB: Is this good practice? As in the matlab code, using Inf as
     // a flag simplifies the code, so that's why I use this. Maybe this
     // doesn't work with some compilers?
-    double Inf = 1.0 / 0.0;
-
+    //double Inf = 1.0 / 0.0;
+    double Inf = std::numeric_limits<float>::infinity();
+    
     // Temporary error flag
     int tmpFlag = 0;
 
