@@ -370,13 +370,14 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
          * cells (composite elements) are exported as individual pieces after the default ones.
          */
         int nPiecesToExport = this->giveNumberOfRegions(); //old name: region, meaning: sets
+        int anyPieceNonEmpty = 0;
 
         for ( int pieceNum = 1; pieceNum <= nPiecesToExport; pieceNum++ ) {
             // Fills a data struct (VTKPiece) with all the necessary data.
             this->setupVTKPiece(this->defaultVTKPiece, tStep, pieceNum);
 
             // Write the VTK piece to file.
-            this->writeVTKPiece(this->defaultVTKPiece, tStep);
+            anyPieceNonEmpty += this->writeVTKPiece(this->defaultVTKPiece, tStep);
         }
 
         /*
@@ -399,7 +400,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
                     this->exportCompositeElement(this->defaultVTKPieces, el, tStep);
 
                     for ( int j = 0; j < ( int ) this->defaultVTKPieces.size(); j++ ) {
-                        this->writeVTKPiece(this->defaultVTKPieces [ j ], tStep);
+                        anyPieceNonEmpty += this->writeVTKPiece(this->defaultVTKPieces [ j ], tStep);
                     }
 #else
                     // No support for binary export yet
@@ -407,6 +408,15 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
                 }
             }
         } // end loop over composite elements
+
+        if (anyPieceNonEmpty == 0) {
+          // write empty piece, Otherwise ParaView complains if the whole vtu file is without <Piece></Piece>
+          fprintf(this->fileStream, "<Piece NumberOfPoints=\"0\" NumberOfCells=\"0\">\n");
+          fprintf(this->fileStream, "<Cells>\n<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\"> </DataArray>\n</Cells>\n");
+          fprintf(this->fileStream, "</Piece>\n");
+        }
+
+        
     } else {     // if (particleExportFlag)
 #ifdef __PFEM_MODULE
         // write out the particles (nodes exported as vertices = VTK_VERTEX)
@@ -758,18 +768,22 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
 }
 
 
-void
+bool
 VTKXMLExportModule :: writeVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep)
 {
     // Write a VTK piece to file. This could be the whole domain (most common case) or it can be a
     // (so-called) composite element consisting of several VTK cells (layered structures, XFEM, etc.).
 
+  /*
     if ( !vtkPiece.giveNumberOfCells() ) { // handle piece with no elements. Otherwise ParaView complains if the whole vtu file is without <Piece></Piece>
          fprintf(this->fileStream, "<Piece NumberOfPoints=\"0\" NumberOfCells=\"0\">\n");
          fprintf(this->fileStream, "<Cells>\n<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\"> </DataArray>\n</Cells>\n");
          fprintf(this->fileStream, "</Piece>\n");
         return;
     }
+  */
+    if ( !vtkPiece.giveNumberOfCells() ) return false;
+
 
     // Write output: node coords
     int numNodes = vtkPiece.giveNumberOfNodes();
@@ -896,6 +910,7 @@ VTKXMLExportModule :: writeVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep)
 
     // Clear object so it can be filled with new data for the next piece
     vtkPiece.clear();
+    return true;
 }
 
 
@@ -1085,7 +1100,12 @@ VTKXMLExportModule :: getNodalVariableFromIS(FloatArray &answer, Node *node, Tim
         answer.at(1) = valSize ? val->at(1) : 0.0;
     } else if ( valType == ISVT_VECTOR ) {
         answer = * val;
-        answer.resizeWithValues(3);
+        // bp: hack for BeamForceMomentumTensor, which should be splitted into force and momentum vectors
+        if (type == IST_BeamForceMomentumTensor) {
+          answer.resizeWithValues(6);
+        } else {
+          answer.resizeWithValues(3);
+        }
     } else if ( valType == ISVT_TENSOR_S3 || valType == ISVT_TENSOR_S3E || valType == ISVT_TENSOR_G ) {
         this->makeFullTensorForm(answer, * val, valType);
     } else {
@@ -2134,7 +2154,12 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
                     d->giveElement(ielem)->giveIPValue(value, gp, isttype, tStep);
 
                     if ( vtype == ISVT_VECTOR ) {
+                      // bp: hack for BeamForceMomentumTensor, which should be splitted into force and momentum vectors
+                      if (isttype == IST_BeamForceMomentumTensor) {
+                        value.resizeWithValues(6);
+                      } else {
                         value.resizeWithValues(3);
+                      }
                     } else if ( vtype == ISVT_TENSOR_S3 || vtype == ISVT_TENSOR_S3E || vtype == ISVT_TENSOR_G ) {
                         FloatArray help = value;
                         this->makeFullTensorForm(value, help, vtype);
