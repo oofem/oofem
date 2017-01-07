@@ -53,9 +53,14 @@ CohesiveInterfaceMaterial :: giveEngTraction_3d(FloatArray &answer, GaussPoint *
 
     answer.resize(3);
 
-    // normal part of elastic stress-strain law
-    answer.at(1) = kn * jump.at(1);
-
+    if (jump.at(1) > 0.) {
+        // reduce with stiffCoeffKn in tension
+        answer.at(1) = kn * stiffCoeffKn * jump.at(1);
+    } else {
+        // normal part of elastic stress-strain law
+        answer.at(1) = kn * jump.at(1);
+    }
+    
     // shear part of elastic stress-strain law
     answer.at(2) = ks * jump.at(2);
     answer.at(3) = ks * jump.at(3);
@@ -71,7 +76,18 @@ CohesiveInterfaceMaterial :: give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatR
 {
     answer.resize(3, 3);
     answer.zero();
-    answer.at(1, 1) = kn;
+    
+    StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus(gp) );
+    double normalJump = status->giveTempJump().at(1);
+    
+    if (normalJump > 0.) {
+        // reduce stiffness in tension
+        answer.at(1, 1) = kn * stiffCoeffKn;
+    } else {
+        // normal part of elastic stress-strain law
+        answer.at(1, 1) = kn;
+    }
+    
     answer.at(2, 2) = answer.at(3, 3) = ks;
 }
 
@@ -89,6 +105,9 @@ CohesiveInterfaceMaterial :: initializeFrom(InputRecord *ir)
     // elastic parameters
     IR_GIVE_FIELD(ir, kn, _IFT_CohesiveInterfaceMaterial_kn);
     IR_GIVE_FIELD(ir, ks, _IFT_CohesiveInterfaceMaterial_ks);
+    // compliance when in tension
+    stiffCoeffKn = 1.;
+    IR_GIVE_OPTIONAL_FIELD(ir, stiffCoeffKn, _IFT_CohesiveInterfaceMaterial_stiffCoeffKn);
 
     return StructuralInterfaceMaterial :: initializeFrom(ir);
 }
@@ -99,6 +118,7 @@ CohesiveInterfaceMaterial :: giveInputRecord(DynamicInputRecord &input)
     StructuralInterfaceMaterial :: giveInputRecord(input);
     input.setField(this->kn, _IFT_CohesiveInterfaceMaterial_kn);
     input.setField(this->ks, _IFT_CohesiveInterfaceMaterial_ks);
+    input.setField(this->stiffCoeffKn, _IFT_CohesiveInterfaceMaterial_stiffCoeffKn);
 }
 
 } // namespace oofem

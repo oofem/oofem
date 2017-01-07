@@ -36,8 +36,6 @@
 #define quad2platesubsoil_H
 
 #include "../sm/Elements/structuralelement.h"
-// #include "zznodalrecoverymodel.h"
-// #include "sprnodalrecoverymodel.h"
 #include "../sm/Elements/quad1platesubsoil.h"
 
 #define _IFT_Quad2PlateSubSoil_Name "quad2platesubsoil"
@@ -67,51 +65,19 @@ public:
     virtual FEInterpolation *giveInterpolation() const;
     virtual FEInterpolation *giveInterpolation(DofIDItem id) const;
 
-    //virtual MaterialMode giveMaterialMode()  { return _2dPlateSubSoil; }
-    //virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_SurfaceLoadSupport ) ? 1 : 0 ); }
-
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_Quad2PlateSubSoil_Name; }
     virtual const char *giveClassName() const { return "Quad2PlateSubSoil"; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual int computeNumberOfDofs() { return 8; }
-    //virtual void giveDofManDofIDMask(int inode, IntArray &) const;
-
-    //virtual void computeMidPlaneNormal(FloatArray &answer, const GaussPoint *gp);
-
-    //virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane);
-    //virtual double computeVolumeAround(GaussPoint *gp);
-
-    //virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
-    //virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
-    //{ computeLumpedMassMatrix(answer, tStep); }
-
-    //virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-    //virtual Interface *giveInterface(InterfaceType it);
 
 protected:
     virtual void computeGaussPoints();
-    //virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-
-    //virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
-    //virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
-    //virtual int SPRNodalRecoveryMI_giveNumberOfIP() { return this->numberOfGaussPoints; }
-    //virtual SPRPatchType SPRNodalRecoveryMI_givePatchType() { return SPRPatchType_2dxy; }
-    /**
-     * @name Surface load support
-     */
-    //@{
-    //virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *gp);
-    //virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const;
-    //virtual IntegrationRule *GetSurfaceIntegrationRule(int iSurf);
-    //virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf);
-    //virtual int computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPoint *gp);
-    //@}
 };
 } // end namespace oofem
 #endif // quad2platesubsoil_H

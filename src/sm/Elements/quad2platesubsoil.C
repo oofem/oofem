@@ -33,19 +33,10 @@
  */
 
 #include "../sm/Elements/quad2platesubsoil.h"
-// #include "../sm/Materials/structuralms.h"
-// #include "../sm/CrossSections/structuralcrosssection.h"
 #include "fei2dquadquad.h"
-// #include "node.h"
-// #include "material.h"
 #include "crosssection.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
-// #include "floatmatrix.h"
-// #include "floatarray.h"
-// #include "intarray.h"
-// #include "load.h"
-// #include "mathfem.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -84,12 +75,6 @@ Quad2PlateSubSoil :: computeGaussPoints()
 }
 
 
-// void
-// Quad1PlateSubSoil :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode)
-// {
-//   OOFEM_ERROR("Body load not supported, use surface load instead");
-// }
-
 
 void
 Quad2PlateSubSoil :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
@@ -114,20 +99,6 @@ Quad2PlateSubSoil :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int l
 }
 
 
-// void
-// Quad1PlateSubSoil :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
-// {
-//     this->giveStructuralCrossSection()->giveGeneralizedStress_PlateSubSoil(answer, gp, strain, tStep);
-// }
-
-
-// void
-// Quad1PlateSubSoil :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-// {
-//     this->giveStructuralCrossSection()->give2dPlateSubSoilStiffMtrx(answer, rMode, gp, tStep);
-// }
-
-
 IRResultType
 Quad2PlateSubSoil :: initializeFrom(InputRecord *ir)
 {
@@ -135,73 +106,6 @@ Quad2PlateSubSoil :: initializeFrom(InputRecord *ir)
     return StructuralElement :: initializeFrom(ir);
 }
 
-
-// void
-// Quad1PlateSubSoil :: giveDofManDofIDMask(int inode, IntArray &answer) const
-// {
-//     answer = {D_w};
-// }
-
-
-// void
-// Quad1PlateSubSoil :: computeMidPlaneNormal(FloatArray &answer, const GaussPoint *gp)
-// {
-//     FloatArray u, v;
-//     u.beDifferenceOf( * this->giveNode(2)->giveCoordinates(), * this->giveNode(1)->giveCoordinates() );
-//     v.beDifferenceOf( * this->giveNode(3)->giveCoordinates(), * this->giveNode(1)->giveCoordinates() );
-// 
-//     answer.beVectorProductOf(u, v);
-//     answer.normalize();
-// }
-
-
-// double
-// Quad1PlateSubSoil :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
-// //
-// // returns receiver's characteristic length for crack band models
-// // for a crack formed in the plane with normal normalToCrackPlane.
-// //
-// {
-//     return this->giveCharacteristicLengthForPlaneElements(normalToCrackPlane);
-// }
-
-
-// double
-// Quad1PlateSubSoil :: computeVolumeAround(GaussPoint *gp)
-// {
-//     double detJ, weight;
-// 
-//     weight = gp->giveWeight();
-//     detJ = fabs( this->interp_lin.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
-//     return detJ * weight;
-// }
-
-
-// void
-// Quad1PlateSubSoil :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
-// // Returns the lumped mass matrix of the receiver.
-// {
-//   OOFEM_ERROR("Mass matrix not provided");
-// }
-
-
-// int
-// Quad1PlateSubSoil :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
-// {
-//   return StructuralElement :: giveIPValue(answer, gp, type, tStep);
-// }
-
-// Interface *
-// Quad1PlateSubSoil :: giveInterface(InterfaceType interface)
-// {
-//     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-//         return static_cast< ZZNodalRecoveryModelInterface * >(this);
-//     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-//         return static_cast< SPRNodalRecoveryModelInterface * >(this);
-//     }
-// 
-//     return NULL;
-// }
 
 void
 Quad2PlateSubSoil :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
@@ -227,52 +131,9 @@ Quad2PlateSubSoil :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &a
     if ( found ) {
         answer.at(1) = pap;
     } else {
-        OOFEM_ERROR("node unknown");
+        OOFEM_ERROR("node %d not found on element %d", pap, this->giveNumber());
     }
 }
-
-
-// void
-// Quad1PlateSubSoil :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
-// {
-//   this->computeNmatrixAt(sgp->giveNaturalCoordinates(), answer);
-// }
-
-// void
-// Quad1PlateSubSoil :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
-// {
-//     answer.resize(4);
-//     answer.zero();
-//     if ( iSurf == 1 ) {
-//         for (int i = 1; i<=4; i++) {
-//             answer.at(i) = i;
-//         }
-//     } else {
-//         OOFEM_ERROR("wrong surface number");
-//     }
-// }
-
-// IntegrationRule *
-// Quad1PlateSubSoil :: GetSurfaceIntegrationRule(int approxOrder)
-// {
-//     IntegrationRule *iRule = new GaussIntegrationRule(1, this, 1, 1);
-//     int npoints = iRule->getRequiredNumberOfIntegrationPoints(_Square, approxOrder);
-//     iRule->SetUpPointsOnSquare(npoints, _Unknown);
-//     return iRule;
-// }
-
-// double
-// Quad1PlateSubSoil :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
-// {
-//     return this->computeVolumeAround(gp);
-// }
-
-
-// int
-// Quad1PlateSubSoil :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int isurf, GaussPoint *gp)
-// {
-//     return 0;
-// }
 
 
 } // end namespace oofem

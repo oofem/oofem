@@ -54,9 +54,9 @@ IntMatCoulombContact :: giveEngTraction_3d( FloatArray &answer, GaussPoint *gp, 
 {
     IntMatCoulombContactStatus *status = static_cast< IntMatCoulombContactStatus * >( this->giveStatus( gp ) );
 
-    double normalJump = jump.at( 3 );
-    FloatArray shearJump = { jump.at(1), jump.at(2) };
-
+    double normalJump = jump.at( 1 );
+    FloatArray shearJump = { jump.at(2), jump.at(3) };
+    
     double normalStress = 0.0;
     FloatArray shearStress, tempShearStressShift = status->giveShearStressShift();
     this->computeEngTraction( normalStress, shearStress, tempShearStressShift,
@@ -64,9 +64,9 @@ IntMatCoulombContact :: giveEngTraction_3d( FloatArray &answer, GaussPoint *gp, 
     
     // Set stress components in the traction vector
     answer.resize( 3 );
-    answer.at( 1 ) = shearStress.at( 1 );
-    answer.at( 2 ) = shearStress.at( 2 );
-    answer.at( 3 ) = normalStress;
+    answer.at( 1 ) = normalStress;
+    answer.at( 2 ) = shearStress.at( 1 );
+    answer.at( 3 ) = shearStress.at( 2 );
 
     // Update gp
     status->setTempShearStressShift( tempShearStressShift );
@@ -80,8 +80,8 @@ IntMatCoulombContact :: giveEngTraction_2d( FloatArray &answer, GaussPoint *gp, 
 {
     IntMatCoulombContactStatus *status = static_cast< IntMatCoulombContactStatus * >( this->giveStatus( gp ) );
 
-    double normalJump = jump.at( 2 );
-    FloatArray shearJump = FloatArray{ jump.at(1) };
+    double normalJump = jump.at( 1 );
+    FloatArray shearJump = FloatArray{ jump.at(2) };
 
     double normalStress = 0.0;
     FloatArray shearStress, tempShearStressShift = status->giveShearStressShift();
@@ -90,8 +90,8 @@ IntMatCoulombContact :: giveEngTraction_2d( FloatArray &answer, GaussPoint *gp, 
 
     // Set stress components in the traction vector
     answer.resize( 2 );
-    answer.at( 1 ) = shearStress.at( 1 );
-    answer.at( 2 ) = normalStress;
+    answer.at( 1 ) = normalStress;
+    answer.at( 2 ) = shearStress.at( 1 );
 
     // Update gp
     status->setTempShearStressShift( tempShearStressShift );
@@ -170,9 +170,8 @@ IntMatCoulombContact :: giveGeneralStiffnessMatrix(FloatMatrix &answer,
     IntMatCoulombContactStatus *status = static_cast< IntMatCoulombContactStatus * > ( this->giveStatus(gp) );
     const FloatArray &jump = status->giveTempJump();
 
-    //const int numSpaceDim = jump.giveSize();
-    double normalJump = jump.at( numSpaceDim );
-
+    double normalJump = jump.at( 1 );
+    
     answer.resize( numSpaceDim, numSpaceDim );
     answer.beUnitMatrix();
     if ( rMode == SecantStiffness || rMode == TangentStiffness ) {
@@ -186,8 +185,6 @@ IntMatCoulombContact :: giveGeneralStiffnessMatrix(FloatMatrix &answer,
     }
 
 }
-
-
 
 
 IRResultType

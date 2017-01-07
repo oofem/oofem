@@ -1,0 +1,38 @@
+InterfaceEL_Point3D_03.out
+Test of Coulomb interface between two points, loaded by tension/compression/shear.
+StaticStructural nsteps 1 rtolf 1.e-4 manrmsteps 1 deltaT 1.0 nmodules 1
+#vtkxml tstep_all primvars 1 1
+errorcheck
+domain 3d
+OutputManager tstep_all dofman_all element_all
+ndofman 7 nelem 6 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1 nset 2
+node 1 coords 3 0.000 0.000 0.000
+node 2 coords 3 2.000 0.000 0.000
+node 3 coords 3 0.000 2.000 0.000
+node 4 coords 3 0.000 0.000 2.000
+node 5 coords 3 -2.000 0.000 0.000
+node 6 coords 3 0.000 -2.000 0.000
+node 7 coords 3 0.000 0.000 -2.000
+IntELPoint 1 nodes 2 1 2 crosssect 1 mat 1 normal 3 1. 0. 0.
+IntELPoint 2 nodes 2 1 3 crosssect 1 mat 1 normal 3 0. 1. 0.
+IntELPoint 3 nodes 2 1 4 crosssect 1 mat 1 normal 3 0. 0. 1.
+IntELPoint 4 nodes 2 1 5 crosssect 1 mat 1 normal 3 -1. 0. 0.
+IntELPoint 5 nodes 2 1 6 crosssect 1 mat 1 normal 3 0. -1. 0.
+IntELPoint 6 nodes 2 1 7 crosssect 1 mat 1 normal 3 0. 0. -1.
+InterfaceCS 1 material 1
+CohInt 1 kn 20000. ks 13000. stiffcoeffkn 0.03
+BoundaryCondition 1 loadTimeFunction 1 dofs 3 1 2 3 values 3 0. 0. 0. set 1
+nodalload 2 loadTimeFunction 1 dofs 3 1 2 3 Components 3 6. 0. 0. set 2
+ConstantFunction 1 f(t) 1.0
+Set 1 nodes 1 1
+Set 2 nodes 6 2 3 4 5 6 7
+
+#%BEGIN_CHECK% tolerance 1.e-5
+##Step 1
+#NODE tStep 1 number 2 dof 1 unknown d value 1.00000000e-02
+#NODE tStep 1 number 3 dof 1 unknown d value 4.61538462e-04
+#NODE tStep 1 number 4 dof 1 unknown d value 4.61538462e-04
+#NODE tStep 1 number 5 dof 1 unknown d value 3.00000000e-04
+#NODE tStep 1 number 6 dof 1 unknown d value 4.61538462e-04
+#NODE tStep 1 number 7 dof 1 unknown d value 4.61538462e-04
+#%END_CHECK%
