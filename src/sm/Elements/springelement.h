@@ -101,7 +101,8 @@ public:
     virtual void updateYourself(TimeStep *tStep) { }
     virtual int checkConsistency() { return 1; }
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
-
+    virtual bool isCast(TimeStep *tStep) {return true;}
+    
 #ifdef __OOFEG
     //void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
     //void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);

@@ -102,7 +102,8 @@ public:
     virtual const char *giveClassName() const { return "NodalSpringElement"; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_point; }
-
+    virtual bool isCast(TimeStep *tStep) {return true;}
+    
 protected:
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
     { answer.clear(); }
