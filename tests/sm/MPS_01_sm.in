@@ -1,8 +1,8 @@
 MPS_01_sm.out
-# 
 basic creep in tension, test includes prediction of paramters q1-q4 based on concrete composition
 #
-IncrLinearStatic endOfTimeOfInterest 10000.00000 prescribedTimes 25 0.0001 0.0002 0.0005 0.001 0.002 0.005 0.01 0.02 0.05 0.1 0.2 0.5 1. 2. 5. 10. 20. 50. 100. 200. 500. 1000. 2000. 5000. 10000.  nmodules 1
+#IncrLinearStatic endOfTimeOfInterest 10000.00000 prescribedTimes 25 0.0001 0.0002 0.0005 0.001 0.002 0.005 0.01 0.02 0.05 0.1 0.2 0.5 1. 2. 5. 10. 20. 50. 100. 200. 500. 1000. 2000. 5000. 10000.  nmodules 1
+StaticStructural nsteps 25 prescribedTimes 25 0.0001 0.0002 0.0005 0.001 0.002 0.005 0.01 0.02 0.05 0.1 0.2 0.5 1. 2. 5. 10. 20. 50. 100. 200. 500. 1000. 2000. 5000. 10000.  nmodules 1
 #
 errorcheck
 # vtkxml tstep_step 1 domain_all vars 2 1 4 primvars 1 1 

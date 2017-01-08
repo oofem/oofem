@@ -1,8 +1,7 @@
 steelRelaxMat.out
-# 
 relaxation of prestressing reinforcement, all dofs fixed
 #
-IncrLinearStatic endOfTimeOfInterest 10000.00000 prescribedTimes 25 0.0001 0.0002 0.0005 0.001 0.002 0.005 0.01 0.02 0.05 0.1 0.2 0.5 1. 2. 5. 10. 20. 50. 100. 200. 500. 1000. 2000. 5000. 10000. nmodules 1
+StaticStructural nsteps 25 prescribedTimes 25 0.0001 0.0002 0.0005 0.001 0.002 0.005 0.01 0.02 0.05 0.1 0.2 0.5 1. 2. 5. 10. 20. 50. 100. 200. 500. 1000. 2000. 5000. 10000. nmodules 1
 #
 errorcheck
 # vtkxml tstep_step 1 domain_all vars 2 1 4 primvars 1 1 
@@ -10,7 +9,7 @@ errorcheck
 domain 2dPlaneStress
 #
 OutputManager tstep_all dofman_all element_all
-ndofman 12 nelem 4 ncrosssect 2 nmat 3 nbc 2 nic 0 nltf 2
+ndofman 12 nelem 4 ncrosssect 3 nmat 3 nbc 2 nic 0 nltf 2
 #
 #
 # NODES
@@ -34,16 +33,17 @@ hangingNode 12 coords 2  0.1  0.25  dofType 2 2 2 masterElement 4
 #
 # ELEMENTS
 #
-Truss2d         1   nodes 2   5 6      crossSect 1 mat 2  cs 1 bodyLoads 1 2
-PlaneStress2d   2   nodes 4   1 2 4 3  crossSect 2 mat 1 
-Truss2d         3   nodes 2   11 12    crossSect 1 mat 3  cs 1 bodyLoads 1 2
-PlaneStress2d   4   nodes 4   7 8 10 9 crossSect 2 mat 1 
+Truss2d         1   nodes 2   5 6      crossSect 2  cs 1 bodyLoads 1 2
+PlaneStress2d   2   nodes 4   1 2 4 3  crossSect 1
+Truss2d         3   nodes 2   11 12    crossSect 3  cs 1 bodyLoads 1 2
+PlaneStress2d   4   nodes 4   7 8 10 9 crossSect 1
 #
 #
 # CROSSECTION
 #
-SimpleCS 1 thick 1.0 area 0.001
-SimpleCS 2 thick 1.0 width 1.0
+SimpleCS 1 thick 1.0 width 1.0 material 1
+SimpleCS 2 thick 1.0 area 0.001 material 2
+SimpleCS 3 thick 1.0 area 0.001 material 3
 #
 #
 # MATERIAL

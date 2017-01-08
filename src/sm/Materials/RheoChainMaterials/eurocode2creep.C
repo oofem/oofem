@@ -319,7 +319,7 @@ Eurocode2CreepMaterial :: computeEquivalentMaturity(GaussPoint *gp, TimeStep *tS
 
     selem->computeResultingIPTemperatureAt(et, tStep, gp, VM_Total);
 
-    if ( tStep->isTheFirstStep() || ( tStep->giveIntrinsicTime() - tStep->giveTimeIncrement() - this->castingTime < 0. ) ) {
+    if ( tStep->isTheFirstStep() || ( tStep->giveIntrinsicTime() - tStep->giveTimeIncrement() - this->castingTime ) < 0. ) {
         initMaturity = this->relMatAge;
         averageTemperature = et.at(1);
     } else {
@@ -342,7 +342,8 @@ Eurocode2CreepMaterial :: computeEquivalentMaturity(GaussPoint *gp, TimeStep *tS
 
 // implements B.9
 double
-Eurocode2CreepMaterial :: computeEquivalentAge(GaussPoint *gp, TimeStep *tStep) {
+Eurocode2CreepMaterial :: computeEquivalentAge(GaussPoint *gp, TimeStep *tStep)
+{
     double maturity;
     double age;
 
@@ -605,31 +606,28 @@ Eurocode2CreepMaterial :: giveShrinkageStrainVector(FloatArray &answer,
             }
         }
     } else { // total
-      if ( dryingTimeNow > 0. ) {
-        if ( ( this->shType == EC2_TotalShrinkage ) || ( this->shType == EC2_DryingShrinkage ) ) {
-	  this->computeIncrementOfDryingShrinkageVector( eps_sh, gp, dryingTimeNow, max(0., ( this->relMatAge - this->t0 ) / this->timeFactor) );
-	  answer.add(eps_sh);
+        if ( dryingTimeNow > 0. ) {
+            if ( ( this->shType == EC2_TotalShrinkage ) || ( this->shType == EC2_DryingShrinkage ) ) {
+                this->computeIncrementOfDryingShrinkageVector( eps_sh, gp, dryingTimeNow, max(0., ( this->relMatAge - this->t0 ) / this->timeFactor) );
+                answer.add(eps_sh);
+            }
         }
-      }
-	
-      if ( autoShrTimeNow > ( this->castingTime + this->relMatAge ) ) {
-	if ( ( this->shType == EC2_TotalShrinkage ) || ( this->shType == EC2_AutogenousShrinkage ) ) {
-	  if (this->castingTime > 0.) {
-	    this->computeIncrementOfAutogenousShrinkageVector(eps_sh, gp, autoShrTimeNow, (this->relMatAge+this->castingTime) / this->timeFactor);
-	  } else {
-	    this->computeIncrementOfAutogenousShrinkageVector(eps_sh, gp, autoShrTimeNow, (this->relMatAge) / this->timeFactor);
-	  }
-	  answer.add(eps_sh);
-	}
-      }
+
+        if ( autoShrTimeNow > ( this->castingTime + this->relMatAge ) ) {
+            if ( ( this->shType == EC2_TotalShrinkage ) || ( this->shType == EC2_AutogenousShrinkage ) ) {
+                if (this->castingTime > 0.) {
+                    this->computeIncrementOfAutogenousShrinkageVector(eps_sh, gp, autoShrTimeNow, (this->relMatAge+this->castingTime) / this->timeFactor);
+                } else {
+                    this->computeIncrementOfAutogenousShrinkageVector(eps_sh, gp, autoShrTimeNow, (this->relMatAge) / this->timeFactor);
+                }
+                answer.add(eps_sh);
+            }
+        }
     }
 
-    
     if ( answer.at(1) != answer.at(1) ) {
       OOFEM_ERROR("shrinkage is NaN: %f", answer.at(1));
     }
-
-    return;
 }
 
 void
@@ -703,9 +701,6 @@ Eurocode2CreepMaterial :: computeIncrementOfAutogenousShrinkageVector(FloatArray
 
 MaterialStatus *
 Eurocode2CreepMaterial :: CreateStatus(GaussPoint *gp) const
-/*
- * creates a new material status corresponding to this class
- */
 {
     return new Eurocode2CreepMaterialStatus(1, this->giveDomain(), gp, nUnits);
 }
