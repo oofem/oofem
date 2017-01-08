@@ -171,15 +171,25 @@ TimeStep *StaticStructural :: giveNextStep()
     }
     previousStep = std :: move(currentStep);
     double dt;
-    if ( this->prescribedTimes.giveSize() ) {
+    if ( this->prescribedTimes.giveSize() > 0 ) {
         dt = this->prescribedTimes.at(previousStep->giveNumber() + 1) - previousStep->giveTargetTime();
     } else {
         dt = this->deltaT;
     }
-    currentStep.reset( new TimeStep(*previousStep, this->deltaT) );
+    currentStep.reset( new TimeStep(*previousStep, dt) );
 
     return currentStep.get();
 }
+
+
+double StaticStructural :: giveEndOfTimeOfInterest()
+{
+    if ( this->prescribedTimes.giveSize() > 0 )
+        return prescribedTimes.at(prescribedTimes.giveSize());
+    else
+        return this->deltaT * this->giveNumberOfSteps();
+}
+
 
 
 void StaticStructural :: solveYourself()

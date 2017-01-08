@@ -99,6 +99,7 @@ public:
     virtual int forceEquationNumbering();
 
     virtual TimeStep *giveNextStep();
+    virtual double giveEndOfTimeOfInterest();
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
     
     virtual fMode giveFormulation() { return TL; }
