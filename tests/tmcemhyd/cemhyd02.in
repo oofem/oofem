@@ -2,8 +2,6 @@ cemhyd02.out
 Test of CEMHYD3D hydration model, Q_pot = 534 J/g_cem, 300 kg cem/m3_con, i.e. max 160.2 kJ/m3_com; deltaT=160200/2.4/870=76.724 C
 #side YZ is kept at 20C and later released. Heat transport coefficient is assigned to opposite YZ side. The setup corresponds to 1D case.
 #8 independent CEMHYD3D models are used, for each integration point one instance.
-#NonStationaryProblem nsteps 21 deltat 3600.0 alpha 0.5 nmodules 1
-#NlTransientTransportProblem nsteps 10 deltat 3600.0 rtol 1.e-5 alpha 0.5 nsmax 30 changingProblemSize nmodules 1
 TransientTransport nsteps 10 deltat 3600.0 alpha 0.5 nmodules 1
 errorcheck
 #vtkxml tstep_all domain_all vars 11 37 39 44 56 67 68 69 70 71 72 73 stype 1

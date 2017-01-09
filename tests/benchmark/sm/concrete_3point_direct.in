@@ -1,7 +1,6 @@
 concrete_3point_direct.out
 Test: 3-point bending, triangular elements, 1 loaded point, direct displacement control
-NonLinearStatic nsteps 20 rtolf 1e-4 MaxIter 2000 stiffmode 1 manrmsteps 10 controlmode 1 nmodules 1
-#StaticStructural nsteps 20 rtolf 1e-4 MaxIter 2000 stiffmode 1 manrmsteps 10 nmodules 1 initialguess 0
+StaticStructural nsteps 20 rtolf 1e-4 maxiter 100 manrmsteps 10 stiffmode 1 nmodules 1 initialguess 1
 errorcheck
 domain 2dPlaneStress
 #
@@ -1277,8 +1276,7 @@ BoundaryCondition 2 loadTimeFunction 1 dofs 1 2 values 1 0. set 4
 BoundaryCondition 3 loadTimeFunction 2 dofs 1 2 values 1 -0.025 set 5
 #NodalLoad 3 loadTimeFunction 1 dofs 2 1 2 Components 2 0. -0.025 set 5
 ConstantFunction 1 f(t) 1.0
-#PiecewiseLinFunction 2 t 2 0.0 200.0 f(t) 2 0.0 200.0
-PiecewiseLinFunction 2 t 2 0.0 200.0 f(t) 2 1.0 201.0
+PiecewiseLinFunction 2 t 2 0.0 200.0 f(t) 2 0.0 200.0
 Set 1 elementranges {(1 240) (562 799)}
 Set 2 elementranges {(241 561)}
 Set 3 nodes 1 12
