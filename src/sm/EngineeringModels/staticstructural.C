@@ -65,10 +65,11 @@ REGISTER_EngngModel(StaticStructural);
 StaticStructural :: StaticStructural(int i, EngngModel *_master) : StructuralEngngModel(i, _master),
     internalForces(),
     eNorm(),
-    sparseMtrxType(SMT_Skyline)
+    sparseMtrxType(SMT_Skyline),
+    solverType(0),
+    stiffMode(TangentStiffness)
 {
     ndomains = 1;
-    solverType = 0;
     mRecomputeStepAfterPropagation = false;
 }
 
@@ -131,6 +132,10 @@ StaticStructural :: initializeFrom(InputRecord *ir)
 
     this->solverType = 0; // Default NR
     IR_GIVE_OPTIONAL_FIELD(ir, solverType, _IFT_StaticStructural_solvertype);
+    
+    int tmp = TangentStiffness; // Default TangentStiffness
+    IR_GIVE_OPTIONAL_FIELD(ir, tmp, _IFT_StaticStructural_stiffmode);
+    this->stiffMode = (MatResponseMode)tmp;
 
     int _val = IG_Tangent;
     IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_EngngModel_initialGuess);
@@ -362,7 +367,7 @@ void StaticStructural :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
         internalVarUpdateStamp = tStep->giveSolutionStateCounter(); // Hack for linearstatic
     } else if ( cmpn == NonLinearLhs ) {
         this->stiffnessMatrix->zero();
-        this->assemble(*this->stiffnessMatrix, tStep, TangentAssembler(TangentStiffness), EModelDefaultEquationNumbering(), d);
+        this->assemble(*this->stiffnessMatrix, tStep, TangentAssembler(this->stiffMode), EModelDefaultEquationNumbering(), d);
     } else {
         OOFEM_ERROR("Unknown component");
     }

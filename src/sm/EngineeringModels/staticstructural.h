@@ -45,6 +45,7 @@
 #define _IFT_StaticStructural_deltat "deltat"
 #define _IFT_StaticStructural_prescribedTimes "prescribedtimes"
 #define _IFT_StaticStructural_solvertype "solvertype"
+#define _IFT_StaticStructural_stiffmode "stiffmode"
 #define _IFT_StaticStructural_nonlocalExtension "nonlocalext"
 
 #define _IFT_StaticStructural_recomputeaftercrackpropagation "recomputeaftercrackprop"
@@ -72,6 +73,7 @@ protected:
 
     std :: unique_ptr< SparseNonLinearSystemNM >nMethod;
     int solverType;
+    MatResponseMode stiffMode;
 
     double deltaT;
     FloatArray prescribedTimes;
