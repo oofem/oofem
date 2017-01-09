@@ -54,11 +54,11 @@ Set 2 nodes 2 11 22
 ##
 #
 #%BEGIN_CHECK% tolerance 1.e-5
-#NODE tStep 4 number 1 dof 14 unknown d value 8.21897850e-01
-#NODE tStep 4 number 3 dof 14 unknown d value 8.16589060e-01
-#NODE tStep 4 number 5 dof 14 unknown d value 8.05354976e-01
-#NODE tStep 8 number 1 dof 14 unknown d value 6.38601921e-01
-#NODE tStep 8 number 3 dof 14 unknown d value 6.34189931e-01
-#NODE tStep 8 number 5 dof 14 unknown d value 6.21702071e-01
+#NODE tStep 4 number 1 dof 14 unknown d value 7.99174594e-01
+#NODE tStep 4 number 3 dof 14 unknown d value 7.93215521e-01
+#NODE tStep 4 number 5 dof 14 unknown d value 7.80840997e-01
+#NODE tStep 8 number 1 dof 14 unknown d value 6.21069014e-01
+#NODE tStep 8 number 3 dof 14 unknown d value 6.16643713e-01
+#NODE tStep 8 number 5 dof 14 unknown d value 6.05649077e-01
 #%END_CHECK%
 
