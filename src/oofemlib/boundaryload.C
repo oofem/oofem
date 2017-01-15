@@ -154,6 +154,6 @@ BoundaryLoad :: giveProperty(int aProperty, TimeStep *tStep, const std :: map< s
 double
 BoundaryLoad :: giveProperty(int aProperty, TimeStep *tStep)
 {
-    return this->giveProperty(aProperty, tStep, {{}});
+    return this->giveProperty(aProperty, tStep, {});
 }
 } // end namespace oofem
