@@ -2279,6 +2279,7 @@ same as on master.
   \recentry{\entKeywordInst{RigidArmNode}}{\field{coords}{ra}}
   \recentry{}{\field{master}{in}}
   \recentry{}{\optField{masterMask}{ia}}
+  \recentry{}{[\field{lcs}{ra}]}
 \end{record}
 Represent node connected to other node (called master) using rigid
 arm. Rigid arm node DOFs can be linked to master (via rigid arm transformation) or can be independent. The rigid arm node allows to avoid very
@@ -2304,6 +2305,10 @@ particular mapped DOF depends on master DOFs. The size of \param{masterMask} arr
 should be equal to number of DOFs. For all linked DOFs (with
 corresponding dofType value equal to 2) the corresponding value of
 \param{masterMask} array should be 1.
+
+The local coordinate system in rigid arm node  is supported, 
+the coordinate system in master and slave can be different. 
+If no lcs is set, global one is assumed.the global cs applies.
 
 \item Hanging node
 
