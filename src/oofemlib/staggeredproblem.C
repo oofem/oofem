@@ -54,14 +54,21 @@
 namespace oofem {
 REGISTER_EngngModel(StaggeredProblem);
 
-StaggeredProblem :: StaggeredProblem(int i, EngngModel *_master) : EngngModel(i, _master)
+StaggeredProblem :: StaggeredProblem(int i, EngngModel *_master) : EngngModel(i, _master),
+    adaptiveStepLength(false),
+    minStepLength(0.),
+    maxStepLength(0.),
+    reqIterations(0.),
+    adaptiveStepSince(0.),
+    endOfTimeOfInterest(0.),
+    prevStepLength(0.),
+    currentStepLength(0.)
 {
     ndomains = 1; // domain is needed to store the time step function
 
     dtFunction = 0;
     stepMultiplier = 1.;
     timeDefinedByProb = 0;
-    adaptiveStepLength = false;
 }
 
 StaggeredProblem :: ~StaggeredProblem()
@@ -368,7 +375,8 @@ StaggeredProblem :: giveSolutionStepWhenIcApply(bool force)
 }
 
 int
-StaggeredProblem :: giveNumberOfFirstStep(bool force) {
+StaggeredProblem :: giveNumberOfFirstStep(bool force)
+{
     if ( timeDefinedByProb && !force) {
         return emodelList [ timeDefinedByProb - 1 ].get()->giveNumberOfFirstStep(true);
     } else {
