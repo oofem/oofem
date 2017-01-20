@@ -2,7 +2,7 @@ staggeredsolver.out
 Uses a staggered Newton-Raphson approach to solve the equations. The equations are subdivided into two dof groups here.
 #Note that convergence is worse than regular NR for this case.
 #Author: Jim brouzoulis
-StaticStructural nsteps 1 lstype 0 smtype 0 rtolf 1.0e-4 rtold -1.0 manrmsteps 1 nmodules 1 solvertype 1 dofidlist 7  1 2 3 15 16 17 18  idpos 4  1 6  7 7
+StaticStructural nsteps 1 lstype 0 smtype 0 rtolf 1.0e-4 manrmsteps 1 nmodules 1 solvertype "staggeredsolver" dofidlist 7  1 2 3 15 16 17 18  idpos 4  1 6  7 7
 #vtkxml tstep_all dofman_all element_all primvars 1 1 
 errorcheck
 domain 3dDirShell 

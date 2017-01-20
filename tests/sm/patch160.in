@@ -1,7 +1,7 @@
 patch160.out
 test of Truss2d elements with j2plasticMaterial
 #LinearStatic nsteps 1
-NonLinearStatic nsteps 6 stepLength 6.  minStepLength 0.1 rtolf 1e-5 Psi 0.0 MaxIter 30 nmodules 1
+StaticStructural nsteps 6 solverType "calm" stepLength 6. minStepLength 0.1 rtolf 1e-5 Psi 0.0 MaxIter 30 nmodules 1
 errorcheck
 domain 2dTruss
 OutputManager tstep_all dofman_all element_all
@@ -13,7 +13,7 @@ SimpleCS 1 thick 1.0 width 1.0 material 1 set 1
 j2mat 1 d 1. Ry 1.7321 E 1.0 n 0.2 IHM 0.5 tAlpha 0.000012
 BoundaryCondition 1 loadTimeFunction 1 dofs 2 1 3 values 2 0.0 0.0 set 2
 BoundaryCondition 2 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 3
-NodalLoad 3 loadTimeFunction 1 dofs 2 1 3 Components 2 0.0 1.0 set 3
+NodalLoad 3 loadTimeFunction 1 dofs 2 1 3 Components 2 0.0 1.0 set 3 reference
 ConstantFunction 1 f(t) 1.0
 Set 1 elementranges {1}
 Set 2 nodes 1 1

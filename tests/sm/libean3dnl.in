@@ -2,7 +2,7 @@ libean3dnl.out
 Non-Linear cantiliver
 #LinearStatic 1 nsteps 1
 #LinearStability nroot 4 rtolv 1.e-8
-NonLinearStatic nsteps 6 maxiter 30 stepLength 1.0471976 minStepLength 1.0471976  rtolf 1e-4 Psi 0.0 manrmsteps 1 HPC 2 9 6 nmodules 1
+StaticStructural nsteps 6 solverType "calm" maxiter 30 stepLength 1.0471976 minStepLength 1.0471976  rtolf 1e-4 Psi 0.0 manrmsteps 1 HPC 2 9 6 nmodules 1
 errorcheck
 domain 3dShell 
 OutputManager tstep_all dofman_all element_all
@@ -31,7 +31,7 @@ LIBeam3dNL 8 nodes 2 8 9 refnode 10 nlgeo 1
 SimpleCS 1 area 1.0 Iy 1.0 Iz 1.0 Ik 1.0  beamShearCoeff 1.0 material 1 set 1
 IsoLE 1 d 1.0 E 1.0 n 0.2 tAlpha 1.2e-5
 BoundaryCondition  1 loadTimeFunction 1 dofs 6 1 2 3 4 5 6 values 6 0 0 0 0 0 0 set 2
-NodalLoad 2 loadTimeFunction 1 dofs 1 6 Components 1 0.78539816 set 3
+NodalLoad 2 loadTimeFunction 1 dofs 1 6 Components 1 0.78539816 set 3 reference
 ConstantFunction 1 f(t) 1.
 Set 1 elementranges {(1 8)}
 Set 2 nodes 2 1 10
