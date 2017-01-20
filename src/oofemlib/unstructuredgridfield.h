@@ -302,15 +302,18 @@ protected:
   long int octreeTimeStamp;
   /// receiver timestamp
   long int timeStamp;
+  /// octree origin shift
+  double octreeOriginShift;
  public:
   /**
    * Constructor. Creates a field, with unspecified field values.
    */
- UnstructuredGridField(int nvert, int ncells) : Field(FieldType::FT_Unknown), spatialLocalizer()
+ UnstructuredGridField(int nvert, int ncells, double octreeOriginShift=0.0 ) : Field(FieldType::FT_Unknown), spatialLocalizer()
     { this->timeStamp = this->octreeTimeStamp = 0;
       this->vertexList.resize(nvert);
       this->cellList.resize(ncells);
       this->valueList.resize(nvert);
+      this->octreeOriginShift = octreeOriginShift;
     }
   virtual ~UnstructuredGridField() { }
 
@@ -404,6 +407,10 @@ protected:
 	  cmin(j)=min(cmin(j), (*vc)(j));
 	}
       }
+      // introduce origin shift (if set up)
+      for (int j=0; j<nsd; j++)  {
+        cmin(j) -= octreeOriginShift;
+      }
       double size = 0.0;
       IntArray mask (3);
       for (int j=0; j<nsd; j++) {
@@ -415,7 +422,14 @@ protected:
       this->spatialLocalizer.init (bb);
       std::vector<Cell>::iterator cit;
       CellInsertionFunctor cf;
+      int cellcount = 1;
       for (cit=this->cellList.begin(); cit != this->cellList.end(); ++cit) {
+        BoundingBox b; (*cit).giveBoundingBox(b);
+        FloatArray o;
+        b.giveOrigin(o);
+        printf ("Inserting cell %d, Origin, Size:", cellcount++);
+        o.printYourself();
+        printf("%lf\n", b.giveSize());
 	this->spatialLocalizer.insertMemberIntoOctree(*cit, cf);
       }
 

@@ -1145,7 +1145,7 @@ void pyclass_Field()
         .def("setValues",&UniformGridField::setValues,(bp::arg("values")))
         ;
 
-    class_<UnstructuredGridField, std::shared_ptr<UnstructuredGridField>, bases<Field>>("UnstructuredGridField", init<int, int>())
+    class_<UnstructuredGridField, std::shared_ptr<UnstructuredGridField>, bases<Field>>("UnstructuredGridField", init<int,int,optional<double>>())
       .def("addVertex",&UnstructuredGridField::addVertex,(bp::arg("num"), bp::arg("coords")))
       .def("setVertexValue", &UnstructuredGridField::setVertexValue, (bp::arg("num"), bp::arg("vv")))
       .def("addCell", &UnstructuredGridField::addCell, (bp::arg("num"), bp::arg("type"), bp::arg("vertices")))

@@ -62,9 +62,11 @@ class IntArray;
 template< class T >class OctreeSpatialLocalizerT;
 
 
-#define TEMPLATED_OCTREE_MAX_NODES_LIMIT 300
+#define TEMPLATED_OCTREE_MAX_NODES_LIMIT 1024
 
-#define TEMPLATED_OCTREE_MAX_DEPTH 15
+#define TEMPLATED_OCTREE_MAX_DEPTH 8
+
+#define TEMPLATED_OCTREE_DEBUG 
 
 ///
 enum boundingSphereStatus { SphereOutsideCell, SphereInsideCell, SphereContainsCell };
@@ -1024,11 +1026,32 @@ protected:
             cellDepth  = this->giveCellDepth(cell);
             if ( cellDepth > maxDepthReached ) {
                 maxDepthReached = cellDepth;
-                //printf("Reached cell depth: %i \n", maxDepthReached);
+#ifdef TEMPLATED_OCTREE_DEBUG
+                printf("Reached cell depth: %i \n", maxDepthReached);
+#endif
             }
 
-            if ( ( nCellItems > TEMPLATED_OCTREE_MAX_NODES_LIMIT ) && ( cellDepth <= TEMPLATED_OCTREE_MAX_DEPTH ) ) {
+            if ( ( nCellItems > TEMPLATED_OCTREE_MAX_NODES_LIMIT ) && ( cellDepth < TEMPLATED_OCTREE_MAX_DEPTH ) ) {
                 cell->divideLocally(1, this->octreeMask);
+
+
+#if 1 // more memory efficient implementation
+                while (!cellDataList->empty())
+                  {
+                    this->insertMemberIntoCell(cellDataList->back(), functor, cell);
+                    insData = functor.giveInsertionList(cellDataList->back());
+                    if ( insData ) {
+                        for ( LIDiterator insDataIT = insData->begin(); insDataIT != insData->end(); ) {
+                            if ( ( * insDataIT ).containedInCell == cell ) {
+                                insDataIT = insData->erase(insDataIT);
+                            } else {
+                                insDataIT++;
+                            }
+                        }
+                    }
+                    cellDataList->pop_back();
+                  }
+#else
                 for ( pos = cellDataList->begin(); pos != cellDataList->end(); ++pos ) {
                     this->insertMemberIntoCell(* pos, functor, cell);
                     insData = functor.giveInsertionList(* pos);
@@ -1044,6 +1067,7 @@ protected:
                 }
 
                 cell->deleteDataList();
+#endif
                 this->insertMemberIntoCell(memberID, functor, cell);
             } else {                     // insertion without refinement
                 insertedPosition = cell->addMember(memberID);
