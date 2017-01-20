@@ -422,14 +422,16 @@ protected:
       this->spatialLocalizer.init (bb);
       std::vector<Cell>::iterator cit;
       CellInsertionFunctor cf;
-      int cellcount = 1;
+      //int cellcount = 1;
       for (cit=this->cellList.begin(); cit != this->cellList.end(); ++cit) {
-        BoundingBox b; (*cit).giveBoundingBox(b);
-        FloatArray o;
-        b.giveOrigin(o);
-        printf ("Inserting cell %d, Origin, Size:", cellcount++);
-        o.printYourself();
-        printf("%lf\n", b.giveSize());
+        /*
+          BoundingBox b; (*cit).giveBoundingBox(b);
+          FloatArray o;
+          b.giveOrigin(o);
+          printf ("Inserting cell %d, Origin, Size:", cellcount++);
+          o.printYourself();
+          printf("%lf\n", b.giveSize());
+        */
 	this->spatialLocalizer.insertMemberIntoOctree(*cit, cf);
       }
 

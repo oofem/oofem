@@ -66,7 +66,7 @@ template< class T >class OctreeSpatialLocalizerT;
 
 #define TEMPLATED_OCTREE_MAX_DEPTH 8
 
-#define TEMPLATED_OCTREE_DEBUG 
+//#define TEMPLATED_OCTREE_DEBUG 
 
 ///
 enum boundingSphereStatus { SphereOutsideCell, SphereInsideCell, SphereContainsCell };
