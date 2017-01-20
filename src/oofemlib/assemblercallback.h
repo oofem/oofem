@@ -122,6 +122,19 @@ public:
 };
 
 /**
+ * Implementation for assembling reference (external) forces vectors
+ * @author Mikael Öhman
+ */
+class ReferenceForceAssembler : public VectorAssembler
+{
+public:
+    virtual void vectorFromLoad(FloatArray &vec, Element &element, BodyLoad *load, TimeStep *tStep, ValueModeType mode) const;
+    virtual void vectorFromBoundaryLoad(FloatArray &vec, Element &element, BoundaryLoad *load, int boundary, TimeStep *tStep, ValueModeType mode) const;
+    virtual void vectorFromEdgeLoad(FloatArray &vec, Element &element, BoundaryLoad *load, int edge, TimeStep *tStep, ValueModeType mode) const;
+    virtual void vectorFromNodeLoad(FloatArray &vec, DofManager &dman, NodalLoad *load, TimeStep *tStep, ValueModeType mode) const;
+};
+
+/**
  * Implementation for assembling lumped mass matrix (diagonal components) in vector form.
  * @author Mikael Öhman
  */

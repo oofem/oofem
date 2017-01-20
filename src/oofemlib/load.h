@@ -45,6 +45,7 @@
 //@{
 #define _IFT_Load_components "components"
 #define _IFT_Load_dofexcludemask "dofexcludemask"
+#define _IFT_Load_reference "reference"
 //@}
 
 namespace oofem {
@@ -95,6 +96,9 @@ protected:
     IntArray dofExcludeMask;
 
 public:
+    // Marks the BC as a reference load. 
+    bool reference;
+
     /**
      * Constructor. Creates boundary condition with given number, belonging to given domain.
      * @param n Boundary condition number
@@ -129,7 +133,7 @@ public:
      * @param coords Global (or local) problem coordinates, which are used to evaluate components values.
      * @param dofids List of DOF IDs to evaluate for.
      * @param mode Determines response mode.
-     */    
+     */
     virtual void computeValues(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, const IntArray &dofids, ValueModeType mode);
     /**
      * Returns the value of dofExcludeMask corresponding to given index.
@@ -138,6 +142,8 @@ public:
      * @return Nonzero if excluded, zero otherwise.
      */
     int isDofExcluded(int index);
+
+    virtual void scale(double s);
 
     /**
      * Returns receiver's coordinate system.

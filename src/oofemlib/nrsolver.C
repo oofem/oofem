@@ -737,7 +737,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
         	numPrintouts++;
 
             if ( engngModel->giveProblemScale() == macroScale && numPrintouts <= maxNumPrintouts) {
-            	OOFEM_LOG_INFO( "  %s:", __DofIDItemToString( ( DofIDItem ) dg ).c_str() );
+                OOFEM_LOG_INFO( "  %s:", __DofIDItemToString( ( DofIDItem ) dg ).c_str() );
             }
 
             if ( rtolf.at(1) > 0.0 ) {

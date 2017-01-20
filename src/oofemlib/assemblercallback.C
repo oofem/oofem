@@ -39,9 +39,9 @@
 #include "dofmanager.h"
 #include "activebc.h"
 
-#include "nodalload.h" // Needed for nodalload -> load conversion. We shouldn't need this.
-#include "bodyload.h" // Needed for bodyload -> load conversion. We shouldn't need this.
-#include "boundaryload.h" // Needed for boundarload -> load conversion. We shouldn't need this.
+#include "nodalload.h"
+#include "bodyload.h"
+#include "boundaryload.h"
 
 namespace oofem {
 
@@ -156,32 +156,65 @@ void ExternalForceAssembler :: vectorFromElement(FloatArray& vec, Element& eleme
 
 void ExternalForceAssembler :: vectorFromLoad(FloatArray& vec, Element& element, BodyLoad* load, TimeStep* tStep, ValueModeType mode) const
 {
-    element.computeLoadVector(vec, load, ExternalForcesVector, mode, tStep);
-    //element.computeExternalForcesFromLoad(vec, load, tStep);
+    if ( ! load->reference )
+        element.computeLoadVector(vec, load, ExternalForcesVector, mode, tStep);
+        //element.computeExternalForcesFromLoad(vec, load, tStep);
 }
 
 void ExternalForceAssembler :: vectorFromBoundaryLoad(FloatArray& vec, Element& element, BoundaryLoad* load, int boundary, TimeStep* tStep, ValueModeType mode) const
 {
-    element.computeBoundaryLoadVector(vec, load, boundary, ExternalForcesVector, mode, tStep);
-    //element.computeExternalForcesFromBoundaryLoad(vec, load, boundary, tStep);
+    if ( ! load->reference )
+        element.computeBoundaryLoadVector(vec, load, boundary, ExternalForcesVector, mode, tStep);
+        //element.computeExternalForcesFromBoundaryLoad(vec, load, boundary, tStep);
 }
 
 void ExternalForceAssembler :: vectorFromEdgeLoad(FloatArray& vec, Element& element, BoundaryLoad* load, int edge, TimeStep* tStep, ValueModeType mode) const
 {
-    element.computeBoundaryEdgeLoadVector(vec, load, edge, ExternalForcesVector, mode, tStep);
-    //element.computeExternalForcesFromEdgeLoad(vec, load, edge, tStep);
+    if ( ! load->reference )
+        element.computeBoundaryEdgeLoadVector(vec, load, edge, ExternalForcesVector, mode, tStep);
+        //element.computeExternalForcesFromEdgeLoad(vec, load, edge, tStep);
 }
 
 void ExternalForceAssembler :: vectorFromNodeLoad(FloatArray& vec, DofManager& dman, NodalLoad* load, TimeStep* tStep, ValueModeType mode) const
 {
-    dman.computeLoadVector(vec, load, ExternalForcesVector, tStep, mode);
-    //dman.computeExternalForcesFromLoad(vec, load, tStep);
+    if ( ! load->reference )
+        dman.computeLoadVector(vec, load, ExternalForcesVector, tStep, mode);
+        //dman.computeExternalForcesFromLoad(vec, load, tStep);
 }
 
 void ExternalForceAssembler :: assembleFromActiveBC(FloatArray &answer, ActiveBoundaryCondition &bc, TimeStep* tStep, ValueModeType mode, const UnknownNumberingScheme &s, FloatArray *eNorms) const
 {
     bc.assembleVector(answer, tStep, ExternalForcesVector, mode, s, eNorms);
     //bc.assembleExternalForces(answer, tStep, s, eNorms);
+}
+
+
+void ReferenceForceAssembler :: vectorFromLoad(FloatArray& vec, Element& element, BodyLoad* load, TimeStep* tStep, ValueModeType mode) const
+{
+    if ( load->reference )
+        element.computeLoadVector(vec, load, ExternalForcesVector, mode, tStep);
+    //element.computeExternalForcesFromLoad(vec, load, tStep);
+}
+
+void ReferenceForceAssembler :: vectorFromBoundaryLoad(FloatArray& vec, Element& element, BoundaryLoad* load, int boundary, TimeStep* tStep, ValueModeType mode) const
+{
+    if ( load->reference )
+        element.computeBoundaryLoadVector(vec, load, boundary, ExternalForcesVector, mode, tStep);
+    //element.computeExternalForcesFromBoundaryLoad(vec, load, boundary, tStep);
+}
+
+void ReferenceForceAssembler :: vectorFromEdgeLoad(FloatArray& vec, Element& element, BoundaryLoad* load, int edge, TimeStep* tStep, ValueModeType mode) const
+{
+    if ( load->reference )
+        element.computeBoundaryEdgeLoadVector(vec, load, edge, ExternalForcesVector, mode, tStep);
+    //element.computeExternalForcesFromEdgeLoad(vec, load, edge, tStep);
+}
+
+void ReferenceForceAssembler :: vectorFromNodeLoad(FloatArray& vec, DofManager& dman, NodalLoad* load, TimeStep* tStep, ValueModeType mode) const
+{
+    if ( load->reference )
+        dman.computeLoadVector(vec, load, ExternalForcesVector, tStep, mode);
+        //dman.computeExternalForcesFromLoad(vec, load, tStep);
 }
 
 

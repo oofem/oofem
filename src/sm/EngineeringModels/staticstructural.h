@@ -72,9 +72,10 @@ protected:
     SparseMtrxType sparseMtrxType;
 
     std :: unique_ptr< SparseNonLinearSystemNM >nMethod;
-    int solverType;
+    std :: string solverType;
     MatResponseMode stiffMode;
 
+    double loadLevel;
     double deltaT;
     FloatArray prescribedTimes;
 
@@ -100,6 +101,7 @@ public:
 
     virtual int forceEquationNumbering();
 
+    virtual double giveLoadLevel() { return loadLevel; }
     virtual TimeStep *giveNextStep();
     virtual double giveEndOfTimeOfInterest();
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
