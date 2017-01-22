@@ -71,7 +71,7 @@ SubspaceIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, Floa
     int nn, nc1, ij = 0, is;
     double rt, art, brt, eigvt;
     FloatMatrix ar, br, vec;
-    SparseLinearSystemNM *solver = GiveClassFactory().createSparseLinSolver(ST_Direct, domain, engngModel);
+    std :: unique_ptr< SparseLinearSystemNM > solver( GiveClassFactory().createSparseLinSolver(ST_Direct, domain, engngModel) );
 
     GJacobi mtd(domain, engngModel);
     int nc = min(2 * nroot, nroot + 8);
