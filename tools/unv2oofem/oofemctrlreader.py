@@ -18,6 +18,7 @@
 #              FEM.Group.oofem_properties  - attributes related to components in that group
 #                                            these are resolved to individual components
 #                                            in CTRL parse
+#                                            set INT can be specified as the last argument
 #              FEM.Group.oofem_etypemap    - dictionary of element types
 #                                            key is unv element id
 #                                            value is corresponding oofem element type
@@ -123,13 +124,18 @@ class CTRLParser:
                         break;
                     #print "Line: ", line,
                     if lineSplit[0].lower() == 'nodeprop':
-                        if (lineSplit[1].lower()=='set'):
+                        if (lineSplit[-2].lower()=='set'):
                             for igroup in groups:
                                 __gr=self.getNodeGroup(FEM, igroup)
                                 if __gr:
-                                    __gr.oofem_sets.append(int(lineSplit[2]));
-                                    str = "\t\tGroup of nodes belongs to set %d" % int(lineSplit[2])
+                                    __gr.oofem_sets.append(int(lineSplit[-1]));
+                                    str = "\t\tGroup of nodes belongs to set %d" % int(lineSplit[-1])
                                     print str
+                                    if (len(lineSplit)>3):#contains also other properties
+                                        __gr=self.getNodeGroup(FEM, igroup)
+                                        __gr.oofem_properties=' '.join(lineSplit[1:-2])
+                                        str = "\t\tGroup of nodes \"%s\" has properties: %s" % (igroup, __gr.oofem_properties)
+                                        print str
                                 else:
                                     str = "WARNING: Group of nodes \"%s\" does not exist" % igroup
                                     print str
@@ -154,19 +160,24 @@ class CTRLParser:
                                     print str
                                 else:
                                     str = "WARNING: Group of elements \"%s\" for boundary load does no exist" % (igroup)
-                        elif (lineSplit[1].lower()=='set'):#check if the group represents a set
+                        elif (lineSplit[-2].lower()=='set'):#check if the group represents a set
                             for igroup in groups:
                                 __gr=self.getElementGroup(FEM,igroup)
                                 if __gr:
                                     # Save id of set
-                                    __gr.oofem_sets.append(int(lineSplit[2]))
+                                    __gr.oofem_sets.append(int(lineSplit[-1]))
                                     # Save orientation
-                                    str = "\t\tGroup of elements \"%s\" belongs to set: %s" % (igroup, lineSplit[2])
+                                    str = "\t\tGroup of elements \"%s\" belongs to set: %s" % (igroup, lineSplit[-1])
                                     print str
+                                    if (len(lineSplit)>3):#contains also other properties
+                                        __gr=self.getElementGroup(FEM,igroup)
+                                        __gr.oofem_properties=' '.join(lineSplit[1:-2])
+                                        str = "\t\tGroup of elements \"%s\" has properties: %s" % (igroup, __gr.oofem_properties)
+                                        print str
                                 else:
                                     str = "WARNING: Group of elements \"%s\" for set does no exist" % (igroup)
                                     print str
-                        else:#not boundary loads
+                        else:#not boundary loads neither set
                             for igroup in groups:
                                 __gr=self.getElementGroup(FEM,igroup)
                                 if __gr:

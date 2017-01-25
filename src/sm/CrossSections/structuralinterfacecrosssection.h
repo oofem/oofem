@@ -132,6 +132,10 @@ public:
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep);
 
+    virtual Material *giveMaterial(IntegrationPoint *ip);
+    int giveMaterialNumber() const { return this->materialNum; }
+    void setMaterialNumber(int matNum) { this->materialNum = matNum; }
+    
     virtual int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp);
     virtual int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp);
     virtual int estimatePackSize(DataStream &buff, GaussPoint *gp);

@@ -161,8 +161,6 @@ public:
     virtual Interface *giveMaterialInterface(InterfaceType t, IntegrationPoint *ip);
 
 
-
-
     virtual void giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep);
     virtual void giveCauchyStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep);
     virtual void giveEshelbyStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedvF, TimeStep *tStep);

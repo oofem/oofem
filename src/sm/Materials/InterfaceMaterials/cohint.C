@@ -54,8 +54,12 @@ CohesiveInterfaceMaterial :: giveEngTraction_3d(FloatArray &answer, GaussPoint *
     answer.resize(3);
 
     if (jump.at(1) > 0.) {
-        // reduce with stiffCoeffKn in tension
-        answer.at(1) = kn * stiffCoeffKn * jump.at(1);
+        if(jump.at(1)<transitionOpening){ // reduce traction in tension
+            double stiffTmp = kn*stiffCoeffKn + (kn - kn*stiffCoeffKn) * (1. - jump.at(1)/transitionOpening);
+            answer.at(1) = stiffTmp * jump.at(1);
+        } else {
+            answer.at(1) = kn * stiffCoeffKn * jump.at(1);
+        }
     } else {
         // normal part of elastic stress-strain law
         answer.at(1) = kn * jump.at(1);
@@ -81,8 +85,12 @@ CohesiveInterfaceMaterial :: give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatR
     double normalJump = status->giveTempJump().at(1);
     
     if (normalJump > 0.) {
-        // reduce stiffness in tension
-        answer.at(1, 1) = kn * stiffCoeffKn;
+        if(normalJump<transitionOpening){ // reduce traction in tension
+            double stiffTmp = kn*stiffCoeffKn + (kn - kn*stiffCoeffKn) * (1. - normalJump/transitionOpening);
+            answer.at(1, 1) = stiffTmp;
+        } else {
+            answer.at(1, 1) = kn * stiffCoeffKn;
+        }
     } else {
         // normal part of elastic stress-strain law
         answer.at(1, 1) = kn;
@@ -108,6 +116,8 @@ CohesiveInterfaceMaterial :: initializeFrom(InputRecord *ir)
     // compliance when in tension
     stiffCoeffKn = 1.;
     IR_GIVE_OPTIONAL_FIELD(ir, stiffCoeffKn, _IFT_CohesiveInterfaceMaterial_stiffCoeffKn);
+    transitionOpening = 0.;
+    IR_GIVE_OPTIONAL_FIELD(ir, transitionOpening, _IFT_CohesiveInterfaceMaterial_transitionopening);
 
     return StructuralInterfaceMaterial :: initializeFrom(ir);
 }
@@ -119,6 +129,7 @@ CohesiveInterfaceMaterial :: giveInputRecord(DynamicInputRecord &input)
     input.setField(this->kn, _IFT_CohesiveInterfaceMaterial_kn);
     input.setField(this->ks, _IFT_CohesiveInterfaceMaterial_ks);
     input.setField(this->stiffCoeffKn, _IFT_CohesiveInterfaceMaterial_stiffCoeffKn);
+    input.setField(this->stiffCoeffKn, _IFT_CohesiveInterfaceMaterial_transitionopening);
 }
 
 } // namespace oofem

@@ -182,6 +182,17 @@ StructuralInterfaceCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *i
     return this->giveInterfaceMaterial()->giveIPValue(answer, ip, type, tStep);
 }
 
+
+Material *StructuralInterfaceCrossSection :: giveMaterial(IntegrationPoint *ip)
+{
+    if ( this->giveMaterialNumber() ) {
+        return this->giveDomain()->giveMaterial( this->giveMaterialNumber() );
+    } else {
+        return ip->giveElement()->giveMaterial();
+    }
+}
+
+
 int
 StructuralInterfaceCrossSection :: packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp)
 {

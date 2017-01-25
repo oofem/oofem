@@ -43,6 +43,7 @@ namespace oofem {
 //@{
 #define _IFT_CohesiveInterfaceMaterial_Name "cohint"
 #define _IFT_CohesiveInterfaceMaterial_kn "kn"
+#define _IFT_CohesiveInterfaceMaterial_transitionopening "transitionopening"
 #define _IFT_CohesiveInterfaceMaterial_ks "ks"
 #define _IFT_CohesiveInterfaceMaterial_stiffCoeffKn "stiffcoeffkn"
 //@}
@@ -59,6 +60,10 @@ protected:
     
     /// Reduction of normal stiffness when in tension
     double stiffCoeffKn;
+    
+    /// Opening when material stiffness changes linearly from kn to kn*stiffCoeffKn
+    double transitionOpening;
+    
 public:
     /// Constructor
     CohesiveInterfaceMaterial(int n, Domain * d);

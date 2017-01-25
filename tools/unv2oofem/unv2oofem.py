@@ -35,9 +35,9 @@ set records
 Assignment of properties to nodes and elements is based on association with some unv group. The same mechanism
 is valid for assignment of boundary conditions (edge, surface) load. The syntax is following:
 group name1 [name2] [name3] ...
-[nodeprop "nodal_attributes_appended_to_nodal_records"]
-[elemprop "element_attributes_appended_to_element_records"]
-[etype[unv_etype]] oofem_etype #provides mapping between unv and oofem element types
+nodeprop "nodal_attributes_appended_to_nodal_records" [set INT]
+elemprop "element_attributes_appended_to_element_records" [set INT]
+etype[unv_etype] oofem_etype #provides mapping between unv and oofem element types
 
 By default, all nodes will be exported,
 elements are exported only when associated to some group
