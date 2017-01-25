@@ -1,4 +1,4 @@
 nonstat_nonlin_01.out
-Staggered analysis in 2d - constantly rising temperature field in NonStationaryProblem is sent to NonLinearStatic problem
+Staggered analysis in 2d - constantly rising temperature field in transport problem is sent to structural problem
 #StaggeredProblem nsteps 3 deltat 3600 prob1 "nonstat_nonlin_01.in.tm" prob2 "nonstat_nonlin_01.in.sm"
 StaggeredProblem nsteps 3 timedefinedbyprob 1 prob1 "nonstat_nonlin_01.in.tm" prob2 "nonstat_nonlin_01.in.sm"

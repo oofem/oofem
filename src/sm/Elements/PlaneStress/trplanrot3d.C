@@ -201,20 +201,21 @@ TrPlaneStrRot3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type
     answer.resize(3, 3);
     answer.zero();
 
-    if ( ( type == LocalForceTensor ) || ( type == GlobalForceTensor ) ) {
+    if ( type == LocalForceTensor || type == GlobalForceTensor ) {
         //this->computeStressVector(charVect, gp, tStep);
         charVect = ms->giveStressVector();
 
-        answer.at(1, 1) = charVect.at(1);
-        answer.at(2, 2) = charVect.at(2);
-        answer.at(1, 2) = charVect.at(3);
-        answer.at(2, 1) = charVect.at(3);
-    } else if ( ( type == LocalMomentumTensor ) || ( type == GlobalMomentumTensor ) ) {
+        double h = this->giveStructuralCrossSection()->give(CS_Thickness, gp);
+        answer.at(1, 1) = charVect.at(1) * h;
+        answer.at(2, 2) = charVect.at(2) * h;
+        answer.at(1, 2) = charVect.at(3) * h;
+        answer.at(2, 1) = charVect.at(3) * h;
+    } else if ( type == LocalMomentumTensor || type == GlobalMomentumTensor ) {
         //this->computeStressVector(charVect, gp, tStep);
         charVect = ms->giveStressVector();
 
         answer.at(3, 3) = charVect.at(4);
-    } else if ( ( type == LocalStrainTensor ) || ( type == GlobalStrainTensor ) ) {
+    } else if ( type == LocalStrainTensor || type == GlobalStrainTensor ) {
         //this->computeStrainVector(charVect, gp, tStep);
         charVect = ms->giveStrainVector();
 
@@ -222,7 +223,7 @@ TrPlaneStrRot3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type
         answer.at(2, 2) = charVect.at(2);
         answer.at(1, 2) = charVect.at(3) / 2.;
         answer.at(2, 1) = charVect.at(3) / 2.;
-    } else if ( ( type == LocalCurvatureTensor ) || ( type == GlobalCurvatureTensor ) ) {
+    } else if ( type == LocalCurvatureTensor || type == GlobalCurvatureTensor ) {
         //this->computeStrainVector(charVect, gp, tStep);
         charVect = ms->giveStrainVector();
 
@@ -232,8 +233,8 @@ TrPlaneStrRot3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type
         exit(1);
     }
 
-    if ( ( type == GlobalForceTensor  ) || ( type == GlobalMomentumTensor  ) ||
-        ( type == GlobalStrainTensor ) || ( type == GlobalCurvatureTensor ) ) {
+    if ( type == GlobalForceTensor || type == GlobalMomentumTensor ||
+         type == GlobalStrainTensor || type == GlobalCurvatureTensor ) {
         this->computeGtoLRotationMatrix();
         answer.rotatedWith(GtoLRotationMatrix);
     }

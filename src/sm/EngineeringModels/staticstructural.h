@@ -43,7 +43,9 @@
 
 #define _IFT_StaticStructural_Name "staticstructural"
 #define _IFT_StaticStructural_deltat "deltat"
+#define _IFT_StaticStructural_prescribedTimes "prescribedtimes"
 #define _IFT_StaticStructural_solvertype "solvertype"
+#define _IFT_StaticStructural_stiffmode "stiffmode"
 #define _IFT_StaticStructural_nonlocalExtension "nonlocalext"
 
 #define _IFT_StaticStructural_recomputeaftercrackpropagation "recomputeaftercrackprop"
@@ -70,9 +72,12 @@ protected:
     SparseMtrxType sparseMtrxType;
 
     std :: unique_ptr< SparseNonLinearSystemNM >nMethod;
-    int solverType;
-    
+    std :: string solverType;
+    MatResponseMode stiffMode;
+
+    double loadLevel;
     double deltaT;
+    FloatArray prescribedTimes;
 
     InitialGuess initialGuessType;
 
@@ -96,7 +101,9 @@ public:
 
     virtual int forceEquationNumbering();
 
+    virtual double giveLoadLevel() { return loadLevel; }
     virtual TimeStep *giveNextStep();
+    virtual double giveEndOfTimeOfInterest();
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
     
     virtual fMode giveFormulation() { return TL; }

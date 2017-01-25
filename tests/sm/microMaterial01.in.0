@@ -1,6 +1,6 @@
 microMaterial01.out
 Micromaterial assembled from 2x3x2 linear bricks, can be run independently from this file or as a subproblem from the macroLspace01.in
-NonLinearStatic nsteps 1 controlmode 1 rtolv 0.0001 MaxIter 30 stiffmode 0 deltaT 1.0 nonlinform 1 nmodules 1
+StaticStructural nsteps 1 deltaT 1.0 maxiter 30 nmodules 1
 errorcheck
 #vtk tstep_all domain_all primvars 1 1 vars 2 1 4
 domain 3d

@@ -555,9 +555,9 @@ EngngModel :: solveYourself()
             OOFEM_LOG_INFO("EngngModel info: user time consumed by solution step %d: %.2fs\n",
                            this->giveCurrentStep()->giveNumber(), _steptime);
 
-            if(!suppressOutput) {
-            	fprintf(this->giveOutputStream(), "\nUser time consumed by solution step %d: %.3f [s]\n\n",
-            			this->giveCurrentStep()->giveNumber(), _steptime);
+            if ( !suppressOutput ) {
+                fprintf(this->giveOutputStream(), "\nUser time consumed by solution step %d: %.3f [s]\n\n",
+                        this->giveCurrentStep()->giveNumber(), _steptime);
             }
 
 #ifdef __PARALLEL_MODE
@@ -570,26 +570,25 @@ EngngModel :: solveYourself()
     }
 }
 
-TimeStep* EngngModel :: generateNextStep(/* arguments */) {
-  /* code */
-  int smstep = 1, sjstep = 1;
-  if ( this->currentStep ) {
-      smstep = this->currentStep->giveMetaStepNumber();
-      sjstep = this->giveMetaStep(smstep)->giveStepRelativeNumber( this->currentStep->giveNumber() ) + 1;
-  }
+TimeStep* EngngModel :: generateNextStep()
+{
+    /* code */
+    int smstep = 1, sjstep = 1;
+    if ( this->currentStep ) {
+        smstep = this->currentStep->giveMetaStepNumber();
+        sjstep = this->giveMetaStep(smstep)->giveStepRelativeNumber( this->currentStep->giveNumber() ) + 1;
+    }
 
-  // test if sjstep still valid for MetaStep
-  if (sjstep > this->giveMetaStep(smstep)->giveNumberOfSteps())
-    smstep++;
-  if (smstep > nMetaSteps) return NULL; // no more metasteps
+    // test if sjstep still valid for MetaStep
+    if (sjstep > this->giveMetaStep(smstep)->giveNumberOfSteps())
+        smstep++;
+    if (smstep > nMetaSteps) return NULL; // no more metasteps
 
-  this->initMetaStepAttributes(this->giveMetaStep(smstep));
+    this->initMetaStepAttributes(this->giveMetaStep(smstep));
 
-  this->preInitializeNextStep();
-  return this->giveNextStep();
+    this->preInitializeNextStep();
+    return this->giveNextStep();
 }
-
-
 
 
 void
@@ -683,7 +682,7 @@ EngngModel :: terminate(TimeStep *tStep)
 void
 EngngModel :: doStepOutput(TimeStep *tStep)
 {
-    if(!suppressOutput) {
+    if ( !suppressOutput ) {
         this->printOutputAt(this->giveOutputStream(), tStep);
         fflush( this->giveOutputStream() );
     }
@@ -1043,72 +1042,72 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
                 const IntArray &elements = set->giveElementList();
                 for ( int ielem = 1; ielem <= elements.giveSize(); ++ielem ) {
                     Element *element = domain->giveElement( elements.at(ielem) );
-		    if ( element->isActivated(tStep) ) {
-		      charVec.clear();
-		      va.vectorFromLoad(charVec, *element, bodyLoad, tStep, mode);
+                    if ( element->isActivated(tStep) ) {
+                        charVec.clear();
+                        va.vectorFromLoad(charVec, *element, bodyLoad, tStep, mode);
 
-		      if ( charVec.isNotEmpty() ) {
-                        if ( element->giveRotationMatrix(R) ) {
-			  charVec.rotatedWith(R, 't');
+                        if ( charVec.isNotEmpty() ) {
+                            if ( element->giveRotationMatrix(R) ) {
+                                charVec.rotatedWith(R, 't');
+                            }
+
+                            va.locationFromElement(loc, *element, s, & dofids);
+                            answer.assemble(charVec, loc);
+
+                            if ( eNorms ) {
+                                eNorms->assembleSquared(charVec, dofids);
+                            }
                         }
-
-                        va.locationFromElement(loc, *element, s, & dofids);
-                        answer.assemble(charVec, loc);
-
-                        if ( eNorms ) {
-			  eNorms->assembleSquared(charVec, dofids);
-                        }
-		      }
-		    }
+                    }
                 }
             } else if ( ( bLoad = dynamic_cast< BoundaryLoad * >(load) ) ) { // Boundary load:
                 const IntArray &boundaries = set->giveBoundaryList();
                 for ( int ibnd = 1; ibnd <= boundaries.giveSize() / 2; ++ibnd ) {
                     Element *element = domain->giveElement( boundaries.at(ibnd * 2 - 1) );
-		    if ( element->isActivated(tStep) ) {
+                    if ( element->isActivated(tStep) ) {
 
-		      int boundary = boundaries.at(ibnd * 2);
-		      charVec.clear();
-		      va.vectorFromBoundaryLoad(charVec, *element, bLoad, boundary, tStep, mode);
+                        int boundary = boundaries.at(ibnd * 2);
+                        charVec.clear();
+                        va.vectorFromBoundaryLoad(charVec, *element, bLoad, boundary, tStep, mode);
 
-		      if ( charVec.isNotEmpty() ) {
-                        element->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
-                        if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
-			  charVec.rotatedWith(R, 't');
+                        if ( charVec.isNotEmpty() ) {
+                            element->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+                            if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
+                                charVec.rotatedWith(R, 't');
+                            }
+
+                            va.locationFromElementNodes(loc, *element, bNodes, s, & dofids);
+                            answer.assemble(charVec, loc);
+
+                            if ( eNorms ) {
+                                eNorms->assembleSquared(charVec, dofids);
+                            }
                         }
-
-                        va.locationFromElementNodes(loc, *element, bNodes, s, & dofids);
-                        answer.assemble(charVec, loc);
-
-                        if ( eNorms ) {
-			  eNorms->assembleSquared(charVec, dofids);
-                        }
-		      }
-		    }
+                    }
                 }
                 ///@todo Should we have a seperate entry for edge loads? Just sticking to the general "boundaryload" for now.
                 const IntArray &edgeBoundaries = set->giveEdgeList();
                 for ( int ibnd = 1; ibnd <= edgeBoundaries.giveSize() / 2; ++ibnd ) {
-		  Element *element = domain->giveElement( edgeBoundaries.at(ibnd * 2 - 1) );
-		  if ( element->isActivated(tStep) ) {
-		    int boundary = edgeBoundaries.at(ibnd * 2);
-		    charVec.clear();
-		    va.vectorFromEdgeLoad(charVec, *element, bLoad, boundary, tStep, mode);
+                    Element *element = domain->giveElement( edgeBoundaries.at(ibnd * 2 - 1) );
+                    if ( element->isActivated(tStep) ) {
+                        int boundary = edgeBoundaries.at(ibnd * 2);
+                        charVec.clear();
+                        va.vectorFromEdgeLoad(charVec, *element, bLoad, boundary, tStep, mode);
 
-		    if ( charVec.isNotEmpty() ) {
-		      element->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
-		      if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
-			charVec.rotatedWith(R, 't');
-		      }
+                        if ( charVec.isNotEmpty() ) {
+                            element->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
+                            if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
+                                charVec.rotatedWith(R, 't');
+                            }
 
-		      va.locationFromElementNodes(loc, *element, bNodes, s, & dofids);
-		      answer.assemble(charVec, loc);
+                            va.locationFromElementNodes(loc, *element, bNodes, s, & dofids);
+                            answer.assemble(charVec, loc);
 
-		      if ( eNorms ) {
-			eNorms->assembleSquared(charVec, dofids);
-		      }
-		    }
-		  }
+                            if ( eNorms ) {
+                                eNorms->assembleSquared(charVec, dofids);
+                            }
+                        }
+                    }
                 }
             } else if ( ( nLoad = dynamic_cast< NodalLoad * >(load) ) ) { // Nodal load:
                 const IntArray &nodes = set->giveNodeList();
@@ -1245,12 +1244,11 @@ EngngModel :: assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, Ch
             element->computeVectorOf(VM_Total, tStep, delta_u);
             FloatArray tmp;
 
-            if(tStep->isTheFirstStep() ) {
-            	tmp = delta_u;
-            	tmp.zero();
-            }
-            else {
-            	element->computeVectorOf(VM_Total, tStep->givePreviousStep(), tmp);
+            if ( tStep->isTheFirstStep() ) {
+                    tmp = delta_u;
+                    tmp.zero();
+            } else {
+                    element->computeVectorOf(VM_Total, tStep->givePreviousStep(), tmp);
             }
 
             delta_u.subtract(tmp);
@@ -1956,6 +1954,10 @@ EngngModel :: balanceLoad(TimeStep *tStep)
 {
     this->giveLoadBalancerMonitor();
     this->giveLoadBalancer();
+    if ( !lb ) {
+        OOFEM_WARNING("No load balancer found, skipping load balancing step");
+        return;
+    }
 
     //print statistics for current step
     lb->printStatistics();

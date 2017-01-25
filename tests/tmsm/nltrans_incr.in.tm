@@ -1,8 +1,6 @@
 nltrans_incr.out.tm
 Quadrilateral elements subjected to heat flux (Newton b.c), changingProblemSize
-TransientTransport nsteps 3 deltat 36000 rtolv 1.e-5 alpha 0.5 lumped exportfields 1 5 nmodules 1
-#NlTransientTransportProblem nsteps 3 deltat 36000 rtol 1.e-5 alpha 0.5 lumpedcapa changingProblemSize exportfields 1 5 nmodules 1
-#TransientTransport nsteps 3 deltat 36000 rtolf 1.e-5 alpha 0.5 lumped exportfields 1 5 nmodules 1
+TransientTransport nsteps 3 deltat 36000 alpha 0.5 lumped exportfields 1 5 nmodules 1
 errorcheck
 #vtkxml tstep_all domain_all primvars 1 6
 domain heattransfer
@@ -34,10 +32,10 @@ Set 2 nodes 3 1 2 3
 Set 3 nodes 3 4 5 6
 Set 4 elementboundaries 4 3 3  4 3
 #%BEGIN_CHECK%
-#NODE tStep 1 number 5 dof 10 unknown d value 1.89337006e+00
-#NODE tStep 1 number 9 dof 10 unknown d value 7.11067547e+01
+#NODE tStep 1 number 5 dof 10 unknown d value 9.98146959e-01
+#NODE tStep 1 number 9 dof 10 unknown d value 7.29756332e+01
 #NODE tStep 2 number 5 dof 10 unknown d value 1.50000000e+02
-#NODE tStep 2 number 9 dof 10 unknown d value 1.46314088e+02
+#NODE tStep 2 number 9 dof 10 unknown d value 1.46062022e+02
 #NODE tStep 3 number 5 dof 10 unknown d value 1.50000000e+02
-#NODE tStep 3 number 9 dof 10 unknown d value 2.17516257e+02
+#NODE tStep 3 number 9 dof 10 unknown d value 2.19225802e+02
 #%END_CHECK%

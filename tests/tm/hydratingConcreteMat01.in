@@ -1,9 +1,7 @@
 hydratingConcreteMat01.out
 Test of hydrating concrete material, linear triangluar element with a heat source, transient linear solver, isothermal conditions, exponential model
-NonStationaryProblem nsteps 30 deltat 3600.0 alpha 0.5 nmodules 1
-#TransientTransport nsteps 30 deltat 3600.0 alpha 0.5 nmodules 1
+TransientTransport nsteps 29 deltat 3600.0 alpha 0.5 nmodules 1
 errorcheck
-#NlTransientTransportProblem nsteps 30 deltat 3600.0 rtol 1.e-5 alpha 0.5 nsmax 30 nmodules 1
 #vtkxml tstep_step 1 domain_all primvars 1 6 vars 3 37 39 56 stype 1
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all
@@ -15,6 +13,7 @@ tr1ht 1 nodes 3 1 2 3
 SimpleTransportCS 1 thickness 0.15 mat 1 set 1
 #Standard concrete k(conductivity)=1.7 W/m/K   c(capacity)=870 J/kg/K
 HydratingConcreteMat 1 d 2458. k 1.7 c 870.0 hydrationmodeltype 1 Qpot 509. masscement 409. referenceTemperature 25. tau 48600. beta 0.9 dohinf 0.85 activationenergy 38300 castingTime 7200.
+#IsoHeat 1 d 2458. k 1.7 c 870.0
 BoundaryCondition 1 loadTimeFunction 1 dofs 1 10 values 1 25.0 set 1
 InitialCondition 1 Conditions 1 u 25.0 dofs 1 10 set 1
 ConstantFunction 1 f(t) 1.0
@@ -23,6 +22,6 @@ Set 1 elements 1 1
 #%BEGIN_CHECK% tolerance 1.e-3
 ##NODE tStep 30 number 1 dof 10 unknown d value 1.84748043e+01
 #ELEMENT tStep 1 number 1 gp 1 keyword 39 component 1 value 0.0
-#ELEMENT tStep 30 number 1 gp 1 keyword 39 component 1 value 4.973780e-01
-##ELEMENT tStep 30 number 1 gp 1 keyword 39 component 1 value 5.06034940e-01
+#ELEMENT tStep 29 number 1 gp 1 keyword 39 component 1 value 4.973780e-01
+##ELEMENT tStep 29 number 1 gp 1 keyword 39 component 1 value 5.06034940e-01
 #%END_CHECK%

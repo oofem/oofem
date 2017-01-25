@@ -40,7 +40,7 @@
 
 namespace oofem {
 Load :: Load(int i, Domain *aDomain) :
-    GeneralBoundaryCondition(i, aDomain), componentArray(), dofExcludeMask()
+    GeneralBoundaryCondition(i, aDomain), componentArray(), dofExcludeMask(), reference(false)
 {
     timeFunction = 0;
 }
@@ -120,8 +120,9 @@ Load :: initializeFrom(InputRecord *ir)
         }
     }
 
+    this->reference = ir->hasField(_IFT_Load_reference);
+
     return GeneralBoundaryCondition :: initializeFrom(ir);
-    dofs.printYourself("dofs");
 }
 
 
@@ -132,6 +133,7 @@ void Load :: giveInputRecord(DynamicInputRecord &input)
     if ( !this->dofExcludeMask.containsOnlyZeroes() ) {
         input.setField(this->dofExcludeMask, _IFT_Load_dofexcludemask);
     }
+    if ( this->reference ) input.setField(_IFT_Load_reference);
 }
 
 
@@ -146,4 +148,13 @@ Load :: isDofExcluded(int indx)
 
     return 0;
 }
+
+
+void
+Load :: scale(double s)
+{
+    this->componentArray.times(s);
+    this->reference = false;
+}
+
 } // end namespace oofem

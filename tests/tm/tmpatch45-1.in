@@ -1,7 +1,6 @@
 tmpatch45-1.out
 Test of tr1ht element with a constant heat source, adiabatic
-NonStationaryProblem nsteps 10 deltat 3600.0 alpha 0.5 nmodules 1
-#TransientTransport nsteps 10 deltat 3600.0 rtolf 1e-10 alpha 0.5 nmodules 1
+TransientTransport nsteps 10 deltat 3600.0 rtolf 1e-6 forcescale 1 0 forcescaledofs 1 10 alpha 0.5 nmodules 1
 errorcheck
 #hom tstep_all
 domain HeatTransfer

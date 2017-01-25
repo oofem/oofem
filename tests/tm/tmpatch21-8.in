@@ -1,7 +1,6 @@
 tmpatch21-8.out
-Test of QuadAxisym1_ht elements; nonstationary case
-NonStationaryProblem nsteps 100 deltat 600000.0 alpha 0.5 lumpedcapa nmodules 1
-#TransientTransport nsteps 100 deltat 600000.0 alpha 0.5 lumped nmodules 1
+Test of QuadAxisym1_ht elements; transient case
+TransientTransport nsteps 100 deltat 600000.0 alpha 0.5 lumped miniter 1 nmodules 1
 errorcheck
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all

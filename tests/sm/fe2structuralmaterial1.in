@@ -1,35 +1,38 @@
 test.out
 Test for multiscale modeling using fe2structuralmaterial. Written by Erik Svenning, Chalmers University of Technology, December 2015.
-StaticStructural nsteps 1 deltat 1.0 rtolv 1.0e-6 MaxIter 10 minIter 2 nmodules 1
+StaticStructural nsteps 1 nmodules 1
 #vtkxml tstep_all domain_all primvars 1 1 cellvars 1 1
 errorcheck
 domain planestrain
 OutputManager tstep_all dofman_all element_all
-ndofman 12 nelem 5 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1 nset 0 nxfemman 0
-node 1     coords 3  0        0        0       bc 2 1 1
-node 2     coords 3  1        0        0       load 1 2
-node 3     coords 3  1        0.2      0       load 1 2
-node 4     coords 3  0        0.2      0       bc 2 1 1
-node 5     coords 3  0.2      0        0       
-node 6     coords 3  0.4      0        0       
-node 7     coords 3  0.6      0        0       
-node 8     coords 3  0.8      0        0       
-node 9     coords 3  0.8      0.2      0       
-node 10    coords 3  0.6      0.2      0       
-node 11    coords 3  0.4      0.2      0       
-node 12    coords 3  0.2      0.2      0       
-quad1planestrain 13    nodes 4   1   5   12  4   crosssect 1
-quad1planestrain 14    nodes 4   5   6   11  12  crosssect 1
-quad1planestrain 15    nodes 4   6   7   10  11  crosssect 1
-quad1planestrain 16    nodes 4   7   8   9   10  crosssect 1
-quad1planestrain 17    nodes 4   8   2   3   9   crosssect 1
-SimpleCS 1 thick 1.0 material 1
+ndofman 12 nelem 5 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1 nset 3 nxfemman 0
+node 1     coords 3  0        0        0
+node 2     coords 3  1        0        0
+node 3     coords 3  1        0.2      0
+node 4     coords 3  0        0.2      0
+node 5     coords 3  0.2      0        0
+node 6     coords 3  0.4      0        0
+node 7     coords 3  0.6      0        0
+node 8     coords 3  0.8      0        0
+node 9     coords 3  0.8      0.2      0
+node 10    coords 3  0.6      0.2      0
+node 11    coords 3  0.4      0.2      0
+node 12    coords 3  0.2      0.2      0
+quad1planestrain 13    nodes 4   1   5   12  4
+quad1planestrain 14    nodes 4   5   6   11  12
+quad1planestrain 15    nodes 4   6   7   10  11
+quad1planestrain 16    nodes 4   7   8   9   10
+quad1planestrain 17    nodes 4   8   2   3   9
+Set 1 elementranges {(13 17)}
+Set 2 nodes 2 1 4
+Set 3 nodes 2 2 3
 #
+SimpleCS 1 thick 1.0 material 1 set 1
 # Linear elasticity
 structfe2material 1 d 1.0 filename fe2structuralmaterial1.in.rve use_num_tangent
 #
-BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
-NodalLoad 2 loadTimeFunction 1 Components 2 0.0 -0.5e6
+BoundaryCondition 1 loadTimeFunction 1 dofs 2 1 2 values 2 0 0 set 2
+NodalLoad 2 loadTimeFunction 1 dofs 2 1 2 components 2 0.0 -0.5e6 set 3
 ConstantFunction 1 f(t) 1.0
 #
 #%BEGIN_CHECK% tolerance 1.e-4

@@ -2,8 +2,6 @@ tmpatch40.out
 Patch test of Tetrah1_ht elements 
 StationaryProblem nsteps 1 nmodules 1
 #TransientTransport nsteps 200 deltat 600000.0 alpha 0.5
-#NonStationaryProblem nsteps 200 deltat 600000.0 alpha 0.5
-#nltransienttransportproblem nsteps 200 deltat 600000.0 rtol 0.001 alpha 0.5 nsmax 300 lumpedcapa
 errorcheck
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all

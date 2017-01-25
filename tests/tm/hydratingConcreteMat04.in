@@ -1,13 +1,11 @@
 hydratingConcreteMat04.out
 Test of hydrating concrete material, linear triangluar element with a heat source, transient nonlinear solver, adiabatic conditions, affinity hydration model
-#NonStationaryProblem nsteps 30 deltat 360.0 alpha 0.5 nmodules 0
-NlTransientTransportProblem nsteps 30 deltat 3600.0 rtol 1.e-5 alpha 0.5 nsmax 30 nmodules 1
-#TransientTransport nsteps 30 deltat 3600.0 alpha 0.5 nmodules 1
+TransientTransport nsteps 29 deltat 3600.0 alpha 0.5 rtolf 1.e-5 nmodules 1
 errorcheck
 #vtkxml tstep_step 1 domain_all primvars 1 6 vars 4 37 39 56 95 stype 1
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all
-ndofman 3 nelem 1 ncrosssect 1 nmat 1 nbc 1 nic 1 nltf 1 nset 1
+ndofman 3 nelem 1 ncrosssect 1 nmat 1 nbc 0 nic 1 nltf 1 nset 1
 node 1 coords 3  1.0   0.0   0.0
 node 2 coords 3  2.2   0.0   0.0
 node 3 coords 3  1.0   1.0   0.0
@@ -15,14 +13,13 @@ tr1ht 1 nodes 3 1 2 3
 SimpleTransportCS 1 thickness 0.15 mat 1 set 1
 #Standard concrete k(conductivity)=1.7 W/m/K   c(capacity)=870 J/kg/K
 HydratingConcreteMat 1 d 2458. k 1.7 c 870.0 hydrationmodeltype 2 Qpot 509. masscement 400. b1 3.51861e-4 b2 8.0e-6 eta 7.4 dohinf 0.85 activationenergy 38300 minModelTimeStepIntegrations 30 castingTime 7200. maturityT0 20.
-BoundaryCondition 1 loadTimeFunction 1 dofs 1 10 values 1 25.0
 InitialCondition 1 Conditions 1 u 25.0 dofs 1 10 set 1
 ConstantFunction 1 f(t) 1.0
 Set 1 elements 1 1
 
 #%BEGIN_CHECK% tolerance 1.e-3
-#NODE tStep 21 number 1 dof 10 unknown d value 74.1220761
-#NODE tStep 30 number 2 dof 10 unknown d value 85.938348
-#ELEMENT tStep 3 number 1 gp 1 keyword 39 component 1 value 0.0
-#ELEMENT tStep 30 number 1 gp 1 keyword 39 component 1 value 6.394230e-01
+#NODE tStep 20 number 1 dof 10 unknown d value 7.41216180e+01
+#NODE tStep 29 number 2 dof 10 unknown d value 8.59378372e+01
+#ELEMENT tStep 2 number 1 gp 1 keyword 39 component 1 value 0.0
+#ELEMENT tStep 29 number 1 gp 1 keyword 39 component 1 value 6.394230e-01
 #%END_CHECK%

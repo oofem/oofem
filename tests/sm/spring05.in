@@ -1,6 +1,6 @@
 spring05.out
 Patch test of torsional spring element in xz plane
-LinearStatic nsteps 1 nmodules 1
+StaticStructural nsteps 1 nmodules 1
 errorcheck
 domain 2dbeam
 OutputManager tstep_all dofman_all element_all

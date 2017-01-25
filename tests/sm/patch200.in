@@ -1,6 +1,6 @@
 patch200.out
 "Patch test of CCT elements -> pure bending"
-LinearStatic nsteps 1 nmodules 1
+StaticStructural nsteps 1 nmodules 1
 errorcheck
 domain 2dMindlinPlate
 OutputManager tstep_all dofman_all element_all

@@ -1,6 +1,6 @@
 patch_mitc4.out
 "Patch test of MITC4Shell elements, three cases pure bending in y, pure shear and twist"
-LinearStatic nsteps 1 nmodules 1
+StaticStructural nsteps 1 nmodules 1
 errorcheck
 domain 3dshell
 OutputManager tstep_all dofman_all element_all

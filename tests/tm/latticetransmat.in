@@ -1,8 +1,7 @@
 latticetransmat.out
 Test of lattice transport material
 #
-nltransienttransportproblem nsteps 2 deltat 20.0 rtol 1.e-14 alpha 1. nsmax 2000 contextOutputStep 100 nmodules 1
-#TransientTransport nsteps 2 deltat 20.0 rtolf 1e-14 alpha 1. contextOutputStep 100 nmodules 1
+TransientTransport nsteps 2 deltat 20.0 rtolf 1e-6 forcescale 1 0 forcescaledofs 1 11 alpha 1. contextOutputStep 100 nmodules 1
 errorcheck
 domain 2dMassLatticeTransport 
 #

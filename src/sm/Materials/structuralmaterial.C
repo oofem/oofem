@@ -102,6 +102,8 @@ StructuralMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, c
         this->giveRealStressVector_Lattice3d(answer, gp, reducedStrain, tStep);
     } else if ( mode == _2dPlateSubSoil ) {
         this->giveRealStressVector_2dPlateSubSoil(answer, gp, reducedStrain, tStep);
+    } else if ( mode == _3dBeamSubSoil ) {
+        this->giveRealStressVector_3dBeamSubSoil(answer, gp, reducedStrain, tStep);
     }
 }
 
@@ -295,6 +297,12 @@ void
 StructuralMaterial :: giveRealStressVector_2dPlateSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
 {
     OOFEM_ERROR("2dPlateSubSoil mode not supported");
+}
+
+void
+StructuralMaterial :: giveRealStressVector_3dBeamSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    OOFEM_ERROR("3dBeamSubSoil mode not supported");
 }
 
 
@@ -958,6 +966,18 @@ StructuralMaterial :: giveVoigtSymVectorMask(IntArray &answer, MaterialMode mmod
         };
         return 6;
 
+    case _3dBeamSubSoil: ///@todo This isn't actually fixed yet. Should be made compatible with 3dShell and 2dBeam
+#if 1
+        answer.enumerate(6);
+        return 6;
+
+#else
+        answer = {
+            1, 5, 6, 7, 8, 9
+        };
+        return 12;
+#endif
+	
     case _Unknown:
         answer.clear();
         return 0;
@@ -1225,6 +1245,14 @@ void
 StructuralMaterial :: give2dPlateSubSoilStiffMtrx(FloatMatrix &answer,
                                                   MatResponseMode mmode, GaussPoint *gp,
                                                   TimeStep *tStep)
+{
+    OOFEM_ERROR("No general implementation provided");
+}
+
+void
+StructuralMaterial :: give3dBeamSubSoilStiffMtrx(FloatMatrix &answer,
+						 MatResponseMode mmode, GaussPoint *gp,
+						 TimeStep *tStep)
 {
     OOFEM_ERROR("No general implementation provided");
 }

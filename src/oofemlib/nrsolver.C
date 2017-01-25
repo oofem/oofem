@@ -331,10 +331,10 @@ NRSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0, FloatArray *iR,
         /////////////////////////////////////////
 
         double maxInc = 0.0;
-        for(double inc : ddX) {
-        	if(fabs(inc) > maxInc) {
-        		maxInc = fabs(inc);
-        	}
+        for ( double inc : ddX ) {
+            if(fabs(inc) > maxInc) {
+                maxInc = fabs(inc);
+            }
         }
 
         if(maxInc > maxIncAllowed) {
@@ -720,7 +720,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
         dg_totalDisp      = collectiveErr;
 
         if ( engngModel->giveProblemScale() == macroScale ) {
-        	OOFEM_LOG_INFO("NRSolver: %-5d", nite);
+            OOFEM_LOG_INFO("NRSolver: %-5d", nite);
         }
 
         int maxNumPrintouts = 6;
@@ -739,7 +739,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
         	numPrintouts++;
 
             if ( engngModel->giveProblemScale() == macroScale && numPrintouts <= maxNumPrintouts) {
-            	OOFEM_LOG_INFO( "  %s:", __DofIDItemToString( ( DofIDItem ) dg ).c_str() );
+                OOFEM_LOG_INFO( "  %s:", __DofIDItemToString( ( DofIDItem ) dg ).c_str() );
             }
 
             if ( rtolf.at(1) > 0.0 ) {
@@ -764,13 +764,13 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                 }
 
                 if ( engngModel->giveProblemScale() == macroScale  && numPrintouts <= maxNumPrintouts) {
-                	OOFEM_LOG_INFO(zeroFNorm ? " *%.3e" : "  %.3e", forceErr);
+                    OOFEM_LOG_INFO(zeroFNorm ? " *%.3e" : "  %.3e", forceErr);
                 }
 
                 // Store the errors from the current iteration
                 if ( this->constrainedNRFlag ) {
                     forceErrVec.at(dg) = forceErr;
-                }       
+                }
             }
 
             if ( rtold.at(1) > 0.0 ) {
@@ -791,14 +791,14 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                 }
 
                 if ( engngModel->giveProblemScale() == macroScale  && numPrintouts <= maxNumPrintouts) {
-                	OOFEM_LOG_INFO(zeroDNorm ? " *%.3e" : "  %.3e", dispErr);
+                    OOFEM_LOG_INFO(zeroDNorm ? " *%.3e" : "  %.3e", dispErr);
                 }
             }
         }
 
 
         if ( engngModel->giveProblemScale() == macroScale ) {
-        	OOFEM_LOG_INFO("\n");
+            OOFEM_LOG_INFO("\n");
         }
 
         //if ( zeroNorm ) OOFEM_WARNING("Had to resort to absolute error measure (marked by *)");
@@ -834,7 +834,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
             }
 
             if ( engngModel->giveProblemScale() == macroScale ) {
-            	OOFEM_LOG_INFO(" %-15e", forceErr);
+                OOFEM_LOG_INFO(" %-15e", forceErr);
             }
 
             if ( this->constrainedNRFlag ) {
@@ -859,12 +859,12 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
             }
 
             if ( engngModel->giveProblemScale() == macroScale ) {
-            	OOFEM_LOG_INFO(" %-15e", dispErr);
+                OOFEM_LOG_INFO(" %-15e", dispErr);
             }
         }
 
         if ( engngModel->giveProblemScale() == macroScale ) {
-        	OOFEM_LOG_INFO("\n");
+            OOFEM_LOG_INFO("\n");
         }
     } // end default case (all dofs contributing)
 

@@ -1,6 +1,6 @@
 spring03.out
 Patch test of spring element in xy plane
-LinearStatic nsteps 1 nmodules 1
+StaticStructural nsteps 1 nmodules 1
 errorcheck
 domain 2dplanestress
 OutputManager tstep_all dofman_all element_all

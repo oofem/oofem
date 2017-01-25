@@ -9,7 +9,7 @@ creep at variable temperature & relative humidity
 # element 5: drying creep, staggered problem, p = -1.5 (correct size effect) or quivalently \tilde{p} = 0.6, zero shrinkage
 # element 6: shrinkage
 #
-IncrLinearStatic endOfTimeOfInterest 10000.00000 nsteps 25 prescribedTimes 25 0.0001 0.0002 0.0005 0.001 0.002 0.005 0.01 0.02 0.05 0.1 0.2 0.5 1. 2. 5. 10. 20. 50. 100. 200. 500. 1000. 2000. 5000. 10000. nmodules 1
+StaticStructural nsteps 23 prescribedTimes 23 0.0001 0.0002 0.0005 0.001 0.002 0.005 0.01 0.02 0.05 0.1 0.2 0.5 1. 2. 5. 10. 20. 50. 100. 200. 500. 1000. 2000. nmodules 1
 #
 errorcheck
 # vtkxml tstep_step 1 domain_all vars 2 1 4 primvars 1 1 
@@ -103,30 +103,24 @@ ConstantFunction 2 f(t) 1.0
 #NODE tStep 11 number 2 dof 1 unknown d value 6.088938e-06
 #NODE tStep 17 number 2 dof 1 unknown d value 7.905037e-06
 #NODE tStep 23 number 2 dof 1 unknown d value 1.081536e-05
-#NODE tStep 26 number 2 dof 1 unknown d value 1.223417e-05
 #NODE tStep 5  number 6 dof 1 unknown d value 4.934415e-06
 #NODE tStep 11 number 6 dof 1 unknown d value 6.088938e-06
 #NODE tStep 17 number 6 dof 1 unknown d value 8.083920e-06
 #NODE tStep 23 number 6 dof 1 unknown d value 1.592778e-05
-#NODE tStep 26 number 6 dof 1 unknown d value 3.010450e-05
 #NODE tStep 5  number 10 dof 1 unknown d value 5.495093e-06
 #NODE tStep 11 number 10 dof 1 unknown d value 6.895561e-06
 #NODE tStep 17 number 10 dof 1 unknown d value 1.100811e-05
 #NODE tStep 23 number 10 dof 1 unknown d value 1.813054e-05
-#NODE tStep 26 number 10 dof 1 unknown d value 2.168211e-05 
 #NODE tStep 5  number 14 dof 1 unknown d value 4.934415e-06
 #NODE tStep 11 number 14 dof 1 unknown d value 6.088938e-06
 #NODE tStep 17 number 14 dof 1 unknown d value 7.937591e-06
 #NODE tStep 23 number 14 dof 1 unknown d value 1.116840e-05
-#NODE tStep 26 number 14 dof 1 unknown d value 1.852805e-05
 #NODE tStep 5  number 18 dof 1 unknown d value 4.934415e-06
 #NODE tStep 11 number 18 dof 1 unknown d value 6.088938e-06
 #NODE tStep 17 number 18 dof 1 unknown d value 7.937396e-06
 #NODE tStep 23 number 18 dof 1 unknown d value 1.092060e-05
-#NODE tStep 26 number 18 dof 1 unknown d value 1.342437e-05
 #NODE tStep 5  number 22 dof 1 unknown d value 4.934415e-06
 #NODE tStep 11 number 22 dof 1 unknown d value 6.088938e-06
 #NODE tStep 17 number 22 dof 1 unknown d value 8.129051e-06
 #NODE tStep 23 number 22 dof 1 unknown d value 1.482263e-05
-#NODE tStep 26 number 22 dof 1 unknown d value 2.772210e-05
 #%END_CHECK%

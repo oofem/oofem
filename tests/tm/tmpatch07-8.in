@@ -1,6 +1,5 @@
 tmpatch07-8.out
-Test of Quad1_ht elements; nonstationary case
-#NonStationaryProblem nsteps 100 deltat 600000.0 alpha 0.5 nmodules 1
+Test of Quad1_ht elements; transient case
 TransientTransport nsteps 100 deltat 600000.0 alpha 0.5 rtolf 1e-6 nmodules 1
 errorcheck
 domain HeatTransfer
@@ -44,8 +43,8 @@ Set 2 nodes 2 1 2
 Set 3 elementboundaries 2 8 2
 
 #%BEGIN_CHECK% tolerance 1.e-5
-#NODE tStep 100 number 17 dof 10 unknown d value 1.10868344e+01
-#NODE tStep 100 number 18 dof 10 unknown d value 1.10868344e+01
+#NODE tStep 100 number 17 dof 10 unknown d value 1.10868860e+01
+#NODE tStep 100 number 18 dof 10 unknown d value 1.10868860e+01
 #%END_CHECK%
 
 

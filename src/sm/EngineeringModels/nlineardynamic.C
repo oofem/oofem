@@ -581,7 +581,7 @@ void NonLinearDynamic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
 #endif
 #if 1
             effectiveStiffnessMatrix->zero();
-            this->assemble(*effectiveStiffnessMatrix, tStep, EffectiveTangentAssembler(false, 1 + this->delta * a1,  this->a0 + this->eta * this->a1),
+            this->assemble(*effectiveStiffnessMatrix, tStep, EffectiveTangentAssembler(TangentStiffness, false, 1 + this->delta * a1,  this->a0 + this->eta * this->a1),
                            EModelDefaultEquationNumbering(), d);
 #else
             this->assemble(effectiveStiffnessMatrix, tStep, TangentStiffnessMatrix,

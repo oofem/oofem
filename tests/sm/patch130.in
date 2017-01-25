@@ -1,6 +1,6 @@
 patch130.out
 Patch test of TrPlaneStress2d elements -> pure compression
-LinearStatic nsteps 1 nmodules 1
+StaticStructural nsteps 1 nmodules 1
 errorcheck
 #hom tstep_all
 domain 2dPlaneStress

@@ -95,9 +95,9 @@ void TracSegArray :: setupIntegrationRuleOnEl()
 PrescribedGradientBCWeak :: PrescribedGradientBCWeak(int n, Domain *d) :
     ActiveBoundaryCondition(n, d),
     PrescribedGradientHomogenization(),
-	mTractionDofIDs( {Trac_u, Trac_v} ),
-	mDispLockDofIDs( {LMP_u, LMP_v} ),
-	mRegularDispDofIDs( {D_u, D_v} ),
+    mTractionDofIDs( {Trac_u, Trac_v} ),
+    mDispLockDofIDs( {LMP_u, LMP_v} ),
+    mRegularDispDofIDs( {D_u, D_v} ),
     mTractionInterpOrder(0),
     mNumTractionNodesAtIntersections(1),
     mTractionNodeSpacing(1),
@@ -107,20 +107,18 @@ PrescribedGradientBCWeak :: PrescribedGradientBCWeak(int n, Domain *d) :
     mTracDofScaling(1.0e0),
     mpDisplacementLock(NULL),
     mLockNodeInd(0),
-    mDispLockScaling(1.0e0),
+    mDispLockScaling(1.0),
+    mSpringNodeInd1(-1),
+    mSpringNodeInd2(-1),
+    mSpringPenaltyStiffness(1.0e-3),
     mPeriodicityNormal({0.0, 1.0}),
     mDomainSize(0.0),
-    mMirrorFunction(0),
-	mSpringNodeInd1(-1),
-	mSpringNodeInd2(-1),
-	mSpringPenaltyStiffness(1.0e-3)
+    mMirrorFunction(0)
 {
-
-	if(d) {
-		// Compute bounding box of the domain
-		computeDomainBoundingBox(* d, mLC, mUC);
-
-	}
+    if ( d ) {
+        // Compute bounding box of the domain
+        computeDomainBoundingBox(* d, mLC, mUC);
+    }
 
 }
 
@@ -165,7 +163,7 @@ DofManager *PrescribedGradientBCWeak :: giveInternalDofManager(int i)
     if ( i - 1 < int( mpTracElNew.size() ) ) {
         return mpTracElNew [ i - 1 ]->mFirstNode.get();
     } else   {
-    	OOFEM_ERROR("return mpDisplacementLock")
+        OOFEM_ERROR("return mpDisplacementLock")
         return mpDisplacementLock;
     }
 }
@@ -201,7 +199,7 @@ IRResultType PrescribedGradientBCWeak :: initializeFrom(InputRecord *ir)
 
     if ( duplicateCorners == 1 ) {
         mDuplicateCornerNodes = true;
-    } else   {
+    } else {
         mDuplicateCornerNodes = false;
     }
 
@@ -220,8 +218,8 @@ IRResultType PrescribedGradientBCWeak :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, mMirrorFunction, _IFT_PrescribedGradientBCWeak_MirrorFunction);
 //    printf("mMirrorFunction: %d\n", mMirrorFunction );
 
-    if(mMirrorFunction == 0) {
-    	mPeriodicityNormal = {0.0, 1.0};
+    if ( mMirrorFunction == 0 ) {
+        mPeriodicityNormal = {0.0, 1.0};
     }
 
     return IRRT_OK;
@@ -238,14 +236,14 @@ void PrescribedGradientBCWeak :: giveInputRecord(DynamicInputRecord &input)
 
     if ( mDuplicateCornerNodes ) {
         input.setField(1, _IFT_PrescribedGradientBCWeak_DuplicateCornerNodes);
-    } else   {
+    } else {
         input.setField(0, _IFT_PrescribedGradientBCWeak_DuplicateCornerNodes);
     }
 
     input.setField(mTangDistPadding, _IFT_PrescribedGradientBCWeak_TangDistPadding);
     input.setField(mTracDofScaling, _IFT_PrescribedGradientBCWeak_TracDofScaling);
 
-    if(mMirrorFunction > 0) {
+    if ( mMirrorFunction > 0 ) {
         input.setField(mMirrorFunction, _IFT_PrescribedGradientBCWeak_MirrorFunction);
         input.setField(mPeriodicityNormal, _IFT_PrescribedGradientBCWeak_PeriodicityNormal);
     }
@@ -265,37 +263,37 @@ void PrescribedGradientBCWeak :: assembleVector(FloatArray &answer, TimeStep *tS
         // f_ext = int N^trac H . (x - x_c)
 
 
-    	for( TracSegArray* el : mpTracElNew ) {
+        for ( TracSegArray* el : mpTracElNew ) {
 
-    		FloatArray contrib;
-    		computeExtForceElContrib(contrib, *el, dim, tStep);
+            FloatArray contrib;
+            computeExtForceElContrib(contrib, *el, dim, tStep);
 
-    		IntArray rows;
+            IntArray rows;
             el->giveTractionLocationArray(rows, type, s);
             answer.assemble(contrib, rows);
 
-    	}
+        }
 
     } else if ( type == InternalForcesVector ) {
 
-    	for( TracSegArray* el : mpTracElNew ) {
+        for ( TracSegArray* el : mpTracElNew ) {
 
             for ( GaussPoint *gp: *(el->mIntRule.get()) ) {
 
-            	// Contribution on gamma_plus
-            	FloatArray contrib_disp, contrib_trac;
-            	IntArray disp_loc_array, trac_loc_array;
-            	computeIntForceGPContrib(contrib_disp, disp_loc_array, contrib_trac, trac_loc_array, *el, *gp, dim, tStep, gp->giveGlobalCoordinates(), 1.0, mode, type, s);
+                // Contribution on gamma_plus
+                FloatArray contrib_disp, contrib_trac;
+                IntArray disp_loc_array, trac_loc_array;
+                computeIntForceGPContrib(contrib_disp, disp_loc_array, contrib_trac, trac_loc_array, *el, *gp, dim, tStep, gp->giveGlobalCoordinates(), 1.0, mode, type, s);
                 answer.assemble(contrib_disp, disp_loc_array);
                 answer.assemble(contrib_trac, trac_loc_array);
 
 
-            	// Contribution on gamma_minus
+                // Contribution on gamma_minus
                 contrib_disp.clear(); contrib_trac.clear();
                 disp_loc_array.clear(); trac_loc_array.clear();
                 FloatArray xMinus;
                 this->giveMirroredPointOnGammaMinus(xMinus, gp->giveGlobalCoordinates());
-            	computeIntForceGPContrib(contrib_disp, disp_loc_array, contrib_trac, trac_loc_array, *el, *gp, dim, tStep, xMinus, -1.0, mode, type, s);
+                computeIntForceGPContrib(contrib_disp, disp_loc_array, contrib_trac, trac_loc_array, *el, *gp, dim, tStep, xMinus, -1.0, mode, type, s);
                 answer.assemble(contrib_disp, disp_loc_array);
                 answer.assemble(contrib_trac, trac_loc_array);
 
@@ -329,13 +327,13 @@ void PrescribedGradientBCWeak :: assembleVector(FloatArray &answer, TimeStep *tS
 void PrescribedGradientBCWeak :: computeExtForceElContrib(FloatArray &oContrib, TracSegArray &iEl, int iDim, TimeStep *tStep)
 {
 
-	oContrib.clear();
-	FloatArray contrib_gp;
+    oContrib.clear();
+    FloatArray contrib_gp;
 
     for ( GaussPoint *gp: *(iEl.mIntRule.get()) ) {
 
-    	// Fetch global coordinate x
-    	const FloatArray &x = gp->giveGlobalCoordinates();
+        // Fetch global coordinate x
+        const FloatArray &x = gp->giveGlobalCoordinates();
 
         // Compute H.[x]
         FloatArray temp;
@@ -371,8 +369,8 @@ void PrescribedGradientBCWeak :: computeIntForceGPContrib(FloatArray &oContrib_d
 
     SpatialLocalizer *localizer = domain->giveSpatialLocalizer();
 
-	FloatMatrix contrib;
-	assembleTangentGPContributionNew(contrib, iEl, iGP, iScaleFac, iBndCoord);
+    FloatMatrix contrib;
+    assembleTangentGPContributionNew(contrib, iEl, iGP, iScaleFac, iBndCoord);
 
     // Compute vector of traction unknowns
     FloatArray tracUnknowns;
@@ -386,14 +384,14 @@ void PrescribedGradientBCWeak :: computeIntForceGPContrib(FloatArray &oContrib_d
     // Compute vector of displacement unknowns
     FloatArray dispUnknowns;
     int numDMan = dispEl->giveNumberOfDofManagers();
-    for(int i = 1; i <= numDMan; i++) {
-    	FloatArray nodeUnknowns;
-    	DofManager *dMan = dispEl->giveDofManager(i);
+    for ( int i = 1; i <= numDMan; i++ ) {
+        FloatArray nodeUnknowns;
+        DofManager *dMan = dispEl->giveDofManager(i);
 
-    	IntArray dispIDs = giveRegularDispDofIDs();
-        if(domain->hasXfemManager()) {
-        	XfemManager *xMan = domain->giveXfemManager();
-        	dispIDs.followedBy(xMan->giveEnrichedDofIDs(*dMan));
+        IntArray dispIDs = giveRegularDispDofIDs();
+        if ( domain->hasXfemManager() ) {
+            XfemManager *xMan = domain->giveXfemManager();
+            dispIDs.followedBy(xMan->giveEnrichedDofIDs(*dMan));
         }
 
         dMan->giveUnknownVector(nodeUnknowns, dispIDs,mode, tStep);
@@ -414,18 +412,18 @@ void PrescribedGradientBCWeak :: computeIntForceGPContrib(FloatArray &oContrib_d
 void PrescribedGradientBCWeak :: assemble(SparseMtrx &answer, TimeStep *tStep,
                                           CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
-	std::vector<FloatArray> gpCoordArray;
+    std::vector<FloatArray> gpCoordArray;
 
     if ( type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == ElasticStiffnessMatrix ) {
 
-    	for( TracSegArray* el : mpTracElNew ) {
+        for ( TracSegArray* el : mpTracElNew ) {
 
             for ( GaussPoint *gp: *(el->mIntRule.get()) ) {
 
-            	gpCoordArray.push_back( gp->giveGlobalCoordinates() );
-            	assembleGPContrib(answer, tStep, type, r_s, c_s, *el, *gp);
+                gpCoordArray.push_back( gp->giveGlobalCoordinates() );
+                assembleGPContrib(answer, tStep, type, r_s, c_s, *el, *gp);
             }
-    	}
+        }
 
         if ( mpDisplacementLock != NULL ) {
             int nsd = domain->giveNumberOfSpatialDimensions();
@@ -556,8 +554,8 @@ void PrescribedGradientBCWeak :: assembleGPContrib(SparseMtrx &answer, TimeStep 
 
     ///////////////
     // Gamma_plus
-	FloatMatrix contrib;
-	assembleTangentGPContributionNew(contrib, iEl, iGP, -1.0, iGP.giveGlobalCoordinates());
+    FloatMatrix contrib;
+    assembleTangentGPContributionNew(contrib, iEl, iGP, -1.0, iGP.giveGlobalCoordinates());
 
     // Compute vector of traction unknowns
     FloatArray tracUnknowns;
@@ -584,13 +582,13 @@ void PrescribedGradientBCWeak :: assembleGPContrib(SparseMtrx &answer, TimeStep 
     ///////////////
     // Gamma_minus
     contrib.clear();
-	FloatArray xMinus;
-	this->giveMirroredPointOnGammaMinus(xMinus, iGP.giveGlobalCoordinates() );
-	assembleTangentGPContributionNew(contrib, iEl, iGP, 1.0, xMinus);
+    FloatArray xMinus;
+    this->giveMirroredPointOnGammaMinus(xMinus, iGP.giveGlobalCoordinates() );
+    assembleTangentGPContributionNew(contrib, iEl, iGP, 1.0, xMinus);
 
     // Compute vector of traction unknowns
-	tracUnknowns.clear();
-	iEl.mFirstNode->giveUnknownVector(tracUnknowns, giveTracDofIDs(), VM_Total, tStep);
+    tracUnknowns.clear();
+    iEl.mFirstNode->giveUnknownVector(tracUnknowns, giveTracDofIDs(), VM_Total, tStep);
 
     trac_rows.clear();
     iEl.giveTractionLocationArray(trac_rows, type, r_s);
@@ -610,9 +608,9 @@ void PrescribedGradientBCWeak :: assembleGPContrib(SparseMtrx &answer, TimeStep 
 
 
     // Assemble zeros on diagonal (required by PETSc solver)
-	FloatMatrix KZero(1,1);
-	KZero.zero();
-    for( int i :  trac_rows) {
+    FloatMatrix KZero(1,1);
+    KZero.zero();
+    for ( int i :  trac_rows) {
         answer.assemble(IntArray({i}), IntArray({i}), KZero);
     }
 }
@@ -626,19 +624,19 @@ void PrescribedGradientBCWeak :: giveLocationArrays(std :: vector< IntArray > &r
 void PrescribedGradientBCWeak :: giveTractionLocationArray(IntArray &rows,
                                                            const UnknownNumberingScheme &s)
 {
-	// Used for the condensation when computing the macroscopic tangent.
+    // Used for the condensation when computing the macroscopic tangent.
 
 
     rows.clear();
 
     // Loop over traction elements
-	for( TracSegArray* el : mpTracElNew ) {
+    for ( TracSegArray* el : mpTracElNew ) {
 
-		IntArray trac_loc_r;
-		el->mFirstNode->giveLocationArray(giveTracDofIDs(), trac_loc_r, s);
+        IntArray trac_loc_r;
+        el->mFirstNode->giveLocationArray(giveTracDofIDs(), trac_loc_r, s);
 
-		rows.followedBy(trac_loc_r);
-	}
+        rows.followedBy(trac_loc_r);
+    }
 
 #if 0
     rows.clear();
@@ -670,13 +668,13 @@ void PrescribedGradientBCWeak :: giveTractionLocationArray(IntArray &rows,
 void PrescribedGradientBCWeak :: giveDisplacementLocationArray(IntArray &rows,
                                        const UnknownNumberingScheme &s)
 {
-	// Used for the condensation when computing the macroscopic tangent.
+    // Used for the condensation when computing the macroscopic tangent.
 
 }
 
 void PrescribedGradientBCWeak :: compute_x_times_N_1(FloatMatrix &o_x_times_N)
 {
-    double rve_size = this->domainSize();
+    //double rve_size = this->domainSize();
     const int dim = domain->giveNumberOfSpatialDimensions();
 
     IntArray loc_t;
@@ -692,13 +690,13 @@ void PrescribedGradientBCWeak :: compute_x_times_N_1(FloatMatrix &o_x_times_N)
 
     int trac_el_ind = 1;
 
-    for( auto *el: mpTracElNew ) {
+    for ( auto *el: mpTracElNew ) {
 
-    	IntArray rows = {trac_el_ind*2-1,trac_el_ind*2};
+        IntArray rows = {trac_el_ind*2-1,trac_el_ind*2};
 
         for ( GaussPoint *gp: *(el->mIntRule.get()) ) {
 
-        	FloatMatrix contrib(2,3);
+            FloatMatrix contrib(2,3);
 
             // For now, assume piecewise constant approx
             FloatArray Ntrac = FloatArray { 1.0*mTracDofScaling };
@@ -708,8 +706,8 @@ void PrescribedGradientBCWeak :: compute_x_times_N_1(FloatMatrix &o_x_times_N)
             Nmat.beNMatrixOf(Ntrac, dim);
 //            printf("Nmat: "); Nmat.printYourself();
 
-        	// Fetch global coordinate x
-        	const FloatArray &x = gp->giveGlobalCoordinates();
+            // Fetch global coordinate x
+            const FloatArray &x = gp->giveGlobalCoordinates();
 
 //            // Compute vector of traction unknowns
 //            FloatArray tracUnknowns;
@@ -764,7 +762,7 @@ void PrescribedGradientBCWeak :: compute_x_times_N_1(FloatMatrix &o_x_times_N)
 
 void PrescribedGradientBCWeak :: compute_x_times_N_2(FloatMatrix &o_x_times_N)
 {
-    double rve_size = this->domainSize();
+    //double rve_size = this->domainSize();
     const int dim = domain->giveNumberOfSpatialDimensions();
 
     IntArray loc_t;
@@ -780,7 +778,7 @@ void PrescribedGradientBCWeak :: compute_x_times_N_2(FloatMatrix &o_x_times_N)
 
     int trac_el_ind = 1;
 
-    for( auto *el: mpTracElNew ) {
+    for ( auto *el: mpTracElNew ) {
 
     	IntArray cols = {trac_el_ind*2-1,trac_el_ind*2};
 
@@ -796,8 +794,8 @@ void PrescribedGradientBCWeak :: compute_x_times_N_2(FloatMatrix &o_x_times_N)
             Nmat.beNMatrixOf(Ntrac, dim);
 //            printf("Nmat: "); Nmat.printYourself();
 
-        	// Fetch global coordinate x
-        	const FloatArray &x = gp->giveGlobalCoordinates();
+            // Fetch global coordinate x
+            const FloatArray &x = gp->giveGlobalCoordinates();
 
 //            // Compute vector of traction unknowns
 //            FloatArray tracUnknowns;
@@ -851,15 +849,15 @@ void PrescribedGradientBCWeak :: compute_x_times_N_2(FloatMatrix &o_x_times_N)
 
 void PrescribedGradientBCWeak :: computeField(FloatArray &sigma, TimeStep *tStep)
 {
-	double Lx = mUC[0] - mLC[0];
-	double Ly = mUC[1] - mLC[1];
-	double dSize = Lx*Ly;
+    double Lx = mUC[0] - mLC[0];
+    double Ly = mUC[1] - mLC[1];
+    double dSize = Lx*Ly;
 //    printf("dSize: %e\n", dSize);
 
     const int dim = domain->giveNumberOfSpatialDimensions();
     FloatMatrix stressMatrix(dim, dim);
 
-    for( auto *el: mpTracElNew ) {
+    for ( auto *el: mpTracElNew ) {
 
         for ( GaussPoint *gp: *(el->mIntRule.get()) ) {
 
@@ -870,8 +868,8 @@ void PrescribedGradientBCWeak :: computeField(FloatArray &sigma, TimeStep *tStep
             FloatMatrix Nmat;
             Nmat.beNMatrixOf(Ntrac, dim);
 
-        	// Fetch global coordinate x
-        	const FloatArray &x = gp->giveGlobalCoordinates();
+            // Fetch global coordinate x
+            const FloatArray &x = gp->giveGlobalCoordinates();
 
             // Compute vector of traction unknowns
             FloatArray tracUnknowns;
@@ -904,7 +902,7 @@ void PrescribedGradientBCWeak :: computeField(FloatArray &sigma, TimeStep *tStep
         sigma = {
             stressMatrix(0, 0), stressMatrix(1, 1), 0.0, 0.0, 0.0, 0.5*(stressMatrix(0, 1) + stressMatrix(1, 0))
         };
-    } else   {
+    } else {
         sigma.beVectorForm(stressMatrix);
     }
 
@@ -917,25 +915,25 @@ void PrescribedGradientBCWeak :: computeField(FloatArray &sigma, TimeStep *tStep
 void PrescribedGradientBCWeak :: computeTangent(FloatMatrix& E, TimeStep* tStep)
 {
 #ifdef TIME_INFO
-	static double tot_time = 0.0;
+    static double tot_time = 0.0;
     Timer timer;
     timer.startTimer();
 
-	static double assemble_time = 0.0;
+    static double assemble_time = 0.0;
     Timer assemble_timer;
 
 #endif
 
-	E.resize(9,9);
+    E.resize(9,9);
 
 
-	// Extract the relevant submatrices from the RVE problem.
-	// At equilibrium, the RVE problem has the structure
-	//
-	// [ S C; C^T 0 ]*[a_u a_t] = [0; f]
-	//
-	// where a_u and a_t denote displacement and traction dofs, respectively.
-	// We need to extract S and C.
+    // Extract the relevant submatrices from the RVE problem.
+    // At equilibrium, the RVE problem has the structure
+    //
+    // [ S C; C^T 0 ]*[a_u a_t] = [0; f]
+    //
+    // where a_u and a_t denote displacement and traction dofs, respectively.
+    // We need to extract S and C.
 
     EngngModel *rve = this->giveDomain()->giveEngngModel();
     ///@todo Get this from engineering model
@@ -944,9 +942,9 @@ void PrescribedGradientBCWeak :: computeTangent(FloatMatrix& E, TimeStep* tStep)
     bool symmetric_matrix = false;
     SparseMtrxType stype = solver->giveRecommendedMatrix(symmetric_matrix);
 //    double rve_size = this->domainSize();
-	double Lx = mUC[0] - mLC[0];
-	double Ly = mUC[1] - mLC[1];
-	double rve_size = Lx*Ly;
+    double Lx = mUC[0] - mLC[0];
+    double Ly = mUC[1] - mLC[1];
+    double rve_size = Lx*Ly;
 
 
     EModelDefaultEquationNumbering fnum;
@@ -956,12 +954,12 @@ void PrescribedGradientBCWeak :: computeTangent(FloatMatrix& E, TimeStep* tStep)
     }
 
     StaticStructural *rveStatStruct = dynamic_cast<StaticStructural*>(rve);
-    if(rveStatStruct != NULL) {
-//    	printf("Successfully casted rve to StaticStructural.\n");
+    if ( rveStatStruct ) {
+//    printf("Successfully casted rve to StaticStructural.\n");
 
-    	if( rveStatStruct->stiffnessMatrix != NULL ) {
-    		Kmicro.reset( rveStatStruct->stiffnessMatrix->GiveCopy() );
-    	}
+        if ( rveStatStruct->stiffnessMatrix ) {
+            Kmicro.reset( rveStatStruct->stiffnessMatrix->GiveCopy() );
+        }
     }
 
 
@@ -969,13 +967,13 @@ void PrescribedGradientBCWeak :: computeTangent(FloatMatrix& E, TimeStep* tStep)
     assemble_timer.startTimer();
 #endif
 
-    if( Kmicro->giveNumberOfColumns() == 0 ) {
-//    	printf("Rebuilding stiffness matrix.\n");
-		Kmicro->buildInternalStructure(rve, this->domain->giveNumber(), fnum);
-		rve->assemble(*Kmicro, tStep, TangentAssembler(TangentStiffness), fnum, this->domain);
+    if ( Kmicro->giveNumberOfColumns() == 0 ) {
+//    printf("Rebuilding stiffness matrix.\n");
+        Kmicro->buildInternalStructure(rve, this->domain->giveNumber(), fnum);
+        rve->assemble(*Kmicro, tStep, TangentAssembler(TangentStiffness), fnum, this->domain);
     }
 //    else {
-//    	printf("Using existing stiffness matrix.\n");
+//        printf("Using existing stiffness matrix.\n");
 //    }
 
     assembleExtraDisplock(*Kmicro, tStep, TangentStiffnessMatrix, fnum, fnum);
@@ -1010,17 +1008,17 @@ void PrescribedGradientBCWeak :: computeTangent(FloatMatrix& E, TimeStep* tStep)
     C->toFloatMatrix(Cd);
 
 
-	// Let Sm = C. Solve for m.
+    // Let Sm = C. Solve for m.
     FloatMatrix m;
     solver->solve(*S, Cd, m);
 
 
-	// Compute G := C^T m. (Which could, formally, be written as G = C^T S^-1 C.)
+    // Compute G := C^T m. (Which could, formally, be written as G = C^T S^-1 C.)
     FloatMatrix G;
     G.beTProductOf(Cd, m);
 
 
-	// Compute D := \int x \otimes N
+    // Compute D := \int x \otimes N
     FloatMatrix D;
     compute_x_times_N_1(D);
 //    FloatMatrix D;
@@ -1028,7 +1026,7 @@ void PrescribedGradientBCWeak :: computeTangent(FloatMatrix& E, TimeStep* tStep)
 //    D.beTranspositionOf(DT);
 
 
-	// Let Gp = D. Solve for p. (Which could, formally, be written as p = G^-1 D = (C^T S^-1 C)^-1 D.)
+    // Let Gp = D. Solve for p. (Which could, formally, be written as p = G^-1 D = (C^T S^-1 C)^-1 D.)
     // Need to make G sparse;
     std :: unique_ptr< SparseMtrx > Gs( classFactory.createSparseMtrx(stype) );
     if ( !Gs ) {
@@ -1038,8 +1036,8 @@ void PrescribedGradientBCWeak :: computeTangent(FloatMatrix& E, TimeStep* tStep)
     int num_eq_G = G.giveNumberOfRows();
     IntArray loc_G(num_eq_G);
 
-    for(int i = 1; i <= num_eq_G; i++) {
-    	loc_G.at(i) = i;
+    for ( int i = 1; i <= num_eq_G; i++) {
+        loc_G.at(i) = i;
     }
 
     Gs->buildInternalStructure(rve, num_eq_G, num_eq_G, loc_G, loc_G);
@@ -1055,7 +1053,7 @@ void PrescribedGradientBCWeak :: computeTangent(FloatMatrix& E, TimeStep* tStep)
     solver->solve(*Gs, D, p);
 
 
-	// Compute d_sigma_depsilon = D^T p.
+    // Compute d_sigma_depsilon = D^T p.
     FloatMatrix Ered;
     Ered.beTProductOf(D,p);
 //    rve_size = 25.0;
@@ -1064,7 +1062,7 @@ void PrescribedGradientBCWeak :: computeTangent(FloatMatrix& E, TimeStep* tStep)
 //    Ered.printYourself();
 
     IntArray indx;
-    int size = StructuralMaterial :: giveVoigtVectorMask(indx, _PlaneStress);
+    //int size = StructuralMaterial :: giveVoigtVectorMask(indx, _PlaneStress);
 
 //    FloatMatrix EredT;
 //    EredT.beTranspositionOf(Ered);
@@ -1089,8 +1087,8 @@ void PrescribedGradientBCWeak :: computeTangent(FloatMatrix& E, TimeStep* tStep)
 
 void PrescribedGradientBCWeak :: giveTractionElNormal(size_t iElInd, FloatArray &oNormal, FloatArray &oTangent) const
 {
-	FloatArray xS, xE;
-	giveTractionElCoord(iElInd, xS, xE);
+    FloatArray xS, xE;
+    giveTractionElCoord(iElInd, xS, xE);
 
     oTangent.beDifferenceOf(xE, xS);
     oTangent.normalize();
@@ -1102,8 +1100,8 @@ void PrescribedGradientBCWeak :: giveTractionElNormal(size_t iElInd, FloatArray 
 
 void PrescribedGradientBCWeak :: giveTractionElArcPos(size_t iElInd, double &oXiStart, double &oXiEnd) const
 {
-	FloatArray xS, xE;
-	giveTractionElCoord(iElInd, xS, xE);
+    FloatArray xS, xE;
+    giveTractionElCoord(iElInd, xS, xE);
 
     FloatArray xC;
     xC.beScaled(0.5, xS);
@@ -1141,17 +1139,17 @@ void PrescribedGradientBCWeak :: recomputeTractionMesh()
 
 void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodicity, int iNumSides)
 {
-	bool split_at_holes = true;
+    bool split_at_holes = true;
 
     const double l_s = mUC[0] - mLC[0];
     const double minPointDist = 1.0e-4*l_s;
 
-	// Find holes intersecting the RVE boundary so that these can be excluded
-	std::vector<FloatArray> holeCoordUnsorted, allCoordUnsorted;
-	findHoleCoord(holeCoordUnsorted, allCoordUnsorted);
+    // Find holes intersecting the RVE boundary so that these can be excluded
+    std::vector<FloatArray> holeCoordUnsorted, allCoordUnsorted;
+    findHoleCoord(holeCoordUnsorted, allCoordUnsorted);
 
 
-	// Add corner points
+    // Add corner points
     holeCoordUnsorted.push_back( {mUC[0], mLC[1]} );
     allCoordUnsorted.push_back( {mUC[0], mLC[1]} );
 
@@ -1178,15 +1176,15 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
 
     // Add refinement points
     int pointsPassed = 0;
-    for( const auto &x : allCoordUnsorted ) {
+    for ( const auto &x : allCoordUnsorted ) {
 
-    	if( pointsPassed >= mTractionNodeSpacing ) {
-    		holeCoordUnsorted.push_back(x);
-    		pointsPassed = 0;
-    	}
+        if ( pointsPassed >= mTractionNodeSpacing ) {
+            holeCoordUnsorted.push_back(x);
+            pointsPassed = 0;
+        }
 
 
-    	pointsPassed++;
+        pointsPassed++;
     }
 
 
@@ -1202,43 +1200,39 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
     removeClosePoints(allCoordUnsorted, minPointDist);
 
 
-	// Create two arrays of segments, where each array represents the coarsest possible traction
-	// mesh on one side of the RVE
+    // Create two arrays of segments, where each array represents the coarsest possible traction
+    // mesh on one side of the RVE
     ArcPosSortFunction4 arcPosFunc( mLC, mUC, 1.0e-4 );
 
     std :: vector< TracSegArray * > tracElNew0, tracElNew1;
     tracElNew0.push_back(new TracSegArray());
     tracElNew1.push_back(new TracSegArray());
 
-    for(size_t i = 1; i < holeCoordUnsorted.size(); i++) {
+    for (size_t i = 1; i < holeCoordUnsorted.size(); i++) {
 
-    	FloatArray xS = holeCoordUnsorted[i-1];
-    	xS.resizeWithValues(2);
-    	FloatArray xE = holeCoordUnsorted[i];
-    	xE.resizeWithValues(2);
-    	const FloatArray xC = {0.5*(xS[0]+xE[0]), 0.5*(xS[1]+xE[1])};
+        FloatArray xS = holeCoordUnsorted[i-1];
+        xS.resizeWithValues(2);
+        FloatArray xE = holeCoordUnsorted[i];
+        xE.resizeWithValues(2);
+        const FloatArray xC = {0.5*(xS[0]+xE[0]), 0.5*(xS[1]+xE[1])};
 
-    	if( arcPosFunc.calcArcPos(xC) < 2.*l_s) {
-    		tracElNew0[0]->mInteriorSegments.push_back( Line(xS, xE) );
-    	}
-    	else {
-    		tracElNew1[0]->mInteriorSegments.push_back( Line(xS, xE) );
-    	}
+        if ( arcPosFunc.calcArcPos(xC) < 2.*l_s ) {
+            tracElNew0[0]->mInteriorSegments.push_back( Line(xS, xE) );
+        } else {
+            tracElNew1[0]->mInteriorSegments.push_back( Line(xS, xE) );
+        }
     }
 
     // Remove segments located in holes
     removeSegOverHoles(*(tracElNew0[0]), 1.0e-4);
     removeSegOverHoles(*(tracElNew1[0]), 1.0e-4);
 
-    if(split_at_holes) {
-    	splitSegments(tracElNew0);
-    	splitSegments(tracElNew1);
+    if ( split_at_holes ) {
+        splitSegments(tracElNew0);
+        splitSegments(tracElNew1);
     }
 
-	// Identify additional points that can be used to refine the traction mesh
-
-
-
+    // Identify additional points that can be used to refine the traction mesh
 
 
 
@@ -1259,7 +1253,7 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
     // we can always create on node on each element.
 
     // RVE side at x=L
-    for( TracSegArray* el : tracElNew0 ) {
+    for ( TracSegArray* el : tracElNew0 ) {
 
         //////////////////////////////////////////////////////
         // Create first node
@@ -1277,7 +1271,7 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
 
 
     // RVE side at y=L
-    for( TracSegArray* el : tracElNew1 ) {
+    for ( TracSegArray* el : tracElNew1 ) {
 
         //////////////////////////////////////////////////////
         // Create first node
@@ -1343,100 +1337,97 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
     // Segment arrays for Gauss quadrature
     size_t i = 0;
 
-    for( TracSegArray* el : mpTracElNew ) {
+    for ( TracSegArray* el : mpTracElNew ) {
 
-    	const FloatArray &xS = el->mInteriorSegments[0].giveVertex(1);
-    	const double arcPosXS = arcPosFunc.calcArcPos(xS);
+        const FloatArray &xS = el->mInteriorSegments[0].giveVertex(1);
+        const double arcPosXS = arcPosFunc.calcArcPos(xS);
 
-       	const FloatArray &xE = el->mInteriorSegments.back().giveVertex(2);
-       	const double arcPosXE = arcPosFunc.calcArcPos(xE);
+        const FloatArray &xE = el->mInteriorSegments.back().giveVertex(2);
+        const double arcPosXE = arcPosFunc.calcArcPos(xE);
 
-       	while(i < allCoordUnsorted.size()) {
+        while (i < allCoordUnsorted.size()) {
 
-       		FloatArray x = allCoordUnsorted[i];
-       		x.resizeWithValues(2);
-        	const double arcPosX = arcPosFunc.calcArcPos(x);
+            FloatArray x = allCoordUnsorted[i];
+            x.resizeWithValues(2);
+            const double arcPosX = arcPosFunc.calcArcPos(x);
 
-        	if( arcPosX > (arcPosXS+minPointDist) && arcPosX < (arcPosXE-minPointDist) ) {
-        		el->mInteriorSegmentsPointsFine.push_back(x);
-        	}
+            if ( arcPosX > (arcPosXS+minPointDist) && arcPosX < (arcPosXE-minPointDist) ) {
+                el->mInteriorSegmentsPointsFine.push_back(x);
+            }
 
-        	if( arcPosX > arcPosXE ) {
-        		break;
-        	}
+            if ( arcPosX > arcPosXE ) {
+                break;
+            }
 
-       		i++;
-       	}
+            i++;
+        }
     }
 
     // Now we have the necessary points on each traction element.
     // The next step is to create splitted segments.
-    for( TracSegArray* el : mpTracElNew ) {
+    for ( TracSegArray* el : mpTracElNew ) {
 
         i = 0;
 
-    	for( Line &line : el->mInteriorSegments ) {
-    		FloatArray xS = line.giveVertex(1);
-    		xS.resizeWithValues(2);
-        	const double arcPosXS = arcPosFunc.calcArcPos(xS);
+        for ( Line &line : el->mInteriorSegments ) {
+            FloatArray xS = line.giveVertex(1);
+            xS.resizeWithValues(2);
+            const double arcPosXS = arcPosFunc.calcArcPos(xS);
 
-    		FloatArray xE = line.giveVertex(2);
-    		xE.resizeWithValues(2);
-        	const double arcPosXE = arcPosFunc.calcArcPos(xE);
+            FloatArray xE = line.giveVertex(2);
+            xE.resizeWithValues(2);
+            const double arcPosXE = arcPosFunc.calcArcPos(xE);
 
-        	if( el->mInteriorSegmentsPointsFine.size() == 0 ) {
-				Line newLine(xS, xE);
-				el->mInteriorSegmentsFine.push_back(newLine);
-        	}
-        	else {
-				while(i < el->mInteriorSegmentsPointsFine.size()) {
+            if ( el->mInteriorSegmentsPointsFine.size() == 0 ) {
+                Line newLine(xS, xE);
+                el->mInteriorSegmentsFine.push_back(newLine);
+            } else {
+                while ( i < el->mInteriorSegmentsPointsFine.size() ) {
 
-					const FloatArray &x = el->mInteriorSegmentsPointsFine[i];
-					const double arcPosX = arcPosFunc.calcArcPos(x);
+                    const FloatArray &x = el->mInteriorSegmentsPointsFine[i];
+                    const double arcPosX = arcPosFunc.calcArcPos(x);
 
-					if(arcPosX < arcPosXS) {
-						OOFEM_ERROR("Error in PrescribedGradientBCWeak :: createTractionMesh.")
-					}
+                    if ( arcPosX < arcPosXS ) {
+                        OOFEM_ERROR("Error in PrescribedGradientBCWeak :: createTractionMesh.")
+                    }
 
-					if( arcPosX < arcPosXE ) {
-						// Split from start pos to x
-						Line newLine(xS, x);
-						el->mInteriorSegmentsFine.push_back(newLine);
+                    if ( arcPosX < arcPosXE ) {
+                        // Split from start pos to x
+                        Line newLine(xS, x);
+                        el->mInteriorSegmentsFine.push_back(newLine);
 
-						xS = x;
-					}
-					else {
-						// Split from x to end pos
-						Line newLine(xS, xE);
-						el->mInteriorSegmentsFine.push_back(newLine);
+                        xS = x;
+                    } else {
+                        // Split from x to end pos
+                        Line newLine(xS, xE);
+                        el->mInteriorSegmentsFine.push_back(newLine);
 
-						break;
-					}
+                        break;
+                    }
 
-					if( i == (el->mInteriorSegmentsPointsFine.size()-1) ) {
-						// Split from x to end pos
-						Line newLine(xS, xE);
-						el->mInteriorSegmentsFine.push_back(newLine);
-					}
+                    if ( i == (el->mInteriorSegmentsPointsFine.size()-1) ) {
+                        // Split from x to end pos
+                        Line newLine(xS, xE);
+                        el->mInteriorSegmentsFine.push_back(newLine);
+                    }
 
-					i++;
-				}
-        	}
-    	}
-
+                    i++;
+                }
+            }
+        }
     }
 
     // Create integration rules
-    for( TracSegArray* el : mpTracElNew ) {
-    	el->setupIntegrationRuleOnEl();
+    for ( TracSegArray* el : mpTracElNew ) {
+        el->setupIntegrationRuleOnEl();
     }
 
     // Write discontinuity points to debug vtk
     std :: vector< FloatArray > discPoints;
-    for( TracSegArray* el : mpTracElNew ) {
+    for ( TracSegArray* el : mpTracElNew ) {
 
-    	discPoints.push_back( el->mInteriorSegments[0].giveVertex(1) );
-    	discPoints.push_back( el->mInteriorSegments.back().giveVertex(2) );
+        discPoints.push_back( el->mInteriorSegments[0].giveVertex(1) );
+        discPoints.push_back( el->mInteriorSegments.back().giveVertex(2) );
     }
 
 //    std :: string fileName("DiscontPoints.vtk");
@@ -1446,20 +1437,20 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
 
 void PrescribedGradientBCWeak :: splitSegments(std :: vector< TracSegArray * > &ioElArray)
 {
-	std :: vector< TracSegArray * > newArray;
+    std :: vector< TracSegArray * > newArray;
 
-	for( TracSegArray *el : ioElArray ) {
+    for ( TracSegArray *el : ioElArray ) {
 
-		for( Line line : el->mInteriorSegments ) {
-			TracSegArray *newEl = new TracSegArray();
-			newEl->mInteriorSegments.push_back(line);
-			newArray.push_back(newEl);
-		}
+        for ( Line line : el->mInteriorSegments ) {
+            TracSegArray *newEl = new TracSegArray();
+            newEl->mInteriorSegments.push_back(line);
+            newArray.push_back(newEl);
+        }
 
-		delete el;
-	}
+        delete el;
+    }
 
-	ioElArray = std::move(newArray);
+    ioElArray = std::move(newArray);
 }
 
 bool PrescribedGradientBCWeak :: damageExceedsTolerance(Element *el)
@@ -1512,7 +1503,7 @@ void PrescribedGradientBCWeak :: assembleTangentGPContributionNew(FloatMatrix &o
         // If the element is an XFEM element, we use the XfemElementInterface to compute the N-matrix
         // of the enriched element.
         xfemElInt->XfemElementInterface_createEnrNmatrixAt(NdispMat, dispElLocCoord, * dispEl, false);
-    } else   {
+    } else {
         // Otherwise, use the usual N-matrix.
         const int numNodes = dispEl->giveNumberOfDofManagers();
         FloatArray N(numNodes);
@@ -1551,9 +1542,9 @@ bool PrescribedGradientBCWeak :: pointIsOnGammaPlus(const FloatArray &iPos) cons
 void PrescribedGradientBCWeak :: giveMirroredPointOnGammaMinus(FloatArray &oPosMinus, const FloatArray &iPosPlus) const
 {
 //#if 0
-	if(mMirrorFunction == 0) {
-		oPosMinus = iPosPlus;
-		const double distTol = 1.0e-12;
+    if ( mMirrorFunction == 0 ) {
+        oPosMinus = iPosPlus;
+        const double distTol = 1.0e-12;
 
 //		if ( iPosPlus.distance(mUC) < distTol ) {
 //			printf("iPosPlus: %.12e %.12e\n", iPosPlus [ 0 ], iPosPlus [ 1 ]);
@@ -1587,217 +1578,202 @@ void PrescribedGradientBCWeak :: giveMirroredPointOnGammaMinus(FloatArray &oPosM
 
 #if 1
 
-		const double distTol = 1.0e-12;
-//		bool mappingPerformed = false;
+        const double distTol = 1.0e-12;
+//        bool mappingPerformed = false;
 
-		FloatArray n = mPeriodicityNormal;
-		FloatArray t = {n(1),-n(0)};
-		t.normalize();
+        FloatArray n = mPeriodicityNormal;
+        FloatArray t = {n(1),-n(0)};
+        t.normalize();
 
-		double l_s = mUC[0] - mLC[0];
+        double l_s = mUC[0] - mLC[0];
 
 		// Compute angle
 		double alpha = 0.0, a = 0.0;
 		if( fabs(t(0)) > 1.0e-6 && fabs(t(1)) > 1.0e-6 ) {
-			alpha = atan2(t(1), t(0));
+			alpha = atan(t(1)/t(0));
 
-			if( alpha > 45.0*M_PI/180.0 ) {
-				a = l_s/tan(alpha);
-			}
-			else {
-				a = l_s*tan(alpha);
-			}
-		}
-		else {
-			// 90 degrees or 0 degrees
-//			alpha = 1.57079632679490e+00;
-			a = 0.0;
-		}
+            if ( alpha > 45.0*M_PI/180.0 ) {
+                a = l_s/tan(alpha);
+            } else {
+                a = l_s*tan(alpha);
+            }
+        } else {
+            // 90 degrees or 0 degrees
+//            alpha = 1.57079632679490e+00;
+            a = 0.0;
+        }
 
-		if( alpha > 45.0*M_PI/180.0 ) {
+        if ( alpha > 45.0*M_PI/180.0 ) {
 
-			// alpha > 45 degrees
+            // alpha > 45 degrees
 
-			if ( iPosPlus [ 0 ] > mUC [ 0 ] - distTol ) {
-				// Gamma_1_plus
-				oPosMinus = {0.0, iPosPlus[1]};
-				return;
-			}
+            if ( iPosPlus [ 0 ] > mUC [ 0 ] - distTol ) {
+                // Gamma_1_plus
+                oPosMinus = {0.0, iPosPlus[1]};
+                return;
+            }
 
-			if ( iPosPlus [ 1 ] > mUC [ 1 ] - distTol ) {
-				// Gamma_2_plus
+            if ( iPosPlus [ 1 ] > mUC [ 1 ] - distTol ) {
+                // Gamma_2_plus
 
-				if(iPosPlus[0] < a) {
-					oPosMinus = {l_s - a + iPosPlus[0], 0.0};
-					return;
-				}
-				else {
-					oPosMinus = {iPosPlus[0] - a, 0.0};
-					return;
-				}
+                if ( iPosPlus[0] < a ) {
+                    oPosMinus = {l_s - a + iPosPlus[0], 0.0};
+                    return;
+                } else {
+                    oPosMinus = {iPosPlus[0] - a, 0.0};
+                    return;
+                }
 
-			}
+            }
 
-		}
-		else {
+        } else {
 
-			// alpha <= 45 degrees
+            // alpha <= 45 degrees
 
-			if ( iPosPlus [ 0 ] > mUC [ 0 ] - distTol ) {
-				// Gamma_1_plus
-				if(iPosPlus[1] < a) {
-					oPosMinus = {0.0, l_s - a + iPosPlus[1]};
-					return;
-				}
-				else {
-					oPosMinus = {0.0, iPosPlus[1] - a};
-					return;
-				}
+            if ( iPosPlus [ 0 ] > mUC [ 0 ] - distTol ) {
+                // Gamma_1_plus
+                if ( iPosPlus[1] < a ) {
+                    oPosMinus = {0.0, l_s - a + iPosPlus[1]};
+                    return;
+                } else {
+                    oPosMinus = {0.0, iPosPlus[1] - a};
+                    return;
+                }
 
-			}
+            }
 
-			if ( iPosPlus [ 1 ] > mUC [ 1 ] - distTol ) {
-				// Gamma_2_plus
+            if ( iPosPlus [ 1 ] > mUC [ 1 ] - distTol ) {
+                // Gamma_2_plus
 
-				oPosMinus = {iPosPlus[0], 0.0};
-				return;
-			}
+                oPosMinus = {iPosPlus[0], 0.0};
+                return;
+            }
 
-		}
+        }
 
 #else
 
 #endif
-	}
-	//#endif
+    }
+    //#endif
 }
 
 void PrescribedGradientBCWeak :: giveMirroredPointOnGammaPlus(FloatArray &oPosPlus, const FloatArray &iPosMinus) const
 {
 //#if 0
-if(mMirrorFunction == 0) {
+    if ( mMirrorFunction == 0 ) {
 
-	const double l_box = mUC(0) - mLC(0);
+        const double l_box = mUC(0) - mLC(0);
 
-    oPosPlus = iPosMinus;
-//    const double distTol = 1.0e-16;
-    const double distTol = l_box*1.0e-10;
+        oPosPlus = iPosMinus;
+//        const double distTol = 1.0e-16;
+        const double distTol = l_box*1.0e-10;
 
-//    if ( iPosMinus.distance(mLC) < distTol ) {
-//        printf("iPosMinus: %.12e %.12e\n", iPosMinus [ 0 ], iPosMinus [ 1 ]);
-//        OOFEM_ERROR("Unmappable point.")
-//    }
+//        if ( iPosMinus.distance(mLC) < distTol ) {
+//            printf("iPosMinus: %.12e %.12e\n", iPosMinus [ 0 ], iPosMinus [ 1 ]);
+//            OOFEM_ERROR("Unmappable point.")
+//        }
 
-    double mappingPerformed = false;
+        double mappingPerformed = false;
 
-    if ( iPosMinus [ 0 ] < mLC [ 0 ] + distTol ) {
-        oPosPlus [ 0 ] = mUC [ 0 ];
-        mappingPerformed = true;
-		return;
-    }
+        if ( iPosMinus [ 0 ] < mLC [ 0 ] + distTol ) {
+            oPosPlus [ 0 ] = mUC [ 0 ];
+            mappingPerformed = true;
+            return;
+        }
 
-    if ( iPosMinus [ 1 ] < mLC [ 1 ] + distTol ) {
-        oPosPlus [ 1 ] = mUC [ 1 ];
-        mappingPerformed = true;
-		return;
-    }
+        if ( iPosMinus [ 1 ] < mLC [ 1 ] + distTol ) {
+            oPosPlus [ 1 ] = mUC [ 1 ];
+            mappingPerformed = true;
+            return;
+        }
 
-    if ( !mappingPerformed ) {
-        iPosMinus.printYourself();
-        OOFEM_ERROR("Mapping failed.")
-    }
+        if ( !mappingPerformed ) {
+            iPosMinus.printYourself();
+            OOFEM_ERROR("Mapping failed.")
+        }
 //#else
-}
-else {
+    } else {
 
 #if 1
 
-	const double distTol = 1.0e-12;
-//	bool mappingPerformed = false;
+        const double distTol = 1.0e-12;
+//        bool mappingPerformed = false;
 
-	FloatArray n = mPeriodicityNormal;
-	FloatArray t = {n(1),-n(0)};
-	t.normalize();
+        FloatArray n = mPeriodicityNormal;
+        FloatArray t = {n(1),-n(0)};
+        t.normalize();
 
-	double l_s = mUC[0] - mLC[0];
+        double l_s = mUC[0] - mLC[0];
 
-	// Compute angle
-	double alpha = 0.0, a = 0.0;
-	if( fabs(t(0)) > 1.0e-6 && fabs(t(1)) > 1.0e-6 ) {
-		alpha = atan(t(1)/t(0));
+        // Compute angle
+        double alpha = 0.0, a = 0.0;
+        if ( fabs(t(0)) > 1.0e-6 && fabs(t(1)) > 1.0e-6 ) {
+            alpha = atan(t(1)/t(0));
 
-		if( alpha > 45.0*M_PI/180.0 ) {
-			a = l_s/tan(alpha);
-		}
-		else {
-			a = l_s*tan(alpha);
-		}
-	}
-	else {
-		// 90 degrees
-		a = 0.0;
-	}
+            if ( alpha > 45.0*M_PI/180.0 ) {
+                a = l_s/tan(alpha);
+            } else {
+                a = l_s*tan(alpha);
+            }
+        } else {
+            // 90 degrees
+            a = 0.0;
+        }
 
 //	printf("t(1)/t(0): %e\n", t(1)/t(0));
 //	printf("a: %e\n", a);
 
-	if( alpha > 45.0*M_PI/180.0 ) {
+        if ( alpha > 45.0*M_PI/180.0 ) {
 
-		// alpha > 45 degrees
+            // alpha > 45 degrees
 
-		if ( iPosMinus [ 0 ] < mLC [ 0 ] + distTol ) {
-			// Gamma_1_minus
-			oPosPlus = {l_s, iPosMinus[1]};
-			return;
-		}
+            if ( iPosMinus [ 0 ] < mLC [ 0 ] + distTol ) {
+                // Gamma_1_minus
+                oPosPlus = {l_s, iPosMinus[1]};
+                return;
+            }
 
-		if ( iPosMinus [ 1 ] < mLC [ 1 ] + distTol ) {
-			// Gamma_2_minus
+            if ( iPosMinus [ 1 ] < mLC [ 1 ] + distTol ) {
+                // Gamma_2_minus
 
-			if(iPosMinus[0] < l_s - a) {
-				oPosPlus = {iPosMinus[0] + a, l_s};
-				return;
-			}
-			else {
-				oPosPlus = {iPosMinus[0] - (l_s - a), l_s};
-				return;
-			}
+                if ( iPosMinus[0] < l_s - a) {
+                    oPosPlus = {iPosMinus[0] + a, l_s};
+                    return;
+                }
+                else {
+                    oPosPlus = {iPosMinus[0] - (l_s - a), l_s};
+                    return;
+                }
 
-		}
+            }
 
-	}
-	else {
-		// alpha <= 45 degrees
+        } else {
+            // alpha <= 45 degrees
 
-		if ( iPosMinus [ 0 ] < mLC [ 0 ] + distTol ) {
-			// Gamma_1_minus
+            if ( iPosMinus [ 0 ] < mLC [ 0 ] + distTol ) {
+                // Gamma_1_minus
 
-			if(iPosMinus[1] < l_s - a) {
-				oPosPlus = {l_s, iPosMinus[1] + a};
-				return;
-			}
-			else {
-				oPosPlus = {l_s, iPosMinus[1] - (l_s - a) };
-				return;
-			}
-		}
+                if ( iPosMinus[1] < l_s - a ) {
+                    oPosPlus = {l_s, iPosMinus[1] + a};
+                    return;
+                } else {
+                    oPosPlus = {l_s, iPosMinus[1] - (l_s - a) };
+                    return;
+                }
+            }
 
-		if ( iPosMinus [ 1 ] < mLC [ 1 ] + distTol ) {
-			// Gamma_2_minus
+            if ( iPosMinus [ 1 ] < mLC [ 1 ] + distTol ) {
+                // Gamma_2_minus
 
-			oPosPlus = {iPosMinus[0], l_s};
-			return;
+                oPosPlus = {iPosMinus[0], l_s};
+                return;
 
-		}
+            }
 
-	}
-
-
-#else
-
+        }
 #endif
-
-}
+    }
 //#endif
 }
 
@@ -1817,11 +1793,11 @@ void PrescribedGradientBCWeak :: computeDomainBoundingBox(Domain &iDomain, Float
 
         for ( int j = 0; j < nsd; j++ ) {
             if ( coord [ j ] < lc [ j ] ) {
-            	lc [ j ] = coord [ j ];
+                lc [ j ] = coord [ j ];
             }
 
             if ( coord [ j ] > uc [ j ] ) {
-            	uc [ j ] = coord [ j ];
+                uc [ j ] = coord [ j ];
             }
         }
     }
@@ -1849,8 +1825,6 @@ int PrescribedGradientBCWeak :: giveSideIndex(const FloatArray &iPos) const
     if ( iPos [ 1 ] < mLC [ 1 ] + distTol ) {
         return 3;
     }
-
-
 
     OOFEM_ERROR("Could not identify side index.")
 
@@ -1882,16 +1856,16 @@ void PrescribedGradientBCWeak :: findHoleCoord(std::vector<FloatArray> &oHoleCoo
 
         auto res = map_bnd_node_ind_to_num_occurences.find(startNodeInd);
         if ( res != map_bnd_node_ind_to_num_occurences.end() ) {
-        	map_bnd_node_ind_to_num_occurences[startNodeInd]++;
+            map_bnd_node_ind_to_num_occurences[startNodeInd]++;
         } else {
-        	map_bnd_node_ind_to_num_occurences[startNodeInd] = 1;
+            map_bnd_node_ind_to_num_occurences[startNodeInd] = 1;
         }
 
         res = map_bnd_node_ind_to_num_occurences.find(endNodeInd);
         if ( res != map_bnd_node_ind_to_num_occurences.end() ) {
-        	map_bnd_node_ind_to_num_occurences[endNodeInd]++;
+            map_bnd_node_ind_to_num_occurences[endNodeInd]++;
         } else {
-        	map_bnd_node_ind_to_num_occurences[endNodeInd] = 1;
+            map_bnd_node_ind_to_num_occurences[endNodeInd] = 1;
         }
 
     }
@@ -1899,10 +1873,10 @@ void PrescribedGradientBCWeak :: findHoleCoord(std::vector<FloatArray> &oHoleCoo
 
     for ( auto it = map_bnd_node_ind_to_num_occurences.begin(); it != map_bnd_node_ind_to_num_occurences.end(); ++it ) {
 
-    	bool mandatory_to_keep = false;
-    	if( it->second == 1 ) {
-    		mandatory_to_keep = true;
-    	}
+        bool mandatory_to_keep = false;
+        if ( it->second == 1 ) {
+            mandatory_to_keep = true;
+        }
 
         DofManager *bndNode   = domain->giveDofManager(it->first);
         const FloatArray &x    = * ( bndNode->giveCoordinates() );
@@ -1912,8 +1886,8 @@ void PrescribedGradientBCWeak :: findHoleCoord(std::vector<FloatArray> &oHoleCoo
             giveMirroredPointOnGammaPlus(xPlus, x);
         }
 
-        if(mandatory_to_keep) {
-        	oHoleCoordUnsorted.push_back(xPlus);
+        if ( mandatory_to_keep ) {
+            oHoleCoordUnsorted.push_back(xPlus);
         }
 
         oAllCoordUnsorted.push_back(xPlus);
@@ -1954,16 +1928,15 @@ void PrescribedGradientBCWeak :: findCrackBndIntersecCoord(std::vector<FloatArra
             std :: vector< FloatArray >intersecPoints;
             xfemElInt->partitionEdgeSegment(boundary, segments, intersecPoints, mTangDistPadding);
 
-            for(auto x : intersecPoints) {
+            for ( auto x : intersecPoints ) {
 
-            	if(pointIsOnGammaPlus(x)) {
-            		oHoleCoordUnsorted.push_back(x);
-            	}
-            	else {
-            		FloatArray xPlus;
-            		giveMirroredPointOnGammaPlus(xPlus, x);
-            		oHoleCoordUnsorted.push_back( std::move(xPlus) );
-            	}
+                if ( pointIsOnGammaPlus(x) ) {
+                    oHoleCoordUnsorted.push_back(x);
+                } else {
+                    FloatArray xPlus;
+                    giveMirroredPointOnGammaPlus(xPlus, x);
+                    oHoleCoordUnsorted.push_back( std::move(xPlus) );
+                }
             }
 
         }
@@ -1983,85 +1956,84 @@ void PrescribedGradientBCWeak :: findPeriodicityCoord(std::vector<FloatArray> &o
     FloatArray n = mPeriodicityNormal;
     FloatArray t = {n(1),-n(0)};
 
-    if(mMirrorFunction == 1 || mMirrorFunction == 2) {
+    if ( mMirrorFunction == 1 || mMirrorFunction == 2 ) {
 
-    	if( fabs(n(1)) <= fabs(n(0)) ) {
-			// a <= l_s/2
-			double a = 0.5*l_s*( 1.0 +  n(1)/n(0) );
+        if ( fabs(n(1)) <= fabs(n(0)) ) {
+            // a <= l_s/2
+            double a = 0.5*l_s*( 1.0 +  n(1)/n(0) );
 
-			FloatArray p1 = {2.0*a, 0.0};
-			FloatArray p1Plus;
-			giveMirroredPointOnGammaPlus(p1Plus, p1);
-			oHoleCoordUnsorted.push_back(std::move(p1Plus));
-		}
-		else {
-			// a > l_s/2
-			double c = l_s - 0.5*l_s*( 1.0 + t(1)/t(0) );
+            FloatArray p1 = {2.0*a, 0.0};
+            FloatArray p1Plus;
+            giveMirroredPointOnGammaPlus(p1Plus, p1);
+            oHoleCoordUnsorted.push_back(std::move(p1Plus));
+        } else {
+            // a > l_s/2
+            double c = l_s - 0.5*l_s*( 1.0 + t(1)/t(0) );
 
-			FloatArray p1 = {l_s, l_s-2.0*c};
-			oHoleCoordUnsorted.push_back(std::move(p1));
+            FloatArray p1 = {l_s, l_s-2.0*c};
+            oHoleCoordUnsorted.push_back(std::move(p1));
 
-			FloatArray p2 = {0, 2.0*c};
-			FloatArray p2Plus;
-			giveMirroredPointOnGammaPlus(p2Plus, p2);
-			oHoleCoordUnsorted.push_back(std::move(p2Plus));
-		}
+            FloatArray p2 = {0, 2.0*c};
+            FloatArray p2Plus;
+            giveMirroredPointOnGammaPlus(p2Plus, p2);
+            oHoleCoordUnsorted.push_back(std::move(p2Plus));
+        }
     }
 
 }
 
 void PrescribedGradientBCWeak :: removeClosePoints(std::vector<FloatArray> &ioCoords, const double &iAbsTol)
 {
-	if(ioCoords.size() == 0) {
-		return;
-	}
+    if ( ioCoords.size() == 0 ) {
+        return;
+    }
 
-	const double tol2 = iAbsTol*iAbsTol;
+    const double tol2 = iAbsTol*iAbsTol;
 
-	std::vector<FloatArray> tmp;
-	tmp.push_back(ioCoords[0]);
-	size_t j = 0;
+    std::vector<FloatArray> tmp;
+    tmp.push_back(ioCoords[0]);
+    size_t j = 0;
 
-	for(size_t i = 1; i < ioCoords.size(); i++) {
-		if( ioCoords[i].distance_square(tmp[j]) > tol2 ) {
-			tmp.push_back(ioCoords[i]);
-			j++;
-		}
-	}
+    for ( size_t i = 1; i < ioCoords.size(); i++ ) {
+        if ( ioCoords[i].distance_square(tmp[j]) > tol2 ) {
+            tmp.push_back(ioCoords[i]);
+            j++;
+        }
+    }
 
-	ioCoords = std::move(tmp);
+    ioCoords = std::move(tmp);
 }
 
 void PrescribedGradientBCWeak :: removeSegOverHoles(TracSegArray &ioTSeg, const double &iAbsTol)
 {
-	// Idea: 	Loop over segments and check if the center point of each
-	//			segment is located on an element. If not, the segment is
-	//			located over a hole and needs to be removed.
+    // Idea: 	Loop over segments and check if the center point of each
+    //			segment is located on an element. If not, the segment is
+    //			located over a hole and needs to be removed.
 
-	std :: vector< Line > tmp;
+    std :: vector< Line > tmp;
 
     SpatialLocalizer *localizer = domain->giveSpatialLocalizer();
     const double tol2 = iAbsTol*iAbsTol;
 
-	for(auto &l : ioTSeg.mInteriorSegments) {
-		const FloatArray &xS = l.giveVertex(1);
-		const FloatArray &xE = l.giveVertex(2);
-		FloatArray xPlus = {0.5*(xS[0]+xE[0]), 0.5*(xS[1]+xE[1])};
+    for ( auto &l : ioTSeg.mInteriorSegments ) {
+        const FloatArray &xS = l.giveVertex(1);
+        const FloatArray &xE = l.giveVertex(2);
+        FloatArray xPlus = {0.5*(xS[0]+xE[0]), 0.5*(xS[1]+xE[1])};
 
-		FloatArray lcoordsPlus, closestPlus;
-		localizer->giveElementClosestToPoint(lcoordsPlus, closestPlus, xPlus);
+        FloatArray lcoordsPlus, closestPlus;
+        localizer->giveElementClosestToPoint(lcoordsPlus, closestPlus, xPlus);
 
-		FloatArray xMinus;
-		giveMirroredPointOnGammaMinus(xMinus, xPlus);
-		FloatArray lcoordsMinus, closestMinus;
-		localizer->giveElementClosestToPoint(lcoordsMinus, closestMinus, xMinus);
+        FloatArray xMinus;
+        giveMirroredPointOnGammaMinus(xMinus, xPlus);
+        FloatArray lcoordsMinus, closestMinus;
+        localizer->giveElementClosestToPoint(lcoordsMinus, closestMinus, xMinus);
 
-		if( !(xPlus.distance_square(closestPlus) > tol2 || xMinus.distance_square(closestMinus) > tol2) ) {
-			tmp.push_back(l);
-		}
-	}
+        if ( !(xPlus.distance_square(closestPlus) > tol2 || xMinus.distance_square(closestMinus) > tol2) ) {
+            tmp.push_back(l);
+        }
+    }
 
-	ioTSeg.mInteriorSegments = std::move(tmp);
+    ioTSeg.mInteriorSegments = std::move(tmp);
 }
 
 } /* namespace oofem */

@@ -200,6 +200,12 @@ Beam3d :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, Tim
         answer.plusProductSymmUpper(B, DB, dV);
     }
     answer.symmetrized();
+
+    if (subsoilMat) {
+      FloatMatrix k;
+      this->computeSubSoilStiffnessMatrix(k, rMode, tStep);
+      answer.add(k);
+    }
 }
 
 
@@ -319,6 +325,24 @@ Beam3d :: computeGtoLRotationMatrix(FloatMatrix &answer)
     return true;
 }
 
+void
+Beam3d :: B3SSMI_getUnknownsGtoLRotationMatrix(FloatMatrix &answer)
+// Returns the rotation matrix for element unknowns
+{
+    FloatMatrix lcs;
+    
+    answer.resize(6, 6);
+    answer.zero();
+
+    this->giveLocalCoordinateSystem(lcs);
+    for ( int i = 1; i <= 3; i++ ) {
+        for ( int j = 1; j <= 3; j++ ) {
+            answer.at(i, j) = lcs.at(i, j);
+            answer.at(i + 3, j + 3) = lcs.at(i, j);
+        }
+    }
+
+}
 
 double
 Beam3d :: computeVolumeAround(GaussPoint *gp)
@@ -564,6 +588,9 @@ Beam3d :: initializeFrom(InputRecord *ir)
       //dofsToCondense = NULL;
     }
 
+    this->subsoilMat = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->subsoilMat, _IFT_Beam3d_subsoilmat);
+    
     return StructuralElement :: initializeFrom(ir);
 }
 
@@ -610,6 +637,16 @@ Beam3d :: giveEndForcesVector(FloatArray &answer, TimeStep *tStep)
     this->computeForceLoadVector(loadEndForces, tStep, VM_Total);
     if ( loadEndForces.giveSize() ) {
         answer.subtract(loadEndForces);
+    }
+
+    if (subsoilMat) {
+      // @todo: linear subsoil assumed here; more general approach should integrate internal forces
+      FloatMatrix k;
+      FloatArray u, F;
+      this->computeSubSoilStiffnessMatrix(k, TangentStiffness, tStep);
+      this->computeVectorOf(VM_Total, tStep, u);
+      F.beProductOf(k, u);
+      answer.add(F);
     }
 }
 
@@ -977,7 +1014,9 @@ Beam3d :: giveInterface(InterfaceType interface)
 {
     if ( interface == FiberedCrossSectionInterfaceType ) {
         return static_cast< FiberedCrossSectionInterface * >( this );
-    }
+    } else if (interface == Beam3dSubsoilMaterialInterfaceType ) {
+        return static_cast< Beam3dSubsoilMaterialInterface * >( this );
+    }      
 
     return NULL;
 }
@@ -1046,4 +1085,34 @@ void Beam3d :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, Un
     EMAddGraphicsToModel(ESIModel(), go);
 }
 #endif
+
+void
+Beam3d :: computeSubSoilNMatrixAt(GaussPoint *gp, FloatMatrix &answer)
+{
+  // only winkler model supported now (passing only unknown interpolation)
+  this->computeNmatrixAt(gp->giveNaturalCoordinates(), answer);
+}
+
+
+void
+Beam3d :: computeSubSoilStiffnessMatrix(FloatMatrix &answer,
+					       MatResponseMode rMode, TimeStep *tStep)
+{
+
+  double l = this->computeLength();
+  FloatMatrix N, DN, d;
+    answer.clear();
+    for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
+        this->computeSubSoilNMatrixAt(gp, N);
+	((StructuralMaterial*)this->domain->giveMaterial(subsoilMat))->give3dBeamSubSoilStiffMtrx(d, rMode, gp, tStep);
+        double dV = gp->giveWeight() * 0.5 * l;
+        DN.beProductOf(d, N);
+        answer.plusProductSymmUpper(N, DN, dV);
+    }
+    answer.symmetrized();
+}
+
+
+
+
 } // end namespace oofem

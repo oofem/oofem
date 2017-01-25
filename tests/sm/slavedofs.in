@@ -1,6 +1,6 @@
 slavedofs.out
 Patch test of Truss2d elements -> simple structure with slave dofs 
-LinearStatic nsteps 1 nmodules 1
+StaticStructural nsteps 1 nmodules 1
 errorcheck
 domain 2dBeam
 OutputManager tstep_all dofman_all element_all

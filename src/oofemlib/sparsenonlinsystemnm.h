@@ -136,6 +136,10 @@ public:
      */
     virtual void setStepLength(double s) { this->deltaL = s; }
     /**
+     * Returns true if reference loads are used (i.e. arc length methods).
+     */
+    virtual bool referenceLoad() const { return false; }
+    /**
      * Prints status message of receiver to output stream.
      * Prints the message corresponding to last solve.
      * @param outputStream Stream to print state to.

@@ -1,6 +1,6 @@
 idm03.out
 Test of damage law with exponential softening on a 1D truss element, fracture energy
-NonLinearStatic nsteps 15 rtolf 1e-4 MaxIter 20 stiffMode 1 controlmode 0 psi 0.0 renumber 0 hpcmode 1 hpc 2 2 1 stepLength 0.05 minsteplength 0.05 nmodules 1
+StaticStructural nsteps 15 solverTYpe "calm" rtolf 1e-4 MaxIter 20 psi 0.0 hpcmode 1 hpc 2 2 1 stepLength 0.05 minsteplength 0.05 nmodules 1
 errorcheck
 #vtkxml tstep_all domain_all primvars 1 1
 domain 1dtruss
@@ -13,7 +13,7 @@ SimpleCS 1 thick 1.0 width 10.0 material 1 set 1
 #exponential softening, fracturing strain
 idm1 1 d 1.0  E 10. n 0.2 e0 0.5 gf 3.0 equivstraintype 0 talpha 0.0 damlaw 0
 BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 2
-NodalLoad 2 loadTimeFunction 1 dofs 1 1 components 1 1.0 set 3
+NodalLoad 2 loadTimeFunction 1 dofs 1 1 components 1 1.0 set 3 reference
 ConstantFunction 1 f(t) 1.0
 Set 1 elementranges {1}
 Set 2 nodes 1 1
