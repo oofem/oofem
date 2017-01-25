@@ -405,7 +405,7 @@ void XfemStructureManager :: mergeCloseCracks()
             for ( int j = i+1; j <= giveNumberOfEnrichmentItems(); j++ ) {
                 // TODO: To improve performance, we may wish to use
                 //       a tree structure here.
-                bool mergedCrack = false;
+//                bool mergedCrack = false;
 
                 Crack *crack_j = dynamic_cast< Crack * >( this->giveEnrichmentItem(j) );
 
@@ -459,7 +459,7 @@ void XfemStructureManager :: mergeCloseCracks()
 							crack_j->setEnrichmentFrontEnd(ef_tmp, false);
 
 
-							mergedCrack = true;
+//							mergedCrack = true;
 							break;
                 		}
 
@@ -496,7 +496,7 @@ void XfemStructureManager :: mergeCloseCracks()
 							crack_j->setEnrichmentFrontStart(ef_tmp, false);
 
 
-							mergedCrack = true;
+//							mergedCrack = true;
 							break;
                 		}
 #endif
@@ -534,7 +534,7 @@ void XfemStructureManager :: mergeCloseCracks()
 							crack_j->setEnrichmentFrontEnd(ef_tmp, false);
 
 
-							mergedCrack = true;
+//							mergedCrack = true;
 							break;
                 		}
                 	}
@@ -569,7 +569,7 @@ void XfemStructureManager :: mergeCloseCracks()
 							crack_j->setEnrichmentFrontStart(ef_tmp, false);
 
 
-							mergedCrack = true;
+//							mergedCrack = true;
 							break;
                 		}
                 	}

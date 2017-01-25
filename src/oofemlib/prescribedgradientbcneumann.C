@@ -334,8 +334,8 @@ void PrescribedGradientBCNeumann :: integrateTangent(FloatMatrix &oTangent, Elem
         }
         interp2d->computeLocalEdgeMapping(edgeNodes, iBndIndex);
 
-        const FloatArray &xS = * ( e->giveDofManager( edgeNodes.at(1) )->giveCoordinates() );
-        const FloatArray &xE = * ( e->giveDofManager( edgeNodes.at( edgeNodes.giveSize() ) )->giveCoordinates() );
+//        const FloatArray &xS = * ( e->giveDofManager( edgeNodes.at(1) )->giveCoordinates() );
+//        const FloatArray &xE = * ( e->giveDofManager( edgeNodes.at( edgeNodes.giveSize() ) )->giveCoordinates() );
 
         std :: vector< Line >segments;
         std :: vector< FloatArray >intersecPoints;

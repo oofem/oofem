@@ -157,13 +157,13 @@ std::vector<std::unique_ptr<EnrichmentItem>> NCPrincipalStress::nucleateEnrichme
 		//							line.computeIntersectionPoints(el.get(), intersecPoints);
 
 									for ( int i = 1; i <= el->giveNumberOfDofManagers(); i++ ) {
-										int n1 = i;
-										int n2 = 0;
-										if ( i < el->giveNumberOfDofManagers() ) {
-											n2 = i + 1;
-										} else {
-											n2 = 1;
-										}
+//										int n1 = i;
+//										int n2 = 0;
+//										if ( i < el->giveNumberOfDofManagers() ) {
+//											n2 = i + 1;
+//										} else {
+//											n2 = 1;
+//										}
 
 		//						        const FloatArray &p1 = *(el->giveDofManager(n1)->giveCoordinates());
 		//						        const FloatArray &p2 = *(el->giveDofManager(n2)->giveCoordinates());

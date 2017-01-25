@@ -109,7 +109,7 @@ bool PLPrincipalStrain :: propagateInterface(Domain &iDomain, EnrichmentFront &i
 
     const FloatArray &xT    = tipInfo.mGlobalCoord;
     const FloatArray &t     = tipInfo.mTangDir;
-    const FloatArray &n     = tipInfo.mNormalDir;
+//    const FloatArray &n     = tipInfo.mNormalDir;
 
     // It is meaningless to propagate a tip that is not inside any element
     Element *el = localizer->giveElementContainingPoint(tipInfo.mGlobalCoord);

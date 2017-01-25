@@ -140,7 +140,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
             // Index of current ei
             int eiIndex = enrichingEIs [ p ];
 
-            bool foundIntersection = false;
+//            bool foundIntersection = false;
 
             // Indices of other ei interaction with this ei through intersection enrichment fronts.
             std :: vector< int >touchingEiIndices;
@@ -148,7 +148,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
             if ( firstIntersection ) {
 
-            	foundIntersection = true;
+//            	foundIntersection = true;
 
                 // Get the points describing each subdivision of the element
                 double startXi, endXi;

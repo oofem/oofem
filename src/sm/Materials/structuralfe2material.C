@@ -370,7 +370,7 @@ double StructuralFE2MaterialStatus :: giveRveLength()
 
 void StructuralFE2MaterialStatus :: copyStateVariables(const MaterialStatus &iStatus)
 {
-	static int num = 0;
+//	static int num = 0;
 //	printf("Entering StructuralFE2MaterialStatus :: copyStateVariables.\n");
 
     this->oldTangent = true;
@@ -407,7 +407,7 @@ void StructuralFE2MaterialStatus :: copyStateVariables(const MaterialStatus &iSt
 		    IRResultType result; // Required by IR_GIVE_FIELD macro
 			std::vector<std::unique_ptr<EnrichmentItem>> eiList;
 
-			DynamicInputRecord *xmanRec = new DynamicInputRecord();
+//			DynamicInputRecord *xmanRec = new DynamicInputRecord();
 //			ext_xMan->giveInputRecord(* xmanRec);
 //			dataReader.insertInputRecord(DataReader :: IR_xfemManRec, xmanRec);
 
