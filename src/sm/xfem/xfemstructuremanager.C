@@ -349,7 +349,8 @@ void XfemStructureManager :: removeShortCracks()
         		// ...therefore, just remove the geometry.
                 PolygonLine *polygonLine = dynamic_cast< PolygonLine * >( crack->giveGeometry() );
                 polygonLine->clear();
-        		FloatArray tmp = {0.0, 0.0, 0.0};
+//        		FloatArray tmp = {0.0, 0.0, 0.0};
+        		FloatArray tmp = {-1.0e3, -1.0e3, -1.0e3};
         		polygonLine->insertVertexBack(tmp);
 
         	}
@@ -360,9 +361,23 @@ void XfemStructureManager :: removeShortCracks()
 
 }
 
+bool XfemStructureManager :: tipsHaveOppositeDirection(EnrichmentFront *iEf1, EnrichmentFront *iEf2)
+{
+	const TipInfo &t1 = iEf1->giveTipInfo();
+	const TipInfo &t2 = iEf2->giveTipInfo();
+
+	if( t1.mTangDir.dotProduct( t2.mTangDir ) > 0.0 ) {
+		return false;
+	}
+	else {
+		return true;
+	}
+
+}
+
 void XfemStructureManager :: mergeCloseCracks()
 {
-	printf("Entering XfemStructureManager :: mergeCloseCracks().\n");
+//	printf("Entering XfemStructureManager :: mergeCloseCracks().\n");
 
 	const double &dist_tol = mCrackMergeTol;
 
@@ -393,6 +408,11 @@ void XfemStructureManager :: mergeCloseCracks()
                 bool mergedCrack = false;
 
                 Crack *crack_j = dynamic_cast< Crack * >( this->giveEnrichmentItem(j) );
+
+                if( crack_i->computeLength() < 1.0e-18 || crack_j->computeLength() < 1.0e-18 ) {
+                	continue;
+                }
+
                 if ( crack_j ) {
                 	BasicGeometry *bg_j = crack_j->giveGeometry();
                 	TipInfo startTip_j, endTip_j;
@@ -413,28 +433,35 @@ void XfemStructureManager :: mergeCloseCracks()
                 	if(ps_i.distance(ps_j) < dist_tol) {
                 		printf("ps_i.distance(ps_j) < dist_tol\n");
 
-                		// Append points to the start of polygonLine_i
-                		int n = polygonLine_j->giveNrVertices();
-                		for(int k = 1; k <= n; k++) {
-                			polygonLine_i->insertVertexFront( polygonLine_j->giveVertex(k) );
+                		// Merging is not reasonable if the tips are close to parallel
+                		if( !tipsHaveOppositeDirection(crack_i->giveEnrichmentFrontStart(), crack_j->giveEnrichmentFrontStart()) ) {
+                			printf("Preventing merge due to parallel tips.\n");
                 		}
+                		else {
 
-                		polygonLine_i->removeDuplicatePoints(1.0e-18);
+							// Append points to the start of polygonLine_i
+							int n = polygonLine_j->giveNrVertices();
+							for(int k = 1; k <= n; k++) {
+								polygonLine_i->insertVertexFront( polygonLine_j->giveVertex(k) );
+							}
 
-
-                		polygonLine_j->clear();
-                		FloatArray tmp = {0.0, 0.0, 0.0};
-                		polygonLine_j->insertVertexBack(tmp);
-
-                		// Fix tips
-                		EnrichmentFront *ef_tmp = crack_i->giveEnrichmentFrontStart();
-                		crack_i->setEnrichmentFrontStart( crack_j->giveEnrichmentFrontEnd(), false );
-                		crack_j->setEnrichmentFrontEnd(ef_tmp, false);
+							polygonLine_i->removeDuplicatePoints(1.0e-18);
 
 
-                		mergedCrack = true;
-                		break;
+							polygonLine_j->clear();
+	//                		FloatArray tmp = { 0.0, 0.0, 0.0};
+							FloatArray tmp = {-1.0e3, -1.0e3, -1.0e3};
+							polygonLine_j->insertVertexBack(tmp);
 
+							// Fix tips
+							EnrichmentFront *ef_tmp = crack_i->giveEnrichmentFrontStart();
+							crack_i->setEnrichmentFrontStart( crack_j->giveEnrichmentFrontEnd(), false );
+							crack_j->setEnrichmentFrontEnd(ef_tmp, false);
+
+
+							mergedCrack = true;
+							break;
+                		}
 
                 	}
 
@@ -443,29 +470,35 @@ void XfemStructureManager :: mergeCloseCracks()
                 		printf("ps_i.distance(pe_j) < dist_tol\n");
 
 #if 1
-                		// Append points to the start of polygonLine_i
-                		int n = polygonLine_j->giveNrVertices();
-                		for(int k = n; k > 0; k--) {
-                			polygonLine_i->insertVertexFront( polygonLine_j->giveVertex(k) );
+                		if( !tipsHaveOppositeDirection(crack_i->giveEnrichmentFrontStart(), crack_j->giveEnrichmentFrontEnd()) ) {
+                			printf("Preventing merge due to parallel tips.\n");
                 		}
+                		else {
 
-                		polygonLine_i->removeDuplicatePoints(1.0e-18);
+							// Append points to the start of polygonLine_i
+							int n = polygonLine_j->giveNrVertices();
+							for(int k = n; k > 0; k--) {
+								polygonLine_i->insertVertexFront( polygonLine_j->giveVertex(k) );
+							}
 
-
-                		polygonLine_j->clear();
-                		FloatArray tmp = {0.0, 0.0, 0.0};
-                		polygonLine_j->insertVertexBack(tmp);
-
-
-                		// Fix tips
-                		EnrichmentFront *ef_tmp = crack_i->giveEnrichmentFrontStart();
-                		crack_i->setEnrichmentFrontStart( crack_j->giveEnrichmentFrontStart(), false );
-                		crack_j->setEnrichmentFrontStart(ef_tmp, false);
+							polygonLine_i->removeDuplicatePoints(1.0e-18);
 
 
-                		mergedCrack = true;
-                		break;
+							polygonLine_j->clear();
+	//                		FloatArray tmp = {0.0, 0.0, 0.0};
+							FloatArray tmp = {-1.0e3, -1.0e3, -1.0e3};
+							polygonLine_j->insertVertexBack(tmp);
 
+
+							// Fix tips
+							EnrichmentFront *ef_tmp = crack_i->giveEnrichmentFrontStart();
+							crack_i->setEnrichmentFrontStart( crack_j->giveEnrichmentFrontStart(), false );
+							crack_j->setEnrichmentFrontStart(ef_tmp, false);
+
+
+							mergedCrack = true;
+							break;
+                		}
 #endif
                 	}
 
@@ -475,58 +508,70 @@ void XfemStructureManager :: mergeCloseCracks()
                 		printf("pe_i.distance(ps_j) < dist_tol\n");
 
 
-                		// Append points to the end of polygonLine_i
-                		int n = polygonLine_j->giveNrVertices();
-                		for(int k = 1; k <= n; k++) {
-                			polygonLine_i->insertVertexBack( polygonLine_j->giveVertex(k) );
+                		if( !tipsHaveOppositeDirection(crack_i->giveEnrichmentFrontEnd(), crack_j->giveEnrichmentFrontStart()) ) {
+                			printf("Preventing merge due to parallel tips.\n");
                 		}
+                		else {
 
-                		polygonLine_i->removeDuplicatePoints(1.0e-18);
+							// Append points to the end of polygonLine_i
+							int n = polygonLine_j->giveNrVertices();
+							for(int k = 1; k <= n; k++) {
+								polygonLine_i->insertVertexBack( polygonLine_j->giveVertex(k) );
+							}
 
-
-                		polygonLine_j->clear();
-                		FloatArray tmp = {0.0, 0.0, 0.0};
-                		polygonLine_j->insertVertexBack(tmp);
-
-
-                		// Fix tips
-                		EnrichmentFront *ef_tmp = crack_i->giveEnrichmentFrontEnd();
-                		crack_i->setEnrichmentFrontEnd( crack_j->giveEnrichmentFrontEnd(), false );
-                		crack_j->setEnrichmentFrontEnd(ef_tmp, false);
+							polygonLine_i->removeDuplicatePoints(1.0e-18);
 
 
-                		mergedCrack = true;
-                		break;
+							polygonLine_j->clear();
+	//                		FloatArray tmp = {0.0, 0.0, 0.0};
+							FloatArray tmp = {-1.0e3, -1.0e3, -1.0e3};
+							polygonLine_j->insertVertexBack(tmp);
 
+
+							// Fix tips
+							EnrichmentFront *ef_tmp = crack_i->giveEnrichmentFrontEnd();
+							crack_i->setEnrichmentFrontEnd( crack_j->giveEnrichmentFrontEnd(), false );
+							crack_j->setEnrichmentFrontEnd(ef_tmp, false);
+
+
+							mergedCrack = true;
+							break;
+                		}
                 	}
 
                     ////////////////////////////////////////////////////////////////
                 	if(pe_i.distance(pe_j) < dist_tol) {
                 		printf("pe_i.distance(pe_j) < dist_tol\n");
 
-                		// Append points to the end of polygonLine_i
-                		int n = polygonLine_j->giveNrVertices();
-                		for(int k = n; k > 0; k--) {
-                			polygonLine_i->insertVertexBack( polygonLine_j->giveVertex(k) );
+                		if( !tipsHaveOppositeDirection(crack_i->giveEnrichmentFrontEnd(), crack_j->giveEnrichmentFrontEnd()) ) {
+                			printf("Preventing merge due to parallel tips.\n");
                 		}
+                		else {
 
-                		polygonLine_i->removeDuplicatePoints(1.0e-18);
+							// Append points to the end of polygonLine_i
+							int n = polygonLine_j->giveNrVertices();
+							for(int k = n; k > 0; k--) {
+								polygonLine_i->insertVertexBack( polygonLine_j->giveVertex(k) );
+							}
 
-
-                		polygonLine_j->clear();
-                		FloatArray tmp = {0.0, 0.0, 0.0};
-                		polygonLine_j->insertVertexBack(tmp);
-
-
-                		// Fix tips
-                		EnrichmentFront *ef_tmp = crack_i->giveEnrichmentFrontEnd();
-                		crack_i->setEnrichmentFrontEnd( crack_j->giveEnrichmentFrontStart(), false );
-                		crack_j->setEnrichmentFrontStart(ef_tmp, false);
+							polygonLine_i->removeDuplicatePoints(1.0e-18);
 
 
-                		mergedCrack = true;
-                		break;
+							polygonLine_j->clear();
+	//                		FloatArray tmp = {0.0, 0.0, 0.0};
+							FloatArray tmp = {-1.0e3, -1.0e3, -1.0e3};
+							polygonLine_j->insertVertexBack(tmp);
 
+
+							// Fix tips
+							EnrichmentFront *ef_tmp = crack_i->giveEnrichmentFrontEnd();
+							crack_i->setEnrichmentFrontEnd( crack_j->giveEnrichmentFrontStart(), false );
+							crack_j->setEnrichmentFrontStart(ef_tmp, false);
+
+
+							mergedCrack = true;
+							break;
+                		}
                 	}
 
                 }

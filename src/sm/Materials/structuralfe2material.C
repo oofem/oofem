@@ -44,7 +44,16 @@
 #include "contextioerr.h"
 #include "generalboundarycondition.h"
 #include "prescribedgradienthomogenization.h"
+#include "exportmodulemanager.h"
+#include "vtkxmlexportmodule.h"
+#include "nummet.h"
+#include "EngineeringModels/xfemsolverinterface.h"
+#include "EngineeringModels/staticstructural.h"
+#include "unknownnumberingscheme.h"
+#include "xfem/xfemstructuremanager.h"
 #include "mathfem.h"
+
+#include "dynamicdatareader.h"
 
 #include <sstream>
 
@@ -98,6 +107,13 @@ StructuralFE2Material :: giveRealStressVector_3d(FloatArray &answer, GaussPoint 
 {
     FloatArray stress;
     StructuralFE2MaterialStatus *ms = static_cast< StructuralFE2MaterialStatus * >( this->giveStatus(gp) );
+
+#if 0
+	XfemStructureManager *xMan = dynamic_cast<XfemStructureManager*>( ms->giveRVE()->giveDomain(1)->giveXfemManager() );
+	if(xMan) {
+		printf("Total crack length in RVE: %e\n", xMan->computeTotalCrackLength() );
+	}
+#endif
 
     ms->setTimeStep(tStep);
     // Set input
@@ -165,30 +181,38 @@ StructuralFE2Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatR
         ms->computeTangent(tStep);
         const FloatMatrix &ans9 = ms->giveTangent();
 
-        // Compute the (minor) symmetrized tangent:
-        answer.resize(6, 6);
-        for ( int i = 0; i < 6; ++i ) {
-            for ( int j = 0; j < 6; ++j ) {
-                answer(i, j) = ans9(i, j);
-            }
-        }
-        for ( int i = 0; i < 6; ++i ) {
-            for ( int j = 6; j < 9; ++j ) {
-                answer(i, j-3) += ans9(i, j);
-                answer(j-3, i) += ans9(j, i);
-            }
-        }
-        for ( int i = 6; i < 9; ++i ) {
-            for ( int j = 6; j < 9; ++j ) {
-                answer(j-3, i-3) += ans9(j, i);
-            }
-        }
-        for ( int i = 0; i < 6; ++i ) {
-            for ( int j = 3; j < 6; ++j ) {
-                answer(j, i) *= 0.5;
-                answer(i, j) *= 0.5;
-            }
-        }
+        StructuralMaterial::giveReducedSymMatrixForm(answer, ans9, _3dMat);
+
+//        const FloatMatrix &ans9 = ms->giveTangent();
+//        printf("ans9: "); ans9.printYourself();
+//
+//        // Compute the (minor) symmetrized tangent:
+//        answer.resize(6, 6);
+//        for ( int i = 0; i < 6; ++i ) {
+//            for ( int j = 0; j < 6; ++j ) {
+//                answer(i, j) = ans9(i, j);
+//            }
+//        }
+//        for ( int i = 0; i < 6; ++i ) {
+//            for ( int j = 6; j < 9; ++j ) {
+//                answer(i, j-3) += ans9(i, j);
+//                answer(j-3, i) += ans9(j, i);
+//            }
+//        }
+//        for ( int i = 6; i < 9; ++i ) {
+//            for ( int j = 6; j < 9; ++j ) {
+//                answer(j-3, i-3) += ans9(j, i);
+//            }
+//        }
+//        for ( int i = 0; i < 6; ++i ) {
+//            for ( int j = 3; j < 6; ++j ) {
+//                answer(j, i) *= 0.5;
+//                answer(i, j) *= 0.5;
+//            }
+//        }
+
+
+
 #if 0
         // Numerical ATS for debugging
         FloatMatrix numericalATS(6, 6);
@@ -228,6 +252,8 @@ StructuralFE2Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatR
 StructuralFE2MaterialStatus :: StructuralFE2MaterialStatus(int n, Domain * d, GaussPoint * g,  const std :: string & inputfile) :
 StructuralMaterialStatus(n, d, g)
 {
+	mInputFile = inputfile;
+
     this->oldTangent = true;
 
     if ( !this->createRVE(n, gp, inputfile) ) {
@@ -341,5 +367,170 @@ double StructuralFE2MaterialStatus :: giveRveLength()
 	double rveLength = sqrt( bc->domainSize() );
 	return rveLength;
 }
+
+void StructuralFE2MaterialStatus :: copyStateVariables(const MaterialStatus &iStatus)
+{
+	static int num = 0;
+//	printf("Entering StructuralFE2MaterialStatus :: copyStateVariables.\n");
+
+    this->oldTangent = true;
+
+//    if ( !this->createRVE(this->giveNumber(), gp, mInputFile) ) {
+//        OOFEM_ERROR("Couldn't create RVE");
+//    }
+
+
+	StructuralMaterialStatus::copyStateVariables(iStatus);
+
+	//////////////////////////////
+	MaterialStatus &tmpStat = const_cast< MaterialStatus & >(iStatus);
+	StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*>(&tmpStat);
+
+	if(!fe2ms) {
+		OOFEM_ERROR("Failed to cast StructuralFE2MaterialStatus.")
+	}
+
+	// The proper way to do this would be to clone the RVE from iStatus.
+	// However, this is a mess due to all pointers that need to be tracked.
+	// Therefore, we consider a simplified version: copy only the enrichment items.
+
+	Domain *ext_domain = fe2ms->giveRVE()->giveDomain(1);
+	if( ext_domain->hasXfemManager() ) {
+
+		Domain *rve_domain = rve->giveDomain(1);
+
+		XfemManager *ext_xMan = ext_domain->giveXfemManager();
+		XfemManager *this_xMan = rve->giveDomain(1)->giveXfemManager();
+		DynamicDataReader dataReader;
+		if ( ext_xMan != NULL ) {
+
+		    IRResultType result; // Required by IR_GIVE_FIELD macro
+			std::vector<std::unique_ptr<EnrichmentItem>> eiList;
+
+			DynamicInputRecord *xmanRec = new DynamicInputRecord();
+//			ext_xMan->giveInputRecord(* xmanRec);
+//			dataReader.insertInputRecord(DataReader :: IR_xfemManRec, xmanRec);
+
+			// Enrichment items
+			int nEI = ext_xMan->giveNumberOfEnrichmentItems();
+			for ( int i = 1; i <= nEI; i++ ) {
+				EnrichmentItem *ext_ei = ext_xMan->giveEnrichmentItem(i);
+				ext_ei->appendInputRecords(dataReader);
+
+
+		        InputRecord *mir = dataReader.giveInputRecord(DataReader :: IR_enrichItemRec, i);
+		        std :: string name;
+		        result = mir->giveRecordKeywordField(name);
+
+		        if ( result != IRRT_OK ) {
+		            mir->report_error(this->giveClassName(), __func__, "", result, __FILE__, __LINE__);
+		        }
+
+		        std :: unique_ptr< EnrichmentItem >ei( classFactory.createEnrichmentItem( name.c_str(), i, this_xMan, rve_domain ) );
+		        if ( ei.get() == NULL ) {
+		            OOFEM_ERROR( "unknown enrichment item (%s)", name.c_str() );
+		        }
+
+		        ei->initializeFrom(mir);
+		        ei->instanciateYourself(&dataReader);
+		        eiList.push_back( std :: move(ei) );
+
+			}
+
+			this_xMan->clearEnrichmentItems();
+			this_xMan->appendEnrichmentItems(eiList);
+
+			rve_domain->postInitialize();
+			rve->forceEquationNumbering();
+		}
+
+	}
+
+//	printf("done.\n");
+
+#if 0
+	Domain *newDomain = fe2ms->giveRVE()->giveDomain(1)->Clone();
+	newDomain->SetEngngModel(rve.get());
+	bool deallocateOld = true;
+	rve->setDomain(1, newDomain, deallocateOld);
+
+//	rve->giveDomain(1)->postInitialize();
+	rve->giveNumericalMethod(NULL)->setDomain(newDomain);
+
+	rve->postInitialize();
+//	rve->forceEquationNumbering();
+
+	rve->initMetaStepAttributes( rve->giveMetaStep(1) );
+    rve->giveNextStep(); // Makes sure there is a timestep (which we will modify before solving a step)
+    rve->init();
+
+
+//    std :: ostringstream name;
+//    name << this->rve->giveOutputBaseFileName() << "-gp" << n;
+//    this->rve->letOutputBaseFileNameBe( name.str() );
+//    n++;
+
+    double crackLength = 0.0;
+    XfemStructureManager *xMan = dynamic_cast<XfemStructureManager*>( rve->giveDomain(1)->giveXfemManager() );
+    if(xMan) {
+    	crackLength = xMan->computeTotalCrackLength();
+    }
+
+    std :: ostringstream name;
+    name << this->rve->giveOutputBaseFileName() << "-gp" << num << "crackLength" << crackLength;
+    if ( this->domain->giveEngngModel()->isParallel() && this->domain->giveEngngModel()->giveNumberOfProcesses() > 1 ) {
+        name << "." << this->domain->giveEngngModel()->giveRank();
+    }
+
+    num++;
+
+    this->rve->letOutputBaseFileNameBe( name.str() );
+
+
+	// Update BC
+	this->bc = dynamic_cast< PrescribedGradientHomogenization * >( this->rve->giveDomain(1)->giveBc(1) );
+
+#if 1
+
+    XfemSolverInterface *xfemSolInt = dynamic_cast<XfemSolverInterface*>(rve.get());
+    StaticStructural *statStruct = dynamic_cast<StaticStructural*>(rve.get());
+    if(xfemSolInt && statStruct) {
+//    	printf("Successfully casted to XfemSolverInterface.\n");
+
+    	TimeStep *tStep = rve->giveCurrentStep();
+
+		EModelDefaultEquationNumbering num;
+		int numDofsNew = rve->giveNumberOfDomainEquations( 1, num );
+		FloatArray u;
+		u.resize(numDofsNew);
+		u.zero();
+
+		xfemSolInt->xfemUpdatePrimaryField(*statStruct, tStep, u);
+
+	    // Set domain pointer to various components ...
+		rve->giveNumericalMethod(NULL)->setDomain(newDomain);
+	//        ioEngngModel.nMethod->setDomain(domain);
+
+    }
+
+//    TimeStep *tStep = rve->giveNextStep();
+//    setTimeStep(tStep);
+//    rve->solveYourselfAt(tStep);
+
+
+
+    int numExpModules = rve->giveExportModuleManager()->giveNumberOfModules();
+    for ( int i = 1; i <= numExpModules; i++ ) {
+        //  ... by diving deep into the hierarchies ... :-/
+        VTKXMLExportModule *vtkxmlMod = dynamic_cast< VTKXMLExportModule * >( rve->giveExportModuleManager()->giveModule(i) );
+        if ( vtkxmlMod != NULL ) {
+            vtkxmlMod->giveSmoother()->setDomain(newDomain);
+            vtkxmlMod->givePrimVarSmoother()->setDomain(newDomain);
+        }
+    }
+#endif
+#endif
+}
+
 
 } // end namespace oofem

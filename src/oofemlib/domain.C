@@ -250,6 +250,8 @@ Domain *Domain :: Clone()
     dNew->instanciateYourself(& dataReader);
     dNew->postInitialize();
 
+    dNew->freeDofID = freeDofID;
+
     return dNew;
 }
 

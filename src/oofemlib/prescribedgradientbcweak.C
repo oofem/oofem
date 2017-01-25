@@ -1599,7 +1599,7 @@ void PrescribedGradientBCWeak :: giveMirroredPointOnGammaMinus(FloatArray &oPosM
 		// Compute angle
 		double alpha = 0.0, a = 0.0;
 		if( fabs(t(0)) > 1.0e-6 && fabs(t(1)) > 1.0e-6 ) {
-			alpha = atan(t(1)/t(0));
+			alpha = atan2(t(1), t(0));
 
 			if( alpha > 45.0*M_PI/180.0 ) {
 				a = l_s/tan(alpha);

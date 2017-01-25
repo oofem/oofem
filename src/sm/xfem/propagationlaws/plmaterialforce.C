@@ -71,6 +71,11 @@ bool PLMaterialForce :: propagateInterface(Domain &iDomain, EnrichmentFront &iEn
     // Check if the tip is located in the domain
     SpatialLocalizer *localizer = iDomain.giveSpatialLocalizer();
     FloatArray lCoords, closest;
+//    printf("tipInfo.mGlobalCoord: \n"); tipInfo.mGlobalCoord.printYourself();
+    if( tipInfo.mGlobalCoord.giveSize() == 0 ) {
+    	return false;
+    }
+
     localizer->giveElementClosestToPoint(lCoords, closest, tipInfo.mGlobalCoord);
 
     if(closest.distance(tipInfo.mGlobalCoord) > 1.0e-9) {
@@ -90,13 +95,14 @@ bool PLMaterialForce :: propagateInterface(Domain &iDomain, EnrichmentFront &iEn
     }
 
     double forceNorm = matForce.computeNorm();
-//    printf("forceNorm: %e\n", forceNorm);
+//    printf("forceNorm: %e mCrackPropThreshold: %e\n", forceNorm, mCrackPropThreshold);
 
     if(forceNorm < mCrackPropThreshold || forceNorm < 1.0e-20) {
         return false;
     }
 
-//    printf("Propagating crack.\n");
+    printf("forceNorm: %e mCrackPropThreshold: %e\n", forceNorm, mCrackPropThreshold);
+    printf("Propagating crack in PLMaterialForce :: propagateInterface.\n");
 //    printf("Tip coord: "); tipInfo.mGlobalCoord.printYourself();
 
     FloatArray dir(matForce);

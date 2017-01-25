@@ -84,6 +84,7 @@ public:
 
     void removeShortCracks();
 
+    bool tipsHaveOppositeDirection(EnrichmentFront *iEf1, EnrichmentFront *iEf2);
     void mergeCloseCracks();
 
     bool giveUseNonStdCz() const {return mNonstandardCz;}

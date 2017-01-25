@@ -303,6 +303,9 @@ VTKXMLExportModule :: giveElementCell(IntArray &answer, Element *elem)
             1, 2, 4, 3
         };
     } else if ( elemGT == EGT_quad_21_interface ) {
+//        nodeMapping = {
+//            1, 2, 5, 4, 3, 6
+//        };
         nodeMapping = {
             1, 2, 5, 4, 3, 6
         };

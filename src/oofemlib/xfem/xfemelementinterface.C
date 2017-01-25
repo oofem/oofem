@@ -537,34 +537,124 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
         }
         int nEdges = this->element->giveInterpolation()->giveNumberOfEdges();
         if ( foundTip ) {
-            oPointPartitions.resize( ( nEdges + 1 ) );
+        	oPointPartitions.clear();
 
             // Divide into subdomains
             int triPassed = 0;
             for ( int i = 1; i <= nEdges; i++ ) {
                 IntArray bNodes;
                 this->element->giveInterpolation()->boundaryGiveNodes(bNodes, i);
-                int nsLoc = bNodes.at(1);
-                int neLoc = bNodes.at( bNodes.giveSize() );
 
-                const FloatArray &coordS = * ( element->giveDofManager(nsLoc)->giveCoordinates() );
-                const FloatArray &coordE = * ( element->giveDofManager(neLoc)->giveCoordinates() );
 
-                if ( i == intersecEdgeInd [ 0 ] ) {
-                    oPointPartitions [ triPassed ].push_back(tipCoord);
-                    oPointPartitions [ triPassed ].push_back(intersecPoints [ 0 ]);
-                    oPointPartitions [ triPassed ].push_back(coordE);
-                    triPassed++;
+                if( bNodes.giveSize() == 2 ) {
 
-                    oPointPartitions [ triPassed ].push_back(tipCoord);
-                    oPointPartitions [ triPassed ].push_back(coordS);
-                    oPointPartitions [ triPassed ].push_back(intersecPoints [ 0 ]);
-                    triPassed++;
-                } else   {
-                    oPointPartitions [ triPassed ].push_back(tipCoord);
-                    oPointPartitions [ triPassed ].push_back(coordS);
-                    oPointPartitions [ triPassed ].push_back(coordE);
-                    triPassed++;
+					int nsLoc = bNodes.at(1);
+					int neLoc = bNodes.at( bNodes.giveSize() );
+
+					const FloatArray &coordS = * ( element->giveDofManager(nsLoc)->giveCoordinates() );
+					const FloatArray &coordE = * ( element->giveDofManager(neLoc)->giveCoordinates() );
+
+					if ( i == intersecEdgeInd [ 0 ] ) {
+						oPointPartitions.push_back( std :: vector< FloatArray >() );
+						oPointPartitions [ triPassed ].push_back(tipCoord);
+						oPointPartitions [ triPassed ].push_back(intersecPoints [ 0 ]);
+						oPointPartitions [ triPassed ].push_back(coordE);
+						triPassed++;
+
+						oPointPartitions.push_back( std :: vector< FloatArray >() );
+						oPointPartitions [ triPassed ].push_back(tipCoord);
+						oPointPartitions [ triPassed ].push_back(coordS);
+						oPointPartitions [ triPassed ].push_back(intersecPoints [ 0 ]);
+						triPassed++;
+					} else   {
+						oPointPartitions.push_back( std :: vector< FloatArray >() );
+						oPointPartitions [ triPassed ].push_back(tipCoord);
+						oPointPartitions [ triPassed ].push_back(coordS);
+						oPointPartitions [ triPassed ].push_back(coordE);
+						triPassed++;
+					}
+                }
+                else if( bNodes.giveSize() == 3 ) {
+
+                	// Start
+					const FloatArray &coordS = * ( element->giveDofManager(bNodes(0))->giveCoordinates() );
+
+					// Center
+					const FloatArray &coordC = * ( element->giveDofManager(bNodes(2))->giveCoordinates() );
+
+					// End
+					const FloatArray &coordE = * ( element->giveDofManager(bNodes(1))->giveCoordinates() );
+
+
+					if ( i == intersecEdgeInd [ 0 ] ) {
+
+						// Check if the intersection point is closer to the start or end, compared to the center point.
+						double dist_S_2 = intersecPoints[0].distance_square(coordS);
+//						double dist_E_2 = intersecPoints[0].distance_square(coordE);
+						double dist_C_2 = coordC.distance_square(coordS);
+
+						if( dist_S_2 < dist_C_2 ) {
+							oPointPartitions.push_back( std :: vector< FloatArray >() );
+							oPointPartitions [ triPassed ].push_back(intersecPoints [ 0 ]);
+							oPointPartitions [ triPassed ].push_back(tipCoord);
+							oPointPartitions [ triPassed ].push_back(coordS);
+							triPassed++;
+
+							oPointPartitions.push_back( std :: vector< FloatArray >() );
+							oPointPartitions [ triPassed ].push_back(coordC);
+							oPointPartitions [ triPassed ].push_back(tipCoord);
+							oPointPartitions [ triPassed ].push_back(intersecPoints [ 0 ]);
+							triPassed++;
+
+							oPointPartitions.push_back( std :: vector< FloatArray >() );
+							oPointPartitions [ triPassed ].push_back(coordE);
+							oPointPartitions [ triPassed ].push_back(tipCoord);
+							oPointPartitions [ triPassed ].push_back(coordC);
+							triPassed++;
+
+						}
+						else {
+
+							oPointPartitions.push_back( std :: vector< FloatArray >() );
+							oPointPartitions [ triPassed ].push_back(coordC);
+							oPointPartitions [ triPassed ].push_back(tipCoord);
+							oPointPartitions [ triPassed ].push_back(coordS);
+							triPassed++;
+
+
+							oPointPartitions.push_back( std :: vector< FloatArray >() );
+							oPointPartitions [ triPassed ].push_back(intersecPoints [ 0 ]);
+							oPointPartitions [ triPassed ].push_back(tipCoord);
+							oPointPartitions [ triPassed ].push_back(coordC);
+							triPassed++;
+
+							oPointPartitions.push_back( std :: vector< FloatArray >() );
+							oPointPartitions [ triPassed ].push_back(coordE);
+							oPointPartitions [ triPassed ].push_back(tipCoord);
+							oPointPartitions [ triPassed ].push_back(coordC);
+							triPassed++;
+
+						}
+
+
+					} else   {
+						oPointPartitions.push_back( std :: vector< FloatArray >() );
+						oPointPartitions [ triPassed ].push_back(tipCoord);
+						oPointPartitions [ triPassed ].push_back(coordS);
+						oPointPartitions [ triPassed ].push_back(coordC);
+						triPassed++;
+
+						oPointPartitions.push_back( std :: vector< FloatArray >() );
+						oPointPartitions [ triPassed ].push_back(tipCoord);
+						oPointPartitions [ triPassed ].push_back(coordC);
+						oPointPartitions [ triPassed ].push_back(coordE);
+						triPassed++;
+					}
+
+                }
+                else {
+                	printf("bNodes.giveSize(): %d\n", bNodes.giveSize() );
+                	OOFEM_ERROR("Unsupported size of bNodes.")
                 }
             }
 

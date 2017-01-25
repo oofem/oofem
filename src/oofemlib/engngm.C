@@ -318,8 +318,8 @@ EngngModel :: initializeFrom(InputRecord *ir)
 
     suppressOutput = ir->hasField(_IFT_EngngModel_suppressOutput);
 
-    if ( suppressOutput ) {
-        printf("Suppressing output.\n");
+    if(suppressOutput) {
+//    	printf("Suppressing output.\n");
     }
     else {
 
@@ -671,8 +671,12 @@ EngngModel :: updateYourself(TimeStep *tStep)
 void
 EngngModel :: terminate(TimeStep *tStep)
 {
-    this->doStepOutput(tStep);
-    this->saveStepContext(tStep);
+    if(!suppressOutput) {
+		this->doStepOutput(tStep);
+		fflush( this->giveOutputStream() );
+    }
+
+	this->saveStepContext(tStep);
 }
 
 
@@ -1025,7 +1029,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
         if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >(bc) ) ) {
             va.assembleFromActiveBC(answer, *abc, tStep, mode, s, eNorms);
         } else if ( bc->giveSetNumber() && ( load = dynamic_cast< Load * >(bc) ) && bc->isImposed(tStep) ) {
-            // Now we assemble the corresponding load type for the respective components in the set:
+            // Now we assemble the corresponding load type fo the respective components in the set:
             IntArray dofids, loc, bNodes;
             FloatArray charVec;
             FloatMatrix R;

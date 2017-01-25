@@ -140,11 +140,16 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
             // Index of current ei
             int eiIndex = enrichingEIs [ p ];
 
+            bool foundIntersection = false;
+
             // Indices of other ei interaction with this ei through intersection enrichment fronts.
             std :: vector< int >touchingEiIndices;
             giveIntersectionsTouchingCrack(touchingEiIndices, enrichingEIs, eiIndex, * xMan);
 
             if ( firstIntersection ) {
+
+            	foundIntersection = true;
+
                 // Get the points describing each subdivision of the element
                 double startXi, endXi;
                 bool intersection = false;
@@ -380,6 +385,16 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                                 if ( crackTang.computeSquaredNorm() > tol2 ) {
                                     crackTang.normalize();
                                 }
+                                else {
+                                	// Oops, we got a segment of length zero.
+                                	// These Gauss weights will be zero, so we can
+                                	// set the tangent to anything reasonable
+                                	crackTang = {0.0, 1.0};
+
+
+    //                            	printf("crackTang.computeSquaredNorm(): %e\n", crackTang.computeSquaredNorm() );
+    //                            	OOFEM_ERROR("Breaking.")
+                                }
 
                                 FloatArray crackNormal = {
                                     -crackTang.at(2), crackTang.at(1)
@@ -399,16 +414,107 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
                                     // Fetch material status and set normal
                                     StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( mpCZMat->giveStatus(gp) );
-                                    if ( ms == NULL ) {
-                                        OOFEM_ERROR("Failed to fetch material status.");
+                                    if ( ms ) {
+                                        ms->letNormalBe(crackNormal);
+                                    }
+                                    else {
+                                    	StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*>( mpCZMat->giveStatus(gp) );
+
+                                    	if(fe2ms) {
+                                    		fe2ms->letNormalBe(crackNormal);
+
+    #ifdef use_ppabc
+                                    		PrescribedGradientBCWeak *bc = dynamic_cast<PrescribedGradientBCWeak*>( fe2ms->giveBC() );
+
+                                    		if(bc) {
+    //                                			printf("Fetched PrescribedGradientBCWeak.\n");
+                                    			FloatArray periodicityNormal = crackNormal;
+    //                                			FloatArray periodicityNormal = {-1.736e-01,  9.848e-01};
+
+    //                                			periodicityNormal = {-8.660190526287e-01, 5.000110003630e-01};
+                                    			periodicityNormal.normalize();
+
+                                    			if( periodicityNormal(0) < 0.0 && periodicityNormal(1) < 0.0 ) {
+                                    				// Rotate 90 degrees (works equally well for periodicity)
+                                    				periodicityNormal = {periodicityNormal(1), -periodicityNormal(0)};
+                                    			}
+
+    //                                			printf("periodicityNormal: "); periodicityNormal.printYourself();
+    //                                			printf("periodicityNormal: %.12e, %.12e\n", periodicityNormal(0), periodicityNormal(1) );
+    //                                			OOFEM_ERROR("Breaking.")
+
+                                    			bc->setPeriodicityNormal(periodicityNormal);
+                                    			bc->recomputeTractionMesh();
+                                    		}
+    #endif
+                                    	}
+                                    	else {
+                                    		OOFEM_ERROR("Failed to fetch material status.");
+                                    	}
                                     }
 
-                                    ms->letNormalBe(crackNormal);
 
                                     // Give Gauss point reference to the enrichment item
                                     // to simplify post processing.
                                     crack->AppendCohesiveZoneGaussPoint(gp);
                                 }
+
+//                                printf("mpCZExtraIntegrationRules\n");
+
+                                for ( GaussPoint *gp: *mpCZExtraIntegrationRules [ newRuleInd ] ) {
+                                    double gw = gp->giveWeight();
+                                    double segLength = crackPolygon [ segIndex ].distance(crackPolygon [ segIndex + 1 ]);
+                                    gw *= 0.5 * segLength;
+                                    gp->setWeight(gw);
+
+
+                                    // Fetch material status and set normal
+                                    StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( mpCZMat->giveStatus(gp) );
+                                    if ( ms ) {
+                                        ms->letNormalBe(crackNormal);
+                                    }
+                                    else {
+                                    	StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*>( mpCZMat->giveStatus(gp) );
+
+                                    	if(fe2ms) {
+                                    		fe2ms->letNormalBe(crackNormal);
+
+    #ifdef use_ppabc
+                                    		PrescribedGradientBCWeak *bc = dynamic_cast<PrescribedGradientBCWeak*>( fe2ms->giveBC() );
+
+                                    		if(bc) {
+    //                                			printf("Fetched PrescribedGradientBCWeak.\n");
+                                    			FloatArray periodicityNormal = crackNormal;
+    //                                			FloatArray periodicityNormal = {-1.736e-01,  9.848e-01};
+
+    //                                			periodicityNormal = {-8.660190526287e-01, 5.000110003630e-01};
+                                    			periodicityNormal.normalize();
+
+                                    			if( periodicityNormal(0) < 0.0 && periodicityNormal(1) < 0.0 ) {
+                                    				// Rotate 90 degrees (works equally well for periodicity)
+                                    				periodicityNormal = {periodicityNormal(1), -periodicityNormal(0)};
+                                    			}
+
+    //                                			printf("periodicityNormal: "); periodicityNormal.printYourself();
+    //                                			printf("periodicityNormal: %.12e, %.12e\n", periodicityNormal(0), periodicityNormal(1) );
+    //                                			OOFEM_ERROR("Breaking.")
+
+                                    			bc->setPeriodicityNormal(periodicityNormal);
+                                    			bc->recomputeTractionMesh();
+                                    		}
+    #endif
+                                    	}
+                                    	else {
+                                    		OOFEM_ERROR("Failed to fetch material status.");
+                                    	}
+                                    }
+
+
+                                    // Give Gauss point reference to the enrichment item
+                                    // to simplify post processing.
+                                    crack->AppendCohesiveZoneGaussPoint(gp);
+                                }
+
                             }
                         }
                     } else {
@@ -696,32 +802,29 @@ double XfemStructuralElementInterface :: computeEffectiveSveSize(StructuralFE2Ma
 
 //	return 2.0*sqrt( iFe2Ms->giveBC()->domainSize() );
 
-#if 1
+#if 0
 	return 1.0*sqrt( iFe2Ms->giveBC()->domainSize() );
+//	return 2.0*sqrt( iFe2Ms->giveBC()->domainSize() );
 
 #else
 	// TODO: Cover also angle < 0 and angle > 90.
 
+	const FloatArray &n = iFe2Ms->giveNormal();
 	double l_box = sqrt( iFe2Ms->giveBC()->domainSize() );
 
 	const FloatArray t = {n(1), -n(0)};
 	double angle = atan2( t(1), t(0) );
 
-
 	if( angle < 0.25*M_PI ){
 		// angle < 45 degrees
-		printf("angle < 45 degrees\n");
-		printf("Scaling: %e\n", cos(angle) );
 
-		double l_s = l_box*cos(angle);
+		double l_s = l_box*(cos(angle));
 		return l_s;
 	}
 	else {
 		// angle >= 45 degrees
-		printf("angle >= 45 degrees\n");
-		printf("Scaling: %e\n", sin(angle) );
 
-		double l_s = l_box*sin(angle);
+		double l_s = l_box*(sin(angle));
 		return l_s;
 	}
 #endif

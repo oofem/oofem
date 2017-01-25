@@ -215,8 +215,10 @@ private:
     /// Topology description
     std :: unique_ptr< TopologyDescription > topology;
 
+public:
     /// Keeps track of next free dof ID (for special Lagrange multipliers, XFEM and such)
     int freeDofID;
+private:
 
 #ifdef __PARALLEL_MODE
     /**
@@ -302,6 +304,9 @@ public:
      * Returns engineering model to which receiver is associated.
      */
     EngngModel *giveEngngModel();
+
+    void SetEngngModel(EngngModel *ipEngngModel) {engineeringModel = ipEngngModel;}
+
     /**
      * Service for accessing particular domain load.
      * Generates error if no such load is defined.

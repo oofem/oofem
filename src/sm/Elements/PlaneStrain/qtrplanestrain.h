@@ -61,6 +61,7 @@ public:
     virtual ~QTrPlaneStrain() { }
 
     virtual Interface *giveInterface(InterfaceType it);
+    virtual double giveParentElSize() const { return 0.5; }
 
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 0 : 0 ); }
 
