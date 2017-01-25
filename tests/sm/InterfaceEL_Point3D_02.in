@@ -5,7 +5,7 @@ StaticStructural nsteps 2 rtolf 1.e-4 manrmsteps 30 deltaT 1.0 nmodules 1
 errorcheck
 domain 3d
 OutputManager tstep_all dofman_all element_all
-ndofman 9 nelem 2 ncrosssect 2 nmat 2 nbc 4 nic 0 nltf 2 nset 4
+ndofman 9 nelem 2 ncrosssect 2 nmat 2 nbc 4 nic 0 nltf 2 nset 5
 node 1 coords 3 0.000 0.000 2.000
 node 2 coords 3 0.000 2.000 2.000
 node 3 coords 3 2.000 2.000 2.000
@@ -16,9 +16,9 @@ node 7 coords 3 2.000 2.000 0.000
 node 8 coords 3 2.000 0.000 0.000
 node 9 coords 3 0.000 2.000 3.000
 lspace 1 nodes 8 1 2 3 4 5 6 7 8 crossSect 1
-IntELPoint 2 nodes 2 9 6 crosssect 2 normal 3 0. 1. 0.
+IntELPoint 2 nodes 2 9 6 normal 3 0. 1. 0.
 SimpleCS 1 material 1
-InterfaceCS 2 material 2
+InterfaceCS 2 material 2 set 5
 IsoLe 1 d 2500. E 40.e+3 n 0.15 talpha 2.40e-6 
 #IntMatElastic 2 k 1.e+4-it would assign stiffness in all direction
 #IntMatDummyCZ 2
@@ -33,6 +33,7 @@ Set 1 nodes 2 1 4
 Set 2 nodes 2 5 9
 Set 3 nodes 1 8
 Set 4 nodes 4 2 3 6 7
+Set 5 elementranges {2}
 #
 #
 #%BEGIN_CHECK% tolerance 1.e-5
