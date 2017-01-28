@@ -656,6 +656,17 @@ public:
      */
     static void giveStrainVectorTranformationMtrx(FloatMatrix &answer, const FloatMatrix &base,
                                                   bool transpose = false);
+
+    /**
+     * Computes 2d strain vector transformation matrix from standard vector transformation matrix.
+     * @param answer Transformation matrix for strain vector.
+     * @param base A (2,2) matrix, where on each column are stored unit direction vectors of
+     * local coordinate axes to which we do transformation.
+     * @param transpose Determines if we transpose matrix before transforming.
+     */
+    static void give2DStrainVectorTranformationMtrx(FloatMatrix &answer, const FloatMatrix &base,
+                                                  bool transpose = false);
+    
     /**
      * Computes 3d stress vector transformation matrix from standard vector transformation matrix.
      * @param answer Transformation matrix for stress vector.

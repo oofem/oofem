@@ -4180,6 +4180,334 @@ Supported modes& 3dMat, PlaneStrain\\
 %\end{center}
 \end{table}
 
+
+
+
+\subsubsection{Fixed crack model for concrete - ConcreteFCM}
+\label{concreteFCM}
+Implementation of a fixed crack model. Uncracked material is modeled as isotropic linear elastic characterized by Young's modulus and Poisson's ratio. 
+Cracking is initiated when principal stress reaches tensile strength. Further loading is governed by a softening law. Proper amount energy dissipation is guaranteed by the crack-band approach.
+Multiple cracking is allowed; the maximum number of allowed cracks is controlled by \param{ncracks} parameter. Only mutually perpendicular cracks are supported. If cracking occurs in more directions, the behavior on the crack planes is considered to be independent.
+The secant stiffness is used for unloading and reloading. In a compression regime, this model correspond to an isotropic linear elastic material.
+The model supports 3 different options for stiffness reduction in shear after cracking, 2 options for the limit of the maximum shear stress on a crack plane and 6 different laws for postpeak behavior. The model parameters are summarized in Tab.~\ref{concrete_fcm_table}.
+
+Sample syntax for a fixed crack model with volume density 24 kN/m$^3$, thermal dilation coefficient $12\times10^{-6}$ K$^{-1}$, Young's modulus 20 GPa, Poisson's ratio 0.2, fracture energy 100 N/m, tensile strength 2 MPa, linear softening, constant shear retention factor $\beta = 0.05$, Collins' shear strength (with compressive strength 30 MPa, aggregate size 0.01 m) and all cracks contribute to the shear stiffness; the analysis uses [m], [MPa] and [MN]:\\
+\texttt{ConcreteFCM 1 d 24.e-3 talpha 12.e-6 E 20000.~n 0.2 Gf 100e-6 ft 2.0 softType 2 shearType 1 beta 0.05 shearStrengthType 2 fc 30 ag 0.01\\ lengthscale 1.~multipleCrackShear}
+
+\begin{htmlonly}
+\begin{longtable}{|l|l|}
+\end{htmlonly}
+%begin{latexonly}
+\begin{longtable}{|l|p{9cm}|}
+%end{latexonly}
+\hline
+Description & Fixed crack model for concrete\\
+\hline
+Record Format & \descitem{ConcreteFCM} 
+\elemparam{}{in}
+\elemparam{d}{rn} 
+\elemparam{tAlpha}{rn}
+\elemparam{E}{rn}
+\elemparam{n}{rn}
+\optelemparam{ncracks}{in}
+\optelemstring{multipleCrackShear}
+\optelemparam{crackSpacing}{rn}
+\optelemparam{softType}{in}
+\optelemparam{shearType}{in}
+\optelemparam{shearStrengthType}{in}
+\optelemparam{ecsm}{rn}
+\optelemparam{Gf}{rn}
+\optelemparam{ft}{rn} 
+\optelemparam{beta}{rn} 
+\optelemparam{sf}{rn} 
+\optelemparam{fc}{rn} 
+\optelemparam{ag}{rn} 
+\optelemparam{lengthscale}{rn} 
+\optelemparam{soft\_w}{ra} 
+\optelemparam{soft(w)}{ra} 
+\optelemparam{soft\_eps}{ra} 
+\optelemparam{soft(eps)}{ra} 
+\optelemparam{beta\_w}{ra} 
+\optelemparam{beta(w)}{ra} 
+\optelemparam{H}{rn} 
+\optelemparam{eps\_f}{rn}
+\\
+Parameters &- \param{} material model number\\
+&- \param{d} material density\\
+&- \param{tAlpha} thermal dilatation coefficient\\
+&- \param{E} Young's modulus\\
+&- \param{n} Poisson's ratio\\
+&- \param{ncracks} maximum allowed number of cracks\\
+&- \param{crackSpacing} specified distance between parallel cracks\\
+&- \param{multipleCrackShear} if not given, shear stiffness computed from the dominant crack, otherwise all cracks contribute\\
+&- \param{softType} allows to select suitable softening law:
+\begin{itemize}\setlength{\itemsep}{-3pt}
+\item[0 -] no softening (default)
+\item[1 -] exponential softening with parameters \param{Gf} and \param{ft}
+\item[2 -] linear softening with parameters \param{Gf} and \param{ft}
+\item[3 -] Hordijk softening with parameters \param{Gf} and \param{ft}
+\item[4 -] user-defined wrt crack opening with parameters \param{ft}, \param{soft\_w}, and \param{soft(w)}
+\item[5 -] linear hardening wrt strain with parameters \param{ft}, \param{H}, and optionally \param{eps\_f}
+\item[6 -] user-defined wrt strain with parameters \param{ft}, \param{soft\_eps}, and \param{soft(eps)}
+\end{itemize}\\
+&- \param{shearType} offers to choose from different approaches for shear stiffness reduction of a cracked element
+\begin{itemize}\setlength{\itemsep}{-3pt}
+\item[0 -] no shear reduction (default)
+\item[1 -] constant shear retention factor with parameter \param{beta}
+\item[2 -] constant shear factor coefficient with parameter \param{sf}
+\item[3 -] user-defined shear retention factor with parameters \param{beta\_w} and \param{beta(w)}
+\end{itemize}\\
+&- \param{shearStrengthType} allows to select a shear stress limit on a crack plane
+\begin{itemize}\setlength{\itemsep}{-3pt}
+\item[0 -] no stress limit (default)
+\item[1 -] constant strength = $f_t$
+\item[2 -] Collins interlock with parameters \param{fc}, \param{ag}, and \param{lengthscale}
+\end{itemize}\\
+&- \param{ecsm} method used for evaluation of characteristic element size $L$: 1 = square root of area, 2 = projection centered, 3 = Oliver, 4 = Oliver modified, 0 (default) = projection \\
+&- \param{Gf} fracture energy\\
+&- \param{ft} tensile strength\\
+&- \param{beta} shear retention factor\\
+&- \param{sf} shear factor coefficient\\
+&- \param{fc} compressive strength in MPa \\
+&- \param{ag} aggregate size \\
+&- \param{lengthscale} factor to convert crack opening and aggregate size in case of Collins aggregate interlock; 1 = analysis in meters, 1000 = in millimeters, etc. \\
+&- \param{soft\_w} specified values of crack opening and \\
+&- \param{soft(w)} corresponding values of traction normalized to \param{ft}\\
+&- \param{soft\_eps} specified values of cracking strain and \\
+&- \param{soft(eps)} corresponding values of traction normalized to \param{ft}\\
+&- \param{beta\_w} specified values of crack opening and \\
+&- \param{beta(w)} corresponding values of shear retention factor\\
+&- \param{H} hardening modulus (expressed wrt cracking strain)\\
+&- \param{eps\_f} threshold for cracking strain after which traction is zero (applicable for linear hardening only) \\
+Supported modes& 3dMat, PlaneStress, PlaneStrain\\
+\hline
+\caption{Fixed crack model for concrete -- summary.}
+\label{concrete_fcm_table}
+\end{longtable}
+
+\subsubsection{Fixed crack model for fiber reinforced composites - FRCFCM}
+
+This material model is an extension of the ConcreteFCM described in Section~\ref{concreteFCM}.
+
+It is possible to choose from three different ``classes'' of fibers. This choice is controlled by keyword \param{fiberType}: 0 = continuous aligned fibers (CAF), 1 = short aligned fibers (SAF) and 2 = short random fibers (SRF). Currently, it is not possible to combine more classes of fibers in one material model.
+
+All of the above-mentioned fiber types are further defined by the material properties and geometry. Fiber quantity is captured by the dimensionless volume fraction \param{Vf} (as decimal). All fibers are assumed to have a circular cross-section (shape factor for shear \param{kfib} with default value 0.9) and to possess the same geometry characterized by the diameter \param{Df} and length \param{Lf}.
+
+The overall elastic stiffness of the fiber-reinforced composite is calculated as a weighted average of the moduli of matrix $E_m$ and fibers $E_f$ and the Poisson's ratio is considered to be equal to the Poisson's ratio of the matrix. Similarly to \texttt{ConcreteFCM}, cracking is initiated once the tensile stress $\sigma$ in matrix reaches the tensile strength $f_t$.
+
+The nominal bridging stress for continuous aligned fibers which are not perpendicular to the crack plane $\sigma_{b,f,\theta}$ can be very easily obtained by multiplying the nominal bridging stress for perpendicular fibers $\sigma_{b,f}$ by two terms: the first one reflecting lower volume of inclined fibers passing through the crack plane and the second one capturing the snubbing effect:
+%
+\begin{equation}
+\sigma_{b,f,\theta} = \sigma_{b,f} \cos(\theta) \exp(\theta f)
+\end{equation}
+%
+where $f$ is a snubbing coefficient.
+
+For the \textbf{CAF} perpendicular to the crack, the nominal bridging stress can be derived as
+%
+\begin{equation}
+  \sigma_{b,f} = 2 V_f \sqrt{ \frac{ E_f (1+\eta) \tau_0 } {D_f} \: \bar{w} }
+\end{equation}
+%
+where $\eta = (E_f V_f)/[E_m (1 - V_f)]$.
+
+For \textbf{SRF} the nominal bridging stress is 
+
+\begin{eqnarray}
+\sigma_{b,f}(w) &=& 2 V_f \sqrt{ \frac{E_f (1+\eta) \tau_0 \bar{w}}{D_f} } - \frac{V_f E_f (1+\eta) \bar{w} }{L_f}  \quad \mathrm{for} \: \bar{w} < w^* \\
+\sigma_{b,f}(w) &=& \frac{V_f L_f \tau_s(w)}{D_f} \left( 1- \frac{2 \bar{w}}{L_f} \right)^2 \quad \mathrm{for} \: w^* \leq \bar{w} < L_f/2 \\
+\sigma_{b,f}(w) &=& 0 \quad \mathrm{for} \: \bar{w} > L_f/2 
+\end{eqnarray}
+where $w^* = \left(L_f^2 \tau_0 \right)/[(1+\eta) E_f D_f]$; $\tau_0$ is the bond shear strength between the fiber and matrix for small crack openings, $w<w^\ast$.
+
+Larger pull-out displacements can lead to significant physical changes in the fiber surface which can result into changes in the bond shear stress. This phenomenon is captured by function $\tau_s(w)$ relating the frictional bond to the crack opening and is implemented in three alternative formulations. (In order to keep $\tau_s(w) = \tau_0$ use \param{fssType} = 0.) In conventional FRC with ordinary concrete matrix, the frictional bond usually decreases with increasing slip. To capture this type of behavior we adopt the function proposed by Sajdlov\'{a} (activated with \param{fssType} = 1) reads
+%
+\begin{equation}
+\tau_s(w) = \tau_0 \left[ 1 + \mathrm{sign}(b_0) \left( 1 - \exp \left( -\frac{|b_0| w}{D_f}  \right) \right)  \right]
+\end{equation}
+where $b_0$ is a micromechanical parameter.
+%
+In composites with high-strength matrix and coated high-strength steel fibers (HSFRC, UHPFRC) as well as in SHCC materials with polymeric fibers, the frictional bond-slip relation often exhibits hardening; this phenomenon can be well approximated by a cubic function (activated with \param{fssType} = 2) proposed by Kabele 
+%
+\begin{equation}
+\tau_s(w) = \tau_0 \left[ 1 + b_1 \frac{w}{D_f} + b_2 \left( \frac{w}{D_f} \right)^2 + b_3 \left( \frac{w}{D_f} \right)^3 \right]
+\end{equation}
+%
+or an alternative formulation which results in smooth changes in the bridging stress (activated with \param{fssType} = 3)
+%
+\begin{equation}
+\tau_s(w) = \tilde{\tau}_0 + \tau_0 \left[ b_1 \frac{ \tilde{w} }{D_f} + b_2 \left( \frac{ \tilde{w} }{D_f} \right)^2 + b_3 \left( \frac{ \tilde{w} }{D_f} \right)^3 \right]
+\end{equation}
+%
+In the last two equations $b_1$, $b_2$ and $b_3$ are micromechanical parameters and additionally in the last equation $\tilde{w} = w - w^{\ast}$, $\tilde{\tau_0} = \tau_0 (1.-w^{\ast}/L_f)^{-2}$ for SRF and $\tilde{\tau_0} = \tau_0 E_f (1+\eta) D_f / [ E_f (1+\eta) D_f - 2 L_f \tau_0 ]$ for SAF.
+
+The bridging stress for \textbf{SRF} is defined as 
+%
+\begin{eqnarray}
+\sigma_{b,f}(w) &=& \frac{g V_f L_f \tau_0}{2 D_f} \left( 2 \sqrt{ \frac{\bar{w} }{w^{\ast}} } - \frac{\bar{w}}{ w^{\ast} } \right) \quad \mathrm{for} \: \bar{w} < w^* \\
+\sigma_{b,f}(w) &=& \frac{g V_f L_f \tau_s(w)}{2 D_f} \left( 1- \frac{2 w}{L_f} \right)^2 \quad \mathrm{for} \: w^* \leq \bar{w} < L_f/2 \\
+\sigma_{b,f}(w) &=& 0 \quad \mathrm{for} \: \bar{w} > L_f/2 
+\end{eqnarray}
+%
+where $g$ is the snubbing factor is defined as 
+\begin{equation}
+g = 2 \frac{ 1 + \exp(\pi f / 2) }{ 4 + f^2}
+\end{equation}
+
+It is possible to delay the activation of the stress in fibers using prameteter \param{fibreActivationOpening} which can be imagined as a ``lag'' of the fiber-related crack opening behind the matrix-related crack opening.
+ 
+
+During unloading the stress in fibers does not decrease linearly to origin. Current implementation uses a power function
+%
+\begin{equation}
+  \sigma_{b,f}(w) = \sigma_{b,f}(w_{max}) \left(\frac{\bar{w}}{\bar{w}_{max}}\right)^M
+\end{equation}
+%
+where $w_{\mathrm{max}}$ is the maximum crack width reached in the entire previous history and $M$ is a positive constant, its default value is $M = 4$.
+
+The influence of crack opening and sliding on the bridging shear stress only due to fibers is expressed as 
+\begin{equation}
+\tau_{b,f} = \bar{V}_f k G_{f} \frac{u}{w_{max}} = \frac{\bar{V}_f k G_{f}}{\varepsilon_{cr,max}} \gamma_{cr} 
+\end{equation}
+%
+where $\bar{V}_f$ is the effective volume of fibers crossing a crack plane ($V_f/2$ for SRF and $V_f \cos (\theta)$ for CAF and SAF), and $G_{f}$ is the fiber shear modulus. This expression is motivated by assumption that the fibers bridging the crack planes behave as the Timoshenko beams subjected to shear. Note that the shear stiffness of fibers is not recovered upon unloading.
+
+It has been found that in some high performance fiber reinforced cement composites, fibers rupture when cracks are exposed to shearing. This phenomenon is modeled by damage parameter $\omega$, which accounts for the ratio of ruptured fibers and varies between the values of 0 and 1. It is assumed that $\omega$ depends on the maximum shear strain sustained by the protruding portions of bridging fibers throughout the loading history. This crack shear strain can be expressed as:
+
+\begin{equation}
+\gamma_{f,max} = \max \left( \frac{\left| u_i(t) \right|}{ \max \left(w_i(t) \right)} \right) \quad \dots w(t) > \Delta w
+\end{equation}
+
+where $u_i$ is the crack sliding displacement (CSD) and and $w_i$ is the maximum value of the crack opening displacement of the i-th crack. This means that the damage does not grow if the crack closes (crack opening decreases). If more cracks exist, the maximum contribution is considered. 
+
+Two different one-parameter damage evolution laws are currently implemented. For \param{fDamType} = 0 the damage is deactivated, with \param{fDamType} = 1 damage is described by
+\begin{equation}
+  \omega(\gamma_f) = \min \left( \frac{\gamma_f}{\gamma_{fc}},\: 1 \right)
+\end{equation}
+and finally with \param{fDamType} = 2
+\begin{equation}
+  \omega(\gamma_f) = 1 - \exp \left( - \frac{\gamma_f}{\gamma_{fc}} \right)
+\end{equation}
+%
+where $\gamma_{fc}$ (\param{gammaCrack} in the input record) is a parameter.
+
+ Since damage reduces the number of crack-bridging fibers, which is proportional to the fiber volume fraction, its effect can be suitably implemented by introducing the effective volume fraction
+%
+\begin{equation}
+V_f^{\ast} = V_f (1-\omega)
+\end{equation}
+
+
+
+The material parameters are summarized in Tables \ref{concrete_fcm_table} (matrix) and \ref{frcfcm_table} (fiber extension).
+
+Sample syntax for a fixed crack model reinforced with fibers with volume density 24 kN/m$^3$, thermal dilation coefficient $12\times10^{-6}$ K$^{-1}$, Young's modulus of the matrix 20 GPa, Poisson's ratio of matrix 0.2, fracture energy of matrix 100 N/m, tensile strength of matrix 2 MPa, linear tension softening, constant shear retention factor $\beta = 0.05$, unlimited shear strength (\texttt{shearStrengthType = 0}), continuous aligned fibers, fiber volume 2\%, fiber diameter 0.04 mm, Young's modulus of fibers 20 GPa, shear modulus of fibers 1 GPa, fiber-matrix bond strength 1 MPa, snubbing coefficient 0.7, shear correction coefficient 0.9, deactivated fiber damage, fiber act if COD exceeds 10 $\mu$m (with smoothing from $w = 8 to 11$ $\mu$m), fiber orientation at 45 degrees in x-y plane, automatic evaluation of crack spacing from composition; the analysis uses [m], [MPa] and [MN]:\\
+\texttt{FRCFCM 1 d 24.e-3 talpha 12.e-6 E 20000.~n 0.2 Gf 100e-6 ft 2.0 \\softType 2 shearType 1 beta 0.05 FiberType 0 Vf 0.02 Df 0.04e-3\\ Ef 20000.~Gfib 1000.~tau\_0 1.~FSStype 0  f 0.7 kfib 0.9 fDamType 0 \\ fibreactivationopening 10.e-6 dw0 2.e-6 dw1 1.e-6 orientationVector 3 1.~1.~0.~computeCrackSpacing}
+
+
+\begin{htmlonly}
+\begin{longtable}{|l|l|}
+\end{htmlonly}
+%begin{latexonly}
+\begin{longtable}{|l|p{9cm}|}
+%end{latexonly}
+\hline
+Description & Fixed crack model for FRC\\
+\hline
+Record Format & \descitem{FRCFCM} input record of ConcreteFCM
+\elemparam{Vf}{rn}
+\elemparam{Lf}{rn}
+\elemparam{Df}{rn}
+\elemparam{Ef}{rn}
+\optelemparam{nuf}{rn}
+\optelemparam{Gfib}{rn}
+\optelemparam{kfib}{rn}
+\elemparam{tau\_0}{rn}
+\elemparam{b0}{rn}
+\elemparam{b1}{rn}
+\elemparam{b2}{rn}
+\elemparam{b3}{rn}
+\elemparam{f}{rn}
+\optelemparam{M}{in}
+\optelemparam{fibreOrientationVector}{ra}
+\optelemparam{fssType}{in}
+\optelemparam{fDamType}{in}
+\optelemparam{fiberType}{in}
+\optelemparam{gammaCrack}{rn}
+\optelemstring{computeCrackSpacing}
+\optelemparam{fibreActivationOpening}{rn}
+\optelemparam{dw0}{rn}
+\optelemparam{dw1}{rn}
+\\
+Parameters &- \param{Vf} fiber content expressed as decimal\\
+&- \param{Lf} fiber length\\
+&- \param{Df} fiber diameter\\
+&- \param{Ef} fiber Young's modulus\\
+&- \param{nuf} fiber Poisson's ratio\\
+&- \param{Gfib} fiber shear modulus (read when \param{nuf} is not provided)\\
+&- \param{kfib} fiber cross-sectional shape correction factor\\
+&- \param{tau\_0} bond shear strength at zero slip\\
+&- \param{b0} micromechanical parameter for fiber shear according to Sajdlová\\
+&- \param{b1}, \param{b2}, \param{b3} micromechanical parameter for fiber shear according to Kabele\\
+&- \param{f} snubbing friction coefficient\\
+&- \param{M} exponent related to fiber unloading\\
+&- \param{fibreOrientationVector} vector specifying orientation for CAF and SAF fibers\\
+&- \param{fssType} type of Fiber bond Shear Strength (bond shear strength vs. crack opening)
+\begin{itemize}\setlength{\itemsep}{-3pt}
+\item[0 -] constant shear strength
+\item[1 -] bond shear strength with parameter \param{b0}
+\item[2 -] bond shear strength with parameters \param{b1}, \param{b2}, \param{b3}
+\item[3 -] bond shear strength with parameters \param{b1}, \param{b2}, \param{b3} which leads to smooth traction-separation law
+\end{itemize}\\
+&- \param{fDamType} type of damage law for fibers
+\begin{itemize}\setlength{\itemsep}{-3pt}
+\item[0 -] no damage
+\item[1 -] damage controlled by shear slip deformation of the crack (with \param{gammaCrack}), linear law
+\item[2 -] damage controlled by shear slip deformation of the crack (with \param{gammaCrack}), exponential law
+\end{itemize}\\
+&- \param{fiberType} type of reinforcing fibers
+\begin{itemize}\setlength{\itemsep}{-3pt}
+\item[0 -] CAF (continuous aligned fibers)
+\item[1 -] SAF (short aligned fibers)
+\item[2 -] SRF (short randomly oriented fibers)
+\end{itemize}\\
+&- \param{gammaCrack} crack shear strain parameter applicable with fDamType = 1 or 2 (here the crack shear strain is understood as the crack slip $u$ divided by the crack opening $w$)\\
+&- \param{computeCrackSpacing} crack spacing is evaluated automatically based on provided composition\\
+&- \param{fibreActivationOpening} crack opening at which the fibers begin transferring bridging stress\\
+&- \param{dw0}, \param{dw1} applicable only if \param{fibreActivationOpening} $\neq 0$, then it allows to smooth the traction-separation law for fibers; lower bound is \param{fibreActivationOpening} - \param{dw0} and the upper bound is \param{fibreActivationOpening} - \param{dw1}\\
+Supported modes& 3dMat, PlaneStress, PlaneStrain\\
+\hline
+\caption{Fixed crack model for fiber reinforced concrete -- summary.}
+\label{frcfcm_table}
+\end{longtable}
+
+
+\subsubsection{``Nonlocal'' model for SHCC}
+
+The material parameters are summarized in Tables \ref{concrete_fcm_table} (matrix), \ref{frcfcm_table} (fiber extension), and \ref{frcfcmnl_table} (nonlocal extension).
+
+\begin{htmlonly}
+\begin{longtable}{|l|l|}
+\end{htmlonly}
+%begin{latexonly}
+\begin{longtable}{|l|p{9cm}|}
+%end{latexonly}
+\hline
+Description & Nonlocal fixed crack model for FRC\\
+\hline
+Record Format & \descitem{FRCFCMNL} input record of ConcreteFCM and FRCFCM
+\elemparam{r}{rn}
+\elemparam{wft}{in}
+\\
+Parameters &- \param{r} nonlocal radius (reasonable value is several millimeters and its maximum is $L_f/2$ for short fibers)\\
+&- \param{wft} nonlocal averaging function, must be set to 4 (constant function)\\
+Supported modes& PlaneStress\\
+\hline
+\caption{Nonlocal fixed crack model for fiber reinforced concrete -- summary.}
+\label{frcfcmnl_table}
+\end{longtable}
+
+
 \subsection{Orthotropic damage model with fixed crack orientations for composites - CompDamMat}
 
 The model is designed for transversely isotropic elastic material defined by five elastic material constants. Typical example is a carbon fiber tow. Axis $1$ represents the material principal direction. The orthotropic material constants are defined as
@@ -6224,12 +6552,6 @@ In Rock Under Compression, International Journal of Fracture Mechanics
 \end{thebibliography}
 
 \end{document}
-
-
-
-
-
-
 
 
 

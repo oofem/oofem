@@ -1825,6 +1825,43 @@ StructuralMaterial :: giveStrainVectorTranformationMtrx(FloatMatrix &answer,
 
 
 void
+StructuralMaterial :: give2DStrainVectorTranformationMtrx(FloatMatrix &answer,
+                                                        const FloatMatrix &base,
+                                                        bool transpose)
+//
+// returns transformation matrix for 2d - strains to another system of axes,
+// given by base.
+// In base (FloatMatrix[2,2]) there are on each column stored vectors of
+// coordinate system to which we do transformation.
+//
+// If transpose == 1 we transpose base matrix before transforming
+//
+{
+    FloatMatrix t;
+    answer.resize(3, 3);
+    answer.zero();
+
+    if ( transpose ) {
+        t.beTranspositionOf(base);
+    } else {
+        t = base;
+    }
+
+    answer.at(1, 1) = t.at(1, 1) * t.at(1, 1);
+    answer.at(1, 2) = t.at(2, 1) * t.at(2, 1);
+    answer.at(1, 3) = t.at(1, 1) * t.at(2, 1);
+
+    answer.at(2, 1) = t.at(1, 2) * t.at(1, 2);
+    answer.at(2, 2) = t.at(2, 2) * t.at(2, 2);
+    answer.at(2, 3) = t.at(1, 2) * t.at(2, 2);
+
+    answer.at(3, 1) = 2.0 * t.at(1, 1) * t.at(1, 2);
+    answer.at(3, 2) = 2.0 * t.at(2, 1) * t.at(2, 2);
+    answer.at(3, 3) = ( t.at(1, 1) * t.at(2, 2) + t.at(2, 1) * t.at(1, 2) );
+}
+  
+
+void
 StructuralMaterial :: giveStressVectorTranformationMtrx(FloatMatrix &answer,
                                                         const FloatMatrix &base,
                                                         bool transpose)

@@ -1,0 +1,208 @@
+frcfcm_tension.out
+fixed crack model for fiber reinforced concrete - separate tests on a single finite element
+#
+NonLinearStatic nsteps 100 deltaT 1. rtolv 1.e-6 maxiter 10000 controllmode 1  stiffmode 0 renumber 1 nmodules 1 
+#
+errorcheck
+#
+domain 2dplanestress
+OutputManager tstep_all dofman_all element_all
+#
+ndofman 24 nelem 8 ncrosssect 8 nmat 8 nbc 5 nic 0 nltf 3 nset 13
+#
+# 1 CAF
+#
+node   1   coords 3  0.0  0.0  0.0 
+node   2   coords 3  0.1  0.0  0.0 
+node   3   coords 3  0.0  0.1  0.0
+#
+# 2 SAF
+#
+node   4   coords 3  0.0  0.0  0.0 
+node   5   coords 3  0.1  0.0  0.0 
+node   6   coords 3  0.0  0.1  0.0
+#
+# 3_SRF
+#
+node   7   coords 3  0.0  0.0  0.0 
+node   8   coords 3  0.1  0.0  0.0 
+node   9   coords 3  0.0  0.1  0.0
+#
+# 4_CAF_activation_opening
+#
+node  10   coords 3  0.0  0.0  0.0 
+node  11   coords 3  0.1  0.0  0.0 
+node  12   coords 3  0.0  0.1  0.0
+#
+# 5_CAF_crack_spacing
+#
+node  13   coords 3  0.0  0.0  0.0 
+node  14   coords 3  0.2  0.0  0.0 
+node  15   coords 3  0.0  0.1  0.0
+#
+# 6_CAF_fibre_orientation_snubbing
+#
+node  16   coords 3  0.0  0.0  0.0 
+node  17   coords 3  0.1  0.0  0.0 
+node  18   coords 3  0.0  0.1  0.0
+#
+# 7_CAF_fibre_orientation_no_snubbing
+#
+node  19   coords 3  0.0  0.0  0.0 
+node  20   coords 3  0.1  0.0  0.0 
+node  21   coords 3  0.0  0.1  0.0 
+#
+# 8_CAF_activation_opening_smooth
+#
+node  22   coords 3  0.0  0.0  0.0 
+node  23   coords 3  0.1  0.0  0.0 
+node  24   coords 3  0.0  0.1  0.0
+#
+TrPlaneStress2D   1   nodes 3    1 2 3 
+TrPlaneStress2D   2   nodes 3    4 5 6 
+TrPlaneStress2D   3   nodes 3    7 8 9 
+TrPlaneStress2D   4   nodes 3    10 11 12 
+TrPlaneStress2D   5   nodes 3    13 14 15 
+TrPlaneStress2D   6   nodes 3    16 17 18 
+TrPlaneStress2D   7   nodes 3    19 20 21 
+TrPlaneStress2D   8   nodes 3    22 23 24 
+#
+SimpleCS 1 thick 1.  width 1.0 material 1 set 6
+SimpleCS 2 thick 1.  width 1.0 material 2 set 7
+SimpleCS 3 thick 1.  width 1.0 material 3 set 8
+SimpleCS 4 thick 1.  width 1.0 material 4 set 9
+SimpleCS 5 thick 1.  width 1.0 material 5 set 10
+SimpleCS 6 thick 1.  width 1.0 material 6 set 11
+SimpleCS 7 thick 1.  width 1.0 material 7 set 12
+SimpleCS 8 thick 1.  width 1.0 material 8 set 13
+#
+frcfcm 1 d 0. talpha 0. E 20000. n 0.2 Gf 100.e-6 ft 2.0 softtype 2 sheartype 0 Vf 0.02 Df 0.04e-3 Ef 20000. Gfib 1000. tau_0 1. f 0.7 kfib 0.9 FSStype 0 fDamType 0 FiberType 0
+frcfcm 2 d 0. talpha 0. E 20000. n 0.2 Gf 100.e-6 ft 2.0 softtype 2 sheartype 0 Vf 0.02 Lf 12.e-3 Df 0.04e-3 Ef 20000. Gfib 1000. tau_0 1. f 0.7 kfib 0.9 FSStype 0 fDamType 0 FiberType 1
+frcfcm 3 d 0. talpha 0. E 20000. n 0.2 Gf 100.e-6 ft 2.0 softtype 2 sheartype 0 Vf 0.02 Lf 12.e-3 Df 0.04e-3 Ef 20000. Gfib 1000. tau_0 1. f 0.7 kfib 0.9 FSStype 0 fDamType 0 FiberType 2
+frcfcm 4 d 0. talpha 0. E 20000. n 0.2 Gf 20.e-6 ft 2.0 softtype 2 sheartype 0 Vf 0.02 Df 0.04e-3 Ef 20000. Gfib 1000. tau_0 1. f 0.7 kfib 0.9 FSStype 0 fDamType 0 FiberType 0 fibreactivationopening 10.e-6
+frcfcm 5 d 0. talpha 0. E 20000. n 0.2 Gf 20.e-6 ft 2.0 softtype 2 sheartype 0 Vf 0.02 Df 0.04e-3 Ef 20000. Gfib 1000. tau_0 1. f 0.7 kfib 0.9 FSStype 0 fDamType 0 FiberType 0 fibreactivationopening 10.e-6 crackSpacing 0.1
+frcfcm 6 d 0. talpha 0. E 20000. n 0.2 Gf 20.e-6 ft 2.0 softtype 2 sheartype 0 Vf 0.02 Df 0.04e-3 Ef 20000. Gfib 1000. tau_0 1. f 0.7 kfib 0.9 FSStype 0 fDamType 0 FiberType 0 fibreactivationopening 00.e-6 fibreOrientationVector 3 0.5 0.866025403784439 0.
+frcfcm 7 d 0. talpha 0. E 20000. n 0.2 Gf 20.e-6 ft 2.0 softtype 2 sheartype 0 Vf 0.02 Df 0.04e-3 Ef 20000. Gfib 1000. tau_0 1. f 0. kfib 0.9 FSStype 0 fDamType 0 FiberType 0 fibreactivationopening 00.e-6 fibreOrientationVector 3 0.5 0.866025403784439 0.
+frcfcm 8 d 0. talpha 0. E 20000. n 0.2 Gf 10.e-6 ft 2.0 softtype 2 sheartype 0 Vf 0.02 Df 0.04e-3 Ef 20000. Gfib 1000. tau_0 1. f 0.7 kfib 0.9 FSStype 0 fDamType 0 FiberType 0 fibreactivationopening 10.e-6 dw0 5.e-6 dw1 5.e-6
+#
+#
+BoundaryCondition  1 loadTimeFunction 1 dofs 1 1 values 1 0. set 1
+BoundaryCondition  2 loadTimeFunction 1 dofs 1 2 values 1 0. set 2
+BoundaryCondition  3 loadTimeFunction 2 dofs 1 1 values 1 1.e-2 set 3
+BoundaryCondition  4 loadTimeFunction 3 dofs 1 1 values 1 1.e-2 set 4
+BoundaryCondition  5 loadTimeFunction 3 dofs 1 1 values 1 2.e-2 set 5
+#
+#
+ConstantFunction 1 f(t) 1.0
+# normal loading:
+PiecewiseLinfunction 2 npoints 12 t 12 0. 1. 10. 20. 30. 40. 50. 60. 70. 80. 90. 100. f(t) 12 0. 1.e-3 5.e-3 0. 5.e-3 10.e-3 0. 10.e-3 20.e-3 0. 20.e-3 60.e-3
+# activation opening:
+PiecewiseLinfunction 3 npoints 11 t 11 0. 10. 20. 30. 40. 50. 60. 70. 80. 90. 100. f(t) 11 0. 1.e-3 2.5e-3 0. 2.5e-3 6.e-3 0. 6.e-3 10.e-3 0. -1.e-3
+#
+#
+Set 1 nodes 16 1 3 4 6 7 9 10 12 13 15 16 18 19 21 22 24
+Set 2 nodes 16 1 2 4 5 7 8 10 11 13 14 16 17 19 20 22 23
+Set 3 nodes 3 2 5 8
+set 4 nodes 4 11 17 20 23
+set 5 nodes 1 14 
+#
+set 6  elementranges {1}
+set 7  elementranges {2}
+set 8  elementranges {3}
+set 9  elementranges {4}
+set 10 elementranges {5}
+set 11 elementranges {6}
+set 12 elementranges {7}
+set 13 elementranges {8}
+#
+#
+#%BEGIN_CHECK% 
+#ELEMENT tStep  5 number 1 gp 1 keyword 1 component 1  value 3.777700e+00 tolerance 1.e-4
+#ELEMENT tStep 15 number 1 gp 1 keyword 1 component 1  value 2.689000e+00 tolerance 1.e-4
+#ELEMENT tStep 27 number 1 gp 1 keyword 1 component 1  value 2.689000e+00 tolerance 1.e-4
+#ELEMENT tStep 35 number 1 gp 1 keyword 1 component 1  value 6.702500e+00 tolerance 1.e-4
+#ELEMENT tStep 45 number 1 gp 1 keyword 1 component 1  value 2.835100e+00 tolerance 1.e-4
+#ELEMENT tStep 57 number 1 gp 1 keyword 1 component 1  value 2.835100e+00 tolerance 1.e-4
+#ELEMENT tStep 65 number 1 gp 1 keyword 1 component 1  value 8.915600e+00 tolerance 1.e-4
+#ELEMENT tStep 75 number 1 gp 1 keyword 1 component 1  value 2.971400e+00 tolerance 1.e-4
+#ELEMENT tStep 87 number 1 gp 1 keyword 1 component 1  value 2.971400e+00 tolerance 1.e-4
+#ELEMENT tStep 95 number 1 gp 1 keyword 1 component 1  value 1.522300e+01 tolerance 1.e-4
+#
+#ELEMENT tStep  5 number 2 gp 1 keyword 1 component 1  value 3.692700e+00 tolerance 1.e-4
+#ELEMENT tStep 15 number 2 gp 1 keyword 1 component 1  value 2.307300e+00 tolerance 1.e-4
+#ELEMENT tStep 27 number 2 gp 1 keyword 1 component 1  value 2.307300e+00 tolerance 1.e-4
+#ELEMENT tStep 35 number 2 gp 1 keyword 1 component 1  value 5.566300e+00 tolerance 1.e-4
+#ELEMENT tStep 45 number 2 gp 1 keyword 1 component 1  value 1.785300e+00 tolerance 1.e-4
+#ELEMENT tStep 57 number 2 gp 1 keyword 1 component 1  value 1.785300e+00 tolerance 1.e-4
+#ELEMENT tStep 65 number 2 gp 1 keyword 1 component 1  value 5.745900e+00 tolerance 1.e-4
+#ELEMENT tStep 75 number 2 gp 1 keyword 1 component 1  value 1.210400e+00 tolerance 1.e-4
+#ELEMENT tStep 87 number 2 gp 1 keyword 1 component 1  value 1.210400e+00 tolerance 1.e-4
+#ELEMENT tStep 95 number 2 gp 1 keyword 1 component 1  value 5.352000e+00 tolerance 1.e-4
+#
+#ELEMENT tStep  5 number 3 gp 1 keyword 1 component 1  value 3.571500e+00 tolerance 1.e-4
+#ELEMENT tStep 15 number 3 gp 1 keyword 1 component 1  value 2.104600e+00 tolerance 1.e-4
+#ELEMENT tStep 27 number 3 gp 1 keyword 1 component 1  value 2.104600e+00 tolerance 1.e-4 
+#ELEMENT tStep 35 number 3 gp 1 keyword 1 component 1  value 5.111000e+00 tolerance 1.e-4
+#ELEMENT tStep 45 number 3 gp 1 keyword 1 component 1  value 1.531200e+00 tolerance 1.e-4
+#ELEMENT tStep 57 number 3 gp 1 keyword 1 component 1  value 1.531200e+00 tolerance 1.e-4
+#ELEMENT tStep 65 number 3 gp 1 keyword 1 component 1  value 5.145300e+00 tolerance 1.e-4
+#ELEMENT tStep 75 number 3 gp 1 keyword 1 component 1  value 1.032300e+00 tolerance 1.e-4
+#ELEMENT tStep 87 number 3 gp 1 keyword 1 component 1  value 1.032300e+00 tolerance 1.e-4
+#ELEMENT tStep 95 number 3 gp 1 keyword 1 component 1  value 4.766400e+00 tolerance 1.e-4
+#
+#ELEMENT tStep  5 number 4 gp 1 keyword 1 component 1  value 8.000000e-01 tolerance 1.e-4
+#ELEMENT tStep 15 number 4 gp 1 keyword 1 component 1  value 1.188800e+00 tolerance 1.e-4
+#ELEMENT tStep 25 number 4 gp 1 keyword 1 component 1  value 6.498400e-01 tolerance 1.e-4
+#ELEMENT tStep 35 number 4 gp 1 keyword 1 component 1  value 3.785700e-01 tolerance 1.e-4
+#ELEMENT tStep 45 number 4 gp 1 keyword 1 component 1  value 3.235400e+00 tolerance 1.e-4
+#ELEMENT tStep 55 number 4 gp 1 keyword 1 component 1  value 1.314200e+00 tolerance 1.e-4
+#ELEMENT tStep 65 number 4 gp 1 keyword 1 component 1  value 2.454600e-01 tolerance 1.e-4
+#ELEMENT tStep 75 number 4 gp 1 keyword 1 component 1  value 5.577700e+00 tolerance 1.e-4
+#ELEMENT tStep 85 number 4 gp 1 keyword 1 component 1  value 1.864700e+00 tolerance 1.e-4
+#ELEMENT tStep 95 number 4 gp 1 keyword 1 component 1  value -8.000000e-01 tolerance 1.e-4
+#
+#ELEMENT tStep  5 number 5 gp 1 keyword 1 component 1  value 8.000000e-01 tolerance 1.e-4
+#ELEMENT tStep 15 number 5 gp 1 keyword 1 component 1  value 1.188800e+00 tolerance 1.e-4
+#ELEMENT tStep 25 number 5 gp 1 keyword 1 component 1  value 6.498400e-01 tolerance 1.e-4
+#ELEMENT tStep 35 number 5 gp 1 keyword 1 component 1  value 3.785700e-01 tolerance 1.e-4
+#ELEMENT tStep 45 number 5 gp 1 keyword 1 component 1  value 3.235400e+00 tolerance 1.e-4
+#ELEMENT tStep 55 number 5 gp 1 keyword 1 component 1  value 1.314200e+00 tolerance 1.e-4
+#ELEMENT tStep 65 number 5 gp 1 keyword 1 component 1  value 2.454600e-01 tolerance 1.e-4
+#ELEMENT tStep 75 number 5 gp 1 keyword 1 component 1  value 5.577700e+00 tolerance 1.e-4
+#ELEMENT tStep 85 number 5 gp 1 keyword 1 component 1  value 1.864700e+00 tolerance 1.e-4
+#ELEMENT tStep 95 number 5 gp 1 keyword 1 component 1  value -8.000000e-01 tolerance 1.e-4
+#
+#ELEMENT tStep  5 number 6 gp 1 keyword 1 component 1  value 8.000000e-01 tolerance 5.e-5
+#ELEMENT tStep 15 number 6 gp 1 keyword 1 component 1  value 2.926100e+00 tolerance 5.e-5
+#ELEMENT tStep 25 number 6 gp 1 keyword 1 component 1  value 1.960000e+00 tolerance 5.e-5
+#ELEMENT tStep 35 number 6 gp 1 keyword 1 component 1  value 1.178100e+00 tolerance 5.e-5
+#ELEMENT tStep 45 number 6 gp 1 keyword 1 component 1  value 4.186100e+00 tolerance 5.e-5
+#ELEMENT tStep 55 number 6 gp 1 keyword 1 component 1  value 2.031900e+00 tolerance 5.e-5
+#ELEMENT tStep 65 number 6 gp 1 keyword 1 component 1  value 7.592900e-01 tolerance 5.e-5
+#ELEMENT tStep 75 number 6 gp 1 keyword 1 component 1  value 6.279600e+00 tolerance 5.e-5
+#ELEMENT tStep 85 number 6 gp 1 keyword 1 component 1  value 2.472800e+00 tolerance 5.e-5
+#ELEMENT tStep 95 number 6 gp 1 keyword 1 component 1  value -8.000000e-01 tolerance 5.e-5
+#
+#ELEMENT tStep  5 number 7 gp 1 keyword 1 component 1  value 8.000000e-01 tolerance 5.e-5
+#ELEMENT tStep 15 number 7 gp 1 keyword 1 component 1  value 2.465800e+00 tolerance 5.e-5
+#ELEMENT tStep 25 number 7 gp 1 keyword 1 component 1  value 9.852800e-01 tolerance 5.e-5
+#ELEMENT tStep 35 number 7 gp 1 keyword 1 component 1  value 5.058500e-01 tolerance 5.e-5
+#ELEMENT tStep 45 number 7 gp 1 keyword 1 component 1  value 2.356800e+00 tolerance 5.e-5
+#ELEMENT tStep 55 number 7 gp 1 keyword 1 component 1  value 7.884800e-01 tolerance 5.e-5
+#ELEMENT tStep 65 number 7 gp 1 keyword 1 component 1  value 2.075500e-01 tolerance 5.e-5
+#ELEMENT tStep 75 number 7 gp 1 keyword 1 component 1  value 3.461000e+00 tolerance 5.e-5
+#ELEMENT tStep 85 number 7 gp 1 keyword 1 component 1  value 9.324100e-01 tolerance 5.e-5
+#ELEMENT tStep 95 number 7 gp 1 keyword 1 component 1  value -8.000000e-01 tolerance 5.e-5
+#
+#ELEMENT tStep  5 number 8 gp 1 keyword 1 component 1  value 8.00000000e-01 tolerance 5.e-5
+#ELEMENT tStep 15 number 8 gp 1 keyword 1 component 1  value 1.00781563e+00 tolerance 5.e-5
+#ELEMENT tStep 25 number 8 gp 1 keyword 1 component 1  value 5.56534357e-01 tolerance 5.e-5
+#ELEMENT tStep 35 number 8 gp 1 keyword 1 component 1  value 8.84920963e-02 tolerance 5.e-5
+#ELEMENT tStep 45 number 8 gp 1 keyword 1 component 1  value 3.23539450e+00 tolerance 5.e-5
+#ELEMENT tStep 55 number 8 gp 1 keyword 1 component 1  value 1.46149038e+00 tolerance 5.e-5
+#ELEMENT tStep 65 number 8 gp 1 keyword 1 component 1  value 3.91347201e-01 tolerance 5.e-5
+#ELEMENT tStep 75 number 8 gp 1 keyword 1 component 1  value 5.57774621e+00 tolerance 5.e-5
+#ELEMENT tStep 85 number 8 gp 1 keyword 1 component 1  value 1.99236910e+00 tolerance 5.e-5
+#ELEMENT tStep 95 number 8 gp 1 keyword 1 component 1  value -7.99999193e-01 tolerance 5.e-5
+#
+#%END_CHECK%

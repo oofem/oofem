@@ -141,6 +141,8 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_CrackDirs:
     case IST_CrackStatuses:
     case IST_CrackVector:
+    case IST_2ndCrackVector:
+    case IST_3rdCrackVector:      
     case IST_InterfaceFirstPKTraction:
     case IST_InterfaceTraction:
     case IST_InterfaceJump:
@@ -190,9 +192,13 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_Maturity:
     case IST_CrossSectionNumber:
     case IST_CrackWidth:
+    case IST_2ndCrackWidth:
+    case IST_3rdCrackWidth: 
     case IST_TensileStrength:
     case IST_ResidualTensileStrength:
     case IST_CrackIndex:
+    case IST_FiberStressNL:
+    case IST_FiberStressLocal:     
         return ISVT_SCALAR;
 
     default:
