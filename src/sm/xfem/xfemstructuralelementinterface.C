@@ -66,11 +66,6 @@
 #include <string>
 #include <sstream>
 
-//#define cz_bulk_corr
-
-//#define rotate_sve
-
-//#define modify_bulk_stress
 
 ////////////////////////////////////
 //
@@ -79,15 +74,6 @@
 // Alt. II : include_bulk_jump = 1 and include_bulk_corr = 0
 //
 // Alt. III: include_bulk_jump = 0 and include_bulk_corr = 0
-//
-// Alt. IV : use_hat_func = 1
-
-
-#define use_ppabc
-
-#define include_bulk_jump
-
-#define include_bulk_corr
 
 
 namespace oofem {
@@ -95,7 +81,9 @@ XfemStructuralElementInterface :: XfemStructuralElementInterface(Element *e) :
     XfemElementInterface(e),
     mpCZMat(NULL),
     mCZMaterialNum(-1),
-    mCSNumGaussPoints(4)
+    mCSNumGaussPoints(4),
+	mIncludeBulkJump(true),
+	mIncludeBulkCorr(true)
 {
 
 
@@ -141,15 +129,11 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
             // Index of current ei
             int eiIndex = enrichingEIs [ p ];
 
-//            bool foundIntersection = false;
-
             // Indices of other ei interaction with this ei through intersection enrichment fronts.
             std :: vector< int >touchingEiIndices;
             giveIntersectionsTouchingCrack(touchingEiIndices, enrichingEIs, eiIndex, * xMan);
 
             if ( firstIntersection ) {
-
-//            	foundIntersection = true;
 
                 // Get the points describing each subdivision of the element
                 double startXi, endXi;
@@ -183,7 +167,10 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                         for ( size_t segIndex = 0; segIndex < numSeg; segIndex++ ) {
                             int czRuleNum = 1;
                             mpCZIntegrationRules_tmp.emplace_back( new GaussIntegrationRule(czRuleNum, element) );
-                            mpCZExtraIntegrationRules_tmp.emplace_back( new GaussIntegrationRule(czRuleNum, element) );
+
+                            if(mIncludeBulkCorr) {
+                            	mpCZExtraIntegrationRules_tmp.emplace_back( new GaussIntegrationRule(czRuleNum, element) );
+                            }
 
                             size_t cz_rule_ind = mpCZIntegrationRules_tmp.size() - 1;
 
@@ -207,9 +194,6 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                             	// set the tangent to anything reasonable
                             	crackTang = {0.0, 1.0};
 
-
-//                            	printf("crackTang.computeSquaredNorm(): %e\n", crackTang.computeSquaredNorm() );
-//                            	OOFEM_ERROR("Breaking.")
                             }
 
                             FloatArray crackNormal = {
@@ -219,8 +203,10 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                             mpCZIntegrationRules_tmp [ cz_rule_ind ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode,
                                                                                            crackPolygon [ segIndex ], crackPolygon [ segIndex + 1 ]);
 
-                            mpCZExtraIntegrationRules_tmp [ cz_rule_ind ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode,
+                            if(mIncludeBulkCorr) {
+                            	mpCZExtraIntegrationRules_tmp [ cz_rule_ind ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode,
                                                                                            crackPolygon [ segIndex ], crackPolygon [ segIndex + 1 ]);
+                            }
 
                             for ( GaussPoint *gp: *mpCZIntegrationRules_tmp [ cz_rule_ind ] ) {
                                 double gw = gp->giveWeight();
@@ -239,15 +225,11 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                                 	if(fe2ms) {
                                 		fe2ms->letNormalBe(crackNormal);
 
-#ifdef use_ppabc
                                 		PrescribedGradientBCWeak *bc = dynamic_cast<PrescribedGradientBCWeak*>( fe2ms->giveBC() );
 
                                 		if(bc) {
-//                                			printf("Fetched PrescribedGradientBCWeak.\n");
                                 			FloatArray periodicityNormal = crackNormal;
-//                                			FloatArray periodicityNormal = {-1.736e-01,  9.848e-01};
 
-//                                			periodicityNormal = {-8.660190526287e-01, 5.000110003630e-01};
                                 			periodicityNormal.normalize();
 
                                 			if( periodicityNormal(0) < 0.0 && periodicityNormal(1) < 0.0 ) {
@@ -255,14 +237,9 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                                 				periodicityNormal = {periodicityNormal(1), -periodicityNormal(0)};
                                 			}
 
-//                                			printf("periodicityNormal: "); periodicityNormal.printYourself();
-//                                			printf("periodicityNormal: %.12e, %.12e\n", periodicityNormal(0), periodicityNormal(1) );
-//                                			OOFEM_ERROR("Breaking.")
-
                                 			bc->setPeriodicityNormal(periodicityNormal);
                                 			bc->recomputeTractionMesh();
                                 		}
-#endif
                                 	}
                                 	else {
                                 		OOFEM_ERROR("Failed to fetch material status.");
@@ -276,65 +253,52 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                             }
 
 
+                            if(mIncludeBulkCorr) {
 
-                            for ( GaussPoint *gp: *mpCZExtraIntegrationRules_tmp [ cz_rule_ind ] ) {
-                                double gw = gp->giveWeight();
-                                double segLength = crackPolygon [ segIndex ].distance(crackPolygon [ segIndex + 1 ]);
-                                gw *= 0.5 * segLength;
-                                gp->setWeight(gw);
+								for ( GaussPoint *gp: *mpCZExtraIntegrationRules_tmp [ cz_rule_ind ] ) {
+									double gw = gp->giveWeight();
+									double segLength = crackPolygon [ segIndex ].distance(crackPolygon [ segIndex + 1 ]);
+									gw *= 0.5 * segLength;
+									gp->setWeight(gw);
 
-                                // Fetch material status and set normal
-                                StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( gp->giveMaterialStatus() );
-                                if ( ms ) {
-                                    ms->letNormalBe(crackNormal);
-                                }
-                                else {
-                                	StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*>( gp->giveMaterialStatus() );
+									// Fetch material status and set normal
+									StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( gp->giveMaterialStatus() );
+									if ( ms ) {
+										ms->letNormalBe(crackNormal);
+									}
+									else {
+										StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*>( gp->giveMaterialStatus() );
 
-                                	if(fe2ms) {
-                                		fe2ms->letNormalBe(crackNormal);
+										if(fe2ms) {
+											fe2ms->letNormalBe(crackNormal);
 
-#ifdef use_ppabc
-                                		PrescribedGradientBCWeak *bc = dynamic_cast<PrescribedGradientBCWeak*>( fe2ms->giveBC() );
+											PrescribedGradientBCWeak *bc = dynamic_cast<PrescribedGradientBCWeak*>( fe2ms->giveBC() );
 
-                                		if(bc) {
-//                                			printf("Fetched PrescribedGradientBCWeak.\n");
-//                                			FloatArray periodicityNormal = crackNormal;
-                                			FloatArray periodicityNormal = crackNormal;
-//                                			FloatArray periodicityNormal = {-1.736e-01,  9.848e-01};
-//                                			periodicityNormal = {-8.660190526287e-01, 5.000110003630e-01};
-                                			periodicityNormal.normalize();
-//                                			printf("periodicityNormal: "); periodicityNormal.printYourself();
-//                                			printf("periodicityNormal: %.12e, %.12e\n", periodicityNormal(0), periodicityNormal(1) );
+											if(bc) {
+												FloatArray periodicityNormal = crackNormal;
+												periodicityNormal.normalize();
 
-                                			if( periodicityNormal(0) < 0.0 && periodicityNormal(1) < 0.0 ) {
-                                				// Rotate 90 degrees (works equally well for periodicity)
-                                				periodicityNormal = {periodicityNormal(1), -periodicityNormal(0)};
-                                			}
+												if( periodicityNormal(0) < 0.0 && periodicityNormal(1) < 0.0 ) {
+													// Rotate 90 degrees (works equally well for periodicity)
+													periodicityNormal = {periodicityNormal(1), -periodicityNormal(0)};
+												}
 
-//                                			OOFEM_ERROR("Breaking.")
-                                			bc->setPeriodicityNormal(periodicityNormal);
-                                			bc->recomputeTractionMesh();
+												bc->setPeriodicityNormal(periodicityNormal);
+												bc->recomputeTractionMesh();
 
-                                		}
-#endif
-                                	}
-                                	else {
-                                		// Macroscale material model: nothing needs to be done.
-//                                		OOFEM_ERROR("Failed to fetch material status.");
-                                	}
-                                }
+											}
+										}
+										else {
+											// Macroscale material model: nothing needs to be done.
+										}
+									}
 
+								}
 
-                                // Give Gauss point reference to the enrichment item
-                                // to simplify post processing.
-//                                crack->AppendCohesiveZoneGaussPoint(gp);
                             }
 
                         }
                     }
-
-
 
                     partitionSucceeded = true;
                 }
@@ -373,7 +337,11 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                             for ( int segIndex = 0; segIndex < numSeg; segIndex++ ) {
                                 int czRuleNum = 1;
                                 mpCZIntegrationRules_tmp.emplace_back( new GaussIntegrationRule(czRuleNum, element) );
-                                mpCZExtraIntegrationRules_tmp.emplace_back( new GaussIntegrationRule(czRuleNum, element) );
+
+                                if(mIncludeBulkCorr) {
+                                	mpCZExtraIntegrationRules_tmp.emplace_back( new GaussIntegrationRule(czRuleNum, element) );
+                                }
+
                                 size_t newRuleInd = mpCZIntegrationRules_tmp.size() - 1;
                                 mCZEnrItemIndices.push_back(eiIndex);
 
@@ -392,9 +360,6 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                                 	// set the tangent to anything reasonable
                                 	crackTang = {0.0, 1.0};
 
-
-    //                            	printf("crackTang.computeSquaredNorm(): %e\n", crackTang.computeSquaredNorm() );
-    //                            	OOFEM_ERROR("Breaking.")
                                 }
 
                                 FloatArray crackNormal = {
@@ -404,8 +369,10 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                                 mpCZIntegrationRules_tmp [ newRuleInd ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode,
                                                                                                  crackPolygon [ segIndex ], crackPolygon [ segIndex + 1 ]);
 
-                                mpCZExtraIntegrationRules_tmp [ newRuleInd ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode,
+                                if(mIncludeBulkCorr) {
+                                	mpCZExtraIntegrationRules_tmp [ newRuleInd ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode,
                                                                                                  crackPolygon [ segIndex ], crackPolygon [ segIndex + 1 ]);
+                                }
 
                                 for ( GaussPoint *gp: *mpCZIntegrationRules_tmp [ newRuleInd ] ) {
                                     double gw = gp->giveWeight();
@@ -424,15 +391,11 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                                     	if(fe2ms) {
                                     		fe2ms->letNormalBe(crackNormal);
 
-    #ifdef use_ppabc
                                     		PrescribedGradientBCWeak *bc = dynamic_cast<PrescribedGradientBCWeak*>( fe2ms->giveBC() );
 
                                     		if(bc) {
-    //                                			printf("Fetched PrescribedGradientBCWeak.\n");
                                     			FloatArray periodicityNormal = crackNormal;
-    //                                			FloatArray periodicityNormal = {-1.736e-01,  9.848e-01};
 
-    //                                			periodicityNormal = {-8.660190526287e-01, 5.000110003630e-01};
                                     			periodicityNormal.normalize();
 
                                     			if( periodicityNormal(0) < 0.0 && periodicityNormal(1) < 0.0 ) {
@@ -440,14 +403,9 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                                     				periodicityNormal = {periodicityNormal(1), -periodicityNormal(0)};
                                     			}
 
-    //                                			printf("periodicityNormal: "); periodicityNormal.printYourself();
-    //                                			printf("periodicityNormal: %.12e, %.12e\n", periodicityNormal(0), periodicityNormal(1) );
-    //                                			OOFEM_ERROR("Breaking.")
-
                                     			bc->setPeriodicityNormal(periodicityNormal);
                                     			bc->recomputeTractionMesh();
                                     		}
-    #endif
                                     	}
                                     	else {
                                     		OOFEM_ERROR("Failed to fetch material status.");
@@ -460,62 +418,53 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                                     crack->AppendCohesiveZoneGaussPoint(gp);
                                 }
 
-//                                printf("mpCZExtraIntegrationRules\n");
+                                if(mIncludeBulkCorr) {
 
-                                for ( GaussPoint *gp: *mpCZExtraIntegrationRules_tmp [ newRuleInd ] ) {
-                                    double gw = gp->giveWeight();
-                                    double segLength = crackPolygon [ segIndex ].distance(crackPolygon [ segIndex + 1 ]);
-                                    gw *= 0.5 * segLength;
-                                    gp->setWeight(gw);
-
-
-                                    // Fetch material status and set normal
-                                    StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( mpCZMat->giveStatus(gp) );
-                                    if ( ms ) {
-                                        ms->letNormalBe(crackNormal);
-                                    }
-                                    else {
-                                    	StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*>( mpCZMat->giveStatus(gp) );
-
-                                    	if(fe2ms) {
-                                    		fe2ms->letNormalBe(crackNormal);
-
-    #ifdef use_ppabc
-                                    		PrescribedGradientBCWeak *bc = dynamic_cast<PrescribedGradientBCWeak*>( fe2ms->giveBC() );
-
-                                    		if(bc) {
-    //                                			printf("Fetched PrescribedGradientBCWeak.\n");
-                                    			FloatArray periodicityNormal = crackNormal;
-    //                                			FloatArray periodicityNormal = {-1.736e-01,  9.848e-01};
-
-    //                                			periodicityNormal = {-8.660190526287e-01, 5.000110003630e-01};
-                                    			periodicityNormal.normalize();
-
-                                    			if( periodicityNormal(0) < 0.0 && periodicityNormal(1) < 0.0 ) {
-                                    				// Rotate 90 degrees (works equally well for periodicity)
-                                    				periodicityNormal = {periodicityNormal(1), -periodicityNormal(0)};
-                                    			}
-
-    //                                			printf("periodicityNormal: "); periodicityNormal.printYourself();
-    //                                			printf("periodicityNormal: %.12e, %.12e\n", periodicityNormal(0), periodicityNormal(1) );
-    //                                			OOFEM_ERROR("Breaking.")
-
-                                    			bc->setPeriodicityNormal(periodicityNormal);
-                                    			bc->recomputeTractionMesh();
-                                    		}
-    #endif
-                                    	}
-                                    	else {
-                                    		OOFEM_ERROR("Failed to fetch material status.");
-                                    	}
-                                    }
+									for ( GaussPoint *gp: *mpCZExtraIntegrationRules_tmp [ newRuleInd ] ) {
+										double gw = gp->giveWeight();
+										double segLength = crackPolygon [ segIndex ].distance(crackPolygon [ segIndex + 1 ]);
+										gw *= 0.5 * segLength;
+										gp->setWeight(gw);
 
 
-                                    // Give Gauss point reference to the enrichment item
-                                    // to simplify post processing.
-                                    crack->AppendCohesiveZoneGaussPoint(gp);
+										// Fetch material status and set normal
+										StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( mpCZMat->giveStatus(gp) );
+										if ( ms ) {
+											ms->letNormalBe(crackNormal);
+										}
+										else {
+											StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*>( mpCZMat->giveStatus(gp) );
+
+											if(fe2ms) {
+												fe2ms->letNormalBe(crackNormal);
+
+												PrescribedGradientBCWeak *bc = dynamic_cast<PrescribedGradientBCWeak*>( fe2ms->giveBC() );
+
+												if(bc) {
+													FloatArray periodicityNormal = crackNormal;
+
+													periodicityNormal.normalize();
+
+													if( periodicityNormal(0) < 0.0 && periodicityNormal(1) < 0.0 ) {
+														// Rotate 90 degrees (works equally well for periodicity)
+														periodicityNormal = {periodicityNormal(1), -periodicityNormal(0)};
+													}
+
+													bc->setPeriodicityNormal(periodicityNormal);
+													bc->recomputeTractionMesh();
+												}
+											}
+											else {
+												OOFEM_ERROR("Failed to fetch material status.");
+											}
+										}
+
+
+										// Give Gauss point reference to the enrichment item
+										// to simplify post processing.
+										crack->AppendCohesiveZoneGaussPoint(gp);
+									}
                                 }
-
                             }
                         }
                     } else {
@@ -568,7 +517,6 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
             std :: vector< std :: unique_ptr< IntegrationRule > >intRule;
             mIntRule_tmp.emplace_back( new PatchIntegrationRule(ruleNum, element, mSubTri) );
             mIntRule_tmp [ 0 ]->SetUpPointsOnTriangle(xMan->giveNumGpPerTri(), matMode);
-//            element->setIntegrationRules( std :: move(intRule) );
         }
 
 
@@ -609,10 +557,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
 
         bool map_state_variables = true;
-//        bool map_state_variables = false;
         if(map_state_variables) {
-//        	printf("Mapping state variables.\n");
-
 
             ////////////////////////////////////////////////////////////////////////
         	// Copy bulk GPs
@@ -625,15 +570,12 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
         			// Fetch new material status. Create it if it does not exist.
         			MaterialStatus *ms_new = dynamic_cast<MaterialStatus*>( gp_new->giveMaterialStatus() );
         			if(!ms_new) {
-        				//printf("ms == NULL\n");
-
         				StructuralElement *s_el = dynamic_cast<StructuralElement*>(element);
         				StructuralCrossSection *cs = s_el->giveStructuralCrossSection();
         				cs->createMaterialStatus(*gp_new);
         				ms_new = dynamic_cast<MaterialStatus*>( gp_new->giveMaterialStatus() );
         			}
 
-//        			printf("ms_new->giveClassName(): %s\n", ms_new->giveClassName() );
 
 
         			// Find closest old GP.
@@ -641,8 +583,6 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
         			MaterialStatus *ms_old = giveClosestGP_MatStat( closest_dist, element->giveIntegrationRulesArray() , gp_new->giveGlobalCoordinates());
 
         			if(ms_old) {
-//        				OOFEM_ERROR("Failed to fetch old material status.")
-
 
 						// Copy state variables.
 						MaterialStatusMapperInterface *mapper_interface = dynamic_cast<MaterialStatusMapperInterface*>( ms_new );
@@ -656,22 +596,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 						}
         			}
 
-//        			StructuralFE2MaterialStatus *ms_fe2 = dynamic_cast<StructuralFE2MaterialStatus*>( ms_new );
-//
-//        			if(ms_fe2) {
-//						if( ms_fe2->mNewlyInitialized ) {
-//							printf("Newly initialized.\n");
-//						}
-//						else {
-//							printf("Not newly initialized.\n");
-//						}
-//        			}
         		}
-
-//        		for(GaussPoint *gp : *(this->element->giveIntegrationRule(i)) ) {
-//        			MaterialStatus *ms = dynamic_cast<MaterialStatus*>( gp->giveMaterialStatus() );
-//        			printf("ms->giveClassName(): %s\n", ms->giveClassName() );
-//        		}
 
         	}
             ////////////////////////////////////////////////////////////////////////
@@ -680,9 +605,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
             ////////////////////////////////////////////////////////////////////////
         	// Copy CZ GPs
-//        	printf("mCZMaterialNum: %d\n", mCZMaterialNum);
         	if( mCZMaterialNum > 0 ) {
-//        		printf("Copying CZ GPs.\n");
 
 				num_ir_new = mpCZIntegrationRules_tmp.size();
 				for( int i = 0; i < num_ir_new; i++ ) {
@@ -692,20 +615,12 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 						// Fetch new material status. Create it if it does not exist.
 						MaterialStatus *ms_new = dynamic_cast<MaterialStatus*>( gp_new->giveMaterialStatus() );
 						if(!ms_new) {
-							//printf("ms == NULL\n");
-
 							ms_new = mpCZMat->CreateStatus(gp_new);
-
-//							StructuralElement *s_el = dynamic_cast<StructuralElement*>(element);
-//							StructuralCrossSection *cs = s_el->giveStructuralCrossSection();
-//							cs->createMaterialStatus(*gp_new);
-//							ms_new = dynamic_cast<MaterialStatus*>( gp_new->giveMaterialStatus() );
 						}
 
 	        			// Find closest old GP.
 	        			double closest_dist_cz = 0.0;
 	        			MaterialStatus *ms_old = giveClosestGP_MatStat(closest_dist_cz, mpCZIntegrationRules , gp_new->giveGlobalCoordinates());
-//						printf("closest_dist_cz: %e\n", closest_dist_cz);
 
 	        			// If we are using the nonstandard cz formulation, we
 	        			// also consider mapping from bulk GPs.
@@ -718,7 +633,6 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 	        			if(non_std_cz) {
 							double closest_dist_bulk = 0.0;
 							MaterialStatus *ms_old_bulk = giveClosestGP_MatStat(closest_dist_bulk, element->giveIntegrationRulesArray() , gp_new->giveGlobalCoordinates());
-//							printf("closest_dist_bulk: %e\n", closest_dist_bulk);
 							if( closest_dist_bulk < closest_dist_cz ) {
 								printf("Bulk is closest. Dist: %e\n", closest_dist_bulk);
 								ms_old = ms_old_bulk;
@@ -726,14 +640,11 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 	        			}
 
 	        			if(ms_old) {
-	//        				OOFEM_ERROR("Failed to fetch old material status.")
-
 
 							// Copy state variables.
 							MaterialStatusMapperInterface *mapper_interface = dynamic_cast<MaterialStatusMapperInterface*>( ms_new );
 
 							if(mapper_interface) {
-	//							printf("Successfully casted to MaterialStatusMapperInterface.\n");
 								mapper_interface->copyStateVariables(*ms_old);
 							}
 							else {
@@ -752,10 +663,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
             ////////////////////////////////////////////////////////////////////////
         	// Copy "extra" CZ GPs (Used for non-standard CZ model)
-
-        	//        	printf("mCZMaterialNum: %d\n", mCZMaterialNum);
-        	if( mCZMaterialNum > 0 ) {
-        	//        		printf("Copying CZ GPs.\n");
+        	if( mCZMaterialNum > 0 && mIncludeBulkCorr ) {
 
         		num_ir_new = mpCZExtraIntegrationRules_tmp.size();
         		for( int i = 0; i < num_ir_new; i++ ) {
@@ -771,7 +679,6 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
         				// Find closest old GP.
         				double closest_dist_cz = 0.0;
         				MaterialStatus *ms_old = giveClosestGP_MatStat(closest_dist_cz, mpCZExtraIntegrationRules , gp_new->giveGlobalCoordinates());
-//        				printf("closest_dist_cz for extra gp: %e\n", closest_dist_cz);
 
         				// If we are using the nonstandard cz formulation, we
         				// also consider mapping from bulk GPs.
@@ -796,7 +703,6 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
         					MaterialStatusMapperInterface *mapper_interface = dynamic_cast<MaterialStatusMapperInterface*>( ms_new );
 
         					if(mapper_interface) {
-        		//							printf("Successfully casted to MaterialStatusMapperInterface.\n");
         						mapper_interface->copyStateVariables(*ms_old);
         					}
         					else {
@@ -808,10 +714,8 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
         		}
         	}
         	else {
-        		printf("No extra CZ GPs to map.\n");
+//        		printf("No extra CZ GPs to map.\n");
         	}
-
-
 
             ////////////////////////////////////////////////////////////////////////
 
@@ -824,7 +728,11 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
     if ( partitionSucceeded ) {
 		mpCZIntegrationRules = std::move(mpCZIntegrationRules_tmp);
-		mpCZExtraIntegrationRules = std::move(mpCZExtraIntegrationRules_tmp);
+
+		if(mIncludeBulkCorr) {
+			mpCZExtraIntegrationRules = std::move(mpCZExtraIntegrationRules_tmp);
+		}
+
 		element->setIntegrationRules( std :: move(mIntRule_tmp) );
     }
 
@@ -833,8 +741,6 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
 MaterialStatus* XfemStructuralElementInterface :: giveClosestGP_MatStat(double &oClosestDist, std :: vector< std :: unique_ptr< IntegrationRule > > &iRules, const FloatArray &iCoord)
 {
-//	printf("Entering XfemStructuralElementInterface :: giveClosestGP_MatStat with iCoord: ");
-//	iCoord.printYourself();
 
 	double min_dist2 = std::numeric_limits<double>::max();
 	MaterialStatus *closest_ms = NULL;
@@ -858,16 +764,6 @@ MaterialStatus* XfemStructuralElementInterface :: giveClosestGP_MatStat(double &
 
 double XfemStructuralElementInterface :: computeEffectiveSveSize(StructuralFE2MaterialStatus *iFe2Ms)
 {
-//	const FloatArray &n = iFe2Ms->giveNormal();
-//	printf("c: %e\n", c);
-
-//	return (1.0/c)*2.0*sqrt( iFe2Ms->giveBC()->domainSize() );
-
-
-//	double c = pow( std::max( fabs(n(0)), fabs(n(1)) ) ,4);
-//	return c*2.0*sqrt( iFe2Ms->giveBC()->domainSize() );
-
-//	return 2.0*sqrt( iFe2Ms->giveBC()->domainSize() );
 
 #if 0
 	return 1.0*sqrt( iFe2Ms->giveBC()->domainSize() );
@@ -979,8 +875,6 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeStressVector(
 
 void XfemStructuralElementInterface :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep)
 {
-
-
 	if(!useNonStdCz()) {
 
 		if ( hasCohesiveZone() ) {
@@ -1002,7 +896,6 @@ void XfemStructuralElementInterface :: computeCohesiveForces(FloatArray &answer,
 					FloatArray T2D;
 
 
-
 					// Fetch material status and get normal
 					StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( mpCZMat->giveStatus(gp) );
 					if ( ms == NULL ) {
@@ -1012,20 +905,6 @@ void XfemStructuralElementInterface :: computeCohesiveForces(FloatArray &answer,
 					ms->setNewlyInserted(false); //TODO: Do this in a better place. /ES
 
 					FloatArray crackNormal( ms->giveNormal() );
-//					printf("crackNormal: "); crackNormal.printYourself();
-//					double cnL = crackNormal.computeNorm();
-//					if( fabs(cnL - 1.0) > 0.01 ) {
-//						printf("crackNormal: "); crackNormal.printYourself();
-//
-//					    if ( this->element->giveDomain()->giveEngngModel()->giveProblemScale() == macroScale ) {
-//					    	printf("macroScale\n");
-//					    }
-//					    else {
-//					    	printf("microScale\n");
-//					    }
-//
-////					    crackNormal = {1.0, 0.0};
-//					}
 
 					// Compute jump vector
 					FloatArray jump2D;
@@ -1065,15 +944,17 @@ void XfemStructuralElementInterface :: computeCohesiveForces(FloatArray &answer,
 				for(int gpInd = 0; gpInd < mpCZIntegrationRules[ segIndex ]->giveNumberOfIntegrationPoints(); gpInd++) {
 
 					GaussPoint *gp = mpCZIntegrationRules[ segIndex ]->getIntegrationPoint(gpInd);
-					GaussPoint *bulk_gp = mpCZExtraIntegrationRules[ segIndex ]->getIntegrationPoint(gpInd);
+
+					GaussPoint *bulk_gp = NULL;
+					if(mIncludeBulkCorr) {
+						bulk_gp = mpCZExtraIntegrationRules[ segIndex ]->getIntegrationPoint(gpInd);
+					}
 
 				    StructuralMaterial *bulkMat = dynamic_cast<StructuralMaterial*>( element->giveCrossSection()->giveMaterial(bulk_gp) );
 				    if(!bulkMat) {
 				    	OOFEM_ERROR("Failed to fetch bulk material.")
 				    }
-//				    printf("bulkMat->giveClassName(): %s\n", bulkMat->giveClassName() );
 
-//					printf("gp->giveNumber(): %d\n", gp->giveNumber() );
 			    	StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*> ( gp->giveMaterialStatus() );
 
 			    	if(fe2ms == NULL) {
@@ -1098,107 +979,56 @@ void XfemStructuralElementInterface :: computeCohesiveForces(FloatArray &answer,
 					////////////////////////////////////////////////////////
 					// Fetch L_s
 					double l_s = computeEffectiveSveSize( fe2ms );
-//					printf("l_s: %e\n", l_s);
 
 
 					////////////////////////////////////////////////////////
 					// Construct strain (only consider the smeared jump for now)
 					FloatArray smearedJumpStrain = {jump2D(0)*crackNormal(0)/l_s, jump2D(1)*crackNormal(1)/l_s, 0.0, 0.0, 0.0, (1.0/l_s)*( jump2D(0)*crackNormal(1) + jump2D(1)*crackNormal(0) )};
-//					printf("smearedJumpStrain: "); smearedJumpStrain.printYourself();
 
-#ifdef include_bulk_jump
-					////////////////////////////////////////////////////////
-					// Bulk contribution to SVE strain
+					FloatArray smearedBulkStrain(6);
+					smearedBulkStrain.zero();
+					FloatMatrix BAvg;
 
-					// Crack gp coordinates
-					const FloatArray &xC = gp->giveGlobalCoordinates();
+					if(mIncludeBulkJump) {
+						////////////////////////////////////////////////////////
+						// Bulk contribution to SVE strain
 
-					// For now, we will just perturb the coordinates of the GP to compute B^- and B^+ numerically.
-					double eps = 1.0e-6;
-					FloatArray xPert = xC;
+						// Crack gp coordinates
+						const FloatArray &xC = gp->giveGlobalCoordinates();
 
-					xPert.add(eps, crackNormal);
-					FloatArray locCoordPert;
-					element->computeLocalCoordinates(locCoordPert, xPert);
+						// For now, we will just perturb the coordinates of the GP to compute B^- and B^+ numerically.
+						double eps = 1.0e-6;
+						FloatArray xPert = xC;
 
-					FloatMatrix BPlus;
-					this->ComputeBOrBHMatrix(BPlus, *gp, *element, false, locCoordPert);
-//					printf("\n\n\n\nBPlus: "); BPlus.printYourself();
+						xPert.add(eps, crackNormal);
+						FloatArray locCoordPert;
+						element->computeLocalCoordinates(locCoordPert, xPert);
 
-					xPert = xC;
-					xPert.add(-eps, crackNormal);
-					element->computeLocalCoordinates(locCoordPert, xPert);
+						FloatMatrix BPlus;
+						this->ComputeBOrBHMatrix(BPlus, *gp, *element, false, locCoordPert);
 
-					FloatMatrix BMinus;
-					this->ComputeBOrBHMatrix(BMinus, *gp, *element, false, locCoordPert);
-//					printf("BMinus: "); BMinus.printYourself();
+						xPert = xC;
+						xPert.add(-eps, crackNormal);
+						element->computeLocalCoordinates(locCoordPert, xPert);
 
-//					FloatMatrix BDiff = BPlus;
-//					BDiff.add(-1.0, BMinus);
-//					printf("BDiff: "); BDiff.printYourself();
+						FloatMatrix BMinus;
+						this->ComputeBOrBHMatrix(BMinus, *gp, *element, false, locCoordPert);
 
-					FloatMatrix BAvg = BPlus;
-					BAvg.add(1.0, BMinus);
-					BAvg.times(0.5);
-//					printf("BAvg: "); BAvg.printYourself();
+						BAvg = BPlus;
+						BAvg.add(1.0, BMinus);
+						BAvg.times(0.5);
 
+						smearedBulkStrain.beProductOf(BAvg, solVec);
 
-					FloatArray smearedBulkStrain;
-					smearedBulkStrain.beProductOf(BAvg, solVec);
+						if( smearedBulkStrain.giveSize() == 4 ) {
+							smearedBulkStrain = {smearedBulkStrain(0), smearedBulkStrain(1), smearedBulkStrain(2), 0.0, 0.0, smearedBulkStrain(3)};
+						}
 
-					if( smearedBulkStrain.giveSize() == 4 ) {
-						smearedBulkStrain = {smearedBulkStrain(0), smearedBulkStrain(1), smearedBulkStrain(2), 0.0, 0.0, smearedBulkStrain(3)};
+						FloatArray smearedJumpStrainTemp = smearedJumpStrain;
+
+						smearedJumpStrain.add(smearedBulkStrain);
 					}
 
-//					printf("\n\n\n\n\nsmearedJumpStrain: "); smearedJumpStrain.printYourself();
-//					printf("smearedBulkStrain: "); smearedBulkStrain.printYourself();
-
-
-					FloatArray smearedJumpStrainTemp = smearedJumpStrain;
-
-					smearedJumpStrain.add(smearedBulkStrain);
-#endif
-
-#ifdef rotate_sve
-
-					FloatArray strainTmp = smearedJumpStrain;
-//					printf("\n\nsmearedJumpStrain: "); smearedJumpStrain.printYourself();
-
-					smearedJumpStrain(5) *= 0.5;
-
-//					printf("\n\ncrackNormal: "); crackNormal.printYourself();
-
-					strainTmp.zero();
-					FloatMatrix R(2,2);
-					R(0,0) =  crackNormal(0);
-					R(0,1) = -crackNormal(1);
-					R(1,0) =  crackNormal(1);
-					R(1,1) =  crackNormal(0);
-
-
-					int i = 0, j = 0;
-					strainTmp(0) = 	R(0,i)*smearedJumpStrain(0)*R(0,j) +
-									R(0,i)*smearedJumpStrain(5)*R(1,j) +
-									R(1,i)*smearedJumpStrain(5)*R(0,j) +
-									R(1,i)*smearedJumpStrain(1)*R(1,j);
-
-					i = 1; j = 1;
-					strainTmp(1) = 	R(0,i)*smearedJumpStrain(0)*R(0,j) +
-									R(0,i)*smearedJumpStrain(5)*R(1,j) +
-									R(1,i)*smearedJumpStrain(5)*R(0,j) +
-									R(1,i)*smearedJumpStrain(1)*R(1,j);
-
-					i = 0; j = 1;
-					strainTmp(5) = 	R(0,i)*smearedJumpStrain(0)*R(0,j) +
-									R(0,i)*smearedJumpStrain(5)*R(1,j) +
-									R(1,i)*smearedJumpStrain(5)*R(0,j) +
-									R(1,i)*smearedJumpStrain(1)*R(1,j);
-
-					smearedJumpStrain = strainTmp;
-					smearedJumpStrain(5) *= 2.0;
-//					printf("smearedJumpStrain: "); smearedJumpStrain.printYourself();
-
-#endif
 
 					////////////////////////////////////////////////////////
 					// Compute homogenized stress
@@ -1208,66 +1038,12 @@ void XfemStructuralElementInterface :: computeCohesiveForces(FloatArray &answer,
 					}
 
 					FloatArray stressVec;
-//					se->computeStressVector(stressVec, smearedJumpStrain, gp, tStep);
-
 
 					fe2Mat->giveRealStressVector_3d(stressVec, gp, smearedJumpStrain, tStep);
 //					printf("stressVec: "); stressVec.printYourself();
 
 
-
-
-#ifdef rotate_sve
-
-					FloatArray stressTmp = stressVec;
-					stressTmp.zero();
-//					FloatMatrix R(2,2);
-//					R(0,0) =  crackNormal(0);
-//					R(0,1) = -crackNormal(1);
-//					R(1,0) =  crackNormal(1);
-//					R(1,1) =  crackNormal(0);
-
-
-					i = 0; j = 0;
-					stressTmp(0) = 	R(i,0)*stressVec(0)*R(j,0) +
-									R(i,0)*stressVec(5)*R(j,1) +
-									R(i,1)*stressVec(5)*R(j,0) +
-									R(i,1)*stressVec(1)*R(j,1);
-
-
-					i = 1; j = 1;
-					stressTmp(1) = 	R(i,0)*stressVec(0)*R(j,0) +
-									R(i,0)*stressVec(5)*R(j,1) +
-									R(i,1)*stressVec(5)*R(j,0) +
-									R(i,1)*stressVec(1)*R(j,1);
-
-					stressTmp(2) = stressVec(2);
-
-					i = 0; j = 1;
-					stressTmp(5) = 	R(i,0)*stressVec(0)*R(j,0) +
-									R(i,0)*stressVec(5)*R(j,1) +
-									R(i,1)*stressVec(5)*R(j,0) +
-									R(i,1)*stressVec(1)*R(j,1);
-
-					stressVec = stressTmp;
-#endif
-
-
 					FloatArray trac = {stressVec(0)*crackNormal(0)+stressVec(5)*crackNormal(1), stressVec(5)*crackNormal(0)+stressVec(1)*crackNormal(1)};
-
-
-//					// Traction
-//					FloatArray trac;
-//					if(stressVec.giveSize() == 3) {
-//						trac = {stressVec(0)*crackNormal(0)+stressVec(2)*crackNormal(1), stressVec(2)*crackNormal(0)+stressVec(1)*crackNormal(1)};
-//					}
-//					else if(stressVec.giveSize() == 4) {
-//						trac = {stressVec(0)*crackNormal(0)+stressVec(3)*crackNormal(1), stressVec(3)*crackNormal(0)+stressVec(1)*crackNormal(1)};
-//					}
-//					else {
-//						OOFEM_ERROR("Unexpected format of stress vector.")
-//					}
-//					printf("trac: "); trac.printYourself();
 
 					////////////////////////////////////////////////////////
 					// Standard part
@@ -1281,27 +1057,19 @@ void XfemStructuralElementInterface :: computeCohesiveForces(FloatArray &answer,
 					double dA = thickness * gp->giveWeight();
 					answer.add(dA, NTimesT);
 
-#ifdef include_bulk_corr
 
-					FloatArray stressVecBulk;
-					bulkMat->giveRealStressVector_3d(stressVecBulk, bulk_gp, smearedBulkStrain, tStep);
-//					printf("stressVecBulk: "); stressVecBulk.printYourself();
+					if(mIncludeBulkCorr) {
 
-//#ifdef cz_bulk_corr
-					////////////////////////////////////////////////////////
-					// Non-standard jump part
-//					fe2Mat->giveRealStressVector_3d(stressVec, gp, smearedBulkStrain, tStep);
+						FloatArray stressVecBulk;
+						bulkMat->giveRealStressVector_3d(stressVecBulk, bulk_gp, smearedBulkStrain, tStep);
 
-//					FloatArray stressV4 = {stressVec(0), stressVec(1), stressVec(2), stressVec(5)};
-					FloatArray stressV4 = {stressVec(0)-stressVecBulk(0), stressVec(1)-stressVecBulk(1), stressVec(2)-stressVecBulk(2), stressVec(5)-stressVecBulk(5)};
-//					FloatArray stressV4 = {-stressVecBulk(0), -stressVecBulk(1), -stressVecBulk(2), -stressVecBulk(5)};
-					FloatArray BTimesT;
-					BTimesT.beTProductOf(BAvg, stressV4);
-					answer.add(1.0*dA*l_s, BTimesT);
-
-//					fe2Mat->giveRealStressVector_3d(stressVec, gp, smearedJumpStrain, tStep);
-//#endif
-#endif
+						////////////////////////////////////////////////////////
+						// Non-standard jump part
+						FloatArray stressV4 = {stressVec(0)-stressVecBulk(0), stressVec(1)-stressVecBulk(1), stressVec(2)-stressVecBulk(2), stressVec(5)-stressVecBulk(5)};
+						FloatArray BTimesT;
+						BTimesT.beTProductOf(BAvg, stressV4);
+						answer.add(1.0*dA*l_s, BTimesT);
+					}
 
 				}
 			}
@@ -1524,10 +1292,6 @@ void XfemStructuralElementInterface :: computeCohesiveTangent(FloatMatrix &answe
 
 		size_t numSeg = mpCZIntegrationRules.size();
 
-//		printf("mpCZMat->giveClassName(): %s\n", mpCZMat->giveClassName() );
-//		printf("mCZMaterialNum: %d\n", mCZMaterialNum);
-
-
 	    StructuralFE2Material *fe2Mat = dynamic_cast<StructuralFE2Material*>(mpCZMat);
 	    if(!fe2Mat) {
 	    	OOFEM_ERROR("Failed to cast StructuralFE2Material*.")
@@ -1538,12 +1302,19 @@ void XfemStructuralElementInterface :: computeCohesiveTangent(FloatMatrix &answe
 			for(int gpInd = 0; gpInd < mpCZIntegrationRules[ segIndex ]->giveNumberOfIntegrationPoints(); gpInd++) {
 
 				GaussPoint *gp = mpCZIntegrationRules[ segIndex ]->getIntegrationPoint(gpInd);
-				GaussPoint *bulk_gp = mpCZExtraIntegrationRules[ segIndex ]->getIntegrationPoint(gpInd);
 
-			    StructuralMaterial *bulkMat = dynamic_cast<StructuralMaterial*>( element->giveCrossSection()->giveMaterial(bulk_gp) );
-			    if(!bulkMat) {
-			    	OOFEM_ERROR("Failed to fetch bulk material.")
-			    }
+				GaussPoint *bulk_gp = NULL;
+				StructuralMaterial *bulkMat = NULL;
+				if(mIncludeBulkCorr) {
+					bulk_gp = mpCZExtraIntegrationRules[ segIndex ]->getIntegrationPoint(gpInd);
+					bulkMat = dynamic_cast<StructuralMaterial*>( element->giveCrossSection()->giveMaterial(bulk_gp) );
+
+				    if(!bulkMat) {
+				    	OOFEM_ERROR("Failed to fetch bulk material.")
+				    }
+
+				}
+
 
 		    	StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*> ( gp->giveMaterialStatus() );
 
@@ -1561,141 +1332,15 @@ void XfemStructuralElementInterface :: computeCohesiveTangent(FloatMatrix &answe
 				////////////////////////////////////////////////////////
 				// Fetch normal
 				FloatArray n( fe2ms->giveNormal() );
-//				n(1) = 0.0;
-//				n.times(-1.0);
-
-//				printf("n: "); n.printYourself();
-
 
 				// Traction part of tangent
 				FloatMatrix C;
 				fe2Mat->give3dMaterialStiffnessMatrix(C, TangentStiffness, gp, tStep);
 
 				FloatMatrix CBulk;
-				bulkMat->give3dMaterialStiffnessMatrix(CBulk, TangentStiffness, bulk_gp, tStep);
-
-#ifdef rotate_sve
-				FloatMatrix CTmp = C;
-				CTmp.zero();
-				FloatMatrix R(2,2);
-				R(0,0) =  n(0);
-				R(0,1) = -n(1);
-				R(1,0) =  n(1);
-				R(1,1) =  n(0);
-
-
-//				C(0,5) *= 2.0;
-//				C(1,5) *= 2.0;
-//				C(5,0) *= 2.0;
-//				C(5,1) *= 2.0;
-//				C(5,5) *= 2.0;
-
-
-				int i = 0, j = 0, k = 0, l = 0;
-				CTmp(0,0) 	= R(i,0)*R(j,0)*C(0,0)*R(k,0)*R(l,0) + R(i,0)*R(j,0)*C(0,5)*R(k,0)*R(l,1)
-							+ R(i,0)*R(j,0)*C(0,5)*R(k,1)*R(l,0) + R(i,0)*R(j,0)*C(0,1)*R(k,1)*R(l,1)
-							+ R(i,0)*R(j,1)*C(5,0)*R(k,0)*R(l,0) + R(i,0)*R(j,1)*C(5,5)*R(k,0)*R(l,1)
-							+ R(i,0)*R(j,1)*C(5,5)*R(k,1)*R(l,0) + R(i,0)*R(j,1)*C(5,1)*R(k,1)*R(l,1)
-							+ R(i,1)*R(j,0)*C(5,0)*R(k,0)*R(l,0) + R(i,1)*R(j,0)*C(5,5)*R(k,0)*R(l,1)
-							+ R(i,1)*R(j,0)*C(5,5)*R(k,1)*R(l,0) + R(i,1)*R(j,0)*C(5,1)*R(k,1)*R(l,1)
-							+ R(i,1)*R(j,1)*C(1,0)*R(k,0)*R(l,0) + R(i,1)*R(j,1)*C(1,5)*R(k,0)*R(l,1)
-							+ R(i,1)*R(j,1)*C(1,5)*R(k,1)*R(l,0) + R(i,1)*R(j,1)*C(1,1)*R(k,1)*R(l,1);
-
-				i = 0; j = 0; k = 1; l = 1;
-				CTmp(0,1) 	= R(i,0)*R(j,0)*C(0,0)*R(k,0)*R(l,0) + R(i,0)*R(j,0)*C(0,5)*R(k,0)*R(l,1)
-							+ R(i,0)*R(j,0)*C(0,5)*R(k,1)*R(l,0) + R(i,0)*R(j,0)*C(0,1)*R(k,1)*R(l,1)
-							+ R(i,0)*R(j,1)*C(5,0)*R(k,0)*R(l,0) + R(i,0)*R(j,1)*C(5,5)*R(k,0)*R(l,1)
-							+ R(i,0)*R(j,1)*C(5,5)*R(k,1)*R(l,0) + R(i,0)*R(j,1)*C(5,1)*R(k,1)*R(l,1)
-							+ R(i,1)*R(j,0)*C(5,0)*R(k,0)*R(l,0) + R(i,1)*R(j,0)*C(5,5)*R(k,0)*R(l,1)
-							+ R(i,1)*R(j,0)*C(5,5)*R(k,1)*R(l,0) + R(i,1)*R(j,0)*C(5,1)*R(k,1)*R(l,1)
-							+ R(i,1)*R(j,1)*C(1,0)*R(k,0)*R(l,0) + R(i,1)*R(j,1)*C(1,5)*R(k,0)*R(l,1)
-							+ R(i,1)*R(j,1)*C(1,5)*R(k,1)*R(l,0) + R(i,1)*R(j,1)*C(1,1)*R(k,1)*R(l,1);
-
-				i = 0; j = 0; k = 0; l = 1;
-				CTmp(0,5) 	= R(i,0)*R(j,0)*C(0,0)*R(k,0)*R(l,0) + R(i,0)*R(j,0)*C(0,5)*R(k,0)*R(l,1)
-							+ R(i,0)*R(j,0)*C(0,5)*R(k,1)*R(l,0) + R(i,0)*R(j,0)*C(0,1)*R(k,1)*R(l,1)
-							+ R(i,0)*R(j,1)*C(5,0)*R(k,0)*R(l,0) + R(i,0)*R(j,1)*C(5,5)*R(k,0)*R(l,1)
-							+ R(i,0)*R(j,1)*C(5,5)*R(k,1)*R(l,0) + R(i,0)*R(j,1)*C(5,1)*R(k,1)*R(l,1)
-							+ R(i,1)*R(j,0)*C(5,0)*R(k,0)*R(l,0) + R(i,1)*R(j,0)*C(5,5)*R(k,0)*R(l,1)
-							+ R(i,1)*R(j,0)*C(5,5)*R(k,1)*R(l,0) + R(i,1)*R(j,0)*C(5,1)*R(k,1)*R(l,1)
-							+ R(i,1)*R(j,1)*C(1,0)*R(k,0)*R(l,0) + R(i,1)*R(j,1)*C(1,5)*R(k,0)*R(l,1)
-							+ R(i,1)*R(j,1)*C(1,5)*R(k,1)*R(l,0) + R(i,1)*R(j,1)*C(1,1)*R(k,1)*R(l,1);
-
-				i = 1; j = 1; k = 0; l = 0;
-				CTmp(1,0) 	= R(i,0)*R(j,0)*C(0,0)*R(k,0)*R(l,0) + R(i,0)*R(j,0)*C(0,5)*R(k,0)*R(l,1)
-							+ R(i,0)*R(j,0)*C(0,5)*R(k,1)*R(l,0) + R(i,0)*R(j,0)*C(0,1)*R(k,1)*R(l,1)
-							+ R(i,0)*R(j,1)*C(5,0)*R(k,0)*R(l,0) + R(i,0)*R(j,1)*C(5,5)*R(k,0)*R(l,1)
-							+ R(i,0)*R(j,1)*C(5,5)*R(k,1)*R(l,0) + R(i,0)*R(j,1)*C(5,1)*R(k,1)*R(l,1)
-							+ R(i,1)*R(j,0)*C(5,0)*R(k,0)*R(l,0) + R(i,1)*R(j,0)*C(5,5)*R(k,0)*R(l,1)
-							+ R(i,1)*R(j,0)*C(5,5)*R(k,1)*R(l,0) + R(i,1)*R(j,0)*C(5,1)*R(k,1)*R(l,1)
-							+ R(i,1)*R(j,1)*C(1,0)*R(k,0)*R(l,0) + R(i,1)*R(j,1)*C(1,5)*R(k,0)*R(l,1)
-							+ R(i,1)*R(j,1)*C(1,5)*R(k,1)*R(l,0) + R(i,1)*R(j,1)*C(1,1)*R(k,1)*R(l,1);
-
-				i = 1; j = 1; k = 1; l = 1;
-				CTmp(1,1) 	= R(i,0)*R(j,0)*C(0,0)*R(k,0)*R(l,0) + R(i,0)*R(j,0)*C(0,5)*R(k,0)*R(l,1)
-							+ R(i,0)*R(j,0)*C(0,5)*R(k,1)*R(l,0) + R(i,0)*R(j,0)*C(0,1)*R(k,1)*R(l,1)
-							+ R(i,0)*R(j,1)*C(5,0)*R(k,0)*R(l,0) + R(i,0)*R(j,1)*C(5,5)*R(k,0)*R(l,1)
-							+ R(i,0)*R(j,1)*C(5,5)*R(k,1)*R(l,0) + R(i,0)*R(j,1)*C(5,1)*R(k,1)*R(l,1)
-							+ R(i,1)*R(j,0)*C(5,0)*R(k,0)*R(l,0) + R(i,1)*R(j,0)*C(5,5)*R(k,0)*R(l,1)
-							+ R(i,1)*R(j,0)*C(5,5)*R(k,1)*R(l,0) + R(i,1)*R(j,0)*C(5,1)*R(k,1)*R(l,1)
-							+ R(i,1)*R(j,1)*C(1,0)*R(k,0)*R(l,0) + R(i,1)*R(j,1)*C(1,5)*R(k,0)*R(l,1)
-							+ R(i,1)*R(j,1)*C(1,5)*R(k,1)*R(l,0) + R(i,1)*R(j,1)*C(1,1)*R(k,1)*R(l,1);
-
-				i = 1; j = 1; k = 0; l = 1;
-				CTmp(1,5) 	= R(i,0)*R(j,0)*C(0,0)*R(k,0)*R(l,0) + R(i,0)*R(j,0)*C(0,5)*R(k,0)*R(l,1)
-							+ R(i,0)*R(j,0)*C(0,5)*R(k,1)*R(l,0) + R(i,0)*R(j,0)*C(0,1)*R(k,1)*R(l,1)
-							+ R(i,0)*R(j,1)*C(5,0)*R(k,0)*R(l,0) + R(i,0)*R(j,1)*C(5,5)*R(k,0)*R(l,1)
-							+ R(i,0)*R(j,1)*C(5,5)*R(k,1)*R(l,0) + R(i,0)*R(j,1)*C(5,1)*R(k,1)*R(l,1)
-							+ R(i,1)*R(j,0)*C(5,0)*R(k,0)*R(l,0) + R(i,1)*R(j,0)*C(5,5)*R(k,0)*R(l,1)
-							+ R(i,1)*R(j,0)*C(5,5)*R(k,1)*R(l,0) + R(i,1)*R(j,0)*C(5,1)*R(k,1)*R(l,1)
-							+ R(i,1)*R(j,1)*C(1,0)*R(k,0)*R(l,0) + R(i,1)*R(j,1)*C(1,5)*R(k,0)*R(l,1)
-							+ R(i,1)*R(j,1)*C(1,5)*R(k,1)*R(l,0) + R(i,1)*R(j,1)*C(1,1)*R(k,1)*R(l,1);
-
-				i = 0; j = 1; k = 0; l = 0;
-				CTmp(5,0) 	= R(i,0)*R(j,0)*C(0,0)*R(k,0)*R(l,0) + R(i,0)*R(j,0)*C(0,5)*R(k,0)*R(l,1)
-							+ R(i,0)*R(j,0)*C(0,5)*R(k,1)*R(l,0) + R(i,0)*R(j,0)*C(0,1)*R(k,1)*R(l,1)
-							+ R(i,0)*R(j,1)*C(5,0)*R(k,0)*R(l,0) + R(i,0)*R(j,1)*C(5,5)*R(k,0)*R(l,1)
-							+ R(i,0)*R(j,1)*C(5,5)*R(k,1)*R(l,0) + R(i,0)*R(j,1)*C(5,1)*R(k,1)*R(l,1)
-							+ R(i,1)*R(j,0)*C(5,0)*R(k,0)*R(l,0) + R(i,1)*R(j,0)*C(5,5)*R(k,0)*R(l,1)
-							+ R(i,1)*R(j,0)*C(5,5)*R(k,1)*R(l,0) + R(i,1)*R(j,0)*C(5,1)*R(k,1)*R(l,1)
-							+ R(i,1)*R(j,1)*C(1,0)*R(k,0)*R(l,0) + R(i,1)*R(j,1)*C(1,5)*R(k,0)*R(l,1)
-							+ R(i,1)*R(j,1)*C(1,5)*R(k,1)*R(l,0) + R(i,1)*R(j,1)*C(1,1)*R(k,1)*R(l,1);
-
-				i = 0; j = 1; k = 1; l = 1;
-				CTmp(5,1) 	= R(i,0)*R(j,0)*C(0,0)*R(k,0)*R(l,0) + R(i,0)*R(j,0)*C(0,5)*R(k,0)*R(l,1)
-							+ R(i,0)*R(j,0)*C(0,5)*R(k,1)*R(l,0) + R(i,0)*R(j,0)*C(0,1)*R(k,1)*R(l,1)
-							+ R(i,0)*R(j,1)*C(5,0)*R(k,0)*R(l,0) + R(i,0)*R(j,1)*C(5,5)*R(k,0)*R(l,1)
-							+ R(i,0)*R(j,1)*C(5,5)*R(k,1)*R(l,0) + R(i,0)*R(j,1)*C(5,1)*R(k,1)*R(l,1)
-							+ R(i,1)*R(j,0)*C(5,0)*R(k,0)*R(l,0) + R(i,1)*R(j,0)*C(5,5)*R(k,0)*R(l,1)
-							+ R(i,1)*R(j,0)*C(5,5)*R(k,1)*R(l,0) + R(i,1)*R(j,0)*C(5,1)*R(k,1)*R(l,1)
-							+ R(i,1)*R(j,1)*C(1,0)*R(k,0)*R(l,0) + R(i,1)*R(j,1)*C(1,5)*R(k,0)*R(l,1)
-							+ R(i,1)*R(j,1)*C(1,5)*R(k,1)*R(l,0) + R(i,1)*R(j,1)*C(1,1)*R(k,1)*R(l,1);
-
-				i = 0; j = 1; k = 0; l = 1;
-				CTmp(5,5) 	= R(i,0)*R(j,0)*C(0,0)*R(k,0)*R(l,0) + R(i,0)*R(j,0)*C(0,5)*R(k,0)*R(l,1)
-							+ R(i,0)*R(j,0)*C(0,5)*R(k,1)*R(l,0) + R(i,0)*R(j,0)*C(0,1)*R(k,1)*R(l,1)
-							+ R(i,0)*R(j,1)*C(5,0)*R(k,0)*R(l,0) + R(i,0)*R(j,1)*C(5,5)*R(k,0)*R(l,1)
-							+ R(i,0)*R(j,1)*C(5,5)*R(k,1)*R(l,0) + R(i,0)*R(j,1)*C(5,1)*R(k,1)*R(l,1)
-							+ R(i,1)*R(j,0)*C(5,0)*R(k,0)*R(l,0) + R(i,1)*R(j,0)*C(5,5)*R(k,0)*R(l,1)
-							+ R(i,1)*R(j,0)*C(5,5)*R(k,1)*R(l,0) + R(i,1)*R(j,0)*C(5,1)*R(k,1)*R(l,1)
-							+ R(i,1)*R(j,1)*C(1,0)*R(k,0)*R(l,0) + R(i,1)*R(j,1)*C(1,5)*R(k,0)*R(l,1)
-							+ R(i,1)*R(j,1)*C(1,5)*R(k,1)*R(l,0) + R(i,1)*R(j,1)*C(1,1)*R(k,1)*R(l,1);
-
-				C = CTmp;
-
-
-//				C(0,5) *= 0.5;
-//				C(1,5) *= 0.5;
-//				C(5,0) *= 0.5;
-//				C(5,1) *= 0.5;
-//				C(5,5) *= 0.5;
-
-#endif
-//				printf("dSigdEps: "); C.printYourself();
-//				printf("C(0,0): %e\n", C(0,0) );
-
-//				printf("C.giveNumberOfRows(): %d\n", C.giveNumberOfRows());
-//				printf("C.giveNumberOfColumns(): %d\n", C.giveNumberOfColumns());
+				if(mIncludeBulkCorr) {
+					bulkMat->give3dMaterialStiffnessMatrix(CBulk, TangentStiffness, bulk_gp, tStep);
+				}
 
 
 				////////////////////////////////////////////////////////
@@ -1720,13 +1365,6 @@ void XfemStructuralElementInterface :: computeCohesiveTangent(FloatMatrix &answe
 				Ka(1,1) = (0.5/l_s)*( a3*C(5,5)*n(0)*n(0) + a1*C(5,1)*n(0)*n(1) + a2*C(1,5)*n(1)*n(0) +    C(1,1)*n(1)*n(1) ) +
 						  (0.5/l_s)*( a3*C(5,5)*n(0)*n(0) + a1*C(5,1)*n(0)*n(1) + a2*C(1,5)*n(1)*n(0) +    C(1,1)*n(1)*n(1) );
 
-//				Ka.times(1.5);
-//				Ka.times(6.0);
-
-//				Ka.times( 1.0/sqrt(2.0) );
-//				Ka.times( 0.25 );
-
-//				printf("Ka: "); Ka.printYourself();
 
 				FloatMatrix tmp, tmp2;
 				tmp.beProductOf(Ka, NMatrix);
@@ -1739,136 +1377,112 @@ void XfemStructuralElementInterface :: computeCohesiveTangent(FloatMatrix &answe
 
 
 
-#ifdef include_bulk_jump
-				////////////////////////////////////////////////////////
-				// Bulk contribution to SVE strain
+				FloatMatrix BAvg;
 
-				// Crack gp coordinates
-				const FloatArray &xC = gp->giveGlobalCoordinates();
+				if(mIncludeBulkJump) {
+					////////////////////////////////////////////////////////
+					// Bulk contribution to SVE strain
 
-				// For now, we will just perturb the coordinates of the GP to compute B^- and B^+ numerically.
-				double eps = 1.0e-6;
-				FloatArray xPert = xC;
+					// Crack gp coordinates
+					const FloatArray &xC = gp->giveGlobalCoordinates();
 
-				xPert.add(eps, n);
-				FloatArray locCoordPert;
-				element->computeLocalCoordinates(locCoordPert, xPert);
+					// For now, we will just perturb the coordinates of the GP to compute B^- and B^+ numerically.
+					double eps = 1.0e-6;
+					FloatArray xPert = xC;
 
-				FloatMatrix BPlus;
-				this->ComputeBOrBHMatrix(BPlus, *gp, *element, false, locCoordPert);
-//					printf("\n\n\n\nBPlus: "); BPlus.printYourself();
+					xPert.add(eps, n);
+					FloatArray locCoordPert;
+					element->computeLocalCoordinates(locCoordPert, xPert);
 
-				xPert = xC;
-				xPert.add(-eps, n);
-				element->computeLocalCoordinates(locCoordPert, xPert);
+					FloatMatrix BPlus;
+					this->ComputeBOrBHMatrix(BPlus, *gp, *element, false, locCoordPert);
 
-				FloatMatrix BMinus;
-				this->ComputeBOrBHMatrix(BMinus, *gp, *element, false, locCoordPert);
-//					printf("BMinus: "); BMinus.printYourself();
+					xPert = xC;
+					xPert.add(-eps, n);
+					element->computeLocalCoordinates(locCoordPert, xPert);
 
-//					FloatMatrix BDiff = BPlus;
-//					BDiff.add(-1.0, BMinus);
-//					printf("BDiff: "); BDiff.printYourself();
+					FloatMatrix BMinus;
+					this->ComputeBOrBHMatrix(BMinus, *gp, *element, false, locCoordPert);
 
-				FloatMatrix BAvg = BPlus;
-				BAvg.add(1.0, BMinus);
-				BAvg.times(0.5);
-//					printf("BAvg: "); BAvg.printYourself();
+					BAvg = BPlus;
+					BAvg.add(1.0, BMinus);
+					BAvg.times(0.5);
 
 
-				FloatMatrix Kb(2,4); // Implicitly assumes plane strain. Fix later.
+					FloatMatrix Kb(2,4); // Implicitly assumes plane strain. Fix later.
 
-				Kb(0,0) = C(0,0)*n(0) + C(5,0)*n(1);
-				Kb(0,1) = C(0,1)*n(0) + C(5,1)*n(1);
-				Kb(0,3) = C(0,5)*n(0) + C(5,5)*n(1);
+					Kb(0,0) = C(0,0)*n(0) + C(5,0)*n(1);
+					Kb(0,1) = C(0,1)*n(0) + C(5,1)*n(1);
+					Kb(0,3) = C(0,5)*n(0) + C(5,5)*n(1);
 
-				Kb(1,0) = C(5,0)*n(0) + C(1,0)*n(1);
-				Kb(1,1) = C(5,1)*n(0) + C(1,1)*n(1);
-				Kb(1,3) = C(5,5)*n(0) + C(1,5)*n(1);
+					Kb(1,0) = C(5,0)*n(0) + C(1,0)*n(1);
+					Kb(1,1) = C(5,1)*n(0) + C(1,1)*n(1);
+					Kb(1,3) = C(5,5)*n(0) + C(1,5)*n(1);
 
-				tmp.beProductOf(Kb, BAvg);
-				tmp2.beTProductOf(NMatrix, tmp);
-				answer.add(dA, tmp2);
-#endif
+					tmp.beProductOf(Kb, BAvg);
+					tmp2.beTProductOf(NMatrix, tmp);
+					answer.add(dA, tmp2);
+				}
 
 				////////////////////////////////////////////////////////
 				// Non-standard bulk contribution
-#ifdef include_bulk_corr
-//#ifdef cz_bulk_corr
-				tmp.beTranspositionOf(tmp2);
-				answer.add(1.0*dA, tmp);
+
+				if(mIncludeBulkCorr) {
+
+					tmp.beTranspositionOf(tmp2);
+					answer.add(1.0*dA, tmp);
 
 
-				FloatMatrix C4(4,4);
-				C4(0,0) = C(0,0);
-				C4(0,1) = C(0,1);
-				C4(0,2) = C(0,2);
-				C4(0,3) = C(0,5);
+					FloatMatrix C4(4,4);
+					C4(0,0) = C(0,0);
+					C4(0,1) = C(0,1);
+					C4(0,2) = C(0,2);
+					C4(0,3) = C(0,5);
 
-				C4(1,0) = C(1,0);
-				C4(1,1) = C(1,1);
-				C4(1,2) = C(1,2);
-				C4(1,3) = C(1,5);
+					C4(1,0) = C(1,0);
+					C4(1,1) = C(1,1);
+					C4(1,2) = C(1,2);
+					C4(1,3) = C(1,5);
 
-				C4(2,0) = C(2,0);
-				C4(2,1) = C(2,1);
-				C4(2,2) = C(2,2);
-				C4(2,3) = C(2,5);
+					C4(2,0) = C(2,0);
+					C4(2,1) = C(2,1);
+					C4(2,2) = C(2,2);
+					C4(2,3) = C(2,5);
 
-				C4(3,0) = C(5,0);
-				C4(3,1) = C(5,1);
-				C4(3,2) = C(5,2);
-				C4(3,3) = C(5,5);
+					C4(3,0) = C(5,0);
+					C4(3,1) = C(5,1);
+					C4(3,2) = C(5,2);
+					C4(3,3) = C(5,5);
 
-				tmp.beProductOf(C4, BAvg);
-				tmp2.beTProductOf(BAvg, tmp);
-				answer.add(1.0*dA*l_s, tmp2);
+					tmp.beProductOf(C4, BAvg);
+					tmp2.beTProductOf(BAvg, tmp);
+					answer.add(1.0*dA*l_s, tmp2);
 
-//				tmp.beProductOf(C4, BPlus);
-//				tmp2.beTProductOf(BPlus, tmp);
-//				answer.add(0.25*dA*l_s, tmp2);
-//
-//				tmp.beProductOf(C4, BPlus);
-//				tmp2.beTProductOf(BMinus, tmp);
-//				answer.add(0.25*dA*l_s, tmp2);
-//
-//				tmp.beProductOf(C4, BMinus);
-//				tmp2.beTProductOf(BMinus, tmp);
-//				answer.add(0.25*dA*l_s, tmp2);
-//
-//				tmp.beProductOf(C4, BMinus);
-//				tmp2.beTProductOf(BPlus, tmp);
-//				answer.add(0.25*dA*l_s, tmp2);
+					FloatMatrix C4Bulk(4,4);
+					C4Bulk(0,0) = CBulk(0,0);
+					C4Bulk(0,1) = CBulk(0,1);
+					C4Bulk(0,2) = CBulk(0,2);
+					C4Bulk(0,3) = CBulk(0,5);
 
+					C4Bulk(1,0) = CBulk(1,0);
+					C4Bulk(1,1) = CBulk(1,1);
+					C4Bulk(1,2) = CBulk(1,2);
+					C4Bulk(1,3) = CBulk(1,5);
 
-				FloatMatrix C4Bulk(4,4);
-				C4Bulk(0,0) = CBulk(0,0);
-				C4Bulk(0,1) = CBulk(0,1);
-				C4Bulk(0,2) = CBulk(0,2);
-				C4Bulk(0,3) = CBulk(0,5);
+					C4Bulk(2,0) = CBulk(2,0);
+					C4Bulk(2,1) = CBulk(2,1);
+					C4Bulk(2,2) = CBulk(2,2);
+					C4Bulk(2,3) = CBulk(2,5);
 
-				C4Bulk(1,0) = CBulk(1,0);
-				C4Bulk(1,1) = CBulk(1,1);
-				C4Bulk(1,2) = CBulk(1,2);
-				C4Bulk(1,3) = CBulk(1,5);
+					C4Bulk(3,0) = CBulk(5,0);
+					C4Bulk(3,1) = CBulk(5,1);
+					C4Bulk(3,2) = CBulk(5,2);
+					C4Bulk(3,3) = CBulk(5,5);
 
-				C4Bulk(2,0) = CBulk(2,0);
-				C4Bulk(2,1) = CBulk(2,1);
-				C4Bulk(2,2) = CBulk(2,2);
-				C4Bulk(2,3) = CBulk(2,5);
-
-				C4Bulk(3,0) = CBulk(5,0);
-				C4Bulk(3,1) = CBulk(5,1);
-				C4Bulk(3,2) = CBulk(5,2);
-				C4Bulk(3,3) = CBulk(5,5);
-
-				tmp.beProductOf(C4Bulk, BAvg);
-				tmp2.beTProductOf(BAvg, tmp);
-				answer.add(-1.0*dA*l_s, tmp2);
-
-
-//#endif
-#endif
+					tmp.beProductOf(C4Bulk, BAvg);
+					tmp2.beTProductOf(BAvg, tmp);
+					answer.add(-1.0*dA*l_s, tmp2);
+				}
 
 			}
 		}
@@ -1958,7 +1572,6 @@ XfemStructuralElementInterface :: initializeCZFrom(InputRecord *ir)
     int material = -1;
     IR_GIVE_OPTIONAL_FIELD(ir, material, _IFT_XfemElementInterface_CohesiveZoneMaterial);
     mCZMaterialNum = material;
-//    printf("In XfemElementInterface :: initializeCZFrom(): mCZMaterialNum: %d\n", mCZMaterialNum );
 
 
     // Number of Gauss points used when integrating the cohesive zone
@@ -1997,9 +1610,6 @@ void XfemStructuralElementInterface :: initializeCZMaterial()
             OOFEM_ERROR("Failed to fetch pointer for mpCZMat.");
         }
     }
-//    else {
-//    	OOFEM_ERROR("Error in initializeCZMaterial().")
-//    }
 }
 
 bool XfemStructuralElementInterface :: useNonStdCz()

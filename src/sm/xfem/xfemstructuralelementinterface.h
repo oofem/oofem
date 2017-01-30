@@ -94,6 +94,9 @@ public:
     int mCZMaterialNum;
     int mCSNumGaussPoints;
 
+    // Options for nonstandard cohesive zone model
+    bool mIncludeBulkJump;
+    bool mIncludeBulkCorr;
 
     // Store element subdivision for postprocessing
     std :: vector< Triangle >mSubTri;

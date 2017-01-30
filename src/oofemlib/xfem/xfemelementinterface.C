@@ -990,6 +990,7 @@ void XfemElementInterface :: updateYourselfCZ(TimeStep *tStep)
         }
     }
 
+    numSeg = mpCZExtraIntegrationRules.size();
     for ( size_t i = 0; i < numSeg; i++ ) {
         if ( mpCZExtraIntegrationRules [ i ] != NULL ) {
             mpCZExtraIntegrationRules [ i ]->updateYourself(tStep);

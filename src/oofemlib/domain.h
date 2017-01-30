@@ -256,9 +256,6 @@ public:
     Domain(const Domain& src) = delete;
     Domain &operator = (const Domain &src) = delete;
 
-    /// Create a copy of the domain using the dynamic data reader.
-    Domain *Clone();
-
     /// Destructor.
     ~Domain();
 
