@@ -56,6 +56,8 @@ public:
     /// Updates integration rule based on the triangulation.
     virtual bool XfemElementInterface_updateIntegrationRule();
 
+    MaterialStatus *giveClosestGP_MatStat(double &oClosestDist, std :: vector< std :: unique_ptr< IntegrationRule > > &iRules, const FloatArray &iCoord);
+
     double computeEffectiveSveSize(StructuralFE2MaterialStatus *iFe2Ms);
 
     virtual void XfemElementInterface_computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *, TimeStep *tStep);

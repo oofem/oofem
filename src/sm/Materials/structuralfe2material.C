@@ -250,7 +250,8 @@ StructuralFE2Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatR
 
 
 StructuralFE2MaterialStatus :: StructuralFE2MaterialStatus(int n, Domain * d, GaussPoint * g,  const std :: string & inputfile) :
-StructuralMaterialStatus(n, d, g)
+StructuralMaterialStatus(n, d, g),
+mNewlyInitialized(true)
 {
 	mInputFile = inputfile;
 
@@ -259,6 +260,7 @@ StructuralMaterialStatus(n, d, g)
     if ( !this->createRVE(n, gp, inputfile) ) {
         OOFEM_ERROR("Couldn't create RVE");
     }
+
 }
 
 PrescribedGradientHomogenization* StructuralFE2MaterialStatus::giveBC()
@@ -336,6 +338,8 @@ StructuralFE2MaterialStatus :: updateYourself(TimeStep *tStep)
     StructuralMaterialStatus :: updateYourself(tStep);
     this->rve->updateYourself(tStep);
     this->rve->terminate(tStep);
+
+    mNewlyInitialized = false;
 }
 
 
@@ -382,6 +386,7 @@ void StructuralFE2MaterialStatus :: copyStateVariables(const MaterialStatus &iSt
 
 	StructuralMaterialStatus::copyStateVariables(iStatus);
 
+
 	//////////////////////////////
 	MaterialStatus &tmpStat = const_cast< MaterialStatus & >(iStatus);
 	StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*>(&tmpStat);
@@ -389,6 +394,9 @@ void StructuralFE2MaterialStatus :: copyStateVariables(const MaterialStatus &iSt
 	if(!fe2ms) {
 		OOFEM_ERROR("Failed to cast StructuralFE2MaterialStatus.")
 	}
+
+
+	this->mNewlyInitialized = fe2ms->mNewlyInitialized;
 
 	// The proper way to do this would be to clone the RVE from iStatus.
 	// However, this is a mess due to all pointers that need to be tracked.

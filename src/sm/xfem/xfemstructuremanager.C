@@ -53,6 +53,7 @@ XfemStructureManager :: XfemStructureManager(Domain *domain) :
     mSplitCracks(false),
 	mNonstandardCz(false),
 	mMinCrackLength(0.0),
+	mCrackMergeTol(0.0),
     mpMatForceEvaluator( new MaterialForceEvaluator() )
 {}
 

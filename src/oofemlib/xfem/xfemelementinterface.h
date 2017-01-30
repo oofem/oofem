@@ -140,6 +140,12 @@ public:
     // For non-standard CZ formulation
     std :: vector< std :: unique_ptr< IntegrationRule > >mpCZExtraIntegrationRules;
 
+
+    // Temporary storage to facilitate state variable mapping
+    std :: vector< std :: unique_ptr< IntegrationRule > >mpCZIntegrationRules_tmp;
+    std :: vector< std :: unique_ptr< IntegrationRule > >mpCZExtraIntegrationRules_tmp;
+    std :: vector< std :: unique_ptr< IntegrationRule > >mIntRule_tmp;
+
     MaterialMode giveMaterialMode();
 
     void updateYourselfCZ(TimeStep *tStep);

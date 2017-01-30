@@ -378,7 +378,6 @@ EngngModel :: instanciateMetaSteps(DataReader *dr)
 
 
     this->numberOfSteps = metaStepList.size();
-    OOFEM_LOG_RELEVANT("Total number of solution steps     %d\n", numberOfSteps);
     return result;
 }
 
@@ -396,7 +395,6 @@ EngngModel :: instanciateDefaultMetaStep(InputRecord *ir)
     //MetaStep *mstep = new MetaStep(1, this, numberOfSteps, *ir);
     metaStepList.emplace_back(1, this, numberOfSteps, *ir);
 
-    OOFEM_LOG_RELEVANT("Total number of solution steps     %d\n",  numberOfSteps);
     return 1;
 }
 

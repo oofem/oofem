@@ -89,15 +89,28 @@ void XfemSolverInterface::propagateXfemInterfaces(TimeStep *tStep, StructuralEng
         	xMan->nucleateEnrichmentItems(eiWereNucleated);
        }
 
+        int numEl = domain->giveNumberOfElements();
+        for ( int i = 1; i <= numEl; i++ ) {
+            ////////////////////////////////////////////////////////
+            // Map state variables for enriched elements
+            XfemElementInterface *xfemElInt = dynamic_cast< XfemElementInterface * >( domain->giveElement(i) );
+
+            if(xfemElInt) {
+            	xfemElInt->XfemElementInterface_updateIntegrationRule();
+            }
+
+        }
+
+
         if(frontsHavePropagated || eiWereNucleated) {
             mNeedsVariableMapping = false;
             
-            if ( mNeedsVariableMapping ) {
-                mapVariables(tStep, ioEngngModel);
-            } else {
+//            if ( mNeedsVariableMapping ) {
+//                mapVariables(tStep, ioEngngModel);
+//            } else {
                 ioEngngModel.giveDomain(1)->postInitialize();
                 ioEngngModel.forceEquationNumbering();
-            }
+//            }
 
             if(iRecomputeStepAfterCrackProp) {
                 printf("Recomputing time step.\n");

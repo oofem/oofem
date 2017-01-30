@@ -757,6 +757,9 @@ public:
      * @return Requested integration rule.
      */
     virtual IntegrationRule *giveIntegrationRule(int i) { return integrationRulesArray [ i ].get(); }
+
+    std::vector< std :: unique_ptr< IntegrationRule > > &giveIntegrationRulesArray() {return integrationRulesArray;}
+
     /**
      * Tests if the element implements required extension. ElementExtension type defines
      * the list of all available element extensions.

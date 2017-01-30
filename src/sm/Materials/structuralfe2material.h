@@ -67,6 +67,8 @@ protected:
 
     std :: string mInputFile;
 
+
+
 public:
     StructuralFE2MaterialStatus(int n, Domain * d, GaussPoint * g,  const std :: string & inputfile);
     virtual ~StructuralFE2MaterialStatus() {}
@@ -102,6 +104,9 @@ public:
     /// Functions for MaterialStatusMapperInterface
     virtual void copyStateVariables(const MaterialStatus &iStatus);
     virtual void addStateVariables(const MaterialStatus &iStatus) {OOFEM_ERROR("Not implemented.")};
+
+    // For debugging only
+    bool mNewlyInitialized;
 
 };
 

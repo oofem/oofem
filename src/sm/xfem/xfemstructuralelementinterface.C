@@ -111,8 +111,9 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
 
     if ( mpCZMat != NULL ) {
-        mpCZIntegrationRules.clear();
-        mpCZExtraIntegrationRules.clear();
+        mpCZIntegrationRules_tmp.clear();
+        mpCZExtraIntegrationRules_tmp.clear();
+        mIntRule_tmp.clear();
         mCZEnrItemIndices.clear();
         mCZTouchingEnrItemIndices.clear();
     }
@@ -181,10 +182,10 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
                         for ( size_t segIndex = 0; segIndex < numSeg; segIndex++ ) {
                             int czRuleNum = 1;
-                            mpCZIntegrationRules.emplace_back( new GaussIntegrationRule(czRuleNum, element) );
-                            mpCZExtraIntegrationRules.emplace_back( new GaussIntegrationRule(czRuleNum, element) );
+                            mpCZIntegrationRules_tmp.emplace_back( new GaussIntegrationRule(czRuleNum, element) );
+                            mpCZExtraIntegrationRules_tmp.emplace_back( new GaussIntegrationRule(czRuleNum, element) );
 
-                            size_t cz_rule_ind = mpCZIntegrationRules.size() - 1;
+                            size_t cz_rule_ind = mpCZIntegrationRules_tmp.size() - 1;
 
                             // Add index of current ei
                             mCZEnrItemIndices.push_back(eiIndex);
@@ -215,13 +216,13 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                                 -crackTang.at(2), crackTang.at(1)
                             };
 
-                            mpCZIntegrationRules [ cz_rule_ind ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode,
+                            mpCZIntegrationRules_tmp [ cz_rule_ind ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode,
                                                                                            crackPolygon [ segIndex ], crackPolygon [ segIndex + 1 ]);
 
-                            mpCZExtraIntegrationRules [ cz_rule_ind ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode,
+                            mpCZExtraIntegrationRules_tmp [ cz_rule_ind ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode,
                                                                                            crackPolygon [ segIndex ], crackPolygon [ segIndex + 1 ]);
 
-                            for ( GaussPoint *gp: *mpCZIntegrationRules [ cz_rule_ind ] ) {
+                            for ( GaussPoint *gp: *mpCZIntegrationRules_tmp [ cz_rule_ind ] ) {
                                 double gw = gp->giveWeight();
                                 double segLength = crackPolygon [ segIndex ].distance(crackPolygon [ segIndex + 1 ]);
                                 gw *= 0.5 * segLength;
@@ -276,7 +277,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
 
 
-                            for ( GaussPoint *gp: *mpCZExtraIntegrationRules [ cz_rule_ind ] ) {
+                            for ( GaussPoint *gp: *mpCZExtraIntegrationRules_tmp [ cz_rule_ind ] ) {
                                 double gw = gp->giveWeight();
                                 double segLength = crackPolygon [ segIndex ].distance(crackPolygon [ segIndex + 1 ]);
                                 gw *= 0.5 * segLength;
@@ -371,9 +372,9 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
                             for ( int segIndex = 0; segIndex < numSeg; segIndex++ ) {
                                 int czRuleNum = 1;
-                                mpCZIntegrationRules.emplace_back( new GaussIntegrationRule(czRuleNum, element) );
-                                mpCZExtraIntegrationRules.emplace_back( new GaussIntegrationRule(czRuleNum, element) );
-                                size_t newRuleInd = mpCZIntegrationRules.size() - 1;
+                                mpCZIntegrationRules_tmp.emplace_back( new GaussIntegrationRule(czRuleNum, element) );
+                                mpCZExtraIntegrationRules_tmp.emplace_back( new GaussIntegrationRule(czRuleNum, element) );
+                                size_t newRuleInd = mpCZIntegrationRules_tmp.size() - 1;
                                 mCZEnrItemIndices.push_back(eiIndex);
 
                                 mCZTouchingEnrItemIndices.push_back(touchingEiIndices);
@@ -400,13 +401,13 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                                     -crackTang.at(2), crackTang.at(1)
                                 };
 
-                                mpCZIntegrationRules [ newRuleInd ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode,
+                                mpCZIntegrationRules_tmp [ newRuleInd ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode,
                                                                                                  crackPolygon [ segIndex ], crackPolygon [ segIndex + 1 ]);
 
-                                mpCZExtraIntegrationRules [ newRuleInd ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode,
+                                mpCZExtraIntegrationRules_tmp [ newRuleInd ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode,
                                                                                                  crackPolygon [ segIndex ], crackPolygon [ segIndex + 1 ]);
 
-                                for ( GaussPoint *gp: *mpCZIntegrationRules [ newRuleInd ] ) {
+                                for ( GaussPoint *gp: *mpCZIntegrationRules_tmp [ newRuleInd ] ) {
                                     double gw = gp->giveWeight();
                                     double segLength = crackPolygon [ segIndex ].distance(crackPolygon [ segIndex + 1 ]);
                                     gw *= 0.5 * segLength;
@@ -461,7 +462,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
 //                                printf("mpCZExtraIntegrationRules\n");
 
-                                for ( GaussPoint *gp: *mpCZExtraIntegrationRules [ newRuleInd ] ) {
+                                for ( GaussPoint *gp: *mpCZExtraIntegrationRules_tmp [ newRuleInd ] ) {
                                     double gw = gp->giveWeight();
                                     double segLength = crackPolygon [ segIndex ].distance(crackPolygon [ segIndex + 1 ]);
                                     gw *= 0.5 * segLength;
@@ -565,9 +566,9 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
         if ( partitionSucceeded ) {
             std :: vector< std :: unique_ptr< IntegrationRule > >intRule;
-            intRule.emplace_back( new PatchIntegrationRule(ruleNum, element, mSubTri) );
-            intRule [ 0 ]->SetUpPointsOnTriangle(xMan->giveNumGpPerTri(), matMode);
-            element->setIntegrationRules( std :: move(intRule) );
+            mIntRule_tmp.emplace_back( new PatchIntegrationRule(ruleNum, element, mSubTri) );
+            mIntRule_tmp [ 0 ]->SetUpPointsOnTriangle(xMan->giveNumGpPerTri(), matMode);
+//            element->setIntegrationRules( std :: move(intRule) );
         }
 
 
@@ -577,8 +578,8 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
             std :: vector< FloatArray >czGPCoord;
 
-            for ( size_t czRulInd = 0; czRulInd < mpCZIntegrationRules.size(); czRulInd++ ) {
-                for ( GaussPoint *gp: *mpCZIntegrationRules [ czRulInd ] ) {
+            for ( size_t czRulInd = 0; czRulInd < mpCZIntegrationRules_tmp.size(); czRulInd++ ) {
+                for ( GaussPoint *gp: *mpCZIntegrationRules_tmp [ czRulInd ] ) {
                     czGPCoord.push_back( gp->giveGlobalCoordinates() );
                 }
             }
@@ -606,187 +607,253 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
         }
 
 
-#ifdef cz_bulk_corr
-        if(useNonStdCz() && partitionSucceeded) {
+
+        bool map_state_variables = true;
+//        bool map_state_variables = false;
+        if(map_state_variables) {
+//        	printf("Mapping state variables.\n");
 
 
-        	// Scale Gauss weights by (1 - phi), where phi is a hat function with
-        	// phi = 1 on the crack surface and phi = 0 at a distance l_s from the crack.
-            for ( auto &gp : *element->giveIntegrationRule(0) ) {
+            ////////////////////////////////////////////////////////////////////////
+        	// Copy bulk GPs
+        	int num_ir_new = mIntRule_tmp.size();
+        	for( int i = 0; i < num_ir_new; i++ ) {
 
-//		    	StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*> ( gp->giveMaterialStatus() );
+        		for(GaussPoint *gp_new : *(mIntRule_tmp[i]) ) {
+
+
+        			// Fetch new material status. Create it if it does not exist.
+        			MaterialStatus *ms_new = dynamic_cast<MaterialStatus*>( gp_new->giveMaterialStatus() );
+        			if(!ms_new) {
+        				//printf("ms == NULL\n");
+
+        				StructuralElement *s_el = dynamic_cast<StructuralElement*>(element);
+        				StructuralCrossSection *cs = s_el->giveStructuralCrossSection();
+        				cs->createMaterialStatus(*gp_new);
+        				ms_new = dynamic_cast<MaterialStatus*>( gp_new->giveMaterialStatus() );
+        			}
+
+//        			printf("ms_new->giveClassName(): %s\n", ms_new->giveClassName() );
+
+
+        			// Find closest old GP.
+        			double closest_dist = 0.0;
+        			MaterialStatus *ms_old = giveClosestGP_MatStat( closest_dist, element->giveIntegrationRulesArray() , gp_new->giveGlobalCoordinates());
+
+        			if(ms_old) {
+//        				OOFEM_ERROR("Failed to fetch old material status.")
+
+
+						// Copy state variables.
+						MaterialStatusMapperInterface *mapper_interface = dynamic_cast<MaterialStatusMapperInterface*>( ms_new );
+
+						if(mapper_interface) {
+//							printf("Successfully casted to MaterialStatusMapperInterface.\n");
+							mapper_interface->copyStateVariables(*ms_old);
+						}
+						else {
+							OOFEM_ERROR("Failed casting to MaterialStatusMapperInterface.")
+						}
+        			}
+
+//        			StructuralFE2MaterialStatus *ms_fe2 = dynamic_cast<StructuralFE2MaterialStatus*>( ms_new );
 //
-//		    	if(fe2ms == NULL) {
-//		    		OOFEM_ERROR("The material status is not of an allowed type.")
-//		    	}
-//
-//				// Fetch l_s
-//				double l_s = 2.0*sqrt( fe2ms->giveBC()->domainSize() );
-
-            	double l_s = 0.5*2.0*1.0e-4; // TODO: Compute properly.
-
-            	const FloatArray &gc = gp->giveGlobalCoordinates();
-//            	printf("gc: "); gc.printYourself();
-
-            	const FloatArray &lc = gp->giveNaturalCoordinates();
-
-                // Compute displacement in gp
-                FloatMatrix NMatrix;
-                FloatArray solVec;
-
-                FloatArray N;
-                FEInterpolation *interp = element->giveInterpolation();
-                interp->evalN( N, lc, FEIElementGeometryWrapper(element) );
-                const int nDofMan = element->giveNumberOfDofManagers();
-
-                XfemManager *xMan = element->giveDomain()->giveXfemManager();
-                int numEI =  xMan->giveNumberOfEnrichmentItems();
-
-
-                double closestDist = 1.0e20;
-
-                for ( int eiIndex = 1; eiIndex <= numEI; eiIndex++ ) {
-                    EnrichmentItem *ei = xMan->giveEnrichmentItem(eiIndex);
-
-                    double levelSetTang = 0.0, levelSetNormal = 0.0, levelSetInNode = 0.0;
-
-                    bool evaluationSucceeded = true;
-                    for ( int elNodeInd = 1; elNodeInd <= nDofMan; elNodeInd++ ) {
-                        DofManager *dMan = element->giveDofManager(elNodeInd);
-                        const FloatArray &nodeCoord = * ( dMan->giveCoordinates() );
-
-                        if ( !ei->evalLevelSetTangInNode(levelSetInNode, dMan->giveGlobalNumber(), nodeCoord) ) {
-                            evaluationSucceeded = false;
-                        }
-                        levelSetTang += N.at(elNodeInd) * levelSetInNode;
-
-                        if ( !ei->evalLevelSetNormalInNode(levelSetInNode, dMan->giveGlobalNumber(), nodeCoord) ) {
-                            evaluationSucceeded = false;
-                        }
-                        levelSetNormal += N.at(elNodeInd) * levelSetInNode;
-                    }
-
-                    double tangSignDist = levelSetTang, arcPos = 0.0;
-
-                    GeometryBasedEI *geoEI = dynamic_cast< GeometryBasedEI * >( ei );
-                    if ( geoEI != NULL ) {
-                        // TODO: Consider removing this special treatment. /ES
-                        geoEI->giveGeometry()->computeTangentialSignDist(tangSignDist, gc, arcPos);
-                    }
-
-
-                    if(evaluationSucceeded) {
-//                            printf("!evaluationSucceeded.\n");
-
-                    	if ( tangSignDist > 0.0 ) {
-//                    		printf("levelSetNormal: %e\n", levelSetNormal);
-
-                    		if( fabs(levelSetNormal) < closestDist ) {
-                    			closestDist = fabs(levelSetNormal);
-                    		}
-                    	}
-
-//                        if ( ( tangSignDist > ( 1.0e-3 ) * meanEdgeLength && fabs(levelSetNormal) < ( 1.0e-2 ) * meanEdgeLength ) && evaluationSucceeded ) {
-//                            joinNodes = false;
-//                        }
-
-//                        if ( ( tangSignDist < ( 1.0e-3 ) * meanEdgeLength || fabs(levelSetNormal) > ( 1.0e-2 ) * meanEdgeLength ) || !evaluationSucceeded ) {
-//						if ( ( tangSignDist < ( 1.0e-3 ) * meanEdgeLength || fabs(levelSetNormal) > ( 1.0e-2 ) * meanEdgeLength ) && false ) {
-//							joinNodes = false;
+//        			if(ms_fe2) {
+//						if( ms_fe2->mNewlyInitialized ) {
+//							printf("Newly initialized.\n");
 //						}
-                    }
-                }
-//
-//                printf("closestDist: %e\n", closestDist );
+//						else {
+//							printf("Not newly initialized.\n");
+//						}
+//        			}
+        		}
 
-                if( closestDist < l_s ) {
-                	double weight_func = closestDist/l_s;
-                	printf("weight_func: %e\n", weight_func);
-                	gp->setWeight( weight_func*gp->giveWeight() );
-                }
+//        		for(GaussPoint *gp : *(this->element->giveIntegrationRule(i)) ) {
+//        			MaterialStatus *ms = dynamic_cast<MaterialStatus*>( gp->giveMaterialStatus() );
+//        			printf("ms->giveClassName(): %s\n", ms->giveClassName() );
+//        		}
 
-            }
-
-
-#if 0
-        	// If the non-standard FE2 cohesive zone model is used, we need to scale the bulk Gauss weights.
-
-        	// Start by computing the element area
-            double totalElArea = 0.0, sumGW = 0.0;
-            IntegrationRule *ir = element->giveIntegrationRule(0);
-            if(ir == NULL) {
-            	printf("ir == NULL\n");
-            }
-            int numGP = ir->giveNumberOfIntegrationPoints();
-//            printf("numGP: %d\n", numGP);
-//
-//            for(int i = 0; i < numGP; i++) {
-//            	GaussPoint *gp = ir->getIntegrationPoint(i);
-//            	totalElArea += gp->giveWeight();
-//            }
-            for ( auto &gp : *element->giveIntegrationRule(0) ) {
-            	double dA = element->computeVolumeAround(gp);
-            	totalElArea += dA;
-            	sumGW += gp->giveWeight();
-            }
+        	}
+            ////////////////////////////////////////////////////////////////////////
 
 
-//            printf("element->computeArea(): %e\n", element->computeArea());
-//            printf("\n\ntotalElArea: %e\n", totalElArea );
 
-            double areaToReduce = 0.0;
+            ////////////////////////////////////////////////////////////////////////
+        	// Copy CZ GPs
+//        	printf("mCZMaterialNum: %d\n", mCZMaterialNum);
+        	if( mCZMaterialNum > 0 ) {
+//        		printf("Copying CZ GPs.\n");
 
-			size_t numSeg = mpCZIntegrationRules.size();
-			for ( size_t segIndex = 0; segIndex < numSeg; segIndex++ ) {
-				for ( GaussPoint *gp: *mpCZIntegrationRules [ segIndex ] ) {
+				num_ir_new = mpCZIntegrationRules_tmp.size();
+				for( int i = 0; i < num_ir_new; i++ ) {
 
-			    	StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*> ( gp->giveMaterialStatus() );
+					for(GaussPoint *gp_new : *(mpCZIntegrationRules_tmp[i]) ) {
 
-			    	if(fe2ms == NULL) {
-			    		OOFEM_ERROR("The material status is not of an allowed type.")
-			    	}
+						// Fetch new material status. Create it if it does not exist.
+						MaterialStatus *ms_new = dynamic_cast<MaterialStatus*>( gp_new->giveMaterialStatus() );
+						if(!ms_new) {
+							//printf("ms == NULL\n");
 
-					// Fetch L_s
-					double l_s = 2.0*sqrt( fe2ms->giveBC()->domainSize() );
+							ms_new = mpCZMat->CreateStatus(gp_new);
 
-					CrossSection *cs  = element->giveCrossSection();
-					double thickness = cs->give(CS_Thickness, gp);
-					double dA = thickness * gp->giveWeight();
+//							StructuralElement *s_el = dynamic_cast<StructuralElement*>(element);
+//							StructuralCrossSection *cs = s_el->giveStructuralCrossSection();
+//							cs->createMaterialStatus(*gp_new);
+//							ms_new = dynamic_cast<MaterialStatus*>( gp_new->giveMaterialStatus() );
+						}
 
-					areaToReduce += l_s*dA;
+	        			// Find closest old GP.
+	        			double closest_dist_cz = 0.0;
+	        			MaterialStatus *ms_old = giveClosestGP_MatStat(closest_dist_cz, mpCZIntegrationRules , gp_new->giveGlobalCoordinates());
+//						printf("closest_dist_cz: %e\n", closest_dist_cz);
 
+	        			// If we are using the nonstandard cz formulation, we
+	        			// also consider mapping from bulk GPs.
+	        			XfemStructureManager *xsMan = dynamic_cast<XfemStructureManager*>( element->giveDomain()->giveXfemManager() );
+	        			bool non_std_cz = false;
+	        			if(xsMan) {
+	        				non_std_cz = xsMan->giveUseNonStdCz();
+	        			}
+
+	        			if(non_std_cz) {
+							double closest_dist_bulk = 0.0;
+							MaterialStatus *ms_old_bulk = giveClosestGP_MatStat(closest_dist_bulk, element->giveIntegrationRulesArray() , gp_new->giveGlobalCoordinates());
+//							printf("closest_dist_bulk: %e\n", closest_dist_bulk);
+							if( closest_dist_bulk < closest_dist_cz ) {
+								printf("Bulk is closest. Dist: %e\n", closest_dist_bulk);
+								ms_old = ms_old_bulk;
+							}
+	        			}
+
+	        			if(ms_old) {
+	//        				OOFEM_ERROR("Failed to fetch old material status.")
+
+
+							// Copy state variables.
+							MaterialStatusMapperInterface *mapper_interface = dynamic_cast<MaterialStatusMapperInterface*>( ms_new );
+
+							if(mapper_interface) {
+	//							printf("Successfully casted to MaterialStatusMapperInterface.\n");
+								mapper_interface->copyStateVariables(*ms_old);
+							}
+							else {
+								OOFEM_ERROR("Failed casting to MaterialStatusMapperInterface.")
+							}
+	        			}
+
+					}
 				}
-			}
+        	}
 
-			printf("\n\ntotalElArea: %e\n", totalElArea );
-			printf("areaToReduce: %e\n", areaToReduce);
-			double reduceFraction = areaToReduce/totalElArea;
-//			if(reduceFraction >= 1.0) {
-//				reduceFraction = 1.0;
-//			}
-			printf("reduceFraction: %e\n", reduceFraction);
-
-			double remainingFraction = 1.0 - reduceFraction;
-//			if(remainingFraction < 1.0e-6) {
-//				remainingFraction = 1.0e-6;
-//			}
-			printf("remainingFraction: %e\n", remainingFraction);
-
-
-			// Scale bulk Gauss weights
-            for ( auto &gp : *element->giveIntegrationRule(0) ) {
-            	gp->setWeight( remainingFraction*gp->giveWeight() );
-            }
+            ////////////////////////////////////////////////////////////////////////
 
 
 
-#endif
+
+            ////////////////////////////////////////////////////////////////////////
+        	// Copy "extra" CZ GPs (Used for non-standard CZ model)
+
+        	//        	printf("mCZMaterialNum: %d\n", mCZMaterialNum);
+        	if( mCZMaterialNum > 0 ) {
+        	//        		printf("Copying CZ GPs.\n");
+
+        		num_ir_new = mpCZExtraIntegrationRules_tmp.size();
+        		for( int i = 0; i < num_ir_new; i++ ) {
+
+        			for(GaussPoint *gp_new : *(mpCZExtraIntegrationRules_tmp[i]) ) {
+
+        				// Fetch new material status. Create it if it does not exist.
+        				MaterialStatus *ms_new = dynamic_cast<MaterialStatus*>( gp_new->giveMaterialStatus() );
+        				if(!ms_new) {
+        					ms_new = mpCZMat->CreateStatus(gp_new);
+        				}
+
+        				// Find closest old GP.
+        				double closest_dist_cz = 0.0;
+        				MaterialStatus *ms_old = giveClosestGP_MatStat(closest_dist_cz, mpCZExtraIntegrationRules , gp_new->giveGlobalCoordinates());
+//        				printf("closest_dist_cz for extra gp: %e\n", closest_dist_cz);
+
+        				// If we are using the nonstandard cz formulation, we
+        				// also consider mapping from bulk GPs.
+        				XfemStructureManager *xsMan = dynamic_cast<XfemStructureManager*>( element->giveDomain()->giveXfemManager() );
+        				bool non_std_cz = false;
+        				if(xsMan) {
+        					non_std_cz = xsMan->giveUseNonStdCz();
+        				}
+
+        				if(non_std_cz) {
+        					double closest_dist_bulk = 0.0;
+        					MaterialStatus *ms_old_bulk = giveClosestGP_MatStat(closest_dist_bulk, element->giveIntegrationRulesArray() , gp_new->giveGlobalCoordinates());
+        					if( closest_dist_bulk < closest_dist_cz ) {
+        						printf("Bulk is closest. Dist: %e\n", closest_dist_bulk);
+        						ms_old = ms_old_bulk;
+        					}
+        				}
+
+        				if(ms_old) {
+
+        					// Copy state variables.
+        					MaterialStatusMapperInterface *mapper_interface = dynamic_cast<MaterialStatusMapperInterface*>( ms_new );
+
+        					if(mapper_interface) {
+        		//							printf("Successfully casted to MaterialStatusMapperInterface.\n");
+        						mapper_interface->copyStateVariables(*ms_old);
+        					}
+        					else {
+        						OOFEM_ERROR("Failed casting to MaterialStatusMapperInterface.")
+        					}
+        				}
+
+        			}
+        		}
+        	}
+        	else {
+        		printf("No extra CZ GPs to map.\n");
+        	}
+
+
+
+            ////////////////////////////////////////////////////////////////////////
+
 
         }
-#endif
+
+
+    }
+
+
+    if ( partitionSucceeded ) {
+		mpCZIntegrationRules = std::move(mpCZIntegrationRules_tmp);
+		mpCZExtraIntegrationRules = std::move(mpCZExtraIntegrationRules_tmp);
+		element->setIntegrationRules( std :: move(mIntRule_tmp) );
     }
 
     return partitionSucceeded;
+}
+
+MaterialStatus* XfemStructuralElementInterface :: giveClosestGP_MatStat(double &oClosestDist, std :: vector< std :: unique_ptr< IntegrationRule > > &iRules, const FloatArray &iCoord)
+{
+//	printf("Entering XfemStructuralElementInterface :: giveClosestGP_MatStat with iCoord: ");
+//	iCoord.printYourself();
+
+	double min_dist2 = std::numeric_limits<double>::max();
+	MaterialStatus *closest_ms = NULL;
+
+	for(size_t i = 0; i < iRules.size(); i++) {
+		for(GaussPoint *gp : *(iRules[i]) ) {
+
+			const FloatArray &x = gp->giveGlobalCoordinates();
+			if( x.distance_square(iCoord) < min_dist2 ) {
+				min_dist2 = x.distance_square(iCoord);
+//				printf("min_dist2: %e\n", min_dist2 );
+				closest_ms = dynamic_cast<MaterialStatus*>( gp->giveMaterialStatus() );
+			}
+
+		}
+	}
+
+	oClosestDist = sqrt(min_dist2);
+	return closest_ms;
 }
 
 double XfemStructuralElementInterface :: computeEffectiveSveSize(StructuralFE2MaterialStatus *iFe2Ms)
