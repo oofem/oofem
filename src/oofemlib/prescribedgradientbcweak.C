@@ -1062,7 +1062,7 @@ void PrescribedGradientBCWeak :: computeTangent(FloatMatrix& E, TimeStep* tStep)
 //    Ered.printYourself();
 
     IntArray indx;
-    //int size = StructuralMaterial :: giveVoigtVectorMask(indx, _PlaneStress);
+    StructuralMaterial :: giveVoigtVectorMask(indx, _PlaneStress);
 
 //    FloatMatrix EredT;
 //    EredT.beTranspositionOf(Ered);
