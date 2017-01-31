@@ -124,7 +124,8 @@ StaticStructural :: initializeFrom(InputRecord *ir)
 
     this->solverType = "nrsolver";
     IR_GIVE_OPTIONAL_FIELD(ir, solverType, _IFT_StaticStructural_solvertype);
-    
+    nMethod.reset(NULL);
+
     int tmp = TangentStiffness; // Default TangentStiffness
     IR_GIVE_OPTIONAL_FIELD(ir, tmp, _IFT_StaticStructural_stiffmode);
     this->stiffMode = (MatResponseMode)tmp;
@@ -132,7 +133,7 @@ StaticStructural :: initializeFrom(InputRecord *ir)
     int _val = IG_Tangent;
     IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_EngngModel_initialGuess);
     this->initialGuessType = ( InitialGuess ) _val;
-    
+
     mRecomputeStepAfterPropagation = ir->hasField(_IFT_StaticStructural_recomputeaftercrackpropagation);
 
 #ifdef __PARALLEL_MODE
@@ -156,6 +157,49 @@ StaticStructural :: initializeFrom(InputRecord *ir)
     this->field.reset( new DofDistributedPrimaryField(this, 1, FT_Displacements, 0) );
 
     return IRRT_OK;
+}
+
+
+void
+StaticStructural :: updateAttributes(MetaStep *mStep)
+{
+    IRResultType result;                  // Required by IR_GIVE_FIELD macro
+
+    MetaStep *mStep1 = this->giveMetaStep( mStep->giveNumber() ); //this line ensures correct input file in staggered problem
+    InputRecord *ir = mStep1->giveAttributesRecord();
+
+    int val = SMT_Skyline;
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
+    sparseMtrxType = ( SparseMtrxType ) val;
+
+    prescribedTimes.clear();
+    IR_GIVE_OPTIONAL_FIELD(ir, prescribedTimes, _IFT_StaticStructural_prescribedTimes);
+    if ( prescribedTimes.giveSize() > 0 ) {
+        numberOfSteps = prescribedTimes.giveSize();
+    } else {
+        this->deltaT = 1.0;
+        IR_GIVE_OPTIONAL_FIELD(ir, deltaT, _IFT_StaticStructural_deltat);
+        IR_GIVE_FIELD(ir, numberOfSteps, _IFT_EngngModel_nsteps);
+    }
+
+    std :: string s = "nrsolver";
+    IR_GIVE_OPTIONAL_FIELD(ir, s, _IFT_StaticStructural_solvertype);
+    if ( s.compare(this->solverType) ) {
+        this->solverType = s;
+        nMethod.reset(NULL);
+    }
+
+    int tmp = TangentStiffness; // Default TangentStiffness
+    IR_GIVE_OPTIONAL_FIELD(ir, tmp, _IFT_StaticStructural_stiffmode);
+    this->stiffMode = (MatResponseMode)tmp;
+
+    int _val = IG_Tangent;
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_EngngModel_initialGuess);
+    this->initialGuessType = ( InitialGuess ) _val;
+
+    mRecomputeStepAfterPropagation = ir->hasField(_IFT_StaticStructural_recomputeaftercrackpropagation);
+
+    EngngModel :: updateAttributes(mStep1);
 }
 
 
@@ -240,9 +284,6 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
         this->stiffnessMatrix->buildInternalStructure( this, di, EModelDefaultEquationNumbering() );
     }
     this->internalForces.resize(neq);
-
-    this->giveNumericalMethod( this->giveCurrentMetaStep() );
-    this->initMetaStepAttributes( this->giveCurrentMetaStep() );
 
     FloatArray incrementOfSolution(neq);
     if ( this->initialGuessType == IG_Tangent ) {

@@ -87,6 +87,7 @@ public:
     StaticStructural(int i, EngngModel * _master = NULL);
     virtual ~StaticStructural();
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void updateAttributes(MetaStep *mStep);
 
     virtual void solveYourself();
     virtual void solveYourselfAt(TimeStep *tStep);
