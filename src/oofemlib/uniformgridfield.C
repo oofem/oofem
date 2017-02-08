@@ -85,17 +85,18 @@ void UniformGridField::setValues(const FloatArray& vv){
     values=vv;
 }
 
-
 double UniformGridField::nodeValue2d(int i, int j){
     assert(div.giveSize()==2);
     assert(values.giveSize()==(div[0]+1)*(div[1]+1));
-    return values[(div[0]+1)*i+j];
+    return values[(div[1]+1)*i+j];
 }
+
 double UniformGridField::nodeValue3d(int i, int j, int k){
     assert(div.giveSize()==3);
     assert(values.giveSize()==(div[0]+1)*(div[1]+1)*(div[2]+1));
-    return values[(div[0]+1)*(div[1]+1)*i+(div[1]+1)*j+k];
+    return values[(div[2]+1)*(div[1]+1)*i+(div[2]+1)*j+k];
 }
+
 
 // see https://github.com/woodem/woo/blob/master/pkg/dem/FlowAnalysis.cpp
 // and https://woodem.org/user/flow-analysis.html for explanation about the interpolation routine

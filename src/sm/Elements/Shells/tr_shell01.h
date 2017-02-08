@@ -148,10 +148,7 @@ protected:
     }
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
     { OOFEM_ERROR("calling of this function is not allowed"); }
-    virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode)
-    { OOFEM_ERROR("calling of this function is not allowed"); }
-    virtual void computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
-    { OOFEM_ERROR("calling of this function is not allowed"); }
+    virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode);
 
 public:
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)

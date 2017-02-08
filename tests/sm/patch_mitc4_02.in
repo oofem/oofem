@@ -44,58 +44,58 @@ Set 4 nodes 2 5 6
 #NODE tStep 1 number 5 dof 1 unknown d value -4.6875
 #NODE tStep 1 number 6 dof 1 unknown d value -4.6875
 ## check element no. 1 strain vector
-#ELEMENT tStep 1 number 1 gp 1 keyword 104 component 1  value -0.520833333
-#ELEMENT tStep 1 number 1 gp 1 keyword 104 component 2  value 0.0
-#ELEMENT tStep 1 number 1 gp 1 keyword 104 component 3  value 0.0
-#ELEMENT tStep 1 number 1 gp 1 keyword 104 component 4  value 0.0
-#ELEMENT tStep 1 number 1 gp 1 keyword 104 component 5  value 0.0
-#ELEMENT tStep 1 number 1 gp 1 keyword 104 component 6  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 1  value -0.520833333
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 2  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 3  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 4  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 5  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 6  value 0.0
 ## check element no. 1 stress vector
-#ELEMENT tStep 1 number 1 gp 1 keyword 10 component 1  value -8.333333333
-#ELEMENT tStep 1 number 1 gp 1 keyword 10 component 2  value -2.083333333
-#ELEMENT tStep 1 number 1 gp 1 keyword 10 component 3  value 0.0
-#ELEMENT tStep 1 number 1 gp 1 keyword 10 component 4  value 0.0
-#ELEMENT tStep 1 number 1 gp 1 keyword 10 component 5  value 0.0
-#ELEMENT tStep 1 number 1 gp 1 keyword 10 component 6  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 1  value -8.333333333
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 2  value -2.083333333
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 3  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 4  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 5  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 6  value 0.0
 ##
-#ELEMENT tStep 1 number 2 gp 2 keyword 104 component 1  value -0.520833333
-#ELEMENT tStep 1 number 2 gp 2 keyword 104 component 3  value 0.0
-#ELEMENT tStep 1 number 2 gp 2 keyword 104 component 4  value 0.0
-#ELEMENT tStep 1 number 2 gp 2 keyword 104 component 5  value 0.0
-#ELEMENT tStep 1 number 2 gp 2 keyword 104 component 2  value 0.0
-#ELEMENT tStep 1 number 2 gp 2 keyword 104 component 6  value 0.0
-#ELEMENT tStep 1 number 2 gp 2 keyword 10 component 1  value -8.333333333
-#ELEMENT tStep 1 number 2 gp 2 keyword 10 component 2  value -2.083333333
-#ELEMENT tStep 1 number 2 gp 2 keyword 10 component 3  value 0.0
-#ELEMENT tStep 1 number 2 gp 2 keyword 10 component 4  value 0.0
-#ELEMENT tStep 1 number 2 gp 2 keyword 10 component 5  value 0.0
-#ELEMENT tStep 1 number 2 gp 2 keyword 10 component 6  value 0.0
+#ELEMENT tStep 1 number 2 gp 2 keyword 4 component 1  value -0.520833333
+#ELEMENT tStep 1 number 2 gp 2 keyword 4 component 3  value 0.0
+#ELEMENT tStep 1 number 2 gp 2 keyword 4 component 4  value 0.0
+#ELEMENT tStep 1 number 2 gp 2 keyword 4 component 5  value 0.0
+#ELEMENT tStep 1 number 2 gp 2 keyword 4 component 2  value 0.0
+#ELEMENT tStep 1 number 2 gp 2 keyword 4 component 6  value 0.0
+#ELEMENT tStep 1 number 2 gp 2 keyword 1 component 1  value -8.333333333
+#ELEMENT tStep 1 number 2 gp 2 keyword 1 component 2  value -2.083333333
+#ELEMENT tStep 1 number 2 gp 2 keyword 1 component 3  value 0.0
+#ELEMENT tStep 1 number 2 gp 2 keyword 1 component 4  value 0.0
+#ELEMENT tStep 1 number 2 gp 2 keyword 1 component 5  value 0.0
+#ELEMENT tStep 1 number 2 gp 2 keyword 1 component 6  value 0.0
 ##
-#ELEMENT tStep 1 number 3 gp 3 keyword 104 component 1  value -0.520833333
-#ELEMENT tStep 1 number 3 gp 3 keyword 104 component 3  value 0.0
-#ELEMENT tStep 1 number 3 gp 3 keyword 104 component 4  value 0.0
-#ELEMENT tStep 1 number 3 gp 3 keyword 104 component 5  value 0.0
-#ELEMENT tStep 1 number 3 gp 3 keyword 104 component 2  value 0.0
-#ELEMENT tStep 1 number 3 gp 3 keyword 104 component 6  value 0.0
-#ELEMENT tStep 1 number 3 gp 3 keyword 10 component 1  value -8.333333333
-#ELEMENT tStep 1 number 3 gp 3 keyword 10 component 2  value -2.083333333
-#ELEMENT tStep 1 number 3 gp 3 keyword 10 component 3  value 0.0
-#ELEMENT tStep 1 number 3 gp 3 keyword 10 component 4  value 0.0
-#ELEMENT tStep 1 number 3 gp 3 keyword 10 component 5  value 0.0
-#ELEMENT tStep 1 number 3 gp 3 keyword 10 component 6  value 0.0
+#ELEMENT tStep 1 number 3 gp 3 keyword 4 component 1  value -0.520833333
+#ELEMENT tStep 1 number 3 gp 3 keyword 4 component 3  value 0.0
+#ELEMENT tStep 1 number 3 gp 3 keyword 4 component 4  value 0.0
+#ELEMENT tStep 1 number 3 gp 3 keyword 4 component 5  value 0.0
+#ELEMENT tStep 1 number 3 gp 3 keyword 4 component 2  value 0.0
+#ELEMENT tStep 1 number 3 gp 3 keyword 4 component 6  value 0.0
+#ELEMENT tStep 1 number 3 gp 3 keyword 1 component 1  value -8.333333333
+#ELEMENT tStep 1 number 3 gp 3 keyword 1 component 2  value -2.083333333
+#ELEMENT tStep 1 number 3 gp 3 keyword 1 component 3  value 0.0
+#ELEMENT tStep 1 number 3 gp 3 keyword 1 component 4  value 0.0
+#ELEMENT tStep 1 number 3 gp 3 keyword 1 component 5  value 0.0
+#ELEMENT tStep 1 number 3 gp 3 keyword 1 component 6  value 0.0
 ##
-#ELEMENT tStep 1 number 4 gp 4 keyword 104 component 1  value -0.520833333
-#ELEMENT tStep 1 number 1 gp 1 keyword 104 component 3  value 0.0
-#ELEMENT tStep 1 number 1 gp 1 keyword 104 component 4  value 0.0
-#ELEMENT tStep 1 number 1 gp 1 keyword 104 component 5  value 0.0
-#ELEMENT tStep 1 number 4 gp 4 keyword 104 component 2  value 0.0
-#ELEMENT tStep 1 number 4 gp 4 keyword 104 component 6  value 0.0
-#ELEMENT tStep 1 number 4 gp 4 keyword 10 component 1  value -8.333333333
-#ELEMENT tStep 1 number 4 gp 4 keyword 10 component 2  value -2.083333333
-#ELEMENT tStep 1 number 4 gp 4 keyword 10 component 3  value 0.0
-#ELEMENT tStep 1 number 4 gp 4 keyword 10 component 4  value 0.0
-#ELEMENT tStep 1 number 4 gp 4 keyword 10 component 5  value 0.0
-#ELEMENT tStep 1 number 4 gp 4 keyword 10 component 6  value 0.0
+#ELEMENT tStep 1 number 4 gp 4 keyword 4 component 1  value -0.520833333
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 3  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 4  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 5  value 0.0
+#ELEMENT tStep 1 number 4 gp 4 keyword 4 component 2  value 0.0
+#ELEMENT tStep 1 number 4 gp 4 keyword 4 component 6  value 0.0
+#ELEMENT tStep 1 number 4 gp 4 keyword 1 component 1  value -8.333333333
+#ELEMENT tStep 1 number 4 gp 4 keyword 1 component 2  value -2.083333333
+#ELEMENT tStep 1 number 4 gp 4 keyword 1 component 3  value 0.0
+#ELEMENT tStep 1 number 4 gp 4 keyword 1 component 4  value 0.0
+#ELEMENT tStep 1 number 4 gp 4 keyword 1 component 5  value 0.0
+#ELEMENT tStep 1 number 4 gp 4 keyword 1 component 6  value 0.0
 #%END_CHECK%
 #
 #

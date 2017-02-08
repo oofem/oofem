@@ -1,0 +1,257 @@
+concrete_fcm_shear.out
+fixed crack model for concrete - separate tests on a single finite element
+#
+NonLinearStatic nsteps 31 deltaT 1. rtolv 1.e-6 maxiter 10000 controllmode 1  stiffmode 0 renumber 1 nmodules 1 
+#
+errorcheck
+#
+domain 2dplanestress
+OutputManager tstep_all dofman_all element_all
+#
+ndofman 44 nelem 11 ncrosssect 11 nmat 11 nbc 10 nic 0 nltf 10 nset 21
+#
+# 1: concrete_fcm_shear_none_dominant
+#
+node   1   coords 3  0.0  0.0  0.0 
+node   2   coords 3  0.1  0.0  0.0 
+node   3   coords 3  0.0  0.1  0.0 
+node   4   coords 3  0.1  0.1  0.0 
+#
+# 2: concrete_fcm_shear_none_multiple
+#
+node   5   coords 3  0.0  0.0  0.0 
+node   6   coords 3  0.1  0.0  0.0 
+node   7   coords 3  0.0  0.1  0.0 
+node   8   coords 3  0.1  0.1  0.0
+#
+# 3: concrete_fcm_shear_beta_dominant
+#
+node   9   coords 3  0.0  0.0  0.0 
+node  10   coords 3  0.1  0.0  0.0 
+node  11   coords 3  0.0  0.1  0.0 
+node  12   coords 3  0.1  0.1  0.0
+#
+# 4: concrete_fcm_shear_beta_multiple
+#
+node  13   coords 3  0.0  0.0  0.0 
+node  14   coords 3  0.1  0.0  0.0 
+node  15   coords 3  0.0  0.1  0.0 
+node  16   coords 3  0.1  0.1  0.0
+#
+# 5: concrete_fcm_shear_sf_dominant
+#
+node  17   coords 3  0.0  0.0  0.0 
+node  18   coords 3  0.1  0.0  0.0 
+node  19   coords 3  0.0  0.1  0.0 
+node  20   coords 3  0.1  0.1  0.0
+#
+# 6: concrete_fcm_shear_sf_multiple
+#
+node  21   coords 3  0.0  0.0  0.0 
+node  22   coords 3  0.1  0.0  0.0 
+node  23   coords 3  0.0  0.1  0.0 
+node  24   coords 3  0.1  0.1  0.0
+#
+# 7: concrete_fcm_shear_userbeta_dominant
+#
+node  25   coords 3  0.0  0.0  0.0 
+node  26   coords 3  0.1  0.0  0.0 
+node  27   coords 3  0.0  0.1  0.0 
+node  28   coords 3  0.1  0.1  0.0
+#
+# 8: concrete_fcm_shear_userbeta_multiple
+#
+node  29   coords 3  0.0  0.0  0.0 
+node  30   coords 3  0.1  0.0  0.0 
+node  31   coords 3  0.0  0.1  0.0 
+node  32   coords 3  0.1  0.1  0.0
+#
+# 9: concrete_fcm_shear_crack_spacing_beta_multiple
+#
+node  33   coords 3  0.0  0.0  0.0 
+node  34   coords 3  0.1  0.0  0.0 
+node  35   coords 3  0.0  0.1  0.0 
+node  36   coords 3  0.1  0.1  0.0
+#
+# 10: concrete_fcm_shear_strength_ft
+#
+node  37   coords 3  0.0  0.0  0.0 
+node  38   coords 3  0.1  0.0  0.0 
+node  39   coords 3  0.0  0.1  0.0 
+node  40   coords 3  0.1  0.1  0.0
+#
+# 11: concrete_fcm_shear_strength_collins
+#
+node  41   coords 3  0.0  0.0  0.0 
+node  42   coords 3  0.1  0.0  0.0 
+node  43   coords 3  0.0  0.1  0.0 
+node  44   coords 3  0.1  0.1  0.0
+#
+#
+#
+PlaneStress2D   1   nodes 4   1  2  4  3
+PlaneStress2D   2   nodes 4   5  6  8  7
+PlaneStress2D   3   nodes 4   9 10 12 11
+PlaneStress2D   4   nodes 4  13 14 16 15
+PlaneStress2D   5   nodes 4  17 18 20 19
+PlaneStress2D   6   nodes 4  21 22 24 23
+PlaneStress2D   7   nodes 4  25 26 28 27
+PlaneStress2D   8   nodes 4  29 30 32 31
+PlaneStress2D   9   nodes 4  33 34 36 35
+PlaneStress2D  10   nodes 4  37 38 40 39
+PlaneStress2D  11   nodes 4  41 42 44 43
+#
+#
+SimpleCS  1 thick 1.  width 1.0 material  1 set 11
+SimpleCS  2 thick 1.  width 1.0 material  2 set 12
+SimpleCS  3 thick 1.  width 1.0 material  3 set 13
+SimpleCS  4 thick 1.  width 1.0 material  4 set 14
+SimpleCS  5 thick 1.  width 1.0 material  5 set 15
+SimpleCS  6 thick 1.  width 1.0 material  6 set 16
+SimpleCS  7 thick 1.  width 1.0 material  7 set 17
+SimpleCS  8 thick 1.  width 1.0 material  8 set 18
+SimpleCS  9 thick 1.  width 1.0 material  9 set 19
+SimpleCS 10 thick 1.  width 1.0 material 10 set 20
+SimpleCS 11 thick 1.  width 1.0 material 11 set 21
+#
+#
+concretefcm 1 d 0. talpha 0. E 20000. n 0.2 Gf 100e-6 ft 2.0 softtype 2 sheartype 0 
+concretefcm 2 d 0. talpha 0. E 20000. n 0.2 Gf 100e-6 ft 2.0 softtype 2 sheartype 0 multiplecrackshear
+#
+concretefcm 3 d 0. talpha 0. E 20000. n 0.2 Gf 100e-6 ft 2.0 softtype 2 sheartype 1 beta 0.2
+concretefcm 4 d 0. talpha 0. E 20000. n 0.2 Gf 100e-6 ft 2.0 softtype 2 sheartype 1 beta 0.2 multiplecrackshear
+#
+concretefcm 5 d 0. talpha 0. E 20000. n 0.2 Gf 100e-6 ft 2.0 softtype 2 sheartype 2 sf 10.
+concretefcm 6 d 0. talpha 0. E 20000. n 0.2 Gf 100e-6 ft 2.0 softtype 2 sheartype 2 sf 10. multiplecrackshear
+#
+concretefcm 7 d 0. talpha 0. E 20000. n 0.2 Gf 100e-6 ft 2.0 softtype 2 sheartype 3 beta_w 6 0. 1.e-6 5.e-6 1.e-5 5.e-5 1.e-3 beta(w) 6 1. 1. 0.5 0.5 0.1 0.1
+concretefcm 8 d 0. talpha 0. E 20000. n 0.2 Gf 100e-6 ft 2.0 softtype 2 sheartype 3 beta_w 6 0. 1.e-6 5.e-6 1.e-5 5.e-5 1.e-3 beta(w) 6 1. 1. 0.5 0.5 0.1 0.1 multiplecrackshear
+#
+concretefcm 9 d 0. talpha 0. E 20000. n 0.2 Gf 100e-6 ft 2.0 softtype 2 sheartype 1 multiplecrackshear beta 0.5 crackSpacing 0.025
+#
+concretefcm 10 d 0. talpha 0. E 20000. n 0.2 Gf 100e-6 ft 2.0 softtype 2 sheartype 1 beta 0.8 shearstrengthtype 1 multiplecrackshear
+#
+concretefcm 11 d 0. talpha 0. E 20000. n 0.2 Gf 100e-6 ft 2.0 softtype 2 sheartype 1 beta 0.8 shearstrengthtype 2 fc 30 ag 0.01 lengthscale 1. multiplecrackshear
+#
+# horizontal restraint
+BoundaryCondition  1 loadTimeFunction 1 dofs 1 1 values 1 0. set 1
+# vertical restraint
+BoundaryCondition  2 loadTimeFunction 2 dofs 1 2 values 1 0. set 2
+#
+# lower right node - creating first crack
+BoundaryCondition  3 loadTimeFunction 3 dofs 1 1 values 1 1.e-5 set 3
+# upper right node - creating first crack and then shearing
+BoundaryCondition  4 loadTimeFunction 4 dofs 1 1 values 1 1.e-5 set 4
+#
+# left upper node - shearing
+BoundaryCondition  5 loadTimeFunction 5 dofs 1 1 values 1 1.e-5 set 5
+# upper nodes - creating second crack
+BoundaryCondition  6 loadTimeFunction 6 dofs 1 2 values 1 1.e-5 set 6
+#
+# ft
+# upper right node - creating first crack and then shearing
+BoundaryCondition  7 loadTimeFunction 7 dofs 1 1 values 1 1.e-5 set 7
+# left upper node - shearing
+BoundaryCondition  8 loadTimeFunction 8 dofs 1 1 values 1 1.e-5 set 8
+#
+# collins
+# upper right node - creating first crack and then shearing
+BoundaryCondition  9 loadTimeFunction 9 dofs 1 1 values 1 1.e-5 set 9
+# left upper node - shearing
+BoundaryCondition 10 loadTimeFunction 10 dofs 1 1 values 1 1.e-5 set 10
+#
+#
+ConstantFunction 1 f(t) 1.0
+ConstantFunction 2 f(t) 1.0
+PiecewiseLinfunction 3 npoints 4 t 4 0. 5. 10. 100. f(t) 4 0. 2. 2. 2.
+#                                                                     0  5 10 15 20 25 30     
+PiecewiseLinfunction 4 npoints 7 t 7 0. 5. 10. 15. 20. 25. 30. f(t) 7 0. 2. 4. 2. 2. 4. 2.
+PiecewiseLinfunction 5 npoints 7 t 7 0. 5. 10. 15. 20. 25. 30. f(t) 7 0. 0. 2. 0. 0. 2. 0.
+PiecewiseLinfunction 6 npoints 7 t 7 0. 5. 10. 15. 20. 25. 30. f(t) 7 0. 0. 0. 0. 3. 3. 3.
+#
+# ft:
+PiecewiseLinfunction 7 npoints 7 t 7 0. 5. 10. 15. 20. 25. 30. f(t) 7 0. 2. 7. 2. 2. 7. 2.
+PiecewiseLinfunction 8 npoints 7 t 7 0. 5. 10. 15. 20. 25. 30. f(t) 7 0. 0. 5. 0. 0. 5. 0.
+#
+# collins: 
+PiecewiseLinfunction 9 npoints 7 t 7 0. 5. 10. 15. 20. 25. 30. f(t) 7 0. 2. 10. 2. 2. 10. 2.
+PiecewiseLinfunction 10 npoints 7 t 7 0. 5. 10. 15. 20. 25. 30. f(t) 7 0. 0. 8. 0. 0. 8. 0.
+#
+
+# horizontal restraint
+Set 1 nodes 11 1 5 9 13 17 21 25 29 33 37 41
+# vertical restraint
+Set 2 nodes 22 1 2 5 6 9 10 13 14 17 18 21 22 25 26 29 30 33 34 37 38 41 42
+#
+# lower right node - creating first crack
+Set 3 nodes 11 2 6 10 14 18 22 26 30 34 38 42
+# upper right node - creating first crack and then shearing
+Set 4 nodes 9 4 8 12 16 20 24 28 32 36
+#
+# left upper node - shearing
+Set 5 nodes 9 3 7 11 15 19 23 27 31 35 
+# upper nodes - creating second crack
+Set 6 nodes 22 3 4 7 8 11 12 15 16 19 20 23 24 27 28 31 32 35 36 39 40 43 44 
+#
+set 7  nodes 1 40 
+set 8  nodes 1 39
+set 9  nodes 1 44
+set 10 nodes 1 43
+#
+#
+set 11 elementranges {1}
+set 12 elementranges {2}
+set 13 elementranges {3}
+set 14 elementranges {4}
+set 15 elementranges {5}
+set 16 elementranges {6}
+set 17 elementranges {7}
+set 18 elementranges {8}
+set 19 elementranges {9}
+set 20 elementranges {10}
+set 21 elementranges {11}
+#
+#
+#%BEGIN_CHECK%
+# 
+#ELEMENT tStep 11 number 1 gp 1 keyword 1 component 6  value 1.66667 tolerance 1.e-5
+#ELEMENT tStep 26 number 1 gp 1 keyword 1 component 6  value 1.66667 tolerance 1.e-5
+# 
+#ELEMENT tStep 11 number 2 gp 1 keyword 1 component 6  value 1.66667 tolerance 1.e-5
+#ELEMENT tStep 26 number 2 gp 1 keyword 1 component 6  value 1.66667 tolerance 1.e-5
+# 
+#ELEMENT tStep 11 number 3 gp 1 keyword 1 component 6  value 0.3333333 tolerance 1.e-5
+#ELEMENT tStep 26 number 3 gp 1 keyword 1 component 6  value 0.3333333 tolerance 1.e-5
+# 
+#ELEMENT tStep 11 number 4 gp 1 keyword 1 component 6  value 0.3333333 tolerance 1.e-5
+#ELEMENT tStep 26 number 4 gp 1 keyword 1 component 6  value 1.851900e-01 tolerance 1.e-5
+# 
+#ELEMENT tStep 11 number 5 gp 1 keyword 1 component 6  value 1.581000e+00 tolerance 5.e-5
+#ELEMENT tStep 26 number 5 gp 1 keyword 1 component 6  value 1.471800e+00 tolerance 5.e-5
+# 
+#ELEMENT tStep 11 number 6 gp 1 keyword 1 component 6  value 1.581000e+00 tolerance 5.e-5
+#ELEMENT tStep 26 number 6 gp 1 keyword 1 component 6  value 1.393500e+00 tolerance 5.e-5
+#
+#ELEMENT tStep 11 number 7 gp 1 keyword 1 component 6  value 8.082600e-01 tolerance 5.e-5
+#ELEMENT tStep 26 number 7 gp 1 keyword 1 component 6  value 5.980800e-01 tolerance 5.e-5
+# 
+#ELEMENT tStep 11 number 8 gp 1 keyword 1 component 6  value 8.082600e-01 tolerance 5.e-5
+#ELEMENT tStep 26 number 8 gp 1 keyword 1 component 6  value 4.245900e-01 tolerance 5.e-5
+# 
+#ELEMENT tStep 11 number 9 gp 1 keyword 1 component 6  value 3.333300e-01 tolerance 5.e-5
+#ELEMENT tStep 26 number 9 gp 1 keyword 1 component 6  value 1.851900e-01 tolerance 5.e-5
+# 
+#ELEMENT tStep  8 number 10 gp 1 keyword 1 component 6  value 1.333333e+00 tolerance 5.e-5
+#ELEMENT tStep 11 number 10 gp 1 keyword 1 component 6  value 2.000000e+00 tolerance 5.e-5
+#ELEMENT tStep 23 number 10 gp 1 keyword 1 component 6  value 1.111111+00 tolerance 5.e-5
+#ELEMENT tStep 26 number 10 gp 1 keyword 1 component 6  value 2.000000e+00 tolerance 5.e-5
+# 
+#ELEMENT tStep  8 number 11 gp 1 keyword 1 component 6  value 2.133333+00 tolerance 5.e-5
+#ELEMENT tStep 11 number 11 gp 1 keyword 1 component 6  value 3.074988e+00 tolerance 5.e-5
+#ELEMENT tStep 23 number 11 gp 1 keyword 1 component 6  value 1.777778e+00 tolerance 5.e-5
+#ELEMENT tStep 26 number 11 gp 1 keyword 1 component 6  value 2.967257e+00 tolerance 5.e-5
+#
+#%END_CHECK%
+
+
+

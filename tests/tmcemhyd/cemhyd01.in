@@ -1,8 +1,8 @@
 cemhyd01.out
 Test of cemhyd3d hydration model on one quadrilateral, Q_pot = 534 J/g_cem, 300 kg cem/m3_con, i.e. max 160.2 kJ/m3_com; deltaT=160200/2.4/870=76.724 C 
 #NonStationaryProblem nsteps 51 deltat 3600.0 alpha 0.5 nmodules 1
-NlTransientTransportProblem nsteps 51 deltat 3600.0 rtol 1.e-5 alpha 0.5 nsmax 30 nmodules 1
-#TransientTransport nsteps 51 deltat 3600.0 alpha 0.5 nmodules 1
+#NlTransientTransportProblem nsteps 51 deltat 3600.0 rtol 1.e-5 alpha 0.5 nsmax 30 nmodules 1
+TransientTransport nsteps 51 deltat 3600.0 alpha 0.5 nmodules 1
 errorcheck
 #vtkxml tstep_all domain_all vars 11 37 39 44 56 67 68 69 70 71 72 73 stype 1 timeScale 2.777777e-4
 domain HeatTransfer
@@ -25,11 +25,11 @@ Set 1 elementranges {1}
 #%BEGIN_CHECK% tolerance 1.e-3
 ## TIME
 ## Check temperature
-#NODE tStep 5 number 1 dof 10 unknown d value 3.97452093e+01
-#NODE tStep 51 number 1 dof 10 unknown d value 8.70868866e+01
+#NODE tStep 5 number 1 dof 10 unknown d value 3.20430451e+01
+#NODE tStep 51 number 1 dof 10 unknown d value 8.49332076e+01
 ## Check degree of hydration
-#ELEMENT tStep 2 number 1 gp 1 keyword 39 component 1 value 0.011853
-#ELEMENT tStep 5 number 1 gp 1 keyword 39 component 1 value 0.224351
-#ELEMENT tStep 51 number 1 gp 1 keyword 39 component 1 value 0.872069
+#ELEMENT tStep 2 number 1 gp 1 keyword 39 component 1 value 2.38356174e-02
+#ELEMENT tStep 5 number 1 gp 1 keyword 39 component 1 value 1.45163349e-01
+#ELEMENT tStep 51 number 1 gp 1 keyword 39 component 1 value 8.34227408e-01
 #%END_CHECK%
 

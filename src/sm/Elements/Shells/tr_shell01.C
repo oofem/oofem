@@ -156,6 +156,23 @@ TR_SHELL01 :: giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeS
     if ( aux.isNotEmpty() ) answer.assemble(aux, loc_membrane);
 }
 
+void TR_SHELL01 :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode)
+{
+  FloatArray aux;
+  
+  answer.resize(18);
+  answer.zero();
+  
+  plate->computeBodyLoadVectorAt(aux, forLoad, tStep, mode);
+  if ( !aux.isEmpty() ) answer.assemble(aux, loc_plate);
+  
+  membrane->computeBodyLoadVectorAt(aux, forLoad, tStep, mode);
+  if ( !aux.isEmpty() ) answer.assemble(aux, loc_membrane);
+ 
+
+
+}
+  
 bool
 TR_SHELL01 :: giveRotationMatrix(FloatMatrix &answer)
 {

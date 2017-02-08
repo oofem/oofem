@@ -137,6 +137,10 @@ private:
     void giveTimeReport();
     /// Iterates through generalTringleList und removes non-valid ones or those containing bounding box nodes
     void cleanUpTriangleList();
+
+    /// Calculates the bounding box base on the domain's nodes
+    void computeBBXBasedOnNodeData(BoundingBox &BBX);
+
 };
 } // end namespace oofem
 #endif // delaunaytrinagulator_h

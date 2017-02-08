@@ -49,9 +49,9 @@ void VectorAssembler :: vectorFromElement(FloatArray& vec, Element& element, Tim
 
 void VectorAssembler :: vectorFromLoad(FloatArray& vec, Element& element, BodyLoad* load, TimeStep* tStep, ValueModeType mode) const { vec.clear(); }
 
-void VectorAssembler :: vectorFromBoundaryLoad(FloatArray& vec, Element& element, BoundaryLoad* load, int boundary, TimeStep* tStep, ValueModeType mode) const { vec.clear(); }
+void VectorAssembler :: vectorFromSurfaceLoad(FloatArray& vec, Element& element, SurfaceLoad* load, int boundary, TimeStep* tStep, ValueModeType mode) const { vec.clear(); }
 
-void VectorAssembler :: vectorFromEdgeLoad(FloatArray& vec, Element& element, BoundaryLoad* load, int edge, TimeStep* tStep, ValueModeType mode) const { vec.clear(); }
+void VectorAssembler :: vectorFromEdgeLoad(FloatArray& vec, Element& element, EdgeLoad* load, int edge, TimeStep* tStep, ValueModeType mode) const { vec.clear(); }
 
 void VectorAssembler :: vectorFromNodeLoad(FloatArray& vec, DofManager& dman, NodalLoad* load, TimeStep* tStep, ValueModeType mode) const { vec.clear(); }
 
@@ -71,9 +71,9 @@ void MatrixAssembler :: matrixFromElement(FloatMatrix& mat, Element& element, Ti
 
 void MatrixAssembler :: matrixFromLoad(FloatMatrix& mat, Element& element, BodyLoad* load, TimeStep* tStep) const { mat.clear(); }
 
-void MatrixAssembler :: matrixFromBoundaryLoad(FloatMatrix& mat, Element& element, BoundaryLoad* load, int boundary, TimeStep* tStep) const { mat.clear(); }
+void MatrixAssembler :: matrixFromSurfaceLoad(FloatMatrix& mat, Element& element, SurfaceLoad* load, int boundary, TimeStep* tStep) const { mat.clear(); }
 
-void MatrixAssembler :: matrixFromEdgeLoad(FloatMatrix& mat, Element& element, BoundaryLoad* load, int edge, TimeStep* tStep) const { mat.clear(); }
+void MatrixAssembler :: matrixFromEdgeLoad(FloatMatrix& mat, Element& element, EdgeLoad* load, int edge, TimeStep* tStep) const { mat.clear(); }
 
 void MatrixAssembler :: assembleFromActiveBC(SparseMtrx &k, ActiveBoundaryCondition &bc, TimeStep* tStep, const UnknownNumberingScheme &s_r, const UnknownNumberingScheme &s_c) const {}
 
@@ -102,17 +102,17 @@ void MatrixProductAssembler :: vectorFromLoad(FloatArray& vec, Element& element,
     vec.beProductOf(mat, this->vec);
 }
 
-void MatrixProductAssembler :: vectorFromBoundaryLoad(FloatArray& vec, Element& element, BoundaryLoad* load, int boundary, TimeStep* tStep, ValueModeType mode) const
+void MatrixProductAssembler :: vectorFromSurfaceLoad(FloatArray& vec, Element& element, SurfaceLoad* load, int boundary, TimeStep* tStep, ValueModeType mode) const
 {
     FloatMatrix mat;
-    this->mAssem.matrixFromBoundaryLoad(mat, element, load, boundary, tStep);
+    this->mAssem.matrixFromSurfaceLoad(mat, element, load, boundary, tStep);
     vec.beProductOf(mat, this->vec);
 }
 
-void MatrixProductAssembler :: vectorFromEdgeLoad(FloatArray& vec, Element& element, BoundaryLoad* load, int edge, TimeStep* tStep, ValueModeType mode) const
+void MatrixProductAssembler :: vectorFromEdgeLoad(FloatArray& vec, Element& element, EdgeLoad* load, int edge, TimeStep* tStep, ValueModeType mode) const
 {
     FloatMatrix mat;
-    this->mAssem.matrixFromBoundaryLoad(mat, element, load, edge, tStep);
+    this->mAssem.matrixFromEdgeLoad(mat, element, load, edge, tStep); // ??????
     vec.beProductOf(mat, this->vec);
 }
 
@@ -129,13 +129,13 @@ void InternalForceAssembler :: vectorFromLoad(FloatArray& vec, Element& element,
     //element.computeInternalForcesFromLoad(vec, load, tStep);
 }
 
-void InternalForceAssembler :: vectorFromBoundaryLoad(FloatArray& vec, Element& element, BoundaryLoad* load, int boundary, TimeStep* tStep, ValueModeType mode) const
+void InternalForceAssembler :: vectorFromSurfaceLoad(FloatArray& vec, Element& element, SurfaceLoad* load, int boundary, TimeStep* tStep, ValueModeType mode) const
 {
-    element.computeBoundaryLoadVector(vec, load, boundary, InternalForcesVector, mode, tStep);
+    element.computeBoundarySurfaceLoadVector(vec, load, boundary, InternalForcesVector, mode, tStep);
     //element.computeInternalForcesFromBoundaryLoad(vec, load, boundary, tStep);
 }
 
-void InternalForceAssembler :: vectorFromEdgeLoad(FloatArray& vec, Element& element, BoundaryLoad* load, int edge, TimeStep* tStep, ValueModeType mode) const
+void InternalForceAssembler :: vectorFromEdgeLoad(FloatArray& vec, Element& element, EdgeLoad* load, int edge, TimeStep* tStep, ValueModeType mode) const
 {
     element.computeBoundaryEdgeLoadVector(vec, load, edge, InternalForcesVector, mode, tStep);
     //element.computeInternalForcesFromEdgeLoad(vec, load, edge, tStep);
@@ -160,13 +160,13 @@ void ExternalForceAssembler :: vectorFromLoad(FloatArray& vec, Element& element,
     //element.computeExternalForcesFromLoad(vec, load, tStep);
 }
 
-void ExternalForceAssembler :: vectorFromBoundaryLoad(FloatArray& vec, Element& element, BoundaryLoad* load, int boundary, TimeStep* tStep, ValueModeType mode) const
+void ExternalForceAssembler :: vectorFromSurfaceLoad(FloatArray& vec, Element& element, SurfaceLoad* load, int boundary, TimeStep* tStep, ValueModeType mode) const
 {
-    element.computeBoundaryLoadVector(vec, load, boundary, ExternalForcesVector, mode, tStep);
+    element.computeBoundarySurfaceLoadVector(vec, load, boundary, ExternalForcesVector, mode, tStep);
     //element.computeExternalForcesFromBoundaryLoad(vec, load, boundary, tStep);
 }
 
-void ExternalForceAssembler :: vectorFromEdgeLoad(FloatArray& vec, Element& element, BoundaryLoad* load, int edge, TimeStep* tStep, ValueModeType mode) const
+void ExternalForceAssembler :: vectorFromEdgeLoad(FloatArray& vec, Element& element, EdgeLoad* load, int edge, TimeStep* tStep, ValueModeType mode) const
 {
     element.computeBoundaryEdgeLoadVector(vec, load, edge, ExternalForcesVector, mode, tStep);
     //element.computeExternalForcesFromEdgeLoad(vec, load, edge, tStep);
@@ -217,15 +217,15 @@ void TangentAssembler :: matrixFromLoad(FloatMatrix& mat, Element& element, Body
     //element.computeTangentFromLoad(mat, load, this->rmode, tStep);
 }
 
-void TangentAssembler :: matrixFromBoundaryLoad(FloatMatrix& mat, Element& element, BoundaryLoad* load, int boundary, TimeStep* tStep) const
+void TangentAssembler :: matrixFromSurfaceLoad(FloatMatrix& mat, Element& element, SurfaceLoad* load, int boundary, TimeStep* tStep) const
 {
-    element.computeTangentFromBoundaryLoad(mat, load, boundary, this->rmode, tStep);
+    element.computeTangentFromSurfaceLoad(mat, load, boundary, this->rmode, tStep);
 }
 
-void TangentAssembler :: matrixFromEdgeLoad(FloatMatrix& mat, Element& element, BoundaryLoad* load, int edge, TimeStep* tStep) const
+void TangentAssembler :: matrixFromEdgeLoad(FloatMatrix& mat, Element& element, EdgeLoad* load, int edge, TimeStep* tStep) const
 {
-    mat.clear();
-    //element.computeTangentFromEdgeLoad(mat, load, edge, this->rmode, tStep);
+  //mat.clear();
+  element.computeTangentFromEdgeLoad(mat, load, edge, this->rmode, tStep);
 }
 
 void TangentAssembler :: assembleFromActiveBC(SparseMtrx &k, ActiveBoundaryCondition &bc, TimeStep* tStep, const UnknownNumberingScheme &s_r, const UnknownNumberingScheme &s_c) const

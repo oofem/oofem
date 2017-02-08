@@ -133,4 +133,27 @@ FEI1dQuad :: giveLength(const FEICellGeometry &cellgeo) const
 {
     return fabs( cellgeo.giveVertexCoordinates(2)->at(cindx) - cellgeo.giveVertexCoordinates(1)->at(cindx) );
 }
+
+
+void FEI1dQuad :: boundaryEdgeGiveNodes(IntArray &answer, int boundary)
+{
+  answer={1, 2, 3};
+}
+
+void FEI1dQuad :: boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+{
+  this->evalN(answer, lcoords, cellgeo);
+}
+
+double FEI1dQuad :: boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+{
+    return this->giveTransformationJacobian(lcoords, cellgeo);
+}
+
+void FEI1dQuad :: boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+{
+    this->local2global(answer, lcoords, cellgeo);
+}
+
+  
 } // end namespace oofem

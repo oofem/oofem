@@ -287,6 +287,10 @@ void StaticStructural :: terminate(TimeStep *tStep)
         StructuralEngngModel::terminate(tStep);
         XfemSolverInterface::propagateXfemInterfaces(tStep, *this, false);
     }
+    
+     for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
+        this->printReactionForces(tStep, idomain);
+    }
 }
 
 double StaticStructural :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)

@@ -22,7 +22,7 @@
 \usepackage{tikz}
 \usepackage{hyperref}
 \usepackage[top=0.1\paperheight, bottom=0.1\paperheight, left=0.1\paperwidth, right=0.1\paperwidth]{geometry}
-\usepackage{biblatex}
+\usepackage[backend=biber]{biblatex}
 \usepackage{ifthen}
 
 \usetikzlibrary{external} 
@@ -50,6 +50,12 @@
 
 \input{../include/include.tex}
 
+%% fix for \blx@shorthands as this was removed from current biblatex version
+%\makeatletter
+%\@ifpackageloaded{tex4ht}{
+%  \def\blx@shorthands{}
+%}
+%\makeatother
 
 \renewcommand{\topfraction}{0.99}	% 99% of page top can be a float
 \renewcommand{\bottomfraction}{0.99}	% 99% of page bottom can be a float
@@ -922,11 +928,18 @@ Although element requires generally six DOFs per node, no stiffness to local rot
 \elementDescription{Features}{Variable cross section support.}
 \elementDescription{CS properties}{Cross section thickness is required (measured along director vector). Director vectors components are required \optField{directorx}{in}\optField{directory}{in}\optField{directorz}{in}(default: directorX=0, directorY=0, directorZ=1).}
 \elementDescription{Loads}{Body and boundary loads are supported.}
-\elementDescription{Output}{On output, the shell strain ($s_s$), and shell force ($s_f$) tensors in \textbf{global coordinate system} are printed as vector form with 6 components, with the following meaning:
+\elementDescription{Output}{On output, the shell force ($s_f$), shell momentum ($s_m$), shell strain ($s_s$), shell curvature ($s_c$), strain ($\varepsilon$), and stress ($\sigma$) tensors in \textbf{global coordinate system} are printed as vector form with 6 components, with the following meaning:
 \begin{eqnarray*}
-s_s&=&\{\varepsilon_x, \varepsilon_y, \varepsilon_z, \gamma_{yz}, \gamma_{zx}, \gamma_{xy}\},\\
-s_f&=&\{\sigma_x, \sigma_y, \sigma_z, \sigma_{yz}, \sigma_{xz}, \sigma_{xy}\}.
+s_f&=&\{n_x, n_y, n_z, v_{yz}, v_{xz}, v_{xy}\},\\
+s_m&=&\{m_x, m_y, m_z, m_{yz}, m_{xz}, m_{xy}\},\\
+s_s&=&\{\varepsilon_x, \varepsilon_y, \varepsilon_z, \gamma_{yz}, \gamma_{xz}, \gamma_{xy}\},\\
+s_c&=&\{\kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xy}\}\\
+\varepsilon&=&\{\varepsilon_x, \varepsilon_y, \varepsilon_z, \gamma_{yz}, \gamma_{zx}, \gamma_{xy}\},\\
+\sigma&=&\{\sigma_x, \sigma_y, \sigma_z, \sigma_{yz}, \sigma_{xz}, \sigma_{xy}\}.
 \end{eqnarray*}
+where $n_x, n_y, n_z, v_{yz}, v_{xz}, v_{xy}$ are integral forces (normal and shear forces), and $m_x, m_y, m_z, m_{yz}, m_{xz}, m_{xy}$ are bending moments, $\varepsilon_x, \varepsilon_y, \varepsilon_z$ are membrane normal deformations, $\gamma_{zy}, \gamma_{zx}, \gamma_{xy}$ are (out of plane and in plane) shear componets, $\kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xy}$ are curvatures.  
+Please note, for example, the bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer (positive z-coordinate).
+The shell force ($s_f$), shell momentum ($s_m$), shell strain ($s_s$), and shell curvature ($s_c$) tensors are evaluated at the midplane of the element (thus are constant along the thickness) while the strain ($\varepsilon$), and stress ($\sigma$) tensors are evaluated at each Gausspoint.
 }
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{-}

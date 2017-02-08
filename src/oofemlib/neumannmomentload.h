@@ -50,7 +50,7 @@
  * centre of the structure and $n$ is the outward pointing normal.
  */
 namespace oofem {
-class OOFEM_EXPORT NeumannMomentLoad : public BoundaryLoad
+class OOFEM_EXPORT NeumannMomentLoad : public SurfaceLoad
 {
 private:
     /// Center of structure
@@ -70,7 +70,7 @@ private:
     /// Compute normal at center of element
     void computeNormal(FloatArray &answer, Element *e, int side);
 public:
-    NeumannMomentLoad(int i, Domain * d) : BoundaryLoad(i, d) { }
+    NeumannMomentLoad(int i, Domain * d) : SurfaceLoad(i, d) { }
 
     // Overloaded methods:
     virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode);

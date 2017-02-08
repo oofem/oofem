@@ -175,6 +175,15 @@ public:
      */
     virtual int setupIntegrationPoints(IntegrationRule &irule, int npoints, Element *element);
     /**
+     * Sets up integration rule for the given element.
+     * Default behavior is just to call the Gauss integration rule, but for example the layered and fibered crosssections need to do their own thing.
+     * @param irule Integration rule to set up.
+     * @param npoints Number of integration points.
+     * @param element Element which the integration rule belongs to.
+     * @return Number of integration points.
+     */
+    virtual int setupIntegrationPoints(IntegrationRule &irule, int npointsXY, int npointsZ, Element *element);
+    /**
      * Returns nonzero, if receiver implements required extension.
      * @param ext Required extension.
      * @return Nonzero, if supported, zero otherwise.

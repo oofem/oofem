@@ -101,7 +101,7 @@ TrPlaneStrRot :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, i
     FloatArray nx = this->GiveDerivativeUX(gp->giveNaturalCoordinates());
     FloatArray ny = this->GiveDerivativeVY(gp->giveNaturalCoordinates());
 
-    FloatArray center = {0.0, 0.0};
+    FloatArray center = {0.33333333, 0.33333333};
     FloatArray nxRed = this->GiveDerivativeVX( center );
     FloatArray nyRed = this->GiveDerivativeUY( center );
     

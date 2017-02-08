@@ -76,6 +76,7 @@ namespace bp = boost::python;
 #include "elementgeometrytype.h"
 #include "field.h"
 #include "uniformgridfield.h"
+#include "unstructuredgridfield.h"
 #include "datastream.h"
 #include "dofmanvalfield.h"
 #include "dofmantransftype.h"
@@ -558,6 +559,7 @@ void pyclass_EngngModel()
         .def("givePreviousStep", &EngngModel::givePreviousStep,(boost::python::arg("force")=false), return_internal_reference<>())
         // .add_property("currentStep",make_function(&PyEngngModel::giveCurrentStep, return_internal_reference<>()))
         .def("giveNextStep",&EngngModel::giveNextStep, &PyEngngModel::default_giveNextStep, return_internal_reference<>())
+        .def("generateNextStep", &EngngModel::generateNextStep, return_internal_reference<>()) // bp prototype
         .def("giveExportModuleManager",&EngngModel::giveExportModuleManager, return_internal_reference<>())
         .add_property("exportModuleManager",make_function(&PyEngngModel::giveExportModuleManager, return_internal_reference<>()))
         .def("giveContext", &PyEngngModel::giveContext, return_internal_reference<>())
@@ -860,7 +862,7 @@ void pyclass_Element()
         .def("giveNode", &Element::giveNode, return_internal_reference<>())
           .def("giveClassName",&Element::giveClassName)
         // TODO return type (copy rather than pointer?)
-        .def("giveDofManArray", &Element::giveDofManager, return_value_policy<reference_existing_object>())
+        .def("giveDofManArray", &Element::giveDofManArray, return_value_policy<reference_existing_object>())
         .def("giveNumberOfIntegrationRules", &Element::giveNumberOfIntegrationRules)
         .add_property("numberOfIntegrationRules", &PyElement::giveNumberOfIntegrationRules)
         .def("giveDefaultIntegrationRulePtr", &Element::giveDefaultIntegrationRulePtr, return_internal_reference<>())
@@ -1142,6 +1144,12 @@ void pyclass_Field()
         .def("setGeometry",&UniformGridField::setGeometry,(bp::arg("lo"),bp::arg("hi"),bp::arg("div")))
         .def("setValues",&UniformGridField::setValues,(bp::arg("values")))
         ;
+
+    class_<UnstructuredGridField, std::shared_ptr<UnstructuredGridField>, bases<Field>>("UnstructuredGridField", init<int,int,optional<double>>())
+      .def("addVertex",&UnstructuredGridField::addVertex,(bp::arg("num"), bp::arg("coords")))
+      .def("setVertexValue", &UnstructuredGridField::setVertexValue, (bp::arg("num"), bp::arg("vv")))
+      .def("addCell", &UnstructuredGridField::addCell, (bp::arg("num"), bp::arg("type"), bp::arg("vertices")))
+      ;
 }
 
 /*****************************************************
@@ -1809,6 +1817,7 @@ BOOST_PYTHON_MODULE (liboofem)
     boost is fixed (unlikely?).
     */
     bp::implicitly_convertible<std::shared_ptr<UniformGridField>,std::shared_ptr<Field>>();
+    bp::implicitly_convertible<std::shared_ptr<UnstructuredGridField>,std::shared_ptr<Field>>();
 
 
 

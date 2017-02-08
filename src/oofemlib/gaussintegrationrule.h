@@ -80,6 +80,7 @@ public:
     virtual int SetUpPointsOnLine(int nPoints, MaterialMode mode);
     virtual int SetUpPointsOnTriangle(int nPoints, MaterialMode mode);
     virtual int SetUpPointsOnSquare(int nPoints, MaterialMode mode);
+    virtual int SetUpPointsOn3dDegShell(int nPointsXY, int nPointsZ, MaterialMode mode);
     virtual int SetUpPointsOnCubeLayers(int nPoints1, int nPoints2, int nPointsDepth, MaterialMode mode, const FloatArray &layerThickness);
     virtual int SetUpPointsOnCube(int nPoints, MaterialMode mode);
     virtual int SetUpPointsOnTetrahedra(int nPoints, MaterialMode mode);

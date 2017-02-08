@@ -192,6 +192,7 @@ public:
     virtual void giveRealStressVector_Lattice3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
     /// Default implementation is not provided
     virtual void giveRealStressVector_2dPlateSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
+    virtual void giveRealStressVector_3dBeamSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
 
     /**
      * @name Methods associated with the First PK stress tensor.
@@ -607,6 +608,17 @@ public:
                                              MatResponseMode mmode, GaussPoint *gp,
                                              TimeStep *tStep);
     /**
+     * Method for computing stiffness matrix of beam3d subsoil model.
+     * Default method is emty; the implementation should be provided by the particular model.
+     * @param answer Stiffness matrix.
+     * @param mmode Material response mode.
+     * @param gp Integration point, which load history is used.
+     * @param tStep Time step (most models are able to respond only when tStep is current time step).
+     */
+    virtual void give3dBeamSubSoilStiffMtrx(FloatMatrix &answer,
+                                             MatResponseMode mmode, GaussPoint *gp,
+                                             TimeStep *tStep);
+    /**
      * Transforms 3d strain vector into another coordinate system.
      * @param answer Transformed strain vector
      * @param base Transformation matrix. There are on each column stored unit vectors of
@@ -644,6 +656,17 @@ public:
      */
     static void giveStrainVectorTranformationMtrx(FloatMatrix &answer, const FloatMatrix &base,
                                                   bool transpose = false);
+
+    /**
+     * Computes 2d strain vector transformation matrix from standard vector transformation matrix.
+     * @param answer Transformation matrix for strain vector.
+     * @param base A (2,2) matrix, where on each column are stored unit direction vectors of
+     * local coordinate axes to which we do transformation.
+     * @param transpose Determines if we transpose matrix before transforming.
+     */
+    static void give2DStrainVectorTranformationMtrx(FloatMatrix &answer, const FloatMatrix &base,
+                                                  bool transpose = false);
+    
     /**
      * Computes 3d stress vector transformation matrix from standard vector transformation matrix.
      * @param answer Transformation matrix for stress vector.

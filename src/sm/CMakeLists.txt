@@ -30,6 +30,7 @@ set (sm_element
     Elements/Beams/libeam3dnl.C 
     Elements/Beams/libeam3dnl2.C 
     Elements/Beams/libeam3d2.C
+    Elements/Beams/beambaseelement.C
     Elements/Beams/beam2d.C 
     Elements/Beams/beam3d.C
     Elements/Plates/cct.C
@@ -82,8 +83,11 @@ set (sm_element
     Elements/lattice2d.C
     Elements/tet21ghostsolid.C
     Elements/quad1platesubsoil.C 
+    Elements/quad2platesubsoil.C
     Elements/tria1platesubsoil.C
+    Elements/linedistributedspring.C
     Elements/trwarp.C
+    Elements/nodalspringelement.C
     #qplanstrssphf.C
     )
 
@@ -168,6 +172,9 @@ set (sm_material
     Materials/ConcreteMaterials/mazarsmodelnl.C
     Materials/ConcreteMaterials/mplasticmaterial2.C
     Materials/ConcreteMaterials/compodamagemat.C
+    Materials/ConcreteMaterials/concretefcm.C
+    Materials/ConcreteMaterials/frcfcm.C
+    Materials/ConcreteMaterials/frcfcmnl.C
     Materials/RheoChainMaterials/rheoChM.C 
     Materials/RheoChainMaterials/maxwellChM.C 
     Materials/RheoChainMaterials/kelvinChM.C
@@ -206,12 +213,14 @@ set (sm_material
     Materials/simplevitrificationmaterial.C
     Materials/anisodamagemodel.C
     Materials/winklerpasternak.C
+    Materials/winklermodel.C
     Materials/structmatsettable.C
     Materials/tutorialmaterial.C
     Materials/graddpmaterialextensioninterface.C
     Materials/rcm2.C
     Materials/isodamagemodel.C
-    Materials/steelrelaxmat.C 
+    Materials/steelrelaxmat.C
+    Materials/fcm.C
     )
 
 if (USE_PYTHON)

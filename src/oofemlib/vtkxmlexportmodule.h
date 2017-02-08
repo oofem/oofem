@@ -276,7 +276,10 @@ protected:
     void writeCellVars(VTKPiece &vtkPiece);
     void writeExternalForces(VTKPiece &vtkPiece);
 
-    void writeVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep);
+    /**
+       @return true if piece is not empty and thus written
+    */
+    bool writeVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep);
 
 
     void exportXFEMVarAs(XFEMStateType xfemstype, IntArray &mapG2L, IntArray &mapL2G, int regionDofMans, int ireg, TimeStep *tStep, EnrichmentItem *ei);

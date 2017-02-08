@@ -102,6 +102,8 @@ StructuralMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, c
         this->giveRealStressVector_Lattice3d(answer, gp, reducedStrain, tStep);
     } else if ( mode == _2dPlateSubSoil ) {
         this->giveRealStressVector_2dPlateSubSoil(answer, gp, reducedStrain, tStep);
+    } else if ( mode == _3dBeamSubSoil ) {
+        this->giveRealStressVector_3dBeamSubSoil(answer, gp, reducedStrain, tStep);
     }
 }
 
@@ -296,6 +298,12 @@ void
 StructuralMaterial :: giveRealStressVector_2dPlateSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
 {
     OOFEM_ERROR("2dPlateSubSoil mode not supported");
+}
+
+void
+StructuralMaterial :: giveRealStressVector_3dBeamSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    OOFEM_ERROR("3dBeamSubSoil mode not supported");
 }
 
 
@@ -945,6 +953,18 @@ StructuralMaterial :: giveVoigtSymVectorMask(IntArray &answer, MaterialMode mmod
         };
         return 6;
 
+    case _3dBeamSubSoil: ///@todo This isn't actually fixed yet. Should be made compatible with 3dShell and 2dBeam
+#if 1
+        answer.enumerate(6);
+        return 6;
+
+#else
+        answer = {
+            1, 5, 6, 7, 8, 9
+        };
+        return 12;
+#endif
+	
     case _Unknown:
         answer.clear();
         return 0;
@@ -1212,6 +1232,14 @@ void
 StructuralMaterial :: give2dPlateSubSoilStiffMtrx(FloatMatrix &answer,
                                                   MatResponseMode mmode, GaussPoint *gp,
                                                   TimeStep *tStep)
+{
+    OOFEM_ERROR("No general implementation provided");
+}
+
+void
+StructuralMaterial :: give3dBeamSubSoilStiffMtrx(FloatMatrix &answer,
+						 MatResponseMode mmode, GaussPoint *gp,
+						 TimeStep *tStep)
 {
     OOFEM_ERROR("No general implementation provided");
 }
@@ -1797,6 +1825,43 @@ StructuralMaterial :: giveStrainVectorTranformationMtrx(FloatMatrix &answer,
 
 
 void
+StructuralMaterial :: give2DStrainVectorTranformationMtrx(FloatMatrix &answer,
+                                                        const FloatMatrix &base,
+                                                        bool transpose)
+//
+// returns transformation matrix for 2d - strains to another system of axes,
+// given by base.
+// In base (FloatMatrix[2,2]) there are on each column stored vectors of
+// coordinate system to which we do transformation.
+//
+// If transpose == 1 we transpose base matrix before transforming
+//
+{
+    FloatMatrix t;
+    answer.resize(3, 3);
+    answer.zero();
+
+    if ( transpose ) {
+        t.beTranspositionOf(base);
+    } else {
+        t = base;
+    }
+
+    answer.at(1, 1) = t.at(1, 1) * t.at(1, 1);
+    answer.at(1, 2) = t.at(2, 1) * t.at(2, 1);
+    answer.at(1, 3) = t.at(1, 1) * t.at(2, 1);
+
+    answer.at(2, 1) = t.at(1, 2) * t.at(1, 2);
+    answer.at(2, 2) = t.at(2, 2) * t.at(2, 2);
+    answer.at(2, 3) = t.at(1, 2) * t.at(2, 2);
+
+    answer.at(3, 1) = 2.0 * t.at(1, 1) * t.at(1, 2);
+    answer.at(3, 2) = 2.0 * t.at(2, 1) * t.at(2, 2);
+    answer.at(3, 3) = ( t.at(1, 1) * t.at(2, 2) + t.at(2, 1) * t.at(1, 2) );
+}
+  
+
+void
 StructuralMaterial :: giveStressVectorTranformationMtrx(FloatMatrix &answer,
                                                         const FloatMatrix &base,
                                                         bool transpose)
@@ -2143,6 +2208,14 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSt
         }
 
         return 1;
+    } else if (type == IST_PlasticStrainTensor ) {
+        StructuralMaterial :: giveFullSymVectorForm( answer, status->giveStrainVector(), gp->giveMaterialMode() );
+        answer.zero();
+        return 1;
+    } else if (type == IST_MaxEquivalentStrainLevel ) {
+        answer.resize(1);
+        answer.at(1)=0.;
+        return 1;
     } else if ( type == IST_DeformationGradientTensor ) {
         answer = status->giveFVector();
         return 1;
@@ -2155,7 +2228,11 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSt
         selem->computeResultingIPEigenstrainAt(eigenstrain, tStep, gp, VM_Total );
         StructuralMaterial :: giveFullSymVectorForm( answer, eigenstrain, gp->giveMaterialMode() );
         return 1;
-    }else {
+    } else if ( type == IST_ShellForceTensor ) {
+        answer.resize(6);
+        answer.zero();
+        return 1;
+    } else {
         return Material :: giveIPValue(answer, gp, type, tStep);
     }
 }

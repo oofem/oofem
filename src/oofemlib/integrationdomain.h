@@ -42,7 +42,7 @@ namespace oofem {
  * integrated (Area,Volume and its shape)
  */
 enum integrationDomain {
-    _Unknown_integrationDomain,
+    _UnknownIntegrationDomain,
     _Point,
     _Line,
     _Triangle,
@@ -51,6 +51,7 @@ enum integrationDomain {
     _Tetrahedra,
     _Wedge,
     _Embedded2dLine,
+    _3dDegShell,
 };
 } // end namespace oofem
 #endif // integrationdomain_h

@@ -35,7 +35,11 @@
 #ifndef XFEMTOLERANCES_H_
 #define XFEMTOLERANCES_H_
 
-/**
+
+namespace oofem {
+
+
+  /**
  * Provides tolerances for the XFEM module.
  * @author Erik Svenning
  * @date Jul 16, 2014
@@ -81,5 +85,5 @@ public:
     static double giveApproxZero() { return sApproxZero; }
 };
 
-
+} // end namespace oofem
 #endif /* XFEMTOLERANCES_H_ */

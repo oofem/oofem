@@ -48,6 +48,7 @@
 #include "fluiddynamicmaterial.h"
 #include "fluidcrosssection.h"
 #include "load.h"
+#include "bodyload.h"
 #include "timestep.h"
 #include "boundaryload.h"
 #include "mathfem.h"
@@ -135,40 +136,9 @@ TR1_2D_PFEM :: computeGaussPoints()
     }
 }
 
-void
-TR1_2D_PFEM :: computeForceVector(FloatArray &answer, TimeStep *atTime) //F
-{
-    FloatArray vec;
-
-    int nLoads = this->boundaryLoadArray.giveSize() / 2;
-    answer.resize(6);
-    answer.zero();
-    for ( int i = 1; i <= nLoads; i++ ) {  // For each Neumann boundary condition
-        int load_number = this->boundaryLoadArray.at(2 * i - 1);
-        int load_id = this->boundaryLoadArray.at(2 * i);
-        Load *load = this->domain->giveLoad(load_number);
-        bcGeomType ltype = load->giveBCGeoType();
-
-        if ( ltype == EdgeLoadBGT ) {
-            this->computeEdgeBCSubVectorAt(vec, load, load_id, atTime);
-            answer.add(vec);
-        }
-    }
-
-    nLoads = this->giveBodyLoadArray()->giveSize();
-    for ( int i = 1; i <= nLoads; i++ ) {
-        Load *load = domain->giveLoad( bodyLoadArray.at(i) );
-        bcGeomType ltype = load->giveBCGeoType();
-        if ( ltype == BodyLoadBGT && load->giveBCValType() == ForceLoadBVT ) {
-            this->computeBodyLoadVectorAt(vec, load, atTime);
-            answer.add(vec);
-        }
-    }
-}
-
 //copied from tr21stokes
 void
-TR1_2D_PFEM :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *atTime)
+TR1_2D_PFEM :: computeBodyLoadVectorAt(FloatArray &answer, BodyLoad *load, TimeStep *atTime, ValueModeType mode)
 {
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ].get();
     FloatArray N, gVector;
@@ -176,7 +146,7 @@ TR1_2D_PFEM :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep 
     answer.resize(6);
     answer.zero();
 
-    load->computeComponentArrayAt(gVector, atTime, VM_Total);
+    load->computeComponentArrayAt(gVector, atTime, mode);
     if ( gVector.giveSize() ) {
         for ( auto &gp : *iRule ) {
             double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );

@@ -128,7 +128,7 @@ FEI3dWedgeLin :: global2local(FloatArray &answer, const FloatArray &gcoords, con
 
         // compute the corrections
         this->giveJacobianMatrixAt(jac, answer, cellgeo);
-        jac.solveForRhs(res, delta, true);
+        jac.solveForRhs(res, delta);
 
         // update guess
         answer.add(delta);

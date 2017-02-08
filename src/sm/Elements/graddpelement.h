@@ -86,8 +86,7 @@ protected:
     void giveNonlocalInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
 
     void computeStressVectorAndLocalCumulatedStrain(FloatArray &answer, double localCumulatedPlasticStrain, GaussPoint *gp, TimeStep *tStep);
-    void computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
-    void computeLocForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
+
     void computeDistanceToBoundary();
 };
 } // end namespace oofem

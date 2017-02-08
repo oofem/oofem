@@ -50,6 +50,9 @@ public:
 
     virtual integrationDomain giveIntegrationDomain() const { return _Tetrahedra; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_tetra_2; }
+    virtual integrationDomain giveBoundaryIntegrationDomain(int ib) const { return _Triangle; }
+    virtual integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf) const { return _Triangle; }
+    virtual integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge) const { return _Line; }
 
     virtual double giveVolume(const FEICellGeometry &cellgeo) const;
 

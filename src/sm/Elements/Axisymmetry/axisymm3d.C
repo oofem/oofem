@@ -55,7 +55,7 @@
 namespace oofem {
 REGISTER_Element(Axisymm3d);
 
-FEI2dTrLin Axisymm3d :: interpolation(1, 2);
+FEI2dTrLinAxi Axisymm3d :: interpolation(1, 2);
 
 Axisymm3d :: Axisymm3d(int n, Domain *aDomain) :
     AxisymElement(n, aDomain), ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface(),

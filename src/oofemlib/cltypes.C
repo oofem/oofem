@@ -57,13 +57,15 @@ namespace oofem {
 char cltypesGiveUnknownTypeModeKey(ValueModeType mode)
 {
     switch ( mode ) {
-    case VM_Unknown:      return 0;
+    case VM_Unknown:        return 0;
 
-    case VM_Total:        return 'u';
+    case VM_Total:          return 'u';
 
-    case VM_Velocity:     return 'v';
+    case VM_Velocity:       return 'v';
 
-    case VM_Acceleration: return 'a';
+    case VM_Acceleration:   return 'a';
+      
+    case VM_TotalIntrinsic: return 'i';
 
     default: OOFEM_ERROR("unsupported ValueModeType");
     }
@@ -82,8 +84,8 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_CylindricalStrainTensor:
     case IST_CreepStrainTensor:
     case IST_StrainTensorTemp:
-    case IST_ShellForceTensor:
     case IST_CurvatureTensorTemp:
+    case IST_EigenStrainTensor:
         return ISVT_TENSOR_S3E;
 
     case IST_StressTensor:
@@ -98,6 +100,7 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     ///@todo "Momentum" should be renamed "Moment"
     case IST_ShellMomentumTensor:
     case IST_MomentumTensorTemp:
+    case IST_ShellForceTensor:
     ///@todo Should be have these are S3E or just S3?
     case IST_AutogenousShrinkageTensor:
     case IST_DryingShrinkageTensor:
@@ -138,6 +141,8 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_CrackDirs:
     case IST_CrackStatuses:
     case IST_CrackVector:
+    case IST_2ndCrackVector:
+    case IST_3rdCrackVector:      
     case IST_InterfaceFirstPKTraction:
     case IST_InterfaceTraction:
     case IST_InterfaceJump:
@@ -187,9 +192,13 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_Maturity:
     case IST_CrossSectionNumber:
     case IST_CrackWidth:
+    case IST_2ndCrackWidth:
+    case IST_3rdCrackWidth: 
     case IST_TensileStrength:
     case IST_ResidualTensileStrength:
     case IST_CrackIndex:
+    case IST_FiberStressNL:
+    case IST_FiberStressLocal:     
         return ISVT_SCALAR;
 
     default:

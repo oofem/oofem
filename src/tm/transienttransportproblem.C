@@ -130,6 +130,9 @@ double TransientTransportProblem :: giveUnknownComponent(ValueModeType mode, Tim
     if ( mode == VM_Total ) {
         //return this->alpha * val1 + (1.-this->alpha) * val0;
         return val1;//The output should be given always at the end of the time step, regardless of alpha
+    } else if ( mode == VM_TotalIntrinsic) {
+        return this->alpha * val1 + (1.-this->alpha) * val0;
+        //return val1;
     } else if ( mode == VM_Velocity ) {
         return (val1 - val0) / tStep->giveTimeIncrement();
     } else if ( mode == VM_Incremental ) {
@@ -201,6 +204,8 @@ TimeStep *TransientTransportProblem :: giveSolutionStepWhenIcApply(bool force)
 
 void TransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
 {
+    OOFEM_LOG_INFO( "Solving [step number %5d, time %e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
+    
     Domain *d = this->giveDomain(1);
     int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
 
@@ -296,7 +301,7 @@ void TransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
 void
 TransientTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
 {
-    // F(T) + C*dT/dt = Q
+    // F(T) + C*dT/dt = Q, F(T)=(K_c+K_h)*T-R_q-R_h
     // Linearized:
     // F(T^(k)) + K*a*dT_1 = Q - C * dT/dt^(k) - C/dt * dT_1
     // Rearranged
@@ -522,5 +527,27 @@ TransientTransportProblem :: updateDomainLinks()
     this->giveNumericalMethod( this->giveCurrentMetaStep() )->setDomain( this->giveDomain(1) );
 }
 
+FieldPtr TransientTransportProblem::giveField (FieldType key, TimeStep *tStep)
+{
+  /* Note: the current implementation uses MaskedPrimaryField, that is automatically updated with the model progress, 
+     so the returned field always refers to active solution step. 
+  */
 
+  if ( tStep != this->giveCurrentStep()) {
+    OOFEM_ERROR("Unable to return field representation for non-current time step");
+  }
+  if ( key == FT_Temperature ) {
+    FieldPtr _ptr ( new MaskedPrimaryField ( key, this->field.get(), {T_f} ) );
+    return _ptr;
+  } else if ( key == FT_HumidityConcentration ) {
+    FieldPtr _ptr ( new MaskedPrimaryField ( key, this->field.get(), {C_1} ) );
+    return _ptr;
+  } else {
+    return FieldPtr();
+  }
+}
+
+
+
+  
 } // end namespace oofem

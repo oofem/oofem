@@ -171,6 +171,15 @@ public:
     /**
      * Initializes the receiver. Receiver integration points are created according to given parameters.
      * @param intdomain Describes integration domain.
+     * @param nPointsXY Required number of integration points of receiver in plane XY.
+     * @param nPointsZ Required number of integration points of receiver in Z direction.
+     * @param matMode Material mode of receiver's integration points.
+     * @return Number of points.
+     */
+    int setUpIntegrationPoints(integrationDomain intdomain, int nPointsXY, int nPointsZ, MaterialMode matMode);
+    /**
+     * Initializes the receiver. Receiver integration points are created according to given parameters.
+     * @param intdomain Describes integration domain.
      * @param nPoints Required number of integration points of receiver.
      * @param matMode Material mode of receiver's integration points.
      * @param coords
@@ -266,6 +275,15 @@ public:
      * @return Number of integration points.
      */
     virtual int SetUpPointsOnSquare(int, MaterialMode mode) { return 0; }
+    /**
+     * Sets up receiver's integration points on unit cube integration domain.
+     * Default implementation does not sets up any integration points and returns 0.
+     * Must be overloaded by derived classes.
+     * @param nPointsXY Number of integration points in the "xi-eta"-plane.
+     * @param nPointsZ Number of integration points in the "zeta"-direction
+     * @return Number of integration points.
+     */
+    virtual int SetUpPointsOn3dDegShell(int nPointsXY, int nPointsZ, MaterialMode mode) { return 0; }
     /**
      * Sets up receiver's integration points on unit cube integration domain.
      * Default implementation does not sets up any integration points and returns 0.

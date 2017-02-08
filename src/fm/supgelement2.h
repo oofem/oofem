@@ -84,7 +84,7 @@ public:
     virtual void computePressureTerm_MC(FloatMatrix &answer, TimeStep *tStep);
     virtual void computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep);
     virtual void computeBCRhsTerm_MC(FloatArray &answer, TimeStep *tStep);
-    virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep);
 
     virtual double computeCriticalTimeStep(TimeStep *tStep) = 0;
 
@@ -112,8 +112,6 @@ protected:
 
     //virtual void computeEdgeNuMatrix (FloatMatrix& answer, GaussPoint* gp) = 0;
     //virtual double computeSurfaceVolumeAround (GaussPoint*, int iedge) = 0;
-    //virtual void computeEdgeIpGlobalCoords (FloatArray& answer, GaussPoint* gp, int iedge) = 0;
-    //virtual int computeLoadGToLRotationMtrx (FloatMatrix& answer) = 0;
     //virtual int computeLoadLBToLRotationMatrix (FloatMatrix& answer, int iedge, GaussPoint* gp) = 0;
     //virtual void giveEdgeUDofMapping (IntArray& answer, int iedge) = 0;
     //virtual int giveUApproxOrder () = 0;

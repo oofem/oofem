@@ -41,7 +41,7 @@
 namespace oofem {
 REGISTER_BoundaryCondition(ConstantPressureLoad);
 
-ConstantPressureLoad :: ConstantPressureLoad(int i, Domain *d) : BoundaryLoad(i, d)
+ConstantPressureLoad :: ConstantPressureLoad(int i, Domain *d) : SurfaceLoad(i, d)
 {
     this->loadOffset = 0.0;
 }

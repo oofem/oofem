@@ -593,21 +593,6 @@ QDKTPlate :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &ma
     answer.at(4) = masterGpStrain.at(4);
 }
 
-// Edge load support
-void
-QDKTPlate :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
-{
-    FloatArray n;
-
-    this->interp_lin.edgeEvalN( n, iedge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(3, 6);
-    answer.at(1, 1) = n.at(1);
-    answer.at(1, 4) = n.at(2);
-    answer.at(2, 2) = answer.at(3, 3) = n.at(1);
-    answer.at(2, 5) = answer.at(3, 6) = n.at(2);
-}
-
 void
 QDKTPlate :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 {
@@ -629,13 +614,6 @@ QDKTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     return detJ *gp->giveWeight();
-}
-
-
-void
-QDKTPlate :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
-{
-    this->interp_lin.edgeLocal2global( answer, iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -682,6 +660,14 @@ QDKTPlate :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint 
 }
 
 void
+QDKTPlate::computeSurfaceNMatrix (FloatMatrix &answer, int boundaryID, const FloatArray& lcoords)
+{
+  FloatArray n_vec;
+  this->giveInterpolation()->boundarySurfaceEvalN(n_vec, boundaryID, lcoords, FEIElementGeometryWrapper(this) );
+  answer.beNMatrixOf(n_vec, 3);
+}
+
+void
 QDKTPlate :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
 {
     answer.resize(12);
@@ -708,13 +694,6 @@ double
 QDKTPlate :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
     return this->computeVolumeAround(gp);
-}
-
-
-void
-QDKTPlate :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
-{
-    this->computeGlobalCoordinates( answer, gp->giveNaturalCoordinates() );
 }
 
 

@@ -155,7 +155,10 @@ SUPGElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Value
 //
 {
     if ( mtrx == ExternalForcesVector ) {
-        // stokes flow
+      answer.clear();
+#if 0
+      // assembled from assembler from loads directly
+      // stokes flow
         IntArray vloc, ploc;
         FloatArray h;
         int size = this->computeNumberOfDofs();
@@ -167,6 +170,7 @@ SUPGElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Value
         answer.assemble(h, vloc);
         this->computeBCRhsTerm_MC(h, tStep);
         answer.assemble(h, ploc);
+#endif
     }
 
 #if 1

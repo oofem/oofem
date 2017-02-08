@@ -75,14 +75,11 @@ Set 5 noderanges {(1 6) 10 11 15 16 20 21 25}
 #NODE tStep 1 number 5 dof 5 unknown d value 0.00000000e+00
 #NODE tStep 1 number 5 dof 6 unknown d value 0.00000000e+00
 ##
-#ELEMENT tStep 1 number 4 gp 1 keyword 10 component 1  value  1.4833e+03 
-#ELEMENT tStep 1 number 4 gp 1 keyword 10 component 2  value -4.0193e+01
-#ELEMENT tStep 1 number 4 gp 1 keyword 10 component 3  value -1.5730e+01
-#ELEMENT tStep 1 number 4 gp 1 keyword 10 component 4  value -2.5054e+02
-#ELEMENT tStep 1 number 4 gp 1 keyword 10 component 5  value 3.6459e+02
-#ELEMENT tStep 1 number 4 gp 1 keyword 10 component 6  value 2.5304e+01
+#ELEMENT tStep 1 number 4 gp 1 keyword 1 component 1  value  1.4833e+03 
+#ELEMENT tStep 1 number 4 gp 1 keyword 1 component 2  value -4.0193e+01
+#ELEMENT tStep 1 number 4 gp 1 keyword 1 component 3  value -1.5730e+01
+#ELEMENT tStep 1 number 4 gp 1 keyword 1 component 4  value -2.5054e+02
+#ELEMENT tStep 1 number 4 gp 1 keyword 1 component 5  value 3.6459e+02
+#ELEMENT tStep 1 number 4 gp 1 keyword 1 component 6  value 2.5304e+01
 ##
 #%END_CHECK%
-
-
-

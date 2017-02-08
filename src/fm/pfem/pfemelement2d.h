@@ -135,7 +135,6 @@ protected:
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, TimeStep *atTime); //K
     virtual void computePressureLaplacianMatrix(FloatMatrix &answer, TimeStep *atTime); //L
     virtual void computeDivergenceMatrix(FloatMatrix &answerx, TimeStep *atTime); //D
-    virtual void computeForceVector(FloatArray &answer, TimeStep *atTime) = 0; //F
     virtual void computeGradientMatrix(FloatMatrix &answer, TimeStep *atTime); //G
 
     void computePrescribedRhsVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);

@@ -43,7 +43,7 @@
 #include "intarray.h"
 #include "mathfem.h"
 #include "classfactory.h"
-#include "fei1dlin.h"
+#include "fei2dlinelin.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -52,7 +52,9 @@
 namespace oofem {
 REGISTER_Element(Truss2d);
 
-FEI1dLin Truss2d :: interp(1);  
+  FEI2dLineLin Truss2d :: interp[3] = {FEI2dLineLin(1,3),
+                                       FEI2dLineLin(1,2),
+                                       FEI2dLineLin(2,3)};  
 
 Truss2d :: Truss2d(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain)
@@ -324,33 +326,6 @@ Truss2d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMod
 
 
 void
-Truss2d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
-{
-    this->computeGlobalCoordinates( answer, gp->giveNaturalCoordinates() );
-}
-
-void
-Truss2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
-{
-    /*
-     *
-     * computes interpolation matrix for element edge.
-     * we assemble locally this matrix for only nonzero
-     * shape functions.
-     * (for example only two nonzero shape functions for 2 dofs are
-     * necessary for linear plane stress tringle edge).
-     * These nonzero shape functions are then mapped to
-     * global element functions.
-     *
-     * Using mapping technique will allow to assemble shape functions
-     * without regarding particular side
-     */
-
-    this->computeNmatrixAt(gp->giveSubPatchCoordinates(), answer);
-}
-
-
-void
 Truss2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 {
     /*
@@ -412,7 +387,7 @@ Truss2d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussP
 FEInterpolation *Truss2d :: giveInterpolation() const 
 {
     // return interpolator
-    return & interp; 
+    return & interp[cs_mode]; 
 }
 
 

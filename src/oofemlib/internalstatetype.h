@@ -162,7 +162,15 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_ResidualTensileStrength, 112) \
     ENUM_ITEM_WITH_VALUE(IST_LocalEquivalentStrain, 113) \
     ENUM_ITEM_WITH_VALUE(IST_CrackIndex, 114) \
-    ENUM_ITEM_WITH_VALUE(IST_EigenStrainTensor, 115)
+    ENUM_ITEM_WITH_VALUE(IST_EigenStrainTensor, 115) \
+    ENUM_ITEM_WITH_VALUE(IST_CrackStrainTensor, 116) \
+    ENUM_ITEM_WITH_VALUE(IST_2ndCrackWidth, 117) \
+    ENUM_ITEM_WITH_VALUE(IST_2ndCrackVector, 118) \
+    ENUM_ITEM_WITH_VALUE(IST_3rdCrackWidth, 119) \
+    ENUM_ITEM_WITH_VALUE(IST_3rdCrackVector, 120) \
+    ENUM_ITEM_WITH_VALUE(IST_FiberStressLocal, 121) \
+    ENUM_ITEM_WITH_VALUE(IST_FiberStressNL, 122) 
+  
 /**
  * Type  representing the physical meaning of element or constitutive model internal variable.
  * Values of this type are used, when these internal variables are requested.

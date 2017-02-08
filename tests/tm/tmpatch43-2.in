@@ -24,7 +24,7 @@ constantedgeload 2 loadTimeFunction 1 components 1 -15. loadtype 2 set 3
 ConstantFunction 1 f(t) 1.0
 Set 1 elementranges {(1 4)}
 Set 2 nodes 2 1 4
-Set 3 elementboundaries 2 4 1
+Set 3 elementedges 2 4 1
 
 #corresponds to exact solution
 #%BEGIN_CHECK%

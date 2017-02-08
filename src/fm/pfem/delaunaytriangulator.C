@@ -48,7 +48,7 @@
 
 namespace oofem {
 DelaunayTriangulator :: DelaunayTriangulator(Domain *d, double setAlpha) :
-    alphaShapeEdgeList(0), triangleOctree(3, d)
+    alphaShapeEdgeList(0), triangleOctree()
 {
     domain = d;
     alphaValue = setAlpha;
@@ -500,7 +500,7 @@ DelaunayTriangulator :: cleanUpTriangleList()
 void DelaunayTriangulator :: buildInitialBBXMesh(InsertTriangleBasedOnCircumcircle &tInsert)
 {
     BoundingBox BBX;
-    triangleOctree.computeBBXBasedOnNodeData(BBX);
+    this->computeBBXBasedOnNodeData(BBX);
 
     //int initialDivision = 5;
     triangleOctree.init(BBX);
@@ -544,4 +544,57 @@ void DelaunayTriangulator :: buildInitialBBXMesh(InsertTriangleBasedOnCircumcirc
     triangleOctree.insertMemberIntoOctree(firstTriangle, tInsert);
     triangleOctree.insertMemberIntoOctree(secondTriangle, tInsert);
 }
+
+void
+DelaunayTriangulator:: computeBBXBasedOnNodeData(BoundingBox &BBX)
+{
+  int i, j, init = 1, nnode = this->domain->giveNumberOfDofManagers();
+  double rootSize, resolutionLimit;
+  FloatArray minc(3), maxc(3), * coords;
+  DofManager *dman;
+
+  // first determine domain extends (bounding box), and check for degenerated domain type
+  for ( i = 1; i <= nnode; i++ ) {
+    dman = domain->giveDofManager(i);
+    coords = static_cast< Node * >( dman )->giveCoordinates();
+    if ( init ) {
+      init = 0;
+      for ( j = 1; j <= coords->giveSize(); j++ ) {
+	minc.at(j) = maxc.at(j) = coords->at(j);
+      }
+    } else {
+      for ( j = 1; j <= coords->giveSize(); j++ ) {
+	if ( coords->at(j) < minc.at(j) ) {
+	  minc.at(j) = coords->at(j);
+	}
+	
+	if ( coords->at(j) > maxc.at(j) ) {
+	  maxc.at(j) = coords->at(j);
+	}
+      }
+    }
+  }                 // end loop over nodes
+  
+  BBX.setOrigin(minc);
+  
+  // determine root size
+  rootSize = 0.0;
+  for ( i = 1; i <= 3; i++ ) {
+    rootSize = 1.000001 * max( rootSize, maxc.at(i) - minc.at(i) );
+  }
+  
+  BBX.setSize(rootSize);
+  
+  // check for degenerated domain
+  resolutionLimit = min(1.e-3, rootSize / 1.e6);
+  for ( i = 1; i <= 3; i++ ) {
+    if ( ( maxc.at(i) - minc.at(i) ) > resolutionLimit ) {
+      BBX.setMask(i, 1);
+    } else {
+      BBX.setMask(i, 0);
+    }
+  }
+}
+
+
 } // end namespace oofem

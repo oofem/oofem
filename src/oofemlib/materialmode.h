@@ -54,6 +54,7 @@ namespace oofem {
     ENUM_ITEM(_3dBeam) \
     ENUM_ITEM(_3dShell) \
     ENUM_ITEM(_3dDegeneratedShell) \
+    ENUM_ITEM(_3dBeamSubSoil) /* Subsoil model for beams */ \
   \
     ENUM_ITEM(_PlateLayer) \
     ENUM_ITEM(_2dBeamLayer) \

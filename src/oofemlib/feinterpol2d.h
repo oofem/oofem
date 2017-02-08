@@ -58,6 +58,11 @@ public:
      */
     virtual double giveArea(const FEICellGeometry &cellgeo) const;
 
+    /**@name Boundary interpolation services. 
+       Boundary is defined as entity of one dimension lower
+       than the interpolation represents
+    */
+    //@{
     virtual void boundaryEdgeGiveNodes(IntArray &answer, int boundary);
     virtual void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
@@ -68,6 +73,23 @@ public:
     virtual double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void boundaryLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+
+    //@}
+
+    
+    /**@name Surface interpolation services */
+    //@{
+    virtual void boundarySurfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual void boundarySurfaceEvaldNdx(FloatMatrix &answer, int isurf,
+					 const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual double boundarySurfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords,
+					     const FEICellGeometry &cellgeo);
+    virtual void boundarySurfaceLocal2global(FloatArray &answer, int isurf,
+					      const FloatArray &lcoords, const FEICellGeometry &cellgeo) ;
+    virtual double boundarySurfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
+							     const FEICellGeometry &cellgeo) ;
+    virtual void boundarySurfaceGiveNodes(IntArray &answer, int boundary);
+    //@}
 
     /**@name Edge interpolation services. */
     //@{
@@ -121,8 +143,6 @@ public:
                                                   const FEICellGeometry &cellgeo);
     //@}
 
-    virtual IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary);
-    virtual IntegrationRule *giveBoundaryEdgeIntegrationRule(int order, int boundary);
 };
 } // end namespace oofem
 #endif // feinterpol2d_h

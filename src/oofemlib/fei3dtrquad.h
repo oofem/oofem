@@ -52,6 +52,11 @@ public:
     virtual integrationDomain giveIntegrationDomain() const { return _Triangle; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
 
+    virtual integrationDomain giveBoundaryIntegrationDomain(int ib) const { return _Triangle; }
+    virtual integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf) const { return _Triangle; }
+    virtual integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge) const { return _Line; }
+
+
     // Bulk
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);

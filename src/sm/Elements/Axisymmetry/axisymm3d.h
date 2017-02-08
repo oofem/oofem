@@ -48,7 +48,7 @@
 //@}
 
 namespace oofem {
-class FEI2dTrLin;
+class FEI2dTrLinAxi;
 
 /**
  * This class implements an triangular three-node finite element for axisymmetric continuum.
@@ -62,7 +62,7 @@ public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterfa
 public SpatialLocalizerInterface
 {
 protected:
-    static FEI2dTrLin interpolation;
+    static FEI2dTrLinAxi interpolation;
 
     double area;
 

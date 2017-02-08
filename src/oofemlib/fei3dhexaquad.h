@@ -74,7 +74,12 @@ public:
 
     virtual integrationDomain giveIntegrationDomain() const { return _Cube; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_hexa_2; }
+    virtual integrationDomain giveBoundaryIntegrationDomain(int ib) const { return _Square; }
+    virtual integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf) const { return _Square; }
+    virtual integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge) const { return _Line; }
 
+
+    
     virtual double giveCharacteristicLength(const FEICellGeometry &cellgeo) const;
 
     // Bulk

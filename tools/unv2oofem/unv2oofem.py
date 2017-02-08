@@ -35,9 +35,9 @@ set records
 Assignment of properties to nodes and elements is based on association with some unv group. The same mechanism
 is valid for assignment of boundary conditions (edge, surface) load. The syntax is following:
 group name1 [name2] [name3] ...
-[nodeprop "nodal_attributes_appended_to_nodal_records"]
-[elemprop "element_attributes_appended_to_element_records"]
-[etype[unv_etype]] oofem_etype #provides mapping between unv and oofem element types
+nodeprop "nodal_attributes_appended_to_nodal_records" [set INT]
+elemprop "element_attributes_appended_to_element_records" [set INT]
+etype[unv_etype] oofem_etype #provides mapping between unv and oofem element types
 
 By default, all nodes will be exported,
 elements are exported only when associated to some group
@@ -218,6 +218,8 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
         sl=CTRL.footer.splitlines()
         for s in sl:
             words=s.split()
+            #if len(words)==0:#skip empty lines
+                #continue
             if (words[0].lower()=='set'):
                 setID=int(words[1])
 
@@ -232,7 +234,7 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
                 elif (words[2].lower()=='elements'):
                     ellist=[]
                     for elemset in FEM.elemsets:
-
+                        #print elemset.id
                         if setID == elemset.id:
                             ellist.extend(elemset.items)
 
@@ -241,7 +243,7 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
                                 ellist.extend(elemset.items)
                     setElements=list(set(ellist))
 
-                elif (words[2].lower()=='elementboundaries'):
+                elif (words[2].lower()=='elementboundaries' or words[2].lower()=='elementedges'):
                     setElements=[]
                     for thisSet in boundarySets:
                         if (thisSet[0]==int(words[1])):

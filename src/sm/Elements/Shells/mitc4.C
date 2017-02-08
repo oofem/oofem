@@ -47,6 +47,7 @@
 #include "floatarray.h"
 #include "intarray.h"
 #include "load.h"
+#include "boundaryload.h"
 #include "mathfem.h"
 #include "classfactory.h"
 
@@ -60,7 +61,10 @@ MITC4Shell :: MITC4Shell(int n, Domain *aDomain) :
     SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(this)
 {
     numberOfDofMans = 4;
-    numberOfGaussPoints = 8;
+    nPointsXY = 4;
+    nPointsZ = 2;
+
+    numberOfGaussPoints = nPointsXY * nPointsZ;
 }
 
 
@@ -142,8 +146,8 @@ MITC4Shell :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize(1);
-        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 6) );
-        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 10) );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], nPointsXY, nPointsZ, this);
     }
 }
 
@@ -328,6 +332,12 @@ MITC4Shell :: giveLocalCoordinates(FloatArray &answer, FloatArray &global)
 IRResultType
 MITC4Shell :: initializeFrom(InputRecord *ir)
 {
+    IRResultType result;                   // Required by IR_GIVE_FIELD macro
+
+    IR_GIVE_OPTIONAL_FIELD(ir, nPointsXY, _IFT_Element_nip);
+    IR_GIVE_OPTIONAL_FIELD(ir, nPointsZ, _IFT_MITC4Shell_nipZ);
+    IR_GIVE_OPTIONAL_FIELD(ir, nlGeometry, _IFT_NLStructuralElement_nlgeoflag);
+
     return this->NLStructuralElement :: initializeFrom(ir);
 }
 
@@ -354,7 +364,7 @@ MITC4Shell :: computeVolumeAround(GaussPoint *gp)
 
     weight = gp->giveWeight();
 
-    this->giveJacobian(gp, jacobianMatrix);
+    this->giveJacobian(lcoords, jacobianMatrix);
 
     detJ = jacobianMatrix.giveDeterminant();
     return detJ * weight;
@@ -362,7 +372,7 @@ MITC4Shell :: computeVolumeAround(GaussPoint *gp)
 
 
 void
-MITC4Shell :: giveJacobian(GaussPoint *gp, FloatMatrix &jacobianMatrix)
+MITC4Shell :: giveJacobian(FloatArray lcoords, FloatMatrix &jacobianMatrix)
 // Returns the jacobianMatrix
 {
     FloatArray h(4);
@@ -374,10 +384,6 @@ MITC4Shell :: giveJacobian(GaussPoint *gp, FloatMatrix &jacobianMatrix)
     double x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4;
     this->giveNodeCoordinates(x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4);
 
-    FloatArray lcoords(3);
-    lcoords.at(1) = gp->giveNaturalCoordinate(1);
-    lcoords.at(2) = gp->giveNaturalCoordinate(2);
-    lcoords.at(3) = gp->giveNaturalCoordinate(3);
     double r3 = lcoords.at(3);
 
     // get local director vector
@@ -462,43 +468,14 @@ MITC4Shell :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int 
     interp_lin.evalN( h, lcoords,  FEIElementGeometryWrapper(this) );
     interp_lin.giveDerivatives(dn, lcoords);
 
-    FloatArray hk1(4);
-    // derivatives of interpolation functions
-    // dh(r1,r2)/dr1
-    hk1.at(1) =  dn.at(1, 1);
-    hk1.at(2) =  dn.at(2, 1);
-    hk1.at(3) =  dn.at(3, 1);
-    hk1.at(4) =  dn.at(4, 1);
-
-    FloatArray hk2(4);
-    // dh(r1,r2)/dr2
-    hk2.at(1) =  dn.at(1, 2);
-    hk2.at(2) =  dn.at(2, 2);
-    hk2.at(3) =  dn.at(3, 2);
-    hk2.at(4) =  dn.at(4, 2);
-
-    FloatArray hkx(4), hky(4);
+    FloatArray hkx, hky;
+    this->givedNdx(hkx, hky, lcoords);
 
     // Jacobian Matrix
-
-    this->giveJacobian(gp, jacobianMatrix);
-
+    this->giveJacobian(lcoords, jacobianMatrix);
     FloatMatrix inv(3, 3);
     FloatMatrix inv2(2, 2);
     inv.beInverseOf(jacobianMatrix);
-
-    inv2.beSubMatrixOf(inv, 1, 2, 1, 2);
-    dndx.beProductTOf(dn, inv2);
-
-    hkx.at(1)  = dndx.at(1, 1);
-    hkx.at(2)  = dndx.at(2, 1);
-    hkx.at(3)  = dndx.at(3, 1);
-    hkx.at(4)  = dndx.at(4, 1);
-
-    hky.at(1)  = dndx.at(1, 2);
-    hky.at(2)  = dndx.at(2, 2);
-    hky.at(3)  = dndx.at(3, 2);
-    hky.at(4)  = dndx.at(4, 2);
 
     double sb = 2 * inv.at(1, 1) * inv.at(3, 3);
     double sa = 2 * inv.at(1, 2) * inv.at(3, 3);
@@ -676,35 +653,33 @@ void
 MITC4Shell :: computeLocalBaseVectors(FloatArray &e1, FloatArray &e2, FloatArray &e3)
 {
     FloatArray help;
-
     FloatArray coordA, coordB;
 
-    // compute A - (node1+node4)/2
-    coordB.beDifferenceOf( * this->giveNode(1)->giveCoordinates(), * this->giveNode(4)->giveCoordinates() );
-    coordB.times(0.5);
-    coordB.add( * this->giveNode(4)->giveCoordinates() );
-
-    // compute B - (node2+node3)/2
+    // compute A - (node2+node3)/2
     coordA.beDifferenceOf( * this->giveNode(2)->giveCoordinates(), * this->giveNode(3)->giveCoordinates() );
     coordA.times(0.5);
     coordA.add( * this->giveNode(3)->giveCoordinates() );
+
+    // compute B - (node1+node4)/2
+    coordB.beDifferenceOf( * this->giveNode(1)->giveCoordinates(), * this->giveNode(4)->giveCoordinates() );
+    coordB.times(0.5);
+    coordB.add( * this->giveNode(4)->giveCoordinates() );
 
     // compute e1' = [B-A]
     e1.beDifferenceOf(coordB, coordA);
 
 
-
-    // compute A - (node2+node1)/2
-    coordB.beDifferenceOf( * this->giveNode(1)->giveCoordinates(), * this->giveNode(2)->giveCoordinates() );
-    coordB.times(0.5);
-    coordB.add( * this->giveNode(2)->giveCoordinates() );
-
-    // compute B - (node3+node4)/2
+    // compute A - (node3+node4)/2
     coordA.beDifferenceOf( * this->giveNode(4)->giveCoordinates(), * this->giveNode(3)->giveCoordinates() );
     coordA.times(0.5);
     coordA.add( * this->giveNode(3)->giveCoordinates() );
 
-    // compute e1' = [B-A]
+    // compute B - (node2+node1)/2
+    coordB.beDifferenceOf( * this->giveNode(1)->giveCoordinates(), * this->giveNode(2)->giveCoordinates() );
+    coordB.times(0.5);
+    coordB.add( * this->giveNode(2)->giveCoordinates() );
+
+    // compute help = [B-A]
     help.beDifferenceOf(coordB, coordA);
 
     // let us normalize e1'
@@ -720,7 +695,7 @@ MITC4Shell :: computeLocalBaseVectors(FloatArray &e1, FloatArray &e2, FloatArray
 
 void
 MITC4Shell :: computeLToDirectorRotationMatrix(FloatMatrix &answer1, FloatMatrix &answer2, FloatMatrix &answer3, FloatMatrix &answer4)
-// Returns the rotation matrix of the reciever of the size [2,3]
+// Returns the rotation matrix of the reciever of the size [3,3]
 // {alpha_i,beta_i} = Ti * {rotL_xi, rotL_yi, rotL_zi}
 //      alpha_i, beta_i - rotations about the components of director vector at node i
 //      r1_i, r2_i, r3_i, - rotations about local coordinates e1', e2', e3'
@@ -803,7 +778,7 @@ MITC4Shell :: computeLToDirectorRotationMatrix(FloatMatrix &answer1, FloatMatrix
 
 bool
 MITC4Shell :: computeGtoLRotationMatrix(FloatMatrix &answer)
-// Returns the rotation matrix of the receiver of the size [20,24]
+// Returns the rotation matrix of the receiver of the size [24,24]
 // r(local) = T * r(global)
 // for one node (r written transposed): {u,v,w,alpha,beta} = T * {u,v,w,r1,r2,r3}
 
@@ -894,27 +869,179 @@ MITC4Shell :: printOutputAt(FILE *file, TimeStep *tStep)
 // Performs end-of-step operations.
 {
     FloatArray v;
+    GaussPoint *gp;
 
     fprintf(file, "element %d (%8d):\n", this->giveLabel(), number);
 
-    for ( GaussPoint *gp : *integrationRulesArray [ 0 ] ) {
-        fprintf( file, "  GP 1.%d :", gp->giveNumber() );
-        this->giveIPValue(v, gp, IST_ShellStrainTensor, tStep);
-        fprintf(file, "  strains    ");
+    for ( int i = 0; i < nPointsXY; i++ ) {
+        fprintf(file, "  GP %d :", i + 1);
+
+        this->giveMidplaneIPValue(v, i, IST_ShellForceTensor, tStep);
+        fprintf(file, "  forces     ");
         for ( auto &val : v ) {
             fprintf(file, " %.4e", val);
         }
 
-        this->giveIPValue(v, gp, IST_ShellForceTensor, tStep);
-        fprintf(file, "\n              stresses   ");
+        this->giveMidplaneIPValue(v, i, IST_ShellMomentumTensor, tStep);
+        fprintf(file, "\n          moments    ");
         for ( auto &val : v ) {
             fprintf(file, " %.4e", val);
         }
 
+        this->giveMidplaneIPValue(v, i, IST_ShellStrainTensor, tStep);
+        fprintf(file, "\n          strains    ");
+        for ( auto &val : v ) {
+            fprintf(file, " %.4e", val);
+        }
+
+        this->giveMidplaneIPValue(v, i, IST_ShellCurvatureTensor, tStep);
+        fprintf(file, "\n          curvatures ");
+        for ( auto &val : v ) {
+            fprintf(file, " %.4e", val);
+        }
+
+        for ( int j = 0; j < nPointsZ; j++ ) {
+            gp = integrationRulesArray [ 0 ]->getIntegrationPoint(nPointsZ * i + j);
+
+            fprintf(file, "\n          GP %d.%d :", i + 1, j + 1);
+
+            this->giveIPValue(v, gp, IST_StrainTensor, tStep);
+            fprintf(file, "    strains    ");
+            for ( auto &val : v ) {
+                fprintf(file, " %.4e", val);
+            }
+
+            this->giveIPValue(v, gp, IST_StressTensor, tStep);
+            fprintf(file, "\n                      stresses   ");
+            for ( auto &val : v ) {
+                fprintf(file, " %.4e", val);
+            }
+        }
         fprintf(file, "\n");
     }
 }
 
+void
+MITC4Shell :: giveMidplaneIPValue(FloatArray &answer, int gpXY, InternalStateType type, TimeStep *tStep)
+{
+    GaussPoint *gp = NULL;
+
+    if ( type == IST_ShellMomentumTensor || type == IST_ShellForceTensor ) {
+        double J, thickness, z, w;
+        FloatArray mLocal;
+        mLocal.resize(6);
+        mLocal.zero();
+
+        for ( int i = 0; i < nPointsZ; i++ ) {
+            gp = integrationRulesArray [ 0 ]->getIntegrationPoint(nPointsZ * gpXY + i);
+            thickness = this->giveCrossSection()->give(CS_Thickness, gp->giveGlobalCoordinates(), this, false);
+            J = thickness / 2.0;
+            if (  type == IST_ShellMomentumTensor ) {
+                z = gp->giveNaturalCoordinates().at(3) * ( thickness / 2 );
+            } else if (  type == IST_ShellForceTensor ) {
+                z = 1;
+            }
+            w = gp->giveWeight() * J * z;
+
+            FloatArray localStress, localStrain;
+            this->computeStrainVector(localStrain, gp, tStep);
+            this->computeStressVector(localStress, localStrain, gp, tStep);
+            mLocal.add(w, localStress);
+        }
+
+        // local to global
+        StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveStructuralCrossSection()->giveMaterial(gp) );
+        this->computeGtoLRotationMatrix();
+        mat->transformStressVectorTo(answer,  GtoLRotationMatrix, mLocal, false);
+    } else if ( type == IST_ShellCurvatureTensor ) {
+        FloatArray h;
+        FloatMatrix dn;
+        FloatArray coords;
+
+        gp = integrationRulesArray [ 0 ]->getIntegrationPoint(nPointsZ * gpXY);
+        coords = gp->giveNaturalCoordinates();
+
+        StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveStructuralCrossSection()->giveMaterial(gp) );
+
+        FloatArray hkx, hky;
+        this->givedNdx(hkx, hky, coords);
+
+        FloatArray dofs(24);
+
+
+        FloatArray rotX(4), rotY(4);
+
+        this->computeVectorOf(VM_Total, tStep, dofs);
+        for ( int i = 0; i < 4; i++ ) {
+            rotX(i) = dofs.at(i * 6 + 4);
+            rotY(i) = dofs.at(i * 6 + 5);
+        }
+        FloatArray cLocal(6);
+        cLocal.zero();
+        cLocal.at(1) = rotY.dotProduct(hkx);
+        cLocal.at(2) = -rotX.dotProduct(hky);
+        cLocal.at(6) = rotY.dotProduct(hky) - rotX.dotProduct(hkx);
+
+        mat->transformStrainVectorTo(answer,  GtoLRotationMatrix, cLocal, false);
+    } else if ( type == IST_ShellStrainTensor ) {
+        FloatArray coords;
+        gp = integrationRulesArray [ 0 ]->getIntegrationPoint(nPointsZ * gpXY);
+        coords = gp->giveNaturalCoordinates();
+        coords.at(3) = 0;     //set to midplane
+        IntegrationRule *iRule = new GaussIntegrationRule(1, this, 1, 10);
+        GaussPoint *midGP = new GaussPoint( iRule, 1, coords, 1, this->giveMaterialMode() );
+
+        this->giveIPValue(answer, midGP, IST_StrainTensor, tStep);
+    } else {
+        OOFEM_ERROR("MITC4Shell :: giveMidplaneIPValue - unknown type");
+    }
+
+    return;
+}
+
+void
+MITC4Shell :: givedNdx(FloatArray &hkx, FloatArray &hky, FloatArray coords)
+{
+    FloatArray h, hk1(4), hk2(4);
+    FloatMatrix dn, dndx, jacobianMatrix, inv, inv2;
+
+    interp_lin.evalN( h, coords,  FEIElementGeometryWrapper(this) );
+    interp_lin.giveDerivatives(dn, coords);
+
+    // derivatives of interpolation functions
+    // dh(r1,r2)/dr1
+    hk1.at(1) =  dn.at(1, 1);
+    hk1.at(2) =  dn.at(2, 1);
+    hk1.at(3) =  dn.at(3, 1);
+    hk1.at(4) =  dn.at(4, 1);
+
+    // dh(r1,r2)/dr2
+    hk2.at(1) =  dn.at(1, 2);
+    hk2.at(2) =  dn.at(2, 2);
+    hk2.at(3) =  dn.at(3, 2);
+    hk2.at(4) =  dn.at(4, 2);
+
+    // Jacobian Matrix
+    this->giveJacobian(coords, jacobianMatrix);
+    inv.beInverseOf(jacobianMatrix);
+
+    inv2.beSubMatrixOf(inv, 1, 2, 1, 2);
+    dndx.beProductTOf(dn, inv2);
+
+    hkx.resize(4);
+    hkx.at(1)  = dndx.at(1, 1);
+    hkx.at(2)  = dndx.at(2, 1);
+    hkx.at(3)  = dndx.at(3, 1);
+    hkx.at(4)  = dndx.at(4, 1);
+
+    hky.resize(4);
+    hky.at(1)  = dndx.at(1, 2);
+    hky.at(2)  = dndx.at(2, 2);
+    hky.at(3)  = dndx.at(3, 2);
+    hky.at(4)  = dndx.at(4, 2);
+
+    return;
+}
 
 
 int
@@ -925,7 +1052,7 @@ MITC4Shell :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
 
     answer.resize(6);
 
-    if (  type == IST_ShellStrainTensor ) {
+    if (  type == IST_StrainTensor ) {
         cht = GlobalStrainTensor;
 
         this->giveCharacteristicTensor(globTensor, cht, gp, tStep);
@@ -935,10 +1062,10 @@ MITC4Shell :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
         answer.at(3) = globTensor.at(3, 3); //zz
         answer.at(4) = 2 * globTensor.at(2, 3); //yz
         answer.at(5) = 2 * globTensor.at(1, 3); //xz
-        answer.at(6) = 2 * globTensor.at(2, 3); //yz
+        answer.at(6) = 2 * globTensor.at(1, 2); //xy
 
         return 1;
-    } else if ( type == IST_ShellForceTensor ) {
+    } else if ( type == IST_StressTensor ) {
         cht = GlobalForceTensor;
 
         this->giveCharacteristicTensor(globTensor, cht, gp, tStep);
@@ -949,6 +1076,11 @@ MITC4Shell :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
         answer.at(4) = globTensor.at(2, 3); //yz
         answer.at(5) = globTensor.at(1, 3); //xz
         answer.at(6) = globTensor.at(1, 2); //xy
+
+        return 1;
+    } else if ( type == IST_ShellMomentumTensor || type == IST_ShellForceTensor || type == IST_ShellCurvatureTensor || type == IST_ShellStrainTensor ) {
+        int gpnXY = ( gp->giveNumber() - 1 ) / 2;
+        this->giveMidplaneIPValue(answer, gpnXY, type, tStep);
 
         return 1;
     } else {
@@ -1023,11 +1155,12 @@ void
 MITC4Shell :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                          InternalStateType type, TimeStep *tStep)
 {
-    double x1 = 0.0, x2 = 0.0, x3 = 0.0, y = 0.0;
-    FloatMatrix A(4, 4);
+    double x1 = 0.0, x2 = 0.0, y = 0.0;
+    FloatMatrix A(3, 3);
     FloatMatrix b, r;
     FloatArray val;
-    double u, v, w;
+    double u, v;
+
 
     int size = 0;
 
@@ -1035,8 +1168,8 @@ MITC4Shell :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int
         giveIPValue(val, gp, type, tStep);
         if ( size == 0 ) {
             size = val.giveSize();
-            b.resize(4, size);
-            r.resize(4, size);
+            b.resize(3, size);
+            r.resize(3, size);
             A.zero();
             r.zero();
         }
@@ -1044,31 +1177,22 @@ MITC4Shell :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int
         const FloatArray &coord = gp->giveNaturalCoordinates();
         u = coord.at(1);
         v = coord.at(2);
-        w = coord.at(3);
 
         A.at(1, 1) += 1;
         A.at(1, 2) += u;
         A.at(1, 3) += v;
-        A.at(1, 4) += w;
         A.at(2, 1) += u;
         A.at(2, 2) += u * u;
         A.at(2, 3) += u * v;
-        A.at(2, 4) += u * w;
         A.at(3, 1) += v;
         A.at(3, 2) += v * u;
         A.at(3, 3) += v * v;
-        A.at(3, 4) += v * w;
-        A.at(4, 1) += w;
-        A.at(4, 2) += w * u;
-        A.at(4, 3) += w * v;
-        A.at(4, 4) += w * w;
 
         for ( int j = 1; j <= size; j++ ) {
             y = val.at(j);
             r.at(1, j) += y;
             r.at(2, j) += y * u;
             r.at(3, j) += y * v;
-            r.at(4, j) += y * w;
         }
     }
 
@@ -1078,22 +1202,18 @@ MITC4Shell :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int
     case 1:
         x1 =  1.0;
         x2 =  1.0;
-        x3 =  1.0;
         break;
     case 2:
         x1 = -1.0;
         x2 =  1.0;
-        x3 =  1.0;
         break;
     case 3:
         x1 = -1.0;
         x2 = -1.0;
-        x3 =  1.0;
         break;
     case 4:
         x1 =  1.0;
         x2 = -1.0;
-        x3 =  1.0;
         break;
     default:
         OOFEM_ERROR("unsupported node");
@@ -1101,21 +1221,8 @@ MITC4Shell :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int
 
     answer.resize(size);
     for ( int j = 1; j <= size; j++ ) {
-        answer.at(j) = b.at(1, j) + x1 *b.at(2, j) * x2 * b.at(3, j) * x3 * b.at(4, j);
+        answer.at(j) = b.at(1, j) + x1 *b.at(2, j) + x2 *b.at(3, j);
     }
-}
-
-
-void
-MITC4Shell :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
-{
-    IntArray edgeNodes;
-    FloatArray n;
-
-    this->interp_lin.edgeEvalN( n, iedge, gp->giveNaturalCoordinates(), FEIVoidCellGeometry() );
-    this->interp_lin.computeLocalEdgeMapping(edgeNodes, iedge);
-
-    answer.beNMatrixOf(n, 6);
 }
 
 
@@ -1278,4 +1385,22 @@ MITC4Shell :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
     detJ = jacobianMatrix.giveDeterminant();
     return detJ * weight;
 }
+
+void
+MITC4Shell :: computeEdgeNMatrix(FloatMatrix &answer, int boundaryID, const FloatArray &lcoords)
+{
+    FloatArray n_vec;
+    this->giveInterpolation()->boundaryEdgeEvalN( n_vec, boundaryID, lcoords, FEIElementGeometryWrapper(this) );
+    answer.beNMatrixOf(n_vec, 6);
+}
+
+
+void
+MITC4Shell :: computeSurfaceNMatrix(FloatMatrix &answer, int boundaryID, const FloatArray &lcoords)
+{
+    FloatArray n_vec;
+    this->giveInterpolation()->boundarySurfaceEvalN( n_vec, boundaryID, lcoords, FEIElementGeometryWrapper(this) );
+    answer.beNMatrixOf(n_vec, 6);
+}
+
 } // end namespace oofem
