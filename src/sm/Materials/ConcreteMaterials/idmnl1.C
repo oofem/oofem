@@ -61,11 +61,7 @@ IDNLMaterial :: IDNLMaterial(int n, Domain *d) : IsotropicDamageMaterial1(n, d),
     //
     // constructor
     //
-{
-    Rf = 0.;
-    exponent = 1.;
-    averType = 0;
-}
+{}
 
 
 IDNLMaterial :: ~IDNLMaterial()
@@ -125,162 +121,14 @@ IDNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussP
 }
 
 double
-IDNLMaterial :: computeModifiedLength(double length, double dam1, double dam2)
+IDNLMaterial :: giveNonlocalMetricModifierAt(GaussPoint *gp)
 {
-    if ( averType == 6 ) { // different (improved) integration scheme
-        return length * 2. / ( 1. / computeDistanceModifier(dam1) + 1. / computeDistanceModifier(dam2) );
-    } else { // standard integration scheme
-        return length * 0.5 * ( computeDistanceModifier(dam1) + computeDistanceModifier(dam2) );
+    IDNLMaterialStatus *status = static_cast< IDNLMaterialStatus * >( this->giveStatus(gp) );
+    double damage = status->giveTempDamage();
+    if ( damage == 0. ) {
+        damage = status->giveDamage();
     }
-}
-
-void
-IDNLMaterial :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
-{
-    IDNLMaterialStatus *nonlocStatus, *status = static_cast< IDNLMaterialStatus * >( this->giveStatus(gp) );
-    std :: list< localIntegrationRecord > *list = this->giveIPIntegrationList(gp);
-    std :: list< localIntegrationRecord > :: iterator pos, postarget;
-
-    // find the current Gauss point (target) in the list of it neighbors
-    for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        if ( pos->nearGp == gp ) {
-            postarget = pos;
-        }
-    }
-
-    Element *elem = gp->giveElement();
-    FloatArray coords;
-    elem->computeGlobalCoordinates( coords, gp->giveNaturalCoordinates() );
-    double xtarget = coords.at(1);
-
-    double w, wsum = 0., x, xprev, damage, damageprev = 0.;
-    Element *nearElem;
-
-    // process the list from the target to the end
-    double distance = 0.; // distance modified by damage
-    xprev = xtarget;
-    for ( pos = postarget; pos != list->end(); ++pos ) {
-        nearElem = ( pos->nearGp )->giveElement();
-        nearElem->computeGlobalCoordinates( coords, pos->nearGp->giveNaturalCoordinates() );
-        x = coords.at(1);
-        nonlocStatus = static_cast< IDNLMaterialStatus * >( this->giveStatus(pos->nearGp) );
-        damage = nonlocStatus->giveTempDamage();
-        if ( damage == 0. ) {
-            damage = nonlocStatus->giveDamage();
-        }
-
-        if ( pos != postarget ) {
-            distance += computeModifiedLength(x - xprev, damage, damageprev);
-            //( x - xprev ) * 0.5 * ( computeDistanceModifier(damage) + computeDistanceModifier(damageprev) );
-        }
-
-        w = computeWeightFunction(distance) * nearElem->computeVolumeAround(pos->nearGp);
-        pos->weight = w;
-        wsum += w;
-        xprev = x;
-        damageprev = damage;
-    }
-
-    // process the list from the target to the beginning
-    distance = 0.;
-    for ( pos = postarget; pos != list->begin(); --pos ) {
-        nearElem = ( pos->nearGp )->giveElement();
-        nearElem->computeGlobalCoordinates( coords, pos->nearGp->giveNaturalCoordinates() );
-        x = coords.at(1);
-        nonlocStatus = static_cast< IDNLMaterialStatus * >( this->giveStatus(pos->nearGp) );
-        damage = nonlocStatus->giveTempDamage();
-        if ( damage == 0. ) {
-            damage = nonlocStatus->giveDamage();
-        }
-
-        if ( pos != postarget ) {
-            distance += computeModifiedLength(xprev - x, damage, damageprev);
-            //distance += ( xprev - x ) * 0.5 * ( computeDistanceModifier(damage) + computeDistanceModifier(damageprev) );
-            w = computeWeightFunction(distance) * nearElem->computeVolumeAround(pos->nearGp);
-            pos->weight = w;
-            wsum += w;
-        }
-
-        xprev = x;
-        damageprev = damage;
-    }
-
-    // the beginning must be treated separately
-    pos = list->begin();
-    if ( pos != postarget ) {
-        nearElem = ( pos->nearGp )->giveElement();
-        nearElem->computeGlobalCoordinates( coords, pos->nearGp->giveNaturalCoordinates() );
-        x = coords.at(1);
-        nonlocStatus = static_cast< IDNLMaterialStatus * >( this->giveStatus(pos->nearGp) );
-        damage = nonlocStatus->giveTempDamage();
-        if ( damage == 0. ) {
-            damage = nonlocStatus->giveDamage();
-        }
-
-        distance += computeModifiedLength(xprev - x, damage, damageprev);
-        //distance += ( xprev - x ) * 0.5 * ( computeDistanceModifier(damage) + computeDistanceModifier(damageprev) );
-        w = computeWeightFunction(distance) * nearElem->computeVolumeAround(pos->nearGp);
-        pos->weight = w;
-        wsum += w;
-    }
-
-    status->setIntegrationScale(wsum);
-
-    // print it
-    /*
-     * if (fabs(fabs(xtarget)-0.049835)<1e-6 ||
-     *  fabs(fabs(xtarget)-0.039934)<1e-6 ||
-     *  fabs(fabs(xtarget)-0.030033)<1e-6 ||0.0250825
-     *  fabs(fabs(xtarget)-0.020132)<1e-6 ||
-     *  fabs(fabs(xtarget)-0.009901)<1e-6 ||
-     *  fabs(fabs(xtarget)-0.00)<1e-6)
-     */
-    /*
-     * if (fabs(fabs(xtarget)-0.049835)<1e-6 ||
-     *  fabs(fabs(xtarget)-0.030033)<1e-6 ||
-     *  fabs(fabs(xtarget)-0.009901)<1e-6 ||
-     *  fabs(fabs(xtarget)-0.00)<1e-6)
-     * {
-     *
-     * for ( auto &lir: *list ) {
-     * nearElem = lir.nearGp->giveElement();
-     * nearElem->computeGlobalCoordinates (coords, *(lir.nearGp->giveCoordinates()));
-     * x = coords.at(1);
-     * w = (lir.weight/wsum)/(nearElem->computeVolumeAround(lir.nearGp));
-     * nonlocStatus = static_cast< IDNLMaterialStatus * >( this->giveStatus(lir.nearGp) );
-     * damage = nonlocStatus->giveDamage();
-     * printf("%g %g %g\n",x,w,damage);
-     * }
-     * printf("\n");
-     * }
-     */
-    /*
-     * printf("%g %g\n",xtarget,wsum);
-     * if (fabs(xtarget-0.049835)<1e-6)
-     * exit(0);
-     */
-}
-
-double
-IDNLMaterial :: computeDistanceModifier(double damage)
-{
-    switch ( averType ) {
-    case 2: return 1. / ( Rf / cl + ( 1. - Rf / cl ) * pow(1. - damage, exponent) );
-
-    case 3: if ( damage == 0. ) {
-            return 1.;
-    } else {
-            return 1. / ( 1. - ( 1. - Rf / cl ) * pow(damage, exponent) );
-    }
-
-    case 4: return 1. / pow(Rf / cl, damage);
-
-    case 5: return ( 2. * cl ) / ( cl + Rf + ( cl - Rf ) * cos(M_PI * damage) );
-
-    case 6: return 1. / sqrt(1. - damage);
-
-    default: return 1.;
-    }
+    return damage;
 }
 
 void
@@ -544,24 +392,6 @@ IDNLMaterial :: initializeFrom(InputRecord *ir)
         return result;
     }
 
-    averType = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, averType, _IFT_IDNLMaterial_averagingtype);
-    if ( averType == 2 ) {
-        exponent = 0.5; // default value for averaging type 2
-    }
-
-    if ( averType == 3 ) {
-        exponent = 1.; // default value for averaging type 3
-    }
-
-    if ( averType == 2 || averType == 3 ) {
-        IR_GIVE_OPTIONAL_FIELD(ir, exponent, _IFT_IDNLMaterial_exp);
-    }
-
-    if ( averType >= 2 && averType <= 5 ) {
-        IR_GIVE_OPTIONAL_FIELD(ir, Rf, _IFT_IDNLMaterial_rf);
-    }
-
     return IRRT_OK;
 }
 
@@ -571,15 +401,6 @@ IDNLMaterial :: giveInputRecord(DynamicInputRecord &input)
 {
     IsotropicDamageMaterial1 :: giveInputRecord(input);
     StructuralNonlocalMaterialExtensionInterface :: giveInputRecord(input);
-
-    input.setField(this->averType, _IFT_IDNLMaterial_averagingtype);
-
-    if ( averType == 2 || averType == 3 ) {
-        input.setField(this->exponent, _IFT_IDNLMaterial_exp);
-    }
-    if ( averType >= 2 && averType <= 5 ) {
-        input.setField(this->Rf, _IFT_IDNLMaterial_rf);
-    }
 }
 
 void

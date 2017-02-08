@@ -60,6 +60,8 @@ public:
     QTrPlaneStrain(int n, Domain * d);
     virtual ~QTrPlaneStrain() { }
 
+    virtual FEInterpolation *giveInterpolation() const;
+
     virtual Interface *giveInterface(InterfaceType it);
 
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 0 : 0 ); }

@@ -8,7 +8,7 @@ namespace oofem {
  * The main purpose is to sort large lists of real numbers efficiently,
  * at N*log(N) algorithmic complexity.
  */
-  
+
 class Heap
 {
 public:
@@ -25,6 +25,7 @@ public:
     int *T2H;
 
     /// Interface with external algorithms (such as fast marching)
+    void setToEmpty(int N);
     bool isInHeap(int Ind);
     int nElems();
     void insert(double time, int Ind);
@@ -58,6 +59,5 @@ private:
     /// Used by printTree. Does the actual printing, top-down.
     void recurse(int row, int pad, int spacing, int S);
 };
- 
 } // end namespace oofem
 #endif // heap_h
