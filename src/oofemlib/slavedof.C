@@ -86,15 +86,18 @@ SlaveDof :: giveNumberOfPrimaryMasterDofs()
     if ( countOfPrimaryMasterDofs > 0 ) {
         return countOfPrimaryMasterDofs;
     } else
-    if ( countOfPrimaryMasterDofs == 0 ) {
-        OOFEM_ERROR("slaveDof is own master");
-    }
+      //if ( countOfPrimaryMasterDofs == 0 ) {
+      //OOFEM_ERROR("slaveDof is own master");
+      //}
 
     countOfPrimaryMasterDofs = 0;
 
     int c = 0;
     for ( int i = 1; i <= countOfMasterDofs; i++ ) {
         c += this->giveMasterDof(i)->giveNumberOfPrimaryMasterDofs();
+    }
+    if ( c == 0 ) {
+      OOFEM_ERROR("slaveDof is own master");
     }
 
     return countOfPrimaryMasterDofs = c;
