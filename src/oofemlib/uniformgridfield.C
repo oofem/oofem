@@ -97,7 +97,6 @@ double UniformGridField::nodeValue3d(int i, int j, int k){
     return values[(div[2]+1)*(div[1]+1)*i+(div[2]+1)*j+k];
 }
 
-
 // see https://github.com/woodem/woo/blob/master/pkg/dem/FlowAnalysis.cpp
 // and https://woodem.org/user/flow-analysis.html for explanation about the interpolation routine
 int UniformGridField::evaluateAt(FloatArray &answer, const FloatArray &coords,

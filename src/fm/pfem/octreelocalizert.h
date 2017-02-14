@@ -62,7 +62,7 @@ class IntArray;
 template< class T >class OctreeSpatialLocalizerT;
 
 
-#define TEMPLATED_OCTREE_MAX_NODES_LIMIT 1024
+#define TEMPLATED_OCTREE_MAX_NODES_LIMIT 800
 
 #define TEMPLATED_OCTREE_MAX_DEPTH 8
 

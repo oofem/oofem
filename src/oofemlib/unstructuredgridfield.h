@@ -35,7 +35,7 @@
 #ifndef unstructuredgridfield_h
 #define unstructuredgridfield_h
 
-#include"field.h"
+#include "field.h"
 #include "floatarray.h"
 #include "intarray.h"
 #include "elementgeometrytype.h"
@@ -47,6 +47,7 @@
 #include "fei2dquadlin.h"
 #include "fei2dquadquad.h"
 #include "fei3dtetlin.h"
+#include "fei3dhexalin.h"
 
 #include "pfem/octreelocalizert.h"
 #include "error.h"
@@ -94,6 +95,7 @@ protected:
     static FEI2dQuadLin i5;
     static FEI2dQuadQuad i6;
     static FEI3dTetLin i7;
+    static FEI3dHexaLin i8;
     
     static FEInterpolation* interpTable[] ;
 
@@ -188,6 +190,7 @@ protected:
       else if (this->itype == EGT_quad_1) return interpTable[4];
       else if (this->itype == EGT_quad_2) return interpTable[5];
       else if (this->itype == EGT_tetra_1) return interpTable[6];
+      else if (this->itype == EGT_hexa_1) return interpTable[7];
       else {
 	OOFEM_LOG_ERROR ("UnstructuredGridField.Cell:: Unsupported cell type");
 	return NULL;
