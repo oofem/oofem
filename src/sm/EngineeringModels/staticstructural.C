@@ -288,9 +288,9 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
     FloatArray incrementOfSolution(neq);
     if ( this->initialGuessType == IG_Tangent ) {
 
-    	if( this->giveProblemScale() == macroScale ) {
-    		OOFEM_LOG_RELEVANT("Computing initial guess\n");
-    	}
+        if ( this->giveProblemScale() == macroScale ) {
+            OOFEM_LOG_RELEVANT("Computing initial guess\n");
+        }
 
         FloatArray extrapolatedForces(neq);
 #if 1
@@ -314,22 +314,22 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
 #endif
         if ( extrapolatedForces.computeNorm() > 0. ) {
 
-        	if( this->giveProblemScale() == macroScale ) {
-        		OOFEM_LOG_RELEVANT("Computing old tangent\n");
-        	}
+            if( this->giveProblemScale() == macroScale ) {
+                OOFEM_LOG_RELEVANT("Computing old tangent\n");
+            }
 
             this->updateComponent( tStep, NonLinearLhs, this->giveDomain(di) );
             SparseLinearSystemNM *linSolver = nMethod->giveLinearSolver();
 
-        	if( this->giveProblemScale() == macroScale ) {
-        		OOFEM_LOG_RELEVANT("Solving for increment\n");
-        	}
+            if( this->giveProblemScale() == macroScale ) {
+                OOFEM_LOG_RELEVANT("Solving for increment\n");
+            }
 
             linSolver->solve(*stiffnessMatrix, extrapolatedForces, incrementOfSolution);
 
-        	if( this->giveProblemScale() == macroScale ) {
-        		OOFEM_LOG_RELEVANT("Initial guess found\n");
-        	}
+            if( this->giveProblemScale() == macroScale ) {
+                OOFEM_LOG_RELEVANT("Initial guess found\n");
+            }
 
             this->solution.add(incrementOfSolution);
             

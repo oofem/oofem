@@ -231,8 +231,8 @@ double NLTransientTransportProblem :: giveUnknownComponent(ValueModeType mode, T
         if ( mode == VM_Incremental ) { //get difference between current and previous time variable
             return dof->giveUnknowns()->at(0) - dof->giveUnknowns()->at(1);
         } else if ( mode == VM_TotalIntrinsic ) { // intrinsic value only for current step
-	    return this->alpha * dof->giveUnknowns()->at(0) + (1.-this->alpha) * dof->giveUnknowns()->at(1);
-	}
+            return this->alpha * dof->giveUnknowns()->at(0) + (1.-this->alpha) * dof->giveUnknowns()->at(1);
+        }
         int hash = this->giveUnknownDictHashIndx(mode, tStep);
         if ( dof->giveUnknowns()->includes(hash) ) {
             return dof->giveUnknowns()->at(hash);
@@ -257,10 +257,10 @@ double NLTransientTransportProblem :: giveUnknownComponent(ValueModeType mode, T
         if ( mode == VM_Velocity ) {
             return ( rtdt - rt ) / currentStep->giveTimeIncrement();
         } else if ( mode == VM_TotalIntrinsic ) {
-	  // only supported for current step
-	    return this->alpha * rtdt + ( 1. - this->alpha ) * rt; 
-	} else if ( mode == VM_Total ) {
-	    return psi * rtdt + ( 1. - psi ) * rt;
+            // only supported for current step
+            return this->alpha * rtdt + ( 1. - this->alpha ) * rt; 
+        } else if ( mode == VM_Total ) {
+            return psi * rtdt + ( 1. - psi ) * rt;
         } else if ( mode == VM_Incremental ) {
             if ( previousStep->isIcApply() ) {
                 return 0;
