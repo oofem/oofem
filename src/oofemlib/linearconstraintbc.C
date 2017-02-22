@@ -104,7 +104,7 @@ void LinearConstraintBC :: giveLocArray(const UnknownNumberingScheme &r_s,  IntA
 
 void LinearConstraintBC :: assemble(SparseMtrx &answer, TimeStep *tStep,
                                     CharType type, const UnknownNumberingScheme &r_s,
-                                    const UnknownNumberingScheme &c_s)
+                                    const UnknownNumberingScheme &c_s, double scale)
 {
     int size = this->weights.giveSize();
     IntArray lambdaeq(1);
@@ -124,6 +124,8 @@ void LinearConstraintBC :: assemble(SparseMtrx &answer, TimeStep *tStep,
             }
             contrib.at(_i, 1) = this->weights.at(_i) * factor;
         }
+
+        contribt.times(scale);
         contribt.beTranspositionOf(contrib);
 
         answer.assemble(lambdaeq, locr, contribt);

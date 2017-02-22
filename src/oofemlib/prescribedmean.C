@@ -77,7 +77,7 @@ PrescribedMean :: initializeFrom(InputRecord *ir)
 
 void
 PrescribedMean :: assemble(SparseMtrx &answer, TimeStep *tStep, CharType type,
-                           const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
+                           const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale)
 {
 
     if ( type != TangentStiffnessMatrix && type != StiffnessMatrix ) {
@@ -132,7 +132,7 @@ PrescribedMean :: assemble(SparseMtrx &answer, TimeStep *tStep, CharType type,
             }
 
             // delta p part:
-            temp = N*detJ*gp->giveWeight()*(1.0/domainSize);
+            temp = N * (scale * detJ * gp->giveWeight() / domainSize);
             tempT.beTranspositionOf(temp);
 
             answer.assemble(r_Sideloc, c_loc, temp);

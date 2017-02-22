@@ -222,6 +222,10 @@ protected:
 public:
     EffectiveTangentAssembler(MatResponseMode mode, bool lumped, double k, double m);
     virtual void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const;
+    virtual void matrixFromLoad(FloatMatrix &mat, Element &element, BodyLoad *load, TimeStep *tStep) const;
+    virtual void matrixFromBoundaryLoad(FloatMatrix &mat, Element &element, BoundaryLoad *load, int boundary, TimeStep *tStep) const;
+    virtual void matrixFromEdgeLoad(FloatMatrix &mat, Element &element, BoundaryLoad *load, int edge, TimeStep *tStep) const;
+    virtual void assembleFromActiveBC(SparseMtrx &k, ActiveBoundaryCondition &bc, TimeStep* tStep, const UnknownNumberingScheme &s_r, const UnknownNumberingScheme &s_c) const;
 };
 
 }

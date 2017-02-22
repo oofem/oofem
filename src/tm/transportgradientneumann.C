@@ -198,7 +198,7 @@ void TransportGradientNeumann :: assembleVector(FloatArray &answer, TimeStep *tS
 }
 
 void TransportGradientNeumann :: assemble(SparseMtrx &answer, TimeStep *tStep,
-                                             CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
+                                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale)
 {
     if ( type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == ElasticStiffnessMatrix ) {
         FloatMatrix Ke, KeT;
@@ -221,7 +221,7 @@ void TransportGradientNeumann :: assemble(SparseMtrx &answer, TimeStep *tStep,
                 e->giveBoundaryLocationArray(loc_c, bNodes, this->dofs, c_s);
 
                 this->integrateTangent(Ke, e, boundary, i, pos);
-                Ke.negated();
+                Ke.times(-scale);
                 KeT.beTranspositionOf(Ke);
 
                 answer.assemble(flux_loc_r, loc_c, Ke); // Contribution to delta_s_i equations

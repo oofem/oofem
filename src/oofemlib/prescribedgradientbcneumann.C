@@ -161,7 +161,7 @@ void PrescribedGradientBCNeumann :: assembleVector(FloatArray &answer, TimeStep 
 }
 
 void PrescribedGradientBCNeumann :: assemble(SparseMtrx &answer, TimeStep *tStep,
-                                             CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
+                                             CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale)
 {
     if ( type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == ElasticStiffnessMatrix ) {
         FloatMatrix Ke, KeT;
@@ -187,6 +187,7 @@ void PrescribedGradientBCNeumann :: assemble(SparseMtrx &answer, TimeStep *tStep
 
             this->integrateTangent(Ke, e, boundary);
             Ke.negated();
+            Ke.times(scale);
             KeT.beTranspositionOf(Ke);
 
             answer.assemble(sigma_loc_r, loc_c, Ke); // Contribution to delta_s_i equations

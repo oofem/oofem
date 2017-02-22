@@ -410,7 +410,7 @@ void PrescribedGradientBCWeak :: computeIntForceGPContrib(FloatArray &oContrib_d
 }
 
 void PrescribedGradientBCWeak :: assemble(SparseMtrx &answer, TimeStep *tStep,
-                                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
+                                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale)
 {
     std::vector<FloatArray> gpCoordArray;
 
@@ -421,7 +421,7 @@ void PrescribedGradientBCWeak :: assemble(SparseMtrx &answer, TimeStep *tStep,
             for ( GaussPoint *gp: *(el->mIntRule.get()) ) {
 
                 gpCoordArray.push_back( gp->giveGlobalCoordinates() );
-                assembleGPContrib(answer, tStep, type, r_s, c_s, *el, *gp);
+                assembleGPContrib(answer, tStep, type, r_s, c_s, *el, *gp, scale);
             }
         }
 
@@ -446,6 +446,7 @@ void PrescribedGradientBCWeak :: assemble(SparseMtrx &answer, TimeStep *tStep,
 
             FloatMatrix KZero( lockRows.giveSize(), lockCols.giveSize() );
             KZero.zero();
+            KZero.times(scale);
             answer.assemble(lockRows, lockCols, KZero);
         }
 
@@ -462,7 +463,7 @@ void PrescribedGradientBCWeak :: assemble(SparseMtrx &answer, TimeStep *tStep,
         IntArray nodeRows, nodeCols;
         node1->giveLocationArray(giveRegularDispDofIDs(), nodeRows, r_s);
         node1->giveLocationArray(giveRegularDispDofIDs(), nodeCols, c_s);
-
+        KeDispLock.times(scale);
         answer.assemble(nodeRows, nodeCols, KeDispLock);
 
 
@@ -475,10 +476,10 @@ void PrescribedGradientBCWeak :: assemble(SparseMtrx &answer, TimeStep *tStep,
 }
 
 void PrescribedGradientBCWeak :: assembleExtraDisplock(SparseMtrx &answer, TimeStep *tStep,
-                      CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
+                       CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 
 {
-//	printf("Entering PrescribedGradientBCWeak :: assembleExtraDisplock.\n");
+//    printf("Entering PrescribedGradientBCWeak :: assembleExtraDisplock.\n");
 
 #if 1
 
@@ -488,7 +489,7 @@ void PrescribedGradientBCWeak :: assembleExtraDisplock(SparseMtrx &answer, TimeS
 
     // Lock in y-direction to get rid of rigid body rotation.
     double scaling = 1.0e0;
-    KeDispLock.at(2,2) 			=  mSpringPenaltyStiffness*scaling;
+    KeDispLock.at(2,2) = mSpringPenaltyStiffness*scaling;
 
     IntArray nodeRows, nodeCols;
 
@@ -509,10 +510,10 @@ void PrescribedGradientBCWeak :: assembleExtraDisplock(SparseMtrx &answer, TimeS
 
     // Lock in y-direction to get rid of rigid body rotation.
     double scaling = 1.0e0;
-    KeDispLock.at(2,2) 			=  mSpringPenaltyStiffness*scaling;
-    KeDispLock.at(2,nsd+1) 		= -mSpringPenaltyStiffness*scaling;
-    KeDispLock.at(nsd+1,2) 		= -mSpringPenaltyStiffness*scaling;
-    KeDispLock.at(nsd+1,nsd+1) 	=  mSpringPenaltyStiffness*scaling;
+    KeDispLock.at(2,2)         =  mSpringPenaltyStiffness*scaling;
+    KeDispLock.at(2,nsd+1)     = -mSpringPenaltyStiffness*scaling;
+    KeDispLock.at(nsd+1,2)     = -mSpringPenaltyStiffness*scaling;
+    KeDispLock.at(nsd+1,nsd+1) =  mSpringPenaltyStiffness*scaling;
 //    KeDispLock.times(mSpringPenaltyStiffness);
 
     IntArray nodeRows, nodeCols;
@@ -539,15 +540,13 @@ void PrescribedGradientBCWeak :: assembleExtraDisplock(SparseMtrx &answer, TimeS
     nodeRows.followedBy(nodeRows2);
     nodeCols.followedBy(nodeCols2);
 
-
-
     answer.assemble(nodeRows, nodeCols, KeDispLock);
 #endif
 
 }
 
 void PrescribedGradientBCWeak :: assembleGPContrib(SparseMtrx &answer, TimeStep *tStep,
-                      CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, TracSegArray &iEl, GaussPoint &iGP)
+                      CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, TracSegArray &iEl, GaussPoint &iGP, double k)
 {
 
     SpatialLocalizer *localizer = domain->giveSpatialLocalizer();
@@ -571,6 +570,7 @@ void PrescribedGradientBCWeak :: assembleGPContrib(SparseMtrx &answer, TimeStep 
     IntArray disp_cols;
     dispEl->giveLocationArray(disp_cols, c_s);
 
+    contrib.times(k);
     answer.assemble(trac_rows, disp_cols, contrib);
 
     FloatMatrix contribT;
@@ -599,7 +599,7 @@ void PrescribedGradientBCWeak :: assembleGPContrib(SparseMtrx &answer, TimeStep 
 
     disp_cols.clear();
     dispEl->giveLocationArray(disp_cols, c_s);
-
+    contrib.times(k);
     answer.assemble(trac_rows, disp_cols, contrib);
 
     contribT.clear();

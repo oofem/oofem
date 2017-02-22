@@ -298,4 +298,31 @@ void EffectiveTangentAssembler :: matrixFromElement(FloatMatrix &answer, Element
     answer.add(this->m, massMatrix);
 }
 
+void EffectiveTangentAssembler :: matrixFromLoad(FloatMatrix& mat, Element& element, BodyLoad* load, TimeStep* tStep) const
+{
+    mat.clear();
+    //element.computeTangentFromLoad(mat, load, this->rmode, tStep);
+    //mat.times(this->k);
+}
+
+void EffectiveTangentAssembler :: matrixFromBoundaryLoad(FloatMatrix& mat, Element& element, BoundaryLoad* load, int boundary, TimeStep* tStep) const
+{
+    element.computeTangentFromBoundaryLoad(mat, load, boundary, this->rmode, tStep);
+    mat.times(this->k);
+}
+
+void EffectiveTangentAssembler :: matrixFromEdgeLoad(FloatMatrix& mat, Element& element, BoundaryLoad* load, int edge, TimeStep* tStep) const
+{
+    mat.clear();
+    //element.computeTangentFromEdgeLoad(mat, load, edge, this->rmode, tStep);
+    //mat.times(this->k);
+}
+
+void EffectiveTangentAssembler :: assembleFromActiveBC(SparseMtrx &k, ActiveBoundaryCondition &bc, TimeStep* tStep, const UnknownNumberingScheme &s_r, const UnknownNumberingScheme &s_c) const
+{
+    // TODO: Crucial part to add: We have to support a scaling factor for this method to support effective tangents.
+    bc.assemble(k, tStep, TangentStiffnessMatrix, s_r, s_c, this->k);
+}
+
+
 }
