@@ -1375,7 +1375,7 @@ int CemhydMatStatus :: readInputFileAndInitialize(const char *inp, bool generate
     xmlFile = new XMLDocument();
     countKey = 0;
     int errorId = xmlFile->LoadFile(inp);
-    if ( errorId != XML_NO_ERROR ) {
+    if ( errorId != XML_SUCCESS ) {
         printf("\nError reading XML file %s or nonletter symbols used, error id = %d\n", inp, errorId);
         exit(0);
     }
