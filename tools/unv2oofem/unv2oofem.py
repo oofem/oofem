@@ -243,7 +243,7 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
                                 ellist.extend(elemset.items)
                     setElements=list(set(ellist))
 
-                elif (words[2].lower()=='elementboundaries'):
+                elif (words[2].lower()=='elementboundaries' or words[2].lower()=='elementedges'):
                     setElements=[]
                     for thisSet in boundarySets:
                         if (thisSet[0]==int(words[1])):

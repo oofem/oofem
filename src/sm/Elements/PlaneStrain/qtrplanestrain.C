@@ -60,6 +60,9 @@ QTrPlaneStrain :: QTrPlaneStrain(int n, Domain *aDomain) :
 }
 
 
+FEInterpolation *
+QTrPlaneStrain :: giveInterpolation() const { return & interpolation; }
+
 Interface *
 QTrPlaneStrain :: giveInterface(InterfaceType interface)
 {

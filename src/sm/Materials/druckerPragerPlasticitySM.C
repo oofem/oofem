@@ -330,6 +330,7 @@ DruckerPragerPlasticitySM :: performLocalStressReturn(GaussPoint *gp,
     // choose and perform correct stress return and update state flag
     if ( computeYieldValue(volumetricStress, trialStressJTwo, tempKappa, eM) / eM
          > yieldTol ) {
+      //printf("*");
         if ( checkForVertexCase(eM, gM, kM, trialStressJTwo, volumetricStress, tempKappa) ) {
             performVertexReturn(eM, gM, kM, trialStressJTwo, stressDeviator, volumetricStress, 
                                 tempKappa, volumetricElasticTrialStrain, kappa);

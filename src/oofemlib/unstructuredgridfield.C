@@ -43,6 +43,7 @@ namespace oofem {
   FEI2dQuadLin  UnstructuredGridField::Cell::i5 (1,2);
   FEI2dQuadQuad UnstructuredGridField::Cell::i6 (1,2);
   FEI3dTetLin   UnstructuredGridField::Cell::i7;
+  FEI3dHexaLin  UnstructuredGridField::Cell::i8;
 
   FEInterpolation* UnstructuredGridField::Cell::interpTable[] = {
     &UnstructuredGridField::Cell::i1,
@@ -51,6 +52,7 @@ namespace oofem {
     &UnstructuredGridField::Cell::i4,
     &UnstructuredGridField::Cell::i5,
     &UnstructuredGridField::Cell::i6,
-    &UnstructuredGridField::Cell::i7
+    &UnstructuredGridField::Cell::i7,
+    &UnstructuredGridField::Cell::i8
   };
 } // end namespace oofem

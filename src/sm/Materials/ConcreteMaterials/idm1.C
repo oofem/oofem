@@ -352,6 +352,11 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, c2, _IFT_IsotropicDamageMaterial1_c2);
         IR_GIVE_FIELD(ir, e2, _IFT_IsotropicDamageMaterial1_e2);
         break;
+    case 10:     // modified power-exponential softening
+        this->softType = ST_ModPowerExponential;
+        IR_GIVE_FIELD(ir, ef, _IFT_IsotropicDamageMaterial1_ef);
+        IR_GIVE_FIELD(ir, md, _IFT_IsotropicDamageMaterial1_md);
+        break;
 
     default:
         OOFEM_WARNING("Softening type number %d is unknown", damageLaw);
@@ -968,7 +973,7 @@ IsotropicDamageMaterial1 :: damageFunction(double kappa, GaussPoint *gp)
 {
     const double e0 = this->give(e0_ID, gp);
     double ef = 0.;
-    if ( softType == ST_Linear || softType == ST_Exponential || softType == ST_SmoothExtended || softType == ST_PowerExponential || softType == ST_DoubleExponential ) {
+    if ( softType == ST_Linear || softType == ST_Exponential || softType == ST_SmoothExtended || softType == ST_PowerExponential || softType == ST_ModPowerExponential || softType == ST_DoubleExponential ) {
         ef = this->give(ef_ID, gp);         // ef is the fracturing strain
     }
 
@@ -1002,6 +1007,13 @@ IsotropicDamageMaterial1 :: damageFunction(double kappa, GaussPoint *gp)
     case ST_PowerExponential:
         if ( kappa > e0 ) {
             return 1.0 - ( e0 / kappa ) * exp( -pow( ( kappa - e0 ) / ( ef - e0 ), md ) );
+        } else {
+            return 0.0;
+        }
+
+    case ST_ModPowerExponential:
+        if ( kappa > e0 ) {
+            return 1.0 - ( e0 / kappa ) * exp( -( pow(kappa, md) - pow(e0, md) ) / ( pow(ef, md) - pow(e0, md) ) );
         } else {
             return 0.0;
         }
