@@ -573,22 +573,27 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
 
         if ( maxElmass <= 0.0 ) {
             OOFEM_WARNING("Element (%d) with zero (or negative) lumped mass encountered\n", i);
-        }
+        } else {
 
-        for ( j = 1; j <= n; j++ ) {
-            if ( charMtrx.at(j, j) > maxElmass * ZERO_REL_MASS ) {
+          if (charMtrx2.isNotEmpty() ) {
+            // in case stifness matrix defined, we can generate artificial mass
+            // in those DOFs without mass
+            for ( j = 1; j <= n; j++ ) {
+              if ( charMtrx.at(j, j) > maxElmass * ZERO_REL_MASS ) {
                 maxOmi =  charMtrx2.at(j, j) / charMtrx.at(j, j);
                 maxOmEl = ( maxOmEl > maxOmi ) ? ( maxOmEl ) : ( maxOmi );
+              }
             }
-        }
-
-        maxOm = ( maxOm > maxOmEl ) ? ( maxOm ) : ( maxOmEl );
-
-        for ( j = 1; j <= n; j++ ) {
-            jj = loc.at(j);
-            if ( ( jj ) && ( charMtrx.at(j, j) <= maxElmass * ZERO_REL_MASS ) ) {
+            
+            maxOm = ( maxOm > maxOmEl ) ? ( maxOm ) : ( maxOmEl );
+            
+            for ( j = 1; j <= n; j++ ) {
+              jj = loc.at(j);
+              if ( ( jj ) && ( charMtrx.at(j, j) <= maxElmass * ZERO_REL_MASS ) ) {
                 charMtrx.at(j, j) = charMtrx2.at(j, j) / maxOmEl;
+              }
             }
+          }
         }
 #endif
 
