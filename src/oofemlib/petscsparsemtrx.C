@@ -940,7 +940,11 @@ void
 PetscSparseMtrx :: writeToFile(const char *fname) const
 {
     PetscViewer viewer;
-    PetscViewerASCIIOpen(PETSC_COMM_WORLD, fname, & viewer);
+#ifdef __PARALLEL_MODE
+    PetscViewerASCIIOpen(this->emodel->giveParallelComm(), fname, & viewer);
+#else
+    PetscViewerASCIIOpen(PETSC_COMM_SELF, fname, & viewer);
+#endif
     MatView(this->mtrx, viewer);
     PetscViewerDestroy(& viewer);
 }

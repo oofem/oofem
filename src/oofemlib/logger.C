@@ -135,16 +135,18 @@ namespace oofem {
 // Default log output
 Logger oofem_logger(Logger :: LOG_LEVEL_INFO);
 
-Logger :: Logger(logLevelType level)
-{
-    this->logLevel = level;
-    this->logStream = stdout;
-    this->errStream = stderr;
-
-    this->closeFlag = false;
-    this->errCloseFlag = false;
-    numberOfWrn = numberOfErr = 0;
-}
+Logger :: Logger(logLevelType level) :
+    logStream(stdout),
+    errStream(stderr),
+    closeFlag(false),
+    errCloseFlag(false),
+    logLevel(level),
+    numberOfWrn(0),
+    numberOfErr(0)
+#ifdef __PARALLEL_MODE
+    ,comm(MPI_COMM_SELF)
+#endif
+{}
 
 Logger :: ~Logger()
 {
@@ -234,7 +236,7 @@ Logger :: writeLogMsg(logLevelType level, const char *format, ...)
     int rank = 0;
 
 #ifdef __PARALLEL_MODE
-    MPI_Comm_rank(MPI_COMM_WORLD, & rank);
+    MPI_Comm_rank(this->comm, & rank);
 #endif
     (void)rank;//prevent a warning about unused variable
     FILE *stream = this->logStream;
@@ -318,6 +320,13 @@ Logger :: setLogLevel(int level)
     }
 }
 
+#ifdef __PARALLEL_MODE
+void
+Logger :: setComm(MPI_Comm comm)
+{
+    this->comm = comm;
+}
+#endif
 
 void
 Logger :: printStatistics()
@@ -325,13 +334,13 @@ Logger :: printStatistics()
     int rank = 0;
 
 #ifdef __PARALLEL_MODE
-    MPI_Comm_rank(MPI_COMM_WORLD, & rank);
+    MPI_Comm_rank(this->comm, & rank);
 #endif
 
     int totalNumberOfErr = numberOfErr, totalNumberOfWrn = numberOfWrn;
 #ifdef __PARALLEL_MODE
-    MPI_Reduce(& numberOfErr, & totalNumberOfErr, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
-    MPI_Reduce(& numberOfWrn, & totalNumberOfWrn, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+    MPI_Reduce(& numberOfErr, & totalNumberOfErr, 1, MPI_INT, MPI_SUM, 0, this->comm);
+    MPI_Reduce(& numberOfWrn, & totalNumberOfWrn, 1, MPI_INT, MPI_SUM, 0, this->comm);
 #endif
     if ( rank == 0 ) {
         // force output
