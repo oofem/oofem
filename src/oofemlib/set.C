@@ -81,6 +81,9 @@ IRResultType Set :: initializeFrom(InputRecord *ir)
     this->elementEdges.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, this->elementEdges, _IFT_Set_elementEdges);
 
+    this->elementSurfaces.clear();
+    IR_GIVE_OPTIONAL_FIELD(ir, this->elementSurfaces, _IFT_Set_elementSurfaces);
+
     return FEMComponent :: initializeFrom(ir);
 }
 
@@ -100,6 +103,9 @@ void Set :: giveInputRecord(DynamicInputRecord &input)
     }
     if ( this->giveEdgeList().giveSize() ) {
         input.setField(this->elementEdges, _IFT_Set_elementEdges);
+    }
+    if ( this->giveSurfaceList().giveSize() ) {
+        input.setField(this->elementSurfaces, _IFT_Set_elementSurfaces);
     }
 }
 
@@ -135,6 +141,8 @@ const IntArray &Set :: giveBoundaryList() { return elementBoundaries; }
 
 const IntArray &Set :: giveEdgeList() { return elementEdges; }
 
+const IntArray &Set :: giveSurfaceList() { return elementSurfaces; }  
+
 const IntArray &Set :: giveNodeList()
 {
     // Lazy evaluation, we compute the unique set of nodes if needed (and store it).
@@ -147,7 +155,8 @@ const IntArray &Set :: giveNodeList()
                 afflictedNodes.at( e->giveNode(inode)->giveNumber() ) = 1;
             }
         }
-
+        
+        /* boundary entities are obsolete, use edges and/or surfaces instead */
         IntArray bNodes;
         for ( int ibnd = 1; ibnd <= this->elementBoundaries.giveSize() / 2; ++ibnd ) {
             Element *e = this->domain->giveElement( this->elementBoundaries.at(ibnd * 2 - 1) );
@@ -163,12 +172,24 @@ const IntArray &Set :: giveNodeList()
         for ( int iedge = 1; iedge <= this->elementEdges.giveSize() / 2; ++iedge ) {
             Element *e = this->domain->giveElement( this->elementEdges.at(iedge * 2 - 1) );
             int edge = this->elementEdges.at(iedge * 2);
-            FEInterpolation3d *fei = static_cast< FEInterpolation3d * >( e->giveInterpolation() );
-            fei->computeLocalEdgeMapping(eNodes, edge);
+            FEInterpolation *fei = e->giveInterpolation();
+            fei->boundaryEdgeGiveNodes(eNodes, edge);
             for ( int inode = 1; inode <= eNodes.giveSize(); ++inode ) {
                 afflictedNodes.at( e->giveNode( eNodes.at(inode) )->giveNumber() ) = 1;
             }
         }
+
+        for ( int isurf = 1; isurf <= this->elementSurfaces.giveSize() / 2; ++isurf ) {
+            Element *e = this->domain->giveElement( this->elementSurfaces.at(isurf * 2 - 1) );
+            int surf = this->elementSurfaces.at(isurf * 2);
+            FEInterpolation *fei = e->giveInterpolation();
+            fei->boundarySurfaceGiveNodes(eNodes, surf);
+            for ( int inode = 1; inode <= eNodes.giveSize(); ++inode ) {
+                afflictedNodes.at( e->giveNode( eNodes.at(inode) )->giveNumber() ) = 1;
+            }
+        }
+
+        
 
         for ( int inode = 1; inode <= this->nodes.giveSize(); ++inode ) {
             afflictedNodes.at( this->nodes.at(inode) ) = 1;

@@ -246,13 +246,6 @@ public:
      */
     //@{
     /**
-     * Gives the boundary nodes for requested boundary number.
-     * Boundaries are defined as the corner nodes for 1D geometries, edges for 2D geometries and surfaces for 3D geometries.
-     * @param answer Array to be filled with the boundary nodes.
-     * @param boundary Boundary number.
-     */
-    virtual void boundaryEdgeGiveNodes(IntArray &answer, int boundary)=0;
-    /**
      * Evaluates the basis functions on the requested boundary.
      * Only basis functions that are nonzero anywhere on the boundary are given. Ordering can be obtained from giveBoundaryNodes.
      * Boundaries are defined as the corner nodes for 1D geometries, edges for 2D geometries and surfaces for 3D geometries.
@@ -290,6 +283,12 @@ public:
      * @param boundary Boundary number.
      */
     virtual IntegrationRule *giveBoundaryEdgeIntegrationRule(int order, int boundary);
+    /**
+     * Gives the boundary nodes for requested boundary number.
+     * @param answer Array to be filled with the boundary nodes.
+     * @param boundary Boundary number.
+     */
+    virtual void boundaryEdgeGiveNodes(IntArray &answer, int boundary)=0;
     //@}
 
     /**@name Surface interpolation services 
