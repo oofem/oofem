@@ -61,6 +61,10 @@
  #include <slepceps.h>
 #endif
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
 #endif
@@ -182,6 +186,17 @@ int main(int argc, char *argv[])
                 parallelFlag = true;
 #else
                 fprintf(stderr, "\nCan't use -p, not compiled with parallel support\a\n\n");
+                exit(EXIT_FAILURE);
+#endif
+            } else if ( strcmp(argv [i], "-t") == 0) {
+#ifdef _OPENMP            
+                if ( i + 1 < argc ) {
+                    i++;
+                    int numberOfThreads = strtol(argv [ i ], NULL, 10);
+                    omp_set_num_threads (numberOfThreads);
+                }
+#else
+                fprintf(stderr, "\nCan't use -t, not compiled with OpenMP support\a\n\n");
                 exit(EXIT_FAILURE);
 #endif
             } else { // Arguments not handled by OOFEM is to be passed to PETSc
