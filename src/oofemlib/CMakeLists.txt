@@ -58,6 +58,10 @@ if (USE_SLEPC)
     list (APPEND core_unsorted slepcsolver.C)
 endif ()
 
+if (USE_SUPERLU_MT)
+  list (APPEND core_unsorted superlusolver.C)
+endif ()
+
 
 set (core_oofeg oofeggraphiccontext.C)
 

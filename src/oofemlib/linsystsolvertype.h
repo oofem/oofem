@@ -51,7 +51,8 @@ enum LinSystSolverType {
     ST_Petsc  = 3,
     ST_DSS    = 4,
     ST_Feti   = 5,
-    ST_MKLPardiso = 6
+    ST_MKLPardiso = 6,
+    ST_SuperLU_MT = 7
 };
 } // end namespace oofem
 #endif // linsystsolvertype_h

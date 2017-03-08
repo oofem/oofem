@@ -56,6 +56,7 @@ set (MY_PETSC_ARCH CACHE STRING "Manual PETSc arch name (e.g. linux-gnu-cxx-opt)
 set (MPI_DIR CACHE PATH "Manual MPI directory")
 set (VTK_DIR CACHE PATH "Manual VTK directory (For binary VTU export)")
 set (LAPACK_DIR CACHE PATH "Manual LAPACK directory")
+set (SUPERLU_MT_DIR CACHE PATH "Manual SuperLU_MT directory")
 set (SPOOLES_DIR CACHE PATH "Manual SPOOLES directory")
 set (ELIXIR_DIR CACHE PATH "Manual Elixir directory (OOFEG only)")
 set (CKIT_DIR CACHE PATH "Manual CKit directory (OOFEG only)")
@@ -86,6 +87,7 @@ option (USE_MKLPARDISO "Enable MKLPARDISO solver support" OFF)
 option (USE_PETSC "Enable PETSc support (required for parallel)" OFF)
 option (USE_SLEPC "Enable SLEPc support" OFF)
 option (USE_LAPACK "Use LAPACK" OFF)
+option (USE_SUPERLU_MT "Use SUPERLU_MT" OFF)
 # Other external libraries
 option (USE_TRIANGLE "Compile with Triangle bindings" OFF)
 option (USE_VTK "Enable VTK (for exporting binary VTU-files)" OFF)
@@ -242,6 +244,32 @@ if (USE_LAPACK)
     list (APPEND EXT_LIBS ${LAPACK_LIBRARIES})
     list (APPEND MODULE_LIST "LAPACK")
     add_definitions (-D__LAPACK_MODULE)
+endif ()
+
+
+## There is a conflict on set.h as defined by libstdc and superlu_mt 3.1
+## Therefore it is assumed that superlu include files
+## are included using #include "SUPERLU_MT/include"
+## The ${SUPERLU_MT_DIR} is added into compiler include path
+## Therefore SUPERLU_MT/include has to be manually added pointing to
+## ${SUPERLU_MT__DIR}/src directory
+if (USE_SUPERLU_MT)
+    set (CMAKE_LIBRARY_DIR ${SUPERLU_MT_DIR})
+    #find_package (SuperLU REQUIRED)
+    find_package(BLAS REQUIRED)
+    find_library (SUPERLU_MT_LIB superlu_mt_OPENMP PATH "${SUPERLU_MT_DIR}/lib")
+    list (APPEND EXT_LIBS ${SUPERLU_MT_LIB} ${BLAS_LIBRARIES})
+    #set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${BLAS_LINKER_FLAGS}")
+    list (APPEND MODULE_LIST "SuperLU_MT")
+    include_directories("${SUPERLU_MT_DIR}")
+    set (CMAKE_REQUIRED_INCLUDES "${SUPERLU_MT_DIR}")
+    add_definitions (-D__SuperLU_MT_MODULE)
+    check_include_file_cxx ("SUPERLU_MT/include/slu_mt_ddefs.h" HAVE_SUPERLU_MT_DDEFS_H)
+    if (NOT HAVE_SUPERLU_MT_DDEFS_H)
+        message (FATAL_ERROR "Necessary SUPERLU_MT headers not found; refer to CMakeLists.txt for details")
+    endif ()
+
+
 endif ()
 
 if (USE_VTK)
