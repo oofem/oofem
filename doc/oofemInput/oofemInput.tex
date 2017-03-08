@@ -1527,24 +1527,24 @@ with solver parameters related to specific solver.
 \begin{table}[ht]
 \begin{center}
 %%\scalebox{0.50}{
-\begin{tabular}{|l|c|c|c|c|c|c|}
+\begin{tabular}{|l|c|c|c|c|c|c|c|c|}
 \hline
 Storage format & id & \multicolumn{5}{c|}{Sparse solver, \param{lstype}} \\
 \hline
 & \param{smtype} & \tiny{Direct (0)} &\tiny{IML (1)}
- &\tiny{Spooles (2)}& \tiny{Petsc (3)}& \tiny{DSS (4)}\\
+ &\tiny{Spooles (2)}& \tiny{Petsc (3)}& \tiny{DSS (4)}& \tiny{MKLPardiso (6)}& \tiny{SuperLU\_MT (7)}\\
 \hline
-\small{SMT\_Skyline}       & 0&+&+& & & \\
-\small{SMT\_SkylineU}      & 1&+&+& & & \\
-\small{SMT\_CompCol}       & 2& &+& & & \\
-\small{SMT\_DynCompCol}    & 3& &+& & & \\
-\small{SMT\_SymCompCol}    & 4& &+& & & \\
-\small{SMT\_DynCompRow}    & 5& &+& & & \\
-\small{SMT\_SpoolesMtrx}   & 6& & &+& & \\
-\small{SMT\_PetscMtrx }    & 7& & & &+& \\
-\small{SMT\_DSS\_sym\_LDL} & 8& & & & &+\\
-\small{SMT\_DSS\_sym\_LL}  & 9& & & & &+\\
-\small{SMT\_DSS\_unsym\_LU}&10& & & & &+\\
+\small{SMT\_Skyline}       & 0&+&+& & & & &\\
+\small{SMT\_SkylineU}      & 1&+&+& & & & & \\
+\small{SMT\_CompCol}       & 2& &+& & & &+&+\\
+\small{SMT\_DynCompCol}    & 3& &+& & & & & \\
+\small{SMT\_SymCompCol}    & 4& &+& & & & & \\
+\small{SMT\_DynCompRow}    & 5& &+& & & & & \\
+\small{SMT\_SpoolesMtrx}   & 6& & &+& & & & \\
+\small{SMT\_PetscMtrx }    & 7& & & &+& & & \\
+\small{SMT\_DSS\_sym\_LDL} & 8& & & & &+ & &\\
+\small{SMT\_DSS\_sym\_LL}  & 9& & & & &+ & &\\
+\small{SMT\_DSS\_unsym\_LU}&10& & & & &+ & &\\
 \hline
 \end{tabular}
 %%}
@@ -1570,6 +1570,8 @@ ST\_IML     &1& \optField{stype}{in} \field{lstol}{rn} \field{lsiter}{in}
 ST\_Spooles &2&  \optField{msglvl}{in} \optField{msgfile}{s}\\
 ST\_Petsc   &3& see Petsc manual, for details\footnotemark\\
 ST\_DSS     &4& \\
+ST\_MKLPardiso&6&\\
+ST\_SuperLU\_MT&7\\
 \hline
 \end{tabular}
 \caption{Solver parameters.}
