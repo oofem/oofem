@@ -295,6 +295,16 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
     this->assembleLoadVector(loadVector, domain, VM_Total, tStep);
 
     //
+    // contribution of internal, viscous and inertia forces due to prescribed (dirichlet) BCs
+    //
+    {
+      FloatArray bcLoadVector;
+      this->assembleDirichletBcRhsVector(bcLoadVector, domain, tStep);
+      loadVector.subtract(bcLoadVector);
+    }
+    
+
+    //
     // Assemble effective load vector (rhs).
     //
 
@@ -476,6 +486,71 @@ DIIDynamic :: assembleLoadVector(FloatArray &_loadVector, Domain *domain, ValueM
     this->updateSharedDofManagers(_loadVector, EModelDefaultEquationNumbering(), LoadExchangeTag);
 }
 
+
+void
+DIIDynamic :: assembleDirichletBcRhsVector (FloatArray& answer, Domain* d, TimeStep *tStep)
+{
+  IntArray loc, dofids;
+  int nelem = d->giveNumberOfElements();
+  FloatArray rp, charVec;
+  FloatMatrix k,m, R;
+  FloatMatrix capacity;
+
+  answer.resize( this->giveNumberOfDomainEquations( d->giveNumber(), EModelDefaultEquationNumbering() ) );
+  answer.zero();
+  
+  for ( int ielem = 1; ielem <= nelem; ielem++ ) {
+    Element *element = d->giveElement(ielem);
+    
+    element->giveElementDofIDMask(dofids);
+    element->giveLocationArray(loc, EModelDefaultEquationNumbering());
+    element->computeVectorOfPrescribed(dofids, VM_Total, tStep, rp);
+    int rotFlag = element->giveRotationMatrix(R);
+    
+    if ( rp.containsOnlyZeroes() ) {
+      continue;
+    } else {
+      element->giveCharacteristicMatrix(k, TangentStiffnessMatrix, tStep);
+      charVec.beProductOf(k, rp);
+      if (rotFlag) charVec.rotatedWith(R, 't');
+      answer.assemble(charVec, loc);
+    }
+
+    // add acceleration forces due to BCs
+    element->computeVectorOfPrescribed(dofids, VM_Acceleration, tStep, rp);
+    if ( rp.containsOnlyZeroes() ) {
+      continue;
+    } else {
+      element->giveCharacteristicMatrix(m, MassMatrix, tStep);
+      charVec.beProductOf(m, rp);
+      if (rotFlag) charVec.rotatedWith(R, 't');
+      answer.assemble(charVec, loc);
+    }
+
+    // add dumping forces due to BCs
+    element->computeVectorOfPrescribed(dofids, VM_Velocity, tStep, rp);
+    if ( rp.containsOnlyZeroes() ) {
+      continue;
+    } else {
+      if (!k.isNotEmpty()) element->giveCharacteristicMatrix(k, TangentStiffnessMatrix, tStep);
+      if (!m.isNotEmpty()) element->giveCharacteristicMatrix(m, MassMatrix, tStep);
+      k.times(this->delta);
+      m.times(this->eta);
+      m.add(k);
+      charVec.beProductOf(m, rp);
+      if (rotFlag) charVec.rotatedWith(R, 't');
+      answer.assemble(charVec, loc);
+    }
+    
+    
+
+    
+  } // end element loop
+
+}
+
+
+  
 void
 DIIDynamic :: determineConstants(TimeStep *tStep)
 {
