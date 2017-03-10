@@ -156,7 +156,7 @@ private:
 
     virtual void computeSurfaceNMatrix(FloatMatrix &answer, int boundaryID, const FloatArray &lcoords);
     virtual void computeEdgeNMatrix(FloatMatrix &answer, int boundaryID, const FloatArray &lcoords);
- 
+    virtual void setupIRForMassMtrxIntegration(IntegrationRule &iRule);
 };
 } // end namespace oofem
 #endif // mitc4_h

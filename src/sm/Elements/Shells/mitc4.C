@@ -1043,6 +1043,11 @@ MITC4Shell :: givedNdx(FloatArray &hkx, FloatArray &hky, FloatArray coords)
     return;
 }
 
+void
+MITC4Shell :: setupIRForMassMtrxIntegration(IntegrationRule &iRule)
+{
+    iRule.setUpIntegrationPoints( this->giveIntegrationDomain(), nPointsXY, nPointsZ, this->giveMaterialMode() );
+}
 
 int
 MITC4Shell :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
@@ -1402,5 +1407,4 @@ MITC4Shell :: computeSurfaceNMatrix(FloatMatrix &answer, int boundaryID, const F
     this->giveInterpolation()->boundarySurfaceEvalN( n_vec, boundaryID, lcoords, FEIElementGeometryWrapper(this) );
     answer.beNMatrixOf(n_vec, 6);
 }
-
 } // end namespace oofem
