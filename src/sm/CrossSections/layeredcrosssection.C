@@ -275,16 +275,17 @@ LayeredCrossSection :: giveGeneralizedStress_Plate(FloatArray &answer, GaussPoin
             double s = sin(rot * M_PI / 180.);
 
             FloatArray rotStress;
-            FloatArray rotStrain(5);
-            rotStrain.at(1) = c * c * strain.at(1) - c *s *strain.at(5) + s *s *strain.at(2);
-            rotStrain.at(2) = c * c * strain.at(2) + c *s *strain.at(5) + s *s *strain.at(1);
-            rotStrain.at(3) = c * strain.at(3) + s *strain.at(4);
-            rotStrain.at(4) = c * strain.at(4) - s *strain.at(3);
-            rotStrain.at(5) = ( c * c - s * s ) * strain.at(5) + c * s * ( strain.at(1) - strain.at(2) );
+	    FloatArray rotStrain = {
+	        c *c * layerStrain.at(1) - c * s * layerStrain.at(5) + s * s * layerStrain.at(2),
+                c * c * layerStrain.at(2) + c * s * layerStrain.at(5) + s * s * layerStrain.at(1),
+                c * layerStrain.at(3) + s * layerStrain.at(4),
+                c * layerStrain.at(4) - s * layerStrain.at(3),
+                ( c * c - s * s ) * layerStrain.at(5) + c * s * ( layerStrain.at(1) - layerStrain.at(2) ),
+            }; 
 
-            layerMat->giveRealStressVector_PlateLayer(rotStress, gp, rotStrain, tStep);
+            layerMat->giveRealStressVector_PlateLayer(rotStress, layerGp, rotStrain, tStep);
 
-            answer = {
+            reducedLayerStress = {
                 c *c * rotStress.at(1) + 2 * c * s * rotStress.at(5) + s * s * rotStress.at(2),
                 c * c * rotStress.at(2) - 2 * c * s * rotStress.at(5) + s * s * rotStress.at(1),
                 c * rotStress.at(3) - s * rotStress.at(4),
@@ -353,16 +354,16 @@ LayeredCrossSection :: giveGeneralizedStress_Shell(FloatArray &answer, GaussPoin
 
             FloatArray rotStress;
             FloatArray rotStrain = {
-                c *c * strain.at(1) - c * s * strain.at(5) + s * s * strain.at(2),
-                c * c * strain.at(2) + c * s * strain.at(5) + s * s * strain.at(1),
-                c * strain.at(3) + s * strain.at(4),
-                c * strain.at(4) - s * strain.at(3),
-                ( c * c - s * s ) * strain.at(5) + c * s * ( strain.at(1) - strain.at(2) ),
+                c *c * layerStrain.at(1) - c * s * layerStrain.at(5) + s * s * layerStrain.at(2),
+                c * c * layerStrain.at(2) + c * s * layerStrain.at(5) + s * s * layerStrain.at(1),
+                c * layerStrain.at(3) + s * layerStrain.at(4),
+                c * layerStrain.at(4) - s * layerStrain.at(3),
+                ( c * c - s * s ) * layerStrain.at(5) + c * s * ( layerStrain.at(1) - layerStrain.at(2) ),
             };
 
-            layerMat->giveRealStressVector_PlateLayer(rotStress, gp, rotStrain, tStep);
+            layerMat->giveRealStressVector_PlateLayer(rotStress, layerGp, rotStrain, tStep);
 
-            answer = {
+            reducedLayerStress = {
                 c *c * rotStress.at(1) + 2 * c * s * rotStress.at(5) + s * s * rotStress.at(2),
                 c * c * rotStress.at(2) - 2 * c * s * rotStress.at(5) + s * s * rotStress.at(1),
                 c * rotStress.at(3) - s * rotStress.at(4),
