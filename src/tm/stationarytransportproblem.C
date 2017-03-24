@@ -163,6 +163,8 @@ TimeStep *StationaryTransportProblem :: giveNextStep()
 
 void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 {
+
+
     //
     // creates system of governing eq's and solves them at given time step
     //
@@ -188,6 +190,15 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
                             EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
     }
+
+    Domain *domain = this->giveDomain(1);
+    // update element state according to given ic
+    for ( auto &elem : domain->giveElements() ) {
+        TransportElement *element = static_cast< TransportElement * >( elem.get() );
+        element->updateInternalState(tStep);
+        element->updateYourself(tStep);
+    }
+
 
     internalForces.resize(neq);
 

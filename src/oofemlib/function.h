@@ -39,6 +39,7 @@
 #include "valuemodetype.h"
 #include "intarray.h"
 #include "floatarray.h"
+#include "gausspoint.h"
 
 #include <map>
 #include <algorithm>
@@ -87,6 +88,9 @@ public:
 class OOFEM_EXPORT Function : public FEMComponent
 {
 public:
+    Domain *funcDomain;
+    int parameterType;
+
     /**
      * Constructor. Creates load time function with given number, belonging to given domain.
      * @param n Load time function number.
@@ -110,7 +114,7 @@ public:
      * @param valDict Map with inputs.
      * @param answer Function value.
      */
-    virtual void evaluate(FloatArray &answer, const std :: map< std :: string, FunctionArgument > &valDict);
+    virtual void evaluate(FloatArray &answer, const std :: map< std :: string, FunctionArgument > &valDict, GaussPoint *gp=NULL, double param=0.);
     /**
      * Returns the (scalar) value of the function for given input.
      * @param valDict Map with inputs.
@@ -136,6 +140,8 @@ public:
      * @return @f$ f''(t) @f$.
      */
     virtual double evaluateAccelerationAtTime(double t) = 0;
+
+    double giveFunctionParameter(int paramID);
 };
 } // end namespace oofem
 #endif // function_h
