@@ -512,7 +512,7 @@ DKTPlate3d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lco
     double l1 = lcoords.at(1);
     double l2 = lcoords.at(2);
     double l3 = 1. - l2 - l1;
-
+    
     answer.resize(3);
     for ( int _i = 1; _i <= 3; _i++ ) {
         answer.at(_i) = l1 * this->giveNode(1)->giveCoordinate(_i) + l2 *this->giveNode(2)->giveCoordinate(_i) + l3 *this->giveNode(3)->giveCoordinate(_i);

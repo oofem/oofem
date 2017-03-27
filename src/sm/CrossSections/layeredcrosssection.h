@@ -118,6 +118,7 @@ public:
 
     virtual void createMaterialStatus(GaussPoint &iGP); // ES
 
+    //Create slave integration points
     virtual int setupIntegrationPoints(IntegrationRule &irule, int npoints, Element *element);
 
     virtual void giveRealStress_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
@@ -264,7 +265,7 @@ public:
      * Computes full 3D strain vector in element layer.
      * This function is necessary if layered cross section is specified..
      * @param answer Full layer strain vector.
-     * @param masterGpStrain Generalized strain at maters gauss point.
+     * @param masterGpStrain Generalized strain at master gauss point.
      * @param masterGp Element integration point.
      * @param slaveGp Slave integration point representing particular layer.
      * @param tStep Time step.

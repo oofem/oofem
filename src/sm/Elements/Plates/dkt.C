@@ -139,6 +139,7 @@ void
 DKTPlate :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 // Returns the [5x9] strain-displacement matrix {B} of the receiver,
 // evaluated at gp.
+// strain components xx, yy, zz, xz, yz
 {
     // get node coordinates
     double x1, x2, x3, y1, y2, y3, z1, z2, z3;
@@ -497,8 +498,8 @@ DKTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
         answer.at(1) = 0.0; // nx
         answer.at(2) = 0.0; // ny
         answer.at(3) = 0.0; // nz
-        answer.at(4) = help.at(5); // vyz
-        answer.at(5) = help.at(4); // vxz
+        answer.at(4) = help.at(5); // vyz in answer
+        answer.at(5) = help.at(4); // vxz in answer
         answer.at(6) = 0.0; // vxy
         return 1;
     } else if ( type == IST_ShellMomentumTensor || type == IST_ShellCurvatureTensor ) {

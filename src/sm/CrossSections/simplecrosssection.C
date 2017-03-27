@@ -196,7 +196,7 @@ void
 SimpleCrossSection :: giveGeneralizedStress_Plate(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
     /**Note: (by bp): This assumes that the behaviour is elastic
-     * there exist a nuumber of nonlinear integral material models for beams/plates/shells
+     * there exist a number of nonlinear integral material models for beams/plates/shells
      * defined directly in terms of integral forces and moments and corresponding
      * deformations and curvatures. This would require to implement support at material model level.
      * Mikael: See earlier response to comment
