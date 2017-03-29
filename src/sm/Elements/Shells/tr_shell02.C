@@ -39,6 +39,7 @@
 #include "gausspoint.h"
 #include "classfactory.h"
 #include "node.h"
+#include "load.h"
 
 #ifdef __OOFEG
  #include "node.h"
@@ -219,11 +220,59 @@ TR_SHELL02 :: computeVolumeAround(GaussPoint *gp)
     return plate->computeVolumeAround(gp);
 }
 
+void
+TR_SHELL02 :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode)
+// We need to separate integration for membrane and plate.
+{
+    double dens, dV;
+    FloatArray force, ntf;
+    FloatMatrix n, T;
+
+    if ( force.giveSize() ) {
+        return;
+    }
+    
+    if ( ( forLoad->giveBCGeoType() != BodyLoadBGT ) || ( forLoad->giveBCValType() != ForceLoadBVT ) ) {
+        OOFEM_ERROR("unknown load type");
+    }
+
+    // note: force is assumed to be in global coordinate system.
+    forLoad->computeComponentArrayAt(force, tStep, mode);
+    // transform from global to element local c.s
+    if ( this->computeLoadGToLRotationMtrx(T) ) {
+        force.rotatedWith(T, 'n');
+    }
+
+    answer.resize(18);
+    answer.zero();
+    IntegrationRule *membraneiRule = membrane->giveDefaultIntegrationRulePtr();
+    IntegrationRule *plateiRule = plate->giveDefaultIntegrationRulePtr();
+    IntegrationRule *iRule;
+    IntArray dofs = forLoad->giveDofIDs();
+    
+    
+    for (int dof : dofs ){
+        if(dof==D_u || dof==D_v){
+            iRule = membraneiRule;
+        } else {
+            iRule = plateiRule;
+        }
+        for ( GaussPoint *gp : *iRule ) {
+            this->computeNmatrixAt(gp->giveSubPatchCoordinates(), n);
+            dV  = this->computeVolumeAround(gp);
+            dens = this->giveCrossSection()->give('d', gp);
+            //ntf.beTProductOf(n, force);
+            //answer.add(dV * dens, ntf);
+        }
+    }
+ 
+}
+
 int
 TR_SHELL02 :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     if ( type == IST_ShellForceTensor || type == IST_ShellStrainTensor ||
-        type == IST_ShellMomentumTensor || type == IST_ShellCurvatureTensor ) {
+        type == IST_ShellMomentTensor || type == IST_ShellCurvatureTensor ) {
         FloatArray aux;
         GaussPoint *membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
         GaussPoint *plateGP = plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
@@ -285,8 +334,8 @@ TR_SHELL02 :: printOutputAt(FILE *file, TimeStep *tStep)
         fprintf(file, "\n              stresses   ");
         for ( auto &val : v ) fprintf(file, " %.4e", val);
 
-        plate->giveIPValue(v, gp, IST_ShellMomentumTensor, tStep);
-        membrane->giveIPValue(aux, membraneGP, IST_ShellMomentumTensor, tStep);
+        plate->giveIPValue(v, gp, IST_ShellMomentTensor, tStep);
+        membrane->giveIPValue(aux, membraneGP, IST_ShellMomentTensor, tStep);
         v.add(aux);
 
         fprintf(file, "\n              moments    ");
@@ -343,7 +392,7 @@ TR_SHELL02 :: ZZErrorEstimatorI_giveIntegrationRule()
 void
 TR_SHELL02 :: ZZErrorEstimatorI_computeLocalStress(FloatArray &answer, FloatArray &sig)
 {
-    // sig is global ShellForceMomentumTensor
+    // sig is global ShellForceMomentTensor
     FloatMatrix globTensor(3, 3);
     const FloatMatrix *GtoLRotationMatrix = plate->computeGtoLRotationMatrix();
     FloatMatrix LtoGRotationMatrix;
@@ -528,7 +577,7 @@ TR_SHELL02 :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
         double tot_w = 0.;
         FloatArray a, v;
         for ( GaussPoint *gp: *plate->giveDefaultIntegrationRulePtr() ) {
-            this->giveIPValue(a, gp, IST_ShellMomentumTensor, tStep);
+            this->giveIPValue(a, gp, IST_ShellMomentTensor, tStep);
             v.add(gp->giveWeight(), a);
             tot_w += gp->giveWeight();
         }

@@ -223,7 +223,7 @@ LinQuad3DPlaneStress :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor
         answer.at(2, 2) = charVect.at(2);
         answer.at(1, 2) = charVect.at(3);
         answer.at(2, 1) = charVect.at(3);
-    } else if ( ( type == LocalMomentumTensor ) || ( type == GlobalMomentumTensor ) ) {
+    } else if ( ( type == LocalMomentTensor ) || ( type == GlobalMomentTensor ) ) {
     } else if ( ( type == LocalStrainTensor ) || ( type == GlobalStrainTensor ) ) {
         //this->computeStrainVector(charVect, gp, tStep);
         charVect = ms->giveStrainVector();
@@ -238,7 +238,7 @@ LinQuad3DPlaneStress :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor
         exit(1);
     }
 
-    if ( ( type == GlobalForceTensor  ) || ( type == GlobalMomentumTensor  ) ||
+    if ( ( type == GlobalForceTensor  ) || ( type == GlobalMomentTensor  ) ||
         ( type == GlobalStrainTensor ) || ( type == GlobalCurvatureTensor ) ) {
         this->computeGtoLRotationMatrix();
         answer.rotatedWith(* GtoLRotationMatrix);
@@ -273,7 +273,7 @@ LinQuad3DPlaneStress :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
         answer.at(6) = c * globTensor.at(2, 3); //yz
 
         return 1;
-    } else if ( type == IST_ShellMomentumTensor || type == IST_ShellCurvatureTensor ) {
+    } else if ( type == IST_ShellMomentTensor || type == IST_ShellCurvatureTensor ) {
         answer.clear();
         return 1;
     } else {
@@ -310,7 +310,7 @@ LinQuad3DPlaneStress :: printOutputAt(FILE *file, TimeStep *tStep)
             fprintf(file, "\n              forces     ");
             for ( auto &val : v ) fprintf(file, " %.4e", val);
             /*
-            this->giveIPValue(v, gp, IST_ShellMomentumTensor, tStep);
+            this->giveIPValue(v, gp, IST_ShellMomentTensor, tStep);
             fprintf(file, "\n              moments    ");
             for ( auto &val : v ) fprintf(file, " %.4e", val);
             */

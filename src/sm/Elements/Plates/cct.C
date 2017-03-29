@@ -465,8 +465,8 @@ CCTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
         answer.at(5) = help.at(4); // vxz
         answer.at(6) = 0.0; // vxy
         return 1;
-    } else if ( type == IST_ShellMomentumTensor || type == IST_ShellCurvatureTensor ) {
-        if ( type == IST_ShellMomentumTensor ) {
+    } else if ( type == IST_ShellMomentTensor || type == IST_ShellCurvatureTensor ) {
+        if ( type == IST_ShellMomentTensor ) {
             help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         } else {
             help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
@@ -493,7 +493,7 @@ CCTPlate :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int n
                                                        InternalStateType type, TimeStep *tStep)
 {
     GaussPoint *gp;
-    if ( ( type == IST_ShellForceTensor ) || ( type == IST_ShellMomentumTensor ) ||
+    if ( ( type == IST_ShellForceTensor ) || ( type == IST_ShellMomentTensor ) ||
         ( type == IST_ShellStrainTensor )  || ( type == IST_ShellCurvatureTensor ) ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
         this->giveIPValue(answer, gp, type, tStep);

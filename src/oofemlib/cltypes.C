@@ -98,8 +98,8 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_ShellCurvatureTensor:
     case IST_ForceTensorTemp:
     ///@todo "Momentum" should be renamed "Moment"
-    case IST_ShellMomentumTensor:
-    case IST_MomentumTensorTemp:
+    case IST_ShellMomentTensor:
+    case IST_MomentTensorTemp:
     case IST_ShellForceTensor:
     ///@todo Should be have these are S3E or just S3?
     case IST_AutogenousShrinkageTensor:
@@ -119,7 +119,7 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     //case IST_MaterialOrientation:
         return ISVT_TENSOR_G;
 
-    case IST_BeamForceMomentumTensor:
+    case IST_BeamForceMomentTensor:
     case IST_BeamStrainCurvatureTensor:
     case IST_PrincipalStressTensor:
     case IST_PrincipalStressTempTensor:

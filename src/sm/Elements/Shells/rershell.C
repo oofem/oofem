@@ -539,7 +539,7 @@ RerShell :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gauss
         answer.at(3, 1) = stress.at(7);
         answer.at(2, 3) = stress.at(8);
         answer.at(3, 2) = stress.at(8);
-    } else if ( ( type == LocalMomentumTensor ) || ( type == GlobalMomentumTensor ) ) {
+    } else if ( ( type == LocalMomentTensor ) || ( type == GlobalMomentTensor ) ) {
         FloatArray stress, strain;
         this->computeStrainVector(strain, gp, tStep);
         this->computeStressVector(stress, strain, gp, tStep);
@@ -571,7 +571,7 @@ RerShell :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gauss
         exit(1);
     }
 
-    if ( ( type == GlobalForceTensor ) || ( type == GlobalMomentumTensor ) ||
+    if ( ( type == GlobalForceTensor ) || ( type == GlobalMomentTensor ) ||
         ( type == GlobalStrainTensor ) || ( type == GlobalCurvatureTensor ) ) {
         this->computeGtoLRotationMatrix();
         answer.rotatedWith(GtoLRotationMatrix);
@@ -636,7 +636,7 @@ RerShell :: printOutputAt(FILE *file, TimeStep *tStep)
                 " %.4e %.4e %.4e %.4e %.4e %.4e ",
                 v.at(1), v.at(2), v.at(3), v.at(4), v.at(5), v.at(6) );
 
-        this->giveIPValue(v, gp, IST_ShellMomentumTensor, tStep);
+        this->giveIPValue(v, gp, IST_ShellMomentTensor, tStep);
         fprintf(file, "\n              moments    ");
         // m_x, m_y, m_z, m_yz, m_xz, m_xy (global)
         fprintf( file,
@@ -688,9 +688,9 @@ RerShell :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
         answer.at(6) = 2*globTensor.at(2, 3); //yz
 
         return 1;
-    } else if ( type == IST_ShellMomentumTensor || type == IST_ShellForceTensor ) {
-        if ( type == IST_ShellMomentumTensor ) {
-            cht = GlobalMomentumTensor;
+    } else if ( type == IST_ShellMomentTensor || type == IST_ShellForceTensor ) {
+        if ( type == IST_ShellMomentTensor ) {
+            cht = GlobalMomentTensor;
         } else {
             cht = GlobalForceTensor;
         }

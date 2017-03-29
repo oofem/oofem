@@ -1609,7 +1609,7 @@ void beamForcePlot(Widget w, XtPointer ptr, XtPointer call_data)
 
     //deleteLayerGraphics(OOFEG_VARPLOT_PATTERN_LAYER);
     ac = * ( ( int * ) ptr );
-    gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setInternalStateType(IST_ShellMomentumTensor);
+    gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setInternalStateType(IST_ShellMomentTensor);
     gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setIntVarIndx(ac);
     gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setPlotMode(OGC_scalarPlot);
 

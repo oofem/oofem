@@ -882,7 +882,7 @@ MITC4Shell :: printOutputAt(FILE *file, TimeStep *tStep)
             fprintf(file, " %.4e", val);
         }
 
-        this->giveMidplaneIPValue(v, i, IST_ShellMomentumTensor, tStep);
+        this->giveMidplaneIPValue(v, i, IST_ShellMomentTensor, tStep);
         fprintf(file, "\n          moments    ");
         for ( auto &val : v ) {
             fprintf(file, " %.4e", val);
@@ -926,7 +926,7 @@ MITC4Shell :: giveMidplaneIPValue(FloatArray &answer, int gpXY, InternalStateTyp
 {
     GaussPoint *gp = NULL;
 
-    if ( type == IST_ShellMomentumTensor || type == IST_ShellForceTensor ) {
+    if ( type == IST_ShellMomentTensor || type == IST_ShellForceTensor ) {
         double J, thickness, z, w;
         FloatArray mLocal;
         mLocal.resize(6);
@@ -936,7 +936,7 @@ MITC4Shell :: giveMidplaneIPValue(FloatArray &answer, int gpXY, InternalStateTyp
             gp = integrationRulesArray [ 0 ]->getIntegrationPoint(nPointsZ * gpXY + i);
             thickness = this->giveCrossSection()->give(CS_Thickness, gp->giveGlobalCoordinates(), this, false);
             J = thickness / 2.0;
-            if (  type == IST_ShellMomentumTensor ) {
+            if (  type == IST_ShellMomentTensor ) {
                 z = gp->giveNaturalCoordinates().at(3) * ( thickness / 2 );
             } else if (  type == IST_ShellForceTensor ) {
                 z = 1;
@@ -1083,7 +1083,7 @@ MITC4Shell :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
         answer.at(6) = globTensor.at(1, 2); //xy
 
         return 1;
-    } else if ( type == IST_ShellMomentumTensor || type == IST_ShellForceTensor || type == IST_ShellCurvatureTensor || type == IST_ShellStrainTensor ) {
+    } else if ( type == IST_ShellMomentTensor || type == IST_ShellForceTensor || type == IST_ShellCurvatureTensor || type == IST_ShellStrainTensor ) {
         int gpnXY = ( gp->giveNumber() - 1 ) / 2;
         this->giveMidplaneIPValue(answer, gpnXY, type, tStep);
 

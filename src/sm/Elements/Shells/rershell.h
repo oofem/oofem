@@ -51,8 +51,8 @@ enum CharTensor {
 
     LocalForceTensor,
     GlobalForceTensor,
-    LocalMomentumTensor,
-    GlobalMomentumTensor
+    LocalMomentTensor,
+    GlobalMomentTensor
 };
 #endif
 

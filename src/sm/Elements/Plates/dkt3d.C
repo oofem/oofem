@@ -190,7 +190,7 @@ DKTPlate3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gau
         answer.at(3, 1) = charVect.at(4);
         answer.at(2, 3) = charVect.at(5);
         answer.at(3, 2) = charVect.at(5);
-    } else if ( ( type == LocalMomentumTensor ) || ( type == GlobalMomentumTensor ) ) {
+    } else if ( ( type == LocalMomentTensor ) || ( type == GlobalMomentTensor ) ) {
         //this->computeStressVector(charVect, gp, tStep);
         charVect = ms->giveStressVector();
 
@@ -219,7 +219,7 @@ DKTPlate3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gau
         exit(1);
     }
 
-    if ( ( type == GlobalForceTensor  ) || ( type == GlobalMomentumTensor  ) ||
+    if ( ( type == GlobalForceTensor  ) || ( type == GlobalMomentTensor  ) ||
         ( type == GlobalStrainTensor ) || ( type == GlobalCurvatureTensor ) ) {
         this->computeGtoLRotationMatrix();
         answer.rotatedWith(GtoLRotationMatrix);
@@ -252,9 +252,9 @@ DKTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
         answer.at(6) = 2*globTensor.at(2, 3); //yz
 
         return 1;
-    } else if ( type == IST_ShellMomentumTensor || type == IST_ShellForceTensor ) {
-        if ( type == IST_ShellMomentumTensor ) {
-            cht = GlobalMomentumTensor;
+    } else if ( type == IST_ShellMomentTensor || type == IST_ShellForceTensor ) {
+        if ( type == IST_ShellMomentTensor ) {
+            cht = GlobalMomentTensor;
         } else {
             cht = GlobalForceTensor;
         }
@@ -386,7 +386,7 @@ DKTPlate3d :: printOutputAt(FILE *file, TimeStep *tStep)
             fprintf(file, "\n              stresses   ");
             for ( auto &val : v ) fprintf(file, " %.4e", val);
 
-            this->giveIPValue(v, gp, IST_ShellMomentumTensor, tStep);
+            this->giveIPValue(v, gp, IST_ShellMomentTensor, tStep);
             fprintf(file, "\n              moments    ");
             for ( auto &val : v ) fprintf(file, " %.4e", val);
 
