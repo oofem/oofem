@@ -121,6 +121,22 @@ GaussPoint *GaussPoint :: giveSlaveGaussPoint(int index)
     return gaussPoints [ index ];
 }
 
+bool GaussPoint :: hasSlaveGaussPoint() {
+    if ( this->gaussPoints.size() != 0 ) {// layered material
+        return true;
+    }
+    return false;
+}
+
+size_t GaussPoint :: findFirstIndexOfSlaveGaussPoint(GaussPoint *gp) {
+    std::vector< GaussPoint * >::iterator it;
+    it = find( gaussPoints.begin(), gaussPoints.end(), gp );
+    if ( it != gaussPoints.end() ) {
+        return it - gaussPoints.begin();
+    } else {
+        OOFEM_ERROR("Slave Gauss point not found.");
+    }
+}
 
 void GaussPoint :: updateYourself(TimeStep *tStep)
 // Performs end-of-step updates.

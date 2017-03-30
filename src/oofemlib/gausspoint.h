@@ -234,7 +234,16 @@ public:
      * @return Slave gp.
      */
     GaussPoint *giveSlaveGaussPoint(int index);
+   
     /**
+     * True if gauss point has slave points. Otherwise false.
+     */
+    bool hasSlaveGaussPoint();
+    /**
+     * Finds index of slave point in an array. Returns position. If not found, returns error.
+     */
+    size_t findFirstIndexOfSlaveGaussPoint(GaussPoint *gp);
+     /**
      * Prints output of receiver to file. Corresponding printOutputAt  function for
      * associated status is called. The same function is also invoked for all available
      * slaves of receiver.

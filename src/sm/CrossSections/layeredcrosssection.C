@@ -918,13 +918,17 @@ LayeredCrossSection :: setupLayerMidPlanes()
 Material *
 LayeredCrossSection :: giveMaterial(IntegrationPoint *ip)
 {
-//     int ngps = ip->giveIntegrationRule()->giveNumberOfIntegrationPoints();
-//     int gpnum = ip->giveNumber();
-//     int gpsperlayer = ngps / this->numberOfLayers;
-//     int layer = ( gpnum - 1 ) / gpsperlayer + 1;
-//     return this->domain->giveMaterial( this->giveLayerMaterial(layer) );
-    ///@todo Temporarily assigned to the first layer
-    return domain->giveMaterial( layerMaterials.at(1) );
+    if ( ip->giveIntegrationRule()->giveIntegrationDomain() == _Cube ||
+        ip->giveIntegrationRule()->giveIntegrationDomain() == _Wedge ) {
+        return this->domain->giveMaterial( this->giveLayerMaterial(ip->giveNumber()) );
+    }
+    
+    if (ip->hasSlaveGaussPoint()) {
+        return domain->giveMaterial( layerMaterials.at(1) );//virtual master, has no material assigned in input file
+    } else {
+        OOFEM_ERROR("Not implemented.")
+    }
+    return NULL;
 }
 
 

@@ -222,50 +222,8 @@ TR_SHELL02 :: computeVolumeAround(GaussPoint *gp)
 
 void
 TR_SHELL02 :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode)
-// We need to separate integration for membrane and plate.
 {
-    double dens, dV;
-    FloatArray force, ntf;
-    FloatMatrix n, T;
-
-    if ( force.giveSize() ) {
-        return;
-    }
-    
-    if ( ( forLoad->giveBCGeoType() != BodyLoadBGT ) || ( forLoad->giveBCValType() != ForceLoadBVT ) ) {
-        OOFEM_ERROR("unknown load type");
-    }
-
-    // note: force is assumed to be in global coordinate system.
-    forLoad->computeComponentArrayAt(force, tStep, mode);
-    // transform from global to element local c.s
-    if ( this->computeLoadGToLRotationMtrx(T) ) {
-        force.rotatedWith(T, 'n');
-    }
-
-    answer.resize(18);
-    answer.zero();
-    IntegrationRule *membraneiRule = membrane->giveDefaultIntegrationRulePtr();
-    IntegrationRule *plateiRule = plate->giveDefaultIntegrationRulePtr();
-    IntegrationRule *iRule;
-    IntArray dofs = forLoad->giveDofIDs();
-    
-    
-    for (int dof : dofs ){
-        if(dof==D_u || dof==D_v){
-            iRule = membraneiRule;
-        } else {
-            iRule = plateiRule;
-        }
-        for ( GaussPoint *gp : *iRule ) {
-            this->computeNmatrixAt(gp->giveSubPatchCoordinates(), n);
-            dV  = this->computeVolumeAround(gp);
-            dens = this->giveCrossSection()->give('d', gp);
-            //ntf.beTProductOf(n, force);
-            //answer.add(dV * dens, ntf);
-        }
-    }
- 
+        OOFEM_ERROR("This function is not implemented yet.");
 }
 
 int
