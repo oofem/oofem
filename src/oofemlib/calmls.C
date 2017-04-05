@@ -106,7 +106,7 @@ CylindricalALM :: ~CylindricalALM()
 
 
 NM_Status
-CylindricalALM :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0, FloatArray *iR,
+CylindricalALM :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
                         FloatArray &X, FloatArray &dX, FloatArray &F,
                         const FloatArray &internalForcesEBENorm, double &ReachedLambda, referenceLoadInputModeType rlm,
                         int &nite, TimeStep *tStep)

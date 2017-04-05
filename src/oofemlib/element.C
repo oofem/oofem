@@ -178,6 +178,34 @@ Element :: computeVectorOf(PrimaryField &field, const IntArray &dofIDMask, Value
 
 
 void
+Element :: computeVectorOfPrescribed(ValueModeType u, TimeStep *tStep, FloatArray &answer)
+{
+    IntArray dofIDMask;
+    FloatMatrix G2L;
+    FloatArray vec;
+
+    answer.reserve( this->computeNumberOfGlobalDofs() );
+
+    for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
+        this->giveDofManDofIDMask(i, dofIDMask);
+        this->giveDofManager(i)->givePrescribedUnknownVector(vec, dofIDMask, u, tStep);
+        answer.append(vec);
+    }
+
+    for ( int i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
+        this->giveInternalDofManDofIDMask(i, dofIDMask);
+	this->giveInternalDofManager(i)->givePrescribedUnknownVector(vec, dofIDMask, u, tStep);
+        answer.append(vec);
+    }
+
+    if ( this->computeGtoLRotationMatrix(G2L) ) {
+        answer.rotatedWith(G2L, 'n');
+    }
+
+}
+
+  
+void
 Element :: computeVectorOfPrescribed(const IntArray &dofIDMask, ValueModeType mode, TimeStep *tStep, FloatArray &answer)
 {
     FloatMatrix G2L;

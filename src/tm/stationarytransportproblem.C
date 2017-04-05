@@ -222,7 +222,6 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     this->nMethod->solve(*this->conductivityMatrix,
                          externalForces,
                          NULL,
-                         NULL,
                          *UnknownsField->giveSolutionVector(tStep),
                          incrementOfSolution,
                          this->internalForces,

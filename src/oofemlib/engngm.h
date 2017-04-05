@@ -196,7 +196,6 @@ public:
         IG_None = 0, ///< No special treatment for new iterations. Probably means ending up using @f$ {}^{n+1}x = {}^{n}x @f$ for all free dofs.
         IG_Tangent = 1, ///< Solves an approximated tangent problem from the last iteration. Useful for changing Dirichlet boundary conditions.
         //IG_Extrapolated = 2, ///< Assumes constant increment extrapolating @f$ {}^{n+1}x = {}^{n}x + \Delta t\delta{x}'@f$, where @f$ \delta x' = ({}^{n}x - {}^{n-1}x)/{}^{n}Delta t@f$.
-        IG_Original = 3
     };
 
 protected:
@@ -974,6 +973,8 @@ public:
      */
     void assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, CharType type, Domain *domain);
 
+    void assemblePrescribedExtrapolatedForces(FloatArray &answer, TimeStep *tStep, CharType type, Domain *domain);
+    
 
     void assembleVectorFromContacts(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
                                     const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
