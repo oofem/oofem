@@ -50,6 +50,7 @@
 #include "boundaryload.h"
 #include "mathfem.h"
 #include "classfactory.h"
+#include "connectivitytable.h"
 
 namespace oofem {
 REGISTER_Element(MITC4Shell);
@@ -155,36 +156,94 @@ MITC4Shell :: computeGaussPoints()
 void
 MITC4Shell ::  giveDirectorVectors(FloatArray &V1, FloatArray &V2, FloatArray &V3, FloatArray &V4)
 {
-    FloatArray *c1, *c2, *c3, *c4;
-    V1.resize(3);
-    V2.resize(3);
-    V3.resize(3);
-    V4.resize(3);
-    c1 = this->giveNode(1)->giveCoordinates();
-    c2 = this->giveNode(2)->giveCoordinates();
-    c3 = this->giveNode(3)->giveCoordinates();
-    c4 = this->giveNode(4)->giveCoordinates();
-    V1.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, * c1, this, false);
-    V1.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, * c1, this, false);
-    V1.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, * c1, this, false);
+    if ( directorType == 0 ) { // normal to the midplane
+        FloatArray e1, e2, e3;
+        this->computeLocalBaseVectors(e1, e2, e3);
+        V1 = e3;
+        V2 = e3;
+        V3 = e3;
+        V4 = e3;
+    } else if ( directorType == 1 )          { // nodal average
+        FloatArray e1, e2, e3;
+        FloatMatrix directors;
+        FloatArray nodeDir;
+        nodeDir.resize(3);
+        directors.resize(3, 4);
+        int csNum = this->giveCrossSection()->giveNumber();
+        // OOFEM_ERROR("DirectorType 1 not implemented yet.");
+        IntArray neighbours;
+        ConnectivityTable *conTable = this->giveDomain()->giveConnectivityTable();
+        IntArray node(1);
+        int count;
 
-    V2.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, * c2, this, false);
-    V2.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, * c2, this, false);
-    V2.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, * c2, this, false);
+        for ( int i = 1; i <= 4; i++ ) {
+            count = 0;
+            nodeDir.zero();
+            node.at(1) = this->giveNode(i)->giveNumber();
+            conTable->giveNodeNeighbourList(neighbours, node);
 
-    V3.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, * c3, this, false);
-    V3.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, * c3, this, false);
-    V3.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, * c3, this, false);
+            for ( int j = 1; j <= neighbours.giveSize(); j++ ) {
+                MITC4Shell *neighbour = dynamic_cast< MITC4Shell * >( this->giveDomain()->giveElement( neighbours.at(j) ) );
+                if ( neighbour ) {
+                    if ( neighbour->giveCrossSection()->giveNumber() == csNum ) {
+                        neighbour->computeLocalBaseVectors(e1, e2, e3);
+                        nodeDir.add(e3);
+                        count++;
+                    }
+                }
+            }
+            directors.at(1, i) = nodeDir.at(1) / count;
+            directors.at(2, i) = nodeDir.at(2) / count;
+            directors.at(3, i) = nodeDir.at(3) / count;
+        }
+        V1.beColumnOf(directors, 1);
+        V2.beColumnOf(directors, 2);
+        V3.beColumnOf(directors, 3);
+        V4.beColumnOf(directors, 4);
 
-    V4.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, * c4, this, false);
-    V4.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, * c4, this, false);
-    V4.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, * c4, this, false);
+        V1.normalize();
+        V2.normalize();
+        V3.normalize();
+        V4.normalize();
+    } else if ( directorType == 2 )          { // specified at crosssection
+        V1.resize(3);
+        V2.resize(3);
+        V3.resize(3);
+        V4.resize(3);
+        FloatArray *c1, *c2, *c3, *c4;
+        c1 = this->giveNode(1)->giveCoordinates();
+        c2 = this->giveNode(2)->giveCoordinates();
+        c3 = this->giveNode(3)->giveCoordinates();
+        c4 = this->giveNode(4)->giveCoordinates();
+        V1.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, * c1, this, false);
+        V1.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, * c1, this, false);
+        V1.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, * c1, this, false);
 
-    V1.normalize();
-    V2.normalize();
-    V3.normalize();
-    V4.normalize();
+        V2.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, * c2, this, false);
+        V2.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, * c2, this, false);
+        V2.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, * c2, this, false);
+
+        V3.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, * c3, this, false);
+        V3.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, * c3, this, false);
+        V3.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, * c3, this, false);
+
+        V4.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, * c4, this, false);
+        V4.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, * c4, this, false);
+        V4.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, * c4, this, false);
+
+        V1.normalize();
+        V2.normalize();
+        V3.normalize();
+        V4.normalize();
+
+        return;
+    } else       {
+        OOFEM_ERROR("Unsupported directorType");
+    }
+
+    return;
 }
+
 
 
 
@@ -337,6 +396,9 @@ MITC4Shell :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, nPointsXY, _IFT_Element_nip);
     IR_GIVE_OPTIONAL_FIELD(ir, nPointsZ, _IFT_MITC4Shell_nipZ);
     IR_GIVE_OPTIONAL_FIELD(ir, nlGeometry, _IFT_NLStructuralElement_nlgeoflag);
+
+    directorType = 0; // default
+    IR_GIVE_OPTIONAL_FIELD(ir, directorType, _IFT_MITC4Shell_directorType);
 
     return this->NLStructuralElement :: initializeFrom(ir);
 }

@@ -45,6 +45,7 @@
 
 #define _IFT_MITC4Shell_Name "mitc4shell"
 #define _IFT_MITC4Shell_nipZ "nipz"
+#define _IFT_MITC4Shell_directorType "directortype"
 
 namespace oofem {
 class FEI2dQuadLin;
@@ -66,6 +67,7 @@ enum CharTensor {
  * Tasks:
  * - calculating its B,D matrices and dV.
  */
+
 class MITC4Shell : public NLStructuralElement, public ZZNodalRecoveryModelInterface,
     public SPRNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface,
     public SpatialLocalizerInterface
@@ -78,7 +80,7 @@ protected:
      * at the element level for computation efficiency.
      */
     FloatMatrix GtoLRotationMatrix;
-    int nPointsXY, nPointsZ;
+    int nPointsXY, nPointsZ, directorType;
 
 public:
 

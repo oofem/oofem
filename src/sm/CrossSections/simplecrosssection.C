@@ -528,7 +528,7 @@ SimpleCrossSection :: initializeFrom(InputRecord *ir)
     this->materialNumber = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->materialNumber, _IFT_SimpleCrossSection_MaterialNumber);
 
-    value = 0.0;
+    value = 0.0; 
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_directorx);
     propertyDictionary.add(CS_DirectorVectorX, value);
 
