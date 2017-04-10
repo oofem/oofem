@@ -66,6 +66,8 @@ enum CrossSectionProperty {
     CS_ShearAreaY,     ///< Shear area in y direction
     CS_ShearAreaZ,     ///< Shear area in z direction
     CS_DrillingStiffness, ///< Penalty stiffness for drilling DOFs.
+    CS_RelDrillingStiffness, ///< Relative penalty stiffness for drilling DOFs.
+    CS_DrillingType,   ///< Type of artificially added drilling stiffness for drilling DOFs.
     CS_TopZCoord,      ///< Top z coordinate
     CS_BottomZCoord,   ///< Bottom z coordinate
     CS_NumLayers,      ///< Number of layers that makes up the cross section

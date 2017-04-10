@@ -93,6 +93,14 @@ VariableCrossSection :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, drillingStiffnessExpr, _IFT_SimpleCrossSection_drillStiffness);
     }
 
+    if ( ir->hasField(_IFT_SimpleCrossSection_relDrillStiffness) ) {
+        IR_GIVE_OPTIONAL_FIELD(ir, relDrillingStiffnessExpr, _IFT_SimpleCrossSection_relDrillStiffness);
+    }
+
+    if ( ir->hasField(_IFT_SimpleCrossSection_drillType) ) {
+        IR_GIVE_OPTIONAL_FIELD(ir, drillingTypeExpr, _IFT_SimpleCrossSection_drillType);
+    }
+
     IR_GIVE_OPTIONAL_FIELD(ir, this->materialNumber, _IFT_SimpleCrossSection_MaterialNumber);
 
     directorxExpr.setValue(0.0);
@@ -131,6 +139,8 @@ void VariableCrossSection :: giveInputRecord(DynamicInputRecord &input)
     input.setField(this->shearAreayExpr, _IFT_SimpleCrossSection_shearareay);
     input.setField(this->shearAreazExpr, _IFT_SimpleCrossSection_shearareaz);
     input.setField(this->drillingStiffnessExpr, _IFT_SimpleCrossSection_drillStiffness);
+    input.setField(this->relDrillingStiffnessExpr, _IFT_SimpleCrossSection_relDrillStiffness);
+    input.setField(this->drillingTypeExpr, _IFT_SimpleCrossSection_drillType);
     input.setField(this->materialNumber, _IFT_SimpleCrossSection_MaterialNumber);
     input.setField(this->directorxExpr, _IFT_SimpleCrossSection_directorx);
     input.setField(this->directoryExpr, _IFT_SimpleCrossSection_directory);
@@ -158,6 +168,10 @@ VariableCrossSection :: giveExpression(const ScalarFunction **expr, CrossSection
         * expr = & shearAreazExpr;
     } else if ( aProperty == CS_DrillingStiffness ) {
         * expr = & drillingStiffnessExpr;
+    } else if ( aProperty == CS_RelDrillingStiffness ) {
+        * expr = & relDrillingStiffnessExpr;
+    } else if ( aProperty == CS_DrillingType ) {
+        * expr = & drillingTypeExpr;
     } else if ( aProperty == CS_DirectorVectorX ) {
         * expr = & directorxExpr;
     } else if ( aProperty == CS_DirectorVectorY ) {

@@ -525,6 +525,14 @@ SimpleCrossSection :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_drillStiffness);
     propertyDictionary.add(CS_DrillingStiffness, value);
 
+    value = 0.0;
+    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_relDrillStiffness);
+    propertyDictionary.add(CS_RelDrillingStiffness, value);
+
+    value = 0.0;
+    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_drillType);
+    propertyDictionary.add(CS_DrillingType, value);
+
     this->materialNumber = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->materialNumber, _IFT_SimpleCrossSection_MaterialNumber);
 

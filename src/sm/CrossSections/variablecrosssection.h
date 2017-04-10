@@ -80,6 +80,10 @@ protected:
     ScalarFunction shearAreazExpr;
     /// Expression for cross section beam drilling stiffness
     ScalarFunction drillingStiffnessExpr;
+    /// Expression for cross section relative drilling stiffness
+    ScalarFunction relDrillingStiffnessExpr;
+    /// Expression for type of artificially added stiffness
+    ScalarFunction drillingTypeExpr;
     /// Expression for director vector component in x-axis
     ScalarFunction directorxExpr;
     /// Expression for director vector component in y-axis

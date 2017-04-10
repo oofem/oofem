@@ -53,6 +53,8 @@
 #define _IFT_SimpleCrossSection_shearareay "shearareay" ///< Shear area y direction
 #define _IFT_SimpleCrossSection_shearareaz "shearareaz" ///< Shear area z direction
 #define _IFT_SimpleCrossSection_drillStiffness "drillstiffness" ///< Penalty term for drilling stiffness.
+#define _IFT_SimpleCrossSection_relDrillStiffness "reldrillstiffness" ///< Relative penalty term for drilling stiffness.
+#define _IFT_SimpleCrossSection_drillType "drilltype" ///< Type of artificially added stiffnes for drilling DOFs.
 #define _IFT_SimpleCrossSection_MaterialNumber "material" ///< Material number for the bulk material
 #define _IFT_SimpleCrossSection_directorx "directorx"
 #define _IFT_SimpleCrossSection_directory "directory"

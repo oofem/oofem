@@ -163,7 +163,7 @@ MITC4Shell ::  giveDirectorVectors(FloatArray &V1, FloatArray &V2, FloatArray &V
         V2 = e3;
         V3 = e3;
         V4 = e3;
-    } else if ( directorType == 1 )          { // nodal average
+    } else if ( directorType == 1 ) {          // nodal average
         FloatArray e1, e2, e3;
         FloatMatrix directors;
         FloatArray nodeDir;
@@ -205,7 +205,7 @@ MITC4Shell ::  giveDirectorVectors(FloatArray &V1, FloatArray &V2, FloatArray &V
         V2.normalize();
         V3.normalize();
         V4.normalize();
-    } else if ( directorType == 2 )          { // specified at crosssection
+    } else if ( directorType == 2 ) {          // specified at crosssection
         V1.resize(3);
         V2.resize(3);
         V3.resize(3);
@@ -237,7 +237,7 @@ MITC4Shell ::  giveDirectorVectors(FloatArray &V1, FloatArray &V2, FloatArray &V
         V4.normalize();
 
         return;
-    } else       {
+    } else {
         OOFEM_ERROR("Unsupported directorType");
     }
 
@@ -494,6 +494,109 @@ MITC4Shell :: giveJacobian(FloatArray lcoords, FloatMatrix &jacobianMatrix)
     jacobianMatrix.at(3, 3) =  1. / 2. * ( a1 * h1 * V1.at(3) + a2 * h2 * V2.at(3) + a3 * h3 * V3.at(3) + a4 * h4 * V4.at(3) );
 }
 
+void
+MITC4Shell :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
+{
+    // This element adds an additional stiffness for the so called drilling dofs.
+    NLStructuralElement :: computeStiffnessMatrix(answer, rMode, tStep);
+
+    bool drillType = this->giveStructuralCrossSection()->give( CS_DrillingType, this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0) );
+    if ( drillType == 1 ) {
+        double relDrillCoeff = this->giveStructuralCrossSection()->give( CS_RelDrillingStiffness, this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0) );
+        FloatArray n;
+        IntArray drillDofs = {
+            6, 12, 18, 24
+        };
+        int j = 1;
+        while ( answer.at(j, j) == 0 ) {
+            j++;
+        }
+        drillCoeff = answer.at(j, j);
+        // find the smallest non-zero number on the diagonal
+        for ( int i = j; i <= 24; i++ ) {
+            if ( drillCoeff > answer.at(i, i) && answer.at(i, i) != 0 ) {
+                drillCoeff = answer.at(i, i);
+            }
+        }
+
+        if ( relDrillCoeff == 0.0 ) {
+            relDrillCoeff = 0.001; // default
+        }
+        drillCoeff *= relDrillCoeff;
+
+        FloatMatrix drillStiffness;
+        drillStiffness.resize(4, 4);
+        drillStiffness.zero();
+        for ( int i = 1; i <= 4; i++ ) {
+            drillStiffness.at(i, i) = drillCoeff;
+        }
+
+        /*
+         * for ( GaussPoint *gp : *integrationRulesArray [ 0 ] ) {
+         *  double dV = this->computeVolumeAround(gp);
+         *  // double drillCoeff = this->giveStructuralCrossSection()->give(CS_DrillingStiffness, gp);
+         *  double coeff = drillCoeff;
+         *  if ( this->giveStructuralCrossSection()->give(CS_DrillingStiffness, gp)> 0)
+         *      drillCoeff *= this->giveStructuralCrossSection()->give(CS_DrillingStiffness, gp);
+         *  // Drilling stiffness is here for improved numerical properties
+         *  this->interp_lin.evalN( n, gp->giveNaturalCoordinates(), FEIVoidCellGeometry() );
+         *  for ( int j = 0; j < 4; j++ ) {
+         *      n(j) -= 0.25;
+         *  }
+         *  drillStiffness.plusDyadSymmUpper(n, coeff * dV);
+         *  }*/
+
+        // drillStiffness.symmetrized();
+        answer.assemble(drillStiffness, drillDofs);
+    }
+}
+
+void
+MITC4Shell :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
+{
+    // This element adds an additional stiffness for the so called drilling dofs.
+    NLStructuralElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord);
+
+    bool drillType = this->giveStructuralCrossSection()->give( CS_DrillingType, this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0) );
+
+    if ( drillType == 1 ) {
+        FloatArray n, tmp;
+        FloatArray drillUnknowns, drillMoment;
+        IntArray drillDofs = {
+            6, 12, 18, 24
+        };
+        this->computeVectorOf(VM_Total, tStep, tmp);
+        drillUnknowns.beSubArrayOf(tmp, drillDofs);
+
+        /*
+         * for ( GaussPoint *gp : *integrationRulesArray [ 0 ] ) {
+         *  double dV = this->computeVolumeAround(gp);
+         *  // double drillCoeff = this->giveStructuralCrossSection()->give(CS_DrillingStiffness, gp);
+         *  double coeff = drillCoeff;
+         *  if ( this->giveStructuralCrossSection()->give(CS_DrillingStiffness, gp)> 0)
+         *      drillCoeff *= this->giveStructuralCrossSection()->give(CS_DrillingStiffness, gp);
+         *
+         *      this->interp_lin.evalN( n, gp->giveNaturalCoordinates(), FEIVoidCellGeometry() );
+         *  for ( int j = 0; j < 4; j++ ) {
+         *      n(j) -= 0.25;
+         *  }
+         *  double dtheta = n.dotProduct(drillUnknowns);
+         *  drillMoment.add(coeff * dV * dtheta, n);
+         * }
+         */
+
+        FloatMatrix drillStiffness;
+        drillStiffness.resize(4, 4);
+        drillStiffness.zero();
+        for ( int i = 1; i <= 4; i++ ) {
+            drillStiffness.at(i, i) = drillCoeff;
+        }
+
+        drillMoment.beProductOf(drillStiffness, drillUnknowns);
+
+        answer.assemble(drillMoment, drillDofs);
+    }
+}
 
 void
 MITC4Shell :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
