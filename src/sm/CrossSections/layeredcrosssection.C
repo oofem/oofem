@@ -93,6 +93,15 @@ LayeredCrossSection :: giveRealStress_3d(FloatArray &answer, GaussPoint *gp, con
     }
 }
 
+void 
+LayeredCrossSection :: giveRealStress_3dDegeneratedShell(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    ///@todo - check-V
+    answer.resize(6);
+    answer.zero();
+}
+
+
 
 void
 LayeredCrossSection :: giveRealStress_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
@@ -670,6 +679,16 @@ LayeredCrossSection :: give3dShellStiffMtrx(FloatMatrix &answer,
     }
 }
 
+void
+LayeredCrossSection :: give3dDegeneratedShellStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    ///@todo - check-V
+    answer.resize(6,6);
+    answer.zero();
+}
+    
+
+
 
 void
 LayeredCrossSection :: give2dBeamStiffMtrx(FloatMatrix &answer,
@@ -918,15 +937,19 @@ LayeredCrossSection :: setupLayerMidPlanes()
 Material *
 LayeredCrossSection :: giveMaterial(IntegrationPoint *ip)
 {
+    ///@todo We should keep track in integration point (integration rule) what material from layer is assigned. Otherwise difficulties due to different elements and IP numbering.
     if ( ip->giveIntegrationRule()->giveIntegrationDomain() == _Cube ||
-        ip->giveIntegrationRule()->giveIntegrationDomain() == _Wedge ) {
-        return this->domain->giveMaterial( this->giveLayerMaterial(ip->giveNumber()) );
+        ip->giveIntegrationRule()->giveIntegrationDomain() == _Wedge
+    ) {
+        return domain->giveMaterial( layerMaterials.at(1) );
+        //return this->domain->giveMaterial( this->giveLayerMaterial(ip->giveNumber()) );
     }
     
     if (ip->hasSlaveGaussPoint()) {
         return domain->giveMaterial( layerMaterials.at(1) );//virtual master, has no material assigned in input file
     } else {
-        OOFEM_ERROR("Not implemented.")
+        return domain->giveMaterial( layerMaterials.at(1) );//virtual master, has no material assigned in input file
+        //OOFEM_ERROR("Not implemented.")
     }
     return NULL;
 }
@@ -968,6 +991,19 @@ LayeredCrossSection :: setupIntegrationPoints(IntegrationRule &irule, int npoint
         return irule.setUpIntegrationPoints( element->giveIntegrationDomain(), npoints, element->giveMaterialMode() );
     }
 }
+
+int
+LayeredCrossSection :: setupIntegrationPoints(IntegrationRule &irule, int nPointsXY, int nPointsZ, Element *element)
+{
+    switch ( element->giveIntegrationDomain() ) {
+    case _3dDegShell:
+        return irule.SetUpPointsOn3dDegShellLayers(nPointsXY, nPointsZ, element->giveMaterialMode(), this->layerThicks);
+    default:
+        OOFEM_ERROR("Unknown mode (%d)", element->giveIntegrationDomain());
+    }
+    return 0;
+}
+
 
 GaussPoint *
 LayeredCrossSection :: giveSlaveGaussPoint(GaussPoint *masterGp, int i)
@@ -1129,10 +1165,12 @@ LayeredCrossSection :: giveCorrespondingSlaveMaterialMode(MaterialMode masterMod
         return _PlaneStress;    
     } else if ( masterMode == _3dShell ) {
         return _PlateLayer;
+    } else if ( masterMode == _3dDegeneratedShell ) {
+        return _3dDegeneratedShell;
     } else if ( masterMode == _3dMat ) {
         return _3dMat;
     } else {
-        OOFEM_ERROR("unsupported material mode");
+        OOFEM_ERROR("unsupported material mode %s", __MaterialModeToString(masterMode) );
     }
 
     return _Unknown;

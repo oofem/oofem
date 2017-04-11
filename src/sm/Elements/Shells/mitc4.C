@@ -335,8 +335,9 @@ MITC4Shell :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 void
 MITC4Shell :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    SimpleCrossSection *cs = dynamic_cast< SimpleCrossSection * >( this->giveCrossSection() );
-    cs->give3dDegeneratedShellStiffMtrx(answer, rMode, gp, tStep);
+    StructuralCrossSection *scs = dynamic_cast< StructuralCrossSection * >( this->giveCrossSection() );
+    //SimpleCrossSection *cs = dynamic_cast< SimpleCrossSection * >( this->giveCrossSection() );
+    scs->give3dDegeneratedShellStiffMtrx(answer, rMode, gp, tStep);
 }
 
 

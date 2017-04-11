@@ -317,10 +317,10 @@ IntegrationRule :: setUpIntegrationPoints(integrationDomain mode, int nPointsXY,
 
     switch ( mode ) {
     case _3dDegShell:
-        return  this->SetUpPointsOn3dDegShell(nPointsXY, nPointsZ, matMode);
+        return this->SetUpPointsOn3dDegShell(nPointsXY, nPointsZ, matMode);
 
     default:
-        OOFEM_ERROR("unknown mode (%d)", mode);
+        OOFEM_ERROR("Unknown mode (%d)", mode);
     }
 
     return 0;

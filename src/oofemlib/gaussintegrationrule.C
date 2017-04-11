@@ -125,7 +125,7 @@ int
 GaussIntegrationRule :: SetUpPointsOn3dDegShell(int nPointsXY, int nPointsZ, MaterialMode mode)
 //GaussIntegrationRule :: SetUpPointsOnCube(int nPoints_xi1, int nPoints_xi2, int nPoints_xi3, MaterialMode mode)
 {
-    int nPoints_xi1 = ( int ) floor(sqrt( double ( nPointsXY ) ) );
+    int nPoints_xi1 = ( int ) floor(sqrt( double ( nPointsXY ) ) + 0.1 );
     int nPoints_xi2 = nPoints_xi1;
     int nPoints_xi3 = nPointsZ;
     FloatArray coords_xi1, weights1, coords_xi2, weights2, coords_xi3, weights3;
@@ -145,6 +145,42 @@ GaussIntegrationRule :: SetUpPointsOn3dDegShell(int nPointsXY, int nPointsZ, Mat
         }
     }
 
+    this->intdomain = _3dDegShell;
+    return this->giveNumberOfIntegrationPoints();
+}
+
+int
+GaussIntegrationRule :: SetUpPointsOn3dDegShellLayers(int nPointsXY, int nPointsZ, MaterialMode mode, const FloatArray &layerThickness)
+{
+    int nPoints_xi1 = ( int ) floor(sqrt( double ( nPointsXY ) ) + 0.1 );
+    int nPoints_xi2 = nPoints_xi1;
+    int nPoints_xi3 = nPointsZ;
+    FloatArray coords_xi1, weights1, coords_xi2, weights2, coords_xi3, weights3;
+    this->giveLineCoordsAndWeights(nPoints_xi1, coords_xi1, weights1);
+    this->giveLineCoordsAndWeights(nPoints_xi2, coords_xi2, weights2);
+    this->giveLineCoordsAndWeights(nPoints_xi3, coords_xi3, weights3);
+    int pointsPerLayer = nPoints_xi1 * nPoints_xi2 * nPoints_xi3;
+    this->gaussPoints.resize( pointsPerLayer * layerThickness.giveSize() );
+    int count = 0;
+    double totalThickness = layerThickness.sum();
+    // bottom is scaled so that it goes from -1 to 1.
+    double bottom = -1.;
+    double scaledThickness;
+    
+    for ( int t = 1; t <= layerThickness.giveSize(); t++ ) {
+        scaledThickness = layerThickness.at(t) / totalThickness;
+        // the order of cycles cannot be changed due to MITC4Shell::giveMomentsAt(...)  
+        for ( int i = 1; i <= nPoints_xi1; i++ ) {
+            for ( int j = 1; j <= nPoints_xi2; j++ ) {
+                for ( int k = 1; k <= nPoints_xi3; k++ ) {
+                    this->gaussPoints [ count ] = new GaussPoint(this, count + 1, {coords_xi1.at(i), coords_xi2.at(j), ( coords_xi3.at(k) + 1. ) * scaledThickness + bottom},
+                                                                weights1.at(i)*weights2.at(j)*weights3.at(k)*scaledThickness, mode);
+                    count++;
+                }
+            }
+        }
+        bottom += 2.0 * scaledThickness;
+    }
     this->intdomain = _3dDegShell;
     return this->giveNumberOfIntegrationPoints();
 }
@@ -200,7 +236,7 @@ int GaussIntegrationRule :: SetUpPointsOnCubeLayers(int nPoints1, int nPoints2, 
                 for ( int k = 1; k <= nPointsDepth; k++ ) {
                     this->gaussPoints [ count ] = new GaussPoint(this, count + 1, 
                                         {coords_xi1.at(i), coords_xi2.at(j), ( coords_xi3.at(k) + 1. ) * scaledThickness + bottom},
-                                        weights1.at ( i ) *weights2.at ( j ) * ( weights3.at ( k ) *scaledThickness ), mode);
+                                        weights1.at(i)*weights2.at(j)*weights3.at(k)*scaledThickness, mode);
                     count++;
                 }
             }
