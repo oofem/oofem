@@ -35,11 +35,21 @@
 #include "function.h"
 #include "timestep.h"
 #include "error.h"
+#include "domain.h"
+#include "gausspoint.h"
 
 namespace oofem {
 Function :: Function(int n, Domain *d) :
     FEMComponent(n, d)
-{ }
+{ this->parameterType=0; }
+
+double
+Function :: giveFunctionParameter(int paramID)
+{
+    if(this->giveDomain()->giveElement(this->giveNumber())!=NULL)
+        return 1.;
+    return 0.;
+}
 
 double
 Function :: evaluate(TimeStep *tStep, ValueModeType mode)
@@ -75,13 +85,24 @@ Function :: evaluateAtTime(double t)
 
 
 void
-Function :: evaluate(FloatArray &answer, const std :: map< std :: string, FunctionArgument > &valDict)
+Function :: evaluate(FloatArray &answer, const std :: map< std :: string, FunctionArgument > &valDict, GaussPoint *gp, double param)
 {
-    auto it = valDict.find("t");
-    if ( it == valDict.end() ) {
-        OOFEM_ERROR("Missing necessary argument \"t\"");
+    if(this->parameterType==0)
+    {
+        auto it = valDict.find("t");
+        if ( it == valDict.end() )
+        {
+            OOFEM_ERROR("Missing necessary argument \"t\"");
+        }else{
+            answer = FloatArray{this->evaluateAtTime(it->second.val0)};
+        }
     }
-    answer = FloatArray{this->evaluateAtTime(it->second.val0)};
+    else if(this->parameterType==1)
+    {
+        answer = FloatArray{this->evaluateAtTime(param)};
+    }
+    else
+        OOFEM_ERROR("Unknown parameter type %d",parameterType);
 }
 
 double

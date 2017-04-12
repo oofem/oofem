@@ -163,6 +163,8 @@ TimeStep *StationaryTransportProblem :: giveNextStep()
 
 void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 {
+
+
     //
     // creates system of governing eq's and solves them at given time step
     //
@@ -189,6 +191,15 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
         }
     }
 
+    Domain *domain = this->giveDomain(1);
+    // update element state according to given ic
+    for ( auto &elem : domain->giveElements() ) {
+        TransportElement *element = static_cast< TransportElement * >( elem.get() );
+        element->updateInternalState(tStep);
+        element->updateYourself(tStep);
+    }
+
+
     internalForces.resize(neq);
 
 #ifdef VERBOSE
@@ -210,7 +221,6 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     int currentIterations;
     this->nMethod->solve(*this->conductivityMatrix,
                          externalForces,
-                         NULL,
                          NULL,
                          *UnknownsField->giveSolutionVector(tStep),
                          incrementOfSolution,

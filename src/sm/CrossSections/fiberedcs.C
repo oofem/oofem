@@ -390,7 +390,7 @@ FiberedCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalS
     Material *mat = this->giveDomain()->giveMaterial( fiberMaterials.at(1) ); ///@todo For now, create material status according to the first fiber material
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) );
 
-    if ( type == IST_BeamForceMomentumTensor ) {
+    if ( type == IST_BeamForceMomentTensor ) {
         answer = status->giveStressVector();
         return 1;
     } else if ( type == IST_BeamStrainCurvatureTensor ) {

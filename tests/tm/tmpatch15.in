@@ -1,9 +1,9 @@
 tmpatch15.out
-Patch test of Quad1_ht elements 
-#StationaryProblem nsteps 1
+Patch test of Quad1_ht elements, nonstationary
 #NonStationaryProblem nsteps 200 deltat 600000.0 alpha 0.5
-nltransienttransportproblem nsteps 200 deltat 600000.0 rtol 0.001 alpha 0.5 nmodules 1
-#transienttransport nsteps 200 deltat 600000.0 alpha 0.5 nmodules 1
+#nltransienttransportproblem nsteps 200 deltat 600000.0 rtol 0.001 alpha 0.5 nmodules 1
+transienttransport nsteps 30 deltat 600000.0 rtolv 1.e-5 alpha 0.5 nmodules 1
+#vtkxml tstep_all domain_all primvars 1 6 vars 2 37 56 stype 1
 errorcheck
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all
@@ -15,24 +15,26 @@ node 4 coords 3  2.0   1.0   0.0
 node 5 coords 3  0.0   8.0   0.0
 node 6 coords 3  2.0   8.0   0.0
 quad1ht 1 nodes 4 1 3 4 2
-quad1ht 2 nodes 4 3 5 6 4 boundaryloads 2 2 2
+#quad1ht 2 nodes 4 3 5 6 4 boundaryloads 2 2 2
+quad1ht 2 nodes 4 3 5 6 4
 SimpleTransportCS 1 mat 1 set 1 thickness 0.15
 IsoHeat 1 d 2400. k 3.0 c 1000.0
 BoundaryCondition 1 loadTimeFunction 1 dofs 1 10 values 1 0.0 set 2
-#BoundaryCondition 1 loadTimeFunction 1 dofs 1 10 values 1 15.0 set 3
 #Newton bc
-constantedgeload 2 loadTimeFunction 1 components 1 15.0 properties 1 a 0.8 loadtype 3
-#constantsurfaceload 2 loadTimeFunction 1 components 1 15.0 properties 1 a 0.8 loadtype 3 set 3
+#constantedgeload 2 loadTimeFunction 1 components 1 15.0 properties 1 a 0.8 loadtype 3
+constantedgeload 2 loadTimeFunction 1 components 1 15.0 properties 1 a 0.8 loadtype 3 set 3
 ConstantFunction 1 f(t) 1.0
 Set 1 elementranges {(1 2)}
 Set 2 nodes 2 1 2
-Set 3 elementboundaries 2 2 2
+Set 3 elementedges 2 2 2
 
 #%BEGIN_CHECK%
-#NODE tStep 200 number 3 dof 10 unknown d value 1.2765957447
-#NODE tStep 200 number 4 dof 10 unknown d value 1.2765957447
-#NODE tStep 200 number 5 dof 10 unknown d value 10.212765957
-#NODE tStep 200 number 6 dof 10 unknown d value 10.212765957
+#NODE tStep 20 number 3 dof 10 unknown d value 8.15996152e-01
+#NODE tStep 20 number 5 dof 10 unknown d value 8.96042091e+00
+#NODE tStep 30 number 3 dof 10 unknown d value 1.10196762e+00
+#NODE tStep 30 number 4 dof 10 unknown d value 1.10196762e+00
+#NODE tStep 30 number 5 dof 10 unknown d value 9.73800585e+00
+#NODE tStep 30 number 6 dof 10 unknown d value 9.73800585e+00
 #%END_CHECK%
 
 

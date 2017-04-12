@@ -190,9 +190,9 @@ HydratingIsoHeatMaterial :: giveCharacteristicValue(MatResponseMode rmode, Gauss
 
     if ( rmode == Capacity ) {
         if ( castAt && ( tStep->giveTargetTime() < castAt ) ) {
-            answer = capacity * this->give('d', gp) / 1000;                            // Zero capacity before cast
+            answer = this->give('c', gp) * this->give('d', gp) / 1000;                            // Zero capacity before cast
         } else {
-            answer = capacity * this->give('d', gp);
+            answer = this->give('c', gp) * this->give('d', gp);
         }
     } else if ( !hydrationLHS ) {
         answer = 0;

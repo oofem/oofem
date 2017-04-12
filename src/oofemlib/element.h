@@ -399,6 +399,14 @@ public:
     /**
      * Returns local vector of prescribed unknowns. Local vector of prescribed unknowns is
      * extracted from nodal (and side - if they hold unknowns) boundary conditions.
+     * @param u      Identifies mode of unknown (eg. total value or velocity of unknown).
+     * @param tStep  Time step, when vector of unknowns is requested.
+     * @param answer Local vector of unknowns.
+     */
+    void computeVectorOfPrescribed(ValueModeType u, TimeStep *tStep, FloatArray &answer);    
+    /**
+     * Returns local vector of prescribed unknowns. Local vector of prescribed unknowns is
+     * extracted from nodal (and side - if they hold unknowns) boundary conditions.
      *
      * @param dofIDMask Dof IDs for unknowns.
      * @param ut Identifies mode of unknown (eg. total values or velocity of unknown).

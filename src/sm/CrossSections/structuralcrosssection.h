@@ -265,6 +265,14 @@ public:
      */
     virtual void give3dShellStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
     /**
+     * Method for computing 3d shell stiffness matrix on degenerated shell elements.
+     * @param answer Stiffness matrix.
+     * @param mode Material response mode.
+     * @param gp Integration point, which load history is used.
+     * @param tStep Time step (most models are able to respond only when tStep is current time step).
+     */
+    virtual void give3dDegeneratedShellStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) { OOFEM_ERROR("Implemented in inherited classes"); };
+    /**
      * Method for computing membrane stiffness matrix with added drilling stiffness.
      * @param answer Stiffness matrix.
      * @param mode Material response mode.

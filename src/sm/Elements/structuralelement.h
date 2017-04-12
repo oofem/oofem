@@ -104,11 +104,11 @@ public:
      * @param n Element number.
      * @param d Domain to which new material will belong.
      */
-    StructuralElement(int n, Domain * d);
+    StructuralElement(int n, Domain *d);
     /// Destructor.
     virtual ~StructuralElement();
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType, TimeStep *tStep);
+    virtual void giveCharacteristicMatrix(FloatMatrix & answer, CharType, TimeStep * tStep);
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
 
     /**
@@ -318,13 +318,13 @@ public:
 
     // Interface for body loads applied by Sets:
     virtual void computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep);
-    virtual void computeBoundarySurfaceLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true);
-    virtual void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true);
+    virtual void computeBoundarySurfaceLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global = true);
+    virtual void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global = true);
     /// computes edge interpolation matrix
-    virtual void computeEdgeNMatrix (FloatMatrix &answer, int boundaryID, const FloatArray& lcoords);
+    virtual void computeEdgeNMatrix(FloatMatrix &answer, int boundaryID, const FloatArray &lcoords);
     /**
      * Computes surface interpolation matrix. Interpolation matrix provide way, how to compute
-     * local surface unknowns (nonzero element unknowns on surface) at any integration 
+     * local surface unknowns (nonzero element unknowns on surface) at any integration
      * point of surface, based on local unknowns in surface nodes.
      * Local coordinate system of surface edge and element surface numbering is element dependent.
      * The integration point is specified using two-dimensional iso coordinates, or using area coordinates
@@ -333,7 +333,7 @@ public:
      * @param boundaryID Surface number.
      * @param local coordinates
      */
-    virtual void computeSurfaceNMatrix (FloatMatrix &answer, int boundaryID, const FloatArray& lcoords);
+    virtual void computeSurfaceNMatrix(FloatMatrix &answer, int boundaryID, const FloatArray &lcoords);
 
 
     /**
@@ -376,7 +376,7 @@ protected:
      * @param tStep Time step.
      * @param mode determines response mode
      */
-    virtual void computePointLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode, bool global=true);
+    virtual void computePointLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode, bool global = true);
 
     /**
      * Assembles edge dof mapping mask, which provides mapping between edge local DOFs and "global" element
@@ -394,7 +394,7 @@ protected:
      * @param iSurf Surface number
      */
     virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const { answer.clear(); }
-    
+
     ///@todo Old, only kept until all el have changed to the above
     virtual IntegrationRule *GetSurfaceIntegrationRule(int order) { return NULL; }
     /**
@@ -508,6 +508,15 @@ protected:
      * @param what Integer array. If at i-th position is nonzero, then i-th component is condensed.
      */
     void condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray *load, IntArray *what);
+
+
+    /**
+     * Setup Integration Rule Gauss Points for Mass Matrix integration
+     */
+    virtual void setupIRForMassMtrxIntegration(IntegrationRule &iRule);
+
+
+
 
     friend class IDNLMaterial;
     friend class TrabBoneNL3D;

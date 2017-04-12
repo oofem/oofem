@@ -278,7 +278,7 @@ PFEMElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType typ
 //         IntArray mask;
 //         int indx = 1;
 //         answer.resize(3);
-//         this->giveElementDofIDMask(EID_MomentumBalance, mask);
+//         this->giveElementDofIDMask(EID_MomentBalance, mask);
 //         if ( mask.findFirstIndexOf(V_u) ) {
 //             answer.at(1) = indx++;
 //         }

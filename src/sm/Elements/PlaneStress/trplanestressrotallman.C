@@ -57,7 +57,7 @@ REGISTER_Element(TrPlanestressRotAllman);
 FEI2dTrQuad TrPlanestressRotAllman :: qinterpolation(1, 2);
 
 TrPlanestressRotAllman :: TrPlanestressRotAllman(int n, Domain *aDomain) :
-    TrPlaneStress2d(n, aDomain)
+    TrPlaneStress2d(n, aDomain), LayeredCrossSectionInterface()
 {
     numberOfDofMans  = 3;
     numberOfGaussPoints = 4;
@@ -66,12 +66,15 @@ TrPlanestressRotAllman :: TrPlanestressRotAllman(int n, Domain *aDomain) :
 Interface *
 TrPlanestressRotAllman :: giveInterface(InterfaceType interface)
 {
-    if ( interface == ZZNodalRecoveryModelInterfaceType ) {
+    if ( interface == LayeredCrossSectionInterfaceType ) {
+        return static_cast< LayeredCrossSectionInterface * >(this);
+    } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
         return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
         return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
         return static_cast< SpatialLocalizerInterface * >(this);
+   
     }
     return NULL;
 }
@@ -308,6 +311,27 @@ TrPlanestressRotAllman :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
     } else {
         OOFEM_ERROR("wrong edge number");
     }
+}
+
+//
+// layered cross section support functions
+//
+void
+TrPlanestressRotAllman :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep)
+// returns full 3d strain vector of given layer (whose z-coordinate from center-line is
+// stored in slaveGp) for given tStep
+{
+    double layerZeta, layerZCoord, top, bottom;
+
+    top    = this->giveCrossSection()->give(CS_TopZCoord, masterGp);
+    bottom = this->giveCrossSection()->give(CS_BottomZCoord, masterGp);
+    layerZeta = slaveGp->giveNaturalCoordinate(3);
+    layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
+    answer.resize(3); // {eps_xx,eps_yy,gamma_yz}
+
+    answer.at(1) = masterGpStrain.at(1) * layerZCoord;
+    answer.at(2) = masterGpStrain.at(2) * layerZCoord;
+    answer.at(3) = masterGpStrain.at(3);
 }
 
 void TrPlanestressRotAllman :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global)

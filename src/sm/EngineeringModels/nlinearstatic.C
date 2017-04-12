@@ -502,40 +502,32 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
     OOFEM_LOG_RELEVANT( "\n\nSolving       [step number %5d.%d, time = %e]\n\n", tStep->giveNumber(), tStep->giveVersion(), tStep->giveIntrinsicTime() );
 #endif
 
-    FloatArray extrapolatedForces;
-    FloatArray *extrapolatedForcesPtr = &extrapolatedForces;
     if ( this->initialGuessType == IG_Tangent ) {
 #ifdef VERBOSE
         OOFEM_LOG_RELEVANT("Computing initial guess\n");
 #endif
-        this->assembleExtrapolatedForces( extrapolatedForces, tStep, TangentStiffnessMatrix, this->giveDomain(di) );
+	FloatArray extrapolatedForces;
+        this->assemblePrescribedExtrapolatedForces( extrapolatedForces, tStep, TangentStiffnessMatrix, this->giveDomain(di) );
         extrapolatedForces.negated();
-
         this->updateComponent( tStep, NonLinearLhs, this->giveDomain(di) );
         SparseLinearSystemNM *linSolver = nMethod->giveLinearSolver();
         OOFEM_LOG_RELEVANT("solving for increment\n");
         linSolver->solve(*stiffnessMatrix, extrapolatedForces, incrementOfDisplacement);
         OOFEM_LOG_RELEVANT("initial guess found\n");
         totalDisplacement.add(incrementOfDisplacement);
-    } else if ( this->initialGuessType == IG_Original ) {
-        incrementOfDisplacement.zero();
-        this->assembleExtrapolatedForces( extrapolatedForces, tStep, ElasticStiffnessMatrix, this->giveDomain(di) );
-        extrapolatedForces.negated();
-        
     } else if ( this->initialGuessType != IG_None ) {
         OOFEM_ERROR("Initial guess type: %d not supported", initialGuessType);
     } else {
         incrementOfDisplacement.zero();
-        extrapolatedForcesPtr = NULL;
     }
 
     //totalDisplacement.printYourself();
     if ( initialLoadVector.isNotEmpty() ) {
-      numMetStatus = nMethod->solve(*stiffnessMatrix, incrementalLoadVector, & initialLoadVector, extrapolatedForcesPtr,
+      numMetStatus = nMethod->solve(*stiffnessMatrix, incrementalLoadVector, & initialLoadVector,
                                       totalDisplacement, incrementOfDisplacement, internalForces,
                                       internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, tStep);
     } else {
-      numMetStatus = nMethod->solve(*stiffnessMatrix, incrementalLoadVector, NULL, extrapolatedForcesPtr,
+      numMetStatus = nMethod->solve(*stiffnessMatrix, incrementalLoadVector, NULL,
                                       totalDisplacement, incrementOfDisplacement, internalForces,
                                       internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, tStep);
     }

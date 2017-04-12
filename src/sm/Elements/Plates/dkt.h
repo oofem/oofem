@@ -52,9 +52,9 @@ namespace oofem {
 class FEI2dTrLin;
 
 /**
- * This class implements an triangular Discrete Kirchhoff Theory (DKT) element.
- * This element is a plate element suitable for thin plates, as the traswerse shear strain energy is neglected.
- * The element has only 9 DOFs (w-displacement and rotations along coordinate axes) in each node
+ * This class implements an triangular Discrete Kirchhoff Theory (DKT) element. It can be defined only in xy plane.
+ * This element is a plate element suitable for thin plates, as the trasverse shear strain energy is neglected.
+ * The element has only 9 DOFs (w-displacement and in-plane rotations along coordinate axes) in each node
  * The derivation starts by assuming quadratic variations of rotation field (fi_x, fi_y)
  * The Kirchhoff hypothesis is imposed at vertices and in side mid nodes
  * The cubic variation of transwerse displacement is assumed along the edges, there is no need to define interpolation for w on the element.

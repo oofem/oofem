@@ -1100,8 +1100,8 @@ VTKXMLExportModule :: getNodalVariableFromIS(FloatArray &answer, Node *node, Tim
         answer.at(1) = valSize ? val->at(1) : 0.0;
     } else if ( valType == ISVT_VECTOR ) {
         answer = * val;
-        // bp: hack for BeamForceMomentumTensor, which should be splitted into force and momentum vectors
-        if (type == IST_BeamForceMomentumTensor) {
+        // bp: hack for BeamForceMomentTensor, which should be splitted into force and momentum vectors
+        if (type == IST_BeamForceMomentTensor) {
           answer.resizeWithValues(6);
         } else {
           answer.resizeWithValues(3);
@@ -2154,8 +2154,8 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
                     d->giveElement(ielem)->giveIPValue(value, gp, isttype, tStep);
 
                     if ( vtype == ISVT_VECTOR ) {
-                      // bp: hack for BeamForceMomentumTensor, which should be splitted into force and momentum vectors
-                      if (isttype == IST_BeamForceMomentumTensor) {
+                      // bp: hack for BeamForceMomentTensor, which should be splitted into force and momentum vectors
+                      if (isttype == IST_BeamForceMomentTensor) {
                         value.resizeWithValues(6);
                       } else {
                         value.resizeWithValues(3);
