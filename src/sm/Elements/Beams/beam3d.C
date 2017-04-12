@@ -1260,7 +1260,7 @@ Beam3d :: giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &
   for ( int i = 1; i <= n; i++ ) {
     isttype = ( InternalStateType ) internalVarsToExport.at(i);
     for (int nN = 1; nN <= nNodes; nN++) {
-      if ( isttype == IST_BeamForceMomentumTensor ) {
+      if ( isttype == IST_BeamForceMomentTensor ) {
 	FloatArray coords = vtkPieces[0].giveNodeCoords(nN);
 	FloatArray endForces;
 	this->giveInternalForcesVectorAtPoint(endForces, tStep, coords);

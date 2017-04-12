@@ -43,7 +43,6 @@
 #include "error.h"
 #include "classfactory.h"
 
-#include <mkl.h>
 
 namespace oofem {
 REGISTER_SparseLinSolver(PardisoProjectOrgSolver, ST_PardisoProjectOrg);
