@@ -772,15 +772,12 @@ Element :: printOutputAt(FILE *file, TimeStep *tStep)
         dman->printOutputAt(file, tStep);
     }
 
-    for ( auto &iRule: integrationRulesArray ) {
-
-      if (this->isActivated(tStep) ) {
-      
-        iRule->printOutputAt(file, tStep);
-
-      } else {
-	fprintf(file, "is not active in current time step\n");
+    if (this->isActivated(tStep) ) {
+      for ( auto &iRule: integrationRulesArray ) {
+	iRule->printOutputAt(file, tStep);
       }
+    } else {
+      fprintf(file, "is not active in current time step\n");
     }
 }
 

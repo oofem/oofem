@@ -498,18 +498,21 @@ StructuralElement :: computeResultingIPTemperatureAt(FloatArray &answer, TimeSte
     for ( int i = 1; i <= nbc; ++i ) {
 
       GeneralBoundaryCondition *bc = domain->giveBc(i);
-     
-      if  ( bc->giveSetNumber() && ( load = dynamic_cast< Load * >(bc) ) && bc->isImposed(tStep) ) {
-	if ( load->giveBCValType() == TemperatureBVT ) {
 
-	  Set *set = domain->giveSet( bc->giveSetNumber() );
-	  const IntArray &elements = set->giveElementList();
-
-	  if (elements.contains(this->giveNumber() ) ) {
+      if ( load = dynamic_cast< StructuralTemperatureLoad * >(bc) ) {
+	
+	if  ( bc->giveSetNumber() && bc->isImposed(tStep) ) {
+	  if ( load->giveBCValType() == TemperatureBVT ) {
+	    
+	    Set *set = domain->giveSet( bc->giveSetNumber() );
+	    const IntArray &elements = set->giveElementList();
+	    
+	    if (elements.contains(this->giveNumber() ) ) {
 	      load->computeValueAt(temperature, tStep, gCoords, mode);
 	      answer.add(temperature);
+	    }
 	  }
-        }
+	}
       }
     }
     
@@ -547,21 +550,22 @@ StructuralElement :: computeResultingIPEigenstrainAt(FloatArray &answer, TimeSte
     for ( int i = 1; i <= nbc; ++i ) {
 
       GeneralBoundaryCondition *bc = domain->giveBc(i);
-     
-      if  ( bc->giveSetNumber() && ( load = dynamic_cast< Load * >(bc) ) && bc->isImposed(tStep) ) {
-	if ( load->giveBCValType() == EigenstrainBVT ) {
 
-	  Set *set = domain->giveSet( bc->giveSetNumber() );
-	  const IntArray &elements = set->giveElementList();
-
-	  if (elements.contains(this->giveNumber() ) ) {
+      if  ( load = dynamic_cast< StructuralEigenstrainLoad * >(bc) ) {
+	if  ( bc->giveSetNumber() && bc->isImposed(tStep) ) {
+	  if ( load->giveBCValType() == EigenstrainBVT ) {
+	    
+	    Set *set = domain->giveSet( bc->giveSetNumber() );
+	    const IntArray &elements = set->giveElementList();
+	    
+	    if (elements.contains(this->giveNumber() ) ) {
 	      load->computeValueAt(eigenstrain, tStep, gCoords, mode);
 	      answer.add(eigenstrain);
+	    }
 	  }
-        }
+	}
       }
     }
-    
 }
 
 
