@@ -75,7 +75,7 @@ public:
                                           GaussPoint *gp,
                                           TimeStep *tStep);
 
-    virtual double giveIsotropicConductivity(GaussPoint *gp);
+    virtual double giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep);
 
     virtual double giveCharacteristicValue(MatResponseMode mode,
                                            GaussPoint *gp,
@@ -90,7 +90,7 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual double give(int aProperty, GaussPoint *gp);
+    virtual double give(int aProperty, GaussPoint *gp, TimeStep *tStep);
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
     double giveTemperature(GaussPoint *gp);
 };

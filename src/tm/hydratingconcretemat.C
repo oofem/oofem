@@ -135,7 +135,7 @@ double
 HydratingConcreteMat :: giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     if ( mode == Capacity ) {
-        return ( giveConcreteCapacity(gp) * giveConcreteDensity(gp) );
+        return ( giveConcreteCapacity(gp, tStep) * giveConcreteDensity(gp, tStep) );
     } else if ( mode == IntSource ) { //for nonlinear solver, return dHeat/dTemperature
         HydratingConcreteMatStatus *ms = static_cast< HydratingConcreteMatStatus * >( this->giveStatus(gp) );
         //it suffices to compute derivative of scaling Arrhenius equation with respect to temporary temperature
@@ -150,15 +150,15 @@ HydratingConcreteMat :: giveCharacteristicValue(MatResponseMode mode, GaussPoint
 }
 
 
-double HydratingConcreteMat :: giveIsotropicConductivity(GaussPoint *gp)
+double HydratingConcreteMat :: giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep)
 {
     HydratingConcreteMatStatus *ms = static_cast< HydratingConcreteMatStatus * >( this->giveStatus(gp) );
     double conduct;
 
     if ( conductivityType == 0 ) { //given from input file
-        conduct = IsotropicHeatTransferMaterial :: give('k', gp);
+        conduct = IsotropicHeatTransferMaterial :: give('k', gp, tStep);
     } else if ( conductivityType == 1 ) { //compute according to Ruiz, Schindler, Rasmussen. Kim, Chang: Concrete temperature modeling and strength prediction using maturity concepts in the FHWA HIPERPAV software, 7th international conference on concrete pavements, Orlando (FL), USA, 2001
-        conduct = IsotropicHeatTransferMaterial :: give('k', gp) * ( 1.0 - 0.33 / 1.33 * ms->giveDoHActual() );
+        conduct = IsotropicHeatTransferMaterial :: give('k', gp, tStep) * ( 1.0 - 0.33 / 1.33 * ms->giveDoHActual() );
     } else {
         OOFEM_ERROR("Unknown conductivityType %d\n", conductivityType);
         conduct = 0.;
@@ -175,12 +175,12 @@ double HydratingConcreteMat :: giveIsotropicConductivity(GaussPoint *gp)
 }
 
 //normally it returns J/kg/K of concrete
-double HydratingConcreteMat :: giveConcreteCapacity(GaussPoint *gp)
+double HydratingConcreteMat :: giveConcreteCapacity(GaussPoint *gp, TimeStep *tStep)
 {
     double capacityConcrete;
 
     if ( capacityType == 0 ) { //given from OOFEM input file
-        capacityConcrete = IsotropicHeatTransferMaterial :: give('c', gp);
+        capacityConcrete = IsotropicHeatTransferMaterial :: give('c', gp, tStep);
     } else if ( capacityType == 1 ) { ////calculate from 5-component model
         OOFEM_ERROR("Calculate from 5-component model, not implemented in capacityType %d\n", capacityType);
         capacityConcrete = 0.;
@@ -200,12 +200,12 @@ double HydratingConcreteMat :: giveConcreteCapacity(GaussPoint *gp)
 }
 
 
-double HydratingConcreteMat :: giveConcreteDensity(GaussPoint *gp)
+double HydratingConcreteMat :: giveConcreteDensity(GaussPoint *gp, TimeStep *tStep)
 {
     double concreteBulkDensity;
 
     if ( densityType == 0 ) { //get from input file
-        concreteBulkDensity = IsotropicHeatTransferMaterial :: give('d', gp);
+        concreteBulkDensity = IsotropicHeatTransferMaterial :: give('d', gp, tStep);
     } else if ( densityType == 1 ) { //calculate from 5-component model - not implemented
         OOFEM_ERROR("Calculate from 5-component model, not implemented in densityType %d\n", densityType);
         concreteBulkDensity = 0.;
@@ -381,7 +381,7 @@ HydratingConcreteMatStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     HydratingConcreteMat *mat = static_cast< HydratingConcreteMat * >( this->gp->giveMaterial() );
     TransportMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "   status {");
-    fprintf( file, "EvaluatingTime %e  DoH %f HeatPower %f [W/m3 of concrete] Temperature %f conductivity %f  capacity %f  density %f", tStep->giveIntrinsicTime(), this->giveDoHActual(), this->power, this->giveTempField().at(1), mat->giveIsotropicConductivity(this->gp), mat->giveConcreteCapacity(this->gp), mat->giveConcreteDensity(this->gp) );
+    fprintf( file, "EvaluatingTime %e  DoH %f HeatPower %f [W/m3 of concrete] Temperature %f conductivity %f  capacity %f  density %f", tStep->giveIntrinsicTime(), this->giveDoHActual(), this->power, this->giveTempField().at(1), mat->giveIsotropicConductivity(this->gp, tStep), mat->giveConcreteCapacity(this->gp, tStep), mat->giveConcreteDensity(this->gp, tStep) );
     fprintf(file, "}\n");
 }
 } // end namespace oofem

@@ -89,9 +89,9 @@ public:
 
     // post-processing
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-    virtual double giveIsotropicConductivity(GaussPoint *gp);
-    virtual double giveConcreteCapacity(GaussPoint *gp);
-    virtual double giveConcreteDensity(GaussPoint *gp);
+    virtual double giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep);
+    virtual double giveConcreteCapacity(GaussPoint *gp, TimeStep *tStep);
+    virtual double giveConcreteDensity(GaussPoint *gp, TimeStep *tStep);
     /// Type of hydration model, e.g. exponential curve, Cervera's model.
     int hydrationModelType;
     double maxModelIntegrationTime;

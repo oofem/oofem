@@ -66,19 +66,19 @@ IsotropicHeatTransferMaterial :: initializeFrom(InputRecord *ir)
 }
 
 double
-IsotropicHeatTransferMaterial :: give(int aProperty, GaussPoint *gp)
+IsotropicHeatTransferMaterial :: give(int aProperty, GaussPoint *gp, TimeStep *tStep)
 //
 // Returns the value of the property aProperty (e.g. 'k' the conductivity of the receiver).
 //
 {
-    if ( aProperty == 'k' ) { //thermal conductivity [W/m/K]
-        return conductivity.eval( { { "te", giveTemperature(gp) } }, this->giveDomain(), gp, giveTemperature(gp) );
+    if ( aProperty == 'k' ) { //thermal conductivity [W/m/K]   
+        return conductivity.eval( { { "te", giveTemperature(gp) }, { "t", tStep->giveIntrinsicTime() } }, this->giveDomain(), gp, giveTemperature(gp) );
     } else if ( aProperty == 'c' ) { //mass-specific heat capacity [J/kg/K]
-        return capacity.eval( { { "te", giveTemperature(gp) } }, this->giveDomain(), gp, giveTemperature(gp) );
+        return capacity.eval( { { "te", giveTemperature(gp) }, { "t", tStep->giveIntrinsicTime() } }, this->giveDomain(), gp, giveTemperature(gp) );
     } else if ( aProperty == 'd' && density.isDefined() ) { //density [kg/m3]
-        return density.eval( { { "te", giveTemperature(gp) } }, this->giveDomain(), gp, giveTemperature(gp) );
+        return density.eval( { { "te", giveTemperature(gp) }, { "t", tStep->giveIntrinsicTime() } }, this->giveDomain(), gp, giveTemperature(gp) );
     } else if ( aProperty == HeatCapaCoeff ) { //volume-specific heat capacity [J/m3/K]
-        return ( this->give('c', gp) * this->give('d', gp) );
+        return ( this->give('c', gp, tStep) * this->give('d', gp, tStep) );
     }
 
     return this->Material :: give(aProperty, gp);
@@ -94,7 +94,7 @@ IsotropicHeatTransferMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *
     ms->setTempGradient(grad);
 
     ///@todo Shouldn't the conductivity typically depend on the primary field and/or its gradient?
-    answer.beScaled(-this->giveIsotropicConductivity(gp), grad);
+    answer.beScaled(-this->giveIsotropicConductivity(gp, tStep), grad);
 
     ms->setTempFlux(answer);
 }
@@ -110,7 +110,7 @@ IsotropicHeatTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
      * returns constitutive (conductivity) matrix of receiver
      */
     MaterialMode mMode = gp->giveMaterialMode();
-    double cond = this->giveIsotropicConductivity(gp);
+    double cond = this->giveIsotropicConductivity(gp, tStep);
 
     switch  ( mMode ) {
     case _1dHeat:
@@ -135,8 +135,8 @@ IsotropicHeatTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 }
 
 double
-IsotropicHeatTransferMaterial :: giveIsotropicConductivity(GaussPoint *gp) {
-    return give('k', gp);
+IsotropicHeatTransferMaterial :: giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep) {
+    return give('k', gp, tStep);
 }
 
 double
@@ -145,7 +145,7 @@ IsotropicHeatTransferMaterial :: giveCharacteristicValue(MatResponseMode mode,
                                                          TimeStep *tStep)
 {
     if ( mode == Capacity ) {
-        return ( this->give('c', gp) * this->give('d', gp) );
+        return ( this->give('c', gp, tStep) * this->give('d', gp, tStep) );
     } else {
         OOFEM_ERROR("unknown mode (%s)", __MatResponseModeToString(mode) );
     }
@@ -163,10 +163,27 @@ IsotropicHeatTransferMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp,
         return 1;
     }
 
+    if ( type == IST_Temperature ) {
+        answer = FloatArray{ this->giveTemperature(gp) };
+        return 1;
+    } else if ( type == IST_Density ) {
+        answer = FloatArray{ this->give('d', gp, tStep) };
+        return 1;
+    } else if ( type == IST_HeatCapacity ) {
+        answer = FloatArray{ this->give('c', gp, tStep) };
+        return 1;
+    } else if ( type == IST_ThermalConductivityIsotropic ) {
+        answer = FloatArray{ this->give('k', gp, tStep) };
+        return 1;
+    }
+
     return TransportMaterial :: giveIPValue(answer, gp, type, tStep);
 }
 
-// standa changes
+
+
+
+
 
 MaterialStatus *
 IsotropicHeatTransferMaterial :: CreateStatus(GaussPoint *gp) const
