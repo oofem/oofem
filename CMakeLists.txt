@@ -62,6 +62,10 @@ set (ELIXIR_DIR CACHE PATH "Manual Elixir directory (OOFEG only)")
 set (CKIT_DIR CACHE PATH "Manual CKit directory (OOFEG only)")
 set (METIS_DIR CACHE PATH "Manual Metis directory (Load balancing)")
 set (PARMETIS_DIR CACHE PATH "Manual ParMetis directory (Load balancing)")
+#intel mkl pardiso
+set (Intel_MKL_PARDISO_DIR CACHE PATH "Manual mkl pardiso directory (sparse direct solver)")
+#pardiso-project.org
+set (PARDISO_ORG_DIR CACHE PATH "Manual pardiso-project.org directory (sparse direct solver)")
 #set (BOOST_DIR CACHE PATH "Manual Boost directory")
 
 #######################################################################
@@ -83,7 +87,8 @@ option (USE_OPENMP "Compile with OpenMP support (for parallel assembly)" OFF)
 option (USE_DSS "Enable DSS module" OFF) # No reason to use this
 option (USE_IML "Enable iml++ solvers" OFF) # or this
 option (USE_SPOOLES "Enable SPOOLES-solver" OFF) # or this
-option (USE_MKLPARDISO "Enable MKLPARDISO solver support" OFF)
+option (USE_INTEL_MKLPARDISO "Enable MKLPARDISO solver support" OFF)
+option (USE_PARDISO_ORG "Enable PARDISO-project.org solver support" OFF)
 option (USE_PETSC "Enable PETSc support (required for parallel)" OFF)
 option (USE_SLEPC "Enable SLEPc support" OFF)
 option (USE_LAPACK "Use LAPACK" OFF)
@@ -311,7 +316,21 @@ if (USE_METIS)
     list (APPEND MODULE_LIST "metis")
 endif ()
 
-if (USE_MKLPARDISO)
+if (USE_PARDISO_ORG)
+    if (PARDISO_ORG_DIR)
+        find_library (PARDISO_ORG_LIB pardiso PATH "${PARDISO_ORG_DIR}")
+    else ()
+        find_library (PARDISO_ORG_LIB pardiso)
+    endif ()
+    if (${PARDISO_ORG_LIB} STREQUAL "PARDISO_ORG_LIB-NOTFOUND")
+        message (FATAL_ERROR "Pardiso library not found")
+    endif ()
+    list (APPEND EXT_LIBS ${PARDISO_ORG_LIB} blas lapack gfortran pthread)
+    set (CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILES_FLAGS} -fopenmp ) 
+    list (APPEND MODULE_LIST "pardiso-project.org")
+endif ()
+
+if (USE_INTEL_MKL_PARDISO)
     # Find the actual libraries:
     list(APPEND MKL_LIBS "mkl_core" "mkl_gf_lp64" "mkl_gnu_thread" "pthread")
     foreach (f ${MKL_LIBS})
@@ -327,7 +346,6 @@ if (USE_MKLPARDISO)
         endif ()
         list (APPEND EXT_LIBS ${${f}_LIB})
     endforeach ()
-
     #list (APPEND EXT_LIBS ${MKLPARDISO_LIB})
     list (APPEND MODULE_LIST "MKLPARDISO")
 endif ()

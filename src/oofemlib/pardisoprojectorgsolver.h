@@ -32,28 +32,36 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef linsystsolvertype_h
-#define linsystsolvertype_h
+#ifndef pardisoprojectorgsolver_h
+#define pardisoprojectorgsolver_h
+
+#include "sparselinsystemnm.h"
 
 namespace oofem {
+
 /**
- * The values of this type should be related not to specific solvers,
- * but more to specific packages that provide linear solver interface
- * (possibly with many solver types) and are represented by a class
- * derived from SparseLinearSystemNM.
- * The selection of particular solver from package should be done using keywords,
- * related to particular package.
+ * Implements the solution of linear system of equation in the form @f$ A\cdot x=b @f$ using solvers
+ * from Pardiso-project.org. Adapted from mklpardisosolver implementation by M. Ohman
+ * Only works with the CSC (compressed sparse column) sparse matrix implementation.
+ * 
  */
-enum LinSystSolverType {
-    ST_Direct = 0,
-    ST_IML    = 1,
-    ST_Spooles= 2,
-    ST_Petsc  = 3,
-    ST_DSS    = 4,
-    ST_Feti   = 5,
-    ST_MKLPardiso = 6,
-    ST_SuperLU_MT = 7,
-    ST_PardisoProjectOrg = 8 // experimental
+class OOFEM_EXPORT PardisoProjectOrgSolver : public SparseLinearSystemNM
+{
+public:
+    /**
+     * Constructor.
+     * @param d Domain which solver belongs to.
+     * @param m Engineering model which solver belongs to.
+     */
+    PardisoProjectOrgSolver(Domain * d, EngngModel * m);
+
+    virtual ~PardisoProjectOrgSolver();
+
+    virtual NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x);
+
+    virtual const char *giveClassName() const { return "PardisoProjectOrgSolver"; }
+    virtual LinSystSolverType giveLinSystSolverType() const { return ST_PardisoProjectOrg; }
+    virtual SparseMtrxType giveRecommendedMatrix(bool symmetric) const { return SMT_CompCol; }
 };
 } // end namespace oofem
-#endif // linsystsolvertype_h
+#endif // pardisoprojectorgsolver_h
