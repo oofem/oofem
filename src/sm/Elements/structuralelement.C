@@ -55,6 +55,7 @@
 #include "mathfem.h"
 #include "materialmapperinterface.h"
 #include "unknownnumberingscheme.h"
+#include "set.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -474,6 +475,7 @@ StructuralElement :: computeResultingIPTemperatureAt(FloatArray &answer, TimeSte
     int n, nLoads;
     Load *load;
     FloatArray gCoords, temperature;
+    int nbc = domain->giveNumberOfBoundaryConditions();
 
     if ( this->computeGlobalCoordinates( gCoords, gp->giveNaturalCoordinates() ) == 0 ) {
         OOFEM_ERROR("computeGlobalCoordinates failed");
@@ -489,6 +491,28 @@ StructuralElement :: computeResultingIPTemperatureAt(FloatArray &answer, TimeSte
             answer.add(temperature);
         }
     }
+
+
+    // new approach using sets
+
+    for ( int i = 1; i <= nbc; ++i ) {
+
+      GeneralBoundaryCondition *bc = domain->giveBc(i);
+     
+      if  ( bc->giveSetNumber() && ( load = dynamic_cast< Load * >(bc) ) && bc->isImposed(tStep) ) {
+	if ( load->giveBCValType() == TemperatureBVT ) {
+
+	  Set *set = domain->giveSet( bc->giveSetNumber() );
+	  const IntArray &elements = set->giveElementList();
+
+	  if (elements.contains(this->giveNumber() ) ) {
+	      load->computeValueAt(temperature, tStep, gCoords, mode);
+	      answer.add(temperature);
+	  }
+        }
+      }
+    }
+    
 }
 
 void
@@ -498,12 +522,16 @@ StructuralElement :: computeResultingIPEigenstrainAt(FloatArray &answer, TimeSte
     int n, nLoads;
     Load *load;
     FloatArray gCoords, eigenstrain;
+    int nbc = domain->giveNumberOfBoundaryConditions();
 
     if ( this->computeGlobalCoordinates( gCoords, gp->giveNaturalCoordinates() ) == 0 ) {
         OOFEM_ERROR("computeGlobalCoordinates failed");
     }
 
     answer.clear();
+
+    // old approach preserved for compatibility
+
     nLoads = this->giveBodyLoadArray()->giveSize();
     for ( int i = 1; i <= nLoads; i++ ) {
         n = bodyLoadArray.at(i);
@@ -513,6 +541,27 @@ StructuralElement :: computeResultingIPEigenstrainAt(FloatArray &answer, TimeSte
             answer.add(eigenstrain);
         }
     }
+
+    // new approach using sets
+
+    for ( int i = 1; i <= nbc; ++i ) {
+
+      GeneralBoundaryCondition *bc = domain->giveBc(i);
+     
+      if  ( bc->giveSetNumber() && ( load = dynamic_cast< Load * >(bc) ) && bc->isImposed(tStep) ) {
+	if ( load->giveBCValType() == EigenstrainBVT ) {
+
+	  Set *set = domain->giveSet( bc->giveSetNumber() );
+	  const IntArray &elements = set->giveElementList();
+
+	  if (elements.contains(this->giveNumber() ) ) {
+	      load->computeValueAt(eigenstrain, tStep, gCoords, mode);
+	      answer.add(eigenstrain);
+	  }
+        }
+      }
+    }
+    
 }
 
 

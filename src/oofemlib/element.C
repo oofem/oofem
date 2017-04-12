@@ -773,7 +773,14 @@ Element :: printOutputAt(FILE *file, TimeStep *tStep)
     }
 
     for ( auto &iRule: integrationRulesArray ) {
+
+      if (this->isActivated(tStep) ) {
+      
         iRule->printOutputAt(file, tStep);
+
+      } else {
+	fprintf(file, "is not active in current time step\n");
+      }
     }
 }
 

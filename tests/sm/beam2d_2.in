@@ -27,7 +27,6 @@ BoundaryCondition 2 loadTimeFunction 1 dofs 1 3 values 1 0.0 set 3
 ConstantEdgeLoad 3 loadTimeFunction 1 Components 3 0.0 2.5 0.0 loadType 3 set 4
 NodalLoad 4 loadTimeFunction 1 dofs 3 1 3 5 Components 3 20.0 00.0 0.0 set 5
 NodalLoad 5 loadTimeFunction 1 dofs 3 1 3 5 Components 3 0.0 6.0 0.0 set 6
-#StructTemperatureLoad 5 loadTimeFunction 3 Components 2 30.0 -20.0
 ConstantFunction 1 f(t) 1.
 Set 1 elementranges {(1 6)}
 Set 2 nodes 2 1 4

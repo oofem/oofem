@@ -11,27 +11,28 @@ errorcheck
 domain 2dPlaneStress
 #
 OutputManager tstep_all dofman_all element_all
-ndofman 4 nelem 2 ncrosssect 1 nmat 2 nbc 2 nic 0 nltf 2
+ndofman 4 nelem 2 ncrosssect 2 nmat 2 nbc 3 nic 0 nltf 2 nset 3
 #
 #
 # NODES
 #
-node   1   coords 2  0.0  0.0  bc 2   1   1 
-node   2   coords 2  0.1  0.0  bc 2   1   1 
-node   3   coords 2  0.0  0.1  bc 2   1   1 
-node   4   coords 2  0.1  0.1  bc 2   1   1 
+node   1   coords 2  0.0  0.0  
+node   2   coords 2  0.1  0.0  
+node   3   coords 2  0.0  0.1  
+node   4   coords 2  0.1  0.1  
 #
 #
 # ELEMENTS
 #
-Truss2d   1   nodes 2   1 2    crossSect 1 mat 1  cs 1 bodyLoads 1 2
+Truss2d   1   nodes 2   1 2   cs 1
 #
-Truss2d   2   nodes 2   3 4    crossSect 1 mat 2  cs 1 bodyLoads 1 2
+Truss2d   2   nodes 2   3 4   cs 1
 #
 #
 # CROSSECTION
 #
-SimpleCS 1 thick 1.0 area 0.001
+SimpleCS 1 thick 1.0 area 0.001 material 1 set 1
+SimpleCS 2 thick 1.0 area 0.001 material 2 set 2
 #
 #
 # MATERIAL
@@ -40,15 +41,21 @@ SteelRelaxMat 1 d 0. E 200.e3 ReinfClass 1 timeFactor 1. charStrength 1000. appr
 SteelRelaxMat 2 d 0. E 200.e3 ReinfClass 1 timeFactor 1. charStrength 1000. approach 1
 #
 #
-BoundaryCondition 1     loadTimeFunction 1 prescribedvalue 0.
+StructEigenstrainLoad 1 loadTimeFunction 2 Components 1 -4.e-3 set 1
+StructEigenstrainLoad 2 loadTimeFunction 2 Components 1 -4.e-3 set 2
 #
-StructEigenstrainLoad 2 loadTimeFunction 2 Components 1 -4.e-3
+BoundaryCondition 3 loadTimeFunction 1 dofs 2 1 2 values 2 0. 0. set 3
+#
 #
 #
 # TIME FUNCTION
 #
 ConstantFunction 1 f(t) 1.0
 HeavisideLTF 2 origin 0.0 value 1.0
+#
+set 1 elements 1 1
+set 2 elements 1 2
+set 3 nodes 4  1 2 3 4
 #
 #TIME
 #%BEGIN_CHECK% tolerance 5.e-3
