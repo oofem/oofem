@@ -893,7 +893,9 @@ Beam3d :: giveInterface(InterfaceType interface)
         return static_cast< FiberedCrossSectionInterface * >( this );
     } else if (interface == Beam3dSubsoilMaterialInterfaceType ) {
         return static_cast< Beam3dSubsoilMaterialInterface * >( this );
-    }      
+    } else if (interface == VTKXMLExportModuleElementInterfaceType) {
+        return static_cast< VTKXMLExportModuleElementInterface * >( this );
+    }    
 
     return NULL;
 }
@@ -989,7 +991,314 @@ Beam3d :: computeSubSoilStiffnessMatrix(FloatMatrix &answer,
     answer.symmetrized();
 }
 
+int
+Beam3d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords, const FloatArray &pCoords)
+{
+    double ksi, n1, n2;
+
+    ksi = lcoords.at(1);
+    n1  = ( 1. - ksi ) * 0.5;
+    n2  = ( 1. + ksi ) * 0.5;
+
+    answer.resize(3);
+    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 * pCoords.at(1);
+    answer.at(2) = n1 * this->giveNode(1)->giveCoordinate(2) + n2 * pCoords.at(2);
+    answer.at(3) = n1 * this->giveNode(1)->giveCoordinate(3) + n2 * pCoords.at(3);
+
+    return 1;
+}
+
+void
+Beam3d :: giveInternalForcesVectorAtPoint(FloatArray &answer, TimeStep *tStep, FloatArray &coords)
+{
+
+    // computes exact global end-forces vector
+    FloatArray loadEndForces, iF;
+    IntArray leftIndx = {1, 2 , 3, 4, 5 , 6};    
+    this->giveEndForcesVector(iF, tStep);
+
+    answer.beSubArrayOf(iF, leftIndx);
+    Node *nodeA;
+    
+    nodeA   = this->giveNode(1);
+    double dx      = nodeA->giveCoordinate(1) - coords.at(1);
+    double dy      = nodeA->giveCoordinate(2) - coords.at(2);
+    double dz      = nodeA->giveCoordinate(3) - coords.at(3);
+    double ds  = sqrt(dx * dx + dy * dy + dz * dz);
+
+    answer.at(5) += iF.at(3)*ds;
+    answer.at(6) -= iF.at(2)*ds;
+    
+
+
+    // loop over body load array first
+    int nBodyLoads = this->giveBodyLoadArray()->giveSize();
+    FloatArray help;
+
+    for ( int i = 1; i <= nBodyLoads; i++ ) {
+        int id = bodyLoadArray.at(i);
+        Load *load = domain->giveLoad(id);
+        bcGeomType ltype = load->giveBCGeoType();
+        if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ForceLoadBVT ) ) {
+            this->computeInternalForcesFromBodyLoadVectorAtPoint(help,load, tStep, VM_Total, coords, ds); // this one is local
+            answer.add(help);
+        } else {
+            if ( load->giveBCValType() != TemperatureBVT && load->giveBCValType() != EigenstrainBVT ) {
+                // temperature and eigenstrain is handled separately at computeLoadVectorAt subroutine
+                OOFEM_ERROR("body load %d is of unsupported type (%d)", id, ltype);
+            }
+        }
+    }
+
+    // loop over boundary load array
+    int nBoundaryLoads = this->giveBoundaryLoadArray()->giveSize() / 2;
+    for ( int i = 1; i <= nBoundaryLoads; i++ ) {
+        int n = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
+        int id = boundaryLoadArray.at(i * 2);
+        Load *load = domain->giveLoad(n);
+	BoundaryLoad* bLoad;
+	if ((bLoad = dynamic_cast<BoundaryLoad*> (load))) {
+	  bcGeomType ltype = load->giveBCGeoType();
+	  if ( ltype == EdgeLoadBGT ) {
+            this->computeInternalForcesFromBoundaryEdgeLoadVectorAtPoint(help, bLoad, id,
+                                                                         ExternalForcesVector, VM_Total, tStep, coords, ds, false);
+            answer.add(help);
+
+	  } else {
+            OOFEM_ERROR("boundary load %d is of unsupported type (%d)", id, ltype);
+	  }
+	}
+    }
+    // add exact end forces due to nonnodal loading
+    //    this->computeForceLoadVectorAt(loadEndForces, tStep, VM_Total, coords); // will compute only contribution of loads applied directly on receiver (not using sets)
+    if ( loadEndForces.giveSize() ) {
+        answer.subtract(loadEndForces);
+    }
+
+    // add exact end forces due to nonnodal loading applied indirectly (via sets)
+    BCTracker *bct = this->domain->giveBCTracker();
+    BCTracker::entryListType bcList = bct->getElementRecords(this->number);
+
+    for (BCTracker::entryListType::iterator it = bcList.begin(); it != bcList.end(); ++it) {
+      GeneralBoundaryCondition *bc = this->domain->giveBc((*it).bcNumber);
+      BodyLoad *bodyLoad;
+      BoundaryLoad *boundaryLoad;
+      if (bc->isImposed(tStep)) {
+        if ((bodyLoad = dynamic_cast<BodyLoad*>(bc))) { // body load
+          this->computeInternalForcesFromBodyLoadVectorAtPoint(help,bodyLoad, tStep, VM_Total, coords, ds); // this one is local
+          //answer.subtract(help);
+        } else if ((boundaryLoad = dynamic_cast<BoundaryLoad*>(bc))) {
+          // compute Boundary Edge load vector in GLOBAL CS !!!!!!!
+          this->computeInternalForcesFromBoundaryEdgeLoadVectorAtPoint(help, boundaryLoad, (*it).boundaryId,
+								       ExternalForcesVector, VM_Total, tStep, coords, ds, false);
+	}
+	answer.add(help);
+      }
+    }
 
 
 
+    
+    if (subsoilMat) {
+      // @todo: linear subsoil assumed here; more general approach should integrate internal forces
+      FloatMatrix k;
+      FloatArray u, F;
+      this->computeSubSoilStiffnessMatrix(k, TangentStiffness, tStep);
+      this->computeVectorOf(VM_Total, tStep, u);
+      F.beProductOf(k, u);
+      answer.add(F);
+    }
+
+
+    answer.times(-1);
+
+}
+
+  
+void
+Beam3d :: computeInternalForcesFromBoundaryEdgeLoadVectorAtPoint(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep, FloatArray &pointCoords, double ds, bool global)
+{
+    answer.clear();
+
+    if ( edge != 1 ) {
+        OOFEM_ERROR("Beam3D only has 1 edge (the midline) that supports loads. Attempted to apply load to edge %d", edge);
+    }
+
+    if ( type != ExternalForcesVector ) {
+        return;
+    }
+
+    FloatArray coords, t;
+    FloatMatrix T;
+
+
+    for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
+	this->computeGlobalCoordinates(coords, lcoords, pointCoords);
+        if ( load ) {
+            load->computeValues(t, tStep, coords, {D_u, D_v, D_w, R_u, R_v, R_w}, mode);
+        } else {
+            load->computeValues(t, tStep, lcoords, {D_u, D_v, D_w, R_u, R_v, R_w}, mode);
+        }
+
+        if ( load->giveCoordSystMode() == Load :: CST_Global ) {
+            if ( this->computeLoadGToLRotationMtrx(T) ) {
+                t.rotatedWith(T, 'n');
+            }
+        }
+
+
+        double dl = gp->giveWeight() * 0.5 * ds;
+	FloatArray f;
+	f = t;
+	f.at(5) += f.at(3) * (lcoords.at(1)+1)*ds/2;
+	f.at(6) -= f.at(2) * (lcoords.at(1)+1)*ds/2;
+        answer.add(dl, f);
+    }
+
+    if (global) {
+      // Loads from sets expects global c.s.
+      this->computeGtoLRotationMatrix(T);
+      answer.rotatedWith(T, 't');
+    }
+}
+
+void
+Beam3d :: computeInternalForcesFromBodyLoadVectorAtPoint(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode, FloatArray &pointCoords, double ds)
+// Computes numerically the load vector of the receiver due to the body
+// loads, at tStep.
+// load is assumed to be in global cs.
+// load vector is then transformed to coordinate system in each node.
+// (should be global coordinate system, but there may be defined
+//  different coordinate system in each node)
+{
+    double dens, dV;
+    FloatArray force, ntf;
+    FloatMatrix n, T;
+    FloatArray lc(1);
+    
+    if ( ( forLoad->giveBCGeoType() != BodyLoadBGT ) || ( forLoad->giveBCValType() != ForceLoadBVT ) ) {
+        OOFEM_ERROR("unknown load type");
+    }
+    
+    // note: force is assumed to be in global coordinate system.
+    forLoad->computeComponentArrayAt(force, tStep, mode);
+    force.times( this->giveCrossSection()->give(CS_Area, lc, this) );
+    // transform from global to element local c.s
+    if ( this->computeLoadGToLRotationMtrx(T) ) {
+        force.rotatedWith(T, 'n');
+    }
+
+    answer.clear();
+
+    if ( force.giveSize() ) {
+        for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
+	  const FloatArray &lcoords = gp->giveNaturalCoordinates();
+            this->computeNmatrixAt(gp->giveSubPatchCoordinates(), n);
+            dV  = gp->giveWeight() * 0.5 * ds;
+            dens = this->giveCrossSection()->give('d', gp);
+	    FloatArray iF;
+	    iF = force;
+	    iF.at(5) += force.at(3) *  (lcoords.at(1)+1)*ds/2;
+	    iF.at(6) -= force.at(2) *  (lcoords.at(1)+1)*ds/2;
+            answer.add(dV * dens, iF);
+        }
+    } else {
+        return;
+    }
+
+
+
+}
+
+
+void
+Beam3d :: giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep )
+{
+  
+
+  // divide element into several small ones
+  vtkPieces.resize(1);
+  vtkPieces[0].setNumberOfCells(Beam3d_nSubBeams);
+  int nNodes = 2 * Beam3d_nSubBeams;
+  vtkPieces[0].setNumberOfNodes(nNodes);
+  FloatArray nodeXi(nNodes), xi(1);
+
+  Node *nodeA, *nodeB;
+  nodeA = this->giveNode(1);
+  nodeB   = this->giveNode(2);
+  double dx = (nodeB->giveCoordinate(1) - nodeA->giveCoordinate(1))/Beam3d_nSubBeams;
+  double dy = (nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2))/Beam3d_nSubBeams;
+  double dz = (nodeB->giveCoordinate(3) - nodeA->giveCoordinate(3))/Beam3d_nSubBeams;
+  FloatArray coords(3);
+  int nodeNumber = 1;
+  int val = 1;
+  int offset = 0;
+  IntArray connectivity(2);
+  for (int i = 0; i < Beam3d_nSubBeams; i++) {
+    for (int j = 0; j < 2; j++) {
+      coords.at(1) = nodeA->giveCoordinate(1) + (i+j) * dx; 
+      coords.at(2) = nodeA->giveCoordinate(2) + (i+j) * dy;
+      coords.at(3) = nodeA->giveCoordinate(3) + (i+j) * dz;
+      vtkPieces[0].setNodeCoords(nodeNumber,coords);
+      nodeXi.at(nodeNumber) = -1.0+(2.0/Beam3d_nSubBeams)*(i+j);
+      nodeNumber++;
+      connectivity.at(j+1) = val++;
+      
+    }
+    vtkPieces[0].setConnectivity(i+1, connectivity);
+    offset += 2;
+    vtkPieces[0].setOffset(i+1, offset);
+    vtkPieces[0].setCellType(i+1,3);
+  }
+
+
+  
+  InternalStateType isttype;
+  int n = internalVarsToExport.giveSize();
+  vtkPieces[0].setNumberOfInternalVarsToExport(n, nNodes);
+  for ( int i = 1; i <= n; i++ ) {
+    isttype = ( InternalStateType ) internalVarsToExport.at(i);
+    for (int nN = 1; nN <= nNodes; nN++) {
+      if ( isttype == IST_BeamForceMomentumTensor ) {
+	FloatArray coords = vtkPieces[0].giveNodeCoords(nN);
+	FloatArray endForces;
+	this->giveInternalForcesVectorAtPoint(endForces, tStep, coords);
+	vtkPieces[0].setInternalVarInNode( i, nN, endForces );
+      } else {
+	fprintf( stderr, "VTKXMLExportModule::exportIntVars: unsupported variable type %s\n", __InternalStateTypeToString(isttype) );
+      }
+    }
+  }
+
+  primaryVarsToExport.giveSize();
+  vtkPieces[0].setNumberOfPrimaryVarsToExport(n, nNodes);
+  for ( int i = 1; i <= n; i++ ) {
+    UnknownType utype = (UnknownType) primaryVarsToExport.at(i);
+    if ( utype == DisplacementVector ) {
+      FloatMatrix Tgl, n;
+      FloatArray d(3);
+      
+      this->B3SSMI_getUnknownsGtoLRotationMatrix(Tgl);
+      for (int nN = 1; nN <= nNodes; nN++) {
+        FloatArray u, dl, dg;
+        this->computeVectorOf(VM_Total, tStep, u);
+        xi.at(1) = nodeXi.at(nN);
+        this->computeNmatrixAt(xi, n);
+        dl.beProductOf(n,u); // local interpolated displacement
+        dg.beTProductOf(Tgl, dl); // local displacement tranformed to global c.s.
+        d.at(1)=dg.at(1); d.at(2)=dg.at(2); d.at(3)=dg.at(3); 
+	vtkPieces[0].setPrimaryVarInNode( i, nN, d );
+      }
+    } else {
+      fprintf( stderr, "VTKXMLExportModule::exportPrimaryVars: unsupported variable type %s\n", __UnknownTypeToString(utype) );
+    }
+  }
+
+}
+
+
+
+
+  
 } // end namespace oofem
