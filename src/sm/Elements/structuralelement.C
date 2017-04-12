@@ -499,7 +499,7 @@ StructuralElement :: computeResultingIPTemperatureAt(FloatArray &answer, TimeSte
 
       GeneralBoundaryCondition *bc = domain->giveBc(i);
 
-      if ( load = dynamic_cast< StructuralTemperatureLoad * >(bc) ) {
+      if (( load = dynamic_cast< StructuralTemperatureLoad * >(bc) )) {
 	
 	if  ( bc->giveSetNumber() && bc->isImposed(tStep) ) {
 	  if ( load->giveBCValType() == TemperatureBVT ) {
@@ -551,7 +551,7 @@ StructuralElement :: computeResultingIPEigenstrainAt(FloatArray &answer, TimeSte
 
       GeneralBoundaryCondition *bc = domain->giveBc(i);
 
-      if  ( load = dynamic_cast< StructuralEigenstrainLoad * >(bc) ) {
+      if  (( load = dynamic_cast< StructuralEigenstrainLoad * >(bc) )) {
 	if  ( bc->giveSetNumber() && bc->isImposed(tStep) ) {
 	  if ( load->giveBCValType() == EigenstrainBVT ) {
 	    
