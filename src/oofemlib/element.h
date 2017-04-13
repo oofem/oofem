@@ -171,7 +171,7 @@ protected:
 
     /// Transformation material matrix, used in orthotropic and anisotropic materials, global->local transformation
     FloatMatrix elemLocalCS;
-
+  
     /// Element activity time function. If defined, nonzero value indicates active receiver, zero value inactive element.
     int activityTimeFunction;
 
@@ -641,6 +641,12 @@ public:
     /// @return Reference to the associated crossSection of element.
     CrossSection *giveCrossSection();
     /**
+     * Sets the material of receiver.
+     * @param matIndx Index of new material.
+     */
+    void setMaterial(int matIndx) { this->material = matIndx; }
+        
+	/**
      * Sets the cross section model of receiver.
      * @param csIndx Index of new cross section.
      */

@@ -269,7 +269,7 @@ protected:
     //  Exports single internal variable by smoothing.
     //
 
-    void setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int region);
+    virtual void setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int region);
     void writeIntVars(VTKPiece &vtkPiece);
     void writeXFEMVars(VTKPiece &vtkPiece);
     void writePrimaryVars(VTKPiece &vtkPiece);
@@ -313,7 +313,7 @@ protected:
      * If mode == 1 then regionNodalNumbers is array with mapping from local to global numbering.
      * The i-th value contains the corresponding global node number.
      */
-    int initRegionNodeNumbering(IntArray &mapG2L, IntArray &mapL2G,
+    virtual int initRegionNodeNumbering(IntArray &mapG2L, IntArray &mapL2G,
                                 int &regionDofMans, 
 				int &totalcells,
                                 Domain *domain, TimeStep *tStep, int reg);

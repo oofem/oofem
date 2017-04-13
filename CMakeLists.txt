@@ -32,6 +32,7 @@ if (MSVC)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W4 -wd4786 -wd4100 -wd4996 -wd4706 -wd4512 -wd4251 -wd4800")
 else ()
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fPIC")
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC")
 endif ()
 # Check with more compilers as time go on
 if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.7)
@@ -103,6 +104,7 @@ option (USE_FM "Enable fluid mechanics module" ON)
 option (USE_PFEM "Enable PFEM module" OFF)
 option (USE_TM "Enable heat/mass transfer module" ON)
 option (USE_CEMHYD "Enable CemHyd support" OFF)
+option (USE_T3D "Enable T3D support" OFF)
 #option (USE_BOOST "Enable Boost" OFF)
 option (USE_PYTHON_BINDINGS "Enable Python bidings (OOFEM usable from Python). Implies USE_PYTHON." OFF)
 option (USE_PYTHON "Enable Python to be used inside OOFEM (e.g. userdef Dirichlet BCs)" OFF)
@@ -117,6 +119,7 @@ endif ()
 #######################################################################
 # I believe the subdirs should be used when including instead.
 include_directories ("${oofem_SOURCE_DIR}/src/oofemlib")
+include_directories ("${oofem_SOURCE_DIR}/src/oofemlib/T3d/src")
 include_directories ("${oofem_BINARY_DIR}")
 
 # Is there really any reason not to compile all of them? Some has cross dependencies.
@@ -424,6 +427,17 @@ if (USE_MPI)
     endif (MPI_DIR)
     list (APPEND MODULE_LIST "MPI")
     # Compile and link flags?
+endif ()
+
+if (USE_T3D)
+    add_definitions (-D__T3D)
+    include_directories ("${oofem_SOURCE_DIR}/src/oofemlib/T3d/src")
+    check_include_file_cxx ("${oofem_SOURCE_DIR}/src/oofemlib/T3d/src/t3d.h" HAVE_T3D_H)
+    if ((NOT HAVE_T3D_H))
+        message (FATAL_ERROR "Necessary T3D headers not found")
+    endif ()
+    set (MODULE_LIST ${MODULE_LIST} "T3D")
+    add_definitions(-DT3D_OOFEM)
 endif ()
 
 if (USE_TRIANGLE)

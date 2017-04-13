@@ -32,44 +32,59 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef t3dinterface_h
-#define t3dinterface_h
+#ifndef geometrygenerator_h
+#define geometrygenerator_h
 
-#include "mesherinterface.h"
+#include "floatarray.h"
 #include "element.h"
+#include "node.h"
 
+#define _IFT_GeometryGenerator_numOfParticles "gg_nop"
+#define _IFT_GeometryGenerator_numOfIterations "gg_noi"
+#define _IFT_GeometryGenerator_numOfItOnePar "gg_noiop"
+#define _IFT_GeometryGenerator_particleRadius "gg_rp"
+//...
 
 namespace oofem {
-#define BMF_FILENAME "t3d.bmf"
-
-class TimeStep;
 
 /**
- * This class represents the interface to t3d mesh generation package.
- * This interface is primarily responsible for two main tasks:
- * - to create input mesher file, containing all information including the mesh density information
- *   based on information from remeshing criteria.
- * - possibly to launch the mesher and transform its output to oofem input (using t3d2oofem)
+ * Generate random geometry of particles and links for CQ simulation.
+ * 
  */
-class OOFEM_EXPORT T3DInterface : public MesherInterface
+class GeometryGenerator 
+
 {
-public:
-    /// Constructor
-    T3DInterface(Domain * d) : MesherInterface(d) { }
-    /// Destructor
-    virtual ~T3DInterface() { }
-
-    virtual returnCode createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, Domain **dNew);
-    int t3d_2_OOFEM(const char *t3dOutFile, Domain **dNew);
-   // Used by HTS elemnt to mesh one element in order to export the HTS element into vtk
-    int createInput(Element *e, char *t3dInFile);
-    int createVTKExportMesh(const char *t3dOutFile,std::vector<FloatArray> &nodeCoords, std::vector<IntArray> &cellNodes, IntArray &cellTypes );
-   // udes in Quasicontinuum    
-    int createQCInterpolationMesh(const char *t3dOutFile,std::vector<FloatArray> &nodeCoords, std::vector<IntArray> &cellNodes, IntArray &cellTypes );
-
 protected:
-    /// Creates the mesher input, containing the required mesh density information.
-    int createInput(Domain *d, TimeStep *tStep);
+// global
+  int nop; // number of particles
+  int nol; // number of links
+  std::vector<FloatArray> Particles;
+  std::vector<IntArray> Links;
+
+// particleGenerator
+  double ParticleRadius;  // minimal distance of two particles
+  int maxNumOfParticles;  // maximal number of generated particles
+  int maxNumOfIterations; // maximal number of iterations during generation
+  int maxNumOfItOnePar;   // maximal number of generation of one particle
+
+public:
+    GeometryGenerator();
+    virtual ~GeometryGenerator();
+
+    IRResultType initializeParticleGenerator(InputRecord *ir);
+    void generateParticles();
+    void loadParticles();
+
+    bool CheckDistances(double R, FloatArray coords, int n);
+
+
+    IRResultType initializeLinkGenerator(InputRecord *ir);
+    void generateLinks();
+    void loadLinks();
+
+
+    virtual const char *giveClassName() const { return "QCFullsolveddomain"; }
+
 };
 } // end namespace oofem
-#endif // t3dinterface_h
+#endif // geometrygenerator_h

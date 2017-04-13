@@ -62,10 +62,13 @@ LinearStatic :: LinearStatic(int i, EngngModel *_master) : StructuralEngngModel(
     ndomains = 1;
     initFlag = 1;
     solverType = ST_Direct;
+    equationNumbering = new EModelDefaultEquationNumbering();
 }
 
 
-LinearStatic :: ~LinearStatic() { }
+LinearStatic :: ~LinearStatic() {
+    delete equationNumbering;
+}
 
 
 NumericalMethod *LinearStatic :: giveNumericalMethod(MetaStep *mStep)
@@ -171,7 +174,7 @@ void LinearStatic :: solveYourself()
     if ( this->isParallel() ) {
 #ifdef __VERBOSE_PARALLEL
         // force equation numbering before setting up comm maps
-        int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
+        int neq = this->giveNumberOfDomainEquations(1, *this->giveEquationNumbering());
         OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), neq);
 #endif
 
@@ -203,10 +206,10 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
             OOFEM_ERROR("sparse matrix creation failed");
         }
 
-        stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
+        stiffnessMatrix->buildInternalStructure( this, 1, *this->giveEquationNumbering() );
 
         this->assemble( *stiffnessMatrix, tStep, TangentAssembler(TangentStiffness),
-                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                       *this->giveEquationNumbering(), this->giveDomain(1) );
 
         initFlag = 0;
     }
@@ -218,28 +221,28 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
     //
     // allocate space for displacementVector
     //
-    displacementVector.resize( this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ) );
+    displacementVector.resize( this->giveNumberOfDomainEquations( 1, *this->giveEquationNumbering() ) ); // km?? replace EModelDefaultEquationNumbering() with this->giveEquationNumbering(). Use pointer?
     displacementVector.zero();
 
     //
     // assembling the load vector
     //
-    loadVector.resize( this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ) );
+    loadVector.resize( this->giveNumberOfDomainEquations( 1, *this->giveEquationNumbering() ) );
     loadVector.zero();
     this->assembleVector( loadVector, tStep, ExternalForceAssembler(), VM_Total,
-                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                         *this->giveEquationNumbering(), this->giveDomain(1) );
 
     //
     // internal forces (from Dirichlet b.c's, or thermal expansion, etc.)
     //
-    FloatArray internalForces( this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ) );
+    FloatArray internalForces( this->giveNumberOfDomainEquations( 1, *this->giveEquationNumbering() ) );
     internalForces.zero();
     this->assembleVector( internalForces, tStep, InternalForceAssembler(), VM_Total,
-                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                         *this->giveEquationNumbering(), this->giveDomain(1) );
 
     loadVector.subtract(internalForces);
 
-    this->updateSharedDofManagers(loadVector, EModelDefaultEquationNumbering(), ReactionExchangeTag);
+    this->updateSharedDofManagers(loadVector, *this->giveEquationNumbering(), ReactionExchangeTag);
 
     //
     // set-up numerical model

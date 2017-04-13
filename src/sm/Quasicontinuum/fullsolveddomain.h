@@ -32,56 +32,53 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef interfacetype_h
-#define interfacetype_h
+#ifndef qc_fullsolveddomain_h
+#define qc_fullsolveddomain_h
+
+#include "floatarray.h"
+#include "element.h"
+#include "node.h"
+
+#define _IFT_FullSolvedDomain_nodes "fsd_n"
+#define _IFT_FullSolvedDomain_elements "fsd_e"
+#define _IFT_FullSolvedDomain_radius "fsd_r"
+#define _IFT_FullSolvedDomain_box "fsd_b"
+
+
+//#define _IFT_QCFullsolveddomain_Name "QCFullsolveddomain"
 
 namespace oofem {
+
 /**
- * Enumerative type, used to identify interface type.
- * @see Interface More details.
+ * Information about fullsolved domain in CQ simulation.
+ * 
  */
-enum InterfaceType {
-    UnknownInterfaceType,
+class QCFullsolveddomain 
 
-    LayeredCrossSectionInterfaceType,
-    FiberedCrossSectionInterfaceType,
+{
+protected:
+    FloatArray FullSolvedDomainNodes;
+    FloatArray FullSolvedDomainElements;
+    FloatArray FullSolvedDomainRadius;
+    FloatArray FullSolvedDomainBox;
 
-    ZZNodalRecoveryModelInterfaceType,
-    NodalAveragingRecoveryModelInterfaceType,
-    SPRNodalRecoveryModelInterfaceType,
+public:
+    QCFullsolveddomain();
+    virtual ~QCFullsolveddomain();
 
-    ZZErrorEstimatorInterfaceType,
-    HuertaErrorEstimatorInterfaceType,
-    Huerta1dErrorEstimatorInterfaceType, // experimental
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    SpatialLocalizerInterfaceType,
+    virtual void updateYourself();
 
-    EIPrimaryUnknownMapperInterfaceType,
-    EIPrimaryFieldInterfaceType,
+    virtual bool isNodeInside(Node *n);
 
-    NonlocalMaterialStatusExtensionInterfaceType,
-    GradDpMaterialExtensionInterfaceType,
-    GradDpMaterialStatusExtensionInterfaceType,
 
-    NonlocalMaterialExtensionInterfaceType,
-    NonlocalMaterialStiffnessInterfaceType,
-    MaterialModelMapperInterfaceType,
-    RandomMaterialStatusExtensionInterfaceType,
+    // identification
+    //virtual const char *giveInputRecordName() const { return _IFT_QCFullsolveddomain_Name; }
+        virtual const char *giveClassName() const { return "QCFullsolveddomain"; }
 
-    HydrationModelInterfaceType,
-    HydrationModelStatusInterfaceType,
 
-    LEPlicElementInterfaceType,
-    LevelSetPCSElementInterfaceType,
 
-    XfemElementInterfaceType,
-    VTKXMLExportModuleElementInterfaceType,
-    FailureModuleElementInterfaceType,
-
-    Beam3dSubsoilElementInterfaceType,
-    Beam3dSubsoilMaterialInterfaceType,
-
-    QCMaterialExtensionInterfaceType
 };
 } // end namespace oofem
-#endif // interfacetype_h
+#endif // qc_fullsolveddomain_h
