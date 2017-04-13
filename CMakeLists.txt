@@ -335,9 +335,9 @@ if (USE_INTEL_MKL_PARDISO)
     # Find the actual libraries:
     list(APPEND MKL_LIBS "mkl_core" "mkl_gf_lp64" "mkl_gnu_thread" "pthread")
     foreach (f ${MKL_LIBS})
-        if (MKL_DIR)
-            find_library (${f}_LIB ${f} PATH "${MKL_DIR}/mkl/lib/intel64/" DOC "MKLPARDISO (library)")
-            include_directories ("${MKL_DIR}/mkl/include")
+        if (INTEL_MKL_PARDISO_DIR)
+            find_library (${f}_LIB ${f} PATH "${INTEL_MKL_PARDISO_DIR}/mkl/lib/intel64/" DOC "MKLPARDISO (library)")
+            include_directories ("${INTEL_MKL_PARDISO_DIR}/mkl/include")
         else ()
             find_library (${f}_LIB ${f} HINTS "/opt/intel/composerxe/mkl/lib/intel64/" DOC "MKLPARDISO (library)")
             include_directories ("/opt/intel/composerxe/mkl/include")
@@ -856,3 +856,4 @@ set (CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 set(CPACK_DEBIAN_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION}.${CPACK_PACKAGE_VERSION_PATCH}+sid1")
 
 include (CPack)
+
