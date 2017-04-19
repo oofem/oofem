@@ -165,7 +165,7 @@ double CemhydMat :: giveDoHActual(GaussPoint *gp)
 }
 
 //standard units are [Wm-1K-1]
-double CemhydMat :: giveIsotropicConductivity(GaussPoint *gp)
+double CemhydMat :: giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep)
 {
     CemhydMatStatus *ms = static_cast< CemhydMatStatus * >( this->giveStatus(gp) );
     double conduct = 0.0;
@@ -175,9 +175,9 @@ double CemhydMat :: giveIsotropicConductivity(GaussPoint *gp)
     }
 
     if ( conductivityType == 0 ) { //given from OOFEM input file
-        conduct = IsotropicHeatTransferMaterial :: give('k', gp);
+        conduct = IsotropicHeatTransferMaterial :: give('k', gp, tStep);
     } else if ( conductivityType == 1 ) { //compute according to Ruiz, Schindler, Rasmussen. Kim, Chang: Concrete temperature modeling and strength prediction using maturity concepts in the FHWA HIPERPAV software, 7th international conference on concrete pavements, Orlando (FL), USA, 2001
-        conduct = IsotropicHeatTransferMaterial :: give('k', gp) * ( 1.33 - 0.33 * ms->GiveDoHActual() );
+        conduct = IsotropicHeatTransferMaterial :: give('k', gp, tStep) * ( 1.33 - 0.33 * ms->GiveDoHActual() );
     } else {
         OOFEM_ERROR("Unknown conductivityType %d\n", conductivityType);
     }
@@ -196,7 +196,7 @@ double CemhydMat :: giveIsotropicConductivity(GaussPoint *gp)
 }
 
 //normally it returns J/kg/K of concrete
-double CemhydMat :: giveConcreteCapacity(GaussPoint *gp)
+double CemhydMat :: giveConcreteCapacity(GaussPoint *gp, TimeStep *tStep)
 {
     CemhydMatStatus *ms = static_cast< CemhydMatStatus * >( this->giveStatus(gp) );
     double capacityConcrete = 0.0;
@@ -206,7 +206,7 @@ double CemhydMat :: giveConcreteCapacity(GaussPoint *gp)
     }
 
     if ( capacityType == 0 ) { //given from OOFEM input file
-        capacityConcrete = IsotropicHeatTransferMaterial :: give('c', gp);
+        capacityConcrete = IsotropicHeatTransferMaterial :: give('c', gp, tStep);
     } else if ( capacityType == 1 ) { //compute from CEMHYD3D according to Bentz
         capacityConcrete = ms->computeConcreteCapacityBentz();
     } else if ( capacityType == 2 ) { //compute from CEMHYD3D directly
@@ -227,7 +227,7 @@ double CemhydMat :: giveConcreteCapacity(GaussPoint *gp)
     return capacityConcrete;
 }
 
-double CemhydMat :: giveConcreteDensity(GaussPoint *gp)
+double CemhydMat :: giveConcreteDensity(GaussPoint *gp, TimeStep *tStep)
 {
     CemhydMatStatus *ms = static_cast< CemhydMatStatus * >( this->giveStatus(gp) );
     double concreteBulkDensity = 0.0;
@@ -237,7 +237,7 @@ double CemhydMat :: giveConcreteDensity(GaussPoint *gp)
     }
 
     if ( densityType == 0 ) { //get from OOFEM input file
-        concreteBulkDensity = IsotropicHeatTransferMaterial :: give('d', gp);
+        concreteBulkDensity = IsotropicHeatTransferMaterial :: give('d', gp, tStep);
     } else if ( densityType == 1 ) { //get from XML input file
         concreteBulkDensity = ms->GiveDensity();
     } else {
@@ -260,7 +260,7 @@ double
 CemhydMat :: giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     if ( mode == Capacity ) {
-        return ( giveConcreteCapacity(gp) * giveConcreteDensity(gp) );
+        return ( giveConcreteCapacity(gp, tStep) * giveConcreteDensity(gp, tStep) );
     } else if ( mode == IntSource ) { //for nonlinear solver, return dHeat/dTemperature
         TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
         //it suffices to compute derivative of Arrhenius equation
@@ -315,15 +315,15 @@ CemhydMat :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType t
         return 1;
     } else if ( type == IST_Density ) {
         answer.resize(1);
-        answer.at(1) = this->giveConcreteDensity(gp);
+        answer.at(1) = this->giveConcreteDensity(gp,tStep);
         return 1;
     } else if ( type == IST_ThermalConductivityIsotropic ) {
         answer.resize(1);
-        answer.at(1) = this->giveIsotropicConductivity(gp);
+        answer.at(1) = this->giveIsotropicConductivity(gp, tStep);
         return 1;
     } else if ( type == IST_HeatCapacity ) {
         answer.resize(1);
-        answer.at(1) = this->giveConcreteCapacity(gp);
+        answer.at(1) = this->giveConcreteCapacity(gp,tStep);
         return 1;
     } else if ( type == IST_AverageTemperature ) {
         answer.resize(1);
@@ -14411,7 +14411,7 @@ CemhydMatStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 
     TransportMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "   status {");
-    fprintf( file, "cyc %d  time %e  DoH %f  conductivity %f  capacity %f  density %f", cemhydmat->giveCycleNumber(this->gp), 3600 * cemhydmat->giveTimeOfCycle(this->gp), cemhydmat->giveDoHActual(this->gp), cemhydmat->giveIsotropicConductivity(this->gp), cemhydmat->giveConcreteCapacity(this->gp), cemhydmat->giveConcreteDensity(this->gp) );
+    fprintf( file, "cyc %d  time %e  DoH %f  conductivity %f  capacity %f  density %f", cemhydmat->giveCycleNumber(this->gp), 3600 * cemhydmat->giveTimeOfCycle(this->gp), cemhydmat->giveDoHActual(this->gp), cemhydmat->giveIsotropicConductivity(this->gp,tStep), cemhydmat->giveConcreteCapacity(this->gp, tStep), cemhydmat->giveConcreteDensity(this->gp, tStep) );
     if ( ms->Calculate_elastic_homogenization ) {
         fprintf(file, " EVirginPaste %f NuVirginPaste %f EConcrete %f NuConcrete %f", ms->last_values [ 2 ], ms->last_values [ 3 ], ms->last_values [ 4 ], ms->last_values [ 5 ]);
     }
