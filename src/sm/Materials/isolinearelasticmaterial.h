@@ -82,7 +82,7 @@ public:
      * @param n material model number in domain
      * @param d domain which receiver belongs to
      */
-    IsotropicLinearElasticMaterial(int n, Domain * d) : LinearElasticMaterial(n, d) { }
+    IsotropicLinearElasticMaterial(int n, Domain *d) : LinearElasticMaterial(n, d) { }
     /**
      * Creates a new IsotropicLinearElasticMaterial class instance
      * with given number belonging to domain d.
@@ -91,7 +91,7 @@ public:
      * @param E Young modulus.
      * @param nu Poisson ratio.
      */
-    IsotropicLinearElasticMaterial(int n, Domain * d, double E, double nu);
+    IsotropicLinearElasticMaterial(int n, Domain *d, double E, double nu);
     /// Destructor.
     virtual ~IsotropicLinearElasticMaterial() { }
 
@@ -107,6 +107,7 @@ public:
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "IsotropicLinearElasticMaterial"; }
     virtual const char *giveInputRecordName() const { return _IFT_IsotropicLinearElasticMaterial_Name; }
+
     /**
      * Initializes receiver according to object description stored in input record.
      * The E modulus (keyword "E"), Poisson ratio ("nu") and coefficient of thermal dilatation
@@ -129,22 +130,22 @@ public:
     /// Returns the bulk elastic modulus @f$ K = \frac{E}{3(1-2\nu)} @f$.
     double giveBulkModulus() { return E / ( 3. * ( 1. - 2. * nu ) ); }
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+    virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
                                                MatResponseMode,
-                                               GaussPoint *gp,
-                                               TimeStep *tStep);
+                                               GaussPoint * gp,
+                                               TimeStep * tStep);
 
-    virtual void givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                          MatResponseMode, GaussPoint *gp,
-                                          TimeStep *tStep);
+    virtual void givePlaneStressStiffMtrx(FloatMatrix & answer,
+                                          MatResponseMode, GaussPoint * gp,
+                                          TimeStep * tStep);
 
-    virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                          MatResponseMode, GaussPoint *gp,
-                                          TimeStep *tStep);
+    virtual void givePlaneStrainStiffMtrx(FloatMatrix & answer,
+                                          MatResponseMode, GaussPoint * gp,
+                                          TimeStep * tStep);
 
-    virtual void give1dStressStiffMtrx(FloatMatrix &answer,
-                                       MatResponseMode, GaussPoint *gp,
-                                       TimeStep *tStep);
+    virtual void give1dStressStiffMtrx(FloatMatrix & answer,
+                                       MatResponseMode, GaussPoint * gp,
+                                       TimeStep * tStep);
 
     /**
      * Computes bulk modulus from given Young's modulus and Poisson's ratio.

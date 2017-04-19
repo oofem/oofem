@@ -194,18 +194,18 @@ public:
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     /*    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
-	  { answer.clear(); }*/
+     *    { answer.clear(); }*/
 
     /// Evaluation of the incremental modulus.
     virtual double giveEModulus(GaussPoint *gp, TimeStep *tStep) = 0;
 
     /*    virtual double giveIncrementalModulus(GaussPoint *gp, TimeStep *tStep) {
-      if ( (tStep->giveIntrinsicTime() < this->castingTime) && ( this->zeroStiffness > 0. ) ) {
-	return this->zeroStiffness;
-      } else {
-	return this->giveEModulus(gp, tStep);
-      }
-      }*/
+     * if ( (tStep->giveIntrinsicTime() < this->castingTime) && ( this->zeroStiffness > 0. ) ) {
+     *  return this->zeroStiffness;
+     * } else {
+     *  return this->giveEModulus(gp, tStep);
+     * }
+     * }*/
 
     /// Evaluation of the moduli of individual units.
     virtual void computeCharCoefficients(FloatArray &answer, double tPrime, GaussPoint *gp, TimeStep *tStep) = 0;
@@ -213,6 +213,9 @@ public:
     // identification and auxiliary functions
     virtual int hasNonLinearBehaviour() { return 0; }
     virtual int hasMaterialModeCapability(MaterialMode mode);
+
+    virtual int hasCastingTimeSupport() { return 1; }
+
     virtual const char *giveClassName() const { return "RheoChainMaterial"; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
@@ -287,11 +290,11 @@ public:
     virtual double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) = 0;
 
     virtual bool isActivated(TimeStep *tStep) {
-      if (this->preCastingTimeMat > 0) {
-	return true;
-      } else {
-	return Material :: isActivated( tStep);
-      }
+        if ( this->preCastingTimeMat > 0 ) {
+            return true;
+        } else {
+            return Material :: isActivated(tStep);
+        }
     }
 
 

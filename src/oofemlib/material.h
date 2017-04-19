@@ -118,7 +118,7 @@ public:
      * @param n Material number.
      * @param d Domain to which new material will belong.
      */
-    Material(int n, Domain * d);
+    Material(int n, Domain *d);
     /// Destructor.
     virtual ~Material();
 
@@ -179,6 +179,14 @@ public:
      */
     virtual int hasMaterialModeCapability(MaterialMode mode);
 
+
+    /**
+     * Tests if material supports casting time
+     * @return Nonzero if supported, zero otherwise.
+     */
+    virtual int hasCastingTimeSupport();
+
+
     ///@name Access functions for internal states. Usually overloaded by new material models.
     //@{
     /**
@@ -224,6 +232,16 @@ public:
      * @exception throws an ContextIOERR exception if error encountered.
      */
     virtual contextIOResultType restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
+
+    /**
+     * Allows programmer to test some internal data, before computation begins.
+     * For example, one may use this function, to ensure that element has material with
+     * required capabilities is assigned to element. This must be done after all
+     * mesh components are instanciated.
+     * @return Nonzero if receiver is consistent.
+     */
+    virtual int checkConsistency();
+
 
     /**
      * Optional function to call specific procedures when initializing a material.

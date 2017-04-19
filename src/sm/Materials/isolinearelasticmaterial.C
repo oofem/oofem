@@ -71,7 +71,9 @@ IsotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
     // compute  value of shear modulus
     G = E / ( 2.0 * ( 1. + nu ) );
 
-    return LinearElasticMaterial :: initializeFrom(ir);;
+    return LinearElasticMaterial :: initializeFrom(ir);
+
+    ;
 }
 
 
@@ -100,17 +102,17 @@ IsotropicLinearElasticMaterial :: give(int aProperty, GaussPoint *gp)
     }
 
     if ( ( aProperty == 'G' ) || ( aProperty == Gyz ) || ( aProperty == Gxz ) ||
-        ( aProperty == Gxy ) ) {
+         ( aProperty == Gxy ) ) {
         return G;
     }
 
     if ( ( aProperty == 'E' ) || ( aProperty == Ex ) || ( aProperty == Ey ) ||
-        ( aProperty == Ez ) ) {
+         ( aProperty == Ez ) ) {
         return E;
     }
 
     if ( ( aProperty == 'n' ) || ( aProperty == NYzx ) || ( aProperty == NYzy ) ||
-        ( aProperty == NYyx ) ) {
+         ( aProperty == NYyx ) ) {
         return nu;
     }
 
@@ -151,6 +153,10 @@ IsotropicLinearElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &ans
     answer.at(6, 6) =  ( 1. - 2. * nu ) * 0.5;
 
     answer.times(ee);
+
+    if ( ( tStep->giveIntrinsicTime() < this->castingTime ) ) {
+        answer.times(1. - this->preCastStiffnessReduction);
+    }
 }
 
 
@@ -176,6 +182,10 @@ IsotropicLinearElasticMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
     answer.at(2, 1) = nu * ee;
     answer.at(2, 2) = ee;
     answer.at(3, 3) = shear;
+
+    if ( ( tStep->giveIntrinsicTime() < this->castingTime ) ) {
+        answer.times(1. - this->preCastStiffnessReduction);
+    }
 }
 
 
@@ -205,6 +215,10 @@ IsotropicLinearElasticMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
     answer.at(3, 2) = ee * nu;
     answer.at(3, 3) = ee * ( 1.0 - nu );
     answer.at(4, 4) = shear;
+
+    if ( ( tStep->giveIntrinsicTime() < this->castingTime ) ) {
+        answer.times(1. - this->preCastStiffnessReduction);
+    }
 }
 
 
@@ -216,6 +230,10 @@ IsotropicLinearElasticMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
 {
     answer.resize(1, 1);
     answer.at(1, 1) = this->E;
+
+    if ( ( tStep->giveIntrinsicTime() < this->castingTime ) ) {
+        answer.times(1. - this->preCastStiffnessReduction);
+    }
 }
 
 
@@ -236,5 +254,4 @@ IsotropicLinearElasticMaterial :: giveThermalDilatationVector(FloatArray &answer
     answer.at(2) = alpha;
     answer.at(3) = alpha;
 }
-
 } // end namespace oofem

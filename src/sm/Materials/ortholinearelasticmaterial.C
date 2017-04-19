@@ -59,7 +59,9 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
 
 
     result = LinearElasticMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     IR_GIVE_FIELD(ir, value, _IFT_OrthotropicLinearElasticMaterial_ex);
     propertyDictionary.add(Ex, value);
@@ -124,8 +126,8 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
 
     size = triplets.giveSize();
     if ( !( ( size == 0 ) || ( size == 6 ) ) ) {
-        OOFEM_WARNING("Warning: lcs in material %d is not properly defined, will be assumed as global",
-                  this->giveNumber() );
+        OOFEM_WARNING( "Warning: lcs in material %d is not properly defined, will be assumed as global",
+                       this->giveNumber() );
     }
 
     if ( size == 6 ) {
@@ -150,13 +152,13 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
         // vector e3' computed from vector product of e1', e2'
         localCoordinateSystem->at(1, 3) =
             ( localCoordinateSystem->at(2, 1) * localCoordinateSystem->at(3, 2) -
-             localCoordinateSystem->at(3, 1) * localCoordinateSystem->at(2, 2) );
+              localCoordinateSystem->at(3, 1) * localCoordinateSystem->at(2, 2) );
         localCoordinateSystem->at(2, 3) =
             ( localCoordinateSystem->at(3, 1) * localCoordinateSystem->at(1, 2) -
-             localCoordinateSystem->at(1, 1) * localCoordinateSystem->at(3, 2) );
+              localCoordinateSystem->at(1, 1) * localCoordinateSystem->at(3, 2) );
         localCoordinateSystem->at(3, 3) =
             ( localCoordinateSystem->at(1, 1) * localCoordinateSystem->at(2, 2) -
-             localCoordinateSystem->at(2, 1) * localCoordinateSystem->at(1, 2) );
+              localCoordinateSystem->at(2, 1) * localCoordinateSystem->at(1, 2) );
     }
 
     // try to read ElementCS section
@@ -174,8 +176,8 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
         //
         size = triplets.giveSize();
         if ( !( ( size == 0 ) || ( size == 3 ) ) ) {
-            OOFEM_WARNING("scs in material %d is not properly defined, will be assumed as global",
-                      this->giveNumber() );
+            OOFEM_WARNING( "scs in material %d is not properly defined, will be assumed as global",
+                           this->giveNumber() );
         }
 
         if ( size == 3 ) {
@@ -309,6 +311,10 @@ OrthotropicLinearElasticMaterial :: give3dLocalMaterialStiffnessMatrix(FloatMatr
     answer.at(4, 4) =  this->give(Gyz, gp);
     answer.at(5, 5) =  this->give(Gxz, gp);
     answer.at(6, 6) =  this->give(Gxy, gp);
+
+    if ( ( tStep->giveIntrinsicTime() < this->castingTime ) ) {
+        answer.times(1. - this->preCastStiffnessReduction);
+    }
 }
 
 
@@ -422,5 +428,4 @@ OrthotropicLinearElasticMaterial :: giveThermalDilatationVector(FloatArray &answ
     this->giveRotationMatrix(transf, gp);
     answer.beProductOf(transf, help);
 }
-
 } // end namespace oofem

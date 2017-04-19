@@ -41,13 +41,11 @@
 #include "contextioerr.h"
 
 namespace oofem {
-
-Material :: Material(int n, Domain* d) : FEMComponent(n, d), propertyDictionary(), castingTime ( -1. ) { }
+Material :: Material(int n, Domain *d) : FEMComponent(n, d), propertyDictionary(), castingTime(-1.) { }
 
 
 Material :: ~Material()
-{
-}
+{}
 
 
 double
@@ -61,7 +59,7 @@ Material :: give(int aProperty, GaussPoint *gp)
     if ( propertyDictionary.includes(aProperty) ) {
         value = propertyDictionary.at(aProperty);
     } else {
-        OOFEM_ERROR("property #%d on element %d and GP %d not defined", aProperty, gp->giveElement()->giveNumber(), gp->giveNumber() );
+        OOFEM_ERROR( "property #%d on element %d and GP %d not defined", aProperty, gp->giveElement()->giveNumber(), gp->giveNumber() );
     }
 
     return value;
@@ -82,7 +80,7 @@ Material :: modifyProperty(int aProperty, double value, GaussPoint *gp)
     if ( propertyDictionary.includes(aProperty) ) {
         propertyDictionary.at(aProperty) = value;
     } else {
-        OOFEM_ERROR("property #%d on element %d and GP %d not defined", aProperty, gp->giveElement()->giveNumber(), gp->giveNumber() );
+        OOFEM_ERROR( "property #%d on element %d and GP %d not defined", aProperty, gp->giveElement()->giveNumber(), gp->giveNumber() );
     }
 }
 
@@ -124,6 +122,19 @@ Material :: hasMaterialModeCapability(MaterialMode mode)
 //
 {
     return 0;
+}
+
+int
+Material :: hasCastingTimeSupport()
+//
+// returns whether receiver fully supports casting time
+//
+{
+    if ( this->castingTime > 0. ) {
+        return 0; // casting time is user-defined. By default the casting time is not supported.
+    } else {
+        return 1; // do not check anything - casting time has not been user-defined
+    }
 }
 
 
@@ -214,6 +225,15 @@ Material :: restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *g
     return CIO_OK;
 }
 
+
+int Material :: checkConsistency()
+{
+    if ( !this->hasCastingTimeSupport() ) {
+        OOFEM_WARNING("Material %3d does not support casting time (casting time = %lf)", this->giveNumber(), this->castingTime);
+    }
+
+    return FEMComponent :: checkConsistency();
+}
 
 
 MaterialStatus *
