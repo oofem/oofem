@@ -1,0 +1,44 @@
+tmpatch46.out
+Patch test of IsoHeatMat with temperature-dependent material parameters
+TransientTransport nsteps 50 deltat 100.0 rtolv 1.e-4 alpha 0.6 lstype 1 lstol 1e-5 lsiter 200 lsprecond 1 renumber 1 exportfields 1 5 nmodules 1
+#vtkxml tstep_all domain_all primvars 1 6 vars 5 37 56 67 68 44 stype 1
+errorcheck
+domain HeatTransfer
+OutputManager
+ndofman 8 nelem 1 ncrosssect 1 nmat 1 nbc 1 nic 0 nltf 4 nset 2
+#
+node     1  coords 3     0.0    0.0    0.0
+node     2  coords 3     0.0    0.0    1.0
+node     3  coords 3     1.0    0.0    1.0
+node     4  coords 3     1.0    0.0    0.0
+node     5  coords 3     0.0    1.0    0.0
+node     6  coords 3     0.0    1.0    1.0
+node     7  coords 3     1.0    1.0    1.0
+node     8  coords 3     1.0    1.0    0.0
+#
+brick1ht     1  nodes 8     1    2    3     4     5    6    7     8
+#
+SimpleTransportCS 1 mat 1 set 1
+IsoHeat 1 d 800 k @2 c @3 td @4
+#
+constantsurfaceload 1 loadTimeFunction 1 components 1 500.0 properties 1 a 10.0 loadtype 3 set 2
+#
+ConstantFunction 1 f(t) 1.0
+# wood thermal conductivity
+Piecewiselinfunction 2 t 7 -100. 20. 200. 350. 500. 800. 1200. f(t) 7 0.12 0.12 0.15 0.07 0.09 0.35 1.5 paramtype 1
+# wood thermal capacity
+Piecewiselinfunction 3 t 8 -100. 20. 150. 200. 250. 300. 800. 1200. f(t) 8 1600. 1600. 2000. 2000. 1600. 850. 1600. 1600. paramtype 1
+# wood density
+Piecewiselinfunction 4 t 4 -100. 200. 400. 1200. f(t) 4 800. 800. 350. 0. paramtype 1
+#
+Set 1 elementranges {(1 1)}
+Set 2 elementboundaries 2 1 6
+#
+#%BEGIN_CHECK%
+#NODE tStep 25 number 1 dof 10 unknown d value 3.74825799e+01
+#NODE tStep 50 number 1 dof 10 unknown d value 7.11168121e+01
+#%END_CHECK%
+
+
+
+

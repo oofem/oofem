@@ -175,6 +175,9 @@ IsotropicHeatTransferMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp,
     } else if ( type == IST_ThermalConductivityIsotropic ) {
         answer = FloatArray{ this->give('k', gp, tStep) };
         return 1;
+    } else if ( type == IST_EnergyMassCapacity ) {
+        answer = FloatArray{ this->give('c', gp, tStep) * this->give('d', gp, tStep) * this->giveTemperature(gp) };
+        return 1;
     }
 
     return TransportMaterial :: giveIPValue(answer, gp, type, tStep);
