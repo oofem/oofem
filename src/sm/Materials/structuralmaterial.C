@@ -2426,7 +2426,20 @@ StructuralMaterial :: giveReducedSymMatrixForm(FloatMatrix &answer, const FloatM
     answer.beSubMatrixOf(full, indx, indx);
 }
 
-
+void
+StructuralMaterial::giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+{
+    double alpha = this->give(tAlpha, gp);
+    if (alpha > 0.0) {
+      answer.resize(6);
+      answer.zero();
+      answer.at(1) = alpha;
+      answer.at(2) = alpha;
+      answer.at(3) = alpha;
+    } else {
+      answer.clear();
+    }
+}
 
 IRResultType
 StructuralMaterial :: initializeFrom(InputRecord *ir)
@@ -2435,6 +2448,15 @@ StructuralMaterial :: initializeFrom(InputRecord *ir)
 
     referenceTemperature = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, referenceTemperature, _IFT_StructuralMaterial_referencetemperature);
+
+    double alpha = 0.0;
+    IR_GIVE_OPTIONAL_FIELD(ir, alpha, _IFT_StructuralMaterial_talpha);
+    if (alpha > 0.0 && !propertyDictionary.includes(tAlpha)) {
+      // put isotropic thermal expansion coeff into dictionary, if provided
+      // and not previosly defined
+      propertyDictionary.add(tAlpha, alpha);
+
+    }
 
     return Material :: initializeFrom(ir);
 }

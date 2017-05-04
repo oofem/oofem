@@ -108,8 +108,12 @@ MisesMat :: giveRealStressVector_1d(FloatArray &answer,
     /// @note: One should obtain the same answer using the iterations in the default implementation (this is verified for this model).
 #if 1
     MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
-
-    this->performPlasticityReturn(gp, totalStrain);
+    FloatArray strainR;
+    
+    // subtract stress independent part
+    this->giveStressDependentPartOfStrainVector(strainR, gp, totalStrain,
+                                                tStep, VM_Total);
+    this->performPlasticityReturn(gp, strainR);
     double omega = computeDamage(gp, tStep);
     answer = status->giveTempEffectiveStress();
     answer.times(1 - omega);
@@ -138,8 +142,12 @@ MisesMat :: giveRealStressVector_3d(FloatArray &answer,
                                  TimeStep *tStep)
 {
     MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
+    // subtract stress independent part
+    FloatArray strainR(6);
+    this->giveStressDependentPartOfStrainVector(strainR, gp, totalStrain,
+                                                tStep, VM_Total);
 
-    this->performPlasticityReturn(gp, totalStrain);
+    this->performPlasticityReturn(gp, strainR);
     double omega = computeDamage(gp, tStep);
     answer = status->giveTempEffectiveStress();
     answer.times(1 - omega);

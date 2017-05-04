@@ -47,6 +47,7 @@
 ///@name Input fields for StructuralMaterial
 //@{
 #define _IFT_StructuralMaterial_referencetemperature "referencetemperature"
+#define _IFT_StructuralMaterial_talpha "talpha"
 //@}
 
 namespace oofem {
@@ -265,10 +266,7 @@ public:
      * @param gp Integration point.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
-    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
-    {
-        answer.clear();
-    }
+    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
     /**
      * Returns the reference temperature of receiver.
      */
