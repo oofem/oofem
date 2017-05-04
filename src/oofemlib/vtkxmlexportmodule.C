@@ -724,7 +724,7 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
 
             // Skip elements that:
             // are inactivated or of composite type ( these are exported individually later)
-            if ( this->isElementComposite(elem) || !elem->isActivated(tStep) ) {
+	    if ( this->isElementComposite(elem) || !elem->isActivated(tStep) ) {
                 continue;
             }
 

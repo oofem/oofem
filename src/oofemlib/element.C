@@ -795,21 +795,21 @@ Element :: updateYourself(TimeStep *tStep)
     }
 }
 
-
+    
 bool
 Element :: isActivated(TimeStep *tStep)
 {
     if ( activityTimeFunction ) {
-        if ( tStep ) {
-            return ( domain->giveFunction(activityTimeFunction)->evaluateAtTime( tStep->giveIntrinsicTime() ) > 1.e-3 );
-        } else {
-            return false;
-        }
+	if ( tStep ) {
+	    return ( domain->giveFunction(activityTimeFunction)->evaluateAtTime( tStep->giveIntrinsicTime() ) > 1.e-3 );
+	} else {
+	    return false;
+	}
     } else {
-        return true;
+	return true;
     }
 }
-
+    
 
 
 bool

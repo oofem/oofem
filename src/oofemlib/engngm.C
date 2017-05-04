@@ -745,7 +745,7 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
         // skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. They introduction is necessary to
         // allow local averaging on domains without fine grain communication between domains).
-        if ( element->giveParallelMode() == Element_remote || !element->isActivated(tStep) ) {
+        if ( element->giveParallelMode() == Element_remote || !element->isActivated(tStep) || !this->isElementActivated(element) ) {
             continue;
         }
 
@@ -868,7 +868,7 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
     for ( int ielem = 1; ielem <= nelem; ielem++ ) {
         Element *element = domain->giveElement(ielem);
 
-        if ( element->giveParallelMode() == Element_remote || !element->isActivated(tStep) ) {
+        if ( element->giveParallelMode() == Element_remote || !element->isActivated(tStep) || !this->isElementActivated(element) ) {
             continue;
         }
 
@@ -1026,7 +1026,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
                 const IntArray &elements = set->giveElementList();
                 for ( int ielem = 1; ielem <= elements.giveSize(); ++ielem ) {
                     Element *element = domain->giveElement( elements.at(ielem) );
-		    if ( element->isActivated(tStep) ) {
+		    if ( element->isActivated(tStep) && this->isElementActivated(element) ) {
 		      charVec.clear();
 		      va.vectorFromLoad(charVec, *element, bodyLoad, tStep, mode);
 
@@ -1048,7 +1048,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
                 const IntArray &boundaries = set->giveBoundaryList();
                 for ( int ibnd = 1; ibnd <= boundaries.giveSize() / 2; ++ibnd ) {
                     Element *element = domain->giveElement( boundaries.at(ibnd * 2 - 1) );
-		    if ( element->isActivated(tStep) ) {
+		    if ( element->isActivated(tStep) && this->isElementActivated(element) ) {
 
 		      int boundary = boundaries.at(ibnd * 2);
 		      charVec.clear();
@@ -1074,7 +1074,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
                 const IntArray &edgeBoundaries = set->giveEdgeList();
                 for ( int ibnd = 1; ibnd <= edgeBoundaries.giveSize() / 2; ++ibnd ) {
 		  Element *element = domain->giveElement( edgeBoundaries.at(ibnd * 2 - 1) );
-		  if ( element->isActivated(tStep) ) {
+		  if ( element->isActivated(tStep) && this->isElementActivated(element) ) {
 		    int boundary = edgeBoundaries.at(ibnd * 2);
 		    charVec.clear();
 		    va.vectorFromEdgeLoad(charVec, *element, eLoad, boundary, tStep, mode);
@@ -1159,7 +1159,7 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
             continue;
         }
 
-        if ( !element->isActivated(tStep) ) {
+        if ( !element->isActivated(tStep) || !this->isElementActivated(element) ) {
             continue;
         }
 
@@ -1293,7 +1293,7 @@ EngngModel :: assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, Ch
             continue;
         }
 
-        if ( !element->isActivated(tStep) ) {
+        if ( !element->isActivated(tStep) || !this->isElementActivated(element) ) {
             continue;
         }
 

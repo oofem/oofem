@@ -97,6 +97,7 @@ protected:
      */
     FloatMatrix *localCoordinateSystem;
 
+
 public:
 
     /**
@@ -179,6 +180,8 @@ public:
     virtual void printYourself();
     virtual int checkConsistency();
     virtual bool isDofTypeCompatible(dofType type) const { return ( type == DT_master || type == DT_simpleSlave || type == DT_active ); }
+    virtual int giveQcNodeType() {return 0;};
+
 
     virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);

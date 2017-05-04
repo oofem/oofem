@@ -38,6 +38,7 @@
 #include "../sm/EngineeringModels/structengngmodel.h"
 #include "sparselinsystemnm.h"
 #include "sparsemtrxtype.h"
+#include "unknownnumberingscheme.h"
 
 #define _IFT_LinearStatic_Name "linearstatic"
 
@@ -72,6 +73,7 @@ protected:
     std :: unique_ptr< SparseLinearSystemNM > nMethod;
 
     int initFlag;
+    EModelDefaultEquationNumbering *equationNumbering;
 
 public:
     LinearStatic(int i, EngngModel * _master = NULL);
@@ -91,6 +93,9 @@ public:
     virtual void terminate(TimeStep *tStep);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+
+    //    EModelDefaultEquationNumbering giveEquationNumbering() {return EModelDefaultEquationNumbering(); }
+    virtual UnknownNumberingScheme *giveEquationNumbering() {return equationNumbering; } //km??
 
     // identification
     virtual const char *giveInputRecordName() const { return _IFT_LinearStatic_Name; }

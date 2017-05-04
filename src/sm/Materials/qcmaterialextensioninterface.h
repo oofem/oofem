@@ -32,56 +32,36 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef interfacetype_h
-#define interfacetype_h
+#ifndef qcmaterialextensioninterface_h
+#define qcmaterialextensioninterface_h
+
+#include "interface.h"
+
 
 namespace oofem {
+class FloatMatrix;
+class GaussPoint;
+class TimeStep;
+
+
+
 /**
- * Enumerative type, used to identify interface type.
- * @see Interface More details.
+ * Material interface for gradient material models.
  */
-enum InterfaceType {
-    UnknownInterfaceType,
-
-    LayeredCrossSectionInterfaceType,
-    FiberedCrossSectionInterfaceType,
-
-    ZZNodalRecoveryModelInterfaceType,
-    NodalAveragingRecoveryModelInterfaceType,
-    SPRNodalRecoveryModelInterfaceType,
-
-    ZZErrorEstimatorInterfaceType,
-    HuertaErrorEstimatorInterfaceType,
-    Huerta1dErrorEstimatorInterfaceType, // experimental
-
-    SpatialLocalizerInterfaceType,
-
-    EIPrimaryUnknownMapperInterfaceType,
-    EIPrimaryFieldInterfaceType,
-
-    NonlocalMaterialStatusExtensionInterfaceType,
-    GradDpMaterialExtensionInterfaceType,
-    GradDpMaterialStatusExtensionInterfaceType,
-
-    NonlocalMaterialExtensionInterfaceType,
-    NonlocalMaterialStiffnessInterfaceType,
-    MaterialModelMapperInterfaceType,
-    RandomMaterialStatusExtensionInterfaceType,
-
-    HydrationModelInterfaceType,
-    HydrationModelStatusInterfaceType,
-
-    LEPlicElementInterfaceType,
-    LevelSetPCSElementInterfaceType,
-
-    XfemElementInterfaceType,
-    VTKXMLExportModuleElementInterfaceType,
-    FailureModuleElementInterfaceType,
-
-    Beam3dSubsoilElementInterfaceType,
-    Beam3dSubsoilMaterialInterfaceType,
-
-    QCMaterialExtensionInterfaceType
+class QCMaterialExtensionInterface : public Interface
+{
+protected:
+public:
+    /**
+     * Constructor. Creates material with given number, belonging to given domain.
+     * @param d Domain to which new material will belong.
+     */
+    QCMaterialExtensionInterface() {}
+    /// Destructor.
+    virtual ~QCMaterialExtensionInterface() { }
+    //
+    virtual double giveQcElasticParamneter() = 0;
+    virtual double giveQcPlasticParamneter() = 0;
 };
-} // end namespace oofem
-#endif // interfacetype_h
+}
+#endif

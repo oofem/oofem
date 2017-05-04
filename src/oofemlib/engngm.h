@@ -1107,6 +1107,10 @@ public:
     void initParallel();
     /// Returns reference to itself -> required by communicator.h
     EngngModel *giveEngngModel() { return this; }
+    virtual bool isElementActivated( int elemNum ) { return true; }
+    virtual bool isElementActivated( Element *e ) { return true; }
+
+    
 
 #ifdef __OOFEG
     virtual void drawYourself(oofegGraphicContext &gc);

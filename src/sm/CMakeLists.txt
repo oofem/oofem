@@ -135,6 +135,7 @@ set (sm_emodel
     EngineeringModels/incrementallinearstatic.C
     EngineeringModels/freewarping.C 
     EngineeringModels/structuralmaterialevaluator.C
+    EngineeringModels/qclinearstatic.C
     )
 
 set (sm_loads
@@ -315,6 +316,14 @@ set (sm_obsolete
     Materials/Obsolete/rankinepm.C
     )
 
+set (sm_quasicontinuum
+    Quasicontinuum/quasicontinuum.C
+    Quasicontinuum/quasicontinuumnumberingscheme.C
+    Quasicontinuum/quasicontinuumvtkxmlexportmodule.C    
+    Quasicontinuum/fullsolveddomain.C
+    Quasicontinuum/geometrygenerator.C
+    )
+
 set (sm
     ${sm_element}
     ${sm_interface_elements}
@@ -332,6 +341,7 @@ set (sm
     ${sm_obsolete}
     ${sm_new}
     ${sm_boundary_conditions}
+    ${sm_quasicontinuum} 
     )
 
 if (USE_PARALLEL)

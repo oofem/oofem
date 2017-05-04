@@ -40,6 +40,8 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 
+#include "qcmaterialextensioninterface.h"
+
 ///@name Input fields for IsotropicLinearElasticMaterial
 //@{
 #define _IFT_IsotropicLinearElasticMaterial_Name "isole"
@@ -65,7 +67,7 @@ class GaussPoint;
  * - Returning a material property (method 'give'). Only for non-standard elements.
  * - Returning real stress state vector(tensor) at gauss point for 3d - case.
  */
-class IsotropicLinearElasticMaterial : public LinearElasticMaterial
+ class IsotropicLinearElasticMaterial : public LinearElasticMaterial, public QCMaterialExtensionInterface
 {
 protected:
     /// Young's modulus.
@@ -168,6 +170,21 @@ public:
     {
         return young / ( 2. * ( 1. + nu ) );
     }
+
+
+    virtual  double giveQcElasticParamneter(){return E;}
+    virtual  double giveQcPlasticParamneter(){return std::numeric_limits<float>::infinity();}
+
+    virtual Interface *giveInterface(InterfaceType t) {
+        if ( t == QCMaterialExtensionInterfaceType ) {
+	    //            return static_cast< QCMaterialExtensionInterface * >(this);
+	    return this;
+        } else {
+            return NULL;
+        }
+    }
+
+    
 };
 } // end namespace oofem
 #endif // isolinearelasticmaterial_h
