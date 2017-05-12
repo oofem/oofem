@@ -388,17 +388,17 @@ void PrescribedGradientBCNeumann :: integrateTangent(FloatMatrix &oTangent, Elem
         interp->boundaryLocal2Global(globalCoord, iBndIndex, lcoords, cellgeo);
 
         // Compute local coordinates on the element
-        FloatArray locCoord;
-        e->computeLocalCoordinates(locCoord, globalCoord);
+        FloatArray bulkElLocCoords;
+        e->computeLocalCoordinates(bulkElLocCoords, globalCoord);
 
         // If cracks cross the edge, special treatment is necessary.
         // Exploit the XfemElementInterface to minimize duplication of code.
         if ( xfemElInt != NULL && domain->hasXfemManager() ) {
 
-            xfemElInt->XfemElementInterface_createEnrNmatrixAt(nMatrix, locCoord, * e, false);
+            xfemElInt->XfemElementInterface_createEnrNmatrixAt(nMatrix, bulkElLocCoords, * e, false);
         } else {
             // Evaluate the velocity/displacement coefficients
-            interp->evalN(n, locCoord, cellgeo);
+            interp->evalN(n, bulkElLocCoords, cellgeo);
             nMatrix.beNMatrixOf(n, nsd);
         }
 
