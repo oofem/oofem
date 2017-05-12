@@ -398,7 +398,7 @@ void PrescribedGradientBCNeumann :: integrateTangent(FloatMatrix &oTangent, Elem
             xfemElInt->XfemElementInterface_createEnrNmatrixAt(nMatrix, locCoord, * e, false);
         } else {
             // Evaluate the velocity/displacement coefficients
-            interp->evalN(n, lcoords, cellgeo);
+            interp->evalN(n, locCoord, cellgeo);
             nMatrix.beNMatrixOf(n, nsd);
         }
 
