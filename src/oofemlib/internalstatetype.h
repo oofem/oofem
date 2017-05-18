@@ -170,7 +170,7 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_3rdCrackVector, 120) \
     ENUM_ITEM_WITH_VALUE(IST_FiberStressLocal, 121) \
     ENUM_ITEM_WITH_VALUE(IST_FiberStressNL, 122)  \
-    ENUM_ITEM_WITH_VALUE(IST_EnergyMassCapacity, 123) 
+    ENUM_ITEM_WITH_VALUE(IST_EnergyMassCapacity, 123)
   
 /**
  * Type  representing the physical meaning of element or constitutive model internal variable.
