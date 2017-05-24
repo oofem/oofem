@@ -1408,9 +1408,7 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
 }
 
 void
-StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &dir,
-                                             const FloatArray &s,
-                                             stressStrainPrincMode mode)
+StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &dir, const FloatArray &s, stressStrainPrincMode mode)
 //
 // This function computes the principal values & directions corresponding to principal values
 // of strains or streses.
@@ -2161,6 +2159,18 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSt
         }
 
         this->computePrincipalValues(answer, s, principal_strain);
+        return 1;
+    } else if ( type == IST_PrincStressVector1 || type == IST_PrincStressVector2 || type == IST_PrincStressVector3 ) {
+        FloatArray arrAnswer;
+        FloatMatrix dir;
+        this->computePrincipalValDir(arrAnswer, dir, status->giveStressVector(), principal_stress);
+        if ( type == IST_PrincStressVector1 ){
+            answer.beColumnOf(dir,1);
+        } else if ( type == IST_PrincStressVector2 ){
+            if (dir.giveNumberOfColumns()>=2) answer.beColumnOf(dir,2); else {answer.beColumnOf(dir,1); answer.zero();}
+        } else {
+            if (dir.giveNumberOfColumns()>=3) answer.beColumnOf(dir,3); else {answer.beColumnOf(dir,1); answer.zero();}
+        }
         return 1;
     } else if ( type == IST_Temperature ) {
         /* add external source, if provided, such as staggered analysis */

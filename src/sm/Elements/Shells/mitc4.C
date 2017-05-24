@@ -1290,13 +1290,16 @@ MITC4Shell :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coor
 int
 MITC4Shell :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-    double l1 = lcoords.at(1);
-    double l2 = lcoords.at(2);
-    double l3 = lcoords.at(3);
+    //double l1 = lcoords.at(1);
+    //double l2 = lcoords.at(2);
+    //double l3 = lcoords.at(3);
+    FloatMatrix N;
+    
+    computeNmatrixAt(lcoords, N);
 
     answer.resize(3);
     for ( int _i = 1; _i <= 3; _i++ ) {
-        answer.at(_i) = l1 * this->giveNode(1)->giveCoordinate(_i) + l2 *this->giveNode(2)->giveCoordinate(_i) + l3 *this->giveNode(3)->giveCoordinate(_i);
+        answer.at(_i) = N.at(_i,_i) * this->giveNode(1)->giveCoordinate(_i) + N.at(_i,_i+6) *this->giveNode(2)->giveCoordinate(_i) + N.at(_i,_i+12)*this->giveNode(3)->giveCoordinate(_i) + N.at(_i,_i+18)*this->giveNode(4)->giveCoordinate(_i);
     }
     return true;
 }

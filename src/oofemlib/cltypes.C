@@ -97,7 +97,6 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_ShellStrainTensor: ///@todo Are shell strains S3E as well?
     case IST_ShellCurvatureTensor:
     case IST_ForceTensorTemp:
-    ///@todo "Momentum" should be renamed "Moment"
     case IST_ShellMomentTensor:
     case IST_MomentTensorTemp:
     case IST_ShellForceTensor:
@@ -146,6 +145,9 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_InterfaceFirstPKTraction:
     case IST_InterfaceTraction:
     case IST_InterfaceJump:
+    case IST_PrincStressVector1:
+    case IST_PrincStressVector2:
+    case IST_PrincStressVector3:
         return ISVT_VECTOR;
 
     case IST_MaxEquivalentStrainLevel:
