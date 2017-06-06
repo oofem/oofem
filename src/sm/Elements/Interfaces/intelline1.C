@@ -160,16 +160,21 @@ void
 IntElLine1 :: computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     // Transformation matrix to the local coordinate system
+    // xy plane
     FloatArray G;
     this->computeCovarBaseVectorAt(gp, G);
     G.normalize();
 
     answer.resize(2, 2);
-    answer.at(1, 1) =  G.at(1);
-    answer.at(2, 1) = -G.at(2);
-    answer.at(1, 2) =  G.at(2);
-    answer.at(2, 2) =  G.at(1);
-
+//     answer.at(1, 1) =  G.at(1);//tangent vector
+//     answer.at(2, 1) = -G.at(2);
+//     answer.at(1, 2) =  G.at(2);
+//     answer.at(2, 2) =  G.at(1);
+    //normal is -G.at(2), G.at(1), perpendicular to nodes 1 2
+    answer.at(1, 1) =  -G.at(2);//normal vector
+    answer.at(2, 1) =  G.at(1);
+    answer.at(1, 2) =  G.at(1);
+    answer.at(2, 2) =  G.at(2);
 }
 
 FEInterpolation *

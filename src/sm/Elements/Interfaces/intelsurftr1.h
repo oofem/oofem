@@ -56,6 +56,7 @@ public:
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
     virtual bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
     virtual void computeCovarBaseVectorsAt(IntegrationPoint *ip, FloatArray &G1, FloatArray &G2);
+    //virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
     virtual void computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answer);
 
     virtual int computeNumberOfDofs() { return 18; }

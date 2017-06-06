@@ -59,6 +59,7 @@ IntMatBilinearCZFagerstromRate :: ~IntMatBilinearCZFagerstromRate()
     // destructor
 }
 
+///@todo - need to rearrange traction and stiffness matrix so the first component is normal
 void 
 IntMatBilinearCZFagerstromRate :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &d,
                                                      const FloatMatrix &F, TimeStep *tStep)

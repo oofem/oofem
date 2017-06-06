@@ -1,8 +1,8 @@
 idm08.out
 Test of PlaneStress2d element -> pure compression in y direction, Griffith/Rankine criteria
-StaticStructural nsteps 1 rtolf 1e-4 nmodules 1
+StaticStructural nsteps 1 rtolf 1e-4 nmodules 2
 errorcheck
-#vtkxml tstep_step 1 cellvars 1 46 vars 4 1 4 13 82 primvars 1 1 stype 2
+vtkxml tstep_step 1 cellvars 1 46 vars 5 1 4 13 82 90 primvars 1 1 stype 2
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
 ndofman 4 nelem 1 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 2 nset 4

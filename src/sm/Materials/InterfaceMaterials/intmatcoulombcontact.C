@@ -56,7 +56,7 @@ IntMatCoulombContact :: giveEngTraction_3d( FloatArray &answer, GaussPoint *gp, 
 
     double normalJump = jump.at( 1 );
     FloatArray shearJump = { jump.at(2), jump.at(3) };
-    
+        
     double normalStress = 0.0;
     FloatArray shearStress, tempShearStressShift = status->giveShearStressShift();
     this->computeEngTraction( normalStress, shearStress, tempShearStressShift,
@@ -67,7 +67,7 @@ IntMatCoulombContact :: giveEngTraction_3d( FloatArray &answer, GaussPoint *gp, 
     answer.at( 1 ) = normalStress;
     answer.at( 2 ) = shearStress.at( 1 );
     answer.at( 3 ) = shearStress.at( 2 );
-
+    
     // Update gp
     status->setTempShearStressShift( tempShearStressShift );
     status->letTempJumpBe( jump );
@@ -170,7 +170,7 @@ IntMatCoulombContact :: giveGeneralStiffnessMatrix(FloatMatrix &answer,
     IntMatCoulombContactStatus *status = static_cast< IntMatCoulombContactStatus * > ( this->giveStatus(gp) );
     const FloatArray &jump = status->giveTempJump();
 
-    double normalJump = jump.at( 1 );
+    double normalJump = jump.at( 1 );//in status, normal is always the first component
     
     answer.resize( numSpaceDim, numSpaceDim );
     answer.beUnitMatrix();

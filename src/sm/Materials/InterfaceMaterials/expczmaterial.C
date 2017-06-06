@@ -59,10 +59,10 @@ ExpCZMaterial :: giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const Fl
 
     /// @todo only study normal stress for now
     // no degradation in shear
-    // jumpVector = [shear 1 shear 2 normal]
-    double gn  = jump.at(3);
-    double gs1 = jump.at(1);
-    double gs2 = jump.at(2);
+    // jumpVector = [normal shear1 shear2]
+    double gn  = jump.at(1);
+    double gs1 = jump.at(2);
+    double gs2 = jump.at(3);
     double gs  = sqrt(gs1 * gs1 + gs2 * gs2);
 
     double xin  = gn / ( gn0 + tolerance );
@@ -70,9 +70,9 @@ ExpCZMaterial :: giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const Fl
     double tn   = GIc / gn0 *exp(-xin) * ( xin * exp(-xit * xit) + ( 1.0 - q ) / ( r - 1.0 ) * ( 1.0 - exp(-xit * xit) ) * ( r - xin ) );
 
     answer.resize(3);
-    answer.at(1) = 0.0;
+    answer.at(1) = tn;
     answer.at(2) = 0.0;
-    answer.at(3) = tn;
+    answer.at(3) = 0.0;
 
     // update gp
     status->letTempJumpBe(jump);
@@ -86,10 +86,10 @@ ExpCZMaterial :: give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode 
     ExpCZMaterialStatus *status = static_cast< ExpCZMaterialStatus * >( this->giveStatus(gp) );
 
     const FloatArray &jumpVector = status->giveTempJump();
-    // jumpVector = [shear 1 shear 2 normal]
-    double gn  = jumpVector.at(3);
-    double gs1 = jumpVector.at(1);
-    double gs2 = jumpVector.at(2);
+    // jumpVector = [normal shear1 shear2]
+    double gn  = jumpVector.at(1);
+    double gs1 = jumpVector.at(2);
+    double gs2 = jumpVector.at(3);
     double gs  = sqrt(gs1 * gs1 + gs2 * gs2);
 
     if ( rMode == TangentStiffness ) {
@@ -101,7 +101,7 @@ ExpCZMaterial :: give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode 
         double dtndgn = GIc / gn0 / gn0 *exp(-xin) *
         ( ( 1.0 - xin ) * exp(-xit * xit) + ( 1.0 - q ) / ( r - 1.0 ) * ( 1.0 - exp(-xit * xit) ) * ( -r + xin - 1.0 ) );
 
-        answer.at(3, 3) = dtndgn;
+        answer.at(1, 1) = dtndgn;
     }  else {
         OOFEM_ERROR("unknown MatResponseMode");
     }

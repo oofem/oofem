@@ -509,17 +509,18 @@ void FloatMatrix :: beNMatrixOf(const FloatArray &n, int nsd)
 }
 
 void FloatMatrix :: beLocalCoordSys(const FloatArray &normal)
-{
+{ //normal should be at the first position, easier for interface material models
     if ( normal.giveSize() == 1 ) {
         this->resize(1, 1);
         this->at(1, 1) = normal(0);
     } else if ( normal.giveSize() == 2 ) {
         this->resize(2, 2);
-        this->at(1, 1) = normal(1);
-        this->at(1, 2) = -normal(0);
-
-        this->at(2, 1) = normal(0);
-        this->at(2, 2) = normal(1);
+        this->at(1, 1) = normal(0);
+        this->at(1, 2) = normal(1);
+        
+        this->at(2, 1) = normal(1);
+        this->at(2, 2) = -normal(0);
+        
     } else if ( normal.giveSize() == 3 ) {
         // Create a permutated vector of n, *always* length 1 and significantly different from n.
         FloatArray b, t = {
@@ -533,18 +534,17 @@ void FloatMatrix :: beLocalCoordSys(const FloatArray &normal)
         b.beVectorProductOf(t, normal);
 
         this->resize(3, 3);
-
-        this->at(1, 1) = t(0);
-        this->at(1, 2) = t(1);
-        this->at(1, 3) = t(2);
-
-        this->at(2, 1) = b(0);
-        this->at(2, 2) = b(1);
-        this->at(2, 3) = b(2);
-
-        this->at(3, 1) = normal(0);
-        this->at(3, 2) = normal(1);
-        this->at(3, 3) = normal(2);
+        this->at(1, 1) = normal.at(1);
+        this->at(1, 2) = normal.at(2);
+        this->at(1, 3) = normal.at(3);
+        
+        this->at(2, 1) = b.at(1);
+        this->at(2, 2) = b.at(2);
+        this->at(2, 3) = b.at(3);
+        
+        this->at(3, 1) = t.at(1);
+        this->at(3, 2) = t.at(2);
+        this->at(3, 3) = t.at(3);
     } else {
         OOFEM_ERROR("Normal needs 1 to 3 components.");
     }

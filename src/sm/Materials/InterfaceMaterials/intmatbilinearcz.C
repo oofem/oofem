@@ -45,6 +45,8 @@
 namespace oofem {
 REGISTER_Material(IntMatBilinearCZ);
 
+
+///@todo - need to rearrange traction and stiffness matrix so the first component is normal
 IntMatBilinearCZStatus :: IntMatBilinearCZStatus(int n, Domain *d, GaussPoint *g) : StructuralInterfaceMaterialStatus(n, d, g),
     mDamageNew(0.), mDamageOld(0.),
     mTractionOld(3), mTractionNew(3),

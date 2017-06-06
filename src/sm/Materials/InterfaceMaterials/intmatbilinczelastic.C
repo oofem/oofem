@@ -61,28 +61,28 @@ IntMatBilinearCZElastic :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint
     answer.zero();
     /// @todo only study normal stress for now 
     // no degradation in shear
-    // jumpVector = [shear 1 shear 2 normal]
-    double gn  = jumpVector.at(3);
-    double gs1 = jumpVector.at(1);
-    double gs2 = jumpVector.at(2);
+    // jumpVector = [normal shear1 shear2]
+    double gn  = jumpVector.at(1);
+    double gs1 = jumpVector.at(2);
+    double gs2 = jumpVector.at(3);
 
     if ( gn <= 0.0 ) { // compresssion
-        answer.at(1) = this->ks0 * gs1;
-        answer.at(2) = this->ks0 * gs2;
-        answer.at(3) = this->knc * gn;
+        answer.at(1) = this->knc * gn;
+        answer.at(2) = this->ks0 * gs1;
+        answer.at(3) = this->ks0 * gs2;
     } else if ( gn <= this->gn0 ) { // first linear part
-        answer.at(1) = this->ks0 * gs1;
-        answer.at(2) = this->ks0 * gs2;
-        answer.at(3) = this->kn0 * gn;
+        answer.at(1) = this->kn0 * gn;
+        answer.at(2) = this->ks0 * gs1;
+        answer.at(3) = this->ks0 * gs2;
     } else if ( gn <= this->gnmax  ) {  // softening branch
-        answer.at(1) = this->ks0 * gs1;
-        answer.at(2) = this->ks0 * gs2;
-        answer.at(3) = this->sigfn + this->kn1 * ( gn - this->gn0 );
+        answer.at(1) = this->sigfn + this->kn1 * ( gn - this->gn0 );
+        answer.at(2) = this->ks0 * gs1;
+        answer.at(3) = this->ks0 * gs2;
         //printf("Softening branch...\n");
     } else {
-        answer.at(1) = this->ks0 * gs1;
-        answer.at(2) = this->ks0 * gs2;
-        answer.at(3) = 0.0; // failed
+        answer.at(1) = 0.0; // failed
+        answer.at(2) = this->ks0 * gs1;
+        answer.at(3) = this->ks0 * gs2;
         //printf("Failed...\n");
     }
 
@@ -98,28 +98,28 @@ IntMatBilinearCZElastic :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatRe
     IntMatBilinearCZElasticStatus *status = static_cast< IntMatBilinearCZElasticStatus * >( this->giveStatus(gp) );
 
     const FloatArray &jumpVector = status->giveTempJump();
-    double gn = jumpVector.at(3);
+    double gn = jumpVector.at(1);
 
     answer.resize(3, 3);
     answer.zero();
     if ( gn <= 0.0 ) { // compresssion
-        answer.at(1, 1) = this->ks0;
+        answer.at(1, 1) = this->knc;
         answer.at(2, 2) = this->ks0;
-        answer.at(3, 3) = this->knc;
+        answer.at(3, 3) = this->ks0;
     } else if ( gn <= this->gn0 ) { // first linear part
-        answer.at(1, 1) = this->ks0;
-        answer.at(2, 2) = this->ks0;
-        answer.at(3, 3) = this->kn0;
+	answer.at(1, 1) = this->kn0;        
+	answer.at(2, 2) = this->ks0;
+        answer.at(3, 3) = this->ks0;
         //printf("Linear branch...\n");
     } else if ( gn <= this->gnmax  ) { // softening branch
-        answer.at(1, 1) = this->ks0; // no degradation in shear
-        answer.at(2, 2) = this->ks0;
-        answer.at(3, 3) = this->kn1;
+	answer.at(1, 1) = this->kn1;        
+	answer.at(2, 2) = this->ks0; // no degradation in shear
+        answer.at(3, 3) = this->ks0;
         //printf("Softening branch...\n");
     } else {
-        answer.at(1, 1) = this->ks0;
-        answer.at(2, 2) = this->ks0;
-        answer.at(3, 3) = 0.0; // failed
+	answer.at(1, 1) = 0.0; // failed        
+	answer.at(2, 2) = this->ks0;
+        answer.at(3, 3) = this->ks0;
         //printf("Failed...\n");
     }
 }

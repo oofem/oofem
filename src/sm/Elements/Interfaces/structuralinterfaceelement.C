@@ -139,7 +139,7 @@ StructuralInterfaceElement :: giveInternalForcesVector(FloatArray &answer,
     FloatMatrix N;
     FloatArray u, traction, jump;
 
-    this->computeVectorOf(VM_Total, tStep, u);
+    this->computeVectorOf(VM_Total, tStep, u); //u in GCS (LCS only if defined computeGtoLRotationMatrix() )
     // subtract initial displacements, if defined
     if ( initialDisplacements.giveSize() ) {
         u.subtract(initialDisplacements);

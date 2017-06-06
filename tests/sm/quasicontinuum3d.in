@@ -1,7 +1,7 @@
 quasicontinuum3d.out
 quasicontinuum 3d test
 #qcLinearStatic nsteps 1 nmodules 0 QcApproach 3 mtrxt 1 geninterpelem 1 t3dfile quasicontinuum3d.t3d.in imsize 100
-qcLinearStatic nsteps 1 nmodules 0 QcApproach 3 mtrxt 1 geninterpelem 2 t3dfile quasicontinuum3d.t3d.out
+qcLinearStatic nsteps 1 nmodules 0 QcApproach 3 mtrxt 1 geninterpelem 2 t3dfile quasicontinuum3d.out.t3d
 #qcvtkxml tstep_all domain_all primvars 1 1 vars 2 1 4 cellvars 2 1 4 expDeaktElem 0
 domain 3d
 OutputManager tstep_all dofman_all element_all

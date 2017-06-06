@@ -52,23 +52,23 @@ CohesiveInterfaceMaterial :: giveEngTraction_3d(FloatArray &answer, GaussPoint *
     StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus(gp) );
 
     answer.resize(3);
-
+  
     if (jump.at(1) > 0.) {
         if(jump.at(1)<transitionOpening){ // reduce traction in tension
             double stiffTmp = kn*stiffCoeffKn + (kn - kn*stiffCoeffKn) * (1. - jump.at(1)/transitionOpening);
             answer.at(1) = stiffTmp * jump.at(1);
-        } else {
+        } else { //in compression
             answer.at(1) = kn * stiffCoeffKn * jump.at(1);
         }
     } else {
-        // normal part of elastic stress-strain law
+        // standard part of elastic stress-strain law
         answer.at(1) = kn * jump.at(1);
     }
     
     // shear part of elastic stress-strain law
     answer.at(2) = ks * jump.at(2);
     answer.at(3) = ks * jump.at(3);
-
+    
     // update gp
     status->letTempJumpBe(jump);
     status->letTempTractionBe(answer);
@@ -92,7 +92,7 @@ CohesiveInterfaceMaterial :: give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatR
             answer.at(1, 1) = kn * stiffCoeffKn;
         }
     } else {
-        // normal part of elastic stress-strain law
+        // standard part of elastic stress-strain law
         answer.at(1, 1) = kn;
     }
     

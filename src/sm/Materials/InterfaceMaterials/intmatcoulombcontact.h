@@ -92,8 +92,11 @@ public:
 class IntMatCoulombContact : public StructuralInterfaceMaterial
 {
 protected:
+    // Normal stiffness
     double kn;
+    // Reduction factor of normal stiffness when material goes to tension
     double stiffCoeff;
+    // Friction coefficient
     double frictCoeff;
     /// Normal distance which needs to be closed when interface element should act in compression (distance is 0 by default).
     double normalClearance;

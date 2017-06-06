@@ -51,6 +51,7 @@ namespace oofem {
  * This class implements an interface element that connects two nodes.
  * In order to compute the normal and tangential direction of the slip plane, 
  * a reference node or specific direction must be specified in the input.
+ * The class adjusts dimensionality automatically to 1D, 2D, or 3D depending on domain.
  * @author Jim Brouzoulis
  * @author Borek Patzak
  */

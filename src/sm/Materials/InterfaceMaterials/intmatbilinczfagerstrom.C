@@ -58,6 +58,7 @@ void
 IntMatBilinearCZFagerstrom :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &d,
                                                      const FloatMatrix &F, TimeStep *tStep)
 {
+    ///@todo - need to rearrange traction and stiffness matrix so the first component is normal
     // returns vector in 3d stress space of receiver according to
     // previous level of stress and current
     // strain increment, the only way, how to correctly update gp records
