@@ -1,6 +1,6 @@
 InterfaceEL_Point3D_03.out
-Test of Coulomb interface between two points, loaded by tension/compression/shear.
-StaticStructural nsteps 1 rtolf 1.e-4 manrmsteps 1 deltaT 1.0 nmodules 1
+Test of cohesive interface between two points, loaded in x by tension/compression/shear.
+StaticStructural nsteps 1 rtolf 1.e-4 manrmsteps 5 deltaT 1.0 nmodules 1
 #vtkxml tstep_all primvars 1 1
 errorcheck
 domain 3d
@@ -20,7 +20,7 @@ IntELPoint 4 nodes 2 1 5 normal 3 -1. 0. 0.
 IntELPoint 5 nodes 2 1 6 normal 3 0. -1. 0.
 IntELPoint 6 nodes 2 1 7 normal 3 0. 0. -1.
 InterfaceCS 1 material 1 set 3
-CohInt 1 kn 20000. ks 13000. stiffcoeffkn 0.03
+CohInt 1 kn 2.e+4 ks 1.3e+4 stiffcoeffkn 0.03 transitionopening 0.0 smoothMag 1.e+8
 BoundaryCondition 1 loadTimeFunction 1 dofs 3 1 2 3 values 3 0. 0. 0. set 1
 nodalload 2 loadTimeFunction 1 dofs 3 1 2 3 Components 3 6. 0. 0. set 2
 ConstantFunction 1 f(t) 1.0

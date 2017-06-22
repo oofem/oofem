@@ -4794,6 +4794,7 @@ Supported modes& 3dMat\\
 %\end{center}
 \end{table}
 
+\clearpage
 
 \subsection{Material models for interfaces}
 
@@ -4801,13 +4802,52 @@ Interface elements have to be used with material models describing
 the constitutive behavior of interfaces between two materials 
 (e.g.\ between steel reinforcement and concrete),
 or between two bodies in contact.
-Such interface laws are formulated in terms of the traction vector and the displacement jump vector.
+Such interface laws are formulated in terms of the traction vector $t$ and the displacement jump vector $\delta$.
+
+\subsubsection{Cohesive interface material - cohInt}
+A simple interface material with generally different stiffness in compression, tension and shear. It is intended for simulating a contact with low stiffness in tension and high in compression. The parameter \param{transitionOpening} specifies initial gap embedded in an element which causes transition from tension to compression. For example, \param{transitionOpening}=0.01~m means that there exists the embedded gap which needs displacement jump 0.01~m to close. Traction-separation law for normal direction takes the following form:
+\begin{eqnarray}
+t_n &=& \left (\frac{\pi}{2} + \arctan (s_m \bar\delta)\right) \frac{k_t}{\pi} \bar\delta + \left (\frac{\pi}{2} - \arctan (s_m \bar\delta)\right) \frac{k_n}{\pi} \bar\delta\label{eq:cohint1}\\
+s_m &=& \mathit{smoothMag}\\
+\delta_0 &=& \mathit{transitionOpening}\\
+\bar\delta &=& \delta_n + \delta_0\\
+k_t &=& k_n \cdot \mathit{stiffCoeffKn}
+\end{eqnarray}
+where \param{smoothMag} controlls smoothing magnitude. Tangential stiffness for normal direction is found by differentiating Eq.~(\ref{eq:cohint1})
+\begin{eqnarray}
+k_{nn} &=& \left (\frac{\pi}{2} + \arctan (s_m \bar\delta)\right) \frac{k_t}{\pi} + \left (\frac{\pi}{2} - \arctan (s_m \bar\delta)\right) \frac{k_n}{\pi} +\\
+&+& \frac{s_m \cdot k_t \bar\delta}{\pi(s_m^2\bar\delta^2+1)} - \frac{s_m \cdot k_n \bar\delta}{\pi(s_m^2\bar\delta^2+1)}
+\end{eqnarray}
+
+Shear stiffness remains constant during all possible loadins and there is no influence of normal direction.
+
+\begin{table}[!htb]
+\begin{mmt}
+\hline
+Description & Cohesive interface material\\
+\hline
+Record Format & \descitem{cohInt}  \elemparam{}{in}
+\elemparam{kn}{rn} \elemparam{ks}{rn} \optelemparam{stiffCoeffKn}{rn}
+\optelemparam{smoothMag}{rn} \optelemparam{transitionOpening}{rn}\\
+Parameters &- \param{} material number\\
+&- \param{kn} (penalty) stiffness in compression\\
+&- \param{ks} stiffness in shear\\
+&- \param{stiffCoeffKn} ratio (tensile stiffness / compression stiffness)\\
+&- \param{smoothMag} smoothing parameter for transition between tensile/compressive behavior\\
+&- \param{transitionOpening} embedded gap in the element\\
+Supported modes& \_1dInterface,\_2dInterface,\_3dInterface\\
+\hline
+\end{mmt}
+\caption{Cohesive interface material -- summary.}
+\label{cohint_table}
+%\end{center}
+\end{table}
 
 \subsubsection{Isotropic damage model for interfaces}
 
 This model is described in Section~\ref{sec:idmfi}.
 
-\subsubsection{Simple interface material}
+\subsubsection{Simple interface material - obsolete}
 
 This model provides a simple interface law with penalty-type contact and friction. 
 In the normal direction, the response is linear elastic, but with different stiffnesses in tension and in compression (stiffness \param{kn} in compression, \param{kn}*\param{stiffcoeff} in tension). 
@@ -5045,8 +5085,6 @@ Supported modes& 1dMat\\
 \label{steelRelax_table}
 %\end{center}
 \end{table}
-
-
 
 
 \clearpage

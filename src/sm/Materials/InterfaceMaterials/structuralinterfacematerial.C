@@ -95,7 +95,6 @@ StructuralInterfaceMaterial :: give1dStiffnessMatrix_Eng(FloatMatrix &answer, Ma
     give3dStiffnessMatrix_Eng(answer3D, mode, gp, tStep);
     answer.resize(1, 1);
     answer.at(1, 1) = answer3D.at(1, 1);
-
 }
 
 
@@ -263,7 +262,7 @@ StructuralInterfaceMaterial :: give2dStiffnessMatrix_dTdj_Num(FloatMatrix &answe
     const FloatMatrix &F = status->giveTempF();
     FloatArray T, TPlus, TMinus;
     FloatArray jumpPlus, jumpMinus, Kcolumn;
-    FloatArray jump =  {status->giveTempJump().at(1), status->giveTempJump().at(3)};
+    FloatArray jump =  {status->giveTempJump().at(1), status->giveTempJump().at(2)};
     int dim = jump.giveSize();
     answer.resize( dim, dim );
 
@@ -321,7 +320,7 @@ StructuralInterfaceMaterial :: give1dStiffnessMatrix_Eng_Num(FloatMatrix &answer
     double eps = 1.0e-9;
     FloatArray t, tPlus, tMinus;
     FloatArray jumpPlus, jumpMinus, Kcolumn;
-    FloatArray jump = FloatArray{status->giveTempJump().at(3)};
+    FloatArray jump = FloatArray{status->giveTempJump().at(1)};
     int dim = jump.giveSize();
     answer.resize( dim, dim );
     answer.zero();
@@ -350,7 +349,7 @@ StructuralInterfaceMaterial :: give2dStiffnessMatrix_Eng_Num(FloatMatrix &answer
     double eps = 1.0e-9;
     FloatArray t, tPlus, tMinus;
     FloatArray tempJump, jumpPlus, jumpMinus, Kcolumn;
-    FloatArray jump = {status->giveTempJump().at(1), status->giveTempJump().at(3)};
+    FloatArray jump = {status->giveTempJump().at(1), status->giveTempJump().at(2)};
     int dim = jump.giveSize();
     answer.resize(dim, dim);
     answer.zero();

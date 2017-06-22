@@ -51,18 +51,15 @@ CohesiveInterfaceMaterial :: giveEngTraction_3d(FloatArray &answer, GaussPoint *
 {
     StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus(gp) );
 
-    answer.resize(3);
-  
-    if (jump.at(1) > 0.) {
-        if(jump.at(1)<transitionOpening){ // reduce traction in tension
-            double stiffTmp = kn*stiffCoeffKn + (kn - kn*stiffCoeffKn) * (1. - jump.at(1)/transitionOpening);
-            answer.at(1) = stiffTmp * jump.at(1);
-        } else { //in compression
-            answer.at(1) = kn * stiffCoeffKn * jump.at(1);
-        }
+    answer.resize(3);    
+
+    double x = jump.at(1) + transitionOpening;
+    
+    if (stiffCoeffKn == 1.){//tension stiffness = compression stiffness
+        answer.at(1) = kn*x;
     } else {
-        // standard part of elastic stress-strain law
-        answer.at(1) = kn * jump.at(1);
+        //composed function from two atan's to have smooth intersection between tension and compression
+        answer.at(1) = (M_PI/2. + atan(smoothMag*x))/M_PI*kn*stiffCoeffKn*x + (M_PI/2.-atan(smoothMag*x))/M_PI*kn*x;
     }
     
     // shear part of elastic stress-strain law
@@ -82,21 +79,43 @@ CohesiveInterfaceMaterial :: give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatR
     answer.zero();
     
     StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus(gp) );
-    double normalJump = status->giveTempJump().at(1);
+//     double normalJump = status->giveTempJump().at(1);
     
-    if (normalJump > 0.) {
-        if(normalJump<transitionOpening){ // reduce traction in tension
-            double stiffTmp = kn*stiffCoeffKn + (kn - kn*stiffCoeffKn) * (1. - normalJump/transitionOpening);
-            answer.at(1, 1) = stiffTmp;
-        } else {
-            answer.at(1, 1) = kn * stiffCoeffKn;
-        }
+//     if (normalJump > 0.) {
+//         if(normalJump<transitionOpening){ // reduce traction in tension
+//             double stiffTmp = kn*stiffCoeffKn + (kn - kn*stiffCoeffKn) * (1. - normalJump/transitionOpening);
+//             answer.at(1, 1) = stiffTmp;
+//         } else {
+//             answer.at(1, 1) = kn * stiffCoeffKn;
+//         }
+//     } else {
+//         // standard part of elastic stress-strain law
+//         answer.at(1, 1) = kn;
+//     }
+//     
+//     if ( rMode == SecantStiffness || rMode == TangentStiffness ) {
+//         if ( normalJump + transitionOpening <= 0. ) { //local CS
+//             answer.at(1, 1) = kn; //compression
+//         } else {
+//             answer.at(1, 1) = 0*kn*stiffCoeffKn; //tension
+//         }
+//     } else {
+//         answer.at(1, 1) = kn; 
+//     }
+    
+    
+    double x = status->giveTempJump().at(1) + transitionOpening;
+    
+    if (stiffCoeffKn == 1.){//tension stiffness = compression stiffness
+        answer.at(1,1) = kn;
     } else {
-        // standard part of elastic stress-strain law
-        answer.at(1, 1) = kn;
+        //TangentStiffness by derivating traction with regards to x (=relative displacement)
+        answer.at(1,1) = (M_PI/2. + atan(smoothMag*x))/M_PI*kn*stiffCoeffKn + (M_PI/2.-atan(smoothMag*x))/M_PI*kn + smoothMag*kn*stiffCoeffKn*x/M_PI/(smoothMag*smoothMag*x*x+1) - smoothMag*kn*x/M_PI/(smoothMag*smoothMag*x*x+1);
     }
     
-    answer.at(2, 2) = answer.at(3, 3) = ks;
+    //answer.at(1, 1) = kn; 
+    answer.at(2, 2) = ks;
+    answer.at(3, 3) = ks;
 }
 
 int
@@ -119,6 +138,9 @@ CohesiveInterfaceMaterial :: initializeFrom(InputRecord *ir)
     transitionOpening = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, transitionOpening, _IFT_CohesiveInterfaceMaterial_transitionopening);
 
+    smoothMag = 1.e+4;
+    IR_GIVE_OPTIONAL_FIELD(ir, smoothMag, _IFT_CohesiveInterfaceMaterial_smoothMag);
+    
     return StructuralInterfaceMaterial :: initializeFrom(ir);
 }
 
