@@ -55,6 +55,7 @@ public:
     /// Destructor.
     virtual ~EmptyCS();
 
+    virtual Material *giveMaterial(IntegrationPoint *ip);
     virtual int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) { return 1; }
     virtual int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) { return 1; }
     virtual int estimatePackSize(DataStream &buff, GaussPoint *ip) { return 0; }

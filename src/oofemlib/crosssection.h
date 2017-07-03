@@ -270,7 +270,7 @@ public:
      * Returns the material associated with the GP.
      * Default implementation uses gp->giveMaterial() for backwards compatibility, but it should be overloaded in each specialized cross-section.
      */
-    virtual Material *giveMaterial(IntegrationPoint *ip) { return ip->giveMaterial(); }
+    virtual Material *giveMaterial(IntegrationPoint *ip) = 0;
 
     /**
      * Stores integration point state to output stream.
