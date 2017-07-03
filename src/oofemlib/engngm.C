@@ -761,7 +761,7 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
         // skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. They introduction is necessary to
         // allow local averaging on domains without fine grain communication between domains).
-        if ( element->giveParallelMode() == Element_remote || !element->isActivated(tStep) ) {
+        if ( element->giveParallelMode() == Element_remote || !element->isActivated(tStep) || !this->isElementActivated(element) ) {
             continue;
         }
 
@@ -796,7 +796,8 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
             IntArray loc, bNodes;
             FloatMatrix mat, R;
             BodyLoad *bodyLoad;
-            BoundaryLoad *bLoad;
+            SurfaceLoad* sLoad;
+            EdgeLoad* eLoad;
             Set *set = domain->giveSet( bc->giveSetNumber() );
 
             if ( ( bodyLoad = dynamic_cast< BodyLoad * >(load) ) ) { // Body load:
@@ -815,13 +816,13 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
                         answer.assemble(loc, mat);
                     }
                 }
-            } else if ( ( bLoad = dynamic_cast< BoundaryLoad * >(load) ) ) { // Boundary load:
+            } else if ( ( sLoad = dynamic_cast< SurfaceLoad * >(load) ) ) { // Surface load:
                 const IntArray &boundaries = set->giveBoundaryList();
                 for ( int ibnd = 1; ibnd <= boundaries.giveSize() / 2; ++ibnd ) {
                     Element *element = domain->giveElement( boundaries.at(ibnd * 2 - 1) );
                     int boundary = boundaries.at(ibnd * 2);
                     mat.clear();
-                    ma.matrixFromBoundaryLoad(mat, *element, bLoad, boundary, tStep);
+                    ma.matrixFromSurfaceLoad(mat, *element, sLoad, boundary, tStep);
 
                     if ( mat.isNotEmpty() ) {
                         element->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
@@ -833,13 +834,13 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
                         answer.assemble(loc, mat);
                     }
                 }
-                ///@todo Should we have a seperate entry for edge loads? Just sticking to the general "boundaryload" for now.
+            } else if ( ( eLoad = dynamic_cast< EdgeLoad * >(load) ) ) { // Edge load:
                 const IntArray &edgeBoundaries = set->giveEdgeList();
                 for ( int ibnd = 1; ibnd <= edgeBoundaries.giveSize() / 2; ++ibnd ) {
                     Element *element = domain->giveElement( edgeBoundaries.at(ibnd * 2 - 1) );
                     int boundary = edgeBoundaries.at(ibnd * 2);
                     mat.clear();
-                    ma.matrixFromEdgeLoad(mat, *element, bLoad, boundary, tStep);
+                    ma.matrixFromEdgeLoad(mat, *element, eLoad, boundary, tStep);
 
                     if ( mat.isNotEmpty() ) {
                         element->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
@@ -883,7 +884,7 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
     for ( int ielem = 1; ielem <= nelem; ielem++ ) {
         Element *element = domain->giveElement(ielem);
 
-        if ( element->giveParallelMode() == Element_remote || !element->isActivated(tStep) ) {
+        if ( element->giveParallelMode() == Element_remote || !element->isActivated(tStep) || !this->isElementActivated(element) ) {
             continue;
         }
 
@@ -1031,7 +1032,8 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
             FloatArray charVec;
             FloatMatrix R;
             BodyLoad *bodyLoad;
-            BoundaryLoad *bLoad;
+            SurfaceLoad *sLoad;
+            EdgeLoad *eLoad;
             //BoundaryEdgeLoad *eLoad;
             NodalLoad *nLoad;
             Set *set = domain->giveSet( bc->giveSetNumber() );
@@ -1040,7 +1042,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
                 const IntArray &elements = set->giveElementList();
                 for ( int ielem = 1; ielem <= elements.giveSize(); ++ielem ) {
                     Element *element = domain->giveElement( elements.at(ielem) );
-                    if ( element->isActivated(tStep) ) {
+                    if ( element->isActivated(tStep) && this->isElementActivated(element) ) {
                         charVec.clear();
                         va.vectorFromLoad(charVec, *element, bodyLoad, tStep, mode);
 
@@ -1058,18 +1060,19 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
                         }
                     }
                 }
-            } else if ( ( bLoad = dynamic_cast< BoundaryLoad * >(load) ) ) { // Boundary load:
+            } else if ( ( sLoad = dynamic_cast< SurfaceLoad * >(load) ) ) { // Surface load:
                 const IntArray &boundaries = set->giveBoundaryList();
                 for ( int ibnd = 1; ibnd <= boundaries.giveSize() / 2; ++ibnd ) {
                     Element *element = domain->giveElement( boundaries.at(ibnd * 2 - 1) );
-                    if ( element->isActivated(tStep) ) {
+                    if ( element->isActivated(tStep) && this->isElementActivated(element) ) {
 
                         int boundary = boundaries.at(ibnd * 2);
                         charVec.clear();
-                        va.vectorFromBoundaryLoad(charVec, *element, bLoad, boundary, tStep, mode);
+                        va.vectorFromSurfaceLoad(charVec, *element, sLoad, boundary, tStep, mode);
 
                         if ( charVec.isNotEmpty() ) {
-                            element->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+                            //element->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+                            element->giveBoundarySurfaceNodes(bNodes, boundary);
                             if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
                                 charVec.rotatedWith(R, 't');
                             }
@@ -1083,17 +1086,18 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
                         }
                     }
                 }
-                ///@todo Should we have a seperate entry for edge loads? Just sticking to the general "boundaryload" for now.
+            } else if ( ( eLoad = dynamic_cast< EdgeLoad * >(load) ) ) { // Edge load:
                 const IntArray &edgeBoundaries = set->giveEdgeList();
                 for ( int ibnd = 1; ibnd <= edgeBoundaries.giveSize() / 2; ++ibnd ) {
                     Element *element = domain->giveElement( edgeBoundaries.at(ibnd * 2 - 1) );
-                    if ( element->isActivated(tStep) ) {
+                    if ( element->isActivated(tStep) && this->isElementActivated(element) ) {
                         int boundary = edgeBoundaries.at(ibnd * 2);
                         charVec.clear();
-                        va.vectorFromEdgeLoad(charVec, *element, bLoad, boundary, tStep, mode);
+                        va.vectorFromEdgeLoad(charVec, *element, eLoad, boundary, tStep, mode);
 
                         if ( charVec.isNotEmpty() ) {
-                            element->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
+                            //element->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
+                            element->giveBoundaryEdgeNodes(bNodes, boundary);
                             if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
                                 charVec.rotatedWith(R, 't');
                             }
@@ -1171,9 +1175,10 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
             continue;
         }
 
-        if ( !element->isActivated(tStep) ) {
+        if ( !element->isActivated(tStep) || !this->isElementActivated(element) ) {
             continue;
         }
+
 
         va.vectorFromElement(charVec, *element, tStep, mode);
         if ( charVec.isNotEmpty() ) {
@@ -1192,6 +1197,160 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
                 }
             }
         }
+
+
+        // obtain form element its body, surface, edge, and point loads
+        const IntArray& list = element->giveBodyLoadList();
+        if (!list.isEmpty()) {
+          for (int iload=1; iload<=list.giveSize(); iload++) { // loop over body loads
+            BodyLoad *bodyLoad;
+            if ((bodyLoad = dynamic_cast< BodyLoad * >(domain->giveLoad(list.at(iload))))) {
+              charVec.clear();
+              va.vectorFromLoad(charVec, *element, bodyLoad, tStep, mode);
+
+              if ( charVec.isNotEmpty() ) {
+                if ( element->giveRotationMatrix(R) ) {
+                  charVec.rotatedWith(R, 't');
+                }
+
+                va.locationFromElement(loc, *element, s, & dofids);
+                answer.assemble(charVec, loc);
+                
+                if ( eNorms ) {
+                  eNorms->assembleSquared(charVec, dofids);
+                }
+              }
+            }
+            
+          } // loop over body load list
+        } // if (!(list = element->giveBodyLoadList()).isEmpty())
+
+        // obtain from element its boundaryloads (surface+edge)
+        const IntArray& list2 = element->giveBoundaryLoadList();
+        IntArray bNodes;
+        if (!list2.isEmpty()) {
+          for (int j=1; j<=list2.giveSize()/2; j++) { // loop over boundary loads
+            int iload = list2.at(j * 2 - 1) ;
+            int boundary = list2.at(j * 2);
+            SurfaceLoad *sLoad;
+            EdgeLoad *eLoad;
+            if ((eLoad = dynamic_cast< EdgeLoad * >(domain->giveLoad(iload)))) {
+              charVec.clear();
+              va.vectorFromEdgeLoad(charVec, *element, eLoad, boundary, tStep, mode);
+              
+              if ( charVec.isNotEmpty() ) {
+                //element->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
+                element->giveBoundaryEdgeNodes(bNodes, boundary);
+                if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
+                  charVec.rotatedWith(R, 't');
+                }
+                
+                va.locationFromElementNodes(loc, *element, bNodes, s, & dofids);
+                answer.assemble(charVec, loc);
+                
+                if ( eNorms ) {
+                  eNorms->assembleSquared(charVec, dofids);
+                }
+              }
+            } else if ((sLoad = dynamic_cast< SurfaceLoad * >(domain->giveLoad(iload)))) {
+              charVec.clear();
+              va.vectorFromSurfaceLoad(charVec, *element, sLoad, boundary, tStep, mode);
+              
+              if ( charVec.isNotEmpty() ) {
+                //element->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+                element->giveBoundarySurfaceNodes(bNodes, boundary);
+                if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
+                  charVec.rotatedWith(R, 't');
+                }
+                
+                va.locationFromElementNodes(loc, *element, bNodes, s, & dofids);
+                answer.assemble(charVec, loc);
+                
+                if ( eNorms ) {
+                  eNorms->assembleSquared(charVec, dofids);
+                }
+              }
+            } else {
+              OOFEM_ERROR ("Unsupported element boundary load type");
+            }
+          }
+        } // end loop over lement boundary loads
+
+    } // end loop over elements
+
+    this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
+}
+
+void
+EngngModel :: assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, CharType type, Domain *domain)
+{
+    // Simply assembles contributions from each element in domain
+    IntArray loc;
+    FloatArray charVec, delta_u;
+    FloatMatrix charMatrix, R;
+    int nelems = domain->giveNumberOfElements();
+    EModelDefaultEquationNumbering dn;
+
+    answer.resize( this->giveNumberOfDomainEquations( domain->giveNumber(), EModelDefaultEquationNumbering() ) );
+    answer.zero();
+
+    this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
+
+#ifdef _OPENMP
+ #pragma omp parallel for shared(answer) private(R, charMatrix, charVec, loc, delta_u)
+#endif
+    for ( int i = 1; i <= nelems; i++ ) {
+        Element *element = domain->giveElement(i);
+
+        // Skip remote elements (these are used as mirrors of remote elements on other domains
+        // when nonlocal constitutive models are used. Their introduction is necessary to
+        // allow local averaging on domains without fine grain communication between domains).
+        if ( element->giveParallelMode() == Element_remote ) {
+            continue;
+        }
+
+        if ( !element->isActivated(tStep) || !this->isElementActivated(element) ) {
+            continue;
+        }
+
+        element->giveLocationArray(loc, dn);
+
+        // Take the tangent from the previous step
+        ///@todo This is not perfect. It is probably no good for viscoelastic materials, and possibly other scenarios that are rate dependent
+        ///(tangent will be computed for the previous step, with whatever deltaT it had)
+        element->giveCharacteristicMatrix(charMatrix, type, tStep);
+        if ( charMatrix.isNotEmpty() ) {
+            ///@note Temporary work-around for active b.c. used in multiscale (it can't support VM_Incremental easily).
+            
+#if 0
+            element->computeVectorOf(VM_Incremental, tStep, delta_u);
+#else
+            element->computeVectorOf(VM_Total, tStep, delta_u);
+            FloatArray tmp;
+
+            if ( tStep->isTheFirstStep() ) {
+                tmp = delta_u;
+                tmp.zero();
+            } else {
+                element->computeVectorOf(VM_Total, tStep->givePreviousStep(), tmp);
+            }
+
+            delta_u.subtract(tmp);
+#endif
+
+            charVec.beProductOf(charMatrix, delta_u);
+            if ( element->giveRotationMatrix(R) ) {
+                charVec.rotatedWith(R, 't');
+            }
+
+            ///@todo Deal with element deactivation and reactivation properly.
+#ifdef _OPENMP
+ #pragma omp critical
+#endif
+            {
+                answer.assemble(charVec, loc);
+            }
+        }
     }
 
     this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
@@ -1199,7 +1358,7 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
 
 
 void
-EngngModel :: assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, CharType type, Domain *domain)
+EngngModel :: assemblePrescribedExtrapolatedForces(FloatArray &answer, TimeStep *tStep, CharType type, Domain *domain)
 {
     // Simply assembles contributions from each element in domain
     IntArray loc;
@@ -1236,20 +1395,7 @@ EngngModel :: assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, Ch
         ///@todo This is not perfect. It is probably no good for viscoelastic materials, and possibly other scenarios that are rate dependent
         ///(tangent will be computed for the previous step, with whatever deltaT it had)
         element->giveCharacteristicMatrix(charMatrix, type, tStep);
-        if ( charMatrix.isNotEmpty() ) {
-            ///@note Temporary work-around for active b.c. used in multiscale (it can't support VM_Incremental easily).
-            //element->computeVectorOf(VM_Incremental, tStep, delta_u);
-            element->computeVectorOf(VM_Total, tStep, delta_u);
-            FloatArray tmp;
-
-            if ( tStep->isTheFirstStep() ) {
-                    tmp = delta_u;
-                    tmp.zero();
-            } else {
-                    element->computeVectorOf(VM_Total, tStep->givePreviousStep(), tmp);
-            }
-
-            delta_u.subtract(tmp);
+        element->computeVectorOfPrescribed(VM_Incremental, tStep, delta_u);
             charVec.beProductOf(charMatrix, delta_u);
             if ( element->giveRotationMatrix(R) ) {
                 charVec.rotatedWith(R, 't');

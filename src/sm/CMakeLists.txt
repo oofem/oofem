@@ -30,6 +30,7 @@ set (sm_element
     Elements/Beams/libeam3dnl.C 
     Elements/Beams/libeam3dnl2.C 
     Elements/Beams/libeam3d2.C
+    Elements/Beams/beambaseelement.C
     Elements/Beams/beam2d.C 
     Elements/Beams/beam3d.C
     Elements/Plates/cct.C
@@ -82,9 +83,12 @@ set (sm_element
     Elements/lattice2d.C
     Elements/tet21ghostsolid.C
     Elements/quad1platesubsoil.C 
+    Elements/quad2platesubsoil.C
     Elements/tria1platesubsoil.C
+    Elements/linedistributedspring.C
     Elements/trwarp.C
     Elements/PlaneStress/basicelement.C
+    Elements/nodalspringelement.C
     Elements/structural2delement.C
     Elements/structural3delement.C
     #Elements/phasefieldelement.C
@@ -136,6 +140,7 @@ set (sm_emodel
     EngineeringModels/incrementallinearstatic.C
     EngineeringModels/freewarping.C 
     EngineeringModels/structuralmaterialevaluator.C
+    EngineeringModels/qclinearstatic.C
     )
 
 set (sm_loads
@@ -173,6 +178,9 @@ set (sm_material
     Materials/ConcreteMaterials/mazarsmodelnl.C
     Materials/ConcreteMaterials/mplasticmaterial2.C
     Materials/ConcreteMaterials/compodamagemat.C
+    Materials/ConcreteMaterials/concretefcm.C
+    Materials/ConcreteMaterials/frcfcm.C
+    Materials/ConcreteMaterials/frcfcmnl.C
     Materials/RheoChainMaterials/rheoChM.C 
     Materials/RheoChainMaterials/maxwellChM.C 
     Materials/RheoChainMaterials/kelvinChM.C
@@ -217,7 +225,8 @@ set (sm_material
     Materials/graddpmaterialextensioninterface.C
     Materials/rcm2.C
     Materials/isodamagemodel.C
-    Materials/steelrelaxmat.C 
+    Materials/steelrelaxmat.C
+    Materials/fcm.C
     )
 
 if (USE_PYTHON)
@@ -316,6 +325,14 @@ set (sm_obsolete
     Materials/Obsolete/rankinepm.C
     )
 
+set (sm_quasicontinuum
+    Quasicontinuum/quasicontinuum.C
+    Quasicontinuum/quasicontinuumnumberingscheme.C
+    Quasicontinuum/quasicontinuumvtkxmlexportmodule.C    
+    Quasicontinuum/fullsolveddomain.C
+    Quasicontinuum/geometrygenerator.C
+    )
+
 set (sm
     ${sm_element}
     ${sm_interface_elements}
@@ -333,6 +350,7 @@ set (sm
     ${sm_obsolete}
     ${sm_new}
     ${sm_boundary_conditions}
+    ${sm_quasicontinuum} 
     )
 
 if (USE_PARALLEL)

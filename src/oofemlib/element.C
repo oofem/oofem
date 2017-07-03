@@ -178,6 +178,34 @@ Element :: computeVectorOf(PrimaryField &field, const IntArray &dofIDMask, Value
 
 
 void
+Element :: computeVectorOfPrescribed(ValueModeType u, TimeStep *tStep, FloatArray &answer)
+{
+    IntArray dofIDMask;
+    FloatMatrix G2L;
+    FloatArray vec;
+
+    answer.reserve( this->computeNumberOfGlobalDofs() );
+
+    for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
+        this->giveDofManDofIDMask(i, dofIDMask);
+        this->giveDofManager(i)->givePrescribedUnknownVector(vec, dofIDMask, u, tStep);
+        answer.append(vec);
+    }
+
+    for ( int i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
+        this->giveInternalDofManDofIDMask(i, dofIDMask);
+	this->giveInternalDofManager(i)->givePrescribedUnknownVector(vec, dofIDMask, u, tStep);
+        answer.append(vec);
+    }
+
+    if ( this->computeGtoLRotationMatrix(G2L) ) {
+        answer.rotatedWith(G2L, 'n');
+    }
+
+}
+
+  
+void
 Element :: computeVectorOfPrescribed(const IntArray &dofIDMask, ValueModeType mode, TimeStep *tStep, FloatArray &answer)
 {
     FloatMatrix G2L;
@@ -559,7 +587,7 @@ Element :: giveCharacteristicVector(FloatArray &answer, CharType type, ValueMode
 
 
 void
-Element :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
+Element :: computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     answer.clear();
     OOFEM_ERROR("Unknown load type.");
@@ -567,7 +595,7 @@ Element :: computeLoadVector(FloatArray &answer, Load *load, CharType type, Valu
 
 
 void
-Element :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep)
+Element :: computeBoundarySurfaceLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
 {
     answer.clear();
     OOFEM_ERROR("Unknown load type.");
@@ -575,13 +603,19 @@ Element :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int
 
 
 void
-Element :: computeTangentFromBoundaryLoad(FloatMatrix &answer, BoundaryLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep)
+Element :: computeTangentFromSurfaceLoad(FloatMatrix &answer, SurfaceLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep)
+{
+    answer.clear();
+}
+
+  void
+Element :: computeTangentFromEdgeLoad(FloatMatrix &answer, EdgeLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep)
 {
     answer.clear();
 }
 
 void
-Element :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep)
+Element :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
 {
     ///@todo Change the load type to "BoundaryEdgeLoad" maybe?
     answer.clear();
@@ -731,8 +765,12 @@ Element :: printOutputAt(FILE *file, TimeStep *tStep)
         dman->printOutputAt(file, tStep);
     }
 
-    for ( auto &iRule: integrationRulesArray ) {
-        iRule->printOutputAt(file, tStep);
+    if (this->isActivated(tStep) ) {
+      for ( auto &iRule: integrationRulesArray ) {
+	iRule->printOutputAt(file, tStep);
+      }
+    } else {
+      fprintf(file, "is not active in current time step\n");
     }
 }
 
@@ -750,21 +788,21 @@ Element :: updateYourself(TimeStep *tStep)
     }
 }
 
-
+    
 bool
 Element :: isActivated(TimeStep *tStep)
 {
     if ( activityTimeFunction ) {
-        if ( tStep ) {
-            return ( domain->giveFunction(activityTimeFunction)->evaluateAtTime( tStep->giveIntrinsicTime() ) > 1.e-3 );
-        } else {
-            return false;
-        }
+	if ( tStep ) {
+	    return ( domain->giveFunction(activityTimeFunction)->evaluateAtTime( tStep->giveIntrinsicTime() ) > 1.e-3 );
+	} else {
+	    return false;
+	}
     } else {
-        return true;
+	return true;
     }
 }
-
+    
 
 
 bool
@@ -780,7 +818,7 @@ Element :: isCast(TimeStep *tStep)
     double castingTime;    
     double tNow = tStep->giveIntrinsicTime();
     
-    if ( integrationRulesArray.size() > 1 ) {
+    if ( integrationRulesArray.size() > 0 ) {
       
       for ( int i = 0; i < (int)integrationRulesArray.size(); i++ ) {
         IntegrationRule *iRule;
@@ -793,15 +831,6 @@ Element :: isCast(TimeStep *tStep)
             return false;
           }          
         }
-      }
-    } else {
-      
-      for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
-        castingTime =  this->giveCrossSection()->giveMaterial(gp)->giveCastingTime();
-        
-         if (tNow < castingTime ) {
-           return false;
-         }
       }
     }
     
@@ -825,6 +854,33 @@ Element :: initForNewStep()
     }
 }
 
+
+
+void
+Element::giveBoundaryEdgeNodes (IntArray& bNodes, int boundary)
+{
+  this->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
+}
+
+void
+Element::giveBoundarySurfaceNodes (IntArray& bNodes, int boundary)
+{
+  this->giveInterpolation()->boundarySurfaceGiveNodes(bNodes, boundary);
+}
+
+IntegrationRule*
+Element::giveBoundaryEdgeIntegrationRule (int order, int boundary)
+{
+  return this->giveInterpolation()->giveBoundaryEdgeIntegrationRule(order, boundary);
+}
+
+IntegrationRule*
+Element::giveBoundarySurfaceIntegrationRule (int order, int boundary)
+{
+  return this->giveInterpolation()->giveBoundarySurfaceIntegrationRule(order, boundary);
+}
+
+  
 
 contextIOResultType Element :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 // saves full element context (saves state variables, that completely describe current state)
@@ -1465,7 +1521,7 @@ integrationDomain
 Element :: giveIntegrationDomain() const
 {
     FEInterpolation *fei = this->giveInterpolation();
-    return fei ? fei->giveIntegrationDomain() : _Unknown_integrationDomain;
+    return fei ? fei->giveIntegrationDomain() : _UnknownIntegrationDomain;
 }
 
 

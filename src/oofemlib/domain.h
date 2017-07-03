@@ -40,6 +40,7 @@
 #include "statecountertype.h"
 #include "intarray.h"
 #include "error.h"
+#include "bctracker.h"
 #ifdef __PARALLEL_MODE
  #include "entityrenumberingscheme.h"
 #endif
@@ -192,7 +193,9 @@ private:
 
     /// Contact Manager
     std :: unique_ptr< ContactManager > contactManager;
-    
+
+    /// BC tracker (keeps track of BCs applied wia sets to components)
+    BCTracker bcTracker;
     
     /**
      * Map from an element's global number to its place
@@ -504,6 +507,8 @@ public:
     FractureManager *giveFractureManager();
     bool hasFractureManager();
 
+    BCTracker *giveBCTracker();
+    
     /**
      * Sets receiver's associated topology description.
      * @param topo New topology description for receiver.

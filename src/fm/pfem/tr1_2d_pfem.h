@@ -163,10 +163,8 @@ protected:
 
     virtual void computeDeviatoricStressDivergence(FloatArray &answer, TimeStep *atTime);
 
-    virtual void computeForceVector(FloatArray &answer, TimeStep *atTime); //F
-
     /// Calculates the body load vector
-    virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *atTime);
+    virtual void computeBodyLoadVectorAt(FloatArray &answer, BodyLoad *load, TimeStep *tStep, ValueModeType mode);
     /// Calculates the boundary condition sub-vector on an edge
     virtual void computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *atTime);
 };

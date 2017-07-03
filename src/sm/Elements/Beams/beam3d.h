@@ -35,10 +35,11 @@
 #ifndef beam3d_h
 #define beam3d_h
 
-#include "../sm/Elements/structuralelement.h"
+#include "../sm/Elements/Beams/beambaseelement.h"
 #include "../sm/CrossSections/fiberedcs.h"
 #include "../sm/Materials/winklermodel.h"
 #include "dofmanager.h"
+#include "vtkxmlexportmodule.h"
 
 ///@name Input fields for Beam3d
 //@{
@@ -49,6 +50,8 @@
 #define _IFT_Beam3d_zaxis "zaxis"
 #define _IFT_Beam3d_subsoilmat "subsoilmat"
 //@}
+
+#define Beam3d_nSubBeams 10
 
 namespace oofem {
 
@@ -68,7 +71,7 @@ class FEI3dLineLin;
  * @author Mikael Öhman
  * @author (several other authors)
  */
- class Beam3d : public StructuralElement, public FiberedCrossSectionInterface, public Beam3dSubsoilMaterialInterface
+ class Beam3d : public BeamBaseElement, public FiberedCrossSectionInterface, public Beam3dSubsoilMaterialInterface,  public VTKXMLExportModuleElementInterface
 {
 protected:
     /// Geometry interpolator only.
@@ -102,7 +105,6 @@ public:
     virtual void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep);
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual int giveLocalCoordinateSystem(FloatMatrix &answer);
-    virtual void computeLocalForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *, int useUpdatedGpRecord = 0);
     void giveEndForcesVector(FloatArray &answer, TimeStep *tStep);
 
@@ -169,7 +171,8 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     ///@todo Introduce interpolator and remove these two:
     virtual integrationDomain giveIntegrationDomain() const { return _Line; }
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
+    //virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_Composite; }
     virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
 
     /*
@@ -187,6 +190,7 @@ public:
     */
     virtual void B3SSMI_getUnknownsGtoLRotationMatrix(FloatMatrix& answer);
 
+    virtual void giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep );
 
     
 #ifdef __OOFEG
@@ -195,8 +199,7 @@ public:
 #endif
 
 protected:
-    virtual void computeEdgeLoadVectorAt(FloatArray &answer, Load *, int, TimeStep *, ValueModeType mode);
-    virtual void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true);
     virtual int computeLoadGToLRotationMtrx(FloatMatrix &answer);
     virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
     virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &);
@@ -220,6 +223,13 @@ protected:
     void computeSubSoilNMatrixAt(GaussPoint *gp, FloatMatrix &answer);
     void computeSubSoilStiffnessMatrix(FloatMatrix &answer,
 				       MatResponseMode rMode, TimeStep *tStep);
+
+    void giveInternalForcesVectorAtPoint(FloatArray &answer, TimeStep *tStep, FloatArray &coords);
+    void computeInternalForcesFromBoundaryEdgeLoadVectorAtPoint(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode,
+                                                                TimeStep *tStep, FloatArray &pointCoords, double ds, bool global);
+    void computeInternalForcesFromBodyLoadVectorAtPoint(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode, FloatArray &pointCoords, double ds);
+    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords, const FloatArray &point);
+
 };
 } // end namespace oofem
 #endif // beam3d_h

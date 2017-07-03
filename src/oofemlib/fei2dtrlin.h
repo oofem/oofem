@@ -47,6 +47,11 @@ public:
     FEI2dTrLin(int ind1, int ind2) : FEInterpolation2d(1, ind1, ind2) { }
 
     virtual integrationDomain giveIntegrationDomain() const { return _Triangle; }
+    virtual integrationDomain giveBoundaryIntegrationDomain(int ib) const { return _Line; }
+    virtual integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf) const { return _Triangle; }
+    virtual integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge) const { return _Line; }
+
+    
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
 
     // Bulk
@@ -76,5 +81,25 @@ public:
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
 };
+
+/**
+ * Class representing a 2d isoparametric linear interpolation based on natural coordinates
+ * for triangular elements in axisymmetric setting.
+ */
+class OOFEM_EXPORT FEI2dTrLinAxi : public FEI2dTrLin
+{
+public:
+  FEI2dTrLinAxi(int ind1, int ind2) : FEI2dTrLin(ind1, ind2) { }
+  
+  virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+  virtual double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+  virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+  virtual double edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords,
+                                                const FEICellGeometry &cellgeo);
+  
+};
+
+
+
 } // end namespace oofem
 #endif // fei2dtrlin_h

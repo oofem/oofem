@@ -134,6 +134,9 @@ StructuralEngngModel :: printReactionForces(TimeStep *tStep, int di, FILE *out)
     }
 }
 
+void StructuralEngngModel :: terminate(TimeStep *tStep){
+    EngngModel :: terminate(tStep);
+}
 
 void
 StructuralEngngModel :: buildReactionTable(IntArray &restrDofMans, IntArray &restrDofs,

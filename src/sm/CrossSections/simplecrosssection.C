@@ -196,7 +196,7 @@ void
 SimpleCrossSection :: giveGeneralizedStress_Plate(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
     /**Note: (by bp): This assumes that the behaviour is elastic
-     * there exist a nuumber of nonlinear integral material models for beams/plates/shells
+     * there exist a number of nonlinear integral material models for beams/plates/shells
      * defined directly in terms of integral forces and moments and corresponding
      * deformations and curvatures. This would require to implement support at material model level.
      * Mikael: See earlier response to comment
@@ -524,6 +524,14 @@ SimpleCrossSection :: initializeFrom(InputRecord *ir)
     value = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_drillStiffness);
     propertyDictionary.add(CS_DrillingStiffness, value);
+
+    value = 0.0;
+    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_relDrillStiffness);
+    propertyDictionary.add(CS_RelDrillingStiffness, value);
+
+    value = 0.0;
+    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_drillType);
+    propertyDictionary.add(CS_DrillingType, value);
 
     this->materialNumber = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->materialNumber, _IFT_SimpleCrossSection_MaterialNumber);

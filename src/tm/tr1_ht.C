@@ -47,6 +47,7 @@
 namespace oofem {
 REGISTER_Element(Tr1_ht);
 REGISTER_Element(Tr1_hmt);
+REGISTER_Element(Tr1_mt);
 
 FEI2dTrLin Tr1_ht :: interp(1, 2);
 
@@ -63,13 +64,14 @@ Tr1_hmt :: Tr1_hmt(int n, Domain *aDomain) : Tr1_ht(n, aDomain)
     emode = HeatMass1TransferEM;
 }
 
-Tr1_ht :: ~Tr1_ht()
-{ }
+Tr1_mt :: Tr1_mt(int n, Domain *aDomain) : Tr1_ht(n, aDomain)
+{
+    emode = Mass1TransferEM;
+}
 
 
 FEInterpolation *
 Tr1_ht :: giveInterpolation() const { return & this->interp; }
-
 
 void
 Tr1_ht :: computeGaussPoints()

@@ -190,7 +190,7 @@ DKTPlate3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gau
         answer.at(3, 1) = charVect.at(4);
         answer.at(2, 3) = charVect.at(5);
         answer.at(3, 2) = charVect.at(5);
-    } else if ( ( type == LocalMomentumTensor ) || ( type == GlobalMomentumTensor ) ) {
+    } else if ( ( type == LocalMomentTensor ) || ( type == GlobalMomentTensor ) ) {
         //this->computeStressVector(charVect, gp, tStep);
         charVect = ms->giveStressVector();
 
@@ -219,7 +219,7 @@ DKTPlate3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gau
         exit(1);
     }
 
-    if ( ( type == GlobalForceTensor  ) || ( type == GlobalMomentumTensor  ) ||
+    if ( ( type == GlobalForceTensor  ) || ( type == GlobalMomentTensor  ) ||
         ( type == GlobalStrainTensor ) || ( type == GlobalCurvatureTensor ) ) {
         this->computeGtoLRotationMatrix();
         answer.rotatedWith(GtoLRotationMatrix);
@@ -254,7 +254,7 @@ DKTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
         return 1;
     } else if ( type == IST_ShellMomentTensor || type == IST_ShellForceTensor ) {
         if ( type == IST_ShellMomentTensor ) {
-            cht = GlobalMomentumTensor;
+            cht = GlobalMomentTensor;
         } else {
             cht = GlobalForceTensor;
         }
@@ -353,13 +353,6 @@ DKTPlate3d :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 }
 
 
-void
-DKTPlate3d :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
-{
-    this->computeGlobalCoordinates( answer, gp->giveNaturalCoordinates() );
-}
-
-
 int
 DKTPlate3d :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int isurf, GaussPoint *gp)
 {
@@ -403,21 +396,6 @@ DKTPlate3d :: printOutputAt(FILE *file, TimeStep *tStep)
 }
 
 
-// Edge load support
-void
-DKTPlate3d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
-{
-    FloatArray n;
-
-    this->interp_lin.edgeEvalN( n, iedge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(6, 12);
-    answer.at(3, 3) = n.at(1);
-    answer.at(3, 9) = n.at(2);
-    answer.at(4, 4) = answer.at(5, 5) = n.at(1);
-    answer.at(4, 10) = answer.at(5, 11) = n.at(2);
-}
-
 void
 DKTPlate3d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 {
@@ -459,13 +437,6 @@ DKTPlate3d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     return detJ *gp->giveWeight();
-}
-
-
-void
-DKTPlate3d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
-{
-    this->interp_lin.edgeLocal2global( answer, iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -541,7 +512,7 @@ DKTPlate3d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lco
     double l1 = lcoords.at(1);
     double l2 = lcoords.at(2);
     double l3 = 1. - l2 - l1;
-
+    
     answer.resize(3);
     for ( int _i = 1; _i <= 3; _i++ ) {
         answer.at(_i) = l1 * this->giveNode(1)->giveCoordinate(_i) + l2 *this->giveNode(2)->giveCoordinate(_i) + l3 *this->giveNode(3)->giveCoordinate(_i);

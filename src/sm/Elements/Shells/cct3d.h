@@ -51,8 +51,8 @@ enum CharTensor {
 
     LocalForceTensor,
     GlobalForceTensor,
-    LocalMomentumTensor,
-    GlobalMomentumTensor
+    LocalMomentTensor,
+    GlobalMomentTensor
 };
 #endif
 
@@ -102,7 +102,6 @@ protected:
     virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const;
     virtual IntegrationRule *GetSurfaceIntegrationRule(int iSurf);
     virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf);
-    virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf);
     virtual int computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPoint *gp);
     //@}
 

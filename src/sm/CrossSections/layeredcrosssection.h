@@ -74,7 +74,7 @@ class StructuralMaterial;
  *
  * It uses master - slave GaussPoint approach, where master gp has more slaves gp.
  * slave gp represent for each layer material point. It's coordinate sections
- * contains z-coordinate (-1,1) from mid-section. the slaves are manage completely
+ * contains z-coordinate (-1,1) from mid-section. The slaves are manage completely
  * ( created, saved their context.,,,) from this class. Master gp only deletes
  * slaves in destructor.
  *
@@ -119,9 +119,21 @@ public:
 
     virtual void createMaterialStatus(GaussPoint &iGP); // ES
 
+    //Create slave integration points
     virtual int setupIntegrationPoints(IntegrationRule &irule, int npoints, Element *element);
+    /**
+     * Sets up integration rule for the given element.
+     * Default behavior is just to call the Gauss integration rule, but for example the layered and fibered crosssections need to do their own thing.
+     * @param irule Integration rule to set up.
+     * @param npointsXY Number of integration points in xi-eta.
+     * @param npointsZ Number of integration points in zeta.
+     * @param element Element which the integration rule belongs to.
+     * @return Number of integration points.
+     */
+    virtual int setupIntegrationPoints(IntegrationRule &irule, int npointsXY, int npointsZ, Element *element);
 
     virtual void giveRealStress_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
+    virtual void giveRealStress_3dDegeneratedShell(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
     virtual void giveRealStress_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
     virtual void giveRealStress_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
     virtual void giveRealStress_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
@@ -148,6 +160,7 @@ public:
     virtual void give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void give2dPlateStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void give3dShellStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give3dDegeneratedShellStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     virtual void giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void give2dPlateSubSoilStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
@@ -266,7 +279,7 @@ public:
      * Computes full 3D strain vector in element layer.
      * This function is necessary if layered cross section is specified..
      * @param answer Full layer strain vector.
-     * @param masterGpStrain Generalized strain at maters gauss point.
+     * @param masterGpStrain Generalized strain at master gauss point.
      * @param masterGp Element integration point.
      * @param slaveGp Slave integration point representing particular layer.
      * @param tStep Time step.

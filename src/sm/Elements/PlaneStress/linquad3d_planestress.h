@@ -71,8 +71,8 @@ protected:
 
         LocalForceTensor,
         GlobalForceTensor,
-        LocalMomentumTensor,
-        GlobalMomentumTensor
+        LocalMomentTensor,
+        GlobalMomentTensor
     };
 
 public:

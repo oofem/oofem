@@ -37,6 +37,8 @@
 #include "gaussintegrationrule.h"
 
 namespace oofem {
+
+
 void FEInterpolation1d :: boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     answer.resize(1);
@@ -81,7 +83,6 @@ IntegrationRule *FEInterpolation1d :: giveBoundaryIntegrationRule(int order, int
 
 IntegrationRule *FEInterpolation1d :: giveBoundaryEdgeIntegrationRule(int order, int boundary)
 {
-    OOFEM_ERROR("Not supported by ");
-    return NULL;
+    return this->giveIntegrationRule(order);
 }
 } // end namespace oofem

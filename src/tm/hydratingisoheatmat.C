@@ -172,7 +172,7 @@ HydratingIsoHeatMaterial :: updateInternalState(const FloatArray &vec, GaussPoin
                     aux.zero();
                 }
 
-                aux.times( 1. / give('d', gp) );
+                aux.times( 1. / give('d', gp, tStep) );
                 fprintf( vyst, "Elem %.3d krok %.2d: t= %.0f, dt=%.0f, %ld. it, ksi= %.12f, T= %.8f, heat=%.8f\n", gp->giveElement()->giveNumber(), tStep->giveNumber(),
                         tStep->giveTargetTime(), tStep->giveTimeIncrement(), tStep->giveSolutionStateCounter(),
                         giveHydrationDegree(gp, tStep, VM_Total), vec.at(1), aux.at(1) * tStep->giveTimeIncrement() );
@@ -190,9 +190,9 @@ HydratingIsoHeatMaterial :: giveCharacteristicValue(MatResponseMode rmode, Gauss
 
     if ( rmode == Capacity ) {
         if ( castAt && ( tStep->giveTargetTime() < castAt ) ) {
-            answer = capacity * this->give('d', gp) / 1000;                            // Zero capacity before cast
+            answer = this->give('c', gp, tStep) * this->give('d', gp, tStep) / 1000;                            // Zero capacity before cast
         } else {
-            answer = capacity * this->give('d', gp);
+            answer = this->give('c', gp, tStep) * this->give('d', gp, tStep);
         }
     } else if ( !hydrationLHS ) {
         answer = 0;

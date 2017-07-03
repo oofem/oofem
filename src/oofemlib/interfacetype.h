@@ -79,7 +79,9 @@ enum InterfaceType {
     FailureModuleElementInterfaceType,
 
     Beam3dSubsoilElementInterfaceType,
-    Beam3dSubsoilMaterialInterfaceType
+    Beam3dSubsoilMaterialInterfaceType,
+
+    QCMaterialExtensionInterfaceType
 };
 } // end namespace oofem
 #endif // interfacetype_h

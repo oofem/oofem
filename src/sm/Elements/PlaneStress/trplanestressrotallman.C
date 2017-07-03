@@ -43,6 +43,7 @@
 #include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
+#include "boundaryload.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -56,7 +57,7 @@ REGISTER_Element(TrPlanestressRotAllman);
 FEI2dTrQuad TrPlanestressRotAllman :: qinterpolation(1, 2);
 
 TrPlanestressRotAllman :: TrPlanestressRotAllman(int n, Domain *aDomain) :
-    TrPlaneStress2d(n, aDomain)
+    TrPlaneStress2d(n, aDomain), LayeredCrossSectionInterface()
 {
     numberOfDofMans  = 3;
     numberOfGaussPoints = 4;
@@ -65,12 +66,15 @@ TrPlanestressRotAllman :: TrPlanestressRotAllman(int n, Domain *aDomain) :
 Interface *
 TrPlanestressRotAllman :: giveInterface(InterfaceType interface)
 {
-    if ( interface == ZZNodalRecoveryModelInterfaceType ) {
+    if ( interface == LayeredCrossSectionInterfaceType ) {
+        return static_cast< LayeredCrossSectionInterface * >(this);
+    } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
         return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
         return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
         return static_cast< SpatialLocalizerInterface * >(this);
+   
     }
     return NULL;
 }
@@ -308,6 +312,89 @@ TrPlanestressRotAllman :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
         OOFEM_ERROR("wrong edge number");
     }
 }
+
+//
+// layered cross section support functions
+//
+void
+TrPlanestressRotAllman :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep)
+// returns full 3d strain vector of given layer (whose z-coordinate from center-line is
+// stored in slaveGp) for given tStep
+{
+    double layerZeta, layerZCoord, top, bottom;
+
+    top    = this->giveCrossSection()->give(CS_TopZCoord, masterGp);
+    bottom = this->giveCrossSection()->give(CS_BottomZCoord, masterGp);
+    layerZeta = slaveGp->giveNaturalCoordinate(3);
+    layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
+    answer.resize(3); // {eps_xx,eps_yy,gamma_yz}
+
+    answer.at(1) = masterGpStrain.at(1) * layerZCoord;
+    answer.at(2) = masterGpStrain.at(2) * layerZCoord;
+    answer.at(3) = masterGpStrain.at(3);
+}
+
+void TrPlanestressRotAllman :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
+{
+    answer.clear();
+    if ( type != ExternalForcesVector ) {
+        return;
+    }
+
+    double dV;
+    FloatMatrix T;
+    FloatArray globalIPcoords;
+
+    EdgeLoad *edgeLoad = dynamic_cast< EdgeLoad * >(load);
+    if ( edgeLoad ) {
+        int approxOrder = edgeLoad->giveApproxOrder() + this->giveInterpolation()->giveInterpolationOrder();
+        int numberOfGaussPoints = ( int ) ceil( ( approxOrder + 1. ) / 2. );
+        GaussIntegrationRule iRule(1, this, 1, 1);
+        iRule.SetUpPointsOnLine(numberOfGaussPoints, _Unknown);
+        FloatArray reducedAnswer, force, ntf;
+        IntArray mask;
+        FloatMatrix n;
+
+        for ( GaussPoint *gp: iRule ) {
+            this->computeEgdeNMatrixAt(n, boundary, gp);
+            dV  = this->computeEdgeVolumeAround(gp, boundary);
+
+            if ( edgeLoad->giveFormulationType() == Load :: FT_Entity ) {
+                edgeLoad->computeValueAt(force, tStep, gp->giveNaturalCoordinates(), mode);
+            } else {
+	        //this->computeEdgeIpGlobalCoords(globalIPcoords, gp, boundary);
+	        this->giveInterpolation()->boundaryEdgeLocal2Global( globalIPcoords, boundary, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+                edgeLoad->computeValueAt(force, tStep, globalIPcoords, mode);
+            }
+
+            // transform force
+            if ( edgeLoad->giveCoordSystMode() == Load :: CST_Global ) {
+            } else {
+              // transform from local boundary to element local c.s
+              if ( this->computeLoadLEToLRotationMatrix(T, boundary, gp) ) {
+                force.rotatedWith(T, 'n');
+              }
+              // then to global c.s
+              if ( this->computeLoadGToLRotationMtrx(T) ) {
+                force.rotatedWith(T, 't');
+              }
+            }
+
+            ntf.beTProductOf(n, force);
+            answer.add(dV, ntf);
+        }
+
+
+        return;
+    } else {
+        OOFEM_ERROR("incompatible load");
+        return;
+    }
+
+
+}
+
+
 
 /*
  * double

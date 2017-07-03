@@ -41,7 +41,7 @@
 
 #define _IFT_Tr1_hmt_Name "tr1hmt"
 #define _IFT_Tr1_ht_Name "tr1ht"
-
+#define _IFT_Tr1_mt_Name "tr1mt"
 
 namespace oofem {
 class FEI2dTrLin;
@@ -57,7 +57,7 @@ protected:
 
 public:
     Tr1_ht(int n, Domain * d);
-    virtual ~Tr1_ht();
+    //virtual ~Tr1_ht();
 
     virtual double computeVolumeAround(GaussPoint *gp);
 
@@ -65,7 +65,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_Tr1_ht_Name; }
     virtual const char *giveClassName() const { return "Tr1_htElement"; }
 
-    virtual int computeNumberOfDofs() { return ( emode == HeatTransferEM ) ? 3 : 6; }
+    virtual int computeNumberOfDofs() { return ( emode == HeatMass1TransferEM ) ? 6 : 3; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _2dHeat; }
     virtual double giveThicknessAt(const FloatArray &gcoords);
@@ -84,6 +84,20 @@ protected:
     virtual void computeGaussPoints();
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
 };
+
+/**
+ * Class for mass transfer.
+ */
+class Tr1_mt : public Tr1_ht
+{
+public:
+    Tr1_mt(int n, Domain * d);
+
+    virtual const char *giveInputRecordName() const { return _IFT_Tr1_mt_Name; }
+    virtual const char *giveClassName() const { return "Tr1_mt"; }
+    virtual MaterialMode giveMaterialMode() { return _2dHeat; }
+};
+
 
 /**
  * Class for heat and mass transfer.

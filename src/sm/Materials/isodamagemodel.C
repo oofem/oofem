@@ -115,7 +115,7 @@ IsotropicDamageMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *
     this->initTempStatus(gp);
 
     // subtract stress-independent part
-    // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
+    // note: eigenStrains (temperature) are present in strains stored in gp
     // therefore it is necessary to subtract always the total eigen strain value
     this->giveStressDependentPartOfStrainVector(reducedTotalStrainVector, gp, totalStrain, tStep, VM_Total);
 
@@ -295,6 +295,12 @@ IsotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Inter
         answer.resize(1);
         answer.at(1) = status->giveLe();
         return 1;
+    } else if (type == IST_CrackWidth) {
+        answer.resize(1);
+        FloatArray reducedTotalStrainVector;
+        this->giveStressDependentPartOfStrainVector(reducedTotalStrainVector, gp, status->giveStrainVector(), tStep, VM_Total);
+        double maxStrain = reducedTotalStrainVector.giveIndexMaxElem();
+        answer.at(1) = status->giveLe() * status->giveDamage() * reducedTotalStrainVector.at(maxStrain);
     } else if ( type == IST_CrackDirs ) {
         answer.resize(1);
         answer.at(1) = status->giveCrackAngle();

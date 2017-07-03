@@ -378,7 +378,7 @@ LIBeam2dNL :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
 {
     ///@todo This should be a common inheritance for all 3d beams (and a similar one for 2D beams) 
     /// to support all the sensible moment/force tensors. 
-    if ( type == IST_BeamForceMomentumTensor ) {
+    if ( type == IST_BeamForceMomentTensor ) {
         answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         return 1;
     } else if ( type == IST_BeamStrainCurvatureTensor ) {
@@ -495,27 +495,6 @@ LIBeam2dNL :: initializeFrom(InputRecord *ir)
 
 
 void
-LIBeam2dNL :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
-{
-    /*
-     *
-     * computes interpolation matrix for element edge.
-     * we assemble locally this matrix for only nonzero
-     * shape functions.
-     * (for example only two nonzero shape functions for 2 dofs are
-     * necessary for linear plane stress tringle edge).
-     * These nonzero shape functions are then mapped to
-     * global element functions.
-     *
-     * Using mapping technique will allow to assemble shape functions
-     * without regarding particular side
-     */
-
-    this->computeNmatrixAt(gp->giveSubPatchCoordinates(), answer);
-}
-
-
-void
 LIBeam2dNL :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 {
     /*
@@ -548,12 +527,6 @@ LIBeam2dNL ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
     return 0.5 * this->computeLength() * weight;
 }
 
-
-void
-LIBeam2dNL :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
-{
-    computeGlobalCoordinates( answer, gp->giveNaturalCoordinates() );
-}
 
 int
 LIBeam2dNL :: computeLoadGToLRotationMtrx(FloatMatrix &answer)

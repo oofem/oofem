@@ -140,6 +140,26 @@ IntElSurfTr1 :: giveDofManDofIDMask(int inode, IntArray &answer) const
     answer = { D_u, D_v, D_w };
 }
 
+#if 0
+bool
+IntElSurfTr1 :: computeGtoLRotationMatrix(FloatMatrix &answer)
+{
+    FloatMatrix lcs;
+    computeTransformationMatrixAt(this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0), lcs);
+    answer.resize(18, 18);
+    for ( int i = 0; i < 6; i++ ) {
+        for ( int j = 1; j <= 3; j++ ) {
+            answer.at(i * 3 + 1, i * 3 + j) = lcs.at(3, j);
+            answer.at(i * 3 + 2, i * 3 + j) = lcs.at(1, j);
+            answer.at(i * 3 + 3, i * 3 + j) = lcs.at(2, j);
+        }
+    }
+    
+    
+    return 1;
+}
+#endif
+
 void
 IntElSurfTr1 :: computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
@@ -149,7 +169,6 @@ IntElSurfTr1 :: computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answe
     Normal.beVectorProductOf(G1, G2);
     Normal.normalize();
     answer.beLocalCoordSys(Normal);
-    
 }
 
 

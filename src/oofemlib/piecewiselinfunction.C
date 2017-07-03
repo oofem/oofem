@@ -162,6 +162,7 @@ PiecewiseLinFunction :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, numberOfPoints, "npoints");
         IR_GIVE_FIELD(ir, dates, _IFT_PiecewiseLinFunction_t);
         IR_GIVE_FIELD(ir, values, _IFT_PiecewiseLinFunction_ft);
+        IR_GIVE_OPTIONAL_FIELD(ir, this->parameterType, "paramtype");
     }
 
     return Function :: initializeFrom(ir);

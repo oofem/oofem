@@ -52,9 +52,9 @@ namespace oofem {
 class FEI2dTrLin;
 
 /**
- * This class implements an triangular Discrete Kirchhoff Theory (DKT) element.
- * This element is a plate element suitable for thin plates, as the traswerse shear strain energy is neglected.
- * The element has only 9 DOFs (w-displacement and rotations along coordinate axes) in each node
+ * This class implements an triangular Discrete Kirchhoff Theory (DKT) element. It can be defined only in xy plane.
+ * This element is a plate element suitable for thin plates, as the trasverse shear strain energy is neglected.
+ * The element has only 9 DOFs (w-displacement and in-plane rotations along coordinate axes) in each node
  * The derivation starts by assuming quadratic variations of rotation field (fi_x, fi_y)
  * The Kirchhoff hypothesis is imposed at vertices and in side mid nodes
  * The cubic variation of transwerse displacement is assumed along the edges, there is no need to define interpolation for w on the element.
@@ -88,6 +88,9 @@ public:
     virtual MaterialMode giveMaterialMode()  { return _2dPlate; }
     virtual int testElementExtension(ElementExtension ext) { return ( ( ( ext == Element_EdgeLoadSupport ) || ( ext == Element_SurfaceLoadSupport ) ) ? 1 : 0 ); }
 
+
+    virtual void computeEdgeNMatrix(FloatMatrix &answer, int boundaryID, const FloatArray& lcoords);
+    
 protected:
 
     virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
@@ -107,10 +110,8 @@ protected:
      * @name Edge load support
      */
     //@{
-    virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
     virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
     virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
     //@}
     /**
@@ -121,7 +122,6 @@ protected:
     virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const;
     virtual IntegrationRule *GetSurfaceIntegrationRule(int iSurf);
     virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf);
-    virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf);
     virtual int computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPoint *gp);
     //@}
 

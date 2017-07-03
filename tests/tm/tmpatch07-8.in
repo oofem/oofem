@@ -35,12 +35,12 @@ SimpleTransportCS 1 mat 1 set 1 thickness 1.0
 IsoHeat 1 d 2400. k 1.5 c 800.0
 BoundaryCondition  1 loadTimeFunction 1 dofs 1 10 values 1 0.0 set 2
 #Newton bc
-constantsurfaceload 2 loadTimeFunction 1 components 1 15.0 properties 1 a 0.85 loadtype 3 set 3
+constantedgeload 2 loadTimeFunction 1 components 1 15.0 properties 1 a 0.85 loadtype 3 set 3
 InitialCondition 1 Conditions 1 u 0.0 dofs 1 10 set 1
 ConstantFunction 1 f(t) 1.0
 Set 1 elementranges {(1 8)}
 Set 2 nodes 2 1 2
-Set 3 elementboundaries 2 8 2
+Set 3 elementedges 2 8 2
 
 #%BEGIN_CHECK% tolerance 1.e-5
 #NODE tStep 100 number 17 dof 10 unknown d value 1.10868860e+01

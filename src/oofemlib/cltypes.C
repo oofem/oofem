@@ -87,6 +87,7 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_ShellStrainTensor:
     case IST_CurvatureTensor:
     case IST_CurvatureTensorTemp:
+    case IST_EigenStrainTensor:
         return ISVT_TENSOR_S3E;
 
     case IST_StressTensor:
@@ -98,7 +99,9 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_ShellForceTensor:
     case IST_ShellForceTensorTemp:
     case IST_ShellMomentTensor:
-    case IST_ShellMomentTensorTemp:
+    case IST_MomentTensor:
+    case IST_MomentTensorTemp:
+    #case IST_ForceTensor:
 
     ///@todo Should be have these are S3E or just S3?
     case IST_AutogenousShrinkageTensor:
@@ -119,7 +122,7 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     //case IST_MaterialOrientation:
         return ISVT_TENSOR_G;
 
-    case IST_BeamForceMomentumTensor:
+    case IST_BeamForceMomentTensor:
     case IST_BeamStrainCurvatureTensor:
     case IST_PrincipalStressTensor:
     case IST_PrincipalStressTempTensor:
@@ -141,10 +144,15 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_CrackDirs:
     case IST_CrackStatuses:
     case IST_CrackVector:
+    case IST_2ndCrackVector:
+    case IST_3rdCrackVector:      
     case IST_InterfaceFirstPKTraction:
     case IST_InterfaceTraction:
     case IST_InterfaceJump:
     case IST_InterfaceNormal:
+    case IST_PrincStressVector1:
+    case IST_PrincStressVector2:
+    case IST_PrincStressVector3:
         return ISVT_VECTOR;
 
     case IST_MaxEquivalentStrainLevel:
@@ -191,9 +199,13 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_Maturity:
     case IST_CrossSectionNumber:
     case IST_CrackWidth:
+    case IST_2ndCrackWidth:
+    case IST_3rdCrackWidth: 
     case IST_TensileStrength:
     case IST_ResidualTensileStrength:
     case IST_CrackIndex:
+    case IST_FiberStressNL:
+    case IST_FiberStressLocal:     
         return ISVT_SCALAR;
 
     default:

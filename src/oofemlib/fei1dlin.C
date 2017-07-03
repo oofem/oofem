@@ -95,4 +95,27 @@ FEI1dLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellG
 {
     return 0.5 * ( cellgeo.giveVertexCoordinates(2)->at(cindx) - cellgeo.giveVertexCoordinates(1)->at(cindx) );
 }
+
+void FEI1dLin :: boundaryEdgeGiveNodes(IntArray &answer, int boundary)
+{
+  answer = {1, 2};
+}
+
+void FEI1dLin :: boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+{
+  this->evalN(answer, lcoords, cellgeo);
+}
+
+double FEI1dLin :: boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+{
+    return this->giveTransformationJacobian(lcoords, cellgeo);
+}
+
+void FEI1dLin :: boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+{
+    this->local2global(answer, lcoords, cellgeo);
+}
+
+
+
 } // end namespace oofem

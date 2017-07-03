@@ -54,6 +54,13 @@ public:
 
     virtual integrationDomain giveIntegrationDomain() const { return _Wedge; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_wedge_1; }
+    virtual integrationDomain giveBoundaryIntegrationDomain(int ib) const {
+      if (ib <= 2) return _Triangle;
+      else return _Square; }
+    virtual integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf) const { return this->giveBoundaryIntegrationDomain(isurf); }
+    virtual integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge) const { return _Line; }
+
+    
 
     // Bulk
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);

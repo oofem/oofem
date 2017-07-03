@@ -86,7 +86,6 @@ protected:
 
     /// Norm of nodal internal forces evaluated on element by element basis (squared)
     FloatArray internalForcesEBENorm;
-
     /**
      * Computes and prints reaction forces, computed from nodal internal forces. Assumes, that real
      * stresses corresponding to reached state are already computed (uses giveInternalForcesVector
@@ -149,6 +148,12 @@ public:
      */
     void computeReaction(FloatArray &answer, TimeStep *tStep, int di);
 
+    /**
+     * Terminates the solution of time step. Default implementation calls prinOutput() service and if specified,
+     * context of whole domain is stored and output for given time step is printed.
+     */
+    virtual void terminate(TimeStep *tStep);
+    
     /**
      * Builds the reaction force table. For each prescribed equation number it will find
      * corresponding node and dof number. The entries in the restrDofMans, restrDofs, and eqn

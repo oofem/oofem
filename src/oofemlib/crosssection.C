@@ -57,6 +57,12 @@ CrossSection :: setupIntegrationPoints(IntegrationRule &irule, int npoints, Elem
 }
 
 
+int
+CrossSection :: setupIntegrationPoints(IntegrationRule &irule, int npointsXY, int npointsZ, Element *element)
+{
+    return irule.setUpIntegrationPoints( element->giveIntegrationDomain(), npointsXY, npointsZ, element->giveMaterialMode() );
+}
+
 IRResultType
 CrossSection :: initializeFrom(InputRecord *ir)
 //

@@ -234,11 +234,14 @@ FEI3dTrQuad :: edgeLocal2global(FloatArray &answer, int iedge,
 double
 FEI3dTrQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    IntArray edgeNodes;
-    this->computeLocalEdgeMapping(edgeNodes, iedge);
-    ///@todo Implement this
-    OOFEM_ERROR("Not supported");
-    return -1;
+    IntArray eNodes;
+    FloatArray dNdu;
+    double u = lcoords.at(1);
+    this->computeLocalEdgeMapping(eNodes, iedge);
+    dNdu.add( u - 0.5, * cellgeo.giveVertexCoordinates( eNodes.at(1) ) );
+    dNdu.add( u + 0.5, * cellgeo.giveVertexCoordinates( eNodes.at(2) ) );
+    dNdu.add( -2. * u, * cellgeo.giveVertexCoordinates( eNodes.at(3) ) );
+    return dNdu.computeNorm();
 }
 
 

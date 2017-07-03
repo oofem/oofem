@@ -139,6 +139,7 @@ void
 DKTPlate :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 // Returns the [5x9] strain-displacement matrix {B} of the receiver,
 // evaluated at gp.
+// strain components xx, yy, zz, xz, yz
 {
     // get node coordinates
     double x1, x2, x3, y1, y2, y3, z1, z2, z3;
@@ -497,8 +498,8 @@ DKTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
         answer.at(1) = 0.0; // nx
         answer.at(2) = 0.0; // ny
         answer.at(3) = 0.0; // nz
-        answer.at(4) = help.at(5); // vyz
-        answer.at(5) = help.at(4); // vxz
+        answer.at(4) = help.at(5); // vyz in answer
+        answer.at(5) = help.at(4); // vxz in answer
         answer.at(6) = 0.0; // vxy
         return 1;
     } else if ( type == IST_ShellMomentTensor || type == IST_CurvatureTensor ) {
@@ -572,6 +573,22 @@ DKTPlate :: SPRNodalRecoveryMI_givePatchType()
 }
 
 
+void
+DKTPlate::computeEdgeNMatrix(FloatMatrix &answer, int boundaryID, const FloatArray& lcoords)
+{
+    FloatArray n;
+
+    this->interp_lin.edgeEvalN( n, boundaryID, lcoords, FEIElementGeometryWrapper(this) );
+
+    answer.resize(3, 6);
+    answer.at(1, 1) = n.at(1);
+    answer.at(1, 4) = n.at(2);
+    answer.at(2, 2) = answer.at(3, 3) = n.at(1);
+    answer.at(2, 5) = answer.at(3, 6) = n.at(2);
+}
+
+
+  
 //
 // layered cross section support functions
 //
@@ -595,21 +612,6 @@ DKTPlate :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &mas
     answer.at(5) = masterGpStrain.at(3) * layerZCoord;
     answer.at(3) = masterGpStrain.at(5);
     answer.at(4) = masterGpStrain.at(4);
-}
-
-// Edge load support
-void
-DKTPlate :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
-{
-    FloatArray n;
-
-    this->interp_lin.edgeEvalN( n, iedge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(3, 6);
-    answer.at(1, 1) = n.at(1);
-    answer.at(1, 4) = n.at(2);
-    answer.at(2, 2) = answer.at(3, 3) = n.at(1);
-    answer.at(2, 5) = answer.at(3, 6) = n.at(2);
 }
 
 void
@@ -652,13 +654,6 @@ DKTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     return detJ *gp->giveWeight();
-}
-
-
-void
-DKTPlate :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
-{
-    this->interp_lin.edgeLocal2global( answer, iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -732,13 +727,6 @@ double
 DKTPlate :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
     return this->computeVolumeAround(gp);
-}
-
-
-void
-DKTPlate :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
-{
-    this->computeGlobalCoordinates( answer, gp->giveNaturalCoordinates() );
 }
 
 

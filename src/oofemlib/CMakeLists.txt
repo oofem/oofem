@@ -20,6 +20,7 @@ set (core_unsorted
     contact/contactdefinition.C
     contact/contactelement.C
     prescribedmean.C
+    bctracker.C
     # Semi sorted:
     errorestimator.C meshqualityerrorestimator.C remeshingcrit.C
     sloangraph.C sloangraphnode.C sloanlevelstruct.C
@@ -53,8 +54,26 @@ if (USE_IML)
         )
 endif ()
 
+if (USE_T3D)
+    list (APPEND core_unsorted
+        T3d/src/t3d.c T3d/src/option.c T3d/src/error.c T3d/src/list.c T3d/src/draw.c T3d/src/draw1.c T3d/src/draw2.c T3d/src/drawpc.c
+		T3d/src/vertex.c T3d/src/vertex1.c T3d/src/region.c T3d/src/patch.c T3d/src/shell.c T3d/src/bernstein.c T3d/src/ctrlpoint.c
+		T3d/src/curve.c T3d/src/curve1.c T3d/src/curve2.c T3d/src/curve3.c 
+		T3d/src/surface.c T3d/src/surface1.c T3d/src/surface2.c T3d/src/surface3.c 
+		T3d/src/input.c T3d/src/input1.c T3d/src/input2.c T3d/src/input3.c T3d/src/input4.c T3d/src/input5.c T3d/src/input6.c 
+		T3d/src/octree.c T3d/src/octree1.c T3d/src/octree2.c T3d/src/domain.c T3d/src/element.c 
+		T3d/src/discret.c T3d/src/discret1.c T3d/src/discret2.c T3d/src/discret3.c 
+		T3d/src/discret4.c T3d/src/discret5.c T3d/src/discret6.c 
+		T3d/src/smooth.c T3d/src/smooth1.c T3d/src/quality.c T3d/src/renum.c T3d/src/output.c T3d/src/output1.c
+        )
+endif ()
+
 if (USE_SLEPC)
     list (APPEND core_unsorted slepcsolver.C)
+endif ()
+
+if (USE_SUPERLU_MT)
+  list (APPEND core_unsorted superlusolver.C)
 endif ()
 
 
@@ -89,9 +108,14 @@ if (USE_PETSC)
     list (APPEND core_nm petscsolver.C petscsparsemtrx.C)
 endif ()
 
-if (USE_MKLPARDISO)
+if (USE_INTEL_MKL_PARDISO)
     list (APPEND core_nm mklpardisosolver.C)
 endif ()
+
+if (USE_PARDISO_ORG)
+  list (APPEND core_nm pardisoprojectorgsolver.C)
+endif ()
+
 
 set (core_fields
     fieldmanager.C
@@ -130,6 +154,7 @@ set (core_dofman
     node.C
     slavenode.C
     hangingnode.C
+    qcnode.C
     rigidarmnode.C
     elementinternaldofman.C
     elementside.C

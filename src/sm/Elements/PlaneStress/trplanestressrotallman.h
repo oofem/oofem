@@ -36,6 +36,8 @@
 #define trplanestressrotallman_h
 
 #include "../sm/Elements/PlaneStress/trplanstrss.h"
+#include "../sm/CrossSections/layeredcrosssection.h"
+
 
 ///@name Input fields for TrPlaneStrRotAllman
 //@{
@@ -54,7 +56,7 @@ class FEI2dTrQuad;
  * A compatible triangular element including vertex rotations for plane elasticity analysis.
  * Computers & Structures Vol. 19, No. 1-2, pp. 1-8, 1984.
  */
-class TrPlanestressRotAllman : public TrPlaneStress2d
+class TrPlanestressRotAllman : public TrPlaneStress2d, public LayeredCrossSectionInterface
 {
 protected:
     static FEI2dTrQuad qinterpolation; // quadratic interpolation for constructing shape functons
@@ -93,7 +95,11 @@ public:
     virtual void giveDofManDofIDMask(int inode, IntArray &) const;
 
     Interface *giveInterface(InterfaceType interface);
+    // layered cross section support functions
+    virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
+                                            GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep);
 
+    void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global);
     void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
     void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
     int SPRNodalRecoveryMI_giveNumberOfIP();

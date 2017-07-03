@@ -60,6 +60,8 @@ public:
     QTrPlaneStrain(int n, Domain * d);
     virtual ~QTrPlaneStrain() { }
 
+    virtual FEInterpolation *giveInterpolation() const;
+
     virtual Interface *giveInterface(InterfaceType it);
     virtual double giveParentElSize() const { return 0.5; }
 

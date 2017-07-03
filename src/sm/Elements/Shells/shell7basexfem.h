@@ -111,9 +111,13 @@ protected:
     void computePressureTangentMatrixDis(FloatMatrix &KCC, FloatMatrix &KCD, FloatMatrix &KDD, IntegrationPoint *ip, Load *load, const int iSurf, TimeStep *tStep);
 
     // External loads
-    virtual void computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep, ValueModeType mode);
-    virtual void computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
-                                            int iSurf, TimeStep *tStep, ValueModeType mode);
+    // Overloaded, as the element is using enhanced approximation 
+    void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global);
+    // overloaded, the computeBoundaryEdgeLoadVector returns full element DOFs
+    virtual void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const UnknownNumberingScheme &s, IntArray *dofIdArray)
+    { this->giveLocationArray (locationArray, s, dofIdArray);}
+
+    
     void computeEnrTractionForce(FloatArray &answer, const int iedge, BoundaryLoad *edgeLoad, TimeStep *tStep, 
         ValueModeType mode, EnrichmentItem *ei);
 

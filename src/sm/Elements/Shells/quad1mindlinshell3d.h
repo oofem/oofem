@@ -132,24 +132,20 @@ public:
 protected:
     virtual void computeGaussPoints();
     virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
-    virtual void computeSurfaceLoadVectorAt(FloatArray &answer, Load *load, int iSurf, TimeStep *tStep, ValueModeType mode);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
 
     virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
-    virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
     virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
     virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
     void computeVectorOfUnknowns(ValueModeType mode, TimeStep* tStep, FloatArray &shellUnknowns, FloatArray &drillUnknowns);
     //virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, GaussPoint *gp) { answer.clear(); }
     //virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const { answer.clear(); }
     //virtual IntegrationRule *GetSurfaceIntegrationRule(int i) { return NULL; }
     //virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf) { return 0.; }
-    //virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf) { answer.clear(); }
 };
 } // end namespace oofem
 #endif // quad1mindlinshell3d_h

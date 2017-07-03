@@ -173,6 +173,7 @@ template< typename T > ContactDefinition *contactDefCreator(ContactManager *cMan
 
 #define REGISTER_ContactManager(class) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerContactManager(_IFT_ ## class ## _Name, contactManCreator< class > );
 #define REGISTER_ContactDefinition(class) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerContactDefinition(_IFT_ ## class ## _Name, contactDefCreator< class > );
+#define REGISTER_Quasicontinuum(class) static bool __dummy_ ## class = GiveClassFactory().registerQuasicontinuum(_IFT_ ## class ## _Name, QuasicontinuumCreator< class > );
 //@}
 
 /**

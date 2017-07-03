@@ -268,7 +268,6 @@ void TransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
     this->nMethod->solve(*this->effectiveMatrix,
                          externalForces,
                          NULL, // ignore
-                         NULL,
                          this->solution,
                          incrementOfSolution,
                          this->internalForces,

@@ -35,7 +35,7 @@
 #ifndef unstructuredgridfield_h
 #define unstructuredgridfield_h
 
-#include"field.h"
+#include "field.h"
 #include "floatarray.h"
 #include "intarray.h"
 #include "elementgeometrytype.h"
@@ -46,7 +46,8 @@
 #include "fei2dtrquad.h"
 #include "fei2dquadlin.h"
 #include "fei2dquadquad.h"
-#include "fei3dtrlin.h"
+#include "fei3dtetlin.h"
+#include "fei3dhexalin.h"
 
 #include "pfem/octreelocalizert.h"
 #include "error.h"
@@ -93,7 +94,8 @@ protected:
     static FEI2dTrQuad i4;
     static FEI2dQuadLin i5;
     static FEI2dQuadQuad i6;
-    static FEI3dTrLin i7;
+    static FEI3dTetLin i7;
+    static FEI3dHexaLin i8;
     
     static FEInterpolation* interpTable[] ;
 
@@ -188,6 +190,7 @@ protected:
       else if (this->itype == EGT_quad_1) return interpTable[4];
       else if (this->itype == EGT_quad_2) return interpTable[5];
       else if (this->itype == EGT_tetra_1) return interpTable[6];
+      else if (this->itype == EGT_hexa_1) return interpTable[7];
       else {
 	OOFEM_LOG_ERROR ("UnstructuredGridField.Cell:: Unsupported cell type");
 	return NULL;
@@ -302,15 +305,18 @@ protected:
   long int octreeTimeStamp;
   /// receiver timestamp
   long int timeStamp;
+  /// octree origin shift
+  double octreeOriginShift;
  public:
   /**
    * Constructor. Creates a field, with unspecified field values.
    */
- UnstructuredGridField(int nvert, int ncells) : Field(FieldType::FT_Unknown), spatialLocalizer()
+ UnstructuredGridField(int nvert, int ncells, double octreeOriginShift=0.0 ) : Field(FieldType::FT_Unknown), spatialLocalizer()
     { this->timeStamp = this->octreeTimeStamp = 0;
       this->vertexList.resize(nvert);
       this->cellList.resize(ncells);
       this->valueList.resize(nvert);
+      this->octreeOriginShift = octreeOriginShift;
     }
   virtual ~UnstructuredGridField() { }
 
@@ -333,7 +339,7 @@ protected:
   int evaluateAt(FloatArray &answer, const FloatArray &coords,
 		 ValueModeType mode, TimeStep *tStep) override {
     std::list<Cell> elist;
-    if (mode == VM_Total) {
+    if ((mode == VM_Total) || (mode == VM_TotalIntrinsic)) {
       this->initOctree();
       CellContainingPointFunctor f(coords);
       this->spatialLocalizer.giveDataOnFilter(elist, f);
@@ -404,6 +410,10 @@ protected:
 	  cmin(j)=min(cmin(j), (*vc)(j));
 	}
       }
+      // introduce origin shift (if set up)
+      for (int j=0; j<nsd; j++)  {
+        cmin(j) -= octreeOriginShift;
+      }
       double size = 0.0;
       IntArray mask (3);
       for (int j=0; j<nsd; j++) {
@@ -415,10 +425,21 @@ protected:
       this->spatialLocalizer.init (bb);
       std::vector<Cell>::iterator cit;
       CellInsertionFunctor cf;
+      //int cellcount = 1;
       for (cit=this->cellList.begin(); cit != this->cellList.end(); ++cit) {
+        /*
+          BoundingBox b; (*cit).giveBoundingBox(b);
+          FloatArray o;
+          b.giveOrigin(o);
+          printf ("Inserting cell %d, Origin, Size:", cellcount++);
+          o.printYourself();
+          printf("%lf\n", b.giveSize());
+        */
 	this->spatialLocalizer.insertMemberIntoOctree(*cit, cf);
       }
-      
+
+      // update timestamp
+      this->octreeTimeStamp = this->timeStamp;
     }
   }
 };

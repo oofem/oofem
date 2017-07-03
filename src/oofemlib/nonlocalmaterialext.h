@@ -38,6 +38,7 @@
 #include "matstatus.h"
 #include "interface.h"
 #include "intarray.h"
+#include "grid.h"
 
 #include <list>
 
@@ -55,7 +56,13 @@
 #define _IFT_NonlocalMaterialExtensionInterface_beta "beta"
 #define _IFT_NonlocalMaterialExtensionInterface_zeta "zeta"
 #define _IFT_NonlocalMaterialExtensionInterface_px "px"
-
+#define _IFT_NonlocalMaterialExtensionInterface_averagingtype "averagingtype"
+#define _IFT_NonlocalMaterialExtensionInterface_exp "exp"
+#define _IFT_NonlocalMaterialExtensionInterface_rf "rf"
+#define _IFT_NonlocalMaterialExtensionInterface_gridsize "gridsize"
+#define _IFT_NonlocalMaterialExtensionInterface_initdiag "initdiag"
+#define _IFT_NonlocalMaterialExtensionInterface_order "order"
+#define _IFT_NonlocalMaterialExtensionInterface_centdiff "centdiff"
 //@}
 
 namespace oofem {
@@ -92,8 +99,10 @@ class OOFEM_EXPORT NonlocalMaterialStatusExtensionInterface : public Interface
 protected:
     /// List containing localIntegrationRecord values.
     std :: vector< localIntegrationRecord >integrationDomainList;
-    /// Nonlocal volume of corresponding integration point.
+    /// Nonlocal volume around the corresponding integration point.
     double integrationScale;
+    /// Local volume around the corresponding integration point.
+    double volumeAround;
 
 public:
     /**
@@ -114,6 +123,10 @@ public:
     double giveIntegrationScale() { return integrationScale; }
     /// Sets associated integration scale.
     void setIntegrationScale(double val) { integrationScale = val; }
+    /// Returns associated volume.
+    double giveVolumeAround() { return volumeAround; }
+    /// Sets associated integration scale.
+    void setVolumeAround(double val) { volumeAround = val; }
     /// clears the integration list of receiver
     void clear() { integrationDomainList.clear(); }
 };
@@ -164,6 +177,15 @@ protected:
     enum WeightFunctionType { WFT_Unknown, WFT_Bell, WFT_Gauss, WFT_Green, WFT_Uniform, WFT_UniformOverElement, WFT_Green_21 };
     /// Parameter specifying the type of nonlocal weight function.
     WeightFunctionType weightFun;
+    /// Grid on which the eikonal equation will be solved (used by eikonal nonlocal models)
+    int gridSize;
+    Grid *grid;
+    /// Auxiliary matrix to store minimum distances of grid points from Gauss points
+    FloatMatrix *minDist2;
+    /// Optional parameters setting details of the fast marching method
+    double initDiag;
+    int order;
+    int centDiff;
 
     /**
      * Characteristic length of the nonlocal model
@@ -222,6 +244,15 @@ protected:
      */
     double px;
 
+    // Parameters used by models with evolving characteristic length.
+
+    /// Final value of interaction radius, for a model with evolving characteristic length.
+    double Rf;
+    /// Parameter used as an exponent by models with evolving characteristic length.
+    double exponent;
+    /// Parameter specifying how the weight function should be adjusted due to damage.
+    int averType;
+
 public:
     /**
      * Constructor. Creates material with given number, belonging to given domain.
@@ -229,7 +260,7 @@ public:
      */
     NonlocalMaterialExtensionInterface(Domain *d);
     /// Destructor.
-    virtual ~NonlocalMaterialExtensionInterface() { }
+    virtual ~NonlocalMaterialExtensionInterface() { delete grid; delete minDist2; }
 
 
     /**
@@ -267,6 +298,33 @@ public:
      * existing list is cleared and  buildNonlocalPointTable service is invoked.
      */
     void rebuildNonlocalPointTable(GaussPoint *gp, IntArray *contributingElems);
+
+    /**
+     * Recompute the nonlocal interaction weights based on the current solution (e.g., on the damage field).
+     * This method is used e.g. by eikonal nonlocal damage models.
+     */
+    void modifyNonlocalWeightFunctionAround(GaussPoint *gp);
+    void modifyNonlocalWeightFunction_1D_Around(GaussPoint *gp);
+
+    /**
+     * Provide the current value of the variable that affects nonlocal interaction (e.g., of damage)
+     * This method is used e.g. by eikonal nonlocal damage models.
+     */
+    virtual double giveNonlocalMetricModifierAt(GaussPoint *gp) { return 1.; }
+
+    /**
+     * Compute the factor that specifies how the interaction length should be modified,
+     * based on the current solution (e.g., on the damage field).
+     * This method is used e.g. by eikonal nonlocal damage models.
+     */
+    double computeDistanceModifier(double damage);
+
+    /**
+     * Compute the modified interaction length based on the current solution (e.g., on the damage field).
+     * This method is used e.g. by eikonal nonlocal damage models.
+     */
+    double computeModifiedLength(double length, double dam1, double dam2);
+
     /**
      * Returns integration list corresponding to given integration point.
      * Contains localIntegrationRecord structures, containing
@@ -383,6 +441,10 @@ protected:
      * @return New interaction radius based on the Distance of the Gauss Point from Nonlocal Boundaries.
      */
     double giveDistanceBasedInteractionRadius(const FloatArray &gpCoords);
+
+    int  mapToGridPoint(double x, double x0) { return 1 + gridSize + ( int ) ceil(gridSize * ( x - x0 ) / suprad - 0.5); }
+    double mapToGridCoord(double x, double x0) { return 1. + gridSize + gridSize * ( x - x0 ) / suprad; }
+    double dist2FromGridNode(double x, double y, int j, int i) { return ( ( x - j ) * ( x - j ) + ( y - i ) * ( y - i ) ); }
 };
 } // end namespace oofem
 #endif // nonlocalmaterialext_h

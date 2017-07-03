@@ -53,6 +53,8 @@
 #define _IFT_SimpleCrossSection_shearareay "shearareay" ///< Shear area y direction
 #define _IFT_SimpleCrossSection_shearareaz "shearareaz" ///< Shear area z direction
 #define _IFT_SimpleCrossSection_drillStiffness "drillstiffness" ///< Penalty term for drilling stiffness.
+#define _IFT_SimpleCrossSection_relDrillStiffness "reldrillstiffness" ///< Relative penalty term for drilling stiffness.
+#define _IFT_SimpleCrossSection_drillType "drilltype" ///< Type of artificially added stiffnes for drilling DOFs.
 #define _IFT_SimpleCrossSection_MaterialNumber "material" ///< Material number for the bulk material
 #define _IFT_SimpleCrossSection_directorx "directorx"
 #define _IFT_SimpleCrossSection_directory "directory"
@@ -117,7 +119,6 @@ public:
     virtual void giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode mode);
 
-
     virtual void give3dDegeneratedShellStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     virtual void give2dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
@@ -159,8 +160,6 @@ public:
     void setMaterialNumber(int matNum) { this->materialNumber = matNum; }
     virtual int checkConsistency();
     virtual Interface *giveMaterialInterface(InterfaceType t, IntegrationPoint *ip);
-
-
 
 
     virtual void giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep);

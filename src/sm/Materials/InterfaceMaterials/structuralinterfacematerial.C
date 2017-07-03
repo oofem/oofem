@@ -133,8 +133,7 @@ StructuralInterfaceMaterial :: give1dStiffnessMatrix_Eng(FloatMatrix &answer, Ma
     FloatMatrix answer3D;
     give3dStiffnessMatrix_Eng(answer3D, mode, gp, tStep);
     answer.resize(1, 1);
-    answer.at(1, 1) = answer3D.at(3, 3);
-
+    answer.at(1, 1) = answer3D.at(1, 1);
 }
 
 
@@ -143,7 +142,7 @@ StructuralInterfaceMaterial :: give2dStiffnessMatrix_Eng(FloatMatrix &answer, Ma
 {
     FloatMatrix answer3D;
     give3dStiffnessMatrix_Eng(answer3D, mode, gp, tStep);
-    IntArray mask = {1, 3};
+    IntArray mask = {1, 2};
     answer.beSubMatrixOf(answer3D, mask, mask);
 
 #if 0
@@ -173,7 +172,7 @@ StructuralInterfaceMaterial :: give1dStiffnessMatrix_dTdj(FloatMatrix &answer, M
 {
     this->give3dStiffnessMatrix_dTdj_Num(answer, gp, tStep);
     answer.resize(1, 1);
-    answer.at(1, 1) = answer.at(3, 3);
+    answer.at(1, 1) = answer.at(1, 1);
 }
 
 
@@ -182,10 +181,10 @@ StructuralInterfaceMaterial :: give2dStiffnessMatrix_dTdj(FloatMatrix &answer, M
 {
     this->give3dStiffnessMatrix_dTdj_Num(answer, gp, tStep);
     answer.resize(2, 2);
-    answer.at(1, 1) = answer.at(1, 1);
-    answer.at(1, 2) = answer.at(1, 3);
-    answer.at(2, 1) = answer.at(3, 1);
-    answer.at(2, 2) = answer.at(3, 3);
+//     answer.at(1, 1) = answer.at(1, 1);
+//     answer.at(1, 2) = answer.at(1, 3);
+//     answer.at(2, 1) = answer.at(3, 1);
+//     answer.at(2, 2) = answer.at(3, 3);
 }
 
 
@@ -203,12 +202,12 @@ StructuralInterfaceMaterial :: giveFirstPKTraction_1d(FloatArray &answer, GaussP
 {
     FloatArray traction3D;
     FloatMatrix F(3, 3);
-    F.at(1, 1) = 1.;
+    F.at(1, 1) = reducedF.at(1, 1);
     F.at(2, 2) = 1.;
-    F.at(3, 3) = reducedF.at(1, 1);
+    F.at(3, 3) = 1.;
     
-    this->giveFirstPKTraction_3d(traction3D, gp, { 0., 0., jump.at(1) }, F, tStep);
-    answer = FloatArray{ traction3D.at(3) };
+    this->giveFirstPKTraction_3d(traction3D, gp, { jump.at(1),  0., 0. }, F, tStep);
+    answer = FloatArray{ traction3D.at(1) };
 }
 
 void
@@ -217,30 +216,37 @@ StructuralInterfaceMaterial :: giveFirstPKTraction_2d(FloatArray &answer, GaussP
 {
     FloatArray traction3D;
     FloatMatrix F(3, 3);
+//     F.at(1, 1) = reducedF.at(1, 1);
+//     F.at(1, 3) = reducedF.at(1, 2);
+//     F.at(2, 2) = 1.;
+//     F.at(3, 1) = reducedF.at(2, 1);
+//     F.at(3, 3) = reducedF.at(2, 2);
     F.at(1, 1) = reducedF.at(1, 1);
-    F.at(1, 3) = reducedF.at(1, 2);
-    F.at(2, 2) = 1.;
-    F.at(3, 1) = reducedF.at(2, 1);
-    F.at(3, 3) = reducedF.at(2, 2);
-
-    this->giveFirstPKTraction_3d(traction3D, gp, { jump.at(1), 0., jump.at(2) }, F, tStep);
-    answer = { traction3D.at(1), traction3D.at(3) };
+    F.at(1, 2) = reducedF.at(1, 2);
+    F.at(2, 1) = reducedF.at(2, 1);
+    F.at(2, 2) = reducedF.at(2, 2);
+    F.at(3, 3) = 1.;
+    
+    //this->giveFirstPKTraction_3d(traction3D, gp, { jump.at(1), 0., jump.at(2) }, F, tStep);
+    this->giveFirstPKTraction_3d(traction3D, gp, { jump.at(1), jump.at(2), 0. }, F, tStep);
+    answer = { traction3D.at(1), traction3D.at(2) };
 }
 
 void
 StructuralInterfaceMaterial :: giveEngTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
 {
     FloatArray traction3D;
-    this->giveEngTraction_3d(traction3D, gp, { 0., 0., jump.at(1) }, tStep);
-    answer = FloatArray{ traction3D.at(3) };
+    this->giveEngTraction_3d(traction3D, gp, { jump.at(1), 0., 0.}, tStep);
+    answer = FloatArray{ traction3D.at(1) };
 }
 
 void
 StructuralInterfaceMaterial :: giveEngTraction_2d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
 {
     FloatArray traction3D;
-    this->giveEngTraction_3d(traction3D, gp, { jump.at(1), 0.0, jump.at(2) }, tStep);
-    answer = { traction3D.at(1), traction3D.at(3) };
+    //this->giveEngTraction_3d(traction3D, gp, { jump.at(1), 0.0, jump.at(2) }, tStep);
+    this->giveEngTraction_3d(traction3D, gp, { jump.at(1), jump.at(2), 0. }, tStep);
+    answer = { traction3D.at(1), traction3D.at(2) };
 }
 
 void
@@ -295,7 +301,7 @@ StructuralInterfaceMaterial :: give2dStiffnessMatrix_dTdj_Num(FloatMatrix &answe
     const FloatMatrix &F = status->giveTempF();
     FloatArray T, TPlus, TMinus;
     FloatArray jumpPlus, jumpMinus, Kcolumn;
-    FloatArray jump =  {status->giveTempJump().at(1), status->giveTempJump().at(3)};
+    FloatArray jump =  {status->giveTempJump().at(1), status->giveTempJump().at(2)};
     int dim = jump.giveSize();
     answer.resize( dim, dim );
 
@@ -353,7 +359,7 @@ StructuralInterfaceMaterial :: give1dStiffnessMatrix_Eng_Num(FloatMatrix &answer
     double eps = 1.0e-9;
     FloatArray t, tPlus, tMinus;
     FloatArray jumpPlus, jumpMinus, Kcolumn;
-    FloatArray jump = FloatArray{status->giveTempJump().at(3)};
+    FloatArray jump = FloatArray{status->giveTempJump().at(1)};
     int dim = jump.giveSize();
     answer.resize( dim, dim );
     answer.zero();
@@ -382,7 +388,7 @@ StructuralInterfaceMaterial :: give2dStiffnessMatrix_Eng_Num(FloatMatrix &answer
     double eps = 1.0e-12;
     FloatArray t, tPlus, tMinus;
     FloatArray tempJump, jumpPlus, jumpMinus, Kcolumn;
-    FloatArray jump = {status->giveTempJump().at(1), status->giveTempJump().at(3)};
+    FloatArray jump = {status->giveTempJump().at(1), status->giveTempJump().at(2)};
     int dim = jump.giveSize();
     answer.resize(dim, dim);
     answer.zero();

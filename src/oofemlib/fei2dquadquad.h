@@ -56,6 +56,9 @@ public:
 
     virtual integrationDomain giveIntegrationDomain() const { return _Square; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_quad_2; }
+    virtual integrationDomain giveBoundaryIntegrationDomain(int ib) const { return _Line; }
+    virtual integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf) const { return _Square; }
+    virtual integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge) const { return _Line; }
 
     virtual double giveArea(const FEICellGeometry &cellgeo) const;
 
@@ -87,5 +90,27 @@ public:
 
     virtual void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 };
+
+
+
+/**
+ * Class representing a 2d isoparametric quadratic interpolation based on natural coordinates
+ * for quadrilateral elements in axisymmetric setting.
+ */
+class OOFEM_EXPORT FEI2dQuadQuadAxi : public FEI2dQuadQuad
+{
+public:
+ FEI2dQuadQuadAxi(int ind1, int ind2) : FEI2dQuadQuad(ind1, ind2) { }
+  
+  virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+  virtual double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+  virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+  virtual double edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords,
+                                                const FEICellGeometry &cellgeo);
+  
+};
+
+
+
 } // end namespace oofem
 #endif // fei2dquadquad_h

@@ -54,7 +54,7 @@ StructuralInterfaceMaterialStatus :: ~StructuralInterfaceMaterialStatus() { }
 
 void StructuralInterfaceMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-#if 0
+#if 1
     MaterialStatus :: printOutputAt(file, tStep);
 
     fprintf(file, "  jump ");
@@ -62,9 +62,9 @@ void StructuralInterfaceMaterialStatus :: printOutputAt(FILE *file, TimeStep *tS
         fprintf(file, " %.4e", val );
     }
 
-    fprintf(File, "\n              traction ");
+    fprintf(file, "\n              traction ");
     for ( auto &val : this->traction ) {
-        fprintf( File, " %.4e", val );
+        fprintf(file, " %.4e", val );
     }
     fprintf(file, "\n");
 #endif

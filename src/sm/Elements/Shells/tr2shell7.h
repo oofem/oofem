@@ -104,6 +104,8 @@ public:
     //virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_Composite; }
     virtual integrationDomain giveIntegrationDomain() const { return _Triangle; }     // write new wedge-like type 'layeredWedge'
+
+    virtual void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const UnknownNumberingScheme &s, IntArray *dofIdArray);
 };
 } // end namespace oofem
 #endif

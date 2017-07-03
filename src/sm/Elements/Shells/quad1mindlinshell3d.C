@@ -151,7 +151,7 @@ Quad1MindlinShell3D :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad
     }
 }
 
-
+/*
 void
 Quad1MindlinShell3D :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
                                                   int iSurf, TimeStep *tStep, ValueModeType mode)
@@ -183,7 +183,7 @@ Quad1MindlinShell3D :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load
         OOFEM_ERROR("only supports constant pressure boundary load.");
     }
 }
-
+*/
 
 void
 Quad1MindlinShell3D :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
@@ -559,19 +559,6 @@ Quad1MindlinShell3D :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalS
 
 
 void
-Quad1MindlinShell3D :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
-{
-    IntArray edgeNodes;
-    FloatArray n;
-
-    this->interp.edgeEvalN( n, iedge, gp->giveNaturalCoordinates(), FEIVoidCellGeometry() );
-    this->interp.computeLocalEdgeMapping(edgeNodes, iedge);
-
-    answer.beNMatrixOf(n, 6);
-}
-
-
-void
 Quad1MindlinShell3D :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 {
     if ( iEdge == 1 ) { // edge between nodes 1 2
@@ -595,7 +582,7 @@ Quad1MindlinShell3D :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
     return detJ *gp->giveWeight();
 }
 
-
+/*
 void
 Quad1MindlinShell3D :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
@@ -605,7 +592,7 @@ Quad1MindlinShell3D :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint 
     local.at(3) = 0.;
     answer.beProductOf(this->lcsMatrix, local);
 }
-
+*/
 
 int
 Quad1MindlinShell3D :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)

@@ -114,13 +114,6 @@ QTruss1dGrad :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, in
 
 
 void
-QTruss1dGrad :: computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
-{
-    GradDpElement :: computeForceLoadVector(answer, tStep, mode);
-}
-
-
-void
 QTruss1dGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatArray &answer)
 {
     this->interpolation_lin.evalN( answer, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );

@@ -39,11 +39,11 @@ Set 4 elementedges 2 1 1
 #NODE tStep 1 number 3 dof 5 unknown d value  0.65625
 ## element stresses and strains
 #BEAM_ELEMENT tStep 1 number 1 keyword 1 component 1  value 0.000e+00
-#BEAM_ELEMENT tStep 1 number 1 keyword 1 component 2  value -9.3750e-01
-#BEAM_ELEMENT tStep 1 number 1 keyword 1 component 3  value -4.6875e+00
+#BEAM_ELEMENT tStep 1 number 1 keyword 1 component 2  value -1.59375000e+01
+#BEAM_ELEMENT tStep 1 number 1 keyword 1 component 3  value 2.81250000e+00
 #BEAM_ELEMENT tStep 1 number 1 keyword 1 component 4  value 0.000e+00
-#BEAM_ELEMENT tStep 1 number 1 keyword 1 component 5  value 9.3750e-01
-#BEAM_ELEMENT tStep 1 number 1 keyword 1 component 6  value 7.5
+#BEAM_ELEMENT tStep 1 number 1 keyword 1 component 5  value -1.40625000e+01
+#BEAM_ELEMENT tStep 1 number 1 keyword 1 component 6  value 0.0
 #
 #REACTION tStep 1 number 1 dof 5 value 2.8125e+00
 #REACTION tStep 1 number 2 dof 3 value -1.59375000e+01

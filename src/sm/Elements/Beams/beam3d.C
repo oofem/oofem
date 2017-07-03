@@ -49,6 +49,10 @@
 #include "classfactory.h"
 #include "elementinternaldofman.h"
 #include "masterdof.h"
+#include "bctracker.h"
+
+#include "bodyload.h"
+#include "boundaryload.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -59,7 +63,7 @@ REGISTER_Element(Beam3d);
 
 FEI3dLineLin Beam3d :: interp;
 
-Beam3d :: Beam3d(int n, Domain *aDomain) : StructuralElement(n, aDomain)
+Beam3d :: Beam3d(int n, Domain *aDomain) : BeamBaseElement(n, aDomain)
 {
     numberOfDofMans = 2;
     referenceNode = 0;
@@ -210,7 +214,7 @@ Beam3d :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, Tim
 
 
 void
-Beam3d :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep)
+Beam3d :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
 {
     answer.clear();
 
@@ -246,10 +250,11 @@ Beam3d :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, 
         answer.plusProduct(N, t, dl);
     }
 
-    // Loads from sets expects global c.s.
-    this->computeGtoLRotationMatrix(T);
-    answer.rotatedWith(T, 't');
-    ///@todo Decide if we want local or global c.s. for loads over sets.
+    if (global) {
+      // Loads from sets expects global c.s.
+      this->computeGtoLRotationMatrix(T);
+      answer.rotatedWith(T, 't');
+    }
 }
 
 
@@ -276,7 +281,6 @@ bool
 Beam3d :: computeGtoLRotationMatrix(FloatMatrix &answer)
 {
     FloatMatrix lcs;
-    
     int ndofs = computeNumberOfGlobalDofs();
     answer.resize(ndofs, ndofs);
     answer.zero();
@@ -325,6 +329,8 @@ Beam3d :: computeGtoLRotationMatrix(FloatMatrix &answer)
     return true;
 }
 
+
+  
 void
 Beam3d :: B3SSMI_getUnknownsGtoLRotationMatrix(FloatMatrix &answer)
 // Returns the rotation matrix for element unknowns
@@ -354,7 +360,7 @@ Beam3d :: computeVolumeAround(GaussPoint *gp)
 int
 Beam3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    if ( type == IST_BeamForceMomentumTensor ) {
+    if ( type == IST_BeamForceMomentTensor ) {
         answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         return 1;
     } else if ( type == IST_BeamStrainCurvatureTensor ) {
@@ -388,7 +394,7 @@ Beam3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type
         answer.at(6) = help.at(5); // mxy
         return 1;
     } else {
-        return StructuralElement :: giveIPValue(answer, gp, type, tStep);
+        return BeamBaseElement :: giveIPValue(answer, gp, type, tStep);
     }
 }
 
@@ -591,7 +597,7 @@ Beam3d :: initializeFrom(InputRecord *ir)
     this->subsoilMat = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->subsoilMat, _IFT_Beam3d_subsoilmat);
     
-    return StructuralElement :: initializeFrom(ir);
+    return BeamBaseElement :: initializeFrom(ir);
 }
 
 
@@ -606,7 +612,17 @@ Beam3d :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useU
     this->computeVectorOf(VM_Total, tStep, u);
     answer.beProductOf(stiffness, u);
 #else
-    StructuralElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord);
+    BeamBaseElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord);
+    if (subsoilMat) {
+      // add internal forces due to subsoil interaction
+      // @todo: linear subsoil assumed here; more general approach should integrate internal forces
+      FloatMatrix k;
+      FloatArray u, F;
+      this->computeSubSoilStiffnessMatrix(k, TangentStiffness, tStep);
+      this->computeVectorOf(VM_Total, tStep, u);
+      F.beProductOf(k, u);
+      answer.add(F);
+    }
 #endif
 }
 
@@ -634,11 +650,11 @@ Beam3d :: giveEndForcesVector(FloatArray &answer, TimeStep *tStep)
     this->giveInternalForcesVector(answer, tStep);
 
     // add exact end forces due to nonnodal loading
-    this->computeForceLoadVector(loadEndForces, tStep, VM_Total);
+    this->computeLocalForceLoadVector(loadEndForces, tStep, VM_Total); // will compute only contribution of loads applied directly on receiver (not using sets)
     if ( loadEndForces.giveSize() ) {
         answer.subtract(loadEndForces);
     }
-
+    /*
     if (subsoilMat) {
       // @todo: linear subsoil assumed here; more general approach should integrate internal forces
       FloatMatrix k;
@@ -648,149 +664,7 @@ Beam3d :: giveEndForcesVector(FloatArray &answer, TimeStep *tStep)
       F.beProductOf(k, u);
       answer.add(F);
     }
-}
-
-
-void
-Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, TimeStep *tStep, ValueModeType mode)
-{
-    FloatArray coords, components, endComponents;
-    FloatMatrix T;
-    double l = this->computeLength();
-    double kappay = this->giveKappayCoeff(tStep);
-    double kappaz = this->giveKappazCoeff(tStep);
-    double fx, fy, fz, fmx, fmy, fmz, dfx, dfy, dfz, dfmx, dfmy, dfmz;
-
-    // evaluates the receivers edge load vector
-    // for clamped beam
-    //
-    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >( load );
-    if ( edgeLoad ) {
-
-        answer.resize(12);
-        answer.zero();
-
-        switch ( edgeLoad->giveApproxOrder() ) {
-        case 0:
-
-            if ( edgeLoad->giveFormulationType() == Load :: FT_Entity ) {
-                coords.resize(1);
-                coords.at(1) = 0.0;
-            } else {
-                coords = * ( this->giveNode(1)->giveCoordinates() );
-            }
-
-            edgeLoad->computeValues(components, tStep, coords, {D_u, D_v, D_w, R_u, R_v, R_w}, mode);
-
-            // prepare transformation coeffs
-            if ( edgeLoad->giveCoordSystMode() == Load :: CST_Global ) {
-                if ( this->computeLoadGToLRotationMtrx(T) ) {
-                    components.rotatedWith(T, 'n');
-                }
-            }
-
-            fx = components.at(1);
-            fy = components.at(2);
-            fz = components.at(3);
-            fmx = components.at(4);
-            fmy = components.at(5);
-            fmz = components.at(6);
-
-
-            answer.at(1) = fx * l / 2.;
-            answer.at(2) = fy * l / 2. + fmz / ( 1. + 2. * kappaz );
-            answer.at(3) = fz * l / 2. + fmy / ( 1. + 2. * kappay );
-            answer.at(4) = fmx * l / 2.;
-            answer.at(5) = ( -1. ) * fz * l * l / 12. + fmy * l * kappay / ( 1. + 2. * kappay );
-            answer.at(6) = ( 1. ) * fy * l * l / 12. + fmz * l * kappaz / ( 1. + 2. * kappaz );
-
-            answer.at(7) = fx * l / 2.;
-            answer.at(8) = fy * l / 2. - fmz / ( 1. + 2. * kappaz );
-            answer.at(9) = fz * l / 2. - fmy / ( 1. + 2. * kappay );
-            answer.at(10) = fmx * l / 2.;
-            answer.at(11) = ( 1. ) * fz * l * l / 12. + fmy * l * kappay / ( 1. + 2. * kappay );
-            answer.at(12) = ( -1. ) * fy * l * l / 12. + fmz * l * kappaz / ( 1. + 2. * kappaz );
-            break;
-
-        case 1:
-            if ( edgeLoad->giveFormulationType() == Load :: FT_Entity ) {
-                coords.resize(1);
-                coords.at(1) = -1.0;
-            } else {
-                coords = * ( this->giveNode(1)->giveCoordinates() );
-            }
-
-            edgeLoad->computeValues(components, tStep, coords, {D_u, D_v, D_w, R_u, R_v, R_w}, mode);
-
-
-            // prepare transformation coeffs
-            if ( edgeLoad->giveCoordSystMode() == Load :: CST_Global ) {
-                if ( this->computeLoadGToLRotationMtrx(T) ) {
-                    components.rotatedWith(T, 'n');
-                }
-            }
-
-            fx = components.at(1);
-            fy = components.at(2);
-            fz = components.at(3);
-            fmx = components.at(4);
-            fmy = components.at(5);
-            fmz = components.at(6);
-
-            if ( edgeLoad->giveFormulationType() == Load :: FT_Entity ) {
-                coords.resize(1);
-                coords.at(1) = 1.0;
-            } else {
-                coords = * ( this->giveNode(2)->giveCoordinates() );
-            }
-
-            edgeLoad->computeValues(endComponents, tStep, coords, {D_u, D_v, D_w, R_u, R_v, R_w}, mode);
-
-            // prepare transformation coeffs
-            if ( edgeLoad->giveCoordSystMode() == Load :: CST_Global ) {
-                if ( T.isNotEmpty() ) {
-                    endComponents.rotatedWith(T, 'n');
-                }
-            }
-
-            // compute differences
-            endComponents.subtract(components);
-
-            dfx = endComponents.at(1);
-            dfy = endComponents.at(2);
-            dfz = endComponents.at(3);
-            dfmx = endComponents.at(4);
-            dfmy = endComponents.at(5);
-            dfmz = endComponents.at(6);
-
-
-            answer.at(1) = fx * l / 2. + dfx * l / 6.;
-            answer.at(2) = fy * l / 2. + dfy * l * ( 20. * kappaz + 9 ) / ( 60. * ( 1. + 2. * kappaz ) ) +
-                           fmz / ( 1. + 2. * kappaz ) + dfmz * ( 1. / 2. ) / ( 1. + 2. * kappaz );
-            answer.at(3) = fz * l / 2. + dfz * l * ( 20. * kappay + 9 ) / ( 60. * ( 1. + 2. * kappay ) ) +
-                           fmy / ( 1. + 2. * kappay ) + dfmy * ( 1. / 2. ) / ( 1. + 2. * kappay );
-            answer.at(4) = fmx * l / 2. + dfmx * l / 6.;
-            answer.at(5) = ( -1. ) * fz * l * l / 12. - dfz * l * l * ( 5. * kappay + 2. ) / ( 60. * ( 1. + 2. * kappay ) ) +
-                           fmy * l * kappay / ( 1. + 2. * kappay ) + dfmy * l * ( 4. * kappay - 1. ) / ( 12. * ( 1. + 2. * kappay ) );
-            answer.at(6) = ( 1. ) * fy * l * l / 12. + dfy * l * l * ( 5. * kappaz + 2. ) / ( 60. * ( 1. + 2. * kappaz ) ) +
-                           fmz * l * kappaz / ( 1. + 2. * kappaz ) + dfmz * l * ( 4. * kappaz - 1. ) / ( 12. * ( 1. + 2. * kappaz ) );
-
-            answer.at(7) = fx * l / 2. + dfx * l / 3.;
-            answer.at(8) = fy * l / 2. + dfy * l * ( 40. * kappaz + 21 ) / ( 60. * ( 1. + 2. * kappaz ) ) -
-                           fmz / ( 1. + 2. * kappaz ) - dfmz * ( 1. / 2. ) / ( ( 1. + 2. * kappaz ) );
-            answer.at(9) = fz * l / 2. + dfz * l * ( 40. * kappay + 21 ) / ( 60. * ( 1. + 2. * kappay ) ) -
-                           fmy / ( 1. + 2. * kappay ) - dfmy * ( 1. / 2. ) / ( ( 1. + 2. * kappay ) );
-            answer.at(10) = fmx * l / 2. + dfmx * l / 3.;
-            answer.at(11) = ( 1. ) * fz * l * l / 12. + dfz * l * l * ( 5. * kappay + 3. ) / ( 60. * ( 1. + 2. * kappay ) ) +
-                            fmy * l * kappay / ( 1. + 2. * kappay ) + dfmy * l * ( 8. * kappay + 1. ) / ( 12. * ( 1. + 2. * kappay ) );
-            answer.at(12) = ( -1. ) * fy * l * l / 12. - dfy * l * l * ( 5. * kappaz + 3. ) / ( 60. * ( 1. + 2. * kappaz ) ) +
-                            fmz * l * kappaz / ( 1. + 2. * kappaz ) + dfmz * l * ( 8. * kappaz + 1. ) / ( 12. * ( 1. + 2. * kappaz ) );
-            break;
-
-        default:
-            OOFEM_ERROR("unsupported load type");
-        }
-    }
+    */
 }
 
 
@@ -825,17 +699,10 @@ Beam3d :: printOutputAt(FILE *File, TimeStep *tStep)
 
 
 void
-Beam3d :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
-{
-    StructuralElement :: computeLocalForceLoadVector(answer, tStep, mode); // in global c.s
-}
-
-
-void
 Beam3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
     FloatArray lc(1);
-    StructuralElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
+    BeamBaseElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
     answer.times( this->giveCrossSection()->give(CS_Area, lc, this) );
 }
 
@@ -847,7 +714,7 @@ Beam3d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, doub
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
     /*
-     * StructuralElement::computeMassMatrix(answer, tStep);
+     * SructuralElement::computeMassMatrix(answer, tStep);
      * answer.times(this->giveCrossSection()->give('A'));
      */
     double l = this->computeLength();
@@ -1016,7 +883,9 @@ Beam3d :: giveInterface(InterfaceType interface)
         return static_cast< FiberedCrossSectionInterface * >( this );
     } else if (interface == Beam3dSubsoilMaterialInterfaceType ) {
         return static_cast< Beam3dSubsoilMaterialInterface * >( this );
-    }      
+    } else if (interface == VTKXMLExportModuleElementInterfaceType) {
+        return static_cast< VTKXMLExportModuleElementInterface * >( this );
+    }    
 
     return NULL;
 }
@@ -1025,7 +894,7 @@ Beam3d :: giveInterface(InterfaceType interface)
 void
 Beam3d :: updateLocalNumbering(EntityRenumberingFunctor &f)
 {
-    StructuralElement :: updateLocalNumbering(f);
+    BeamBaseElement :: updateLocalNumbering(f);
     if ( this->referenceNode ) {
         this->referenceNode = f(this->referenceNode, ERS_DofManager);
     }
@@ -1112,7 +981,314 @@ Beam3d :: computeSubSoilStiffnessMatrix(FloatMatrix &answer,
     answer.symmetrized();
 }
 
+int
+Beam3d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords, const FloatArray &pCoords)
+{
+    double ksi, n1, n2;
+
+    ksi = lcoords.at(1);
+    n1  = ( 1. - ksi ) * 0.5;
+    n2  = ( 1. + ksi ) * 0.5;
+
+    answer.resize(3);
+    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 * pCoords.at(1);
+    answer.at(2) = n1 * this->giveNode(1)->giveCoordinate(2) + n2 * pCoords.at(2);
+    answer.at(3) = n1 * this->giveNode(1)->giveCoordinate(3) + n2 * pCoords.at(3);
+
+    return 1;
+}
+
+void
+Beam3d :: giveInternalForcesVectorAtPoint(FloatArray &answer, TimeStep *tStep, FloatArray &coords)
+{
+
+    // computes exact global end-forces vector
+    FloatArray loadEndForces, iF;
+    IntArray leftIndx = {1, 2 , 3, 4, 5 , 6};    
+    this->giveEndForcesVector(iF, tStep);
+
+    answer.beSubArrayOf(iF, leftIndx);
+    Node *nodeA;
+    
+    nodeA   = this->giveNode(1);
+    double dx      = nodeA->giveCoordinate(1) - coords.at(1);
+    double dy      = nodeA->giveCoordinate(2) - coords.at(2);
+    double dz      = nodeA->giveCoordinate(3) - coords.at(3);
+    double ds  = sqrt(dx * dx + dy * dy + dz * dz);
+
+    answer.at(5) += iF.at(3)*ds;
+    answer.at(6) -= iF.at(2)*ds;
+    
+
+
+    // loop over body load array first
+    int nBodyLoads = this->giveBodyLoadArray()->giveSize();
+    FloatArray help;
+
+    for ( int i = 1; i <= nBodyLoads; i++ ) {
+        int id = bodyLoadArray.at(i);
+        Load *load = domain->giveLoad(id);
+        bcGeomType ltype = load->giveBCGeoType();
+        if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ForceLoadBVT ) ) {
+            this->computeInternalForcesFromBodyLoadVectorAtPoint(help,load, tStep, VM_Total, coords, ds); // this one is local
+            answer.add(help);
+        } else {
+            if ( load->giveBCValType() != TemperatureBVT && load->giveBCValType() != EigenstrainBVT ) {
+                // temperature and eigenstrain is handled separately at computeLoadVectorAt subroutine
+                OOFEM_ERROR("body load %d is of unsupported type (%d)", id, ltype);
+            }
+        }
+    }
+
+    // loop over boundary load array
+    int nBoundaryLoads = this->giveBoundaryLoadArray()->giveSize() / 2;
+    for ( int i = 1; i <= nBoundaryLoads; i++ ) {
+        int n = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
+        int id = boundaryLoadArray.at(i * 2);
+        Load *load = domain->giveLoad(n);
+	BoundaryLoad* bLoad;
+	if ((bLoad = dynamic_cast<BoundaryLoad*> (load))) {
+	  bcGeomType ltype = load->giveBCGeoType();
+	  if ( ltype == EdgeLoadBGT ) {
+            this->computeInternalForcesFromBoundaryEdgeLoadVectorAtPoint(help, bLoad, id,
+                                                                         ExternalForcesVector, VM_Total, tStep, coords, ds, false);
+            answer.add(help);
+
+	  } else {
+            OOFEM_ERROR("boundary load %d is of unsupported type (%d)", id, ltype);
+	  }
+	}
+    }
+    // add exact end forces due to nonnodal loading
+    //    this->computeForceLoadVectorAt(loadEndForces, tStep, VM_Total, coords); // will compute only contribution of loads applied directly on receiver (not using sets)
+    if ( loadEndForces.giveSize() ) {
+        answer.subtract(loadEndForces);
+    }
+
+    // add exact end forces due to nonnodal loading applied indirectly (via sets)
+    BCTracker *bct = this->domain->giveBCTracker();
+    BCTracker::entryListType bcList = bct->getElementRecords(this->number);
+
+    for (BCTracker::entryListType::iterator it = bcList.begin(); it != bcList.end(); ++it) {
+      GeneralBoundaryCondition *bc = this->domain->giveBc((*it).bcNumber);
+      BodyLoad *bodyLoad;
+      BoundaryLoad *boundaryLoad;
+      if (bc->isImposed(tStep)) {
+        if ((bodyLoad = dynamic_cast<BodyLoad*>(bc))) { // body load
+          this->computeInternalForcesFromBodyLoadVectorAtPoint(help,bodyLoad, tStep, VM_Total, coords, ds); // this one is local
+          //answer.subtract(help);
+        } else if ((boundaryLoad = dynamic_cast<BoundaryLoad*>(bc))) {
+          // compute Boundary Edge load vector in GLOBAL CS !!!!!!!
+          this->computeInternalForcesFromBoundaryEdgeLoadVectorAtPoint(help, boundaryLoad, (*it).boundaryId,
+								       ExternalForcesVector, VM_Total, tStep, coords, ds, false);
+	}
+	answer.add(help);
+      }
+    }
 
 
 
+    
+    if (subsoilMat) {
+      // @todo: linear subsoil assumed here; more general approach should integrate internal forces
+      FloatMatrix k;
+      FloatArray u, F;
+      this->computeSubSoilStiffnessMatrix(k, TangentStiffness, tStep);
+      this->computeVectorOf(VM_Total, tStep, u);
+      F.beProductOf(k, u);
+      answer.add(F);
+    }
+
+
+    answer.times(-1);
+
+}
+
+  
+void
+Beam3d :: computeInternalForcesFromBoundaryEdgeLoadVectorAtPoint(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep, FloatArray &pointCoords, double ds, bool global)
+{
+    answer.clear();
+
+    if ( edge != 1 ) {
+        OOFEM_ERROR("Beam3D only has 1 edge (the midline) that supports loads. Attempted to apply load to edge %d", edge);
+    }
+
+    if ( type != ExternalForcesVector ) {
+        return;
+    }
+
+    FloatArray coords, t;
+    FloatMatrix T;
+
+
+    for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
+	this->computeGlobalCoordinates(coords, lcoords, pointCoords);
+        if ( load ) {
+            load->computeValues(t, tStep, coords, {D_u, D_v, D_w, R_u, R_v, R_w}, mode);
+        } else {
+            load->computeValues(t, tStep, lcoords, {D_u, D_v, D_w, R_u, R_v, R_w}, mode);
+        }
+
+        if ( load->giveCoordSystMode() == Load :: CST_Global ) {
+            if ( this->computeLoadGToLRotationMtrx(T) ) {
+                t.rotatedWith(T, 'n');
+            }
+        }
+
+
+        double dl = gp->giveWeight() * 0.5 * ds;
+	FloatArray f;
+	f = t;
+	f.at(5) += f.at(3) * (lcoords.at(1)+1)*ds/2;
+	f.at(6) -= f.at(2) * (lcoords.at(1)+1)*ds/2;
+        answer.add(dl, f);
+    }
+
+    if (global) {
+      // Loads from sets expects global c.s.
+      this->computeGtoLRotationMatrix(T);
+      answer.rotatedWith(T, 't');
+    }
+}
+
+void
+Beam3d :: computeInternalForcesFromBodyLoadVectorAtPoint(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode, FloatArray &pointCoords, double ds)
+// Computes numerically the load vector of the receiver due to the body
+// loads, at tStep.
+// load is assumed to be in global cs.
+// load vector is then transformed to coordinate system in each node.
+// (should be global coordinate system, but there may be defined
+//  different coordinate system in each node)
+{
+    double dens, dV;
+    FloatArray force, ntf;
+    FloatMatrix n, T;
+    FloatArray lc(1);
+    
+    if ( ( forLoad->giveBCGeoType() != BodyLoadBGT ) || ( forLoad->giveBCValType() != ForceLoadBVT ) ) {
+        OOFEM_ERROR("unknown load type");
+    }
+    
+    // note: force is assumed to be in global coordinate system.
+    forLoad->computeComponentArrayAt(force, tStep, mode);
+    force.times( this->giveCrossSection()->give(CS_Area, lc, this) );
+    // transform from global to element local c.s
+    if ( this->computeLoadGToLRotationMtrx(T) ) {
+        force.rotatedWith(T, 'n');
+    }
+
+    answer.clear();
+
+    if ( force.giveSize() ) {
+        for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
+	  const FloatArray &lcoords = gp->giveNaturalCoordinates();
+            this->computeNmatrixAt(gp->giveSubPatchCoordinates(), n);
+            dV  = gp->giveWeight() * 0.5 * ds;
+            dens = this->giveCrossSection()->give('d', gp);
+	    FloatArray iF;
+	    iF = force;
+	    iF.at(5) += force.at(3) *  (lcoords.at(1)+1)*ds/2;
+	    iF.at(6) -= force.at(2) *  (lcoords.at(1)+1)*ds/2;
+            answer.add(dV * dens, iF);
+        }
+    } else {
+        return;
+    }
+
+
+
+}
+
+
+void
+Beam3d :: giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep )
+{
+  
+
+  // divide element into several small ones
+  vtkPieces.resize(1);
+  vtkPieces[0].setNumberOfCells(Beam3d_nSubBeams);
+  int nNodes = 2 * Beam3d_nSubBeams;
+  vtkPieces[0].setNumberOfNodes(nNodes);
+  FloatArray nodeXi(nNodes), xi(1);
+
+  Node *nodeA, *nodeB;
+  nodeA = this->giveNode(1);
+  nodeB   = this->giveNode(2);
+  double dx = (nodeB->giveCoordinate(1) - nodeA->giveCoordinate(1))/Beam3d_nSubBeams;
+  double dy = (nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2))/Beam3d_nSubBeams;
+  double dz = (nodeB->giveCoordinate(3) - nodeA->giveCoordinate(3))/Beam3d_nSubBeams;
+  FloatArray coords(3);
+  int nodeNumber = 1;
+  int val = 1;
+  int offset = 0;
+  IntArray connectivity(2);
+  for (int i = 0; i < Beam3d_nSubBeams; i++) {
+    for (int j = 0; j < 2; j++) {
+      coords.at(1) = nodeA->giveCoordinate(1) + (i+j) * dx; 
+      coords.at(2) = nodeA->giveCoordinate(2) + (i+j) * dy;
+      coords.at(3) = nodeA->giveCoordinate(3) + (i+j) * dz;
+      vtkPieces[0].setNodeCoords(nodeNumber,coords);
+      nodeXi.at(nodeNumber) = -1.0+(2.0/Beam3d_nSubBeams)*(i+j);
+      nodeNumber++;
+      connectivity.at(j+1) = val++;
+      
+    }
+    vtkPieces[0].setConnectivity(i+1, connectivity);
+    offset += 2;
+    vtkPieces[0].setOffset(i+1, offset);
+    vtkPieces[0].setCellType(i+1,3);
+  }
+
+
+  
+  InternalStateType isttype;
+  int n = internalVarsToExport.giveSize();
+  vtkPieces[0].setNumberOfInternalVarsToExport(n, nNodes);
+  for ( int i = 1; i <= n; i++ ) {
+    isttype = ( InternalStateType ) internalVarsToExport.at(i);
+    for (int nN = 1; nN <= nNodes; nN++) {
+      if ( isttype == IST_BeamForceMomentTensor ) {
+	FloatArray coords = vtkPieces[0].giveNodeCoords(nN);
+	FloatArray endForces;
+	this->giveInternalForcesVectorAtPoint(endForces, tStep, coords);
+	vtkPieces[0].setInternalVarInNode( i, nN, endForces );
+      } else {
+	fprintf( stderr, "VTKXMLExportModule::exportIntVars: unsupported variable type %s\n", __InternalStateTypeToString(isttype) );
+      }
+    }
+  }
+
+  primaryVarsToExport.giveSize();
+  vtkPieces[0].setNumberOfPrimaryVarsToExport(n, nNodes);
+  for ( int i = 1; i <= n; i++ ) {
+    UnknownType utype = (UnknownType) primaryVarsToExport.at(i);
+    if ( utype == DisplacementVector ) {
+      FloatMatrix Tgl, n;
+      FloatArray d(3);
+      
+      this->B3SSMI_getUnknownsGtoLRotationMatrix(Tgl);
+      for (int nN = 1; nN <= nNodes; nN++) {
+        FloatArray u, dl, dg;
+        this->computeVectorOf(VM_Total, tStep, u);
+        xi.at(1) = nodeXi.at(nN);
+        this->computeNmatrixAt(xi, n);
+        dl.beProductOf(n,u); // local interpolated displacement
+        dg.beTProductOf(Tgl, dl); // local displacement tranformed to global c.s.
+        d.at(1)=dg.at(1); d.at(2)=dg.at(2); d.at(3)=dg.at(3); 
+	vtkPieces[0].setPrimaryVarInNode( i, nN, d );
+      }
+    } else {
+      fprintf( stderr, "VTKXMLExportModule::exportPrimaryVars: unsupported variable type %s\n", __UnknownTypeToString(utype) );
+    }
+  }
+
+}
+
+
+
+
+  
 } // end namespace oofem

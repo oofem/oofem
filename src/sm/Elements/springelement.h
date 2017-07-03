@@ -89,8 +89,7 @@ public:
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
     { answer.clear(); }
-    virtual void computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType)
-    { answer.clear(); }
+
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
 
     virtual int computeNumberOfDofs() { return 2; }
@@ -102,7 +101,8 @@ public:
     virtual void updateYourself(TimeStep *tStep) { }
     virtual int checkConsistency() { return 1; }
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
-
+    virtual bool isCast(TimeStep *tStep) {return true;}
+    
 #ifdef __OOFEG
     //void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
     //void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);

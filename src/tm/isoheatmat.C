@@ -34,8 +34,10 @@
 
 #include "isoheatmat.h"
 #include "floatmatrix.h"
+#include "function.h"
 #include "gausspoint.h"
 #include "classfactory.h"
+#include "engngm.h"
 
 namespace oofem {
 REGISTER_Material(IsotropicHeatTransferMaterial);
@@ -58,22 +60,25 @@ IsotropicHeatTransferMaterial :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, conductivity, _IFT_IsotropicHeatTransferMaterial_k);
     IR_GIVE_FIELD(ir, capacity, _IFT_IsotropicHeatTransferMaterial_c);
     IR_GIVE_OPTIONAL_FIELD(ir, maturityT0, _IFT_IsotropicHeatTransferMaterial_maturityT0);
+    IR_GIVE_OPTIONAL_FIELD(ir, density, _IFT_IsotropicHeatTransferMaterial_d);
 
     return Material :: initializeFrom(ir);
 }
 
 double
-IsotropicHeatTransferMaterial :: give(int aProperty, GaussPoint *gp)
+IsotropicHeatTransferMaterial :: give(int aProperty, GaussPoint *gp, TimeStep *tStep)
 //
 // Returns the value of the property aProperty (e.g. 'k' the conductivity of the receiver).
 //
 {
-    if ( aProperty == 'k' ) { //thermal conductivity [W/m/K]
-        return conductivity;
+    if ( aProperty == 'k' ) { //thermal conductivity [W/m/K]   
+        return conductivity.eval( { { "te", giveTemperature(gp) }, { "t", tStep->giveIntrinsicTime() } }, this->giveDomain(), gp, giveTemperature(gp) );
     } else if ( aProperty == 'c' ) { //mass-specific heat capacity [J/kg/K]
-        return capacity;
+        return capacity.eval( { { "te", giveTemperature(gp) }, { "t", tStep->giveIntrinsicTime() } }, this->giveDomain(), gp, giveTemperature(gp) );
+    } else if ( aProperty == 'd' && density.isDefined() ) { //density [kg/m3]
+        return density.eval( { { "te", giveTemperature(gp) }, { "t", tStep->giveIntrinsicTime() } }, this->giveDomain(), gp, giveTemperature(gp) );
     } else if ( aProperty == HeatCapaCoeff ) { //volume-specific heat capacity [J/m3/K]
-        return ( capacity * this->give('d', gp) );
+        return ( this->give('c', gp, tStep) * this->give('d', gp, tStep) );
     }
 
     return this->Material :: give(aProperty, gp);
@@ -89,7 +94,7 @@ IsotropicHeatTransferMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *
     ms->setTempGradient(grad);
 
     ///@todo Shouldn't the conductivity typically depend on the primary field and/or its gradient?
-    answer.beScaled(-this->giveIsotropicConductivity(gp), grad);
+    answer.beScaled(-this->giveIsotropicConductivity(gp, tStep), grad);
 
     ms->setTempFlux(answer);
 }
@@ -105,7 +110,7 @@ IsotropicHeatTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
      * returns constitutive (conductivity) matrix of receiver
      */
     MaterialMode mMode = gp->giveMaterialMode();
-    double cond = this->giveIsotropicConductivity(gp);
+    double cond = this->giveIsotropicConductivity(gp, tStep);
 
     switch  ( mMode ) {
     case _1dHeat:
@@ -129,6 +134,10 @@ IsotropicHeatTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     }
 }
 
+double
+IsotropicHeatTransferMaterial :: giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep) {
+    return give('k', gp, tStep);
+}
 
 double
 IsotropicHeatTransferMaterial :: giveCharacteristicValue(MatResponseMode mode,
@@ -136,7 +145,7 @@ IsotropicHeatTransferMaterial :: giveCharacteristicValue(MatResponseMode mode,
                                                          TimeStep *tStep)
 {
     if ( mode == Capacity ) {
-        return ( capacity * this->give('d', gp) );
+        return ( this->give('c', gp, tStep) * this->give('d', gp, tStep) );
     } else {
         OOFEM_ERROR("unknown mode (%s)", __MatResponseModeToString(mode) );
     }
@@ -154,6 +163,58 @@ IsotropicHeatTransferMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp,
         return 1;
     }
 
+    if ( type == IST_Temperature ) {
+        answer = FloatArray{ this->giveTemperature(gp) };
+        return 1;
+    } else if ( type == IST_Density ) {
+        answer = FloatArray{ this->give('d', gp, tStep) };
+        return 1;
+    } else if ( type == IST_HeatCapacity ) {
+        answer = FloatArray{ this->give('c', gp, tStep) };
+        return 1;
+    } else if ( type == IST_ThermalConductivityIsotropic ) {
+        answer = FloatArray{ this->give('k', gp, tStep) };
+        return 1;
+    } else if ( type == IST_EnergyMassCapacity ) {
+        answer = FloatArray{ this->give('c', gp, tStep) * this->give('d', gp, tStep) * this->giveTemperature(gp) };
+        return 1;
+    }
+
     return TransportMaterial :: giveIPValue(answer, gp, type, tStep);
 }
+
+
+
+
+
+
+MaterialStatus *
+IsotropicHeatTransferMaterial :: CreateStatus(GaussPoint *gp) const
+{
+    return new IsotropicHeatTransferMaterialStatus(1, domain, gp);
+}
+
+IsotropicHeatTransferMaterialStatus :: IsotropicHeatTransferMaterialStatus(int n, Domain *d, GaussPoint *g) : TransportMaterialStatus(n, d, g)
+{
+    //constructor
+}
+
+
+IsotropicHeatTransferMaterialStatus :: ~IsotropicHeatTransferMaterialStatus()
+{
+    //destructor
+}
+
+void
+IsotropicHeatTransferMaterialStatus :: updateYourself(TimeStep *tStep)
+{
+    TransportMaterialStatus :: updateYourself(tStep);
+}
+
+double IsotropicHeatTransferMaterial :: giveTemperature(GaussPoint *gp)
+{
+    IsotropicHeatTransferMaterialStatus *ms = static_cast< IsotropicHeatTransferMaterialStatus * >( this->giveStatus(gp) );
+    return ms->giveTempField().at(1);
+}
+
 } // end namespace oofem

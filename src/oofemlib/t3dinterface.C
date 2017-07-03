@@ -40,6 +40,22 @@
 #include "engngm.h"
 #include "remeshingcrit.h"
 
+#include "oofemtxtdatareader.h"
+#include "dynamicinputrecord.h"
+
+#include <math.h>
+
+#include "crosssection.h"
+#include "classfactory.h"
+
+#include "nonlocalbarrier.h"
+#include "initialcondition.h"
+#include "classfactory.h"
+//#include "loadtimefunction.h"
+#include "function.h"
+#include "outputmanager.h"
+
+
 namespace oofem {
 MesherInterface :: returnCode
 T3DInterface :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, Domain **dNew)
@@ -263,4 +279,614 @@ T3DInterface :: createInput(Domain *d, TimeStep *tStep)
     OOFEM_LOG_INFO("t3d.bmf file created\n");
     return 1;
 }
+
+
+
+
+
+int
+T3DInterface :: t3d_2_OOFEM(const char *t3dOutFile, Domain **dNew)
+{
+  
+  std::ifstream inputStream;
+  inputStream.open( t3dOutFile );
+  if ( !inputStream.is_open() ) {
+    OOFEM_ERROR("OOFEMTXTDataReader::OOFEMTXTDataReader: Can't open T3D input stream (%s)", t3dOutFile);
+    return 0;
+  }
+   // create new domain
+  ( * dNew ) = new Domain( 2, this->domain->giveSerialNumber() + 1, this->domain->giveEngngModel() );
+  ( * dNew )->setDomainType( this->domain->giveDomainType() );
+
+  std::string line;
+
+  //read first line from t3d out file - 4 numbers
+  // 2 degree of interpolation
+  // other are not important so far 
+  std::getline(inputStream, line);
+  //convert const char to char in order to use strtok
+  char *currentLine = new char[line.size() + 1];
+  std::strcpy ( currentLine, line.c_str() );
+  // tokenizing line
+  char *token = std::strtok(currentLine, " ");
+  // set counter to 0
+  int i = 0;
+  while (token != NULL) {
+    if(i == 0)
+	{}//int n1 = atoi(token);
+    else if (i == 1)
+	{}//int interp = atoi(token);
+    else if(i == 2)
+	{}//int n3 = atoi(token);
+    else if(i == 3)
+	{}//int n4 = atoi(token);
+    else
+      break;
+    token = std::strtok(NULL, " ");
+    i++;
+  }  
+
+
+  int nnodes,ntriangles,ntetras; // nedges,
+    
+  /*read second line from t3d out file
+    4 numbers
+    1 - number of nodes
+    2 - number of edges
+    3 - number of triangles
+    4 - number of tetras
+  */
+  std::getline(inputStream, line);
+  //convert const char to char in order to use strtok
+  currentLine = new char[line.size() + 1];
+  std::strcpy ( currentLine, line.c_str() );
+  // tokenizing line
+  token = std::strtok(currentLine, " ");
+  // set counter to 0
+  i = 0;
+  while (token != NULL) {
+    if(i == 0)
+      nnodes = atoi(token);
+    else if (i == 1)
+	{}//nedges = atoi(token);
+    else if(i == 2)
+      ntriangles = atoi(token);
+    else if(i == 3)
+      ntetras = atoi(token);
+    else
+      break;
+    token = std::strtok(NULL, " ");
+    i++;
+  }  
+  // create new domain
+  (*dNew)->resizeDofManagers(nnodes);
+
+
+  //one empty line
+  std::getline(inputStream, line);  
+  // create nodes
+  Node *node;
+  // read dofs
+  const IntArray dofIDArrayPtr = domain->giveDefaultNodeDofIDArry();
+  int ndofs = dofIDArrayPtr.giveSize();
+  // loop over number of nodes, read coordinates and create new nodes
+  for ( int inode = 1; inode <= nnodes; inode++ ) {
+      FloatArray coords(3);
+      std::getline(inputStream, line);  
+      //convert const char to char in order to use strtok
+      currentLine = new char[line.size() + 1];
+      std::strcpy ( currentLine, line.c_str() );
+      // tokenizing line
+      token = std::strtok(currentLine, " ");
+      // set counter to 0
+      i = 0;
+      while (token != NULL) {
+	if(i == 0)
+	    {}//int nodeNum = atoi(token);
+	else if (i == 1)
+	  coords.at(1) = atof(token);
+	else if(i == 2)
+	  coords.at(2) = atof(token);
+	else if(i == 3)
+	  coords.at(3) = atof(token);
+	else
+	  break;
+	token = std::strtok(NULL, " ");
+	i++;
+      }  
+      // newly created node
+      node = new Node(inode, * dNew);
+      //create new node with default DOFs
+      node->setNumberOfDofs(ndofs);
+      node->setCoordinates( coords );
+      // how to set boundary condition ??
+      //      node->setBoundaryFlag( mesh->giveNode(inode)->isBoundary() );
+      // ( * dNew )->setDofManager(inode, node);
+
+  }//end loop over nodes
+
+  //read empty line 
+  std::getline(inputStream, line);  
+
+
+
+  Element *parentElementPtr, *elem;
+  parentElementPtr = domain->giveElement(1); //??km??
+  // loop over triangles, read dofman numbers and create new elements
+  for (int itriangle = 1; itriangle <= ntriangles; itriangle++) {
+    int elemNumber;
+    IntArray dofManagers(3);
+    std::getline(inputStream, line); 
+    //convert const char to char in order to use strtok
+    currentLine = new char[line.size() + 1];
+    std::strcpy ( currentLine, line.c_str() );
+    // tokenizing line
+    token = std::strtok(currentLine, " ");
+    // set counter to 0
+    i = 0;
+    while (token != NULL) {
+      if(i == 0)
+	elemNumber = atoi(token);
+      else if (i >= 1 && i<=4)
+	dofManagers.at(i) = atof(token);
+      else
+	break;
+      token = std::strtok(NULL, " ");
+      i++;
+      } 
+    elem = classFactory.createElement(parentElementPtr->giveClassName(), elemNumber, * dNew);
+    elem->setDofManagers( dofManagers );
+    elem->setMaterial( parentElementPtr->giveMaterial()->giveNumber() );
+    elem->setCrossSection( parentElementPtr->giveCrossSection()->giveNumber() );
+    //
+    // ...
+    //
+
+  }//end loop over triangles 
+
+  
+// loop over tetras, read dofman numbers and create new elements
+  for (int itetra = 1; itetra <= ntetras; itetra++) {
+    int elemNumber;
+    IntArray dofManagers(4);
+    std::getline(inputStream, line); 
+    //convert const char to char in order to use strtok
+    currentLine = new char[line.size() + 1];
+    std::strcpy ( currentLine, line.c_str() );
+    // tokenizing line
+    token = std::strtok(currentLine, " ");
+       // set counter to 0
+    i = 0;
+    while (token != NULL) {
+      if(i == 0)
+	elemNumber = atoi(token);
+      else if (i >= 1 && i<=4)
+	dofManagers.at(i) = atof(token);
+      else
+	break;
+      token = std::strtok(NULL, " ");
+      i++;
+    } 
+    //elem = classFactory.createElement(parentElementPtr->giveClassName(), elemNumber, * dNew);
+    elem = classFactory.createElement("LTRSpace", elemNumber, * dNew);
+    elem->setDofManagers( dofManagers );
+    elem->setMaterial( parentElementPtr->giveMaterial()->giveNumber() );
+    elem->setCrossSection( parentElementPtr->giveCrossSection()->giveNumber() );
+    (*dNew)->setElement(elemNumber, elem);
+  }//end loop over tetras
+  
+  
+  
+  CrossSection *crossSection;
+  Material *mat;
+  NonlocalBarrier *barrier;
+  GeneralBoundaryCondition *bc;
+  InitialCondition *ic;
+  //LoadTimeFunction *ltf;
+  Function *ltf;
+  std::string name;
+  
+  // copy of crossections from old domain
+  int ncrosssect = domain->giveNumberOfCrossSectionModels();
+  ( * dNew )->resizeCrossSectionModels(ncrosssect);
+  for ( int i = 1; i <= ncrosssect; i++ ) {
+    DynamicInputRecord ir;
+    domain->giveCrossSection(i)->giveInputRecord(ir);
+    ir.giveRecordKeywordField(name);
+    
+    crossSection = classFactory.createCrossSection(name.c_str(), i, * dNew);
+    crossSection->initializeFrom(&ir);
+    ( * dNew )->setCrossSection(i, crossSection);
+  }
+  
+  // copy of materials  from old domain
+  int nmat = domain->giveNumberOfMaterialModels();
+  ( * dNew )->resizeMaterials(nmat);
+  for ( int i = 1; i <= nmat; i++ ) {
+    DynamicInputRecord ir;
+      domain->giveMaterial(i)->giveInputRecord(ir);
+      ir.giveRecordKeywordField(name);
+      
+      mat = classFactory.createMaterial(name.c_str(), i, * dNew);
+      mat->initializeFrom(&ir);
+      ( * dNew )->setMaterial(i, mat);
+  }
+  
+  // copy of crossections from old domain
+  int nbarriers = domain->giveNumberOfNonlocalBarriers();
+  ( * dNew )->resizeNonlocalBarriers(nbarriers);
+  for ( int i = 1; i <= nbarriers; i++ ) {
+      DynamicInputRecord ir;
+      domain->giveNonlocalBarrier(i)->giveInputRecord(ir);
+      ir.giveRecordKeywordField(name);
+      
+      barrier = classFactory.createNonlocalBarrier(name.c_str(), i, * dNew);
+      barrier->initializeFrom(&ir);
+      ( * dNew )->setNonlocalBarrier(i, barrier);
+  }
+  
+    // copy of boundary conditions from old domain
+  int nbc = domain->giveNumberOfBoundaryConditions();
+  ( * dNew )->resizeBoundaryConditions(nbc);
+  for ( int i = 1; i <= nbc; i++ ) {
+    DynamicInputRecord ir;
+    domain->giveBc(i)->giveInputRecord(ir);
+    ir.giveRecordKeywordField(name);
+    
+    bc = classFactory.createBoundaryCondition(name.c_str(), i, * dNew);
+    bc->initializeFrom(&ir);
+    ( * dNew )->setBoundaryCondition(i, bc);
+  }
+  
+  // copy of initial conditions from old domain
+  int nic = domain->giveNumberOfInitialConditions();
+  ( * dNew )->resizeInitialConditions(nic);
+  for ( int i = 1; i <= nic; i++ ) {
+    DynamicInputRecord ir;
+    domain->giveIc(i)->giveInputRecord(ir);
+    ir.giveRecordKeywordField(name);
+    
+    ic = new InitialCondition(i, *dNew);
+    ic->initializeFrom(&ir);
+    ( * dNew )->setInitialCondition(i, ic);
+  }
+  
+  // copy of load time functions from old domain
+  //  int nltf = domain->giveNumberOfLoadTimeFunctions();
+    int nltf = domain->giveNumberOfFunctions();
+  // ( * dNew )->resizeLoadTimeFunctions(nltf);
+   ( * dNew )->resizeFunctions(nltf);
+  for ( int i = 1; i <= nltf; i++ ) {
+    DynamicInputRecord ir;
+    //domain->giveLoadTimeFunction(i)->giveInputRecord(ir);
+    domain->giveFunction(i)->giveInputRecord(ir);
+    ir.giveRecordKeywordField(name);
+    
+    //ltf = classFactory.createLoadTimeFunction(name.c_str(), i, * dNew);
+    ltf = classFactory.createFunction(name.c_str(), i, * dNew);
+    ltf->initializeFrom(&ir);
+    //( * dNew )->setLoadTimeFunction(i, ltf);
+    ( * dNew )->setFunction(i, ltf);
+  }
+  
+  // copy output manager settings from old domain
+  ( * dNew )->giveOutputManager()->beCopyOf( domain->giveOutputManager() );  
+ return 1;  
+  
+}
+
+// used by HTS element to create export mesh to vtk
+
+int
+T3DInterface :: createInput(Element *e, char *t3dInFile)
+{ 
+  FILE *inputStrem;
+  inputStrem = fopen(t3dInFile, "w");
+ 
+  int nnodes = e->giveNumberOfDofManagers();
+  // loop over nodes and write vertexes into t3d input file
+  for ( int i = 1; i <= nnodes; i++ ) {
+    Node *inode;
+    inode = e->giveNode(i);
+    fprintf(inputStrem, "vertex %d xyz %e %e %e\n", i, inode->giveCoordinate(1), inode->giveCoordinate(2), inode->giveCoordinate(3));
+  }
+  for (int i = 1; i<=nnodes; i++) {
+    if( i< nnodes)
+      fprintf(inputStrem, "curve %d order 2 vertex %d %d\n", i, i, i+1);
+    else
+      fprintf(inputStrem, "curve %d order 2 vertex %d %d\n", i, i, 1);
+  }
+  fprintf(inputStrem, "patch 1 normal 0 0 1 boundary curve");
+  for (int i = 1; i<=nnodes; i++) {
+    fprintf(inputStrem, " %d", i);
+  }
+  fclose(inputStrem);
+  
+  return 1;
+
+}
+
+
+
+
+
+
+
+int
+T3DInterface :: createVTKExportMesh(const char *t3dOutFile,std::vector<FloatArray> &nodeCoords, std::vector<IntArray> &cellNodes, IntArray &cellTypes )
+{
+
+   std::ifstream inputStream;
+  inputStream.open( t3dOutFile );
+  if ( !inputStream.is_open() ) {
+    OOFEM_ERROR("OOFEMTXTDataReader::OOFEMTXTDataReader: Can't open T3D input stream (%s)", t3dOutFile);
+    return 0;
+  }
+  std::string line;
+  //read and skip first line from t3d out file - 4 numbers
+  std::getline(inputStream, line);
+  /*read second line from t3d out file
+    4 numbers
+    1 - number of nodes
+    2 - number of edges
+    3 - number of triangles
+    4 - number of tetras
+  */
+  int nnodes,ntriangles;// nedges, ntetras
+  std::getline(inputStream, line);
+  //convert const char to char in order to use strtok
+  char *currentLine = new char[line.size() + 1];
+  std::strcpy ( currentLine, line.c_str() );
+  // tokenizing line
+  char *token = std::strtok(currentLine, " ");
+  // set counter to 0
+  int i = 0;
+  while (token != NULL) {
+    if(i == 0)
+      nnodes = atoi(token);
+    else if (i == 1)
+	{}//nedges = atoi(token);
+    else if(i == 2)
+      ntriangles = atoi(token);
+    else if(i == 3)
+	{}//ntetras = atoi(token);
+    else
+      break;
+    token = std::strtok(NULL, " ");
+    i++;
+  }  
+  delete [] currentLine;
+  //read one empty line
+  std::getline(inputStream, line);  
+
+
+ // loop over number of nodes, read coordinates and put them into nodeCoords Array
+  for ( int inode = 1; inode <= nnodes; inode++ ) {
+      // int nodeNum;
+      FloatArray coords(3);
+      std::getline(inputStream, line);  
+      //convert const char to char in order to use strtok
+      currentLine = new char[line.size() + 1];
+      std::strcpy ( currentLine, line.c_str() );
+      // tokenizing line
+      token = std::strtok(currentLine, " ");
+      // set counter to 0
+      i = 0;
+      while (token != NULL) {
+	if(i == 0)
+	    {}// nodeNum = atoi(token);
+	else if (i == 1)
+	  coords.at(1) = atof(token);
+	else if(i == 2)
+	  coords.at(2) = atof(token);
+	else if(i == 3)
+	  coords.at(3) = atof(token);
+	else
+	  break;
+	token = std::strtok(NULL, " ");
+	i++;
+      }  
+
+      nodeCoords.push_back(coords);  
+      delete [] currentLine;
+  }//end loop over nodes
+
+
+
+  //one empty line
+  std::getline(inputStream, line);  
+  cellTypes.resize(ntriangles);
+  // loop over triangles, and fill nodeCoords, cellNodes nad cellTypes arrays
+  for (int itriangle = 1; itriangle <= ntriangles; itriangle++) {
+    // int elemNumber;
+    IntArray dofManagers(3);
+    std::getline(inputStream, line); 
+    //convert const char to char in order to use strtok
+    currentLine = new char[line.size() + 1];
+    std::strcpy ( currentLine, line.c_str() );
+    // tokenizing line
+    token = std::strtok(currentLine, " ");
+    // set counter to 0
+    i = 0;
+    while (token != NULL) {
+      if(i == 0)
+	  {}//elemNumber = atoi(token);
+      else if (i >= 1 && i<=3)
+	dofManagers.at(i) = atof(token) - 1;
+      else
+	break;
+      token = std::strtok(NULL, " ");
+      i++;
+    } 
+    cellNodes.push_back(dofManagers);
+    // in vtk number 5 corresponds to linear triangle
+    cellTypes.at(itriangle) = 5;
+    delete [] currentLine;
+  }//end loop over triangles 
+  
+  return 1;
+}
+
+
+
+
+
+int
+T3DInterface :: createQCInterpolationMesh(const char *t3dOutFile,std::vector<FloatArray> &nodeCoords, std::vector<IntArray> &cellNodes, IntArray &cellTypes )
+//
+// create interpolation mest from t3dOutFile
+// node coordinates and element nodes are saved in "matrix" vector<FloatArray/IntArray> 
+//
+{
+
+   std::ifstream inputStream;
+  inputStream.open( t3dOutFile );
+  if ( !inputStream.is_open() ) {
+    OOFEM_ERROR("OOFEMTXTDataReader::OOFEMTXTDataReader: Can't open T3D input stream (%s)", t3dOutFile);
+    return 0;
+  }
+  std::string line;
+  //read and skip first line from t3d out file - 4 numbers
+  std::getline(inputStream, line);
+  /*read second line from t3d out file
+    4 numbers
+    1 - number of nodes
+    2 - number of edges
+    3 - number of triangles
+    4 - number of tetras
+  */
+  int nnodes,ntriangles,ntetras;//nedges,
+  std::getline(inputStream, line);
+  //convert const char to char in order to use strtok
+  char *currentLine = new char[line.size() + 1];
+  std::strcpy ( currentLine, line.c_str() );
+  // tokenizing line
+  char *token = std::strtok(currentLine, " ");
+  // set counter to 0
+  int i = 0;
+  while (token != NULL) {
+    if(i == 0)
+      nnodes = atoi(token);
+    else if (i == 1)
+	{}//nedges = atoi(token);
+    else if(i == 2)
+      ntriangles = atoi(token);
+    else if(i == 3)
+      ntetras = atoi(token);
+    else
+      break;
+    token = std::strtok(NULL, " ");
+    i++;
+  }  
+  delete [] currentLine;
+  //read one empty line
+  std::getline(inputStream, line);  
+
+  // check the number of interpolation element
+  if (ntriangles!=0 && ntetras!=0 ) {
+    OOFEM_ERROR( "T3DInterface: 2D and 3D interpolation elements are not supported together");  
+  } else if (ntriangles!=0) {
+    cellTypes.resize(ntriangles);
+  } else if (ntetras!=0) {
+    cellTypes.resize(ntetras);
+  } else { 
+	OOFEM_ERROR( "T3DInterface: No interpolation element found in %s", t3dOutFile);  
+  } 
+  
+  // loop over number of nodes, read coordinates and put them into nodeCoords Array
+  for ( int inode = 1; inode <= nnodes; inode++ ) {
+      FloatArray coords(3);
+      // int nodeNum;
+      std::getline(inputStream, line);  
+      //convert const char to char in order to use strtok
+      currentLine = new char[line.size() + 1];
+      std::strcpy ( currentLine, line.c_str() );
+      // tokenizing line
+      token = std::strtok(currentLine, " ");
+      // set counter to 0
+      i = 0;
+      while (token != NULL) {
+	if(i == 0)
+	    {}// nodeNum = atoi(token);
+	else if (i == 1)
+	  coords.at(1) = atof(token);
+	else if(i == 2)
+	  coords.at(2) = atof(token);
+	else if(i == 3)
+	  coords.at(3) = atof(token);
+	else
+	  break;
+	token = std::strtok(NULL, " ");
+	i++;
+      }  
+
+      nodeCoords.push_back(coords);  
+      delete [] currentLine;
+  }//end loop over nodes
+
+  //one empty line
+  std::getline(inputStream, line);  
+
+// loop over triangles, and fill nodeCoords, cellNodes nad cellTypes arrays
+  for (int itriangle = 1; itriangle <= ntriangles; itriangle++) {
+    IntArray dofManagers(3);
+    // int elemNumber;
+    std::getline(inputStream, line); 
+    //convert const char to char in order to use strtok
+    currentLine = new char[line.size() + 1];
+    std::strcpy ( currentLine, line.c_str() );
+    // tokenizing line
+    token = std::strtok(currentLine, " ");
+    // set counter to 0
+    i = 0;
+    while (token != NULL) {
+      if(i == 0)
+	  {}//elemNumber = atoi(token);
+      else if (i >= 1 && i<=3)
+	dofManagers.at(i) = atof(token);
+      else
+	break;
+      token = std::strtok(NULL, " ");
+      i++;
+    } 
+    cellNodes.push_back(dofManagers);
+    // in vtk number 5 corresponds to linear triangle
+    cellTypes.at(itriangle) = 5;
+    delete [] currentLine;
+  }//end loop over triangles 
+
+// loop over tetras, read dofman numbers and fill nodeCoords, cellNodes nad cellTypes arrays
+  for (int itetra = 1; itetra <= ntetras; itetra++) {
+    IntArray dofManagers(4);
+    // int elemNumber;
+    std::getline(inputStream, line); 
+    //convert const char to char in order to use strtok
+    currentLine = new char[line.size() + 1];
+    std::strcpy ( currentLine, line.c_str() );
+    // tokenizing line
+    token = std::strtok(currentLine, " ");
+       // set counter to 0
+    i = 0;
+    while (token != NULL) {
+      if(i == 0)
+	  {}//elemNumber = atoi(token);
+      else if (i >= 1 && i<=4)
+	dofManagers.at(i) = atof(token);
+      else
+	break;
+      token = std::strtok(NULL, " ");
+      i++;
+    } 
+    cellNodes.push_back(dofManagers);
+    // in vtk number 5 corresponds to linear triangle  
+    cellTypes.at(itetra) = 5;    // ??km?? TODO: number for tetras in vtk = ???
+    delete [] currentLine;
+  }//end loop over tetras
+ 
+  
+  return 1;
+}
+
+
+  
 } // end namespace oofem

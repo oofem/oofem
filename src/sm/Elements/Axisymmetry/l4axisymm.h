@@ -43,7 +43,7 @@
 #define _IFT_L4Axisymm_Name "l4axisymm"
 
 namespace oofem {
-class FEI2dQuadLin;
+class FEI2dQuadLinAxi;
 
 /**
  * This class implements an isoparametric four-node quadrilateral axisymmetric
@@ -53,7 +53,7 @@ class L4Axisymm : public AxisymElement, public ZZNodalRecoveryModelInterface, pu
 public SpatialLocalizerInterface
 {
 protected:
-    static FEI2dQuadLin interpolation;
+    static FEI2dQuadLinAxi interpolation;
     int numberOfFiAndShGaussPoints;
 
 public:

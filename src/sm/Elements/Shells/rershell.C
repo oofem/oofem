@@ -539,7 +539,7 @@ RerShell :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gauss
         answer.at(3, 1) = stress.at(7);
         answer.at(2, 3) = stress.at(8);
         answer.at(3, 2) = stress.at(8);
-    } else if ( ( type == LocalMomentumTensor ) || ( type == GlobalMomentumTensor ) ) {
+    } else if ( ( type == LocalMomentTensor ) || ( type == GlobalMomentTensor ) ) {
         FloatArray stress, strain;
         this->computeStrainVector(strain, gp, tStep);
         this->computeStressVector(stress, strain, gp, tStep);
@@ -571,7 +571,7 @@ RerShell :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gauss
         exit(1);
     }
 
-    if ( ( type == GlobalForceTensor ) || ( type == GlobalMomentumTensor ) ||
+    if ( ( type == GlobalForceTensor ) || ( type == GlobalMomentTensor ) ||
         ( type == GlobalStrainTensor ) || ( type == GlobalCurvatureTensor ) ) {
         this->computeGtoLRotationMatrix();
         answer.rotatedWith(GtoLRotationMatrix);
@@ -690,7 +690,7 @@ RerShell :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
         return 1;
     } else if ( type == IST_ShellMomentTensor || type == IST_ShellForceTensor ) {
         if ( type == IST_ShellMomentTensor ) {
-            cht = GlobalMomentumTensor;
+            cht = GlobalMomentTensor;
         } else {
             cht = GlobalForceTensor;
         }

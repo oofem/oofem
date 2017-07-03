@@ -56,7 +56,9 @@ public:
     virtual double giveThicknessAt(const FloatArray &gcoords);
 
     virtual const char *giveClassName() const { return "QuadAxisym1_ht"; }
-
+    virtual IntegrationRule* giveBoundaryEdgeIntegrationRule (int order, int boundary);
+    virtual IntegrationRule* giveBoundarySurfaceIntegrationRule (int order, int boundary);
+    
 protected:
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
     virtual double computeRadiusAt(GaussPoint *gp);

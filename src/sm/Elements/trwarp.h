@@ -58,9 +58,9 @@ public:
     virtual void computeFirstMomentOfArea(FloatArray &answer);
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
-    virtual void computeLocalForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     virtual void computeEdgeLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
-
+    virtual void giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode,
+					  TimeStep *tStep);
     // definition
     virtual const char *giveInputRecordName() const { return _IFT_Tr_Warp_Name; }
     virtual const char *giveClassName() const { return "Tr_WarpElement"; }

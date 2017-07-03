@@ -35,6 +35,7 @@
 #include "rigidarmnode.h"
 #include "slavedof.h"
 #include "floatarray.h"
+#include "floatmatrix.h"
 #include "intarray.h"
 #include "classfactory.h"
 #include "domain.h"
@@ -120,10 +121,11 @@ RigidArmNode :: checkConsistency()
     result = Node :: checkConsistency();
 
     // check if receiver has the same coordinate system as master dofManager
+    /*
     if ( !this->hasSameLCS(this->masterNode) ) {
         OOFEM_WARNING("different lcs for master/slave nodes", 1);
         result = 0;
-    }
+    }*/
 
     // check if created DOFs (dofType) compatible with mastermask
     for ( int i = 1; i <= this->giveNumberOfDofs(); i++ ) {
@@ -140,6 +142,7 @@ void
 RigidArmNode :: computeMasterContribution(std::map< DofIDItem, IntArray > &masterDofID, 
                                           std::map< DofIDItem, FloatArray > &masterContribution)
 {
+#if 0 // original implementation without support of different LCS in slave and master
     int k;
     IntArray R_uvw(3), uvw(3);
     FloatArray xyz(3);
@@ -217,6 +220,54 @@ RigidArmNode :: computeMasterContribution(std::map< DofIDItem, IntArray > &maste
         masterDofID [ id ].resizeWithValues(k);
         masterContribution [ id ].resizeWithValues(k);
     }
+#else
+    // receiver lcs stored in localCoordinateSystem
+    // (this defines the transformation from global to local)
+    FloatArray xyz(3);
+    FloatMatrix TG2L(6,6); // receiver global to receiver local
+    FloatMatrix TR(6,6); // rigid arm transformation between receiver global DOFs and Master global DOFs
+    FloatMatrix TMG2L(6,6); // master global to local
+    FloatMatrix T(6,6); // full transformation for all dofs
+    IntArray fullDofMask = {D_u, D_v, D_w, R_u, R_v, R_w};
+    bool hasg2l = this->computeL2GTransformation(TG2L, fullDofMask);
+    bool mhasg2l = masterNode->computeL2GTransformation(TMG2L, fullDofMask);
+
+    xyz.beDifferenceOf(*this->giveCoordinates(), *masterNode->giveCoordinates());
+    
+    TR.beUnitMatrix();
+    TR.at(1,5) =  xyz.at(3);
+    TR.at(1,6) = -xyz.at(2);
+    TR.at(2,4) = -xyz.at(3);
+    TR.at(2,6) =  xyz.at(1);
+    TR.at(3,4) =  xyz.at(2);
+    TR.at(3,5) = -xyz.at(1);
+
+    if (hasg2l && mhasg2l) {
+      FloatMatrix h; 
+      h.beTProductOf(TG2L, TR);  // T transforms global master DOfs to local dofs;
+      T.beProductOf(h,TMG2L);    // Add transformation to master local c.s.
+    } else if (hasg2l) {
+      T.beTProductOf(TG2L, TR);  // T transforms global master DOfs to local dofs;
+    } else if (mhasg2l) {
+      T.beProductOf(TR,TMG2L);   // Add transformation to master local c.s.
+    } else {
+      T = TR;
+    }
+    
+    // assemble DOF weights for relevant dofs
+    for ( int i = 1; i <= this->dofidmask->giveSize(); i++ ) {
+      Dof *dof = this->giveDofWithID(dofidmask->at(i));
+      DofIDItem id = dof->giveDofID();
+      masterDofID [ id ] = *dofidmask;
+      masterContribution [ id ].resize(dofidmask->giveSize());
+      
+      for (int j = 1; j <= this->dofidmask->giveSize(); j++ ) {
+        masterContribution [ id ].at(j) = T.at(id, dofidmask->at(j));
+      }
+    }
+
+#endif
+
 }
 
 

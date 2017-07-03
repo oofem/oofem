@@ -1420,9 +1420,7 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
 }
 
 void
-StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &dir,
-                                             const FloatArray &s,
-                                             stressStrainPrincMode mode)
+StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &dir, const FloatArray &s, stressStrainPrincMode mode)
 //
 // This function computes the principal values & directions corresponding to principal values
 // of strains or streses.
@@ -1843,6 +1841,43 @@ StructuralMaterial :: giveStrainVectorTranformationMtrx(FloatMatrix &answer,
 
 
 void
+StructuralMaterial :: give2DStrainVectorTranformationMtrx(FloatMatrix &answer,
+                                                        const FloatMatrix &base,
+                                                        bool transpose)
+//
+// returns transformation matrix for 2d - strains to another system of axes,
+// given by base.
+// In base (FloatMatrix[2,2]) there are on each column stored vectors of
+// coordinate system to which we do transformation.
+//
+// If transpose == 1 we transpose base matrix before transforming
+//
+{
+    FloatMatrix t;
+    answer.resize(3, 3);
+    answer.zero();
+
+    if ( transpose ) {
+        t.beTranspositionOf(base);
+    } else {
+        t = base;
+    }
+
+    answer.at(1, 1) = t.at(1, 1) * t.at(1, 1);
+    answer.at(1, 2) = t.at(2, 1) * t.at(2, 1);
+    answer.at(1, 3) = t.at(1, 1) * t.at(2, 1);
+
+    answer.at(2, 1) = t.at(1, 2) * t.at(1, 2);
+    answer.at(2, 2) = t.at(2, 2) * t.at(2, 2);
+    answer.at(2, 3) = t.at(1, 2) * t.at(2, 2);
+
+    answer.at(3, 1) = 2.0 * t.at(1, 1) * t.at(1, 2);
+    answer.at(3, 2) = 2.0 * t.at(2, 1) * t.at(2, 2);
+    answer.at(3, 3) = ( t.at(1, 1) * t.at(2, 2) + t.at(2, 1) * t.at(1, 2) );
+}
+  
+
+void
 StructuralMaterial :: giveStressVectorTranformationMtrx(FloatMatrix &answer,
                                                         const FloatMatrix &base,
                                                         bool transpose)
@@ -2143,6 +2178,18 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSt
 
         this->computePrincipalValues(answer, s, principal_strain);
         return 1;
+    } else if ( type == IST_PrincStressVector1 || type == IST_PrincStressVector2 || type == IST_PrincStressVector3 ) {
+        FloatArray arrAnswer;
+        FloatMatrix dir;
+        this->computePrincipalValDir(arrAnswer, dir, status->giveStressVector(), principal_stress);
+        if ( type == IST_PrincStressVector1 ){
+            answer.beColumnOf(dir,1);
+        } else if ( type == IST_PrincStressVector2 ){
+            if (dir.giveNumberOfColumns()>=2) answer.beColumnOf(dir,2); else {answer.beColumnOf(dir,1); answer.zero();}
+        } else {
+            if (dir.giveNumberOfColumns()>=3) answer.beColumnOf(dir,3); else {answer.beColumnOf(dir,1); answer.zero();}
+        }
+        return 1;
     } else if ( type == IST_Temperature ) {
         /* add external source, if provided, such as staggered analysis */
         FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
@@ -2189,6 +2236,14 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSt
         }
 
         return 1;
+    } else if (type == IST_PlasticStrainTensor ) {
+        StructuralMaterial :: giveFullSymVectorForm( answer, status->giveStrainVector(), gp->giveMaterialMode() );
+        answer.zero();
+        return 1;
+    } else if (type == IST_MaxEquivalentStrainLevel ) {
+        answer.resize(1);
+        answer.at(1)=0.;
+        return 1;
     } else if ( type == IST_DeformationGradientTensor ) {
         answer = status->giveFVector();
         return 1;
@@ -2201,7 +2256,11 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSt
         selem->computeResultingIPEigenstrainAt(eigenstrain, tStep, gp, VM_Total );
         StructuralMaterial :: giveFullSymVectorForm( answer, eigenstrain, gp->giveMaterialMode() );
         return 1;
-    }else {
+    } else if ( type == IST_ShellForceTensor ) {
+        answer.resize(6);
+        answer.zero();
+        return 1;
+    } else {
         return Material :: giveIPValue(answer, gp, type, tStep);
     }
 }
@@ -2476,7 +2535,20 @@ StructuralMaterial :: giveReducedSymMatrixForm(FloatMatrix &answer, const FloatM
     answer.beSubMatrixOf(full, indx, indx);
 }
 
-
+void
+StructuralMaterial::giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+{
+    double alpha = this->give(tAlpha, gp);
+    if (alpha > 0.0) {
+      answer.resize(6);
+      answer.zero();
+      answer.at(1) = alpha;
+      answer.at(2) = alpha;
+      answer.at(3) = alpha;
+    } else {
+      answer.clear();
+    }
+}
 
 IRResultType
 StructuralMaterial :: initializeFrom(InputRecord *ir)
@@ -2485,6 +2557,15 @@ StructuralMaterial :: initializeFrom(InputRecord *ir)
 
     referenceTemperature = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, referenceTemperature, _IFT_StructuralMaterial_referencetemperature);
+
+    double alpha = 0.0;
+    IR_GIVE_OPTIONAL_FIELD(ir, alpha, _IFT_StructuralMaterial_talpha);
+    if (alpha > 0.0 && !propertyDictionary.includes(tAlpha)) {
+      // put isotropic thermal expansion coeff into dictionary, if provided
+      // and not previosly defined
+      propertyDictionary.add(tAlpha, alpha);
+
+    }
 
     return Material :: initializeFrom(ir);
 }

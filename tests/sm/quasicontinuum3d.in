@@ -1,0 +1,936 @@
+quasicontinuum3d.out
+quasicontinuum 3d test
+#qcLinearStatic nsteps 1 nmodules 0 QcApproach 3 mtrxt 1 geninterpelem 1 t3dfile quasicontinuum3d.t3d.in imsize 100
+qcLinearStatic nsteps 1 nmodules 0 QcApproach 3 mtrxt 1 geninterpelem 2 t3dfile quasicontinuum3d.out.t3d
+#qcvtkxml tstep_all domain_all primvars 1 1 vars 2 1 4 cellvars 2 1 4 expDeaktElem 0
+domain 3d
+OutputManager tstep_all dofman_all element_all
+ndofman 125 nelem 780 ncrosssect 1 nmat 1 nbc 4 nic 0 nltf 2
+qcNode 1 coords 3 0.000000e+00 0.000000e+00 0.000000e+00  bc 3 1 1 1
+qcNode 2 coords 3 2.386392e+01 0.000000e+00 0.000000e+00  bc 3 0 0 1
+qcNode 3 coords 3 5.704490e+01 0.000000e+00 0.000000e+00  bc 3 0 0 1
+qcNode 4 coords 3 8.160597e+01 0.000000e+00 0.000000e+00  bc 3 0 0 1
+qcNode 5 coords 3 1.000000e+02 0.000000e+00 0.000000e+00  bc 3 0 1 1
+qcNode 6 coords 3 0.000000e+00 3.025520e+01 0.000000e+00  bc 3 0 0 1
+qcNode 7 coords 3 2.507359e+01 1.811778e+01 0.000000e+00  bc 3 0 0 1
+qcNode 8 coords 3 5.616520e+01 2.526394e+01 0.000000e+00  bc 3 0 0 1
+qcNode 9 coords 3 7.893643e+01 2.447111e+01 0.000000e+00  bc 3 0 0 1
+qcNode 10 coords 3 1.000000e+02 1.850615e+01 0.000000e+00  bc 3 0 0 1
+qcNode 11 coords 3 0.000000e+00 5.324879e+01 0.000000e+00  bc 3 0 0 1
+qcNode 12 coords 3 2.148997e+01 4.942390e+01 0.000000e+00  bc 3 0 0 1
+qcNode 13 coords 3 5.665355e+01 4.817626e+01 0.000000e+00  bc 3 0 0 1
+qcNode 14 coords 3 7.794694e+01 4.881804e+01 0.000000e+00  bc 3 0 0 1
+qcNode 15 coords 3 1.000000e+02 5.060307e+01 0.000000e+00  bc 3 0 0 1
+qcNode 16 coords 3 0.000000e+00 7.195549e+01 0.000000e+00  bc 3 0 0 1
+qcNode 17 coords 3 2.474393e+01 8.183198e+01 0.000000e+00  bc 3 0 0 1
+qcNode 18 coords 3 5.179461e+01 8.342655e+01 0.000000e+00  bc 3 0 0 1
+qcNode 19 coords 3 7.216134e+01 7.447822e+01 0.000000e+00  bc 3 0 0 1
+qcNode 20 coords 3 1.000000e+02 6.760755e+01 0.000000e+00  bc 3 0 0 1
+qcNode 21 coords 3 0.000000e+00 1.000000e+02 0.000000e+00  bc 3 0 0 1
+qcNode 22 coords 3 2.014950e+01 1.000000e+02 0.000000e+00  bc 3 0 0 1
+qcNode 23 coords 3 5.250302e+01 1.000000e+02 0.000000e+00  bc 3 0 0 1
+qcNode 24 coords 3 6.658439e+01 1.000000e+02 0.000000e+00  bc 3 0 0 1
+qcNode 25 coords 3 1.000000e+02 1.000000e+02 0.000000e+00  bc 3 0 0 1
+qcNode 26 coords 3 0.000000e+00 0.000000e+00 3.114258e+01  bc 3 0 0 0
+qcNode 27 coords 3 2.159710e+01 0.000000e+00 2.919170e+01  bc 3 0 0 0
+qcNode 28 coords 3 4.346121e+01 0.000000e+00 1.765322e+01  bc 3 0 0 0
+qcNode 29 coords 3 7.969805e+01 0.000000e+00 2.790051e+01  bc 3 0 0 0
+qcNode 30 coords 3 1.000000e+02 0.000000e+00 2.768806e+01  bc 3 0 0 0
+qcNode 31 coords 3 0.000000e+00 1.749366e+01 1.979924e+01  bc 3 0 0 0
+qcNode 32 coords 3 2.894056e+01 2.148033e+01 3.248362e+01  bc 3 0 0 0
+qcNode 33 coords 3 4.218674e+01 2.646504e+01 2.752074e+01  bc 3 0 0 0
+qcNode 34 coords 3 8.208859e+01 2.954350e+01 2.050366e+01  bc 3 0 0 0
+qcNode 35 coords 3 1.000000e+02 2.707141e+01 3.287711e+01  bc 3 0 0 0
+qcNode 36 coords 3 0.000000e+00 4.369445e+01 2.555694e+01  bc 3 0 0 0
+qcNode 37 coords 3 2.648101e+01 4.399509e+01 3.274242e+01  bc 3 0 0 0
+qcNode 38 coords 3 4.594799e+01 4.426725e+01 3.317919e+01  bc 3 0 0 0
+qcNode 39 coords 3 7.943015e+01 4.456902e+01 1.739293e+01  bc 3 0 0 0
+qcNode 40 coords 3 1.000000e+02 5.269848e+01 2.668904e+01  bc 3 0 0 0
+qcNode 41 coords 3 0.000000e+00 6.774711e+01 2.949948e+01  bc 3 0 0 0
+qcNode 42 coords 3 2.621432e+01 6.839902e+01 2.510875e+01  bc 3 0 0 0
+qcNode 43 coords 3 4.851474e+01 6.977685e+01 2.866746e+01  bc 3 0 0 0
+qcNode 44 coords 3 7.899507e+01 8.054940e+01 3.308648e+01  bc 3 0 0 0
+qcNode 45 coords 3 1.000000e+02 6.712954e+01 2.783164e+01  bc 3 0 0 0
+qcNode 46 coords 3 0.000000e+00 1.000000e+02 2.511655e+01  bc 3 0 0 0
+qcNode 47 coords 3 2.492736e+01 1.000000e+02 2.487299e+01  bc 3 0 0 0
+qcNode 48 coords 3 5.367647e+01 1.000000e+02 2.537727e+01  bc 3 0 0 0
+qcNode 49 coords 3 7.558647e+01 1.000000e+02 2.491875e+01  bc 3 0 0 0
+qcNode 50 coords 3 1.000000e+02 1.000000e+02 1.849454e+01  bc 3 0 0 0
+qcNode 51 coords 3 0.000000e+00 0.000000e+00 4.885481e+01  bc 3 0 0 0
+qcNode 52 coords 3 2.362059e+01 0.000000e+00 5.109402e+01  bc 3 0 0 0
+qcNode 53 coords 3 5.683233e+01 0.000000e+00 4.549929e+01  bc 3 0 0 0
+qcNode 54 coords 3 7.070932e+01 0.000000e+00 4.234276e+01  bc 3 0 0 0
+qcNode 55 coords 3 1.000000e+02 0.000000e+00 4.227799e+01  bc 3 0 0 0
+qcNode 56 coords 3 0.000000e+00 3.143285e+01 4.695378e+01  bc 3 0 0 0
+qcNode 57 coords 3 3.011858e+01 2.709272e+01 5.078077e+01  bc 3 0 0 0
+qcNode 58 coords 3 5.274030e+01 3.370275e+01 5.391194e+01  bc 3 0 0 0
+qcNode 59 coords 3 6.907733e+01 3.001987e+01 5.321763e+01  bc 3 0 0 0
+qcNode 60 coords 3 1.000000e+02 2.629498e+01 4.832407e+01  bc 3 0 0 0
+qcNode 61 coords 3 0.000000e+00 5.493581e+01 4.776170e+01  bc 3 0 0 0
+qcNode 62 coords 3 2.412082e+01 4.222526e+01 5.402354e+01  bc 3 0 0 0
+qcNode 63 coords 3 4.763304e+01 5.281012e+01 5.064511e+01  bc 3 0 0 0
+qcNode 64 coords 3 7.131852e+01 5.188278e+01 5.530080e+01  bc 3 0 0 0
+qcNode 65 coords 3 1.000000e+02 5.346044e+01 5.786504e+01  bc 3 0 0 0
+qcNode 66 coords 3 0.000000e+00 7.573610e+01 5.029017e+01  bc 3 0 0 0
+qcNode 67 coords 3 2.716771e+01 7.635882e+01 4.516496e+01  bc 3 0 0 0
+qcNode 68 coords 3 5.537059e+01 6.673930e+01 4.956428e+01  bc 3 0 0 0
+qcNode 69 coords 3 6.952780e+01 7.105490e+01 4.811215e+01  bc 3 0 0 0
+qcNode 70 coords 3 1.000000e+02 8.187309e+01 4.177167e+01  bc 3 0 0 0
+qcNode 71 coords 3 0.000000e+00 1.000000e+02 5.461551e+01  bc 3 0 0 0
+qcNode 72 coords 3 3.207271e+01 1.000000e+02 4.701913e+01  bc 3 0 0 0
+qcNode 73 coords 3 4.496493e+01 1.000000e+02 4.796648e+01  bc 3 0 0 0
+qcNode 74 coords 3 6.758542e+01 1.000000e+02 4.212166e+01  bc 3 0 0 0
+qcNode 75 coords 3 1.000000e+02 1.000000e+02 4.361455e+01  bc 3 0 0 0
+qcNode 76 coords 3 0.000000e+00 0.000000e+00 7.142496e+01  bc 3 0 0 0
+qcNode 77 coords 3 3.258637e+01 0.000000e+00 7.270428e+01  bc 3 0 0 0
+qcNode 78 coords 3 5.723341e+01 0.000000e+00 7.441326e+01  bc 3 0 0 0
+qcNode 79 coords 3 8.098829e+01 0.000000e+00 6.750446e+01  bc 3 0 0 0
+qcNode 80 coords 3 1.000000e+02 0.000000e+00 7.801659e+01  bc 3 0 0 0
+qcNode 81 coords 3 0.000000e+00 3.205975e+01 8.240392e+01  bc 3 0 0 0
+qcNode 82 coords 3 2.490413e+01 1.684923e+01 7.404712e+01  bc 3 0 0 0
+qcNode 83 coords 3 5.122304e+01 2.199334e+01 7.032300e+01  bc 3 0 0 0
+qcNode 84 coords 3 6.970970e+01 2.216671e+01 7.064457e+01  bc 3 0 0 0
+qcNode 85 coords 3 1.000000e+02 2.177140e+01 7.798745e+01  bc 3 0 0 0
+qcNode 86 coords 3 0.000000e+00 4.778554e+01 8.032594e+01  bc 3 0 0 0
+qcNode 87 coords 3 1.817502e+01 4.250543e+01 7.875983e+01  bc 3 0 0 0
+qcNode 88 coords 3 4.720327e+01 5.761556e+01 6.945987e+01  bc 3 0 0 0
+qcNode 89 coords 3 7.509745e+01 4.800664e+01 7.356901e+01  bc 3 0 0 0
+qcNode 90 coords 3 1.000000e+02 4.904713e+01 7.770440e+01  bc 3 0 0 0
+qcNode 91 coords 3 0.000000e+00 7.840624e+01 7.604987e+01  bc 3 0 0 0
+qcNode 92 coords 3 1.970184e+01 8.362054e+01 6.738415e+01  bc 3 0 0 0
+qcNode 93 coords 3 5.020997e+01 7.416241e+01 7.841827e+01  bc 3 0 0 0
+qcNode 94 coords 3 7.641376e+01 6.743085e+01 8.086068e+01  bc 3 0 0 0
+qcNode 95 coords 3 1.000000e+02 7.083553e+01 8.342953e+01  bc 3 0 0 0
+qcNode 96 coords 3 0.000000e+00 1.000000e+02 6.632543e+01  bc 3 0 0 0
+qcNode 97 coords 3 2.578253e+01 1.000000e+02 8.083042e+01  bc 3 0 0 0
+qcNode 98 coords 3 4.514444e+01 1.000000e+02 8.085977e+01  bc 3 0 0 0
+qcNode 99 coords 3 7.158038e+01 1.000000e+02 6.880919e+01  bc 3 0 0 0
+qcNode 100 coords 3 1.000000e+02 1.000000e+02 7.549022e+01  bc 3 0 0 0
+qcNode 101 coords 3 0.000000e+00 0.000000e+00 1.000000e+02  bc 3 0 0 2
+qcNode 102 coords 3 2.741046e+01 0.000000e+00 1.000000e+02  bc 3 0 0 2
+qcNode 103 coords 3 4.173739e+01 0.000000e+00 1.000000e+02  bc 3 0 0 2
+qcNode 104 coords 3 7.074844e+01 0.000000e+00 1.000000e+02  bc 3 0 0 2
+qcNode 105 coords 3 1.000000e+02 0.000000e+00 1.000000e+02  bc 3 0 0 2
+qcNode 106 coords 3 0.000000e+00 2.420773e+01 1.000000e+02  bc 3 0 0 2
+qcNode 107 coords 3 2.923563e+01 2.525491e+01 1.000000e+02  bc 3 0 0 2
+qcNode 108 coords 3 5.618166e+01 2.358003e+01 1.000000e+02  bc 3 0 0 2
+qcNode 109 coords 3 8.232362e+01 2.038121e+01 1.000000e+02  bc 3 0 0 2
+qcNode 110 coords 3 1.000000e+02 2.679055e+01 1.000000e+02  bc 3 0 0 2
+qcNode 111 coords 3 0.000000e+00 4.976947e+01 1.000000e+02  bc 3 0 0 2
+qcNode 112 coords 3 1.732297e+01 4.140860e+01 1.000000e+02  bc 3 0 0 2
+qcNode 113 coords 3 5.237508e+01 4.140442e+01 1.000000e+02  bc 3 0 0 2
+qcNode 114 coords 3 7.089569e+01 4.382217e+01 1.000000e+02  bc 3 0 0 2
+qcNode 115 coords 3 1.000000e+02 4.354914e+01 1.000000e+02  bc 3 0 0 2
+qcNode 116 coords 3 0.000000e+00 8.257139e+01 1.000000e+02  bc 3 0 0 2
+qcNode 117 coords 3 3.078973e+01 7.224206e+01 1.000000e+02  bc 3 0 0 2
+qcNode 118 coords 3 5.802586e+01 8.131430e+01 1.000000e+02  bc 3 0 0 2
+qcNode 119 coords 3 7.266703e+01 7.636784e+01 1.000000e+02  bc 3 0 0 2
+qcNode 120 coords 3 1.000000e+02 7.197724e+01 1.000000e+02  bc 3 0 0 2
+qcNode 121 coords 3 0.000000e+00 1.000000e+02 1.000000e+02  bc 3 0 0 2
+qcNode 122 coords 3 3.091187e+01 1.000000e+02 1.000000e+02  bc 3 0 0 2
+qcNode 123 coords 3 4.265763e+01 1.000000e+02 1.000000e+02  bc 3 0 0 2
+qcNode 124 coords 3 7.900376e+01 1.000000e+02 1.000000e+02  bc 3 0 0 2
+qcNode 125 coords 3 1.000000e+02 1.000000e+02 1.000000e+02  bc 3 0 0 2
+Truss3d 1 nodes 2 1 2 mat 1 crossSect 1
+Truss3d 2 nodes 2 1 6 mat 1 crossSect 1
+Truss3d 3 nodes 2 1 7 mat 1 crossSect 1
+Truss3d 4 nodes 2 2 6 mat 1 crossSect 1
+Truss3d 5 nodes 2 1 26 mat 1 crossSect 1
+Truss3d 6 nodes 2 1 27 mat 1 crossSect 1
+Truss3d 7 nodes 2 26 2 mat 1 crossSect 1
+Truss3d 8 nodes 2 1 31 mat 1 crossSect 1
+Truss3d 9 nodes 2 26 6 mat 1 crossSect 1
+Truss3d 10 nodes 2 2 3 mat 1 crossSect 1
+Truss3d 11 nodes 2 2 7 mat 1 crossSect 1
+Truss3d 12 nodes 2 2 8 mat 1 crossSect 1
+Truss3d 13 nodes 2 3 7 mat 1 crossSect 1
+Truss3d 14 nodes 2 2 27 mat 1 crossSect 1
+Truss3d 15 nodes 2 2 28 mat 1 crossSect 1
+Truss3d 16 nodes 2 27 3 mat 1 crossSect 1
+Truss3d 17 nodes 2 2 32 mat 1 crossSect 1
+Truss3d 18 nodes 2 27 7 mat 1 crossSect 1
+Truss3d 19 nodes 2 3 4 mat 1 crossSect 1
+Truss3d 20 nodes 2 3 8 mat 1 crossSect 1
+Truss3d 21 nodes 2 3 9 mat 1 crossSect 1
+Truss3d 22 nodes 2 4 8 mat 1 crossSect 1
+Truss3d 23 nodes 2 3 28 mat 1 crossSect 1
+Truss3d 24 nodes 2 3 29 mat 1 crossSect 1
+Truss3d 25 nodes 2 28 4 mat 1 crossSect 1
+Truss3d 26 nodes 2 3 33 mat 1 crossSect 1
+Truss3d 27 nodes 2 28 8 mat 1 crossSect 1
+Truss3d 28 nodes 2 4 5 mat 1 crossSect 1
+Truss3d 29 nodes 2 4 9 mat 1 crossSect 1
+Truss3d 30 nodes 2 4 10 mat 1 crossSect 1
+Truss3d 31 nodes 2 5 9 mat 1 crossSect 1
+Truss3d 32 nodes 2 4 29 mat 1 crossSect 1
+Truss3d 33 nodes 2 4 30 mat 1 crossSect 1
+Truss3d 34 nodes 2 29 5 mat 1 crossSect 1
+Truss3d 35 nodes 2 4 34 mat 1 crossSect 1
+Truss3d 36 nodes 2 29 9 mat 1 crossSect 1
+Truss3d 37 nodes 2 5 10 mat 1 crossSect 1
+Truss3d 38 nodes 2 5 30 mat 1 crossSect 1
+Truss3d 39 nodes 2 5 35 mat 1 crossSect 1
+Truss3d 40 nodes 2 30 10 mat 1 crossSect 1
+Truss3d 41 nodes 2 6 7 mat 1 crossSect 1
+Truss3d 42 nodes 2 6 11 mat 1 crossSect 1
+Truss3d 43 nodes 2 6 12 mat 1 crossSect 1
+Truss3d 44 nodes 2 7 11 mat 1 crossSect 1
+Truss3d 45 nodes 2 6 31 mat 1 crossSect 1
+Truss3d 46 nodes 2 6 32 mat 1 crossSect 1
+Truss3d 47 nodes 2 31 7 mat 1 crossSect 1
+Truss3d 48 nodes 2 6 36 mat 1 crossSect 1
+Truss3d 49 nodes 2 31 11 mat 1 crossSect 1
+Truss3d 50 nodes 2 7 8 mat 1 crossSect 1
+Truss3d 51 nodes 2 7 12 mat 1 crossSect 1
+Truss3d 52 nodes 2 7 13 mat 1 crossSect 1
+Truss3d 53 nodes 2 8 12 mat 1 crossSect 1
+Truss3d 54 nodes 2 7 32 mat 1 crossSect 1
+Truss3d 55 nodes 2 7 33 mat 1 crossSect 1
+Truss3d 56 nodes 2 32 8 mat 1 crossSect 1
+Truss3d 57 nodes 2 7 37 mat 1 crossSect 1
+Truss3d 58 nodes 2 32 12 mat 1 crossSect 1
+Truss3d 59 nodes 2 8 9 mat 1 crossSect 1
+Truss3d 60 nodes 2 8 13 mat 1 crossSect 1
+Truss3d 61 nodes 2 8 14 mat 1 crossSect 1
+Truss3d 62 nodes 2 9 13 mat 1 crossSect 1
+Truss3d 63 nodes 2 8 33 mat 1 crossSect 1
+Truss3d 64 nodes 2 8 34 mat 1 crossSect 1
+Truss3d 65 nodes 2 33 9 mat 1 crossSect 1
+Truss3d 66 nodes 2 8 38 mat 1 crossSect 1
+Truss3d 67 nodes 2 33 13 mat 1 crossSect 1
+Truss3d 68 nodes 2 9 10 mat 1 crossSect 1
+Truss3d 69 nodes 2 9 14 mat 1 crossSect 1
+Truss3d 70 nodes 2 9 15 mat 1 crossSect 1
+Truss3d 71 nodes 2 10 14 mat 1 crossSect 1
+Truss3d 72 nodes 2 9 34 mat 1 crossSect 1
+Truss3d 73 nodes 2 9 35 mat 1 crossSect 1
+Truss3d 74 nodes 2 34 10 mat 1 crossSect 1
+Truss3d 75 nodes 2 9 39 mat 1 crossSect 1
+Truss3d 76 nodes 2 34 14 mat 1 crossSect 1
+Truss3d 77 nodes 2 10 15 mat 1 crossSect 1
+Truss3d 78 nodes 2 10 35 mat 1 crossSect 1
+Truss3d 79 nodes 2 10 40 mat 1 crossSect 1
+Truss3d 80 nodes 2 35 15 mat 1 crossSect 1
+Truss3d 81 nodes 2 11 12 mat 1 crossSect 1
+Truss3d 82 nodes 2 11 16 mat 1 crossSect 1
+Truss3d 83 nodes 2 11 17 mat 1 crossSect 1
+Truss3d 84 nodes 2 12 16 mat 1 crossSect 1
+Truss3d 85 nodes 2 11 36 mat 1 crossSect 1
+Truss3d 86 nodes 2 11 37 mat 1 crossSect 1
+Truss3d 87 nodes 2 36 12 mat 1 crossSect 1
+Truss3d 88 nodes 2 11 41 mat 1 crossSect 1
+Truss3d 89 nodes 2 36 16 mat 1 crossSect 1
+Truss3d 90 nodes 2 12 13 mat 1 crossSect 1
+Truss3d 91 nodes 2 12 17 mat 1 crossSect 1
+Truss3d 92 nodes 2 12 18 mat 1 crossSect 1
+Truss3d 93 nodes 2 13 17 mat 1 crossSect 1
+Truss3d 94 nodes 2 12 37 mat 1 crossSect 1
+Truss3d 95 nodes 2 12 38 mat 1 crossSect 1
+Truss3d 96 nodes 2 37 13 mat 1 crossSect 1
+Truss3d 97 nodes 2 12 42 mat 1 crossSect 1
+Truss3d 98 nodes 2 37 17 mat 1 crossSect 1
+Truss3d 99 nodes 2 13 14 mat 1 crossSect 1
+Truss3d 100 nodes 2 13 18 mat 1 crossSect 1
+Truss3d 101 nodes 2 13 19 mat 1 crossSect 1
+Truss3d 102 nodes 2 14 18 mat 1 crossSect 1
+Truss3d 103 nodes 2 13 38 mat 1 crossSect 1
+Truss3d 104 nodes 2 13 39 mat 1 crossSect 1
+Truss3d 105 nodes 2 38 14 mat 1 crossSect 1
+Truss3d 106 nodes 2 13 43 mat 1 crossSect 1
+Truss3d 107 nodes 2 38 18 mat 1 crossSect 1
+Truss3d 108 nodes 2 14 15 mat 1 crossSect 1
+Truss3d 109 nodes 2 14 19 mat 1 crossSect 1
+Truss3d 110 nodes 2 14 20 mat 1 crossSect 1
+Truss3d 111 nodes 2 15 19 mat 1 crossSect 1
+Truss3d 112 nodes 2 14 39 mat 1 crossSect 1
+Truss3d 113 nodes 2 14 40 mat 1 crossSect 1
+Truss3d 114 nodes 2 39 15 mat 1 crossSect 1
+Truss3d 115 nodes 2 14 44 mat 1 crossSect 1
+Truss3d 116 nodes 2 39 19 mat 1 crossSect 1
+Truss3d 117 nodes 2 15 20 mat 1 crossSect 1
+Truss3d 118 nodes 2 15 40 mat 1 crossSect 1
+Truss3d 119 nodes 2 15 45 mat 1 crossSect 1
+Truss3d 120 nodes 2 40 20 mat 1 crossSect 1
+Truss3d 121 nodes 2 16 17 mat 1 crossSect 1
+Truss3d 122 nodes 2 16 21 mat 1 crossSect 1
+Truss3d 123 nodes 2 16 22 mat 1 crossSect 1
+Truss3d 124 nodes 2 17 21 mat 1 crossSect 1
+Truss3d 125 nodes 2 16 41 mat 1 crossSect 1
+Truss3d 126 nodes 2 16 42 mat 1 crossSect 1
+Truss3d 127 nodes 2 41 17 mat 1 crossSect 1
+Truss3d 128 nodes 2 16 46 mat 1 crossSect 1
+Truss3d 129 nodes 2 41 21 mat 1 crossSect 1
+Truss3d 130 nodes 2 17 18 mat 1 crossSect 1
+Truss3d 131 nodes 2 17 22 mat 1 crossSect 1
+Truss3d 132 nodes 2 17 23 mat 1 crossSect 1
+Truss3d 133 nodes 2 18 22 mat 1 crossSect 1
+Truss3d 134 nodes 2 17 42 mat 1 crossSect 1
+Truss3d 135 nodes 2 17 43 mat 1 crossSect 1
+Truss3d 136 nodes 2 42 18 mat 1 crossSect 1
+Truss3d 137 nodes 2 17 47 mat 1 crossSect 1
+Truss3d 138 nodes 2 42 22 mat 1 crossSect 1
+Truss3d 139 nodes 2 18 19 mat 1 crossSect 1
+Truss3d 140 nodes 2 18 23 mat 1 crossSect 1
+Truss3d 141 nodes 2 18 24 mat 1 crossSect 1
+Truss3d 142 nodes 2 19 23 mat 1 crossSect 1
+Truss3d 143 nodes 2 18 43 mat 1 crossSect 1
+Truss3d 144 nodes 2 18 44 mat 1 crossSect 1
+Truss3d 145 nodes 2 43 19 mat 1 crossSect 1
+Truss3d 146 nodes 2 18 48 mat 1 crossSect 1
+Truss3d 147 nodes 2 43 23 mat 1 crossSect 1
+Truss3d 148 nodes 2 19 20 mat 1 crossSect 1
+Truss3d 149 nodes 2 19 24 mat 1 crossSect 1
+Truss3d 150 nodes 2 19 25 mat 1 crossSect 1
+Truss3d 151 nodes 2 20 24 mat 1 crossSect 1
+Truss3d 152 nodes 2 19 44 mat 1 crossSect 1
+Truss3d 153 nodes 2 19 45 mat 1 crossSect 1
+Truss3d 154 nodes 2 44 20 mat 1 crossSect 1
+Truss3d 155 nodes 2 19 49 mat 1 crossSect 1
+Truss3d 156 nodes 2 44 24 mat 1 crossSect 1
+Truss3d 157 nodes 2 20 25 mat 1 crossSect 1
+Truss3d 158 nodes 2 20 45 mat 1 crossSect 1
+Truss3d 159 nodes 2 20 50 mat 1 crossSect 1
+Truss3d 160 nodes 2 45 25 mat 1 crossSect 1
+Truss3d 161 nodes 2 21 22 mat 1 crossSect 1
+Truss3d 162 nodes 2 21 46 mat 1 crossSect 1
+Truss3d 163 nodes 2 21 47 mat 1 crossSect 1
+Truss3d 164 nodes 2 46 22 mat 1 crossSect 1
+Truss3d 165 nodes 2 22 23 mat 1 crossSect 1
+Truss3d 166 nodes 2 22 47 mat 1 crossSect 1
+Truss3d 167 nodes 2 22 48 mat 1 crossSect 1
+Truss3d 168 nodes 2 47 23 mat 1 crossSect 1
+Truss3d 169 nodes 2 23 24 mat 1 crossSect 1
+Truss3d 170 nodes 2 23 48 mat 1 crossSect 1
+Truss3d 171 nodes 2 23 49 mat 1 crossSect 1
+Truss3d 172 nodes 2 48 24 mat 1 crossSect 1
+Truss3d 173 nodes 2 24 25 mat 1 crossSect 1
+Truss3d 174 nodes 2 24 49 mat 1 crossSect 1
+Truss3d 175 nodes 2 24 50 mat 1 crossSect 1
+Truss3d 176 nodes 2 49 25 mat 1 crossSect 1
+Truss3d 177 nodes 2 25 50 mat 1 crossSect 1
+Truss3d 178 nodes 2 26 27 mat 1 crossSect 1
+Truss3d 179 nodes 2 26 31 mat 1 crossSect 1
+Truss3d 180 nodes 2 26 32 mat 1 crossSect 1
+Truss3d 181 nodes 2 27 31 mat 1 crossSect 1
+Truss3d 182 nodes 2 26 51 mat 1 crossSect 1
+Truss3d 183 nodes 2 26 52 mat 1 crossSect 1
+Truss3d 184 nodes 2 51 27 mat 1 crossSect 1
+Truss3d 185 nodes 2 26 56 mat 1 crossSect 1
+Truss3d 186 nodes 2 51 31 mat 1 crossSect 1
+Truss3d 187 nodes 2 27 28 mat 1 crossSect 1
+Truss3d 188 nodes 2 27 32 mat 1 crossSect 1
+Truss3d 189 nodes 2 27 33 mat 1 crossSect 1
+Truss3d 190 nodes 2 28 32 mat 1 crossSect 1
+Truss3d 191 nodes 2 27 52 mat 1 crossSect 1
+Truss3d 192 nodes 2 27 53 mat 1 crossSect 1
+Truss3d 193 nodes 2 52 28 mat 1 crossSect 1
+Truss3d 194 nodes 2 27 57 mat 1 crossSect 1
+Truss3d 195 nodes 2 52 32 mat 1 crossSect 1
+Truss3d 196 nodes 2 28 29 mat 1 crossSect 1
+Truss3d 197 nodes 2 28 33 mat 1 crossSect 1
+Truss3d 198 nodes 2 28 34 mat 1 crossSect 1
+Truss3d 199 nodes 2 29 33 mat 1 crossSect 1
+Truss3d 200 nodes 2 28 53 mat 1 crossSect 1
+Truss3d 201 nodes 2 28 54 mat 1 crossSect 1
+Truss3d 202 nodes 2 53 29 mat 1 crossSect 1
+Truss3d 203 nodes 2 28 58 mat 1 crossSect 1
+Truss3d 204 nodes 2 53 33 mat 1 crossSect 1
+Truss3d 205 nodes 2 29 30 mat 1 crossSect 1
+Truss3d 206 nodes 2 29 34 mat 1 crossSect 1
+Truss3d 207 nodes 2 29 35 mat 1 crossSect 1
+Truss3d 208 nodes 2 30 34 mat 1 crossSect 1
+Truss3d 209 nodes 2 29 54 mat 1 crossSect 1
+Truss3d 210 nodes 2 29 55 mat 1 crossSect 1
+Truss3d 211 nodes 2 54 30 mat 1 crossSect 1
+Truss3d 212 nodes 2 29 59 mat 1 crossSect 1
+Truss3d 213 nodes 2 54 34 mat 1 crossSect 1
+Truss3d 214 nodes 2 30 35 mat 1 crossSect 1
+Truss3d 215 nodes 2 30 55 mat 1 crossSect 1
+Truss3d 216 nodes 2 30 60 mat 1 crossSect 1
+Truss3d 217 nodes 2 55 35 mat 1 crossSect 1
+Truss3d 218 nodes 2 31 32 mat 1 crossSect 1
+Truss3d 219 nodes 2 31 36 mat 1 crossSect 1
+Truss3d 220 nodes 2 31 37 mat 1 crossSect 1
+Truss3d 221 nodes 2 32 36 mat 1 crossSect 1
+Truss3d 222 nodes 2 31 56 mat 1 crossSect 1
+Truss3d 223 nodes 2 31 57 mat 1 crossSect 1
+Truss3d 224 nodes 2 56 32 mat 1 crossSect 1
+Truss3d 225 nodes 2 31 61 mat 1 crossSect 1
+Truss3d 226 nodes 2 56 36 mat 1 crossSect 1
+Truss3d 227 nodes 2 32 33 mat 1 crossSect 1
+Truss3d 228 nodes 2 32 37 mat 1 crossSect 1
+Truss3d 229 nodes 2 32 38 mat 1 crossSect 1
+Truss3d 230 nodes 2 33 37 mat 1 crossSect 1
+Truss3d 231 nodes 2 32 57 mat 1 crossSect 1
+Truss3d 232 nodes 2 32 58 mat 1 crossSect 1
+Truss3d 233 nodes 2 57 33 mat 1 crossSect 1
+Truss3d 234 nodes 2 32 62 mat 1 crossSect 1
+Truss3d 235 nodes 2 57 37 mat 1 crossSect 1
+Truss3d 236 nodes 2 33 34 mat 1 crossSect 1
+Truss3d 237 nodes 2 33 38 mat 1 crossSect 1
+Truss3d 238 nodes 2 33 39 mat 1 crossSect 1
+Truss3d 239 nodes 2 34 38 mat 1 crossSect 1
+Truss3d 240 nodes 2 33 58 mat 1 crossSect 1
+Truss3d 241 nodes 2 33 59 mat 1 crossSect 1
+Truss3d 242 nodes 2 58 34 mat 1 crossSect 1
+Truss3d 243 nodes 2 33 63 mat 1 crossSect 1
+Truss3d 244 nodes 2 58 38 mat 1 crossSect 1
+Truss3d 245 nodes 2 34 35 mat 1 crossSect 1
+Truss3d 246 nodes 2 34 39 mat 1 crossSect 1
+Truss3d 247 nodes 2 34 40 mat 1 crossSect 1
+Truss3d 248 nodes 2 35 39 mat 1 crossSect 1
+Truss3d 249 nodes 2 34 59 mat 1 crossSect 1
+Truss3d 250 nodes 2 34 60 mat 1 crossSect 1
+Truss3d 251 nodes 2 59 35 mat 1 crossSect 1
+Truss3d 252 nodes 2 34 64 mat 1 crossSect 1
+Truss3d 253 nodes 2 59 39 mat 1 crossSect 1
+Truss3d 254 nodes 2 35 40 mat 1 crossSect 1
+Truss3d 255 nodes 2 35 60 mat 1 crossSect 1
+Truss3d 256 nodes 2 35 65 mat 1 crossSect 1
+Truss3d 257 nodes 2 60 40 mat 1 crossSect 1
+Truss3d 258 nodes 2 36 37 mat 1 crossSect 1
+Truss3d 259 nodes 2 36 41 mat 1 crossSect 1
+Truss3d 260 nodes 2 36 42 mat 1 crossSect 1
+Truss3d 261 nodes 2 37 41 mat 1 crossSect 1
+Truss3d 262 nodes 2 36 61 mat 1 crossSect 1
+Truss3d 263 nodes 2 36 62 mat 1 crossSect 1
+Truss3d 264 nodes 2 61 37 mat 1 crossSect 1
+Truss3d 265 nodes 2 36 66 mat 1 crossSect 1
+Truss3d 266 nodes 2 61 41 mat 1 crossSect 1
+Truss3d 267 nodes 2 37 38 mat 1 crossSect 1
+Truss3d 268 nodes 2 37 42 mat 1 crossSect 1
+Truss3d 269 nodes 2 37 43 mat 1 crossSect 1
+Truss3d 270 nodes 2 38 42 mat 1 crossSect 1
+Truss3d 271 nodes 2 37 62 mat 1 crossSect 1
+Truss3d 272 nodes 2 37 63 mat 1 crossSect 1
+Truss3d 273 nodes 2 62 38 mat 1 crossSect 1
+Truss3d 274 nodes 2 37 67 mat 1 crossSect 1
+Truss3d 275 nodes 2 62 42 mat 1 crossSect 1
+Truss3d 276 nodes 2 38 39 mat 1 crossSect 1
+Truss3d 277 nodes 2 38 43 mat 1 crossSect 1
+Truss3d 278 nodes 2 38 44 mat 1 crossSect 1
+Truss3d 279 nodes 2 39 43 mat 1 crossSect 1
+Truss3d 280 nodes 2 38 63 mat 1 crossSect 1
+Truss3d 281 nodes 2 38 64 mat 1 crossSect 1
+Truss3d 282 nodes 2 63 39 mat 1 crossSect 1
+Truss3d 283 nodes 2 38 68 mat 1 crossSect 1
+Truss3d 284 nodes 2 63 43 mat 1 crossSect 1
+Truss3d 285 nodes 2 39 40 mat 1 crossSect 1
+Truss3d 286 nodes 2 39 44 mat 1 crossSect 1
+Truss3d 287 nodes 2 39 45 mat 1 crossSect 1
+Truss3d 288 nodes 2 40 44 mat 1 crossSect 1
+Truss3d 289 nodes 2 39 64 mat 1 crossSect 1
+Truss3d 290 nodes 2 39 65 mat 1 crossSect 1
+Truss3d 291 nodes 2 64 40 mat 1 crossSect 1
+Truss3d 292 nodes 2 39 69 mat 1 crossSect 1
+Truss3d 293 nodes 2 64 44 mat 1 crossSect 1
+Truss3d 294 nodes 2 40 45 mat 1 crossSect 1
+Truss3d 295 nodes 2 40 65 mat 1 crossSect 1
+Truss3d 296 nodes 2 40 70 mat 1 crossSect 1
+Truss3d 297 nodes 2 65 45 mat 1 crossSect 1
+Truss3d 298 nodes 2 41 42 mat 1 crossSect 1
+Truss3d 299 nodes 2 41 46 mat 1 crossSect 1
+Truss3d 300 nodes 2 41 47 mat 1 crossSect 1
+Truss3d 301 nodes 2 42 46 mat 1 crossSect 1
+Truss3d 302 nodes 2 41 66 mat 1 crossSect 1
+Truss3d 303 nodes 2 41 67 mat 1 crossSect 1
+Truss3d 304 nodes 2 66 42 mat 1 crossSect 1
+Truss3d 305 nodes 2 41 71 mat 1 crossSect 1
+Truss3d 306 nodes 2 66 46 mat 1 crossSect 1
+Truss3d 307 nodes 2 42 43 mat 1 crossSect 1
+Truss3d 308 nodes 2 42 47 mat 1 crossSect 1
+Truss3d 309 nodes 2 42 48 mat 1 crossSect 1
+Truss3d 310 nodes 2 43 47 mat 1 crossSect 1
+Truss3d 311 nodes 2 42 67 mat 1 crossSect 1
+Truss3d 312 nodes 2 42 68 mat 1 crossSect 1
+Truss3d 313 nodes 2 67 43 mat 1 crossSect 1
+Truss3d 314 nodes 2 42 72 mat 1 crossSect 1
+Truss3d 315 nodes 2 67 47 mat 1 crossSect 1
+Truss3d 316 nodes 2 43 44 mat 1 crossSect 1
+Truss3d 317 nodes 2 43 48 mat 1 crossSect 1
+Truss3d 318 nodes 2 43 49 mat 1 crossSect 1
+Truss3d 319 nodes 2 44 48 mat 1 crossSect 1
+Truss3d 320 nodes 2 43 68 mat 1 crossSect 1
+Truss3d 321 nodes 2 43 69 mat 1 crossSect 1
+Truss3d 322 nodes 2 68 44 mat 1 crossSect 1
+Truss3d 323 nodes 2 43 73 mat 1 crossSect 1
+Truss3d 324 nodes 2 68 48 mat 1 crossSect 1
+Truss3d 325 nodes 2 44 45 mat 1 crossSect 1
+Truss3d 326 nodes 2 44 49 mat 1 crossSect 1
+Truss3d 327 nodes 2 44 50 mat 1 crossSect 1
+Truss3d 328 nodes 2 45 49 mat 1 crossSect 1
+Truss3d 329 nodes 2 44 69 mat 1 crossSect 1
+Truss3d 330 nodes 2 44 70 mat 1 crossSect 1
+Truss3d 331 nodes 2 69 45 mat 1 crossSect 1
+Truss3d 332 nodes 2 44 74 mat 1 crossSect 1
+Truss3d 333 nodes 2 69 49 mat 1 crossSect 1
+Truss3d 334 nodes 2 45 50 mat 1 crossSect 1
+Truss3d 335 nodes 2 45 70 mat 1 crossSect 1
+Truss3d 336 nodes 2 45 75 mat 1 crossSect 1
+Truss3d 337 nodes 2 70 50 mat 1 crossSect 1
+Truss3d 338 nodes 2 46 47 mat 1 crossSect 1
+Truss3d 339 nodes 2 46 71 mat 1 crossSect 1
+Truss3d 340 nodes 2 46 72 mat 1 crossSect 1
+Truss3d 341 nodes 2 71 47 mat 1 crossSect 1
+Truss3d 342 nodes 2 47 48 mat 1 crossSect 1
+Truss3d 343 nodes 2 47 72 mat 1 crossSect 1
+Truss3d 344 nodes 2 47 73 mat 1 crossSect 1
+Truss3d 345 nodes 2 72 48 mat 1 crossSect 1
+Truss3d 346 nodes 2 48 49 mat 1 crossSect 1
+Truss3d 347 nodes 2 48 73 mat 1 crossSect 1
+Truss3d 348 nodes 2 48 74 mat 1 crossSect 1
+Truss3d 349 nodes 2 73 49 mat 1 crossSect 1
+Truss3d 350 nodes 2 49 50 mat 1 crossSect 1
+Truss3d 351 nodes 2 49 74 mat 1 crossSect 1
+Truss3d 352 nodes 2 49 75 mat 1 crossSect 1
+Truss3d 353 nodes 2 74 50 mat 1 crossSect 1
+Truss3d 354 nodes 2 50 75 mat 1 crossSect 1
+Truss3d 355 nodes 2 51 52 mat 1 crossSect 1
+Truss3d 356 nodes 2 51 56 mat 1 crossSect 1
+Truss3d 357 nodes 2 51 57 mat 1 crossSect 1
+Truss3d 358 nodes 2 52 56 mat 1 crossSect 1
+Truss3d 359 nodes 2 51 76 mat 1 crossSect 1
+Truss3d 360 nodes 2 51 77 mat 1 crossSect 1
+Truss3d 361 nodes 2 76 52 mat 1 crossSect 1
+Truss3d 362 nodes 2 51 81 mat 1 crossSect 1
+Truss3d 363 nodes 2 76 56 mat 1 crossSect 1
+Truss3d 364 nodes 2 52 53 mat 1 crossSect 1
+Truss3d 365 nodes 2 52 57 mat 1 crossSect 1
+Truss3d 366 nodes 2 52 58 mat 1 crossSect 1
+Truss3d 367 nodes 2 53 57 mat 1 crossSect 1
+Truss3d 368 nodes 2 52 77 mat 1 crossSect 1
+Truss3d 369 nodes 2 52 78 mat 1 crossSect 1
+Truss3d 370 nodes 2 77 53 mat 1 crossSect 1
+Truss3d 371 nodes 2 52 82 mat 1 crossSect 1
+Truss3d 372 nodes 2 77 57 mat 1 crossSect 1
+Truss3d 373 nodes 2 53 54 mat 1 crossSect 1
+Truss3d 374 nodes 2 53 58 mat 1 crossSect 1
+Truss3d 375 nodes 2 53 59 mat 1 crossSect 1
+Truss3d 376 nodes 2 54 58 mat 1 crossSect 1
+Truss3d 377 nodes 2 53 78 mat 1 crossSect 1
+Truss3d 378 nodes 2 53 79 mat 1 crossSect 1
+Truss3d 379 nodes 2 78 54 mat 1 crossSect 1
+Truss3d 380 nodes 2 53 83 mat 1 crossSect 1
+Truss3d 381 nodes 2 78 58 mat 1 crossSect 1
+Truss3d 382 nodes 2 54 55 mat 1 crossSect 1
+Truss3d 383 nodes 2 54 59 mat 1 crossSect 1
+Truss3d 384 nodes 2 54 60 mat 1 crossSect 1
+Truss3d 385 nodes 2 55 59 mat 1 crossSect 1
+Truss3d 386 nodes 2 54 79 mat 1 crossSect 1
+Truss3d 387 nodes 2 54 80 mat 1 crossSect 1
+Truss3d 388 nodes 2 79 55 mat 1 crossSect 1
+Truss3d 389 nodes 2 54 84 mat 1 crossSect 1
+Truss3d 390 nodes 2 79 59 mat 1 crossSect 1
+Truss3d 391 nodes 2 55 60 mat 1 crossSect 1
+Truss3d 392 nodes 2 55 80 mat 1 crossSect 1
+Truss3d 393 nodes 2 55 85 mat 1 crossSect 1
+Truss3d 394 nodes 2 80 60 mat 1 crossSect 1
+Truss3d 395 nodes 2 56 57 mat 1 crossSect 1
+Truss3d 396 nodes 2 56 61 mat 1 crossSect 1
+Truss3d 397 nodes 2 56 62 mat 1 crossSect 1
+Truss3d 398 nodes 2 57 61 mat 1 crossSect 1
+Truss3d 399 nodes 2 56 81 mat 1 crossSect 1
+Truss3d 400 nodes 2 56 82 mat 1 crossSect 1
+Truss3d 401 nodes 2 81 57 mat 1 crossSect 1
+Truss3d 402 nodes 2 56 86 mat 1 crossSect 1
+Truss3d 403 nodes 2 81 61 mat 1 crossSect 1
+Truss3d 404 nodes 2 57 58 mat 1 crossSect 1
+Truss3d 405 nodes 2 57 62 mat 1 crossSect 1
+Truss3d 406 nodes 2 57 63 mat 1 crossSect 1
+Truss3d 407 nodes 2 58 62 mat 1 crossSect 1
+Truss3d 408 nodes 2 57 82 mat 1 crossSect 1
+Truss3d 409 nodes 2 57 83 mat 1 crossSect 1
+Truss3d 410 nodes 2 82 58 mat 1 crossSect 1
+Truss3d 411 nodes 2 57 87 mat 1 crossSect 1
+Truss3d 412 nodes 2 82 62 mat 1 crossSect 1
+Truss3d 413 nodes 2 58 59 mat 1 crossSect 1
+Truss3d 414 nodes 2 58 63 mat 1 crossSect 1
+Truss3d 415 nodes 2 58 64 mat 1 crossSect 1
+Truss3d 416 nodes 2 59 63 mat 1 crossSect 1
+Truss3d 417 nodes 2 58 83 mat 1 crossSect 1
+Truss3d 418 nodes 2 58 84 mat 1 crossSect 1
+Truss3d 419 nodes 2 83 59 mat 1 crossSect 1
+Truss3d 420 nodes 2 58 88 mat 1 crossSect 1
+Truss3d 421 nodes 2 83 63 mat 1 crossSect 1
+Truss3d 422 nodes 2 59 60 mat 1 crossSect 1
+Truss3d 423 nodes 2 59 64 mat 1 crossSect 1
+Truss3d 424 nodes 2 59 65 mat 1 crossSect 1
+Truss3d 425 nodes 2 60 64 mat 1 crossSect 1
+Truss3d 426 nodes 2 59 84 mat 1 crossSect 1
+Truss3d 427 nodes 2 59 85 mat 1 crossSect 1
+Truss3d 428 nodes 2 84 60 mat 1 crossSect 1
+Truss3d 429 nodes 2 59 89 mat 1 crossSect 1
+Truss3d 430 nodes 2 84 64 mat 1 crossSect 1
+Truss3d 431 nodes 2 60 65 mat 1 crossSect 1
+Truss3d 432 nodes 2 60 85 mat 1 crossSect 1
+Truss3d 433 nodes 2 60 90 mat 1 crossSect 1
+Truss3d 434 nodes 2 85 65 mat 1 crossSect 1
+Truss3d 435 nodes 2 61 62 mat 1 crossSect 1
+Truss3d 436 nodes 2 61 66 mat 1 crossSect 1
+Truss3d 437 nodes 2 61 67 mat 1 crossSect 1
+Truss3d 438 nodes 2 62 66 mat 1 crossSect 1
+Truss3d 439 nodes 2 61 86 mat 1 crossSect 1
+Truss3d 440 nodes 2 61 87 mat 1 crossSect 1
+Truss3d 441 nodes 2 86 62 mat 1 crossSect 1
+Truss3d 442 nodes 2 61 91 mat 1 crossSect 1
+Truss3d 443 nodes 2 86 66 mat 1 crossSect 1
+Truss3d 444 nodes 2 62 63 mat 1 crossSect 1
+Truss3d 445 nodes 2 62 67 mat 1 crossSect 1
+Truss3d 446 nodes 2 62 68 mat 1 crossSect 1
+Truss3d 447 nodes 2 63 67 mat 1 crossSect 1
+Truss3d 448 nodes 2 62 87 mat 1 crossSect 1
+Truss3d 449 nodes 2 62 88 mat 1 crossSect 1
+Truss3d 450 nodes 2 87 63 mat 1 crossSect 1
+Truss3d 451 nodes 2 62 92 mat 1 crossSect 1
+Truss3d 452 nodes 2 87 67 mat 1 crossSect 1
+Truss3d 453 nodes 2 63 64 mat 1 crossSect 1
+Truss3d 454 nodes 2 63 68 mat 1 crossSect 1
+Truss3d 455 nodes 2 63 69 mat 1 crossSect 1
+Truss3d 456 nodes 2 64 68 mat 1 crossSect 1
+Truss3d 457 nodes 2 63 88 mat 1 crossSect 1
+Truss3d 458 nodes 2 63 89 mat 1 crossSect 1
+Truss3d 459 nodes 2 88 64 mat 1 crossSect 1
+Truss3d 460 nodes 2 63 93 mat 1 crossSect 1
+Truss3d 461 nodes 2 88 68 mat 1 crossSect 1
+Truss3d 462 nodes 2 64 65 mat 1 crossSect 1
+Truss3d 463 nodes 2 64 69 mat 1 crossSect 1
+Truss3d 464 nodes 2 64 70 mat 1 crossSect 1
+Truss3d 465 nodes 2 65 69 mat 1 crossSect 1
+Truss3d 466 nodes 2 64 89 mat 1 crossSect 1
+Truss3d 467 nodes 2 64 90 mat 1 crossSect 1
+Truss3d 468 nodes 2 89 65 mat 1 crossSect 1
+Truss3d 469 nodes 2 64 94 mat 1 crossSect 1
+Truss3d 470 nodes 2 89 69 mat 1 crossSect 1
+Truss3d 471 nodes 2 65 70 mat 1 crossSect 1
+Truss3d 472 nodes 2 65 90 mat 1 crossSect 1
+Truss3d 473 nodes 2 65 95 mat 1 crossSect 1
+Truss3d 474 nodes 2 90 70 mat 1 crossSect 1
+Truss3d 475 nodes 2 66 67 mat 1 crossSect 1
+Truss3d 476 nodes 2 66 71 mat 1 crossSect 1
+Truss3d 477 nodes 2 66 72 mat 1 crossSect 1
+Truss3d 478 nodes 2 67 71 mat 1 crossSect 1
+Truss3d 479 nodes 2 66 91 mat 1 crossSect 1
+Truss3d 480 nodes 2 66 92 mat 1 crossSect 1
+Truss3d 481 nodes 2 91 67 mat 1 crossSect 1
+Truss3d 482 nodes 2 66 96 mat 1 crossSect 1
+Truss3d 483 nodes 2 91 71 mat 1 crossSect 1
+Truss3d 484 nodes 2 67 68 mat 1 crossSect 1
+Truss3d 485 nodes 2 67 72 mat 1 crossSect 1
+Truss3d 486 nodes 2 67 73 mat 1 crossSect 1
+Truss3d 487 nodes 2 68 72 mat 1 crossSect 1
+Truss3d 488 nodes 2 67 92 mat 1 crossSect 1
+Truss3d 489 nodes 2 67 93 mat 1 crossSect 1
+Truss3d 490 nodes 2 92 68 mat 1 crossSect 1
+Truss3d 491 nodes 2 67 97 mat 1 crossSect 1
+Truss3d 492 nodes 2 92 72 mat 1 crossSect 1
+Truss3d 493 nodes 2 68 69 mat 1 crossSect 1
+Truss3d 494 nodes 2 68 73 mat 1 crossSect 1
+Truss3d 495 nodes 2 68 74 mat 1 crossSect 1
+Truss3d 496 nodes 2 69 73 mat 1 crossSect 1
+Truss3d 497 nodes 2 68 93 mat 1 crossSect 1
+Truss3d 498 nodes 2 68 94 mat 1 crossSect 1
+Truss3d 499 nodes 2 93 69 mat 1 crossSect 1
+Truss3d 500 nodes 2 68 98 mat 1 crossSect 1
+Truss3d 501 nodes 2 93 73 mat 1 crossSect 1
+Truss3d 502 nodes 2 69 70 mat 1 crossSect 1
+Truss3d 503 nodes 2 69 74 mat 1 crossSect 1
+Truss3d 504 nodes 2 69 75 mat 1 crossSect 1
+Truss3d 505 nodes 2 70 74 mat 1 crossSect 1
+Truss3d 506 nodes 2 69 94 mat 1 crossSect 1
+Truss3d 507 nodes 2 69 95 mat 1 crossSect 1
+Truss3d 508 nodes 2 94 70 mat 1 crossSect 1
+Truss3d 509 nodes 2 69 99 mat 1 crossSect 1
+Truss3d 510 nodes 2 94 74 mat 1 crossSect 1
+Truss3d 511 nodes 2 70 75 mat 1 crossSect 1
+Truss3d 512 nodes 2 70 95 mat 1 crossSect 1
+Truss3d 513 nodes 2 70 100 mat 1 crossSect 1
+Truss3d 514 nodes 2 95 75 mat 1 crossSect 1
+Truss3d 515 nodes 2 71 72 mat 1 crossSect 1
+Truss3d 516 nodes 2 71 96 mat 1 crossSect 1
+Truss3d 517 nodes 2 71 97 mat 1 crossSect 1
+Truss3d 518 nodes 2 96 72 mat 1 crossSect 1
+Truss3d 519 nodes 2 72 73 mat 1 crossSect 1
+Truss3d 520 nodes 2 72 97 mat 1 crossSect 1
+Truss3d 521 nodes 2 72 98 mat 1 crossSect 1
+Truss3d 522 nodes 2 97 73 mat 1 crossSect 1
+Truss3d 523 nodes 2 73 74 mat 1 crossSect 1
+Truss3d 524 nodes 2 73 98 mat 1 crossSect 1
+Truss3d 525 nodes 2 73 99 mat 1 crossSect 1
+Truss3d 526 nodes 2 98 74 mat 1 crossSect 1
+Truss3d 527 nodes 2 74 75 mat 1 crossSect 1
+Truss3d 528 nodes 2 74 99 mat 1 crossSect 1
+Truss3d 529 nodes 2 74 100 mat 1 crossSect 1
+Truss3d 530 nodes 2 99 75 mat 1 crossSect 1
+Truss3d 531 nodes 2 75 100 mat 1 crossSect 1
+Truss3d 532 nodes 2 76 77 mat 1 crossSect 1
+Truss3d 533 nodes 2 76 81 mat 1 crossSect 1
+Truss3d 534 nodes 2 76 82 mat 1 crossSect 1
+Truss3d 535 nodes 2 77 81 mat 1 crossSect 1
+Truss3d 536 nodes 2 76 101 mat 1 crossSect 1
+Truss3d 537 nodes 2 76 102 mat 1 crossSect 1
+Truss3d 538 nodes 2 101 77 mat 1 crossSect 1
+Truss3d 539 nodes 2 76 106 mat 1 crossSect 1
+Truss3d 540 nodes 2 101 81 mat 1 crossSect 1
+Truss3d 541 nodes 2 77 78 mat 1 crossSect 1
+Truss3d 542 nodes 2 77 82 mat 1 crossSect 1
+Truss3d 543 nodes 2 77 83 mat 1 crossSect 1
+Truss3d 544 nodes 2 78 82 mat 1 crossSect 1
+Truss3d 545 nodes 2 77 102 mat 1 crossSect 1
+Truss3d 546 nodes 2 77 103 mat 1 crossSect 1
+Truss3d 547 nodes 2 102 78 mat 1 crossSect 1
+Truss3d 548 nodes 2 77 107 mat 1 crossSect 1
+Truss3d 549 nodes 2 102 82 mat 1 crossSect 1
+Truss3d 550 nodes 2 78 79 mat 1 crossSect 1
+Truss3d 551 nodes 2 78 83 mat 1 crossSect 1
+Truss3d 552 nodes 2 78 84 mat 1 crossSect 1
+Truss3d 553 nodes 2 79 83 mat 1 crossSect 1
+Truss3d 554 nodes 2 78 103 mat 1 crossSect 1
+Truss3d 555 nodes 2 78 104 mat 1 crossSect 1
+Truss3d 556 nodes 2 103 79 mat 1 crossSect 1
+Truss3d 557 nodes 2 78 108 mat 1 crossSect 1
+Truss3d 558 nodes 2 103 83 mat 1 crossSect 1
+Truss3d 559 nodes 2 79 80 mat 1 crossSect 1
+Truss3d 560 nodes 2 79 84 mat 1 crossSect 1
+Truss3d 561 nodes 2 79 85 mat 1 crossSect 1
+Truss3d 562 nodes 2 80 84 mat 1 crossSect 1
+Truss3d 563 nodes 2 79 104 mat 1 crossSect 1
+Truss3d 564 nodes 2 79 105 mat 1 crossSect 1
+Truss3d 565 nodes 2 104 80 mat 1 crossSect 1
+Truss3d 566 nodes 2 79 109 mat 1 crossSect 1
+Truss3d 567 nodes 2 104 84 mat 1 crossSect 1
+Truss3d 568 nodes 2 80 85 mat 1 crossSect 1
+Truss3d 569 nodes 2 80 105 mat 1 crossSect 1
+Truss3d 570 nodes 2 80 110 mat 1 crossSect 1
+Truss3d 571 nodes 2 105 85 mat 1 crossSect 1
+Truss3d 572 nodes 2 81 82 mat 1 crossSect 1
+Truss3d 573 nodes 2 81 86 mat 1 crossSect 1
+Truss3d 574 nodes 2 81 87 mat 1 crossSect 1
+Truss3d 575 nodes 2 82 86 mat 1 crossSect 1
+Truss3d 576 nodes 2 81 106 mat 1 crossSect 1
+Truss3d 577 nodes 2 81 107 mat 1 crossSect 1
+Truss3d 578 nodes 2 106 82 mat 1 crossSect 1
+Truss3d 579 nodes 2 81 111 mat 1 crossSect 1
+Truss3d 580 nodes 2 106 86 mat 1 crossSect 1
+Truss3d 581 nodes 2 82 83 mat 1 crossSect 1
+Truss3d 582 nodes 2 82 87 mat 1 crossSect 1
+Truss3d 583 nodes 2 82 88 mat 1 crossSect 1
+Truss3d 584 nodes 2 83 87 mat 1 crossSect 1
+Truss3d 585 nodes 2 82 107 mat 1 crossSect 1
+Truss3d 586 nodes 2 82 108 mat 1 crossSect 1
+Truss3d 587 nodes 2 107 83 mat 1 crossSect 1
+Truss3d 588 nodes 2 82 112 mat 1 crossSect 1
+Truss3d 589 nodes 2 107 87 mat 1 crossSect 1
+Truss3d 590 nodes 2 83 84 mat 1 crossSect 1
+Truss3d 591 nodes 2 83 88 mat 1 crossSect 1
+Truss3d 592 nodes 2 83 89 mat 1 crossSect 1
+Truss3d 593 nodes 2 84 88 mat 1 crossSect 1
+Truss3d 594 nodes 2 83 108 mat 1 crossSect 1
+Truss3d 595 nodes 2 83 109 mat 1 crossSect 1
+Truss3d 596 nodes 2 108 84 mat 1 crossSect 1
+Truss3d 597 nodes 2 83 113 mat 1 crossSect 1
+Truss3d 598 nodes 2 108 88 mat 1 crossSect 1
+Truss3d 599 nodes 2 84 85 mat 1 crossSect 1
+Truss3d 600 nodes 2 84 89 mat 1 crossSect 1
+Truss3d 601 nodes 2 84 90 mat 1 crossSect 1
+Truss3d 602 nodes 2 85 89 mat 1 crossSect 1
+Truss3d 603 nodes 2 84 109 mat 1 crossSect 1
+Truss3d 604 nodes 2 84 110 mat 1 crossSect 1
+Truss3d 605 nodes 2 109 85 mat 1 crossSect 1
+Truss3d 606 nodes 2 84 114 mat 1 crossSect 1
+Truss3d 607 nodes 2 109 89 mat 1 crossSect 1
+Truss3d 608 nodes 2 85 90 mat 1 crossSect 1
+Truss3d 609 nodes 2 85 110 mat 1 crossSect 1
+Truss3d 610 nodes 2 85 115 mat 1 crossSect 1
+Truss3d 611 nodes 2 110 90 mat 1 crossSect 1
+Truss3d 612 nodes 2 86 87 mat 1 crossSect 1
+Truss3d 613 nodes 2 86 91 mat 1 crossSect 1
+Truss3d 614 nodes 2 86 92 mat 1 crossSect 1
+Truss3d 615 nodes 2 87 91 mat 1 crossSect 1
+Truss3d 616 nodes 2 86 111 mat 1 crossSect 1
+Truss3d 617 nodes 2 86 112 mat 1 crossSect 1
+Truss3d 618 nodes 2 111 87 mat 1 crossSect 1
+Truss3d 619 nodes 2 86 116 mat 1 crossSect 1
+Truss3d 620 nodes 2 111 91 mat 1 crossSect 1
+Truss3d 621 nodes 2 87 88 mat 1 crossSect 1
+Truss3d 622 nodes 2 87 92 mat 1 crossSect 1
+Truss3d 623 nodes 2 87 93 mat 1 crossSect 1
+Truss3d 624 nodes 2 88 92 mat 1 crossSect 1
+Truss3d 625 nodes 2 87 112 mat 1 crossSect 1
+Truss3d 626 nodes 2 87 113 mat 1 crossSect 1
+Truss3d 627 nodes 2 112 88 mat 1 crossSect 1
+Truss3d 628 nodes 2 87 117 mat 1 crossSect 1
+Truss3d 629 nodes 2 112 92 mat 1 crossSect 1
+Truss3d 630 nodes 2 88 89 mat 1 crossSect 1
+Truss3d 631 nodes 2 88 93 mat 1 crossSect 1
+Truss3d 632 nodes 2 88 94 mat 1 crossSect 1
+Truss3d 633 nodes 2 89 93 mat 1 crossSect 1
+Truss3d 634 nodes 2 88 113 mat 1 crossSect 1
+Truss3d 635 nodes 2 88 114 mat 1 crossSect 1
+Truss3d 636 nodes 2 113 89 mat 1 crossSect 1
+Truss3d 637 nodes 2 88 118 mat 1 crossSect 1
+Truss3d 638 nodes 2 113 93 mat 1 crossSect 1
+Truss3d 639 nodes 2 89 90 mat 1 crossSect 1
+Truss3d 640 nodes 2 89 94 mat 1 crossSect 1
+Truss3d 641 nodes 2 89 95 mat 1 crossSect 1
+Truss3d 642 nodes 2 90 94 mat 1 crossSect 1
+Truss3d 643 nodes 2 89 114 mat 1 crossSect 1
+Truss3d 644 nodes 2 89 115 mat 1 crossSect 1
+Truss3d 645 nodes 2 114 90 mat 1 crossSect 1
+Truss3d 646 nodes 2 89 119 mat 1 crossSect 1
+Truss3d 647 nodes 2 114 94 mat 1 crossSect 1
+Truss3d 648 nodes 2 90 95 mat 1 crossSect 1
+Truss3d 649 nodes 2 90 115 mat 1 crossSect 1
+Truss3d 650 nodes 2 90 120 mat 1 crossSect 1
+Truss3d 651 nodes 2 115 95 mat 1 crossSect 1
+Truss3d 652 nodes 2 91 92 mat 1 crossSect 1
+Truss3d 653 nodes 2 91 96 mat 1 crossSect 1
+Truss3d 654 nodes 2 91 97 mat 1 crossSect 1
+Truss3d 655 nodes 2 92 96 mat 1 crossSect 1
+Truss3d 656 nodes 2 91 116 mat 1 crossSect 1
+Truss3d 657 nodes 2 91 117 mat 1 crossSect 1
+Truss3d 658 nodes 2 116 92 mat 1 crossSect 1
+Truss3d 659 nodes 2 91 121 mat 1 crossSect 1
+Truss3d 660 nodes 2 116 96 mat 1 crossSect 1
+Truss3d 661 nodes 2 92 93 mat 1 crossSect 1
+Truss3d 662 nodes 2 92 97 mat 1 crossSect 1
+Truss3d 663 nodes 2 92 98 mat 1 crossSect 1
+Truss3d 664 nodes 2 93 97 mat 1 crossSect 1
+Truss3d 665 nodes 2 92 117 mat 1 crossSect 1
+Truss3d 666 nodes 2 92 118 mat 1 crossSect 1
+Truss3d 667 nodes 2 117 93 mat 1 crossSect 1
+Truss3d 668 nodes 2 92 122 mat 1 crossSect 1
+Truss3d 669 nodes 2 117 97 mat 1 crossSect 1
+Truss3d 670 nodes 2 93 94 mat 1 crossSect 1
+Truss3d 671 nodes 2 93 98 mat 1 crossSect 1
+Truss3d 672 nodes 2 93 99 mat 1 crossSect 1
+Truss3d 673 nodes 2 94 98 mat 1 crossSect 1
+Truss3d 674 nodes 2 93 118 mat 1 crossSect 1
+Truss3d 675 nodes 2 93 119 mat 1 crossSect 1
+Truss3d 676 nodes 2 118 94 mat 1 crossSect 1
+Truss3d 677 nodes 2 93 123 mat 1 crossSect 1
+Truss3d 678 nodes 2 118 98 mat 1 crossSect 1
+Truss3d 679 nodes 2 94 95 mat 1 crossSect 1
+Truss3d 680 nodes 2 94 99 mat 1 crossSect 1
+Truss3d 681 nodes 2 94 100 mat 1 crossSect 1
+Truss3d 682 nodes 2 95 99 mat 1 crossSect 1
+Truss3d 683 nodes 2 94 119 mat 1 crossSect 1
+Truss3d 684 nodes 2 94 120 mat 1 crossSect 1
+Truss3d 685 nodes 2 119 95 mat 1 crossSect 1
+Truss3d 686 nodes 2 94 124 mat 1 crossSect 1
+Truss3d 687 nodes 2 119 99 mat 1 crossSect 1
+Truss3d 688 nodes 2 95 100 mat 1 crossSect 1
+Truss3d 689 nodes 2 95 120 mat 1 crossSect 1
+Truss3d 690 nodes 2 95 125 mat 1 crossSect 1
+Truss3d 691 nodes 2 120 100 mat 1 crossSect 1
+Truss3d 692 nodes 2 96 97 mat 1 crossSect 1
+Truss3d 693 nodes 2 96 121 mat 1 crossSect 1
+Truss3d 694 nodes 2 96 122 mat 1 crossSect 1
+Truss3d 695 nodes 2 121 97 mat 1 crossSect 1
+Truss3d 696 nodes 2 97 98 mat 1 crossSect 1
+Truss3d 697 nodes 2 97 122 mat 1 crossSect 1
+Truss3d 698 nodes 2 97 123 mat 1 crossSect 1
+Truss3d 699 nodes 2 122 98 mat 1 crossSect 1
+Truss3d 700 nodes 2 98 99 mat 1 crossSect 1
+Truss3d 701 nodes 2 98 123 mat 1 crossSect 1
+Truss3d 702 nodes 2 98 124 mat 1 crossSect 1
+Truss3d 703 nodes 2 123 99 mat 1 crossSect 1
+Truss3d 704 nodes 2 99 100 mat 1 crossSect 1
+Truss3d 705 nodes 2 99 124 mat 1 crossSect 1
+Truss3d 706 nodes 2 99 125 mat 1 crossSect 1
+Truss3d 707 nodes 2 124 100 mat 1 crossSect 1
+Truss3d 708 nodes 2 100 125 mat 1 crossSect 1
+Truss3d 709 nodes 2 101 102 mat 1 crossSect 1
+Truss3d 710 nodes 2 101 106 mat 1 crossSect 1
+Truss3d 711 nodes 2 101 107 mat 1 crossSect 1
+Truss3d 712 nodes 2 102 106 mat 1 crossSect 1
+Truss3d 713 nodes 2 102 103 mat 1 crossSect 1
+Truss3d 714 nodes 2 102 107 mat 1 crossSect 1
+Truss3d 715 nodes 2 102 108 mat 1 crossSect 1
+Truss3d 716 nodes 2 103 107 mat 1 crossSect 1
+Truss3d 717 nodes 2 103 104 mat 1 crossSect 1
+Truss3d 718 nodes 2 103 108 mat 1 crossSect 1
+Truss3d 719 nodes 2 103 109 mat 1 crossSect 1
+Truss3d 720 nodes 2 104 108 mat 1 crossSect 1
+Truss3d 721 nodes 2 104 105 mat 1 crossSect 1
+Truss3d 722 nodes 2 104 109 mat 1 crossSect 1
+Truss3d 723 nodes 2 104 110 mat 1 crossSect 1
+Truss3d 724 nodes 2 105 109 mat 1 crossSect 1
+Truss3d 725 nodes 2 105 110 mat 1 crossSect 1
+Truss3d 726 nodes 2 106 107 mat 1 crossSect 1
+Truss3d 727 nodes 2 106 111 mat 1 crossSect 1
+Truss3d 728 nodes 2 106 112 mat 1 crossSect 1
+Truss3d 729 nodes 2 107 111 mat 1 crossSect 1
+Truss3d 730 nodes 2 107 108 mat 1 crossSect 1
+Truss3d 731 nodes 2 107 112 mat 1 crossSect 1
+Truss3d 732 nodes 2 107 113 mat 1 crossSect 1
+Truss3d 733 nodes 2 108 112 mat 1 crossSect 1
+Truss3d 734 nodes 2 108 109 mat 1 crossSect 1
+Truss3d 735 nodes 2 108 113 mat 1 crossSect 1
+Truss3d 736 nodes 2 108 114 mat 1 crossSect 1
+Truss3d 737 nodes 2 109 113 mat 1 crossSect 1
+Truss3d 738 nodes 2 109 110 mat 1 crossSect 1
+Truss3d 739 nodes 2 109 114 mat 1 crossSect 1
+Truss3d 740 nodes 2 109 115 mat 1 crossSect 1
+Truss3d 741 nodes 2 110 114 mat 1 crossSect 1
+Truss3d 742 nodes 2 110 115 mat 1 crossSect 1
+Truss3d 743 nodes 2 111 112 mat 1 crossSect 1
+Truss3d 744 nodes 2 111 116 mat 1 crossSect 1
+Truss3d 745 nodes 2 111 117 mat 1 crossSect 1
+Truss3d 746 nodes 2 112 116 mat 1 crossSect 1
+Truss3d 747 nodes 2 112 113 mat 1 crossSect 1
+Truss3d 748 nodes 2 112 117 mat 1 crossSect 1
+Truss3d 749 nodes 2 112 118 mat 1 crossSect 1
+Truss3d 750 nodes 2 113 117 mat 1 crossSect 1
+Truss3d 751 nodes 2 113 114 mat 1 crossSect 1
+Truss3d 752 nodes 2 113 118 mat 1 crossSect 1
+Truss3d 753 nodes 2 113 119 mat 1 crossSect 1
+Truss3d 754 nodes 2 114 118 mat 1 crossSect 1
+Truss3d 755 nodes 2 114 115 mat 1 crossSect 1
+Truss3d 756 nodes 2 114 119 mat 1 crossSect 1
+Truss3d 757 nodes 2 114 120 mat 1 crossSect 1
+Truss3d 758 nodes 2 115 119 mat 1 crossSect 1
+Truss3d 759 nodes 2 115 120 mat 1 crossSect 1
+Truss3d 760 nodes 2 116 117 mat 1 crossSect 1
+Truss3d 761 nodes 2 116 121 mat 1 crossSect 1
+Truss3d 762 nodes 2 116 122 mat 1 crossSect 1
+Truss3d 763 nodes 2 117 121 mat 1 crossSect 1
+Truss3d 764 nodes 2 117 118 mat 1 crossSect 1
+Truss3d 765 nodes 2 117 122 mat 1 crossSect 1
+Truss3d 766 nodes 2 117 123 mat 1 crossSect 1
+Truss3d 767 nodes 2 118 122 mat 1 crossSect 1
+Truss3d 768 nodes 2 118 119 mat 1 crossSect 1
+Truss3d 769 nodes 2 118 123 mat 1 crossSect 1
+Truss3d 770 nodes 2 118 124 mat 1 crossSect 1
+Truss3d 771 nodes 2 119 123 mat 1 crossSect 1
+Truss3d 772 nodes 2 119 120 mat 1 crossSect 1
+Truss3d 773 nodes 2 119 124 mat 1 crossSect 1
+Truss3d 774 nodes 2 119 125 mat 1 crossSect 1
+Truss3d 775 nodes 2 120 124 mat 1 crossSect 1
+Truss3d 776 nodes 2 120 125 mat 1 crossSect 1
+Truss3d 777 nodes 2 121 122 mat 1 crossSect 1
+Truss3d 778 nodes 2 122 123 mat 1 crossSect 1
+Truss3d 779 nodes 2 123 124 mat 1 crossSect 1
+Truss3d 780 nodes 2 124 125 mat 1 crossSect 1
+SimpleCS 1 thick 1.0 width 1.0
+IsoLE 1 d 0. E 1.000000e+03 n 0.2 tAlpha 0.
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
+BoundaryCondition 2 loadTimeFunction 2 prescribedvalue 0.001
+NodalLoad 3 loadTimeFunction 2 Components 2 10.0 0.0
+BoundaryCondition 4 loadTimeFunction 2 prescribedvalue 0.002
+ConstantFunction 1 f(t) 1.0
+PiecewiseLinFunction 2 npoints 2 t 2 0. 10000 f(t) 2 0. 10000.
+#
+#%BEGIN_CHECK% tolerance 1.e-8
+## check selected nodes
+#NODE tStep 1 number 13 dof 1 unknown d value -1.60994912e-04
+#NODE tStep 1 number 13 dof 2 unknown d value -1.31229798e-04
+#NODE tStep 1 number 13 dof 3 unknown d value 0.00000000e+00
+#NODE tStep 1 number 27 dof 1 unknown d value -5.53110189e-05
+#NODE tStep 1 number 27 dof 2 unknown d value -8.16073291e-06
+#NODE tStep 1 number 27 dof 3 unknown d value 2.93714152e-04
+##
+## check element strain vector
+#ELEMENT tStep 1 number  1  gp 1 keyword 4 component 1  value -2.6818e-06
+#ELEMENT tStep 1 number  79 gp 1 keyword 4 component 1  value 2.1534e-06
+##
+#%END_CHECK%

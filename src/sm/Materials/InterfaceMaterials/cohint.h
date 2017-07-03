@@ -43,7 +43,10 @@ namespace oofem {
 //@{
 #define _IFT_CohesiveInterfaceMaterial_Name "cohint"
 #define _IFT_CohesiveInterfaceMaterial_kn "kn"
+#define _IFT_CohesiveInterfaceMaterial_transitionopening "transitionopening"
 #define _IFT_CohesiveInterfaceMaterial_ks "ks"
+#define _IFT_CohesiveInterfaceMaterial_stiffCoeffKn "stiffcoeffkn"
+#define _IFT_CohesiveInterfaceMaterial_smoothMag "smoothmag"
 //@}
 
 /**
@@ -55,7 +58,19 @@ class CohesiveInterfaceMaterial : public StructuralInterfaceMaterial
 protected:
     /// Elastic properties (normal and shear moduli).
     double kn, ks;
-
+    
+    /// Reduction of normal stiffness when in tension
+    double stiffCoeffKn;
+    
+    /// Opening when material stiffness changes from kn to kn*stiffCoeffKn
+    double transitionOpening;
+    
+    /// Smoothing region between tension and compression stiffness.
+    /// Uses atan(smoothMag*x) function, where (smoothMag*x) needs to be 6
+    /// to be 10% off the asymptotic value. SmoothMag is by default 1.e+4.
+    /// Higher values mean sharper transition.
+    double smoothMag;
+    
 public:
     /// Constructor
     CohesiveInterfaceMaterial(int n, Domain * d);

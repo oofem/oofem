@@ -1527,24 +1527,24 @@ with solver parameters related to specific solver.
 \begin{table}[ht]
 \begin{center}
 %%\scalebox{0.50}{
-\begin{tabular}{|l|c|c|c|c|c|c|}
+\begin{tabular}{|l|c|c|c|c|c|c|c|c|}
 \hline
 Storage format & id & \multicolumn{5}{c|}{Sparse solver, \param{lstype}} \\
 \hline
 & \param{smtype} & \tiny{Direct (0)} &\tiny{IML (1)}
- &\tiny{Spooles (2)}& \tiny{Petsc (3)}& \tiny{DSS (4)}\\
+ &\tiny{Spooles (2)}& \tiny{Petsc (3)}& \tiny{DSS (4)}& \tiny{MKLPardiso (6)}& \tiny{SuperLU\_MT (7)}\\
 \hline
-\small{SMT\_Skyline}       & 0&+&+& & & \\
-\small{SMT\_SkylineU}      & 1&+&+& & & \\
-\small{SMT\_CompCol}       & 2& &+& & & \\
-\small{SMT\_DynCompCol}    & 3& &+& & & \\
-\small{SMT\_SymCompCol}    & 4& &+& & & \\
-\small{SMT\_DynCompRow}    & 5& &+& & & \\
-\small{SMT\_SpoolesMtrx}   & 6& & &+& & \\
-\small{SMT\_PetscMtrx }    & 7& & & &+& \\
-\small{SMT\_DSS\_sym\_LDL} & 8& & & & &+\\
-\small{SMT\_DSS\_sym\_LL}  & 9& & & & &+\\
-\small{SMT\_DSS\_unsym\_LU}&10& & & & &+\\
+\small{SMT\_Skyline}       & 0&+&+& & & & &\\
+\small{SMT\_SkylineU}      & 1&+&+& & & & & \\
+\small{SMT\_CompCol}       & 2& &+& & & &+&+\\
+\small{SMT\_DynCompCol}    & 3& &+& & & & & \\
+\small{SMT\_SymCompCol}    & 4& &+& & & & & \\
+\small{SMT\_DynCompRow}    & 5& &+& & & & & \\
+\small{SMT\_SpoolesMtrx}   & 6& & &+& & & & \\
+\small{SMT\_PetscMtrx }    & 7& & & &+& & & \\
+\small{SMT\_DSS\_sym\_LDL} & 8& & & & &+ & &\\
+\small{SMT\_DSS\_sym\_LL}  & 9& & & & &+ & &\\
+\small{SMT\_DSS\_unsym\_LU}&10& & & & &+ & &\\
 \hline
 \end{tabular}
 %%}
@@ -1570,6 +1570,8 @@ ST\_IML     &1& \optField{stype}{in} \field{lstol}{rn} \field{lsiter}{in}
 ST\_Spooles &2&  \optField{msglvl}{in} \optField{msgfile}{s}\\
 ST\_Petsc   &3& see Petsc manual, for details\footnotemark\\
 ST\_DSS     &4& \\
+ST\_MKLPardiso&6&\\
+ST\_SuperLU\_MT&7\\
 \hline
 \end{tabular}
 \caption{Solver parameters.}
@@ -2279,14 +2281,14 @@ same as on master.
   \recentry{\entKeywordInst{RigidArmNode}}{\field{coords}{ra}}
   \recentry{}{\field{master}{in}}
   \recentry{}{\optField{masterMask}{ia}}
+  \recentry{}{[\field{lcs}{ra}]}
 \end{record}
 Represent node connected to other node (called master) using rigid
-arm. Rigid arm node posses no degrees of freedom - all dofs are mapped to master
-dofs. The introduction of rigid arm connected nodes allows to avoid very
+arm. Rigid arm node DOFs can be linked to master (via rigid arm transformation) or can be independent. The rigid arm node allows to avoid very
 stiff elements used for modelling the rigid-arm connection.
 The rigid arm node maps its dofs to master dofs using simple transformations
 (small rotations are assumed). Therefore, the contribution to rigid
-arm node are localized directly to master related equations.
+arm node can be localized directly to master related equations.
 {\em The rigid arm node can not have its own boundary or initial conditions, they are
 determined completely from master dof conditions. Currently it is
 possible to map only certain dofs - see \param{dofType}. Linked DOFs
@@ -2298,12 +2300,17 @@ global coordinate system) are described using \param{coords}
 field. This array contains x, y and possibly z (depends on problem
 under consideration) coordinate of node. The \param{master} parameter is the
 master node number, to which rigid arm node dofs are mapped.
-{\em The current implementation allows chaining of rigid arm nodes.}
+The rigid arm node and master can have arbvitrary local coordinate systems (if not specified, global one is assumed).
+
 The optional parameter \param{masterMask} allows to specify how
 particular mapped DOF depends on master DOFs. The size of \param{masterMask} array
 should be equal to number of DOFs. For all linked DOFs (with
 corresponding dofType value equal to 2) the corresponding value of
 \param{masterMask} array should be 1.
+
+The local coordinate system in rigid arm node  is supported, 
+the coordinate system in master and slave can be different. 
+If no lcs is set, global one is assumed.the global cs applies.
 
 \item Hanging node
 

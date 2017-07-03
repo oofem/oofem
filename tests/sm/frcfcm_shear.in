@@ -1,0 +1,111 @@
+frcfcm_shear.out
+fixed crack model for fiber reinforced concrete - separate tests on a single finite element
+#
+NonLinearStatic nsteps 31 deltaT 1. rtolv 1.e-6 maxiter 10000 controllmode 1  stiffmode 0 renumber 1 nmodules 1 
+#
+errorcheck
+#
+domain 2dplanestress
+OutputManager tstep_all dofman_all element_all
+#
+ndofman 12 nelem 3 ncrosssect 3 nmat 3 nbc 6 nic 0 nltf 6 nset 9
+#
+# 1: frcfcm_shear_CAF_beta_multiple
+#
+node   1   coords 3  0.0  0.0  0.0 
+node   2   coords 3  0.1  0.0  0.0 
+node   3   coords 3  0.0  0.1  0.0 
+node   4   coords 3  0.1  0.1  0.0 
+#
+# 2: frcfcm_shear_SRF_beta_multiple
+#
+node   5   coords 3  0.0  0.0  0.0 
+node   6   coords 3  0.1  0.0  0.0 
+node   7   coords 3  0.0  0.1  0.0 
+node   8   coords 3  0.1  0.1  0.0
+#
+# 3: frcfcm_shear_SRF_damage_exp
+#
+node   9   coords 3  0.0  0.0  0.0 
+node  10   coords 3  0.1  0.0  0.0 
+node  11   coords 3  0.0  0.1  0.0 
+node  12   coords 3  0.1  0.1  0.0
+#
+#
+#
+#
+PlaneStress2D   1   nodes 4   1  2  4  3
+PlaneStress2D   2   nodes 4   5  6  8  7
+PlaneStress2D   3   nodes 4   9 10 12 11
+#
+#
+SimpleCS  1 thick 1.  width 1.0 material  1 set 7
+SimpleCS  2 thick 1.  width 1.0 material  2 set 8
+SimpleCS  3 thick 1.  width 1.0 material  3 set 9
+#
+#
+frcfcm 1 d 0. talpha 0. E 20000. n 0.2 Gf 100.e-6 ft 2.0 softtype 2 sheartype 1 multiplecrackshear beta 0.01 Vf 0.02 Df 0.04e-3 Ef 20000. Gfib 1000. tau_0 1. f 0.7 kfib 0.9 FSStype 0 fDamType 0 FiberType 0 fibreOrientationVector 3 10. 1. 0.
+#
+frcfcm 2 d 0. talpha 0. E 20000. n 0.2 Gf 100.e-6 ft 2.0 softtype 2 sheartype 1 multiplecrackshear beta 0.01 Vf 0.02 Lf 12.e-3 Df 0.04e-3 Ef 20000. Gfib 1000. tau_0 1. f 0.7 kfib 0.9 FSStype 0 fDamType 0 FiberType 2 crackSpacing 0.025
+#
+frcfcm 3 d 0. talpha 0. E 20000. n 0.2 Gf 100.e-6 ft 2.0 softtype 2 sheartype 1 multiplecrackshear beta 0.01 Vf 0.02 Lf 12.e-3 Df 0.04e-3 Ef 20000. Gfib 1000. tau_0 1. f 0.7 kfib 0.9 FSStype 0 FiberType 2 crackSpacing 0.025 fDamType 2 gammaCrack 0.5
+#
+# horizontal restraint
+BoundaryCondition  1 loadTimeFunction 1 dofs 1 1 values 1 0. set 1
+# vertical restraint
+BoundaryCondition  2 loadTimeFunction 2 dofs 1 2 values 1 0. set 2
+#
+# lower right node - creating first crack
+BoundaryCondition  3 loadTimeFunction 3 dofs 1 1 values 1 1.e-5 set 3
+# upper right node - creating first crack and then shearing
+BoundaryCondition  4 loadTimeFunction 4 dofs 1 1 values 1 1.e-5 set 4
+#
+# left upper node - shearing
+BoundaryCondition  5 loadTimeFunction 5 dofs 1 1 values 1 1.e-5 set 5
+# upper nodes - creating second crack
+BoundaryCondition  6 loadTimeFunction 6 dofs 1 2 values 1 1.e-5 set 6
+#
+#
+ConstantFunction 1 f(t) 1.0
+ConstantFunction 2 f(t) 1.0
+PiecewiseLinfunction 3 npoints 4 t 4 0. 5. 10. 100. f(t) 4 0. 2. 2. 2.
+#                                                                     0  5 10 15 20 25 30     
+PiecewiseLinfunction 4 npoints 7 t 7 0. 5. 10. 15. 20. 25. 30. f(t) 7 0. 2. 4. 2. 2. 4. 2.
+PiecewiseLinfunction 5 npoints 7 t 7 0. 5. 10. 15. 20. 25. 30. f(t) 7 0. 0. 2. 0. 0. 2. 0.
+PiecewiseLinfunction 6 npoints 7 t 7 0. 5. 10. 15. 20. 25. 30. f(t) 7 0. 0. 0. 0. 3. 3. 3.
+#
+# horizontal restraint
+Set 1 nodes 3 1 5 9
+# vertical restraint
+Set 2 nodes 6 1 2 5 6 9 10
+#
+# lower right node - creating first crack
+Set 3 nodes 3 2 6 10
+# upper right node - creating first crack and then shearing
+Set 4 nodes 3 4 8 12
+#
+# left upper node - shearing
+Set 5 nodes 3 3 7 11
+# upper nodes - creating second crack
+Set 6 nodes 6 3 4 7 8 11 12 
+#
+set 7 elementranges {1}
+set 8 elementranges {2}
+set 9 elementranges {3}
+#
+#
+#%BEGIN_CHECK% tolerance 1.e-5
+# 
+#ELEMENT tStep 11 number 1 gp 1 keyword 1 component 6  value 1.644200e+00
+#ELEMENT tStep 26 number 1 gp 1 keyword 1 component 6  value 8.533200e-01
+#
+#ELEMENT tStep 11 number 2 gp 1 keyword 1 component 6  value 1.5767143e+00
+#ELEMENT tStep 26 number 2 gp 1 keyword 1 component 6  value 1.359300e+00
+#
+#ELEMENT tStep 11 number 3 gp 1 keyword 1 component 6  value 1.442849e+00
+#ELEMENT tStep 26 number 3 gp 1 keyword 1 component 6  value 1.072458e+00
+#
+#%END_CHECK%
+
+
+

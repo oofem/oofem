@@ -105,7 +105,41 @@ Tr2Shell7 :: computeGaussPoints()
 }
 
 
+void
+Tr2Shell7 :: giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const UnknownNumberingScheme &s, IntArray *dofIdArray)
+{
+  IntArray localloc;
 
+  // not a nice solution here, trying to deduce if Boundary is egde or surface
+  if (bNodes.giveSize() == 3) { // should be edge
+    //detect edge number
+    if (bNodes.at(1)==1 && bNodes.at(2)==2 && bNodes.at(3)==4) {
+      // edge #1
+      giveEdgeDofMapping(localloc, 1);
+    } else if (bNodes.at(1)==2 && bNodes.at(2)==3 && bNodes.at(3)==5) {
+      // edge #2
+      giveEdgeDofMapping(localloc, 2);
+    } else if (bNodes.at(1)==3 && bNodes.at(2)==1 && bNodes.at(3)==6) {
+      // edge #3
+      giveEdgeDofMapping(localloc, 3);
+    } else {
+      OOFEM_ERROR ("wrong edge number detected");
+    }
+  } else if (bNodes.giveSize() == 6) { // should be surface
+    this->giveSurfaceDofMapping(localloc, 1);
+  } else {
+    OOFEM_ERROR ("boundary not supported/detected");
+  }
+  IntArray eloc, dofID;
+  this->giveLocationArray(eloc, s, &dofID);
+  locationArray.resize(localloc.giveSize());
+  dofIdArray->resize(localloc.giveSize());
+  for (int i=1; i<=localloc.giveSize(); i++) {
+    locationArray.at(i)=eloc.at(localloc.at(i));
+    dofIdArray->at(i) = dofID.at(localloc.at(i));
+  }
+  
+}
 
 void
 Tr2Shell7 :: giveEdgeDofMapping(IntArray &answer, int iEdge) const

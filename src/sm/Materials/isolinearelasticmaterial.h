@@ -40,6 +40,8 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 
+#include "qcmaterialextensioninterface.h"
+
 ///@name Input fields for IsotropicLinearElasticMaterial
 //@{
 #define _IFT_IsotropicLinearElasticMaterial_Name "isole"
@@ -65,7 +67,7 @@ class GaussPoint;
  * - Returning a material property (method 'give'). Only for non-standard elements.
  * - Returning real stress state vector(tensor) at gauss point for 3d - case.
  */
-class IsotropicLinearElasticMaterial : public LinearElasticMaterial
+ class IsotropicLinearElasticMaterial : public LinearElasticMaterial, public QCMaterialExtensionInterface
 {
 protected:
     /// Young's modulus.
@@ -82,7 +84,7 @@ public:
      * @param n material model number in domain
      * @param d domain which receiver belongs to
      */
-    IsotropicLinearElasticMaterial(int n, Domain * d) : LinearElasticMaterial(n, d) { }
+    IsotropicLinearElasticMaterial(int n, Domain *d) : LinearElasticMaterial(n, d) { }
     /**
      * Creates a new IsotropicLinearElasticMaterial class instance
      * with given number belonging to domain d.
@@ -91,7 +93,7 @@ public:
      * @param E Young modulus.
      * @param nu Poisson ratio.
      */
-    IsotropicLinearElasticMaterial(int n, Domain * d, double E, double nu);
+    IsotropicLinearElasticMaterial(int n, Domain *d, double E, double nu);
     /// Destructor.
     virtual ~IsotropicLinearElasticMaterial() { }
 
@@ -107,6 +109,7 @@ public:
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "IsotropicLinearElasticMaterial"; }
     virtual const char *giveInputRecordName() const { return _IFT_IsotropicLinearElasticMaterial_Name; }
+
     /**
      * Initializes receiver according to object description stored in input record.
      * The E modulus (keyword "E"), Poisson ratio ("nu") and coefficient of thermal dilatation
@@ -129,22 +132,22 @@ public:
     /// Returns the bulk elastic modulus @f$ K = \frac{E}{3(1-2\nu)} @f$.
     double giveBulkModulus() { return E / ( 3. * ( 1. - 2. * nu ) ); }
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+    virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
                                                MatResponseMode,
-                                               GaussPoint *gp,
-                                               TimeStep *tStep);
+                                               GaussPoint * gp,
+                                               TimeStep * tStep);
 
-    virtual void givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                          MatResponseMode, GaussPoint *gp,
-                                          TimeStep *tStep);
+    virtual void givePlaneStressStiffMtrx(FloatMatrix & answer,
+                                          MatResponseMode, GaussPoint * gp,
+                                          TimeStep * tStep);
 
-    virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                          MatResponseMode, GaussPoint *gp,
-                                          TimeStep *tStep);
+    virtual void givePlaneStrainStiffMtrx(FloatMatrix & answer,
+                                          MatResponseMode, GaussPoint * gp,
+                                          TimeStep * tStep);
 
-    virtual void give1dStressStiffMtrx(FloatMatrix &answer,
-                                       MatResponseMode, GaussPoint *gp,
-                                       TimeStep *tStep);
+    virtual void give1dStressStiffMtrx(FloatMatrix & answer,
+                                       MatResponseMode, GaussPoint * gp,
+                                       TimeStep * tStep);
 
     /**
      * Computes bulk modulus from given Young's modulus and Poisson's ratio.
@@ -167,6 +170,21 @@ public:
     {
         return young / ( 2. * ( 1. + nu ) );
     }
+
+
+    virtual  double giveQcElasticParamneter(){return E;}
+    virtual  double giveQcPlasticParamneter(){return std::numeric_limits<float>::infinity();}
+
+    virtual Interface *giveInterface(InterfaceType t) {
+        if ( t == QCMaterialExtensionInterfaceType ) {
+	    //            return static_cast< QCMaterialExtensionInterface * >(this);
+	    return this;
+        } else {
+            return NULL;
+        }
+    }
+
+    
 };
 } // end namespace oofem
 #endif // isolinearelasticmaterial_h

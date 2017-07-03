@@ -51,8 +51,8 @@ Set 6 nodes 1 6
 #NODE tStep 1 number 3 dof 1 unknown d value   4.61950515e-03
 ## check element no. 1 force vector
 #BEAM_ELEMENT tStep 1 number 1 keyword 1 component 1  value 8.70448469 
-#BEAM_ELEMENT tStep 1 number 1 keyword 1 component 2  value -1.67422378e+01 
-#BEAM_ELEMENT tStep 1 number 1 keyword 1 component 3  value 5.0633e+01 
+#BEAM_ELEMENT tStep 1 number 1 keyword 1 component 2  value -2.17422378e+01
+#BEAM_ELEMENT tStep 1 number 1 keyword 1 component 3  value 5.22996624e+01
 ## element 5
 #BEAM_ELEMENT tStep 1 number 5 keyword 1 component 1  value 1.29551531e+00 
 #BEAM_ELEMENT tStep 1 number 5 keyword 1 component 2  value -8.75776225e+00 

@@ -66,6 +66,8 @@ enum CrossSectionProperty {
     CS_ShearAreaY,     ///< Shear area in y direction
     CS_ShearAreaZ,     ///< Shear area in z direction
     CS_DrillingStiffness, ///< Penalty stiffness for drilling DOFs.
+    CS_RelDrillingStiffness, ///< Relative penalty stiffness for drilling DOFs.
+    CS_DrillingType,   ///< Type of artificially added drilling stiffness for drilling DOFs.
     CS_TopZCoord,      ///< Top z coordinate
     CS_BottomZCoord,   ///< Bottom z coordinate
     CS_NumLayers,      ///< Number of layers that makes up the cross section
@@ -179,6 +181,15 @@ public:
      * @return Number of integration points.
      */
     virtual int setupIntegrationPoints(IntegrationRule &irule, int npoints, Element *element);
+    /**
+     * Sets up integration rule for the given element.
+     * Default behavior is just to call the Gauss integration rule, but for example the layered and fibered crosssections need to do their own thing.
+     * @param irule Integration rule to set up.
+     * @param npoints Number of integration points.
+     * @param element Element which the integration rule belongs to.
+     * @return Number of integration points.
+     */
+    virtual int setupIntegrationPoints(IntegrationRule &irule, int npointsXY, int npointsZ, Element *element);
     /**
      * Returns nonzero, if receiver implements required extension.
      * @param ext Required extension.

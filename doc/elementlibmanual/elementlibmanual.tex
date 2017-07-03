@@ -920,7 +920,7 @@ This class implements a triangular, quadratic, six-node shell element. The eleme
 
 The element features are summarized in Table~\ref{quad1mindlinsummary}.
 
-\begin{elementsummary}{tr2shell7}{Triangular, quadratic, six-node shell with 7 dofs/node}{\optField{NIP}{in}}{tr2shell7 element summary}{quad1mindlinsummary}
+\begin{elementsummary}{tr2shell7}{Triangular, quadratic, six-node shell with 7 dofs/node}{\optField{NIP}{in}}{tr2shell7 element summary}{tr2shell7summary}
 
 \elementDescription{Unknowns}{Seven dofs (displacement in u, v and w-direction; change in director field in u, v and w-direction; and inhomgenous thickness stretch) are required in each node.}
 \elementDescription{Approximation}{Quadratic for all unknowns.}
@@ -940,18 +940,28 @@ A four-node quadrilateral shell element formulated using three-dimensional conti
 
 Although element requires generally six DOFs per node, no stiffness to local rotation along z-axis (rotation around director vector) is supplied. The element features are summarized in Table~\ref{mitc4shellsummary}.
 
-\begin{elementsummary}{mitc4shell}{Quadrilateral, bilinear, four-node shell element using the MITC technique.}{-}{mitc4shell element summary}{mitc4shellsummary}
+\begin{elementsummary}{mitc4shell}{Quadrilateral, bilinear, four-node shell element using the MITC technique.}{\optField{NIP}{in} \optField{NIPZ}{in} \optField{directorType}{in}}{mitc4shell element summary}{mitc4shellsummary}
+\elementParam{\param{NIP}: allows to set the number of integration points in local x-y plane (default 4).}
+\elementParam{\param{NIPZ}: allows to set the number of integration points in local z-direction (default 2).}
+\elementParam{\param{directorType}: allows to set director vectors. Director vectors can be set as normal to the plane (\param{directorType} = 0, default), or calculated for each node as an average of neighbouring elements of same crosssection (\param{directorType} = 1), or can be specified at crosssection (\param{directorType} =2).}
 \elementDescription{Unknowns}{Six dofs (u,v,w-displacements and u,v,w rotations) are in general required in each node. Note, that although element requires generally six DOFs per node, no stiffness to local rotation along z-axis (rotation around director vector) is supplied.}
 \elementDescription{Approximation}{Linear approximation of displacements and rotations.}
-\elementDescription{Integration}{Integration of all terms using eight point formula.}
+\elementDescription{Integration}{Integration of all terms using Gauss integration formula in 8 points (default) or specified using \param{NIP} and \param{NIPZ} parameters.  }
 \elementDescription{Features}{Variable cross section support.}
-\elementDescription{CS properties}{Cross section thickness is required (measured along director vector). Director vectors components are required \optField{directorx}{in}\optField{directory}{in}\optField{directorz}{in}(default: directorX=0, directorY=0, directorZ=1).}
+\elementDescription{CS properties}{Cross section thickness is required (measured along director vector). Director vectors components may be specified \optField{directorx}{in}\optField{directory}{in}\optField{directorz}{in} in case of \param{directorType 2}.}
 \elementDescription{Loads}{Body and boundary loads are supported.}
-\elementDescription{Output}{On output, the shell strain ($s_s$), and shell force ($s_f$) tensors in \textbf{global coordinate system} are printed as vector form with 6 components, with the following meaning:
+\elementDescription{Output}{On output, the shell force ($s_f$), shell momentum ($s_m$), shell strain ($s_s$), shell curvature ($s_c$), strain ($\varepsilon$), and stress ($\sigma$) tensors in \textbf{global coordinate system} are printed as vector form with 6 components, with the following meaning:
 \begin{align*}
-s_s &= \{\varepsilon_x, \varepsilon_y, \varepsilon_z, \gamma_{yz}, \gamma_{zx}, \gamma_{xy}\},\\
-s_f &= \{\sigma_x, \sigma_y, \sigma_z, \sigma_{yz}, \sigma_{xz}, \sigma_{xy}\}.
+s_f &= \{n_x, n_y, n_z, v_{yz}, v_{xz}, v_{xy}\},\\
+s_m &= \{m_x, m_y, m_z, m_{yz}, m_{xz}, m_{xy}\},\\
+s_s &= \{\varepsilon_x, \varepsilon_y, \varepsilon_z, \gamma_{yz}, \gamma_{xz}, \gamma_{xy}\},\\
+s_c &= \{\kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xy}\}\\
+\varepsilon&=&\{\varepsilon_x, \varepsilon_y, \varepsilon_z, \gamma_{yz}, \gamma_{zx}, \gamma_{xy}\},\\
+\sigma &= \{\sigma_x, \sigma_y, \sigma_z, \sigma_{yz}, \sigma_{xz}, \sigma_{xy}\}.
 \end{align*}
+where $n_x, n_y, n_z, v_{yz}, v_{xz}, v_{xy}$ are integral forces (normal and shear forces), and $m_x, m_y, m_z, m_{yz}, m_{xz}, m_{xy}$ are bending moments, $\varepsilon_x, \varepsilon_y, \varepsilon_z$ are membrane normal deformations, $\gamma_{zy}, \gamma_{zx}, \gamma_{xy}$ are (out of plane and in plane) shear componets, $\kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xy}$ are curvatures.  
+Please note, for example, the bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer (positive z-coordinate).
+The shell force ($s_f$), shell momentum ($s_m$), shell strain ($s_s$), and shell curvature ($s_c$) tensors are evaluated at the midplane of the element (thus are constant along the thickness) while the strain ($\varepsilon$), and stress ($\sigma$) tensors are evaluated at each Gausspoint.
 }
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{-}
@@ -1244,7 +1254,7 @@ Following node numbering convention is adopted (see also Fig.~\ref{qwedge_fig}):
 \subsection{Interface elements}
 Interface elements represents an interaction between points, edges or surfaces. They are used to model debonding between surfaces or more general fracture processes through the use of cohesive zone (cz) models. They can also be used to model contact between elements. Specific interface material models needs to be used - consult the {\it matlibmanual} for supported models. 
 
-\paragraph{Node ordering convention:} All inerface elements have \emph{plus}-side and a \emph{minus}-side and all nodes shold first be specified for the minus-side and then the plus-side. The normal to the interface is defined to point from the minus-side to the-plus side.
+\paragraph{Ordering convention:} All inerface elements have \emph{plus}-side and a \emph{minus}-side and all nodes should first be specified for the minus-side and then the plus-side. The normal to the interface is defined to point from the minus-side to the-plus side. Direction of normal vector on an element specifies normal stress/cohesion across the element. It is assumed that normal jump, normal traction are at the first position of corresponding vectors. Stiffness matrix in local coordinates has always on position 1,1 normal stiffness and then shear stiffness.
 
 \subsubsection{IntElPoint}
 \subsubsection{Interface1d element}
@@ -1280,7 +1290,7 @@ The element can be used to tie together two element edges and is defined by four
  \input{interf2d_lin.tikz}
  \end{makeimage}
  \caption{Interface2dlin element with linear interpolation. Definition and node numbering convention}
- \label{interf2d_quad_fig}
+ \label{interf2d_lin_fig}
 \end{figure}
 
 \begin{elementsummary}{Interface2dlin}{2D  interface element with linear approximation}{\optField{axisymmode}{}}{Interface2dlin element summary}{Interface2dlinsummary}
@@ -1570,6 +1580,48 @@ $\textbf{B}_H$ should give the displcement gradient in Voigt form with 9 compone
 \clearpage
 \section{Elements for Transport problems (TM Module)}
 \subsection{2D Elements}
+\subsubsection{Tr1ht element}
+\label{Tr1ht}
+Implements the linear triangular finite element for heat transfer problems. Each node has 1 degree of freedom.
+The cross section thickness property is requested form cross section model.
+The node numbering is anti-clockwise. The element features are summarized in Table~\ref{Tr1htsummary}.
+
+\begin{figure}[htb]
+ \centering
+ \begin{makeimage}
+  \input{trplanstrss.tikz}
+ \end{makeimage}
+ \caption{Tr1ht element - node and side numbering.}
+ \label{Tr1htfig}
+\end{figure}
+
+\begin{elementsummary}{Tr1ht}{triangular finite element with linear approximation for heat transfer problems}{-}{Tr1ht element summary}{Tr1htsummary}
+%\elementParam{\param{NIP}: allows to change the default number of integration point used.}
+\elementDescription{Unknowns}{Single dof (T\_f - temperature) is required in each node.}
+\elementDescription{Approximation}{Linear approximation of temperature.}
+\elementDescription{Integration}{Integration using one point gauss integration formula.}
+\elementDescription{Loads}{Body loads are supported. Boundary loads are
+supported and are computed  using numerical integration. The side numbering is
+following. Each i-th element side begins in i-th element node and
+ends on next element node (i+1-th node or 1-st node, in the case of 
+side number 3). The local positive edge x-axis coincides with side
+direction, the positive local edge y-axis is rotated 90 degrees
+anti-clockwise (see fig. (\ref{Tr1htfig})).}
+\elementDescription{Features}{-}
+\elementDescription{CS properties}{-}
+\elementDescription{Status}{}
+\end{elementsummary}
+
+\subsubsection{Tr1mt element}
+Isoparametric triangular finite element with linear approximation of moisture.
+Other features are the same as for Tr1ht in Section~\ref{Tr1ht}.
+
+\subsubsection{Tr1hmt element}
+Isoparametric triangular finite element with linear approximations of 
+temperature and moisture. 
+Other features are the same as for Tr1ht in Section~\ref{Tr1ht}.
+
+
 \subsubsection{Quad1ht element}
 \label{Quad1ht}
 Represents isoparametric four-node quadrilateral finite element for
@@ -1610,44 +1662,16 @@ anti-clockwise (see fig. (\ref{Quad1htfig})).}
 \elementDescription{Status}{}
 \end{elementsummary}
 
+\subsubsection{Quad1mt element}
+Isoparametric four-node quadrilateral finite element.
+Other features are the same as for Quad1ht in Section~\ref{Quad1ht}.
+
 \subsubsection{Quad1hmt element}
 Represents isoparametric four-node quadrilateral finite element for
 heat and mass (one constituent) transfer problems. 
 Two dofs (T\_f - temperature and C\_1 - concentration) are required in
 each node. Linear approximation of temperature and mass concentration.
 Other features are similar to Quad1 element, see section \ref{Quad1ht}.
-
-\subsubsection{Tr1ht element}
-\label{Tr1ht}
-Implements the linear triangular finite element for heat transfer problems. Each node has 1 degree of freedom.
-The cross section thickness property is requested form cross section model.
-The node numbering is anti-clockwise. The element features are summarized in Table~\ref{Tr1htsummary}.
-
-\begin{figure}[htb]
- \centering
- \begin{makeimage}
-  \input{trplanstrss.tikz}
- \end{makeimage}
- \caption{Tr1ht element - node and side numbering.}
- \label{Tr1htfig}
-\end{figure}
-
-\begin{elementsummary}{Tr1ht}{triangular finite element with linear approximation for heat transfer problems}{-}{Tr1ht element summary}{Tr1htsummary}
-%\elementParam{\param{NIP}: allows to change the default number of integration point used.}
-\elementDescription{Unknowns}{Single dof (T\_f - temperature) is required in each node.}
-\elementDescription{Approximation}{Linear approximation of temperature.}
-\elementDescription{Integration}{Integration using one point gauss integration formula.}
-\elementDescription{Loads}{Body loads are supported. Boundary loads are
-supported and are computed  using numerical integration. The side numbering is
-following. Each i-th element side begins in i-th element node and
-ends on next element node (i+1-th node or 1-st node, in the case of 
-side number 3). The local positive edge x-axis coincides with side
-direction, the positive local edge y-axis is rotated 90 degrees
-anti-clockwise (see fig. (\ref{Tr1htfig})).}
-\elementDescription{Features}{-}
-\elementDescription{CS properties}{-}
-\elementDescription{Status}{}
-\end{elementsummary}
 
 %-----------------------------------------------------------------------------------------------
 \clearpage
@@ -1793,7 +1817,7 @@ Standard 27 node hexahedral element for stokes flow, with quadratic geometry, ve
   \raisebox{-0.5\height}{\input{hexa_quad_b.tikz}}
  \end{makeimage}
  \caption{Hexa21Stokes element. Node numbering and face numbering.}
- \label{Tr1CBSfig}
+ \label{Hexa21Stokes}
 \end{figure}
 
 \begin{elementsummary}{Hexa21Stokes}{Standard 10 node tetrahedral element for stokes flow, with quadratic geometry, velocity and linear pressure}{-}{Hexa21Stokes element summary}{Hexa21Stokessummary}

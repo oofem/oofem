@@ -192,7 +192,7 @@ TrPlanestressRotAllman3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTe
         answer.at(2, 2) = charVect.at(2);
         answer.at(1, 2) = charVect.at(3);
         answer.at(2, 1) = charVect.at(3);
-    } else if ( ( type == LocalMomentumTensor ) || ( type == GlobalMomentumTensor ) ) {} else if ( ( type == LocalStrainTensor ) || ( type == GlobalStrainTensor ) ) {
+    } else if ( ( type == LocalMomentTensor ) || ( type == GlobalMomentTensor ) ) {} else if ( ( type == LocalStrainTensor ) || ( type == GlobalStrainTensor ) ) {
         //this->computeStrainVector(charVect, gp, tStep);
         charVect = ms->giveStrainVector();
 
@@ -205,7 +205,7 @@ TrPlanestressRotAllman3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTe
         exit(1);
     }
 
-    if ( ( type == GlobalForceTensor  ) || ( type == GlobalMomentumTensor  ) ||
+    if ( ( type == GlobalForceTensor  ) || ( type == GlobalMomentTensor  ) ||
          ( type == GlobalStrainTensor ) || ( type == GlobalCurvatureTensor ) ) {
         this->computeGtoLRotationMatrix();
         answer.rotatedWith(* GtoLRotationMatrix);

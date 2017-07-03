@@ -53,7 +53,7 @@ IntMatBilinearCZJansson :: IntMatBilinearCZJansson(int n, Domain *d) : Structura
 
 IntMatBilinearCZJansson :: ~IntMatBilinearCZJansson() { }
 
-
+///@todo - need to rearrange traction and stiffness matrix so the first component is normal
 void 
 IntMatBilinearCZJansson :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &d,
                                                      const FloatMatrix &F, TimeStep *tStep)

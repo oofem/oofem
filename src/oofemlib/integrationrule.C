@@ -48,7 +48,7 @@ IntegrationRule :: IntegrationRule(int n, Element *e, int startIndx, int endIndx
     firstLocalStrainIndx = startIndx;
     lastLocalStrainIndx  = endIndx;
     isDynamic = dynamic;
-    intdomain = _Unknown_integrationDomain;
+    intdomain = _UnknownIntegrationDomain;
 }
 
 IntegrationRule :: IntegrationRule(int n, Element *e)
@@ -57,7 +57,7 @@ IntegrationRule :: IntegrationRule(int n, Element *e)
     elem = e;
     firstLocalStrainIndx = lastLocalStrainIndx = 0;
     isDynamic = false;
-    intdomain = _Unknown_integrationDomain;
+    intdomain = _UnknownIntegrationDomain;
 }
 
 
@@ -304,6 +304,23 @@ IntegrationRule :: setUpIntegrationPoints(integrationDomain mode, int nPoints,
 
     default:
         OOFEM_ERROR("unknown mode (%d)", mode);
+    }
+
+    return 0;
+}
+
+int
+IntegrationRule :: setUpIntegrationPoints(integrationDomain mode, int nPointsXY, int nPointsZ,
+                                          MaterialMode matMode)
+{
+    intdomain = mode;
+
+    switch ( mode ) {
+    case _3dDegShell:
+        return this->SetUpPointsOn3dDegShell(nPointsXY, nPointsZ, matMode);
+
+    default:
+        OOFEM_ERROR("Unknown mode (%d)", mode);
     }
 
     return 0;

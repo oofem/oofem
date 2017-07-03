@@ -37,6 +37,12 @@
 
 #include "../sm/Materials/structuralmaterial.h"
 
+///@name Input fields for LinearElasticMaterial
+//@{
+#define _IFT_LinearElasticMaterial_preCastStiffRed "precaststiffred"
+//@}
+
+
 namespace oofem {
 /**
  * This class is a abstract base class for all linear elastic material models
@@ -56,11 +62,18 @@ namespace oofem {
  */
 class LinearElasticMaterial : public StructuralMaterial
 {
+protected:
+    /// artificial isotropic damage to reflect reduction in stiffness for time < castingTime.
+    double preCastStiffnessReduction;
+
 public:
     /// Constructor.
     LinearElasticMaterial(int n, Domain *d) : StructuralMaterial(n, d) { }
     /// Destructor.
     virtual ~LinearElasticMaterial() { }
+
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep);
     virtual void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
@@ -79,6 +92,7 @@ public:
 
     virtual double giveShearModulus() { return 1.; }
     virtual int hasNonLinearBehaviour() { return 0; }
+    virtual int hasCastingTimeSupport() { return 1.; }
     virtual const char *giveClassName() const { return "LinearElasticMaterial"; }
 };
 } // end namespace oofem

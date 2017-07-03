@@ -51,7 +51,7 @@ InterpolatingFuction :: ~InterpolatingFuction()
 
 
 void
-InterpolatingFuction :: evaluate(FloatArray &answer, const std :: map< std :: string, FunctionArgument > &valDict)
+InterpolatingFuction :: evaluate(FloatArray &answer, const std :: map< std :: string, FunctionArgument > &valDict, GaussPoint *gp, double param)
 {
     auto it = valDict.find("x");
     if ( it == valDict.end() ) {

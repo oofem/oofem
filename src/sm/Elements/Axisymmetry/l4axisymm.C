@@ -55,7 +55,7 @@
 namespace oofem {
 REGISTER_Element(L4Axisymm);
 
-FEI2dQuadLin L4Axisymm :: interpolation(1, 2);
+FEI2dQuadLinAxi L4Axisymm :: interpolation(1, 2);
 
 L4Axisymm :: L4Axisymm(int n, Domain *aDomain) :
     AxisymElement(n, aDomain), ZZNodalRecoveryModelInterface(this), SpatialLocalizerInterface(this)

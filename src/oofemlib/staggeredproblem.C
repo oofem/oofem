@@ -182,9 +182,15 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
     //    IR_GIVE_OPTIONAL_FIELD(ir, timeLag, _IFT_StaggeredProblem_timeLag);
 
     inputStreamNames.resize(2);
+    if ( ir->hasField(_IFT_StaggeredProblem_prob3) ){
+        inputStreamNames.resize(3);
+    }
+    
     IR_GIVE_FIELD(ir, inputStreamNames [ 0 ], _IFT_StaggeredProblem_prob1);
     IR_GIVE_FIELD(ir, inputStreamNames [ 1 ], _IFT_StaggeredProblem_prob2);
-
+    IR_GIVE_OPTIONAL_FIELD(ir, inputStreamNames [ 2 ], _IFT_StaggeredProblem_prob3);
+    
+    
     renumberFlag = true; // The staggered problem itself should always try to check if the sub-problems needs renumbering.
 
     coupledModels.resize(3);

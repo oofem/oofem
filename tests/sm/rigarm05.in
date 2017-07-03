@@ -1,0 +1,36 @@
+rigarm05.out
+Test of master-slave connection
+#only momentum influence to the displacements is taken into account
+#beamShearCoeff is artificially enlarged.
+LinearStatic nsteps 1 nmodules 1
+errorcheck
+domain 2dBeam
+OutputManager tstep_all dofman_all element_all
+ndofman 5 nelem 0 ncrosssect 1 nmat 1 nbc 1 nic 0 nltf 1 nset 1
+node 1 coords 3 0.  0. 0.0 DofIDMask 3 1 3 5
+rigidarmnode 2 coords 3 0.0 0. 1.0 master 1 DofIDMask 3 1 3 5 doftype 3 2 2 2 mastermask 3 1 1 1
+rigidarmnode 3 coords 3 0.0 0. 1.0 master 1 DofIDMask 3 1 3 5 doftype 3 2 2 2 mastermask 3 1 1 1 lcs 6 0 0 1 0 1 0
+#
+node 4 coords 3 0 0 0 dofidmask 3 1 3 5 lcs 6 0 0 1 0 1 0
+rigidarmnode 5 coords 3 0.0 0. 1.0 master 4 DofIDMask 3 1 3 5 doftype 3 2 2 2 mastermask 3 1 1 1
+#
+SimpleCS 1 area 1. Iy 1.0 beamShearCoeff 1.e18 material 1 
+IsoLE 1 d 1. E 2. n 0.2 tAlpha 1.2e-5
+BoundaryCondition  1 loadTimeFunction 1 dofs 3 1 3 5 values 3 0 1 1 set 1
+ConstantFunction 1 f(t) 1.
+Set 1 nodes 2 1 4
+#
+# exact solution (do not change!!)
+#
+#%BEGIN_CHECK% tolerance 1.e-6
+## check all nodes
+#NODE tStep 1 number 2 dof 1 unknown d value 1.0
+#NODE tStep 1 number 2 dof 3 unknown d value 1.0
+#NODE tStep 1 number 2 dof 5 unknown d value 1.0
+#NODE tStep 1 number 3 dof 1 unknown d value 1.0
+#NODE tStep 1 number 3 dof 3 unknown d value -1.0
+#NODE tStep 1 number 3 dof 5 unknown d value 1.0
+#NODE tStep 1 number 5 dof 1 unknown d value 0.0
+#NODE tStep 1 number 5 dof 3 unknown d value 0.0
+#NODE tStep 1 number 5 dof 5 unknown d value 1.0
+#%END_CHECK%

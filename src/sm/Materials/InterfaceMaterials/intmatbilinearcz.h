@@ -101,7 +101,7 @@ protected:
     /// Material parameters
     double mPenaltyStiffness;
     double mGIc;   // fracture energy, mode 1
-    double mGIIc;  // fracture energy, mode 1
+    double mGIIc;  // fracture energy, mode 2
     double mSigmaF;  // max stress
 
     double mMu;    // loading function parameter

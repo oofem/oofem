@@ -4,7 +4,6 @@
 #include <math.h>
 
 namespace oofem {
-  
 #define MIN(a, b) ( ( a ) > ( b ) ? ( b ) : ( a ) )
 
 Heap :: Heap(int N) {
@@ -35,6 +34,12 @@ Heap :: ~Heap() {
     free(T2H);
 }
 
+void Heap :: setToEmpty(int N) {
+    heapCount = 0;
+    for ( int i = 0; i < N; i++ ) {
+        T2H [ i ] = -1;
+    }
+}
 
 int Heap :: parentInd(int inInd) {
     return ( inInd - 1 ) / 2;
@@ -88,7 +93,7 @@ void Heap :: upHeap(int Ind) {
         if ( Keys [ Ind ] < Keys [ parent ] ) {
             swapElements(Ind, parent);
             Ind = parent;
-        } else   {
+        } else {
             break;
         }
     }
@@ -121,7 +126,7 @@ void Heap :: downHeap(int Ind) {
         if ( minChild != Ind ) {
             swapElements(Ind, minChild);
             Ind = minChild;
-        } else   {
+        } else {
             break;
         }
     }

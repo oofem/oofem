@@ -85,12 +85,10 @@ protected:
     }
     //dodelat internal forces, budou potreba pro nelinearni vypocet
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord) { answer.resize(numberOfDofs); }
-    virtual void computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
 
     void computePuVectorAt(FloatArray &answer, FloatMatrix N, FloatArray u, GaussPoint *gp, int sideNumber);
     void computePsVectorAt(FloatArray &answer, FloatArray t, GaussPoint *gp);
     void computePrescribedDisplacementLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
-    virtual void computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep, ValueModeType mode);
     virtual int testElementExtension(ElementExtension ext) { return ( ext == Element_EdgeLoadSupport ); }
 
 

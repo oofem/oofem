@@ -68,7 +68,7 @@ AnisotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
     if ( alpha.giveSize() == 0 ) {
         alpha.resize(6);
         alpha.zero();
-    } else if ( alpha.giveSize() != 6 )     {
+    } else if ( alpha.giveSize() != 6 ) {
         OOFEM_ERROR( "Incorrect size of talpha - should be 0 or 6, is %d\n", alpha.giveSize() );
     }
 
@@ -100,6 +100,10 @@ AnisotropicLinearElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &a
                                                                   TimeStep *tStep)
 {
     answer = stiffmat;
+
+    if ( ( tStep->giveIntrinsicTime() < this->castingTime ) ) {
+        answer.times(1. - this->preCastStiffnessReduction);
+    }
 }
 
 

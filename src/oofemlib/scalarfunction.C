@@ -38,6 +38,7 @@
 #include "function.h"
 #include "parser.h"
 #include "error.h"
+#include "gausspoint.h"
 
 #include <map>
 #include <string>
@@ -99,7 +100,7 @@ ScalarFunction :: setReference(int val)
 
 
 double
-ScalarFunction :: eval(const std :: map< std :: string, FunctionArgument > &valDict, Domain *d) const
+ScalarFunction :: eval(const std :: map< std :: string, FunctionArgument >valDict, Domain *d, GaussPoint *gp, double param) const
 {
     if ( this->dvType == DV_ValueType ) {
         return this->dValue;
@@ -134,7 +135,7 @@ ScalarFunction :: eval(const std :: map< std :: string, FunctionArgument > &valD
         return value;
     } else if ( this->dvType == DV_FunctionReferenceType ) {
         FloatArray val;
-        d->giveFunction(this->fReference)->evaluate(val, valDict);
+        d->giveFunction(this->fReference)->evaluate(val, valDict, gp, param);
         if ( val.giveSize() != 1 ) {
             OOFEM_ERROR( "Function @%d did not return a scalar (size = %d)", this->fReference, val.giveSize() );
         }

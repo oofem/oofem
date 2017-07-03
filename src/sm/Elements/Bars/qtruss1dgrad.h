@@ -71,7 +71,6 @@ protected:
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual void computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer);
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
-    virtual void computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     virtual void computeGaussPoints();
     virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
     virtual StructuralElement *giveStructuralElement() { return this; }

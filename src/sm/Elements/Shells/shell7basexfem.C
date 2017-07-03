@@ -1514,11 +1514,14 @@ Shell7BaseXFEM :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
 #endif
 }
 
-
-
-void
-Shell7BaseXFEM :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep, ValueModeType mode)
+void Shell7BaseXFEM :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
 {
+  //@todo present formulation returns edge vector localized into element vector, efficient implementation can return only dofs related to edge (bp)
+    answer.clear();
+    if ( type != ExternalForcesVector ) {
+        return;
+    }
+
     BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >(load);
     if ( edgeLoad ) {
         answer.resize( this->computeNumberOfDofs() );
@@ -1526,7 +1529,7 @@ Shell7BaseXFEM :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iE
 
         // Continuous part
         FloatArray fT;
-        Shell7Base :: computeTractionForce(fT, iEdge, edgeLoad, tStep, mode);
+        Shell7Base :: computeTractionForce(fT, boundary, edgeLoad, tStep, mode, true);
 
         IntArray activeDofs, ordering;
         this->computeOrderingArray(ordering, activeDofs, NULL);
@@ -1547,7 +1550,7 @@ Shell7BaseXFEM :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iE
 
             EnrichmentItem *ei = this->xMan->giveEnrichmentItem(i);
             if ( ei->isElementEnriched(this) ) {
-                this->computeEnrTractionForce(temp, iEdge, edgeLoad, tStep, mode, ei);
+                this->computeEnrTractionForce(temp, boundary, edgeLoad, tStep, mode, ei);
                 this->computeOrderingArray(ordering, activeDofs, ei);
                 tempRed.beSubArrayOf(temp, activeDofs);
                 answer.assemble(tempRed, ordering);
@@ -1723,7 +1726,9 @@ Shell7BaseXFEM :: edgeEvalEnrCovarBaseVectorsAt(const FloatArray &lcoords, const
     gcov = {g1, g2, g3};
 }
 
+  
 // Surface
+/*
 void
 Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
                                          int iSurf, TimeStep *tStep, ValueModeType mode)
@@ -1786,7 +1791,7 @@ Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
         return;
     }
 }
-
+*/
 
 
 // Shifted N and B matrices

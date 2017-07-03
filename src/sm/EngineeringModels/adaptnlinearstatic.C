@@ -385,11 +385,11 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
         //nMethod -> solveYourselfAt(this->giveCurrentStep()) ;
         nMethod->setStepLength(deltaL / 5.0);
         if ( initialLoadVector.isNotEmpty() ) {
-          numMetStatus = nMethod->solve( *stiffnessMatrix, incrementalLoadVector, & initialLoadVector, NULL,
+          numMetStatus = nMethod->solve( *stiffnessMatrix, incrementalLoadVector, & initialLoadVector,
                                           totalDisplacement, incrementOfDisplacement, internalForces,
                                           internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         } else {
-          numMetStatus = nMethod->solve( *stiffnessMatrix, incrementalLoadVector, NULL, NULL, 
+          numMetStatus = nMethod->solve( *stiffnessMatrix, incrementalLoadVector, NULL, 
                                           totalDisplacement, incrementOfDisplacement, internalForces,
                                           internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         }
@@ -704,11 +704,11 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
         //nMethod -> solveYourselfAt(this->giveCurrentStep()) ;
         nMethod->setStepLength(deltaL / 5.0);
         if ( initialLoadVector.isNotEmpty() ) {
-          numMetStatus = nMethod->solve( *stiffnessMatrix, incrementalLoadVector, & initialLoadVector, NULL, 
+          numMetStatus = nMethod->solve( *stiffnessMatrix, incrementalLoadVector, & initialLoadVector,
                                           totalDisplacement, incrementOfDisplacement, internalForces,
                                           internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         } else {
-          numMetStatus = nMethod->solve( *stiffnessMatrix, incrementalLoadVector, NULL, NULL,
+          numMetStatus = nMethod->solve( *stiffnessMatrix, incrementalLoadVector, NULL,
                                           totalDisplacement, incrementOfDisplacement, internalForces,
                                           internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         }

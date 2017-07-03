@@ -38,6 +38,7 @@
 #include "transportmaterial.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
+#include "scalarfunction.h"
 
 ///@name Input fields for IsotropicHeatTransferMaterial
 //@{
@@ -45,9 +46,12 @@
 #define _IFT_IsotropicHeatTransferMaterial_k "k" ///< Conductivity
 #define _IFT_IsotropicHeatTransferMaterial_c "c" ///< Specific heat
 #define _IFT_IsotropicHeatTransferMaterial_maturityT0 "maturityt0" ///< Baseline for maturity method
+#define _IFT_IsotropicHeatTransferMaterial_mt "mt" ///< Type of the material (0=default, 1=steel, 2=wood, 3=concrete) ...temporary
+#define _IFT_IsotropicHeatTransferMaterial_d "td"
 //@}
 
 namespace oofem {
+
 /**
  * This class implements an isotropic linear heat  material. A material
  * is an attribute of a domain. It is usually also attribute of many elements.
@@ -55,8 +59,9 @@ namespace oofem {
 class IsotropicHeatTransferMaterial : public TransportMaterial
 {
 protected:
-    double conductivity; ///< Conductivity (k in input file).
-    double capacity;     ///< Capacity (c in input file).
+    ScalarFunction conductivity; ///< Conductivity (k in input file).
+    ScalarFunction capacity;     ///< Capacity (c in input file).
+    ScalarFunction density;     ///< Density (td in input file).
     double maturityT0;   ///< Baseline for maturity mathod
 
 public:
@@ -70,7 +75,7 @@ public:
                                           GaussPoint *gp,
                                           TimeStep *tStep);
 
-    virtual double giveIsotropicConductivity(GaussPoint *gp) { return conductivity; }
+    virtual double giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep);
 
     virtual double giveCharacteristicValue(MatResponseMode mode,
                                            GaussPoint *gp,
@@ -85,7 +90,18 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual double give(int aProperty, GaussPoint *gp);
+    virtual double give(int aProperty, GaussPoint *gp, TimeStep *tStep);
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    double giveTemperature(GaussPoint *gp);
 };
+
+class IsotropicHeatTransferMaterialStatus : public TransportMaterialStatus
+{
+public:
+    IsotropicHeatTransferMaterialStatus(int n, Domain * d, GaussPoint * g);
+    virtual ~IsotropicHeatTransferMaterialStatus();
+    virtual void updateYourself(TimeStep *tStep);
+};
+
 } // end namespace oofem
 #endif // isoheatmat_h

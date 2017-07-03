@@ -1117,19 +1117,17 @@ Shell7Base :: computeConvectiveMassForce(FloatArray &answer, TimeStep *tStep)
 // External forces
 
 #if 1
-void
-Shell7Base :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep, ValueModeType mode)
+void Shell7Base :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
 {
-    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >( load );
-    if ( edgeLoad ) {
-        this->computeTractionForce(answer, iEdge, edgeLoad, tStep, mode);
-    } else {
-        OOFEM_ERROR("Load type not supported");
+    answer.clear();
+    if ( type != ExternalForcesVector ) {
+        return;
     }
+    this->computeTractionForce(answer, boundary, load, tStep, mode);
 }
 
 
-// Surface
+/*
 void
 Shell7Base :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
                                          int iSurf, TimeStep *tStep, ValueModeType mode)
@@ -1148,7 +1146,8 @@ Shell7Base :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
         OOFEM_ERROR("Load type not supported");
     }
 }
-
+*/
+  
 void
 Shell7Base :: computePressureForce(FloatArray &answer, FloatArray solVec, const int iSurf, BoundaryLoad *surfLoad, TimeStep *tStep, ValueModeType mode)
 {
@@ -1265,7 +1264,7 @@ Shell7Base :: evalInitialCovarNormalAt(FloatArray &nCov, const FloatArray &lCoor
 }
 
 void
-Shell7Base :: computeTractionForce(FloatArray &answer, const int iEdge, BoundaryLoad *edgeLoad, TimeStep *tStep, ValueModeType mode)
+Shell7Base :: computeTractionForce(FloatArray &answer, const int iEdge, BoundaryLoad *edgeLoad, TimeStep *tStep, ValueModeType mode, bool map2elementDOFs)
 {
 
     int approxOrder = edgeLoad->giveApproxOrder() + this->giveInterpolation()->giveInterpolationOrder();
@@ -1313,12 +1312,16 @@ Shell7Base :: computeTractionForce(FloatArray &answer, const int iEdge, Boundary
         
         Nf.plusProduct(N, fT, dL);
     }
-
-    IntArray mask;
-    this->giveEdgeDofMapping(mask, iEdge);
-    answer.resize( Shell7Base :: giveNumberOfDofs()  );
-    answer.zero();
-    answer.assemble(Nf, mask);
+    /* Note: now used from computeBoundaryEdgeLoadVector, so result should be in global cs for edge dofs */
+    if (map2elementDOFs) {
+      IntArray mask;
+      this->giveEdgeDofMapping(mask, iEdge);
+      answer.resize( Shell7Base :: giveNumberOfDofs()  );
+      answer.zero();
+      answer.assemble(Nf, mask);
+    } else {
+      answer = Nf;
+    }
 
 }
 

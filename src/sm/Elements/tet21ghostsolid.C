@@ -44,6 +44,7 @@
 #include "element.h"
 #include "dofmanager.h"
 #include "load.h"
+#include "bodyload.h"
 #include "boundaryload.h"
 #include "neumannmomentload.h"
 #include "dof.h"
@@ -598,7 +599,7 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
 }
 
 void
-tet21ghostsolid :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
+tet21ghostsolid :: computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     // Compute displacements used to compute J
 
@@ -1371,7 +1372,7 @@ tet21ghostsolid :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer
 }
 
 void
-tet21ghostsolid :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep)
+tet21ghostsolid :: computeBoundarySurfaceLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
 {
     answer.clear();
     if ( type != ExternalForcesVector ) {

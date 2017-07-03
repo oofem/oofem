@@ -264,14 +264,6 @@ Structural3DElement :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, G
     answer.beNMatrixOf(N, 3);
 }
 
-#if 1
-IntegrationRule *
-Structural3DElement :: giveSurfaceIntegrationRule(int order, int isurf)
-{
-    return static_cast< FEInterpolation3d* > ( this->giveInterpolation() )->giveBoundaryIntegrationRule(order, isurf);   
-}
-#endif
-
 void
 Structural3DElement :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
 {
@@ -303,14 +295,6 @@ Structural3DElement :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
     return volume;
 }
 
-void
-Structural3DElement :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf)
-{
-    static_cast< FEInterpolation3d* > ( this->giveInterpolation() )-> 
-        surfaceLocal2global( answer, iSurf, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-}
-
-
 
 
 int
@@ -328,24 +312,6 @@ Structural3DElement :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int, 
 // Edge support
 
 void
-Structural3DElement :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
-{
-    /* Returns the [ 3 x (nno*3)] shape function matrix {N} of the receiver, 
-     * evaluated at the given gp.
-     * {u} = {N}*{a} gives the displacements at the integration point.
-     */ 
-    ///@todo move up in hiearchy
-          
-    // Evaluate the shape functions at the position of the gp. 
-    FloatArray N;
-    static_cast< FEInterpolation3d* > ( this->giveInterpolation() )->
-        edgeEvalN( N, iedge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );  
-    answer.beNMatrixOf(N, 3);
-}
-
-
-
-void
 Structural3DElement :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 {
     /*
@@ -361,15 +327,6 @@ Structural3DElement :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
         answer.at(i * 3 - 1) = eNodes.at(i) * 3 - 1;
         answer.at(i * 3)     = eNodes.at(i) * 3;
     }
-}
-
-
-
-void
-Structural3DElement :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
-{
-    static_cast< FEInterpolation3d* > ( this->giveInterpolation() )->
-        edgeLocal2global( answer, iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 

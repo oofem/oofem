@@ -232,7 +232,7 @@ CCTPlate3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gau
         answer.at(3, 1) = charVect.at(4);
         answer.at(2, 3) = charVect.at(5);
         answer.at(3, 2) = charVect.at(5);
-    } else if ( ( type == LocalMomentumTensor ) || ( type == GlobalMomentumTensor ) ) {
+    } else if ( ( type == LocalMomentTensor ) || ( type == GlobalMomentTensor ) ) {
         //this->computeStressVector(charVect, gp, tStep);
         charVect = ms->giveStressVector();
 
@@ -261,7 +261,7 @@ CCTPlate3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gau
         exit(1);
     }
 
-    if ( ( type == GlobalForceTensor  ) || ( type == GlobalMomentumTensor  ) ||
+    if ( ( type == GlobalForceTensor  ) || ( type == GlobalMomentTensor  ) ||
         ( type == GlobalStrainTensor ) || ( type == GlobalCurvatureTensor ) ) {
         this->computeGtoLRotationMatrix();
         answer.rotatedWith(GtoLRotationMatrix);
@@ -296,7 +296,7 @@ CCTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
         return 1;
     } else if ( type == IST_ShellMomentTensor || type == IST_ShellForceTensor ) {
         if ( type == IST_ShellMomentTensor ) {
-            cht = GlobalMomentumTensor;
+            cht = GlobalMomentTensor;
         } else {
             cht = GlobalForceTensor;
         }
@@ -354,8 +354,11 @@ CCTPlate3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeSte
     GaussIntegrationRule irule(1, this, 1, 5);
     irule.SetUpPointsOnTriangle(1, _2dPlate);
 
-    // note: force is assumed to be in global coordinate system.
+    // note: force is assumed to be in global coordinate system, 6 components
     forLoad->computeComponentArrayAt(force, tStep, mode);
+    // get it in local c.s.
+    this->computeLoadGToLRotationMtrx(T);
+    force.rotatedWith(T, 'n');
 
     if ( force.giveSize() ) {
         GaussPoint *gp = irule.getIntegrationPoint(0);
@@ -363,28 +366,28 @@ CCTPlate3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeSte
         dens = this->giveStructuralCrossSection()->give('d', gp); // constant density assumed
         dV   = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness, gp); // constant thickness assumed
 
-        answer.resize(18);
+        answer.resize(9);
         answer.zero();
 
-        load = force.at(1) * dens * dV / 3.0;
-        answer.at(1) = load;
-        answer.at(7) = load;
-        answer.at(13) = load;
-
-        load = force.at(2) * dens * dV / 3.0;
-        answer.at(2) = load;
-        answer.at(8) = load;
-        answer.at(14) = load;
-
         load = force.at(3) * dens * dV / 3.0;
+        answer.at(1) = load;
+        answer.at(4) = load;
+        answer.at(7) = load;
+
+        load = force.at(4) * dens * dV / 3.0;
+        answer.at(2) = load;
+        answer.at(5) = load;
+        answer.at(8) = load;
+
+        load = force.at(5) * dens * dV / 3.0;
         answer.at(3) = load;
+        answer.at(6) = load;
         answer.at(9) = load;
-        answer.at(15) = load;
 
         // transform result from global cs to local element cs.
-        if ( this->computeGtoLRotationMatrix(T) ) {
-            answer.rotatedWith(T, 'n');
-        }
+        //if ( this->computeGtoLRotationMatrix(T) ) {
+        //    answer.rotatedWith(T, 'n');
+        //}
     } else {
         answer.clear();          // nil resultant
     }
@@ -447,13 +450,6 @@ double
 CCTPlate3d :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
     return this->computeVolumeAround(gp);
-}
-
-
-void
-CCTPlate3d :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
-{
-    this->computeGlobalCoordinates( answer, gp->giveNaturalCoordinates() );
 }
 
 

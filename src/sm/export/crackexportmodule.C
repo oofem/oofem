@@ -200,7 +200,7 @@ CrackExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
             }
         }
     }
-    // vyblejt do outputu
+    // print to output
     std :: stringstream strCracks;
     strCracks  << ".dat";
     std :: string nameCracks = this->giveOutputBaseFileName(tStep) + strCracks.str();

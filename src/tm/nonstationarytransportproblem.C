@@ -707,6 +707,13 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
     }
 
 #endif //__CEMHYD_MODULE
+
+    // update element state according to given ic
+    for ( auto &elem : domain->giveElements() ) {
+        TransportElement *element = static_cast< TransportElement * >( elem.get() );
+        element->updateInternalState(stepWhenIcApply);
+        element->updateYourself(stepWhenIcApply);
+    }
 }
 
 

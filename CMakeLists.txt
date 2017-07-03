@@ -14,7 +14,7 @@ set (oofem_VERSION_MINOR 4)
 set (oofem_VERSION_PATCH 0) # Unused
 set (oofem_HOMEPAGE "http://www.oofem.org")
 set (bp_HOMEPAGE "http://ksm.fsv.cvut.cz/%7Ebp/bp.html")
-set (oofem_COPYRIGHT "Copyright (C) 1994-2014 Borek Patzak")
+set (oofem_COPYRIGHT "Copyright (C) 1994-2017 Borek Patzak")
 set (oofem_EMAIL "info@oofem.org")
 
 # Default is debug build
@@ -32,6 +32,7 @@ if (MSVC)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W4 -wd4786 -wd4100 -wd4996 -wd4706 -wd4512 -wd4251 -wd4800")
 else ()
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fPIC")
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC")
 endif ()
 # Check with more compilers as time go on
 if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.7)
@@ -56,11 +57,16 @@ set (MY_PETSC_ARCH CACHE STRING "Manual PETSc arch name (e.g. linux-gnu-cxx-opt)
 set (MPI_DIR CACHE PATH "Manual MPI directory")
 set (VTK_DIR CACHE PATH "Manual VTK directory (For binary VTU export)")
 set (LAPACK_DIR CACHE PATH "Manual LAPACK directory")
+set (SUPERLU_MT_DIR CACHE PATH "Manual SuperLU_MT directory")
 set (SPOOLES_DIR CACHE PATH "Manual SPOOLES directory")
 set (ELIXIR_DIR CACHE PATH "Manual Elixir directory (OOFEG only)")
 set (CKIT_DIR CACHE PATH "Manual CKit directory (OOFEG only)")
 set (METIS_DIR CACHE PATH "Manual Metis directory (Load balancing)")
 set (PARMETIS_DIR CACHE PATH "Manual ParMetis directory (Load balancing)")
+#intel mkl pardiso
+set (INTEL_MKL_PARDISO_DIR CACHE PATH "Manual mkl pardiso directory (sparse direct solver)")
+#pardiso-project.org
+set (PARDISO_ORG_DIR CACHE PATH "Manual pardiso-project.org directory (sparse direct solver)")
 #set (BOOST_DIR CACHE PATH "Manual Boost directory")
 
 #######################################################################
@@ -82,10 +88,12 @@ option (USE_OPENMP "Compile with OpenMP support (for parallel assembly)" OFF)
 option (USE_DSS "Enable DSS module" OFF) # No reason to use this
 option (USE_IML "Enable iml++ solvers" OFF) # or this
 option (USE_SPOOLES "Enable SPOOLES-solver" OFF) # or this
-option (USE_MKLPARDISO "Enable MKLPARDISO solver support" OFF)
+option (USE_INTEL_MKLPARDISO "Enable MKLPARDISO solver support" OFF)
+option (USE_PARDISO_ORG "Enable PARDISO-project.org solver support" OFF)
 option (USE_PETSC "Enable PETSc support (required for parallel)" OFF)
 option (USE_SLEPC "Enable SLEPc support" OFF)
 option (USE_LAPACK "Use LAPACK" OFF)
+option (USE_SUPERLU_MT "Use SUPERLU_MT" OFF)
 # Other external libraries
 option (USE_TRIANGLE "Compile with Triangle bindings" OFF)
 option (USE_VTK "Enable VTK (for exporting binary VTU-files)" OFF)
@@ -96,6 +104,7 @@ option (USE_FM "Enable fluid mechanics module" ON)
 option (USE_PFEM "Enable PFEM module" OFF)
 option (USE_TM "Enable heat/mass transfer module" ON)
 option (USE_CEMHYD "Enable CemHyd support" OFF)
+option (USE_T3D "Enable T3D support" OFF)
 #option (USE_BOOST "Enable Boost" OFF)
 option (USE_PYTHON_BINDINGS "Enable Python bidings (OOFEM usable from Python). Implies USE_PYTHON." OFF)
 option (USE_PYTHON "Enable Python to be used inside OOFEM (e.g. userdef Dirichlet BCs)" OFF)
@@ -110,6 +119,7 @@ endif ()
 #######################################################################
 # I believe the subdirs should be used when including instead.
 include_directories ("${oofem_SOURCE_DIR}/src/oofemlib")
+include_directories ("${oofem_SOURCE_DIR}/src/oofemlib/T3d/src")
 include_directories ("${oofem_BINARY_DIR}")
 
 # Is there really any reason not to compile all of them? Some has cross dependencies.
@@ -244,6 +254,32 @@ if (USE_LAPACK)
     add_definitions (-D__LAPACK_MODULE)
 endif ()
 
+
+## There is a conflict on set.h as defined by libstdc and superlu_mt 3.1
+## Therefore it is assumed that superlu include files
+## are included using #include "SUPERLU_MT/include"
+## The ${SUPERLU_MT_DIR} is added into compiler include path
+## Therefore SUPERLU_MT/include has to be manually added pointing to
+## ${SUPERLU_MT__DIR}/src directory
+if (USE_SUPERLU_MT)
+    set (CMAKE_LIBRARY_DIR ${SUPERLU_MT_DIR})
+    #find_package (SuperLU REQUIRED)
+    find_package(BLAS REQUIRED)
+    find_library (SUPERLU_MT_LIB superlu_mt_OPENMP PATH "${SUPERLU_MT_DIR}/lib")
+    list (APPEND EXT_LIBS ${SUPERLU_MT_LIB} ${BLAS_LIBRARIES})
+    #set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${BLAS_LINKER_FLAGS}")
+    list (APPEND MODULE_LIST "SuperLU_MT")
+    include_directories("${SUPERLU_MT_DIR}")
+    set (CMAKE_REQUIRED_INCLUDES "${SUPERLU_MT_DIR}")
+    add_definitions (-D__SuperLU_MT_MODULE)
+    check_include_file_cxx ("SUPERLU_MT/include/slu_mt_ddefs.h" HAVE_SUPERLU_MT_DDEFS_H)
+    if (NOT HAVE_SUPERLU_MT_DDEFS_H)
+        message (FATAL_ERROR "Necessary SUPERLU_MT headers not found; refer to CMakeLists.txt for details")
+    endif ()
+
+
+endif ()
+
 if (USE_VTK)
     set (CMAKE_LIBRARY_DIR ${VTK_DIR})
     find_package (VTK REQUIRED NO_MODULE)
@@ -283,13 +319,28 @@ if (USE_METIS)
     list (APPEND MODULE_LIST "metis")
 endif ()
 
-if (USE_MKLPARDISO)
+if (USE_PARDISO_ORG)
+    if (PARDISO_ORG_DIR)
+        find_library (PARDISO_ORG_LIB pardiso PATH "${PARDISO_ORG_DIR}")
+    else ()
+        find_library (PARDISO_ORG_LIB pardiso)
+    endif ()
+    if (${PARDISO_ORG_LIB} STREQUAL "PARDISO_ORG_LIB-NOTFOUND")
+        message (FATAL_ERROR "Pardiso library not found")
+    endif ()
+    list (APPEND EXT_LIBS ${PARDISO_ORG_LIB} blas lapack gfortran pthread)
+    set (CMAKE_CXX_COMPILE_FLAGS "${CMAKE_CXX_COMPILES_FLAGS} -fopenmp")
+    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp" ) 
+    list (APPEND MODULE_LIST "pardiso-project.org")
+endif ()
+
+if (USE_INTEL_MKL_PARDISO)
     # Find the actual libraries:
     list(APPEND MKL_LIBS "mkl_core" "mkl_gf_lp64" "mkl_gnu_thread" "pthread")
     foreach (f ${MKL_LIBS})
-        if (MKL_DIR)
-            find_library (${f}_LIB ${f} PATH "${MKL_DIR}/mkl/lib/intel64/" DOC "MKLPARDISO (library)")
-            include_directories ("${MKL_DIR}/mkl/include")
+        if (INTEL_MKL_PARDISO_DIR)
+            find_library (${f}_LIB ${f} PATH "${INTEL_MKL_PARDISO_DIR}/mkl/lib/intel64/" DOC "MKLPARDISO (library)")
+            include_directories ("${INTEL_MKL_PARDISO_DIR}/mkl/include")
         else ()
             find_library (${f}_LIB ${f} HINTS "/opt/intel/composerxe/mkl/lib/intel64/" DOC "MKLPARDISO (library)")
             include_directories ("/opt/intel/composerxe/mkl/include")
@@ -299,7 +350,6 @@ if (USE_MKLPARDISO)
         endif ()
         list (APPEND EXT_LIBS ${${f}_LIB})
     endforeach ()
-
     #list (APPEND EXT_LIBS ${MKLPARDISO_LIB})
     list (APPEND MODULE_LIST "MKLPARDISO")
 endif ()
@@ -377,6 +427,17 @@ if (USE_MPI)
     endif (MPI_DIR)
     list (APPEND MODULE_LIST "MPI")
     # Compile and link flags?
+endif ()
+
+if (USE_T3D)
+    add_definitions (-D__T3D)
+    include_directories ("${oofem_SOURCE_DIR}/src/oofemlib/T3d/src")
+    check_include_file_cxx ("${oofem_SOURCE_DIR}/src/oofemlib/T3d/src/t3d.h" HAVE_T3D_H)
+    if ((NOT HAVE_T3D_H))
+        message (FATAL_ERROR "Necessary T3D headers not found")
+    endif ()
+    set (MODULE_LIST ${MODULE_LIST} "T3D")
+    add_definitions(-DT3D_OOFEM)
 endif ()
 
 if (USE_TRIANGLE)
@@ -812,3 +873,4 @@ set (CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 set(CPACK_DEBIAN_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION}.${CPACK_PACKAGE_VERSION_PATCH}+sid1")
 
 include (CPack)
+

@@ -73,13 +73,14 @@ public:
     virtual void computeLumpedCapacityVector(FloatArray &answer, TimeStep *tStep);
 
     //Compute volumetric load from element
-    virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep);
     //Boundary load by prescribed flux, convection, or radiation over surface
-    virtual void computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void computeBoundarySurfaceLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true);
     //Contribution to conductivity matrix from convection
-    virtual void computeTangentFromBoundaryLoad(FloatMatrix &answer, BoundaryLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep);
+    virtual void computeTangentFromSurfaceLoad(FloatMatrix &answer, SurfaceLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep);
+    virtual void computeTangentFromEdgeLoad(FloatMatrix &answer, EdgeLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep);
     //Boundary load by prescribed flux, convection, or radiation over length
-    virtual void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true);
 
     //Compute radiative heat tranfer coefficient as 4*eps*sigma*T_infty^3
     virtual double getRadiativeHeatTranferCoef(BoundaryLoad *bLoad, TimeStep *tStep);
@@ -247,13 +248,11 @@ protected:
      * Computes the length around a integration point on a edge.
      */
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge) = 0;
-    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, const FloatArray &lcoord, int iEdge);
 
     virtual IntegrationRule *GetSurfaceIntegrationRule(int approxOrder) { return NULL; }
     virtual void computeSurfaceNAt(FloatArray &answer, int iSurf, const FloatArray &lcoord);
     virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf) { return 0.; }
     virtual void giveSurfaceDofMapping(IntArray &mask, int iSurf);
-    virtual void computeSurfIpGlobalCoords(FloatArray &answer, const FloatArray &lcoord, int iSurf);
 
     virtual int giveApproxOrder(int unknownIndx);
 

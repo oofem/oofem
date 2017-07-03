@@ -43,9 +43,6 @@
 //@{
 #define _IFT_IDNLMaterial_Name "idmnl1"
 #define _IFT_IDNLMaterial_r "r"
-#define _IFT_IDNLMaterial_averagingtype "averagingtype"
-#define _IFT_IDNLMaterial_exp "exp"
-#define _IFT_IDNLMaterial_rf "rf"
 //@}
 
 namespace oofem {
@@ -111,14 +108,6 @@ public:
 class IDNLMaterial : public IsotropicDamageMaterial1, public StructuralNonlocalMaterialExtensionInterface,
     public NonlocalMaterialStiffnessInterface
 {
-protected:
-    /// Final value of interaction radius, for a model with evolving characteristic length.
-    double Rf;
-    /// Parameter used as an exponent by models with evolving characteristic length.
-    double exponent;
-    /// Parameter specifying how the weight function should be adjusted due to damage.
-    int averType;
-
 public:
     /// Constructor
     IDNLMaterial(int n, Domain *d);
@@ -163,9 +152,8 @@ public:
 
     virtual void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep);
 
-    double computeModifiedLength(double length, double dam1, double dam2);
-    void modifyNonlocalWeightFunctionAround(GaussPoint *gp);
-    double computeDistanceModifier(double damage);
+    /// Compute the factor that specifies how the interaction length should be modified (by eikonal nonlocal damage models)
+    virtual double giveNonlocalMetricModifierAt(GaussPoint *gp);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
