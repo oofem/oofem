@@ -235,7 +235,7 @@ TrPlaneStrRot3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type
         exit(1);
     }
 
-    if ( type == GlobalForceTensor || type == GlobalMomentumTensor ||
+    if ( type == GlobalForceTensor || type == GlobalMomentTensor ||
          type == GlobalStrainTensor || type == GlobalCurvatureTensor ) {
         this->computeGtoLRotationMatrix();
         answer.rotatedWith(GtoLRotationMatrix);

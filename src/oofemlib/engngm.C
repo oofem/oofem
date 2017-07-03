@@ -1396,6 +1396,7 @@ EngngModel :: assemblePrescribedExtrapolatedForces(FloatArray &answer, TimeStep 
         ///(tangent will be computed for the previous step, with whatever deltaT it had)
         element->giveCharacteristicMatrix(charMatrix, type, tStep);
         element->computeVectorOfPrescribed(VM_Incremental, tStep, delta_u);
+        if ( charMatrix.isNotEmpty() ) {
             charVec.beProductOf(charMatrix, delta_u);
             if ( element->giveRotationMatrix(R) ) {
                 charVec.rotatedWith(R, 't');

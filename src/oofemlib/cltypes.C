@@ -101,7 +101,6 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_ShellMomentTensor:
     case IST_MomentTensor:
     case IST_MomentTensorTemp:
-    #case IST_ForceTensor:
 
     ///@todo Should be have these are S3E or just S3?
     case IST_AutogenousShrinkageTensor:

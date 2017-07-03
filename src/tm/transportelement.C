@@ -730,13 +730,21 @@ TransportElement :: computeTangentFromEdgeLoad(FloatMatrix &answer, EdgeLoad *lo
         return;
     }
 
-    FloatArray gcoords, n;
+    FloatArray gcoords, n, unknowns;
     FloatMatrix N;
     int unknownsPerNode = this->emode == HeatMass1TransferEM ? 2 : 1;
 
     ///@todo Deal with coupled fields (I think they should be another class of problems completely).
     FEInterpolation *interp = this->giveInterpolation();
     std :: unique_ptr< IntegrationRule > iRule( this->giveBoundaryEdgeIntegrationRule(load->giveApproxOrder() + interp->giveInterpolationOrder(), boundary) );
+
+    if ( load->propertyMultExpr.isDefined() ) {
+        IntArray bNodes, dofid;
+        this->giveElementDofIDMask(dofid);
+        interp->boundaryEdgeGiveNodes(bNodes, boundary);
+        this->giveElementDofIDMask(dofid);
+        this->computeBoundaryVectorOf(bNodes, dofid, VM_TotalIntrinsic, tStep, unknowns);
+    }
 
     for ( auto &gp : *iRule ) {
         const FloatArray &lcoords = gp->giveNaturalCoordinates();
@@ -748,7 +756,19 @@ TransportElement :: computeTangentFromEdgeLoad(FloatMatrix &answer, EdgeLoad *lo
         N.beNMatrixOf(n, unknownsPerNode);
 
         if ( load->giveType() == ConvectionBC ){
-            answer.plusProductSymmUpper(N, N, load->giveProperty('a', tStep) * dA);
+            double a;
+            if ( load->propertyMultExpr.isDefined() ) {
+                if ( unknownsPerNode != 1 ) {
+                    OOFEM_ERROR("Not implemented for >=2 coupled fields");
+                }
+                FloatArray field, val;
+                field.beProductOf(N, unknowns);
+                val.subtract(field);
+                a = load->giveProperty('a', tStep, { { "u", field.at(1) } });
+            } else {
+                a = load->giveProperty('a', tStep);
+            }
+            answer.plusProductSymmUpper(N, N, a * dA);
         } else if ( load->giveType() == RadiationBC ){
             answer.plusProductSymmUpper(N, N, getRadiativeHeatTranferCoef(load, tStep) * dA);
         }
@@ -769,80 +789,53 @@ TransportElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLo
         return;
     }
 
-    if (!load->isImposed(tStep) ) {
+    if ( !load->isImposed(tStep) ) {
       return;
     }
-    
+
     FloatArray gcoords, val, n, unknowns, field;
     FloatMatrix N;
-    IntArray dofid;
-    double coeff;
     int unknownsPerNode = this->emode == HeatMass1TransferEM ? 2 : 1;
-    
-    this->giveElementDofIDMask(dofid);
 
     ///@todo Deal with coupled fields (I think they should be another class of problems completely).
     FEInterpolation *interp = this->giveInterpolation();
     std :: unique_ptr< IntegrationRule > iRule( this->giveBoundaryEdgeIntegrationRule(load->giveApproxOrder() + interp->giveInterpolationOrder(), boundary) );
 
     // get solution vector for InternalForcesVector (Convention or radiation)
-    if ( (type == InternalForcesVector) &&
-	 (load->giveType() == ConvectionBC || load->giveType() == RadiationBC )) {
-        IntArray bNodes;
+    if ( load->giveType() == ConvectionBC || load->giveType() == RadiationBC ) {
+        IntArray bNodes, dofid;
+        this->giveElementDofIDMask(dofid);
         interp->boundaryEdgeGiveNodes(bNodes, boundary);
         this->computeBoundaryVectorOf(bNodes, dofid, VM_TotalIntrinsic, tStep, unknowns);
     }
 
     for ( auto &gp: *iRule ) {
-      if( load->propertyMultExpr.isDefined()) {//dependence on state variable
-	///@todo Deal with coupled fields
-	if ( emode!=HeatTransferEM && emode!=Mass1TransferEM ){
-	  OOFEM_ERROR("Not implemented for >=2 coupled fields");
-	}
-	FloatArray unknowns;
-	IntArray dofid, mask;
-	this->computeEgdeNAt( n, boundary, gp->giveNaturalCoordinates() );
-	this->giveElementDofIDMask(dofid);
-	this->giveEdgeDofMapping(mask, boundary);
-	this->computeBoundaryVectorOf(mask, dofid, VM_TotalIntrinsic, tStep, unknowns);
-	double value = n.dotProduct(unknowns);//unknown in IP
-	load->setVariableState('x', value);
-      }
-
-      if ( load->giveType() == TransmissionBC ) {
-	coeff = -1.0;
-      } else if ( load->giveType() == ConvectionBC ) {
-	coeff = -load->giveProperty('a', tStep);
-      } else if ( load->giveType() == RadiationBC ){
-	coeff = -getRadiativeHeatTranferCoef(load, tStep);
-      }
-      
-
-      const FloatArray &lcoords = gp->giveNaturalCoordinates();
-      //this->computeEgdeNAt(n, boundary, lcoords);
-      interp->boundaryEdgeEvalN( n, boundary, lcoords, FEIElementGeometryWrapper(this) );
-      N.beNMatrixOf(n, unknownsPerNode);
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
+        //this->computeEgdeNAt(n, boundary, lcoords);
+        interp->boundaryEdgeEvalN( n, boundary, lcoords, FEIElementGeometryWrapper(this) );
+        N.beNMatrixOf(n, unknownsPerNode);
 
 
-      //double detJ = interp->boundaryEdgeGiveTransformationJacobian( boundary, lcoords, FEIElementGeometryWrapper(this) );
-      //double dL = this->giveThicknessAt(gcoords) * gp->giveWeight() * detJ;
-      double dV = this->computeEdgeVolumeAround(gp, boundary);
-      FieldPtr tf;
-      if (tf = domain->giveEngngModel()->giveContext()->giveFieldManager()->giveField(FT_TemperatureAmbient)){
-	interp->boundaryEdgeLocal2Global( gcoords, boundary, lcoords, FEIElementGeometryWrapper(this) );
-	tf->evaluateAt(val, gcoords, VM_TotalIntrinsic, tStep);
-      } else if ( load->giveFormulationType() == Load :: FT_Entity ) {
-	load->computeValueAt(val, tStep, lcoords, mode);
-      } else {
-	interp->boundaryEdgeLocal2Global( gcoords, boundary, lcoords, FEIElementGeometryWrapper(this) );
-	load->computeValueAt(val, tStep, gcoords, mode);
-      }
+        //double detJ = interp->boundaryEdgeGiveTransformationJacobian( boundary, lcoords, FEIElementGeometryWrapper(this) );
+        //double dL = this->giveThicknessAt(gcoords) * gp->giveWeight() * detJ;
+        double dV = this->computeEdgeVolumeAround(gp, boundary);
 
+        FieldPtr tf = domain->giveEngngModel()->giveContext()->giveFieldManager()->giveField(FT_TemperatureAmbient);
+        if ( tf ) {
+            tf->evaluateAt(val, gcoords, VM_TotalIntrinsic, tStep);
+        } else if ( load->giveFormulationType() == Load :: FT_Entity ) {
+            load->computeValueAt(val, tStep, lcoords, mode);
+        } else {
+            load->computeValueAt(val, tStep, gcoords, mode);
+        }
 
-      if ( (load->giveType() == TransmissionBC)) {
-	answer.plusProduct(N, val, dV*coeff);
-      } else if ((load->giveType() == ConvectionBC ) || (load->giveType() == RadiationBC  )) {
-	if (type == InternalForcesVector) {
+        if ( load->giveType() == TransmissionBC ) {
+            val.negated();
+        } else if ( load->giveType() == ConvectionBC ) {
+            field.beProductOf(N, unknowns);
+            val.subtract(field);
+            double a;
+            
             if ( load->propertyMultExpr.isDefined() ) {
                 if ( unknownsPerNode != 1 ) {
                     OOFEM_ERROR("Not implemented for >=2 coupled fields");
@@ -852,13 +845,13 @@ TransportElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLo
                 a = load->giveProperty('a', tStep);
             }
             val.times( -1.0 * a );
-	  field.beProductOf(N, unknowns);	
-	  val.subtract(field);
-	}
-	answer.plusProduct(N, val, dV*coeff);
-      }
-
-
+        } else if ( load->giveType() == RadiationBC  ) {
+            //actual Temperature in C in field
+            field.beProductOf(N, unknowns);
+            val.subtract(field);
+            val.times( -1.0 * getRadiativeHeatTranferCoef(load, tStep) );
+        }
+        answer.plusProduct(N, val, dV);
     }
 }
 

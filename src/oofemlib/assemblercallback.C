@@ -196,14 +196,15 @@ void ReferenceForceAssembler :: vectorFromLoad(FloatArray& vec, Element& element
     //element.computeExternalForcesFromLoad(vec, load, tStep);
 }
 
-void ReferenceForceAssembler :: vectorFromBoundaryLoad(FloatArray& vec, Element& element, BoundaryLoad* load, int boundary, TimeStep* tStep, ValueModeType mode) const
+
+void ReferenceForceAssembler :: vectorFromSurfaceLoad(FloatArray& vec, Element& element, SurfaceLoad* load, int boundary, TimeStep* tStep, ValueModeType mode) const
 {
     if ( load->reference )
-        element.computeBoundaryLoadVector(vec, load, boundary, ExternalForcesVector, mode, tStep);
+        element.computeBoundarySurfaceLoadVector(vec, load, boundary, ExternalForcesVector, mode, tStep);
     //element.computeExternalForcesFromBoundaryLoad(vec, load, boundary, tStep);
 }
 
-void ReferenceForceAssembler :: vectorFromEdgeLoad(FloatArray& vec, Element& element, BoundaryLoad* load, int edge, TimeStep* tStep, ValueModeType mode) const
+void ReferenceForceAssembler :: vectorFromEdgeLoad(FloatArray& vec, Element& element, EdgeLoad* load, int edge, TimeStep* tStep, ValueModeType mode) const
 {
     if ( load->reference )
         element.computeBoundaryEdgeLoadVector(vec, load, edge, ExternalForcesVector, mode, tStep);
@@ -305,13 +306,13 @@ void EffectiveTangentAssembler :: matrixFromLoad(FloatMatrix& mat, Element& elem
     //mat.times(this->k);
 }
 
-void EffectiveTangentAssembler :: matrixFromBoundaryLoad(FloatMatrix& mat, Element& element, BoundaryLoad* load, int boundary, TimeStep* tStep) const
+void EffectiveTangentAssembler :: matrixFromSurfaceLoad(FloatMatrix& mat, Element& element, SurfaceLoad* load, int boundary, TimeStep* tStep) const
 {
-    element.computeTangentFromBoundaryLoad(mat, load, boundary, this->rmode, tStep);
+    element.computeTangentFromSurfaceLoad(mat, load, boundary, this->rmode, tStep);
     mat.times(this->k);
 }
 
-void EffectiveTangentAssembler :: matrixFromEdgeLoad(FloatMatrix& mat, Element& element, BoundaryLoad* load, int edge, TimeStep* tStep) const
+void EffectiveTangentAssembler :: matrixFromEdgeLoad(FloatMatrix& mat, Element& element, EdgeLoad* load, int edge, TimeStep* tStep) const
 {
     mat.clear();
     //element.computeTangentFromEdgeLoad(mat, load, edge, this->rmode, tStep);

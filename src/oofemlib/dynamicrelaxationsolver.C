@@ -63,7 +63,7 @@ DynamicRelaxationSolver :: initializeFrom(InputRecord *ir)
 
 
 NM_Status
-DynamicRelaxationSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0, FloatArray *iR,
+DynamicRelaxationSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
                   FloatArray &X, FloatArray &dX, FloatArray &F,
                   const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                   int &nite, TimeStep *tStep)

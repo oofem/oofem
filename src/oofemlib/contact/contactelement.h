@@ -75,7 +75,7 @@ class IntegrationRule;
 class OOFEM_EXPORT ContactElement
 {
 private:
-    ContactDefinition *cDef;
+    //ContactDefinition *cDef;
     
     std :: vector< ContactElement *> slaveObjectList; // remove?
     

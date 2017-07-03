@@ -1,0 +1,6 @@
+brazil error check
+#%BEGIN_CHECK% tolerance 1.e-5
+#LOADLEVEL tStep 30 value 1.39616308e+02
+#NODE tStep 30 number 7 dof 2 unknown d value -1.30502546e-02
+#NODE tStep 30 number 3 dof 1 unknown d value  9.78700602e-04
+#%END_CHECK%

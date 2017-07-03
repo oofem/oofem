@@ -83,7 +83,6 @@ public:
     virtual int SPRNodalRecoveryMI_giveNumberOfIP();
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
 
-    virtual FEInterpolation *giveInterpolation() const;
 
 protected:
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }

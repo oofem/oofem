@@ -1,6 +1,6 @@
 MPS_block02_in.out.tm
 OOFEM input file for thermal analysis, automatically generated, test for ConTemp, a brick with size x=0.6 y=0.5 z=0.5
-TransientTransport nsteps 36 deltat 7200 rtolf 1.e-5 alpha 0.6 lumped exportfields 1 5 nmodules 1
+TransientTransport nsteps 36 deltat 7200 rtolf 1.e-6 alpha 0.6 lumped exportfields 1 5 nmodules 1
 #vtkxml tstep_all domain_all primvars 1 6 vars 3 39 56 95 stype 2 timescale 2.77777e-4
 errorcheck
 domain HeatTransfer
@@ -58,6 +58,6 @@ UsrDefLTF 6 f(t) 0+(0)*sin(2*3.14159*(t+28800-28800)/86400.)+h(-1.e+30*sin(2*3.1
 UsrDefLTF 7 f(t) 20+(0)*sin(2*3.14159*(t+28800-28800)/86400.)+h(-1.e+30*sin(2*3.14159*(t+28800-28800)/86400.))*(0)*sin(2*3.14159*(t+28800-28800)/86400.)
 #
 #%BEGIN_CHECK% tolerance 1e-6
-#NODE tStep 10  number 8 dof 10 unknown d value 3.16474966e+01
-#NODE tStep 15  number 8 dof 10 unknown d value 3.12575730e+01
+#NODE tStep 10  number 8 dof 10 unknown d value 3.16474966e+01 tolerance 1e-3
+#NODE tStep 15  number 8 dof 10 unknown d value 3.12575730e+01 tolerance 1e-3
 #%END_CHECK%

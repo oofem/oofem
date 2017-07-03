@@ -39,6 +39,7 @@
 #include "interface.h"
 #include "intarray.h"
 #include "grid.h"
+#include "mathfem.h"
 
 #include <list>
 

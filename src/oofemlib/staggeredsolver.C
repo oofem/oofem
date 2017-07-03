@@ -91,8 +91,8 @@ StaggeredSolver :: instanciateYourself()
         }
         this->UnknownNumberingSchemeList[i].setDofIdArray(idList);
         this->UnknownNumberingSchemeList[i].setNumber(i+1);
-  
-    }    
+
+    }
     
     // Allocate stiffness matrices and internal forces vectors corresponding to each dof group
    
@@ -146,11 +146,11 @@ StaggeredSolver :: giveTotalLocationArray(IntArray &condensedLocationArray, cons
     for ( int i = 1; i <= nonZeroMask.giveSize(); i++ ) {
         condensedLocationArray.at(i) = locationArray.at( nonZeroMask.at(i) );    
     }
-}    
+}
 
 
 NM_Status
-StaggeredSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0, FloatArray *iR,
+StaggeredSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
                   FloatArray &Xtotal, FloatArray &dXtotal, FloatArray &F,
                   const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                   int &nite, TimeStep *tStep)
@@ -163,7 +163,7 @@ StaggeredSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0, FloatArra
     NM_Status status;
     bool converged, errorOutOfRangeFlag;
     ParallelContext *parallel_context = engngModel->giveParallelContext( this->domain->giveNumber() );
-        
+
     if ( engngModel->giveProblemScale() == macroScale ) {
         OOFEM_LOG_INFO("StaggeredSolver: Iteration");
         if ( rtolf.at(1) > 0.0 ) {
@@ -198,9 +198,7 @@ StaggeredSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0, FloatArra
     // This improves convergence for many nonlinear problems, but not all. It may actually
     // cause divergence for some nonlinear problems. Therefore a flag is used to determine if
     // the stiffness should be evaluated before the residual (default yes). /ES
-    
-    //-------------------------------------------------    
-  
+
     // Compute external forces 
     int numDofIdGroups = (int)this->UnknownNumberingSchemeList.size();
     FloatArray RRT(numDofIdGroups);

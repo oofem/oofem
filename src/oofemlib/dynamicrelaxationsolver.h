@@ -65,7 +65,7 @@ public:
     DynamicRelaxationSolver(Domain * d, EngngModel * m);
     virtual ~DynamicRelaxationSolver() {}
 
-    virtual NM_Status solve(SparseMtrx &k, FloatArray &R, FloatArray *R0, FloatArray *iR,
+    virtual NM_Status solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
                             FloatArray &X, FloatArray &dX, FloatArray &F,
                             const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                             int &nite, TimeStep *);

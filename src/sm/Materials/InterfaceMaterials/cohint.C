@@ -36,6 +36,7 @@
 #include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
+#include "mathfem.h"
 #include "contextioerr.h"
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
@@ -51,7 +52,7 @@ CohesiveInterfaceMaterial :: giveEngTraction_3d(FloatArray &answer, GaussPoint *
 {
     StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus(gp) );
 
-    answer.resize(3);    
+    answer.resize(3);
 
     double x = jump.at(1) + transitionOpening;
     

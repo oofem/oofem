@@ -36,6 +36,7 @@
 #include "../sm/EngineeringModels/qclinearstatic.h"
 #include "qcnode.h"
 #include "element.h"
+#include "mathfem.h"
 
 #include "classfactory.h"
 #include "dynamicinputrecord.h"

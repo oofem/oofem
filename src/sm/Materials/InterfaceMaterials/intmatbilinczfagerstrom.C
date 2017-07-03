@@ -373,7 +373,7 @@ IntMatBilinearCZFagerstrom :: giveIPValue(FloatArray &answer, GaussPoint *gp, In
 
 }
 
-const double tolerance = 1.0e-12; // small number
+//const double tolerance = 1.0e-12; // small number
 IRResultType
 IntMatBilinearCZFagerstrom :: initializeFrom(InputRecord *ir)
 {

@@ -1,6 +1,6 @@
 MPS_block01_in.out.sm
 OOFEM input file for structural analysis, automatically generated, test for ConTemp, a brick with size x=0.6 y=0.5 z=0.5. No damage occurs.
-staticstructural nsteps 2 deltaT 1. rtolf 1e-5 lstype 0 smtype 0 nmodules 2
+staticstructural nsteps 2 deltaT 1. rtolf 1e-6 lstype 0 smtype 0 nmodules 2
 #vtkxml tstep_step 1 domain_all vars 11 1 2 112 111 4 106 109 110 52 90 114 primvars 1 1 cellvars 2 90 82 stype 1 regionsets 1 1 timescale 2.77777e-4
 #vtkxml tstep_step 1 domain_all vars 5 1 2 4 27 28 primvars 1 1 stype 1 regionsets 1 2 timescale 2.77777e-4
 hom tstep_all ists 1 52 regionsets 1 1 timescale 2.77777e-4

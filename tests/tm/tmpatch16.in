@@ -32,7 +32,7 @@ InitialCondition 1 Conditions 1 u 5.0 dofs 1 10 set 1
 ConstantFunction 1 f(t) 1.0
 Set 1 elementranges {(1 2)}
 Set 2 nodes 2 1 2
-Set 3 elementboundaries 2 2 2
+Set 3 elementedges 2 2 2
 
 #%BEGIN_CHECK%
 #NODE tStep 1 number 3 dof 10 unknown d value 6.10573968e+00

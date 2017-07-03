@@ -293,7 +293,6 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
 void
 NonlocalMaterialExtensionInterface :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
 {
-    int i, j;
     Element *elem = gp->giveElement();
     FloatArray coords;
     elem->computeGlobalCoordinates( coords, gp->giveNaturalCoordinates() );
@@ -314,12 +313,11 @@ NonlocalMaterialExtensionInterface :: modifyNonlocalWeightFunctionAround(GaussPo
     // This is a simple initialization that leads to standard Euclidean distance
     /*
      * for (i=1; i<=2*gridSize+1; i++)
-     * for (j=1; j<=2*gridSize+1; j++)
+     * for (j=1; j<=2*gridSize+1; j++)pos
      * speed->at(i,j) = 1.;
      */
 
-    std :: list< localIntegrationRecord > *list = this->giveIPIntegrationList(gp);
-    std :: list< localIntegrationRecord > :: iterator pos;
+    auto *list = this->giveIPIntegrationList(gp);
     Element *ngpElem;
     FloatArray ngpCoords(2);
 
@@ -330,27 +328,27 @@ NonlocalMaterialExtensionInterface :: modifyNonlocalWeightFunctionAround(GaussPo
     double ygp = coords.at(2);
     int ipos = 0;
     double xngp, yngp, damgp;
-    for ( pos = list->begin(); pos != list->end(); ++pos ) {
+    for ( auto lip : *list ) {
         ipos++;
         // Determine the global coordinates of the neighboring Gauss point
-        ngpElem = ( pos->nearGp )->giveElement();
-        ngpElem->computeGlobalCoordinates( ngpCoords, pos->nearGp->giveNaturalCoordinates() );
+        ngpElem = ( lip.nearGp )->giveElement();
+        ngpElem->computeGlobalCoordinates( ngpCoords, lip.nearGp->giveNaturalCoordinates() );
         // Get damage at the neighboring Gauss point
         xngp = mapToGridCoord(ngpCoords.at(1), xgp);
         yngp = mapToGridCoord(ngpCoords.at(2), ygp);
-        damgp = this->giveNonlocalMetricModifierAt(pos->nearGp);
+        damgp = this->giveNonlocalMetricModifierAt(lip.nearGp);
         // For the first neighbor, set damage as initial guess
         if ( ipos == 1 ) {
-            for ( i = 1; i <= 2 * gridSize + 1; i++ ) {
-                for ( j = 1; j <= 2 * gridSize + 1; j++ ) {
+            for ( int i = 1; i <= 2 * gridSize + 1; i++ ) {
+                for ( int j = 1; j <= 2 * gridSize + 1; j++ ) {
                     minDist2->at(i, j) = dist2FromGridNode(xngp, yngp, j, i);
                     speed->at(i, j) = damgp;
                 }
             }
             // For the other neighbors, check whether distance is smaller and update damage
         } else {
-            for ( i = 1; i <= 2 * gridSize + 1; i++ ) {
-                for ( j = 1; j <= 2 * gridSize + 1; j++ ) {
+            for ( int i = 1; i <= 2 * gridSize + 1; i++ ) {
+                for ( int j = 1; j <= 2 * gridSize + 1; j++ ) {
                     double dist2 = dist2FromGridNode(xngp, yngp, j, i);
                     if ( dist2 < minDist2->at(i, j) ) {
                         minDist2->at(i, j) = dist2;
@@ -362,8 +360,8 @@ NonlocalMaterialExtensionInterface :: modifyNonlocalWeightFunctionAround(GaussPo
     }
 
     // Transform damage to speed
-    for ( i = 1; i <= 2 * gridSize + 1; i++ ) {
-        for ( j = 1; j <= 2 * gridSize + 1; j++ ) {
+    for ( int i = 1; i <= 2 * gridSize + 1; i++ ) {
+        for ( int j = 1; j <= 2 * gridSize + 1; j++ ) {
             speed->at(i, j) = 1. / computeDistanceModifier( speed->at(i, j) );
         }
     }
@@ -383,18 +381,18 @@ NonlocalMaterialExtensionInterface :: modifyNonlocalWeightFunctionAround(GaussPo
 
     double wsum = 0.;
     // Loop over neighboring Gauss points - evaluation of new weights
-    for ( pos = list->begin(); pos != list->end(); ++pos ) {
+    for ( auto lip : *list ) {
         // Determine the global coordinates of a neighboring Gauss point
-        ngpElem = ( pos->nearGp )->giveElement();
-        ngpElem->computeGlobalCoordinates( ngpCoords, pos->nearGp->giveNaturalCoordinates() );
+        ngpElem = ( lip.nearGp )->giveElement();
+        ngpElem->computeGlobalCoordinates( ngpCoords, lip.nearGp->giveNaturalCoordinates() );
         // Find the nearest node of the grid (transformation from physical coordinates to grid coordinates)
-        j = mapToGridPoint( ngpCoords.at(1), coords.at(1) );
+        int j = mapToGridPoint( ngpCoords.at(1), coords.at(1) );
         if ( j < 1 ) {
             j = 1;
         } else if ( j > 2 * gridSize + 1 ) {
             j = 2 * gridSize + 1;
         }
-        i = mapToGridPoint( ngpCoords.at(2), coords.at(2) );
+        int i = mapToGridPoint( ngpCoords.at(2), coords.at(2) );
         if ( i < 1 ) {
             i = 1;
         } else if ( i > 2 * gridSize + 1 ) {
@@ -407,14 +405,14 @@ NonlocalMaterialExtensionInterface :: modifyNonlocalWeightFunctionAround(GaussPo
             printf("Warning\n");
         }
         // Compute and store the weight function for that distance
-        // double volumeAround = ngpElem->computeVolumeAround(pos->nearGp); // old style
+        // double volumeAround = ngpElem->computeVolumeAround(lip.nearGp); // old style
         // More efficient:
         NonlocalMaterialStatusExtensionInterface *statusExt =
-            static_cast< NonlocalMaterialStatusExtensionInterface * >( pos->nearGp->giveMaterialStatus()->
+            static_cast< NonlocalMaterialStatusExtensionInterface * >( lip.nearGp->giveMaterialStatus()->
                                                                        giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
         double volumeAround = statusExt->giveVolumeAround();
         double w = computeWeightFunction(distance) * volumeAround;
-        pos->weight = w;
+        lip.weight = w;
         wsum += w;
     }
 
@@ -429,11 +427,11 @@ NonlocalMaterialExtensionInterface :: modifyNonlocalWeightFunctionAround(GaussPo
 void
 NonlocalMaterialExtensionInterface :: modifyNonlocalWeightFunction_1D_Around(GaussPoint *gp)
 {
-    std :: list< localIntegrationRecord > *list = this->giveIPIntegrationList(gp);
-    std :: list< localIntegrationRecord > :: iterator pos, postarget;
+    auto *list = this->giveIPIntegrationList(gp);
+    std :: vector< localIntegrationRecord > :: iterator postarget;
 
     // find the current Gauss point (target) in the list of it neighbors
-    for ( pos = list->begin(); pos != list->end(); ++pos ) {
+    for ( auto pos = list->begin(); pos != list->end(); ++pos ) {
         if ( pos->nearGp == gp ) {
             postarget = pos;
         }
@@ -450,7 +448,7 @@ NonlocalMaterialExtensionInterface :: modifyNonlocalWeightFunction_1D_Around(Gau
     // process the list from the target to the end
     double distance = 0.; // distance modified by damage
     xprev = xtarget;
-    for ( pos = postarget; pos != list->end(); ++pos ) {
+    for ( auto pos = postarget; pos != list->end(); ++pos ) {
         nearElem = ( pos->nearGp )->giveElement();
         nearElem->computeGlobalCoordinates( coords, pos->nearGp->giveNaturalCoordinates() );
         x = coords.at(1);
@@ -477,7 +475,7 @@ NonlocalMaterialExtensionInterface :: modifyNonlocalWeightFunction_1D_Around(Gau
 
     // process the list from the target to the beginning
     distance = 0.;
-    for ( pos = postarget; pos != list->begin(); --pos ) {
+    for ( auto pos = postarget; pos != list->begin(); --pos ) {
         nearElem = ( pos->nearGp )->giveElement();
         nearElem->computeGlobalCoordinates( coords, pos->nearGp->giveNaturalCoordinates() );
         x = coords.at(1);
@@ -503,7 +501,7 @@ NonlocalMaterialExtensionInterface :: modifyNonlocalWeightFunction_1D_Around(Gau
     }
 
     // the beginning must be treated separately
-    pos = list->begin();
+    auto pos = list->begin();
     if ( pos != postarget ) {
         nearElem = ( pos->nearGp )->giveElement();
         nearElem->computeGlobalCoordinates( coords, pos->nearGp->giveNaturalCoordinates() );

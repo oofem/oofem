@@ -69,7 +69,7 @@ private:
     std :: vector< ContactElement *> masterElementList;
     int numberOfConstraintEq; // used when creating new dofs
     
-    ContactMaterial *contactMaterial;
+    //ContactMaterial *contactMaterial;
     
 public:
     /// Constructor.

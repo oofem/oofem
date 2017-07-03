@@ -368,7 +368,6 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
         status = this->nMethod->solve(*this->stiffnessMatrix,
                                       referenceForces,
                                       &externalForces,
-                                      NULL,
                                       this->solution,
                                       incrementOfSolution,
                                       this->internalForces,
@@ -405,10 +404,6 @@ void StaticStructural :: terminate(TimeStep *tStep)
         // Propagate cracks at the end of the time step
         StructuralEngngModel::terminate(tStep);
         XfemSolverInterface::propagateXfemInterfaces(tStep, *this, false);
-    }
-    
-     for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
-        this->printReactionForces(tStep, idomain);
     }
 }
 

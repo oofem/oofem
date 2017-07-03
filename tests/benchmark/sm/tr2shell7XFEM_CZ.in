@@ -1,35 +1,35 @@
 tr2shell7XFEM_CZ.out
 Test of internal cohesive zone model in Tr2Shell7XFEM. Pure shear test.
 StaticStructural nsteps 1 rtolf 1.0e-5 nmodules 1
-#vtkxml tstep_all dofman_all element_all primvars 1 1 
-#matlab reactionforces dofmanlist 6 1 2 3 4 5 6 
+#vtkxml tstep_all dofman_all element_all primvars 1 1
+#matlab reactionforces dofmanlist 6 1 2 3 4 5 6
 errorcheck
-domain 3dDirShell 
+domain 3dDirShell
 OutputManager tstep_all dofman_all element_all
 ndofman 6 nelem 1 ncrosssect 1 nmat 2 nbc 1 nic 0 nltf 1 nset 2 nxfemman 1
 #
-node 1 coords 3 0.0 0.0 0.0 
-node 2 coords 3 1.0 0.0 0.0 
-node 3 coords 3 0.0 1.0 0.0 
-node 4 coords 3 0.5 0.0 0.0 
-node 5 coords 3 0.5 0.5 0.0 
-node 6 coords 3 0.0 0.5 0.0 
+node 1 coords 3 0.0 0.0 0.0
+node 2 coords 3 1.0 0.0 0.0
+node 3 coords 3 0.0 1.0 0.0
+node 4 coords 3 0.5 0.0 0.0
+node 5 coords 3 0.5 0.5 0.0
+node 6 coords 3 0.0 0.5 0.0
 #
-Tr2Shell7XFEM  1 nodes 6 1 2 3 4 5 6 
+Tr2Shell7XFEM  1 nodes 6 1 2 3 4 5 6
 #
 layeredCS 1 nlayers 2 layermaterials 2 1 1 thicks 2 0.05 0.05 nintegrationpoints 2 set 1 interfacematerials 1 2
 #
 hyperelmat 1 d 1. K 1666666.7 G 76923.
 IntMatBilinearCZFagerstrom 2 kn 1.0e5 ks 1.0e5 knc 2.0e5 g1c 2000.0 g2c 3000.0 mu 0.00 gamma 1. sigf 5.e3
 #
-BoundaryCondition 1 loadTimeFunction 1 values 13  0.0 0.0 0.0 0.0 0.0 0.0 0.0   0.0 10.0e-3 0.0 0.0 0.0 0.0 dofs 13  1 2 3 15 16 17 18  500 501 502 503 504 505 set 2    
+BoundaryCondition 1 loadTimeFunction 1 values 13  0.0 0.0 0.0 0.0 0.0 0.0 0.0   0.0 10.0e-3 0.0 0.0 0.0 0.0 dofs 13  1 2 3 15 16 17 18  500 501 502 503 504 505 set 2
 #
 Constantfunction 1 f(t) 1.0
 #
 Set 1 elements 1 1
 Set 2 nodes 6 1 2 3 4 5 6
 #
-XfemManager 1 numberofenrichmentitems 1 
+XfemManager 1 numberofenrichmentitems 1
 Delamination interfacenum 1 1 csnum 1 1
 DiscontinuousFunction 1
 DofManList 1 list 6   1 2 3 4 5 6

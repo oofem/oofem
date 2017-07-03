@@ -1,52 +1,51 @@
 InterfaceEL_Line1.out
-Test of interface element - linear line element: Written by Jim Brouzoulis, Chalmers University of Technology.
-staticstructural nsteps 5 deltat 1.0 rtolf 1.e-8 MaxIter 20 minIter 2 nmodules 1 manrmsteps 1
-#vtkxml tstep_all dofman_all element_all primvars 1 1 vars 1 1
+Test of interface element - linear line element: Written by Jim Brouzoulis, Chalmers University of Technology. Interface element is loaded in shear only.
+staticstructural nsteps 5 deltat 1.0 rtolf 1.e-6 MaxIter 10 minIter 2 manrmsteps 1 nmodules 1
+#vtkxml tstep_all dofman_all element_all primvars 1 1 vars 2 1 4
 errorcheck
 Domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
-ndofman 8 nelem 3 ncrosssect 2 nmat 2 nbc 2 nic 0 nltf 1 nset 2
-# 
+ndofman 8 nelem 3 ncrosssect 2 nmat 2 nbc 3 nic 0 nltf 1 nset 4
 node 1 coords 3  0        0        0
 node 2 coords 3  1        0        0
 node 3 coords 3  1        0.3      0
 node 4 coords 3  0        0.3      0
-# 
 node 5 coords 3  0        0.3      0
 node 6 coords 3  1        0.3      0
 node 7 coords 3  1        1.0      0
 node 8 coords 3  0        1.0      0
-#
 PlaneStress2D 1 nodes 4   1   2   3   4 crosssect 1 nip 9
 PlaneStress2D 2 nodes 4   5   6   7   8 crosssect 1 nip 9
-IntElLine1 3 nodes 4  4 3 5 6 crossSect 2
-#
-# Cross sections:
-  SimpleCS 1 thick 1.0 material 1
-  InterfaceCS 2 thickness 1.0 material 2
-# Materials:
-# Linear elasticity
-  IsoLE 1 d 0.0 E 1.0e5 n 0.0 tAlpha 0.0
+IntElLine1 3 nodes 4  4 3 5 6
+SimpleCS 1 thick 1.0 material 1
+InterfaceCS 2 thickness 1.0 material 2 set 4
+IsoLE 1 d 0.0 E 1.0e5 n 0.0 tAlpha 0.0
 # Bilinear cohesive zone material
-  intmatbilinearcz 2 kn 1.0e6 g1c 1.0e1 g2c 1.5e0 mu 0.0 gamma 0.5 sigf 1.e2  use_num_tangent 1
-# Boundar conditions
-  BoundaryCondition 1 loadTimeFunction 1 dofs 2 1 2 values 2 0.0 0.0 set 1
-  BoundaryCondition 2 loadTimeFunction 1 dofs 2 1 2 values 2 0.8e-1 0. set 2
+#intmatbilinearcz 2 kn 1.0e6 g1c 1.0e1 g2c 1.5e0 mu 0.0 gamma 0.5 sigf 1.e2  use_num_tangent 1
+CohInt 2 kn 1. ks 100.0 stiffCoeffKn 1.0
+BoundaryCondition 1 loadTimeFunction 1 dofs 2 1 2 values 2 0.0 0.0 set 1
+BoundaryCondition 2 loadTimeFunction 1 dofs 2 1 2 values 2 0.0 0.0 set 2
+BoundaryCondition 3 loadTimeFunction 1 dofs 2 1 2 values 2 0.8 0.0 set 3
+PiecewiseLinFunction 1 t 2 1.0 6.0 f(t) 2 0.0 1.0
+Set 1 nodes 1 1
+Set 2 nodes 1 2
+Set 3 nodes 2 7 8
+Set 4 elements 1 3
 #
-  PiecewiseLinFunction 1 t 2 1.0 6.0 f(t) 2 0.0 1.0
-#
-Set 1 nodes 2 1 2
-Set 2 nodes 2 7 8
 #
 #%BEGIN_CHECK% tolerance 1.e-5
 ## step 2
-#REACTION tStep 2 number 1 dof 1 value -1.87968676e+01
-#REACTION tStep 2 number 1 dof 2 value -1.06925475e+01
-#REACTION tStep 2 number 8 dof 1 value  1.87968670e+01 
-#REACTION tStep 2 number 8 dof 2 value -2.69011191e+01
+#REACTION tStep 2 number 1 dof 1 value -7.97519718e+00
+#REACTION tStep 2 number 2 dof 1 value -7.97519718e+00
+#REACTION tStep 2 number 7 dof 1 value  7.97519718e+00
+#REACTION tStep 2 number 8 dof 1 value  7.97519718e+00
+#REACTION tStep 2 number 1 dof 2 value -4.78515021e+00
+#REACTION tStep 2 number 2 dof 2 value  4.78515021e+00
 ## step 5
-#REACTION tStep 5 number 1 dof 1 value 0.0 
-#REACTION tStep 5 number 1 dof 2 value 7.64490194e+00
-#REACTION tStep 5 number 8 dof 1 value 0.0
-#REACTION tStep 5 number 8 dof 2 value -7.64490244e+00
+#REACTION tStep 5 number 1 dof 1 value -3.19007887e+01
+#REACTION tStep 5 number 2 dof 1 value -3.19007887e+01
+#REACTION tStep 5 number 7 dof 1 value  3.19007887e+01
+#REACTION tStep 5 number 8 dof 1 value  3.19007887e+01
+#REACTION tStep 5 number 1 dof 2 value -1.91406008e+01
+#REACTION tStep 5 number 2 dof 2 value  1.91406008e+01
 #%END_CHECK%
