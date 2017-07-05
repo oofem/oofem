@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
     myData.insertInputRecord(DataReader::IR_elemRec, beam);
 
     beam = CreateElementIR(2, _IFT_Beam2d_Name, {2, 3});
-    beam->setField({6}, _IFT_Beam2d_dofstocondense);
+    beam->setField(IntArray{6}, _IFT_Beam2d_dofstocondense);
     beam->setField(IntArray{5}, _IFT_Element_bodyload);
     myData.insertInputRecord(DataReader::IR_elemRec, beam);
 
@@ -153,6 +153,7 @@ int main(int argc, char *argv[])
     myInput = new DynamicInputRecord(_IFT_NodalLoad_Name, 4);
     myInput->setField(1, _IFT_GeneralBoundaryCondition_timeFunct);
     myInput->setField(FloatArray{-18.0, 24.0, 0.0}, _IFT_Load_components);
+    myInput->setField(IntArray{1, 3, 5}, _IFT_GeneralBoundaryCondition_dofs);
     myInput->setField(3, _IFT_GeneralBoundaryCondition_set);
     myData.insertInputRecord(DataReader::IR_bcRec, myInput);
 
