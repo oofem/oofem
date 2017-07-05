@@ -112,7 +112,7 @@ contextIOResultType ProblemSequence :: saveContext(DataStream *stream, ContextMo
 
 contextIOResultType ProblemSequence :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
-    contextIOResultType ret = EngngModel :: saveContext(stream, mode, obj);
+    contextIOResultType ret = EngngModel :: restoreContext(stream, mode, obj);
 
     stream->read(activeModel);
 
