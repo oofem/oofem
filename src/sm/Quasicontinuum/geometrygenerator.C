@@ -147,7 +147,7 @@ GeometryGenerator :: CheckDistances(double R, FloatArray coords, int n)
     if ( n == 0 ) {
         return true;
     }
-    if ( (uint) n > Particles.size() ) {
+    if ( (unsigned int) n > Particles.size() ) {
         n = Particles.size();
     }
 
