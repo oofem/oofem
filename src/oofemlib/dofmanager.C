@@ -553,29 +553,25 @@ contextIOResultType DofManager :: saveContext(DataStream &stream, ContextMode mo
         THROW_CIOERR(iores);
     }
 
-
-    int numberOfDofs = this->giveNumberOfDofs();
-    if ( !stream.write(numberOfDofs) ) {
-        THROW_CIOERR(CIO_IOERR);
-    }
-
-    // store dof types
-    for ( Dof *dof: *this ) {
-        _val = dof->giveDofType();
-        if ( !stream.write(_val) ) {
-            THROW_CIOERR(CIO_IOERR);
-        }
-    }
-
-    // store dof types
-    for ( Dof *dof: *this ) {
-        _val = dof->giveDofID();
-        if ( !stream.write(_val) ) {
-            THROW_CIOERR(CIO_IOERR);
-        }
-    }
-
     if ( mode & CM_Definition ) {
+        if ( !stream.write(this->giveNumberOfDofs()) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+
+        for ( auto &dof : *this ) {
+            _val = dof->giveDofType();
+            if ( !stream.write(_val) ) {
+                THROW_CIOERR(CIO_IOERR);
+            }
+            _val = dof->giveDofID();
+            if ( !stream.write(_val) ) {
+                THROW_CIOERR(CIO_IOERR);
+            }
+            if ( ( iores = dof->saveContext(stream, mode, obj) ) != CIO_OK ) {
+                THROW_CIOERR(iores);
+            }
+        }
+
         if ( ( iores = loadArray.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
@@ -592,7 +588,7 @@ contextIOResultType DofManager :: saveContext(DataStream &stream, ContextMode mo
             THROW_CIOERR(CIO_IOERR);
         }
 
-        _val = ( int ) parallel_mode;
+        _val = parallel_mode;
         if ( !stream.write(_val) ) {
             THROW_CIOERR(CIO_IOERR);
         }
@@ -600,11 +596,11 @@ contextIOResultType DofManager :: saveContext(DataStream &stream, ContextMode mo
         if ( ( iores = partitions.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
-    }
-
-    for ( Dof *dof: *this ) {
-        if ( ( iores = dof->saveContext(stream, mode, obj) ) != CIO_OK ) {
-            THROW_CIOERR(iores);
+    } else {
+        for ( auto &dof : *this ) {
+            if ( ( iores = dof->saveContext(stream, mode, obj) ) != CIO_OK ) {
+                THROW_CIOERR(iores);
+            }
         }
     }
 
@@ -624,36 +620,31 @@ contextIOResultType DofManager :: restoreContext(DataStream &stream, ContextMode
         THROW_CIOERR(iores);
     }
 
-    int _numberOfDofs;
-    if ( !stream.read(_numberOfDofs) ) {
-        THROW_CIOERR(CIO_IOERR);
-    }
-
-    IntArray dtypes(_numberOfDofs);
-    // restore dof types
-    for ( int i = 1; i <= _numberOfDofs; i++ ) {
-        if ( !stream.read(dtypes.at(i)) ) {
-            THROW_CIOERR(CIO_IOERR);
-        }
-    }
-    
-    IntArray dofids(_numberOfDofs);
-    // restore dof ids
-    for ( int i = 1; i <= _numberOfDofs; i++ ) {
-        if ( !stream.read(dofids.at(i)) ) {
-            THROW_CIOERR(CIO_IOERR);
-        }
-    }
-
-    // allocate new ones
-    for ( auto &d: dofArray) { delete d; } ///@todo Smart pointers would be nicer here
-    dofArray.clear();
-    for ( int i = 0; i < _numberOfDofs; i++ ) {
-        Dof *dof = classFactory.createDof( ( dofType ) dtypes(i), (DofIDItem)dofids(i), this );
-        this->appendDof(dof);
-    }
-
     if ( mode & CM_Definition ) {
+        int _numberOfDofs;
+        if ( !stream.read(_numberOfDofs) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+
+        // allocate new ones
+        for ( auto &d: dofArray) { delete d; } ///@todo Smart pointers would be nicer here
+        dofArray.clear();
+
+        for ( int i = 0; i < _numberOfDofs; i++ ) {
+            int dtype, dofid;
+            if ( !stream.read(dtype) ) {
+                THROW_CIOERR(CIO_IOERR);
+            }
+            if ( !stream.read(dofid) ) {
+                THROW_CIOERR(CIO_IOERR);
+            }
+            Dof *dof = classFactory.createDof( ( dofType ) dtype, (DofIDItem)dofid, this );
+            if ( ( iores = dof->restoreContext(stream, mode, obj) ) != CIO_OK ) {
+                THROW_CIOERR(iores);
+            }
+            this->appendDof(dof);
+        }
+
         if ( ( iores = loadArray.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
@@ -679,11 +670,11 @@ contextIOResultType DofManager :: restoreContext(DataStream &stream, ContextMode
         if ( ( iores = partitions.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
-    }
-
-    for ( Dof *dof: *this ) {
-        if ( ( iores = dof->restoreContext(stream, mode, obj) ) != CIO_OK ) {
-            THROW_CIOERR(iores);
+    } else {
+        for ( auto &dof : this->dofArray ) {
+            if ( ( iores = dof->restoreContext(stream, mode, obj) ) != CIO_OK ) {
+                THROW_CIOERR(iores);
+            }
         }
     }
 
@@ -702,10 +693,8 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
         if ( pos == this->end() ) {
             if ( padding ) {
                 answer.at(++k) = 0.;
-                continue;
-            } else {
-                continue;
             }
+            continue;
         }
         answer.at(++k) = (*pos)->giveUnknown(mode, tStep);
     }
@@ -730,10 +719,8 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
         if ( pos == this->end() ) {
             if ( padding ) {
                 answer.at(++k) = 0.;
-                continue;
-            } else {
-                continue;
             }
+            continue;
         }
         answer.at(++k) = (*pos)->giveUnknown(field, mode, tStep);
     }
