@@ -66,76 +66,53 @@ class IntArray;
  * @author David Krybus
  */
 class PFEMElement2d : public PFEMElement
-
 {
 protected:
 
 public:
     /// Constructor
-    PFEMElement2d(int, Domain *);
+    PFEMElement2d(int n, Domain *d);
     /// Destructor
     ~PFEMElement2d();
 
-    /// Calculates critical time step
-    virtual double        computeCriticalTimeStep(TimeStep *tStep) = 0;
+    virtual double computeCriticalTimeStep(TimeStep *tStep) = 0;
 
-    // definition
-    const char *giveClassName() const { return "PFEMElement"; }
+    virtual const char *giveClassName() const { return "PFEMElement2d"; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
 
     virtual void giveElementDofIDMask(IntArray &answer) const = 0;
-    virtual void           giveDofManDofIDMask(int inode, IntArray &answer) const = 0;
-    virtual int            computeNumberOfDofs() = 0;
-    IRResultType           initializeFrom(InputRecord *ir);
-    virtual void          updateYourself(TimeStep *tStep);
-    virtual int           checkConsistency();
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const = 0;
+    virtual int computeNumberOfDofs() = 0;
+    IRResultType initializeFrom(InputRecord *ir);
+    virtual int checkConsistency();
 
-    /**
-     * Stores receiver state to output stream.
-     * @exception throws an ContextIOERR exception if error encountered
-     */
-    contextIOResultType   saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    /**
-     * Restores the receiver state previously written in stream.
-     * @exception throws an ContextIOERR exception if error encountered
-     */
-    contextIOResultType   restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-
-
-    /** Interface requesting service */
     virtual Interface *giveInterface(InterfaceType) = 0;
 
     virtual Element *giveElement() { return this; }
 
 #ifdef __OOFEG
     virtual int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                        int node, TimeStep *atTime) = 0;
-    //
+                                        int node, TimeStep *tStep) = 0;
     // Graphics output
-    //
-    //void          drawYourself (oofegGraphicContext&);
-    // virtual void  drawRawGeometry(oofegGraphicContext &);
-    //  virtual void  drawScalar(oofegGraphicContext &context);
-    //virtual void  drawDeformedGeometry(oofegGraphicContext&, UnknownType) {}
+    //virtual void drawYourself (oofegGraphicContext&);
+    //virtual void drawRawGeometry(oofegGraphicContext &);
+    //virtual void drawScalar(oofegGraphicContext &context);
+    //virtual void drawDeformedGeometry(oofegGraphicContext&, UnknownType) {}
 #endif
-
-    /** Prints output of receiver to stream, for given time step */
-    virtual void   printOutputAt(FILE *, TimeStep *);
-
 
     virtual FEInterpolation *giveVelocityInterpolation() = 0;
     virtual FEInterpolation *givePressureInterpolation() = 0;
 
 protected:
     virtual void computeGaussPoints() = 0;
-    virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *) = 0;
-    virtual void computeDeviatoricStressDivergence(FloatArray &answer, TimeStep *atTime) = 0;
+    virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) = 0;
+    virtual void computeDeviatoricStressDivergence(FloatArray &answer, TimeStep *tStep) = 0;
 
     virtual void computeBMatrix(FloatMatrix &answer, GaussPoint *gp);
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, TimeStep *atTime); //K
-    virtual void computePressureLaplacianMatrix(FloatMatrix &answer, TimeStep *atTime); //L
-    virtual void computeDivergenceMatrix(FloatMatrix &answerx, TimeStep *atTime); //D
-    virtual void computeGradientMatrix(FloatMatrix &answer, TimeStep *atTime); //G
+    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, TimeStep *tStep); //K
+    virtual void computePressureLaplacianMatrix(FloatMatrix &answer, TimeStep *tStep); //L
+    virtual void computeDivergenceMatrix(FloatMatrix &answerx, TimeStep *tStep); //D
+    virtual void computeGradientMatrix(FloatMatrix &answer, TimeStep *tStep); //G
 
     void computePrescribedRhsVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
 
@@ -146,7 +123,7 @@ protected:
     /// Calculates the volume around an edge
     double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
     /// Gives the mapping for degrees of freedom on an edge
-    void  giveEdgeDofMapping(IntArray &answer, int iEdge) const;
+    void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
 };
 } // end namespace oofem
 #endif // pfemelement_2d_h

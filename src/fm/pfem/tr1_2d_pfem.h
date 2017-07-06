@@ -99,13 +99,12 @@ public:
     /// Destructor
     ~TR1_2D_PFEM();
 
-    virtual void computeDiagonalMassMtrx(FloatArray &answer, TimeStep *);
-    virtual void computeDiagonalMassMtrx(FloatMatrix &answer, TimeStep *);
+    virtual void computeDiagonalMassMtrx(FloatArray &answer, TimeStep *tStep);
+    virtual void computeDiagonalMassMtrx(FloatMatrix &answer, TimeStep *tStep);
 
     virtual double computeCriticalTimeStep(TimeStep *tStep);
 
-    // definition
-    virtual const char *giveClassName() const { return "PFEMElement"; }
+    virtual const char *giveClassName() const { return "TR1_2D_PFEM"; }
     virtual const char *giveInputRecordName() const { return _IFT_TR1_2D_PFEM_Name; }
 
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
@@ -115,32 +114,26 @@ public:
     virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
     virtual int computeNumberOfDofs();
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void updateYourself(TimeStep *tStep);
     virtual int checkConsistency();
-
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     virtual double computeVolumeAround(GaussPoint *gp);
 
     virtual Interface *giveInterface(InterfaceType);
+
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj);
 
     virtual Element *giveElement() { return this; }
 
 #ifdef __OOFEG
     virtual int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
                                         int node, TimeStep *atTime);
-    //
     // Graphics output
-    //
-    //virtual void drawYourself (oofegGraphicContext&);
-    virtual void  drawRawGeometry(oofegGraphicContext &);
-    virtual void  drawScalar(oofegGraphicContext &context);
-    //virtual void  drawDeformedGeometry(oofegGraphicContext&, UnknownType) {}
+    //virtual void drawYourself(oofegGraphicContext&);
+    virtual void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawScalar(oofegGraphicContext &context);
+    //virtual void drawDeformedGeometry(oofegGraphicContext&, UnknownType) {}
 #endif
-
-    /** Prints output of receiver to stream, for given time step */
-    virtual void printOutputAt(FILE *, TimeStep *);
 
     virtual FEInterpolation *giveVelocityInterpolation() { return & velocityInterpolation; }
     virtual FEInterpolation *givePressureInterpolation() { return & pressureInterpolation; }
@@ -159,14 +152,12 @@ public:
 
 protected:
     virtual void computeGaussPoints();
-    virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *);
+    virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
-    virtual void computeDeviatoricStressDivergence(FloatArray &answer, TimeStep *atTime);
+    virtual void computeDeviatoricStressDivergence(FloatArray &answer, TimeStep *tStep);
 
-    /// Calculates the body load vector
     virtual void computeBodyLoadVectorAt(FloatArray &answer, BodyLoad *load, TimeStep *tStep, ValueModeType mode);
-    /// Calculates the boundary condition sub-vector on an edge
-    virtual void computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *atTime);
+    virtual void computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // tr1_2d_pfem_h

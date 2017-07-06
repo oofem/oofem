@@ -405,33 +405,11 @@ TR1_2D_PFEM :: computeCriticalTimeStep(TimeStep *tStep)
 }
 
 
-
-
-void
-TR1_2D_PFEM :: updateYourself(TimeStep *tStep)
-{
-    PFEMElement :: updateYourself(tStep);
-}
-
-
-void
-TR1_2D_PFEM :: printOutputAt(FILE *file, TimeStep *stepN)
-// Performs end-of-step operations.
-{
-    PFEMElement :: printOutputAt(file, stepN);
-}
-
-
-
-contextIOResultType TR1_2D_PFEM :: saveContext(DataStream *stream, ContextMode mode, void *obj)
-//
-// saves full element context (saves state variables, that completely describe
-// current state)
-//
+contextIOResultType TR1_2D_PFEM :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
-    if ( ( iores = PFEMElement :: saveContext(* stream, mode, obj) ) != CIO_OK ) {
+    if ( ( iores = PFEMElement2d :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -439,22 +417,18 @@ contextIOResultType TR1_2D_PFEM :: saveContext(DataStream *stream, ContextMode m
 }
 
 
-
-contextIOResultType TR1_2D_PFEM :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
-//
-// restores full element context (saves state variables, that completely describe
-// current state)
-//
+contextIOResultType TR1_2D_PFEM :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
-    if ( ( iores = PFEMElement :: restoreContext(* stream, mode, obj) ) != CIO_OK ) {
+    if ( ( iores = PFEMElement2d :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
 
     return CIO_OK;
 }
+
 
 double
 TR1_2D_PFEM :: computeVolumeAround(GaussPoint *gp)
