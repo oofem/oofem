@@ -365,31 +365,13 @@ void IncrementalLinearStatic :: updateDofUnknownsDictionary(DofManager *inode, T
 }
 
 
-contextIOResultType IncrementalLinearStatic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType IncrementalLinearStatic :: saveContext(DataStream &stream, ContextMode mode)
 {
-    int closeFlag = 0;
     contextIOResultType iores;
-    FILE *file = NULL;
-
-    if ( stream == NULL ) {
-        if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
-                                    this->giveCurrentStep()->giveVersion(), contextMode_write) ) {
-            THROW_CIOERR(CIO_IOERR);
-        }
-
-        stream = new FileDataStream(file);
-        closeFlag = 1;
-    }
 
     if ( ( iores = StructuralEngngModel :: saveContext(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    if ( closeFlag ) {
-        fclose(file);
-        delete stream;
-        stream = NULL;
-    } // ensure consistent records
 
     return CIO_OK;
 }

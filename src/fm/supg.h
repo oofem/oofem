@@ -161,7 +161,7 @@ public:
     virtual void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d);
     virtual double giveReynoldsNumber();
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     virtual void updateDomainLinks();

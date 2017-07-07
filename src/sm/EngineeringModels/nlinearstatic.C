@@ -358,7 +358,7 @@ NonLinearStatic :: terminate(TimeStep *tStep)
 {
     this->doStepOutput(tStep);
     this->updateLoadVectors(tStep);
-    this->saveStepContext(tStep);
+    this->saveStepContext(tStep, CM_State | CM_Definition);
 }
 
 
@@ -612,67 +612,42 @@ NonLinearStatic :: printOutputAt(FILE *file, TimeStep *tStep)
 
 
 contextIOResultType
-NonLinearStatic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
-//
-// saves state variable - displacement vector
-//
+NonLinearStatic :: saveContext(DataStream &stream, ContextMode mode)
 {
-    int closeFlag = 0;
     contextIOResultType iores;
-    FILE *file = NULL;
-
-    if ( stream == NULL ) {
-        if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
-                                    this->giveCurrentStep()->giveVersion(), contextMode_write) ) {
-            THROW_CIOERR(CIO_IOERR); // override
-        }
-
-        stream = new FileDataStream(file);
-        closeFlag = 1;
-    }
 
     if ( ( iores = EngngModel :: saveContext(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    //if ((iores = this->giveNumericalMethod(giveCurrentStep())->saveContext (stream)) != CIO_OK) THROW_CIOERR(iores);
-
-    if ( ( iores = totalDisplacement.storeYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = totalDisplacement.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = incrementOfDisplacement.storeYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = incrementOfDisplacement.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     int _cm = controlMode;
-    if ( !stream->write(_cm) ) {
+    if ( !stream.write(_cm) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(loadLevel) ) {
+    if ( !stream.write(loadLevel) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(cumulatedLoadLevel) ) {
+    if ( !stream.write(cumulatedLoadLevel) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    // store InitialLoadVector
-    if ( ( iores = initialLoadVector.storeYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = initialLoadVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = initialLoadVectorOfPrescribed.storeYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = initialLoadVectorOfPrescribed.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-
-    if ( closeFlag ) {
-        fclose(file);
-        delete stream;
-        stream = NULL;
-    } // ensure consistent records
 
     return CIO_OK;
 }

@@ -163,7 +163,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void updateAttributes(MetaStep *mStep);
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual void updateDomainLinks();
 

@@ -559,11 +559,11 @@ StaggeredProblem :: printOutputAt(FILE *file, TimeStep *tStep)
 
 
 contextIOResultType
-StaggeredProblem :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+StaggeredProblem :: saveContext(DataStream &stream, ContextMode mode)
 {
-    EngngModel :: saveContext(stream, mode, obj);
+    EngngModel :: saveContext(stream, mode);
     for ( auto &emodel: emodelList ) {
-        emodel->saveContext(stream, mode, obj);
+        emodel->saveContext(stream, mode);
     }
 
     return CIO_OK;

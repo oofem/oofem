@@ -351,7 +351,7 @@ StructuralFE2MaterialStatus :: saveContext(DataStream &stream, ContextMode mode,
         THROW_CIOERR(iores);
     }
 
-    return this->rve->saveContext(&stream, mode, obj);
+    return this->rve->saveContext(stream, mode);
 }
 
 

@@ -418,44 +418,25 @@ void LinearStability :: printOutputAt(FILE *file, TimeStep *tStep)
 }
 
 
-contextIOResultType LinearStability :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType LinearStability :: saveContext(DataStream &stream, ContextMode mode)
 {
     contextIOResultType iores;
-    int closeFlag = 0;
-    FILE *file = NULL;
-
-    OOFEM_LOG_INFO("Storing context \n");
-    if ( stream == NULL ) {
-        if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
-                                    this->giveCurrentStep()->giveVersion(), contextMode_write) ) {
-            THROW_CIOERR(CIO_IOERR); // override
-        }
-
-        stream = new FileDataStream(file);
-        closeFlag = 1;
-    }
 
     if ( ( iores = StructuralEngngModel :: saveContext(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = displacementVector.storeYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = displacementVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = eigVal.storeYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = eigVal.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = eigVec.storeYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = eigVec.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    if ( closeFlag ) {
-        fclose(file);
-        delete stream;
-        stream = NULL;
-    }                                                        // ensure consistent records
 
     return CIO_OK;
 }

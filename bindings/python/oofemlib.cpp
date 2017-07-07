@@ -1077,7 +1077,7 @@ public:
             ValueModeType mode, TimeStep *atTime) {
         return this->get_override("evaluateAt")(answer,dman,mode,atTime);
     }
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode) {
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode) {
         return this->get_override("saveContext")(stream, mode);
     }
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode) {

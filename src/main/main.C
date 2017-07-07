@@ -109,7 +109,6 @@ int main(int argc, char *argv[])
          inputFileFlag = false, outputFileFlag = false, errOutputFileFlag = false;
     std :: stringstream inputFileName, outputFileName, errOutputFileName;
     std :: vector< const char * >modulesArgs;
-    EngngModel *problem = 0;
 
     int rank = 0;
 
@@ -190,7 +189,7 @@ int main(int argc, char *argv[])
                 exit(EXIT_FAILURE);
 #endif
             } else if ( strcmp(argv [i], "-t") == 0) {
-#ifdef _OPENMP            
+#ifdef _OPENMP
                 if ( i + 1 < argc ) {
                     i++;
                     int numberOfThreads = strtol(argv [ i ], NULL, 10);
@@ -265,7 +264,7 @@ int main(int argc, char *argv[])
     OOFEM_LOG_FORCED(PRG_HEADER_SM);
 
     OOFEMTXTDataReader dr( inputFileName.str ( ).c_str() );
-    problem = :: InstanciateProblem(& dr, _processor, contextFlag, NULL, parallelFlag);
+    EngngModel *problem = :: InstanciateProblem(& dr, _processor, contextFlag, NULL, parallelFlag);
     dr.finish();
     if ( !problem ) {
         OOFEM_LOG_ERROR("Couldn't instanciate problem, exiting");
@@ -289,7 +288,7 @@ int main(int argc, char *argv[])
         problem->initStepIncrements();
     } else if ( adaptiveRestartFlag ) {
         problem->initializeAdaptive(adaptiveRestartFlag);
-        problem->saveContext(NULL, CM_State);
+        problem->saveStepContext(problem->giveCurrentStep(),CM_State);
         // exit (1);
     }
 

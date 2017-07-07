@@ -272,42 +272,21 @@ void EigenValueDynamic :: printOutputAt(FILE *file, TimeStep *tStep)
 }
 
 
-contextIOResultType EigenValueDynamic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
-//
-// saves state variable - displacement vector
-//
+contextIOResultType EigenValueDynamic :: saveContext(DataStream &stream, ContextMode mode)
 {
-    int closeFlag = 0;
     contextIOResultType iores;
-    FILE *file = NULL;
-
-    if ( stream == NULL ) {
-        if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
-                                    this->giveCurrentStep()->giveVersion(), contextMode_write) ) {
-            THROW_CIOERR(CIO_IOERR); // override
-        }
-
-        stream = new FileDataStream(file);
-        closeFlag = 1;
-    }
 
     if ( ( iores = EngngModel :: saveContext(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = eigVal.storeYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = eigVal.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( eigVec.storeYourself(*stream) ) != CIO_OK ) {
+    if ( ( eigVec.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    if ( closeFlag ) {
-        fclose(file);
-        delete stream;
-        stream = NULL;
-    } // ensure consistent records
 
     return CIO_OK;
 }

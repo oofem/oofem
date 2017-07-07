@@ -663,46 +663,28 @@ NonLinearDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
     iDof->printMultipleOutputAt(stream, tStep, dofchar, dofmodes, 3);
 }
 
-contextIOResultType NonLinearDynamic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType NonLinearDynamic :: saveContext(DataStream &stream, ContextMode mode)
 {
-    int closeFlag = 0;
     contextIOResultType iores;
-    FILE *file = NULL;
-
-    if ( stream == NULL ) {
-        if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
-                                    this->giveCurrentStep()->giveVersion(), contextMode_write) ) {
-            THROW_CIOERR(CIO_IOERR);
-        }
-
-        stream = new FileDataStream(file);
-        closeFlag = 1;
-    }
 
     if ( ( iores = EngngModel :: saveContext(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = incrementOfDisplacement.storeYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = incrementOfDisplacement.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = totalDisplacement.storeYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = totalDisplacement.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = velocityVector.storeYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = velocityVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = accelerationVector.storeYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = accelerationVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
-    }
-
-    if ( closeFlag ) {
-        fclose(file);
-        delete stream;
-        stream = NULL;
     }
 
     return CIO_OK;

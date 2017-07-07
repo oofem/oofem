@@ -673,7 +673,7 @@ EngngModel :: terminate(TimeStep *tStep)
 		fflush( this->giveOutputStream() );
     }
 
-	this->saveStepContext(tStep);
+    this->saveStepContext(tStep, CM_State | CM_Definition);
 }
 
 
@@ -690,18 +690,23 @@ EngngModel :: doStepOutput(TimeStep *tStep)
 }
 
 void
-EngngModel :: saveStepContext(TimeStep *tStep)
+EngngModel :: saveStepContext(TimeStep *tStep, ContextMode mode)
 {
     // save context if required
     // default - save only if ALWAYS is set ( see cltypes.h )
 
-    if ( ( this->giveContextOutputMode() == COM_Always ) ||
-        ( this->giveContextOutputMode() == COM_Required ) ) {
-        this->saveContext(NULL, CM_State | CM_Definition);
-    } else if ( this->giveContextOutputMode() == COM_UserDefined ) {
-        if ( tStep->giveNumber() % this->giveContextOutputStep() == 0 ) {
-            this->saveContext(NULL, CM_State | CM_Definition);
+    if ( this->giveContextOutputMode() == COM_Always || this->giveContextOutputMode() == COM_Required || 
+        ( this->giveContextOutputMode() == COM_UserDefined && tStep->giveNumber() % this->giveContextOutputStep() == 0 ) ) {
+
+        /// @todo Just pass a filename instead of passing a FILE object! Let the FileDataStream decide how to write the data.
+        FILE *file = NULL;
+        if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
+            this->giveCurrentStep()->giveVersion(), contextMode_write) ) {
+            THROW_CIOERR(CIO_IOERR); // override
         }
+        FileDataStream stream(file);
+        this->saveContext(stream, mode);
+        fclose(file);
     }
 }
 
@@ -1468,7 +1473,7 @@ EngngModel :: updateDomainLinks()
 };
 
 
-contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType EngngModel :: saveContext(DataStream &stream, ContextMode mode)
 //
 // this procedure is used mainly for two reasons:
 //
@@ -1488,69 +1493,42 @@ contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mo
 //
 {
     contextIOResultType iores;
-    int closeFlag = 0;
-    FILE *file = NULL;
-
-
-    OOFEM_LOG_INFO("Storing context\n");
-    if ( stream == NULL ) {
-        if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
-                                    this->giveCurrentStep()->giveVersion(), contextMode_write) ) {
-            THROW_CIOERR(CIO_IOERR); // override
-        }
-
-        stream = new FileDataStream(file);
-        closeFlag = 1;
-    }
-
-    // store solution step
-    if ( ( iores = giveCurrentStep()->saveContext(*stream, mode) ) != CIO_OK ) {
+ 
+    if ( ( iores = giveCurrentStep()->saveContext(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    // store numberOfEquations and domainNeqs array
-    if ( !stream->write(numberOfEquations) ) {
+    if ( !stream.write(numberOfEquations) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = domainNeqs.storeYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = domainNeqs.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    // store numberOfPrescribedEquations and domainNeqs array
-    if ( !stream->write(numberOfPrescribedEquations) ) {
+    if ( !stream.write(numberOfPrescribedEquations) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = domainPrescribedNeqs.storeYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = domainPrescribedNeqs.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    // store renumber flag
-    if ( !stream->write(renumberFlag) ) {
+    if ( !stream.write(renumberFlag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
 
     for ( auto &domain: domainList ) {
-        domain->saveContext(*stream, mode);
+        domain->saveContext(stream, mode);
     }
-
 
     // store nMethod
     NumericalMethod *nmethod = this->giveNumericalMethod( this->giveMetaStep( giveCurrentStep()->giveMetaStepNumber() ) );
     if ( nmethod ) {
-        if ( ( iores = nmethod->saveContext(*stream, mode) ) != CIO_OK ) {
+        if ( ( iores = nmethod->saveContext(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
-
-
-    if ( closeFlag ) {
-        fclose(file);
-        delete(stream);
-        stream = NULL;
-    }                                                         // ensure consistent records
 
     return CIO_OK;
 }

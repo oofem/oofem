@@ -463,7 +463,7 @@ public:
     /**
      * Saves context of given solution step, if required (determined using this->giveContextOutputMode() method).
      */
-    void saveStepContext(TimeStep *tStep);
+    void saveStepContext(TimeStep *tStep, ContextMode mode);
     /**
      * Updates internal state after finishing time step. (for example total values may be
      * updated according to previously solved increments). Then element values are also updated
@@ -645,20 +645,12 @@ public:
      * but also same function is invoked for all DofManagers and Elements in associated
      * domain. Note that by storing element context also contexts of all associated
      * integration points (and material statuses) are stored.
-     * Stored context is associated with current time step. One time step can have only
-     * one associated context. Multiple call to saveContext within same time step
-     * override previously saved context for this step.
-     * By default the stream parameter is used to store data and is not closed.
-     * If stream is NULL, new file descriptor is created and this must be also closed at the end.
-     * @param stream Context stream. If NULL then new file descriptor will be opened and closed
-     * at the end else the stream given as parameter will be used and not closed at the end.
+     * @param stream Context stream.
      * @param mode Determines amount of info in stream.
-     * @param obj Void pointer to an int array containing two values:time step number and
-     * version of a context file to be restored.
      * @return contextIOResultType.
      * @exception ContextIOERR If error encountered.
      */
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
     /**
      * Restores the state of model from output stream. Restores not only the receiver state,
      * but also same function is invoked for all DofManagers and Elements in associated

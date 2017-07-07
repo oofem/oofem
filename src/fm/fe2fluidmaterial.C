@@ -385,7 +385,7 @@ contextIOResultType FE2FluidMaterialStatus :: saveContext(DataStream &stream, Co
         THROW_CIOERR(iores);
     }
 
-    return this->rve->saveContext(&stream, mode, obj);
+    return this->rve->saveContext(stream, mode);
 }
 
 contextIOResultType FE2FluidMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)

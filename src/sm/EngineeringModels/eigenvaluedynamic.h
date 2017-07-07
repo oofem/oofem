@@ -94,7 +94,7 @@ public:
 
     virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual TimeStep *giveNextStep();
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
