@@ -423,6 +423,8 @@ AdaptiveNonLinearStatic :: initializeAdaptive(int tStepNumber)
     stepinfo [ 1 ] = 0;
 
     try {
+        //FileDataStream stream(this->giveContextFileName(tStepNumber, 0), false);
+        //this->restoreContext(stream, CM_State);
         this->restoreContext(NULL, CM_State, ( void * ) stepinfo);
     } catch(ContextIOERR & c) {
         c.print();

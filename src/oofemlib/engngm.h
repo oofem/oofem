@@ -788,6 +788,12 @@ public:
      */
     int giveContextFile(FILE **contextFile, int tStepNumber, int stepVersion,
                         ContextFileMode cmode, int errLevel = 1);
+    /**
+     * Returns the filename for the context file for the given step and version
+     * @param tStepNumber Solution step number to store/restore.
+     * @param stepVersion Version of step.
+     */
+    std :: string giveContextFileName(int tStepNumber, int stepVersion);
     /** Returns true if context file for given step and version is available */
     bool testContextFile(int tStepNumber, int stepVersion);
     /**

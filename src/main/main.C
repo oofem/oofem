@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
     std :: set_new_handler(freeStoreError);   // prevents memory overflow
 #endif
 
-    int adaptiveRestartFlag = 0, restartStepInfo [ 2 ];
+    int adaptiveRestartFlag = 0, restartStep;
     bool parallelFlag = false, renumberFlag = false, debugFlag = false, contextFlag = false, restartFlag = false,
          inputFileFlag = false, outputFileFlag = false, errOutputFileFlag = false;
     std :: stringstream inputFileName, outputFileName, errOutputFileName;
@@ -150,8 +150,7 @@ int main(int argc, char *argv[])
                 if ( i + 1 < argc ) {
                     i++;
                     restartFlag = true;
-                    restartStepInfo [ 0 ] = strtol(argv [ i ], NULL, 10);
-                    restartStepInfo [ 1 ] = 0;
+                    restartStep = strtol(argv [ i ], NULL, 10);
                 }
             } else if ( strcmp(argv [ i ], "-rn") == 0 ) {
                 renumberFlag = true;
@@ -280,7 +279,10 @@ int main(int argc, char *argv[])
 
     if ( restartFlag ) {
         try {
-            problem->restoreContext(NULL, CM_State, ( void * ) restartStepInfo);
+            //FileDataStream stream(this->giveContextFileName(restartStep, 0), false);
+            //problem->restoreContext(stream, CM_State | CM_Definition);
+            int restartStepInfo [ 2 ] = {restartStep, 0};
+            problem->restoreContext(NULL, CM_State | CM_Definition, ( void * ) restartStepInfo);
         } catch(ContextIOERR & c) {
             c.print();
             exit(1);

@@ -692,21 +692,12 @@ EngngModel :: doStepOutput(TimeStep *tStep)
 void
 EngngModel :: saveStepContext(TimeStep *tStep, ContextMode mode)
 {
-    // save context if required
-    // default - save only if ALWAYS is set ( see cltypes.h )
-
     if ( this->giveContextOutputMode() == COM_Always || this->giveContextOutputMode() == COM_Required || 
         ( this->giveContextOutputMode() == COM_UserDefined && tStep->giveNumber() % this->giveContextOutputStep() == 0 ) ) {
 
-        /// @todo Just pass a filename instead of passing a FILE object! Let the FileDataStream decide how to write the data.
-        FILE *file = NULL;
-        if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
-            this->giveCurrentStep()->giveVersion(), contextMode_write) ) {
-            THROW_CIOERR(CIO_IOERR); // override
-        }
-        FileDataStream stream(file);
+        auto fname = this->giveContextFileName(this->giveCurrentStep()->giveNumber(), this->giveCurrentStep()->giveVersion());
+        FileDataStream stream(fname, true);
         this->saveContext(stream, mode);
-        fclose(file);
     }
 }
 
@@ -1677,16 +1668,8 @@ EngngModel :: giveCurrentMetaStep()
 
 int
 EngngModel :: giveContextFile(FILE **contextFile, int tStepNumber, int stepVersion, ContextFileMode cmode, int errLevel)
-//
-//
-// assigns context file of given step number to stream
-// returns nonzero on success
-//
 {
-    std :: string fname = this->coreOutputFileName;
-    char fext [ 100 ];
-    sprintf(fext, ".%d.%d.osf", tStepNumber, stepVersion);
-    fname += fext;
+    std :: string fname = giveContextFileName(tStepNumber, stepVersion);
 
     if ( cmode ==  contextMode_read ) {
         * contextFile = fopen(fname.c_str(), "rb"); // open for reading
@@ -1705,13 +1688,21 @@ EngngModel :: giveContextFile(FILE **contextFile, int tStepNumber, int stepVersi
     return 1;
 }
 
-bool
-EngngModel :: testContextFile(int tStepNumber, int stepVersion)
+
+std ::string
+EngngModel :: giveContextFileName(int tStepNumber, int stepVersion)
 {
     std :: string fname = this->coreOutputFileName;
     char fext [ 100 ];
     sprintf(fext, ".%d.%d.osf", tStepNumber, stepVersion);
-    fname.append(fext);
+    return fname + fext;
+}
+
+
+bool
+EngngModel :: testContextFile(int tStepNumber, int stepVersion)
+{
+    std :: string fname = giveContextFileName(tStepNumber, stepVersion);
 
 #ifdef HAVE_ACCESS
     return access(fname.c_str(), R_OK) == 0;
@@ -1815,7 +1806,7 @@ EngngModel :: giveMetaStep(int i)
 }
 
 void
-EngngModel::letOutputBaseFileNameBe(const std :: string &src)
+EngngModel :: letOutputBaseFileNameBe(const std :: string &src)
 {
     this->dataOutputFileName = src;
 

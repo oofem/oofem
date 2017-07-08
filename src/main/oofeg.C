@@ -952,23 +952,16 @@ void OOFEGSimpleCmd(char *buf)
     if ( !strncmp(cmd, "active_step", 11) ) {
         pstep = gc [ 0 ].getActiveStep();
         istep = atoi(remain);
-        FILE *file;
         try {
-            if ( !this->giveContextFile(& file, istep, iversion, contextMode_write) ) {
-                THROW_CIOERR(CIO_IOERR);
-            }
-            FileDataStream stream(file);
-            problem->restoreContext(& stream, CM_State | CM_Definition);
-            fclose(file);
+            //FileDataStream stream(this->giveContextFileName(istep, iversion), false);
+            //problem->restoreContext(stream, CM_State | CM_Definition);
+            problem->restoreContext(NULL, CM_State | CM_Definition);
         } catch(ContextIOERR & m) {
             m.print();
             try {
-                if ( !this->giveContextFile(& file, pstep, iversion, contextMode_write) ) {
-                    THROW_CIOERR(CIO_IOERR);
-                }
-                FileDataStream stream(file);
+                //FileDataStream stream(this->giveContextFileName(pstep, iversion), false);
+                //problem->restoreContext(stream, CM_State | CM_Definition);
                 problem->restoreContext(NULL, CM_State | CM_Definition);
-                fclose(file);
             } catch(ContextIOERR & m2) {
                 m2.print();
                 exit(1);
@@ -986,6 +979,8 @@ void OOFEGSimpleCmd(char *buf)
         stepinfo [ 0 ] = istep;
         stepinfo [ 1 ] = iversion;
         try {
+            //FileDataStream stream(this->giveContextFileName(istep, iversion), false);
+            //problem->restoreContext(stream, CM_State | CM_Definition);
             problem->restoreContext(NULL, CM_State | CM_Definition, ( void * ) stepinfo);
         } catch(ContextIOERR & m) {
             m.print();
@@ -1155,6 +1150,8 @@ void nextStep(Widget wid, XtPointer cl, XtPointer cd)
             stepInfo [ 1 ] = istepVersion;
             printf("OOFEG: restoring context file %d.%d\n", stepInfo [ 0 ], stepInfo [ 1 ]);
             try {
+                //FileDataStream stream(this->giveContextFileName(prevStep, istepVersion), false);
+                //problem->restoreContext(stream, CM_State | CM_Definition);
                 problem->restoreContext(NULL, CM_State| CM_Definition, ( void * ) stepInfo);
             } catch(ContextIOERR & m) {
                 m.print();
@@ -1162,7 +1159,9 @@ void nextStep(Widget wid, XtPointer cl, XtPointer cd)
                 stepInfo [ 0 ] = prevStep;
                 stepInfo [ 1 ] = 0;
                 try {
-                    problem->restoreContext(NULL, CM_State| CM_Definition, ( void * ) stepInfo);
+                    //FileDataStream stream(this->giveContextFileName(prevStep, 0), false);
+                    //problem->restoreContext(stream, CM_State | CM_Definition);
+                    problem->restoreContext(NULL, CM_State | CM_Definition, ( void * ) stepInfo);
                 } catch(ContextIOERR & m2) {
                     m2.print();
                     exit(1);
@@ -1178,12 +1177,16 @@ void nextStep(Widget wid, XtPointer cl, XtPointer cd)
 
             //printf ("NextStep: prevStep %d, nstep %d, stepStep %d\n", prevStep, istep, stepStep);
             try {
+                //FileDataStream stream(this->giveContextFileName(prevStep + stepStep, 0);, false);
+                //problem->restoreContext(stream, CM_State | CM_Definition);
                 problem->restoreContext(NULL, CM_State| CM_Definition, ( void * ) stepInfo);
             } catch(ContextIOERR & m) {
                 m.print();
                 stepInfo [ 0 ] = prevStep;
                 stepInfo [ 1 ] = 0;
                 try {
+                    //FileDataStream stream(this->giveContextFileName(prevStep, 0), false);
+                    //problem->restoreContext(stream, CM_State | CM_Definition);
                     problem->restoreContext(NULL, CM_State| CM_Definition, ( void * ) stepInfo);
                 } catch(ContextIOERR & m2) {
                     m2.print();
@@ -1200,6 +1203,8 @@ void nextStep(Widget wid, XtPointer cl, XtPointer cd)
         stepInfo [ 0 ] = istep;
         stepInfo [ 1 ] = 0;
         try {
+            //FileDataStream stream(this->giveContextFileName(istep, 0), false);
+            //problem->restoreContext(stream, CM_State | CM_Definition);
             problem->restoreContext(NULL, CM_State| CM_Definition, ( void * ) stepInfo);
         } catch(ContextIOERR & m) {
             m.print();
@@ -1225,12 +1230,16 @@ void previousStep(Widget wid, XtPointer cl, XtPointer cd)
             stepInfo [ 0 ] = istep;
             stepInfo [ 1 ] = 0;
             try {
+                //FileDataStream stream(this->giveContextFileName(istep, 0), false);
+                //problem->restoreContext(stream, CM_State | CM_Definition);
                 problem->restoreContext(NULL, CM_State | CM_Definition, ( void * ) stepInfo);
             } catch(ContextIOERR & m) {
                 m.print();
                 stepInfo [ 0 ] = prevStep;
                 stepInfo [ 1 ] = 0;
                 try {
+                    //FileDataStream stream(this->giveContextFileName(prevStep, 0), false);
+                    //problem->restoreContext(stream, CM_State | CM_Definition);
                     problem->restoreContext(NULL, CM_State | CM_Definition, ( void * ) stepInfo);
                 } catch(ContextIOERR & m2) {
                     m2.print();
@@ -1248,6 +1257,8 @@ void previousStep(Widget wid, XtPointer cl, XtPointer cd)
         stepInfo [ 0 ] = istep;
         stepInfo [ 1 ] = 0;
         try {
+            //FileDataStream stream(this->giveContextFileName(istep, 0), false);
+            //problem->restoreContext(stream, CM_State | CM_Definition);
             problem->restoreContext(NULL, CM_State | CM_Definition, ( void * ) stepInfo);
         } catch(ContextIOERR & m) {
             m.print();
@@ -2216,6 +2227,8 @@ pass_setanimate_command(Widget w, XtPointer ptr, XtPointer call_data)
         stepinfo [ 0 ] = istep;
         stepinfo [ 1 ] = iversion;
         try {
+            //FileDataStream stream(this->giveContextFileName(istep, iversion), false);
+            //problem->restoreContext(stream, CM_State | CM_Definition);
             problem->restoreContext(NULL, CM_State | CM_Definition, ( void * ) stepinfo);
         } catch(ContextIOERR & m) {
             m.print();
