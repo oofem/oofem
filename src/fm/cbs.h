@@ -234,7 +234,7 @@ public:
     double giveTractionPressure(Dof *dof);
 
     virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode);
 
     virtual void updateDomainLinks();
 

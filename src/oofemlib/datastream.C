@@ -70,7 +70,7 @@ FileDataStream :: FileDataStream(std::string filename, bool write):
     this->stream = fopen(this->filename.c_str(), write ? "wb" : "rb" );
     if ( this->stream == NULL ) {
         //throw some exception here
-        OOFEM_ERROR("nope");
+        OOFEM_ERROR("Can't open \"%s\"", this->filename.c_str());
     }
 }
 

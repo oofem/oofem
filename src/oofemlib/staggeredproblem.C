@@ -571,11 +571,11 @@ StaggeredProblem :: saveContext(DataStream &stream, ContextMode mode)
 
 
 contextIOResultType
-StaggeredProblem :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+StaggeredProblem :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    EngngModel :: restoreContext(stream, mode, obj);
+    EngngModel :: restoreContext(stream, mode);
     for ( auto &emodel: this->emodelList ) {
-        emodel->restoreContext(stream, mode, obj);
+        emodel->restoreContext(stream, mode);
     }
 
     return CIO_OK;

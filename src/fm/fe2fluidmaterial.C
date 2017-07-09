@@ -396,7 +396,7 @@ contextIOResultType FE2FluidMaterialStatus :: restoreContext(DataStream &stream,
     }
     this->markOldTangents();
 
-    return this->rve->restoreContext(&stream, mode, obj);
+    return this->rve->restoreContext(stream, mode);
 }
 
 void FE2FluidMaterialStatus :: markOldTangents() { this->oldTangents = true; }

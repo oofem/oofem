@@ -109,10 +109,10 @@ StructuralFE2Material :: giveRealStressVector_3d(FloatArray &answer, GaussPoint 
     StructuralFE2MaterialStatus *ms = static_cast< StructuralFE2MaterialStatus * >( this->giveStatus(gp) );
 
 #if 0
-	XfemStructureManager *xMan = dynamic_cast<XfemStructureManager*>( ms->giveRVE()->giveDomain(1)->giveXfemManager() );
-	if(xMan) {
-		printf("Total crack length in RVE: %e\n", xMan->computeTotalCrackLength() );
-	}
+    XfemStructureManager *xMan = dynamic_cast<XfemStructureManager*>( ms->giveRVE()->giveDomain(1)->giveXfemManager() );
+    if(xMan) {
+        printf("Total crack length in RVE: %e\n", xMan->computeTotalCrackLength() );
+    }
 #endif
 
     ms->setTimeStep(tStep);
@@ -253,7 +253,7 @@ StructuralFE2MaterialStatus :: StructuralFE2MaterialStatus(int n, Domain * d, Ga
 StructuralMaterialStatus(n, d, g),
 mNewlyInitialized(true)
 {
-	mInputFile = inputfile;
+    mInputFile = inputfile;
 
     this->oldTangent = true;
 
@@ -265,8 +265,8 @@ mNewlyInitialized(true)
 
 PrescribedGradientHomogenization* StructuralFE2MaterialStatus::giveBC()
 {
-	this->bc = dynamic_cast< PrescribedGradientHomogenization * >( this->rve->giveDomain(1)->giveBc(1) );
-	return this->bc;
+    this->bc = dynamic_cast< PrescribedGradientHomogenization * >( this->rve->giveDomain(1)->giveBc(1) );
+    return this->bc;
 }
 
 
@@ -363,19 +363,18 @@ StructuralFE2MaterialStatus :: restoreContext(DataStream &stream, ContextMode mo
         THROW_CIOERR(iores);
     }
 
-    return this->rve->restoreContext(&stream, mode, obj);
+    return this->rve->restoreContext(stream, mode);
 }
 
 double StructuralFE2MaterialStatus :: giveRveLength()
 {
-	double rveLength = sqrt( bc->domainSize() );
-	return rveLength;
+    return sqrt( bc->domainSize() );
 }
 
 void StructuralFE2MaterialStatus :: copyStateVariables(const MaterialStatus &iStatus)
 {
-//	static int num = 0;
-//	printf("Entering StructuralFE2MaterialStatus :: copyStateVariables.\n");
+    //static int num = 0;
+    //printf("Entering StructuralFE2MaterialStatus :: copyStateVariables.\n");
 
     this->oldTangent = true;
 
@@ -384,91 +383,91 @@ void StructuralFE2MaterialStatus :: copyStateVariables(const MaterialStatus &iSt
 //    }
 
 
-	StructuralMaterialStatus::copyStateVariables(iStatus);
+    StructuralMaterialStatus :: copyStateVariables(iStatus);
 
 
-	//////////////////////////////
-	MaterialStatus &tmpStat = const_cast< MaterialStatus & >(iStatus);
-	StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*>(&tmpStat);
+    //////////////////////////////
+    MaterialStatus &tmpStat = const_cast< MaterialStatus & >(iStatus);
+    StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*>(&tmpStat);
 
-	if(!fe2ms) {
-		OOFEM_ERROR("Failed to cast StructuralFE2MaterialStatus.")
-	}
-
-
-	this->mNewlyInitialized = fe2ms->mNewlyInitialized;
-
-	// The proper way to do this would be to clone the RVE from iStatus.
-	// However, this is a mess due to all pointers that need to be tracked.
-	// Therefore, we consider a simplified version: copy only the enrichment items.
-
-	Domain *ext_domain = fe2ms->giveRVE()->giveDomain(1);
-	if( ext_domain->hasXfemManager() ) {
-
-		Domain *rve_domain = rve->giveDomain(1);
-
-		XfemManager *ext_xMan = ext_domain->giveXfemManager();
-		XfemManager *this_xMan = rve->giveDomain(1)->giveXfemManager();
-		DynamicDataReader dataReader;
-		if ( ext_xMan != NULL ) {
-
-		    IRResultType result; // Required by IR_GIVE_FIELD macro
-			std::vector<std::unique_ptr<EnrichmentItem>> eiList;
-
-//			DynamicInputRecord *xmanRec = new DynamicInputRecord();
-//			ext_xMan->giveInputRecord(* xmanRec);
-//			dataReader.insertInputRecord(DataReader :: IR_xfemManRec, xmanRec);
-
-			// Enrichment items
-			int nEI = ext_xMan->giveNumberOfEnrichmentItems();
-			for ( int i = 1; i <= nEI; i++ ) {
-				EnrichmentItem *ext_ei = ext_xMan->giveEnrichmentItem(i);
-				ext_ei->appendInputRecords(dataReader);
+    if ( !fe2ms ) {
+        OOFEM_ERROR("Failed to cast StructuralFE2MaterialStatus.")
+    }
 
 
-		        InputRecord *mir = dataReader.giveInputRecord(DataReader :: IR_enrichItemRec, i);
-		        std :: string name;
-		        result = mir->giveRecordKeywordField(name);
+    this->mNewlyInitialized = fe2ms->mNewlyInitialized;
 
-		        if ( result != IRRT_OK ) {
-		            mir->report_error(this->giveClassName(), __func__, "", result, __FILE__, __LINE__);
-		        }
+    // The proper way to do this would be to clone the RVE from iStatus.
+    // However, this is a mess due to all pointers that need to be tracked.
+    // Therefore, we consider a simplified version: copy only the enrichment items.
 
-		        std :: unique_ptr< EnrichmentItem >ei( classFactory.createEnrichmentItem( name.c_str(), i, this_xMan, rve_domain ) );
-		        if ( ei.get() == NULL ) {
-		            OOFEM_ERROR( "unknown enrichment item (%s)", name.c_str() );
-		        }
+    Domain *ext_domain = fe2ms->giveRVE()->giveDomain(1);
+    if ( ext_domain->hasXfemManager() ) {
 
-		        ei->initializeFrom(mir);
-		        ei->instanciateYourself(&dataReader);
-		        eiList.push_back( std :: move(ei) );
+        Domain *rve_domain = rve->giveDomain(1);
 
-			}
+        XfemManager *ext_xMan = ext_domain->giveXfemManager();
+        XfemManager *this_xMan = rve->giveDomain(1)->giveXfemManager();
+        DynamicDataReader dataReader;
+        if ( ext_xMan != NULL ) {
 
-			this_xMan->clearEnrichmentItems();
-			this_xMan->appendEnrichmentItems(eiList);
+            IRResultType result; // Required by IR_GIVE_FIELD macro
+            std::vector<std::unique_ptr<EnrichmentItem>> eiList;
 
-			rve_domain->postInitialize();
-			rve->forceEquationNumbering();
-		}
+            //DynamicInputRecord *xmanRec = new DynamicInputRecord();
+            //ext_xMan->giveInputRecord(* xmanRec);
+            //dataReader.insertInputRecord(DataReader :: IR_xfemManRec, xmanRec);
 
-	}
+            // Enrichment items
+            int nEI = ext_xMan->giveNumberOfEnrichmentItems();
+            for ( int i = 1; i <= nEI; i++ ) {
+                EnrichmentItem *ext_ei = ext_xMan->giveEnrichmentItem(i);
+                ext_ei->appendInputRecords(dataReader);
 
-//	printf("done.\n");
+
+                InputRecord *mir = dataReader.giveInputRecord(DataReader :: IR_enrichItemRec, i);
+                std :: string name;
+                result = mir->giveRecordKeywordField(name);
+
+                if ( result != IRRT_OK ) {
+                    mir->report_error(this->giveClassName(), __func__, "", result, __FILE__, __LINE__);
+                }
+
+                std :: unique_ptr< EnrichmentItem >ei( classFactory.createEnrichmentItem( name.c_str(), i, this_xMan, rve_domain ) );
+                if ( ei.get() == NULL ) {
+                    OOFEM_ERROR( "unknown enrichment item (%s)", name.c_str() );
+                }
+
+                ei->initializeFrom(mir);
+                ei->instanciateYourself(&dataReader);
+                eiList.push_back( std :: move(ei) );
+
+            }
+
+            this_xMan->clearEnrichmentItems();
+            this_xMan->appendEnrichmentItems(eiList);
+
+            rve_domain->postInitialize();
+            rve->forceEquationNumbering();
+        }
+
+    }
+
+    //printf("done.\n");
 
 #if 0
-	Domain *newDomain = fe2ms->giveRVE()->giveDomain(1)->Clone();
-	newDomain->SetEngngModel(rve.get());
-	bool deallocateOld = true;
-	rve->setDomain(1, newDomain, deallocateOld);
+    Domain *newDomain = fe2ms->giveRVE()->giveDomain(1)->Clone();
+    newDomain->SetEngngModel(rve.get());
+    bool deallocateOld = true;
+    rve->setDomain(1, newDomain, deallocateOld);
 
-//	rve->giveDomain(1)->postInitialize();
-	rve->giveNumericalMethod(NULL)->setDomain(newDomain);
+    //rve->giveDomain(1)->postInitialize();
+    rve->giveNumericalMethod(NULL)->setDomain(newDomain);
 
-	rve->postInitialize();
-//	rve->forceEquationNumbering();
+    rve->postInitialize();
+    //rve->forceEquationNumbering();
 
-	rve->initMetaStepAttributes( rve->giveMetaStep(1) );
+    rve->initMetaStepAttributes( rve->giveMetaStep(1) );
     rve->giveNextStep(); // Makes sure there is a timestep (which we will modify before solving a step)
     rve->init();
 
@@ -480,8 +479,8 @@ void StructuralFE2MaterialStatus :: copyStateVariables(const MaterialStatus &iSt
 
     double crackLength = 0.0;
     XfemStructureManager *xMan = dynamic_cast<XfemStructureManager*>( rve->giveDomain(1)->giveXfemManager() );
-    if(xMan) {
-    	crackLength = xMan->computeTotalCrackLength();
+    if ( xMan ) {
+        crackLength = xMan->computeTotalCrackLength();
     }
 
     std :: ostringstream name;
@@ -495,36 +494,35 @@ void StructuralFE2MaterialStatus :: copyStateVariables(const MaterialStatus &iSt
     this->rve->letOutputBaseFileNameBe( name.str() );
 
 
-	// Update BC
-	this->bc = dynamic_cast< PrescribedGradientHomogenization * >( this->rve->giveDomain(1)->giveBc(1) );
+    // Update BC
+    this->bc = dynamic_cast< PrescribedGradientHomogenization * >( this->rve->giveDomain(1)->giveBc(1) );
 
 #if 1
 
     XfemSolverInterface *xfemSolInt = dynamic_cast<XfemSolverInterface*>(rve.get());
     StaticStructural *statStruct = dynamic_cast<StaticStructural*>(rve.get());
-    if(xfemSolInt && statStruct) {
-//    	printf("Successfully casted to XfemSolverInterface.\n");
+    if ( xfemSolInt && statStruct ) {
+        //printf("Successfully casted to XfemSolverInterface.\n");
 
-    	TimeStep *tStep = rve->giveCurrentStep();
+        TimeStep *tStep = rve->giveCurrentStep();
 
-		EModelDefaultEquationNumbering num;
-		int numDofsNew = rve->giveNumberOfDomainEquations( 1, num );
-		FloatArray u;
-		u.resize(numDofsNew);
-		u.zero();
+        EModelDefaultEquationNumbering num;
+        int numDofsNew = rve->giveNumberOfDomainEquations( 1, num );
+        FloatArray u;
+        u.resize(numDofsNew);
+        u.zero();
 
-		xfemSolInt->xfemUpdatePrimaryField(*statStruct, tStep, u);
+        xfemSolInt->xfemUpdatePrimaryField(*statStruct, tStep, u);
 
-	    // Set domain pointer to various components ...
-		rve->giveNumericalMethod(NULL)->setDomain(newDomain);
-	//        ioEngngModel.nMethod->setDomain(domain);
+        // Set domain pointer to various components ...
+        rve->giveNumericalMethod(NULL)->setDomain(newDomain);
+        //ioEngngModel.nMethod->setDomain(domain);
 
     }
 
 //    TimeStep *tStep = rve->giveNextStep();
 //    setTimeStep(tStep);
 //    rve->solveYourselfAt(tStep);
-
 
 
     int numExpModules = rve->giveExportModuleManager()->giveNumberOfModules();

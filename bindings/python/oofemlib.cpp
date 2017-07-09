@@ -1080,7 +1080,7 @@ public:
     contextIOResultType saveContext(DataStream &stream, ContextMode mode) {
         return this->get_override("saveContext")(stream, mode);
     }
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode) {
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode) {
         return this->get_override("restoreContext")(stream, mode);
     }
 };

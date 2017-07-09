@@ -284,43 +284,17 @@ StationaryTransportProblem :: saveContext(DataStream &stream, ContextMode mode)
 
 
 contextIOResultType
-StationaryTransportProblem :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
-//
-// restore state variable - displacement vector
-//
+StationaryTransportProblem :: restoreContext(DataStream &stream, ContextMode mode)
 {
     contextIOResultType iores;
-    int closeFlag = 0;
-    int istep, iversion;
-    FILE *file = NULL;
 
-    this->resolveCorrespondingStepNumber(istep, iversion, obj);
-
-    if ( stream == NULL ) {
-        if ( !this->giveContextFile(& file, istep, iversion, contextMode_read) ) {
-            THROW_CIOERR(CIO_IOERR); // override
-        }
-
-        stream = new FileDataStream(file);
-        closeFlag = 1;
-    }
-
-    if ( ( iores = EngngModel :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
+    if ( ( iores = EngngModel :: restoreContext(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = UnknownsField->restoreContext(*stream, mode) ) != CIO_OK ) {
+    if ( ( iores = UnknownsField->restoreContext(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-
-    if ( closeFlag ) {
-        fclose(file);
-        delete stream;
-        stream = NULL;
-    }
-
-    // ensure consistent records
 
     return CIO_OK;
 }

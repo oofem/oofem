@@ -43,6 +43,7 @@
 #include "oofemcfg.h"
 
 #include "oofemtxtdatareader.h"
+#include "datastream.h"
 #include "util.h"
 #include "error.h"
 #include "logger.h"
@@ -279,10 +280,8 @@ int main(int argc, char *argv[])
 
     if ( restartFlag ) {
         try {
-            //FileDataStream stream(this->giveContextFileName(restartStep, 0), false);
-            //problem->restoreContext(stream, CM_State | CM_Definition);
-            int restartStepInfo [ 2 ] = {restartStep, 0};
-            problem->restoreContext(NULL, CM_State | CM_Definition, ( void * ) restartStepInfo);
+            FileDataStream stream(problem->giveContextFileName(restartStep, 0), false);
+            problem->restoreContext(stream, CM_State | CM_Definition);
         } catch(ContextIOERR & c) {
             c.print();
             exit(1);

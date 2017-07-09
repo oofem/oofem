@@ -1485,6 +1485,10 @@ contextIOResultType EngngModel :: saveContext(DataStream &stream, ContextMode mo
 {
     contextIOResultType iores;
  
+    if ( !stream.write(giveCurrentStep()->giveNumber()) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
     if ( ( iores = giveCurrentStep()->saveContext(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
@@ -1525,7 +1529,7 @@ contextIOResultType EngngModel :: saveContext(DataStream &stream, ContextMode mo
 }
 
 
-contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType EngngModel :: restoreContext(DataStream &stream, ContextMode mode)
 //
 // this procedure is used mainly for two reasons:
 //
@@ -1544,32 +1548,20 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
 // This version loads only Element and Material properties.
 //
 // This function is inverse to the saveContext() member function
-//
-// WARNING obj is cast into int pointer  to time step for which to seek Context.
-//
 {
     contextIOResultType iores;
-    int closeFlag = 0, istep, iversion;
-    FILE *file = NULL;
-
-    this->resolveCorrespondingStepNumber(istep, iversion, obj);
-    OOFEM_LOG_RELEVANT("Restoring context for time step %d.%d\n", istep, iversion);
-
-    if ( stream == NULL ) {
-        if ( !this->giveContextFile(& file, istep, iversion, contextMode_read) ) {
-            THROW_CIOERR(CIO_IOERR);                                                              // override
-        }
-
-        stream = new FileDataStream(file);
-        closeFlag = 1;
-    }
 
     // restore solution step
+    int istep;
+    if ( !stream.read(istep) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
     if ( !currentStep ) {
         currentStep.reset( new TimeStep(istep, this, 0, 0., 0., 0) );
     }
 
-    if ( ( iores = currentStep->restoreContext(*stream, mode) ) != CIO_OK ) {
+    if ( ( iores = currentStep->restoreContext(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -1586,36 +1578,36 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
                                 currentStep->giveTimeIncrement(), currentStep->giveSolutionStateCounter() - 1) );
 
     // restore numberOfEquations and domainNeqs array
-    if ( !stream->read(numberOfEquations) ) {
+    if ( !stream.read(numberOfEquations) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = domainNeqs.restoreYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = domainNeqs.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     // restore numberOfPrescribedEquations and domainNeqs array
-    if ( !stream->read(numberOfPrescribedEquations) ) {
+    if ( !stream.read(numberOfPrescribedEquations) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = domainPrescribedNeqs.restoreYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = domainPrescribedNeqs.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     // restore renumber flag
-    if ( !stream->read(renumberFlag) ) {
+    if ( !stream.read(renumberFlag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     for ( auto &domain: domainList ) {
-        domain->restoreContext(*stream, mode);
+        domain->restoreContext(stream, mode);
     }
 
     // restore nMethod
     NumericalMethod *nmethod = this->giveNumericalMethod( this->giveCurrentMetaStep() );
     if ( nmethod ) {
-        if ( ( iores = nmethod->restoreContext(*stream, mode) ) != CIO_OK ) {
+        if ( ( iores = nmethod->restoreContext(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
@@ -1624,38 +1616,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
     this->updateAttributes( this->giveCurrentMetaStep() );
     this->initStepIncrements();
 
-    if ( closeFlag ) {
-        fclose(file);
-        delete stream;
-        stream = NULL;
-    }                                                           // ensure consistent records
-
     return CIO_OK;
-}
-
-
-void
-EngngModel :: resolveCorrespondingStepNumber(int &istep, int &iversion, void *obj)
-{
-    //
-    // returns corresponding step number
-    //
-    if ( obj == NULL ) {
-        istep = 1;
-        iversion = 0;
-        return;
-    }
-
-    istep = * ( int * ) obj;
-    iversion = * ( ( ( int * ) obj ) + 1 );
-
-    if ( istep > this->giveNumberOfSteps() ) {
-        istep = this->giveNumberOfSteps();
-    }
-
-    if ( istep <= 0 ) {
-        istep = 1;
-    }
 }
 
 

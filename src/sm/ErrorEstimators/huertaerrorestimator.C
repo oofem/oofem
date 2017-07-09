@@ -435,9 +435,8 @@ HuertaErrorEstimator :: estimateError(EE_ErrorMode err_mode, TimeStep *tStep)
                     // it would be much cleaner to call restore from engng model
                     while ( tStepNumber < curNumber ) {
                         try {
-                            //FileDataStream stream(this->giveContextFileName(tStepNumber, 0), false);
-                            //model->restoreContext(stream, CM_State );
-                            model->restoreContext(NULL, CM_State, ( void * ) & tStepNumber);
+                            FileDataStream stream(model->giveContextFileName(tStepNumber, 0), false);
+                            model->restoreContext(stream, CM_State );
                         } catch(ContextIOERR & c) {
                             c.print();
                             exit(1);

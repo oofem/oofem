@@ -664,12 +664,10 @@ public:
      * context.
      * @param stream Context file.
      * @param mode Determines amount of info in stream.
-     * @param obj Void pointer to an int array containing two values:time step number and
-     * version of a context file to be restored.
      * @return contextIOResultType.
      * @exception ContextIOERR exception if error encountered.
      */
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode);
     /**
      * Updates domain links after the domains of receiver have changed. Used mainly after
      * restoring context - the domains may change and this service is then used
@@ -677,7 +675,6 @@ public:
      * like error estimators, solvers, etc, having domains as attributes.
      */
     virtual void updateDomainLinks();
-    void resolveCorrespondingStepNumber(int &, int &, void *obj);
     /// Returns current meta step.
     MetaStep *giveCurrentMetaStep();
     /** Returns current time step.
