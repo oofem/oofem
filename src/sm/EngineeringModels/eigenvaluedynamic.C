@@ -368,4 +368,15 @@ int EigenValueDynamic :: resolveCorrespondingEigenStepNumber(void *obj)
     return * istep;
 }
 
+
+void EigenValueDynamic :: setActiveVector(int i)
+{
+    this->activeVector = i;
+    if ( activeVector > numberOfRequiredEigenValues ) {
+        activeVector = numberOfRequiredEigenValues;
+    }
+
+    this->giveCurrentStep()->setTime( ( double ) activeVector );
+}
+
 } // end namespace oofem

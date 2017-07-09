@@ -418,6 +418,12 @@ void LinearStability :: printOutputAt(FILE *file, TimeStep *tStep)
 }
 
 
+void LinearStability :: setActiveVector(int activeVector)
+{
+    this->giveCurrentStep()->setTime( ( double ) activeVector );
+}
+
+
 contextIOResultType LinearStability :: saveContext(DataStream &stream, ContextMode mode)
 {
     contextIOResultType iores;

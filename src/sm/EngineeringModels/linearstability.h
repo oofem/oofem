@@ -112,6 +112,7 @@ public:
     virtual TimeStep *giveNextStep();
 
     virtual double giveEigenValue(int eigNum) { return eigVal.at(eigNum); }
+    virtual void setActiveVector(int i);
 
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
     SparseLinearSystemNM *giveNumericalMethodForLinStaticProblem(TimeStep *tStep);

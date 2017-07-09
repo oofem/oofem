@@ -520,7 +520,8 @@ public:
 
     /// Only relevant for eigen value analysis. Otherwise returns zero.
     virtual double giveEigenValue(int eigNum) { return 0.0; }
-
+    /// Only relevant for eigen value  analysis. Otherwise does noting.
+    virtual void setActiveVector(int i) { }
     /**
      * Exchanges necessary remote DofManagers data.
      * @todo The name and description of this function is misleading, the function really just accumulates the total values for shared "equations".

@@ -98,7 +98,7 @@ public:
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual TimeStep *giveNextStep();
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
-    virtual void setActiveVector(int i) { activeVector = i; }
+    virtual void setActiveVector(int i);
     virtual int resolveCorrespondingEigenStepNumber(void *obj);
 
     virtual double giveEigenValue(int eigNum) { return eigVal.at(eigNum); }
