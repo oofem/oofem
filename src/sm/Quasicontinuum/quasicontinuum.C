@@ -625,12 +625,12 @@ Quasicontinuum :: applyApproach3(Domain *d, int homMtrxType)
 
 
     // delete
-    for ( uint i = 0; i <= individualStiffnessTensors.size() - 1; i++ ) {
+    for ( unsigned int i = 0; i <= individualStiffnessTensors.size() - 1; i++ ) {
         delete individualStiffnessTensors [ i ];
         delete individualStiffnessMatrices [ i ];
     }
 
-    for ( uint i = 0; i <= connectivityTable.size() - 1; i++ ) {
+    for ( unsigned int i = 0; i <= connectivityTable.size() - 1; i++ ) {
         delete connectivityTable [ i ];
     }
 }
