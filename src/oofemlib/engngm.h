@@ -1029,7 +1029,23 @@ public:
      * (gaussPoint::printOutputAt).
      */
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
-
+    virtual void printOutputAt(FILE *file, TimeStep *tStep, const IntArray &nodeSets, const IntArray &elementSets);
+    /**
+     * Outputs all nodes in the given set.
+     * @param file Output stream.
+     * @param domain Domain.
+     * @param tStep Time step.
+     * @param setNum Set number. If zero, outputs all elements.
+     */
+    void outputNodes(FILE *file, Domain &domain, TimeStep *tStep, int setNum);
+    /**
+     * Outputs all elements in the given set.
+     * @param file Output stream.
+     * @param domain Domain.
+     * @param tStep Time step.
+     * @param setNum Set number. If zero, outputs all elements.
+     */
+    void outputElements(FILE *file, Domain &domain, TimeStep *tStep, int setNum);
 
     // input / output
     /// Prints state of receiver. Useful for debugging.

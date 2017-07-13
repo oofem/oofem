@@ -668,9 +668,11 @@ EngngModel :: updateYourself(TimeStep *tStep)
 void
 EngngModel :: terminate(TimeStep *tStep)
 {
-    if(!suppressOutput) {
-		this->doStepOutput(tStep);
-		fflush( this->giveOutputStream() );
+    if ( !suppressOutput ) {
+        this->doStepOutput(tStep);
+        fflush( this->giveOutputStream() );
+    } else {
+        exportModuleManager->doOutput(tStep);
     }
 
     this->saveStepContext(tStep, CM_State | CM_Definition);
@@ -725,6 +727,79 @@ EngngModel :: printOutputAt(FILE *file, TimeStep *tStep)
         domain->giveOutputManager()->doElementOutput(file, tStep);
     }
 }
+
+
+void
+EngngModel :: printOutputAt(FILE *file, TimeStep *tStep, const IntArray &nodeSets, const IntArray &elementSets)
+{
+    for ( auto &domain: domainList ) {
+        int dnum = domain->giveNumber();
+        fprintf( file, "Output for domain %3d\n", dnum );
+        int nset = nodeSets.giveSize() < dnum ? 0 : nodeSets.at(dnum);
+        int eset = elementSets.giveSize() < dnum ? 0 : elementSets.at(dnum);
+
+        this->outputNodes(file, *domain, tStep, nset);
+        this->outputElements(file, *domain, tStep, eset);
+        ///@todo Add general support for reaction forces
+#if 0
+        this->outputReactionForces(file, *domain, tStep, nset);
+#endif
+    }
+}
+
+
+void
+EngngModel :: outputNodes(FILE *file, Domain &domain, TimeStep *tStep, int setNum)
+{
+    fprintf(file, "\n\nNode output:\n------------------\n");
+
+    if ( setNum == 0 ) { // No set specified, export all
+        for ( auto &dman : domain.giveDofManagers() ) {
+            if ( dman->giveParallelMode() == DofManager_null ) {
+                continue;
+            }
+            dman->printOutputAt(file, tStep);
+        }
+    } else {
+        auto &nodes = domain.giveSet(setNum)->giveNodeList();
+
+        for ( int inode : nodes ) {
+            auto dman = domain.giveDofManager(inode);
+            if ( dman->giveParallelMode() == DofManager_null ) {
+                continue;
+            }
+            dman->printOutputAt(file, tStep);
+        }
+    }
+    fprintf(file, "\n\n");
+}
+
+
+void
+EngngModel :: outputElements(FILE *file, Domain &domain, TimeStep *tStep, int setNum)
+{
+    fprintf(file, "\n\nElement output:\n---------------\n");
+
+    if ( setNum == 0 ) {
+        for ( auto &elem : domain.giveElements() ) {
+            if ( elem->giveParallelMode() == Element_remote ) {
+                continue;
+            }
+            elem->printOutputAt(file, tStep);
+        }
+    } else {
+        auto &elements = domain.giveSet(setNum)->giveElementList();
+        for ( int ielem : elements ) {
+            auto element = domain.giveElement(ielem);
+            if ( element->giveParallelMode() == Element_remote ) {
+                continue;
+            }
+            element->printOutputAt(file, tStep);
+        }
+    }
+    fprintf(file, "\n\n");
+}
+
 
 void EngngModel :: printYourself()
 {

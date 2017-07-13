@@ -42,7 +42,7 @@
 ///@name Input fields for OutputExportModule
 //@{
 #define _IFT_OutputExportModule_Name "output"
-#define _IFT_OutputExportModule_nodeSets "dofman_sets"
+#define _IFT_OutputExportModule_nodeSets "node_sets"
 #define _IFT_OutputExportModule_elementSets "element_sets"
 //@}
 
@@ -53,10 +53,9 @@ class DofManager;
 
 /**
  * Standard output for OOFEM. Most available data is written in plain text.
- * 
- * Adapted from OutputManager.
+ * Implementation simply relies on EngngModel::printOutputAt
  *
- * @author Mikael Öhman (and others)
+ * @author Mikael Öhman
  */
 class OOFEM_EXPORT OutputExportModule : public ExportModule
 {
@@ -68,28 +67,6 @@ protected:
 
     /// Set which contains elements which should be exported
     IntArray elementSets;
-
-    /**
-     * Does the dofmanager output.
-     * All selected dofmanagers are requested for doing their output using printOutputAt service.
-     */
-    void doDofManOutput(FILE *file, Domain *domain, TimeStep *tStep);
-    /**
-     * Does the element output.
-     * All selected elements are requested for doing their output using printOutputAt service.
-     */
-    void doElementOutput(FILE *file, Domain *domain, TimeStep *tStep);
-
-    /**
-     * Tests if given dof manager is required to do its output for given time step.
-     * @return nonzero if output required.
-     */
-    int testDofManOutput(DofManager *dman);
-    /**
-     * Tests if given element is required to do its output for given time step.
-     * @return nonzero if output required.
-     */
-    int testElementOutput(Element *element);
 
 public:
     OutputExportModule(int n, EngngModel * e);
