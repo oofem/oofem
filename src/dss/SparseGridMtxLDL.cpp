@@ -429,9 +429,9 @@ void SparseGridMtxLDL :: Factorize()
             // Factorize diagonal block
             BlockArith->FactorizeBlock(dd + Djj);
 
-            if ( ( bj % newdotcnount ) == 0 ) {
-           //     Write("."); //JB
-            }
+            /*if ( ( bj % newdotcnount ) == 0 ) {
+	        Write("."); //JB
+	   }*/
 
             Djj += block_storage;
             eMT->act_block += block_size;
@@ -561,9 +561,9 @@ void SparseGridMtxLDL :: Factorize_Incomplete()
             // Factorize diagonal block
             BlockArith->FactorizeBlock(dd + Djj);
 
-            if ( ( bj % newdotcnount ) == 0 ) {
-                // Write("."); // JB
-            }
+            /*if ( ( bj % newdotcnount ) == 0 ) {
+  	        Write("."); // JB
+		}*/
 
             Djj += block_storage;
             eMT->act_block += block_size;

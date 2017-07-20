@@ -376,9 +376,9 @@ void SparseGridMtxLU :: Factorize()
             // Factorize diagonal block
             BlockArith->LU_Decomposition(dd + Djj);
 
-            if ( ( bj % newdotcnount ) == 0 ) {
+            /*if ( ( bj % newdotcnount ) == 0 ) {
                 Write(".");
-            }
+		}*/
 
             Djj += block_storage;
             eMT->act_block += block_size;
