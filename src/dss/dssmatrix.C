@@ -171,8 +171,8 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
         nz_ += columns [ i ].size();
     }
 
-    unsigned long *rowind_ = new unsigned long [ nz_ ];
-    unsigned long *colptr_ = new unsigned long [ neq + 1 ];
+    rowind_.reset( new unsigned long [ nz_ ]);
+    colptr_.reset( new unsigned long [ neq + 1 ]);
     if ( ( rowind_ == NULL ) || ( colptr_ == NULL ) ) {
         OOFEM_ERROR("free store exhausted, exiting");
     }
@@ -180,7 +180,7 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
     indx = 0;
 
     for ( int j = 0; j < neq; j++ ) { // column loop
-        colptr_ [ j ] = indx;
+      colptr_ [ j ] = indx;
         for ( auto &val : columns [ j ] ) { // row loop
             rowind_ [ indx++ ] = val;
         }
@@ -188,7 +188,7 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
 
     colptr_ [ neq ] = indx;
 
-    _sm.reset( new SparseMatrixF(neq, NULL, rowind_, colptr_, 0, 0, true) ); 
+    _sm.reset( new SparseMatrixF(neq, NULL, rowind_.get(), colptr_.get(), 0, 0, true) ); 
     if ( !_sm ) {
         OOFEM_FATAL("free store exhausted, exiting");
     }

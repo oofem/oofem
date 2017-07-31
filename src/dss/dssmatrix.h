@@ -64,6 +64,12 @@ protected:
     std :: unique_ptr< SparseMatrixF > _sm;
     /// pointer to DSSolver class (representation of Direct Sparse Solver in DSS lib)
     std :: unique_ptr< DSSolver > _dss;
+
+
+    /// Pointer ro row indices
+    std:: unique_ptr<unsigned long[]> rowind_;
+    /// Pointer to columns
+    std:: unique_ptr<unsigned long[]> colptr_;
     /// Flag indicating whether factorized.
     bool isFactorized;
     /// type of storage & factorization
