@@ -976,6 +976,7 @@ void OOFEGSimpleCmd(char *buf)
     } else if ( !strncmp(cmd, "active_eigen_value", 18) ) {
         istep = atoi(remain);
         gc [ 0 ].setActiveStep(istep);
+        int stepinfo [ 2 ];
         stepinfo [ 0 ] = istep;
         stepinfo [ 1 ] = iversion;
         try {
