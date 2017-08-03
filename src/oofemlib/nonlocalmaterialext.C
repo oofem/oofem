@@ -670,7 +670,7 @@ NonlocalMaterialExtensionInterface :: giveIntegralOfWeightFunction(const int spa
 
         case 2: return cl * cl * pi / 3.;
 
-        case 3: return cl * cl * cl * pi * 8. / 105.;
+        case 3: return cl * cl * cl * pi * 32. / 105.;
 
         default: return 1.;
         }
@@ -681,7 +681,7 @@ NonlocalMaterialExtensionInterface :: giveIntegralOfWeightFunction(const int spa
 
         case 2: return cl * cl * pi;
 
-        case 3: return cl * cl * cl * sqrt(pi * pi * pi) / 4.;
+        case 3: return cl * cl * cl * sqrt(pi * pi * pi);
 
         default: return 1.;
         }
