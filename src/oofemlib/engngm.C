@@ -205,7 +205,6 @@ EngngModel :: Instanciate_init()
 
 
 int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const char *dataOutputFileName, const char *desc)
-// simple input - only number of steps variable is read
 {
     OOFEMTXTDataReader *txtReader = dynamic_cast< OOFEMTXTDataReader* > (dr);
     if ( txtReader != NULL ) {
@@ -522,7 +521,7 @@ EngngModel :: solveYourself()
     }
 
     for ( int imstep = smstep; imstep <= nMetaSteps; imstep++, sjstep = 1 ) { //loop over meta steps
-        MetaStep *activeMStep = this->giveMetaStep(imstep);
+        auto activeMStep = this->giveMetaStep(imstep);
         // update state according to new meta step
         this->initMetaStepAttributes(activeMStep);
 
@@ -570,7 +569,6 @@ EngngModel :: solveYourself()
 
 TimeStep* EngngModel :: generateNextStep()
 {
-    /* code */
     int smstep = 1, sjstep = 1;
     if ( this->currentStep ) {
         smstep = this->currentStep->giveMetaStepNumber();
@@ -815,9 +813,6 @@ void EngngModel :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 
 void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAssembler &ma,
                             const UnknownNumberingScheme &s, Domain *domain)
-//
-// assembles matrix
-//
 {
     IntArray loc;
     FloatMatrix mat, R;
@@ -828,7 +823,7 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
  #pragma omp parallel for shared(answer) private(mat, R, loc)
 #endif
     for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-        Element *element = domain->giveElement(ielem);
+        auto element = domain->giveElement(ielem);
         // skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. They introduction is necessary to
         // allow local averaging on domains without fine grain communication between domains).
@@ -854,15 +849,15 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
         }
     }
 
-    int nbc = domain->giveNumberOfBoundaryConditions();
-    for ( int i = 1; i <= nbc; ++i ) {
-        GeneralBoundaryCondition *bc = domain->giveBc(i);
-        ActiveBoundaryCondition *abc;
-        Load *load;
+    for ( auto &bc : domain->giveBcs() ) {
+        if ( !bc->isImposed(tStep) ) continue;
+        auto abc = dynamic_cast< ActiveBoundaryCondition * >(bc.get());
 
-        if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >(bc) ) ) {
+        if ( abc ) {
             ma.assembleFromActiveBC(answer, *abc, tStep, s, s);
-        } else if ( bc->giveSetNumber() && ( load = dynamic_cast< Load * >(bc) ) && bc->isImposed(tStep) ) {
+        } else if ( bc->giveSetNumber() ) {
+            auto load = dynamic_cast< Load * >(bc.get());
+            if ( !load ) continue;
             // Now we assemble the corresponding load type for the respective components in the set:
             IntArray loc, bNodes;
             FloatMatrix mat, R;
@@ -873,8 +868,8 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
 
             if ( ( bodyLoad = dynamic_cast< BodyLoad * >(load) ) ) { // Body load:
                 const IntArray &elements = set->giveElementList();
-                for ( int ielem = 1; ielem <= elements.giveSize(); ++ielem ) {
-                    Element *element = domain->giveElement( elements.at(ielem) );
+                for ( auto ielem : elements ) {
+                    auto element = domain->giveElement( ielem );
                     mat.clear();
                     ma.matrixFromLoad(mat, *element, bodyLoad, tStep);
 
@@ -887,11 +882,11 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
                         answer.assemble(loc, mat);
                     }
                 }
-            } else if ( ( sLoad = dynamic_cast< SurfaceLoad * >(load) ) ) { // Surface load:
-                const IntArray &boundaries = set->giveBoundaryList();
-                for ( int ibnd = 1; ibnd <= boundaries.giveSize() / 2; ++ibnd ) {
-                    Element *element = domain->giveElement( boundaries.at(ibnd * 2 - 1) );
-                    int boundary = boundaries.at(ibnd * 2);
+            } else if ( ( sLoad = dynamic_cast< SurfaceLoad * >(load) ) ) {
+                const auto &surfaces = set->giveBoundaryList();
+                for ( int ibnd = 1; ibnd <= surfaces.giveSize() / 2; ++ibnd ) {
+                    auto element = domain->giveElement( surfaces.at(ibnd * 2 - 1) );
+                    int boundary = surfaces.at(ibnd * 2);
                     mat.clear();
                     ma.matrixFromSurfaceLoad(mat, *element, sLoad, boundary, tStep);
 
@@ -905,11 +900,11 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
                         answer.assemble(loc, mat);
                     }
                 }
-            } else if ( ( eLoad = dynamic_cast< EdgeLoad * >(load) ) ) { // Edge load:
-                const IntArray &edgeBoundaries = set->giveEdgeList();
-                for ( int ibnd = 1; ibnd <= edgeBoundaries.giveSize() / 2; ++ibnd ) {
-                    Element *element = domain->giveElement( edgeBoundaries.at(ibnd * 2 - 1) );
-                    int boundary = edgeBoundaries.at(ibnd * 2);
+            } else if ( ( eLoad = dynamic_cast< EdgeLoad * >(load) ) ) {
+                const auto &edges = set->giveEdgeList();
+                for ( int ibnd = 1; ibnd <= edges.giveSize() / 2; ++ibnd ) {
+                    auto element = domain->giveElement( edges.at(ibnd * 2 - 1) );
+                    int boundary = edges.at(ibnd * 2);
                     mat.clear();
                     ma.matrixFromEdgeLoad(mat, *element, eLoad, boundary, tStep);
 
@@ -928,7 +923,7 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
     }
 
     if ( domain->hasContactManager() ) {
-        OOFEM_ERROR("Contant problems temporarily deactivated");
+        OOFEM_ERROR("Contact problems temporarily deactivated");
         //domain->giveContactManager()->assembleTangentFromContacts(answer, tStep, type, s, s);
     }
 
@@ -978,9 +973,8 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
         }
     }
 
-    int nbc = domain->giveNumberOfBoundaryConditions();
-    for ( int i = 1; i <= nbc; ++i ) {
-        ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
+    for ( auto &gbc : domain->giveBcs() ) {
+        ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( gbc.get() );
         if ( bc != NULL ) {
             ma.assembleFromActiveBC(answer, *bc, tStep, rs, cs);
         }
