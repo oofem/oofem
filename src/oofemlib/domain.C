@@ -1323,20 +1323,18 @@ Domain :: createDofs()
                 OOFEM_ERROR("Incompatible dof type (%d) in node %d", dtype, i);
             }
 
-
-
             // Finally create the new DOF: 
             //printf("Creating: node %d, id = %d, dofType = %d, bc = %d, ic = %d\n", i, id, dtype, bcid, icid);
-            if (!dman->hasDofID((DofIDItem)id)) {
+            if ( !dman->hasDofID((DofIDItem)id) ) {
 
-              Dof *dof = classFactory.createDof(dtype, (DofIDItem)id, dman);
-              dof->setBcId(bcid); // Note: slave dofs and such will simple ignore this.
-              dof->setIcId(icid);
-              // Slave dofs obtain their weights post-initialization, simple slave dofs must have their master node specified.
-              if ( dtype == DT_simpleSlave ) {
-                static_cast< SimpleSlaveDof * >(dof)->setMasterDofManagerNum( ( * dman->giveMasterMap() ) [ id ] );
-              }
-              dman->appendDof(dof);
+                Dof *dof = classFactory.createDof(dtype, (DofIDItem)id, dman);
+                dof->setBcId(bcid); // Note: slave dofs and such will simple ignore this.
+                dof->setIcId(icid);
+                // Slave dofs obtain their weights post-initialization, simple slave dofs must have their master node specified.
+                if ( dtype == DT_simpleSlave ) {
+                    static_cast< SimpleSlaveDof * >(dof)->setMasterDofManagerNum( ( * dman->giveMasterMap() ) [ id ] );
+                }
+                dman->appendDof(dof);
             }
         }
     }
@@ -1345,11 +1343,10 @@ Domain :: createDofs()
     if ( this->hasXfemManager() ) {
         xfemManager->createEnrichedDofs();
     }
-    
+
     if ( this->hasContactManager() ) {
         contactManager->createContactDofs();
     }
-    
 }
 
 
@@ -1451,93 +1448,77 @@ Domain :: giveTopology()
 }
 
 
-
-#define SAVE_COMPONENTS(list)                       \
-    {                                               \
-        for ( const auto &object: list ) {             \
-            if ( ( mode & CM_Definition ) != 0 ) {       \
-                if ( stream.write( std :: string( object->giveInputRecordName() ) ) == 0 ) { \
-                    THROW_CIOERR(CIO_IOERR);        \
-                }                                   \
-            }                                       \
-            if ( ( iores = object->saveContext(stream, mode) ) != CIO_OK ) { \
-                THROW_CIOERR(iores);                \
-            }                                       \
-        }                                           \
+template< typename T >
+void save_components(T &list, DataStream &stream, ContextMode mode)
+{
+    if ( !stream.write((int)list.size()) ) {
+        THROW_CIOERR(CIO_IOERR);
     }
-
-#define RESTORE_COMPONENTS(size, list, creator) \
-    {                                           \
-        if ( mode & CM_Definition ) {           \
-            list.resize(size);                  \
-        }                                       \
-        for ( int i = 1; i <= size; i++ ) {     \
-            if ( mode & CM_Definition ) {       \
-                std :: string name;             \
-                if ( !stream.read(name) ) {     \
-                    THROW_CIOERR(CIO_IOERR);    \
-                }                               \
-                auto *object = creator(name.c_str(), i, this); \
-                if ( !object ) {                   \
-                    THROW_CIOERR(CIO_BADVERSION); \
-                }                               \
-                list[i-1].reset(object);           \
-            }                                   \
-            if ( ( iores = list[i-1]->restoreContext(stream, mode) ) != CIO_OK ) { \
-                THROW_CIOERR(iores);            \
-            }                                   \
-        }                                       \
+    for ( const auto &object: list ) {
+        if ( ( mode & CM_Definition ) != 0 ) {
+            if ( stream.write( std :: string( object->giveInputRecordName() ) ) == 0 ) { \
+                THROW_CIOERR(CIO_IOERR);
+            }
+        }
+        auto iores = object->saveContext(stream, mode);
+        if ( iores != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
     }
+}
 
-#define DOMAIN_NCOMP 8
+
+template< typename T, typename C >
+void restore_components(T &list, DataStream &stream, ContextMode mode, const C &creator)
+{
+    int size = 0;
+    if ( !stream.read(size) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+    if ( mode & CM_Definition ) {
+        list.clear();
+        list.resize(size);
+    }
+    for ( int i = 1; i <= size; i++ ) {
+        if ( mode & CM_Definition ) {
+            std :: string name;
+            if ( !stream.read(name) ) {
+                THROW_CIOERR(CIO_IOERR);
+            }
+            auto object = creator(name, i);
+            list[i-1].reset(object);
+        }
+        auto iores = list[i-1]->restoreContext(stream, mode);
+        if ( iores != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+    }
+}
+
 
 contextIOResultType
 Domain :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-    int serNum;
-    ErrorEstimator *ee;
-
-    // save domain serial number
-    serNum = this->giveSerialNumber();
-    if ( !stream.write(serNum) ) {
+    if ( !stream.write(this->giveSerialNumber()) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     if ( ( mode & CM_Definition ) ) {
-        long ncomp [ DOMAIN_NCOMP ];
-        ncomp [ 0 ] = this->giveNumberOfDofManagers();
-        ncomp [ 1 ] = this->giveNumberOfElements();
-        ncomp [ 2 ] = this->giveNumberOfMaterialModels();
-        ncomp [ 3 ] = this->giveNumberOfCrossSectionModels();
-        ncomp [ 4 ] = this->giveNumberOfBoundaryConditions();
-        ncomp [ 5 ] = this->giveNumberOfInitialConditions();
-        ncomp [ 6 ] = this->giveNumberOfFunctions();
-        ncomp [ 7 ] = this->giveNumberOfNonlocalBarriers();
-
-        // store number of components
-        if ( !stream.write(ncomp, DOMAIN_NCOMP) ) {
-            THROW_CIOERR(CIO_IOERR);
-        }
-
-        // Have to store materials (and possible other things first) before restoring integration points and such).
-        SAVE_COMPONENTS(this->materialList);
-        SAVE_COMPONENTS(this->crossSectionList);
-        SAVE_COMPONENTS(this->icList);
-        SAVE_COMPONENTS(this->functionList);
-        SAVE_COMPONENTS(this->nonlocalBarrierList);
+        save_components(this->setList, stream, mode);
+        save_components(this->materialList, stream, mode);
+        save_components(this->crossSectionList, stream, mode);
+        save_components(this->icList, stream, mode);
+        save_components(this->functionList, stream, mode);
+        save_components(this->nonlocalBarrierList, stream, mode);
     }
 
-    // save dof managers
-    SAVE_COMPONENTS(this->dofManagerList);
-    // elements and corresponding integration points
-    SAVE_COMPONENTS(this->elementList);
-    // boundary conditions
-    SAVE_COMPONENTS(this->bcList);
+    save_components(this->dofManagerList, stream, mode);
+    save_components(this->elementList, stream, mode);
+    save_components(this->bcList, stream, mode);
 
-    // store error estimator data
-    ee = this->giveErrorEstimator();
+    auto ee = this->giveErrorEstimator();
     if ( ee ) {
+        contextIOResultType iores;
         if ( ( iores = ee->saveContext(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
@@ -1550,57 +1531,33 @@ Domain :: saveContext(DataStream &stream, ContextMode mode)
 contextIOResultType
 Domain :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-    int serNum;
-    bool domainUpdated;
-    ErrorEstimator *ee;
-    long ncomp [ DOMAIN_NCOMP ];
-
-    int nnodes, nelem, nmat, ncs, nbc, nic, nfunc, nnlb;
-
-
-    domainUpdated = false;
-    serNum = this->giveSerialNumber();
+    bool domainUpdated = false;
+    int serNum = this->giveSerialNumber();
     // restore domain serial number
     if ( !stream.read(this->serialNumber) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     if ( ( mode & CM_Definition ) ) {
-        // read number of components
-        if ( !stream.read(ncomp, DOMAIN_NCOMP) ) {
-            THROW_CIOERR(CIO_IOERR);
-        }
-
-        nnodes = ncomp [ 0 ];
-        nelem = ncomp [ 1 ];
-        nmat  = ncomp [ 2 ];
-        ncs   = ncomp [ 3 ];
-        nbc   = ncomp [ 4 ];
-        nic   = ncomp [ 5 ];
-        nfunc = ncomp [ 6 ];
-        nnlb  = ncomp [ 7 ];
-
-        // clear receiver data
-        dofManagerList.clear();
-        elementList.clear();
+        // clear cached data:
         mElementPlaceInArray.clear();
         mDofManPlaceInArray.clear();
-        materialList.clear();
-        bcList.clear();
-        icList.clear();
-        functionList.clear();
-        nonlocalBarrierList.clear();
-        setList.clear();
+ 
         ///@todo Saving and restoring xfemmanagers.
         xfemManager.reset(NULL);
-        //this->clear();
 
-        RESTORE_COMPONENTS(nmat, this->materialList, classFactory.createMaterial);
-        RESTORE_COMPONENTS(ncs, this->crossSectionList, classFactory.createCrossSection);
-        RESTORE_COMPONENTS(nic, this->icList, classFactory.createInitialCondition);
-        RESTORE_COMPONENTS(nfunc, this->functionList, classFactory.createFunction);
-        RESTORE_COMPONENTS(nnlb, this->nonlocalBarrierList, classFactory.createNonlocalBarrier);
+        restore_components(this->setList, stream, mode,
+                           [this] (std::string &x, int i) { return new Set(i, this); });
+        restore_components(this->materialList, stream, mode,
+                           [this] (std::string &x, int i) { return classFactory.createMaterial(x.c_str(), i, this); });
+        restore_components(this->crossSectionList, stream, mode,
+                           [this] (std::string &x, int i) { return classFactory.createCrossSection(x.c_str(), i, this); });
+        restore_components(this->icList, stream, mode,
+                           [this] (std::string &x, int i) { return classFactory.createInitialCondition(x.c_str(), i, this); });
+        restore_components(this->functionList, stream, mode,
+                           [this] (std::string &x, int i) { return classFactory.createFunction(x.c_str(), i, this); });
+        restore_components(this->nonlocalBarrierList, stream, mode,
+                           [this] (std::string &x, int i) { return classFactory.createNonlocalBarrier(x.c_str(), i, this); });
 
         domainUpdated = true;
     } else {
@@ -1617,22 +1574,21 @@ Domain :: restoreContext(DataStream &stream, ContextMode mode)
             delete domainDr;
             domainUpdated = true;
         }
-
-        nnodes = this->giveNumberOfDofManagers();
-        nelem = this->giveNumberOfElements();
-        nbc = this->giveNumberOfBoundaryConditions();
     }
 
-    RESTORE_COMPONENTS(nnodes, this->dofManagerList, classFactory.createDofManager);
-    RESTORE_COMPONENTS(nelem, this->elementList, classFactory.createElement);
-    RESTORE_COMPONENTS(nbc, this->bcList, classFactory.createBoundaryCondition);
+    restore_components(this->dofManagerList, stream, mode,
+                       [this] (std::string &x, int i) { return classFactory.createDofManager(x.c_str(), i, this); });
+    restore_components(this->elementList, stream, mode,
+                       [this] (std::string &x, int i) { return classFactory.createElement(x.c_str(), i, this); });
+    restore_components(this->bcList, stream, mode,
+                       [this] (std::string &x, int i) { return classFactory.createBoundaryCondition(x.c_str(), i, this); });
 
-    // restore error estimator data
-    ee = this->giveErrorEstimator();
+    auto ee = this->giveErrorEstimator();
     if ( ee ) {
         if ( domainUpdated ) {
             ee->setDomain(this);
         }
+        contextIOResultType iores;
         if ( ( iores = ee->restoreContext(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
@@ -1646,9 +1602,6 @@ Domain :: restoreContext(DataStream &stream, ContextMode mode)
 
     return CIO_OK;
 }
-
-
-
 
 #ifdef __PARALLEL_MODE
 
@@ -1823,7 +1776,7 @@ Domain :: renumberDofManData(DomainTransactionManager *tm)
     SpecificEntityRenumberingFunctor< Domain > domainLToLFunctor(this, &Domain :: LB_giveUpdatedLocalNumber);
 
 
-    for ( auto &map: dmanMap ) {
+    for ( auto &map : dmanMap ) {
         if ( tm->dofmanTransactions.find(map.first) != tm->dofmanTransactions.end() ) {
             // received dof manager -> we map global numbers to new local number
             map.second->updateLocalNumbering(domainGToLFunctor); // g_to_l
@@ -1841,7 +1794,7 @@ Domain :: renumberElementData(DomainTransactionManager *tm)
     SpecificEntityRenumberingFunctor< Domain > domainGToLFunctor(this, &Domain :: LB_giveUpdatedGlobalNumber);
     SpecificEntityRenumberingFunctor< Domain > domainLToLFunctor(this, &Domain :: LB_giveUpdatedLocalNumber);
 
-    for ( auto &map: elementMap ) {
+    for ( auto &map : elementMap ) {
         if ( tm->elementTransactions.find(map.first) != tm->elementTransactions.end() ) {
             // received dof manager -> we map global numbers to new local number
             map.second->updateLocalNumbering(domainGToLFunctor); // g_to_l
@@ -1877,7 +1830,7 @@ int
 Domain :: LB_giveUpdatedLocalNumber(int num, EntityRenumberingScheme scheme)
 {
     if ( scheme == ERS_DofManager ) {
-        DofManager *dm = this->giveDofManager(num);
+        auto dm = this->giveDofManager(num);
         if ( dm ) {
             return dm->giveNumber();
         } else {
@@ -1895,7 +1848,7 @@ int
 Domain :: LB_giveUpdatedGlobalNumber(int num, EntityRenumberingScheme scheme)
 {
     if ( scheme == ERS_DofManager ) {
-        DofManager *dm = dmanMap [ num ];
+        auto dm = dmanMap [ num ];
         if ( dm ) {
             return dm->giveNumber();
         } else {
@@ -1932,8 +1885,6 @@ Domain :: elementGlobal2Local(int _globnum)
         return 0;
     }
 }
-
-
 
 #endif
 
