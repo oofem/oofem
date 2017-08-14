@@ -124,7 +124,7 @@ static FloatArray exactCoarseError;
 
 //static FloatArray uNormArray;
 
-static DynamicDataReader refinedReader;
+static DynamicDataReader refinedReader("huerta");
 
 static int impCSect, perCSect;
 static FloatArray impPos;

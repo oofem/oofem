@@ -61,8 +61,6 @@
 #include "errorestimator.h"
 #include "range.h"
 #include "fracturemanager.h"
-#include "dynamicinputrecord.h"
-#include "dynamicdatareader.h"
 #include "datareader.h"
 #include "initmodulemanager.h"
 #include "exportmodulemanager.h"

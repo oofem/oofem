@@ -206,10 +206,7 @@ EngngModel :: Instanciate_init()
 
 int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const char *dataOutputFileName, const char *desc)
 {
-    OOFEMTXTDataReader *txtReader = dynamic_cast< OOFEMTXTDataReader* > (dr);
-    if ( txtReader != NULL ) {
-        referenceFileName = std :: string(txtReader->giveDataSourceName());
-    }
+    referenceFileName = dr->giveReferenceName();
 
     bool inputReaderFinish = true;
 
@@ -228,7 +225,7 @@ int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const cha
     this->startTime = time(NULL);
 
 #  ifdef VERBOSE
-    OOFEM_LOG_DEBUG( "Reading all data from input file %s\n", dr->giveDataSourceName() );
+    OOFEM_LOG_DEBUG( "Reading all data from \"%s\"\n", referenceFileName.c_str() );
 #  endif
 
     simulationDescription = std::string(desc);
@@ -355,7 +352,6 @@ EngngModel :: instanciateDomains(DataReader *dr)
 }
 
 
-
 int
 EngngModel :: instanciateMetaSteps(DataReader *dr)
 {
@@ -374,7 +370,6 @@ EngngModel :: instanciateMetaSteps(DataReader *dr)
         InputRecord *ir = dr->giveInputRecord(DataReader :: IR_mstepRec, i);
         result &= metaStepList[i-1].initializeFrom(ir);
     }
-
 
     this->numberOfSteps = metaStepList.size();
     return result;
@@ -1748,11 +1743,6 @@ EngngModel :: testContextFile(int tStepNumber, int stepVersion)
 
 DataReader *
 EngngModel :: GiveDomainDataReader(int domainNum, int domainSerNum, ContextFileMode cmode)
-//
-//
-// returns domain i/o file
-// returns nonzero on success
-//
 {
     std :: string fname = this->coreOutputFileName;
     char fext [ 100 ];

@@ -124,8 +124,6 @@ OOFEMTXTDataReader :: finish()
 bool
 OOFEMTXTDataReader :: giveLineFromInput(std :: ifstream &stream, int &lineNum, std :: string &line)
 {
-    // reads one line from inputStream
-    // if " detected, start/stop changing to lower case characters
     bool flag = false; //0-tolower, 1-remain with capitals
 
     bool read = this->giveRawLineFromInput(stream, lineNum, line);
@@ -148,9 +146,6 @@ OOFEMTXTDataReader :: giveLineFromInput(std :: ifstream &stream, int &lineNum, s
 bool
 OOFEMTXTDataReader :: giveRawLineFromInput(std :: ifstream &stream, int &lineNum, std :: string &line)
 {
-    //
-    // reads one line from inputStream - for private use only.
-    //
     do {
         lineNum++;
         std :: getline(stream, line);

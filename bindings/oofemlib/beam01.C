@@ -25,7 +25,7 @@ using namespace oofem;
 
 int main(int argc, char *argv[])
 {
-    DynamicDataReader myData;
+    DynamicDataReader myData("beam01");
     DynamicInputRecord *myInput;
 
     //Output File

@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
     int tangentProblem = atoi(argv[8]);
     FloatArray rvePosition;
     
-    DynamicDataReader myData;
+    DynamicDataReader myData("hexgrid");
     DynamicInputRecord *myInput;
 
     // Read the file with all inclusions:

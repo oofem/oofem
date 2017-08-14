@@ -36,10 +36,11 @@
 #include "inputrecord.h"
 #include "error.h"
 
+#include <memory>
 #include <fstream>
 
 namespace oofem {
-DynamicDataReader :: DynamicDataReader() : DataReader()
+DynamicDataReader :: DynamicDataReader(std :: string name) : DataReader(), name(std :: move(name))
 {
     this->it = recordList.end();
 }

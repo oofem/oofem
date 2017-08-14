@@ -408,7 +408,7 @@ void StructuralFE2MaterialStatus :: copyStateVariables(const MaterialStatus &iSt
 
         XfemManager *ext_xMan = ext_domain->giveXfemManager();
         XfemManager *this_xMan = rve->giveDomain(1)->giveXfemManager();
-        DynamicDataReader dataReader;
+        DynamicDataReader dataReader("fe2");
         if ( ext_xMan != NULL ) {
 
             IRResultType result; // Required by IR_GIVE_FIELD macro
