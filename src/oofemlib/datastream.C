@@ -63,14 +63,13 @@ int DataStream :: write(const std :: string &data)
 }
 
 FileDataStream :: FileDataStream(std::string filename, bool write): 
-    stream(NULL),
-    filename(std::move(filename)),
-    close(true)
+    stream(nullptr),
+    filename(std::move(filename))
 {
+    //stream.open(filename, (write ? std::ios::out : std::ios:in) | std::ios::binary );
     this->stream = fopen(this->filename.c_str(), write ? "wb" : "rb" );
-    if ( this->stream == NULL ) {
-        //throw some exception here
-        OOFEM_ERROR("Can't open \"%s\"", this->filename.c_str());
+    if ( !this->stream ) {
+        throw CantOpen(this->filename);
     }
 }
 
@@ -82,6 +81,8 @@ FileDataStream :: ~FileDataStream()
 int FileDataStream :: read(int *data, int count)
 {
     return ( (int)fread(data, sizeof( int ), count, stream) == count );
+    //this->stream.read(reinterpret_cast< char* >(data), sizeof(int)*count);
+    //return this->stream.good();
 }
 
 int FileDataStream :: read(unsigned long *data, int count)

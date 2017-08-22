@@ -43,6 +43,7 @@
 #include "node.h"
 #include "domain.h"
 #include "datareader.h"
+#include "oofemtxtdatareader.h"
 #include "remeshingcrit.h"
 #include "mesherinterface.h"
 #include "dof.h"
@@ -430,12 +431,10 @@ AdaptiveNonLinearStatic :: initializeAdaptive(int tStepNumber)
     int sernum = this->giveDomain(1)->giveSerialNumber();
     OOFEM_LOG_INFO("restoring domain %d.%d\n", 1, sernum + 1);
     Domain *dNew = new Domain(2, sernum + 1, this);
-    DataReader *domainDr = this->GiveDomainDataReader(1, sernum + 1, contextMode_read);
+    OOFEMTXTDataReader domainDr(this->giveDomainFileName(1, sernum + 1));
     if ( !dNew->instanciateYourself(domainDr) ) {
         OOFEM_ERROR("domain Instanciation failed");
     }
-
-    delete domainDr;
 
     // remap solution to new domain
     return this->adaptiveRemap(dNew);

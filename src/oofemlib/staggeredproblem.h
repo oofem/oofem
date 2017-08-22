@@ -159,7 +159,7 @@ public:
     virtual void terminate(TimeStep *tStep);
     virtual void doStepOutput(TimeStep *tStep);
 
-    virtual int instanciateYourself(DataReader *dr, InputRecord *ir, const char *outFileName, const char *desc);
+    virtual int instanciateYourself(DataReader &dr, InputRecord *ir, const char *outFileName, const char *desc);
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void updateAttributes(MetaStep *mStep);
 

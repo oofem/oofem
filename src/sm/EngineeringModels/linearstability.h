@@ -96,6 +96,7 @@ public:
 
     virtual void doStepOutput(TimeStep *tStep);
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    //virtual void printOutputAt(FILE *file, TimeStep *tStep, const IntArray &nodeSets, const IntArray &elementSets);
     void terminateLinStatic(TimeStep *tStep);
     int requiresNewLsh() { return 0; }
     virtual void updateYourself(TimeStep *tStep);

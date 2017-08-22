@@ -375,7 +375,7 @@ SolutionbasedShapeFunction :: loadProblem()
 
         // Set up and solve problem
         OOFEMTXTDataReader drMicro( filename.c_str() );
-        EngngModel *myEngngModel = InstanciateProblem(& drMicro, _processor, 0, NULL, false);
+        EngngModel *myEngngModel = InstanciateProblem(drMicro, _processor, 0, NULL, false);
         drMicro.finish();
         myEngngModel->checkProblemConsistency();
         myEngngModel->initMetaStepAttributes( myEngngModel->giveMetaStep(1) );

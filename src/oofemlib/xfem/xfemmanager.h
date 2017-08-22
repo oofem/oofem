@@ -195,7 +195,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
-    virtual int instanciateYourself(DataReader *dr);
+    virtual int instanciateYourself(DataReader &dr);
     virtual const char *giveClassName() const { return "XfemManager"; }
     virtual const char *giveInputRecordName() const { return _IFT_XfemManager_Name; }
 

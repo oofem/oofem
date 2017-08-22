@@ -89,7 +89,7 @@ public:
     virtual void finish() = 0;
 
     /// Gives the reference file name (e.g. file name)
-    virtual std :: string giveReferenceName() const;
+    virtual std :: string giveReferenceName() const = 0;
     /// Gives the output file name
     std :: string giveOutputFileName() { return this->outputFileName; }
     /// Gives the problem description

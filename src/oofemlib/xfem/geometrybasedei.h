@@ -57,7 +57,7 @@ public:
     GeometryBasedEI(int n, XfemManager *xm, Domain *aDomain);
     virtual ~GeometryBasedEI();
 
-    virtual int instanciateYourself(DataReader *dr);
+    virtual int instanciateYourself(DataReader &dr);
 
     virtual void updateDofIdPool();
 

@@ -97,7 +97,7 @@ public:
     
     ContactElement *giveSlave(const int num) { return slaveObjectList[num-1]; }
     int giveNumberOfSlaves() { return (int)slaveObjectList.size(); }
-    virtual int instanciateYourself(DataReader *dr){ return 1; }
+    virtual int instanciateYourself(DataReader &dr){ return 1; }
     //virtual const char *giveClassName() const { return "ContactDefinition"; }
     bool isInContact() { return inContact; }
     virtual void giveDofManagersToAppendTo(IntArray &answer) { answer.clear(); }
@@ -137,7 +137,7 @@ public:
     Node2NodeContact(DofManager *master, DofManager *slave);
     /// Destructor.
     virtual ~Node2NodeContact(){};
-    virtual int instanciateYourself(DataReader *dr);
+    virtual int instanciateYourself(DataReader &dr);
     virtual void setupIntegrationPoints();
     
     virtual void computeGap(FloatArray &answer, TimeStep *tStep);
@@ -178,7 +178,7 @@ public:
     Node2NodeContactL(DofManager *master, DofManager *slave);
     /// Destructor.
     virtual ~Node2NodeContactL(){};
-    //virtual int instanciateYourself(DataReader *dr);
+    //virtual int instanciateYourself(DataReader &dr);
     virtual void giveDofManagersToAppendTo(IntArray &answer); 
     virtual void computeContactTractionAt(GaussPoint *gp, FloatArray &t, FloatArray &gap, TimeStep *tStep);
     

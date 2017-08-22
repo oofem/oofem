@@ -76,7 +76,7 @@ protected:
 public:
     Delamination(int n, XfemManager *xm, Domain *aDomain);
 
-    virtual int instanciateYourself(DataReader *dr);
+    virtual int instanciateYourself(DataReader &dr);
 
     virtual const char *giveClassName() const { return "Delamination"; }
     virtual const char *giveInputRecordName() const { return _IFT_Delamination_Name; }

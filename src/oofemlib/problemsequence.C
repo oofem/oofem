@@ -64,14 +64,14 @@ void ProblemSequence :: solveYourself()
 }
 
 
-int ProblemSequence :: instanciateYourself(DataReader *dr, InputRecord *ir, const char *outFileName, const char *desc)
+int ProblemSequence :: instanciateYourself(DataReader &dr, InputRecord *ir, const char *outFileName, const char *desc)
 {
     int result = EngngModel :: instanciateYourself(dr, ir, dataOutputFileName.c_str(), desc);
     ir->finish();
 
     for ( auto &s : inputStreamNames ) {
         OOFEMTXTDataReader dr( inputStreamNames [ i - 1 ] );
-        std :: unique_ptr< EngngModel >prob( InstanciateProblem(& dr, this->pMode, this->contextOutputMode, NULL) );
+        std :: unique_ptr< EngngModel >prob( InstanciateProblem(dr, this->pMode, this->contextOutputMode, NULL) );
         emodelList.emplace_back(std :: move(prob));
         if ( prob ) {
             return 0;

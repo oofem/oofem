@@ -58,7 +58,7 @@ public:
 	virtual std::vector<std::unique_ptr<EnrichmentItem>> nucleateEnrichmentItems();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int instanciateYourself(DataReader *dr);
+    virtual int instanciateYourself(DataReader &dr);
 
     virtual void appendInputRecords(DynamicDataReader &oDR);
 

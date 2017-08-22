@@ -51,7 +51,6 @@
 #include "connectivitytable.h"
 #include "outputmanager.h"
 #include "octreelocalizer.h"
-#include "datareader.h"
 #include "nodalrecoverymodel.h"
 #include "nonlocalbarrier.h"
 #include "classfactory.h"
@@ -62,6 +61,7 @@
 #include "range.h"
 #include "fracturemanager.h"
 #include "datareader.h"
+#include "oofemtxtdatareader.h"
 #include "initmodulemanager.h"
 #include "exportmodulemanager.h"
 #include "xfem/enrichmentitem.h"
@@ -465,7 +465,7 @@ void Domain :: setXfemManager(XfemManager *ipXfemManager) { xfemManager.reset(ip
 void Domain :: clearBoundaryConditions() { bcList.clear(); }
 void Domain :: clearElements() { elementList.clear(); }
 int
-Domain :: instanciateYourself(DataReader *dr)
+Domain :: instanciateYourself(DataReader &dr)
 // Creates all objects mentioned in the data file.
 {
     IRResultType result;                            // Required by IR_GIVE_FIELD macro
@@ -481,7 +481,7 @@ Domain :: instanciateYourself(DataReader *dr)
     std :: map< int, int >dofManLabelMap, elemLabelMap;
 
     // read type of Domain to be solved
-    InputRecord *ir = dr->giveInputRecord(DataReader :: IR_domainRec, 1);
+    InputRecord *ir = dr.giveInputRecord(DataReader :: IR_domainRec, 1);
     IR_GIVE_FIELD(ir, name, _IFT_Domain_type); // This is inconsistent, "domain" isn't  exactly a field, but the actual record keyword.
 
     mDomainType = name;
@@ -496,7 +496,7 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read output manager record
     std :: string tmp;
-    ir = dr->giveInputRecord(DataReader :: IR_outManRec, 1);
+    ir = dr.giveInputRecord(DataReader :: IR_outManRec, 1);
     ir->giveRecordKeywordField(tmp);
 
     if(!giveEngngModel()->giveSuppressOutput()) {
@@ -506,7 +506,7 @@ Domain :: instanciateYourself(DataReader *dr)
     ir->finish();
 
     // read domain description
-    ir = dr->giveInputRecord(DataReader :: IR_domainCompRec, 1);
+    ir = dr.giveInputRecord(DataReader :: IR_domainCompRec, 1);
     IR_GIVE_FIELD(ir, nnode, _IFT_Domain_ndofman);
     IR_GIVE_FIELD(ir, nelem, _IFT_Domain_nelem);
     IR_GIVE_FIELD(ir, ncrossSections, _IFT_Domain_ncrosssect);
@@ -542,7 +542,7 @@ Domain :: instanciateYourself(DataReader *dr)
     dofManagerList.clear();
     dofManagerList.resize(nnode);
     for ( int i = 1; i <= nnode; i++ ) {
-        ir = dr->giveInputRecord(DataReader :: IR_dofmanRec, i);
+        ir = dr.giveInputRecord(DataReader :: IR_dofmanRec, i);
         // read type of dofManager
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
@@ -577,7 +577,7 @@ Domain :: instanciateYourself(DataReader *dr)
     elementList.clear();
     elementList.resize(nelem);
     for ( int i = 1; i <= nelem; i++ ) {
-        ir = dr->giveInputRecord(DataReader :: IR_elemRec, i);
+        ir = dr.giveInputRecord(DataReader :: IR_elemRec, i);
         // read type of element
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
@@ -605,10 +605,10 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // Support sets defined directly after the elements (special hack for backwards compatibility).
     setList.clear();
-    if ( dr->peakNext("set") ) {
+    if ( dr.peakNext("set") ) {
         setList.resize(nset);
         for ( int i = 1; i <= nset; i++ ) {
-            ir = dr->giveInputRecord(DataReader :: IR_setRec, i);
+            ir = dr.giveInputRecord(DataReader :: IR_setRec, i);
             // read type of set
             IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
             // Only one set for now (i don't see any need to ever introduce any other version)
@@ -642,7 +642,7 @@ Domain :: instanciateYourself(DataReader *dr)
     crossSectionList.clear();
     crossSectionList.resize(ncrossSections);
     for ( int i = 1; i <= ncrossSections; i++ ) {
-        ir = dr->giveInputRecord(DataReader :: IR_crosssectRec, i);
+        ir = dr.giveInputRecord(DataReader :: IR_crosssectRec, i);
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
         std :: unique_ptr< CrossSection >crossSection( classFactory.createCrossSection(name.c_str(), num, this) );
@@ -674,7 +674,7 @@ Domain :: instanciateYourself(DataReader *dr)
     materialList.clear();
     materialList.resize(nmat);
     for ( int i = 1; i <= nmat; i++ ) {
-        ir = dr->giveInputRecord(DataReader :: IR_matRec, i);
+        ir = dr.giveInputRecord(DataReader :: IR_matRec, i);
         // read type of material
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
@@ -707,7 +707,7 @@ Domain :: instanciateYourself(DataReader *dr)
     nonlocalBarrierList.clear();
     nonlocalBarrierList.resize(nbarrier);
     for ( int i = 1; i <= nbarrier; i++ ) {
-        ir = dr->giveInputRecord(DataReader :: IR_nlocBarRec, i);
+        ir = dr.giveInputRecord(DataReader :: IR_nlocBarRec, i);
         // read type of load
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
@@ -742,7 +742,7 @@ Domain :: instanciateYourself(DataReader *dr)
     bcList.clear();
     bcList.resize(nload);
     for ( int i = 1; i <= nload; i++ ) {
-        ir = dr->giveInputRecord(DataReader :: IR_bcRec, i);
+        ir = dr.giveInputRecord(DataReader :: IR_bcRec, i);
         // read type of bc
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
@@ -775,7 +775,7 @@ Domain :: instanciateYourself(DataReader *dr)
     icList.clear();
     icList.resize(nic);
     for ( int i = 1; i <= nic; i++ ) {
-        ir = dr->giveInputRecord(DataReader :: IR_icRec, i);
+        ir = dr.giveInputRecord(DataReader :: IR_icRec, i);
         // read type of load
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
@@ -809,7 +809,7 @@ Domain :: instanciateYourself(DataReader *dr)
     functionList.clear();
     functionList.resize(nloadtimefunc);
     for ( int i = 1; i <= nloadtimefunc; i++ ) {
-        ir = dr->giveInputRecord(DataReader :: IR_funcRec, i);
+        ir = dr.giveInputRecord(DataReader :: IR_funcRec, i);
         // read type of func
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
@@ -842,7 +842,7 @@ Domain :: instanciateYourself(DataReader *dr)
     if ( setList.size() == 0 ) {
         setList.resize(nset);
         for ( int i = 1; i <= nset; i++ ) {
-            ir = dr->giveInputRecord(DataReader :: IR_setRec, i);
+            ir = dr.giveInputRecord(DataReader :: IR_setRec, i);
             // read type of set
             IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
             // Only one set for now (i don't see any need to ever introduce any other version)
@@ -875,7 +875,7 @@ Domain :: instanciateYourself(DataReader *dr)
 #  endif
 
     if ( nxfemman ) {
-        ir = dr->giveInputRecord(DataReader :: IR_xfemManRec, 1);
+        ir = dr.giveInputRecord(DataReader :: IR_xfemManRec, 1);
 
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
         xfemManager.reset( classFactory.createXfemManager(name.c_str(), this) );
@@ -893,7 +893,7 @@ Domain :: instanciateYourself(DataReader *dr)
 
     if ( ncontactman ) {
         // don't read any input yet
-        ir = dr->giveInputRecord(DataReader :: IR_contactManRec, 1);
+        ir = dr.giveInputRecord(DataReader :: IR_contactManRec, 1);
 
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
         contactManager.reset( classFactory.createContactManager(name.c_str(), this) );
@@ -926,7 +926,7 @@ Domain :: instanciateYourself(DataReader *dr)
 
 
     if ( nfracman ) {
-        ir = dr->giveInputRecord(DataReader :: IR_fracManRec, 1);
+        ir = dr.giveInputRecord(DataReader :: IR_fracManRec, 1);
         fracManager.reset( new FractureManager(this) );
         fracManager->initializeFrom(ir);
         fracManager->instanciateYourself(dr);
@@ -1562,14 +1562,13 @@ Domain :: restoreContext(DataStream &stream, ContextMode mode)
         if ( serNum != this->giveSerialNumber() ) {
             // read corresponding domain
             OOFEM_LOG_INFO("restoring domain %d.%d\n", this->number, this->giveSerialNumber());
-            DataReader *domainDr = this->engineeringModel->GiveDomainDataReader(1, this->giveSerialNumber(), contextMode_read);
+            OOFEMTXTDataReader domainDr(this->engineeringModel->giveDomainFileName(1, this->giveSerialNumber()));
             this->clear();
 
             if ( !this->instanciateYourself(domainDr) ) {
                 OOFEM_ERROR("domain Instanciation failed");
             }
 
-            delete domainDr;
             domainUpdated = true;
         }
     }

@@ -84,14 +84,14 @@ IRResultType FractureManager :: initializeFrom(InputRecord *ir)
 }
 
 
-int FractureManager :: instanciateYourself(DataReader *dr)
+int FractureManager :: instanciateYourself(DataReader &dr)
 {
     IRResultType result; // Required by IR_GIVE_FIELD macro
     std :: string name;
 
     // Create and initialize all failure criterias
     for ( int i = 1; i <= ( int ) this->criteriaList.size(); i++ ) {
-        InputRecord *mir = dr->giveInputRecord(DataReader :: IR_failCritRec, i);
+        InputRecord *mir = dr.giveInputRecord(DataReader :: IR_failCritRec, i);
         result = mir->giveRecordKeywordField(name);
 
         if ( result != IRRT_OK ) { ///@todo Make so that this can't fail.

@@ -79,7 +79,7 @@ public:
     virtual void solveYourself();
 
     //virtual void initializeYourself(TimeStep *tStep);
-    virtual int instanciateYourself(DataReader *dr, InputRecord *ir, const char *outFileName, const char *desc);
+    virtual int instanciateYourself(DataReader &dr, InputRecord *ir, const char *outFileName, const char *desc);
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int checkProblemConsistency();
 

@@ -87,7 +87,7 @@ public:
     virtual InputRecord *giveInputRecord(InputRecordType, int recordId);
     virtual bool peakNext(const std :: string &keyword);
     virtual void finish();
-    virtual std :: string giveReferenceName() const;
+    virtual std :: string giveReferenceName() const { return name; }
 
     /**
      * Writes all input records to file.

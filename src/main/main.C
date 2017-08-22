@@ -263,8 +263,8 @@ int main(int argc, char *argv[])
     // print header to redirected output
     OOFEM_LOG_FORCED(PRG_HEADER_SM);
 
-    OOFEMTXTDataReader dr( inputFileName.str ( ).c_str() );
-    EngngModel *problem = :: InstanciateProblem(& dr, _processor, contextFlag, NULL, parallelFlag);
+    OOFEMTXTDataReader dr( inputFileName.str() );
+    EngngModel *problem = :: InstanciateProblem(dr, _processor, contextFlag, NULL, parallelFlag);
     dr.finish();
     if ( !problem ) {
         OOFEM_LOG_ERROR("Couldn't instanciate problem, exiting");
@@ -282,7 +282,10 @@ int main(int argc, char *argv[])
         try {
             FileDataStream stream(problem->giveContextFileName(restartStep, 0), false);
             problem->restoreContext(stream, CM_State | CM_Definition);
-        } catch(ContextIOERR & c) {
+        } catch ( const FileDataStream::CantOpen & e ) {
+            printf("%s", e.what());
+            exit(1);
+        } catch ( ContextIOERR & c ) {
             c.print();
             exit(1);
         }

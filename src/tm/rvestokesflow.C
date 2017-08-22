@@ -57,7 +57,7 @@ RVEStokesFlowMaterialStatus :: RVEStokesFlowMaterialStatus(int n, Domain *d, Gau
     OOFEM_LOG_INFO( "************************** Instanciating microproblem from file %s\n", inputfile.c_str() );
     OOFEMTXTDataReader dr( inputfile.c_str() );
 
-    EngngModel *e = InstanciateProblem(& dr, _processor, 0);
+    EngngModel *e = InstanciateProblem(dr, _processor, 0);
     dr.finish();
  
     if ( dynamic_cast< StokesFlowVelocityHomogenization* >(e) ) {

@@ -79,12 +79,6 @@
 #include <cstdio>
 #include <cstdarg>
 #include <ctime>
-// include unistd.h; needed for access
-#ifdef HAVE_UNISTD_H
- #include <unistd.h>
-#elif _MSC_VER
- #include <io.h>
-#endif
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -204,9 +198,9 @@ EngngModel :: Instanciate_init()
 }
 
 
-int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const char *dataOutputFileName, const char *desc)
+int EngngModel :: instanciateYourself(DataReader &dr, InputRecord *ir, const char *dataOutputFileName, const char *desc)
 {
-    referenceFileName = dr->giveReferenceName();
+    referenceFileName = dr.giveReferenceName();
 
     bool inputReaderFinish = true;
 
@@ -339,7 +333,7 @@ EngngModel :: initializeFrom(InputRecord *ir)
 
 
 int
-EngngModel :: instanciateDomains(DataReader *dr)
+EngngModel :: instanciateDomains(DataReader &dr)
 {
     int result = 1;
     // read problem domains
@@ -353,7 +347,7 @@ EngngModel :: instanciateDomains(DataReader *dr)
 
 
 int
-EngngModel :: instanciateMetaSteps(DataReader *dr)
+EngngModel :: instanciateMetaSteps(DataReader &dr)
 {
     int result = 1;
 
@@ -367,7 +361,7 @@ EngngModel :: instanciateMetaSteps(DataReader *dr)
 
     // read problem domains
     for ( int i = 1; i <= this->nMetaSteps; i++ ) {
-        InputRecord *ir = dr->giveInputRecord(DataReader :: IR_mstepRec, i);
+        InputRecord *ir = dr.giveInputRecord(DataReader :: IR_mstepRec, i);
         result &= metaStepList[i-1].initializeFrom(ir);
     }
 
@@ -1691,31 +1685,8 @@ EngngModel :: giveCurrentMetaStep()
 }
 
 
-int
-EngngModel :: giveContextFile(FILE **contextFile, int tStepNumber, int stepVersion, ContextFileMode cmode, int errLevel)
-{
-    std :: string fname = giveContextFileName(tStepNumber, stepVersion);
-
-    if ( cmode ==  contextMode_read ) {
-        * contextFile = fopen(fname.c_str(), "rb"); // open for reading
-    } else {
-        * contextFile = fopen(fname.c_str(), "wb"); // open for writing,
-    }
-
-    //  rewind (*contextFile); // seek the beginning
-    // // overwrite if exist
-    // else *contextFile = fopen(fname,"r+"); // open for reading and writing
-
-    if ( ( * contextFile == NULL ) && errLevel > 0 ) {
-        OOFEM_ERROR("can't open %s", fname.c_str());
-    }
-
-    return 1;
-}
-
-
 std ::string
-EngngModel :: giveContextFileName(int tStepNumber, int stepVersion)
+EngngModel :: giveContextFileName(int tStepNumber, int stepVersion) const
 {
     std :: string fname = this->coreOutputFileName;
     char fext [ 100 ];
@@ -1724,38 +1695,13 @@ EngngModel :: giveContextFileName(int tStepNumber, int stepVersion)
 }
 
 
-bool
-EngngModel :: testContextFile(int tStepNumber, int stepVersion)
-{
-    std :: string fname = giveContextFileName(tStepNumber, stepVersion);
-
-#ifdef HAVE_ACCESS
-    return access(fname.c_str(), R_OK) == 0;
-
-#elif _MSC_VER
-    return _access(fname.c_str(), 4) == 0;
-
-#else
-    return true;
-
-#endif
-}
-
-DataReader *
-EngngModel :: GiveDomainDataReader(int domainNum, int domainSerNum, ContextFileMode cmode)
+std :: string
+EngngModel :: giveDomainFileName(int domainNum, int domainSerNum) const
 {
     std :: string fname = this->coreOutputFileName;
     char fext [ 100 ];
     sprintf(fext, ".domain.%d.%d.din", domainNum, domainSerNum);
-    fname += fext;
-
-    DataReader *dr;
-
-    if ( ( dr = new OOFEMTXTDataReader( fname ) ) == NULL ) {
-        OOFEM_ERROR("Creation of DataReader failed");
-    }
-
-    return dr;
+    return fname + fext;
 }
 
 std :: string

@@ -572,9 +572,9 @@ void pyclass_EngngModel()
         ;
 }
 
-EngngModel *InstanciateProblem_1 (DataReader *dr, problemMode mode, int contextFlag)
+EngngModel *InstanciateProblem_1 (DataReader &dr, problemMode mode, int contextFlag)
 {
-    return InstanciateProblem (dr, mode, contextFlag, 0);
+    return InstanciateProblem(dr, mode, contextFlag);
 }
 
 

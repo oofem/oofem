@@ -362,7 +362,7 @@ main(int argc, char *argv[])
     std :: string jobName = temp.substr(k);
     std :: string viewTitle = "OOFEG (" + jobName + ")";
 
-    problem = InstanciateProblem(& dr, _postProcessor, 0, NULL, parallelFlag);
+    problem = InstanciateProblem(dr, _postProcessor, 0, NULL, parallelFlag);
     dr.finish();
     problem->checkProblemConsistency();
 
@@ -1119,23 +1119,21 @@ int  updateDefPlotFlag()
 
 void nextStep(Widget wid, XtPointer cl, XtPointer cd)
 {
-    int istep, prevStep, stepStep, prevStepVersion, istepVersion;
-
-    stepStep = problem->giveContextOutputStep();
+    int stepStep = problem->giveContextOutputStep();
     if ( stepStep == 0 ) {
         stepStep = 1;
     }
 
     if ( gc [ 0 ].getActiveStep() != -1 ) {
-        prevStep = gc [ 0 ].getActiveStep();
-        prevStepVersion = gc [ 0 ].getActiveStepVersion();
+        int prevStep = gc [ 0 ].getActiveStep();
+        int prevStepVersion = gc [ 0 ].getActiveStepVersion(); 
 
         // first try next version for the same step
-        if ( problem->testContextFile(prevStep, prevStepVersion + 1) ) {
-            istepVersion = prevStepVersion + 1;
+        int istepVersion = prevStepVersion + 1;
+        try {
+            FileDataStream stream(this->giveContextFileName(prevStep, istepVersion), false);
             printf("OOFEG: restoring context file %d.%d\n", prevStep, istepVersion);
             try {
-                FileDataStream stream(this->giveContextFileName(prevStep, istepVersion), false);
                 problem->restoreContext(stream, CM_State | CM_Definition);
             } catch(ContextIOERR & m) {
                 m.print();
@@ -1143,20 +1141,20 @@ void nextStep(Widget wid, XtPointer cl, XtPointer cd)
                 try {
                     FileDataStream stream(this->giveContextFileName(prevStep, 0), false);
                     problem->restoreContext(stream, CM_State | CM_Definition);
-                } catch(ContextIOERR & m2) {
+                } catch ( ContextIOERR & m2 ) {
                     m2.print();
                     exit(1);
                 }
             }
             gc [ 0 ].setActiveStep(prevStep);
             gc [ 0 ].setActiveStepVersion(istepVersion);
-        } else {
+        catch ( const FileDataStream::CantOpen &e ) {
             // no next version exist => next step with version 0
-            istep = prevStep + stepStep;
+            int istep = prevStep + stepStep;
 
             //printf ("NextStep: prevStep %d, nstep %d, stepStep %d\n", prevStep, istep, stepStep);
             try {
-                FileDataStream stream(this->giveContextFileName(prevStep + stepStep, 0);, false);
+                FileDataStream stream(this->giveContextFileName(prevStep + stepStep, 0), false);
                 problem->restoreContext(stream, CM_State | CM_Definition);
             } catch(ContextIOERR & m) {
                 m.print();
@@ -1173,7 +1171,7 @@ void nextStep(Widget wid, XtPointer cl, XtPointer cd)
             gc [ 0 ].setActiveStepVersion(0);
         }
     } else {
-        istep = problem->giveNumberOfFirstStep() + stepStep - 1;
+        int istep = problem->giveNumberOfFirstStep() + stepStep - 1;
         gc [ 0 ].setActiveStep(istep);
         try {
             FileDataStream stream(this->giveContextFileName(istep, 0), false);

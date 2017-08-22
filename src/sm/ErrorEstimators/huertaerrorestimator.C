@@ -2912,7 +2912,7 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
 #ifdef TIME_INFO
     timer.startTimer();
 #endif
-    refinedProblem = InstanciateProblem(& refinedReader, _processor, contextFlag);
+    refinedProblem = InstanciateProblem(refinedReader, _processor, contextFlag);
     refinedReader.finish();
 #ifdef TIME_INFO
     timer.stopTimer();
@@ -3446,7 +3446,7 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
 #ifdef TIME_INFO
     timer.startTimer();
 #endif
-    refinedProblem = InstanciateProblem(& refinedReader, _processor, contextFlag);
+    refinedProblem = InstanciateProblem(refinedReader, _processor, contextFlag);
     refinedReader.finish();
 #ifdef TIME_INFO
     timer.stopTimer();
@@ -3672,7 +3672,7 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
  #ifdef TIME_INFO
     timer.startTimer();
  #endif
-    refinedProblem = InstanciateProblem(& refinedReader, _processor, contextFlag);
+    refinedProblem = InstanciateProblem(refinedReader, _processor, contextFlag);
  #ifdef TIME_INFO
     timer.stopTimer();
     et_init = timer.getUtime();
