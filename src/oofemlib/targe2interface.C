@@ -38,8 +38,11 @@
 #include "node.h"
 #include "element.h"
 #include "remeshingcrit.h"
+#include "classfactory.h"
 
 namespace oofem {
+REGISTER_Mesher(Targe2Interface, MPT_TARGE2);
+
 MesherInterface :: returnCode
 Targe2Interface :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, Domain **dNew)
 {

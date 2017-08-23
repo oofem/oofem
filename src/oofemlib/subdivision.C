@@ -68,6 +68,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Mesher(Subdivision, MPT_SUBDIVISION);
+
 //#define __VERBOSE_PARALLEL
 #define DEBUG_CHECK
 //#define DEBUG_INFO

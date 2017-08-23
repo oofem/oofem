@@ -39,11 +39,8 @@
 #include "element.h"
 #include "engngm.h"
 #include "remeshingcrit.h"
-
 #include "oofemtxtdatareader.h"
 #include "dynamicinputrecord.h"
-
-#include <math.h>
 
 #include "crosssection.h"
 #include "classfactory.h"
@@ -55,8 +52,12 @@
 #include "function.h"
 #include "outputmanager.h"
 
+#include <cmath>
 
 namespace oofem {
+REGISTER_Mesher(T3DInterface, MPT_T3D);
+
+
 MesherInterface :: returnCode
 T3DInterface :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, Domain **dNew)
 {
