@@ -38,6 +38,9 @@
 #include "sparsemtrx.h"
 #include "rowcol.h"
 
+#define _IFT_SkylineUnsym_Name "skylineu"
+
+
 namespace oofem {
 /// "zero" pivot for SkylineUnsym class
 #define SkylineUnsym_TINY_PIVOT 1.e-30

@@ -41,7 +41,7 @@
 
 #include <memory>
 
-#include <memory>
+#define _IFT_DSSMatrix_Name "dss"
 
 /* DSS module lives in global namespace, not in oofem namespace */
 class DSSolver;

@@ -38,6 +38,8 @@
 #include "nodalrecoverymodel.h"
 #include "interface.h"
 
+#define _IFT_SPRNodalRecoveryModel_Name "spr"
+
 namespace oofem {
 class GaussPoint;
 class SPRNodalRecoveryModelInterface;

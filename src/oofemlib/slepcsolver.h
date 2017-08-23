@@ -41,6 +41,8 @@
 
 #include <slepceps.h>
 
+#define _IFT_SLEPcSolver_Name "slepc"
+
 namespace oofem {
 class Domain;
 class EngngModel;

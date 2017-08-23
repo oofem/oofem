@@ -38,6 +38,8 @@
 #include "errorestimator.h"
 #include "errorestimatortype.h"
 
+#define _IFT_MeshQualityErrorEstimator_Name "meshquality"
+
 namespace oofem {
 class Domain;
 class Element;

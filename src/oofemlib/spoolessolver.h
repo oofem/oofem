@@ -46,6 +46,7 @@ extern "C" {
 
 ///@name Input fields for SpoolesSolver
 //@{
+#define _IFT_SpoolesSolver_Name "spooles"
 #define _IFT_SpoolesSolver_msglvl "msglvl"
 #define _IFT_SpoolesSolver_msgfile "msgfile"
 //@}

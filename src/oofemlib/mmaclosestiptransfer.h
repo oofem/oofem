@@ -37,6 +37,8 @@
 
 #include "materialmappingalgorithm.h"
 
+#define _IFT_MMAClosestIPTransfer_Name "closest"
+
 namespace oofem {
 class Domain;
 class Element;

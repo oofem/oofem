@@ -32,18 +32,14 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-
-//   ******************************************
-//   *** CLASS LDL^T Factorization          ***
-//   ******************************************
-
-
 #ifndef ldltfact_h
 #define ldltfact_h
 
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
 #include "floatarray.h"
+
+#define _IFT_LDLTFactorization_Name "direct"
 
 namespace oofem {
 class Domain;
@@ -57,8 +53,6 @@ class FloatMatrix;
  */
 class OOFEM_EXPORT LDLTFactorization : public SparseLinearSystemNM
 {
-private:
-
 public:
     /// Constructor - creates new instance of LDLTFactorization, with number i, belonging to domain d and Engngmodel m.
     LDLTFactorization(Domain * d, EngngModel * m);
