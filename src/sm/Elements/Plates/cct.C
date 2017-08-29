@@ -663,6 +663,18 @@ CCTPlate :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gauss
 }
 
 
+void
+CCTPlate::computeSurfaceNMatrix(FloatMatrix &answer, int boundaryID, const FloatArray &lcoords)
+{
+  if (boundaryID == 1) {
+    this->computeNmatrixAt(lcoords, answer);
+  } else {
+    OOFEM_ERROR("computeSurfaceNMatrix: Unsupported surface id");
+  }
+}
+
+  
+
 //
 // io routines
 //
