@@ -1978,17 +1978,20 @@ in integration points. The supported values are $0$ for simple nodal averageing 
 
 By default vtk and vtkxml modules perform recovery over the whole domain. The VTKXML module can operate in region-by-region mode (see \param{nvr} and \param{vrmap} parameters). In this case, the smoothing is performed only over particular virtual region, where only elements in this virtual region participate. 
 
-\item Homogenization of stresses and strains in the global coordinate system. Corresponding stress and strain components are summed and averaged over the volume. It is possible to select material numbers from which the averaging occurs. The averaging works for 3D domains with an extension to trusses. A truss is considered as a volume element with oriented stress and strain components along the truss axis. The transformation to global components occurs before averaging.
+\item Homogenization of IP quantities in the global coordinate system (such as stress, strain, damage, heat flow). Corresponding IP quantities are summed and averaged over the volume. It is possible to select region sets from which the averaging occurs. The averaging works for all domains with an extension to trusses. A truss is considered as a volume element with oriented stress and strain components along the truss axis. The transformation to global components occurs before averaging.
 
 \begin{record}[0.9\textwidth]
-  \recentry{hom}{\optField{scale}{rn}}
-  \recentry{}{\optField{MatNum}{ia}}
+  \recentry{}{\field{ists}{ia}}
+  \recentry{}{\optField{scale}{rn}}
+  \recentry{}{\optField{regionSets}{ia}}
 \end{record}
 \begin{itemize}
 
-\item The parameter \param{scale} multiplies all averaged stresses and strains. \param{scale}=1 by default.
+\item An integer array \param{ists} specifies internal state types for export which are defined in internalstatetype.h file.
 
-\item An integer array \param{MatNum} specifies which material numbers are taken into account. All material numbers are averaged by default.
+\item The parameter \param{scale} multiplies all averaged IP quantities. \param{scale}=1 by default.
+
+\item An integer array \param{regionSets} specifies region sets for averaging. All domain is averaged by default.
 \end{itemize}
 
 \item Gauss point export is useful if one needs to plot a certain variable

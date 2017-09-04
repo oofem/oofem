@@ -1205,6 +1205,11 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
         }
 
         for ( int i = 1; i <= 3; i++ ) {
+            crackVect.at(i) = principalDir.at(i, indx);
+        }
+        status->setCrackVector(crackVect);
+        
+        for ( int i = 1; i <= 3; i++ ) {
             crackPlaneNormal.at(i) = principalDir.at(i, indx);
         }
 
@@ -1277,12 +1282,6 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
             }
         }
 
-
-        for ( int i = 1; i <= 3; i++ ) {
-            crackVect.at(i) = principalDir.at(i, indx);
-        }
-
-        status->setCrackVector(crackVect);
 
         if ( isCrackBandApproachUsed() ) { // le needed only if the crack band approach is used
             le = gp->giveElement()->giveCharacteristicSize(gp, crackPlaneNormal, ecsMethod);
