@@ -1,6 +1,6 @@
 nltrans_nonlin.out.sm
 Quadrilateral element subjected to temperature strains
-nonlinearstatic nsteps 3 rtolv 0.001 controlmode 1 maxiter 100 nmodules 1
+staticstructural nsteps 3 rtolf 1e-5 nmodules 1
 errorcheck
 #vtkxml tstep_all vars 2 1 4 primvars 1 1 stype 1
 domain 2dplanestress

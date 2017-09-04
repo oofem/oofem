@@ -41,6 +41,11 @@
 #include <cstring>
 #include <algorithm>
 #include <memory>
+#include <numeric>
+#include <cmath>
+#include <iostream>
+#include <fstream>
+#include <iomanip>
 
 namespace oofem {
 
@@ -250,10 +255,36 @@ void IntArray :: printYourself(const std::string name) const
     printf("\n");
 }
 
+bool IntArray :: isFinite() const
+{
+    for(int val : values) {
+        if(!std::isfinite(val)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 void IntArray :: pY() const {
     printYourself();
 }
 
+void IntArray :: printYourselfToFile(const std::string filename, const bool showDimensions) const
+// Prints the receiver to file.
+{
+    std :: ofstream arrayfile (filename);
+    if (arrayfile.is_open()) {
+        if (showDimensions)
+            arrayfile << "IntArray of size : " << this->giveSize() << "\n";
+        for ( int x: *this ) {
+            arrayfile << x << "\t";
+        }
+        arrayfile.close();
+    } else {
+        OOFEM_ERROR("Failed to write to file");
+    }
+}
 
 contextIOResultType IntArray :: storeYourself(DataStream &stream) const
 {
@@ -326,7 +357,7 @@ void IntArray :: insertSorted(int val, int allocChunk)
 }
 
 
-void IntArray :: insertSortedOnce(int val, int allocChunk)
+bool IntArray :: insertSortedOnce(int val, int allocChunk)
 {
     if ( allocChunk > 0 && values.size() + 1 >= values.capacity() ) {
         values.reserve(allocChunk + values.capacity());
@@ -334,7 +365,9 @@ void IntArray :: insertSortedOnce(int val, int allocChunk)
     auto low = std::lower_bound(values.begin(), values.end(), val);
     if ( low == values.end() || *low != val ) {
         values.insert(low, val);
+        return true;
     }
+    return false;
 }
 
 

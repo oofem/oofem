@@ -60,6 +60,8 @@
 #include "dofmanager.h"
 #include "xfem/matforceevaluator.h"
 #include "function.h"
+#include "Elements/Interfaces/structuralinterfaceelement.h"
+#include "Materials/structuralfe2material.h"
 
 #include <sstream>
 
@@ -74,6 +76,7 @@ GnuplotExportModule::GnuplotExportModule(int n, EngngModel *e):
     mExportMesh(false),
     mExportXFEM(false),
     mExportCrackLength(false),
+	mExportInterfaceEl(false),
     mMonitorNodeIndex(-1),
     mpMatForceEvaluator( new  MaterialForceEvaluator() )
 {}
@@ -89,11 +92,12 @@ IRResultType GnuplotExportModule::initializeFrom(InputRecord *ir)
     mExportMesh = ir->hasField(_IFT_GnuplotExportModule_mesh);
     mExportXFEM = ir->hasField(_IFT_GnuplotExportModule_xfem);
     mExportCrackLength = ir->hasField(_IFT_GnuplotExportModule_cracklength);
+    mExportInterfaceEl = ir->hasField(_IFT_GnuplotExportModule_interface_el);
 
     ir->giveOptionalField(mMonitorNodeIndex, _IFT_GnuplotExportModule_monitornode);
 
     ir->giveOptionalField(mMatForceRadii, _IFT_GnuplotExportModule_materialforceradii);
-    printf("mMatForceRadii: "); mMatForceRadii.printYourself();
+//    printf("mMatForceRadii: "); mMatForceRadii.printYourself();
 
     return ExportModule::initializeFrom(ir);
 }
@@ -170,6 +174,10 @@ void GnuplotExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
         DofManager *dMan = domain->giveDofManager(mMonitorNodeIndex);
         outputNodeDisp(*dMan, tStep);
     }
+
+    if(mExportInterfaceEl) {
+    	outputInterfaceEl(*domain, tStep);
+    }
 }
 
 void GnuplotExportModule::initialize()
@@ -245,7 +253,7 @@ void GnuplotExportModule::outputReactionForces(TimeStep *tStep)
                 // Slightly dirty
                 BoundaryCondition *bc = dynamic_cast<BoundaryCondition*> (domain->giveBc(bcInd+1));
                 if ( bc != NULL ) {
-                    disp.at(bcInd+1) = bc->give(dof, VM_Total, tStep->giveTargetTime());
+                    disp.at(bcInd+1) = std::max( disp.at(bcInd+1), bc->give(dof, VM_Total, tStep->giveTargetTime()) );
                 }
                 ///@todo This function should be using the primaryfield instead of asking BCs directly. / Mikael
             }
@@ -296,36 +304,116 @@ void GnuplotExportModule::outputXFEM(Crack &iCrack, TimeStep *tStep)
 {
     const std::vector<GaussPoint*> &czGaussPoints = iCrack.giveCohesiveZoneGaussPoints();
 
-    std::vector<double> arcLengthPositions, normalJumps, tangJumps, normalTractions;
+    std::vector<double> arcLengthPositions, normalJumps, tangJumps, normalTractions, tangTractions;
+
+    std::vector<double> arcLengthPositionsB = iCrack.giveCohesiveZoneArcPositions();
 
     const BasicGeometry *bg = iCrack.giveGeometry();
 
-    for( GaussPoint *gp: czGaussPoints ) {
+//    for( auto *gp: czGaussPoints ) {
+//
+//        StructuralInterfaceMaterialStatus *matStat = dynamic_cast<StructuralInterfaceMaterialStatus*> ( gp->giveMaterialStatus() );
+//        if(matStat != NULL) {
+//
+//            // Compute arc length position of the Gauss point
+//            const FloatArray &coord = (gp->giveGlobalCoordinates());
+//            printf("coord: "); coord.printYourself();
+//            double tangDist = 0.0, arcPos = 0.0;
+//            bg->computeTangentialSignDist(tangDist, coord, arcPos);
+//            arcLengthPositions.push_back(arcPos);
+//
+////            // Compute displacement jump in normal and tangential direction
+////            // Local numbering: (tang_z, tang, normal)
+////            const FloatArray &jumpLoc = matStat->giveJump();
+////
+////            double normalJump = jumpLoc.at(3);
+////            normalJumps.push_back(normalJump);
+////
+////
+////            tangJumps.push_back( jumpLoc.at(2) );
+////
+////
+////            const FloatArray &trac = matStat->giveFirstPKTraction();
+////            normalTractions.push_back(trac.at(3));
+//        }
+//    }
 
-        StructuralInterfaceMaterialStatus *matStat = dynamic_cast<StructuralInterfaceMaterialStatus*> ( gp->giveMaterialStatus() );
-        if(matStat != NULL) {
+#if 1
+    size_t num_cz_gp = czGaussPoints.size();
 
-            // Compute arc length position of the Gauss point
-            const FloatArray &coord = (gp->giveGlobalCoordinates());
-            double tangDist = 0.0, arcPos = 0.0;
-            bg->computeTangentialSignDist(tangDist, coord, arcPos);
-            arcLengthPositions.push_back(arcPos);
+//    for( auto *gp: czGaussPoints ) {
+    for(size_t gp_ind = 0; gp_ind < num_cz_gp; gp_ind++) {
+//    	printf("gp_ind: %lu\n", gp_ind );
+    	GaussPoint *gp = czGaussPoints[gp_ind];
 
-            // Compute displacement jump in normal and tangential direction
-            // Local numbering: (tang_z, tang, normal)
-            const FloatArray &jumpLoc = matStat->giveJump();
+    	if( gp != NULL ) {
 
-            double normalJump = jumpLoc.at(3);
-            normalJumps.push_back(normalJump);
+			StructuralInterfaceMaterialStatus *matStat = dynamic_cast<StructuralInterfaceMaterialStatus*> ( gp->giveMaterialStatus() );
+			if(matStat != NULL) {
+
+				// Compute arc length position of the Gauss point
+				const FloatArray &coord = (gp->giveGlobalCoordinates());
+				double tangDist = 0.0, arcPos = 0.0;
+				bg->computeTangentialSignDist(tangDist, coord, arcPos);
+//				printf("arcPos: %e\n", arcPos );
+				arcLengthPositions.push_back(arcPos);
+
+				// Compute displacement jump in normal and tangential direction
+				// Local numbering: (tang_z, tang, normal)
+				const FloatArray &jumpLoc = matStat->giveJump();
+
+				double normalJump = jumpLoc.at(3);
+				normalJumps.push_back(normalJump);
 
 
-            tangJumps.push_back( jumpLoc.at(2) );
+				tangJumps.push_back( jumpLoc.at(2) );
 
 
-            const FloatArray &trac = matStat->giveFirstPKTraction();
-            normalTractions.push_back(trac.at(3));
-        }
+				const FloatArray &trac = matStat->giveFirstPKTraction();
+				normalTractions.push_back(trac.at(3));
+
+				tangTractions.push_back(trac.at(2));
+			}
+			else {
+			    StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*>(gp->giveMaterialStatus());
+
+			    if(fe2ms != NULL) {
+//			    	printf("Casted to StructuralFE2MaterialStatus.\n");
+
+					const FloatArray &coord = (gp->giveGlobalCoordinates());
+					double tangDist = 0.0, arcPos = 0.0;
+					bg->computeTangentialSignDist(tangDist, coord, arcPos);
+	//				printf("arcPos: %e\n", arcPos );
+					arcLengthPositions.push_back(arcPos);
+
+			    	const FloatArray &n = fe2ms->giveNormal();
+//			    	printf("n: "); n.printYourself();
+
+			    	const FloatArray &sig_v = fe2ms->giveStressVector();
+//			    	printf("sig_v: "); sig_v.printYourself();
+
+			    	FloatMatrix sig_m(2,2);
+			    	sig_m(0,0) = sig_v(0);
+			    	sig_m(1,1) = sig_v(1);
+			    	sig_m(0,1) = sig_m(1,0) = sig_v( sig_v.giveSize()-1 );
+
+			    	FloatArray trac(2);
+			    	trac(0) = sig_m(0,0)*n(0) + sig_m(0,1)*n(1);
+			    	trac(1) = sig_m(1,0)*n(0) + sig_m(1,1)*n(1);
+			    	double trac_n = trac(0)*n(0) + trac(1)*n(1);
+					normalTractions.push_back(trac_n);
+
+					const FloatArray t = {-n(1), n(0)};
+			    	double trac_t = trac(0)*t(0) + trac(1)*t(1);
+					tangTractions.push_back(trac_t);
+
+
+			    }
+
+			}
+    	}
     }
+#endif
 
 
 
@@ -355,6 +443,11 @@ void GnuplotExportModule::outputXFEM(Crack &iCrack, TimeStep *tStep)
         strNormalTrac << "NormalTracGnuplotEI" << eiIndex << "Time" << time << ".dat";
         std :: string nameNormalTrac = strNormalTrac.str();
         XFEMDebugTools::WriteArrayToGnuplot(nameNormalTrac, arcLengthPositions, normalTractions);
+
+        std :: stringstream strTangTrac;
+        strTangTrac << "TangTracGnuplotEI" << eiIndex << "Time" << time << ".dat";
+        std :: string nameTangTrac = strTangTrac.str();
+        XFEMDebugTools::WriteArrayToGnuplot(nameTangTrac, arcLengthPositions, tangTractions);
 
 
         std::vector<FloatArray> matForcesStart, matForcesEnd;
@@ -511,6 +604,7 @@ void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCWeak &iBC,
     iBC.computeField(stress, tStep);
 
     printf("Mean stress computed in Gnuplot export module: "); stress.printYourself();
+    printf("sigXX: %.12e\n", stress(0) );
 
     double time = 0.0;
 
@@ -814,6 +908,141 @@ void GnuplotExportModule :: outputNodeDisp(DofManager &iDMan, TimeStep *tStep)
 
     std :: string name = "MonitorNodeSolGnuplot.dat";
     WritePointsToGnuplot(name, nodeDispHist);
+}
+
+void GnuplotExportModule :: outputInterfaceEl(Domain &d, TimeStep *tStep) {
+//	printf("Exporting interface el.\n");
+
+	std::vector<FloatArray> points, tractions, tractionsProj;
+
+	int numEl = d.giveNumberOfElements();
+	for(int i = 1; i <= numEl; i++) {
+		Element *el = d.giveElement(i);
+
+		StructuralInterfaceElement *intEl = dynamic_cast<StructuralInterfaceElement*>(el);
+
+		if(intEl) {
+			printf("Found StructuralInterfaceElement.\n");
+
+			IntegrationRule *ir = intEl->giveDefaultIntegrationRulePtr();
+
+			int numGP = ir->giveNumberOfIntegrationPoints();
+//			printf("numGP: %d\n", numGP );
+
+			for(int gpInd = 0; gpInd < numGP; gpInd++ ) {
+				GaussPoint *gp = ir->getIntegrationPoint(gpInd);
+//				gp->giveGlobalCoordinates().printYourself();
+
+				points.push_back( (gp->giveGlobalCoordinates()) );
+
+			    MaterialStatus *ms = static_cast< MaterialStatus * >( gp->giveMaterialStatus() );
+				StructuralInterfaceMaterialStatus *ims = static_cast<StructuralInterfaceMaterialStatus*>(ms);
+
+				FloatArray traction = ims->giveTraction();
+//				printf("traction: "); traction.printYourself();
+				tractions.push_back(traction);
+
+
+				FloatArray tractionProj = ims->giveProjectedTraction();
+				tractionsProj.push_back(tractionProj);
+
+			}
+
+		}
+	}
+
+    // Export x vs normal traction
+
+    double time = 0.0;
+
+    TimeStep *ts = emodel->giveCurrentStep();
+    if ( ts != NULL ) {
+        time = ts->giveTargetTime();
+    }
+
+    FILE * pFileX;
+    std :: stringstream strFileNameX;
+    strFileNameX << "NormalTractionVsXTime" << time << ".dat";
+    std :: string nameStringX = strFileNameX.str();
+
+    pFileX = fopen ( nameStringX.c_str() , "wb" );
+
+    fprintf(pFileX, "#x tn\n");
+    for ( size_t j = 0; j < points.size(); j++ ) {
+    	fprintf(pFileX, "%e %e\n", points[j][0], tractions[j].at(3) );
+    }
+
+    fclose(pFileX);
+
+
+//    FILE * pFileXProj;
+//    std :: stringstream strFileNameXProj;
+//    strFileNameXProj << "NormalTractionProjVsXTime" << time << ".dat";
+//    std :: string nameStringXProj = strFileNameXProj.str();
+//
+//    pFileXProj = fopen ( nameStringXProj.c_str() , "wb" );
+//
+//    fprintf(pFileXProj, "#x tn\n");
+//    for ( size_t j = 0; j < points.size(); j++ ) {
+////    	printf("tractionsProj[j]: "); tractionsProj[j].printYourself();
+//    	fprintf(pFileXProj, "%e %e\n", points[j][0], tractionsProj[j].at(3) );
+//    }
+//
+//    fclose(pFileXProj);
+
+
+    // Export x vs shear traction
+
+    FILE * pFileXshear;
+    std :: stringstream strFileNameXshear;
+    strFileNameXshear << "ShearTractionVsXTime" << time << ".dat";
+    std :: string nameStringXshear = strFileNameXshear.str();
+
+    pFileXshear = fopen ( nameStringXshear.c_str() , "wb" );
+
+    fprintf(pFileXshear, "#x tn\n");
+    for ( size_t j = 0; j < points.size(); j++ ) {
+    	fprintf(pFileXshear, "%e %e\n", points[j][0], tractions[j].at(1) );
+    }
+
+    fclose(pFileXshear);
+
+
+
+
+    // Export y vs normal traction
+    FILE * pFileY;
+    std :: stringstream strFileNameY;
+    strFileNameY << "NormalTractionVsYTime" << time << ".dat";
+    std :: string nameStringY = strFileNameY.str();
+
+    pFileY = fopen ( nameStringY.c_str() , "wb" );
+
+    fprintf(pFileY, "#y tn\n");
+    for ( size_t j = 0; j < points.size(); j++ ) {
+    	fprintf(pFileY, "%e %e\n", points[j][1], tractions[j].at(3) );
+    }
+
+    fclose(pFileY);
+
+
+
+
+    // Export y vs shear traction
+    FILE * pFileYshear;
+    std :: stringstream strFileNameYshear;
+    strFileNameYshear << "ShearTractionVsYTime" << time << ".dat";
+    std :: string nameStringYshear = strFileNameYshear.str();
+
+    pFileYshear = fopen ( nameStringYshear.c_str() , "wb" );
+
+    fprintf(pFileYshear, "#y tn\n");
+    for ( size_t j = 0; j < points.size(); j++ ) {
+    	fprintf(pFileYshear, "%e %e\n", points[j][1], tractions[j].at(1) );
+    }
+
+    fclose(pFileYshear);
+
 }
 
 

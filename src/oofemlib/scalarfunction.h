@@ -116,7 +116,7 @@ public:
      * @param valDict map defining input parameters in the form  (name, value) pairs
      * @param d domain managing external functions
      */
-    double eval(std :: map< std :: string, FunctionArgument >valDict, Domain *d, GaussPoint *gp=NULL, double param=0.) const;
+    double eval(const std :: map< std :: string, FunctionArgument >valDict, Domain *d, GaussPoint *gp=NULL, double param=0.) const;
 
     /**
      * Evaluates the receiver (convenience function that directly takes just the time as a parameter).

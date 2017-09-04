@@ -266,7 +266,7 @@ DustMaterial :: giveRealStressVector_3d(FloatArray &answer,
     this->initTempStatus(gp);
 
     // subtract stress-independent part of strain
-    this->giveStressDependentPartOfStrainVector(strainVectorR, gp, totalStrain, tStep, VM_Total);
+    this->giveStressDependentPartOfStrainVector_3d(strainVectorR, gp, totalStrain, tStep, VM_Total);
 
     // perform the local stress return and update the history variables
     performStressReturn(gp, strainVectorR);

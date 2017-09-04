@@ -637,6 +637,9 @@ add_executable(beam01 ${oofem_SOURCE_DIR}/bindings/oofemlib/beam01.C)
 set_target_properties(beam01 PROPERTIES EXCLUDE_FROM_ALL TRUE)
 target_link_libraries (beam01 liboofem)
 
+add_executable(hexgrid ${oofem_SOURCE_DIR}/bindings/oofemlib/hexgrid.C)
+set_target_properties(hexgrid PROPERTIES EXCLUDE_FROM_ALL TRUE)
+target_link_libraries (hexgrid liboofem)
 
 
 # CppCheck target (not built by default)
@@ -715,7 +718,7 @@ if (USE_PARALLEL)
     foreach (case ${parallel_tests})
         file (GLOB files "${par_dir}/${case}/${case}.oofem.in.*")
         list (LENGTH files num_files)
-        add_test (NAME "partest_${case}" WORKING_DIRECTORY ${par_dir}/${case} COMMAND "mpirun" "-np" ${num_files} ${oofem_cmd} "-p" "-f" ${case}.oofem.in "-ksp_type" "cg")
+        add_test (NAME "partest_${case}" WORKING_DIRECTORY ${par_dir}/${case} COMMAND "mpirun" "--oversubscribe" "-np" ${num_files} ${oofem_cmd} "-p" "-f" ${case}.oofem.in "-ksp_type" "cg")
     endforeach (case)
     # partest_brazil_2d_nl7 requires more time on testing server than default 1500
     set_tests_properties(partest_brazil_2d_nl7 PROPERTIES TIMEOUT 2500)

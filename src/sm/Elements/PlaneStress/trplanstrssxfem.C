@@ -25,6 +25,7 @@
 #include "intarray.h"
 #include "mathfem.h"
 #include "classfactory.h"
+#include "dynamicinputrecord.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -160,8 +161,9 @@ void TrPlaneStress2dXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatRespo
     TrPlaneStress2d :: computeStiffnessMatrix(answer, rMode, tStep);
     XfemStructuralElementInterface :: computeCohesiveTangent(answer, tStep);
 
-    const double tol = 1.0e-6;
-    const double regularizationCoeff = 1.0e-6;
+
+    const double tol = mRegCoeffTol;
+    const double regularizationCoeff = mRegCoeff;
     int numRows = answer.giveNumberOfRows();
     for(int i = 0; i < numRows; i++) {
         if( fabs(answer(i,i)) < tol ) {
@@ -181,6 +183,31 @@ TrPlaneStress2dXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
 {
     TrPlaneStress2d :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord);
     XfemStructuralElementInterface :: computeCohesiveForces(answer, tStep);
+
+
+#if 0
+    ////////////////////////////////////////////
+    // Contribution from regularization
+    FloatMatrix K;
+	computeStiffnessMatrix(K, TangentStiffness, tStep);
+
+    FloatArray u;
+    this->computeVectorOf(VM_Total, tStep, u);
+    // subtract initial displacements, if defined
+    if ( initialDisplacements ) {
+        u.subtract(* initialDisplacements);
+    }
+
+    const double tol = mRegCoeffTol+mRegCoeff;
+    const double regularizationCoeff = mRegCoeff;
+    int numRows = K.giveNumberOfRows();
+    for(int i = 0; i < numRows; i++) {
+        if( fabs(K(i,i)) < tol ) {
+            answer(i) += regularizationCoeff*u(i);
+//          printf("Found zero on diagonal.\n");
+        }
+    }
+#endif
 }
 
 
@@ -279,6 +306,18 @@ TrPlaneStress2dXFEM :: initializeFrom(InputRecord *ir)
     }
 
     result = XfemStructuralElementInterface :: initializeCZFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+
+    if(ir->hasField(_IFT_TrPlaneStress2dXFEM_RegCoeff) ) {
+		ir->giveOptionalField(mRegCoeff, _IFT_TrPlaneStress2dXFEM_RegCoeff);
+    }
+
+    if(ir->hasField(_IFT_TrPlaneStress2dXFEM_RegCoeffTol) ) {
+		ir->giveOptionalField(mRegCoeffTol, _IFT_TrPlaneStress2dXFEM_RegCoeffTol);
+    }
+
     return result;
 }
 
@@ -291,6 +330,10 @@ void TrPlaneStress2dXFEM :: giveInputRecord(DynamicInputRecord &input)
 {
     TrPlaneStress2d :: giveInputRecord(input);
     XfemStructuralElementInterface :: giveCZInputRecord(input);
+
+    input.setField(mRegCoeff, _IFT_TrPlaneStress2dXFEM_RegCoeff);
+    input.setField(mRegCoeffTol, _IFT_TrPlaneStress2dXFEM_RegCoeffTol);
+
 }
 
 
@@ -322,10 +365,9 @@ TrPlaneStress2dXFEM :: giveCompositeExportData(std::vector< VTKPiece > &vtkPiece
     vtkPieces.resize(1);
 
     const int numCells = mSubTri.size();
-
     if(numCells == 0) {
         // Enriched but uncut element
-        // Visualize as a quad
+        // Visualize as a triangle
         vtkPieces[0].setNumberOfCells(1);
 
         int numTotalNodes = 3;
@@ -413,16 +455,25 @@ TrPlaneStress2dXFEM :: giveCompositeExportData(std::vector< VTKPiece > &vtkPiece
             FloatArray average;
             std :: unique_ptr< IntegrationRule > &iRule = integrationRulesArray [ 0 ];
             VTKXMLExportModule :: computeIPAverage(average, iRule.get(), this, type, tStep);
+            if(average.giveSize() == 0) {
+            	average = {0., 0., 0., 0., 0., 0.};
+            }
 
-            FloatArray averageV9(9);
-            averageV9.at(1) = average.at(1);
-            averageV9.at(5) = average.at(2);
-            averageV9.at(9) = average.at(3);
-            averageV9.at(6) = averageV9.at(8) = average.at(4);
-            averageV9.at(3) = averageV9.at(7) = average.at(5);
-            averageV9.at(2) = averageV9.at(4) = average.at(6);
+            if(average.giveSize() == 1) {
+				vtkPieces[0].setCellVar( i, 1, average );
+            }
 
-            vtkPieces[0].setCellVar( i, 1, averageV9 );
+            if(average.giveSize() == 6) {
+				FloatArray averageV9(9);
+				averageV9.at(1) = average.at(1);
+				averageV9.at(5) = average.at(2);
+				averageV9.at(9) = average.at(3);
+				averageV9.at(6) = averageV9.at(8) = average.at(4);
+				averageV9.at(3) = averageV9.at(7) = average.at(5);
+				averageV9.at(2) = averageV9.at(4) = average.at(6);
+
+				vtkPieces[0].setCellVar( i, 1, averageV9 );
+            }
         }
 
 

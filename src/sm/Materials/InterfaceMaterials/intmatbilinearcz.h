@@ -47,6 +47,7 @@
 #define _IFT_IntMatBilinearCZ_mu "mu"
 #define _IFT_IntMatBilinearCZ_gamma "gamma"
 #define _IFT_IntMatBilinearCZ_sigf "sigf"
+#define _IFT_IntMatBilinearCZ_semiexplicit "semiexplicit"
 //@}
 
 namespace oofem {

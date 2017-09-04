@@ -66,8 +66,6 @@ public:
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual int  global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo);
-    virtual void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual int giveNumberOfNodes() const { return 8; } 
     /**
      * Returns a characteristic length of the geometry, typically a diagonal or edge length.
@@ -75,6 +73,8 @@ public:
      * @return distance from node 1 to 3
      */
     virtual double giveCharacteristicLength(const FEICellGeometry &cellgeo) const;
+
+    virtual bool inside(const FloatArray &lcoords) const;
 
     // Edge
     virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge);
@@ -88,8 +88,7 @@ public:
 
     virtual IntegrationRule *giveIntegrationRule(int order);
 
-protected:
-    virtual void giveDerivatives(FloatMatrix &dn, const FloatArray &lc);
+    virtual void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 };
 
 

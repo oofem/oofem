@@ -301,15 +301,6 @@ NonLinearDynamic :: solveYourselfAt(TimeStep *tStep)
     proceedStep(1, tStep);
 }
 
-void
-NonLinearDynamic :: terminate(TimeStep *tStep)
-{
-    this->doStepOutput(tStep);
-    this->printReactionForces(tStep, 1);
-    fflush( this->giveOutputStream() );
-    this->saveStepContext(tStep);
-}
-
 void 
 NonLinearDynamic :: initializeYourself(TimeStep *tStep)
 {
@@ -590,7 +581,7 @@ void NonLinearDynamic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
 #endif
 #if 1
             effectiveStiffnessMatrix->zero();
-            this->assemble(*effectiveStiffnessMatrix, tStep, EffectiveTangentAssembler(false, 1 + this->delta * a1,  this->a0 + this->eta * this->a1),
+            this->assemble(*effectiveStiffnessMatrix, tStep, EffectiveTangentAssembler(TangentStiffness, false, 1 + this->delta * a1,  this->a0 + this->eta * this->a1),
                            EModelDefaultEquationNumbering(), d);
 #else
             this->assemble(effectiveStiffnessMatrix, tStep, TangentStiffnessMatrix,
@@ -645,22 +636,20 @@ void NonLinearDynamic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
 }
 
 void
-NonLinearDynamic :: printOutputAt(FILE *File, TimeStep *tStep)
+NonLinearDynamic :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-    //FILE* File = this -> giveDomain() -> giveOutputStream() ;
-
     if ( !this->giveDomain(1)->giveOutputManager()->testTimeStepOutput(tStep) ) {
         return; // Do not print even Solution step header
     }
 
-    fprintf( File, "\n\nOutput for time %.3e, solution step number %d\n", tStep->giveTargetTime(), tStep->giveNumber() );
-    fprintf(File, "Equilibrium reached in %d iterations\n\n", currentIterations);
+    fprintf(file, "\n\nOutput for time %.3e, solution step number %d\n", tStep->giveTargetTime(), tStep->giveNumber() );
+    fprintf(file, "Equilibrium reached in %d iterations\n\n", currentIterations);
 
+    nMethod->printState(file);
 
-    nMethod->printState(File);
-
-    this->giveDomain(1)->giveOutputManager()->doDofManOutput(File, tStep);
-    this->giveDomain(1)->giveOutputManager()->doElementOutput(File, tStep);
+    this->giveDomain(1)->giveOutputManager()->doDofManOutput(file, tStep);
+    this->giveDomain(1)->giveOutputManager()->doElementOutput(file, tStep);
+    this->printReactionForces(tStep, 1, file);
 }
 
 void
@@ -674,51 +663,32 @@ NonLinearDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
     iDof->printMultipleOutputAt(stream, tStep, dofchar, dofmodes, 3);
 }
 
-contextIOResultType NonLinearDynamic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType NonLinearDynamic :: saveContext(DataStream &stream, ContextMode mode)
 {
-    int closeFlag = 0;
     contextIOResultType iores;
-    FILE *file = NULL;
-
-    if ( stream == NULL ) {
-        if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
-                                    this->giveCurrentStep()->giveVersion(), contextMode_write) ) {
-            THROW_CIOERR(CIO_IOERR);
-        }
-
-        stream = new FileDataStream(file);
-        closeFlag = 1;
-    }
 
     if ( ( iores = EngngModel :: saveContext(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = incrementOfDisplacement.storeYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = incrementOfDisplacement.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = totalDisplacement.storeYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = totalDisplacement.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = velocityVector.storeYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = velocityVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = accelerationVector.storeYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = accelerationVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
-    }
-
-    if ( closeFlag ) {
-        fclose(file);
-        delete stream;
-        stream = NULL;
     }
 
     return CIO_OK;
 }
-
 
 
 contextIOResultType NonLinearDynamic :: restoreContext(DataStream *stream, ContextMode mode, void *obj)

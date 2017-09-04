@@ -39,6 +39,7 @@
 #include "interface.h"
 #include "intarray.h"
 #include "grid.h"
+#include "mathfem.h"
 
 #include <list>
 
@@ -98,7 +99,7 @@ class OOFEM_EXPORT NonlocalMaterialStatusExtensionInterface : public Interface
 {
 protected:
     /// List containing localIntegrationRecord values.
-    std :: list< localIntegrationRecord >integrationDomainList;
+    std :: vector< localIntegrationRecord >integrationDomainList;
     /// Nonlocal volume around the corresponding integration point.
     double integrationScale;
     /// Local volume around the corresponding integration point.
@@ -118,7 +119,7 @@ public:
      * references to integration points and their weights that influence the nonlocal average in
      * receiver's associated integration point.
      */
-    std :: list< localIntegrationRecord > *giveIntegrationDomainList() { return & integrationDomainList; }
+    std :: vector< localIntegrationRecord > *giveIntegrationDomainList() { return & integrationDomainList; }
     /// Returns associated integration scale.
     double giveIntegrationScale() { return integrationScale; }
     /// Sets associated integration scale.
@@ -332,7 +333,7 @@ public:
      * receiver's associated integration point.
      * Rebuilds the IP list by calling  buildNonlocalPointTable if not available.
      */
-    std :: list< localIntegrationRecord > *giveIPIntegrationList(GaussPoint *gp);
+    std :: vector< localIntegrationRecord > *giveIPIntegrationList(GaussPoint *gp);
 
     /**
      * Evaluates the basic nonlocal weight function for a given distance

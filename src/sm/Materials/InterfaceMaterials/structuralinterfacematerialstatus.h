@@ -88,6 +88,9 @@ protected:
     FloatArray mNormalDir;
 
     bool mNewlyInserted;
+
+    FloatArray projectedTraction;
+
 public:
     /// Constructor. Creates new StructuralInterfaceMaterialStatus with number n, belonging to domain d and IntegrationPoint g.
     StructuralInterfaceMaterialStatus(int n, Domain * d, GaussPoint * g);
@@ -120,6 +123,8 @@ public:
     const FloatMatrix &giveTempF() const { return tempF; }
     /// Returns const reference to normal vector.
     const FloatArray &giveNormal() const { return mNormalDir; }
+    /// Returns the projected traction.
+    const FloatArray &giveProjectedTraction() const { return projectedTraction; }
     /// Assigns jump to given vector v.
     void letJumpBe(FloatArray v) { jump = std :: move(v); }
     /// Assigns traction to given vector v.
@@ -138,6 +143,8 @@ public:
     void letTempFBe(FloatMatrix v) { tempF = std :: move(v); }
     /// Assigns normal vector
     void letNormalBe(FloatArray iN) { mNormalDir = std :: move(iN); }
+    /// Assigns projeted traction
+    void letProjectedTractionBe(FloatArray iProjectedTraction) { projectedTraction = std :: move(iProjectedTraction); }
 
     virtual const char *giveClassName() const { return "StructuralInterfaceMaterialStatus"; }
 
@@ -147,6 +154,9 @@ public:
 
     bool giveNewlyInserted() const {return mNewlyInserted;}
     void setNewlyInserted(bool iNewlyInserted) {mNewlyInserted = iNewlyInserted;}
+    
+    virtual double giveDamage() { return 0.0; }     // no default damage
+    virtual double giveTempDamage() { return 0.0; } // no default damage
 };
 } // end namespace oofem
 #endif // structuralinterfacematerialstatus_h

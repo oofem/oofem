@@ -1,8 +1,7 @@
 steelRelaxMat.out
-# 
 relaxation of prestressing reinforcement, all dofs fixed
 #
-IncrLinearStatic endOfTimeOfInterest 10000.00000 prescribedTimes 25 0.0001 0.0002 0.0005 0.001 0.002 0.005 0.01 0.02 0.05 0.1 0.2 0.5 1. 2. 5. 10. 20. 50. 100. 200. 500. 1000. 2000. 5000. 10000. nmodules 1 
+StaticStructural nsteps 25 prescribedTimes 25 0.0001 0.0002 0.0005 0.001 0.002 0.005 0.01 0.02 0.05 0.1 0.2 0.5 1. 2. 5. 10. 20. 50. 100. 200. 500. 1000. 2000. 5000. 10000. nmodules 1
 #
 errorcheck
 # vtkxml tstep_step 1 domain_all vars 2 1 4 primvars 1 1 
@@ -10,23 +9,23 @@ errorcheck
 domain 2dPlaneStress
 #
 OutputManager tstep_all dofman_all element_all
-ndofman 12 nelem 4 ncrosssect 3 nmat 3 nbc 4 nic 0 nltf 2 nset 5
+ndofman 12 nelem 4 ncrosssect 3 nmat 3 nbc 3 nic 0 nltf 2 nset 2
 #
 #
 # NODES
 #
-node   1   coords 2  0.0  0.0  
-node   2   coords 2  0.1  0.0  
-node   3   coords 2  0.0  0.1  
-node   4   coords 2  0.1  0.1  
+node   1   coords 2  0.0  0.0
+node   2   coords 2  0.1  0.0
+node   3   coords 2  0.0  0.1
+node   4   coords 2  0.1  0.1
 #
 hangingNode 5 coords 2  0.0  0.05  dofType 2 2 2 masterElement 2
 hangingNode 6 coords 2  0.1  0.05  dofType 2 2 2 masterElement 2
 #
-node   7   coords 2  0.0  0.2  
-node   8   coords 2  0.1  0.2  
-node   9   coords 2  0.0  0.3  
-node   10   coords 2  0.1  0.3  
+node   7   coords 2  0.0  0.2
+node   8   coords 2  0.1  0.2
+node   9   coords 2  0.0  0.3
+node   10  coords 2  0.1  0.3
 #
 hangingNode 11 coords 2  0.0  0.25  dofType 2 2 2 masterElement 4
 hangingNode 12 coords 2  0.1  0.25  dofType 2 2 2 masterElement 4
@@ -34,17 +33,19 @@ hangingNode 12 coords 2  0.1  0.25  dofType 2 2 2 masterElement 4
 #
 # ELEMENTS
 #
-Truss2d         1   nodes 2   5 6 cs 1     
-PlaneStress2d   2   nodes 4   1 2 4 3  
-Truss2d         3   nodes 2   11 12 cs 1 
-PlaneStress2d   4   nodes 4   7 8 10 9 
+Truss2d         1   nodes 2   5 6      crossSect 2  cs 1 bodyLoads 1 3
+PlaneStress2d   2   nodes 4   1 2 4 3  crossSect 1
+Truss2d         3   nodes 2   11 12    crossSect 3  cs 1 bodyLoads 1 3
+PlaneStress2d   4   nodes 4   7 8 10 9 crossSect 1
 #
+Set 1 nodes 2 1 7
+Set 2 nodes 2 3 9
 #
 # CROSSECTION
 #
-SimpleCS 1 thick 1.0 area 0.001 material 2  set 4
-SimpleCS 2 thick 1.0 area 0.001 material 3  set 5
-SimpleCS 3 thick 1.0 material 1 set 3
+SimpleCS 1 thick 1.0 width 1.0 material 1
+SimpleCS 2 thick 1.0 area 0.001 material 2
+SimpleCS 3 thick 1.0 area 0.001 material 3
 #
 #
 # MATERIAL
@@ -54,11 +55,10 @@ SteelRelaxMat 2 d 0. E 200.e3 ReinfClass 1 timeFactor 1. charStrength 1000. appr
 SteelRelaxMat 3 d 0. E 200.e3 ReinfClass 1 timeFactor 1. charStrength 1000. approach 1
 #
 #
-BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0. set 1
-BoundaryCondition 2 loadTimeFunction 1 dofs 1 2 values 1 0. set 2
+BoundaryCondition 1 loadTimeFunction 1 dofs 2 1 2 values 2 0. 0. set 1
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 1 values 1 0. set 2
 #
-StructEigenstrainLoad 3 loadTimeFunction 2 Components 1 -4.e-3 set 4
-StructEigenstrainLoad 4 loadTimeFunction 2 Components 1 -4.e-3 set 5
+StructEigenstrainLoad 3 loadTimeFunction 2 Components 1 -4.e-3
 #
 #
 # TIME FUNCTION
@@ -66,15 +66,6 @@ StructEigenstrainLoad 4 loadTimeFunction 2 Components 1 -4.e-3 set 5
 ConstantFunction 1 f(t) 1.0
 HeavisideLTF 2 origin 0.0 value 1.0
 #
-set 1 nodes 4  1 3 7 9
-set 2 nodes 2  1 7
-set 3 elements 2 2 4
-set 4 elements 1 1
-set 5 elements 1 3
-#
-#TIME
-#ELEMENT number 1 gp 1 keyword stresses component 1
-#ELEMENT number 3 gp 1 keyword stresses component 1
 #%BEGIN_CHECK% tolerance 5.e-3
 #ELEMENT tStep 10 number 1 gp 1 keyword 1 component 1 value 7.237900e+02 
 #ELEMENT tStep 10 number 3 gp 1 keyword 1 component 1 value 7.349400e+02

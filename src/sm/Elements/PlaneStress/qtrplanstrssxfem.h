@@ -42,14 +42,14 @@
 #include "domain.h"
 
 #define _IFT_QTrPlaneStress2dXFEM_Name "qtrplanestress2dxfem"
+#define _IFT_QTrPlaneStress2dXFEM_RegCoeff "reg_coeff"
+#define _IFT_QTrPlaneStress2dXFEM_RegCoeffTol "reg_coeff_tol"
 
 namespace oofem {
 
 
 /**
  * 6-node triangle with XFEM kinematics.
- * Only corner nodes are enriched, i.e. we use a quadratic approximation
- * for the continuous field and a linear approximation for enrichment fields.
  * @author Erik Svenning
  * @date Dec 19, 2014
  */
@@ -59,9 +59,13 @@ protected:
     virtual void updateYourself(TimeStep *tStep);
     virtual void postInitialize();
 
+    double mRegCoeff, mRegCoeffTol;
+
 public:
-    QTrPlaneStress2dXFEM(int n, Domain * d) : QTrPlaneStress2d(n, d), XfemStructuralElementInterface(this), VTKXMLExportModuleElementInterface() { numberOfDofMans = 6; }
+    QTrPlaneStress2dXFEM(int n, Domain * d) : QTrPlaneStress2d(n, d), XfemStructuralElementInterface(this), VTKXMLExportModuleElementInterface() { numberOfDofMans = 6; mRegCoeff = 1.0e-6; mRegCoeffTol = 1.0e-6; }
     virtual ~QTrPlaneStress2dXFEM();
+
+    virtual Interface *giveInterface(InterfaceType it);
 
     virtual const char *giveInputRecordName() const { return _IFT_QTrPlaneStress2dXFEM_Name; }
     virtual const char *giveClassName() const { return "QTrPlaneStress2dXFEM"; }
@@ -91,6 +95,9 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual void computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer);
+
+    /// VTK Interface
+    virtual void giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep);
 
 protected:
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 6; } // TODO: Check

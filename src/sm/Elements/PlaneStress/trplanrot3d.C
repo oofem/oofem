@@ -203,20 +203,21 @@ TrPlaneStrRot3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type
     answer.resize(3, 3);
     answer.zero();
 
-    if ( ( type == LocalForceTensor ) || ( type == GlobalForceTensor ) ) {
+    if ( type == LocalForceTensor || type == GlobalForceTensor ) {
         //this->computeStressVector(charVect, gp, tStep);
         charVect = ms->giveStressVector();
 
-        answer.at(1, 1) = charVect.at(1);
-        answer.at(2, 2) = charVect.at(2);
-        answer.at(1, 2) = charVect.at(3);
-        answer.at(2, 1) = charVect.at(3);
-    } else if ( ( type == LocalMomentTensor ) || ( type == GlobalMomentTensor ) ) {
+        double h = this->giveStructuralCrossSection()->give(CS_Thickness, gp);
+        answer.at(1, 1) = charVect.at(1) * h;
+        answer.at(2, 2) = charVect.at(2) * h;
+        answer.at(1, 2) = charVect.at(3) * h;
+        answer.at(2, 1) = charVect.at(3) * h;
+    } else if ( type == LocalMomentTensor || type == GlobalMomentTensor ) {
         //this->computeStressVector(charVect, gp, tStep);
         charVect = ms->giveStressVector();
 
         answer.at(3, 3) = charVect.at(4);
-    } else if ( ( type == LocalStrainTensor ) || ( type == GlobalStrainTensor ) ) {
+    } else if ( type == LocalStrainTensor || type == GlobalStrainTensor ) {
         //this->computeStrainVector(charVect, gp, tStep);
         charVect = ms->giveStrainVector();
 
@@ -224,7 +225,7 @@ TrPlaneStrRot3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type
         answer.at(2, 2) = charVect.at(2);
         answer.at(1, 2) = charVect.at(3) / 2.;
         answer.at(2, 1) = charVect.at(3) / 2.;
-    } else if ( ( type == LocalCurvatureTensor ) || ( type == GlobalCurvatureTensor ) ) {
+    } else if ( type == LocalCurvatureTensor || type == GlobalCurvatureTensor ) {
         //this->computeStrainVector(charVect, gp, tStep);
         charVect = ms->giveStrainVector();
 
@@ -234,8 +235,8 @@ TrPlaneStrRot3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type
         exit(1);
     }
 
-    if ( ( type == GlobalForceTensor  ) || ( type == GlobalMomentTensor  ) ||
-        ( type == GlobalStrainTensor ) || ( type == GlobalCurvatureTensor ) ) {
+    if ( type == GlobalForceTensor || type == GlobalMomentTensor ||
+         type == GlobalStrainTensor || type == GlobalCurvatureTensor ) {
         this->computeGtoLRotationMatrix();
         answer.rotatedWith(GtoLRotationMatrix);
     }
@@ -250,8 +251,8 @@ TrPlaneStrRot3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalState
 
     answer.resize(6);
 
-    if (  type == IST_ShellCurvatureTensor || type == IST_ShellStrainTensor ) {
-        if ( type == IST_ShellCurvatureTensor ) {
+    if ( type == IST_CurvatureTensor || type == IST_ShellStrainTensor ) {
+        if ( type == IST_CurvatureTensor ) {
             cht = GlobalCurvatureTensor;
         } else {
             cht = GlobalStrainTensor;
@@ -264,7 +265,7 @@ TrPlaneStrRot3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalState
         answer.at(3) = globTensor.at(3, 3); //zz
         answer.at(4) = 2 * globTensor.at(2, 3); //yz
         answer.at(5) = 2 * globTensor.at(1, 3); //xz
-        answer.at(6) = 2 * globTensor.at(2, 3); //yz
+        answer.at(6) = 2 * globTensor.at(1, 2); //xy
 
         return 1;
     } else if ( type == IST_ShellMomentTensor || type == IST_ShellForceTensor ) {
@@ -281,12 +282,11 @@ TrPlaneStrRot3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalState
         answer.at(3) = globTensor.at(3, 3); //zz
         answer.at(4) = globTensor.at(2, 3); //yz
         answer.at(5) = globTensor.at(1, 3); //xz
-        answer.at(6) = globTensor.at(2, 3); //yz
+        answer.at(6) = globTensor.at(1, 2); //xy
 
         return 1;
     } else {
-        answer.clear();
-        return 0;
+        return TrPlaneStrRot :: giveIPValue(answer, gp, type, tStep);
     }
 }
 
@@ -454,7 +454,7 @@ TrPlaneStrRot3d :: printOutputAt(FILE *file, TimeStep *tStep)
             fprintf(file, "  strains    ");
             for ( auto &val : v ) fprintf(file, " %.4e", val);
 
-            this->giveIPValue(v, gp, IST_ShellCurvatureTensor, tStep);
+            this->giveIPValue(v, gp, IST_CurvatureTensor, tStep);
             fprintf(file, "\n              curvatures ");
             for ( auto &val : v ) fprintf(file, " %.4e", val);
 

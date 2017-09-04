@@ -1,0 +1,56 @@
+barnl.oofem.out
+1D test
+#
+# note this example cannot be processed by run_problem
+# because imperfection must be made in input file
+#
+#nonlinearstatic nsteps 15 rtolf 1e-4 MaxIter 200 reqIterations 80 manrmsteps 10 stiffMode 1 controlmode 0 psi 0.0 renumber 0 hpcmode 1 hpc 2 2 1 stepLength 1.0 nmodules 1
+staticstructural nsteps 15 nmodules 1 \
+solverType "calm" rtolf 1 MinIter 200 MaxIter 200 reqIterations 80 manrmsteps 10 stiffMode 1 psi 0. hpcmode 1 hpc 2 2 1 stepLength 1.
+errorcheck filename "barnl.oofem.in"
+domain 1dTruss
+OutputManager tstep_all dofman_all element_all
+ndofman 12 nelem 11 ncrosssect 2 nmat 2 nbc 2 nltf 2 nic 0 nset 4
+node 1 coords 3 0.000000e+00 0.000000e+00 0.000000e+00
+node 2 coords 3 1.100000e+01 0.000000e+00 0.000000e+00
+node 3 coords 3 1.000000e+00 0.000000e+00 0.000000e+00
+node 4 coords 3 2.000000e+00 0.000000e+00 0.000000e+00
+node 5 coords 3 3.000000e+00 0.000000e+00 0.000000e+00
+node 6 coords 3 4.000000e+00 0.000000e+00 0.000000e+00
+node 7 coords 3 5.000000e+00 0.000000e+00 0.000000e+00
+node 8 coords 3 6.000000e+00 0.000000e+00 0.000000e+00
+node 9 coords 3 7.000000e+00 0.000000e+00 0.000000e+00
+node 10 coords 3 8.000000e+00 0.000000e+00 0.000000e+00
+node 11 coords 3 9.000000e+00 0.000000e+00 0.000000e+00
+node 12 coords 3 1.000000e+01 0.000000e+00 0.000000e+00
+truss1d 1 nodes 2 1 3 mat 1
+truss1d 2 nodes 2 3 4 mat 1
+truss1d 3 nodes 2 4 5 mat 1
+truss1d 4 nodes 2 5 6 mat 2
+truss1d 5 nodes 2 6 7 mat 1
+truss1d 6 nodes 2 7 8 mat 1
+truss1d 7 nodes 2 8 9 mat 1
+truss1d 8 nodes 2 9 10 mat 1
+truss1d 9 nodes 2 10 11 mat 1
+truss1d 10 nodes 2 11 12 mat 1
+truss1d 11 nodes 2 12 2 mat 1
+Set 1 elementranges {1 2 (4 11)}
+Set 2 elements 1 3
+Set 3 nodes 1 1
+Set 4 nodes 1 2
+SimpleCS 1 thick 1.0 width 1.0 material 1 set 1
+SimpleCS 2 thick 1.0 width 1.0 material 2 set 2
+idmnl1 1 d 1.0  E 1.0  n 0.2  e0 1.0 ef 5.0 R 2.0 equivstraintype 1 talpha 0.0
+idmnl1 2 d 1.0  E 1.0  n 0.2  e0 0.97 ef 5.0 R 2.0 equivstraintype 1 talpha 0.0
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 3
+NodalLoad 2 loadTimeFunction 1 dofs 1 1 components 1 1.0 set 4 reference
+ConstantFunction 1 f(t) 1.0
+PiecewiseLinFunction 2 t 2 0.0 1000.0 f(t) 2 1.0 1001.0
+#%BEGIN_CHECK% tolerance 1.e-5
+#NODE tStep 15 number 2 dof 1 unknown d value 1.45293329e+01
+#NODE tStep 15 number 5 dof 1 unknown d value 4.06591821e+00
+#NODE tStep 15 number 6 dof 1 unknown d value 7.50758455e+00
+#ELEMENT tStep 15 number 4 gp 1 keyword 4 component 1  value 3.44166634e+00
+#ELEMENT tStep 15 number 4 gp 1 keyword 1 component 1  value 7.4049e-01
+#REACTION tStep 15 number 1 dof 1 value -7.4053e-01
+#%END_CHECK%

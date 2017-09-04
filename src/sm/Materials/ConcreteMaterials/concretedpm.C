@@ -48,7 +48,7 @@
 namespace oofem {
 REGISTER_Material(ConcreteDPM);
 ///@todo Eventually remove this old input string (replacing the name in input files is easy anyway).
-static bool __dummy_ConcreteDPM_alt = GiveClassFactory().registerMaterial("concreteidp", matCreator< ConcreteDPM > );
+static bool __dummy_ConcreteDPM_alt __attribute__((unused)) = GiveClassFactory().registerMaterial("concreteidp", matCreator< ConcreteDPM > );
 
 ConcreteDPMStatus :: ConcreteDPMStatus(int n, Domain *d, GaussPoint *gp) :
     StructuralMaterialStatus(n, d, gp),
@@ -431,7 +431,7 @@ ConcreteDPM :: giveRealStressVector_3d(FloatArray &answer,
 
     // subtract stress-independent part of strain
     // (due to temperature changes, shrinkage, etc.)
-    this->giveStressDependentPartOfStrainVector(strain, gp, strainVector, tStep, VM_Total);
+    this->giveStressDependentPartOfStrainVector_3d(strain, gp, strainVector, tStep, VM_Total);
 
     // perform plasticity return
     performPlasticityReturn(gp, strain);

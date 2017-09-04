@@ -218,8 +218,10 @@ private:
     /// Topology description
     std :: unique_ptr< TopologyDescription > topology;
 
+public:
     /// Keeps track of next free dof ID (for special Lagrange multipliers, XFEM and such)
     int freeDofID;
+private:
 
 #ifdef __PARALLEL_MODE
     /**
@@ -256,9 +258,6 @@ public:
 
     Domain(const Domain& src) = delete;
     Domain &operator = (const Domain &src) = delete;
-
-    /// Create a copy of the domain using the dynamic data reader.
-    Domain *Clone();
 
     /// Destructor.
     ~Domain();
@@ -305,6 +304,9 @@ public:
      * Returns engineering model to which receiver is associated.
      */
     EngngModel *giveEngngModel();
+
+    void SetEngngModel(EngngModel *ipEngngModel) {engineeringModel = ipEngngModel;}
+
     /**
      * Service for accessing particular domain load.
      * Generates error if no such load is defined.
@@ -531,12 +533,10 @@ public:
      * @param stream Context stream. If NULL then new file descriptor will be opened and closed
      * at the end else the stream given as parameter will be used and not closed at the end.
      * @param mode Determines amount of info in stream.
-     * @param obj Void pointer to an int array containing two values:time step number and
-     * version of a context file to be restored.
      * @return contextIOResultType.
      * @exception ContextIOERR If error encountered.
      */
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode);
     /**
      * Restores the domain state from output stream. Restores recursively the state of all
      * managed objects, like DofManagers and Elements.
@@ -547,12 +547,10 @@ public:
      * context.
      * @param stream Context file.
      * @param mode Determines amount of info in stream.
-     * @param obj Void pointer to an int array containing two values:time step number and
-     * version of a context file to be restored.
      * @return contextIOResultType.
      * @exception ContextIOERR exception if error encountered.
      */
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode);
     /**
      * Returns default DofID array which defines physical meaning of particular DOFs.
      * of nodal dofs. Default values are determined using current domain type.
@@ -600,6 +598,8 @@ public:
      * Gives the current maximum dof ID used.
      */
     int giveMaxDofID() { return this->freeDofID - 1; }
+
+    void setNextFreeDofID(int dofid){ this->freeDofID = dofid;}
 
     /**
      * Returns receiver's associated connectivity table.

@@ -67,6 +67,7 @@
 #include "initmodulemanager.h"
 #include "exportmodulemanager.h"
 #include "xfem/enrichmentitem.h"
+#include "xfem/nucleationcriterion.h"
 #include "xfem/enrichmentfunction.h"
 #include "xfem/propagationlaw.h"
 #include "contact/contactmanager.h"
@@ -92,10 +93,15 @@
 
 namespace oofem {
 Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry(),
-                                                     outputManager( new OutputManager(this) ),
                                                      bcTracker(this)
     // Constructor. Creates a new domain.
 {
+    if ( !e->giveSuppressOutput() ) {
+        outputManager = std::unique_ptr<OutputManager> (new OutputManager(this) );
+    } else {
+        outputManager = NULL;
+    }
+
     this->engineeringModel = e;
     this->number = n;
     this->serialNumber = serNum;
@@ -112,133 +118,6 @@ Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry(),
     dmanMapInitialized = elementMapInitialized = false;
     transactionManager = NULL;
 #endif
-}
-
-
-Domain *Domain :: Clone()
-{
-    /////////////////////////////////////////////////////////
-    // Create a copy of the domain using
-    // the dynamic data reader.
-
-    EngngModel *eModel = this->giveEngngModel();
-
-    int domNum = this->giveNumber();
-    int serNum = this->giveSerialNumber();
-    Domain *dNew = new Domain(domNum, serNum, eModel);
-
-
-    DynamicDataReader dataReader;
-    DynamicInputRecord *inputRec;
-
-
-    //Domain
-    inputRec = new DynamicInputRecord();
-    inputRec->setField(mDomainType, _IFT_Domain_type);
-    dataReader.insertInputRecord(DataReader :: IR_domainRec, inputRec);
-
-
-    //Output
-    inputRec = new DynamicInputRecord();
-    inputRec->setRecordKeywordField(_IFT_OutputManager_Name, 1);
-    inputRec->setField(_IFT_OutputManager_tstepall);
-    inputRec->setField(_IFT_OutputManager_dofmanall);
-    inputRec->setField(_IFT_OutputManager_elementall);
-    dataReader.insertInputRecord(DataReader :: IR_outManRec, inputRec);
-
-    //Components size record
-    inputRec = new DynamicInputRecord();
-    inputRec->setField(this->giveNumberOfDofManagers(),         _IFT_Domain_ndofman);
-    inputRec->setField(this->giveNumberOfElements(),            _IFT_Domain_nelem);
-    inputRec->setField(this->giveNumberOfCrossSectionModels(),  _IFT_Domain_ncrosssect);
-    inputRec->setField(this->giveNumberOfMaterialModels(),      _IFT_Domain_nmat);
-    inputRec->setField(this->giveNumberOfBoundaryConditions(),  _IFT_Domain_nbc);
-    inputRec->setField(this->giveNumberOfInitialConditions(),   _IFT_Domain_nic);
-    inputRec->setField(this->giveNumberOfFunctions(),           _IFT_Domain_nfunct);
-    inputRec->setField(this->giveNumberOfSets(),                _IFT_Domain_nset);
-    inputRec->setField(this->giveNumberOfSpatialDimensions(),   _IFT_Domain_numberOfSpatialDimensions);
-    if ( this->isAxisymmetric() ) {
-        inputRec->setField(_IFT_Domain_axisymmetric);
-    }
-
-
-    // fields to add:
-    // inputRec->setField( , _IFT_Domain_nbarrier);
-    // inputRec->setField( , _IFT_Domain_nrandgen);
-    // inputRec->setField( , _IFT_Domain_topology);
-    // inputRec->setField( , _IFT_Domain_nfracman);
-
-
-    bool nxfemMan = 0;
-    if ( this->hasXfemManager() ) {
-        nxfemMan = 1;
-    }
-    inputRec->setField(nxfemMan, _IFT_Domain_nxfemman);
-
-
-    dataReader.insertInputRecord(DataReader :: IR_domainCompRec, inputRec);
-
-
-    //Nodes
-    for ( auto &dman: dofManagerList ) {
-        dataReader.insertInputRecord(DataReader :: IR_dofmanRec, new DynamicInputRecord( *dman ));
-    }
-
-    //Elements
-    for ( auto &el: elementList ) {
-        dataReader.insertInputRecord(DataReader :: IR_elemRec, new DynamicInputRecord( *el ));
-    }
-
-    //CrossSection
-    for ( auto &cs: crossSectionList ) {
-        dataReader.insertInputRecord(DataReader :: IR_crosssectRec, new DynamicInputRecord( *cs ));
-    }
-
-    //Material
-    for ( auto &mat: materialList ) {
-        dataReader.insertInputRecord(DataReader :: IR_matRec, new DynamicInputRecord( *mat ));
-    }
-
-    //Boundary Conditions
-    for ( auto &bc: bcList ) {
-        dataReader.insertInputRecord(DataReader :: IR_bcRec, new DynamicInputRecord( *bc ));
-    }
-
-    //Initial Conditions
-    for ( auto &ic: icList ) {
-        dataReader.insertInputRecord(DataReader :: IR_icRec, new DynamicInputRecord( *ic ));
-    }
-
-    //Functions
-    for ( auto &func: functionList ) {
-        dataReader.insertInputRecord(DataReader :: IR_funcRec, new DynamicInputRecord( *func ));
-    }
-
-    //Sets
-    for ( auto &set: setList ) {
-        dataReader.insertInputRecord(DataReader :: IR_setRec, new DynamicInputRecord( *set ));
-    }
-
-    //XFEM manager
-    ///@todo Redesign this part (as well as this whole clone function); / Mikael
-    if ( this->xfemManager != NULL ) {
-        DynamicInputRecord *xmanRec = new DynamicInputRecord();
-        xfemManager->giveInputRecord(* xmanRec);
-        dataReader.insertInputRecord(DataReader :: IR_xfemManRec, xmanRec);
-
-
-        // Enrichment items
-        int nEI = xfemManager->giveNumberOfEnrichmentItems();
-        for ( int i = 1; i <= nEI; i++ ) {
-            EnrichmentItem *ei = xfemManager->giveEnrichmentItem(i);
-            ei->appendInputRecords(dataReader);
-        }
-    }
-
-    dNew->instanciateYourself(& dataReader);
-    dNew->postInitialize();
-
-    return dNew;
 }
 
 Domain :: ~Domain() { }
@@ -603,8 +482,6 @@ Domain :: instanciateYourself(DataReader *dr)
     // mapping from label to local numbers for dofmans and elements
     std :: map< int, int >dofManLabelMap, elemLabelMap;
 
-    FILE *outputStream = this->giveEngngModel()->giveOutputStream();
-
     // read type of Domain to be solved
     InputRecord *ir = dr->giveInputRecord(DataReader :: IR_domainRec, 1);
     IR_GIVE_FIELD(ir, name, _IFT_Domain_type); // This is inconsistent, "domain" isn't  exactly a field, but the actual record keyword.
@@ -618,14 +495,16 @@ Domain :: instanciateYourself(DataReader *dr)
 #  endif
 
     resolveDomainDofsDefaults( name.c_str() );
-    fprintf( outputStream, "Domain type: %s, default ndofs per node is %d\n\n\n",
-            name.c_str(), giveDefaultNodeDofIDArry().giveSize() );
 
     // read output manager record
     std :: string tmp;
     ir = dr->giveInputRecord(DataReader :: IR_outManRec, 1);
     ir->giveRecordKeywordField(tmp);
-    outputManager->initializeFrom(ir);
+
+    if(!giveEngngModel()->giveSuppressOutput()) {
+    	outputManager->initializeFrom(ir);
+    }
+
     ir->finish();
 
     // read domain description
@@ -694,6 +573,8 @@ Domain :: instanciateYourself(DataReader *dr)
     VERBOSE_PRINT0("Instanciated nodes & sides ", nnode)
 #  endif
 
+    BuildDofManPlaceInArrayMap();
+
     // read elements
     elementList.clear();
     elementList.resize(nelem);
@@ -723,7 +604,6 @@ Domain :: instanciateYourself(DataReader *dr)
     }
 
     BuildElementPlaceInArrayMap();
-    BuildDofManPlaceInArrayMap();
 
     // Support sets defined directly after the elements (special hack for backwards compatibility).
     setList.clear();
@@ -1612,7 +1492,7 @@ Domain :: giveTopology()
 #define DOMAIN_NCOMP 8
 
 contextIOResultType
-Domain :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+Domain :: saveContext(DataStream &stream, ContextMode mode)
 {
     contextIOResultType iores;
     int serNum;
@@ -1668,7 +1548,7 @@ Domain :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 
 
 contextIOResultType
-Domain :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+Domain :: restoreContext(DataStream &stream, ContextMode mode)
 {
     contextIOResultType iores;
     int serNum;

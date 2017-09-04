@@ -526,7 +526,7 @@ Quad1MindlinShell3D :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalS
 {
     FloatArray help;
     answer.resize(6);
-    if ( type == IST_ShellForceTensor || type == IST_ShellMomentTensor ) {
+    if ( type == IST_ShellForceTensor || type == IST_ShellStrainTensor ) {
         if ( type == IST_ShellForceTensor ) {
             help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         } else {
@@ -539,7 +539,7 @@ Quad1MindlinShell3D :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalS
         answer.at(5) = help.at(7); // vxy
         answer.at(6) = help.at(3); // vxy
         return 1;
-    } else if ( type == IST_ShellMomentTensor || type == IST_ShellCurvatureTensor ) {
+    } else if ( type == IST_ShellMomentTensor || type == IST_CurvatureTensor ) {
         if ( type == IST_ShellMomentTensor ) {
             help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         } else {

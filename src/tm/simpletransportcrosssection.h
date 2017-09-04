@@ -70,7 +70,8 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     /// Temporary function that hands out the material. Must be removed for future layered support, but input files will still look the same.
-    TransportMaterial *giveMaterial();
+    virtual TransportMaterial *giveMaterial();
+    virtual Material *giveMaterial(IntegrationPoint *ip);
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep);

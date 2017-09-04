@@ -95,7 +95,6 @@ protected:
     /// Subsoil material
     int subsoilMat;
     
-
 public:
     Beam3d(int n, Domain *d);
     virtual ~Beam3d();
@@ -211,10 +210,6 @@ protected:
     double giveKappazCoeff(TimeStep *tStep);
     void computeKappaCoeffs(TimeStep *tStep);
     virtual double computeLength();
-    virtual void computeClampedStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseMode rMode, TimeStep *tStep);
-    virtual void computeLocalStiffnessMatrix(FloatMatrix &answer,
-                                             MatResponseMode rMode, TimeStep *tStep);
     virtual void computeGaussPoints();
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);

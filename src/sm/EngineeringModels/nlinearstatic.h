@@ -154,7 +154,7 @@ public:
 
     virtual double giveLoadLevel() { return cumulatedLoadLevel + loadLevel; }
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     virtual void updateDomainLinks();
@@ -168,7 +168,7 @@ public:
     virtual int giveCurrentNumberOfIterations() {return currentIterations;}
 
 #ifdef __OOFEG
-    void showSparseMtrxStructure(int type, oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void showSparseMtrxStructure(int type, oofegGraphicContext &gc, TimeStep *tStep);
 #endif
 
     virtual int estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType);

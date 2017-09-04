@@ -62,7 +62,7 @@ public:
         IR_emodelRec, IR_mstepRec, IR_expModuleRec, IR_dofmanRec, IR_elemRec,
         IR_crosssectRec, IR_matRec, IR_nlocBarRec, IR_bcRec, IR_icRec, IR_funcRec, IR_setRec,
         IR_xfemManRec, IR_enrichFuncRec, IR_geoRec, IR_enrichItemRec,
-        IR_enrichFrontRec, IR_propagationLawRec, IR_fracManRec, IR_failCritRec, 
+        IR_enrichFrontRec, IR_propagationLawRec, IR_crackNucleationRec, IR_fracManRec, IR_failCritRec,
         IR_contactManRec, IR_contactDefRec
     };
 

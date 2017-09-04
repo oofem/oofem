@@ -43,7 +43,10 @@
 
 #define _IFT_StaticStructural_Name "staticstructural"
 #define _IFT_StaticStructural_deltat "deltat"
+#define _IFT_StaticStructural_prescribedTimes "prescribedtimes"
 #define _IFT_StaticStructural_solvertype "solvertype"
+#define _IFT_StaticStructural_stiffmode "stiffmode"
+#define _IFT_StaticStructural_nonlocalExtension "nonlocalext"
 
 #define _IFT_StaticStructural_recomputeaftercrackpropagation "recomputeaftercrackprop"
 namespace oofem {
@@ -59,16 +62,22 @@ protected:
     FloatArray solution;
     FloatArray internalForces;
     FloatArray eNorm;
+
+public:
     std :: unique_ptr< SparseMtrx >stiffnessMatrix;
+protected:
 
     std :: unique_ptr< PrimaryField >field;
 
     SparseMtrxType sparseMtrxType;
 
     std :: unique_ptr< SparseNonLinearSystemNM >nMethod;
-    int solverType;
-    
+    std :: string solverType;
+    MatResponseMode stiffMode;
+
+    double loadLevel;
     double deltaT;
+    FloatArray prescribedTimes;
 
     InitialGuess initialGuessType;
 
@@ -78,6 +87,7 @@ public:
     StaticStructural(int i, EngngModel * _master = NULL);
     virtual ~StaticStructural();
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void updateAttributes(MetaStep *mStep);
 
     virtual void solveYourself();
     virtual void solveYourselfAt(TimeStep *tStep);
@@ -92,7 +102,9 @@ public:
 
     virtual int forceEquationNumbering();
 
+    virtual double giveLoadLevel() { return loadLevel; }
     virtual TimeStep *giveNextStep();
+    virtual double giveEndOfTimeOfInterest();
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
     
     virtual fMode giveFormulation() { return TL; }
@@ -108,7 +120,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_StaticStructural_Name; }
     virtual const char *giveClassName() const { return "StaticStructural"; }
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     
     virtual int estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType);

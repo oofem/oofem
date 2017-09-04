@@ -43,7 +43,7 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 
-///@name Input fields for PrescribedTensor
+///@name Input fields for PrescribedGradient
 //@{
 #define _IFT_PrescribedGradient_Name "prescribedgradient"
 //@}

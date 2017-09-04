@@ -235,16 +235,10 @@ MITC4Shell ::  giveDirectorVectors(FloatArray &V1, FloatArray &V2, FloatArray &V
         V2.normalize();
         V3.normalize();
         V4.normalize();
-
-        return;
     } else {
         OOFEM_ERROR("Unsupported directorType");
     }
-
-    return;
 }
-
-
 
 
 void
@@ -259,6 +253,7 @@ MITC4Shell ::  giveLocalDirectorVectors(FloatArray &V1, FloatArray &V2, FloatArr
     V3.beProductOf(GtoLRotationMatrix, V3g);
     V4.beProductOf(GtoLRotationMatrix, V4g);
 }
+
 
 void
 MITC4Shell :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
@@ -458,7 +453,7 @@ MITC4Shell :: giveJacobian(FloatArray lcoords, FloatMatrix &jacobianMatrix)
     this->giveThickness(a1, a2, a3, a4);
 
     interp_lin.evalN( h, lcoords,  FEIElementGeometryWrapper(this) );
-    interp_lin.giveDerivatives(dn, lcoords);
+    interp_lin.evaldNdxi(dn, lcoords, FEIElementGeometryWrapper(this) );
 
     FloatArray hk1(4);
     // derivatives of interpolation functions
@@ -632,7 +627,7 @@ MITC4Shell :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int 
     this->giveThickness(a1, a2, a3, a4);
 
     interp_lin.evalN( h, lcoords,  FEIElementGeometryWrapper(this) );
-    interp_lin.giveDerivatives(dn, lcoords);
+    interp_lin.evaldNdxi(dn, lcoords, FEIElementGeometryWrapper(this) );
 
     FloatArray hkx, hky;
     this->givedNdx(hkx, hky, lcoords);
@@ -995,7 +990,7 @@ MITC4Shell :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gau
     this->computeGtoLRotationMatrix();
     StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveStructuralCrossSection()->giveMaterial(gp) );
 
-    if ( ( type == GlobalForceTensor ) ) {
+    if ( type == GlobalForceTensor ) {
         FloatArray stress, localStress, localStrain;
         this->computeStrainVector(localStrain, gp, tStep);
         this->computeStressVector(localStress, localStrain, gp, tStep);
@@ -1010,7 +1005,7 @@ MITC4Shell :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gau
         answer.at(3, 2) = stress.at(5);
         answer.at(1, 3) = stress.at(6);
         answer.at(3, 1) = stress.at(6);
-    } else if ( ( type == GlobalStrainTensor ) ) {
+    } else if ( type == GlobalStrainTensor ) {
         FloatArray strain, localStrain;
         this->computeStrainVector(localStrain, gp, tStep);
         mat->transformStrainVectorTo(strain,  GtoLRotationMatrix, localStrain, false);
@@ -1060,7 +1055,7 @@ MITC4Shell :: printOutputAt(FILE *file, TimeStep *tStep)
             fprintf(file, " %.4e", val);
         }
 
-        this->giveMidplaneIPValue(v, i, IST_ShellCurvatureTensor, tStep);
+        this->giveMidplaneIPValue(v, i, IST_CurvatureTensor, tStep);
         fprintf(file, "\n          curvatures ");
         for ( auto &val : v ) {
             fprintf(file, " %.4e", val);
@@ -1119,7 +1114,7 @@ MITC4Shell :: giveMidplaneIPValue(FloatArray &answer, int gpXY, InternalStateTyp
         StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveStructuralCrossSection()->giveMaterial(gp) );
         this->computeGtoLRotationMatrix();
         mat->transformStressVectorTo(answer,  GtoLRotationMatrix, mLocal, false);
-    } else if ( type == IST_ShellCurvatureTensor ) {
+    } else if ( type == IST_CurvatureTensor ) {
         FloatArray h;
         FloatMatrix dn;
         FloatArray coords;
@@ -1172,7 +1167,7 @@ MITC4Shell :: givedNdx(FloatArray &hkx, FloatArray &hky, FloatArray coords)
     FloatMatrix dn, dndx, jacobianMatrix, inv, inv2;
 
     interp_lin.evalN( h, coords,  FEIElementGeometryWrapper(this) );
-    interp_lin.giveDerivatives(dn, coords);
+    interp_lin.evaldNdxi(dn, coords, FEIElementGeometryWrapper(this) );
 
     // derivatives of interpolation functions
     // dh(r1,r2)/dr1
@@ -1249,7 +1244,7 @@ MITC4Shell :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
         answer.at(6) = globTensor.at(1, 2); //xy
 
         return 1;
-    } else if ( type == IST_ShellMomentTensor || type == IST_ShellForceTensor || type == IST_ShellCurvatureTensor || type == IST_ShellStrainTensor ) {
+    } else if ( type == IST_ShellMomentTensor || type == IST_ShellForceTensor || type == IST_CurvatureTensor || type == IST_ShellStrainTensor ) {
         int gpnXY = ( gp->giveNumber() - 1 ) / 2;
         this->giveMidplaneIPValue(answer, gpnXY, type, tStep);
 
@@ -1544,7 +1539,7 @@ MITC4Shell :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 
     weight = gp->giveWeight();
 
-    interp_lin.giveDerivatives(dn, lcoords);
+    interp_lin.evaldNdxi(dn, lcoords, FEIElementGeometryWrapper(this) );
 
     for ( int i = 1; i <= dn.giveNumberOfRows(); i++ ) {
         double xl = x.at(i);

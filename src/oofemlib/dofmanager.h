@@ -491,7 +491,7 @@ public:
      * @return True if receiver has dof with given id.
      * @see DofIDItem
      */
-    bool hasDofID(DofIDItem id);
+    bool hasDofID(DofIDItem id) const;
 
 #ifdef __OOFEG
     virtual void drawYourself(oofegGraphicContext &gc, TimeStep *tStep) { }
@@ -535,13 +535,9 @@ public:
     /// Returns true if receiver is locally maintained.
     bool isLocal();
     /// Returns true if receiver is shared.
-    bool isShared() {
-        if ( parallel_mode == DofManager_shared ) {
-            return true;
-        } else {
-            return false;
-        }
-    }
+    bool isShared() { return parallel_mode == DofManager_shared; }
+    /// Returns true if receiver is shared.
+    bool isNull() { return parallel_mode == DofManager_null; }
 };
 } // end namespace oofem
 #endif // dofmanager_h

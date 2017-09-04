@@ -63,6 +63,7 @@ public:
     virtual FEInterpolation *giveInterpolation() const;
 
     virtual Interface *giveInterface(InterfaceType it);
+    virtual double giveParentElSize() const { return 0.5; }
 
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 0 : 0 ); }
 
@@ -81,6 +82,7 @@ public:
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
     virtual int SPRNodalRecoveryMI_giveNumberOfIP();
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
+
 
 protected:
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }

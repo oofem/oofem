@@ -29,6 +29,7 @@ void PrescribedGradientBCWeakPeriodic :: postInitialize()
 {
     bool enforceCornerPeriodicity = true;
     int numSides = 2;
+    clear();
     createTractionMesh(enforceCornerPeriodicity, numSides);
 }
 

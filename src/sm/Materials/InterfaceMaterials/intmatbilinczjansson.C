@@ -46,7 +46,9 @@ namespace oofem {
 REGISTER_Material( IntMatBilinearCZJansson );
 
 
-IntMatBilinearCZJansson :: IntMatBilinearCZJansson(int n, Domain *d) : StructuralInterfaceMaterial(n, d) { }
+IntMatBilinearCZJansson :: IntMatBilinearCZJansson(int n, Domain *d) : StructuralInterfaceMaterial(n, d),
+    mSemiExplicit(false)
+{ }
 
 
 IntMatBilinearCZJansson :: ~IntMatBilinearCZJansson() { }
@@ -83,10 +85,11 @@ IntMatBilinearCZJansson :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint
         Qtemp_comp.at(3) = this->knc*dJ.at(3);
     }
 
+    FloatArray Qtrial = status->giveEffectiveMandelTraction(); 
 
     if (oldDamage < 0.99) {
         
-        FloatArray Qtrial = status->giveEffectiveMandelTraction(); 
+        //FloatArray Qtrial = status->giveEffectiveMandelTraction(); 
 
         FloatMatrix Kstiff(3,3);
         FloatArray help;
@@ -167,7 +170,7 @@ IntMatBilinearCZJansson :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint
             
             double beta = pow(Qt,2)*Kstiff.at(3,3)/(pow(Qn_M,2)*Kstiff.at(1,1) + pow(Qt,2)*Kstiff.at(3,3));
 
-            double G_beta = beta*(this->GIIc - pow(gamma*sigf,2)/this->ks0) + (1-beta)*(this->GIc - pow(sigf,2)/this->kn0); // assuming linear interpolation between mode I and II
+            double G_beta = beta*(this->GIIc - pow(gamma*sigf,2)/(2*this->ks0)) + (1-beta)*(this->GIc - pow(sigf,2)/(2*this->kn0)); // assuming linear interpolation between mode I and II
             
             
             double eta = (pow(Qn_M,2) + pow(Qt,2)*Kstiff.at(3,3)/Kstiff.at(1,1))/(G_beta*sigf);
@@ -288,6 +291,16 @@ IntMatBilinearCZJansson :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint
     status->letTempJumpBe(d);
     status->letTempFirstPKTractionBe(answer);
     status->letTempFBe(F);
+    
+    if(mSemiExplicit) {
+                        
+        Qtemp = Qtrial;
+        Qtemp.times(1-oldDamage);
+        Qtemp.add(Qtemp_comp);
+        answer.beTProductOf(Finv,Qtemp);                    // t_1_hat = MATMUL(TRANSPOSE(Fci),Q)
+
+    }
+    
 }
 
 
@@ -457,6 +470,12 @@ IntMatBilinearCZJansson :: initializeFrom(InputRecord *ir)
         OOFEM_WARNING("gamma (%.2e) is below zero which is unphysical",  this->gamma);
         return IRRT_BAD_FORMAT;
     }
+    
+    if( ir->hasField(_IFT_IntMatBilinearCZJansson_semiexplicit) ) {
+        mSemiExplicit = true;
+        printf("In IntMatBilinearCZJansson::initializeFrom: Semi-explicit time integration activated.\n");
+    }
+    
     return IRRT_OK;
 }
 

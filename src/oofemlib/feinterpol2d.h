@@ -36,6 +36,7 @@
 #define feinterpol2d_h
 
 #include "feinterpol.h"
+#include "mathfem.h"
 
 namespace oofem {
 /**
@@ -57,6 +58,23 @@ public:
      * @return Area of geometry.
      */
     virtual double giveArea(const FEICellGeometry &cellgeo) const;
+
+    /**
+     * Returns a characteristic length of the geometry, typically a diagonal or edge length.
+     * @param cellgeo Underlying cell geometry.
+     * @return Square root of area.
+     */
+    virtual double giveCharacteristicLength(const FEICellGeometry &cellgeo) const {return sqrt( this->giveArea(cellgeo) );}
+
+    /**
+     * Default implementation using Newton's method to find the local coordinates.
+     * Can be overloaded if desired.
+     */
+    virtual int global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo);
+
+    virtual void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+
+    virtual bool inside(const FloatArray &lcoords) const;
 
     /**@name Boundary interpolation services. 
        Boundary is defined as entity of one dimension lower

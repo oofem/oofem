@@ -78,7 +78,6 @@ QTrPlaneStrain :: giveInterface(InterfaceType interface)
     return NULL;
 }
 
-
 #ifdef __OOFEG
  #define TR_LENGHT_REDUCT 0.3333
 

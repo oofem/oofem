@@ -71,19 +71,19 @@ FEI2dQuadConst :: local2global(FloatArray &answer, const FloatArray &lcoords, co
 }
 
 
-int
-FEI2dQuadConst :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo)
+bool FEI2dQuadConst :: inside(const FloatArray &lcoords) const
 {
-    OOFEM_ERROR("not implemented");
-    return false;
-}
+	const double point_tol = 1.0e-3;
+    bool inside = true;
+    for ( int i = 1; i <= 2; i++ ) {
+        if ( lcoords.at(i) < ( -1. - point_tol ) ) {
+            inside = false;
+        } else if ( lcoords.at(i) > ( 1. + point_tol ) ) {
+            inside = false;
+        }
+    }
 
-
-double
-FEI2dQuadConst :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-{
-    OOFEM_ERROR("not implemented");
-    return 0.0;
+    return inside;
 }
 
 

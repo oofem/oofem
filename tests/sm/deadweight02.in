@@ -5,7 +5,7 @@ Test of deadweight on LSpace element
 #sigma(x)=-20x
 #epsilon(x)=0.2x
 #displacement_x(x)=0.1x^2-0.4
-nonlinearstatic nsteps 1 rtolv 1.e-3 MaxIter 30 controllmode 1 stiffMode 2 nmodules 1
+StaticStructural nsteps 1 nmodules 1
 errorcheck
 #vtkxml tstep_all domain_all cellvars 1 53 primvars 1 1 vars 2 4 1 stype 1
 domain 3d

@@ -2,8 +2,6 @@ tmpatch36.out
 Patch test of Quad1_ht elements in x-dir
 StationaryProblem nsteps 1 nmodules 1
 #TransientTransport nsteps 200 deltat 600000.0 alpha 0.5
-#NonStationaryProblem nsteps 200 deltat 600000.0 alpha 0.5
-#nltransienttransportproblem nsteps 200 deltat 600000.0 rtol 0.001 alpha 0.5 nsmax 300 lumpedcapa
 #vtkxml tstep_all domain_all primvars 1 6 vars 2 37 56 stype 2
 errorcheck
 domain HeatTransfer

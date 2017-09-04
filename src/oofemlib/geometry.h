@@ -98,6 +98,10 @@ public:
     /// Computes normal signed distance between this object and a point.
     virtual double computeDistanceTo(const FloatArray *point) { return 0; }
 
+
+    // For debugging
+    virtual void printVTK(int iTStepIndex, int iIndex) {};
+
     /// Functions for computing signed distance in normal and tangential direction.
     /// Used by XFEM level set functions.
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const = 0;
@@ -126,6 +130,9 @@ public:
     void insertVertexFront(const FloatArray &iP) { mVertices.insert(mVertices.begin(), iP); }
     void insertVertexBack(const FloatArray &iP) { mVertices.push_back(iP); }
 
+    void clear() {mVertices.clear();}
+
+    void translate(const FloatArray &iTrans);
 
     /// Initializes the Geometry from the InputRecord.
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }

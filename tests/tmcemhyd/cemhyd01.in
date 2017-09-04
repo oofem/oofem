@@ -1,7 +1,5 @@
 cemhyd01.out
 Test of cemhyd3d hydration model on one quadrilateral, Q_pot = 534 J/g_cem, 300 kg cem/m3_con, i.e. max 160.2 kJ/m3_com; deltaT=160200/2.4/870=76.724 C 
-#NonStationaryProblem nsteps 51 deltat 3600.0 alpha 0.5 nmodules 1
-#NlTransientTransportProblem nsteps 51 deltat 3600.0 rtol 1.e-5 alpha 0.5 nsmax 30 nmodules 1
 TransientTransport nsteps 51 deltat 3600.0 alpha 0.5 nmodules 1
 errorcheck
 #vtkxml tstep_all domain_all vars 11 37 39 44 56 67 68 69 70 71 72 73 stype 1 timeScale 2.777777e-4

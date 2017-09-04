@@ -512,7 +512,7 @@ QDKTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType t
         answer.at(5) = help.at(4); // vxz
         answer.at(6) = 0.0; // vxy
         return 1;
-    } else if ( type == IST_ShellMomentTensor || type == IST_ShellCurvatureTensor ) {
+    } else if ( type == IST_ShellMomentTensor || type == IST_CurvatureTensor ) {
         if ( type == IST_ShellMomentTensor ) {
             help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         } else {
@@ -531,10 +531,6 @@ QDKTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType t
 }
 
 
-
-//
-// The element interface required by SPRNodalRecoveryModelInterface
-//
 void
 QDKTPlate :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 {

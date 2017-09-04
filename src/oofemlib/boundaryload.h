@@ -130,8 +130,6 @@ protected:
     Dictionary propertyDictionary;
     /// Optional time-functions for properties
     Dictionary propertyTimeFunctDictionary;
-    /// Temporal storage of state variables, particularly for boundary conditions depending on them, e.g. convection depending on actual temperature
-    Dictionary variableState;
 
 public:
     /**
@@ -163,22 +161,9 @@ public:
      * See cltypes.h file for details.
      */
     virtual bcType giveType() const { return lType; }
+    virtual double giveProperty(int aProperty, TimeStep *tStep, const std :: map< std :: string, FunctionArgument > &valDict);
     virtual double giveProperty(int aProperty, TimeStep *tStep);
 
-    /**
-     * Temporal storage of state variables, particularly for boundary conditions 
-     * depending on them, e.g. convection depending on actual temperature
-     * @param aVariable Variable name.
-     * @param val Value of a variable which is used for evaluating boundary load
-     */
-    virtual void setVariableState(int aVariable, double val);
-
-    /**
-     * Obtain value of a state variable.
-     * @param aVariable Variable name.
-     * @return Variable value.
-     */
-    virtual double giveVariableState(int aVariable);
     /// Expression to multiply all properties
     ScalarFunction propertyMultExpr;
 

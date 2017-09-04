@@ -1,6 +1,6 @@
 Tr2Shell7XFEM_multicrack.out
 Test case with 2 interlaminar and 2 intralaminar cracks
-StaticStructural nsteps 1 maxiter 3 rtolf 1.0e-5 manrmsteps 1 nmodules 1
+StaticStructural nsteps 1 maxiter 5 rtolf 1.0e-5 manrmsteps 1 nmodules 1
 #vtkxml tstep_all dofman_all element_all primvars 1 1 
 errorcheck 1
 domain 3dDirShell
@@ -52,11 +52,11 @@ Set 5 nodes 1 9
 ## XFEM 
 XfemManager 1 numberofenrichmentitems 4 debugvtk 0  
 #
-delamination 1 interfacenum 2 1 2 csnum 1 
+delamination 1 interfacenum 2 1 2 csnum 1 1
 DiscontinuousFunction 1 
 DofManList 1 list 9  1 2 3 4 5 6 7 8 9
 #
-delamination 2 interfacenum 1 2 csnum 1 
+delamination 2 interfacenum 1 2 csnum 1 1
 DiscontinuousFunction 1 
 DofManList 1 list 9  1 2 3 4 5 6 7 8 9
 #
@@ -72,27 +72,27 @@ polygonline 1 points 6  -2.0 -2.0   -0.8 -0.4   2.0 1.4
 EnrFrontDoNothing 1
 EnrFrontDoNothing 1
 #
-#%BEGIN_CHECK% tolerance 1.e-3
-#NODE tStep 1 number 1 dof 524 unknown d value 4.94642e-05
-#NODE tStep 1 number 1 dof 525 unknown d value -7.5883e-05
-#NODE tStep 1 number 1 dof 526 unknown d value 0.00442168
-#NODE tStep 1 number 1 dof 527 unknown d value -0.000157894
-#NODE tStep 1 number 1 dof 528 unknown d value -6.86528e-06
-#NODE tStep 1 number 2 dof 524 unknown d value 0.00124909
-#NODE tStep 1 number 2 dof 525 unknown d value 0.110489
-#NODE tStep 1 number 2 dof 526 unknown d value -0.374559
-#NODE tStep 1 number 2 dof 527 unknown d value -0.228795
-#NODE tStep 1 number 2 dof 528 unknown d value -0.000247742
-#NODE tStep 1 number 3 dof 524 unknown d value 0.000464808
-#NODE tStep 1 number 3 dof 525 unknown d value 0.452443
-#NODE tStep 1 number 3 dof 526 unknown d value -0.803816
-#NODE tStep 1 number 3 dof 527 unknown d value -0.322842
-#NODE tStep 1 number 3 dof 528 unknown d value -0.00111384
-#NODE tStep 1 number 4 dof 524 unknown d value 4.47869e-11
-#NODE tStep 1 number 4 dof 525 unknown d value -1.88964e-10
-#NODE tStep 1 number 4 dof 526 unknown d value -7.73866e-10
-#NODE tStep 1 number 4 dof 527 unknown d value -4.86075e-09
-#NODE tStep 1 number 4 dof 528 unknown d value -2.6807e-11
+#%BEGIN_CHECK% tolerance 1.e-6
+#NODE tStep 1 number 1 dof 524 unknown d value 4.94642e-08
+#NODE tStep 1 number 1 dof 525 unknown d value -7.5883e-08
+#NODE tStep 1 number 1 dof 526 unknown d value 0.00442168e-3
+#NODE tStep 1 number 1 dof 527 unknown d value -0.000157894e-3
+#NODE tStep 1 number 1 dof 528 unknown d value -6.86528e-09
+#NODE tStep 1 number 2 dof 524 unknown d value 0.00124909e-3
+#NODE tStep 1 number 2 dof 525 unknown d value 0.110489e-3
+#NODE tStep 1 number 2 dof 526 unknown d value -0.374559e-3
+#NODE tStep 1 number 2 dof 527 unknown d value -0.228795e-3
+#NODE tStep 1 number 2 dof 528 unknown d value -0.000247742e-3
+#NODE tStep 1 number 3 dof 524 unknown d value 0.000464808e-3
+#NODE tStep 1 number 3 dof 525 unknown d value 0.452443e-3
+#NODE tStep 1 number 3 dof 526 unknown d value -0.803816e-3
+#NODE tStep 1 number 3 dof 527 unknown d value -0.322842e-3
+#NODE tStep 1 number 3 dof 528 unknown d value -0.00111384e-3
+#NODE tStep 1 number 4 dof 524 unknown d value 4.47869e-14
+#NODE tStep 1 number 4 dof 525 unknown d value -1.88964e-13
+#NODE tStep 1 number 4 dof 526 unknown d value -7.73866e-13
+#NODE tStep 1 number 4 dof 527 unknown d value -4.86075e-12
+#NODE tStep 1 number 4 dof 528 unknown d value -2.6807e-14
 #NODE tStep 1 number 5 dof 1 unknown d value 1.14968e-07
 #NODE tStep 1 number 5 dof 2 unknown d value 7.27635e-06
 #NODE tStep 1 number 5 dof 3 unknown d value -0.000183212
@@ -100,30 +100,30 @@ EnrFrontDoNothing 1
 #NODE tStep 1 number 5 dof 16 unknown d value 0.000733062
 #NODE tStep 1 number 5 dof 17 unknown d value -2.65464e-07
 #NODE tStep 1 number 5 dof 18 unknown d value -7.85256e-08
-#NODE tStep 1 number 5 dof 500 unknown d value -0.000114968
-#NODE tStep 1 number 5 dof 501 unknown d value -0.00727635
-#NODE tStep 1 number 5 dof 502 unknown d value 0.183212
-#NODE tStep 1 number 5 dof 503 unknown d value -0.0117125
-#NODE tStep 1 number 5 dof 504 unknown d value -0.733062
-#NODE tStep 1 number 5 dof 505 unknown d value 0.000265464
-#NODE tStep 1 number 5 dof 506 unknown d value 0.0134299
-#NODE tStep 1 number 5 dof 507 unknown d value -0.00736822
-#NODE tStep 1 number 5 dof 508 unknown d value 0.529555
-#NODE tStep 1 number 5 dof 509 unknown d value -1.39659
-#NODE tStep 1 number 5 dof 510 unknown d value -0.739612
-#NODE tStep 1 number 5 dof 511 unknown d value -0.000688709
-#NODE tStep 1 number 5 dof 512 unknown d value -5.74838e-05
-#NODE tStep 1 number 5 dof 513 unknown d value -0.00363818
-#NODE tStep 1 number 5 dof 514 unknown d value 0.0916062
-#NODE tStep 1 number 5 dof 515 unknown d value -0.00585624
-#NODE tStep 1 number 5 dof 516 unknown d value -0.366531
-#NODE tStep 1 number 5 dof 517 unknown d value 0.00013234
-#NODE tStep 1 number 5 dof 523 unknown d value 0.00677241
-#NODE tStep 1 number 5 dof 524 unknown d value -4.59337e-05
-#NODE tStep 1 number 5 dof 525 unknown d value 0.173171
-#NODE tStep 1 number 5 dof 526 unknown d value -0.692436
-#NODE tStep 1 number 5 dof 527 unknown d value -0.00327501
-#NODE tStep 1 number 5 dof 528 unknown d value -0.000477479
+#NODE tStep 1 number 5 dof 500 unknown d value -0.000114968e-3
+#NODE tStep 1 number 5 dof 501 unknown d value -0.00727635e-3
+#NODE tStep 1 number 5 dof 502 unknown d value 0.183212e-3
+#NODE tStep 1 number 5 dof 503 unknown d value -0.0117125e-3
+#NODE tStep 1 number 5 dof 504 unknown d value -0.733062e-3
+#NODE tStep 1 number 5 dof 505 unknown d value 0.000265464e-3
+#NODE tStep 1 number 5 dof 506 unknown d value 0.0134299e-3
+#NODE tStep 1 number 5 dof 507 unknown d value -0.00736822e-3
+#NODE tStep 1 number 5 dof 508 unknown d value 0.529555e-3
+#NODE tStep 1 number 5 dof 509 unknown d value -1.39659e-3
+#NODE tStep 1 number 5 dof 510 unknown d value -0.739612e-3
+#NODE tStep 1 number 5 dof 511 unknown d value -0.000688709e-3
+#NODE tStep 1 number 5 dof 512 unknown d value -5.74838e-08
+#NODE tStep 1 number 5 dof 513 unknown d value -0.00363818e-3
+#NODE tStep 1 number 5 dof 514 unknown d value 0.0916062e-3
+#NODE tStep 1 number 5 dof 515 unknown d value -0.00585624e-3
+#NODE tStep 1 number 5 dof 516 unknown d value -0.366531e-3
+#NODE tStep 1 number 5 dof 517 unknown d value 0.00013234e-3
+#NODE tStep 1 number 5 dof 523 unknown d value 0.00677241e-3
+#NODE tStep 1 number 5 dof 524 unknown d value -4.59337e-08
+#NODE tStep 1 number 5 dof 525 unknown d value 0.173171e-3
+#NODE tStep 1 number 5 dof 526 unknown d value -0.692436e-3
+#NODE tStep 1 number 5 dof 527 unknown d value -0.00327501e-3
+#NODE tStep 1 number 5 dof 528 unknown d value -0.000477479e-3
 #NODE tStep 1 number 6 dof 1 unknown d value 4.27324e-08
 #NODE tStep 1 number 6 dof 2 unknown d value 7.36793e-06
 #NODE tStep 1 number 6 dof 3 unknown d value -0.00018677
@@ -131,35 +131,35 @@ EnrFrontDoNothing 1
 #NODE tStep 1 number 6 dof 16 unknown d value 0.000742143
 #NODE tStep 1 number 6 dof 17 unknown d value -2.9358e-07
 #NODE tStep 1 number 6 dof 18 unknown d value -1.03637e-06
-#NODE tStep 1 number 6 dof 500 unknown d value -4.27324e-05
-#NODE tStep 1 number 6 dof 501 unknown d value -0.00736793
-#NODE tStep 1 number 6 dof 502 unknown d value 0.18677
-#NODE tStep 1 number 6 dof 503 unknown d value -0.00479931
-#NODE tStep 1 number 6 dof 504 unknown d value -0.742143
-#NODE tStep 1 number 6 dof 505 unknown d value 0.00029358
-#NODE tStep 1 number 6 dof 506 unknown d value -4.27324e-05
-#NODE tStep 1 number 6 dof 507 unknown d value -0.00736793
-#NODE tStep 1 number 6 dof 508 unknown d value 0.18677
-#NODE tStep 1 number 6 dof 509 unknown d value -0.00479931
-#NODE tStep 1 number 6 dof 510 unknown d value -0.742143
-#NODE tStep 1 number 6 dof 511 unknown d value 0.000303943
-#NODE tStep 1 number 6 dof 512 unknown d value -2.13663e-05
-#NODE tStep 1 number 6 dof 513 unknown d value -0.00368396
-#NODE tStep 1 number 6 dof 514 unknown d value 0.0933852
-#NODE tStep 1 number 6 dof 515 unknown d value -0.00239966
-#NODE tStep 1 number 6 dof 516 unknown d value -0.371071
-#NODE tStep 1 number 6 dof 517 unknown d value 0.000141608
-#NODE tStep 1 number 6 dof 523 unknown d value 0.00958376
-#NODE tStep 1 number 6 dof 524 unknown d value 0.00124835
-#NODE tStep 1 number 6 dof 525 unknown d value 0.633677
-#NODE tStep 1 number 6 dof 526 unknown d value -1.13829
-#NODE tStep 1 number 6 dof 527 unknown d value -0.208829
-#NODE tStep 1 number 6 dof 528 unknown d value -0.00139776
-#NODE tStep 1 number 7 dof 524 unknown d value 2.281e-10
-#NODE tStep 1 number 7 dof 525 unknown d value -6.18429e-10
-#NODE tStep 1 number 7 dof 526 unknown d value -4.15672e-09
-#NODE tStep 1 number 7 dof 527 unknown d value -2.47831e-08
-#NODE tStep 1 number 7 dof 528 unknown d value -1.21667e-10
+#NODE tStep 1 number 6 dof 500 unknown d value -4.27324e-08
+#NODE tStep 1 number 6 dof 501 unknown d value -0.00736793e-3
+#NODE tStep 1 number 6 dof 502 unknown d value 0.18677e-3
+#NODE tStep 1 number 6 dof 503 unknown d value -0.00479931e-3
+#NODE tStep 1 number 6 dof 504 unknown d value -0.742143e-3
+#NODE tStep 1 number 6 dof 505 unknown d value 0.00029358e-3
+#NODE tStep 1 number 6 dof 506 unknown d value -4.27324e-08
+#NODE tStep 1 number 6 dof 507 unknown d value -0.00736793e-3
+#NODE tStep 1 number 6 dof 508 unknown d value 0.18677e-3
+#NODE tStep 1 number 6 dof 509 unknown d value -0.00479931e-3
+#NODE tStep 1 number 6 dof 510 unknown d value -0.742143e-3
+#NODE tStep 1 number 6 dof 511 unknown d value 0.000303943e-3
+#NODE tStep 1 number 6 dof 512 unknown d value -2.13663e-08
+#NODE tStep 1 number 6 dof 513 unknown d value -0.00368396e-3
+#NODE tStep 1 number 6 dof 514 unknown d value 0.0933852e-3
+#NODE tStep 1 number 6 dof 515 unknown d value -0.00239966e-3
+#NODE tStep 1 number 6 dof 516 unknown d value -0.371071e-3
+#NODE tStep 1 number 6 dof 517 unknown d value 0.000141608e-3
+#NODE tStep 1 number 6 dof 523 unknown d value 0.00958376e-3
+#NODE tStep 1 number 6 dof 524 unknown d value 0.00124835e-3
+#NODE tStep 1 number 6 dof 525 unknown d value 0.633677e-3
+#NODE tStep 1 number 6 dof 526 unknown d value -1.13829e-3
+#NODE tStep 1 number 6 dof 527 unknown d value -0.208829e-3
+#NODE tStep 1 number 6 dof 528 unknown d value -0.00139776e-3
+#NODE tStep 1 number 7 dof 524 unknown d value 2.281e-13
+#NODE tStep 1 number 7 dof 525 unknown d value -6.18429e-13
+#NODE tStep 1 number 7 dof 526 unknown d value -4.15672e-12
+#NODE tStep 1 number 7 dof 527 unknown d value -2.47831e-11
+#NODE tStep 1 number 7 dof 528 unknown d value -1.21667e-13
 #NODE tStep 1 number 8 dof 1 unknown d value 3.98138e-14
 #NODE tStep 1 number 8 dof 2 unknown d value 7.72493e-15
 #NODE tStep 1 number 8 dof 3 unknown d value 5.15592e-11
@@ -167,30 +167,30 @@ EnrFrontDoNothing 1
 #NODE tStep 1 number 8 dof 16 unknown d value 1.09395e-12
 #NODE tStep 1 number 8 dof 17 unknown d value 1.14656e-08
 #NODE tStep 1 number 8 dof 18 unknown d value 1.14656e-06
-#NODE tStep 1 number 8 dof 500 unknown d value -3.96408e-11
-#NODE tStep 1 number 8 dof 501 unknown d value -9.00883e-12
-#NODE tStep 1 number 8 dof 502 unknown d value -5.6327e-08
-#NODE tStep 1 number 8 dof 503 unknown d value -4.01491e-09
-#NODE tStep 1 number 8 dof 504 unknown d value -1.09395e-09
-#NODE tStep 1 number 8 dof 505 unknown d value -1.14656e-05
-#NODE tStep 1 number 8 dof 506 unknown d value 0.0138652
-#NODE tStep 1 number 8 dof 507 unknown d value -0.000152901
-#NODE tStep 1 number 8 dof 508 unknown d value 0.349304
-#NODE tStep 1 number 8 dof 509 unknown d value -1.39164
-#NODE tStep 1 number 8 dof 510 unknown d value -0.00558678
-#NODE tStep 1 number 8 dof 511 unknown d value -0.001002
-#NODE tStep 1 number 8 dof 512 unknown d value -0.0025559
-#NODE tStep 1 number 8 dof 513 unknown d value -0.00356834
-#NODE tStep 1 number 8 dof 514 unknown d value 0.275754
-#NODE tStep 1 number 8 dof 515 unknown d value -0.256886
-#NODE tStep 1 number 8 dof 516 unknown d value -0.369363
-#NODE tStep 1 number 8 dof 517 unknown d value 0.000167326
-#NODE tStep 1 number 8 dof 523 unknown d value 0.00693258
-#NODE tStep 1 number 8 dof 524 unknown d value -7.64506e-05
-#NODE tStep 1 number 8 dof 525 unknown d value 0.174652
-#NODE tStep 1 number 8 dof 526 unknown d value -0.69582
-#NODE tStep 1 number 8 dof 527 unknown d value -0.0027934
-#NODE tStep 1 number 8 dof 528 unknown d value -0.000489534
+#NODE tStep 1 number 8 dof 500 unknown d value -3.96408e-14
+#NODE tStep 1 number 8 dof 501 unknown d value -9.00883e-15
+#NODE tStep 1 number 8 dof 502 unknown d value -5.6327e-11
+#NODE tStep 1 number 8 dof 503 unknown d value -4.01491e-12
+#NODE tStep 1 number 8 dof 504 unknown d value -1.09395e-12
+#NODE tStep 1 number 8 dof 505 unknown d value -1.14656e-08
+#NODE tStep 1 number 8 dof 506 unknown d value 0.0138652e-3
+#NODE tStep 1 number 8 dof 507 unknown d value -0.000152901e-3
+#NODE tStep 1 number 8 dof 508 unknown d value 0.349304e-3
+#NODE tStep 1 number 8 dof 509 unknown d value -1.39164e-3
+#NODE tStep 1 number 8 dof 510 unknown d value -0.00558678e-3
+#NODE tStep 1 number 8 dof 511 unknown d value -0.001002e-3
+#NODE tStep 1 number 8 dof 512 unknown d value -0.0025559e-3
+#NODE tStep 1 number 8 dof 513 unknown d value -0.00356834e-3
+#NODE tStep 1 number 8 dof 514 unknown d value 0.275754e-3
+#NODE tStep 1 number 8 dof 515 unknown d value -0.256886e-3
+#NODE tStep 1 number 8 dof 516 unknown d value -0.369363e-3
+#NODE tStep 1 number 8 dof 517 unknown d value 0.000167326e-3
+#NODE tStep 1 number 8 dof 523 unknown d value 0.00693258e-3
+#NODE tStep 1 number 8 dof 524 unknown d value -7.64506e-08
+#NODE tStep 1 number 8 dof 525 unknown d value 0.174652e-3
+#NODE tStep 1 number 8 dof 526 unknown d value -0.69582e-3
+#NODE tStep 1 number 8 dof 527 unknown d value -0.0027934e-3
+#NODE tStep 1 number 8 dof 528 unknown d value -0.000489534e-3
 #NODE tStep 1 number 9 dof 1 unknown d value 4.60636e-08
 #NODE tStep 1 number 9 dof 2 unknown d value 1.44245e-05
 #NODE tStep 1 number 9 dof 3 unknown d value -0.000741161
@@ -198,28 +198,28 @@ EnrFrontDoNothing 1
 #NODE tStep 1 number 9 dof 16 unknown d value 0.00147579
 #NODE tStep 1 number 9 dof 17 unknown d value -1.09064e-06
 #NODE tStep 1 number 9 dof 18 unknown d value 8.52506e-08
-#NODE tStep 1 number 9 dof 500 unknown d value -4.60636e-05
-#NODE tStep 1 number 9 dof 501 unknown d value -0.0144245
-#NODE tStep 1 number 9 dof 502 unknown d value 0.741161
-#NODE tStep 1 number 9 dof 503 unknown d value -0.00738378
-#NODE tStep 1 number 9 dof 504 unknown d value -1.47579
-#NODE tStep 1 number 9 dof 505 unknown d value 0.00109064
-#NODE tStep 1 number 9 dof 506 unknown d value 0.0266754
-#NODE tStep 1 number 9 dof 507 unknown d value -0.0151898
-#NODE tStep 1 number 9 dof 508 unknown d value 2.1329
-#NODE tStep 1 number 9 dof 509 unknown d value -2.78284
-#NODE tStep 1 number 9 dof 510 unknown d value -1.48702
-#NODE tStep 1 number 9 dof 511 unknown d value -0.00277564
-#NODE tStep 1 number 9 dof 512 unknown d value -2.30318e-05
-#NODE tStep 1 number 9 dof 513 unknown d value -0.00721224
-#NODE tStep 1 number 9 dof 514 unknown d value 0.37058
-#NODE tStep 1 number 9 dof 515 unknown d value -0.00369189
-#NODE tStep 1 number 9 dof 516 unknown d value -0.737893
-#NODE tStep 1 number 9 dof 517 unknown d value 0.000545747
-#NODE tStep 1 number 9 dof 523 unknown d value 0.0133607
-#NODE tStep 1 number 9 dof 524 unknown d value -0.000382685
-#NODE tStep 1 number 9 dof 525 unknown d value 0.695869
-#NODE tStep 1 number 9 dof 526 unknown d value -1.38773
-#NODE tStep 1 number 9 dof 527 unknown d value -0.00561471
-#NODE tStep 1 number 9 dof 528 unknown d value -0.00193271
+#NODE tStep 1 number 9 dof 500 unknown d value -4.60636e-08
+#NODE tStep 1 number 9 dof 501 unknown d value -0.0144245e-3
+#NODE tStep 1 number 9 dof 502 unknown d value 0.741161e-3
+#NODE tStep 1 number 9 dof 503 unknown d value -0.00738378e-3
+#NODE tStep 1 number 9 dof 504 unknown d value -1.47579e-3
+#NODE tStep 1 number 9 dof 505 unknown d value 0.00109064e-3
+#NODE tStep 1 number 9 dof 506 unknown d value 0.0266754e-3
+#NODE tStep 1 number 9 dof 507 unknown d value -0.0151898e-3
+#NODE tStep 1 number 9 dof 508 unknown d value 2.1329e-3
+#NODE tStep 1 number 9 dof 509 unknown d value -2.78284e-3
+#NODE tStep 1 number 9 dof 510 unknown d value -1.48702e-3
+#NODE tStep 1 number 9 dof 511 unknown d value -0.00277564e-3
+#NODE tStep 1 number 9 dof 512 unknown d value -2.30318e-08
+#NODE tStep 1 number 9 dof 513 unknown d value -0.00721224e-3
+#NODE tStep 1 number 9 dof 514 unknown d value 0.37058e-3
+#NODE tStep 1 number 9 dof 515 unknown d value -0.00369189e-3
+#NODE tStep 1 number 9 dof 516 unknown d value -0.737893e-3
+#NODE tStep 1 number 9 dof 517 unknown d value 0.000545747e-3
+#NODE tStep 1 number 9 dof 523 unknown d value 0.0133607e-3
+#NODE tStep 1 number 9 dof 524 unknown d value -0.000382685e-3
+#NODE tStep 1 number 9 dof 525 unknown d value 0.695869e-3
+#NODE tStep 1 number 9 dof 526 unknown d value -1.38773e-3
+#NODE tStep 1 number 9 dof 527 unknown d value -0.00561471e-3
+#NODE tStep 1 number 9 dof 528 unknown d value -0.00193271e-3
 #%END_CHECK%

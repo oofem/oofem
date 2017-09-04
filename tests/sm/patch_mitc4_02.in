@@ -1,6 +1,6 @@
 patch100_mitc4_02.out
 Patch test of mitc4shell elements -> pure compression in x direction
-LinearStatic nsteps 1 nmodules 1
+StaticStructural nsteps 1 nmodules 1
 errorcheck
 domain 3dshell
 OutputManager tstep_all dofman_all element_all

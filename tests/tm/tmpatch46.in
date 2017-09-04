@@ -1,6 +1,6 @@
 tmpatch46.out
 Patch test of IsoHeatMat with temperature-dependent material parameters
-TransientTransport nsteps 50 deltat 100.0 rtolv 1.e-4 alpha 0.6 lstype 1 lstol 1e-5 lsiter 200 lsprecond 1 renumber 1 exportfields 1 5 nmodules 1
+TransientTransport nsteps 50 deltat 100.0 rtolf 1.e-6 alpha 0.6 lstype 1 lstol 1e-6 lsiter 200 lsprecond 1 renumber 1 exportfields 1 5 nmodules 1
 #vtkxml tstep_all domain_all primvars 1 6 vars 5 37 56 67 68 44 stype 1
 errorcheck
 domain HeatTransfer
@@ -35,8 +35,8 @@ Set 1 elementranges {(1 1)}
 Set 2 elementboundaries 2 1 6
 #
 #%BEGIN_CHECK%
-#NODE tStep 25 number 1 dof 10 unknown d value 3.74825799e+01
-#NODE tStep 50 number 1 dof 10 unknown d value 7.11168121e+01
+#NODE tStep 25 number 1 dof 10 unknown d value 3.74825883e+01
+#NODE tStep 50 number 1 dof 10 unknown d value 7.11157261e+01
 #%END_CHECK%
 
 

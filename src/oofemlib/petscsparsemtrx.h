@@ -79,12 +79,14 @@ public:
     virtual void times(double x);
     virtual void add(double x, SparseMtrx &m);
     virtual void addDiagonal(double x, FloatArray &m);
+    virtual int buildInternalStructure(EngngModel *eModel, int n, int m, const IntArray &I, const IntArray &J);
     virtual int buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &s);
     virtual int buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
     virtual int assemble(const IntArray &loc, const FloatMatrix &mat);
     virtual int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat);
     virtual int assembleBegin();
     virtual int assembleEnd();
+    virtual SparseMtrx *giveSubMatrix(const IntArray &rows, const IntArray &cols);
     virtual bool canBeFactorized() const { return false; }
     virtual SparseMtrx *factorized() { return NULL; }
     virtual FloatArray *backSubstitutionWith(FloatArray &y) const { return NULL; }

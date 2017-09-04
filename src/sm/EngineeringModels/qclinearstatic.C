@@ -475,7 +475,7 @@ QClinearStatic :: generateInterpolationMesh(Domain *d)
     const char *t3dInFile; //char *t3dInFile = "interpolationMesh_t3d.in";
     const char *t3dOutFile; //char *t3dOutFile = "interpolationMesh_t3d.out";
 
-    std :: __cxx11 :: string temp;
+    std :: string temp;
     temp = t3dFileName;
     temp.append(".oofem.t3d.out");
     t3dOutFile = temp.c_str();

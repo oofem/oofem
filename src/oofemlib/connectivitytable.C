@@ -60,7 +60,7 @@ ConnectivityTable :: instanciateConnectivityTable()
         return;                     // already initialized
     }
 
-    OOFEM_LOG_INFO("ConnectivityTable: initializing\n");
+//    OOFEM_LOG_INFO("ConnectivityTable: initializing\n");
 
     for ( auto &elem : domain->giveElements() ) {
         int nnodes = elem->giveNumberOfDofManagers();

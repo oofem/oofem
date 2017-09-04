@@ -33,7 +33,7 @@
  */
 
 #ifndef steelrelaxmat_h
-#define steelrealxmat_h
+#define steelrelaxmat_h
 
 #include "../sm/Materials/structuralmaterial.h"
 #include "../sm/Materials/structuralms.h"

@@ -38,6 +38,7 @@
 #include "set.h"
 #include "feinterpol.h"
 #include "element.h"
+#include "mathfem.h"
 
 namespace oofem {
 
@@ -68,7 +69,8 @@ void PrescribedGradientHomogenization :: setPrescribedGradientVoigt(const FloatA
         this->mGradient.resize(2, 2);
         this->mGradient.at(1, 1) = t.at(1);
         this->mGradient.at(2, 2) = t.at(2);
-        this->mGradient.at(1, 2) = this->mGradient.at(2, 1) = t.at(3);
+        // In voigt form, assuming the use of gamma_12 instead of eps_12
+        this->mGradient.at(1, 2) = this->mGradient.at(2, 1) = t.at(3) * 0.5;
     } else if ( n == 6 ) { // Then 3D
         this->mGradient.resize(3, 3);
         this->mGradient.at(1, 1) = t.at(1);
@@ -103,7 +105,11 @@ void PrescribedGradientHomogenization :: giveGradientVoigt(FloatArray &oGradient
         };
         break;
     case 3:
-        OOFEM_ERROR("PrescribedGradientHomogenization :: giveGradientVoigt() not implemented for 3 rows.\n")
+        // TODO: Fix this properly.
+        oGradient = {
+            mGradient.at(1, 1), mGradient.at(2, 2), mGradient.at(1, 2), mGradient.at(2, 1)
+        };
+//        OOFEM_ERROR("PrescribedGradientHomogenization :: giveGradientVoigt() not implemented for 3 rows.\n")
         break;
     }
 }

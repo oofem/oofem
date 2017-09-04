@@ -46,6 +46,7 @@
 #include "linesearch.h"
 
 #include <memory>
+#include <map>
 
 ///@name Input fields for NRSolver
 //@{
@@ -65,6 +66,9 @@
 #define _IFT_NRSolver_calcstiffbeforeres "calcstiffbeforeres"
 #define _IFT_NRSolver_constrainedNRalpha "constrainednralpha"
 #define _IFT_NRSolver_constrainedNRminiter "constrainednrminiter"
+#define _IFT_NRSolver_maxinc "maxinc"
+#define _IFT_NRSolver_forceScale "forcescale"
+#define _IFT_NRSolver_forceScaleDofs "forcescaledofs"
 //@}
 
 namespace oofem {
@@ -95,7 +99,6 @@ protected:
 
     int nsmax, minIterations;
     double minStepLength;
-    int solved;
     nrsolver_ModeType NR_Mode, NR_OldMode;
     int NR_ModeTick;
     int MANRMSteps;
@@ -149,6 +152,11 @@ protected:
     ///@todo This doesn't check units, it is nonsense and must be corrected / Mikael
     FloatArray forceErrVec;
     FloatArray forceErrVecOld;
+
+    /// Optional user supplied scale of forces used in convergence check.
+    std :: map<int, double> dg_forceScale;
+
+    double maxIncAllowed;
 public:
     NRSolver(Domain * d, EngngModel * m);
     virtual ~NRSolver();

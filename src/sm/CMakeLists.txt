@@ -87,7 +87,11 @@ set (sm_element
     Elements/tria1platesubsoil.C
     Elements/linedistributedspring.C
     Elements/trwarp.C
+    Elements/PlaneStress/basicelement.C
     Elements/nodalspringelement.C
+    Elements/structural2delement.C
+    Elements/structural3delement.C
+    #Elements/phasefieldelement.C
     #qplanstrssphf.C
     )
 
@@ -96,7 +100,9 @@ set (sm_interface_elements
     Elements/Interfaces/structuralinterfaceelement.C
     Elements/Interfaces/intelpoint.C
     Elements/Interfaces/intelline1.C
+    Elements/Interfaces/intelline1intpen.C
     Elements/Interfaces/intelline2.C
+    Elements/Interfaces/intelline2intpen.C
     Elements/Interfaces/intelsurftr1.C
     Elements/Interfaces/Deprecated/interfaceelement1d.C
     Elements/Interfaces/Deprecated/interfaceelem2dlin.C
@@ -123,7 +129,6 @@ set (sm_emodel
     EngineeringModels/staticstructural.C
     EngineeringModels/linearstatic.C
     EngineeringModels/nlinearstatic.C
-    EngineeringModels/xfemstatic.C
     EngineeringModels/nlineardynamic.C
     EngineeringModels/eigenvaluedynamic.C
     EngineeringModels/linearstability.C
@@ -282,9 +287,13 @@ set (sm_xfem
     xfem/enrichmentitems/delamination.C
     xfem/enrichmentitems/shellcrack.C
     xfem/propagationlaws/plhoopstresscirc.C
+    xfem/propagationlaws/plprincipalstrain.C
     xfem/propagationlaws/plmaterialforce.C
+    xfem/propagationlaws/plczdamageradius.C
     xfem/xfemstructuremanager.C
     xfem/matforceevaluator.C
+    xfem/nucleationcriteria/ncprincipalstress.C
+    xfem/nucleationcriteria/ncprincipalstrain.C
     EngineeringModels/xfemsolverinterface.C
     )
 

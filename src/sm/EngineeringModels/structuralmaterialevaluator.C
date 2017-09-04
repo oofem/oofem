@@ -67,6 +67,7 @@ IRResultType StructuralMaterialEvaluator :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, this->cmpntFunctions, _IFT_StructuralMaterialEvaluator_componentFunctions);
     IR_GIVE_FIELD(ir, this->sControl, _IFT_StructuralMaterialEvaluator_stressControl);
+    this->keepTangent = ir->hasField(_IFT_StructuralMaterialEvaluator_keepTangent);
 
     tolerance = 1.0;
     if ( this->sControl.giveSize() > 0 ) {
@@ -74,6 +75,8 @@ IRResultType StructuralMaterialEvaluator :: initializeFrom(InputRecord *ir)
     }
 
     IR_GIVE_FIELD(ir, this->vars, _IFT_StructuralMaterialEvaluator_outputVariables);
+
+    this->suppressOutput = true;
 
     // Compute the strain control (everything not controlled by stress)
     for ( int i = 1; i <= 6; ++i ) {
@@ -135,24 +138,43 @@ void StructuralMaterialEvaluator :: solveYourself()
                 stressC.at(j) = d->giveFunction( cmpntFunctions.at(p) )->evaluateAtTime( tStep->giveIntrinsicTime() );
             }
 
+            //strain.add(-100, {6.27e-06,  6.27e-06, 6.27e-06, 0, 0, 0});
             for ( int iter = 1; iter < maxiter; iter++ ) {
+#if 0
+                // Debugging:
+                mat->give3dMaterialStiffnessMatrix(tangent, TangentStiffness, gp, tStep);
+                tangent.printYourself("# tangent");
+                
+                strain.zero();
+                mat->giveRealStressVector_3d(stress, gp, strain, tStep);
+                FloatArray strain2;
+                tangent.solveForRhs(stress, strain2);
+                strain2.printYourself("# thermal expansion");
+                break;
+#endif
+
+                strain.printYourself("Macro strain guess");
                 mat->giveRealStressVector_3d(stress, gp, strain, tStep);
                 for ( int j = 1; j <= sControl.giveSize(); ++j ) {
                     res.at(j) = stressC.at(j) - stress.at( sControl.at(j) );
                 }
 
-                OOFEM_LOG_RELEVANT( "Time step: %d, Material %d, Iteration: %d,  Residual = %e\n", istep, imat, iter, res.computeNorm() );
+                OOFEM_LOG_INFO("*** Time step: %d (t = %.2e), Material %d, Iteration: %d,  Residual = %e (tolerance %.2e)\n", 
+                              istep, tStep->giveIntrinsicTime(), imat, iter, res.computeNorm(), tolerance);
+
                 if ( res.computeNorm() <= tolerance ) {
                     break;
-                }
+                } else {
+                    if ( tangent.giveNumberOfRows() == 0 || !keepTangent ) {
+                        mat->give3dMaterialStiffnessMatrix(tangent, TangentStiffness, gp, tStep);
+                    }
 
-                mat->give3dMaterialStiffnessMatrix(tangent, TangentStiffness, gp, tStep);
-                if ( res.giveSize() > 0 ) {
                     // Pick out the stress-controlled part;
                     reducedTangent.beSubMatrixOf(tangent, sControl, sControl);
 
                     // Update stress-controlled part of the strain
                     reducedTangent.solveForRhs(res, deltaStrain);
+                    //deltaStrain.printYourself("deltaStrain");
                     for ( int j = 1; j <= sControl.giveSize(); ++j ) {
                         strain.at( sControl.at(j) ) += deltaStrain.at(j);
                     }
@@ -178,7 +200,7 @@ void StructuralMaterialEvaluator :: solveYourself()
 
 int StructuralMaterialEvaluator :: checkConsistency()
 {
-    Domain *d =  this->giveDomain(1);
+    Domain *d = this->giveDomain(1);
     for ( auto &mat : d->giveMaterials() ) {
         if ( !dynamic_cast< StructuralMaterial * >( mat.get() ) ) {
             OOFEM_LOG_ERROR("Material %d is not a StructuralMaterial", mat->giveNumber());

@@ -108,7 +108,6 @@ VariableCrossSection :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, directorxExpr, _IFT_SimpleCrossSection_directorx);
     }
 
-
     directoryExpr.setValue(0.0);
     if ( ir->hasField(_IFT_SimpleCrossSection_directory) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, directoryExpr, _IFT_SimpleCrossSection_directory);

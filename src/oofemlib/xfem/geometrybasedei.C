@@ -50,6 +50,9 @@
 #include "xfem/propagationlaw.h"
 #include "xfem/enrichmentfronts/enrichmentfrontdonothing.h"
 
+#include "engngm.h"
+#include "timestep.h"
+
 #include <string>
 #include <algorithm>
 #include <set>
@@ -153,9 +156,24 @@ int GeometryBasedEI :: instanciateYourself(DataReader *dr)
     this->updateNodeEnrMarker(* xMan);
 
 
-    writeVtkDebug();
+//    writeVtkDebug();
 
     return 1;
+}
+
+void GeometryBasedEI :: updateDofIdPool()
+{
+    // Set start of the enrichment dof pool for the given EI
+    int xDofPoolAllocSize = this->giveDofPoolSize();
+    this->startOfDofIdPool = this->giveDomain()->giveNextFreeDofID(xDofPoolAllocSize);
+    this->endOfDofIdPool = this->startOfDofIdPool + xDofPoolAllocSize - 1;
+
+//    printf("startOfDofIdPool: %d\n", startOfDofIdPool);
+//    printf("endOfDofIdPool: %d\n", endOfDofIdPool);
+
+    XfemManager *xMan = this->giveDomain()->giveXfemManager();
+    //    mpEnrichmentDomain->CallNodeEnrMarkerUpdate(* this, * xMan);
+    this->updateNodeEnrMarker(* xMan);
 }
 
 void GeometryBasedEI :: appendInputRecords(DynamicDataReader &oDR)
@@ -168,6 +186,9 @@ void GeometryBasedEI :: appendInputRecords(DynamicDataReader &oDR)
 
     if ( mInheritBoundaryConditions ) {
         eiRec->setField(_IFT_EnrichmentItem_inheritbc);
+    }
+    if ( mInheritOrderedBoundaryConditions ) {
+        eiRec->setField(_IFT_EnrichmentItem_inheritorderedbc);
     }
 
     oDR.insertInputRecord(DataReader :: IR_enrichItemRec, eiRec);
@@ -222,7 +243,7 @@ void GeometryBasedEI :: updateNodeEnrMarker(XfemManager &ixFemMan)
 
     mNodeEnrMarkerMap.clear();
     TipInfo tipInfoStart, tipInfoEnd;
-    mpBasicGeometry->giveTips(tipInfoStart, tipInfoEnd);
+    bool foundTips = mpBasicGeometry->giveTips(tipInfoStart, tipInfoEnd);
 
 
     FloatArray center;
@@ -230,7 +251,7 @@ void GeometryBasedEI :: updateNodeEnrMarker(XfemManager &ixFemMan)
     giveBoundingSphere(center, radius);
 
 
-    std :: set< int >elList;
+    IntArray elList;
     localizer->giveAllElementsWithNodesWithinBox(elList, center, radius);
 
     // Loop over elements and use the level sets to mark nodes belonging to completely cut elements.
@@ -323,9 +344,11 @@ void GeometryBasedEI :: updateNodeEnrMarker(XfemManager &ixFemMan)
     }
 
     // Mark tip nodes for special treatment.
-    XfemManager *xMan = this->giveDomain()->giveXfemManager();
-    mpEnrichmentFrontStart->MarkNodesAsFront(mNodeEnrMarkerMap, * xMan, mLevelSetNormalDirMap, mLevelSetTangDirMap, tipInfoStart);
-    mpEnrichmentFrontEnd->MarkNodesAsFront(mNodeEnrMarkerMap, * xMan, mLevelSetNormalDirMap, mLevelSetTangDirMap, tipInfoEnd);
+    if(foundTips) {
+		XfemManager *xMan = this->giveDomain()->giveXfemManager();
+		mpEnrichmentFrontStart->MarkNodesAsFront(mNodeEnrMarkerMap, * xMan, mLevelSetNormalDirMap, mLevelSetTangDirMap, tipInfoStart);
+		mpEnrichmentFrontEnd->MarkNodesAsFront(mNodeEnrMarkerMap, * xMan, mLevelSetNormalDirMap, mLevelSetTangDirMap, tipInfoEnd);
+    }
 }
 
 void GeometryBasedEI :: updateLevelSets(XfemManager &ixFemMan)
@@ -923,27 +946,13 @@ void GeometryBasedEI :: computeIntersectionPoints(std :: vector< FloatArray > &o
 
 void GeometryBasedEI :: writeVtkDebug() const
 {
-#if 0
     // For debugging only
-    if ( mpEnrichmentDomain->getVtkDebug() ) {
-        int tStepInd = 0; //this->domain->giveEngngModel()->giveCurrentStep()->giveNumber();
-
-        EnrichmentDomain_BG *enrDomBG = dynamic_cast< EnrichmentDomain_BG * >( mpEnrichmentDomain );
-
-        if ( enrDomBG != NULL ) {
-            PolygonLine *pl = dynamic_cast< PolygonLine * >( enrDomBG->bg );
-            if ( pl != NULL ) {
-                pl->printVTK(tStepInd, number);
-            }
-        }
-    }
-#endif
-
-    //    PolygonLine *pl = dynamic_cast< PolygonLine * >( this->mpBasicGeometry );
-    //    if(pl != NULL) {
-    //        int tStepInd = 0;
-    //        pl->printVTK(tStepInd, number);
-    //    }
+	int tStepInd = 0;
+	TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep(false);
+	if(tStep != NULL) {
+		tStepInd = tStep->giveNumber();
+	}
+    this->mpBasicGeometry->printVTK(tStepInd, number);
 }
 
 void GeometryBasedEI :: giveSubPolygon(std :: vector< FloatArray > &oPoints, const double &iXiStart, const double &iXiEnd) const
@@ -995,6 +1004,10 @@ void GeometryBasedEI :: propagateFronts(bool &oFrontsHavePropagated)
     }
 #endif
     updateGeometry();
+
+//    if( domain->giveEngngModel()->giveProblemScale() == macroScale ) {
+//   	writeVtkDebug();
+//    }
 }
 
 bool GeometryBasedEI :: giveElementTipCoord(FloatArray &oCoord, double &oArcPos,  Element &iEl, const FloatArray &iElCenter) const

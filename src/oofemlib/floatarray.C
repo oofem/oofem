@@ -47,6 +47,9 @@
 #include <memory>
 #include <numeric>
 #include <cmath>
+#include <iostream>
+#include <fstream>
+#include <iomanip>
 
 #define FAST_RESIZE(newsize) \
     if ( (newsize) < this->giveSize() ) { \
@@ -762,6 +765,23 @@ void FloatArray :: printYourself(const std::string &name) const
     }
 
     printf("\n");
+}
+
+void FloatArray :: printYourselfToFile(const std::string filename, const bool showDimensions) const
+// Prints the receiver to file.
+{
+    std :: ofstream arrayfile (filename);
+    if (arrayfile.is_open()) {
+        if (showDimensions)
+            arrayfile << "FloatArray of size : " << this->giveSize() << "\n";
+        arrayfile << std::scientific << std::right << std::setprecision(3);
+        for ( double x: *this ) {
+            arrayfile << std::setw(10) << x << "\t";
+        }
+        arrayfile.close();
+    } else {
+        OOFEM_ERROR("Failed to write to file");
+    }
 }
 
 void FloatArray :: pY() const

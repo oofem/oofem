@@ -12,10 +12,10 @@ node 3 coords 3 0. 3. 0. bc 3 1 0 1
 node 4 coords 3 0. 0. 6. bc 3 1 1 2
 node 5 coords 3 3. 0. 6. bc 3 0 1 2
 node 6 coords 3 0. 3. 6. bc 3 1 0 2
-LTRSpace  1 nodes 4 1 2 3 4 crosssect 1 mat 1 
+LTRSpace  1 nodes 4 1 2 3 4 crosssect 1 mat 1
 LTRSpace  2 nodes 4 4 5 2 3 crosssect 1 mat 1
 LTRSpace  3 nodes 4 4 6 5 3 crosssect 1 mat 1
-SimpleCS 1 
+SimpleCS 1 material 1
 idm1 1 E 1.0 n 0.18 e0 2.0 gf 36. damlaw 1  talpha 0.0 d 0.0
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0 
 BoundaryCondition 2 loadTimeFunction 2 prescribedvalue 6.0 

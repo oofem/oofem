@@ -221,6 +221,7 @@ public:
     virtual double giveCurrentStepLength() { return deltaL; }
     virtual void setStepLength(double s) { deltaL = s; }
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual bool referenceLoad() const { return true; }
     virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
     virtual void setDomain(Domain *d) {

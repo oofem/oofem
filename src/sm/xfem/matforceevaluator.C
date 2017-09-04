@@ -48,12 +48,12 @@
 
 namespace oofem {
 
-MaterialForceEvaluator::MaterialForceEvaluator() {
-
+MaterialForceEvaluator::MaterialForceEvaluator()
+{
 }
 
-MaterialForceEvaluator::~MaterialForceEvaluator() {
-
+MaterialForceEvaluator::~MaterialForceEvaluator()
+{
 }
 
 void MaterialForceEvaluator::computeMaterialForce(FloatArray &oMatForce, Domain &iDomain, const TipInfo &iTipInfo, TimeStep *tStep, const double &iRadius)
@@ -64,21 +64,20 @@ void MaterialForceEvaluator::computeMaterialForce(FloatArray &oMatForce, Domain 
 
     // Fetch elements within a specified volume around the crack tip
     SpatialLocalizer *localizer = iDomain.giveSpatialLocalizer();
-    std :: set< int > elList;
+    IntArray elList;
     localizer->giveAllElementsWithNodesWithinBox(elList, iTipInfo.mGlobalCoord, iRadius);
 
-    if( elList.empty() ) {
+    if ( elList.isEmpty() ) {
         FloatArray lcoords, closest;
         Element *closestEl = localizer->giveElementClosestToPoint(lcoords, closest, iTipInfo.mGlobalCoord);
 
-        if(closestEl != NULL) {
-            if( closest.distance(iTipInfo.mGlobalCoord) < 1.0e-9 ) {
+        if ( closestEl != NULL ) {
+            if ( closest.distance(iTipInfo.mGlobalCoord) < 1.0e-9 ) {
                 int elInd = closestEl->giveGlobalNumber();
                 int elPlaceInArray = iDomain.giveElementPlaceInArray(elInd);
-                elList.insert( elPlaceInArray );
+                elList.insertSortedOnce( elPlaceInArray );
             }
-        }
-        else {
+        } else {
             printf("Could not find closest element.\n");
         }
     }
@@ -86,12 +85,12 @@ void MaterialForceEvaluator::computeMaterialForce(FloatArray &oMatForce, Domain 
     // Compute phi in nodes
     std::unordered_map<int, double> weightInNodes;
 
-    for( int elIndex : elList ) {
+    for ( int elIndex : elList ) {
 //        int elPlaceInArray = iDomain.giveElementPlaceInArray(elIndex);
         Element *el = iDomain.giveElement(elIndex);
 
         const IntArray &elNodes = el->giveDofManArray();
-        for(int nodeInd : elNodes) {
+        for ( int nodeInd : elNodes ) {
             DofManager *dMan = iDomain.giveDofManager(nodeInd);
 
             weightInNodes[nodeInd] = computeWeightFunctionInPoint( *(dMan->giveCoordinates()), iTipInfo.mGlobalCoord, iRadius);
@@ -104,13 +103,13 @@ void MaterialForceEvaluator::computeMaterialForce(FloatArray &oMatForce, Domain 
 //        int elPlaceInArray = iDomain.giveElementPlaceInArray(elIndex);
         NLStructuralElement *el = dynamic_cast<NLStructuralElement*>( iDomain.giveElement(elIndex) );
 
-        if(el == NULL) {
+        if ( el == NULL ) {
             OOFEM_ERROR("Could not cast to NLStructuralElement.")
         }
 
 //        const IntArray &elNodes = el->giveDofManArray();
 
-        for(GaussPoint *gp : *(el->giveDefaultIntegrationRulePtr()) ) {
+        for ( auto &gp : *(el->giveDefaultIntegrationRulePtr()) ) {
 
             FloatArray gradWeight;
             const FloatArray &pos = gp->giveGlobalCoordinates();
@@ -141,7 +140,7 @@ void MaterialForceEvaluator::computeMaterialForce(FloatArray &oMatForce, Domain 
 
             // Compute Eshelby stress
             StructuralCrossSection *cs = dynamic_cast<StructuralCrossSection*>( gp->giveCrossSection() );
-            if(cs != NULL) {
+            if (cs != NULL) {
 
                 FloatArray Fv;
                 el->computeDeformationGradientVector(Fv, gp, tStep);
@@ -158,6 +157,7 @@ void MaterialForceEvaluator::computeMaterialForce(FloatArray &oMatForce, Domain 
                 FloatMatrix eshelbyStress2D;
                 eshelbyStress2D.beSubMatrixOf(eshelbyStress3D, 1, 2, 1, 2);
 
+//                printf("eshelbyStress2D: "); eshelbyStress2D.printYourself();
 
                 if( computeWeightFunctionInPoint( pos, iTipInfo.mGlobalCoord, iRadius) > 0.0 ) {
                     // Add contribution

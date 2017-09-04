@@ -1,6 +1,6 @@
 beam2d_5.out
 Timoshenko Cantilever beam - test 
-LinearStatic nsteps 1 nmodules 1
+StaticStructural nsteps 1 nmodules 1
 errorcheck
 domain 2dBeam
 OutputManager tstep_all dofman_all element_all

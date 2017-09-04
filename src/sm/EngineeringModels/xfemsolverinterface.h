@@ -52,14 +52,7 @@ public:
     virtual ~XfemSolverInterface();
 
     void propagateXfemInterfaces(TimeStep *tStep, StructuralEngngModel &ioEngngModel, bool iRecomputeStepAfterCrackProp);
-    void mapVariables(TimeStep *tStep, StructuralEngngModel &ioEngngModel);
 
-#if 0
-    void mapVariables(TimeStep *tStep, StaticStructural &ioEngngModel);
-#endif
-
-    void xfemUpdatePrimaryField(StructuralEngngModel &ioEngngModel, TimeStep *tStep, const FloatArray &iNewSol) { }
-    void xfemUpdatePrimaryField(StaticStructural &ioEngngModel, TimeStep *tStep, const FloatArray &iNewSol);
 
 protected:
     bool mNeedsVariableMapping;

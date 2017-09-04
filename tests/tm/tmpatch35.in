@@ -1,9 +1,7 @@
 tmpatch35.out
 Patch test of Quad1_ht elements 
 #StationaryProblem nsteps 1 
-#NonStationaryProblem nsteps 200 deltat 600000.0 alpha 0.5
-nltransienttransportproblem nsteps 200 deltat 600000.0 rtol 0.001 alpha 0.5 nsmax 300 lumpedcapa nmodules 1
-#transienttransport nsteps 200 deltat 600000.0 alpha 0.5 lumped nmodules 1
+transienttransport nsteps 200 deltat 600000.0 alpha 0.5 lumped miniter 1 nmodules 1
 errorcheck
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all

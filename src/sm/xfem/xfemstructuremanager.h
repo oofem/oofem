@@ -43,6 +43,9 @@
 //@{
 #define _IFT_XfemStructureManager_Name "xfemstructuremanager"
 #define _IFT_XfemStructureManager_splitCracks "splitcracks"
+#define _IFT_XfemStructureManager_nonstandardCZ "nonstandardcz"
+#define _IFT_XfemStructureManager_minCrackLength "mincracklength"
+#define _IFT_XfemStructureManager_crackMergeTol "crackmergetol"
 //@}
 
 namespace oofem {
@@ -70,6 +73,8 @@ public:
     virtual const char *giveClassName() const { return "XfemStructureManager"; }
     virtual const char *giveInputRecordName() const { return _IFT_XfemStructureManager_Name; }
 
+    virtual void propagateFronts(bool &oAnyFronHasPropagated);
+
     /**
      * Update enrichment items (level sets).
      */
@@ -77,12 +82,37 @@ public:
 
     void splitCracks();
 
+    void removeShortCracks();
+
+    bool tipsHaveOppositeDirection(EnrichmentFront *iEf1, EnrichmentFront *iEf2);
+    void mergeCloseCracks();
+
+    bool giveUseNonStdCz() const {return mNonstandardCz;}
+
+    /// Compute the total length of all cracks in the domain.
+    double computeTotalCrackLength();
+
 protected:
 
     /**
      * If cracks should be splitted at intersections as a pre-processing step.
      */
     bool mSplitCracks;
+
+    /**
+     * If a non-standard cohesive zone formulation should be used.
+     */
+    bool mNonstandardCz;
+
+    /**
+     * Cracks shorter than this length are automatically removed.
+     */
+    double mMinCrackLength;
+
+    /**
+     * Cracks with tips closer than this distance are automatically merged.
+     */
+    double mCrackMergeTol;
 
     /**
      * Evaluator for material forces.

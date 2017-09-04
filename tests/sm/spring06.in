@@ -1,6 +1,6 @@
 spring06.out
 Patch test of torsional spring element in 3D space
-LinearStatic nsteps 1 nmodules 1
+StaticStructural nsteps 1 nmodules 1
 errorcheck
 domain 3dshell
 OutputManager tstep_all dofman_all element_all

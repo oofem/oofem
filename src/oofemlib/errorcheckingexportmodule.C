@@ -46,6 +46,7 @@
 #include "dof.h"
 #include "oofemtxtinputrecord.h"
 #include "irresulttype.h"
+#include "mathfem.h"
 #ifdef __SM_MODULE
  #include "../sm/EngineeringModels/structengngmodel.h"
  #include "../sm/Elements/Beams/beam2d.h"

@@ -86,7 +86,7 @@ OctantRec :: giveNodeList()
     return nodeList;
 }
 
-std :: set< int > &
+IntArray &
 OctantRec :: giveIPElementList()
 {
     return elementIPList;
@@ -212,7 +212,7 @@ void OctantRec :: printYourself()
 {
     if ( this->isTerminalOctant() ) {
         std :: cout << " center = {" << this->origin.at(1) << "," << this->origin.at(2) << "," << this->origin.at(3)
-                    << "} size = " << ( this->halfWidth * 2. ) << " nodes = " << this->nodeList.size() << " elem_ips = " << this->elementIPList.size() << "\n";
+                    << "} size = " << ( this->halfWidth * 2. ) << " nodes = " << this->nodeList.size() << " elem_ips = " << this->elementIPList.giveSize() << "\n";
     } else {
         if ( this->depth == 0 ) {
             printf("*ROOTCELL*");
@@ -270,7 +270,7 @@ OctreeSpatialLocalizer :: findTerminalContaining(OctantRec *startCell, const Flo
 bool
 OctreeSpatialLocalizer :: buildOctreeDataStructure()
 {
-    OOFEM_LOG_INFO("Initializing Octree structure\n");
+//    OOFEM_LOG_INFO("Initializing Octree structure\n");
     int init = 1, nnode = this->domain->giveNumberOfDofManagers();
     double rootSize, resolutionLimit;
     FloatArray minc(3), maxc(3), * coords;
@@ -633,7 +633,7 @@ OctreeSpatialLocalizer :: giveElementContainingPoint(OctantRec *cell, const Floa
     elementContainerType &elementList = cell->giveIPElementList();
 
     // recursive implementation
-    if ( cell->isTerminalOctant() && ( !elementList.empty() ) ) {
+    if ( cell->isTerminalOctant() && ( !elementList.isEmpty() ) ) {
 
         for ( int iel: elementList ) {
             Element *ielemptr = this->giveDomain()->giveElement(iel);
@@ -691,7 +691,7 @@ OctreeSpatialLocalizer :: giveElementContainingPoint(OctantRec *cell, const Floa
     elementContainerType &elementList = cell->giveIPElementList();
 
     // recursive implementation
-    if ( cell->isTerminalOctant() && ( !elementList.empty() ) ) {
+    if ( cell->isTerminalOctant() && ( !elementList.isEmpty() ) ) {
 
         for ( int iel: elementList ) {
             Element *ielemptr = this->giveDomain()->giveElement(iel);
@@ -832,65 +832,64 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region, bo
     currCell = this->findTerminalContaining(rootCell, coords);
     elementContainerType &elementList = currCell->giveIPElementList();
     // find nearest ip in this terminal cell
-    if ( !elementList.empty() ) {
-        for ( int iel: elementList ) {
-            Element *ielem = domain->giveElement(iel);
 
-            /* HUHU CHEATING */
-            if ( ielem->giveParallelMode() == Element_remote ) {
-                continue;
+    for ( int iel: elementList ) {
+        Element *ielem = domain->giveElement(iel);
+
+        /* HUHU CHEATING */
+        if ( ielem->giveParallelMode() == Element_remote ) {
+            continue;
+        }
+
+        //igp   = ipContainer[i].giveGp();
+        if ( ( region > 0 ) && ( region != ielem->giveRegionNumber() ) ) {
+            continue;
+        }
+
+        if ( !iCohesiveZoneGP ) {
+            // test if element already visited
+            // if (!visitedElems.insert(*pos).second) continue;
+            for ( GaussPoint *jGp: *ielem->giveDefaultIntegrationRulePtr() ) {
+                if ( ielem->computeGlobalCoordinates( jGpCoords, jGp->giveNaturalCoordinates() ) ) {
+                    // compute distance
+                    double dist = coords.distance(jGpCoords);
+                    if ( dist < minDist ) {
+                        minDist   = dist;
+                        nearestGp = jGp;
+                    }
+                } else {
+                    OOFEM_ERROR("computeGlobalCoordinates failed");
+                }
             }
+        } else {
+            ////////////////////////////////
+            // Check for cohesive zone Gauss points
+            XfemElementInterface *xFemEl = dynamic_cast< XfemElementInterface * >(ielem);
 
-            //igp   = ipContainer[i].giveGp();
-            if ( ( region > 0 ) && ( region != ielem->giveRegionNumber() ) ) {
-                continue;
-            }
-
-            if ( !iCohesiveZoneGP ) {
-                // test if element already visited
-                // if (!visitedElems.insert(*pos).second) continue;
-                for ( GaussPoint *jGp: *ielem->giveDefaultIntegrationRulePtr() ) {
-                    if ( ielem->computeGlobalCoordinates( jGpCoords, jGp->giveNaturalCoordinates() ) ) {
-                        // compute distance
-                        double dist = coords.distance(jGpCoords);
-                        if ( dist < minDist ) {
-                            minDist   = dist;
-                            nearestGp = jGp;
+            if ( xFemEl != NULL ) {
+                size_t numCZRules = xFemEl->mpCZIntegrationRules.size();
+                for ( size_t czRuleIndex = 0; czRuleIndex < numCZRules; czRuleIndex++ ) {
+                    std :: unique_ptr< IntegrationRule > &iRule = xFemEl->mpCZIntegrationRules [ czRuleIndex ];
+                    if ( iRule ) {
+                        for ( GaussPoint *jGp: *iRule ) {
+                            if ( ielem->computeGlobalCoordinates( jGpCoords, jGp->giveNaturalCoordinates() ) ) {
+                                // compute distance
+                                double dist = coords.distance(jGpCoords);
+                                //printf("czRuleIndex: %d j: %d dist: %e\n", czRuleIndex, j, dist);
+                                if ( dist < minDist ) {
+                                    minDist   = dist;
+                                    nearestGp = jGp;
+                                }
+                            } else {
+                                OOFEM_ERROR("computeGlobalCoordinates failed");
+                            }
                         }
                     } else {
-                        OOFEM_ERROR("computeGlobalCoordinates failed");
+                        OOFEM_ERROR("iRule == NULL");
                     }
                 }
-            } else {
-                ////////////////////////////////
-                // Check for cohesive zone Gauss points
-                XfemElementInterface *xFemEl = dynamic_cast< XfemElementInterface * >(ielem);
-
-                if ( xFemEl != NULL ) {
-                    size_t numCZRules = xFemEl->mpCZIntegrationRules.size();
-                    for ( size_t czRuleIndex = 0; czRuleIndex < numCZRules; czRuleIndex++ ) {
-                        std :: unique_ptr< IntegrationRule > &iRule = xFemEl->mpCZIntegrationRules [ czRuleIndex ];
-                        if ( iRule ) {
-                            for ( GaussPoint *jGp: *iRule ) {
-                                if ( ielem->computeGlobalCoordinates( jGpCoords, jGp->giveNaturalCoordinates() ) ) {
-                                    // compute distance
-                                    double dist = coords.distance(jGpCoords);
-                                    //printf("czRuleIndex: %d j: %d dist: %e\n", czRuleIndex, j, dist);
-                                    if ( dist < minDist ) {
-                                        minDist   = dist;
-                                        nearestGp = jGp;
-                                    }
-                                } else {
-                                    OOFEM_ERROR("computeGlobalCoordinates failed");
-                                }
-                            }
-                        } else {
-                            OOFEM_ERROR("iRule == NULL");
-                        }
-                    }
-                }
-                ////////////////////////////////
             }
+            ////////////////////////////////
         }
     }
 
@@ -996,63 +995,61 @@ OctreeSpatialLocalizer :: giveClosestIPWithinOctant(OctantRec *currentCell, //el
 
         // loop over cell elements and check if they meet the criteria
         elementContainerType &elementList = currentCell->giveIPElementList();
-        if ( !elementList.empty() ) {
-            for ( int iel: elementList ) {
-                // ask for element
-                Element *ielem = domain->giveElement(iel);
+        for ( int iel: elementList ) {
+            // ask for element
+            Element *ielem = domain->giveElement(iel);
 
-                /* HUHU CHEATING */
-                if ( ielem->giveParallelMode() == Element_remote ) {
-                    continue;
-                }
+            /* HUHU CHEATING */
+            if ( ielem->giveParallelMode() == Element_remote ) {
+                continue;
+            }
 
-                if ( ( region > 0 ) && ( region != ielem->giveRegionNumber() ) ) {
-                    continue;
-                }
+            if ( ( region > 0 ) && ( region != ielem->giveRegionNumber() ) ) {
+                continue;
+            }
 
-                if ( !iCohesiveZoneGP ) {
-                    // test if element already visited
-                    // if (!visitedElems.insert(*pos).second) continue;
-                    // is one of his ip's  within given bbox -> inset it into elemSet
-                    for ( GaussPoint *gp: *ielem->giveDefaultIntegrationRulePtr() ) {
-                        if ( ielem->computeGlobalCoordinates( jGpCoords, gp->giveNaturalCoordinates() ) ) {
-                            currDist = coords.distance(jGpCoords);
-                            // multiple insertion are handled by STL set implementation
-                            if ( currDist <= dist ) {
-                                dist = currDist;
-                                * answer = gp;
-                            }
-                        } else {
-                            OOFEM_ERROR("computeGlobalCoordinates failed");
+            if ( !iCohesiveZoneGP ) {
+                // test if element already visited
+                // if (!visitedElems.insert(*pos).second) continue;
+                // is one of his ip's  within given bbox -> inset it into elemSet
+                for ( GaussPoint *gp: *ielem->giveDefaultIntegrationRulePtr() ) {
+                    if ( ielem->computeGlobalCoordinates( jGpCoords, gp->giveNaturalCoordinates() ) ) {
+                        currDist = coords.distance(jGpCoords);
+                        // multiple insertion are handled by STL set implementation
+                        if ( currDist <= dist ) {
+                            dist = currDist;
+                            * answer = gp;
                         }
+                    } else {
+                        OOFEM_ERROR("computeGlobalCoordinates failed");
                     }
-                } else {
-                    //////////////////////////////////////////////////////////
-                    // Check for cohesive zone Gauss points
-                    XfemElementInterface *xFemEl = dynamic_cast< XfemElementInterface * >(ielem);
+                }
+            } else {
+                //////////////////////////////////////////////////////////
+                // Check for cohesive zone Gauss points
+                XfemElementInterface *xFemEl = dynamic_cast< XfemElementInterface * >(ielem);
 
-                    if ( xFemEl != NULL ) {
-                        size_t numCZRules = xFemEl->mpCZIntegrationRules.size();
-                        for ( size_t czRuleIndex = 0; czRuleIndex < numCZRules; czRuleIndex++ ) {
-                            std :: unique_ptr< IntegrationRule > &iRule = xFemEl->mpCZIntegrationRules [ czRuleIndex ];
-                            if ( iRule ) {
-                                for ( GaussPoint *gp: *iRule ) {
-                                    if ( ielem->computeGlobalCoordinates( jGpCoords, gp->giveNaturalCoordinates() ) ) {
-                                        currDist = coords.distance(jGpCoords);
-                                        // multiple insertion are handled by STL set implementation
-                                        if ( currDist <= dist ) {
-                                            dist = currDist;
-                                            * answer = gp;
-                                        }
-                                    } else {
-                                        OOFEM_ERROR("computeGlobalCoordinates failed");
+                if ( xFemEl != NULL ) {
+                    size_t numCZRules = xFemEl->mpCZIntegrationRules.size();
+                    for ( size_t czRuleIndex = 0; czRuleIndex < numCZRules; czRuleIndex++ ) {
+                        std :: unique_ptr< IntegrationRule > &iRule = xFemEl->mpCZIntegrationRules [ czRuleIndex ];
+                        if ( iRule ) {
+                            for ( GaussPoint *gp: *iRule ) {
+                                if ( ielem->computeGlobalCoordinates( jGpCoords, gp->giveNaturalCoordinates() ) ) {
+                                    currDist = coords.distance(jGpCoords);
+                                    // multiple insertion are handled by STL set implementation
+                                    if ( currDist <= dist ) {
+                                        dist = currDist;
+                                        * answer = gp;
                                     }
+                                } else {
+                                    OOFEM_ERROR("computeGlobalCoordinates failed");
                                 }
                             }
                         }
                     }
-                    //////////////////////////////////////////////////////////
                 }
+                //////////////////////////////////////////////////////////
             }
         }
 
@@ -1098,65 +1095,63 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, Set &elementSe
     currCell = this->findTerminalContaining(rootCell, coords);
     elementContainerType &elementList = currCell->giveIPElementList();
     // find nearest ip in this terminal cell
-    if ( !elementList.empty() ) {
-        for ( int iel: elementList) {
-            Element *ielem = domain->giveElement(iel);
+    for ( int iel: elementList) {
+        Element *ielem = domain->giveElement(iel);
 
-            /* HUHU CHEATING */
-            if ( ielem->giveParallelMode() == Element_remote ) {
-                continue;
+        /* HUHU CHEATING */
+        if ( ielem->giveParallelMode() == Element_remote ) {
+            continue;
+        }
+
+        //igp   = ipContainer[i].giveGp();
+        if ( !elementSet.hasElement( ielem->giveNumber() ) ) {
+            continue;
+        }
+
+        if ( !iCohesiveZoneGP ) {
+            // test if element already visited
+            // if (!visitedElems.insert(ielem).second) continue;
+            for ( GaussPoint *jGp: *ielem->giveDefaultIntegrationRulePtr() ) {
+                if ( ielem->computeGlobalCoordinates( jGpCoords, jGp->giveNaturalCoordinates() ) ) {
+                    // compute distance
+                    double dist = coords.distance(jGpCoords);
+                    if ( dist < minDist ) {
+                        minDist   = dist;
+                        nearestGp = jGp;
+                    }
+                } else {
+                    OOFEM_ERROR("computeGlobalCoordinates failed");
+                }
             }
+        } else {
+            ////////////////////////////////
+            // Check for cohesive zone Gauss points
+            XfemElementInterface *xFemEl = dynamic_cast< XfemElementInterface * >(ielem);
 
-            //igp   = ipContainer[i].giveGp();
-            if ( !elementSet.hasElement( ielem->giveNumber() ) ) {
-                continue;
-            }
-
-            if ( !iCohesiveZoneGP ) {
-                // test if element already visited
-                // if (!visitedElems.insert(ielem).second) continue;
-                for ( GaussPoint *jGp: *ielem->giveDefaultIntegrationRulePtr() ) {
-                    if ( ielem->computeGlobalCoordinates( jGpCoords, jGp->giveNaturalCoordinates() ) ) {
-                        // compute distance
-                        double dist = coords.distance(jGpCoords);
-                        if ( dist < minDist ) {
-                            minDist   = dist;
-                            nearestGp = jGp;
+            if ( xFemEl != NULL ) {
+                size_t numCZRules = xFemEl->mpCZIntegrationRules.size();
+                for ( size_t czRuleIndex = 0; czRuleIndex < numCZRules; czRuleIndex++ ) {
+                    std :: unique_ptr< IntegrationRule > &iRule = xFemEl->mpCZIntegrationRules [ czRuleIndex ];
+                    if ( iRule ) {
+                        for ( GaussPoint *jGp: *iRule ) {
+                            if ( ielem->computeGlobalCoordinates( jGpCoords, jGp->giveNaturalCoordinates() ) ) {
+                                // compute distance
+                                double dist = coords.distance(jGpCoords);
+                                //printf("czRuleIndex: %d j: %d dist: %e\n", czRuleIndex, j, dist);
+                                if ( dist < minDist ) {
+                                    minDist   = dist;
+                                    nearestGp = jGp;
+                                }
+                            } else {
+                                OOFEM_ERROR("computeGlobalCoordinates failed");
+                            }
                         }
                     } else {
-                        OOFEM_ERROR("computeGlobalCoordinates failed");
+                        OOFEM_ERROR("iRule == NULL");
                     }
                 }
-            } else {
-                ////////////////////////////////
-                // Check for cohesive zone Gauss points
-                XfemElementInterface *xFemEl = dynamic_cast< XfemElementInterface * >(ielem);
-
-                if ( xFemEl != NULL ) {
-                    size_t numCZRules = xFemEl->mpCZIntegrationRules.size();
-                    for ( size_t czRuleIndex = 0; czRuleIndex < numCZRules; czRuleIndex++ ) {
-                        std :: unique_ptr< IntegrationRule > &iRule = xFemEl->mpCZIntegrationRules [ czRuleIndex ];
-                        if ( iRule ) {
-                            for ( GaussPoint *jGp: *iRule ) {
-                                if ( ielem->computeGlobalCoordinates( jGpCoords, jGp->giveNaturalCoordinates() ) ) {
-                                    // compute distance
-                                    double dist = coords.distance(jGpCoords);
-                                    //printf("czRuleIndex: %d j: %d dist: %e\n", czRuleIndex, j, dist);
-                                    if ( dist < minDist ) {
-                                        minDist   = dist;
-                                        nearestGp = jGp;
-                                    }
-                                } else {
-                                    OOFEM_ERROR("computeGlobalCoordinates failed");
-                                }
-                            }
-                        } else {
-                            OOFEM_ERROR("iRule == NULL");
-                        }
-                    }
-                }
-                ////////////////////////////////
             }
+            ////////////////////////////////
         }
     }
 
@@ -1261,63 +1256,61 @@ OctreeSpatialLocalizer :: giveClosestIPWithinOctant(OctantRec *currentCell, //el
 
         // loop over cell elements and check if they meet the criteria
         elementContainerType &elementList = currentCell->giveIPElementList();
-        if ( !elementList.empty() ) {
-            for ( int iel: elementList ) {
-                // ask for element
-                Element *ielem = domain->giveElement(iel);
+        for ( int iel: elementList ) {
+            // ask for element
+            Element *ielem = domain->giveElement(iel);
 
-                /* HUHU CHEATING */
-                if ( ielem->giveParallelMode() == Element_remote ) {
-                    continue;
-                }
+            /* HUHU CHEATING */
+            if ( ielem->giveParallelMode() == Element_remote ) {
+                continue;
+            }
 
-                if ( !elementSet.hasElement( ielem->giveNumber() ) ) {
-                    continue;
-                }
+            if ( !elementSet.hasElement( ielem->giveNumber() ) ) {
+                continue;
+            }
 
-                if ( !iCohesiveZoneGP ) {
-                    // test if element already visited
-                    // if (!visitedElems.insert(iel).second) continue;
-                    // is one of his ip's  within given bbox -> inset it into elemSet
-                    for ( GaussPoint *gp: *ielem->giveDefaultIntegrationRulePtr() ) {
-                        if ( ielem->computeGlobalCoordinates( jGpCoords, gp->giveNaturalCoordinates() ) ) {
-                            currDist = coords.distance(jGpCoords);
-                            // multiple insertion are handled by STL set implementation
-                            if ( currDist <= dist ) {
-                                dist = currDist;
-                                * answer = gp;
-                            }
-                        } else {
-                            OOFEM_ERROR("computeGlobalCoordinates failed");
+            if ( !iCohesiveZoneGP ) {
+                // test if element already visited
+                // if (!visitedElems.insert(iel).second) continue;
+                // is one of his ip's  within given bbox -> inset it into elemSet
+                for ( GaussPoint *gp: *ielem->giveDefaultIntegrationRulePtr() ) {
+                    if ( ielem->computeGlobalCoordinates( jGpCoords, gp->giveNaturalCoordinates() ) ) {
+                        currDist = coords.distance(jGpCoords);
+                        // multiple insertion are handled by STL set implementation
+                        if ( currDist <= dist ) {
+                            dist = currDist;
+                            * answer = gp;
                         }
+                    } else {
+                        OOFEM_ERROR("computeGlobalCoordinates failed");
                     }
-                } else {
-                    //////////////////////////////////////////////////////////
-                    // Check for cohesive zone Gauss points
-                    XfemElementInterface *xFemEl = dynamic_cast< XfemElementInterface * >(ielem);
+                }
+            } else {
+                //////////////////////////////////////////////////////////
+                // Check for cohesive zone Gauss points
+                XfemElementInterface *xFemEl = dynamic_cast< XfemElementInterface * >(ielem);
 
-                    if ( xFemEl != NULL ) {
-                        size_t numCZRules = xFemEl->mpCZIntegrationRules.size();
-                        for ( size_t czRuleIndex = 0; czRuleIndex < numCZRules; czRuleIndex++ ) {
-                            std :: unique_ptr< IntegrationRule > &iRule = xFemEl->mpCZIntegrationRules [ czRuleIndex ];
-                            if ( iRule ) {
-                                for ( GaussPoint *gp: *iRule ) {
-                                    if ( ielem->computeGlobalCoordinates( jGpCoords, gp->giveNaturalCoordinates() ) ) {
-                                        currDist = coords.distance(jGpCoords);
-                                        // multiple insertion are handled by STL set implementation
-                                        if ( currDist <= dist ) {
-                                            dist = currDist;
-                                            * answer = gp;
-                                        }
-                                    } else {
-                                        OOFEM_ERROR("computeGlobalCoordinates failed");
+                if ( xFemEl != NULL ) {
+                    size_t numCZRules = xFemEl->mpCZIntegrationRules.size();
+                    for ( size_t czRuleIndex = 0; czRuleIndex < numCZRules; czRuleIndex++ ) {
+                        std :: unique_ptr< IntegrationRule > &iRule = xFemEl->mpCZIntegrationRules [ czRuleIndex ];
+                        if ( iRule ) {
+                            for ( GaussPoint *gp: *iRule ) {
+                                if ( ielem->computeGlobalCoordinates( jGpCoords, gp->giveNaturalCoordinates() ) ) {
+                                    currDist = coords.distance(jGpCoords);
+                                    // multiple insertion are handled by STL set implementation
+                                    if ( currDist <= dist ) {
+                                        dist = currDist;
+                                        * answer = gp;
                                     }
+                                } else {
+                                    OOFEM_ERROR("computeGlobalCoordinates failed");
                                 }
                             }
                         }
                     }
-                    //////////////////////////////////////////////////////////
                 }
+                //////////////////////////////////////////////////////////
             }
         }
 
@@ -1372,7 +1365,7 @@ OctreeSpatialLocalizer :: giveAllElementsWithIpWithinBox(elementContainerType &e
                                                          const double radius, bool iCohesiveZoneGP)
 {
     this->giveAllElementsWithIpWithinBox_EvenIfEmpty(elemSet, coords, radius, iCohesiveZoneGP);
-    if ( elemSet.empty() ) {
+    if ( elemSet.isEmpty() ) {
         OOFEM_ERROR("empty set found");
     }
 }
@@ -1388,56 +1381,57 @@ OctreeSpatialLocalizer :: giveElementsWithIPWithinBox(elementContainerType &elem
 
         // loop over cell elements and check if they meet the criteria
         elementContainerType &elementList = currentCell->giveIPElementList();
-        if ( !elementList.empty() ) {
-            for ( int iel: elementList ) {
-                // test if element is already present
-                if ( elemSet.find(iel) != elemSet.end() ) {
-                    continue;
-                }
+        for ( int iel: elementList ) {
+            // test if element is already present
+            if ( elemSet.findSorted(iel) ) {
+                continue;
+            }
 
-                // ask for element
-                Element *ielem = domain->giveElement(iel);
+            // ask for element
+            Element *ielem = domain->giveElement(iel);
 
-                //if(ielem -> giveParallelMode() == Element_remote)continue;
-                if ( !iCohesiveZoneGP ) {
-                    // is one of his ip's  within given bbox -> inset it into elemSet
-                    for ( GaussPoint *gp: *ielem->giveDefaultIntegrationRulePtr() ) {
-                        if ( ielem->computeGlobalCoordinates( jGpCoords, gp->giveNaturalCoordinates() ) ) {
-                            currDist = coords.distance(jGpCoords);
-                            // multiple insertion are handled by STL set implementation
-                            if ( currDist <= radius ) {
-                                elemSet.insert(iel);
-                            }
-                        } else {
-                            OOFEM_ERROR("computeGlobalCoordinates failed");
+            //if(ielem -> giveParallelMode() == Element_remote)continue;
+            if ( !iCohesiveZoneGP ) {
+                // is one of his ip's  within given bbox -> inset it into elemSet
+                for ( auto &gp: *ielem->giveDefaultIntegrationRulePtr() ) {
+                    if ( ielem->computeGlobalCoordinates( jGpCoords, gp->giveNaturalCoordinates() ) ) {
+                        currDist = coords.distance(jGpCoords);
+                        // multiple insertion are handled by STL set implementation
+                        if ( currDist <= radius ) {
+                            elemSet.insertSortedOnce(iel);
+                            break;
                         }
+                    } else {
+                        OOFEM_ERROR("computeGlobalCoordinates failed");
                     }
-                } else {
-                    ///////////////////////////////////////////////////
+                }
+            } else {
+                ///////////////////////////////////////////////////
 
-                    XfemElementInterface *xFemEl = dynamic_cast< XfemElementInterface * >(ielem);
+                XfemElementInterface *xFemEl = dynamic_cast< XfemElementInterface * >(ielem);
 
-                    if ( xFemEl != NULL ) {
-                        size_t numCZRules = xFemEl->mpCZIntegrationRules.size();
-                        for ( size_t czRuleIndex = 0; czRuleIndex < numCZRules; czRuleIndex++ ) {
-                            std :: unique_ptr< IntegrationRule > &iRule = xFemEl->mpCZIntegrationRules [ czRuleIndex ];
-                            if ( iRule ) {
-                                for ( GaussPoint *gp: *iRule ) {
-                                    if ( ielem->computeGlobalCoordinates( jGpCoords, gp->giveNaturalCoordinates() ) ) {
-                                        currDist = coords.distance(jGpCoords);
-                                        // multiple insertion are handled by STL set implementation
-                                        if ( currDist <= radius ) {
-                                            elemSet.insert(iel);
-                                        }
-                                    } else {
-                                        OOFEM_ERROR("computeGlobalCoordinates failed");
+                if ( xFemEl != NULL ) {
+                    size_t numCZRules = xFemEl->mpCZIntegrationRules.size();
+                    for ( size_t czRuleIndex = 0; czRuleIndex < numCZRules; czRuleIndex++ ) {
+                        std :: unique_ptr< IntegrationRule > &iRule = xFemEl->mpCZIntegrationRules [ czRuleIndex ];
+                        if ( iRule ) {
+                            for ( auto &gp: *iRule ) {
+                                if ( ielem->computeGlobalCoordinates( jGpCoords, gp->giveNaturalCoordinates() ) ) {
+                                    currDist = coords.distance(jGpCoords);
+                                    // multiple insertion are handled by STL set implementation
+                                    if ( currDist <= radius ) {
+                                        elemSet.insertSortedOnce(iel);
+                                        czRuleIndex = numCZRules;
+                                        break;
                                     }
+                                } else {
+                                    OOFEM_ERROR("computeGlobalCoordinates failed");
                                 }
                             }
                         }
                     }
-                    ///////////////////////////////////////////////////
                 }
+                ///////////////////////////////////////////////////
             }
         }
     } else {

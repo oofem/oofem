@@ -5,6 +5,10 @@
 # ignore all files under targets dir
 targets/
 
+# ignore all files under release and debug dir
+release/
+debug/
+
 # test results
 *.out
 *.vtu
@@ -26,6 +30,7 @@ perf.data*
 *.blg
 
 
+*.idea
 __pycache__
 *.pyc
 *.swp

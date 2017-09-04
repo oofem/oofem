@@ -1,8 +1,6 @@
 nltrans_incr.out.tm
 Quadrilateral elements subjected to heat flux (Newton b.c), changingProblemSize
-TransientTransport nsteps 3 deltat 36000 rtolv 1.e-5 alpha 0.5 lumped exportfields 1 5 nmodules 1
-#NlTransientTransportProblem nsteps 3 deltat 36000 rtol 1.e-5 alpha 0.5 lumpedcapa changingProblemSize exportfields 1 5 nmodules 1
-#TransientTransport nsteps 3 deltat 36000 rtolf 1.e-5 alpha 0.5 lumped exportfields 1 5 nmodules 1
+TransientTransport nsteps 3 deltat 36000 alpha 0.5 lumped exportfields 1 5 nmodules 1
 errorcheck
 #vtkxml tstep_all domain_all primvars 1 6
 domain heattransfer

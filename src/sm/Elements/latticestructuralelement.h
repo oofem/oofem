@@ -126,7 +126,7 @@ public:
      * Returns the coupling numbers
      * @return couplingNumbers.
      */
-    virtual void giveCouplingNumbers(IntArray &numbers){return;}
+    virtual void giveCouplingNumbers(IntArray &numbers) { }
 
     /**
      * Returns the normal stress.

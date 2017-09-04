@@ -94,7 +94,8 @@ public:
     virtual void solveYourself();
     virtual void solveYourselfAt(TimeStep *tStep);
 
-    virtual void terminate(TimeStep *tStep);
+    virtual void doStepOutput(TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
     void terminateLinStatic(TimeStep *tStep);
     int requiresNewLsh() { return 0; }
     virtual void updateYourself(TimeStep *tStep);
@@ -106,7 +107,7 @@ public:
     // otherwise corresponding eigen vector is considered as displacement vector
     virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual TimeStep *giveNextStep();
 

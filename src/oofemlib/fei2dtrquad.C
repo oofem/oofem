@@ -61,7 +61,7 @@ FEI2dTrQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FE
 {
     FloatMatrix jacobianMatrix(2, 2), inv, dn;
 
-    this->giveDerivatives(dn, lcoords);
+    this->evaldNdxi(dn, lcoords, cellgeo);
     for ( int i = 1; i <= dn.giveNumberOfRows(); i++ ) {
         double x = cellgeo.giveVertexCoordinates(i)->at(xind);
         double y = cellgeo.giveVertexCoordinates(i)->at(yind);
@@ -141,69 +141,6 @@ FEI2dTrQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const
     }
 }
 
-
-double FEI2dTrQuad :: giveCharacteristicLength(const FEICellGeometry &cellgeo) const
-{
-    return sqrt( this->giveArea(cellgeo) );
-}
-
-
-#define POINT_TOL 1.e-3
-
-int
-FEI2dTrQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo)
-{
-    FloatArray res, delta, guess, lcoords_guess;
-    FloatMatrix jac;
-    double convergence_limit, error = 0.0;
-
-    // find a suitable convergence limit
-    convergence_limit = 1e-6 * this->giveCharacteristicLength(cellgeo);
-
-    // setup initial guess
-    lcoords_guess.resize( 2 );
-    lcoords_guess.zero();
-
-    // apply Newton-Raphson to solve the problem
-    for ( int nite = 0; nite < 10; nite++ ) {
-        // compute the residual
-        this->local2global(guess, lcoords_guess, cellgeo);
-        res = {gcoords(0) - guess(0), gcoords(1) - guess(1)};
-
-        // check for convergence
-        error = res.computeNorm();
-        if ( error < convergence_limit ) {
-            break;
-        }
-
-        // compute the corrections
-        this->giveJacobianMatrixAt(jac, lcoords_guess, cellgeo);
-        jac.solveForRhs(res, delta);
-
-        // update guess
-        lcoords_guess.add(delta);
-    }
-    if ( error > convergence_limit ) { // Imperfect, could give false negatives.
-        //OOFEM_WARNING("Failed convergence");
-        answer = {1. / 3., 1. / 3., 1. / 3.};
-        return false;
-    }
-
-    answer = { lcoords_guess(0), lcoords_guess(1), 1.0 - lcoords_guess(0) - lcoords_guess(1) };
-
-    bool inside = true;
-    for ( int i = 0; i < 3; i++ ) {
-        if ( answer(i) < ( 0. - POINT_TOL ) ) {
-            answer(i) = 0.;
-            inside = false;
-        } else if ( answer(i) > ( 1. + POINT_TOL ) ) {
-            answer(i) = 1.;
-            inside = false;
-        }
-    }
-
-    return inside;
-}
 
 void
 FEI2dTrQuad :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
@@ -321,54 +258,31 @@ FEI2dTrQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
 }
 
 
-void
-FEI2dTrQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-// Returns the jacobian matrix  J (x,y)/(ksi,eta)  of the receiver.
-{
-    double x, y;
-    FloatMatrix dn;
 
-    jacobianMatrix.resize(2, 2);
-    jacobianMatrix.zero();
-
-    this->giveDerivatives(dn, lcoords);
-
-    for ( int i = 1; i <= dn.giveNumberOfRows(); i++ ) {
-        x = cellgeo.giveVertexCoordinates(i)->at(xind);
-        y = cellgeo.giveVertexCoordinates(i)->at(yind);
-
-        jacobianMatrix.at(1, 1) += dn.at(i, 1) * x;
-        jacobianMatrix.at(1, 2) += dn.at(i, 1) * y;
-        jacobianMatrix.at(2, 1) += dn.at(i, 2) * x;
-        jacobianMatrix.at(2, 2) += dn.at(i, 2) * y;
-    }
-}
-
-
-void
-FEI2dTrQuad :: giveDerivatives(FloatMatrix &dn, const FloatArray &lc)
+void FEI2dTrQuad :: evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double l1, l2, l3;
-    l1 = lc.at(1);
-    l2 = lc.at(2);
+    l1 = lcoords.at(1);
+    l2 = lcoords.at(2);
     l3 = 1.0 - l1 - l2;
 
-    dn.resize(6, 2);
+    answer.resize(6, 2);
 
-    dn.at(1, 1) =  4.0 * l1 - 1.0;
-    dn.at(2, 1) =  0.0;
-    dn.at(3, 1) = -1.0 * ( 4.0 * l3 - 1.0 );
-    dn.at(4, 1) =  4.0 * l2;
-    dn.at(5, 1) = -4.0 * l2;
-    dn.at(6, 1) =  4.0 * l3 - 4.0 * l1;
+    answer.at(1, 1) =  4.0 * l1 - 1.0;
+    answer.at(2, 1) =  0.0;
+    answer.at(3, 1) = -1.0 * ( 4.0 * l3 - 1.0 );
+    answer.at(4, 1) =  4.0 * l2;
+    answer.at(5, 1) = -4.0 * l2;
+    answer.at(6, 1) =  4.0 * l3 - 4.0 * l1;
 
-    dn.at(1, 2) =  0.0;
-    dn.at(2, 2) =  4.0 * l2 - 1.0;
-    dn.at(3, 2) = -1.0 * ( 4.0 * l3 - 1.0 );
-    dn.at(4, 2) =  4.0 * l1;
-    dn.at(5, 2) =  4.0 * l3 - 4.0 * l2;
-    dn.at(6, 2) = -4.0 * l1;
+    answer.at(1, 2) =  0.0;
+    answer.at(2, 2) =  4.0 * l2 - 1.0;
+    answer.at(3, 2) = -1.0 * ( 4.0 * l3 - 1.0 );
+    answer.at(4, 2) =  4.0 * l1;
+    answer.at(5, 2) =  4.0 * l3 - 4.0 * l2;
+    answer.at(6, 2) = -4.0 * l1;
 }
+
 
 double
 FEI2dTrQuad :: giveArea(const FEICellGeometry &cellgeo) const
@@ -397,6 +311,27 @@ FEI2dTrQuad :: giveArea(const FEICellGeometry &cellgeo) const
 
     return fabs( ( 4 * ( -( x4 * y1 ) + x6 * y1 + x4 * y2 - x5 * y2 + x5 * y3 - x6 * y3 ) + x2 * ( y1 - y3 - 4 * y4 + 4 * y5 ) +
             x1 * ( -y2 + y3 + 4 * y4 - 4 * y6 ) + x3 * ( -y1 + y2 - 4 * y5 + 4 * y6 ) ) / 6 );
+}
+
+bool FEI2dTrQuad :: inside(const FloatArray &lcoords) const
+{
+	const double point_tol = 1.0e-3;
+    bool inside = true;
+    for ( int i = 1; i <= 2; i++ ) {
+        if ( lcoords.at(i) < - point_tol ) {
+            inside = false;
+        } else if ( lcoords.at(i) > ( 1. + point_tol ) ) {
+            inside = false;
+        }
+    }
+
+    if ( 1. - lcoords.at(1) - lcoords.at(2) < - point_tol ) {
+        inside = false;
+    } else if ( 1. - lcoords.at(1) - lcoords.at(2) > ( 1. + point_tol ) ) {
+        inside = false;
+    }
+
+    return inside;
 }
 
 double

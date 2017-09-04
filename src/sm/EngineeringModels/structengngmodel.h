@@ -96,7 +96,7 @@ protected:
      * @param tStep Time step.
      * @param id Domain number.
      */
-    void printReactionForces(TimeStep *tStep, int id);
+    void printReactionForces(TimeStep *tStep, int id, FILE *out);
 
     /**
      * Computes the contribution external loading to reaction forces in given domain. Default implementations adds the
@@ -123,6 +123,8 @@ protected:
      * @param tStep Solution step.
      */
     void updateInternalState(TimeStep *tStep);
+
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
 public:
     /// Creates new StructuralEngngModel with number i, associated to domain d.
@@ -169,7 +171,7 @@ public:
     /**
      * Shows the sparse structure of required matrix, type == 1 stiffness.
      */
-    void showSparseMtrxStructure(int type, oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void showSparseMtrxStructure(int type, oofegGraphicContext &gc, TimeStep *tStep);
 #endif
 };
 } // end namespace oofem

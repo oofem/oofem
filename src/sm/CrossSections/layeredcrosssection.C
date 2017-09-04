@@ -865,11 +865,33 @@ LayeredCrossSection :: initializeFrom(InputRecord *ir)
     layerRots.zero();
     IR_GIVE_OPTIONAL_FIELD(ir, layerRots, _IFT_LayeredCrossSection_layerRotations);
 
-    if ( numberOfLayers != layerMaterials.giveSize() ||
-        numberOfLayers != layerThicks.giveSize()  ||
-        numberOfLayers != layerRots.giveSize() ) {  //|| ( numberOfLayers != layerWidths.giveSize() ) )
-        OOFEM_WARNING("numberOfLayers does not equal given number of thicknesses. ");
+    if ( numberOfLayers != layerRots.giveSize() ) {  //|| ( numberOfLayers != layerWidths.giveSize() ) ) || numberOfLayers != layerThicks.giveSize() || numberOfLayers != layerMaterials.giveSize()
+        OOFEM_WARNING("numberOfLayers does not equal given number of layer rotations. ");
         return IRRT_BAD_FORMAT;
+    }
+
+    if ( numberOfLayers != layerThicks.giveSize() ) {  
+        if ( layerThicks.giveSize() == 1 ) {
+            OOFEM_WARNING("Assuming same thickness in all layers");
+            double temp = layerThicks.at(1);
+            layerThicks.resize(numberOfLayers); layerThicks.zero();
+            layerThicks.add(temp);
+        } else {
+            OOFEM_WARNING("numberOfLayers does not equal given number of thicknesses. ");
+            return IRRT_BAD_FORMAT;
+        }
+    }
+
+    if ( numberOfLayers != layerMaterials.giveSize() ) {  
+        if ( layerMaterials.giveSize() == 1 ) {
+            OOFEM_WARNING("Assuming same material in all layers");
+            double temp = layerMaterials.at(1);
+            layerMaterials.resize(numberOfLayers); layerMaterials.zero();
+            layerMaterials.add(temp);
+        } else {
+            OOFEM_WARNING("numberOfLayers does not equal given number of materials. ");
+            return IRRT_BAD_FORMAT;
+        }
     }
 
     if ( numberOfLayers <= 0 ) {
@@ -1191,10 +1213,33 @@ LayeredCrossSection :: give(CrossSectionProperty aProperty, GaussPoint *gp)
         return this->giveArea();
     } else if ( aProperty == CS_NumLayers ) {
         return this->numberOfLayers;
+    //} else if (aProperty == CS_Layer ) {
+    //    return this->giveLayer(gp);
     }
 
     return CrossSection :: give(aProperty, gp);
 }
+
+int 
+LayeredCrossSection :: giveLayer(GaussPoint *gp)	//@todo: works only for equal thickness of each layer
+{
+    FloatArray lCoords;
+    int noLayers = this->giveNumberOfLayers();
+    double dh = 2.0/noLayers;
+    lCoords = gp->giveNaturalCoordinates();
+    double lowXi = -1.0;
+
+    for (int i = 1; i <= noLayers; i++)
+    {
+        if (lCoords.at(3) > lowXi && lCoords.at(3) < lowXi+dh)
+        {
+            return i;
+        }
+        lowXi+=dh;
+    }
+    OOFEM_ERROR("LayeredCrossSection :: giveLayer - the actual integration point can not be associated with a layer in the cross section");
+}
+
 double
 LayeredCrossSection :: give(CrossSectionProperty aProperty, const FloatArray &coords, Element *elem, bool local)
 {
@@ -1430,7 +1475,7 @@ LayeredCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalS
                 };
             } else if ( valType == ISVT_VECTOR ) {
                 answer = {
-                    c *rotVal.at(1) - s * rotVal.at(2), s * rotVal.at(1), +c * rotVal.at(2), rotVal.at(3)
+                    c *rotVal.at(1) - s * rotVal.at(2), s * rotVal.at(1) +c * rotVal.at(2), rotVal.at(3)
                 };
             } else if ( valType == ISVT_SCALAR ) {
                 answer = rotVal;

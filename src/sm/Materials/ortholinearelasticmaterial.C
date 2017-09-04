@@ -235,10 +235,6 @@ OrthotropicLinearElasticMaterial :: giveInputRecord(DynamicInputRecord &input)
 
 double
 OrthotropicLinearElasticMaterial :: give(int aProperty, GaussPoint *gp)
-//
-// Returns the value of the property aProperty (e.g. the Young's modulus
-// 'E') of the receiver.
-//
 {
     if ( aProperty == NYzx ) {
         return this->give(NYxz, gp) * this->give(Ez, gp) / this->give(Ex, gp);
@@ -261,9 +257,6 @@ OrthotropicLinearElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &a
                                                                   MatResponseMode mode,
                                                                   GaussPoint *gp,
                                                                   TimeStep *tStep)
-//
-// forceElasticResponse ignored - always elastic
-//
 {
     FloatMatrix rotationMatrix;
 

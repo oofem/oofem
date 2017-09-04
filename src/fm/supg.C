@@ -805,45 +805,27 @@ SUPG :: updateInternalState(TimeStep *tStep)
 
 
 contextIOResultType
-SUPG :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+SUPG :: saveContext(DataStream &stream, ContextMode mode)
 {
     contextIOResultType iores;
-    int closeFlag = 0;
-    FILE *file = NULL;
-
-    if ( stream == NULL ) {
-        if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
-                                    this->giveCurrentStep()->giveVersion(), contextMode_write) ) {
-            THROW_CIOERR(CIO_IOERR); // override
-        }
-
-        stream = new FileDataStream(file);
-        closeFlag = 1;
-    }
 
     if ( ( iores = EngngModel :: saveContext(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = VelocityPressureField->saveContext(*stream, mode) ) != CIO_OK ) {
+    if ( ( iores = VelocityPressureField->saveContext(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = accelerationVector.storeYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = accelerationVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     if ( materialInterface ) {
-        if ( ( iores = materialInterface->saveContext(*stream, mode) ) != CIO_OK ) {
+        if ( ( iores = materialInterface->saveContext(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
-
-    if ( closeFlag ) {
-        fclose(file);
-        delete stream;
-        stream = NULL;
-    } // ensure consistent records
 
     return CIO_OK;
 }

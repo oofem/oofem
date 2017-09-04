@@ -328,7 +328,7 @@ void MixedGradientPressureNeumann :: integrateDevTangent(FloatMatrix &answer, El
     std :: unique_ptr< IntegrationRule > ir( interp->giveBoundaryIntegrationRule(order, boundary) );
 
     answer.clear();
-    for ( GaussPoint *gp: *ir ) {
+    for ( auto &gp: *ir ) {
         const FloatArray &lcoords = gp->giveNaturalCoordinates();
         FEIElementGeometryWrapper cellgeo(e);
 
@@ -466,7 +466,7 @@ void MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeStep
 
 
 void MixedGradientPressureNeumann :: assemble(SparseMtrx &answer, TimeStep *tStep,
-                                              CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
+                                              CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale)
 {
     if ( type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == ElasticStiffnessMatrix ) {
         FloatMatrix Ke, KeT;
@@ -489,8 +489,8 @@ void MixedGradientPressureNeumann :: assemble(SparseMtrx &answer, TimeStep *tSte
             e->giveBoundaryLocationArray(loc_c, bNodes, this->dofs, c_s);
             this->integrateDevTangent(Ke, e, boundary);
             Ke.negated();
+            Ke.times(scale);
             KeT.beTranspositionOf(Ke);
-
             answer.assemble(sigma_loc_r, loc_c, Ke); // Contribution to delta_s_i equations
             answer.assemble(loc_r, sigma_loc_c, KeT); // Contributions to delta_v equations
         }
@@ -558,7 +558,7 @@ void MixedGradientPressureNeumann :: computeTangents(FloatMatrix &Ed, FloatArray
         OOFEM_ERROR("Couldn't create sparse matrix of type %d\n", stype);
     }
     Kff->buildInternalStructure(rve, this->domain->giveNumber(), fnum);
-    rve->assemble(*Kff, tStep, TangentAssembler(TangentStiffness), fnum, fnum, this->domain);
+    rve->assemble(*Kff, tStep, TangentAssembler(TangentStiffness), fnum, this->domain);
 
     // Setup up indices and locations
     int neq = Kff->giveNumberOfRows();

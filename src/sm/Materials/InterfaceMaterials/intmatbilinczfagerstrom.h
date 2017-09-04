@@ -205,6 +205,8 @@ public:
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
+    
+    virtual FloatArray giveInterfaceStrength() { return {this->sigf*this->gamma,this->sigf*this->gamma,this->sigf}; }
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new IntMatBilinearCZFagerstromStatus(1, domain, gp); } //@Martin: Why new?
     void printYourself();

@@ -74,11 +74,6 @@ protected:
      */
     FloatMatrix GtoLRotationMatrix;
 
-public:
-    TrPlaneStrRot3d(int n, Domain * d);
-    virtual ~TrPlaneStrRot3d() { }
-
-protected:
     void giveLocalCoordinates(FloatArray &answer, FloatArray &global);
     virtual void giveNodeCoordinates(FloatArray &x, FloatArray &y);
 
@@ -101,6 +96,9 @@ protected:
     //@}
 
 public:
+    TrPlaneStrRot3d(int n, Domain * d);
+    virtual ~TrPlaneStrRot3d() { }
+
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_TrPlaneStrRot3d_Name; }
     virtual const char *giveClassName() const { return "TrPlaneStrRot3d"; }

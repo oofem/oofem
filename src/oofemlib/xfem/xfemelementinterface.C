@@ -58,6 +58,7 @@ XfemElementInterface :: XfemElementInterface(Element *e) :
     mUsePlaneStrain(false)
 {
     mpCZIntegrationRules.clear();
+    mpCZExtraIntegrationRules.clear();
 }
 
 XfemElementInterface :: ~XfemElementInterface()
@@ -65,20 +66,24 @@ XfemElementInterface :: ~XfemElementInterface()
 
 void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl)
 {
-    ComputeBOrBHMatrix(oAnswer, iGP, iEl, false);
+    ComputeBOrBHMatrix(oAnswer, iGP, iEl, false, iGP.giveNaturalCoordinates());
 }
 
 void XfemElementInterface :: XfemElementInterface_createEnrBHmatrixAt(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl)
 {
-    ComputeBOrBHMatrix(oAnswer, iGP, iEl, true);
+    ComputeBOrBHMatrix(oAnswer, iGP, iEl, true, iGP.giveNaturalCoordinates());
 }
 
-void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl, bool iComputeBH)
+void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl, bool iComputeBH, const FloatArray &iNaturalGpCoord)
 {
     /*
      * Computes the B or BH matrix.
      * iComputeBH = true implies that BH is computed,
      * while B is computed if iComputeBH = false.
+     *
+     * We could take the natural coordinates directly from the Gauss point instead of entering them separately.
+     * However, there are situations where one wants to add a small perturbation to the coordinates and hence
+     * it is easier to enter them separately.
      */
     const int dim = 2;
     const int nDofMan = iEl.giveNumberOfDofManagers();
@@ -97,8 +102,8 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
     FloatArray N;
     FEInterpolation *interp = iEl.giveInterpolation();
     const FEIElementGeometryWrapper geomWrapper(& iEl);
-    interp->evaldNdx(dNdx, iGP.giveNaturalCoordinates(), geomWrapper);
-    interp->evalN(N, iGP.giveNaturalCoordinates(), geomWrapper);
+    interp->evaldNdx(dNdx, iNaturalGpCoord, geomWrapper);
+    interp->evalN(N, iNaturalGpCoord, geomWrapper);
 
     const IntArray &elNodes = iEl.giveDofManArray();
 
@@ -169,26 +174,27 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
                 EnrichmentItem *ei = xMan->giveEnrichmentItem(nodeEiIndices [ i ]);
 
                 if ( ei->isDofManEnriched(* dMan) ) {
-                    int numEnr = ei->giveNumDofManEnrichments(* dMan);
+//                    int numEnr = ei->giveNumDofManEnrichments(* dMan);
 
                     // Enrichment function derivative in Gauss point
                     std :: vector< FloatArray >efgpD;
-                    ei->evaluateEnrFuncDerivAt(efgpD, globalCoord, iGP.giveNaturalCoordinates(), globalNodeInd, * element, N, dNdx, elNodes);
+                    ei->evaluateEnrFuncDerivAt(efgpD, globalCoord, iNaturalGpCoord, globalNodeInd, * element, N, dNdx, elNodes);
                     // Enrichment function in Gauss Point
                     std :: vector< double >efGP;
-                    ei->evaluateEnrFuncAt(efGP, globalCoord, iGP.giveNaturalCoordinates(), globalNodeInd, * element, N, elNodes);
+                    ei->evaluateEnrFuncAt(efGP, globalCoord, iNaturalGpCoord, globalNodeInd, * element, N, elNodes);
 
 
                     const FloatArray &nodePos = node->giveNodeCoordinates();
 
-                    double levelSetNode  = 0.0;
-                    ei->evalLevelSetNormalInNode(levelSetNode, globalNodeInd, nodePos);
+//                    double levelSetNode  = 0.0;
+//                    ei->evalLevelSetNormalInNode(levelSetNode, globalNodeInd, nodePos);
 
                     std :: vector< double >efNode;
                     FloatArray nodeNaturalCoord;
                     iEl.computeLocalCoordinates(nodeNaturalCoord, nodePos);
                     ei->evaluateEnrFuncInNode(efNode, * node);
 
+                    int numEnr = efGP.size();
                     for ( int k = 0; k < numEnr; k++ ) {
                         // matrix to be added anytime a node is enriched
                         // Creates nabla*(ef*N)
@@ -295,7 +301,7 @@ void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix
             EnrichmentItem *ei = xMan->giveEnrichmentItem(nodeEiIndices [ i ]);
 
             if ( ei->isDofManEnriched(* dMan) ) {
-                int numEnr = ei->giveNumDofManEnrichments(* dMan);
+//                int numEnr = ei->giveNumDofManEnrichments(* dMan);
 
 
                 // Enrichment function in Gauss Point
@@ -312,6 +318,7 @@ void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix
                 ei->evaluateEnrFuncInNode(efNode, * node);
 
 
+                int numEnr = efGP.size();
                 for ( int k = 0; k < numEnr; k++ ) {
                     if ( iSetDiscontContribToZero ) {
                         NdNode [ nodeCounter ] = 0.0;
@@ -530,34 +537,124 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
         }
         int nEdges = this->element->giveInterpolation()->giveNumberOfEdges();
         if ( foundTip ) {
-            oPointPartitions.resize( ( nEdges + 1 ) );
+        	oPointPartitions.clear();
 
             // Divide into subdomains
             int triPassed = 0;
             for ( int i = 1; i <= nEdges; i++ ) {
                 IntArray bNodes;
                 this->element->giveInterpolation()->boundaryGiveNodes(bNodes, i);
-                int nsLoc = bNodes.at(1);
-                int neLoc = bNodes.at( bNodes.giveSize() );
 
-                const FloatArray &coordS = * ( element->giveDofManager(nsLoc)->giveCoordinates() );
-                const FloatArray &coordE = * ( element->giveDofManager(neLoc)->giveCoordinates() );
 
-                if ( i == intersecEdgeInd [ 0 ] ) {
-                    oPointPartitions [ triPassed ].push_back(tipCoord);
-                    oPointPartitions [ triPassed ].push_back(intersecPoints [ 0 ]);
-                    oPointPartitions [ triPassed ].push_back(coordE);
-                    triPassed++;
+                if( bNodes.giveSize() == 2 ) {
 
-                    oPointPartitions [ triPassed ].push_back(tipCoord);
-                    oPointPartitions [ triPassed ].push_back(coordS);
-                    oPointPartitions [ triPassed ].push_back(intersecPoints [ 0 ]);
-                    triPassed++;
-                } else   {
-                    oPointPartitions [ triPassed ].push_back(tipCoord);
-                    oPointPartitions [ triPassed ].push_back(coordS);
-                    oPointPartitions [ triPassed ].push_back(coordE);
-                    triPassed++;
+					int nsLoc = bNodes.at(1);
+					int neLoc = bNodes.at( bNodes.giveSize() );
+
+					const FloatArray &coordS = * ( element->giveDofManager(nsLoc)->giveCoordinates() );
+					const FloatArray &coordE = * ( element->giveDofManager(neLoc)->giveCoordinates() );
+
+					if ( i == intersecEdgeInd [ 0 ] ) {
+						oPointPartitions.push_back( std :: vector< FloatArray >() );
+						oPointPartitions [ triPassed ].push_back(tipCoord);
+						oPointPartitions [ triPassed ].push_back(intersecPoints [ 0 ]);
+						oPointPartitions [ triPassed ].push_back(coordE);
+						triPassed++;
+
+						oPointPartitions.push_back( std :: vector< FloatArray >() );
+						oPointPartitions [ triPassed ].push_back(tipCoord);
+						oPointPartitions [ triPassed ].push_back(coordS);
+						oPointPartitions [ triPassed ].push_back(intersecPoints [ 0 ]);
+						triPassed++;
+					} else   {
+						oPointPartitions.push_back( std :: vector< FloatArray >() );
+						oPointPartitions [ triPassed ].push_back(tipCoord);
+						oPointPartitions [ triPassed ].push_back(coordS);
+						oPointPartitions [ triPassed ].push_back(coordE);
+						triPassed++;
+					}
+                }
+                else if( bNodes.giveSize() == 3 ) {
+
+                	// Start
+					const FloatArray &coordS = * ( element->giveDofManager(bNodes(0))->giveCoordinates() );
+
+					// Center
+					const FloatArray &coordC = * ( element->giveDofManager(bNodes(2))->giveCoordinates() );
+
+					// End
+					const FloatArray &coordE = * ( element->giveDofManager(bNodes(1))->giveCoordinates() );
+
+
+					if ( i == intersecEdgeInd [ 0 ] ) {
+
+						// Check if the intersection point is closer to the start or end, compared to the center point.
+						double dist_S_2 = intersecPoints[0].distance_square(coordS);
+//						double dist_E_2 = intersecPoints[0].distance_square(coordE);
+						double dist_C_2 = coordC.distance_square(coordS);
+
+						if( dist_S_2 < dist_C_2 ) {
+							oPointPartitions.push_back( std :: vector< FloatArray >() );
+							oPointPartitions [ triPassed ].push_back(intersecPoints [ 0 ]);
+							oPointPartitions [ triPassed ].push_back(tipCoord);
+							oPointPartitions [ triPassed ].push_back(coordS);
+							triPassed++;
+
+							oPointPartitions.push_back( std :: vector< FloatArray >() );
+							oPointPartitions [ triPassed ].push_back(coordC);
+							oPointPartitions [ triPassed ].push_back(tipCoord);
+							oPointPartitions [ triPassed ].push_back(intersecPoints [ 0 ]);
+							triPassed++;
+
+							oPointPartitions.push_back( std :: vector< FloatArray >() );
+							oPointPartitions [ triPassed ].push_back(coordE);
+							oPointPartitions [ triPassed ].push_back(tipCoord);
+							oPointPartitions [ triPassed ].push_back(coordC);
+							triPassed++;
+
+						}
+						else {
+
+							oPointPartitions.push_back( std :: vector< FloatArray >() );
+							oPointPartitions [ triPassed ].push_back(coordC);
+							oPointPartitions [ triPassed ].push_back(tipCoord);
+							oPointPartitions [ triPassed ].push_back(coordS);
+							triPassed++;
+
+
+							oPointPartitions.push_back( std :: vector< FloatArray >() );
+							oPointPartitions [ triPassed ].push_back(intersecPoints [ 0 ]);
+							oPointPartitions [ triPassed ].push_back(tipCoord);
+							oPointPartitions [ triPassed ].push_back(coordC);
+							triPassed++;
+
+							oPointPartitions.push_back( std :: vector< FloatArray >() );
+							oPointPartitions [ triPassed ].push_back(coordE);
+							oPointPartitions [ triPassed ].push_back(tipCoord);
+							oPointPartitions [ triPassed ].push_back(coordC);
+							triPassed++;
+
+						}
+
+
+					} else   {
+						oPointPartitions.push_back( std :: vector< FloatArray >() );
+						oPointPartitions [ triPassed ].push_back(tipCoord);
+						oPointPartitions [ triPassed ].push_back(coordS);
+						oPointPartitions [ triPassed ].push_back(coordC);
+						triPassed++;
+
+						oPointPartitions.push_back( std :: vector< FloatArray >() );
+						oPointPartitions [ triPassed ].push_back(tipCoord);
+						oPointPartitions [ triPassed ].push_back(coordC);
+						oPointPartitions [ triPassed ].push_back(coordE);
+						triPassed++;
+					}
+
+                }
+                else {
+                	printf("bNodes.giveSize(): %d\n", bNodes.giveSize() );
+                	OOFEM_ERROR("Unsupported size of bNodes.")
                 }
             }
 
@@ -892,6 +989,14 @@ void XfemElementInterface :: updateYourselfCZ(TimeStep *tStep)
             mpCZIntegrationRules [ i ]->updateYourself(tStep);
         }
     }
+
+    numSeg = mpCZExtraIntegrationRules.size();
+    for ( size_t i = 0; i < numSeg; i++ ) {
+        if ( mpCZExtraIntegrationRules [ i ] != NULL ) {
+            mpCZExtraIntegrationRules [ i ]->updateYourself(tStep);
+        }
+    }
+
 }
 
 void XfemElementInterface :: computeDisplacementJump(oofem :: GaussPoint &iGP, oofem :: FloatArray &oJump, const oofem :: FloatArray &iSolVec, const oofem :: FloatMatrix &iNMatrix)

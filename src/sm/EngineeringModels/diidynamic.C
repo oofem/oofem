@@ -265,7 +265,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
 
         stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
 
-        this->assemble(*stiffnessMatrix, tStep, EffectiveTangentAssembler(false, 1 + this->delta * a1,  this->a0 + this->eta * this->a1),
+        this->assemble(*stiffnessMatrix, tStep, EffectiveTangentAssembler(TangentStiffness, false, 1 + this->delta * a1,  this->a0 + this->eta * this->a1),
                        EModelDefaultEquationNumbering(), domain);
 
         help.resize(neq);
@@ -284,7 +284,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
         OOFEM_LOG_DEBUG("Assembling stiffness matrix\n");
 #endif
         stiffnessMatrix->zero();
-        this->assemble(*stiffnessMatrix, tStep, EffectiveTangentAssembler(false, 1 + this->delta * a1,  this->a0 + this->eta * this->a1),
+        this->assemble(*stiffnessMatrix, tStep, EffectiveTangentAssembler(TangentStiffness, false, 1 + this->delta * a1,  this->a0 + this->eta * this->a1),
                        EModelDefaultEquationNumbering(), domain);
     }
 
@@ -621,50 +621,32 @@ DIIDynamic :: determineConstants(TimeStep *tStep)
 }
 
 
-contextIOResultType DIIDynamic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType DIIDynamic :: saveContext(DataStream &stream, ContextMode mode)
 {
-    int closeFlag = 0;
     contextIOResultType iores;
-    FILE *file = NULL;
-
-    if ( stream == NULL ) {
-        if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
-                                    this->giveCurrentStep()->giveVersion(), contextMode_write) ) {
-            THROW_CIOERR(CIO_IOERR); // Override.
-        }
-
-        stream = new FileDataStream(file);
-        closeFlag = 1;
-    }
 
     if ( ( iores = EngngModel :: saveContext(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = displacementVector.storeYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = displacementVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = velocityVector.storeYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = velocityVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = accelerationVector.storeYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = accelerationVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = loadVector.storeYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = loadVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = previousIncrementOfDisplacement.storeYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = previousIncrementOfDisplacement.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
-    }
-
-    if ( closeFlag ) {
-        fclose(file);
-        delete stream;
-        stream = NULL;
     }
 
     return CIO_OK;

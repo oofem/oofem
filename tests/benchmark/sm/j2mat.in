@@ -1,6 +1,6 @@
 j2mat.out
 Plane stress - cantilever l=3. h=1. - Nonlinear solution using HMH material.
-NonLinearStatic nsteps 8 stepLength 0.000011497039 minStepLength 0.00001 rtolf 1e-3 Psi 0.0 MaxIter 120 nmodules 1
+StaticStructural nsteps 8 solverType "calm" stepLength 0.000011497039 minStepLength 0.00001 rtolf 1e-3 Psi 0.0 MaxIter 120 nmodules 1
 errorcheck
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
@@ -462,7 +462,7 @@ j2mat 1 E 15.0e6 n 0.25 Ry 10.0  tAlpha 0.000012 d 1.0
 #Steel1 1 d 0. E 15.e6 n 0.25 Ry 10.0
 #IsoLE 1 d 0. E 15.0 n 0.25
 BoundaryCondition  1 loadTimeFunction 1 dofs 2 1 2 values 2 0. 0. set 2
-NodalLoad 2 loadTimeFunction 1 dofs 2 1 2 components 2  0. 0.011904762 set 3
+NodalLoad 2 loadTimeFunction 1 dofs 2 1 2 components 2  0. 0.011904762 set 3 reference
 ConstantFunction 1 f(t) 1.0
 Set 1 elementranges {(1 281)}
 Set 2 nodes 12 63 80 99 116 127 138 147 156 162 166 169 171

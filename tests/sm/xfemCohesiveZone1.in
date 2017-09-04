@@ -35,14 +35,14 @@ PolygonLine 1 points 6 -0.5 0.3 -0.2 0.3 1.1 0.3
 #
 #%BEGIN_CHECK% tolerance 1.e-4
 ## step 2
-#REACTION tStep 2 number 3 dof 1 value 1.87813253e+01
-#REACTION tStep 2 number 4 dof 1 value 1.87813439e+01
+#REACTION tStep 2 number 3 dof 1 value 1.87798081e+01
+#REACTION tStep 2 number 4 dof 1 value 1.87798262e+01
 ## step 3
-#REACTION tStep 3 number 3 dof 1 value 1.19669860e+01
-#REACTION tStep 3 number 4 dof 1 value 1.19669860e+01
+#REACTION tStep 3 number 3 dof 1 value 1.19649016e+01
+#REACTION tStep 3 number 4 dof 1 value 1.19649061e+01
 ## step 4
-#REACTION tStep 4 number 3 dof 1 value 5.14949702e+00
-#REACTION tStep 4 number 4 dof 1 value 5.14949702e+00
+#REACTION tStep 4 number 3 dof 1 value 5.14994041e+00
+#REACTION tStep 4 number 4 dof 1 value 5.14994490e+00
 ## step 5
 #REACTION tStep 5 number 3 dof 1 value 0.0e+00
 #REACTION tStep 5 number 4 dof 1 value 0.0e+00

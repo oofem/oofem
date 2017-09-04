@@ -54,14 +54,21 @@
 namespace oofem {
 REGISTER_EngngModel(StaggeredProblem);
 
-StaggeredProblem :: StaggeredProblem(int i, EngngModel *_master) : EngngModel(i, _master)
+StaggeredProblem :: StaggeredProblem(int i, EngngModel *_master) : EngngModel(i, _master),
+    adaptiveStepLength(false),
+    minStepLength(0.),
+    maxStepLength(0.),
+    reqIterations(0.),
+    adaptiveStepSince(0.),
+    endOfTimeOfInterest(0.),
+    prevStepLength(0.),
+    currentStepLength(0.)
 {
     ndomains = 1; // domain is needed to store the time step function
 
     dtFunction = 0;
     stepMultiplier = 1.;
     timeDefinedByProb = 0;
-    adaptiveStepLength = false;
 }
 
 StaggeredProblem :: ~StaggeredProblem()
@@ -196,6 +203,29 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
         domainPrescribedNeqs.clear();
         domainList.clear();
     }
+
+    suppressOutput = ir->hasField(_IFT_EngngModel_suppressOutput);
+
+    if ( suppressOutput ) {
+        printf("Suppressing output.\n");
+    } else {
+
+        if ( ( outputStream = fopen(this->dataOutputFileName.c_str(), "w") ) == NULL ) {
+            OOFEM_ERROR("Can't open output file %s", this->dataOutputFileName.c_str());
+        }
+
+        fprintf(outputStream, "%s", PRG_HEADER);
+        fprintf(outputStream, "\nStarting analysis on: %s\n", ctime(& this->startTime) );
+        fprintf(outputStream, "%s\n", simulationDescription.c_str());
+
+#ifdef __PARALLEL_MODE
+        if ( this->isParallel() ) {
+            fprintf(outputStream, "Problem rank is %d/%d on %s\n\n", this->rank, this->numProcs, this->processor_name);
+        }
+#endif
+    }
+
+
 
     return IRRT_OK;
 }
@@ -351,7 +381,8 @@ StaggeredProblem :: giveSolutionStepWhenIcApply(bool force)
 }
 
 int
-StaggeredProblem :: giveNumberOfFirstStep(bool force) {
+StaggeredProblem :: giveNumberOfFirstStep(bool force)
+{
     if ( timeDefinedByProb && !force) {
         return emodelList [ timeDefinedByProb - 1 ].get()->giveNumberOfFirstStep(true);
     } else {
@@ -384,6 +415,7 @@ StaggeredProblem :: giveNextStep()
         OOFEM_LOG_INFO("\n==================================================================\n");
         OOFEM_LOG_INFO( "\nAdjusting time step length to: %lf \n\n", totalTime - previousStep->giveTargetTime() );
         currentStep.reset( new TimeStep(istep, this, 1, totalTime, totalTime - previousStep->giveTargetTime(), counter) );
+        this->numberOfSteps = istep;
     } else {
         if ( this->adaptiveStepLength ) {
             OOFEM_LOG_INFO("\n==================================================================\n");
@@ -408,7 +440,6 @@ StaggeredProblem :: solveYourself()
     }
 
     int smstep = 1, sjstep = 1;
-    FILE *out = this->giveOutputStream();
     this->timer.startTimer(EngngModelTimer :: EMTT_AnalysisTimer);
 
     if ( sp->giveCurrentStep() ) {
@@ -443,8 +474,10 @@ StaggeredProblem :: solveYourself()
             OOFEM_LOG_INFO("EngngModel info: user time consumed by solution step %d: %.2fs\n",
                            sp->giveCurrentStep()->giveNumber(), _steptime);
 
-            fprintf(out, "\nUser time consumed by solution step %d: %.3f [s]\n\n",
-                    sp->giveCurrentStep()->giveNumber(), _steptime);
+            if(!suppressOutput) {
+            	fprintf(this->giveOutputStream(), "\nUser time consumed by solution step %d: %.3f [s]\n\n",
+                        sp->giveCurrentStep()->giveNumber(), _steptime);
+            }
 
 #ifdef __PARALLEL_MODE
             if ( loadBalancingFlag ) {
@@ -464,7 +497,7 @@ void
 StaggeredProblem :: solveYourselfAt(TimeStep *tStep)
 {
 #ifdef VERBOSE
-    OOFEM_LOG_RELEVANT( "Solving [step number %5d, time %e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
+    OOFEM_LOG_RELEVANT("Solving [step number %5d, time %e]\n", tStep->giveNumber(), tStep->giveTargetTime());
 #endif
     for ( auto &emodel: emodelList ) {
         emodel->solveYourselfAt(tStep);
@@ -507,18 +540,11 @@ StaggeredProblem :: terminate(TimeStep *tStep)
     for ( auto &emodel: emodelList ) {
         emodel->terminate(tStep);
     }
-
-    fflush( this->giveOutputStream() );
 }
 
 void
 StaggeredProblem :: doStepOutput(TimeStep *tStep)
 {
-    FILE *File = this->giveOutputStream();
-
-    // print output
-    this->printOutputAt(File, tStep);
-    // export using export manager
     for ( auto &emodel: emodelList ) {
         emodel->giveExportModuleManager()->doOutput(tStep);
     }
@@ -526,22 +552,18 @@ StaggeredProblem :: doStepOutput(TimeStep *tStep)
 
 
 void
-StaggeredProblem :: printOutputAt(FILE *File, TimeStep *tStep)
+StaggeredProblem :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-    FILE *slaveFile;
-    for ( auto &emodel: emodelList ) {
-        slaveFile = emodel->giveOutputStream();
-        emodel->printOutputAt(slaveFile, tStep);
-    }
+    // Subproblems handle the output themselves.
 }
 
 
 contextIOResultType
-StaggeredProblem :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+StaggeredProblem :: saveContext(DataStream &stream, ContextMode mode)
 {
-    EngngModel :: saveContext(stream, mode, obj);
+    EngngModel :: saveContext(stream, mode);
     for ( auto &emodel: emodelList ) {
-        emodel->saveContext(stream, mode, obj);
+        emodel->saveContext(stream, mode);
     }
 
     return CIO_OK;

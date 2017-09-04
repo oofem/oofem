@@ -1,0 +1,198 @@
+## 1. Output file
+Tr2shell7XFEM_adaptiveDelam.out
+## 2. Job description
+Adaptive XFEM delamination in shell7. cf Främby, Fagerström & Bouzoulis, 'Adaptive modelling of delamination initiation and propagation using an equivalent single-layer shell approach', IJNME, 2016
+#
+## 3. Analysis type with export modules
+StaticStructural nsteps 3 rtolf 1.0e-5 rtold -1.0 manrmsteps 1 nmodules 1 lstype 4 smtype 8  forcescaledofs 18 500 501 502 503 504 505  506 507 508 509 510 511  512 513 514 515 516 517  forcescale 18  1 1 1 1 1 1  1 1 1 1 1 1  1 1 1 1 1 1
+#initialguess 0
+errorcheck
+#vtkxml 1 tstep_all dofman_all element_all primvars 1 1  vars 1 92
+#matlab 2 tstep_all data 1 dataNodeSet 3 reactionforces 1 reactionforcesnodeset 3  
+#integrationpoints 1 internalvars 1 1 ipelset 5
+#
+## 4. Domain
+domain 3dDirShell
+#
+## 5. Output manager
+OutputManager tstep_all dofman_output {42}
+#
+## 6. Component size 
+ndofman 63 nelem 20 ncrosssect 1 nmat 5 nbc 13 nic 0 nltf 2 nset 7 nxfemman 1
+#
+## 7. Dof manager (node & element-side record) 
+node     1 coords 3  0.000000000000  0.000000000000  0.000000000000 
+node     2 coords 3  0.150000000000  0.000000000000  0.000000000000 
+node     3 coords 3  0.300000000000  0.000000000000  0.000000000000 
+node     4 coords 3  0.450000000000  0.000000000000  0.000000000000 
+node     5 coords 3  0.600000000000  0.000000000000  0.000000000000 
+node     6 coords 3  0.750000000000  0.000000000000  0.000000000000 
+node     7 coords 3  0.900000000000  0.000000000000  0.000000000000 
+node     8 coords 3  1.050000000000  0.000000000000  0.000000000000 
+node     9 coords 3  1.200000000000  0.000000000000  0.000000000000 
+node    10 coords 3  1.350000000000  0.000000000000  0.000000000000 
+node    11 coords 3  1.500000000000  0.000000000000  0.000000000000 
+node    12 coords 3  1.650000000000  0.000000000000  0.000000000000 
+node    13 coords 3  1.800000000000  0.000000000000  0.000000000000 
+node    14 coords 3  1.950000000000  0.000000000000  0.000000000000 
+node    15 coords 3  2.100000000000  0.000000000000  0.000000000000 
+node    16 coords 3  2.250000000000  0.000000000000  0.000000000000 
+node    17 coords 3  2.400000000000  0.000000000000  0.000000000000 
+node    18 coords 3  2.550000000000  0.000000000000  0.000000000000 
+node    19 coords 3  2.700000000000  0.000000000000  0.000000000000 
+node    20 coords 3  2.850000000000  0.000000000000  0.000000000000 
+node    21 coords 3  3.000000000000  0.000000000000  0.000000000000 
+node    22 coords 3  0.000000000000  0.150000000000  0.000000000000 
+node    23 coords 3  0.150000000000  0.150000000000  0.000000000000 
+node    24 coords 3  0.300000000000  0.150000000000  0.000000000000 
+node    25 coords 3  0.450000000000  0.150000000000  0.000000000000 
+node    26 coords 3  0.600000000000  0.150000000000  0.000000000000 
+node    27 coords 3  0.750000000000  0.150000000000  0.000000000000 
+node    28 coords 3  0.900000000000  0.150000000000  0.000000000000 
+node    29 coords 3  1.050000000000  0.150000000000  0.000000000000 
+node    30 coords 3  1.200000000000  0.150000000000  0.000000000000 
+node    31 coords 3  1.350000000000  0.150000000000  0.000000000000 
+node    32 coords 3  1.500000000000  0.150000000000  0.000000000000 
+node    33 coords 3  1.650000000000  0.150000000000  0.000000000000 
+node    34 coords 3  1.800000000000  0.150000000000  0.000000000000 
+node    35 coords 3  1.950000000000  0.150000000000  0.000000000000 
+node    36 coords 3  2.100000000000  0.150000000000  0.000000000000 
+node    37 coords 3  2.250000000000  0.150000000000  0.000000000000 
+node    38 coords 3  2.400000000000  0.150000000000  0.000000000000 
+node    39 coords 3  2.550000000000  0.150000000000  0.000000000000 
+node    40 coords 3  2.700000000000  0.150000000000  0.000000000000 
+node    41 coords 3  2.850000000000  0.150000000000  0.000000000000 
+node    42 coords 3  3.000000000000  0.150000000000  0.000000000000 
+node    43 coords 3  0.000000000000  0.300000000000  0.000000000000 
+node    44 coords 3  0.150000000000  0.300000000000  0.000000000000 
+node    45 coords 3  0.300000000000  0.300000000000  0.000000000000 
+node    46 coords 3  0.450000000000  0.300000000000  0.000000000000 
+node    47 coords 3  0.600000000000  0.300000000000  0.000000000000 
+node    48 coords 3  0.750000000000  0.300000000000  0.000000000000 
+node    49 coords 3  0.900000000000  0.300000000000  0.000000000000 
+node    50 coords 3  1.050000000000  0.300000000000  0.000000000000 
+node    51 coords 3  1.200000000000  0.300000000000  0.000000000000 
+node    52 coords 3  1.350000000000  0.300000000000  0.000000000000 
+node    53 coords 3  1.500000000000  0.300000000000  0.000000000000 
+node    54 coords 3  1.650000000000  0.300000000000  0.000000000000 
+node    55 coords 3  1.800000000000  0.300000000000  0.000000000000 
+node    56 coords 3  1.950000000000  0.300000000000  0.000000000000 
+node    57 coords 3  2.100000000000  0.300000000000  0.000000000000 
+node    58 coords 3  2.250000000000  0.300000000000  0.000000000000 
+node    59 coords 3  2.400000000000  0.300000000000  0.000000000000 
+node    60 coords 3  2.550000000000  0.300000000000  0.000000000000 
+node    61 coords 3  2.700000000000  0.300000000000  0.000000000000 
+node    62 coords 3  2.850000000000  0.300000000000  0.000000000000 
+node    63 coords 3  3.000000000000  0.300000000000  0.000000000000 
+#
+## 8. Elements 
+Tr2Shell7xfem     1 nodes  6      1      3     45      2     24     23  boundaryLoads   2  3  0  
+Tr2Shell7xfem     2 nodes  6     45     43      1     44     22     23  boundaryLoads   2  3  0  
+Tr2Shell7xfem     3 nodes  6      3      5     47      4     26     25  boundaryLoads   2  4  0  
+Tr2Shell7xfem     4 nodes  6     47     45      3     46     24     25  boundaryLoads   2  4  0  
+Tr2Shell7xfem     5 nodes  6      5      7     49      6     28     27  boundaryLoads   2  5  0  
+Tr2Shell7xfem     6 nodes  6     49     47      5     48     26     27  boundaryLoads   2  5  0  
+Tr2Shell7xfem     7 nodes  6      7      9     51      8     30     29  boundaryLoads   2  6  0  
+Tr2Shell7xfem     8 nodes  6     51     49      7     50     28     29  boundaryLoads   2  6  0  
+Tr2Shell7xfem     9 nodes  6      9     11     53     10     32     31  boundaryLoads   2  7  0  
+Tr2Shell7xfem    10 nodes  6     53     51      9     52     30     31  boundaryLoads   2  7  0  
+Tr2Shell7xfem    11 nodes  6     11     13     55     12     34     33  boundaryLoads   2  8  0  
+Tr2Shell7xfem    12 nodes  6     55     53     11     54     32     33  boundaryLoads   2  8  0  
+Tr2Shell7xfem    13 nodes  6     13     15     57     14     36     35  boundaryLoads   2  9  0  
+Tr2Shell7xfem    14 nodes  6     57     55     13     56     34     35  boundaryLoads   2  9  0  
+Tr2Shell7xfem    15 nodes  6     15     17     59     16     38     37  boundaryLoads   2 10  0  
+Tr2Shell7xfem    16 nodes  6     59     57     15     58     36     37  boundaryLoads   2 10  0  
+Tr2Shell7xfem    17 nodes  6     17     19     61     18     40     39  boundaryLoads   2 11  0  
+Tr2Shell7xfem    18 nodes  6     61     59     17     60     38     39  boundaryLoads   2 11  0  
+Tr2Shell7xfem    19 nodes  6     19     21     63     20     42     41  boundaryLoads   2 12  0  
+Tr2Shell7xfem    20 nodes  6     63     61     19     62     40     41  boundaryLoads   2 12  0  
+#
+## 9. Cross section
+# Failure index at support two times mid 
+layeredCS 1 nlayers 4 layermaterials 4 1 1 1 1  thicks 4 .33 .33 .33 .33  nintegrationpoints 3 set 7 interfacematerials 3 5 5 5
+# 
+## 10. Material type 
+# Ortotropic elasticity
+#  0 ply
+OrthoLE  1 d 1.0e-9 Ex 126e3 Ey 10e3 Ez 10e3 NYyz .29 NYxz .29 NYxy .29 Gyz 8e3 Gxz 8e3 Gxy 8e3 tAlphax 1e-6 tAlphay 1e-6 tAlphaz 1e-6 lcs 6  1.  0.  0.  0.  1.  0.
+# -45 ply
+OrthoLE  2 d 1.0e-9 Ex 126e3 Ey 10e3 Ez 10e3 NYyz .29 NYxz .29 NYxy .29 Gyz 8e3 Gxz 8e3 Gxy 8e3 tAlphax 1e-6 tAlphay 1e-6 tAlphaz 1e-6 lcs 6 .7071 -.7071  0.  .7071  .7071  0.
+# 90 ply
+OrthoLE  3 d 1.0e-9 Ex 126e3 Ey 10e3 Ez 10e3 NYyz .29 NYxz .29 NYxy .29 Gyz 8e3 Gxz 8e3 Gxy 8e3 tAlphax 1e-6 tAlphay 1e-6 tAlphaz 1e-6 lcs 6  0.  1.  0. -1.  0.  0.
+# +45 ply
+OrthoLE  4 d 1.0e-9 Ex 126e3 Ey 10e3 Ez 10e3 NYyz .29 NYxz .29 NYxy .29 Gyz 8e3 Gxz 8e3 Gxy 8e3 tAlphax 1e-6 tAlphay 1e-6 tAlphaz 1e-6 lcs 6 .7071  .7071  0. -.7071  .7071  0.
+#
+intmatbilinearczjansson 5 kn 1.0e6 knc 0. g1c 218.e-3 g2c 800.e-3 mu 0.0 gamma 1.0 sigf 20. 
+#semiexplicit
+#
+#
+## 11. Nonlocal barrier
+#
+## 12. Load and boundary conditions
+#BoundaryCondition    1 loadTimeFunction 1            dofs 9  3 17 18  502 505  508 511  514 517  values 9  0. 0. 0.  0. 0.  0. 0.  0. 0.   set 1
+BoundaryCondition    1 loadTimeFunction 1            dofs 3  3 17 18  values 3  0. 0. 0.    set 1
+#BoundaryCondition    2 loadTimeFunction 1            dofs 8  1 15  500 503  506 509  512 515  values 8  0. 0.  0. 0.  0. 0.  0. 0.    set 2
+BoundaryCondition    2 loadTimeFunction 1            dofs 2  1 15  values 2  0. 0.   set 2
+# Distributed load: 23.7 (sigfn = 20) will give failure at symmetry BC.
+ConstantSurfaceLoad  3 loadTimeFunction 2 loadtype 3 dofs 1 3      Components 1  1.0   loadOffset 1.0 
+ConstantSurfaceLoad  4 loadTimeFunction 2 loadtype 3 dofs 1 3      Components 1  2.0   loadOffset 1.0 
+ConstantSurfaceLoad  5 loadTimeFunction 2 loadtype 3 dofs 1 3      Components 1  3.0   loadOffset 1.0 
+ConstantSurfaceLoad  6 loadTimeFunction 2 loadtype 3 dofs 1 3      Components 1  4.0   loadOffset 1.0 
+ConstantSurfaceLoad  7 loadTimeFunction 2 loadtype 3 dofs 1 3      Components 1  5.0   loadOffset 1.0 
+ConstantSurfaceLoad  8 loadTimeFunction 2 loadtype 3 dofs 1 3      Components 1  6.0   loadOffset 1.0 
+ConstantSurfaceLoad  9 loadTimeFunction 2 loadtype 3 dofs 1 3      Components 1  7.0   loadOffset 1.0 
+ConstantSurfaceLoad 10 loadTimeFunction 2 loadtype 3 dofs 1 3      Components 1  8.0   loadOffset 1.0 
+ConstantSurfaceLoad 11 loadTimeFunction 2 loadtype 3 dofs 1 3      Components 1  9.0   loadOffset 1.0 
+ConstantSurfaceLoad 12 loadTimeFunction 2 loadtype 3 dofs 1 3      Components 1 10.0   loadOffset 1.0 
+# Midline symmetry
+BoundaryCondition   13 loadTimeFunction 1            dofs 8  2 16  501 504  507 510  513 516  values 8  0. 0.  0. 0.  0. 0.  0. 0.    set 6
+#
+## 13. Initial conditions
+#
+## 14. Time functions
+ConstantFunction 1 f(t) 1.0
+#PiecewiseLinFunction 2 npoints 2 t 2 0. 4. f(t) 2 0. .59
+#PiecewiseLinFunction 2 npoints 2 t 2 0. 1. f(t) 2 0. 1.58
+#PiecewiseLinFunction 2 npoints 5 t 5 0. 1. 2. 3. 4. f(t) 5 0. .3555 .395 .553 .593
+#PiecewiseLinFunction 2 npoints 4 t 4 0. 1. 2. 3. f(t) 4 0. .395 .553 .593
+PiecewiseLinFunction 2 npoints 4 t 4 0. 1. 2. 3. f(t) 4 0. 1.185 1.66 1.78
+#
+## 16. Sets
+#
+# LH edge
+Set     1 nodes     3     1    22    43
+# RH edge
+Set     2 nodes     3    21    42    63
+# exportNodes = LH + RH edge
+Set     3 nodes     6     1    22    43       21    42    63
+Set     4 nodes     1     1
+Set     5 elements    10     1     3     5     7     9    11    13    15    17    19
+Set     6 noderanges    {(22 42)}
+Set     7 allelements 
+#
+## 15. Xfem manager record and associated records
+XfemManager 1 numberofenrichmentitems 3
+#
+delamination 1 interfacenum 1 2 csnum 1 1 propagationlaw 1 initiationfactor .9 initiationradius 0.0 inheritorderedbc 
+DiscontinuousFunction 1
+DofManList 1 list    0
+propagationlawczdamageradius 1 incrementradius 0.9 damagethreshold 0.000001  
+#
+delamination 2 interfacenum 1 3 csnum 1 1 propagationlaw 2 initiationfactor .9 initiationradius 0.0 inheritorderedbc 
+DiscontinuousFunction 2
+DofManList 2 list    0
+propagationlawczdamageradius 2 incrementradius 0.9 damagethreshold 0.000001  
+#
+delamination 3 interfacenum 1 1 csnum 1 1 propagationlaw 3 initiationfactor .9 initiationradius 0.0 inheritorderedbc 
+DiscontinuousFunction 3 
+DofManList 3 list    0
+propagationlawczdamageradius 3 incrementradius 0.9 damagethreshold 0.000001  
+#
+#
+#
+#%BEGIN_CHECK% tolerance 1.e-10
+#NODE tStep 1 number 42 dof 3 unknown d value 9.20318119e-03
+#NODE tStep 2 number 42 dof 3 unknown d value 1.39539556e-02
+#NODE tStep 3 number 42 dof 3 unknown d value 2.82788732e-02
+#%END_CHECK%
+#

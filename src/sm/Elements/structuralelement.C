@@ -72,7 +72,7 @@ StructuralElement :: StructuralElement(int n, Domain *aDomain) :
 StructuralElement :: ~StructuralElement()
 {}
 
-
+#if 0
 void
 StructuralElement :: computeConstitutiveMatrixAt(FloatMatrix &answer,
                                                  MatResponseMode rMode, GaussPoint *gp,
@@ -84,7 +84,7 @@ StructuralElement :: computeConstitutiveMatrixAt(FloatMatrix &answer,
 {
     this->giveStructuralCrossSection()->giveCharMaterialStiffnessMatrix(answer, rMode, gp, tStep);
 }
-
+#endif
 
 void StructuralElement :: computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep)
 {
@@ -720,13 +720,13 @@ StructuralElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, Tim
     answer.beProductOf(b, u);
 }
 
-
+#if 0
 void
 StructuralElement :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
     this->giveStructuralCrossSection()->giveRealStresses(answer, gp, strain, tStep);
 }
-
+#endif
 
 void
 StructuralElement :: giveInternalForcesVector(FloatArray &answer,
@@ -1148,16 +1148,12 @@ StructuralElement :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSta
 void
 StructuralElement :: giveNonlocalLocationArray(IntArray &locationArray, const UnknownNumberingScheme &s)
 {
-    NonlocalMaterialStiffnessInterface *interface;
-
     IntArray elemLocArry;
-    // create lit of remote elements, contributing to receiver
-    std :: list< localIntegrationRecord > *integrationDomainList;
 
     locationArray.clear();
     // loop over element IP
     for ( IntegrationPoint *ip : *this->giveDefaultIntegrationRulePtr() ) {
-        interface =  static_cast< NonlocalMaterialStiffnessInterface * >( this->giveStructuralCrossSection()->
+        auto interface =  static_cast< NonlocalMaterialStiffnessInterface * >( this->giveStructuralCrossSection()->
                                                                           giveMaterialInterface(NonlocalMaterialStiffnessInterfaceType, ip) );
 
 
@@ -1166,7 +1162,7 @@ StructuralElement :: giveNonlocalLocationArray(IntArray &locationArray, const Un
             return;
         }
 
-        integrationDomainList = interface->
+        auto integrationDomainList = interface->
                                 NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(ip);
         // loop over IP influencing IPs, extract corresponding element numbers and their code numbers
         for ( auto &lir : *integrationDomainList ) {
@@ -1184,7 +1180,6 @@ void
 StructuralElement :: addNonlocalStiffnessContributions(SparseMtrx &dest, const UnknownNumberingScheme &s, TimeStep *tStep)
 {
     ///@todo Take into account cross section model (slaves)
-    NonlocalMaterialStiffnessInterface *interface;
 
     if ( !this->isActivated(tStep) ) {
         return;
@@ -1192,7 +1187,7 @@ StructuralElement :: addNonlocalStiffnessContributions(SparseMtrx &dest, const U
 
     // loop over element IP
     for ( IntegrationPoint *ip : *this->giveDefaultIntegrationRulePtr() ) {
-        interface = static_cast< NonlocalMaterialStiffnessInterface * >( this->giveStructuralCrossSection()->
+        auto interface = static_cast< NonlocalMaterialStiffnessInterface * >( this->giveStructuralCrossSection()->
                                                                          giveMaterialInterface(NonlocalMaterialStiffnessInterfaceType, ip) );
         if ( interface == NULL ) {
             return;
@@ -1209,10 +1204,9 @@ StructuralElement :: adaptiveUpdate(TimeStep *tStep)
     int result = 1;
     FloatArray strain;
 
-    MaterialModelMapperInterface *interface;
     for ( auto &iRule : integrationRulesArray ) {
         for ( IntegrationPoint *ip : *iRule ) {
-            interface = static_cast< MaterialModelMapperInterface * >( this->giveStructuralCrossSection()->
+            auto interface = static_cast< MaterialModelMapperInterface * >( this->giveStructuralCrossSection()->
                                                                        giveMaterialInterface(MaterialModelMapperInterfaceType, ip) );
 
             if ( interface == NULL ) {
@@ -1363,11 +1357,10 @@ StructuralElement :: showSparseMtrxStructure(CharType mtrx, oofegGraphicContext 
 void
 StructuralElement :: showExtendedSparseMtrxStructure(CharType mtrx, oofegGraphicContext &gc, TimeStep *tStep)
 {
-    NonlocalMaterialStiffnessInterface *interface;
     if ( mtrx == TangentStiffnessMatrix ) {
         // loop over element IP
         for ( IntegrationPoint *ip : *this->giveDefaultIntegrationRulePtr() ) {
-            interface = static_cast< NonlocalMaterialStiffnessInterface * >( this->giveStructuralCrossSection()->
+            auto interface = static_cast< NonlocalMaterialStiffnessInterface * >( this->giveStructuralCrossSection()->
                                                                              giveMaterialInterface(NonlocalMaterialStiffnessInterfaceType, ip) );
 
             if ( interface == NULL ) {

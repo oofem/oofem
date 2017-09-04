@@ -73,7 +73,7 @@ public:
                                 const UnknownNumberingScheme &s, FloatArray *eNorm = NULL);
 
     virtual void assemble(SparseMtrx &answer, TimeStep *tStep,
-                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
+                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale = 1.0);
 
     virtual void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,
                                     const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);

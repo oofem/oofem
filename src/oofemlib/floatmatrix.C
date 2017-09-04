@@ -48,6 +48,9 @@
 #include <cstdlib>
 #include <cstring>
 #include <ostream>
+#include <iostream>
+#include <fstream>
+#include <iomanip>
 #include <numeric>
 #define RESIZE(nr, nc) \
     { \
@@ -198,6 +201,7 @@ void FloatMatrix :: checkBounds(int i, int j) const
     }
 
     if ( j > nColumns ) {
+		printf("APA \n");
         OOFEM_ERROR("matrix error on columns : %d > %d", j, nColumns);
     }
 }
@@ -912,8 +916,8 @@ void FloatMatrix :: beInverseOf(const FloatMatrix &src)
         // lower triangle elimination by columns
         for ( int i = 1; i < nRows; i++ ) {
             piv = tmp.at(i, i);
-            if ( fabs(piv) < 1.e-20 ) {
-                OOFEM_ERROR("cannot inverse a %d by %d matrix", nRows, nColumns);
+            if ( fabs(piv) < 1.e-24 ) {
+                OOFEM_ERROR("pivot (%d,%d) to close to small (< 1.e-24)", i, i);
             }
 
             for ( int j = i + 1; j <= nRows; j++ ) {
@@ -1470,6 +1474,28 @@ void FloatMatrix :: printYourself() const
 }
 
 
+void FloatMatrix :: printYourselfToFile(const std::string filename, const bool showDimensions) const
+// Prints the receiver to file.
+{
+    std :: ofstream matrixfile (filename);
+    if (matrixfile.is_open()) {
+        if (showDimensions)
+            matrixfile << "FloatMatrix with dimensions : " << nRows << ", " << nColumns << "\n";
+        matrixfile << std::scientific << std::right << std::setprecision(3);
+        for ( int i = 1; i <= nRows; ++i ) {
+            for ( int j = 1; j <= nColumns; ++j ) {
+                matrixfile << std::setw(10) << this->at(i, j) << "\t";
+            }
+
+            matrixfile << "\n";
+        }
+        matrixfile.close();
+    } else {
+        OOFEM_ERROR("Failed to write to file");
+    }
+}
+
+
 void FloatMatrix :: printYourself(const std::string &name) const
 // Prints the receiver on screen.
 {
@@ -1483,7 +1509,14 @@ void FloatMatrix :: printYourself(const std::string &name) const
             printf("\n");
         }
     } else {
-        printf("   large matrix : coefficients not printed \n");
+        for ( int i = 1; i <= nRows && i <= 20; ++i ) {
+            for ( int j = 1; j <= nColumns && j <= 10; ++j ) {
+                printf( "%10.3e  ", this->at(i, j) );
+            }
+            if ( nColumns > 10 ) printf(" ...");
+            printf("\n");
+        }
+        if ( nRows > 20 )  printf(" ...\n");
     }
 }
 

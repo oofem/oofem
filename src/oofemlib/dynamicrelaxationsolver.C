@@ -41,6 +41,7 @@
 #include "dofmanager.h"
 #include "element.h"
 #include "unknownnumberingscheme.h"
+#include "mathfem.h"
 
 namespace oofem {
 
@@ -62,7 +63,7 @@ DynamicRelaxationSolver :: initializeFrom(InputRecord *ir)
 
 
 NM_Status
-DynamicRelaxationSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0, FloatArray *iR,
+DynamicRelaxationSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
                   FloatArray &X, FloatArray &dX, FloatArray &F,
                   const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                   int &nite, TimeStep *tStep)
@@ -130,6 +131,7 @@ DynamicRelaxationSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0, F
             OOFEM_WARNING("Divergence reached after %d iterations", nite);
             break;
         } else if ( converged && ( nite >= minIterations ) ) {
+            status |= NM_Success;
             break;
         } else if ( nite >= nsmax ) {
             OOFEM_LOG_DEBUG("Maximum number of iterations reached\n");
@@ -154,9 +156,6 @@ DynamicRelaxationSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0, F
         tStep->incrementStateCounter(); // update solution state counter
         tStep->incrementSubStepNumber();
     }
-
-    status |= NM_Success;
-    solved = 1;
 
     return status;
 }

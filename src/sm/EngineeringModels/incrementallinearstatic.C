@@ -112,6 +112,23 @@ IRResultType IncrementalLinearStatic :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
     sparseMtrxType = ( SparseMtrxType ) val;
 
+
+    suppressOutput = ir->hasField(_IFT_EngngModel_suppressOutput);
+
+    if(suppressOutput) {
+    	printf("Suppressing output.\n");
+    }
+    else {
+
+		if ( ( outputStream = fopen(this->dataOutputFileName.c_str(), "w") ) == NULL ) {
+			OOFEM_ERROR("Can't open output file %s", this->dataOutputFileName.c_str());
+		}
+
+		fprintf(outputStream, "%s", PRG_HEADER);
+		fprintf(outputStream, "\nStarting analysis on: %s\n", ctime(& this->startTime) );
+		fprintf(outputStream, "%s\n", simulationDescription.c_str());
+	}
+
     //StructuralEngngModel::initializeFrom (ir);
     return IRRT_OK;
 }
@@ -348,39 +365,13 @@ void IncrementalLinearStatic :: updateDofUnknownsDictionary(DofManager *inode, T
 }
 
 
-void IncrementalLinearStatic :: terminate(TimeStep *tStep)
+contextIOResultType IncrementalLinearStatic :: saveContext(DataStream &stream, ContextMode mode)
 {
-    StructuralEngngModel :: terminate(tStep);
-    this->printReactionForces(tStep, 1);
-    fflush( this->giveOutputStream() );
-}
-
-
-contextIOResultType IncrementalLinearStatic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
-{
-    int closeFlag = 0;
     contextIOResultType iores;
-    FILE *file = NULL;
-
-    if ( stream == NULL ) {
-        if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
-                                    this->giveCurrentStep()->giveVersion(), contextMode_write) ) {
-            THROW_CIOERR(CIO_IOERR);
-        }
-
-        stream = new FileDataStream(file);
-        closeFlag = 1;
-    }
 
     if ( ( iores = StructuralEngngModel :: saveContext(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    if ( closeFlag ) {
-        fclose(file);
-        delete stream;
-        stream = NULL;
-    } // ensure consistent records
 
     return CIO_OK;
 }

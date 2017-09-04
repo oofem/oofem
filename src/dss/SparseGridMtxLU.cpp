@@ -304,7 +304,7 @@ void SparseGridMtxLU :: Factorize()
     long *p_blockJ_pattern = new long [ n_blocks + 1 ];
     memset( p_blockJ_pattern, 0, ( n_blocks + 1 ) * sizeof( long ) );
 
-    long newdotcnount = ( long ) ceil( ( double ) n_blocks / 24.0 );
+    //    long newdotcnount = ( long ) ceil( ( double ) n_blocks / 24.0 );
     //long newdotcnount = n / 24;
     BlockArith->zero_pivots = 0;
 
@@ -376,9 +376,9 @@ void SparseGridMtxLU :: Factorize()
             // Factorize diagonal block
             BlockArith->LU_Decomposition(dd + Djj);
 
-            if ( ( bj % newdotcnount ) == 0 ) {
+            /*if ( ( bj % newdotcnount ) == 0 ) {
                 Write(".");
-            }
+		}*/
 
             Djj += block_storage;
             eMT->act_block += block_size;

@@ -230,7 +230,7 @@ int
 TR_SHELL02 :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     if ( type == IST_ShellForceTensor || type == IST_ShellStrainTensor ||
-        type == IST_ShellMomentTensor || type == IST_ShellCurvatureTensor ) {
+        type == IST_ShellMomentTensor || type == IST_CurvatureTensor ) {
         FloatArray aux;
         GaussPoint *membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
         GaussPoint *plateGP = plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
@@ -277,8 +277,8 @@ TR_SHELL02 :: printOutputAt(FILE *file, TimeStep *tStep)
         fprintf(file, "  strains    ");
         for ( auto &val : v ) fprintf(file, " %.4e", val);
 
-        plate->giveIPValue(v, gp, IST_ShellCurvatureTensor, tStep);
-        membrane->giveIPValue(aux, membraneGP, IST_ShellCurvatureTensor, tStep);
+        plate->giveIPValue(v, gp, IST_CurvatureTensor, tStep);
+        membrane->giveIPValue(aux, membraneGP, IST_CurvatureTensor, tStep);
         v.add(aux);
 
         fprintf(file, "\n              curvatures ");

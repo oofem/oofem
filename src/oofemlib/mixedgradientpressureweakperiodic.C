@@ -423,7 +423,7 @@ void MixedGradientPressureWeakPeriodic :: assembleVector(FloatArray &answer, Tim
 
 
 void MixedGradientPressureWeakPeriodic :: assemble(SparseMtrx &answer, TimeStep *tStep,
-                                                   CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
+                                                   CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale)
 {
     if ( type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == ElasticStiffnessMatrix ) {
         FloatMatrix Ke_v, Ke_vT, Ke_e, Ke_eT;
@@ -450,8 +450,9 @@ void MixedGradientPressureWeakPeriodic :: assemble(SparseMtrx &answer, TimeStep 
 
             this->integrateTractionVelocityTangent(Ke_v, el, boundary);
             this->integrateTractionXTangent(Ke_e, el, boundary);
-
             Ke_v.negated();
+            Ke_v.times(scale);
+            Ke_e.times(scale);
             Ke_vT.beTranspositionOf(Ke_v);
             Ke_eT.beTranspositionOf(Ke_e);
 
@@ -560,7 +561,7 @@ void MixedGradientPressureWeakPeriodic :: computeTangents(FloatMatrix &Ed, Float
         OOFEM_ERROR("Couldn't create sparse matrix of type %d\n", stype);
     }
     Kff->buildInternalStructure(rve, this->domain->giveNumber(), fnum);
-    rve->assemble(*Kff, tStep, TangentAssembler(TangentStiffness), fnum, fnum, this->domain);
+    rve->assemble(*Kff, tStep, TangentAssembler(TangentStiffness), fnum, this->domain);
 
     // Setup up indices and locations
     int neq = Kff->giveNumberOfRows();

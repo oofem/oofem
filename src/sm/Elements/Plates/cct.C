@@ -465,7 +465,7 @@ CCTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
         answer.at(5) = help.at(4); // vxz
         answer.at(6) = 0.0; // vxy
         return 1;
-    } else if ( type == IST_ShellMomentTensor || type == IST_ShellCurvatureTensor ) {
+    } else if ( type == IST_ShellMomentTensor || type == IST_CurvatureTensor ) {
         if ( type == IST_ShellMomentTensor ) {
             help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         } else {
@@ -483,18 +483,13 @@ CCTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
     }
 }
 
-
-
-//
-// The element interface required by NodalAveragingRecoveryModel
-//
 void
 CCTPlate :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                        InternalStateType type, TimeStep *tStep)
 {
     GaussPoint *gp;
     if ( ( type == IST_ShellForceTensor ) || ( type == IST_ShellMomentTensor ) ||
-        ( type == IST_ShellStrainTensor )  || ( type == IST_ShellCurvatureTensor ) ) {
+        ( type == IST_ShellStrainTensor )  || ( type == IST_CurvatureTensor ) ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
         this->giveIPValue(answer, gp, type, tStep);
     } else {
@@ -503,9 +498,6 @@ CCTPlate :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int n
 }
 
 
-//
-// The element interface required by SPRNodalRecoveryModelInterface
-//
 void
 CCTPlate :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 {
@@ -670,6 +662,18 @@ CCTPlate :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gauss
     return 1;
 }
 
+
+void
+CCTPlate::computeSurfaceNMatrix(FloatMatrix &answer, int boundaryID, const FloatArray &lcoords)
+{
+  if (boundaryID == 1) {
+    this->computeNmatrixAt(lcoords, answer);
+  } else {
+    OOFEM_ERROR("computeSurfaceNMatrix: Unsupported surface id");
+  }
+}
+
+  
 
 //
 // io routines

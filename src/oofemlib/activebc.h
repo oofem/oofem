@@ -104,9 +104,10 @@ public:
      * @param type Type of matrix to assemble.
      * @param r_s Row numbering scheme.
      * @param c_s Column numbering scheme.
+     * @param scale Scaling factor.
      */
     virtual void assemble(SparseMtrx &answer, TimeStep *tStep,
-                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) { }
+                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale = 1.0) { }
 
     /**
      * Assembles B.C. contributions to specified vector.
@@ -115,7 +116,7 @@ public:
      * @param type Type of matrix to assemble.
      * @param mode Mode of value.
      * @param s Numbering scheme.
-     * @param eNorms Norms for each dofid (optional).
+     * @param eNorms Norms for each dofid.
      * @return Equivalent of the sum of the element norm (squared) of assembled vector.
      */
     virtual void assembleVector(FloatArray &answer, TimeStep *tStep,

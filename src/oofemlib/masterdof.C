@@ -149,7 +149,7 @@ double MasterDof :: giveUnknown(ValueModeType mode, TimeStep *tStep)
     if ( dofManager->giveParallelMode() == DofManager_null ) {
         return 0.0;
     }
-
+#if 1
     // first try if IC apply
     if ( tStep->giveNumber() == dofManager->giveDomain()->giveEngngModel()->giveNumberOfTimeStepWhenIcApply() ) { // step when Ic apply
         if ( this->hasIcOn(mode) ) {
@@ -182,7 +182,7 @@ double MasterDof :: giveUnknown(ValueModeType mode, TimeStep *tStep)
     if ( !dofManager->giveDomain()->giveEngngModel()->requiresUnknownsDictionaryUpdate() && this->hasBc(tStep) ) {
         return this->giveBcValue(mode, tStep);
     }
-
+#endif
     return ( dofManager->giveDomain()->giveEngngModel()->
             giveUnknownComponent(mode, tStep, dofManager->giveDomain(), this) );
 }

@@ -207,7 +207,7 @@ void
 Node :: printYourself()
 // Prints the receiver on screen.
 {
-    printf("Node %d    coord : x %f  y %fz< %f\n", number, this->giveCoordinate(1), this->giveCoordinate(2), this->giveCoordinate(3));
+    printf("Node %d    coord : x %f  y %f  z %f\n", number, this->giveCoordinate(1), this->giveCoordinate(2), this->giveCoordinate(3));
     for ( Dof *dof: *this ) {
         dof->printYourself();
     }

@@ -36,6 +36,9 @@
 #include "inputrecord.h"
 #include "classfactory.h"
 #include "util.h"
+#include "inputrecord.h"
+#include "datastream.h"
+#include "oofemtxtdatareader.h"
 
 #include <memory>
 
@@ -43,14 +46,14 @@ namespace oofem {
 
 REGISTER_EngngModel(ProblemSequence)
 
-ProblemSequence :: ProblemSequence(int i, EngngModel * _master = NULL) {}
+ProblemSequence :: ProblemSequence(int i, EngngModel *master): EngngModel(i, master) {}
 
 ProblemSequence :: ~ProblemSequence() {}
 
 
 void ProblemSequence :: solveYourself()
 {
-    for (auto &emodel : emodelList) {
+    for ( auto &emodel : emodelList ) {
         emodel->solveYourself();
         ///@todo Still lacking the all important code to connect the subsequent analysis!
         // Options:
@@ -63,7 +66,7 @@ void ProblemSequence :: solveYourself()
 
 int ProblemSequence :: instanciateYourself(DataReader *dr, InputRecord *ir, const char *outFileName, const char *desc)
 {
-    int result = EngngModel :: instanciateYourself(dr, ir, dataOutputFileName, desc);
+    int result = EngngModel :: instanciateYourself(dr, ir, dataOutputFileName.c_str(), desc);
     ir->finish();
 
     for ( auto &s : inputStreamNames ) {
@@ -81,7 +84,7 @@ int ProblemSequence :: instanciateYourself(DataReader *dr, InputRecord *ir, cons
 
 IRResultType ProblemSequence :: initializeFrom(InputRecord *ir)
 {
-    IRREsultType *ret = EngngModel :: initializeFrom(ir);
+    IRResultType ret = EngngModel :: initializeFrom(ir);
     IR_GIVE_FIELD(ir, inputStreamNames, _IFT_ProblemSequence_engineeringModels);
     return ret;
 }
@@ -97,14 +100,14 @@ int ProblemSequence :: checkProblemConsistency()
 }
 
 
-contextIOResultType ProblemSequence :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType ProblemSequence :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType ret = EngngModel :: saveContext(stream, mode, obj);
+    contextIOResultType ret = EngngModel :: saveContext(stream, mode);
 
-    stream->write(activeModel);
+    stream.write(activeModel);
 
     for (auto &emodel : emodelList) {
-        emodel->saveContext(stream, mode, obj);
+        emodel->saveContext(stream, mode);
     }
     return ret;
 }
@@ -112,7 +115,7 @@ contextIOResultType ProblemSequence :: saveContext(DataStream *stream, ContextMo
 
 contextIOResultType ProblemSequence :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
-    contextIOResultType ret = EngngModel :: saveContext(stream, mode, obj);
+    contextIOResultType ret = EngngModel :: restoreContext(stream, mode, obj);
 
     stream->read(activeModel);
 

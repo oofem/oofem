@@ -105,7 +105,7 @@ FEI2dQuadQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const 
 {
     FloatMatrix jacobianMatrix(2, 2), inv, dn;
 
-    this->giveDerivatives(dn, lcoords);
+    this->evaldNdxi(dn, lcoords, cellgeo);
     for ( int i = 1; i <= dn.giveNumberOfRows(); i++ ) {
         double x = cellgeo.giveVertexCoordinates(i)->at(xind);
         double y = cellgeo.giveVertexCoordinates(i)->at(yind);
@@ -143,61 +143,21 @@ double FEI2dQuadQuad :: giveCharacteristicLength(const FEICellGeometry &cellgeo)
     return n1->distance(n2);
 }
 
-#define POINT_TOL 1.e-3
-
-int
-FEI2dQuadQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo)
+bool FEI2dQuadQuad :: inside(const FloatArray &lcoords) const
 {
-    FloatArray res, delta, guess;
-    FloatMatrix jac;
-    double convergence_limit, error = 0.0;
-
-    // find a suitable convergence limit
-    convergence_limit = 1e-6 * this->giveCharacteristicLength(cellgeo);
-
-    // setup initial guess
-    answer.resize( gcoords.giveSize() );
-    answer.zero();
-
-    // apply Newton-Raphson to solve the problem
-    for ( int nite = 0; nite < 10; nite++ ) {
-        // compute the residual
-        this->local2global(guess, answer, cellgeo);
-        res.beDifferenceOf(gcoords, guess);
-
-        // check for convergence
-        error = res.computeNorm();
-        if ( error < convergence_limit ) {
-            break;
-        }
-
-        // compute the corrections
-        this->giveJacobianMatrixAt(jac, answer, cellgeo);
-        jac.solveForRhs(res, delta);
-
-        // update guess
-        answer.add(delta);
-    }
-    if ( error > convergence_limit ) { // Imperfect, could give false negatives.
-        //OOFEM_ERROR("no convergence after 10 iterations");
-        answer.zero();
-        return false;
-    }
-
-    // check limits for each local coordinate [-1,1] for quadrilaterals
+	const double point_tol = 1.0e-3;
     bool inside = true;
-    for ( int i = 1; i <= answer.giveSize(); i++ ) {
-        if ( answer.at(i) < ( -1. - POINT_TOL ) ) {
-            answer.at(i) = -1.;
+    for ( int i = 1; i <= 2; i++ ) {
+        if ( lcoords.at(i) < ( -1. - point_tol ) ) {
             inside = false;
-        } else if ( answer.at(i) > ( 1. + POINT_TOL ) ) {
-            answer.at(i) = 1.;
+        } else if ( lcoords.at(i) > ( 1. + point_tol ) ) {
             inside = false;
         }
     }
 
     return inside;
 }
+
 
 void
 FEI2dQuadQuad :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
@@ -290,56 +250,32 @@ double FEI2dQuadQuad :: edgeEvalNormal(FloatArray &normal, int iedge, const Floa
     return normal.normalize();
 }
 
-void
-FEI2dQuadQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-// Returns the jacobian matrix  J (x,y)/(ksi,eta)  of the receiver.
-{
-    double x, y;
-    FloatMatrix dn;
 
-    jacobianMatrix.resize(2, 2);
-    jacobianMatrix.zero();
-
-    this->giveDerivatives(dn, lcoords);
-
-    for ( int i = 1; i <= dn.giveNumberOfRows(); i++ ) {
-        x = cellgeo.giveVertexCoordinates(i)->at(xind);
-        y = cellgeo.giveVertexCoordinates(i)->at(yind);
-
-        jacobianMatrix.at(1, 1) += dn.at(i, 1) * x;
-        jacobianMatrix.at(1, 2) += dn.at(i, 1) * y;
-        jacobianMatrix.at(2, 1) += dn.at(i, 2) * x;
-        jacobianMatrix.at(2, 2) += dn.at(i, 2) * y;
-    }
-}
-
-
-void
-FEI2dQuadQuad :: giveDerivatives(FloatMatrix &dn, const FloatArray &lc)
+void FEI2dQuadQuad :: evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double ksi, eta;
-    ksi = lc.at(1);
-    eta = lc.at(2);
-    dn.resize(8, 2);
+    ksi = lcoords.at(1);
+    eta = lcoords.at(2);
+    answer.resize(8, 2);
 
     // dn/dxi
-    dn.at(1, 1) =  0.25 * ( 1. + eta ) * ( 2.0 * ksi + eta );
-    dn.at(2, 1) = -0.25 * ( 1. + eta ) * ( -2.0 * ksi + eta );
-    dn.at(3, 1) = -0.25 * ( 1. - eta ) * ( -2.0 * ksi - eta );
-    dn.at(4, 1) =  0.25 * ( 1. - eta ) * ( 2.0 * ksi - eta );
-    dn.at(5, 1) = -ksi * ( 1. + eta );
-    dn.at(6, 1) = -0.5 * ( 1. - eta * eta );
-    dn.at(7, 1) = -ksi * ( 1. - eta );
-    dn.at(8, 1) =  0.5 * ( 1. - eta * eta );
+    answer.at(1, 1) =  0.25 * ( 1. + eta ) * ( 2.0 * ksi + eta );
+    answer.at(2, 1) = -0.25 * ( 1. + eta ) * ( -2.0 * ksi + eta );
+    answer.at(3, 1) = -0.25 * ( 1. - eta ) * ( -2.0 * ksi - eta );
+    answer.at(4, 1) =  0.25 * ( 1. - eta ) * ( 2.0 * ksi - eta );
+    answer.at(5, 1) = -ksi * ( 1. + eta );
+    answer.at(6, 1) = -0.5 * ( 1. - eta * eta );
+    answer.at(7, 1) = -ksi * ( 1. - eta );
+    answer.at(8, 1) =  0.5 * ( 1. - eta * eta );
 
-    dn.at(1, 2) =  0.25 * ( 1. + ksi ) * ( 2.0 * eta + ksi );
-    dn.at(2, 2) =  0.25 * ( 1. - ksi ) * ( 2.0 * eta - ksi );
-    dn.at(3, 2) = -0.25 * ( 1. - ksi ) * ( -2.0 * eta - ksi );
-    dn.at(4, 2) = -0.25 * ( 1. + ksi ) * ( -2.0 * eta + ksi );
-    dn.at(5, 2) =  0.5 * ( 1. - ksi * ksi );
-    dn.at(6, 2) = -eta * ( 1. - ksi );
-    dn.at(7, 2) = -0.5 * ( 1. - ksi * ksi );
-    dn.at(8, 2) = -eta * ( 1. + ksi );
+    answer.at(1, 2) =  0.25 * ( 1. + ksi ) * ( 2.0 * eta + ksi );
+    answer.at(2, 2) =  0.25 * ( 1. - ksi ) * ( 2.0 * eta - ksi );
+    answer.at(3, 2) = -0.25 * ( 1. - ksi ) * ( -2.0 * eta - ksi );
+    answer.at(4, 2) = -0.25 * ( 1. + ksi ) * ( -2.0 * eta + ksi );
+    answer.at(5, 2) =  0.5 * ( 1. - ksi * ksi );
+    answer.at(6, 2) = -eta * ( 1. - ksi );
+    answer.at(7, 2) = -0.5 * ( 1. - ksi * ksi );
+    answer.at(8, 2) = -eta * ( 1. + ksi );
 }
 
 

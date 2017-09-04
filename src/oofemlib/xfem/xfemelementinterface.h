@@ -100,7 +100,7 @@ public:
      * Help function for computation of B and BH.
      * Avoid duplication of code.
      */
-    void ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl, bool iComputeBH);
+    void ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl, bool iComputeBH, const FloatArray &iNaturalGpCoord);
 
     /// Creates enriched N-matrix.
     void XfemElementInterface_createEnrNmatrixAt(FloatMatrix &oAnswer, const FloatArray &iLocCoord, Element &iEl, bool iSetDiscontContribToZero);
@@ -136,6 +136,15 @@ public:
 
     // TODO: Move to XfemStructuralElementInterface
     std :: vector< std :: unique_ptr< IntegrationRule > >mpCZIntegrationRules;
+
+    // For non-standard CZ formulation
+    std :: vector< std :: unique_ptr< IntegrationRule > >mpCZExtraIntegrationRules;
+
+
+    // Temporary storage to facilitate state variable mapping
+    std :: vector< std :: unique_ptr< IntegrationRule > >mpCZIntegrationRules_tmp;
+    std :: vector< std :: unique_ptr< IntegrationRule > >mpCZExtraIntegrationRules_tmp;
+    std :: vector< std :: unique_ptr< IntegrationRule > >mIntRule_tmp;
 
     MaterialMode giveMaterialMode();
 

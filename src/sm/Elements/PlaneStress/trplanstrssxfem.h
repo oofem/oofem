@@ -42,6 +42,9 @@
 
 #define _IFT_TrPlaneStress2dXFEM_Name "trplanestress2dxfem"
 
+#define _IFT_TrPlaneStress2dXFEM_RegCoeff "reg_coeff"
+#define _IFT_TrPlaneStress2dXFEM_RegCoeffTol "reg_coeff_tol"
+
 namespace oofem {
 /**
  * 3-node triangle with XFEM kinematics
@@ -53,12 +56,12 @@ protected:
     virtual void updateYourself(TimeStep *tStep);
     virtual void postInitialize();
 
+    double mRegCoeff, mRegCoeffTol;
 
 public:
-    TrPlaneStress2dXFEM(int n, Domain * d) : TrPlaneStress2d(n, d), XfemStructuralElementInterface(this), VTKXMLExportModuleElementInterface() { numberOfDofMans = 3; }
+    TrPlaneStress2dXFEM(int n, Domain * d) : TrPlaneStress2d(n, d), XfemStructuralElementInterface(this), VTKXMLExportModuleElementInterface() { numberOfDofMans = 3; mRegCoeff = 1.0e-6; mRegCoeffTol = 1.0e-6;}
 
     virtual ~TrPlaneStress2dXFEM();
-
 
     virtual int checkConsistency();
 

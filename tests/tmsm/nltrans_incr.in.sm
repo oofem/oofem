@@ -1,6 +1,6 @@
 nltrans_incr.out.sm
 Quadrilateral elements subjected to temperature strains, changes in static system
-IncrLinearStatic endOfTimeOfInterest 5.0  prescribedTimes 3 1. 2. 3. nmodules 1
+IncrLinearStatic endOfTimeOfInterest 3.0  prescribedTimes 3 1. 2. 3. nmodules 1
 errorcheck
 #vtkxml tstep_all vars 2 1 4 primvars 1 1 stype 1
 domain 2dplanestress

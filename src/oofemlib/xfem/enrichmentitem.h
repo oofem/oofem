@@ -56,6 +56,7 @@
 #define _IFT_EnrichmentItem_propagationlaw "propagationlaw"
 
 #define _IFT_EnrichmentItem_inheritbc "inheritbc"
+#define _IFT_EnrichmentItem_inheritorderedbc "inheritorderedbc"
 
 //@}
 
@@ -144,10 +145,13 @@ public:
 
     // Should update receiver geometry to the state reached at given time step.
     virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep) { }
+    virtual void updateGeometry(TimeStep *tStep) { }
     virtual void updateGeometry() = 0;
     virtual void propagateFronts(bool &oFrontsHavePropagated) = 0;
 
     virtual bool hasPropagatingFronts() const;
+    virtual bool hasInitiationCriteria() { return false; }
+
 
 
     int giveStartOfDofIdPool() const { return this->startOfDofIdPool; }
@@ -158,7 +162,8 @@ public:
      */
     virtual void computeEnrichedDofManDofIdArray(IntArray &oDofIdArray, DofManager &iDMan);
 
-    void giveEIDofIdArray(IntArray &answer) const; // list of id's for the enrichment dofs
+    virtual void giveEIDofIdArray(IntArray &answer) const; // list of id's for the enrichment dofs
+    virtual void givePotentialEIDofIdArray(IntArray &answer) const; // List of potential IDs for enrichment
 
     virtual void evaluateEnrFuncInNode(std :: vector< double > &oEnrFunc, const Node &iNode) const = 0;
 
@@ -211,6 +216,7 @@ public:
     static void calcPolarCoord(double &oR, double &oTheta, const FloatArray &iOrigin, const FloatArray &iPos, const FloatArray &iN, const FloatArray &iT, const EfInput &iEfInput, bool iFlipTangent);
 
     PropagationLaw *givePropagationLaw() { return this->mpPropagationLaw; }
+    void setPropagationLaw(PropagationLaw *ipPropagationLaw);
     bool hasPropagationLaw() { return this->mPropLawIndex != 0; }
 
 
@@ -222,13 +228,14 @@ public:
     virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius) = 0;
 
     EnrichmentFront *giveEnrichmentFrontStart() { return mpEnrichmentFrontStart; }
-    void setEnrichmentFrontStart(EnrichmentFront *ipEnrichmentFrontStart);
+    void setEnrichmentFrontStart(EnrichmentFront *ipEnrichmentFrontStart, bool iDeleteOld = true);
 
     EnrichmentFront *giveEnrichmentFrontEnd() { return mpEnrichmentFrontEnd; }
-    void setEnrichmentFrontEnd(EnrichmentFront *ipEnrichmentFrontEnd);
+    void setEnrichmentFrontEnd(EnrichmentFront *ipEnrichmentFrontEnd, bool iDeleteOld = true);
 
     bool tipIsTouchingEI(const TipInfo &iTipInfo);
 
+    void setEnrichmentFunction(EnrichmentFunction *ipEnrichmentFunc) {mpEnrichmentFunc = ipEnrichmentFunc;}
 
 protected:
 
@@ -247,11 +254,19 @@ protected:
     /**
      * If newly created enriched dofs should inherit boundary conditions
      * from the node they are introduced in. Default is false, i.e.
-     * XFEM dofs are free by default. Note: the routine takes the first
-     * Dirichlet BC it finds in the node. Therefore, we may get in trouble
-     * if the node has different Dirichlet BCs for different dofs.
+     * XFEM dofs are free by default. Two alternatives exists:
+     * mInheritBoundaryConditions takes the first Dirichlet BC it finds in the 
+     * node. Therefore, we may get in trouble if the node has different Dirichlet 
+     * BCs for different dofs.
+     * mInheritOrderedBoundaryConditions assumes that the enriched dofs are of the
+     * same type and in the same order as the original dofs and uses the same BC
+     * on the enriched dofs
+     * NB: These routines basically only works for zero Dirichlet BC, since enriched
+     * dofs often are related to the existing dofs. If nonzero BC are prescibed this 
+     * will be a problem.
      */
     bool mInheritBoundaryConditions;
+    bool mInheritOrderedBoundaryConditions;
 
     int startOfDofIdPool; // points to the first available dofId number associated with the ei
     int endOfDofIdPool;
@@ -272,6 +287,9 @@ protected:
 
     // Field with desired node enrichment types
     std :: unordered_map< int, NodeEnrichmentType >mNodeEnrMarkerMap;
+
+    // Enrichment dof IDs used by the enrichment item.
+    IntArray mEIDofIdArray;
 
     bool mLevelSetsNeedUpdate;
 

@@ -34,18 +34,18 @@ Set 1 elementranges {(1 4)}
 Set 2 nodes 3 1 4 11
 XfemManager 1 numberofenrichmentitems 1 
 #delamination 1 enrichmentdomains 1 1  enrichmentfunction 1  enrichmentdomain 1 enrichmentfront 1 delaminationxicoord 0.0  
-delamination 1 interfacenum 1 1 csnum 1
+delamination 1 interfacenum 1 1 csnum 1 1
 DiscontinuousFunction 1 
 DofManList 1 list 12  2 3 5 6 7 8 9 10 12 13 14 15
 #EnrFrontDoNothing 1
 #PLDoNothing 1
-#%BEGIN_CHECK% tolerance 1.e-5
+#%BEGIN_CHECK% tolerance 1.e-11
 ## Check unknowns in node 13 (mid edge node)
 ## with XFEM dofs scaled with 1.0e-3
-#NODE tStep 1 number 13 dof 500 unknown d value 2.13801213e-002
-#NODE tStep 1 number 13 dof 501 unknown d value 3.16073130e-004
-#NODE tStep 1 number 13 dof 502 unknown d value 3.75487293e-000
-#NODE tStep 1 number 13 dof 503 unknown d value -6.00550422e-000
-#NODE tStep 1 number 13 dof 504 unknown d value -1.48540916e-002
-#NODE tStep 1 number 13 dof 505 unknown d value -1.80551597e-002
+#NODE tStep 1 number 13 dof 500 unknown d value 2.13801213e-005
+#NODE tStep 1 number 13 dof 501 unknown d value 3.16073130e-007
+#NODE tStep 1 number 13 dof 502 unknown d value 3.75487293e-003
+#NODE tStep 1 number 13 dof 503 unknown d value -6.00550422e-003
+#NODE tStep 1 number 13 dof 504 unknown d value -1.48540916e-005
+#NODE tStep 1 number 13 dof 505 unknown d value -1.80551597e-005
 #%END_CHECK%

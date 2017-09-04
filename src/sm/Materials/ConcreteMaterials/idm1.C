@@ -45,6 +45,7 @@
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
 #include "engngm.h"
+#include "crosssection.h"
 
 
 namespace oofem {
@@ -618,7 +619,10 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
         FloatArray principalStrains;
         FloatMatrix N;
 
-        if ( gp->giveMaterialMode() == _1dMat ) {
+        if ( strain.giveSize() == 6 || gp->giveMaterialMode() == _3dMat ) {
+            dim = 3;
+            this->computePrincipalValDir(principalStrains, N, strain, principal_strain);
+        } else if ( gp->giveMaterialMode() == _1dMat ) {
             dim = 1;
             StrainVector fullStrain(strain, _1dMat);
             fullStrain.computePrincipalValDir(principalStrains, N);
@@ -635,15 +639,10 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
             dim = 3;
             StrainVector fullStrain(strain, _PlaneStrain);
             fullStrain.computePrincipalValDir(principalStrains, N);
-        } else if ( gp->giveMaterialMode() == _3dMat ) {
-            dim = 3;
-            StrainVector fullStrain(strain, _3dMat);
-            fullStrain.computePrincipalValDir(principalStrains, N);
         } else {
             dim = 0;
             OOFEM_ERROR("Unknown material mode.");
         }
-
         FloatArray n(dim);
         FloatMatrix Eta(dim, dim);
         Eta.zero();
@@ -651,9 +650,7 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
         for ( int i = 1; i <= 3; i++ ) {
             if ( i <= dim ) {
                 if ( principalStrains.at(i) > 0.0 ) {
-                    for ( int j = 1; j < 3; j++ ) {
-                        n.at(j) = N.at(j, i);
-                    }
+                    n.beColumnOf(N, i);
 
                     Eta.plusDyadSymmUpper( n, principalStrains.at(i) );
                 }
@@ -678,7 +675,14 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
             return;
         }
 
-        if ( gp->giveMaterialMode() == _1dMat ) {
+        if ( strain.giveSize() == 6 || gp->giveMaterialMode() == _3dMat ) {
+            answer.at(1) = Eta.at(1, 1);
+            answer.at(2) = Eta.at(2, 2);
+            answer.at(3) = Eta.at(3, 3);
+            answer.at(4) = Eta.at(2, 3);
+            answer.at(5) = Eta.at(1, 3);
+            answer.at(6) = Eta.at(1, 2);
+        } else if ( gp->giveMaterialMode() == _1dMat ) {
             answer.at(1) = Eta.at(1, 1);
         } else if ( gp->giveMaterialMode() == _PlaneStress ) {
             answer.at(1) = Eta.at(1, 1);
@@ -690,13 +694,6 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
             answer.at(2) = Eta.at(2, 2);
             answer.at(3) = Eta.at(3, 3);
             answer.at(4) = Eta.at(1, 2);
-        } else if ( gp->giveMaterialMode() == _3dMat ) {
-            answer.at(1) = Eta.at(1, 1);
-            answer.at(2) = Eta.at(2, 2);
-            answer.at(3) = Eta.at(3, 3);
-            answer.at(4) = Eta.at(2, 3);
-            answer.at(5) = Eta.at(1, 3);
-            answer.at(6) = Eta.at(1, 2);
         }
     } else if ( ( this->equivStrainType == EST_Rankine_Smooth ) || ( this->equivStrainType == EST_Rankine_Standard ) ) {
         int index = 0, dim = 0;
@@ -707,7 +704,10 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
         lmat->giveStiffnessMatrix(de, SecantStiffness, gp, tStep);
         stress.beProductOf(de, strain);
 
-        if ( gp->giveMaterialMode() == _1dMat ) {
+        if ( strain.giveSize() == 6 || gp->giveMaterialMode() == _3dMat ) {
+            this->computePrincipalValDir(principalStress, N, strain, principal_stress);
+            dim = 3;
+        } else if ( gp->giveMaterialMode() == _1dMat ) {
             StressVector fullStress(stress, _1dMat);
             fullStress.computePrincipalValDir(principalStress, N);
             principalStress.resizeWithValues(3);
@@ -719,10 +719,6 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
             dim = 2;
         } else if ( gp->giveMaterialMode() == _PlaneStrain ) {
             StressVector fullStress(stress, _PlaneStrain);
-            fullStress.computePrincipalValDir(principalStress, N);
-            dim = 3;
-        } else if ( gp->giveMaterialMode() == _3dMat ) {
-            StressVector fullStress(stress, _3dMat);
             fullStress.computePrincipalValDir(principalStress, N);
             dim = 3;
         } else {
@@ -781,7 +777,14 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
             Eta.times( 1. / lmat->give('E', gp) );
         }
 
-        if ( gp->giveMaterialMode() == _1dMat ) {
+        if ( strain.giveSize() == 6 || gp->giveMaterialMode() == _3dMat ) {
+            eta.at(1) = Eta.at(1, 1);
+            eta.at(2) = Eta.at(2, 2);
+            eta.at(3) = Eta.at(3, 3);
+            eta.at(4) = Eta.at(2, 3);
+            eta.at(5) = Eta.at(1, 3);
+            eta.at(6) = Eta.at(1, 2);
+        } else if ( gp->giveMaterialMode() == _1dMat ) {
             eta.at(1) = Eta.at(1, 1);
         } else if ( gp->giveMaterialMode() == _PlaneStress ) {
             eta.at(1) = Eta.at(1, 1);
@@ -793,13 +796,6 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
             eta.at(2) = Eta.at(2, 2);
             eta.at(3) = Eta.at(3, 3);
             eta.at(4) = 2. * Eta.at(1, 2);
-        } else if ( gp->giveMaterialMode() == _3dMat ) {
-            eta.at(1) = Eta.at(1, 1);
-            eta.at(2) = Eta.at(2, 2);
-            eta.at(3) = Eta.at(3, 3);
-            eta.at(4) = Eta.at(2, 3);
-            eta.at(5) = Eta.at(1, 3);
-            eta.at(6) = Eta.at(1, 2);
         }
 
         answer.beProductOf(de, eta);
@@ -1165,8 +1161,8 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
     int indx = 1;
     double le = 0.;
     double E = this->giveLinearElasticMaterial()->give('E', gp);
-    FloatArray principalStrains, crackPlaneNormal(3), fullStrain, crackVect(3);
-    FloatMatrix principalDir(3, 3);
+    FloatArray principalStrains, crackPlaneNormal, fullStrain, crackVect;
+    FloatMatrix principalDir;
     IsotropicDamageMaterial1Status *status = static_cast< IsotropicDamageMaterial1Status * >( this->giveStatus(gp) );
 
     const double e0 = this->give(e0_ID, gp);
@@ -1282,7 +1278,6 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
             }
         }
 
-
         if ( isCrackBandApproachUsed() ) { // le needed only if the crack band approach is used
             le = gp->giveElement()->giveCharacteristicSize(gp, crackPlaneNormal, ecsMethod);
             // store le in corresponding status
@@ -1354,7 +1349,7 @@ IsotropicDamageMaterial1 :: giveInterface(InterfaceType type)
 MaterialStatus *
 IsotropicDamageMaterial1 :: CreateStatus(GaussPoint *gp) const
 {
-    return new IsotropicDamageMaterial1Status(1, IsotropicDamageMaterial1 :: domain, gp);
+    return new IsotropicDamageMaterial1Status(1, domain, gp);
 }
 
 MaterialStatus *
@@ -1394,7 +1389,7 @@ IsotropicDamageMaterial1 :: MMI_map(GaussPoint *gp, Domain *oldd, TimeStep *tSte
         IntArray el;
         // compile source list to contain all elements on old odmain with the same material id
         for ( int i = 1; i <= oldd->giveNumberOfElements(); i++ ) {
-            if ( oldd->giveElement(i)->giveMaterial()->giveNumber() == this->giveNumber() ) {
+            if ( oldd->giveElement(i)->giveCrossSection()->giveMaterial(gp)->giveNumber() == this->giveNumber() ) {
                 // add oldd domain element to source list
                 el.followedBy(i, 10);
             }
@@ -1468,30 +1463,6 @@ IsotropicDamageMaterial1 :: MMI_finish(TimeStep *tStep)
 IsotropicDamageMaterial1Status :: IsotropicDamageMaterial1Status(int n, Domain *d, GaussPoint *g) :
     IsotropicDamageMaterialStatus(n, d, g), RandomMaterialStatusExtensionInterface()
 {
-    le = 0.0;
-}
-
-void
-IsotropicDamageMaterial1Status :: initTempStatus()
-//
-// initializes temp variables according to variables form previous equlibrium state.
-// builds new crackMap
-//
-{
-    IsotropicDamageMaterialStatus :: initTempStatus();
-}
-
-
-
-void
-IsotropicDamageMaterial1Status :: updateYourself(TimeStep *tStep)
-//
-// updates variables (nonTemp variables describing situation at previous equilibrium state)
-// after a new equilibrium state has been reached
-// temporary variables are having values corresponding to newly reched equilibrium.
-//
-{
-    IsotropicDamageMaterialStatus :: updateYourself(tStep);
 }
 
 Interface *
@@ -1504,45 +1475,4 @@ IsotropicDamageMaterial1Status :: giveInterface(InterfaceType type)
     }
 }
 
-
-contextIOResultType
-IsotropicDamageMaterial1Status :: saveContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// saves full information stored in this Status
-// no temp variables stored
-//
-{
-    contextIOResultType iores;
-    // save parent class status
-    if ( ( iores = IsotropicDamageMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // write a raw data
-    if ( !stream.write(le) ) {
-        THROW_CIOERR(CIO_IOERR);
-    }
-
-    return CIO_OK;
-}
-
-contextIOResultType
-IsotropicDamageMaterial1Status :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// restores full information stored in stream to this Status
-//
-{
-    contextIOResultType iores;
-    // read parent class status
-    if ( ( iores = IsotropicDamageMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // read raw data
-    if ( !stream.read(le) ) {
-        THROW_CIOERR(CIO_IOERR);
-    }
-
-    return CIO_OK;
-}
 }     // end namespace oofem

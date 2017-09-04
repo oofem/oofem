@@ -1,9 +1,6 @@
 layered_libeam2d.out
 Test of LIBeam2d elements -> cantilever loaded by end moment, with plastic layers
-#LinearStatic nsteps 1 nmodules 1
-##NonLinearStatic nsteps 180 stepLength 0.015 minStepLength 0.001 rtolf 1e-4 Psi 1.0 nmodules 1
-NonLinearStatic nsteps 11 stepLength 0.00020 minStepLength 0.0001 rtolf 1e-4 Psi 0.0 nmodules 1
-#NonLinearStatic nsteps 2 stepLength 150 minStepLength 0.00001 rtolf 1e-4 Psi 1.0 nmodules 1
+StaticStructural nsteps 11 solverType "calm" stepLength 0.00020 minStepLength 0.0001 rtolf 1e-4 Psi 0.0 nmodules 1
 errorcheck
 domain 2dBeam
 OutputManager tstep_all dofman_all element_all
@@ -21,7 +18,7 @@ LayeredCS 1 nLayers 10 LayerMaterials 10 1 1 1 1 1 1 1 1 1 1 Thicks 10 0.03 0.03
 j2mat 1 E 15.0e6 n 0.25 Ry 10.0 tAlpha 0.000012 d 1.0
 #IsoLE 1 d 0. E 15000000.0 n 0.25
 BoundaryCondition  1 loadTimeFunction 1 dofs 3 1 3 5 values 3 0 0 0 set 2
-NodalLoad 2 loadTimeFunction 1 dofs 1 5 Components 1 0.15 set 3
+NodalLoad 2 loadTimeFunction 1 dofs 1 5 Components 1 0.15 set 3 reference
 ConstantFunction 1 f(t) 1.0
 Set 1 elementranges {(1 3)}
 Set 2 nodes 1 1

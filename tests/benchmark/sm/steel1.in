@@ -1,6 +1,6 @@
 steel1.out
 Plane stress - cantilever l=3. h=1. - Nonlinear solution using HMH material.
-NonLinearStatic nsteps 8 stepLength 0.000011497039 minStepLength 0.00001 rtolv 0.01 Psi 0.0 MaxIter 120 nmodules 1
+StaticStructural nsteps 8 solverType "calm" stepLength 0.000011497039 minStepLength 0.00001 rtolf 1e-4 Psi 0.0 MaxIter 120 nmodules 1
 errorcheck
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
@@ -461,7 +461,7 @@ SimpleCS 1 thick 0.15 material 1 set 1
 Steel1 1 d 0. E 15.e6 n 0.25 Ry 10.0  tAlpha 0.000012
 #IsoLE 1 d 0. E 15.0 n 0.25
 BoundaryCondition  1 loadTimeFunction 1 dofs 2 1 2 values 2 0. 0. set 2
-NodalLoad 2 loadTimeFunction 1 dofs 2 1 2 components 2  0. 0.011904762 set 3
+NodalLoad 2 loadTimeFunction 1 dofs 2 1 2 components 2  0. 0.011904762 set 3 reference
 ConstantFunction 1 f(t) 1.0
 Set 1 elementranges {(1 281)}
 Set 2 nodes 12 63 80 99 116 127 138 147 156 162 166 169 171
@@ -475,14 +475,14 @@ Set 3 nodes 7 1 2 3 4 5 6 7
 #
 #%BEGIN_CHECK% tolerance 1.e-6
 ## check load levels
-#LOADLEVEL tStep 8 value 1.610709
+#LOADLEVEL tStep 8 value 1.60996114
 ## check node displacement at final step
-#NODE tStep 8 number 1 dof 1 unknown d value 2.80734367e-06 tolerance 1e-12
-#NODE tStep 8 number 1 dof 2 unknown d value 1.40257208e-05 tolerance 1e-12
-#NODE tStep 8 number 2 dof 1 unknown d value -2.82627572e-06 tolerance 1e-12
-#NODE tStep 8 number 2 dof 2 unknown d value 1.40448131e-05 tolerance 1e-12
+#NODE tStep 8 number 1 dof 1 unknown d value 2.76788319e-06 tolerance 1e-12
+#NODE tStep 8 number 1 dof 2 unknown d value 1.37932193e-05 tolerance 1e-12
+#NODE tStep 8 number 2 dof 1 unknown d value -2.78609161e-06 tolerance 1e-12
+#NODE tStep 8 number 2 dof 2 unknown d value 1.38123028e-05 tolerance 1e-12
 ## check some arbitrary element
-#ELEMENT tStep 8 number 144 gp 1 keyword 1 component 1  value -1.08520930e+01
-#ELEMENT tStep 8 number 144 gp 1 keyword 1 component 2  value -9.28042227e+00
-#ELEMENT tStep 8 number 144 gp 1 keyword 1 component 6  value  2.17002247e-01
+#ELEMENT tStep 8 number 144 gp 1 keyword 1 component 1  value -1.08502681e+01
+#ELEMENT tStep 8 number 144 gp 1 keyword 1 component 2  value -9.27864221e+00
+#ELEMENT tStep 8 number 144 gp 1 keyword 1 component 6  value  2.14472819e-01
 #%END_CHECK%

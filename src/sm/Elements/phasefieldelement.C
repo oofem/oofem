@@ -49,12 +49,12 @@
 namespace oofem {
 
 PhaseFieldElement :: PhaseFieldElement( int i, Domain *aDomain ) 
-{  
+{
     ///@todo will be set by the cross section later
     internalLength = 6.0;
     criticalEnergy = 1.0e0;
     relaxationTime = 1.0;
-};
+}
 
 void
 PhaseFieldElement :: computeLocationArrayOfDofIDs( const IntArray &dofIdArray, IntArray &answer )
@@ -63,11 +63,11 @@ PhaseFieldElement :: computeLocationArrayOfDofIDs( const IntArray &dofIdArray, I
     answer.clear();
     NLStructuralElement *el = this->giveElement();
     int k = 0;
-    for(int i = 1; i <= el->giveNumberOfDofManagers(); i++) {
+    for ( int i = 1; i <= el->giveNumberOfDofManagers(); i++ ) {
         DofManager *dMan = el->giveDofManager( i );
-        for(int j = 1; j <= dofIdArray.giveSize( ); j++) {
+        for ( int j = 1; j <= dofIdArray.giveSize( ); j++ ) {
 
-            if(dMan->hasDofID( (DofIDItem) dofIdArray.at( j ) )) {
+            if ( dMan->hasDofID( (DofIDItem) dofIdArray.at( j ) ) ) {
                 Dof *d = dMan->giveDofWithID( dofIdArray.at( j ) );
                 answer.followedBy( k + d->giveNumber( ) );
             }
@@ -102,9 +102,9 @@ PhaseFieldElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tSte
     this->giveDofManDofIDMask_d( IdMask_d );
     this->computeLocationArrayOfDofIDs( IdMask_u, loc_u );
     this->computeLocationArrayOfDofIDs( IdMask_d, loc_d );
-    
-    int ndofs = this->computeNumberOfDofs();
-    answer.resize( ndofs);
+
+    int ndofs = this->giveElement()->computeNumberOfDofs();
+    answer.resize(ndofs);
     answer.zero();
 
     FloatArray answer_u(0);
@@ -122,18 +122,17 @@ PhaseFieldElement :: giveInternalForcesVector_u(FloatArray &answer, TimeStep *tS
     // computes int_V ( B_u^t * BSgima_u ) * dV
     FloatArray NStress, BStress, vGenStress, NS;
     FloatMatrix N, B;
-    NLStructuralElement *el = this->giveElement( );
+    NLStructuralElement *el = this->giveElement();
 
     answer.clear();
     for ( auto &gp: el->giveIntegrationRule(0) ) {
         double dV = el->computeVolumeAround(gp);
-            
+
         // compute generalized stress measure
         el->computeBmatrixAt(gp, B);
         this->computeBStress_u(BStress, gp, tStep, useUpdatedGpRecord);
         answer.plusProduct(B, BStress, dV);
     }
-    
 }
 
 void
@@ -142,34 +141,32 @@ PhaseFieldElement :: giveInternalForcesVector_d(FloatArray &answer, TimeStep *tS
     // Computes int_V ( N^t *Nstress_d  +  B^t * g_c*l*grad(d)  ) dV
     FloatArray NStress, BStress, NS, a_d, grad_d;
     FloatMatrix N, B;
-    NLStructuralElement *el = this->giveElement( );
+    NLStructuralElement *el = this->giveElement();
     this->computeDamageUnknowns( a_d, VM_Total, tStep );
 
     for ( auto &gp: el->giveIntegrationRule(0) ) {
         double dV = el->computeVolumeAround(gp);
-            
+        
         // compute generalized stress measures
-        this->computeNd_matrixAt( *gp->giveCoordinates(), N);
+        this->computeNd_matrixAt( *gp->giveNaturalCoordinates(), N);
         computeNStress_d(NStress, gp, tStep, useUpdatedGpRecord);
         NS.beTProductOf(N, NStress);
         answer.add(dV, NS);
 
-        this->computeBd_matrixAt(gp, B );
+        this->computeBd_matrixAt(gp, B);
         grad_d.beProductOf(B, a_d);
         double l = this->giveInternalLength();
-        double g_c = this->giveCriticalEnergy( );
+        double g_c = this->giveCriticalEnergy();
         BStress = grad_d * l * g_c;
         answer.plusProduct(B, BStress, dV);
-      
     }
-    
 }
 
 void
 PhaseFieldElement :: computeBStress_u(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, int useUpdatedGpRecord)
 {
     // computes G(d)*sig(u)
-    NLStructuralElement *el = this->giveElement( );
+    NLStructuralElement *el = this->giveElement();
     FloatArray strain, a_u;
     FloatMatrix B_u;
 
@@ -214,11 +211,11 @@ double
 PhaseFieldElement :: computeDamageAt(GaussPoint *gp, ValueModeType valueMode, TimeStep *stepN)
 {
     // d = N_d * a_d
-    NLStructuralElement *el = this->giveElement( );
+    NLStructuralElement *el = this->giveElement();
     FloatArray dVec;
     computeDamageUnknowns(dVec, valueMode, stepN);
     FloatArray Nvec;
-    el->giveInterpolation()->evalN(Nvec, *gp->giveCoordinates(), FEIElementGeometryWrapper(el));
+    el->giveInterpolation()->evalN(Nvec, *gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(el));
     return Nvec.dotProduct(dVec);
 }
 
@@ -242,7 +239,7 @@ PhaseFieldElement :: computeGPrim(GaussPoint *gp, ValueModeType valueMode, TimeS
 void
 PhaseFieldElement :: computeNd_matrixAt(const FloatArray &lCoords, FloatMatrix &N)
 {
-    NLStructuralElement *el = this->giveElement( );
+    NLStructuralElement *el = this->giveElement();
     FloatArray Nvec;
     el->giveInterpolation( )->evalN( Nvec, lCoords, FEIElementGeometryWrapper( el ) );
     N.resize(1, Nvec.giveSize());
@@ -256,23 +253,10 @@ PhaseFieldElement :: computeBd_matrixAt(GaussPoint *gp, FloatMatrix &answer, int
     // Returns the [numSpaceDim x nDofs] gradient matrix {B_d} of the receiver,
     // evaluated at gp.
 
-    NLStructuralElement *el = this->giveElement( );
+    NLStructuralElement *el = this->giveElement();
     FloatMatrix dNdx;
-    el->giveInterpolation( )->evaldNdx( dNdx, *gp->giveCoordinates( ), FEIElementGeometryWrapper( el ) );
+    el->giveInterpolation( )->evaldNdx( dNdx, *gp->giveNaturalCoordinates( ), FEIElementGeometryWrapper( el ) );
     answer.beTranspositionOf( dNdx );
-}
-
-int
-PhaseFieldElement :: computeNumberOfDofs()
-{
-    ///@todo This is NOT correct procedure. This function may absolutely not ask the dof managers _anything_.
-    NLStructuralElement *el = this->giveElement( );
-    int nDofs = 0;
-    for( int i = 1; i <= el->giveNumberOfDofManagers(); i++)
-    {
-        nDofs += el->giveDofManager( i )->giveNumberOfDofs();
-    }
-    return nDofs;
 }
 
 void
@@ -286,7 +270,7 @@ PhaseFieldElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
     this->computeLocationArrayOfDofIDs( IdMask_u, loc_u );
     this->computeLocationArrayOfDofIDs( IdMask_d, loc_d );
 
-    int nDofs = this->computeNumberOfDofs();
+    int nDofs = this->giveElement()->computeNumberOfDofs();
     answer.resize( nDofs, nDofs );
     answer.zero();
 
@@ -296,7 +280,7 @@ PhaseFieldElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
     //this->computeStiffnessMatrix_du(answer3, rMode, tStep); //symmetric
     answer3.beTranspositionOf( answer2 );
     this->computeStiffnessMatrix_dd(answer4, rMode, tStep);
-    
+
     answer.assemble( answer1, loc_u, loc_u );
     answer.assemble( answer2, loc_u, loc_d );
     answer.assemble( answer3, loc_d, loc_u );
@@ -308,7 +292,7 @@ PhaseFieldElement :: computeStiffnessMatrix_uu(FloatMatrix &answer, MatResponseM
 {
     // This is the regular stiffness matrix times G
     FloatMatrix B, DB, N, D_B;
-    NLStructuralElement *el = this->giveElement( );
+    NLStructuralElement *el = this->giveElement();
     StructuralCrossSection *cs = dynamic_cast<StructuralCrossSection* > (el->giveCrossSection() );
 
     bool matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric(rMode);
@@ -326,14 +310,12 @@ PhaseFieldElement :: computeStiffnessMatrix_uu(FloatMatrix &answer, MatResponseM
             answer.plusProductSymmUpper(B, DB, dV);
         } else {
             answer.plusProductUnsym(B, DB, dV);
-        }    
-        
+        }
     }
 
     if ( matStiffSymmFlag ) {
         answer.symmetrized();
     }
-    
 }
 
 void
@@ -341,7 +323,7 @@ PhaseFieldElement :: computeStiffnessMatrix_ud(FloatMatrix &answer, MatResponseM
 {
     FloatMatrix B, DB, N_d, DN, S(3,1);
     FloatArray stress;
-    NLStructuralElement *el = this->giveElement( );
+    NLStructuralElement *el = this->giveElement();
     StructuralCrossSection *cs = dynamic_cast<StructuralCrossSection* > (el->giveCrossSection() );
 
     answer.clear();
@@ -351,8 +333,8 @@ PhaseFieldElement :: computeStiffnessMatrix_ud(FloatMatrix &answer, MatResponseM
 
         double dV = el->computeVolumeAround(gp);
         // compute int_V ( B^t * D_B * B )dV
-        
-        this->computeNd_matrixAt(*gp->giveCoordinates(), N_d);
+
+        this->computeNd_matrixAt(*gp->giveNaturalCoordinates(), N_d);
 
         // stress   
         FloatArray reducedStrain, a_u;
@@ -363,7 +345,7 @@ PhaseFieldElement :: computeStiffnessMatrix_ud(FloatMatrix &answer, MatResponseM
         
         S.setColumn(stress,1);
         DN.beProductOf(S, N_d);
-        answer.plusProductUnsym(B_u, DN, dV);        
+        answer.plusProductUnsym(B_u, DN, dV);
     }
 
 }
@@ -371,7 +353,6 @@ PhaseFieldElement :: computeStiffnessMatrix_ud(FloatMatrix &answer, MatResponseM
 void
 PhaseFieldElement :: computeStiffnessMatrix_dd(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
-
     double Delta_t = tStep->giveTimeIncrement();
     double t_star = this->giveRelaxationTime();
     double l = this->giveInternalLength();
@@ -379,22 +360,21 @@ PhaseFieldElement :: computeStiffnessMatrix_dd(FloatMatrix &answer, MatResponseM
 
     FloatMatrix B_d, N_d;
     //StructuralCrossSection *cs = dynamic_cast<StructuralCrossSection* > (this->giveCrossSection() );
-    NLStructuralElement *el = this->giveElement( );
+    NLStructuralElement *el = this->giveElement();
     answer.clear();
 
     for ( auto &gp: el->giveIntegrationRule(0) ) {
         double dV = el->computeVolumeAround(gp);
-        
-        this->computeNd_matrixAt(*gp->giveCoordinates(), N_d);
+
+        this->computeNd_matrixAt(*gp->giveNaturalCoordinates(), N_d);
         this->computeBd_matrixAt(gp, B_d, 1, 3);
-        
+
         double Gprim = this->computeGPrim(gp, VM_Total, tStep);
-        
         double psiBar = this->computeFreeEnergy( gp, tStep );
         //double factorN = t_star/Delta_t + g_c/l + psiBar*Gbis;
         double factorN = t_star / Delta_t + g_c / l + psiBar*(-2.0);
         double factorB = g_c*l;
-        
+
         answer.plusProductSymmUpper(N_d, N_d, factorN*dV);
         answer.plusProductSymmUpper(B_d, B_d, factorB*dV);   
     }
@@ -413,119 +393,112 @@ PhaseFieldElement :: initializeFrom(InputRecord *ir)
 }
 
 
+#if 0
+void
+PhaseFieldElement :: computeStressVectorAndLocalCumulatedStrain(FloatArray &answer, double localCumulatedStrain, GaussPoint *gp, TimeStep *stepN)
+//PhaseFieldElement :: computeStressVector(FloatArray &answer, double localCumulatedStrain, GaussPoint *gp, TimeStep *stepN)
+{
+    NLStructuralElement *elem = this->giveNLStructuralElement();
 
-//void
-//PhaseFieldElement :: computeStressVectorAndLocalCumulatedStrain(FloatArray &answer, double localCumulatedStrain, GaussPoint *gp, TimeStep *stepN)
-////PhaseFieldElement :: computeStressVector(FloatArray &answer, double localCumulatedStrain, GaussPoint *gp, TimeStep *stepN)
-//{
-//    NLStructuralElement *elem = this->giveNLStructuralElement();
-//
-//    nlGeo = elem->giveGeometryMode();
-//    StructuralCrossSection *cs = this->giveNLStructuralElement()->giveStructuralCrossSection();
-//
-//    //this->computeDamage(alpha, gp, stepN);
-//    if ( nlGeo == 0 ) {
-//        FloatArray Epsilon;
-//        this->computeLocalStrainVector(Epsilon, gp, stepN);
-//        dpmat->giveRealStressVector(answer, gp, Epsilon, nlCumulatedStrain, stepN);
-//    } else if ( nlGeo == 1 ) {
-//        if ( elem->giveDomain()->giveEngngModel()->giveFormulation() == TL ) {
-//            FloatArray vF;
-//            this->computeDeformationGradientVector(vF, gp, stepN);
-//            dpmat->giveFirstPKStressVector(answer, gp, vF, nlCumulatedStrain, stepN);
-//        }
-//
-//    }
-//}
-//
-//
-//void
-//PhaseFieldElement :: giveInternalForcesVector_u(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
-//{
-//    // computes int_V ( B_u^t * BSgima_u ) * dV
-//    this->giveInternalForcesVectorGen(answer, tStep, useUpdatedGpRecord, 
-//        NULL, 
-//        &this->computeBmatrixAt,
-//        NULL, 
-//        &this->computeBStress_u,
-//        &this->computeVolumeAround
-//        );
-//
-//}
-//
-//void
-//PhaseFieldElement :: giveInternalForcesVector_d(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
-//{
-//    // computes int_V ( N_d^t * NSgima_d + B_d^t * BSgima_d ) * dV
-//    this->giveInternalForcesVectorGen(answer, tStep, useUpdatedGpRecord, 
-//        &this->computeNmatrixAt, 
-//        &this->computeBmatrixAt,
-//        &this->computeNStress_d, 
-//        &this->computeBStress_d,
-//        &this->computeVolumeAround
-//        );
-//
-//}
-//
-//void
-//PhaseFieldElement :: computeBStress_d(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, int useUpdatedGpRecord)
-//{
-//    // computes g_c*l
-//    // PhaseFieldCrossSection *cs = static_cast... 
-//    double l = this->giveInternalLength();
-//    double g_c = this->giveCriticalEnergy();
-//    answer.resize(1);
-//    answer.at(1) = g_c*l;
-//}
-//
-//void
-//PhaseFieldElement :: computeStiffnessMatrix_du(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
-//{
-//
-//}
-//void
-//PhaseFieldElement :: computeStiffnessMatrix_dd(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
-//{
-//   
-//    StructuralCrossSection *cs = this->giveStructuralCrossSection();
-//        
-//    this->computeStiffnessMatrixGen(answer, rMode, tStep, 
-//        NULL, 
-//        &this->computeBmatrixAt,
-//        NULL, 
-//        &this->Duu_B,
-//        this->computeVolumeAround 
-//        );
-//
-//}
-//
-//void
-//PhaseFieldElement :: computeStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
-//{
-//    // This is the regular stiffness matrix times G
-//        
-//    this->computeStiffnessMatrixGen(answer, rMode, tStep, 
-//        NULL, 
-//        &this->computeBmatrixAt,
-//        NULL, 
-//        &this->Duu_B,
-//        this->computeVolumeAround 
-//        );
-//
-//}
-//
-//void
-//PhaseFieldElement :: Duu_B(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-//{
-//    // G*dSig/dEps
-//    //StructuralCrossSection *cs = this->giveStructuralCrossSection();
-//    //cs->giveCharMaterialStiffnessMatrix(answer, rMode, gp, tStep);
-//
-//    //answer.times( this->computeG(gp) );
-//}
+    nlGeo = elem->giveGeometryMode();
+    StructuralCrossSection *cs = this->giveNLStructuralElement()->giveStructuralCrossSection();
+
+    //this->computeDamage(alpha, gp, stepN);
+    if ( nlGeo == 0 ) {
+        FloatArray Epsilon;
+        this->computeLocalStrainVector(Epsilon, gp, stepN);
+        dpmat->giveRealStressVector(answer, gp, Epsilon, nlCumulatedStrain, stepN);
+    } else if ( nlGeo == 1 ) {
+        if ( elem->giveDomain()->giveEngngModel()->giveFormulation() == TL ) {
+            FloatArray vF;
+            this->computeDeformationGradientVector(vF, gp, stepN);
+            dpmat->giveFirstPKStressVector(answer, gp, vF, nlCumulatedStrain, stepN);
+        }
+
+    }
+}
 
 
+void
+PhaseFieldElement :: giveInternalForcesVector_u(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
+{
+    // computes int_V ( B_u^t * BSgima_u ) * dV
+    this->giveInternalForcesVectorGen(answer, tStep, useUpdatedGpRecord, 
+        NULL,
+        &this->computeBmatrixAt,
+        NULL,
+        &this->computeBStress_u,
+        &this->computeVolumeAround
+        );
+}
 
+void
+PhaseFieldElement :: giveInternalForcesVector_d(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
+{
+   // computes int_V ( N_d^t * NSgima_d + B_d^t * BSgima_d ) * dV
+   this->giveInternalForcesVectorGen(answer, tStep, useUpdatedGpRecord, 
+       &this->computeNmatrixAt,
+       &this->computeBmatrixAt,
+       &this->computeNStress_d,
+       &this->computeBStress_d,
+       &this->computeVolumeAround
+       );
+}
+
+void
+PhaseFieldElement :: computeBStress_d(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, int useUpdatedGpRecord)
+{
+    // computes g_c*l
+    // PhaseFieldCrossSection *cs = static_cast... 
+    double l = this->giveInternalLength();
+    double g_c = this->giveCriticalEnergy();
+    answer.resize(1);
+    answer.at(1) = g_c*l;
+}
+
+void
+PhaseFieldElement :: computeStiffnessMatrix_du(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
+{
+
+}
+void
+PhaseFieldElement :: computeStiffnessMatrix_dd(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
+{
+    StructuralCrossSection *cs = this->giveStructuralCrossSection();
+
+    this->computeStiffnessMatrixGen(answer, rMode, tStep, 
+        NULL, 
+        &this->computeBmatrixAt,
+        NULL, 
+        &this->Duu_B,
+        this->computeVolumeAround 
+        );
+}
+
+void
+PhaseFieldElement :: computeStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
+{
+    // This is the regular stiffness matrix times G
+
+    this->computeStiffnessMatrixGen(answer, rMode, tStep, 
+        NULL, 
+        &this->computeBmatrixAt,
+        NULL, 
+        &this->Duu_B,
+        this->computeVolumeAround 
+        );
+}
+
+void
+PhaseFieldElement :: Duu_B(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    // G*dSig/dEps
+    //StructuralCrossSection *cs = this->giveStructuralCrossSection();
+    //cs->giveCharMaterialStiffnessMatrix(answer, rMode, gp, tStep);
+
+    //answer.times( this->computeG(gp) );
+}
+#endif
 
 
 } // end namespace oofem

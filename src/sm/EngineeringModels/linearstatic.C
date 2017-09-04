@@ -264,37 +264,16 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
 }
 
 
-contextIOResultType LinearStatic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
-//
-// saves state variable - displacement vector
-//
+contextIOResultType LinearStatic :: saveContext(DataStream &stream, ContextMode mode)
 {
     contextIOResultType iores;
-    int closeFlag = 0;
-    FILE *file = NULL;
-
-    if ( stream == NULL ) {
-        if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
-                                    this->giveCurrentStep()->giveVersion(), contextMode_write) ) {
-            THROW_CIOERR(CIO_IOERR); // override
-        }
-
-        stream = new FileDataStream(file);
-        closeFlag = 1;
-    }
 
     if ( ( iores = StructuralEngngModel :: saveContext(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = displacementVector.storeYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = displacementVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
-    }
-
-    if ( closeFlag ) {
-        fclose(file);
-        delete stream;
-        stream = NULL;
     }
 
     return CIO_OK;
@@ -338,15 +317,6 @@ contextIOResultType LinearStatic :: restoreContext(DataStream *stream, ContextMo
     }
 
     return CIO_OK;
-}
-
-
-void
-LinearStatic :: terminate(TimeStep *tStep)
-{
-    StructuralEngngModel :: terminate(tStep);
-    this->printReactionForces(tStep, 1);
-    fflush( this->giveOutputStream() );
 }
 
 

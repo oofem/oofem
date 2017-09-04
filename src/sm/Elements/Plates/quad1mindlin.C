@@ -76,7 +76,6 @@ Quad1Mindlin :: giveInterpolation(DofIDItem id) const
 
 void
 Quad1Mindlin :: computeGaussPoints()
-// Sets up the array containing the four Gauss points of the receiver.
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );
@@ -266,7 +265,7 @@ Quad1Mindlin :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateTyp
         answer.at(5) = help.at(4); // vxz
         answer.at(6) = 0.0; // vxy
         return 1;
-    } else if ( type == IST_ShellMomentTensor || type == IST_ShellCurvatureTensor ) {
+    } else if ( type == IST_ShellMomentTensor || type == IST_CurvatureTensor ) {
         if ( type == IST_ShellMomentTensor ) {
             help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         } else {

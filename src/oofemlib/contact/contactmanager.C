@@ -106,7 +106,7 @@ ContactManager :: assembleVectorFromContacts(FloatArray &answer, TimeStep *tStep
     if ( type == InternalForcesVector) {
         //printf("\n Add forces due to contact... \n");
         for ( auto &cDef : contactDefinitionList ) {
-            cDef->computeContactForces(answer, tStep, type, mode, s, domain, eNorms);
+            cDef->computeContactForces(answer, tStep, mode, s, domain, eNorms);
         }
     }
 }
@@ -115,10 +115,12 @@ ContactManager :: assembleVectorFromContacts(FloatArray &answer, TimeStep *tStep
 void 
 ContactManager :: assembleTangentFromContacts(SparseMtrx &answer, TimeStep *tStep,
                       CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) 
-{ 
-    //printf("\n Add tangents due to contact... \n");
-    for ( auto &cDef : contactDefinitionList ) {
-        cDef->computeContactTangent(answer, tStep, type, r_s, c_s);
+{
+    if ( type == TangentStiffnessMatrix ) {
+        //printf("\n Add tangents due to contact... \n");
+        for ( auto &cDef : contactDefinitionList ) {
+            cDef->computeContactTangent(answer, tStep, r_s, c_s);
+        }
     }
 }
 

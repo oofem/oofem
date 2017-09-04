@@ -83,14 +83,13 @@ public:
     virtual void solveYourselfAt(TimeStep *tStep);
 
     virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     virtual void updateDomainLinks();
 
     virtual TimeStep *giveNextStep();
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
-    virtual void terminate(TimeStep *tStep);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 

@@ -488,7 +488,7 @@ void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Elem
     }
 }
 
-void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx &answer, TimeStep *tStep, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
+void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx &answer, TimeStep *tStep, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale)
 {
     if ( type != TangentStiffnessMatrix && type != StiffnessMatrix ) {
         return;
@@ -584,7 +584,7 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx &answer, TimeStep *tSt
 
             }
 
-            B.times(normalSign);
+            B.times(normalSign * scale);
             BT.beTranspositionOf(B);
 
             answer.assemble(r_sideLoc, c_loc, B);

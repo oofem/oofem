@@ -88,6 +88,12 @@ SimpleTransportCrossSection :: giveMaterial()
     return dynamic_cast< TransportMaterial * >( this->domain->giveMaterial(this->matNumber) );
 }
 
+Material *
+SimpleTransportCrossSection :: giveMaterial(IntegrationPoint *ip)
+{
+    return this->domain->giveMaterial(this->matNumber);
+}
+
 
 int
 SimpleTransportCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep)

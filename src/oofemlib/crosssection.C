@@ -34,6 +34,7 @@
 
 #include "crosssection.h"
 #include "dictionary.h"
+#include "dynamicinputrecord.h"
 #include "gausspoint.h"
 #include "material.h"
 #include "contextioerr.h"
@@ -75,6 +76,13 @@ CrossSection :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, this->setNumber, _IFT_CrossSection_SetNumber);
 
     return IRRT_OK;
+}
+
+void
+CrossSection :: giveInputRecord(DynamicInputRecord &input)
+{
+	FEMComponent :: giveInputRecord(input);
+    input.setField(this->setNumber, _IFT_CrossSection_SetNumber);
 }
 
 int
@@ -133,6 +141,11 @@ CrossSection :: restoreIPContext(DataStream &stream, ContextMode mode, GaussPoin
     return CIO_OK;
 }
 
+bool
+CrossSection :: hasProperty(CrossSectionProperty aProperty)
+{
+    return propertyDictionary.includes(aProperty);
+}
 
 double
 CrossSection :: give(CrossSectionProperty aProperty, GaussPoint *gp)

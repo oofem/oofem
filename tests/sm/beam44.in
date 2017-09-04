@@ -1,7 +1,7 @@
 beam44.out
 TEST OF trplanestressrotallman ELEMENTS (clamped beam loaded by uniform load)
 #domain section
-LinearStatic nsteps 1 nmodules 1
+StaticStructural nsteps 1 nmodules 1
 errorcheck
 domain 2dPlaneStressrot
 OutputManager tstep_all dofman_all element_all

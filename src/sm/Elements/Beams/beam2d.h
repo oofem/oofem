@@ -162,14 +162,9 @@ protected:
     double giveKappaCoeff(TimeStep *tStep);
     virtual double computeLength();
     double givePitch();
-    virtual void computeClampedStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseMode rMode, TimeStep *tStep);
-    virtual void computeLocalStiffnessMatrix(FloatMatrix &answer,
-                                             MatResponseMode rMode, TimeStep *tStep);
     virtual void computeGaussPoints();
     virtual MaterialMode giveMaterialMode() { return _2dBeam; }
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }
-
 
     bool hasDofs2Condense() { return ( ghostNodes [ 0 ] || ghostNodes [ 1 ] ); }
 };

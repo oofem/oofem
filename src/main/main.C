@@ -104,12 +104,11 @@ int main(int argc, char *argv[])
     std :: set_new_handler(freeStoreError);   // prevents memory overflow
 #endif
 
-    int adaptiveRestartFlag = 0, restartStepInfo [ 2 ];
+    int adaptiveRestartFlag = 0, restartStep;
     bool parallelFlag = false, renumberFlag = false, debugFlag = false, contextFlag = false, restartFlag = false,
          inputFileFlag = false, outputFileFlag = false, errOutputFileFlag = false;
     std :: stringstream inputFileName, outputFileName, errOutputFileName;
     std :: vector< const char * >modulesArgs;
-    EngngModel *problem = 0;
 
     int rank = 0;
 
@@ -117,6 +116,7 @@ int main(int argc, char *argv[])
  #ifdef __USE_MPI
     MPI_Init(& argc, & argv);
     MPI_Comm_rank(MPI_COMM_WORLD, & rank);
+    oofem_logger.setComm(MPI_COMM_WORLD);
  #endif
 #endif
 
@@ -150,8 +150,7 @@ int main(int argc, char *argv[])
                 if ( i + 1 < argc ) {
                     i++;
                     restartFlag = true;
-                    restartStepInfo [ 0 ] = strtol(argv [ i ], NULL, 10);
-                    restartStepInfo [ 1 ] = 0;
+                    restartStep = strtol(argv [ i ], NULL, 10);
                 }
             } else if ( strcmp(argv [ i ], "-rn") == 0 ) {
                 renumberFlag = true;
@@ -189,7 +188,7 @@ int main(int argc, char *argv[])
                 exit(EXIT_FAILURE);
 #endif
             } else if ( strcmp(argv [i], "-t") == 0) {
-#ifdef _OPENMP            
+#ifdef _OPENMP
                 if ( i + 1 < argc ) {
                     i++;
                     int numberOfThreads = strtol(argv [ i ], NULL, 10);
@@ -264,7 +263,7 @@ int main(int argc, char *argv[])
     OOFEM_LOG_FORCED(PRG_HEADER_SM);
 
     OOFEMTXTDataReader dr( inputFileName.str ( ).c_str() );
-    problem = :: InstanciateProblem(& dr, _processor, contextFlag, NULL, parallelFlag);
+    EngngModel *problem = :: InstanciateProblem(& dr, _processor, contextFlag, NULL, parallelFlag);
     dr.finish();
     if ( !problem ) {
         OOFEM_LOG_ERROR("Couldn't instanciate problem, exiting");
@@ -280,6 +279,9 @@ int main(int argc, char *argv[])
 
     if ( restartFlag ) {
         try {
+            //FileDataStream stream(this->giveContextFileName(restartStep, 0), false);
+            //problem->restoreContext(stream, CM_State | CM_Definition);
+            int restartStepInfo [ 2 ] = {restartStep, 0};
             problem->restoreContext(NULL, CM_State | CM_Definition, ( void * ) restartStepInfo);
         } catch(ContextIOERR & c) {
             c.print();
@@ -288,7 +290,7 @@ int main(int argc, char *argv[])
         problem->initStepIncrements();
     } else if ( adaptiveRestartFlag ) {
         problem->initializeAdaptive(adaptiveRestartFlag);
-        problem->saveContext(NULL, CM_State | CM_Definition);
+        problem->saveStepContext(problem->giveCurrentStep(),CM_State);
         // exit (1);
     }
 
@@ -380,10 +382,10 @@ void oofem_finalize_modules()
 void oofem_debug(EngngModel *emodel)
 {
     //FloatMatrix k;
-    //((BsplinePlaneStressElement*)emodel.giveDomain(1)->giveElement(1))->giveCharacteristicMatrix(k, TangentStiffnessMatrix, NULL);
+    //((BsplinePlaneStressElement*)emodel->giveDomain(1)->giveElement(1))->giveCharacteristicMatrix(k, StiffnessMatrix, NULL);
 
 #ifdef __PARALLEL_MODE
-    //LoadBalancer* lb = emodel.giveDomain(1)->giveLoadBalancer();
+    //LoadBalancer* lb = emodel->giveDomain(1)->giveLoadBalancer();
     //lb->calculateLoadTransfer();
     //lb->migrateLoad();
     //exit(1);

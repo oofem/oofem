@@ -372,7 +372,7 @@ FRCFCMNL :: computeNonlocalStressInFibers(const FloatArray &crackVectorHome, Gau
 
     this->buildNonlocalPointTable(gp);
 
-    std :: list< localIntegrationRecord > *list = this->giveIPIntegrationList(gp); // !
+    auto *list = this->giveIPIntegrationList(gp); // !
 
     // two fiber stresses - from left and right part of the crack - rewrite if it turns out that one stress is fully sufficientaveraged
     double sigma_f_left = 0.;
@@ -526,14 +526,15 @@ FRCFCMNL :: computeNonlocalStressInFibers(const FloatArray &crackVectorHome, Gau
 
 
 double
-FRCFCMNL :: computeNonlocalStressInFibersInUncracked(GaussPoint *gp, TimeStep *tStep) {
+FRCFCMNL :: computeNonlocalStressInFibersInUncracked(GaussPoint *gp, TimeStep *tStep)
+{
     // using "non-local" approach
 
     FRCFCMNLStatus *nonlocStatus;
 
     this->buildNonlocalPointTable(gp);
 
-    std :: list< localIntegrationRecord > *list = this->giveIPIntegrationList(gp); // !
+    auto *list = this->giveIPIntegrationList(gp); // !
 
     FloatArray coordsHome, coordsTarget;
 

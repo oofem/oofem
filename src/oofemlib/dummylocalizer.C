@@ -194,7 +194,7 @@ DummySpatialLocalizer :: giveAllElementsWithIpWithinBox(elementContainerType &el
             if ( ielem->computeGlobalCoordinates( jGpCoords, jGp->giveNaturalCoordinates() ) ) {
                 double currDist = coords.distance(jGpCoords);
                 if ( currDist <= radius ) {
-                    elemSet.insert(i);
+                    elemSet.insertSortedOnce(i);
                 }
             }
         }

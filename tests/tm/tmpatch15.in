@@ -1,8 +1,6 @@
 tmpatch15.out
 Patch test of Quad1_ht elements, nonstationary
-#NonStationaryProblem nsteps 200 deltat 600000.0 alpha 0.5
-#nltransienttransportproblem nsteps 200 deltat 600000.0 rtol 0.001 alpha 0.5 nmodules 1
-transienttransport nsteps 30 deltat 600000.0 rtolv 1.e-5 alpha 0.5 nmodules 1
+TransientTransport nsteps 30 deltat 600000.0 rtolf 1.e-6 alpha 0.5 miniter 1 nmodules 1
 #vtkxml tstep_all domain_all primvars 1 6 vars 2 37 56 stype 1
 errorcheck
 domain HeatTransfer
@@ -29,12 +27,12 @@ Set 2 nodes 2 1 2
 Set 3 elementedges 2 2 2
 
 #%BEGIN_CHECK%
-#NODE tStep 20 number 3 dof 10 unknown d value 8.15996152e-01
-#NODE tStep 20 number 5 dof 10 unknown d value 8.96042091e+00
-#NODE tStep 30 number 3 dof 10 unknown d value 1.10196762e+00
-#NODE tStep 30 number 4 dof 10 unknown d value 1.10196762e+00
-#NODE tStep 30 number 5 dof 10 unknown d value 9.73800585e+00
-#NODE tStep 30 number 6 dof 10 unknown d value 9.73800585e+00
+#NODE tStep 20 number 3 dof 10 unknown d value 8.15996152e-01 tolerance 1e-5
+#NODE tStep 20 number 5 dof 10 unknown d value 8.96042091e+00 tolerance 1e-5
+#NODE tStep 30 number 3 dof 10 unknown d value 1.10196762e+00 tolerance 1e-5
+#NODE tStep 30 number 4 dof 10 unknown d value 1.10196762e+00 tolerance 1e-5
+#NODE tStep 30 number 5 dof 10 unknown d value 9.73800585e+00 tolerance 1e-5
+#NODE tStep 30 number 6 dof 10 unknown d value 9.73800585e+00 tolerance 1e-5
 #%END_CHECK%
 
 

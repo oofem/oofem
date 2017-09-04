@@ -69,10 +69,10 @@ LinearElasticMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint 
     this->give3dMaterialStiffnessMatrix(d, TangentStiffness, gp, tStep);
 
     if ( this->castingTime < 0. ) { // no changes in material stiffness ->> total formulation
-        this->giveStressDependentPartOfStrainVector(strainVector, gp, reducedStrain, tStep, VM_Total);
+        this->giveStressDependentPartOfStrainVector_3d(strainVector, gp, reducedStrain, tStep, VM_Total);
         answer.beProductOf(d, strainVector);
     } else { // changes in material stiffness ->> incremental formulation
-        this->giveStressDependentPartOfStrainVector(strainVector, gp, reducedStrain, tStep, VM_Incremental);
+        this->giveStressDependentPartOfStrainVector_3d(strainVector, gp, reducedStrain, tStep, VM_Incremental);
         strainIncrement.beDifferenceOf( strainVector, status->giveStrainVector() );
 
         answer.beProductOf(d, strainIncrement);

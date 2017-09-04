@@ -502,7 +502,7 @@ DKTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
         answer.at(5) = help.at(4); // vxz in answer
         answer.at(6) = 0.0; // vxy
         return 1;
-    } else if ( type == IST_ShellMomentTensor || type == IST_ShellCurvatureTensor ) {
+    } else if ( type == IST_ShellMomentTensor || type == IST_CurvatureTensor ) {
         if ( type == IST_ShellMomentTensor ) {
             help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         } else {
@@ -530,7 +530,7 @@ DKTPlate :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int n
 {
     GaussPoint *gp;
     if ( ( type == IST_ShellForceTensor ) || ( type == IST_ShellMomentTensor ) ||
-        ( type == IST_ShellStrainTensor )  || ( type == IST_ShellCurvatureTensor ) ) {
+        ( type == IST_ShellStrainTensor )  || ( type == IST_CurvatureTensor ) ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
         this->giveIPValue(answer, gp, type, tStep);
     } else {

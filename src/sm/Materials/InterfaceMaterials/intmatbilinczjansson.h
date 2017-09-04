@@ -49,6 +49,7 @@
 #define _IFT_IntMatBilinearCZJansson_mu "mu"
 #define _IFT_IntMatBilinearCZJansson_gamma "gamma"
 #define _IFT_IntMatBilinearCZJansson_sigf "sigf"
+#define _IFT_IntMatBilinearCZJansson_semiexplicit "semiexplicit"
 //@}
 
 namespace oofem {
@@ -170,6 +171,8 @@ protected:
 
     double mu;    // loading function parameter
     double gamma; // loading function parameter
+    
+    bool mSemiExplicit; // If semi-explicit time integration should be used
 
 
     virtual int checkConsistency();
@@ -196,6 +199,8 @@ public:
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual IRResultType initializeFrom(InputRecord *ir);
+    
+    virtual FloatArray giveInterfaceStrength() { return {this->sigf*this->gamma,this->sigf*this->gamma,this->sigf}; }
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new IntMatBilinearCZJanssonStatus(1, domain, gp); } //@Martin: Why new?
     void printYourself();

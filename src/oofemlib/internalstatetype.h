@@ -58,7 +58,7 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_BeamStrainCurvatureTensor, 8) \
     ENUM_ITEM_WITH_VALUE(IST_ShellMomentTensor, 9)  \
     ENUM_ITEM_WITH_VALUE(IST_ShellForceTensor, 10) \
-    ENUM_ITEM_WITH_VALUE(IST_ShellCurvatureTensor, 11) \
+    ENUM_ITEM_WITH_VALUE(IST_CurvatureTensor, 11) \
     ENUM_ITEM_WITH_VALUE(IST_DisplacementVector, 12) \
     ENUM_ITEM_WITH_VALUE(IST_DamageTensor, 13) \
     ENUM_ITEM_WITH_VALUE(IST_DamageInvTensor, 14) \
@@ -67,8 +67,8 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_CrackState, 17) \
     ENUM_ITEM_WITH_VALUE(IST_StressTensorTemp, 18) \
     ENUM_ITEM_WITH_VALUE(IST_StrainTensorTemp, 19) \
-    ENUM_ITEM_WITH_VALUE(IST_ForceTensorTemp, 20) \
-    ENUM_ITEM_WITH_VALUE(IST_MomentTensorTemp, 21) \
+    ENUM_ITEM_WITH_VALUE(IST_ShellForceTensorTemp, 20) \
+    ENUM_ITEM_WITH_VALUE(IST_ShellMomentTensorTemp, 21) \
     ENUM_ITEM_WITH_VALUE(IST_CurvatureTensorTemp, 22) \
     ENUM_ITEM_WITH_VALUE(IST_DisplacementVectorTemp, 23) \
     ENUM_ITEM_WITH_VALUE(IST_DamageTensorTemp, 24) \
@@ -173,8 +173,10 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_EnergyMassCapacity, 123) \
     ENUM_ITEM_WITH_VALUE(IST_PrincStressVector1, 124) \
     ENUM_ITEM_WITH_VALUE(IST_PrincStressVector2, 125) \
-    ENUM_ITEM_WITH_VALUE(IST_PrincStressVector3, 126)
-    
+    ENUM_ITEM_WITH_VALUE(IST_PrincStressVector3, 126) \
+    ENUM_ITEM_WITH_VALUE(IST_InterfaceNormal, 127) \
+    ENUM_ITEM_WITH_VALUE(IST_MomentTensor, 128) \
+    ENUM_ITEM_WITH_VALUE(IST_MomentTensorTemp, 129)
   
 /**
  * Type  representing the physical meaning of element or constitutive model internal variable.

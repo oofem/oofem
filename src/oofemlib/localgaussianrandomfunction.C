@@ -48,7 +48,7 @@ LocalGaussianRandomFunction :: ~LocalGaussianRandomFunction()
 { }
 
 void
-LocalGaussianRandomFunction :: evaluate(FloatArray &answer, const std :: map< std :: string, FunctionArgument > &valDict)
+LocalGaussianRandomFunction :: evaluate(FloatArray &answer, const std :: map< std :: string, FunctionArgument > &valDict, GaussPoint *gp, double param)
 {
     answer = FloatArray{evaluateAtTime(0)};
 }
@@ -56,7 +56,7 @@ LocalGaussianRandomFunction :: evaluate(FloatArray &answer, const std :: map< st
 double
 LocalGaussianRandomFunction :: evaluateAtTime(double t)
 {
-    return {normalCdfInverse(ran1(& randomInteger), mean, variance * mean)};
+    return normalCdfInverse(ran1(& randomInteger), mean, variance * mean);
 }
 
 double

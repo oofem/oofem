@@ -118,7 +118,7 @@ TrabBoneNLEmbed :: computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep
     this->buildNonlocalPointTable(gp);
     this->updateDomainBeforeNonlocAverage(tStep);
 
-    std :: list< localIntegrationRecord > *list = status->giveIntegrationDomainList();
+    auto list = status->giveIntegrationDomainList();
 
     for ( auto &lir: *list ) {
         nonlocStatus = static_cast< TrabBoneNLEmbedStatus * >( this->giveStatus(lir.nearGp) );

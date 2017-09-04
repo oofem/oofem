@@ -37,6 +37,7 @@
 #include "node.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
+#include "lobattoir.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
@@ -90,7 +91,10 @@ IntElLine1 :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );
-        //integrationRulesArray[ 0 ].reset( new LobattoIntegrationRule (1,domain, 1, 2) );
+
+//        integrationRulesArray[ 0 ].reset( new LobattoIntegrationRule (1,this, 1, 2, false) );
+//        integrationRulesArray [ 0 ]->SetUpPointsOnLine(2, _2dInterface);
+
         integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 2) );
         integrationRulesArray [ 0 ]->SetUpPointsOnLine(this->numberOfGaussPoints, _2dInterface);
     }
@@ -145,8 +149,41 @@ IntElLine1 :: initializeFrom(InputRecord *ir)
 {
     this->axisymmode = false;
     this->axisymmode = ir->hasField(_IFT_IntElLine1_axisymmode);
-    return StructuralInterfaceElement :: initializeFrom(ir);
-    
+    IRResultType result = StructuralInterfaceElement :: initializeFrom(ir);
+
+
+
+    // Check if node numbering is ok
+    int nodeInd1 = this->giveDofManagerNumber(1);
+    int arrayInd1 = domain->giveDofManPlaceInArray(nodeInd1);
+    DofManager *node1 = domain->giveDofManager(arrayInd1);
+    const FloatArray &x1 = *(node1->giveCoordinates());
+
+//    DofManager *node2 = this->giveDofManager(2);
+    int nodeInd2 = this->giveDofManagerNumber(2);
+    int arrayInd2 = domain->giveDofManPlaceInArray(nodeInd2);
+    DofManager *node2 = domain->giveDofManager(arrayInd2);
+    const FloatArray &x2 = *(node2->giveCoordinates());
+
+//    DofManager *node3 = this->giveDofManager(3);
+    int nodeInd3 = this->giveDofManagerNumber(3);
+    int arrayInd3 = domain->giveDofManPlaceInArray(nodeInd3);
+    DofManager *node3 = domain->giveDofManager(arrayInd3);
+    const FloatArray &x3 = *(node3->giveCoordinates());
+
+
+    double L2 = x1.distance_square(x2);
+    double L3 = x1.distance_square(x3);
+
+
+    if(L2 < L3) {
+    	printf("Renumbering element %d\n.\n", this->giveNumber());
+    	IntArray dofManArrayTmp = {dofManArray.at(3), dofManArray.at(1), dofManArray.at(4), dofManArray.at(2)};
+    	dofManArray = std::move(dofManArrayTmp);
+    }
+
+
+    return result;
 }
 
 

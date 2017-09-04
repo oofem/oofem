@@ -70,11 +70,7 @@ NlDEIDynamic :: ~NlDEIDynamic()
 { }
 
 NumericalMethod *NlDEIDynamic :: giveNumericalMethod(MetaStep *mStep)
-// Only one has reason for NlDEIDynamic
-//     - SolutionOfLinearEquations
-
 {
-    //return NULL;  // Not necessary here - Diagonal matrix and simple inversion is used.
     if ( nMethod ) {
         return nMethod;
     }
@@ -713,51 +709,33 @@ NlDEIDynamic :: estimateMaxPackSize(IntArray &commMap, DataStream &buff, int pac
     return 0;
 }
 
-contextIOResultType NlDEIDynamic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType NlDEIDynamic :: saveContext(DataStream &stream, ContextMode mode)
 {
     contextIOResultType iores;
-    int closeFlag = 0;
-    FILE *file = NULL;
-
-    if ( stream == NULL ) {
-        if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
-                                    this->giveCurrentStep()->giveVersion(), contextMode_write) ) {
-            THROW_CIOERR(CIO_IOERR); // override
-        }
-
-        stream = new FileDataStream(file);
-        closeFlag = 1;
-    }
 
     if ( ( iores = StructuralEngngModel :: saveContext(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = previousIncrementOfDisplacementVector.storeYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = previousIncrementOfDisplacementVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = displacementVector.storeYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = displacementVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = velocityVector.storeYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = velocityVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = accelerationVector.storeYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = accelerationVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( !stream->write(deltaT) ) {
+    if ( !stream.write(deltaT) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
-    if ( closeFlag ) {
-        fclose(file);
-        delete stream;
-        stream = NULL;
-    } // Ensure consistent records
 
     return CIO_OK;
 }
@@ -827,28 +805,21 @@ NlDEIDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
     iDof->printMultipleOutputAt(stream, tStep, dofchar, dofmodes, 3);
 }
 
-void
-NlDEIDynamic :: terminate(TimeStep *tStep)
-{
-    StructuralEngngModel :: terminate(tStep);
-    this->printReactionForces(tStep, 1);
-    fflush( this->giveOutputStream() );
-}
-
 
 void
-NlDEIDynamic :: printOutputAt(FILE *File, TimeStep *tStep)
+NlDEIDynamic :: printOutputAt(FILE *file, TimeStep *tStep)
 {
     if ( !this->giveDomain(1)->giveOutputManager()->testTimeStepOutput(tStep) ) {
         return;                                                                      // do not print even Solution step header
     }
 
-    fprintf( File, "\n\nOutput for time %.3e, solution step number %d\n", tStep->giveTargetTime(), tStep->giveNumber() );
+    fprintf(file, "\n\nOutput for time %.3e, solution step number %d\n", tStep->giveTargetTime(), tStep->giveNumber() );
     if ( drFlag ) {
-        fprintf(File, "Reached load level : %e\n\n", this->pt);
+        fprintf(file, "Reached load level : %e\n\n", this->pt);
     }
 
-    this->giveDomain(1)->giveOutputManager()->doDofManOutput(File, tStep);
-    this->giveDomain(1)->giveOutputManager()->doElementOutput(File, tStep);
+    this->giveDomain(1)->giveOutputManager()->doDofManOutput(file, tStep);
+    this->giveDomain(1)->giveOutputManager()->doElementOutput(file, tStep);
+    this->printReactionForces(tStep, 1, file);
 }
 } // end namespace oofem

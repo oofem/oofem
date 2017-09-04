@@ -1,7 +1,5 @@
 tmpatch11dtf.out
 Patch test of Quad1_ht elements 
-#nltransienttransportproblem nsteps 20 deltaTfunction 2 rtol 0.001 alpha 0.5 nsmax 300 nmodules 1
-#NonStationaryProblem nsteps 20 deltaT 6000. alpha 0.5 nmodules 1
 TransientTransport nsteps 20 dtfunction 2 alpha 0.5 nmodules 1
 errorcheck
 #vtkxml tstep_all domain_all primvars 1 6 vars 2 37 56 stype 1

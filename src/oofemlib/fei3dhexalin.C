@@ -242,6 +242,16 @@ FEI3dHexaLin :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
     answer.at(2, 1) =  1.0 / l;
 }
 
+
+void
+FEI3dHexaLin :: edgeEvaldNdxi(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+{
+    answer.resize(2);
+    answer(0) = -0.5;
+    answer(1) =  0.5;
+}
+
+
 void
 FEI3dHexaLin :: edgeLocal2global(FloatArray &answer, int iedge,
                                  const FloatArray &lcoords, const FEICellGeometry &cellgeo)
@@ -340,6 +350,61 @@ FEI3dHexaLin :: surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lc
 }
 
 void
+FEI3dHexaLin :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+{
+    // Note, this must be in correct order, not just the correct nodes, therefore we must use snodes;
+    IntArray snodes;
+    this->computeLocalSurfaceMapping(snodes, isurf);
+
+    FloatArray lcoords_hex;
+
+    ///@note Nodal, surface, edge ordering on this class is a mess. No consistency or rules. Have to convert surface->volume coords manually:
+#if 1
+    if ( isurf == 1 ) { // surface 1 - nodes 1 4 3 2
+        lcoords_hex = {-lcoords.at(1), -lcoords.at(2), 1};
+    } else if ( isurf == 2 ) { // surface 2 - nodes 5 6 7 8
+        lcoords_hex = {-lcoords.at(2), -lcoords.at(1), -1};
+    } else if ( isurf == 3 ) { // surface 3 - nodes 1 2 6 5
+        lcoords_hex = {-1, -lcoords.at(1), lcoords.at(2)};
+    } else if ( isurf == 4 ) { // surface 4 - nodes 2 3 7 6
+        lcoords_hex = {-lcoords.at(1), 1, lcoords.at(2)};
+    } else if ( isurf == 5 ) { // surface 5 - nodes 3 4 8 7
+        lcoords_hex = {1, lcoords.at(1), lcoords.at(2)};
+    } else if ( isurf == 6 ) { // surface 6 - nodes 4 1 5 8
+        lcoords_hex = {lcoords.at(1), -1, lcoords.at(2)};
+    } else {
+        OOFEM_ERROR("wrong surface number (%d)", isurf);
+    }
+#else
+    ///@note This would be somewhat consistent at least.
+    if ( isurf == 1 ) { // surface 1 - nodes 3 4 8 7
+        lcoords_hex = {-1, lcoords.at(1), lcoords.at(2)};
+    } else if ( isurf == 2 ) { // surface 2 - nodes 2 1 5 6
+        lcoords_hex = {1, lcoords.at(1), lcoords.at(2)};
+    } else if ( isurf == 3 ) { // surface 3 - nodes 3 7 6 2
+        lcoords_hex = {lcoords.at(1), -1, lcoords.at(2)};
+    } else if ( isurf == 4 ) { // surface 4 - nodes 4 8 5 1
+        lcoords_hex = {lcoords.at(1), 1, lcoords.at(2)};
+    } else if ( isurf == 5 ) { // surface 5 - nodes 3 2 1 4
+        lcoords_hex = {lcoords.at(1), lcoords.at(2), -1};
+    } else if ( isurf == 6 ) { // surface 6 - nodes 7 6 5 8
+        lcoords_hex = {lcoords.at(1), lcoords.at(2), 1};
+    } else {
+        OOFEM_ERROR("wrong surface number (%d)", isurf);
+    }
+#endif
+
+    FloatMatrix fullB;
+    this->evaldNdx(fullB, lcoords_hex, cellgeo);
+    answer.resize(snodes.giveSize(), 3);
+    for ( int i = 1; i <= snodes.giveSize(); ++i ) {
+        for ( int j = 1; j <= 3; ++j ) {
+            answer.at(i, j) = fullB.at(snodes.at(i), j);
+        }
+    }
+}
+
+void
 FEI3dHexaLin :: surfaceLocal2global(FloatArray &answer, int iedge,
                                     const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
@@ -401,43 +466,21 @@ FEI3dHexaLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &l
 void
 FEI3dHexaLin :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
 {
-    int aNode = 0, bNode = 0, cNode = 0, dNode = 0;
-
     if ( isurf == 1 ) { // surface 1 - nodes 1 4 3 2
-        aNode = 1;
-        bNode = 4;
-        cNode = 3;
-        dNode = 2;
+        surfNodes = {1, 4, 3, 2};
     } else if ( isurf == 2 ) { // surface 2 - nodes 5 6 7 8
-        aNode = 5;
-        bNode = 6;
-        cNode = 7;
-        dNode = 8;
+        surfNodes = {5, 6, 7, 8};
     } else if ( isurf == 3 ) { // surface 3  - nodes 1 2 6 5
-        aNode = 1;
-        bNode = 2;
-        cNode = 6;
-        dNode = 5;
+        surfNodes = {1, 2, 6, 5};
     } else if ( isurf == 4 ) { // surface 4 - nodes 2 3 7 6
-        aNode = 2;
-        bNode = 3;
-        cNode = 7;
-        dNode = 6;
+        surfNodes = {2, 3, 7, 6};
     } else if ( isurf == 5 ) { // surface 5 - nodes 3 4 8 7
-        aNode = 3;
-        bNode = 4;
-        cNode = 8;
-        dNode = 7;
+        surfNodes = {3, 4, 8, 7};
     } else if ( isurf == 6 ) { // surface 6 - nodes 4 1 5 8
-        aNode = 4;
-        bNode = 1;
-        cNode = 5;
-        dNode = 8;
+        surfNodes = {4, 1, 5, 8};
     } else {
         OOFEM_ERROR("wrong surface number (%d)", isurf);
     }
-
-    surfNodes = {aNode, bNode, cNode, dNode};
 }
 
 void

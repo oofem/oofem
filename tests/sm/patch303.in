@@ -3,7 +3,7 @@ Patch test of PlaneStress2d elements -> pure compression in x direction
 #
 # three tests in onex
 #
-LinearStatic nsteps 1 nmodules 1
+StaticStructural nsteps 1 nmodules 1
 errorcheck
 domain 3d
 OutputManager tstep_all dofman_all element_all

@@ -53,9 +53,8 @@ class EngngModel;
 class OOFEM_EXPORT GJacobi : public NumericalMethod
 {
 private:
-    int n, nsmax;
+    int nsmax;
     double rtol;
-    int solved;
 
 public:
     GJacobi(Domain * d, EngngModel * m);
