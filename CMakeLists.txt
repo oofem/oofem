@@ -108,6 +108,7 @@ option (USE_T3D "Enable T3D support" OFF)
 #option (USE_BOOST "Enable Boost" OFF)
 option (USE_PYTHON_BINDINGS "Enable Python bidings (OOFEM usable from Python). Implies USE_PYTHON." OFF)
 option (USE_PYTHON "Enable Python to be used inside OOFEM (e.g. userdef Dirichlet BCs)" OFF)
+option (USE_HDF5 "HDF5 support" OFF)
 
 if (USE_PARALLEL)
     add_definitions (-D__PARALLEL_MODE)
@@ -450,6 +451,12 @@ if (USE_TRIANGLE)
     list (APPEND MODULE_LIST "Triangle")
 endif ()
 
+if (USE_HDF5)
+    find_package(HDF5 REQUIRED "CXX")
+    include_directories(${HDF5_INCLUDE_DIRS})
+    list (APPEND EXT_LIBS ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
+endif ()
+
 if (USE_TINYXML)
     if (TINYXML2_DIR)
         include_directories (${TINYXML2_DIR})
@@ -640,7 +647,6 @@ target_link_libraries (beam01 liboofem)
 add_executable(hexgrid ${oofem_SOURCE_DIR}/bindings/oofemlib/hexgrid.C)
 set_target_properties(hexgrid PROPERTIES EXCLUDE_FROM_ALL TRUE)
 target_link_libraries (hexgrid liboofem)
-
 
 # CppCheck target (not built by default)
 add_custom_target(cppcheck)
