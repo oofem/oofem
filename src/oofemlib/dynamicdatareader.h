@@ -36,7 +36,7 @@
 #define dynamicdatareader_h
 
 #include "datareader.h"
-#include <list>
+#include <vector>
 #include <memory>
 
 namespace oofem {
@@ -54,9 +54,9 @@ class OOFEM_EXPORT DynamicDataReader : public DataReader
 {
 protected:
     /// Keeps track of the current position in the list
-    std :: list< std :: unique_ptr< InputRecord > > :: iterator it;
+    std :: vector< std :: unique_ptr< InputRecord > > :: iterator it;
     /// All record types will be appended to this list, no split in terms of InputRecordType is implemented yet.
-    std :: list< std :: unique_ptr< InputRecord > >recordList;
+    std :: vector< std :: unique_ptr< InputRecord > >recordList;
 
 public:
     /// Constructor.

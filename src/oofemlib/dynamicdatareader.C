@@ -53,6 +53,7 @@ DynamicDataReader :: insertInputRecord(InputRecordType type, InputRecord *record
 {
     // Should care about the record type, but its a hassle.
     this->recordList.emplace_back(record);
+    this->it = recordList.end();
 }
 
 InputRecord *
