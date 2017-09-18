@@ -82,6 +82,7 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_DeviatoricStrain:
     case IST_PlasticStrainTensor:
     case IST_ThermalStrainTensor:
+    case IST_ElasticStrainTensor:
     case IST_CylindricalStrainTensor:
     case IST_CreepStrainTensor:
     case IST_ShellStrainTensor:
