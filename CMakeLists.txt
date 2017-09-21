@@ -646,6 +646,10 @@ add_executable(hexgrid ${oofem_SOURCE_DIR}/bindings/oofemlib/hexgrid.C)
 set_target_properties(hexgrid PROPERTIES EXCLUDE_FROM_ALL TRUE)
 target_link_libraries (hexgrid liboofem)
 
+add_executable(dream3d_analysis ${oofem_SOURCE_DIR}/bindings/oofemlib/dream3d_analysis.C)
+set_target_properties(dream3d_analysis PROPERTIES EXCLUDE_FROM_ALL TRUE)
+target_link_libraries(dream3d_analysis liboofem)
+
 # CppCheck target (not built by default)
 add_custom_target(cppcheck)
 set_target_properties(cppcheck PROPERTIES EXCLUDE_FROM_ALL TRUE)
