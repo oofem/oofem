@@ -100,7 +100,9 @@ TR_SHELL01 :: postInitialize()
     StructuralElement :: postInitialize();
 
     if ( plate->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints() != membrane->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints() ) {
-        OOFEM_ERROR("incompatible integration rules detected");
+        OOFEM_ERROR("incompatible integration rules detected %d vs %d IPs",
+                plate->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints(),
+                membrane->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints());
     }
 }
 

@@ -1437,6 +1437,10 @@ GaussIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coords
 // Create arrays of coordinates and weights for Gauss Integration Points of a line with 'nPoints' integrationpoints
 {
     switch ( nPoints ) {
+    case 0:
+        coords_xi = FloatArray{};
+        weights = FloatArray{};
+        break;
     case 1:
         coords_xi = FloatArray{0.0};
         weights = FloatArray{2.0};
