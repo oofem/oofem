@@ -67,7 +67,7 @@ Truss3d  10 nodes 2   30   31
 # CS for concrete:
 simpleCS 1 material 1 set 1
 # CS for reinforcements, i.e. constant reinfrocement ratio + row + single:
-simpleCS 2 material 2 area 7.8540e-005 set 2
+simpleCS 2 material 2 area 1.e-4 set 2
 #
 # MATERIALS
 #
@@ -102,10 +102,10 @@ set 6 nodes 9 1 2 3 4 5 6 7 8 9
 #
 #%BEGIN_CHECK% tolerance 1e-7
 #NODE tStep 2  number 9 dof 1 unknown d value 0.0000000
-#NODE tStep 10  number 9 dof 1 unknown d value 5.63690266e-05 tolerance 1e-10
-#NODE tStep 15  number 9 dof 1 unknown d value 4.63093191e-05 tolerance 1e-10
+#NODE tStep 10  number 9 dof 1 unknown d value 6.51901149e-05 tolerance 1e-10
+#NODE tStep 15  number 9 dof 1 unknown d value 5.78804768e-05 tolerance 1e-10
 ##Check element's stress vector
 #ELEMENT tStep 2 number 4 gp 1 keyword 1 component 1 value 0.0000000
-#ELEMENT tStep 10 number 4 gp 1 keyword 1 component 1 value -1.48958603e-01
-#ELEMENT tStep 15 number 4 gp 1 keyword 1 component 1 value -1.14372454e-01
+#ELEMENT tStep 10 number 4 gp 1 keyword 1 component 1 value 3.97144912e-02
+#ELEMENT tStep 15 number 4 gp 1 keyword 1 component 1 value 1.47988005e-01
 #%END_CHECK%

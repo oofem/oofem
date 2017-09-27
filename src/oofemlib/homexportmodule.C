@@ -74,14 +74,15 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     for ( int ireg = 1; ireg <= this->giveNumberOfRegions(); ireg++ ) {
         elements.followedBy(this->giveRegionSet(ireg)->giveElementList());
     }
-    elements.printYourself();
+    //elements.printYourself();
 
     for ( int ist: ists ) {
         FloatArray ipState, avgState;
         double VolTot = 0.;
         Domain *d = emodel->giveDomain(1);
         for ( auto &elem : d->giveElements() ) {
-            if ( elements.contains(elem -> giveGlobalNumber()) ){
+            //printf("%d ", elem -> giveNumber());
+            if ( elements.contains(elem -> giveNumber()) ){
                 for ( GaussPoint *gp: *elem->giveDefaultIntegrationRulePtr() ) {
                     double dV = elem->computeVolumeAround(gp);
                     VolTot += dV;

@@ -1200,14 +1200,7 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
             }
         }
 
-        for ( int i = 1; i <= 3; i++ ) {
-            crackVect.at(i) = principalDir.at(i, indx);
-        }
-        status->setCrackVector(crackVect);
-        
-        for ( int i = 1; i <= 3; i++ ) {
-            crackPlaneNormal.at(i) = principalDir.at(i, indx);
-        }
+        crackPlaneNormal.beColumnOf(principalDir, indx);
 
         // find index with minimal value but non-zero for plane-stress condition - this is the crack direction
         indx = 1;
@@ -1277,6 +1270,11 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
                 crackPlaneNormal.rotatedWith(rotMtrx, 'n');
             }
         }
+
+
+        crackVect.beColumnOf(principalDir, indx);
+
+        status->setCrackVector(crackVect);
 
         if ( isCrackBandApproachUsed() ) { // le needed only if the crack band approach is used
             le = gp->giveElement()->giveCharacteristicSize(gp, crackPlaneNormal, ecsMethod);

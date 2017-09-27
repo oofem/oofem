@@ -217,9 +217,9 @@ set 3 elementranges { }
 #%BEGIN_CHECK% tolerance 1e-7
 ##Check element's stress vector
 #ELEMENT tStep 2 number 30 gp 2 keyword 1 component 2  value 0.0000000
-#ELEMENT tStep 4 number 30 gp 2 keyword 1 component 2  value 1.27094996e-02
-#ELEMENT tStep 9 number 30 gp 2 keyword 1 component 2  value 1.75314263e-01
-#ELEMENT tStep 14 number 30 gp 2 keyword 1 component 2  value 2.57836161e-01
-#ELEMENT tStep 19 number 30 gp 2 keyword 1 component 2  value 2.35262144e-01
+#ELEMENT tStep 4 number 30 gp 2 keyword 1 component 2  value 1.21535586e-02
+#ELEMENT tStep 9 number 30 gp 2 keyword 1 component 2  value 1.75469285e-01
+#ELEMENT tStep 14 number 30 gp 2 keyword 1 component 2  value 2.64457409e-01
+#ELEMENT tStep 19 number 30 gp 2 keyword 1 component 2  value 2.42316691e-01
 #%END_CHECK%
 
