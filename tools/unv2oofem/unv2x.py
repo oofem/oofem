@@ -126,6 +126,7 @@ class UNVParser:
                 else:
                     dataline=Line2Int(line1)
                     coords=Line2Float(line2)
+                    print (dataline)
                     FEM.nodes.append(Node(dataline[0],coords))
                     FEM.nnodes=FEM.nnodes+1
             else:
@@ -168,7 +169,7 @@ class UNVParser:
                         # standard elements have their connectivities on second line
                         cntvt=Line2Int(line2)
                     if(len(dataline)<6):
-                        print "I need at least 6 entries on dataline %s" % dataline
+                        print ("I need at least 6 entries on dataline %s" % dataline)
                         exit(0)
                     FEM.elems.append(Element(dataline[0],dataline[1],0,0,dataline[5],cntvt))
                     FEM.nelems=FEM.nelems+1
@@ -194,12 +195,12 @@ class UNVParser:
                 dataline=Line2Int(line1)
                 groupname=line2
                 if(len(dataline)==0):
-                    print "Group %s is empty, did you remesh the object and lost the members?" % groupname
+                    print ("Group %s is empty, did you remesh the object and lost the members?" % groupname)
                     exit(0)
                 else:
                     id=0 # dataline[0]
                     nitems=dataline[7]
-                nlines=(nitems+1)/2
+                nlines=(nitems+1)//2
                 # read group items
                 lst=[]
                 for i in range(nlines):
@@ -232,7 +233,7 @@ class UNVParser:
 
     def parse(self):
         """ parse UNV file to fill the FEM data structure"""
-        self.file=open(self.filename,'rb')
+        self.file=open(self.filename,'r')
         self.scanfile()
         for sectionId,offset in self.sections:
             if (sectionId in self.datasetsIds):
@@ -281,7 +282,7 @@ if __name__=='__main__':
             lst=group.items
             for i in range(group.nitems):
                 count=count+1
-                if (count<8)&(i<>group.nitems-1):
+                if (count<8)&(i!=g<roup.nitems-1):
                     gf.write('%5d, ' % lst.pop(0))
                 else:
                     gf.write(('%5d'+ls) % lst.pop(0))
