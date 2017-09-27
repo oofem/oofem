@@ -107,7 +107,7 @@ class AbaqusParser:
                  elType = es.unvType
                  
          if nnodes == -1:
-             print "Element not supported"
+             print ("Element not supported")
              exit(0)
          
          while True:
