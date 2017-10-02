@@ -59,7 +59,7 @@ UsrDefLTF 6 f(t) 0+(0)*sin(2*3.14159*(t+28800-28800)/86400.)+h(-1.e+30*sin(2*3.1
 UsrDefLTF 7 f(t) 20+(0)*sin(2*3.14159*(t+28800-28800)/86400.)+h(-1.e+30*sin(2*3.14159*(t+28800-28800)/86400.))*(0)*sin(2*3.14159*(t+28800-28800)/86400.)
 #
 #%BEGIN_CHECK% tolerance 1e-6
-#NODE tStep 10  number 8 dof 10 unknown d value 3.16474914e+01 tolerance 1e-4
-#NODE tStep 15  number 8 dof 10 unknown d value 3.12575771e+01 tolerance 1e-4
+#NODE tStep 10  number 8 dof 10 unknown d value 3.16472144e+01 tolerance 1e-4
+#NODE tStep 15  number 8 dof 10 unknown d value 3.12574472e+01 tolerance 1e-4
 #%END_CHECK%
 

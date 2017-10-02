@@ -60,6 +60,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_Steel1_Name; }
     virtual const char *giveClassName() const { return "Steel1MaterialClass"; }
     virtual void updateIfFailure(GaussPoint *gp, FloatArray *, FloatArray *) { }
+    virtual int hasCastingTimeSupport() { return 1.; }
 
 protected:
     //

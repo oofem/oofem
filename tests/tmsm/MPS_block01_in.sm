@@ -102,10 +102,10 @@ set 6 nodes 9 1 2 3 4 5 6 7 8 9
 #
 #%BEGIN_CHECK% tolerance 1e-7
 #NODE tStep 2  number 9 dof 1 unknown d value 0.0000000
-#NODE tStep 10  number 9 dof 1 unknown d value 5.63690811e-05 tolerance 1e-10
-#NODE tStep 15  number 9 dof 1 unknown d value 4.63090925e-05 tolerance 1e-10
+#NODE tStep 10  number 9 dof 1 unknown d value 6.32868414e-05 tolerance 1e-10
+#NODE tStep 15  number 9 dof 1 unknown d value 5.53560405e-05 tolerance 1e-10
 ##Check element's stress vector
 #ELEMENT tStep 2 number 4 gp 1 keyword 1 component 1 value 0.0000000
-#ELEMENT tStep 10 number 4 gp 1 keyword 1 component 1 value -1.48961778e-01
-#ELEMENT tStep 15 number 4 gp 1 keyword 1 component 1 value -1.14374711e-01
+#ELEMENT tStep 10 number 4 gp 1 keyword 1 component 1 value -3.96370454e-03
+#ELEMENT tStep 15 number 4 gp 1 keyword 1 component 1 value 8.69418948e-02
 #%END_CHECK%
