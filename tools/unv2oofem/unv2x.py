@@ -26,8 +26,8 @@ class UNVParser:
         self.startFlag='    -1'
         self.endFlag='    -1'
         # list of supported datasets and corresponding dataset handler functions
-        self.datasetsIds=[2411,2412,2467]
-        self.datasetsHandlers=[self.UNV2411Reader, self.UNV2412Reader, self.UNV2467Reader]
+        self.datasetsIds=[2411,2412,2467, 2477]
+        self.datasetsHandlers=[self.UNV2411Reader, self.UNV2412Reader, self.UNV2467Reader, self.UNV2467Reader]
         self.sections=[]
 
     def mapping(self):
@@ -126,7 +126,7 @@ class UNVParser:
                 else:
                     dataline=Line2Int(line1)
                     coords=Line2Float(line2)
-                    print (dataline)
+                    #print (dataline)
                     FEM.nodes.append(Node(dataline[0],coords))
                     FEM.nnodes=FEM.nnodes+1
             else:
