@@ -200,12 +200,15 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
 
     bool _succ = true;
     int _ndofs, _neq, ndofmans = domain->giveNumberOfDofManagers();
-    int ndofmansbc = 0;
+    int ndofmansbc = 0, nInternalElementDofMans=0;
 
-    ///@todo This still misses element internal dofs.
     // count number of internal dofmans on active bc
     for ( auto &bc : domain->giveBcs() ) {
         ndofmansbc += bc->giveNumberOfInternalDofManagers();
+    }
+    // count element internal dofmans
+    for ( auto &elem : domain->giveElements() ) {
+      nInternalElementDofMans += elem->giveNumberOfInternalDofManagers();
     }
 
     int bsize = 0;
@@ -213,7 +216,7 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
         bsize = domain->giveDofManager(1)->giveNumberOfDofs();
     }
 
-    long *mcn = new long [ (ndofmans+ndofmansbc) * bsize ];
+    long *mcn = new long [ (ndofmans+ndofmansbc+nInternalElementDofMans) * bsize ];
     long _c = 0;
 
     if ( mcn == NULL ) {
@@ -272,10 +275,38 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
             }
         }
     }
+
+    // loop over internal element dofs
+    for ( auto &elem : domain->giveElements() ) {
+      int ndman = elem->giveNumberOfInternalDofManagers();
+      for (int idman = 1; idman <= ndman; idman ++) {
+            DofManager *dman = elem->giveInternalDofManager(idman);
+            _ndofs = dman->giveNumberOfDofs();
+            if ( _ndofs > bsize ) {
+                _succ = false;
+                break;
+            }
+
+            for ( Dof *dof: *dman ) {
+                if ( dof->isPrimaryDof() ) {
+                    _neq = dof->giveEquationNumber(s);
+                    if ( _neq > 0 ) {
+                    mcn [ _c++ ] = _neq - 1;
+                    } else {
+                    mcn [ _c++ ] = -1; // no corresponding row in sparse mtrx structure
+                    }
+                }
+            }
+
+            for ( int i = _ndofs + 1; i <= bsize; i++ ) {
+                mcn [ _c++ ] = -1;                         // no corresponding row in sparse mtrx structure
+            }
+        }
+    }
     
     if ( _succ ) {
         _dss->SetMatrixPattern(_sm.get(), bsize);
-        _dss->LoadMCN(ndofmans+ndofmansbc, bsize, mcn);
+        _dss->LoadMCN(ndofmans+ndofmansbc+nInternalElementDofMans, bsize, mcn);
     } else {
         OOFEM_LOG_INFO("DSSMatrix: using assumed block structure");
         _dss->SetMatrixPattern(_sm.get(), bsize);
