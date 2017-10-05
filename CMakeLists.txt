@@ -17,6 +17,8 @@ set (bp_HOMEPAGE "http://ksm.fsv.cvut.cz/%7Ebp/bp.html")
 set (oofem_COPYRIGHT "Copyright (C) 1994-2017 Borek Patzak")
 set (oofem_EMAIL "info@oofem.org")
 
+set(CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+
 # Default is debug build
 if (NOT CMAKE_BUILD_TYPE)
     set (CMAKE_BUILD_TYPE Debug)
@@ -52,8 +54,8 @@ set (CMAKE_CXX_FLAGS_PROFILING "${CMAKE_CXX_FLAGS_PROFILING} -O2 -pg")
 set (SLEPC_DIR CACHE PATH "Manual SLEPc directory")
 set (X11_DIR CACHE PATH "Manual X11 directory (OOFEG)")
 set (TINYXML2_DIR CACHE PATH "Manual TinyXML-2 directory (CEMHYD only)")
-set (MY_PETSC_DIR CACHE PATH "Manual PETSc directory")
-set (MY_PETSC_ARCH CACHE STRING "Manual PETSc arch name (e.g. linux-gnu-cxx-opt)")
+#set (PETSC_DIR CACHE PATH "Manual PETSc directory")
+#set (PETSC_ARCH CACHE STRING "Manual PETSc arch name (e.g. linux-gnu-cxx-opt)")
 set (MPI_DIR CACHE PATH "Manual MPI directory")
 set (VTK_DIR CACHE PATH "Manual VTK directory (For binary VTU export)")
 set (LAPACK_DIR CACHE PATH "Manual LAPACK directory")
@@ -90,7 +92,7 @@ option (USE_IML "Enable iml++ solvers" OFF) # or this
 option (USE_SPOOLES "Enable SPOOLES-solver" OFF) # or this
 option (USE_INTEL_MKLPARDISO "Enable MKLPARDISO solver support" OFF)
 option (USE_PARDISO_ORG "Enable PARDISO-project.org solver support" OFF)
-option (USE_PETSC "Enable PETSc support (required for parallel)" OFF)
+option (USE_PETSC "Enable PETSc support (specify PETSC_DIR and/or PETSC_ARCH if needed)" OFF)
 option (USE_SLEPC "Enable SLEPc support" OFF)
 option (USE_LAPACK "Use LAPACK" OFF)
 option (USE_SUPERLU_MT "Use SUPERLU_MT" OFF)
@@ -372,37 +374,20 @@ if (USE_SLEPC)
 endif ()
 
 if (USE_PETSC)
-    # A real PETScConfig.cmake file would have been nice to use:
-    #find_package (PETSc 3.3 HINTS "${MY_PETSC_DIR}/${MY_PETSC_ARCH}")
-
-    # Have to use pkgconfig information
-    find_package (PkgConfig REQUIRED)
-    
-    set (ENV{PKG_CONFIG_PATH} "${MY_PETSC_DIR}/${MY_PETSC_ARCH}/lib64/pkgconfig:${MY_PETSC_DIR}/${MY_PETSC_ARCH}/lib/pkgconfig")
-    pkg_check_modules (PC_PETSC REQUIRED PETSc)
-    include_directories (${PC_PETSC_INCLUDE_DIRS})
-
-    # Find the actual libraries:
-    foreach (f ${PC_PETSC_LIBRARIES})
-        find_library (${f}_LIBRARY NAMES ${f} lib${f}
-            HINTS
-            ${PC_PETSC_LIBRARY_DIRS}
-        )
-        list (APPEND EXT_LIBS ${${f}_LIBRARY})
-    endforeach ()
-    # Currently unused flags:
-    #   PC_PETSC_LDFLAGS        ... all required linker flags
-    #   PC_PETSC_LDFLAGS_OTHER  ... all other linker flags
-    #   PC_PETSC_CFLAGS         ... all required cflags
-    #   PC_PETSC_CFLAGS_OTHER   ... the other compiler flags
-
-    #find_package (PETSc REQUIRED HINTS "${MY_PETSC_DIR}/${MY_PETSC_ARCH}/conf")
-    #include_directories ("${MY_PETSC_DIR}/include" "${MY_PETSC_DIR}/${MY_PETSC_ARCH}/include" ${PETSC_INCLUDE_PATH})
-    #find_library (PETSC_LIB petsc PATH "${MY_PETSC_DIR}/${MY_PETSC_ARCH}/lib/") 
-    #if (${PETSC_LIB} STREQUAL "PETSC_LIB-NOTFOUND")
-    #    message (FATAL_ERROR "PETSc library not found")
-    #endif ()
-    #list (APPEND EXT_LIBS ${PETSC_LIB} ${PETSC_PACKAGE_LIBS})
+    if (NOT "${PETSC_DIR}")
+        # setting defaults for typical linux environments:
+        #file (GLOB paths "/usr/lib/petscdir/*.*.*")
+        #list (GET paths 0 PETSC_DIR)
+        #message ("***************** PETSC_DIR: ${PETSC_DIR}")
+    endif ()
+    if (NOT "${PETSC_ARCH}")
+        #file (GLOB children RELATIVE ${PETSC_DIR} "${PETSC_DIR}/*")
+        #list (GET children 0 PETSC_ARCH)
+        #message ("***************** PETSC_ARCH: ${PETSC_ARCH}")
+    endif ()
+    find_package (PETSc REQUIRED)
+    include_directories (${PETSC_INCLUDES})
+    list (APPEND EXT_LIBS ${PETSC_LIBRARIES})
     list (APPEND MODULE_LIST "PETSc")
     set (USE_MPI ON)
     add_definitions (-D__PETSC_MODULE)
