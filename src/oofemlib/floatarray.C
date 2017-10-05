@@ -1102,6 +1102,14 @@ std :: ostream &operator << ( std :: ostream & out, const FloatArray & x )
 //    this->at(6) = ( aMatrix.at(1,2) + aMatrix.at(2,1) );
 //}
 
+void FloatArray :: power(const double exponent)
+{
+    for ( double &x : *this ) {
+        x = pow(x, exponent);
+    }
+}
+
+
 
 void FloatArray :: beColumnOf(const FloatMatrix &mat, int col)
 {
