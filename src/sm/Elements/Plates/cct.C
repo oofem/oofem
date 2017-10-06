@@ -370,16 +370,18 @@ CCTPlate :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.resize(9, 9);
     answer.zero();
 
-    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+    double mass = 0.0;
+    IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
+    if ( iRule ) {
+        for ( GaussPoint *gp: *iRule ) {
+          mass += this->computeVolumeAround(gp) * this->giveStructuralCrossSection()->give('d', gp) * this->giveCrossSection()->give(CS_Thickness, gp);
+        }
+    }
+    double mass3 = mass/3.0;
 
-    double dV = this->computeVolumeAround(gp);
-    // constant thickness and density assumed
-    double density = this->giveStructuralCrossSection()->give('d', gp);
-    double mss1 = dV * this->giveCrossSection()->give(CS_Thickness, gp) * density / 3.;
-
-    answer.at(1, 1) = mss1;
-    answer.at(4, 4) = mss1;
-    answer.at(7, 7) = mss1;
+    answer.at(1, 1) = mass3;
+    answer.at(4, 4) = mass3;
+    answer.at(7, 7) = mass3;
 }
 
 
