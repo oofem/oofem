@@ -659,8 +659,8 @@ TransportElement :: computeBoundarySurfaceLoadVector(FloatArray &answer, Boundar
             val.times( -1.0 * a );
         } else if ( load->giveType() == RadiationBC ) {
             //actual Temperature in C in field
-            field.beProductOf(N, unknowns); field.add(273.15); field.power(4);
-            val.add(273.15); val.power(4); val.subtract(field);
+            field.beProductOf(N, unknowns); field.add(load->giveTemperOffset()); field.power(4);
+            val.add(load->giveTemperOffset()); val.power(4); val.subtract(field);
             val.times( -1.0 * load->giveProperty('e', tStep) * stefanBoltzmann );
         }
 
@@ -844,8 +844,8 @@ TransportElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLo
             val.times( -1.0 * a );
         } else if ( load->giveType() == RadiationBC  ) {
             //actual Temperature in C in field
-            field.beProductOf(N, unknowns); field.add(273.15); field.power(4);
-            val.add(273.15); val.power(4); val.subtract(field);
+            field.beProductOf(N, unknowns); field.add(load->giveTemperOffset()); field.power(4);
+            val.add(load->giveTemperOffset()); val.power(4); val.subtract(field);
             val.times( -1.0 * load->giveProperty('e', tStep) * stefanBoltzmann );
         }
         answer.plusProduct(N, val, dV);

@@ -2886,7 +2886,7 @@ Parameter \param{loadType} distinguishes the type of boundary condition. Support
 environmental values (temperature of the environment) corresponding to
 element unknowns, and \param{properties} dictionary should contain
 value of transfer (convection) coefficient (assumed to be a constant) under the key 'a',
-\item \param{loadType} = 7 specifies radiative boundary condition. It requires to specify emmisivity $\varepsilon\in\langle 0,1\rangle$ and the \param{components} array contains the environmental values (temperature of the environment).
+\item \param{loadType} = 7 specifies radiative boundary condition (Stefan-Boltzmann). It requires to specify emmisivity $\varepsilon\in\langle 0,1\rangle$, the \param{components} array contains the environmental values (temperature of the environment). Default units are Celsius. Optional parameter \param{temperOffset} = 0 can be used to calculate in Kelvin.
 \end{itemize}
 
 If the boundary condition corresponds to distributed force load, the \param{components} array contains components of distributed load corresponding to element unknowns.

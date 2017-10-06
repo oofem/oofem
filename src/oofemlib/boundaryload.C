@@ -114,6 +114,9 @@ BoundaryLoad :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_OPTIONAL_FIELD(ir, propertyMultExpr, _IFT_BoundaryLoad_propertyMultExpr);
 
+    temperOffset = 273.15;
+    IR_GIVE_OPTIONAL_FIELD(ir, temperOffset, _IFT_BoundaryLoad_temperOffset);
+    
     return IRRT_OK;
 }
 
@@ -156,4 +159,12 @@ BoundaryLoad :: giveProperty(int aProperty, TimeStep *tStep)
 {
     return this->giveProperty(aProperty, tStep, {});
 }
+
+double
+BoundaryLoad :: giveTemperOffset(void)
+{
+    return this->temperOffset;
+}
+
+
 } // end namespace oofem
