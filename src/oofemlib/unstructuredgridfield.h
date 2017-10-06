@@ -113,7 +113,7 @@ protected:
       }
       virtual ~FEICellGeometryWrapper() { }
       int giveNumberOfVertices() const {
-	return this->cell->giveNumberOfVertices();
+        return this->cell->giveNumberOfVertices();
       }
       inline const FloatArray *giveVertexCoordinates(int i) const
       {
@@ -145,8 +145,8 @@ protected:
       BoundingBox b;
       this->giveBoundingBox(b);
       if (b.contains(coords)) {
-	const FEICellGeometryWrapper cgw = FEICellGeometryWrapper(this);
-	return (this->getInterpolation()->global2local (tmp, coords, cgw));
+        const FEICellGeometryWrapper cgw = FEICellGeometryWrapper(this);
+        return (this->getInterpolation()->global2local (tmp, coords, cgw));
       }
       return false;
     }
@@ -192,8 +192,8 @@ protected:
       else if (this->itype == EGT_tetra_1) return interpTable[6];
       else if (this->itype == EGT_hexa_1) return interpTable[7];
       else {
-	OOFEM_LOG_ERROR ("UnstructuredGridField.Cell:: Unsupported cell type");
-	return NULL;
+        OOFEM_LOG_ERROR ("UnstructuredGridField.Cell:: Unsupported cell type");
+        return NULL;
       }
       
     }
@@ -210,9 +210,9 @@ protected:
       answer.resize(size);
       answer.zero();
       for (i=0; i<giveNumberOfVertices(); i++) {
-	for (j=0; j<size; j++) {
-	  answer(j)+=N(i)*vertexVals[i]->at(j+1);
-	}
+        for (j=0; j<size; j++) {
+          answer(j)+=N(i)*vertexVals[i]->at(j+1);
+        }
       }
       return 1;
     }
@@ -231,9 +231,9 @@ protected:
       member.giveBoundingBox(b);
       OctantRec::BoundingBoxStatus s = cell->testBoundingBox(b);
       if ((s == OctantRec :: BBS_InsideCell) || (s == OctantRec :: BBS_ContainsCell)) {
-	return true;
+        return true;
       } else {
-	return false;
+        return false;
       }
     }
     
@@ -264,10 +264,10 @@ protected:
     bool evaluate(Cell& c)
     {
       if (c.containsPoint(position)) {
-	cells.push_back(c);
-	return true;
+        cells.push_back(c);
+        return true;
       } else {
-	return false;
+        return false;
       }
     }
     
@@ -337,25 +337,46 @@ protected:
   }
 
   int evaluateAt(FloatArray &answer, const FloatArray &coords,
-		 ValueModeType mode, TimeStep *tStep) override {
+                 ValueModeType mode, TimeStep *tStep) override {
     std::list<Cell> elist;
     if ((mode == VM_Total) || (mode == VM_TotalIntrinsic)) {
-      this->initOctree();
-      CellContainingPointFunctor f(coords);
-      this->spatialLocalizer.giveDataOnFilter(elist, f);
-      if (elist.size()) {
-	Cell &c = elist.front(); // take first
-	// colect vertex values
-	int size = c.giveNumberOfVertices();
-	FloatArray** vertexValues = new FloatArray*[size]; 
-	for (int i=0; i<size; i++) {
-	  vertexValues[i]=&(this->valueList[c.getVertexNum(i)]);
-	}
-	c.interpolate (answer, coords, vertexValues);
-	return 0;
-      } else {
-	return 1;
-      }
+        if(this->cellList.size()>0){
+            this->initOctree();
+            CellContainingPointFunctor f(coords);
+            this->spatialLocalizer.giveDataOnFilter(elist, f);
+            if (elist.size()) {
+                Cell &c = elist.front(); // take first
+                // colect vertex values
+                int size = c.giveNumberOfVertices();
+                FloatArray** vertexValues = new FloatArray*[size];
+                for (int i=0; i<size; i++) {
+                    vertexValues[i]=&(this->valueList[c.getVertexNum(i)]);
+                }
+                c.interpolate (answer, coords, vertexValues);
+                return 0;
+            } else {
+                return 1;
+            }
+        } else {
+            if(!this->vertexList.size()) {
+                return 1;
+            }
+            // alternative method - we use the value of the closest point
+            double minDist=0.,dist=0.;
+            
+            int idOfClosestPoint=-1;
+            for(int i=0;i<(int) this->vertexList.size();i++){
+                const FloatArray *pcoords=this->vertexList[i].getCoordinates();
+                dist=sqrt( pow(coords[0]-pcoords->at(1),2)+pow(coords[1]-pcoords->at(2),2)+pow(coords[2]-pcoords->at(3),2) );
+                if(dist<minDist or !i){
+                    minDist=dist;
+                    idOfClosestPoint=i;
+                }
+            }
+            answer=this->valueList[idOfClosestPoint];
+            //printf("closest point is %d\n",idOfClosestPoint);
+            return 0;
+        }
     } else {
       OOFEM_ERROR("Unsupported ValueModeType");
     }
@@ -365,7 +386,7 @@ protected:
      Implementaton of Field::evaluateAt for DofManager.
   */
   int evaluateAt(FloatArray &answer, DofManager *dman,
-		 ValueModeType mode, TimeStep *tStep) override {
+                 ValueModeType mode, TimeStep *tStep) override {
     FloatArray* coords = dman->giveCoordinates();
     return this->evaluateAt (answer, *coords, mode, tStep);
   }
@@ -404,11 +425,11 @@ protected:
       int nsd  = cmin.giveSize();
       ++it;
       for (; it != vertexList.end(); ++it) {
-	const FloatArray *vc = (*it).getCoordinates();
-	for (int j=0; j<nsd; j++)  {
-	  cmax(j)=max(cmax(j), (*vc)(j));
-	  cmin(j)=min(cmin(j), (*vc)(j));
-	}
+        const FloatArray *vc = (*it).getCoordinates();
+        for (int j=0; j<nsd; j++)  {
+          cmax(j)=max(cmax(j), (*vc)(j));
+          cmin(j)=min(cmin(j), (*vc)(j));
+        }
       }
       // introduce origin shift (if set up)
       for (int j=0; j<nsd; j++)  {
@@ -417,8 +438,8 @@ protected:
       double size = 0.0;
       IntArray mask (3);
       for (int j=0; j<nsd; j++) {
-	size = max(size, cmax(j)-cmin(j));
-	mask(j)=1;
+        size = max(size, cmax(j)-cmin(j));
+        mask(j)=1;
       }
       BoundingBox bb;
       bb.init(cmin, size, mask);
@@ -435,7 +456,7 @@ protected:
           o.printYourself();
           printf("%lf\n", b.giveSize());
         */
-	this->spatialLocalizer.insertMemberIntoOctree(*cit, cf);
+        this->spatialLocalizer.insertMemberIntoOctree(*cit, cf);
       }
 
       // update timestamp

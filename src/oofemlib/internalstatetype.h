@@ -176,7 +176,8 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_PrincStressVector3, 126) \
     ENUM_ITEM_WITH_VALUE(IST_InterfaceNormal, 127) \
     ENUM_ITEM_WITH_VALUE(IST_MomentTensor, 128) \
-    ENUM_ITEM_WITH_VALUE(IST_MomentTensorTemp, 129)
+    ENUM_ITEM_WITH_VALUE(IST_MomentTensorTemp, 129) \
+    ENUM_ITEM_WITH_VALUE(IST_YieldStrength, 130)
   
 /**
  * Type  representing the physical meaning of element or constitutive model internal variable.

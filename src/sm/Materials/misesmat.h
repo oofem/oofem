@@ -41,6 +41,7 @@
 #include "dictionary.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
+#include "scalarfunction.h"
 
 ///@name Input fields for MisesMat
 //@{
@@ -84,7 +85,7 @@ protected:
     double H;
 
     /// Initial (uniaxial) yield stress.
-    double sig0;
+    ScalarFunction sig0;
 
     double omega_crit;
     double a;
@@ -93,7 +94,7 @@ public:
     MisesMat(int n, Domain * d);
     virtual ~MisesMat();
 
-    void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain);
+    void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep);
     double computeDamage(GaussPoint *gp, TimeStep *tStep);
     double computeDamageParam(double tempKappa);
     double computeDamageParamPrime(double tempKappa);
@@ -127,6 +128,9 @@ public:
     virtual void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
 
     virtual void giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &vF, TimeStep *tStep);
+
+    virtual double give(int aProperty, GaussPoint *gp, TimeStep *tStep);
+    double giveTemperature(GaussPoint *gp, TimeStep *tStep);
 
 protected:
     void computeGLPlasticStrain(const FloatMatrix &F, FloatMatrix &Ep, FloatMatrix b, double J);
