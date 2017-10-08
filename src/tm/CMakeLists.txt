@@ -20,6 +20,8 @@ set (tm_element
     traxisym1_ht.C
     brick1_ht.C
     qbrick1_ht.C
+    wedge_ht.C
+    qwedge_ht.C
     tetrah1_ht.C
     tr1darcy.C
     latticetransportelement.C
