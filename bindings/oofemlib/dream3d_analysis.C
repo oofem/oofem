@@ -187,7 +187,7 @@ int main(int argc, char *argv[])
     {
         Timer timer;
         timer.startTimer();
-        DynamicDataReader myData;
+        DynamicDataReader myData("dream3d_analysis");
 
         DynamicInputRecord *myInput;
         myData.setOutputFileName(name + ".out");
@@ -535,7 +535,7 @@ int main(int argc, char *argv[])
 
         printf("Initializing problem\n");
         timer.startTimer();
-        em.reset(InstanciateProblem(&myData, _processor, 0));
+        em.reset(InstanciateProblem(myData, _processor, 0));
 
         myData.finish();
         timer.stopTimer();
