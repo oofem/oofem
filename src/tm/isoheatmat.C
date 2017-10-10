@@ -71,7 +71,6 @@ IsotropicHeatTransferMaterial :: give(int aProperty, GaussPoint *gp, TimeStep *t
 // Returns the value of the property aProperty (e.g. 'k' the conductivity of the receiver).
 //
 {
-    printf("property = %d\n", aProperty);
     if ( aProperty == 'k' ) { //thermal conductivity [W/m/K]   
         return conductivity.eval( { { "te", giveTemperature(gp) }, { "t", tStep->giveIntrinsicTime() } }, this->giveDomain(), gp, giveTemperature(gp) );
     } else if ( aProperty == 'c' ) { //mass-specific heat capacity [J/kg/K]
