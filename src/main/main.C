@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
     std :: set_new_handler(freeStoreError);   // prevents memory overflow
 #endif
 
-    int adaptiveRestartFlag = 0, restartStep;
+    int adaptiveRestartFlag = 0, restartStep = 0;
     bool parallelFlag = false, renumberFlag = false, debugFlag = false, contextFlag = false, restartFlag = false,
          inputFileFlag = false, outputFileFlag = false, errOutputFileFlag = false;
     std :: stringstream inputFileName, outputFileName, errOutputFileName;
