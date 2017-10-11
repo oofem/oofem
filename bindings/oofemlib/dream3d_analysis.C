@@ -535,7 +535,7 @@ int main(int argc, char *argv[])
         myData.insertInputRecord(DataReader::IR_funcRec, myInput);
 
         timer.stopTimer();
-        printf("Mesh generation time %.3f s\n", timer.getUtime());
+        printf("Mesh generation time %.3f s\n", timer.getWtime());
         // Writing to file (to verify, and for backups)
         //myData.writeToFile((name + "_debug.in").c_str());
 
@@ -545,11 +545,13 @@ int main(int argc, char *argv[])
 
         myData.finish();
         timer.stopTimer();
-        printf("Instanciation time %.3f s\n", timer.getUtime());
+        printf("Instanciation time %.3f s\n", timer.getWtime());
     }
 
     //std::cin.get();
 
+    Timer timer;
+    timer.startTimer();
     printf("Starting analysis\n");
     if ( !tangentProblem ) {
         em->solveYourself();
@@ -577,6 +579,9 @@ int main(int argc, char *argv[])
         }
         fout.close();
     }
+
+    timer.stopTimer();
+    printf("Compute time %.3f s\n", timer.getWtime());
 
 #ifdef __PETSC_MODULE
     PetscFinalize();
