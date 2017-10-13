@@ -1,6 +1,7 @@
 tmpatch46.out
 Patch test of IsoHeatMat with temperature-dependent material parameters
-TransientTransport nsteps 50 deltat 100.0 rtolf 1.e-6 alpha 0.6 lstype 1 lstol 1e-6 lsiter 200 lsprecond 1 renumber 1 exportfields 1 5 nmodules 1
+#TransientTransport nsteps 50 deltat 100.0 rtolf 1.e-6 alpha 0.6 lstype 1 lstol 1e-6 lsiter 200 lsprecond 1 renumber 1 exportfields 1 5 nmodules 1
+TransientTransport nsteps 50 deltat 100.0 rtolf 1.e-6 alpha 0.6 lstype 0 renumber 1 exportfields 1 5 nmodules 1
 #vtkxml tstep_all domain_all primvars 1 6 vars 5 37 56 67 68 44 stype 1
 errorcheck
 domain HeatTransfer
