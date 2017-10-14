@@ -372,7 +372,8 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         // Option to take into account initial conditions.
         if ( !effectiveStiffnessMatrix ) {
             effectiveStiffnessMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
-            massMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+	    // create mass matrix as compcol storage, need only mass multiplication by vector, not linear system solution.
+            massMatrix.reset( classFactory.createSparseMtrx(SMT_CompCol) ); 
         }
 
         if ( !effectiveStiffnessMatrix || !massMatrix ) {
