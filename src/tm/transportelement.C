@@ -133,7 +133,7 @@ TransportElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, 
     if ( mtrx == InternalForcesVector ) {
       this->computeInternalForcesVector(answer, tStep);
     } else if ( mtrx == ExternalForcesVector ) {
-      //this->computeExternalForcesVector(answer, tStep, mode); // bp: assembled by emodel 
+      //this->computeExternalForcesVector(answer, tStep, mode); // bp: assembled by emodel->updateComponent
       answer.resize(0);
     } else if ( mtrx == InertiaForcesVector ) {
         this->computeInertiaForcesVector(answer, tStep);
@@ -658,22 +658,23 @@ TransportElement :: computeBoundarySurfaceLoadVector(FloatArray &answer, Boundar
             }
             val.times( -1.0 * a );
         } else if ( load->giveType() == RadiationBC ) {
-            field.beProductOf(N, unknowns);
-            val.subtract(field);
-            val.times( -1.0 * getRadiativeHeatTranferCoef(load, tStep) );
+            //actual Temperature in C in field
+            field.beProductOf(N, unknowns); field.add(load->giveTemperOffset()); field.power(4);
+            val.add(load->giveTemperOffset()); val.power(4); val.subtract(field);
+            val.times( -1.0 * load->giveProperty('e', tStep) * stefanBoltzmann );
         }
 
         answer.plusProduct(N, val, dA);
     }
 }
 
-
+//Contribution to conductivity matrix from convection and radiation
 void
 TransportElement :: computeTangentFromSurfaceLoad(FloatMatrix &answer, SurfaceLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep)
 {
     answer.clear();
 
-    if ( load->giveType() != ConvectionBC && load->giveType() != RadiationBC ) {
+    if ( load->giveType() != ConvectionBC ) {
         return;
     }
 
@@ -713,8 +714,6 @@ TransportElement :: computeTangentFromSurfaceLoad(FloatMatrix &answer, SurfaceLo
                 a = load->giveProperty('a', tStep);
             }
             answer.plusProductSymmUpper(N, N, a * dA);
-        } else if ( load->giveType() == RadiationBC ){
-            answer.plusProductSymmUpper(N, N, getRadiativeHeatTranferCoef(load, tStep) * dA);
         }
     }
     answer.symmetrized();
@@ -726,7 +725,7 @@ TransportElement :: computeTangentFromEdgeLoad(FloatMatrix &answer, EdgeLoad *lo
 {
     answer.clear();
 
-    if ( load->giveType() != ConvectionBC && load->giveType() != RadiationBC ) {
+    if ( load->giveType() != ConvectionBC ) {
         return;
     }
 
@@ -769,8 +768,6 @@ TransportElement :: computeTangentFromEdgeLoad(FloatMatrix &answer, EdgeLoad *lo
                 a = load->giveProperty('a', tStep);
             }
             answer.plusProductSymmUpper(N, N, a * dA);
-        } else if ( load->giveType() == RadiationBC ){
-            answer.plusProductSymmUpper(N, N, getRadiativeHeatTranferCoef(load, tStep) * dA);
         }
     }
     answer.symmetrized();
@@ -847,9 +844,9 @@ TransportElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLo
             val.times( -1.0 * a );
         } else if ( load->giveType() == RadiationBC  ) {
             //actual Temperature in C in field
-            field.beProductOf(N, unknowns);
-            val.subtract(field);
-            val.times( -1.0 * getRadiativeHeatTranferCoef(load, tStep) );
+            field.beProductOf(N, unknowns); field.add(load->giveTemperOffset()); field.power(4);
+            val.add(load->giveTemperOffset()); val.power(4); val.subtract(field);
+            val.times( -1.0 * load->giveProperty('e', tStep) * stefanBoltzmann );
         }
         answer.plusProduct(N, val, dV);
     }
@@ -1003,7 +1000,8 @@ TransportElement :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int
                     coeff = edgeLoad->giveProperty('a', tStep);
                 }
             } else if ( load->giveType() == RadiationBC ){
-                coeff = getRadiativeHeatTranferCoef(edgeLoad, tStep);
+                OOFEM_ERROR("Not implemented, use TransientTransport solver");
+                //coeff = getRadiativeHeatTranferCoef(edgeLoad, tStep);
             }
 
             const FloatArray &lcoords = gp->giveNaturalCoordinates();
@@ -1013,8 +1011,8 @@ TransportElement :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int
             FieldPtr tf;
             FloatArray gcoords;
             if (tf = domain->giveEngngModel()->giveContext()->giveFieldManager()->giveField(FT_TemperatureAmbient)){
-	        //this->computeEdgeIpGlobalCoords(gcoords, lcoords, iEdge);
-	        this->giveInterpolation()->boundaryEdgeLocal2Global( gcoords, iEdge, lcoords, FEIElementGeometryWrapper(this) );
+                //this->computeEdgeIpGlobalCoords(gcoords, lcoords, iEdge);
+                this->giveInterpolation()->boundaryEdgeLocal2Global( gcoords, iEdge, lcoords, FEIElementGeometryWrapper(this) );
                 
                 tf->evaluateAt(val, gcoords, VM_TotalIntrinsic, tStep);
             } else if ( edgeLoad->giveFormulationType() == Load :: FT_Entity ) {
@@ -1077,7 +1075,8 @@ TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
                     coeff = surfLoad->giveProperty('a', tStep);
                 }
             } else if ( load->giveType() == RadiationBC ) {
-                coeff = getRadiativeHeatTranferCoef(surfLoad, tStep);
+                OOFEM_ERROR("Not implemented, use TransientTransport solver");
+                //coeff = getRadiativeHeatTranferCoef(surfLoad, tStep);
             } else {
                 OOFEM_ERROR("Unknown load type");
             }
@@ -1124,7 +1123,7 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
         int k = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
         int id = boundaryLoadArray.at(i * 2);
         GeneralBoundaryCondition *load = domain->giveLoad(k);
-        if ( load->giveType() == ConvectionBC || load->giveType() == RadiationBC ) {
+        if ( load->giveType() == ConvectionBC ) {
             bcGeomType ltype = load->giveBCGeoType();
             if ( ltype == EdgeLoadBGT ) {
                 BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >(load);
@@ -1162,8 +1161,6 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
                             a = edgeLoad->giveProperty('a', tStep);
                         }
                         subAnswer.plusDyadSymmUpper( n, dV * a );
-                    } else if ( load->giveType() == RadiationBC ) {
-                        subAnswer.plusDyadSymmUpper( n, dV * getRadiativeHeatTranferCoef(edgeLoad, tStep) );
                     }
                 }
 
@@ -1205,8 +1202,6 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
                             a = surfLoad->giveProperty('a', tStep);
                         }
                         subAnswer.plusDyadSymmUpper( n, dV * a );
-                    } else if ( load->giveType() == RadiationBC ) {
-                        subAnswer.plusDyadSymmUpper( n, dV * getRadiativeHeatTranferCoef(surfLoad, tStep) );
                     }
                 }
 
@@ -1254,21 +1249,6 @@ TransportElement :: assembleLocalContribution(FloatArray &answer, FloatArray &sr
         answer.at(ti) += src.at(i);
     }
 }
-
-double
-TransportElement :: getRadiativeHeatTranferCoef(BoundaryLoad *bLoad, TimeStep *tStep)
-{
-    double answer = 0;
-    ///@todo Why aren't this code using the standard approach of calling computeComponentArrayAt(...) to get the time function scaling and all?
-    const FloatArray &components = bLoad->giveComponentArray();
-
-    answer = components.at(1);//T_infty
-    answer += 273.15;
-    answer = answer*answer*answer;
-    answer *= 4 * bLoad->giveProperty('e', tStep) * stefanBoltzmann;
-    return answer;
-}
-
 
 void
 TransportElement :: computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)

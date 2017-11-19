@@ -110,7 +110,25 @@ SparseMtrx *DSSMatrix :: GiveCopy() const
 
 void DSSMatrix :: times(const FloatArray &x, FloatArray &answer) const
 {
-    OOFEM_ERROR("not implemented");
+  // Note: not really eficient. The sparse matrix is assembled directly into its block structure,
+  // which is efficient for factorization, but unfortunately not efficient for implementing the multiplication,
+  // as the blocks have to be identified (see implementation of ElementAt method) when traversing rows
+  // Also note, that this method will yield correct results only before factorization, after that the blocks
+  // contain factorized matrix.
+
+  int i, j, dim;
+
+  dim = this->_sm->neq;
+
+  answer.resize(dim);
+  answer.zero();
+	
+  for (i = 1; i <= dim; i++) {
+    for (j = 1; j <= dim; j++) 
+      {
+	answer.at(i) += _dss->ElementAt(i - 1, j - 1) * x.at(j);  
+      }
+  }
 }
 
 void DSSMatrix :: times(double x)
@@ -171,8 +189,8 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
         nz_ += columns [ i ].size();
     }
 
-    unsigned long *rowind_ = new unsigned long [ nz_ ];
-    unsigned long *colptr_ = new unsigned long [ neq + 1 ];
+    rowind_.reset( new unsigned long [ nz_ ]);
+    colptr_.reset( new unsigned long [ neq + 1 ]);
     if ( ( rowind_ == NULL ) || ( colptr_ == NULL ) ) {
         OOFEM_ERROR("free store exhausted, exiting");
     }
@@ -180,7 +198,7 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
     indx = 0;
 
     for ( int j = 0; j < neq; j++ ) { // column loop
-        colptr_ [ j ] = indx;
+      colptr_ [ j ] = indx;
         for ( auto &val : columns [ j ] ) { // row loop
             rowind_ [ indx++ ] = val;
         }
@@ -188,7 +206,7 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
 
     colptr_ [ neq ] = indx;
 
-    _sm.reset( new SparseMatrixF(neq, NULL, rowind_, colptr_, 0, 0, true) ); 
+    _sm.reset( new SparseMatrixF(neq, NULL, rowind_.get(), colptr_.get(), 0, 0, true) ); 
     if ( !_sm ) {
         OOFEM_FATAL("free store exhausted, exiting");
     }
@@ -200,12 +218,15 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
 
     bool _succ = true;
     int _ndofs, _neq, ndofmans = domain->giveNumberOfDofManagers();
-    int ndofmansbc = 0;
+    int ndofmansbc = 0, nInternalElementDofMans=0;
 
-    ///@todo This still misses element internal dofs.
     // count number of internal dofmans on active bc
     for ( auto &bc : domain->giveBcs() ) {
         ndofmansbc += bc->giveNumberOfInternalDofManagers();
+    }
+    // count element internal dofmans
+    for ( auto &elem : domain->giveElements() ) {
+      nInternalElementDofMans += elem->giveNumberOfInternalDofManagers();
     }
 
     int bsize = 0;
@@ -213,7 +234,7 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
         bsize = domain->giveDofManager(1)->giveNumberOfDofs();
     }
 
-    long *mcn = new long [ (ndofmans+ndofmansbc) * bsize ];
+    long *mcn = new long [ (ndofmans+ndofmansbc+nInternalElementDofMans) * bsize ];
     long _c = 0;
 
     if ( mcn == NULL ) {
@@ -272,10 +293,38 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
             }
         }
     }
+
+    // loop over internal element dofs
+    for ( auto &elem : domain->giveElements() ) {
+      int ndman = elem->giveNumberOfInternalDofManagers();
+      for (int idman = 1; idman <= ndman; idman ++) {
+            DofManager *dman = elem->giveInternalDofManager(idman);
+            _ndofs = dman->giveNumberOfDofs();
+            if ( _ndofs > bsize ) {
+                _succ = false;
+                break;
+            }
+
+            for ( Dof *dof: *dman ) {
+                if ( dof->isPrimaryDof() ) {
+                    _neq = dof->giveEquationNumber(s);
+                    if ( _neq > 0 ) {
+                    mcn [ _c++ ] = _neq - 1;
+                    } else {
+                    mcn [ _c++ ] = -1; // no corresponding row in sparse mtrx structure
+                    }
+                }
+            }
+
+            for ( int i = _ndofs + 1; i <= bsize; i++ ) {
+                mcn [ _c++ ] = -1;                         // no corresponding row in sparse mtrx structure
+            }
+        }
+    }
     
     if ( _succ ) {
         _dss->SetMatrixPattern(_sm.get(), bsize);
-        _dss->LoadMCN(ndofmans+ndofmansbc, bsize, mcn);
+        _dss->LoadMCN(ndofmans+ndofmansbc+nInternalElementDofMans, bsize, mcn);
     } else {
         OOFEM_LOG_INFO("DSSMatrix: using assumed block structure");
         _dss->SetMatrixPattern(_sm.get(), bsize);

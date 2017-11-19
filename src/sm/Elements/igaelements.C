@@ -228,7 +228,7 @@ void BsplinePlaneStressElement :: drawScalar(oofegGraphicContext &gc, TimeStep *
                         s [ k ] = val.at(indx);
                     }
 
-                    if ( ( isnan(s [ 0 ]) ) || ( isnan(s [ 1 ]) ) || ( isnan(s [ 2 ]) ) || ( isnan(s [ 3 ]) ) ) {
+                    if ( ( std::isnan(s [ 0 ]) ) || ( std::isnan(s [ 1 ]) ) || ( std::isnan(s [ 2 ]) ) || ( std::isnan(s [ 3 ]) ) ) {
                         continue;
                     }
 
@@ -421,7 +421,7 @@ void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &gc, TimeStep *tS
  #endif
                     }
 
-                    if ( ( isnan(s [ 0 ]) ) || ( isnan(s [ 1 ]) ) || ( isnan(s [ 2 ]) ) || ( isnan(s [ 3 ]) ) ) {
+                    if ( ( std::isnan(s [ 0 ]) ) || ( std::isnan(s [ 1 ]) ) || ( std::isnan(s [ 2 ]) ) || ( std::isnan(s [ 3 ]) ) ) {
                         continue;
                     }
 
@@ -541,7 +541,7 @@ void TSplinePlaneStressElement :: drawScalar(oofegGraphicContext &gc, TimeStep *
                         s [ k ] = val.at(indx);
                     }
 
-                    if ( ( isnan(s [ 0 ]) ) || ( isnan(s [ 1 ]) ) || ( isnan(s [ 2 ]) ) || ( isnan(s [ 3 ]) ) ) {
+                    if ( ( std::isnan(s [ 0 ]) ) || ( std::isnan(s [ 1 ]) ) || ( std::isnan(s [ 2 ]) ) || ( std::isnan(s [ 3 ]) ) ) {
                         continue;
                     }
 
@@ -796,11 +796,11 @@ void NURBSSpace3dElement :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
  #endif
                         }
 
-                        if ( ( isnan(s [ 0 ]) ) || ( isnan(s [ 1 ]) ) || ( isnan(s [ 2 ]) ) || ( isnan(s [ 3 ]) ) ) {
+                        if ( ( std::isnan(s [ 0 ]) ) || ( std::isnan(s [ 1 ]) ) || ( std::isnan(s [ 2 ]) ) || ( std::isnan(s [ 3 ]) ) ) {
                             continue;
                         }
 
-                        if ( ( isnan(s [ 4 ]) ) || ( isnan(s [ 5 ]) ) || ( isnan(s [ 6 ]) ) || ( isnan(s [ 7 ]) ) ) {
+                        if ( ( std::isnan(s [ 4 ]) ) || ( std::isnan(s [ 5 ]) ) || ( std::isnan(s [ 6 ]) ) || ( std::isnan(s [ 7 ]) ) ) {
                             continue;
                         }
 

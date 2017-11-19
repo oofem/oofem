@@ -219,7 +219,7 @@ MisesMatGrad :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mo
 
     // === plastic loading ===
     // yield stress at the beginning of the step
-    double sigmaY = sig0 + H * kappa;
+    double sigmaY = this->give('s', gp, tStep) + H * kappa;
     // trial deviatoric stress and its norm
     StressVector trialStressDev(status->giveTrialStressDev(), _PlaneStrain);
     double trialS = trialStressDev.computeStressNorm();
@@ -273,7 +273,7 @@ MisesMatGrad :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMo
     if ( dKappa > 0.0 ) {
         double tempDamage = status->giveTempDamage();
         double damage = status->giveDamage();
-        double sigmaY = sig0 + H * kappa;
+        double sigmaY = this->give('s', gp, tStep) + H * kappa;
         // trial deviatoric stress and its norm
         const FloatArray &trialStressDev = status->giveTrialStressDev();
         /*****************************************************/
@@ -464,7 +464,7 @@ MisesMatGrad :: giveRealStressVectorGrad(FloatArray &answer1, double &answer2, G
 
     double tempDamage;
 
-    MisesMat :: performPlasticityReturn(gp, totalStrain);
+    MisesMat :: performPlasticityReturn(gp, totalStrain, tStep);
     status->letTempStrainVectorBe(totalStrain);
     tempDamage = computeDamage(gp, tStep);
     const FloatArray &tempEffStress = status->giveTempEffectiveStress();

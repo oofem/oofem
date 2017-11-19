@@ -145,6 +145,10 @@ Material :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
         answer.resize(1);
         answer.at(1) = this->giveNumber();
         return 1;
+    } else if ( type == IST_Density ) {
+        answer.resize(1);
+        answer.at(1) = this->propertyDictionary.at('d');
+        return 1;
     }
 
     answer.clear();

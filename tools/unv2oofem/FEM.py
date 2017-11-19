@@ -44,8 +44,8 @@ class Group:
 
 def Line2Float(line):
     """Convert a string into a list of Float"""
-    return map(float,line.split())
+    return [float(x) for x in line.split()]
 
 def Line2Int(line):
     """Convert a string into a list of Int"""
-    return map(int,line.split())
+    return [int(x) for x in line.split()]

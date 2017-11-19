@@ -82,9 +82,6 @@ public:
     //Boundary load by prescribed flux, convection, or radiation over length
     virtual void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true);
 
-    //Compute radiative heat tranfer coefficient as 4*eps*sigma*T_infty^3
-    virtual double getRadiativeHeatTranferCoef(BoundaryLoad *bLoad, TimeStep *tStep);
-    
     virtual void computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer);
 
     TransportCrossSection * giveTransportCrossSection();

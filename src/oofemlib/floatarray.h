@@ -489,6 +489,11 @@ public:
      */
     void changeComponentOrder();
 
+    /**
+     * Raise each element to its power
+     * @param exponent An exponent.
+    */
+    void power(const double exponent);
 
     /**
      * Reciever will be set to a given column in a matrix

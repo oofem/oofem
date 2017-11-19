@@ -9,11 +9,11 @@
 
                OOFEM : Object Oriented Finite Element Code
 
-                 Copyright (C) 1993 - 2013   Borek Patzak
+                 Copyright (C) 1993 - 2017   Borek Patzak
 
          Czech Technical University, Faculty of Civil Engineering,
           Department of Mechanics, 166 29 Prague, Czech Republic
-                www.oofem.org    e-mail: info@oofem.org
+                www.oofem.org    e-mail: oofem@fsv.cvut.cz
      
 
     This program is free software; you can redistribute it and/or modify
@@ -199,7 +199,7 @@ more documentation, manuals and new versions.
 Bugs
 ==============================================================================
 
-Please mail all bug reports and suggestions to [info@oofem.org]. I will try to
+Please mail all bug reports and suggestions to [oofem@fsv.cvut.cz]. I will try to
 give satisfaction, if the time is at least partially on my side. 
 
 

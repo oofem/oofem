@@ -6520,13 +6520,13 @@ Heat flow from a body surrounded by a medium at a temperature $T_\infty$ is gove
 \begin{eqnarray}
 q(T, T_\infty) = \varepsilon \sigma (T^4 - T_\infty^4)\label{eq:StefanBoltzmann}
 \end{eqnarray}
-where $\varepsilon\in\langle 0, 1 \rangle$ represents emissivity between the surface and the boundary at temperature $T_\infty$. $\sigma=5.67\cdot 10^{-8}$ W/m$^{-2}$K$^{-4}$ stands for a Stefan-Boltzmann constant. Since the unknown temperature $T$ is in the forth power, it is necessary to linearize this equation. The most straightforward approach is using Taylor expansion around $T_\infty$ and neglecting higher-order terms
+where $\varepsilon\in\langle 0, 1 \rangle$ represents emissivity between the surface and the boundary at temperature $T_\infty$. $\sigma=5.67\cdot 10^{-8}$ W/m$^{-2}$K$^{-4}$ stands for a Stefan-Boltzmann constant. Transport elements in OOFEM implement \refeq{eq:StefanBoltzmann} and require non-linear solver.
+
+Alternatively (not implemented), a linearization using Taylor expansion around $T_\infty$ and neglecting higher-order terms results to
 \begin{eqnarray}
 q(T, T_\infty) &\approx& q(T=T_\infty) + \frac{\partial q(T,T_\infty)}{\partial T_\infty} (T_\infty-T) = 4\varepsilon \sigma T_\infty^3 (T-T_\infty)
 \end{eqnarray}
-leading to so-called radiation heat transfer coefficient $\alpha_{rad}=4\varepsilon \sigma T_\infty^3$. The latter resembles similar coefficient as in convective heat transfer. Other methods for \refeq{eq:StefanBoltzmann} could be based on Oseen or Newton-Kantorovich linearization.
-
-Alternatively (not implemented), radiative heat transfer coefficient $\alpha_{rad}$ can be expressed as \cite[pp.28]{Baehr:06}
+leading to so-called radiation heat transfer coefficient $\alpha_{rad}=4\varepsilon \sigma T_\infty^3$. The latter resembles similar coefficient as in convective heat transfer. Other methods for \refeq{eq:StefanBoltzmann} could be based on Oseen or Newton-Kantorovich linearization. Also, radiative heat transfer coefficient $\alpha_{rad}$ can be expressed as \cite[pp.28]{Baehr:06}
 \begin{eqnarray}
 q(T, T_\infty) = \varepsilon \sigma \frac{T^4 - T_\infty^4}{T-T_\infty}(T-T_\infty) = \underbrace{\varepsilon \sigma (T^2+T_\infty^2)(T+T_\infty)}_{\alpha_{rad}}(T-T_\infty)
 \end{eqnarray}

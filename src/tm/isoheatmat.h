@@ -46,7 +46,6 @@
 #define _IFT_IsotropicHeatTransferMaterial_k "k" ///< Conductivity
 #define _IFT_IsotropicHeatTransferMaterial_c "c" ///< Specific heat
 #define _IFT_IsotropicHeatTransferMaterial_maturityT0 "maturityt0" ///< Baseline for maturity method
-#define _IFT_IsotropicHeatTransferMaterial_mt "mt" ///< Type of the material (0=default, 1=steel, 2=wood, 3=concrete) ...temporary
 #define _IFT_IsotropicHeatTransferMaterial_d "td"
 //@}
 
@@ -61,8 +60,8 @@ class IsotropicHeatTransferMaterial : public TransportMaterial
 protected:
     ScalarFunction conductivity; ///< Conductivity (k in input file).
     ScalarFunction capacity;     ///< Capacity (c in input file).
-    ScalarFunction density;     ///< Density (td in input file).
-    double maturityT0;   ///< Baseline for maturity mathod
+    ScalarFunction density;      ///< Density (td in input file).
+    double maturityT0;           ///< Baseline for maturity mathod
 
 public:
     IsotropicHeatTransferMaterial(int n, Domain * d);

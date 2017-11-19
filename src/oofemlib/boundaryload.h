@@ -48,6 +48,7 @@
 #define _IFT_BoundaryLoad_properties "properties"
 #define _IFT_BoundaryLoad_propertyTimeFunctions "propertytf"
 #define _IFT_BoundaryLoad_propertyMultExpr "propertymultexpr"
+#define _IFT_BoundaryLoad_temperOffset "temperoffset"
 //@}
 
 namespace oofem {
@@ -130,6 +131,8 @@ protected:
     Dictionary propertyDictionary;
     /// Optional time-functions for properties
     Dictionary propertyTimeFunctDictionary;
+    /// Temperature offset with regards to Kelvin. Default is 273.15.
+    double temperOffset;
 
 public:
     /**
@@ -163,7 +166,8 @@ public:
     virtual bcType giveType() const { return lType; }
     virtual double giveProperty(int aProperty, TimeStep *tStep, const std :: map< std :: string, FunctionArgument > &valDict);
     virtual double giveProperty(int aProperty, TimeStep *tStep);
-
+    /// Return temperature offset
+    virtual double giveTemperOffset(void);
     /// Expression to multiply all properties
     ScalarFunction propertyMultExpr;
 

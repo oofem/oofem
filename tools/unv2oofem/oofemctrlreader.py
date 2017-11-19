@@ -113,7 +113,7 @@ class CTRLParser:
             match=re.search('^group(([\-\w]| )+)', line, re.IGNORECASE)
             if match:
                 groups = match.group(1).split()
-                print "\tFound properties for group(s):", groups
+                print ("\tFound properties for group(s):", groups)
                 # parse group record
                 while True:
                     line=self.file.readline()
@@ -130,25 +130,25 @@ class CTRLParser:
                                 if __gr:
                                     __gr.oofem_sets.append(int(lineSplit[-1]));
                                     str = "\t\tGroup of nodes belongs to set %d" % int(lineSplit[-1])
-                                    print str
+                                    print (str)
                                     if (len(lineSplit)>3):#contains also other properties
                                         __gr=self.getNodeGroup(FEM, igroup)
                                         __gr.oofem_properties=' '.join(lineSplit[1:-2])
                                         str = "\t\tGroup of nodes \"%s\" has properties: %s" % (igroup, __gr.oofem_properties)
-                                        print str
+                                        print (str)
                                 else:
                                     str = "WARNING: Group of nodes \"%s\" does not exist" % igroup
-                                    print str
+                                    print (str)
                         else:
                             for igroup in groups:
                                 __gr=self.getNodeGroup(FEM,igroup)
                                 if __gr:
                                     __gr.oofem_properties=' '.join(lineSplit[1:])
                                     str = "\t\tGroup of nodes \"%s\" has properties: %s" % (igroup, __gr.oofem_properties)
-                                    print str
+                                    print (str)
                                 else:
                                     str = "WARNING: Group of nodes \"%s\" does not exist" % igroup
-                                    print str
+                                    print (str)
                     elif lineSplit[0].lower() == 'elemprop':
                         if (lineSplit[1].lower()=='bloadnum'):#check if the group represents a boundary load
                             for igroup in groups:
@@ -157,7 +157,7 @@ class CTRLParser:
                                     __gr.oofem_boundaryLoadsNum=[int(s) for s in lineSplit[2:]]
                                     __gr.oofem_groupNameForLoads=igroup.lstrip()
                                     str = "\t\tGroup of elements \"%s\" has boundary loads with numbers: %s" % (igroup, __gr.oofem_boundaryLoadsNum)
-                                    print str
+                                    print (str)
                                 else:
                                     str = "WARNING: Group of elements \"%s\" for boundary load does no exist" % (igroup)
                         elif (lineSplit[-2].lower()=='set'):#check if the group represents a set
@@ -168,25 +168,25 @@ class CTRLParser:
                                     __gr.oofem_sets.append(int(lineSplit[-1]))
                                     # Save orientation
                                     str = "\t\tGroup of elements \"%s\" belongs to set: %s" % (igroup, lineSplit[-1])
-                                    print str
+                                    print (str)
                                     if (len(lineSplit)>3):#contains also other properties
                                         __gr=self.getElementGroup(FEM,igroup)
                                         __gr.oofem_properties=' '.join(lineSplit[1:-2])
                                         str = "\t\tGroup of elements \"%s\" has properties: %s" % (igroup, __gr.oofem_properties)
-                                        print str
+                                        print (str)
                                 else:
                                     str = "WARNING: Group of elements \"%s\" for set does no exist" % (igroup)
-                                    print str
+                                    print (str)
                         else:#not boundary loads neither set
                             for igroup in groups:
                                 __gr=self.getElementGroup(FEM,igroup)
                                 if __gr:
                                     __gr.oofem_properties=' '.join(lineSplit[1:])
                                     str = "\t\tGroup of elements \"%s\" has properties: %s" % (igroup, __gr.oofem_properties)
-                                    print str
+                                    print (str)
                                 else:
                                     str = "WARNING: Group of elements \"%s\" does no exist" % (igroup)
-                                    print str
+                                    print (str)
                     elif lineSplit[0][:5].lower() == 'etype':
                         etmatch=re.search('^etype\[(\d+)\]', lineSplit[0], re.IGNORECASE)
                         unvetype = int(etmatch.group(1))
@@ -208,14 +208,14 @@ class CTRLParser:
                                         __gr.oofem_etypemap[unvetype]= n
                                         break
                                 else:
-                                    print "OOFEM element %s not found in OOFEM's list of eligible elements" % elemName
+                                    print ("OOFEM element %s not found in OOFEM's list of eligible elements" % elemName)
                                     sys.exit(0)
 
                                 str = "\t\tGroup of elements \"%s\" of unv_element_type[%d] = %s" % (igroup, unvetype, elemName)
-                                print str
+                                print (str)
                             else:
                                 str = "WARNING: Group of elements \"%s\" not found" % (igroup)
-                                print str
+                                print (str)
                     elif lineSplit[0].lower() == '#':
                         continue;
 
@@ -225,12 +225,12 @@ class CTRLParser:
 
     def parse(self, FEM):
 
-        self.file=open(self.filename,'rb')#'rb' mode for M$ compatibility
+        self.file=open(self.filename,'r')#'rb' mode for M$ compatibility
         # read header info ending with OutputManager
         while True:
             line=self.file.readline()
             if len(line)==1:
-                print "I did not find keyword \"OutputManager\" or empty line is present in the header"
+                print ("I did not find keyword \"OutputManager\" or empty line is present in the header")
                 sys.exit(0)
             self.header+=line
             if (line.split()[0].lower()=="outputmanager"):
@@ -240,9 +240,9 @@ class CTRLParser:
         data=self.getRecordLine()
         dataline = data.split()
         if(dataline[0].lower()!="ncrosssect" or dataline[2].lower()!="nmat" or dataline[4].lower()!="nbc" or dataline[6].lower()!="nic" or dataline[8].lower()!="nltf"):
-            print "Error in entry: %s" % data
-            print "Correct format: ncrosssect # nmat # nbc # nic # nltf #"
-            print "but keywords are %s # %s # %s # %s # %s"%(dataline[0], dataline[2], dataline[4], dataline[6], dataline[8])
+            print ("Error in entry: %s" % data)
+            print ("Correct format: ncrosssect # nmat # nbc # nic # nltf #")
+            print ("but keywords are %s # %s # %s # %s # %s"%(dataline[0], dataline[2], dataline[4], dataline[6], dataline[8]))
             sys.exit(0)
 
         if len(dataline)>10 and dataline[10].lower() == "nset":

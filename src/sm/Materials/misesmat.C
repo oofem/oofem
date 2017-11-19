@@ -37,11 +37,15 @@
 #include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
+#include "function.h"
 #include "intarray.h"
 #include "mathfem.h"
 #include "contextioerr.h"
 #include "datastream.h"
 #include "classfactory.h"
+#include "fieldmanager.h"
+#include "../sm/Elements/structuralelement.h"
+#include "engngm.h"
 
 namespace oofem {
 REGISTER_Material(MisesMat);
@@ -51,7 +55,7 @@ MisesMat :: MisesMat(int n, Domain *d) : StructuralMaterial(n, d)
 {
     linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
     H = 0.;
-    sig0 = 0.;
+    //sig0 = 0.;
     G = 0.;
     K = 0.;
 }
@@ -113,7 +117,7 @@ MisesMat :: giveRealStressVector_1d(FloatArray &answer,
     // subtract stress independent part
     this->giveStressDependentPartOfStrainVector(strainR, gp, totalStrain,
                                                 tStep, VM_Total);
-    this->performPlasticityReturn(gp, strainR);
+    this->performPlasticityReturn(gp, strainR, tStep);
     double omega = computeDamage(gp, tStep);
     answer = status->giveTempEffectiveStress();
     answer.times(1 - omega);
@@ -147,7 +151,7 @@ MisesMat :: giveRealStressVector_3d(FloatArray &answer,
     this->giveStressDependentPartOfStrainVector(strainR, gp, totalStrain,
                                                 tStep, VM_Total);
 
-    this->performPlasticityReturn(gp, strainR);
+    this->performPlasticityReturn(gp, strainR, tStep);
     double omega = computeDamage(gp, tStep);
     answer = status->giveTempEffectiveStress();
     answer.times(1 - omega);
@@ -206,7 +210,7 @@ MisesMat :: giveFirstPKStressVector_3d(FloatArray &answer,
 
     //check for plastic loading
     double trialS = computeStressNorm(trialStressDev);
-    double sigmaY = sig0 + H * kappa;
+    double sigmaY = this->give('s', gp, tStep) + H * kappa;
     //yieldValue = sqrt(3./2.)*trialS-sigmaY;
     yieldValue = trialS - sqrt(2. / 3.) * sigmaY;
 
@@ -287,7 +291,7 @@ MisesMat :: computeGLPlasticStrain(const FloatMatrix &F, FloatMatrix &Ep, FloatM
 
 
 void
-MisesMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain)
+MisesMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep)
 {
     MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
     double kappa;
@@ -306,7 +310,7 @@ MisesMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrai
         fullStress.at(1) = E * ( totalStrain.at(1) - plStrain.at(1) );
         double trialS = fabs(fullStress.at(1));
         /*yield function*/
-        double yieldValue = trialS - (sig0 + H * kappa);
+        double yieldValue = trialS - (this->give('s', gp, tStep) + H * kappa);
         // === radial return algorithm ===
         if ( yieldValue > 0 ) {
             double dKappa = yieldValue / ( H + E );
@@ -334,7 +338,7 @@ MisesMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrai
         status->setTrialStressVol(trialStressVol);
         // check the yield condition at the trial state
         double trialS = computeStressNorm(trialStressDev);
-        double yieldValue = sqrt(3./2.) * trialS - (sig0 + H * kappa);
+        double yieldValue = sqrt(3./2.) * trialS - (this->give('s', gp, tStep) + H * kappa);
         if ( yieldValue > 0. ) {
             // increment of cumulative plastic strain
             double dKappa = yieldValue / ( H + 3. * G );
@@ -441,7 +445,7 @@ MisesMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     // === plastic loading ===
 
     // yield stress at the beginning of the step
-    double sigmaY = sig0 + H * kappa;
+    double sigmaY = this->give('s', gp, tStep) + H * kappa;
 
     // trial deviatoric stress and its norm
     const FloatArray &trialStressDev = status->giveTrialStressDev();
@@ -699,6 +703,10 @@ MisesMat :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
         answer.resize(1);
         answer.at(1) = status->giveDamage();
         return 1;
+    } else if ( type == IST_YieldStrength ) {
+        answer.resize(1);
+        answer.at(1) = this->give('s', gp, tStep);
+        return 1;
     } else {
         return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
     }
@@ -813,6 +821,37 @@ MisesMatStatus :: updateYourself(TimeStep *tStep)
     damage = tempDamage;
     trialStressD.clear(); // to indicate that it is not defined any more
     leftCauchyGreen = tempLeftCauchyGreen;
+}
+
+
+double
+MisesMat :: give(int aProperty, GaussPoint *gp, TimeStep *tStep)
+//
+// Returns the value of the property aProperty.
+//
+{
+    if ( aProperty == 's' ) {
+        return sig0.eval( { { "te", giveTemperature(gp, tStep) }, { "t", tStep->giveIntrinsicTime() } }, this->giveDomain(), gp, giveTemperature(gp, tStep) );
+    }
+
+    return this->Material :: give(aProperty, gp);
+}
+
+double MisesMat :: giveTemperature(GaussPoint *gp, TimeStep *tStep)
+{
+    FieldManager *fm = this->domain->giveEngngModel()->giveContext()->giveFieldManager();
+    FieldPtr tf;
+    int err;
+    if ( ( tf = fm->giveField(FT_Temperature) ) ) {
+        // temperature field registered
+        FloatArray gcoords, answer;
+        static_cast< StructuralElement * >( gp->giveElement() )->computeGlobalCoordinates( gcoords, gp->giveNaturalCoordinates() );
+        if ( ( err = tf->evaluateAt(answer, gcoords, VM_Total, tStep) ) ) {
+            OOFEM_ERROR("tf->evaluateAt failed, element %d, error code %d", gp->giveElement()->giveNumber(), err);
+        }
+        return answer.at(1);
+    }
+    return 0.;
 }
 
 

@@ -218,16 +218,16 @@ set 3 elementranges { }
 #
 #%BEGIN_CHECK% tolerance 1e-7
 #NODE tStep 2  number 39 dof 1 unknown d value 0.0000000
-#NODE tStep 4  number 39 dof 1 unknown d value 3.92140275e-05
-#NODE tStep 9  number 39 dof 1 unknown d value 2.55020049e-04
-#NODE tStep 14  number 39 dof 1 unknown d value 3.31379893e-04
-#NODE tStep 19  number 39 dof 1 unknown d value 3.16734022e-04
+#NODE tStep 4  number 39 dof 1 unknown d value 3.95745447e-05
+#NODE tStep 9  number 39 dof 1 unknown d value 2.54306044e-04
+#NODE tStep 14  number 39 dof 1 unknown d value 3.35193649e-04
+#NODE tStep 19  number 39 dof 1 unknown d value 3.20825301e-04
 ##Check element's stress vector
 #ELEMENT tStep 2 number 30 gp 1 keyword 1 component 2  value 0.0000000
-#ELEMENT tStep 4 number 30 gp 1 keyword 1 component 2  value 5.46197817e-03
-#ELEMENT tStep 9 number 30 gp 1 keyword 1 component 2  value 8.46230379e-02
-#ELEMENT tStep 14 number 30 gp 1 keyword 1 component 2  value 1.33771470e-01
-#ELEMENT tStep 19 number 30 gp 1 keyword 1 component 2  value 1.25860683e-01
+#ELEMENT tStep 4 number 30 gp 1 keyword 1 component 2  value 5.04220350e-03
+#ELEMENT tStep 9 number 30 gp 1 keyword 1 component 2  value 8.42770991e-02
+#ELEMENT tStep 14 number 30 gp 1 keyword 1 component 2  value 1.38105684e-01
+#ELEMENT tStep 19 number 30 gp 1 keyword 1 component 2  value 1.30319067e-01
 #%END_CHECK%
 
 

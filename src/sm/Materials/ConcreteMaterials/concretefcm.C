@@ -306,9 +306,11 @@ ConcreteFCM :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, int i)
         } else if ( softType == ST_UserDefinedCrack ) {
             w = ec * Le;
 
-            if ( w > soft_w.giveSize() ) {
+	    if ( w > soft_w.at(soft_w.giveSize() ) ) {
                 Cf = 0.;
+#ifdef DEBUG
                 OOFEM_WARNING("Crack width is larger than the last user-defined value in the traction-opening law.");
+#endif
             } else if ( emax == 0. ) {
                 Cf = this->Ft * ( soft_function_w.at(2) - soft_function_w.at(1) ) / ( ( soft_w.at(2) - soft_w.at(1) ) / Le );
             } else { // softening
@@ -332,9 +334,11 @@ ConcreteFCM :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, int i)
                 Cf = this->H;
             }
         } else if ( softType == ST_UserDefinedStrain ) {
-            if ( ec > soft_eps.giveSize() ) {
+		if ( ec > soft_eps.at(soft_eps.giveSize() ) ) {
                 Cf = 0.;
+#ifdef DEBUG
                 OOFEM_WARNING("Crack strain is larger than the last user-defined value in the stress-crack-strain law.");
+#endif
             } else if ( emax == 0. ) {
                 Cf = this->Ft * ( soft_function_eps.at(2) - soft_function_eps.at(1) ) / ( soft_eps.at(2) - soft_eps.at(1) );
             } else { // softening
@@ -439,10 +443,15 @@ ConcreteFCM :: giveNormalCrackingStress(GaussPoint *gp, double ec, int i)
     } else if ( softType == ST_UserDefinedCrack ) {
         w = ec * Le;
 
+	traction = 0.;
 
-        if ( w > soft_w.giveSize() ) {
+            if ( w > soft_w.at(soft_w.giveSize() ) ) {
             traction = 0.;
+
+#ifdef DEBUG
             OOFEM_WARNING("Crack width is larger than the last user-defined value in the traction-opening law.");
+#endif
+	    
         } else if ( ec >= emax ) { // softening
             for ( int i = 1; i <= soft_w.giveSize(); i++ ) {
                 if ( ( w - soft_w.at(i) ) < fcm_SMALL_STRAIN ) {
@@ -487,9 +496,11 @@ ConcreteFCM :: giveNormalCrackingStress(GaussPoint *gp, double ec, int i)
             traction = ( this->Ft + emax * this->H ) * ec / emax;
         }
     } else if ( softType == ST_UserDefinedStrain ) {
-        if ( emax > soft_eps.giveSize() ) {
+      if ( emax > soft_eps.at(soft_eps.giveSize() ) ) {
             traction = 0.;
+#ifdef DEBUG
             OOFEM_WARNING("Cracking strain is larger than the last user-defined value in the traction-cracking-strain law.");
+#endif
         } else if ( ec >= emax ) { // softening
             for ( int i = 1; i <= soft_eps.giveSize(); i++ ) {
                 if ( ( ec - soft_eps.at(i) ) < fcm_SMALL_STRAIN ) {
