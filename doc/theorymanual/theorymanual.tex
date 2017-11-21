@@ -1,0 +1,38 @@
+\documentclass[a4paper]{book}
+%\pagestyle{page}
+\usepackage{graphicx}
+\usepackage{html}
+\usepackage{ifpdf}
+\usepackage{fancyhdr}
+\usepackage[utf8]{inputenc}
+\input{include.tex}
+
+\oddsidemargin -10mm
+\evensidemargin -10mm
+\textwidth 180mm
+\parindent 0mm
+
+\begin{document}
+\input{titlepage.tex}
+\input{ackno.tex}
+\clearpage
+\setcounter{page}{1}
+\pagestyle{headings}
+
+\tableofcontents
+%\input{chapter1.tex}
+\chapter{Introduction and basic equations}
+\section{Introduction}
+\section{Notation}
+
+\chapter{Solution procedures}
+\chapter{Elements}
+\chapter{Constitutive Equations}
+\chapter{Boundary conditions}
+
+\chapter{Bibliography}
+\bibliographystyle{plain}
+\bibliography{references}
+\end{document}
+
+
