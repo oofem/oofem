@@ -403,11 +403,12 @@ The general format of this record can be specified in
     \recentry{}{\optField{ninitmodules}{in}}
     \recentry{}{\optField{nmodules}{in}}
     \recentry{}{\optField{nxfemman}{in}}
-  \end{record}
+  \end{record}\\
   immediately followed by \param{nmsteps} meta step records with the following syntax:\\
   \begin{record}[0.9\textwidth]
     \recentry{}{\field{nsteps}{in} \field{attributes}{string}}
-  \end{record}
+  \end{record}\\
+  
   The \param{nmsteps} parameter determines the number of ``metasteps''. The
 meta step represent sequence of solution steps with common attributes.
 There is expected to be \param{nmsteps} subsequent metastep records.
@@ -1731,7 +1732,7 @@ Supported DofManagerType keywords are
 \begin{record}[0.9\textwidth]
   \recentry{\entKeywordInst{Node}}{\field{coords}{ra}}
   \recentry{}{[\field{lcs}{ra}]}
-\end{record}
+\end{record}\\
 Represent an abstraction for finite element node.
 The node coordinates in space (given by global coordinate system) are described
 using \param{coords} attribute. This array contains x, y and possibly z
@@ -1764,7 +1765,7 @@ same as on master.
   \recentry{}{\field{master}{in}}
   \recentry{}{\optField{masterMask}{ia}}
   \recentry{}{[\field{lcs}{ra}]}
-\end{record}
+\end{record}\\
 Represent node connected to other node (called master) using rigid
 arm. Rigid arm node DOFs can be linked to master (via rigid arm transformation) or can be independent. The rigid arm node allows to avoid very
 stiff elements used for modelling the rigid-arm connection.
@@ -1845,14 +1846,14 @@ but given explicitly, as well as the connected dof managers (\param{masterDMan})
 
 \begin{record}[0.9\textwidth]
   \recentry{\entKeywordInst{ElementSide}}{}
-\end{record}
+\end{record}\\
 Represents an abstraction for element side, which holds some unknowns.
 
 \item PFEMParticle \label{pfemparticles}
 
 \begin{record}[0.9\textwidth]
   \recentry{\entKeywordInst{PFEMParticle}}{\field{coords}{ra}}
-\end{record}
+\end{record}\\
 Represent the particle used in PFEM analysis.
 
 \item InteractionPFEMParticle \label{interactionparticle}
@@ -1861,7 +1862,7 @@ Represent the particle used in PFEM analysis.
   \recentry{\entKeywordInst{InteractionPFEMParticle}}{\field{coords}{ra}}
   \recentry{}{\field{bc}{ia}}
   \recentry{}{\field{coupledNode}{in}}
-\end{record}
+\end{record}\\
 Represent a special particle used in the PFEM-part of the FluidStructureProblem. The particle is 
 attached to \param{coupledNode} from the structural counter part. InteractionBoundaryCondition~\ref{interactionbc} must be prescribed under \param{bc} to access the velocities from solid nodes.
 
@@ -1984,7 +1985,7 @@ Integral cross section with constant properties\\
   \recentry{\entKeywordInst{SimpleCS}}{\optField{thick}{rn} \optField{width}{rn} \optField{area}{rn}}
   \recentry{}{\optField{iy}{rn} \optField{iz}{rn} \optField{ik}{rn}}
   \recentry{}{\optField{shearareay}{rn} \optField{shearareaz}{rn} \field{beamshearcoeff}{rn}}
-\end{record}
+\end{record}\\
 Represents integral type of cross section model. In current
 implementation, such cross section is described using cross section
 thick (\param{thickVal}) and width (\param{widthVal}). For some
@@ -2000,7 +2001,7 @@ Integral cross section with variable properties\\
   \recentry{\entKeywordInst{VariableCS}}{\optField{thick}{expr} \optField{width}{expr} \optField{area}{expr}}
   \recentry{}{\optField{iy}{expr} \optField{iz}{expr} \optField{ik}{expr}}
   \recentry{}{\optField{shearareay}{expr} \optField{shearareaz}{expr} }
-\end{record}
+\end{record}\\
 Represents integral type of cross section model, where individual cross section parameters can be expressed as an arbitrary function of global coordinates x,y,z. Similar to SimpleCS, for some problems (for example 3d), the corresponding volume and cross section dimensions are
 determined using element geometry, then you can omit many (or some) parameters (refer to documentation of individual elements for required cross section properties). 
 Parameter \param{area} allows to set cross section area, parameters \param{iz}, \param{iz}, and \param{ik} represent 
@@ -2013,7 +2014,7 @@ Layered cross section \\
   \recentry{}{\field{LayerMaterials}{ia}}
   \recentry{}{\field{Thicks}{ra} \field{Widths}{ra}}
   \recentry{}{\field{mid\-Surf}{rn}}
-\end{record}
+\end{record}\\
 Represents the layered cross section model, based on
 geometrical hypothesis, that cross sections remain planar after
 deformation. Number of layers is
@@ -2034,7 +2035,7 @@ Fibered cross section\\
   \recentry{\entKeywordInst{FiberedCS}}{\field{nfibers}{in} \field{fibermaterials}{ia}}
   \recentry{}{\field{thicks}{ra} \field{widths}{ra} \field{thick}{rn} \field{width}{rn}}
   \recentry{}{\field{fiberycentrecoords}{ra} \field{fiberzcentrecoords}{ra}}
-\end{record}
+\end{record}\\
 Cross section represented as a set of rectangular fibers. It is based on
 geometrical hypothesis, that cross sections remain planar after
 deformation (3d generalization of layered approach for beams).
@@ -2051,7 +2052,7 @@ The model requires to specify a material model corresponding to particular fiber
 Warping cross section \\
 \begin{record}[0.9\textwidth]
 \recentry{\entKeywordInst{WarpingCS}}{\field{WarpingNode}{in}}
-\end{record}
+\end{record}\\
 Represents the cross section for Free warping analysis, see section \ref{FreeWarping}. The \param{WarpingNode} parametr defines the number of external node with prescribed boundary condition which corresponds to the relative twist of warping cross section.
 
 \end{itemize}
@@ -2099,7 +2100,7 @@ Currently, the supported barrier types are following:
 \begin{record}[0.9\textwidth]
   \recentry{\entKeywordInst{polylinebarrier}}{\componentNum\ \field{vertexnodes}{ia}}
   \recentry{}{\optField{xcoordindx}{in} \optField{ycoordindx}{in}}
-\end{record}
+\end{record}\\
 This represents a polyline barrier for 2D problems. Barrier is a
 polyline, defined as a sequence of nodes representing vertices.
 The vertices are specified using parameter \param{vertexnodes} array,
@@ -2113,7 +2114,7 @@ are 1 for \param{xcoordindx} and 2 for \param{ycoordindx}, representing barrier 
 \begin{record}[0.9\textwidth]
   \recentry{\entKeywordInst{symmetrybarrier}}{\componentNum\ \field{origin}{ra}}
   \recentry{}{\field{normals}{ra} \field{activemask}{ia}}
-\end{record}
+\end{record}\\
 Implementation of symmetry barier, that allows to specify up to three planes (orthogonal ones) of symmetry.
 This barrier allows to  model the symmetry of the averaged field on the boundary without
 the need of modeling the other part of structure across the plane of symmetry.
@@ -2300,7 +2301,7 @@ Is a special boundary condition prescribed on InteractionPFEMParticles~\ref{inte
 \noindent
 \begin{record}[0.9\textwidth]
   \recentry{\entKeywordInst{DeadWeight}}{\field{components}{ra}}
-\end{record}
+\end{record}\\
 Represents dead weight loading applied on element volume (for
 structural elements). For transport problems, it represents the
 internal source, i.e. the rate of (heat) generated per unit volume.
@@ -2632,8 +2633,9 @@ with solver parameters related to specific solver.
 \hline
 Storage format & id & \multicolumn{5}{c|}{Sparse solver, \param{lstype}} \\
 \hline
-& \param{smtype} & \tiny{Direct (0)} &\tiny{IML (1)}
- &\tiny{Spooles (2)}& \tiny{Petsc (3)}& \tiny{DSS (4)}& \tiny{MKLPardiso (6)}& \tiny{SuperLU\_MT (7)}\\
+& \param{smtype} & \tiny{Direct (0)} &\tiny{IML (1)} &\tiny{Spooles (2)}& \tiny{Petsc (3)}& \tiny{DSS (4)}& \tiny{MKLPardiso (6)}& \tiny{SuperLU\_MT (7)}\\
+&                &                   &               &                  &                 &               & \tiny{Pardiso.org(8)}&                       \\
+
 \hline
 \small{SMT\_Skyline}       & 0&+&+& & & & &\\
 \small{SMT\_SkylineU}      & 1&+&+& & & & & \\
@@ -2661,18 +2663,21 @@ type and are summarized in table (\ref{sparsesolverparams}).
 \begin{center}
 \begin{tabular}{|l|l|l|}
 \hline
-Solver type & id & Solver parameters \\
+Solver type & id & Solver parameters/notes \\
 \hline
 ST\_Direct  &0&\\
-ST\_IML     &1& \optField{stype}{in} \field{lstol}{rn} \field{lsiter}{in}
-\field{lsprecond}{in}\\
-                  & &  \optField{precondattributes}{string}\\
-
-ST\_Spooles &2&  \optField{msglvl}{in} \optField{msgfile}{s}\\
-ST\_Petsc   &3& see Petsc manual, for details\footnotemark\\
-ST\_DSS     &4& \\
-ST\_MKLPardiso&6&\\
-ST\_SuperLU\_MT&7\\
+ST\_IML     &1& \optField{stype}{in} \field{lstol}{rn} \field{lsiter}{in}\field{lsprecond}{in}\\
+            & & \optField{precondattributes}{string}\\
+            & & Included in OOFEM, requires to compile with USE\_IML\\
+ST\_Spooles &2& \optField{msglvl}{in} \optField{msgfile}{s}\\
+            & & http://www.netlib.org/linalg/spooles/spooles.2.2.html\\
+ST\_Petsc   &3& See Petsc manual, for details\footnotemark\\
+ST\_DSS     &4& Sparse direct solver, included in OOFEM\\
+            & & Requires to compile with USE\_DSS\\
+ST\_MKLPardiso&6&Requires Intel MKL Pardiso \\
+ST\_SuperLU\_MT&7&SuperLU for shared memory machines\\
+               & &http://crd-legacy.lbl.gov/~xiaoye/SuperLU/\\
+ST\_PardisoProjectOrg&8&Requires Pardiso solver(http://www.pardiso-project.org/)\\
 \hline
 \end{tabular}
 \caption{Solver parameters.}
