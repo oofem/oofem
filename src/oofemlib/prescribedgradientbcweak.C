@@ -62,6 +62,7 @@
 #include <cmath>
 #include <string>
 #include <sstream>
+#include <iterator>
 
 namespace oofem {
 
