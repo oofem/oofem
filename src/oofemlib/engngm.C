@@ -839,12 +839,14 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
     }
 
     for ( auto &bc : domain->giveBcs() ) {
-        if ( !bc->isImposed(tStep) ) continue;
         auto abc = dynamic_cast< ActiveBoundaryCondition * >(bc.get());
 
         if ( abc ) {
+            /// @note: Some active bcs still make changes even when they are not applied
+            /// We should probably reconsider this approach, so that they e.g. just prescribe their lagrange mult. instead.
             ma.assembleFromActiveBC(answer, *abc, tStep, s, s);
         } else if ( bc->giveSetNumber() ) {
+            if ( !bc->isImposed(tStep) ) continue;
             auto load = dynamic_cast< Load * >(bc.get());
             if ( !load ) continue;
             // Now we assemble the corresponding load type for the respective components in the set:
