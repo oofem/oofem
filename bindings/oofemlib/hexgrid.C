@@ -409,7 +409,7 @@ int main(int argc, char *argv[])
     myData.insertInputRecord(DataReader::IR_matRec, myInput);
 
     //Boundary Conditions
-    if ( bc == "d" or bc == "md" ) {
+    if ( bc == "d" || bc == "md" ) {
         myInput = new DynamicInputRecord(_IFT_TransportGradientDirichlet_Name, 1);
         myInput->setField(1, _IFT_GeneralBoundaryCondition_timeFunct);
         myInput->setField(IntArray{10}, _IFT_GeneralBoundaryCondition_dofs);
@@ -421,7 +421,7 @@ int main(int argc, char *argv[])
             myInput->setField(_IFT_TransportGradientDirichlet_tractionControl);
         }
         myData.insertInputRecord(DataReader::IR_bcRec, myInput);
-    } else if ( bc == "n" or bc == "mn" ) {
+    } else if ( bc == "n" || bc == "mn" ) {
         myInput = new DynamicInputRecord(_IFT_TransportGradientNeumann_Name, 1);
         myInput->setField(1, _IFT_GeneralBoundaryCondition_timeFunct);
         myInput->setField(IntArray{10}, _IFT_GeneralBoundaryCondition_dofs);
