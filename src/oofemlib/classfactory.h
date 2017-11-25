@@ -171,10 +171,10 @@ template< typename T > ContactDefinition *contactDefCreator(ContactManager *cMan
 #define REGISTER_SparseMtrx(class, type) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerSparseMtrx(type, sparseMtrxCreator< class > );
 #define REGISTER_SparseLinSolver(class, type) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerSparseLinSolver(type, sparseLinSolCreator< class > );
 #define REGISTER_ErrorEstimator(class, type) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerErrorEstimator(type, errEstCreator< class > );
-#define REGISTER_NodalRecoveryModel(class, type) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerNodalRecoveryModel(type, nrmCreator< class > );
-#define REGISTER_GeneralizedEigenValueSolver(class, type) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerGeneralizedEigenValueSolver(type, gesCreator< class > );
-#define REGISTER_Mesher(class, type) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerMesherInterface(type, mesherCreator< class > );
-#define REGISTER_MaterialMappingAlgorithm(class, type) static bool __dummy_ ## class __attribute__((unused)) = GiveClassFactory().registerMaterialMappingAlgorithm(type, mmaCreator< class > );
+#define REGISTER_NodalRecoveryModel(class, type) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerNodalRecoveryModel(type, nrmCreator< class > );
+#define REGISTER_GeneralizedEigenValueSolver(class, type) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerGeneralizedEigenValueSolver(type, gesCreator< class > );
+#define REGISTER_Mesher(class, type) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerMesherInterface(type, mesherCreator< class > );
+#define REGISTER_MaterialMappingAlgorithm(class, type) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerMaterialMappingAlgorithm(type, mmaCreator< class > );
 
 #define REGISTER_XfemManager(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerXfemManager(_IFT_ ## class ## _Name, xManCreator< class > );
 #define REGISTER_EnrichmentItem(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerEnrichmentItem(_IFT_ ## class ## _Name, enrichItemCreator< class > );
@@ -190,7 +190,7 @@ template< typename T > ContactDefinition *contactDefCreator(ContactManager *cMan
 
 #define REGISTER_ContactManager(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerContactManager(_IFT_ ## class ## _Name, contactManCreator< class > );
 #define REGISTER_ContactDefinition(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerContactDefinition(_IFT_ ## class ## _Name, contactDefCreator< class > );
-#define REGISTER_Quasicontinuum(class) static bool __dummy_ ## class = GiveClassFactory().registerQuasicontinuum(_IFT_ ## class ## _Name, QuasicontinuumCreator< class > );
+#define REGISTER_Quasicontinuum(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerQuasicontinuum(_IFT_ ## class ## _Name, QuasicontinuumCreator< class > );
 //@}
 
 /**
