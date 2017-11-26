@@ -365,22 +365,17 @@ MITC4Shell :: giveNodeCoordinates(double &x1, double &x2, double &x3, double &x4
 }
 
 void
-MITC4Shell :: giveLocalCoordinates(FloatArray &answer, FloatArray &global)
-// Returns global coordinates given in global vector
-// transformed into local coordinate system of the
-// receiver
+MITC4Shell :: giveLocalCoordinates(FloatArray &answer, const FloatArray &global)
 {
-    FloatArray offset;
     // test the parametr
     if ( global.giveSize() != 3 ) {
         OOFEM_ERROR("cannot transform coordinates - size mismatch");
-        exit(1);
     }
 
     this->computeGtoLRotationMatrix();
 
-    offset = global;
-    offset.subtract( * this->giveNode(1)->giveCoordinates() );
+    FloatArray offset;
+    offset.beDifferenceOf(global, * this->giveNode(1)->giveCoordinates() );
     answer.beProductOf(GtoLRotationMatrix, offset);
 }
 
@@ -1265,7 +1260,7 @@ MITC4Shell :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coor
     FloatArray inputCoords_ElCS;
     std :: vector< FloatArray >lc(3);
     FloatArray llc;
-    this->giveLocalCoordinates( inputCoords_ElCS, const_cast< FloatArray & >(coords) );
+    this->giveLocalCoordinates( inputCoords_ElCS, coords );
     for ( int _i = 0; _i < 4; _i++ ) {
         this->giveLocalCoordinates( lc [ _i ], * this->giveNode(_i + 1)->giveCoordinates() );
     }

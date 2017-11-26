@@ -398,7 +398,7 @@ RerShell :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
 
     //rotate the input point Coordinate System into the element CS
     FloatArray inputCoords_ElCS;
-    this->giveLocalCoordinates( inputCoords_ElCS, const_cast< FloatArray & >(coords) );
+    this->giveLocalCoordinates( inputCoords_ElCS, coords );
 
     //Nodes are defined in the global CS, so they also need to be rotated into the element CS, therefore get the node points and
     //rotate them into the element CS
@@ -498,16 +498,9 @@ RerShell :: computeGtoLRotationMatrix(FloatMatrix &answer)
 
 void
 RerShell :: giveLocalCoordinates(FloatArray &answer, const FloatArray &global)
-//
-// Returns global coordinates given in global vector
-// transformed into local coordinate system of the
-// receiver
-//
 {
-    // test the parameter
     if ( global.giveSize() != 3 ) {
         OOFEM_ERROR("cannot transform coordinates- size mismatch");
-        exit(1);
     }
 
     // first ensure that receiver's GtoLRotationMatrix[3,3]
