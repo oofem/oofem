@@ -80,8 +80,7 @@ void IntMatBilinearCZStatus :: copyStateVariables(const MaterialStatus &iStatus)
 {
     StructuralInterfaceMaterialStatus :: copyStateVariables(iStatus);
 
-    MaterialStatus &tmpStat = const_cast< MaterialStatus & >(iStatus);
-    const IntMatBilinearCZStatus &structStatus = dynamic_cast< IntMatBilinearCZStatus & >(tmpStat);
+    const IntMatBilinearCZStatus &structStatus = static_cast< const IntMatBilinearCZStatus & >(iStatus);
 
     mDamageNew   = structStatus.mDamageNew;
     mDamageOld   = structStatus.mDamageOld;

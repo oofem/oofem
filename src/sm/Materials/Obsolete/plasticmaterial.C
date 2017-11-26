@@ -856,8 +856,7 @@ void PlasticMaterialStatus :: copyStateVariables(const MaterialStatus &iStatus)
 {
     StructuralMaterialStatus :: copyStateVariables(iStatus);
 
-    MaterialStatus &tmpStat = const_cast< MaterialStatus & >(iStatus);
-    const PlasticMaterialStatus &plastStatus = dynamic_cast< PlasticMaterialStatus & >(tmpStat);
+    const PlasticMaterialStatus &plastStatus = static_cast< const PlasticMaterialStatus & >(iStatus);
 
     plasticStrainVector = plastStatus.givePlasticStrainVector();
     tempPlasticStrainVector = plastStatus.giveTempPlasticStrainVector();
