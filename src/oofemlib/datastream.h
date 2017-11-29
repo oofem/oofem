@@ -40,6 +40,7 @@
 #include <sstream>
 #include <cstdio>
 #include <exception>
+#include <stdexcept>
 
 namespace oofem {
 /**
@@ -139,7 +140,7 @@ public:
     {
     public:
         std::string filename;
-        CantOpen(std::string file): runtime_error("can't open file"), filename(std::move(file)) {}
+        CantOpen(std::string file): std::runtime_error("can't open file"), filename(std::move(file)) {}
     };
 
 private:

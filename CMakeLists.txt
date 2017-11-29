@@ -117,6 +117,17 @@ if (USE_PARALLEL)
     set (USE_MPI ON)
 endif ()
 
+# Enable coverage testing
+if (CMAKE_COMPILER_IS_GNUCC)
+  option(ENABLE_COVERAGE "Enable coverage reporting for gcc/clang" FALSE)
+
+  if (ENABLE_COVERAGE)
+    add_compile_options(--coverage -O0)
+    list (APPEND EXT_LIBS --coverage)
+    
+  endif()
+endif ()
+
 #######################################################################
 ######################## Internal libraries ###########################
 #######################################################################
@@ -596,15 +607,16 @@ endif ()
 
 # OOFEM target
 if (USE_SHARED_LIB) # Prefer dynamic lib if available.
-    add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C)
-    target_link_libraries (oofem liboofem)
+  add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C)
+  target_link_libraries (oofem liboofem)
 elseif (${CMAKE_VERSION} VERSION_LESS "2.8.8") # Hackish backwards compatibility 
-    add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C)
-    target_link_libraries (oofem ${LIBS} ${EXT_LIBS})
+  add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C)
+  target_link_libraries (oofem ${LIBS} ${EXT_LIBS})
 else ()
-    add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C ${LIBS})
-    target_link_libraries (oofem ${EXT_LIBS})
+  add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C ${LIBS})
+  target_link_libraries (oofem ${EXT_LIBS})
 endif ()
+
 install (TARGETS oofem DESTINATION bin)
 
 if (USE_OOFEG)
