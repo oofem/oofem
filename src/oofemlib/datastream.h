@@ -40,6 +40,7 @@
 #include <sstream>
 #include <cstdio>
 #include <exception>
+#include <stdexcept>
 
 namespace oofem {
 /**
