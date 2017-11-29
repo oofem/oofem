@@ -43,6 +43,8 @@ extern "C" {
 #include <spooles/SymbFac.h>
 };
 
+#define _IFT_SpoolesSparseMtrx_Name "spooles"
+
 namespace oofem {
 /**
  * This class provides an sparse matrix interface to SPOOLES InpMtrx
@@ -56,19 +58,18 @@ protected:
     int sflag;
 
 public:
-    SpoolesSparseMtrx(int _type, int _nent, int _sflag, int n, int m) : SparseMtrx(n, m)
-    {
-        type = _type;
-        nent = _nent;
-        sflag = _sflag;
-        mtrx = NULL;
-    }
-    SpoolesSparseMtrx() : SparseMtrx() {
-        type = SPOOLES_REAL;
-        nent = 0;
-        sflag = SPOOLES_SYMMETRIC;
-        mtrx = NULL;
-    }
+    SpoolesSparseMtrx(int _type, int _nent, int _sflag, int n, int m) : SparseMtrx(n, m),
+        mtrx(NULL),
+        type(_type),
+        nent(_nent),
+        sflag(_sflag)
+    { }
+    SpoolesSparseMtrx() : SparseMtrx(),
+        mtrx(NULL),
+        type(SPOOLES_REAL),
+        nent(0),
+        sflag(SPOOLES_SYMMETRIC)
+    { }
     virtual ~SpoolesSparseMtrx() {
         if ( mtrx ) {
             InpMtx_free(mtrx);

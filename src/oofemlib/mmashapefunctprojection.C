@@ -41,10 +41,13 @@
 #include "timestep.h"
 #include "feinterpol.h"
 #include "nodalaveragingrecoverymodel.h"
+#include "classfactory.h"
 
 #include <cstdlib>
 
 namespace oofem {
+REGISTER_MaterialMappingAlgorithm(MMAShapeFunctProjection, MMA_ShapeFunctionProjection);
+
 MMAShapeFunctProjection :: MMAShapeFunctProjection() : MaterialMappingAlgorithm()
 {
     stateCounter = 0;

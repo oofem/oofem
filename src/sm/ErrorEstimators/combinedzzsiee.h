@@ -39,6 +39,8 @@
 #include "../sm/ErrorEstimators/scalarerrorindicator.h"
 #include "../sm/ErrorEstimators/directerrorindicatorrc.h"
 
+#define _IFT_CombinedZZSIErrorEstimator_Name "zzscalar"
+
 namespace oofem {
 /**
  * The implementation of combined criteria: Zienkiewicz Zhu Error Estimator for elastic regime and

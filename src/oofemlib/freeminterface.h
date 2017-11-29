@@ -38,6 +38,8 @@
 #include "mesherinterface.h"
 #include "floatarray.h"
 
+#define _IFT_FreemInterface_Name "freem"
+
 namespace oofem {
 class TimeStep;
 

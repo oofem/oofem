@@ -207,14 +207,14 @@ void XfemManager :: giveInputRecord(DynamicInputRecord &input)
     }
 }
 
-int XfemManager :: instanciateYourself(DataReader *dr)
+int XfemManager :: instanciateYourself(DataReader &dr)
 {
     IRResultType result; // Required by IR_GIVE_FIELD macro
     std :: string name;
 
     enrichmentItemList.resize(numberOfEnrichmentItems);
     for ( int i = 1; i <= numberOfEnrichmentItems; i++ ) {
-        InputRecord *mir = dr->giveInputRecord(DataReader :: IR_enrichItemRec, i);
+        InputRecord *mir = dr.giveInputRecord(DataReader :: IR_enrichItemRec, i);
         result = mir->giveRecordKeywordField(name);
 
         if ( result != IRRT_OK ) {
@@ -233,7 +233,7 @@ int XfemManager :: instanciateYourself(DataReader *dr)
 
     mNucleationCriteria.resize(numberOfNucleationCriteria);
     for ( int i = 1; i <= numberOfNucleationCriteria; i++ ) {
-        InputRecord *mir = dr->giveInputRecord(DataReader :: IR_crackNucleationRec, i);
+        InputRecord *mir = dr.giveInputRecord(DataReader :: IR_crackNucleationRec, i);
         result = mir->giveRecordKeywordField(name);
 
         if ( result != IRRT_OK ) {

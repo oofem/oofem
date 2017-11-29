@@ -115,6 +115,8 @@ void TransportGradientPeriodic :: findSlaveToMasterMap()
     jumps.emplace_back(FloatArray{0., jump.at(2), 0.});
     jumps.emplace_back(FloatArray{0., 0., jump.at(3)});
 
+    double maxdist = jump.computeNorm()*1e-5;
+
     this->slavemap.clear();
     for ( int inode : nodes ) {
         Node *masterNode = NULL;
@@ -124,14 +126,14 @@ void TransportGradientPeriodic :: findSlaveToMasterMap()
         // The difficult part, what offset to subtract to find the master side;
         for ( FloatArray &testJump : jumps ) {
             coord.beDifferenceOf(masterCoord, testJump);
-            masterNode = sl->giveNodeClosestToPoint(coord, fabs(jump.at(1))*1e-5);
+            masterNode = sl->giveNodeClosestToPoint(coord, maxdist);
             if ( masterNode != NULL ) {
                 //printf("Found master (%d) to node %d (distance = %e)\n",  masterNode->giveNumber(), node->giveNumber(),
                 //       masterNode->giveCoordinates()->distance(coord));
                 break;
             }
         }
-        if ( masterNode != NULL ) {
+        if ( masterNode ) {
             this->slavemap.insert({node->giveNumber(), masterNode->giveNumber()});
         } else {
             OOFEM_ERROR("Couldn't find master node!");
@@ -221,7 +223,7 @@ void TransportGradientPeriodic :: computeTangent(FloatMatrix &k, TimeStep *tStep
     Kpp->buildInternalStructure(rve, this->domain->giveNumber(), pnum);
     //Kfp->buildInternalStructure(rve, neq, nsd, {}, {});
     //Kpp->buildInternalStructure(rve, nsd, nsd, {}, {});
-#if 0
+#if 1
     rve->assemble(*Kff, tStep, TangentAssembler(TangentStiffness), fnum, this->domain);
     rve->assemble(*Kfp, tStep, TangentAssembler(TangentStiffness), fnum, pnum, this->domain);
     rve->assemble(*Kpp, tStep, TangentAssembler(TangentStiffness), pnum, this->domain);
@@ -300,7 +302,7 @@ void TransportGradientPeriodic :: computeTangent(FloatMatrix &k, TimeStep *tStep
             }
         }
     }
-    
+
     if ( solver->solve(*Kff, rhs, sol) & NM_NoSuccess ) {
         OOFEM_ERROR("Failed to solve Kff");
     }

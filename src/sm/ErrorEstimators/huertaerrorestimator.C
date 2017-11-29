@@ -124,7 +124,7 @@ static FloatArray exactCoarseError;
 
 //static FloatArray uNormArray;
 
-static DynamicDataReader refinedReader;
+static DynamicDataReader refinedReader("huerta");
 
 static int impCSect, perCSect;
 static FloatArray impPos;
@@ -435,9 +435,8 @@ HuertaErrorEstimator :: estimateError(EE_ErrorMode err_mode, TimeStep *tStep)
                     // it would be much cleaner to call restore from engng model
                     while ( tStepNumber < curNumber ) {
                         try {
-                            //FileDataStream stream(this->giveContextFileName(tStepNumber, 0), false);
-                            //model->restoreContext(stream, CM_State );
-                            model->restoreContext(NULL, CM_State, ( void * ) & tStepNumber);
+                            FileDataStream stream(model->giveContextFileName(tStepNumber, 0), false);
+                            model->restoreContext(stream, CM_State );
                         } catch(ContextIOERR & c) {
                             c.print();
                             exit(1);
@@ -2913,7 +2912,7 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
 #ifdef TIME_INFO
     timer.startTimer();
 #endif
-    refinedProblem = InstanciateProblem(& refinedReader, _processor, contextFlag);
+    refinedProblem = InstanciateProblem(refinedReader, _processor, contextFlag);
     refinedReader.finish();
 #ifdef TIME_INFO
     timer.stopTimer();
@@ -3447,7 +3446,7 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
 #ifdef TIME_INFO
     timer.startTimer();
 #endif
-    refinedProblem = InstanciateProblem(& refinedReader, _processor, contextFlag);
+    refinedProblem = InstanciateProblem(refinedReader, _processor, contextFlag);
     refinedReader.finish();
 #ifdef TIME_INFO
     timer.stopTimer();
@@ -3673,7 +3672,7 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
  #ifdef TIME_INFO
     timer.startTimer();
  #endif
-    refinedProblem = InstanciateProblem(& refinedReader, _processor, contextFlag);
+    refinedProblem = InstanciateProblem(refinedReader, _processor, contextFlag);
  #ifdef TIME_INFO
     timer.stopTimer();
     et_init = timer.getUtime();

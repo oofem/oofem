@@ -91,7 +91,7 @@ public:
      * @param ir Record for receiver.
      * @return Nonzero if o.k.
      */
-    virtual int instanciateYourself(DataReader *dr, InputRecord *ir)
+    virtual int instanciateYourself(DataReader &dr, InputRecord *ir)
     {
         IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
@@ -100,7 +100,7 @@ public:
         // read modules
         moduleList.reserve(numberOfModules);
         for ( int i = 0; i < numberOfModules; i++ ) {
-            InputRecord *mir = dr->giveInputRecord(DataReader :: IR_expModuleRec, i + 1);
+            InputRecord *mir = dr.giveInputRecord(DataReader :: IR_expModuleRec, i + 1);
             result = mir->giveRecordKeywordField(name);
             if ( result != IRRT_OK ) {
                 IR_IOERR("", mir, result);

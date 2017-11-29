@@ -40,6 +40,7 @@
 #include "integrationrule.h"
 #include "gausspoint.h"
 #include "engngm.h"
+#include "classfactory.h"
 
 #ifdef __PARALLEL_MODE
  #include "processcomm.h"
@@ -50,6 +51,8 @@
 #include <list>
 
 namespace oofem {
+REGISTER_NodalRecoveryModel(SPRNodalRecoveryModel, NodalRecoveryModel :: NRM_SPR);
+
 SPRNodalRecoveryModel :: SPRNodalRecoveryModel(Domain *d) : NodalRecoveryModel(d)
 { }
 

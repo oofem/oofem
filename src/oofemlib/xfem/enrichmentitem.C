@@ -46,7 +46,6 @@
 #include "masterdof.h"
 #include "propagationlaw.h"
 #include "dynamicinputrecord.h"
-#include "dynamicdatareader.h"
 #include "XFEMDebugTools.h"
 #include "xfemtolerances.h"
 #include "spatiallocalizer.h"

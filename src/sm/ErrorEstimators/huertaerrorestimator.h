@@ -47,6 +47,7 @@
 
 ///@name Input fields for HuertaErrorEstimator
 //@{
+#define _IFT_HuertaErrorEstimator_Name "huerta"
 #define _IFT_HuertaErrorEstimator_normtype "normtype"
 #define _IFT_HuertaErrorEstimator_refinelevel "refinelevel"
 #define _IFT_HuertaErrorEstimator_requirederror "requirederror"

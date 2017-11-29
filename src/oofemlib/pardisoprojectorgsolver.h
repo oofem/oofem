@@ -46,6 +46,8 @@ extern "C" void pardiso_chkvec(int *, int *, double *, int *);
 extern "C" void pardiso_printstats(int *, int *, double *, int *, int *, int *,
                                    double *, int *);
 
+#define _IFT_PardisoProjectOrgSolver_Name "pardiso"
+
 namespace oofem {
 /**
  * Implements the solution of linear system of equation in the form @f$ A\cdot x=b @f$ using solvers

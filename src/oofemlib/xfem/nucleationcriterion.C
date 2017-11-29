@@ -45,22 +45,23 @@
 namespace oofem {
 
 NucleationCriterion::NucleationCriterion(Domain *ipDomain):
-mpDomain(ipDomain),
-mpEnrichmentFunc(NULL)
+    mpDomain(ipDomain),
+    mpEnrichmentFunc(NULL)
 {
 
 }
 
 NucleationCriterion::~NucleationCriterion()
 {
-	delete mpEnrichmentFunc;
+    delete mpEnrichmentFunc;
 }
 
-std::vector<std::unique_ptr<EnrichmentItem>> NucleationCriterion::nucleateEnrichmentItems() {
-	OOFEM_ERROR("Not implemented.")
+std::vector<std::unique_ptr<EnrichmentItem>> NucleationCriterion::nucleateEnrichmentItems()
+{
+    OOFEM_ERROR("Not implemented.")
 
-	std::vector<std::unique_ptr<EnrichmentItem>> eiList;
-	return std::move( eiList );
+    std::vector<std::unique_ptr<EnrichmentItem>> eiList;
+    return std::move( eiList );
 }
 
 IRResultType NucleationCriterion::initializeFrom(InputRecord *ir) {
@@ -68,15 +69,13 @@ IRResultType NucleationCriterion::initializeFrom(InputRecord *ir) {
     return IRRT_OK;
 }
 
-int NucleationCriterion::instanciateYourself(DataReader *dr) {
-
-//	printf("Entering NucleationCriterion::instanciateYourself(DataReader *dr)\n");
-
+int NucleationCriterion::instanciateYourself(DataReader &dr)
+{
     IRResultType result; // Required by IR_GIVE_FIELD macro
     std :: string name;
 
     // Instantiate enrichment function
-    InputRecord *mir = dr->giveInputRecord(DataReader :: IR_crackNucleationRec, 1);
+    InputRecord *mir = dr.giveInputRecord(DataReader :: IR_crackNucleationRec, 1);
     result = mir->giveRecordKeywordField(name);
 
     if ( result != IRRT_OK ) {

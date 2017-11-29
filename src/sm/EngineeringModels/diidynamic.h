@@ -121,7 +121,7 @@ public:
     void assembleDirichletBcRhsVector (FloatArray& answer, Domain* d, TimeStep *tStep);
     void determineConstants(TimeStep *tStep);
     virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode);
 
 	TimeDiscretizationType giveInitialTimeDiscretization() { return initialTimeDiscretization; }
 };

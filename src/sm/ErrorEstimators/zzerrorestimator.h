@@ -46,6 +46,7 @@
 
 ///@name Input fields for ZZErrorEstimator
 //@{
+#define _IFT_ZZErrorEstimator_Name "zz"
 #define _IFT_ZZErrorEstimator_normtype "normtype"
 #define _IFT_ZZErrorEstimator_recoverytype "recoverytype"
 //@}

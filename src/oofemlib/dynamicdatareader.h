@@ -36,7 +36,7 @@
 #define dynamicdatareader_h
 
 #include "datareader.h"
-#include <list>
+#include <vector>
 #include <memory>
 
 namespace oofem {
@@ -53,14 +53,15 @@ class InputRecord;
 class OOFEM_EXPORT DynamicDataReader : public DataReader
 {
 protected:
+    std :: string name;
     /// Keeps track of the current position in the list
-    std :: list< std :: unique_ptr< InputRecord > > :: iterator it;
+    std :: vector< std :: unique_ptr< InputRecord > > :: iterator it;
     /// All record types will be appended to this list, no split in terms of InputRecordType is implemented yet.
-    std :: list< std :: unique_ptr< InputRecord > >recordList;
+    std :: vector< std :: unique_ptr< InputRecord > >recordList;
 
 public:
     /// Constructor.
-    DynamicDataReader();
+    DynamicDataReader(std :: string name);
     virtual ~DynamicDataReader();
 
     DynamicDataReader(const DynamicDataReader& src) = delete;
@@ -86,7 +87,7 @@ public:
     virtual InputRecord *giveInputRecord(InputRecordType, int recordId);
     virtual bool peakNext(const std :: string &keyword);
     virtual void finish();
-    virtual const char *giveDataSourceName() const { return ""; }
+    virtual std :: string giveReferenceName() const { return name; }
 
     /**
      * Writes all input records to file.

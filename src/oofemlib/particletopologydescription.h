@@ -254,7 +254,7 @@ protected:
 public:
     ParticleTopologyDescription(Domain *d);
     virtual ~ParticleTopologyDescription();
-    virtual bool instanciateYourself(DataReader *dr);
+    virtual bool instanciateYourself(DataReader &dr);
 
     virtual TopologyState updateYourself(TimeStep *tStep);
 

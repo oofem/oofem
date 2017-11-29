@@ -741,54 +741,33 @@ contextIOResultType NlDEIDynamic :: saveContext(DataStream &stream, ContextMode 
 }
 
 
-contextIOResultType NlDEIDynamic :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType NlDEIDynamic :: restoreContext(DataStream &stream, ContextMode mode)
 {
     contextIOResultType iores;
-    int closeFlag = 0;
-    int istep, iversion;
-    FILE *file = NULL;
 
-    this->resolveCorrespondingStepNumber(istep, iversion, obj);
-
-    if ( stream == NULL ) {
-        if ( !this->giveContextFile(& file, istep, iversion, contextMode_read) ) {
-            THROW_CIOERR(CIO_IOERR); // override
-        }
-
-        stream = new FileDataStream(file);
-        closeFlag = 1;
-    }
-
-    // Save element context.
-    if ( ( iores = StructuralEngngModel :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
+    if ( ( iores = StructuralEngngModel :: restoreContext(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = previousIncrementOfDisplacementVector.restoreYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = previousIncrementOfDisplacementVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = displacementVector.restoreYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = displacementVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = velocityVector.restoreYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = velocityVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = accelerationVector.restoreYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = accelerationVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( !stream->read(deltaT) ) {
+    if ( !stream.read(deltaT) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
-    if ( closeFlag ) {
-        fclose(file);
-        delete stream;
-        stream = NULL;
-    } // ensure consistent records
 
     return CIO_OK;
 }

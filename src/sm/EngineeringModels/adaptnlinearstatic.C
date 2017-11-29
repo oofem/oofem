@@ -43,6 +43,7 @@
 #include "node.h"
 #include "domain.h"
 #include "datareader.h"
+#include "oofemtxtdatareader.h"
 #include "remeshingcrit.h"
 #include "mesherinterface.h"
 #include "dof.h"
@@ -417,15 +418,9 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
 int
 AdaptiveNonLinearStatic :: initializeAdaptive(int tStepNumber)
 {
-    int stepinfo [ 2 ];
-
-    stepinfo [ 0 ] = tStepNumber;
-    stepinfo [ 1 ] = 0;
-
     try {
-        //FileDataStream stream(this->giveContextFileName(tStepNumber, 0), false);
-        //this->restoreContext(stream, CM_State);
-        this->restoreContext(NULL, CM_State, ( void * ) stepinfo);
+        FileDataStream stream(this->giveContextFileName(tStepNumber, 0), false);
+        this->restoreContext(stream, CM_State);
     } catch(ContextIOERR & c) {
         c.print();
         exit(1);
@@ -436,12 +431,10 @@ AdaptiveNonLinearStatic :: initializeAdaptive(int tStepNumber)
     int sernum = this->giveDomain(1)->giveSerialNumber();
     OOFEM_LOG_INFO("restoring domain %d.%d\n", 1, sernum + 1);
     Domain *dNew = new Domain(2, sernum + 1, this);
-    DataReader *domainDr = this->GiveDomainDataReader(1, sernum + 1, contextMode_read);
+    OOFEMTXTDataReader domainDr(this->giveDomainFileName(1, sernum + 1));
     if ( !dNew->instanciateYourself(domainDr) ) {
         OOFEM_ERROR("domain Instanciation failed");
     }
-
-    delete domainDr;
 
     // remap solution to new domain
     return this->adaptiveRemap(dNew);
@@ -752,36 +745,17 @@ AdaptiveNonLinearStatic :: saveContext(DataStream &stream, ContextMode mode)
 }
 
 contextIOResultType
-AdaptiveNonLinearStatic :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+AdaptiveNonLinearStatic :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    int closeFlag = 0;
-    int istep, iversion;
     contextIOResultType iores;
-    FILE *file = NULL;
 
-    this->resolveCorrespondingStepNumber(istep, iversion, obj);
-    if ( stream == NULL ) {
-        if ( !this->giveContextFile(& file, istep, iversion, contextMode_read) ) {
-            THROW_CIOERR(CIO_IOERR); // override
-        }
-
-        stream = new FileDataStream(file);
-        closeFlag = 1;
-    }
-
-    if ( ( iores = NonLinearStatic :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
+    if ( ( iores = NonLinearStatic :: restoreContext(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = timeStepLoadLevels.restoreYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = timeStepLoadLevels.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    if ( closeFlag ) {
-        fclose(file);
-        delete stream;
-        stream = NULL;
-    } // ensure consistent records
 
     return CIO_OK;
 }

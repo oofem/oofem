@@ -37,6 +37,8 @@
 
 #include "sparselinsystemnm.h"
 
+#define _IFT_MKLPardisoSolver_Name "mklpardiso"
+
 namespace oofem {
 
 /**

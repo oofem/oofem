@@ -41,6 +41,8 @@
 #include "classfactory.h"
 
 namespace oofem {
+REGISTER_GeneralizedEigenValueSolver(InverseIteration, GES_InverseIt);
+
 
 InverseIteration :: InverseIteration(Domain *d, EngngModel *m) :
     SparseGeneralEigenValueSystemNM(d, m)

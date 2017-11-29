@@ -124,7 +124,7 @@ public:
     bool hasFailed(int i) { return failedFlags.at(i - 1); }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int instanciateYourself(DataReader *dr) { return 1; }
+    virtual int instanciateYourself(DataReader &dr) { return 1; }
     virtual const char *giveClassName() const { return "FailureCriteriaStatus"; }
 };
 
@@ -154,7 +154,7 @@ public:
     void setType(FailureCriteriaType type) { this->type = type; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    int instanciateYourself(DataReader *dr);
+    int instanciateYourself(DataReader &dr);
     virtual const char *giveClassName() const { return "FailureCriteria"; }
 
 
@@ -237,7 +237,7 @@ public:
 
 
     IRResultType initializeFrom(InputRecord *ir);
-    int instanciateYourself(DataReader *dr);
+    int instanciateYourself(DataReader &dr);
     const char *giveClassName() const { return "FractureManager"; }
     const char *giveInputRecordName() const { return "FractureManager"; }
     void clear();

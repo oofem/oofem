@@ -572,9 +572,9 @@ void pyclass_EngngModel()
         ;
 }
 
-EngngModel *InstanciateProblem_1 (DataReader *dr, problemMode mode, int contextFlag)
+EngngModel *InstanciateProblem_1 (DataReader &dr, problemMode mode, int contextFlag)
 {
-    return InstanciateProblem (dr, mode, contextFlag, 0);
+    return InstanciateProblem(dr, mode, contextFlag);
 }
 
 
@@ -1080,7 +1080,7 @@ public:
     contextIOResultType saveContext(DataStream &stream, ContextMode mode) {
         return this->get_override("saveContext")(stream, mode);
     }
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode) {
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode) {
         return this->get_override("restoreContext")(stream, mode);
     }
 };

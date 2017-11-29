@@ -43,6 +43,7 @@
 #include "feinterpol.h"
 #include "error.h"
 #include "engngm.h"
+#include "classfactory.h"
 
 #include <sstream>
 #include <set>
@@ -55,6 +56,8 @@
 #define ZZNRM_ZERO_VALUE 1.e-12
 
 namespace oofem {
+REGISTER_NodalRecoveryModel(ZZNodalRecoveryModel, NodalRecoveryModel :: NRM_ZienkiewiczZhu);
+
 ZZNodalRecoveryModel :: ZZNodalRecoveryModel(Domain *d) : NodalRecoveryModel(d)
 { }
 

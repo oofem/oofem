@@ -84,7 +84,7 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 
-    virtual int instanciateYourself(DataReader *dr);
+    virtual int instanciateYourself(DataReader &dr);
     virtual const char *giveClassName() const { return "ContactDefinition"; }
     //virtual const char *giveInputRecordName() const { return _IFT_ContactDefinition_Name; }
     ContactManager *giveContactManager() { return this->cMan; }

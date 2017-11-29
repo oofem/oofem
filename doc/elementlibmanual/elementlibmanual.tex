@@ -1484,8 +1484,10 @@ This element, defined by a single node, allows to introduce additional concentra
 A different mass and rotary inertia may be assigned to each coordinate direction. At present, individual mass/inertia components can be specified for  every degree of freedom of element node. Only displacement and rotational degrees od freedom are considered.  The element features are summarized in Table~\ref{LumpedMasssummary}.
 
 \begin{elementsummary}{LumpedMass}{Lumped mass element}{\field{components}{ra}}{LumpedMass element summary}{LumpedMasssummary}
-\elementParam{\param{components}: allows to specify additional concentrated mass components (Force*Time$^2$/Length) and rotary inertias (Force*Length*Time$^2$) about the nodal coordinate axes. Only displacement and rotational degrees of freedom are considered. The individual DOFs are ordered according to following rule: first, displacement degrees of freedom in the direction of x,y, and z axes (if any), followed by rotational DOFs around x,y, and z axes (if any).}
-\elementDescription{Unknowns}{Only displacement and roational DOFs are considered ($D_u$, $D_v$, $D_w$, $R_u$, $R_v$, and $R_w$).}
+\elementParam{\param{components}: allows to specify additional concentrated mass components (Force*Time$^2$/Length) and rotary inertias (Force*Length*Time$^2$) about the nodal coordinate axes.
+\elementParam{\param{dofs}: dofs to which the components apply.
+}
+\elementDescription{Unknowns}{As specified by \param{dofs}.}
 \elementDescription{Approximation}{-}
 \elementDescription{Integration}{-}
 \elementDescription{Features}{-}

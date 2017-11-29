@@ -35,8 +35,11 @@
 #ifndef dsssolver_h
 #define dsssolver_h
 
+#include "oofemcfg.h"
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
+
+#define _IFT_DSSSolver_Name "dss"
 
 namespace oofem {
 class Domain;

@@ -38,6 +38,7 @@
 #include "mesherinterface.h"
 #include "element.h"
 
+#define _IFT_T3DInterface_Name "t3d"
 
 namespace oofem {
 #define BMF_FILENAME "t3d.bmf"

@@ -123,6 +123,12 @@ template< typename T > SparseMtrx *sparseMtrxCreator() { return new T(); }
 template< typename T > SparseLinearSystemNM *sparseLinSolCreator(Domain *d, EngngModel *m) { return new T(d, m); }
 template< typename T > ErrorEstimator *errEstCreator(int n, Domain *d) { return new T(n, d); }
 
+template< typename T > NodalRecoveryModel *nrmCreator(Domain *d) { return new T(d); }
+template< typename T > SparseGeneralEigenValueSystemNM *gesCreator(Domain *d, EngngModel *m) { return new T(d, m); }
+template< typename T > MesherInterface *mesherCreator(Domain *d) { return new T(d); }
+template< typename T > MaterialMappingAlgorithm *mmaCreator() { return new T(); }
+
+
 template< typename T > LoadBalancer *loadBalancerCreator(Domain *d) { return new T(d); }
 template< typename T > LoadBalancerMonitor *loadMonitorCreator(EngngModel *e) { return new T(e); }
 
@@ -165,6 +171,10 @@ template< typename T > ContactDefinition *contactDefCreator(ContactManager *cMan
 #define REGISTER_SparseMtrx(class, type) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerSparseMtrx(type, sparseMtrxCreator< class > );
 #define REGISTER_SparseLinSolver(class, type) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerSparseLinSolver(type, sparseLinSolCreator< class > );
 #define REGISTER_ErrorEstimator(class, type) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerErrorEstimator(type, errEstCreator< class > );
+#define REGISTER_NodalRecoveryModel(class, type) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerNodalRecoveryModel(type, nrmCreator< class > );
+#define REGISTER_GeneralizedEigenValueSolver(class, type) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerGeneralizedEigenValueSolver(type, gesCreator< class > );
+#define REGISTER_Mesher(class, type) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerMesherInterface(type, mesherCreator< class > );
+#define REGISTER_MaterialMappingAlgorithm(class, type) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerMaterialMappingAlgorithm(type, mmaCreator< class > );
 
 #define REGISTER_XfemManager(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerXfemManager(_IFT_ ## class ## _Name, xManCreator< class > );
 #define REGISTER_EnrichmentItem(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerEnrichmentItem(_IFT_ ## class ## _Name, enrichItemCreator< class > );
@@ -180,7 +190,7 @@ template< typename T > ContactDefinition *contactDefCreator(ContactManager *cMan
 
 #define REGISTER_ContactManager(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerContactManager(_IFT_ ## class ## _Name, contactManCreator< class > );
 #define REGISTER_ContactDefinition(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerContactDefinition(_IFT_ ## class ## _Name, contactDefCreator< class > );
-#define REGISTER_Quasicontinuum(class) static bool __dummy_ ## class = GiveClassFactory().registerQuasicontinuum(_IFT_ ## class ## _Name, QuasicontinuumCreator< class > );
+#define REGISTER_Quasicontinuum(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerQuasicontinuum(_IFT_ ## class ## _Name, QuasicontinuumCreator< class > );
 //@}
 
 /**
@@ -231,6 +241,14 @@ private:
     std :: map < ErrorEstimatorType, ErrorEstimator * ( * )(int, Domain *) > errEstList;
     /// Associative container containing sparse linear solver creators
     std :: map < LinSystSolverType, SparseLinearSystemNM * ( * )(Domain *, EngngModel *) > sparseLinSolList;
+    /// Associative container containing nodal recovery model creators
+    std :: map < NodalRecoveryModel :: NodalRecoveryModelType, NodalRecoveryModel * ( * )(Domain *) > nodalRecoveryModelList;
+    /// Associative container containing sparse generalized eigenvalue creators
+    std :: map < GenEigvalSolverType, SparseGeneralEigenValueSystemNM * ( * )(Domain *, EngngModel *) > generalizedEigenValueSolverList;
+    /// Associative container containing material mapping algorithm creators
+    std :: map < MaterialMappingAlgorithmType, MaterialMappingAlgorithm * ( * )() > materialMappingList;
+    /// Associative container containing mesher interface creators
+    std :: map < MeshPackageType, MesherInterface * ( * )(Domain *) > mesherInterfaceList;
 
     // XFEM:
     /// Associative container containing enrichment item creators
@@ -475,6 +493,11 @@ public:
      */
     bool registerErrorEstimator( ErrorEstimatorType type, ErrorEstimator * ( *creator )(int, Domain *) );
     /**
+     * Registers a new nodal recovery model.
+     * @param name Indentifier.
+     */
+    bool registerNodalRecoveryModel( NodalRecoveryModel :: NodalRecoveryModelType name, NodalRecoveryModel * ( *creator )(Domain *) );
+    /**
      * Creates new instance of nodal recovery model corresponding to given type.
      * @param type ID determining the type of new instance.
      * @param d Domain assigned to new object.
@@ -513,7 +536,6 @@ public:
 
     ContactDefinition *createContactDefinition(const char *name, ContactManager *cMan);
     bool registerContactDefinition( const char *name, ContactDefinition * ( *creator )( ContactManager * ) );
-    
 
     // Failure module (in development!)
     FailureCriteria *createFailureCriteria(const char *name, int num, FractureManager *fracManager);
@@ -522,11 +544,16 @@ public:
     FailureCriteriaStatus *createFailureCriteriaStatus(const char *name, int num, FailureCriteria *critManager);
     bool registerFailureCriteriaStatus( const char *name, FailureCriteriaStatus * ( *creator )( int, FailureCriteria * ) );
 
+    bool registerGeneralizedEigenValueSolver( GenEigvalSolverType name, SparseGeneralEigenValueSystemNM * ( *creator )(Domain *, EngngModel *) );
+    SparseGeneralEigenValueSystemNM *createGeneralizedEigenValueSolver(GenEigvalSolverType name, Domain *d, EngngModel *m);
 
-    SparseGeneralEigenValueSystemNM *createGeneralizedEigenValueSolver(GenEigvalSolverType st, Domain *d, EngngModel *m);
-    IntegrationRule *createIRule(IntegrationRuleType type, int number, Element *e);
-    MaterialMappingAlgorithm *createMaterialMappingAlgorithm(MaterialMappingAlgorithmType type);
-    MesherInterface *createMesherInterface(MeshPackageType type, Domain *d);
+    IntegrationRule *createIRule(IntegrationRuleType name, int number, Element *e);
+
+    bool registerMaterialMappingAlgorithm( MaterialMappingAlgorithmType name, MaterialMappingAlgorithm * ( *creator )( ) );
+    MaterialMappingAlgorithm *createMaterialMappingAlgorithm(MaterialMappingAlgorithmType name);
+
+    bool registerMesherInterface( MeshPackageType name, MesherInterface * ( *creator )( Domain * ) );
+    MesherInterface *createMesherInterface(MeshPackageType name, Domain *d);
 
     LoadBalancerMonitor *createLoadBalancerMonitor(const char *name, EngngModel *e);
     bool registerLoadBalancerMonitor( const char *name, LoadBalancerMonitor * ( *creator )( EngngModel * ) );

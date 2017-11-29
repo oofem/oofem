@@ -42,6 +42,8 @@
 #include <vector>
 #include <memory>
 
+#define _IFT_MMAShapeFunctProjection_Name "shapefun"
+
 namespace oofem {
 class Domain;
 class Element;

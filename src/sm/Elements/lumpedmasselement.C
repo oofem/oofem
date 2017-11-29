@@ -49,7 +49,6 @@ namespace oofem {
 REGISTER_Element(LumpedMassElement);
 
 LumpedMassElement :: LumpedMassElement(int n, Domain *aDomain) : StructuralElement(n, aDomain)
-    // Constructor.
 {
     numberOfDofMans = 1;
 }
@@ -57,8 +56,6 @@ LumpedMassElement :: LumpedMassElement(int n, Domain *aDomain) : StructuralEleme
 
 void
 LumpedMassElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
-// Returns the lumped mass matrix of the receiver. This expression is
-// valid in both local and global axes.
 {
     int ndofs = this->computeNumberOfDofs();
     answer.resize(ndofs, ndofs);
@@ -72,6 +69,7 @@ LumpedMassElement :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
+    IR_GIVE_FIELD(ir, dofs, _IFT_LumpedMassElement_dofs);
     IR_GIVE_FIELD(ir, components, _IFT_LumpedMassElement_components);
 
     return StructuralElement :: initializeFrom(ir);
@@ -80,14 +78,10 @@ LumpedMassElement :: initializeFrom(InputRecord *ir)
 
 int
 LumpedMassElement :: checkConsistency()
-//
-// check internal consistency
-//
 {
     int _result = StructuralElement :: checkConsistency();
-    int _ndofs = this->computeNumberOfDofs();
-    if ( _ndofs != this->components.giveSize() ) {
-        OOFEM_WARNING("component array size mismatch");
+    if ( this->dofs.giveSize() != this->components.giveSize() ) {
+        OOFEM_WARNING("component/dof array size mismatch");
         _result = 0;
     }
 
@@ -98,37 +92,14 @@ LumpedMassElement :: checkConsistency()
 int
 LumpedMassElement :: computeNumberOfDofs()
 {
-    DofManager *dman = this->giveDofManager(1);
-    int answer = 0;
-
-    // simply count all "structural" dofs of element node
-    for ( Dof *dof: *dman ) {
-        DofIDItem _dofid = dof->giveDofID();
-        if ( ( _dofid == D_u ) || ( _dofid == D_v ) || ( _dofid == D_w ) ||
-            ( _dofid == R_u ) || ( _dofid == R_v ) || ( _dofid == R_w ) ) {
-            answer++;
-        }
-    }
-
-    return answer;
+    return dofs.giveSize();
 }
 
 
 void
 LumpedMassElement :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer.resize(6);
-    answer.clear();
-    DofManager *dman = this->giveDofManager(inode);
-
-    // simply collect all "structural" dofs of element node
-    for ( Dof *dof: *dman ) {
-        DofIDItem _dofid = dof->giveDofID();
-        if ( ( _dofid == D_u ) || ( _dofid == D_v ) || ( _dofid == D_w ) ||
-            ( _dofid == R_u ) || ( _dofid == R_v ) || ( _dofid == R_w ) ) {
-            answer.followedBy(_dofid);
-        }
-    }
+    answer = dofs;
 }
 
 #ifdef __OOFEG

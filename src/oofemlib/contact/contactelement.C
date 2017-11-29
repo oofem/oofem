@@ -65,7 +65,7 @@ Node2NodeContact :: Node2NodeContact(DofManager *master, DofManager *slave) : Co
 };   
   
 int
-Node2NodeContact :: instanciateYourself(DataReader *dr)
+Node2NodeContact :: instanciateYourself(DataReader &dr)
 {
     // compute normal as direction vector from master node to slave node
     FloatArray xs, xm, normal;

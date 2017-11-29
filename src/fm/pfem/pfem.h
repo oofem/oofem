@@ -217,8 +217,8 @@ public:
 
     double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
 
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode);
 
     TimeStep *giveNextStep();
     TimeStep *giveSolutionStepWhenIcApply();

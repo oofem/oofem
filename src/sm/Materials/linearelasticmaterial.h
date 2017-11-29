@@ -87,6 +87,7 @@ public:
 
     virtual void giveEshelbyStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
     double giveEnergyDensity(GaussPoint *gp, TimeStep *tStep);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 

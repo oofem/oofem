@@ -40,6 +40,8 @@
 #include "floatarray.h"
 #include "SUPERLU_MT/include/slu_mt_ddefs.h"
 
+#define _IFT_SuperLUSolver_Name "superlu"
+
 namespace oofem {
 class Domain;
 class EngngModel;

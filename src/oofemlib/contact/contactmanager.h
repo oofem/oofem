@@ -85,7 +85,7 @@ public:
     /// Initializes receiver according to object description stored in input record.
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual int instanciateYourself(DataReader *dr);
+    virtual int instanciateYourself(DataReader &dr);
     virtual const char *giveClassName() const { return "ContactManager"; }
 
     Domain *giveDomain() { return this->domain; }

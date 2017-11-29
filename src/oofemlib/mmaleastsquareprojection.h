@@ -42,6 +42,7 @@
 
 ///@name Input fields for MMALeastSquareProjection
 //@{
+#define _IFT_MMALeastSquareProjection_Name "leastsquare"
 #define _IFT_MMALeastSquareProjection_statefilter "mmalsp_statefilter"
 #define _IFT_MMALeastSquareProjection_regionfilter "mmalsp_regionfilter"
 //@}

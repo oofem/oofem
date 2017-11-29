@@ -41,6 +41,7 @@
 //@{
 #define _IFT_LumpedMassElement_Name "lumpedmass"
 #define _IFT_LumpedMassElement_components "components"
+#define _IFT_LumpedMassElement_dofs "dofs"
 //@}
 
 namespace oofem {
@@ -54,8 +55,10 @@ namespace oofem {
 class LumpedMassElement : public StructuralElement
 {
 protected:
-    ///Mass and moments of inertia corresponding to nodal DOFs
+    /// Mass and moments of inertia corresponding to the specified DOFs
     FloatArray components;
+    /// List of DOFs
+    IntArray dofs;
 
 public:
     LumpedMassElement(int n, Domain * d);

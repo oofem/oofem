@@ -42,6 +42,7 @@
 
 ///@name Input fields for IMLSolver
 //@{
+#define _IFT_IMLSolver_Name "iml"
 #define _IFT_IMLSolver_stype "stype"
 #define _IFT_IMLSolver_lstol "lstol"
 #define _IFT_IMLSolver_lsiter "lsiter"

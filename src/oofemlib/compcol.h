@@ -75,6 +75,8 @@
 #include "sparsemtrx.h"
 #include "intarray.h"
 
+#define _IFT_CompCol_Name "csc"
+
 namespace oofem {
 /*
  * Implementation of sparse matrix stored in compressed column storage.

@@ -37,6 +37,8 @@
 #include "sparselinsystemnm.h"
 #include "petscsparsemtrx.h"
 
+#define _IFT_PetscSolver_Name "petsc"
+
 namespace oofem {
 class Domain;
 class EngngModel;

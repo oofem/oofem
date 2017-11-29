@@ -84,7 +84,7 @@ ParticleTopologyDescription :: ~ParticleTopologyDescription()
     }
 }
 
-bool ParticleTopologyDescription :: instanciateYourself(DataReader *dr)
+bool ParticleTopologyDescription :: instanciateYourself(DataReader &dr)
 {
     // Required by IR_GIVE_FIELD macro
     IRResultType result;
@@ -102,7 +102,7 @@ bool ParticleTopologyDescription :: instanciateYourself(DataReader *dr)
     int id, nsegments;
 
     // Read topology description
-    ir = dr->giveInputRecord(DataReader :: IR_gbpmRec, 1);
+    ir = dr.giveInputRecord(DataReader :: IR_gbpmRec, 1);
     IR_GIVE_FIELD(ir, nsd, _IFT_ParticleTopologyDescription_nsd);
     IR_GIVE_FIELD(ir, res, _IFT_ParticleTopologyDescription_baseResolution);
     IR_GIVE_FIELD(ir, bb0, _IFT_ParticleTopologyDescription_boundingBoxA);
@@ -132,7 +132,7 @@ bool ParticleTopologyDescription :: instanciateYourself(DataReader *dr)
     this->grid.reset( new ParticleGrid< ParticlePoint >(resolution, bb0, bb1) );
 
     for ( int i = 1; i <= nsegments; i++ ) {
-        ir = dr->giveInputRecord(DataReader :: IR_geometryRec, i);
+        ir = dr.giveInputRecord(DataReader :: IR_geometryRec, i);
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
         IR_GIVE_FIELD(ir, id, _IFT_ParticleTopologyDescription_identification);
         if ( name.compare("line") == 0 ) {

@@ -73,7 +73,7 @@ public:
     /**
      * Instanciates itself.
      */
-    virtual bool instanciateYourself(DataReader *dr) = 0;
+    virtual bool instanciateYourself(DataReader &dr) = 0;
 
     /**
      * Updates the topology from the FE solution.

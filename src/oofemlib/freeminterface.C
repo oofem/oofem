@@ -40,10 +40,13 @@
 #include "connectivitytable.h"
 #include "mathfem.h"
 #include "remeshingcrit.h"
+#include "classfactory.h"
 
 #include <list>
 
 namespace oofem {
+REGISTER_Mesher(FreemInterface, MPT_FREEM);
+
 MesherInterface :: returnCode
 FreemInterface :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, Domain **dNew)
 {

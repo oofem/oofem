@@ -827,7 +827,7 @@ WeakPeriodicBoundaryCondition :: giveExternalForcesVector(FloatArray &answer, Ti
 
             std :: unique_ptr< IntegrationRule >iRule(geoInterpolation->giveBoundaryIntegrationRule(orderOfPolygon, side [ thisSide ].at(ielement) ));
 
-            for ( GaussPoint *gp: *iRule ) {
+            for ( auto gp: *iRule ) {
 
                 FloatArray gcoords;
                 FloatArray lcoords = gp->giveNaturalCoordinates();
@@ -837,12 +837,12 @@ WeakPeriodicBoundaryCondition :: giveExternalForcesVector(FloatArray &answer, Ti
                 // Compute Jacobian
                 double detJ = fabs( geoInterpolation->boundaryGiveTransformationJacobian( side [ thisSide ].at(ielement), lcoords, FEIElementGeometryWrapper(thisElement) ) );
 
-                for (int j=0; j<ndof; j++) {
+                for ( int j = 0; j < ndof; j++ ) {
                     FloatArray coord;
 
-                    double fVal = computeBaseFunctionValue(j, gcoords );
+                    double fVal = computeBaseFunctionValue(j, gcoords);
 
-                    temp.at(j+1)=temp.at(j+1) + normalSign*this->g.dotProduct(gcoords)*fVal*gp->giveWeight()*detJ;
+                    temp.at(j+1) += normalSign*this->g.dotProduct(gcoords)*fVal*gp->giveWeight()*detJ;
                 }
             }
         }
@@ -851,8 +851,7 @@ WeakPeriodicBoundaryCondition :: giveExternalForcesVector(FloatArray &answer, Ti
     answer.assemble(temp, gammaLoc);
 
     // Finally, compute value of loadtimefunction
-    double factor;
-    factor = this->giveTimeFunction()->evaluate(tStep, mode);
+    double factor = this->giveTimeFunction()->evaluate(tStep, mode);
     answer.times(factor);
 }
 

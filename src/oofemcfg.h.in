@@ -24,16 +24,10 @@ ____________________________________________________\n"
 
 /* Headers */
 
-/* Define if unistd.h defined */
-#cmakedefine HAVE_UNISTD_H 1
-
 /* Define if execinfo.h defined */
 #cmakedefine HAVE_EXECINFO_H 1
 
 /* Symbols */
-/* Define if access is defined */
-#cmakedefine HAVE_ACCESS 1
-
 /* Define if cbrt is defined */
 #cmakedefine HAVE_CBRT 1
 

@@ -64,11 +64,11 @@ protected:
 private:
     DofManager *masterNode;
     DofManager *slaveNode;
-    
+
     // should be set by input:
     double area; // The area associated with the node (default = 1)- in order to represent some physical dimension.  
     double epsN;  // penalty stiffness 
-    
+
     FloatArray normal;
 public:
 
@@ -76,25 +76,23 @@ public:
     Node2NodeContact(DofManager *master, DofManager *slave);
     /// Destructor.
     virtual ~Node2NodeContact(){};
-    virtual int instanciateYourself(DataReader *dr);
+    virtual int instanciateYourself(DataReader &dr);
     virtual void setupIntegrationPoints();
-    
+
     virtual void computeGap(FloatArray &answer, TimeStep *tStep);
     virtual void computeContactTractionAt(GaussPoint *gp, FloatArray &t, FloatArray &gap, TimeStep *tStep);
     virtual void computeCmatrixAt(GaussPoint *gp, FloatArray &answer, TimeStep *TimeStep);
     FloatArray &giveNormal() { return this->normal; }
-    
-    
+
+
     // Necessary methods - pure virtual in base class
     virtual void computeContactForces(FloatArray &answer, TimeStep *tStep, ValueModeType mode,
                                 const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms);    
-    
+
     virtual void computeContactTangent(FloatMatrix &answer, TimeStep *tStep);
-    
+
     virtual void giveLocationArray(IntArray &answer, const UnknownNumberingScheme &s);
 };
-
-
 
 
 class OOFEM_EXPORT Node2NodeContactL : public Node2NodeContact
@@ -106,30 +104,26 @@ private:
     DofManager *masterNode;
     DofManager *slaveNode;
     int lagrangeId; // dof Id associated with the Lagrange multiplier
-    
+
     // should be set by input:
     double area; // The area associated with the node (default = 1)- in order to represent some physical dimension.  
-  
-    
-public:
 
+public:
     /// Constructor.
     Node2NodeContactL(DofManager *master, DofManager *slave);
     /// Destructor.
     virtual ~Node2NodeContactL(){};
     virtual void giveDofManagersToAppendTo(IntArray &answer); 
     virtual void computeContactTractionAt(GaussPoint *gp, FloatArray &t, FloatArray &gap, TimeStep *tStep);
-    
+
     // Necessary methods - pure virtual in base class
     virtual void computeContactForces(FloatArray &answer, TimeStep *tStep, ValueModeType mode,
                                 const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms);    
-    
+
     virtual void computeContactTangent(FloatMatrix &answer, TimeStep *tStep);
-    
+
     virtual void giveLocationArray(IntArray &answer, const UnknownNumberingScheme &s);
 };
-
-
 
 } // end namespace oofem
 #endif // celnode2node_h

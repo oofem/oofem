@@ -79,12 +79,12 @@ public:
     virtual void solveYourself();
 
     //virtual void initializeYourself(TimeStep *tStep);
-    virtual int instanciateYourself(DataReader *dr, InputRecord *ir, const char *outFileName, const char *desc);
+    virtual int instanciateYourself(DataReader &dr, InputRecord *ir, const char *outFileName, const char *desc);
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int checkProblemConsistency();
 
     virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode);
 
     // identification
     virtual const char *giveClassName() const { return "ProblemSequence"; }

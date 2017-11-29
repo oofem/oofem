@@ -44,10 +44,11 @@
 
 ///@name Input fields for FETISolver
 //@{
- #define _IFT_FETISolver_maxiter "maxiter"
- #define _IFT_FETISolver_maxerr "maxerr"
- #define _IFT_FETISolver_limit "limit"
- #define _IFT_FETISolver_energynormflag "energynormflag"
+#define _IFT_FETISolver_Name "feti"
+#define _IFT_FETISolver_maxiter "maxiter"
+#define _IFT_FETISolver_maxerr "maxerr"
+#define _IFT_FETISolver_limit "limit"
+#define _IFT_FETISolver_energynormflag "energynormflag"
 //@}
 
 namespace oofem {

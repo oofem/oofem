@@ -38,6 +38,8 @@
 
 #include <petscksp.h>
 
+#define _IFT_PetscSparseMtrx_Name "petsc"
+
 namespace oofem {
 /**
  * This class provides an sparse matrix interface to PETSc Matrices

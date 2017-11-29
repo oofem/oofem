@@ -520,7 +520,8 @@ public:
 
     /// Only relevant for eigen value analysis. Otherwise returns zero.
     virtual double giveEigenValue(int eigNum) { return 0.0; }
-
+    /// Only relevant for eigen value  analysis. Otherwise does noting.
+    virtual void setActiveVector(int i) { }
     /**
      * Exchanges necessary remote DofManagers data.
      * @todo The name and description of this function is misleading, the function really just accumulates the total values for shared "equations".
@@ -603,7 +604,7 @@ public:
      * Prints header, opens the outFileName, instanciate itself the receiver using
      * using virtual initializeFrom service and instanciates all problem domains.
      */
-    virtual int instanciateYourself(DataReader *dr, InputRecord *ir, const char *outFileName, const char *desc);
+    virtual int instanciateYourself(DataReader &dr, InputRecord *ir, const char *outFileName, const char *desc);
     /**
      * Initialization of the receiver state (opening the default output stream, empty domain creation,
      * initialization of parallel context, etc)
@@ -618,9 +619,9 @@ public:
      * to extract particular field from record.*/
     virtual IRResultType initializeFrom(InputRecord *ir);
     /// Instanciate problem domains by calling their instanciateYourself() service
-    int instanciateDomains(DataReader *dr);
+    int instanciateDomains(DataReader &dr);
     /// Instanciate problem meta steps by calling their instanciateYourself() service
-    int instanciateMetaSteps(DataReader *dr);
+    int instanciateMetaSteps(DataReader &dr);
     /// Instanciate default metastep, if nmsteps is zero
     virtual int instanciateDefaultMetaStep(InputRecord *ir);
 
@@ -663,12 +664,10 @@ public:
      * context.
      * @param stream Context file.
      * @param mode Determines amount of info in stream.
-     * @param obj Void pointer to an int array containing two values:time step number and
-     * version of a context file to be restored.
      * @return contextIOResultType.
      * @exception ContextIOERR exception if error encountered.
      */
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode);
     /**
      * Updates domain links after the domains of receiver have changed. Used mainly after
      * restoring context - the domains may change and this service is then used
@@ -676,7 +675,6 @@ public:
      * like error estimators, solvers, etc, having domains as attributes.
      */
     virtual void updateDomainLinks();
-    void resolveCorrespondingStepNumber(int &, int &, void *obj);
     /// Returns current meta step.
     MetaStep *giveCurrentMetaStep();
     /** Returns current time step.
@@ -778,32 +776,17 @@ public:
      */
     virtual int giveNewPrescribedEquationNumber(int domain, DofIDItem) { return ++domainPrescribedNeqs.at(domain); }
     /**
-     * Assigns context file-descriptor for given step number to stream.
-     * Returns nonzero on success.
-     * @param contextFile Assigned file descriptor.
-     * @param tStepNumber Solution step number to store/restore.
-     * @param stepVersion Version of step.
-     * @param cmode Determines the i/o mode of context file.
-     * @param errLevel Determines the amount of warning messages if errors are encountered, level 0 no warnings reported.
-     */
-    int giveContextFile(FILE **contextFile, int tStepNumber, int stepVersion,
-                        ContextFileMode cmode, int errLevel = 1);
-    /**
      * Returns the filename for the context file for the given step and version
      * @param tStepNumber Solution step number to store/restore.
      * @param stepVersion Version of step.
      */
-    std :: string giveContextFileName(int tStepNumber, int stepVersion);
-    /** Returns true if context file for given step and version is available */
-    bool testContextFile(int tStepNumber, int stepVersion);
+    std :: string giveContextFileName(int tStepNumber, int stepVersion) const;
     /**
-     * Creates new DataReader for given domain.
-     * Returns nonzero on success.
+     * Returns the filename for the given domain (used by adaptivity and restore)
      * @param domainNum Domain number.
      * @param domainSerNum Domain serial number.
-     * @param cmode Determines the i/o mode of context file.
      */
-    DataReader *GiveDomainDataReader(int domainNum, int domainSerNum, ContextFileMode cmode);
+    std :: string giveDomainFileName(int domainNum, int domainSerNum) const;
     /**
      * Updates components mapped to numerical method if necessary during solution process.
      * Some numerical methods may require updating
@@ -1031,7 +1014,23 @@ public:
      * (gaussPoint::printOutputAt).
      */
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
-
+    virtual void printOutputAt(FILE *file, TimeStep *tStep, const IntArray &nodeSets, const IntArray &elementSets);
+    /**
+     * Outputs all nodes in the given set.
+     * @param file Output stream.
+     * @param domain Domain.
+     * @param tStep Time step.
+     * @param setNum Set number. If zero, outputs all elements.
+     */
+    void outputNodes(FILE *file, Domain &domain, TimeStep *tStep, int setNum);
+    /**
+     * Outputs all elements in the given set.
+     * @param file Output stream.
+     * @param domain Domain.
+     * @param tStep Time step.
+     * @param setNum Set number. If zero, outputs all elements.
+     */
+    void outputElements(FILE *file, Domain &domain, TimeStep *tStep, int setNum);
 
     // input / output
     /// Prints state of receiver. Useful for debugging.

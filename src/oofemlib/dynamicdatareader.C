@@ -36,10 +36,11 @@
 #include "inputrecord.h"
 #include "error.h"
 
+#include <memory>
 #include <fstream>
 
 namespace oofem {
-DynamicDataReader :: DynamicDataReader() : DataReader()
+DynamicDataReader :: DynamicDataReader(std :: string name) : DataReader(), name(std :: move(name))
 {
     this->it = recordList.end();
 }
@@ -53,6 +54,7 @@ DynamicDataReader :: insertInputRecord(InputRecordType type, InputRecord *record
 {
     // Should care about the record type, but its a hassle.
     this->recordList.emplace_back(record);
+    this->it = recordList.end();
 }
 
 InputRecord *

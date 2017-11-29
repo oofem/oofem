@@ -39,6 +39,7 @@
 
 #include <sstream>
 #include <cstdio>
+#include <exception>
 
 namespace oofem {
 /**
@@ -133,15 +134,21 @@ public:
  */
 class OOFEM_EXPORT FileDataStream : public DataStream
 {
+public:
+    class CantOpen : public std::runtime_error
+    {
+    public:
+        std::string filename;
+        CantOpen(std::string file): runtime_error("can't open file"), filename(std::move(file)) {}
+    };
+
 private:
     /// FILE pointer of associated stream
     FILE *stream;
     /// Filename
     std :: string filename;
-    bool close;
 public:
     /// Constructor, takes associated stream pointer as parameter
-    FileDataStream(FILE * s): stream(s), close(false) { }
     FileDataStream(std :: string filename, bool write);
 
     /// Destructor (will not close stream!)
