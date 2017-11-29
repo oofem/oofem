@@ -630,8 +630,8 @@ struct PyDataReader : DataReader, wrapper<DataReader>
         this->get_override("finish")();
     }
 
-    const char *giveDataSourceName() const {
-        return this->get_override("giveDataSourceName")();
+    std :: string giveReferenceName() const {
+        return this->get_override("giveReferenceName")();
     }
 };
 
