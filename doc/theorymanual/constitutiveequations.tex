@@ -1,0 +1,402 @@
+The purpose of this chapter is to present the theoretical backgroung
+of some handy general purpose theories and algorithms, that are provided in oofem in the
+form of general material base classes. They can significantly
+facilitate the implementation of particular material models that are
+based on such concepts. Typical example can be a general purpose
+plasticity class, that implements general stress return and stifness
+matrix evaluation algorithms, based on provided methods for computing
+yield functions and corresponding derivatives. Particular
+models are simply derived from the base classes, inheriting
+common algorithms.
+
+
+\section{Isotropic damage model}
+\label{IsoDamMod}
+ In this section, the formulation of an isotropic damage model will be
+ described. To cover the various models based on isotropic damage concept,
+ a base class IsotropicDamageMaterial is defined first,
+ declaring the necessary services and providing the implementation of
+ them, which are general. The derived classes then only  implement a particular
+ damage-evolution law.
+
+ The isotropic damage models are based on the simplifying assumption
+ that the stiffness degradation is isotropic, i.e., stiffness moduli
+ corresponding to different directions decrease proportionally and
+ independently of direction of loading. Consequently, the damaged
+ stiffness matrix is expressed as
+ $$
+\mbf{D} = (1-\omega)\mbf{D}_e,
+ $$
+ where $\mbf{D}_e$ is elastic stiffness matrix of the undamaged
+ material and $\omega$ is the damage parameter. Initially, $\omega$ is
+ set to zero, representing the virgin undamaged material, and the response is
+ linear-elastic. As the material undergoes the deformation, the
+ initiation and propagation of microdefects decreases the stiffness,
+ which is represented by the growth of the damage parameter $\omega$.
+ For $\omega = 1$, the stiffness completely disappears.
+
+ In the present context, the $\mbf{D}$ matrix represents the secant
+ stiffness that relates the total strain to the total stress
+ $$
+ \mbf{\sigma}=\mbf{D}\mbf{\varepsilon} = (1-\omega)\mbf{D}_e\mbf{\varepsilon}.
+ $$
+ Similarly to the theory of plasticity, a loading function $f$ is
+ introduced. In the damage theory, it is natural to work in the strain
+ space and therefore the loading function is depending on the strain
+ and on an additional parameter $\kappa$, describing the evolution of
+ the damage. Physically, $\kappa$ is a scalar measure of the
+ largest strain level ever reached. The loading function usually has
+ the form
+ $$
+ f(\mbf{\varepsilon}, \kappa) = \tilde\varepsilon(\mbf{\varepsilon}) - \kappa,
+ $$
+ where $\tilde\varepsilon$ is the equivalent strain, i.e., the scalar
+ measure of the strain level.
+ Damage can grow only if current state reaches the boundary of elastic
+ domain ($f=0$). This is expressed by the following loading/unloading
+ conditions
+ $$
+ f \le 0,\;\;\dot\kappa \ge0,\;\;\dot\kappa f = 0.
+ $$
+ It remains to link the variable $\kappa$ to the damage parameter
+ $\omega$. As both $\kappa$ and $\omega$ grow monotonically, it is
+ convenient to postulate an explicit evolution law
+ $$
+ \omega = g(\kappa).
+ $$
+ The important advantage of this explicit formulation is that the
+ stress corresponding to the given strain can be evaluated directly,
+ without the need to solve the nonlinear system of equations.
+ For the given strain, the corresponding stress is computed simply by
+ evaluating the current equivalent strain, updating the maximum
+ previously reached equivalent strain value $\kappa$  and the damage
+ parameter and reducing the effective stress according to $\mbf{\sigma}
+ = (1-\omega)\mbf{D}_e \mbf{\varepsilon}$.
+
+ This general framework for computing stresses and
+ stiffness matrix is  common for all material models of this type.
+ Therefore, it is natural to introduce
+ the base class for all isotropic-based damage models which provides the general
+ implementation for the stress and stiffness matrix evaluation
+ algorithms. The particular models then only provide their equivalent
+ strain and damage evolution law definitions.
+ The base class only declares the virtual services for computing equivalent
+ strain and corresponding damage. The implementation of common services
+ uses these virtual functions, but they are only declared at
+ IsotropicDamageMaterial class level and have to be
+ implemented by the derived classes.
+
+ Together with the material model, the corresponding status has to be
+ defined, containing all necessary history variables.
+ For the isotropic-based damage models, the only history variable is
+ the value of the largest strain level ever reached ($\kappa$).
+ In addition, the corresponding damage level $\omega$ will be stored.
+ This is not necessary because damage can be always computed from
+ corresponding $\kappa$.
+ The IsotropicDamageMaterialStatus class is derived from
+ StructuralMaterialStatus class. The base class represents the
+ base material status class for all structural statuses. At
+ StructuralMaterialStatus level, the attributes common to all
+ ``structural analysis'' material models - the strain and
+ stress vectors (both the temporary and non-temporary) are introduced. The
+ corresponding services for accessing, setting, initializing, and
+ updating these attributes are provided.
+ Therefore, only the $\kappa$ and $\omega$ parameters are introduced
+ (both the temporary and non-temporary). The corresponding services for
+ manipulating these attributes are added and services for context
+ initialization, update, and store/restore operations are overloaded, to
+ handle the history parameters properly.
+
+
+
+\section{Multisurface plasticity driver - MPlasticMaterial class}
+
+In this section, a general multisurface plasticity theory with
+hardening/softening is reviewed. The presented algorithms are
+implemented in MPlasticMaterial class.
+
+
+
+\subsection{Plasticity overview}
+Let $\mbf{\sigma},\e, {\rm and}\  \ep$ be the stress, total strain, and plastic strain vectors, respectively.
+It is assumed that the total strain is decomposed into reversible elastic and irreversible plastic parts
+\begin{equation}
+  \e = \e^e + \ep
+\end{equation}
+The elastic response is characterized in terms of elastic constitutive matrix $\mbf{D}$ as
+\begin{equation}
+\label{el1}
+\mbf{\sigma}=\mbf{D}\e^e = \mbf{D}(\mbf{\varepsilon}-\ep)
+\end{equation}
+As long as the stress remains inside the elastic domain, the deformation process is purely elastic and the plastic strain does not change.
+It is assumed that the elastic domain, denoted as $IE$ is bounded by a composite yield surface. It is defined as
+\begin{equation}
+IE=\{(\mbf{\sigma},\mbf{\kappa})|f_i(\mbf{\sigma},\mbf{\kappa})<0, \rm{for\ all\ }i\in\{1,\cdots,m\}\}
+\end{equation}
+where $f_i(\mbf{\sigma},\mbf{\kappa})$ are $m\ge1$ yield functions intersecting in a possibly non-smooth fashion. The
+vector $\mbf{\kappa}$ contains internal variables controlling the evolution of yield surfaces (amount of hardening or softening).
+The evolution of plastic strain $\ep$ is expressed in Koiter's form. Assuming the non-associated plasticity, this reads
+\begin{equation}
+\label{epe}
+\epd=\sum^{m}_{i=1} \lambda^i \partial_{\mbf{\sigma}}g_i(\mbf{\sigma},\mbf{\kappa})
+\end{equation}
+where $g_i$ are plastic potential functions. The $\lambda^i$ are referred as plastic consistency parameters, which satisfy the following Kuhn-Tucker conditions
+\begin{equation}
+\label{ktc}
+\lambda^i\ge0,\;f_i\le0,\;{\rm and}\ \lambda^i f_i=0
+\end{equation}
+These conditions imply  that in the elastic regime the yield function must remain negative and the rate of the plastic multiplier is zero (plastic strain remains constant) while in the plastic regime the yield function must be equal to zero (stress remains on the surface) and the rate of the plastic multiplier is positive.
+The evolution of vector of internal hardening/softening variables $\mbf{\kappa}$  is expressed in terms of a general
+hardening/softening law of the form
+\begin{equation}
+\dot{\mbf{\kappa}} = \dot{\mbf{\kappa}}(\sig, \mbf{\lambda})
+\end{equation}
+where $\mbf{\lambda}$ is the vector of plastic consistency parameters $\lambda_i$.
+
+
+
+\subsection{Closest-point return algorithm}
+Let us assume, that at time $t_n$ the total and plastic strain vectors and internal variables are known
+$$
+\{\mbf{\varepsilon}_n, \mbf{\varepsilon}^p_n, \mbf{\kappa}_n\}\  {\rm given\ at}\ t_n
+$$
+By applying an implicit backward Euler difference scheme to the evolution equations (\ref{el1} and \ref{epe})
+and making use of the initial conditions the following discrete non-linear system is obtained
+\begin{eqnarray}
+\e_{n+1}&=&\e_n+\Delta\e\\
+\label{del}
+\sig_{n+1}&=&\mbf{D}(\e_{n+1}-\ep_{n+1})\\
+\label{dep}
+\ep_{n+1}&=&\ep_{n}+\sum\lambda^i\partial_{\sig} g_i(\sig_{n+1}, \mbf{\kappa}_{n+1})
+\end{eqnarray}
+In addition, the discrete counterpart of the Kuhn-Tucker conditions becomes
+\begin{eqnarray}
+\label{dktc}
+f_i(\sig_{n+1}, \mbf{\kappa}_{n+1}) &=& 0\\
+\lambda^i_{n+1} &\ge& 0\\
+\lambda^i_{n+1} f_i(\sig_{n+1}, \mbf{\kappa}_{n+1})&=& 0
+\end{eqnarray}
+In the standard displacement-based finite element analysis, the strain evolution is determined by the displacement increments computed on the structural level. The basic task on the level of a material point is to evaluate the stress evolution generated by strain history.
+According to this, the strain driven algorithm is assumed, i.e. that the total strain $\e_{n+1}$ is given.
+Then, the Kuhn-Tucker conditions determine whether a constraint is active. The set of active constraints is denoted as $J_{act}$ and is defined as
+\begin{equation}
+J_{act}=\{\beta\in\{1,\cdots,m\}|f_\beta=0\ \&\ \dot{f}_\beta=0\}
+\end{equation}
+Let's start with the definition of the residual of plastic flow
+\begin{equation}
+\label{rpf}
+\mbf{R}_{n+1}=-\ep_{n+1}+\ep_{n}+\sum_{j\in J_{act}}\lambda^j_{n+1}\partial_\sigma g_{n+1}
+\end{equation}
+By noting that total strain $\e_{n+1}$ is fixed during the increment we can express the plastic strain increment using  (\ref{el1}) as
+\begin{equation}
+\Delta\ep_{n+1} = -\mbf{D}\Delta\sig_{n+1}
+\end{equation}
+The linearization of the plastic flow residual (\ref{rpf}) yields\footnote{For brevity, the simplified notation is introduced: $f=f(\sig,\mbf{\kappa}),\  g=g(\sig,\  \mbf{\kappa}),\  \mbf{\kappa}=\mbf{\kappa}(\sig,\lambda)$, and subscript $n+1$ is omitted.}
+\begin{eqnarray}
+\nonumber
+&&\mbf{R}+\mbf{D}^{-1}\Delta\sig+\sum\lambda\partial_{\sigma\sigma}g\Delta\sig+\\
+&&+\sum\lambda\partial_{\sigma\kappa}g\cdot(\partial_\sigma\kappa\Delta\sig+\partial_\lambda\kappa\Delta\lambda)+\sum\Delta\lambda\partial_{\sigma}g =0
+\end{eqnarray}
+From the previous equation, the stress increment $\Delta\sig$ can be expressed as
+\begin{equation}
+\label{dsig}
+\Delta\sig=-\mbf{H}^{-1}\left(\mbf{R}+\sum\Delta\lambda\partial_{\sigma}g+\sum\lambda\partial_{\sigma\kappa}g\partial_{\lambda}\kappa\Delta\lambda\right)
+\end{equation}
+where $\mbf{H}$ is algorithmic moduli defined as
+\begin{equation}
+\mbf{H}=\left[\mbf{D}^{-1}+\sum\lambda\partial_{\sigma\sigma}g+\sum\lambda\partial_{\sigma\kappa}g\partial_{\sigma}\kappa\right]
+\end{equation}
+Differentiation of active discrete consistency conditions (\ref{dktc}) yields
+\begin{equation}
+\label{ddyc}
+\mbf{f}+\partial_{\sigma}\mbf{f}\Delta\sig+\partial_{\kappa}\mbf{f} (\partial_\sigma\kappa\Delta\sig+\partial_\lambda\kappa\Delta\lambda) =0
+\end{equation}
+Finally, by combining equations (\ref{dsig}) and (\ref{ddyc}), one can obtain expression for incremental vector of consistency parameters $\Delta\mbf{\lambda}$
+\begin{equation}
+\left[\mbf{V}^T\mbf{H}^{-1}\mbf{U}-\partial_{\kappa}\mbf{f}\partial_{\lambda}\mbf{\kappa}\right]\Delta\mbf{\lambda}=\mbf{f}-\mbf{V}^T\mbf{H}^{-1}\mbf{R}
+\end{equation}
+where the matrices $\mbf{U}$ and $\mbf{V}$ are defined as
+\begin{eqnarray}
+\mbf{U} &=& \left[\partial_{\sigma}\mbf{g}+\sum\lambda\partial_{\sigma\kappa}g\partial_{\lambda}\kappa\right]\\
+\mbf{V} &=& \left[\partial_{\sigma}\mbf{f}+\partial_{\kappa}\mbf{f}\partial_{\sigma}\kappa\right]
+\end{eqnarray}
+
+Before presenting the final return mapping algorithm, the algorithm for determination of the active constrains should be discussed. A yield surface $f_{i,n+1}$ is active if $\lambda^i_{n+1} > 0$. A systematic enforcement of the discrete Kuhn-Tucker condition (\ref{dktc}), which relies on the solution of return mapping algorithm, then serves as the basis for determining the active constraints. The starting point in enforcing (\ref{dktc}) is to define the trial set
+\begin{equation}
+  J^{trial}_{act}=\{j\in\{1,\cdots,m\}|f^{trial}_{j,n+1} > 0\}
+\end{equation}
+where $J_{act}\subseteq J_{act}^{trial}$. Two different procedures can be adopted to determine the final set $J_{act}$. The conceptual procedure is as follows
+\begin{itemize}
+ \item
+ Solve the closest point projection with $J_{act}=J_{act}^{trial}$ to obtain final stresses, along with $\lambda^i_{n+1},\ i\in J_{act}^{trial}$.
+\item
+Check the sign of $\lambda^i_{n+1}$. If $\lambda^i_{n+1} <0$, for some $i\in J_{act}^{trial}$, drop the $i-$th constrain from the active set and goto first point. Otherwise exit.
+\end{itemize}
+
+In the procedure 2, the working set $J_{act}^{trial}$ is allowed to change within the iteration process, as follows
+\begin{itemize}
+\item
+Let $J_{act}^{(k)}$ be the working set at the k-th iteration. Compute increments $\Delta\lambda^{i,(k)}_{n+1},\ i\in J_{act}^{(k)}$.
+\item
+Update and check the signs of $\Delta\lambda^{i,(k)}_{n+1}$. If $\Delta\lambda^{i,(k)}_{n+1} < 0$, drop the i-th constrain from the active set $J_{act}^{(k)}$ and restart the iteration. Otherwise continue with next iteration.
+\end{itemize}
+If the consistency parameters $\Delta\lambda^{i}$ can be shown to increase monotonically within the return mapping algorithm, the the latter procedure is preferred since it leads to more efficient computer implementation.
+
+The overall algorithm is convergent, first order accurate and unconditionally stable.
+The general algorithm is summarized in Tab.~\ref{closespointalgo}.
+
+\begin{table}
+\label{closespointalgo}
+{\small
+\begin{enumerate}
+\item
+  Elastic predictor
+
+  \begin{enumerate}
+  \item
+ Compute Elastic predictor (assume frozen plastic flow)\\
+ $\sig^{trial}_{n+1} = \mbf{D}\left(\e_{n+1}-\ep_{n}\right)$\\
+ $f^{trial}_{i,n+1}=f_i(\sig^{trial}_{n+1},\kap_{n}),\ \rm{for}\ i\in\{1,\cdots,m\}$
+  \item
+ Check for plastic processes
+ IF $f^{trial}_{i,n+1}\le 0$ for all $i\in\{1,\cdots,m\}$ THEN:
+ \begin{itemize}
+\item[]
+  Trial state is the final state, EXIT.
+ \end{itemize}
+ ELSE:
+ \begin{itemize}
+ \item[]
+$J^{(0)}_{act}=\{i\in\{1,\cdots,m\}|f^{trial}_{i,n+1} > 0\}$
+ \item[]
+$\e^{p(0)}_{n+1}=\ep_n,\ \kap^{(0)}_{n+1}=\kap_n,\ \lambda^{i(0)}_{n+1}=0$
+ \end{itemize}
+ ENDIF
+\end{enumerate}
+
+\item
+  Plastic Corrector
+  \begin{enumerate}
+  \item[(c)]
+ Evaluate plastic strain residual
+ \begin{itemize}
+ \item[]
+$\sig^{(k)}_{n+1} = \mbf{D}\left(\e_{n+1}-\e^{p(k)}_{n+1}\right)$
+ \item[]
+$\mbf{R}^{(k)}_{n+1}=-\e^{p(k)}_{n+1}+\ep_n+\sum\lambda^{i(k)}_{n+1}\partial_{\sigma}g_i$
+ \end{itemize}
+  \item[(d)]
+ Check convergence
+ \begin{itemize}
+ \item[]
+$f^{(k)}_{i,n+1}=f_i(\sig^{(k)}_{n+1},\kap^{(k)}_{n+1})$
+ \item[]
+if $f^{(k)}_{i,n+1} < TOL$, for all $i\in J^{(k)}_{act}$ and $\Vert\mbf{R}^{(k)}_{n+1}\Vert<TOL$ then EXIT
+ \end{itemize}
+  \item[(e)]
+ Compute consistent moduli
+ \begin{itemize}
+ \item[]
+$\mbf{G}=\left[\mbf{V}^T\mbf{H}^{-1}\mbf{U}-\partial_{\kappa}\mbf{f}\partial_{\lambda}\mbf{\kappa}\right]^{-1}$
+ \end{itemize}
+  \item[(f)]
+ Obtain increments to consistency parameter
+ \begin{itemize}
+ \item[]
+$\Delta\mbf{\lambda}^{(k)}_{n+1}=\mbf{G}\{\mbf{f}-\mbf{V}^T\mbf{H}^{-1}\mbf{R}\}^{(k)}_{n+1}$
+ %%\item[]
+%%$\bar{\lambda}^{i,(k+1)}_{n+1}=\lambda^{i,(k)}_{n+1}+\Delta\lambda^{i(k)}_{n+1}$
+ \item[]
+If using procedure 2 to determine active constrains, then update the active set and restart iteration if necessary
+ \end{itemize}
+  \item[(g)]
+ Obtain increments of plastic strains and internal variables
+ \begin{itemize}
+ \item[]
+$\Delta\e^{p(k)}_{n+1}=\mbf{D}^{-1}\left\{\mbf{R}^{(k)}_{n+1}+\sum\Delta\lambda^{i(k)}_{n+1}\partial_{\sigma}g^{(k)}_{n+1}+\sum\lambda^{i(k)}_{n+1}\partial_{\sigma\kappa}g^{(k)}_{n+1}\partial_{\lambda}\kappa\Delta\lambda^{i(k)}_{n+1}\right\}$
+ \item[]
+$\Delta\kap^{(k)}_{n+1} = \dot{\mbf{\kappa}}(\sig^{(k)_{n+1}}, \mbf{\lambda}^{k}_{n+1})$
+ \end{itemize}
+  \item[(h)]
+ Update state variables
+ \begin{itemize}
+ \item[]
+$\e^{p(k+1)}_{n+1}=\e^{p(k)}_{n+1}+\Delta\e^{p(k)}_{n+1}$
+ \item[]
+$\kap^{(k+1)}_{n+1}=\kap^{(k)}_{n+1}+\Delta\kap^{(k)}_{n+1}$
+ \item[]
+$\lambda^{i(k+1)}_{n+1}=\lambda^{i(k)}_{n+1}+\Delta\mbf{\lambda}^{(k)}_{n+1},\ i\in J_{act}$
+ \end{itemize}
+  \item[(i)]
+ Set k=k+1 and goto step (b)
+  \end{enumerate}
+\end{enumerate}
+}
+\caption{General multisurface closest point algorithm}
+\end{table}
+
+
+
+\subsection{Algorithmic stiffness}
+Differentiation of the elastic stress-strain relations (\ref{del}) and the discrete flow rule (\ref{dep}) yields
+\begin{eqnarray}
+  d\sig_{n+1}&=&\mbf{D}\left(d\e_{n+1}-d\ep_{n+1}\right)\\
+  d\ep_{n+1}&=&\sum\left(\lambda^i\partial_{\sigma\sigma}gd\sig + \lambda^i\partial_{\sigma\kappa}g\left(\partial_{\sigma}\kap d\sig+\partial_{\lambda}\kap d\lambda^i\right)+d\lambda^i\partial_{\sigma}g\right)
+\end{eqnarray}
+Combining this two equations, one obtains following relation
+\begin{equation}
+\label{algrel1}
+  d\sig = \mbf{\Xi}_{n+1} \left\{d\e_{n+1}-\sum\lambda^i\partial_{\sigma\kappa}g\partial_{\lambda}\kap d\lambda^i - \sum d\lambda^i\partial_{\sigma}g\right\}
+\end{equation}
+where $\mbf{\Xi}_{n+1}$ is the algorithmic moduli defined as
+\begin{equation}
+  \mbf{\Xi}_{n+1}=\left[\mbf{D}^{-1}+\sum\lambda^i\partial_{\sigma\sigma}g+\sum\lambda\partial_{\sigma\kappa}g\partial_{\sigma}\kap\right]
+\end{equation}
+Differentiation of discrete consistency condition yields
+\begin{equation}
+  \label{dcc}
+  \partial_\sigma f^i d\sig + \partial_\kappa f^i (\partial_\sigma \kap d\sig + \partial_\lambda \kap d\mbf{\lambda}) = 0
+\end{equation}
+By substitution of (\ref{algrel1}) into (\ref{dcc}) the following relation is obtained
+\begin{equation}
+  d\mbf{\lambda} = \mbf{G} \left\{\mbf{V}\mbf{\Xi}d\e\right\}
+\end{equation}
+where matrix $\mbf{G}$ is defined as
+\begin{equation}
+ \label{gmat}
+  \mbf{G}=\left[\mbf{V}^T\mbf{\Xi}\mbf{U}-\partial_{\kappa}\mbf{f}\partial_{\lambda}\mbf{\kappa}\right]^{-1}
+\end{equation}
+Finally, by substitution of (\ref{gmat}) into (\ref{algrel1}) one obtains the algorithmic elastoplastic tangent moduli
+\begin{equation}
+  \del{\rm{d}\sig}{\rm{d}\e}\vert_{n+1}=\mbf{\Xi}-\mbf{\Xi}\mbf{U}\left(\mbf{V}\mbf{\Xi}\mbf{U}-[\partial_{\kappa}f][\partial_{\lambda}\kap]\right) \mbf{V}\mbf{\Xi}
+\end{equation}
+
+
+
+\subsection{Implementation of particular models}
+
+As follows from previous sections, a new plasticity based class has to
+provide only some model-specific services. The list of services, that
+should be implemented includes (for full reference, please consult
+documentation of MPlasticMaterial class):
+\begin{itemize}
+\item method for computing the value of yield function
+  (computeYieldValueAt service)
+\item method for computing stress gradients of yield and load
+  functions (method computeStressGradientVector)
+\item method for computing hardening variable gradients of yield and load
+  functions (method computeKGradientVector)
+\item methods for computing gradient of hardening variables with
+  respect to stress and plastic multipliers vectors
+  (computeReducedHardeningVarsSigmaGradient and
+  computeReducedHardeningVarsLamGradient methods)
+\item method for evaluating the increments of hardening variables due
+  to reached state (computeStrainHardeningVarsIncrement)
+\item methods for computing second order derivatives of load and yield
+  functions (computeReducedSSGradientMatrix and
+  computeReducedSKGradientMatrix methods). Necessary only if consistent stiffness is required.
+\end{itemize}
+
+
+
+
