@@ -55,9 +55,7 @@ class OOFEM_EXPORT SkylineUnsym : public SparseMtrx
 {
 protected:
     /// Row column segments
-    RowColumn **rowColumns;
-    /// Size of receiver
-    int size;
+    std::vector<RowColumn> rowColumns;
     /// Factorization flag
     int isFactorized;
 
@@ -102,10 +100,9 @@ public:
 protected:
     void checkSizeTowards(const IntArray &);
     void checkSizeTowards(const IntArray &rloc, const IntArray &cloc);
-    RowColumn *giveRowColumn(int j) const;
     void growTo(int);
 
-    SkylineUnsym(RowColumn * *, int, int);
+    SkylineUnsym(int n, std::vector<RowColumn> data, bool isFact);
 };
 } // end namespace oofem
 #endif // skylineu_h

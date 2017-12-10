@@ -37,9 +37,11 @@
 
 #include "oofemcfg.h"
 
+#include "vector"
+
 namespace oofem {
-class FloatArray;
 class IntArray;
+class FloatArray;
 
 /**
  * This class implements a segment of a unsymmetric matrix stored in
@@ -65,38 +67,37 @@ class IntArray;
 class OOFEM_NO_EXPORT RowColumn
 {
 protected:
-
     int number;
     int start;
-    double *row;
-    double *column;
+    std::vector<double> row;
+    std::vector<double> column;
     double diag;
 
 public:
-    RowColumn(int, int);
-    ~RowColumn();
+    RowColumn(int n);
+    RowColumn(int n, int start);
 
 #ifdef DEBUG
     double &atU(int);
     double &atL(int);
+    double atU(int) const;
+    double atL(int) const;
 #else
     double &atU(int i) { return column [ i - start ]; }
     double &atL(int i) { return row [ i - start ]; }
+    double atU(int i) const { return column [ i - start ]; }
+    double atL(int i) const { return row [ i - start ]; }
 #endif
     double &atDiag() { return diag; }
-    void checkBounds(int);
+    double atDiag() const { return diag; }
+    void checkBounds(int)  const;
     void checkSizeTowards(const IntArray &);
-    double dot(const FloatArray &, char, int, int);
-    int giveStart()                   { return start; }
+    double dot(const FloatArray &, char, int, int)  const;
+    int giveStart()  const { return start; }
     void growTo(int);
     void zero();
-    void printYourself();
-    int giveSize() { return 1 + 2 * ( number - start ); }
-
-    RowColumn *GiveCopy();
-
-protected:
-    RowColumn(int, int, double *, double *, double);
+    void printYourself() const;
+    int giveSize() const { return 1 + 2 * ( number - start ); }
 };
 } // end namespace oofem
 #endif // rowcol_h
