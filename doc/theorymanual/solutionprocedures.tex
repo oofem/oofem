@@ -1,4 +1,128 @@
-\section{Nonstationary linear transport model}
+\section{Solution procedures for nonlinear systems}
+We illustrate this on problem of nonlinear mechanics. Our starting point is general form of equilibrium equations expressing the balance between internal $\mbf{f}^{int}$ and external $\mbf{f}^{ext}$
+$$
+\mbf{f}^{int}(\mbf{r}) = \mbf{f}^{ext}
+$$
+Suppose we are looking for an equilibrium at the end of load increment $\Delta\mbf{f}^{ext}$
+\begin{equation}
+  \mbf{f}^{int}(\mbf{r}+\Delta\mbf{r}) = \mbf{f}^{ext}+\Delta\mbf{f}^{ext}
+  \label{eq:nonlinearequalibrium}
+\end{equation}
+By the linearization of the nodal force vector around known equilibrium state we can obtain
+\begin{equation}
+  \mbf{f}^{int}(\mbf{r})+\pard{\mbf{f}^{int}}{\mbf{r}}\Delta\mbf{r}+O(\|\Delta\mbf{r}\|^2)
+\end{equation}
+The derivative of internal force vector with respect to nodal displacements is called jacobian matrix and in solid mechanics as tangent stiffness matrix.
+For the case of material non-linearity
+$$
+\mbf{f}^{e,int}(\mbf{r^e})=\int_{\Omega^e}\mbf{B}^T\mbf{\sigma}(\mbf{\eps}(\mbf{r^e}))\ d\Omega \Rightarrow
+\pard{\mbf{f}^{e,int}}{\mbf{d}^e} = \int_{\Omega^e}\mbf{B}^T\pard{\mbf{\sigma}}{\mbf{\eps}}\pard{\mbf{\eps}}{\mbf{r^e}}\ d\Omega =
+\int_{\Omega^e}\mbf{B}^T\pard{\mbf{\sigma}}{\mbf{\eps}}\mbf{B}{\mbf{r}^e}\ d\Omega =
+\int_{\Omega^e}\mbf{B}^T\mbf{D}\mbf{B}{\mbf{r}^e}\ d\Omega
+\label{eq:newtonlinearization}
+$$
+
+\subsection{Newton-Raphson method}
+The method is based on splitting of the loading process into series of subsequent incremental loading steps in which the incremental loading vector $\Delta\mbf{f}$ is applied. We are looking for the equilibrium at the end of loading step~\ref{eq:nonlinearequalibrium} using the iterative procedure outlined in~\ref{eq:newtonlinearization}. The algorithm is graphically outlined in Fig.~\ref{fig:newtonraphson} for a system with one unknown and summarized in Table~\ref{tab:newtonraphson}.
+
+\begin{table}[h!]
+  \begin{center}
+  \begin{tabular}{|l|l|}
+    \hline
+    Given \\
+    \;\;$\mbf{f}^{ext}_{n-1}$\\
+    \;\;$\mbf{f}^{ext}_{n}=\mbf{f}^{ext}_{n-1}+\delta\mbf{f}^{ext}_n$\\
+    \;\;$\mbf{r}^{0}_{n} = \mbf{r}_{n-1}$\\
+    Looking for $\mbf{r}_n$, such that $\mbf{f}^{int}(\mbf{r}_n) = \mbf{f}^{ext}_n$\\
+    Solve for $i=1,2,\cdots$\\ 
+    \;\;$\mbf{K}^{i}\delta\mbf{r}^{i} = \mbf{f}^{ext}_n-\mbf{f}^{int}_n(\mbf{r}^{i-1}_{n})$\\
+    \;\;$\mbf{r}^i_{n} = \mbf{r}^{i-1}_{n}+\delta\mbf{r}^i$\\
+    Until $\|\mbf{f}^{ext}_n-\mbf{f}^{int}_n(\mbf{r}^{i-1}_{n})\| \le \eps$\\
+    \hline
+  \end{tabular}
+  \end{center}
+  \caption{Newton-Raphson method}
+  \label{tab:newtonraphson}
+\end{table}
+
+Based on update strategy for stiffness matrix, one can obtain different variants of the method. 
+When the stiffness matrix $\mbf{K}^{i}$ is updated in each iteration, the full Newton-Raphson method is obtained. When stiffness matrix only every n-th iteration, one speaks about modified Newton-Raphson method. Finally, when the stiffness matrix is updated only at the beginning of the loading step, one obtains so called initial stiffness method.
+For the full Newton-Raphson method a quadratic convergence is obtained.
+
+One can implement two blends of Newton-Raphson algorithm, where the loading can be driven by load control or by displacement control, where the prescribed increments of displacements are applied to selected DOFs.
+
+\subsection{Arc-length method}
+We start by assuming the parametrized loading, in which the total external load vector is expressed as 
+$$\mbf{f}^{ext}(\lambda) = +\lambda\mbf{f}^{ext}_p$$
+where $\mbf{f}_p$ is proportional, reference load vector, and $\lambda$ is load scaling parameter, 
+The arc-length method is based on idea of controlling the length passed along the loading path. For the differential length of loading  path we can write
+\begin{equation}
+  \Delta l = \sqrt{\Delta\mbf{r}^T\Delta\mbf{r}+(c^2\Delta\lambda^2\mbf{f}^T_p\mbf{f}_p)}
+  \label{eq:arclength}
+\end{equation}
+where $c$ is coefficient of generalized metrics used to define $\Delta l$ (taking into account different units of displacement and load).
+For selected increment of loading path length $\Delta l$, we are looking for the equilibrium, where the unknowns are nodal displacements $\mbf{r}$ and the load scaling parameter $\lambda$. We have the equilibrium equation and additional scalar equation~\ref{eq:arclength}:
+\begin{eqnarray}
+  \label{eq:alm1}
+  \mbf{f}^{int}(\mbf{r}_n) &=& \mbf{f}^{ext}(\lambda_n\mbf{f}_p)\\
+  \label{eq:alm2}
+  \Delta l_n^2&=&\Delta\mbf{r}_n^T\Delta\mbf{r}_n+c^2\Delta\lambda^2\mbf{f}^T_p\mbf{f}_p
+\end{eqnarray}
+
+At the end of n-th loading step and i-th iteration the displacement vector can be written as
+$\mbf{r}^i_n = \mbf{r}^{i-1}_n+\delta\mbf{r}$ and similarly the load scaling parameter as $\lambda_n^i = \lambda_n^{i-1}+\delta\lambda$. Substituting this into equilibrium equation~\ref{eq:alm1} we get
+$$\mbf{f}^{int}(\mbf{r}_n^{i-1}+\delta\mbf{r})=\mbf{f}^{ext}((\lambda_n^{i-1}+\delta\lambda)\mbf{f}_p)$$
+By linearization of $\mbf{F}^{int}$ around known state $\mbf{r}_n^{i-1}$ we get
+$$\mbf{f}^{int}_n(\mbf{r}_n^{i-1})+\mbf{K}_n^{i-1}\delta\mbf{r} = \mbf{f}^{ext,i-1}+\delta\lambda\mbf{f}_p$$
+and finally for unknown $\delta\mbf{r}$
+\begin{equation}
+  \delta\mbf{r} = \underbrace{(\mbf{K}_n^{i-1})^{-1}(\mbf{f}^{ext,i-1}-\mbf{f}^{int}(\mbf{r}_n^{i-1}))}_{\delta\mbf{r}_r} + \delta\lambda\underbrace{(\mbf{K}_n^{i-1})^{-1}\mbf{f}_p}_{\delta\mbf{r}_\lambda}
+\end{equation}
+Note that the vectors $\delta\mbf{r}_r$ and $\delta\mbf{r}_\lambda$ can be computed and the only unknown remaining is the incremental change of loading parameter $\delta\lambda$, which could be determined from~\ref{eq:alm2}
+\begin{eqnarray}
+  \Delta l_n^2&=&(\Delta\mbf{r}_n^{i-1}+\delta\mbf{r}_r+\delta\lambda\delta\mbf{r}_\lambda)^T(\Delta\mbf{r}_n^{i-1}+\delta\mbf{r}_r+\delta\lambda\delta\mbf{r}_\lambda) + c^2(\Delta\lambda_n^{i-1}+\delta\lambda)^2\mbf{f}^T_p\mbf{f}_p
+  \label{eq:quadraticlambda}
+\end{eqnarray}
+This finally yields a quadratic equation for unknown increment of loading parameter $\delta\lambda$. The algorithm is summarized in Table~\ref{tab:alm}.
+
+\begin{table}[h!]
+  \begin{center}
+  \begin{tabular}{|l|l|}
+    \hline
+    Given \\
+    \;\;$\mbf{f}^{ext}_{n-1}, \mbf{f}_p$\\
+    \;\;$\mbf{r}^{0}_{n} = \mbf{r}_{n-1}$\\
+    Evaluate\\
+    $\;\;\delta\mbf{r}_\lambda = (\mbf{K}_n)^{-1}\mbf{f}_p$\\
+    $\;\;\Delta\lambda^0=\pm{\Delta l}/{\sqrt{\delta\mbf{r}_\lambda^T\delta\mbf{r}_\lambda+c^2\mbf{f}_p^T\mbf{f}_p}}$\\
+    $\;\;\Delta\mbf{r}_n^0 = (\mbf{K}_n)^{-1}(\Delta\lambda\mbf{f}_p) = (\mbf{K}_n)^{-1}((\lambda_n+\Delta\lambda^0)\mbf{f}_p - \mbf{f}^{int,0}_n)$\\
+    Repeat for $i=1,2,\cdots$\\ 
+    \;\;$\delta\mbf{r}_\lambda = (\mbf{K}_n^{i-1})^{-1}\mbf{f}_p$\\
+    \;\;$\delta\mbf{r}_r = (\mbf{K}_n^{i-1})^{-1}(\lambda_n^{i-1}\mbf{f}_p-\mbf{f}^{int}(\mbf{r}_n^{i-1}))\\
+    \;\;Solve quadratic equation~\ref{eq:quadraticlambda} for $\delta\lambda$\\
+    \;\;$\delta\mbf{r}^i = \delta\mbf{r}_r+\delta\lambda\delta\mbf{r}_\lambda$\\
+    \;\;$\Delta\mbf{r}_n^i = \Delta\mbf{r}^{i-1}+\delta\mbf{r}^i,\ \mbf{r}_n^i = \mbf{r}_n^{i-1}+\delta\mbf{r}^i$\\
+    \;\;$\lambda^i = \lambda^{i-1}+\delta\lambda,\ \Delta\Lambda_n^i = \Delta\Lambda_n^{i-1}+\delta\lambda$\\
+    Until convergence reached\\
+    \hline
+  \end{tabular}
+  \end{center}
+  \caption{Newton-Raphson method}
+  \label{tab:newtonraphson}
+\end{table}
+
+
+
+
+
+
+
+
+
+
+
+
+\section{Non-stationary linear transport model}
 \label{NonLinTrans}
 The weak form of diffusion-type differential equation leads to
 \begin{eqnarray}
@@ -33,7 +157,7 @@ The vectors $\mbf{F}_t$ or $\mbf{F}_{t+\Delta t}$ contain all known contribution
 \underbrace{\int_{\Omega}\mbf{N}^T\overline{Q}_t\ud\Omega}_{\textrm{Source}}\label{NonLinTrans:8}
 \end{eqnarray}
 
-\section{Nonstationary nonlinear transport model}
+\section{Non-stationary nonlinear transport model}
 \label{NonNonTrans}
 In a nonlinear model, \refeq{NonLinTrans:1} is modified to
 \begin{eqnarray}

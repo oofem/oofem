@@ -1,6 +1,6 @@
 % Basic equations
-\subsection{Linear elasticity}
-\subsubsection{Linear kinematics}
+\section{Linear elasticity}
+\subsection{Linear kinematics}
 Let us consider a deformable body as a collection of points, where position of each point is denoted as $\x\in\Omega$. In a deformed configuration the position of each point is identified by its position vector $\xd(x) = \mbf{\phi}(\x)$. The displacement vector is then defined as:
 \begin{equation}
   \label{eq:displacementvector}
@@ -31,7 +31,7 @@ The antisymmetric part corresponds to infinitesimal rotation. The symmeric part 
 $$
 d\xd = \mbf{\eps} d\x
 $$
-\subsubsection{Equlibrium equations}
+\subsection{Equlibrium equations}
 Stress is defined as the force across a "small" boundary per unit area of that boundary, for all orientations of the boundary. In the most general case, called triaxial stress, the stress is nonzero across every surface element. Cauchy observed that the stress vector $\mbf{t}$ across a surface is a linear function of the surface's normal vector $\mbf{n}$:
 $$
 \mbf{t}(x)=\mbf{\sigma}(x)\mbf{n}(x)
@@ -75,7 +75,7 @@ where we use summation convention over repated indices and $F_i$ are the compone
   \caption{Stress balance in 2D}
 \end{figure}
 
-\subsubsection{Constitutive equations}
+\subsection{Constitutive equations}
 In this section we present the constituve relations (i.e. relations between stress and strain tensors) for the case of hyperelasticity, which could be defined in terms of strain energy density $W(\mbf{\eps})$, which allows to evaluate stress components as partial derivatives:
 $$
 \sigma_{ij}=\pard{W}{\eps_{ij}}
@@ -91,7 +91,7 @@ C_{ijkl}=\lambda\delta_{ij}\delta_{kl}+2\mu {1\over 2}[\delta_{ik}\delta_{jl}+
  \delta_{il}\delta_{jk}] \equiv \mbf{C}=\lambda\mbf{1}\otimes\mbf{I}+2\mu\mbf{I}
 $$
 
-\subsubsection{Voight notation}
+\subsection{Voight notation}
 
 The Voigt notation is hrequantly used to take advantage of the symmetry of the stress tensor to express the stress tensor as a six-dimensional vector of the following form:
 $$
@@ -117,13 +117,13 @@ $$
 
 The benefit of using different representations for stress and strain is the scalar invariance
 $$
-\mbf{\sigma}\cdot\mbf{\eps}=\sigma_{ij}\eps_{ij}=\tilde\sigma \tilde\eps
+\mbf{\sigma}\cdot\mbf{\eps}=\sigma_{ij}\eps_{ij}=\tilde{\sigma} \tilde{\eps}
 $$
 Similarly, a three-dimensional symmetric fourth-order tensor can be reduced to a [6,6] matrix.
 
 
-\section {Boundary value problem in small strain elasticity}
-\subsection{Strong form}
+\subsection {Boundary value problem in small strain elasticity}
+\subsubsection{Strong form}
 
 Starting from the equilibrium equations~ref{eq:staticequlibrium3d}, into which we can substitute the constituve equations and strain-displacement relation we obtain the equlibrium equation expressed in terms of displacements:
 $$
@@ -134,15 +134,14 @@ This system of three partial differnetial equations can be solved, provided that
 \fbox{
   \begin{minipage}{8cm}
     Find $\mbf{u}\in R^n$, such that\\[4mm]
-    $
-    \pard{}{x_j}\left({C_{ijkl} {1\over 2}(\pard{u_k}{x_l}+\pard{u_l}{x_k})}\right) + F_i = 0 \in \Omega\,$\\[2mm]
+    $\pard{}{x_j}\left({C_{ijkl} {1\over 2}(\pard{u_k}{x_l}+\pard{u_l}{x_k})}\right) + F_i = 0 \in \Omega\,$\\[2mm]
     $\mbf{u}=\mbf{\bar{u}} \in \Gamma_u$\\[2mm]
     $\mbf{t}^n_i = C_{ijkl}{1\over 2}(\pard{u_k}{x_l}+\pard{u_l}{x_k})\,n_j = \bar t_i \,\in \Gamma_t$
   \end{minipage}
 }
 \end{center}
 
-\subsection{Weak form}
+\subsubsection{Weak form}
 
   By following the method of weighted residuals, we multiply the governing differential equations~\ref{eq:equlibriumequations3d} in residual form by a sutable test functions $\delta\mbf{u}$, satisfying the homogeneous boundary conditions on $\Gamma_u$
   $$
@@ -161,16 +160,16 @@ This system of three partial differnetial equations can be solved, provided that
   \label{weakform3d}
   \end{equation}
   Or, equaivalently using Voight's notation
-  $$
-  \int_\Omega\delta\tilde\eps^T\tilde\mbf{D}\tilde\mbf{\eps}\ d\Omega =
+  \begin{equation}
+  \int_\Omega\delta\tilde{\eps}^T\tilde{\mbf{D}}\tilde{\mbf{\eps}}\ d\Omega =
   \int_\Omega\delta\mbf{u}^T\mbf{F}\ d\Omega + \int_\Gamma\delta\mbf{u}^T\mbf{t}\ d\Gamma
   \label{eq:weakformvoight}
-  $$
+  \end{equation}
   
   Note: this is equaivalent to the principle of virtual displacements. For hyperelastic material, the weak form is identical to the principle of minimum potential energy.
 
   
-\section{Finite element discretization}
+\subsection{Finite element discretization}
 Let us consider discretization of the problem domain $\Omega$ into set of nonoverlapping subdomains $\Omega_e$, called elements.
 Next we will consider the approximation of the unknown displacement field, defined on individual subdomains. Note that the approximation is not arbitrary:
 \begin{itemize}
@@ -197,14 +196,27 @@ $$
 
   We will need also the derivatives of the displacement and test functions
   \begin{eqnarray}
-  \tilde\eps^e = = \mbf{B}^e(\mbf{x})\mbf{r}^e\\
-  \delta\tilde\eps^e&=&\mbf{B}^e(\mbf{x})\delta\mbf{r}^e
+  \tilde{\eps}^e = = \mbf{B}^e(\mbf{x})\mbf{r}^e\\
+  \delta\tilde{\eps}^e&=&\mbf{B}^e(\mbf{x})\delta\mbf{r}^e
 \end{eqnarray}
 where $B^e$ matrix contains the first partial derivatives of the shape functions. 
 By substiituting into the weak form~\ref{eq:weakformvoight} we obtain
 \begin{equation}
   \sum_e \delta\mbf{r}^{e,T}
   \left[
-    \underbrace{\int_\Omega \mbf{B}^{e,T}\tilde\mbf{D}^e\mbf{B}^e\mbf{r}^e\ d\Omega}_{\mbf{K}^e}\mbf{r}^e-\underbrace{\int_{\Omega}\mbf{N}^{e,T}\mbf{F}\ d\Omega}_{\mbf{f}^e_\Omega} - \underbrace{\int_{\Gamma_t}\mbf{N}^{e,T}\bar{\mbf{t}}\ d\Gamma}_{\mbf{f}^e_\Gamma}
-    \right] = 0
+    \underbrace{\int_{\Omega^e} \mbf{B}^{e,T}\tilde{\mbf{D}}^e\mbf{B}^e\mbf{r}^e\ d\Omega}_{\mbf{K}^e}\mbf{r}^e-\underbrace{\int_{\Omega}\mbf{N}^{e,T}\mbf{F}\ d\Omega}_{\mbf{f}^e_\Omega} - \underbrace{\int_{\Gamma_t}\mbf{N}^{e,T}\bar{\mbf{t}}\ d\Gamma}_{\mbf{f}^e_\Gamma}
+    \right] = \mbf{0}
 \end{equation}
+
+After introducing a mappig between element displacement vectors $\mbf{r}^e$, nodal vectors of test function values $\delta\mbf{r}$ and their global counterparts $\hat{\mbf{r}}, \delta\hat{\mbf{r}}$ one can obtain
+\begin{equation}
+  \delta\hat{\mbf{r}}^{T}
+  \left[
+    \hat{\mbf{K}}\hat{\mbf{r}}-\hat{\mbf{f}}_\Omega - \hat{\mbf{f}}_{\Gamma}
+    \right] = \mbf{0}
+\end{equation}
+By taking into account that the test fuctions are arbitrary (i.e. $\delta\hat{\mbf{r}}\ne\mbf{0}$), one finnaly obtains the following set of linear algebraic equations for unknonwn nodal displacements $\hat{\mbf{r}}$:
+\begin{equation}
+    \hat{\mbf{K}}\hat{\mbf{r}}=\hat{\mbf{f}}_\Omega + \hat{\mbf{f}}_{\Gamma}
+\end{equation}
+
