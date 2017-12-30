@@ -16,7 +16,7 @@ pdf:
 www-install: html pdf
 ifdef INSTALLDIR
 	$(RCP) -r html $(INSTALLDIR)/resources/doc/theorymanual
-	$(RCP) -r theorymanual.ps $(INSTALLDIR)/resources/doc/theorymanual
+#       $(RCP) -r theorymanual.ps $(INSTALLDIR)/resources/doc/theorymanual
 	$(RCP) -r theorymanual.pdf $(INSTALLDIR)/resources/doc/theorymanual
 else
 	echo "INSTALLDIR not defined"
