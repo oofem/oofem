@@ -39,7 +39,7 @@ ifdef INSTALLDIR
 	cd matlibmanual; make www-install
 	cd programmer; make www-install
 	cd refman; make www-install
-	cd theorymanaual; make www-install
+	cd theorymanual; make www-install
 else
 	echo "INSTALLDIR not defined"
 endif
