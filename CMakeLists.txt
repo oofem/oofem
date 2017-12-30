@@ -5,7 +5,6 @@ include (CheckIncludeFiles)
 include (CheckIncludeFileCXX)
 include (CheckCXXSourceCompiles)
 include (GenerateExportHeader)
-include (UsePkgConfig)
 include (ProcessorCount)
 
 project (oofem CXX C)
