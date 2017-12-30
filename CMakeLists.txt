@@ -10,7 +10,7 @@ include (ProcessorCount)
 
 project (oofem CXX C)
 set (oofem_VERSION_MAJOR 2)
-set (oofem_VERSION_MINOR 5)
+set (oofem_VERSION_MINOR 6)
 set (oofem_VERSION_PATCH 0) # Unused
 set (oofem_HOMEPAGE "http://www.oofem.org")
 set (bp_HOMEPAGE "http://ksm.fsv.cvut.cz/%7Ebp/bp.html")
