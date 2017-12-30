@@ -1454,7 +1454,7 @@ void save_components(T &list, DataStream &stream, ContextMode mode)
     }
     for ( const auto &object: list ) {
         if ( ( mode & CM_Definition ) != 0 ) {
-            if ( stream.write( std :: string( object->giveInputRecordName() ) ) == 0 ) { \
+            if ( stream.write( std :: string( object->giveInputRecordName() ) ) == 0 ) {
                 THROW_CIOERR(CIO_IOERR);
             }
         }

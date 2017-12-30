@@ -179,8 +179,7 @@ StructuralMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode,
 
 void StructuralMaterialStatus :: copyStateVariables(const MaterialStatus &iStatus)
 {
-    MaterialStatus &tmpStat = const_cast< MaterialStatus & >(iStatus);
-    const StructuralMaterialStatus &structStatus = dynamic_cast< StructuralMaterialStatus & >(tmpStat);
+    const StructuralMaterialStatus &structStatus = static_cast< const StructuralMaterialStatus & >(iStatus);
 
     strainVector = structStatus.giveStrainVector();
     stressVector = structStatus.giveStressVector();
