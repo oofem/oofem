@@ -1,6 +1,6 @@
 from __future__ import print_function
 import liboofem
-dr=liboofem.OOFEMTXTDataReader("tmpatch42.in")
+dr=liboofem.OOFEMTXTDataReader("inputs/tmpatch42.in")
 pb=liboofem.InstanciateProblem(dr,liboofem.problemMode._processor,0)
 pb.checkProblemConsistency()
 pb.setRenumberFlag()

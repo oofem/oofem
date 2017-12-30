@@ -31,7 +31,7 @@ b.assemble(a,ind);
 b.printYourself();
 
 
-dr=liboofem.OOFEMTXTDataReader("patch100.in");
+dr=liboofem.OOFEMTXTDataReader("inputs/patch100.in");
 problem=liboofem.InstanciateProblem(dr,liboofem.problemMode._processor,0);
 problem.checkProblemConsistency();
 problem.setRenumberFlag();

@@ -1,0 +1,28 @@
+tmpatch05.out
+Patch test of Quad1_ht elements. Convection as the Newton law (Cauchy's b.c.) via a heat transfer coefficient.
+StationaryProblem nsteps 1 nmodules 1
+errorcheck
+#vtkxml tstep_all domain_all primvars 1 6 vars 1 56 stype 1
+domain HeatTransfer
+OutputManager tstep_all dofman_all element_all
+ndofman 6 nelem 2 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1 nset 3
+node 1 coords 3  0.0   0.0   0.0
+node 2 coords 3  2.0   0.0   0.0
+node 3 coords 3  0.0   1.0   0.0
+node 4 coords 3  2.0   1.0   0.0
+node 5 coords 3  0.0   8.0   0.0
+node 6 coords 3  2.0   8.0   0.0
+quad1ht 1 nodes 4 1 2 4 3
+quad1ht 2 nodes 4 4 6 5 3
+SimpleTransportCS 1 mat 1 set 1 thickness 0.15
+IsoHeat 1 d 0. k 3.0 c 1.0
+BoundaryCondition  1 loadTimeFunction 1 dofs 1 10 values 1 0.0 set 2
+#BoundaryCondition  1 loadTimeFunction 1 dofs 1 10 values 1 15.0 set 3
+#Newton bc
+constantedgeload 2 loadTimeFunction 1 components 1 15.0 properties 1 a 0.8 loadtype 3 set 3
+ConstantFunction 1 f(t) 1.0
+Set 1 elementranges {(1 2)}
+Set 2 nodes 2 1 2
+Set 3 elementedges 2 2 2
+
+
