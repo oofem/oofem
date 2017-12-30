@@ -25,6 +25,15 @@ $$
 \subsection{Newton-Raphson method}
 The method is based on splitting of the loading process into series of subsequent incremental loading steps in which the incremental loading vector $\Delta\mbf{f}$ is applied. We are looking for the equilibrium at the end of loading step~\ref{eq:nonlinearequalibrium} using the iterative procedure outlined in~\ref{eq:newtonlinearization}. The algorithm is graphically outlined in Fig.~\ref{fig:newtonraphson} for a system with one unknown and summarized in Table~\ref{tab:newtonraphson}.
 
+\begin{figure}
+  \begin{center}
+    \includegraphics[width=0.8\textwidth]{figs/newtonraphson.png}
+  \end{center}
+  \label{fig:newtonraphson}
+  \caption{Illustration of Newton-Raphson method}
+\end{figure}
+
+
 \begin{table}[h!]
   \begin{center}
   \begin{tabular}{|l|l|}
@@ -69,6 +78,15 @@ For selected increment of loading path length $\Delta l$, we are looking for the
   \Delta l_n^2&=&\Delta\mbf{r}_n^T\Delta\mbf{r}_n+c^2\Delta\lambda^2\mbf{f}^T_p\mbf{f}_p
 \end{eqnarray}
 
+\begin{figure}
+  \begin{center}
+    \includegraphics[width=0.8\textwidth]{figs/arclength.png}
+  \end{center}
+  \label{fig:arclength}
+  \caption{Illustration of Acr-length method}
+\end{figure}
+
+
 At the end of n-th loading step and i-th iteration the displacement vector can be written as
 $\mbf{r}^i_n = \mbf{r}^{i-1}_n+\delta\mbf{r}$ and similarly the load scaling parameter as $\lambda_n^i = \lambda_n^{i-1}+\delta\lambda$. Substituting this into equilibrium equation~\ref{eq:alm1} we get
 $$\mbf{f}^{int}(\mbf{r}_n^{i-1}+\delta\mbf{r})=\mbf{f}^{ext}((\lambda_n^{i-1}+\delta\lambda)\mbf{f}_p)$$
@@ -97,12 +115,12 @@ This finally yields a quadratic equation for unknown increment of loading parame
     $\;\;\Delta\lambda^0=\pm{\Delta l}/{\sqrt{\delta\mbf{r}_\lambda^T\delta\mbf{r}_\lambda+c^2\mbf{f}_p^T\mbf{f}_p}}$\\
     $\;\;\Delta\mbf{r}_n^0 = (\mbf{K}_n)^{-1}(\Delta\lambda\mbf{f}_p) = (\mbf{K}_n)^{-1}((\lambda_n+\Delta\lambda^0)\mbf{f}_p - \mbf{f}^{int,0}_n)$\\
     Repeat for $i=1,2,\cdots$\\ 
-    \;\;$\delta\mbf{r}_\lambda = (\mbf{K}_n^{i-1})^{-1}\mbf{f}_p$\\
-    \;\;$\delta\mbf{r}_r = (\mbf{K}_n^{i-1})^{-1}(\lambda_n^{i-1}\mbf{f}_p-\mbf{f}^{int}(\mbf{r}_n^{i-1}))\\
-    \;\;Solve quadratic equation~\ref{eq:quadraticlambda} for $\delta\lambda$\\
-    \;\;$\delta\mbf{r}^i = \delta\mbf{r}_r+\delta\lambda\delta\mbf{r}_\lambda$\\
-    \;\;$\Delta\mbf{r}_n^i = \Delta\mbf{r}^{i-1}+\delta\mbf{r}^i,\ \mbf{r}_n^i = \mbf{r}_n^{i-1}+\delta\mbf{r}^i$\\
-    \;\;$\lambda^i = \lambda^{i-1}+\delta\lambda,\ \Delta\Lambda_n^i = \Delta\Lambda_n^{i-1}+\delta\lambda$\\
+    $\;\;\delta\mbf{r}_\lambda = (\mbf{K}_n^{i-1})^{-1}\mbf{f}_p$\\
+    $\;\;\delta\mbf{r}_r = (\mbf{K}_n^{i-1})^{-1}(\lambda_n^{i-1}\mbf{f}_p-\mbf{f}^{int}(\mbf{r}_n^{i-1}))$\\
+    $\;\;$Solve quadratic equation~\ref{eq:quadraticlambda} for $\delta\lambda$\\
+    $\;\;\delta\mbf{r}^i = \delta\mbf{r}_r+\delta\lambda\delta\mbf{r}_\lambda$\\
+    $\;\;\Delta\mbf{r}_n^i = \Delta\mbf{r}^{i-1}+\delta\mbf{r}^i,\ \mbf{r}_n^i = \mbf{r}_n^{i-1}+\delta\mbf{r}^i$\\
+    $\;\;\lambda^i = \lambda^{i-1}+\delta\lambda,\ \Delta\Lambda_n^i = \Delta\Lambda_n^{i-1}+\delta\lambda$\\
     Until convergence reached\\
     \hline
   \end{tabular}
@@ -230,7 +248,7 @@ q(T, T_\infty) = \varepsilon \sigma \frac{T^4 - T_\infty^4}{T-T_\infty}(T-T_\inf
 
 
 
-\section{Transient incompressible flow\\PFEM Algorithm}
+\section{Transient incompressible flow - Lagrangian Particle Method}
 \subsection{Lagrangian governing equations of incompressible fluid}
 The Particle finite element method (PFEM) is based on the Lagrangian form of the Navier-Stokes equation for incompressible Newtonian fluids. Assuming the density does not change in time for an incompressible fluid, the continuity equation reduces to zero requirements for the divergence of the velocity. The Navier-Stokes equations take the form
 \begin{eqnarray}
