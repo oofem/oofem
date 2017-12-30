@@ -22,7 +22,7 @@
 \usepackage{tikz}
 \usepackage{hyperref}
 \usepackage[top=0.1\paperheight, bottom=0.1\paperheight, left=0.1\paperwidth, right=0.1\paperwidth]{geometry}
-\usepackage[backend=biber]{biblatex}
+%\usepackage[backend=biber]{biblatex}
 \usepackage{ifthen}
 
 \usetikzlibrary{external} 
@@ -51,11 +51,12 @@
 \input{../include/include.tex}
 
 %% fix for \blx@shorthands as this was removed from current biblatex version
-%\makeatletter
-%\@ifpackageloaded{tex4ht}{
-%  \def\blx@shorthands{}
-%}
-%\makeatother
+\makeatletter
+\@ifpackageloaded{tex4ht}{
+  \def\blx@shorthands{}
+%  \def\blx@unitmark{}
+}
+\makeatother
 
 \renewcommand{\topfraction}{0.99}	% 99% of page top can be a float
 \renewcommand{\bottomfraction}{0.99}	% 99% of page bottom can be a float
@@ -133,7 +134,7 @@
 \newcommand{\recentry}[2]{\ifthenelse{\value{rcc}>0}{&$\backslash$ \\}{\setcounter{rcc}{1}}{#1}&{#2}}
 
 
-\addbibresource{References.bib}
+%\addbibresource{References.bib}
 
 \begin{document}
 
@@ -2054,8 +2055,13 @@ supports modelling of two immiscible fluids.}
 
 
 % References;
-\printbibliography
+%\printbibliography
 
+\begin{thebibliography}{99}
+\bibitem{RobertCook1989} R. D. Cook and D. S. Malkus and M. E. Plesha, ``Concepts and Applications of Finite Element Analysis'', Third Edition, isbn: 0-471-84788-7, 1989.
+\bibitem{BittnarSejnoha1996} Z. Bittnar and J. Sejnoha, ``Numerical Methods in Structural Mechanics'',Thomas Telford,isbn:978-0784401705, 1996.
+\bibitem{RagnarLarsson2011} R. Larsson and J. Mediavilla and M. Fagerström, ``Dynamic fracture modeling in shell structures based on XFEM'', International Journal for Numerical Methods in Engineering, vol. 86, no. 4-5, 499--527, 2011.
+\end{thebibliography}
 \end{document}
 
 

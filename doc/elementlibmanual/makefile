@@ -19,7 +19,7 @@ ps: pdf
 pdf:
 	rm -f *.toc *.lot *.aux
 	pdflatex -shell-escape elementlibmanual
-	biber elementlibmanual
+        # biber elementlibmanual
 	pdflatex -shell-escape elementlibmanual
 
 
