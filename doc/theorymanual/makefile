@@ -2,15 +2,11 @@ SHELL = /bin/sh
 BACKUP_FILES = *.tex *.eps *.sty makefile
 RCP = scp
 
-html: ps
+html: pdf
 	latex2html -style "/oofeml2h.css" -local_icons -dir html -mkdir theorymanual
 
 ps:
-
-	rm -f *.toc *.lot *.aux
-	latex \\nonstopmode\\input theorymanual
-	latex \\nonstopmode\\input theorymanual
-	dvips -o 	theorymanual.ps theorymanual
+	echo "PS version not supported"
 
 pdf:
 	rm -f *.toc *.lot *.aux
