@@ -1,4 +1,5 @@
-2017-12-20 Borek Patzak  <Borek.Patzak@fsv.cvut.cz>
+2017-12-30 Borek Patzak  <Borek.Patzak@fsv.cvut.cz>
+	* OOFEM 2.5 released
 	* Added support for other sparse matrix storage schemes in nlinear dynamic problem
 	* Adding linear and quadratic wedge elements for transport
 	* unv2oofem python3 support, added support for sets
@@ -16,7 +17,7 @@
 
 2016-02-15  Borek Patzak  <Borek.Patzak@fsv.cvut.cz>
 
-	* OOFEm 2.4 released
+	* OOFEM 2.4 released
 	* Added new StaticStructural, TransientTransport, and Warping analyses, as well as new Particle FEM CFD submodule
 	* MKL Pardiso solver support with optimized CSC implementation, support for block matrices in PETSc
 	* New structural elements: MITC4 and trshell02 shells, 3D plane stress Almann element
