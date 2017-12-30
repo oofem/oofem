@@ -172,11 +172,7 @@ Dictionary :: formatAsString(std :: string &str)
 }
 
 
-contextIOResultType Dictionary :: saveContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// saves full node context (saves state variables, that completely describe
-// current state)
-//
+void Dictionary :: saveContext(DataStream &stream)
 {
     int nitems = 0;
     int key;
@@ -209,17 +205,10 @@ contextIOResultType Dictionary :: saveContext(DataStream &stream, ContextMode mo
 
         next = next->giveNext();
     }
-
-    // return result back
-    return CIO_OK;
 }
 
 
-contextIOResultType Dictionary :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// restores full node context (saves state variables, that completely describe
-// current state)
-//
+void Dictionary :: restoreContext(DataStream &stream)
 {
     int size;
     int key;
@@ -245,8 +234,6 @@ contextIOResultType Dictionary :: restoreContext(DataStream &stream, ContextMode
 
         this->at(key) = value;
     }
-
-    return CIO_OK;
 }
 
 

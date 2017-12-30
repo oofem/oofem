@@ -296,10 +296,6 @@ void MasterDof :: printYourself()
 
 
 contextIOResultType MasterDof :: saveContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// saves full node context (saves state variables, that completely describe
-// current state)
-//
 {
     contextIOResultType iores;
 
@@ -323,9 +319,7 @@ contextIOResultType MasterDof :: saveContext(DataStream &stream, ContextMode mod
     }
 
     if ( ( mode & CM_UnknownDictState ) || ( dofManager->giveDomain()->giveEngngModel()->requiresUnknownsDictionaryUpdate() ) ) {
-        if ( ( iores = unknowns.saveContext(stream, mode, obj) ) != CIO_OK ) {
-            THROW_CIOERR(iores);
-        }
+        unknowns.saveContext(stream);
     }
 
     return CIO_OK;
@@ -333,10 +327,6 @@ contextIOResultType MasterDof :: saveContext(DataStream &stream, ContextMode mod
 
 
 contextIOResultType MasterDof :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// restores full node context (saves state variables, that completely describe
-// current state)
-//
 {
     contextIOResultType iores;
 
@@ -361,9 +351,7 @@ contextIOResultType MasterDof :: restoreContext(DataStream &stream, ContextMode 
     }
 
     if ( ( mode & CM_UnknownDictState ) || ( dofManager->giveDomain()->giveEngngModel()->requiresUnknownsDictionaryUpdate() ) ) {
-        if ( ( iores = unknowns.restoreContext(stream, mode, obj) ) != CIO_OK ) {
-            THROW_CIOERR(iores);
-        }
+        unknowns.restoreContext(stream);
     }
 
     return CIO_OK;
