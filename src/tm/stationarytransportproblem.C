@@ -274,9 +274,7 @@ StationaryTransportProblem :: saveContext(DataStream &stream, ContextMode mode)
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = UnknownsField->saveContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    UnknownsField->saveContext(stream);
 
     return CIO_OK;
 }
@@ -292,9 +290,7 @@ StationaryTransportProblem :: restoreContext(DataStream &stream, ContextMode mod
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = UnknownsField->restoreContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    UnknownsField->restoreContext(stream);
 
     return CIO_OK;
 }

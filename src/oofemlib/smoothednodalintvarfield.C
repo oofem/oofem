@@ -109,15 +109,13 @@ SmoothedNodalInternalVariableField :: evaluateAt(FloatArray &answer, DofManager 
     }
 }
 
-contextIOResultType
-SmoothedNodalInternalVariableField :: saveContext(DataStream &stream, ContextMode mode)
+void
+SmoothedNodalInternalVariableField :: saveContext(DataStream &stream)
 {
-    return CIO_OK;
 }
 
-contextIOResultType
-SmoothedNodalInternalVariableField :: restoreContext(DataStream &stream, ContextMode mode)
+void
+SmoothedNodalInternalVariableField :: restoreContext(DataStream &stream)
 {
-    return CIO_OK;
 }
 } // end namespace oofem

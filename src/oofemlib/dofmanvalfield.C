@@ -93,15 +93,11 @@ DofManValueField :: setDofManValue(int dofMan, FloatArray value)
     this->dmanvallist[dofMan-1] = std :: move(value);
 }
 
-contextIOResultType
-DofManValueField :: saveContext(DataStream &stream, ContextMode mode)
-{
-    return CIO_OK;
-}
+void
+DofManValueField :: saveContext(DataStream &stream)
+{}
 
-contextIOResultType
-DofManValueField :: restoreContext(DataStream &stream, ContextMode mode)
-{
-    return CIO_OK;
-}
+void
+DofManValueField :: restoreContext(DataStream &stream)
+{}
 } // end namespace oofem

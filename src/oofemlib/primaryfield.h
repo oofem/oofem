@@ -170,26 +170,10 @@ public:
      * @return Value of interest at given DOF.
      */
     virtual double giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *tStep);
-    /**
-     * Evaluates the field at given point
-     * @param answer Evaluated field at point.
-     * @param coords Coordinates of the point of interest.
-     * @param mode Mode of evaluated unknowns.
-     * @param tStep Time step of interest.
-     * @return Error code (0-ok, 1-point not found in domain).
-     */
-    virtual int evaluateAt(FloatArray &answer, const FloatArray &coords,
-                           ValueModeType mode, TimeStep *tStep);
-    /**
-     * Evaluates the field at given DofManager
-     * @param answer Evaluated field at dman.
-     * @param dman DOF manager to evaluate at.
-     * @param mode Mode of evaluated unknowns.
-     * @param tStep Time step of interest.
-     * @return Error code (0-ok, 1-point not found in domain).
-     */
-    virtual int evaluateAt(FloatArray &answer, DofManager *dman,
-                           ValueModeType mode, TimeStep *tStep);
+
+    int evaluateAt(FloatArray &answer, const FloatArray &coords, ValueModeType mode, TimeStep *tStep) override;
+    int evaluateAt(FloatArray &answer, DofManager *dman, ValueModeType mode, TimeStep *tStep) override;
+
     /**
      * Evaluates the field at given DOF manager, allows to select specific
      * dofs using mask
@@ -234,11 +218,10 @@ public:
      */
     virtual void advanceSolution(TimeStep *tStep);
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode);
+    void saveContext(DataStream &stream) override;
+    void restoreContext(DataStream &stream) override;
 
-    virtual const char *giveClassName() const { return "PrimaryField"; }
-
+    const char *giveClassName() const override { return "PrimaryField"; }
 
     int giveActualStepNumber() { return actualStepNumber; }
 protected:

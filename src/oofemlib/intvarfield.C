@@ -77,15 +77,12 @@ InternalVariableField :: evaluateAt(FloatArray &answer, DofManager *dman, ValueM
     }
 }
 
-contextIOResultType
-InternalVariableField :: saveContext(DataStream &stream, ContextMode mode)
+void
+InternalVariableField :: saveContext(DataStream &stream)
 {
-    return CIO_OK;
 }
 
-contextIOResultType
-InternalVariableField :: restoreContext(DataStream &stream, ContextMode mode)
-{
-    return CIO_OK;
-}
+void
+InternalVariableField :: restoreContext(DataStream &stream)
+{}
 } // end namespace oofem

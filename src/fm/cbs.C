@@ -490,13 +490,8 @@ CBS :: saveContext(DataStream &stream, ContextMode mode)
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = PressureField.saveContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    if ( ( iores = VelocityField.saveContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    PressureField.saveContext(stream);
+    VelocityField.saveContext(stream);
 
     if ( ( iores = prescribedTractionPressure.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
@@ -515,13 +510,8 @@ CBS :: restoreContext(DataStream &stream, ContextMode mode)
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = PressureField.restoreContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    if ( ( iores = VelocityField.restoreContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    PressureField.restoreContext(stream);
+    VelocityField.restoreContext(stream);
 
     if ( ( iores = prescribedTractionPressure.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);

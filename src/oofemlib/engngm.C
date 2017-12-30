@@ -1549,9 +1549,7 @@ contextIOResultType EngngModel :: saveContext(DataStream &stream, ContextMode mo
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = giveCurrentStep()->saveContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    giveCurrentStep()->saveContext(stream);
 
     if ( !stream.write(numberOfEquations) ) {
         THROW_CIOERR(CIO_IOERR);
@@ -1621,9 +1619,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream &stream, ContextMode
         currentStep.reset( new TimeStep(istep, this, 0, 0., 0., 0) );
     }
 
-    if ( ( iores = currentStep->restoreContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    currentStep->restoreContext(stream);
 
     // this->updateAttributes (currentStep);
 

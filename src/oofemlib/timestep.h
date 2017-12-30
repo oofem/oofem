@@ -198,21 +198,15 @@ public:
     IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
     /**
      * Stores receiver state to output stream.
-     * Receiver should write class-id first in order to allow test
-     * whether correct data are then restored.
      * @param stream Output stream.
-     * @param mode Determines amount of info required in stream (state, definition,...).
-     * @param obj Special parameter, used only to send particular integration.
-     * point to material class version of this method. Except this
-     * case, obj parameter is always NULL pointer.
      * @exception ContextIOERR If error encountered.
      */
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    void saveContext(DataStream &stream);
     /**
      * Restores the receiver state previously written in stream.
      * @see saveContext member function.
      */
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    void restoreContext(DataStream &stream);
 
     std :: string errorInfo(const char *func) { return std :: string("TimeStep::") + func; }
 };

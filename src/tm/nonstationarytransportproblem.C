@@ -482,9 +482,7 @@ NonStationaryTransportProblem :: saveContext(DataStream &stream, ContextMode mod
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = UnknownsField->saveContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+     UnknownsField->saveContext(stream);
 
     return CIO_OK;
 }
@@ -500,9 +498,7 @@ NonStationaryTransportProblem :: restoreContext(DataStream &stream, ContextMode 
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = UnknownsField->restoreContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    UnknownsField->restoreContext(stream);
 
     return CIO_OK;
 }

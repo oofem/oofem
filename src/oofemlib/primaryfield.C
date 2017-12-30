@@ -503,8 +503,8 @@ PrimaryField :: advanceSolution(TimeStep *tStep)
 }
 
 
-contextIOResultType
-PrimaryField :: saveContext(DataStream &stream, ContextMode mode)
+void
+PrimaryField :: saveContext(DataStream &stream)
 {
     contextIOResultType iores(CIO_IOERR);
 
@@ -529,16 +529,12 @@ PrimaryField :: saveContext(DataStream &stream, ContextMode mode)
     }
 
     for ( auto &step : solStepList ) {
-        if ( ( iores = step.saveContext(stream, mode) ) != CIO_OK ) {
-            THROW_CIOERR(iores);
-        }
+        step.saveContext(stream);
     }
-
-    return CIO_OK;
 }
 
-contextIOResultType
-PrimaryField :: restoreContext(DataStream &stream, ContextMode mode)
+void
+PrimaryField :: restoreContext(DataStream &stream)
 {
     contextIOResultType iores(CIO_IOERR);
 
@@ -564,11 +560,7 @@ PrimaryField :: restoreContext(DataStream &stream, ContextMode mode)
 
     for ( int i = 0; i <= nHistVectors; i++ ) {
         solStepList[i] = TimeStep(emodel);
-        if ( ( iores = solStepList[i].restoreContext(stream, mode) ) != CIO_OK ) {
-            THROW_CIOERR(iores);
-        }
+        solStepList[i].restoreContext(stream);
     }
-
-    return CIO_OK;
 }
 } // end namespace oofem

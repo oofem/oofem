@@ -54,7 +54,7 @@ protected:
     /// Associated domain (need its elements to interpolate)
     Domain *domain;
     /// Array of dofman values
-    std::vector< FloatArray >dmanvallist;
+    std::vector< FloatArray > dmanvallist;
 
 public:
     /**
@@ -62,16 +62,8 @@ public:
      */
     DofManValueField(FieldType b, Domain * d);
     virtual ~DofManValueField() { }
-    /**
-     * Evaluates the field at given point.
-     * @param coords Coordinates of the point of interest
-     * @param answer Field evaluated at coordinate.
-     * @param tStep Time step to evaluate for.
-     * @param mode Mode of value (total, velocity,...).
-     * @return Zero if ok, otherwise nonzero.
-     */
-    virtual int evaluateAt(FloatArray &answer, const FloatArray &coords,
-                           ValueModeType mode, TimeStep *tStep);
+
+    int evaluateAt(FloatArray &answer, const FloatArray &coords, ValueModeType mode, TimeStep *tStep) override;
 
     /**
      * Evaluates the field at given DofManager. This potentially can be resolved quickly, as
@@ -87,36 +79,17 @@ public:
      * @param tStep Time step to evaluate for.
      * @return Zero if ok, nonzero Error code (0-ok, 1-failed)
      */
-    virtual int evaluateAt(FloatArray &answer, DofManager *dman,
-                           ValueModeType mode, TimeStep *tStep);
+    int evaluateAt(FloatArray &answer, DofManager *dman, ValueModeType mode, TimeStep *tStep) override;
 
-    /**
-     * Stores receiver state to output stream.
-     * Writes the FEMComponent class-id in order to allow test whether correct data are then restored.
-     * @param stream Output stream.
-     * @param mode Determines amount of info in stream (state, definition,...).
-     * @return contextIOResultType.
-     * @exception Throws an ContextIOERR exception if error encountered.
-     */
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
-    /**
-     * Restores the receiver state previously written in stream.
-     * Reads the FEMComponent class-id in order to allow test consistency.
-     * @param stream Input stream.
-     * @param mode Determines amount of info in stream (state, definition,...).
-     * @return contextIOResultType.
-     * @exception Throws an ContextIOERR exception if error encountered.
-     */
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode);
-
+    void saveContext(DataStream &stream) override;
+    void restoreContext(DataStream &stream) override;
 
     /**
      * Sets the value associated to given dofManager
      */
     void setDofManValue(int dofMan, FloatArray value);
 
-    /// @return Class name of the receiver.
-    virtual const char *giveClassName() const { return "DofManValueField"; }
+    virtual const char *giveClassName() const override { return "DofManValueField"; }
 };
 } // end namespace oofem
 #endif // dofmanvalfield_h
