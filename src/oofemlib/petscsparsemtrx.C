@@ -335,7 +335,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int n, int m, cons
 
         total_nnz = 0;
         for ( int i = 0; i < leqs; i++ ) {
-            d_nnz(i) = rows_upper [ i ].giveSize() + rows_lower [ i ].giveSize();
+            d_nnz[i] = rows_upper [ i ].giveSize() + rows_lower [ i ].giveSize();
         }
     }
 
@@ -443,8 +443,8 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, const Unkn
 
         total_nnz = 0;
         for ( int i = 0; i < leqs; i++ ) {
-            d_nnz(i) = rows_upper [ i ].giveSize() + rows_lower [ i ].giveSize();
-            total_nnz += d_nnz(i);
+            d_nnz[i] = rows_upper [ i ].giveSize() + rows_lower [ i ].giveSize();
+            total_nnz += d_nnz[i];
         }
     }
 
@@ -918,22 +918,25 @@ PetscSparseMtrx :: toFloatMatrix(FloatMatrix &answer) const
 void
 PetscSparseMtrx :: printStatistics() const
 {
-    PetscViewerSetFormat(PETSC_VIEWER_STDOUT_SELF, PETSC_VIEWER_ASCII_INFO);
+    PetscViewerPushFormat(PETSC_VIEWER_STDOUT_SELF, PETSC_VIEWER_ASCII_INFO);
     MatView(this->mtrx, PETSC_VIEWER_STDOUT_SELF);
+    PetscViewerPopFormat(PETSC_VIEWER_STDOUT_SELF);
 }
 
 void
 PetscSparseMtrx :: printYourself() const
 {
-    PetscViewerSetFormat(PETSC_VIEWER_STDOUT_SELF, PETSC_VIEWER_ASCII_DENSE);
+    PetscViewerPushFormat(PETSC_VIEWER_STDOUT_SELF, PETSC_VIEWER_ASCII_DENSE);
     MatView(this->mtrx, PETSC_VIEWER_STDOUT_SELF);
+    PetscViewerPopFormat(PETSC_VIEWER_STDOUT_SELF);
 }
 
 void
 PetscSparseMtrx :: printMatlab() const
 {
-    PetscViewerSetFormat(PETSC_VIEWER_STDOUT_SELF, PETSC_VIEWER_ASCII_MATLAB);
+    PetscViewerPushFormat(PETSC_VIEWER_STDOUT_SELF, PETSC_VIEWER_ASCII_MATLAB);
     MatView(this->mtrx, PETSC_VIEWER_STDOUT_SELF);
+    PetscViewerPopFormat(PETSC_VIEWER_STDOUT_SELF);
 }
 
 void
