@@ -378,7 +378,7 @@ void TransportGradientNeumann :: computeTangent(FloatMatrix &tangent, TimeStep *
 #endif
     us.resize(KusD.giveNumberOfRows(), KusD.giveNumberOfColumns());
     for ( auto &n : domain->giveDofManagers() ) {
-        int k1 = n->giveDofWithID( this->dofs(0) )->__giveEquationNumber();
+        int k1 = n->giveDofWithID( this->dofs[0] )->__giveEquationNumber();
         if ( k1 ) {
             FloatArray *coords = n->giveCoordinates();
             for ( int i = 1; i <= nsd; ++i ) {
@@ -529,7 +529,7 @@ void TransportGradientNeumann :: integrateTangent(FloatMatrix &oTangent, Element
     FloatArray normal, n;
 
     FEInterpolation *interp = e->giveInterpolation(); // Geometry interpolation
-    //FEInterpolation *interpUnknown = e->giveInterpolation(this->dofs(0));
+    //FEInterpolation *interpUnknown = e->giveInterpolation(this->dofs[0]);
 
     int order = interp->giveInterpolationOrder();
     std :: unique_ptr< IntegrationRule > ir( interp->giveBoundaryIntegrationRule(order, boundary) );

@@ -158,8 +158,8 @@ void CompCol :: times(const FloatArray &x, FloatArray &answer) const
 
     for ( int j = 0; j < N; j++ ) {
         double rhs = x(j);
-        for ( int t = colptr_(j); t < colptr_(j + 1); t++ ) {
-            answer( rowind_(t) ) += val_(t) * rhs;
+        for ( int t = colptr_[j]; t < colptr_[j + 1]; t++ ) {
+            answer( rowind_[t] ) += val_[t] * rhs;
         }
     }
 }
@@ -231,13 +231,13 @@ int CompCol :: buildInternalStructure(EngngModel *eModel, int di, const UnknownN
     indx = 0;
 
     for ( int j = 0; j < neq; j++ ) { // column loop
-        colptr_(j) = indx;
-        for ( int row: columns [  j ] ) { // row loop
-            rowind_(indx++) = row;
+        colptr_[j] = indx;
+        for ( int row: columns [ j ] ) { // row loop
+            rowind_[indx++] = row;
         }
     }
 
-    colptr_(neq) = indx;
+    colptr_[neq] = indx;
 
     // allocate value array
     val_.resize(nz_);
@@ -361,22 +361,22 @@ double &CompCol :: at(int i, int j)
     // increment version
     this->version++;
 
-    for ( int t = colptr_(j - 1); t < colptr_(j); t++ ) {
-        if ( rowind_(t) == i - 1 ) {
-            return val_(t);
+    for ( int t = colptr_[j - 1]; t < colptr_[j]; t++ ) {
+        if ( rowind_[t] == i - 1 ) {
+            return val_[t];
         }
     }
 
     OOFEM_ERROR("Array accessing exception -- (%d,%d) out of bounds", i, j);
-    return val_(0); // return to suppress compiler warning message
+    return val_[0]; // return to suppress compiler warning message
 }
 
 
 double CompCol :: at(int i, int j) const
 {
-    for ( int t = colptr_(j - 1); t < colptr_(j); t++ ) {
-        if ( rowind_(t) == i - 1 ) {
-            return val_(t);
+    for ( int t = colptr_[j - 1]; t < colptr_[j]; t++ ) {
+        if ( rowind_[t] == i - 1 ) {
+            return val_[t];
         }
     }
 
@@ -384,15 +384,15 @@ double CompCol :: at(int i, int j) const
         return 0.0;
     } else {
         OOFEM_ERROR("Array accessing exception -- (%d,%d) out of bounds", i, j);
-        return ( 0 ); // return to suppress compiler warning message
+        return 0.; // return to suppress compiler warning message
     }
 }
 
 double CompCol :: operator() (int i, int j)  const
 {
-    for ( int t = colptr_(j); t < colptr_(j + 1); t++ ) {
-        if ( rowind_(t) == i ) {
-            return val_(t);
+    for ( int t = colptr_[j]; t < colptr_[j + 1]; t++ ) {
+        if ( rowind_[t] == i ) {
+            return val_[t];
         }
     }
 
@@ -400,7 +400,7 @@ double CompCol :: operator() (int i, int j)  const
         return 0.0;
     } else {
         OOFEM_ERROR("Array accessing exception -- (%d,%d) out of bounds", i, j);
-        return ( 0 ); // return to suppress compiler warning message
+        return 0.; // return to suppress compiler warning message
     }
 }
 
@@ -409,14 +409,14 @@ double &CompCol :: operator() (int i, int j)
     // increment version
     this->version++;
 
-    for ( int t = colptr_(j); t < colptr_(j + 1); t++ ) {
-        if ( rowind_(t) == i ) {
-            return val_(t);
+    for ( int t = colptr_[j]; t < colptr_[j + 1]; t++ ) {
+        if ( rowind_[t] == i ) {
+            return val_[t];
         }
     }
 
     OOFEM_ERROR("Array element (%d,%d) not in sparse structure -- cannot assign", i, j);
-    return val_(0); // return to suppress compiler warning message
+    return val_[0]; // return to suppress compiler warning message
 }
 
 void CompCol :: timesT(const FloatArray &x, FloatArray &answer) const
@@ -434,8 +434,8 @@ void CompCol :: timesT(const FloatArray &x, FloatArray &answer) const
 
     for ( int i = 0; i < N; i++ ) {
         double r = 0.0;
-        for ( int t = colptr_(i); t < colptr_(i + 1); t++ ) {
-            r += val_(t) * x( rowind_(t) );
+        for ( int t = colptr_[i]; t < colptr_[i + 1]; t++ ) {
+            r += val_(t) * x( rowind_[t] );
         }
 
         answer(i) = r;

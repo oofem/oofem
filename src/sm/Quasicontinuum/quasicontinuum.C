@@ -526,15 +526,15 @@ Quasicontinuum :: applyApproach3(Domain *d, int homMtrxType)
 
     // deactivate homogenized nodes
     for ( int i = 1; i <= d->giveNumberOfDofManagers(); i++ ) {
-        if ( !nodeList(i) ) {
-            /// d->giveNode(i)->deactivateYourself();
+        if ( !nodeList.at(i) ) {
+            // d->giveNode(i)->deactivateYourself();
         }
     }
 
     // deactivate homogenized elements
     for ( int i = 1; i <= d->giveNumberOfElements(); i++ ) {
-        if ( !elemList(i) ) {
-            /// d->giveElement(i)->deactivateYourself();
+        if ( !elemList.at(i) ) {
+            // d->giveElement(i)->deactivateYourself();
         }
     }
 

@@ -31,7 +31,6 @@
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-// Class DynCompRow
 
 // inspired by SL++
 
@@ -53,7 +52,7 @@
 namespace oofem {
 REGISTER_SparseMtrx(DynCompRow, SMT_DynCompRow);
 
-DynCompRow :: DynCompRow(void) : SparseMtrx(), base_(0)
+DynCompRow :: DynCompRow() : SparseMtrx(), base_(0)
 {
     rows_ = NULL;
     colind_  = NULL;
@@ -69,16 +68,11 @@ DynCompRow :: DynCompRow(int n) : SparseMtrx(n, n), base_(0)
 }
 
 
-/*****************************/
-/*  Copy constructor         */
-/*****************************/
-
 DynCompRow :: DynCompRow(const DynCompRow &S) : SparseMtrx(S.nRows, S.nColumns), base_(S.base_)
 {
-    int i;
     if ( S.rows_ ) {
         this->rows_ = new FloatArray * [ S.nRows ];
-        for ( i = 0; i < S.nRows; i++ ) {
+        for ( int i = 0; i < S.nRows; i++ ) {
             this->rows_ [ i ] = new FloatArray(*S.rows_ [ i ]);
         }
     } else {
@@ -87,7 +81,7 @@ DynCompRow :: DynCompRow(const DynCompRow &S) : SparseMtrx(S.nRows, S.nColumns),
 
     if ( S.colind_ ) {
         this->colind_ = new IntArray * [ S.nRows ];
-        for ( i = 0; i < S.nRows; i++ ) {
+        for ( int i = 0; i < S.nRows; i++ ) {
             this->colind_ [ i ] = new IntArray(*S.colind_ [ i ]);
         }
     } else {
@@ -100,13 +94,10 @@ DynCompRow :: DynCompRow(const DynCompRow &S) : SparseMtrx(S.nRows, S.nColumns),
 }
 
 
-// Destructor
 DynCompRow :: ~DynCompRow()
 {
-    int i;
-
     if ( this->rows_ ) {
-        for ( i = 0; i < nRows; i++ ) {
+        for ( int i = 0; i < nRows; i++ ) {
             delete this->rows_ [ i ];
         }
 
@@ -114,7 +105,7 @@ DynCompRow :: ~DynCompRow()
     }
 
     if ( this->colind_ ) {
-        for ( i = 0; i < nRows; i++ ) {
+        for ( int i = 0; i < nRows; i++ ) {
             delete this->colind_ [ i ];
         }
 
@@ -130,12 +121,10 @@ DynCompRow :: ~DynCompRow()
 
 DynCompRow &DynCompRow :: operator = ( const DynCompRow & C )
 {
-    base_   = C.base_;
-
-    int i;
+    base_ = C.base_;
 
     if ( this->rows_ ) {
-        for ( i = 0; i < nRows; i++ ) {
+        for ( int i = 0; i < nRows; i++ ) {
             delete this->rows_ [ i ];
         }
 
@@ -144,7 +133,7 @@ DynCompRow &DynCompRow :: operator = ( const DynCompRow & C )
 
     if ( C.rows_ ) {
         this->rows_ = new FloatArray * [ C.nRows ];
-        for ( i = 0; i < C.nRows; i++ ) {
+        for ( int i = 0; i < C.nRows; i++ ) {
             this->rows_ [ i ] = new FloatArray(*C.rows_ [ i ]);
         }
     } else {
@@ -153,7 +142,7 @@ DynCompRow &DynCompRow :: operator = ( const DynCompRow & C )
 
 
     if ( this->colind_ ) {
-        for ( i = 0; i < nRows; i++ ) {
+        for ( int i = 0; i < nRows; i++ ) {
             delete this->colind_ [ i ];
         }
 
@@ -162,7 +151,7 @@ DynCompRow &DynCompRow :: operator = ( const DynCompRow & C )
 
     if ( C.colind_ ) {
         this->colind_ = new IntArray * [ C.nRows ];
-        for ( i = 0; i < C.nRows; i++ ) {
+        for ( int i = 0; i < C.nRows; i++ ) {
             this->colind_ [ i ] = new IntArray(*C.colind_ [ i ]);
         }
     } else {
@@ -177,8 +166,7 @@ DynCompRow &DynCompRow :: operator = ( const DynCompRow & C )
 
 SparseMtrx *DynCompRow :: GiveCopy() const
 {
-    DynCompRow *result = new DynCompRow(*this);
-    return result;
+    return new DynCompRow(*this);
 }
 
 
@@ -192,13 +180,10 @@ void DynCompRow :: times(const FloatArray &x, FloatArray &answer) const
     answer.resize(nRows);
     answer.zero();
 
-    int j, t;
-    double r;
-
-    for ( j = 0; j < nRows; j++ ) {
-        r = 0.0;
-        for ( t = 1; t <= rows_ [ j ]->giveSize(); t++ ) {
-            r += rows_ [ j ]->at(t) * x( colind_ [ j ]->at(t) );
+    for ( int j = 0; j < nRows; j++ ) {
+        double r = 0.0;
+        for ( int t = 1; t <= rows_ [ j ]->giveSize(); t++ ) {
+            r += rows_ [ j ]->at(t) * x[ colind_ [ j ]->at(t) ];
         }
 
         answer(j) = r;
@@ -221,7 +206,6 @@ int DynCompRow :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
 
     IntArray loc;
     Domain *domain = eModel->giveDomain(di);
-    int i, ii, j, jj;
 
 #ifdef TIME_REPORT
     Timer timer;
@@ -231,7 +215,7 @@ int DynCompRow :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
     nColumns = nRows = neq;
 
     if ( colind_ ) {
-        for ( i = 0; i < nRows; i++ ) {
+        for ( int i = 0; i < nRows; i++ ) {
             delete this->colind_ [ i ];
         }
 
@@ -239,13 +223,13 @@ int DynCompRow :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
     }
 
     colind_ = ( IntArray ** ) new IntArray * [ neq ];
-    for ( j = 0; j < neq; j++ ) {
+    for ( int j = 0; j < neq; j++ ) {
         colind_ [ j ] = new IntArray();
     }
 
     // allocate value array
     if ( rows_ ) {
-        for ( i = 0; i < nRows; i++ ) {
+        for ( int i = 0; i < nRows; i++ ) {
             delete this->rows_ [ i ];
         }
 
@@ -253,16 +237,17 @@ int DynCompRow :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
     }
 
     rows_ = ( FloatArray ** ) new FloatArray * [ neq ];
-    for ( j = 0; j < neq; j++ ) {
+    for ( int j = 0; j < neq; j++ ) {
         rows_ [ j ] = new FloatArray();
     }
 
     for ( auto &elem : domain->giveElements() ) {
         elem->giveLocationArray(loc, s);
-
-        for ( i = 1; i <= loc.giveSize(); i++ ) { // row indx
+        for ( int i = 1; i <= loc.giveSize(); i++ ) { // row indx
+            int ii;
             if ( ( ii = loc.at(i) ) ) {
-                for ( j = 1; j <= loc.giveSize(); j++ ) { // col indx
+                for ( int j = 1; j <= loc.giveSize(); j++ ) { // col indx
+                    int jj;
                     if ( ( jj = loc.at(j) ) ) {
                         this->insertColInRow(ii - 1, jj - 1);
                     }
@@ -279,14 +264,16 @@ int DynCompRow :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
 
     for ( auto &gbc : domain->giveBcs() ) {
         ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( gbc.get() );
-        if ( bc != NULL ) {
+        if ( bc ) {
             bc->giveLocationArrays(r_locs, c_locs, UnknownCharType, s, s);
             for ( std :: size_t k = 0; k < r_locs.size(); k++ ) {
                 IntArray &krloc = r_locs [ k ];
                 IntArray &kcloc = c_locs [ k ];
                 for ( int i = 1; i <= krloc.giveSize(); i++ ) {
+                    int ii;
                     if ( ( ii = krloc.at(i) ) ) {
                         for ( int j = 1; j <= kcloc.giveSize(); j++ ) {
+                            int jj;
                             if ( ( jj = kcloc.at(j) ) ) {
                                 this->insertColInRow(ii - 1, jj - 1);
                             }
@@ -297,11 +284,8 @@ int DynCompRow :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
         }
     }
 
-
-
-
     int nz_ = 0;
-    for ( j = 0; j < neq; j++ ) {
+    for ( int j = 0; j < neq; j++ ) {
         nz_ += this->colind_ [ j ]->giveSize();
     }
 
@@ -320,23 +304,19 @@ int DynCompRow :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
 
 int DynCompRow :: assemble(const IntArray &loc, const FloatMatrix &mat)
 {
-    int i, j, ii, jj, dim;
+    int dim = mat.giveNumberOfRows();
 
 #  ifdef DEBUG
-    dim = mat.giveNumberOfRows();
     if ( dim != loc.giveSize() ) {
         OOFEM_ERROR("dimension of 'k' and 'loc' mismatch");
     }
-
 #  endif
 
-    dim = mat.giveNumberOfRows();
-
-    for ( j = 1; j <= dim; j++ ) {
-        jj = loc.at(j);
+    for ( int j = 1; j <= dim; j++ ) {
+        int jj = loc.at(j);
         if ( jj ) {
-            for ( i = 1; i <= dim; i++ ) {
-                ii = loc.at(i);
+            for ( int i = 1; i <= dim; i++ ) {
+                int ii = loc.at(i);
                 if ( ii ) {
                     this->at(ii, jj) += mat.at(i, j);
                 }
@@ -353,18 +333,19 @@ int DynCompRow :: assemble(const IntArray &rloc, const IntArray &cloc, const Flo
 {
     // optimized low-end implementation
     IntArray colsToAdd( rloc.giveSize() );
-    int i, ii, ii1, j, jj, jj1, colindx;
     int rsize = rloc.giveSize();
     int csize = cloc.giveSize();
 
-    for ( i = 0; i < rsize; i++ ) {
-        if ( ( ii = rloc(i) ) ) {
-            ii1 = ii - 1;
-            for ( j = 0; j < csize; j++ ) {
-                if ( ( jj = cloc(j) ) ) {
-                    jj1 = jj - 1;
+    for ( int i = 0; i < rsize; i++ ) {
+        int ii;
+        if ( ( ii = rloc[i] ) ) {
+            int ii1 = ii - 1;
+            for ( int j = 0; j < csize; j++ ) {
+                int jj;
+                if ( ( jj = cloc[j] ) ) {
+                    int jj1 = jj - 1;
 
-                    colindx = this->insertColInRow(ii1, jj1);
+                    int colindx = this->insertColInRow(ii1, jj1);
                     //if (rowind_[j-1]->at(t) == (i-1)) return columns_[j-1]->at(t);
                     rows_ [ ii1 ]->at(colindx) += mat(i, j);
                 }
@@ -473,12 +454,9 @@ void DynCompRow :: timesT(const FloatArray &x, FloatArray &answer) const
     answer.resize(nColumns);
     answer.zero();
 
-    int i, t;
-    double r;
-
-    for ( i = 0; i < nColumns; i++ ) {
-        r = x(i);
-        for ( t = 1; t <= rows_ [ i ]->giveSize(); t++ ) {
+    for ( int i = 0; i < nColumns; i++ ) {
+        double r = x(i);
+        for ( int t = 1; t <= rows_ [ i ]->giveSize(); t++ ) {
             answer( colind_ [ i ]->at(t) ) += rows_ [ i ]->at(t) * r;
         }
     }
@@ -488,21 +466,21 @@ void DynCompRow :: timesT(const FloatArray &x, FloatArray &answer) const
 
 void DynCompRow :: checkSizeTowards(IntArray &loc)
 {
-    int i, maxid = 0;
+    int maxid = 0;
     int size = loc.giveSize();
     // adjust the size of receiver
-    for ( i = 0; i < size; i++ ) {
-        maxid = max( maxid, loc(i) );
+    for ( int i = 0; i < size; i++ ) {
+        maxid = max( maxid, loc[i] );
     }
 
     this->growTo(maxid);
 
-    int ii, j, jj;
-
-    for ( i = 0; i < size; i++ ) {
-        if ( ( ii = loc(i) ) ) {
-            for ( j = 0; j < size; j++ ) {
-                if ( ( jj = loc(j) ) ) {
+    for ( int i = 0; i < size; i++ ) {
+        int ii;
+        if ( ( ii = loc[i] ) ) {
+            for ( int j = 0; j < size; j++ ) {
+                int jj;
+                if ( ( jj = loc[j] ) ) {
                     this->insertColInRow(ii - 1, jj - 1);
                 }
             }
@@ -513,27 +491,27 @@ void DynCompRow :: checkSizeTowards(IntArray &loc)
 
 void DynCompRow :: checkSizeTowards(const IntArray &rloc, const IntArray &cloc)
 {
-    int i, maxid = 0;
+    int maxid = 0;
     int rsize = rloc.giveSize();
     int csize = cloc.giveSize();
 
     // adjust the size of receiver
-    for ( i = 0; i < rsize; i++ ) {
-        maxid = max( maxid, rloc(i) );
+    for ( int i = 0; i < rsize; i++ ) {
+        maxid = max( maxid, rloc[i] );
     }
 
-    for ( i = 0; i < csize; i++ ) {
-        maxid = max( maxid, cloc(i) );
+    for ( int i = 0; i < csize; i++ ) {
+        maxid = max( maxid, cloc[i] );
     }
 
     this->growTo(maxid);
 
-    int ii, j, jj;
-
-    for ( i = 0; i < rsize; i++ ) {
-        if ( ( ii = rloc(i) ) ) {
-            for ( j = 0; j < csize; j++ ) {
-                if ( ( jj = cloc(j) ) ) {
+    for ( int i = 0; i < rsize; i++ ) {
+        int ii;
+        if ( ( ii = rloc[i] ) ) {
+            for ( int j = 0; j < csize; j++ ) {
+                int jj;
+                if ( ( jj = cloc[j] ) ) {
                     this->insertColInRow(ii - 1, jj - 1);
                 }
             }
@@ -604,7 +582,7 @@ int
 DynCompRow :: insertColInRow(int row, int col)
 {
     // insert col entry into row, preserving order of col indexes.
-    int i, oldsize = this->colind_ [ row ]->giveSize();
+    int oldsize = this->colind_ [ row ]->giveSize();
     int left = 1, right = oldsize;
     int middle = ( left + right ) / 2;
     int middleVal;
@@ -646,7 +624,7 @@ DynCompRow :: insertColInRow(int row, int col)
     colind_ [ row ]->resizeWithValues(oldsize + 1, DynCompRow_CHUNK);
     rows_ [ row ]->resizeWithValues(oldsize + 1, DynCompRow_CHUNK);
 
-    for ( i = oldsize; i >= right; i-- ) {
+    for ( int i = oldsize; i >= right; i-- ) {
         colind_ [ row ]->at(i + 1) = colind_ [ row ]->at(i);
         rows_ [ row ]->at(i + 1) = rows_ [ row ]->at(i);
     }
@@ -657,66 +635,6 @@ DynCompRow :: insertColInRow(int row, int col)
 }
 
 
-
-
-
-/* reference ILU(0) version
- * void
- * DynCompRow::ILUPYourself ()
- * {
- * int i, j, k, kk, krow, colk;
- * double multiplier;
- *
- * IntArray iw (nColumns);
- * diag_rowptr_.resize(nRows);
- *
- **#ifndef DynCompRow_USE_STL_SETS
- * for (i = 0; i < nRows; i++) // row loop
- *  if ((diag_rowptr_(i) = giveColIndx (i, i)) == 0) { // giveColIndx returns 1-based indexing
- * printf ("DynCompRow:: Zero diagonal member\n");
- * exit(1);
- * }
- *
- **#else
- * std::map<int, double>::iterator pos;
- * for (i = 0; i < nRows; i++) {// row loop
- * pos  = this->rows[i]->find(i);
- * if (pos != this->rows[i-1]->end())
- * diag_rowptr_(i) = *pos->first;
- * else {
- * printf ("DynCompRow:: Zero diagonal member\n");
- * exit(1);
- * }
- * }
- **#endif
- *
- * // FACTOR MATRIX //
- **#ifndef DynCompRow_USE_STL_SETS
- *
- * for (i=1; i< nRows; i++) { // loop  over rows
- * for (k=0; k < (diag_rowptr_(i)-1); k++) { // loop 1,...,i-1 for (i,k) \in NZ(A)
- * // initialize k-th row indexes
- * krow = colind_[i]->at(k+1);
- * for (kk=1;  kk<= rows_[krow]->giveSize(); kk++)
- *  iw(colind_[krow]->at(kk)) = kk;
- * multiplier = (rows_[i]->at(k+1) /= rows_[krow]->at(diag_rowptr_(krow)));
- * for (j=k+1; j < rows_[i]->giveSize(); j++) { // loop over k+1,...,n for (i,j) \in NZ(A)
- *  colk = iw (colind_[i]->at(j+1));   // column position of a(i,j) at row k
- *  if (colk) rows_[i]->at(j+1) -= multiplier * rows_[krow]->at(colk); // aij=aij-aik*akj
- * }
- * // Refresh all iw enries to zero
- * for (kk=1;  kk<= rows_[krow]->giveSize(); kk++)
- *  iw(colind_[krow]->at(kk)) = 0;
- * }
- * }
- *
- **#else
- * NOT IMPLEMENTED NOW
- **#endif
- * }
- */
-
-
 //#define ILU_0
 //#define ILU_DROP_TOL 1.e-8
 #define ILU_ROW_CHUNK 10
@@ -725,7 +643,7 @@ DynCompRow :: insertColInRow(int row, int col)
 void
 DynCompRow :: ILUPYourself(int part_fill, double drop_tol)
 {
-    int i, ii, j, jcol, k, kk, krow, ck;
+    int ck;
     int end, curr;
     double multiplier, inorm, val;
 
@@ -738,17 +656,17 @@ DynCompRow :: ILUPYourself(int part_fill, double drop_tol)
     timer.startTimer();
 #endif
 
-    for ( i = 0; i < nRows; i++ ) { // row loop
-        if ( ( diag_rowptr_(i) = giveColIndx(i, i) ) == 0 ) { // giveColIndx returns 1-based indexing
+    for ( int i = 0; i < nRows; i++ ) { // row loop
+        if ( ( diag_rowptr_[i] = giveColIndx(i, i) ) == 0 ) { // giveColIndx returns 1-based indexing
             OOFEM_ERROR("zero value on diagonal");
         }
     }
 
     /* FACTOR MATRIX */
 
-    for ( i = 1; i < nRows; i++ ) { // loop  over rows
+    for ( int i = 1; i < nRows; i++ ) { // loop  over rows
         inorm = 0.0;
-        for ( ii = 1; ii <= rows_ [ i ]->giveSize(); ii++ ) {
+        for ( int ii = 1; ii <= rows_ [ i ]->giveSize(); ii++ ) {
             val = rows_ [ i ]->at(ii);
             inorm += val * val;
         }
@@ -757,19 +675,19 @@ DynCompRow :: ILUPYourself(int part_fill, double drop_tol)
 
         w.resizeWithValues(rows_ [ i ]->giveSize(), ILU_ROW_CHUNK);
         iw.resizeWithValues(rows_ [ i ]->giveSize(), ILU_ROW_CHUNK);
-        for ( kk = 1; kk <= rows_ [ i ]->giveSize(); kk++ ) {
-            irw( colind_ [ i ]->at(kk) ) = kk;
-            iw(kk - 1) = colind_ [ i ]->at(kk);
-            w(kk - 1) = rows_ [ i ]->at(kk);
+        for ( int kk = 1; kk <= rows_ [ i ]->giveSize(); kk++ ) {
+            irw[ colind_ [ i ]->at(kk) ] = kk;
+            iw[kk - 1] = colind_ [ i ]->at(kk);
+            w[kk - 1] = rows_ [ i ]->at(kk);
         }
 
         //for (k=0; k < (diag_rowptr_(i)-1); k++) { // loop 1,...,i-1 for (i,k) \in NZ(A)
-        k = 0;
+        int k = 0;
         while ( iw.at(k + 1) < i ) {
             // initialize k-th row indexes
-            krow = iw.at(k + 1);
+            int krow = iw.at(k + 1);
             //multiplier = (rows_[i]->at(k+1) /= rows_[krow]->at(diag_rowptr_(krow)));
-            multiplier = ( w.at(k + 1) /= rows_ [ krow ]->at( diag_rowptr_(krow) ) );
+            multiplier = ( w.at(k + 1) /= rows_ [ krow ]->at( diag_rowptr_[krow] ) );
 
 
 #ifndef ILU_0
@@ -777,12 +695,12 @@ DynCompRow :: ILUPYourself(int part_fill, double drop_tol)
             if ( fabs(multiplier) >= drop_tol * inorm )
 #endif
             { // first drop rule
-                for ( j = 0; j < colind_ [ krow ]->giveSize(); j++ ) {
-                    jcol = colind_ [ krow ]->at(j + 1);
+                for ( int j = 0; j < colind_ [ krow ]->giveSize(); j++ ) {
+                    int jcol = colind_ [ krow ]->at(j + 1);
                     if ( jcol > krow ) {
-                        if ( irw(jcol) ) {
+                        if ( irw[jcol] ) {
                             //rows_[i]->at(irw(jcol)) -= multiplier*rows_[krow]->at(j+1);
-                            w.at( irw(jcol) ) -= multiplier * rows_ [ krow ]->at(j + 1);
+                            w.at( irw[jcol] ) -= multiplier * rows_ [ krow ]->at(j + 1);
                         } else {
 #ifndef ILU_0
                             // insert new entry
@@ -792,7 +710,7 @@ DynCompRow :: ILUPYourself(int part_fill, double drop_tol)
 
                             iw.at(newsize) = jcol;
                             w.at(newsize) = -multiplier * rows_ [ krow ]->at(j + 1);
-                            irw(jcol) = newsize;
+                            irw[jcol] = newsize;
 #endif
 
                             /*
@@ -812,13 +730,13 @@ DynCompRow :: ILUPYourself(int part_fill, double drop_tol)
 
             // scan iw to find closest index to krow
             ck = nColumns + 1;
-            for ( kk = 0; kk < iw.giveSize(); kk++ ) {
-                if ( ( ( iw(kk) - krow ) > 0 ) && ( ( iw(kk) - krow ) < ( ck - krow ) ) ) {
-                    ck = iw(kk);
+            for ( int kk = 0; kk < iw.giveSize(); kk++ ) {
+                if ( ( ( iw[kk] - krow ) > 0 ) && ( ( iw[kk] - krow ) < ( ck - krow ) ) ) {
+                    ck = iw[kk];
                 }
             }
 
-            k = irw(ck) - 1;
+            k = irw[ck] - 1;
         }
 
 #ifndef ILU_0
@@ -830,10 +748,10 @@ DynCompRow :: ILUPYourself(int part_fill, double drop_tol)
             if ( ( fabs( w.at(curr) ) < drop_tol * inorm ) && ( iw.at(curr) != i ) ) {
                 // remove entry
                 w.at(curr) = w.at(end);
-                irw( iw.at(curr) ) = 0;
+                irw[ iw.at(curr) ] = 0;
                 iw.at(curr) = iw.at(end);
                 if ( curr != end ) {
-                    irw( iw.at(curr) ) = curr;
+                    irw[ iw.at(curr) ] = curr;
                 }
 
                 end--;
@@ -851,7 +769,7 @@ DynCompRow :: ILUPYourself(int part_fill, double drop_tol)
         // select only the p-largest w values
         this->qsortRow(iw, irw, w, 0, iw.giveSize() - 1);
         //
-        int lsizeLimit = diag_rowptr_(i) - 1;
+        int lsizeLimit = diag_rowptr_[i] - 1;
         int usizeLimit = rows_ [ i ]->giveSize() - lsizeLimit;
 
         lsizeLimit += part_fill;
@@ -860,16 +778,16 @@ DynCompRow :: ILUPYourself(int part_fill, double drop_tol)
         int lnums = 0;
         int unums = 0;
         count = 0;
-        for ( kk = 1; kk <= iw.giveSize(); kk++ ) {
+        for ( int kk = 1; kk <= iw.giveSize(); kk++ ) {
             if ( iw.at(kk) < i ) { // lpart
                 if ( ++lnums > lsizeLimit ) {
-                    irw( iw.at(kk) ) = 0;
+                    irw[ iw.at(kk) ] = 0;
                 } else {
                     count++;
                 }
             } else if ( iw.at(kk) > i ) { // upart
                 if ( ++unums > usizeLimit ) {
-                    irw( iw.at(kk) ) = 0;
+                    irw[ iw.at(kk) ] = 0;
                 } else {
                     count++;
                 }
@@ -885,16 +803,16 @@ DynCompRow :: ILUPYourself(int part_fill, double drop_tol)
         colind_ [ i ]->resize(count);
 
         int icount = 1;
-        int kki, indx, idist, previndx = -1;
+        int indx, idist, previndx = -1;
         int kkend = iw.giveSize();
 
-        for ( kk = 1; kk <= count; kk++ ) {
+        for ( int kk = 1; kk <= count; kk++ ) {
             idist = nColumns + 2;
             indx = 0;
 
-            for ( kki = 1; kki <= kkend; kki++ ) {
-                if ( ( irw( iw.at(kki) ) != 0 ) && ( iw.at(kki) > previndx ) && ( ( iw.at(kki) - previndx ) < idist ) ) {
-                    idist = ( iw.at(kki) - previndx );
+            for ( int kki = 1; kki <= kkend; kki++ ) {
+                if ( ( irw[ iw.at(kki) ] != 0 ) && ( iw.at(kki) > previndx ) && ( ( iw.at(kki) - previndx ) < idist ) ) {
+                    idist = iw.at(kki) - previndx;
                     indx = kki;
                 }
             }
@@ -907,18 +825,18 @@ DynCompRow :: ILUPYourself(int part_fill, double drop_tol)
             rows_ [ i ]->at(icount) = w.at(indx);
             colind_ [ i ]->at(icount) = iw.at(indx);
             if ( colind_ [ i ]->at(icount) == i ) {
-                diag_rowptr_(i) = icount;
+                diag_rowptr_[i] = icount;
             }
 
             icount++;
 
 
             // exclude the indx entry from search by moving it to the end of list
-            irw( iw.at(indx) ) = 0;
+            irw[ iw.at(indx) ] = 0;
             iw.at(indx) = iw.at(kkend);
             w.at(indx)  = w.at(kkend);
-            if ( irw( iw.at(indx) ) != 0 ) {
-                irw( iw.at(indx) ) = indx;
+            if ( irw[ iw.at(indx) ] != 0 ) {
+                irw[ iw.at(indx) ] = indx;
             }
 
             kkend--;
@@ -948,8 +866,8 @@ DynCompRow :: ILUPYourself(int part_fill, double drop_tol)
         }
 
         //Refresh all iw enries to zero
-        for ( kk = 1; kk <= iw.giveSize(); kk++ ) {
-            irw( iw.at(kk) ) = 0;
+        for ( int kk = 1; kk <= iw.giveSize(); kk++ ) {
+            irw[ iw.at(kk) ] = 0;
         }
 
         //irw.zero();
@@ -970,36 +888,30 @@ void
 DynCompRow :: ILUPsolve(const FloatArray &x, FloatArray &y) const
 {
     int M = x.giveSize();
-    double r;
     FloatArray work(M);
-
-    int i, t;
 
     y.resize(M);
 
-    work.zero();
     // solve Lw=x
-    for ( i = 0; i < M; i++ ) {
-        r = x(i);
-        for ( t = 0; t < ( diag_rowptr_(i) - 1 ); t++ ) {
+    for ( int i = 0; i < M; i++ ) {
+        double r = x[i];
+        for ( int t = 0; t < ( diag_rowptr_[i] - 1 ); t++ ) {
             r -= rows_ [ i ]->at(t + 1) * work( colind_ [ i ]->at(t + 1) );
         }
 
-        work(i) = r;
+        work[i] = r;
     }
 
     y.zero();
     // solve Uy=w
-    for ( i = M - 1; i >= 0; i-- ) {
-        r = work(i);
-        for ( t = diag_rowptr_(i); t < rows_ [ i ]->giveSize(); t++ ) {
+    for ( int i = M - 1; i >= 0; i-- ) {
+        double r = work[i];
+        for ( int t = diag_rowptr_[i]; t < rows_ [ i ]->giveSize(); t++ ) {
             r -= rows_ [ i ]->at(t + 1) * y( colind_ [ i ]->at(t + 1) );
         }
 
-        y(i) = r / rows_ [ i ]->at( diag_rowptr_(i) );
+        y[i] = r / rows_ [ i ]->at( diag_rowptr_[i] );
     }
-
-    //return y;
 }
 
 
@@ -1009,27 +921,23 @@ DynCompRow :: ILUPtrans_solve(const FloatArray &x, FloatArray &y) const
     int M = x.giveSize();
     FloatArray work(M);
 
-    int i, t;
-
     y.resize(M);
-    //work.zero();
+
     // solve for U^Tw = x
-    for ( i = 0; i < M; i++ ) {
-        work(i) = ( x(i) + work(i) ) / rows_ [ i ]->at( diag_rowptr_(i) );
-        for ( t = diag_rowptr_(i); t < rows_ [ i ]->giveSize(); t++ ) {
-            work( colind_ [ i ]->at(t + 1) ) -= rows_ [ i ]->at(t + 1) * work(i);
+    for ( int i = 0; i < M; i++ ) {
+        work[i] = ( x[i] + work[i] ) / rows_ [ i ]->at( diag_rowptr_[i] );
+        for ( int t = diag_rowptr_[i]; t < rows_ [ i ]->giveSize(); t++ ) {
+            work( colind_ [ i ]->at(t + 1) ) -= rows_ [ i ]->at(t + 1) * work[i];
         }
     }
 
     // solve for L^T y = w
-    for ( i = M - 1; i >= 0; i-- ) {
-        y(i) = work(i);
-        for ( t = 1; t < diag_rowptr_(i); t++ ) {
-            work( colind_ [ i ]->at(t) ) -= rows_ [ i ]->at(t) * y(i);
+    for ( int i = M - 1; i >= 0; i-- ) {
+        y[i] = work[i];
+        for ( int t = 1; t < diag_rowptr_[i]; t++ ) {
+            work( colind_ [ i ]->at(t) ) -= rows_ [ i ]->at(t) * y[i];
         }
     }
-
-    //return y;
 }
 
 
@@ -1048,7 +956,7 @@ DynCompRow :: ILUPtrans_solve(const FloatArray &x, FloatArray &y) const
  * DynCompRow::qsortRowPartition (IntArray& ind, IntArray& ir, FloatArray& val, int l, int r)
  * {
  * int i=l-1, j=r;
- * double v = fabs(val(r));
+ * double v = fabs(val[r]);
  * int swap;
  * double dswap;
  *
@@ -1056,13 +964,13 @@ DynCompRow :: ILUPtrans_solve(const FloatArray &x, FloatArray &y) const
  * while (( fabs(val(++i)) >  v ));
  * while (( v > fabs(val(--j)))) if (j==l) break;
  * if (i >= j) break;
- * swap = ir(ind(i)); ir(ind(i)) = ir(ind(j)); ir(ind(j)) = swap;
- * swap = ind(i); ind(i) = ind(j); ind(j) = swap;
- * dswap= val(i); val(i) = val(j); val(j) = dswap;
+ * swap = ir(ind[i]); ir(ind[i]) = ir(ind[j]); ir(ind[j]) = swap;
+ * swap = ind[i]; ind[i] = ind[j]; ind[j] = swap;
+ * dswap= val[i]; val[i] = val[j]; val[j] = dswap;
  * }
- * swap = ir(ind(i)); ir(ind(i)) = ir(ind(r)); ir(ind(r)) = swap;
- * swap = ind(i); ind(i) = ind(r); ind(r) = swap;
- * dswap= val(i); val(i) = val(r); val(r) = dswap;
+ * swap = ir(ind[i]); ir(ind[i]) = ir(ind[r]); ir(ind[r]) = swap;
+ * swap = ind[i]; ind[i] = ind[r]; ind[r] = swap;
+ * dswap= val[i]; val[i] = val[r]; val[r] = dswap;
  *
  * return i;
  * }
@@ -1085,7 +993,7 @@ int
 DynCompRow :: qsortRowPartition(IntArray &ind, IntArray &ir, FloatArray &val, int l, int r)
 {
     int i = l - 1, j = r;
-    double v = fabs( val(r) );
+    double v = fabs( val[r] );
     int swap;
     double dswap;
 
@@ -1104,26 +1012,26 @@ DynCompRow :: qsortRowPartition(IntArray &ind, IntArray &ir, FloatArray &val, in
             break;
         }
 
-        swap = ir( ind(i) );
-        ir( ind(i) ) = ir( ind(j) );
-        ir( ind(j) ) = swap;
-        swap = ind(i);
-        ind(i) = ind(j);
-        ind(j) = swap;
-        dswap = val(i);
-        val(i) = val(j);
-        val(j) = dswap;
+        swap = ir[ ind[i] ];
+        ir[ ind[i] ] = ir[ ind[j] ];
+        ir[ ind[j] ] = swap;
+        swap = ind[i];
+        ind[i] = ind[j];
+        ind[j] = swap;
+        dswap = val[i];
+        val[i] = val[j];
+        val[j] = dswap;
     }
 
-    swap = ir( ind(i) );
-    ir( ind(i) ) = ir( ind(r) );
-    ir( ind(r) ) = swap;
-    swap = ind(i);
-    ind(i) = ind(r);
-    ind(r) = swap;
-    dswap = val(i);
-    val(i) = val(r);
-    val(r) = dswap;
+    swap = ir[ ind[i] ];
+    ir[ ind[i] ] = ir[ ind[r] ];
+    ir[ ind[r] ] = swap;
+    swap = ind[i];
+    ind[i] = ind[r];
+    ind[r] = swap;
+    dswap = val[i];
+    val[i] = val[r];
+    val[r] = dswap;
 
     return i;
 }

@@ -747,60 +747,51 @@ MatlabExportModule :: giveOutputStream(TimeStep *tStep)
 }
 
 void
-MatlabExportModule :: doOutputHomogenizeDofIDs(TimeStep *tStep,    FILE *FID)
+MatlabExportModule :: doOutputHomogenizeDofIDs(TimeStep *tStep, FILE *FID)
 {
-
-    std :: vector <FloatArray*> HomQuantities;
-    double Vol = 0.0;
+    std :: vector <FloatArray> HomQuantities;
+    double vol = 0.0;
 
     // Initialize vector of arrays constaining homogenized quantities
     HomQuantities.resize(internalVarsToExport.giveSize());
-
-    for (int j=0; j<internalVarsToExport.giveSize(); j++) {
-        HomQuantities.at(j) = new FloatArray;
-    }
 
     int nelem = this->elList.giveSize();
     for (int i = 1; i<=nelem; i++) {
         Element *e = this->emodel->giveDomain(1)->giveElement(elList.at(i));
         FEInterpolation *Interpolation = e->giveInterpolation();
 
-        Vol = Vol + e->computeVolumeAreaOrLength();
+        vol += e->computeVolumeAreaOrLength();
 
-        for ( GaussPoint *gp: *e->giveDefaultIntegrationRulePtr() ) {
+        for ( auto &gp: *e->giveDefaultIntegrationRulePtr() ) {
 
             for (int j=0; j<internalVarsToExport.giveSize(); j++) {
                 FloatArray elementValues;
-                e->giveIPValue(elementValues, gp, (InternalStateType) internalVarsToExport(j), tStep);
+                e->giveIPValue(elementValues, gp, (InternalStateType) internalVarsToExport[j], tStep);
                 double detJ=fabs(Interpolation->giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(e)));
 
                 elementValues.times(gp->giveWeight()*detJ);
-                if (HomQuantities.at(j)->giveSize() == 0) {
-                    HomQuantities.at(j)->resize(elementValues.giveSize());
-                    HomQuantities.at(j)->zero();
+                if (HomQuantities[j].giveSize() == 0) {
+                    HomQuantities[j].resize(elementValues.giveSize());
                 };
-                HomQuantities.at(j)->add(elementValues);
+                HomQuantities[j].add(elementValues);
             }
         }
     }
 
-
-    if (noscaling) Vol=1.0;
+    if (noscaling) vol = 1.0;
 
     for ( std :: size_t i = 0; i < HomQuantities.size(); i ++) {
-        FloatArray *thisIS;
-        thisIS = HomQuantities.at(i);
-        thisIS->times(1.0/Vol);
-        fprintf(FID, "\tspecials.%s = [", __InternalStateTypeToString ( InternalStateType (internalVarsToExport(i)) ) );
+        FloatArray &thisIS = HomQuantities[i];
+        thisIS.times(1.0/vol);
+        fprintf(FID, "\tspecials.%s = [", __InternalStateTypeToString ( (InternalStateType) internalVarsToExport[i] ) );
 
-        for (int j = 0; j<thisIS->giveSize(); j++) {
-            fprintf(FID, "%e", thisIS->at(j+1));
-            if (j!=(thisIS->giveSize()-1) ) {
+        for (int j = 0; j<thisIS.giveSize(); j++) {
+            fprintf(FID, "%e", thisIS.at(j+1));
+            if (j!=(thisIS.giveSize()-1) ) {
                 fprintf(FID, ", ");
             }
         }
         fprintf(FID, "];\n");
-        delete HomQuantities.at(i);
     }
 
 }

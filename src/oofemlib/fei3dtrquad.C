@@ -191,9 +191,9 @@ FEI3dTrQuad :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoord
 {
     double xi = lcoords.at(1);
     answer.resize(3);
-    answer(0) = 0.5 * ( xi - 1.0 ) * xi;
-    answer(1) = 0.5 * ( xi + 1.0 ) * xi;
-    answer(2) = 1.0 - xi * xi;
+    answer[0] = 0.5 * ( xi - 1.0 ) * xi;
+    answer[1] = 0.5 * ( xi + 1.0 ) * xi;
+    answer[2] = 1.0 - xi * xi;
 }
 
 
@@ -210,9 +210,9 @@ FEI3dTrQuad :: edgeEvaldNdxi(FloatArray &answer, int iedge, const FloatArray &lc
 {
     double xi = lcoords.at(1);
     answer.resize(3);
-    answer(0) = xi - 0.5;
-    answer(1) = xi + 0.5;
-    answer(2) = -2 * xi;
+    answer[0] = xi - 0.5;
+    answer[1] = xi + 0.5;
+    answer[2] = -2 * xi;
 }
 
 void
@@ -226,7 +226,7 @@ FEI3dTrQuad :: edgeLocal2global(FloatArray &answer, int iedge,
 
     answer.clear();
     for ( int i = 0; i < N.giveSize(); ++i ) {
-        answer.add( N(i), * cellgeo.giveVertexCoordinates( edgeNodes(i) ) );
+        answer.add( N[i], * cellgeo.giveVertexCoordinates( edgeNodes[i] ) );
     }
 }
 
@@ -323,8 +323,8 @@ FEI3dTrQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
     this->surfaceEvalN(N, isurf, lcoords, cellgeo);
 
     answer.clear();
-    for ( int i = 0; i < N.giveSize(); ++i ) {
-        answer.add( N(i), * cellgeo.giveVertexCoordinates(i) );
+    for ( int i = 1; i <= N.giveSize(); ++i ) {
+        answer.add( N.at(i), * cellgeo.giveVertexCoordinates(i) );
     }
 }
 

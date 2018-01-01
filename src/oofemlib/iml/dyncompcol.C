@@ -78,10 +78,9 @@ DynCompCol :: DynCompCol(int n) : SparseMtrx(n, n), base_(0)
 DynCompCol :: DynCompCol(const DynCompCol &S) : SparseMtrx(S.nRows, S.nColumns), base_(S.base_)
 {
 #ifndef DynCompCol_USE_STL_SETS
-    int i;
     if ( S.columns_ ) {
         this->columns_ = new FloatArray * [ S.nColumns ];
-        for ( i = 0; i < S.nColumns; i++ ) {
+        for ( int i = 0; i < S.nColumns; i++ ) {
             this->columns_ [ i ] = new FloatArray(*S.columns_ [ i ]);
         }
     } else {
@@ -90,7 +89,7 @@ DynCompCol :: DynCompCol(const DynCompCol &S) : SparseMtrx(S.nRows, S.nColumns),
 
     if ( S.rowind_ ) {
         this->rowind_ = new IntArray * [ S.nColumns ];
-        for ( i = 0; i < S.nColumns; i++ ) {
+        for ( int i = 0; i < S.nColumns; i++ ) {
             this->rowind_ [ i ] = new IntArray(*S.rowind_ [ i ]);
         }
     } else {
@@ -98,10 +97,9 @@ DynCompCol :: DynCompCol(const DynCompCol &S) : SparseMtrx(S.nRows, S.nColumns),
     }
 
 #else
-    int i;
     if ( S.columns ) {
         this->columns = new std :: map< int, double > * [ S.nColumns ];
-        for ( i = 0; i < S.nColumns; i++ ) {
+        for ( int i = 0; i < S.nColumns; i++ ) {
             this->columns [ i ] = new std :: map< int, double >(*S.columns [ i ]);
         }
     } else {
@@ -120,10 +118,9 @@ DynCompCol :: DynCompCol(const DynCompCol &S) : SparseMtrx(S.nRows, S.nColumns),
 DynCompCol :: ~DynCompCol()
 {
 #ifndef DynCompCol_USE_STL_SETS
-    int i;
 
     if ( this->columns_ ) {
-        for ( i = 0; i < nColumns; i++ ) {
+        for ( int i = 0; i < nColumns; i++ ) {
             delete this->columns_ [ i ];
         }
 
@@ -131,7 +128,7 @@ DynCompCol :: ~DynCompCol()
     }
 
     if ( this->rowind_ ) {
-        for ( i = 0; i < nColumns; i++ ) {
+        for ( int i = 0; i < nColumns; i++ ) {
             delete this->rowind_ [ i ];
         }
 
@@ -139,10 +136,9 @@ DynCompCol :: ~DynCompCol()
     }
 
 #else
-    int i;
 
     if ( this->columns ) {
-        for ( i = 0; i < nColumns; i++ ) {
+        for ( int i = 0; i < nColumns; i++ ) {
             delete this->columns [ i ];
         }
 
@@ -444,10 +440,10 @@ int DynCompCol :: assemble(const IntArray &rloc, const IntArray &cloc, const Flo
      */
 
     for ( i = 0; i < csize; i++ ) {
-        if ( ( ii = cloc(i) ) ) {
+        if ( ( ii = cloc[i] ) ) {
             ii1 = ii - 1;
             for ( j = 0; j < rsize; j++ ) {
-                if ( ( jj = rloc(j) ) ) {
+                if ( ( jj = rloc[j] ) ) {
                     jj1 = jj - 1;
 
                     /*
@@ -477,16 +473,16 @@ int DynCompCol :: assemble(const IntArray &rloc, const IntArray &cloc, const Flo
     }
 
 #else
-    int i, ii, ii1, j, jj, jj1;
+    int ii, jj;
     int rsize = rloc.giveSize();
     int csize = cloc.giveSize();
 
-    for ( i = 0; i < csize; i++ ) {
-        if ( ( ii = cloc(i) ) ) {
-            ii1 = ii - 1;
-            for ( j = 0; j < rsize; j++ ) {
-                if ( ( jj = rloc(j) ) ) {
-                    jj1 = jj - 1;
+    for ( int i = 0; i < csize; i++ ) {
+        if ( ( ii = cloc[i] ) ) {
+            int ii1 = ii - 1;
+            for ( int j = 0; j < rsize; j++ ) {
+                if ( ( jj = rloc[j] ) ) {
+                    int jj1 = jj - 1;
                     this->columns [ ii1 ] [ jj1 ] += mat(j, i);
                 }
             }
@@ -521,14 +517,14 @@ void DynCompCol :: zero()
 
 void DynCompCol :: printStatistics() const
 {
-    int j, nz_ = 0;
+    int nz_ = 0;
 #ifndef DynCompCol_USE_STL_SETS
-    for ( j = 0; j < nColumns; j++ ) {
+    for ( int j = 0; j < nColumns; j++ ) {
         nz_ += rowind_ [ j ]->giveSize();
     }
 
 #else
-    for ( j = 0; j < nColumns; j++ ) {
+    for ( int j = 0; j < nColumns; j++ ) {
         nz_ += columns [ j ].size();
 #endif
     OOFEM_LOG_DEBUG("DynCompCol info: neq is %d, nelem is %d\n", nColumns, nz_);
@@ -681,12 +677,10 @@ void DynCompCol :: timesT(const FloatArray &x, FloatArray &answer) const
     answer.zero();
 
 #ifndef DynCompCol_USE_STL_SETS
-    int i, t;
-    double r;
 
-    for ( i = 0; i < nColumns; i++ ) {
-        r = 0.0;
-        for ( t = 1; t <= columns_ [ i ]->giveSize(); t++ ) {
+    for ( int i = 0; i < nColumns; i++ ) {
+        double r = 0.0;
+        for ( int t = 1; t <= columns_ [ i ]->giveSize(); t++ ) {
             r += columns_ [ i ]->at(t) * x( rowind_ [ i ]->at(t) );
         }
 
@@ -694,7 +688,6 @@ void DynCompCol :: timesT(const FloatArray &x, FloatArray &answer) const
     }
 
 #else
-    double r;
     for ( int i = 0; i < nColumns; i++ ) {
         double r = 0.0;
         for ( auto &val: columns [ i ] ) {
@@ -711,22 +704,22 @@ void DynCompCol :: timesT(const FloatArray &x, FloatArray &answer) const
 
 void DynCompCol :: checkSizeTowards(IntArray &loc)
 {
-    int i, maxid = 0;
+    int maxid = 0;
     int size = loc.giveSize();
     // adjust the size of receiver
-    for ( i = 0; i < size; i++ ) {
-        maxid = max( maxid, loc(i) );
+    for ( int i = 0; i < size; i++ ) {
+        maxid = max( maxid, loc[i] );
     }
 
     this->growTo(maxid);
 
 #ifndef DynCompCol_USE_STL_SETS
-    int ii, j, jj;
+    int ii, jj;
 
-    for ( i = 0; i < size; i++ ) {
-        if ( ( ii = loc(i) ) ) {
-            for ( j = 0; j < size; j++ ) {
-                if ( ( jj = loc(j) ) ) {
+    for ( int i = 0; i < size; i++ ) {
+        if ( ( ii = loc[i] ) ) {
+            for ( int j = 0; j < size; j++ ) {
+                if ( ( jj = loc[j] ) ) {
                     this->insertRowInColumn(ii - 1, jj - 1);
                 }
             }
@@ -739,29 +732,29 @@ void DynCompCol :: checkSizeTowards(IntArray &loc)
 
 void DynCompCol :: checkSizeTowards(const IntArray &rloc, const IntArray &cloc)
 {
-    int i, maxid = 0;
+    int maxid = 0;
     int rsize = rloc.giveSize();
     int csize = cloc.giveSize();
 
     // adjust the size of receiver
-    for ( i = 0; i < rsize; i++ ) {
-        maxid = max( maxid, rloc(i) );
+    for ( int i = 0; i < rsize; i++ ) {
+        maxid = max( maxid, rloc[i] );
     }
 
-    for ( i = 0; i < csize; i++ ) {
-        maxid = max( maxid, cloc(i) );
+    for ( int i = 0; i < csize; i++ ) {
+        maxid = max( maxid, cloc[i] );
     }
 
     this->growTo(maxid);
 
 #ifndef DynCompCol_USE_STL_SETS
     IntArray rowsToAdd( rloc.giveSize() );
-    int ii, j, jj;
+    int ii, jj;
 
-    for ( i = 0; i < csize; i++ ) {
-        if ( ( ii = cloc(i) ) ) {
-            for ( j = 0; j < rsize; j++ ) {
-                if ( ( jj = rloc(j) ) ) {
+    for ( int i = 0; i < csize; i++ ) {
+        if ( ( ii = cloc[i] ) ) {
+            for ( int j = 0; j < rsize; j++ ) {
+                if ( ( jj = rloc[j] ) ) {
                     insertRowInColumn(ii - 1, jj - 1);
                 }
             }

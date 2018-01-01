@@ -116,9 +116,9 @@ public:
     virtual bool isAntisymmetric() const { return false; }
 
 
-    const double &val(int i) const { return val_(i); }
-    const int &row_ind(int i) const { return rowind_(i); }
-    const int &col_ptr(int i) const { return colptr_(i); }
+    const double &val(int i) const { return val_[i]; }
+    const int &row_ind(int i) const { return rowind_[i]; }
+    const int &col_ptr(int i) const { return colptr_[i]; }
     int dim(int i) const { return dim_ [ i ]; }
 
 protected:
@@ -126,9 +126,9 @@ protected:
     /*  Access and info functions  */
     /*******************************/
 
-    double &val(int i) { return val_(i); }
-    int &row_ind(int i) { return rowind_(i); }
-    int &col_ptr(int i) { return colptr_(i); }
+    double &val(int i) { return val_[i]; }
+    int &row_ind(int i) { return rowind_[i]; }
+    int &col_ptr(int i) { return colptr_[i]; }
 
     int size(int i) const { return dim_ [ i ]; }
     int NumNonzeros() const { return nz_; }

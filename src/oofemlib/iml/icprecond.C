@@ -68,12 +68,9 @@ CompCol_ICPreconditioner :: initialize(const CompCol &A)
 
     pntr_.resize(A.dim(1) + 1);
 
-
-    int i, j, k;
-
     nz_ = 0;
-    for ( k = 0; k < dim_ [ 1 ]; k++ ) {
-        for ( j = A.col_ptr(k); j < A.col_ptr(k + 1); j++ ) {
+    for ( int k = 0; k < dim_ [ 1 ]; k++ ) {
+        for ( int j = A.col_ptr(k); j < A.col_ptr(k + 1); j++ ) {
             if ( A.row_ind(j) >= k ) {
                 nz_++;
             }
@@ -84,23 +81,20 @@ CompCol_ICPreconditioner :: initialize(const CompCol &A)
     indx_.resize(nz_);
 
     // Copy just triangular part
-    pntr_(0) = 0;
-    for ( k = 0; k < dim_ [ 1 ]; k++ ) {
-        pntr_(k + 1) = pntr_(k);
-        for ( j = A.col_ptr(k); j < A.col_ptr(k + 1); j++ ) {
+    pntr_[0] = 0;
+    for ( int k = 0; k < dim_ [ 1 ]; k++ ) {
+        pntr_[k + 1] = pntr_[k];
+        for ( int j = A.col_ptr(k); j < A.col_ptr(k + 1); j++ ) {
             if ( A.row_ind(j) >= k ) {
-                i = pntr_(k + 1)++;
-                val_(i) = A.val(j);
-                indx_(i) = A.row_ind(j);
+                int i = pntr_[k + 1]++;
+                val_[i] = A.val(j);
+                indx_[i] = A.row_ind(j);
             }
         }
     }
 
-    //  for (i = 0; i < dim_[1]; i++)
-    //    qsortRow(indx_, val_, pntr_(i), pntr_(i+1) -1);
-
-    for ( i = 0; i < dim_ [ 1 ]; i++ ) {
-        if ( indx_( pntr_(i) ) != i ) {
+    for ( int i = 0; i < dim_ [ 1 ]; i++ ) {
+        if ( indx_[ pntr_[i] ] != i ) {
             OOFEM_ERROR("diagonal not found!");
         }
     }
@@ -128,62 +122,60 @@ CompCol_ICPreconditioner :: trans_solve(const FloatArray &x, FloatArray &y) cons
 void
 CompCol_ICPreconditioner :: ICFactor()
 {
-    int d, g, h, i, j, k, n = pntr_.giveSize() - 1;
-    double z;
+    int n = pntr_.giveSize() - 1;
+ 
+    for ( int k = 0; k < n - 1; k++ ) {
+        int d = pntr_[k];
+        double z = val_[d] = sqrt( val_[d] );
 
-    for ( k = 0; k < n - 1; k++ ) {
-        d = pntr_(k);
-        z = val_(d) = sqrt( val_(d) );
-
-        for ( i = d + 1; i < pntr_(k + 1); i++ ) {
-            val_(i) /= z;
+        for ( int i = d + 1; i < pntr_[k + 1]; i++ ) {
+            val_[i] /= z;
         }
 
-        for ( i = d + 1; i < pntr_(k + 1); i++ ) {
-            z = val_(i);
-            h = indx_(i);
-            g = i;
+        for ( int i = d + 1; i < pntr_[k + 1]; i++ ) {
+            double z = val_[i];
+            int h = indx_[i];
+            int g = i;
 
-            for ( j = pntr_(h); j < pntr_(h + 1); j++ ) {
-                for ( ; g < pntr_(k + 1) && indx_(g + 1) <= indx_(j); g++ ) {
-                    if ( indx_(g) == indx_(j) ) {
-                        val_(j) -= z * val_(g);
+            for ( int j = pntr_[h]; j < pntr_[h + 1]; j++ ) {
+                for ( ; g < pntr_[k + 1] && indx_[g + 1] <= indx_[j]; g++ ) {
+                    if ( indx_[g] == indx_[j] ) {
+                        val_[j] -= z * val_[g];
                     }
                 }
             }
         }
     }
 
-    d = pntr_(n - 1);
-    val_(d) = sqrt( val_(d) );
+    int d = pntr_[n - 1];
+    val_[d] = sqrt( val_[d] );
 }
 
 
 void
 CompCol_ICPreconditioner :: ICSolve(FloatArray &dest) const
 {
-    int i, t, M = dest.giveSize();
+    int M = dest.giveSize();
     FloatArray work(M);
-    double val;
     // lower diag
 
-    work.zero();
     // solve Uw=x
-    for ( i = 0; i < M; i++ ) {
-        work(i) = val = ( dest(i) + work(i) ) / val_( pntr_(i) );
-        for ( t = pntr_(i) + 1; t < pntr_(i + 1); t++ ) {
-            work( indx_(t) ) -= val_(t) * val;
+    for ( int i = 0; i < M; i++ ) {
+        double val;
+        work[i] = val = ( dest[i] + work[i] ) / val_( pntr_[i] );
+        for ( int t = pntr_[i] + 1; t < pntr_[i + 1]; t++ ) {
+            work( indx_[t] ) -= val_[t] * val;
         }
     }
 
     dest.zero();
     // solve U^Ty=w
-    for ( i = M - 1; i >= 0; i-- ) {
-        for ( t = pntr_(i) + 1; t < pntr_(i + 1); t++ ) {
-            dest(i) -= val_(t) * dest( indx_(t) );
+    for ( int i = M - 1; i >= 0; i-- ) {
+        for ( int t = pntr_[i] + 1; t < pntr_[i + 1]; t++ ) {
+            dest[i] -= val_[t] * dest( indx_[t] );
         }
 
-        dest(i) = ( work(i) + dest(i) ) / val_( pntr_(i) );
+        dest[i] = ( work[i] + dest[i] ) / val_( pntr_[i] );
     }
 }
 
@@ -205,16 +197,16 @@ int
 CompCol_ICPreconditioner :: qsortRowPartition(IntArray &src, FloatArray &val, int l, int r)
 {
     int i = l - 1, j = r;
-    int v = src(r);
+    int v = src[r];
     int swap;
     double dswap;
 
     for ( ; ; ) {
-        while ( ( src(++i) <  v ) ) {
+        while ( ( src[++i] <  v ) ) {
             ;
         }
 
-        while ( ( v < src(--j) ) ) {
+        while ( ( v < src[--j] ) ) {
             if ( j == l ) {
                 break;
             }
@@ -224,20 +216,20 @@ CompCol_ICPreconditioner :: qsortRowPartition(IntArray &src, FloatArray &val, in
             break;
         }
 
-        swap = src(i);
-        src(i) = src(j);
-        src(j) = swap;
-        dswap = val(i);
-        val(i) = val(j);
-        val(j) = dswap;
+        swap = src[i];
+        src[i] = src[j];
+        src[j] = swap;
+        dswap = val[i];
+        val[i] = val[j];
+        val[j] = dswap;
     }
 
-    swap = src(i);
-    src(i) = src(r);
-    src(r) = swap;
-    dswap = val(i);
-    val(i) = val(r);
-    val(r) = dswap;
+    swap = src[i];
+    src[i] = src[r];
+    src[r] = swap;
+    dswap = val[i];
+    val[i] = val[r];
+    val[r] = dswap;
 
     return i;
 }

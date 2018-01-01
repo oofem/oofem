@@ -294,7 +294,7 @@ void TransportGradientPeriodic :: computeTangent(FloatMatrix &k, TimeStep *tStep
 
     // Initial guess (Taylor assumption) helps KSP-iterations
     for ( auto &n : domain->giveDofManagers() ) {
-        int k1 = n->giveDofWithID( this->dofs(0) )->__giveEquationNumber();
+        int k1 = n->giveDofWithID( this->dofs[0] )->__giveEquationNumber();
         if ( k1 ) {
             FloatArray *coords = n->giveCoordinates();
             for ( int i = 1; i <= nsd; ++i ) {

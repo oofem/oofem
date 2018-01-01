@@ -105,20 +105,20 @@ tet21ghostsolid :: tet21ghostsolid(int n, Domain *aDomain) : NLStructuralElement
     };
 
     for ( int i = 0, j = 1; i < 10; ++i ) {
-        momentum_ordering(i * 3 + 0) = j++;
-        momentum_ordering(i * 3 + 1) = j++;
-        momentum_ordering(i * 3 + 2) = j++;
+        momentum_ordering[i * 3 + 0] = j++;
+        momentum_ordering[i * 3 + 1] = j++;
+        momentum_ordering[i * 3 + 2] = j++;
         if ( i <= 3 ) {
             j++;
         }
-        j = j + 3;
+        j += 3;
     }
 
     for ( int i = 0, j = 1; i < 10; ++i ) {
-        j = j + 3;
-        ghostdisplacement_ordering(i * 3 + 0) = j++;
-        ghostdisplacement_ordering(i * 3 + 1) = j++;
-        ghostdisplacement_ordering(i * 3 + 2) = j++;
+        j += 3;
+        ghostdisplacement_ordering[i * 3 + 0] = j++;
+        ghostdisplacement_ordering[i * 3 + 1] = j++;
+        ghostdisplacement_ordering[i * 3 + 2] = j++;
         if ( i <= 3 ) {
             j++;
         }

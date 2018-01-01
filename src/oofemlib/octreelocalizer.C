@@ -430,7 +430,8 @@ OctreeSpatialLocalizer :: initElementDataStructure(int region)
     FloatArray b0, b1;
 
     this->init();
-    if ( this->elementListsInitialized.giveSize() >= region + 1 && this->elementListsInitialized(region) ) {
+    printf("region = %d\n", region);
+    if ( this->elementListsInitialized.giveSize() >= region + 1 && this->elementListsInitialized[region] ) {
         return;
     }
 
@@ -444,7 +445,7 @@ OctreeSpatialLocalizer :: initElementDataStructure(int region)
             }
         }
     }
-    this->elementListsInitialized(region) = true;
+    this->elementListsInitialized[region] = true;
 }
 
 

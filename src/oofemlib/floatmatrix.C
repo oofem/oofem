@@ -31,11 +31,6 @@
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/*
- * The original idea for this class comes from
- * Dubois-Pelerin, Y.: "Object-Oriented  Finite Elements: Programming concepts and Implementation",
- * PhD Thesis, EPFL, Lausanne, 1992.
- */
 
 #include "floatmatrix.h"
 #include "floatarray.h"
@@ -217,42 +212,11 @@ bool FloatMatrix :: isFinite() const
     return true;
 }
 
-#ifdef DEBUG
-double &FloatMatrix :: at(int i, int j)
-// Returns the coefficient (i,j) of the receiver. Safer but slower than
-// the inline version of method 'at'.
-{
-    this->checkBounds(i, j);
-    return values [ ( j - 1 ) * nRows + i - 1 ];
-}
-
-double FloatMatrix :: at(int i, int j) const
-// Returns the coefficient (i,j) of the receiver. Safer but slower than
-// the inline version of method 'at'.
-{
-    this->checkBounds(i, j);
-    return values [ ( j - 1 ) * nRows + i - 1 ];
-}
-
-double &FloatMatrix :: operator() (int i, int j)
-{
-    this->checkBounds(i + 1, j + 1);
-    return values [ j * nRows + i ];
-}
-
-double FloatMatrix :: operator() (int i, int j) const
-{
-    this->checkBounds(i + 1, j + 1);
-    return values [ j * nRows + i ];
-}
-#endif
-
-
 void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &loc)
 {
     int ii, jj, size = src.giveNumberOfRows();
 
-#ifdef DEBUG
+#ifndef NDEBUG
     if ( size != loc.giveSize() ) {
         OOFEM_ERROR("dimensions of 'src' and 'loc' mismatch");
     }
@@ -280,7 +244,7 @@ void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &rowind, con
     int nr = src.giveNumberOfRows();
     int nc = src.giveNumberOfColumns();
 
-#ifdef DEBUG
+#ifndef NDEBUG
     if ( nr != rowind.giveSize() ) {
         OOFEM_ERROR("row dimensions of 'src' and 'rowind' mismatch");
     }
@@ -337,7 +301,7 @@ void FloatMatrix :: beTranspositionOf(const FloatMatrix &src)
 void FloatMatrix :: beProductOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatrix)
 // Receiver = aMatrix * bMatrix
 {
-#  ifdef DEBUG
+#  ifndef NDEBUG
     if ( aMatrix.nColumns != bMatrix.nRows ) {
         OOFEM_ERROR("error in product A*B : dimensions do not match");
     }
@@ -367,7 +331,7 @@ void FloatMatrix :: beProductOf(const FloatMatrix &aMatrix, const FloatMatrix &b
 void FloatMatrix :: beTProductOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatrix)
 // Receiver = aMatrix^T * bMatrix
 {
-#  ifdef DEBUG
+#  ifndef NDEBUG
     if ( aMatrix.nRows != bMatrix.nRows ) {
         OOFEM_ERROR("error in product A*B : dimensions do not match");
     }
@@ -397,7 +361,7 @@ void FloatMatrix :: beTProductOf(const FloatMatrix &aMatrix, const FloatMatrix &
 void FloatMatrix :: beProductTOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatrix)
 // Receiver = aMatrix * bMatrix^T
 {
-#  ifdef DEBUG
+#  ifndef NDEBUG
     if ( aMatrix.nColumns != bMatrix.nColumns ) {
         OOFEM_ERROR("error in product A*B : dimensions do not match");
     }
@@ -427,7 +391,7 @@ void FloatMatrix :: beProductTOf(const FloatMatrix &aMatrix, const FloatMatrix &
 void FloatMatrix :: addProductOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatrix)
 // Receiver = aMatrix * bMatrix
 {
-#  ifdef DEBUG
+#  ifndef NDEBUG
     if ( aMatrix.nColumns != bMatrix.nRows ) {
         OOFEM_ERROR("error in product A*B : dimensions do not match");
     }
@@ -459,7 +423,7 @@ void FloatMatrix :: addProductOf(const FloatMatrix &aMatrix, const FloatMatrix &
 void FloatMatrix :: addTProductOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatrix)
 // Receiver += aMatrix^T * bMatrix
 {
-#  ifdef DEBUG
+#  ifndef NDEBUG
     if ( aMatrix.nRows != bMatrix.nRows ) {
         OOFEM_ERROR("error in product A*B : dimensions do not match");
     }
@@ -560,7 +524,7 @@ void FloatMatrix :: setSubMatrix(const FloatMatrix &src, int sr, int sc)
     sc--;
 
     int srcRows = src.giveNumberOfRows(), srcCols = src.giveNumberOfColumns();
-#ifdef DEBUG
+#ifndef NDEBUG
     int nr = sr + srcRows;
     int nc = sc + srcCols;
 
@@ -585,7 +549,7 @@ void FloatMatrix :: setTSubMatrix(const FloatMatrix &src, int sr, int sc)
     sc--;
 
     int srcRows = src.giveNumberOfRows(), srcCols = src.giveNumberOfColumns();
-#ifdef DEBUG
+#ifndef NDEBUG
     int nr = sr + srcCols;
     int nc = sc + srcRows;
 
@@ -648,7 +612,7 @@ void FloatMatrix :: addSubVectorCol(const FloatArray &src, int sr, int sc)
 void FloatMatrix :: setColumn(const FloatArray &src, int c)
 {
     int nr = src.giveSize();
-#ifdef DEBUG
+#ifndef NDEBUG
     if ( this->giveNumberOfRows() != nr || c < 1 || c > this->giveNumberOfColumns() ) {
         OOFEM_ERROR("Size mismatch");
     }
@@ -662,7 +626,7 @@ void FloatMatrix :: setColumn(const FloatArray &src, int c)
 void FloatMatrix :: copyColumn(FloatArray &dest, int c) const
 {
     int nr = this->giveNumberOfRows();
-#ifdef DEBUG
+#ifndef NDEBUG
     if ( c < 1 || c > this->giveNumberOfColumns() ) {
         OOFEM_ERROR("Column outside range (%d)", c);
     }
@@ -837,7 +801,7 @@ void FloatMatrix :: beInverseOf(const FloatMatrix &src)
 {
     double det;
 
-#  ifdef DEBUG
+#  ifndef NDEBUG
     if ( !src.isSquare() ) {
         OOFEM_ERROR("cannot inverse a %d by %d matrix", src.nRows, src.nColumns);
     }
@@ -967,7 +931,7 @@ void FloatMatrix :: beSubMatrixOf(const FloatMatrix &src,
  * input parameters
  */
 {
-#ifdef DEBUG
+#ifndef NDEBUG
     if ( ( topRow < 1 ) || ( bottomRow < 1 ) || ( topCol < 1 ) || ( bottomCol < 1 ) ) {
         OOFEM_ERROR("subindexes size mismatch");
     }
@@ -1002,7 +966,7 @@ FloatMatrix :: beSubMatrixOf(const FloatMatrix &src, const IntArray &indxRow, co
  * this(i,j) = src( indxRow(i), indxCol(j) )
  */
 {
-#  ifdef DEBUG
+#  ifndef NDEBUG
     if ( indxRow.maximum() > src.giveNumberOfRows()  ||  indxCol.maximum() > src.giveNumberOfColumns()  ||
          indxRow.minimum() < 1  ||  indxCol.minimum() < 1 ) {
         OOFEM_ERROR("index exceeds source dimensions");
@@ -1032,7 +996,7 @@ void FloatMatrix :: add(const FloatMatrix &aMatrix)
         this->operator = ( aMatrix );
         return;
     }
-#     ifdef DEBUG
+#     ifndef NDEBUG
     if ( ( aMatrix.nRows != nRows || aMatrix.nColumns != nColumns ) && aMatrix.isNotEmpty() ) {
         OOFEM_ERROR("dimensions mismatch : (r1,c1)+(r2,c2) : (%d,%d)+(%d,%d)", nRows, nColumns, aMatrix.nRows, aMatrix.nColumns);
     }
@@ -1064,7 +1028,7 @@ void FloatMatrix :: add(double s, const FloatMatrix &aMatrix)
         this->times(s);
         return;
     }
-#     ifdef DEBUG
+#     ifndef NDEBUG
     if ( ( aMatrix.nRows != nRows || aMatrix.nColumns != nColumns ) && aMatrix.isNotEmpty() ) {
         OOFEM_ERROR("dimensions mismatch : (r1,c1)+(r2,c2) : (%d,%d)+(%d,%d)", nRows, nColumns, aMatrix.nRows, aMatrix.nColumns);
     }
@@ -1090,7 +1054,7 @@ void FloatMatrix :: subtract(const FloatMatrix &aMatrix)
         this->negated();
         return;
     }
-#     ifdef DEBUG
+#     ifndef NDEBUG
     if ( ( aMatrix.nRows != nRows || aMatrix.nColumns != nColumns ) && aMatrix.isNotEmpty() ) {
         OOFEM_ERROR("dimensions mismatch : (r1,c1)-(r2,c2) : (%d,%d)-(%d,%d)", nRows, nColumns, aMatrix.nRows, aMatrix.nColumns);
     }
@@ -1112,7 +1076,7 @@ void FloatMatrix :: subtract(const FloatMatrix &aMatrix)
 bool FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer, bool transpose)
 // solves equation b = this * x
 {
-#  ifdef DEBUG
+#  ifndef NDEBUG
     if ( !this->isSquare() ) {
         OOFEM_ERROR("cannot solve a %d by %d matrix", nRows, nColumns);
     }
@@ -1208,7 +1172,7 @@ void FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer, bool 
 // gaussian elimination - slow but safe
 //
 {
-#  ifdef DEBUG
+#  ifndef NDEBUG
     if ( !this->isSquare() ) {
         OOFEM_ERROR("cannot solve a %d by %d matrix", nRows, nColumns);
     }
@@ -1331,7 +1295,7 @@ void FloatMatrix :: zero()
 
 void FloatMatrix :: beUnitMatrix()
 {
-#ifdef DEBUG
+#ifndef NDEBUG
     if ( !this->isSquare() ) {
         OOFEM_ERROR("cannot make unit matrix of %d by %d matrix", nRows, nColumns);
     }
@@ -1408,7 +1372,7 @@ void FloatMatrix :: hardResize(int rows, int columns)
 double FloatMatrix :: giveDeterminant() const
 // Returns the determinant of the receiver.
 {
-#  ifdef DEBUG
+#  ifndef NDEBUG
     if ( !this->isSquare() ) {
         OOFEM_ERROR("cannot compute the determinant of a non-square %d by %d matrix", nRows, nColumns);
     }
@@ -1442,7 +1406,7 @@ void FloatMatrix :: beDiagonal(const FloatArray &diag)
 
 double FloatMatrix :: giveTrace() const
 {
-#  ifdef DEBUG
+#  ifndef NDEBUG
     if ( !this->isSquare() ) {
         OOFEM_ERROR("cannot compute the trace of a non-square %d by %d matrix", nRows, nColumns);
     }
@@ -1576,7 +1540,7 @@ void FloatMatrix :: rotatedWith(const FloatMatrix &r, char mode)
 void FloatMatrix :: symmetrized()
 // Initializes the lower half of the receiver to the upper half.
 {
-#  ifdef DEBUG
+#  ifndef NDEBUG
     if ( nRows != nColumns ) {
         OOFEM_ERROR("cannot symmetrize a non-square matrix");
     }
@@ -1659,7 +1623,7 @@ void FloatMatrix :: beMatrixForm(const FloatArray &aArray)
     // Revrites the vector on matrix form (symmetrized matrix used if size is 6),
     // order: 11, 22, 33, 23, 13, 12
     // order: 11, 22, 33, 23, 13, 12, 32, 31, 21
-#  ifdef DEBUG
+#  ifndef NDEBUG
     if ( aArray.giveSize() != 6 && aArray.giveSize() != 9 ) {
         OOFEM_ERROR("matrix dimension is not 3x3");
     }
@@ -1691,7 +1655,7 @@ void FloatMatrix :: beMatrixForm(const FloatArray &aArray)
 void FloatMatrix :: changeComponentOrder()
 {
     // Changes index order between abaqus <-> OOFEM
-//#  ifdef DEBUG
+//#  ifndef NDEBUG
 //    if ( nRows != 6 || nColumns != 6 ) {
 //        OOFEM_ERROR("matrix dimension is not 6x6");
 //    }
@@ -1736,7 +1700,7 @@ void FloatMatrix :: changeComponentOrder()
 
 double FloatMatrix :: computeReciprocalCondition(char p) const
 {
-#  ifdef DEBUG
+#  ifndef NDEBUG
     if ( !this->isSquare() ) {
         OOFEM_ERROR("receiver must be square (is %d by %d)", this->nRows, this->nColumns);
     }
@@ -1774,7 +1738,7 @@ double FloatMatrix :: computeReciprocalCondition(char p) const
 void FloatMatrix :: beMatrixFormOfStress(const FloatArray &aArray)
 {
     // Revrites the  matrix on vector form (symmetrized matrix used), order: 11, 22, 33, 23, 13, 12
-#  ifdef DEBUG
+#  ifndef NDEBUG
     if ( aArray.giveSize() != 6 && aArray.giveSize() != 9 ) {
         OOFEM_ERROR("matrix dimension is not 3x3");
     }
@@ -1934,7 +1898,7 @@ bool FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
     //double c_b27 = .01;
 
     /* Function Body */
-#ifdef DEBUG
+#ifndef NDEBUG
     if ( !isSquare() ) {
         OOFEM_ERROR("Not square matrix");
     }

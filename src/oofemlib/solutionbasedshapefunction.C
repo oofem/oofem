@@ -160,8 +160,8 @@ SolutionbasedShapeFunction :: computeCorrectionFactors(modeStruct &myMode, IntAr
     IntArray BoundaryList = mySet->giveBoundaryList();
 
     for ( int i = 0; i < BoundaryList.giveSize() / 2; i++ ) {
-        int ElementID = BoundaryList(2 * i);
-        int Boundary = BoundaryList(2 * i + 1);
+        int ElementID = BoundaryList[2 * i];
+        int Boundary = BoundaryList[2 * i + 1];
 
         Element *thisElement = model->giveDomain(1)->giveElement(ElementID);
         FEInterpolation *geoInterpolation = thisElement->giveInterpolation();
@@ -653,8 +653,8 @@ SolutionbasedShapeFunction :: initializeSurfaceData(modeStruct *mode)
 
     // First add all nodes to pNodes or nNodes respectively depending on coordinate and normal.
     for ( int i = 0; i < BoundaryList.giveSize() / 2; i++ ) {
-        int ElementID = BoundaryList(2 * i);
-        int Boundary = BoundaryList(2 * i + 1);
+        int ElementID = BoundaryList[2 * i];
+        int Boundary = BoundaryList[2 * i + 1];
 
         Element *e = m->giveDomain(1)->giveElement(ElementID);
         FEInterpolation *geoInterpolation = e->giveInterpolation();

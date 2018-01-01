@@ -543,13 +543,13 @@ void TriangleMesherInterface :: fixNodeMarkers(const std :: vector< FloatArray >
     n_markers.resize( nodes.size() );
 
     for ( std :: size_t i = 0; i < segments.size(); ++i ) {
-        for ( int j = 1; j <= segments [ i ].giveSize(); ++j ) {
-            n_markers [ segments [ i ].at(j) - 1 ].insertSortedOnce( s_markers(i) );
+        for ( int segment : segments [ i ] ) {
+            n_markers [ segment - 1 ].insertSortedOnce( s_markers[i] );
         }
     }
     for ( std :: size_t i = 0; i < triangles.size(); ++i ) {
-        for ( int j = 1; j <= triangles [ i ].giveSize(); ++j ) {
-            n_markers [ triangles [ i ].at(j) - 1 ].insertSortedOnce( t_markers(i) );
+        for ( int triangle : triangles [ i ] ) {
+            n_markers [ triangle - 1 ].insertSortedOnce( t_markers[i] );
         }
     }
 }
@@ -562,8 +562,8 @@ void TriangleMesherInterface :: simplifyPSLG(Triangle_PSLG &coarse, const Triang
     // Calculate the inverted connection node->element
     std :: set< int > *connectivity = new std :: set< int > [ nodes ];
     for ( int i = 0; i < segments; i++ ) {
-        connectivity [ pslg.segment_a(i) - 1 ].insert(i + 1);
-        connectivity [ pslg.segment_b(i) - 1 ].insert(i + 1);
+        connectivity [ pslg.segment_a[i] - 1 ].insert(i + 1);
+        connectivity [ pslg.segment_b[i] - 1 ].insert(i + 1);
     }
 
     // Some conservative error measure
@@ -621,21 +621,21 @@ void TriangleMesherInterface :: simplifyPSLG(Triangle_PSLG &coarse, const Triang
                     n1 = i;
                     n2 = seg_a.at(e1) == i ? seg_b.at(e1) : seg_a.at(e1);
 
-                    ab(0) = pslg.nx.at(n1) - pslg.nx.at(n0);
-                    ab(1) = pslg.ny.at(n1) - pslg.ny.at(n0);
-                    ac(0) = pslg.nx.at(n2) - pslg.nx.at(n0);
-                    ac(1) = pslg.ny.at(n2) - pslg.ny.at(n0);
+                    ab[0] = pslg.nx.at(n1) - pslg.nx.at(n0);
+                    ab[1] = pslg.ny.at(n1) - pslg.ny.at(n0);
+                    ac[0] = pslg.nx.at(n2) - pslg.nx.at(n0);
+                    ac[1] = pslg.ny.at(n2) - pslg.ny.at(n0);
 
                     abac = ab.dotProduct(ac);
                     acac = ac.computeSquaredNorm();
 
                     // Find the error (how far the point would be moved to obtain the following line without it).
                     if ( abac <= 0 || acac == 0 ) { // then -ab
-                        err_vec(0) = -ab(0);
-                        err_vec(1) = -ab(1);
+                        err_vec[0] = -ab[0];
+                        err_vec[1] = -ab[1];
                     } else if ( abac >= acac ) { // then bc
-                        err_vec(0) = pslg.nx.at(n2) - pslg.nx.at(n1);
-                        err_vec(1) = pslg.ny.at(n2) - pslg.ny.at(n1);
+                        err_vec[0] = pslg.nx.at(n2) - pslg.nx.at(n1);
+                        err_vec[1] = pslg.ny.at(n2) - pslg.ny.at(n1);
                     } else {
                         err_vec = ac;
                         err_vec.times(abac / acac);
@@ -648,8 +648,8 @@ void TriangleMesherInterface :: simplifyPSLG(Triangle_PSLG &coarse, const Triang
                     if ( ev_norm == 0 ) {
                         real_error = 0.0;
                     } else {
-                        error_x.at(n1) += err_vec(0);
-                        error_y.at(n1) += err_vec(1);
+                        error_x.at(n1) += err_vec[0];
+                        error_y.at(n1) += err_vec[1];
                         real_error = sqrt( error_x.at(n1) * error_x.at(n1) + error_y.at(n1) * error_y.at(n1) );
                     }
 
@@ -692,10 +692,10 @@ void TriangleMesherInterface :: simplifyPSLG(Triangle_PSLG &coarse, const Triang
                     n1 = i;
                     n2 = seg_a.at(e1) == i ? seg_b.at(e1) : seg_a.at(e1);
 
-                    ab(0) = pslg.nx.at(n1) - pslg.nx.at(n0);
-                    ab(1) = pslg.ny.at(n1) - pslg.ny.at(n0);
-                    bc(0) = pslg.nx.at(n2) - pslg.nx.at(n1);
-                    bc(1) = pslg.ny.at(n2) - pslg.ny.at(n1);
+                    ab[0] = pslg.nx.at(n1) - pslg.nx.at(n0);
+                    ab[1] = pslg.ny.at(n1) - pslg.ny.at(n0);
+                    bc[0] = pslg.nx.at(n2) - pslg.nx.at(n1);
+                    bc[1] = pslg.ny.at(n2) - pslg.ny.at(n1);
 
                     if ( ab.computeSquaredNorm() < minlen * minlen || bc.computeSquaredNorm() < minlen * minlen ) {
                         // Mark node for removal, remove second edge, more first edge connection to next node;

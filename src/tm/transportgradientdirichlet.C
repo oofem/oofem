@@ -183,7 +183,7 @@ void TransportGradientDirichlet :: computeCoefficientMatrix(FloatMatrix &C)
 
     for ( auto &n : domain->giveDofManagers() ) {
         FloatArray *coords = n->giveCoordinates();
-        Dof *d1 = n->giveDofWithID( this->dofs(0) );
+        Dof *d1 = n->giveDofWithID( this->dofs[0] );
         int k1 = d1->__givePrescribedEquationNumber();
         if ( k1 ) {
             // Add "xi" if it is defined. Classical Dirichlet b.c. is retained if this isn't defined (or set to zero).
@@ -318,7 +318,7 @@ void TransportGradientDirichlet :: computeTangent(FloatMatrix &tangent, TimeStep
     sol.resize(KfpC.giveNumberOfRows(), KfpC.giveNumberOfColumns());
     int nsd = domain->giveNumberOfSpatialDimensions();
     for ( auto &n : domain->giveDofManagers() ) {
-        int k1 = n->giveDofWithID( this->dofs(0) )->__giveEquationNumber();
+        int k1 = n->giveDofWithID( this->dofs[0] )->__giveEquationNumber();
         if ( k1 ) {
             FloatArray *coords = n->giveCoordinates();
             for ( int i = 1; i <= nsd; ++i ) {

@@ -145,7 +145,7 @@ FEI3dTrLin :: edgeLocal2global(FloatArray &answer, int iedge,
 
     answer.resize(0);
     for ( int i = 0; i < N.giveSize(); ++i ) {
-        answer.add( N(i), * cellgeo.giveVertexCoordinates( edgeNodes(i) ) );
+        answer.add( N[i], * cellgeo.giveVertexCoordinates( edgeNodes[i] ) );
     }
 }
 
@@ -223,8 +223,8 @@ FEI3dTrLin :: surfaceLocal2global(FloatArray &answer, int isurf,
     this->surfaceEvalN(N, isurf, lcoords, cellgeo);
 
     answer.resize(0);
-    for ( int i = 0; i < N.giveSize(); ++i ) {
-        answer.add( N(i), * cellgeo.giveVertexCoordinates(i) );
+    for ( int i = 1; i <= N.giveSize(); ++i ) {
+        answer.add( N.at(i), * cellgeo.giveVertexCoordinates(i) );
     }
 }
 

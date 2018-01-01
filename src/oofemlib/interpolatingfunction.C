@@ -66,10 +66,10 @@ InterpolatingFuction :: evaluate(FloatArray &answer, const std :: map< std :: st
     int i = 0, exitFlag = 0;
 
     //Check if gp lies in random field
-    double randomXStart = field(0);
-    double randomXEnd = field( 3 * ( numberReal(0) - 1 ) * numberReal(1) );
-    double randomYStart = field(1);
-    double randomYEnd = field(3 * ( numberReal(0) - 1 ) + 1);
+    double randomXStart = field[0];
+    double randomXEnd = field[ 3 * ( numberReal[0] - 1 ) * numberReal[1] ];
+    double randomYStart = field[1];
+    double randomYEnd = field[3 * ( numberReal[0] - 1 ) + 1];
 
     if ( !( globalCoordinates.at(1) > randomXStart && globalCoordinates.at(1) < randomXEnd &&
             globalCoordinates.at(2) > randomYStart && globalCoordinates.at(2) < randomYEnd ) ) {
@@ -77,18 +77,18 @@ InterpolatingFuction :: evaluate(FloatArray &answer, const std :: map< std :: st
     } else {
         //Determine the corner points of the square over which we are going to interpolate
         while ( exitFlag == 0 ) {
-            if ( field( 3 * i * numberReal(1) ) > globalCoordinates.at(1) ) {
+            if ( field[ 3 * i * numberReal[1] ] > globalCoordinates.at(1) ) {
                 if ( i == 0 ) { //Check soundness
                     OOFEM_ERROR("i is zero");
-                } else if ( i == numberReal(0) ) {
+                } else if ( i == numberReal[0] ) {
                     OOFEM_ERROR("i is equal to realNumber");
                 }
 
                 exitFlag = 1;
                 countXDown = i - 1;
                 countXUp = i;
-                helpX = ( globalCoordinates.at(1) - field( 3 * countXDown * numberReal(1) ) )
-                        / ( field( 3 * countXUp * numberReal(1) ) - field( 3 * countXDown * numberReal(1) ) );
+                helpX = ( globalCoordinates.at(1) - field[ 3 * countXDown * numberReal[1] ] )
+                        / ( field[ 3 * countXUp * numberReal[1] ] - field[ 3 * countXDown * numberReal[1] ] );
             }
 
             i++;
@@ -100,15 +100,15 @@ InterpolatingFuction :: evaluate(FloatArray &answer, const std :: map< std :: st
             if ( field(3 * i + 1) > globalCoordinates.at(2) ) {
                 if ( i == 0 ) {
                     OOFEM_ERROR("i is zero");
-                } else if ( i == numberReal(0) ) {
+                } else if ( i == numberReal[0] ) {
                     OOFEM_ERROR("i is equal to realNumber");
                 }
 
                 exitFlag = 1;
                 countYDown = i - 1;
                 countYUp = i;
-                helpY = ( globalCoordinates.at(2) - field(3 * countYDown + 1) )
-                        / ( field(3 * countYUp + 1) - field(3 * countYDown + 1) );
+                helpY = ( globalCoordinates.at(2) - field[3 * countYDown + 1] )
+                        / ( field[3 * countYUp + 1] - field[3 * countYDown + 1] );
             }
 
             i++;
@@ -117,10 +117,10 @@ InterpolatingFuction :: evaluate(FloatArray &answer, const std :: map< std :: st
         //Do the interpolation
         if ( randomVariable == 0. ) {
             randomVariable =
-                ( 1. - helpX ) * ( 1. - helpY ) * field(3 * ( countXDown * numberReal(1) + countYDown ) + 2) +
-            helpX * ( 1. - helpY ) * field(3 * ( countXUp * numberReal(1) + countYDown ) + 2) +
-            helpX *helpY *field(3 * ( countXUp *numberReal ( 1 ) + countYUp ) + 2) +
-            ( 1. - helpX ) * helpY * field(3 * ( countXDown * numberReal(1) + countYUp ) + 2);
+                ( 1. - helpX ) * ( 1. - helpY ) * field[3 * ( countXDown * numberReal[1] + countYDown ) + 2] +
+                helpX * ( 1. - helpY ) * field[3 * ( countXUp * numberReal[1] + countYDown ) + 2] +
+                helpX * helpY * field[3 * ( countXUp * numberReal[1] + countYUp ) + 2] +
+                ( 1. - helpX ) * helpY * field[3 * ( countXDown * numberReal[1] + countYUp ) + 2];
         }
     }
 
@@ -158,14 +158,14 @@ InterpolatingFuction :: initializeFrom(InputRecord *ir)
     double deltaX, deltaY;
     numberReal.resize(2);
     numberReal.zero();
-    inputField >> numberReal(0) >> numberReal(1) >> deltaX >> deltaY;
+    inputField >> numberReal[0] >> numberReal[1] >> deltaX >> deltaY;
 
-    field.resize( 3 * numberReal(0) * numberReal(1) );
+    field.resize( 3 * numberReal[0] * numberReal[1] );
     field.zero();
 
     //Read in coordinates and field values
-    for ( int i = 0; i < numberReal(0) * numberReal(1); i++ ) {
-        inputField >> field(3 * i) >> field(3 * i + 1) >> field(3 * i + 2);
+    for ( int i = 0; i < numberReal[0] * numberReal[1]; i++ ) {
+        inputField >> field[3 * i] >> field[3 * i + 1] >> field[3 * i + 2];
     }
 
     return IRRT_OK;

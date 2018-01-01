@@ -32,8 +32,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-// Class SymCompCol
-
 // inspired by
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*             ********   ***                                 SparseLib++    */
@@ -64,10 +62,6 @@
 /* provided ``as is'' without expressed or implied warranty.                 */
 /*                                                                           */
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-
-/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*          Compressed column symmetric sparse matrix (0-based)          */
-/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 #include "symcompcol.h"
 #include "floatarray.h"
@@ -101,12 +95,9 @@ SymCompCol :: SymCompCol(const SymCompCol &S) : CompCol(S)
 
 SparseMtrx *SymCompCol :: GiveCopy() const
 {
-    SymCompCol *result = new SymCompCol(*this);
-    return result;
+    return new SymCompCol(*this);
 }
 
-
-#define MAP(i, j) map [ ( j ) * neq - ( j ) * ( ( j ) + 1 ) / 2 + ( i ) ]
 
 int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &s)
 {
@@ -139,7 +130,7 @@ int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
 
     for ( auto &gbc : domain->giveBcs() ) {
         ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( gbc.get() );
-        if ( bc != NULL ) {
+        if ( bc ) {
             bc->giveLocationArrays(r_locs, c_locs, UnknownCharType, s, s);
             for ( std :: size_t k = 0; k < r_locs.size(); k++ ) {
                 IntArray &krloc = r_locs [ k ];
@@ -167,14 +158,14 @@ int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
     colptr_.resize(neq + 1);
     indx = 0;
 
-    for ( int j = 0; j < neq; j++ ) { // column loop
-        colptr_(j) = indx;
-        for ( int row: columns [ j ] ) { // row loop
-            rowind_(indx++) = row;
+    for ( int j = 0; j < neq; j++ ) {
+        colptr_[j] = indx;
+        for ( int row: columns [ j ] ) {
+            rowind_[indx++] = row;
         }
     }
 
-    colptr_(neq) = indx;
+    colptr_[neq] = indx;
 
     // allocate value array
     val_.resize(nz_);
@@ -209,13 +200,13 @@ void SymCompCol :: times(const FloatArray &x, FloatArray &answer) const
     for ( int j = 0; j < N; j++ ) {
         double rhs = x(j);
         double sum = 0.0;
-        for ( int t = colptr_(j) + 1; t < colptr_(j + 1); t++ ) {
-            answer( rowind_(t) ) += val_(t) * rhs; // column loop
-            sum += val_(t) * x( rowind_(t) ); // row loop
+        for ( int t = colptr_[j] + 1; t < colptr_[j + 1]; t++ ) {
+            answer[ rowind_[t] ] += val_[t] * rhs; // column loop
+            sum += val_[t] * x[ rowind_[t] ]; // row loop
         }
 
         answer(j) += sum;
-        answer(j) += val_( colptr_(j) ) * rhs; // diagonal
+        answer(j) += val_[ colptr_[j] ] * rhs; // diagonal
     }
 }
 
@@ -226,7 +217,6 @@ void SymCompCol :: times(double x)
     // increment version
     this->version++;
 }
-
 
 
 int SymCompCol :: assemble(const IntArray &loc, const FloatMatrix &mat)
@@ -272,6 +262,7 @@ int SymCompCol :: assemble(const IntArray &loc, const FloatMatrix &mat)
     return 1;
 }
 
+
 int SymCompCol :: assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat)
 {
     int dim1, dim2;
@@ -312,6 +303,7 @@ int SymCompCol :: assemble(const IntArray &rloc, const IntArray &cloc, const Flo
     return 1;
 }
 
+
 void SymCompCol :: zero()
 {
     val_.zero();
@@ -320,9 +312,6 @@ void SymCompCol :: zero()
     this->version++;
 }
 
-/*********************/
-/*   Array access    */
-/*********************/
 
 double &SymCompCol :: at(int i, int j)
 {
@@ -335,14 +324,14 @@ double &SymCompCol :: at(int i, int j)
     // increment version
     this->version++;
 
-    for ( int t = colptr_(jj - 1); t < colptr_(jj); t++ ) {
-        if ( rowind_(t) == ( ii - 1 ) ) {
-            return val_(t);
+    for ( int t = colptr_[jj - 1]; t < colptr_[jj]; t++ ) {
+        if ( rowind_[t] == ( ii - 1 ) ) {
+            return val_[t];
         }
     }
 
     OOFEM_ERROR("Array accessing exception -- out of bounds");
-    return val_(0); // return to suppress compiler warning message
+    return val_[0]; // return to suppress compiler warning message
 }
 
 
@@ -354,9 +343,9 @@ double SymCompCol :: at(int i, int j) const
         jj = i;
     }
 
-    for ( int t = colptr_(jj - 1); t < colptr_(jj); t++ ) {
-        if ( rowind_(t) == ( ii - 1 ) ) {
-            return val_(t);
+    for ( int t = colptr_[jj - 1]; t < colptr_[jj]; t++ ) {
+        if ( rowind_[t] == ( ii - 1 ) ) {
+            return val_[t];
         }
     }
 
@@ -376,9 +365,9 @@ double SymCompCol :: operator() (int i, int j)  const
         jj = i;
     }
 
-    for ( int t = colptr_(jj); t < colptr_(jj + 1); t++ ) {
-        if ( rowind_(t) == ii ) {
-            return val_(t);
+    for ( int t = colptr_[jj]; t < colptr_[jj + 1]; t++ ) {
+        if ( rowind_[t] == ii ) {
+            return val_[t];
         }
     }
 
@@ -401,8 +390,8 @@ double &SymCompCol :: operator() (int i, int j)
     // increment version
     this->version++;
 
-    for ( int t = colptr_(jj); t < colptr_(jj + 1); t++ ) {
-        if ( rowind_(t) == ii ) {
+    for ( int t = colptr_[jj]; t < colptr_[jj + 1]; t++ ) {
+        if ( rowind_[t] == ii ) {
             return val_(t);
         }
     }

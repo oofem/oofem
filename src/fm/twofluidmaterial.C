@@ -117,7 +117,7 @@ TwoFluidMaterial :: CreateStatus(GaussPoint *gp) const
 FluidDynamicMaterial *
 TwoFluidMaterial :: giveMaterial(int i) const
 {
-    return static_cast< FluidDynamicMaterial * >( domain->giveMaterial( slaveMaterial(i) ) );
+    return static_cast< FluidDynamicMaterial * >( domain->giveMaterial( slaveMaterial[i] ) );
 }
 
 void
@@ -180,8 +180,8 @@ TwoFluidMaterialStatus :: TwoFluidMaterialStatus(int n, Domain *d, GaussPoint *g
     slaveGp0( new GaussPoint(NULL, 0, FloatArray(), 0., gp->giveMaterialMode()) ),
     slaveGp1( new GaussPoint(NULL, 0, FloatArray(), 0., gp->giveMaterialMode()) )
 {
-    this->slaveGp0->setMaterialStatus( domain->giveMaterial( slaveMaterial(0) )->CreateStatus(this->slaveGp0.get()), this->giveNumber() );
-    this->slaveGp1->setMaterialStatus( domain->giveMaterial( slaveMaterial(1) )->CreateStatus(this->slaveGp0.get()), this->giveNumber() );
+    this->slaveGp0->setMaterialStatus( domain->giveMaterial( slaveMaterial[0] )->CreateStatus(this->slaveGp0.get()), this->giveNumber() );
+    this->slaveGp1->setMaterialStatus( domain->giveMaterial( slaveMaterial[1] )->CreateStatus(this->slaveGp0.get()), this->giveNumber() );
 }
 
 

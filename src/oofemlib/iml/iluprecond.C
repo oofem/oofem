@@ -80,8 +80,7 @@ CompCol_ILUPreconditioner :: init(const SparseMtrx &A)
 void
 CompCol_ILUPreconditioner :: initialize(const CompCol &A)
 {
-    int i, j, k, pn, qn, rn;
-    double multiplier;
+    int pn, qn, rn;
 
     // Copy
     dim_ [ 0 ] = A.giveNumberOfRows();
@@ -94,8 +93,8 @@ CompCol_ILUPreconditioner :: initialize(const CompCol &A)
     u_nz_ = 0;
 
     // Get size of l and u
-    for ( i = 0; i < dim_ [ 1 ]; i++ ) {
-        for ( j = A.col_ptr(i); j < A.col_ptr(i + 1); j++ ) {
+    for ( int i = 0; i < dim_ [ 1 ]; i++ ) {
+        for ( int j = A.col_ptr(i); j < A.col_ptr(i + 1); j++ ) {
             if ( A.row_ind(j) > i ) {
                 l_nz_++;
             } else {
@@ -109,22 +108,22 @@ CompCol_ILUPreconditioner :: initialize(const CompCol &A)
     l_rowind_.resize(l_nz_);
     u_rowind_.resize(u_nz_);
 
-    l_colptr_(0) = u_colptr_(0) = 0;
+    l_colptr_[0] = u_colptr_[0] = 0;
 
     // Split up A into l and u
-    for ( i = 0; i < dim_ [ 1 ]; i++ ) {
-        l_colptr_(i + 1) = l_colptr_(i);
-        u_colptr_(i + 1) = u_colptr_(i);
+    for ( int i = 0; i < dim_ [ 1 ]; i++ ) {
+        l_colptr_[i + 1] = l_colptr_[i];
+        u_colptr_[i + 1] = u_colptr_[i];
 
-        for ( j = A.col_ptr(i); j < A.col_ptr(i + 1); j++ ) {
+        for ( int j = A.col_ptr(i); j < A.col_ptr(i + 1); j++ ) {
             if ( A.row_ind(j) > i ) {
-                k = l_colptr_(i + 1)++;
-                l_val_(k) = A.val(j);
-                l_rowind_(k) = A.row_ind(j);
+                int k = l_colptr_[i + 1]++;
+                l_val_[k] = A.val(j);
+                l_rowind_[k] = A.row_ind(j);
             } else if ( A.row_ind(j) <= i ) {
-                k = u_colptr_(i + 1)++;
-                u_val_(k) = A.val(j);
-                u_rowind_(k) = A.row_ind(j);
+                int k = u_colptr_[i + 1]++;
+                u_val_[k] = A.val(j);
+                u_rowind_[k] = A.row_ind(j);
             }
         }
     }
@@ -137,35 +136,34 @@ CompCol_ILUPreconditioner :: initialize(const CompCol &A)
      * }
      */
     // Factor matrix
-    for ( i = 0; i < dim_ [ 0 ] - 1; i++ ) {
-        multiplier = u_val_(u_colptr_(i + 1) - 1);
+    for ( int i = 0; i < dim_ [ 0 ] - 1; i++ ) {
+        double multiplier = u_val_[u_colptr_[i + 1] - 1];
 
-        for ( j = l_colptr_(i); j < l_colptr_(i + 1); j++ ) {
-            l_val_(j) /= multiplier;
+        for ( int j = l_colptr_[i]; j < l_colptr_[i + 1]; j++ ) {
+            l_val_[j] /= multiplier;
         }
 
-        for ( j = u_colptr_(i + 1); j < u_colptr_(i + 2) - 1; j++ ) {
-            multiplier = u_val_(j);
+        for ( int j = u_colptr_[i + 1]; j < u_colptr_[i + 2] - 1; j++ ) {
+            multiplier = u_val_[j];
             qn = j + 1;
-            rn = l_colptr_(i + 1);
-            for ( pn = l_colptr_( u_rowind_(j) );
-                  pn < l_colptr_(u_rowind_(j) + 1) && l_rowind_(pn) <= i + 1; pn++ ) {
-                while ( qn < u_colptr_(i + 2) && u_rowind_(qn) < l_rowind_(pn) ) {
+            rn = l_colptr_[i + 1];
+            for ( pn = l_colptr_[ u_rowind_[j] ]; pn < l_colptr_[u_rowind_[j] + 1] && l_rowind_[pn] <= i + 1; pn++ ) {
+                while ( qn < u_colptr_[i + 2] && u_rowind_[qn] < l_rowind_[pn] ) {
                     qn++;
                 }
 
-                if ( qn < u_colptr_(i + 2) && l_rowind_(pn) == u_rowind_(qn) ) {
-                    u_val_(qn) -= multiplier * l_val_(pn);
+                if ( qn < u_colptr_[i + 2] && l_rowind_[pn] == u_rowind_[qn] ) {
+                    u_val_[qn] -= multiplier * l_val_[pn];
                 }
             }
 
-            for ( ; pn < l_colptr_(u_rowind_(j) + 1); pn++ ) {
-                while ( rn < l_colptr_(i + 2) && l_rowind_(rn) < l_rowind_(pn) ) {
+            for ( ; pn < l_colptr_[u_rowind_[j] + 1]; pn++ ) {
+                while ( rn < l_colptr_[i + 2] && l_rowind_[rn] < l_rowind_[pn] ) {
                     rn++;
                 }
 
-                if ( rn < l_colptr_(i + 2) && l_rowind_(pn) == l_rowind_(rn) ) {
-                    l_val_(rn) -= multiplier * l_val_(pn);
+                if ( rn < l_colptr_[i + 2] && l_rowind_[pn] == l_rowind_[rn] ) {
+                    l_val_[rn] -= multiplier * l_val_[pn];
                 }
             }
         }
@@ -176,8 +174,7 @@ CompCol_ILUPreconditioner :: initialize(const CompCol &A)
 void
 CompCol_ILUPreconditioner :: initialize(const DynCompCol &A)
 {
-    int i, j, k, pn, qn, rn;
-    double multiplier;
+    int pn, qn, rn;
 
     // Copy
     dim_ [ 0 ] = A.giveNumberOfRows();
@@ -191,8 +188,8 @@ CompCol_ILUPreconditioner :: initialize(const DynCompCol &A)
 
 #ifndef DynCompCol_USE_STL_SETS
     // Get size of l and u
-    for ( i = 0; i < dim_ [ 1 ]; i++ ) {
-        for ( j = 0; j < A.row_ind(i)->giveSize(); j++ ) {
+    for ( int i = 0; i < dim_ [ 1 ]; i++ ) {
+        for ( int j = 0; j < A.row_ind(i)->giveSize(); j++ ) {
             if ( A.row_ind(i)->at(j + 1) > i ) {
                 l_nz_++;
             } else {
@@ -206,29 +203,29 @@ CompCol_ILUPreconditioner :: initialize(const DynCompCol &A)
     l_rowind_.resize(l_nz_);
     u_rowind_.resize(u_nz_);
 
-    l_colptr_(0) = u_colptr_(0) = 0;
+    l_colptr_[0] = u_colptr_[0] = 0;
 
     // Split up A into l and u
-    for ( i = 0; i < dim_ [ 1 ]; i++ ) {
-        l_colptr_(i + 1) = l_colptr_(i);
-        u_colptr_(i + 1) = u_colptr_(i);
+    for ( int i = 0; i < dim_ [ 1 ]; i++ ) {
+        l_colptr_[i + 1] = l_colptr_[i];
+        u_colptr_[i + 1] = u_colptr_[i];
 
-        for ( j = 0; j < A.row_ind(i)->giveSize(); j++ ) {
+        for ( int j = 0; j < A.row_ind(i)->giveSize(); j++ ) {
             if ( A.row_ind(i)->at(j + 1) > i ) {
-                k = l_colptr_(i + 1)++;
-                l_val_(k) = A.column(i)->at(j + 1);
-                l_rowind_(k) = A.row_ind(i)->at(j + 1);
+                int k = l_colptr_[i + 1]++;
+                l_val_[k] = A.column(i)->at(j + 1);
+                l_rowind_[k] = A.row_ind(i)->at(j + 1);
             } else if ( A.row_ind(i)->at(j + 1) <= i ) {
-                k = u_colptr_(i + 1)++;
-                u_val_(k) = A.column(i)->at(j + 1);
-                u_rowind_(k) = A.row_ind(i)->at(j + 1);
+                int k = u_colptr_[i + 1]++;
+                u_val_[k] = A.column(i)->at(j + 1);
+                u_rowind_[k] = A.row_ind(i)->at(j + 1);
             }
         }
     }
 
 #else
     // Get size of l and u
-    for ( i = 0; i < dim_ [ 1 ]; i++ ) {
+    for ( int i = 0; i < dim_ [ 1 ]; i++ ) {
         for ( auto &val: A.column(i) ) {
             if ( val.first > i ) {
                 l_nz_++;
@@ -243,22 +240,22 @@ CompCol_ILUPreconditioner :: initialize(const DynCompCol &A)
     l_rowind_.resize(l_nz_);
     u_rowind_.resize(u_nz_);
 
-    l_colptr_(0) = u_colptr_(0) = 0;
+    l_colptr_[0] = u_colptr_[0] = 0;
 
     // Split up A into l and u
-    for ( i = 0; i < dim_ [ 1 ]; i++ ) {
-        l_colptr_(i + 1) = l_colptr_(i);
-        u_colptr_(i + 1) = u_colptr_(i);
+    for ( int i = 0; i < dim_ [ 1 ]; i++ ) {
+        l_colptr_[i + 1] = l_colptr_[i];
+        u_colptr_[i + 1] = u_colptr_[i];
 
         for ( auto &val: A.column(i) ) {
             if ( val.first > i ) {
-                k = l_colptr_(i + 1)++;
-                l_val_(k) = val.second;
-                l_rowind_(k) = val.first;
+                int k = l_colptr_[i + 1]++;
+                l_val_[k] = val.second;
+                l_rowind_[k] = val.first;
             } else if ( val.first <= i ) {
-                k = u_colptr_(i + 1)++;
-                u_val_(k) = val.second;
-                u_rowind_(k) = val.first;
+                int k = u_colptr_[i + 1]++;
+                u_val_[k] = val.second;
+                u_rowind_[k] = val.first;
             }
         }
     }
@@ -266,41 +263,40 @@ CompCol_ILUPreconditioner :: initialize(const DynCompCol &A)
 #endif
     /* sort entries to assure entries stored with increasing row index */
 
-    for ( i = 0; i < dim_ [ 1 ]; i++ ) {
-        qsortRow(l_rowind_, l_val_, l_colptr_(i), l_colptr_(i + 1) - 1);
-        qsortRow(u_rowind_, u_val_, u_colptr_(i), u_colptr_(i + 1) - 1);
+    for ( int i = 0; i < dim_ [ 1 ]; i++ ) {
+        qsortRow(l_rowind_, l_val_, l_colptr_[i], l_colptr_[i + 1] - 1);
+        qsortRow(u_rowind_, u_val_, u_colptr_[i], u_colptr_[i + 1] - 1);
     }
 
     // Factor matrix
-    for ( i = 0; i < dim_ [ 0 ] - 1; i++ ) {
-        multiplier = u_val_(u_colptr_(i + 1) - 1);
+    for ( int i = 0; i < dim_ [ 0 ] - 1; i++ ) {
+        double multiplier = u_val_[u_colptr_[i + 1] - 1];
 
-        for ( j = l_colptr_(i); j < l_colptr_(i + 1); j++ ) {
-            l_val_(j) /= multiplier;
+        for ( int j = l_colptr_[i]; j < l_colptr_[i + 1]; j++ ) {
+            l_val_[j] /= multiplier;
         }
 
-        for ( j = u_colptr_(i + 1); j < u_colptr_(i + 2) - 1; j++ ) {
-            multiplier = u_val_(j);
+        for ( int j = u_colptr_[i + 1]; j < u_colptr_[i + 2] - 1; j++ ) {
+            multiplier = u_val_[j];
             qn = j + 1;
-            rn = l_colptr_(i + 1);
-            for ( pn = l_colptr_( u_rowind_(j) );
-                  pn < l_colptr_(u_rowind_(j) + 1) && l_rowind_(pn) <= i + 1; pn++ ) {
-                while ( qn < u_colptr_(i + 2) && u_rowind_(qn) < l_rowind_(pn) ) {
+            rn = l_colptr_[i + 1];
+            for ( pn = l_colptr_[ u_rowind_[j] ]; pn < l_colptr_[u_rowind_[j] + 1] && l_rowind_[pn] <= i + 1; pn++ ) {
+                while ( qn < u_colptr_[i + 2] && u_rowind_[qn] < l_rowind_[pn] ) {
                     qn++;
                 }
 
-                if ( qn < u_colptr_(i + 2) && l_rowind_(pn) == u_rowind_(qn) ) {
-                    u_val_(qn) -= multiplier * l_val_(pn);
+                if ( qn < u_colptr_[i + 2] && l_rowind_[pn] == u_rowind_[qn] ) {
+                    u_val_[qn] -= multiplier * l_val_[pn];
                 }
             }
 
-            for ( ; pn < l_colptr_(u_rowind_(j) + 1); pn++ ) {
-                while ( rn < l_colptr_(i + 2) && l_rowind_(rn) < l_rowind_(pn) ) {
+            for ( ; pn < l_colptr_[u_rowind_[j] + 1]; pn++ ) {
+                while ( rn < l_colptr_[i + 2] && l_rowind_[rn] < l_rowind_[pn] ) {
                     rn++;
                 }
 
-                if ( rn < l_colptr_(i + 2) && l_rowind_(pn) == l_rowind_(rn) ) {
-                    l_val_(rn) -= multiplier * l_val_(pn);
+                if ( rn < l_colptr_[i + 2] && l_rowind_[pn] == l_rowind_[rn] ) {
+                    l_val_[rn] -= multiplier * l_val_[pn];
                 }
             }
         }
@@ -314,28 +310,24 @@ CompCol_ILUPreconditioner :: solve(const FloatArray &x, FloatArray &y) const
     int M = x.giveSize();
     FloatArray work(M);
 
-    int i, t;
-
     y.resize(M);
-    work.zero();
+
     // solve Lw=x
-    for ( i = 0; i < M; i++ ) {
-        work(i) = x(i) + work(i);
-        for ( t = l_colptr_(i); t < l_colptr_(i + 1); t++ ) {
-            work( l_rowind_(t) ) -= l_val_(t) * work(i);
+    for ( int i = 0; i < M; i++ ) {
+        work[i] += x[i];
+        for ( int t = l_colptr_[i]; t < l_colptr_[i + 1]; t++ ) {
+            work( l_rowind_[t] ) -= l_val_[t] * work[i];
         }
     }
 
     y.zero();
     // solve Uy=w
-    for ( i = M - 1; i >= 0; i-- ) {
-        y(i) = ( work(i) ) / u_val_(u_colptr_(i + 1) - 1);
-        for ( t = u_colptr_(i); t < u_colptr_(i + 1) - 1; t++ ) {
-            work( u_rowind_(t) ) -= u_val_(t) * y(i);
+    for ( int i = M - 1; i >= 0; i-- ) {
+        y[i] = ( work[i] ) / u_val_(u_colptr_[i + 1] - 1);
+        for ( int t = u_colptr_[i]; t < u_colptr_[i + 1] - 1; t++ ) {
+            work( u_rowind_[t] ) -= u_val_[t] * y[i];
         }
     }
-
-    //return y;
 }
 
 
@@ -345,33 +337,28 @@ CompCol_ILUPreconditioner :: trans_solve(const FloatArray &x, FloatArray &y) con
     int M = x.giveSize();
     FloatArray work(M);
 
-    int i, t;
-    double val;
-
     y.resize(M);
-    //work.zero();
+
     // solve for U^Tw = x
-    for ( i = 0; i < M; i++ ) {
-        val = 0.0;
-        for ( t = u_colptr_(i); t < u_colptr_(i + 1) - 1; t++ ) {
-            val += u_val_(t) * x( u_rowind_(t) );
+    for ( int i = 0; i < M; i++ ) {
+        double val = 0.0;
+        for ( int t = u_colptr_[i]; t < u_colptr_[i + 1] - 1; t++ ) {
+            val += u_val_[t] * x[ u_rowind_[t] ];
         }
 
-        work(i) = ( x(i) - val ) / u_val_(u_colptr_(i + 1) - 1);
+        work[i] = ( x[i] - val ) / u_val_(u_colptr_[i + 1] - 1);
     }
 
 
     // solve for L^T y = w
-    for ( i = M - 1; i >= 0; i-- ) {
-        val = 0.0;
-        for ( t = l_colptr_(i); t < l_colptr_(i + 1); t++ ) {
-            val += l_val_(t) * work( l_rowind_(t) );
+    for ( int i = M - 1; i >= 0; i-- ) {
+        double val = 0.0;
+        for ( int t = l_colptr_[i]; t < l_colptr_[i + 1]; t++ ) {
+            val += l_val_[t] * work( l_rowind_[t] );
         }
 
-        y.at(i) = work(i) - val;
+        y[i] = work[i] - val;
     }
-
-    //return y;
 }
 
 
@@ -392,16 +379,16 @@ int
 CompCol_ILUPreconditioner :: qsortRowPartition(IntArray &src, FloatArray &val, int l, int r)
 {
     int i = l - 1, j = r;
-    int v = src(r);
+    int v = src[r];
     int swap;
     double dswap;
 
     for ( ; ; ) {
-        while ( ( src(++i) <  v ) ) {
+        while ( ( src[++i] <  v ) ) {
             ;
         }
 
-        while ( ( v < src(--j) ) ) {
+        while ( ( v < src[--j] ) ) {
             if ( j == l ) {
                 break;
             }
@@ -411,20 +398,20 @@ CompCol_ILUPreconditioner :: qsortRowPartition(IntArray &src, FloatArray &val, i
             break;
         }
 
-        swap = src(i);
-        src(i) = src(j);
-        src(j) = swap;
-        dswap = val(i);
-        val(i) = val(j);
-        val(j) = dswap;
+        swap = src[i];
+        src[i] = src[j];
+        src[j] = swap;
+        dswap = val[i];
+        val[i] = val[j];
+        val[j] = dswap;
     }
 
-    swap = src(i);
-    src(i) = src(r);
-    src(r) = swap;
-    dswap = val(i);
-    val(i) = val(r);
-    val(r) = dswap;
+    swap = src[i];
+    src[i] = src[r];
+    src[r] = swap;
+    dswap = val[i];
+    val[i] = val[r];
+    val[r] = dswap;
 
     return i;
 }
