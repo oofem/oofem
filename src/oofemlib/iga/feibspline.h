@@ -63,26 +63,26 @@ protected:
     /// Number of spatial directions.
     int nsd;
     /// Degree in each direction.
-    int *degree;                                   // eg. 2
+    std::array<int, 3> degree;                                   // eg. 2
     /// Knot values [nsd]
-    FloatArray *knotValues;                        // eg. 0 1 2 3 4 5
+    std::array<FloatArray, 3> knotValues;                        // eg. 0 1 2 3 4 5
     /// Knot multiplicity [nsd]
-    IntArray *knotMultiplicity;                    // eg. 3 1 1 1 2 3
+    std::array<IntArray, 3> knotMultiplicity;                    // eg. 3 1 1 1 2 3
     /// numberOfControlPoints[nsd]
     /**
      * For TSpline this is filled by values corresponding to case when there are no T-junctions
      * (i.e. TSpline = BSpline)
      */
-    int *numberOfControlPoints;
+    std::array<int, 3> numberOfControlPoints;
     /// Knot vectors [nsd][knot_vector_size]
-    double **knotVector;                           // eg. 0 0 0 1 2 3 4 4 5 5 5
+    std::array<FloatArray, 3> knotVector;                           // eg. 0 0 0 1 2 3 4 4 5 5 5
     /// Nonzero spans in each directions [nsd]
-    int *numberOfKnotSpans;                        // eg. 5 (0-1,1-2,2-3,3-4,4-5)
+    std::array<int, 3> numberOfKnotSpans;                        // eg. 5 (0-1,1-2,2-3,3-4,4-5)
 public:
-    BSplineInterpolation(int nsd) : FEInterpolation(0) {
-        this->nsd = nsd;
-    }
-    virtual ~BSplineInterpolation();
+    BSplineInterpolation(int nsd) : FEInterpolation(0),
+        nsd(nsd)
+    {}
+    virtual ~BSplineInterpolation() {}
 
     virtual integrationDomain giveIntegrationDomain() const {
         if ( nsd == 3 ) {
@@ -180,8 +180,8 @@ public:
 
     virtual int giveNumberOfKnotSpans(int dim) { return numberOfKnotSpans [ dim - 1 ]; }
     virtual int giveNumberOfControlPoints(int dim) { return numberOfControlPoints [ dim - 1 ]; }
-    virtual const double *const *giveKnotVector() {
-        return this->knotVector;
+    virtual const FloatArray *giveKnotVector() {
+        return this->knotVector.data();
     }
     virtual const IntArray *giveKnotMultiplicity(int dim) { return & this->knotMultiplicity [ dim - 1 ]; }
     virtual const FloatArray *giveKnotValues(int dim) { return & this->knotValues [ dim - 1 ]; }
@@ -219,7 +219,7 @@ protected:
      * @param N Computed p+1 nonvanishing functions (N_{span-p,p}-N_{span,p})
      * @warning Parameter u and span must be in a valid range.
      */
-    void basisFuns(FloatArray &N, int span, double u, int p, const double *U);
+    void basisFuns(FloatArray &N, int span, double u, int p, const FloatArray &U);
     /**
      * Computes nonzero basis functions and their derivatives at u.
      *
@@ -241,7 +241,7 @@ protected:
      *
      * @warning Parameters n, u and span must be in a valid range.
      */
-    void dersBasisFuns(int n, double u, int span, int p, double *const U, FloatMatrix &ders);
+    void dersBasisFuns(int n, double u, int span, int p, const FloatArray &U, FloatMatrix &ders);
     /**
      * Determines the knot span index (Algorithm A2.1 from the NURBS book)
      *
@@ -256,7 +256,7 @@ protected:
      * @return Span index at u (zero based).
      * @warning Parameter u must be in a valid range.
      */
-    int findSpan(int n, int p, double u, const double *U) const;
+    int findSpan(int n, int p, double u, const FloatArray &U) const;
     /**
      * Returns the range of nonzero basis functions for given knot span and given degree.
      */

@@ -39,21 +39,6 @@
 #include "mathfem.h"
 
 namespace oofem {
-BSplineInterpolation :: ~BSplineInterpolation()
-{
-    delete [] degree;
-    delete [] numberOfControlPoints;
-    delete [] numberOfKnotSpans;
-
-    for ( int i = 0; i < nsd; i++ ) {
-        delete [] knotVector [ i ];
-    }
-
-    delete [] knotValues;
-    delete [] knotMultiplicity;
-    delete [] knotVector;
-}
-
 
 IRResultType
 BSplineInterpolation :: initializeFrom(InputRecord *ir)
@@ -61,8 +46,6 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
 
     IntArray degree_tmp;
-    double *knotVec, knotVal;
-    int sum, pos, size;
 
     InputFieldType IFT_knotVector [ 3 ] = {
         _IFT_BSplineInterpolation_knotVectorU,
@@ -76,13 +59,6 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
         _IFT_BSplineInterpolation_knotMultiplicityW
     };
 
-    knotValues = new FloatArray [ nsd ];
-    knotMultiplicity = new IntArray [ nsd ];
-    degree = new int [ nsd ];
-    knotVector = new double * [ nsd ];
-    numberOfKnotSpans = new int [ nsd ];
-    numberOfControlPoints = new int  [ nsd ];
-
     IR_GIVE_FIELD(ir, degree_tmp, _IFT_BSplineInterpolation_degree);
     if ( degree_tmp.giveSize() != nsd ) {
         OOFEM_WARNING("degree size mismatch");
@@ -95,14 +71,14 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
 
     for ( int n = 0; n < nsd; n++ ) {
         IR_GIVE_FIELD(ir, knotValues [ n ], IFT_knotVector [ n ]);
-        size = knotValues [ n ].giveSize();
+        int size = knotValues [ n ].giveSize();
         if ( size < 2 ) {
             OOFEM_WARNING("invalid size of knot vector %s", IFT_knotVector [ n ]);
             return IRRT_BAD_FORMAT;
         }
 
         // check for monotonicity of knot vector without multiplicity
-        knotVal = knotValues [ n ].at(1);
+        double knotVal = knotValues [ n ].at(1);
         for ( int i = 1; i < size; i++ ) {
             if ( knotValues [ n ].at(i + 1) <= knotVal ) {
                 OOFEM_WARNING("knot vector %s is not monotonic", IFT_knotVector [ n ]);
@@ -155,18 +131,18 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
         knotMultiplicity [ n ].at(1) = knotMultiplicity [ n ].at(size) = degree [ n ] + 1;
 
         // sum the size of knot vector with multiplicity values
-        sum = 0;
+        int sum = 0;
         for ( int i = 0; i < size; i++ ) {
-            sum += knotMultiplicity [ n ].at(i + 1);
+            sum += knotMultiplicity [ n ][i];
         }
 
-        knotVec = knotVector [ n ] = new double [ sum ];
+        knotVector [ n ].resize( sum );
 
         // fill knot vector including multiplicity values
-        pos = 0;
+        int pos = 0;
         for ( int i = 0; i < size; i++ ) {
             for ( int j = 0; j < knotMultiplicity [ n ].at(i + 1); j++ ) {
-                knotVec [ pos++ ] = knotValues [ n ].at(i + 1);
+                knotVector [ n ] [ pos++ ] = knotValues [ n ].at(i + 1);
             }
         }
 
@@ -180,14 +156,13 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
 
 void BSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
+    const FEIIGAElementGeometryWrapper &gw = static_cast< const FEIIGAElementGeometryWrapper& >(cellgeo);
     IntArray span(nsd);
-    int c = 1, count;
+    int c = 1;
     std :: vector< FloatArray > N(nsd);
 
-
-    if ( gw->knotSpan ) {
-        span = * gw->knotSpan;
+    if ( gw.knotSpan ) {
+        span = * gw.knotSpan;
     } else {
         for ( int i = 0; i < nsd; i++ ) {
             span[i] = this->findSpan(numberOfControlPoints [ i ], degree [ i ], lcoords[i], knotVector [ i ]);
@@ -198,8 +173,7 @@ void BSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords
         this->basisFuns(N [ i ], span[i], lcoords[i], degree [ i ], knotVector [ i ]);
     }
 
-    count = giveNumberOfKnotSpanBasisFunctions(span);
-    answer.resize(count);
+    answer.resize(giveNumberOfKnotSpanBasisFunctions(span));
 
     if ( nsd == 1 ) {
         for ( int k = 0; k <= degree [ 0 ]; k++ ) {
@@ -227,17 +201,14 @@ void BSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords
 
 double BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
+    const FEIIGAElementGeometryWrapper &gw = static_cast< const FEIIGAElementGeometryWrapper& >(cellgeo);
     FloatMatrix jacobian(nsd, nsd);
     IntArray span(nsd);
     double Jacob = 0.;
-    int count, cnt, ind, indx, uind, vind, tind;
     std :: vector< FloatMatrix > ders(nsd);
 
-
-
-    if ( gw->knotSpan ) {
-        span = * gw->knotSpan;
+    if ( gw.knotSpan ) {
+        span = * gw.knotSpan;
     } else {
         for ( int i = 0; i < nsd; i++ ) {
             span[i] = this->findSpan(numberOfControlPoints [ i ], degree [ i ], lcoords[i], knotVector [ i ]);
@@ -248,13 +219,13 @@ double BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
         this->dersBasisFuns(1, lcoords[i], span[i], degree [ i ], knotVector [ i ], ders [ i ]);
     }
 
-    count = giveNumberOfKnotSpanBasisFunctions(span);
+    int count = giveNumberOfKnotSpanBasisFunctions(span);
     answer.resize(count, nsd);
     jacobian.zero();
 
     if ( nsd == 1 ) {
-        uind = span[0] - degree [ 0 ];
-        ind = uind + 1;
+        int uind = span[0] - degree [ 0 ];
+        int ind = uind + 1;
         for ( int k = 0; k <= degree [ 0 ]; k++ ) {
             const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates(ind + k);
             jacobian(0, 0) += ders [ 0 ](1, k) * vertexCoords[0];       // dx/du=sum(dNu/du*x)
@@ -266,7 +237,7 @@ double BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
             OOFEM_ERROR("evaldNdx - zero Jacobian");
         }
 
-        cnt = 0;
+        int cnt = 0;
         for ( int k = 0; k <= degree [ 0 ]; k++ ) {
             answer(cnt, 0) = ders [ 0 ](1, k) / Jacob;         // dN/dx=dN/du / dx/du
             cnt++;
@@ -274,9 +245,9 @@ double BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
     } else if ( nsd == 2 ) {
         FloatArray tmp1(nsd), tmp2(nsd);
 
-        uind = span[0] - degree [ 0 ];
-        vind = span[1] - degree [ 1 ];
-        ind = vind * numberOfControlPoints [ 0 ] + uind + 1;
+        int uind = span[0] - degree [ 0 ];
+        int vind = span[1] - degree [ 1 ];
+        int ind = vind * numberOfControlPoints [ 0 ] + uind + 1;
         for ( int l = 0; l <= degree [ 1 ]; l++ ) {
             tmp1.zero();
             tmp2.zero();
@@ -305,7 +276,7 @@ double BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
             OOFEM_ERROR("evaldNdx - zero Jacobian");
         }
 
-        cnt = 0;
+        int cnt = 0;
         for ( int l = 0; l <= degree [ 1 ]; l++ ) {
             for ( int k = 0; k <= degree [ 0 ]; k++ ) {
                 tmp1[0] = ders [ 0 ](1, k) * ders [ 1 ](0, l); // dN/du=dNu/du*Nv
@@ -319,15 +290,15 @@ double BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
         FloatArray tmp1(nsd), tmp2(nsd);
         FloatArray temp1(nsd), temp2(nsd), temp3(nsd);
 
-        uind = span[0] - degree [ 0 ];
-        vind = span[1] - degree [ 1 ];
-        tind = span[2] - degree [ 2 ];
-        ind = tind * numberOfControlPoints [ 0 ] * numberOfControlPoints [ 1 ] + vind * numberOfControlPoints [ 0 ] + uind + 1;
+        int uind = span[0] - degree [ 0 ];
+        int vind = span[1] - degree [ 1 ];
+        int tind = span[2] - degree [ 2 ];
+        int ind = tind * numberOfControlPoints [ 0 ] * numberOfControlPoints [ 1 ] + vind * numberOfControlPoints [ 0 ] + uind + 1;
         for ( int m = 0; m <= degree [ 2 ]; m++ ) {
             temp1.zero();
             temp2.zero();
             temp3.zero();
-            indx = ind;
+            int indx = ind;
             for ( int l = 0; l <= degree [ 1 ]; l++ ) {
                 tmp1.zero();
                 tmp2.zero();
@@ -379,7 +350,7 @@ double BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
             OOFEM_ERROR("evaldNdx - zero Jacobian");
         }
 
-        cnt = 0;
+        int cnt = 0;
         for ( int m = 0; m <= degree [ 2 ]; m++ ) {
             for ( int l = 0; l <= degree [ 1 ]; l++ ) {
                 for ( int k = 0; k <= degree [ 0 ]; k++ ) {
@@ -410,14 +381,13 @@ double BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
 void BSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     /* Based on SurfacePoint A3.5 implementation*/
-    FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
+    const FEIIGAElementGeometryWrapper &gw = static_cast< const FEIIGAElementGeometryWrapper& >(cellgeo);
     IntArray span(nsd);
-    int ind, indx, uind, vind, tind;
     std :: vector< FloatArray > N(nsd);
 
 
-    if ( gw->knotSpan ) {
-        span = * gw->knotSpan;
+    if ( gw.knotSpan ) {
+        span = * gw.knotSpan;
     } else {
         for ( int i = 0; i < nsd; i++ ) {
             span[i] = this->findSpan(numberOfControlPoints [ i ], degree [ i ], lcoords[i], knotVector [ i ]);
@@ -432,8 +402,8 @@ void BSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &
     answer.zero();
 
     if ( nsd == 1 ) {
-        uind = span[0] - degree [ 0 ];
-        ind = uind + 1;
+        int uind = span[0] - degree [ 0 ];
+        int ind = uind + 1;
         for ( int k = 0; k <= degree [ 0 ]; k++ ) {
             const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates(ind + k);
             answer[0] += N [ 0 ][k] * vertexCoords[0];
@@ -441,9 +411,9 @@ void BSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &
     } else if ( nsd == 2 ) {
         FloatArray tmp(nsd);
 
-        uind = span[0] - degree [ 0 ];
-        vind = span[1] - degree [ 1 ];
-        ind = vind * numberOfControlPoints [ 0 ] + uind + 1;
+        int uind = span[0] - degree [ 0 ];
+        int vind = span[1] - degree [ 1 ];
+        int ind = vind * numberOfControlPoints [ 0 ] + uind + 1;
         for ( int l = 0; l <= degree [ 1 ]; l++ ) {
             tmp.zero();
             for ( int k = 0; k <= degree [ 0 ]; k++ ) {
@@ -461,13 +431,13 @@ void BSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &
     } else if ( nsd == 3 ) {
         FloatArray tmp(nsd), temp(nsd);
 
-        uind = span[0] - degree [ 0 ];
-        vind = span[1] - degree [ 1 ];
-        tind = span[2] - degree [ 2 ];
-        ind = tind * numberOfControlPoints [ 0 ] * numberOfControlPoints [ 1 ] + vind * numberOfControlPoints [ 0 ] + uind + 1;
+        int uind = span[0] - degree [ 0 ];
+        int vind = span[1] - degree [ 1 ];
+        int tind = span[2] - degree [ 2 ];
+        int ind = tind * numberOfControlPoints [ 0 ] * numberOfControlPoints [ 1 ] + vind * numberOfControlPoints [ 0 ] + uind + 1;
         for ( int m = 0; m <= degree [ 2 ]; m++ ) {
             temp.zero();
-            indx = ind;
+            int indx = ind;
             for ( int l = 0; l <= degree [ 1 ]; l++ ) {
                 tmp.zero();
                 for ( int k = 0; k <= degree [ 0 ]; k++ ) {
@@ -492,13 +462,13 @@ void BSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &
 
 void BSplineInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
+    const FEIIGAElementGeometryWrapper &gw = static_cast< const FEIIGAElementGeometryWrapper& >(cellgeo);
     IntArray span(nsd);
     std :: vector< FloatMatrix > ders(nsd);
     jacobian.resize(nsd, nsd);
 
-    if ( gw->knotSpan ) {
-        span = * gw->knotSpan;
+    if ( gw.knotSpan ) {
+        span = * gw.knotSpan;
     } else {
         for ( int i = 0; i < nsd; i++ ) {
             span[i] = this->findSpan(numberOfControlPoints [ i ], degree [ i ], lcoords[i], knotVector [ i ]);
@@ -597,31 +567,30 @@ void BSplineInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const F
 
 int BSplineInterpolation :: giveKnotSpanBasisFuncMask(const IntArray &knotSpan, IntArray &mask)
 {
-    int size, c = 1, iindx, jindx, kindx;
-
-    size = giveNumberOfKnotSpanBasisFunctions(knotSpan);
+    int c = 1;
+    int size = giveNumberOfKnotSpanBasisFunctions(knotSpan);
     mask.resize(size);
 
     if ( nsd == 1 ) {
         for ( int i = 0; i <= degree [ 0 ]; i++ ) {
-            iindx = ( i + knotSpan[0] - degree [ 0 ] );
+            int iindx = ( i + knotSpan[0] - degree [ 0 ] );
             mask.at(c++) = iindx + 1;
         }
     } else if ( nsd == 2 ) {
         for ( int j = 0; j <= degree [ 1 ]; j++ ) {
-            jindx = ( j + knotSpan[1] - degree [ 1 ] );
+            int jindx = ( j + knotSpan[1] - degree [ 1 ] );
             for ( int i = 0; i <= degree [ 0 ]; i++ ) {
-                iindx = ( i + knotSpan[0] - degree [ 0 ] );
+                int iindx = ( i + knotSpan[0] - degree [ 0 ] );
                 mask.at(c++) = jindx * numberOfControlPoints [ 0 ] + iindx + 1;
             }
         }
     } else if ( nsd == 3 ) {
         for ( int k = 0; k <= degree [ 2 ]; k++ ) {
-            kindx = ( k + knotSpan[2] - degree [ 2 ] );
+            int kindx = ( k + knotSpan[2] - degree [ 2 ] );
             for ( int j = 0; j <= degree [ 1 ]; j++ ) {
-                jindx = ( j + knotSpan[1] - degree [ 1 ] );
+                int jindx = ( j + knotSpan[1] - degree [ 1 ] );
                 for ( int i = 0; i <= degree [ 0 ]; i++ ) {
-                    iindx = ( i + knotSpan[0] - degree [ 0 ] );
+                    int iindx = ( i + knotSpan[0] - degree [ 0 ] );
                     mask.at(c++) = kindx * numberOfControlPoints [ 0 ] * numberOfControlPoints [ 1 ] + jindx * numberOfControlPoints [ 0 ] + iindx + 1;
                 }
             }
@@ -653,23 +622,22 @@ int BSplineInterpolation :: giveNumberOfKnotSpanBasisFunctions(const IntArray &k
 // it is also redundant to pass the span which can be calculated
 // but we want to profit from knowing the span a priori
 
-void BSplineInterpolation :: basisFuns(FloatArray &N, int span, double u, int p, const double *U)
+void BSplineInterpolation :: basisFuns(FloatArray &N, int span, double u, int p, const FloatArray &U)
 {
     //
     // Based on Algorithm A2.2 (p. 70)
     //
     FloatArray right(p + 1);
     FloatArray left(p + 1);
-    double saved, temp;
 
     N.resize(p + 1);
     N[0] = 1.0;
     for ( int j = 1; j <= p; j++ ) {
         left[j] = u - U [ span + 1 - j ];
         right[j] = U [ span + j ] - u;
-        saved = 0.0;
+        double saved = 0.0;
         for ( int r = 0; r < j; r++ ) {
-            temp = N[r] / ( right(r + 1) + left(j - r) );
+            double temp = N[r] / ( right(r + 1) + left(j - r) );
             N[r] = saved + right(r + 1) * temp;
             saved = left(j - r) * temp;
         }
@@ -685,7 +653,7 @@ void BSplineInterpolation :: basisFuns(FloatArray &N, int span, double u, int p,
 // it is also redundant to pass the span which can be calculated
 // but we want to profit from knowing the span a priori
 
-void BSplineInterpolation :: dersBasisFuns(int n, double u, int span, int p, double *const U, FloatMatrix &ders)
+void BSplineInterpolation :: dersBasisFuns(int n, double u, int span, int p, const FloatArray &U, FloatMatrix &ders)
 {
     //
     // Based on Algorithm A2.3 (p. 72)
@@ -784,7 +752,7 @@ void BSplineInterpolation :: dersBasisFuns(int n, double u, int span, int p, dou
 
 // jaky ma vyznam const = ve funkci se objekt nesmi zmenit
 
-int BSplineInterpolation :: findSpan(int n, int p, double u, const double *U) const
+int BSplineInterpolation :: findSpan(int n, int p, double u, const FloatArray &U) const
 {
     if ( u == U [ n + 1 ] ) {
         return n;

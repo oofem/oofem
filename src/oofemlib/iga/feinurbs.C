@@ -41,20 +41,16 @@ namespace oofem {
 // optimized version of A4.4 for d=1
 #define OPTIMIZED_VERSION_A4dot4
 
-
-NURBSInterpolation :: ~NURBSInterpolation() { }
-
-
 void NURBSInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
+    const FEIIGAElementGeometryWrapper &gw = static_cast< const FEIIGAElementGeometryWrapper& >(cellgeo);
     IntArray span(nsd);
     double sum = 0.0, val;
-    int count, c = 1, ind, indx, uind, vind, tind;
+    int count, c = 1;
     std :: vector< FloatArray >N;
 
-    if ( gw->knotSpan ) {
-        span = * gw->knotSpan;
+    if ( gw.knotSpan ) {
+        span = * gw.knotSpan;
     } else {
         for ( int i = 0; i < nsd; i++ ) {
             span[i] = this->findSpan(numberOfControlPoints [ i ], degree [ i ], lcoords[i], knotVector [ i ]);
@@ -69,16 +65,16 @@ void NURBSInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, 
     answer.resize(count);
 
     if ( nsd == 1 ) {
-        uind = span[0] - degree [ 0 ];
-        ind = uind + 1;
+        int uind = span[0] - degree [ 0 ];
+        int ind = uind + 1;
         for ( int k = 0; k <= degree [ 0 ]; k++ ) {
             answer.at(c++) = val = N [ 0 ][k] * cellgeo.giveVertexCoordinates(ind + k)->at(2);       // Nu*w
             sum += val;
         }
     } else if ( nsd == 2 ) {
-        uind = span[0] - degree [ 0 ];
-        vind = span[1] - degree [ 1 ];
-        ind = vind * numberOfControlPoints [ 0 ] + uind + 1;
+        int uind = span[0] - degree [ 0 ];
+        int vind = span[1] - degree [ 1 ];
+        int ind = vind * numberOfControlPoints [ 0 ] + uind + 1;
         for ( int l = 0; l <= degree [ 1 ]; l++ ) {
             for ( int k = 0; k <= degree [ 0 ]; k++ ) {
                 answer.at(c++) = val = N [ 0 ][k] * N [ 1 ][l] * cellgeo.giveVertexCoordinates(ind + k)->at(3); // Nu*Nv*w
@@ -88,12 +84,12 @@ void NURBSInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, 
             ind += numberOfControlPoints [ 0 ];
         }
     } else if ( nsd == 3 ) {
-        uind = span[0] - degree [ 0 ];
-        vind = span[1] - degree [ 1 ];
-        tind = span[2] - degree [ 2 ];
-        ind = tind * numberOfControlPoints [ 0 ] * numberOfControlPoints [ 1 ] + vind * numberOfControlPoints [ 0 ] + uind + 1;
+        int uind = span[0] - degree [ 0 ];
+        int vind = span[1] - degree [ 1 ];
+        int tind = span[2] - degree [ 2 ];
+        int ind = tind * numberOfControlPoints [ 0 ] * numberOfControlPoints [ 1 ] + vind * numberOfControlPoints [ 0 ] + uind + 1;
         for ( int m = 0; m <= degree [ 2 ]; m++ ) {
-            indx = ind;
+            int indx = ind;
             for ( int l = 0; l <= degree [ 1 ]; l++ ) {
                 for ( int k = 0; k <= degree [ 0 ]; k++ ) {
                     answer.at(c++) = val = N [ 0 ][k] * N [ 1 ][l] * N [ 2 ][m] * cellgeo.giveVertexCoordinates(ind + k)->at(4);     // Nu*Nv*Nt*w
@@ -109,24 +105,22 @@ void NURBSInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, 
         OOFEM_ERROR("not implemented for nsd = %d", nsd);
     }
 
-    while ( count ) {
-        answer.at(count--) /= sum;
-    }
+    answer.times(1./sum);
 }
 
 
 double NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
+    const FEIIGAElementGeometryWrapper &gw = static_cast< const FEIIGAElementGeometryWrapper& >(cellgeo);
     FloatMatrix jacobian(nsd, nsd);
     IntArray span(nsd);
-    double Jacob = 0., product, w, weight;
-    int count, cnt, ind, indx, uind, vind, tind;
+    double Jacob = 0.;
+    int count;
     std :: vector< FloatArray > N(nsd);
     std :: vector< FloatMatrix > ders(nsd);
 
-    if ( gw->knotSpan ) {
-        span = * gw->knotSpan;
+    if ( gw.knotSpan ) {
+        span = * gw.knotSpan;
     } else {
         for ( int i = 0; i < nsd; i++ ) {
             span[i] = this->findSpan(numberOfControlPoints [ i ], degree [ i ], lcoords[i], knotVector [ i ]);
@@ -170,15 +164,15 @@ double NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
 
         // calculation of jacobian matrix according to A4.4
         // calculate values and derivatives of nonrational Bspline surface with weights at first (Aders, wders)
-        uind = span[0] - degree [ 0 ];
-        vind = span[1] - degree [ 1 ];
-        ind = vind * numberOfControlPoints [ 0 ] + uind + 1;
+        int uind = span[0] - degree [ 0 ];
+        int vind = span[1] - degree [ 1 ];
+        int ind = vind * numberOfControlPoints [ 0 ] + uind + 1;
         for ( int l = 0; l <= degree [ 1 ]; l++ ) {
             tmp1.zero();
             tmp2.zero();
             for ( int k = 0; k <= degree [ 0 ]; k++ ) {
                 const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates(ind + k);
-                w = vertexCoords[2];
+                double w = vertexCoords[2];
 
                 tmp1[0] += ders [ 0 ](0, k) * vertexCoords[0] * w; // sum(Nu*x*w)
                 tmp1[1] += ders [ 0 ](0, k) * vertexCoords[1] * w; // sum(Nu*y*w)
@@ -204,7 +198,7 @@ double NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
             wders(1, 0)    += ders [ 1 ](0, l) * tmp2[2];       // dw/du=sum(Nv*sum(dNu/du*w))
         }
 
-        weight = wders(0, 0);
+        double weight = wders(0, 0);
 
  #ifndef OPTIMIZED_VERSION_A4dot4
         const int d = 1;
@@ -275,12 +269,12 @@ double NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
         Jacob = jacobian.giveDeterminant();
 
         //calculation of derivatives of NURBS basis functions with respect to local parameters is not covered by NURBS book
-        product = Jacob * weight * weight;
-        cnt = 0;
+        double product = Jacob * weight * weight;
+        int cnt = 0;
         ind = vind * numberOfControlPoints [ 0 ] + uind + 1;
         for ( int l = 0; l <= degree [ 1 ]; l++ ) {
             for ( int k = 0; k <= degree [ 0 ]; k++ ) {
-                w = cellgeo.giveVertexCoordinates(ind + k)->at(3);
+                double w = cellgeo.giveVertexCoordinates(ind + k)->at(3);
                 // dNu/du*Nv*w*sum(Nv*Nu*w) - Nu*Nv*w*sum(dNu/du*Nv*w)
                 tmp1[0] = ders [ 0 ](1, k) * ders [ 1 ](0, l) * w * weight - ders [ 0 ](0, k) * ders [ 1 ](0, l) * w * wders(1, 0);
                 // Nu*dNv/dv*w*sum(Nv*Nu*w) - Nu*Nv*w*sum(Nu*dNv/dv*w)
@@ -311,11 +305,11 @@ double NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
 
     if ( nsd == 1 ) {
         // calculate values and derivatives of nonrational Bspline curve with weights at first (Aders, wders)
-        uind = span[0] - degree [ 0 ];
-        ind = uind + 1;
+        int uind = span[0] - degree [ 0 ];
+        int ind = uind + 1;
         for ( int k = 0; k <= degree [ 0 ]; k++ ) {
             const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates(ind + k);
-            w = vertexCoords[1];
+            double w = vertexCoords[1];
 
             Aders [ 0 ][0] += ders [ 0 ](0, k) * vertexCoords[0] * w;   // xw=sum(Nu*x*w)
             wders[0]    += ders [ 0 ](0, k) * w;                               // w=sum(Nu*w)
@@ -324,7 +318,7 @@ double NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
             wders[1]    += ders [ 0 ](1, k) * w;                               // dw/du=sum(dNu/du*w)
         }
 
-        weight = wders[0];
+        double weight = wders[0];
 
         // calculation of jacobian matrix according to Eq 4.7
         jacobian(0, 0) = ( Aders [ 0 ][1] - wders[1] * Aders [ 0 ][0] / weight ) / weight; // dx/du
@@ -332,11 +326,11 @@ double NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
         Jacob = jacobian.giveDeterminant();
 
         //calculation of derivatives of NURBS basis functions with respect to local parameters is not covered by NURBS book
-        product = Jacob * weight * weight;
-        cnt = 0;
+        double product = Jacob * weight * weight;
+        int cnt = 0;
         ind = uind + 1;
         for ( int k = 0; k <= degree [ 0 ]; k++ ) {
-            w = cellgeo.giveVertexCoordinates(ind + k)->at(2);
+            double w = cellgeo.giveVertexCoordinates(ind + k)->at(2);
             // [dNu/du*w*sum(Nu*w) - Nu*w*sum(dNu/du*w)] / [J*sum(Nu*w)^2]
             answer(cnt, 0) = ders [ 0 ](1, k) * w * weight - ders [ 0 ](0, k) * w * wders[1] / product;
             cnt++;
@@ -345,15 +339,15 @@ double NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
         FloatArray tmp1(nsd + 1), tmp2(nsd + 1);    // allow for weight
 
         // calculate values and derivatives of nonrational Bspline surface with weights at first (Aders, wders)
-        uind = span[0] - degree [ 0 ];
-        vind = span[1] - degree [ 1 ];
-        ind = vind * numberOfControlPoints [ 0 ] + uind + 1;
+        int uind = span[0] - degree [ 0 ];
+        int vind = span[1] - degree [ 1 ];
+        int ind = vind * numberOfControlPoints [ 0 ] + uind + 1;
         for ( int l = 0; l <= degree [ 1 ]; l++ ) {
             tmp1.zero();
             tmp2.zero();
             for ( int k = 0; k <= degree [ 0 ]; k++ ) {
                 const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates(ind + k);
-                w = vertexCoords[2];
+                double w = vertexCoords[2];
 
                 tmp1[0] += ders [ 0 ](0, k) * vertexCoords[0] * w; // sum(Nu*x*w)
                 tmp1[1] += ders [ 0 ](0, k) * vertexCoords[1] * w; // sum(Nu*y*w)
@@ -379,7 +373,7 @@ double NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
             wders[2]    += ders [ 1 ](1, l) * tmp1[2]; // dw/dv=sum(dNv/dv*sum(Nu*w)
         }
 
-        weight = wders[0];
+        double weight = wders[0];
 
         // calculation of jacobian matrix according to Eq 4.19
         tmp1[0] = Aders [ 0 ][0] / weight;
@@ -392,12 +386,12 @@ double NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
         Jacob = jacobian.giveDeterminant();
 
         //calculation of derivatives of NURBS basis functions with respect to local parameters is not covered by NURBS book
-        product = Jacob * weight * weight;
-        cnt = 0;
+        double product = Jacob * weight * weight;
+        int cnt = 0;
         ind = vind * numberOfControlPoints [ 0 ] + uind + 1;
         for ( int l = 0; l <= degree [ 1 ]; l++ ) {
             for ( int k = 0; k <= degree [ 0 ]; k++ ) {
-                w = cellgeo.giveVertexCoordinates(ind + k)->at(3);
+                double w = cellgeo.giveVertexCoordinates(ind + k)->at(3);
                 // dNu/du*Nv*w*sum(Nu*Nv*w) - Nu*Nv*w*sum(dNu/du*Nv*w)
                 tmp1[0] = ders [ 0 ](1, k) * ders [ 1 ](0, l) * w * weight - ders [ 0 ](0, k) * ders [ 1 ](0, l) * w * wders[1];
                 // Nu*dNv/dv*w*sum(Nu*Nv*w) - Nu*Nv*w*sum(Nu*dNv/dv*w)
@@ -415,21 +409,21 @@ double NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
         FloatArray temp1(nsd + 1), temp2(nsd + 1), temp3(nsd + 1); // allow for weight
 
         // calculate values and derivatives of nonrational Bspline solid with weights at first (Aders, wders)
-        uind = span[0] - degree [ 0 ];
-        vind = span[1] - degree [ 1 ];
-        tind = span[2] - degree [ 2 ];
-        ind = tind * numberOfControlPoints [ 0 ] * numberOfControlPoints [ 1 ] + vind * numberOfControlPoints [ 0 ] + uind + 1;
+        int uind = span[0] - degree [ 0 ];
+        int vind = span[1] - degree [ 1 ];
+        int tind = span[2] - degree [ 2 ];
+        int ind = tind * numberOfControlPoints [ 0 ] * numberOfControlPoints [ 1 ] + vind * numberOfControlPoints [ 0 ] + uind + 1;
         for ( int m = 0; m <= degree [ 2 ]; m++ ) {
             temp1.zero();
             temp2.zero();
             temp3.zero();
-            indx = ind;
+            int indx = ind;
             for ( int l = 0; l <= degree [ 1 ]; l++ ) {
                 tmp1.zero();
                 tmp2.zero();
                 for ( int k = 0; k <= degree [ 0 ]; k++ ) {
                     const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates(ind + k);
-                    w = vertexCoords[3];
+                    double w = vertexCoords[3];
 
                     tmp1[0] += ders [ 0 ](0, k) * vertexCoords[0] * w;              // sum(Nu*x*w)
                     tmp1[1] += ders [ 0 ](0, k) * vertexCoords[1] * w;              // sum(Nu*y*w)
@@ -483,7 +477,7 @@ double NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
             wders[3]    += ders [ 2 ](1, m) * temp1[3];        // dw/dt=sum(dNt/dt*sum(Nv*sum(Nu*w)))
         }
 
-        weight = wders[0];
+        double weight = wders[0];
 
         // calculation of jacobian matrix
         tmp1[0] = Aders [ 0 ][0] / weight;
@@ -502,14 +496,14 @@ double NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
         Jacob = jacobian.giveDeterminant();
 
         //calculation of derivatives of NURBS basis functions with respect to local parameters is not covered by NURBS book
-        product = Jacob * weight * weight;
-        cnt = 0;
+        double product = Jacob * weight * weight;
+        int cnt = 0;
         ind = tind * numberOfControlPoints [ 0 ] * numberOfControlPoints [ 1 ] + vind * numberOfControlPoints [ 0 ] + uind + 1;
         for ( int m = 0; m <= degree [ 2 ]; m++ ) {
-            indx = ind;
+            int indx = ind;
             for ( int l = 0; l <= degree [ 1 ]; l++ ) {
                 for ( int k = 0; k <= degree [ 0 ]; k++ ) {
-                    w = cellgeo.giveVertexCoordinates(ind + k)->at(4);
+                    double w = cellgeo.giveVertexCoordinates(ind + k)->at(4);
                     // dNu/du*Nv*Nt*w*sum(Nu*Nv*Nt*w) - Nu*Nv*Nt*w*sum(dNu/du*Nv*Nt*w)
                     tmp1[0] = ders [ 0 ](1, k) * ders [ 1 ](0, l) * ders [ 2 ](0, m) * w * weight - ders [ 0 ](0, k) * ders [ 1 ](0, l) * ders [ 2 ](0, m) * w * wders[1];
                     // Nu*dNv/dv*Nt*w*sum(Nu*Nv*Nt*w) - Nu*Nv*Nt*w*sum(Nu*dNv/dv*Nt*w)
@@ -547,14 +541,13 @@ double NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
 void NURBSInterpolation :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     /* Based on SurfacePoint A4.3 implementation*/
-    FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
+    const FEIIGAElementGeometryWrapper &gw = static_cast< const FEIIGAElementGeometryWrapper& >(cellgeo);
     IntArray span(nsd);
-    double w, weight = 0.0;
-    int ind, indx, uind, vind, tind;
+    double weight = 0.0;
     std :: vector< FloatArray > N(nsd);
 
-    if ( gw->knotSpan ) {
-        span = * gw->knotSpan;
+    if ( gw.knotSpan ) {
+        span = * gw.knotSpan;
     } else {
         for ( int i = 0; i < nsd; i++ ) {
             span[i] = this->findSpan(numberOfControlPoints [ i ], degree [ i ], lcoords[i], knotVector [ i ]);
@@ -569,25 +562,25 @@ void NURBSInterpolation :: local2global(FloatArray &answer, const FloatArray &lc
     answer.zero();
 
     if ( nsd == 1 ) {
-        uind = span[0] - degree [ 0 ];
-        ind = uind + 1;
+        int uind = span[0] - degree [ 0 ];
+        int ind = uind + 1;
         for ( int k = 0; k <= degree [ 0 ]; k++ ) {
             const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates(ind + k);
-            w = vertexCoords[1];
+            double w = vertexCoords[1];
             answer[0] += N [ 0 ][k] * vertexCoords[0] * w;       // xw=sum(Nu*x*w)
             weight    += N [ 0 ][k] * w;                                // w=sum(Nu*w)
         }
     } else if ( nsd == 2 ) {
         FloatArray tmp(nsd + 1);       // allow for weight
 
-        uind = span[0] - degree [ 0 ];
-        vind = span[1] - degree [ 1 ];
-        ind = vind * numberOfControlPoints [ 0 ] + uind + 1;
+        int uind = span[0] - degree [ 0 ];
+        int vind = span[1] - degree [ 1 ];
+        int ind = vind * numberOfControlPoints [ 0 ] + uind + 1;
         for ( int l = 0; l <= degree [ 1 ]; l++ ) {
             tmp.zero();
             for ( int k = 0; k <= degree [ 0 ]; k++ ) {
                 const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates(ind + k);
-                w = vertexCoords[2];
+                double w = vertexCoords[2];
                 tmp[0] += N [ 0 ][k] * vertexCoords[0] * w; // sum(Nu*x*w)
                 tmp[1] += N [ 0 ][k] * vertexCoords[1] * w; // sum(Nu*y*w)
                 tmp[2] += N [ 0 ][k] * w;            // sum(Nu*w)
@@ -601,18 +594,18 @@ void NURBSInterpolation :: local2global(FloatArray &answer, const FloatArray &lc
     } else if ( nsd == 3 ) {
         FloatArray tmp(nsd + 1), temp(nsd + 1);    // allow for weight
 
-        uind = span[0] - degree [ 0 ];
-        vind = span[1] - degree [ 1 ];
-        tind = span[2] - degree [ 2 ];
-        ind = tind * numberOfControlPoints [ 0 ] * numberOfControlPoints [ 1 ] + vind * numberOfControlPoints [ 0 ] + uind + 1;
+        int uind = span[0] - degree [ 0 ];
+        int vind = span[1] - degree [ 1 ];
+        int tind = span[2] - degree [ 2 ];
+        int ind = tind * numberOfControlPoints [ 0 ] * numberOfControlPoints [ 1 ] + vind * numberOfControlPoints [ 0 ] + uind + 1;
         for ( int m = 0; m <= degree [ 2 ]; m++ ) {
             temp.zero();
-            indx = ind;
+            int indx = ind;
             for ( int l = 0; l <= degree [ 1 ]; l++ ) {
                 tmp.zero();
                 for ( int k = 0; k <= degree [ 0 ]; k++ ) {
                     const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates(ind + k);
-                    w = vertexCoords[3];
+                    double w = vertexCoords[3];
                     tmp[0] += N [ 0 ][k] * vertexCoords[1] * w;               // sum(Nu*x*w)
                     tmp[1] += N [ 0 ][k] * vertexCoords[2] * w;               // sum(Nu*y*w)
                     tmp[2] += N [ 0 ][k] * vertexCoords[3] * w;               // sum(Nu*z*w)
@@ -647,15 +640,13 @@ void NURBSInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const Flo
     //
     // Based on Algorithm A4.4 (p. 137) for d=1
     //
-    FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
+    const FEIIGAElementGeometryWrapper &gw = static_cast< const FEIIGAElementGeometryWrapper& >(cellgeo);
     IntArray span(nsd);
-    double w, weight;
-    int ind, indx, uind, vind, tind;
     std :: vector< FloatMatrix > ders(nsd);
     jacobian.resize(nsd, nsd);
 
-    if ( gw->knotSpan ) {
-        span = * gw->knotSpan;
+    if ( gw.knotSpan ) {
+        span = * gw.knotSpan;
     } else {
         for ( int i = 0; i < nsd; i++ ) {
             span[i] = this->findSpan(numberOfControlPoints [ i ], degree [ i ], lcoords[i], knotVector [ i ]);
@@ -696,15 +687,15 @@ void NURBSInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const Flo
 
         // calculation of jacobian matrix according to A4.4
         // calculate values and derivatives of nonrational Bspline surface with weights at first (Aders, wders)
-        uind = span[0] - degree [ 0 ];
-        vind = span[1] - degree [ 1 ];
-        ind = vind * numberOfControlPoints [ 0 ] + uind + 1;
+        int uind = span[0] - degree [ 0 ];
+        int vind = span[1] - degree [ 1 ];
+        int ind = vind * numberOfControlPoints [ 0 ] + uind + 1;
         for ( int l = 0; l <= degree [ 1 ]; l++ ) {
             tmp1.zero();
             tmp2.zero();
             for ( int k = 0; k <= degree [ 0 ]; k++ ) {
                 const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates(ind + k);
-                w = vertexCoords[2];
+                double w = vertexCoords[2];
 
                 tmp1[0] += ders [ 0 ](0, k) * vertexCoords[0] * w; // sum(Nu*x*w)
                 tmp1[1] += ders [ 0 ](0, k) * vertexCoords[1] * w; // sum(Nu*y*w)
@@ -730,7 +721,7 @@ void NURBSInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const Flo
             wders(1, 0)    += ders [ 1 ](0, l) * tmp2[2];       // dw/du=sum(Nv*sum(dNu/du*w))
         }
 
-        weight = wders(0, 0);
+        double weight = wders(0, 0);
 
  #ifndef OPTIMIZED_VERSION_A4dot4
         const int d = 1;
@@ -815,11 +806,11 @@ void NURBSInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const Flo
 
     if ( nsd == 1 ) {
         // calculate values and derivatives of nonrational Bspline curve with weights at first (Aders, wders)
-        uind = span[0] - degree [ 0 ];
-        ind = uind + 1;
+        int uind = span[0] - degree [ 0 ];
+        int ind = uind + 1;
         for ( int k = 0; k <= degree [ 0 ]; k++ ) {
             const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates(ind + k);
-            w = vertexCoords[1];
+            double w = vertexCoords[1];
 
             Aders [ 0 ][0] += ders [ 0 ](0, k) * vertexCoords[0] * w;   // xw=sum(Nu*x*w)
             wders[0]    += ders [ 0 ](0, k) * w;                               // w=sum(Nu*w)
@@ -828,7 +819,7 @@ void NURBSInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const Flo
             wders[1]    += ders [ 0 ](1, k) * w;                               // dw/du=sum(dNu/du*w)
         }
 
-        weight = wders[0];
+        double weight = wders[0];
 
         // calculation of jacobian matrix according to Eq 4.7
         jacobian(0, 0) = ( Aders [ 0 ][1] - wders[1] * Aders [ 0 ][0] / weight ) / weight; // dx/du
@@ -836,15 +827,15 @@ void NURBSInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const Flo
         FloatArray tmp1(nsd + 1), tmp2(nsd + 1);    // allow for weight
 
         // calculate values and derivatives of nonrational Bspline surface with weights at first (Aders, wders)
-        uind = span[0] - degree [ 0 ];
-        vind = span[1] - degree [ 1 ];
-        ind = vind * numberOfControlPoints [ 0 ] + uind + 1;
+        int uind = span[0] - degree [ 0 ];
+        int vind = span[1] - degree [ 1 ];
+        int ind = vind * numberOfControlPoints [ 0 ] + uind + 1;
         for ( int l = 0; l <= degree [ 1 ]; l++ ) {
             tmp1.zero();
             tmp2.zero();
             for ( int k = 0; k <= degree [ 0 ]; k++ ) {
                 const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates(ind + k);
-                w = vertexCoords[2];
+                double w = vertexCoords[2];
 
                 tmp1[0] += ders [ 0 ](0, k) * vertexCoords[0] * w; // sum(Nu*x*w)
                 tmp1[1] += ders [ 0 ](0, k) * vertexCoords[1] * w; // sum(Nu*y*w)
@@ -870,7 +861,7 @@ void NURBSInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const Flo
             wders[2]    += ders [ 1 ](1, l) * tmp1[2]; // dw/dv=sum(dNv/dv*sum(Nu*w)
         }
 
-        weight = wders[0];
+        double weight = wders[0];
 
         // calculation of jacobian matrix according to Eq 4.19
         tmp1[0] = Aders [ 0 ][0] / weight;
@@ -884,21 +875,21 @@ void NURBSInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const Flo
         FloatArray temp1(nsd + 1), temp2(nsd + 1), temp3(nsd + 1); // allow for weight
 
         // calculate values and derivatives of nonrational Bspline solid with weights at first (Aders, wders)
-        uind = span[0] - degree [ 0 ];
-        vind = span[1] - degree [ 1 ];
-        tind = span[2] - degree [ 2 ];
-        ind = tind * numberOfControlPoints [ 0 ] * numberOfControlPoints [ 1 ] + vind * numberOfControlPoints [ 0 ] + uind + 1;
+        int uind = span[0] - degree [ 0 ];
+        int vind = span[1] - degree [ 1 ];
+        int tind = span[2] - degree [ 2 ];
+        int ind = tind * numberOfControlPoints [ 0 ] * numberOfControlPoints [ 1 ] + vind * numberOfControlPoints [ 0 ] + uind + 1;
         for ( int m = 0; m <= degree [ 2 ]; m++ ) {
             temp1.zero();
             temp2.zero();
             temp3.zero();
-            indx = ind;
+            int indx = ind;
             for ( int l = 0; l <= degree [ 1 ]; l++ ) {
                 tmp1.zero();
                 tmp2.zero();
                 for ( int k = 0; k <= degree [ 0 ]; k++ ) {
                     const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates(ind + k);
-                    w = vertexCoords[3];
+                    double w = vertexCoords[3];
 
                     tmp1[0] += ders [ 0 ](0, k) * vertexCoords[0] * w;              // sum(Nu*x*w)
                     tmp1[1] += ders [ 0 ](0, k) * vertexCoords[1] * w;              // sum(Nu*y*w)
@@ -952,7 +943,7 @@ void NURBSInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const Flo
             wders[3]    += ders [ 2 ](1, m) * temp1[3];        // dw/dt=sum(dNt/dt*sum(Nv*sum(Nu*w)))
         }
 
-        weight = wders[0];
+        double weight = wders[0];
 
         // calculation of jacobian matrix
         tmp1[0] = Aders [ 0 ][0] / weight;

@@ -454,7 +454,7 @@ public:
     /**
      * Returns the subdivision of patch parametric space
      */
-    virtual const double *const *giveKnotVector() {
+    virtual const FloatArray *giveKnotVector() {
         return NULL;
     }
     /**

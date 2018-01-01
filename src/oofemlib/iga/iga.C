@@ -325,7 +325,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
     nseq = 4;
  #endif
 
-    const double *const *knotVector = interp->giveKnotVector();
+    const FloatArray *knotVector = interp->giveKnotVector();
     const IntArray *span;
     int nsd = this->giveNsd();
 
@@ -1035,7 +1035,7 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
     nseg = 4;
  #endif
 
-    const double *const *knotVector = interp->giveKnotVector();
+    const FloatArray *knotVector = interp->giveKnotVector();
     const IntArray *span;
     int nsd = interp->giveNsd();
 
