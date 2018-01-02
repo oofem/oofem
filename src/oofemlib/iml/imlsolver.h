@@ -40,6 +40,8 @@
 #include "floatarray.h"
 #include "precond.h"
 
+#include <memory>
+
 ///@name Input fields for IMLSolver
 //@{
 #define _IFT_IMLSolver_Name "iml"
@@ -67,11 +69,11 @@ private:
     enum IMLPrecondType { IML_VoidPrec, IML_DiagPrec, IML_ILU_CompColPrec, IML_ILU_CompRowPrec, IML_ICPrec };
 
     /// Last mapped Lhs matrix
-    SparseMtrx *Lhs;
+    SparseMtrx *lhs;
     /// Last mapped matrix version
     SparseMtrx :: SparseMtrxVersionType lhsVersion;
     /// Preconditioner.
-    Preconditioner *M;
+    std::unique_ptr<Preconditioner> M;
     /// IML Solver type.
     IMLSolverType solverType;
     /// IML Preconditioner type.
@@ -86,26 +88,18 @@ private:
     /// Max number of iterations.
     int maxite;
 
-
 public:
     /// Constructor. Creates new instance of LDLTFactorization, with number i, belonging to domain d and Engngmodel m.
     IMLSolver(Domain * d, EngngModel * m);
     /// Destructor
-    virtual ~IMLSolver();
+    virtual ~IMLSolver() {}
 
-    /**
-     * Solves the given linear system iteratively by method described by IMLSolverType.
-     * @param A Coefficient matrix.
-     * @param b Right hand side.
-     * @param x Solution array.
-     * @return Status value.
-     */
-    virtual NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x);
+    NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual const char *giveClassName() const { return "IMLSolver"; }
-    virtual LinSystSolverType giveLinSystSolverType() const { return ST_IML; }
-    virtual SparseMtrxType giveRecommendedMatrix(bool symmetric) const { return symmetric ? SMT_SymCompCol : SMT_CompCol; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    const char *giveClassName() const override { return "IMLSolver"; }
+    LinSystSolverType giveLinSystSolverType() const override { return ST_IML; }
+    SparseMtrxType giveRecommendedMatrix(bool symmetric) const override { return symmetric ? SMT_SymCompCol : SMT_CompCol; }
 };
 } // end namespace oofem
 #endif // imlsolver_h

@@ -84,9 +84,7 @@ public:
      * Constructor, creates (n,m) sparse matrix. Due to sparsity character of matrix,
      * not all coefficient are physically stored (in general, zero members are omitted).
      */
-    SparseMtrx(int n, int m) : nRows(n), nColumns(m), version(0) { }
-    /// Constructor
-    SparseMtrx() : nRows(0), nColumns(0), version(0) { }
+    SparseMtrx(int n=0, int m=0) : nRows(n), nColumns(m), version(0) { }
     /// Destructor
     virtual ~SparseMtrx() { }
 

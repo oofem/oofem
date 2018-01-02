@@ -52,10 +52,13 @@ REGISTER_SparseMtrx( DSSMatrixLDL, SMT_DSS_sym_LDL);
 REGISTER_SparseMtrx( DSSMatrixLL, SMT_DSS_sym_LL);
 REGISTER_SparseMtrx( DSSMatrixLU, SMT_DSS_unsym_LU);
 
-DSSMatrix :: DSSMatrix(dssType _t) : SparseMtrx(), _dss(new DSSolver())
+
+DSSMatrix :: DSSMatrix(dssType _t, int n) : SparseMtrx(n, n),
+    _dss(new DSSolver()),
+    isFactorized(false),
+    _type(_t)
 {
     eDSSolverType _st = eDSSFactorizationLDLT;
-    _type = _t;
     if ( _t == sym_LDL ) {
         _st = eDSSFactorizationLDLT;
     } else if ( _t == sym_LL ) {
@@ -67,31 +70,8 @@ DSSMatrix :: DSSMatrix(dssType _t) : SparseMtrx(), _dss(new DSSolver())
     }
 
     _dss->Initialize(0, _st);
-    isFactorized = false;
 }
 
-
-DSSMatrix :: DSSMatrix(dssType _t, int n) : SparseMtrx(n, n), _dss(new DSSolver())
-{
-    eDSSolverType _st = eDSSFactorizationLDLT;
-    _type = _t;
-    if ( _t == sym_LDL ) {
-        _st = eDSSFactorizationLDLT;
-    } else if ( _t == sym_LL ) {
-        _st = eDSSFactorizationLLT;
-    } else if ( _t == unsym_LU ) {
-        _st = eDSSFactorizationLU;
-    } else {
-        OOFEM_ERROR("unknown dssType");
-    }
-
-    _dss->Initialize(0, _st);
-    isFactorized = false;
-}
-
-DSSMatrix :: ~DSSMatrix()
-{
-}
 
 /*****************************/
 /*  Copy constructor         */

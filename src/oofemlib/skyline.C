@@ -66,17 +66,6 @@ Skyline :: Skyline(int n) : SparseMtrx(n, n),
 }
 
 
-Skyline :: Skyline() : SparseMtrx(0, 0),
-    isFactorized(false)
-{
-}
-
-
-Skyline :: ~Skyline()
-{
-}
-
-
 double &
 Skyline :: at(int i, int j)
 {

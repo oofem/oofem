@@ -50,10 +50,17 @@ REGISTER_SparseMtrx(PetscSparseMtrx, SMT_PetscMtrx);
 
 
 PetscSparseMtrx :: PetscSparseMtrx(int n, int m) : SparseMtrx(n, m),
-    mtrx(NULL), symmFlag(false), leqs(0), geqs(0), blocksize(1), di(0), kspInit(false), newValues(true), localIS(NULL), globalIS(NULL) { }
-
-PetscSparseMtrx :: PetscSparseMtrx() : SparseMtrx(),
-    mtrx(NULL), symmFlag(false), leqs(0), geqs(0), blocksize(1), di(0), kspInit(false), newValues(true), localIS(NULL), globalIS(NULL){ }
+    mtrx(NULL),
+    symmFlag(false),
+    leqs(0),
+    geqs(0),
+    blocksize(1),
+    di(0),
+    kspInit(false),
+    newValues(true),
+    localIS(NULL),
+    globalIS(NULL)
+{ }
 
 
 PetscSparseMtrx :: ~PetscSparseMtrx()

@@ -58,14 +58,6 @@ SkylineUnsym :: SkylineUnsym(int n) : SparseMtrx(n, n),
 {
 }
 
-SkylineUnsym :: SkylineUnsym() : SparseMtrx(),
-    isFactorized(false)
-{
-}
-
-SkylineUnsym :: ~SkylineUnsym()
-{
-}
 
 void
 SkylineUnsym :: toFloatMatrix(FloatMatrix &answer) const

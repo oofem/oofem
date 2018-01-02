@@ -65,37 +65,32 @@ public:
      * @param n Size of matrix
      * @see buildInternalStructure
      */
-    SkylineUnsym(int n);
-    /**
-     * Constructor. Before any operation an internal profile must be built.
-     * @see buildInternalStructure
-     */
-    SkylineUnsym();
+    SkylineUnsym(int n=0);
     /// Destructor
-    virtual ~SkylineUnsym();
+    virtual ~SkylineUnsym() {}
 
     // Overloaded methods:
-    virtual SparseMtrx *GiveCopy() const;
-    virtual void times(const FloatArray &x, FloatArray &answer) const;
-    virtual void timesT(const FloatArray &x, FloatArray &answer) const;
-    virtual void times(double x);
-    virtual int buildInternalStructure(EngngModel *, int, const UnknownNumberingScheme &s);
+    SparseMtrx *GiveCopy() const override;
+    void times(const FloatArray &x, FloatArray &answer) const override;
+    void timesT(const FloatArray &x, FloatArray &answer) const override;
+    void times(double x) override;
+    int buildInternalStructure(EngngModel *, int, const UnknownNumberingScheme &s) override;
     int setInternalStructure(IntArray &a);
-    virtual int assemble(const IntArray &loc, const FloatMatrix &mat);
-    virtual int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat);
-    virtual bool canBeFactorized() const { return true; }
-    virtual SparseMtrx *factorized();
-    virtual FloatArray *backSubstitutionWith(FloatArray &) const;
-    virtual void zero();
-    virtual double &at(int i, int j);
-    virtual double at(int i, int j) const;
-    virtual void toFloatMatrix(FloatMatrix &answer) const;
-    virtual void printYourself() const;
-    virtual void printStatistics() const;
-    virtual void writeToFile(const char *fname) const;
-    virtual SparseMtrxType giveType() const { return SMT_SkylineU; }
-    virtual bool isAsymmetric() const { return true; }
-    virtual const char *giveClassName() const { return "SkylineU"; }
+    int assemble(const IntArray &loc, const FloatMatrix &mat) override;
+    int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat) override;
+    bool canBeFactorized() const override { return true; }
+    SparseMtrx *factorized() override;
+    FloatArray *backSubstitutionWith(FloatArray &) const override;
+    void zero() override;
+    double &at(int i, int j) override;
+    double at(int i, int j) const override;
+    void toFloatMatrix(FloatMatrix &answer) const override;
+    void printYourself() const override;
+    void printStatistics() const override;
+    void writeToFile(const char *fname) const override;
+    SparseMtrxType giveType() const override { return SMT_SkylineU; }
+    bool isAsymmetric() const override { return true; }
+    const char *giveClassName() const override { return "SkylineU"; }
 
 protected:
     void checkSizeTowards(const IntArray &);
