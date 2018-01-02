@@ -58,11 +58,21 @@
 
 %editing macros
 \newcommand{\missing}[1]{}
-
+\definecolor{gray}{rgb}{0.5, 0.5, 0.5}
+\definecolor{Navy}{rgb}{0.0, 0.0, 0.5}
 % macros for items related to parallel
-\newcommand{\Pmode}[1]{{\color{Navy}\sffamily #1}}
-\newcommand{\Pparam}[1]{\param{#1}}
-\newcommand{\oofemParallel}[1]{\color{Navy}$\langle${#1}$\rangle$}
+\begin{htmlonly}
+  % no xcolor support in latex2html
+  \newcommand{\Pmode}[1]{\sffamily {#1}}
+  \newcommand{\Pparam}[1]{\param{#1}}
+  \newcommand{\oofemParallel}[1]{{$\langle${#1}$\rangle$}}
+\end{htmlonly}
+%begin{latexonly}
+  \newcommand{\Pmode}[1]{\sffamily \color{Navy} {#1}}
+  \newcommand{\Pparam}[1]{\param{#1}}
+  \newcommand{\oofemParallel}[1]{{$\langle${#1}$\rangle$}}
+%end{latexonly}
+
 \newcommand{\PentKeyword}[1]{\oofemParallel{\entKeyword{#1}}}
 \newcommand{\PentKeywordInst}[1]{\oofemParallel{\entKeywordInst{#1}}}
 \newcommand{\Pfield}[2]{\oofemParallel{\field{#1}{#2}}}
