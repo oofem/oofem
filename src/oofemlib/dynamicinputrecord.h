@@ -62,7 +62,6 @@ protected:
     std :: string recordKeyword;
     int recordNumber;
 
-    // Record representation.
     std :: set< std :: string >emptyRecord; ///< Fields without values
     std :: map< std :: string, int >intRecord;
     std :: map< std :: string, double >doubleRecord;
@@ -88,27 +87,28 @@ public:
     /// Assignment operator.
     DynamicInputRecord &operator = ( const DynamicInputRecord & );
 
-    virtual InputRecord *GiveCopy() { return new DynamicInputRecord(*this); }
-    virtual void finish(bool wrn = true);
+    std::unique_ptr<InputRecord> clone() override { return std::unique_ptr<InputRecord>(new DynamicInputRecord(*this)); }
+    void finish(bool wrn = true) override;
 
-    virtual std :: string giveRecordAsString() const;
+    std :: string giveRecordAsString() const override;
 
-    virtual IRResultType giveRecordKeywordField(std :: string &answer, int &value);
-    virtual IRResultType giveRecordKeywordField(std :: string &answer);
-    virtual IRResultType giveField(int &answer, InputFieldType id);
-    virtual IRResultType giveField(double &answer, InputFieldType id);
-    virtual IRResultType giveField(bool &answer, InputFieldType id);
-    virtual IRResultType giveField(std :: string &answer, InputFieldType id);
-    virtual IRResultType giveField(FloatArray &answer, InputFieldType id);
-    virtual IRResultType giveField(IntArray &answer, InputFieldType id);
-    virtual IRResultType giveField(FloatMatrix &answer, InputFieldType id);
-    virtual IRResultType giveField(std :: vector< std :: string > &answer, InputFieldType id);
-    virtual IRResultType giveField(Dictionary &answer, InputFieldType id);
-    virtual IRResultType giveField(std :: list< Range > &answer, InputFieldType id);
-    virtual IRResultType giveField(ScalarFunction &function, InputFieldType id);
+    IRResultType giveRecordKeywordField(std :: string &answer, int &value) override;
+    IRResultType giveRecordKeywordField(std :: string &answer) override;
+    IRResultType giveField(int &answer, InputFieldType id) override;
+    IRResultType giveField(double &answer, InputFieldType id) override;
+    IRResultType giveField(bool &answer, InputFieldType id) override;
+    IRResultType giveField(std :: string &answer, InputFieldType id) override;
+    IRResultType giveField(FloatArray &answer, InputFieldType id) override;
+    IRResultType giveField(IntArray &answer, InputFieldType id) override;
+    IRResultType giveField(FloatMatrix &answer, InputFieldType id) override;
+    IRResultType giveField(std :: vector< std :: string > &answer, InputFieldType id) override;
+    IRResultType giveField(Dictionary &answer, InputFieldType id) override;
+    IRResultType giveField(std :: list< Range > &answer, InputFieldType id) override;
+    IRResultType giveField(ScalarFunction &function, InputFieldType id) override;
 
-    virtual bool hasField(InputFieldType id);
-    virtual void printYourself();
+    bool hasField(InputFieldType id) override;
+    void printYourself() override;
+
     // Setters, unique for the dynamic input record
     void setRecordKeywordField(std :: string keyword, int number);
     void setRecordKeywordNumber(int number);
@@ -128,8 +128,8 @@ public:
     /// Removes given field from record.
     void unsetField(InputFieldType id);
 
-    virtual void report_error(const char *_class, const char *proc, InputFieldType id,
-                              IRResultType result, const char *file, int line);
+    void report_error(const char *_class, const char *proc, InputFieldType id,
+                      IRResultType result, const char *file, int line) override;
 };
 } // end namespace oofem
 #endif // dynamicinputrecord_h

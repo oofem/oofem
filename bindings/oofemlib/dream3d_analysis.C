@@ -44,22 +44,22 @@ using namespace H5;
 class OOFEM_EXPORT BasicInputRecord : public InputRecord
 {
 public:
-    virtual InputRecord *GiveCopy() { return nullptr; }
-    virtual std :: string giveRecordAsString() const { return ""; }
-    virtual IRResultType giveField(int &answer, InputFieldType id) { return IRRT_NOTFOUND; }
-    virtual IRResultType giveField(double &answer, InputFieldType id) { return IRRT_NOTFOUND; }
-    virtual IRResultType giveField(bool &answer, InputFieldType id) { return IRRT_NOTFOUND; }
-    virtual IRResultType giveField(std :: string &answer, InputFieldType id) { return IRRT_NOTFOUND; }
-    virtual IRResultType giveField(FloatArray &answer, InputFieldType id) { return IRRT_NOTFOUND; }
-    virtual IRResultType giveField(IntArray &answer, InputFieldType id) { return IRRT_NOTFOUND; }
-    virtual IRResultType giveField(FloatMatrix &answer, InputFieldType id) { return IRRT_NOTFOUND; }
-    virtual IRResultType giveField(std :: vector< std :: string > &answer, InputFieldType id) { return IRRT_NOTFOUND; }
-    virtual IRResultType giveField(Dictionary &answer, InputFieldType id) { return IRRT_NOTFOUND; }
-    virtual IRResultType giveField(std :: list< Range > &answer, InputFieldType id) { return IRRT_NOTFOUND; }
-    virtual IRResultType giveField(ScalarFunction &function, InputFieldType id) { return IRRT_NOTFOUND; }
-    virtual void printYourself() {}
-    virtual void report_error(const char *_class, const char *proc, InputFieldType id, IRResultType result, const char *file, int line) {}
-    virtual void finish(bool wrn = true) {}
+    std::unique_ptr<InputRecord> clone() override { return std::unique_ptr<InputRecord>(); }
+    std :: string giveRecordAsString() const override { return ""; }
+    IRResultType giveField(int &answer, InputFieldType id) override { return IRRT_NOTFOUND; }
+    IRResultType giveField(double &answer, InputFieldType id) override { return IRRT_NOTFOUND; }
+    IRResultType giveField(bool &answer, InputFieldType id) override { return IRRT_NOTFOUND; }
+    IRResultType giveField(std :: string &answer, InputFieldType id) override { return IRRT_NOTFOUND; }
+    IRResultType giveField(FloatArray &answer, InputFieldType id) override { return IRRT_NOTFOUND; }
+    IRResultType giveField(IntArray &answer, InputFieldType id) override { return IRRT_NOTFOUND; }
+    IRResultType giveField(FloatMatrix &answer, InputFieldType id) override { return IRRT_NOTFOUND; }
+    IRResultType giveField(std :: vector< std :: string > &answer, InputFieldType id) override { return IRRT_NOTFOUND; }
+    IRResultType giveField(Dictionary &answer, InputFieldType id) override { return IRRT_NOTFOUND; }
+    IRResultType giveField(std :: list< Range > &answer, InputFieldType id) override { return IRRT_NOTFOUND; }
+    IRResultType giveField(ScalarFunction &function, InputFieldType id) override { return IRRT_NOTFOUND; }
+    void printYourself() override {}
+    void report_error(const char *_class, const char *proc, InputFieldType id, IRResultType result, const char *file, int line) override {}
+    void finish(bool wrn = true) override {}
 };
 
 class OOFEM_EXPORT BasicNodeInputRecord : public BasicInputRecord
@@ -72,14 +72,14 @@ public:
     BasicNodeInputRecord(int num, FloatArray coords): recordNumber(num), coords(std::move(coords)) { }
     virtual ~BasicNodeInputRecord() {}
 
-    virtual IRResultType giveRecordKeywordField(std :: string &answer, int &value) { answer = "node"; value = recordNumber; return IRRT_OK; }
-    virtual IRResultType giveRecordKeywordField(std :: string &answer) { answer = "node"; return IRRT_OK; }
-    virtual IRResultType giveField(FloatArray &answer, InputFieldType id) {
+    IRResultType giveRecordKeywordField(std :: string &answer, int &value) override { answer = "node"; value = recordNumber; return IRRT_OK; }
+    IRResultType giveRecordKeywordField(std :: string &answer) override { answer = "node"; return IRRT_OK; }
+    IRResultType giveField(FloatArray &answer, InputFieldType id) override {
         if (std::string(id) == _IFT_Node_coords) { answer = coords; return IRRT_OK; }
         return IRRT_NOTFOUND;
     }
 
-    virtual bool hasField(InputFieldType id) { return std::string(id) == _IFT_Node_coords; }
+    bool hasField(InputFieldType id) override { return std::string(id) == _IFT_Node_coords; }
 };
 
 
@@ -93,18 +93,14 @@ public:
     BasicElementInputRecord(int num, IntArray enodes): recordNumber(num), enodes(std::move(enodes)) { }
     virtual ~BasicElementInputRecord() {}
 
-    virtual InputRecord *GiveCopy() { return nullptr; }
-
-    virtual std :: string giveRecordAsString() const { return ""; }
-
-    virtual IRResultType giveRecordKeywordField(std :: string &answer, int &value) { answer = _IFT_Brick1_ht_Name; value = recordNumber; return IRRT_OK; }
-    virtual IRResultType giveRecordKeywordField(std :: string &answer) { answer = _IFT_Brick1_ht_Name; return IRRT_OK; }
-    virtual IRResultType giveField(IntArray &answer, InputFieldType id) { 
+    IRResultType giveRecordKeywordField(std :: string &answer, int &value) override { answer = _IFT_Brick1_ht_Name; value = recordNumber; return IRRT_OK; }
+    IRResultType giveRecordKeywordField(std :: string &answer) override { answer = _IFT_Brick1_ht_Name; return IRRT_OK; }
+    IRResultType giveField(IntArray &answer, InputFieldType id) override { 
         if (std::string(id) == _IFT_Element_nodes) { answer = enodes; return IRRT_OK; }
         return IRRT_NOTFOUND;
     }
 
-    virtual bool hasField(InputFieldType id) { return std::string(id) == _IFT_Element_nodes; }
+    bool hasField(InputFieldType id) override { return std::string(id) == _IFT_Element_nodes; }
 };
 
 

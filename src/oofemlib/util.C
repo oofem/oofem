@@ -55,7 +55,7 @@ EngngModel *InstanciateProblem(DataReader &dr, problemMode mode, int contextFlag
      * be updated as reading e-model components (nodes, etc). But we need this record being available
      * through the whole e-model instanciation
      */
-    InputRecord *emodelir = dr.giveInputRecord(DataReader :: IR_emodelRec, 1)->GiveCopy();
+    auto emodelir = dr.giveInputRecord(DataReader :: IR_emodelRec, 1)->clone();
     result = emodelir->giveRecordKeywordField(problemName); ///@todo Make this function robust, it can't be allowed to fail (the record keyword is not a normal field-id)
     if ( result != IRRT_OK ) {
         emodelir->report_error("", __func__, "", result, __FILE__, __LINE__);
@@ -74,9 +74,7 @@ EngngModel *InstanciateProblem(DataReader &dr, problemMode mode, int contextFlag
         problem->setContextOutputMode(COM_Always);
     }
 
-    problem->instanciateYourself( dr, emodelir, dataOutputFileName.c_str(), desc.c_str() );
-
-    delete emodelir;
+    problem->instanciateYourself( dr, emodelir.get(), dataOutputFileName.c_str(), desc.c_str() );
 
     return problem;
 }

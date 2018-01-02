@@ -38,6 +38,7 @@
 #include <vector>
 #include <list>
 #include <string>
+#include <memory>
 
 #include "logger.h" // for missing __func__ in MSC
 #include "oofemcfg.h"
@@ -111,7 +112,7 @@ public:
     InputRecord &operator = ( const InputRecord & );
 
     /** Creates a newly allocated copy of the receiver */
-    virtual InputRecord *GiveCopy() = 0;
+    virtual std::unique_ptr<InputRecord> clone() = 0;
 
     /// Returns string representation of record in OOFEMs text format.
     virtual std :: string giveRecordAsString() const = 0;
