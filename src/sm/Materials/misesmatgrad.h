@@ -126,7 +126,6 @@ public:
 
     virtual void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep);
     void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain);
-    LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
 protected:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new MisesMatGradStatus(1, MisesMat :: domain, gp); }

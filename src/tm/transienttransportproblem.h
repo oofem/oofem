@@ -38,6 +38,7 @@
 #include "engngm.h"
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
+#include "sparsenonlinsystemnm.h"
 
 #include <memory>
 
@@ -54,7 +55,6 @@
 //@}
 
 namespace oofem {
-class SparseNonLinearSystemNM;
 class PrimaryField;
 class Function;
 

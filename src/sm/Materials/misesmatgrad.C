@@ -164,8 +164,7 @@ void
 MisesMatGrad :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     answer.resize(1, 1);
-    LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
-    double E = lmat->give('E', gp);
+    double E = this->linearElasticMaterial.give('E', gp);
     answer.at(1, 1) = E;
     if ( mode != TangentStiffness ) {
         return;
@@ -201,7 +200,7 @@ MisesMatGrad :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode,
 void
 MisesMatGrad :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
+    this->linearElasticMaterial.giveStiffnessMatrix(answer, mode, gp, tStep);
     if ( mode != TangentStiffness ) {
         return;
     }
@@ -260,7 +259,7 @@ void
 MisesMatGrad :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MisesMatGradStatus *status = static_cast< MisesMatGradStatus * >( this->giveStatus(gp) );
-    this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    this->linearElasticMaterial.give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
     // start from the elastic stiffness
     if ( mode != TangentStiffness ) {
         return;
@@ -313,8 +312,7 @@ MisesMatGrad :: give1dKappaMatrix(FloatMatrix &answer, MatResponseMode mode, Gau
 {
     answer.resize(1, 1);
     answer.zero();
-    LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
-    double E = lmat->give('E', gp);
+    double E = linearElasticMaterial.give('E', gp);
     MisesMatGradStatus *status = static_cast< MisesMatGradStatus * >( this->giveStatus(gp) );
     double tempKappa = status->giveTempCumulativePlasticStrain();
     double dKappa = tempKappa - status->giveCumulativePlasticStrain();

@@ -51,26 +51,21 @@
 namespace oofem {
 REGISTER_EngngModel(StationaryTransportProblem);
 
-StationaryTransportProblem :: StationaryTransportProblem(int i, EngngModel *_master = NULL) : EngngModel(i, _master)
+StationaryTransportProblem :: StationaryTransportProblem(int i, EngngModel *_master = NULL) : EngngModel(i, _master),
+    nMethod(nullptr)
 {
     ndomains = 1;
-    nMethod = NULL;
 }
 
-StationaryTransportProblem :: ~StationaryTransportProblem()
-{
-    delete nMethod;
-}
 
 NumericalMethod *StationaryTransportProblem :: giveNumericalMethod(MetaStep *mStep)
 {
-    if ( nMethod ) {
-        return nMethod;
+    if ( !nMethod ) {
+        nMethod.reset(new NRSolver(this->giveDomain(1), this));
     }
-
-    nMethod = new NRSolver(this->giveDomain(1), this);
-    return nMethod;
+    return nMethod.get();
 }
+
 
 IRResultType
 StationaryTransportProblem :: initializeFrom(InputRecord *ir)

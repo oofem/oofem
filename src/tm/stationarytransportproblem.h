@@ -37,6 +37,7 @@
 
 #include "engngm.h"
 #include "sparselinsystemnm.h"
+#include "sparsenonlinsystemnm.h"
 #include "sparsemtrx.h"
 #include "primaryfield.h"
 
@@ -48,7 +49,6 @@
 //@}
 
 namespace oofem {
-class SparseNonLinearSystemNM;
 
 /**
  * This class represents stationary transport problem.
@@ -66,7 +66,7 @@ protected:
     FloatArray eNorm;
 
     /// Numerical method used to solve the problem
-    SparseNonLinearSystemNM *nMethod;
+    std::unique_ptr<SparseNonLinearSystemNM> nMethod;
 
     bool keepTangent;
 
@@ -74,7 +74,7 @@ public:
     /// Constructor.
     StationaryTransportProblem(int i, EngngModel * _master);
     /// Destructor.
-    virtual ~StationaryTransportProblem();
+    virtual ~StationaryTransportProblem() {}
 
     virtual void solveYourselfAt(TimeStep *tStep);
     virtual void updateYourself(TimeStep *tStep);

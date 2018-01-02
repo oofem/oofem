@@ -48,22 +48,16 @@ namespace oofem {
 REGISTER_Material( StructuralMaterialSettable );
 
 StructuralMaterialSettable :: StructuralMaterialSettable(int n, Domain *d) :
-    StructuralMaterial(n, d)
-{
-    isoLE = new IsotropicLinearElasticMaterial(n,d);
-}
+    StructuralMaterial(n, d),
+    isoLE(n,d)
+{}
 
-StructuralMaterialSettable :: ~StructuralMaterialSettable()
-{
-    delete isoLE;
-}
 
 IRResultType
 StructuralMaterialSettable :: initializeFrom(InputRecord *ir)
 {
-    //IRResultType result;                // Required by IR_GIVE_FIELD macro
     StructuralMaterial :: initializeFrom(ir);
-    return isoLE->initializeFrom(ir);
+    return isoLE.initializeFrom(ir);
 }
 
 void
@@ -72,14 +66,12 @@ StructuralMaterialSettable :: giveRealStressVector_3d(FloatArray &answer,
                                                   const FloatArray &totalStrain,
                                                   TimeStep *atTime)
 {
-
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
     const FloatArray& stressVector = status->giveStressVector();
 
     status->letTempStrainVectorBe(totalStrain);
     status->letTempStressVectorBe(stressVector);
     answer = stressVector;
-    return;
 }
 
 
@@ -90,7 +82,7 @@ StructuralMaterialSettable :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                            GaussPoint *gp,
                                                            TimeStep *atTime)
 {
-    isoLE->give3dMaterialStiffnessMatrix(answer,mode,gp,atTime);
+    isoLE.give3dMaterialStiffnessMatrix(answer,mode,gp,atTime);
 }
 
 MaterialStatus *
