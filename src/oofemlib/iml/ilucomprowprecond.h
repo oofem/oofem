@@ -68,25 +68,16 @@ public:
     /// Destructor
     virtual ~CompRow_ILUPreconditioner(void) { }
 
-    /**
-     * Initializes the receiver (constructs the precontioning matrix M) of given matrix.
-     * @param a Sparse matrix to be preconditioned
-     */
-    virtual void init(const SparseMtrx &a);
+    void init(const SparseMtrx &a) override;
 
     //void initialize (const CompCol &A);
     void initialize(const DynCompRow &A);
 
-    /// Solves the linear system
-    virtual void solve(const FloatArray &x, FloatArray &y) const;
-    /// Solves transposed system
-    virtual void trans_solve(const FloatArray &x, FloatArray &y) const;
+    void solve(const FloatArray &x, FloatArray &y) const override;
+    void trans_solve(const FloatArray &x, FloatArray &y) const override;
 
-    /// returns the preconditioner name
-    virtual const char *giveClassName() const { return "ILUT"; }
-    /// Initializes receiver from given record. Empty implementation.
-    virtual IRResultType initializeFrom(InputRecord *ir);
-
+    const char *giveClassName() const override { return "ILUT"; }
+    IRResultType initializeFrom(InputRecord *ir) override;
 
 protected:
     void qsortCol(IntArray &, FloatArray &, int l, int r);
