@@ -191,7 +191,7 @@ EngngModel :: Instanciate_init()
     domainList.clear();
     domainList.reserve(ndomains);
     for ( int i = 1; i <= ndomains; i++ ) {
-        domainList.emplace_back(new Domain(i, 0, this));
+        domainList.push_back(std::make_unique<Domain>(i, 0, this));
     }
 
     this->initParallelContexts();

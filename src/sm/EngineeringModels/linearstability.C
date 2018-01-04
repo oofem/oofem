@@ -251,7 +251,7 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
 
     stiffnessMatrix->zero();
     if ( !initialStressMatrix ) {
-        initialStressMatrix.reset( stiffnessMatrix->GiveCopy() );
+        initialStressMatrix = stiffnessMatrix->clone();
     } else {
         initialStressMatrix->zero();
     }

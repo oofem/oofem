@@ -35,19 +35,19 @@
 #ifndef MATSTATMAPPERINT_H_
 #define MATSTATMAPPERINT_H_
 
+#include "materialmappingalgorithm.h"
+
+#include <memory>
+
 namespace oofem {
 class MaterialStatus;
 class StructuralInterfaceMaterialStatus;
-class MaterialMappingAlgorithm;
 class GaussPoint;
 class Domain;
 class TimeStep;
 class Set;
 
 /**
- * matstatmapperint.h
- *
- * MaterialStatusMapperInterface:
  * An interface class for MaterialStatus. The purpose is to allow
  * mapping of state variables (Gauss point variables) in a
  * generic way. This is useful when the mesh changes, e.g. due to
@@ -67,9 +67,12 @@ class Set;
  */
 class MaterialStatusMapperInterface
 {
+protected:
+    std::unique_ptr< MaterialMappingAlgorithm > mpMaterialMapper;
+
 public:
     MaterialStatusMapperInterface();
-    virtual ~MaterialStatusMapperInterface();
+    virtual ~MaterialStatusMapperInterface() {}
 
     virtual void copyStateVariables(const MaterialStatus &iStatus) = 0;
     virtual void addStateVariables(const MaterialStatus &iStatus) = 0;
@@ -98,9 +101,6 @@ public:
      * Finishes the mapping for given time step. Used to perform cleanup.
      */
     virtual int MSMI_finish(const TimeStep &iTStep);
-
-protected:
-    MaterialMappingAlgorithm *mpMaterialMapper;
 };
 } /* namespace oofem */
 #endif /* MATSTATMAPPERINT_H_ */

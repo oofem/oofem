@@ -93,7 +93,6 @@ public:
     /// Destructor
     virtual ~DSSMatrix() {}
 
-    SparseMtrx *GiveCopy() const override;
     void times(const FloatArray &x, FloatArray &answer) const override;
     void times(double x) override;
     int buildInternalStructure(EngngModel *, int, const UnknownNumberingScheme & s) override;

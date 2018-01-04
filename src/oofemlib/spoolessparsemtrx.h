@@ -68,7 +68,6 @@ public:
         }
     }
 
-    SparseMtrx *GiveCopy() const override;
     void times(const FloatArray &x, FloatArray &answer) const override;
     void timesT(const FloatArray &x, FloatArray &answer) const override;
     void times(double x) override;

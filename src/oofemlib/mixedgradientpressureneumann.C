@@ -60,7 +60,7 @@ namespace oofem {
 REGISTER_BoundaryCondition(MixedGradientPressureNeumann);
 
 MixedGradientPressureNeumann :: MixedGradientPressureNeumann(int n, Domain *d) : MixedGradientPressureBC(n, d),
-    sigmaDev(new Node(-1, d)) // Node number lacks meaning here.
+    sigmaDev(std::make_unique<Node>(-1, d)) // Node number lacks meaning here.
 {
     ///@todo Rethink this. Should be created as part of createDofs()
     int nsd = d->giveNumberOfSpatialDimensions();

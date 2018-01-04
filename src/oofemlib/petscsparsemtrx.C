@@ -76,10 +76,10 @@ PetscSparseMtrx :: ~PetscSparseMtrx()
 }
 
 
-SparseMtrx *
-PetscSparseMtrx :: GiveCopy() const
+std::unique_ptr<SparseMtrx>
+PetscSparseMtrx :: clone() const
 {
-    PetscSparseMtrx *answer = new PetscSparseMtrx(nRows, nColumns);
+    std::unique_ptr<PetscSparseMtrx> answer = std::make_unique<PetscSparseMtrx>(nRows, nColumns);
     MatDuplicate( this->mtrx, MAT_COPY_VALUES, & ( answer->mtrx ) );
     answer->symmFlag = this->symmFlag;
     answer->mType    = this->mType;
@@ -90,7 +90,7 @@ PetscSparseMtrx :: GiveCopy() const
     answer->kspInit  = false;
     answer->newValues = this->newValues;
 
-    return answer;
+    return std::move(answer);
 }
 
 void

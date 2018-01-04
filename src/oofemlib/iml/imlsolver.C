@@ -82,15 +82,15 @@ IMLSolver :: initializeFrom(InputRecord *ir)
 
     // create preconditioner
     if ( precondType == IML_DiagPrec ) {
-        M.reset(new DiagPreconditioner());
+        M = std::make_unique<DiagPreconditioner>();
     } else if ( precondType == IML_VoidPrec ) {
-        M.reset(new VoidPreconditioner());
+        M = std::make_unique<VoidPreconditioner>();
     } else if ( precondType == IML_ILU_CompRowPrec ) {
-        M.reset(new CompRow_ILUPreconditioner());
+        M = std::make_unique<CompRow_ILUPreconditioner>();
     } else if ( precondType == IML_ILU_CompColPrec ) {
-        M.reset(new CompCol_ILUPreconditioner());
+        M = std::make_unique<CompCol_ILUPreconditioner>();
     } else if ( precondType == IML_ICPrec ) {
-        M.reset(new CompCol_ICPreconditioner());
+        M = std::make_unique<CompCol_ICPreconditioner>();
     } else {
         OOFEM_WARNING("unknown preconditioner type");
         return IRRT_BAD_FORMAT;

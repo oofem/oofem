@@ -75,9 +75,9 @@ DynCompCol &DynCompCol :: operator = ( const DynCompCol & C )
     return * this;
 }
 
-SparseMtrx *DynCompCol :: GiveCopy() const
+std::unique_ptr<SparseMtrx> DynCompCol :: clone() const
 {
-    return new DynCompCol(*this);
+    return std::make_unique<DynCompCol>(*this);
 }
 
 void DynCompCol :: times(const FloatArray &x, FloatArray &answer) const

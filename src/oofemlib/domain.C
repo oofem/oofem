@@ -95,9 +95,7 @@ Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry(),
     // Constructor. Creates a new domain.
 {
     if ( !e->giveSuppressOutput() ) {
-        outputManager = std::unique_ptr<OutputManager> (new OutputManager(this) );
-    } else {
-        outputManager = NULL;
+        outputManager = std::make_unique<OutputManager>(this);
     }
 
     this->engineeringModel = e;
@@ -612,7 +610,7 @@ Domain :: instanciateYourself(DataReader &dr)
             // read type of set
             IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
             // Only one set for now (i don't see any need to ever introduce any other version)
-            std :: unique_ptr< Set > set(new Set(num, this)); //classFactory.createSet(name.c_str(), num, this)
+            std :: unique_ptr< Set > set = std::make_unique<Set>(num, this); //classFactory.createSet(name.c_str(), num, this)
             if ( !set ) {
                 OOFEM_ERROR("Couldn't create set: %s", name.c_str());
             }
@@ -846,7 +844,7 @@ Domain :: instanciateYourself(DataReader &dr)
             // read type of set
             IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
             // Only one set for now (i don't see any need to ever introduce any other version)
-            std :: unique_ptr< Set > set(new Set(num, this)); //classFactory.createSet(name.c_str(), num, this)
+            std :: unique_ptr< Set > set = std::make_unique<Set>(num, this); //classFactory.createSet(name.c_str(), num, this)
             if ( !set ) {
                 OOFEM_ERROR("Couldn't create set: %s", name.c_str());
             }

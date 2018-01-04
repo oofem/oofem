@@ -116,9 +116,9 @@ CompCol &CompCol :: operator = ( const CompCol & C )
 }
 
 
-SparseMtrx *CompCol :: GiveCopy() const
+std::unique_ptr<SparseMtrx> CompCol :: clone() const
 {
-    return new CompCol(*this);
+    return std::make_unique<CompCol>(*this);
 }
 
 

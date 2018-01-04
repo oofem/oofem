@@ -72,7 +72,7 @@ public:
      * @param d Domain which field belongs to.
      */
     InternalVariableField(InternalStateType ist, FieldType b, MaterialMappingAlgorithmType mma_type, Domain * d);
-    virtual ~InternalVariableField();
+    virtual ~InternalVariableField() {}
 
     int evaluateAt(FloatArray &answer, const FloatArray &coords, ValueModeType mode, TimeStep *tStep) override;
     int evaluateAt(FloatArray &answer, DofManager *dman, ValueModeType mode, TimeStep *tStep) override;

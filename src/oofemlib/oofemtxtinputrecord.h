@@ -74,7 +74,7 @@ public:
     /// Assignment operator.
     OOFEMTXTInputRecord &operator = ( const OOFEMTXTInputRecord & );
 
-    std::unique_ptr<InputRecord> clone() override { return std::unique_ptr<InputRecord>(new OOFEMTXTInputRecord(*this)); }
+    std::unique_ptr<InputRecord> clone() override { return std::make_unique<OOFEMTXTInputRecord>(*this); }
 
 public:
     /// Sets the record string.

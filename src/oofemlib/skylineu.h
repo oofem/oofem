@@ -66,11 +66,12 @@ public:
      * @see buildInternalStructure
      */
     SkylineUnsym(int n=0);
+    SkylineUnsym(const SkylineUnsym &s);
     /// Destructor
     virtual ~SkylineUnsym() {}
 
     // Overloaded methods:
-    SparseMtrx *GiveCopy() const override;
+    std::unique_ptr<SparseMtrx> clone() const override;
     void times(const FloatArray &x, FloatArray &answer) const override;
     void timesT(const FloatArray &x, FloatArray &answer) const override;
     void times(double x) override;

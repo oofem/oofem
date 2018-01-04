@@ -619,27 +619,27 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
 #if 1
         nMethod->solve(*lhs, rhs, incrementalSolutionVector);
 #else
+        {
+            auto lhs_copy = lhs->clone();
 
-        SparseMtrx *__lhs = lhs->GiveCopy();
+            nMethod->solve(*lhs, rhs, incrementalSolutionVector);
 
-        nMethod->solve(*lhs, rhs, incrementalSolutionVector);
+            // check solver
+            FloatArray __rhs(neq);
+            double __absErr = 0., __relErr = 0.;
+            lhs_copy->times(incrementalSolutionVector, __rhs);
+            for ( int i = 1; i <= neq; i++ ) {
+                if ( fabs( __rhs.at(i) - rhs.at(i) ) > __absErr ) {
+                    __absErr = fabs( __rhs.at(i) - rhs.at(i) );
+                }
 
-        // check solver
-        FloatArray __rhs(neq);
-        double __absErr = 0., __relErr = 0.;
-        __lhs->times(incrementalSolutionVector, __rhs);
-        for ( int i = 1; i <= neq; i++ ) {
-            if ( fabs( __rhs.at(i) - rhs.at(i) ) > __absErr ) {
-                __absErr = fabs( __rhs.at(i) - rhs.at(i) );
+                if ( fabs( ( __rhs.at(i) - rhs.at(i) ) / rhs.at(i) ) > __relErr ) {
+                    __relErr = fabs( ( __rhs.at(i) - rhs.at(i) ) / rhs.at(i) );
+                }
             }
 
-            if ( fabs( ( __rhs.at(i) - rhs.at(i) ) / rhs.at(i) ) > __relErr ) {
-                __relErr = fabs( ( __rhs.at(i) - rhs.at(i) ) / rhs.at(i) );
-            }
+            OOFEM_LOG_INFO("SUPG: solver check: absoluteError %e, relativeError %e\n", __absErr, __relErr);
         }
-
-        OOFEM_LOG_INFO("SUPG: solver check: absoluteError %e, relativeError %e\n", __absErr, __relErr);
-        delete(__lhs);
 #endif
 
 

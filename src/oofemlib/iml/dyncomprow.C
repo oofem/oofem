@@ -79,9 +79,9 @@ DynCompRow &DynCompRow :: operator = ( const DynCompRow & C )
     return * this;
 }
 
-SparseMtrx *DynCompRow :: GiveCopy() const
+std::unique_ptr<SparseMtrx> DynCompRow :: clone() const
 {
-    return new DynCompRow(*this);
+    return std::make_unique<DynCompRow>(*this);
 }
 
 

@@ -280,7 +280,7 @@ TimeStep *NonLinearStatic :: giveSolutionStepWhenIcApply(bool force)
     if ( !stepWhenIcApply ) {
         int inin = giveNumberOfTimeStepWhenIcApply();
 	//        int nFirst = giveNumberOfFirstStep();
-        stepWhenIcApply.reset(new TimeStep(inin, this, 0, -deltaT, deltaT, 0));
+        stepWhenIcApply = std::make_unique<TimeStep>(inin, this, 0, -deltaT, deltaT, 0);
     }
 
     return stepWhenIcApply.get();
@@ -316,7 +316,7 @@ TimeStep *NonLinearStatic :: giveNextStep()
     } else {
         // first step -> generate initial step
         TimeStep *newStep = giveSolutionStepWhenIcApply();
-        currentStep.reset(new TimeStep(*newStep));
+        currentStep = std::make_unique<TimeStep>(*newStep);
     }
 
     previousStep = std :: move(currentStep);

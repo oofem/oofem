@@ -350,11 +350,10 @@ void pyclass_IntArray()
 *****************************************************/
 struct PySparseMtrx : SparseMtrx, wrapper<SparseMtrx>
 {
-    PySparseMtrx() : SparseMtrx() {}
-    PySparseMtrx(int n, int m): SparseMtrx(n,m) {}
+    PySparseMtrx(int n=0, int m=0): SparseMtrx(n,m) {}
 
-    SparseMtrx *GiveCopy() const {
-        return this->get_override("GiveCopy")();
+    std::unique_ptr<SparseMtrx> clone() const {
+        return this->get_override("clone")();
     }
 
     void times(const FloatArray &x, FloatArray &answer) const {

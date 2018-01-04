@@ -66,6 +66,19 @@ Skyline :: Skyline(int n) : SparseMtrx(n, n),
 }
 
 
+Skyline :: Skyline(const Skyline &s) : SparseMtrx(s.giveNumberOfRows(), s.giveNumberOfColumns()),
+    mtrx(s.mtrx),
+    adr(s.adr),
+    isFactorized(s.isFactorized)
+{}
+
+
+std::unique_ptr<SparseMtrx> Skyline :: clone() const
+{
+    return std::make_unique<Skyline>(*this);
+}
+
+
 double &
 Skyline :: at(int i, int j)
 {
@@ -571,11 +584,6 @@ void Skyline :: zero()
     this->version++;
 }
 
-
-SparseMtrx *Skyline :: GiveCopy() const
-{
-    return new Skyline(*this);
-}
 
 Skyline :: Skyline(int n, FloatArray mtrx1, IntArray adr1) : SparseMtrx(n, n),
     mtrx(std::move(mtrx1)),

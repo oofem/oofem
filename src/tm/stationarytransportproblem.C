@@ -61,7 +61,7 @@ StationaryTransportProblem :: StationaryTransportProblem(int i, EngngModel *_mas
 NumericalMethod *StationaryTransportProblem :: giveNumericalMethod(MetaStep *mStep)
 {
     if ( !nMethod ) {
-        nMethod.reset(new NRSolver(this->giveDomain(1), this));
+        nMethod = std::make_unique<NRSolver>(this->giveDomain(1), this);
     }
     return nMethod.get();
 }

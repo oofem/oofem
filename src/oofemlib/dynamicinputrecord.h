@@ -87,7 +87,7 @@ public:
     /// Assignment operator.
     DynamicInputRecord &operator = ( const DynamicInputRecord & );
 
-    std::unique_ptr<InputRecord> clone() override { return std::unique_ptr<InputRecord>(new DynamicInputRecord(*this)); }
+    std::unique_ptr<InputRecord> clone() override { return std::make_unique<DynamicInputRecord>(*this); }
     void finish(bool wrn = true) override;
 
     std :: string giveRecordAsString() const override;

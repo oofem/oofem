@@ -42,6 +42,8 @@
 #include "error.h"
 #include "sparsemtrxtype.h"
 
+#include <memory>
+
 namespace oofem {
 class EngngModel;
 class TimeStep;
@@ -122,9 +124,10 @@ public:
      * care about proper deallocation of allocated space.
      * @return Newly allocated copy of receiver.
      */
-    virtual SparseMtrx *GiveCopy() const {
+    virtual std::unique_ptr<SparseMtrx> clone() const
+    {
         OOFEM_ERROR("Not implemented");
-        return NULL;
+        return nullptr;
     }
 
     /**

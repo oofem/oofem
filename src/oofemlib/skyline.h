@@ -81,10 +81,11 @@ public:
      * @see builInternalStructure
      */
     Skyline(int n=0);
+    Skyline(const Skyline &s);
     /// Destructor
     virtual ~Skyline() {}
 
-    SparseMtrx *GiveCopy() const override;
+    std::unique_ptr<SparseMtrx> clone() const override;
 
     void times(const FloatArray &x, FloatArray &answer) const override;
     void timesT(const FloatArray &x, FloatArray &answer) const override { this->times(x, answer); }

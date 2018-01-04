@@ -86,9 +86,9 @@ SymCompCol :: SymCompCol(const SymCompCol &S) : CompCol(S)
 { }
 
 
-SparseMtrx *SymCompCol :: GiveCopy() const
+std::unique_ptr<SparseMtrx> SymCompCol :: clone() const
 {
-    return new SymCompCol(*this);
+    return std::make_unique<SymCompCol>(*this);
 }
 
 

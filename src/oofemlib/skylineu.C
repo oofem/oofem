@@ -59,6 +59,20 @@ SkylineUnsym :: SkylineUnsym(int n) : SparseMtrx(n, n),
 }
 
 
+SkylineUnsym :: SkylineUnsym(const SkylineUnsym &s) : SparseMtrx(s.nRows, s.nColumns),
+    rowColumns(s.rowColumns),
+    isFactorized(s.isFactorized)
+{
+}
+
+
+std::unique_ptr<SparseMtrx>
+SkylineUnsym :: clone() const
+{
+    return std::make_unique<SkylineUnsym>(*this);
+}
+
+
 void
 SkylineUnsym :: toFloatMatrix(FloatMatrix &answer) const
 {
@@ -454,11 +468,6 @@ SkylineUnsym :: backSubstitutionWith(FloatArray &y) const
     return & y;
 }
 
-SparseMtrx *
-SkylineUnsym :: GiveCopy() const
-{
-    return new SkylineUnsym(*this);
-}
 
 void
 SkylineUnsym :: times(const FloatArray &x, FloatArray &answer) const

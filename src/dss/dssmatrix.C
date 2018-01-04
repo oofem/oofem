@@ -54,7 +54,7 @@ REGISTER_SparseMtrx( DSSMatrixLU, SMT_DSS_unsym_LU);
 
 
 DSSMatrix :: DSSMatrix(dssType _t, int n) : SparseMtrx(n, n),
-    _dss(new DSSolver()),
+    _dss(std::make_unique<DSSolver>()),
     isFactorized(false),
     _type(_t)
 {
@@ -82,11 +82,6 @@ DSSMatrix :: DSSMatrix(const DSSMatrix &S) : SparseMtrx(S.nRows, S.nColumns)
     OOFEM_ERROR("not implemented");
 }
 
-SparseMtrx *DSSMatrix :: GiveCopy() const
-{
-    OOFEM_ERROR("not implemented");
-    return NULL;
-}
 
 void DSSMatrix :: times(const FloatArray &x, FloatArray &answer) const
 {
