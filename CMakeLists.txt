@@ -108,13 +108,12 @@ endif ()
 
 # Enable coverage testing
 if (CMAKE_COMPILER_IS_GNUCC)
-  option(ENABLE_COVERAGE "Enable coverage reporting for gcc/clang" FALSE)
+    option(ENABLE_COVERAGE "Enable coverage reporting for gcc/clang" FALSE)
 
-  if (ENABLE_COVERAGE)
-    add_compile_options(--coverage -O0)
-    list (APPEND EXT_LIBS --coverage)
-    
-  endif()
+    if (ENABLE_COVERAGE)
+        add_compile_options(--coverage -O0)
+        list (APPEND EXT_LIBS --coverage)
+    endif()
 endif ()
 
 #######################################################################
