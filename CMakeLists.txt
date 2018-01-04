@@ -120,6 +120,7 @@ endif ()
 ######################## Internal libraries ###########################
 #######################################################################
 # I believe the subdirs should be used when including instead.
+include_directories ("${oofem_SOURCE_DIR}/src")
 include_directories ("${oofem_SOURCE_DIR}/src/oofemlib")
 include_directories ("${oofem_SOURCE_DIR}/src/oofemlib/T3d/src")
 include_directories ("${oofem_BINARY_DIR}")
