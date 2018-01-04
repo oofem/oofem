@@ -11,7 +11,7 @@ ugrid.setValues([0,.5,0, .5,1,.5, 0,.5,.5])
 #ugrid.setValues([15,15,15,15,15,15,15,15,15])
 print (ugrid.evaluateAtPos((0.5,0.2)))
 
-dr = liboofem.OOFEMTXTDataReader("tmpatch05.in")
+dr = liboofem.OOFEMTXTDataReader("inputs/tmpatch05.in")
 transpModel = liboofem.InstanciateProblem(dr,liboofem.problemMode._processor,0)
 transpModel.checkProblemConsistency()
 

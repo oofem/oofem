@@ -1487,13 +1487,7 @@ object engngModel(bp::tuple args, bp::dict kw)
     EngngModel *engngm = classFactory.createEngngModel(aClass.c_str(),number,master);
     if (engngm==NULL) { OOFEM_LOG_ERROR("engngModel: wrong input data"); }
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
-    engngm->initializeFrom(&ir);
     // instanciateYourself
-    if ( ir.hasField(_IFT_EngngModel_nmsteps) ) {
-        OOFEM_LOG_ERROR("engngModel: simulation with metasteps is not (yet) supported in Python");
-    } else {
-        engngm->instanciateDefaultMetaStep(&ir);
-    }
     ///@todo Output filename isn't stored like this (and has never been!)!?
     string outFile;
     if ( ir.hasField("outfile") ) {
@@ -1503,6 +1497,14 @@ object engngModel(bp::tuple args, bp::dict kw)
     }
     //engngm->Instanciate_init(outFile.c_str(), engngm->giveNumberOfDomains());
     engngm->letOutputBaseFileNameBe(outFile);
+    engngm->initializeFrom(&ir);
+
+    if ( ir.hasField(_IFT_EngngModel_nmsteps) ) {
+      OOFEM_LOG_ERROR("engngModel: simulation with metasteps is not (yet) supported in Python");
+    } else {
+      engngm->instanciateDefaultMetaStep(&ir);
+    }
+
     engngm->Instanciate_init();
     //
     object ret = object(ptr(engngm));
