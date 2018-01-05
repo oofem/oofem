@@ -117,7 +117,14 @@ IsotropicMoistureTransferMaterial :: giveIPValue(FloatArray &answer, GaussPoint 
         answer.resize(1);
         answer.at(1) = 0.;
         return 1;
+    } else if (  type == IST_MoistureContent ) {
+        FloatArray humidity;
+        answer.resize(1);
+        this->giveIPValue(humidity, gp, IST_Humidity, tStep);
+        answer.at(1) = giveMoistureContent(humidity.at(1));
+        return 1;
     }
+        
 
     /* else if (  type == IST_Humidity ) {
      * FloatArray state = static_cast< TransportMaterialStatus * >( giveStatus(gp) )->giveStateVector();

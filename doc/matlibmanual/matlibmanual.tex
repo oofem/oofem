@@ -5233,14 +5233,18 @@ materials, based on a nonlinear sorption isotherm (relation between
 the pore relative humidity $h$ and the water content $w$) 
 and on a humidity-dependent
 moisture permeability.
-The governing differential equation reads
+The governing differential equation solves water mass balance in a unit volume [kg/m$^3$/s] and reads
 \begin{equation}\label{nlisomoisture:governing}
-k(h) \frac{\partial h}{\partial t} = \nabla \cdot \left[ c(h) \nabla h \right]
+k(h) \frac{\partial h}{\partial t} = \nabla \cdot \left[ c(h) \nabla h \right] + w_n \frac{\ud \alpha}{\ud t}
 \end{equation} 
 where 
 $k(h)$ [kg/m$^3$] is the humidity-dependent moisture capacity (derivative of
-the moisture content with respect to the relative humidity), and $c(h)$
-[kg/m$\cdot$s] is the moisture permeability. 
+the moisture content with respect to the relative humidity), $c(h)$
+[kg/m/s] is the moisture permeability and the sink term 
+$w_n \frac{\ud \alpha}{\ud t}$ corresponds to non-evaporable water loss due to hydration. $w_n$ is
+non-evaporable water content for complete hydration per m$^3$ [kg/m$^3$] and $\alpha$ is degree of hydration [-]. 
+For the majority of cements, 1 kg of cement consumes approximately 0.23 kg of non-evaporable water at complete hydration.
+
 
 So far, six different functions for the {\bf sorption
 isotherm} have been implemented  (in fact, what matters for the model
@@ -5366,7 +5370,9 @@ Record Format & \descitem{NlIsoMoistureMat} \elemparam{num}{in}
 \optelemparam{perm\_h}{ra} \optelemparam{perm\_c(h)}{ra}
 \optelemparam{c1}{rn} \optelemparam{n}{rn} \optelemparam{alpha0}{rn}
 \optelemparam{hc}{rn} \optelemparam{alphah}{rn}
-\optelemparam{betah}{rn} \optelemparam{gammah}{rn} \\
+\optelemparam{betah}{rn} \optelemparam{gammah}{rn}
+\optelemparam{wn}{rn} \optelemparam{alpha}{expr} \\
+\\
 Parameters &- \param{num} material model number \\
 &- \param{d} material density \\
 &- \param{isothermType} isotherm function as listed above (0, 1, ...5)
@@ -5402,6 +5408,8 @@ between its minimum and maximum value (for $permeabilityType=1$) \\
 &- \param{alphah} [kg m$^{-1}$ s$^{-1}$] (for $permeabilityType=2$) \\
 &- \param{betah} [kg m$^{-1}$ s$^{-1}$] (for $permeabilityType=2$) \\
 &- \param{gammah} [-] (for $permeabilityType=2$) \\
+&- \param{wn} [kg m$^{-3}$] nonevaporable water content per m$^3$ of concrete, default 0.23 kg/kg of cement\\
+&- \param{alpha} [-] function of degree of hydration \\
 
 Supported modes& \_2dHeat \\
 \hline

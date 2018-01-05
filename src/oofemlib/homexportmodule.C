@@ -67,7 +67,7 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     }
 
     bool volExported = false;
-    fprintf(this->stream, "%.3e  ", tStep->giveIntrinsicTime()*this->timeScale);
+    fprintf(this->stream, "%.3e  ", tStep->giveTargetTime()*this->timeScale);
     IntArray elements;
     //assemble list of eligible elements. Elements can be present more times in a list but averaging goes just once over each element.
     elements.resize(0);

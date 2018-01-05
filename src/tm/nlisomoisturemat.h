@@ -37,6 +37,8 @@
 
 #include "isomoisturemat.h"
 #include "floatarray.h"
+#include "scalarfunction.h"
+#include "function.h"
 
 ///@name Input fields for NlIsoMoistureMaterial
 //@{
@@ -79,7 +81,8 @@
 #define _IFT_NlIsoMoistureMaterial_mu "mu"
 #define _IFT_NlIsoMoistureMaterial_t "t"
 #define _IFT_NlIsoMoistureMaterial_timescale "timescale"
-
+#define _IFT_NlIsoMoistureMaterial_wn "wn"
+#define _IFT_NlIsoMoistureMaterial_alpha "alpha"
 
 //@}
 
@@ -118,7 +121,13 @@ protected:
     double hx, dx;
     double iso_offset;
     double c1, c2, capa2;
-
+    
+    /// Nonevaporable water content per m3 of concrete at complete hydration
+    double wn;
+    
+    /// Function of degree of hydration
+    ScalarFunction alpha;
+    
 
     enum permeabilityType { multilin, Bazant, Xi, KunzelPerm } Permeability;
 
@@ -150,7 +159,7 @@ public:
 
     /// evaluates slope of the sorption isotherm
     virtual double giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep);
-    virtual double sorptionIsotherm(double humidity);
+    virtual double giveMoistureContent(double humidity);
     virtual double givePermeability(GaussPoint *gp, TimeStep *tStep);
     virtual double computeCapTranspCoeff(double humidity);
 
@@ -160,6 +169,9 @@ public:
     virtual double giveHumidity(GaussPoint *gp, ValueModeType mode);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual int hasInternalSource();
+    virtual  void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
+    
 };
 } // end namespace oofem
 #endif // nlisomoisturemat_h

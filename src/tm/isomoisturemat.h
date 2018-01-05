@@ -63,6 +63,8 @@ public:
 
     virtual double givePermeability(GaussPoint *gp, TimeStep *tStep) = 0;
     virtual double giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep) = 0;
+    //sorption isotherm, return total water mass [kg/m3]
+    virtual double giveMoistureContent(double humidity) {return 0.;};
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual const char *giveClassName() const { return "IsotropicMoistureTransferMaterial"; }

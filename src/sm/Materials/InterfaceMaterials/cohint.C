@@ -137,9 +137,9 @@ CohesiveInterfaceMaterial :: initializeFrom(InputRecord *ir)
     stiffCoeffKn = 1.;
     IR_GIVE_OPTIONAL_FIELD(ir, stiffCoeffKn, _IFT_CohesiveInterfaceMaterial_stiffCoeffKn);
     transitionOpening = 0.;
-    IR_GIVE_OPTIONAL_FIELD(ir, transitionOpening, _IFT_CohesiveInterfaceMaterial_transitionopening);
+    IR_GIVE_OPTIONAL_FIELD(ir, transitionOpening, _IFT_CohesiveInterfaceMaterial_transitionopening);//Better term DisplacementOffset.
 
-    smoothMag = 1.e+4;
+    smoothMag = 1.e+8;
     IR_GIVE_OPTIONAL_FIELD(ir, smoothMag, _IFT_CohesiveInterfaceMaterial_smoothMag);
     
     return StructuralInterfaceMaterial :: initializeFrom(ir);

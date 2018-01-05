@@ -220,6 +220,11 @@ NlIsoMoistureMaterial :: initializeFrom(InputRecord *ir)
     } else {
         OOFEM_ERROR("unknown permeability type");
     }
+    
+    wn=0.;
+    IR_GIVE_OPTIONAL_FIELD(ir, wn, _IFT_NlIsoMoistureMaterial_wn);
+    IR_GIVE_OPTIONAL_FIELD(ir, alpha, _IFT_NlIsoMoistureMaterial_alpha);
+    
 
     return IsotropicMoistureTransferMaterial :: initializeFrom(ir);
 }
@@ -265,7 +270,7 @@ NlIsoMoistureMaterial :: giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep)
 }
 
 double
-NlIsoMoistureMaterial :: sorptionIsotherm(double humidity)
+NlIsoMoistureMaterial :: giveMoistureContent(double humidity)
 {
     if ( this->Isotherm == linear ) {
         return moistureCapacity*humidity;
@@ -361,7 +366,7 @@ NlIsoMoistureMaterial :: computeCapTranspCoeff(double humidity)
         }
 
     } else if ( this->CapillaryTransport == Multilin_wV ) {
-        double wV = this->sorptionIsotherm(humidity) / rhoH2O;
+        double wV = this->giveMoistureContent(humidity) / rhoH2O;
         double tol = 1.e-10;
         for (int i = 1; i <= capPerm_wV.giveSize(); i++) {
             if ((wV - capPerm_wV.at(i))<tol) {
@@ -372,7 +377,7 @@ NlIsoMoistureMaterial :: computeCapTranspCoeff(double humidity)
 
     } else if ( this->CapillaryTransport == KunzelCT ){
         double w;
-        w = this->sorptionIsotherm(humidity);
+        w = this->giveMoistureContent(humidity);
         Dw = 3.8 * (Abs/wf)*(Abs/wf) * pow(1000., w/wf -1.);
 
     } else {
@@ -394,4 +399,26 @@ NlIsoMoistureMaterial :: giveHumidity(GaussPoint *gp, ValueModeType mode)
         return tempState.at(1);
     }
 }
+
+int
+NlIsoMoistureMaterial :: hasInternalSource()
+{
+    if (this->wn !=0.){
+        return 1;
+    }
+return 0;
+}
+
+void
+NlIsoMoistureMaterial :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
+{
+    val.resize(1);
+    if (( mode == VM_Total) || (mode == VM_TotalIntrinsic)) {
+        val.at(1) = -wn*(this->alpha.eval( {{ "t", tStep->giveTargetTime() }}, this->giveDomain() ) - this->alpha.eval( {{ "t", tStep->giveTargetTime()-tStep->giveTimeIncrement()}} , this->giveDomain() ) ) / tStep->giveTimeIncrement();
+    } else {
+        OOFEM_ERROR("Undefined mode %s\n", __ValueModeTypeToString(mode) );
+    }
+}
+
+
 } // end namespace oofem
