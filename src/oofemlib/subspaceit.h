@@ -44,6 +44,8 @@
 #include "sparsemtrx.h"
 #include "floatarray.h"
 
+#define _IFT_SubspaceIteration_Name "subspaceit"
+
 namespace oofem {
 class Domain;
 class EngngModel;
@@ -86,7 +88,6 @@ class EngngModel;
  *      EIGV(NROOT)  -  VLASTNI CISLA
  *      R(NN,NROOT)  -  VLASTNI VEKTORY
  */
-
 class OOFEM_EXPORT SubspaceIteration : public SparseGeneralEigenValueSystemNM
 {
 private:

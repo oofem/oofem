@@ -25,7 +25,7 @@ using namespace oofem;
 
 int main(int argc, char *argv[])
 {
-    DynamicDataReader myData;
+    DynamicDataReader myData("beam01");
     DynamicInputRecord *myInput;
 
     //Output File
@@ -198,7 +198,7 @@ int main(int argc, char *argv[])
     // Writing to file (to verify, and for backups)
     myData.writeToFile("beam01.in");
 
-    EngngModel *em = InstanciateProblem(&myData, _processor, 0);
+    EngngModel *em = InstanciateProblem(myData, _processor, 0);
     em->solveYourself();
     myData.finish();
 }

@@ -37,6 +37,8 @@
 
 #include "integrationrule.h"
 
+#define _IFT_LobattoIntegrationRule_Name "lobatto"
+
 namespace oofem {
 /**
  * Class representing Lobatto-quadrature integration rule.

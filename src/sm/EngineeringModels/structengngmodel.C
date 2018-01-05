@@ -62,18 +62,16 @@ void LinearizedDilationForceAssembler :: vectorFromElement(FloatArray &vec, Elem
 
     vec.clear();
     for ( auto &gp : *selem.giveDefaultIntegrationRulePtr() ) {
-        FloatMatrix B;
         FloatArray epsilonTemperature;
-        
-        double dV = selem.computeVolumeAround(gp);
-        selem.computeBmatrixAt(gp, B);
 
         /// @todo Problematic: Needs direct access to material model. Should do without (can be easily done by adding lots of code, but I'm searching for a simple, general, implementation) / Mikael
         static_cast< StructuralMaterial *>( selem.giveStructuralCrossSection()->giveMaterial(gp) )->computeStressIndependentStrainVector(epsilonTemperature, gp, tStep, VM_Incremental);
 
         if ( epsilonTemperature.giveSize() > 0 ) {
+            FloatMatrix D, B;
             FloatArray s;
-            FloatMatrix D;
+            double dV = selem.computeVolumeAround(gp);
+            selem.computeBmatrixAt(gp, B);
             selem.computeConstitutiveMatrixAt(D, ElasticStiffness, gp, tStep);
             s.beProductOf(D, epsilonTemperature);
             vec.plusProduct(B, s, dV);

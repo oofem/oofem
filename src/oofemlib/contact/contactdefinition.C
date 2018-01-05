@@ -59,9 +59,9 @@ ContactDefinition :: ~ContactDefinition()
 
 
 int
-ContactDefinition :: instanciateYourself(DataReader *dr)
+ContactDefinition :: instanciateYourself(DataReader &dr)
 {
-    for ( ContactElement *cEl : this->masterElementList ) {
+    for ( auto cEl : this->masterElementList ) {
         cEl->instanciateYourself(dr);
         cEl->setupIntegrationPoints();
     }

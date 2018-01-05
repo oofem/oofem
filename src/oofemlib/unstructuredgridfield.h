@@ -368,7 +368,7 @@ protected:
             for(int i=0;i<(int) this->vertexList.size();i++){
                 const FloatArray *pcoords=this->vertexList[i].getCoordinates();
                 dist=sqrt( pow(coords[0]-pcoords->at(1),2)+pow(coords[1]-pcoords->at(2),2)+pow(coords[2]-pcoords->at(3),2) );
-                if(dist<minDist or !i){
+                if((dist<minDist) || (!i)){
                     minDist=dist;
                     idOfClosestPoint=i;
                 }

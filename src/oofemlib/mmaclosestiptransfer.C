@@ -38,9 +38,12 @@
 #include "material.h"
 #include "gausspoint.h"
 #include "matstatmapperint.h"
+#include "classfactory.h"
 #include "xfem/xfemelementinterface.h"
 
 namespace oofem {
+REGISTER_MaterialMappingAlgorithm(MMAClosestIPTransfer, MMA_ClosestPoint);
+
 MMAClosestIPTransfer :: MMAClosestIPTransfer() : MaterialMappingAlgorithm()
 { }
 

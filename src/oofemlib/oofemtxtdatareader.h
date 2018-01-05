@@ -67,10 +67,15 @@ public:
     virtual InputRecord *giveInputRecord(InputRecordType, int recordId);
     virtual bool peakNext(const std :: string &keyword);
     virtual void finish();
-    virtual const char *giveDataSourceName() const { return dataSourceName.c_str(); }
+    virtual std :: string giveReferenceName() const { return dataSourceName; }
 
 protected:
+    /**
+     * Reads one line from inputStream
+     * Parts within quotations have case preserved.
+     */
     bool giveLineFromInput(std :: ifstream &stream, int &lineNum, std :: string &line);
+    /// Reads one line from stream.
     bool giveRawLineFromInput(std :: ifstream &stream, int &lineNum, std :: string &line);
 };
 } // end namespace oofem

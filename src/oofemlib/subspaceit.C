@@ -45,6 +45,8 @@
 #include "classfactory.h"
 
 namespace oofem {
+REGISTER_GeneralizedEigenValueSolver(SubspaceIteration, GES_SubspaceIt);
+
 SubspaceIteration :: SubspaceIteration(Domain *d, EngngModel *m) :
     SparseGeneralEigenValueSystemNM(d, m)
 {

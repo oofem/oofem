@@ -1,3 +1,29 @@
+2017-12-30 Borek Patzak  <Borek.Patzak@fsv.cvut.cz>
+	* OOFEM 2.5 released
+	* Added support for other sparse matrix storage schemes in nlinear dynamic problem
+	* Adding linear and quadratic wedge elements for transport
+	* unv2oofem python3 support, added support for sets
+	* boundarysurfaceload support for cct element
+	* Implementation of quasicontinuum
+	* PARDISO_ORG sparse solver supported
+	* Adding support of artificial drillStiffness and layered cross-section on MITC element.
+	* Adding SuperLU_MT interface, new -p option to set number of threads
+	* 2D eikonal nonlocal damage model
+	* Added new material models for concrete: ConcreteFCM, FRCFCM and FRCFCMNL
+	* Unified boundary load evaluation
+	* Adding linear nodal spring element,  linear line-distributed spring element
+	* Added subsoil elements
+
+
+2016-02-15  Borek Patzak  <Borek.Patzak@fsv.cvut.cz>
+
+	* OOFEM 2.4 released
+	* Added new StaticStructural, TransientTransport, and Warping analyses, as well as new Particle FEM CFD submodule
+	* MKL Pardiso solver support with optimized CSC implementation, support for block matrices in PETSc
+	* New structural elements: MITC4 and trshell02 shells, 3D plane stress Almann element
+	* Added support for global condensation (fixes many issues on beam elements)
+	* And many improvements and bug-fixes
+
 2014-02-12  Borek Patzak  <Borek.Patzak@fsv.cvut.cz>
 
 	* OOFEM 2.3 released.

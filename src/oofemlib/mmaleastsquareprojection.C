@@ -41,8 +41,11 @@
 #include "integrationrule.h"
 #include "connectivitytable.h"
 #include "dynamicinputrecord.h"
+#include "classfactory.h"
 
 namespace oofem {
+REGISTER_MaterialMappingAlgorithm(MMALeastSquareProjection, MMA_LeastSquareProjection);
+
 MMALeastSquareProjection :: MMALeastSquareProjection() : MaterialMappingAlgorithm()
 {
     this->stateFilter = 0;

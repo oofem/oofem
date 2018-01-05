@@ -37,6 +37,8 @@
 
 #include "mesherinterface.h"
 
+#define _IFT_Targe2Interface_Name "targe2"
+
 namespace oofem {
 class TimeStep;
 

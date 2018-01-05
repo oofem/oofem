@@ -64,14 +64,14 @@ void ProblemSequence :: solveYourself()
 }
 
 
-int ProblemSequence :: instanciateYourself(DataReader *dr, InputRecord *ir, const char *outFileName, const char *desc)
+int ProblemSequence :: instanciateYourself(DataReader &dr, InputRecord *ir, const char *outFileName, const char *desc)
 {
     int result = EngngModel :: instanciateYourself(dr, ir, dataOutputFileName.c_str(), desc);
     ir->finish();
 
     for ( auto &s : inputStreamNames ) {
         OOFEMTXTDataReader dr( inputStreamNames [ i - 1 ] );
-        std :: unique_ptr< EngngModel >prob( InstanciateProblem(& dr, this->pMode, this->contextOutputMode, NULL) );
+        std :: unique_ptr< EngngModel >prob( InstanciateProblem(dr, this->pMode, this->contextOutputMode, NULL) );
         emodelList.emplace_back(std :: move(prob));
         if ( prob ) {
             return 0;
@@ -113,14 +113,14 @@ contextIOResultType ProblemSequence :: saveContext(DataStream &stream, ContextMo
 }
 
 
-contextIOResultType ProblemSequence :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType ProblemSequence :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType ret = EngngModel :: restoreContext(stream, mode, obj);
+    contextIOResultType ret = EngngModel :: restoreContext(stream, mode);
 
-    stream->read(activeModel);
+    stream.read(activeModel);
 
     for (auto &emodel : emodelList) {
-        emodel->restoreContext(stream, mode, obj);
+        emodel->restoreContext(stream, mode);
     }
     return ret;
 }

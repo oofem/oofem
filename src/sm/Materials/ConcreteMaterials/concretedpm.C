@@ -48,7 +48,8 @@
 namespace oofem {
 REGISTER_Material(ConcreteDPM);
 ///@todo Eventually remove this old input string (replacing the name in input files is easy anyway).
-static bool __dummy_ConcreteDPM_alt __attribute__((unused)) = GiveClassFactory().registerMaterial("concreteidp", matCreator< ConcreteDPM > );
+//static bool __dummy_ConcreteDPM_alt __attribute__((unused)) = GiveClassFactory().registerMaterial("concreteidp", matCreator< ConcreteDPM > );
+REGISTER_Material_Alt(ConcreteDPM, concreteidp);
 
 ConcreteDPMStatus :: ConcreteDPMStatus(int n, Domain *d, GaussPoint *gp) :
     StructuralMaterialStatus(n, d, gp),

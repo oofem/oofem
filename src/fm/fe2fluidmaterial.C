@@ -331,7 +331,7 @@ FE2FluidMaterialStatus :: ~FE2FluidMaterialStatus()
 bool FE2FluidMaterialStatus :: createRVE(int n, GaussPoint *gp, const std :: string &inputfile)
 {
     OOFEMTXTDataReader dr( inputfile.c_str() );
-    EngngModel *em = InstanciateProblem(& dr, _processor, 0); // Everything but nrsolver is updated.
+    EngngModel *em = InstanciateProblem(dr, _processor, 0); // Everything but nrsolver is updated.
     dr.finish();
     em->setProblemScale(microScale);
     em->checkProblemConsistency();
@@ -396,7 +396,7 @@ contextIOResultType FE2FluidMaterialStatus :: restoreContext(DataStream &stream,
     }
     this->markOldTangents();
 
-    return this->rve->restoreContext(&stream, mode, obj);
+    return this->rve->restoreContext(stream, mode);
 }
 
 void FE2FluidMaterialStatus :: markOldTangents() { this->oldTangents = true; }

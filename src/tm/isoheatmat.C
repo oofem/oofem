@@ -210,6 +210,7 @@ IsotropicHeatTransferMaterialStatus :: updateYourself(TimeStep *tStep)
 double IsotropicHeatTransferMaterial :: giveTemperature(GaussPoint *gp)
 {
     IsotropicHeatTransferMaterialStatus *ms = static_cast< IsotropicHeatTransferMaterialStatus * >( this->giveStatus(gp) );
+    if ( ms->giveTempField().isEmpty() ) return 0;
     return ms->giveTempField().at(1);
 }
 

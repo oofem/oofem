@@ -47,6 +47,8 @@
 #include <queue>
 #include <list>
 
+#define _IFT_Subdivision_Name "subdiv"
+
 namespace oofem {
 
 #define SHARED_IRREGULAR_DATA_TAG 7654

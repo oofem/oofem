@@ -147,7 +147,7 @@ IRResultType MicroMaterial :: initializeFrom(InputRecord *ir)
 
     OOFEM_LOG_INFO( "** Instanciating microproblem with BC from file %s\n", inputFileNameMicro.c_str() );
     OOFEMTXTDataReader drMicro( inputFileNameMicro.c_str() );
-    this->problemMicro = InstanciateProblem(& drMicro, _processor, 0); //0=contextFlag-store/resore
+    this->problemMicro = InstanciateProblem(drMicro, _processor, 0); //0=contextFlag-store/resore
     drMicro.finish();
     OOFEM_LOG_INFO("** Microproblem %p instanciated\n\n", problemMicro);
 

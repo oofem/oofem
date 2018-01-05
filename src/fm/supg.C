@@ -832,47 +832,27 @@ SUPG :: saveContext(DataStream &stream, ContextMode mode)
 
 
 contextIOResultType
-SUPG :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+SUPG :: restoreContext(DataStream &stream, ContextMode mode)
 {
     contextIOResultType iores;
-    int closeFlag = 0;
-    int istep, iversion;
-    FILE *file = NULL;
 
-    this->resolveCorrespondingStepNumber(istep, iversion, obj);
-
-    if ( stream == NULL ) {
-        if ( !this->giveContextFile(& file, istep, iversion, contextMode_read) ) {
-            THROW_CIOERR(CIO_IOERR); // override
-        }
-
-        stream = new FileDataStream(file);
-        closeFlag = 1;
-    }
-
-    if ( ( iores = EngngModel :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
+    if ( ( iores = EngngModel :: restoreContext(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = VelocityPressureField->restoreContext(*stream, mode) ) != CIO_OK ) {
+    if ( ( iores = VelocityPressureField->restoreContext(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = accelerationVector.restoreYourself(*stream) ) != CIO_OK ) {
+    if ( ( iores = accelerationVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     if ( materialInterface ) {
-        if ( ( iores = materialInterface->restoreContext(*stream, mode) ) != CIO_OK ) {
+        if ( ( iores = materialInterface->restoreContext(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
-
-    if ( closeFlag ) {
-        fclose(file);
-        delete stream;
-        stream = NULL;
-    } // ensure consistent records
 
     return CIO_OK;
 }

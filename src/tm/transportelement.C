@@ -819,10 +819,12 @@ TransportElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLo
 
         FieldPtr tf = domain->giveEngngModel()->giveContext()->giveFieldManager()->giveField(FT_TemperatureAmbient);
         if ( tf ) {
+            interp->boundaryLocal2Global( gcoords, boundary, lcoords, FEIElementGeometryWrapper(this) );
             tf->evaluateAt(val, gcoords, VM_TotalIntrinsic, tStep);
         } else if ( load->giveFormulationType() == Load :: FT_Entity ) {
             load->computeValueAt(val, tStep, lcoords, mode);
         } else {
+            interp->boundaryLocal2Global( gcoords, boundary, lcoords, FEIElementGeometryWrapper(this) );
             load->computeValueAt(val, tStep, gcoords, mode);
         }
 

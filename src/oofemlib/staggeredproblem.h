@@ -159,12 +159,12 @@ public:
     virtual void terminate(TimeStep *tStep);
     virtual void doStepOutput(TimeStep *tStep);
 
-    virtual int instanciateYourself(DataReader *dr, InputRecord *ir, const char *outFileName, const char *desc);
+    virtual int instanciateYourself(DataReader &dr, InputRecord *ir, const char *outFileName, const char *desc);
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void updateAttributes(MetaStep *mStep);
 
     virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mod);
     virtual void updateDomainLinks();
 
     void printYourself();

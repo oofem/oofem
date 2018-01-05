@@ -1,6 +1,6 @@
 BACKUP_NAME=oofem.tar.gz
-DOC_RELEASE_FILES="elementlibmanual/elementlibmanual.pdf paper-actap/paper-actap.pdf extractorInput/extractorInput.pdf matlibmanual/matlibmanual.pdf oofemInput/oofemInput.pdf programmer/programmer.pdf"
-DOC_DIRS="doc/elementlibmanual doc/paper-actap doc/extractorInput doc/matlibmanual doc/oofemInput doc/programmer"
+DOC_RELEASE_FILES="elementlibmanual/elementlibmanual.pdf paper-actap/paper-actap.pdf extractorInput/extractorInput.pdf matlibmanual/matlibmanual.pdf oofemInput/oofemInput.pdf programmer/programmer.pdf theorymanual/theorymanual.pdf"
+DOC_DIRS="doc/elementlibmanual doc/paper-actap doc/extractorInput doc/matlibmanual doc/oofemInput doc/programmer doc/theorymanual"
 
 if [ -z $1 ]
 then

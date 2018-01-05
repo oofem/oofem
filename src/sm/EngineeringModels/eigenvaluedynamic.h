@@ -95,11 +95,10 @@ public:
     virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode);
     virtual TimeStep *giveNextStep();
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
-    virtual void setActiveVector(int i) { activeVector = i; }
-    virtual int resolveCorrespondingEigenStepNumber(void *obj);
+    virtual void setActiveVector(int i);
 
     virtual double giveEigenValue(int eigNum) { return eigVal.at(eigNum); }
 

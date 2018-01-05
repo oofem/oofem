@@ -37,6 +37,7 @@
 #include "element.h"
 #include "dofmanager.h"
 #include "engngm.h"
+#include "classfactory.h"
 
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"
@@ -45,6 +46,8 @@
 #endif
 
 namespace oofem {
+REGISTER_NodalRecoveryModel(NodalAveragingRecoveryModel, NodalRecoveryModel :: NRM_NodalAveraging);
+
 NodalAveragingRecoveryModel :: NodalAveragingRecoveryModel(Domain *d) : NodalRecoveryModel(d)
 { }
 

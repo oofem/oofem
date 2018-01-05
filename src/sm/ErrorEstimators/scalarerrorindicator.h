@@ -40,6 +40,7 @@
 
 ///@name Input fields for ScalarErrorIndicator
 //@{
+#define _IFT_ScalarErrorIndicator_Name "scalar"
 #define _IFT_ScalarErrorIndicator_vartype "vartype"
 //@}
 

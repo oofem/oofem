@@ -258,7 +258,7 @@ void IntArray :: printYourself(const std::string name) const
 bool IntArray :: isFinite() const
 {
     for(int val : values) {
-        if(!std::isfinite(val)) {
+      if(!std::isfinite((double)val)) {
             return false;
         }
     }

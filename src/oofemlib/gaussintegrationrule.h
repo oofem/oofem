@@ -37,6 +37,8 @@
 
 #include "integrationrule.h"
 
+#define _IFT_GaussIntegrationRule_Name "gauss"
+
 namespace oofem {
 class Element;
 

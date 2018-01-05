@@ -43,6 +43,8 @@
 #include "sparsegeneigenvalsystemnm.h"
 #include "floatarray.h"
 
+#define _IFT_InverseIteration_Name "inverseit"
+
 namespace oofem {
 class Domain;
 class EngngModel;

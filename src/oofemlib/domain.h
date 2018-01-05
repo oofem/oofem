@@ -416,7 +416,7 @@ public:
      * @return Nonzero if o.k.
      * @see FemComponent::initializeFrom
      */
-    int instanciateYourself(DataReader *dr);
+    int instanciateYourself(DataReader &dr);
     /**
      * Performs post-initialization for all the domain contents (which is called after initializeFrom).
      * Currently, it only calls Element::postInitialize.

@@ -43,6 +43,8 @@
 #include "sparsemtrx.h"
 #include "intarray.h"
 
+#define _IFT_DynCompRow_Name "dcsr"
+
 namespace oofem {
 // alloc chunk for columns
 #define DynCompRow_CHUNK 8

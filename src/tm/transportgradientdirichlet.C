@@ -62,6 +62,7 @@
 #include <tuple>
 #include <vector>
 #include <algorithm>
+#include <iterator>
 
 namespace oofem {
 REGISTER_BoundaryCondition(TransportGradientDirichlet);
@@ -384,7 +385,7 @@ void TransportGradientDirichlet :: computeXi()
         for ( int j = i+1; j < this->surfSets.giveSize(); ++j ) {
             std :: vector< std :: tuple< int, int > > ijEdgeSet;
             std :: set_intersection(surfedges[i].begin(), surfedges[i].end(), 
-                                    surfedges[j].begin(), surfedges[j].end(), back_inserter(ijEdgeSet));
+                                    surfedges[j].begin(), surfedges[j].end(), std::back_inserter(ijEdgeSet));
             IntArray edgelist;
             edgelist.preallocate(ijEdgeSet.size() * 2);
             for ( auto &edge : ijEdgeSet ) {

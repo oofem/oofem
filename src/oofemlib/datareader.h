@@ -88,13 +88,13 @@ public:
      */
     virtual void finish() = 0;
 
+    /// Gives the reference file name (e.g. file name)
+    virtual std :: string giveReferenceName() const = 0;
     /// Gives the output file name
     std :: string giveOutputFileName() { return this->outputFileName; }
     /// Gives the problem description
     std :: string giveDescription() { return this->description; }
 
-    /// Prints the name (shortened) of data source.
-    virtual const char *giveDataSourceName() const = 0;
     /// Prints the error message.
     void report_error(const char *_class, const char *proc, const char *kwd, IRResultType result, const char *file, int line);
 };

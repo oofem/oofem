@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
     int tangentProblem = atoi(argv[8]);
     FloatArray rvePosition;
     
-    DynamicDataReader myData;
+    DynamicDataReader myData("hexgrid");
     DynamicInputRecord *myInput;
 
     // Read the file with all inclusions:
@@ -409,7 +409,7 @@ int main(int argc, char *argv[])
     myData.insertInputRecord(DataReader::IR_matRec, myInput);
 
     //Boundary Conditions
-    if ( bc == "d" or bc == "md" ) {
+    if ( bc == "d" || bc == "md" ) {
         myInput = new DynamicInputRecord(_IFT_TransportGradientDirichlet_Name, 1);
         myInput->setField(1, _IFT_GeneralBoundaryCondition_timeFunct);
         myInput->setField(IntArray{10}, _IFT_GeneralBoundaryCondition_dofs);
@@ -421,7 +421,7 @@ int main(int argc, char *argv[])
             myInput->setField(_IFT_TransportGradientDirichlet_tractionControl);
         }
         myData.insertInputRecord(DataReader::IR_bcRec, myInput);
-    } else if ( bc == "n" or bc == "mn" ) {
+    } else if ( bc == "n" || bc == "mn" ) {
         myInput = new DynamicInputRecord(_IFT_TransportGradientNeumann_Name, 1);
         myInput->setField(1, _IFT_GeneralBoundaryCondition_timeFunct);
         myInput->setField(IntArray{10}, _IFT_GeneralBoundaryCondition_dofs);
@@ -467,7 +467,7 @@ int main(int argc, char *argv[])
 
     printf("Initializing problem\n");
     timer.startTimer();
-    EngngModel *em = InstanciateProblem(&myData, _processor, 0);
+    EngngModel *em = InstanciateProblem(myData, _processor, 0);
     timer.stopTimer();
     printf("Instanciation time %.3f s\n", timer.getUtime());
     printf("Starting analysis\n");

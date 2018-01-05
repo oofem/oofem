@@ -22,7 +22,7 @@
 \usepackage{tikz}
 \usepackage{hyperref}
 \usepackage[top=0.1\paperheight, bottom=0.1\paperheight, left=0.1\paperwidth, right=0.1\paperwidth]{geometry}
-\usepackage[backend=biber]{biblatex}
+%\usepackage[backend=biber]{biblatex}
 \usepackage{ifthen}
 
 \usetikzlibrary{external} 
@@ -51,11 +51,12 @@
 \input{../include/include.tex}
 
 %% fix for \blx@shorthands as this was removed from current biblatex version
-%\makeatletter
-%\@ifpackageloaded{tex4ht}{
-%  \def\blx@shorthands{}
-%}
-%\makeatother
+\makeatletter
+\@ifpackageloaded{tex4ht}{
+  \def\blx@shorthands{}
+%  \def\blx@unitmark{}
+}
+\makeatother
 
 \renewcommand{\topfraction}{0.99}	% 99% of page top can be a float
 \renewcommand{\bottomfraction}{0.99}	% 99% of page bottom can be a float
@@ -133,7 +134,7 @@
 \newcommand{\recentry}[2]{\ifthenelse{\value{rcc}>0}{&$\backslash$ \\}{\setcounter{rcc}{1}}{#1}&{#2}}
 
 
-\addbibresource{References.bib}
+%\addbibresource{References.bib}
 
 \begin{document}
 
@@ -1256,14 +1257,13 @@ Interface elements represents an interaction between points, edges or surfaces. 
 
 \paragraph{Ordering convention:} All inerface elements have \emph{plus}-side and a \emph{minus}-side and all nodes should first be specified for the minus-side and then the plus-side. The normal to the interface is defined to point from the minus-side to the-plus side. Direction of normal vector on an element specifies normal stress/cohesion across the element. It is assumed that normal jump, normal traction are at the first position of corresponding vectors. Stiffness matrix in local coordinates has always on position 1,1 normal stiffness and then shear stiffness.
 
-\subsubsection{IntElPoint}
-\subsubsection{Interface1d element}
+\subsubsection{IntElPoint, Interface1d elements}
 Implementation of one dimensional (slip) interface element. 
 This element connects two separate nodes and the interaction is governed by a one-dimensional slip law. 
 This law determines the force acting between the nodes as a function on their relative displacement in the slip direction. The element can
 be used in 1D, 2D, and 3D (default) and its features are summarized in Table~\ref{Interface1dsummary}.
 
-\begin{elementsummary}{Interface1d}{One dimensional (slip) interface element}{\optField{refnode}{in} \optField{normal}{ra}}{Interface1d element summary}{Interface1dsummary}
+\begin{elementsummary}{IntElPoint, Interface1d (deprecated)}{One dimensional (slip) interface element}{\optField{refnode}{in} \optField{normal}{ra}}{IntElPoint element summary}{Interface1dsummary}
 \elementParam{\param{refnode}: determines the reference node, which is used to specify a reference direction (the direction vector is obtained by subtracting the coordinates of the first node from the reference node).}
 \elementParam{\param{normal}: The reference direction can be directly specified by the optional parameter \param{normal}. Although both \param{refnode} and \param{normal} are optional, at least one of them must be specified.}
 
@@ -1279,8 +1279,7 @@ w-displacement) are required in each node, according to element mode (determined
 \elementDescription{Note}{Element requires material model with \_1dInterface support.}
 \end{elementsummary}
 
-\subsubsection{IntElLine1 element}
-\subsubsection{Interface2dlin element}
+\subsubsection{IntElLine1, Interface2dlin elements}
 Implementation of a two dimensional line element with a linear approximation of the displacement jump. 
 The element can be used to tie together two element edges and is defined by four nodes - two on each edge. Note that, the nodes along the interface are doubled, each couple with identical coordinates. Nodes on the negative side are numbered first, followed by nodes on the positive part. Requires material model with \_2dInterface support.  The element features are summarized in Table~\ref{Interface2dlinsummary}.
 
@@ -1293,7 +1292,7 @@ The element can be used to tie together two element edges and is defined by four
  \label{interf2d_lin_fig}
 \end{figure}
 
-\begin{elementsummary}{Interface2dlin}{2D  interface element with linear approximation}{\optField{axisymmode}{}}{Interface2dlin element summary}{Interface2dlinsummary}
+\begin{elementsummary}{IntElLine1, Interface2dlin(deprecated) }{2D  interface element with linear approximation}{\optField{axisymmode}{}}{IntElLine1 element summary}{IntElLine1}
 \elementParam{\param{axisymmode}: Flag controlling axisymmetric mode (integration over unit circumferential angle).}
 \elementDescription{Unknowns}{Two dofs (u-displacement, v-displacement) are required in each node.}
 \elementDescription{Approximation}{Linear approximation of displacements and geometry.}
@@ -1307,7 +1306,7 @@ The element can be used to tie together two element edges and is defined by four
 \end{elementsummary}
 
 
-\subsubsection{Interface2dquad element}
+\subsubsection{IntElLine2, Interface2dquad elements}
 Implementation of a two dimensional interface element with quadratic
 approximation of displacement field. Can be used to glue together two elements with quadratic displacement approximation along the shared edge. Note, that the nodes along the interface are doubled, each couple with identical coordinates. Nodes on the negative side are numbered first, followed by nodes on the positive part. Requires material model with \_2dInterface support.  The element features are summarized in Table~\ref{Interface2dquadsummary}.
 
@@ -1320,7 +1319,7 @@ approximation of displacement field. Can be used to glue together two elements w
  \label{interf2d_quad_fig}
 \end{figure}
 
-\begin{elementsummary}{Interface2dquad}{2D  interface element with quadratic approximation}{\optField{axisymmode}{}}{Interface2dquad element summary}{Interface2dquadsummary}
+\begin{elementsummary}{IntElLine2, Interface2dquad (deprecated)}{2D  interface element with quadratic approximation}{\optField{axisymmode}{}}{IntElLine2 element summary}{IntElLine2}
 \elementParam{\param{axisymmode}: Flag controlling axisymmetric mode (integration over unit circumferential angle).}
 \elementDescription{Unknowns}{Two dofs (u-displacement, v-displacement) are required in each node.}
 \elementDescription{Approximation}{Quadratic approximation of displacements and geometry.}
@@ -1333,7 +1332,7 @@ approximation of displacement field. Can be used to glue together two elements w
 \elementDescription{Note}{Element requires material model with \_2dInterface support.}
 \end{elementsummary}
 
-\subsubsection{Interface3dtrlin element}
+\subsubsection{IntElSurfTr1, Interface3dtrlin elements}
 Implementation of a three dimensional interface element with linear
 approximation of displacement field. Can be used to glue together two elements with linear displacement approximation along the shared triangular surface. Note, that the nodes along the interface are doubled, each couple with identical coordinates. Nodes on the negative surface are numbered first, followed by nodes on the positive part. The numbering of surface nodes on positive surface (+) determines the positive normal (right hand rule). Requires material model with \_3dInterface support. The element features are summarized in Table~\ref{Interface3dtrlinsummary}.
 
@@ -1346,7 +1345,7 @@ approximation of displacement field. Can be used to glue together two elements w
  \label{interf3d_lin_fig}
 \end{figure}
 
-\begin{elementsummary}{Interface3dtrlin}{3D  interface element with linear approximation}{-}{Interface3dtrlin element summary}{Interface3dtrlinsummary}
+\begin{elementsummary}{IntElSurfTr1, Interface3dtrlin (deprecated)}{3D  interface element with linear approximation}{-}{IntElSurfTr1 element summary}{Interface3dtrlinsummary}
 %\elementParam{\param{refnode}: determines the reference node, which is used to specify a reference direction (the direction vector is obtained by subtracting the coordinates of the first node from the reference node).}
 \elementDescription{Unknowns}{Three dofs (u-displacement, v-displacement, w-displacement) are required in each node.}
 \elementDescription{Approximation}{Linear approximation of displacements and geometry.}
@@ -1484,8 +1483,10 @@ This element, defined by a single node, allows to introduce additional concentra
 A different mass and rotary inertia may be assigned to each coordinate direction. At present, individual mass/inertia components can be specified for  every degree of freedom of element node. Only displacement and rotational degrees od freedom are considered.  The element features are summarized in Table~\ref{LumpedMasssummary}.
 
 \begin{elementsummary}{LumpedMass}{Lumped mass element}{\field{components}{ra}}{LumpedMass element summary}{LumpedMasssummary}
-\elementParam{\param{components}: allows to specify additional concentrated mass components (Force*Time$^2$/Length) and rotary inertias (Force*Length*Time$^2$) about the nodal coordinate axes. Only displacement and rotational degrees of freedom are considered. The individual DOFs are ordered according to following rule: first, displacement degrees of freedom in the direction of x,y, and z axes (if any), followed by rotational DOFs around x,y, and z axes (if any).}
-\elementDescription{Unknowns}{Only displacement and roational DOFs are considered ($D_u$, $D_v$, $D_w$, $R_u$, $R_v$, and $R_w$).}
+\elementParam{\param{components}: allows to specify additional concentrated mass components (Force*Time$^2$/Length) and rotary inertias (Force*Length*Time$^2$) about the nodal coordinate axes.}
+\elementParam{\param{dofs}: dofs to which the components apply.
+}
+\elementDescription{Unknowns}{As specified by \param{dofs}.}
 \elementDescription{Approximation}{-}
 \elementDescription{Integration}{-}
 \elementDescription{Features}{-}
@@ -2056,8 +2057,13 @@ supports modelling of two immiscible fluids.}
 
 
 % References;
-\printbibliography
+%\printbibliography
 
+\begin{thebibliography}{99}
+\bibitem{RobertCook1989} R. D. Cook and D. S. Malkus and M. E. Plesha, ``Concepts and Applications of Finite Element Analysis'', Third Edition, isbn: 0-471-84788-7, 1989.
+\bibitem{BittnarSejnoha1996} Z. Bittnar and J. Sejnoha, ``Numerical Methods in Structural Mechanics'',Thomas Telford,isbn:978-0784401705, 1996.
+\bibitem{RagnarLarsson2011} R. Larsson and J. Mediavilla and M. Fagerström, ``Dynamic fracture modeling in shell structures based on XFEM'', International Journal for Numerical Methods in Engineering, vol. 86, no. 4-5, 499--527, 2011.
+\end{thebibliography}
 \end{document}
 
 

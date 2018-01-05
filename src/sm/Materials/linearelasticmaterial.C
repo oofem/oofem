@@ -372,6 +372,18 @@ LinearElasticMaterial :: giveEnergyDensity(GaussPoint *gp, TimeStep *tStep)
     return 0.5 * stress.dotProduct(strain);
 }
 
+int
+LinearElasticMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
+{
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+    if ( type == IST_ElasticStrainTensor ) {
+        this->giveStressDependentPartOfStrainVector(answer, gp, status->giveStrainVector(), tStep, VM_Total);
+        return 1;
+    } else {
+        return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
+    }
+}
+
 
 MaterialStatus *
 LinearElasticMaterial :: CreateStatus(GaussPoint *gp) const

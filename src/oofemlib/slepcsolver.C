@@ -33,19 +33,23 @@
  */
 
 #include "slepcsolver.h"
-
-#define TIME_REPORT
 #include "petscsparsemtrx.h"
 #include "engngm.h"
 #include "floatarray.h"
 #include "verbose.h"
 #include "domain.h"
+#include "classfactory.h"
+
+#define TIME_REPORT
 
 #ifdef TIME_REPORT
  #include "timer.h"
 #endif
 
 namespace oofem {
+REGISTER_GeneralizedEigenValueSolver(SLEPcSolver, GES_SLEPc);
+
+
 SLEPcSolver :: SLEPcSolver(Domain *d, EngngModel *m) : SparseGeneralEigenValueSystemNM(d, m)
 {
     A = B = NULL;

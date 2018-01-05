@@ -37,6 +37,8 @@
 
 #include "sparsemtrx.h"
 
+#define _IFT_Skyline_Name "skyline"
+
 namespace oofem {
 /**
  * Class implementing sparse matrix stored in skyline form. This class

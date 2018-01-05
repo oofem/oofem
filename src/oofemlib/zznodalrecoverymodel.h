@@ -38,6 +38,8 @@
 #include "nodalrecoverymodel.h"
 #include "interface.h"
 
+#define _IFT_ZZNodalRecoveryModel_Name "zz"
+
 namespace oofem {
 class GaussPoint;
 class ZZNodalRecoveryModelInterface;

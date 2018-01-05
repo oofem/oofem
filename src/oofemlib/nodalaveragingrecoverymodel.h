@@ -38,6 +38,8 @@
 #include "nodalrecoverymodel.h"
 #include "interface.h"
 
+#define _IFT_NodalAveragingRecoveryModel_Name "nodalaverage"
+
 namespace oofem {
 class GaussPoint;
 class ProcessCommunicator;

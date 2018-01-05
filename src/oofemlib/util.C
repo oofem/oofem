@@ -42,20 +42,20 @@
 #include <cstring>
 
 namespace oofem {
-EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag, EngngModel *_master, bool parallelFlag)
+EngngModel *InstanciateProblem(DataReader &dr, problemMode mode, int contextFlag, EngngModel *_master, bool parallelFlag)
 {
     IRResultType result;                       // Required by IR_GIVE_FIELD macro
     EngngModel *problem;
     std :: string problemName, dataOutputFileName, desc;
 
-    dataOutputFileName = dr->giveOutputFileName();
-    desc = dr->giveDescription();
+    dataOutputFileName = dr.giveOutputFileName();
+    desc = dr.giveDescription();
 
-    /* here we need copy of input record. The pointer returned by dr->giveInputRecord can (and will)
+    /* here we need copy of input record. The pointer returned by dr.giveInputRecord can (and will)
      * be updated as reading e-model components (nodes, etc). But we need this record being available
      * through the whole e-model instanciation
      */
-    InputRecord *emodelir = dr->giveInputRecord(DataReader :: IR_emodelRec, 1)->GiveCopy();
+    InputRecord *emodelir = dr.giveInputRecord(DataReader :: IR_emodelRec, 1)->GiveCopy();
     result = emodelir->giveRecordKeywordField(problemName); ///@todo Make this function robust, it can't be allowed to fail (the record keyword is not a normal field-id)
     if ( result != IRRT_OK ) {
         emodelir->report_error("", __func__, "", result, __FILE__, __LINE__);

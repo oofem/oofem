@@ -10,12 +10,14 @@ include (ProcessorCount)
 
 project (oofem CXX C)
 set (oofem_VERSION_MAJOR 2)
-set (oofem_VERSION_MINOR 4)
+set (oofem_VERSION_MINOR 6)
 set (oofem_VERSION_PATCH 0) # Unused
 set (oofem_HOMEPAGE "http://www.oofem.org")
 set (bp_HOMEPAGE "http://ksm.fsv.cvut.cz/%7Ebp/bp.html")
 set (oofem_COPYRIGHT "Copyright (C) 1994-2017 Borek Patzak")
-set (oofem_EMAIL "info@oofem.org")
+set (oofem_EMAIL "oofem@fsv.cvut.cz")
+
+set(CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 # Default is debug build
 if (NOT CMAKE_BUILD_TYPE)
@@ -52,8 +54,8 @@ set (CMAKE_CXX_FLAGS_PROFILING "${CMAKE_CXX_FLAGS_PROFILING} -O2 -pg")
 set (SLEPC_DIR CACHE PATH "Manual SLEPc directory")
 set (X11_DIR CACHE PATH "Manual X11 directory (OOFEG)")
 set (TINYXML2_DIR CACHE PATH "Manual TinyXML-2 directory (CEMHYD only)")
-set (MY_PETSC_DIR CACHE PATH "Manual PETSc directory")
-set (MY_PETSC_ARCH CACHE STRING "Manual PETSc arch name (e.g. linux-gnu-cxx-opt)")
+#set (PETSC_DIR CACHE PATH "Manual PETSc directory")
+#set (PETSC_ARCH CACHE STRING "Manual PETSc arch name (e.g. linux-gnu-cxx-opt)")
 set (MPI_DIR CACHE PATH "Manual MPI directory")
 set (VTK_DIR CACHE PATH "Manual VTK directory (For binary VTU export)")
 set (LAPACK_DIR CACHE PATH "Manual LAPACK directory")
@@ -90,7 +92,7 @@ option (USE_IML "Enable iml++ solvers" OFF) # or this
 option (USE_SPOOLES "Enable SPOOLES-solver" OFF) # or this
 option (USE_INTEL_MKLPARDISO "Enable MKLPARDISO solver support" OFF)
 option (USE_PARDISO_ORG "Enable PARDISO-project.org solver support" OFF)
-option (USE_PETSC "Enable PETSc support (required for parallel)" OFF)
+option (USE_PETSC "Enable PETSc support (specify PETSC_DIR and/or PETSC_ARCH if needed)" OFF)
 option (USE_SLEPC "Enable SLEPc support" OFF)
 option (USE_LAPACK "Use LAPACK" OFF)
 option (USE_SUPERLU_MT "Use SUPERLU_MT" OFF)
@@ -108,10 +110,22 @@ option (USE_T3D "Enable T3D support" OFF)
 #option (USE_BOOST "Enable Boost" OFF)
 option (USE_PYTHON_BINDINGS "Enable Python bidings (OOFEM usable from Python). Implies USE_PYTHON." OFF)
 option (USE_PYTHON "Enable Python to be used inside OOFEM (e.g. userdef Dirichlet BCs)" OFF)
+option (USE_HDF5 "HDF5 support" OFF)
 
 if (USE_PARALLEL)
     add_definitions (-D__PARALLEL_MODE)
     set (USE_MPI ON)
+endif ()
+
+# Enable coverage testing
+if (CMAKE_COMPILER_IS_GNUCC)
+  option(ENABLE_COVERAGE "Enable coverage reporting for gcc/clang" FALSE)
+
+  if (ENABLE_COVERAGE)
+    add_compile_options(--coverage -O0)
+    list (APPEND EXT_LIBS --coverage)
+    
+  endif()
 endif ()
 
 #######################################################################
@@ -371,37 +385,20 @@ if (USE_SLEPC)
 endif ()
 
 if (USE_PETSC)
-    # A real PETScConfig.cmake file would have been nice to use:
-    #find_package (PETSc 3.3 HINTS "${MY_PETSC_DIR}/${MY_PETSC_ARCH}")
-
-    # Have to use pkgconfig information
-    find_package (PkgConfig REQUIRED)
-    
-    set (ENV{PKG_CONFIG_PATH} "${MY_PETSC_DIR}/${MY_PETSC_ARCH}/lib64/pkgconfig:${MY_PETSC_DIR}/${MY_PETSC_ARCH}/lib/pkgconfig")
-    pkg_check_modules (PC_PETSC REQUIRED PETSc)
-    include_directories (${PC_PETSC_INCLUDE_DIRS})
-
-    # Find the actual libraries:
-    foreach (f ${PC_PETSC_LIBRARIES})
-        find_library (${f}_LIBRARY NAMES ${f} lib${f}
-            HINTS
-            ${PC_PETSC_LIBRARY_DIRS}
-        )
-        list (APPEND EXT_LIBS ${${f}_LIBRARY})
-    endforeach ()
-    # Currently unused flags:
-    #   PC_PETSC_LDFLAGS        ... all required linker flags
-    #   PC_PETSC_LDFLAGS_OTHER  ... all other linker flags
-    #   PC_PETSC_CFLAGS         ... all required cflags
-    #   PC_PETSC_CFLAGS_OTHER   ... the other compiler flags
-
-    #find_package (PETSc REQUIRED HINTS "${MY_PETSC_DIR}/${MY_PETSC_ARCH}/conf")
-    #include_directories ("${MY_PETSC_DIR}/include" "${MY_PETSC_DIR}/${MY_PETSC_ARCH}/include" ${PETSC_INCLUDE_PATH})
-    #find_library (PETSC_LIB petsc PATH "${MY_PETSC_DIR}/${MY_PETSC_ARCH}/lib/") 
-    #if (${PETSC_LIB} STREQUAL "PETSC_LIB-NOTFOUND")
-    #    message (FATAL_ERROR "PETSc library not found")
-    #endif ()
-    #list (APPEND EXT_LIBS ${PETSC_LIB} ${PETSC_PACKAGE_LIBS})
+    if (NOT "${PETSC_DIR}")
+        # setting defaults for typical linux environments:
+        #file (GLOB paths "/usr/lib/petscdir/*.*.*")
+        #list (GET paths 0 PETSC_DIR)
+        #message ("***************** PETSC_DIR: ${PETSC_DIR}")
+    endif ()
+    if (NOT "${PETSC_ARCH}")
+        #file (GLOB children RELATIVE ${PETSC_DIR} "${PETSC_DIR}/*")
+        #list (GET children 0 PETSC_ARCH)
+        #message ("***************** PETSC_ARCH: ${PETSC_ARCH}")
+    endif ()
+    find_package (PETSc REQUIRED)
+    include_directories (${PETSC_INCLUDES})
+    list (APPEND EXT_LIBS ${PETSC_LIBRARIES})
     list (APPEND MODULE_LIST "PETSc")
     set (USE_MPI ON)
     add_definitions (-D__PETSC_MODULE)
@@ -448,6 +445,12 @@ if (USE_TRIANGLE)
     add_definitions (-D__TRIANGLE_MODULE)
     list (APPEND EXT_LIBS ${TRIANGLE_LIB})
     list (APPEND MODULE_LIST "Triangle")
+endif ()
+
+if (USE_HDF5)
+    find_package(HDF5 REQUIRED "CXX")
+    include_directories(${HDF5_INCLUDE_DIRS})
+    list (APPEND EXT_LIBS ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
 endif ()
 
 if (USE_TINYXML)
@@ -519,9 +522,7 @@ site_name (HOST_NAME)
 set (HOST_TYPE "${CMAKE_SYSTEM_PROCESSOR}-${CMAKE_SYSTEM_NAME}") # This should be renamed TARGET_TYPE.
 set (BUILDNAME "OOFEM(${MODULE_LIST})-${HOST_TYPE}-${HOST_NAME}")
 
-check_include_file_cxx ("unistd.h" HAVE_UNISTD_H)
 check_include_file_cxx ("execinfo.h" HAVE_EXECINFO_H)
-check_cxx_symbol_exists ("access" "unistd.h" HAVE_ACCESS)
 check_cxx_symbol_exists ("cbrt" "cmath" HAVE_CBRT)
 check_cxx_symbol_exists ("isnan" "cmath" HAVE_ISNAN)
 if (USE_SHARED_LIB)
@@ -606,15 +607,16 @@ endif ()
 
 # OOFEM target
 if (USE_SHARED_LIB) # Prefer dynamic lib if available.
-    add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C)
-    target_link_libraries (oofem liboofem)
+  add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C)
+  target_link_libraries (oofem liboofem)
 elseif (${CMAKE_VERSION} VERSION_LESS "2.8.8") # Hackish backwards compatibility 
-    add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C)
-    target_link_libraries (oofem ${LIBS} ${EXT_LIBS})
+  add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C)
+  target_link_libraries (oofem ${LIBS} ${EXT_LIBS})
 else ()
-    add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C ${LIBS})
-    target_link_libraries (oofem ${EXT_LIBS})
+  add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C ${LIBS})
+  target_link_libraries (oofem ${EXT_LIBS})
 endif ()
+
 install (TARGETS oofem DESTINATION bin)
 
 if (USE_OOFEG)
@@ -641,6 +643,9 @@ add_executable(hexgrid ${oofem_SOURCE_DIR}/bindings/oofemlib/hexgrid.C)
 set_target_properties(hexgrid PROPERTIES EXCLUDE_FROM_ALL TRUE)
 target_link_libraries (hexgrid liboofem)
 
+add_executable(dream3d_analysis ${oofem_SOURCE_DIR}/bindings/oofemlib/dream3d_analysis.C)
+set_target_properties(dream3d_analysis PROPERTIES EXCLUDE_FROM_ALL TRUE)
+target_link_libraries(dream3d_analysis liboofem)
 
 # CppCheck target (not built by default)
 add_custom_target(cppcheck)
