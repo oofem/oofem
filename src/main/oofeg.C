@@ -953,12 +953,12 @@ void OOFEGSimpleCmd(char *buf)
         pstep = gc [ 0 ].getActiveStep();
         istep = atoi(remain);
         try {
-            FileDataStream stream(this->giveContextFileName(istep, iversion), false);
+            FileDataStream stream(problem->giveContextFileName(istep, iversion), false);
             problem->restoreContext(stream, CM_State | CM_Definition);
         } catch(ContextIOERR & m) {
             m.print();
             try {
-                FileDataStream stream(this->giveContextFileName(pstep, iversion), false);
+                FileDataStream stream(problem->giveContextFileName(pstep, iversion), false);
                 problem->restoreContext(stream, CM_State | CM_Definition);
             } catch(ContextIOERR & m2) {
                 m2.print();
@@ -973,7 +973,7 @@ void OOFEGSimpleCmd(char *buf)
         //problem ->forceEquationNumbering();
     } else if ( !strncmp(cmd, "active_eigen_value", 18) ) {
         double ieig = atoi(remain);
-        problem->setActiveEigenVector(ieig);
+        problem->setActiveVector(ieig);
         gc [ 0 ].setActiveEigVal(ieig);
     } else if ( !strncmp(cmd, "set_def_scale", 13) ) {
         gc [ 0 ].setDefScale( strtod(remain, NULL) );
@@ -1131,7 +1131,7 @@ void nextStep(Widget wid, XtPointer cl, XtPointer cd)
         // first try next version for the same step
         int istepVersion = prevStepVersion + 1;
         try {
-            FileDataStream stream(this->giveContextFileName(prevStep, istepVersion), false);
+            FileDataStream stream(problem->giveContextFileName(prevStep, istepVersion), false);
             printf("OOFEG: restoring context file %d.%d\n", prevStep, istepVersion);
             try {
                 problem->restoreContext(stream, CM_State | CM_Definition);
@@ -1139,7 +1139,7 @@ void nextStep(Widget wid, XtPointer cl, XtPointer cd)
                 m.print();
                 istepVersion = 0;
                 try {
-                    FileDataStream stream(this->giveContextFileName(prevStep, 0), false);
+                    FileDataStream stream(problem->giveContextFileName(prevStep, 0), false);
                     problem->restoreContext(stream, CM_State | CM_Definition);
                 } catch ( ContextIOERR & m2 ) {
                     m2.print();
@@ -1148,18 +1148,18 @@ void nextStep(Widget wid, XtPointer cl, XtPointer cd)
             }
             gc [ 0 ].setActiveStep(prevStep);
             gc [ 0 ].setActiveStepVersion(istepVersion);
-        catch ( const FileDataStream::CantOpen &e ) {
+        } catch ( const FileDataStream::CantOpen &e ) {
             // no next version exist => next step with version 0
             int istep = prevStep + stepStep;
 
             //printf ("NextStep: prevStep %d, nstep %d, stepStep %d\n", prevStep, istep, stepStep);
             try {
-                FileDataStream stream(this->giveContextFileName(prevStep + stepStep, 0), false);
+                FileDataStream stream(problem->giveContextFileName(prevStep + stepStep, 0), false);
                 problem->restoreContext(stream, CM_State | CM_Definition);
             } catch(ContextIOERR & m) {
                 m.print();
                 try {
-                    FileDataStream stream(this->giveContextFileName(prevStep, 0), false);
+                    FileDataStream stream(problem->giveContextFileName(prevStep, 0), false);
                     problem->restoreContext(stream, CM_State | CM_Definition);
                 } catch(ContextIOERR & m2) {
                     m2.print();
@@ -1174,7 +1174,7 @@ void nextStep(Widget wid, XtPointer cl, XtPointer cd)
         int istep = problem->giveNumberOfFirstStep() + stepStep - 1;
         gc [ 0 ].setActiveStep(istep);
         try {
-            FileDataStream stream(this->giveContextFileName(istep, 0), false);
+            FileDataStream stream(problem->giveContextFileName(istep, 0), false);
             problem->restoreContext(stream, CM_State | CM_Definition);
         } catch(ContextIOERR & m) {
             m.print();
@@ -1197,12 +1197,12 @@ void previousStep(Widget wid, XtPointer cl, XtPointer cd)
         istep = prevStep - stepStep;
         if ( istep >= 0 ) {
             try {
-                FileDataStream stream(this->giveContextFileName(istep, 0), false);
+                FileDataStream stream(problem->giveContextFileName(istep, 0), false);
                 problem->restoreContext(stream, CM_State | CM_Definition);
             } catch(ContextIOERR & m) {
                 m.print();
                 try {
-                    FileDataStream stream(this->giveContextFileName(prevStep, 0), false);
+                    FileDataStream stream(problem->giveContextFileName(prevStep, 0), false);
                     problem->restoreContext(stream, CM_State | CM_Definition);
                 } catch(ContextIOERR & m2) {
                     m2.print();
@@ -1218,7 +1218,7 @@ void previousStep(Widget wid, XtPointer cl, XtPointer cd)
         gc [ 0 ].setActiveStep(istep);
         gc [ 0 ].setActiveStepVersion(0);
         try {
-            FileDataStream stream(this->giveContextFileName(istep, 0), false);
+            FileDataStream stream(problem->giveContextFileName(istep, 0), false);
             problem->restoreContext(stream, CM_State | CM_Definition);
         } catch(ContextIOERR & m) {
             m.print();
@@ -2184,7 +2184,7 @@ pass_setanimate_command(Widget w, XtPointer ptr, XtPointer call_data)
 
     for ( istep = sstep; istep <= estep; istep++ ) {
         try {
-            FileDataStream stream(this->giveContextFileName(istep, iversion), false);
+            FileDataStream stream(problem->giveContextFileName(istep, iversion), false);
             problem->restoreContext(stream, CM_State | CM_Definition);
         } catch(ContextIOERR & m) {
             m.print();

@@ -1,4 +1,4 @@
-nlisomoisture.out
+nlisomoisture01.out
 test of nonlinear isotropic material for moisture transport
 #
 TransientTransport nsteps 5 alpha 0.5 lumped forceScale 1 0 forceScaleDofs 1 14 rtolf 1e-5 prescribedtimes 5 0.01 0.1 0.2 0.3 0.4 nmodules 1

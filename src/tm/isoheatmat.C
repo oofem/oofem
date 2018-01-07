@@ -184,10 +184,6 @@ IsotropicHeatTransferMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp,
 }
 
 
-
-
-
-
 MaterialStatus *
 IsotropicHeatTransferMaterial :: CreateStatus(GaussPoint *gp) const
 {

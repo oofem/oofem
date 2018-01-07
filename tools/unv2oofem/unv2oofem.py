@@ -1,10 +1,11 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 from unv2x import *
 from abaqus2x import *
 from oofemctrlreader import *
 import time
+import sys
 from numpy.core.defchararray import splitlines
 
 
@@ -50,7 +51,8 @@ Enjoy.
     welcomeMsg = """
 UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
                     (C) 2009 Borek Patzak
-"""
+                    Running python version %s.%s
+""" % (sys.version_info.major, sys.version_info.minor)
     print (welcomeMsg)
     t1 = time.time()
     if len(sys.argv)==4:

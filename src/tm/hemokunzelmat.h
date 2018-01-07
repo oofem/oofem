@@ -134,10 +134,10 @@ public:
     virtual const char *giveClassName() const { return "HeMoKunzelMaterial"; }
 
     /// returns water content (in kg/m^3)
-    double sorptionIsotherm(double h);
+    double giveMoistureContent(double h);
 
     /// computes derivative of the moisture storage function (sorption isotherm) with respect to relative humidity
-    double sorptionIsothermDerivative(double h);
+    double giveMoistureContentDerivative(double h);
 
     double computeWaterVaporPerm(double T);
     double computeSatVaporPressure(double T);

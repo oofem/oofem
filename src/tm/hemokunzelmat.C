@@ -360,7 +360,7 @@ double HeMoKunzelMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoi
         }
 
         h = s.at(2);
-        dw_dh = this->sorptionIsothermDerivative(h);
+        dw_dh = this->giveMoistureContentDerivative(h);
 
         return dw_dh;
 
@@ -384,7 +384,7 @@ double HeMoKunzelMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoi
 
         h = s.at(2);
 
-        w = this->sorptionIsotherm(h);
+        w = this->giveMoistureContent(h);
 
         dHs_dT = cs * give('d', NULL);
         dHw_dT = cw * w;
@@ -401,12 +401,12 @@ double HeMoKunzelMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoi
 
 
 double
-HeMoKunzelMaterial :: sorptionIsotherm(double h)
+HeMoKunzelMaterial :: giveMoistureContent(double h)
 {
     double w = 0.;
 
     if ( ( h < 0.0 ) || ( h > 1.00 ) ) {
-        OOFEM_ERROR("HeMoKunzelMaterial :: sorptionIsotherm : Relative humidity %.3f is out of range", h);
+        OOFEM_ERROR("HeMoKunzelMaterial :: giveMoistureContent : Relative humidity %.3f is out of range", h);
     }
 
     if ( this->Isotherm == Hansen ) {
@@ -421,12 +421,12 @@ HeMoKunzelMaterial :: sorptionIsotherm(double h)
 }
 
 double
-HeMoKunzelMaterial :: sorptionIsothermDerivative(double h)
+HeMoKunzelMaterial :: giveMoistureContentDerivative(double h)
 {
     double dw_dh = 0.;
 
     if ( ( h < 0.0 ) || ( h > 1.00 ) ) {
-        OOFEM_ERROR("HeMoKunzelMaterial :: sorptionIsothermDerivative : Relative humidity %.3f is out of range", h);
+        OOFEM_ERROR("HeMoKunzelMaterial :: giveMoistureContentDerivative : Relative humidity %.3f is out of range", h);
     }
 
     if ( this->Isotherm == Hansen ) {
@@ -509,7 +509,7 @@ HeMoKunzelMaterial :: computeDw(double h)
             }
         }
     } else if ( this->Permeability == Multilin_wV ) {
-        double wV = this->sorptionIsotherm(h) / rhoH2O;
+        double wV = this->giveMoistureContent(h) / rhoH2O;
         double tol = 1.e-10;
         for ( int i = 1; i <= perm_wV.giveSize(); i++ ) {
             if ( ( wV - perm_wV.at(i) ) < tol ) {
@@ -519,7 +519,7 @@ HeMoKunzelMaterial :: computeDw(double h)
         }
     } else if ( this->Permeability == Kunzelperm ) {
         double w;
-        w = this->sorptionIsotherm(h);
+        w = this->giveMoistureContent(h);
         Dw = 3.8 * ( A / iso_wh ) * ( A / iso_wh ) * pow(1000., w / iso_wh - 1.);
     } else {
         OOFEM_ERROR("initializeFrom: permeabilityType must be equal to 0, 1 or 2");
@@ -542,7 +542,7 @@ HeMoKunzelMaterial :: perm_mm(double h, double T)
     double dw_dh, Dw;
     double deltap, p_sat;
 
-    dw_dh = this->sorptionIsothermDerivative(h);
+    dw_dh = this->giveMoistureContentDerivative(h);
 
     Dw = this->computeDw(h);
 
@@ -604,7 +604,7 @@ HeMoKunzelMaterial :: perm_hh(double h, double T)
     double k_hh;
     double lambda, deltap, dpsat_dT, w;
 
-    w = this->sorptionIsotherm(h);
+    w = this->giveMoistureContent(h);
     lambda = lambda0 * ( 1. + b * w / give('d', NULL) );
     deltap = this->computeWaterVaporPerm(T);
     dpsat_dT = computeSatVaporPressureDerivative(T);
@@ -636,6 +636,10 @@ HeMoKunzelMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSt
         answer.resize(1);
         answer.at(1) = giveHumidity(gp, VM_Velocity); // VM_Previous = equilibrated value of humidity
         return 1;
+    } else if ( type == IST_MoistureContent ) {
+        double humidity = giveHumidity(gp, VM_Velocity);;
+        answer.resize(1);
+        answer.at(1) = giveMoistureContent(humidity);
     } else {
         return TransportMaterial :: giveIPValue(answer, gp, type, atTime);
     }

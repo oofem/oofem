@@ -134,7 +134,7 @@ protected:
     double talpha;
     /// Number of (Maxwell or Kelvin) units in the rheologic chain.
     int nUnits;
-    /// Physical age of the material at simulation time = 0.
+    /// Physical age of the material at castingTime
     double relMatAge;
 
     bool lattice;
