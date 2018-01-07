@@ -32,13 +32,13 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Elements/Shells/solidshell.h"
+#include "sm/Elements/Shells/solidshell.h"
 #include <Materials/structuralms.h>
 #include "classfactory.h"
 #include "fei3dhexalin.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
-#include "CrossSections/structuralcrosssection.h"
+#include "sm/CrossSections/structuralcrosssection.h"
 
 namespace oofem {
 REGISTER_Element(SolidShell);

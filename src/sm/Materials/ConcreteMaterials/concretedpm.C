@@ -35,14 +35,14 @@
 #include "concretedpm.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
-#include "../sm/Materials/structuralms.h"
+#include "sm/Materials/structuralms.h"
 #include "gausspoint.h"
 #include "intarray.h"
 #include "mathfem.h"
 #include "datastream.h"
 #include "contextioerr.h"
-#include "../sm/Materials/structuralmaterial.h"
-#include "Materials/isolinearelasticmaterial.h"
+#include "sm/Materials/structuralmaterial.h"
+#include "sm/Materials/isolinearelasticmaterial.h"
 #include "classfactory.h"
 
 namespace oofem {

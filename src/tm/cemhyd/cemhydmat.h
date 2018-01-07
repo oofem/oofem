@@ -51,7 +51,7 @@ using namespace tinyxml2;
 
 #ifdef __TM_MODULE //OOFEM transport module
  #include "domain.h"
- #include "../isoheatmat.h"
+ #include "isoheatmat.h"
 #endif
 
 ///@name Input fields for CemhydMat

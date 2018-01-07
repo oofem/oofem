@@ -32,10 +32,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/EngineeringModels/qclinearstatic.h"
-#include "../sm/Quasicontinuum/fullsolveddomain.h"
-#include "../sm/Elements/structuralelement.h"
-#include "../sm/Elements/structuralelementevaluator.h"
+#include "sm/EngineeringModels/qclinearstatic.h"
+#include "sm/Quasicontinuum/fullsolveddomain.h"
+#include "sm/Elements/structuralelement.h"
+#include "sm/Elements/structuralelementevaluator.h"
 #include "nummet.h"
 #include "timestep.h"
 #include "element.h"
@@ -51,12 +51,12 @@
 #include "dof.h"
 #include "crosssection.h"
 
-#include "../sm/Quasicontinuum/quasicontinuum.h"
-#include "../sm/Quasicontinuum/fullsolveddomain.h"
-#include "../sm/Quasicontinuum/geometrygenerator.h"
+#include "sm/Quasicontinuum/quasicontinuum.h"
+#include "sm/Quasicontinuum/fullsolveddomain.h"
+#include "sm/Quasicontinuum/geometrygenerator.h"
 #include "unknownnumberingscheme.h"
 
-#include "../sm/Quasicontinuum/quasicontinuumnumberingscheme.h"
+#include "sm/Quasicontinuum/quasicontinuumnumberingscheme.h"
 
  #include "t3dinterface.h"
 #ifdef __T3D

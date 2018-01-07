@@ -35,7 +35,7 @@
 #ifndef lspacebb_h
 #define lspacebb_h
 
-#include "../sm/Elements/3D/lspace.h"
+#include "sm/Elements/3D/lspace.h"
 
 #define _IFT_LSpaceBB_Name "lspacebb"
 

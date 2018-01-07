@@ -35,7 +35,7 @@
 #ifndef masonry02_h
 #define masonry02_h
 
-#include "Materials/ConcreteMaterials/mplasticmaterial2.h"
+#include "sm/Materials/ConcreteMaterials/mplasticmaterial2.h"
 
 ///@name Input fields for Masonry02
 //@{

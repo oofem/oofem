@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Elements/3D/lspacebb.h"
+#include "sm/Elements/3D/lspacebb.h"
 #include "fei3dhexalin.h"
 #include "gausspoint.h"
 #include "floatmatrix.h"

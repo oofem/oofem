@@ -35,8 +35,9 @@
 #ifndef intelline1pf_h
 #define intelline1pf_h
 
-#include "Elements/Interfaces/structuralinterfaceelement.h"
-#include "Elements/phasefieldelement.h"
+#include "sm/Elements/Interfaces/structuralinterfaceelement.h"
+#include "sm/Elements/phasefieldelement.h"
+
 #define _IFT_IntElLine1PF_Name "IntElLine1PF"
 #define _IFT_IntElLine1PF_prescribedDamage "prescribeddamage"
 

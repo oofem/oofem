@@ -35,7 +35,7 @@
 #ifndef deidynamic_h
 #define deidynamic_h
 
-#include "../sm/EngineeringModels/structengngmodel.h"
+#include "sm/EngineeringModels/structengngmodel.h"
 
 ///@name Input fields for DEIDynamic
 //@{

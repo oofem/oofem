@@ -34,7 +34,7 @@
 
 #ifndef MisesMatGrad_h
 
-#include "Materials/misesmat.h"
+#include "sm/Materials/misesmat.h"
 #include "graddpmaterialextensioninterface.h"
 #include "cltypes.h"
 

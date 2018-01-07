@@ -35,7 +35,7 @@
 #ifndef intelline2_h
 #define intelline2_h
 
-#include "../sm/Elements/Interfaces/intelline1.h"
+#include "sm/Elements/Interfaces/intelline1.h"
 
 #define _IFT_IntElLine2_Name "intelline2"
 #define _IFT_IntElLine2_LinearTraction "linear"

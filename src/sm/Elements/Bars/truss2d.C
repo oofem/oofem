@@ -32,8 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Elements/Bars/truss2d.h"
-#include "CrossSections/structuralcrosssection.h"
+#include "sm/Elements/Bars/truss2d.h"
+#include "sm/CrossSections/structuralcrosssection.h"
 #include "node.h"
 #include "material.h"
 #include "gausspoint.h"

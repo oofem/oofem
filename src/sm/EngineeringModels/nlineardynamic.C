@@ -35,9 +35,9 @@
 #include <iostream>
 using namespace std;
 
-#include "../sm/EngineeringModels/nlineardynamic.h"
-#include "../sm/Elements/nlstructuralelement.h"
-#include "../sm/Elements/structuralelementevaluator.h"
+#include "sm/EngineeringModels/nlineardynamic.h"
+#include "sm/Elements/nlstructuralelement.h"
+#include "sm/Elements/structuralelementevaluator.h"
 #include "nummet.h"
 #include "timestep.h"
 #include "metastep.h"

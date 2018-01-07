@@ -35,9 +35,9 @@
 #ifndef lsmastermat_h
 #define lsmastermat_h
 
-#include "../sm/Materials/structuralmaterial.h"
-#include "../sm/Materials/structuralms.h"
-#include "Materials/linearelasticmaterial.h"
+#include "sm/Materials/structuralmaterial.h"
+#include "sm/Materials/structuralms.h"
+#include "sm/Materials/linearelasticmaterial.h"
 #include "dictionary.h"
 #include "floatarray.h"
 #include "floatmatrix.h"

@@ -35,7 +35,7 @@
 #ifndef mitc4_h
 #define mitc4_h
 
-#include "../sm/Elements/nlstructuralelement.h"
+#include "sm/Elements/nlstructuralelement.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"

@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Elements/PlaneStress/qplanstrssphf.h"
+#include "sm/Elements/PlaneStress/qplanstrssphf.h"
 #include "classfactory.h"
 
 namespace oofem {

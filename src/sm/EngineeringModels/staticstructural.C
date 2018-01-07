@@ -32,9 +32,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/EngineeringModels/staticstructural.h"
-#include "../sm/Elements/structuralelement.h"
-#include "../sm/Elements/structuralelementevaluator.h"
+#include "sm/EngineeringModels/staticstructural.h"
+#include "sm/Elements/structuralelement.h"
+#include "sm/Elements/structuralelementevaluator.h"
 #include "dofmanager.h"
 #include "set.h"
 #include "timestep.h"
@@ -124,7 +124,7 @@ StaticStructural :: initializeFrom(InputRecord *ir)
 
     this->solverType = "nrsolver";
     IR_GIVE_OPTIONAL_FIELD(ir, solverType, _IFT_StaticStructural_solvertype);
-    nMethod.reset(NULL);
+    nMethod = nullptr;
 
     int tmp = TangentStiffness; // Default TangentStiffness
     IR_GIVE_OPTIONAL_FIELD(ir, tmp, _IFT_StaticStructural_stiffmode);
@@ -154,7 +154,7 @@ StaticStructural :: initializeFrom(InputRecord *ir)
 
 #endif
 
-    this->field.reset( new DofDistributedPrimaryField(this, 1, FT_Displacements, 0) );
+    this->field = std::make_unique<DofDistributedPrimaryField>(this, 1, FT_Displacements, 0);
 
     return IRRT_OK;
 }

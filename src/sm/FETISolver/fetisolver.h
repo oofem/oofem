@@ -35,7 +35,7 @@
 #ifndef fetisolver_h
 #define fetisolver_h
 
-#include "../sm/FETISolver/feticommunicator.h"
+#include "sm/FETISolver/feticommunicator.h"
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
 #include "floatarray.h"

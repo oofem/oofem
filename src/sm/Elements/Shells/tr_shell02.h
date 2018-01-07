@@ -35,11 +35,11 @@
 #ifndef tr_shell02_h
 #define tr_shell02_h
 
-#include "../sm/Elements/structuralelement.h"
+#include "sm/Elements/structuralelement.h"
 #include "zznodalrecoverymodel.h"
-#include "../sm/ErrorEstimators/zzerrorestimator.h"
-#include "../sm/Elements/Plates/dkt3d.h"
-#include "../sm/Elements/PlaneStress/trplanestressrotallman3d.h"
+#include "sm/ErrorEstimators/zzerrorestimator.h"
+#include "sm/Elements/Plates/dkt3d.h"
+#include "sm/Elements/PlaneStress/trplanestressrotallman3d.h"
 #include "spatiallocalizer.h"
 
 #include <memory>

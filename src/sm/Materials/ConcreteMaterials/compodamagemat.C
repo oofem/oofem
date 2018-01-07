@@ -33,10 +33,10 @@
  */
 
 #include "compodamagemat.h"
-#include "../sm/Elements/structuralelement.h"
+#include "sm/Elements/structuralelement.h"
 #include "gausspoint.h"
-#include "../sm/Materials/structuralmaterial.h"
-#include "../sm/Materials/structuralms.h"
+#include "sm/Materials/structuralmaterial.h"
+#include "sm/Materials/structuralms.h"
 #include "mathfem.h"
 #include "classfactory.h"
 #include "contextioerr.h"

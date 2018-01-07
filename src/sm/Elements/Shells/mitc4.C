@@ -32,16 +32,16 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Elements/Shells/mitc4.h"
-#include "../sm/Materials/structuralms.h"
-#include "../sm/Materials/structuralmaterial.h"
-#include "../sm/CrossSections/structuralcrosssection.h"
+#include "sm/Elements/Shells/mitc4.h"
+#include "sm/Materials/structuralms.h"
+#include "sm/Materials/structuralmaterial.h"
+#include "sm/CrossSections/structuralcrosssection.h"
 #include "fei2dquadlin.h"
 #include "node.h"
 #include "material.h"
 #include "crosssection.h"
 #include "gausspoint.h"
-#include "../sm/CrossSections/variablecrosssection.h"
+#include "sm/CrossSections/variablecrosssection.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
 #include "floatarray.h"

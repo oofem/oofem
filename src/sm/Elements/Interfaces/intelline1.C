@@ -32,8 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Elements/Interfaces/intelline1.h"
-#include "../sm/CrossSections/structuralinterfacecrosssection.h"
+#include "sm/Elements/Interfaces/intelline1.h"
+#include "sm/CrossSections/structuralinterfacecrosssection.h"
 #include "node.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"

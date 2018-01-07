@@ -41,7 +41,7 @@
 #include "intarray.h"
 #include "mathfem.h"
 #include "fei2dlinelin.h"
-#include "../sm/CrossSections/structuralinterfacecrosssection.h"
+#include "sm/CrossSections/structuralinterfacecrosssection.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG

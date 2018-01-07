@@ -34,8 +34,8 @@
 
 #include "linearelasticmaterial.h"
 #include "isolinearelasticmaterial.h"
-#include "../sm/CrossSections/simplecrosssection.h"
-#include "../sm/Materials/structuralms.h"
+#include "sm/CrossSections/simplecrosssection.h"
+#include "sm/Materials/structuralms.h"
 #include "floatmatrix.h"
 #include "gausspoint.h"
 #include "classfactory.h"

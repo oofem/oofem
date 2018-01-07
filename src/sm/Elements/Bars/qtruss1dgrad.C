@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Elements/Bars/qtruss1dgrad.h"
+#include "sm/Elements/Bars/qtruss1dgrad.h"
 #include "fei1dlin.h"
 #include "fei1dquad.h"
 #include "gausspoint.h"
@@ -40,7 +40,7 @@
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
-#include "../sm/CrossSections/structuralcrosssection.h"
+#include "sm/CrossSections/structuralcrosssection.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG

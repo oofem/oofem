@@ -35,7 +35,7 @@
 #ifndef intelpoint_h
 #define intelpoint_h
 
-#include "../sm/Elements/Interfaces/structuralinterfaceelement.h"
+#include "sm/Elements/Interfaces/structuralinterfaceelement.h"
 #include "gaussintegrationrule.h"
 
 ///@name Input fields for Material

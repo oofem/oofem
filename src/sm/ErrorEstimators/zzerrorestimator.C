@@ -32,9 +32,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/ErrorEstimators/zzerrorestimator.h"
-#include "../sm/Elements/structuralelement.h"
-#include "../sm/Materials/structuralmaterial.h"
+#include "sm/ErrorEstimators/zzerrorestimator.h"
+#include "sm/Elements/structuralelement.h"
+#include "sm/Materials/structuralmaterial.h"
 #include "domain.h"
 #include "dofmanager.h"
 #include "element.h"

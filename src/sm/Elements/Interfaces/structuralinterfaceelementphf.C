@@ -32,11 +32,11 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Elements/Interfaces/structuralinterfaceelementphf.h"
-#include "Materials/InterfaceMaterials/structuralinterfacematerialphf.h"
-#include "Materials/InterfaceMaterials/structuralinterfacematerialstatus.h"
+#include "sm/Elements/Interfaces/structuralinterfaceelementphf.h"
+#include "sm/Materials/InterfaceMaterials/structuralinterfacematerialphf.h"
+#include "sm/Materials/InterfaceMaterials/structuralinterfacematerialstatus.h"
 
-#include "CrossSections/structuralinterfacecrosssection.h"
+#include "sm/CrossSections/structuralinterfacecrosssection.h"
 #include "feinterpol.h"
 #include "domain.h"
 #include "material.h"

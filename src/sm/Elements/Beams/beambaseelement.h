@@ -35,9 +35,9 @@
 #ifndef beambaseelement_h
 #define beambaseelement_h
 
-#include "../sm/Elements/structuralelement.h"
-#include "../sm/CrossSections/fiberedcs.h"
-#include "../sm/Materials/winklermodel.h"
+#include "sm/Elements/structuralelement.h"
+#include "sm/CrossSections/fiberedcs.h"
+#include "sm/Materials/winklermodel.h"
 #include "dofmanager.h"
 
 namespace oofem {

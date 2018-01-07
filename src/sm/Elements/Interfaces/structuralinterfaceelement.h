@@ -35,7 +35,7 @@
 #ifndef structuralinterfaceelement_h
 #define structuralinterfaceelement_h
 
-#include "../sm/CrossSections/structuralinterfacecrosssection.h"
+#include "sm/CrossSections/structuralinterfacecrosssection.h"
 #include "element.h"
 #include "floatmatrix.h"
 #include "function.h"

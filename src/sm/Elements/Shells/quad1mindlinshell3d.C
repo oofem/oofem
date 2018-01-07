@@ -32,10 +32,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Elements/Shells/quad1mindlinshell3d.h"
-#include "../sm/Materials/structuralms.h"
-#include "../sm/CrossSections/structuralcrosssection.h"
-#include "../sm/Loads/constantpressureload.h"
+#include "sm/Elements/Shells/quad1mindlinshell3d.h"
+#include "sm/Materials/structuralms.h"
+#include "sm/CrossSections/structuralcrosssection.h"
+#include "sm/Loads/constantpressureload.h"
 #include "node.h"
 #include "material.h"
 #include "crosssection.h"

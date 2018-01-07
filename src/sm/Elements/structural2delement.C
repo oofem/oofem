@@ -32,10 +32,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Elements/structural2delement.h"
+#include "sm/Elements/structural2delement.h"
 #include "feinterpol2d.h"
 #include "gausspoint.h"
-#include "CrossSections/structuralcrosssection.h"
+#include "sm/CrossSections/structuralcrosssection.h"
 #include "gaussintegrationrule.h"
 #include "mathfem.h"
 

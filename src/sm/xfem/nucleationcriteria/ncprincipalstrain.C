@@ -40,8 +40,8 @@
 #include "element.h"
 #include "gausspoint.h"
 
-#include "Materials/structuralms.h"
-#include "Materials/structuralmaterial.h"
+#include "sm/Materials/structuralms.h"
+#include "sm/Materials/structuralmaterial.h"
 
 #include "xfem/enrichmentitems/crack.h"
 #include "xfem/xfemmanager.h"
@@ -195,11 +195,11 @@ std::vector<std::unique_ptr<EnrichmentItem>> NCPrincipalStrain::nucleateEnrichme
 
 								if(insertionAllowed) {
 									int n = xMan->giveNumberOfEnrichmentItems() + 1;
-									std::unique_ptr<Crack> crack(new Crack(n, xMan, mpDomain));
+									std::unique_ptr<Crack> crack = std::make_unique<Crack>(n, xMan, mpDomain);
 
 
 									// Geometry
-									std::unique_ptr<BasicGeometry> geom = std::unique_ptr<BasicGeometry>(new PolygonLine());
+									std::unique_ptr<BasicGeometry> geom = std::make_unique<PolygonLine>();
 									geom->insertVertexBack(ps);
 									geom->insertVertexBack(pc);
 									geom->insertVertexBack(pe);

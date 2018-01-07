@@ -35,8 +35,8 @@
 #ifndef Shell7Base_h
 #define Shell7Base_h
 
-#include "CrossSections/layeredcrosssection.h"
-#include "Elements/nlstructuralelement.h"
+#include "sm/CrossSections/layeredcrosssection.h"
+#include "sm/Elements/nlstructuralelement.h"
 #include "eleminterpmapperinterface.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "vtkxmlexportmodule.h"
@@ -46,7 +46,7 @@
 #include "fracturemanager.h"
 #include "cltypes.h"
 #include <vector>
-#include "EngineeringModels/structengngmodel.h"
+#include "sm/EngineeringModels/structengngmodel.h"
 
 ///@name Input fields for shell7base
 //@{

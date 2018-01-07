@@ -49,7 +49,7 @@
 #include "feinterpol.h"
 #include "sparsemtrx.h"
 #include "sparselinsystemnm.h"
-#include "Elements/Shells/shell7base.h"
+#include "sm/Elements/Shells/shell7base.h"
 
 namespace oofem {
 REGISTER_BoundaryCondition(PrescribedGenStrainShell7);

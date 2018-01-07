@@ -37,9 +37,9 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 
-#include "../sm/Materials/structuralms.h"
-#include "../sm/Materials/structuralmaterial.h"
-#include "Materials/isolinearelasticmaterial.h"
+#include "sm/Materials/structuralms.h"
+#include "sm/Materials/structuralmaterial.h"
+#include "sm/Materials/isolinearelasticmaterial.h"
 
 ///@name Input fields for StructuralMaterialSettable
 //@{

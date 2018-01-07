@@ -35,8 +35,8 @@
 #ifndef trplanestressrotallman_h
 #define trplanestressrotallman_h
 
-#include "../sm/Elements/PlaneStress/trplanstrss.h"
-#include "../sm/CrossSections/layeredcrosssection.h"
+#include "sm/Elements/PlaneStress/trplanstrss.h"
+#include "sm/CrossSections/layeredcrosssection.h"
 
 
 ///@name Input fields for TrPlaneStrRotAllman

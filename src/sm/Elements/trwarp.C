@@ -33,20 +33,20 @@
 
 #include "trwarp.h"
 #include "node.h"
-#include "CrossSections/warpingcrosssection.h"
+#include "sm/CrossSections/warpingcrosssection.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
-#include "CrossSections/structuralcrosssection.h"
+#include "sm/CrossSections/structuralcrosssection.h"
 #include "classfactory.h"
 #include "load.h"
-#include "EngineeringModels/freewarping.h"
+#include "sm/EngineeringModels/freewarping.h"
 #include "engngm.h"
 #include "dof.h"
-#include "CrossSections/structuralcrosssection.h"
+#include "sm/CrossSections/structuralcrosssection.h"
 
 
 

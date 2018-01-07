@@ -35,13 +35,13 @@
 #ifndef trabbonematerial_h
 #define trabbonematerial_h
 
-#include "../sm/Materials/structuralmaterial.h"
+#include "sm/Materials/structuralmaterial.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "cltypes.h"
 #include "matconst.h"
 #include "matstatus.h"
-#include "../sm/Materials/structuralms.h"
+#include "sm/Materials/structuralms.h"
 #include "cltypes.h"
 
 ///@name Input fields for TrabBoneMaterial

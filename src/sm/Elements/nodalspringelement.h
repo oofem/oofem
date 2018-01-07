@@ -35,7 +35,7 @@
 #ifndef nodalspringelement_h
 #define nodalspringelement_h
 
-#include "../sm/Elements/structuralelement.h"
+#include "sm/Elements/structuralelement.h"
 
 ///@name Input fields for spring element
 //@{

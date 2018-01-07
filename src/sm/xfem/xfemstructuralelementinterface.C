@@ -33,20 +33,20 @@
  */
 
 #include "xfemstructuralelementinterface.h"
-#include "../sm/Materials/InterfaceMaterials/structuralinterfacematerial.h"
-#include "../sm/Materials/InterfaceMaterials/structuralinterfacematerialstatus.h"
-#include "../sm/Elements/structuralelement.h"
-#include "../sm/CrossSections/structuralcrosssection.h"
+#include "sm/Materials/InterfaceMaterials/structuralinterfacematerial.h"
+#include "sm/Materials/InterfaceMaterials/structuralinterfacematerialstatus.h"
+#include "sm/Elements/structuralelement.h"
+#include "sm/CrossSections/structuralcrosssection.h"
 #include "gaussintegrationrule.h"
 #include "gausspoint.h"
 #include "dynamicinputrecord.h"
 #include "feinterpol.h"
 #include "spatiallocalizer.h"
 #include "engngm.h"
-#include "Elements/nlstructuralelement.h"
+#include "sm/Elements/nlstructuralelement.h"
 #include "mathfem.h"
 
-#include "Materials/structuralfe2material.h"
+#include "sm/Materials/structuralfe2material.h"
 #include "prescribedgradienthomogenization.h"
 
 #include "xfem/patchintegrationrule.h"

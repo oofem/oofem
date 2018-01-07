@@ -12,7 +12,7 @@
 #include "fei2dlinelin.h"
 #include "fei2dlinequad.h"
 #include "feinterpol.h"
-#include "../sm/Materials/InterfaceMaterials/structuralinterfacematerialstatus.h"
+#include "sm/Materials/InterfaceMaterials/structuralinterfacematerialstatus.h"
 
 namespace oofem {
 REGISTER_Element(IntElLine1IntPen);

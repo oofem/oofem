@@ -38,8 +38,8 @@
 #include<boost/python.hpp>
 namespace bp=boost::python;
 
-#include "../sm/Materials/structuralmaterial.h"
-#include "../sm/Materials/structuralms.h"
+#include "sm/Materials/structuralmaterial.h"
+#include "sm/Materials/structuralms.h"
 
 #if 0
 #ifndef PyObject_HEAD

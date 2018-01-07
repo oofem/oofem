@@ -33,7 +33,7 @@
  */
 
 #include "misesmat.h"
-#include "Materials/isolinearelasticmaterial.h"
+#include "sm/Materials/isolinearelasticmaterial.h"
 #include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
@@ -44,7 +44,7 @@
 #include "datastream.h"
 #include "classfactory.h"
 #include "fieldmanager.h"
-#include "../sm/Elements/structuralelement.h"
+#include "sm/Elements/structuralelement.h"
 #include "engngm.h"
 
 namespace oofem {

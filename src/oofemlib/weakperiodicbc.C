@@ -54,8 +54,8 @@
 #include "function.h"
 
 #include "timestep.h"
-// #include "../sm/Elements/tet21ghostsolid.h"
-#include "../sm/Elements/nlstructuralelement.h"
+// #include "sm/Elements/tet21ghostsolid.h"
+#include "sm/Elements/nlstructuralelement.h"
 
 namespace oofem {
 REGISTER_BoundaryCondition(WeakPeriodicBoundaryCondition);

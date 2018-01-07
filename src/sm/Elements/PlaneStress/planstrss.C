@@ -32,8 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Elements/PlaneStress/planstrss.h"
-#include "../sm/Materials/structuralms.h"
+#include "sm/Elements/PlaneStress/planstrss.h"
+#include "sm/Materials/structuralms.h"
 #include "fei2dquadlin.h"
 #include "node.h"
 #include "crosssection.h"
@@ -51,7 +51,7 @@
  #include "oofeggraphiccontext.h"
  #include "oofegutils.h"
  #include "connectivitytable.h"
- #include "Materials/rcm2.h"
+ #include "sm/Materials/rcm2.h"
 #endif
 
 namespace oofem {

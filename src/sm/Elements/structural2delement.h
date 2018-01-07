@@ -35,7 +35,7 @@
 #ifndef structural2delement_h
 #define structural2delement_h
 
-#include "Elements/nlstructuralelement.h"
+#include "sm/Elements/nlstructuralelement.h"
 #include "feinterpol2d.h"
 
 #define _IFT_Structural2DElement_materialCoordinateSystem "matcs" ///< [optional] Support for material directions based on element orientation.

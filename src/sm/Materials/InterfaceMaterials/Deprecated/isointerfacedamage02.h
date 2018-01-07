@@ -35,8 +35,8 @@
 #ifndef isointerfacedamage02_h
 #define isointerfacedamage02_h
 
-#include "../structuralinterfacematerial.h"
-#include "../structuralinterfacematerialstatus.h"
+#include "sm/Materials/InterfaceMaterials/structuralinterfacematerial.h"
+#include "sm/Materials/InterfaceMaterials/structuralinterfacematerialstatus.h"
 
 #include <fstream>
 

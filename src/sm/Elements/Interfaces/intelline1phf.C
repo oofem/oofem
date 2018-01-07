@@ -32,9 +32,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Elements/Interfaces/intelline1phf.h"
-#include "CrossSections/structuralinterfacecrosssection.h"
-#include "Materials/InterfaceMaterials/structuralinterfacematerialphf.h"
+#include "sm/Elements/Interfaces/intelline1phf.h"
+#include "sm/CrossSections/structuralinterfacecrosssection.h"
+#include "sm/Materials/InterfaceMaterials/structuralinterfacematerialphf.h"
 #include "node.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"

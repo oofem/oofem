@@ -35,7 +35,7 @@
 #ifndef axisymm3d_h
 #define axisymm3d_h
 
-#include "Elements/structural2delement.h"
+#include "sm/Elements/structural2delement.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"

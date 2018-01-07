@@ -32,9 +32,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Elements/linedistributedspring.h"
-#include "../sm/Materials/structuralms.h"
-#include "../sm/CrossSections/structuralcrosssection.h"
+#include "sm/Elements/linedistributedspring.h"
+#include "sm/Materials/structuralms.h"
+#include "sm/CrossSections/structuralcrosssection.h"
 #include "fei3dlinelin.h"
 #include "node.h"
 #include "material.h"

@@ -35,8 +35,8 @@
 #ifndef idmnl1_h
 #define idmnl1_h
 
-#include "Materials/ConcreteMaterials/idm1.h"
-#include "Materials/structuralnonlocalmaterialext.h"
+#include "sm/Materials/ConcreteMaterials/idm1.h"
+#include "sm/Materials/structuralnonlocalmaterialext.h"
 #include "nonlocmatstiffinterface.h"
 
 ///@name Input fields for IDNLMaterial

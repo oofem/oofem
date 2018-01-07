@@ -38,10 +38,10 @@
 #include "femcmpnn.h"
 #include "dictionary.h"
 #include "material.h"
-#include "Materials/deformationtheorymaterial.h"
-#include "Materials/isolinearelasticmaterial.h"
+#include "sm/Materials/deformationtheorymaterial.h"
+#include "sm/Materials/isolinearelasticmaterial.h"
 #include "floatarray.h"
-#include "../sm/Materials/structuralms.h"
+#include "sm/Materials/structuralms.h"
 
 ///@name Input fields for Concrete2
 //@{

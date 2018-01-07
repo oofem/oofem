@@ -32,8 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Contact/cdefnode2node.h"
-#include "Contact/celnode2node.h"
+#include "sm/Contact/cdefnode2node.h"
+#include "sm/Contact/celnode2node.h"
 #include "domain.h"
 #include "classfactory.h"
 

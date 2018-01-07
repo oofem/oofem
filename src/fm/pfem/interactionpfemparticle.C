@@ -38,7 +38,7 @@
 #include "classfactory.h"
 #include "floatmatrix.h"
 #include "fluidstructureproblem.h"
-#include "../../sm/EngineeringModels/structengngmodel.h"
+#include "sm/EngineeringModels/structengngmodel.h"
 #include "domain.h"
 #include "dof.h"
 #include "mathfem.h"

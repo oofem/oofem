@@ -35,7 +35,7 @@
 #ifndef layeredcrosssection_h
 #define layeredcrosssection_h
 
-#include "../sm/CrossSections/structuralcrosssection.h"
+#include "sm/CrossSections/structuralcrosssection.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "interface.h"

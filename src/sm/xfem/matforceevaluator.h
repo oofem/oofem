@@ -32,13 +32,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-/*
- * matforceevaluator.h
- *
- *  Created on: Nov 12, 2014
- *      Author: svennine
- */
-
 #ifndef MATFORCEEVALUATOR_H_
 #define MATFORCEEVALUATOR_H_
 

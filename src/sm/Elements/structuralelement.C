@@ -32,12 +32,12 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Elements/structuralelement.h"
-#include "CrossSections/structuralcrosssection.h"
-#include "Materials/structuralmaterial.h"
-#include "Materials/structuralms.h"
+#include "sm/Elements/structuralelement.h"
+#include "sm/CrossSections/structuralcrosssection.h"
+#include "sm/Materials/structuralmaterial.h"
+#include "sm/Materials/structuralms.h"
 #include "Loads/structtemperatureload.h"
-#include "Materials/structuralnonlocalmaterialext.h"
+#include "sm/Materials/structuralnonlocalmaterialext.h"
 #include "Loads/structeigenstrainload.h"
 #include "feinterpol.h"
 #include "domain.h"

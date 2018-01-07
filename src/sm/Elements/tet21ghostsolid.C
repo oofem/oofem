@@ -32,9 +32,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Elements/tet21ghostsolid.h"
-#include "../sm/Elements/nlstructuralelement.h"
-#include "../sm/CrossSections/structuralcrosssection.h"
+#include "sm/Elements/tet21ghostsolid.h"
+#include "sm/Elements/nlstructuralelement.h"
+#include "sm/CrossSections/structuralcrosssection.h"
 #include "fei3dtetquad.h"
 #include "fei3dtetlin.h"
 #include "classfactory.h"

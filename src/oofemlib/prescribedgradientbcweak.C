@@ -52,8 +52,8 @@
 #include "mathfem.h"
 #include "sparselinsystemnm.h"
 #include "unknownnumberingscheme.h"
-#include "../sm/Materials/structuralmaterial.h"
-#include "../sm/EngineeringModels/staticstructural.h"
+#include "sm/Materials/structuralmaterial.h"
+#include "sm/EngineeringModels/staticstructural.h"
 
 #include "timer.h"
 

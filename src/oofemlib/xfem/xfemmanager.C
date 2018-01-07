@@ -52,8 +52,8 @@
 #include "XFEMDebugTools.h"
 #include "xfemtolerances.h"
 #include "nucleationcriterion.h"
-#include "Elements/Shells/shell7basexfem.h"
-#include "EngineeringModels/structengngmodel.h"
+#include "sm/Elements/Shells/shell7basexfem.h"
+#include "sm/EngineeringModels/structengngmodel.h"
 
 namespace oofem {
 REGISTER_XfemManager(XfemManager)

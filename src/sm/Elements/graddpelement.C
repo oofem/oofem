@@ -34,11 +34,11 @@
  */
 
 
-#include "../sm/Elements/graddpelement.h"
-#include "../sm/Materials/structuralms.h"
-#include "../sm/CrossSections/structuralcrosssection.h"
-#include "../sm/Elements/nlstructuralelement.h"
-#include "../sm/Materials/graddpmaterialextensioninterface.h"
+#include "sm/Elements/graddpelement.h"
+#include "sm/Materials/structuralms.h"
+#include "sm/CrossSections/structuralcrosssection.h"
+#include "sm/Elements/nlstructuralelement.h"
+#include "sm/Materials/graddpmaterialextensioninterface.h"
 #include "node.h"
 #include "material.h"
 #include "gausspoint.h"

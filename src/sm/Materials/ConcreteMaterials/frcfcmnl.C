@@ -42,7 +42,7 @@
 
 #include "nonlocalmaterialext.h"
 
-#include "../sm/Elements/structuralelement.h"
+#include "sm/Elements/structuralelement.h"
 
 #include "floatmatrix.h"
 #include "floatarray.h"

@@ -36,10 +36,10 @@
 #define latticedamage2d_h
 
 #include "material.h"
-#include "Materials/linearelasticmaterial.h"
+#include "sm/Materials/linearelasticmaterial.h"
 #include "latticematstatus.h"
 #include "cltypes.h"
-#include "../sm/Materials/structuralmaterial.h"
+#include "sm/Materials/structuralmaterial.h"
 #include "randommaterialext.h"
 #include "strainvector.h"
 #include "stressvector.h"

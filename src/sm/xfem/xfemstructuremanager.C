@@ -39,7 +39,7 @@
 #include "datareader.h"
 #include "mathfem.h"
 
-#include "xfem/enrichmentitems/crack.h"
+#include "sm/xfem/enrichmentitems/crack.h"
 #include "xfem/enrichmentfronts/enrichmentfrontintersection.h"
 #include "geometry.h"
 

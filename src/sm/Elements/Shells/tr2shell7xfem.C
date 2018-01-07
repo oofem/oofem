@@ -32,10 +32,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Elements/Shells/tr2shell7xfem.h"
-#include "../sm/Materials/structuralms.h"
-#include "../sm/xfem/enrichmentitems/crack.h"
-#include "../sm/xfem/enrichmentitems/shellcrack.h"
+#include "sm/Elements/Shells/tr2shell7xfem.h"
+#include "sm/Materials/structuralms.h"
+#include "sm/xfem/enrichmentitems/crack.h"
+#include "sm/xfem/enrichmentitems/shellcrack.h"
 #include "node.h"
 #include "load.h"
 #include "mathfem.h"

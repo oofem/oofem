@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Elements/Interfaces/cohsur3d.h"
+#include "sm/Elements/Interfaces/cohsur3d.h"
 #include "dof.h"
 #include "node.h"
 #include "particle.h"
@@ -41,7 +41,7 @@
 #include "intarray.h"
 #include "floatarray.h"
 #include "mathfem.h"
-#include "../sm/CrossSections/structuralinterfacecrosssection.h"
+#include "sm/CrossSections/structuralinterfacecrosssection.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG

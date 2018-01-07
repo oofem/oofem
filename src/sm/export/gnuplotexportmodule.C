@@ -42,13 +42,13 @@
 #include "gnuplotexportmodule.h"
 #include "classfactory.h"
 #include "valuemodetype.h"
-#include "../sm/EngineeringModels/structengngmodel.h"
+#include "sm/EngineeringModels/structengngmodel.h"
 #include "outputmanager.h"
 #include "dofmanager.h"
 #include "boundarycondition.h"
 #include "xfem/enrichmentitem.h"
 #include "xfem/xfemmanager.h"
-#include "../sm/Materials/InterfaceMaterials/structuralinterfacematerialstatus.h"
+#include "sm/Materials/InterfaceMaterials/structuralinterfacematerialstatus.h"
 #include "xfem/XFEMDebugTools.h"
 #include "prescribedgradient.h"
 #include "prescribedgradientbcneumann.h"
@@ -60,8 +60,8 @@
 #include "dofmanager.h"
 #include "xfem/matforceevaluator.h"
 #include "function.h"
-#include "Elements/Interfaces/structuralinterfaceelement.h"
-#include "Materials/structuralfe2material.h"
+#include "sm/Elements/Interfaces/structuralinterfaceelement.h"
+#include "sm/Materials/structuralfe2material.h"
 
 #include <sstream>
 

@@ -32,10 +32,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Elements/lattice2d.h"
-#include "../sm/Materials/latticematstatus.h"
-#include "../sm/Elements/latticestructuralelement.h"
-#include "CrossSections/structuralcrosssection.h"
+#include "sm/Elements/lattice2d.h"
+#include "sm/Materials/latticematstatus.h"
+#include "sm/Elements/latticestructuralelement.h"
+#include "sm/CrossSections/structuralcrosssection.h"
 #include "domain.h"
 #include "node.h"
 #include "material.h"
@@ -51,7 +51,7 @@
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
- #include "../sm/Materials/structuralmaterial.h"
+ #include "sm/Materials/structuralmaterial.h"
 #endif
 
 namespace oofem {

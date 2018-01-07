@@ -35,9 +35,9 @@
 #ifndef variablecrosssection_h
 #define variablecrosssection_h
 
-#include "../sm/CrossSections/simplecrosssection.h"
-#include "../sm/CrossSections/layeredcrosssection.h"
-#include "../sm/Materials/structuralmaterial.h"
+#include "sm/CrossSections/simplecrosssection.h"
+#include "sm/CrossSections/layeredcrosssection.h"
+#include "sm/Materials/structuralmaterial.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "scalarfunction.h"

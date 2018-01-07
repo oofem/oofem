@@ -32,8 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Elements/Beams/beam2d.h"
-#include "../sm/Materials/structuralms.h"
+#include "sm/Elements/Beams/beam2d.h"
+#include "sm/Materials/structuralms.h"
 #include "fei2dlinelin.h"
 #include "fei2dlinehermite.h"
 #include "node.h"

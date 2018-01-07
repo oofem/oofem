@@ -35,8 +35,8 @@
 #ifndef planstrssphf_h
 #define planstrssphf_h
 
-#include "../sm/Elements/phasefieldelement.h"
-#include "../sm/Elements/PlaneStress/planstrss.h"
+#include "sm/Elements/phasefieldelement.h"
+#include "sm/Elements/PlaneStress/planstrss.h"
 
 #define _IFT_PlaneStressPhF2d_Name "PlaneStressPhF2d"
 

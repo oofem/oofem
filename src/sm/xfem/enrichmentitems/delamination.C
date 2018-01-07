@@ -37,14 +37,14 @@
 #include "fracturemanager.h"
 #include "element.h"
 #include "dof.h"
-#include "../sm/CrossSections/layeredcrosssection.h"
+#include "sm/CrossSections/layeredcrosssection.h"
 #include "dynamicinputrecord.h"
 #include "dynamicdatareader.h"
 #include "xfem/enrichmentfunction.h"
 #include "xfem/propagationlaw.h"
 #include "xfem/xfemmanager.h"
 #include "xfem/enrichmentfronts/enrichmentfrontdonothing.h"
-#include "Elements/Shells/shell7basexfem.h"
+#include "sm/Elements/Shells/shell7basexfem.h"
 #include "spatiallocalizer.h"
 
 namespace oofem {

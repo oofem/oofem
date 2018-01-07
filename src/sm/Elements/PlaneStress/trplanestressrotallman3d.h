@@ -35,7 +35,7 @@
 #ifndef trplanestressrotallman3d_h
 #define trplanestressrotallman3d_h
 
-#include "../sm/Elements/PlaneStress/trplanestressrotallman.h"
+#include "sm/Elements/PlaneStress/trplanestressrotallman.h"
 
 #define _IFT_TrPlanestressRotAllman3d_Name "trplanestressrotallman3d"
 

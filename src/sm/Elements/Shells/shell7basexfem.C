@@ -32,12 +32,12 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Elements/Shells/shell7basexfem.h"
-#include "Elements/Shells/shell7base.h"
+#include "sm/Elements/Shells/shell7basexfem.h"
+#include "sm/Elements/Shells/shell7base.h"
 #include "Loads/constantpressureload.h"
 #include "constantsurfaceload.h"
-#include "Materials/InterfaceMaterials/intmatbilinczfagerstrom.h"
-#include "Materials/InterfaceMaterials/intmatbilinczjansson.h"
+#include "sm/Materials/InterfaceMaterials/intmatbilinczfagerstrom.h"
+#include "sm/Materials/InterfaceMaterials/intmatbilinczjansson.h"
 #include "xfem/enrichmentitems/crack.h"
 #include "xfem/enrichmentitems/shellcrack.h"
 #include "feinterpol3d.h"

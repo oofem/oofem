@@ -32,19 +32,19 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Quasicontinuum/quasicontinuum.h"
-#include "../sm/EngineeringModels/qclinearstatic.h"
+#include "sm/Quasicontinuum/quasicontinuum.h"
+#include "sm/EngineeringModels/qclinearstatic.h"
 #include "qcnode.h"
 #include "element.h"
 #include "mathfem.h"
 
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
-#include "../sm/CrossSections/simplecrosssection.h"
-#include "../sm/Materials/isolinearelasticmaterial.h"
-#include "../sm/Materials/anisolinearelasticmaterial.h"
+#include "sm/CrossSections/simplecrosssection.h"
+#include "sm/Materials/isolinearelasticmaterial.h"
+#include "sm/Materials/anisolinearelasticmaterial.h"
 #include "interfacetype.h"
-#include "../sm/Materials/qcmaterialextensioninterface.h"
+#include "sm/Materials/qcmaterialextensioninterface.h"
 
 
 namespace oofem {

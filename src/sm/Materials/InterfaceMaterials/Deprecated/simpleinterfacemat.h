@@ -35,8 +35,8 @@
 #ifndef simpleinterfacemat_h
 #define simpleinterfacemat_h
 
-#include "../structuralinterfacematerial.h"
-#include "../structuralinterfacematerialstatus.h"
+#include "sm/Materials/InterfaceMaterials/structuralinterfacematerial.h"
+#include "sm/Materials/InterfaceMaterials/structuralinterfacematerialstatus.h"
 
 ///@name Input fields for SimpleInterfaceMaterial
 //@{

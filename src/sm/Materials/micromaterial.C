@@ -33,8 +33,8 @@
  */
 
 #include "micromaterial.h"
-#include "../sm/Materials/structuralmaterial.h"
-#include "../sm/Materials/structuralms.h"
+#include "sm/Materials/structuralmaterial.h"
+#include "sm/Materials/structuralms.h"
 #include "domain.h"
 #include "dofmanager.h"
 #include "classfactory.h"
@@ -92,56 +92,16 @@ contextIOResultType MicroMaterialStatus :: restoreContext(DataStream &stream, Co
 }
 
 
-MicroMaterial :: MicroMaterial(int n, Domain *d) : StructuralMaterial(n, d), UnknownNumberingScheme()
-{
-    this->problemMicro = NULL;
-    this->isDefaultNumbering = true;
-    this->DofEquationNumbering = AllNodes;
-    this->microBoundaryDofs = NULL;
-    this->microInternalDofs = NULL;
-    this->microDefaultDofs = NULL;
-    this->microBoundaryDofsArr.clear();
-    this->microInternalDofsArr.clear();
-    this->microMatIsUsed = false;
-}
+MicroMaterial :: MicroMaterial(int n, Domain *d) : StructuralMaterial(n, d), UnknownNumberingScheme(),
+    microMatIsUsed(false),
+    isDefaultNumbering(true),
+    DofEquationNumbering(AllNodes)
+{}
 
-MicroMaterial :: ~MicroMaterial()
-{
-    if ( this->problemMicro ) {
-        delete this->problemMicro;
-    }
-
-    for ( int i = 0; i < this->NumberOfDofManagers; i++ ) {
-        if ( this->microBoundaryDofs ) {
-            delete [] microBoundaryDofs [ i ];
-        }
-
-        if ( this->microInternalDofs ) {
-            delete [] microInternalDofs [ i ];
-        }
-
-        if ( this->microDefaultDofs ) {
-            delete [] microDefaultDofs [ i ];
-        }
-    }
-
-    if ( this->microBoundaryDofs ) {
-        delete [] microBoundaryDofs;
-    }
-
-    if ( this->microInternalDofs ) {
-        delete [] microInternalDofs;
-    }
-
-    if ( this->microDefaultDofs ) {
-        delete [] microDefaultDofs;
-    }
-}
 
 IRResultType MicroMaterial :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;              // Required by IR_GIVE_FIELD macro
-
 
     IR_GIVE_FIELD(ir, this->inputFileNameMicro, _IFT_MicroMaterial_fileName);
 
@@ -149,12 +109,10 @@ IRResultType MicroMaterial :: initializeFrom(InputRecord *ir)
     OOFEMTXTDataReader drMicro( inputFileNameMicro.c_str() );
     this->problemMicro = InstanciateProblem(drMicro, _processor, 0); //0=contextFlag-store/resore
     drMicro.finish();
-    OOFEM_LOG_INFO("** Microproblem %p instanciated\n\n", problemMicro);
+    OOFEM_LOG_INFO("Microproblem instanciated\n");
 
     return IRRT_OK;
 }
-
-
 
 
 //original pure virtual function has to be declared here
@@ -226,8 +184,7 @@ void MicroMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp
 MaterialStatus *
 MicroMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    MicroMaterialStatus *status = new MicroMaterialStatus(1, StructuralMaterial :: giveDomain(), gp);
-    return status;
+    return new MicroMaterialStatus(1, StructuralMaterial :: giveDomain(), gp);
 }
 
 
@@ -531,19 +488,18 @@ void MicroMaterial :: setMacroProperties(Domain *macroDomain, MacroLSpace *macro
     mstep = microEngngModel->giveCurrentMetaStep();
     mstep->setNumberOfSteps(this->macroDomain->giveEngngModel()->giveMetaStep(1)->giveNumberOfSteps() + 1);
 
-
     //separate DOFs into boundary and internal
     this->NumberOfDofManagers = microDomain->giveNumberOfDofManagers();
-    microBoundaryDofs = new int * [ this->NumberOfDofManagers ];
-    microInternalDofs = new int * [ this->NumberOfDofManagers ];
-    microDefaultDofs  = new int * [ this->NumberOfDofManagers ];
+    microBoundaryDofs.resize( this->NumberOfDofManagers );
+    microInternalDofs.resize( this->NumberOfDofManagers );
+    microDefaultDofs.resize( this->NumberOfDofManagers );
     for ( int i = 0; i < this->NumberOfDofManagers; i++ ) {
-        microBoundaryDofs [ i ] = new int [ 3 ];
-        microInternalDofs [ i ] = new int [ 3 ];
-        microDefaultDofs [ i ] =  new int [ 3 ];
-        microBoundaryDofs [ i ] [ 0 ] = microBoundaryDofs [ i ] [ 1 ] = microBoundaryDofs [ i ] [ 2 ] = 0;
-        microInternalDofs [ i ] [ 0 ] = microInternalDofs [ i ] [ 1 ] = microInternalDofs [ i ] [ 2 ] = 0;
-        microDefaultDofs [ i ] [ 0 ]  = microDefaultDofs [ i ] [ 1 ]  = microDefaultDofs [ i ] [ 2 ]  = 0;
+        microBoundaryDofs [ i ].resize(3);
+        microInternalDofs [ i ].resize(3);
+        microDefaultDofs [ i ].resize(3);
+        microBoundaryDofs [ i ].zero();
+        microInternalDofs [ i ].zero();
+        microDefaultDofs [ i ].zero();
     }
 
     for ( int i = 0; i < this->NumberOfDofManagers; i++ ) {
@@ -607,30 +563,24 @@ void MicroMaterial :: init(void)
 //Each node has three dofs (x,y,z direction)
 int MicroMaterial :: giveDofEquationNumber(Dof *dof) const
 {
-    int answer;
-    int numDofMan, numDof;
-
-    numDofMan = dof->giveDofManNumber();
-    numDof = dof->giveDofID(); // Note: Relieas on D_u, D_v, D_w being 1, 2, 3
+    int numDofMan = dof->giveDofManNumber();
+    int numDof = dof->giveDofID(); // Note: Relieas on D_u, D_v, D_w being 1, 2, 3
 
     //depending on the assembly of submatrix, swith to equation numbering
     switch ( DofEquationNumbering ) {
     case AllNodes: //the default
-        answer =  microDefaultDofs [ numDofMan - 1 ] [ numDof - 1 ];
+        return  microDefaultDofs [ numDofMan - 1 ] [ numDof - 1 ];
         break;
     case BoundaryNodes:
-        answer =  microBoundaryDofs [ numDofMan - 1 ] [ numDof - 1 ];
+        return  microBoundaryDofs [ numDofMan - 1 ] [ numDof - 1 ];
         break;
     case InteriorNodes:
-        answer =  microInternalDofs [ numDofMan - 1 ] [ numDof - 1 ];
+        return  microInternalDofs [ numDofMan - 1 ] [ numDof - 1 ];
         break;
     default:
-        answer = 0;
         OOFEM_ERROR("Node numbering undefined");
+        return 0;
     }
-
-    //    answer = 3 * ( dof->giveDofManNumber() - 1 ) + dof->giveNumber();
-    return answer;
 }
 
 //from class UnknownNumberingScheme

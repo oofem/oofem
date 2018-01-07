@@ -54,14 +54,14 @@
 #include "feinterpol.h"
     
 #ifdef __FM_MODULE
-#include "../fm/tr21stokes.h"
-#include "../fm/tet21stokes.h"
-#include "../fm/stokesflow.h"
+#include "fm/tr21stokes.h"
+#include "fm/tet21stokes.h"
+#include "fm/stokesflow.h"
 #endif
 
 #ifdef __SM_MODULE
-#include "../sm/Elements/nlstructuralelement.h"
-#include "../sm/EngineeringModels/structengngmodel.h"
+#include "sm/Elements/nlstructuralelement.h"
+#include "sm/EngineeringModels/structengngmodel.h"
 #endif
 
 
