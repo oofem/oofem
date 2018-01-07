@@ -41,7 +41,7 @@
 
 namespace oofem {
 MaterialStatusMapperInterface :: MaterialStatusMapperInterface() :
-    mpMaterialMapper(new MMAClosestIPTransfer())
+    mpMaterialMapper(std::make_unique<MMAClosestIPTransfer>())
 {}
 
 int MaterialStatusMapperInterface :: MSMI_map(const GaussPoint &iGP, const Domain &iOldDom, Set &sourceSet, const TimeStep &iTStep, MaterialStatus &oStatus)

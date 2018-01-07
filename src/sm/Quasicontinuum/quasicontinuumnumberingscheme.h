@@ -61,14 +61,14 @@ protected:
     /// Flag controlling wether the numbering has been initialized or not
     bool isInitialized;
     /// map form dofid to equation number
-    std::map<int, std::map<int,int>> *equationMap;
+    std::map<int, std::map<int,int>> equationMap;
 
 
 public:
     /// Constructor
     QuasicontinuumNumberingscheme();
     /// Destructor
-    virtual ~QuasicontinuumNumberingscheme();
+    virtual ~QuasicontinuumNumberingscheme() {}
 
     /**
      * Initializes the receiver

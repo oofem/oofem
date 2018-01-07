@@ -43,11 +43,6 @@ QuasicontinuumNumberingscheme :: QuasicontinuumNumberingscheme() :
     , isInitialized(false)
 { }
 
-QuasicontinuumNumberingscheme :: ~QuasicontinuumNumberingscheme()
-{
-    delete equationMap;
-}
-
 void
 QuasicontinuumNumberingscheme :: init(Domain *domain, std :: vector< bool >activatedNodeList, TimeStep *tStep)
 {
@@ -67,58 +62,53 @@ QuasicontinuumNumberingscheme :: init(Domain *domain, std :: vector< bool >activ
      */
     this->selectedNodes.resize( activatedNodeList.size() );
     selectedNodes.zero();
-    for ( int i = 1; i <= ( int ) activatedNodeList.size(); i++ ) {
-        if ( activatedNodeList [ i - 1 ] ) {
-            selectedNodes.at(i) = 1;
+    for ( int i = 0; i < ( int ) activatedNodeList.size(); i++ ) {
+        if ( activatedNodeList [ i ] ) {
+            selectedNodes[i] = 1;
         }
     }
 
 
     //int nnode = domain->giveNumberOfDofManagers();
     //int nnode = 0;
-    DofManager *idofman;
-
     //   this->dofEquationNumbers.resize(nnode);
 
-    equationMap = new std :: map< int, std :: map< int, int > >();
-
+    equationMap.clear();
 
     for ( int inode = 1; inode <= selectedNodes.giveSize(); inode++ ) {
         if ( selectedNodes.at(inode) == 1 ) {
-            std :: map< int, int > *dof2EquationMap = new std :: map< int, int >();
-            idofman = domain->giveDofManager(inode);
+            std :: map< int, int > dof2EquationMap;
+            auto idofman = domain->giveDofManager(inode);
             IntArray dofIDArray;
             idofman->giveCompleteMasterDofIDArray(dofIDArray);
             if ( !idofman->hasAnySlaveDofs() ) {
-                for ( int k = 1; k <= dofIDArray.giveSize(); k++ ) {
-                    if ( idofman->giveDofWithID( dofIDArray.at(k) )->hasBc(tStep) ) {
-                        ( * dof2EquationMap ) [ dofIDArray.at(k) ] = --pres_neq;
+                for ( auto &dofid : dofIDArray ) {
+                    if ( idofman->giveDofWithID( dofid )->hasBc(tStep) ) {
+                        dof2EquationMap [ dofid ] = --pres_neq;
                     } else {
-                        ( * dof2EquationMap ) [ dofIDArray.at(k) ] = ++neq;
+                        dof2EquationMap [ dofid ] = ++neq;
                     }
                 }
             } else {
-                /*
-                 * IntArray masterDofIDArray, masterDofMans;
-                 * //idofman->giveMasterDofIDArray({D_u, D_v},masterDofIDArray);
-                 * idofman->giveMasterDofMans(masterDofMans);
-                 * DofManager *mdofman;
-                 * for (int m = 1; m <= masterDofMans.giveSize(); m++ ) {
-                 *  mdofman = domain->giveDofManager(masterDofMans.at(m));
-                 *  mdofman->giveCompleteMasterDofIDArray(dofIDArray);
-                 *  for (int k = 1; k <= dofIDArray.giveSize(); k++) {
-                 *      if(mdofman->giveDofWithID(dofIDArray.at(k))->hasBc(tStep)) {
-                 *          ( *dof2EquationMap ) [ dofIDArray.at(k) ] = --pres_neq;
-                 *      } else {
-                 *          ( *dof2EquationMap ) [ dofIDArray.at(k) ] = ++neq;
-                 *      }
-                 *  }
-                 * }
-                 */
+#if 0
+                IntArray masterDofIDArray, masterDofMans;
+                //idofman->giveMasterDofIDArray({D_u, D_v},masterDofIDArray);
+                idofman->giveMasterDofMans(masterDofMans);
+                for (int m = 1; m <= masterDofMans.giveSize(); m++ ) {
+                    auto mdofman = domain->giveDofManager(masterDofMans.at(m));
+                    mdofman->giveCompleteMasterDofIDArray(dofIDArray);
+                    for ( auto &dofid : dofIDArray ) {
+                        if(mdofman->giveDofWithID(dofid)->hasBc(tStep)) {
+                            dof2EquationMap [ dofid ] = --pres_neq;
+                        } else {
+                            dof2EquationMap [ dofid ] = ++neq;
+                        }
+                    }
+                 }
+#endif
             }
 
-            ( * this->equationMap ) [ inode ] = * dof2EquationMap;
-            delete dof2EquationMap;
+            this->equationMap.insert( {inode, std::move(dof2EquationMap)} );
         }
     }
 }
@@ -133,13 +123,10 @@ QuasicontinuumNumberingscheme :: reset()
 int
 QuasicontinuumNumberingscheme :: giveDofEquationNumber(Dof *dof) const
 {
-    //std::map<int,int> map = (equationMap->find(dof->giveDofManNumber())->second)->find((int)dof->giveDofID)->second;
-
-
     int dofEqNum = 0;
 
     if ( selectedNodes.at( dof->giveDofManNumber() ) == 1 ) {
-        dofEqNum = ( equationMap->find( dof->giveDofManNumber() )->second ).find( dof->giveDofID() )->second;
+        dofEqNum = ( equationMap.find( dof->giveDofManNumber() )->second ).find( dof->giveDofID() )->second;
     } else {
         dofEqNum = 0;
     }

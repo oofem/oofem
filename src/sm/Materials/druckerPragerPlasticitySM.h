@@ -38,9 +38,9 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 
-#include "../sm/Materials/structuralms.h"
-#include "../sm/Materials/structuralmaterial.h"
-#include "Materials/isolinearelasticmaterial.h"
+#include "sm/Materials/structuralms.h"
+#include "sm/Materials/structuralmaterial.h"
+#include "sm/Materials/isolinearelasticmaterial.h"
 
 ///@name Input fields for DruckerPragerPlasticitySM
 //@{
@@ -220,7 +220,7 @@ protected:
     double kFactor;
 
     /// Associated linear elastic material.
-    IsotropicLinearElasticMaterial *LEMaterial;
+    IsotropicLinearElasticMaterial LEMaterial;
 
     /// Yield tolerance.
     double yieldTol;
@@ -231,7 +231,7 @@ public:
     /// Constructor
     DruckerPragerPlasticitySM(int n, Domain * d);
     /// Destructor
-    virtual ~DruckerPragerPlasticitySM();
+    virtual ~DruckerPragerPlasticitySM() {}
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
@@ -335,7 +335,7 @@ public:
 
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
     {
-        LEMaterial->giveThermalDilatationVector(answer, gp, tStep);
+        LEMaterial.giveThermalDilatationVector(answer, gp, tStep);
     }
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
