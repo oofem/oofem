@@ -88,14 +88,14 @@ namespace bp = boost::python;
 #include "gausspoint.h"
 #include "internalstatetype.h"
 #include "matresponsemode.h"
-#include "Materials/structuralmaterial.h"
+#include "sm/Materials/structuralmaterial.h"
 #include "matstatus.h"
-#include "Materials/structuralms.h"
+#include "sm/Materials/structuralms.h"
 #include "exportmodulemanager.h"
 #include "outputmanager.h"
 #include "classfactory.h"
 
-#include "Materials/structmatsettable.h"
+#include "sm/Materials/structmatsettable.h"
 
 #include<iostream>
 
@@ -573,7 +573,7 @@ void pyclass_EngngModel()
 
 EngngModel *InstanciateProblem_1 (DataReader &dr, problemMode mode, int contextFlag)
 {
-    return InstanciateProblem(dr, mode, contextFlag);
+    return InstanciateProblem(dr, mode, contextFlag).release();
 }
 
 

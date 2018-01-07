@@ -199,15 +199,15 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
     Dof *dof;
 
     FloatMatrix Kbb; //contains reduced problem with boundary nodes and without interior nodes
-    FloatMatrix *Kbi = NULL; //can be zero size if no internal DOFs
-    FloatMatrix *Kii1KbiT = NULL; //can be zero size if no internal DOFs
-    FloatMatrix *Kbb_1 = NULL; //help matrix
+    FloatMatrix Kbi; //can be zero size if no internal DOFs
+    FloatMatrix Kii1KbiT; //can be zero size if no internal DOFs
+    FloatMatrix Kbb_1; //help matrix
 
     FloatMatrix slaveMasterOnBoundary; //transformation matrix representing displacements on boundary tied to master nodes
 
     SparseMtrxType sparseMtrxType = ( SparseMtrxType ) 0; //SMT_Skyline symmetric skyline
-    SparseMtrx *stiffnessMatrixMicro = NULL; //full stiffness matrix without any constraint
-    SparseMtrx *Kii = NULL; //submatrix of internal DOFs
+    std::unique_ptr<SparseMtrx> stiffnessMatrixMicro; //full stiffness matrix without any constraint
+    std::unique_ptr<SparseMtrx> Kii; //submatrix of internal DOFs
 
     Kbb.resize(totalBoundaryDofs, totalBoundaryDofs);
     Kbb.zero();
@@ -221,13 +221,12 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
     printf( "Internal DOFs %d\n", this->giveRequiredNumberOfDomainEquation() );
     this->DofEquationNumbering = InteriorNodes;
     if ( totalInternalDofs ) {
-        Kbi = new FloatMatrix(totalBoundaryDofs, totalInternalDofs);
-        Kbi->zero();
-        Kii1KbiT = new FloatMatrix(totalInternalDofs, totalBoundaryDofs);
-        Kii1KbiT->zero();
-        Kii = classFactory.createSparseMtrx(sparseMtrxType);
+        Kbi.resize(totalBoundaryDofs, totalInternalDofs);
+        Kbi.zero();
+        Kii1KbiT.resize(totalInternalDofs, totalBoundaryDofs);
+        Kii1KbiT.zero();
+        Kii.reset( classFactory.createSparseMtrx(sparseMtrxType) );
         Kii->buildInternalStructure(microEngngModel, 1, * this);
-        Kii->zero();
         microEngngModel->assemble(*Kii, tStep, TangentAssembler(rMode), * this, microDomain);
     }
 
@@ -237,10 +236,8 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
     this->reqNumberOfDomainEquation = this->maxNumberOfDomainEquation;
     this->DofEquationNumbering = AllNodes;
 
-    stiffnessMatrixMicro = classFactory.createSparseMtrx(sparseMtrxType);
-    stiffnessMatrixMicro->zero();
+    stiffnessMatrixMicro.reset( classFactory.createSparseMtrx(sparseMtrxType) );
     stiffnessMatrixMicro->buildInternalStructure(microEngngModel, 1, * this);
-    stiffnessMatrixMicro->zero();
     microEngngModel->assemble(*stiffnessMatrixMicro, tStep, TangentAssembler(rMode), * this, microDomain);
 
 
@@ -258,7 +255,7 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
             row = microBoundaryDofsArr.at(i);
             col = microInternalDofsArr.at(j);
             if ( stiffnessMatrixMicro->isAllocatedAt(row, col) ) {
-                Kbi->at(i, j) = stiffnessMatrixMicro->at(row, col);
+                Kbi.at(i, j) = stiffnessMatrixMicro->at(row, col);
             }
         }
     }
@@ -278,10 +275,10 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
             for ( int b = 1; b <= totalBoundaryDofs; b++ ) { //do not store Kii^-1, it is a dense matrix, compute multiplication directly
                 tmpDouble = 0.;
                 for ( int j = 1; j <= totalInternalDofs; j++ ) {
-                    tmpDouble += xVector.at(j) * Kbi->at(b, j);
+                    tmpDouble += xVector.at(j) * Kbi.at(b, j);
                 }
 
-                Kii1KbiT->at(i, b) = tmpDouble;
+                Kii1KbiT.at(i, b) = tmpDouble;
             }
 
             //OOFEM_LOG_INFO("%d ", i);
@@ -289,39 +286,18 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
 
         OOFEM_LOG_INFO("\n");
 
-        Kbb_1 = new FloatMatrix();
-        Kbb_1->beProductOf( ( FloatMatrix const & ) * Kbi, ( FloatMatrix const & ) * Kii1KbiT );
+        Kbb_1.beProductOf( Kbi, Kii1KbiT );
         for ( int i = 1; i <= totalBoundaryDofs; i++ ) {
             for ( int j = 1; j <= totalBoundaryDofs; j++ ) {
-                Kbb.at(i, j) -= Kbb_1->at(i, j);
+                Kbb.at(i, j) -= Kbb_1.at(i, j);
             }
         }
     }
 
-    if ( Kbi ) {
-        delete Kbi;
-    }
-
-    if ( Kii1KbiT ) {
-        delete Kii1KbiT;
-    }
-
-    if ( Kbb_1 ) {
-        delete Kbb_1;
-    }
-
-    //Kbb_1->printYourself();
+    //Kbb_1-printYourself();
     //OOFEM_ERROR("Stop");
     this->isDefaultNumbering = true; //switch back to default numbering
     this->DofEquationNumbering = AllNodes;
-
-    if ( Kii ) {
-        delete Kii;
-    }
-
-    if ( stiffnessMatrixMicro ) {
-        delete stiffnessMatrixMicro;
-    }
 
     //     IntArray interiorDofNode; //equation numbers to be condensed out, sorted
     //     IntArray boundaryDofNode;//equation numbers in rows (or columns) of stiffness matrix without interior nodes, sorted

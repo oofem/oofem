@@ -35,7 +35,7 @@
 #include "rvestokesflow.h"
 #include "util.h"
 #include "oofemtxtdatareader.h"
-#include "../fm/stokesflowvelocityhomogenization.h"
+#include "fm/stokesflowvelocityhomogenization.h"
 #include "engngm.h"
 #include "contextioerr.h"
 #include "gausspoint.h"
@@ -57,13 +57,12 @@ RVEStokesFlowMaterialStatus :: RVEStokesFlowMaterialStatus(int n, Domain *d, Gau
     OOFEM_LOG_INFO( "************************** Instanciating microproblem from file %s\n", inputfile.c_str() );
     OOFEMTXTDataReader dr( inputfile.c_str() );
 
-    EngngModel *e = InstanciateProblem(dr, _processor, 0);
+    auto e = InstanciateProblem(dr, _processor, 0);
     dr.finish();
  
-    if ( dynamic_cast< StokesFlowVelocityHomogenization* >(e) ) {
-        this->rve.reset( dynamic_cast< StokesFlowVelocityHomogenization* >(e) );
+    if ( dynamic_cast< StokesFlowVelocityHomogenization* >(e.get()) ) {
+        this->rve.reset( dynamic_cast< StokesFlowVelocityHomogenization* >(e.release()) );
     } else {
-        delete e;
         OOFEM_ERROR("Unexpected RVE engineering model");
     }
 
@@ -160,7 +159,6 @@ RVEStokesFlow :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateTy
 {
     RVEStokesFlowMaterialStatus *thisMaterialStatus;
     thisMaterialStatus = static_cast< RVEStokesFlowMaterialStatus * >( this->giveStatus(gp) );
-    FloatMatrix temp;
     answer.clear();
 
     switch ( type ) {
@@ -171,18 +169,19 @@ RVEStokesFlow :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateTy
         answer.copySubVector(thisMaterialStatus->giveGradient(), 1);
         return 1;
     case IST_TangentNorm:
-        temp = thisMaterialStatus->giveTangentMatrix();
         answer.resize(1);
-        answer.at(1) = temp.computeFrobeniusNorm();
+        answer.at(1) = thisMaterialStatus->giveTangentMatrix().computeFrobeniusNorm();
         return 1;
     case IST_Tangent:
-        temp = thisMaterialStatus->giveTangentMatrix();
+    {
+        const FloatMatrix &temp = thisMaterialStatus->giveTangentMatrix();
         answer.resize(4);
         answer.at(1) = temp.at(1, 1);
         answer.at(2) = temp.at(1, 2);
         answer.at(3) = temp.at(2, 1);
         answer.at(4) = temp.at(2, 2);
         return 1;
+    }
     default:
         return TransportMaterial :: giveIPValue(answer, gp, type, tStep);
     }

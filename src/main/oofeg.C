@@ -123,7 +123,7 @@ static XtActionsRec oofeg_remap_return[] = {
 static int oofeg_box_setup = 0;
 static int oofeg_axes      = 1;
 
-EngngModel *problem;
+std::unique_ptr<EngngModel> problem;
 
 
 
@@ -387,7 +387,7 @@ main(int argc, char *argv[])
                              const_cast< char * >(OOFEG_DEFAULTDRAW_COLOR), 500, 400);
     EVSetRenderMode(myview, WIRE_RENDERING);
     EMAttachView(age_model, myview);
-    gc [ 0 ].init(problem); // init all gcs
+    gc [ 0 ].init(problem.get()); // init all gcs
 
     // AugmentCommandTable();
 
@@ -2763,7 +2763,7 @@ void debug_run(Widget w, XtPointer ptr, XtPointer call_data)
         gc [ 0 ].setActiveStep(0);
         problem->solveYourself();
     } catch(OOFEM_Terminate & c) {
-        delete problem;
+        problem = nullptr;
  #ifdef __PETSC_MODULE
         PetscFinalize();
  #endif

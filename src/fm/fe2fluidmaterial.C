@@ -331,15 +331,13 @@ FE2FluidMaterialStatus :: ~FE2FluidMaterialStatus()
 bool FE2FluidMaterialStatus :: createRVE(int n, GaussPoint *gp, const std :: string &inputfile)
 {
     OOFEMTXTDataReader dr( inputfile.c_str() );
-    EngngModel *em = InstanciateProblem(dr, _processor, 0); // Everything but nrsolver is updated.
+    this->rve = InstanciateProblem(dr, _processor, 0); // Everything but nrsolver is updated.
     dr.finish();
-    em->setProblemScale(microScale);
-    em->checkProblemConsistency();
-    em->initMetaStepAttributes( em->giveMetaStep(1) );
-    em->giveNextStep(); // Makes sure there is a timestep (which we will modify before solving a step)
-    em->init();
-
-    this->rve.reset( em );
+    this->rve->setProblemScale(microScale);
+    this->rve->checkProblemConsistency();
+    this->rve->initMetaStepAttributes( this->rve->giveMetaStep(1) );
+    this->rve->giveNextStep(); // Makes sure there is a timestep (which we will modify before solving a step)
+    this->rve->init();
 
     std :: ostringstream name;
     name << this->rve->giveOutputBaseFileName() << "-gp" << n;

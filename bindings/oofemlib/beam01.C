@@ -6,15 +6,15 @@
 
 
 // Optional (only need the input fields defines)
-#include "../sm/EngineeringModels/linearstatic.h"
-#include "../sm/CrossSections/simplecrosssection.h"
-#include "../sm/Materials/isolinearelasticmaterial.h"
-#include "../sm/Elements/Bars/truss2d.h"
+#include "sm/EngineeringModels/linearstatic.h"
+#include "sm/CrossSections/simplecrosssection.h"
+#include "sm/Materials/isolinearelasticmaterial.h"
+#include "sm/Elements/Bars/truss2d.h"
 #include "generalboundarycondition.h"
-#include "../sm/Elements/Beams/beam2d.h"
+#include "sm/Elements/Beams/beam2d.h"
 #include "constantedgeload.h"
 #include "nodalload.h"
-#include "../sm/Loads/structtemperatureload.h"
+#include "sm/Loads/structtemperatureload.h"
 #include "peakfunction.h"
 #include "node.h"
 #include "outputmanager.h"
@@ -198,7 +198,7 @@ int main(int argc, char *argv[])
     // Writing to file (to verify, and for backups)
     myData.writeToFile("beam01.in");
 
-    EngngModel *em = InstanciateProblem(myData, _processor, 0);
-    em->solveYourself();
+    auto em = InstanciateProblem(myData, _processor, 0);
     myData.finish();
+    em->solveYourself();
 }

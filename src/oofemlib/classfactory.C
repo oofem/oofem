@@ -38,6 +38,8 @@
 #include <algorithm>
 #include <cctype>
 
+// unique_ptrs need the base 
+#include "engngm.h"
 #include "masterdof.h"
 #include "slavedof.h"
 #include "simpleslavedof.h"
@@ -47,7 +49,6 @@
 #include "lobattoir.h"
 
 #include "initialcondition.h"
-
 
 namespace oofem {
 ClassFactory &GiveClassFactory()
@@ -80,6 +81,13 @@ template< typename T, typename V, typename C> bool cf_store2(T &list, V name, C 
 
 // Helper for creating objects
 template< typename C, typename T, typename ... As> C *cf_create(const T &list, const char *name, As ... args)
+{
+    auto creator = list.find(conv2lower(name));
+    return creator != list.end() ? creator->second(args...) : nullptr;
+}
+
+// Helper for creating objects
+template< typename C, typename T, typename ... As> std::unique_ptr<C> cf_create3(const T &list, const char *name, As ... args)
 {
     auto creator = list.find(conv2lower(name));
     return creator != list.end() ? creator->second(args...) : nullptr;
@@ -206,12 +214,12 @@ bool ClassFactory :: registerMaterial( const char *name, Material * ( *creator )
     return cf_store(matList, name, creator);
 }
 
-EngngModel *ClassFactory :: createEngngModel(const char *name, int number, EngngModel *master)
+std::unique_ptr<EngngModel> ClassFactory :: createEngngModel(const char *name, int number, EngngModel *master)
 {
-    return cf_create<EngngModel>(engngList, name, number, master);
+    return cf_create3<EngngModel>(engngList, name, number, master);
 }
 
-bool ClassFactory :: registerEngngModel( const char *name, EngngModel * ( *creator )( int, EngngModel * ) )
+bool ClassFactory :: registerEngngModel( const char *name, std::unique_ptr<EngngModel> ( *creator )( int, EngngModel * ) )
 {
     return cf_store(engngList, name, creator);
 }
