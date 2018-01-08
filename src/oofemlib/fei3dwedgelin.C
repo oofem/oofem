@@ -161,7 +161,7 @@ FEI3dWedgeLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEI
     FloatMatrix jacobianMatrix;
 
     this->giveJacobianMatrixAt(jacobianMatrix, lcoords, cellgeo);
-    return jacobianMatrix.giveDeterminant() / 2.; ///@todo Should this really be a factor 1/2 here?
+    return jacobianMatrix.giveDeterminant();
 }
 
 
