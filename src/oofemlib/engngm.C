@@ -1616,7 +1616,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream &stream, ContextMode
     }
 
     if ( !currentStep ) {
-        currentStep.reset( new TimeStep(istep, this, 0, 0., 0., 0) );
+        currentStep = std::make_unique<TimeStep>(istep, this, 0, 0., 0., 0);
     }
 
     currentStep->restoreContext(stream);
@@ -1630,8 +1630,8 @@ contextIOResultType EngngModel :: restoreContext(DataStream &stream, ContextMode
         }
     }
 
-    previousStep.reset( new TimeStep(istep - 1, this, pmstep, currentStep->giveTargetTime ( ) - currentStep->giveTimeIncrement(),
-                                currentStep->giveTimeIncrement(), currentStep->giveSolutionStateCounter() - 1) );
+    previousStep = std::make_unique<TimeStep>(istep - 1, this, pmstep, currentStep->giveTargetTime ( ) - currentStep->giveTimeIncrement(),
+                                currentStep->giveTimeIncrement(), currentStep->giveSolutionStateCounter() - 1);
 
     // restore numberOfEquations and domainNeqs array
     if ( !stream.read(numberOfEquations) ) {

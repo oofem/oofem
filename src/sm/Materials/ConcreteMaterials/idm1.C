@@ -69,9 +69,6 @@ MMALeastSquareProjection IsotropicDamageMaterial1 :: mapper;
 
 IsotropicDamageMaterial1 :: IsotropicDamageMaterial1(int n, Domain *d) : IsotropicDamageMaterial(n, d),
     RandomMaterialExtensionInterface()
-    //
-    // constructor
-    //
 {
     // deleted by parent, where linearElasticMaterial instance declared
     linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);

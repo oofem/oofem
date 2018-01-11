@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/FETISolver/feticommunicator.h"
+#include "sm/FETISolver/feticommunicator.h"
 #include "engngm.h"
 #include "intarray.h"
 #include "dofmanager.h"
@@ -60,10 +60,11 @@ FETICommunicator :: ~FETICommunicator()
 void
 FETICommunicator :: setUpCommunicationMaps(EngngModel *pm)
 {
-    int i, j, l, maxRec;
+    int i, j, maxRec;
     int globaldofmannum, localNumber, ndofs;
     int numberOfBoundaryDofMans;
     int source, tag;
+    int size = this->processComms.size();
     IntArray numberOfPartitionBoundaryDofMans(size);
     StaticCommunicationBuffer commBuff(MPI_COMM_WORLD);
     EModelDefaultEquationNumbering dn;
@@ -72,7 +73,7 @@ FETICommunicator :: setUpCommunicationMaps(EngngModel *pm)
     // value is corresponding local master dof manager number
     map< int, int, less< int > >BoundaryDofManagerMap;
     // communication maps of slaves
-    IntArray **commMaps = new IntArray * [ size ];
+    std::vector<IntArray> commMaps(size);
     // location array
     IntArray locNum;
     Domain *domain = pm->giveDomain(1);
@@ -88,7 +89,7 @@ FETICommunicator :: setUpCommunicationMaps(EngngModel *pm)
     //
     // receive data
     //
-    for ( i = 1; i < size; i++ ) {
+    for ( int i = 1; i < size; i++ ) {
         commBuff.iRecv(MPI_ANY_SOURCE, FETICommunicator :: NumberOfBoundaryDofManagersMsg);
         while ( !commBuff.testCompletion(source, tag) ) {
             ;
@@ -110,7 +111,7 @@ FETICommunicator :: setUpCommunicationMaps(EngngModel *pm)
     // determine the total number of boundary dof managers at master
     int nnodes = domain->giveNumberOfDofManagers();
     j = 0;
-    for ( i = 1; i <= nnodes; i++ ) {
+    for ( int i = 1; i <= nnodes; i++ ) {
         if ( domain->giveDofManager(i)->giveParallelMode() == DofManager_shared ) {
             j++;
         }
@@ -124,7 +125,7 @@ FETICommunicator :: setUpCommunicationMaps(EngngModel *pm)
 
     // resize the receive buffer to fit all messages
     maxRec = 0;
-    for ( i = 0; i < size; i++ ) {
+    for ( int i = 0; i < size; i++ ) {
         if ( numberOfPartitionBoundaryDofMans.at(i + 1) > maxRec ) {
             maxRec = numberOfPartitionBoundaryDofMans.at(i + 1);
         }
@@ -132,16 +133,16 @@ FETICommunicator :: setUpCommunicationMaps(EngngModel *pm)
 
     commBuff.resize( 2 * maxRec * commBuff.givePackSizeOfInt(1) );
     // resize communication maps acordingly
-    for ( i = 0; i < size; i++ ) {
+    for ( int i = 0; i < size; i++ ) {
         j = numberOfPartitionBoundaryDofMans.at(i + 1);
-        commMaps [ i ] = new IntArray(j);
+        commMaps [ i ].resize(j);
     }
 
 
     // add local master contribution first
     // loop over all dofmanager data received
     i = 0;
-    for ( j = 1; j <= numberOfPartitionBoundaryDofMans.at(1); j++ ) {
+    for ( int j = 1; j <= numberOfPartitionBoundaryDofMans.at(1); j++ ) {
         // fing next shared dofman
         while ( !( domain->giveDofManager(++i)->giveParallelMode() == DofManager_shared ) ) {
             ;
@@ -150,7 +151,7 @@ FETICommunicator :: setUpCommunicationMaps(EngngModel *pm)
         globaldofmannum = domain->giveDofManager(i)->giveGlobalNumber();
         domain->giveDofManager(i)->giveCompleteLocationArray(locNum, dn);
         ndofs = 0;
-        for ( l = 1; l <= locNum.giveSize(); l++ ) {
+        for ( int l = 1; l <= locNum.giveSize(); l++ ) {
             if ( locNum.at(l) ) {
                 ndofs++;
             }
@@ -171,14 +172,14 @@ FETICommunicator :: setUpCommunicationMaps(EngngModel *pm)
         }
 
         // remember communication map for particular partition
-        commMaps [ 0 ]->at(j) = localNumber;
+        commMaps [ 0 ].at(j) = localNumber;
     }
 
     //
     // receive data from slave partitions
     //
 
-    for ( i = 1; i < size; i++ ) {
+    for ( int i = 1; i < size; i++ ) {
         commBuff.iRecv(MPI_ANY_SOURCE, FETICommunicator :: BoundaryDofManagersRecMsg);
         while ( !commBuff.testCompletion(source, tag) ) {
             ;
@@ -191,7 +192,7 @@ FETICommunicator :: setUpCommunicationMaps(EngngModel *pm)
 #endif
 
         // loop over all dofmanager data received
-        for ( j = 1; j <= numberOfPartitionBoundaryDofMans.at(source + 1); j++ ) {
+        for ( int j = 1; j <= numberOfPartitionBoundaryDofMans.at(source + 1); j++ ) {
             commBuff.read(globaldofmannum);
             commBuff.read(ndofs);
 
@@ -210,7 +211,7 @@ FETICommunicator :: setUpCommunicationMaps(EngngModel *pm)
             }
 
             // remember communication map for particular partition
-            commMaps [ source ]->at(j) = localNumber;
+            commMaps [ source ].at(j) = localNumber;
         }
 
         commBuff.init();
@@ -222,23 +223,19 @@ FETICommunicator :: setUpCommunicationMaps(EngngModel *pm)
     //
     numberOfEquations = 0;
     numberOfBoundaryDofMans = boundaryDofManList.size();
-    for ( i = 1; i <= numberOfBoundaryDofMans; i++ ) {
+    for ( int i = 1; i <= numberOfBoundaryDofMans; i++ ) {
         boundaryDofManList [ i - 1 ].setCodeNumbers(numberOfEquations); // updates numberOfEquations
     }
 
     // store the commMaps
-    for ( i = 0; i < size; i++ ) {
+    for ( int i = 0; i < size; i++ ) {
         if ( i != 0 ) {
-            this->giveProcessCommunicator(i)->setToSendArry(engngModel, * commMaps [ i ], 0);
-            this->giveProcessCommunicator(i)->setToRecvArry(engngModel, * commMaps [ i ], 0);
+            this->giveProcessCommunicator(i)->setToSendArry(engngModel, commMaps [ i ], 0);
+            this->giveProcessCommunicator(i)->setToRecvArry(engngModel, commMaps [ i ], 0);
         } else {
-            masterCommMap = * commMaps [ i ];
+            masterCommMap = commMaps [ i ];
         }
-
-        delete commMaps [ i ];
     }
-
-    delete commMaps;
 
     MPI_Barrier(MPI_COMM_WORLD);
 

@@ -84,7 +84,7 @@ LoadBalancer :: initializeWtp(IntArray &wtp)
         for ( int iwtp: wtp ) {
             std :: unique_ptr< WorkTransferPlugin > plugin;
             if ( iwtp == 1 ) {
-                plugin.reset( new NonlocalMaterialWTP(this) );
+                plugin = std::make_unique<NonlocalMaterialWTP>(this);
             } else {
                 OOFEM_ERROR("Unknown work transfer plugin type");
             }

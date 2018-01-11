@@ -90,13 +90,13 @@ Tet1_3D_SUPG :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize(3);
-        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3) );
+        integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
 
-        integrationRulesArray [ 1 ].reset( new GaussIntegrationRule(2, this, 1, 3) );
+        integrationRulesArray [ 1 ] = std::make_unique<GaussIntegrationRule>(2, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 1 ], 4, this);
 
-        integrationRulesArray [ 2 ].reset( new GaussIntegrationRule(3, this, 1, 3) );
+        integrationRulesArray [ 2 ] = std::make_unique<GaussIntegrationRule>(3, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 2 ], 4, this);
     }
 }

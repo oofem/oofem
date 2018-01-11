@@ -68,7 +68,7 @@ Tet1BubbleStokes :: Tet1BubbleStokes(int n, Domain *aDomain) : FMElement(n, aDom
     this->numberOfDofMans = 4;
     this->numberOfGaussPoints = 24;
 
-    this->bubble.reset( new ElementDofManager(1, aDomain, this) );
+    this->bubble = std::make_unique<ElementDofManager>(1, aDomain, this);
     this->bubble->appendDof( new MasterDof(this->bubble.get(), V_u) );
     this->bubble->appendDof( new MasterDof(this->bubble.get(), V_v) );
     this->bubble->appendDof( new MasterDof(this->bubble.get(), V_w) );
@@ -82,7 +82,7 @@ void Tet1BubbleStokes :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize(1);
-        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3) );
+        integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], this->numberOfGaussPoints, this);
     }
 }

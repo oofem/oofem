@@ -75,9 +75,9 @@ IRResultType StokesFlow :: initializeFrom(InputRecord *ir)
     this->deltaT = 1.0;
     IR_GIVE_OPTIONAL_FIELD(ir, deltaT, _IFT_StokesFlow_deltat);
 
-    this->velocityPressureField.reset( new DofDistributedPrimaryField(this, 1, FT_VelocityPressure, 1) );
-    this->stiffnessMatrix.reset( NULL );
-    this->meshqualityee.reset( NULL );
+    this->velocityPressureField = std::make_unique<DofDistributedPrimaryField>(this, 1, FT_VelocityPressure, 1);
+    this->stiffnessMatrix = nullptr;
+    this->meshqualityee = nullptr;
 
     this->ts = TS_OK;
 
@@ -95,7 +95,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
 
     if ( d->giveNumberOfElements() == 0 && d->giveTopology() ) {
         d->giveTopology()->replaceFEMesh();
-        this->meshqualityee.reset( new MeshQualityErrorEstimator( 1, d ) );
+        this->meshqualityee = std::make_unique<MeshQualityErrorEstimator>( 1, d );
     }
 
     if ( d->giveTopology() && this->meshqualityee ) {
@@ -212,7 +212,7 @@ int StokesFlow :: forceEquationNumbering(int id)
 {
     int neq = FluidModel :: forceEquationNumbering(id);
     this->equationNumberingCompleted = false;
-    this->stiffnessMatrix.reset( NULL );
+    this->stiffnessMatrix = nullptr;
     return neq;
 }
 
@@ -271,7 +271,7 @@ void StokesFlow :: doStepOutput(TimeStep *tStep)
 NumericalMethod *StokesFlow :: giveNumericalMethod(MetaStep *mStep)
 {
     if ( !this->nMethod ) {
-        this->nMethod.reset( new NRSolver(this->giveDomain(1), this) );
+        this->nMethod = std::make_unique<NRSolver>(this->giveDomain(1), this);
     }
     return this->nMethod.get();
 }
@@ -280,11 +280,11 @@ TimeStep *StokesFlow :: giveNextStep()
 {
     if ( !currentStep ) {
         // first step -> generate initial step
-        //currentStep.reset( new TimeStep(*giveSolutionStepWhenIcApply()) );
-        currentStep.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 1, 0., this->deltaT, 0) );
+        //currentStep = std::make_unique<TimeStep>(*giveSolutionStepWhenIcApply());
+        currentStep = std::make_unique<TimeStep>(giveNumberOfTimeStepWhenIcApply(), this, 1, 0., this->deltaT, 0);
     }
     previousStep = std :: move(currentStep);
-    currentStep.reset( new TimeStep(*previousStep, this->deltaT) );
+    currentStep = std::make_unique<TimeStep>(*previousStep, this->deltaT);
 
     return currentStep.get();
 }

@@ -248,9 +248,9 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
         OOFEM_ERROR("source problem must also be AdaptiveNonlinearStatic.");
     }
 
-    this->currentStep.reset( new TimeStep( * ( sourceProblem->giveCurrentStep() ) ) );
+    this->currentStep = std::make_unique<TimeStep>( * ( sourceProblem->giveCurrentStep() ) );
     if ( sourceProblem->givePreviousStep() ) {
-        this->previousStep.reset( new TimeStep( * ( sourceProblem->givePreviousStep() ) ) );
+        this->previousStep = std::make_unique<TimeStep>( * ( sourceProblem->givePreviousStep() ) );
     }
 
     // map primary unknowns

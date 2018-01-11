@@ -129,7 +129,7 @@ bool ParticleTopologyDescription :: instanciateYourself(DataReader &dr)
 
     this->tubeWidth = ( bb1(0) - bb0(0) ) / res * tubewidth;
 
-    this->grid.reset( new ParticleGrid< ParticlePoint >(resolution, bb0, bb1) );
+    this->grid = std::make_unique< ParticleGrid< ParticlePoint > >(resolution, bb0, bb1);
 
     for ( int i = 1; i <= nsegments; i++ ) {
         ir = dr.giveInputRecord(DataReader :: IR_geometryRec, i);

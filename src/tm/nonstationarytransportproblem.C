@@ -153,9 +153,9 @@ NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
     //secure equation renumbering, otherwise keep efficient algorithms
     if ( ir->hasField(_IFT_NonStationaryTransportProblem_changingproblemsize) ) {
         changingProblemSize = true;
-        UnknownsField.reset( new DofDistributedPrimaryField(this, 1, FT_TransportProblemUnknowns, 1) );
+        UnknownsField = std::make_unique<DofDistributedPrimaryField>(this, 1, FT_TransportProblemUnknowns, 1);
     } else {
-        UnknownsField.reset( new PrimaryField(this, 1, FT_TransportProblemUnknowns, 1) );
+        UnknownsField = std::make_unique<PrimaryField>(this, 1, FT_TransportProblemUnknowns, 1);
     }
 
     //read other input data from StationaryTransportProblem
@@ -211,8 +211,8 @@ NonStationaryTransportProblem :: giveSolutionStepWhenIcApply(bool force)
         return master->giveSolutionStepWhenIcApply();
     } else {
         if ( !stepWhenIcApply ) {
-            stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, this->initT - giveDeltaT ( giveNumberOfFirstStep() ), giveDeltaT ( giveNumberOfFirstStep() ), 0) );
-            //stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -deltaT, deltaT, 0) );
+            stepWhenIcApply = std::make_unique<TimeStep>(giveNumberOfTimeStepWhenIcApply(), this, 0, this->initT - giveDeltaT( giveNumberOfFirstStep() ), giveDeltaT( giveNumberOfFirstStep() ), 0);
+            //stepWhenIcApply = std::make_unique<TimeStep>(giveNumberOfTimeStepWhenIcApply(), this, 0, -deltaT, deltaT, 0);
         }
 
         return stepWhenIcApply.get();
@@ -275,11 +275,11 @@ NonStationaryTransportProblem :: giveNextStep()
         counter = currentStep->giveSolutionStateCounter() + 1;
     } else {
         // first step -> generate initial step
-        currentStep.reset( new TimeStep( *giveSolutionStepWhenIcApply() ) );
+        currentStep = std::make_unique<TimeStep>( *giveSolutionStepWhenIcApply() );
     }
 
     previousStep = std :: move(currentStep);
-    currentStep.reset( new TimeStep(istep, this, 1, totalTime, this->giveDeltaT ( istep ), counter) );
+    currentStep = std::make_unique<TimeStep>(istep, this, 1, totalTime, this->giveDeltaT ( istep ), counter);
     //set intrinsic time to time of integration
     intrinsicTime = currentStep->giveTargetTime();
 //     intrinsicTime = previousStep->giveTargetTime() + this->alpha *this->giveDeltaT(istep);

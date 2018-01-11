@@ -108,7 +108,7 @@ RemeshingCriteria *
 ScalarErrorIndicator :: giveRemeshingCrit()
 {
     if ( !this->rc ) {
-        this->rc.reset( new DirectErrorIndicatorRC(1, this) );
+        this->rc = std::make_unique<DirectErrorIndicatorRC>(1, this);
     }
 
     return this->rc.get();

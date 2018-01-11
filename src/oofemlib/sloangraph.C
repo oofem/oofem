@@ -196,7 +196,7 @@ SloanGraph :: findPeripheralNodes()
     }
 
     // initial spine
-    Spine.reset( new SloanLevelStructure(this, InitialRoot) );
+    Spine = std::make_unique<SloanLevelStructure>(this, InitialRoot);
     this->startNode = InitialRoot;
 
     int CurrentDiameter = Spine->giveDepth();

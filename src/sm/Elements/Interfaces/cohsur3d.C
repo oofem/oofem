@@ -208,7 +208,7 @@ void CohesiveSurface3d :: computeGaussPoints()
     // The Gauss point is used only when methods from crosssection and/or material
     // classes are requested.
     integrationRulesArray.resize( 1 );
-    integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this) );
+    integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this);
     this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
 }
 

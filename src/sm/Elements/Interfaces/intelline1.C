@@ -92,10 +92,10 @@ IntElLine1 :: computeGaussPoints()
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );
 
-//        integrationRulesArray[ 0 ].reset( new LobattoIntegrationRule (1,this, 1, 2, false) );
+//        integrationRulesArray[ 0 ] = std::make_unique<LobattoIntegrationRule>(1,this, 1, 2, false);
 //        integrationRulesArray [ 0 ]->SetUpPointsOnLine(2, _2dInterface);
 
-        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 2) );
+        integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 2);
         integrationRulesArray [ 0 ]->SetUpPointsOnLine(this->numberOfGaussPoints, _2dInterface);
     }
 }

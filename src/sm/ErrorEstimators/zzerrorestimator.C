@@ -205,7 +205,7 @@ RemeshingCriteria *
 ZZErrorEstimator :: giveRemeshingCrit()
 {
     if ( !this->rc ) {
-        this->rc.reset( new ZZRemeshingCriteria(1, this) );
+        this->rc = std::make_unique<ZZRemeshingCriteria>(1, this);
     }
 
     return this->rc.get();

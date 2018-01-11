@@ -99,8 +99,8 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
     }
 
     if ( !UnknownsField ) { // can exist from nonstationary transport problem
-        //UnknownsField.reset( new DofDistributedPrimaryField(this, 1, FT_TransportProblemUnknowns, 0) );
-        UnknownsField.reset( new PrimaryField(this, 1, FT_TransportProblemUnknowns, 0) );
+        //UnknownsField = std::make_unique<DofDistributedPrimaryField>(this, 1, FT_TransportProblemUnknowns, 0);
+        UnknownsField = std::make_unique<PrimaryField>(this, 1, FT_TransportProblemUnknowns, 0);
     }
 
     return IRRT_OK;
@@ -153,7 +153,7 @@ TimeStep *StationaryTransportProblem :: giveNextStep()
     }
 
     previousStep = std :: move(currentStep);
-    currentStep.reset( new TimeStep(istep, this, 1, ( double ) istep, 0., counter) );
+    currentStep = std::make_unique<TimeStep>(istep, this, 1, ( double ) istep, 0., counter);
     return currentStep.get();
 }
 

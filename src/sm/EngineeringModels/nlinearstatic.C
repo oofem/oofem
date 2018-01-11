@@ -320,7 +320,7 @@ TimeStep *NonLinearStatic :: giveNextStep()
     }
 
     previousStep = std :: move(currentStep);
-    currentStep.reset( new TimeStep(istep, this, mStepNum, totalTime, deltaTtmp, counter) );
+    currentStep = std::make_unique<TimeStep>(istep, this, mStepNum, totalTime, deltaTtmp, counter);
     // dt variable are set eq to 0 for statics - has no meaning
     // *Wrong* It has meaning for viscoelastic materials.
 

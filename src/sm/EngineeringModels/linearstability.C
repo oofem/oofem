@@ -166,7 +166,7 @@ TimeStep *LinearStability :: giveNextStep()
     }
 
     previousStep = std :: move(currentStep);
-    currentStep.reset( new TimeStep(istep, this, 1, 0., 0., counter) );
+    currentStep = std::make_unique<TimeStep>(istep, this, 1, 0., 0., counter);
 
     return currentStep.get();
 }

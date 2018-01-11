@@ -556,7 +556,7 @@ RemeshingCriteria *
 HuertaErrorEstimator :: giveRemeshingCrit()
 {
     if ( !this->rc ) {
-        this->rc.reset( new HuertaRemeshingCriteria(1, this) );
+        this->rc = std::make_unique<HuertaRemeshingCriteria>(1, this);
     }
 
     return this->rc.get();

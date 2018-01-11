@@ -197,7 +197,7 @@ Lattice2d_mt :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
     integrationRulesArray.resize( 1 );
-    integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 2) );
+    integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 2);
     integrationRulesArray [ 0 ]->SetUpPointsOnLine(1, _2dMTLattice);
 }
 

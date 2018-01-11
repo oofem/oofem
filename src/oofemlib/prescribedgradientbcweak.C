@@ -73,7 +73,7 @@ void TracSegArray::giveTractionLocationArray(IntArray &rows, CharType type, cons
 
 void TracSegArray :: setupIntegrationRuleOnEl()
 {
-    mIntRule.reset( new DiscontinuousSegmentIntegrationRule(1, nullptr, mInteriorSegmentsFine) );
+    mIntRule = std::make_unique<DiscontinuousSegmentIntegrationRule>(1, nullptr, mInteriorSegmentsFine);
 
     int numPointsPerSeg = 1;
     mIntRule->SetUpPointsOnLine(numPointsPerSeg, _PlaneStrain);
@@ -118,7 +118,7 @@ PrescribedGradientBCWeak :: ~PrescribedGradientBCWeak()
 void PrescribedGradientBCWeak :: clear()
 {
     mpTracElNew.clear();
-    mpDisplacementLock.reset(nullptr);
+    mpDisplacementLock = nullptr;
 }
 
 //#define DAMAGE_TEST
@@ -1207,7 +1207,7 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
         // Create first node
         totNodesCreated++;
 
-        el.mFirstNode.reset( new Node(numNodes + 1, domain) );
+        el.mFirstNode = std::make_unique<Node>(numNodes + 1, domain);
         el.mFirstNode->setGlobalNumber(numNodes + 1);
         for ( auto &dofId: giveTracDofIDs() ) {
         	el.mFirstNode->appendDof( new MasterDof(el.mFirstNode.get(), ( DofIDItem ) dofId) );
@@ -1225,7 +1225,7 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
         // Create first node
         totNodesCreated++;
 
-        el.mFirstNode.reset( new Node(numNodes + 1, domain) );
+        el.mFirstNode = std::make_unique<Node>(numNodes + 1, domain);
         el.mFirstNode->setGlobalNumber(numNodes + 1);
         for ( auto &dofId: giveTracDofIDs() ) {
         	el.mFirstNode->appendDof( new MasterDof(el.mFirstNode.get(), ( DofIDItem ) dofId) );
@@ -1239,7 +1239,7 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
         // Lock displacement in one node if we use periodic BCs
 
         int numNodes = domain->giveNumberOfDofManagers();
-        mpDisplacementLock.reset( new Node(numNodes + 1, domain) );
+        mpDisplacementLock = std::make_unique<Node>(numNodes + 1, domain);
         mLockNodeInd = domain->giveElement(1)->giveNode(1)->giveGlobalNumber();
 
 

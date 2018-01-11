@@ -62,8 +62,8 @@ struct SurfaceDataStruct {
 
 struct modeStruct {
     double am, ap;
-    EngngModel *myEngngModel;
-    std :: vector< SurfaceDataStruct * >SurfaceData;
+    std::unique_ptr<EngngModel> myEngngModel;
+    std :: vector<SurfaceDataStruct> SurfaceData;
 };
 
 class OOFEM_EXPORT SolutionbasedShapeFunction : public ActiveBoundaryCondition
@@ -86,20 +86,20 @@ private:
 
     bool isCoeff(ActiveDof *dof);
 
-    std :: vector< modeStruct * >modes;
+    std :: vector< modeStruct >modes;
 
-    void updateModelWithFactors(modeStruct *m);
+    void updateModelWithFactors(modeStruct &m);
     TimeStep *thisTimestep;
 
     FloatArray maxCoord, minCoord;
 
     void setBoundaryConditionOnDof(Dof *d, double value);
 
-    void setLoads(EngngModel *myEngngModel, int d);
+    void setLoads(EngngModel &myEngngModel, int d);
     void loadProblem();
     void init();
 
-    void computeCorrectionFactors(modeStruct &myMode, IntArray *Dofs, double *am, double *ap);
+    void computeCorrectionFactors(modeStruct &myMode, IntArray &Dofs, double &am, double &ap);
 
     /**
      * @brief giveValueAtPoint
@@ -116,15 +116,15 @@ private:
 
     void computeBaseFunctionValueAt(FloatArray &answer, FloatArray &coords, IntArray &dofIDs, EngngModel &myEngngModel);
 
-    void initializeSurfaceData(modeStruct *mode);
+    void initializeSurfaceData(modeStruct &mode);
 
-    void copyDofManagersToSurfaceData(modeStruct *mode, IntArray nodeList, bool isPlus, bool isMinus, bool isZero);
+    void copyDofManagersToSurfaceData(modeStruct &mode, IntArray nodeList, bool isPlus, bool isMinus, bool isZero);
 
     void whichBoundary(FloatArray &coord, bool &isPlus, bool &isMinus, bool &isZero);
 
 public:
     SolutionbasedShapeFunction(int n, Domain * d);
-    virtual ~SolutionbasedShapeFunction();
+    virtual ~SolutionbasedShapeFunction() {}
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 

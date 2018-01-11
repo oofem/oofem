@@ -356,7 +356,7 @@ IntegrationRule *
 TR_SHELL01 :: ZZErrorEstimatorI_giveIntegrationRule()
 {
     if ( !this->compositeIR ) {
-        this->compositeIR.reset( new GaussIntegrationRule(1, this, 1, 12) );
+        this->compositeIR = std::make_unique<GaussIntegrationRule>(1, this, 1, 12);
         this->compositeIR->SetUpPointsOnTriangle(plate->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints(), _3dShell);
     }
     return this->compositeIR.get();

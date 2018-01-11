@@ -160,11 +160,11 @@ TR1_2D_SUPG2 :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize(2);
-        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3, true) );
-        integrationRulesArray [ 1 ].reset( new GaussIntegrationRule(2, this, 1, 3, true) );
+        integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 3, true);
+        integrationRulesArray [ 1 ] = std::make_unique<GaussIntegrationRule>(2, this, 1, 3, true);
     }
     if ( !defaultIRule ) {
-        defaultIRule.reset( new GaussIntegrationRule(1, this, 1, 3, true) );
+        defaultIRule = std::make_unique<GaussIntegrationRule>(1, this, 1, 3, true);
         this->giveCrossSection()->setupIntegrationPoints(* defaultIRule, 1, this);
     }
 }

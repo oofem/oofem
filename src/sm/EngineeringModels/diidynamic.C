@@ -191,7 +191,7 @@ TimeStep *DIIDynamic :: giveNextStep()
 
     previousStep = std :: move(currentStep);
 
-    currentStep.reset( new TimeStep(istep, this, 1, totalTime, deltaT, counter, td) );
+    currentStep = std::make_unique<TimeStep>(istep, this, 1, totalTime, deltaT, counter, td);
 
     return currentStep.get();
 }

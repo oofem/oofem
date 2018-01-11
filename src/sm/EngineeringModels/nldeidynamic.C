@@ -166,7 +166,7 @@ TimeStep *NlDEIDynamic :: giveNextStep()
     }
 
     previousStep = std :: move(currentStep);
-    currentStep.reset( new TimeStep(istep, this, 1, totalTime, deltaT, counter) );
+    currentStep = std::make_unique<TimeStep>(istep, this, 1, totalTime, deltaT, counter);
 
     return currentStep.get();
 }

@@ -175,7 +175,7 @@ CBS :: initializeFrom(InputRecord *ir)
     val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_CBS_miflag);
     if ( val ) {
-        this->materialInterface.reset( new LEPlic( 1, this->giveDomain(1) ) );
+        this->materialInterface = std::make_unique<LEPlic>( 1, this->giveDomain(1) );
         // export velocity field
         FieldManager *fm = this->giveContext()->giveFieldManager();
         IntArray mask = {V_u, V_v, V_w};
@@ -238,16 +238,15 @@ CBS :: giveTractionPressure(Dof *dof)
 TimeStep *
 CBS :: giveSolutionStepWhenIcApply(bool force)
 {
-  if ( master && (!force)) {
-    return master->giveSolutionStepWhenIcApply();
-  } else {
-    if ( !stepWhenIcApply ) {
-        stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0,
-                                       0.0, deltaT, 0) );
-    }
+    if ( master && (!force)) {
+        return master->giveSolutionStepWhenIcApply();
+    } else {
+        if ( !stepWhenIcApply ) {
+            stepWhenIcApply = std::make_unique<TimeStep>(giveNumberOfTimeStepWhenIcApply(), this, 0, 0.0, deltaT, 0);
+        }
 
-    return stepWhenIcApply.get();
-  }
+        return stepWhenIcApply.get();
+    }
 }
 
 TimeStep *
@@ -256,7 +255,7 @@ CBS :: giveNextStep()
     double dt = deltaT;
     if ( !currentStep ) {
         // first step -> generate initial step
-        currentStep.reset( new TimeStep( *giveSolutionStepWhenIcApply() ) );
+        currentStep = std::make_unique<TimeStep>( *giveSolutionStepWhenIcApply() );
     }
 
     previousStep = std :: move(currentStep);
@@ -271,7 +270,7 @@ CBS :: giveNextStep()
     dt = max(dt, minDeltaT);
     dt /= this->giveVariableScale(VST_Time);
 
-    currentStep.reset( new TimeStep(*previousStep, dt) );
+    currentStep = std::make_unique<TimeStep>(*previousStep, dt);
 
     OOFEM_LOG_INFO( "SolutionStep %d : t = %e, dt = %e\n", currentStep->giveNumber(),
                     currentStep->giveTargetTime() * this->giveVariableScale(VST_Time), dt * this->giveVariableScale(VST_Time) );

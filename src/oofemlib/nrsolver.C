@@ -392,8 +392,6 @@ NRSolver :: giveLinearSolver()
     if ( linSolver ) {
         if ( linSolver->giveLinSystSolverType() == solverType ) {
             return linSolver.get();
-        } else {
-            linSolver.reset(NULL);
         }
     }
 
@@ -410,7 +408,7 @@ LineSearchNM *
 NRSolver :: giveLineSearchSolver()
 {
     if ( !linesearchSolver ) {
-        linesearchSolver.reset( new LineSearchNM(domain, engngModel) );
+        linesearchSolver = std::make_unique<LineSearchNM>(domain, engngModel);
     }
 
     return linesearchSolver.get();

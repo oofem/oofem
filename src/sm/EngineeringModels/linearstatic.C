@@ -159,11 +159,11 @@ TimeStep *LinearStatic :: giveNextStep()
 {
     if ( !currentStep ) {
         // first step -> generate initial step
-        //currentStep.reset( new TimeStep(*giveSolutionStepWhenIcApply()) );
-        currentStep.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 1, 0., 1., 0) );
+        //currentStep = std::make_unique<TimeStep>(*giveSolutionStepWhenIcApply());
+        currentStep = std::make_unique<TimeStep>(giveNumberOfTimeStepWhenIcApply(), this, 1, 0., 1., 0);
     }
     previousStep = std :: move(currentStep);
-    currentStep.reset( new TimeStep(*previousStep, 1.) );
+    currentStep = std::make_unique<TimeStep>(*previousStep, 1.);
 
     return currentStep.get();
 }

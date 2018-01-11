@@ -608,7 +608,7 @@ HydrationModelInterface :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_HydrationModelInterface_hydration);
     if ( value >= 0. ) {
         OOFEM_LOG_INFO("HydratingMaterial: creating HydrationModel.");
-        hydrationModel.reset( new HydrationModel() );
+        hydrationModel = std::make_unique<HydrationModel>();
         if ( !hydrationModel ) {
             OOFEM_WARNING("Could not create HydrationModel instance.");
             return IRRT_BAD_FORMAT;

@@ -84,7 +84,7 @@ RemeshingCriteria *
 CombinedZZSIErrorEstimator :: giveRemeshingCrit()
 {
     if ( !this->rc ) {
-        this->rc.reset( new CombinedZZSIRemeshingCriteria(1, this) );
+        this->rc = std::make_unique<CombinedZZSIRemeshingCriteria>(1, this);
     }
 
     return this->rc.get();

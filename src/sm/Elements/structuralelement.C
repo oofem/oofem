@@ -943,7 +943,7 @@ StructuralElement :: updateYourself(TimeStep *tStep)
     // record initial displacement if element not active
     if ( activityTimeFunction && !isActivated(tStep) ) {
         if ( !initialDisplacements ) {
-            initialDisplacements.reset( new FloatArray() );
+            initialDisplacements = std::make_unique<FloatArray>();
         }
 
         this->computeVectorOf(VM_Total, tStep, * initialDisplacements);

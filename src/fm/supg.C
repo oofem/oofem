@@ -285,15 +285,15 @@ SUPG :: initializeFrom(InputRecord *ir)
     }
 
     if ( requiresUnknownsDictionaryUpdate() ) {
-        VelocityPressureField.reset( new DofDistributedPrimaryField(this, 1, FT_VelocityPressure, 1) );
+        VelocityPressureField = std::make_unique<DofDistributedPrimaryField>(this, 1, FT_VelocityPressure, 1);
     } else {
-        VelocityPressureField.reset( new PrimaryField(this, 1, FT_VelocityPressure, 1) );
+        VelocityPressureField = std::make_unique<PrimaryField>(this, 1, FT_VelocityPressure, 1);
     }
 
     val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_SUPG_miflag);
     if ( val == 1 ) {
-        this->materialInterface.reset( new LEPlic( 1, this->giveDomain(1) ) );
+        this->materialInterface = std::make_unique<LEPlic>( 1, this->giveDomain(1) );
         this->materialInterface->initializeFrom(ir);
         // export velocity field
         FieldManager *fm = this->giveContext()->giveFieldManager();
@@ -307,7 +307,7 @@ SUPG :: initializeFrom(InputRecord *ir)
         //IR_GIVE_OPTIONAL_FIELD (ir, fsflag, _IFT_SUPG_fsflag, "fsflag");
     } else if ( val == 2 ) {
         // positive coefficient scheme level set alg
-        this->materialInterface.reset( new LevelSetPCS( 1, this->giveDomain(1) ) );
+        this->materialInterface = std::make_unique<LevelSetPCS>( 1, this->giveDomain(1) );
         this->materialInterface->initializeFrom(ir);
     }
 
@@ -403,8 +403,7 @@ SUPG :: giveSolutionStepWhenIcApply(bool force)
     if ( !stepWhenIcApply ) {
         double dt = deltaT / this->giveVariableScale(VST_Time);
 
-        stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0,
-                                       0.0, dt, 0) );
+        stepWhenIcApply = std::make_unique<TimeStep>(giveNumberOfTimeStepWhenIcApply(), this, 0, 0.0, dt, 0);
     }
 
     return stepWhenIcApply.get();
@@ -420,7 +419,7 @@ SUPG :: giveNextStep()
 
     if ( !currentStep ) {
         // first step -> generate initial step
-        currentStep.reset( new TimeStep( *giveSolutionStepWhenIcApply() ) );
+        currentStep = std::make_unique<TimeStep>( *giveSolutionStepWhenIcApply() );
     }
 
     previousStep = std :: move(currentStep);
@@ -441,7 +440,7 @@ SUPG :: giveNextStep()
     // dt *= 0.6;
     dt /= this->giveVariableScale(VST_Time);
 
-    currentStep.reset( new TimeStep(*previousStep, dt) );
+    currentStep = std::make_unique<TimeStep>(*previousStep, dt);
 
     OOFEM_LOG_INFO( "SolutionStep %d : t = %e, dt = %e\n", currentStep->giveNumber(), 
                     currentStep->giveTargetTime() * this->giveVariableScale(VST_Time), dt * this->giveVariableScale(VST_Time) );

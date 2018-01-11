@@ -518,11 +518,11 @@ IntElLine1IntPen :: computeGaussPoints()
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );
 
-//        integrationRulesArray[ 0 ].reset( new LobattoIntegrationRule (1,this, 1, 2, false) );
+//        integrationRulesArray[ 0 ] = std::make_unique<LobattoIntegrationRule>(1,this, 1, 2, false);
 //        integrationRulesArray [ 0 ]->SetUpPointsOnLine(2, _2dInterface);
 
         int numGP = 4;
-        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 2) );
+        integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 2);
         integrationRulesArray [ 0 ]->SetUpPointsOnLine(numGP, _2dInterface);
     }
 }

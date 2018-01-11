@@ -78,7 +78,7 @@ NodeCommunicator :: setUpCommunicationMaps(EngngModel *pm, bool excludeSelfCommF
 
     Domain *domain = pm->giveDomain(1);
     int nnodes = domain->giveNumberOfDofManagers();
-
+    int size = this->processComms.size();
     //
     // receive and send maps are same and are assembled locally
     // using DofManager's partition lists.
@@ -146,7 +146,8 @@ ElementCommunicator :: setUpCommunicationMaps(EngngModel *pm,  bool excludeSelfC
     OOFEM_LOG_RELEVANT("[%d] ElementCommunicator :: Setting up communication maps\n", rank);
 
     Domain *domain = pm->giveDomain(1);
-
+    int size = this->processComms.size();
+    
     /*
      * Initially, each partition knows for which nodes a receive
      * is needed (and can therefore compute easily the recv map),
@@ -423,7 +424,6 @@ ProblemCommunicator :: quickSortPartition( IntArray &map, int l, int r, int ( Pr
 {
     int i = l - 1, j = r;
     int v = map.at(r);
-    int swap;
 
     for ( ; ; ) {
         while ( ( ( this->*cmp )(map.at(++i), v) ) < 0 ) {
@@ -440,14 +440,10 @@ ProblemCommunicator :: quickSortPartition( IntArray &map, int l, int r, int ( Pr
             break;
         }
 
-        swap = map.at(i);
-        map.at(i) = map.at(j);
-        map.at(j) = swap;
+        std::swap(map.at(i), map.at(j));
     }
 
-    swap = map.at(i);
-    map.at(i) = map.at(r);
-    map.at(r) = swap;
+    std::swap(map.at(i), map.at(r));
     return i;
 }
 

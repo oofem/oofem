@@ -238,7 +238,7 @@ TimeStep *FreeWarping :: giveNextStep()
     }
 
     previousStep = std :: move(currentStep);
-    currentStep.reset( new TimeStep(istep, this, 1, ( double ) istep, 0., counter) );
+    currentStep = std::make_unique<TimeStep>(istep, this, 1, ( double ) istep, 0., counter);
     return currentStep.get();
 }
 

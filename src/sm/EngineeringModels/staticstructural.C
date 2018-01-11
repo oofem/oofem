@@ -186,7 +186,7 @@ StaticStructural :: updateAttributes(MetaStep *mStep)
     IR_GIVE_OPTIONAL_FIELD(ir, s, _IFT_StaticStructural_solvertype);
     if ( s.compare(this->solverType) ) {
         this->solverType = s;
-        nMethod.reset(NULL);
+        nMethod = nullptr;
     }
 
     int tmp = TangentStiffness; // Default TangentStiffness
@@ -207,8 +207,8 @@ TimeStep *StaticStructural :: giveNextStep()
 {
     if ( !currentStep ) {
         // first step -> generate initial step
-        //currentStep.reset( new TimeStep(*giveSolutionStepWhenIcApply()) );
-        currentStep.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 1, 0., this->deltaT, 0) );
+        //currentStep = std::make_unique<TimeStep>(*giveSolutionStepWhenIcApply());
+        currentStep = std::make_unique<TimeStep>(giveNumberOfTimeStepWhenIcApply(), this, 1, 0., this->deltaT, 0);
     }
     previousStep = std :: move(currentStep);
     double dt;
@@ -217,7 +217,7 @@ TimeStep *StaticStructural :: giveNextStep()
     } else {
         dt = this->deltaT;
     }
-    currentStep.reset( new TimeStep(*previousStep, dt) );
+    currentStep = std::make_unique<TimeStep>(*previousStep, dt);
 
     return currentStep.get();
 }
@@ -484,7 +484,7 @@ StaticStructural :: updateDomainLinks()
 int
 StaticStructural :: forceEquationNumbering()
 {
-    stiffnessMatrix.reset( NULL );
+    stiffnessMatrix = nullptr;
     return StructuralEngngModel::forceEquationNumbering();
 }
 

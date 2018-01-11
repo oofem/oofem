@@ -50,7 +50,7 @@ IRResultType DarcyFlow :: initializeFrom(InputRecord *ir)
     sparseMtrxType = ( SparseMtrxType ) val;
 
     // Create solution space for pressure field
-    PressureField.reset( new PrimaryField(this, 1, FT_Pressure, 1) );
+    PressureField = std::make_unique<PrimaryField>(this, 1, FT_Pressure, 1);
     return IRRT_OK;
 }
 
@@ -194,7 +194,7 @@ int DarcyFlow :: forceEquationNumbering(int id)  // Is this really needed???!?
     int neq = EngngModel :: forceEquationNumbering(id);
 
     this->equationNumberingCompleted = false;
-    this->stiffnessMatrix.reset(NULL);
+    this->stiffnessMatrix = nullptr;
 
     return neq;
 }
@@ -207,7 +207,7 @@ NumericalMethod *DarcyFlow :: giveNumericalMethod(MetaStep *mStep)
      */
 
     if ( !this->nMethod ) {
-        this->nMethod.reset( new NRSolver(this->giveDomain(1), this) );
+        this->nMethod = std::make_unique<NRSolver>(this->giveDomain(1), this);
         if ( !nMethod ) {
             OOFEM_ERROR("numerical method creation failed");
         }
@@ -220,11 +220,11 @@ TimeStep *DarcyFlow :: giveNextStep()
 {
     if ( !currentStep ) {
         // first step -> generate initial step
-        //currentStep.reset( new TimeStep(*giveSolutionStepWhenIcApply()) );
-        currentStep.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 1, 0., 1.0, 0) );
+        //currentStep = std::make_unique<TimeStep>(*giveSolutionStepWhenIcApply());
+        currentStep = std::make_unique<TimeStep>(giveNumberOfTimeStepWhenIcApply(), this, 1, 0., 1.0, 0);
     }
     previousStep = std :: move(currentStep);
-    currentStep.reset( new TimeStep(*previousStep, 1.0) );
+    currentStep = std::make_unique<TimeStep>(*previousStep, 1.0);
 
     return currentStep.get();
 }

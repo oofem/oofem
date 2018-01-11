@@ -70,7 +70,7 @@ TransientTransportProblem :: ~TransientTransportProblem() {}
 NumericalMethod *TransientTransportProblem :: giveNumericalMethod(MetaStep *mStep)
 {
     if ( !nMethod ) {
-        nMethod.reset( new NRSolver(this->giveDomain(1), this) );
+        nMethod = std::make_unique<NRSolver>(this->giveDomain(1), this);
     }
     return nMethod.get();
 }
@@ -101,7 +101,7 @@ TransientTransportProblem :: initializeFrom(InputRecord *ir)
 
     this->lumped = ir->hasField(_IFT_TransientTransportProblem_lumped);
 
-    field.reset( new DofDistributedPrimaryField(this, 1, FT_TransportProblemUnknowns, 0) );
+    field = std::make_unique<DofDistributedPrimaryField>(this, 1, FT_TransportProblemUnknowns, 0);
 
     // read field export flag
     exportFields.clear();
@@ -175,12 +175,12 @@ TimeStep *TransientTransportProblem :: giveNextStep()
 {
     if ( !currentStep ) {
         // first step -> generate initial step
-        currentStep.reset( new TimeStep( *giveSolutionStepWhenIcApply() ) );
+        currentStep = std::make_unique<TimeStep>( *giveSolutionStepWhenIcApply() );
     }
 
     double dt = this->giveDeltaT(currentStep->giveNumber()+1);
     previousStep = std :: move(currentStep);
-    currentStep.reset( new TimeStep(*previousStep, dt) );
+    currentStep = std::make_unique<TimeStep>(*previousStep, dt);
     currentStep->setIntrinsicTime(previousStep->giveTargetTime() + alpha * dt);
     return currentStep.get();
 }
@@ -193,7 +193,7 @@ TimeStep *TransientTransportProblem :: giveSolutionStepWhenIcApply(bool force)
     } else {
         if ( !stepWhenIcApply ) {
             double dt = this->giveDeltaT(1);
-            stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, 0., dt, 0) );
+            stepWhenIcApply = std::make_unique<TimeStep>(giveNumberOfTimeStepWhenIcApply(), this, 0, 0., dt, 0);
             // The initial step goes from [-dt, 0], so the intrinsic time is at: -deltaT  + alpha*dt
             stepWhenIcApply->setIntrinsicTime(-dt + alpha * dt);
         }
@@ -380,7 +380,7 @@ TransientTransportProblem :: requiresEquationRenumbering(TimeStep *tStep)
 int
 TransientTransportProblem :: forceEquationNumbering()
 {
-    this->effectiveMatrix.reset(NULL);
+    this->effectiveMatrix = nullptr;
     return EngngModel :: forceEquationNumbering();
 }
 

@@ -202,7 +202,7 @@ void Lattice2d :: computeGaussPoints()
     // the gauss point is used only when methods from crosssection and/or material
     // classes are requested
     integrationRulesArray.resize(1);
-    integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3) );
+    integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 3);
     integrationRulesArray [ 0 ]->SetUpPointsOnLine(1, _2dLattice);
 }
 

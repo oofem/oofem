@@ -124,7 +124,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
     //create previous solution from IC or from previous tStep
     if ( tStep->isTheFirstStep() ) {
         if ( !stepWhenIcApply ) {
-            stepWhenIcApply.reset( new TimeStep( *tStep->givePreviousStep() ) );
+            stepWhenIcApply = std::make_unique<TimeStep>( *tStep->givePreviousStep() );
         }
         this->applyIC(stepWhenIcApply.get()); //insert solution to hash=1(previous), if changes in equation numbering
     }
