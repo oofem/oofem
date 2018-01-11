@@ -970,9 +970,9 @@ void PrescribedGradientBCWeak :: computeTangent(FloatMatrix& E, TimeStep* tStep)
     }
 
     // Fetch the submatrices
-    std :: unique_ptr< SparseMtrx > S(Kmicro->giveSubMatrix(loc_u, loc_u));
+    std :: unique_ptr< SparseMtrx > S = Kmicro->giveSubMatrix(loc_u, loc_u);
     // NOTE: Kus is actually a dense matrix, but we have to make it a dense matrix first
-    std :: unique_ptr< SparseMtrx > C(Kmicro->giveSubMatrix(loc_u, loc_t));
+    std :: unique_ptr< SparseMtrx > C = Kmicro->giveSubMatrix(loc_u, loc_t);
     FloatMatrix Cd;
     C->toFloatMatrix(Cd);
 

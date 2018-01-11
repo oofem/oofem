@@ -73,6 +73,13 @@ Skyline :: Skyline(const Skyline &s) : SparseMtrx(s.giveNumberOfRows(), s.giveNu
 {}
 
 
+Skyline :: Skyline(int n, FloatArray mtrx1, IntArray adr1) : SparseMtrx(n, n),
+    mtrx(std::move(mtrx1)),
+    adr(std::move(adr1)),
+    isFactorized(false)
+{}
+
+
 std::unique_ptr<SparseMtrx> Skyline :: clone() const
 {
     return std::make_unique<Skyline>(*this);
@@ -585,15 +592,7 @@ void Skyline :: zero()
 }
 
 
-Skyline :: Skyline(int n, FloatArray mtrx1, IntArray adr1) : SparseMtrx(n, n),
-    mtrx(std::move(mtrx1)),
-    adr(std::move(adr1)),
-    isFactorized(false)
-{
-}
-
-
-SparseMtrx *Skyline :: giveSubMatrix(const IntArray &rows, const IntArray &cols) 
+std::unique_ptr<SparseMtrx> Skyline :: giveSubMatrix(const IntArray &rows, const IntArray &cols) 
 {
     IntArray positions( cols.giveSize() + 1 );
 
@@ -630,7 +629,7 @@ SparseMtrx *Skyline :: giveSubMatrix(const IntArray &rows, const IntArray &cols)
     }
     int neq = rows.giveSize();
 
-    return new Skyline(neq, mtrxValues, positions);
+    return std::make_unique<Skyline>(neq, mtrxValues, positions);
 }
 
 

@@ -882,7 +882,7 @@ PetscSparseMtrx :: at(int i, int j) const
     //return value;
 }
 
-SparseMtrx *
+std::unique_ptr<SparseMtrx>
 PetscSparseMtrx :: giveSubMatrix(const IntArray &rows, const IntArray &cols)
 {
 #ifdef __PARALLEL_MODE
@@ -894,7 +894,7 @@ PetscSparseMtrx :: giveSubMatrix(const IntArray &rows, const IntArray &cols)
     prows.add(-1);
     pcols.add(-1);
 
-    PetscSparseMtrx *answer = new PetscSparseMtrx(prows.giveSize(), pcols.giveSize());
+    std::unique_ptr<PetscSparseMtrx> answer = std::make_unique<PetscSparseMtrx>(prows.giveSize(), pcols.giveSize());
     answer->emodel = this->emodel;
     IS is_rows;
     IS is_cols;
@@ -905,7 +905,7 @@ PetscSparseMtrx :: giveSubMatrix(const IntArray &rows, const IntArray &cols)
     ISDestroy(& is_rows);
     ISDestroy(& is_cols);
 
-    return answer;
+    return std::move(answer);
 }
 
 void

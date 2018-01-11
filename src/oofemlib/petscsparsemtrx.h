@@ -86,7 +86,7 @@ public:
     int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat) override;
     int assembleBegin() override;
     int assembleEnd() override;
-    SparseMtrx *giveSubMatrix(const IntArray &rows, const IntArray &cols) override;
+    std::unique_ptr<SparseMtrx> giveSubMatrix(const IntArray &rows, const IntArray &cols) override;
     bool canBeFactorized() const override { return false; }
     SparseMtrx *factorized() override { return NULL; }
     FloatArray *backSubstitutionWith(FloatArray &y) const override { return NULL; }

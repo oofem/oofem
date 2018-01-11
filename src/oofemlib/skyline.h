@@ -82,6 +82,7 @@ public:
      */
     Skyline(int n=0);
     Skyline(const Skyline &s);
+    Skyline(int n, FloatArray mtrx, IntArray adr);
     /// Destructor
     virtual ~Skyline() {}
 
@@ -93,7 +94,7 @@ public:
     void add(double x, SparseMtrx &m) override;
     int buildInternalStructure(EngngModel *, int, const UnknownNumberingScheme &) override;
 
-    SparseMtrx *giveSubMatrix(const IntArray &rows, const IntArray &cols) override; 
+    std::unique_ptr<SparseMtrx> giveSubMatrix(const IntArray &rows, const IntArray &cols) override; 
     /**
      * Allocates and builds internal structure according to given
      * array holding addresses of diagonal members values (adr).
@@ -144,9 +145,6 @@ public:
     bool isAsymmetric() const override { return false; }
 
     const char *giveClassName() const override { return "Skyline"; }
-
-protected:
-    Skyline(int n, FloatArray mtrx, IntArray adr);
 };
 } // end namespace oofem
 #endif // skyline_h

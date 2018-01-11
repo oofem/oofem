@@ -318,11 +318,11 @@ void TransportGradientNeumann :: computeTangent(FloatMatrix &tangent, TimeStep *
         }
     }
 
-    std :: unique_ptr< SparseMtrx > Kuu(Kff->giveSubMatrix(loc_u, loc_u));
+    std :: unique_ptr< SparseMtrx > Kuu = Kff->giveSubMatrix(loc_u, loc_u);
     FloatMatrix KusD;
 #if 0
     // NOTE: Kus is actually a dense matrix, but we have to make it a dense matrix first
-    std :: unique_ptr< SparseMtrx > Kus(Kff->giveSubMatrix(loc_u, loc_s));
+    std :: unique_ptr< SparseMtrx > Kus = Kff->giveSubMatrix(loc_u, loc_s);
     Kus->toFloatMatrix(KusD);
     Kus.reset();
 #else
