@@ -123,7 +123,7 @@ GPInitModule :: doInit()
                 mat->setIPValue(value, gp, vartype);
             }
             // restore consistency (compute dependent internal variables)
-            status->restoreConsistency();
+            mat->restoreConsistency(gp);
 
         }
     }

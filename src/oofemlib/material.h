@@ -241,8 +241,13 @@ public:
      * @return Nonzero if receiver is consistent.
      */
     virtual int checkConsistency();
-
-
+    /**
+     * Restores consistency of the status, i.e., computes or corrects
+     * the values of certain status variables such that the state is admissible.
+     * For instance, if the initial values of some internal variables
+     * are read from a file, other internal variables are adjusted accordingly.
+     */
+    virtual void restoreConsistency(GaussPoint *gp) { }
     /**
      * Optional function to call specific procedures when initializing a material.
      * For example, multiscale simulations need to create master and slave material statuses on specific integration points before the computation.

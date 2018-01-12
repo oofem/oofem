@@ -153,7 +153,6 @@ public:
 
     int setIPValue(const FloatArray &value, InternalStateType type);
 
-    virtual void restoreConsistency();
     virtual const char *giveClassName() const { return "ConcreteDPMStatus"; }
 
     /**
@@ -286,6 +285,10 @@ public:
      * @param v New temp value of deviatoric plastic strain.
      */
     void letTempPlasticStrainBe(const FloatArray &v) { tempPlasticStrain = v; }
+    /**
+     * Assigns converged value (only to be used when restoring consistency)
+     */
+    void letPlasticStrainBe(const FloatArray &v) { plasticStrain = v; }
 
     /**
      * Assign the value of deviatoric plastic strain.
@@ -313,12 +316,19 @@ public:
      * @param v New temp value of the hardening variable.
      */
     void letTempKappaDBe(double v) { tempKappaD = v; }
-
+    /**
+     * Assigns converged value (only to be used when restoring consistency)
+     */
+    void letKappaDBe(double v) { kappaD = v; }
     /**
      * Assign the temp value of the hardening variable of the damage model.
      * @param v New temp value of the hardening variable.
      */
     void letTempEquivStrainBe(double v) { tempEquivStrain = v; }
+    /**
+     * Assigns converged value (only to be used when restoring consistency)
+     */
+    void letEquivStrainBe(double v) { equivStrain = v; }
 
     /**
      * Assign the temp value of the damage variable of the damage model.
@@ -732,6 +742,8 @@ public:
                             GaussPoint *gp,
                             InternalStateType type,
                             TimeStep *tStep);
+
+    virtual void restoreConsistency(GaussPoint *gp);
 
 protected:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
