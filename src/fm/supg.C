@@ -297,10 +297,9 @@ SUPG :: initializeFrom(InputRecord *ir)
         this->materialInterface->initializeFrom(ir);
         // export velocity field
         FieldManager *fm = this->giveContext()->giveFieldManager();
-        IntArray mask;
-        mask = {V_u, V_v, V_w};
+        IntArray mask = {V_u, V_v, V_w};
 
-        std :: shared_ptr< Field > _velocityField( new MaskedPrimaryField ( FT_Velocity, this->VelocityPressureField.get(), mask ) );
+        std :: shared_ptr< Field > _velocityField = std::make_shared<MaskedPrimaryField>( FT_Velocity, this->VelocityPressureField.get(), mask );
         fm->registerField(_velocityField, FT_Velocity);
 
         //fsflag = 0;

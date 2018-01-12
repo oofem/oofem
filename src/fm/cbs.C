@@ -180,8 +180,7 @@ CBS :: initializeFrom(InputRecord *ir)
         FieldManager *fm = this->giveContext()->giveFieldManager();
         IntArray mask = {V_u, V_v, V_w};
 
-        //std::shared_ptr<Field> _velocityField = make_shared<MaskedPrimaryField>(FT_Velocity, &this->VelocityField, mask);
-        std :: shared_ptr< Field > _velocityField( new MaskedPrimaryField ( FT_Velocity, &this->VelocityField, mask ) );
+        std::shared_ptr<Field> _velocityField = std::make_shared<MaskedPrimaryField>(FT_Velocity, &this->VelocityField, mask);
         fm->registerField(_velocityField, FT_Velocity);
     }
     //</RESTRICTED_SECTION>

@@ -124,7 +124,7 @@ TR21_2D_SUPG :: computeGaussPoints()
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 2 ], 13, this);
 
 
-        //integrationRulesArray [ 3 ] = new GaussIntegrationRule(4, this, 1, 3);
+        //integrationRulesArray [ 3 ] = std::make_unique<GaussIntegrationRule>(4, this, 1, 3);
         //this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[3], 27, this );
     }
 }
