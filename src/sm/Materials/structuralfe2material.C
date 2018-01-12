@@ -250,14 +250,14 @@ StructuralFE2Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatR
 
 
 StructuralFE2MaterialStatus :: StructuralFE2MaterialStatus(int n, Domain * d, GaussPoint * g,  const std :: string & inputfile) :
-StructuralMaterialStatus(n, d, g),
-mNewlyInitialized(true)
+    StructuralMaterialStatus(n, d, g),
+    mNewlyInitialized(true)
 {
     mInputFile = inputfile;
 
     this->oldTangent = true;
 
-    if ( !this->createRVE(n, gp, inputfile) ) {
+    if ( !this->createRVE(n, inputfile) ) {
         OOFEM_ERROR("Couldn't create RVE");
     }
 
@@ -271,7 +271,7 @@ PrescribedGradientHomogenization* StructuralFE2MaterialStatus::giveBC()
 
 
 bool
-StructuralFE2MaterialStatus :: createRVE(int n, GaussPoint *gp, const std :: string &inputfile)
+StructuralFE2MaterialStatus :: createRVE(int n, const std :: string &inputfile)
 {
     OOFEMTXTDataReader dr( inputfile.c_str() );
     this->rve = InstanciateProblem(dr, _processor, 0); // Everything but nrsolver is updated.
