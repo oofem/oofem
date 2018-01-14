@@ -48,14 +48,11 @@ namespace oofem {
 REGISTER_GeneralizedEigenValueSolver(SubspaceIteration, GES_SubspaceIt);
 
 SubspaceIteration :: SubspaceIteration(Domain *d, EngngModel *m) :
-    SparseGeneralEigenValueSystemNM(d, m)
+    SparseGeneralEigenValueSystemNM(d, m),
+    nitem(40)
 {
-    nitem = 40; // max number of iterations
 }
 
-
-SubspaceIteration :: ~SubspaceIteration()
-{ }
 
 NM_Status
 SubspaceIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, FloatMatrix &_r, double rtol, int nroot)

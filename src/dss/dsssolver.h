@@ -65,20 +65,11 @@ public:
     /// Destructor.
     virtual ~DSSSolver();
 
-    /**
-     * Solves the given linear system by @f$L\cdot D\cdot L^{\mathrm{T}}@f$ factorization.
-     * Implementation rely on factorization support provided by mapped sparse matrix.
-     * It calls Lhs->factorized()->backSubstitutionWith(*solutionArray). Sets solved flag to 1 if o.k.
-     * @param A Coefficient matrix.
-     * @param b Right hand side.
-     * @param x Solution array.
-     * @return NM_Status value.
-     */
-    virtual NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x);
+    NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x) override;
 
-    virtual const char *giveClassName() const { return "DSSSolver"; }
-    virtual LinSystSolverType giveLinSystSolverType() const { return ST_DSS; }
-    virtual SparseMtrxType giveRecommendedMatrix(bool symmetric) const { return symmetric ? SMT_DSS_sym_LDL : SMT_DSS_unsym_LU; } ///@todo Check
+    const char *giveClassName() const override { return "DSSSolver"; }
+    LinSystSolverType giveLinSystSolverType() const override { return ST_DSS; }
+    SparseMtrxType giveRecommendedMatrix(bool symmetric) const override { return symmetric ? SMT_DSS_sym_LDL : SMT_DSS_unsym_LU; } ///@todo Check
 };
 } // end namespace oofem
 

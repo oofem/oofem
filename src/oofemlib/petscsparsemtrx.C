@@ -132,7 +132,7 @@ PetscSparseMtrx :: times(const FloatArray &x, FloatArray &answer) const
         VecGetArray(globY, & ptr);
         answer.resize(this->nRows);
         for ( int i = 0; i < this->nRows; i++ ) {
-            answer(i) = ptr [ i ];
+            answer[i] = ptr [ i ];
         }
 
         VecRestoreArray(globY, & ptr);
@@ -163,7 +163,7 @@ PetscSparseMtrx :: timesT(const FloatArray &x, FloatArray &answer) const
     VecGetArray(globY, & ptr);
     answer.resize(this->nColumns);
     for ( int i = 0; i < this->nColumns; i++ ) {
-        answer(i) = ptr [ i ];
+        answer[i] = ptr [ i ];
     }
 
     VecRestoreArray(globY, & ptr);
@@ -254,13 +254,13 @@ PetscSparseMtrx :: timesT(const FloatMatrix &B, FloatMatrix &answer) const
     BT.beTranspositionOf(B);
     MatCreateSeqDense(PETSC_COMM_SELF, BT.giveNumberOfRows(), BT.giveNumberOfColumns(), BT.givePointer(), & globB);
     MatMatMult(globB, this->mtrx, MAT_INITIAL_MATRIX, PETSC_DEFAULT, & globC);
-    const double *vals;
     for ( int r = 0; r < nc; r++ ) {
-        MatGetRow(globC, r, NULL, NULL, & vals);
+        const double *vals;
+        MatGetRow(globC, r, nullptr, nullptr, & vals);
         for ( int i = 0; i < nr; i++ ) {
             * aptr++ = vals [ i ];
         }
-        MatRestoreRow(globC, r, NULL, NULL, & vals);
+        MatRestoreRow(globC, r, nullptr, nullptr, & vals);
     }
 
     MatDestroy(& globB);
@@ -497,8 +497,8 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, const Unkn
     if ( localIS ) {
         ISDestroy(& localIS);
         ISDestroy(& globalIS);
-        localIS = NULL;
-        globalIS = NULL;
+        localIS = nullptr;
+        globalIS = nullptr;
     }
 
     this->emodel = eModel;
@@ -584,16 +584,16 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, const Unkn
             }
 
             for ( int i = 0; i < leqs; i++ ) {
-                d_nnz(i) = d_rows_upper [ i ].giveSize() + d_rows_lower [ i ].giveSize();
-                o_nnz(i) = o_rows_upper [ i ].giveSize() + o_rows_lower [ i ].giveSize();
+                d_nnz[i] = d_rows_upper [ i ].giveSize() + d_rows_lower [ i ].giveSize();
+                o_nnz[i] = o_rows_upper [ i ].giveSize() + o_rows_lower [ i ].giveSize();
 
-                d_nnz_sym(i) = d_rows_upper [ i ].giveSize();
-                o_nnz_sym(i) = o_rows_upper [ i ].giveSize();
+                d_nnz_sym[i] = d_rows_upper [ i ].giveSize();
+                o_nnz_sym[i] = o_rows_upper [ i ].giveSize();
             }
         }
 
         //fprintf (stderr,"\n[%d]PetscSparseMtrx: Profile ...",rank);
-        //for (i=0; i<leqs; i++) fprintf(stderr, "%d ", d_nnz(i));
+        //for (i=0; i<leqs; i++) fprintf(stderr, "%d ", d_nnz[i]);
         //fprintf (stderr,"\n[%d]PetscSparseMtrx: Creating MPIAIJ Matrix ...\n",rank);
 
         // create PETSc mat

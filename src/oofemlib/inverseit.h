@@ -32,11 +32,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-//   **************************************************
-//   *** CLASS GENERALIZED INVERSE ITERATION SOLVER ***
-//   **************************************************
-
-
 #ifndef inverseit_h
 #define inverseit_h
 
@@ -86,14 +81,15 @@ class EngngModel;
 class OOFEM_EXPORT InverseIteration : public SparseGeneralEigenValueSystemNM
 {
 private:
+    /// Max number of iterations
     int nitem;
 
 public:
     InverseIteration(Domain * d, EngngModel * m);
-    virtual ~InverseIteration();
+    virtual ~InverseIteration() {}
 
-    virtual NM_Status solve(SparseMtrx &A, SparseMtrx &B, FloatArray &x, FloatMatrix &v, double rtol, int nroot);
-    virtual const char *giveClassName() const { return "InverseIteration"; }
+    NM_Status solve(SparseMtrx &A, SparseMtrx &B, FloatArray &x, FloatMatrix &v, double rtol, int nroot) override;
+    const char *giveClassName() const override { return "InverseIteration"; }
 };
 } // end namespace oofem
 #endif // inverseit_h
