@@ -1,6 +1,7 @@
 deactivate_1.out
 Patch test of Truss2d elements -> simple structure with activated and deactivated element L
 IncrLinearStatic endOfTimeOfInterest 5.0 prescribedTimes 5 0.0 1.0 2.0 3.0 4.0  nmodules 1
+#StaticStructural nsteps 5 prescribedTimes 5 0.0 1.0 2.0 3.0 4.0  nmodules 1
 errorcheck
 domain 2dTruss
 OutputManager tstep_all dofman_all element_all
