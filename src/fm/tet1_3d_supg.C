@@ -399,6 +399,20 @@ Tet1_3D_SUPG :: computeVolumeAround(GaussPoint *gp)
 }
 
 
+void
+Tet1_3D_SUPG :: computeDeviatoricStress(FloatArray &answer, const FloatArray &eps, GaussPoint *gp, TimeStep *tStep)
+{
+    static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial()->computeDeviatoricStress3D(answer, gp, eps, tStep);
+}
+
+
+void
+Tet1_3D_SUPG :: computeTangent(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial()->computeTangent3D(answer, mode, gp, tStep);
+}
+
+
 double
 Tet1_3D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep)
 {

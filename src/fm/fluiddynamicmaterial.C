@@ -38,28 +38,74 @@
 #include "contextioerr.h"
 
 namespace oofem {
-void
-FluidDynamicMaterial :: updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *tStep)
-{ }
-
 
 void
-FluidDynamicMaterial :: computeDeviatoricStressVector(FloatArray &stress_dev, double &epsp_vol, GaussPoint *gp, const FloatArray &eps, double pressure, TimeStep *tStep)
+FluidDynamicMaterial :: computeDeviatoricStress3D(FloatArray &stress_dev, double &epsp_vol, GaussPoint *gp, const FloatArray &eps, double pressure, TimeStep *tStep)
 {
-    if ( gp->giveMaterialMode() == _2dFlow ) {
-        epsp_vol = -( eps.at(1) + eps.at(2) );
-    } else {
-        epsp_vol = -( eps.at(1) + eps.at(2) + eps.at(3) );
-    }
-
-    this->computeDeviatoricStressVector(stress_dev, gp, eps, tStep);
+    epsp_vol = -( eps[0] + eps[1] + eps[2] );
+    this->computeDeviatoricStress3D(stress_dev, gp, eps, tStep);
 }
 
+
 void
-FluidDynamicMaterial :: giveStiffnessMatrices(FloatMatrix &dsdd, FloatArray &dsdp, FloatArray &dedd, double &dedp,
-                                              MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+FluidDynamicMaterial :: computeDeviatoricStress2D(FloatArray &stress_dev, double &epsp_vol, GaussPoint *gp, const FloatArray &eps, double pressure, TimeStep *tStep)
 {
-    this->giveDeviatoricStiffnessMatrix(dsdd, mode, gp, tStep);
+    FloatArray stress3, eps3 = {eps[0], eps[1], 0., 0., 0., eps[2]};
+    this->computeDeviatoricStress3D(stress3, epsp_vol, gp, eps3, pressure, tStep);
+    stress_dev = {stress3[0], stress3[1], stress3[5]};
+}
+
+
+void
+FluidDynamicMaterial :: computeDeviatoricStress2D(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep)
+{
+    FloatArray stress3, eps3 = {eps[0], eps[1], 0., 0., 0., eps[2]};
+    this->computeDeviatoricStress3D(stress3, gp, eps3, tStep);
+    answer = {stress3[0], stress3[1], stress3[5]};
+}
+
+
+void
+FluidDynamicMaterial :: computeDeviatoricStressAxi(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep)
+{
+    FloatArray stress3, eps3 = {eps[0], eps[1], eps[2], 0., 0., eps[3]};
+    this->computeDeviatoricStress3D(stress3, gp, eps3, tStep);
+    answer = {stress3[0], stress3[1], stress3[2], stress3[5]};
+}
+
+
+void
+FluidDynamicMaterial :: computeTangent2D(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    FloatMatrix dsdd3;
+    this->computeTangent3D(dsdd3, mode, gp, tStep);
+    answer = {
+        {dsdd3(0, 0), dsdd3(0, 1), dsdd3(0, 5)},
+        {dsdd3(1, 0), dsdd3(1, 1), dsdd3(0, 5)},
+        {dsdd3(5, 0), dsdd3(5, 1), dsdd3(5, 5)}
+    };
+}
+
+
+void
+FluidDynamicMaterial :: computeTangentAxi(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    FloatMatrix dsdd3;
+    this->computeTangent3D(dsdd3, mode, gp, tStep);
+    answer = {
+        {dsdd3(0, 0), dsdd3(0, 1), dsdd3(0, 2), dsdd3(0, 5)},
+        {dsdd3(1, 0), dsdd3(1, 1), dsdd3(1, 2), dsdd3(1, 5)},
+        {dsdd3(2, 0), dsdd3(2, 1), dsdd3(2, 2), dsdd3(2, 5)},
+        {dsdd3(5, 0), dsdd3(5, 1), dsdd3(5, 2), dsdd3(5, 5)}
+    };
+}
+
+
+void
+FluidDynamicMaterial :: computeTangents3D(FloatMatrix &dsdd, FloatArray &dsdp, FloatArray &dedd, double &dedp,
+                                          MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    this->computeTangent3D(dsdd, mode, gp, tStep);
     int size = dsdd.giveNumberOfRows();
     dsdp.resize(size);
     dsdp.zero();
@@ -69,92 +115,49 @@ FluidDynamicMaterial :: giveStiffnessMatrices(FloatMatrix &dsdd, FloatArray &dsd
 }
 
 
+void
+FluidDynamicMaterial :: computeTangents2D(FloatMatrix &dsdd, FloatArray &dsdp, FloatArray &dedd, double &dedp,
+                                          MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    FloatMatrix dsdd3;
+    FloatArray dsdp3, dedd3;
+    this->computeTangents3D(dsdd3, dsdp3, dedd3, dedp, mode, gp, tStep);
+
+    dsdd = {
+        {dsdd3(0, 0), dsdd3(0, 1), dsdd3(0, 5)},
+        {dsdd3(1, 0), dsdd3(1, 1), dsdd3(1, 5)},
+        {dsdd3(5, 0), dsdd3(5, 1), dsdd3(5, 5)}
+    };
+    dsdp = {dsdp3[0], dsdp3[1], dsdp3[5]};
+    dedd = {dedd3[0], dedd3[1], dedd3[5]};
+}
+
+
 FluidDynamicMaterialStatus :: FluidDynamicMaterialStatus(int n, Domain *d, GaussPoint *g) :
-    MaterialStatus(n, d, g), deviatoricStressVector(), deviatoricStrainRateVector()
+    MaterialStatus(n, d, g), deviatoricStressVector(6), deviatoricStrainRateVector(6)
 { }
 
 void
-FluidDynamicMaterialStatus :: printOutputAt(FILE *File, TimeStep *tStep)
-// Prints the strains and stresses on the data file.
+FluidDynamicMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-    fprintf(File, "\n deviatoric stresses");
+    fprintf(file, "\n deviatoric stresses");
     for ( double e: deviatoricStressVector ) {
-        fprintf( File, " %.4e", e );
+        fprintf(file, " %.4e", e );
     }
 
-    fprintf(File, "\n");
+    fprintf(file, "\n");
 }
-
-void
-FluidDynamicMaterialStatus :: initTempStatus()
-{
-    MaterialStatus :: initTempStatus();
-}
-
 
 int
 FluidDynamicMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     FluidDynamicMaterialStatus *status = static_cast< FluidDynamicMaterialStatus * >( this->giveStatus(gp) );
     if ( type == IST_DeviatoricStress ) {
-        MaterialMode mmode = gp->giveMaterialMode();
-        const FloatArray &vec = status->giveDeviatoricStressVector();
-        if ( mmode == _2dFlow ) {
-            answer.resize(6);
-            answer.at(1) = vec.at(1);
-            answer.at(2) = vec.at(2);
-            answer.at(3) = -( vec.at(1) + vec.at(2) ); ///@todo Verify that this is correct for for all models.
-            answer.at(4) = 0.;
-            answer.at(5) = 0.;
-            answer.at(6) = vec.at(3);
-            return 1;
-        } else if ( mmode == _2dAxiFlow ) {
-            answer.resize(6);
-            answer.at(1) = vec.at(1);
-            answer.at(2) = vec.at(2);
-            answer.at(3) = vec.at(3);
-            answer.at(4) = 0;
-            answer.at(5) = 0;
-            answer.at(6) = vec.at(6);
-            return 1;
-        } else if ( mmode == _3dFlow ) {
-            answer = vec;
-            return 1;
-        } else {
-            OOFEM_ERROR("material mode not supported");
-            return 0;
-        }
-
+        answer = status->giveDeviatoricStressVector();
+        return 1;
     } else if ( type == IST_DeviatoricStrain ) {
-        MaterialMode mmode = gp->giveMaterialMode();
-        const FloatArray &vec = status->giveDeviatoricStrainRateVector();
-        if ( mmode == _2dFlow ) {
-            answer.resize(6);
-            answer.at(1) = vec.at(1);
-            answer.at(2) = vec.at(2);
-            answer.at(3) = 0.;
-            answer.at(4) = vec.at(3);
-            answer.at(5) = 0.;
-            answer.at(6) = 0.;
-            answer.copySubVector(vec, 1);
-            return 1;
-        } else if ( mmode == _2dAxiFlow ) {
-            answer.resize(6);
-            answer.at(1) = vec.at(1);
-            answer.at(2) = vec.at(2);
-            answer.at(3) = vec.at(3);
-            answer.at(4) = 0;
-            answer.at(5) = 0;
-            answer.at(6) = vec.at(6);
-            return 1;
-        } else if ( mmode == _3dFlow ) {
-            answer = vec;
-            return 1;
-        } else {
-            OOFEM_ERROR("material mode not supported");
-            return 0;
-        }
-
+        answer = status->giveDeviatoricStrainRateVector();
+        return 1;
     } else if ( type == IST_Viscosity ) {
         answer.resize(1);
         answer.at(1) = this->giveEffectiveViscosity(gp, tStep);

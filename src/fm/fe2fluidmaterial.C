@@ -61,15 +61,11 @@ void FE2FluidMaterialStatus :: setTimeStep(TimeStep *tStep)
     rveTStep->setTimeIncrement( tStep->giveTimeIncrement() );
 }
 
-void FE2FluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep)
+void FE2FluidMaterial :: computeDeviatoricStress3D(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep)
 {
     double r_vol;
-    this->computeDeviatoricStressVector(answer, r_vol, gp, eps, 0.0, tStep);
-    if ( gp->giveMaterialMode() == _2dFlow ) {
-        r_vol += eps.at(1) + eps.at(2);
-    } else {
-        r_vol += eps.at(1) + eps.at(2) + eps.at(3);
-    }
+    this->computeDeviatoricStress3D(answer, r_vol, gp, eps, 0.0, tStep);
+    r_vol += eps.at(1) + eps.at(2) + eps.at(3);
 
     if ( r_vol > 1e-9 ) {
         OOFEM_ERROR("RVE seems to be compressible;"
@@ -77,7 +73,7 @@ void FE2FluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, Gauss
     }
 }
 
-void FE2FluidMaterial :: computeDeviatoricStressVector(FloatArray &stress_dev, double &r_vol, GaussPoint *gp, const FloatArray &eps, double pressure, TimeStep *tStep)
+void FE2FluidMaterial :: computeDeviatoricStress3D(FloatArray &stress_dev, double &r_vol, GaussPoint *gp, const FloatArray &eps, double pressure, TimeStep *tStep)
 {
     FE2FluidMaterialStatus *ms = static_cast< FE2FluidMaterialStatus * >( this->giveStatus(gp) );
 
@@ -99,10 +95,9 @@ void FE2FluidMaterial :: computeDeviatoricStressVector(FloatArray &stress_dev, d
     ms->markOldTangents(); // Mark this so that tangents are reevaluated if they are needed.
     // One could also just compute them here, but you don't actually need them if the problem has converged, so this method saves on that iteration.
     // Computing the tangents are often *more* expensive than computeFields, so this is well worth the time it saves
-    // All the tangents are computed in one go, because they are almost always all needed, and doing so saves time.
 }
 
-void FE2FluidMaterial :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+void FE2FluidMaterial :: computeTangent3D(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     FE2FluidMaterialStatus *ms = static_cast< FE2FluidMaterialStatus * >( this->giveStatus(gp) );
     ms->computeTangents(tStep);
@@ -113,8 +108,8 @@ void FE2FluidMaterial :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatR
     }
 }
 
-void FE2FluidMaterial :: giveStiffnessMatrices(FloatMatrix &dsdd, FloatArray &dsdp, FloatArray &dedd, double &dedp,
-                                               MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+void FE2FluidMaterial :: computeTangents3D(FloatMatrix &dsdd, FloatArray &dsdp, FloatArray &dedd, double &dedp,
+                                           MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     FE2FluidMaterialStatus *ms = static_cast< FE2FluidMaterialStatus * >( this->giveStatus(gp) );
     ms->computeTangents(tStep);
@@ -310,21 +305,13 @@ int FE2FluidMaterial :: checkConsistency()
 }
 
 FE2FluidMaterialStatus :: FE2FluidMaterialStatus(int n, Domain *d, GaussPoint *gp, const std :: string &inputfile) :
-    FluidDynamicMaterialStatus(n, d, gp)
+    FluidDynamicMaterialStatus(n, d, gp),
+    voffraction(0.0),
+    oldTangents(true)
 {
-    //this->strainVector.resize(size);
-    //this->strainVector.zero();
-    //this->tempStrainVector = this->strainVector;
-    this->voffraction = 0.0;
-    this->oldTangents = true;
-
     if ( !this->createRVE(n, gp, inputfile) ) {
         OOFEM_ERROR("Couldn't create RVE");
     }
-}
-
-FE2FluidMaterialStatus :: ~FE2FluidMaterialStatus()
-{
 }
 
 // Uses an input file for now, should eventually create the RVE itself.

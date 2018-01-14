@@ -69,19 +69,19 @@ public:
     /// Destructor.
     virtual ~TwoFluidMaterial() { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual void computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep);
-    virtual void giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    void computeDeviatoricStress3D(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep) override;
+    void computeTangent3D(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep);
-    virtual double give(int aProperty, GaussPoint *gp);
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-    virtual const char *giveClassName() const { return "TwoFluidMaterial"; }
-    virtual const char *giveInputRecordName() const { return _IFT_TwoFluidMaterial_Name; }
-    virtual int checkConsistency();
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep) override;
+    double give(int aProperty, GaussPoint *gp) override;
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
+    const char *giveClassName() const override { return "TwoFluidMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_TwoFluidMaterial_Name; }
+    int checkConsistency() override;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
 protected:
     FluidDynamicMaterial *giveMaterial(int i) const;
@@ -101,14 +101,14 @@ public:
     /// Destructor
     virtual ~TwoFluidMaterialStatus() { }
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual const char *giveClassName() const { return "TwoFluidMaterialStatus"; }
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    const char *giveClassName() const override { return "TwoFluidMaterialStatus"; }
 
     GaussPoint *giveSlaveGaussPoint0() { return this->slaveGp0.get(); }
     GaussPoint *giveSlaveGaussPoint1() { return this->slaveGp1.get(); }

@@ -173,7 +173,7 @@ void Tr1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeStep
         pressure = N.dotProduct(a_pressure);
         epsp.beProductOf(B, a_velocity);
 
-        mat->computeDeviatoricStressVector(devStress, r_vol, gp, epsp, pressure, tStep);
+        mat->computeDeviatoricStress2D(devStress, r_vol, gp, epsp, pressure, tStep);
 
         momentum.plusProduct(B, devStress, dA);
         momentum.add(-pressure * dA, dNv);
@@ -332,7 +332,7 @@ void Tr1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseM
 
         // Computing the internal forces should have been done first.
         // dsigma_dev/deps_dev  dsigma_dev/dp  deps_vol/deps_dev  deps_vol/dp
-        mat->giveStiffnessMatrices(Ed, Ep, Cd, Cp, mode, gp, tStep);
+        mat->computeTangents2D(Ed, Ep, Cd, Cp, mode, gp, tStep);
 
         EdB.beProductOf(Ed, B);
         K.plusProductSymmUpper(B, EdB, dA);

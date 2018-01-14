@@ -208,12 +208,13 @@ SUPGElement2 :: checkConsistency()
 void
 SUPGElement2 :: updateInternalState(TimeStep *tStep)
 {
-    FloatArray stress;
+    FloatArray stress, eps;
 
     // force updating strains & stresses
     for ( auto &iRule: integrationRulesArray ) {
-        for ( GaussPoint *gp: *iRule ) {
-            computeDeviatoricStress(stress, gp, tStep);
+        for ( auto &gp: *iRule ) {
+            computeDeviatoricStrain(eps, gp, tStep);
+            computeDeviatoricStress(stress, eps, gp, tStep);
         }
     }
 }
@@ -341,7 +342,6 @@ SUPGElement2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep)
 
     answer.clear();
 
-    FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
     this->computeVectorOfVelocities(VM_Total, tStep, u);
 
     int rule = 1;
@@ -351,7 +351,7 @@ SUPGElement2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep)
         this->computeDivTauMatrix(dDB, gp, tStep);
         this->computeUDotGradUMatrix( un_gu, gp, tStep->givePreviousStep() );
         eps.beProductOf(b, u);
-        mat->computeDeviatoricStressVector(stress, gp, eps, tStep);
+        this->computeDeviatoricStress(stress, eps, gp, tStep);
         dDB_u.beProductOf(dDB, u);
         /* consistent part */
         answer.plusProduct(b, stress, dV / Re);
@@ -369,13 +369,11 @@ SUPGElement2 :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRespon
 
     answer.clear();
 
-    FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
-
     int rule = 1;
     for ( GaussPoint *gp: *this->integrationRulesArray [ rule ] ) {
         double dV = this->computeVolumeAround(gp);
         this->computeBMatrix(_b, gp);
-        mat->giveDeviatoricStiffnessMatrix(_d, mode, gp, tStep);
+        this->computeTangent(_d, mode, gp, tStep);
 
         this->computeDivTauMatrix(dDB, gp, tStep);
         this->computeUDotGradUMatrix( un_gu, gp, tStep->givePreviousStep() );
@@ -789,14 +787,4 @@ SUPGElement2 :: computeDeviatoricStrain(FloatArray &answer, GaussPoint *gp, Time
     answer.beProductOf(b, u);
 }
 
-void
-SUPGElement2 :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
-{
-    FloatArray eps;
-
-    // compute deviatoric strain
-    this->computeDeviatoricStrain(eps, gp, tStep);
-    // call material to compute stress
-    static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial()->computeDeviatoricStressVector(answer, gp, eps, tStep);
-}
 } // end namespace oofem

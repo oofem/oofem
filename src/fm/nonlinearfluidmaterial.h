@@ -107,23 +107,22 @@ public:
 
     virtual ~NonlinearFluidMaterial() { }
 
-    virtual void computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep);
+    void computeDeviatoricStress3D(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep) override;
 
-    virtual void giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp,
-                                               TimeStep *tStep);
+    void computeTangent3D(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep);
-    virtual double give(int aProperty, GaussPoint *);
+    double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep) override;
+    double give(int aProperty, GaussPoint *) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual const char *giveClassName() const { return "NewtonianFluidMaterial"; }
-    virtual const char *giveInputRecordName() const { return _IFT_NonlinearFluidMaterial_Name; }
+    const char *giveClassName() const override { return "NewtonianFluidMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_NonlinearFluidMaterial_Name; }
 
-    virtual int checkConsistency();
+    int checkConsistency() override;
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 };
 } // end namespace oofem
 #endif // nonlinearfluidmaterial_h

@@ -76,9 +76,9 @@ protected:
     /// Non-equilibrated second order damage tensor
     FloatMatrix tempDamage;
     /// Out-of-plane value for 2dPlaneStress mode
-    double tempStrainZ;
-    /// Non-equilibrated out-of-plane value for 2dPlaneStress mode
     double strainZ;
+    /// Non-equilibrated out-of-plane value for 2dPlaneStress mode
+    double tempStrainZ;
     /// This flag turns into 1 and remains 1 when the trace of the damage tensor is >1 in compression (tr(strainTensor)<0)
     int flag;
     int tempFlag;
@@ -100,7 +100,7 @@ public:
     /// Constructor
     AnisotropicDamageMaterialStatus(int n, Domain *d, GaussPoint *g);
     /// Destructor
-    virtual ~AnisotropicDamageMaterialStatus();
+    virtual ~AnisotropicDamageMaterialStatus() {}
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
@@ -181,7 +181,7 @@ class AnisotropicDamageMaterial : public StructuralMaterial
 protected:
 
     /// Reference to bulk (undamaged) material
-    IsotropicLinearElasticMaterial *linearElasticMaterial;
+    IsotropicLinearElasticMaterial linearElasticMaterial;
     /// Young's modulus
     double E;
     /// Poisson's ratio
@@ -205,7 +205,7 @@ public:
     /// Constructor
     AnisotropicDamageMaterial(int n, Domain *d);
     /// Destructor
-    virtual ~AnisotropicDamageMaterial();
+    virtual ~AnisotropicDamageMaterial() {}
 
     virtual int hasNonLinearBehaviour() { return 1; }
     virtual int hasMaterialModeCapability(MaterialMode mode);
@@ -213,9 +213,6 @@ public:
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "AnisotropicDamageMaterial"; }
     virtual const char *giveInputRecordName() const { return _IFT_AnisotropicDamageMaterial_Name; }
-
-    /// Returns reference to undamaged (bulk) material
-    IsotropicLinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
     /// Plane-stress version of the stress evaluation algorithm
     virtual void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);

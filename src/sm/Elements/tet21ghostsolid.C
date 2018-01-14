@@ -282,7 +282,7 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
 
 #ifdef __FM_MODULE
         gp->setMaterialMode(_3dFlow);
-        fluidMaterial->giveDeviatoricStiffnessMatrix(Ed, TangentStiffness, gp, tStep);
+        fluidMaterial->computeTangent3D(Ed, TangentStiffness, gp, tStep);
         gp->setMaterialMode(_3dMat);
 #else
         OOFEM_ERROR("Fluid module missing\n");
@@ -344,7 +344,7 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
 #endif
 
             gp->setMaterialMode(_3dFlow);
-            fluidMaterial->computeDeviatoricStressVector(fluidCauchyArray, epsvol, gp, epsf, pressure, tStep);
+            fluidMaterial->computeDeviatoricStress3D(fluidCauchyArray, epsvol, gp, epsf, pressure, tStep);
             gp->setMaterialMode(_3dMat);
             fluidCauchyMatrix.beMatrixFormOfStress(fluidCauchyArray);
 
@@ -759,7 +759,7 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolution(FloatArray &answer, Tim
             // Momentum equation
             gp->setMaterialMode(_3dFlow);
 #ifdef __FM_MODULE
-            fluidMaterial->computeDeviatoricStressVector(fluidStress, epsvol, gp, epsf, pressure, tStep);
+            fluidMaterial->computeDeviatoricStress3D(fluidStress, epsvol, gp, epsf, pressure, tStep);
 #else
             OOFEM_ERROR("Missing FM module");
 #endif
@@ -806,7 +806,7 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolution(FloatArray &answer, Tim
 
             gp->setMaterialMode(_3dFlow);
 #ifdef __FM_MODULE
-            fluidMaterial->computeDeviatoricStressVector(fluidCauchyArray, epsvol, gp, epsf, pressure, tStep);
+            fluidMaterial->computeDeviatoricStress3D(fluidCauchyArray, epsvol, gp, epsf, pressure, tStep);
 #else
             OOFEM_ERROR("Missing FM module");
 #endif
@@ -916,7 +916,7 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolutionDebug(FloatArray &answer
             // Momentum equation
             gp->setMaterialMode(_3dFlow);
 #ifdef __FM_MODULE
-            fluidMaterial->computeDeviatoricStressVector(fluidStress, epsvol, gp, epsf, pressure, tStep);
+            fluidMaterial->computeDeviatoricStress3D(fluidStress, epsvol, gp, epsf, pressure, tStep);
 #else
             OOFEM_ERROR("Missing FM module");
 #endif
@@ -974,7 +974,7 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolutionDebug(FloatArray &answer
 
             gp->setMaterialMode(_3dFlow);
 #ifdef __FM_MODULE
-            fluidMaterial->computeDeviatoricStressVector(fluidCauchy, epsvol, gp, epsf, pressure, tStep);
+            fluidMaterial->computeDeviatoricStress3D(fluidCauchy, epsvol, gp, epsf, pressure, tStep);
 #else
             OOFEM_ERROR("Missing FM module");
 #endif

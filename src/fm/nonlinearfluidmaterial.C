@@ -98,26 +98,16 @@ NonlinearFluidMaterial :: CreateStatus(GaussPoint *gp) const
 
 
 void
-NonlinearFluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep)
+NonlinearFluidMaterial :: computeDeviatoricStress3D(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep)
 {
     NonlinearFluidMaterialStatus *status = static_cast< NonlinearFluidMaterialStatus * >( this->giveStatus(gp) );
 
-    double normeps2;
+    double normeps2 = eps[0] * eps[0] + eps[1] * eps[1] + eps[2] * eps[2] + 0.5 * ( eps[3] * eps[3] + eps[4] * eps[4] +  eps[5] * eps[5] );
 
     answer = eps;
-    if ( eps.giveSize() == 3 ) {
-        normeps2 = eps.at(1) * eps.at(1) + eps.at(2) * eps.at(2) + 0.5 * ( eps.at(3) * eps.at(3) );
-        answer.at(3) *= 0.5;
-    } else if ( eps.giveSize() == 4 ) {
-        normeps2 = eps.at(1) * eps.at(1) + eps.at(2) * eps.at(2) + eps.at(3) * eps.at(3) + 0.5 * ( eps.at(4) * eps.at(4) );
-        answer.at(4) *= 0.5;
-    } else {
-        normeps2 = eps.at(1) * eps.at(1) + eps.at(2) * eps.at(2) + eps.at(3) * eps.at(3) + 0.5 * ( eps.at(4) * eps.at(4) + eps.at(5) * eps.at(5) +  eps.at(6) * eps.at(6) );
-        answer.at(4) *= 0.5;
-        answer.at(5) *= 0.5;
-        answer.at(6) *= 0.5;
-    }
-
+    answer[3] *= 0.5;
+    answer[4] *= 0.5;
+    answer[5] *= 0.5;
     answer.times( 2.0 * viscosity * ( 1.0 + c * pow(normeps2, alpha * 0.5) ) );
 
     status->letTempDeviatoricStressVectorBe(answer);
@@ -126,42 +116,25 @@ NonlinearFluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, Gaus
 }
 
 void
-NonlinearFluidMaterial :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp,
-                                                        TimeStep *tStep)
+NonlinearFluidMaterial :: computeTangent3D(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
-    FloatArray eps;
-    double normeps2;
-
     NonlinearFluidMaterialStatus *status = static_cast< NonlinearFluidMaterialStatus * >( this->giveStatus(gp) );
-    eps = status->giveTempDeviatoricStrainVector();
-    normeps2 = status->giveTempStrainNorm2();
+    double normeps2 = status->giveTempStrainNorm2();
 
-    answer.resize( eps.giveSize(), eps.giveSize() );
-    answer.zero();
-    for ( int i = 1; i <= answer.giveNumberOfRows(); i++ ) {
-        answer.at(i, i) = 1.;
-    }
-    if ( eps.giveSize() == 3 ) {
-        answer.at(3, 3) *= 0.5;
-    } else if ( eps.giveSize() == 4 ) {
-        answer.at(4, 4) *= 0.5;
-    } else {
-        answer.at(4, 4) *= 0.5;
-        answer.at(5, 5) *= 0.5;
-        answer.at(6, 6) *= 0.5;
-    }
+    answer.resize(6, 6);
+    answer.beUnitMatrix();
+    answer.at(4, 4) *= 0.5;
+    answer.at(5, 5) *= 0.5;
+    answer.at(6, 6) *= 0.5;
 
     if ( normeps2 != 0 ) {
+        FloatArray eps = status->giveTempDeviatoricStrainVector();
         FloatMatrix op;
-        if ( eps.giveSize() == 3 ) {
-            eps.at(3) *= 0.5;
-        } else if ( eps.giveSize() == 4 ) {
-            eps.at(4) *= 0.5;
-        } else {
-            eps.at(4) *= 0.5;
-            eps.at(5) *= 0.5;
-            eps.at(6) *= 0.5;
-        }
+
+        eps.at(4) *= 0.5;
+        eps.at(5) *= 0.5;
+        eps.at(6) *= 0.5;
+
         op.beDyadicProductOf(eps, eps);
         answer.times( 2 * viscosity * ( 1 + c * pow(normeps2, alpha * 0.5) ) );
         answer.add(2 * viscosity * c * alpha * pow(normeps2, alpha * 0.5 - 1), op);

@@ -99,7 +99,6 @@ public:
 
 protected:
     virtual void computeDeviatoricStrain(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
-    virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
     virtual void computeNuMatrix(FloatMatrix &answer, GaussPoint *gp) = 0;
     virtual void computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep) = 0;
     virtual void computeBMatrix(FloatMatrix &anwer, GaussPoint *gp) = 0;

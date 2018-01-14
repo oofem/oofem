@@ -121,14 +121,14 @@ TwoFluidMaterial :: giveMaterial(int i) const
 }
 
 void
-TwoFluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep)
+TwoFluidMaterial :: computeDeviatoricStress3D(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep)
 {
     double vof = this->giveTempVOF(gp);
     FloatArray v0, v1;
     TwoFluidMaterialStatus *status = static_cast< TwoFluidMaterialStatus * >( this->giveStatus(gp) );
 
-    this->giveMaterial(0)->computeDeviatoricStressVector(v0, status->giveSlaveGaussPoint0(), eps, tStep);
-    this->giveMaterial(1)->computeDeviatoricStressVector(v1, status->giveSlaveGaussPoint1(), eps, tStep);
+    this->giveMaterial(0)->computeDeviatoricStress3D(v0, status->giveSlaveGaussPoint0(), eps, tStep);
+    this->giveMaterial(1)->computeDeviatoricStress3D(v1, status->giveSlaveGaussPoint1(), eps, tStep);
 
     answer.clear();
     answer.add(1.0 - vof, v0);
@@ -139,15 +139,14 @@ TwoFluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, GaussPoint
 }
 
 void
-TwoFluidMaterial :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp,
-                                                  TimeStep *tStep)
+TwoFluidMaterial :: computeTangent3D(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     FloatMatrix a0, a1;
     double vof = this->giveTempVOF(gp);
     TwoFluidMaterialStatus *status = static_cast< TwoFluidMaterialStatus * >( this->giveStatus(gp) );
 
-    this->giveMaterial(0)->giveDeviatoricStiffnessMatrix(a0, mode, status->giveSlaveGaussPoint0(), tStep);
-    this->giveMaterial(1)->giveDeviatoricStiffnessMatrix(a1, mode, status->giveSlaveGaussPoint1(), tStep);
+    this->giveMaterial(0)->computeTangent3D(a0, mode, status->giveSlaveGaussPoint0(), tStep);
+    this->giveMaterial(1)->computeTangent3D(a1, mode, status->giveSlaveGaussPoint1(), tStep);
 
     answer.clear();
     answer.add(1.0 - vof, a0);

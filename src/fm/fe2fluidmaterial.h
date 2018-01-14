@@ -83,7 +83,7 @@ public:
      */
     FE2FluidMaterialStatus(int n, Domain * d, GaussPoint * gp, const std :: string & inputfile);
     /// Destructor
-    virtual ~FE2FluidMaterialStatus();
+    virtual ~FE2FluidMaterialStatus() {}
 
     EngngModel *giveRVE() { return this->rve.get(); }
     MixedGradientPressureBC *giveBC() { return this->bc; }
@@ -107,15 +107,15 @@ public:
     double givePressure() { return this->pressure; }
     void letPressureBe(double val) { this->pressure = val; }
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
-    virtual const char *giveClassName() const { return "FE2FluidMaterialStatus"; }
+    const char *giveClassName() const override { return "FE2FluidMaterialStatus"; }
 };
 
 
@@ -145,26 +145,26 @@ public:
     /// Destructor.
     virtual ~FE2FluidMaterial() { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual int checkConsistency();
+    int checkConsistency() override;
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
-    virtual void computeDeviatoricStressVector(FloatArray &stress_dev, double &r_vol, GaussPoint *gp, const FloatArray &eps, double pressure, TimeStep *tStep);
-    virtual void computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep);
+    void computeDeviatoricStress3D(FloatArray &stress_dev, double &r_vol, GaussPoint *gp, const FloatArray &eps, double pressure, TimeStep *tStep) override;
+    void computeDeviatoricStress3D(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep) override;
 
-    virtual void giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void giveStiffnessMatrices(FloatMatrix &dsdd, FloatArray &dsdp, FloatArray &dedd, double &dedp,
-                                       MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    void computeTangent3D(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    void computeTangents3D(FloatMatrix &dsdd, FloatArray &dsdp, FloatArray &dedd, double &dedp,
+                               MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep);
+    double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-    virtual const char *giveClassName() const { return "FE2FluidMaterial"; }
-    virtual const char *giveInputRecordName() const { return _IFT_FE2FluidMaterial_Name; }
+    const char *giveClassName() const override { return "FE2FluidMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_FE2FluidMaterial_Name; }
 };
 } // end namespace oofem
 #endif // rvesinteringmaterial_h

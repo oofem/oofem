@@ -90,99 +90,35 @@ NewtonianFluidMaterial :: CreateStatus(GaussPoint *gp) const
 
 
 void
-NewtonianFluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep)
+NewtonianFluidMaterial :: computeDeviatoricStress3D(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep)
 {
-    int size = eps.giveSize();
-    answer.resize(size);
+    double ekk = eps.at(1) + eps.at(2) + eps.at(3);
 
-    if ( gp->giveMaterialMode() == _2dFlow ) {
-        double ekk = eps.at(1) + eps.at(2);
-
-        answer = {
-            2.0 * viscosity * ( eps.at(1) - ekk / 3.0 ),
-            2.0 * viscosity * ( eps.at(2) - ekk / 3.0 ),
-            eps.at(3) * viscosity
-        };
-    } else if ( gp->giveMaterialMode() == _2dAxiFlow ) {
-#if 1
-        double ekk = eps.at(1) + eps.at(2) + eps.at(3);
-
-        answer = {
-            2.0 * viscosity * ( eps.at(1) - ekk / 3.0 ),
-            2.0 * viscosity * ( eps.at(2) - ekk / 3.0 ),
-            2.0 * viscosity * ( eps.at(3) - ekk / 3.0 ),
-            eps.at(4) * viscosity
-        };
-#else
-        answer = {
-            2.0 * viscosity * ( eps.at(1) ),
-            2.0 * viscosity * ( eps.at(2) ),
-            2.0 * viscosity * ( eps.at(3) ),
-            eps.at(4) * viscosity
-        };
-#endif
-    } else if ( gp->giveMaterialMode() == _3dFlow ) {
-        double ekk = eps.at(1) + eps.at(2) + eps.at(3);
-
-        answer = {
-            2.0 * viscosity * ( eps.at(1) - ekk / 3.0 ),
-            2.0 * viscosity * ( eps.at(2) - ekk / 3.0 ),
-            2.0 * viscosity * ( eps.at(3) - ekk / 3.0 ),
-            eps.at(4) * viscosity,
-            eps.at(5) * viscosity,
-            eps.at(6) * viscosity
-        };
-    }  else {
-        OOFEM_ERROR("unsupported material mode");
-    }
-
+    answer = {
+        2.0 * viscosity * ( eps.at(1) - ekk / 3.0 ),
+        2.0 * viscosity * ( eps.at(2) - ekk / 3.0 ),
+        2.0 * viscosity * ( eps.at(3) - ekk / 3.0 ),
+        eps.at(4) * viscosity,
+        eps.at(5) * viscosity,
+        eps.at(6) * viscosity
+    };
 
     static_cast< FluidDynamicMaterialStatus * >( this->giveStatus(gp) )->letDeviatoricStressVectorBe(answer);
     static_cast< FluidDynamicMaterialStatus * >( this->giveStatus(gp) )->letDeviatoricStrainRateVectorBe(eps);
 }
 
 void
-NewtonianFluidMaterial :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp,
-                                                        TimeStep *tStep)
+NewtonianFluidMaterial :: computeTangent3D(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
-    if ( ( gp->giveMaterialMode() == _2dFlow ) ) {
-        answer.resize(3, 3);
-        answer.zero();
+    answer.resize(6, 6);
+    answer.zero();
 
-        answer.at(1, 1) = answer.at(2, 2) = 2.0 * viscosity * ( 2. / 3. );
-        answer.at(1, 2) = answer.at(2, 1) = -2.0 * viscosity * ( 1. / 3. );
-        answer.at(3, 3) = viscosity;
-    } else if ( gp->giveMaterialMode() == _2dAxiFlow ) {
-#if 1
-        answer.resize(4, 4);
-        answer.zero();
+    answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = 2.0 * viscosity * ( 2. / 3. );
+    answer.at(1, 2) = answer.at(1, 3) = -2.0 * viscosity * ( 1. / 3. );
+    answer.at(2, 1) = answer.at(2, 3) = -2.0 * viscosity * ( 1. / 3. );
+    answer.at(3, 1) = answer.at(3, 2) = -2.0 * viscosity * ( 1. / 3. );
 
-        answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = 2.0 * viscosity * ( 2. / 3. );
-        answer.at(1, 2) = answer.at(1, 3) = -2.0 * viscosity * ( 1. / 3. );
-        answer.at(2, 1) = answer.at(2, 3) = -2.0 * viscosity * ( 1. / 3. );
-        answer.at(3, 1) = answer.at(3, 2) = -2.0 * viscosity * ( 1. / 3. );
-
-        answer.at(4, 4) = viscosity;
-#else
-        answer.resize(4, 4);
-        answer.zero();
-
-        answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = 2.0 * viscosity;
-        answer.at(4, 4) = viscosity;
-#endif
-    } else if ( gp->giveMaterialMode() == _3dFlow ) {
-        answer.resize(6, 6);
-        answer.zero();
-
-        answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = 2.0 * viscosity * ( 2. / 3. );
-        answer.at(1, 2) = answer.at(1, 3) = -2.0 * viscosity * ( 1. / 3. );
-        answer.at(2, 1) = answer.at(2, 3) = -2.0 * viscosity * ( 1. / 3. );
-        answer.at(3, 1) = answer.at(3, 2) = -2.0 * viscosity * ( 1. / 3. );
-
-        answer.at(4, 4) = answer.at(5, 5) = answer.at(6, 6) = viscosity;
-    } else {
-        OOFEM_ERROR("unsupportted material mode");
-    }
+    answer.at(4, 4) = answer.at(5, 5) = answer.at(6, 6) = viscosity;
 }
 
 

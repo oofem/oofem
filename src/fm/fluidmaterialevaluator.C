@@ -157,7 +157,12 @@ void FluidMaterialEvaluator :: solveYourself()
             }
 
             for ( int iter = 1; iter < maxiter; iter++ ) {
-                mat->computeDeviatoricStressVector(stressDev, strainVol, gp, strainDev, pressure, tStep);
+                if ( ndim == 3 ) {
+                    mat->computeDeviatoricStress3D(stressDev, strainVol, gp, strainDev, pressure, tStep);
+                } else {
+                    mat->computeDeviatoricStress2D(stressDev, strainVol, gp, strainDev, pressure, tStep);
+                }
+
                 for ( int j = 1; j <= sControl.giveSize(); ++j ) {
                     res.at(j) = stressDevC.at(j) - stressDev.at( sControl.at(j) );
                 }
@@ -170,8 +175,11 @@ void FluidMaterialEvaluator :: solveYourself()
                 if ( res.computeNorm() <= tolerance && resVol <= tolerance ) { ///@todo More flexible control of convergence needed. Something relative?
                     break;
                 }
-
-                mat->giveStiffnessMatrices(tangent, dsdp, dedd, dedp, TangentStiffness, gp, tStep);
+                if ( ndim == 3 ) {
+                    mat->computeTangents3D(tangent, dsdp, dedd, dedp, TangentStiffness, gp, tStep);
+                } else {
+                    mat->computeTangents2D(tangent, dsdp, dedd, dedp, TangentStiffness, gp, tStep);
+                }
                 if ( res.giveSize() > 0 ) {
                     // Add mean part to make it invertible
                     double norm = tangent.computeFrobeniusNorm();

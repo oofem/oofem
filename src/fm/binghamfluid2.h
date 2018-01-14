@@ -51,7 +51,6 @@
 //@}
 
 namespace oofem {
-class GaussPoint;
 
 #define BINGHAM_DEFAULT_STRESS_GROWTH_RATE 400.0
 
@@ -74,13 +73,13 @@ public:
     /// Destructor
     virtual ~BinghamFluidMaterial2Status() { }
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
     double giveTempDevStressMagnitude() const { return temp_devStressMagnitude; }
     double giveTempDevStrainMagnitude() const { return temp_devStrainMagnitude; }
@@ -93,9 +92,8 @@ public:
     const FloatArray &giveTempDeviatoricStrainVector() { return temp_deviatoricStrainVector; }
     void letTempDeviatoricStrainVectorBe(FloatArray v) { temp_deviatoricStrainVector = std :: move(v); }
 
-    virtual const char *giveClassName() const { return "BinghamFluidMaterialStatus"; }
+    const char *giveClassName() const override { return "BinghamFluidMaterialStatus"; }
 };
-
 
 
 /**
@@ -111,7 +109,7 @@ protected:
     double tau_0;
     double tau_c;
     double mu_inf;
-    // Stress growth rate - parameter controlling the shape of regularized model.
+    /// Stress growth rate - parameter controlling the shape of regularized model.
     double stressGrowthRate;
 
 public:
@@ -124,29 +122,29 @@ public:
     /// Destructor.
     virtual ~BinghamFluidMaterial2() { }
 
-    virtual void computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep);
+    void computeDeviatoricStress3D(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep) override;
 
-    virtual void giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp,
-                                               TimeStep *tStep);
+    void computeTangent3D(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep);
-    virtual double give(int aProperty, GaussPoint *gp);
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
-    virtual const char *giveClassName() const { return "BinghamFluidMaterial2"; }
-    virtual const char *giveInputRecordName() const { return _IFT_BinghamFluidMaterial2_Name; }
-    virtual int checkConsistency();
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep) override;
+    double give(int aProperty, GaussPoint *gp) override;
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
+    const char *giveClassName() const override { return "BinghamFluidMaterial2"; }
+    const char *giveInputRecordName() const override { return _IFT_BinghamFluidMaterial2_Name; }
+    int checkConsistency() override;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
 protected:
-    double computeActualViscosity(double Tau, double shearRate);
-    double computeDevStrainMagnitude(MaterialMode mmode, const FloatArray &epsd);
-    double computeDevStressMagnitude(MaterialMode mmode, const FloatArray &sigd);
-    void computeDeviatoricStrain(FloatArray &answer, const FloatArray &eps, MaterialMode mmode);
-    void computeDeviatoricStress(FloatArray &answer, const FloatArray &deps,
-                                 double _nu, MaterialMode mmode);
+    double computeActualViscosity(double tau, double shearRate);
+    double computeDevStrainMagnitude(const FloatArray &epsd);
+    double computeDevStressMagnitude(const FloatArray &sigd);
+    void computeDeviatoricStrain(FloatArray &answer, const FloatArray &eps);
+    void computeDeviatoricStress(FloatArray &answer, const FloatArray &deps, double nu);
 
+#if 0
     void __debug(GaussPoint *gp, TimeStep *tStep);
+#endif
 };
 } // end namespace oofem
 #endif // binghamfluid2_h

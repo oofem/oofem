@@ -62,7 +62,7 @@ MPSDamMaterialStatus :: MPSDamMaterialStatus(int n, Domain *d, GaussPoint *g, in
 
     var_e0 = var_gf = 0.;
 
-    int rsize = StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() );
+    int rsize = StructuralMaterial :: giveSizeOfVoigtSymVector( g->giveMaterialMode() );
     effectiveStressVector.resize(rsize);
     effectiveStressVector.zero();
     tempEffectiveStressVector = effectiveStressVector;

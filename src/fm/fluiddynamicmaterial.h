@@ -66,11 +66,10 @@ public:
     /// Destructor.
     virtual ~FluidDynamicMaterialStatus() { }
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
-    virtual void initTempStatus();
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
     /**
      * Gives the deviatoric stress.
@@ -111,7 +110,8 @@ public:
      * @param pressure Pressure.
      * @param tStep Time step.
      */
-    virtual void computeDeviatoricStressVector(FloatArray &stress_dev, double &epsp_vol, GaussPoint *gp, const FloatArray &eps, double pressure, TimeStep *tStep);
+    virtual void computeDeviatoricStress3D(FloatArray &stress_dev, double &epsp_vol, GaussPoint *gp, const FloatArray &eps, double pressure, TimeStep *tStep);
+    virtual void computeDeviatoricStress2D(FloatArray &stress_dev, double &epsp_vol, GaussPoint *gp, const FloatArray &eps, double pressure, TimeStep *tStep);
     /**
      * Computes the deviatoric stress vector from given strain.
      * @param answer Deviatoric stress.
@@ -119,8 +119,9 @@ public:
      * @param eps Strain-rate.
      * @param tStep Time step.
      */
-    virtual void computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep) = 0;
-
+    virtual void computeDeviatoricStress3D(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep) = 0;
+    virtual void computeDeviatoricStress2D(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep);
+    virtual void computeDeviatoricStressAxi(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep);
 
     /**
      * Computes the deviatoric stiffness; @f$ \frac{\partial\sigma_{\mathrm{dev}}}{\partial \epsilon_{\mathrm{dev}}}@f$.
@@ -129,7 +130,10 @@ public:
      * @param gp Integration point.
      * @param tStep Time step.
      */
-    virtual void giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
+    virtual void computeTangent3D(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
+    virtual void computeTangent2D(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeTangentAxi(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+
     /**
      * Computes the 4 tangents of the compressible material response in 3D.
      * @param dsdd @f$ \frac{\partial\sigma_{\mathrm{dev}}}{\partial \epsilon_{\mathrm{dev}}}@f$.
@@ -140,8 +144,10 @@ public:
      * @param gp Integration point.
      * @param tStep Time step.
      */
-    virtual void giveStiffnessMatrices(FloatMatrix &dsdd, FloatArray &dsdp, FloatArray &dedd, double &dedp,
-                                       MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeTangents3D(FloatMatrix &dsdd, FloatArray &dsdp, FloatArray &dedd, double &dedp,
+                                         MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeTangents2D(FloatMatrix &dsdd, FloatArray &dsdp, FloatArray &dedd, double &dedp,
+                                         MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
     /**
      * Gives the effective viscosity for the given integration point.
@@ -151,15 +157,7 @@ public:
      */
     virtual double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep) = 0;
 
-    /**
-     * Updates internal state of material according to new state vector.
-     * @param vec New state vector.
-     * @param gp Integration point.
-     * @param tStep Solution step.
-     */
-    virtual void updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *tStep);
-
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 };
 } // end namespace oofem
 #endif // fluiddynamicmaterial_h
