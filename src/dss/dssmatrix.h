@@ -38,6 +38,8 @@
 #include "sparsemtrx.h"
 #include "intarray.h"
 #include "floatarray.h"
+#include "DSSolver.h"
+#include "SparseMatrixF.h"
 
 #include <memory>
 
@@ -100,7 +102,7 @@ public:
     int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat) override;
     bool canBeFactorized() const override { return true; }
     SparseMtrx *factorized() override;
-    void solve(FloatArray &b, FloatArray &x) override;
+    void solve(FloatArray &b, FloatArray &x);
     void zero() override;
     double &at(int i, int j) override;
     double at(int i, int j) const override;

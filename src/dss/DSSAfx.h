@@ -52,10 +52,7 @@
 #include <cstdio>
 #include <ctime>
 #include <cstring>
-
-#ifndef min
- #define min(a, b) ( ( a ) < ( b ) ? ( a ) : ( b ) )
-#endif
+#include <algorithm>
 
 #define DSS_NAMESPASE_BEGIN
 #define DSS_NAMESPASE_END

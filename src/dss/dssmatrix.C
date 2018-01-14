@@ -42,7 +42,7 @@
 #include "sparsemtrxtype.h"
 #include "classfactory.h"
 #include "activebc.h"
-#include "DSSolver.h"
+#include "timer.h"
 
 #include <set>
 
