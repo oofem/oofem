@@ -646,20 +646,19 @@ SPRNodalRecoveryModel :: exchangeDofManValues(FloatArray &dofManValues, IntArray
 int
 SPRNodalRecoveryModel :: packSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm)
 {
-    int result = 1, i, j, indx, eq, size;
+    int result = 1;
     ProcessCommunicatorBuff *pcbuff = processComm.giveProcessCommunicatorBuff();
-    IntArray const *toSendMap = processComm.giveToSendMap();
+    const IntArray &toSendMap = processComm.giveToSendMap();
 
-    size = toSendMap->giveSize();
-    for ( i = 1; i <= size; i++ ) {
+    for ( int inode : toSendMap ) {
         // toSendMap contains all shared dofmans with remote partition
         // one has to check, if particular shared node value is available for given region
-        indx = s->regionNodalNumbers->at( toSendMap->at(i) );
+        int indx = s->regionNodalNumbers->at( inode );
         if ( indx && s->dofManPatchCount->at(indx) ) {
             // pack "1" to indicate that for given shared node this is a valid contribution
             result &= pcbuff->write(1);
-            eq = ( indx - 1 ) * s->regionValSize;
-            for ( j = 1; j <= s->regionValSize; j++ ) {
+            int eq = ( indx - 1 ) * s->regionValSize;
+            for ( int j = 1; j <= s->regionValSize; j++ ) {
                 result &= pcbuff->write( s->dofManValues->at(eq + j) );
             }
         } else {
@@ -675,21 +674,20 @@ int
 SPRNodalRecoveryModel :: unpackSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm)
 {
     int result = 1;
-    int i, j, eq, indx, size, flag;
-    IntArray const *toRecvMap = processComm.giveToRecvMap();
+    int flag;
+    const IntArray &toRecvMap = processComm.giveToRecvMap();
     ProcessCommunicatorBuff *pcbuff = processComm.giveProcessCommunicatorBuff();
-    double value;
 
-    size = toRecvMap->giveSize();
-    for ( i = 1; i <= size; i++ ) {
-        indx = s->regionNodalNumbers->at( toRecvMap->at(i) );
+    for ( int inode : toRecvMap ) {
+        int indx = s->regionNodalNumbers->at( inode );
         // toRecvMap contains all shared dofmans with remote partition
         // one has to check, if particular shared node received contribution is available for given region
         result &= pcbuff->read(flag);
         if ( flag ) {
             // "1" to indicates that for given shared node this is a valid contribution
-            eq = ( indx - 1 ) * s->regionValSize;
-            for ( j = 1; j <= s->regionValSize; j++ ) {
+            int eq = ( indx - 1 ) * s->regionValSize;
+            for ( int j = 1; j <= s->regionValSize; j++ ) {
+                double value;
                 result &= pcbuff->read(value);
                 if ( indx ) {
                     s->dofManValues->at(eq + j) += value;

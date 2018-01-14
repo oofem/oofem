@@ -316,13 +316,12 @@ DirectErrorIndicatorRC :: exchangeDofManDensities()
 int
 DirectErrorIndicatorRC :: packSharedDofManLocalDensities(ProcessCommunicator &processComm)
 {
-    int result = 1, i, size;
+    int result = 1;
     ProcessCommunicatorBuff *pcbuff = processComm.giveProcessCommunicatorBuff();
-    IntArray const *toSendMap = processComm.giveToSendMap();
+    const IntArray &toSendMap = processComm.giveToSendMap();
 
-    size = toSendMap->giveSize();
-    for ( i = 1; i <= size; i++ ) {
-        result &= pcbuff->write(this->sharedDofManDensities [ toSendMap->at(i) ]);
+    for ( int inode : toSendMap ) {
+        result &= pcbuff->write(this->sharedDofManDensities [ inode ]);
     }
 
     return result;
@@ -332,17 +331,15 @@ int
 DirectErrorIndicatorRC :: unpackSharedDofManLocalDensities(ProcessCommunicator &processComm)
 {
     int result = 1;
-    int i, size;
-    IntArray const *toRecvMap = processComm.giveToRecvMap();
+    const IntArray &toRecvMap = processComm.giveToRecvMap();
     ProcessCommunicatorBuff *pcbuff = processComm.giveProcessCommunicatorBuff();
     double value;
 
-    size = toRecvMap->giveSize();
-    for ( i = 1; i <= size; i++ ) {
+    for ( int inode : toRecvMap ) {
         result &= pcbuff->read(value);
-        this->sharedDofManDensities [ toRecvMap->at(i) ] = max(value, this->sharedDofManDensities [ toRecvMap->at(i) ]);
+        this->sharedDofManDensities [ inode ] = max(value, this->sharedDofManDensities [ inode ]);
  #ifdef __VERBOSE_PARALLEL
-        OOFEM_LOG_INFO("unpackSharedDofManLocalDensities: node %d[%d], value %f\n", toRecvMap->at(i), domain->giveDofManager( toRecvMap->at(i) )->giveGlobalNumber(), this->sharedDofManDensities [ toRecvMap->at(i) ]);
+        OOFEM_LOG_INFO("unpackSharedDofManLocalDensities: node %d[%d], value %f\n", inode, domain->giveDofManager( inode )->giveGlobalNumber(), this->sharedDofManDensities [ inode ]);
  #endif
     }
 
@@ -376,14 +373,12 @@ DirectErrorIndicatorRC :: exchangeDofManIndicatorVals(TimeStep *tStep)
 int
 DirectErrorIndicatorRC :: packSharedDofManLocalIndicatorVals(ProcessCommunicator &processComm)
 {
-    int result = 1, i, size;
-    //Domain *d = this->giveDomain();
+    int result = 1;
     ProcessCommunicatorBuff *pcbuff = processComm.giveProcessCommunicatorBuff();
-    IntArray const *toSendMap = processComm.giveToSendMap();
+    const IntArray &toSendMap = processComm.giveToSendMap();
 
-    size = toSendMap->giveSize();
-    for ( i = 1; i <= size; i++ ) {
-        result &= pcbuff->write(this->sharedDofManIndicatorVals [ toSendMap->at(i) ]);
+    for ( int inode : toSendMap ) {
+        result &= pcbuff->write(this->sharedDofManIndicatorVals [ inode ]);
     }
 
     return result;
@@ -393,17 +388,15 @@ int
 DirectErrorIndicatorRC :: unpackSharedDofManLocalIndicatorVals(ProcessCommunicator &processComm)
 {
     int result = 1;
-    int i, size;
-    IntArray const *toRecvMap = processComm.giveToRecvMap();
+    const IntArray &toRecvMap = processComm.giveToRecvMap();
     ProcessCommunicatorBuff *pcbuff = processComm.giveProcessCommunicatorBuff();
-    double value;
 
-    size = toRecvMap->giveSize();
-    for ( i = 1; i <= size; i++ ) {
+    for ( int inode : toRecvMap ) {
+        double value;
         result &= pcbuff->read(value);
-        this->sharedDofManIndicatorVals [ toRecvMap->at(i) ] = max(value, this->sharedDofManIndicatorVals [ toRecvMap->at(i) ]);
+        this->sharedDofManIndicatorVals [ inode ] = max(value, this->sharedDofManIndicatorVals [ inode ]);
  #ifdef __VERBOSE_PARALLEL
-        OOFEM_LOG_INFO("unpackSharedDofManLocalIndicatorVals: node %d[%d], value %f\n", toRecvMap->at(i), domain->giveDofManager( toRecvMap->at(i) )->giveGlobalNumber(), this->sharedDofManIndicatorVals [ toRecvMap->at(i) ]);
+        OOFEM_LOG_INFO("unpackSharedDofManLocalIndicatorVals: node %d[%d], value %f\n", inode, domain->giveDofManager( inode )->giveGlobalNumber(), this->sharedDofManIndicatorVals [ inode ]);
  #endif
     }
 

@@ -2093,13 +2093,13 @@ int
 EngngModel :: packRemoteElementData(ProcessCommunicator &processComm)
 {
     int result = 1;
-    IntArray const *toSendMap = processComm.giveToSendMap();
-    CommunicationBuffer *send_buff = processComm.giveProcessCommunicatorBuff()->giveSendBuff();
+    const IntArray &toSendMap = processComm.giveToSendMap();
+    CommunicationBuffer &send_buff = processComm.giveProcessCommunicatorBuff()->giveSendBuff();
     Domain *domain = this->giveDomain(1);
 
 
-    for ( int i = 1; i <= toSendMap->giveSize(); i++ ) {
-        result &= domain->giveElement( toSendMap->at(i) )->packUnknowns( * send_buff, this->giveCurrentStep() );
+    for ( int ielem : toSendMap ) {
+        result &= domain->giveElement( ielem )->packUnknowns( send_buff, this->giveCurrentStep() );
     }
 
     return result;
@@ -2110,15 +2110,15 @@ int
 EngngModel :: unpackRemoteElementData(ProcessCommunicator &processComm)
 {
     int result = 1;
-    IntArray const *toRecvMap = processComm.giveToRecvMap();
-    CommunicationBuffer *recv_buff = processComm.giveProcessCommunicatorBuff()->giveRecvBuff();
+    const IntArray &toRecvMap = processComm.giveToRecvMap();
+    CommunicationBuffer &recv_buff = processComm.giveProcessCommunicatorBuff()->giveRecvBuff();
     Domain *domain = this->giveDomain(1);
 
 
-    for ( int i = 1; i <= toRecvMap->giveSize(); i++ ) {
-        Element *element = domain->giveElement( toRecvMap->at(i) );
+    for ( int ielem : toRecvMap ) {
+        Element *element = domain->giveElement( ielem );
         if ( element->giveParallelMode() == Element_remote ) {
-            result &= element->unpackAndUpdateUnknowns( * recv_buff, this->giveCurrentStep() );
+            result &= element->unpackAndUpdateUnknowns( recv_buff, this->giveCurrentStep() );
         } else {
             OOFEM_ERROR("element is not remote");
         }
@@ -2135,14 +2135,14 @@ EngngModel :: packDofManagers(ArrayWithNumbering *srcData, ProcessCommunicator &
     const UnknownNumberingScheme &s = * srcData->numbering;
     int result = 1;
     Domain *domain = this->giveDomain(1);
-    IntArray const *toSendMap = processComm.giveToSendMap();
+    const IntArray &toSendMap = processComm.giveToSendMap();
     ProcessCommunicatorBuff *pcbuff = processComm.giveProcessCommunicatorBuff();
 
     ///@todo Shouldn't hardcode domain number 1
     ///@todo Must fix: Internal dofmanagers in xfem and bc
-    for ( int i = 1; i <= toSendMap->giveSize(); i++ ) {
-        DofManager *dman = domain->giveDofManager( toSendMap->at(i) );
-        for ( Dof *jdof: *dman ) {
+    for ( int inode : toSendMap ) {
+        DofManager *dman = domain->giveDofManager( inode );
+        for ( auto &jdof: *dman ) {
             if ( jdof->isPrimaryDof() ) {
                 int eqNum = jdof->giveEquationNumber(s);
                 if ( eqNum ) {
@@ -2163,16 +2163,16 @@ EngngModel :: unpackDofManagers(ArrayWithNumbering *destData, ProcessCommunicato
     const UnknownNumberingScheme &s = * destData->numbering;
     int result = 1;
     Domain *domain = this->giveDomain(1);
-    IntArray const *toRecvMap = processComm.giveToRecvMap();
+    const IntArray &toRecvMap = processComm.giveToRecvMap();
     ProcessCommunicatorBuff *pcbuff = processComm.giveProcessCommunicatorBuff();
     double value;
 
     ///@todo Shouldn't hardcode domain number 1
     ///@todo Must fix: Internal dofmanagers in bc
-    for ( int i = 1; i <= toRecvMap->giveSize(); i++ ) {
-        DofManager *dman = domain->giveDofManager( toRecvMap->at(i) );
+    for ( int inode : toRecvMap ) {
+        DofManager *dman = domain->giveDofManager( inode );
         dofManagerParallelMode dofmanmode = dman->giveParallelMode();
-        for ( Dof *jdof: *dman ) {
+        for ( auto &jdof: *dman ) {
             int eqNum = jdof->giveEquationNumber(s);
             if ( jdof->isPrimaryDof() && eqNum ) {
                 result &= pcbuff->read(value);

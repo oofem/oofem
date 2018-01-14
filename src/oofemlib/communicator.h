@@ -250,7 +250,7 @@ Communicator :: unpackAllData( T *ptr, int ( T :: *unpackFunc )( ProcessCommunic
 
     for  ( int i = 0; i < size; i++ ) {
         // receive if receive map is not empty or mode is dynamic
-        if ( processComms[i].giveToRecvMap()->giveSize() || this->mode == CommMode_Dynamic ) {
+        if ( processComms[i].giveToRecvMap().giveSize() || this->mode == CommMode_Dynamic ) {
             recvFlag[i] = 1;
             num_recv++;
         }
@@ -361,7 +361,7 @@ Communicator :: unpackAllData( T *ptr, P *dest, int ( T :: *unpackFunc )( P *, P
 
     for  ( int i = 0; i < size; i++ ) {
         // receive if receive map is not empty or mode is dynamic
-        if ( processComms[i].giveToRecvMap()->giveSize() || this->mode == CommMode_Dynamic ) {
+        if ( processComms[i].giveToRecvMap().giveSize() || this->mode == CommMode_Dynamic ) {
             recvFlag[i] = 1;
             num_recv++;
         }

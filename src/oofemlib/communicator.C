@@ -42,17 +42,20 @@
 #endif
 
 namespace oofem {
-CommunicatorBuff :: CommunicatorBuff(int s, CommBuffType t) : 
-    processCommBuffs(s, t)
-{}
-
-
-Communicator :: Communicator(EngngModel *emodel, CommunicatorBuff *b, int rank, int size, CommunicatorMode m)
+CommunicatorBuff :: CommunicatorBuff(int s, CommBuffType t)
 {
-    this->engngModel = emodel;
-    this->rank = rank;
-    this->mode = m;
+    this->processCommBuffs.reserve(s);
+    for ( int i = 0; i < s; ++i ) {
+        this->processCommBuffs.emplace_back(t);
+    }
+}
 
+
+Communicator :: Communicator(EngngModel *emodel, CommunicatorBuff *b, int rank, int size, CommunicatorMode m) :
+    rank(rank),
+    engngModel(emodel),
+    mode(m)
+{
     processComms.reserve(size);
     for ( int i = 0; i < size; i++ ) {
         processComms.emplace_back(b->giveProcessCommunicatorBuff ( i ), i, mode);

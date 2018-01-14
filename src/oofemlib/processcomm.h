@@ -46,6 +46,7 @@
 #include "logger.h"
 
 #include <string>
+#include <memory>
 
 namespace oofem {
 /**
@@ -65,13 +66,12 @@ class OOFEM_EXPORT ProcessCommunicatorBuff: public DataStream
 {
 protected:
     /// Send buffer.
-    CommunicationBuffer *send_buff;
+    std::unique_ptr<CommunicationBuffer> send_buff;
     /// Receive buffer.
-    CommunicationBuffer *recv_buff;
+    std::unique_ptr<CommunicationBuffer> recv_buff;
 public:
     /// Constructor, creates empty send and receive com buffs in MPI_COMM_WORLD.
     ProcessCommunicatorBuff(CommBuffType t);
-    virtual ~ProcessCommunicatorBuff();
 
     virtual int givePackSizeOfInt(int count) { return send_buff->givePackSizeOfInt(count); }
     virtual int givePackSizeOfDouble(int count) { return send_buff->givePackSizeOfDouble(count); }
@@ -160,11 +160,11 @@ public:
     /**
      * Returns send buffer of receiver.
      */
-    CommunicationBuffer *giveSendBuff() { return send_buff; }
+    CommunicationBuffer &giveSendBuff() { return *send_buff; }
     /**
      * Returns receive buffer of receiver.
      */
-    CommunicationBuffer *giveRecvBuff() { return recv_buff; }
+    CommunicationBuffer &giveRecvBuff() { return *recv_buff; }
 };
 
 
@@ -198,8 +198,6 @@ public:
      * @param m Mode of communicator.
      */
     ProcessCommunicator(ProcessCommunicatorBuff * b, int irank, CommunicatorMode m = CommMode_Static);
-    /// Destructor
-    ~ProcessCommunicator() { }
 
     /**
      * Returns corresponding rank of associated partition
@@ -220,11 +218,11 @@ public:
     /**
      * Returns receiver to send map.
      */
-    const IntArray *giveToSendMap() { return & toSend; }
+    const IntArray &giveToSendMap() { return toSend; }
     /**
      * Returns receiver to receive map.
      */
-    const IntArray *giveToRecvMap() { return & toReceive; }
+    const IntArray &giveToRecvMap() { return toReceive; }
 
 
     /**
@@ -399,7 +397,7 @@ ProcessCommunicator :: resizeSendBuff(T *emodel, int packUnpackType)
 {
     int size;
     // determine space for send buffer
-    size = emodel->estimateMaxPackSize(toSend, * giveProcessCommunicatorBuff()->giveSendBuff(), packUnpackType);
+    size = emodel->estimateMaxPackSize(toSend, giveProcessCommunicatorBuff()->giveSendBuff(), packUnpackType);
     giveProcessCommunicatorBuff()->resizeSendBuffer(size);
     //giveSendBuff()->resize (size);
     return 1;
@@ -412,7 +410,7 @@ ProcessCommunicator :: resizeRecvBuff(T *emodel, int packUnpackType)
     int size;
 
     // determine space for recv buffer
-    size = emodel->estimateMaxPackSize(toReceive, * giveProcessCommunicatorBuff()->giveRecvBuff(), packUnpackType);
+    size = emodel->estimateMaxPackSize(toReceive, giveProcessCommunicatorBuff()->giveRecvBuff(), packUnpackType);
     giveProcessCommunicatorBuff()->resizeReceiveBuffer(size);
     //giveRecvBuff()->resize (size);
 

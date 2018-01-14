@@ -45,28 +45,21 @@ namespace oofem {
 ProcessCommunicatorBuff :: ProcessCommunicatorBuff(CommBuffType t)
 {
     if ( t == CBT_static ) {
-        send_buff = new StaticCommunicationBuffer(MPI_COMM_WORLD);
-        recv_buff = new StaticCommunicationBuffer(MPI_COMM_WORLD);
+        send_buff = std::make_unique<StaticCommunicationBuffer>(MPI_COMM_WORLD);
+        recv_buff = std::make_unique<StaticCommunicationBuffer>(MPI_COMM_WORLD);
     } else {
-        send_buff = new DynamicCommunicationBuffer(MPI_COMM_WORLD);
-        recv_buff = new DynamicCommunicationBuffer(MPI_COMM_WORLD);
+        send_buff = std::make_unique<DynamicCommunicationBuffer>(MPI_COMM_WORLD);
+        recv_buff = std::make_unique<DynamicCommunicationBuffer>(MPI_COMM_WORLD);
     }
 }
 
 
 ProcessCommunicator :: ProcessCommunicator(ProcessCommunicatorBuff *b, int rank, CommunicatorMode m) :
-    toSend(), toReceive()
+    rank(rank),
+    pcBuffer(b),
+    toSend(), toReceive(),
+    mode(m)
 {
-    this->rank = rank;
-    this->pcBuffer =  b;
-    this->mode = m;
-}
-
-
-ProcessCommunicatorBuff :: ~ProcessCommunicatorBuff()
-{
-    delete send_buff;
-    delete recv_buff;
 }
 
 
