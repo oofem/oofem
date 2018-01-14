@@ -82,7 +82,6 @@ GPInitModule :: doInit()
         // loop over Gauss points
         for ( auto &gp: *elem->giveDefaultIntegrationRulePtr() ) {
             Material *mat = elem->giveCrossSection()->giveMaterial(gp);
-            MaterialStatus *status = static_cast< MaterialStatus * >( gp->giveMaterialStatus() );
             if ( fscanf(initStream, "%d %d", & ie, & ig) != 2 ) {
                 OOFEM_ERROR("initStream reading error");
             }
