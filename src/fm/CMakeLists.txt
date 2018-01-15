@@ -30,19 +30,16 @@ set (fm_element
 
 set (fm_material
     fluidcrosssection.C
-    newtonianfluid.C
-    fe2fluidmaterial.C
-    nonlinearfluidmaterial.C
+    Materials/newtonianfluid.C
+    Materials/fe2fluidmaterial.C
+    Materials/nonlinearfluidmaterial.C
+    Materials/fluiddynamicmaterial.C
+    Materials/twofluidmaterial.C
+    Materials/binghamfluid2.C
     )
 
 set (fm_loads
     tractionpressurebc.C
-    )
-
-set (fm_status
-    fluiddynamicmaterial.C
-    twofluidmaterial.C
-    binghamfluid2.C
     )
 
 set (fm_interface
@@ -77,7 +74,6 @@ set (fm
     ${fm_emodel}
     ${fm_element}
     ${fm_material}
-    ${fm_status}
     ${fm_loads}
     ${fm_interface}
     ${fm_levelset}

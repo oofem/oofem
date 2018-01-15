@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "newtonianfluid.h"
+#include "fm/Materials/newtonianfluid.h"
 #include "domain.h"
 #include "floatmatrix.h"
 #include "gausspoint.h"

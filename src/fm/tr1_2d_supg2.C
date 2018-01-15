@@ -44,7 +44,7 @@
 #include "domain.h"
 #include "mathfem.h"
 #include "engngm.h"
-#include "fluiddynamicmaterial.h"
+#include "fm/Materials/fluiddynamicmaterial.h"
 #include "fluidcrosssection.h"
 #include "load.h"
 #include "timestep.h"

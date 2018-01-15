@@ -39,7 +39,7 @@
 #include "intarray.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
-#include "fluiddynamicmaterial.h"
+#include "fm/Materials/fluiddynamicmaterial.h"
 #include "fluidcrosssection.h"
 #include "dynamicinputrecord.h"
 #include "engngm.h"

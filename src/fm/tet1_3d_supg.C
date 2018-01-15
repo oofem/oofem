@@ -39,7 +39,7 @@
 #include "material.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
-#include "fluiddynamicmaterial.h"
+#include "fm/Materials/fluiddynamicmaterial.h"
 #include "fluidcrosssection.h"
 #include "floatmatrix.h"
 #include "floatarray.h"

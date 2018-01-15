@@ -47,7 +47,7 @@
 #include "timestep.h"
 #include "bodyload.h"
 #include "boundaryload.h"
-#include "fluiddynamicmaterial.h"
+#include "fm/Materials/fluiddynamicmaterial.h"
 #include "fluidcrosssection.h"
 #include "crosssection.h"
 #include "classfactory.h"

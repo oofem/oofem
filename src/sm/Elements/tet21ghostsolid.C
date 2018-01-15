@@ -53,7 +53,7 @@
 #include <iostream>
 
 #ifdef __FM_MODULE
- #include "fluiddynamicmaterial.h"
+ #include "fm/Materials/fluiddynamicmaterial.h"
  #include "fluidcrosssection.h"
 #endif
 

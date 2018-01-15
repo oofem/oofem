@@ -35,7 +35,7 @@
 #ifndef binghamfluid2_h
 #define binghamfluid2_h
 
-#include "fluiddynamicmaterial.h"
+#include "fm/Materials/fluiddynamicmaterial.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "matconst.h"

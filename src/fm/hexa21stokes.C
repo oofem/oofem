@@ -44,7 +44,7 @@
 #include "bodyload.h"
 #include "boundaryload.h"
 #include "mathfem.h"
-#include "fluiddynamicmaterial.h"
+#include "fm/Materials/fluiddynamicmaterial.h"
 #include "fei3dhexalin.h"
 #include "fei3dhexatriquad.h"
 #include "fluidcrosssection.h"

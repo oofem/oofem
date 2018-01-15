@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "fe2fluidmaterial.h"
+#include "fm/Materials/fe2fluidmaterial.h"
 #include "stokesflow.h"
 #include "oofemtxtdatareader.h"
 #include "domain.h"

@@ -43,7 +43,7 @@
 #include "bodyload.h"
 #include "boundaryload.h"
 #include "mathfem.h"
-#include "fluiddynamicmaterial.h"
+#include "fm/Materials/fluiddynamicmaterial.h"
 #include "fei2dtrlin.h"
 #include "masterdof.h"
 #include "fluidcrosssection.h"

@@ -35,7 +35,7 @@
 #ifndef fe2sinteringmaterial_h
 #define fe2sinteringmaterial_h
 
-#include "fluiddynamicmaterial.h"
+#include "fm/Materials/fluiddynamicmaterial.h"
 #include "matstatus.h"
 #include "mixedgradientpressurebc.h"
 #include "floatmatrix.h"

@@ -35,7 +35,7 @@
 #ifndef twofluidmaterial_h
 #define twofluidmaterial_h
 
-#include "fluiddynamicmaterial.h"
+#include "fm/Materials/fluiddynamicmaterial.h"
 #include "intarray.h"
 #include "matstatus.h"
 

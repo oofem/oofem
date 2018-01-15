@@ -33,7 +33,7 @@
  */
 
 #include "fluidcrosssection.h"
-#include "fluiddynamicmaterial.h"
+#include "fm/Materials/fluiddynamicmaterial.h"
 #include "dynamicinputrecord.h"
 #include "domain.h"
 #include "classfactory.h"

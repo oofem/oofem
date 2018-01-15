@@ -35,7 +35,7 @@
 #ifndef newtonianfluid_h
 #define newtonianfluid_h
 
-#include "fluiddynamicmaterial.h"
+#include "fm/Materials/fluiddynamicmaterial.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "matconst.h"

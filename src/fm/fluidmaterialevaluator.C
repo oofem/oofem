@@ -37,7 +37,7 @@
 #include "timestep.h"
 #include "domain.h"
 #include "gausspoint.h"
-#include "fluiddynamicmaterial.h"
+#include "fm/Materials/fluiddynamicmaterial.h"
 #include "function.h"
 #include "classfactory.h"
 

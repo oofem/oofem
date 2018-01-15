@@ -40,7 +40,7 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "fluidmodel.h"
-#include "fluiddynamicmaterial.h"
+#include "fm/Materials/fluiddynamicmaterial.h"
 #include "fluidcrosssection.h"
 #include "integrationrule.h"
 #include "node.h"

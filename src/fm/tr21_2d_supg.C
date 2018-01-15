@@ -43,7 +43,7 @@
 #include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
-#include "fluiddynamicmaterial.h"
+#include "fm/Materials/fluiddynamicmaterial.h"
 #include "fluidcrosssection.h"
 #include "timestep.h"
 #include "contextioerr.h"
