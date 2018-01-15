@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "transportgradientneumann.h"
+#include "tm/BoundaryCondition/transportgradientneumann.h"
 #include "classfactory.h"
 #include "node.h"
 #include "masterdof.h"
@@ -58,7 +58,7 @@ REGISTER_BoundaryCondition(TransportGradientNeumann);
 TransportGradientNeumann :: TransportGradientNeumann(int n, Domain *d) :
     ActiveBoundaryCondition(n, d),
     //PrescribedGradientHomogenization(),
-    mpFluxHom( new Node(0, d) )
+    mpFluxHom( std::make_unique<Node>(0, d) )
 {
     int nsd = d->giveNumberOfSpatialDimensions();
     for ( int i = 0; i < nsd; i++ ) {

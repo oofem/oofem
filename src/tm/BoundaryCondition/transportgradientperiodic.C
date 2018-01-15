@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "transportgradientperiodic.h"
+#include "tm/BoundaryCondition/transportgradientperiodic.h"
 #include "dofiditem.h"
 #include "node.h"
 #include "dofmanager.h"

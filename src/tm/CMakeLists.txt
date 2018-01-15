@@ -29,10 +29,10 @@ set (tm_element
     )
 
 set (tm_boundary
-    gravitypressure.C
-    transportgradientneumann.C
-    transportgradientdirichlet.C
-    transportgradientperiodic.C
+    BoundaryCondition/gravitypressure.C
+    BoundaryCondition/transportgradientneumann.C
+    BoundaryCondition/transportgradientdirichlet.C
+    BoundaryCondition/transportgradientperiodic.C
     )
 
 set (tm_cs

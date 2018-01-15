@@ -32,7 +32,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-
 #ifndef transportgradientperiodic_h_
 #define transportgradientperiodic_h_
 

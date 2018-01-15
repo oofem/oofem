@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "transportgradientdirichlet.h"
+#include "tm/BoundaryCondition/transportgradientdirichlet.h"
 #include "dofiditem.h"
 #include "dofmanager.h"
 #include "dof.h"
