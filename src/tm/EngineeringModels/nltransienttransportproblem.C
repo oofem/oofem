@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "nltransienttransportproblem.h"
+#include "tm/EngineeringModels/nltransienttransportproblem.h"
 #include "timestep.h"
 #include "element.h"
 #include "dofmanager.h"

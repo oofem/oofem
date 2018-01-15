@@ -35,7 +35,7 @@
 #ifndef nltransienttransportproblem_h
 #define nltransienttransportproblem_h
 
-#include "nonstationarytransportproblem.h"
+#include "tm/EngineeringModels/nonstationarytransportproblem.h"
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
 

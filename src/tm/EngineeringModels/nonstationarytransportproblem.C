@@ -32,8 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "nonstationarytransportproblem.h"
-#include "stationarytransportproblem.h"
+#include "tm/EngineeringModels/nonstationarytransportproblem.h"
+#include "tm/EngineeringModels/stationarytransportproblem.h"
 #include "nummet.h"
 #include "timestep.h"
 #include "element.h"

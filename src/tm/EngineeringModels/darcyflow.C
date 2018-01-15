@@ -5,7 +5,7 @@
  *      Author: carl
  */
 
-#include "darcyflow.h"
+#include "tm/EngineeringModels/darcyflow.h"
 #include "element.h"
 #include "inputrecord.h"
 #include "timestep.h"

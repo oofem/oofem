@@ -5,11 +5,11 @@ if (USE_CEMHYD)
 endif ()
 
 set (tm_emodel
-    stationarytransportproblem.C
-    nonstationarytransportproblem.C
-    nltransienttransportproblem.C
-    darcyflow.C
-    transienttransportproblem.C
+    EngineeringModels/darcyflow.C
+    EngineeringModels/nltransienttransportproblem.C
+    EngineeringModels/nonstationarytransportproblem.C
+    EngineeringModels/stationarytransportproblem.C
+    EngineeringModels/transienttransportproblem.C
     )
 
 set (tm_element

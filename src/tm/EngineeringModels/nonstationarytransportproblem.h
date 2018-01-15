@@ -40,7 +40,7 @@
 #include "primaryfield.h"
 #include "dofdistributedprimaryfield.h"
 #include "tm/Materials/transportmaterial.h"
-#include "stationarytransportproblem.h"
+#include "tm/EngineeringModels/stationarytransportproblem.h"
 #include "linsystsolvertype.h"
 
 ///@name Input fields for NonStationaryTransportProblem

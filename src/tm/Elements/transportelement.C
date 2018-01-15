@@ -51,7 +51,7 @@
 #include "feinterpol2d.h"
 #include "feinterpol3d.h"
 #include "dof.h"
-#include "stationarytransportproblem.h"
+#include "tm/EngineeringModels/stationarytransportproblem.h"
 #include "function.h"
 #ifdef __CEMHYD_MODULE
  #include "tm/Materials/cemhyd/cemhydmat.h"
