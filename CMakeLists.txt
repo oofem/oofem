@@ -497,7 +497,7 @@ check_cxx_symbol_exists ("isnan" "cmath" HAVE_ISNAN)
 if (USE_SHARED_LIB)
     set (OOFEM_EXPORT_HEADER "#include \"oofem_export.h\"")
     # For consistant library on linux and windows platforms.
-    add_compiler_export_flags (LIBOOFEM_EXPORT_CFLAGS)
+    #add_compiler_export_flags (LIBOOFEM_EXPORT_CFLAGS)
 else ()
     set (OOFEM_EXPORT_HEADER "#define OOFEM_EXPORT\n#define OOFEM_NO_EXPORT")
 endif ()

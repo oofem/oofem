@@ -4,7 +4,8 @@ bar.oofem.out
 # note this example cannot be processed by run_problem
 # because imperfection must be made in input file
 #
-nonlinearstatic nsteps 15 rtolf 1e-4 MaxIter 200 reqIterations 80 manrmsteps 10 stiffMode 1 controlmode 0 psi 0.0 renumber 0 hpcmode 1 hpc 2 2 1 stepLength 1.0 nmodules 1
+staticstructural nsteps 15 nmodules 1 \
+rtolf 1e-4 MaxIter 200 reqIterations 80 manrmsteps 10 solverType "calm" psi 0.0 hpcmode 1 hpc 2 2 1 stepLength 1.0 smtype 7 lstype 3
 errorcheck filename "bar.oofem.in"
 domain 1dTruss
 OutputManager tstep_all dofman_all element_all
@@ -41,7 +42,7 @@ SimpleCS 2 thick 1.0 width 1.0 material 2 set 2
 idm1 1 d 1.0  E 1.0  n 0.2  e0 1.0 wf 5.0 equivstraintype 1 talpha 0.0
 idm1 2 d 1.0  E 1.0  n 0.2  e0 0.97 wf 5.0 equivstraintype 1 talpha 0.0
 BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 3
-NodalLoad 2 loadTimeFunction 1 dofs 1 1 components 1 1.0 set 4
+NodalLoad 2 loadTimeFunction 1 dofs 1 1 components 1 1.0 set 4 reference
 ConstantFunction 1 f(t) 1.0
 PiecewiseLinFunction 2 t 2 0.0 1000.0 f(t) 2 1.0 1001.0
 

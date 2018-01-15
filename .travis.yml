@@ -1,6 +1,6 @@
 language: cpp
 script:
-   - CXX=g++-4.8 cmake -DUSE_PYTHON_BINDINGS=ON -DENABLE_COVERAGE:BOOL=TRUE .
+   - CXX=g++-5.4 cmake -DUSE_PYTHON_BINDINGS=ON -DENABLE_COVERAGE:BOOL=TRUE .
    - make
    - make test
    - bash <(curl -s https://codecov.io/bash)

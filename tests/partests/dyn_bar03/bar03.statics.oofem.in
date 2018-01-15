@@ -1,6 +1,7 @@
 bar03.statics.oofem.out
 dynamic relaxation of a spring 0.01 
-NonLinearStatic nsteps 10 stepLength 0.01 minStepLength 0.01 rtolv 0.01 Psi 0.0 MaxIter 120 HPC 2 2 1 stiffmode 1 nmodules 1
+StaticStructural nsteps 10 stepLength 0.01 minStepLength 0.01 rtolf 1e-5 Psi 0.0 MaxIter 120 HPC 2 2 1 stiffmode 1 nmodules 1
+#NonLinearStatic nsteps 10 stepLength 0.01 minStepLength 0.01 rtolv 0.01 Psi 0.0 MaxIter 120 HPC 2 2 1 stiffmode 1 nmodules 1
 #nldeidynamic nsteps 1000 deltat 0.01 dumpcoef 0.0 drflag 1 tau 10.0 py 0.0666666666667
 errorcheck
 domain 3d

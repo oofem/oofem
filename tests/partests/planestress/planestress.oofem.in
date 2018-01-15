@@ -1,6 +1,6 @@
 planestress.oofem.out
 1D PETSc test
-linearstatic nsteps 1 nmodules 1
+StaticStructural nsteps 1 nmodules 1
 errorcheck filename "planestress.oofem.in"
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all

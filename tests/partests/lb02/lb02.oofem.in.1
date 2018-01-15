@@ -1,6 +1,7 @@
 lb02.out.1
 Test of PlaneStress2d elements -> pure compression in x direction
-NonLinearStatic nsteps 2 controllmode 1 rtolv 1.e-3 refloadmode 0 lstype 3 smtype 7 lbflag 1 forcelb1 1 nmodules 1
+NonLinearStatic nsteps 2 controlmode 1 rtolv 1.e-3 refloadmode 0 lstype 3 smtype 7 lbflag 1 forcelb1 1 nmodules 1
+#StaticStructural nsteps 2 lstype 3 smtype 7 lbflag 1 forcelb1 1 nmodules 1
 errorcheck filename "lb02.oofem.in"
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
