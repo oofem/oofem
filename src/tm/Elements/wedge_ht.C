@@ -33,7 +33,7 @@
  */
 
 
-#include "wedge_ht.h"
+#include "tm/Elements/wedge_ht.h"
 #include "fei3dwedgelin.h"
 #include "node.h"
 #include "gausspoint.h"

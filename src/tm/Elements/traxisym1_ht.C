@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "traxisym1_ht.h"
+#include "tm/Elements/traxisym1_ht.h"
 #include "fei2dtrlin.h"
 #include "gausspoint.h"
 #include "floatarray.h"

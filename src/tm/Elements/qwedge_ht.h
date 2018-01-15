@@ -23,7 +23,7 @@
  *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of.
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
  *
@@ -32,96 +32,97 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef brick1_ht_h
-#define brick1_ht_h
 
-#include "transportelement.h"
+#ifndef qwedge_ht_h
+#define qwedge_ht_h
+
+
+#include "tm/Elements/transportelement.h"
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 
-#define _IFT_Brick1_ht_Name "brick1ht"
-#define _IFT_Brick1_hmt_Name "brick1hmt"
-#define _IFT_Brick1_mt_Name "brick1mt"
+
+#define _IFT_QWedge_ht_Name "qwedgeht"
+#define _IFT_QWedge_hmt_Name "qwedgehmt"
+#define _IFT_QWedge_mt_Name "qwedgemt"
 
 namespace oofem {
-class FEI3dHexaLin;
+class FEI3dWedgeQuad;
 
 /**
- * Brick (3d) elements with linear approximation for heat and mass transfer.
+ * This class implements a Linear 3d  6 - node thermal finite element.
  */
-class Brick1_ht : public TransportElement, public SpatialLocalizerInterface, public ZZNodalRecoveryModelInterface, public SPRNodalRecoveryModelInterface
+ class QWedge_ht : public TransportElement, public SpatialLocalizerInterface, public ZZNodalRecoveryModelInterface, public SPRNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
 {
 protected:
-    static FEI3dHexaLin interpolation;
+    static FEI3dWedgeQuad interpolation;
+
 
 public:
-    Brick1_ht(int n, Domain * d);
-    virtual ~Brick1_ht();
+    QWedge_ht(int, Domain *);
+    virtual ~QWedge_ht() { }
+
 
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual FEInterpolation *giveInterpolation() const;
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_Brick1_ht_Name; }
-    virtual const char *giveClassName() const { return "Brick1_ht"; }
+    virtual const char *giveInputRecordName() const { return _IFT_QWedge_ht_Name; }
+    virtual const char *giveClassName() const { return "QWedge_ht"; }
 
-    virtual int computeNumberOfDofs() { return 8; }
+    virtual int computeNumberOfDofs() { return 15; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _3dHeat; }
 
     virtual Interface *giveInterface(InterfaceType t);
     virtual int testElementExtension(ElementExtension ext)
-    { return ( ext == Element_EdgeLoadSupport ) || ( ext == Element_SurfaceLoadSupport ); }
+    { return ( ext == Element_EdgeLoadSupport );}
 
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
     virtual int SPRNodalRecoveryMI_giveNumberOfIP();
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
+    virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
 
-
-#ifdef __OOFEG
-    // Graphics output
-    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
-    //virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) {}
-    //virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) {}
-#endif
-
-protected:
+ protected:
     virtual void computeGaussPoints();
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    virtual IntegrationRule *GetSurfaceIntegrationRule(int approxOrder);
-    virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iEdge);
+
+    
 };
+
+
 
 /**
  * Class for heat and mass transfer.
  */
-class Brick1_hmt : public Brick1_ht
+class QWedge_hmt : public QWedge_ht
 {
 public:
-    Brick1_hmt(int n, Domain * d);
+    QWedge_hmt(int n, Domain * d);
 
-    virtual const char *giveInputRecordName() const { return _IFT_Brick1_hmt_Name; }
-    virtual const char *giveClassName() const { return "Brick1_hmt"; }
-    virtual int computeNumberOfDofs() { return 16; }
+    virtual const char *giveInputRecordName() const { return _IFT_QWedge_hmt_Name; }
+    virtual const char *giveClassName() const { return "QWedge_hmt"; }
+    virtual int computeNumberOfDofs() { return 24; }
     virtual MaterialMode giveMaterialMode() { return _3dHeMo; }
 };
 
 /**
  * Class for mass transfer.
  */
-class Brick1_mt : public Brick1_ht
+class QWedge_mt : public QWedge_ht
 {
 public:
-    Brick1_mt(int n, Domain * d);
+    QWedge_mt(int n, Domain * d);
 
-    virtual const char *giveInputRecordName() const { return _IFT_Brick1_mt_Name; }
-    virtual const char *giveClassName() const { return "Brick1_mt"; }
-    virtual int computeNumberOfDofs() { return 8; }
+    virtual const char *giveInputRecordName() const { return _IFT_QWedge_mt_Name; }
+    virtual const char *giveClassName() const { return "QWedge_mt"; }
+    virtual int computeNumberOfDofs() { return 15; }
     virtual MaterialMode giveMaterialMode() { return _3dHeat; }
 };
+
+ 
 } // end namespace oofem
-#endif // brick1_ht_h
+#endif

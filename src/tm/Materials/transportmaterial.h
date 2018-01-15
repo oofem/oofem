@@ -40,7 +40,7 @@
 #include "floatmatrix.h"
 #include "matconst.h"
 #include "matstatus.h"
-#include "transportelement.h"
+#include "tm/Elements/transportelement.h"
 
 namespace oofem {
 /**

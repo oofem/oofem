@@ -32,50 +32,50 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef quad1_ht_h
-#define quad1_ht_h
+#ifndef tr1_ht_h
+#define tr1_ht_h
 
-#include "transportelement.h"
+#include "tm/Elements/transportelement.h"
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
 
-#define _IFT_Quad1_ht_Name "quad1ht"
-#define _IFT_Quad1_hmt_Name "quad1hmt"
-#define _IFT_Quad1_mt_Name "quad1mt"
+#define _IFT_Tr1_hmt_Name "tr1hmt"
+#define _IFT_Tr1_ht_Name "tr1ht"
+#define _IFT_Tr1_mt_Name "tr1mt"
 
 namespace oofem {
-class FEI2dQuadLin;
+class FEI2dTrLin;
 
 /**
- * Quadratic (2d) element with linear approximation for heat transfer.
+ * Triangle (2d) element with linear approximation for heat transfer.
+ * @todo Use the interpolation classes.
  */
-class Quad1_ht : public TransportElement, public SpatialLocalizerInterface, public ZZNodalRecoveryModelInterface
+class Tr1_ht : public TransportElement, public SpatialLocalizerInterface, public ZZNodalRecoveryModelInterface
 {
 protected:
-    static FEI2dQuadLin interpolation;
+    static FEI2dTrLin interp;
 
 public:
-    Quad1_ht(int n, Domain * d);
-    virtual ~Quad1_ht();
+    Tr1_ht(int n, Domain * d);
+    //virtual ~Tr1_ht();
 
-    virtual FEInterpolation *giveInterpolation() const;
     virtual double computeVolumeAround(GaussPoint *gp);
 
-    virtual const char *giveInputRecordName() const { return _IFT_Quad1_ht_Name; }
-    virtual const char *giveClassName() const { return "Quad1_ht"; }
+    // definition
+    virtual const char *giveInputRecordName() const { return _IFT_Tr1_ht_Name; }
+    virtual const char *giveClassName() const { return "Tr1_htElement"; }
 
-    //    virtual int computeNumberOfDofs() { return ( emode == HeatTransferEM ) ? 4 : 8; }
-    virtual int computeNumberOfDofs() { return 4; }
+    virtual int computeNumberOfDofs() { return ( emode == HeatMass1TransferEM ) ? 6 : 3; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _2dHeat; }
     virtual double giveThicknessAt(const FloatArray &gcoords);
 
     virtual Interface *giveInterface(InterfaceType t);
 
+    virtual FEInterpolation *giveInterpolation() const;
+
 #ifdef __OOFEG
     // Graphics output
-    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
     //virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) {}
     //virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) {}
 #endif
@@ -86,31 +86,30 @@ protected:
 };
 
 /**
- * Class for heat and mass transfer.
- */
-class Quad1_hmt : public Quad1_ht
-{
-public:
-    Quad1_hmt(int n, Domain * d);
-
-    virtual const char *giveInputRecordName() const { return _IFT_Quad1_hmt_Name; }
-    virtual const char *giveClassName() const { return "Quad1_hmt"; }
-    virtual int computeNumberOfDofs() { return 8; }
-    virtual MaterialMode giveMaterialMode() { return _2dHeMo; }
-};
-
-/**
  * Class for mass transfer.
  */
-class Quad1_mt : public Quad1_ht
+class Tr1_mt : public Tr1_ht
 {
 public:
-    Quad1_mt(int n, Domain * d);
+    Tr1_mt(int n, Domain * d);
 
-    virtual const char *giveInputRecordName() const { return _IFT_Quad1_mt_Name; }
-    virtual const char *giveClassName() const { return "Quad1_mt"; }
-    virtual int computeNumberOfDofs() { return 4; }
+    virtual const char *giveInputRecordName() const { return _IFT_Tr1_mt_Name; }
+    virtual const char *giveClassName() const { return "Tr1_mt"; }
     virtual MaterialMode giveMaterialMode() { return _2dHeat; }
 };
+
+
+/**
+ * Class for heat and mass transfer.
+ */
+class Tr1_hmt : public Tr1_ht
+{
+public:
+    Tr1_hmt(int n, Domain * d);
+
+    virtual const char *giveInputRecordName() const { return _IFT_Tr1_hmt_Name; }
+    virtual const char *giveClassName() const { return "Tr1_hmt"; }
+    virtual MaterialMode giveMaterialMode() { return _2dHeMo; }
+};
 } // end namespace oofem
-#endif // quad1_ht_h
+#endif // tr1_ht_h

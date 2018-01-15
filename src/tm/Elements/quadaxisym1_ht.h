@@ -35,7 +35,7 @@
 #ifndef quadaxisym1_ht_h
 #define quadaxisym1_ht_h
 
-#include "quad1_ht.h"
+#include "tm/Elements/quad1_ht.h"
 
 #define _IFT_QuadAxisym1_ht_Name "quadaxisym1ht"
 #define _IFT_QuadAxisym1_hmt_Name "quadaxisym1hmt"

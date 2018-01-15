@@ -32,47 +32,43 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#ifndef wedge_ht_h
+#define wedge_ht_h
 
-#ifndef qwedge_ht_h
-#define qwedge_ht_h
-
-
-#include "transportelement.h"
+#include "tm/Elements/transportelement.h"
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 
-
-#define _IFT_QWedge_ht_Name "qwedgeht"
-#define _IFT_QWedge_hmt_Name "qwedgehmt"
-#define _IFT_QWedge_mt_Name "qwedgemt"
+#define _IFT_Wedge_ht_Name "wedgeht"
+#define _IFT_Wedge_hmt_Name "wedgehmt"
+#define _IFT_Wedge_mt_Name "wedgemt"
 
 namespace oofem {
-class FEI3dWedgeQuad;
+class FEI3dWedgeLin;
 
 /**
  * This class implements a Linear 3d  6 - node thermal finite element.
  */
- class QWedge_ht : public TransportElement, public SpatialLocalizerInterface, public ZZNodalRecoveryModelInterface, public SPRNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
+ class Wedge_ht : public TransportElement, public SpatialLocalizerInterface, public ZZNodalRecoveryModelInterface, public SPRNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
 {
 protected:
-    static FEI3dWedgeQuad interpolation;
-
+    static FEI3dWedgeLin interpolation;
 
 public:
-    QWedge_ht(int, Domain *);
-    virtual ~QWedge_ht() { }
+    Wedge_ht(int, Domain *);
+    virtual ~Wedge_ht() { }
 
 
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual FEInterpolation *giveInterpolation() const;
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_QWedge_ht_Name; }
-    virtual const char *giveClassName() const { return "QWedge_ht"; }
+    virtual const char *giveInputRecordName() const { return _IFT_Wedge_ht_Name; }
+    virtual const char *giveClassName() const { return "Wedge_ht"; }
 
-    virtual int computeNumberOfDofs() { return 15; }
+    virtual int computeNumberOfDofs() { return 6; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _3dHeat; }
 
@@ -89,8 +85,6 @@ public:
  protected:
     virtual void computeGaussPoints();
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-
-    
 };
 
 
@@ -98,28 +92,28 @@ public:
 /**
  * Class for heat and mass transfer.
  */
-class QWedge_hmt : public QWedge_ht
+class Wedge_hmt : public Wedge_ht
 {
 public:
-    QWedge_hmt(int n, Domain * d);
+    Wedge_hmt(int n, Domain * d);
 
-    virtual const char *giveInputRecordName() const { return _IFT_QWedge_hmt_Name; }
-    virtual const char *giveClassName() const { return "QWedge_hmt"; }
-    virtual int computeNumberOfDofs() { return 24; }
+    virtual const char *giveInputRecordName() const { return _IFT_Wedge_hmt_Name; }
+    virtual const char *giveClassName() const { return "Wedge_hmt"; }
+    virtual int computeNumberOfDofs() { return 12; }
     virtual MaterialMode giveMaterialMode() { return _3dHeMo; }
 };
 
 /**
  * Class for mass transfer.
  */
-class QWedge_mt : public QWedge_ht
+class Wedge_mt : public Wedge_ht
 {
 public:
-    QWedge_mt(int n, Domain * d);
+    Wedge_mt(int n, Domain * d);
 
-    virtual const char *giveInputRecordName() const { return _IFT_QWedge_mt_Name; }
-    virtual const char *giveClassName() const { return "QWedge_mt"; }
-    virtual int computeNumberOfDofs() { return 15; }
+    virtual const char *giveInputRecordName() const { return _IFT_Wedge_mt_Name; }
+    virtual const char *giveClassName() const { return "Wedge_mt"; }
+    virtual int computeNumberOfDofs() { return 6; }
     virtual MaterialMode giveMaterialMode() { return _3dHeat; }
 };
 

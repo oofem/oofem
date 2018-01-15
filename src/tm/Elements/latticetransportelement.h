@@ -36,7 +36,7 @@
 #ifndef latticetransportelement_h
 #define latticetransportelement_h
 
-#include "transportelement.h"
+#include "tm/Elements/transportelement.h"
 
 /**
  * This class implements the base of a special transport lattice element following

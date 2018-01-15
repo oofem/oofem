@@ -50,7 +50,7 @@
 #include "engngm.h"
 #include "mathfem.h"
 #include "dynamicinputrecord.h"
-#include "transportelement.h"
+#include "tm/Elements/transportelement.h"
 
 namespace oofem {
 REGISTER_BoundaryCondition(TransportGradientNeumann);

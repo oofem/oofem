@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "lattice2d_mt.h"
+#include "tm/Elements/lattice2d_mt.h"
 #include "tm/Materials/transportmaterial.h"
 #include "tm/Materials/latticetransmat.h"
 #include "node.h"

@@ -32,56 +32,53 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "brick1_ht.h"
-#include "fei3dhexalin.h"
-#include "node.h"
+#include "tm/Elements/tetrah1_ht.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
-#include "load.h"
 #include "crosssection.h"
+#include "fei3dtetlin.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
  #include "oofegutils.h"
- #include "connectivitytable.h"
 #endif
 
 namespace oofem {
-REGISTER_Element(Brick1_ht);
-REGISTER_Element(Brick1_hmt);
-REGISTER_Element(Brick1_mt);
+REGISTER_Element(Tetrah1_ht);
+REGISTER_Element(Tetrah1_hmt);
 
-FEI3dHexaLin Brick1_ht :: interpolation;
+FEI3dTetLin Tetrah1_ht :: interpolation;
 
-Brick1_ht :: Brick1_ht(int n, Domain *aDomain) : TransportElement(n, aDomain, HeatTransferEM), SpatialLocalizerInterface(this), ZZNodalRecoveryModelInterface(this), SPRNodalRecoveryModelInterface()
+Tetrah1_ht :: Tetrah1_ht(int n, Domain *aDomain) : TransportElement(n, aDomain, HeatTransferEM), SpatialLocalizerInterface(this), ZZNodalRecoveryModelInterface(this)
 {
-    numberOfDofMans  = 8;
-    numberOfGaussPoints = 8;
+    numberOfDofMans  = 4;
+    numberOfGaussPoints = 1;
 }
 
-Brick1_hmt :: Brick1_hmt(int n, Domain *aDomain) : Brick1_ht(n, aDomain)
+Tetrah1_hmt :: Tetrah1_hmt(int n, Domain *aDomain) : Tetrah1_ht(n, aDomain)
 {
-    emode = HeatMass1TransferEM;
+    this->emode = HeatMass1TransferEM; // This could be done in a better way.
 }
 
-Brick1_mt :: Brick1_mt(int n, Domain *aDomain) : Brick1_ht(n, aDomain)
-{
-    emode = Mass1TransferEM;
-}
-
-Brick1_ht :: ~Brick1_ht()
+Tetrah1_ht :: ~Tetrah1_ht()
 { }
 
+
 FEInterpolation *
-Brick1_ht :: giveInterpolation() const { return & interpolation; }
+Tetrah1_ht :: giveInterpolation() const
+{
+    return & interpolation;
+}
+
 
 void
-Brick1_ht :: computeGaussPoints()
+Tetrah1_ht :: computeGaussPoints()
+// Sets up the array containing the four Gauss points of the receiver.
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );
@@ -92,15 +89,15 @@ Brick1_ht :: computeGaussPoints()
 
 
 IRResultType
-Brick1_ht :: initializeFrom(InputRecord *ir)
+Tetrah1_ht :: initializeFrom(InputRecord *ir)
 {
-    numberOfGaussPoints = 8;
+    numberOfGaussPoints = 1;
     return TransportElement :: initializeFrom(ir);
 }
 
 
 double
-Brick1_ht :: computeVolumeAround(GaussPoint *gp)
+Tetrah1_ht :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, volume;
@@ -114,7 +111,7 @@ Brick1_ht :: computeVolumeAround(GaussPoint *gp)
 
 
 double
-Brick1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
+Tetrah1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) );
@@ -123,28 +120,28 @@ Brick1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 
 
 IntegrationRule *
-Brick1_ht :: GetSurfaceIntegrationRule(int approxOrder)
+Tetrah1_ht :: GetSurfaceIntegrationRule(int approxOrder)
 {
     IntegrationRule *iRule = new GaussIntegrationRule(1, this, 1, 1);
-    int npoints = iRule->getRequiredNumberOfIntegrationPoints(_Square, approxOrder);
-    iRule->SetUpPointsOnSquare(npoints, _Unknown);
+    int npoints = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, approxOrder);
+    iRule->SetUpPointsOnTriangle(npoints, _Unknown);
     return iRule;
 }
 
 
 double
-Brick1_ht :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
+Tetrah1_ht :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
-    double determinant, weight, volume;
-    determinant = fabs( interpolation.surfaceGiveTransformationJacobian( iSurf, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    double detJ, weight;
+    detJ = fabs( interpolation.surfaceGiveTransformationJacobian( iSurf, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+
     weight = gp->giveWeight();
-    volume = determinant * weight;
-    return volume;
+    return detJ * weight;
 }
 
 
 Interface *
-Brick1_ht :: giveInterface(InterfaceType interface)
+Tetrah1_ht :: giveInterface(InterfaceType interface)
 {
     if ( interface == SpatialLocalizerInterfaceType ) {
         return static_cast< SpatialLocalizerInterface * >(this);
@@ -152,59 +149,19 @@ Brick1_ht :: giveInterface(InterfaceType interface)
         return static_cast< EIPrimaryFieldInterface * >(this);
     } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
         return static_cast< ZZNodalRecoveryModelInterface * >(this);
-    } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return static_cast< SPRNodalRecoveryModelInterface * >(this);
     }
 
     return NULL;
 }
 
-void
-Brick1_ht :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
-{
-    pap.resize(numberOfDofMans);
-    for ( int i = 1; i <= numberOfDofMans; i++ ) {
-        pap.at(i) = this->giveNode(i)->giveNumber();
-    }
-}
-
-void
-Brick1_ht :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap)
-{
-    int found = 0;
-    answer.resize(1);
-
-    for ( int i = 1; i <= numberOfDofMans; i++ ) {
-        if ( this->giveNode(i)->giveNumber() == pap ) {
-            found = 1;
-        }
-    }
-
-    if ( found ) {
-        answer.at(1) = pap;
-    } else {
-        OOFEM_ERROR("unknown node number %d", pap);
-    }
-}
-
-int
-Brick1_ht :: SPRNodalRecoveryMI_giveNumberOfIP()
-{
-    return numberOfGaussPoints;
-}
-
-
-SPRPatchType
-Brick1_ht :: SPRNodalRecoveryMI_givePatchType()
-{
-    return SPRPatchType_3dBiLin;
-}
-
 
 #ifdef __OOFEG
-void Brick1_ht :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
+ #define TR_LENGHT_REDUCT 0.3333
+
+void
+Tetrah1_ht :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
-    WCRec p [ 8 ];
+    WCRec p [ 4 ];
     GraphicObj *go;
 
     if ( !gc.testElementGraphicActivity(this) ) {
@@ -217,37 +174,45 @@ void Brick1_ht :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
     EASValsSetEdgeFlag(true);
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
     EASValsSetFillStyle(FILL_SOLID);
-    for ( int i = 0; i < 8; i++ ) {
-        p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
-        p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
-        p [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(3);
-    }
+    p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveCoordinate(1);
+    p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveCoordinate(2);
+    p [ 0 ].z = ( FPNum ) this->giveNode(1)->giveCoordinate(3);
+    p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveCoordinate(1);
+    p [ 1 ].y = ( FPNum ) this->giveNode(2)->giveCoordinate(2);
+    p [ 1 ].z = ( FPNum ) this->giveNode(2)->giveCoordinate(3);
+    p [ 2 ].x = ( FPNum ) this->giveNode(3)->giveCoordinate(1);
+    p [ 2 ].y = ( FPNum ) this->giveNode(3)->giveCoordinate(2);
+    p [ 2 ].z = ( FPNum ) this->giveNode(3)->giveCoordinate(3);
+    p [ 3 ].x = ( FPNum ) this->giveNode(4)->giveCoordinate(1);
+    p [ 3 ].y = ( FPNum ) this->giveNode(4)->giveCoordinate(2);
+    p [ 3 ].z = ( FPNum ) this->giveNode(4)->giveCoordinate(3);
 
-    go =  CreateHexahedron(p);
+    go =  CreateTetra(p);
     EGWithMaskChangeAttributes(WIDTH_MASK | FILL_MASK | COLOR_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK | LAYER_MASK, go);
     EGAttachObject(go, ( EObjectP ) this);
     EMAddGraphicsToModel(ESIModel(), go);
 }
 
 
-void Brick1_ht :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
+void
+Tetrah1_ht :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
-    int indx, result = 0;
-    WCRec p [ 8 ];
+    int i, indx, result = 0;
+    WCRec p [ 4 ];
     GraphicObj *tr;
-    FloatArray v [ 8 ];
-    double s [ 8 ];
+    FloatArray v [ 4 ];
+    double s [ 4 ];
 
     if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
     if ( gc.giveIntVarMode() == ISM_recovered ) {
-        for ( int i = 1; i <= 8; i++ ) {
+        for ( i = 1; i <= 4; i++ ) {
             result += this->giveInternalStateAtNode(v [ i - 1 ], gc.giveIntVarType(), gc.giveIntVarMode(), i, tStep);
         }
 
-        if ( result != 8 ) {
+        if ( result != 4 ) {
             return;
         }
     } else if ( gc.giveIntVarMode() == ISM_local ) {
@@ -256,7 +221,7 @@ void Brick1_ht :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 
     indx = gc.giveIntVarIndx();
 
-    for ( int i = 1; i <= 8; i++ ) {
+    for ( i = 1; i <= 4; i++ ) {
         s [ i - 1 ] = v [ i - 1 ].at(indx);
     }
 
@@ -264,14 +229,14 @@ void Brick1_ht :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
     EASValsSetEdgeFlag(true);
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
     if ( gc.getScalarAlgo() == SA_ISO_SURF ) {
-        for ( int i = 0; i < 8; i++ ) {
+        for ( i = 0; i < 4; i++ ) {
             p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
             p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
             p [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(3);
         }
 
-        gc.updateFringeTableMinMax(s, 8);
-        tr = CreateHexahedronWD(p, s);
+        gc.updateFringeTableMinMax(s, 4);
+        tr = CreateTetraWD(p, s);
         EGWithMaskChangeAttributes(LAYER_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK, tr);
         EMAddGraphicsToModel(ESIModel(), tr);
     }

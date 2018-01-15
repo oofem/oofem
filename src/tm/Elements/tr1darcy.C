@@ -33,7 +33,7 @@
  */
 
 
-#include "tr1darcy.h"
+#include "tm/Elements/tr1darcy.h"
 #include "fei2dtrlin.h"
 #include "gaussintegrationrule.h"
 #include "gausspoint.h"

@@ -13,19 +13,19 @@ set (tm_emodel
     )
 
 set (tm_element
-    transportelement.C
-    quad1_ht.C
-    tr1_ht.C
-    quadaxisym1_ht.C
-    traxisym1_ht.C
-    brick1_ht.C
-    qbrick1_ht.C
-    wedge_ht.C
-    qwedge_ht.C
-    tetrah1_ht.C
-    tr1darcy.C
-    latticetransportelement.C
-    lattice2d_mt.C
+    Elements/transportelement.C
+    Elements/quad1_ht.C
+    Elements/tr1_ht.C
+    Elements/quadaxisym1_ht.C
+    Elements/traxisym1_ht.C
+    Elements/brick1_ht.C
+    Elements/qbrick1_ht.C
+    Elements/wedge_ht.C
+    Elements/qwedge_ht.C
+    Elements/tetrah1_ht.C
+    Elements/tr1darcy.C
+    Elements/latticetransportelement.C
+    Elements/lattice2d_mt.C
     )
 
 set (tm_boundary

@@ -35,7 +35,7 @@
 #ifndef tetrah1_ht_h
 #define tetrah1_ht_h
 
-#include "transportelement.h"
+#include "tm/Elements/transportelement.h"
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
 

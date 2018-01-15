@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "transportelement.h"
+#include "tm/Elements/transportelement.h"
 #include "domain.h"
 #include "tm/Materials/transportmaterial.h"
 #include "load.h"

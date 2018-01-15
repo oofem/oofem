@@ -33,7 +33,7 @@
  */
 
 
-#include "qwedge_ht.h"
+#include "tm/Elements/qwedge_ht.h"
 #include "fei3dwedgequad.h"
 #include "node.h"
 #include "gausspoint.h"

@@ -35,7 +35,7 @@
 #ifndef lattice2d_mt_h
 #define lattice2d_mt_h
 
-#include "latticetransportelement.h"
+#include "tm/Elements/latticetransportelement.h"
 #include "spatiallocalizer.h"
 
 ///@name Input fields for Lattice2d_mt

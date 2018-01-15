@@ -38,7 +38,7 @@
 #include "dofmanager.h"
 #include "dof.h"
 #include "verbose.h"
-#include "transportelement.h"
+#include "tm/Elements/transportelement.h"
 #include "classfactory.h"
 #include "mathfem.h"
 #include "assemblercallback.h"

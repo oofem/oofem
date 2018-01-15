@@ -44,7 +44,7 @@
 #include "staggeredproblem.h"
 #include "classfactory.h"
 #ifdef __TM_MODULE
- #include "tm/latticetransportelement.h"
+ #include "tm/Elements/latticetransportelement.h"
 #endif
 
 #include <cstdlib>

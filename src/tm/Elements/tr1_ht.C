@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "tr1_ht.h"
+#include "tm/Elements/tr1_ht.h"
 #include "fei2dtrlin.h"
 #include "crosssection.h"
 #include "gausspoint.h"

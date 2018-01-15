@@ -35,7 +35,7 @@
 #ifndef traxisym1_ht_h
 #define traxisym1_ht_h
 
-#include "tr1_ht.h"
+#include "tm/Elements/tr1_ht.h"
 
 #define _IFT_TrAxisym1_ht_Name "traxisym1ht"
 

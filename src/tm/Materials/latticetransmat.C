@@ -35,7 +35,7 @@
 #include "tm/Materials/latticetransmat.h"
 #include "domain.h"
 #include "gausspoint.h"
-#include "latticetransportelement.h"
+#include "tm/Elements/latticetransportelement.h"
 #include "mathfem.h"
 #include "staggeredproblem.h"
 #include "classfactory.h"

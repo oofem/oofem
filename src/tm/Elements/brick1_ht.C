@@ -32,48 +32,56 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "qbrick1_ht.h"
-#include "fei3dhexaquad.h"
+#include "tm/Elements/brick1_ht.h"
+#include "fei3dhexalin.h"
 #include "node.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
-#include "domain.h"
 #include "mathfem.h"
 #include "load.h"
 #include "crosssection.h"
 #include "classfactory.h"
 
+#ifdef __OOFEG
+ #include "oofeggraphiccontext.h"
+ #include "oofegutils.h"
+ #include "connectivitytable.h"
+#endif
+
 namespace oofem {
-REGISTER_Element(QBrick1_ht);
-REGISTER_Element(QBrick1_hmt);
+REGISTER_Element(Brick1_ht);
+REGISTER_Element(Brick1_hmt);
+REGISTER_Element(Brick1_mt);
 
-FEI3dHexaQuad QBrick1_ht :: interpolation;
+FEI3dHexaLin Brick1_ht :: interpolation;
 
-QBrick1_ht :: QBrick1_ht(int n, Domain *aDomain) : TransportElement(n, aDomain, HeatTransferEM), SpatialLocalizerInterface(this), ZZNodalRecoveryModelInterface(this), SPRNodalRecoveryModelInterface()
+Brick1_ht :: Brick1_ht(int n, Domain *aDomain) : TransportElement(n, aDomain, HeatTransferEM), SpatialLocalizerInterface(this), ZZNodalRecoveryModelInterface(this), SPRNodalRecoveryModelInterface()
 {
-    numberOfDofMans  = 20;
-    numberOfGaussPoints = 27;
+    numberOfDofMans  = 8;
+    numberOfGaussPoints = 8;
 }
 
-QBrick1_hmt :: QBrick1_hmt(int n, Domain *aDomain) : QBrick1_ht(n, aDomain)
+Brick1_hmt :: Brick1_hmt(int n, Domain *aDomain) : Brick1_ht(n, aDomain)
 {
     emode = HeatMass1TransferEM;
 }
 
-QBrick1_ht :: ~QBrick1_ht()
+Brick1_mt :: Brick1_mt(int n, Domain *aDomain) : Brick1_ht(n, aDomain)
+{
+    emode = Mass1TransferEM;
+}
+
+Brick1_ht :: ~Brick1_ht()
 { }
 
-
 FEInterpolation *
-QBrick1_ht :: giveInterpolation() const { return & interpolation; }
-
+Brick1_ht :: giveInterpolation() const { return & interpolation; }
 
 void
-QBrick1_ht :: computeGaussPoints()
-// Sets up the array containing the four Gauss points of the receiver.
+Brick1_ht :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );
@@ -84,15 +92,15 @@ QBrick1_ht :: computeGaussPoints()
 
 
 IRResultType
-QBrick1_ht :: initializeFrom(InputRecord *ir)
+Brick1_ht :: initializeFrom(InputRecord *ir)
 {
-    numberOfGaussPoints = 27;
+    numberOfGaussPoints = 8;
     return TransportElement :: initializeFrom(ir);
 }
 
 
 double
-QBrick1_ht :: computeVolumeAround(GaussPoint *gp)
+Brick1_ht :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, volume;
@@ -106,7 +114,7 @@ QBrick1_ht :: computeVolumeAround(GaussPoint *gp)
 
 
 double
-QBrick1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
+Brick1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) );
@@ -115,7 +123,7 @@ QBrick1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 
 
 IntegrationRule *
-QBrick1_ht :: GetSurfaceIntegrationRule(int approxOrder)
+Brick1_ht :: GetSurfaceIntegrationRule(int approxOrder)
 {
     IntegrationRule *iRule = new GaussIntegrationRule(1, this, 1, 1);
     int npoints = iRule->getRequiredNumberOfIntegrationPoints(_Square, approxOrder);
@@ -125,7 +133,7 @@ QBrick1_ht :: GetSurfaceIntegrationRule(int approxOrder)
 
 
 double
-QBrick1_ht :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
+Brick1_ht :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
     double determinant, weight, volume;
     determinant = fabs( interpolation.surfaceGiveTransformationJacobian( iSurf, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
@@ -136,7 +144,7 @@ QBrick1_ht :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 
 
 Interface *
-QBrick1_ht :: giveInterface(InterfaceType interface)
+Brick1_ht :: giveInterface(InterfaceType interface)
 {
     if ( interface == SpatialLocalizerInterfaceType ) {
         return static_cast< SpatialLocalizerInterface * >(this);
@@ -152,7 +160,7 @@ QBrick1_ht :: giveInterface(InterfaceType interface)
 }
 
 void
-QBrick1_ht :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
+Brick1_ht :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 {
     pap.resize(numberOfDofMans);
     for ( int i = 1; i <= numberOfDofMans; i++ ) {
@@ -161,7 +169,7 @@ QBrick1_ht :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 }
 
 void
-QBrick1_ht :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap)
+Brick1_ht :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap)
 {
     int found = 0;
     answer.resize(1);
@@ -180,16 +188,94 @@ QBrick1_ht :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, 
 }
 
 int
-QBrick1_ht :: SPRNodalRecoveryMI_giveNumberOfIP()
+Brick1_ht :: SPRNodalRecoveryMI_giveNumberOfIP()
 {
     return numberOfGaussPoints;
 }
 
 
 SPRPatchType
-QBrick1_ht :: SPRNodalRecoveryMI_givePatchType()
+Brick1_ht :: SPRNodalRecoveryMI_givePatchType()
 {
-    return SPRPatchType_3dBiQuadratic;
+    return SPRPatchType_3dBiLin;
 }
 
+
+#ifdef __OOFEG
+void Brick1_ht :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
+{
+    WCRec p [ 8 ];
+    GraphicObj *go;
+
+    if ( !gc.testElementGraphicActivity(this) ) {
+        return;
+    }
+
+    EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
+    EASValsSetColor( gc.getElementColor() );
+    EASValsSetEdgeColor( gc.getElementEdgeColor() );
+    EASValsSetEdgeFlag(true);
+    EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
+    EASValsSetFillStyle(FILL_SOLID);
+    for ( int i = 0; i < 8; i++ ) {
+        p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
+        p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
+        p [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(3);
+    }
+
+    go =  CreateHexahedron(p);
+    EGWithMaskChangeAttributes(WIDTH_MASK | FILL_MASK | COLOR_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK | LAYER_MASK, go);
+    EGAttachObject(go, ( EObjectP ) this);
+    EMAddGraphicsToModel(ESIModel(), go);
+}
+
+
+void Brick1_ht :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
+{
+    int indx, result = 0;
+    WCRec p [ 8 ];
+    GraphicObj *tr;
+    FloatArray v [ 8 ];
+    double s [ 8 ];
+
+    if ( !gc.testElementGraphicActivity(this) ) {
+        return;
+    }
+
+    if ( gc.giveIntVarMode() == ISM_recovered ) {
+        for ( int i = 1; i <= 8; i++ ) {
+            result += this->giveInternalStateAtNode(v [ i - 1 ], gc.giveIntVarType(), gc.giveIntVarMode(), i, tStep);
+        }
+
+        if ( result != 8 ) {
+            return;
+        }
+    } else if ( gc.giveIntVarMode() == ISM_local ) {
+        return;
+    }
+
+    indx = gc.giveIntVarIndx();
+
+    for ( int i = 1; i <= 8; i++ ) {
+        s [ i - 1 ] = v [ i - 1 ].at(indx);
+    }
+
+    EASValsSetEdgeColor( gc.getElementEdgeColor() );
+    EASValsSetEdgeFlag(true);
+    EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
+    if ( gc.getScalarAlgo() == SA_ISO_SURF ) {
+        for ( int i = 0; i < 8; i++ ) {
+            p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
+            p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
+            p [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(3);
+        }
+
+        gc.updateFringeTableMinMax(s, 8);
+        tr = CreateHexahedronWD(p, s);
+        EGWithMaskChangeAttributes(LAYER_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK, tr);
+        EMAddGraphicsToModel(ESIModel(), tr);
+    }
+}
+
+#endif
 } // end namespace oofem
