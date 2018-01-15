@@ -12,5 +12,5 @@ addons:
          - ubuntu-toolchain-r-test
       packages:
          - libboost-python-dev
-         - g++-4.8
+         - g++-5.4
          - binutils-gold
