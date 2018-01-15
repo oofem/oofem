@@ -50,7 +50,7 @@
 #include "unknownnumberingscheme.h"
 
 #ifdef __CEMHYD_MODULE
- #include "cemhyd/cemhydmat.h"
+ #include "tm/Materials/cemhyd/cemhydmat.h"
 #endif
 
 namespace oofem {

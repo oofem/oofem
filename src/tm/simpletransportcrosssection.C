@@ -33,7 +33,7 @@
  */
 
 #include "simpletransportcrosssection.h"
-#include "transportmaterial.h"
+#include "tm/Materials/transportmaterial.h"
 #include "dynamicinputrecord.h"
 #include "classfactory.h"
 

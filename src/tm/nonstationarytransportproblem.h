@@ -39,7 +39,7 @@
 #include "sparsemtrx.h"
 #include "primaryfield.h"
 #include "dofdistributedprimaryfield.h"
-#include "transportmaterial.h"
+#include "tm/Materials/transportmaterial.h"
 #include "stationarytransportproblem.h"
 #include "linsystsolvertype.h"
 

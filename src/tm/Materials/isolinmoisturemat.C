@@ -32,23 +32,35 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "latticetransportelement.h"
-#include "tm/Materials/transportmaterial.h"
+#include "tm/Materials/isolinmoisturemat.h"
+#include "floatmatrix.h"
+#include "gausspoint.h"
+#include "classfactory.h"
 
 namespace oofem {
-LatticeTransportElement :: LatticeTransportElement(int n, Domain *aDomain, ElementMode em) : TransportElement(n, aDomain, em)
-{ }
-
-LatticeTransportElement :: ~LatticeTransportElement()
-{ }
-
+REGISTER_Material(IsotropicLinMoistureTransferMaterial);
 
 IRResultType
-LatticeTransportElement :: initializeFrom(InputRecord *ir)
+IsotropicLinMoistureTransferMaterial :: initializeFrom(InputRecord *ir)
 {
-    return TransportElement :: initializeFrom(ir);
+    IRResultType result;                // Required by IR_GIVE_FIELD macro
+
+    IR_GIVE_FIELD(ir, permeability, _IFT_IsotropicLinMoistureTransferMaterial_perm);
+    IR_GIVE_FIELD(ir, moistureCapacity, _IFT_IsotropicLinMoistureTransferMaterial_capa);
+
+    return IsotropicMoistureTransferMaterial :: initializeFrom(ir);
 }
 
 
+double
+IsotropicLinMoistureTransferMaterial :: giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep)
+{
+    return this->moistureCapacity;
+}
 
+double
+IsotropicLinMoistureTransferMaterial :: givePermeability(GaussPoint *gp, TimeStep *tStep)
+{
+    return this->permeability;
+}
 } // end namespace oofem

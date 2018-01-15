@@ -32,23 +32,42 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "latticetransportelement.h"
-#include "tm/Materials/transportmaterial.h"
+#ifndef isolinmoisturemat_h
+#define isolinmoisturemat_h
+
+#include "tm/Materials/isomoisturemat.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
+
+///@name Input fields for IsotropicLinMoistureTransferMaterial
+//@{
+#define _IFT_IsotropicLinMoistureTransferMaterial_Name "isolinmoisturemat"
+#define _IFT_IsotropicLinMoistureTransferMaterial_perm "perm" ///< Moisture permeability
+#define _IFT_IsotropicLinMoistureTransferMaterial_capa "capa" ///< Moisture capacity
+//@}
 
 namespace oofem {
-LatticeTransportElement :: LatticeTransportElement(int n, Domain *aDomain, ElementMode em) : TransportElement(n, aDomain, em)
-{ }
-
-LatticeTransportElement :: ~LatticeTransportElement()
-{ }
-
-
-IRResultType
-LatticeTransportElement :: initializeFrom(InputRecord *ir)
+/**
+ * This class implements a isotropic moisture tranport material. A material
+ * is an attribute of a domain. It is usually also attribute of many elements.
+ */
+class IsotropicLinMoistureTransferMaterial : public IsotropicMoistureTransferMaterial
 {
-    return TransportElement :: initializeFrom(ir);
-}
+protected:
+    double moistureCapacity;
+    double permeability;
 
+public:
+    IsotropicLinMoistureTransferMaterial(int n, Domain * d) : IsotropicMoistureTransferMaterial(n, d) { }
+    virtual ~IsotropicLinMoistureTransferMaterial() { }
 
+    virtual double givePermeability(GaussPoint *gp, TimeStep *tStep);
+    virtual double giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep);
 
+    virtual const char *giveInputRecordName() const { return _IFT_IsotropicLinMoistureTransferMaterial_Name; }
+    virtual const char *giveClassName() const { return "IsotropicLinMoistureTransferMaterial"; }
+
+    virtual IRResultType initializeFrom(InputRecord *ir);
+};
 } // end namespace oofem
+#endif // isolinmoisturemat_h

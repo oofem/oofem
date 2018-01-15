@@ -34,7 +34,7 @@
 
 #include "transportelement.h"
 #include "domain.h"
-#include "transportmaterial.h"
+#include "tm/Materials/transportmaterial.h"
 #include "load.h"
 #include "bodyload.h"
 #include "boundaryload.h"
@@ -54,7 +54,7 @@
 #include "stationarytransportproblem.h"
 #include "function.h"
 #ifdef __CEMHYD_MODULE
- #include "cemhyd/cemhydmat.h"
+ #include "tm/Materials/cemhyd/cemhydmat.h"
 #endif
 
 

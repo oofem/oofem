@@ -33,8 +33,8 @@
  */
 
 #include "lattice2d_mt.h"
-#include "transportmaterial.h"
-#include "latticetransmat.h"
+#include "tm/Materials/transportmaterial.h"
+#include "tm/Materials/latticetransmat.h"
 #include "node.h"
 #include "material.h"
 #include "crosssection.h"
