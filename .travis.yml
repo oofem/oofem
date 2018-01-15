@@ -1,6 +1,7 @@
 language: cpp
+dist: trusty
 script:
-   - CXX=g++-5.4 cmake -DUSE_PYTHON_BINDINGS=ON -DENABLE_COVERAGE:BOOL=TRUE .
+   - CXX=g++-6 cmake -DUSE_PYTHON_BINDINGS=ON -DENABLE_COVERAGE:BOOL=TRUE .
    - make
    - make test
    - bash <(curl -s https://codecov.io/bash)
@@ -12,5 +13,5 @@ addons:
          - ubuntu-toolchain-r-test
       packages:
          - libboost-python-dev
-         - g++-5.4
+         - g++-6
          - binutils-gold
