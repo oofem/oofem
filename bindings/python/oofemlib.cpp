@@ -352,9 +352,6 @@ struct PySparseMtrx : SparseMtrx, wrapper<SparseMtrx>
 {
     PySparseMtrx(int n=0, int m=0): SparseMtrx(n,m) {}
 
-    std::unique_ptr<SparseMtrx> clone() const {
-        return this->get_override("clone")();
-    }
 
     void times(const FloatArray &x, FloatArray &answer) const {
         this->get_override("times")();
@@ -1484,8 +1481,8 @@ object engngModel(bp::tuple args, bp::dict kw)
     string aClass = extract<string>(args[0])();
     int number = len(args)>1? extract<int>(args[1])() : 0;
     EngngModel* master = len(args)>2? extract<EngngModel*>(args[2])() : NULL;
-    EngngModel *engngm = classFactory.createEngngModel(aClass.c_str(),number,master);
-    if (engngm==NULL) { OOFEM_LOG_ERROR("engngModel: wrong input data"); }
+    std::unique_ptr<EngngModel> engngm = classFactory.createEngngModel(aClass.c_str(),number,master);
+    if ( !engngm ) { OOFEM_LOG_ERROR("engngModel: wrong input data"); }
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     // instanciateYourself
     ///@todo Output filename isn't stored like this (and has never been!)!?
@@ -1507,7 +1504,7 @@ object engngModel(bp::tuple args, bp::dict kw)
 
     engngm->Instanciate_init();
     //
-    object ret = object(ptr(engngm));
+    object ret = object(ptr(engngm.release()));
     /* ????????????????????
     // sets the last created engngModel as default one for further script
     temp_global["defaultEngngModel"] = ret;

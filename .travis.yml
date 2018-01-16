@@ -2,7 +2,7 @@ language: cpp
 dist: trusty
 script:
    - CXX=g++-6 cmake -DUSE_PYTHON_BINDINGS=ON -DENABLE_COVERAGE:BOOL=TRUE .
-   - make
+   - make -j 2
    - make test
    - bash <(curl -s https://codecov.io/bash)
    
