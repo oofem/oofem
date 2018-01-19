@@ -69,7 +69,7 @@ protected:
     double value;
 
 public:
- ErrorCheckingRule(double tol) : tolerance(tol) {tsubstep=0;}
+    ErrorCheckingRule(double tol) : tolerance(tol) {tsubstep=0;}
 
     /// Checks if the rule is correct.
     virtual bool check(Domain *domain, TimeStep *tStep) = 0;
@@ -87,8 +87,8 @@ protected:
 
 public:
     NodeErrorCheckingRule(const std :: string &line, double tol);
-    virtual bool check(Domain *domain, TimeStep *tStep);
-    virtual const char *giveClassName() const {return "NodeErrorCheckingRule";}
+    bool check(Domain *domain, TimeStep *tStep) override;
+    const char *giveClassName() const override { return "NodeErrorCheckingRule"; }
 };
 
 /// Checks an element value
@@ -102,26 +102,27 @@ protected:
 
 public:
     ElementErrorCheckingRule(const std :: string &line, double tol);
-    virtual bool check(Domain *domain, TimeStep *tStep);
-    virtual const char *giveClassName() const {return "ElementErrorCheckingRule";}
+    bool check(Domain *domain, TimeStep *tStep) override;
+    const char *giveClassName() const override { return "ElementErrorCheckingRule"; }
 };
 
 /// Checks a beam element value (in terms of  end forces and and-displacements)
 class OOFEM_EXPORT BeamElementErrorCheckingRule : public ErrorCheckingRule
 {
 public:
-  enum BeamElementValueType{
-    BET_localEndDisplacement,
-    BET_localEndForces
-  } ;
+    enum BeamElementValueType{
+        BET_localEndDisplacement,
+        BET_localEndForces
+    };
+
 protected:
     BeamElementValueType ist;
     int component;
 
 public:
     BeamElementErrorCheckingRule(const std :: string &line, double tol);
-    virtual bool check(Domain *domain, TimeStep *tStep);
-    virtual const char *giveClassName() const {return "BeamElementErrorCheckingRule";}
+    bool check(Domain *domain, TimeStep *tStep) override;
+    const char *giveClassName() const override { return "BeamElementErrorCheckingRule"; }
 };
 
 
@@ -133,8 +134,8 @@ protected:
 
 public:
     ReactionErrorCheckingRule(const std :: string &line, double tol);
-    virtual bool check(Domain *domain, TimeStep *tStep);
-    virtual const char *giveClassName() const {return "ReactionErrorCheckingRule";}
+    bool check(Domain *domain, TimeStep *tStep) override;
+    const char *giveClassName() const override { return "ReactionErrorCheckingRule"; }
 };
 
 /// Checks a reaction force value
@@ -142,8 +143,8 @@ class OOFEM_EXPORT LoadLevelErrorCheckingRule : public ErrorCheckingRule
 {
 public:
     LoadLevelErrorCheckingRule(const std :: string &line, double tol);
-    virtual bool check(Domain *domain, TimeStep *tStep);
-    virtual const char *giveClassName() const {return "LoadLevelErrorCheckingRule";}
+    bool check(Domain *domain, TimeStep *tStep) override;
+    const char *giveClassName() const override { return "LoadLevelErrorCheckingRule"; }
 };
 
 /// Checks eigen value
@@ -151,8 +152,8 @@ class OOFEM_EXPORT EigenValueErrorCheckingRule : public ErrorCheckingRule
 {
 public:
     EigenValueErrorCheckingRule(const std :: string &line, double tol);
-    virtual bool check(Domain *domain, TimeStep *tStep);
-    virtual const char *giveClassName() const {return "EigenValueErrorCheckingRule";}
+    bool check(Domain *domain, TimeStep *tStep) override;
+    const char *giveClassName() const override { return "EigenValueErrorCheckingRule"; }
 };
 
 
@@ -172,7 +173,7 @@ protected:
     IntArray writeIST;
 
     bool scanToErrorChecks(std :: ifstream &stream, double &errorTolerance);
-    ErrorCheckingRule *giveErrorCheck(std :: ifstream &stream, double errorTolerance);
+    std::unique_ptr<ErrorCheckingRule> giveErrorCheck(std :: ifstream &stream, double errorTolerance);
 
     void writeCheck(Domain *domain, TimeStep *tStep);
 
@@ -181,12 +182,12 @@ public:
     virtual ~ErrorCheckingExportModule() {}
     ErrorCheckingExportModule(const ErrorCheckingExportModule &) = delete;
     ErrorCheckingExportModule &operator=(const ErrorCheckingExportModule &) = delete;
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void doOutput(TimeStep *tStep, bool forcedOutput = false);
 
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void doOutput(TimeStep *tStep, bool forcedOutput = false) override;
 
-    virtual const char *giveClassName() const { return "ErrorCheckingExportModule"; }
-    virtual const char *giveInputRecordName() const { return _IFT_ErrorCheckingExportModule_Name; }
+    const char *giveClassName() const override { return "ErrorCheckingExportModule"; }
+    const char *giveInputRecordName() const { return _IFT_ErrorCheckingExportModule_Name; }
 };
 } // end namespace oofem
 #endif // errorcheckingexportmodule_h_
