@@ -156,6 +156,7 @@ void ExternalForceAssembler :: vectorFromElement(FloatArray& vec, Element& eleme
 
 void ExternalForceAssembler :: vectorFromLoad(FloatArray& vec, Element& element, BodyLoad* load, TimeStep* tStep, ValueModeType mode) const
 {
+    vec.clear();
     if ( ! load->reference )
         element.computeLoadVector(vec, load, ExternalForcesVector, mode, tStep);
         //element.computeExternalForcesFromLoad(vec, load, tStep);
@@ -163,6 +164,7 @@ void ExternalForceAssembler :: vectorFromLoad(FloatArray& vec, Element& element,
 
 void ExternalForceAssembler :: vectorFromSurfaceLoad(FloatArray& vec, Element& element, SurfaceLoad* load, int boundary, TimeStep* tStep, ValueModeType mode) const
 {
+    vec.clear();
     if ( ! load->reference )
         element.computeBoundarySurfaceLoadVector(vec, load, boundary, ExternalForcesVector, mode, tStep);
         //element.computeExternalForcesFromSurfaceLoad(vec, load, boundary, tStep);
@@ -170,6 +172,7 @@ void ExternalForceAssembler :: vectorFromSurfaceLoad(FloatArray& vec, Element& e
 
 void ExternalForceAssembler :: vectorFromEdgeLoad(FloatArray& vec, Element& element, EdgeLoad* load, int edge, TimeStep* tStep, ValueModeType mode) const
 {
+    vec.clear();
     if ( ! load->reference )
         element.computeBoundaryEdgeLoadVector(vec, load, edge, ExternalForcesVector, mode, tStep);
         //element.computeExternalForcesFromEdgeLoad(vec, load, edge, tStep);
@@ -177,6 +180,7 @@ void ExternalForceAssembler :: vectorFromEdgeLoad(FloatArray& vec, Element& elem
 
 void ExternalForceAssembler :: vectorFromNodeLoad(FloatArray& vec, DofManager& dman, NodalLoad* load, TimeStep* tStep, ValueModeType mode) const
 {
+    vec.clear();
     if ( ! load->reference )
         dman.computeLoadVector(vec, load, ExternalForcesVector, tStep, mode);
         //dman.computeExternalForcesFromLoad(vec, load, tStep);
@@ -191,6 +195,7 @@ void ExternalForceAssembler :: assembleFromActiveBC(FloatArray &answer, ActiveBo
 
 void ReferenceForceAssembler :: vectorFromLoad(FloatArray& vec, Element& element, BodyLoad* load, TimeStep* tStep, ValueModeType mode) const
 {
+    vec.clear();
     if ( load->reference )
         element.computeLoadVector(vec, load, ExternalForcesVector, mode, tStep);
     //element.computeExternalForcesFromLoad(vec, load, tStep);
@@ -199,6 +204,7 @@ void ReferenceForceAssembler :: vectorFromLoad(FloatArray& vec, Element& element
 
 void ReferenceForceAssembler :: vectorFromSurfaceLoad(FloatArray& vec, Element& element, SurfaceLoad* load, int boundary, TimeStep* tStep, ValueModeType mode) const
 {
+    vec.clear();
     if ( load->reference )
         element.computeBoundarySurfaceLoadVector(vec, load, boundary, ExternalForcesVector, mode, tStep);
     //element.computeExternalForcesFromBoundaryLoad(vec, load, boundary, tStep);
@@ -206,6 +212,7 @@ void ReferenceForceAssembler :: vectorFromSurfaceLoad(FloatArray& vec, Element& 
 
 void ReferenceForceAssembler :: vectorFromEdgeLoad(FloatArray& vec, Element& element, EdgeLoad* load, int edge, TimeStep* tStep, ValueModeType mode) const
 {
+    vec.clear();
     if ( load->reference )
         element.computeBoundaryEdgeLoadVector(vec, load, edge, ExternalForcesVector, mode, tStep);
     //element.computeExternalForcesFromEdgeLoad(vec, load, edge, tStep);
@@ -213,6 +220,7 @@ void ReferenceForceAssembler :: vectorFromEdgeLoad(FloatArray& vec, Element& ele
 
 void ReferenceForceAssembler :: vectorFromNodeLoad(FloatArray& vec, DofManager& dman, NodalLoad* load, TimeStep* tStep, ValueModeType mode) const
 {
+    vec.clear();
     if ( load->reference )
         dman.computeLoadVector(vec, load, ExternalForcesVector, tStep, mode);
         //dman.computeExternalForcesFromLoad(vec, load, tStep);
