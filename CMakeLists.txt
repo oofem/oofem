@@ -735,6 +735,13 @@ if (USE_SM)
     foreach (case ${sm_tests})
         add_test (NAME "test_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/sm COMMAND ${oofem_cmd} "-f" ${case})
     endforeach (case)
+
+    file (GLOB sm_tests RELATIVE "${oofem_TEST_DIR}/sm" "${oofem_TEST_DIR}/sm/*.sh")
+    foreach (case ${sm_tests})
+        add_test (NAME "test_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/sm COMMAND bash ${case} ${oofem_cmd})
+    endforeach (case)
+
+    
 endif ()
 
 if (USE_FM)
